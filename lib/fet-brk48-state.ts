@@ -14,6 +14,9 @@ export interface FetBrk48PositionState {
   gross: number;
   hardStop: number;
   stopClientOrderId: string;
+  protectionMode?: "INITIAL_HARD_STOP" | "PROFIT_FLOOR_0P5";
+  profitFloorArmedAt?: number;
+  profitFloorTriggerPrice?: number;
 }
 
 export interface FetBrk48PendingState {
@@ -64,7 +67,10 @@ function validPosition(p: any): p is FetBrk48PositionState {
     && finitePositive(p.gross)
     && finitePositive(p.hardStop)
     && typeof p.stopClientOrderId === "string"
-    && p.stopClientOrderId.length > 0;
+    && p.stopClientOrderId.length > 0
+    && (p.protectionMode === undefined || ["INITIAL_HARD_STOP", "PROFIT_FLOOR_0P5"].includes(p.protectionMode))
+    && (p.profitFloorArmedAt === undefined || finitePositive(p.profitFloorArmedAt))
+    && (p.profitFloorTriggerPrice === undefined || finitePositive(p.profitFloorTriggerPrice));
 }
 
 function validPending(p: any): p is FetBrk48PendingState {

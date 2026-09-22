@@ -45,6 +45,7 @@ test("FET live runner enters once, protects, survives restart, and exits after 2
   const openOrders: any[] = [];
   const tradeCalls: any[] = [];
   const orderResults = new Map<string, any>();
+  let liveMarkPrice = 110;
 
   const oldKill = process.env.DISDEX_SHARED_KILL_SWITCH_FILE;
   const oldLegacy = process.env.DISDEX_V96_KILL_SWITCH_FILE;
@@ -76,7 +77,7 @@ test("FET live runner enters once, protects, survives restart, and exits after 2
         asset: "USDT",
         updatedAt: now,
       }),
-      getPositions: async () => positions.map((row) => ({ ...row, updatedAt: now, markPrice: 110 })),
+      getPositions: async () => positions.map((row) => ({ ...row, updatedAt: now, markPrice: liveMarkPrice })),
       getOpenOrders: async () => openOrders.map((row) => ({ ...row })),
       getMarketQuote: async () => ({
         symbol: "FETUSDT",
@@ -213,6 +214,8 @@ test("FET live runner enters once, protects, survives restart, and exits after 2
     const afterEntry = await readFetBrk48State(statePath, RUNTIME_SHA);
     assert.ok(afterEntry.position);
     assert.equal(afterEntry.position?.quantity, openOrders[0].quantity);
+    assert.equal(afterEntry.position?.protectionMode, "INITIAL_HARD_STOP");
+    assert.equal(afterEntry.position?.hardStop, 111 * 0.95);
     assert.equal(afterEntry.pending, undefined);
 
     // A fresh runner instance must reconcile the same state and must not enter twice.
@@ -222,6 +225,36 @@ test("FET live runner enters once, protects, survives restart, and exits after 2
     assert.equal(restarted.message, "FET_POSITION_HELD_PROTECTED");
     assert.equal(tradeCalls.length, 1);
     assert.equal(openOrders.length, 1);
+
+    // Crossing +5% arms the +0.5% profit floor exactly once. The old -5% STOP
+    // is canceled, the replacement is read back, and the upgraded protection
+    // persists in state for restart recovery.
+    liveMarkPrice = 111 * 1.051;
+    now += 30_000;
+    const armed = await new FetBrk48LiveRunner(deps).tick();
+    assert.equal(armed.status, "held");
+    assert.equal(armed.message, "FET_PROFIT_FLOOR_ARMED_0P5_AFTER_5P0");
+    assert.equal(armed.ordersSent, 1);
+    assert.equal(tradeCalls.length, 1);
+    assert.equal(openOrders.length, 1);
+    assert.equal(openOrders[0].stopPrice, 111 * 1.005);
+    const upgradedStopClientOrderId = openOrders[0].clientOrderId;
+
+    const armedState = await readFetBrk48State(statePath, RUNTIME_SHA);
+    assert.equal(armedState.position?.protectionMode, "PROFIT_FLOOR_0P5");
+    assert.equal(armedState.position?.hardStop, 111 * 1.005);
+    assert.equal(armedState.position?.stopClientOrderId, upgradedStopClientOrderId);
+    assert.ok((armedState.position?.profitFloorArmedAt || 0) > 0);
+    assert.equal(armedState.position?.profitFloorTriggerPrice, 111 * 1.05);
+
+    now += 30_000;
+    const armedRestart = await new FetBrk48LiveRunner(deps).tick();
+    assert.equal(armedRestart.status, "held");
+    assert.equal(armedRestart.message, "FET_POSITION_HELD_PROTECTED");
+    assert.equal(armedRestart.ordersSent, 0);
+    assert.equal(openOrders.length, 1);
+    assert.equal(openOrders[0].clientOrderId, upgradedStopClientOrderId);
+    assert.equal(openOrders[0].stopPrice, 111 * 1.005);
 
     now = entryTs + 24 * HOUR + 1_000;
     await writeSharedCryptoDailyRisk(riskPath, buildSharedCryptoDailyRiskState({

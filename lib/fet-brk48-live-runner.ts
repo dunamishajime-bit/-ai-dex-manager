@@ -137,12 +137,25 @@ async function ensureProtection(
   deps: FetBrk48LiveRunnerDependencies,
   state: FetBrk48State,
   actual: DirectPosition,
-  input: { entryTs: number; exitTs: number; targetGross: number; hardStopPct: number; stopClientOrderId?: string },
+  input: {
+    entryTs: number;
+    exitTs: number;
+    targetGross: number;
+    hardStopPct: number;
+    stopClientOrderId?: string;
+    requestedStopPrice?: number;
+    protectionMode?: FetBrk48PositionState["protectionMode"];
+    profitFloorArmedAt?: number;
+    profitFloorTriggerPrice?: number;
+  },
 ) {
   const entryPrice = finite(actual.entryPrice);
   const quantity = Math.abs(actual.quantity);
   if (!(entryPrice > 0 && quantity > 0)) throw new Error("FET_PROTECTION_POSITION_INVALID");
-  const normalizedStop = await deps.adapter.normalizeStopPrice("FETUSDT", entryPrice * (1 - input.hardStopPct));
+  const requestedStop = finite(input.requestedStopPrice) > 0
+    ? finite(input.requestedStopPrice)
+    : entryPrice * (1 - input.hardStopPct);
+  const normalizedStop = await deps.adapter.normalizeStopPrice("FETUSDT", requestedStop);
   const stopClientOrderId = input.stopClientOrderId || deterministicId("stop", `${input.entryTs}|${quantity}|${entryPrice}`);
   const position: FetBrk48PositionState = {
     symbol: "FETUSDT",
@@ -154,6 +167,9 @@ async function ensureProtection(
     gross: input.targetGross,
     hardStop: normalizedStop.price,
     stopClientOrderId,
+    protectionMode: input.protectionMode || "INITIAL_HARD_STOP",
+    profitFloorArmedAt: input.profitFloorArmedAt,
+    profitFloorTriggerPrice: input.profitFloorTriggerPrice,
   };
 
   if (!await verifyStop(deps.adapter, position)) {
@@ -175,6 +191,55 @@ async function ensureProtection(
     await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
   }
   throw new Error("FET_PROTECTIVE_STOP_READBACK_FAILED");
+}
+
+async function maybeArmProfitFloor(
+  deps: FetBrk48LiveRunnerDependencies,
+  state: FetBrk48State,
+  actual: DirectPosition,
+) {
+  const position = state.position;
+  if (!position) return false;
+  if (position.protectionMode === "PROFIT_FLOOR_0P5") return false;
+
+  const markPrice = finite(actual.markPrice);
+  if (!(markPrice > 0)) return false;
+
+  const triggerPrice = position.entryPrice * (1 + FET_BRK48_RESIDUAL.profitFloorTriggerPct);
+  if (markPrice + EPS < triggerPrice) return false;
+
+  const armedAt = (deps.now || Date.now)();
+  const normalizedFloor = await deps.adapter.normalizeStopPrice(
+    "FETUSDT",
+    position.entryPrice * (1 + FET_BRK48_RESIDUAL.profitFloorStopPct),
+  );
+  if (!(normalizedFloor.price > position.hardStop + EPS)) {
+    position.protectionMode = "PROFIT_FLOOR_0P5";
+    position.profitFloorArmedAt = armedAt;
+    position.profitFloorTriggerPrice = triggerPrice;
+    state.position = position;
+    return true;
+  }
+
+  const previousStopClientOrderId = position.stopClientOrderId;
+  const nextStopClientOrderId = deterministicId(
+    "stop",
+    `${position.entryTs}|${position.quantity}|${position.entryPrice}|profit-floor|${normalizedFloor.price}`,
+  );
+
+  await deps.adapter.cancel(previousStopClientOrderId);
+  await ensureProtection(deps, state, actual, {
+    entryTs: position.entryTs,
+    exitTs: position.exitTs,
+    targetGross: position.gross,
+    hardStopPct: FET_BRK48_RESIDUAL.hardStopPct,
+    requestedStopPrice: normalizedFloor.price,
+    stopClientOrderId: nextStopClientOrderId,
+    protectionMode: "PROFIT_FLOOR_0P5",
+    profitFloorArmedAt: armedAt,
+    profitFloorTriggerPrice: triggerPrice,
+  });
+  return true;
 }
 
 async function emergencyFlattenProtectedFailure(
@@ -386,6 +451,10 @@ export class FetBrk48LiveRunner {
               targetGross: state.position.gross,
               hardStopPct: FET_BRK48_RESIDUAL.hardStopPct,
               stopClientOrderId: state.position.stopClientOrderId,
+              requestedStopPrice: state.position.hardStop,
+              protectionMode: state.position.protectionMode,
+              profitFloorArmedAt: state.position.profitFloorArmedAt,
+              profitFloorTriggerPrice: state.position.profitFloorTriggerPrice,
             });
             await writeFetBrk48State(this.deps.statePath, state);
           } catch (error) {
@@ -394,6 +463,17 @@ export class FetBrk48LiveRunner {
           }
         }
         if (now >= state.position.exitTs) return executeExit(this.deps, state, ours[0]);
+        try {
+          const profitFloorArmed = await maybeArmProfitFloor(this.deps, state, ours[0]);
+          state.lastReconciledAt = now;
+          await writeFetBrk48State(this.deps.statePath, state);
+          if (profitFloorArmed) {
+            return { status: "held", message: "FET_PROFIT_FLOOR_ARMED_0P5_AFTER_5P0", ordersSent: 1, gross: state.position?.gross };
+          }
+        } catch (error) {
+          await emergencyFlattenProtectedFailure(this.deps, state, ours[0], error instanceof Error ? error.message : String(error));
+          return { status: "manual-review", message: state.manualReview || "FET_PROFIT_FLOOR_PROTECTION_FAILURE", ordersSent: 1 };
+        }
         state.lastReconciledAt = now;
         await writeFetBrk48State(this.deps.statePath, state);
         return { status: "held", message: "FET_POSITION_HELD_PROTECTED", ordersSent: 0, gross: state.position.gross };
