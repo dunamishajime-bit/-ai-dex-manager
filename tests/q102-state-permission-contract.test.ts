@@ -14,3 +14,13 @@ test("current runtime wiring keeps the Q102 state path canonical", async () => {
   assert.match(source, /QUALITY102_CAUSAL_V1_STATE_PATH=\/var\/lib\/disdex\/quality102-causal-v1\/state\.json/);
   assert.match(source, /DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH=\$\{SHARED_ROOT\}\/aster-rate-budget\.json/);
 });
+
+test("Q102 migration and daemon startup preserve deploy-owned state", async () => {
+  const migration = await readFile("scripts/disdex-quality102-causal-v1-state-migrate.ts", "utf8");
+  const unit = await readFile("ops/systemd/disdex-quality102-causal-v1@.service", "utf8");
+  assert.match(migration, /normalizeLiveStateOwnership/);
+  assert.match(migration, /await normalizeLiveStateOwnership\(statePath/);
+  assert.match(unit, /state\.json/);
+  assert.match(unit, /chown deploy:deploy/);
+  assert.match(unit, /chmod 600/);
+});

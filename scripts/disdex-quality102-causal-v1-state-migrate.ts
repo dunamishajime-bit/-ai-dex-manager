@@ -5,6 +5,7 @@ import {
   FileQuality102CausalV1StateStore,
   type Quality102CausalV1State,
 } from "../lib/disdex-quality102-causal-v1-state";
+import { normalizeLiveStateOwnership } from "../lib/disdex-live-state-ownership";
 
 const SHA_PATTERN = /^[0-9a-f]{40}$/i;
 
@@ -76,6 +77,12 @@ export async function migrateQuality102CausalV1State(
   await copyFile(statePath, backupPath);
   const targetState = stateWithRuntimeSha(before, toRuntimeSha);
   await new FileQuality102CausalV1StateStore(statePath, "LIVE", toRuntimeSha).save(targetState);
+  // Production state is read by the deploy-owned Q102 daemon and Margin Guard.
+  // Root-run migration must not leave a root:root 0600 file that those services
+  // cannot read. Windows self-tests do not have the Linux deploy principal.
+  if (process.platform !== "win32") {
+    await normalizeLiveStateOwnership(statePath, { label: "QUALITY102_STATE_MIGRATION_STATE" });
+  }
   const after = await new FileQuality102CausalV1StateStore(statePath, "LIVE", toRuntimeSha).load();
   if (JSON.stringify(after) !== JSON.stringify(targetState)) {
     throw new Error("QUALITY102_STATE_MIGRATION_POSTCHECK_MISMATCH");
