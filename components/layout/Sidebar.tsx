@@ -9,11 +9,23 @@ import { SITE_BRAND_NAME } from "@/lib/site-access";
 
 const NAV_ITEMS = [
   { href: "/", label: "ホーム", icon: Home },
-  { href: "/positions", label: "\u30c0\u30c3\u30b7\u30e5\u30dc\u30fc\u30c9", icon: BarChart3 },
+  { href: "/positions", label: "ダッシュボード", icon: BarChart3 },
   { href: "/decision-status", label: "判定状況", icon: BarChart3 },
   { href: "/wallets", label: "運用ウォレット", icon: Wallet },
   { href: "/performance", label: "損益カレンダー", icon: CalendarDays },
-  { href: "/history", label: "トレード履歴", icon: FileText },
+  {
+    href: "/history",
+    label: "トレード履歴",
+    icon: FileText,
+    children: [
+      { href: "/history/performance", label: "損益集計", icon: BarChart3 },
+      { href: "/history/v12", label: "V12", icon: BarChart3 },
+      { href: "/history/pengu", label: "PENGU", icon: BarChart3 },
+      { href: "/history/q102", label: "Q102", icon: BarChart3 },
+      { href: "/history/fet", label: "FET", icon: BarChart3 },
+      { href: "/history/v52", label: "V52", icon: BarChart3 },
+    ],
+  },
   { href: "/settings", label: "設定", icon: Settings },
 ] as const;
 
@@ -25,9 +37,7 @@ export function Sidebar() {
     <aside className="hidden w-[188px] shrink-0 bg-[#04070c] px-3 py-4 md:flex md:flex-col">
       <div className="rounded-[20px] border border-[#8f8551] bg-[linear-gradient(180deg,rgba(35,35,24,0.92),rgba(16,18,18,0.96))] px-4 py-3 shadow-[0_0_24px_rgba(0,0,0,0.28)]">
         <div className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full border border-[#6d653f] bg-[#11150f] text-sm font-bold text-[#efe8c6]">
-            D
-          </div>
+          <div className="flex h-9 w-9 items-center justify-center rounded-full border border-[#6d653f] bg-[#11150f] text-sm font-bold text-[#efe8c6]">D</div>
           <div className="min-w-0">
             <div className="truncate text-[11px] font-bold text-white">{SITE_BRAND_NAME}</div>
             <div className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#dad1a7]">Personal</div>
@@ -40,21 +50,43 @@ export function Sidebar() {
         <div className="px-3 pb-2 text-[11px] font-bold text-white/76">メニュー</div>
         <nav className="space-y-1">
           {NAV_ITEMS.map((item) => {
-            const active = pathname === item.href;
+            const children = "children" in item ? item.children : undefined;
+            const active = pathname === item.href || (item.href === "/history" && pathname.startsWith("/history/"));
             return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "flex items-center gap-3 rounded-[14px] border px-3 py-3 text-[13px] font-semibold transition-colors",
-                  active
-                    ? "border-[#7c6d38] bg-[linear-gradient(90deg,rgba(92,73,28,0.52),rgba(63,49,21,0.28))] text-white"
-                    : "border-transparent text-white/78 hover:border-white/8 hover:bg-white/[0.03] hover:text-white",
-                )}
-              >
-                <item.icon className={cn("h-4 w-4", active ? "text-[#f0df9c]" : "text-white/55")} />
-                <span>{item.label}</span>
-              </Link>
+              <div key={item.href}>
+                <Link
+                  href={item.href}
+                  className={cn(
+                    "flex items-center gap-3 rounded-[14px] border px-3 py-3 text-[13px] font-semibold transition-colors",
+                    active
+                      ? "border-[#7c6d38] bg-[linear-gradient(90deg,rgba(92,73,28,0.52),rgba(63,49,21,0.28))] text-white"
+                      : "border-transparent text-white/78 hover:border-white/8 hover:bg-white/[0.03] hover:text-white",
+                  )}
+                >
+                  <item.icon className={cn("h-4 w-4", active ? "text-[#f0df9c]" : "text-white/55")} />
+                  <span>{item.label}</span>
+                </Link>
+                {children && active ? (
+                  <div className="ml-4 mt-1 space-y-1 border-l border-white/10 pl-2">
+                    {children.map((child) => {
+                      const childActive = pathname === child.href;
+                      return (
+                        <Link
+                          key={child.href}
+                          href={child.href}
+                          className={cn(
+                            "flex items-center gap-2 rounded-xl px-2 py-2 text-[11px] font-semibold transition-colors",
+                            childActive ? "bg-[#6d551d]/35 text-[#f2dfa0]" : "text-white/52 hover:bg-white/[0.04] hover:text-white/80",
+                          )}
+                        >
+                          <child.icon className="h-3.5 w-3.5" />
+                          <span>{child.label}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                ) : null}
+              </div>
             );
           })}
         </nav>

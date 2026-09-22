@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { icon: Home, label: "ホーム", href: "/" },
-  { icon: BarChart3, label: "\u30c0\u30c3\u30b7\u30e5", href: "/positions" },
+  { icon: BarChart3, label: "ダッシュ", href: "/positions" },
   { icon: BarChart3, label: "判定状況", href: "/decision-status" },
   { icon: Wallet, label: "ウォレット", href: "/wallets" },
   { icon: CalendarDays, label: "損益", href: "/performance" },
@@ -30,7 +30,7 @@ export function BottomNav() {
 
 function BottomNavItem({ icon: Icon, label, href }: (typeof NAV_ITEMS)[number]) {
   const pathname = usePathname();
-  const isActive = pathname === href;
+  const isActive = pathname === href || (href === "/history" && pathname.startsWith("/history/"));
 
   return (
     <Link

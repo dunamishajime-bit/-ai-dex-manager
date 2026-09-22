@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { CalendarDays, ChevronLeft, ChevronRight, RefreshCw, TrendingUp } from "lucide-react";
 
+import { LivePerformanceOverviewCharts } from "@/components/features/LivePerformanceOverviewCharts";
 import { Card } from "@/components/ui/Card";
 import { useCurrency } from "@/context/CurrencyContext";
 import { useOperationalWallet } from "@/hooks/useOperationalWallet";
@@ -306,6 +307,8 @@ export default function PerformancePage() {
           </div>
         </Card>
       </div>
+
+      <LivePerformanceOverviewCharts />
 
       <div className="rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">
         上部カードはAster口座評価額です。下の週次・月次サマリーと日別一覧は、約定手数料が取得できる場合は手数料控除後の closed trade 損益です。

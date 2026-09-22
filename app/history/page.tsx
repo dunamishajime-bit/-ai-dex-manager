@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Download, ExternalLink, RefreshCw, CalendarDays } from "lucide-react";
 import Link from "next/link";
 
+import { HistoryAnalyticsNav } from "@/components/features/HistoryAnalyticsNav";
 import { Card } from "@/components/ui/Card";
 import { displayTradePnlUsd } from "@/lib/trade-pnl";
 import { formatTradeHistoryAttributionLabel, getTradeHistoryAttributionTone } from "@/lib/trade-history-attribution";
@@ -287,6 +288,8 @@ export default function HistoryPage() {
           </button>
         </div>
       </div>
+
+      <HistoryAnalyticsNav />
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card glow="gold" noHover>
