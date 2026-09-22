@@ -754,7 +754,7 @@ self_test() {
   SELF_TEST_FIXTURE="$(mktemp -d)"
   trap 'rm -rf -- "$SELF_TEST_FIXTURE"' RETURN
   CURRENT_RELEASE="$SELF_TEST_FIXTURE"
-  mkdir -p "$SELF_TEST_FIXTURE/scripts/ops/root" "$SELF_TEST_FIXTURE/lib" "$SELF_TEST_FIXTURE/node_modules/.bin" "$SELF_TEST_FIXTURE/.venv2/bin"
+  mkdir -p "$SELF_TEST_FIXTURE/scripts/ops/root" "$SELF_TEST_FIXTURE/scripts/generated" "$SELF_TEST_FIXTURE/lib" "$SELF_TEST_FIXTURE/node_modules/.bin" "$SELF_TEST_FIXTURE/.venv2/bin"
   for required_file in \
     scripts/disdex-v12-x1-all-live-runner.ts \
     scripts/disdex-pengu-dual-ls-v2-live-runner.ts \
