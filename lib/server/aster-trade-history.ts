@@ -8,9 +8,16 @@ import { DIST_TERMINAL_LIVE_CONFIG as liveConfig } from "@/lib/disterminal-live-
 import { deriveTradeHistoryAttribution, type TradeHistoryAttribution } from "@/lib/trade-history-attribution";
 import { forcedExitCauseFromEvidence, loadFillLineageEvidence, routeFromFillEvidence, type FillLineageEvidence } from "@/lib/server/fill-lineage-evidence";
 
+const Q102_HISTORY_SYMBOLS = [
+  "AAVEUSDT", "APTUSDT", "ARBUSDT", "AVAXUSDT", "DOGEUSDT", "DOTUSDT",
+  "ENAUSDT", "FETUSDT", "FILUSDT", "JUPUSDT", "LDOUSDT", "NEARUSDT",
+  "ONDOUSDT", "OPUSDT", "RENDERUSDT", "SEIUSDT", "SOLUSDT", "SUIUSDT",
+  "TAOUSDT", "TIAUSDT", "TRXUSDT", "UNIUSDT",
+] as const;
+
 const ASTER_HISTORY_SYMBOLS: readonly string[] = Array.from(new Set([
   ...liveConfig.cryptoSymbols,
-  "FETUSDT",
+  ...Q102_HISTORY_SYMBOLS,
   ...liveConfig.stockSymbols,
 ]));
 const CACHE_TTL_MS = 60_000;
@@ -50,9 +57,7 @@ function strategyForSymbol(symbol: string): StrategyId {
   if (/^(AMZN|META|MSFT|NVDA|TSLA)/.test(symbol)) return "V52";
   if (symbol === liveConfig.penguSymbol) return "PENGU";
   if (symbol === "FETUSDT") return "UNKNOWN";
-  if (liveConfig.quality102Runtime.symbols.includes(symbol as (typeof liveConfig.quality102Runtime.symbols)[number])) {
-    return "QUALITY102";
-  }
+  if ((Q102_HISTORY_SYMBOLS as readonly string[]).includes(symbol)) return "QUALITY102";
   return "V12";
 }
 
