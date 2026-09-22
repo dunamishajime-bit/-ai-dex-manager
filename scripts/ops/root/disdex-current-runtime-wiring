@@ -92,6 +92,7 @@ validate_release_artifacts() {
     "$CURRENT_RELEASE/scripts/disdex-pengu-presubmit-snapshot-recovery.ts"
     "$CURRENT_RELEASE/scripts/disdex-v12-benign-entry-gate-recovery.ts"
     "$CURRENT_RELEASE/scripts/disdex-quality102-causal-v1-live-runner.ts"
+    "$CURRENT_RELEASE/scripts/generated/disdex-quality102-ranking-observer.cjs"
     "$CURRENT_RELEASE/scripts/disdex-current-live-target-readiness.ts"
     "$CURRENT_RELEASE/scripts/ops/root/disdex-live-operator-activation-gate.mjs"
     "$CURRENT_RELEASE/scripts/disdex-fet-brk48-live-runner.ts"
@@ -165,6 +166,8 @@ set_units() {
   V12_UNIT="disdex-v12-x1-all@${DEPLOYED_SHA}.service"
   PENGU_UNIT="disdex-pengu-dual-ls-v2@${DEPLOYED_SHA}.service"
   Q102_UNIT="disdex-quality102-causal-v1@${DEPLOYED_SHA}.service"
+  Q102_RANKING_OBSERVER_SERVICE="disdex-quality102-ranking-observer@${DEPLOYED_SHA}.service"
+  Q102_RANKING_OBSERVER_TIMER="disdex-quality102-ranking-observer@${DEPLOYED_SHA}.timer"
   FET_UNIT="disdex-fet-brk48@${DEPLOYED_SHA}.service"
   V52_UNIT="disdex-v52-aster-only@${DEPLOYED_SHA}.service"
   MARGIN_UNIT="disdex-v12-v52-margin-guard@${DEPLOYED_SHA}.service"
@@ -189,6 +192,8 @@ show_plan() {
   printf 'v12Unit=%s\n' "$V12_UNIT"
   printf 'penguUnit=%s\n' "$PENGU_UNIT"
   printf 'q102Unit=%s\n' "$Q102_UNIT"
+  printf 'q102RankingObserverService=%s\n' "$Q102_RANKING_OBSERVER_SERVICE"
+  printf 'q102RankingObserverTimer=%s\n' "$Q102_RANKING_OBSERVER_TIMER"
   printf 'fetUnit=%s\n' "$FET_UNIT"
   printf 'v52Unit=%s\n' "$V52_UNIT"
   printf 'marginUnit=%s\n' "$MARGIN_UNIT"
@@ -329,6 +334,28 @@ ensure_monitor_timer_active() {
     return 1
   }
   printf 'DISDEX_MONITOR_TIMER_ACTIVE unit=%s ordersSent=0 cancelSent=0 positionChangesSent=0\n' "$unit"
+}
+
+retarget_quality102_ranking_observer() {
+  local unit state
+  while read -r unit state _; do
+    [[ "$unit" =~ ^disdex-quality102-ranking-observer@[0-9a-f]{40}\.timer$ ]] || continue
+    [[ "$unit" == "$Q102_RANKING_OBSERVER_TIMER" ]] && continue
+    systemctl disable --now "$unit" >/dev/null 2>&1 || true
+    printf 'DISDEX_Q102_RANKING_OBSERVER_STALE_TIMER_DISABLED unit=%s previousState=%s\n' "$unit" "${state:-unknown}"
+  done < <(systemctl list-unit-files 'disdex-quality102-ranking-observer@*.timer' --no-legend 2>/dev/null || true)
+
+  systemctl enable --now "$Q102_RANKING_OBSERVER_TIMER" >/dev/null
+  ensure_monitor_timer_active "$Q102_RANKING_OBSERVER_TIMER"
+
+  # Ranking generation is read-only with tradingMutation=0. Run it once now so
+  # the HP never waits until the next hourly tick after a Production promotion.
+  systemctl reset-failed "$Q102_RANKING_OBSERVER_SERVICE" >/dev/null 2>&1 || true
+  if systemctl start "$Q102_RANKING_OBSERVER_SERVICE"; then
+    printf 'DISDEX_Q102_RANKING_OBSERVER_REFRESHED service=%s ordersSent=0 cancelSent=0 positionChangesSent=0\n' "$Q102_RANKING_OBSERVER_SERVICE"
+  else
+    printf 'Q102 ranking observer immediate refresh failed; timer remains armed: %s\n' "$Q102_RANKING_OBSERVER_SERVICE" >&2
+  fi
 }
 
 assert_current_live_target_ready() {
@@ -687,6 +714,7 @@ Environment=DISDEX_V96_KILL_SWITCH_FILE=/var/lib/disdex/shared/kill-switch.json"
   systemctl reset-failed disdex-ui-retention.service || true
   ensure_safety_daemon_active "$SHARED_RISK_UNIT"
   ensure_safety_daemon_active "$MARGIN_UNIT"
+  retarget_quality102_ranking_observer
 
   if operator_activation_all_trading_ready; then
     systemctl enable --now disdex-v12-kill-switch-auto-repair.path
@@ -718,6 +746,8 @@ self_test() {
   [[ "$sample_sha" =~ ^[0-9a-f]{40}$ ]]
   [[ "disdex-v12-x1-all@${sample_sha}.service" == *"@${sample_sha}.service" ]]
   [[ "disdex-quality102-causal-v1@${sample_sha}.service" == *"@${sample_sha}.service" ]]
+  [[ "disdex-quality102-ranking-observer@${sample_sha}.service" == *"@${sample_sha}.service" ]]
+  [[ "disdex-quality102-ranking-observer@${sample_sha}.timer" == *"@${sample_sha}.timer" ]]
   [[ "disdex-fet-brk48@${sample_sha}.service" == *"@${sample_sha}.service" ]]
   [[ "scripts/disdex_v96_v52_margin_guard_runtime.py" == scripts/* ]]
   [[ "scripts/disdex_v52_aster_only_live_engine.py" == scripts/* ]]
@@ -729,6 +759,7 @@ self_test() {
     scripts/disdex-v12-x1-all-live-runner.ts \
     scripts/disdex-pengu-dual-ls-v2-live-runner.ts \
     scripts/disdex-quality102-causal-v1-live-runner.ts \
+    scripts/generated/disdex-quality102-ranking-observer.cjs \
     scripts/disdex-current-live-target-readiness.ts \
     scripts/disdex-fet-brk48-live-runner.ts \
     scripts/disdex-pengu-presubmit-snapshot-recovery.ts \
