@@ -41,6 +41,26 @@ export interface V12LiveExecutionDependencies {
     log?: (message: string, payload?: Record<string, unknown>) => void;
 }
 
+const TRANSIENT_V12_RATE_BUDGET_REASONS = [
+    /^ASTER_GLOBAL_RATE_BUDGET_SATURATED:\d+$/,
+    /^ASTER_GLOBAL_RATE_BUDGET_LOCK_TIMEOUT$/,
+    /^ASTER_GLOBAL_RATE_BUDGET_LOCK_RELEASE_FAILED$/,
+    /^ASTER_GLOBAL_RATE_BUDGET_RECOVERY_LOCK_RELEASE_FAILED$/,
+];
+
+export function isTransientV12RateBudgetError(error: unknown): boolean {
+    const reason = error instanceof Error ? error.message : String(error);
+    return TRANSIENT_V12_RATE_BUDGET_REASONS.some((pattern) => pattern.test(reason.trim()));
+}
+
+export function classifyV12InfrastructureFailure(error: unknown): V12LiveTickResult | undefined {
+    if (!isTransientV12RateBudgetError(error)) return undefined;
+    return {
+        status: "locked",
+        reason: error instanceof Error ? error.message : String(error),
+    };
+}
+
 function finite(value: unknown, fallback = 0) { const n = Number(value); return Number.isFinite(n) ? n : fallback; }
 function actualSide(position: DirectPosition): "LONG" | "SHORT" { if (position.positionSide === "LONG") return "LONG"; if (position.positionSide === "SHORT") return "SHORT"; return position.quantity < 0 ? "SHORT" : "LONG"; }
 function actualQuantity(position: DirectPosition) { return Math.abs(position.quantity); }
@@ -804,6 +824,16 @@ export class V12LiveExecutionEngine {
             }
             return lastResult;
         } catch (error) {
+            const transient = classifyV12InfrastructureFailure(error);
+            if (transient) {
+                this.log("v12-rate-budget-deferred", {
+                    reason: transient.reason,
+                    ordersSent: 0,
+                    cancelsSent: 0,
+                    positionChangesSent: 0,
+                });
+                return transient;
+            }
             const state = await this.d.stateStore.load(); return this.fail(state, safeV12ErrorMessage(error));
         } finally { await handle.release(); }
     }
