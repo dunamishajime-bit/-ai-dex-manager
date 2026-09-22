@@ -14,6 +14,7 @@ import { resolveV12X1AllRuntime } from "../config/v12X1AllRuntime";
 
 const APPLY_ACK = "I_ACK_MARGIN_GUARD_EMERGENCY_RECOVERY_AFTER_STATE_RECONCILE_AND_3X_FLAT";
 const DATA_UNAVAILABLE_REASON = "Margin Guard lost authenticated risk data while managed positions were active";
+const DATA_UNAVAILABLE_GRACE_EXPIRED_REASON = "Margin Guard recovery grace expired while authenticated risk data remained unavailable";
 const PRELIQ_REASON_PREFIX = "Margin Guard triggered pre-liquidation managed stop-loss:";
 
 function argValue(flag: string) {
@@ -28,7 +29,9 @@ function exactSha(value: string) {
   return /^[0-9a-f]{40}$/.test(value);
 }
 function isMarginGuardKillReason(reason: string) {
-  return reason === DATA_UNAVAILABLE_REASON || reason.startsWith(PRELIQ_REASON_PREFIX);
+  return reason === DATA_UNAVAILABLE_REASON
+    || reason === DATA_UNAVAILABLE_GRACE_EXPIRED_REASON
+    || reason.startsWith(PRELIQ_REASON_PREFIX);
 }
 function parseLastJson(output: string) {
   for (const line of output.split(/\r?\n/).map((v) => v.trim()).filter(Boolean).reverse()) {
@@ -94,6 +97,7 @@ async function main() {
   if (process.argv.includes("--self-test")) {
     if (!exactSha("a".repeat(40)) || exactSha("abc")) throw new Error("MARGIN_GUARD_RECOVERY_SELFTEST_SHA_FAILED");
     if (!isMarginGuardKillReason(DATA_UNAVAILABLE_REASON)) throw new Error("MARGIN_GUARD_RECOVERY_SELFTEST_DATA_REASON_FAILED");
+    if (!isMarginGuardKillReason(DATA_UNAVAILABLE_GRACE_EXPIRED_REASON)) throw new Error("MARGIN_GUARD_RECOVERY_SELFTEST_GRACE_EXPIRED_REASON_FAILED");
     if (!isMarginGuardKillReason(PRELIQ_REASON_PREFIX + "stage=CRITICAL")) throw new Error("MARGIN_GUARD_RECOVERY_SELFTEST_PRELIQ_REASON_FAILED");
     if (isMarginGuardKillReason("unrelated")) throw new Error("MARGIN_GUARD_RECOVERY_SELFTEST_ALLOWLIST_FAILED");
     console.log("MARGIN_GUARD_EMERGENCY_RECOVERY_SELFTEST_PASS");
