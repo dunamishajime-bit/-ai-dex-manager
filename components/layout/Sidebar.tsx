@@ -40,7 +40,19 @@ const NAV_ITEMS: NavItem[] = [
     ],
   },
   { href: "/wallets", label: "運用ウォレット", icon: Wallet },
-  { href: "/history", label: "トレード履歴", icon: FileText },
+  {
+    href: "/history",
+    label: "トレード履歴",
+    icon: FileText,
+    children: [
+      { href: "/history/performance", label: "損益集計", icon: BarChart3 },
+      { href: "/history/v12", label: "V12", icon: BarChart3 },
+      { href: "/history/pengu", label: "PENGU", icon: BarChart3 },
+      { href: "/history/q102", label: "Q102", icon: BarChart3 },
+      { href: "/history/fet", label: "FET", icon: BarChart3 },
+      { href: "/history/v52", label: "V52", icon: BarChart3 },
+    ],
+  },
   { href: "/settings", label: "設定", icon: Settings },
 ];
 

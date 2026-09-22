@@ -11,7 +11,7 @@ const NAV_ITEMS = [
   { icon: BarChart3, label: "ダッシュ", href: "/positions", matchPrefix: false },
   { icon: Activity, label: "AIラボ", href: "/research-lab", matchPrefix: true },
   { icon: Wallet, label: "ウォレット", href: "/wallets", matchPrefix: false },
-  { icon: FileText, label: "履歴", href: "/history", matchPrefix: false },
+  { icon: FileText, label: "履歴", href: "/history", matchPrefix: true },
   { icon: Settings, label: "設定", href: "/settings", matchPrefix: false },
 ] as const;
 

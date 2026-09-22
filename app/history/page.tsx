@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Download, ExternalLink, RefreshCw } from "lucide-react";
 
+import { HistoryAnalyticsNav } from "@/components/features/HistoryAnalyticsNav";
 import { Card } from "@/components/ui/Card";
 
 type TradeHistoryEntry = {
@@ -164,6 +165,8 @@ export default function HistoryPage() {
           </button>
         </div>
       </div>
+
+      <HistoryAnalyticsNav />
 
       <div className="grid gap-4 md:grid-cols-4">
         <Card glow="gold" noHover>
