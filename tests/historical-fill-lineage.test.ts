@@ -9,7 +9,8 @@ import {
   loadFillLineageEvidence,
   routeFromFillEvidence,
 } from "@/lib/server/fill-lineage-evidence";
-import { loadLivePerformanceAnalytics } from "@/lib/server/live-performance-analytics";
+import { liveTradeFromOfficialHistoryEntry, loadLivePerformanceAnalytics } from "@/lib/server/live-performance-analytics";
+import type { TradeHistoryEntry } from "@/lib/server/trade-history-db";
 
 test("historical Aster order read-back restores V12 Dynamic, PENGU Recovery V8 and FET lineage", async () => {
   const dir = await mkdtemp(join(tmpdir(), "disdex-lineage-"));
@@ -81,4 +82,51 @@ test("LIVE performance uses audited order lineage without changing Aster PnL tru
   } finally {
     await rm(dir, { recursive: true, force: true });
   }
+});
+test("official history only counts explicit lineage and preserves Q102 route", () => {
+  const base: TradeHistoryEntry = {
+    id: "q102-entry",
+    executedAt: "2026-09-10T00:00:00.000Z",
+    walletId: "asterdex-primary",
+    walletAddress: "Aster account",
+    chainId: 1666,
+    txHash: "order:9001",
+    provider: "AsterDex",
+    action: "BUY",
+    sourceSymbol: "USDT",
+    destSymbol: "SUI",
+    sourceAmount: 10,
+    destAmount: 5,
+    sourceUsdValue: 10,
+    destUsdValue: 10,
+    reason: "Aster official fill / QUALITY102 / LONG / Entry",
+    orderId: "9001",
+    tradeStatus: "open",
+    strategyId: "QUALITY102",
+    attribution: {
+      classification: "alternate-route",
+      logicLabel: "Q102",
+      routeLabel: "HIGH_VOL",
+      evidence: "explicit",
+    },
+  };
+
+  const q102 = liveTradeFromOfficialHistoryEntry(base);
+  assert.equal(q102.logic, "Q102");
+  assert.equal(q102.variant, "Q102 HIGH_VOL");
+  assert.equal(q102.attributed, true);
+
+  const inferred = liveTradeFromOfficialHistoryEntry({
+    ...base,
+    id: "inferred",
+    orderId: "9002",
+    strategyId: "QUALITY102",
+    attribution: {
+      classification: "logic",
+      logicLabel: "Q102",
+      evidence: "symbol-inference",
+    },
+  });
+  assert.equal(inferred.logic, "UNATTRIBUTED");
+  assert.equal(inferred.attributed, false);
 });

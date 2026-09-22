@@ -1,6 +1,8 @@
 import { readFile } from "node:fs/promises";
 
+import { loadAsterTradeHistory } from "@/lib/server/aster-trade-history";
 import { HISTORICAL_FILL_LINEAGE_BY_ORDER_ID } from "@/lib/server/historical-fill-lineage";
+import type { TradeHistoryEntry } from "@/lib/server/trade-history-db";
 
 export const LIVE_LOGIC_KEYS = ["V12", "PENGU", "Q102", "FET", "V52", "UNATTRIBUTED"] as const;
 export type LiveLogicKey = (typeof LIVE_LOGIC_KEYS)[number];
@@ -252,6 +254,68 @@ function classifyStrategy(event?: FillEvent): { logic: LiveLogicKey; variant: st
   return { logic: "UNATTRIBUTED", variant: "未分類", strategyId: strategyId || "UNKNOWN" };
 }
 
+const STABLE_COMMISSION_ASSETS = new Set(["USDT", "USDC", "BUSD", "FDUSD", "USDF", "USD1"]);
+
+function logicFromOfficialHistory(entry: TradeHistoryEntry): { logic: LiveLogicKey; attributed: boolean } {
+  const strategy = String(entry.strategyId || "").toUpperCase();
+  const explicit = entry.attribution?.evidence === "explicit";
+  if (!explicit) return { logic: "UNATTRIBUTED", attributed: false };
+  if (strategy.includes("QUALITY102") || strategy === "Q102") return { logic: "Q102", attributed: true };
+  if (strategy.includes("PENGU")) return { logic: "PENGU", attributed: true };
+  if (strategy.includes("FET")) return { logic: "FET", attributed: true };
+  if (strategy.includes("V52") || strategy.includes("V11") || strategy.includes("V50")) return { logic: "V52", attributed: true };
+  if (strategy.includes("V12")) return { logic: "V12", attributed: true };
+  return { logic: "UNATTRIBUTED", attributed: false };
+}
+
+function variantFromOfficialHistory(entry: TradeHistoryEntry, logic: LiveLogicKey) {
+  const route = String(entry.attribution?.routeLabel || "").trim();
+  if (logic === "V12") return route ? `V12 別ルート / ${route}` : "V12 通常";
+  if (logic === "PENGU") return route ? `PENGU ${route}` : "PENGU";
+  if (logic === "Q102") return route ? `Q102 ${route}` : "Q102 Causal V4";
+  if (logic === "FET") return route ? `FET ${route}` : "FET BRK48";
+  if (logic === "V52") return route ? `V52 / ${route}` : "V52";
+  return "未分類";
+}
+
+export function liveTradeFromOfficialHistoryEntry(entry: TradeHistoryEntry): LivePerformanceTrade {
+  const { logic, attributed } = logicFromOfficialHistory(entry);
+  const realizedPnlUsd = finite(entry.realizedPnlUsd);
+  const commissionAsset = String(entry.commissionAsset || "").toUpperCase();
+  const rawCommission = Math.max(0, finite(entry.commission));
+  const derivedCommission = entry.netPnlUsd !== undefined && entry.realizedPnlUsd !== undefined
+    ? Math.max(0, realizedPnlUsd - finite(entry.netPnlUsd))
+    : 0;
+  const commissionUsd = STABLE_COMMISSION_ASSETS.has(commissionAsset) ? rawCommission : derivedCommission;
+  const netPnlUsd = entry.netPnlUsd !== undefined
+    ? finite(entry.netPnlUsd)
+    : realizedPnlUsd - commissionUsd;
+  const base = String(entry.action === "BUY" ? entry.destSymbol : entry.sourceSymbol || "").toUpperCase();
+  const symbol = base.endsWith("USDT") ? base : base ? `${base}USDT` : "";
+  const lineage = entry.orderId ? HISTORICAL_FILL_LINEAGE_BY_ORDER_ID[String(entry.orderId)] : undefined;
+  const clientOrderId = typeof lineage?.clientOrderId === "string" ? lineage.clientOrderId : null;
+  const close = entry.tradeStatus === "closed" || entry.tradeStatus === "unmatched_exit";
+
+  return {
+    id: entry.id,
+    orderId: entry.orderId ? String(entry.orderId) : null,
+    symbol,
+    side: entry.action,
+    executedAt: entry.executedAt,
+    realizedPnlUsd,
+    commissionUsd,
+    netPnlUsd,
+    logic,
+    logicLabel: logicLabel(logic),
+    variant: variantFromOfficialHistory(entry, logic),
+    strategyId: String(entry.strategyId || "UNKNOWN"),
+    eventType: close ? "EXIT_FILL" : "ENTRY_FILL",
+    reason: entry.exitCause ? `${entry.reason} / ${entry.exitCause}` : entry.reason,
+    clientOrderId,
+    attributed,
+  };
+}
+
 function isoFrom(row: { executedAt?: string; time?: number }) {
   if (row.executedAt && Number.isFinite(Date.parse(row.executedAt))) return new Date(row.executedAt).toISOString();
   const time = finite(row.time);
@@ -298,7 +362,8 @@ export async function loadLivePerformanceAnalytics(paths: LivePerformancePaths =
   const marginGuardPath = paths.marginGuardPath || DEFAULT_MARGIN_GUARD;
   const equityHistoryPath = paths.equityHistoryPath || DEFAULT_EQUITY_HISTORY;
 
-  const [history, fills, marginGuard, equityRaw] = await Promise.all([
+  const [officialHistory, history, fills, marginGuard, equityRaw] = await Promise.all([
+    paths.historyPath ? Promise.resolve(null) : loadAsterTradeHistory(),
     readJson<HistorySnapshot>(historyPath),
     readFillEvents(fillSpoolPath),
     readJson<MarginGuardSnapshot>(marginGuardPath),
@@ -315,7 +380,7 @@ export async function loadLivePerformanceAnalytics(paths: LivePerformancePaths =
   }
 
   const entries = Array.isArray(history?.entries) ? history!.entries! : [];
-  const trades = entries.map((row, index): LivePerformanceTrade => {
+  const snapshotTrades = entries.map((row, index): LivePerformanceTrade => {
     const orderId = row.orderId == null ? "" : String(row.orderId);
     const fill = orderId ? fillByOrderId.get(orderId) : undefined;
     const classified = classifyStrategy(fill);
@@ -340,7 +405,10 @@ export async function loadLivePerformanceAnalytics(paths: LivePerformancePaths =
       clientOrderId: fill?.clientOrderId ? String(fill.clientOrderId) : null,
       attributed: Boolean(fill),
     };
-  }).sort((a, b) => Date.parse(a.executedAt) - Date.parse(b.executedAt));
+  });
+  const officialTrades = officialHistory?.entries?.map(liveTradeFromOfficialHistoryEntry) || [];
+  const trades = (officialTrades.length ? officialTrades : snapshotTrades)
+    .sort((a, b) => Date.parse(a.executedAt) - Date.parse(b.executedAt));
 
   const fundingRows = Array.isArray(history?.fundingIncome) ? history!.fundingIncome! : [];
   const fundingEvents = fundingRows.map((row) => ({
@@ -451,7 +519,7 @@ export async function loadLivePerformanceAnalytics(paths: LivePerformancePaths =
   }
 
   return {
-    generatedAt: history?.generatedAt || null,
+    generatedAt: officialHistory?.refreshedAt || history?.generatedAt || null,
     source: "ASTER_OFFICIAL_USER_TRADES",
     attribution: {
       matched,
