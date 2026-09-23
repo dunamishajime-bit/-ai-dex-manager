@@ -26,7 +26,7 @@ for(const e of entries){
   const t=Date.parse(e.entry), bb=all.BTCUSDT, sb=all[e.symbol];
   const bi=idxBefore(bb,t), si=idxBefore(sb,t);
   const btc24=ret(bb,bi,12), sym24=ret(sb,si,12);
-  const f={barClose:new Date(sb[si].ct).toISOString(),btcEr12:er(bb,bi,6),btcEr24:er(bb,bi,12),sym6:ret(sb,si,3),volumeRatio:vr(sb,si),rel24:sym24-btc24,btc24,sym24};
+  const f={barClose:new Date(sb[si].ct).toISOString(),btc6:ret(bb,bi,3),btc12:ret(bb,bi,6),btcEr12:er(bb,bi,6),btcEr24:er(bb,bi,12),sym6:ret(sb,si,3),volumeRatio:vr(sb,si),rel24:sym24-btc24,btc24,sym24};
   const A=f.btcEr24>=.50&&f.btcEr12<.50;
   const B=f.btcEr24>=.60&&f.sym6<.01;
   const C=f.volumeRatio>=2.0&&f.rel24<0;
