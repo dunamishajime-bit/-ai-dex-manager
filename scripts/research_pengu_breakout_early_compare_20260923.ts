@@ -152,7 +152,8 @@ function replay(rows:PenguDualLsV2EvaluationRow[],points:FundingPoint[],v:Varian
   const cost=BASE_FEE_PER_SIDE+(mode==="SEVERE"?STRESS_SLIPPAGE_PER_SIDE:0);const trades:Trade[]=[];
   let i=250,cooldownUntilTs=0;
   while(i<rows.length-2){
-    const currentReferenceTs=rows[i]?.features?.referenceTs ?? rows[i]?.candle.openTime ?? 0;\n    if(currentReferenceTs<cooldownUntilTs){i++;continue;}const f=rows[i].features;if(!f){i++;continue;}
+    const currentReferenceTs=rows[i]?.features?.referenceTs ?? rows[i]?.candle.openTime ?? 0;
+    if(currentReferenceTs<cooldownUntilTs){i++;continue;}const f=rows[i].features;if(!f){i++;continue;}
     const longRoute=routeAt(rows,i,v);const longSignal=Boolean(longRoute);
     const adjustedRecovery=rows[i].recoveryV8?{...rows[i].recoveryV8,ordinaryLongEligible:longSignal,baseLongSignal:longSignal}:undefined;
     const recovery=adjustedRecovery?evaluateRecoveryV8Entry(adjustedRecovery):undefined;
