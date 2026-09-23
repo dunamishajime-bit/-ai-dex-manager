@@ -2,7 +2,7 @@ name: V12 market-state loss-cluster research BT
 on:
   push:
     branches:
-      - research/v12-market-state-loss-cluster-20260923
+      - research/v12-winrate-priority-xrp04-20260923
     paths:
       - scripts/research_v12_winrate_priority_xrp04_20260923.ts
       - .github/workflows/v12-market-state-loss-cluster-research.yml
