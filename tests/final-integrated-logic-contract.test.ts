@@ -28,10 +28,10 @@ test("V12 Top3 preserves strong-quality signal while Rank3 residual sizing is ex
   assert.equal(V12_X1_ALL.neutralScoreThreshold, 1.4649);
 });
 
-test("PENGU allocation is the formal 0.85x production contract", () => {
-  assert.equal(PENGU_DUAL_LS_V2.maximumGross, 0.85);
-  assert.equal(PENGU_DUAL_LS_V2.longGross, 0.85);
-  assert.equal(PENGU_DUAL_LS_V2.shortGross, 0.85);
+test("PENGU allocation target is fixed at 1.0x", () => {
+  assert.equal(PENGU_DUAL_LS_V2.maximumGross, 1.0);
+  assert.equal(PENGU_DUAL_LS_V2.longGross, 1.0);
+  assert.equal(PENGU_DUAL_LS_V2.shortGross, 1.0);
   assert.equal(PENGU_DUAL_LS_V2.hardStopCooldownHours, 24);
 });
 
