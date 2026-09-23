@@ -1,0 +1,31 @@
+name: V12 Aster exact win-rate BT
+on:
+  push:
+    branches:
+      - research/v12-live-bt-parity-20260923
+    paths:
+      - scripts/research_v12_aster_exact_winrate_20260923.ts
+      - .github/workflows/v12-aster-exact-winrate-bt.yml
+  workflow_dispatch:
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Run Aster-exact V12 backtest
+        run: |
+          npx tsx scripts/research_v12_aster_exact_winrate_20260923.ts > /tmp/v12-aster-exact-winrate.json 2> /tmp/v12-aster-exact-winrate-summary.txt
+          cat /tmp/v12-aster-exact-winrate-summary.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v12-aster-exact-winrate
+          path: |
+            .research-state/v12-winrate-gates-20260923/result.json
+            /tmp/v12-aster-exact-winrate-summary.txt
