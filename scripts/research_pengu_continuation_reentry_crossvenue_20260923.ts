@@ -92,7 +92,7 @@ async function okxCandles(symbol:string){
 }
 async function gateCandles(symbol:string){
   const contract=symbol==="PENGUUSDT"?"PENGU_USDT":"BTC_USDT";
-  const map=new Map<number,DisDexV35Candle>();let cursor=WARM_START;const span=1900*HOUR;
+  const map=new Map<number,DisDexV35Candle>();const gateStart=Math.max(WARM_START,RECENT_END-9_900*HOUR);let cursor=gateStart;const span=1900*HOUR;
   while(cursor<RECENT_END){
     const end=Math.min(RECENT_END,cursor+span);
     const u=new URL("https://api.gateio.ws/api/v4/futures/usdt/candlesticks");
