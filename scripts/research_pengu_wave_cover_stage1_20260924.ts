@@ -282,7 +282,7 @@ function replay(rows:PenguDualLsV2EvaluationRow[],points:FundingPoint[],v:Varian
         }
         rp=ev.updatedPosition;
         if(["HARD_STOP","TRAILING_STOP","MAX_HOLD","YIELD_BASE_LONG"].includes(ev.kind)){
-          exitIndex=j;exitPrice=ev.stopPrice??rows[j].candle.close;exitReason=\`RECOVERY_V8_\${ev.kind}\`;break;
+          exitIndex=j;exitPrice=ev.stopPrice??rows[j].candle.close;exitReason=`RECOVERY_V8_${ev.kind}`;break;
         }
       }
       const leg=legReturn("L",remainingGross,entry.open,exitPrice,entry.openTime,rows[exitIndex].candle.openTime,points,cost);
@@ -550,7 +550,7 @@ function rescueSummary(rows:PenguDualLsV2EvaluationRow[],baseline:Trade[],candid
 async function main(){
   const [p,b,fp]=await Promise.all([candles("PENGUUSDT"),candles("BTCUSDT"),funding()]);
   const common=new Set(p.map(x=>x.openTime));const btc=b.filter(x=>common.has(x.openTime));const btcSet=new Set(btc.map(x=>x.openTime));const pengu=p.filter(x=>btcSet.has(x.openTime));
-  assert.equal(pengu.length,btc.length);assert.ok(pengu.length>9000,\`insufficient common rows \${pengu.length}\`);
+  assert.equal(pengu.length,btc.length);assert.ok(pengu.length>9000,`insufficient common rows ${pengu.length}`);
   const history:PenguDualLsV2History={pengu1h:pengu,btc1h:btc,penguFunding:fp};
   const rows=buildPenguDualLsV2EvaluationSeries(history,RECENT_END+1);
   const rollingStart=RECENT_END-365*24*HOUR;
@@ -565,12 +565,12 @@ async function main(){
     SHORT_DIRECT_BREAKDOWN:{purpose:"direct breakdown without bounce/rearm requirement",ret6Max:-.035,ret24Max:-.03,ret72Max:.10,relative24Max:-.015,btc24Max:.04,rsi:[30,58],requireCloseBelowPreviousLowAndEma72:true},
   },windows:{},safety:{researchOnly:true,ordersSent:false,liveChanged:false,vpsChanged:false,productionChanged:false}};
   const cache:any={};
-  for(const mode of ["NORMAL","SEVERE"] as Mode[])for(const v of variants)cache[\`\${mode}:\${v}\`]=replay(rows,fp,v,mode);
+  for(const mode of ["NORMAL","SEVERE"] as Mode[])for(const v of variants)cache[`${mode}:${v}`]=replay(rows,fp,v,mode);
   for(const w of windows){
     const baseN=between(cache["NORMAL:BASELINE"],w.start,w.end),baseS=between(cache["SEVERE:BASELINE"],w.start,w.end);
     const out:any={start:new Date(w.start).toISOString(),end:new Date(w.end).toISOString(),baseline:{NORMAL:metrics(baseN),SEVERE:metrics(baseS)},variants:{}};
     for(const v of variants.filter(x=>x!=="BASELINE")){
-      const n=between(cache[\`NORMAL:\${v}\`],w.start,w.end),sv=between(cache[\`SEVERE:\${v}\`],w.start,w.end);
+      const n=between(cache[`NORMAL:${v}`],w.start,w.end),sv=between(cache[`SEVERE:${v}`],w.start,w.end);
       const direction:WaveDirection=v.startsWith("LONG_")?"UP":"DOWN";
       const nm=metrics(n),sm=metrics(sv),bn=metrics(baseN),bs=metrics(baseS);
       out.variants[v]={
