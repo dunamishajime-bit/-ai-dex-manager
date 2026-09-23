@@ -52,6 +52,10 @@ type Variant = {
   altMaxScore?: number;
   tpAtrOverride?: number;
   trailAtrOverride?: number;
+  hcMinRet24?: number;
+  hcMaxPrevVolume?: number;
+  hcMinBtc24?: number;
+  hcAltOnly?: boolean;
 };
 type Mode = { name:string; feeBps:number; slipBps:number };
 
@@ -114,6 +118,11 @@ const variants: Variant[] = [
   { name:"TP1P5_TRAIL0P6", tpAtrOverride:1.5, trailAtrOverride:0.6 },
   { name:"ALT_ATR0174_TP2P0", altMinAtrRatio:0.01739, tpAtrOverride:2.0 },
   { name:"ALT_ATR0174_TP1P5", altMinAtrRatio:0.01739, tpAtrOverride:1.5 },
+  { name:"HC_18_080_20", hcMinRet24:0.018, hcMaxPrevVolume:0.80, hcMinBtc24:0.020 },
+  { name:"HC_15_085_15", hcMinRet24:0.015, hcMaxPrevVolume:0.85, hcMinBtc24:0.015 },
+  { name:"HC_20_080_20", hcMinRet24:0.020, hcMaxPrevVolume:0.80, hcMinBtc24:0.020 },
+  { name:"HC_18_085_20", hcMinRet24:0.018, hcMaxPrevVolume:0.85, hcMinBtc24:0.020 },
+  { name:"HC_ALT_18_080_20", hcMinRet24:0.018, hcMaxPrevVolume:0.80, hcMinBtc24:0.020, hcAltOnly:true },
 ];
 const modes: Mode[] = [
   { name:"NORMAL", feeBps:5, slipBps:0 },
@@ -217,6 +226,10 @@ function variantSignals(p:Prepared,t:number,v:Variant,currentDd:number){
     return {...s,route:routeFor(p,s,t),features};
   }) as RoutedSignal[];
   ss=ss.filter(s=>fastBtcPass(p,s,t,v.fastBtcVeto));
+  if(v.hcMinRet24!=null) ss=ss.filter(s=>s.features.ret24h>=v.hcMinRet24!);
+  if(v.hcMaxPrevVolume!=null) ss=ss.filter(s=>s.features.prevVolumeRatio<=v.hcMaxPrevVolume!);
+  if(v.hcMinBtc24!=null) ss=ss.filter(s=>s.features.btc24h>=v.hcMinBtc24!);
+  if(v.hcAltOnly) ss=ss.filter(s=>s.route!=="NORMAL_SCORE");
   if(v.breakoutConfirm) ss=ss.filter(s=>breakoutPass(p,s,t));
   if(v.rank2MinScore!=null) ss=ss.filter(s=>s.rank!==2 || s.score>=v.rank2MinScore!);
   if(v.blockStrongAlt) ss=ss.filter(s=>s.route!=="STRONG_REGIME_ALT");
