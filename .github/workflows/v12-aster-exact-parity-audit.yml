@@ -1,0 +1,27 @@
+name: V12 Aster exact parity audit
+on:
+  push:
+    branches:
+      - research/v12-live-bt-parity-20260923
+    paths:
+      - scripts/audit_v12_aster_exact_parity_20260923.ts
+      - .github/workflows/v12-aster-exact-parity-audit.yml
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Run exact Aster replay
+        run: npx tsx scripts/audit_v12_aster_exact_parity_20260923.ts | tee /tmp/v12-aster-parity.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v12-aster-exact-parity
+          path: /tmp/v12-aster-parity.json
