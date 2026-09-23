@@ -338,7 +338,7 @@ function simulate(d:PerpMarketData,p:Prepared,v:Variant,m:Mode){
     maxDrawdownPct:maxDd,profitFactor:gl?gp/gl:gp?99:0,winRatePct:pnls.length?pnls.filter(x=>x>0).length/pnls.length*100:0,
     tradeCount:pnls.length,entries,rank2Entries,filteredSignals:filtered,averageTradePct:tradeRows.length?tradeRows.reduce((a,x)=>a+x.pct,0)/tradeRows.length:0,
     grossAtEnd:gross(END-H),routeStats, losses:tradeRows.filter(x=>x.net<0).sort((a,b)=>a.net-b.net).slice(0,10),
-    trades: v.name==="BASELINE" && m.name==="NORMAL" ? tradeRows : undefined,
+    trades: v.name==="HC175_LOCKED" && m.name==="NORMAL" ? tradeRows : undefined,
   };
 }
 
