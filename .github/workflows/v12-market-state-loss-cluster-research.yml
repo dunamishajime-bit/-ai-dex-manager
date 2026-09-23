@@ -4,7 +4,7 @@ on:
     branches:
       - research/v12-market-state-loss-cluster-20260923
     paths:
-      - scripts/research_v12_no_trend_refinement_20260923.ts
+      - scripts/research_v12_no_trend_refinement_v2_20260923.ts
       - .github/workflows/v12-market-state-loss-cluster-research.yml
   workflow_dispatch:
 
@@ -21,11 +21,11 @@ jobs:
       - run: npm ci
       - name: Run research backtest
         run: |
-          npx tsx scripts/research_v12_no_trend_refinement_20260923.ts > /tmp/v12-market-state-bt.json 2> /tmp/v12-market-state-summary.txt
+          npx tsx scripts/research_v12_no_trend_refinement_v2_20260923.ts > /tmp/v12-market-state-bt.json 2> /tmp/v12-market-state-summary.txt
           cat /tmp/v12-market-state-summary.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: v12-no-trend-refinement-result
+          name: v12-no-trend-refinement-v2-result
           path: |
             .research-state/v12-winrate-gates-20260923/result.json
             /tmp/v12-market-state-summary.txt
