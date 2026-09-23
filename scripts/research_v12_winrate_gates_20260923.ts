@@ -19,9 +19,11 @@ const WARM = START - 180 * 24 * H;
 const SYMS = [...V12_X1_ALL.universe];
 
 type Prepared = { bars: Record<string,V12Bar[]>; idx: Record<string,Map<number,number>>; timeline:number[] };
+type Route = "NORMAL_SCORE"|"STRONG_REGIME_ALT"|"RELAXED_MOMENTUM_ALT"|"UNKNOWN";
+type RoutedSignal = V12Signal & { route: Route };
 type Position = {
   symbol:string; side:"LONG"|"SHORT"; entry:number; qty:number; entryFee:number; funding:number; lastFund:number;
-  initialStop:number; stop:number; tp:number; trailingDistance:number; peak:number; trough:number; bars:number; rank:number; entryTs:number;
+  initialStop:number; stop:number; tp:number; trailingDistance:number; peak:number; trough:number; bars:number; rank:number; entryTs:number; route:Route;
 };
 type Variant = {
   name:string;
@@ -31,6 +33,11 @@ type Variant = {
   rank2MinScore?: number;
   breakoutConfirm?: boolean;
   ddDefense?: boolean;
+  blockStrongAlt?: boolean;
+  blockRelaxedAlt?: boolean;
+  altMinScore?: number;
+  altMinVolume?: number;
+  altMinMomentum?: number;
 };
 type Mode = { name:string; feeBps:number; slipBps:number };
 
@@ -53,6 +60,18 @@ const variants: Variant[] = [
   { name:"LOSS_COOLDOWN_12H", lossOnlyCooldownBars:6 },
   { name:"BTC_BOTH_NEGATIVE", fastBtcVeto:"bothNegative" },
   { name:"LOSS6H_PLUS_BTC_BOTH_NEG", lossOnlyCooldownBars:3, fastBtcVeto:"bothNegative" },
+  { name:"BLOCK_STRONG_ALT", blockStrongAlt:true },
+  { name:"BLOCK_RELAXED_ALT", blockRelaxedAlt:true },
+  { name:"NORMAL_ONLY", blockStrongAlt:true, blockRelaxedAlt:true },
+  { name:"ALT_SCORE_030", altMinScore:0.30 },
+  { name:"ALT_SCORE_040", altMinScore:0.40 },
+  { name:"ALT_SCORE_050", altMinScore:0.50 },
+  { name:"ALT_VOLUME_120", altMinVolume:1.20 },
+  { name:"ALT_VOLUME_140", altMinVolume:1.40 },
+  { name:"ALT_MOM_080", altMinMomentum:0.08 },
+  { name:"ALT_SCORE030_VOL120", altMinScore:0.30, altMinVolume:1.20 },
+  { name:"ALT_SCORE040_VOL120", altMinScore:0.40, altMinVolume:1.20 },
+  { name:"ALT_SCORE030_VOL120_LOSS6H", altMinScore:0.30, altMinVolume:1.20, lossOnlyCooldownBars:3 },
 ];
 const modes: Mode[] = [
   { name:"NORMAL", feeBps:5, slipBps:0 },
@@ -95,12 +114,37 @@ function fastBtcPass(p:Prepared,s:V12Signal,t:number,mode:Variant["fastBtcVeto"]
   if(s.side==="LONG") return mode==="24h" ? r24>=0 : (r24>=0 && r12>=0);
   return mode==="24h" ? r24<=0 : (r24<=0 && r12<=0);
 }
+function routeFor(p:Prepared,s:V12Signal,t:number):Route{
+  if(s.score>=V12_X1_ALL.neutralScoreThreshold)return "NORMAL_SCORE";
+  const bi=p.idx.BTC?.get(t), btc=p.bars.BTC, si=p.idx[s.symbol]?.get(t), sb=p.bars[s.symbol];
+  if(bi==null||!btc||si==null||!sb)return "UNKNOWN";
+  const slice=btc.slice(bi-V12_X1_ALL.btcRegimeSmaBars+1,bi+1);
+  if(slice.length!==V12_X1_ALL.btcRegimeSmaBars)return "UNKNOWN";
+  const ma=slice.reduce((a,x)=>a+x.close,0)/slice.length;
+  const dist=btc[bi].close/ma-1;
+  const strong=Math.abs(dist)>=V12_X1_ALL.strongRegimeThresholdPct;
+  const atrRatio=s.atr/sb[si].close;
+  if(strong && s.score>=V12_X1_ALL.strongRegimeQualityScoreMinimum && s.score<=V12_X1_ALL.strongRegimeQualityScoreMaximum && atrRatio>=V12_X1_ALL.strongRegimeQualityMinimumAtrRatio)return "STRONG_REGIME_ALT";
+  const aligned=s.side==="LONG"?s.momentum:-s.momentum;
+  if(aligned>=V12_X1_ALL.relaxedRegimeMinimumMomentumPct && atrRatio>=V12_X1_ALL.relaxedRegimeMinimumAtrRatio)return "RELAXED_MOMENTUM_ALT";
+  return "UNKNOWN";
+}
 function variantSignals(p:Prepared,t:number,v:Variant,currentDd:number){
-  const i=p.idx.BTC?.get(t); if(i==null)return [] as V12Signal[];
-  let ss=buildV12Signals(p.bars,i,V12_X1_ALL.maximumPositions);
+  const i=p.idx.BTC?.get(t); if(i==null)return [] as RoutedSignal[];
+  let ss=buildV12Signals(p.bars,i,V12_X1_ALL.maximumPositions).map(s=>({...s,route:routeFor(p,s,t)})) as RoutedSignal[];
   ss=ss.filter(s=>fastBtcPass(p,s,t,v.fastBtcVeto));
   if(v.breakoutConfirm) ss=ss.filter(s=>breakoutPass(p,s,t));
   if(v.rank2MinScore!=null) ss=ss.filter(s=>s.rank!==2 || s.score>=v.rank2MinScore!);
+  if(v.blockStrongAlt) ss=ss.filter(s=>s.route!=="STRONG_REGIME_ALT");
+  if(v.blockRelaxedAlt) ss=ss.filter(s=>s.route!=="RELAXED_MOMENTUM_ALT");
+  ss=ss.filter(s=>{
+    if(s.route==="NORMAL_SCORE")return true;
+    if(v.altMinScore!=null && s.score<v.altMinScore)return false;
+    if(v.altMinVolume!=null && s.volumeRatio<v.altMinVolume)return false;
+    const aligned=s.side==="LONG"?s.momentum:-s.momentum;
+    if(v.altMinMomentum!=null && aligned<v.altMinMomentum)return false;
+    return true;
+  });
   if(v.ddDefense){
     if(currentDd>=5) ss=ss.filter(s=>s.rank===1 && s.score>=0.45);
     else if(currentDd>=4) ss=ss.filter(s=>s.rank===1);
@@ -113,7 +157,7 @@ function simulate(d:PerpMarketData,p:Prepared,v:Variant,m:Mode){
   const times=p.timeline.filter(t=>t>=START&&t<END);
   const deposits=monthlyDepositSchedule(); let depI=0;
   let cash=10000, contributed=10000, peak=10000, maxDd=0;
-  const pos=new Map<string,Position>(); const pending=new Map<string,V12Signal>(); const cool=new Map<string,number>();
+  const pos=new Map<string,Position>(); const pending=new Map<string,RoutedSignal>(); const cool=new Map<string,number>();
   const pnls:number[]=[]; const tradeRows:any[]=[]; let entries=0, rank2Entries=0, filtered=0, winsFiltered=0;
   const px=(s:string,t:number,f:"open"|"close"="close")=>{const i=p.idx[s]?.get(t);return i==null?undefined:p.bars[s]?.[i]?.[f];};
   const equity=(t:number,f:"open"|"close"="close")=>{let e=cash;for(const q of pos.values()){const x=px(q.symbol,t,f)??q.entry;const dir=q.side==="LONG"?1:-1;e+=dir*q.qty*(x-q.entry)-q.qty*x*fee;}return Math.max(0,e);};
@@ -121,7 +165,7 @@ function simulate(d:PerpMarketData,p:Prepared,v:Variant,m:Mode){
   const close=(q:Position,raw:number,reason:string,t:number)=>{
     const x=q.side==="LONG"?raw*(1-slip):raw*(1+slip);const dir=q.side==="LONG"?1:-1;
     const g=dir*q.qty*(x-q.entry),ef=q.qty*x*fee,net=g-q.entryFee-ef-q.funding;
-    cash=Math.max(0,cash+g-ef);pnls.push(net);tradeRows.push({symbol:q.symbol,rank:q.rank,entryTs:q.entryTs,exitTs:t,net,pct:(x/q.entry-1)*100*dir,reason});
+    cash=Math.max(0,cash+g-ef);pnls.push(net);tradeRows.push({symbol:q.symbol,rank:q.rank,route:q.route,entryTs:q.entryTs,exitTs:t,net,pct:(x/q.entry-1)*100*dir,reason});
     pos.delete(q.symbol);
     const coolBars = v.lossOnlyCooldownBars && net < 0
       ? v.lossOnlyCooldownBars
@@ -140,7 +184,7 @@ function simulate(d:PerpMarketData,p:Prepared,v:Variant,m:Mode){
       const notional=Math.min(sz.requestedNotional,rankCap,cap);
       if(notional/e<0.05){pending.delete(s);continue;}
       const qty=notional/entry,entryFee=notional*fee,levels=protectiveLevels(entry,sig.atr,sig.side);
-      cash-=entryFee;pos.set(s,{symbol:s,side:sig.side,entry,qty,entryFee,funding:0,lastFund:t,initialStop:levels.initialStop,stop:levels.initialStop,tp:levels.takeProfit,trailingDistance:levels.trailingDistance,peak:entry,trough:entry,bars:0,rank:sig.rank,entryTs:t});
+      cash-=entryFee;pos.set(s,{symbol:s,side:sig.side,entry,qty,entryFee,funding:0,lastFund:t,initialStop:levels.initialStop,stop:levels.initialStop,tp:levels.takeProfit,trailingDistance:levels.trailingDistance,peak:entry,trough:entry,bars:0,rank:sig.rank,entryTs:t,route:sig.route});
       entries++;if(sig.rank===2)rank2Entries++;pending.delete(s);
     }
     for(const q of [...pos.values()]){
@@ -161,11 +205,15 @@ function simulate(d:PerpMarketData,p:Prepared,v:Variant,m:Mode){
   while(depI<deposits.length&&deposits[depI]<=END){cash+=10000;contributed+=10000;depI++;}
   for(const q of [...pos.values()]){const b=p.bars[q.symbol];const last=b?.filter(x=>x.ts<END).at(-1);if(last)close(q,last.close,"end",END);}
   const gp=pnls.filter(x=>x>0).reduce((a,b)=>a+b,0),gl=-pnls.filter(x=>x<0).reduce((a,b)=>a+b,0);
+  const routeStats=Object.fromEntries((["NORMAL_SCORE","STRONG_REGIME_ALT","RELAXED_MOMENTUM_ALT","UNKNOWN"] as Route[]).map(route=>{
+    const xs=tradeRows.filter(x=>x.route===route), rgp=xs.filter(x=>x.net>0).reduce((a,x)=>a+x.net,0), rgl=-xs.filter(x=>x.net<0).reduce((a,x)=>a+x.net,0);
+    return [route,{tradeCount:xs.length,winRatePct:xs.length?xs.filter(x=>x.net>0).length/xs.length*100:0,profitFactor:rgl?rgp/rgl:rgp?99:0,netPnl:xs.reduce((a,x)=>a+x.net,0),avgPct:xs.length?xs.reduce((a,x)=>a+x.pct,0)/xs.length:0}];
+  }));
   return {
     finalEquity:cash,contributed,netProfit:cash-contributed,returnOnContributionPct:(cash/contributed-1)*100,
     maxDrawdownPct:maxDd,profitFactor:gl?gp/gl:gp?99:0,winRatePct:pnls.length?pnls.filter(x=>x>0).length/pnls.length*100:0,
     tradeCount:pnls.length,entries,rank2Entries,filteredSignals:filtered,averageTradePct:tradeRows.length?tradeRows.reduce((a,x)=>a+x.pct,0)/tradeRows.length:0,
-    grossAtEnd:gross(END-H), losses:tradeRows.filter(x=>x.net<0).sort((a,b)=>a.net-b.net).slice(0,10),
+    grossAtEnd:gross(END-H),routeStats, losses:tradeRows.filter(x=>x.net<0).sort((a,b)=>a.net-b.net).slice(0,10),
   };
 }
 
