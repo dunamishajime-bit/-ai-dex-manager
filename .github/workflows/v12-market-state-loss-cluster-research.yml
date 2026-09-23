@@ -1,0 +1,31 @@
+name: V12 market-state loss-cluster research BT
+on:
+  push:
+    branches:
+      - research/v12-market-state-loss-cluster-20260923
+    paths:
+      - scripts/research_v12_market_state_loss_cluster_20260923.ts
+      - .github/workflows/v12-market-state-loss-cluster-research.yml
+  workflow_dispatch:
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Run research backtest
+        run: |
+          npx tsx scripts/research_v12_market_state_loss_cluster_20260923.ts > /tmp/v12-market-state-bt.json 2> /tmp/v12-market-state-summary.txt
+          cat /tmp/v12-market-state-summary.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v12-market-state-loss-cluster-result
+          path: |
+            .research-state/v12-winrate-gates-20260923/result.json
+            /tmp/v12-market-state-summary.txt
