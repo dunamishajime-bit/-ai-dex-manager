@@ -1,0 +1,59 @@
+name: V12 Aster Rank1 rolling validation
+on:
+  push:
+    branches:
+      - research/v12-live-bt-parity-20260923
+    paths:
+      - scripts/research_v12_aster_rank1_fast_rolling_20260923.ts
+      - .github/workflows/v12-aster-rank1-fast-rolling.yml
+  workflow_dispatch:
+
+jobs:
+  rolling:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: 2025Q1
+            start: 2025-01-01T00:00:00Z
+            end: 2025-04-01T00:00:00Z
+          - label: 2025Q2
+            start: 2025-04-01T00:00:00Z
+            end: 2025-07-01T00:00:00Z
+          - label: 2025Q3
+            start: 2025-07-01T00:00:00Z
+            end: 2025-10-01T00:00:00Z
+          - label: 2025Q4
+            start: 2025-10-01T00:00:00Z
+            end: 2026-01-01T00:00:00Z
+          - label: 2026Q1
+            start: 2026-01-01T00:00:00Z
+            end: 2026-04-01T00:00:00Z
+          - label: 2026Q2
+            start: 2026-04-01T00:00:00Z
+            end: 2026-07-01T00:00:00Z
+          - label: 2026Q3_holdout
+            start: 2026-07-01T00:00:00Z
+            end: 2026-09-22T18:00:00Z
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Run rolling validation
+        env:
+          V12_START: ${{ matrix.start }}
+          V12_END: ${{ matrix.end }}
+        run: |
+          npx tsx scripts/research_v12_aster_rank1_fast_rolling_20260923.ts > /tmp/result.json 2> /tmp/summary.txt
+          cat /tmp/summary.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v12-rank1-rolling-${{ matrix.label }}
+          path: |
+            .research-state/v12-winrate-gates-20260923/result.json
+            /tmp/summary.txt
