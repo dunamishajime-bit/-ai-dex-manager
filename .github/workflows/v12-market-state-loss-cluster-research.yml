@@ -4,7 +4,7 @@ on:
     branches:
       - research/v12-market-state-loss-cluster-20260923
     paths:
-      - scripts/audit_v12_today_signal_rebuild_20260923.ts
+      - scripts/research_v12_high_score_reversal_final_20260923.ts
       - .github/workflows/v12-market-state-loss-cluster-research.yml
   workflow_dispatch:
 
@@ -19,10 +19,13 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci
-      - name: Rebuild today's signals
+      - name: Run final high-score reversal backtest
         run: |
-          npx tsx scripts/audit_v12_today_signal_rebuild_20260923.ts | tee /tmp/v12-today-signal-rebuild.txt
+          npx tsx scripts/research_v12_high_score_reversal_final_20260923.ts > /tmp/v12-high-score-reversal.json 2> /tmp/v12-high-score-reversal-summary.txt
+          cat /tmp/v12-high-score-reversal-summary.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: v12-today-signal-rebuild
-          path: /tmp/v12-today-signal-rebuild.txt
+          name: v12-high-score-reversal-final
+          path: |
+            .research-state/v12-winrate-gates-20260923/result.json
+            /tmp/v12-high-score-reversal-summary.txt
