@@ -3,7 +3,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 
 import { PENGU_DUAL_LS_V2 } from "../config/penguDualLsV2Runtime";
-import { PENGU_RECOVERY_V8 } from "../config/penguRecoveryV8";
+import { PENGU_RECOVERY_V8, PENGU_V8_V64_BASE } from "../config/penguRecoveryV8";
 import {
   buildPenguDualLsV2EvaluationSeries,
   cooldownHoursForPenguExit,
