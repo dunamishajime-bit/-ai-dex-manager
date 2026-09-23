@@ -150,9 +150,9 @@ function legReturn(side:"L"|"S",gross:number,entry:number,exit:number,entryTs:nu
 }
 function replay(rows:PenguDualLsV2EvaluationRow[],points:FundingPoint[],v:Variant,mode:Mode){
   const cost=BASE_FEE_PER_SIDE+(mode==="SEVERE"?STRESS_SLIPPAGE_PER_SIDE:0);const trades:Trade[]=[];
-  let i=250,cooldown=-1;
+  let i=250,cooldownUntilTs=0;
   while(i<rows.length-2){
-    if(i<=cooldown){i++;continue;}const f=rows[i].features;if(!f){i++;continue;}
+    const currentReferenceTs=rows[i]?.features?.referenceTs ?? rows[i]?.candle.openTime ?? 0;\n    if(currentReferenceTs<cooldownUntilTs){i++;continue;}const f=rows[i].features;if(!f){i++;continue;}
     const longRoute=routeAt(rows,i,v);const longSignal=Boolean(longRoute);
     const adjustedRecovery=rows[i].recoveryV8?{...rows[i].recoveryV8,ordinaryLongEligible:longSignal,baseLongSignal:longSignal}:undefined;
     const recovery=adjustedRecovery?evaluateRecoveryV8Entry(adjustedRecovery):undefined;
@@ -160,10 +160,10 @@ function replay(rows:PenguDualLsV2EvaluationRow[],points:FundingPoint[],v:Varian
     if(rows[i].shortSignal)route="SHORT_V20"; else if(longRoute)route=longRoute; else if(recovery?.kind==="RECOVERY_V8")route="RECOVERY_V8";
     if(!route){i++;continue;}
     const side:"L"|"S"=route==="SHORT_V20"?"S":"L";const entryIndex=i+1,entry=rows[entryIndex].candle,gross=acceptedGross(route,f);
-    let exitIndex=entryIndex,exitPrice=entry.open,exitReason="MAX_HOLD",partialDefense=false,partialAccountReturn=0,accountReturn=0,rawUnitReturn=0,fundingUnitReturn=0,costUnitReturn=0;
+    let exitIndex=entryIndex,exitPrice=entry.open,exitReason="WINDOW_END",partialDefense=false,partialAccountReturn=0,accountReturn=0,rawUnitReturn=0,fundingUnitReturn=0,costUnitReturn=0;
     if(route==="RECOVERY_V8"){
       let rp:RecoveryV8Position={side:1,entryTs:entry.openTime,entryPrice:entry.open,quantity:1,originalGross:gross,remainingGross:gross,partialDefenseTriggered:false,highWaterMark:entry.open};
-      const last=Math.min(rows.length-1,entryIndex+PENGU_RECOVERY_V8.exit.maxHoldHours-1);exitIndex=last;exitPrice=rows[last].candle.close;
+      const naturalLast=entryIndex+PENGU_RECOVERY_V8.exit.maxHoldHours-1;const last=Math.min(rows.length-1,naturalLast);exitIndex=last;exitPrice=rows[last].candle.close;exitReason=last===naturalLast?"RECOVERY_V8_MAX_HOLD":"WINDOW_END";
       let remainingGross=gross;
       for(let j=entryIndex;j<=last;j++){
         const rr=rows[j].recoveryV8?{...rows[j].recoveryV8,ordinaryLongEligible:variantSignal(rows,j,v),baseLongSignal:variantSignal(rows,j,v)}:undefined;
@@ -185,12 +185,12 @@ function replay(rows:PenguDualLsV2EvaluationRow[],points:FundingPoint[],v:Varian
       let pos:PenguDualLsV2Position={side:side==="L"?1:-1,entryTs:entry.openTime,entryPrice:entry.open,quantity:1,gross,highWaterMark:entry.open,lowWaterMark:entry.open,
         entryVersion:side==="S"?"SHORT_V20":"LONG_V2_FINAL",
         shortV20:side==="S"?createPenguShortV20State({entryPrice:entry.open,requestedGross:gross,entryAtr24Ratio:f.atr24Ratio,btcEma168Distance:f.btcEma168Distance,btcReturn24h:f.btcReturn24h}):undefined};
-      const hold=side==="L"?PENGU_DUAL_LS_V2.long.maxHoldHours:PENGU_DUAL_LS_V2.short.maxHoldHours;const last=Math.min(rows.length-1,entryIndex+hold-1);exitIndex=last;exitPrice=rows[last].candle.close;
+      const hold=side==="L"?PENGU_DUAL_LS_V2.long.maxHoldHours:PENGU_DUAL_LS_V2.short.maxHoldHours;const naturalLast=entryIndex+hold-1;const last=Math.min(rows.length-1,naturalLast);exitIndex=last;exitPrice=rows[last].candle.close;exitReason=last===naturalLast?(side==="L"?"LONG_MAX_HOLD":"SHORT_MAX_HOLD"):"WINDOW_END";
       for(let j=entryIndex;j<=last;j++){const ff=rows[j].features;if(!ff)continue;const ev=evaluatePenguDualLsV2PositionBar(pos,ff);pos=ev.updatedPosition;if(ev.exit){exitIndex=j;exitPrice=ev.exit.stopPrice??rows[j].candle.close;exitReason=ev.exit.reason;break;}}
       const leg=legReturn(side,gross,entry.open,exitPrice,entry.openTime,rows[exitIndex].candle.openTime,points,cost);accountReturn=leg.account;rawUnitReturn=leg.raw;fundingUnitReturn=leg.fu;costUnitReturn=leg.cu;
     }
     trades.push({variant:v,mode,route,side,signalTs:rows[i].candle.openTime,entryTs:entry.openTime,exitTs:rows[exitIndex].candle.openTime,entryPrice:entry.open,exitPrice,requestedGross:gross,accountReturn,rawUnitReturn,fundingUnitReturn,costUnitReturn,exitReason,entryFeatures:{...f},partialDefense,partialAccountReturn});
-    cooldown=exitIndex+cooldownHoursForPenguExit(exitReason as any);i=exitIndex+1;
+    cooldownUntilTs=rows[exitIndex].candle.openTime+cooldownHoursForPenguExit(exitReason as any)*HOUR;i=exitIndex+1;
   }
   return trades;
 }
