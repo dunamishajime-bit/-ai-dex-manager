@@ -253,6 +253,16 @@ function researchV64RequestedLongGross(f:PenguDualLsV2Features){
   const baseGross=Math.min(RESEARCH_PENGU_MAX_GROSS*multiplier,Math.max(floor,target));
   return f.penguReturn72h<=PENGU_V8_V64_BASE.lowGrossRule.threshold?baseGross:Math.min(baseGross,PENGU_V8_V64_BASE.lowGross);
 }
+function researchShortV20State(input:{entryPrice:number;requestedGross:number;entryAtr24Ratio:number;btcEma168Distance:number;btcReturn24h:number}){
+  const state=createPenguShortV20State(input);
+  const eps=1e-12;
+  state.sizingState=Math.abs(input.requestedGross-RESEARCH_PENGU_MAX_GROSS)<=eps
+    ? "CAP"
+    : Math.abs(input.requestedGross-PENGU_DUAL_LS_V2.sizing.grossFloor)<=eps
+      ? "FLOOR"
+      : "VOL_TARGET";
+  return state;
+}
 function acceptedGross(route:EntryRoute,f:PenguDualLsV2Features){
   if(route==="RECOVERY_V8")return Math.min(RESEARCH_PENGU_MAX_GROSS,PENGU_RECOVERY_V8.initialGross);
   if(routeSide(route)==="S")return Math.min(RESEARCH_PENGU_MAX_GROSS,researchTargetGrossForAtr(f.atr24Ratio));
@@ -335,7 +345,7 @@ function replay(rows:PenguDualLsV2EvaluationRow[],points:FundingPoint[],v:Varian
       }else{
         let pos:PenguDualLsV2Position={side:side==="L"?1:-1,entryTs:entry.openTime,entryPrice:entry.open,quantity:1,gross,highWaterMark:entry.open,lowWaterMark:entry.open,
           entryVersion:side==="S"?(route==="SHORT_V20"?"SHORT_V20":"LEGACY_V2"):"LONG_V2_FINAL",
-          shortV20:route==="SHORT_V20"?createPenguShortV20State({entryPrice:entry.open,requestedGross:gross,entryAtr24Ratio:f.atr24Ratio,btcEma168Distance:f.btcEma168Distance,btcReturn24h:f.btcReturn24h}):undefined};
+          shortV20:route==="SHORT_V20"?researchShortV20State({entryPrice:entry.open,requestedGross:gross,entryAtr24Ratio:f.atr24Ratio,btcEma168Distance:f.btcEma168Distance,btcReturn24h:f.btcReturn24h}):undefined};
         const hold=side==="L"?PENGU_DUAL_LS_V2.long.maxHoldHours:PENGU_DUAL_LS_V2.short.maxHoldHours;
         const naturalLast=entryIndex+hold-1,last=Math.min(rows.length-1,naturalLast);exitIndex=last;exitPrice=rows[last].candle.close;exitReason=last===naturalLast?(side==="L"?"LONG_MAX_HOLD":"SHORT_MAX_HOLD"):"WINDOW_END";
         for(let j=entryIndex;j<=last;j++){const ff=rows[j].features;if(!ff)continue;const ev=evaluatePenguDualLsV2PositionBar(pos,ff);pos=ev.updatedPosition;if(ev.exit){exitIndex=j;exitPrice=ev.exit.stopPrice??rows[j].candle.close;exitReason=ev.exit.reason;break;}}
