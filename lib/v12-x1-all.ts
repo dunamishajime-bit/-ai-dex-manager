@@ -28,18 +28,52 @@ export interface V12Candidate {
     score: number;
 }
 
+export type V12EntryGateReason =
+    | "ALLOW_STANDARD"
+    | "ALLOW_HC175"
+    | "BLOCK_FALSE_BURST80"
+    | "BLOCK_RANK1_FAST_E085_REL10"
+    | "BLOCK_FEATURES_INVALID";
+
+export interface V12WinRateGateFeatures {
+    ret6h: number;
+    ret24h: number;
+    btc12h: number;
+    btc24h: number;
+    btcEr12: number;
+    btcEr24: number;
+    rel24h: number;
+    previousVolumeRatio: number;
+}
+
+export interface V12WinRateGateDecision {
+    allow: boolean;
+    reason: V12EntryGateReason;
+    highConfidence: boolean;
+    entryGrossMultiplier: number;
+    features: V12WinRateGateFeatures;
+}
+
 export interface V12Signal extends V12Candidate {
     referenceTs: number;
     entryTs: number;
     regime: V12Regime;
     /** Portfolio slot rank. Rank3 is the lower-priority 0.10x residual slot. */
     rank: 1 | 2 | 3;
+    /** Research-validated entry quality metadata used by LIVE sizing/attribution. */
+    entryQualityClass?: "HC175" | "STANDARD";
+    entryGrossMultiplier?: number;
+    entryGateReason?: V12EntryGateReason;
 }
 
 export interface V12ObservedCandidate extends V12Candidate {
     rank: number;
+    portfolioRank?: 1 | 2 | 3;
     signalEligible: boolean;
     signalReason: string;
+    entryGateReason?: V12EntryGateReason;
+    highConfidence?: boolean;
+    entryGrossMultiplier?: number;
 }
 
 export interface V12DecisionObservation {
@@ -84,6 +118,105 @@ export function selectV12Top3Candidates(ranked: readonly V12Candidate[], limit: 
     return selected;
 }
 
+function directionalReturn(bars: V12Bar[], index: number, lookback: number, side: V12Side) {
+    if (index < lookback) return NaN;
+    const current = bars[index]?.close;
+    const base = bars[index - lookback]?.close;
+    if (!(current > 0 && base > 0)) return NaN;
+    const raw = current / base - 1;
+    return side === "LONG" ? raw : -raw;
+}
+
+function efficiencyRatio(bars: V12Bar[], index: number, lookback: number) {
+    if (index < lookback) return NaN;
+    const first = bars[index - lookback]?.close;
+    const last = bars[index]?.close;
+    if (!(first > 0 && last > 0)) return NaN;
+    const net = Math.abs(last - first);
+    let path = 0;
+    for (let i = index - lookback + 1; i <= index; i += 1) {
+        const current = bars[i]?.close;
+        const previous = bars[i - 1]?.close;
+        if (!(current > 0 && previous > 0)) return NaN;
+        path += Math.abs(current - previous);
+    }
+    return path > 0 ? net / path : 0;
+}
+
+function volumeRatioAt(bars: V12Bar[], index: number) {
+    if (index < 20 || !bars[index]) return NaN;
+    const window = bars.slice(index - 20, index);
+    if (window.length !== 20) return NaN;
+    const mean = window.reduce((sum, bar) => sum + bar.volume, 0) / window.length;
+    return mean > 0 ? bars[index].volume / mean : NaN;
+}
+
+export function buildV12WinRateGateFeatures(
+    universe: Record<string, V12Bar[]>,
+    index: number,
+    input: Pick<V12Signal, "symbol" | "side">,
+): V12WinRateGateFeatures {
+    const symbolBars = universe[input.symbol] || [];
+    const btcBars = universe.BTC || [];
+    const ret24h = directionalReturn(symbolBars, index, 12, input.side);
+    const btc24h = directionalReturn(btcBars, index, 12, input.side);
+    return {
+        ret6h: directionalReturn(symbolBars, index, 3, input.side),
+        ret24h,
+        btc12h: directionalReturn(btcBars, index, 6, input.side),
+        btc24h,
+        btcEr12: efficiencyRatio(btcBars, index, 6),
+        btcEr24: efficiencyRatio(btcBars, index, 12),
+        rel24h: ret24h - btc24h,
+        previousVolumeRatio: volumeRatioAt(symbolBars, index - 1),
+    };
+}
+
+export function evaluateV12WinRateGateFromFeatures(
+    features: V12WinRateGateFeatures,
+    rank: number,
+): V12WinRateGateDecision {
+    const values = Object.values(features);
+    if (values.some((value) => !Number.isFinite(value))) {
+        return { allow: false, reason: "BLOCK_FEATURES_INVALID", highConfidence: false, entryGrossMultiplier: 1, features };
+    }
+    const highConfidence = features.ret24h >= V12_X1_ALL.highConfidenceRet24hMin
+        && features.previousVolumeRatio <= V12_X1_ALL.highConfidencePreviousVolumeRatioMax
+        && features.btc24h >= V12_X1_ALL.highConfidenceBtc24hMin;
+    if (highConfidence) {
+        return {
+            allow: true,
+            reason: "ALLOW_HC175",
+            highConfidence: true,
+            entryGrossMultiplier: V12_X1_ALL.highConfidenceGrossMultiplier,
+            features,
+        };
+    }
+    const falseBurst80 = features.btcEr24 < V12_X1_ALL.falseBurstBtcEr24Max
+        && features.btcEr12 >= V12_X1_ALL.falseBurstBtcEr12Min
+        && features.btcEr12 < V12_X1_ALL.falseBurstBtcEr12Max
+        && features.ret6h >= V12_X1_ALL.falseBurstSymbol6hMin;
+    if (falseBurst80) {
+        return { allow: false, reason: "BLOCK_FALSE_BURST80", highConfidence: false, entryGrossMultiplier: 1, features };
+    }
+    const rank1Fast = rank === 1
+        && features.btcEr12 < V12_X1_ALL.rank1FastBtcEr12Max
+        && features.btc12h < V12_X1_ALL.rank1FastBtc12hAdverseMax
+        && features.rel24h < V12_X1_ALL.rank1FastRelative24hMax;
+    if (rank1Fast) {
+        return { allow: false, reason: "BLOCK_RANK1_FAST_E085_REL10", highConfidence: false, entryGrossMultiplier: 1, features };
+    }
+    return { allow: true, reason: "ALLOW_STANDARD", highConfidence: false, entryGrossMultiplier: 1, features };
+}
+
+export function evaluateV12WinRateGate(
+    universe: Record<string, V12Bar[]>,
+    index: number,
+    signal: Pick<V12Signal, "symbol" | "side" | "rank">,
+): V12WinRateGateDecision {
+    return evaluateV12WinRateGateFromFeatures(buildV12WinRateGateFeatures(universe, index, signal), signal.rank);
+}
+
 export function buildV12Signals(universe: Record<string, V12Bar[]>, index: number, limit: number = V12_X1_ALL.maximumPositions): V12Signal[] {
     const btc = universe.BTC;
     if (!btc?.[index]) return [];
@@ -94,17 +227,39 @@ export function buildV12Signals(universe: Record<string, V12Bar[]>, index: numbe
         .filter((candidate): candidate is V12Candidate => Boolean(candidate))
         .sort((a, b) => b.score - a.score || a.symbol.localeCompare(b.symbol));
 
-    return selectV12Top3Candidates(ranked, limit).map(({ candidate, rank }) => ({
-        ...candidate,
-        rank,
-        regime: regimeState.regime,
-        referenceTs: universe[candidate.symbol][index].endTs,
-        entryTs: universe[candidate.symbol][index + 1]?.ts || universe[candidate.symbol][index].endTs,
-    }));
+    return selectV12Top3Candidates(ranked, limit)
+        .map(({ candidate, rank }) => {
+            const base: V12Signal = {
+                ...candidate,
+                rank,
+                regime: regimeState.regime,
+                referenceTs: universe[candidate.symbol][index].endTs,
+                entryTs: universe[candidate.symbol][index + 1]?.ts || universe[candidate.symbol][index].endTs,
+            };
+            const gate = evaluateV12WinRateGate(universe, index, base);
+            return { base, gate };
+        })
+        .filter(({ gate }) => gate.allow)
+        .map(({ base, gate }) => ({
+            ...base,
+            entryQualityClass: gate.highConfidence ? "HC175" as const : "STANDARD" as const,
+            entryGrossMultiplier: gate.entryGrossMultiplier,
+            entryGateReason: gate.reason,
+        }));
 }
 
 export function v12EntryGrossCapForRank(rank: number | undefined): number {
     return rank === 3 ? V12_X1_ALL.rank3EntryGrossCap : V12_X1_ALL.perPositionEntryGrossCap;
+}
+
+export function v12EntryGrossMultiplierForSignal(signal: Pick<V12Signal, "rank" | "entryGrossMultiplier">): number {
+    if (signal.rank === 3) return 1;
+    const multiplier = Number(signal.entryGrossMultiplier ?? 1);
+    return Number.isFinite(multiplier) && multiplier > 0 ? multiplier : 1;
+}
+
+export function v12EntryGrossCapForSignal(signal: Pick<V12Signal, "rank" | "entryGrossMultiplier">): number {
+    return v12EntryGrossCapForRank(signal.rank) * v12EntryGrossMultiplierForSignal(signal);
 }
 
 function finite(value: unknown, fallback = NaN) {
@@ -273,15 +428,46 @@ export function buildV12DecisionObservation(universe: Record<string, V12Bar[]>, 
     if (!btc?.[index]) return null;
     const regimeState = computeV12RegimeState(btc, index);
     if (!regimeState) return null;
-    const ranked = V12_X1_ALL.universe
+    const rawRanked = V12_X1_ALL.universe
         .map((symbol) => {
             const metrics = candidateMetricsFor(symbol, universe[symbol] || [], index);
             if (!metrics) return null;
             return { ...metrics.candidate, ...candidateEligibility(metrics.candidate, metrics.atrRatio, regimeState) };
         })
         .filter((candidate): candidate is NonNullable<typeof candidate> => Boolean(candidate))
-        .sort((a, b) => b.score - a.score || a.symbol.localeCompare(b.symbol))
-        .map((candidate, rankIndex) => ({
+        .sort((a, b) => b.score - a.score || a.symbol.localeCompare(b.symbol));
+
+    const eligibleCandidates: V12Candidate[] = rawRanked
+        .filter((candidate) => candidate.eligible)
+        .map((candidate) => ({
+            symbol: candidate.symbol,
+            side: candidate.side,
+            momentum: candidate.momentum,
+            volatility: candidate.volatility,
+            atr: candidate.atr,
+            volumeRatio: candidate.volumeRatio,
+            score: candidate.score,
+        }));
+    const portfolioRanks = new Map(
+        selectV12Top3Candidates(eligibleCandidates).map(({ candidate, rank }) => [`${candidate.symbol}|${candidate.side}`, rank] as const),
+    );
+    const ranked: V12ObservedCandidate[] = rawRanked.map((candidate, rankIndex) => {
+        const portfolioRank = portfolioRanks.get(`${candidate.symbol}|${candidate.side}`);
+        let signalEligible = candidate.eligible;
+        let signalReason = candidate.reason;
+        let gate: V12WinRateGateDecision | undefined;
+        if (candidate.eligible && portfolioRank) {
+            gate = evaluateV12WinRateGate(universe, index, {
+                symbol: candidate.symbol,
+                side: candidate.side,
+                rank: portfolioRank,
+            });
+            if (!gate.allow) {
+                signalEligible = false;
+                signalReason = gate.reason;
+            }
+        }
+        return {
             symbol: candidate.symbol,
             side: candidate.side,
             momentum: candidate.momentum,
@@ -290,10 +476,20 @@ export function buildV12DecisionObservation(universe: Record<string, V12Bar[]>, 
             volumeRatio: candidate.volumeRatio,
             score: candidate.score,
             rank: rankIndex + 1,
-            signalEligible: candidate.eligible,
-            signalReason: candidate.reason,
-        }));
-    const selected = ranked.find((candidate) => candidate.signalEligible);
+            portfolioRank,
+            signalEligible,
+            signalReason,
+            entryGateReason: gate?.reason,
+            highConfidence: gate?.highConfidence,
+            entryGrossMultiplier: gate?.entryGrossMultiplier,
+        };
+    });
+
+    const signals = buildV12Signals(universe, index);
+    const selectedSignal = signals[0];
+    const selected = selectedSignal
+        ? ranked.find((candidate) => candidate.symbol === selectedSignal.symbol && candidate.side === selectedSignal.side)
+        : undefined;
     const selectedAt = new Date(observedAt).toISOString();
     const referenceTs = btc[index].endTs;
     const entryTs = btc[index + 1]?.ts || referenceTs;
@@ -306,15 +502,15 @@ export function buildV12DecisionObservation(universe: Record<string, V12Bar[]>, 
         entryTs,
         regime: regimeState.regime,
         btcRegime: regimeState.regime,
-        reason: selected ? "SIGNAL_AVAILABLE" : "NO_COMPLETED_BAR_SIGNAL",
-        symbol: selected?.symbol,
-        side: selected?.side,
-        rank: selected?.rank,
-        score: selected?.score,
-        momentum: selected?.momentum,
-        volumeRatio: selected?.volumeRatio,
-        volatility: selected?.volatility,
-        atr: selected?.atr,
+        reason: selectedSignal ? "SIGNAL_AVAILABLE" : "NO_COMPLETED_BAR_SIGNAL",
+        symbol: selectedSignal?.symbol,
+        side: selectedSignal?.side,
+        rank: selectedSignal?.rank,
+        score: selectedSignal?.score,
+        momentum: selectedSignal?.momentum,
+        volumeRatio: selectedSignal?.volumeRatio,
+        volatility: selectedSignal?.volatility,
+        atr: selectedSignal?.atr,
         candidates: ranked,
     };
 }
