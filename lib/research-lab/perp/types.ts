@@ -63,7 +63,7 @@ export interface PerpFundingPoint {
 export interface PerpMarketData {
   startTs: number;
   endTs: number;
-  source: "binance-usdm-futures" | "synthetic";
+  source: "binance-usdm-futures" | "aster-futures-exact" | "synthetic";
   bySymbol: Record<string, Candle1h[]>;
   fundingBySymbol: Record<string, PerpFundingPoint[]>;
 }
