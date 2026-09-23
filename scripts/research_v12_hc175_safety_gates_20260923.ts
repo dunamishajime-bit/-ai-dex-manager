@@ -67,31 +67,37 @@ type Variant = {
   weakRank2Breakout?: boolean;
   nonHcSoftBreakout?: boolean;
   nonHcDdDefense?: "moderate"|"hard";
+  nonHcLossCooldownBars?: number;
+  weakRank2BtcVeto?: "bothNegative"|"24h";
+  lowScoreBtcVeto?: boolean;
+  relaxedOnlyBtcVeto?: boolean;
+  nonHcRank2BtcAgainstSizeMult?: number;
+  ddWeakNonHcRank2?: boolean;
 };
 type Mode = { name:string; feeBps:number; slipBps:number };
 
 // HC is a locked 1.75x multiplier in every candidate; never remove its entry conditions.
 const LOCKED = {hcOverlay:true,hcPriority:true,hcGrossMultiplier:1.75,nonHcGrossMultiplier:1} as const;
-const variants: Variant[] = [
-  {name:"HC175_LOCKED",...LOCKED},
-  {name:"HC175_BTC_SOFT",...LOCKED,fastBtcVeto:"bothNegative"},
-  {name:"HC175_BTC_24H_HARD",...LOCKED,fastBtcVeto:"24h"},
-  {name:"HC175_LOSS6H",...LOCKED,lossOnlyCooldownBars:3},
-  {name:"HC175_EXIT4H",...LOCKED,sameSymbolCooldownBars:2},
-  {name:"HC175_RANK2_030",...LOCKED,nonHcRank2Floor:0.30},
-  {name:"HC175_RANK2_035",...LOCKED,nonHcRank2Floor:0.35},
-  {name:"HC175_RANK2_040",...LOCKED,nonHcRank2Floor:0.40},
-  {name:"HC175_RANK1_025_RANK2_035",...LOCKED,nonHcRank1Floor:0.25,nonHcRank2Floor:0.35},
-  {name:"HC175_BREAKOUT_LOW_RANK2",...LOCKED,weakRank2Breakout:true},
-  {name:"HC175_BREAKOUT_NON_HC",...LOCKED,nonHcSoftBreakout:true},
-  {name:"HC175_DD_MODERATE",...LOCKED,nonHcDdDefense:"moderate"},
-  {name:"HC175_DD_HARD",...LOCKED,nonHcDdDefense:"hard"},
-  {name:"HC175_BTC_SOFT_LOSS6H",...LOCKED,fastBtcVeto:"bothNegative",lossOnlyCooldownBars:3},
-  {name:"HC175_BTC_SOFT_RANK2_035",...LOCKED,fastBtcVeto:"bothNegative",nonHcRank2Floor:0.35},
-  {name:"HC175_BTC_SOFT_LOSS6H_RANK2_035",...LOCKED,fastBtcVeto:"bothNegative",lossOnlyCooldownBars:3,nonHcRank2Floor:0.35},
-  {name:"HC175_BTC_SOFT_LOSS6H_BREAKOUT_WEAK",...LOCKED,fastBtcVeto:"bothNegative",lossOnlyCooldownBars:3,weakRank2Breakout:true},
-  {name:"HC175_BTC_SOFT_LOSS6H_DD_MODERATE",...LOCKED,fastBtcVeto:"bothNegative",lossOnlyCooldownBars:3,nonHcDdDefense:"moderate"},
-  {name:"HC175_ALL_GATES",...LOCKED,fastBtcVeto:"bothNegative",lossOnlyCooldownBars:3,nonHcRank2Floor:0.35,weakRank2Breakout:true,nonHcDdDefense:"moderate"},
+// HC condition and 1.75 allocation locked; only narrow nonHC protection varies.
+const LOCKED={hcOverlay:true,hcPriority:true,hcGrossMultiplier:1.75,nonHcGrossMultiplier:1} as const;
+const variants:Variant[]=[
+{name:"HC175_LOCKED",...LOCKED},
+{name:"HC175_LOSS6H_ALL",...LOCKED,lossOnlyCooldownBars:3},
+{name:"HC175_LOSS6H_NONHC",...LOCKED,nonHcLossCooldownBars:3},
+{name:"HC175_BTC_BOTH_ALL",...LOCKED,fastBtcVeto:"bothNegative"},
+{name:"HC175_BTC_BOTH_LOW_RANK2",...LOCKED,weakRank2BtcVeto:"bothNegative"},
+{name:"HC175_BTC24_LOW_RANK2",...LOCKED,weakRank2BtcVeto:"24h"},
+{name:"HC175_BTC_BOTH_LOW_SCORE",...LOCKED,lowScoreBtcVeto:true},
+{name:"HC175_BTC_BOTH_RELAXED",...LOCKED,relaxedOnlyBtcVeto:true},
+{name:"HC175_RANK2_BAD_BTC_HALF",...LOCKED,nonHcRank2BtcAgainstSizeMult:0.5},
+{name:"HC175_RANK2_BAD_BTC_075",...LOCKED,nonHcRank2BtcAgainstSizeMult:0.75},
+{name:"HC175_LOSS6_NONHC_BTC_BOTH_LOW_RANK2",...LOCKED,nonHcLossCooldownBars:3,weakRank2BtcVeto:"bothNegative"},
+{name:"HC175_LOSS6_NONHC_BTC24_LOW_RANK2",...LOCKED,nonHcLossCooldownBars:3,weakRank2BtcVeto:"24h"},
+{name:"HC175_LOSS6_NONHC_BTC_BOTH_RELAXED",...LOCKED,nonHcLossCooldownBars:3,relaxedOnlyBtcVeto:true},
+{name:"HC175_LOSS6_NONHC_BTC_BOTH_ALL",...LOCKED,nonHcLossCooldownBars:3,fastBtcVeto:"bothNegative"},
+{name:"HC175_LOSS6_NONHC_RANK2_HALF",...LOCKED,nonHcLossCooldownBars:3,nonHcRank2BtcAgainstSizeMult:0.5},
+{name:"HC175_DD_WEAK_NONHC",...LOCKED,ddWeakNonHcRank2:true},
+{name:"HC175_LOSS6_NONHC_DD_WEAK",...LOCKED,nonHcLossCooldownBars:3,ddWeakNonHcRank2:true},
 ];
 const modes: Mode[] = [
   { name:"NORMAL", feeBps:5, slipBps:0 },
@@ -226,6 +232,10 @@ function variantSignals(p:Prepared,t:number,v:Variant,currentDd:number){
     if(s.route==="RELAXED_MOMENTUM_ALT" && v.relaxedMaxMomentum!=null && aligned>v.relaxedMaxMomentum)return false;
     return true;
   });
+  if(v.weakRank2BtcVeto) ss=ss.filter(s=>highConfidence(s)||s.rank!==2||s.score>=0.35||fastBtcPass(p,s,t,v.weakRank2BtcVeto==="24h"?"24h":"bothNegative"));
+  if(v.lowScoreBtcVeto) ss=ss.filter(s=>highConfidence(s)||s.score>=0.35||fastBtcPass(p,s,t,"bothNegative"));
+  if(v.relaxedOnlyBtcVeto) ss=ss.filter(s=>highConfidence(s)||s.route!=="RELAXED_MOMENTUM_ALT"||fastBtcPass(p,s,t,"bothNegative"));
+  if(v.ddWeakNonHcRank2 && currentDd>=4)ss=ss.filter(s=>highConfidence(s)||s.rank!==2||s.score>=0.35||fastBtcPass(p,s,t,"bothNegative"));
   if(v.ddDefense){
     if(currentDd>=5) ss=ss.filter(s=>s.rank===1 && s.score>=0.45);
     else if(currentDd>=4) ss=ss.filter(s=>s.rank===1);
@@ -252,7 +262,7 @@ function simulate(d:PerpMarketData,p:Prepared,v:Variant,m:Mode){
   const times=p.timeline.filter(t=>t>=START&&t<END);
   const deposits=monthlyDepositSchedule(); let depI=0;
   let cash=10000, contributed=10000, peak=10000, maxDd=0;
-  const pos=new Map<string,Position>(); const pending=new Map<string,RoutedSignal>(); const cool=new Map<string,number>();
+  const pos=new Map<string,Position>(); const pending=new Map<string,RoutedSignal>(); const cool=new Map<string,number>(); const cooldownNonHc=new Map<string,number>();
   const pnls:number[]=[]; const tradeRows:any[]=[]; let entries=0, rank2Entries=0, filtered=0, winsFiltered=0, maxEntryGross=0, hcEntries=0,nonHcEntries=0;
   const px=(s:string,t:number,f:"open"|"close"="close")=>{const i=p.idx[s]?.get(t);return i==null?undefined:p.bars[s]?.[i]?.[f];};
   const equity=(t:number,f:"open"|"close"="close")=>{let e=cash;for(const q of pos.values()){const x=px(q.symbol,t,f)??q.entry;const dir=q.side==="LONG"?1:-1;e+=dir*q.qty*(x-q.entry)-q.qty*x*fee;}return Math.max(0,e);};
@@ -266,17 +276,20 @@ function simulate(d:PerpMarketData,p:Prepared,v:Variant,m:Mode){
       ? v.lossOnlyCooldownBars
       : (v.sameSymbolCooldownBars ?? V12_X1_ALL.cooldownBars);
     cool.set(q.symbol,t+coolBars*V12_X1_ALL.timeframeHours*H);
+    if(net<0 && v.nonHcLossCooldownBars)cooldownNonHc.set(q.symbol,t+v.nonHcLossCooldownBars*V12_X1_ALL.timeframeHours*H);
   };
   for(const t of times){
     while(depI<deposits.length&&deposits[depI]<=t){cash+=10000;contributed+=10000;peak+=10000;depI++;}
     for(const [s,sig] of [...pending]){
-      if(pos.has(s)||(cool.get(s)||0)>t){pending.delete(s);continue;}
+      if(pos.has(s)||(cool.get(s)||0)>t||((cooldownNonHc.get(s)||0)>t&&!highConfidence(sig))){pending.delete(s);continue;}
       const raw=px(s,t,"open");if(!raw){pending.delete(s);continue;}
       const e=equity(t,"open"),entry=sig.side==="LONG"?raw*(1+slip):raw*(1-slip);
       const sz=sizeV12Position(e,entry,sig.atr,sig.side); const active=[...pos.values()].reduce((n,q)=>n+q.qty*(px(q.symbol,t,"open")??q.entry),0);
       const cap=Math.max(0,e*V12_X1_ALL.dynamicResidualAggregateGrossCap-active);
       const isHC=highConfidence(sig);
-      const mult=v.hcOverlay?(isHC?(v.hcGrossMultiplier??1):(v.nonHcGrossMultiplier??1)):1;
+      const baseMult=v.hcOverlay?(isHC?(v.hcGrossMultiplier??1):(v.nonHcGrossMultiplier??1)):1;
+      const riskMult=v.nonHcRank2BtcAgainstSizeMult!=null&&!isHC&&sig.rank===2&&sig.score<0.35&&sig.features.btc24h<0?v.nonHcRank2BtcAgainstSizeMult:1;
+      const mult=baseMult*riskMult;
       // Keep rank3's original 0.10x ceiling. Boost rank1/2 only within the unchanged aggregate cap.
       const rankCap=e*(sig.rank===3?V12_X1_ALL.rank3EntryGrossCap* Math.min(1,mult):V12_X1_ALL.perPositionEntryGrossCap*mult);
       const notional=Math.min(sz.requestedNotional*mult,rankCap,cap);
@@ -304,7 +317,7 @@ function simulate(d:PerpMarketData,p:Prepared,v:Variant,m:Mode){
     if(v.hcPriority) ss.sort((a,b)=>Number(highConfidence(b))-Number(highConfidence(a)) || a.rank-b.rank);
     filtered += Math.max(0,base.length-ss.length);
     let slots=Math.max(0,V12_X1_ALL.maximumPositions-pos.size-pending.size);
-    for(const s of ss){if(slots<=0)break;if(pos.has(s.symbol)||pending.has(s.symbol)||(cool.get(s.symbol)||0)>t)continue;pending.set(s.symbol,s);slots--;}
+    for(const s of ss){if(slots<=0)break;if(pos.has(s.symbol)||pending.has(s.symbol)||(cool.get(s.symbol)||0)>t||((cooldownNonHc.get(s.symbol)||0)>t&&!highConfidence(s)))continue;pending.set(s.symbol,s);slots--;}
   }
   while(depI<deposits.length&&deposits[depI]<=END){cash+=10000;contributed+=10000;depI++;}
   for(const q of [...pos.values()]){const b=p.bars[q.symbol];const last=b?.filter(x=>x.ts<END).at(-1);if(last)close(q,last.close,"end",END);}
