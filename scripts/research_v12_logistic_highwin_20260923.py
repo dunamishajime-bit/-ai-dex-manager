@@ -56,18 +56,24 @@ print("BASE",[stats([(1,x) for x in f]) for f in folds])
 for l2 in [0.0,0.001,0.005,0.01,0.03,0.1]:
     w=train(l2)
     val=probs(w,folds[1]); test=probs(w,folds[2]); trainp=probs(w,folds[0])
-    cand=[]
-    for th in [i/100 for i in range(40,91)]:
+    allstats=[]
+    for th in [i/100 for i in range(35,96)]:
         sv=[z for z in val if z[0]>=th]
         st=stats(sv)
-        if st["n"]>=40 and st["wr"]>=68:
-            cand.append((th,st))
+        allstats.append((th,st))
+    for minn in [10,20,30,40,60]:
+        valid=[z for z in allstats if z[1]["n"]>=minn]
+        if valid:
+            thb,vsb=max(valid,key=lambda z:(z[1]["wr"],z[1]["pf"]))
+            tsb=stats([z for z in test if z[0]>=thb])
+            print("BEST_AT_N","l2",l2,"minN",minn,"th",thb,"val",vsb,"oos",tsb,"oosRet",round(tsb["n"]/len(folds[2]),3))
+    cand=[z for z in allstats if z[1]["n"]>=20 and z[1]["wr"]>=70]
     if not cand:
-        print("L2",l2,"NO_VALIDATION_68_WITH_N40")
+        print("L2",l2,"NO_VALIDATION_70_WITH_N20")
         continue
     th,vs=min(cand,key=lambda z:z[0])
     ts=stats([z for z in test if z[0]>=th]); trs=stats([z for z in trainp if z[0]>=th])
-    print("MODEL","l2",l2,"th",th,"train",trs,"val",vs,"oos",ts,"oosRet",round(ts["n"]/len(folds[2]),3))
+    print("MODEL70","l2",l2,"th",th,"train",trs,"val",vs,"oos",ts,"oosRet",round(ts["n"]/len(folds[2]),3))
     # show feature weights
     names=["intercept"]+features+["rank"]+["route_"+r for r in routes]
     top=sorted(zip(names,w),key=lambda z:abs(z[1]),reverse=True)[:10]
