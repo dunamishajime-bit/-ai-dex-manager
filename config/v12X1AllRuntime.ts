@@ -50,6 +50,19 @@ export const V12_X1_ALL = Object.freeze({
     allowNeutralRegime: true,
     neutralScoreThreshold: 1.4649,
     normalRoundTripCostBps: 10,
+    // 2026-09-23 Aster-exact win-rate entry contract. HC is an entry-quality
+    // overlay, not venue leverage; shared/aggregate gross ceilings are unchanged.
+    highConfidenceRet24hMin: 0.018,
+    highConfidencePreviousVolumeRatioMax: 0.80,
+    highConfidenceBtc24hMin: 0.020,
+    highConfidenceGrossMultiplier: 1.75,
+    falseBurstBtcEr24Max: 0.20,
+    falseBurstBtcEr12Min: 0.55,
+    falseBurstBtcEr12Max: 0.80,
+    falseBurstSymbol6hMin: 0.020,
+    rank1FastBtcEr12Max: 0.085,
+    rank1FastBtc12hAdverseMax: 0,
+    rank1FastRelative24hMax: 0.010,
     universe: ["BTC", "ETH", "BNB", "SOL", "LINK", "AVAX", "DOGE", "INJ", "XRP", "ADA", "LTC", "ATOM", "AAVE", "NEAR"] as const,
 });
 
