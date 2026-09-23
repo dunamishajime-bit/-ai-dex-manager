@@ -19,13 +19,10 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci
-      - name: Run research backtest
+      - name: Rebuild today's signals
         run: |
-          npx tsx scripts/audit_v12_today_signal_rebuild_20260923.ts > /tmp/v12-market-state-bt.json 2> /tmp/v12-market-state-summary.txt
-          cat /tmp/v12-market-state-summary.txt
+          npx tsx scripts/audit_v12_today_signal_rebuild_20260923.ts | tee /tmp/v12-today-signal-rebuild.txt
       - uses: actions/upload-artifact@v4
         with:
           name: v12-today-signal-rebuild
-          path: |
-            .research-state/v12-winrate-gates-20260923/result.json
-            /tmp/v12-market-state-summary.txt
+          path: /tmp/v12-today-signal-rebuild.txt
