@@ -421,7 +421,7 @@ function waveAuditWindow(rows:PenguDualLsV2EvaluationRow[],trades:Trade[],startT
 async function main(){
   const [p,b,fp]=await Promise.all([candles("PENGUUSDT"),candles("BTCUSDT"),funding()]);
   const common=new Set(p.map(x=>x.openTime));const btc=b.filter(x=>common.has(x.openTime));const btcSet=new Set(btc.map(x=>x.openTime));const pengu=p.filter(x=>btcSet.has(x.openTime));
-  assert.equal(pengu.length,btc.length);assert.ok(pengu.length>9000,\`insufficient common rows \${pengu.length}\`);
+  assert.equal(pengu.length,btc.length);assert.ok(pengu.length>9000,`insufficient common rows ${pengu.length}`);
   const history:PenguDualLsV2History={pengu1h:pengu,btc1h:btc,penguFunding:fp};
   const rows=buildPenguDualLsV2EvaluationSeries(history,RECENT_END+1);
   const baselineAll=replay(rows,fp,"BASELINE","NORMAL");
