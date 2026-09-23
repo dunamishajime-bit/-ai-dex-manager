@@ -6,13 +6,14 @@ const entries=[
   {name:"SOL 15:00",symbol:"SOLUSDT",entry:"2026-09-23T06:00:31Z",side:"LONG"},
   {name:"NEAR 17:00",symbol:"NEARUSDT",entry:"2026-09-23T08:00:28Z",side:"LONG"},
 ];
-const API="https://fapi.binance.com/fapi/v1/klines";
+const API="https://www.okx.com/api/v5/market/candles";
 async function bars(symbol){
-  const start=Date.parse("2026-09-19T00:00:00Z"), end=Date.parse("2026-09-23T10:00:00Z");
-  const u=API+"?symbol="+symbol+"&interval=2h&startTime="+start+"&endTime="+end+"&limit=1000";
+  const inst=symbol.replace("USDT","-USDT-SWAP");
+  const u=API+"?instId="+inst+"&bar=2H&limit=100";
   const r=await fetch(u); if(!r.ok) throw new Error(symbol+" "+r.status+" "+await r.text());
-  const a=await r.json();
-  return a.map(x=>({ot:+x[0],ct:+x[6],o:+x[1],h:+x[2],l:+x[3],c:+x[4],v:+x[5]}));
+  const j=await r.json(); if(j.code!=="0") throw new Error(symbol+" "+JSON.stringify(j));
+  const a=j.data.map(x=>({ot:+x[0],ct:+x[0]+2*3600*1000-1,o:+x[1],h:+x[2],l:+x[3],c:+x[4],v:+x[5]}));
+  return a.sort((a,b)=>a.ot-b.ot);
 }
 function idxBefore(b,t){let out=-1;for(let i=0;i<b.length;i++)if(b[i].ct<t)out=i;return out;}
 function ret(b,i,n){return i>=n?b[i].c/b[i-n].c-1:NaN;}
