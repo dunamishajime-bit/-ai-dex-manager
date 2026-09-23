@@ -50,6 +50,8 @@ type Variant = {
   altMinRet24?: number;
   altMinBtc24?: number;
   altMaxScore?: number;
+  tpAtrOverride?: number;
+  trailAtrOverride?: number;
 };
 type Mode = { name:string; feeBps:number; slipBps:number };
 
@@ -102,6 +104,16 @@ const variants: Variant[] = [
   { name:"ALT_ATR_0174_RET24_0086", altMinAtrRatio:0.01739, altMinRet24:0.008572 },
   { name:"ALT_ATR_0147_BTC24_0253", altMinAtrRatio:0.014736, altMinBtc24:0.02525 },
   { name:"ALT_SCORE_MAX042_ATR_0147", altMaxScore:0.420462, altMinAtrRatio:0.014736 },
+  { name:"TP_ATR_2P5", tpAtrOverride:2.5 },
+  { name:"TP_ATR_2P0", tpAtrOverride:2.0 },
+  { name:"TP_ATR_1P5", tpAtrOverride:1.5 },
+  { name:"TP_ATR_1P25", tpAtrOverride:1.25 },
+  { name:"TP_ATR_1P0", tpAtrOverride:1.0 },
+  { name:"TP_ATR_0P75", tpAtrOverride:0.75 },
+  { name:"TP2P0_TRAIL0P6", tpAtrOverride:2.0, trailAtrOverride:0.6 },
+  { name:"TP1P5_TRAIL0P6", tpAtrOverride:1.5, trailAtrOverride:0.6 },
+  { name:"ALT_ATR0174_TP2P0", altMinAtrRatio:0.01739, tpAtrOverride:2.0 },
+  { name:"ALT_ATR0174_TP1P5", altMinAtrRatio:0.01739, tpAtrOverride:1.5 },
 ];
 const modes: Mode[] = [
   { name:"NORMAL", feeBps:5, slipBps:0 },
@@ -246,7 +258,10 @@ function simulate(d:PerpMarketData,p:Prepared,v:Variant,m:Mode){
       const notional=Math.min(sz.requestedNotional,rankCap,cap);
       if(notional/e<0.05){pending.delete(s);continue;}
       const qty=notional/entry,entryFee=notional*fee,levels=protectiveLevels(entry,sig.atr,sig.side);
-      cash-=entryFee;pos.set(s,{symbol:s,side:sig.side,entry,qty,entryFee,funding:0,lastFund:t,initialStop:levels.initialStop,stop:levels.initialStop,tp:levels.takeProfit,trailingDistance:levels.trailingDistance,peak:entry,trough:entry,bars:0,rank:sig.rank,entryTs:t,route:sig.route,features:sig.features});
+      const tpAtr=v.tpAtrOverride??V12_X1_ALL.takeProfitAtr;
+      const tp=sig.side==="LONG"?entry+sig.atr*tpAtr:entry-sig.atr*tpAtr;
+      const trailingDistance=sig.atr*(v.trailAtrOverride??V12_X1_ALL.trailingAtr);
+      cash-=entryFee;pos.set(s,{symbol:s,side:sig.side,entry,qty,entryFee,funding:0,lastFund:t,initialStop:levels.initialStop,stop:levels.initialStop,tp,trailingDistance,peak:entry,trough:entry,bars:0,rank:sig.rank,entryTs:t,route:sig.route,features:sig.features});
       entries++;if(sig.rank===2)rank2Entries++;pending.delete(s);
     }
     for(const q of [...pos.values()]){
