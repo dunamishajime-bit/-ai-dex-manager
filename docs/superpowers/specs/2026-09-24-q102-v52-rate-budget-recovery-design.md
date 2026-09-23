@@ -15,7 +15,7 @@ Earlier read-only Aster checks found no positions or open orders, an order looku
 - Do not change strategy signal, selection, priority, sizing, gross limits, or exit rules.
 - Do not bypass operator activation, Global Kill Switch, Shared Risk, Margin Guard, account-order lock, or any fail-closed preflight.
 - Never synthesize, test, force, cancel, flatten, or duplicate an order for validation.
-- Do not hand-edit state or Kill Switch JSON. State transitions use the existing state store or an audited official recovery interface and preserve unrelated/unknown fields.
+- Do not hand-edit state or Kill Switch JSON. State transitions use the existing state store or an audited official recovery interface, preserve every field accepted by the current schema, and reject unknown/malformed fields without writing.
 - A budget coordination failure must never be reported as an Aster HTTP/API response because no venue request was sent.
 - Keep unknown, malformed, stale, credential, HTTP 429/418, connection, and execution-state errors distinct; they retain their existing fail-closed behavior.
 
@@ -27,7 +27,7 @@ Add a dedicated one-shot reconciliation path for a stale Q102 pending entry. It 
 
 The path requires three consecutive authenticated read-only reconciliation rounds. Every round must show: no matching open order; order lookup conclusively `-2013`/not found (transport or ambiguous errors fail closed); no matching user trade since shortly before pending creation; no matching Aster position; and no unmanaged account position/order. The pending record must remain byte/identity-equivalent across rounds. A changed state or any inconsistent evidence aborts without writing.
 
-After evidence is complete, create a timestamped backup, then use the Q102 state store to mark this exact pending attempt terminal-without-exposure while preserving the rest of the state and audit history. Do not reset the state or silently discard the idempotency/client-order identifiers. Re-run Q102 self-check and preflight; both must report flat, no pending, and reconciliation pass. Orders, cancels, and position changes remain zero.
+After evidence is complete, create a timestamped backup, then use the Q102 state store to mark this exact pending attempt terminal-without-exposure while preserving every other field accepted by the current schema and the audit history. Do not reset the state or silently discard the idempotency/client-order identifiers. Keep the source runtime SHA unchanged during this recovery write. Then use the existing formal migration helper, with its own backup, to migrate the reconciled flat state to the candidate release SHA and run candidate self-check/preflight. Unknown fields fail closed before any write. Orders, cancels, and position changes remain zero.
 
 ### 2. Common rate-budget coordination contract
 
@@ -63,7 +63,7 @@ After the Q102 state is fresh and reconciled, verify that V52's `QUALITY102_STAT
 Use TDD. First add failing tests, observe the expected failures, then implement the smallest change. Tests must cover:
 
 - Q102 pending recovery accepts only the exact planned/no-fill/no-position/no-open-order case after three stable read-only rounds; any ambiguity, state race, trade, position, or unrelated order rejects with zero writes.
-- Recovery backup and state-store transition preserve schema, unknown fields, history, and identifiers; state owner/mode and SHA contract remain enforced.
+- Recovery backup and state-store transition preserve all schema-recognized fields, history, and identifiers; unknown fields reject without mutation; state owner/mode and SHA contract remain enforced.
 - The same canonical rate-budget errors produce the same deferred/fail-closed decision in V12, PENGU, Q102, V52, and FET; orders/cancels/position changes are zero.
 - New-exposure work is denied during deferral; protective/reduce-only and reconciliation work is prioritized; safety-critical deadline failure holds the system closed.
 - HTTP 429/418, malformed lock/state, connection reset, and unknown errors are not misclassified as local saturation.
