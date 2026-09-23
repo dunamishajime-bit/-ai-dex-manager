@@ -76,7 +76,7 @@ type Variant = {
   clusterWindowBars?: number;
   clusterTrendRecovery?: boolean;
   narrowMode?: "ER_BLOCK"|"ER_HALF"|"LAG6_BLOCK"|"LAG6_HALF"|"WEAK_BLOCK"|"WEAK_HALF"|"ERLAG_BLOCK"|"ERLAG_HALF"|"ANY_BLOCK"|"ANY_HALF";
-  noTrend?: {er12Max:number; er24Max?:number; requireBtc12Adverse?:boolean; requireBtc6OrSymbolWeak?:boolean; symbol6Max?:number; includeBurst?:boolean; combineAnyWeak?:boolean};
+  noTrend?: {er12Max:number; er24Max?:number; requireBtc12Adverse?:boolean; requireBtc6OrSymbolWeak?:boolean; symbol6Max?:number; includeBurst?:boolean; burstEr12Max?:number; combineAnyWeak?:boolean};
 };
 type Mode = { name:string; feeBps:number; slipBps:number };
 
@@ -96,6 +96,10 @@ const variants:Variant[]=[
   {name:"NT_ER10_FAST_ANYWEAK",...LOCKED,noTrend:{er12Max:.10,requireBtc12Adverse:true,requireBtc6OrSymbolWeak:true,symbol6Max:.005,combineAnyWeak:true}},
   {name:"NT_ER20_FAST_ANYWEAK",...LOCKED,noTrend:{er12Max:.20,requireBtc12Adverse:true,requireBtc6OrSymbolWeak:true,symbol6Max:.005,combineAnyWeak:true}},
   {name:"NT_ER15_FAST_BURST_ANYWEAK",...LOCKED,noTrend:{er12Max:.15,requireBtc12Adverse:true,requireBtc6OrSymbolWeak:true,symbol6Max:.005,includeBurst:true,combineAnyWeak:true}},
+  {name:"NT_ER10_FAST_FALSEBURST70_ANYWEAK",...LOCKED,noTrend:{er12Max:.10,requireBtc12Adverse:true,requireBtc6OrSymbolWeak:true,symbol6Max:.005,includeBurst:true,burstEr12Max:.70,combineAnyWeak:true}},
+  {name:"NT_ER10_FAST_FALSEBURST75_ANYWEAK",...LOCKED,noTrend:{er12Max:.10,requireBtc12Adverse:true,requireBtc6OrSymbolWeak:true,symbol6Max:.005,includeBurst:true,burstEr12Max:.75,combineAnyWeak:true}},
+  {name:"NT_ER10_FAST_FALSEBURST80_ANYWEAK",...LOCKED,noTrend:{er12Max:.10,requireBtc12Adverse:true,requireBtc6OrSymbolWeak:true,symbol6Max:.005,includeBurst:true,burstEr12Max:.80,combineAnyWeak:true}},
+  {name:"NT_ER15_FAST_FALSEBURST70_ANYWEAK",...LOCKED,noTrend:{er12Max:.15,requireBtc12Adverse:true,requireBtc6OrSymbolWeak:true,symbol6Max:.005,includeBurst:true,burstEr12Max:.70,combineAnyWeak:true}},
 ];
 const modes: Mode[] = [
   { name:"NORMAL", feeBps:5, slipBps:0 },
@@ -347,7 +351,7 @@ function noTrendMatch(s:RoutedSignal,opt:NonNullable<Variant["noTrend"]>){
   const btc12Ok=!opt.requireBtc12Adverse || f.btc12h<0;
   const weakOk=!opt.requireBtc6OrSymbolWeak || f.btc6h<0 || f.ret6h<(opt.symbol6Max??.005);
   const noTrend=erOk&&btc12Ok&&weakOk;
-  const burst=!!opt.includeBurst && f.btcEr24<.20 && f.btcEr12>=.55 && f.ret6h>=.02;
+  const burst=!!opt.includeBurst && f.btcEr24<.20 && f.btcEr12>=.55 && f.btcEr12<(opt.burstEr12Max??Infinity) && f.ret6h>=.02;
   const oldWeak=!!opt.combineAnyWeak && narrowFlags(s).any;
   return noTrend||burst||oldWeak;
 }
@@ -477,7 +481,7 @@ async function main(){
       const b12=!v.noTrend!.requireBtc12Adverse||f.btc12h<0;
       const weak=!v.noTrend!.requireBtc6OrSymbolWeak||f.btc6h<0||f.ret6h<(v.noTrend!.symbol6Max??.005);
       const nt=erOk&&b12&&weak;
-      const burst=!!v.noTrend!.includeBurst&&f.btcEr24<.20&&f.btcEr12>=.55&&f.ret6h>=.02;
+      const burst=!!v.noTrend!.includeBurst&&f.btcEr24<.20&&f.btcEr12>=.55&&f.btcEr12<(v.noTrend!.burstEr12Max??Infinity)&&f.ret6h>=.02;
       const any=!!v.noTrend!.combineAnyWeak&&((f.btcEr24>=.50&&f.btcEr12<.50)||(f.btcEr24>=.60&&f.ret6h<.01)||(f.volumeRatio>=2&&f.rel24h<0));
       return nt||burst||any;
     }).map(x=>x.name);
