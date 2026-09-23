@@ -25,8 +25,9 @@ type Position = {
 };
 type Variant = {
   name:string;
-  fastBtcVeto?: "24h"|"12h24h";
+  fastBtcVeto?: "24h"|"12h24h"|"bothNegative";
   sameSymbolCooldownBars?: number;
+  lossOnlyCooldownBars?: number;
   rank2MinScore?: number;
   breakoutConfirm?: boolean;
   ddDefense?: boolean;
@@ -47,6 +48,11 @@ const variants: Variant[] = [
   { name:"COMBO_A", fastBtcVeto:"24h", sameSymbolCooldownBars:2, rank2MinScore:0.35 },
   { name:"COMBO_B", fastBtcVeto:"24h", sameSymbolCooldownBars:3, rank2MinScore:0.45 },
   { name:"COMBO_C", fastBtcVeto:"12h24h", sameSymbolCooldownBars:3, rank2MinScore:0.45, ddDefense:true },
+  { name:"LOSS_COOLDOWN_4H", lossOnlyCooldownBars:2 },
+  { name:"LOSS_COOLDOWN_6H", lossOnlyCooldownBars:3 },
+  { name:"LOSS_COOLDOWN_12H", lossOnlyCooldownBars:6 },
+  { name:"BTC_BOTH_NEGATIVE", fastBtcVeto:"bothNegative" },
+  { name:"LOSS6H_PLUS_BTC_BOTH_NEG", lossOnlyCooldownBars:3, fastBtcVeto:"bothNegative" },
 ];
 const modes: Mode[] = [
   { name:"NORMAL", feeBps:5, slipBps:0 },
@@ -82,6 +88,10 @@ function fastBtcPass(p:Prepared,s:V12Signal,t:number,mode:Variant["fastBtcVeto"]
   if(!mode)return true; const i=p.idx.BTC?.get(t); const b=p.bars.BTC; if(i==null||!b)return false;
   const r24=ret(b,i,12); const r12=ret(b,i,6);
   if(!Number.isFinite(r24)||!Number.isFinite(r12))return false;
+  if(mode==="bothNegative"){
+    if(s.side==="LONG") return !(r24<0 && r12<0);
+    return !(r24>0 && r12>0);
+  }
   if(s.side==="LONG") return mode==="24h" ? r24>=0 : (r24>=0 && r12>=0);
   return mode==="24h" ? r24<=0 : (r24<=0 && r12<=0);
 }
@@ -112,7 +122,11 @@ function simulate(d:PerpMarketData,p:Prepared,v:Variant,m:Mode){
     const x=q.side==="LONG"?raw*(1-slip):raw*(1+slip);const dir=q.side==="LONG"?1:-1;
     const g=dir*q.qty*(x-q.entry),ef=q.qty*x*fee,net=g-q.entryFee-ef-q.funding;
     cash=Math.max(0,cash+g-ef);pnls.push(net);tradeRows.push({symbol:q.symbol,rank:q.rank,entryTs:q.entryTs,exitTs:t,net,pct:(x/q.entry-1)*100*dir,reason});
-    pos.delete(q.symbol); cool.set(q.symbol,t+(v.sameSymbolCooldownBars??V12_X1_ALL.cooldownBars)*V12_X1_ALL.timeframeHours*H);
+    pos.delete(q.symbol);
+    const coolBars = v.lossOnlyCooldownBars && net < 0
+      ? v.lossOnlyCooldownBars
+      : (v.sameSymbolCooldownBars ?? V12_X1_ALL.cooldownBars);
+    cool.set(q.symbol,t+coolBars*V12_X1_ALL.timeframeHours*H);
   };
   for(const t of times){
     while(depI<deposits.length&&deposits[depI]<=t){cash+=10000;contributed+=10000;peak+=10000;depI++;}
