@@ -278,6 +278,10 @@ async function main(){
     {label:"R72_040_R6_035",ret6:.035,dist:.40,r72:.40},
     {label:"R72_040_D030",ret6:.03,dist:.30,r72:.40},
     {label:"R72_040_D050",ret6:.03,dist:.50,r72:.40},
+    {label:"R72_038_D050",ret6:.03,dist:.50,r72:.38},
+    {label:"R72_040_D045",ret6:.03,dist:.45,r72:.40},
+    {label:"R72_040_D055",ret6:.03,dist:.55,r72:.40},
+    {label:"R72_040_D050_R6_040",ret6:.04,dist:.50,r72:.40},
   ];
   const out:any={schema:"pengu-continuation-momentum-sweep/v1",venue,productionSourceSha:process.env.PRODUCTION_SOURCE_SHA||null,configs:{}};
   for(const cfg of configs){
