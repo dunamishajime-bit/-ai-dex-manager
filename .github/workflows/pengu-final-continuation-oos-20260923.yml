@@ -1,0 +1,75 @@
+name: PENGU Final Continuation OOS
+on:
+  push:
+    branches:
+      - research/pengu-continuation-reentry-20260923
+    paths:
+      - scripts/research_pengu_continuation_final_oos_crossvenue_20260923.ts
+      - scripts/research_pengu_continuation_final_oos_bitget_20260923.ts
+      - scripts/research_pengu_continuation_final_oos_aster_20260923.ts
+      - .github/workflows/pengu-final-continuation-oos-20260923.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  cross:
+    strategy:
+      fail-fast: false
+      matrix:
+        venue: [OKX, GATE]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - env:
+          PENGU_CROSS_VENUE: ${{ matrix.venue }}
+        run: npx tsx scripts/research_pengu_continuation_final_oos_crossvenue_20260923.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-final-continuation-oos-${{ matrix.venue }}
+          path: .research-state/pengu-continuation-final-oos-cross-*
+          retention-days: 90
+
+  bitget:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npx tsx scripts/research_pengu_continuation_final_oos_bitget_20260923.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-final-continuation-oos-BITGET
+          path: .research-state/pengu-continuation-final-oos-bitget
+          retention-days: 90
+
+  aster:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npx tsx scripts/research_pengu_continuation_final_oos_aster_20260923.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-final-continuation-oos-ASTER
+          path: .research-state/pengu-continuation-final-oos-aster
+          retention-days: 90
