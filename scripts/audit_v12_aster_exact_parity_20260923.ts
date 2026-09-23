@@ -63,6 +63,7 @@ async function main(){
     const sb=data[e.symbol], si=idxAt(sb,e.ts), bb=data.BTC, bi=idxAt(bb,e.ts);
     const side:"LONG"="LONG";
     const sym24=ret(sb,si,12), btc24=ret(bb,bi,12);
+    const prevVolumeRatio=vr(sb,si-1);
     const f={
       referenceEnd:new Date(bb[bi].endTs).toISOString(),
       btc6:sideAdjusted(ret(bb,bi,3),side),
@@ -73,6 +74,7 @@ async function main(){
       sym6:sideAdjusted(ret(sb,si,3),side),
       sym24:sideAdjusted(sym24,side),
       volumeRatio:vr(sb,si),
+      prevVolumeRatio,
       rel24:sideAdjusted(sym24-btc24,side),
     };
     const A=f.btcEr24>=.50&&f.btcEr12<.50;
@@ -81,6 +83,11 @@ async function main(){
     const falseBurst=f.btcEr24<.20&&f.btcEr12>=.55&&f.btcEr12<.80&&f.sym6>=.02;
     const matched=sig.find(x=>x.symbol===e.symbol&&x.side==="LONG");
     if(!matched) throw new Error(`PARITY_SIGNAL_MISSING:${e.name}`);
+    const hc=f.sym24>=.018 && f.prevVolumeRatio<=.80 && f.btc24>=.020;
+    const rank1Fast=!hc && matched.rank===1 && f.btcEr12<.085 && f.btc12<0 && f.rel24<.010;
+    const finalCandidateBlock=!hc && (falseBurst || rank1Fast);
+    const expectedBlock=["XRP04","INJ0840","SOL15"].includes(e.name);
+    if(finalCandidateBlock!==expectedBlock) throw new Error(`FINAL_GATE_AUDIT_MISMATCH:${e.name}:expected=${expectedBlock}:actual=${finalCandidateBlock}`);
     if(matched.rank!==e.expectedRank) throw new Error(`PARITY_RANK_MISMATCH:${e.name}:expected=${e.expectedRank}:actual=${matched.rank}`);
     if(new Date(bb[bi].endTs).toISOString()!==e.expectedReferenceEnd) throw new Error(`PARITY_REFERENCE_BAR_MISMATCH:${e.name}`);
     out.push({
@@ -89,12 +96,16 @@ async function main(){
       ...f,
       anyWeak:A||B||C,
       falseBurst80:falseBurst,
+      hc175:hc,
+      rank1FastE085Rel10:rank1Fast,
+      finalCandidateBlock,
+      expectedBlock,
       proposedBlock:(A||B||C||falseBurst),
       productionSignals:sig.map(x=>({symbol:x.symbol,side:x.side,rank:x.rank,score:x.score,momentum:x.momentum,volumeRatio:x.volumeRatio,referenceTs:x.referenceTs})),
       observation:obs?{regime:obs.regime,reason:obs.reason,selected:obs.symbol?{symbol:obs.symbol,side:obs.side,rank:obs.rank,score:obs.score,momentum:obs.momentum,volumeRatio:obs.volumeRatio}:null,top:obs.candidates.slice(0,8)}:null,
       actualSymbolInSignals:sig.some(x=>x.symbol===e.symbol&&x.side==="LONG"),
     });
   }
-  console.log(JSON.stringify({status:"PASS_ASTER_EXACT_PRODUCTION_REPLAY_AND_RANK_PARITY",sourceSha:"c6add8d39676584ad9db094d1ad04deb4050ed06",commonBars:common.size,out},null,2));
+  console.log(JSON.stringify({status:"PASS_ASTER_EXACT_PRODUCTION_REPLAY_RANK_AND_FINAL_GATE_AUDIT",sourceSha:"c6add8d39676584ad9db094d1ad04deb4050ed06",commonBars:common.size,out},null,2));
 }
 main().catch(e=>{console.error(e);process.exit(1);});
