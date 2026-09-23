@@ -17,7 +17,7 @@ import {
     type V12StopState,
     type V12TrailingPlan,
 } from "@/lib/v12-resident-stop-lifecycle";
-import { buildV12DecisionObservation, buildV12Signals, protectiveLevels, sizeV12Position, v12EntryGrossCapForRank, type V12Bar, type V12DecisionObservation, type V12Signal } from "@/lib/v12-x1-all";
+import { buildV12DecisionObservation, buildV12Signals, protectiveLevels, sizeV12Position, v12EntryGrossCapForSignal, v12EntryGrossMultiplierForSignal, type V12Bar, type V12DecisionObservation, type V12PositionSizing, type V12Signal } from "@/lib/v12-x1-all";
 import { FileV12X1AllRunnerStateStore, type V12ActivePositionState, type V12PendingOrderState, type V12X1AllRunnerState } from "@/lib/v12-x1-all-runner-state";
 import { decideV12ResidualEntry, validateV12EntryGrossReservation, type V12ResidualDecision } from "@/lib/v12-top2-residual";
 import { reduceV12DynamicResidualForCoreConflict } from "@/lib/v12-dynamic-residual-live-reduction";
@@ -64,6 +64,16 @@ export function classifyV12InfrastructureFailure(error: unknown): V12LiveTickRes
 function finite(value: unknown, fallback = 0) { const n = Number(value); return Number.isFinite(n) ? n : fallback; }
 function actualSide(position: DirectPosition): "LONG" | "SHORT" { if (position.positionSide === "LONG") return "LONG"; if (position.positionSide === "SHORT") return "SHORT"; return position.quantity < 0 ? "SHORT" : "LONG"; }
 function actualQuantity(position: DirectPosition) { return Math.abs(position.quantity); }
+function applyV12SignalGrossMultiplier(sizing: V12PositionSizing, signal: V12Signal): V12PositionSizing {
+    const multiplier = v12EntryGrossMultiplierForSignal(signal);
+    if (Math.abs(multiplier - 1) <= EPS) return sizing;
+    return {
+        ...sizing,
+        requestedNotional: sizing.requestedNotional * multiplier,
+        requestedGross: sizing.requestedGross * multiplier,
+        quantity: sizing.quantity * multiplier,
+    };
+}
 function positionMatches(state: V12ActivePositionState, actual: DirectPosition) {
     return actual.symbol.toUpperCase() === state.symbol.toUpperCase() && actualSide(actual) === state.side && Math.abs(actualQuantity(actual) - state.quantity) <= Math.max(1e-8, state.quantity * 0.01);
 }
@@ -572,7 +582,9 @@ export class V12LiveExecutionEngine {
             dynamicRequestedGross: decision.dynamicAcceptedGross,
             entryRank: signal.rank,
             atrAtEntry: signal.atr,
-            reason: decision.dynamicAcceptedGross > EPS ? "signal-entry-with-dynamic-residual" : "signal-entry-base",
+            reason: decision.dynamicAcceptedGross > EPS
+                ? (signal.entryQualityClass === "HC175" ? "signal-entry-with-dynamic-residual-hc175" : "signal-entry-with-dynamic-residual")
+                : (signal.entryQualityClass === "HC175" ? "signal-entry-base-hc175" : "signal-entry-base"),
             createdAt: this.now(),
         };
         state.pending = pending; await this.d.stateStore.save(state);
@@ -739,12 +751,12 @@ export class V12LiveExecutionEngine {
                     if (!(equity > 0)) return this.fail(state, "V12_ACCOUNT_EQUITY_INVALID");
                     const freshActive = this.activePortfolio(freshPositions, equity, quality102Ownership);
                     const quote = await this.d.adapter.executor.getMarketQuote(`${next.symbol}USDT`);
-                    sizing = sizeV12Position(
+                    sizing = applyV12SignalGrossMultiplier(sizeV12Position(
                         equity,
                         next.side === "LONG" ? quote.askPrice : quote.bidPrice,
                         next.atr,
                         next.side,
-                    );
+                    ), next);
                     const v12Components = v12GrossComponents(state, freshActive);
                     const snapshot = {
                         v12Gross: freshActive.filter((row) => row.sleeve === "V12").reduce((sum, row) => sum + row.gross, 0),
@@ -754,11 +766,11 @@ export class V12LiveExecutionEngine {
                         stockGross: freshActive.filter((row) => row.sleeve === "V11_EQ" || row.sleeve === "V50_POST_OPEN_BASIS").reduce((sum, row) => sum + row.gross, 0),
                         totalGross: freshActive.reduce((sum, row) => sum + row.gross, 0),
                     };
-                    const rankedRequestGross = Math.min(sizing.requestedGross, v12EntryGrossCapForRank(next.rank));
+                    const rankedRequestGross = Math.min(sizing.requestedGross, v12EntryGrossCapForSignal(next));
                     decision = decideV12ResidualEntry(rankedRequestGross, snapshot, activePositionsOf(state).length);
                     const requestedBase = Math.min(
                         rankedRequestGross,
-                        v12EntryGrossCapForRank(next.rank),
+                        v12EntryGrossCapForSignal(next),
                         Math.max(0, V12_X1_ALL.aggregateEntryGrossCap - v12Components.baseGross),
                     );
                     const trimNeeded = Math.min(
@@ -807,10 +819,10 @@ export class V12LiveExecutionEngine {
                 const activePortfolio = this.activePortfolio(latestPositions, entryEquity, quality102Ownership);
                 const quote = await this.d.adapter.executor.getMarketQuote(`${signal.symbol}USDT`);
                 const entryPrice = signal.side === "LONG" ? quote.askPrice : quote.bidPrice;
-                const sizing = sizeV12Position(entryEquity, entryPrice, signal.atr, signal.side);
+                const sizing = applyV12SignalGrossMultiplier(sizeV12Position(entryEquity, entryPrice, signal.atr, signal.side), signal);
                 const v12Components = v12GrossComponents(state, activePortfolio);
                 const snapshot = { v12Gross: activePortfolio.filter((row) => row.sleeve === "V12").reduce((sum, row) => sum + row.gross, 0), v12BaseGross: v12Components.baseGross, v12DynamicGross: v12Components.dynamicGross, cryptoGross: activePortfolio.filter((row) => row.sleeve === "V12" || row.sleeve === "PENGU_DUAL_LS_V2").reduce((sum, row) => sum + row.gross, 0), stockGross: activePortfolio.filter((row) => row.sleeve === "V11_EQ" || row.sleeve === "V50_POST_OPEN_BASIS").reduce((sum, row) => sum + row.gross, 0), totalGross: activePortfolio.reduce((sum, row) => sum + row.gross, 0) };
-                const rankedRequestGross = Math.min(sizing.requestedGross, v12EntryGrossCapForRank(signal.rank));
+                const rankedRequestGross = Math.min(sizing.requestedGross, v12EntryGrossCapForSignal(signal));
                 const decision = decideV12ResidualEntry(rankedRequestGross, snapshot, activePositionsOf(state).length);
                 if (!(decision.acceptedGross > 0)) {
                     if (enteredCount === 0) lastResult = { status: "capacity-blocked", reason: `V12_RANK${activePositionsOf(state).length + 1}_${decision.reason || "NO_RESIDUAL"}`, signal };
