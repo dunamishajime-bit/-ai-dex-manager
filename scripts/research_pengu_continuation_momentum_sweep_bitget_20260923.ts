@@ -33,10 +33,10 @@ const RECENT_END = Date.parse("2026-09-23T13:00:00Z");
 const BASE_URL = "https://api.bitget.com";
 const BASE_FEE_PER_SIDE = 0.0006;
 const STRESS_SLIPPAGE_PER_SIDE = 0.0035;
-const MOMENTUM_RET6_MIN = Number(process.env.PENGU_MOMENTUM_RET6_MIN || "0.03");
-const MOMENTUM_DISTANCE_ATR_MAX = Number(process.env.PENGU_MOMENTUM_DISTANCE_ATR_MAX || "0.40");
-const CONTINUATION_RET72_MAX = Number(process.env.PENGU_CONTINUATION_RET72_MAX || "999");
-const SWEEP_LABEL = String(process.env.PENGU_SWEEP_LABEL || "default");
+let MOMENTUM_RET6_MIN = 0.03;
+let MOMENTUM_DISTANCE_ATR_MAX = 0.40;
+let CONTINUATION_RET72_MAX = 999;
+
 
 type Variant = "BASELINE" | "TRAIL_RECLAIM" | "TRAIL_MOMENTUM" | "TRAIL_CONFIRMED";
 type Mode = "NORMAL" | "SEVERE";
@@ -241,14 +241,46 @@ async function main(){
   const [p,b,fp]=await Promise.all([candles("PENGUUSDT"),candles("BTCUSDT"),funding()]);
   const common=new Set(p.map(x=>x.openTime));const btc=b.filter(x=>common.has(x.openTime));const btcSet=new Set(btc.map(x=>x.openTime));const pengu=p.filter(x=>btcSet.has(x.openTime));
   assert.equal(pengu.length,btc.length);assert.ok(pengu.length>9000,`insufficient common rows ${pengu.length}`);
-  console.log(`PENGU_BITGET_AVAILABLE_RANGE=${new Date(pengu[0].openTime).toISOString()}..${new Date(pengu.at(-1)!.openTime+HOUR).toISOString()} rows=${pengu.length}`);
+  const venue="BITGET";
+  console.log(`PENGU_SWEEP_AVAILABLE_RANGE venue=${venue} ${new Date(pengu[0].openTime).toISOString()}..${new Date(pengu.at(-1)!.openTime+HOUR).toISOString()} rows=${pengu.length}`);
   const history:PenguDualLsV2History={pengu1h:pengu,btc1h:btc,penguFunding:fp};
   const rows=buildPenguDualLsV2EvaluationSeries(history,RECENT_END+1);
-  const variants:Variant[]=["BASELINE","TRAIL_RECLAIM","TRAIL_MOMENTUM","TRAIL_CONFIRMED"];const modes:Mode[]=["NORMAL","SEVERE"];
-  const result:any={schema:"pengu-continuation-reentry-bitget/v1",source:{venue:"BITGET_USDT_FUTURES",productionSourceSha:process.env.PRODUCTION_SOURCE_SHA||null},contract:{priority:"SHORT > BASE_V64_LONG > CONTINUATION > RECOVERY_V8",armOnlyAfter:"profitable BASE_V64_LONG LONG_TRAILING_STOP",armWindowHours:24,cooldown:"production cooldownHoursForPenguExit",gross:"current PENGU gross request, planner-clamped by current maximumGross",exits:"unchanged Production Long/Short/Recovery exits"},thresholds:{common:{priceAtOrAbovePriorTrailExit:true,penguReturn24hMin:.10,penguReturn72hMin:.15,relativeReturn24hMin:.05,btcReturn24hMin:0,rsi:[55,90],volumeRatio:[PENGU_DUAL_LS_V2.long.volumeRatioMinimum,PENGU_DUAL_LS_V2.long.volumeRatioMaximum],atr24RatioMax:PENGU_DUAL_LS_V2.long.atr24RatioMaximum},TRAIL_MOMENTUM:{ret6hMin:.03,distanceFromPrior18hHighAtrMax:.40},TRAIL_CONFIRMED:{breakoutAtrMin:.50}},gross:{maximum:PENGU_DUAL_LS_V2.maximumGross,recovery:PENGU_RECOVERY_V8.initialGross},windows:{formal:[new Date(FORMAL_START).toISOString(),new Date(FORMAL_END).toISOString()],recentHoldout:[new Date(FORMAL_END).toISOString(),new Date(RECENT_END).toISOString()]},variants:{},safety:{researchOnly:true,ordersSent:false,liveChanged:false,vpsChanged:false,productionChanged:false}};
-  for(const v of variants){result.variants[v]={};for(const m of modes){const all=replay(rows,fp,v,m);const formal=between(all,FORMAL_START,FORMAL_END),recent=between(all,FORMAL_END,RECENT_END);result.variants[v][m]={formal:metrics(formal),formalFolds:formalFolds(formal),recentHoldout:metrics(recent),fullThroughSep23:metrics(between(all,FORMAL_START,RECENT_END)),routeFormal:routeMetrics(formal),routeRecent:routeMetrics(recent),continuationFormal:continuationLedger(formal),continuationRecent:continuationLedger(recent),trades:all.filter(t=>t.entryTs>=FORMAL_START&&t.entryTs<RECENT_END)};}}
-  const base=result.variants.BASELINE.NORMAL;for(const v of variants.filter(x=>x!=="BASELINE")){const x=result.variants[v];x.deltaVsBaseline={formalReturnPct:x.NORMAL.formal.returnPct-base.formal.returnPct,formalWinRatePct:(x.NORMAL.formal.winRatePct??0)-(base.formal.winRatePct??0),formalPf:(x.NORMAL.formal.profitFactor??0)-(base.formal.profitFactor??0),formalDdPct:x.NORMAL.formal.maxDrawdownPct-base.formal.maxDrawdownPct,recentClosedReturnPct:x.NORMAL.recentHoldout.returnPct-base.recentHoldout.returnPct,recentMarkedReturnPct:x.NORMAL.recentHoldout.markToWindowReturnPct-base.recentHoldout.markToWindowReturnPct};}
-  await fs.mkdir(".research-state/pengu-continuation-momentum-sweep-bitget",{recursive:true});await fs.writeFile(".research-state/pengu-continuation-momentum-sweep-bitget/result.json",JSON.stringify(result,null,2)+"\n");
-  console.log(`PENGU_SWEEP_META=${JSON.stringify({label:SWEEP_LABEL,ret6Min:MOMENTUM_RET6_MIN,distanceAtrMax:MOMENTUM_DISTANCE_ATR_MAX,ret72Max:CONTINUATION_RET72_MAX})}`);\n  console.log("PENGU_CONTINUATION_SUMMARY="+JSON.stringify(Object.fromEntries(variants.map(v=>[v,{normal:{formal:result.variants[v].NORMAL.formal,folds:result.variants[v].NORMAL.formalFolds,recent:result.variants[v].NORMAL.recentHoldout,routeFormal:result.variants[v].NORMAL.routeFormal,routeRecent:result.variants[v].NORMAL.routeRecent,continuationFormal:result.variants[v].NORMAL.continuationFormal,continuationRecent:result.variants[v].NORMAL.continuationRecent},severe:{formal:result.variants[v].SEVERE.formal,recent:result.variants[v].SEVERE.recentHoldout},delta:result.variants[v].deltaVsBaseline}]))));
+  const configs=[
+    {label:"BASE",ret6:.03,dist:.40,r72:999},
+    {label:"R72_035",ret6:.03,dist:.40,r72:.35},
+    {label:"R72_040",ret6:.03,dist:.40,r72:.40},
+    {label:"R72_045",ret6:.03,dist:.40,r72:.45},
+    {label:"R72_040_R6_025",ret6:.025,dist:.40,r72:.40},
+    {label:"R72_040_R6_035",ret6:.035,dist:.40,r72:.40},
+    {label:"R72_040_D030",ret6:.03,dist:.30,r72:.40},
+    {label:"R72_040_D050",ret6:.03,dist:.50,r72:.40},
+  ];
+  const out:any={schema:"pengu-continuation-momentum-sweep/v1",venue,productionSourceSha:process.env.PRODUCTION_SOURCE_SHA||null,configs:{}};
+  for(const cfg of configs){
+    MOMENTUM_RET6_MIN=cfg.ret6;MOMENTUM_DISTANCE_ATR_MAX=cfg.dist;CONTINUATION_RET72_MAX=cfg.r72;
+    const row:any={thresholds:cfg};
+    for(const mode of ["NORMAL","SEVERE"] as Mode[]){
+      const baseAll=replay(rows,fp,"BASELINE",mode);
+      const momAll=replay(rows,fp,"TRAIL_MOMENTUM",mode);
+      const baseFormal=between(baseAll,FORMAL_START,FORMAL_END),momFormal=between(momAll,FORMAL_START,FORMAL_END);
+      const baseRecent=between(baseAll,FORMAL_END,RECENT_END),momRecent=between(momAll,FORMAL_END,RECENT_END);
+      row[mode]={
+        baselineFormal:metrics(baseFormal),momentumFormal:metrics(momFormal),
+        baselineRecent:metrics(baseRecent),momentumRecent:metrics(momRecent),
+        momentumFolds:formalFolds(momFormal),
+        continuationFormal:continuationLedger(momFormal),
+        continuationRecent:continuationLedger(momRecent),
+        deltaFormalReturnPct:metrics(momFormal).returnPct-metrics(baseFormal).returnPct,
+        deltaFormalWinRatePct:(metrics(momFormal).winRatePct??0)-(metrics(baseFormal).winRatePct??0),
+        deltaFormalPf:(metrics(momFormal).profitFactor??0)-(metrics(baseFormal).profitFactor??0),
+        deltaFormalDdPct:metrics(momFormal).maxDrawdownPct-metrics(baseFormal).maxDrawdownPct,
+        deltaRecentMarkedReturnPct:metrics(momRecent).markToWindowReturnPct-metrics(baseRecent).markToWindowReturnPct,
+      };
+    }
+    out.configs[cfg.label]=row;
+  }
+  const outDir=" .research-state/pengu-continuation-momentum-sweep-bitget".trim();
+  await fs.mkdir(outDir,{recursive:true});await fs.writeFile(path.join(outDir,"result.json"),JSON.stringify(out,null,2)+"\n");
+  console.log("PENGU_MOMENTUM_SWEEP_SUMMARY="+JSON.stringify(out));
 }
 main().catch(e=>{console.error(e);process.exit(1);});
