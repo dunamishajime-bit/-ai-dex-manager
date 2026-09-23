@@ -20,10 +20,11 @@ const SYMS = [...V12_X1_ALL.universe];
 
 type Prepared = { bars: Record<string,V12Bar[]>; idx: Record<string,Map<number,number>>; timeline:number[] };
 type Route = "NORMAL_SCORE"|"STRONG_REGIME_ALT"|"RELAXED_MOMENTUM_ALT"|"UNKNOWN";
-type RoutedSignal = V12Signal & { route: Route };
+type EntryFeatures = { score:number; momentum:number; volumeRatio:number; atrRatio:number; ret2h:number; ret6h:number; ret12h:number; ret24h:number; btc6h:number; btc12h:number; btc24h:number; rel24h:number; breakout12:number; closePos:number };
+type RoutedSignal = V12Signal & { route: Route; features: EntryFeatures };
 type Position = {
   symbol:string; side:"LONG"|"SHORT"; entry:number; qty:number; entryFee:number; funding:number; lastFund:number;
-  initialStop:number; stop:number; tp:number; trailingDistance:number; peak:number; trough:number; bars:number; rank:number; entryTs:number; route:Route;
+  initialStop:number; stop:number; tp:number; trailingDistance:number; peak:number; trough:number; bars:number; rank:number; entryTs:number; route:Route; features:EntryFeatures;
 };
 type Variant = {
   name:string;
@@ -135,6 +136,25 @@ function fastBtcPass(p:Prepared,s:V12Signal,t:number,mode:Variant["fastBtcVeto"]
   if(s.side==="LONG") return mode==="24h" ? r24>=0 : (r24>=0 && r12>=0);
   return mode==="24h" ? r24<=0 : (r24<=0 && r12<=0);
 }
+function entryFeatures(p:Prepared,s:V12Signal,t:number):EntryFeatures{
+  const si=p.idx[s.symbol]?.get(t), bi=p.idx.BTC?.get(t), sb=p.bars[s.symbol], bb=p.bars.BTC;
+  if(si==null||bi==null||!sb||!bb) throw new Error("FEATURE_INDEX_MISSING");
+  const side=s.side==="LONG"?1:-1;
+  const r=(b:V12Bar[],i:number,n:number)=>i>=n?b[i].close/b[i-n].close-1:NaN;
+  const prior12=sb.slice(Math.max(0,si-12),si);
+  const priorHigh=prior12.length?Math.max(...prior12.map(x=>x.high)):sb[si].high;
+  const priorLow=prior12.length?Math.min(...prior12.map(x=>x.low)):sb[si].low;
+  const range=Math.max(1e-12,sb[si].high-sb[si].low);
+  const rawPos=(sb[si].close-sb[si].low)/range;
+  const sym24=r(sb,si,12), btc24=r(bb,bi,12);
+  return {
+    score:s.score,momentum:side*s.momentum,volumeRatio:s.volumeRatio,atrRatio:s.atr/sb[si].close,
+    ret2h:side*r(sb,si,1),ret6h:side*r(sb,si,3),ret12h:side*r(sb,si,6),ret24h:side*sym24,
+    btc6h:side*r(bb,bi,3),btc12h:side*r(bb,bi,6),btc24h:side*btc24,rel24h:side*(sym24-btc24),
+    breakout12:s.side==="LONG"?sb[si].close/priorHigh-1:priorLow/sb[si].close-1,
+    closePos:s.side==="LONG"?rawPos:1-rawPos,
+  };
+}
 function routeFor(p:Prepared,s:V12Signal,t:number):Route{
   if(s.score>=V12_X1_ALL.neutralScoreThreshold)return "NORMAL_SCORE";
   const bi=p.idx.BTC?.get(t), btc=p.bars.BTC, si=p.idx[s.symbol]?.get(t), sb=p.bars[s.symbol];
@@ -152,7 +172,7 @@ function routeFor(p:Prepared,s:V12Signal,t:number):Route{
 }
 function variantSignals(p:Prepared,t:number,v:Variant,currentDd:number){
   const i=p.idx.BTC?.get(t); if(i==null)return [] as RoutedSignal[];
-  let ss=buildV12Signals(p.bars,i,V12_X1_ALL.maximumPositions).map(s=>({...s,route:routeFor(p,s,t)})) as RoutedSignal[];
+  let ss=buildV12Signals(p.bars,i,V12_X1_ALL.maximumPositions).map(s=>({...s,route:routeFor(p,s,t),features:entryFeatures(p,s,t)})) as RoutedSignal[];
   ss=ss.filter(s=>fastBtcPass(p,s,t,v.fastBtcVeto));
   if(v.breakoutConfirm) ss=ss.filter(s=>breakoutPass(p,s,t));
   if(v.rank2MinScore!=null) ss=ss.filter(s=>s.rank!==2 || s.score>=v.rank2MinScore!);
@@ -195,7 +215,7 @@ function simulate(d:PerpMarketData,p:Prepared,v:Variant,m:Mode){
   const close=(q:Position,raw:number,reason:string,t:number)=>{
     const x=q.side==="LONG"?raw*(1-slip):raw*(1+slip);const dir=q.side==="LONG"?1:-1;
     const g=dir*q.qty*(x-q.entry),ef=q.qty*x*fee,net=g-q.entryFee-ef-q.funding;
-    cash=Math.max(0,cash+g-ef);pnls.push(net);tradeRows.push({symbol:q.symbol,rank:q.rank,route:q.route,entryTs:q.entryTs,exitTs:t,net,pct:(x/q.entry-1)*100*dir,reason});
+    cash=Math.max(0,cash+g-ef);pnls.push(net);tradeRows.push({symbol:q.symbol,rank:q.rank,route:q.route,entryTs:q.entryTs,exitTs:t,net,pct:(x/q.entry-1)*100*dir,reason,...q.features});
     pos.delete(q.symbol);
     const coolBars = v.lossOnlyCooldownBars && net < 0
       ? v.lossOnlyCooldownBars
@@ -214,7 +234,7 @@ function simulate(d:PerpMarketData,p:Prepared,v:Variant,m:Mode){
       const notional=Math.min(sz.requestedNotional,rankCap,cap);
       if(notional/e<0.05){pending.delete(s);continue;}
       const qty=notional/entry,entryFee=notional*fee,levels=protectiveLevels(entry,sig.atr,sig.side);
-      cash-=entryFee;pos.set(s,{symbol:s,side:sig.side,entry,qty,entryFee,funding:0,lastFund:t,initialStop:levels.initialStop,stop:levels.initialStop,tp:levels.takeProfit,trailingDistance:levels.trailingDistance,peak:entry,trough:entry,bars:0,rank:sig.rank,entryTs:t,route:sig.route});
+      cash-=entryFee;pos.set(s,{symbol:s,side:sig.side,entry,qty,entryFee,funding:0,lastFund:t,initialStop:levels.initialStop,stop:levels.initialStop,tp:levels.takeProfit,trailingDistance:levels.trailingDistance,peak:entry,trough:entry,bars:0,rank:sig.rank,entryTs:t,route:sig.route,features:sig.features});
       entries++;if(sig.rank===2)rank2Entries++;pending.delete(s);
     }
     for(const q of [...pos.values()]){
@@ -244,6 +264,7 @@ function simulate(d:PerpMarketData,p:Prepared,v:Variant,m:Mode){
     maxDrawdownPct:maxDd,profitFactor:gl?gp/gl:gp?99:0,winRatePct:pnls.length?pnls.filter(x=>x>0).length/pnls.length*100:0,
     tradeCount:pnls.length,entries,rank2Entries,filteredSignals:filtered,averageTradePct:tradeRows.length?tradeRows.reduce((a,x)=>a+x.pct,0)/tradeRows.length:0,
     grossAtEnd:gross(END-H),routeStats, losses:tradeRows.filter(x=>x.net<0).sort((a,b)=>a.net-b.net).slice(0,10),
+    trades: v.name==="BASELINE" && m.name==="NORMAL" ? tradeRows : undefined,
   };
 }
 
