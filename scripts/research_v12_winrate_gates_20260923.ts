@@ -42,6 +42,9 @@ type Variant = {
   relaxedMinScore?: number;
   relaxedMinVolume?: number;
   relaxedBtcBothNegativeVeto?: boolean;
+  altMaxMomentum?: number;
+  strongMaxMomentum?: number;
+  relaxedMaxMomentum?: number;
 };
 type Mode = { name:string; feeBps:number; slipBps:number };
 
@@ -84,6 +87,12 @@ const variants: Variant[] = [
   { name:"RELAXED_BTC_BOTH_NEG", relaxedBtcBothNegativeVeto:true },
   { name:"RELAXED_VOL120_BTC_BOTH_NEG", relaxedMinVolume:1.20, relaxedBtcBothNegativeVeto:true },
   { name:"RELAXED_VOL140_BTC_BOTH_NEG", relaxedMinVolume:1.40, relaxedBtcBothNegativeVeto:true },
+  { name:"ALT_MAX_MOM_080", altMaxMomentum:0.08 },
+  { name:"ALT_MAX_MOM_100", altMaxMomentum:0.10 },
+  { name:"ALT_MAX_MOM_120", altMaxMomentum:0.12 },
+  { name:"STRONG_MAX_MOM_100", strongMaxMomentum:0.10 },
+  { name:"RELAXED_MAX_MOM_100", relaxedMaxMomentum:0.10 },
+  { name:"ALT_MAX_MOM_100_LOSS6H", altMaxMomentum:0.10, lossOnlyCooldownBars:3 },
 ];
 const modes: Mode[] = [
   { name:"NORMAL", feeBps:5, slipBps:0 },
@@ -161,6 +170,9 @@ function variantSignals(p:Prepared,t:number,v:Variant,currentDd:number){
     if(v.altMinVolume!=null && s.volumeRatio<v.altMinVolume)return false;
     const aligned=s.side==="LONG"?s.momentum:-s.momentum;
     if(v.altMinMomentum!=null && aligned<v.altMinMomentum)return false;
+    if(v.altMaxMomentum!=null && aligned>v.altMaxMomentum)return false;
+    if(s.route==="STRONG_REGIME_ALT" && v.strongMaxMomentum!=null && aligned>v.strongMaxMomentum)return false;
+    if(s.route==="RELAXED_MOMENTUM_ALT" && v.relaxedMaxMomentum!=null && aligned>v.relaxedMaxMomentum)return false;
     return true;
   });
   if(v.ddDefense){
