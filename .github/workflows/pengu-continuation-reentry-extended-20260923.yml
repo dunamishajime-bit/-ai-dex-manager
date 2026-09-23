@@ -1,0 +1,34 @@
+name: PENGU Continuation Reentry Extended
+on:
+  push:
+    branches:
+      - research/pengu-continuation-reentry-20260923
+    paths:
+      - scripts/research_pengu_continuation_reentry_extended_20260923.ts
+      - .github/workflows/pengu-continuation-reentry-extended-20260923.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Run extended Aster exact continuation research
+        env:
+          PRODUCTION_SOURCE_SHA: c6add8d39676584ad9db094d1ad04deb4050ed06
+        run: npx tsx scripts/research_pengu_continuation_reentry_extended_20260923.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-continuation-reentry-extended
+          path: .research-state/pengu-continuation-reentry-extended
+          retention-days: 90
