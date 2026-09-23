@@ -1,0 +1,18 @@
+name: Audit V12 today weak-flow
+on:
+  push:
+    branches:
+      - research/v12-market-state-loss-cluster-20260923
+    paths:
+      - scripts/audit_v12_today_any_weak_20260923.mjs
+      - .github/workflows/audit-v12-today-weak-flow.yml
+  workflow_dispatch:
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: node scripts/audit_v12_today_any_weak_20260923.mjs
