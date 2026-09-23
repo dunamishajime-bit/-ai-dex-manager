@@ -1,0 +1,31 @@
+name: V12 Aster Rank1 holdout
+on:
+  push:
+    branches:
+      - research/v12-live-bt-parity-20260923
+    paths:
+      - scripts/research_v12_aster_rank1_fast_holdout_20260923.ts
+      - .github/workflows/v12-aster-rank1-fast-holdout.yml
+  workflow_dispatch:
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Run holdout
+        run: |
+          npx tsx scripts/research_v12_aster_rank1_fast_holdout_20260923.ts > /tmp/v12-r1-holdout.json 2> /tmp/v12-r1-holdout-summary.txt
+          cat /tmp/v12-r1-holdout-summary.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: v12-aster-rank1-fast-holdout
+          path: |
+            .research-state/v12-winrate-gates-20260923/result.json
+            /tmp/v12-r1-holdout-summary.txt
