@@ -73,6 +73,11 @@ type Variant = {
   relaxedOnlyBtcVeto?: boolean;
   nonHcRank2BtcAgainstSizeMult?: number;
   ddWeakNonHcRank2?: boolean;
+  blockNonHcRel24Negative?: boolean;
+  blockRelaxedRel24Negative?: boolean;
+  blockPrevVolHotRelWeak?: boolean;
+  blockFastBtcAndRelWeak?: boolean;
+  blockFastBtcPrevVolHot?: boolean;
 };
 type Mode = { name:string; feeBps:number; slipBps:number };
 
@@ -80,22 +85,16 @@ type Mode = { name:string; feeBps:number; slipBps:number };
 const LOCKED={hcOverlay:true,hcPriority:true,hcGrossMultiplier:1.75,nonHcGrossMultiplier:1} as const;
 const variants:Variant[]=[
 {name:"HC175_LOCKED",...LOCKED},
-{name:"HC175_LOSS6H_ALL",...LOCKED,lossOnlyCooldownBars:3},
 {name:"HC175_LOSS6H_NONHC",...LOCKED,nonHcLossCooldownBars:3},
-{name:"HC175_BTC_BOTH_ALL",...LOCKED,fastBtcVeto:"bothNegative"},
-{name:"HC175_BTC_BOTH_LOW_RANK2",...LOCKED,weakRank2BtcVeto:"bothNegative"},
-{name:"HC175_BTC24_LOW_RANK2",...LOCKED,weakRank2BtcVeto:"24h"},
-{name:"HC175_BTC_BOTH_LOW_SCORE",...LOCKED,lowScoreBtcVeto:true},
-{name:"HC175_BTC_BOTH_RELAXED",...LOCKED,relaxedOnlyBtcVeto:true},
-{name:"HC175_RANK2_BAD_BTC_HALF",...LOCKED,nonHcRank2BtcAgainstSizeMult:0.5},
-{name:"HC175_RANK2_BAD_BTC_075",...LOCKED,nonHcRank2BtcAgainstSizeMult:0.75},
-{name:"HC175_LOSS6_NONHC_BTC_BOTH_LOW_RANK2",...LOCKED,nonHcLossCooldownBars:3,weakRank2BtcVeto:"bothNegative"},
-{name:"HC175_LOSS6_NONHC_BTC24_LOW_RANK2",...LOCKED,nonHcLossCooldownBars:3,weakRank2BtcVeto:"24h"},
-{name:"HC175_LOSS6_NONHC_BTC_BOTH_RELAXED",...LOCKED,nonHcLossCooldownBars:3,relaxedOnlyBtcVeto:true},
-{name:"HC175_LOSS6_NONHC_BTC_BOTH_ALL",...LOCKED,nonHcLossCooldownBars:3,fastBtcVeto:"bothNegative"},
-{name:"HC175_LOSS6_NONHC_RANK2_HALF",...LOCKED,nonHcLossCooldownBars:3,nonHcRank2BtcAgainstSizeMult:0.5},
-{name:"HC175_DD_WEAK_NONHC",...LOCKED,ddWeakNonHcRank2:true},
-{name:"HC175_LOSS6_NONHC_DD_WEAK",...LOCKED,nonHcLossCooldownBars:3,ddWeakNonHcRank2:true},
+{name:"HC175_LOSS6_RELNEG_ALL",...LOCKED,nonHcLossCooldownBars:3,blockNonHcRel24Negative:true},
+{name:"HC175_LOSS6_RELNEG_RELAXED",...LOCKED,nonHcLossCooldownBars:3,blockRelaxedRel24Negative:true},
+{name:"HC175_LOSS6_PREVVOLHOT_RELWEAK",...LOCKED,nonHcLossCooldownBars:3,blockPrevVolHotRelWeak:true},
+{name:"HC175_LOSS6_FASTBTC_RELWEAK",...LOCKED,nonHcLossCooldownBars:3,blockFastBtcAndRelWeak:true},
+{name:"HC175_LOSS6_FASTBTC_PREVVOLHOT",...LOCKED,nonHcLossCooldownBars:3,blockFastBtcPrevVolHot:true},
+{name:"HC175_RELNEG_RELAXED",...LOCKED,blockRelaxedRel24Negative:true},
+{name:"HC175_PREVVOLHOT_RELWEAK",...LOCKED,blockPrevVolHotRelWeak:true},
+{name:"HC175_FASTBTC_RELWEAK",...LOCKED,blockFastBtcAndRelWeak:true},
+{name:"HC175_FASTBTC_PREVVOLHOT",...LOCKED,blockFastBtcPrevVolHot:true},
 ];
 const modes: Mode[] = [
   { name:"NORMAL", feeBps:5, slipBps:0 },
@@ -230,6 +229,11 @@ function variantSignals(p:Prepared,t:number,v:Variant,currentDd:number){
     if(s.route==="RELAXED_MOMENTUM_ALT" && v.relaxedMaxMomentum!=null && aligned>v.relaxedMaxMomentum)return false;
     return true;
   });
+  if(v.blockNonHcRel24Negative)ss=ss.filter(s=>highConfidence(s)||s.features.rel24h>=0);
+  if(v.blockRelaxedRel24Negative)ss=ss.filter(s=>highConfidence(s)||s.route!=="RELAXED_MOMENTUM_ALT"||s.features.rel24h>=0);
+  if(v.blockPrevVolHotRelWeak)ss=ss.filter(s=>highConfidence(s)||!(s.features.prevVolumeRatio>1.0&&s.features.rel24h<0));
+  if(v.blockFastBtcAndRelWeak)ss=ss.filter(s=>highConfidence(s)||!(s.features.btc12h<0&&s.features.btc24h<0&&s.features.rel24h<0));
+  if(v.blockFastBtcPrevVolHot)ss=ss.filter(s=>highConfidence(s)||!(s.features.btc12h<0&&s.features.btc24h<0&&s.features.prevVolumeRatio>1.0));
   if(v.weakRank2BtcVeto) ss=ss.filter(s=>highConfidence(s)||s.rank!==2||s.score>=0.35||fastBtcPass(p,s,t,v.weakRank2BtcVeto==="24h"?"24h":"bothNegative"));
   if(v.lowScoreBtcVeto) ss=ss.filter(s=>highConfidence(s)||s.score>=0.35||fastBtcPass(p,s,t,"bothNegative"));
   if(v.relaxedOnlyBtcVeto) ss=ss.filter(s=>highConfidence(s)||s.route!=="RELAXED_MOMENTUM_ALT"||fastBtcPass(p,s,t,"bothNegative"));
