@@ -75,7 +75,6 @@ type Variant = {
 type Mode = { name:string; feeBps:number; slipBps:number };
 
 // HC is a locked 1.75x multiplier in every candidate; never remove its entry conditions.
-const LOCKED = {hcOverlay:true,hcPriority:true,hcGrossMultiplier:1.75,nonHcGrossMultiplier:1} as const;
 // HC 1.75x frozen in ALL variants. Exploratory early-route parameters require independent validation.
 const LOCKED={hcOverlay:true,hcPriority:true,hcGrossMultiplier:1.75,nonHcGrossMultiplier:1} as const;
 const variants:Variant[]=[
