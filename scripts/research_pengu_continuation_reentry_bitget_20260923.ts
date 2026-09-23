@@ -88,7 +88,8 @@ async function candles(symbol:string){
   }
   return [...map.values()].sort((a,b)=>a.openTime-b.openTime);
 }
-async function funding(){ return [] as FundingPoint[]; }\nfunction fundingBetween(points:FundingPoint[],a:number,b:number){return points.filter(x=>x.fundingTime>a&&x.fundingTime<=b).reduce((s,x)=>s+x.fundingRate,0);}
+async function funding(){ return [] as FundingPoint[]; }
+function fundingBetween(points:FundingPoint[],a:number,b:number){return points.filter(x=>x.fundingTime>a&&x.fundingTime<=b).reduce((s,x)=>s+x.fundingRate,0);}
 function allLongGatesExcept(f:PenguDualLsV2Features, except:Set<string>){
   const r=PENGU_DUAL_LS_V2.long;
   const gates:Record<string,boolean>={
