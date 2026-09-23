@@ -1,0 +1,66 @@
+name: Capture Integrated Replay Engine
+on:
+  push:
+    branches:
+      - research/pengu-gross1-full-integrated-20260924
+    paths:
+      - scripts/research_capture_integrated_engine_20260924.py
+      - .github/workflows/pengu-integrated-engine-capture-20260924.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  capture:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore frozen stock cache
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            .cache/perp-research-usdm
+            .cache/aster-only-v39-overnight-open
+          key: pengu-integrated-capture-${{ runner.os }}
+          restore-keys: |
+            flat-boost-preemption-
+            quality102-gross-cap-sweep-
+            quality102-grosssafe-
+            latest-v12-pengu-v8-v52-dca-
+            aster-only-v52-v39cache-
+            perp-research-usdm-
+      - name: Restore original V12/PENGU ledger artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: latest-v12-pengu-v8-v52-dca-1y-33257164125
+          path: .research-state/prior
+          github-token: ${{ github.token }}
+          repository: dunamishajime-bit/-ai-dex-manager
+          run-id: 33257164125
+      - name: Restore current BTC2 V12 ledger
+        uses: actions/download-artifact@v4
+        with:
+          name: flat-boost-preemption-35337138289
+          path: .research-state/flat
+          github-token: ${{ github.token }}
+          repository: dunamishajime-bit/-ai-dex-manager
+          run-id: 35337138289
+      - name: Capture exact generated source
+        run: |
+          python scripts/research_capture_integrated_engine_20260924.py \
+            --stock-cache-dir .cache/aster-only-v39-overnight-open \
+            --v12-ledger .research-state/flat/flat-boost-current/v12-top2-ledger.json \
+            --pengu-ledger .research-state/prior/pengu-v8-ledger.json \
+            --output .research-state/capture/integrated-engine.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pengu-integrated-engine-capture
+          path: .research-state/capture/
+          include-hidden-files: true
+          retention-days: 30
