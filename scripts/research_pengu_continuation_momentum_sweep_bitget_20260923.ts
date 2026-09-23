@@ -128,7 +128,8 @@ function continuationCommon(rows:readonly PenguDualLsV2EvaluationRow[],i:number,
     && ts<=arm.expiresTs
     && f.close>=arm.exitPrice
     && f.penguReturn24h>=0.10
-    && f.penguReturn72h>=0.15\n    && f.penguReturn72h<=CONTINUATION_RET72_MAX
+    && f.penguReturn72h>=0.15
+    && f.penguReturn72h<=CONTINUATION_RET72_MAX
     && f.relativeReturn24h>=0.05
     && f.btcReturn24h>=0
     && f.rsi14>=55 && f.rsi14<=90
