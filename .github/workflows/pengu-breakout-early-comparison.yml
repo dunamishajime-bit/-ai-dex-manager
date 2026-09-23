@@ -1,0 +1,34 @@
+name: PENGU Breakout Early Comparison
+on:
+  push:
+    branches:
+      - research/pengu-breakout-early-comparison-20260923
+    paths:
+      - scripts/research_pengu_breakout_early_compare_20260923.ts
+      - .github/workflows/pengu-breakout-early-comparison.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Run Aster exact PENGU comparison
+        env:
+          PRODUCTION_SOURCE_SHA: 43a604e3940d4f3b4229ef586a178dd1fa258768
+        run: npx tsx scripts/research_pengu_breakout_early_compare_20260923.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-breakout-early-comparison
+          path: .research-state/pengu-breakout-early-comparison
+          retention-days: 90
