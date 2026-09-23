@@ -235,7 +235,8 @@ function continuationLedger(ts:Trade[]){return ts.filter(t=>t.route.startsWith("
 async function main(){
   const [p,b,fp]=await Promise.all([candles("PENGUUSDT"),candles("BTCUSDT"),funding()]);
   const common=new Set(p.map(x=>x.openTime));const btc=b.filter(x=>common.has(x.openTime));const btcSet=new Set(btc.map(x=>x.openTime));const pengu=p.filter(x=>btcSet.has(x.openTime));
-  assert.equal(pengu.length,btc.length);assert.ok(pengu.length>9000,`insufficient common rows ${pengu.length}`);\n  console.log(`PENGU_AVAILABLE_RANGE=${new Date(pengu[0].openTime).toISOString()}..${new Date(pengu.at(-1)!.openTime+HOUR).toISOString()} rows=${pengu.length}`);
+  assert.equal(pengu.length,btc.length);assert.ok(pengu.length>9000,`insufficient common rows ${pengu.length}`);
+  console.log(`PENGU_AVAILABLE_RANGE=${new Date(pengu[0].openTime).toISOString()}..${new Date(pengu.at(-1)!.openTime+HOUR).toISOString()} rows=${pengu.length}`);
   const history:PenguDualLsV2History={pengu1h:pengu,btc1h:btc,penguFunding:fp};
   const rows=buildPenguDualLsV2EvaluationSeries(history,RECENT_END+1);
   const variants:Variant[]=["BASELINE","TRAIL_RECLAIM","TRAIL_MOMENTUM","TRAIL_CONFIRMED"];const modes:Mode[]=["NORMAL","SEVERE"];
