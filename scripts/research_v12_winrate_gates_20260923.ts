@@ -24,7 +24,7 @@ type EntryFeatures = { score:number; momentum:number; volumeRatio:number; prevVo
 type RoutedSignal = V12Signal & { route: Route; features: EntryFeatures };
 type Position = {
   symbol:string; side:"LONG"|"SHORT"; entry:number; qty:number; entryFee:number; funding:number; lastFund:number;
-  initialStop:number; stop:number; tp:number; trailingDistance:number; peak:number; trough:number; bars:number; rank:number; entryTs:number; route:Route; features:EntryFeatures;
+  initialStop:number; stop:number; tp:number; trailingDistance:number; peak:number; trough:number; bars:number; rank:number; entryTs:number; route:Route; features:EntryFeatures; isHC:boolean;
 };
 type Variant = {
   name:string;
@@ -58,6 +58,10 @@ type Variant = {
   hcAltOnly?: boolean;
   hcMaxRankGap?: number;
   hcMaxRet2h?: number;
+  hcOverlay?: boolean;
+  hcPriority?: boolean;
+  hcGrossMultiplier?: number;
+  nonHcGrossMultiplier?: number;
 };
 type Mode = { name:string; feeBps:number; slipBps:number };
 
@@ -129,6 +133,19 @@ const variants: Variant[] = [
   { name:"HC_RANK_RET_PREV", hcMinRet24:0.018, hcMaxPrevVolume:0.80, hcMaxRankGap:0.2421 },
   { name:"HC_RANK_RET_RET2_BTC16", hcMinRet24:0.018, hcMinBtc24:0.0163, hcMaxRankGap:0.2421, hcMaxRet2h:0.00461 },
   { name:"HC_ALT_RANK_RET_RET2_BTC16", hcMinRet24:0.018, hcMinBtc24:0.0163, hcMaxRankGap:0.2421, hcMaxRet2h:0.00461, hcAltOnly:true },
+  { name:"OVERLAY_TAG_CONTROL",hcOverlay:true },
+  { name:"OVERLAY_PRIORITY",hcOverlay:true,hcPriority:true },
+  { name:"OVERLAY_HC125_NON100",hcOverlay:true,hcPriority:true,hcGrossMultiplier:1.25,nonHcGrossMultiplier:1 },
+  { name:"OVERLAY_HC150_NON100",hcOverlay:true,hcPriority:true,hcGrossMultiplier:1.5,nonHcGrossMultiplier:1 },
+  { name:"OVERLAY_HC175_NON100",hcOverlay:true,hcPriority:true,hcGrossMultiplier:1.75,nonHcGrossMultiplier:1 },
+  { name:"OVERLAY_HC200_NON100",hcOverlay:true,hcPriority:true,hcGrossMultiplier:2,nonHcGrossMultiplier:1 },
+  { name:"OVERLAY_HC125_NON075",hcOverlay:true,hcPriority:true,hcGrossMultiplier:1.25,nonHcGrossMultiplier:.75 },
+  { name:"OVERLAY_HC150_NON075",hcOverlay:true,hcPriority:true,hcGrossMultiplier:1.5,nonHcGrossMultiplier:.75 },
+  { name:"OVERLAY_HC175_NON075",hcOverlay:true,hcPriority:true,hcGrossMultiplier:1.75,nonHcGrossMultiplier:.75 },
+  { name:"OVERLAY_HC200_NON075",hcOverlay:true,hcPriority:true,hcGrossMultiplier:2,nonHcGrossMultiplier:.75 },
+  { name:"OVERLAY_HC150_NON050",hcOverlay:true,hcPriority:true,hcGrossMultiplier:1.5,nonHcGrossMultiplier:.5 },
+  { name:"OVERLAY_HC175_NON050",hcOverlay:true,hcPriority:true,hcGrossMultiplier:1.75,nonHcGrossMultiplier:.5 },
+  { name:"OVERLAY_HC200_NON050",hcOverlay:true,hcPriority:true,hcGrossMultiplier:2,nonHcGrossMultiplier:.5 },
 ];
 const modes: Mode[] = [
   { name:"NORMAL", feeBps:5, slipBps:0 },
@@ -270,20 +287,24 @@ function variantSignals(p:Prepared,t:number,v:Variant,currentDd:number){
   return ss;
 }
 
+function highConfidence(s:RoutedSignal):boolean {
+  const f=s.features;
+  return f.ret24h>=0.018 && f.prevVolumeRatio<=0.80 && f.btc24h>=0.020;
+}
 function simulate(d:PerpMarketData,p:Prepared,v:Variant,m:Mode){
   const fee=m.feeBps/10000, slip=m.slipBps/10000;
   const times=p.timeline.filter(t=>t>=START&&t<END);
   const deposits=monthlyDepositSchedule(); let depI=0;
   let cash=10000, contributed=10000, peak=10000, maxDd=0;
   const pos=new Map<string,Position>(); const pending=new Map<string,RoutedSignal>(); const cool=new Map<string,number>();
-  const pnls:number[]=[]; const tradeRows:any[]=[]; let entries=0, rank2Entries=0, filtered=0, winsFiltered=0;
+  const pnls:number[]=[]; const tradeRows:any[]=[]; let entries=0, rank2Entries=0, filtered=0, winsFiltered=0, maxEntryGross=0, hcEntries=0,nonHcEntries=0;
   const px=(s:string,t:number,f:"open"|"close"="close")=>{const i=p.idx[s]?.get(t);return i==null?undefined:p.bars[s]?.[i]?.[f];};
   const equity=(t:number,f:"open"|"close"="close")=>{let e=cash;for(const q of pos.values()){const x=px(q.symbol,t,f)??q.entry;const dir=q.side==="LONG"?1:-1;e+=dir*q.qty*(x-q.entry)-q.qty*x*fee;}return Math.max(0,e);};
   const gross=(t:number)=>{const e=Math.max(1,equity(t));let n=0;for(const q of pos.values())n+=q.qty*(px(q.symbol,t)??q.entry);return n/e;};
   const close=(q:Position,raw:number,reason:string,t:number)=>{
     const x=q.side==="LONG"?raw*(1-slip):raw*(1+slip);const dir=q.side==="LONG"?1:-1;
     const g=dir*q.qty*(x-q.entry),ef=q.qty*x*fee,net=g-q.entryFee-ef-q.funding;
-    cash=Math.max(0,cash+g-ef);pnls.push(net);tradeRows.push({symbol:q.symbol,rank:q.rank,route:q.route,entryTs:q.entryTs,exitTs:t,net,pct:(x/q.entry-1)*100*dir,reason,...q.features});
+    cash=Math.max(0,cash+g-ef);pnls.push(net);tradeRows.push({symbol:q.symbol,rank:q.rank,route:q.route,entryTs:q.entryTs,exitTs:t,net,pct:(x/q.entry-1)*100*dir,reason,isHC:q.isHC,...q.features});
     pos.delete(q.symbol);
     const coolBars = v.lossOnlyCooldownBars && net < 0
       ? v.lossOnlyCooldownBars
@@ -298,14 +319,19 @@ function simulate(d:PerpMarketData,p:Prepared,v:Variant,m:Mode){
       const e=equity(t,"open"),entry=sig.side==="LONG"?raw*(1+slip):raw*(1-slip);
       const sz=sizeV12Position(e,entry,sig.atr,sig.side); const active=[...pos.values()].reduce((n,q)=>n+q.qty*(px(q.symbol,t,"open")??q.entry),0);
       const cap=Math.max(0,e*V12_X1_ALL.dynamicResidualAggregateGrossCap-active);
-      const rankCap=e*(sig.rank===3?V12_X1_ALL.rank3EntryGrossCap:V12_X1_ALL.perPositionEntryGrossCap);
-      const notional=Math.min(sz.requestedNotional,rankCap,cap);
+      const isHC=highConfidence(sig);
+      const mult=v.hcOverlay?(isHC?(v.hcGrossMultiplier??1):(v.nonHcGrossMultiplier??1)):1;
+      // Keep rank3's original 0.10x ceiling. Boost rank1/2 only within the unchanged aggregate cap.
+      const rankCap=e*(sig.rank===3?V12_X1_ALL.rank3EntryGrossCap* Math.min(1,mult):V12_X1_ALL.perPositionEntryGrossCap*mult);
+      const notional=Math.min(sz.requestedNotional*mult,rankCap,cap);
       if(notional/e<0.05){pending.delete(s);continue;}
       const qty=notional/entry,entryFee=notional*fee,levels=protectiveLevels(entry,sig.atr,sig.side);
       const tpAtr=v.tpAtrOverride??V12_X1_ALL.takeProfitAtr;
       const tp=sig.side==="LONG"?entry+sig.atr*tpAtr:entry-sig.atr*tpAtr;
       const trailingDistance=sig.atr*(v.trailAtrOverride??V12_X1_ALL.trailingAtr);
-      cash-=entryFee;pos.set(s,{symbol:s,side:sig.side,entry,qty,entryFee,funding:0,lastFund:t,initialStop:levels.initialStop,stop:levels.initialStop,tp,trailingDistance,peak:entry,trough:entry,bars:0,rank:sig.rank,entryTs:t,route:sig.route,features:sig.features});
+      cash-=entryFee;pos.set(s,{symbol:s,side:sig.side,entry,qty,entryFee,funding:0,lastFund:t,initialStop:levels.initialStop,stop:levels.initialStop,tp,trailingDistance,peak:entry,trough:entry,bars:0,rank:sig.rank,entryTs:t,route:sig.route,features:sig.features,isHC});
+      maxEntryGross=Math.max(maxEntryGross,(active+notional)/e);
+      if(isHC)hcEntries++;else nonHcEntries++;
       entries++;if(sig.rank===2)rank2Entries++;pending.delete(s);
     }
     for(const q of [...pos.values()]){
@@ -319,6 +345,7 @@ function simulate(d:PerpMarketData,p:Prepared,v:Variant,m:Mode){
     const e=equity(t);peak=Math.max(peak,e);const dd=peak>0?(peak-e)/peak*100:0;maxDd=Math.max(maxDd,dd);
     const baseI=p.idx.BTC?.get(t); const base=baseI==null?[]:buildV12Signals(p.bars,baseI,V12_X1_ALL.maximumPositions);
     const ss=variantSignals(p,t,v,dd);
+    if(v.hcPriority) ss.sort((a,b)=>Number(highConfidence(b))-Number(highConfidence(a)) || a.rank-b.rank);
     filtered += Math.max(0,base.length-ss.length);
     let slots=Math.max(0,V12_X1_ALL.maximumPositions-pos.size-pending.size);
     for(const s of ss){if(slots<=0)break;if(pos.has(s.symbol)||pending.has(s.symbol)||(cool.get(s.symbol)||0)>t)continue;pending.set(s.symbol,s);slots--;}
@@ -330,7 +357,14 @@ function simulate(d:PerpMarketData,p:Prepared,v:Variant,m:Mode){
     const xs=tradeRows.filter(x=>x.route===route), rgp=xs.filter(x=>x.net>0).reduce((a,x)=>a+x.net,0), rgl=-xs.filter(x=>x.net<0).reduce((a,x)=>a+x.net,0);
     return [route,{tradeCount:xs.length,winRatePct:xs.length?xs.filter(x=>x.net>0).length/xs.length*100:0,profitFactor:rgl?rgp/rgl:rgp?99:0,netPnl:xs.reduce((a,x)=>a+x.net,0),avgPct:xs.length?xs.reduce((a,x)=>a+x.pct,0)/xs.length:0}];
   }));
+  const hcRows=tradeRows.filter(x=>x.isHC), nonHcRows=tradeRows.filter(x=>!x.isHC);
+  const subgroup=(xs:any[])=>{
+    const win=xs.filter(x=>x.net>0), gp=win.reduce((a,x)=>a+x.net,0);
+    const gl=-xs.filter(x=>x.net<0).reduce((a,x)=>a+x.net,0);
+    return {trades:xs.length,winRatePct:xs.length?100*win.length/xs.length:0,pf:gl?gp/gl:gp?99:0,netPnl:xs.reduce((a,x)=>a+x.net,0)};
+  };
   return {
+    hcStats:subgroup(hcRows),nonHcStats:subgroup(nonHcRows),maxEntryGross,hcEntries,nonHcEntries,
     finalEquity:cash,contributed,netProfit:cash-contributed,returnOnContributionPct:(cash/contributed-1)*100,
     maxDrawdownPct:maxDd,profitFactor:gl?gp/gl:gp?99:0,winRatePct:pnls.length?pnls.filter(x=>x>0).length/pnls.length*100:0,
     tradeCount:pnls.length,entries,rank2Entries,filteredSignals:filtered,averageTradePct:tradeRows.length?tradeRows.reduce((a,x)=>a+x.pct,0)/tradeRows.length:0,
