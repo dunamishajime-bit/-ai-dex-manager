@@ -1,0 +1,45 @@
+name: PENGU Gross1 Fixed Candidate CI
+on:
+  push:
+    branches:
+      - research/pengu-gross1-fixed-production-target-20260924
+    paths:
+      - config/integratedProductionRiskPolicy.ts
+      - config/penguDualLsV2Runtime.ts
+      - tests/final-integrated-logic-contract.test.ts
+      - scripts/pengu-v8-gross-contract-selftest.ts
+      - scripts/research_pengu_gross1_all_orders_20260924.ts
+      - docs/research/PENGU_GROSS1_ALL_ORDER_ALLOCATION_20260924.md
+      - .github/workflows/pengu-gross1-fixed-candidate-ci-20260924.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Typecheck
+        run: npx tsc --noEmit -p tsconfig.json
+      - name: Integrated risk contract test
+        run: npx tsx --test tests/final-integrated-logic-contract.test.ts
+      - name: PENGU strict gross contract selftest
+        run: npx tsx scripts/pengu-v8-gross-contract-selftest.ts
+      - name: PENGU Gross1 all-order research parity
+        env:
+          PRODUCTION_SOURCE_SHA: c6add8d39676584ad9db094d1ad04deb4050ed06
+        run: npx tsx scripts/research_pengu_gross1_all_orders_20260924.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-gross1-fixed-candidate
+          path: .research-state/pengu-gross1-all-orders/
+          retention-days: 90
