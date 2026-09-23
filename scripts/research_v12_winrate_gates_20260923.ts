@@ -20,7 +20,7 @@ const SYMS = [...V12_X1_ALL.universe];
 
 type Prepared = { bars: Record<string,V12Bar[]>; idx: Record<string,Map<number,number>>; timeline:number[] };
 type Route = "NORMAL_SCORE"|"STRONG_REGIME_ALT"|"RELAXED_MOMENTUM_ALT"|"UNKNOWN";
-type EntryFeatures = { score:number; momentum:number; volumeRatio:number; atrRatio:number; ret2h:number; ret6h:number; ret12h:number; ret24h:number; btc6h:number; btc12h:number; btc24h:number; rel24h:number; breakout12:number; closePos:number };
+type EntryFeatures = { score:number; momentum:number; volumeRatio:number; prevVolumeRatio:number; volume2Mean:number; atrRatio:number; ret2h:number; ret6h:number; ret12h:number; ret24h:number; btc6h:number; btc12h:number; btc24h:number; rel24h:number; eth12h:number; sol12h:number; breadth12:number; breadth24:number; breakout12:number; closePos:number; reclaim6:number; pullback6:number; rankGap:number };
 type RoutedSignal = V12Signal & { route: Route; features: EntryFeatures };
 type Position = {
   symbol:string; side:"LONG"|"SHORT"; entry:number; qty:number; entryFee:number; funding:number; lastFund:number;
@@ -161,18 +161,35 @@ function entryFeatures(p:Prepared,s:V12Signal,t:number):EntryFeatures{
   if(si==null||bi==null||!sb||!bb) throw new Error("FEATURE_INDEX_MISSING");
   const side=s.side==="LONG"?1:-1;
   const r=(b:V12Bar[],i:number,n:number)=>i>=n?b[i].close/b[i-n].close-1:NaN;
+  const vrAt=(b:V12Bar[],i:number)=>{if(i<20)return NaN;const m=b.slice(i-20,i).reduce((a,x)=>a+x.volume,0)/20;return m>0?b[i].volume/m:NaN;};
   const prior12=sb.slice(Math.max(0,si-12),si);
   const priorHigh=prior12.length?Math.max(...prior12.map(x=>x.high)):sb[si].high;
   const priorLow=prior12.length?Math.min(...prior12.map(x=>x.low)):sb[si].low;
   const range=Math.max(1e-12,sb[si].high-sb[si].low);
   const rawPos=(sb[si].close-sb[si].low)/range;
   const sym24=r(sb,si,12), btc24=r(bb,bi,12);
+  const prevVr=vrAt(sb,si-1);
+  const eth=p.bars.ETH, sol=p.bars.SOL, ei=p.idx.ETH?.get(t), soi=p.idx.SOL?.get(t);
+  const eth12=ei==null||!eth?NaN:side*r(eth,ei,6), sol12=soi==null||!sol?NaN:side*r(sol,soi,6);
+  const btc12=side*r(bb,bi,6);
+  const eth24=ei==null||!eth?NaN:side*r(eth,ei,12), sol24=soi==null||!sol?NaN:side*r(sol,soi,12);
+  const vals12=[btc12,eth12,sol12].filter(Number.isFinite), vals24=[side*btc24,eth24,sol24].filter(Number.isFinite);
+  const swing=sb.slice(Math.max(0,si-7),Math.max(0,si-1));
+  const prev=si>=1?sb[si-1]:sb[si];
+  const levelHigh=swing.length?Math.max(...swing.map(x=>x.high)):prev.high;
+  const levelLow=swing.length?Math.min(...swing.map(x=>x.low)):prev.low;
+  const reclaim6=s.side==="LONG"
+    ? (prev.low<=levelHigh*1.005 && sb[si].close>levelHigh && sb[si].close>prev.high?1:0)
+    : (prev.high>=levelLow*0.995 && sb[si].close<levelLow && sb[si].close<prev.low?1:0);
+  const pullback6=s.side==="LONG"?(prev.close/levelHigh-1):(levelLow/prev.close-1);
   return {
-    score:s.score,momentum:side*s.momentum,volumeRatio:s.volumeRatio,atrRatio:s.atr/sb[si].close,
+    score:s.score,momentum:side*s.momentum,volumeRatio:s.volumeRatio,prevVolumeRatio:prevVr,volume2Mean:(s.volumeRatio+prevVr)/2,atrRatio:s.atr/sb[si].close,
     ret2h:side*r(sb,si,1),ret6h:side*r(sb,si,3),ret12h:side*r(sb,si,6),ret24h:side*sym24,
-    btc6h:side*r(bb,bi,3),btc12h:side*r(bb,bi,6),btc24h:side*btc24,rel24h:side*(sym24-btc24),
+    btc6h:side*r(bb,bi,3),btc12h:btc12,btc24h:side*btc24,rel24h:side*(sym24-btc24),
+    eth12h:eth12,sol12h:sol12,breadth12:vals12.length?vals12.filter(x=>x>0).length/vals12.length:0,
+    breadth24:vals24.length?vals24.filter(x=>x>0).length/vals24.length:0,
     breakout12:s.side==="LONG"?sb[si].close/priorHigh-1:priorLow/sb[si].close-1,
-    closePos:s.side==="LONG"?rawPos:1-rawPos,
+    closePos:s.side==="LONG"?rawPos:1-rawPos,reclaim6,pullback6,rankGap:0,
   };
 }
 function routeFor(p:Prepared,s:V12Signal,t:number):Route{
@@ -192,7 +209,13 @@ function routeFor(p:Prepared,s:V12Signal,t:number):Route{
 }
 function variantSignals(p:Prepared,t:number,v:Variant,currentDd:number){
   const i=p.idx.BTC?.get(t); if(i==null)return [] as RoutedSignal[];
-  let ss=buildV12Signals(p.bars,i,V12_X1_ALL.maximumPositions).map(s=>({...s,route:routeFor(p,s,t),features:entryFeatures(p,s,t)})) as RoutedSignal[];
+  const rawSignals=buildV12Signals(p.bars,i,V12_X1_ALL.maximumPositions);
+  let ss=rawSignals.map((s,idx)=>{
+    const features=entryFeatures(p,s,t);
+    const next=rawSignals[idx+1];
+    features.rankGap=next?Math.max(0,s.score-next.score):Math.max(0,s.score);
+    return {...s,route:routeFor(p,s,t),features};
+  }) as RoutedSignal[];
   ss=ss.filter(s=>fastBtcPass(p,s,t,v.fastBtcVeto));
   if(v.breakoutConfirm) ss=ss.filter(s=>breakoutPass(p,s,t));
   if(v.rank2MinScore!=null) ss=ss.filter(s=>s.rank!==2 || s.score>=v.rank2MinScore!);
