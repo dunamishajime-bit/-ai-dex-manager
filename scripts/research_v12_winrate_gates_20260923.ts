@@ -56,6 +56,8 @@ type Variant = {
   hcMaxPrevVolume?: number;
   hcMinBtc24?: number;
   hcAltOnly?: boolean;
+  hcMaxRankGap?: number;
+  hcMaxRet2h?: number;
 };
 type Mode = { name:string; feeBps:number; slipBps:number };
 
@@ -123,6 +125,10 @@ const variants: Variant[] = [
   { name:"HC_20_080_20", hcMinRet24:0.020, hcMaxPrevVolume:0.80, hcMinBtc24:0.020 },
   { name:"HC_18_085_20", hcMinRet24:0.018, hcMaxPrevVolume:0.85, hcMinBtc24:0.020 },
   { name:"HC_ALT_18_080_20", hcMinRet24:0.018, hcMaxPrevVolume:0.80, hcMinBtc24:0.020, hcAltOnly:true },
+  { name:"HC_RET_PREV_BTC16", hcMinRet24:0.018, hcMaxPrevVolume:0.80, hcMinBtc24:0.0163 },
+  { name:"HC_RANK_RET_PREV", hcMinRet24:0.018, hcMaxPrevVolume:0.80, hcMaxRankGap:0.2421 },
+  { name:"HC_RANK_RET_RET2_BTC16", hcMinRet24:0.018, hcMinBtc24:0.0163, hcMaxRankGap:0.2421, hcMaxRet2h:0.00461 },
+  { name:"HC_ALT_RANK_RET_RET2_BTC16", hcMinRet24:0.018, hcMinBtc24:0.0163, hcMaxRankGap:0.2421, hcMaxRet2h:0.00461, hcAltOnly:true },
 ];
 const modes: Mode[] = [
   { name:"NORMAL", feeBps:5, slipBps:0 },
@@ -229,6 +235,8 @@ function variantSignals(p:Prepared,t:number,v:Variant,currentDd:number){
   if(v.hcMinRet24!=null) ss=ss.filter(s=>s.features.ret24h>=v.hcMinRet24!);
   if(v.hcMaxPrevVolume!=null) ss=ss.filter(s=>s.features.prevVolumeRatio<=v.hcMaxPrevVolume!);
   if(v.hcMinBtc24!=null) ss=ss.filter(s=>s.features.btc24h>=v.hcMinBtc24!);
+  if(v.hcMaxRankGap!=null) ss=ss.filter(s=>s.features.rankGap<=v.hcMaxRankGap!);
+  if(v.hcMaxRet2h!=null) ss=ss.filter(s=>s.features.ret2h<=v.hcMaxRet2h!);
   if(v.hcAltOnly) ss=ss.filter(s=>s.route!=="NORMAL_SCORE");
   if(v.breakoutConfirm) ss=ss.filter(s=>breakoutPass(p,s,t));
   if(v.rank2MinScore!=null) ss=ss.filter(s=>s.rank!==2 || s.score>=v.rank2MinScore!);
