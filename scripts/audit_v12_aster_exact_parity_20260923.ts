@@ -7,12 +7,12 @@ const START=Date.parse("2026-09-10T00:00:00Z");
 const END=Date.parse("2026-09-23T10:00:00Z");
 
 const entries=[
-  {name:"XRP04",symbol:"XRP",ts:Date.parse("2026-09-22T19:06:20Z")},
-  {name:"INJ0840",symbol:"INJ",ts:Date.parse("2026-09-22T23:40:22Z")},
-  {name:"XRP0840",symbol:"XRP",ts:Date.parse("2026-09-22T23:40:31Z")},
-  {name:"LTC13",symbol:"LTC",ts:Date.parse("2026-09-23T04:00:27Z")},
-  {name:"SOL15",symbol:"SOL",ts:Date.parse("2026-09-23T06:00:31Z")},
-  {name:"NEAR17",symbol:"NEAR",ts:Date.parse("2026-09-23T08:00:28Z")},
+  {name:"XRP04",symbol:"XRP",ts:Date.parse("2026-09-22T19:06:20Z"),expectedRank:1,expectedReferenceEnd:"2026-09-22T18:00:00.000Z"},
+  {name:"INJ0840",symbol:"INJ",ts:Date.parse("2026-09-22T23:40:22Z"),expectedRank:1,expectedReferenceEnd:"2026-09-22T22:00:00.000Z"},
+  {name:"XRP0840",symbol:"XRP",ts:Date.parse("2026-09-22T23:40:31Z"),expectedRank:2,expectedReferenceEnd:"2026-09-22T22:00:00.000Z"},
+  {name:"LTC13",symbol:"LTC",ts:Date.parse("2026-09-23T04:00:27Z"),expectedRank:1,expectedReferenceEnd:"2026-09-23T04:00:00.000Z"},
+  {name:"SOL15",symbol:"SOL",ts:Date.parse("2026-09-23T06:00:31Z"),expectedRank:1,expectedReferenceEnd:"2026-09-23T06:00:00.000Z"},
+  {name:"NEAR17",symbol:"NEAR",ts:Date.parse("2026-09-23T08:00:28Z"),expectedRank:2,expectedReferenceEnd:"2026-09-23T08:00:00.000Z"},
 ];
 
 function parse(row:AsterKline){
@@ -79,6 +79,10 @@ async function main(){
     const B=f.btcEr24>=.60&&f.sym6<.01;
     const C=f.volumeRatio>=2&&f.rel24<0;
     const falseBurst=f.btcEr24<.20&&f.btcEr12>=.55&&f.btcEr12<.80&&f.sym6>=.02;
+    const matched=sig.find(x=>x.symbol===e.symbol&&x.side==="LONG");
+    if(!matched) throw new Error(`PARITY_SIGNAL_MISSING:${e.name}`);
+    if(matched.rank!==e.expectedRank) throw new Error(`PARITY_RANK_MISMATCH:${e.name}:expected=${e.expectedRank}:actual=${matched.rank}`);
+    if(new Date(bb[bi].endTs).toISOString()!==e.expectedReferenceEnd) throw new Error(`PARITY_REFERENCE_BAR_MISMATCH:${e.name}`);
     out.push({
       entry:e,
       index:i,
@@ -91,6 +95,6 @@ async function main(){
       actualSymbolInSignals:sig.some(x=>x.symbol===e.symbol&&x.side==="LONG"),
     });
   }
-  console.log(JSON.stringify({status:"PASS_ASTER_EXACT_PRODUCTION_REPLAY",sourceSha:"c6add8d39676584ad9db094d1ad04deb4050ed06",commonBars:common.size,out},null,2));
+  console.log(JSON.stringify({status:"PASS_ASTER_EXACT_PRODUCTION_REPLAY_AND_RANK_PARITY",sourceSha:"c6add8d39676584ad9db094d1ad04deb4050ed06",commonBars:common.size,out},null,2));
 }
 main().catch(e=>{console.error(e);process.exit(1);});
