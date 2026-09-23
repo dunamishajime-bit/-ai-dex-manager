@@ -1,0 +1,61 @@
+name: PENGU Continuation Momentum Robustness Sweep
+on:
+  push:
+    branches:
+      - research/pengu-continuation-reentry-20260923
+    paths:
+      - scripts/research_pengu_continuation_momentum_sweep_crossvenue_20260923.ts
+      - scripts/research_pengu_continuation_momentum_sweep_bitget_20260923.ts
+      - .github/workflows/pengu-continuation-momentum-sweep-20260923.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  crossvenue:
+    strategy:
+      fail-fast: false
+      matrix:
+        venue: [OKX, GATE]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Run momentum sweep
+        env:
+          PENGU_CROSS_VENUE: ${{ matrix.venue }}
+          PRODUCTION_SOURCE_SHA: c6add8d39676584ad9db094d1ad04deb4050ed06
+        run: npx tsx scripts/research_pengu_continuation_momentum_sweep_crossvenue_20260923.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-momentum-sweep-${{ matrix.venue }}
+          path: .research-state/pengu-continuation-momentum-sweep-cross-*
+          retention-days: 90
+
+  bitget:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Run Bitget momentum sweep
+        env:
+          PRODUCTION_SOURCE_SHA: c6add8d39676584ad9db094d1ad04deb4050ed06
+        run: npx tsx scripts/research_pengu_continuation_momentum_sweep_bitget_20260923.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-momentum-sweep-BITGET
+          path: .research-state/pengu-continuation-momentum-sweep-bitget
+          retention-days: 90
