@@ -52,27 +52,33 @@ for z in sing:
     f=z[3][0]
     if per.get(f,0)>=4: continue
     pool.append(z[3]); per[f]=per.get(f,0)+1
-    if len(pool)>=70:break
+    if len(pool)>=42:break
 cands=[]
 def compatible(rule):
     # avoid exact duplicate feature/op combinations that add no information
     ks=[(a[0],a[1],a[2]) for a in rule]
     return len(set(ks))==len(ks)
-for k in [1,2,3,4]:
-    combos=itertools.combinations(pool,k)
-    for rule in combos:
-        if not compatible(rule):continue
-        st=ev(rule,train)
-        if st["n"]<35 or st["wr"]<62:continue
-        sv=ev(rule,folds[1])
-        if sv["n"]<35:continue
-        # selection criteria use train+validation ONLY
-        minwr=min(st["wr"],sv["wr"])
-        avgwr=(st["wr"]+sv["wr"])/2
-        minpf=min(st["pf"],sv["pf"])
-        if minwr<60:continue
-        score=minwr*2+avgwr+min(minpf,10)*0.5+min(st["n"],sv["n"])*0.02
-        cands.append((score,minwr,avgwr,minpf,rule,st,sv))
+def consider(rule):
+    if not compatible(rule): return
+    st=ev(rule,train)
+    if st["n"]<35 or st["wr"]<62:return
+    sv=ev(rule,folds[1])
+    if sv["n"]<35:return
+    minwr=min(st["wr"],sv["wr"])
+    avgwr=(st["wr"]+sv["wr"])/2
+    minpf=min(st["pf"],sv["pf"])
+    if minwr<60:return
+    score=minwr*2+avgwr+min(minpf,10)*0.5+min(st["n"],sv["n"])*0.02
+    cands.append((score,minwr,avgwr,minpf,rule,st,sv))
+for k in [1,2,3]:
+    for rule in itertools.combinations(pool,k): consider(rule)
+cands.sort(reverse=True,key=lambda z:z[0])
+# Only extend the best dev-only 3-condition rules to a fourth condition.
+seeds=[z[4] for z in cands[:30] if len(z[4])==3]
+for seed in seeds:
+    for a in pool:
+        if a in seed: continue
+        consider(tuple(list(seed)+[a]))
 cands.sort(reverse=True,key=lambda z:z[0])
 print("BASE",base)
 print("POOL",len(pool),"CANDS",len(cands))
