@@ -1,0 +1,43 @@
+name: V12 Win-rate Gate LIVE CI
+on:
+  push:
+    branches:
+      - codex/v12-winrate-gates-live-20260923
+    paths:
+      - config/v12X1AllRuntime.ts
+      - lib/v12-x1-all.ts
+      - lib/v12-live-execution-engine.ts
+      - tests/v12-winrate-entry-gate.test.ts
+      - scripts/audit-v12-winrate-gate-live-parity-20260923.ts
+      - .github/workflows/v12-winrate-gate-live-ci.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Typecheck
+        run: npx tsc --noEmit -p tsconfig.json
+      - name: Gate contract tests
+        run: npx tsx --test tests/v12-winrate-entry-gate.test.ts
+      - name: Existing V12 safety regression
+        run: |
+          npx tsx scripts/v12-x1-all-selftest.ts
+          npx tsx scripts/disdex-v12-x1-all-live-runner.ts --self-test
+          npx tsx --test tests/v12-preorder-gross-reservation.test.ts
+      - name: Aster exact Sep23 LIVE parity
+        run: npx tsx scripts/audit-v12-winrate-gate-live-parity-20260923.ts
+      - name: Assert CI cannot place orders
+        shell: bash
+        run: |
+          ! grep -Eq 'placeMarket|executeEntry|submitOrder|I_ACCEPT_REAL_MONEY' tests/v12-winrate-entry-gate.test.ts scripts/audit-v12-winrate-gate-live-parity-20260923.ts
