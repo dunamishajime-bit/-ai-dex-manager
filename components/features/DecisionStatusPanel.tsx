@@ -601,6 +601,27 @@ function q102MetricValue(key: string, value: number | string | boolean) {
   return Math.abs(value) >= 100 ? value.toFixed(2) : value.toFixed(4);
 }
 
+function q102RankingScoreText(value?: number) {
+  return value === undefined || !Number.isFinite(value) ? "—" : value.toFixed(2);
+}
+
+function q102ScoreFormula(stage?: string, family?: string) {
+  switch (stage) {
+    case "RAW_REJECTED": return "60 + 接近度×0.10";
+    case "QUALITY_PASS": return "70 + 接近度×0.10";
+    case "FEATURE_PASS": return "80 + 接近度×0.10";
+    case "IMPROVEMENT_PASS": return "90 + 接近度×0.10";
+    case "SIGNAL_READY": return "全Gate通過 = 100.00";
+    case "GRID_WAIT": return "改善条件まで通過していても4h Grid外は89.00";
+    case "HIGH_VOL_RAW_READY": return "HIGH_VOL raw成立 + scanner健全 = 100.00";
+    case "HIGH_VOL_APPROACH":
+      return family === "HIGH_VOL"
+        ? "scanner健全: 40 + 接近度×0.40 / 不健全: 20 + 接近度×0.20"
+        : "HIGH_VOL接近度";
+    default: return "observerの実測接近度";
+  }
+}
+
 function Quality102SymbolTable({ snapshot, error }: { snapshot: Q102SymbolSnapshot | null; error: string | null }) {
   if (error) return <section className="panel-gold rounded-[28px] p-4 md:p-5"><div className="text-sm font-bold text-white">Q102 通貨別 Causal V4 判定</div><div className="mt-3 rounded-xl border border-amber-400/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">{error}</div></section>;
   if (!snapshot) return <section className="panel-gold rounded-[28px] p-4 md:p-5"><div className="text-sm font-bold text-white">Q102 通貨別 Causal V4 判定</div><div className="mt-3 text-sm text-white/60">Production selectorをread-only評価中…</div></section>;
@@ -619,7 +640,7 @@ function Quality102SymbolTable({ snapshot, error }: { snapshot: Q102SymbolSnapsh
     <div className="flex flex-wrap items-start justify-between gap-3">
       <div>
         <div className="text-lg font-bold text-white">Q102 通貨別 Causal V4 判定</div>
-        <p className="mt-1 text-xs text-white/55">実測featureを保存し、発火条件への接近度を0〜100でランキングします。ランキングは観測・検証専用で、発注条件には使用しません。</p>
+        <p className="mt-1 text-xs text-white/55">実測featureを保存し、発火条件への接近度を0〜100でランキングします。スコアはobserverの実分解能で小数2桁まで表示し、Stage・未通過Gate・正式未発火理由を分離して表示します。ランキングは観測・検証専用で、発注条件には使用しません。</p>
       </div>
       <div className="text-right text-xs text-white/60">
         <div>Eligible {eligible.length}/{snapshot.items.length}</div>
@@ -633,7 +654,7 @@ function Quality102SymbolTable({ snapshot, error }: { snapshot: Q102SymbolSnapsh
       {topFive.map((item) => <div key={"rank-" + item.symbol} className="rounded-2xl border border-gold-100/15 bg-gold-100/[0.04] p-3">
         <div className="flex items-center justify-between gap-2">
           <span className="text-xs font-bold text-gold-100">#{item.rankingRank ?? "-"}</span>
-          <span className="text-xl font-black text-white">{item.rankingScore?.toFixed(1)}</span>
+          <span className="text-xl font-black text-white">{q102RankingScoreText(item.rankingScore)}</span>
         </div>
         <div className="mt-1 font-bold text-white">{item.symbol}</div>
         <div className="mt-1 text-[11px] text-white/55">{item.rankingFamily || "—"} / {q102StageText(item.rankingStage)}</div>
@@ -647,12 +668,25 @@ function Quality102SymbolTable({ snapshot, error }: { snapshot: Q102SymbolSnapsh
         const s34 = item.diagnostics?.s34 || [];
         const bestS34 = s34[0];
         const score = item.rankingScore;
+        const firstFailedGate = bestS34?.gates?.find((gate) => gate.pass === false);
+        const formalNoFireReason = item.selected
+          ? "Global selectorで選定済み。実発注はRunner側のexecution Gateを別途確認します。"
+          : item.eligible
+            ? snapshot.selectedSymbol
+              ? `Signal条件は成立。ただしQ102は1-slotのため、Global selectorで ${snapshot.selectedSymbol} が優先され今回は未選定です。`
+              : "Signal条件は成立していますが、Global selectorで今回の選定はありません。"
+            : q102ReasonText(item.reason);
+        const observedBlockReason = firstFailedGate
+          ? `${q102GateName(firstFailedGate.name)}: ${q102GateReasonText(firstFailedGate.reason) || "不通過"}${q102GateValueText(firstFailedGate) ? ` (${q102GateValueText(firstFailedGate)})` : ""}`
+          : item.rankingStage === "GRID_WAIT"
+            ? "改善条件まで到達していますが、S34 4時間Gridの対象時刻待ちです。"
+            : item.rankingReason || "追加の未通過観測Gateはありません。";
         const scoreClass = score === undefined ? "text-white/35" : score >= 90 ? "text-emerald-200" : score >= 70 ? "text-gold-100" : score >= 50 ? "text-amber-200" : "text-white/55";
         return <details key={item.symbol} className="group rounded-2xl border border-white/10 bg-black/20">
           <summary className="grid cursor-pointer list-none grid-cols-[42px_90px_62px_64px_1fr_84px] items-center gap-2 px-3 py-3 text-xs md:grid-cols-[48px_110px_72px_72px_110px_1fr_100px]">
             <span className="font-black text-gold-100">#{item.rankingRank ?? "—"}</span>
             <span className="font-bold text-white">{item.symbol}</span>
-            <span className={"text-lg font-black " + scoreClass}>{score === undefined ? "—" : score.toFixed(1)}</span>
+            <span className={"text-lg font-black " + scoreClass}>{q102RankingScoreText(score)}</span>
             <span className={"font-semibold " + (item.eligible ? "text-emerald-200" : "text-rose-200")}>{item.eligible ? "PASS" : "BLOCK"}</span>
             <span className="hidden text-white/75 md:block">{item.rankingFamily || item.family || "候補なし"}</span>
             <span className="truncate text-white/55">{q102StageText(item.rankingStage)} / {item.rankingReason || q102ReasonText(item.reason)}</span>
@@ -663,7 +697,7 @@ function Quality102SymbolTable({ snapshot, error }: { snapshot: Q102SymbolSnapsh
             <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
               <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
                 <div className="font-semibold text-white">ランキング</div>
-                <div className="mt-1 text-2xl font-black text-white">{score === undefined ? "—" : score.toFixed(1)}<span className="text-xs font-normal text-white/45"> / 100</span></div>
+                <div className="mt-1 text-2xl font-black text-white">{q102RankingScoreText(score)}<span className="text-xs font-normal text-white/45"> / 100</span></div>
                 <div className="mt-1">#{item.rankingRank ?? "—"} / {item.rankingFamily || "—"} / {q102StageText(item.rankingStage)}</div>
                 <div className="mt-1 break-all text-white/45">{item.rankingVariant || "Variant未取得"}</div>
               </div>
@@ -686,14 +720,22 @@ function Quality102SymbolTable({ snapshot, error }: { snapshot: Q102SymbolSnapsh
               </div>
             </div>
 
+            <div className="mt-3 rounded-xl border border-amber-400/25 bg-amber-500/[0.06] p-3">
+              <div className="font-semibold text-amber-100">なぜ発火しない？</div>
+              <div className="mt-2 text-white/80"><span className="text-white/45">正式判定：</span>{formalNoFireReason}</div>
+              <div className="mt-1 text-white/80"><span className="text-white/45">最有力観測Gate：</span>{observedBlockReason}</div>
+              <div className="mt-1 text-white/80"><span className="text-white/45">Score算式：</span>{q102ScoreFormula(item.rankingStage, item.rankingFamily)}</div>
+              <div className="mt-1 text-[10px] text-white/45">Scoreはobserverが保存した小数2桁をそのまま表示します。同じStageでは基準点が共通のため近い値になり、完全同点の場合はsymbol名で順位を確定します。</div>
+            </div>
+
             {highVol ? <div className="mt-3 rounded-xl border border-violet-400/20 bg-violet-400/[0.04] p-3">
-              <div className="flex flex-wrap items-center justify-between gap-2"><span className="font-semibold text-white">HIGH_VOL 実測</span><span className="text-white/50">接近度 {highVol.proximityScore?.toFixed(1) ?? "—"} / scanner {highVol.scannerHealthPass ? "PASS" : "BLOCK"} / raw {highVol.rawMatched ? "MATCH" : "WAIT"}</span></div>
+              <div className="flex flex-wrap items-center justify-between gap-2"><span className="font-semibold text-white">HIGH_VOL 実測</span><span className="text-white/50">接近度 {highVol.proximityScore?.toFixed(2) ?? "—"} / scanner {highVol.scannerHealthPass ? "PASS" : "BLOCK"} / raw {highVol.rawMatched ? "MATCH" : "WAIT"}</span></div>
               {highVol.features ? <div className="mt-2 grid gap-2 sm:grid-cols-3 xl:grid-cols-6">{Object.entries(highVol.features).map(([key, value]) => <div key={key} className="rounded-lg bg-black/20 px-2 py-1"><div className="text-[10px] text-white/40">{q102MetricName(key)}</div><div className="font-semibold text-white/80">{q102MetricValue(key, value)}</div></div>)}</div> : null}
               {highVol.rule ? <div className="mt-2 text-[11px] text-white/50">Monthly rule: {Object.entries(highVol.rule).map(([key, value]) => key + "=" + value).join(" / ")}</div> : null}
             </div> : null}
 
             {bestS34 ? <div className="mt-3 rounded-xl border border-sky-400/20 bg-sky-400/[0.04] p-3">
-              <div className="flex flex-wrap items-center justify-between gap-2"><span className="font-semibold text-white">最有力 S34: {bestS34.family} / {bestS34.variant}</span><span className="text-white/50">接近度 {bestS34.proximityScore?.toFixed(1) ?? "—"} / Rank score {bestS34.rankingScore?.toFixed(1) ?? "—"}</span></div>
+              <div className="flex flex-wrap items-center justify-between gap-2"><span className="font-semibold text-white">最有力 S34: {bestS34.family} / {bestS34.variant}</span><span className="text-white/50">接近度 {bestS34.proximityScore?.toFixed(2) ?? "—"} / Rank score {bestS34.rankingScore?.toFixed(2) ?? "—"}</span></div>
               {bestS34.metrics ? <div className="mt-2 grid gap-2 sm:grid-cols-3 xl:grid-cols-6">{Object.entries(bestS34.metrics).map(([key, value]) => <div key={key} className="rounded-lg bg-black/20 px-2 py-1"><div className="text-[10px] text-white/40">{q102MetricName(key)}</div><div className="font-semibold text-white/80">{q102MetricValue(key, value)}</div></div>)}</div> : null}
               {bestS34.gates?.length ? <div className="mt-3 grid gap-2 md:grid-cols-2 xl:grid-cols-4">{bestS34.gates.map((gate, index) => <div key={(gate.name || "gate") + index} className={"rounded-xl border px-3 py-2 " + (gate.pass ? "border-emerald-400/30 bg-emerald-500/10" : "border-rose-400/30 bg-rose-500/10")}>
                 <div className="flex items-start justify-between gap-2">
