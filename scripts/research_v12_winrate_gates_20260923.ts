@@ -38,6 +38,10 @@ type Variant = {
   altMinScore?: number;
   altMinVolume?: number;
   altMinMomentum?: number;
+  blockNormalScore?: boolean;
+  relaxedMinScore?: number;
+  relaxedMinVolume?: number;
+  relaxedBtcBothNegativeVeto?: boolean;
 };
 type Mode = { name:string; feeBps:number; slipBps:number };
 
@@ -72,6 +76,14 @@ const variants: Variant[] = [
   { name:"ALT_SCORE030_VOL120", altMinScore:0.30, altMinVolume:1.20 },
   { name:"ALT_SCORE040_VOL120", altMinScore:0.40, altMinVolume:1.20 },
   { name:"ALT_SCORE030_VOL120_LOSS6H", altMinScore:0.30, altMinVolume:1.20, lossOnlyCooldownBars:3 },
+  { name:"BLOCK_NORMAL_SCORE", blockNormalScore:true },
+  { name:"RELAXED_SCORE_030", relaxedMinScore:0.30 },
+  { name:"RELAXED_SCORE_040", relaxedMinScore:0.40 },
+  { name:"RELAXED_VOLUME_120", relaxedMinVolume:1.20 },
+  { name:"RELAXED_VOLUME_140", relaxedMinVolume:1.40 },
+  { name:"RELAXED_BTC_BOTH_NEG", relaxedBtcBothNegativeVeto:true },
+  { name:"RELAXED_VOL120_BTC_BOTH_NEG", relaxedMinVolume:1.20, relaxedBtcBothNegativeVeto:true },
+  { name:"RELAXED_VOL140_BTC_BOTH_NEG", relaxedMinVolume:1.40, relaxedBtcBothNegativeVeto:true },
 ];
 const modes: Mode[] = [
   { name:"NORMAL", feeBps:5, slipBps:0 },
@@ -137,8 +149,14 @@ function variantSignals(p:Prepared,t:number,v:Variant,currentDd:number){
   if(v.rank2MinScore!=null) ss=ss.filter(s=>s.rank!==2 || s.score>=v.rank2MinScore!);
   if(v.blockStrongAlt) ss=ss.filter(s=>s.route!=="STRONG_REGIME_ALT");
   if(v.blockRelaxedAlt) ss=ss.filter(s=>s.route!=="RELAXED_MOMENTUM_ALT");
+  if(v.blockNormalScore) ss=ss.filter(s=>s.route!=="NORMAL_SCORE");
   ss=ss.filter(s=>{
     if(s.route==="NORMAL_SCORE")return true;
+    if(s.route==="RELAXED_MOMENTUM_ALT"){
+      if(v.relaxedMinScore!=null && s.score<v.relaxedMinScore)return false;
+      if(v.relaxedMinVolume!=null && s.volumeRatio<v.relaxedMinVolume)return false;
+      if(v.relaxedBtcBothNegativeVeto && !fastBtcPass(p,s,t,"bothNegative"))return false;
+    }
     if(v.altMinScore!=null && s.score<v.altMinScore)return false;
     if(v.altMinVolume!=null && s.volumeRatio<v.altMinVolume)return false;
     const aligned=s.side==="LONG"?s.momentum:-s.momentum;
