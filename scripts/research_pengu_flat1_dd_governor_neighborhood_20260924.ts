@@ -537,12 +537,12 @@ function replay(rows:PenguDualLsV2EvaluationRow[],points:FundingPoint[],v:Varian
       consecutiveLosses=0;
     }
 
-    const routeLossHours=route2Loss14dHours();
-    if(routeLossHours>0 && accountReturn<0){
+    const routeStrikeHours=route2Loss14dHours();
+    if(routeStrikeHours>0 && accountReturn<0){
       const prior=(recentRouteLosses.get(route)??[]).filter(ts=>tradeExitTs-ts<=14*24*HOUR);
       prior.push(tradeExitTs);recentRouteLosses.set(route,prior);
       if(prior.length>=2){
-        const until=tradeExitTs+routeLossHours*HOUR;
+        const until=tradeExitTs+routeStrikeHours*HOUR;
         routeGovernorUntil.set(route,Math.max(routeGovernorUntil.get(route)??0,until));
         governorEvents.push({kind:"ROUTE_2LOSS_14D",route,side,exitTs:tradeExitTs,until,count:prior.length});
         recentRouteLosses.set(route,[]);
@@ -898,7 +898,7 @@ async function main(){
       DD12_Q168:"same at12% drawdown",
       ROUTE120_LOSS2_Q72:"same-route hard-stop120h plus two-loss global72h",
       ROUTE120_DD10_Q168:"same-route hard-stop120h plus10% strategy-DD pause168h",
-      SMART_GOVERNOR:"same-route hard-stop120h + two-loss global72h +10% strategy-DD pause168h"
+      SMART_GOVERNOR:"same-route hard-stop120h + two-loss global72h +10% strategy-DD pause168h",
       ROUTE_HARDSTOP_Q48:"same-route hard-stop quarantine48h",
       ROUTE_HARDSTOP_Q60:"same-route hard-stop quarantine60h",
       ROUTE_HARDSTOP_Q84:"same-route hard-stop quarantine84h",
