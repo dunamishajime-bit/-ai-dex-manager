@@ -25,3 +25,22 @@ jobs:
             code="$(curl -sS -L -I -o /dev/null -w '%{http_code}' --max-time 15 "${url//%26/\&}" || true)"
             echo "SOURCE=$name HTTP=$code"
           done
+      - name: Inspect public archive schema and endpoint coverage
+        run: |
+          python - <<'PY'
+          import csv, io, urllib.request, zipfile
+          urls = {
+            "KLINES_BTC_AUG25": "https://data.binance.vision/data/futures/um/monthly/klines/BTCUSDT/1h/BTCUSDT-1h-2025-08.zip",
+            "FUNDING_BTC_AUG25": "https://data.binance.vision/data/futures/um/monthly/fundingRate/BTCUSDT/BTCUSDT-fundingRate-2025-08.zip",
+            "KLINES_FET_AUG25": "https://data.binance.vision/data/futures/um/monthly/klines/FETUSDT/1h/FETUSDT-1h-2025-08.zip",
+            "KLINES_BTC_AUG26": "https://data.binance.vision/data/futures/um/monthly/klines/BTCUSDT/1h/BTCUSDT-1h-2026-08.zip",
+          }
+          for name,url in urls.items():
+            with urllib.request.urlopen(url,timeout=30) as stream:
+              data=stream.read()
+            with zipfile.ZipFile(io.BytesIO(data)) as z:
+              with z.open(z.namelist()[0]) as f:
+                rows=csv.reader(io.TextIOWrapper(f,encoding="utf-8-sig"))
+                first=next(rows,None); second=next(rows,None)
+            print(name, "bytes",len(data),"first", first, "second", second)
+          PY
