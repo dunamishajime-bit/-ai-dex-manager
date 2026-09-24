@@ -618,9 +618,24 @@ def _candidate_sets(raw_bundle: dict[str, Any], mode: str) -> list[dict[str, Any
     return sorted(candidates, key=lambda candidate: (int(candidate.get("signalTs", 0)), str(candidate.get("strategyId", candidate.get("strategy", ""))), str(candidate.get("positionId", ""))))
 
 
+# Deliberately labeled RESEARCH sensitivity assumptions. The original formal
+# NORMAL/SEVERE execution/cost contract has NOT been recovered.
+RESEARCH_STRESS_ASSUMPTIONS = {
+    "NORMAL": {"fee_rate": 0.0006, "slippage_bps": 2.0, "funding_multiplier": 1.0},
+    "SEVERE": {"fee_rate": 0.0012, "slippage_bps": 12.0, "funding_multiplier": 1.5},
+}
+
+
 def run_integrated(mode: str, raw_bundle: dict[str, Any], capital: CapitalContract) -> dict[str, Any]:
     candidates = _candidate_sets(raw_bundle, mode)
-    result = run_replay(mode, raw_bundle, candidates, capital, pengu_variant=str(raw_bundle.get("penguVariant", "Q60_DD170_H72")))
+    if mode not in RESEARCH_STRESS_ASSUMPTIONS:
+        raise ValueError("UNSUPPORTED_RESEARCH_STRESS_SCENARIO")
+    assumptions = dict(RESEARCH_STRESS_ASSUMPTIONS[mode])
+    result = run_replay(
+        mode, raw_bundle, candidates, capital,
+        pengu_variant=str(raw_bundle.get("penguVariant", "Q60_DD170_H72")),
+        **assumptions,
+    )
     result["acceptedCandidateCount"] = result["acceptedEntryCount"]
     result["rejectedCandidateCount"] = result["rejectedEntryCount"]
     result["source"] = "raw-bars-and-stock-bars-replay"
