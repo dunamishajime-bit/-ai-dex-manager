@@ -56,3 +56,11 @@ deploy-xserver-*.zip
 resend-button-fix-*.tar.gz
 *.tar.gz
 *.zip
+
+# local raw/replay inputs and generated ledgers are reproducible artifacts,
+# not source-controlled market-data payloads
+/.raw-data/
+/.research-state/
+/scripts/research/raw_data/__pycache__/
+/research-results/*-events.json
+/research-results/*-equity.json

@@ -52,13 +52,24 @@
     "invalidRows": [{"symbol": "BTCUSDT", "ts": "2025-09-13T04:00:00Z", "tsMs": 1757768400000, "open": 115941.8, "high": 115916.1, "low": 115580.7, "close": 115707.3, "reason": "high < open"}],
     "valid": false
   },
-  "formalRun": {"executed": false, "reason": "Aster raw validation failed, but a valid Binance alternate source was acquired. Formal Production signal/exit/MTM parity is still not established by the contract-level adapters, so no formal NORMAL/SEVERE result is claimed.", "normal": null, "severe": null, "newPenguStandalone": null, "integratedComparison": null, "resultHash": null},
+  "formalRun": {"executed": false, "reason": "Aster raw validation failed, but a valid Binance alternate source and executable accounting replay were acquired. The replay uses simplified adapters and no paired V50 basis/execution input, so formal Production-equivalent NORMAL/SEVERE parity is not claimed.", "normal": null, "severe": null, "newPenguStandalone": null, "integratedComparison": null, "resultHash": null},
   "rawSourceAdapterRun": {
     "executed": true,
     "source": "Binance USD-M Futures public REST",
     "normal": {"acceptedCandidateCount": 3, "rejectedCandidateCount": 36386, "realizedPnl": 0.0, "fees": 0.0, "funding": 0.0, "pendingReservations": ["pengu:SHORT_V20:1754787600000", "v12:BNBUSDT:1754787600000", "v12:SOLUSDT:1754787600000"]},
     "severe": {"acceptedCandidateCount": 3, "rejectedCandidateCount": 36386, "realizedPnl": 0.0, "fees": 0.0, "funding": 0.0, "pendingReservations": ["pengu:SHORT_V20:1754787600000", "v12:BNBUSDT:1754787600000", "v12:SOLUSDT:1754787600000"]},
-    "interpretation": "adapter-level reservation smoke only; no fills, exits, mark-to-market, or formal PnL"
+    "interpretation": "historical adapter-level reservation smoke retained for comparison; superseded for executable accounting by rawReplayRun"
+  },
+  "rawReplayRun": {
+    "executed": true,
+    "summaryPath": "research-results/alternate-replay-summary.json",
+    "source": "Binance USD-M Futures public REST",
+    "engine": "scripts/research/raw_data/integrated_engine.py",
+    "accounting": ["next_bar_fill", "fees", "funding", "max_hold", "mark_to_market", "monthly_deposits", "gross_reservation", "fet_preemption", "pengu_q60_dd17_h72"],
+    "normalCurrent": {"finalEquity": 109927.0222508967, "profitFactor": 1.017597150179098, "maxDrawdownPct": -64.37093638607938, "tradeCount": 367, "acceptedEntryCount": 370},
+    "normalQ60Dd17H72": {"finalEquity": 30929.56809743653, "profitFactor": 0.8127809212683806, "maxDrawdownPct": -84.05082604114652, "tradeCount": 729, "acceptedEntryCount": 734},
+    "severeInputTransformationApplied": false,
+    "interpretation": "executable alternate replay only; NORMAL and SEVERE are identical adapter runs, not formal stress cases; not Production-equivalent"
   },
   "implementationParityVerified": false,
   "tradeLedgersUsedAsInput": false,

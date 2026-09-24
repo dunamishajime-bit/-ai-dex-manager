@@ -24,6 +24,14 @@
     "partialNullRowsRejected": true,
     "basisExecutionPairVerified": false
   },
+  "alternateReplay": {
+    "summaryPath": "research-results/alternate-replay-summary.json",
+    "summarySha256": "0034FC970DA41BA9CECDD761EA1E609D271152AEE05CC844F24B1A76DA7ECD75",
+    "engine": "scripts/research/raw_data/integrated_engine.py",
+    "accounting": ["next_bar_fill", "fees", "funding", "max_hold", "mark_to_market", "monthly_deposits", "gross_reservation", "fet_preemption", "pengu_q60_dd17_h72"],
+    "formalParity": false,
+    "severeInputTransformationApplied": false
+  },
   "qualityGate": {"valid": false, "primarySource": "Aster", "invalidRows": 1, "incompleteSymbols": [], "gaps": 0},
   "resultHash": null,
   "implementationParityVerified": false,

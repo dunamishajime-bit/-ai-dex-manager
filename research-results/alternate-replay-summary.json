@@ -1,0 +1,184 @@
+{
+  "NORMAL_CURRENT": {
+    "acceptedEntryCount": 370,
+    "candidateCount": 36389,
+    "fees": 28020.449174569992,
+    "finalEquity": 109927.0222508967,
+    "funding": -215.3477852339871,
+    "metrics": {
+      "ddPeakTs": 1771106400000,
+      "ddTroughTs": 1779519600000,
+      "logic": {
+        "PENGU_DUAL_LS_V2_FINAL": {
+          "pnl": 7198.155691195434,
+          "trades": 361
+        },
+        "V12_X1.00_ALL": {
+          "pnl": 5313.6657627405175,
+          "trades": 6
+        }
+      },
+      "maxDrawdownPct": -64.37093638607938,
+      "profitFactor": 1.017597150179098
+    },
+    "mode": "NORMAL",
+    "penguState": {
+      "peakRealizedEquity": 10000.0,
+      "realizedEquity": 10000.0,
+      "routeQuarantineUntil": {},
+      "startingEquity": 10000.0
+    },
+    "penguVariant": "CURRENT",
+    "preemptions": [],
+    "realizedPnl": -1571.7900585397078,
+    "rejectedEntryCount": 36019,
+    "source": "raw-bars-and-stock-bars-replay",
+    "tradeCount": 367
+  },
+  "NORMAL_Q60_DD170_H72": {
+    "acceptedEntryCount": 734,
+    "candidateCount": 36389,
+    "fees": 21467.02018708529,
+    "finalEquity": 30929.56809743653,
+    "funding": 2190.095075045158,
+    "metrics": {
+      "ddPeakTs": 1773694800000,
+      "ddTroughTs": 1783501200000,
+      "logic": {
+        "PENGU_DUAL_LS_V2_FINAL": {
+          "pnl": -44420.00631177513,
+          "trades": 173
+        },
+        "QUALITY102_CAUSAL_V1": {
+          "pnl": -7393.6536890902935,
+          "trades": 6
+        },
+        "V12_X1.00_ALL": {
+          "pnl": -26948.234401567803,
+          "trades": 550
+        }
+      },
+      "maxDrawdownPct": -84.05082604114652,
+      "profitFactor": 0.8127809212683806
+    },
+    "mode": "NORMAL",
+    "penguState": {
+      "governorHoldUntil": 1786482000000,
+      "lastClosedTradeTs": 1786222800000,
+      "newEntriesPaused": true,
+      "peakRealizedEquity": 11530.71060082742,
+      "realizedDrawdown": -4.18273094984929,
+      "realizedEquity": -36699.14950300873,
+      "routeQuarantineUntil": {},
+      "startingEquity": 10000.0
+    },
+    "penguVariant": "Q60_DD170_H72",
+    "preemptions": [
+      {
+        "positionId": "fet:1760428800000",
+        "reason": "CORE_PREEMPTION",
+        "releasedGross": 2.25
+      },
+      {
+        "positionId": "fet:1761037200000",
+        "reason": "CORE_PREEMPTION",
+        "releasedGross": 2.25
+      }
+    ],
+    "realizedPnl": -87263.17508393401,
+    "rejectedEntryCount": 35655,
+    "source": "raw-bars-and-stock-bars-replay",
+    "tradeCount": 729
+  },
+  "SEVERE_CURRENT": {
+    "acceptedEntryCount": 370,
+    "candidateCount": 36389,
+    "fees": 28020.449174569992,
+    "finalEquity": 109927.0222508967,
+    "funding": -215.3477852339871,
+    "metrics": {
+      "ddPeakTs": 1771106400000,
+      "ddTroughTs": 1779519600000,
+      "logic": {
+        "PENGU_DUAL_LS_V2_FINAL": {
+          "pnl": 7198.155691195434,
+          "trades": 361
+        },
+        "V12_X1.00_ALL": {
+          "pnl": 5313.6657627405175,
+          "trades": 6
+        }
+      },
+      "maxDrawdownPct": -64.37093638607938,
+      "profitFactor": 1.017597150179098
+    },
+    "mode": "SEVERE",
+    "penguState": {
+      "peakRealizedEquity": 10000.0,
+      "realizedEquity": 10000.0,
+      "routeQuarantineUntil": {},
+      "startingEquity": 10000.0
+    },
+    "penguVariant": "CURRENT",
+    "preemptions": [],
+    "realizedPnl": -1571.7900585397078,
+    "rejectedEntryCount": 36019,
+    "source": "raw-bars-and-stock-bars-replay",
+    "tradeCount": 367
+  },
+  "SEVERE_Q60_DD170_H72": {
+    "acceptedEntryCount": 734,
+    "candidateCount": 36389,
+    "fees": 21467.02018708529,
+    "finalEquity": 30929.56809743653,
+    "funding": 2190.095075045158,
+    "metrics": {
+      "ddPeakTs": 1773694800000,
+      "ddTroughTs": 1783501200000,
+      "logic": {
+        "PENGU_DUAL_LS_V2_FINAL": {
+          "pnl": -44420.00631177513,
+          "trades": 173
+        },
+        "QUALITY102_CAUSAL_V1": {
+          "pnl": -7393.6536890902935,
+          "trades": 6
+        },
+        "V12_X1.00_ALL": {
+          "pnl": -26948.234401567803,
+          "trades": 550
+        }
+      },
+      "maxDrawdownPct": -84.05082604114652,
+      "profitFactor": 0.8127809212683806
+    },
+    "mode": "SEVERE",
+    "penguState": {
+      "governorHoldUntil": 1786482000000,
+      "lastClosedTradeTs": 1786222800000,
+      "newEntriesPaused": true,
+      "peakRealizedEquity": 11530.71060082742,
+      "realizedDrawdown": -4.18273094984929,
+      "realizedEquity": -36699.14950300873,
+      "routeQuarantineUntil": {},
+      "startingEquity": 10000.0
+    },
+    "penguVariant": "Q60_DD170_H72",
+    "preemptions": [
+      {
+        "positionId": "fet:1760428800000",
+        "reason": "CORE_PREEMPTION",
+        "releasedGross": 2.25
+      },
+      {
+        "positionId": "fet:1761037200000",
+        "reason": "CORE_PREEMPTION",
+        "releasedGross": 2.25
+      }
+    ],
+    "realizedPnl": -87263.17508393401,
+    "rejectedEntryCount": 35655,
+    "source": "raw-bars-and-stock-bars-replay",
+    "tradeCount": 729
+  }
+}

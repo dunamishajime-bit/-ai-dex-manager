@@ -7,8 +7,14 @@ from scripts.research.raw_data.integrated_engine import (
     preempt_fet,
     reserve_entry,
     run_integrated,
+    run_replay,
     settle_exit,
 )
+from scripts.research.raw_data.models import Bar
+
+
+START = 1_700_000_000_000
+HOUR = 3_600_000
 
 
 class RawIntegratedEngineTests(unittest.TestCase):
@@ -80,6 +86,52 @@ class RawIntegratedEngineTests(unittest.TestCase):
         self.assertEqual(severe["mode"], "SEVERE")
         self.assertEqual(normal["totalContributed"], severe["totalContributed"])
         self.assertIsNot(normal["events"], severe["events"])
+
+    def test_replay_fills_next_bar_and_realizes_mark_to_market_pnl(self):
+        bars = {"BTCUSDT": [
+            Bar("BTCUSDT", START, 100.0, 101.0, 99.0, 100.0, 1.0),
+            Bar("BTCUSDT", START + HOUR, 100.0, 101.0, 99.0, 100.0, 1.0),
+            Bar("BTCUSDT", START + 2 * HOUR, 110.0, 121.0, 109.0, 120.0, 1.0),
+        ]}
+        candidates = [{
+            "positionId": "v12:test",
+            "strategyId": "V12_X1.00_ALL",
+            "strategy": "V12",
+            "symbol": "BTCUSDT",
+            "side": "LONG",
+            "signalTs": START,
+            "entryTs": START + HOUR,
+            "requestedGross": 1.0,
+            "acceptedGross": 1.0,
+            "maxHoldHours": 1,
+        }]
+        result = run_replay(
+            "NORMAL",
+            {"bars": bars, "funding": {}, "stock_bars": {}},
+            candidates,
+            CapitalContract(initial=10_000.0, monthly=0.0, months=0, start_ts_ms=START),
+            fee_rate=0.0,
+        )
+        self.assertEqual(result["tradeCount"], 1)
+        self.assertGreater(result["realizedPnl"], 0.0)
+        self.assertGreater(result["finalEquity"], 10_000.0)
+        self.assertEqual(result["pendingReservations"], {})
+
+    def test_integrated_engine_uses_replay_accounting(self):
+        bars = {"BTCUSDT": [
+            Bar("BTCUSDT", START, 100.0, 101.0, 99.0, 100.0, 1.0),
+            Bar("BTCUSDT", START + HOUR, 100.0, 102.0, 99.0, 101.0, 1.0),
+            Bar("BTCUSDT", START + 2 * HOUR, 110.0, 112.0, 109.0, 111.0, 1.0),
+            Bar("BTCUSDT", START + 3 * HOUR, 120.0, 122.0, 119.0, 121.0, 1.0),
+        ]}
+        result = run_integrated(
+            "NORMAL",
+            {"bars": bars, "funding": {}, "stock_bars": {}, "contracts": {"V12": {}}},
+            CapitalContract(initial=10_000.0, monthly=0.0, months=0, start_ts_ms=START),
+        )
+        self.assertGreater(result["acceptedEntryCount"], 0)
+        self.assertGreater(result["tradeCount"], 0)
+        self.assertGreater(result["finalEquity"], 10_000.0)
 
 
 if __name__ == "__main__":
