@@ -306,11 +306,11 @@ export async function loadFetRuntimeObservability(): Promise<FetRuntimeStatus> {
       readFile(CURRENT_CONFIG, "utf8"),
       readJson(heartbeatPath).catch(() => null),
     ]);
+    const signal = await loadFetSignalDiagnostic(config);
     const expectedRuntimeSha = marker.trim();
     const runtimeCommitSha = nonEmpty(state.runtimeCommitSha);
     const updatedAt = positive(state.updatedAt);
-    const maximumGrossMatch = config.match(/\bmaximumGross\s*:\s*([0-9]+(?:\.[0-9]+)?)/);
-    const maximumGross = maximumGrossMatch ? positive(maximumGrossMatch[1]) : undefined;
+    const maximumGross = configNumber(config, "maximumGross");
     const positionState = record(state.position);
     const pendingState = record(state.pending);
     const manualReview = nonEmpty(state.manualReview);
@@ -323,7 +323,7 @@ export async function loadFetRuntimeObservability(): Promise<FetRuntimeStatus> {
     const common: FetRuntimeStatus = {
       ...base, expectedRuntimeSha, runtimeCommitSha, updatedAt, maximumGross,
       lastReferenceTs, lastReconciledAt, manualReview, killSwitchActive,
-      heartbeatAt, serviceUnit, heartbeatSafetyState,
+      heartbeatAt, serviceUnit, heartbeatSafetyState, signal,
     };
 
     if (state.schema !== STATE_SCHEMA || state.strategyId !== "FET_BRK48_RESIDUAL") {
@@ -358,6 +358,9 @@ export async function loadFetRuntimeObservability(): Promise<FetRuntimeStatus> {
         symbol: "FETUSDT", side: "LONG", quantity, entryPrice, gross, hardStop,
         entryTs, exitTs,
         stopOrderIdRecorded: Boolean(nonEmpty(positionState.stopClientOrderId)),
+        protectionMode: nonEmpty(positionState.protectionMode),
+        profitFloorArmedAt: positive(positionState.profitFloorArmedAt),
+        profitFloorTriggerPrice: positive(positionState.profitFloorTriggerPrice),
       };
     }
     const pending = pendingState ? {
