@@ -22,15 +22,15 @@ export function Card({ children, className, title, glow = "none", noHover = fals
     return (
         <div
             className={cn(
-                "glass-panel rounded-xl p-6 relative overflow-hidden",
+                "glass-panel relative min-w-0 overflow-hidden rounded-xl p-4 sm:p-6",
                 !noHover && "card-3d shine-on-hover ring-glow",
                 glowStyles[glow],
                 className
             )}
         >
             {title && (
-                <div className="mb-4 border-b border-gold-500/20 pb-2 flex justify-between items-center">
-                    <h3 className="text-lg font-semibold tracking-wider text-gold-500 uppercase flex items-center gap-2 font-mono">
+                <div className="mb-4 flex min-w-0 flex-wrap items-center justify-between gap-2 border-b border-gold-500/20 pb-2">
+                    <h3 className="flex min-w-0 items-center gap-2 break-words font-mono text-base font-semibold uppercase tracking-wider text-gold-500 sm:text-lg [overflow-wrap:anywhere]">
                         <span className="w-1 h-4 bg-gold-400 rounded-full inline-block shadow-[0_0_8px_rgba(255,215,0,0.8)]" />
                         {title}
                     </h3>
