@@ -891,6 +891,19 @@ function drawdownDecomposition(ts:Trade[]){
     byRoute,byExit,worst
   };
 }
+function selectedLedgerRow(t:Trade, window:string, selectedVariant:DDMode){
+  if(selectedVariant!=="Q60_DD170_H72")throw new Error("PENGU_VARIANT_MISMATCH");
+  if(Math.abs(t.requestedGross-1)>1e-12)throw new Error("PENGU_GROSS_NOT_FLAT1");
+  return {
+    strategy:"PENGU",window,variant:selectedVariant,mode:t.mode,route:t.route,side:t.side,
+    signalTs:new Date(t.signalTs).toISOString(),entryTs:new Date(t.entryTs).toISOString(),exitTs:new Date(t.exitTs).toISOString(),
+    entryPrice:t.entryPrice,exitPrice:t.exitPrice,gross:1,accepted:true,
+    accountReturn:t.accountReturn,rawUnitReturn:t.rawUnitReturn,fundingUnitReturn:t.fundingUnitReturn,costUnitReturn:t.costUnitReturn,
+    exitReason:t.exitReason,features:t.entryFeatures,partialDefense:t.partialDefense??false,
+    partialAccountReturn:t.partialAccountReturn??0,openAtWindowEnd:t.openAtWindowEnd??false,
+  };
+}
+
 async function main(){
   allocationMode="CAP1_EVERY_ENTRY_FLAT";
   const [p,b,fp]=await Promise.all([candles("PENGUUSDT"),candles("BTCUSDT"),funding()]);
@@ -1001,6 +1014,13 @@ async function main(){
     }
     result.windows[w.name]={start:new Date(w.start).toISOString(),end:new Date(w.end).toISOString(),cases};
   }
+  const selectedVariant:DDMode="Q60_DD170_H72";
+  result.selectedVariant=selectedVariant;
+  result.selectedLedgers=Object.fromEntries(windows.map(w=>{
+    const windowTrades=between(cache[`${selectedVariant}:NORMAL`],w.start,w.end).map(t=>selectedLedgerRow(t,w.name,selectedVariant));
+    const stressTrades=between(cache[`${selectedVariant}:SEVERE`],w.start,w.end).map(t=>selectedLedgerRow(t,w.name,selectedVariant));
+    return [w.name,{NORMAL:windowTrades,SEVERE:stressTrades}];
+  }));
   const formal=result.windows.FORMAL.cases.BASELINE_FLAT1,rolling=result.windows.ROLLING365.cases.BASELINE_FLAT1;
   approx(formal.NORMAL.returnPct,1307.9130447891462,"formal flat1 normal parity");
   approx(formal.SEVERE.returnPct,769.7792392486292,"formal flat1 severe parity");
