@@ -1,0 +1,23 @@
+{
+  "schema": "canonical-integrated-bt-source-bundle/v1",
+  "bundle_kind": "CANONICAL_EVENT_LEDGER_BUNDLE_V1",
+  "event_ledger_ids": [
+    "global_integrated_events",
+    "v12_top3",
+    "pengu_current",
+    "fet_brk48",
+    "q102_causal_v4",
+    "v52"
+  ],
+  "required_files": [
+    {"id": "global_integrated_events", "path": "ledgers/global-integrated-events.jsonl", "sha256": "0000000000000000000000000000000000000000000000000000000000000000"},
+    {"id": "v12_top3", "path": "ledgers/v12-top3.json", "sha256": "0000000000000000000000000000000000000000000000000000000000000000"},
+    {"id": "pengu_current", "path": "ledgers/pengu-current.json", "sha256": "0000000000000000000000000000000000000000000000000000000000000000"},
+    {"id": "fet_brk48", "path": "ledgers/fet-brk48.json", "sha256": "0000000000000000000000000000000000000000000000000000000000000000"},
+    {"id": "q102_causal_v4", "path": "ledgers/q102-causal-v4.json", "sha256": "0000000000000000000000000000000000000000000000000000000000000000"},
+    {"id": "v52", "path": "ledgers/v52.json", "sha256": "0000000000000000000000000000000000000000000000000000000000000000"},
+    {"id": "market_data_manifest", "path": "inputs/market-data-manifest.json", "sha256": "0000000000000000000000000000000000000000000000000000000000000000"},
+    {"id": "deposit_schedule", "path": "inputs/deposit-schedule.json", "sha256": "0000000000000000000000000000000000000000000000000000000000000000"},
+    {"id": "original_allocator", "path": "allocator/original-allocator.py", "sha256": "0000000000000000000000000000000000000000000000000000000000000000"}
+  ]
+}

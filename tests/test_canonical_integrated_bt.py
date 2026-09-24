@@ -8,6 +8,7 @@ from pathlib import Path
 from scripts.research.canonical_integrated_bt.core import (
     ReplayError, replay_synthetic, required_anchor_evidence,
 )
+from scripts.research.canonical_integrated_bt.source_bundle import inspect_source_bundle
 
 
 def event(ident, hour, seq, kind, **kw):
@@ -43,6 +44,26 @@ def policy(**override):
 
 
 class CanonicalKernelStarterTests(unittest.TestCase):
+    def test_summary_only_bundle_is_not_formal_source(self):
+        manifest = Path("tests/fixtures/canonical-integrated-bt/summary-only.json")
+        result = inspect_source_bundle(manifest)
+        self.assertEqual(result["status"], "BLOCKED_MISSING_CANONICAL_SOURCE")
+        self.assertEqual(result["reason"], "SOURCE_BUNDLE_KIND_NOT_FORMAL")
+
+    def test_missing_event_ledger_is_fail_closed(self):
+        manifest = Path("tests/fixtures/canonical-integrated-bt/missing-ledger.json")
+        result = inspect_source_bundle(manifest)
+        self.assertEqual(result["status"], "BLOCKED_MISSING_CANONICAL_SOURCE")
+        self.assertEqual(result["reason"], "SOURCE_BUNDLE_EVENT_LEDGER_FILES_MISSING")
+        self.assertEqual(result["missing_event_ledgers"], ["global"])
+
+    def test_hash_mismatch_is_not_accepted_as_formal_input(self):
+        manifest = Path("tests/fixtures/canonical-integrated-bt/hash-mismatch.json")
+        result = inspect_source_bundle(manifest)
+        self.assertEqual(result["status"], "BLOCKED_MISSING_CANONICAL_SOURCE")
+        self.assertEqual(result["reason"], "SOURCE_BUNDLE_FILE_VERIFICATION_FAILED")
+        self.assertEqual(result["hash_mismatches"], ["v12"])
+
     def test_manifest_fail_closed_and_no_formal_result(self):
         p = Path("scripts/research/canonical_integrated_bt/anchor-source-manifest.json")
         manifest = json.loads(p.read_text(encoding="utf-8"))

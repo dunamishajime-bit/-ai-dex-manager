@@ -34,6 +34,19 @@ jobs:
           set -e
           test "$rc" -eq 2
           grep -q BLOCKED_MISSING_CANONICAL_SOURCE .research-state/canonical-integrated-bt/evidence-gate.json
+      - name: Verify canonical source bundle is still fail-closed
+        shell: bash
+        run: |
+          set +e
+          python -m scripts.research.canonical_integrated_bt \
+            --mode discover-source \
+            --bundle-manifest scripts/research/canonical_integrated_bt/source-bundle-requirements.json \
+            --source-root . \
+            --output .research-state/canonical-integrated-bt/source-bundle-gate.json
+          rc=$?
+          set -e
+          test "$rc" -eq 2
+          grep -q BLOCKED_MISSING_CANONICAL_SOURCE .research-state/canonical-integrated-bt/source-bundle-gate.json
       - name: Upload evidence gate report (NOT a formal BT)
         uses: actions/upload-artifact@v4
         if: always()

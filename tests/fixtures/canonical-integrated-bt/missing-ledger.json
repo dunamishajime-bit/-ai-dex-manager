@@ -1,0 +1,11 @@
+{
+  "bundle_kind": "CANONICAL_EVENT_LEDGER_BUNDLE_V1",
+  "required_files": [
+    {
+      "id": "v12",
+      "path": "not-present-v12.json",
+      "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+    }
+  ],
+  "event_ledger_ids": ["v12", "global"]
+}
