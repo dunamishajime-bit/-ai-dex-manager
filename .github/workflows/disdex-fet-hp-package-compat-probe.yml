@@ -1,0 +1,76 @@
+name: DisDex FET HP package compatibility probe
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    if: >-
+      github.event.issue.number == 132 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == 'DISDEX_FET_HP_PACKAGE_PROBE_20260924'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    env:
+      TARGET_SHA: 1ac7dfffbfbb1dd809e4d9e5db3ed2ce21c7877e
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          fetch-depth: 1
+      - name: Candidate metadata
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          echo "CANDIDATE_PACKAGE_JSON_SHA256=$(sha256sum package.json | awk '{print $1}')"
+          echo "CANDIDATE_LOCK_SHA256=$(sha256sum package-lock.json | awk '{print $1}')"
+          node -e 'const p=require("./package.json"); console.log("CANDIDATE_NEXT="+p.dependencies.next); console.log("CANDIDATE_REACT="+p.dependencies.react); console.log("CANDIDATE_REACT_DOM="+p.dependencies["react-dom"])'
+      - name: Configure SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          root=Path.home()/".ssh"
+          def norm(v): return os.environ[v].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (root/"id_vps_root").write_text(norm("ROOT_KEY"),encoding="utf-8")
+          (root/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"),encoding="utf-8")
+          PY
+          chmod 600 "$HOME/.ssh/id_vps_root" "$HOME/.ssh/known_hosts"
+      - name: Read current UI package metadata
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          SSH_PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_vps_root" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -p "$SSH_PORT" "root@$SSH_HOST" 'bash -s' <<'REMOTE'
+          set -Eeuo pipefail
+          wd="$(systemctl show ai-dex-manager-ui.service --property WorkingDirectory --value)"
+          [[ -d "$wd" && -f "$wd/package.json" && -f "$wd/package-lock.json" ]]
+          echo "CURRENT_UI=$wd"
+          echo "CURRENT_PACKAGE_JSON_SHA256=$(sha256sum "$wd/package.json" | awk '{print $1}')"
+          echo "CURRENT_LOCK_SHA256=$(sha256sum "$wd/package-lock.json" | awk '{print $1}')"
+          node - "$wd/package.json" "$wd" <<'NODE'
+          const fs=require("fs"),path=require("path");
+          const pkg=JSON.parse(fs.readFileSync(process.argv[2],"utf8"));
+          const wd=process.argv[3];
+          console.log("CURRENT_NEXT_SPEC="+pkg.dependencies.next);
+          console.log("CURRENT_REACT_SPEC="+pkg.dependencies.react);
+          console.log("CURRENT_REACT_DOM_SPEC="+pkg.dependencies["react-dom"]);
+          for (const dep of ["next","react","react-dom"]) {
+            const p=JSON.parse(fs.readFileSync(path.join(wd,"node_modules",dep,"package.json"),"utf8"));
+            console.log("INSTALLED_"+dep.toUpperCase().replace("-","_")+"="+p.version);
+          }
+          NODE
+          echo 'TRADING_MUTATION=0'
+          REMOTE
