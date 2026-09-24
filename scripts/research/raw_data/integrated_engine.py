@@ -3,6 +3,7 @@ from __future__ import annotations
 import calendar
 import hashlib
 import json
+import math
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any
@@ -232,12 +233,22 @@ def _all_bars(raw_bundle: dict[str, Any]) -> dict[str, dict[int, Any]]:
     result: dict[str, dict[int, Any]] = {}
     for source_name in ("bars", "stock_bars"):
         for symbol, rows in raw_bundle.get(source_name, {}).items():
+            last_ts: int | None = None
             for row in rows:
-                try:
-                    bar = coerce_bar(row)
-                except (KeyError, TypeError, ValueError):
-                    continue
+                bar = coerce_bar(row)
+                values = (bar.open, bar.high, bar.low, bar.close, bar.volume)
+                if (bar.symbol != symbol
+                    or not all(math.isfinite(value) for value in values)
+                    or min(bar.open, bar.high, bar.low, bar.close) <= 0
+                    or bar.volume < 0 or bar.high < max(bar.open, bar.close)
+                    or bar.low > min(bar.open, bar.close)):
+                    raise ValueError(f"INVALID_REPLAY_OHLC:{source_name}:{symbol}:{bar.ts_ms}")
+                if last_ts is not None and bar.ts_ms <= last_ts:
+                    raise ValueError(f"NONMONOTONIC_OR_DUPLICATE_REPLAY_BAR:{source_name}:{symbol}:{bar.ts_ms}")
+                if bar.ts_ms in result.get(symbol, {}):
+                    raise ValueError(f"CONFLICTING_DUPLICATE_REPLAY_SOURCE:{source_name}:{symbol}:{bar.ts_ms}")
                 result.setdefault(symbol, {})[bar.ts_ms] = bar
+                last_ts = bar.ts_ms
     return result
 
 
@@ -246,11 +257,16 @@ def _all_funding(raw_bundle: dict[str, Any]) -> list[Funding]:
     if isinstance(raw, dict):
         raw = [item for rows in raw.values() for item in rows]
     result: list[Funding] = []
+    seen: set[tuple[str, int]] = set()
     for row in raw:
-        try:
-            result.append(coerce_funding(row))
-        except (KeyError, TypeError, ValueError):
-            continue
+        value = coerce_funding(row)
+        if not math.isfinite(value.rate) or value.ts_ms <= 0:
+            raise ValueError(f"INVALID_REPLAY_FUNDING:{value.symbol}:{value.ts_ms}")
+        key = (value.symbol, value.ts_ms)
+        if key in seen:
+            raise ValueError(f"DUPLICATE_REPLAY_FUNDING:{value.symbol}:{value.ts_ms}")
+        seen.add(key)
+        result.append(value)
     return sorted(result, key=lambda item: (item.ts_ms, item.symbol))
 
 
