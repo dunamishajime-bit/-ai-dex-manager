@@ -1,4 +1,5 @@
 import { strict as assert } from "node:assert";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 import {
     isAsterUpstreamKillReason,
@@ -44,4 +45,9 @@ test("only the exact local V52 rate-budget saturation reason is recoverable", ()
     assert.equal(isRecoverableAsterRateBudgetKillReason("V52 upstream state unavailable: ASTER_GLOBAL_RATE_BUDGET_SATURATED:5005"), false);
     assert.equal(isRecoverableAsterRateBudgetKillReason("V52 recoverable tick error: ASTER_GLOBAL_RATE_BUDGET_MALFORMED"), false);
     assert.equal(isRecoverableAsterRateBudgetKillReason("V52 recoverable tick error: HTTP 429"), false);
+});
+
+test("upstream recovery normalizes the shared Kill Switch for deploy-owned runners", async () => {
+    const source = await readFile("scripts/disdex-aster-upstream-live-recovery.ts", "utf8");
+    assert.match(source, /normalizeLiveSharedStateOwnership\(sharedKill\.sourcePath/);
 });

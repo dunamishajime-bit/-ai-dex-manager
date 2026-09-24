@@ -58,3 +58,34 @@ export async function normalizeLiveStateOwnership(
   assertLiveStateMetadata(after, uid, gid, label);
   return { uid, gid, mode: after.mode & 0o777 };
 }
+
+/**
+ * Shared runtime files are read by deploy-owned trading runners and may be
+ * written by a root recovery helper.  Keep the file regular and non-world
+ * writable, while allowing the deploy group to read/write the shared state.
+ */
+export async function normalizeLiveSharedStateOwnership(
+  path: string,
+  options: { user?: string; group?: string; mode?: number; label?: string } = {},
+) {
+  const user = options.user || "deploy";
+  const group = options.group || "deploy";
+  const mode = options.mode ?? 0o660;
+  const label = options.label || "LIVE_SHARED_STATE";
+  if ((mode & 0o007) !== 0 || (mode & 0o600) !== 0o600) {
+    throw new Error(`${label}_MODE_POLICY_INVALID`);
+  }
+  const uid = numericId("-u", user);
+  const gid = numericId("-g", group);
+  const before = await lstat(path);
+  if (!before.isFile() || before.isSymbolicLink()) {
+    throw new Error(`${label}_NOT_REGULAR_FILE`);
+  }
+  await chown(path, uid, gid);
+  await chmod(path, mode);
+  const after = await lstat(path);
+  if (!after.isFile() || after.isSymbolicLink() || after.uid !== uid || after.gid !== gid || (after.mode & 0o777) !== mode) {
+    throw new Error(`${label}_POSTCHECK_FAILED`);
+  }
+  return { uid, gid, mode: after.mode & 0o777 };
+}

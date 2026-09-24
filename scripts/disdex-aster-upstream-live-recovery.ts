@@ -19,7 +19,7 @@ import { readSharedCryptoDailyRisk } from "../lib/disdex-shared-crypto-daily-ris
 import { readSharedKillSwitch } from "../lib/disdex-shared-kill-switch";
 import { resolveV12X1AllRuntime } from "../config/v12X1AllRuntime";
 import { FileV12X1AllRunnerStateStore } from "../lib/v12-x1-all-runner-state";
-import { normalizeLiveStateOwnership } from "../lib/disdex-live-state-ownership";
+import { normalizeLiveSharedStateOwnership, normalizeLiveStateOwnership } from "../lib/disdex-live-state-ownership";
 
 const APPLY_ACK = "I_ACK_ASTER_UPSTREAM_RECOVERY_AFTER_3X_READONLY_FLAT";
 
@@ -219,6 +219,7 @@ async function main() {
                 candidateSha,
                 requestId,
             });
+            await normalizeLiveSharedStateOwnership(sharedKill.sourcePath, { label: "ASTER_UPSTREAM_RECOVERY_SHARED_KILL_SWITCH" });
             assertNoConflictingReleaseUnits(candidateSha);
             assertLegacyLiveSupervisorInactive();
             const clean = await stateStore.load();
@@ -229,6 +230,7 @@ async function main() {
             await writeFile(statePath, beforeState, { mode: 0o600 }).catch(() => undefined);
             await normalizeLiveStateOwnership(statePath, { label: "ASTER_UPSTREAM_RECOVERY_V12_ROLLBACK_STATE" }).catch(() => undefined);
             await writeFile(sharedKill.sourcePath, beforeKill, { mode: 0o600 }).catch(() => undefined);
+            await normalizeLiveSharedStateOwnership(sharedKill.sourcePath, { label: "ASTER_UPSTREAM_RECOVERY_SHARED_KILL_SWITCH_ROLLBACK" }).catch(() => undefined);
             throw error;
         }
         console.log(JSON.stringify({
