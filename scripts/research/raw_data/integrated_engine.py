@@ -127,14 +127,62 @@ def commit_entry(state: PortfolioState, candidate: dict[str, Any], entry_price: 
     return position
 
 
-def preempt_fet(state: PortfolioState, candidate: dict[str, Any]) -> bool:
+def preempt_fet(
+    state: PortfolioState,
+    candidate: dict[str, Any],
+    *,
+    fill_bars: dict[str, Any] | None = None,
+    ts_ms: int | None = None,
+    fee_rate: float = 0.0,
+    slippage_bps: float = 0.0,
+    funding: list[Funding] | None = None,
+    funding_multiplier: float = 1.0,
+) -> bool:
+    """Settle FET at the decision bar OPEN before releasing its gross.
+
+    No quote/fill timestamp means no preemption: deleting a live position
+    without accounting for its PnL, costs and liquidation price is forbidden.
+    """
     candidate_priority = int(candidate.get("priority", 2))
-    targets = [position for position in state.positions.values() if position.preemptible and position.strategy.startswith("FET") and position.priority > candidate_priority]
-    if not targets:
+    targets = [
+        position for position in state.positions.values()
+        if position.preemptible and position.strategy.startswith("FET")
+        and position.priority > candidate_priority
+    ]
+    if not targets or fill_bars is None or ts_ms is None:
+        return False
+    if str(candidate.get("assetClass", "crypto")) != "crypto":
+        return False
+    if not all(position.symbol in fill_bars and float(fill_bars[position.symbol].open) > 0 for position in targets):
+        return False
+    requested = float(candidate.get("requestedGross", 0.0))
+    released = sum(position.gross for position in targets)
+    if (requested <= 0 or
+        _open_gross(state, "crypto") - released + requested > state.crypto_gross_cap + 1e-12 or
+        _open_gross(state) - released + requested > state.total_gross_cap + 1e-12):
         return False
     for position in targets:
-        del state.positions[position.position_id]
-        state.preemptions.append({"positionId": position.position_id, "releasedGross": position.gross, "reason": "CORE_PREEMPTION"})
+        before_cash = state.cash
+        bar = fill_bars[position.symbol]
+        exit_price = _slip(float(bar.open), position.side, slippage_bps, False)
+        exit_fee = abs(exit_price * position.qty) * fee_rate
+        funding_cash = _funding_cash(funding or [], position, ts_ms) * funding_multiplier
+        settle_exit(state, position, {
+            "exitPrice": exit_price, "qty": position.qty,
+            "fee": exit_fee, "funding": funding_cash, "exitTs": ts_ms,
+        })
+        state.events[-1].update({
+            "strategy": position.strategy, "symbol": position.symbol,
+            "route": position.route, "exitReason": "CORE_PREEMPTION",
+            "closed": True, "fillSource": "current-next-bar-open",
+        })
+        receipt = {
+            "positionId": position.position_id, "releasedGross": position.gross,
+            "reason": "CORE_PREEMPTION", "exitPrice": exit_price,
+            "pnlNet": state.cash - before_cash, "fee": exit_fee,
+            "funding": funding_cash, "exitTs": ts_ms,
+        }
+        state.preemptions.append(receipt)
     return True
 
 
