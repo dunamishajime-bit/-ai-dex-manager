@@ -1,0 +1,67 @@
+name: Final repaired independent BT from verified immutable archive
+on:
+  push:
+    branches: [research/raw-replay-accounting-fix-20260925]
+    paths: [.github/workflows/repaired-independent-bt-final-20260925.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  corrected-replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run complete raw replay tests
+        run: |
+          python -m unittest discover -s tests -p 'test_raw_*.py' -v
+          python -m unittest discover -s tests -p 'test_remaining_raw_rebuilds.py' -v
+          python -m unittest discover -s tests -p 'test_v12_raw_rebuild.py' -v
+          python -m unittest discover -s tests -p 'test_pengu_raw_rebuild.py' -v
+      - name: Restore only checksum-verified raw historical source from successful run
+        uses: actions/download-artifact@v4
+        with:
+          name: repaired-independent-bt-20260925
+          run-id: 36059507772
+          github-token: ${{ github.token }}
+          path: .
+      - name: Verify identical immutable source and remove stale summaries
+        run: |
+          python - <<'PY'
+          import gzip,json
+          from pathlib import Path
+          from scripts.research.raw_data.validate_bundle import validate_bundle
+          path=Path(".raw-data/repaired-binance-2025-2026.json.gz")
+          with gzip.open(path,"rt",encoding="utf-8") as file:
+            bundle=json.load(file)
+          actual=validate_bundle(bundle)
+          assert actual["valid"] and not actual["gaps"],actual
+          assert actual["sha256"]=="d935ef15a13b9332699df47d9b681c53d821ed4b6e69f111f816f8737216158d",actual["sha256"]
+          assert sum(x["row_count"] for x in actual["ranges"].values())==140160
+          assert bundle["source"]["publishedChecksumVerifiedForAllArchives"] is True
+          assert bundle["source"]["archiveCount"]==416
+          print("IMMUTABLE_RAW_BUNDLE_VERIFIED",actual["sha256"],bundle["source"]["archiveCount"])
+          PY
+          rm -rf research-results/repaired-independent-20260925
+      - name: Recompute full one-year four-scenario alternate twice with Aster FET inception
+        run: |
+          python -m scripts.research.raw_data.run_repaired_independent_bt \
+            --bundle .raw-data/repaired-binance-2025-2026.json.gz \
+            --source binance-vision --verify-determinism \
+            --output research-results/repaired-independent-20260925/summary.json
+      - name: Upload final source and all corrected research ledgers
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: repaired-independent-bt-final-20260925
+          path: |
+            .raw-data/repaired-binance-2025-2026.json.gz
+            research-results/repaired-independent-20260925/
+          if-no-files-found: warn
+          include-hidden-files: true
+          compression-level: 6
+          retention-days: 90
