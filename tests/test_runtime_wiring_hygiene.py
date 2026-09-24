@@ -25,6 +25,12 @@ class RuntimeWiringHygieneTest(unittest.TestCase):
         self.assertIn('EnvironmentFile=/etc/disdex/disdex-quality102-causal-v1.env', source)
         self.assertIn('ExecStart=${CURRENT_RELEASE}/node_modules/.bin/tsx scripts/disdex-aster-trade-history-git-sync.ts', source)
 
+    def test_stale_support_cleanup_includes_history_sync_dropins(self):
+        source = WIRING.read_text(encoding="utf-8")
+        start = source.index("remove_stale_support_release_pin_dropins()")
+        end = source.index("reset_stale_release_failed_units()", start)
+        self.assertIn('"$HISTORY_SYNC_DROPIN_DIR"', source[start:end])
+
 
 if __name__ == "__main__":
     unittest.main()

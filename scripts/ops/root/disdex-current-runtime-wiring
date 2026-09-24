@@ -274,7 +274,7 @@ remove_stale_auto_repair_unit_pin_dropins() {
 
 remove_stale_support_release_pin_dropins() {
   local dir keep dropin
-  for dir in "$WATCHDOG_DROPIN_DIR" "$SNAPSHOT_DROPIN_DIR" "$POSITION_RECOVERY_DROPIN_DIR" "$FILL_NOTIFIER_DROPIN_DIR"; do
+  for dir in "$WATCHDOG_DROPIN_DIR" "$SNAPSHOT_DROPIN_DIR" "$POSITION_RECOVERY_DROPIN_DIR" "$FILL_NOTIFIER_DROPIN_DIR" "$HISTORY_SYNC_DROPIN_DIR"; do
     [[ -d "$dir" ]] || continue
     keep="$dir/$CURRENT_SUPPORT_OVERRIDE"
     while IFS= read -r -d '' dropin; do
