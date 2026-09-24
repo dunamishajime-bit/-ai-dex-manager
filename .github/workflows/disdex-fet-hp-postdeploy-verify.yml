@@ -1,0 +1,103 @@
+name: DisDex FET HP postdeploy verify
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    if: >-
+      github.event.issue.number == 132 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == 'DISDEX_FET_HP_VERIFY_20260924'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      EXPECTED_UI_SHA: 1ac7dfffbfbb1dd809e4d9e5db3ed2ce21c7877e
+      EXPECTED_TRADING_SHA: 95688d657eba498cfdcb97a850fdb0442cf751f7
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Verify public HTTPS surface from GitHub runner
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          home_code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 15 https://professional-dismanager.net/)"
+          fet_page_code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 15 https://professional-dismanager.net/decision-status/fet)"
+          api_code="$(curl -sS -o /tmp/fet-api-public.json -w '%{http_code}' --max-time 15 https://professional-dismanager.net/api/system/fet-status)"
+          echo "PUBLIC_HOME_HTTP=$home_code"
+          echo "PUBLIC_FET_PAGE_HTTP=$fet_page_code"
+          echo "PUBLIC_FET_API_HTTP=$api_code"
+          [[ "$home_code" =~ ^(200|30[1278])$ ]]
+          [[ "$fet_page_code" =~ ^(200|30[1278])$ ]]
+          [[ "$api_code" == "401" ]]
+          grep -Fq '"tradingMutation":0' /tmp/fet-api-public.json
+      - name: Configure pinned root SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          p=Path.home()/".ssh"
+          def n(v): return os.environ[v].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(n("ROOT_KEY"),encoding="utf-8")
+          (p/"known_hosts").write_text(n("SSH_KNOWN_HOSTS"),encoding="utf-8")
+          PY
+          chmod 600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Verify deployed UI and FET runtime surface
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          SSH_PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -p "$SSH_PORT" "root@$SSH_HOST"             "EXPECTED_UI_SHA='$EXPECTED_UI_SHA' EXPECTED_TRADING_SHA='$EXPECTED_TRADING_SHA' bash -s" <<'REMOTE'
+          set -Eeuo pipefail
+          service='ai-dex-manager-ui.service'
+          [[ "$(systemctl is-active "$service")" == "active" ]]
+          wd="$(systemctl show "$service" --property WorkingDirectory --value)"
+          envline="$(systemctl show "$service" --property Environment --value)"
+          sha="$(sed -nE 's/.*DISDEX_UI_RELEASE_SHA=([0-9a-f]{40}).*/\1/p' <<<"$envline")"
+          [[ "$sha" == "$EXPECTED_UI_SHA" ]]
+          [[ "$wd" == "/home/deploy/disdex-trading/ui-releases/ui-fet-${EXPECTED_UI_SHA:0:8}" ]]
+          [[ -f "$wd/app/decision-status/fet/page.tsx" ]]
+          [[ -f "$wd/app/api/system/fet-status/route.ts" ]]
+          [[ -f "$wd/lib/server/fet-runtime-observability.ts" ]]
+          [[ "$(curl -sS -o /dev/null -w '%{http_code}' --max-time 5 http://127.0.0.1:3001/)" == "200" ]]
+          trading="$(readlink -f /home/deploy/disdex-trading/current)"
+          [[ "$trading" == "/home/deploy/disdex-trading/releases/$EXPECTED_TRADING_SHA" ]]
+          [[ "$(tr -d '[:space:]' < /home/deploy/disdex-trading/current/.disdex-release-sha)" == "$EXPECTED_TRADING_SHA" ]]
+          for f in             /home/deploy/disdex-trading/current/.disdex-release-sha             /home/deploy/disdex-trading/current/config/fetBrk48Runtime.ts             /var/lib/disdex/fet-brk48-residual/state.json             /var/lib/disdex/shared/kill-switch.json; do
+            if runuser -u deploy -- test -r "$f"; then echo "DEPLOY_READABLE=TRUE path=$f"; else echo "DEPLOY_READABLE=FALSE path=$f"; fi
+          done
+          hb=/var/lib/disdex/runner-health/heartbeats/fet-brk48-residual.json
+          if runuser -u deploy -- test -r "$hb"; then echo "DEPLOY_READABLE=TRUE path=$hb"; else echo "DEPLOY_READABLE=FALSE path=$hb"; fi
+          code="$(curl -sS -o /tmp/fet-local.json -w '%{http_code}' --max-time 5 -H 'Cookie: disdex_auth=1' http://127.0.0.1:3001/api/system/fet-status)"
+          [[ "$code" == "200" ]]
+          node - /tmp/fet-local.json <<'NODE'
+          const fs=require("fs");
+          const j=JSON.parse(fs.readFileSync(process.argv[2],"utf8"));
+          if(j.readOnly!==true || j.tradingMutation!==0 || j.strategyId!=="FET_BRK48_RESIDUAL" || j.symbol!=="FETUSDT") process.exit(2);
+          if(!["LIVE","STALE","UNAVAILABLE","UNCONFIRMED"].includes(j.status)) process.exit(3);
+          console.log("FET_API_STATUS="+j.status);
+          console.log("FET_API_OK="+j.ok);
+          console.log("FET_API_REASON="+String(j.reason||"").replace(/\n/g," "));
+          console.log("FET_RUNTIME_SHA="+String(j.runtimeCommitSha||"UNAVAILABLE"));
+          console.log("FET_EXPECTED_SHA="+String(j.expectedRuntimeSha||"UNAVAILABLE"));
+          console.log("FET_MAX_GROSS="+String(j.maximumGross??"UNAVAILABLE"));
+          console.log("FET_KILL_SWITCH_ACTIVE="+String(j.killSwitchActive));
+          NODE
+          echo "UI_WORKDIR=$wd"
+          echo "UI_SHA=$sha"
+          echo "UI_HTTP_STATUS=200"
+          echo "TRADING_CURRENT=$trading"
+          echo 'TRADING_MUTATION=0'
+          echo 'FET_HP_POSTDEPLOY_VERIFY=PASS'
+          REMOTE
