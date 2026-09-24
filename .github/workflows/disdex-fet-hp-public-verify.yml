@@ -1,4 +1,4 @@
-name: DisDex FET HP public verify
+name: DisDex HP mobile FET public verify
 
 on:
   issue_comment:
@@ -13,7 +13,7 @@ jobs:
       github.event.issue.number == 132 &&
       github.actor == 'dunamishajime-bit' &&
       github.event.comment.author_association == 'OWNER' &&
-      github.event.comment.body == 'DISDEX_FET_HP_PUBLIC_VERIFY_20260924'
+      github.event.comment.body == 'DISDEX_HP_MOBILE_FET_PUBLIC_VERIFY_20260925'
     runs-on: ubuntu-24.04
     timeout-minutes: 8
     env:
@@ -21,7 +21,7 @@ jobs:
       ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
       SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
       SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
-      TARGET_SHA: 1ac7dfffbfbb1dd809e4d9e5db3ed2ce21c7877e
+      TARGET_SHA: 6e7f71f00e3ec33efbfb819e6d25f6872913750c
     steps:
       - name: Public HTTPS probe from GitHub runner
         shell: bash
@@ -59,7 +59,7 @@ jobs:
           svc='ai-dex-manager-ui.service'
           [[ "$(systemctl is-active "$svc")" == "active" ]]
           wd="$(systemctl show "$svc" --property WorkingDirectory --value)"
-          [[ "$wd" == "/home/deploy/disdex-trading/ui-releases/ui-fet-1ac7dfff" ]]
+          [[ "$wd" == "/home/deploy/disdex-trading/ui-releases/ui-fet-6e7f71f0" ]]
           [[ "$(tr -d '[:space:]' < "$wd/.disdex-release-sha")" == "$TARGET_SHA" ]]
           envs="$(systemctl show "$svc" --property Environment --value)"
           [[ " $envs " == *" DISDEX_UI_RELEASE_SHA=$TARGET_SHA "* ]]
@@ -68,7 +68,7 @@ jobs:
           [[ "$local_code" == "200" ]]
           fet_code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 5 http://127.0.0.1:3001/decision-status/fet)"
           [[ "$fet_code" =~ ^(200|307|308|401|403)$ ]]
-          echo 'STATUS=FET_HP_PUBLIC_VERIFIED'
+          echo 'STATUS=HP_MOBILE_FET_PUBLIC_VERIFIED'
           echo "UI_WORKDIR=$wd"
           echo "UI_SHA=$TARGET_SHA"
           echo "LOCAL_HTTP=$local_code"
