@@ -1,0 +1,28 @@
+name: Q102 recovery resilience CI
+
+on:
+  push:
+    branches:
+      - codex/q102-recovery-resilience-20260924
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Q102 pending recovery wiring
+        run: npx tsx --test tests/quality102-pending-recovery-wiring.test.ts tests/quality102-pending-order-recovery.test.ts
+      - name: Q102 runner selftest
+        run: npx tsx scripts/disdex-quality102-causal-v1-runner-selftest.ts
+      - name: TypeScript
+        run: npx tsc --noEmit
