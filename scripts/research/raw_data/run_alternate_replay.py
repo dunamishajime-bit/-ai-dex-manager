@@ -11,7 +11,7 @@ from .stock_fetch import load_yahoo_chart_json
 
 
 START_MS = 1_754_784_000_000
-END_MS = 1_786_032_000_000
+END_MS = 1_786_320_000_000
 
 
 def _load_bundle(path: Path) -> dict[str, Any]:
@@ -42,9 +42,23 @@ def _load_stock_directory(path: Path) -> dict[str, list[Any]]:
 
 
 def _metrics(result: dict[str, Any]) -> dict[str, Any]:
+    entries = {event["positionId"]: event for event in result["events"]
+               if event.get("type") == "ENTRY"}
     exits = [event for event in result["events"] if event.get("type") == "EXIT"]
-    profits = sum(max(0.0, float(event.get("pnl", 0.0))) for event in exits)
-    losses = sum(min(0.0, float(event.get("pnl", 0.0))) for event in exits)
+    net_trades = []
+    for event in exits:
+        entry = entries.get(event.get("positionId"))
+        if entry is None:
+            raise ValueError("UNMATCHED_EXIT_IN_LEDGER")
+        net_trades.append({
+            **event,
+            "netPnl": float(event.get("pnl", 0.0))
+                     - float(event.get("fee", 0.0))
+                     + float(event.get("funding", 0.0))
+                     - float(entry.get("fee", 0.0)),
+        })
+    profits = sum(max(0.0, item["netPnl"]) for item in net_trades)
+    losses = sum(min(0.0, item["netPnl"]) for item in net_trades)
     peak = None
     max_dd = 0.0
     dd_peak_ts = None
@@ -60,17 +74,26 @@ def _metrics(result: dict[str, Any]) -> dict[str, Any]:
                 max_dd = drawdown
                 dd_trough_ts = int(point["ts_ms"])
     by_strategy: dict[str, dict[str, Any]] = {}
-    for event in exits:
+    for event in net_trades:
         strategy = str(event.get("strategy", "UNKNOWN"))
         item = by_strategy.setdefault(strategy, {"pnl": 0.0, "trades": 0})
-        item["pnl"] += float(event.get("pnl", 0.0))
+        item["pnl"] += event["netPnl"]
         item["trades"] += 1
+    deposited = sum(float(event.get("amount", 0.0)) for event in result["events"]
+                    if event.get("type") == "DEPOSIT")
+    total_net = sum(item["netPnl"] for item in net_trades)
+    if len(entries) != len(net_trades) or abs(
+        float(result["finalEquity"]) - (deposited + total_net)
+    ) > max(0.01, abs(float(result["finalEquity"])) * 1e-10):
+        raise ValueError("REPLAY_ACCOUNTING_LEDGER_DOES_NOT_RECONCILE")
     return {
         "profitFactor": (profits / abs(losses)) if losses else None,
         "maxDrawdownPct": max_dd * 100.0,
         "ddPeakTs": dd_peak_ts,
         "ddTroughTs": dd_trough_ts,
+        "netClosedPnl": total_net,
         "logic": by_strategy,
+        "ledgerReconciled": True,
     }
 
 
@@ -103,6 +126,9 @@ def run(path: Path, output: Path, stock_dir: Path | None) -> dict[str, Any]:
                 "preemptions": result["preemptions"],
                 "penguState": result["penguState"],
                 "metrics": _metrics(result),
+                "stressAssumptions": result["stressAssumptions"],
+                "formalParity": False,
+                "missingSources": ["original_integrated_event_ledger", "production_v12_q102_pengu_adapters", "v52_basis_execution_pair", "aster_price_parity"],
                 "source": result["source"],
             }
             (output.parent / f"{mode.lower()}-{variant.lower()}-events.json").write_text(json.dumps(result["events"], ensure_ascii=False, sort_keys=True), encoding="utf-8")
