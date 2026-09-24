@@ -32,13 +32,31 @@ class RemainingRawRebuildTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "FIXED_REPLAY_FORBIDDEN"):
             generate_q102_candidates(bundle, "NORMAL")
 
-    def test_fet_candidate_is_lower_priority_and_preemptible(self):
-        candidates = generate_fet_candidates({"bars": {"FETUSDT": crypto_rows("FETUSDT", [3.0])}}, "SEVERE")
-        self.assertTrue(candidates)
-        self.assertEqual(candidates[0]["strategyId"], "FET_BRK48_RESIDUAL")
-        self.assertEqual(candidates[0]["requestedGross"], 2.25)
-        self.assertTrue(candidates[0]["preemptible"])
-        self.assertGreater(candidates[0]["priority"], 1)
+    def test_fet_needs_48h_breakout_72h_volume_and_correct_entry_hour(self):
+        from datetime import datetime, timezone
+        hour = 3_600_000
+        start = 1_700_000_000_000 // hour * hour
+        signal_index = next(i for i in range(72, 80)
+                            if datetime.fromtimestamp((start + (i + 1) * hour) / 1000, timezone.utc).hour % 4 == 1)
+        rows = [
+            Bar("FETUSDT", start + i * hour, 100, 100, 100, 100, 100)
+            for i in range(signal_index)
+        ]
+        rows.append(Bar("FETUSDT", start + signal_index * hour, 100, 104, 100, 103, 200))
+        rows.append(Bar("FETUSDT", start + (signal_index + 1) * hour, 103, 104, 102, 103, 100))
+        candidates = generate_fet_candidates({"bars": {"FETUSDT": rows}}, "SEVERE")
+        self.assertEqual(len(candidates), 1)
+        candidate = candidates[0]
+        self.assertEqual(candidate["strategyId"], "FET_BRK48_RESIDUAL")
+        self.assertEqual(candidate["requestedGross"], 2.25)
+        self.assertTrue(candidate["preemptible"])
+        self.assertEqual(candidate["prior48hHigh"], 100)
+        self.assertGreaterEqual(candidate["volumeRatio"], 1.2)
+        self.assertEqual(candidate["maxHoldHours"], 24)
+        self.assertEqual(candidate["entryTs"] - candidate["signalTs"], hour)
+
+        rows[signal_index] = Bar("FETUSDT", start + signal_index * hour, 100, 104, 100, 103, 100)
+        self.assertEqual(generate_fet_candidates({"bars": {"FETUSDT": rows}}, "SEVERE"), [])
 
     def test_v11_identity_is_preserved(self):
         row = {"ts_ms": 1_700_000_000_000, "strategy": "V11_EQ", "symbol": "STOCK", "basis_bps": 100, "convergence_bps": 20, "net_edge_bps": 10, "spread_bps": 10, "estimated_round_trip_cost_bps": 20}
