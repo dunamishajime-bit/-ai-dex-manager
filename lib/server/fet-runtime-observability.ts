@@ -89,6 +89,8 @@ const CURRENT_CONFIG = "/home/deploy/disdex-trading/current/config/fetBrk48Runti
 const DEFAULT_STATE = "/var/lib/disdex/fet-brk48-residual/state.json";
 const DEFAULT_KILL_SWITCH = "/var/lib/disdex/shared/kill-switch.json";
 const DEFAULT_HEARTBEAT = "/var/lib/disdex/runner-health/heartbeats/fet-brk48-residual.json";
+const DEFAULT_ASTER_BASE_URL = "https://fapi.asterdex.com";
+const HOUR_MS = 3_600_000;
 const MAX_HEARTBEAT_AGE_MS = 10 * 60_000;
 const MAX_BYTES = 512 * 1024;
 const MAX_AGE_MS = 3 * 60_000;
@@ -110,6 +112,24 @@ function positive(value: unknown): number | undefined {
 }
 function nonEmpty(value: unknown): string | undefined {
   return typeof value === "string" && value.trim() ? value.trim() : undefined;
+}
+function configNumber(source: string, key: string): number | undefined {
+  const match = source.match(new RegExp("\\b" + key + "\\s*:\\s*([0-9]+(?:\\.[0-9]+)?)"));
+  return match ? finite(match[1]) : undefined;
+}
+function median(values: number[]): number {
+  const sorted = [...values].filter(Number.isFinite).sort((a, b) => a - b);
+  if (!sorted.length) return 0;
+  const middle = Math.floor(sorted.length / 2);
+  return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
+}
+function nextDecisionAt(now: number, modulo: number, remainder: number): number {
+  let hour = Math.ceil(now / HOUR_MS) * HOUR_MS;
+  for (let i = 0; i < 48; i += 1) {
+    if (new Date(hour).getUTCHours() % modulo === remainder) return hour;
+    hour += HOUR_MS;
+  }
+  return hour;
 }
 async function readJson(path: string): Promise<Record<string, unknown>> {
   if (!isAbsolute(path)) throw new Error("FET_STATE_PATH_NOT_ABSOLUTE");
