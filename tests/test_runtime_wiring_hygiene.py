@@ -15,7 +15,7 @@ class RuntimeWiringHygieneTest(unittest.TestCase):
         source = WIRING.read_text(encoding="utf-8")
         self.assertIn("reset_stale_release_failed_units", source)
         reset_call = source.index("  reset_stale_release_failed_units", source.index("systemctl daemon-reload"))
-        monitor_call = source.index('systemctl restart disdex-v12-kill-switch-auto-repair.path')
+        monitor_call = source.index('systemctl enable --now disdex-v12-kill-switch-auto-repair.path')
         self.assertLess(reset_call, monitor_call)
 
     def test_wiring_pins_trade_history_sync_to_current_release(self):

@@ -16,13 +16,24 @@ function hasAsterCommunicationFailure(value: string) {
 export function isAsterUpstreamKillReason(reason: unknown) {
     const value = normalized(reason);
     const v52Upstream = value.startsWith("v52 fatal tick error:") || value.startsWith("v52 upstream state unavailable:");
-    return v52Upstream && hasAsterCommunicationFailure(value);
+    return (v52Upstream && hasAsterCommunicationFailure(value)) || isRecoverableAsterRateBudgetKillReason(value);
 }
 
 export function isRecoverableV52ReferenceKillReason(reason: unknown) {
     const value = normalized(reason);
     return value.startsWith("v52 fatal tick error: http 503 http://127.0.0.1:8797/quote?symbol=")
         && value.includes('"error":"stale_quote"');
+}
+
+/**
+ * A local rate-budget queue saturation happens before an Aster HTTP request.
+ * Only the exact incident prefix and numeric wait suffix may be cleared by the
+ * audited recovery path; malformed budget state and venue failures remain
+ * fail-closed.
+ */
+export function isRecoverableAsterRateBudgetKillReason(reason: unknown) {
+    const value = normalized(reason);
+    return /^v52 recoverable tick error: aster_global_rate_budget_saturated:\d+$/.test(value);
 }
 
 export function isRecoverableV12AsterManualReview(reason: unknown) {

@@ -1,3 +1,5 @@
+import { classifyAsterRateBudgetFailure } from "./disdex-aster-rate-budget-policy";
+
 export const PENGU_HOUR_MS = 60 * 60_000;
 
 export type PenguDaemonTickStatus = "locked" | string;
@@ -15,6 +17,6 @@ export function nextPenguDaemonWaitMs(
   message?: string,
 ) {
   if (status === "locked") return lockRetryMs;
-  if (status === "failed" && message?.startsWith("ASTER_GLOBAL_RATE_BUDGET_SATURATED:")) return lockRetryMs;
+  if (status === "failed" && classifyAsterRateBudgetFailure(message)?.kind === "RATE_BUDGET_DEFERRED") return lockRetryMs;
   return PENGU_HOUR_MS - (nowMs % PENGU_HOUR_MS) + boundaryDelayMs;
 }

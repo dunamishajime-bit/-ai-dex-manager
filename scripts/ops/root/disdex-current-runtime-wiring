@@ -596,7 +596,11 @@ ExecStart=${CURRENT_RELEASE}/node_modules/.bin/tsx scripts/disdex-aster-trade-hi
 ReadWritePaths=
 ReadWritePaths=/home/deploy/ai-dex-manager/data"
 
-  write_atomic "${V12_DROPIN_DIR}/zzzzzzzzzzzz-current-release-contract.conf" "[Service]
+  write_atomic "${V12_DROPIN_DIR}/zzzzzzzzzzzz-current-release-contract.conf" "[Unit]
+StartLimitIntervalSec=300s
+StartLimitBurst=3
+[Service]
+RestartSec=30s
 EnvironmentFile=${CONTRACT_ENV_FILE}
 ExecStartPre=+/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root ${CURRENT_RELEASE} --sha ${DEPLOYED_SHA} --runner V12_X1_ALL --activation-path ${OPERATOR_ACTIVATION_PATH}
 Environment=DISDEX_RELEASE_SHA=${DEPLOYED_SHA}
@@ -613,7 +617,11 @@ Environment=TOTAL_GROSS_CAP=4.25
 Environment=QUALITY102_LIVE_ENABLED=false
 Environment=QUALITY102_LIVE_SELECTOR_PARITY=false"
 
-  write_atomic "${PENGU_DROPIN_DIR}/zzzzzzzzzzzz-current-release-contract.conf" "[Service]
+  write_atomic "${PENGU_DROPIN_DIR}/zzzzzzzzzzzz-current-release-contract.conf" "[Unit]
+StartLimitIntervalSec=300s
+StartLimitBurst=3
+[Service]
+RestartSec=30s
 EnvironmentFile=${CONTRACT_ENV_FILE}
 ExecStartPre=+/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root ${CURRENT_RELEASE} --sha ${DEPLOYED_SHA} --runner PENGU_V8 --activation-path ${OPERATOR_ACTIVATION_PATH}
 ExecStartPre=+/bin/sh -c 'if [ -e /var/lib/disdex/pengu-dual-ls-v2/runner-live.json ]; then chown deploy:deploy /var/lib/disdex/pengu-dual-ls-v2/runner-live.json && chmod 600 /var/lib/disdex/pengu-dual-ls-v2/runner-live.json; fi'
@@ -631,7 +639,11 @@ Environment=TOTAL_GROSS_CAP=4.25
 Environment=QUALITY102_LIVE_ENABLED=false
 Environment=QUALITY102_LIVE_SELECTOR_PARITY=false"
 
-  write_atomic "${Q102_DROPIN_DIR}/zzzzzzzzzzzz-current-release-contract.conf" "[Service]
+  write_atomic "${Q102_DROPIN_DIR}/zzzzzzzzzzzz-current-release-contract.conf" "[Unit]
+StartLimitIntervalSec=300s
+StartLimitBurst=3
+[Service]
+RestartSec=30s
 EnvironmentFile=${CONTRACT_ENV_FILE}
 ExecStartPre=+/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root ${CURRENT_RELEASE} --sha ${DEPLOYED_SHA} --runner QUALITY102_CAUSAL_V1 --activation-path ${OPERATOR_ACTIVATION_PATH}
 ExecStartPre=+/bin/sh -c 'if [ -e /var/lib/disdex/quality102-causal-v1/state.json ]; then chown deploy:deploy /var/lib/disdex/quality102-causal-v1/state.json && chmod 600 /var/lib/disdex/quality102-causal-v1/state.json; fi'
@@ -648,7 +660,11 @@ Environment=STRICT_PORTFOLIO_PLANNER_ACTIVE=true
 Environment=CRYPTO_GROSS_CAP=3.0
 Environment=TOTAL_GROSS_CAP=4.25"
 
-  write_atomic "${FET_DROPIN_DIR}/zzzzzzzzzzzz-current-release-contract.conf" "[Service]
+  write_atomic "${FET_DROPIN_DIR}/zzzzzzzzzzzz-current-release-contract.conf" "[Unit]
+StartLimitIntervalSec=300s
+StartLimitBurst=3
+[Service]
+RestartSec=30s
 EnvironmentFile=${CONTRACT_ENV_FILE}
 ExecStartPre=+/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root ${CURRENT_RELEASE} --sha ${DEPLOYED_SHA} --runner FET_BRK48_RESIDUAL --activation-path ${OPERATOR_ACTIVATION_PATH}
 ExecStartPre=+/usr/bin/install -d -o deploy -g deploy -m 0700 /var/lib/disdex/fet-brk48-residual
@@ -684,7 +700,11 @@ Environment=DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED=true
 Environment=DISDEX_V96_STATE_DIR=${V52_LEGACY_CRYPTO_ROOT}
 Environment=DISDEX_V96_KILL_SWITCH_FILE=/var/lib/disdex/shared/kill-switch.json"
 
-  write_atomic "${V52_DROPIN_DIR}/zzzzzzzzzzzz-current-release-paths.conf" "[Service]
+  write_atomic "${V52_DROPIN_DIR}/zzzzzzzzzzzz-current-release-paths.conf" "[Unit]
+StartLimitIntervalSec=300s
+StartLimitBurst=3
+[Service]
+RestartSec=30s
 EnvironmentFile=${CONTRACT_ENV_FILE}
 WorkingDirectory=${CURRENT_RELEASE}
 ExecStartPre=

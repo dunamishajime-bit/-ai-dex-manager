@@ -4,6 +4,7 @@ import { AsterV3Client } from "../lib/aster-v3-client";
 import { V12AsterLiveAdapter } from "../lib/v12-aster-live-adapter";
 import { FetBrk48LiveRunner } from "../lib/fet-brk48-live-runner";
 import { createInterruptibleDelay } from "../lib/interruptible-delay";
+import { classifyAsterRateBudgetFailure, nextAsterRateBudgetRetryMs } from "../lib/disdex-aster-rate-budget-policy";
 
 function numberEnv(name: string, fallback: number) {
   const n = Number(process.env[name]);
@@ -83,7 +84,32 @@ async function main() {
   process.on("SIGTERM", shutdown);
 
   do {
-    const result = await runner.tick();
+    let result;
+    try {
+      result = await runner.tick();
+    } catch (error) {
+      const deferred = classifyAsterRateBudgetFailure(error);
+      if (!deferred) throw error;
+      const retryMs = nextAsterRateBudgetRetryMs(0, 1_000, 30_000, deferred.waitMs || 0);
+      console.log(JSON.stringify({
+        timestamp: new Date().toISOString(),
+        strategyId: "FET_BRK48_RESIDUAL",
+        runtimeSha,
+        status: "blocked",
+        message: deferred.reason,
+        errorClass: deferred.kind,
+        queueWaitMs: deferred.waitMs,
+        priority: "RISK_READ",
+        decision: "DEFER_NO_EXPOSURE",
+        retryMs,
+        ordersSent: 0,
+        cancelsSent: 0,
+        positionChangesSent: 0,
+      }));
+      if (!daemon || stop) break;
+      await delay.wait(retryMs);
+      continue;
+    }
     console.log(JSON.stringify({ timestamp: new Date().toISOString(), strategyId: "FET_BRK48_RESIDUAL", runtimeSha, ...result }));
     if (!daemon || stop) break;
     await delay.wait(numberEnv("FET_BRK48_POLL_MS", 30_000));

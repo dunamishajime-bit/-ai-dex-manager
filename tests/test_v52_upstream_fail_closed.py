@@ -9,6 +9,10 @@ import disdex_v52_aster_only_legacy_engine as v52  # noqa: E402
 
 
 class V52UpstreamFailClosedTests(unittest.TestCase):
+    def test_local_rate_budget_saturation_is_deferred_not_upstream_kill(self):
+        self.assertTrue(v52.rate_budget_deferred_error("ASTER_GLOBAL_RATE_BUDGET_SATURATED:5005"))
+        self.assertFalse(v52.upstream_fail_closed_error("ASTER_GLOBAL_RATE_BUDGET_SATURATED:5005"))
+
     def test_classifies_observed_aster_transport_failures_as_upstream_fail_closed(self):
         self.assertTrue(v52.upstream_fail_closed_error("HTTP 429 /fapi/v3/positionRisk"))
         self.assertTrue(v52.upstream_fail_closed_error("HTTP Error 429: Too Many Requests"))

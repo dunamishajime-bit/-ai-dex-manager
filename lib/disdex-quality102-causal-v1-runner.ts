@@ -33,6 +33,7 @@ import {
     readSharedCryptoDailyRiskWithRolloverRetry,
 } from "@/lib/disdex-shared-crypto-daily-risk";
 import { isAsterDepositRequirementError } from "@/lib/aster-v3-client";
+import { classifyAsterRateBudgetFailure } from "@/lib/disdex-aster-rate-budget-policy";
 import { quality102GovernorGross, readPortfolioDdGovernor } from "@/lib/disdex-portfolio-dd-governor";
 import { classifyAsterSymbol } from "@/lib/disdex-aster-portfolio-classifier";
 import { findManagedFetBrk48ProtectiveOrders, findManagedPenguRecoveryV8ProtectiveOrders, findManagedV12ProtectiveOrders } from "@/lib/disdex-managed-protective-orders";
@@ -1292,6 +1293,20 @@ export class Quality102CausalV1Runner {
             const planned = await this.planEntry(state, signal, live.account, live.positions, quote);
             return planned.status === "planned" ? this.executePending(state, lock) : planned;
         } catch (error) {
+            const rateBudget = classifyAsterRateBudgetFailure(error);
+            if (rateBudget) {
+                this.dependencies.logger?.warn("Q102 rate-budget deferred before Aster request", {
+                    errorClass: rateBudget.kind,
+                    reason: rateBudget.reason,
+                    queueWaitMs: rateBudget.waitMs,
+                    priority: "RISK_READ",
+                    decision: "DEFER_NO_EXPOSURE",
+                    ordersSent: 0,
+                    cancelsSent: 0,
+                    positionChangesSent: 0,
+                });
+                return { status: "blocked-local", message: rateBudget.reason, ordersSent: 0 };
+            }
             const state = await this.dependencies.stateStore.load().catch(() => undefined);
             if (state) {
                 const message = isAsterDepositRequirementError(error)

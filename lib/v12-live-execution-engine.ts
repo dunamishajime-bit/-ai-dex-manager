@@ -4,6 +4,7 @@ import { V12_X1_ALL } from "@/config/v12X1AllRuntime";
 import { AsterApiError } from "@/lib/aster-v3-client";
 import { activeReservedGross, FileAccountOrderLock } from "@/lib/disdex-account-order-lock";
 import { classifyAsterSymbol } from "@/lib/disdex-aster-portfolio-classifier";
+import { classifyAsterRateBudgetFailure } from "@/lib/disdex-aster-rate-budget-policy";
 import { readSharedCryptoDailyRisk, readSharedCryptoDailyRiskWithRolloverRetry } from "@/lib/disdex-shared-crypto-daily-risk";
 import type { ActivePortfolioPosition } from "@/lib/disdex-unified-portfolio-routing";
 import { V12AsterLiveAdapter, deterministicV12ClientOrderId } from "@/lib/v12-aster-live-adapter";
@@ -41,16 +42,8 @@ export interface V12LiveExecutionDependencies {
     log?: (message: string, payload?: Record<string, unknown>) => void;
 }
 
-const TRANSIENT_V12_RATE_BUDGET_REASONS = [
-    /^ASTER_GLOBAL_RATE_BUDGET_SATURATED:\d+$/,
-    /^ASTER_GLOBAL_RATE_BUDGET_LOCK_TIMEOUT$/,
-    /^ASTER_GLOBAL_RATE_BUDGET_LOCK_RELEASE_FAILED$/,
-    /^ASTER_GLOBAL_RATE_BUDGET_RECOVERY_LOCK_RELEASE_FAILED$/,
-];
-
 export function isTransientV12RateBudgetError(error: unknown): boolean {
-    const reason = error instanceof Error ? error.message : String(error);
-    return TRANSIENT_V12_RATE_BUDGET_REASONS.some((pattern) => pattern.test(reason.trim()));
+    return classifyAsterRateBudgetFailure(error) !== undefined;
 }
 
 export function classifyV12InfrastructureFailure(error: unknown): V12LiveTickResult | undefined {

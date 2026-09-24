@@ -24,6 +24,7 @@ from disdex_strict_portfolio_planner import (
 )
 from disdex_trade_fill_notification import enqueue_trade_fill_notification
 from disdex_us_equity_calendar import regular_us_equity_session
+from disdex_aster_rate_budget_policy import classify_aster_rate_budget_failure, next_aster_rate_budget_retry_ms
 
 base = legacy.base
 
@@ -118,6 +119,16 @@ def rate_limit_error(error: BaseException | str) -> bool:
     ))
 
 
+def rate_budget_deferred_error(error: BaseException | str) -> bool:
+    """A local pre-request scheduler denial is not a venue/API failure.
+
+    The classifier is deliberately exact.  In particular, malformed budget
+    state, HTTP 429/418, network failures, and unknown errors remain on the
+    existing fail-closed paths.
+    """
+    return classify_aster_rate_budget_failure(error) is not None
+
+
 def upstream_fail_closed_error(error: BaseException | str) -> bool:
     message = str(error).lower()
     return rate_limit_error(error) or any(marker in message for marker in (
@@ -176,6 +187,8 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         self.minimum_entry_usd = base.float_env("DISDEX_V52_MIN_ENTRY_USD", 5.0)
         self.max_daily_loss_pct = base.float_env("DISDEX_V52_MAX_DAILY_LOSS_PCT", 3.5)
         self._upstream_fail_closed_hold = False
+        self._rate_budget_defer_attempt = 0
+        self._rate_budget_defer_until_ms = 0
         self._last_kill_flatten_key: Optional[str] = None
         self.state.setdefault("v52Ledger", {"strategyId": STRATEGY_ID, "trades": []})
         self._migrate_state()
@@ -351,6 +364,33 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
                 recoverable=True,
             )
         self.log("v52-upstream-state-fail-closed", phase=phase, error=message)
+
+    def _defer_rate_budget(self, error: BaseException | str, phase: str) -> None:
+        classification = classify_aster_rate_budget_failure(error)
+        if classification is None:
+            raise RuntimeError("V52_RATE_BUDGET_DEFER_CLASSIFICATION_REQUIRED")
+        attempt = int(getattr(self, "_rate_budget_defer_attempt", 0))
+        retry_ms = next_aster_rate_budget_retry_ms(
+            attempt=attempt,
+            base_ms=max(250, base.int_env("DISDEX_ASTER_RATE_BUDGET_RETRY_BASE_MS", 1_000)),
+            max_ms=max(1_000, base.int_env("DISDEX_ASTER_RATE_BUDGET_RETRY_MAX_MS", 30_000)),
+            wait_ms=int(classification.get("waitMs", 0) or 0),
+        )
+        self._rate_budget_defer_attempt = min(attempt + 1, 10)
+        self._rate_budget_defer_until_ms = max(base.now_ms(), int(getattr(self, "_rate_budget_defer_until_ms", 0))) + retry_ms
+        self.log(
+            "v52-rate-budget-deferred",
+            phase=phase,
+            errorClass=classification["kind"],
+            reason=classification["reason"],
+            queueWaitMs=classification.get("waitMs"),
+            priority="RISK_READ",
+            retryMs=retry_ms,
+            decision="DEFER_NO_EXPOSURE",
+            ordersSent=0,
+            cancelsSent=0,
+            positionChangesSent=0,
+        )
 
     @staticmethod
     def _kill_flatten_key(kill: dict) -> str:
@@ -1212,6 +1252,10 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
     def run(self, daemon: bool) -> None:
         started_once = False
         while not self.stop_requested:
+            defer_until = int(getattr(self, "_rate_budget_defer_until_ms", 0))
+            if defer_until > base.now_ms():
+                time.sleep(max(0, defer_until - base.now_ms()) / 1000.0)
+                continue
             if self._upstream_fail_closed_hold:
                 time.sleep(max(1, base.int_env("DISDEX_V52_UPSTREAM_HOLD_SECONDS", 60)))
                 self._upstream_fail_closed_hold = False
@@ -1220,7 +1264,10 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
             try:
                 prepared = self.prepare_tick_inputs()
             except Exception as error:
-                if upstream_fail_closed_error(error):
+                if rate_budget_deferred_error(error):
+                    self._defer_rate_budget(error, "PRELOCK")
+                    prepared = {"local": self.current_local_time(), "rows": None, "skipWithoutLock": True, "rateBudgetDeferred": True}
+                elif upstream_fail_closed_error(error):
                     self._hold_upstream_fail_closed(error, "PRELOCK")
                     prepared = {"local": self.current_local_time(), "rows": None, "skipWithoutLock": False, "upstreamHold": True}
                 elif transient_reference_error(error) and not self.positions():
@@ -1244,7 +1291,9 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
                     self.tick(prepared)
                 except Exception as error:
                     self.log("v52-tick-error", error=str(error))
-                    if upstream_fail_closed_error(error):
+                    if rate_budget_deferred_error(error):
+                        self._defer_rate_budget(error, "TICK")
+                    elif upstream_fail_closed_error(error):
                         self._hold_upstream_fail_closed(error, "TICK")
                     elif transient_reference_error(error) and not self.positions():
                         self.log("v52-entry-held-reference-validation", error=str(error))

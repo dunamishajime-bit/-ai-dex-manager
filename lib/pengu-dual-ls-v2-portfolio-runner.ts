@@ -29,6 +29,7 @@ import { readSharedCryptoDailyRisk, readSharedCryptoDailyRiskWithRolloverRetry }
 import { readPortfolioDdGovernor } from "@/lib/disdex-portfolio-dd-governor";
 import { createPenguShortV20State } from "@/lib/pengu-short-v20";
 import { classifyAsterSymbol } from "@/lib/disdex-aster-portfolio-classifier";
+import { classifyAsterRateBudgetFailure } from "@/lib/disdex-aster-rate-budget-policy";
 import { planStrictPortfolio, type StrictPortfolioIntent, type StrictPortfolioPosition } from "@/lib/disdex-strict-portfolio-planner";
 import { readQuality102CausalV1Ownership, quality102OwnsOrder, quality102OwnsPosition, type Quality102CausalV1OwnershipSnapshot } from "@/lib/disdex-quality102-causal-v1-ownership";
 import { reduceQuality102CausalV1ForBaseConflict } from "@/lib/disdex-quality102-causal-v1-live-reduction";
@@ -576,6 +577,24 @@ export class PenguDualLsV2PortfolioRunner {
             const result = await this.dependencies.executor.executeMarket(command);
             return this.applyResult(state, pending, result);
         } catch (error) {
+            const rateBudget = classifyAsterRateBudgetFailure(error);
+            if (rateBudget && !submitted) {
+                pending.lastError = rateBudget.reason;
+                pending.updatedAt = this.now();
+                pending.phase = "planned";
+                await this.dependencies.stateStore.save(state);
+                this.log.warn("PENGU rate-budget deferred before Aster request", {
+                    errorClass: rateBudget.kind,
+                    reason: rateBudget.reason,
+                    queueWaitMs: rateBudget.waitMs,
+                    priority: "NEW_EXPOSURE",
+                    decision: "DEFER_NO_EXPOSURE",
+                    ordersSent: 0,
+                    cancelsSent: 0,
+                    positionChangesSent: 0,
+                });
+                return { status: "failed", message: rateBudget.reason, idempotencyKey: pending.idempotencyKey };
+            }
             pending.lastError = this.recordFailure(state, error);
             pending.updatedAt = this.now();
             // Once the durable state says submitted, any exception can be
