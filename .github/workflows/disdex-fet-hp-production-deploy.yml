@@ -1,0 +1,215 @@
+name: DisDex FET HP production deploy
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-fet-hp-production-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: >-
+      github.event.issue.number == 132 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == 'DISDEX_FET_HP_DEPLOY_20260924'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      TARGET_REF: codex/ui-current-q102-plus-fet-20260924
+      TARGET_SHA: 1ac7dfffbfbb1dd809e4d9e5db3ed2ce21c7877e
+      EXPECTED_OLD_UI_SHA: 15360fe637436a1b771197c5decf0e1e2a0b243f
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Verify exact production candidate
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ "$(git rev-parse HEAD)" == "$TARGET_SHA" ]]
+          git diff --check "$TARGET_SHA^" "$TARGET_SHA"
+      - name: Install and test FET HP candidate
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          npm ci
+          npx tsx --test tests/hp-fet-display-contract.test.ts
+          npx tsc --noEmit
+          DISDEX_UI_VERIFIED_TSC=1 npm run build
+          test -d .next
+          tar -czf /tmp/disdex-fet-ui-next.tgz .next
+          echo "BUILD_ARCHIVE_BYTES=$(stat -c %s /tmp/disdex-fet-ui-next.tgz)"
+      - name: Configure pinned root SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ -n "$SSH_HOST" && -n "$ROOT_KEY" && -n "$SSH_KNOWN_HOSTS" ]]
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          root=Path.home()/".ssh"
+          def norm(v): return os.environ[v].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (root/"id_vps_root").write_text(norm("ROOT_KEY"),encoding="utf-8")
+          (root/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"),encoding="utf-8")
+          PY
+          chmod 600 "$HOME/.ssh/id_vps_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_vps_root" >/dev/null
+      - name: Stage exact source and switch UI only
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          SSH_PORT="${SSH_PORT:-22}"
+          SSH=(ssh -T -i "$HOME/.ssh/id_vps_root" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -o ConnectTimeout=15 -p "$SSH_PORT" "root@$SSH_HOST")
+          export DEPLOY_REQUEST_ID="fet-hp-${GITHUB_RUN_ID}"
+          "${SSH[@]}" "TARGET_REF='$TARGET_REF' TARGET_SHA='$TARGET_SHA' EXPECTED_OLD_UI_SHA='$EXPECTED_OLD_UI_SHA' REQUEST_ID='$DEPLOY_REQUEST_ID' bash -s" <<'REMOTE'
+          set -Eeuo pipefail
+          umask 022
+          ui_service='ai-dex-manager-ui.service'
+          ui_root='/home/deploy/disdex-trading/ui-releases'
+          source_repo='/home/deploy/ai-dex-manager'
+          current="$(systemctl show "$ui_service" --property WorkingDirectory --value)"
+          [[ "$(systemctl is-active "$ui_service")" == "active" ]]
+          [[ "$current" == "$ui_root/"* && -d "$current" && ! -L "$current" ]]
+          [[ "$(stat -c '%U:%G' "$current")" == "deploy:deploy" ]]
+          before_http="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 5 http://127.0.0.1:3001/ || true)"
+          [[ "$before_http" == "200" ]]
+          trading_before="$(readlink -f /home/deploy/disdex-trading/current)"
+          [[ "$trading_before" == /home/deploy/disdex-trading/releases/* ]]
+          effective_env="$(systemctl show "$ui_service" --property Environment --value)"
+          old_sha="$(sed -nE 's/.*DISDEX_UI_RELEASE_SHA=([0-9a-f]{40}).*/\1/p' <<<"$effective_env")"
+          [[ "$old_sha" == "$EXPECTED_OLD_UI_SHA" ]] || {
+            echo "OLD_UI_SHA_MISMATCH expected=$EXPECTED_OLD_UI_SHA actual=$old_sha"; exit 30;
+          }
+          [[ -d "$source_repo/.git" && "$(stat -c '%U' "$source_repo")" == "deploy" ]]
+          origin="$(runuser -u deploy -- git -C "$source_repo" remote get-url origin)"
+          [[ "$origin" == "https://github.com/dunamishajime-bit/-ai-dex-manager.git" || "$origin" == "https://github.com/dunamishajime-bit/-ai-dex-manager" ]]
+          runuser -u deploy -- git -C "$source_repo" fetch --no-tags origin "refs/heads/$TARGET_REF:refs/remotes/origin/$TARGET_REF"
+          remote_sha="$(runuser -u deploy -- git -C "$source_repo" rev-parse --verify "refs/remotes/origin/$TARGET_REF^{commit}")"
+          [[ "$remote_sha" == "$TARGET_SHA" ]]
+          release="$ui_root/ui-fet-${TARGET_SHA:0:8}"
+          stage="$ui_root/.ui-fet-${TARGET_SHA:0:8}.tmp-$REQUEST_ID"
+          [[ ! -e "$release" && ! -L "$release" ]]
+          rm -rf -- "$stage"
+          install -d -o deploy -g deploy -m 0755 "$stage"
+          runuser -u deploy -- git -C "$source_repo" archive "$TARGET_SHA" | runuser -u deploy -- tar -x -C "$stage"
+          [[ -f "$current/package-lock.json" && -f "$stage/package-lock.json" ]]
+          old_lock="$(sha256sum "$current/package-lock.json" | awk '{print $1}')"
+          new_lock="$(sha256sum "$stage/package-lock.json" | awk '{print $1}')"
+          [[ "$old_lock" == "$new_lock" ]] || { echo 'PACKAGE_LOCK_CHANGED_REFUSE_NODE_MODULE_REUSE'; exit 31; }
+          [[ -d "$current/node_modules" && -x "$current/node_modules/.bin/next" ]]
+          cp -al -- "$current/node_modules" "$stage/node_modules"
+          chown -h deploy:deploy "$stage/node_modules"
+          printf '%s\n' "$TARGET_SHA" > "$stage/.disdex-release-sha"
+          chown deploy:deploy "$stage/.disdex-release-sha"
+          avail_kb="$(df -Pk "$ui_root" | awk 'NR==2 {print $4}')"
+          [[ "$avail_kb" -ge 700000 ]] || { echo "INSUFFICIENT_DISK_KB=$avail_kb"; exit 32; }
+          echo "STAGE_READY=$stage"
+          echo "CURRENT_UI=$current"
+          echo "TRADING_CURRENT_BEFORE=$trading_before"
+          REMOTE
+          cat /tmp/disdex-fet-ui-next.tgz | "${SSH[@]}" "TARGET_SHA='$TARGET_SHA' REQUEST_ID='$DEPLOY_REQUEST_ID' bash -s" <<'REMOTE'
+          set -Eeuo pipefail
+          ui_root='/home/deploy/disdex-trading/ui-releases'
+          stage="$ui_root/.ui-fet-${TARGET_SHA:0:8}.tmp-$REQUEST_ID"
+          [[ -d "$stage" && ! -L "$stage" ]]
+          tar --no-same-owner -xzf - -C "$stage"
+          chown -R deploy:deploy "$stage/.next"
+          [[ -f "$stage/.next/BUILD_ID" ]]
+          REMOTE
+          "${SSH[@]}" "TARGET_SHA='$TARGET_SHA' EXPECTED_OLD_UI_SHA='$EXPECTED_OLD_UI_SHA' REQUEST_ID='$DEPLOY_REQUEST_ID' bash -s" <<'REMOTE'
+          set -Eeuo pipefail
+          ui_service='ai-dex-manager-ui.service'
+          ui_root='/home/deploy/disdex-trading/ui-releases'
+          stage="$ui_root/.ui-fet-${TARGET_SHA:0:8}.tmp-$REQUEST_ID"
+          release="$ui_root/ui-fet-${TARGET_SHA:0:8}"
+          current="$(systemctl show "$ui_service" --property WorkingDirectory --value)"
+          trading_before="$(readlink -f /home/deploy/disdex-trading/current)"
+          effective_env="$(systemctl show "$ui_service" --property Environment --value)"
+          old_sha="$(sed -nE 's/.*DISDEX_UI_RELEASE_SHA=([0-9a-f]{40}).*/\1/p' <<<"$effective_env")"
+          [[ "$old_sha" == "$EXPECTED_OLD_UI_SHA" ]]
+          mapfile -t work_files < <(grep -lFx "WorkingDirectory=$current" /etc/systemd/system/ai-dex-manager-ui.service.d/*.conf 2>/dev/null || true)
+          [[ "${#work_files[@]}" -eq 1 ]] || { echo "WORKDIR_DROPIN_COUNT=${#work_files[@]}"; exit 33; }
+          mapfile -t sha_files < <(grep -lF "DISDEX_UI_RELEASE_SHA=$old_sha" /etc/systemd/system/ai-dex-manager-ui.service.d/*.conf 2>/dev/null || true)
+          [[ "${#sha_files[@]}" -eq 1 ]] || { echo "SHA_DROPIN_COUNT=${#sha_files[@]}"; exit 34; }
+          backup_root="/var/lib/disdex-hp-deploy/$REQUEST_ID"
+          install -d -o root -g root -m 0700 "$backup_root"
+          cp -a -- "${work_files[0]}" "$backup_root/workdir.conf"
+          if [[ "${sha_files[0]}" != "${work_files[0]}" ]]; then cp -a -- "${sha_files[0]}" "$backup_root/sha.conf"; fi
+          rollback() {
+            rc=$?
+            trap - ERR
+            set +e
+            cp -a -- "$backup_root/workdir.conf" "${work_files[0]}"
+            if [[ -f "$backup_root/sha.conf" ]]; then cp -a -- "$backup_root/sha.conf" "${sha_files[0]}"; fi
+            systemctl daemon-reload
+            systemctl restart "$ui_service"
+            for _ in $(seq 1 20); do
+              [[ "$(curl -sS -o /dev/null -w '%{http_code}' --max-time 3 http://127.0.0.1:3001/ 2>/dev/null || true)" == "200" ]] && break
+              sleep 1
+            done
+            echo "UI_ROLLBACK_ATTEMPTED=TRUE"
+            exit "$rc"
+          }
+          trap rollback ERR
+          mv -- "$stage" "$release"
+          python3 - "${work_files[0]}" "$current" "$release" <<'PY'
+          from pathlib import Path
+          import sys
+          p=Path(sys.argv[1]); old=sys.argv[2]; new=sys.argv[3]
+          s=p.read_text()
+          needle=f"WorkingDirectory={old}"
+          assert s.count(needle)==1
+          p.write_text(s.replace(needle,f"WorkingDirectory={new}"))
+          PY
+          python3 - "${sha_files[0]}" "$old_sha" "$TARGET_SHA" <<'PY'
+          from pathlib import Path
+          import sys
+          p=Path(sys.argv[1]); old=sys.argv[2]; new=sys.argv[3]
+          s=p.read_text()
+          needle=f"DISDEX_UI_RELEASE_SHA={old}"
+          assert s.count(needle)==1
+          p.write_text(s.replace(needle,f"DISDEX_UI_RELEASE_SHA={new}"))
+          PY
+          chown root:root "${work_files[0]}" "${sha_files[0]}"
+          chmod 0644 "${work_files[0]}" "${sha_files[0]}"
+          systemctl daemon-reload
+          systemctl restart "$ui_service"
+          ok=false
+          for _ in $(seq 1 30); do
+            if [[ "$(systemctl is-active "$ui_service" 2>/dev/null || true)" == "active" ]]; then
+              code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 5 http://127.0.0.1:3001/ || true)"
+              if [[ "$code" == "200" ]]; then ok=true; break; fi
+            fi
+            sleep 1
+          done
+          [[ "$ok" == true ]]
+          [[ "$(systemctl show "$ui_service" --property WorkingDirectory --value)" == "$release" ]]
+          final_env="$(systemctl show "$ui_service" --property Environment --value)"
+          [[ " $final_env " == *" DISDEX_UI_RELEASE_SHA=$TARGET_SHA "* ]]
+          trading_after="$(readlink -f /home/deploy/disdex-trading/current)"
+          [[ "$trading_after" == "$trading_before" ]]
+          trap - ERR
+          echo 'STATUS=FET_HP_DEPLOYED_VERIFIED'
+          echo "UI_RELEASE=$release"
+          echo "UI_SHA=$TARGET_SHA"
+          echo 'UI_HTTP_STATUS=200'
+          echo 'TRADING_CURRENT_UNCHANGED=TRUE'
+          echo 'TRADING_RESTART_ATTEMPTED=FALSE'
+          echo 'ORDERS_SENT_BY_DEPLOY=0'
+          REMOTE
