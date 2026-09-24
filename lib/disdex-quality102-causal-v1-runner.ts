@@ -877,7 +877,29 @@ export class Quality102CausalV1Runner {
         if (pending.phase !== "planned") return this.manualReview(state, "Q102_PENDING_PHASE_NOT_EXECUTABLE", pending.idempotencyKey);
         let reservation: { reservationId: string } | undefined;
         try {
-            const executionWindow = await this.validatePendingExecutionWindow(state, pending);
+            let executionWindow;
+            try {
+                executionWindow = await this.validatePendingExecutionWindow(state, pending);
+            } catch (error) {
+                const message = error instanceof Error ? error.message : String(error);
+                if (pending.phase === "planned" && message === "Q102_PENDING_QUOTE_STALE_OR_INVALID") {
+                    const idempotencyKey = pending.idempotencyKey;
+                    state.pending = undefined;
+                    this.recordFailure(state, "Q102_PENDING_QUOTE_STALE_OR_INVALID_RETRYABLE_NO_ORDER", idempotencyKey);
+                    await this.dependencies.stateStore.save(state);
+                    this.log.warn("Q102 pending quote became stale before submission; pending cleared for a safe later re-evaluation.", {
+                        idempotencyKey,
+                        ordersSent: 0,
+                    });
+                    return {
+                        status: "blocked-local",
+                        message: "Q102_PENDING_QUOTE_STALE_OR_INVALID_RETRYABLE_NO_ORDER",
+                        idempotencyKey,
+                        ordersSent: 0,
+                    };
+                }
+                throw error;
+            }
             const normalized = await this.dependencies.executor.normalizeMarketQuantity(
                 pending.symbol,
                 pending.quantity,
