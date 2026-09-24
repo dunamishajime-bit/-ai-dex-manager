@@ -1,3 +1,5 @@
+// Shared contract only. Raw-data rebuilds emit events independently and do
+// not consume the reconstructed ledger represented by this module.
 export const PENGU_Q60_DD17_H72 = Object.freeze({
   variant: "Q60_DD170_H72" as const,
   logic: "COMBINED_FILTERED" as const,
