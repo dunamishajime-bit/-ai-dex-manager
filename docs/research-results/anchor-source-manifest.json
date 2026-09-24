@@ -8,7 +8,22 @@
   "eventOrdering": "signal bar features -> next bar execution -> reservation -> settlement",
   "asterBundleSha256": "56E260A47DC3B8CB3005CA40D71F1196CF9F4C33F1C4BBCF3AA070CC69E72E7F",
   "asterCanonicalSha256": "1951f664d3fcb2f150521fea9b92acde9795e1ec5abea1dc86e78b3ac798a18a",
-  "qualityGate": {"valid": false, "invalidRows": 1, "incompleteSymbols": [], "gaps": 0},
+  "alternateCryptoSource": {
+    "provider": "Binance USD-M Futures public REST",
+    "bundleSha256": "4447178C2CC121B4756F3FC37A92250088F8DD5A13871839CFD5DA7BC3AF621A",
+    "canonicalBundleSha256": "5d2f0d6ec495bfd7455f24e2465a98b62ecc561e71044adc8eb6f739f121c400",
+    "symbols": 16,
+    "hourlyRows": 140160,
+    "qualityGate": {"valid": true, "invalidRows": 0, "incompleteSymbols": [], "gaps": 0}
+  },
+  "yahooV52Reference": {
+    "symbols": 5,
+    "loadedBarsPerSymbol": 1735,
+    "allNullMarketClosedRowsSkipped": true,
+    "partialNullRowsRejected": true,
+    "basisExecutionPairVerified": false
+  },
+  "qualityGate": {"valid": false, "primarySource": "Aster", "invalidRows": 1, "incompleteSymbols": [], "gaps": 0},
   "resultHash": null,
   "implementationParityVerified": false,
   "tradeLedgersUsedAsInput": false

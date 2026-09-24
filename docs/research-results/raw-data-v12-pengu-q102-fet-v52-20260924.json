@@ -15,6 +15,19 @@
     "rows": {"fullPeriodSymbols": 15, "fetRows": 5094, "expectedHourlyRows": 8760},
     "fundingRows": {"standardSymbols": 1096, "pengu": 2190, "fet": 5140}
   },
+  "alternateCryptoSource": {
+    "provider": "Binance USD-M Futures public REST",
+    "baseUrl": "https://fapi.binance.com",
+    "authenticated": false,
+    "interval": "1h",
+    "symbols": ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "LINKUSDT", "AVAXUSDT", "DOGEUSDT", "INJUSDT", "XRPUSDT", "ADAUSDT", "LTCUSDT", "ATOMUSDT", "AAVEUSDT", "NEARUSDT", "PENGUUSDT", "FETUSDT"],
+    "bundlePath": ".raw-data/binance-2025-08-10-2026-08-10.json.gz",
+    "bundleSha256": "4447178C2CC121B4756F3FC37A92250088F8DD5A13871839CFD5DA7BC3AF621A",
+    "canonicalBundleSha256": "5d2f0d6ec495bfd7455f24e2465a98b62ecc561e71044adc8eb6f739f121c400",
+    "rows": {"fullPeriodSymbols": 16, "expectedHourlyRows": 8760, "allRows": 140160},
+    "fundingRows": {"standardSymbols": 1095, "pengu": 2189, "fet": 1095},
+    "quality": {"valid": true, "duplicateRows": 0, "invalidRows": 0, "gaps": 0, "incompleteSymbols": []}
+  },
   "stockSource": {
     "provider": "Yahoo Finance chart JSON cache",
     "asterClaim": false,
@@ -26,7 +39,8 @@
       "MSFT": "8C403EAFE1B20E7DAC7CE2B23002C66D4905C1B02EA6B143205FE5A555FD93AB",
       "NVDA": "F7F17931C9A13CBAF2738A241CF589DD947B37B5D11FDD44D9AD50422C3D764C",
       "TSLA": "04BEEEB95A62C59ABD945C08AA19AA73112C0359C66E2AE32880D37E81601F5B"
-    }
+    },
+    "quality": {"loadedBarsPerSymbol": {"AMZN": 1735, "META": 1735, "MSFT": 1735, "NVDA": 1735, "TSLA": 1735}, "allNullMarketClosedRowsSkipped": true, "partialNullRowsRejected": true}
   },
   "quality": {
     "duplicateRows": 0,
@@ -37,7 +51,14 @@
     "invalidRows": [{"symbol": "BTCUSDT", "ts": "2025-09-13T04:00:00Z", "tsMs": 1757768400000, "open": 115941.8, "high": 115916.1, "low": 115580.7, "close": 115707.3, "reason": "high < open"}],
     "valid": false
   },
-  "formalRun": {"executed": false, "reason": "Aster raw validation failed; invalid OHLC cannot be silently repaired or dropped. Production signal/exit/MTM parity is also not established by the contract-level adapters.", "normal": null, "severe": null, "newPenguStandalone": null, "integratedComparison": null, "resultHash": null},
+  "formalRun": {"executed": false, "reason": "Aster raw validation failed, but a valid Binance alternate source was acquired. Formal Production signal/exit/MTM parity is still not established by the contract-level adapters, so no formal NORMAL/SEVERE result is claimed.", "normal": null, "severe": null, "newPenguStandalone": null, "integratedComparison": null, "resultHash": null},
+  "rawSourceAdapterRun": {
+    "executed": true,
+    "source": "Binance USD-M Futures public REST",
+    "normal": {"acceptedCandidateCount": 3, "rejectedCandidateCount": 36386, "realizedPnl": 0.0, "fees": 0.0, "funding": 0.0, "pendingReservations": ["pengu:SHORT_V20:1754787600000", "v12:BNBUSDT:1754787600000", "v12:SOLUSDT:1754787600000"]},
+    "severe": {"acceptedCandidateCount": 3, "rejectedCandidateCount": 36386, "realizedPnl": 0.0, "fees": 0.0, "funding": 0.0, "pendingReservations": ["pengu:SHORT_V20:1754787600000", "v12:BNBUSDT:1754787600000", "v12:SOLUSDT:1754787600000"]},
+    "interpretation": "adapter-level reservation smoke only; no fills, exits, mark-to-market, or formal PnL"
+  },
   "implementationParityVerified": false,
   "tradeLedgersUsedAsInput": false,
   "vpsOrLiveChanged": false
