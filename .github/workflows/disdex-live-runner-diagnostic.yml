@@ -1,0 +1,117 @@
+name: DisDex LIVE runner diagnostic
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    if: >-
+      github.event.issue.number == 132 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == 'DISDEX_LIVE_RUNNER_DIAG_20260924'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Configure root SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          root=Path.home()/".ssh"
+          def norm(v): return os.environ[v].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (root/"id_root").write_text(norm("ROOT_KEY"),encoding="utf-8")
+          (root/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"),encoding="utf-8")
+          PY
+          chmod 600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Read-only runner diagnosis
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          SSH_PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -p "$SSH_PORT" "root@$SSH_HOST" 'bash -s' <<'REMOTE'
+          set -Eeuo pipefail
+          echo '=== CURRENT RELEASE ==='
+          echo "TRADING_CURRENT=$(readlink -f /home/deploy/disdex-trading/current 2>/dev/null || true)"
+          if [[ -f /home/deploy/disdex-trading/current/.disdex-release-sha ]]; then
+            echo "TRADING_SHA=$(tr -d '[:space:]' < /home/deploy/disdex-trading/current/.disdex-release-sha)"
+          fi
+          echo '=== FAILED UNITS ==='
+          systemctl --failed --no-pager || true
+          echo '=== RELEVANT SERVICES ==='
+          systemctl list-units --type=service --all --no-pager | grep -Ei 'disdex|pengu|quality102|fet|v12|v52|margin|shared|watchdog|runner' || true
+          echo '=== RELEVANT TIMERS ==='
+          systemctl list-timers --all --no-pager | grep -Ei 'disdex|pengu|quality102|fet|v12|v52|margin|shared|watchdog|runner' || true
+          echo '=== UNIT DEFINITIONS ==='
+          systemctl list-unit-files --type=service --no-pager | grep -Ei 'disdex|pengu|quality102|fet|v12|v52|margin|shared|watchdog|runner' || true
+          echo '=== KILL SWITCH ==='
+          if [[ -f /var/lib/disdex/shared/kill-switch.json ]]; then
+            stat -c 'KILL_SWITCH_MODE=%U:%G:%a MTIME=%y' /var/lib/disdex/shared/kill-switch.json
+            python3 - <<'PY'
+          import json
+          p='/var/lib/disdex/shared/kill-switch.json'
+          try:
+              d=json.load(open(p))
+              keep={k:d.get(k) for k in ['active','mode','reason','updatedAt','since','source','stage'] if k in d}
+              print('KILL_SWITCH='+json.dumps(keep,separators=(',',':')))
+          except Exception as e: print('KILL_SWITCH_PARSE_ERROR='+type(e).__name__)
+          PY
+          else echo 'KILL_SWITCH_MISSING'; fi
+          echo '=== HEARTBEATS ==='
+          for f in /var/lib/disdex/runner-health/heartbeats/*.json; do
+            [[ -f "$f" ]] || continue
+            stat -c 'HB %n %U:%G:%a %Y' "$f"
+            python3 - "$f" <<'PY'
+          import json,sys
+          f=sys.argv[1]
+          try:
+              d=json.load(open(f))
+              keys=['schema','runnerId','strategyId','runtimeSha','expectedSha','mode','liveEnabled','safetyState','heartbeatAt','updatedAt','reason','manualReview']
+              print('HBJSON',f,{k:d.get(k) for k in keys if k in d})
+          except Exception as e: print('HBERR',f,type(e).__name__)
+          PY
+          done
+          echo '=== STATE FILES ==='
+          for f in /var/lib/disdex/v12-x1-all/runner.json /var/lib/disdex/pengu-dual-ls-v2/runner-live.json /var/lib/disdex/quality102-causal-v1/state.json /var/lib/disdex/fet-brk48-residual/state.json /var/lib/disdex/v52-aster-only/runner-live.json; do
+            if [[ -f "$f" ]]; then
+              stat -c 'STATE %n %U:%G:%a %Y' "$f"
+              python3 - "$f" <<'PY'
+          import json,sys
+          f=sys.argv[1]
+          try:
+              d=json.load(open(f))
+              keys=['schema','strategyId','runtimeCommitSha','runtimeSha','updatedAt','heartbeatAt','manualReview','pending','lastError','status','mode']
+              o={k:d.get(k) for k in keys if k in d}
+              if isinstance(o.get('pending'),dict): o['pending']={k:o['pending'].get(k) for k in ['action','reason','updatedAt'] if k in o['pending']}
+              print('STATEJSON',f,o)
+          except Exception as e: print('STATEERR',f,type(e).__name__)
+          PY
+            else echo "STATE_MISSING $f"; fi
+          done
+          echo '=== RESTART COUNTS / ACTIVE STATE ==='
+          mapfile -t units < <(systemctl list-unit-files --type=service --no-legend | awk '{print $1}' | grep -Ei 'disdex.*(v12|pengu|quality102|fet|v52|margin|shared|watchdog|runner)' | sort -u)
+          for u in "${units[@]}"; do
+            echo "UNIT=$u ACTIVE=$(systemctl is-active "$u" 2>/dev/null || true) ENABLED=$(systemctl is-enabled "$u" 2>/dev/null || true) RESULT=$(systemctl show "$u" -p Result --value 2>/dev/null || true) PID=$(systemctl show "$u" -p MainPID --value 2>/dev/null || true) NRESTARTS=$(systemctl show "$u" -p NRestarts --value 2>/dev/null || true)"
+          done
+          echo '=== RECENT ERRORS ==='
+          journalctl --since '90 minutes ago' --no-pager -p warning..alert | grep -Ei 'disdex|pengu|quality102|fet|v12|v52|margin|shared|watchdog|aster|kill|fail|error' | tail -n 500 || true
+          echo '=== DISK/MEMORY ==='
+          df -h /
+          free -h
+          echo 'TRADING_MUTATION=0'
+          echo 'RUNNER_DIAG_COMPLETE'
+          REMOTE
