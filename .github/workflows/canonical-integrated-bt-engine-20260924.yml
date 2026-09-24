@@ -1,0 +1,44 @@
+name: Canonical Integrated BT Engine Starter (research only)
+on:
+  push:
+    branches:
+      - codex/canonical-integrated-bt-engine-20260924
+    paths:
+      - 'scripts/research/canonical_integrated_bt/**'
+      - 'tests/test_canonical_integrated_bt.py'
+      - '.github/workflows/canonical-integrated-bt-engine-20260924.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  synthetic-contract-and-provenance:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Execute deterministic kernel contract tests
+        run: python -m unittest discover -s tests -p test_canonical_integrated_bt.py -v
+      - name: Audit missing original formal anchor evidence (failure expected)
+        shell: bash
+        run: |
+          set +e
+          python -m scripts.research.canonical_integrated_bt \
+            --mode audit \
+            --output .research-state/canonical-integrated-bt/evidence-gate.json
+          rc=$?
+          set -e
+          test "$rc" -eq 2
+          grep -q BLOCKED_MISSING_CANONICAL_SOURCE .research-state/canonical-integrated-bt/evidence-gate.json
+      - name: Upload evidence gate report (NOT a formal BT)
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: canonical-integrated-bt-evidence-gate
+          path: .research-state/canonical-integrated-bt/
+          include-hidden-files: true
+          retention-days: 90
