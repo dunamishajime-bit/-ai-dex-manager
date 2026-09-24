@@ -9,6 +9,10 @@ USD-M Futures public REST bundle was also acquired for the same period and
 universe. V52 reference data is a separately identified Yahoo Finance stock
 source and is not claimed to be Aster crypto data.
 
+For the alternate raw run, Binance is the selected crypto source. It is a
+clean independent market-data source, but it is not evidence of Aster venue
+price/fill parity.
+
 Capital contract: initial ¥10,000, twelve monthly ¥10,000 deposits, total
 contributed ¥130,000, compounding enabled.
 

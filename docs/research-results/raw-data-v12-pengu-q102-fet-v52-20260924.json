@@ -1,5 +1,6 @@
 {
   "status": "BLOCKED_RAW_SOURCE_OR_PARITY",
+  "selectedCryptoSource": "Binance USD-M Futures public REST (alternate raw run; not Aster venue parity)",
   "period": {"start": "2025-08-10T00:00:00Z", "end": "2026-08-10T00:00:00Z", "endExclusive": true},
   "capital": {"initialJpy": 10000, "monthlyJpy": 10000, "monthlyCount": 12, "totalContributedJpy": 130000, "compounding": true},
   "productionContractSource": {"path": "docs/production/current-live-target.json", "sha256": "8F052EEA2E7D71BC040798D3F4473C08DF828A7C8FD70D5F26A7DC5B076E1CDE"},
