@@ -264,7 +264,8 @@ def replay_synthetic(events: Sequence[Mapping[str, Any]], policy: Mapping[str, A
                     del state.reservations[reservation_id]
                 state.cash -= notional * fee_rate
                 state.positions[pid] = Position(pid, strategy, symbol, route, int(side), price, notional,
-                                                ONE, equity, gross, lev)
+                                                ONE, equity, gross, lev,
+                                                accrued_realized=-(notional * fee_rate))
                 state.marks.setdefault(symbol, price)
                 state.counts[f"{strategy}.entries"] += 1
         elif kind == "EXIT":
