@@ -27,6 +27,13 @@ Because the raw-data contract rejects invalid OHLC and forbids post-hoc
 repair, NORMAL/SEVERE integrated results were not reported. No formal
 baseline parity or new-PENGU comparison is claimed.
 
+In addition, the new raw adapters are contract-level rebuild scaffolding, not
+evidence of complete Production signal parity: the full V12 feature stack,
+Q102 causal model, PENGU route exits, FET BRK48 rules, V52 Aster/reference
+join, and end-to-end exit/mark-to-market replay still require their source
+rules and validated inputs. Their unit contracts pass, but that is not a
+formal portfolio BT result.
+
 ## Implemented and tested
 
 The branch contains raw-data models/validation, Aster pagination and funding

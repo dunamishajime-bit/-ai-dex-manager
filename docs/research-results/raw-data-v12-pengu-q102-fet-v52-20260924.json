@@ -37,7 +37,8 @@
     "invalidRows": [{"symbol": "BTCUSDT", "ts": "2025-09-13T04:00:00Z", "tsMs": 1757768400000, "open": 115941.8, "high": 115916.1, "low": 115580.7, "close": 115707.3, "reason": "high < open"}],
     "valid": false
   },
-  "formalRun": {"executed": false, "reason": "Aster raw validation failed; invalid OHLC cannot be silently repaired or dropped.", "normal": null, "severe": null, "newPenguStandalone": null, "integratedComparison": null, "resultHash": null},
+  "formalRun": {"executed": false, "reason": "Aster raw validation failed; invalid OHLC cannot be silently repaired or dropped. Production signal/exit/MTM parity is also not established by the contract-level adapters.", "normal": null, "severe": null, "newPenguStandalone": null, "integratedComparison": null, "resultHash": null},
+  "implementationParityVerified": false,
   "tradeLedgersUsedAsInput": false,
   "vpsOrLiveChanged": false
 }

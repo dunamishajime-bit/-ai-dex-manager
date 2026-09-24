@@ -10,5 +10,6 @@
   "asterCanonicalSha256": "1951f664d3fcb2f150521fea9b92acde9795e1ec5abea1dc86e78b3ac798a18a",
   "qualityGate": {"valid": false, "invalidRows": 1, "incompleteSymbols": [], "gaps": 0},
   "resultHash": null,
+  "implementationParityVerified": false,
   "tradeLedgersUsedAsInput": false
 }
