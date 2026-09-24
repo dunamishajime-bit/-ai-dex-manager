@@ -8,6 +8,7 @@ import { useOperationalWallet } from "@/hooks/useOperationalWallet";
 import { useLivePortfolio } from "@/hooks/useLivePortfolio";
 import { useLiveStatus } from "@/hooks/useLiveStatus";
 import { useProductionRuntime } from "@/hooks/useProductionRuntime";
+import { FetDecisionPanel } from "@/components/features/FetDecisionPanel";
 
 function SummaryCard({ title, value, detail, tone = "default" }: { title: string; value: string; detail: string; tone?: "default" | "profit" | "loss" }) {
   return (
@@ -79,12 +80,13 @@ export default function HomePage() {
         <section className="grid gap-3 xl:grid-cols-[1.15fr_0.85fr]">
           <div className="panel-gold rounded-[30px] p-5 md:p-7">
             <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-gold-100/76"><ShieldCheck className="h-4 w-4" />DISTerminal Production</div>
-            <h1 className="gold-heading mt-3 text-3xl font-black tracking-tight md:text-5xl">{v12 && pengu && v52 ? `${v12.strategyId} / ${pengu.strategyId} / Q102 ${q102?.selectorMode ?? "UNAVAILABLE"} / ${v52.policyId}` : "DISTerminal Production Runtime"}</h1>
-            <p className="mt-4 max-w-3xl text-sm leading-7 text-white/82">AsterDEXのV12 X1.00 ALL Top2、PENGU V2 / Short V20 / Recovery V8、Q102 Causal V4、V52 Stockを、同一口座の実残高・実建玉・未決済注文とともに読み取り表示します。取得できない値は推測せず、未取得として表示します。</p>
+            <h1 className="gold-heading mt-3 text-3xl font-black tracking-tight md:text-5xl">{v12 && pengu && v52 ? `${v12.strategyId} / ${pengu.strategyId} / Q102 ${q102?.selectorMode ?? "UNAVAILABLE"} / FET BRK48 / ${v52.policyId}` : "DISTerminal Production Runtime"}</h1>
+            <p className="mt-4 max-w-3xl text-sm leading-7 text-white/82">AsterDEXのV12 X1.00 ALL Top2、PENGU V2 / Short V20 / Recovery V8、Q102 Causal V4、FET BRK48 LONG、V52 Stockを、同一口座の実残高・実建玉・未決済注文とともに読み取り表示します。取得できない値は推測せず、未取得として表示します。</p>
             <div className="mt-5 flex flex-wrap gap-2 text-[11px] font-semibold">
               <span className={`rounded-full border px-3 py-1.5 ${v12RuntimeStatus?.status === "LIVE" ? "border-emerald-400/25 bg-emerald-500/10 text-emerald-100" : "border-amber-400/25 bg-amber-500/10 text-amber-100"}`}>LIVE状態: {liveStatus}</span>
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">{v12?.strategyId ?? "V12 runtime未取得"}</span>
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">{pengu?.strategyId ?? "PENGU runtime未取得"}</span>
+              <Link href="/decision-status/fet" className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">FET BRK48（実稼働状態は詳細参照）</Link>
               <span className={`rounded-full border px-3 py-1.5 ${productionRuntime && lineage?.synchronized ? "border-emerald-400/25 bg-emerald-500/10 text-emerald-100" : "border-amber-400/25 bg-amber-500/10 text-amber-100"}`}>{productionRuntime ? (lineage?.synchronized ? `Production ${productionRuntime.releaseSha.slice(0, 12)} / runtime SHA同期` : `Production ${productionRuntime.releaseSha.slice(0, 12)} / RUNTIME MISMATCH`) : `Production runtime未接続${productionRuntimeError ? `: ${productionRuntimeError}` : ""}`}</span>
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">{caps ? `Crypto共有損失上限 ${caps.sharedCryptoDailyLossPct}%` : "Crypto risk runtime未取得"}</span>
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">{caps ? `V52損失上限 ${caps.stockDailyLossPct}%` : "V52 risk runtime未取得"}</span>
@@ -101,11 +103,12 @@ export default function HomePage() {
           </div>
         </section>
         <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
-          <QuickLink href="/positions" title="ダッシュボード" detail="V12、PENGU V2、V52、Quality102の実建玉・保護注文・リスク状態を確認します。" icon={BarChart3} />
+          <QuickLink href="/positions" title="ダッシュボード" detail="V12、PENGU、Q102、FET、V52の実建玉・保護注文・リスク状態を確認します。" icon={BarChart3} />
           <QuickLink href="/wallets" title="AsterDEXウォレット" detail="口座残高、利用可能残高、ウォレット情報を確認します。" icon={Wallet} />
           <QuickLink href="/performance" title="成績" detail="実約定に基づく損益と保有期間を確認します。" icon={Coins} />
           <QuickLink href="/settings" title="設定" detail="認証と表示設定を確認します。実売買設定はここから変更しません。" icon={Settings} />
         </section>
+        <FetDecisionPanel compact />
         <V52Top2Summary />
         <section className="rounded-[24px] border border-amber-400/25 bg-amber-500/5 p-4 text-sm leading-6 text-amber-100">
           <div className="font-bold">Q102 {q102?.selectorMode ?? "runtime未取得"} の公開状態</div>
