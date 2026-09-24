@@ -47,6 +47,20 @@ to certify the portfolio result: it does not supply the other sleeves, the
 original event ordering, or the shared allocator state. Summary JSON and a
 generated result JSON are therefore rejected by the new source-bundle gate.
 
+Additional remote recovery checks were performed after the initial handoff:
+
+- `research/current-performance-restoration-20260905` is present remotely,
+  but its Git tree contains scripts/workflows only; the ignored
+  `.research-state` inputs are not in the repository.
+- `codex/v52-vps-live-sync-20260829` is present remotely, with the same
+  limitation.
+- Successful Actions run `32806882868` is the older `V12 + PENGU V2 + V52`
+  workflow. It is not the requested `Top3 + FET + Q102 Governor + current
+  PENGU + V52` anchor and is not used as a substitute.
+- The newer Top3/FET/Q102 candidate runs inspected on GitHub were rejected
+  before job creation (`jobs=0`), so they do not provide a successful formal
+  event-ledger artifact.
+
 ## Safety behavior
 
 The branch now has an executable `discover-source` gate. It accepts a source
