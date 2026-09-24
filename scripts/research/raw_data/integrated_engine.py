@@ -42,6 +42,9 @@ class Position:
     hard_stop_pct: float | None = None
     take_profit_pct: float | None = None
     asset_class: str = "crypto"
+    profit_floor_trigger_pct: float | None = None
+    profit_floor_stop_pct: float | None = None
+    profit_floor_armed: bool = False
 
 
 @dataclass(frozen=True)
@@ -117,6 +120,8 @@ def commit_entry(state: PortfolioState, candidate: dict[str, Any], entry_price: 
         hard_stop_pct=_optional_float(candidate, "hardStopPct", "hard_stop_pct"),
         take_profit_pct=_optional_float(candidate, "takeProfitPct", "take_profit_pct"),
         asset_class=str(candidate.get("assetClass", "stock" if str(candidate.get("symbol", "")).startswith("STOCK") else "crypto")),
+        profit_floor_trigger_pct=_optional_float(candidate, "profitFloorTriggerPct"),
+        profit_floor_stop_pct=_optional_float(candidate, "profitFloorStopPct"),
     )
     state.positions[position.position_id] = position
     return position
