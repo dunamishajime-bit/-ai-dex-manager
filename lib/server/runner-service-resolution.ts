@@ -2,6 +2,7 @@ export type AlertRunnerId =
   | "V12"
   | "PENGU_V8"
   | "V52"
+  | "FET_BRK48_RESIDUAL"
   | "QUALITY102_CAUSAL_V1"
   | "SHARED_CRYPTO_RISK"
   | "MARGIN_GUARD";
@@ -12,6 +13,7 @@ const SERVICE_PREFIX: Record<AlertRunnerId, string> = {
   V12: "disdex-v12-x1-all@",
   PENGU_V8: "disdex-pengu-dual-ls-v2@",
   V52: "disdex-v52-aster-only@",
+  FET_BRK48_RESIDUAL: "disdex-fet-brk48@",
   QUALITY102_CAUSAL_V1: "disdex-quality102-causal-v1@",
   SHARED_CRYPTO_RISK: "disdex-shared-crypto-risk@",
   MARGIN_GUARD: "disdex-v12-v52-margin-guard@",

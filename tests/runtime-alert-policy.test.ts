@@ -42,6 +42,7 @@ test("runner unit resolution is pinned to the current release SHA", () => {
   assert.equal(expectedRunnerServiceUnit("QUALITY102_CAUSAL_V1", currentSha), "disdex-quality102-causal-v1@ba32a19ec67a70185ce14cd281a01631c4ee07cf.service");
   assert.equal(expectedRunnerServiceUnit("SHARED_CRYPTO_RISK", currentSha), "disdex-shared-crypto-risk@ba32a19ec67a70185ce14cd281a01631c4ee07cf.service");
   assert.equal(expectedRunnerServiceUnit("MARGIN_GUARD", currentSha), "disdex-v12-v52-margin-guard@ba32a19ec67a70185ce14cd281a01631c4ee07cf.service");
+  assert.equal(expectedRunnerServiceUnit("FET_BRK48_RESIDUAL", currentSha), "disdex-fet-brk48@ba32a19ec67a70185ce14cd281a01631c4ee07cf.service");
   assert.equal(resolveRunnerServiceUnit("V12", currentSha).detail, `current release ${currentSha} のunitを使用`);
   assert.equal(normalizeCurrentReleaseSha(` ${currentSha.toUpperCase()} `), currentSha);
 });

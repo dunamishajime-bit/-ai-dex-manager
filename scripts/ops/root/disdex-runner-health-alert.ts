@@ -47,6 +47,11 @@ const runners: Array<{ id: RunnerId; label: string; unitEnv: string; intentional
     intentionalStopPath: "/var/lib/disdex/runner-health/v52.intentional-stop",
   },
   {
+    id: "FET_BRK48_RESIDUAL",
+    label: "FET BRK48 Residual",
+    unitEnv: "DISDEX_ALERT_FET_BRK48_SERVICE_UNIT",
+  },
+  {
     id: "QUALITY102_CAUSAL_V1",
     label: "Quality102 Causal V4",
     unitEnv: "DISDEX_ALERT_QUALITY102_SERVICE_UNIT",
