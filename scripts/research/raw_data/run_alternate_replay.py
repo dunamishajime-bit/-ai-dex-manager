@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import gzip
 import json
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -17,6 +18,21 @@ END_MS = 1_786_320_000_000
 def _load_bundle(path: Path) -> dict[str, Any]:
     with gzip.open(path, "rt", encoding="utf-8") as handle:
         bundle = json.load(handle)
+    # Binance lists FET earlier than Aster's audited FET inception. Aster
+    # venue availability governs ALL strategy sleeves in this alternate run:
+    # no FET signal, ranking or funding can use pre-listing Binance bars.
+    aster_fet_inception_ms = int(datetime(2026, 1, 9, 18, tzinfo=timezone.utc).timestamp() * 1000)
+    if "FETUSDT" in bundle.get("bars", {}):
+        bundle["bars"]["FETUSDT"] = [
+            row for row in bundle["bars"]["FETUSDT"]
+            if int(row["ts_ms"]) >= aster_fet_inception_ms
+        ]
+    if isinstance(bundle.get("funding"), dict) and "FETUSDT" in bundle["funding"]:
+        bundle["funding"]["FETUSDT"] = [
+            row for row in bundle["funding"]["FETUSDT"]
+            if int(row["ts_ms"]) >= aster_fet_inception_ms
+        ]
+    bundle["venueAvailability"] = {"FETUSDT": aster_fet_inception_ms}
     bundle["contracts"] = {
         "V12": {
             "top_n": 3,
