@@ -1,0 +1,52 @@
+name: Repaired independent one-year integrated BT (research only)
+on:
+  push:
+    branches: [research/raw-replay-accounting-fix-20260925]
+    paths:
+      - scripts/research/raw_data/run_repaired_independent_bt.py
+      - .github/workflows/repaired-independent-bt-20260925.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  repaired-independent-bt:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run repaired accounting regression before market fetch
+        run: |
+          python -m unittest discover -s tests -p 'test_raw_*.py' -v
+          python -m unittest discover -s tests -p 'test_remaining_raw_rebuilds.py' -v
+          python -m unittest discover -s tests -p 'test_v12_raw_rebuild.py' -v
+          python -m unittest discover -s tests -p 'test_pengu_raw_rebuild.py' -v
+      - name: Verify Binance USD-M public read-only endpoint
+        run: |
+          python - <<'PY'
+          from urllib.request import Request, urlopen
+          with urlopen(Request("https://fapi.binance.com/fapi/v1/klines?symbol=BTCUSDT&interval=1h&limit=1",headers={"User-Agent":"DisDex-research-raw-backtest/1.0"}),timeout=20) as r:
+              assert r.status == 200
+              assert r.read(1)
+              print("BINANCE_PUBLIC_READONLY_AVAILABLE=TRUE")
+          PY
+      - name: Download/validate and replay all four corrected independent scenarios twice
+        run: |
+          python -m scripts.research.raw_data.run_repaired_independent_bt \
+            --download --verify-determinism \
+            --bundle .raw-data/repaired-binance-2025-2026.json.gz \
+            --output research-results/repaired-independent-20260925/summary.json
+      - name: Upload complete research-only raw source, replay events and audit
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: repaired-independent-bt-20260925
+          path: |
+            .raw-data/repaired-binance-2025-2026.json.gz
+            research-results/repaired-independent-20260925/
+          if-no-files-found: warn
+          include-hidden-files: true
+          compression-level: 6
+          retention-days: 90
