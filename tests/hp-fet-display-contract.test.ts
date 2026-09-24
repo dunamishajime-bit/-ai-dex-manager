@@ -16,6 +16,7 @@ const sidebar = read("components/layout/Sidebar.tsx");
 
 test("FET has a dedicated page, overview navigation and both dashboard surfaces", () => {
   assert.match(page, /FetDecisionPanel/);
+  assert.match(page, /LivePerformanceDashboard logic="FET"/);
   assert.match(overview, /\/decision-status\/fet/);
   assert.match(home, /FetDecisionPanel compact/);
   assert.match(positions, /FetDecisionPanel compact/);
@@ -48,7 +49,30 @@ test("FET cannot be shown LIVE on stale, mismatched or unverified state", () => 
 
 test("FET gross comes from current Production config, not a hard-coded UI number", () => {
   assert.match(observer, /CURRENT_CONFIG/);
-  assert.match(observer, /maximumGrossMatch/);
+  assert.match(observer, /configNumber\(config, "maximumGross"\)/);
   assert.match(panel, /snapshot\?\.maximumGross/);
   assert.doesNotMatch(panel, /2\.25x|2\.25/);
+});
+
+
+test("FET detail recomputes BRK48 read-only gates from current Production config and public 1h klines", () => {
+  assert.match(observer, /\/fapi\/v3\/klines/);
+  assert.match(observer, /lookbackHours/);
+  assert.match(observer, /volumeMedianHours/);
+  assert.match(observer, /minimumVolumeRatio/);
+  assert.match(observer, /decisionEntryHourModulo/);
+  assert.match(observer, /signalEligible/);
+  assert.match(panel, /FET BRK48 LONG 現在判定/);
+  assert.match(panel, /Breakout距離/);
+  assert.match(panel, /Volume Ratio/);
+  assert.match(panel, /利益保護/);
+});
+
+test("decision status and FET detail are mobile-safe for long runtime reasons and identifiers", () => {
+  assert.match(overview, /overflow-x-hidden/);
+  assert.match(overview, /overflow-wrap:anywhere/);
+  assert.match(overview, /grid-cols-\[36px_minmax\(0,1fr\)_56px\]/);
+  assert.match(panel, /overflow-x-hidden/);
+  assert.match(panel, /overflow-wrap:anywhere/);
+  assert.match(page, /overflow-x-hidden/);
 });
