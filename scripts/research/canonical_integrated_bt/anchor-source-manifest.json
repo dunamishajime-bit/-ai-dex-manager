@@ -1,0 +1,65 @@
+{
+  "schema": "canonical-integrated-anchor-manifest/v1",
+  "status": "BLOCKED_MISSING_CANONICAL_SOURCE",
+  "formal_anchor_name": "Top3 + FET + Q102 Governor / original PENGU",
+  "period_label": "2025-08-10 through 2026-08-10 (UTC boundaries unverified)",
+  "original_run_id": null,
+  "original_source_sha": null,
+  "original_engine_sha": null,
+  "formal_start_utc": null,
+  "formal_end_utc": null,
+  "market_data_sha256": null,
+  "deposits_verified": false,
+  "cost_model_verified": false,
+  "tie_break_verified": false,
+  "trade_count_definition_verified": false,
+  "baseline_ledgers_sha256": null,
+  "original_allocator_sha256": null,
+  "fet_preemption_verified": false,
+  "q102_governor_verified": false,
+  "v52_calendar_verified": false,
+  "strategy_source_shas": {
+    "V12": null,
+    "PENGU": null,
+    "FET": null,
+    "Q102": null,
+    "V52": null
+  },
+  "published_reference_not_proven_by_manifest": {
+    "NORMAL": {
+      "final_equity_jpy": "740771278.01",
+      "profit_factor": "4.12008119",
+      "max_dd_pct": "-19.8845",
+      "portfolio_trades": 1195,
+      "pengu_trades": 66
+    },
+    "SEVERE": {
+      "final_equity_jpy": "65669109.00",
+      "profit_factor": "3.05645475",
+      "max_dd_pct": "-19.9903",
+      "portfolio_trades": 1036,
+      "pengu_trades": 66
+    }
+  },
+  "candidate_penguin_new": {
+    "logic": "COMBINED_FILTERED",
+    "every_entry_gross": "1.0",
+    "same_route_hardstop_quarantine_hours": 60,
+    "realized_dd_trigger_pct": "17",
+    "new_entry_pause_hours": 72,
+    "standalone_normal_trades": 69,
+    "standalone_severe_trades": 68
+  },
+  "source_hints": {
+    "production_branch": "codex/final-dynamic-gross-live-20260922",
+    "production_sha": "b937a1b209a652b71a165216d7ac0dbed5a13908",
+    "new_penguin_research_branch": "research/pengu-flat1-dd-reduction-20260924",
+    "historical_engine_capture_branch": "research/pengu-gross1-full-integrated-20260924"
+  },
+  "notes": [
+    "Published summary is not a substitute for event ledgers and original source provenance.",
+    "Current Production FET 2.25x and older shadow FET 1.25x are different contracts; recover anchor's exact configuration.",
+    "Original historical engine capture uses V12 Top2 and total cap3.5; not a substitute for current formal anchor.",
+    "Do not change Production, LIVE, VPS, or orders as part of this research."
+  ]
+}
