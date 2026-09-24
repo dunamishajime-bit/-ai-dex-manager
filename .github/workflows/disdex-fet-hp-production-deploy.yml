@@ -1,4 +1,4 @@
-name: DisDex FET HP production deploy
+name: DisDex HP mobile FET production deploy
 
 on:
   issue_comment:
@@ -17,13 +17,13 @@ jobs:
       github.event.issue.number == 132 &&
       github.actor == 'dunamishajime-bit' &&
       github.event.comment.author_association == 'OWNER' &&
-      github.event.comment.body == 'DISDEX_FET_HP_DEPLOY_20260924'
+      github.event.comment.body == 'DISDEX_HP_MOBILE_FET_DEPLOY_20260925'
     runs-on: ubuntu-24.04
     timeout-minutes: 35
     env:
-      TARGET_REF: codex/ui-current-q102-plus-fet-20260924
-      TARGET_SHA: 1ac7dfffbfbb1dd809e4d9e5db3ed2ce21c7877e
-      EXPECTED_OLD_UI_SHA: 15360fe637436a1b771197c5decf0e1e2a0b243f
+      TARGET_REF: codex/ui-live-performance-20260922
+      TARGET_SHA: 6e7f71f00e3ec33efbfb819e6d25f6872913750c
+      EXPECTED_OLD_UI_SHA: 1ac7dfffbfbb1dd809e4d9e5db3ed2ce21c7877e
       SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
       ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
       SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
