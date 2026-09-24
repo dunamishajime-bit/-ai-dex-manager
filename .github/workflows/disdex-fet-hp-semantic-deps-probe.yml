@@ -1,0 +1,70 @@
+name: DisDex FET HP semantic deps probe
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    if: >-
+      github.event.issue.number == 132 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == 'DISDEX_FET_HP_SEMANTIC_DEPS_PROBE_20260924'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Configure SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          p=Path.home()/".ssh"
+          def n(v): return os.environ[v].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(n("ROOT_KEY"),encoding="utf-8")
+          (p/"known_hosts").write_text(n("SSH_KNOWN_HOSTS"),encoding="utf-8")
+          PY
+          chmod 600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+      - name: Compare parsed package metadata on VPS
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          SSH_PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes             -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -p "$SSH_PORT" "root@$SSH_HOST" 'bash -s' <<'REMOTE'
+          set -Eeuo pipefail
+          current="$(systemctl show ai-dex-manager-ui.service --property WorkingDirectory --value)"
+          stage="$(find /home/deploy/disdex-trading/ui-releases -maxdepth 1 -type d -name '.ui-fet-1ac7dfff.tmp-*' | head -n1)"
+          [[ -d "$current" && -d "$stage" ]]
+          node - "$current" "$stage" <<'NODE'
+          const fs=require("fs"),path=require("path"),crypto=require("crypto");
+          const [cur,stg]=process.argv.slice(2);
+          const canon=(file)=>JSON.stringify(JSON.parse(fs.readFileSync(file,"utf8")));
+          for(const name of ["package.json","package-lock.json"]){
+            const a=canon(path.join(cur,name)), b=canon(path.join(stg,name));
+            console.log(name.replace(/[-.]/g,"_").toUpperCase()+"_SEMANTIC_EQUAL="+(a===b));
+            console.log("CURRENT_"+name.replace(/[-.]/g,"_").toUpperCase()+"_CANON_SHA256="+crypto.createHash("sha256").update(a).digest("hex"));
+            console.log("STAGE_"+name.replace(/[-.]/g,"_").toUpperCase()+"_CANON_SHA256="+crypto.createHash("sha256").update(b).digest("hex"));
+          }
+          const nm=path.join(cur,"node_modules");
+          const st=fs.lstatSync(nm);
+          console.log("NODE_MODULES_IS_SYMLINK="+st.isSymbolicLink());
+          console.log("NODE_MODULES_REALPATH="+fs.realpathSync(nm));
+          const deps=JSON.parse(fs.readFileSync(path.join(cur,"package.json"),"utf8")).dependencies;
+          for(const d of ["next","react","react-dom","lucide-react"]){
+            const v=JSON.parse(fs.readFileSync(path.join(fs.realpathSync(nm),d,"package.json"),"utf8")).version;
+            console.log("INSTALLED_"+d.toUpperCase().replace(/-/g,"_")+"="+v+" DECLARED="+deps[d]);
+          }
+          NODE
+          echo 'TRADING_MUTATION=0'
+          REMOTE
