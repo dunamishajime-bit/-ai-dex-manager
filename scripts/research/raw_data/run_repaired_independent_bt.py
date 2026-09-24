@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any
 
 from .binance_fetch import fetch_binance_bundle
+from .binance_vision_fetch import fetch_binance_vision_bundle
 from .models import Bar, Funding
 from .run_alternate_replay import START_MS, END_MS, run
 from .validate_bundle import validate_bundle
@@ -40,6 +41,7 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=Path("research-results/repaired-independent-20260925/summary.json"))
     parser.add_argument("--manifest", type=Path, default=REFERENCE_MANIFEST)
     parser.add_argument("--download", action="store_true")
+    parser.add_argument("--source", choices=["binance-vision", "binance-rest"], default="binance-vision")
     parser.add_argument("--stock-dir", type=Path)
     parser.add_argument("--verify-determinism", action="store_true")
     args = parser.parse_args()
@@ -55,7 +57,9 @@ def main() -> None:
         raise SystemExit("ALTERNATE_BUNDLE_UNIVERSE_UNVERIFIED")
 
     if args.download:
-        raw = fetch_binance_bundle(symbols, START_MS, END_MS)
+        raw = (fetch_binance_vision_bundle(symbols, START_MS, END_MS)
+               if args.source == "binance-vision"
+               else fetch_binance_bundle(symbols, START_MS, END_MS))
         _write_gzip(args.bundle, raw)
     if not args.bundle.is_file():
         raise SystemExit("RAW_BUNDLE_MISSING_NO_DOWNLOAD")
@@ -99,7 +103,7 @@ def main() -> None:
         "newPenguProductionParityVerified": False,
         "v52PairedBasisExecutionVerified": False,
         "v52Included": bool(args.stock_dir and args.stock_dir.is_dir()),
-        "rawSource": "Binance USD-M Futures public REST (NOT Aster parity)",
+        "rawSource": str(bundle.get("source", {}).get("provider", "UNKNOWN")) + " (NOT Aster parity)",
         "originalRawBundleHashMatches": (
             quality["sha256"].lower() ==
             source_manifest["alternateCryptoSource"]["canonicalBundleSha256"].lower()
