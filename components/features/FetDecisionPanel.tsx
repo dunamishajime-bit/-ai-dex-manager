@@ -108,6 +108,9 @@ export function FetDecisionPanel({ compact = false }: { compact?: boolean }) {
           ["最大Gross（本番設定）", amount(snapshot?.maximumGross, "x")],
           ["実建玉Gross", snapshot?.position ? amount(snapshot.position.gross, "x") : snapshot ? "建玉stateなし" : "未取得"],
           ["state更新", date(snapshot?.updatedAt)],
+          ["runner-health更新", date(snapshot?.heartbeatAt)],
+          ["service identity", snapshot?.serviceUnit || "未取得"],
+          ["runner-health", snapshot?.heartbeatSafetyState || "未取得"],
           ["最終処理足", date(snapshot?.lastReferenceTs)],
           ["本番SHA", snapshot?.expectedRuntimeSha?.slice(0, 12) || "未取得"],
           ["FET state SHA", snapshot?.runtimeCommitSha?.slice(0, 12) || "未取得"],
@@ -146,7 +149,7 @@ export function FetDecisionPanel({ compact = false }: { compact?: boolean }) {
               : "Pending注文: " + (snapshot ? "記録なし" : "未取得")}
           </p>
           <p className="mt-3 text-xs leading-6 text-amber-100/80">
-            FET stateの更新確認はsystemd active/running・NRestarts=0・Aster実建玉・reduceOnly保護注文の確認とは別です。
+            LIVE表示には最新stateとrunner-healthのservice identity確認が必要です。NRestarts=0・Aster実建玉・reduceOnly保護注文のread-backは別途必要です。
             この画面では未検証項目をLIVE完了とみなしません。
           </p>
         </div>
