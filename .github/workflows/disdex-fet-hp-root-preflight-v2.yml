@@ -1,0 +1,87 @@
+name: DisDex FET HP root preflight v2
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-fet-hp-deploy
+  cancel-in-progress: false
+
+jobs:
+  root-preflight:
+    if: >-
+      github.event.issue.number == 132 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == 'DISDEX_FET_HP_ROOT_PROBE_V2_20260924'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Configure root SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ -n "$SSH_HOST" && -n "$ROOT_KEY" && -n "$SSH_KNOWN_HOSTS" ]]
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          root=Path.home()/".ssh"
+          def norm(v): return os.environ[v].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (root/"id_vps_root").write_text(norm("ROOT_KEY"),encoding="utf-8")
+          (root/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"),encoding="utf-8")
+          PY
+          chmod 600 "$HOME/.ssh/id_vps_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_vps_root" >/dev/null
+      - name: Read-only production UI inspection
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          SSH_PORT="${SSH_PORT:-22}"
+          timeout 90 ssh -T -i "$HOME/.ssh/id_vps_root" \
+            -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -o ConnectTimeout=15 \
+            -p "$SSH_PORT" "root@$SSH_HOST" 'bash -s' <<'REMOTE'
+          set -Eeuo pipefail
+          [[ "$(id -un)" == "root" ]]
+          echo 'ROOT_SSH=PASS'
+          ui_service='ai-dex-manager-ui.service'
+          echo "UI_ACTIVE=$(systemctl is-active "$ui_service" 2>/dev/null || true)"
+          echo "UI_WORKDIR=$(systemctl show "$ui_service" --property WorkingDirectory --value 2>/dev/null || true)"
+          echo "UI_MAINPID=$(systemctl show "$ui_service" --property MainPID --value 2>/dev/null || true)"
+          echo "UI_FRAGMENT=$(systemctl show "$ui_service" --property FragmentPath --value 2>/dev/null || true)"
+          echo "UI_DROPINS=$(systemctl show "$ui_service" --property DropInPaths --value 2>/dev/null || true)"
+          echo "UI_ENV=$(systemctl show "$ui_service" --property Environment --value 2>/dev/null | sed -E 's/([^ =]*(TOKEN|KEY|PASSWORD|SECRET)[^ =]*)=[^ ]*/\1=***REDACTED***/Ig')"
+          wd="$(systemctl show "$ui_service" --property WorkingDirectory --value 2>/dev/null || true)"
+          if [[ -n "$wd" && -d "$wd" ]]; then
+            echo "UI_RELEASE_REALPATH=$(readlink -f "$wd")"
+            if [[ -f "$wd/.disdex-release-sha" ]]; then echo "UI_RELEASE_SHA=$(tr -d '[:space:]' < "$wd/.disdex-release-sha")"; fi
+            echo "UI_OWNER_MODE=$(stat -c '%U:%G:%a' "$wd")"
+          fi
+          echo "TRADING_CURRENT=$(readlink -f /home/deploy/disdex-trading/current 2>/dev/null || true)"
+          if [[ -f /home/deploy/disdex-trading/current/.disdex-release-sha ]]; then
+            echo "TRADING_SHA=$(tr -d '[:space:]' < /home/deploy/disdex-trading/current/.disdex-release-sha)"
+          fi
+          echo "UI_LOCAL_HTTP=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 5 http://127.0.0.1:3001/ || true)"
+          echo 'SOURCE_REPOS_BEGIN'
+          find /home/deploy -maxdepth 5 -type d -name .git -print 2>/dev/null | while read -r gitdir; do
+            repo="${gitdir%/.git}"
+            origin="$(runuser -u deploy -- git -C "$repo" remote get-url origin 2>/dev/null || true)"
+            if [[ "$origin" == *"dunamishajime-bit/-ai-dex-manager"* ]]; then
+              echo "SOURCE_REPO=$repo ORIGIN=$origin"
+            fi
+          done
+          echo 'SOURCE_REPOS_END'
+          echo "DISK=$(df -h /home/deploy | tail -n1 | tr -s ' ')"
+          echo 'TRADING_MUTATION=0'
+          echo 'ROOT_PREFLIGHT_V2=PASS'
+          REMOTE
