@@ -114,6 +114,12 @@ function nonEmpty(value: unknown): string | undefined {
   return typeof value === "string" && value.trim() ? value.trim() : undefined;
 }
 function configNumber(source: string, key: string): number | undefined {
+  const expressionMatch = source.match(new RegExp("\\b" + key + "\\s*:\\s*([0-9_.*\\s]+)\\s*,"));
+  const expression = expressionMatch?.[1]?.trim();
+  if (expression && /^[0-9_.*\\s]+$/.test(expression)) {
+    const factors = expression.split("*").map((part) => Number(part.replaceAll("_", "").trim()));
+    if (factors.length && factors.every(Number.isFinite)) return factors.reduce((product, value) => product * value, 1);
+  }
   const match = source.match(new RegExp("\\b" + key + "\\s*:\\s*([0-9]+(?:\\.[0-9]+)?)"));
   return match ? finite(match[1]) : undefined;
 }
