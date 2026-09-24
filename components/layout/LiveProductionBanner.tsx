@@ -18,7 +18,7 @@ function BannerContent() {
     <div className="mx-auto flex max-w-[1600px] flex-wrap items-center gap-x-4 gap-y-2 text-[11px] text-white/80">
       <span className="inline-flex items-center gap-1.5 font-bold text-emerald-200">
         <Activity className="h-3.5 w-3.5" />
-        {runtime && v12 && pengu && v52 ? `${v12.strategyId} / ${pengu.strategyId} / Q102 ${q102?.selectorMode ?? "UNAVAILABLE"} / ${v52.policyId}` : "DISTerminal Production Runtime"}
+        {runtime && v12 && pengu && v52 ? `${v12.strategyId} / ${pengu.strategyId} / Q102 ${q102?.selectorMode ?? "UNAVAILABLE"} / FET BRK48 / ${v52.policyId}` : "DISTerminal Production Runtime"}
       </span>
       <span>{config.executionVenue}</span>
       <span className={runtime && lineage?.synchronized ? "text-emerald-200" : "text-amber-200"}>

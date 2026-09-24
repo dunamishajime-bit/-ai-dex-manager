@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { loadDecisionStatus } from "@/lib/server/disdex-decision-status";
+import { loadFetRuntimeObservability } from "@/lib/server/fet-runtime-observability";
 import { loadV12DecisionObservability } from "@/lib/server/v12-decision-observability";
 import { loadV52Top2Observability } from "@/lib/server/v52-top2-observability";
 import { loadPenguRuntimeObservability } from "@/lib/server/pengu-runtime-observability";
@@ -53,7 +54,23 @@ export async function GET(req: NextRequest) {
         return { ...unit, status: v52Top2Observability.status === "LIVE" ? "LIVE" : v52Top2Observability.status === "STALE" ? "STALE" : "UNAVAILABLE", updatedAt: v52Top2Observability.updatedAt, reason: v52Top2Observability.errors[0] || v52Top2Observability.reason || (v52Top2Observability.status === "LIVE" ? "V52 runner state更新済み、Kill Switch inactiveを確認しました。" : "V52 runner stateがLIVE確認条件を満たしていません。") };
       }),
     };
-    return NextResponse.json({ ...snapshot, runtime, v12Observability, v52Top2Observability, penguRuntime, quality102Runtime }, { headers: { "Cache-Control": "private, no-store" } });
+    const fetRuntime = await loadFetRuntimeObservability();
+    runtime.units.push({
+      id: "FET_BRK48_RESIDUAL",
+      label: "FET BRK48 LONG",
+      status: fetRuntime.status,
+      releaseSha: fetRuntime.expectedRuntimeSha || "UNAVAILABLE",
+      venue: "Aster FETUSDT",
+      timeframe: "H1 / BRK48",
+      entryPolicy: "FET BRK48 LONG / 本番最大Gross " + (fetRuntime.maximumGross?.toFixed(2) || "未取得") + "x",
+      protection: fetRuntime.position
+        ? "state保護STOP ID " + (fetRuntime.position.stopOrderIdRecorded ? "記録あり（実注文照合は別途）" : "記録なし")
+        : "建玉stateなし。保護注文の有無はAster read-backで確認してください。",
+      note: "LIVEには最新stateとrunner-healthのservice identity一致が必要です。Aster実建玉・reduceOnly注文・NRestartsは別途照合します。",
+      reason: fetRuntime.reason,
+      updatedAt: fetRuntime.updatedAt,
+    });
+    return NextResponse.json({ ...snapshot, runtime, v12Observability, v52Top2Observability, penguRuntime, quality102Runtime, fetRuntime }, { headers: { "Cache-Control": "private, no-store" } });
   }
   catch (error) { return NextResponse.json({ ok: false, readOnly: true, error: error instanceof Error ? error.message : "判定データを取得できません。" }, { status: 503 }); }
 }
