@@ -42,6 +42,16 @@ class RuntimeWiringHygieneTest(unittest.TestCase):
             source,
         )
 
+    def test_health_alert_pins_safety_units_to_current_release(self):
+        source = WIRING.read_text(encoding="utf-8")
+        self.assertIn('HEALTH_ALERT_DROPIN_DIR=', source)
+        self.assertIn('write_atomic "${HEALTH_ALERT_DROPIN_DIR}/${CURRENT_SUPPORT_OVERRIDE}"', source)
+        self.assertIn('DISDEX_ALERT_SHARED_CRYPTO_RISK_SERVICE_UNIT=${SHARED_RISK_UNIT}', source)
+        self.assertIn('DISDEX_ALERT_MARGIN_GUARD_SERVICE_UNIT=${MARGIN_UNIT}', source)
+        start = source.index("remove_stale_health_alert_unit_pin_dropins()")
+        end = source.index("reset_stale_release_failed_units()", start)
+        self.assertIn('HEALTH_ALERT_DROPIN_DIR', source[start:end])
+
 
 if __name__ == "__main__":
     unittest.main()

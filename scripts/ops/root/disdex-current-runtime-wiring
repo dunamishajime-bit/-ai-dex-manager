@@ -29,6 +29,7 @@ AUTO_REPAIR_DROPIN_DIR="/etc/systemd/system/disdex-v12-kill-switch-auto-repair.s
 AUTO_REPAIR_PATH_DROPIN_DIR="/etc/systemd/system/disdex-v12-kill-switch-auto-repair.path.d"
 THREE_HOUR_HEALTH_DROPIN_DIR="/etc/systemd/system/disdex-v12-three-hour-health-check.service.d"
 HISTORY_SYNC_DROPIN_DIR="/etc/systemd/system/aster-trade-history-git-sync.service.d"
+HEALTH_ALERT_DROPIN_DIR="/etc/systemd/system/disdex-runner-health-alert.service.d"
 V12_DROPIN_DIR="/etc/systemd/system/disdex-v12-x1-all@CURRENT.service.d"
 PENGU_DROPIN_DIR="/etc/systemd/system/disdex-pengu-dual-ls-v2@CURRENT.service.d"
 Q102_DROPIN_DIR="/etc/systemd/system/disdex-quality102-causal-v1@CURRENT.service.d"
@@ -206,6 +207,7 @@ show_plan() {
   printf 'healthSnapshotDropin=%s/%s\n' "$SNAPSHOT_DROPIN_DIR" "$CURRENT_SUPPORT_OVERRIDE"
   printf 'positionRecoveryDropin=%s/%s\n' "$POSITION_RECOVERY_DROPIN_DIR" "$CURRENT_SUPPORT_OVERRIDE"
   printf 'fillNotifierDropin=%s/%s\n' "$FILL_NOTIFIER_DROPIN_DIR" "$CURRENT_SUPPORT_OVERRIDE"
+  printf 'healthAlertDropin=%s/%s\n' "$HEALTH_ALERT_DROPIN_DIR" "$CURRENT_SUPPORT_OVERRIDE"
   printf 'v12Dropin=%s/zzzzzzzzzzzz-current-release-contract.conf\n' "$V12_DROPIN_DIR"
   printf 'penguDropin=%s/zzzzzzzzzzzz-current-release-contract.conf\n' "$PENGU_DROPIN_DIR"
   printf 'q102Dropin=%s/zzzzzzzzzzzz-current-release-contract.conf\n' "$Q102_DROPIN_DIR"
@@ -284,6 +286,18 @@ remove_stale_support_release_pin_dropins() {
       fi
     done < <(find "$dir" -maxdepth 1 -type f -name '*.conf' -print0)
   done
+}
+
+remove_stale_health_alert_unit_pin_dropins() {
+  local current_dropin="${HEALTH_ALERT_DROPIN_DIR}/${CURRENT_SUPPORT_OVERRIDE}"
+  local dropin
+  [[ -d "$HEALTH_ALERT_DROPIN_DIR" ]] || return 0
+  while IFS= read -r -d '' dropin; do
+    [[ "$dropin" == "$current_dropin" ]] && continue
+    if grep -Eq '^Environment=DISDEX_ALERT_(SHARED_CRYPTO_RISK|MARGIN_GUARD)_SERVICE_UNIT=disdex-(shared-crypto-risk|v12-v52-margin-guard)@[0-9a-f]{40}\.service$' "$dropin"; then
+      rm -f -- "$dropin"
+    fi
+  done < <(find "$HEALTH_ALERT_DROPIN_DIR" -maxdepth 1 -type f -name '*.conf' -print0)
 }
 
 reset_stale_release_failed_units() {
@@ -549,6 +563,13 @@ ExecStart=
 ExecStart=${CURRENT_RELEASE}/node_modules/.bin/tsx ${CURRENT_RELEASE}/scripts/ops/root/disdex-trade-fill-notifier.ts"
 
   remove_stale_support_release_pin_dropins
+
+  write_atomic "${HEALTH_ALERT_DROPIN_DIR}/${CURRENT_SUPPORT_OVERRIDE}" "[Service]
+Environment=DISDEX_ALERT_OPERATOR_ACTIVATION_PATH=${OPERATOR_ACTIVATION_PATH}
+Environment=DISDEX_ALERT_SHARED_CRYPTO_RISK_SERVICE_UNIT=${SHARED_RISK_UNIT}
+Environment=DISDEX_ALERT_MARGIN_GUARD_SERVICE_UNIT=${MARGIN_UNIT}"
+
+  remove_stale_health_alert_unit_pin_dropins
 
   install -d -o root -g root -m 0755 /usr/local/libexec /usr/local/sbin
   install -m 0755 "$CURRENT_RELEASE/scripts/ops/root/disdex-v12-kill-switch-auto-repair" /usr/local/libexec/disdex-v12-kill-switch-auto-repair
