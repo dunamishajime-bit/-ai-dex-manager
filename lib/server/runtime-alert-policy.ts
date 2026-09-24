@@ -97,6 +97,6 @@ export function classifyRunnerAlertTransition(
 ): RunnerAlertTransition {
   if (current === "INTENTIONAL_STOP") return "NONE";
   if (unhealthy.has(current) && !unhealthy.has(previous as RunnerHealthStatus)) return "UNHEALTHY";
-  if (current === "ACTIVE" && unhealthy.has(previous as RunnerHealthStatus)) return "RECOVERED";
+  if (current === "ACTIVE" && (unhealthy.has(previous as RunnerHealthStatus) || previous === "INTENTIONAL_STOP")) return "RECOVERED";
   return "NONE";
 }
