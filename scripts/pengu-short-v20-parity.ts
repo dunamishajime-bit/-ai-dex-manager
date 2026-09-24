@@ -116,7 +116,7 @@ assert.equal(volTargetResult.production.phase, "PROBATION");
 
 const capSeed = createPenguShortV20State({
     entryPrice: 100,
-    requestedGross: 0.85,
+    requestedGross: 1.0,
     entryAtr24Ratio: 0.03,
     btcEma168Distance: 0.01,
     btcReturn24h: 0,

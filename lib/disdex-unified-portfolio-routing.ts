@@ -9,7 +9,10 @@ export const V12_PENGU_V52_PORTFOLIO_POLICY = Object.freeze({
     priority: "BASE_STRATEGIES_BEFORE_QUALITY102" as const,
     v12Multiplier: 1,
     v12MaximumGross: STRICT_BT33404708902.v12MaximumGross,
-    penguMaximumGross: STRICT_BT33404708902.penguMaximumGross,
+    // The historical Quality102 source-run object is retained for selector
+    // identity, but the live PENGU sleeve follows the current integrated
+    // COMBINED_FILTERED Q60/DD17/H72 contract.
+    penguMaximumGross: INTEGRATED_PRODUCTION_RISK_POLICY.penguMaximumGross,
     cryptoGrossCap: STRICT_BT33404708902.cryptoGrossCap,
     stockGrossCap: STRICT_BT33404708902.stockGrossCap,
     totalGrossCap: STRICT_BT33404708902.totalGrossCap,

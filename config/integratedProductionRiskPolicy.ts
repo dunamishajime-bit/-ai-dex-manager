@@ -22,7 +22,7 @@ export const INTEGRATED_PRODUCTION_RISK_POLICY = Object.freeze({
   v12MaximumPositions: 3,
   fetResidualMaximumGross: 2.25,
   fetResidualMinimumGross: 0.05,
-  penguMaximumGross: 0.85,
+  penguMaximumGross: 1.0,
   q102FamilyGross: Q102_CAUSAL_V4_FAMILY_GROSS,
   q102CausalV4MaximumGross: 3.0,
   q102MaximumPositions: 1,

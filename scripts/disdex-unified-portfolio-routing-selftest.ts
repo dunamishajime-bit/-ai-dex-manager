@@ -4,12 +4,12 @@ import { planUnifiedPortfolio } from "@/lib/disdex-unified-portfolio-routing";
 const plan = planUnifiedPortfolio([
     { sleeve: "V12", symbol: "ETHUSDT", side: "LONG", gross: 1, notionalUsd: 1000, signalTs: 1 },
     { sleeve: "V11_EQ", symbol: "METAUSDT", side: "LONG", gross: 1, notionalUsd: 1000, signalTs: 1 },
-    { sleeve: "PENGU_DUAL_LS_V2", symbol: "PENGUUSDT", side: "SHORT", gross: 0.85, notionalUsd: 850, signalTs: 1 },
+    { sleeve: "PENGU_DUAL_LS_V2", symbol: "PENGUUSDT", side: "SHORT", gross: 1.0, notionalUsd: 1000, signalTs: 1 },
     { sleeve: "V12", symbol: "UNKNOWNUSDT", side: "LONG", gross: 1, notionalUsd: 1000, signalTs: 1 },
 ], []);
 assert.equal(plan.accepted.length, 3);
 assert.equal(plan.rejected[0].reason, "UNKNOWN_OR_SLEEVE_MISMATCH");
-assert.equal(plan.totalGross, 2.85);
+assert.equal(plan.totalGross, 3.0);
 assert.equal(plan.cryptoGross <= 3, true);
 assert.equal(plan.quality102LiveSelectorParity, false);
 assert.equal(plan.quality102LiveBlockedFailClosed, true);

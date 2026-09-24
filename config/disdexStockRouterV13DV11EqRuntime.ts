@@ -149,5 +149,5 @@ export const DISDEX_V13D_V11EQ_V96_RUNTIME = {
     legacyV11StateMigrationAcknowledgement: "I_ACKNOWLEDGE_V11_TO_V52_STATE_MIGRATION",
     cryptoV96RetainsOwnLiveGates: true,
     liveBlockReason:
-        "Real orders require V52 live mode, the acknowledgement, verified V96 migration, exact-commit approval for PENGU 0.85, shared Crypto Gross 3.0, Stock Gross 1.5, Total Gross 3.5, fixed 5x cross margin for all managed Aster symbols, at least 20% projected available balance, at most 70% projected initial-margin usage, fresh Pyth/IEX references, inactive Kill Switch, reconciled positions, and all sleeve limits. Hyperliquid and V13D remain excluded.",
+        "Real orders require V52 live mode, the acknowledgement, verified V96 migration, exact-commit approval for PENGU COMBINED_FILTERED 1.0, shared Crypto Gross 3.0, Stock Gross 1.5, Total Gross 3.5, fixed 5x cross margin for all managed Aster symbols, at least 20% projected available balance, at most 70% projected initial-margin usage, fresh Pyth/IEX references, inactive Kill Switch, reconciled positions, and all sleeve limits. Hyperliquid and V13D remain excluded.",
 } as const;

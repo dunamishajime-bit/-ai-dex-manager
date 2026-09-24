@@ -18,7 +18,7 @@ class FinalDynamicGrossStrictCapsTest(unittest.TestCase):
             "V12_BASE_GROSS_CAP": "2.0",
             "V12_DYNAMIC_GROSS_CAP": "2.0",
             "V12_GROSS_CAP": "2.0",
-            "PENGU_GROSS_CAP": "0.85",
+            "PENGU_GROSS_CAP": "1.0",
             "STOCK_GROSS_CAP": "4.0",
             "CRYPTO_GROSS_CAP": "3.0",
             "TOTAL_GROSS_CAP": "4.25",

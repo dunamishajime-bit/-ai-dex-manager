@@ -3,6 +3,11 @@ import { dirname, resolve } from "node:path";
 import type { PenguDualLsV2Mode } from "@/config/penguDualLsV2Runtime";
 import type { PenguDualLsV2ExitDecision, PenguDualLsV2Position, PenguDualLsV2ShortV20State, PenguDualLsV2Signal } from "@/lib/pengu-dual-ls-v2";
 import type { RecoveryV8DurableState } from "@/lib/pengu-recovery-v8";
+import {
+    createPenguRiskOverlayState,
+    normalizePenguRiskOverlayState,
+    type PenguRiskOverlayState,
+} from "@/lib/pengu-route-quarantine-dd-governor";
 
 export interface PenguDualLsV2PendingOrder {
     idempotencyKey: string;
@@ -51,6 +56,8 @@ export interface PenguDualLsV2RunnerState {
     latestSignal?: PenguDualLsV2Signal;
     lastCompletedIdempotencyKey?: string;
     cooldownUntilTs?: number;
+    /** Durable Q60 route quarantine + realized DD17/H72 overlay state. */
+    riskOverlay: PenguRiskOverlayState;
     position?: PenguDualLsV2Position;
     pending?: PenguDualLsV2PendingOrder;
     failures: PenguDualLsV2RunnerFailure[];
@@ -62,6 +69,7 @@ function defaultState(mode: PenguDualLsV2Mode): PenguDualLsV2RunnerState {
         strategyId: "PENGU_DUAL_LS_V2_FINAL",
         mode,
         updatedAt: Date.now(),
+        riskOverlay: createPenguRiskOverlayState(),
         failures: [],
     };
 }
@@ -142,6 +150,7 @@ function normalize(value: unknown, mode: PenguDualLsV2Mode): PenguDualLsV2Runner
         latestSignal: raw.latestSignal && typeof raw.latestSignal === "object" ? raw.latestSignal as PenguDualLsV2Signal : undefined,
         lastCompletedIdempotencyKey: typeof raw.lastCompletedIdempotencyKey === "string" ? raw.lastCompletedIdempotencyKey : undefined,
         cooldownUntilTs: Number.isFinite(Number(raw.cooldownUntilTs)) ? Number(raw.cooldownUntilTs) : undefined,
+        riskOverlay: normalizePenguRiskOverlayState(raw.riskOverlay),
         position: position && (position.side === 1 || position.side === -1) ? position : undefined,
         pending: raw.pending && typeof raw.pending === "object" ? raw.pending as PenguDualLsV2PendingOrder : undefined,
         failures: Array.isArray(raw.failures)

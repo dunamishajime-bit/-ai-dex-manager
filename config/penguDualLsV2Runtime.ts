@@ -5,6 +5,10 @@ export type PenguDualLsV2Mode = "SHADOW" | "PAPER" | "LIVE";
 
 export const PENGU_DUAL_LS_V2 = {
     id: "PENGU_DUAL_LS_V2_FINAL",
+    logicProfile: "COMBINED_FILTERED_Q60_DD17_H72",
+    routeHardStopQuarantineHours: 60,
+    realizedDrawdownThresholdPct: 17,
+    realizedDrawdownHoldHours: 72,
     symbol: "PENGUUSDT",
     decisionIntervalHours: 1,
     longGross: INTEGRATED_PRODUCTION_RISK_POLICY.penguMaximumGross,

@@ -202,7 +202,7 @@ export class V12StrictAsterLiveAdapter extends V12AsterLiveAdapter {
                     causeIdempotencyKey: input.clientOrderId || `v12-strict-${input.signalTs}-${input.symbol}-${input.side}`,
                     statePath: process.env.FET_BRK48_STATE_PATH,
                     maxSlippageBps: this.maxSlippageBps,
-                    expectedRuntimeSha: process.env.DISDEX_RUNTIME_COMMIT_SHA,
+                    expectedRuntimeSha: process.env.DISDEX_Q102_RUNTIME_SHA || process.env.DISDEX_RUNTIME_COMMIT_SHA,
                 });
                 if (reduced.status !== "reduced") throw new Error(`FET_RESIDUAL_PREEMPT_BLOCKED:${reduced.message}`);
                 [workingAccount, workingPositions, workingOpenOrders] = await Promise.all([

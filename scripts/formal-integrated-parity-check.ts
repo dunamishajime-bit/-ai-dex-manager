@@ -85,7 +85,7 @@ function verifyIntegrated(research: JsonObject): JsonObject {
   close(numberAt(v12, "perPositionGrossCap"), 1.0, "V12 per-position gross");
   close(numberAt(v12, "aggregateGrossCap"), 1.5, "V12 aggregate gross");
   const pengu = objectAt(architecture, "pengu");
-  close(numberAt(pengu, "allocationGrossCap"), 0.85, "PENGU gross");
+  close(numberAt(pengu, "allocationGrossCap"), 1.0, "PENGU gross");
   assert.equal(numberAt(pengu, "hardStopCooldownHours"), 24);
   const quality102 = objectAt(architecture, "quality102");
   close(numberAt(quality102, "maximumGross"), 1.5, "Q102 gross");

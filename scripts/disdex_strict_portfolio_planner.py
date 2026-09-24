@@ -17,7 +17,7 @@ class StrictPortfolioCaps:
     v12_base_gross: float = 2.00
     v12_gross: float = 2.00
     v12_per_position_gross: float = 1.00
-    pengu_gross: float = 0.85
+    pengu_gross: float = 1.00
     quality102_gross: float = 0.50
     quality102_causal_v1_gross: float = 3.00
     stock_gross: float = 4.00

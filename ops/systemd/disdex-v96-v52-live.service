@@ -54,7 +54,7 @@ Environment=PENGU_DUAL_LS_V2_MODE=LIVE
 Environment=PENGU_DUAL_LS_V2_ENABLED=true
 Environment=PENGU_DUAL_LS_V2_LIVE_TRADING_ENABLED=true
 Environment=PENGU_DUAL_LS_V2_LIVE_EXECUTION_ENABLED=true
-Environment=PENGU_DUAL_LS_V2_MAX_GROSS=0.85
+Environment=PENGU_DUAL_LS_V2_MAX_GROSS=1.0
 Environment=PENGU_DUAL_LS_V2_PORTFOLIO_GROSS_CAP=1.5
 Environment=PENGU_DUAL_LS_V2_MAX_DAILY_LOSS_PCT=7.5
 Environment=DISDEX_V96_FORWARD_EVIDENCE_FILE=/home/deploy/ai-dex-manager-v96-paper/.runtime-approval/disdex-v96-forward.json

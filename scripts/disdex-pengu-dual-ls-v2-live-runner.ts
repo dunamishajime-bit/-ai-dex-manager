@@ -5,7 +5,7 @@ import { AsterDirectTradeExecutor, type DirectTradeExecutor } from "../lib/direc
 import { FileAccountOrderLock } from "../lib/disdex-account-order-lock";
 import { createInterruptibleDelay } from "../lib/interruptible-delay";
 import { SignedPaperDirectTradeExecutor } from "../lib/signed-paper-direct-trade-executor";
-import { resolvePenguDualLsV2Runtime } from "../config/penguDualLsV2Runtime";
+import { PENGU_DUAL_LS_V2, resolvePenguDualLsV2Runtime } from "../config/penguDualLsV2Runtime";
 import { INTEGRATED_PRODUCTION_RISK_POLICY } from "../config/integratedProductionRiskPolicy";
 import { PenguDualLsV2AsterMarketDataProvider } from "../lib/pengu-dual-ls-v2-market-data-provider";
 import { PenguDualLsV2PortfolioRunner } from "../lib/pengu-dual-ls-v2-portfolio-runner";
@@ -103,7 +103,7 @@ async function main() {
             maxTransactionRetries: runtime.maxTransactionRetries,
             maximumEntryDelayMs: runtime.maximumEntryDelayMs,
             // The verified strict portfolio has a 2.00x aggregate crypto cap.
-            // PENGU's own sleeve remains capped at 0.85x by maximumGross.
+            // PENGU's COMBINED_FILTERED sleeve remains capped at 1.0x by maximumGross.
             portfolioGrossCap: INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap,
             maximumDailyLossPct: runtime.maximumDailyLossPct,
             killSwitchPath: runtime.killSwitchPath,
@@ -115,7 +115,22 @@ async function main() {
         v12DynamicAdapter,
         v12StatePath: process.env.V12_X1_ALL_STATE_PATH || ".runtime-state/v12-x1-all/runner.json",
     });
-    console.log(JSON.stringify({ timestamp: new Date().toISOString(), level: "info", event: "pengu-runtime-contract", strategyId: runtime.strategyId, mode: runtime.mode, recoveryV8Enabled, v64DynamicLongEnabled: recoveryV8Enabled, promotionStatus: PENGU_RECOVERY_V8_PROMOTION.status }));
+    console.log(JSON.stringify({
+        timestamp: new Date().toISOString(),
+        level: "info",
+        event: "pengu-runtime-contract",
+        strategyId: runtime.strategyId,
+        mode: runtime.mode,
+        logicProfile: PENGU_DUAL_LS_V2.logicProfile,
+        maximumGross: runtime.maximumGross,
+        everyAcceptedEntryGross: runtime.maximumGross,
+        routeHardStopQuarantineHours: PENGU_DUAL_LS_V2.routeHardStopQuarantineHours,
+        realizedDrawdownThresholdPct: PENGU_DUAL_LS_V2.realizedDrawdownThresholdPct,
+        realizedDrawdownHoldHours: PENGU_DUAL_LS_V2.realizedDrawdownHoldHours,
+        recoveryV8Enabled,
+        v64DynamicLongEnabled: recoveryV8Enabled,
+        promotionStatus: PENGU_RECOVERY_V8_PROMOTION.status,
+    }));
     const daemon = process.argv.includes("--daemon");
     const boundaryDelayMs = Math.min(30_000, Math.max(1_000, numberEnv("PENGU_DUAL_LS_V2_BOUNDARY_DELAY_MS", 5_000)));
     const lockRetryMs = Math.min(30_000, Math.max(1_000, numberEnv("PENGU_DUAL_LS_V2_LOCK_RETRY_MS", 5_000)));

@@ -16,6 +16,7 @@ import {
 } from "@/lib/pengu-recovery-v8";
 import { FilePenguDualLsV2RunnerStateStore } from "@/lib/pengu-dual-ls-v2-runner-state";
 import { selectPenguRecoveryV8Entry } from "@/lib/pengu-dual-ls-v2";
+import { createPenguRiskOverlayState } from "@/lib/pengu-route-quarantine-dd-governor";
 
 const HOUR = 3_600_000;
 
@@ -109,6 +110,7 @@ async function stateRoundTrip() {
         strategyId: "PENGU_DUAL_LS_V2_FINAL" as const,
         mode: "PAPER" as const,
         updatedAt: Date.now(),
+        riskOverlay: createPenguRiskOverlayState(),
         failures: [],
         position: {
             side: 1 as const,

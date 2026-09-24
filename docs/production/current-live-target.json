@@ -45,8 +45,13 @@
       "failSafe": "STALE_MISSING_MALFORMED_GOVERNOR_USES_BASE_FAMILY_GROSS"
     },
     "pengu": {
-      "policy": "PRESERVE_CURRENT_PRODUCTION",
-      "maximumGross": 0.85
+      "policy": "COMBINED_FILTERED_Q60_DD17_H72",
+      "maximumGross": 1.0,
+      "everyAcceptedEntryGross": 1.0,
+      "sameRouteHardStopQuarantineHours": 60,
+      "realizedDrawdownThresholdPct": 17,
+      "realizedDrawdownHoldHours": 72,
+      "preserveExistingProtectionAndExits": true
     },
     "v52": {
       "policy": "PRESERVE_CURRENT_PRODUCTION",

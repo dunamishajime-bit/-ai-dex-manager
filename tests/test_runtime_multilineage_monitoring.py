@@ -53,7 +53,7 @@ if __name__ == "__main__":
 class RuntimeCurrentContractCleanupTest(unittest.TestCase):
     def test_current_wiring_has_no_legacy_pengu_or_q102_caps(self):
         source = WIRING.read_text(encoding="utf-8")
-        self.assertIn("PENGU_GROSS_CAP=0.85", source)
+        self.assertIn("PENGU_GROSS_CAP=1.0", source)
         self.assertIn("QUALITY102_CAUSAL_V1_MAX_GROSS=3.0", source)
         self.assertIn("QUALITY102_CAUSAL_V1_SELECTOR_MODE=CAUSAL_V4", source)
         self.assertNotIn("PENGU_GROSS_CAP=0.9375", source)

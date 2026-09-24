@@ -5,7 +5,7 @@ This document is the implementation and acceptance contract for the final integr
 ## Strategy allocation contract
 
 - V12: Top3, Rank3 0.10x when score >= 0.70, base/dynamic aggregate cap 2.00x, per-position cap 1.00x.
-- PENGU: maximum gross 0.85x.
+- PENGU: `COMBINED_FILTERED`, every accepted entry gross 1.00x; same-route hard-stop quarantine 60h; realized closed-equity DD -17% holds new entries for 72h.
 - FET BRK48 residual: maximum gross 2.25x, lower priority than core logic and preemptible by core entries.
 - Q102 Causal V4: one slot, family gross unchanged, DD governor boost maximum 3.00x.
 - V52/V50 stock sleeve: stock aggregate gross 4.00x, slot gross 2.00x.

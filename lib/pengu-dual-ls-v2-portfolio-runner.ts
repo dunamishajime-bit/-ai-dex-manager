@@ -42,6 +42,13 @@ import {
     replaceRecoveryV8Stops,
     type RecoveryV8ProtectiveOrderGateway,
 } from "@/lib/pengu-recovery-v8-protective-orders";
+import {
+    createPenguRiskOverlayState,
+    evaluatePenguNewEntryGate,
+    recordPenguClosedTrade,
+    recordPenguHardStop,
+    routeForPenguEntryVersion,
+} from "@/lib/pengu-route-quarantine-dd-governor";
 
 const SYMBOL = "PENGUUSDT";
 
@@ -426,8 +433,19 @@ export class PenguDualLsV2PortfolioRunner {
             return this.manualReview(state, `PENGU_DUAL_LS_POST_FILL_RECONCILIATION_FAILED:${error instanceof Error ? error.message : String(error)}`, pending.idempotencyKey);
         }
         const actual = actualPosition(positions);
+        const closedPosition = state.position;
         if (pending.reduceOnly) {
             if (actual) return this.manualReview(state, "PENGU_DUAL_LS_EXIT_POSITION_REMAINS_AFTER_FILL", pending.idempotencyKey);
+            if (!closedPosition) return this.manualReview(state, "PENGU_DUAL_LS_EXIT_STATE_MISSING_AFTER_FILL", pending.idempotencyKey);
+            const directionalReturn = closedPosition.side > 0
+                ? result.averagePrice / closedPosition.entryPrice - 1
+                : closedPosition.entryPrice / result.averagePrice - 1;
+            const netAccountReturn = closedPosition.gross * (directionalReturn - 2 * 0.0006);
+            const route = routeForPenguEntryVersion(closedPosition.entryVersion === "LEGACY_V2" ? "LONG_V2_FINAL" : closedPosition.entryVersion);
+            state.riskOverlay = recordPenguClosedTrade(state.riskOverlay || createPenguRiskOverlayState(), route, netAccountReturn, this.now());
+            if (pending.exitReason === "LONG_HARD_STOP" || pending.exitReason === "SHORT_HARD_STOP" || pending.exitReason === "RECOVERY_V8_HARD_STOP") {
+                state.riskOverlay = recordPenguHardStop(state.riskOverlay, route, this.now());
+            }
         } else if (!actual
             || positionSide(actual) !== (pending.side === "BUY" ? 1 : -1)
             || Math.abs(Math.abs(actual.quantity) - result.executedQuantity) > Math.max(1e-8, result.executedQuantity * 0.02)) {
@@ -756,6 +774,16 @@ export class PenguDualLsV2PortfolioRunner {
                     signal,
                 };
             }
+            if (!reduceOnly && signal.side !== 0) {
+                const route = routeForPenguEntryVersion(signal.entryVersion);
+                const riskGate = evaluatePenguNewEntryGate(state.riskOverlay || createPenguRiskOverlayState(), route, this.now());
+                if (!riskGate.allowed) {
+                    const message = `${riskGate.reason}${riskGate.untilTs ? ` until=${riskGate.untilTs}` : ""}`;
+                    state.failures = [...state.failures, { occurredAt: this.now(), message }].slice(-100);
+                    await this.dependencies.stateStore.save(state);
+                    return { status: "held", message, signal };
+                }
+            }
             if (!side) {
                 await this.dependencies.stateStore.save(state);
                 return { status: "no-change", message: signal.reason, signal };
@@ -848,7 +876,7 @@ export class PenguDualLsV2PortfolioRunner {
                             causeIdempotencyKey: `${signal.strategyId}|${signal.referenceTs}|${signal.side}|ENTRY`,
                             statePath: process.env.FET_BRK48_STATE_PATH,
                             maxSlippageBps: this.dependencies.config.maxSlippageBps,
-                            expectedRuntimeSha: process.env.DISDEX_RUNTIME_COMMIT_SHA,
+                            expectedRuntimeSha: process.env.DISDEX_Q102_RUNTIME_SHA || process.env.DISDEX_RUNTIME_COMMIT_SHA,
                             now: this.now,
                         });
                         if (reduced.status !== "reduced") throw new Error(`PENGU_FET_PREEMPT_BLOCKED:${reduced.message}`);
