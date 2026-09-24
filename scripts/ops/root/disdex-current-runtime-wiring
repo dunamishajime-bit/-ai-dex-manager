@@ -583,7 +583,7 @@ WorkingDirectory=${CURRENT_RELEASE}
 ExecStart=
 ExecStart=/usr/local/libexec/disdex-v12-three-hour-health-check"
 
-  write_atomic "${HISTORY_SYNC_DROPIN_DIR}/zzzzzzzzzzzz-current-release.conf" "[Service]
+  write_atomic "${HISTORY_SYNC_DROPIN_DIR}/${CURRENT_SUPPORT_OVERRIDE}" "[Service]
 EnvironmentFile=/etc/disdex/disdex-quality102-causal-v1.env
 WorkingDirectory=${CURRENT_RELEASE}
 Environment=DISDEX_GIT_HISTORY_SNAPSHOT_PATH=/home/deploy/ai-dex-manager/data/trade-history-git.json

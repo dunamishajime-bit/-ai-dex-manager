@@ -31,6 +31,17 @@ class RuntimeWiringHygieneTest(unittest.TestCase):
         end = source.index("reset_stale_release_failed_units()", start)
         self.assertIn('"$HISTORY_SYNC_DROPIN_DIR"', source[start:end])
 
+    def test_history_sync_writes_the_common_current_support_override(self):
+        source = WIRING.read_text(encoding="utf-8")
+        self.assertIn(
+            'write_atomic "${HISTORY_SYNC_DROPIN_DIR}/${CURRENT_SUPPORT_OVERRIDE}"',
+            source,
+        )
+        self.assertNotIn(
+            'write_atomic "${HISTORY_SYNC_DROPIN_DIR}/zzzzzzzzzzzz-current-release.conf"',
+            source,
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
