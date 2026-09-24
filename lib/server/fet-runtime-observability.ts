@@ -1,6 +1,44 @@
 import { readFile } from "node:fs/promises";
 import { isAbsolute } from "node:path";
 
+export type FetGateDiagnostic = {
+  key: "ENTRY_WINDOW" | "BREAKOUT_48H" | "VOLUME_72H";
+  label: string;
+  pass: boolean;
+  value: string;
+  threshold: string;
+  reason: string;
+};
+
+export type FetSignalDiagnostic = {
+  available: boolean;
+  evaluatedAt: string;
+  referenceTs?: number;
+  entryTs?: number;
+  entryHourUtc?: number;
+  entryWindowOpen?: boolean;
+  nextDecisionAt?: number;
+  latestClose?: number;
+  prior48hHigh?: number;
+  breakoutDistancePct?: number;
+  latestVolume?: number;
+  volumeMedian72h?: number;
+  volumeRatio?: number;
+  minimumVolumeRatio?: number;
+  lookbackHours?: number;
+  volumeMedianHours?: number;
+  holdHours?: number;
+  hardStopPct?: number;
+  profitFloorTriggerPct?: number;
+  profitFloorStopPct?: number;
+  decisionEntryHourModulo?: number;
+  decisionEntryHourRemainder?: number;
+  liveEntryWindowMs?: number;
+  signalEligible?: boolean;
+  signalReason: string;
+  gates: FetGateDiagnostic[];
+};
+
 export type FetRuntimeStatus = {
   ok: boolean;
   readOnly: true;
@@ -21,6 +59,7 @@ export type FetRuntimeStatus = {
   maximumGross?: number;
   killSwitchActive?: boolean;
   manualReview?: string;
+  signal?: FetSignalDiagnostic;
   position?: {
     symbol: string;
     side: "LONG";
@@ -31,6 +70,9 @@ export type FetRuntimeStatus = {
     entryTs: number;
     exitTs: number;
     stopOrderIdRecorded: boolean;
+    protectionMode?: string;
+    profitFloorArmedAt?: number;
+    profitFloorTriggerPrice?: number;
   };
   pending?: {
     action: string;
