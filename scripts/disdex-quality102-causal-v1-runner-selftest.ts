@@ -46,6 +46,7 @@ class FakeExecutor implements DirectTradeExecutor {
     positions: DirectPosition[] = [];
     openOrders: DirectOpenOrder[] = [];
     quote: DirectMarketQuote = { symbol: "FETUSDT", bidPrice: 99, askPrice: 101, bidQuantity: 100, askQuantity: 100, midPrice: 100, spreadBps: 200, updatedAt: NOW - 1000 };
+    quoteResponses: DirectMarketQuote[] = [];
     executeResult: DirectTradeResult = {
         requestId: "",
         clientOrderId: "",
@@ -64,7 +65,11 @@ class FakeExecutor implements DirectTradeExecutor {
     async getAccountSnapshot() { this.calls.account += 1; return this.account; }
     async getPositions() { this.calls.positions += 1; return this.positions; }
     async getOpenOrders() { this.calls.orders += 1; return this.openOrders; }
-    async getMarketQuote(symbol: string) { this.calls.quote += 1; return { ...this.quote, symbol }; }
+    async getMarketQuote(symbol: string) {
+        this.calls.quote += 1;
+        const next = this.quoteResponses.length ? this.quoteResponses.shift()! : this.quote;
+        return { ...next, symbol };
+    }
     async normalizeMarketQuantity(symbol: string, requestedQuantity: number, referencePrice: number): Promise<NormalizedOrderQuantity> {
         this.calls.normalize += 1;
         return { symbol, quantity: requestedQuantity, quantityText: String(requestedQuantity), minQuantity: 0, maxQuantity: 1e9, stepSize: 0.001, minNotional: 5, notional: requestedQuantity * referencePrice };
@@ -249,6 +254,23 @@ async function run(): Promise<void> {
         assert.equal(result.status, "manual-review");
         assert.equal(fake.calls.reconcile, 1);
         assert.equal(fake.calls.execute, 0);
+    }
+
+    {
+        const fake = new FakeExecutor();
+        fake.quoteResponses = [
+            { ...fake.quote, updatedAt: NOW - 1000 },
+            { ...fake.quote, updatedAt: NOW - 10 * 60_000 },
+        ];
+        const built = deps(fake, state());
+        const result = await built.runner.tick();
+        assert.equal(result.status, "blocked-local");
+        assert.equal(result.message, "Q102_PENDING_QUOTE_STALE_OR_INVALID_RETRYABLE_NO_ORDER");
+        assert.equal(fake.calls.execute, 0);
+        const saved = await (built.runner as unknown as { dependencies: { stateStore: { load(): Promise<Quality102CausalV1State> } } }).dependencies.stateStore.load();
+        assert.equal(saved.pending, undefined);
+        assert.equal(saved.lastProcessedReferenceTs, undefined);
+        assert.match(saved.failures.at(-1)?.message || "", /RETRYABLE_NO_ORDER/);
     }
 
     {
