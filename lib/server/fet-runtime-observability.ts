@@ -140,6 +140,153 @@ async function readJson(path: string): Promise<Record<string, unknown>> {
   return parsed;
 }
 
+
+type Kline = [number, string, string, string, string, string, number, ...unknown[]];
+
+async function loadFetSignalDiagnostic(config: string): Promise<FetSignalDiagnostic> {
+  const evaluatedAt = new Date().toISOString();
+  const now = Date.now();
+  const lookbackHours = configNumber(config, "lookbackHours") ?? 48;
+  const volumeMedianHours = configNumber(config, "volumeMedianHours") ?? 72;
+  const minimumVolumeRatio = configNumber(config, "minimumVolumeRatio") ?? 1.2;
+  const holdHours = configNumber(config, "holdHours") ?? 24;
+  const hardStopPct = configNumber(config, "hardStopPct") ?? 0.05;
+  const profitFloorTriggerPct = configNumber(config, "profitFloorTriggerPct") ?? 0.05;
+  const profitFloorStopPct = configNumber(config, "profitFloorStopPct") ?? 0.005;
+  const decisionEntryHourModulo = configNumber(config, "decisionEntryHourModulo") ?? 4;
+  const decisionEntryHourRemainder = configNumber(config, "decisionEntryHourRemainder") ?? 1;
+  const liveEntryWindowMs = configNumber(config, "liveEntryWindowMs") ?? 5 * 60_000;
+  const entryTs = Math.floor(now / HOUR_MS) * HOUR_MS;
+  const entryHourUtc = new Date(entryTs).getUTCHours();
+  const entryWindowOpen =
+    entryHourUtc % decisionEntryHourModulo === decisionEntryHourRemainder
+    && now - entryTs <= liveEntryWindowMs;
+  const followingDecision = entryWindowOpen
+    ? entryTs
+    : nextDecisionAt(entryTs + HOUR_MS, decisionEntryHourModulo, decisionEntryHourRemainder);
+
+  try {
+    const baseUrl = String(process.env.ASTER_API_BASE_URL || process.env.ASTER_FUTURES_BASE_URL || DEFAULT_ASTER_BASE_URL).replace(/\/$/, "");
+    const url = new URL(baseUrl + "/fapi/v3/klines");
+    url.searchParams.set("symbol", "FETUSDT");
+    url.searchParams.set("interval", "1h");
+    url.searchParams.set("limit", "120");
+    const response = await fetch(url, { cache: "no-store" });
+    if (!response.ok) throw new Error("ASTER_PUBLIC_KLINES_" + response.status);
+    const rows = await response.json() as Kline[];
+    const completed = rows
+      .map((row) => ({
+        openTs: Number(row[0]),
+        closeTs: Number(row[6]),
+        high: Number(row[2]),
+        close: Number(row[4]),
+        volume: Number(row[5]),
+      }))
+      .filter((row) =>
+        Number.isFinite(row.openTs) && Number.isFinite(row.closeTs)
+        && Number.isFinite(row.high) && Number.isFinite(row.close) && Number.isFinite(row.volume)
+        && row.openTs > 0 && row.closeTs > 0 && row.closeTs < entryTs
+        && row.high > 0 && row.close > 0 && row.volume >= 0,
+      )
+      .sort((a, b) => a.openTs - b.openTs);
+
+    const latest = completed.at(-1);
+    const prior48 = completed.slice(-(lookbackHours + 1), -1);
+    const prior72 = completed.slice(-(volumeMedianHours + 1), -1);
+    if (!latest || prior48.length !== lookbackHours || prior72.length !== volumeMedianHours) {
+      throw new Error("FET_PUBLIC_KLINES_HISTORY_INCOMPLETE");
+    }
+
+    const prior48hHigh = Math.max(...prior48.map((row) => row.high));
+    const volumeMedian72h = median(prior72.map((row) => row.volume));
+    const volumeRatio = volumeMedian72h > 0 ? latest.volume / volumeMedian72h : 0;
+    const breakoutDistancePct = prior48hHigh > 0 ? latest.close / prior48hHigh - 1 : 0;
+    const latestBarAligned = latest.openTs === entryTs - HOUR_MS;
+    const breakoutPass = latestBarAligned && latest.close > prior48hHigh;
+    const volumePass = latestBarAligned && volumeRatio + 1e-12 >= minimumVolumeRatio;
+    const signalEligible = entryWindowOpen && breakoutPass && volumePass;
+    const gates: FetGateDiagnostic[] = [
+      {
+        key: "ENTRY_WINDOW",
+        label: "4時間エントリー窓",
+        pass: entryWindowOpen,
+        value: "UTC " + String(entryHourUtc).padStart(2, "0") + ":00 / " + Math.max(0, Math.round((now - entryTs) / 1000)) + "秒経過",
+        threshold: "UTC hour % " + decisionEntryHourModulo + " = " + decisionEntryHourRemainder + " / " + Math.round(liveEntryWindowMs / 60_000) + "分以内",
+        reason: entryWindowOpen ? "現在はFET判定・新規エントリー対象時間です。" : "現在は新規エントリー時間外です。",
+      },
+      {
+        key: "BREAKOUT_48H",
+        label: lookbackHours + "h High ブレイク",
+        pass: breakoutPass,
+        value: latest.close.toFixed(6) + " / High " + prior48hHigh.toFixed(6) + " (" + (breakoutDistancePct * 100).toFixed(2) + "%)",
+        threshold: "直近確定1h Close > 過去" + lookbackHours + "h High",
+        reason: !latestBarAligned ? "直近確定1h足が判定時刻と未整合です。" : breakoutPass ? "ブレイク条件を通過しています。" : "まだ過去Highを上抜けていません。",
+      },
+      {
+        key: "VOLUME_72H",
+        label: volumeMedianHours + "h Volume",
+        pass: volumePass,
+        value: volumeRatio.toFixed(3) + "x",
+        threshold: "Volume / " + volumeMedianHours + "h中央値 ≥ " + minimumVolumeRatio.toFixed(2) + "x",
+        reason: !latestBarAligned ? "直近確定1h足が判定時刻と未整合です。" : volumePass ? "出来高条件を通過しています。" : "必要出来高比に未到達です。",
+      },
+    ];
+
+    return {
+      available: true,
+      evaluatedAt,
+      referenceTs: latest.closeTs,
+      entryTs,
+      entryHourUtc,
+      entryWindowOpen,
+      nextDecisionAt: followingDecision,
+      latestClose: latest.close,
+      prior48hHigh,
+      breakoutDistancePct,
+      latestVolume: latest.volume,
+      volumeMedian72h,
+      volumeRatio,
+      minimumVolumeRatio,
+      lookbackHours,
+      volumeMedianHours,
+      holdHours,
+      hardStopPct,
+      profitFloorTriggerPct,
+      profitFloorStopPct,
+      decisionEntryHourModulo,
+      decisionEntryHourRemainder,
+      liveEntryWindowMs,
+      signalEligible,
+      signalReason: signalEligible
+        ? "FET BRK48 LONGの時間・ブレイク・出来高Gateがすべて成立しています。"
+        : gates.filter((gate) => !gate.pass).map((gate) => gate.label + "未成立").join(" / "),
+      gates,
+    };
+  } catch (error) {
+    return {
+      available: false,
+      evaluatedAt,
+      entryTs,
+      entryHourUtc,
+      entryWindowOpen,
+      nextDecisionAt: followingDecision,
+      minimumVolumeRatio,
+      lookbackHours,
+      volumeMedianHours,
+      holdHours,
+      hardStopPct,
+      profitFloorTriggerPct,
+      profitFloorStopPct,
+      decisionEntryHourModulo,
+      decisionEntryHourRemainder,
+      liveEntryWindowMs,
+      signalEligible: false,
+      signalReason: "FET公開market data判定を取得できません: " + (error instanceof Error ? error.message : String(error)),
+      gates: [],
+    };
+  }
+}
+
 /** Reads only VPS production artifacts. Never imports or executes the trading runner. */
 export async function loadFetRuntimeObservability(): Promise<FetRuntimeStatus> {
   const checkedAt = new Date().toISOString();
