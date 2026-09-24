@@ -102,7 +102,9 @@ def main() -> None:
         "formalIntegratedBtVerified": False,
         "newPenguProductionParityVerified": False,
         "v52PairedBasisExecutionVerified": False,
-        "v52Included": bool(args.stock_dir and args.stock_dir.is_dir()),
+        "v52Included": False,
+        "yahooReferencePresent": bool(args.stock_dir and args.stock_dir.is_dir()),
+        "fetAsterInceptionEnforced": "2026-01-09T18:00:00Z",
         "rawSource": str(bundle.get("source", {}).get("provider", "UNKNOWN")) + " (NOT Aster parity)",
         "originalRawBundleHashMatches": (
             quality["sha256"].lower() ==
