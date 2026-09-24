@@ -1,0 +1,90 @@
+name: DisDex FET HP VPS preflight
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-fet-hp-deploy
+  cancel-in-progress: false
+
+jobs:
+  probe:
+    if: >-
+      github.event.issue.number == 132 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == 'DISDEX_FET_HP_PROBE_20260924'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      SSH_KEY: ${{ secrets.DISDEX_VPS_DEPLOY_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Configure previously registered pinned SSH identity
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ -n "$SSH_HOST" && -n "$SSH_KEY" && -n "$SSH_KNOWN_HOSTS" ]] || {
+            echo 'PREVIOUSLY_REGISTERED_VPS_SECRETS_MISSING'; exit 2;
+          }
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          root = Path.home() / ".ssh"
+          key = os.environ["SSH_KEY"].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          known = os.environ["SSH_KNOWN_HOSTS"].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (root/"disdex_fet_deploy").write_text(key,encoding="utf-8")
+          (root/"known_hosts").write_text(known,encoding="utf-8")
+          PY
+          chmod 600 "$HOME/.ssh/disdex_fet_deploy" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/disdex_fet_deploy" >/dev/null
+          echo 'SSH_SECRET_FORMAT_PASS'
+      - name: Inspect current UI only (no trading mutation)
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          SSH_PORT="${SSH_PORT:-22}"
+          [[ "$SSH_PORT" =~ ^[0-9]{1,5}$ ]]
+          timeout 75 ssh -T -i "$HOME/.ssh/disdex_fet_deploy" \
+            -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -o ConnectTimeout=15 \
+            -p "$SSH_PORT" "deploy@$SSH_HOST" 'bash -s' <<'REMOTE'
+          set -Eeuo pipefail
+          echo 'FET_HP_PROBE_CONNECTED=TRUE'
+          echo "REMOTE_USER=$(id -un)"
+          echo "NODE_VERSION=$(node --version 2>/dev/null || echo MISSING)"
+          echo "PM2_VERSION=$(pm2 --version 2>/dev/null || echo MISSING)"
+          echo 'UI_PM2_METADATA_BEGIN'
+          PM2_HOME=/home/deploy/.pm2 pm2 jlist | node -e '
+            let s="";process.stdin.on("data",x=>s+=x);
+            process.stdin.on("end",()=>{
+              const rows=JSON.parse(s||"[]");
+              for(const p of rows) {
+                const name=String(p.name||"");
+                if(!/dex|manager|ui/i.test(name)) continue;
+                console.log(JSON.stringify({
+                  name, status:p.pm2_env?.status, cwd:p.pm2_env?.pm_cwd,
+                  script:p.pm2_env?.pm_exec_path, pid:p.pid
+                }));
+              }
+            });
+          '
+          echo 'UI_PM2_METADATA_END'
+          for path in /home/deploy/ai-dex-manager /home/deploy/disdex-trading/current /home/deploy/disdex-trading/releases; do
+            if [[ -e "$path" ]]; then
+              printf 'PATH=%s REALPATH=%s\n' "$path" "$(readlink -f "$path")"
+            else
+              printf 'PATH=%s MISSING\n' "$path"
+            fi
+          done
+          df -h /home/deploy | tail -n 1
+          echo 'TRADING_MUTATION=0'
+          echo 'FET_HP_PROBE_COMPLETE'
+          REMOTE
