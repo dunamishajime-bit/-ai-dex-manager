@@ -66,7 +66,7 @@ export async function GET(req: NextRequest) {
       protection: fetRuntime.position
         ? "state保護STOP ID " + (fetRuntime.position.stopOrderIdRecorded ? "記録あり（実注文照合は別途）" : "記録なし")
         : "建玉stateなし。保護注文の有無はAster read-backで確認してください。",
-      note: "state読取のみ。systemd active/running、実建玉・reduceOnly注文の照合は別途必要です。",
+      note: "LIVEには最新stateとrunner-healthのservice identity一致が必要です。Aster実建玉・reduceOnly注文・NRestartsは別途照合します。",
       reason: fetRuntime.reason,
       updatedAt: fetRuntime.updatedAt,
     });
