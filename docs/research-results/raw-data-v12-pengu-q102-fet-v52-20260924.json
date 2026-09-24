@@ -1,0 +1,24 @@
+{
+  "status": "RAW_BUNDLE_SCHEMA_READY",
+  "purpose": "Provenance manifest placeholder; populated only by the end-to-end raw-data run.",
+  "crypto_source": {
+    "provider": "Aster public Futures REST",
+    "base_url": "https://fapi.asterdex.com",
+    "authenticated": false,
+    "trade_ledgers_used": false
+  },
+  "stock_source": {
+    "provider": "raw stock OHLCV source",
+    "aster_data_claim": false,
+    "trade_ledgers_used": false
+  },
+  "period": {
+    "start": "2025-08-10T00:00:00Z",
+    "end": "2026-08-10T00:00:00Z",
+    "end_exclusive": true
+  },
+  "quality": {
+    "valid": false,
+    "status": "NOT_RUN"
+  }
+}
