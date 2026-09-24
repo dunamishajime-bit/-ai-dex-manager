@@ -288,6 +288,97 @@ for(const longHard of [.04,.045,.05,.055,.06]){
     }
   }
 }
+function scaleLow(){return allocationMode==="CAP1_LOW_SCALED"||allocationMode==="CAP1_LOW_AND_RECOVERY_SCALED"||allocationMode==="CAP1_ALL_OLD_ORDERS_LINEAR";}
+function scaleRecovery(){return allocationMode==="CAP1_RECOVERY_SCALED"||allocationMode==="CAP1_LOW_AND_RECOVERY_SCALED"||allocationMode==="CAP1_ALL_OLD_ORDERS_LINEAR";}
+function effectiveFloor(){return PENGU_DUAL_LS_V2.sizing.grossFloor*(allocationMode==="CAP1_ALL_OLD_ORDERS_LINEAR"?FACTOR:1);}
+function recoveryInitialGross(){return allocationMode==="CAP1_EVERY_ENTRY_FLAT"?CAP:PENGU_RECOVERY_V8.initialGross*(scaleRecovery()?FACTOR:1);}
+function recoveryPartialGross(){return allocationMode==="CAP1_EVERY_ENTRY_FLAT"?CAP/2:PENGU_RECOVERY_V8.partial.gross*(scaleRecovery()?FACTOR:1);}
+function researchTargetGrossForAtr(atr24Ratio:number){
+  if(!Number.isFinite(atr24Ratio)||atr24Ratio<=0)return 0;
+  return Math.min(CAP,Math.max(effectiveFloor(),CAP*PENGU_DUAL_LS_V2.sizing.targetVolatility/atr24Ratio));
+}
+function researchV64RequestedLongGross(f:PenguDualLsV2Features){
+  if(!Number.isFinite(f.atr24Ratio)||f.atr24Ratio<=0)return 0;
+  const multiplier=PENGU_V8_V64_BASE.longMultiplier;
+  const floor=effectiveFloor()*multiplier;
+  const target=CAP*PENGU_DUAL_LS_V2.sizing.targetVolatility/f.atr24Ratio*multiplier;
+  const baseGross=Math.min(CAP*multiplier,Math.max(floor,target));
+  const lowGross=PENGU_V8_V64_BASE.lowGross*(scaleLow()?FACTOR:1);
+  return f.penguReturn72h<=PENGU_V8_V64_BASE.lowGrossRule.threshold?baseGross:Math.min(baseGross,lowGross);
+}
+function researchShortV20State(input:{entryPrice:number;requestedGross:number;entryAtr24Ratio:number;btcEma168Distance:number;btcReturn24h:number}){
+  const state=createPenguShortV20State(input);
+  const eps=1e-12;
+  state.sizingState=Math.abs(input.requestedGross-CAP)<=eps
+    ? "CAP"
+    : Math.abs(input.requestedGross-effectiveFloor())<=eps
+      ? "FLOOR"
+      : "VOL_TARGET";
+  return state;
+}
+function acceptedGross(route:EntryRoute,f:PenguDualLsV2Features){
+  if(allocationMode==="CAP1_EVERY_ENTRY_FLAT")return CAP;
+  if(route==="RECOVERY_V8")return Math.min(CAP,recoveryInitialGross());
+  if(routeSide(route)==="S")return Math.min(CAP,researchTargetGrossForAtr(f.atr24Ratio));
+  return Math.min(CAP,researchV64RequestedLongGross(f));
+}
+function legReturn(side:"L"|"S",gross:number,entry:number,exit:number,entryTs:number,exitTs:number,points:FundingPoint[],cost:number){
+  const raw=side==="L"?exit/entry-1:entry/exit-1;
+  const fr=fundingBetween(points,entryTs,exitTs);const fu=side==="L"?-fr:fr;const cu=-2*cost;
+  return {raw,fu,cu,account:gross*(raw+fu+cu)};
+}
+
+
+function longOverlayExit(pos:PenguDualLsV2Position,f:PenguDualLsV2Features,route:EntryRoute){
+  const prev=Math.max(pos.entryPrice,pos.highWaterMark);
+  const hard=riskProfile.longHard;
+  if(hard!==undefined){
+    const px=pos.entryPrice*(1-hard);
+    if(f.low<=px)return {reason:"LONG_HARD_STOP",price:px};
+  }
+  const beAct=riskProfile.breakevenActivation,beLock=riskProfile.breakevenLock??0;
+  if(beAct!==undefined&&prev/pos.entryPrice-1>=beAct){
+    const px=pos.entryPrice*(1+beLock);
+    if(f.low<=px)return {reason:"LONG_BREAKEVEN_LOCK_EXIT",price:px};
+  }
+  const act=riskProfile.longTrailAct,ret=riskProfile.longTrailRet;
+  if(act!==undefined&&ret!==undefined&&prev/pos.entryPrice-1>=act){
+    const px=prev*(1-ret);
+    if(f.low<=px)return {reason:"LONG_TRAILING_STOP",price:px};
+  }
+  if(riskProfile.longTrendFail && f.referenceTs>=pos.entryTs+12*HOUR && f.close<f.ema72 && f.penguReturn24h<0 && f.relativeReturn24h<0){
+    return {reason:"LONG_TREND_FAIL_EXIT",price:f.close};
+  }
+  return undefined;
+}
+function shortOverlayExit(pos:PenguDualLsV2Position,f:PenguDualLsV2Features){
+  const prev=Math.min(pos.entryPrice,pos.lowWaterMark??pos.entryPrice);
+  const hard=riskProfile.shortHard;
+  if(hard!==undefined){
+    const px=pos.entryPrice*(1+hard);
+    if(f.high>=px)return {reason:"SHORT_HARD_STOP",price:px};
+  }
+  const beAct=riskProfile.breakevenActivation,beLock=riskProfile.breakevenLock??0;
+  if(beAct!==undefined&&pos.entryPrice/prev-1>=beAct){
+    const px=pos.entryPrice*(1-beLock);
+    if(f.high>=px)return {reason:"SHORT_BREAKEVEN_LOCK_EXIT",price:px};
+  }
+  const act=riskProfile.shortTrailAct,ret=riskProfile.shortTrailRet;
+  if(act!==undefined&&ret!==undefined&&pos.entryPrice/prev-1>=act){
+    const px=prev*(1+ret);
+    if(f.high>=px)return {reason:"SHORT_TRAILING_STOP",price:px};
+  }
+  if(riskProfile.shortTrendFail && f.referenceTs>=pos.entryTs+12*HOUR && f.close>f.ema72 && f.penguReturn24h>0 && f.relativeReturn24h>0){
+    return {reason:"SHORT_TREND_FAIL_EXIT",price:f.close};
+  }
+  return undefined;
+}
+function recoveryOverridesActive(){
+  return riskProfile.recoveryHard!==undefined||riskProfile.recoveryPartialStop!==undefined||riskProfile.recoveryPartialAfterHours!==undefined||
+    riskProfile.recoveryTrailAct!==undefined||riskProfile.recoveryTrailRet!==undefined||riskProfile.recoveryMaxHold!==undefined||riskProfile.recoveryTrendFail===true;
+}
+function replay(rows:PenguDualLsV2EvaluationRow[],points:FundingPoint[],v:Variant,mode:Mode){
+  const cost=BASE_FEE_PER_SIDE+(mode==="SEVERE"?STRESS_SLIPPAGE_PER_SIDE:0);const trades:Trade[]=[];
   let i=250,cooldownUntilTs=0,consecutiveLosses=0;
   let longTrail:ProfitExitArm|undefined,shortExit:ProfitExitArm|undefined,shortTrail:ProfitExitArm|undefined;
   while(i<rows.length-2){
