@@ -1,0 +1,97 @@
+name: DisDex FET HP root read-only preflight
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-fet-hp-deploy
+  cancel-in-progress: false
+
+jobs:
+  root-preflight:
+    if: >-
+      github.event.issue.number == 132 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == 'DISDEX_FET_HP_ROOT_PROBE_20260924'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Require separately authorized root key
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ -n "$SSH_HOST" && -n "$SSH_KNOWN_HOSTS" ]] || {
+            echo 'EXISTING_VPS_HOST_OR_KNOWN_HOSTS_MISSING'; exit 2;
+          }
+          [[ -n "$ROOT_KEY" ]] || {
+            echo 'DISDEX_VPS_ROOT_PRIVATE_KEY_NOT_CONFIGURED';
+            echo 'Existing deploy key is a forced-command key and cannot run this preflight.';
+            exit 3;
+          }
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          root = Path.home()/".ssh"
+          key = os.environ["ROOT_KEY"].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          known = os.environ["SSH_KNOWN_HOSTS"].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (root/"disdex_fet_root").write_text(key,encoding="utf-8")
+          (root/"known_hosts").write_text(known,encoding="utf-8")
+          PY
+          chmod 600 "$HOME/.ssh/disdex_fet_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/disdex_fet_root" >/dev/null
+          echo 'ROOT_KEY_FORMAT_PASS'
+      - name: Inspect exact live UI process and directory without mutation
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          SSH_PORT="${SSH_PORT:-22}"
+          [[ "$SSH_PORT" =~ ^[0-9]{1,5}$ ]]
+          timeout 90 ssh -T -i "$HOME/.ssh/disdex_fet_root" \
+            -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -o ConnectTimeout=15 \
+            -p "$SSH_PORT" "root@$SSH_HOST" 'bash -s' <<'REMOTE'
+          set -Eeuo pipefail
+          [[ "$(id -un)" == "root" ]] || exit 20
+          echo 'FET_HP_ROOT_SSH_PASS'
+          echo 'PM2_UI_METADATA_BEGIN'
+          runuser -u deploy -- env PM2_HOME=/home/deploy/.pm2 pm2 jlist | node -e '
+            let raw="";process.stdin.on("data",x=>raw+=x);
+            process.stdin.on("end",()=>{
+              const rows=JSON.parse(raw||"[]");
+              for(const row of rows){
+                if(!/dex|manager|ui/i.test(String(row.name||""))) continue;
+                console.log(JSON.stringify({
+                  name:row.name,status:row.pm2_env?.status,
+                  cwd:row.pm2_env?.pm_cwd,script:row.pm2_env?.pm_exec_path,
+                  pid:row.pid
+                }));
+              }
+            });
+          '
+          echo 'PM2_UI_METADATA_END'
+          for path in /home/deploy/ai-dex-manager /home/deploy/disdex-trading/current /home/deploy/disdex-trading/releases; do
+            if [[ -e "$path" ]]; then
+              printf 'PATH=%s REALPATH=%s\n' "$path" "$(readlink -f "$path")"
+              if [[ "$path" == "/home/deploy/ai-dex-manager" ]] && git -C "$path" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+                printf 'UI_GIT_SHA=%s\n' "$(git -C "$path" rev-parse HEAD)"
+              fi
+            else
+              printf 'PATH=%s MISSING\n' "$path"
+            fi
+          done
+          echo "NODE_VERSION=$(node --version 2>/dev/null || echo MISSING)"
+          df -h /home/deploy | tail -n 1
+          echo 'TRADING_MUTATION=0'
+          echo 'FET_HP_ROOT_PREFLIGHT_COMPLETE'
+          REMOTE
