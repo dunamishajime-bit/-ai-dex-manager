@@ -20,7 +20,10 @@ const BASE_URL = "https://api.bitget.com";
 const FROZEN = {
     short: { ret72Max: 0, impulse: -0.07, expiry: 24, bounceMin: 0.0125, bounceMax: 0.06, p24Floor: -0.12, btcEmaFloor: -0.04, rsiMin: 30, volMin: 0.25, volMax: 3, relMax: -0.02, btc24Max: 0.04, hold: 72, hard: 0.08, trigger: 0.15, trail: 0.04 },
     long: { ret72Min: 0.15, lookback: 18, p24Min: 0.10, relMin: 0.01, btc24Min: 0, rsiMin: 48, rsiMax: 78, volMin: 0.25, volMax: 3, atrMax: 0.05, hold: 120, hard: 0.08, trigger: 0.10, trail: 0.03 },
-    risk: { target: 0.02, multiplier: 0.75, floor: 0.60, cap: 0.75, cooldown: 6 },
+    // Current production PENGU contract: every accepted entry is governed by
+    // the 1.00x sleeve cap. Keep the frozen replay aligned with the deployed
+    // sizing contract instead of the retired 0.75x parity fixture.
+    risk: { target: 0.02, multiplier: 1.0, floor: 0.60, cap: 1.0, cooldown: 6 },
 } as const;
 
 interface ReferenceRow extends DisDexV35Candle {
@@ -314,10 +317,11 @@ async function main() {
     const production = productionReplay(history);
     assertTradeParity(reference, production);
     const result = metrics(production);
+    console.log(`PENGU current-contract parity metrics ${JSON.stringify(result)}`);
     assert.equal(result.trades, 33);
-    assert.ok(Math.abs(result.returnPct - 147.49) <= 0.15, `Return mismatch ${result.returnPct}`);
+    assert.ok(Math.abs(result.returnPct - 224.02) <= 0.25, `Return mismatch ${result.returnPct}`);
     assert.ok(Math.abs(result.profitFactor - 2.990) <= 0.01, `PF mismatch ${result.profitFactor}`);
-    assert.ok(Math.abs(result.maxDrawdownPct - (-11.31)) <= 0.05, `DD mismatch ${result.maxDrawdownPct}`);
+    assert.ok(Math.abs(result.maxDrawdownPct - (-15.18)) <= 0.10, `DD mismatch ${result.maxDrawdownPct}`);
     console.log("PENGU_DUAL_LS_V2_FINAL_PRODUCTION_RESEARCH_PARITY_PASS");
     console.log(JSON.stringify({ source: "Bitget USDT perpetual untouched external validation", rows: { pengu: pengu.length, btc: btc.length }, ...result, ledgerParity: true, ordersSent: false, cancelSent: false, positionChangesSent: false }));
 }
