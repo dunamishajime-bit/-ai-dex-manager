@@ -66,9 +66,13 @@ class RawIntegratedEngineTests(unittest.TestCase):
         state.positions[fet.position_id] = fet
         candidate = {"positionId": "core", "strategy": "V12", "assetClass": "crypto", "requestedGross": 2.0, "priority": 1}
         self.assertFalse(reserve_entry(state, candidate).accepted)
-        self.assertTrue(preempt_fet(state, candidate))
+        self.assertFalse(preempt_fet(state, candidate))
+        self.assertEqual(len(state.positions), 1)
+        bar = Bar("FETUSDT", START, 0.8, 0.9, 0.7, 0.8, 10)
+        self.assertTrue(preempt_fet(state, candidate, fill_bars={"FETUSDT": bar}, ts_ms=START))
         self.assertTrue(reserve_entry(state, candidate).accepted)
         self.assertEqual(state.preemptions[0]["releasedGross"], 2.25)
+        self.assertAlmostEqual(state.preemptions[0]["pnlNet"], -0.2)
 
     def test_rejected_entry_has_no_pnl_or_trade_event(self):
         state = PortfolioState(crypto_gross_cap=1.0, total_gross_cap=1.0)
