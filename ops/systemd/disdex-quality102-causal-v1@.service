@@ -13,6 +13,7 @@ EnvironmentFile=/etc/disdex/disdex-v12-pengu-v2-v52.env
 EnvironmentFile=/etc/disdex/disdex-quality102-causal-v1.env
 Environment=NODE_ENV=production
 ExecStartPre=+/usr/bin/install -d -o deploy -g deploy -m 0700 /var/lib/disdex/quality102-causal-v1
+ExecStartPre=+/usr/bin/install -d -o deploy -g deploy -m 0700 /var/lib/disdex/quality102-causal-v1/recovery-archive
 ExecStartPre=+/bin/sh -c 'if [ -e /var/lib/disdex/quality102-causal-v1/market-history.json ]; then chown deploy:deploy /var/lib/disdex/quality102-causal-v1/market-history.json && chmod 600 /var/lib/disdex/quality102-causal-v1/market-history.json; fi'
 ExecStartPre=+/bin/sh -c 'if [ -e /var/lib/disdex/quality102-causal-v1/state.json ]; then chown deploy:deploy /var/lib/disdex/quality102-causal-v1/state.json && chmod 600 /var/lib/disdex/quality102-causal-v1/state.json; fi'
 ExecStartPre=/usr/bin/test -f /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
