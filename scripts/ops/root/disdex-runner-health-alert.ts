@@ -3,7 +3,10 @@ import { chmod, mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 
-import { shouldTreatV52StopAsIntentional, type RunnerHealthStatus } from "../../../lib/server/runtime-alert-policy";
+import {
+  shouldTreatV52StopAsIntentional,
+  type RunnerHealthStatus,
+} from "../../../lib/server/runtime-alert-policy";
 import {
   formatRunnerHealthEmail,
   markRunnerAlertAttempt,
@@ -11,6 +14,10 @@ import {
   observeRunnerStatus,
   type RunnerAlertRecord,
 } from "../../../lib/server/runner-health-notification";
+import {
+  resolveRunnerServiceUnit,
+  type AlertRunnerId,
+} from "../../../lib/server/runner-service-resolution";
 
 const ROOT = process.env.DISDEX_TRADING_ROOT || "/home/deploy/disdex-trading/current";
 const STATE_PATH = process.env.DISDEX_ALERT_STATE_PATH || "/var/lib/disdex/runner-health/private/email-alert-state.json";
@@ -19,58 +26,40 @@ const DEFAULT_RECIPIENT = "dunamis.hajime@gmail.com";
 // No order, cancel, position, Kill Switch, or approval-gate mutation is
 // performed by this monitor. It is observation and email notification only.
 
-type RunnerId =
-  | "V12"
-  | "PENGU_V8"
-  | "V52"
-  | "QUALITY102_CAUSAL_V1"
-  | "SHARED_CRYPTO_RISK"
-  | "MARGIN_GUARD";
+type RunnerId = AlertRunnerId;
 type AlertState = { runners: Partial<Record<RunnerId, RunnerAlertRecord>> };
 
-const runners: Array<{ id: RunnerId; label: string; unitEnv: string; defaultUnit: string; unitPattern: string; intentionalStopPath?: string }> = [
+const runners: Array<{ id: RunnerId; label: string; unitEnv: string; intentionalStopPath?: string }> = [
   {
     id: "V12",
     label: "V12 X1.00 ALL",
     unitEnv: "DISDEX_ALERT_V12_SERVICE_UNIT",
-    defaultUnit: "disdex-v12-x1-all@f59347fad11553b833e75f6f35a0c545464fdf5f.service",
-    unitPattern: "disdex-v12-x1-all@*.service",
   },
   {
     id: "PENGU_V8",
     label: "PENGU Dual LS V2 / Short V20 / Recovery V8",
     unitEnv: "DISDEX_ALERT_PENGU_V8_SERVICE_UNIT",
-    defaultUnit: "disdex-pengu-dual-ls-v2-v20.service",
-    unitPattern: "disdex-pengu-dual-ls-v2*.service",
   },
   {
     id: "V52",
     label: "V52 Aster-only",
     unitEnv: "DISDEX_ALERT_V52_SERVICE_UNIT",
-    defaultUnit: "disdex-v52-aster-only@239982a73daed630a88b466404af43483aea8a10.service",
-    unitPattern: "disdex-v52-aster-only@*.service",
     intentionalStopPath: "/var/lib/disdex/runner-health/v52.intentional-stop",
   },
   {
     id: "QUALITY102_CAUSAL_V1",
     label: "Quality102 Causal V4",
     unitEnv: "DISDEX_ALERT_QUALITY102_SERVICE_UNIT",
-    defaultUnit: "disdex-quality102-causal-v1@f59347fad11553b833e75f6f35a0c545464fdf5f.service",
-    unitPattern: "disdex-quality102-causal-v1@*.service",
   },
   {
     id: "SHARED_CRYPTO_RISK",
     label: "共有Crypto Risk安全Gate",
     unitEnv: "DISDEX_ALERT_SHARED_CRYPTO_RISK_SERVICE_UNIT",
-    defaultUnit: "disdex-shared-crypto-risk@current.service",
-    unitPattern: "disdex-shared-crypto-risk@*.service",
   },
   {
     id: "MARGIN_GUARD",
     label: "V12/PENGU/V52 Margin Guard安全Gate",
     unitEnv: "DISDEX_ALERT_MARGIN_GUARD_SERVICE_UNIT",
-    defaultUnit: "disdex-v12-v52-margin-guard@current.service",
-    unitPattern: "disdex-v12-v52-margin-guard@*.service",
   },
 ];
 
@@ -84,32 +73,25 @@ function unitExists(unit: string) {
   }
 }
 
-function matchingUnits(pattern: string, activeOnly: boolean) {
+async function readCurrentReleaseSha() {
   try {
-    const args = ["list-units", "--all", "--type=service", "--plain", "--no-legend"];
-    if (activeOnly) args.push("--state=active");
-    args.push(pattern);
-    const output = execFileSync("/usr/bin/systemctl", args, { encoding: "utf8" });
-    return [...new Set(output.split(/\r?\n/)
-      .map((line) => line.match(/([A-Za-z0-9@._:+-]+\.service)\b/)?.[1])
-      .filter((unit): unit is string => Boolean(unit)))];
+    return (await readFile(join(ROOT, ".disdex-release-sha"), "utf8")).trim();
   } catch {
-    return [];
+    return undefined;
   }
 }
 
-function resolveServiceUnit(runner: typeof runners[number]) {
-  const active = matchingUnits(runner.unitPattern, true);
-  if (active.length === 1) return { unit: active[0], detail: "active unitを動的解決" };
-  if (active.length > 1) return { unit: active[0], detail: `同一ロジックのactive unitが複数あります: ${active.join(", ")}`, conflict: true };
-
-  const configured = process.env[runner.unitEnv]?.trim();
-  if (configured && unitExists(configured)) return { unit: configured, detail: "active unitなし・設定済みunitを確認" };
-
-  const installed = matchingUnits(runner.unitPattern, false);
-  if (installed.length === 1) return { unit: installed[0], detail: "active unitなし・installed unitを確認" };
-  if (installed.length > 1) return { unit: installed[0], detail: `active unitなし・候補unitが複数あります: ${installed.join(", ")}`, conflict: true };
-  return { unit: configured || runner.defaultUnit, detail: "対象unitを解決できません" };
+function resolveServiceUnit(runner: typeof runners[number], currentReleaseSha: string | undefined) {
+  const resolved = resolveRunnerServiceUnit(runner.id, currentReleaseSha);
+  if (!resolved.unit) return resolved;
+  if (!unitExists(resolved.unit)) {
+    return {
+      ...resolved,
+      failClosed: true,
+      detail: `${resolved.detail} がsystemdに存在しないためFail Closed`,
+    } as const;
+  }
+  return resolved;
 }
 
 function serviceStatus(unit: string, conflict = false): { status: RunnerHealthStatus; detail: string } {
@@ -153,8 +135,12 @@ async function saveState(state: AlertState) {
   await chmod(STATE_PATH, 0o600);
 }
 
-function statusForRunner(runner: typeof runners[number], observedAt = new Date()) {
-  const resolved = resolveServiceUnit(runner);
+function statusForRunner(runner: typeof runners[number], currentReleaseSha: string | undefined, observedAt = new Date()) {
+  const resolved = resolveServiceUnit(runner, currentReleaseSha);
+  if (resolved.failClosed) {
+    const service = serviceStatus(resolved.unit, true);
+    return { ...service, service: resolved.unit, detail: resolved.detail };
+  }
   if (runner.intentionalStopPath) {
     let markerPresent = false;
     try {
@@ -167,7 +153,7 @@ function statusForRunner(runner: typeof runners[number], observedAt = new Date()
       return { status: "INTENTIONAL_STOP" as const, service: resolved.unit, detail: "V52市場時間外停止マーカーを確認" };
     }
   }
-  const service = serviceStatus(resolved.unit, resolved.conflict);
+  const service = serviceStatus(resolved.unit, resolved.failClosed);
   return { ...service, service: resolved.unit, detail: `${resolved.detail}; ${service.detail}` };
 }
 
@@ -205,8 +191,9 @@ async function main() {
   const state = await readState();
   let deliveryFailure = false;
   const observedAt = new Date();
+  const currentReleaseSha = await readCurrentReleaseSha();
   for (const runner of runners) {
-    const observed = statusForRunner(runner, observedAt);
+    const observed = statusForRunner(runner, currentReleaseSha, observedAt);
     const observation = observeRunnerStatus(state.runners[runner.id], observed.status, observedAt);
     state.runners[runner.id] = observation.record;
     if (!observation.shouldSend || observation.transition === "NONE") continue;

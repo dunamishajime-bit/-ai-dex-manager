@@ -34,8 +34,11 @@ function timestamp(value: string | undefined) {
 
 /**
  * Fold one read-only systemd observation into the persistent alert state.
- * A mail transport outage cannot create a new mail on every timer tick; it
- * can only retry the same incident after the bounded retry interval.
+ *
+ * The monitor deliberately uses the last delivered state for transition
+ * detection. This means a mail transport outage cannot create a new mail on
+ * every one-minute timer tick; it can only retry the same incident after the
+ * bounded retry interval.
  */
 export function observeRunnerStatus(
   previous: RunnerAlertRecord | undefined,
@@ -54,6 +57,8 @@ export function observeRunnerStatus(
   };
   const previousNotifiedStatus = prior.lastNotifiedStatus;
 
+  // V52's market-hours stop is intentionally quiet and becomes the new
+  // baseline, so market open does not generate a false recovery message.
   if (current === "INTENTIONAL_STOP") {
     return {
       record: {

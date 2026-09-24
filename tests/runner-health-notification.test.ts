@@ -66,3 +66,13 @@ test("intentional V52 stop is quiet and mail is Japanese", () => {
   assert.match(mail.text, /読み取り専用/);
   assert.doesNotMatch(mail.text, /runner health alert|stopped or unhealthy/i);
 });
+
+test("runner recovery after an intentional stop sends a recovered notification", () => {
+  const t0 = new Date("2026-09-07T00:00:00.000Z");
+  const intentional = observeRunnerStatus(undefined, "INTENTIONAL_STOP", t0);
+  const active1 = observeRunnerStatus(intentional.record, "ACTIVE", new Date(t0.getTime() + 60_000));
+  assert.equal(active1.shouldSend, false);
+  const active2 = observeRunnerStatus(active1.record, "ACTIVE", new Date(t0.getTime() + 120_000));
+  assert.equal(active2.transition, "RECOVERED");
+  assert.equal(active2.shouldSend, true);
+});

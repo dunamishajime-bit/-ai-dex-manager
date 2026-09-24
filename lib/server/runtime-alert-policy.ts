@@ -2,6 +2,7 @@ export type RunnerHealthStatus = "ACTIVE" | "INACTIVE" | "FAILED" | "UNKNOWN" | 
 export type RunnerAlertTransition = "UNHEALTHY" | "RECOVERED" | "NONE";
 
 const unhealthy = new Set<RunnerHealthStatus>(["INACTIVE", "FAILED", "UNKNOWN"]);
+
 const NEW_YORK_TIME_ZONE = "America/New_York";
 
 function datePartsInNewYork(at: Date) {
@@ -75,7 +76,7 @@ function isUsEquityHoliday(year: number, month: number, day: number) {
   return observed.some((holiday) => holiday.getUTCFullYear() === date.getUTCFullYear() && holiday.getUTCMonth() === date.getUTCMonth() && holiday.getUTCDate() === date.getUTCDate());
 }
 
-/** True only during the US equity regular session used by the V52 sleeve. */
+/** True only during the US equity regular session used by the V52 stock sleeve. */
 export function isUsEquityRegularSessionAt(at: Date) {
   const parts = datePartsInNewYork(at);
   const year = Number(parts.year);
@@ -90,13 +91,16 @@ export function shouldTreatV52StopAsIntentional(markerPresent: boolean, at: Date
   return markerPresent && !isUsEquityRegularSessionAt(at);
 }
 
-/** Alerting is observational only. It never changes a trading gate. */
+/**
+ * Alerting is observational only. It never clears a gate, restarts a runner,
+ * cancels an order, or changes a position.
+ */
 export function classifyRunnerAlertTransition(
   previous: RunnerHealthStatus | undefined,
   current: RunnerHealthStatus,
 ): RunnerAlertTransition {
   if (current === "INTENTIONAL_STOP") return "NONE";
   if (unhealthy.has(current) && !unhealthy.has(previous as RunnerHealthStatus)) return "UNHEALTHY";
-  if (current === "ACTIVE" && unhealthy.has(previous as RunnerHealthStatus)) return "RECOVERED";
+  if (current === "ACTIVE" && (unhealthy.has(previous as RunnerHealthStatus) || previous === "INTENTIONAL_STOP")) return "RECOVERED";
   return "NONE";
 }
