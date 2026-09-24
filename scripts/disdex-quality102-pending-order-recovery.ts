@@ -42,7 +42,18 @@ async function main() {
   if (!handle) throw new Error("Q102_PENDING_RECOVERY_ACCOUNT_LOCK_UNAVAILABLE");
   try {
     const before = await store.load();
-    if (!before.pending) throw new Error("Q102_PENDING_RECOVERY_PENDING_REQUIRED");
+    if (!before.pending) {
+      if (!process.argv.includes("--allow-no-pending")) throw new Error("Q102_PENDING_RECOVERY_PENDING_REQUIRED");
+      console.log(JSON.stringify({
+        status: "Q102_PENDING_RECOVERY_NOT_REQUIRED",
+        statePath,
+        runtimeCommitSha: sha,
+        ordersSent: 0,
+        cancelsSent: 0,
+        positionChangesSent: 0,
+      }));
+      return;
+    }
     const result = await reconcilePlannedQ102Pending({
       stateStore: store,
       readonlyDeps: {
