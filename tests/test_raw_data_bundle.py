@@ -1,6 +1,7 @@
 import unittest
 
 from scripts.research.raw_data.models import Bar, Funding
+from scripts.research.raw_data.aster_fetch import parse_aster_funding_rows
 from scripts.research.raw_data.validate_bundle import validate_bundle
 
 
@@ -61,6 +62,24 @@ class RawDataBundleValidationTests(unittest.TestCase):
         report = validate_bundle(bundle)
         self.assertFalse(report["valid"])
         self.assertEqual(report["funding_after_decision"], 1)
+
+    def test_aster_funding_payload_is_normalized_without_signed_fields(self):
+        rows = parse_aster_funding_rows("BTCUSDT", [{"fundingTime": START, "fundingRate": "0.0001"}])
+        self.assertEqual(rows, [Funding("BTCUSDT", START, 0.0001)])
+
+    def test_missing_decision_boundary_is_incomplete(self):
+        bundle = self.base_bundle()
+        bundle["bars"]["BTCUSDT"] = [bundle["bars"]["BTCUSDT"][1]]
+        report = validate_bundle(bundle)
+        self.assertFalse(report["valid"])
+        self.assertIn("BTCUSDT", report["incomplete_symbols"])
+
+    def test_declared_symbol_inception_is_not_treated_as_missing_history(self):
+        bundle = self.base_bundle()
+        bundle["bars"]["BTCUSDT"] = [bundle["bars"]["BTCUSDT"][1]]
+        bundle["availability"] = {"BTCUSDT": {"start_ms": START + HOUR}}
+        report = validate_bundle(bundle)
+        self.assertTrue(report["valid"], report)
 
 
 if __name__ == "__main__":

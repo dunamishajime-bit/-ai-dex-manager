@@ -1,24 +1,43 @@
 {
-  "status": "RAW_BUNDLE_SCHEMA_READY",
-  "purpose": "Provenance manifest placeholder; populated only by the end-to-end raw-data run.",
-  "crypto_source": {
+  "status": "BLOCKED_RAW_SOURCE_OR_PARITY",
+  "period": {"start": "2025-08-10T00:00:00Z", "end": "2026-08-10T00:00:00Z", "endExclusive": true},
+  "capital": {"initialJpy": 10000, "monthlyJpy": 10000, "monthlyCount": 12, "totalContributedJpy": 130000, "compounding": true},
+  "productionContractSource": {"path": "docs/production/current-live-target.json", "sha256": "8F052EEA2E7D71BC040798D3F4473C08DF828A7C8FD70D5F26A7DC5B076E1CDE"},
+  "cryptoSource": {
     "provider": "Aster public Futures REST",
-    "base_url": "https://fapi.asterdex.com",
+    "baseUrl": "https://fapi.asterdex.com",
     "authenticated": false,
-    "trade_ledgers_used": false
+    "interval": "1h",
+    "symbols": ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "LINKUSDT", "AVAXUSDT", "DOGEUSDT", "INJUSDT", "XRPUSDT", "ADAUSDT", "LTCUSDT", "ATOMUSDT", "AAVEUSDT", "NEARUSDT", "PENGUUSDT", "FETUSDT"],
+    "bundlePath": ".raw-data/aster-2025-08-10-2026-08-10.json.gz",
+    "bundleSha256": "56E260A47DC3B8CB3005CA40D71F1196CF9F4C33F1C4BBCF3AA070CC69E72E7F",
+    "canonicalBundleSha256": "1951f664d3fcb2f150521fea9b92acde9795e1ec5abea1dc86e78b3ac798a18a",
+    "rows": {"fullPeriodSymbols": 15, "fetRows": 5094, "expectedHourlyRows": 8760},
+    "fundingRows": {"standardSymbols": 1096, "pengu": 2190, "fet": 5140}
   },
-  "stock_source": {
-    "provider": "raw stock OHLCV source",
-    "aster_data_claim": false,
-    "trade_ledgers_used": false
-  },
-  "period": {
-    "start": "2025-08-10T00:00:00Z",
-    "end": "2026-08-10T00:00:00Z",
-    "end_exclusive": true
+  "stockSource": {
+    "provider": "Yahoo Finance chart JSON cache",
+    "asterClaim": false,
+    "symbols": ["AMZN", "META", "MSFT", "NVDA", "TSLA"],
+    "sourceDirectory": "C:/Users/dis/-ai-dex-manager/.worktrees/performance-restoration-20260905/.research-state/q102-2slot-compare/inputs/stock-cache/aligned/v11-cash",
+    "sha256": {
+      "AMZN": "504C6D61228645D6B23BB37DE976A5620C660B08AD6AFD15D8DD29FDB02099C0",
+      "META": "EB3FF7DEE551C4E047E3B68411056407E42B2FA960E2B7994F80603AF39D7C0C",
+      "MSFT": "8C403EAFE1B20E7DAC7CE2B23002C66D4905C1B02EA6B143205FE5A555FD93AB",
+      "NVDA": "F7F17931C9A13CBAF2738A241CF589DD947B37B5D11FDD44D9AD50422C3D764C",
+      "TSLA": "04BEEEB95A62C59ABD945C08AA19AA73112C0359C66E2AE32880D37E81601F5B"
+    }
   },
   "quality": {
-    "valid": false,
-    "status": "NOT_RUN"
-  }
+    "duplicateRows": 0,
+    "nonMonotonicRows": 0,
+    "postPeriodRows": 0,
+    "gaps": 0,
+    "declaredInception": {"FETUSDT": "2026-01-09T18:00:00Z"},
+    "invalidRows": [{"symbol": "BTCUSDT", "ts": "2025-09-13T04:00:00Z", "tsMs": 1757768400000, "open": 115941.8, "high": 115916.1, "low": 115580.7, "close": 115707.3, "reason": "high < open"}],
+    "valid": false
+  },
+  "formalRun": {"executed": false, "reason": "Aster raw validation failed; invalid OHLC cannot be silently repaired or dropped.", "normal": null, "severe": null, "newPenguStandalone": null, "integratedComparison": null, "resultHash": null},
+  "tradeLedgersUsedAsInput": false,
+  "vpsOrLiveChanged": false
 }

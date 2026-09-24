@@ -41,6 +41,7 @@ def validate_bundle(bundle: dict[str, Any]) -> dict[str, Any]:
     post_period_rows = 0
     pre_period_rows = 0
     funding_after_decision = 0
+    incomplete_symbols: list[str] = []
     gaps: list[dict[str, Any]] = []
     ranges: dict[str, dict[str, int | None]] = {}
 
@@ -69,6 +70,9 @@ def validate_bundle(bundle: dict[str, Any]) -> dict[str, Any]:
             "last_ts_ms": max(in_period) if in_period else None,
             "row_count": len(in_period),
         }
+        declared_start = int(bundle.get("availability", {}).get(str(symbol), {}).get("start_ms", start_ms))
+        if not in_period or in_period[0] != declared_start or in_period[-1] != end_ms - interval_ms:
+            incomplete_symbols.append(str(symbol))
         for left, right in zip(in_period, in_period[1:]):
             if right - left > interval_ms:
                 gaps.append({"symbol": str(symbol), "from_ts_ms": left, "to_ts_ms": right, "missing_bars": (right - left) // interval_ms - 1})
@@ -81,7 +85,7 @@ def validate_bundle(bundle: dict[str, Any]) -> dict[str, Any]:
                 funding_after_decision += 1
 
     digest = hashlib.sha256(_canonical(bundle)).hexdigest()
-    valid = not any((duplicate_rows, invalid_rows, non_monotonic_rows, post_period_rows, pre_period_rows, funding_after_decision))
+    valid = not any((duplicate_rows, invalid_rows, non_monotonic_rows, post_period_rows, pre_period_rows, funding_after_decision, incomplete_symbols))
     return {
         "valid": valid,
         "period": {"start_ms": start_ms, "end_ms": end_ms},
@@ -91,8 +95,8 @@ def validate_bundle(bundle: dict[str, Any]) -> dict[str, Any]:
         "post_period_rows": post_period_rows,
         "pre_period_rows": pre_period_rows,
         "funding_after_decision": funding_after_decision,
+        "incomplete_symbols": incomplete_symbols,
         "gaps": gaps,
         "ranges": ranges,
         "sha256": digest,
     }
-

@@ -1,0 +1,14 @@
+{
+  "status": "BLOCKED_RAW_SOURCE_OR_PARITY",
+  "engineSha": "10f5f6422cca868d4974676b51dbc342cd617bdd",
+  "strategyContractSha256": "8F052EEA2E7D71BC040798D3F4473C08DF828A7C8FD70D5F26A7DC5B076E1CDE",
+  "period": {"start": "2025-08-10T00:00:00Z", "end": "2026-08-10T00:00:00Z", "endExclusive": true},
+  "deposits": {"initialJpy": 10000, "monthlyJpy": 10000, "count": 12, "totalJpy": 130000},
+  "grossCaps": {"cryptoNormal": 3.0, "totalNormal": 4.25, "cryptoHard": 5.0, "totalHard": 8.0, "v12": 2.0, "pengu": 1.0, "fet": 2.25, "q102": 3.0, "stock": 4.0, "stockSlot": 2.0},
+  "eventOrdering": "signal bar features -> next bar execution -> reservation -> settlement",
+  "asterBundleSha256": "56E260A47DC3B8CB3005CA40D71F1196CF9F4C33F1C4BBCF3AA070CC69E72E7F",
+  "asterCanonicalSha256": "1951f664d3fcb2f150521fea9b92acde9795e1ec5abea1dc86e78b3ac798a18a",
+  "qualityGate": {"valid": false, "invalidRows": 1, "incompleteSymbols": [], "gaps": 0},
+  "resultHash": null,
+  "tradeLedgersUsedAsInput": false
+}

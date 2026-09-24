@@ -14,6 +14,10 @@ from .models import Bar, Funding
 ASTER_FUTURES_BASE = "https://fapi.asterdex.com"
 
 
+def parse_aster_funding_rows(symbol: str, payload: list[dict[str, Any]]) -> list[Funding]:
+    return [Funding(symbol, int(item["fundingTime"]), float(item["fundingRate"])) for item in payload]
+
+
 def _get_json(url: str) -> Any:
     request = Request(url, headers={"User-Agent": "DisDex-raw-bt/1.0"})
     with urlopen(request, timeout=30) as response:
@@ -43,7 +47,22 @@ def fetch_aster_bundle(symbols: list[str], start_ms: int, end_ms: int, interval:
                 break
             time.sleep(0.05)
         bars[symbol] = rows
-        funding[symbol] = []
+        funding_rows: list[Funding] = []
+        funding_cursor = start_ms
+        while funding_cursor < end_ms:
+            funding_query = urlencode({"symbol": symbol, "startTime": funding_cursor, "endTime": end_ms, "limit": 1000})
+            funding_payload = _get_json(f"{ASTER_FUTURES_BASE}/fapi/v1/fundingRate?{funding_query}")
+            if not funding_payload:
+                break
+            funding_rows.extend(parse_aster_funding_rows(symbol, funding_payload))
+            last_funding = int(funding_payload[-1]["fundingTime"])
+            if last_funding < funding_cursor:
+                raise RuntimeError(f"Aster funding cursor did not advance for {symbol}")
+            funding_cursor = last_funding + 1
+            if len(funding_payload) < 1000:
+                break
+            time.sleep(0.05)
+        funding[symbol] = funding_rows
     return {"period": {"start_ms": start_ms, "end_ms": end_ms}, "interval": interval, "interval_ms": 3_600_000, "bars": bars, "funding": funding}
 
 
@@ -54,4 +73,3 @@ def load_stock_bars(path: Path, symbol: str) -> list[Bar]:
             ts_value = item.get("ts_ms") or item.get("timestamp") or item.get("ts")
             rows.append(Bar(symbol, int(ts_value), float(item["open"]), float(item["high"]), float(item["low"]), float(item["close"]), float(item.get("volume", 0.0))))
     return rows
-
