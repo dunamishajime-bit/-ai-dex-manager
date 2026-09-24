@@ -271,16 +271,31 @@ def _slip(price: float, side: str, bps: float, is_entry: bool) -> float:
 
 def _exit_for_bar(position: Position, bar: Any, ts_ms: int) -> tuple[str, float] | None:
     direction = 1.0 if position.side in ("LONG", "L") else -1.0
+    # A profit floor may arm only after the previous bar has closed; intrabar
+    # trigger-and-stop ordering is unknowable from OHLC. Never use that
+    # same bar's high to retroactively arm a stop at its low.
+    if position.profit_floor_armed and position.profit_floor_stop_pct is not None:
+        floor = position.entry_price * (1.0 + direction * position.profit_floor_stop_pct)
+        if direction > 0 and bar.open <= floor:
+            return "PROFIT_FLOOR_GAP", bar.open
+        if direction < 0 and bar.open >= floor:
+            return "PROFIT_FLOOR_GAP", bar.open
+        if (direction > 0 and bar.low <= floor) or (direction < 0 and bar.high >= floor):
+            return "PROFIT_FLOOR", floor
     if position.hard_stop_pct is not None:
         stop = position.entry_price * (1.0 - direction * position.hard_stop_pct)
+        if direction > 0 and bar.open <= stop:
+            return "HARD_STOP_GAP", bar.open
+        if direction < 0 and bar.open >= stop:
+            return "HARD_STOP_GAP", bar.open
         if (direction > 0 and bar.low <= stop) or (direction < 0 and bar.high >= stop):
             return "HARD_STOP", stop
+    if position.entry_ts and ts_ms - position.entry_ts >= position.max_hold_hours * 3_600_000:
+        return "MAX_HOLD", bar.open
     if position.take_profit_pct is not None:
         target = position.entry_price * (1.0 + direction * position.take_profit_pct)
         if (direction > 0 and bar.high >= target) or (direction < 0 and bar.low <= target):
             return "TAKE_PROFIT", target
-    if position.entry_ts and ts_ms - position.entry_ts >= position.max_hold_hours * 3_600_000:
-        return "MAX_HOLD", bar.close
     return None
 
 
