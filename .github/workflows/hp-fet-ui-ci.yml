@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - codex/hp-fet-live-display-20260924
+      - codex/hp-mobile-fet-detail-20260925
   workflow_dispatch:
 
 permissions:
