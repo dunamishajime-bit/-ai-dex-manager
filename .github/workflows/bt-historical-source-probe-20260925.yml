@@ -1,0 +1,27 @@
+name: Independent historical source connectivity probe
+on:
+  push:
+    branches: [research/raw-replay-accounting-fix-20260925]
+    paths: [.github/workflows/bt-historical-source-probe-20260925.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Test public historical market data endpoints without credentials
+        shell: bash
+        run: |
+          set -u
+          for entry in \
+            "BINANCE_FUTURES|https://fapi.binance.com/fapi/v1/klines?symbol=BTCUSDT%26interval=1h%26limit=1" \
+            "BINANCE_VISION_KLINES|https://data.binance.vision/data/futures/um/monthly/klines/BTCUSDT/1h/BTCUSDT-1h-2025-08.zip" \
+            "BINANCE_VISION_FUNDING|https://data.binance.vision/data/futures/um/monthly/fundingRate/BTCUSDT/BTCUSDT-fundingRate-2025-08.zip" \
+            "ASTER_FUTURES|https://fapi.asterdex.com/fapi/v1/klines?symbol=BTCUSDT%26interval=1h%26limit=1"; do
+            name="${entry%%|*}"
+            url="${entry#*|}"
+            code="$(curl -sS -L -I -o /dev/null -w '%{http_code}' --max-time 15 "${url//%26/\&}" || true)"
+            echo "SOURCE=$name HTTP=$code"
+          done
