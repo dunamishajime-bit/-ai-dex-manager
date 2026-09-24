@@ -1,0 +1,77 @@
+name: DisDex FET HP public verify
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    if: >-
+      github.event.issue.number == 132 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == 'DISDEX_FET_HP_PUBLIC_VERIFY_20260924'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+      TARGET_SHA: 1ac7dfffbfbb1dd809e4d9e5db3ed2ce21c7877e
+    steps:
+      - name: Public HTTPS probe from GitHub runner
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          for url in https://professional-dismanager.net/ https://professional-dismanager.net/decision-status/fet; do
+            code="$(curl -sS -L --max-redirs 5 --max-time 20 -o /tmp/body -w '%{http_code}' "$url")"
+            echo "PUBLIC_URL=$url HTTP=$code"
+            [[ "$code" =~ ^(200|401|403)$ ]]
+          done
+      - name: Configure root SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          root=Path.home()/".ssh"
+          def norm(v): return os.environ[v].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (root/"id_root").write_text(norm("ROOT_KEY"),encoding="utf-8")
+          (root/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"),encoding="utf-8")
+          PY
+          chmod 600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Verify deployed FET route and systemd UI
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          SSH_PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -p "$SSH_PORT" "root@$SSH_HOST" \
+            "TARGET_SHA='$TARGET_SHA' bash -s" <<'REMOTE'
+          set -Eeuo pipefail
+          svc='ai-dex-manager-ui.service'
+          [[ "$(systemctl is-active "$svc")" == "active" ]]
+          wd="$(systemctl show "$svc" --property WorkingDirectory --value)"
+          [[ "$wd" == "/home/deploy/disdex-trading/ui-releases/ui-fet-1ac7dfff" ]]
+          [[ "$(tr -d '[:space:]' < "$wd/.disdex-release-sha")" == "$TARGET_SHA" ]]
+          envs="$(systemctl show "$svc" --property Environment --value)"
+          [[ " $envs " == *" DISDEX_UI_RELEASE_SHA=$TARGET_SHA "* ]]
+          [[ -f "$wd/.next/server/app/decision-status/fet.html" || -e "$wd/.next/server/app/decision-status/fet" || -f "$wd/.next/server/app/decision-status/fet/page.js" || -f "$wd/.next/server/app/decision-status/fet/page_client-reference-manifest.js" ]]
+          local_code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 5 http://127.0.0.1:3001/)"
+          [[ "$local_code" == "200" ]]
+          fet_code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 5 http://127.0.0.1:3001/decision-status/fet)"
+          [[ "$fet_code" =~ ^(200|307|308|401|403)$ ]]
+          echo 'STATUS=FET_HP_PUBLIC_VERIFIED'
+          echo "UI_WORKDIR=$wd"
+          echo "UI_SHA=$TARGET_SHA"
+          echo "LOCAL_HTTP=$local_code"
+          echo "LOCAL_FET_HTTP=$fet_code"
+          echo 'TRADING_MUTATION=0'
+          REMOTE
