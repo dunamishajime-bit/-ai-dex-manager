@@ -52,7 +52,7 @@ jobs:
           npx tsc --noEmit
           DISDEX_UI_VERIFIED_TSC=1 npm run build
           test -d .next
-          tar -czf /tmp/disdex-fet-ui-next.tgz .next
+          tar --exclude='.next/cache' -czf /tmp/disdex-fet-ui-next.tgz .next
           echo "BUILD_ARCHIVE_BYTES=$(stat -c %s /tmp/disdex-fet-ui-next.tgz)"
       - name: Configure pinned root SSH
         shell: bash
@@ -109,11 +109,26 @@ jobs:
           install -d -o deploy -g deploy -m 0755 "$stage"
           runuser -u deploy -- git -C "$source_repo" archive "$TARGET_SHA" | runuser -u deploy -- tar -x -C "$stage"
           [[ -f "$current/package-lock.json" && -f "$stage/package-lock.json" ]]
-          old_lock="$(sha256sum "$current/package-lock.json" | awk '{print $1}')"
-          new_lock="$(sha256sum "$stage/package-lock.json" | awk '{print $1}')"
-          [[ "$old_lock" == "$new_lock" ]] || { echo 'PACKAGE_LOCK_CHANGED_REFUSE_NODE_MODULE_REUSE'; exit 31; }
-          [[ -d "$current/node_modules" && -x "$current/node_modules/.bin/next" ]]
-          cp -al -- "$current/node_modules" "$stage/node_modules"
+          python3 - "$current/package.json" "$stage/package.json" "$current/package-lock.json" "$stage/package-lock.json" <<'PY'
+          import json,sys
+          a,b,c,d=sys.argv[1:]
+          with open(a,encoding='utf-8-sig') as f: pa=json.load(f)
+          with open(b,encoding='utf-8-sig') as f: pb=json.load(f)
+          with open(c,encoding='utf-8-sig') as f: la=json.load(f)
+          with open(d,encoding='utf-8-sig') as f: lb=json.load(f)
+          if pa != pb: raise SystemExit('PACKAGE_JSON_SEMANTIC_MISMATCH')
+          if la != lb: raise SystemExit('PACKAGE_LOCK_SEMANTIC_MISMATCH')
+          print('DEPENDENCY_MANIFEST_SEMANTIC_MATCH=TRUE')
+          PY
+          [[ -e "$current/node_modules" && -x "$current/node_modules/.bin/next" ]]
+          if [[ -L "$current/node_modules" ]]; then
+            modules_target="$(readlink -f "$current/node_modules")"
+            [[ -d "$modules_target" ]]
+            ln -s "$modules_target" "$stage/node_modules"
+          else
+            [[ -d "$current/node_modules" ]]
+            cp -al -- "$current/node_modules" "$stage/node_modules"
+          fi
           chown -h deploy:deploy "$stage/node_modules"
           printf '%s\n' "$TARGET_SHA" > "$stage/.disdex-release-sha"
           chown deploy:deploy "$stage/.disdex-release-sha"
@@ -123,12 +138,17 @@ jobs:
           echo "CURRENT_UI=$current"
           echo "TRADING_CURRENT_BEFORE=$trading_before"
           REMOTE
-          cat /tmp/disdex-fet-ui-next.tgz | "${SSH[@]}" "TARGET_SHA='$TARGET_SHA' REQUEST_ID='$DEPLOY_REQUEST_ID' bash -s" <<'REMOTE'
+          scp -i "$HOME/.ssh/id_vps_root" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -P "$SSH_PORT" \
+            /tmp/disdex-fet-ui-next.tgz "root@$SSH_HOST:/tmp/disdex-fet-ui-next-$DEPLOY_REQUEST_ID.tgz"
+          "${SSH[@]}" "TARGET_SHA='$TARGET_SHA' REQUEST_ID='$DEPLOY_REQUEST_ID' bash -s" <<'REMOTE'
           set -Eeuo pipefail
           ui_root='/home/deploy/disdex-trading/ui-releases'
           stage="$ui_root/.ui-fet-${TARGET_SHA:0:8}.tmp-$REQUEST_ID"
-          [[ -d "$stage" && ! -L "$stage" ]]
-          tar --no-same-owner -xzf - -C "$stage"
+          archive="/tmp/disdex-fet-ui-next-$REQUEST_ID.tgz"
+          [[ -d "$stage" && ! -L "$stage" && -f "$archive" ]]
+          tar --no-same-owner -xzf "$archive" -C "$stage"
+          rm -f -- "$archive"
           chown -R deploy:deploy "$stage/.next"
           [[ -f "$stage/.next/BUILD_ID" ]]
           REMOTE
