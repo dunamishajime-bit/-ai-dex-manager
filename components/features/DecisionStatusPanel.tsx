@@ -780,6 +780,7 @@ export function DecisionStatusPanel({ logic = "overview" }: { logic?: DecisionLo
       { key: "v12", title: "V12", href: "/decision-status/v12", detail: "候補Rank / signalEligible / Entry Quality / 共有risk" },
       { key: "pengu", title: "PENGU", href: "/decision-status/pengu", detail: "Long V2 / Short V20 / Recovery V8 / cooldown / 保護状態" },
       { key: "q102", title: "Q102 Causal V4", href: "/decision-status/q102", detail: "通貨別Gate / Family / 1-slot selector / 実state" },
+      { key: "fet", title: "FET BRK48", href: "/decision-status/fet", detail: "LONG / 最大Gross / 本番state更新 / 建玉・STOP / pending・operator Gate" },
       { key: "v52", title: "V52", href: "/decision-status/v52", detail: "V50 / V11_EQ / Stock window / basis・net-edge Gate" },
     ] as const;
     return <div className="space-y-4">{toolbar}{warning}<RuntimeSummary runtime={snapshot.runtime} /><section className="grid gap-4 md:grid-cols-2">{cards.map((card) => <Link key={card.key} href={card.href} className="panel-gold group rounded-[28px] p-5 transition hover:-translate-y-0.5 hover:border-gold-300/40"><div className="flex items-center justify-between gap-3"><div className="text-xl font-black text-white">{card.title}</div><span className="text-xs text-gold-100">詳細を見る →</span></div><p className="mt-3 text-sm leading-6 text-white/65">{card.detail}</p></Link>)}</section></div>;

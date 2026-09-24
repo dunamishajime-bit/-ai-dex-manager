@@ -1,0 +1,28 @@
+name: HP FET read-only display CI
+
+on:
+  push:
+    branches:
+      - codex/hp-fet-live-display-20260924
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ui:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: FET display contract tests
+        run: npx tsx --test tests/hp-fet-display-contract.test.ts
+      - name: TypeScript
+        run: npx tsc --noEmit
+      - name: Next.js build
+        run: npm run build
