@@ -1,0 +1,78 @@
+name: DisDex FET HP deploy disk deps probe
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    if: >-
+      github.event.issue.number == 132 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == 'DISDEX_FET_HP_DEPS_PROBE_20260924'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Configure SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          root=Path.home()/".ssh"
+          def norm(v): return os.environ[v].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (root/"id_root").write_text(norm("ROOT_KEY"),encoding="utf-8")
+          (root/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"),encoding="utf-8")
+          PY
+          chmod 600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Read-only dependency and disk probe
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          SSH_PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -p "$SSH_PORT" "root@$SSH_HOST" 'bash -s' <<'REMOTE'
+          set -Eeuo pipefail
+          service='ai-dex-manager-ui.service'
+          current="$(systemctl show "$service" --property WorkingDirectory --value)"
+          echo "CURRENT=$current"
+          echo "CURRENT_ENV_SHA=$(systemctl show "$service" --property Environment --value | sed -nE 's/.*DISDEX_UI_RELEASE_SHA=([0-9a-f]{40}).*/\1/p')"
+          for f in package.json package-lock.json; do
+            echo "CURRENT_${f//[-.]/_}_SHA256=$(sha256sum "$current/$f" | awk '{print $1}')"
+          done
+          echo "CURRENT_NEXT_DECLARED=$(node -e "console.log(require('$current/package.json').dependencies.next)")"
+          echo "CURRENT_NEXT_INSTALLED=$(node -e "console.log(require('$current/node_modules/next/package.json').version)")"
+          echo "CURRENT_NODE_MODULES_SIZE=$(du -sh "$current/node_modules" | awk '{print $1}')"
+          echo "CURRENT_NEXT_SIZE=$(du -sh "$current/.next" | awk '{print $1}')"
+          echo 'UI_RELEASE_SIZES_BEGIN'
+          du -sh /home/deploy/disdex-trading/ui-releases/* 2>/dev/null | sort -h | tail -n 30
+          echo 'UI_RELEASE_SIZES_END'
+          echo 'FAILED_STAGE_SIZES_BEGIN'
+          du -sh /home/deploy/disdex-trading/ui-releases/.ui-fet-* 2>/dev/null || true
+          echo 'FAILED_STAGE_SIZES_END'
+          stage="$(find /home/deploy/disdex-trading/ui-releases -maxdepth 1 -type d -name '.ui-fet-1ac7dfff.tmp-*' | head -n1)"
+          if [[ -n "$stage" ]]; then
+            echo "STAGE=$stage"
+            for f in package.json package-lock.json; do
+              echo "STAGE_${f//[-.]/_}_SHA256=$(sha256sum "$stage/$f" | awk '{print $1}')"
+            done
+            echo "STAGE_NEXT_DECLARED=$(node -e "console.log(require('$stage/package.json').dependencies.next)")"
+            echo 'PACKAGE_JSON_DIFF_BEGIN'
+            diff -u "$current/package.json" "$stage/package.json" || true
+            echo 'PACKAGE_JSON_DIFF_END'
+          fi
+          echo "DISK=$(df -h /home/deploy | tail -n1 | tr -s ' ')"
+          echo 'TRADING_MUTATION=0'
+          REMOTE
