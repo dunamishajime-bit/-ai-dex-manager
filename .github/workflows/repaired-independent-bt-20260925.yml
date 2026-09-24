@@ -23,14 +23,16 @@ jobs:
           python -m unittest discover -s tests -p 'test_remaining_raw_rebuilds.py' -v
           python -m unittest discover -s tests -p 'test_v12_raw_rebuild.py' -v
           python -m unittest discover -s tests -p 'test_pengu_raw_rebuild.py' -v
-      - name: Verify Binance USD-M public read-only endpoint
+      - name: Verify official Binance Vision public archive and checksum
         run: |
           python - <<'PY'
           from urllib.request import Request, urlopen
-          with urlopen(Request("https://fapi.binance.com/fapi/v1/klines?symbol=BTCUSDT&interval=1h&limit=1",headers={"User-Agent":"DisDex-research-raw-backtest/1.0"}),timeout=20) as r:
-              assert r.status == 200
-              assert r.read(1)
-              print("BINANCE_PUBLIC_READONLY_AVAILABLE=TRUE")
+          root="https://data.binance.vision/data/futures/um/monthly/klines/BTCUSDT/1h/BTCUSDT-1h-2025-08.zip"
+          for url in [root,root+".CHECKSUM"]:
+            with urlopen(Request(url,headers={"User-Agent":"DisDex-research-raw-backtest/1.0"}),timeout=20) as response:
+              assert response.status==200
+              assert response.read(1)
+          print("BINANCE_VISION_ARCHIVE_CHECKSUM_PUBLIC=TRUE")
           PY
       - name: Download/validate and replay all four corrected independent scenarios twice
         run: |
