@@ -1,0 +1,81 @@
+name: DisDex LIVE runner recovery diagnostic
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    if: >-
+      github.event.issue.number == 132 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == 'DISDEX_LIVE_RUNNER_RECOVERY_DIAG_20260924'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Configure root SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          p=Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Inspect current runner failure roots
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          SSH_PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -p "$SSH_PORT" "root@$SSH_HOST" 'bash -s' <<'REMOTE'
+          set -Eeuo pipefail
+          current="$(readlink -f /home/deploy/disdex-trading/current)"
+          sha="$(tr -d '[:space:]' < "$current/.disdex-release-sha")"
+          echo "CURRENT=$current"
+          echo "SHA=$sha"
+          echo '=== CURRENT SHA SERVICES ==='
+          systemctl list-units --type=service --all --no-pager | grep -F "$sha" || true
+          echo '=== LOGIC INSTANCES ALL SHAS ==='
+          systemctl list-units --type=service --all --no-pager | grep -E 'disdex-(v12-x1-all|pengu-dual-ls-v2|quality102-causal-v1|fet-brk48|v52-aster-only|shared-crypto-risk|v12-v52-margin-guard)@' || true
+          echo '=== CURRENT SHA STATUS ==='
+          for base in disdex-v12-x1-all disdex-pengu-dual-ls-v2 disdex-quality102-causal-v1 disdex-fet-brk48 disdex-v52-aster-only disdex-shared-crypto-risk disdex-v12-v52-margin-guard; do
+            u="$base@$sha.service"
+            echo "--- $u ---"
+            systemctl status "$u" --no-pager -l || true
+            echo "LOAD=$(systemctl show "$u" -p LoadState --value 2>/dev/null || true) ACTIVE=$(systemctl show "$u" -p ActiveState --value 2>/dev/null || true) SUB=$(systemctl show "$u" -p SubState --value 2>/dev/null || true) RESULT=$(systemctl show "$u" -p Result --value 2>/dev/null || true) NRESTARTS=$(systemctl show "$u" -p NRestarts --value 2>/dev/null || true) MASK=$(systemctl is-enabled "$u" 2>/dev/null || true)"
+            journalctl -u "$u" -n 100 --no-pager -o short-iso || true
+          done
+          echo '=== OPERATOR / ACTIVATION ARTIFACTS ==='
+          find /var/lib/disdex /etc/disdex /run/disdex -maxdepth 4 -type f \( -iname '*operator*' -o -iname '*approval*' -o -iname '*activation*' -o -iname '*review*' -o -iname '*promotion*' -o -iname '*reconcile*' \) -printf '%p %U:%G:%m %TY-%Tm-%TdT%TH:%TM:%TS\n' 2>/dev/null | sort | tail -n 250 || true
+          echo '=== MASK LINKS ==='
+          find /run/systemd/system /etc/systemd/system -maxdepth 3 -type l -lname /dev/null -printf '%p -> %l\n' 2>/dev/null | grep -E 'disdex-(v12|pengu|quality102|fet|v52|shared|margin)' || true
+          echo '=== WATCHDOG/TIMER SCHEDULE ==='
+          systemctl list-timers --all --no-pager | grep -E 'runner-(watchdog|health|position)|quality102|disdex' || true
+          for u in disdex-runner-watchdog.timer disdex-runner-health-snapshot.timer disdex-runner-position-recovery.timer; do
+            echo "--- $u ---"
+            systemctl cat "$u" 2>/dev/null || true
+            systemctl status "$u" --no-pager -l 2>/dev/null || true
+          done
+          echo '=== CURRENT CONFIG IDENTITY/GATES ==='
+          grep -RniE 'operator|approval|activation|fail.closed|manualReview|runtimeCommitSha|gross|kill.switch|watchdog' "$current/config" "$current/ops" "$current/scripts/ops" 2>/dev/null | head -n 500 || true
+          echo '=== DISK ==='
+          df -h /
+          echo 'TRADING_MUTATION=0'
+          echo 'RECOVERY_DIAG_COMPLETE'
+          REMOTE
