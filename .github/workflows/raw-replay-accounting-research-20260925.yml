@@ -1,0 +1,24 @@
+name: Raw integrated BT accounting regression (research only)
+on:
+  push:
+    branches: [research/raw-replay-accounting-fix-20260925]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  accounting-regression:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Execute raw-data and accounting regression tests
+        run: |
+          python -m unittest discover -s tests -p 'test_raw_*.py' -v
+          python -m unittest discover -s tests -p 'test_v12_raw_rebuild.py' -v
+          python -m unittest discover -s tests -p 'test_remaining_raw_rebuilds.py' -v
+          python -m unittest discover -s tests -p 'test_pengu_raw_rebuild.py' -v
+      - name: Compile all updated BT modules
+        run: python -m compileall -q scripts/research/raw_data tests/test_raw_integrated_engine.py
