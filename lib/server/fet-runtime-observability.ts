@@ -11,6 +11,9 @@ export type FetRuntimeStatus = {
   reason: string;
   checkedAt: string;
   updatedAt?: number;
+  heartbeatAt?: number;
+  serviceUnit?: string;
+  heartbeatSafetyState?: string;
   lastReferenceTs?: number;
   lastReconciledAt?: number;
   expectedRuntimeSha?: string;
@@ -43,6 +46,8 @@ const CURRENT_MARKER = "/home/deploy/disdex-trading/current/.disdex-release-sha"
 const CURRENT_CONFIG = "/home/deploy/disdex-trading/current/config/fetBrk48Runtime.ts";
 const DEFAULT_STATE = "/var/lib/disdex/fet-brk48-residual/state.json";
 const DEFAULT_KILL_SWITCH = "/var/lib/disdex/shared/kill-switch.json";
+const DEFAULT_HEARTBEAT = "/var/lib/disdex/runner-health/heartbeats/fet-brk48-residual.json";
+const MAX_HEARTBEAT_AGE_MS = 10 * 60_000;
 const MAX_BYTES = 512 * 1024;
 const MAX_AGE_MS = 3 * 60_000;
 const SHA_RE = /^[0-9a-f]{40}$/i;
@@ -84,11 +89,13 @@ export async function loadFetRuntimeObservability(): Promise<FetRuntimeStatus> {
   try {
     const configured = String(process.env.FET_BRK48_STATE_PATH || DEFAULT_STATE).trim();
     const killSwitchPath = String(process.env.DISDEX_KILL_SWITCH_PATH || DEFAULT_KILL_SWITCH).trim();
-    const [marker, state, killSwitch, config] = await Promise.all([
+    const heartbeatPath = String(process.env.FET_BRK48_HEARTBEAT_PATH || DEFAULT_HEARTBEAT).trim();
+    const [marker, state, killSwitch, config, heartbeat] = await Promise.all([
       readFile(CURRENT_MARKER, "utf8"),
       readJson(configured),
       readJson(killSwitchPath),
       readFile(CURRENT_CONFIG, "utf8"),
+      readJson(heartbeatPath).catch(() => null),
     ]);
     const expectedRuntimeSha = marker.trim();
     const runtimeCommitSha = nonEmpty(state.runtimeCommitSha);
@@ -101,9 +108,13 @@ export async function loadFetRuntimeObservability(): Promise<FetRuntimeStatus> {
     const lastReferenceTs = positive(state.lastReferenceTs);
     const lastReconciledAt = positive(state.lastReconciledAt);
     const killSwitchActive = killSwitch.active === true ? true : killSwitch.active === false ? false : undefined;
+    const heartbeatAt = positive(heartbeat?.heartbeatAt);
+    const serviceUnit = nonEmpty(heartbeat?.serviceUnit);
+    const heartbeatSafetyState = nonEmpty(heartbeat?.safetyState);
     const common: FetRuntimeStatus = {
       ...base, expectedRuntimeSha, runtimeCommitSha, updatedAt, maximumGross,
       lastReferenceTs, lastReconciledAt, manualReview, killSwitchActive,
+      heartbeatAt, serviceUnit, heartbeatSafetyState,
     };
 
     if (state.schema !== STATE_SCHEMA || state.strategyId !== "FET_BRK48_RESIDUAL") {
@@ -150,6 +161,9 @@ export async function loadFetRuntimeObservability(): Promise<FetRuntimeStatus> {
     if (Date.now() - updatedAt > MAX_AGE_MS) {
       return { ...complete, status: "STALE" as const, reason: "FET runner stateの更新が3分以上ありません。" };
     }
+    if (position && !position.stopOrderIdRecorded) {
+      return { ...complete, status: "UNCONFIRMED", reason: "FET保有stateに保護STOP注文IDがありません。" };
+    }
     if (killSwitchActive !== false || manualReview || pending) {
       return {
         ...complete, status: "UNCONFIRMED" as const,
@@ -158,9 +172,18 @@ export async function loadFetRuntimeObservability(): Promise<FetRuntimeStatus> {
           : "共有Kill Switchが有効か状態を確認できません。",
       };
     }
+    if (!heartbeat || heartbeat.schema !== "disdex-runner-heartbeat/v1" ||
+        heartbeat.runnerId !== "FET_BRK48_RESIDUAL" ||
+        heartbeat.runtimeSha !== expectedRuntimeSha || heartbeat.expectedSha !== expectedRuntimeSha ||
+        heartbeat.mode !== "LIVE" || heartbeat.liveEnabled !== true ||
+        heartbeatSafetyState !== "HEALTHY" || !heartbeatAt ||
+        heartbeatAt > Date.now() + 60_000 || Date.now() - heartbeatAt > MAX_HEARTBEAT_AGE_MS) {
+      return { ...complete, status: "UNCONFIRMED", reason: "FET systemd identity / runner-health heartbeatが未取得・不一致・古い、またはBLOCKEDです。" };
+    }
     return {
-      ...complete, ok: true, status: "LIVE", reason: "本番SHA一致・更新3分以内・manualReviewなし・共有Kill Switch inactive。",
-      warning: "stateの更新確認です。systemd稼働・Aster実建玉・保護注文のread-backは別途確認が必要です。",
+      ...complete, ok: true, status: "LIVE",
+      reason: "本番SHA・最新state・runner-health HEALTHY（service identity確認済み）・Kill Switch inactive。",
+      warning: "Aster実建玉と保護注文reduceOnlyのread-back、およびNRestarts=0の検証は別途必要です。",
     };
   } catch (error) {
     return { ...base, reason: "FET観測ファイルを読み取れません: " + (error instanceof Error ? error.message : String(error)) };
