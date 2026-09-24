@@ -1,0 +1,32 @@
+name: Audit repaired independent BT final artifact
+on:
+  push:
+    branches: [research/raw-replay-accounting-fix-20260925]
+    paths: [.github/workflows/repaired-independent-bt-audit-20260925.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore immutable final BT artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: repaired-independent-bt-final-20260925
+          run-id: 36059797093
+          github-token: ${{ github.token }}
+          path: .
+      - name: Reconcile all entries, exits, strategy net PnL, deposits and gross maxima
+        run: python -m scripts.research.raw_data.audit_repaired_artifact
+      - uses: actions/upload-artifact@v4
+        with:
+          name: repaired-independent-bt-detailed-audit-20260925
+          path: research-results/repaired-independent-20260925/audit-detail.json
+          retention-days: 90
