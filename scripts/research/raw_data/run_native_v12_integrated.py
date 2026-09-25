@@ -74,11 +74,17 @@ def run(bundle_path: Path, native_path: Path, output_dir: Path) -> dict:
         "nativeSignalsSha256": sha256(native_path),
         "bundleSha256": sha256(bundle_path),
         "formalIntegratedComparisonPermitted": False,
-        "originalReference": {
+        "historicalReferenceOnly": {
+            "logicVintage": "HISTORICAL_TOP3_FET1P25_Q102GOV030_20260920",
             "normalFinalEquityJpy": 740771278.01,
             "severeFinalEquityJpy": 65669109.00,
-            "status": "HEADLINE_ONLY_NOT_REPRODUCED",
+            "status": "HEADLINE_ONLY_DIFFERENT_LOGIC_NOT_REPRODUCTION_TARGET",
+            "sameLogicAsStudy": False,
+            "directPerformanceComparisonPermitted": False,
         },
+        "studyLogicVintage": "RESEARCH_NATIVE_V12_PLUS_NONPARITY_PROXIES_20260925",
+        "requestedCurrentLogicTarget": "VPS_EFFECTIVE_RUNTIME_7e80cf8a_20260925",
+        "currentRuntimeFullParityVerified": False,
         "missingParity": [
             "V12_REAL_ENTRY_EXIT_TRAILING_DYNAMIC_RESIDUAL",
             "PENGU_FULL_COMBINED_FILTERED_ROUTE_AND_EXECUTION",
