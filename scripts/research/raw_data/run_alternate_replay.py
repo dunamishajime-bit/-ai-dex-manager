@@ -76,6 +76,7 @@ def _metrics(result: dict[str, Any]) -> dict[str, Any]:
     profits = sum(max(0.0, item["netPnl"]) for item in net_trades)
     losses = sum(min(0.0, item["netPnl"]) for item in net_trades)
     peak = None
+    running_peak_ts = None
     max_dd = 0.0
     dd_peak_ts = None
     dd_trough_ts = None
@@ -83,11 +84,15 @@ def _metrics(result: dict[str, Any]) -> dict[str, Any]:
         equity = float(point["equity"])
         if peak is None or equity > peak:
             peak = equity
-            dd_peak_ts = int(point["ts_ms"])
+            running_peak_ts = int(point["ts_ms"])
         if peak and equity < peak:
             drawdown = equity / peak - 1.0
             if drawdown < max_dd:
                 max_dd = drawdown
+                # Keep the PEAK belonging to this exact maximum-DD interval.
+                # Updating ddPeakTs on every later high-water mark can produce
+                # an impossible peak timestamp AFTER the reported trough.
+                dd_peak_ts = running_peak_ts
                 dd_trough_ts = int(point["ts_ms"])
     by_strategy: dict[str, dict[str, Any]] = {}
     for event in net_trades:
