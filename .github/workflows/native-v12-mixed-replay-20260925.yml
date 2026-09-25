@@ -1,0 +1,70 @@
+name: Research replay with native V12 signals (NOT formal)
+on:
+  push:
+    branches: [research/raw-replay-accounting-fix-20260925]
+    paths:
+      - scripts/research/raw_data/integrated_engine.py
+      - scripts/research/raw_data/run_native_v12_integrated.py
+      - .github/workflows/native-v12-mixed-replay-20260925.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  native-v12-mixed-replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fetch frozen Binance raw and production-native signal evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -Eeuo pipefail
+          gh run download 36059797093 -n repaired-independent-bt-final-20260925 \
+            --repo "${{ github.repository }}" --dir .native-v12/raw
+          gh run download 36085980285 -n native-v12-pure-signal-parity-20260925 \
+            --repo "${{ github.repository }}" --dir .native-v12/native
+          test -s .native-v12/raw/.raw-data/repaired-binance-2025-2026.json.gz
+          test -s .native-v12/native/native-signals.json
+          test -s .native-v12/native/crosscheck.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          j=json.loads(Path(".native-v12/native/crosscheck.json").read_text())
+          assert j["status"]=="V12_PURE_SIGNAL_CROSS_LANGUAGE_PARITY"
+          assert j["canonicalIntegratedBtParity"] is False
+          print("V12_NATIVE_PURE_SIGNAL_EVIDENCE_VERIFIED")
+          PY
+      - name: Accounting and replay contract tests
+        run: |
+          python -m unittest discover -s tests -p 'test_raw_replay_accounting_regressions.py' -v
+          python -m compileall -q scripts/research/raw_data
+      - name: Four independent scenarios with real V12 signal source
+        run: |
+          python -m scripts.research.raw_data.run_native_v12_integrated \
+            --bundle .native-v12/raw/.raw-data/repaired-binance-2025-2026.json.gz \
+            --native .native-v12/native/native-signals.json \
+            --output-dir research-results/native-v12-mixed-replay-20260925
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report=json.loads(Path("research-results/native-v12-mixed-replay-20260925/audit-summary.json").read_text())
+          assert report["status"]=="INDEPENDENT_NATIVE_V12_ONLY_INTEGRATION_NOT_PRODUCTION_PARITY"
+          assert report["formalIntegratedComparisonPermitted"] is False
+          assert report["nativeV12SignalCrosscheck"]["status"]=="V12_PURE_SIGNAL_CROSS_LANGUAGE_PARITY"
+          assert len(report["scenarios"])==4
+          assert all(v["ledgerReconciled"] for v in report["scenarios"].values())
+          print("INDEPENDENT_NATIVE_V12_REPLAY_AUDITED_NOT_FORMAL")
+          PY
+      - name: Preserve complete research replay and evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: independent-native-v12-mixed-replay-20260925
+          path: research-results/native-v12-mixed-replay-20260925/
+          if-no-files-found: warn
+          retention-days: 90
