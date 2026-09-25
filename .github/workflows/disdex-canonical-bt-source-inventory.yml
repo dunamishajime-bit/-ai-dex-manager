@@ -51,7 +51,7 @@ jobs:
           [[ "$(id -un)" == root ]]
           echo 'INVENTORY_BEGIN'
           echo "CURRENT_TRADING_SHA=$(cat /home/deploy/disdex-trading/current/.disdex-release-sha 2>/dev/null || true)"
-          for parent in /home/deploy/ai-dex-manager /home/deploy/disdex-trading /root/.research-state /var/lib/disdex/research /home/deploy/.research-state; do
+          for parent in /root/.research-state /var/lib/disdex/research /home/deploy/.research-state /home/deploy/ai-dex-manager/.research-state /home/deploy/ai-dex-manager/research-results /home/deploy/ai-dex-manager; do
             if [[ -d "$parent" ]]; then
               echo "SEARCH_ROOT=$parent"
               find "$parent" -maxdepth 8 \
@@ -64,7 +64,7 @@ jobs:
                 -iname '*v50*basis*' -o -iname '*integrated*event*' -o \
                 -iname '*integrated*result*' -o -iname '*stock*cache*' -o \
                 -iname 'bt*source*manifest*' -o -iname 'research*state*manifest*' \
-                \) -print \) 2>/dev/null | sort -u | head -n 100 | while IFS= read -r file; do
+                \) -print \) 2>/dev/null | sort -u | awk 'NR<=100' | while IFS= read -r file; do
                 size=$(stat -c %s "$file" 2>/dev/null || echo -1)
                 echo "CANDIDATE_PATH=$file SIZE=$size"
                 if [[ "$size" -gt 0 && "$size" -le 200000000 ]]; then
@@ -78,7 +78,7 @@ jobs:
           echo 'HISTORICAL_STATE_DIRS_BEGIN'
           find /home/deploy /root /var/lib/disdex -maxdepth 5 -type d \
             \( -name .research-state -o -name research-results -o -name stock-cache -o -name historical-cache \) \
-            2>/dev/null | head -n 75 || true
+            2>/dev/null | awk 'NR<=75' || true
           echo 'HISTORICAL_STATE_DIRS_END'
           echo 'TRADING_MUTATION=0'
           echo 'INVENTORY_COMPLETE'
