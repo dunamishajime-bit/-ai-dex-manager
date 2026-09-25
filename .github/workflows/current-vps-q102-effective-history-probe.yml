@@ -1,0 +1,73 @@
+name: Current VPS effective Q102 history hours read-only
+on:
+  issue_comment:
+    types: [created]
+permissions:
+  contents: read
+jobs:
+  probe:
+    if: >-
+      github.event.issue.number == 132 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == 'DISDEX_CURRENT_VPS_Q102_EFFECTIVE_HOURS_20260925'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Configure owner-authorized root SSH without logging credentials
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          d=Path.home()/".ssh"
+          def norm(key):return os.environ[key].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (d/"id_root").write_text(norm("ROOT_KEY"))
+          (d/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Observe effective Q102 history requirement, current SHA and nothing else
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -p "${SSH_PORT:-22}" "root@$SSH_HOST" 'python3 -' <<'PY'
+          import pathlib,re,subprocess
+          current=pathlib.Path("/home/deploy/disdex-trading/current")
+          sha=(current/".disdex-release-sha").read_text().strip()
+          if not re.fullmatch("[0-9a-f]{40}",sha):raise SystemExit("INVALID_CURRENT_SHA")
+          service="disdex-quality102-causal-v1@"+sha+".service"
+          r=subprocess.run(["systemctl","show",service,"--property=EnvironmentFiles","--value"],capture_output=True,text=True,check=True)
+          envfiles=re.findall(r"(/[^\s]+)\s+\(ignore_errors=",r.stdout)
+          if not envfiles:envfiles=[
+            "/etc/disdex/disdex-v13d-v11eq-v96.env",
+            "/etc/disdex/disdex-v12-pengu-v2-v52.env",
+            "/etc/disdex/disdex-quality102-causal-v1.env"
+          ]
+          effective=None
+          source="DEFAULT_SOURCE_225_DAYS"
+          for file in envfiles:
+            path=pathlib.Path(file)
+            if not path.is_file():continue
+            for line in path.read_text(encoding="utf8").splitlines():
+              match=re.match(r"^\s*QUALITY102_CAUSAL_V1_HISTORY_HOURS\s*=\s*([0-9]+)\s*(?:#.*)?$",line)
+              if match:
+                effective=int(match.group(1))
+                source=path.name
+          hours=effective if effective is not None else 225*24
+          if hours<181*24 or hours>365*24:raise SystemExit("Q102_HISTORY_HOURS_OUTSIDE_CONTRACT")
+          print("CURRENT_VPS_SHA="+sha)
+          print("EFFECTIVE_Q102_HISTORY_HOURS="+str(hours))
+          print("EFFECTIVE_Q102_HISTORY_SOURCE="+source)
+          print("Q102_EFFECTIVE_HISTORY_READONLY_VERIFIED=TRUE")
+          print("TRADING_MUTATION=0")
+          PY
