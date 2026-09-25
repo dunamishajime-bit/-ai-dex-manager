@@ -1,0 +1,68 @@
+name: Native V12 signal cross-language parity (research only)
+on:
+  push:
+    branches: [research/raw-replay-accounting-fix-20260925]
+    paths:
+      - scripts/research/raw_data/v12_native_signal_export.ts
+      - scripts/research/raw_data/v12_native_crosscheck.py
+      - .github/workflows/v12-native-signal-parity-20260925.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  v12-native-parity:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fetch previously validated immutable Binance Vision archive
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -Eeuo pipefail
+          mkdir -p .native-v12-input
+          gh run download 36059797093 \
+            -n repaired-independent-bt-final-20260925 \
+            --repo "${{ github.repository }}" \
+            --dir .native-v12-input
+          test -s .native-v12-input/.raw-data/repaired-binance-2025-2026.json.gz
+          sha256sum .native-v12-input/.raw-data/repaired-binance-2025-2026.json.gz
+      - name: Build native production pure-signal output
+        run: |
+          npm ci --no-audit --no-fund
+          mkdir -p research-results/native-v12-parity-20260925
+          npx tsx scripts/research/raw_data/v12_native_signal_export.ts \
+            .native-v12-input/.raw-data/repaired-binance-2025-2026.json.gz \
+            research-results/native-v12-parity-20260925/native-signals.json
+      - name: Verify every signal against independent Python implementation
+        run: |
+          python scripts/research/raw_data/v12_native_crosscheck.py \
+            --bundle .native-v12-input/.raw-data/repaired-binance-2025-2026.json.gz \
+            --native research-results/native-v12-parity-20260925/native-signals.json \
+            --output research-results/native-v12-parity-20260925/crosscheck.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          result=json.loads(Path('research-results/native-v12-parity-20260925/crosscheck.json').read_text())
+          assert result['status']=='V12_PURE_SIGNAL_CROSS_LANGUAGE_PARITY'
+          assert result['signals']>0
+          assert result['bySide'].get('LONG',0)>0 and result['bySide'].get('SHORT',0)>0
+          assert result['canonicalIntegratedBtParity'] is False
+          print('NATIVE_PRODUCTION_SIGNAL_CROSS_LANGUAGE_PARITY_PASS')
+          PY
+      - name: Upload source-backed per-signal parity evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-v12-pure-signal-parity-20260925
+          path: research-results/native-v12-parity-20260925/
+          if-no-files-found: warn
+          retention-days: 90
