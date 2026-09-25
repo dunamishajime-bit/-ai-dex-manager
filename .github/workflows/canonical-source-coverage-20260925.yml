@@ -1,0 +1,49 @@
+name: Canonical BT model source coverage audit (research)
+on:
+  push:
+    branches: [research/raw-replay-accounting-fix-20260925]
+    paths:
+      - scripts/research/raw_data/canonical_source_coverage.py
+      - .github/workflows/canonical-source-coverage-20260925.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  source-coverage:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fetch previously verified Binance Vision 1y research source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run download 36059797093 -n repaired-independent-bt-final-20260925 \
+            --repo "${{ github.repository }}" --dir .canonical-coverage-input
+          test -s .canonical-coverage-input/.raw-data/repaired-binance-2025-2026.json.gz
+      - name: Audit exact Production V4 model coverage vs historical source
+        run: |
+          python -m scripts.research.raw_data.canonical_source_coverage \
+            --bundle .canonical-coverage-input/.raw-data/repaired-binance-2025-2026.json.gz \
+            --model config/disdexQuality102CausalV4Model.ts \
+            --output research-results/native-v12-mixed-replay-20260925/source-coverage.json
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          d=json.loads(Path("research-results/native-v12-mixed-replay-20260925/source-coverage.json").read_text())
+          assert d["status"]=="BLOCKED_INCOMPLETE_CANONICAL_INPUT_COVERAGE"
+          assert d["missingModelSymbols"]==["APTUSDT","DOTUSDT","LDOUSDT","RENDERUSDT","UNIUSDT"]
+          assert d["modelS34Count"]==11
+          assert d["formalComparable"] is False
+          print("CANONICAL_MISSING_SOURCE_IDENTIFIED_AND_FORMAL_GATE_CLOSED")
+          PY
+      - name: Preserve auditable Q102 raw-coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: canonical-source-coverage-q102-20260925
+          path: research-results/native-v12-mixed-replay-20260925/source-coverage.json
+          retention-days: 90
