@@ -78,10 +78,10 @@ function AppLayout({ children }: { children: React.ReactNode }) {
     <AuthGuard>
       <div className="flex h-screen overflow-hidden bg-cyber-black text-white">
         <Sidebar />
-        <div className="flex flex-1 flex-col overflow-hidden">
+        <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
           <TopBar />
           <LiveProductionBanner />
-          <main className="custom-scrollbar flex-1 overflow-y-auto p-4 pb-16 md:p-6 md:pb-4">{children}</main>
+          <main className="custom-scrollbar min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-4 pb-16 md:p-6 md:pb-4">{children}</main>
         </div>
         <FlashEffect />
         <TradeNotificationToast />

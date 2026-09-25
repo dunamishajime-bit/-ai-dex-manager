@@ -34,11 +34,11 @@ export default function PositionsPage() {
   }, {}) ?? {};
 
   return (
-    <main className="relative min-h-full overflow-hidden rounded-[28px] border border-gold-400/16 bg-[#04060a] p-3 text-white md:p-4">
-      <div className="relative z-10 space-y-3">
-        <header className="panel-gold rounded-[30px] p-5 md:p-7">
+    <main className="relative min-w-0 min-h-full overflow-x-hidden overflow-y-visible rounded-[28px] border border-gold-400/16 bg-[#04060a] p-3 text-white md:p-4">
+      <div className="relative z-10 min-w-0 space-y-3">
+        <header className="panel-gold min-w-0 rounded-[30px] p-5 md:p-7 [overflow-wrap:anywhere]">
           <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-gold-100/76"><ShieldCheck className="h-4 w-4" />Current Production Dashboard</div>
-          <h1 className="gold-heading mt-3 text-3xl font-black tracking-tight md:text-5xl">{productionRuntime && v12 && pengu && v52 ? `${v12.strategyId} / ${pengu.strategyId} / Q102 ${q102?.selectorMode ?? "UNAVAILABLE"} / ${v52.policyId}` : "DISTerminal Production Runtime"}</h1>
+          <h1 className="gold-heading mt-3 break-words text-2xl font-black leading-tight tracking-tight sm:text-3xl md:text-5xl">{productionRuntime && v12 && pengu && v52 ? `${v12.strategyId} / ${pengu.strategyId} / Q102 ${q102?.selectorMode ?? "UNAVAILABLE"} / ${v52.policyId}` : "DISTerminal Production Runtime"}</h1>
           <p className="mt-3 max-w-4xl text-sm leading-7 text-white/82">Asterの読み取り結果を正本として、口座残高、実建玉、未決済注文、保護注文を表示します。データ未取得時は正常稼働と推測表示しません。</p>
           <p className={`mt-2 max-w-4xl rounded-2xl border px-4 py-3 text-[12px] leading-6 ${productionRuntime && lineage?.synchronized ? "border-emerald-400/25 bg-emerald-500/5 text-emerald-100/85" : "border-amber-400/25 bg-amber-500/5 text-amber-100/85"}`}>{productionRuntime && caps && q102 ? `${lineage?.synchronized ? "Runtime SHA同期" : "RUNTIME MISMATCH"} / Production ${productionRuntime.releaseSha.slice(0, 12)} / Q102 ${q102.selectorMode} ${caps.quality102Gross.toFixed(2)}x / Crypto ${caps.cryptoGross.toFixed(2)}x / Total ${caps.totalGross.toFixed(2)}x` : `Production runtime未接続${productionRuntimeError ? `: ${productionRuntimeError}` : "。旧固定値は表示しません。"}`}</p>
         </header>

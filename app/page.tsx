@@ -73,19 +73,19 @@ export default function HomePage() {
   const liveStatus = v12RuntimeStatus?.status === "LIVE" ? "V12 LIVE確認済み" : v12RuntimeStatus?.status === "STALE" ? "V12 要確認" : v12StatusLoading ? "LIVE状態を確認中" : "LIVE状態未取得";
 
   return (
-    <main className="relative min-h-full overflow-hidden rounded-[28px] border border-gold-400/16 bg-[#03050a] p-3 text-white shadow-[0_0_30px_rgba(253,224,71,0.06)] md:p-4">
+    <main className="relative min-w-0 min-h-full overflow-x-hidden overflow-y-visible rounded-[28px] border border-gold-400/16 bg-[#03050a] p-3 text-white shadow-[0_0_30px_rgba(253,224,71,0.06)] md:p-4">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(253,224,71,0.12),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(56,189,248,0.05),transparent_28%)]" />
-      <div className="relative z-10 space-y-3">
-        <section className="grid gap-3 xl:grid-cols-[1.15fr_0.85fr]">
-          <div className="panel-gold rounded-[30px] p-5 md:p-7">
+      <div className="relative z-10 min-w-0 space-y-3">
+        <section className="grid min-w-0 gap-3 xl:grid-cols-[1.15fr_0.85fr]">
+          <div className="panel-gold min-w-0 rounded-[30px] p-5 md:p-7 [overflow-wrap:anywhere]">
             <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-gold-100/76"><ShieldCheck className="h-4 w-4" />DISTerminal Production</div>
-            <h1 className="gold-heading mt-3 text-3xl font-black tracking-tight md:text-5xl">{v12 && pengu && v52 ? `${v12.strategyId} / ${pengu.strategyId} / Q102 ${q102?.selectorMode ?? "UNAVAILABLE"} / ${v52.policyId}` : "DISTerminal Production Runtime"}</h1>
+            <h1 className="gold-heading mt-3 break-words text-2xl font-black leading-tight tracking-tight sm:text-3xl md:text-5xl">{v12 && pengu && v52 ? `${v12.strategyId} / ${pengu.strategyId} / Q102 ${q102?.selectorMode ?? "UNAVAILABLE"} / ${v52.policyId}` : "DISTerminal Production Runtime"}</h1>
             <p className="mt-4 max-w-3xl text-sm leading-7 text-white/82">AsterDEXのV12 X1.00 ALL Top2、PENGU V2 / Short V20 / Recovery V8、Q102 Causal V4、V52 Stockを、同一口座の実残高・実建玉・未決済注文とともに読み取り表示します。取得できない値は推測せず、未取得として表示します。</p>
-            <div className="mt-5 flex flex-wrap gap-2 text-[11px] font-semibold">
-              <span className={`rounded-full border px-3 py-1.5 ${v12RuntimeStatus?.status === "LIVE" ? "border-emerald-400/25 bg-emerald-500/10 text-emerald-100" : "border-amber-400/25 bg-amber-500/10 text-amber-100"}`}>LIVE状態: {liveStatus}</span>
-              <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">{v12?.strategyId ?? "V12 runtime未取得"}</span>
-              <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">{pengu?.strategyId ?? "PENGU runtime未取得"}</span>
-              <span className={`rounded-full border px-3 py-1.5 ${productionRuntime && lineage?.synchronized ? "border-emerald-400/25 bg-emerald-500/10 text-emerald-100" : "border-amber-400/25 bg-amber-500/10 text-amber-100"}`}>{productionRuntime ? (lineage?.synchronized ? `Production ${productionRuntime.releaseSha.slice(0, 12)} / runtime SHA同期` : `Production ${productionRuntime.releaseSha.slice(0, 12)} / RUNTIME MISMATCH`) : `Production runtime未接続${productionRuntimeError ? `: ${productionRuntimeError}` : ""}`}</span>
+            <div className="mt-5 flex min-w-0 flex-wrap gap-2 text-[11px] font-semibold [overflow-wrap:anywhere]">
+              <span className={`min-w-0 break-words rounded-full border px-3 py-1.5 ${v12RuntimeStatus?.status === "LIVE" ? "border-emerald-400/25 bg-emerald-500/10 text-emerald-100" : "border-amber-400/25 bg-amber-500/10 text-amber-100"}`}>LIVE状態: {liveStatus}</span>
+              <span className="min-w-0 break-words rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">{v12?.strategyId ?? "V12 runtime未取得"}</span>
+              <span className="min-w-0 break-words rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">{pengu?.strategyId ?? "PENGU runtime未取得"}</span>
+              <span className={`min-w-0 break-words rounded-full border px-3 py-1.5 ${productionRuntime && lineage?.synchronized ? "border-emerald-400/25 bg-emerald-500/10 text-emerald-100" : "border-amber-400/25 bg-amber-500/10 text-amber-100"}`}>{productionRuntime ? (lineage?.synchronized ? `Production ${productionRuntime.releaseSha.slice(0, 12)} / runtime SHA同期` : `Production ${productionRuntime.releaseSha.slice(0, 12)} / RUNTIME MISMATCH`) : `Production runtime未接続${productionRuntimeError ? `: ${productionRuntimeError}` : ""}`}</span>
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">{caps ? `Crypto共有損失上限 ${caps.sharedCryptoDailyLossPct}%` : "Crypto risk runtime未取得"}</span>
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">{caps ? `V52損失上限 ${caps.stockDailyLossPct}%` : "V52 risk runtime未取得"}</span>
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">{caps ? `Portfolio Gross上限 ≤ ${caps.totalGross.toFixed(1)}x` : "Portfolio runtime未取得"}</span>
