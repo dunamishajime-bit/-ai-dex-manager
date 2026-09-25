@@ -687,13 +687,13 @@ function Quality102SymbolTable({ snapshot, error }: { snapshot: Q102SymbolSnapsh
             : item.rankingReason || "追加の未通過観測Gateはありません。";
         const scoreClass = score === undefined ? "text-white/35" : score >= 90 ? "text-emerald-200" : score >= 70 ? "text-gold-100" : score >= 50 ? "text-amber-200" : "text-white/55";
         return <details key={item.symbol} className="group rounded-2xl border border-white/10 bg-black/20">
-          <summary className="grid cursor-pointer list-none grid-cols-[42px_90px_62px_64px_1fr_84px] items-center gap-2 px-3 py-3 text-xs md:grid-cols-[48px_110px_72px_72px_110px_1fr_100px]">
+          <summary className="grid min-w-0 cursor-pointer list-none grid-cols-[36px_minmax(0,1fr)_56px] items-center gap-2 px-3 py-3 text-xs md:grid-cols-[48px_110px_72px_72px_110px_minmax(0,1fr)_100px]">
             <span className="font-black text-gold-100">#{item.rankingRank ?? "—"}</span>
             <span className="font-bold text-white">{item.symbol}</span>
             <span className={"text-lg font-black " + scoreClass}>{q102RankingScoreText(score)}</span>
-            <span className={"font-semibold " + (item.eligible ? "text-emerald-200" : "text-rose-200")}>{item.eligible ? "PASS" : "BLOCK"}</span>
+            <span className={"hidden font-semibold md:block " + (item.eligible ? "text-emerald-200" : "text-rose-200")}>{item.eligible ? "PASS" : "BLOCK"}</span>
             <span className="hidden text-white/75 md:block">{item.rankingFamily || item.family || "候補なし"}</span>
-            <span className="truncate text-white/55">{q102StageText(item.rankingStage)} / {item.rankingReason || q102ReasonText(item.reason)}</span>
+            <span className="col-span-2 min-w-0 break-words text-white/55 [overflow-wrap:anywhere] md:col-span-1 md:truncate">{q102StageText(item.rankingStage)} / {item.rankingReason || q102ReasonText(item.reason)}</span>
             <span className={"text-right font-semibold " + (item.selected ? "text-gold-100" : "text-white/45")}>{item.selected ? "SELECTED" : "詳細 ▼"}</span>
           </summary>
 
@@ -818,7 +818,7 @@ export function DecisionStatusPanel({ logic = "overview" }: { logic?: DecisionLo
   if (loading && !snapshot) return <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-8 text-center text-sm text-white/60">判定状況を読み込み中…</div>;
   if (!snapshot) return <div className="rounded-2xl border border-rose-400/25 bg-rose-500/10 px-4 py-8 text-center text-sm text-rose-100">{error || "判定状況を取得できませんでした"}</div>;
 
-  const toolbar = <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-xs text-white/60"><span className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-emerald-300" />HP読み取り専用 / 発注・取消・建玉変更なし</span><span className="flex items-center gap-2"><Clock3 className="h-4 w-4" />確認時刻：{time(snapshot.checkedAt)} / 自動更新30秒</span><button type="button" onClick={() => { void load(true); if (logic === "q102") void loadQ102Symbols(); }} disabled={loading} className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-white/80 hover:bg-white/[0.08] disabled:cursor-wait disabled:opacity-60"><RefreshCw className={"h-4 w-4 " + (loading ? "animate-spin" : "")} />{loading ? "更新中" : "再読込"}</button></div>;
+  const toolbar = <div className="flex min-w-0 flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-3 py-3 text-xs text-white/60 sm:px-4 [overflow-wrap:anywhere]"><span className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-emerald-300" />HP読み取り専用 / 発注・取消・建玉変更なし</span><span className="flex items-center gap-2"><Clock3 className="h-4 w-4" />確認時刻：{time(snapshot.checkedAt)} / 自動更新30秒</span><button type="button" onClick={() => { void load(true); if (logic === "q102") void loadQ102Symbols(); }} disabled={loading} className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-white/80 hover:bg-white/[0.08] disabled:cursor-wait disabled:opacity-60"><RefreshCw className={"h-4 w-4 " + (loading ? "animate-spin" : "")} />{loading ? "更新中" : "再読込"}</button></div>;
   const warning = error ? <div className="rounded-xl border border-amber-400/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">一部観測に注意：{error}</div> : null;
 
   if (logic === "overview") {
@@ -828,10 +828,10 @@ export function DecisionStatusPanel({ logic = "overview" }: { logic?: DecisionLo
       { key: "q102", title: "Q102 Causal V4", href: "/decision-status/q102", detail: "通貨別Gate / Family / 1-slot selector / 実state" },
       { key: "v52", title: "V52", href: "/decision-status/v52", detail: "V50 / V11_EQ / Stock window / basis・net-edge Gate" },
     ] as const;
-    return <div className="space-y-4">{toolbar}{warning}<RuntimeSummary runtime={snapshot.runtime} /><section className="grid gap-4 md:grid-cols-2">{cards.map((card) => <Link key={card.key} href={card.href} className="panel-gold group rounded-[28px] p-5 transition hover:-translate-y-0.5 hover:border-gold-300/40"><div className="flex items-center justify-between gap-3"><div className="text-xl font-black text-white">{card.title}</div><span className="text-xs text-gold-100">詳細を見る →</span></div><p className="mt-3 text-sm leading-6 text-white/65">{card.detail}</p></Link>)}</section></div>;
+    return <div className="min-w-0 space-y-4 overflow-x-hidden [overflow-wrap:anywhere]">{toolbar}{warning}<RuntimeSummary runtime={snapshot.runtime} /><section className="grid gap-4 md:grid-cols-2">{cards.map((card) => <Link key={card.key} href={card.href} className="panel-gold group rounded-[28px] p-5 transition hover:-translate-y-0.5 hover:border-gold-300/40"><div className="flex items-center justify-between gap-3"><div className="text-xl font-black text-white">{card.title}</div><span className="text-xs text-gold-100">詳細を見る →</span></div><p className="mt-3 text-sm leading-6 text-white/65">{card.detail}</p></Link>)}</section></div>;
   }
 
-  return <div className="space-y-4">
+  return <div className="min-w-0 space-y-4 overflow-x-hidden [overflow-wrap:anywhere]">
     {toolbar}
     {warning}
     <div><Link href="/decision-status" className="inline-flex rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-xs text-white/75 hover:bg-white/[0.08]">← 判定状況一覧</Link></div>
