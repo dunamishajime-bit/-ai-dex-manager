@@ -610,7 +610,42 @@ def _apply_deposits(state: PortfolioState, capital: CapitalContract) -> list[dic
 
 def _candidate_sets(raw_bundle: dict[str, Any], mode: str) -> list[dict[str, Any]]:
     candidates: list[dict[str, Any]] = []
-    candidates.extend(generate_v12_candidates(raw_bundle.get("bars", {}), raw_bundle.get("contracts", {}).get("V12", {}), mode))
+    native_v12 = raw_bundle.get("native_v12_signals")
+    if native_v12 is None:
+        candidates.extend(generate_v12_candidates(
+            raw_bundle.get("bars", {}), raw_bundle.get("contracts", {}).get("V12", {}), mode,
+        ))
+    else:
+        if (not isinstance(native_v12, dict)
+            or native_v12.get("schema") != "v12-native-pure-signal-dump/v1"
+            or not isinstance(native_v12.get("signals"), list)
+            or native_v12.get("candidates") != len(native_v12["signals"])
+            or raw_bundle.get("v12_native_crosscheck", {}).get("status")
+                != "V12_PURE_SIGNAL_CROSS_LANGUAGE_PARITY"
+            or raw_bundle.get("v12_native_crosscheck", {}).get("signals")
+                != len(native_v12["signals"])):
+            raise ValueError("V12_NATIVE_PURE_SIGNAL_PARITY_EVIDENCE_MISSING")
+        for row in native_v12["signals"]:
+            if (row.get("researchOnly") is not True
+                or row.get("productionSignalFunction") != "buildV12Signals"
+                or row.get("side") not in ("LONG", "SHORT")
+                or row.get("rank") not in (1, 2, 3)
+                or float(row.get("requestedGross", 0)) <= 0
+                or float(row.get("requestedGross", 0)) >
+                    (0.1 if row["rank"] == 3 else 1.0) + 1e-10
+                or int(row.get("signalTs", 0)) >= int(row.get("entryTs", 0))):
+                raise ValueError("V12_NATIVE_SIGNAL_INVALID")
+            candidates.append({
+                **row,
+                "strategyId": "V12_X1.00_ALL",
+                "mode": mode,
+                "acceptedGross": float(row["requestedGross"]),
+                "priority": 1,
+                "maximumPositions": 3,
+                "assetClass": "crypto",
+                "adapterModel": "NATIVE_PRODUCTION_PURE_SIGNAL__EXECUTION_NOT_PARITY",
+                "productionParity": False,
+            })
     candidates.extend(generate_pengu_candidates(raw_bundle.get("bars", {}), raw_bundle.get("funding", []), mode))
     candidates.extend(generate_q102_candidates(raw_bundle, mode))
     candidates.extend(generate_fet_candidates(raw_bundle, mode))
