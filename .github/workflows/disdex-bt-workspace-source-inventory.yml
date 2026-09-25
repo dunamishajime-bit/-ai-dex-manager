@@ -1,0 +1,78 @@
+name: Canonical BT targeted workspaces read-only
+on:
+  issue_comment:
+    types: [created]
+permissions:
+  contents: read
+jobs:
+  inventory:
+    if: >-
+      github.event.issue.number == 132 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == 'DISDEX_BT_WORKSPACE_SOURCE_DISCOVERY_20260925'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Configure root SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          p=Path.home()/".ssh"
+          def norm(k):
+              return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"),encoding="utf8")
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"),encoding="utf8")
+          PY
+          chmod 600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Inventory actual historical research workspaces only
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -p "${SSH_PORT:-22}" "root@$SSH_HOST" 'bash -s' <<'REMOTE'
+          set -Eeuo pipefail
+          [[ "$(id -un)" == root ]]
+          echo "CURRENT_TRADING_SHA=$(cat /home/deploy/disdex-trading/current/.disdex-release-sha 2>/dev/null || true)"
+          for root_dir in \
+            /home/deploy/disdex-trading/work/v12-winrate-gates-20260923/.research-state \
+            /home/deploy/disdex-trading/work/v12-winrate-gates-20260923/research-results \
+            /home/deploy/disdex-trading/work/repair-20260918/research-results \
+            /home/deploy/disdex-trading/work/v12-winrate-gates-20260923/docs/research-results \
+            /home/deploy/disdex-trading/work/repair-20260918/docs/research-results \
+            /home/deploy/disdex-v12-tool-fc76e3f29f22276b7878f570925d24d47e85538f/docs/research-results; do
+            if [[ ! -d "$root_dir" ]]; then
+              echo "ROOT_ABSENT=$root_dir"
+              continue
+            fi
+            echo "ROOT_BEGIN=$root_dir"
+            count=0
+            while IFS= read -r -d '' path; do
+              count=$((count + 1))
+              if (( count > 130 )); then continue; fi
+              size=$(stat -c %s "$path" 2>/dev/null || echo -1)
+              echo "SOURCE_CANDIDATE_PATH=$path BYTES=$size"
+              if [[ "$size" -ge 0 && "$size" -le 100000000 ]]; then
+                echo "SOURCE_SHA256=$(sha256sum "$path" | awk '{print $1}')"
+              fi
+            done < <(find "$root_dir" -maxdepth 6 -type f \
+              \( -iname '*.json' -o -iname '*.jsonl' -o -iname '*.csv' -o \
+                -iname '*.parquet' -o -iname '*.gz' -o -iname '*.zip' -o \
+                -iname '*.py' -o -iname '*.ts' -o -iname '*.md' \) \
+              -print0 2>/dev/null | sort -z)
+            echo "ROOT_END=$root_dir TOTAL_FILES=$count REPORTED=$(( count > 130 ? 130 : count ))"
+          done
+          echo 'WORKSPACE_INVENTORY_COMPLETE'
+          echo 'TRADING_MUTATION=0'
+          REMOTE
