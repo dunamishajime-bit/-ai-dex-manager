@@ -282,19 +282,20 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         deadline = self._kill_iso_ms(row.get("graceDeadlineAt"))
         return bool(deadline and base.now_ms() >= deadline)
 
-    def _clear_own_recoverable_hold(self, reason: str) -> None:
-        kill = self._own_recoverable_hold()
-        if not kill:
-            return
-        base.atomic_write_json(self.kill_switch_path, {
-            **kill,
-            "active": False,
-            "action": "HOLD_PROTECTED",
-            "recoverable": True,
-            "reason": reason,
-            "recoveredAt": dt.datetime.now(tz=base.UTC).isoformat(),
-        })
-        self.log("v52-recoverable-hold-cleared", reason=reason)
+    def _require_manual_review_for_expired_hold(self, error: BaseException | str, phase: str) -> bool:
+        hold = self._own_recoverable_hold()
+        if not hold or not self._recoverable_hold_expired(hold):
+            return False
+        self.log(
+            "v52-recovery-grace-expired-manual-review",
+            phase=phase,
+            error=str(error),
+            action="HOLD_PROTECTED",
+            newOrdersAllowed=False,
+            positionChangesAllowed=False,
+            operatorReviewRequired=True,
+        )
+        return True
 
     def _migrate_state(self) -> None:
         positions = self.state.get("positions")
@@ -343,19 +344,7 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
     def _hold_upstream_fail_closed(self, error: BaseException | str, phase: str) -> None:
         self._upstream_fail_closed_hold = True
         message = str(error)
-        hold = self._own_recoverable_hold()
-        if hold and self._recoverable_hold_expired(hold):
-            self.activate_kill_switch(
-                f"V52 recovery grace expired while upstream state remained unavailable: {message}",
-                action="FLATTEN_MANAGED",
-                recoverable=False,
-            )
-            self.log(
-                "v52-recovery-grace-escalated",
-                phase=phase,
-                error=message,
-                flattenDeferredUntilAccountLock=True,
-            )
+        if self._require_manual_review_for_expired_hold(message, phase):
             return
         if not self.kill_switch():
             self.activate_kill_switch(
@@ -1158,13 +1147,17 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         if soft_hold:
             own_hold = self._own_recoverable_hold()
             if own_hold:
-                self._clear_own_recoverable_hold(
-                    "V52 recovered a successful managed-position tick within recovery grace; new entries remain held until the next tick."
+                self.log(
+                    "v52-recoverable-hold-requires-manual-review",
+                    reason=str(own_hold.get("reason") or "RECOVERABLE_HOLD"),
+                    newOrdersAllowed=False,
                 )
             else:
                 self.log(
                     "v52-soft-hold-entry-blocked",
                     reason=str((self.kill_switch() or {}).get("reason") or "SHARED_RISK_RECOVERY_GRACE"),
+                    operatorReviewRequired=True,
+                    newOrdersAllowed=False,
                 )
             return
         if not self.state.get("v11Attempted") and base.clock("10:30:00") <= sec <= base.clock("10:30:20"):
@@ -1298,28 +1291,20 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
                     elif transient_reference_error(error) and not self.positions():
                         self.log("v52-entry-held-reference-validation", error=str(error))
                     elif self.live:
-                        hold = self._own_recoverable_hold()
-                        if hold and self._recoverable_hold_expired(hold):
-                            self.activate_kill_switch(
-                                f"V52 recovery grace expired after repeated tick error: {error}",
-                                action="FLATTEN_MANAGED",
-                                recoverable=False,
-                            )
-                            self.flatten_all("RECOVERY_GRACE_EXPIRED")
-                            raise
-                        self.activate_kill_switch(
-                            f"V52 recoverable tick error: {error}",
-                            action="HOLD_PROTECTED",
-                            recoverable=True,
-                        )
                         self._upstream_fail_closed_hold = True
-                        self.log(
-                            "v52-recoverable-error-hold",
-                            error=str(error),
-                            graceDeadlineAt=(self._own_recoverable_hold() or {}).get("graceDeadlineAt"),
-                            existingPositionsRetained=bool(self.positions()),
-                            newOrdersAllowed=False,
-                        )
+                        if not self._require_manual_review_for_expired_hold(error, "TICK"):
+                            self.activate_kill_switch(
+                                f"V52 recoverable tick error: {error}",
+                                action="HOLD_PROTECTED",
+                                recoverable=True,
+                            )
+                            self.log(
+                                "v52-recoverable-error-hold",
+                                error=str(error),
+                                graceDeadlineAt=(self._own_recoverable_hold() or {}).get("graceDeadlineAt"),
+                                existingPositionsRetained=bool(self.positions()),
+                                newOrdersAllowed=False,
+                            )
                 finally:
                     self.lock.release()
             if not daemon: break
@@ -1365,14 +1350,7 @@ def self_test() -> None:
         assert soft["recoverable"] is True
         assert soft.get("graceDeadlineAt")
         assert hold_engine._recoverable_hold_expired(soft) is False
-        hold_engine._clear_own_recoverable_hold("recovered")
-        assert hold_engine.kill_switch() is None
-
-        hold_engine.activate_kill_switch(
-            "temporary upstream error",
-            action="HOLD_PROTECTED",
-            recoverable=True,
-        )
+        assert hold_engine.kill_switch() == soft
         hold_engine.activate_kill_switch(
             "grace expired",
             action="FLATTEN_MANAGED",

@@ -6,6 +6,7 @@ import os
 import signal
 import subprocess
 import sys
+from pathlib import Path
 
 import disdex_v52_aster_only_legacy_engine as legacy
 from disdex_strict_portfolio_planner import (
@@ -54,7 +55,7 @@ class V52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
         if not self.live:
             return 0.0
         state_path = os.getenv("V12_X1_ALL_STATE_PATH", "/var/lib/disdex/v12-x1-all/runner.json")
-        raw = base.read_json(state_path, None)
+        raw = base.read_json(Path(state_path), None)
         if raw is None:
             return 0.0
         if not isinstance(raw, dict) or raw.get("strategyId") != "V12_X1.00_ALL":

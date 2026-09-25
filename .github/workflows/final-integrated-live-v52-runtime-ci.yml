@@ -50,6 +50,8 @@ jobs:
           tests/test_runtime_multilineage_monitoring.py
           tests/test_v52_account_lock_scope.py
           tests/test_v52_telemetry_contract.py
+          tests/test_v52_upstream_fail_closed.py
+          tests/test_v52_safety_regressions.py
           tests/test_dynamic_v12_q102_margin_guard.py
           tests/test_final_dynamic_gross_strict_caps.py
       - name: Strategy self-tests
