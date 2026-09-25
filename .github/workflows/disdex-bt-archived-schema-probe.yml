@@ -1,0 +1,79 @@
+name: Canonical BT archived event schema probe
+on:
+  issue_comment:
+    types: [created]
+permissions:
+  contents: read
+jobs:
+  schema-probe:
+    if: >-
+      github.event.issue.number == 132 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == 'DISDEX_BT_ARCHIVED_SCHEMA_PROBE_20260925'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Configure root SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          p=Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Inspect only verified historical research JSON metadata
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -p "${SSH_PORT:-22}" "root@$SSH_HOST" 'python3 -' <<'PY'
+          import hashlib,json,os
+          sources=[
+           ("/home/deploy/disdex-trading/work/v12-winrate-gates-20260923/.research-state/v12-winrate-gates-20260923/result.json","99e320d855c91b986c691fc7ba1eac93321bc0660bb1ef69eda2901a8f938575"),
+           ("/home/deploy/disdex-trading/work/v12-winrate-gates-20260923/docs/research-results/v12-v52-pengu-v2-combined-latest.json","0675fd17a0a93382d622761e17b4f0a4ab87fa8842fd5273dc3faf51fd7b7177"),
+           ("/home/deploy/disdex-trading/work/v12-winrate-gates-20260923/docs/research-results/top3-fet-q102gov-integrated-20260920.json","9e522e7d93a4c3e7023065825d6d5f41688cdd47410c6223d97ed016dbbdd995"),
+          ]
+          keys_of_interest={"events","trades","orders","positions","ledger","fills","candidate","candidates","signals","entries","exits","equity","timeline","normal","severe"}
+          def audit(value,prefix,depth=0):
+              if depth>4: return
+              if isinstance(value,dict):
+                  ks=list(value)
+                  print("OBJECT",prefix,"KEYS",",".join(str(k) for k in ks[:55]),"COUNT",len(ks))
+                  for k,v in value.items():
+                      name=str(k).lower()
+                      if isinstance(v,list):
+                          sample=v[0] if v else None
+                          sample_keys=list(sample)[:22] if isinstance(sample,dict) else []
+                          if depth<=2 or any(t in name for t in keys_of_interest):
+                              print("ARRAY",prefix+"."+str(k),"LEN",len(v),"ITEM_KEYS",",".join(str(s) for s in sample_keys))
+                      elif isinstance(v,dict) and (depth<2 or any(t in name for t in keys_of_interest)):
+                          audit(v,prefix+"."+str(k),depth+1)
+              elif isinstance(value,list):
+                  print("ARRAY_ROOT",prefix,"LEN",len(value))
+          for path,expected in sources:
+              raw=open(path,"rb").read()
+              checksum=hashlib.sha256(raw).hexdigest()
+              if checksum!=expected: raise SystemExit("HASH_MISMATCH:"+path)
+              doc=json.loads(raw)
+              print("SOURCE_BEGIN",path,"BYTES",len(raw),"SHA256",checksum)
+              audit(doc,"ROOT")
+              for needle in (b"740771278",b"740771277",b"65669109",b"top3_q102gov030_fet1.25"):
+                  print("EXACT_MARKER",needle.decode(),"PRESENT",needle in raw)
+              print("SOURCE_END",path)
+          print("ARCHIVED_SCHEMA_PROBE_COMPLETE")
+          print("TRADING_MUTATION=0")
+          PY
