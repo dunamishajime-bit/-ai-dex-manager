@@ -1,0 +1,89 @@
+name: Current VPS BT source and venue probe (read only)
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    if: >-
+      github.event.issue.number == 132 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == 'DISDEX_CURRENT_VPS_FRESH_BT_PROBE_20260925'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Verify fresh Aster historical price/funding availability
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json,urllib.parse,urllib.request
+          base="https://fapi.asterdex.com"
+          start=1754784000000
+          for symbol in ("BTCUSDT","PENGUUSDT","FETUSDT","NVDAUSDT"):
+            params=urllib.parse.urlencode({"symbol":symbol,"interval":"1h","startTime":start,"endTime":start+3_600_000,"limit":2})
+            url=base+"/fapi/v3/klines?"+params
+            try:
+              with urllib.request.urlopen(urllib.request.Request(url,headers={"User-Agent":"DisDex-CurrentVPS-FreshBT-Research/1.0"}),timeout=18) as res:
+                j=json.load(res)
+                print("HISTORICAL_ASTER",symbol,"HTTP",res.status,"ROWS",len(j) if isinstance(j,list) else "INVALID","FIRST_TS",j[0][0] if isinstance(j,list) and j else "NONE")
+            except Exception as exc:
+              print("HISTORICAL_ASTER",symbol,"ERROR",type(exc).__name__,str(exc)[:110])
+          params=urllib.parse.urlencode({"symbol":"PENGUUSDT","startTime":start,"endTime":start+24*3_600_000,"limit":10})
+          try:
+            with urllib.request.urlopen(urllib.request.Request(base+"/fapi/v3/fundingRate?"+params,headers={"User-Agent":"DisDex-CurrentVPS-FreshBT-Research/1.0"}),timeout=18) as res:
+              j=json.load(res)
+              print("ASTER_FUNDING_PUBLIC","HTTP",res.status,"ROWS",len(j) if isinstance(j,list) else "INVALID")
+          except Exception as exc: print("ASTER_FUNDING_PUBLIC","ERROR",type(exc).__name__,str(exc)[:110])
+          PY
+      - name: Configure owner-authorized VPS SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          p=Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"),encoding="utf8")
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"),encoding="utf8")
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Fingerprint actual CURRENT VPS runtime without reading credentials
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -p "${SSH_PORT:-22}" "root@$SSH_HOST" 'bash -s' <<'REMOTE'
+          set -Eeuo pipefail
+          release="$(readlink -f /home/deploy/disdex-trading/current)"
+          sha="$(tr -d '[:space:]' < "$release/.disdex-release-sha")"
+          [[ "$sha" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$release" == "/home/deploy/disdex-trading/releases/$sha" ]]
+          echo "VPS_CURRENT_RELEASE_SHA=$sha"
+          echo "VPS_CURRENT_RELEASE=$release"
+          echo "CURRENT_SHA_GIT_CHECK=$(git -C /home/deploy/ai-dex-manager cat-file -t "$sha" 2>/dev/null || true)"
+          for f in config/v12X1AllRuntime.ts config/penguDualLsV2Runtime.ts \
+            config/fetBrk48Runtime.ts config/disdexQuality102CausalV4Model.ts \
+            config/integratedProductionRiskPolicy.ts config/v52V50Runtime.json \
+            lib/v12-x1-all.ts lib/pengu-dual-ls-v2.ts \
+            lib/disdex-quality102-causal-v4-signal.ts lib/fet-brk48-signal.ts \
+            lib/disdex-integrated-gross-governor.ts scripts/disdex_v52_aster_only_live_engine.py; do
+            [[ -f "$release/$f" ]] || { echo "SOURCE_MISSING=$f"; exit 38; }
+            echo "SOURCE_SHA256 $f $(sha256sum "$release/$f" | cut -d' ' -f1)"
+          done
+          echo "TRADING_MUTATION=0"
+          echo "VPS_SOURCE_FINGERPRINT_COMPLETE"
+          REMOTE
