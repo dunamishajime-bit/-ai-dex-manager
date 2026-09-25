@@ -52,3 +52,11 @@ Focused workspace PR #234/run `36086931624` succeeded and located:
 4. Only after all five candidate and execution ledgers exactly reconcile, re-run first original historical anchor and then user-requested new PENGU comparison. Fail closed on missing rows, timeline mismatch, unproven parity or zero executions for nonzero original sleeve counts.
 
 **No VPS trading runner, Aster account, positions, Kill Switch, HP, or LIVE runtime is modified by these research jobs.**
+
+## Archived-source schema audit (2026-09-25, complete)
+
+- Read-only run: https://github.com/dunamishajime-bit/-ai-dex-manager/actions/runs/36087148210 — success; all three independently hashed frozen VPS JSON documents verified; trading mutation 0.
+- The 9,827,755-byte V12 win-rate archive is schema `status/limitations/period/conditions/productionConstants/dataSource/variants/results/rankingNormal`, containing 16 HC175 V12 variants and specific 872-, 921-, 884-, 877-trade NORMAL/SEVERE arrays. It contains **neither** original five-sleeve headline marker nor Top3/Q102/FET/V52 combined event ledger. It is genuine *V12-only source evidence*, not the five-sleeve original.
+- The older 245,003-byte three-sleeve combined research JSON contains `V12+PENGU+V52` summary, variant results, research proxies and sensitivity warnings, not the missing Sept20 original Top3/Q102/FET/V52 event ledger.
+- The 8,433-byte original `top3-fet-q102gov-integrated-20260920.json` includes the ¥740,771,278 and ¥65,669,109 headline markers as an array of eight summaries, but has **no original trade-event ledger**.
+- Do not infer that the complete original five-sleeve source exists on the VPS from these similar-looking archive titles. New source discovery must identify a full historical event ledger/allocator and provenance **before** claiming reproduced original equity/PF/DD.
