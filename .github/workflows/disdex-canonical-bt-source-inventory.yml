@@ -1,0 +1,85 @@
+name: Canonical BT source inventory (VPS read only)
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+
+jobs:
+  inventory:
+    if: >-
+      github.event.issue.number == 132 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == 'DISDEX_BT_CANONICAL_SOURCE_DISCOVERY_20260925'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Configure authorized root SSH without logging secrets
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          test -n "$SSH_HOST" && test -n "$ROOT_KEY" && test -n "$SSH_KNOWN_HOSTS"
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          d=Path.home()/".ssh"
+          def norm(k):
+              return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (d/"canonical_root").write_text(norm("ROOT_KEY"))
+          (d/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 600 "$HOME/.ssh/canonical_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/canonical_root" >/dev/null
+      - name: Read-only historical BT source inventory
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          timeout 210 ssh -T -i "$HOME/.ssh/canonical_root" \
+            -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -o ConnectTimeout=15 \
+            -p "${SSH_PORT:-22}" "root@$SSH_HOST" 'bash -s' <<'REMOTE'
+          set -Eeuo pipefail
+          [[ "$(id -un)" == root ]]
+          echo 'INVENTORY_BEGIN'
+          echo "CURRENT_TRADING_SHA=$(cat /home/deploy/disdex-trading/current/.disdex-release-sha 2>/dev/null || true)"
+          for parent in /home/deploy/ai-dex-manager /home/deploy/disdex-trading /root/.research-state /var/lib/disdex/research /home/deploy/.research-state; do
+            if [[ -d "$parent" ]]; then
+              echo "SEARCH_ROOT=$parent"
+              find "$parent" -maxdepth 8 \
+                \( -type d \( -name node_modules -o -name .next -o -name .git -o -name ui-releases \) -prune \) -o \
+                \( -type f \( \
+                -name pengu-hard-cd24.json -o -name candidate-1slot.csv -o \
+                -iname '*top3*ledger*' -o -iname '*v12*ledger*' -o -iname '*pengu*ledger*' -o \
+                -iname '*q102*ledger*' -o -iname '*quality102*ledger*' -o \
+                -iname '*fet*ledger*' -o -iname '*v52*ledger*' -o \
+                -iname '*v50*basis*' -o -iname '*integrated*event*' -o \
+                -iname '*integrated*result*' -o -iname '*stock*cache*' -o \
+                -iname 'bt*source*manifest*' -o -iname 'research*state*manifest*' \
+                \) -print \) 2>/dev/null | sort -u | head -n 100 | while IFS= read -r file; do
+                size=$(stat -c %s "$file" 2>/dev/null || echo -1)
+                echo "CANDIDATE_PATH=$file SIZE=$size"
+                if [[ "$size" -gt 0 && "$size" -le 200000000 ]]; then
+                  echo "CANDIDATE_SHA256=$(sha256sum "$file" | cut -d' ' -f1)"
+                fi
+              done
+            else
+              echo "ABSENT_ROOT=$parent"
+            fi
+          done
+          echo 'HISTORICAL_STATE_DIRS_BEGIN'
+          find /home/deploy /root /var/lib/disdex -maxdepth 5 -type d \
+            \( -name .research-state -o -name research-results -o -name stock-cache -o -name historical-cache \) \
+            2>/dev/null | head -n 75 || true
+          echo 'HISTORICAL_STATE_DIRS_END'
+          echo 'TRADING_MUTATION=0'
+          echo 'INVENTORY_COMPLETE'
+          REMOTE
