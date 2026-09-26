@@ -4,6 +4,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 WORKFLOW = ROOT / ".github" / "workflows" / "disdex-vps-ops-ci.yml"
+Q102_RUNNER = ROOT / "scripts" / "disdex-quality102-causal-v1-live-runner.ts"
 
 
 class VpsOpsCiContractTest(unittest.TestCase):
@@ -31,6 +32,13 @@ class VpsOpsCiContractTest(unittest.TestCase):
             "tests/watchdog-release-lineage.test.ts",
         ):
             self.assertIn(required, current)
+
+    def test_q102_preflight_defers_only_global_rate_budget_saturation(self):
+        source = Q102_RUNNER.read_text(encoding="utf-8")
+        self.assertIn("classifyQ102PreflightRateBudgetDeferral", source)
+        self.assertIn("QUALITY102_CAUSAL_V1_READ_ONLY_PREFLIGHT_DEFERRED_RATE_BUDGET", source)
+        self.assertIn('safetyState: "DEFERRED_FAIL_CLOSED"', source)
+        self.assertIn("if (!deferred) throw error;", source)
 
 
 if __name__ == "__main__":
