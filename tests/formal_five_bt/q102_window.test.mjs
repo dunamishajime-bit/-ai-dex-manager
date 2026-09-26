@@ -26,7 +26,7 @@ test("newly listed symbols are excluded ONLY until their own causal 181-day hist
   assert.equal(early.ready,true);
   assert.ok(early.eligibleSymbols.includes("SOLUSDT"));
   assert.ok(!early.eligibleSymbols.includes("NEWUSDT"));
-  const late=q102HistoryAt(idx,t+60*24*HOUR_MS+REQUIRED_HOURS*HOUR_MS);
+  const late=q102HistoryAt(idx,T+60*24*HOUR_MS+REQUIRED_HOURS*HOUR_MS);
   assert.ok(late.eligibleSymbols.includes("NEWUSDT"));
 });
 test("invalid completed bar or gap cannot be silently bridged",()=>{
