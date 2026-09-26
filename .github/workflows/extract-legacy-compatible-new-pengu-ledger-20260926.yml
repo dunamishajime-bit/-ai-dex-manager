@@ -1,0 +1,74 @@
+name: Extract original new PENGU flat-one Q60 DD17H72 trade ledger
+on:
+  push:
+    branches: [research/recover-final-governor-bt-20260926]
+    paths: [.github/workflows/extract-legacy-compatible-new-pengu-ledger-20260926.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-pengu-ledger:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: daf9db5251d364951c158fc6b4a7abf53c2a593c
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Add export ONLY to captured original PENGU simulator without altering signal/sizing/exits
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path('scripts/research_pengu_flat1_dd_q60_robustness_20260924.ts')
+          s=p.read_text()
+          anchor='  const formal=result.windows.FORMAL.cases.BASELINE_FLAT1,rolling=result.windows.ROLLING365.cases.BASELINE_FLAT1;'
+          assert s.count(anchor)==1
+          addon='''  const preservedNewPenguLedger={
+            schema:"pengu-combined-filtered-flat1-q60-dd17-h72-original-ledger/v1",
+            sourceCommit:"daf9db5251d364951c158fc6b4a7abf53c2a593c",
+            inputVenue:"ASTER_FUTURES_V3",
+            period:{start:"2025-08-10T00:00:00.000Z",end:"2026-08-10T00:00:00.000Z"},
+            contract:{logic:"COMBINED_FILTERED",grossCap:1,everyEntryGross:1,quarantineHours:60,ddThresholdPct:-17,globalCooldownHours:72},
+            modes:{
+              normal:between(cache["Q60_DD170_H72:NORMAL"],FORMAL_START,FORMAL_END),
+              stress:between(cache["Q60_DD170_H72:SEVERE"],FORMAL_START,FORMAL_END),
+            },
+            safety:{researchOnly:true,ordersSent:false,productionChanged:false}
+          };
+          await fs.mkdir(".research-state/pengu-flat1-dd-q60-robustness",{recursive:true});
+          await fs.writeFile(".research-state/pengu-flat1-dd-q60-robustness/preserved-new-pengu-ledger.json",JSON.stringify(preservedNewPenguLedger,null,2)+"\\n");
+          '''
+          p.write_text(s.replace(anchor,addon+anchor))
+          PY
+      - name: Execute ORIGINAL native PENGU code with original Aster H1 and funding
+        shell: bash
+        run: |
+          set -o pipefail
+          npx --no-install tsx scripts/research_pengu_flat1_dd_q60_robustness_20260924.ts 2>&1 | tee original-pengu-export.log
+          python3 - <<'PY'
+          import json,hashlib,pathlib
+          p=pathlib.Path('.research-state/pengu-flat1-dd-q60-robustness/preserved-new-pengu-ledger.json')
+          x=json.loads(p.read_text())
+          assert len(x['modes']['normal'])==69,(len(x['modes']['normal']),'normal count')
+          assert len(x['modes']['stress'])==68,(len(x['modes']['stress']),'severe count')
+          for mode in ('normal','stress'):
+              for t in x['modes'][mode]:
+                  assert abs(t['requestedGross']-1.0)<1e-9
+                  assert t['entryTs']<t['exitTs']
+          print('NATIVE_NEW_PENGU_ORIGINAL_LEDGER_EXTRACTED',
+            len(x['modes']['normal']),len(x['modes']['stress']),hashlib.sha256(p.read_bytes()).hexdigest())
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: original-new-pengu-q60-dd17-h72-ledger-20260926
+          path: |
+            .research-state/pengu-flat1-dd-q60-robustness/
+            original-pengu-export.log
+          retention-days: 90
+          if-no-files-found: warn
