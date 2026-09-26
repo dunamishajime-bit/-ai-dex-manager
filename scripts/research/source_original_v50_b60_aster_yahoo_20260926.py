@@ -53,7 +53,7 @@ def source_aligned(aster,yahoo):
     # 30m prior close / preceding CASH completed H1 close is signal proxy,
     # while 30m/60m current OPENs are opening-entry proxy; no future OHLC.
     signal_basis=(pre/prev-1)*10000
-    rows.append({"basisBps":(entry/ref-1)*10000,"signalBasisBps":signal_basis,
+    rows.append({"basisBps":signal_basis,"signalBasisBps":signal_basis,
        "exit":entry,"exitTs":t,"asterVolumeAtOpenBar":float(bar[5])})
     refs.append({"cash":ref,"timestamp":t})
    if len(rows)!=len(ts):reject["MISSING_ALIGNED_HISTORY"]+=1;break
