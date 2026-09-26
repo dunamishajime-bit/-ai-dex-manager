@@ -1,0 +1,325 @@
+{
+  "schema_version": 1,
+  "runtime_sha": "e1b58060d6263a3af7ced51bec854d3e211d2f35",
+  "active_release_id": "a09ea45ca3cbd72100f9eb0eaae499039c40b6a0",
+  "verified_repository_commit": "a09ea45ca3cbd72100f9eb0eaae499039c40b6a0",
+  "source_provenance": {
+    "active_systemd_working_directory_release": "a09ea45ca3cbd72100f9eb0eaae499039c40b6a0",
+    "release_marker_matches_repository_commit": true,
+    "active_service_inventory_read_only": true,
+    "runtime_sha_basis": "read-only runtime audit recorded before implementation; current active release ID independently matched to the service WorkingDirectory marker and public GitHub commit"
+  },
+  "units": [
+    "disdex-v12-x1-all@a09ea45ca3cbd72100f9eb0eaae499039c40b6a0.service",
+    "disdex-pengu-dual-ls-v2@a09ea45ca3cbd72100f9eb0eaae499039c40b6a0.service",
+    "disdex-quality102-causal-v1@a09ea45ca3cbd72100f9eb0eaae499039c40b6a0.service",
+    "disdex-fet-brk48@a09ea45ca3cbd72100f9eb0eaae499039c40b6a0.service",
+    "disdex-v52-aster-only@a09ea45ca3cbd72100f9eb0eaae499039c40b6a0.service",
+    "disdex-v12-v52-margin-guard@a09ea45ca3cbd72100f9eb0eaae499039c40b6a0.service"
+  ],
+  "files": [
+    {
+      "path": "config/disdexQuality102CausalV1Runtime.ts",
+      "sha256": "4569f972f906ebc85521e6ce65399b498baa8e58bcdeeea73da9c1992e836b5d"
+    },
+    {
+      "path": "config/disdexQuality102CausalV4Model.ts",
+      "sha256": "d4d69ad4afabdc5d89faa704c25630f36b9f724aa7007f131a18c3fbb52539e8"
+    },
+    {
+      "path": "config/disdexV96Runtime.ts",
+      "sha256": "66e2512e01986e29865f83637665595e53c2a476026e869b5340e319e91e6e8a"
+    },
+    {
+      "path": "config/fetBrk48Runtime.ts",
+      "sha256": "9412bd90534625db422aac353a4df7147b3a40740a1f124ee3f9167ebecd17b5"
+    },
+    {
+      "path": "config/integratedProductionRiskPolicy.ts",
+      "sha256": "21dbaae85234e375d1ac6b102c8946f9dbbf0ecd1cc12a4dcc0d07258714401b"
+    },
+    {
+      "path": "config/penguDualLsV2Runtime.ts",
+      "sha256": "936f7c01d0332e9380b955e81dab42aee686f68ceee7d8da2fbc1d9a98f7d6f2"
+    },
+    {
+      "path": "config/penguRecoveryV8.ts",
+      "sha256": "053f4578390ce3cd8547669c01142b70517969e837391608948206a672d088d8"
+    },
+    {
+      "path": "config/sharedCryptoRiskPolicy.ts",
+      "sha256": "a83611274a909616031c9c94faa25e44fa1d07436e09c044d2053aa88f6a7494"
+    },
+    {
+      "path": "config/strategyExecutionRoutes.ts",
+      "sha256": "4cfdd76ab630ec41b3b706aed85a2f0f06a5684ffd5187a2f53db28b8f4df742"
+    },
+    {
+      "path": "config/strategyUniverse.ts",
+      "sha256": "de0dc274b80c4ab79f2aa834068ac3444cadd44789ea5af1ab5f3e15ddac1c64"
+    },
+    {
+      "path": "config/v12X1AllRuntime.ts",
+      "sha256": "ceeda9843f94938526c5c67abc2449f764baaf2b93ceaec4e966304441b40cac"
+    },
+    {
+      "path": "config/v52V50Runtime.json",
+      "sha256": "16c24ec472df9141bbde60b993120fb0a9b9bc3739a0bb8251c6371119e3390c"
+    },
+    {
+      "path": "lib/disdex-quality102-causal-pipeline.ts",
+      "sha256": "7483c4ca504320ff9b4f06479c84418604d1b310aeeaa6c3574ae8ca5285ab8f"
+    },
+    {
+      "path": "lib/disdex-quality102-causal-v1-runner.ts",
+      "sha256": "a6a75c810448698246ed33c87d5db135460d9818c024a13800ac522437d843a8"
+    },
+    {
+      "path": "lib/disdex-quality102-causal-v4-observability.ts",
+      "sha256": "c23777071bae6822e9d40d9038e3813da98cf668a0078c278f2abbdd5b4dfe1a"
+    },
+    {
+      "path": "lib/disdex-quality102-causal-v4-ranking.ts",
+      "sha256": "f4cd1f3d1dd2f0e0f8b69d0ef49236f37838e90f501771b0f2088d909dde8e37"
+    },
+    {
+      "path": "lib/disdex-quality102-causal-v4-s34.ts",
+      "sha256": "333191f07ffb05e0889a2235d63c4b9f70213244efb1fde68d8e17bcecd3279f"
+    },
+    {
+      "path": "lib/disdex-quality102-causal-v4-signal.ts",
+      "sha256": "0826b61a7f5a90bb8158aaf25369343c3fcb854a87da060c27aadb5422b0df4e"
+    },
+    {
+      "path": "lib/disdex-quality102-live-selector.ts",
+      "sha256": "f9eda592602adc6a75e1bf1c220f239fdb2c6ddffcdc9ba5271a1df592f5f728"
+    },
+    {
+      "path": "lib/disdex-shared-crypto-daily-risk.ts",
+      "sha256": "3652d9776fb798a63c5489fa61cdf31e829ced82a7b669479b495b4515fec0f4"
+    },
+    {
+      "path": "lib/disdex-shared-crypto-risk-writer.ts",
+      "sha256": "15c67a5ecb4cbbb6debb9cbe71422d4f436e9eb9b6d59b7074e172218b46524d"
+    },
+    {
+      "path": "lib/disdex-v96-live-risk-controls.ts",
+      "sha256": "d58f6af89cf6c1f4c459b7f33d0ec8db5c52bab6fdb7dc10d6fd0d7ee803efb6"
+    },
+    {
+      "path": "lib/fet-brk48-live-reduction.ts",
+      "sha256": "e118847ce0f0d9d67a52aa5921bf75823871d728a17299aacce54627ae65aca7"
+    },
+    {
+      "path": "lib/fet-brk48-live-runner.ts",
+      "sha256": "86f7b5d2932b4cadbd53e8d1151aacfe2e6e28d764a763e06f38ad882e3627a7"
+    },
+    {
+      "path": "lib/fet-brk48-ownership.ts",
+      "sha256": "56de2334094257fff227d81a2ab11aa65a138d574ff1cbfadbb4b913ff049949"
+    },
+    {
+      "path": "lib/fet-brk48-signal.ts",
+      "sha256": "c67344623b30065e285023b967808ff0faec182c0b8fb973bb929888d8fa42e9"
+    },
+    {
+      "path": "lib/fet-brk48-state.ts",
+      "sha256": "d59d8048b26a4d4cc856ba9f2c6a890e29f29913f0b1cd166b9e7e48f4981f4c"
+    },
+    {
+      "path": "lib/pengu-dual-ls-v2-market-data-provider.ts",
+      "sha256": "944d42778726dda0e76d498d634d2ae26fcbfaba00ab9790be5a7807b3520d12"
+    },
+    {
+      "path": "lib/pengu-dual-ls-v2-portfolio-runner.ts",
+      "sha256": "dc7710ec7a98930426725cfbdb4725869d4d6b4c8bae33f31d2cf17d6a57ec66"
+    },
+    {
+      "path": "lib/pengu-dual-ls-v2-runner-state.ts",
+      "sha256": "6f1fd6bd62c6cdf36a3c52e0c32c1554f85e1d0b73ecc4f6e8454f61ba23625b"
+    },
+    {
+      "path": "lib/pengu-dual-ls-v2.ts",
+      "sha256": "d408e9e602e3ddc7ff9b6b4d80eaf0624e05ae28ad11b92ca60c99253d320a5a"
+    },
+    {
+      "path": "lib/pengu-recovery-v8-protective-orders.ts",
+      "sha256": "3d0a37d4ee76d00d8aeb6840bd34716e288666a071c79eb9f90d8298f3e729ce"
+    },
+    {
+      "path": "lib/pengu-recovery-v8.ts",
+      "sha256": "0a71d69ccc3e60be018e7cb00b3b4a9f6584974757923719267e5206bcd43c43"
+    },
+    {
+      "path": "lib/pengu-route-quarantine-dd-governor.ts",
+      "sha256": "9386668a0475aeadfdd1f65035b91d9a433c9710d027b1291ffc4fbf21b334cf"
+    },
+    {
+      "path": "lib/pengu-short-v20.ts",
+      "sha256": "fce39b4ff1c6b5c7e62438e9a974a9479c0ecf5b5a1b41a91a5f2edf78caee65"
+    },
+    {
+      "path": "lib/v12-aster-live-adapter.ts",
+      "sha256": "f1b59f77297e4961022935e1da858fc93bec4430a60eb75b82611ecec928947e"
+    },
+    {
+      "path": "lib/v12-dynamic-residual-live-reduction.ts",
+      "sha256": "a95a7e6503b7e50b3e025e1cfcdfa0ef91f1756fd95fdab335d9a8f6564c1ff9"
+    },
+    {
+      "path": "lib/v12-live-execution-engine.ts",
+      "sha256": "f15391447acd1e9ce6f1ae39d724f83e0b22e8faaf545571adba2ea07680eecd"
+    },
+    {
+      "path": "lib/v12-resident-stop-lifecycle.ts",
+      "sha256": "176ed2d8f04a05d98688427330d9763262ede75e6efa3e7b9400e4e976980d7a"
+    },
+    {
+      "path": "lib/v12-strict-live-adapter.ts",
+      "sha256": "b083290dd251e88a98498e507a28408aa413e865aa5e432be1969cf72f3a137b"
+    },
+    {
+      "path": "lib/v12-top2-residual.ts",
+      "sha256": "f549848a4d0a6604586c90131c35c772c6014b7f2bdaceeb7dda216f2dc69498"
+    },
+    {
+      "path": "lib/v12-x1-all-runner-state.ts",
+      "sha256": "444039749bb2f7c7e4b1e725585af0fb47b02ad42ce7c245deb353dd68eae80d"
+    },
+    {
+      "path": "lib/v12-x1-all.ts",
+      "sha256": "df25590af24128f156333021fc7539d1d3088c7a60fa380d74df357a5a08caca"
+    },
+    {
+      "path": "scripts/disdex-fet-brk48-core-preempt.ts",
+      "sha256": "1eb5a2a0348fb33fff105e3b089eb0e304050aa095f794322a9233306f37494f"
+    },
+    {
+      "path": "scripts/disdex-fet-brk48-live-runner.ts",
+      "sha256": "08e1e002955974eef26653e15d53d627d68a3e7de49906dd0264907687e73a8e"
+    },
+    {
+      "path": "scripts/disdex-pengu-dual-ls-v2-live-runner.ts",
+      "sha256": "fba5963f4cb275dc31e42e4a306c620eba08fd2df54268cb2b799357264b0f2e"
+    },
+    {
+      "path": "scripts/disdex-quality102-causal-v1-live-runner.ts",
+      "sha256": "5e6b2d2b8952d0d1f80bd7b60bee3950dec100b17de18c81674bea4e41f1024f"
+    },
+    {
+      "path": "scripts/disdex-v12-x1-all-live-runner.ts",
+      "sha256": "3d911162f2e96750027e98b510bedb1e8ff60c161faebb6ce6f25ab830f2e1b4"
+    },
+    {
+      "path": "scripts/disdex_stock_reference_alpaca_proxy.py",
+      "sha256": "da707a435fe904f875b1ea0ef236b56885b64bf7cb8491ee1116b682195a3b51"
+    },
+    {
+      "path": "scripts/disdex_stock_reference_pyth_iex_proxy.py",
+      "sha256": "bdf9b6b0948862313cfb4db991efd0c3f039086b59d0d70ed763fc82ea11e66b"
+    },
+    {
+      "path": "scripts/disdex_v52_aster_only_live_engine.py",
+      "sha256": "aec87b91e74137bf3f90fb313337e4dd0699f1d78f5cf1e0bef86ae9e08f36e9"
+    },
+    {
+      "path": "scripts/disdex_v52_margin_aware_live_engine.py",
+      "sha256": "4de8979e1915f672250075dc745bfa8d32d97bc5cfb7889c925c05a58fbdada1"
+    },
+    {
+      "path": "scripts/disdex_v96_v52_margin_guard.py",
+      "sha256": "51379f7f1b64ae85fa474e06dba3becbc63a1ac33506e1cf87cc2c2701d3bc7b"
+    },
+    {
+      "path": "scripts/disdex_v96_v52_margin_guard_runtime.py",
+      "sha256": "362ab6e0f213b5748f5b378562f49194afbcb26cc3abd8b53738321152e0e113"
+    },
+    {
+      "path": "scripts/disdex_v96_v52_margin_risk_policy.py",
+      "sha256": "524ebe7451b95b525247e05a42b1e4c574aecf656108a671ba4b0c87f66aab29"
+    }
+  ],
+  "config_allowlist": {
+    "live_process_environment": {
+      "V12_X1_ALL_MODE": "LIVE",
+      "V12_X1_ALL_ENABLED": true,
+      "V12_X1_ALL_LIVE_TRADING_ENABLED": true,
+      "V12_X1_ALL_LIVE_EXECUTION_ENABLED": true,
+      "PENGU_DUAL_LS_V2_MODE": "LIVE",
+      "PENGU_DUAL_LS_V2_ENABLED": true,
+      "PENGU_DUAL_LS_V2_LIVE_TRADING_ENABLED": true,
+      "PENGU_DUAL_LS_V2_LIVE_EXECUTION_ENABLED": true,
+      "PENGU_DUAL_LS_V2_MAX_GROSS": 1.0,
+      "PENGU_DUAL_LS_V2_PORTFOLIO_GROSS_CAP": 1.5,
+      "PENGU_DUAL_LS_V2_MAX_DAILY_LOSS_PCT": 7.5,
+      "QUALITY102_CAUSAL_V1_MODE": "LIVE",
+      "QUALITY102_CAUSAL_V1_ENABLED": true,
+      "QUALITY102_CAUSAL_V1_LIVE_TRADING_ENABLED": true,
+      "QUALITY102_CAUSAL_V1_LIVE_EXECUTION_ENABLED": true,
+      "QUALITY102_CAUSAL_V1_OPERATOR_ARMED": true,
+      "QUALITY102_CAUSAL_V1_MAX_GROSS": 3.0,
+      "QUALITY102_CAUSAL_V1_MAX_DAILY_LOSS_PCT": 7.5,
+      "QUALITY102_CAUSAL_V1_SELECTOR_MODE": "CAUSAL_V4",
+      "QUALITY102_CAUSAL_V1_PREFLIGHT_HISTORY_CHECK": false,
+      "QUALITY102_CAUSAL_V1_SYMBOLS": [
+        "SUIUSDT",
+        "SEIUSDT",
+        "APTUSDT",
+        "ARBUSDT",
+        "OPUSDT",
+        "TIAUSDT",
+        "JUPUSDT",
+        "ENAUSDT",
+        "ONDOUSDT",
+        "FILUSDT",
+        "RENDERUSDT",
+        "TAOUSDT",
+        "TRXUSDT"
+      ],
+      "FET_BRK48_LIVE_ENABLED": true,
+      "DISDEX_V52_ASTER_ONLY_RUNNER_MODE": "live",
+      "CRYPTO_GROSS_CAP": 3.0,
+      "STOCK_GROSS_CAP": 4.0,
+      "TOTAL_GROSS_CAP": 4.25,
+      "DISDEX_SHARED_CRYPTO_MAX_DAILY_LOSS_PCT": 7.5,
+      "DISDEX_KILL_SWITCH_RECOVERY_GRACE_MS": 600000
+    },
+    "source_config_paths": {
+      "V12": "config/v12X1AllRuntime.ts",
+      "PENGU": "config/penguDualLsV2Runtime.ts",
+      "PENGU_RECOVERY": "config/penguRecoveryV8.ts",
+      "Q102_CAUSAL_V4": "config/disdexQuality102CausalV4Model.ts",
+      "FET": "config/fetBrk48Runtime.ts",
+      "V52": "config/v52V50Runtime.json",
+      "SHARED_RISK": "config/integratedProductionRiskPolicy.ts",
+      "MARGIN_GUARD": "scripts/disdex_v96_v52_margin_risk_policy.py"
+    },
+    "effective_shared_policy": {
+      "v12_base_aggregate_gross": 2.0,
+      "v12_dynamic_aggregate_gross_cap": 2.0,
+      "v12_per_position_gross_cap": 1.0,
+      "v12_maximum_positions": 3,
+      "pengu_maximum_gross": 1.0,
+      "q102_causal_v4_maximum_gross": 3.0,
+      "crypto_gross_cap": 3.0,
+      "stock_gross_cap": 4.0,
+      "combined_gross_cap": 4.25,
+      "hard_crypto_gross_cap": 5.0,
+      "hard_total_gross_cap": 8.0,
+      "crypto_daily_loss_pct": 7.5,
+      "stock_daily_loss_pct": 3.5,
+      "margin_guard": {
+        "warning_mmr_pct": 50.0,
+        "reduce_mmr_pct": 65.0,
+        "critical_mmr_pct": 75.0,
+        "warning_liquidation_buffer_pct": 12.0,
+        "reduce_liquidation_buffer_pct": 8.0,
+        "critical_liquidation_buffer_pct": 5.0,
+        "recovery_mmr_below_pct": 45.0,
+        "recovery_liquidation_buffer_above_pct": 15.0
+      }
+    }
+  },
+  "extraction_utc": "2026-09-26T15:42:20Z",
+  "secrets_excluded": true
+}
