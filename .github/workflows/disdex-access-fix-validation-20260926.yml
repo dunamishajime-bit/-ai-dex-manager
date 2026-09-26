@@ -1,0 +1,79 @@
+name: DisDex access fix tests and protected retention dry-run
+on:
+  issue_comment:
+    types: [created]
+permissions:
+  contents: read
+jobs:
+  audit:
+    if: >-
+      github.event.issue.number == 132 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == 'DISDEX_ACCESS_FIX_VALIDATE_20260926'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Configure approved VPS read-only transport
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Checkout candidate fix for isolated root integration test
+        uses: actions/checkout@v4
+        with:
+          ref: fix/20260926-state-permissions-gate-study
+      - name: Test the candidate fail-closed writer without live state access
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          bash -n scripts/ops/root/disdex-v12-kill-switch-auto-repair
+          sudo useradd -M -r deploy 2>/dev/null || true
+          sudo bash tests/test-v12-auto-repair-kill-ownership.sh
+      - name: Check actual installed recovery and protected retention dry-run
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -p "${SSH_PORT:-22}" "root@$SSH_HOST" 'python3 -' <<'PY'
+          import os,pathlib,subprocess,json,hashlib
+          release=pathlib.Path("/home/deploy/disdex-trading/current").resolve()
+          script=release/"scripts/ops/root/disdex-v12-kill-switch-auto-repair"
+          installed=pathlib.Path("/usr/local/sbin/disdex-v12-kill-switch-auto-repair")
+          print("ROOT_HELPER_INSTALLED="+json.dumps({"exists":installed.exists(),"symlink":installed.is_symlink(),"resolves":str(installed.resolve(strict=False)),"identicalToRelease":installed.is_file() and script.is_file() and installed.read_bytes()==script.read_bytes()}))
+          for unit in ["disdex-vps-retention.timer","disdex-vps-retention.service"]:
+           p=subprocess.run(["systemctl","show",unit,"-p","ActiveState","-p","SubState","-p","Result","-p","LastTriggerUSec","-p","NextElapseUSecRealtime"],capture_output=True,text=True,timeout=8)
+           print("RETENTION_UNIT="+json.dumps({"unit":unit,"rc":p.returncode,"props":p.stdout.strip().replace("\n",";")}))
+          cleanup=pathlib.Path("/usr/local/sbin/disdex-vps-retention-cleanup")
+          print("RETENTION_INSTALLED="+json.dumps({"exists":cleanup.is_file(),"matchesRelease":cleanup.is_file() and (release/"scripts/ops/root/disdex-vps-retention-cleanup").read_bytes()==cleanup.read_bytes()}))
+          if cleanup.is_file():
+           try:
+            p=subprocess.run([str(cleanup),"--dry-run"],capture_output=True,text=True,timeout=250)
+            obj=None
+            for line in reversed(p.stdout.splitlines()):
+             try:
+              q=json.loads(line)
+              if isinstance(q,dict) and q.get("status")=="DISDEX_VPS_RETENTION_CLEANUP_PASS":
+               obj=q;break
+             except Exception:pass
+            if obj:
+             print("PROTECTED_RETENTION_DRY_RUN="+json.dumps({"returncode":p.returncode,"dryRun":obj.get("dryRun"),"deletedCount":len(obj.get("deletedPaths",[])),"candidatePaths":obj.get("deletedPaths",[])[:15],"protectedCount":len(obj.get("protectedPaths",[])),"unverified":obj.get("unverifiedProtected",[])[:8],"estimatedReclaimedGB":round((obj.get("bytesReclaimed") or 0)/1e9,3),"usedPct":obj.get("filesystemUsedPct"),"promotionLockBusy":obj.get("promotionLockBusy"),"protectedPathsTouched":obj.get("protectedPathsTouched"),"currentReleaseDeleted":obj.get("currentReleaseDeleted"),"runtimeStateDeleted":obj.get("runtimeStateDeleted")}))
+            else:print("PROTECTED_RETENTION_DRY_RUN="+json.dumps({"returncode":p.returncode,"parse":"NO_JSON","stderrCategory":"TIMEOUT_OR_CONFIG"}))
+           except Exception as exc:print("PROTECTED_RETENTION_DRY_RUN="+json.dumps({"error":type(exc).__name__}))
+          print("VPS_PROBE_TRADING_MUTATION=0")
+          PY
