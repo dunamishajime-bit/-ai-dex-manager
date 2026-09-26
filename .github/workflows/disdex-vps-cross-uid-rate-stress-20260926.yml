@@ -1,0 +1,62 @@
+name: DisDex live-VPS isolated root/deploy shared-budget stress
+on:
+  issue_comment:
+    types: [created]
+permissions:
+  contents: read
+jobs:
+  audit:
+    if: >-
+      github.event.issue.number == 132 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == 'DISDEX_VPS_CROSS_UID_RATE_STRESS_20260926'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Configure approved VPS read-only transport
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Checkout exact approved-production source test
+        uses: actions/checkout@v4
+        with:
+          ref: 6d5131bf6974c890443b904a44018cf79fdb16cd
+      - name: Compile isolated fixture
+        run: python3 -m py_compile scripts/ops/root/disdex-crossuser-rate-lease-test-20260926.py
+      - name: Transfer isolated fixture to VPS and test against real installed production code
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          digest="$(sha256sum scripts/ops/root/disdex-crossuser-rate-lease-test-20260926.py | awk '{print $1}')"
+          target="/root/disdex-crossuid-${GITHUB_RUN_ID}.py"
+          scp -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -P "${SSH_PORT:-22}" \
+            scripts/ops/root/disdex-crossuser-rate-lease-test-20260926.py "root@$SSH_HOST:$target"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -p "${SSH_PORT:-22}" "root@$SSH_HOST" \
+            "bash -s -- '$target' '$digest'" <<'BASH'
+          set -Eeuo pipefail
+          source="$1"; expected="$2"
+          trap 'rm -f -- "$source"' EXIT
+          [[ ! -L "$source" && "$(sha256sum "$source" | awk '{print $1}')" == "$expected" ]] || { echo 'FIXTURE_SHA_MISMATCH'; exit 4; }
+          python3 -u "$source"
+          echo "VPS_CROSS_UID_NO_LIVE_BUDGET_MUTATION_INTENDED=TRUE"
+          BASH
