@@ -172,7 +172,7 @@ class SourceAndCalendarTests(unittest.TestCase):
         import hashlib
         from unittest.mock import patch
         primary_urls = []
-        full = b"observation_date,DEXJPUS\\n2025-08-08,147.25\\n2025-08-10,148.5\\n2026-09-01,220\\n"
+        full = b"observation_date,DEXJPUS\n2025-08-08,147.25\n2025-08-10,148.5\n2026-09-01,220\n"
         def sample(url):
             primary_urls.append(url)
             if "?id=DEXJPUS" in url:
@@ -190,10 +190,10 @@ class SourceAndCalendarTests(unittest.TestCase):
         import hashlib
         from unittest.mock import patch
         # The real H10 package has metadata before the Time Period header.
-        package = ("Unit: ,Japanese Yen,Other\\n"
-                   "Time Period,RXI_N.B.JA,RXI_N.B.AL\\n"
-                   "2025-08-08,147.25,0.5\\n"
-                   "2025-08-11,147.80,0.6\\n").encode("utf-8")
+        package = ("Unit: ,Japanese Yen,Other\n"
+                   "Time Period,RXI_N.B.JA,RXI_N.B.AL\n"
+                   "2025-08-08,147.25,0.5\n"
+                   "2025-08-11,147.80,0.6\n").encode("utf-8")
         from research.formal_five_bt import sources
         def only_fed(url):
             if "federalreserve.gov" not in url:
