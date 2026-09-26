@@ -1,0 +1,105 @@
+name: Canonical five-logic generator source provenance read only
+on:
+  push:
+    branches: [research/five-logic-canonical-source-probe-20260926]
+permissions:
+  contents: read
+jobs:
+  provenance:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Configure authorized read only root transport
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          test -n "$SSH_HOST" && test -n "$ROOT_KEY" && test -n "$SSH_KNOWN_HOSTS"
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Fingerprint canonical five-logic source scripts and stored data without writes
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -p "${SSH_PORT:-22}" "root@$SSH_HOST" 'python3 -' <<'PY'
+          import hashlib,json,os,pathlib,re,time
+          starts=[
+            "/home/deploy/disdex-trading/work/v12-winrate-gates-20260923",
+            "/home/deploy/disdex-trading/work/repair-20260918",
+            "/home/deploy/disdex-trading/current",
+            "/home/deploy/ai-dex-manager",
+            "/home/deploy/disdex-trading/research-results",
+            "/home/deploy/disdex-trading/backtests",
+            "/home/deploy/disdex-v12-tool-fc76e3f29f22276b7878f570925d24d47e85538f",
+          ]
+          needles=("final-live-governor-20260922","top3_q102gov030_fet2.25",
+                   "1448665533","FINAL_INTEGRATED_GROSS_LIVE_CONTRACT")
+          extensions={".py",".ts",".tsx",".js",".mjs",".cjs",".md"}
+          skip={".git","node_modules",".next","__pycache__",".venv","venv",".runtime-state",
+                "ui-releases","releases","logs",".cache","dist"}
+          all_hash={}
+          print("SOURCE_PROBE_BEGIN")
+          for start in starts:
+            root=pathlib.Path(start).resolve()
+            if not root.is_dir():
+              print("ROOT_UNAVAILABLE",start);continue
+            print("ROOT",start,"RESOLVED",str(root))
+            visited=0;hits=[];names=[]
+            for here,dirs,files in os.walk(root):
+              rel=pathlib.Path(here).relative_to(root)
+              if len(rel.parts)>=7:dirs[:]=[];continue
+              dirs[:]=sorted(d for d in dirs if d not in skip and not d.startswith(".staging"))
+              for filename in sorted(files):
+                visited+=1
+                p=pathlib.Path(here)/filename
+                if p.suffix not in extensions or p.is_symlink():continue
+                try:
+                  size=p.stat().st_size
+                  if not (0<size<600000):continue
+                  if any(t in filename.lower() for t in ("integrat","governor","backtest","gross")):
+                    if len(names)<36:names.append(str(p))
+                  contents=p.read_text(errors="replace")
+                  matches=[token for token in needles if token in contents]
+                  if matches:
+                    h=hashlib.sha256(p.read_bytes()).hexdigest()
+                    if h not in all_hash:
+                      hits.append({"file":str(p),"sha256":h,"size":size,"anchors":matches})
+                      all_hash[h]=str(p)
+                except (OSError,UnicodeError):pass
+              if visited>50000:
+                print("SCAN_LIMIT_REACHED",start);break
+            print("ROOT_RESULT",json.dumps({"root":start,"filesVisited":visited,"matched":hits[:48],
+                                             "candidateGeneratorNames":names[:36]},ensure_ascii=False))
+          # Data presence and hashed metadata only; no market data or credentials are printed.
+          for base in ("/home/deploy/disdex-trading/work/v12-winrate-gates-20260923/.research-state",
+                       "/home/deploy/disdex-trading/work/v12-winrate-gates-20260923/research-results",
+                       "/home/deploy/disdex-trading/data",
+                       "/home/deploy/disdex-trading/backtests"):
+            p=pathlib.Path(base)
+            if not p.is_dir():continue
+            sample=[]
+            for here,dirs,files in os.walk(p):
+              dirs[:]=[d for d in dirs if d not in skip]
+              if len(pathlib.Path(here).relative_to(p).parts)>5:dirs[:]=[];continue
+              for name in files:
+                q=pathlib.Path(here)/name
+                if q.suffix.lower() in (".parquet",".csv",".jsonl",".feather",".gz") and len(sample)<35:
+                  sample.append({"file":str(q),"bytes":q.stat().st_size})
+              if len(sample)>=35:break
+            print("DATA_SOURCE_CANDIDATES",json.dumps({"root":base,"items":sample}))
+          print("SOURCE_PROBE_COMPLETE TRADING_MUTATION=0")
+          PY
