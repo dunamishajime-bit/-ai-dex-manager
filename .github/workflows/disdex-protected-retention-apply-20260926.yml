@@ -1,0 +1,104 @@
+name: DisDex approved protected VPS retention apply
+on:
+  issue_comment:
+    types: [created]
+permissions:
+  contents: read
+jobs:
+  audit:
+    if: >-
+      github.event.issue.number == 132 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == 'DISDEX_PROTECTED_RETENTION_APPLY_20260926'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Configure approved VPS read-only transport
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Recheck archived stale references and run installed retention's own dry-run and apply with promotion lock
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -o ServerAliveInterval=20 -o ServerAliveCountMax=8 \
+            -p "${SSH_PORT:-22}" "root@$SSH_HOST" 'python3 -u -' <<'PY'
+          import os,sys,subprocess,shutil,json,pathlib,re,stat,fcntl,time,importlib.util,importlib.machinery,hashlib,tarfile
+          root=pathlib.Path("/home/deploy/disdex-trading")
+          current=root/"current";expected="e1b58060d6263a3af7ced51bec854d3e211d2f35"
+          arch=pathlib.Path("/root/disdex-release-binding-archives")
+          unitNames=("disdex-v12-x1-all","disdex-pengu-dual-ls-v2","disdex-quality102-causal-v1","disdex-fet-brk48","disdex-v52-aster-only","disdex-shared-crypto-risk","disdex-v12-v52-margin-guard")
+          def gates():
+           assert current.resolve().name==expected,"BLOCK_CURRENT_SHA_CHANGED"
+           assert (current.resolve()/".disdex-release-sha").read_text().strip()==expected,"BLOCK_CURRENT_RELEASE_MARKER"
+           assert json.loads(pathlib.Path("/var/lib/disdex/shared/kill-switch.json").read_text()).get("active") is False,"BLOCK_KILL_ACTIVE"
+           assert subprocess.run(["runuser","-u","deploy","--","test","-r","/var/lib/disdex/shared/kill-switch.json"]).returncode==0,"BLOCK_SHARED_KILL_PERM"
+           states={}
+           for unit in unitNames:
+            name=unit+"@"+expected+".service"
+            p=subprocess.run(["systemctl","show",name,"-p","ActiveState","-p","NRestarts","-p","MainPID"],capture_output=True,text=True,timeout=8)
+            props=dict(line.split("=",1) for line in p.stdout.splitlines() if "=" in line)
+            assert p.returncode==0 and props.get("ActiveState")=="active" and props.get("NRestarts")=="0" and int(props.get("MainPID","0"))>0,"BLOCK_UNIT_"+unit
+            states[unit]=props["MainPID"]
+           return states
+          beforeUnits=gates()
+          backups=sorted(arch.glob("bindings-*.tar.gz"),key=lambda p:p.stat().st_mtime,reverse=True) if arch.is_dir() else []
+          assert backups and time.time()-backups[0].stat().st_mtime<21600,"BLOCK_ARCHIVED_BINDINGS_NOT_CONFIRMED"
+          with tarfile.open(backups[0],"r:gz") as backup:
+           manifest=json.loads(backup.extractfile("MANIFEST.json").read())
+          assert manifest["current"]==expected and len(manifest["files"])>=100,"BLOCK_ARCHIVE_MANIFEST_INVALID"
+          helper=pathlib.Path("/usr/local/sbin/disdex-vps-retention-cleanup")
+          repoSource=current.resolve()/"scripts/ops/root/disdex-vps-retention-cleanup"
+          assert helper.is_file() and not helper.is_symlink() and helper.read_bytes()==repoSource.read_bytes(),"BLOCK_RETENTION_HELPER_SOURCE_DRIFT"
+          loader=importlib.machinery.SourceFileLoader("disdex_retention_approved",str(helper))
+          spec=importlib.util.spec_from_loader(loader.name,loader)
+          module=importlib.util.module_from_spec(spec);sys.modules[spec.name]=module;loader.exec_module(module)
+          lockPath=pathlib.Path("/home/deploy/disdex-ops/promotion.lock")
+          freeBefore=shutil.disk_usage("/").free
+          with lockPath.open("a+") as lock:
+           fcntl.flock(lock.fileno(),fcntl.LOCK_EX|fcntl.LOCK_NB)
+           gates()
+           dry=module.run_cleanup(module.CleanupPaths(),dry_run=True,acquire_lock=False)
+           assert not dry.promotion_lock_busy,"BLOCK_PROMOTION_BUSY"
+           currentPath=str(current.resolve())
+           protected=set(dry.protected_paths)
+           assert currentPath in protected,"BLOCK_CURRENT_NOT_PINNED"
+           assert currentPath not in dry.deleted_paths,"BLOCK_CURRENT_CANDIDATE"
+           assert not (set(dry.deleted_paths)&protected),"BLOCK_PROTECTED_CANDIDATE"
+           for path in dry.deleted_paths:
+            p=pathlib.Path(path)
+            assert not p.is_symlink(),"BLOCK_SYMLINK_DELETE"
+            if p.is_dir() and ("/releases/" in path or "/ui-releases/" in path):
+             assert p.resolve().parent in {root/"releases",root/"ui-releases"},"BLOCK_DELETE_OUTSIDE_RELEASE_ROOT"
+           print("RETENTION_SAFETY_DRYRUN="+json.dumps({"candidateCount":len(dry.deleted_paths),"candidateReleases":len([x for x in dry.deleted_paths if "/releases/" in x]),"candidateUiReleases":len([x for x in dry.deleted_paths if "/ui-releases/" in x]),"estimatedGB":round(dry.bytes_reclaimed/1e9,2),"unverifiedCount":len(dry.unverified_protected),"protected":len(protected),"freeGBBefore":round(freeBefore/1e9,3)}),flush=True)
+           if not dry.deleted_paths:
+            print("RETENTION_STATUS=NO_SAFE_CANDIDATES",flush=True)
+           else:
+            applied=module.run_cleanup(module.CleanupPaths(),dry_run=False,acquire_lock=False)
+            gates()
+            assert applied.deleted_paths and not (set(applied.deleted_paths)&protected),"APPLY_PROTECTED_GUARD"
+            assert current.resolve().name==expected,"APPLY_CHANGED_CURRENT"
+            print("RETENTION_APPLIED="+json.dumps({"deletedCount":len(applied.deleted_paths),"deletedReleases":len([x for x in applied.deleted_paths if "/releases/" in x]),"deletedUiReleases":len([x for x in applied.deleted_paths if "/ui-releases/" in x]),"reclaimedGBReported":round(applied.bytes_reclaimed/1e9,3),"unverifiedCount":len(applied.unverified_protected),"protectedCount":len(applied.protected_paths),"archive":str(backups[0]),"ordersSent":0,"runnersRestartedByWorkflow":False}),flush=True)
+          freeAfter=shutil.disk_usage("/").free
+          afterUnits=gates()
+          print("DISK_RETENTION_POSTCHECK="+json.dumps({"beforeFreeGB":round(freeBefore/1e9,3),"afterFreeGB":round(freeAfter/1e9,3),"netFreedGB":round((freeAfter-freeBefore)/1e9,3),"remainingReleaseDirs":len([p for p in (root/"releases").iterdir() if p.is_dir() and not p.is_symlink()]),"sameRunnerPids":beforeUnits==afterUnits,"currentSha":current.resolve().name,"killSwitchActive":False,"ordersSent":0,"positionsChanged":0}),flush=True)
+          
+          PY
