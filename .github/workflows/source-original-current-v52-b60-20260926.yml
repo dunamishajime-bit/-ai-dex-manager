@@ -1,0 +1,56 @@
+name: Research original V50 current B60 OHLC candidate audit
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  native-source:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: e1b58060d6263a3af7ced51bec854d3e211d2f35
+          path: .live
+      - uses: actions/checkout@v4
+        with:
+          ref: 9f51d5876fd7c7924b3c99dc1934336bdd832852
+          path: .original-repo
+      - uses: actions/checkout@v4
+        with:
+          ref: 04c1a369223bd27e9e42bc93604b3777b9230d92
+          path: .original-repo/.stock-research
+      - uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .original-repo/.stock-research/.v11
+      - uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .original-repo/.stock-research/.v13
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: production-parity-five-bt-verified-independent-sources-20260926
+          path: .verified
+          github-token: ${{ github.token }}
+          repository: dunamishajime-bit/-ai-dex-manager
+          run-id: 36201479367
+      - name: Replay original stock generator only
+        env:
+          PYTHONPATH: .original-repo/scripts:.original-repo/.stock-research/scripts
+        run: |
+          set -Eeuo pipefail
+          mkdir -p .live/scripts/research current-v50-evidence
+          cp scripts/research/source_original_v50_b60_aster_yahoo_20260926.py .live/scripts/research/
+          cd .live
+          PYTHONPATH="$GITHUB_WORKSPACE/.original-repo/scripts:$GITHUB_WORKSPACE/.original-repo/.stock-research/scripts" python3 scripts/research/source_original_v50_b60_aster_yahoo_20260926.py --source "$GITHUB_WORKSPACE/.verified/independent-sources.json.gz" --output "$GITHUB_WORKSPACE/current-v50-evidence"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: original-stock-current-B60-price-proxy-20260926
+          path: current-v50-evidence/
+          retention-days: 90
