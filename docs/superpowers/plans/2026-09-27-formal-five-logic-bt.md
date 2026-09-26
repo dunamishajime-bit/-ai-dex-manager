@@ -162,5 +162,5 @@
 
 - [x] Verify spec acceptance criteria against commands, hashes, source coverage, and run outputs; failed/unverified BT requirements are documented in the local report and progress ledger.
 - [x] Run `python -m unittest discover -s tests/formal_five_bt -v`, runtime-bridge parity tests, and Python compile checks; record real outputs.
-- [ ] Run `git diff --check`, scan staged files for secrets and prohibited data artifacts, and review the full branch diff.
-- [ ] Commit completed work on `codex/formal-five-logic-bt-20260926`; push only rights-safe engine/test/methodology artifacts to the authorized GitHub remote. Keep local data-bearing outputs out of the public push unless redistribution rights are verified.
+- [x] Run `git diff --check`, scan staged files for secrets and prohibited data artifacts, and review the full branch diff.
+- [x] Commit completed work on `codex/formal-five-logic-bt-20260926`; push only rights-safe engine/test/methodology artifacts to the authorized GitHub remote. Keep local data-bearing outputs out of the public push unless redistribution rights are verified.
