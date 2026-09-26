@@ -4,6 +4,7 @@ import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { registerHooks, stripTypeScriptTypes } from "node:module";
 import readline from "node:readline";
+import { indexQ102History, q102HistoryAt } from "./q102_window.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO = path.resolve(HERE, "..", "..", "..");
@@ -193,32 +194,41 @@ if (process.argv.includes("--list")) {
         const startMs = Number(request.startMs);
         const endMs = Number(request.endMs);
         if (!candlesBySymbol || !Array.isArray(highVolSymbols) || !Array.isArray(symbols) || !Number.isFinite(startMs) || !Number.isFinite(endMs) || endMs < startMs) throw new Error("Q102_SERIES_INPUT_INVALID");
-        const indexBySymbol = Object.fromEntries(Object.entries(candlesBySymbol).map(([symbol, rows]) => [symbol, 0]));
+        const indexed = indexQ102History(candlesBySymbol);
         const results = [];
-        for (let decisionTs = Math.ceil(startMs / 3_600_000) * 3_600_000; decisionTs <= endMs; decisionTs += 3_600_000) {
-          const asofCandles = {};
-          const entryOpenBySymbol = {};
-          for (const [symbol, rows] of Object.entries(candlesBySymbol)) {
-            let index = indexBySymbol[symbol];
-            while (index < rows.length && rows[index].timestampMs + 3_600_000 <= decisionTs) index += 1;
-            indexBySymbol[symbol] = index;
-            let end = index;
-            while (end < rows.length && rows[end].timestampMs < decisionTs) end += 1;
-            asofCandles[symbol] = rows.slice(0, end);
-            if (rows[index]?.timestampMs === decisionTs) entryOpenBySymbol[symbol] = { timestampMs: decisionTs, open: rows[index].open };
+        const eligibleRequested = new Set(symbols.map(s => String(s).toUpperCase()));
+        const highVolRequested = new Set(highVolSymbols.map(s => String(s).toUpperCase()));
+        for (let decisionTs = Math.ceil(startMs / 3_600_000) * 3_600_000;
+             decisionTs <= endMs; decisionTs += 3_600_000) {
+          const availability = q102HistoryAt(indexed,decisionTs);
+          const eligible = availability.eligibleSymbols.filter(symbol => eligibleRequested.has(symbol));
+          const validHighVol = eligible.filter(symbol => highVolRequested.has(symbol));
+          const exclusions = Object.fromEntries(Object.entries(availability.exclusions)
+            .filter(([symbol]) => eligibleRequested.has(symbol) || symbol === "BTCUSDT"));
+          if (!availability.ready || validHighVol.length === 0) {
+            results.push({ decisionTs, error:availability.exclusions.BTCUSDT ?
+              "Q102_BTC_181D_SOURCE_WINDOW_UNVERIFIED" :
+              validHighVol.length===0?"Q102_HIGH_VOL_181D_SOURCE_WINDOW_UNVERIFIED":
+              "Q102_NO_ELIGIBLE_SOURCE_COMPLETE_SYMBOL",
+              exclusions,eligibleSymbols:eligible,minimumHistoryHours:availability.minimumHistoryHours });
+            continue;
           }
-          const history = { candlesBySymbol: asofCandles, entryOpenBySymbol };
+          const history = {
+            candlesBySymbol:Object.fromEntries(Object.entries(availability.history.candlesBySymbol)
+              .filter(([symbol]) => symbol==="BTCUSDT" || eligibleRequested.has(symbol))),
+            entryOpenBySymbol:Object.fromEntries(Object.entries(availability.history.entryOpenBySymbol)
+              .filter(([symbol]) => symbol==="BTCUSDT" || eligibleRequested.has(symbol))),
+          };
           try {
             const snapshot = loaded.q102Observability.buildQuality102CausalV4DecisionSnapshot({
-              history,
-              decisionTs,
-              highVolSymbols,
-              symbols,
+              history, decisionTs, highVolSymbols: validHighVol, symbols: eligible,
               runtimeCommitSha: manifest.runtime_sha,
             });
-            results.push({ decisionTs, snapshot });
-          } catch (error) {
-            results.push({ decisionTs, error: error instanceof Error ? error.message.split("\n")[0] : "Q102_EVALUATION_FAILED" });
+            results.push({decisionTs,snapshot,exclusions,eligibleSymbols:eligible,
+              historicalUniverseSubset:eligible.length!==eligibleRequested.size});
+          }catch(error){
+            results.push({decisionTs,error:error instanceof Error?error.message.split("\n")[0]:"Q102_EVALUATION_FAILED",
+              exclusions,eligibleSymbols:eligible,historicalUniverseSubset:eligible.length!==eligibleRequested.size});
           }
         }
         response = { ok: true, result: jsonSafe(results) };

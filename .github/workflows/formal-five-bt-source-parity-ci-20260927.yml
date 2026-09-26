@@ -67,6 +67,7 @@ jobs:
           set -Eeuo pipefail
           python -m pip install --disable-pip-version-check -r research/formal_five_bt/requirements.txt
           npm ci --no-audit --no-fund
+          node --test tests/formal_five_bt/q102_window.test.mjs
           python -m unittest discover -s tests/formal_five_bt -v
           echo FORMAL_FIVE_BT_TESTS_PASS
       - name: Confirm no raw market data or trading changes were introduced
