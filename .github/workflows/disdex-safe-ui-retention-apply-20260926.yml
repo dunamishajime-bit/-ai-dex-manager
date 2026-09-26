@@ -1,0 +1,106 @@
+name: DisDex safe UI release retention after build
+on:
+  issue_comment:
+    types: [created]
+permissions:
+  contents: read
+jobs:
+  audit:
+    if: >-
+      github.event.issue.number == 132 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == 'DISDEX_SAFE_UI_RETENTION_APPLY_20260926'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Configure approved VPS read-only transport
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Check UI build is finished and apply only installed source-backed UI retention if eligible
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -o ServerAliveInterval=20 -o ServerAliveCountMax=8 \
+            -p "${SSH_PORT:-22}" "root@$SSH_HOST" 'python3 -u -' <<'PY'
+          import subprocess,os,pathlib,json,time,shutil
+          ROOT=pathlib.Path("/home/deploy/disdex-trading/ui-releases")
+          currentTrading=pathlib.Path("/home/deploy/disdex-trading/current").resolve()
+          sha="e1b58060d6263a3af7ced51bec854d3e211d2f35"
+          assert currentTrading.name==sha,"BLOCK_TRADING_RELEASE_CHANGED"
+          helper=pathlib.Path("/usr/local/sbin/disdex-ui-retention-cleanup")
+          source=currentTrading/"scripts/ops/root/disdex-ui-retention-cleanup"
+          assert helper.is_file() and not helper.is_symlink() and helper.read_bytes()==source.read_bytes(),"BLOCK_HELPER_SOURCE_DRIFT"
+          def sysprops(service):
+           p=subprocess.run(["systemctl","show",service,"-p","ActiveState","-p","MainPID","-p","WorkingDirectory","-p","NRestarts"],capture_output=True,text=True,timeout=10)
+           assert p.returncode==0,"SYSTEMCTL_QUERY_FAILED"
+           return dict(x.split("=",1) for x in p.stdout.splitlines() if "=" in x)
+          uBefore=sysprops("ai-dex-manager-ui.service")
+          assert uBefore.get("ActiveState")=="active" and int(uBefore.get("MainPID","0"))>0,"BLOCK_UI_NOT_ACTIVE"
+          tNames=["disdex-v12-x1-all","disdex-pengu-dual-ls-v2","disdex-quality102-causal-v1","disdex-fet-brk48","disdex-v52-aster-only"]
+          tradingBefore={}
+          for base in tNames:
+           unit=base+"@"+sha+".service"
+           x=sysprops(unit)
+           assert x.get("ActiveState")=="active" and int(x.get("MainPID","0"))>0,"BLOCK_TRADING_UNIT_"+unit
+           tradingBefore[unit]=x["MainPID"]
+          proc=subprocess.run(["ps","-eo","pid=,args="],capture_output=True,text=True,timeout=8).stdout
+          builds=[]
+          for line in proc.splitlines():
+           try:
+            pid,args=line.strip().split(None,1)
+            if "next build" in args and "ui-releases" in args:builds.append({"pid":pid,"cmd":args[:150]})
+           except Exception:pass
+          if builds:
+           print("UI_RETENTION_SKIP_ACTIVE_BUILD="+json.dumps({"builds":builds,"freeGB":round(shutil.disk_usage("/").free/1e9,3)}),flush=True)
+          else:
+           freeBefore=shutil.disk_usage("/").free
+           def retention(mode):
+            p=subprocess.run([str(helper),mode],capture_output=True,text=True,timeout=840)
+            if p.returncode!=0:raise RuntimeError("UI_RETENTION_HELPER_FAILED:"+mode+":"+p.stderr[-180:])
+            rows=[json.loads(l) for l in p.stdout.splitlines() if l.strip().startswith("{")]
+            assert rows and rows[-1].get("status")=="DISDEX_UI_RETENTION_PASS","UI_RETENTION_BAD_REPORT"
+            return rows[-1]
+           dry=retention("--dry-run")
+           assert dry.get("tradingReleaseDeleted")==False and dry.get("runtimeStateDeleted")==False,"UI_DRYRUN_MUTATION_POLICY"
+           currentUi=dry.get("currentRelease")
+           assert pathlib.Path(currentUi).resolve()==pathlib.Path(uBefore["WorkingDirectory"]).resolve(),"BLOCK_UI_RELEASE_DRIFT"
+           c=dry.get("deleteCandidates",[])
+           recent=[x["path"] for x in c if time.time()-pathlib.Path(x["path"]).stat().st_mtime<86400]
+           for item in c:
+            p=pathlib.Path(item["path"]);assert p.parent==ROOT and p!=pathlib.Path(currentUi) and not p.is_symlink(),"BLOCK_UI_CANDIDATE_PATH"
+           print("UI_RETENTION_SAFETY_DRYRUN="+json.dumps({"eligible":len(c),"estimatedGB":round(dry.get("bytesReclaimed",0)/1e9,3),"protected":len(dry.get("protected",[])),"unverified":len(dry.get("unverifiedProtected",[])),"recentCandidates":recent[:6],"pressure":dry.get("underPressure"),"uiCurrent":currentUi,"freeGBBefore":round(freeBefore/1e9,3)}),flush=True)
+           if recent:
+            print("UI_RETENTION_SKIP_RECENT_DEPLOYMENT_CANDIDATES=TRUE",flush=True)
+           elif c:
+            assert currentTrading.name==sha,"BLOCK_TRADING_CHANGED_BEFORE_APPLY"
+            assert sysprops("ai-dex-manager-ui.service")["MainPID"]==uBefore["MainPID"],"BLOCK_UI_SERVICE_RESTARTED_BEFORE_APPLY"
+            applied=retention("--apply")
+            uAfter=sysprops("ai-dex-manager-ui.service")
+            tradingAfter={unit:sysprops(unit)["MainPID"] for unit in tradingBefore}
+            assert uAfter["MainPID"]==uBefore["MainPID"] and tradingAfter==tradingBefore,"POSTCHECK_DAEMON_DRIFT"
+            assert applied["currentRelease"]==currentUi and not set(applied.get("deletedReleases",[]))&set(applied.get("protectedReleases",[])),"POSTCHECK_PROTECTED_UI"
+            freeAfter=shutil.disk_usage("/").free
+            print("UI_RETENTION_APPLIED="+json.dumps({"deletedReleaseDirs":len(applied.get("deletedReleases",[])),"reportedGB":round(applied.get("bytesReclaimed",0)/1e9,3),"beforeFreeGB":round(freeBefore/1e9,3),"afterFreeGB":round(freeAfter/1e9,3),"netFreeGB":round((freeAfter-freeBefore)/1e9,3),"tradingPidsSame":True,"uiPidSame":True,"ordersSent":0,"activeUIReleaseProtected":True}),flush=True)
+           else:print("UI_RETENTION_NO_ELIGIBLE_RELEASES="+json.dumps({"freeGB":round(freeBefore/1e9,3)}),flush=True)
+          print("UI_RETENTION_TRADING_MUTATION=0",flush=True)
+          
+          PY
