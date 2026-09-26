@@ -6,6 +6,7 @@ on:
     paths:
       - 'scripts/research/canonical_integrated_bt/**'
       - 'tests/test_canonical_integrated_bt.py'
+      - 'tests/test_canonical_pengusix_sources_20260926.py'
       - '.github/workflows/canonical-integrated-bt-engine-20260924.yml'
   workflow_dispatch:
 
@@ -23,6 +24,8 @@ jobs:
           python-version: '3.12'
       - name: Execute deterministic kernel contract tests
         run: python -m unittest discover -s tests -p test_canonical_integrated_bt.py -v
+      - name: Verify six sourced Gross1 PENGU variants are standalone and the original formal anchor is still evidence-blocked
+        run: python -m unittest discover -s tests -p test_canonical_pengusix_sources_20260926.py -v
       - name: Audit missing original formal anchor evidence (failure expected)
         shell: bash
         run: |
