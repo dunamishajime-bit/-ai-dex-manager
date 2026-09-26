@@ -110,7 +110,7 @@ async function main(){
         const start=symbolBars[i+1].open;
         const end=symbolBars[i+HOLD_BARS].close;
         if(!(start>0&&end>0))throw Error("INVALID_FORWARD_PRICE");
-        const signedNet=(candidate.side==="LONG" ? end/start-1 : start/end-1)-ROUND_TRIP_COST_PCT;
+        const signedNet=(candidate.side==="LONG" ? end/start-1 : 1-end/start)-ROUND_TRIP_COST_PCT;
         run.net24hProxy.push(signedNet);
         run.returnByKey.set(name,signedNet);
       }
@@ -146,7 +146,7 @@ async function main(){
     windows,commonH2Bars:common.size,
     frozenGateExactParity:true,hcGrossMultiplierUnchanged:1.75,
     feeProxyRoundTrip:ROUND_TRIP_COST_PCT,
-    caveat:"Overlapping signed 24h forward proxies are NOT realized trade PnL, WR, PF, DD, stop-aware fills or investable performance.",
+    caveat:"Overlapping entry-notional signed 24h forward proxies are NOT realized trade PnL, WR, PF, DD, stop-aware fills or investable performance.",
     results,safety:{ordersSent:0,liveChanged:false,productionChanged:false},
   };
   writeFileSync(process.env.GATE_RESEARCH_OUT||"v12-short-gate-sensitivity-20260926.json",JSON.stringify(artifact,null,2)+"\n");
