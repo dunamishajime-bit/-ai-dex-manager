@@ -51,6 +51,7 @@ jobs:
           set -Eeuo pipefail
           python -m pip install --disable-pip-version-check --no-cache-dir -r research/formal_five_bt/requirements.txt
           npm ci --no-audit --no-fund
+          node --test tests/formal_five_bt/q102_window.test.mjs
           python -m unittest discover -s tests/formal_five_bt -v 2>&1 | tail -n 12
       - name: Public Aster market-data endpoint and FRED source sanity (no secrets)
         shell: bash
@@ -103,6 +104,59 @@ jobs:
             "fx_observations":m.get("fred",{}).get("observations")}
           print("FIVE_BT_ACQUIRED",json.dumps(report,sort_keys=True))
           PY
+      - name: Preserve complete new Aster dataset in root-owned private VPS research archive
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+          SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -Eeuo pipefail
+          [[ -n "$SSH_HOST" && -n "$ROOT_KEY" && -n "$SSH_KNOWN_HOSTS" ]]
+          source="$RUNNER_TEMP/formal-five-bt/input"
+          test -f "$source/acquisition-manifest.json"
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          p=Path(os.environ["RUNNER_TEMP"])/"formal-five-bt/input/acquisition-manifest.json"
+          j=json.loads(p.read_text())
+          rows=j["venues"]["aster"]["klines"]
+          assert j["runtime_sha"]=="a09ea45ca3cbd72100f9eb0eaae499039c40b6a0"
+          assert sum(x.get("status")=="ACQUIRED" for x in rows.values())>=25
+          print("FIVE_BT_MINIMUM_SOURCE_COVERAGE="+str(len(rows)))
+          PY
+          tar --use-compress-program='gzip -3' -cf "$RUNNER_TEMP/five-bt-a09-input.tgz" -C "$RUNNER_TEMP/formal-five-bt" input
+          bytes="$(stat -c %s "$RUNNER_TEMP/five-bt-a09-input.tgz")"
+          [[ "$bytes" -le 800000000 ]] || { echo "PRIVATE_ARCHIVE_EXCEEDS_DISK_GUARD_BYTES=$bytes"; exit 11; }
+          checksum="$(sha256sum "$RUNNER_TEMP/five-bt-a09-input.tgz" | awk '{print $1}')"
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k):return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+          port="${SSH_PORT:-22}"
+          remote_dir="/var/lib/disdex/research-bt-formal"
+          remote_file="$remote_dir/a09-new-data-$GITHUB_RUN_ID.tgz"
+          ssh -T -i "$HOME/.ssh/id_root" -o BatchMode=yes -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -p "$port" "root@$SSH_HOST" \
+            "set -Eeuo pipefail; [[ \"\$(tr -d '[:space:]' < /home/deploy/disdex-trading/current/.disdex-release-sha)\" == 'a09ea45ca3cbd72100f9eb0eaae499039c40b6a0' ]]; install -d -o root -g root -m 0700 '$remote_dir'; free=\$(df -Pk '$remote_dir' | awk 'NR==2 {print \$4}'); [[ \$free -gt 1700000 ]]; test ! -e '$remote_file'; echo PRIVATE_BT_STORAGE_PREFLIGHT_OK"
+          scp -i "$HOME/.ssh/id_root" -o BatchMode=yes -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -P "$port" "$RUNNER_TEMP/five-bt-a09-input.tgz" "root@$SSH_HOST:$remote_file"
+          ssh -T -i "$HOME/.ssh/id_root" -o BatchMode=yes -o IdentitiesOnly=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -p "$port" "root@$SSH_HOST" \
+            "set -Eeuo pipefail; chmod 0600 '$remote_file'; [[ \"\$(sha256sum '$remote_file' | awk '{print \$1}')\" == '$checksum' ]]; echo PRIVATE_NEW_ASTER_ARCHIVE_VERIFIED_SHA256='$checksum'; echo ARCHIVE_BYTES='$bytes'; echo TRADING_MUTATION=0"
+          echo "PRIVATE_RESEARCH_DATA_SAVED=YES"
+          # The dataset remains private on the user's VPS; this public repo and
+          # all public Actions artifacts expose only integrity/coverage counts.
       - name: Generate exact frozen production V12 PENGU FET signal decisions
         shell: bash
         run: |
