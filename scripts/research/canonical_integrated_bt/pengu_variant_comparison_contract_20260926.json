@@ -1,0 +1,213 @@
+{
+  "schema": "pengu-canonical-integrated-variants/v1",
+  "status": "RESEARCH_SOURCE_VERIFIED_STANDALONE_ONLY",
+  "formalBaselineParityVerified": false,
+  "formalFiveStrategyComparisonVerified": false,
+  "basis": {
+    "originalFormalAnchor": {
+      "normalJpy": "740771278.01",
+      "severeJpy": "65669109.00",
+      "source": "docs/implementation/CODEX_CANONICAL_INTEGRATED_BT_ENGINE_HANDOFF_20260924.md",
+      "canonicalRunId": null,
+      "exactStrategyLedgersVerified": false
+    },
+    "allocationSource": {
+      "repository": "dunamishajime-bit/-ai-dex-manager",
+      "commit": "007ed8f9ccd775e5b3bb9e5348b829abc7911503",
+      "path": "docs/research/PENGU_GROSS1_ALL_ORDER_ALLOCATION_20260924.md",
+      "script": "scripts/research_pengu_gross1_all_orders_20260924.ts",
+      "ciRunId": 35920417464,
+      "ciJobConclusion": "success",
+      "strategy": "COMBINED_FILTERED",
+      "standaloneOnly": true
+    },
+    "q60Source": {
+      "branch": "research/pengu-flat1-dd-reduction-20260924",
+      "path": "docs/research/PENGU_FLAT1_DD_REDUCTION_FINAL_20260924.md",
+      "mode": "Q60_DD170_H72",
+      "standaloneOnly": true
+    }
+  },
+  "requiredPortfolioArms": [
+    {
+      "id": "CANONICAL_ORIGINAL",
+      "requiresG0": true,
+      "penguFrom": "formal anchor unchanged",
+      "grossCap": "UNVERIFIED_ANCHOR_SOURCE",
+      "isFormalComparator": true
+    },
+    {
+      "id": "CAP1_ALL_OLD_ORDERS_LINEAR",
+      "requiresG1": true,
+      "penguFrom": "007ed8f9ccd775e5b3bb9e5348b829abc7911503",
+      "variant": "COMBINED_FILTERED",
+      "maxGross": "1.0",
+      "entryGross": "min(1, original_0p85_entry_requested_gross / 0.85)",
+      "q60": false,
+      "realizedDdGovernor": false,
+      "sourceStandaloneOnly": true
+    },
+    {
+      "id": "CAP1_EVERY_ENTRY_FLAT",
+      "requiresG1": true,
+      "penguFrom": "007ed8f9ccd775e5b3bb9e5348b829abc7911503",
+      "variant": "COMBINED_FILTERED",
+      "maxGross": "1.0",
+      "entryGross": "1.0",
+      "q60": false,
+      "realizedDdGovernor": false,
+      "sourceStandaloneOnly": true
+    },
+    {
+      "id": "FLAT1_Q60_DD170_H72",
+      "requiresG1": true,
+      "penguFrom": "research/pengu-flat1-dd-reduction-20260924",
+      "variant": "COMBINED_FILTERED",
+      "maxGross": "1.0",
+      "entryGross": "1.0",
+      "q60": {
+        "hours": 60,
+        "scope": "same-route after actually filled HARD_STOP"
+      },
+      "realizedDdGovernor": {
+        "drawdownPct": "17",
+        "holdNewEntryHours": 72,
+        "basis": "actual portfolio-accepted PENGU closed trades ONLY",
+        "protectiveExitsRemainEnabled": true
+      },
+      "standaloneCounts": {
+        "NORMAL": 69,
+        "SEVERE": 68
+      },
+      "sourceStandaloneOnly": true
+    }
+  ],
+  "additionalAllocationFamilySixReference": [
+    {
+      "id": "CAP1_CURRENT_DESIGN",
+      "v64Low": "0.1875",
+      "recoveryInitial": "0.5",
+      "recoveryPartial": "0.25",
+      "atrFloor": "0.6",
+      "formalNormal": {
+        "returnPct": "746.42",
+        "pf": "4.752",
+        "maxDdPct": "-13.05"
+      },
+      "formalSevere": {
+        "returnPct": "512.93",
+        "pf": "3.786",
+        "maxDdPct": "-14.92"
+      }
+    },
+    {
+      "id": "CAP1_LOW_SCALED",
+      "v64Low": "0.22058823529411765",
+      "recoveryInitial": "0.5",
+      "recoveryPartial": "0.25",
+      "atrFloor": "0.6",
+      "formalNormal": {
+        "returnPct": "748.85",
+        "pf": "4.724",
+        "maxDdPct": "-13.05"
+      },
+      "formalSevere": {
+        "returnPct": "513.98",
+        "pf": "3.766",
+        "maxDdPct": "-14.92"
+      }
+    },
+    {
+      "id": "CAP1_RECOVERY_SCALED",
+      "v64Low": "0.1875",
+      "recoveryInitial": "0.5882352941176471",
+      "recoveryPartial": "0.29411764705882354",
+      "atrFloor": "0.6",
+      "formalNormal": {
+        "returnPct": "817.44",
+        "pf": "4.663",
+        "maxDdPct": "-14.01"
+      },
+      "formalSevere": {
+        "returnPct": "549.28",
+        "pf": "3.703",
+        "maxDdPct": "-16.09"
+      }
+    },
+    {
+      "id": "CAP1_LOW_AND_RECOVERY_SCALED",
+      "v64Low": "0.22058823529411765",
+      "recoveryInitial": "0.5882352941176471",
+      "recoveryPartial": "0.29411764705882354",
+      "atrFloor": "0.6",
+      "formalNormal": {
+        "returnPct": "820.07",
+        "pf": "4.638",
+        "maxDdPct": "-14.01"
+      },
+      "formalSevere": {
+        "returnPct": "550.39",
+        "pf": "3.684",
+        "maxDdPct": "-16.09"
+      }
+    },
+    {
+      "id": "CAP1_ALL_OLD_ORDERS_LINEAR",
+      "v64Low": "0.22058823529411765",
+      "recoveryInitial": "0.5882352941176471",
+      "recoveryPartial": "0.29411764705882354",
+      "atrFloor": "0.7058823529411765",
+      "formalNormal": {
+        "returnPct": "820.07",
+        "pf": "4.638",
+        "maxDdPct": "-14.01"
+      },
+      "formalSevere": {
+        "returnPct": "550.39",
+        "pf": "3.684",
+        "maxDdPct": "-16.09"
+      }
+    },
+    {
+      "id": "CAP1_EVERY_ENTRY_FLAT",
+      "v64Low": "1.0",
+      "recoveryInitial": "1.0",
+      "recoveryPartial": "0.5",
+      "atrFloor": null,
+      "formalNormal": {
+        "returnPct": "1307.91",
+        "pf": "3.979",
+        "maxDdPct": "-20.82"
+      },
+      "formalSevere": {
+        "returnPct": "769.78",
+        "pf": "3.147",
+        "maxDdPct": "-22.60"
+      }
+    }
+  ],
+  "q60StandaloneReference": {
+    "mode": "FLAT1_Q60_DD170_H72",
+    "normal": {
+      "returnPct": "1536.60",
+      "pf": "4.609",
+      "maxDdPct": "-15.05",
+      "trades": 69
+    },
+    "severe": {
+      "returnPct": "843.24",
+      "pf": "3.397",
+      "maxDdPct": "-16.99",
+      "trades": 68
+    }
+  },
+  "hardGates": [
+    "G0 exact original formal anchor code, original Top3/FET/Q102/V52/current PENGU event ledger and manifest",
+    "G1 NORMAL and SEVERE 740771278.01/65669109.00 PF/DD/trade-count parity",
+    "G2 new PENGU standalone 69/68 Q60 DD17/H72 parity",
+    "G3 original LIVE historic portfolio allocator replay with same input market, capital, fees, funding and timeline",
+    "all integrated arms re-run from initial state; standalones must NOT be added to original portfolio results"
+  ],
+  "comparisonStatus": "BLOCKED_MISSING_CANONICAL_SOURCE",
+  "noLiveChanges": true
+}
