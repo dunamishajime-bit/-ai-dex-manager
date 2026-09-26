@@ -1,0 +1,107 @@
+name: HP HYPE ZEC actual VPS runtime and state read-only probe
+on:
+  push:
+    branches: [codex/hp-hype-zec-live-sync-20260927]
+    paths: [.github/workflows/hp-hype-zec-vps-readonly-probe-20260927.yml]
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Configure pinned root SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ -n "$SSH_HOST" && -n "$ROOT_KEY" && -n "$SSH_KNOWN_HOSTS" ]]
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def normalize(k):return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(normalize("ROOT_KEY"))
+          (p/"known_hosts").write_text(normalize("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Inspect exact SHA, sidecars, heartbeat, files, unit name, protection flags
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -p "${SSH_PORT:-22}" "root@$SSH_HOST" 'python3 -' <<'PY'
+          import json,pathlib,subprocess,stat,os,re,time
+          def cmd(*a):
+            p=subprocess.run(a,capture_output=True,text=True,timeout=16)
+            return p.stdout.strip()
+          marker=pathlib.Path("/home/deploy/disdex-trading/current/.disdex-release-sha")
+          current=marker.read_text().strip()
+          ui=cmd("systemctl","show","ai-dex-manager-ui.service","-p","WorkingDirectory","--value")
+          ui_env=cmd("systemctl","show","ai-dex-manager-ui.service","-p","Environment","--value")
+          matched=re.search(r"(?:^|\s)DISDEX_UI_RELEASE_SHA=([a-f0-9]{40})(?:\s|$)",ui_env)
+          print("VPS_SHA",json.dumps({"trading":current,"uiBuild":matched.group(1) if matched else None,
+            "uiWd":ui,"uiActive":cmd("systemctl","is-active","ai-dex-manager-ui.service"),
+            "disk":cmd("df","-Pk","/home/deploy").splitlines()[-1]}))
+          units=cmd("systemctl","list-units","--all","--type=service","--no-pager","--no-legend").splitlines()
+          patterns=("hype","zec","v12","pengu","quality102","fet","v52","risk","margin","watchdog")
+          service_names=[]
+          for line in units:
+            parts=line.split()
+            if parts and any(p in parts[0].lower() for p in patterns):
+              name=parts[0]
+              if len(name)<160:service_names.append(name)
+          for name in sorted(set(service_names)):
+            fields={}
+            for prop in ("ActiveState","SubState","Result","MainPID","NRestarts","WorkingDirectory"):
+              fields[prop]=cmd("systemctl","show",name,"-p",prop,"--value")
+            print("RUNNER_UNIT",json.dumps({"unit":name,**fields}))
+          root=pathlib.Path("/var/lib/disdex")
+          watch=(root/"runner-health/heartbeats")
+          for folder in [root/"hype-zec-long",root/"hype-long",root/"zec-long",watch]:
+            if not folder.is_dir():continue
+            paths=[p for p in folder.iterdir() if p.is_file() and ("hype" in p.name.lower() or "zec" in p.name.lower() or folder!=watch)]
+            for p in paths[:30]:
+              try:
+                size=p.stat().st_size
+                if size>300000 or not p.name.endswith(".json"):continue
+                j=json.loads(p.read_text())
+                if not isinstance(j,dict):continue
+                last=j.get("lastDecision") if isinstance(j.get("lastDecision"),dict) else {}
+                safe={"path":str(p),"schema":j.get("schema"),"mode":j.get("mode"),
+                  "runtimeSha":j.get("runtimeCommitSha") or j.get("runtimeSha"),
+                  "expectedSha":j.get("expectedSha"),"strategyId":j.get("strategyId"),
+                  "updatedAt":j.get("updatedAt"),"lastDecisionTs":j.get("lastDecisionTs"),
+                  "lastDecision":last,"keys":list(j.keys())[:45],"stateBytes":size,
+                  "positions":len(j.get("positions",[])) if isinstance(j.get("positions"),list) else None,
+                  "pending":bool(j.get("pending")),"manualReview":bool(j.get("manualReview")),
+                  "failureCount":len(j.get("failures",[])) if isinstance(j.get("failures"),list) else None}
+                print("SIDECAR_STATE",json.dumps(safe,ensure_ascii=False))
+              except Exception as e:print("SIDECAR_STATE",json.dumps({"path":str(p),"error":type(e).__name__}))
+          p=root/"shared/operator-activation/current.json"
+          if p.is_file():
+            j=json.loads(p.read_text())
+            print("OPERATOR_APPROVAL",json.dumps({"approvedSha":j.get("approvedSha"),"ordersEnabled":j.get("ordersEnabled"),
+              "runners":j.get("approvedRunners"),"active":j.get("active")}))
+          release=pathlib.Path("/home/deploy/disdex-trading/current")
+          for rel in ("config/hypeZecLongPolicy.ts","config/hypeZecLongRuntime.ts",
+                      "scripts/disdex-hype-zec-long-live-runner.ts","lib/hype-zec-long-runner.ts",
+                      "lib/hype-zec-long-sleeves.ts","ops/systemd/disdex-hype-zec-long@.service"):
+            p=release/rel
+            print("SIDECAR_SOURCE",json.dumps({"path":rel,"present":p.is_file(),"bytes":p.stat().st_size if p.is_file() else None}))
+          for p in (pathlib.Path("/etc/disdex/current-runtime")/(current+".env"),):
+            if p.is_file():
+              names=[]
+              for line in p.read_text().splitlines():
+                if "=" in line and not line.lstrip().startswith("#"):
+                  k=line.split("=",1)[0].strip()
+                  if "HYPE" in k or "ZEC" in k:names.append(k)
+              print("RUNTIME_ENV_KEYS",json.dumps({"filePresent":True,"hypeZecKeys":names}))
+          print("HYPE_ZEC_READONLY_PROBE_COMPLETE TRADING_MUTATION=0")
+          PY
