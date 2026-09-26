@@ -53,7 +53,7 @@ export function HypeZecDecisionPanel({strategy}:{strategy:Strategy}){
           ["mode",row?.stateMode||"未取得"],
           ["state更新",dt(row?.stateUpdatedAt)],
           ["本番サービス",row?.serviceActive?"active":"未確認"],
-          ["Shared Kill Switch",data?.sharedKillActive===null?"未取得":data?.sharedKillActive?"ON":"OFF"],
+          ["Shared Kill Switch",data?.sharedKillActive==null?"未取得":data?.sharedKillActive?"ON":"OFF"],
           ["公開足の発火条件",row?.publicSignalEligible===null?"未取得":row?.publicSignalEligible?"成立（発注とは別）":"未成立"],
           ["実Runner最終判定",row?.lastDecision?.reason||"対象通貨の最新記録なし"],
         ].map(([label,value])=><div key={label} className="min-w-0 rounded-xl border border-white/10 bg-black/20 px-3 py-3">
