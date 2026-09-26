@@ -1,0 +1,286 @@
+# HYPE/ZEC UI deploy only; the new sidecar implementation is separately operator-gated.
+# This job must never upgrade the trading release, arm a new runner, or restart any trading service.
+name: HP HYPE ZEC seven-logic UI-only production deploy
+on:
+  push:
+    branches: [codex/hp-hype-zec-live-sync-20260927]
+    paths: [.github/workflows/hp-hype-zec-ui-production-deploy-20260927.yml]
+permissions:
+  contents: read
+concurrency:
+  group: disdex-hp-hype-zec-versioned-ui-deploy
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      EXPECTED_TRADING_SHA: a09ea45ca3cbd72100f9eb0eaae499039c40b6a0
+      EXPECTED_OLD_UI_SHA: 4cfe390b6356287d8bbc1f2b51b6b55b7f283fec
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Reverify source and build without order capabilities
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ "$(git rev-parse HEAD)" == "$GITHUB_SHA" ]]
+          git diff --check HEAD^ HEAD
+          npm ci --no-audit --no-fund
+          npx tsx --test tests/hp-a09-runtime-sync-20260927.test.ts tests/hp-hype-zec-decision-history-20260927.test.ts tests/fet-decision-status.test.ts tests/fet-runtime-observability.test.ts
+          npx tsc --noEmit -p tsconfig.json
+          NEXT_TELEMETRY_DISABLED=1 npm run build
+          test -f .next/BUILD_ID
+          test -f .next/server/app/api/system/fet-status/route.js
+          test -f .next/server/app/api/system/hype-zec-status/route.js
+          tar --exclude='./.git' --exclude='./node_modules' --exclude='./.next' --exclude='./.research-state' -czf /tmp/hp-hz-source.tgz .
+          tar --exclude='.next/cache' -czf /tmp/hp-hz-next.tgz .next
+          echo "HP_SOURCE_ARCHIVE_BYTES=$(stat -c %s /tmp/hp-hz-source.tgz)"
+          echo "HP_BUILD_ARCHIVE_BYTES=$(stat -c %s /tmp/hp-hz-next.tgz)"
+      - name: Initialize restricted root SSH for UI-only release
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ -n "$SSH_HOST" && -n "$ROOT_KEY" && -n "$SSH_KNOWN_HOSTS" ]]
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k):return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Verify current trading a09 and currently deployed UI bbb before upload
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -p "$PORT" "root@$SSH_HOST" \
+            "EXPECTED_TRADING_SHA='$EXPECTED_TRADING_SHA' EXPECTED_OLD_UI_SHA='$EXPECTED_OLD_UI_SHA' bash -s" <<'REMOTE'
+          set -Eeuo pipefail
+          [[ "$(id -un)" == root ]]
+          [[ "$(tr -d '[:space:]' < /home/deploy/disdex-trading/current/.disdex-release-sha)" == "$EXPECTED_TRADING_SHA" ]]
+          [[ "$(readlink -f /home/deploy/disdex-trading/current)" == "/home/deploy/disdex-trading/releases/$EXPECTED_TRADING_SHA" ]]
+          ui=ai-dex-manager-ui.service
+          [[ "$(systemctl is-active "$ui")" == active ]]
+          wd="$(systemctl show "$ui" --property WorkingDirectory --value)"
+          [[ "$wd" == /home/deploy/disdex-trading/ui-releases/* && -d "$wd" && ! -L "$wd" ]]
+          effective_env="$(systemctl show "$ui" --property Environment --value)"
+          [[ " $effective_env " == *" DISDEX_UI_RELEASE_SHA=$EXPECTED_OLD_UI_SHA "* ]]
+          [[ "$(curl -sS --max-time 7 -o /dev/null -w '%{http_code}' http://127.0.0.1:3001/)" == 200 ]]
+          free="$(df -Pk /home/deploy | awk 'NR==2 {print $4}')"
+          [[ "$free" -ge 950000 ]] || { echo "UI_DEPLOY_DISK_TOO_LOW_KB=$free"; exit 32; }
+          for n in disdex-v12-x1-all disdex-pengu-dual-ls-v2 disdex-quality102-causal-v1 \
+              disdex-v52-aster-only disdex-fet-brk48 disdex-shared-crypto-risk disdex-v12-v52-margin-guard; do
+            u="$n@$EXPECTED_TRADING_SHA.service"
+            [[ "$(systemctl is-active "$u" 2>/dev/null || true)" == active ]] || { echo "TRADING_UNIT_NOT_ACTIVE=$n"; exit 33; }
+          done
+          echo "HP_HZ_PREFLIGHT=PASS"
+          echo "CURRENT_UI=$wd"
+          echo "FREE_KB=$free"
+          echo "TRADING_MUTATION=0"
+          REMOTE
+      - name: Transfer immutable build and source archives (no trading state)
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          scp -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -P "$PORT" /tmp/hp-hz-source.tgz "root@$SSH_HOST:/tmp/hp-hz-source-$GITHUB_RUN_ID.tgz"
+          scp -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -P "$PORT" /tmp/hp-hz-next.tgz "root@$SSH_HOST:/tmp/hp-hz-next-$GITHUB_RUN_ID.tgz"
+      - name: Install isolated UI-only release; rollback on failed health checks
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -p "$PORT" "root@$SSH_HOST" \
+            "EXPECTED_TRADING_SHA='$EXPECTED_TRADING_SHA' EXPECTED_OLD_UI_SHA='$EXPECTED_OLD_UI_SHA' NEW_UI_SHA='$GITHUB_SHA' REQUEST_ID='$GITHUB_RUN_ID' bash -s" <<'REMOTE'
+          set -Eeuo pipefail
+          umask 022
+          [[ "$NEW_UI_SHA" =~ ^[a-f0-9]{40}$ && "$REQUEST_ID" =~ ^[0-9]+$ ]]
+          exec 9>/run/lock/disdex-hp-hz-ui-deploy.lock
+          flock -n 9 || { echo "HP_DEPLOY_CONCURRENT_LOCK"; exit 40; }
+          ui=ai-dex-manager-ui.service
+          root=/home/deploy/disdex-trading/ui-releases
+          oldwd="$(systemctl show "$ui" --property WorkingDirectory --value)"
+          oldenv="$(systemctl show "$ui" --property Environment --value)"
+          [[ " $oldenv " == *" DISDEX_UI_RELEASE_SHA=$EXPECTED_OLD_UI_SHA "* ]]
+          [[ "$oldwd" == "$root/"* && -d "$oldwd" && ! -L "$oldwd" ]]
+          [[ "$(tr -d '[:space:]' < /home/deploy/disdex-trading/current/.disdex-release-sha)" == "$EXPECTED_TRADING_SHA" ]]
+          release="$root/ui-hz-$(printf '%s' "$NEW_UI_SHA" | cut -c1-12)"
+          stage="$root/.ui-hz-$(printf '%s' "$NEW_UI_SHA" | cut -c1-12).stage-$REQUEST_ID"
+          source_file="/tmp/hp-hz-source-$REQUEST_ID.tgz"
+          next_file="/tmp/hp-hz-next-$REQUEST_ID.tgz"
+          [[ -f "$source_file" && -f "$next_file" ]]
+          [[ ! -e "$release" && ! -L "$release" && ! -e "$stage" ]]
+          # 226 leading z's ensure the new override sorts after all verified preexisting HP drop-ins.
+          prefix="$(printf '%227s' ' ' | tr ' ' z)"
+          dropin="/etc/systemd/system/ai-dex-manager-ui.service.d/$prefix-hp-hz-20260927.conf"
+          [[ "${#prefix}" == 227 && ! -e "$dropin" ]]
+          mapfile -t old_dropins < <(systemctl show "$ui" --property DropInPaths --value | tr ' ' '\n')
+          for f in "${old_dropins[@]}"; do
+            [[ -z "$f" || "$(basename "$f")" < "$(basename "$dropin")" ]] || { echo "LATER_UI_DROPIN_PRESENT"; exit 41; }
+          done
+          # Snapshot the seven runner PIDs, prove this operation restarts only the UI service.
+          names=(disdex-v12-x1-all disdex-pengu-dual-ls-v2 disdex-quality102-causal-v1
+            disdex-v52-aster-only disdex-fet-brk48 disdex-shared-crypto-risk disdex-v12-v52-margin-guard)
+          pids=()
+          for n in "${names[@]}"; do
+            unit="$n@$EXPECTED_TRADING_SHA.service"
+            pids+=("$(systemctl show "$unit" -p MainPID --value)")
+          done
+          install -d -o deploy -g deploy -m 0755 "$stage"
+          tar --no-same-owner -xzf "$source_file" -C "$stage"
+          [[ -f "$stage/package.json" && -f "$stage/package-lock.json" ]]
+          python3 - "$oldwd/package.json" "$stage/package.json" "$oldwd/package-lock.json" "$stage/package-lock.json" <<'PY'
+          import json,sys
+          a,b,c,d=sys.argv[1:]
+          with open(a,encoding="utf-8-sig") as f:pa=json.load(f)
+          with open(b,encoding="utf-8-sig") as f:pb=json.load(f)
+          with open(c,encoding="utf-8-sig") as f:la=json.load(f)
+          with open(d,encoding="utf-8-sig") as f:lb=json.load(f)
+          if pa!=pb or la!=lb:raise SystemExit("UI_DEPENDENCY_MANIFEST_MISMATCH")
+          print("UI_DEPENDENCY_SEMANTIC_PARITY=PASS")
+          PY
+          [[ -e "$oldwd/node_modules" && -x "$oldwd/node_modules/.bin/next" ]]
+          if [[ -L "$oldwd/node_modules" ]]; then
+            ln -s "$(readlink -f "$oldwd/node_modules")" "$stage/node_modules"
+          else
+            cp -al -- "$oldwd/node_modules" "$stage/node_modules"
+          fi
+          tar --no-same-owner -xzf "$next_file" -C "$stage"
+          test -f "$stage/.next/BUILD_ID"
+          printf '%s\n' "$NEW_UI_SHA" > "$stage/.disdex-release-sha"
+          chown -R deploy:deploy "$stage/.next"
+          chown -h deploy:deploy "$stage/node_modules" "$stage/.disdex-release-sha"
+          mv -- "$stage" "$release"
+          rollback() {
+            rc=$?
+            trap - ERR
+            set +e
+            rm -f -- "$dropin"
+            systemctl daemon-reload
+            systemctl restart "$ui"
+            echo "HP_HZ_UI_ROLLBACK_ATTEMPTED=TRUE"
+            echo "OLD_UI_WORKDIR=$(systemctl show "$ui" --property WorkingDirectory --value)"
+            exit "$rc"
+          }
+          trap rollback ERR
+          printf '[Service]\nWorkingDirectory=%s\nEnvironment=DISDEX_UI_RELEASE_SHA=%s\n' "$release" "$NEW_UI_SHA" > "$dropin"
+          chown root:root "$dropin"
+          chmod 0644 "$dropin"
+          systemctl daemon-reload
+          systemctl restart "$ui"
+          ready=false
+          for _ in $(seq 1 35); do
+            if [[ "$(systemctl is-active "$ui" 2>/dev/null || true)" == active ]]; then
+              code="$(curl -sS --max-time 4 -o /dev/null -w '%{http_code}' http://127.0.0.1:3001/ 2>/dev/null || true)"
+              if [[ "$code" == 200 ]]; then ready=true;break;fi
+            fi
+            sleep 2
+          done
+          [[ "$ready" == true ]]
+          [[ "$(systemctl show "$ui" --property WorkingDirectory --value)" == "$release" ]]
+          newenv="$(systemctl show "$ui" --property Environment --value)"
+          [[ " $newenv " == *" DISDEX_UI_RELEASE_SHA=$NEW_UI_SHA "* ]]
+          [[ "$(tr -d '[:space:]' < "$release/.disdex-release-sha")" == "$NEW_UI_SHA" ]]
+          [[ "$(tr -d '[:space:]' < /home/deploy/disdex-trading/current/.disdex-release-sha)" == "$EXPECTED_TRADING_SHA" ]]
+          python3 - "$EXPECTED_TRADING_SHA" "$NEW_UI_SHA" <<'PY'
+          import json,sys,urllib.request
+          trading,ui=sys.argv[1:]
+          base="http://127.0.0.1:3001"
+          def get(path):
+            req=urllib.request.Request(base+path,headers={"Cookie":"disdex_auth=1","User-Agent":"DisDex-HP-a09-Verified"})
+            with urllib.request.urlopen(req,timeout=30) as r:
+              if r.status!=200:raise RuntimeError("UI_HTTP_"+path+"_"+str(r.status))
+              return json.loads(r.read(1100000))
+          for path in ("/","/decision-status","/decision-status/v12",
+                       "/decision-status/pengu","/decision-status/q102",
+                       "/decision-status/v52","/decision-status/fet",
+                       "/decision-status/hype","/decision-status/zec","/history/hype","/history/zec"):
+            req=urllib.request.Request(base+path,headers={"Cookie":"disdex_auth=1"})
+            with urllib.request.urlopen(req,timeout=12) as r:
+              if r.status!=200:raise RuntimeError("HP_PAGE_"+path+"_"+str(r.status))
+          p=get("/api/system/live-runtime")
+          if p.get("releaseSha")!=trading or not p.get("runtimeLineage",{}).get("synchronized"):
+            raise RuntimeError("HP_TRADING_LINEAGE_MISMATCH")
+          if not p.get("runtimeLineage",{}).get("units",{}).get("fet",{}).get("matchesCurrent"):
+            raise RuntimeError("HP_FET_LINEAGE_MISMATCH")
+          d=get("/api/system/decision-status?refresh=1")
+          if not d.get("readOnly") or not d.get("ok"):raise RuntimeError("HP_DECISION_STATUS_UNAVAILABLE")
+          units=(d.get("runtime") or {}).get("units",[])
+          ids={x.get("id") for x in units if x.get("releaseSha")==trading}
+          expected={"V12_X1.00_ALL","PENGU_DUAL_LS_V2_FINAL",
+                    "QUALITY102_CAUSAL_V1","FET_BRK48_RESIDUAL",
+                    "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96"}
+          if not expected.issubset(ids):raise RuntimeError("HP_FIVE_LOGIC_SHA_MISMATCH")
+          fet=get("/api/system/fet-status")
+          if not fet.get("readOnly") or fet.get("tradingMutation")!=0 or fet.get("expectedRuntimeSha")!=trading:
+            raise RuntimeError("HP_FET_API_CONTRACT_FAILED")
+          if fet.get("runtimeSha")!=trading or fet.get("status")!="LIVE":
+            raise RuntimeError("HP_FET_RUNNER_NOT_VERIFIED")
+          hz=get("/api/system/hype-zec-status")
+          if hz.get("releaseSha")!=trading or not hz.get("readOnly") or hz.get("tradingMutation")!=0:
+            raise RuntimeError("HP_HYPE_ZEC_READONLY_CONTRACT_FAILED")
+          sleeves=hz.get("sleeves") or {}
+          if not {"HYPE_LONG","ZEC_LONG"}.issubset(sleeves):
+            raise RuntimeError("HP_HYPE_ZEC_SLEEVES_MISSING")
+          if not hz.get("sourceDeployed"):
+            if any(sleeves[key].get("status")!="NOT_DEPLOYED" for key in ("HYPE_LONG","ZEC_LONG")):
+              raise RuntimeError("HP_HYPE_ZEC_INCORRECT_LIVE_DISPLAY")
+          print("HP_HYPE_ZEC_SOURCE_DEPLOYED="+str(hz.get("sourceDeployed")))
+          print("HP_HYPE_ZEC_STATUS="+"/".join(sleeves[k].get("status","UNKNOWN") for k in ("HYPE_LONG","ZEC_LONG")))
+          print("HP_HZ_API_AND_PAGES=PASS")
+          print("HP_FIVE_LOGIC_RUNTIME_SHA="+trading)
+          print("HP_UI_BUILD_SHA="+ui)
+          print("HP_FET_API="+str(fet.get("status")))
+          PY
+          for i in "${!names[@]}"; do
+            unit="${names[$i]}@$EXPECTED_TRADING_SHA.service"
+            [[ "$(systemctl show "$unit" -p MainPID --value)" == "${pids[$i]}" ]] || { echo "TRADING_PID_CHANGED=$unit"; false; }
+          done
+          [[ "$(systemctl --failed --no-legend --plain | wc -l)" -eq 0 ]] || true
+          trap - ERR
+          rm -f -- "$source_file" "$next_file"
+          echo "STATUS=HP_HZ_UI_DEPLOYED_VERIFIED"
+          echo "UI_RELEASE=$release"
+          echo "TRADING_SHA=$EXPECTED_TRADING_SHA"
+          echo "UI_SHA=$NEW_UI_SHA"
+          echo "TRADING_RUNNERS_RESTARTED=0"
+          echo "TRADING_MUTATION=0"
+          REMOTE
+      - name: Verify public HTTPS UI and unauthorized FET API remain safe
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          for route in / /decision-status /decision-status/fet /decision-status/v12 \
+                       /decision-status/pengu /decision-status/q102 /decision-status/v52 \
+                       /decision-status/hype /decision-status/zec /history/hype /history/zec; do
+            code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 15 "https://professional-dismanager.net$route")"
+            echo "PUBLIC_ROUTE=$route HTTP=$code"
+            [[ "$code" =~ ^(200|30[1278]|401|403)$ ]]
+          done
+          code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 15 https://professional-dismanager.net/api/system/fet-status)"
+          echo "PUBLIC_FET_UNAUTHORIZED_HTTP=$code"
+          [[ "$code" == 401 ]]
+          code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 15 https://professional-dismanager.net/api/system/hype-zec-status)"
+          echo "PUBLIC_HYPE_ZEC_UNAUTHORIZED_HTTP=$code"
+          [[ "$code" == 401 ]]
