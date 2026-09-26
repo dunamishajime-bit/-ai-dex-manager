@@ -133,6 +133,81 @@ def scan():
                     capture_output=True,text=True,timeout=8)
    result["gitHistory"].append({"repository":path,"matches":p.stdout.splitlines()[:20],"stderrClass":"none" if p.returncode==0 else "nonzero"})
   except (OSError,subprocess.TimeoutExpired):pass
+ # Inventory VPS backup sets and inspect archive member names, never extract.
+ result["backupFiles"]=[]
+ for root_s in ("/home/deploy/disdex-trading/backups","/var/backups","/home/deploy/ai-dex-manager/backups"):
+  b=pathlib.Path(root_s)
+  if not b.is_dir():continue
+  for parent,dirs,files in os.walk(b,followlinks=False):
+   here=pathlib.Path(parent)
+   dirs[:]=[d for d in dirs if d not in SKIP and not (here/d).is_symlink()]
+   if len(here.relative_to(b).parts)>=4:dirs[:]=[]
+   for name in sorted(files):
+    p=here/name
+    if p.is_symlink():continue
+    try:
+     stat=p.stat()
+     meta={"path":str(p),"size":stat.st_size,"mtimeUtc":int(stat.st_mtime)}
+     if stat.st_size<150_000_000 and (p.suffix==".zip" or name.endswith((".tar",".tar.gz",".tgz"))):
+      try:
+       if p.suffix==".zip":
+        import zipfile
+        with zipfile.ZipFile(p) as z:names=z.namelist()
+       else:
+        import tarfile
+        with tarfile.open(p) as t:names=t.getnames()
+       meta["archiveEntries"]=len(names)
+       meta["relevantEntries"]=[n for n in names if re.search(
+        r"research_v12_dynamic|research_lab_v96_v52|final-live-governor|q102|fet|integrat|research-state",n,re.I)][:120]
+      except (OSError,ValueError):meta["archiveReadable"]=False
+     result["backupFiles"].append(meta)
+    except OSError:pass
+ result["shellHistoryMatches"]=[]
+ for filename in ("/root/.bash_history","/home/deploy/.bash_history","/root/.zsh_history","/home/deploy/.zsh_history"):
+  p=pathlib.Path(filename)
+  if not p.is_file() or p.is_symlink():continue
+  try:
+   raw=p.read_bytes()[:2_000_000]
+   terms=[k for k,v in MARKERS.items() if v in raw]
+   if terms:result["shellHistoryMatches"].append({"path":str(p),"markers":terms})
+  except OSError:pass
+ result["oldCodexSessionMatches"]=[]
+ for root_s in ("/root/.codex/sessions","/home/deploy/.codex/sessions",
+                "/root/.local/share/codex","/home/deploy/.local/share/codex"):
+  p=pathlib.Path(root_s)
+  if not p.is_dir():continue
+  for parent,dirs,files in os.walk(p,followlinks=False):
+   here=pathlib.Path(parent)
+   dirs[:]=[d for d in dirs if d not in SKIP and not (here/d).is_symlink()]
+   if len(here.relative_to(p).parts)>=9:dirs[:]=[]
+   for filename in files:
+    f=here/filename
+    if f.is_symlink() or f.suffix.lower() not in (".jsonl",".json",".log",".txt",".md"):continue
+    try:
+     stat=f.stat()
+     if stat.st_size>40_000_000:continue
+     raw=f.read_bytes()
+     terms=[k for k,v in MARKERS.items() if v in raw]
+     if terms:result["oldCodexSessionMatches"].append({"path":str(f),"bytes":stat.st_size,
+       "mtimeUtc":int(stat.st_mtime),"markers":terms,"sha256":hashlib.sha256(raw).hexdigest()})
+    except OSError:pass
+ result["additionalTmpPython"]=[]
+ for base in ("/tmp","/var/tmp"):
+  p=pathlib.Path(base)
+  if not p.is_dir():continue
+  for here,ds,files in os.walk(p,followlinks=False):
+   depth=len(pathlib.Path(here).relative_to(p).parts)
+   ds[:]=[d for d in ds if d not in SKIP]
+   if depth>=3:ds[:]=[]
+   for name in files:
+    if not name.endswith((".py",".sh",".ipynb")):continue
+    f=pathlib.Path(here)/name
+    if f.is_symlink():continue
+    try:
+     meta=safe_meta(f)
+     result["additionalTmpPython"].append(meta)
+    except OSError:pass
+    if len(result["additionalTmpPython"])>=150:break
  return result
 if __name__=="__main__":
  print(json.dumps(scan(),ensure_ascii=False,separators=(",",":")))
