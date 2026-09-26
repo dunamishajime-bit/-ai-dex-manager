@@ -1,0 +1,31 @@
+name: Source exact Aster FET core preemption 1m, read only
+on:
+  push:
+    branches: [research/recover-final-governor-bt-20260926]
+    paths:
+      - scripts/research/fetch_fet_core_preempt_exact_1m_20260926.py
+      - .github/workflows/fet-core-preempt-exact-1m-20260926.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  fetch-exact-public-ohlc:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Read-only exact historical FET 1m prices at 16 audited conflicts
+        run: |
+          python3 -m py_compile scripts/research/fetch_fet_core_preempt_exact_1m_20260926.py
+          python3 scripts/research/fetch_fet_core_preempt_exact_1m_20260926.py
+      - name: Archive source evidence, without claiming executable quotes
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fet-current-native-core-preempt-exact-1m-20260926
+          path: research-results/current-five-bt-20260926/fet-core-preempt-exact1m.json
+          if-no-files-found: warn
+          retention-days: 90
