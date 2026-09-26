@@ -46,6 +46,8 @@ class SevenEngineContractTests(unittest.TestCase):
                 _load_signal_rows(root)
     def test_missing_fred_is_not_a_fabricated_zero_or_rate(self):
         with tempfile.TemporaryDirectory() as d:
+            (Path(d)/"acquisition-manifest.json").write_text(json.dumps({"fred":
+                {"status":"NOT_VERIFIABLE_FRED_UNAVAILABLE","observations":0}}))
             rates,issues=load_fred_fx(d)
             self.assertEqual(rates,())
             self.assertTrue(issues)
