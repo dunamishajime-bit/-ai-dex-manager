@@ -1,0 +1,53 @@
+name: Verify official H10 and FRED USDJPY no-key research FX feeds
+on:
+  push:
+    branches: [research/formal-seven-logic-bt-20260927]
+    paths: [.github/workflows/formal-seven-fx-fallback-probe-20260927.yml]
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Probe two official public-keyless Federal Reserve daily yen USD sources without logging prices
+        shell: bash
+        run: |
+          python - <<'PY'
+          import csv,hashlib,io,json,time,urllib.request,urllib.error
+          urls={
+            "FED_H10_PACKAGE":"https://www.federalreserve.gov/datadownload/Output.aspx?rel=H10&series=60f32914ab61dfab590e0e470153e3ae&lastobs=700&filetype=csv&label=include&layout=seriescolumn&type=package",
+            "FRED_DEXJPUS_FULL":"https://fred.stlouisfed.org/graph/fredgraph.csv?id=DEXJPUS",
+            "FED_H10_PACKAGE_DATES":"https://www.federalreserve.gov/datadownload/Output.aspx?rel=H10&series=60f32914ab61dfab590e0e470153e3ae&lastobs=&from=01%2F01%2F2025&to=08%2F11%2F2026&filetype=csv&label=include&layout=seriescolumn&type=package"
+          }
+          for name,url in urls.items():
+            result={"name":name}
+            try:
+              req=urllib.request.Request(url,headers={
+                "User-Agent":"DisDex-formal-seven-research-fx-check/20260927",
+                "Accept":"text/csv,application/csv,*/*"})
+              with urllib.request.urlopen(req,timeout=26) as r:
+                raw=r.read(18*1024*1024)
+                result["status"]=r.status
+                result["content_type"]=r.headers.get("content-type","").split(";")[0]
+              sample=raw.decode("utf-8-sig",errors="replace")
+              result["bytes"]=len(raw)
+              result["sha256"]=hashlib.sha256(raw).hexdigest()
+              lines=sample.splitlines()
+              result["first_headers_only"]=[[cell[:80] for cell in next(csv.reader([line]))[:7]]
+                  for line in lines[:8] if (line.startswith("Date") or "RXI_N.B.JA" in line or "DEXJPUS" in line)][:4]
+              result["potential_jpy_columns"]=sorted(set(
+                  col for line in lines[:15] for col in next(csv.reader([line]))
+                  if "RXI_N.B.JA" in col or "DEXJPUS" in col))[:5]
+              result["date_rows"]=sum(line[:4] in ("2025","2026") for line in lines)
+              result["contains_2025_08"]=any(line.startswith("2025-08") for line in lines)
+              result["contains_2026_08"]=any(line.startswith("2026-08") for line in lines)
+              result["looks_html"]=("<html" in sample[:500].lower() or "<!doctype" in sample[:500].lower())
+            except Exception as e:
+              result["error"]=type(e).__name__+":"+str(e)[:130]
+            print("OFFICIAL_FX_PROBE",json.dumps(result,sort_keys=True))
+          PY
