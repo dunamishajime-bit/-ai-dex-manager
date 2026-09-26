@@ -1,0 +1,117 @@
+name: DisDex root shared Kill Switch ownership hotfix
+on:
+  issue_comment:
+    types: [created]
+permissions:
+  contents: read
+jobs:
+  audit:
+    if: >-
+      github.event.issue.number == 132 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == 'DISDEX_ROOT_KILL_OWNER_HOTFIX_20260926'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Configure approved VPS read-only transport
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Checkout exact production-lineage patch
+        uses: actions/checkout@v4
+        with:
+          ref: 2972e92a4602b732ee0bcb98663f8841acf499e1
+      - name: Validate patch in isolated hosted-root fixture
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          bash -n scripts/ops/root/disdex-v12-kill-switch-auto-repair
+          sudo useradd -M -r deploy 2>/dev/null || true
+          sudo bash tests/test-v12-auto-repair-kill-ownership.sh
+      - name: Stage candidate root helper and fixture without changing active code
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          candidate=/root/disdex-v12-auto-repair-hotfix-${GITHUB_RUN_ID}
+          testfile=/root/disdex-v12-auto-repair-test-${GITHUB_RUN_ID}
+          digest="$(sha256sum scripts/ops/root/disdex-v12-kill-switch-auto-repair | awk '{print $1}')"
+          echo "PATCH_SOURCE_SHA256=$digest"
+          scp -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -P "${SSH_PORT:-22}" \
+            scripts/ops/root/disdex-v12-kill-switch-auto-repair "root@$SSH_HOST:$candidate"
+          scp -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -P "${SSH_PORT:-22}" \
+            tests/test-v12-auto-repair-kill-ownership.sh "root@$SSH_HOST:$testfile"
+          echo "PATCH_DIGEST=$digest" >> "$GITHUB_ENV"
+      - name: Gate and atomically patch only the installed root helper
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -p "${SSH_PORT:-22}" "root@$SSH_HOST" \
+            "bash -s -- '/root/disdex-v12-auto-repair-hotfix-${GITHUB_RUN_ID}' '/root/disdex-v12-auto-repair-test-${GITHUB_RUN_ID}' '$PATCH_DIGEST'" <<'BASH'
+          set -Eeuo pipefail
+          umask 077
+          candidate="$1"; fixture="$2"; expected="$3"
+          release="/home/deploy/disdex-trading/current"
+          installed="/usr/local/libexec/disdex-v12-kill-switch-auto-repair"
+          lock="/var/lib/disdex/v12-auto-repair.lock"
+          cleanup_staging() { rm -f -- "$candidate" "$fixture"; }
+          trap cleanup_staging EXIT
+          [[ "$(basename "$(readlink -f "$release")")" == "e1b58060d6263a3af7ced51bec854d3e211d2f35" ]] || { echo 'BLOCKED_RELEASE_CHANGED'; exit 4; }
+          [[ -f "$installed" && ! -L "$installed" && "$(stat -c '%U:%G' "$installed")" == "root:root" ]] || { echo 'BLOCKED_INSTALLED_HELPER_IDENTITY'; exit 4; }
+          [[ -f "$candidate" && ! -L "$candidate" && "$(sha256sum "$candidate" | awk '{print $1}')" == "$expected" ]] || { echo 'BLOCKED_CANDIDATE_DIGEST'; exit 4; }
+          [[ -f "$fixture" && ! -L "$fixture" ]] || { echo 'BLOCKED_FIXTURE_MISSING'; exit 4; }
+          service="$(systemctl show disdex-v12-kill-switch-auto-repair.service -p ExecStart --value)"
+          [[ "$service" == *"/usr/local/libexec/disdex-v12-kill-switch-auto-repair"* ]] || { echo 'BLOCKED_SERVICE_WRONG_EXECUTABLE'; exit 4; }
+          [[ "$(systemctl is-active disdex-v12-kill-switch-auto-repair.service || true)" != "active" ]] || { echo 'BLOCKED_RECOVERY_SERVICE_RUNNING'; exit 4; }
+          source_file="$release/scripts/ops/root/disdex-v12-kill-switch-auto-repair"
+          [[ -f "$source_file" && "$(sha256sum "$source_file" | awk '{print $1}')" == "$(sha256sum "$installed" | awk '{print $1}')" ]] || { echo 'BLOCKED_INSTALLED_HELPER_DRIFT'; exit 4; }
+          bash -n "$candidate"
+          bash "$fixture" "$candidate"
+          exec 9>"$lock"
+          flock -n 9 || { echo 'BLOCKED_AUTO_REPAIR_LOCK_BUSY'; exit 4; }
+          [[ "$(systemctl is-active disdex-v12-kill-switch-auto-repair.service || true)" != "active" ]] || { echo 'BLOCKED_RECOVERY_NOW_ACTIVE'; exit 4; }
+          backup_root="/home/deploy/disdex-ops/patch-backups"
+          install -d -o root -g root -m 0700 "$backup_root"
+          backup="$backup_root/disdex-v12-kill-switch-auto-repair.$(date -u +%Y%m%dT%H%M%SZ).before-ownership-hotfix"
+          cp -a -- "$installed" "$backup"
+          tmp="$(mktemp /usr/local/libexec/.disdex-v12-owner-patch.XXXXXXXX)"
+          mode="$(stat -c '%a' "$installed")"
+          install -o root -g root -m "$mode" "$candidate" "$tmp"
+          [[ "$(sha256sum "$tmp" | awk '{print $1}')" == "$expected" ]] || { rm -f "$tmp"; echo 'BLOCKED_STAGED_DIGEST'; exit 4; }
+          mv -fT -- "$tmp" "$installed"
+          if ! bash -n "$installed" || [[ "$(sha256sum "$installed" | awk '{print $1}')" != "$expected" ]]; then
+            rollback_tmp="$(mktemp /usr/local/libexec/.disdex-v12-owner-rollback.XXXXXXXX)"
+            cp -a -- "$backup" "$rollback_tmp"
+            mv -fT -- "$rollback_tmp" "$installed"
+            echo 'HOTFIX_ROLLED_BACK_POSTCHECK_FAILED'
+            exit 1
+          fi
+          runuser -u deploy -- test -r /var/lib/disdex/shared/kill-switch.json || { echo 'POSTCHECK_DEPLOY_READ_FAILED'; exit 5; }
+          echo "ROOT_AUTO_REPAIR_OWNERSHIP_HOTFIX_APPLIED=TRUE"
+          echo "ROOT_HELPER_SHA256=$expected"
+          echo "BACKUP_PATH=$backup"
+          echo 'RELEASE_UNCHANGED=TRUE'
+          echo 'ORDERS_SENT=0'
+          echo 'TRADING_STATE_MUTATION=0'
+          BASH
