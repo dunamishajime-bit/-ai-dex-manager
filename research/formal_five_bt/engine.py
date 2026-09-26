@@ -383,16 +383,32 @@ def run_integrated_bt(data_root: str | Path, scan_root: str | Path, l2_root: str
     decisions_by_strategy = {
         strategy: signal_rows.get(strategy, []) for strategy in modeled_strategies
     }
+    q102_scan = scan_manifests.get("baseline-signal-scan-q102", {})
+    q102_stats = (q102_scan.get("stats") or {}).get("Q102") or {}
+    q102_all_invalid = bool(
+        str(q102_scan.get("status") or "").startswith("NOT_VERIFIABLE")
+        or (q102_stats.get("decision_timestamps") is not None
+            and int(q102_stats.get("decision_timestamps") or 0) > 0
+            and int(q102_stats.get("error_timestamps") or 0)
+                >= int(q102_stats.get("decision_timestamps") or 0))
+    )
+    missing_strategy_signals = set()
+    if q102_all_invalid:
+        missing_strategy_signals.add("Q102")
+    if sidecar_present:
+        missing_strategy_signals.update(strategy for strategy in ("HYPE", "ZEC")
+            if scan_manifests["baseline-signal-scan-hz"].get("stats", {})
+                .get(strategy, {}).get("status") == "NOT_VERIFIABLE")
     input_candidate_counts = {
-        strategy: (None if sidecar_present and strategy in {"HYPE", "ZEC"}
-          and scan_manifests["baseline-signal-scan-hz"]["stats"][strategy].get("status")
-          == "NOT_VERIFIABLE"
-          else sum(row.get("status") == "SIGNAL" for row in rows))
+        strategy: (None if strategy in missing_strategy_signals
+                   else sum(row.get("status") == "SIGNAL" for row in rows))
         for strategy, rows in decisions_by_strategy.items()
     }
     initial_gap_counts = {
-        strategy: sum(row.get("status") == "SIGNAL" and _candidate_time(strategy, row) < int(INITIAL_GAP_END.timestamp() * 1000)
-                      for row in rows)
+        strategy: (None if strategy in missing_strategy_signals
+            else sum(row.get("status") == "SIGNAL"
+                and _candidate_time(strategy, row) < int(INITIAL_GAP_END.timestamp() * 1000)
+                for row in rows))
         for strategy, rows in decisions_by_strategy.items()
     }
 
@@ -412,6 +428,9 @@ def run_integrated_bt(data_root: str | Path, scan_root: str | Path, l2_root: str
                     for row in decisions_by_strategy[strategy]]
             all_decisions.extend(rows)
             metrics = _metric_row(strategy, rows)
+            if strategy in missing_strategy_signals:
+                metrics["signal_candidates"] = None
+                metrics["metric_status"] = "NOT_VERIFIABLE_FULL_PERIOD_OR_DATA_COVERAGE"
             if sidecar_present and strategy in {"HYPE", "ZEC"}:
                 metrics["source_status"] = "HYPOTHETICAL_SEVEN_RESEARCH_CODE_NOT_LIVE"
                 metrics["source_sha"] = scan_manifests["baseline-signal-scan-hz"]["sidecar_source_sha"]
@@ -598,8 +617,11 @@ def render_report(manifest: Mapping[str, Any], coverage: Mapping[str, Any]) -> s
         "|---|---|---:|---:|---:|---:|---:|",
     ]
     for row in manifest["scenarios"]:
-        candidate_total = sum(int(value) for value in row["candidate_signals"].values())
-        lines.append(f"| {row['scenario_id']} | {row['status']} | {candidate_total} | {row['verified_fills']} | — | — | — |")
+        missing = [name for name, value in row["candidate_signals"].items() if value is None]
+        known = sum(int(v) for v in row["candidate_signals"].values() if v is not None)
+        candidate_display = (f">= {known}; unverified: {', '.join(sorted(missing))}"
+            if missing else str(known))
+        lines.append(f"| {row['scenario_id']} | {row['status']} | {candidate_display} | {row['verified_fills']} | — | — | — |")
     lines.extend([
         "",
         "Each signal count is a LIVE-function candidate, not a trade count: shared position-state, cooldown, and allocator allocation have not been converted into filled orders because no candidate passed historical execution-data verification.",
@@ -607,8 +629,10 @@ def render_report(manifest: Mapping[str, Any], coverage: Mapping[str, Any]) -> s
         "V12: " + str(manifest["scenarios"][0]["candidate_signals"].get("V12", 0))
         + "; PENGU: " + str(manifest["scenarios"][0]["candidate_signals"].get("PENGU", 0))
         + "; Q102: " + str(manifest["scenarios"][0]["candidate_signals"].get("Q102", 0))
-        + "; FET: " + str(manifest["scenarios"][0]["candidate_signals"].get("FET", 0))
-        + " signal candidates were returned by the scan.",
+        + "; FET: " + str(manifest["scenarios"][0]["candidate_signals"].get("FET"))
+        + "; HYPE: " + str(manifest["scenarios"][0]["candidate_signals"].get("HYPE", "not included"))
+        + "; ZEC: " + str(manifest["scenarios"][0]["candidate_signals"].get("ZEC", "not included"))
+        + " candidate observations or explicitly unverified statuses; none is an actual trade.",
         "",
         "## Coverage findings",
         "",

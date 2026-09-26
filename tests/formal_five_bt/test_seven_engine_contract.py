@@ -2,7 +2,7 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
-from research.formal_five_bt.engine import _load_signal_rows, _load_signal_scan_manifests
+from research.formal_five_bt.engine import _load_signal_rows, _load_signal_scan_manifests, render_report, PERIOD_START, SCENARIOS
 from research.formal_five_bt.seven_source import LIVE_FIVE_SHA,SEVEN_RESEARCH_SHA
 from research.formal_five_bt.datasets import load_fred_fx
 
@@ -44,6 +44,21 @@ class SevenEngineContractTests(unittest.TestCase):
             p.write_text(json.dumps(m))
             with self.assertRaisesRegex(ValueError,"SIDECAR_SOURCE_MANIFEST_INVALID"):
                 _load_signal_rows(root)
+    def test_report_does_not_turn_unknown_Q102_HYPE_ZEC_into_zero(self):
+        scenarios = [{"scenario_id": name+"_"+coverage,"status":"NOT_VERIFIABLE",
+            "candidate_signals":{"V12":1459,"PENGU":52,"Q102":None,
+                "FET":26,"HYPE":None,"ZEC":None},
+            "verified_fills":0,"initial_gap_candidate_signals":{"Q102":None}}
+            for name,coverage in SCENARIOS]
+        meta={"run_id":"test","status":"NOT_VERIFIABLE","runtime_sha":LIVE_FIVE_SHA,
+            "audited_release_id":LIVE_FIVE_SHA,"period_start_utc":PERIOD_START.isoformat(),
+            "starting_capital_jpy":10000,"monthly_contribution_jpy":10000,
+            "monthly_contribution_count":12,"total_contributions_jpy":130000,
+            "scenarios":scenarios,"limitations":["TEST_MISSING_COVERAGE"]}
+        report=render_report(meta,{"symbols":[],"fx":{
+            "observations":0,"status":"NOT_VERIFIABLE"},"l2_archives":[]})
+        self.assertIn("unverified: HYPE, Q102, ZEC",report)
+        self.assertIn("HYPE: None",report)
     def test_missing_fred_is_not_a_fabricated_zero_or_rate(self):
         with tempfile.TemporaryDirectory() as d:
             (Path(d)/"acquisition-manifest.json").write_text(json.dumps({"fred":

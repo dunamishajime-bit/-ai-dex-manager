@@ -75,6 +75,21 @@ jobs:
             --source-root "$SEVEN_BT_SOURCE_ROOT" \
             --output-root "$RUNNER_TEMP/seven-bt/scans/baseline-signal-scan-hz" \
             --pace 0.24 --acquire
+      - name: Show source-only native 15m coverage and bounded failure cause
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          path=Path(os.environ["RUNNER_TEMP"])/"seven-bt/input/sidecar-15m-acquisition.json"
+          if path.is_file():
+            source=json.loads(path.read_text())
+            print("SEVEN_BT_NATIVE_HZ_COVERAGE",json.dumps({
+              symbol:{"status":v.get("status"),"rows":v.get("rows"),
+                "gaps":v.get("gaps"),"quarantined_bad":v.get("quarantined_bad_candles"),
+                "reason":v.get("reason")}
+              for symbol,v in source.get("symbols",{}).items()},sort_keys=True))
+          PY
       - name: Evaluate original HYPE/ZEC code on causally closed 15m and selective 1m breakouts
         shell: bash
         run: |

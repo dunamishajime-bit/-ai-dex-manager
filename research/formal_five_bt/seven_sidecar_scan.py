@@ -143,11 +143,31 @@ def fetch_sidecar_15m(data_root:Path,*,pace:float=0.18,
                 "listed_from_ms":native.listed_from_ms}
             continue
         try:
-            if pace:time.sleep(pace)
-            acquisition=sources.fetch_historical_klines("aster",symbol,effective_start,
-                end_ms-1,interval="15m")
-            rows=[to_bar(x,FIFTEEN) for x in acquisition.rows]
-            if len({x["ts"] for x in rows})!=len(rows):
+            if pace: time.sleep(pace)
+            acquisition = None
+            # Aster BTC15m may fail transiently while HYPE/ZEC succeed.
+            # Never switch the actual strategy feature bars to another venue.
+            for attempt in range(3 if symbol == "BTCUSDT" else 1):
+                try:
+                    acquisition = sources.fetch_historical_klines(
+                        "aster", symbol, effective_start, end_ms - 1, interval="15m")
+                    break
+                except (RuntimeError, TimeoutError, OSError):
+                    if attempt >= (2 if symbol == "BTCUSDT" else 0):
+                        raise
+                    time.sleep(1.6 * (attempt + 1))
+            if acquisition is None:
+                raise ValueError("HYPE_ZEC_NATIVE_CANDLES_MISSING")
+            rows, invalid = [], []
+            for raw in acquisition.rows:
+                try:
+                    rows.append(to_bar(raw, FIFTEEN))
+                except (TypeError, ValueError) as error:
+                    # Quarantine raw bad rows; leave actual time gaps in source.
+                    invalid.append({"timestamp_ms":raw[0] if isinstance(raw, list) and raw
+                                    else None,
+                                    "reason":type(error).__name__+":"+str(error)[:90]})
+            if len({x["ts"] for x in rows}) != len(rows):
                 raise ValueError("HYPE_ZEC_DUPLICATE_SOURCE_BARS")
             rows.sort(key=lambda x:x["ts"])
             n,gaps,duplicates=check_contiguous(rows,FIFTEEN)
@@ -155,6 +175,8 @@ def fetch_sidecar_15m(data_root:Path,*,pace:float=0.18,
             count,digest=save_jsonl(data_root/rel,rows)
             metadata["symbols"][symbol]={"status":"ACQUIRED" if count else "NO_ROWS",
                 "rows":n,"gaps":gaps,"duplicates":duplicates,
+                "quarantined_bad_candles":len(invalid),
+                "bad_candle_sample":invalid[:12],
                 "listed_from_ms":native.listed_from_ms,
                 "first_ms":rows[0]["ts"] if rows else None,
                 "last_ms":rows[-1]["ts"] if rows else None,
@@ -197,6 +219,9 @@ def fifteen_minute_gates(btc:list[dict],sym:list[dict],rules:dict,
     dist=abs((b["close"]/max(_ema(sym),1e-7)-1)*10000)
     gate={"BTC_MOVE":bm,"BTC_ACCEL":ba,"SYMBOL_MOVE":sm,
           "SYMBOL_ACCEL":sa,"EMA20_DISTANCE":dist}
+    for seq in (btc, sym):
+        if any(int(b["ts"])-int(a["ts"])!=FIFTEEN for a,b in zip(seq,seq[1:])):
+            return False,{"DATA":"15M_HISTORY_GAP_INVALIDATES_EMA_OR_BTC_REFERENCE"}
     # Compare with tolerant prefilter only. The frozen TS function makes all
     # final decisions, and acceptance cannot be inferred from Python alone.
     eps=1e-8
@@ -304,7 +329,12 @@ def scan_seven_sidecars(data_root: str | Path,scan_root: str | Path,
                       "source_status":"HYPOTHETICAL_RESEARCH_NOT_LIVE",
                       "gate_status":detail}
                 if not pass15:
-                    decisions.append(dict(base,status="WAIT",reason="15M_PRE_ENTRY_GATE_NOT_MET"))
+                    if detail.get("DATA"):
+                        decisions.append(dict(base,status="NOT_VERIFIABLE",
+                            reason=str(detail["DATA"])))
+                    else:
+                        decisions.append(dict(base,status="WAIT",
+                            reason="15M_PRE_ENTRY_GATE_NOT_MET"))
                     continue
                 possible.append(dict(base,confirm_minutes=int(rules["breakoutConfirmMinutes"]),
                                      btc_history=bwindow,symbol_history=swindow))
