@@ -36,3 +36,7 @@ python -m unittest discover -s tests/formal_five_bt -v
 ```
 
 The accepted behavior, methodology, and audited-source scope are documented in `docs/research/formal-five-logic-bt-spec.md`, `docs/research/formal-five-logic-bt-methodology.md`, and `research/formal_five_bt/runtime_source_manifest.json`.
+
+## Documented FX substitute when FRED is network-blocked
+
+The fresh-data runner uses the official ECB daily JPY/EUR divided by USD/EUR cross, with an observation only available after the end of its UTC observation date. The acquisition manifest declares `provider=ECB_DAILY_CROSS_NOT_FRED` and saves both original currency legs and their source hash; it never calls this series FRED DEXJPUS. Results are therefore not directly identical to a FRED-only historical deposit conversion. The GitHub-hosted runner and the authorized VPS both timed out when fetching FRED in the 2026-09-27 source connectivity checks. Re-run with `--fx-source fred` once FRED becomes accessible to compare both official reference series.

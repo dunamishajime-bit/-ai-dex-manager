@@ -25,3 +25,7 @@ Raw market data and detailed market-derived outputs are intentionally excluded f
 ## Reproduction
 
 See `research/formal_five_bt/README.md` for the Python/Node requirements, local-only input layout, commands, four scenarios, and test command. Runtime source and data hashes must match the local run manifest before comparing results.
+
+## Official FX source change (2026-09-27)
+
+Fresh Aster candles/funding for 32 instruments were acquired successfully, but official FRED `DEXJPUS` timed out from both the CI runner and authorized VPS. For the next isolated research replay, the explicitly labeled fallback is the official ECB daily EUR reference rates, `JPY per EUR / USD per EUR`, paired by identical business date. This substitute never masquerades as FRED. It is conservatively unavailable until the final millisecond of the recorded UTC day and both raw ECB legs and derived observations are hash recorded. The run manifest reports the FX provider so returns calculated with an ECB cross are not declared exact parity with a FRED DEXJPUS run.
