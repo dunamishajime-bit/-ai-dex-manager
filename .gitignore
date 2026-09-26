@@ -45,6 +45,7 @@ debug-*.js
 check_scores.js
 .cache/
 .runtime-state/
+__pycache__/
 /research/formal_five_bt/runtime_source_snapshot/
 /research-runs/formal-five-logic-bt/
 backups/
