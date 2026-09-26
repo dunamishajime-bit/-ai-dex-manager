@@ -1,0 +1,70 @@
+name: DisDex Current Release Signal and Execution Audit
+on:
+  issue_comment:
+    types: [created]
+permissions:
+  contents: read
+jobs:
+  audit:
+    if: >-
+      github.event.issue.number == 132 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == 'DISDEX_NOENTRY_SOURCE_TEST_AUDIT_20260926'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: e1b58060d6263a3af7ced51bec854d3e211d2f35
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci
+      - name: Read-only strategy and shared-execution tests (current production SHA)
+        shell: bash
+        run: |
+          set +e
+          failures=0
+          echo '=== START_v12_signal_and_execution ==='
+          bash -lc 'npm run strategy:v12-x1-all:selftest'
+          rc=$?
+          echo 'TEST_RESULT v12_signal_and_execution exit='"$rc"
+          if [ "$rc" -ne 0 ]; then failures=$((failures + 1)); fi
+          echo '=== START_pengu_short_v20_recovery_v8 ==='
+          bash -lc 'npm run strategy:pengu-dual-ls-v2:selftest && npm run strategy:pengu-dual-ls-v2:v8-v64:selftest'
+          rc=$?
+          echo 'TEST_RESULT pengu_short_v20_recovery_v8 exit='"$rc"
+          if [ "$rc" -ne 0 ]; then failures=$((failures + 1)); fi
+          echo '=== START_q102_causal_v4 ==='
+          bash -lc 'npm run strategy:quality102-causal-v4:selftest && npm run strategy:quality102-causal-v1:signal:selftest'
+          rc=$?
+          echo 'TEST_RESULT q102_causal_v4 exit='"$rc"
+          if [ "$rc" -ne 0 ]; then failures=$((failures + 1)); fi
+          echo '=== START_shared_risk ==='
+          bash -lc 'npm run strategy:shared-crypto-risk:selftest'
+          rc=$?
+          echo 'TEST_RESULT shared_risk exit='"$rc"
+          if [ "$rc" -ne 0 ]; then failures=$((failures + 1)); fi
+          echo '=== START_cross_logic_unit_regression ==='
+          bash -lc 'npx tsx --test tests/fet-brk48-signal.test.ts tests/fet-brk48-live-runner.test.ts tests/v12-winrate-entry-gate.test.ts tests/v12_decision_observation.test.ts tests/quality102_ranking_observability.test.ts tests/pengu-q60-dd17-production-contract.test.ts tests/portfolio-dd-governor.test.ts tests/aster-global-rate-budget.test.ts tests/aster-rate-budget-policy.test.ts tests/fet-core-preemption.test.ts tests/v12-preorder-gross-reservation.test.ts'
+          rc=$?
+          echo 'TEST_RESULT cross_logic_unit_regression exit='"$rc"
+          if [ "$rc" -ne 0 ]; then failures=$((failures + 1)); fi
+          echo '=== START_v52_safety ==='
+          bash -lc 'python3 -m unittest tests/test_v52_safety_regressions.py'
+          rc=$?
+          echo 'TEST_RESULT v52_safety exit='"$rc"
+          if [ "$rc" -ne 0 ]; then failures=$((failures + 1)); fi
+          echo '=== START_typecheck ==='
+          bash -lc 'npm run strategy:v12-x1-all:typecheck'
+          rc=$?
+          echo 'TEST_RESULT typecheck exit='"$rc"
+          if [ "$rc" -ne 0 ]; then failures=$((failures + 1)); fi
+          echo 'TOTAL_FAILED_SUITES='"$failures"
+          exit "$failures"
