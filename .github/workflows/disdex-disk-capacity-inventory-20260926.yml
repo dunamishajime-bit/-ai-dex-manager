@@ -1,0 +1,77 @@
+name: DisDex targeted disk capacity and stale-release inventory
+on:
+  issue_comment:
+    types: [created]
+permissions:
+  contents: read
+jobs:
+  audit:
+    if: >-
+      github.event.issue.number == 132 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == 'DISDEX_DISK_CAPACITY_INVENTORY_20260926'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Configure approved VPS read-only transport
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Read-only targeted VPS disk usage and retention blockers
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -p "${SSH_PORT:-22}" "root@$SSH_HOST" 'python3 -' <<'PY'
+          import os,subprocess,json,pathlib,time
+          def cmd(a,seconds=12):
+           try:
+            r=subprocess.run(a,stdout=subprocess.PIPE,stderr=subprocess.PIPE,encoding="utf-8",errors="replace",timeout=seconds,check=False)
+            return {"rc":r.returncode,"text":r.stdout.strip()[:2200],"error":r.stderr.strip()[:120]}
+           except subprocess.TimeoutExpired:return {"error":"TIMEOUT_"+str(seconds)+"S"}
+           except OSError as e:return {"error":type(e).__name__}
+          print("DISK_BASELINE="+json.dumps({"df":cmd(["df","-B1","/"]),"dfInodes":cmd(["df","-i","/"]),"journal":cmd(["journalctl","--disk-usage"],8),"aptCache":cmd(["du","-sxB1","/var/cache/apt/archives"],5),"docker":cmd(["docker","system","df"],6)},ensure_ascii=False))
+          targets=["/home/deploy/disdex-trading/releases","/home/deploy/disdex-trading/ui-releases","/home/deploy/disdex-trading/runner-watchdog","/home/deploy/disdex-ops","/home/deploy/.npm","/home/deploy/.cache","/home/deploy/ai-dex-manager-v96-paper","/var/lib/disdex","/var/log","/root/.npm","/root/.cache","/var/lib/docker","/tmp"]
+          for p in targets:
+           if os.path.exists(p):
+            print("DISK_BUCKET="+json.dumps({"path":p,"size":cmd(["du","-sxB1",p],11)}))
+          root=pathlib.Path("/home/deploy/disdex-trading/releases")
+          if root.is_dir():
+           children=[]
+           for e in root.iterdir():
+            if not e.is_dir() or e.is_symlink():continue
+            st=e.stat()
+            children.append({"name":e.name,"mtimeUtc":time.strftime("%Y-%m-%dT%H:%MZ",time.gmtime(st.st_mtime))})
+           children.sort(key=lambda x:x["mtimeUtc"],reverse=True)
+           print("RELEASE_COUNTS="+json.dumps({"count":len(children),"newest":children[:8],"oldest":children[-10:]}))
+           sizeTargets=[x["name"] for x in children[:3]+children[-5:] if len(x["name"])==40]
+           for sha in dict.fromkeys(sizeTargets):
+            print("RELEASE_SAMPLE_SIZE="+json.dumps({"sha":sha,"size":cmd(["du","-sxB1",str(root/sha)],11)}))
+          for p in ["/var/log/journal","/var/log/syslog","/var/log/messages","/var/log/auth.log","/home/deploy/disdex-trading/node_modules"]:
+           try:
+            x=pathlib.Path(p)
+            if x.exists():print("DISK_PATH_EXISTS="+json.dumps({"path":p,"isDir":x.is_dir(),"sizeDirect":x.stat().st_size}))
+           except OSError:pass
+          rootUnit=pathlib.Path("/etc/systemd/system")
+          running=cmd(["systemctl","list-units","--all","--type=service","--plain","--no-legend"],10)
+          print("ACTIVE_SHA_SERVICES="+json.dumps([s[:200] for s in running.get("text","").splitlines() if "disdex-" in s and " running " in s][:18]))
+          print("DISK_AUDIT_TRADING_MUTATION=0")
+          
+          PY
