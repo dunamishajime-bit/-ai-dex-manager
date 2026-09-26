@@ -1,0 +1,67 @@
+name: Source-native current VPS V12 Top3 HC1.75 and FET history recovery
+on:
+  push:
+    branches: [research/recover-final-governor-bt-20260926]
+    paths:
+      - scripts/research/native_current_v12_fet_candidates_20260926.ts
+      - .github/workflows/native-current-v12-fet-candidate-recovery-20260926.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  actual-native-signal-replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 85
+    steps:
+      - name: Checkout recovery adapter only
+        uses: actions/checkout@v4
+      - name: Checkout byte-matched current VPS production original SHA
+        uses: actions/checkout@v4
+        with:
+          ref: e1b58060d6263a3af7ced51bec854d3e211d2f35
+          path: .source
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: .source/package-lock.json
+      - name: Install exact production dependency lockfile
+        working-directory: .source
+        run: npm ci
+      - name: Stage only research adapter into the source-frozen isolated checkout
+        run: |
+          set -Eeuo pipefail
+          mkdir -p .source/scripts/research
+          cp scripts/research/native_current_v12_fet_candidates_20260926.ts .source/scripts/research/
+          test "$(git -C .source rev-parse HEAD)" = e1b58060d6263a3af7ced51bec854d3e211d2f35
+      - name: Re-download Aster public H1 and invoke production-native signal source
+        working-directory: .source
+        run: |
+          set -o pipefail
+          npx --no-install tsx scripts/research/native_current_v12_fet_candidates_20260926.ts \
+            2>&1 | tee current-native-signal-export.log
+      - name: Print source-backed signal results
+        if: always()
+        working-directory: .source
+        run: |
+          if [ -f .research-state/current-vps-native-v12-fet/summary.json ]; then
+            python3 - <<'PY'
+          import json
+          x=json.load(open('.research-state/current-vps-native-v12-fet/summary.json'))
+          print('CURRENT_VPS_NATIVE_SOURCE_OUTPUT',json.dumps({
+           'sha':x['sourceCommit'],'candidateCounts':x['candidateCounts'],
+           'dataSymbols':len(x['marketRows']),'marketBars':sum(x['marketRows'].values()),
+           'qualifications':x['qualifications']},ensure_ascii=False))
+          PY
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: current-vps-source-native-v12-fet-h1-candidates-20260926
+          path: |
+            .source/.research-state/current-vps-native-v12-fet/
+            .source/current-native-signal-export.log
+          include-hidden-files: true
+          retention-days: 90
+          if-no-files-found: warn
