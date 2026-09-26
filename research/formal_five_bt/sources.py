@@ -616,19 +616,82 @@ def fetch_fred_dexjpus(
     if end_date < start_date:
         raise ValueError("end_date precedes start_date")
     query = urlencode({"id": "DEXJPUS", "cosd": start_date.isoformat(), "coed": end_date.isoformat()})
-    url = f"{SUPPORTED_SOURCES['fred']}/graph/fredgraph.csv?{query}"
-    raw = (fetch or fetch_bytes)(url)
-    observations = []
-    for row in csv.DictReader(io.StringIO(raw.decode("utf-8-sig"))):
-        value = row.get("DEXJPUS")
-        if not value or value == ".":
+    primary = f"{SUPPORTED_SOURCES['fred']}/graph/fredgraph.csv?{query}"
+    # The bounded date-query failed on GitHub Actions while the public, full
+    # single-series FRED CSV and official Fed H.10 daily-rates package both
+    # returned 2025/26 observations with valid headers. Use those as read-only
+    # official no-key fallbacks; never fabricate or interpolate an FX rate.
+    full_series = f"{SUPPORTED_SOURCES['fred']}/graph/fredgraph.csv?id=DEXJPUS"
+    federal_h10 = (
+        "https://www.federalreserve.gov/datadownload/Output.aspx?"
+        "rel=H10&series=60f32914ab61dfab590e0e470153e3ae"
+        "&lastobs=700&filetype=csv&label=include&layout=seriescolumn&type=package"
+    )
+    attempts = [(primary, "FRED_DEXJPUS")] if fetch is not None else [
+        (full_series, "FRED_DEXJPUS"),
+        (primary, "FRED_DEXJPUS"),
+        (federal_h10, "FEDERAL_RESERVE_H10_REVISED"),
+    ]
+    for index, (url, kind) in enumerate(attempts):
+        try:
+            raw = (fetch or fetch_bytes)(url)
+            lines = list(csv.reader(io.StringIO(raw.decode("utf-8-sig"))))
+            if kind == "FEDERAL_RESERVE_H10_REVISED":
+                headers = next((i for i, cells in enumerate(lines)
+                    if cells and cells[0].strip() == "Time Period"
+                    and "RXI_N.B.JA" in [cell.strip() for cell in cells]), None)
+                if headers is None:
+                    raise ValueError("FED_H10_JAPANESE_YEN_COLUMN_NOT_FOUND")
+                names = [cell.strip() for cell in lines[headers]]
+                value_column = names.index("RXI_N.B.JA")
+                date_column = 0
+                data = lines[headers + 1:]
+            else:
+                if not lines or not {"observation_date", "DEXJPUS"}.issubset(
+                    {cell.strip() for cell in lines[0]}
+                ):
+                    raise ValueError("FRED_DEXJPUS_CSV_HEADER_MISMATCH")
+                names = [cell.strip() for cell in lines[0]]
+                date_column, value_column = (
+                    names.index("observation_date"), names.index("DEXJPUS")
+                )
+                data = lines[1:]
+            observations = []
+            for cells in data:
+                if max(date_column, value_column) >= len(cells):
+                    continue
+                datum, value = cells[date_column].strip(), cells[value_column].strip()
+                if not value or value in {".", "ND", "N/A"}:
+                    continue
+                try:
+                    at = date.fromisoformat(datum)
+                except ValueError:
+                    # FRED/H.10 release metadata is not a dated observation.
+                    continue
+                if not start_date <= at <= end_date:
+                    continue
+                rate = float(value)
+                if not math.isfinite(rate) or rate <= 0:
+                    raise ValueError("OFFICIAL_FX_RATE_INVALID")
+                ts = int(datetime(at.year, at.month, at.day,
+                                  tzinfo=timezone.utc).timestamp() * 1000) + 86_400_000 - 1
+                observations.append({
+                    "event_time_ms": ts, "source_time_ms": ts,
+                    "rate_jpy_per_usd": rate,
+                })
+            if not observations:
+                raise ValueError("OFFICIAL_FX_NO_OBSERVATIONS_IN_REQUESTED_RANGE")
+            if any(later["event_time_ms"] <= earlier["event_time_ms"]
+                   for earlier, later in zip(observations, observations[1:])):
+                raise ValueError("OFFICIAL_FX_DATES_NOT_STRICTLY_INCREASING")
+            return FxAcquisition(
+                observations, hashlib.sha256(raw).hexdigest(), url, raw
+            )
+        except (RuntimeError, ValueError, UnicodeError, IndexError):
+            if index == len(attempts) - 1:
+                raise RuntimeError("ALL_APPROVED_OFFICIAL_USDJPY_SOURCES_UNAVAILABLE") from None
             continue
-        # FRED publishes date-only observations; treating them as available at
-        # 00:00 UTC would leak same-day values into earlier UTC valuations.
-        dt = datetime.strptime(row["observation_date"], "%Y-%m-%d").replace(tzinfo=timezone.utc)
-        ts = int(dt.timestamp() * 1000) + 86_400_000 - 1
-        observations.append({"event_time_ms": ts, "source_time_ms": ts, "rate_jpy_per_usd": float(value)})
-    return FxAcquisition(observations, hashlib.sha256(raw).hexdigest(), url, raw)
+    raise RuntimeError("ALL_APPROVED_OFFICIAL_USDJPY_SOURCES_UNAVAILABLE")
 
 
 def alpaca_iex_quote_headers(environ: Mapping[str, str] | None = None) -> dict[str, str]:

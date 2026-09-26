@@ -8,6 +8,8 @@ on:
       - .github/workflows/formal-seven-source-ci-20260927.yml
       - research/formal_five_bt/engine.py
       - research/formal_five_bt/acquire.py
+      - research/formal_five_bt/sources.py
+      - tests/formal_five_bt/test_sources_and_calendar.py
 permissions:
   contents: read
 jobs:
@@ -43,6 +45,7 @@ jobs:
           python -m research.formal_five_bt.seven_source --output-root "$SEVEN_BT_SOURCE_ROOT"
           python -m unittest discover -s tests/formal_five_bt -p 'test_seven_*.py' -v
           python -m unittest discover -s tests/formal_five_bt -p 'test_engine.py' -v
+          python -m unittest discover -s tests/formal_five_bt -p 'test_sources_and_calendar.py' -v
           printf '%s\n' '{"op":"audit"}' | node research/formal_five_bt/seven_runtime_bridge.mjs > "$RUNNER_TEMP/seven-audit.jsonl"
           python - <<'PY'
           import json,os

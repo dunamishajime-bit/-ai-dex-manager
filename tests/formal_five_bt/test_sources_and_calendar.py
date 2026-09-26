@@ -168,6 +168,43 @@ class SourceAndCalendarTests(unittest.TestCase):
         self.assertEqual(okx_fetch.call_args_list[0].args[2]["after"], 3 * hour + 1)
         self.assertNotIn("before", okx_fetch.call_args_list[0].args[2])
 
+    def test_official_usdjpy_full_series_fallback_is_pinned_and_asof_safe(self) -> None:
+        import hashlib
+        from unittest.mock import patch
+        primary_urls = []
+        full = b"observation_date,DEXJPUS\\n2025-08-08,147.25\\n2025-08-10,148.5\\n2026-09-01,220\\n"
+        def sample(url):
+            primary_urls.append(url)
+            if "?id=DEXJPUS" in url:
+                return full
+            raise RuntimeError("BOUNDED_COSD_QUERY_FAILED")
+        from research.formal_five_bt import sources
+        with patch.object(sources, "fetch_bytes", side_effect=sample):
+            result = sources.fetch_fred_dexjpus(date(2025, 8, 8), date(2025, 8, 11))
+        self.assertEqual(len(result.observations), 2)
+        self.assertEqual(result.observations[0]["rate_jpy_per_usd"], 147.25)
+        self.assertEqual(result.raw_sha256, hashlib.sha256(full).hexdigest())
+        self.assertIn("id=DEXJPUS", result.source_url)
+
+    def test_official_fed_h10_last_fallback_can_supply_verified_jpy_only(self) -> None:
+        import hashlib
+        from unittest.mock import patch
+        # The real H10 package has metadata before the Time Period header.
+        package = ("Unit: ,Japanese Yen,Other\\n"
+                   "Time Period,RXI_N.B.JA,RXI_N.B.AL\\n"
+                   "2025-08-08,147.25,0.5\\n"
+                   "2025-08-11,147.80,0.6\\n").encode("utf-8")
+        from research.formal_five_bt import sources
+        def only_fed(url):
+            if "federalreserve.gov" not in url:
+                raise RuntimeError("FRED_TRANSPORT_DOWN")
+            return package
+        with patch.object(sources, "fetch_bytes", side_effect=only_fed):
+            result = sources.fetch_fred_dexjpus(date(2025, 8, 8), date(2025, 8, 11))
+        self.assertEqual(len(result.observations), 2)
+        self.assertTrue(result.source_url.startswith("https://www.federalreserve.gov"))
+        self.assertEqual(result.observations[-1]["rate_jpy_per_usd"],147.8)
+
     def test_fred_rates_keep_response_hash_and_ignore_missing_observations(self) -> None:
         raw = b"observation_date,DEXJPUS\n2025-08-10,147.25\n2025-08-11,.\n"
         result = fetch_fred_dexjpus(date(2025, 8, 10), date(2025, 8, 11), fetch=lambda _url: raw)
