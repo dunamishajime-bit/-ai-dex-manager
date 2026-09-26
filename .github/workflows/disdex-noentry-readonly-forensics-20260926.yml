@@ -1,0 +1,124 @@
+name: DisDex No Entry Read Only Forensics
+on:
+  issue_comment:
+    types: [created]
+permissions:
+  contents: read
+jobs:
+  audit:
+    if: >-
+      github.event.issue.number == 132 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == 'DISDEX_NOENTRY_FORENSIC_AUDIT_20260926'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Configure SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          root=Path.home()/'.ssh'
+          for name,target in [('ROOT_KEY','id_root'),('SSH_KNOWN_HOSTS','known_hosts')]:
+              (root/target).write_text(os.environ[name].lstrip('\ufeff').replace('\r\n','\n').replace('\r','\n').strip()+'\n')
+          PY
+          chmod 600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Production read-only per-symbol decision and order-path diagnosis
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -o ConnectTimeout=15 \
+            -p "${SSH_PORT:-22}" "root@$SSH_HOST" 'python3 -' <<'PY'
+          import json,os,re,subprocess,time,collections
+          from pathlib import Path
+          now=time.time()
+          root=Path("/home/deploy/disdex-trading/current")
+          sha=(root/".disdex-release-sha").read_text().strip()
+          assert re.fullmatch(r"[0-9a-f]{40}",sha),"BAD_RELEASE_SHA"
+          print("AUDIT_CURRENT_SHA",sha)
+          def out(tag,value):print(tag,json.dumps(value,ensure_ascii=False,separators=(",",":"),default=str))
+          def snap(path,kind):
+           p=Path(path)
+           if not p.is_file():out("SNAPSHOT_MISSING",{"kind":kind,"path":str(p)});return
+           try:o=json.loads(p.read_text())
+           except Exception as e:out("SNAPSHOT_PARSE_ERROR",{"kind":kind,"error":type(e).__name__});return
+           base={"kind":kind,"ageSec":round(now-p.stat().st_mtime),"size":p.stat().st_size}
+           if kind=="V12":
+            for k in ["observedAt","selectedAt","referenceTs","entryTs","regime","btcRegime","reason","symbol","side","rank","score"]:base[k]=o.get(k)
+            c=o.get("candidates") or []
+            base["candidateCount"]=len(c)
+            base["reasonCounts"]=dict(collections.Counter(str(x.get("signalReason")) for x in c if isinstance(x,dict)))
+            base["eligibleCount"]=sum(bool(x.get("signalEligible")) for x in c if isinstance(x,dict))
+            out("V12_SNAPSHOT",base)
+            for x in c[:45]:
+             if isinstance(x,dict):out("V12_CANDIDATE",{k:x.get(k) for k in ["symbol","side","rank","portfolioRank","score","momentum","volumeRatio","signalEligible","signalReason","entryGateReason","highConfidence"]})
+           else:
+            for k in ["schemaVersion","strategyId","selectorMode","runtimeCommitSha","capturedAt","decisionTs","referenceTs","selectedSymbol","selectedFamily","selectedReason","rankingCapturedAt","observerCommitSha"]:base[k]=o.get(k)
+            c=o.get("items") or []
+            base["symbolCount"]=len(c)
+            base["reasonCounts"]=dict(collections.Counter(str(x.get("reason")) for x in c if isinstance(x,dict)))
+            base["stageCounts"]=dict(collections.Counter(str(x.get("rankingStage")) for x in c if isinstance(x,dict)))
+            base["eligibleCount"]=sum(bool(x.get("eligible")) for x in c if isinstance(x,dict))
+            out(kind+"_SNAPSHOT",base)
+            items=sorted([x for x in c if isinstance(x,dict)],key=lambda x:(-float(x.get("rankingScore") or 0),str(x.get("symbol") or "")))
+            for x in items[:45]:out(kind+"_SYMBOL",{k:x.get(k) for k in ["symbol","eligible","side","family","layer","variant","requestedGross","reason","selected","rankingScore","rankingRank","rankingFamily","rankingStage","rankingReason"]})
+          snap("/var/lib/disdex/v12-x1-all/decision-snapshot.json","V12")
+          snap("/var/lib/disdex/quality102-causal-v1/decision-snapshot.json","Q102")
+          snap("/var/lib/disdex/quality102-causal-v1/decision-ranking-snapshot.json","Q102_RANKING")
+          u={"V12":"disdex-v12-x1-all","PENGU":"disdex-pengu-dual-ls-v2","Q102":"disdex-quality102-causal-v1","FET":"disdex-fet-brk48","V52":"disdex-v52-aster-only","SHARED_RISK":"disdex-shared-crypto-risk","MARGIN_GUARD":"disdex-v12-v52-margin-guard","Q102_RANKING_OBSERVER":"disdex-quality102-ranking-observer"}
+          for name,base in u.items():
+           unit=base+"@"+sha+".service"
+           s=subprocess.run(["systemctl","show",unit,"-p","ActiveState","-p","SubState","-p","Result","-p","NRestarts","-p","MainPID"],capture_output=True,text=True)
+           out("SYSTEMD",{"strategy":name,"status":s.stdout.strip().replace("\n",";")})
+           r=subprocess.run(["journalctl","-u",unit,"--since","12 hours ago","-n","1500","-o","cat","--no-pager"],capture_output=True,text=True,errors="replace")
+           events=[];notes=[]
+           for line in r.stdout.splitlines():
+            line=line.strip()
+            if not line:continue
+            try:
+             obj=json.loads(line)
+             if isinstance(obj,dict):events.append(obj)
+            except Exception:
+             if re.search(r"(ERROR|FAIL|BLOCK|STALE|RATE|LOCK|FATAL|hold)",line,re.I):notes.append(line[:180])
+           counts=collections.Counter(str(e.get("status") or e.get("event") or e.get("level") or "-") for e in events)
+           reasons=collections.Counter(str(e.get("reason") or e.get("message") or "")[:100] for e in events if e.get("status") in ("no-signal","no-change","held","blocked","failed","locked"))
+           out("JOURNAL_SUMMARY",{"strategy":name,"total":len(events),"counts":counts.most_common(15),"reasons":reasons.most_common(15),"nonJsonAlerts":notes[-8:]})
+           for e in events[-3:]:
+            row={k:e.get(k) for k in ["timestamp","status","event","reason","message","ordersAllowed","newOrdersAllowed","stage","tripped","lossPct","maximumLossPct","ordersSent"] if k in e}
+            if name=="PENGU":
+             sig=e.get("signal") or {}
+             row["signal"]={k:sig.get(k) for k in ["side","reason","targetGross"] if k in sig}
+             f=sig.get("features") or {};row["features"]={k:f.get(k) for k in ["penguReturn24h","btcReturn24h","relativeReturn24h","volumeRatio6OverPrior36","rsi14"] if k in f}
+             d=sig.get("diagnostics") or {};row["diagnostics"]={k:d.get(k) for k in ["edgeTriggered","longEligible","shortEligible","cooldownBlocked","shortSetupActive"] if k in d}
+            if name=="Q102":
+             sig=e.get("signal") or {};row["signal"]={k:sig.get(k) for k in ["side","reason","requestedGross","referenceTs","dataCutoffTs"] if k in sig}
+            if name=="SHARED_RISK":
+             d=e.get("portfolioDdGovernor") or {};row["dd"]={k:d.get(k) for k in ["currentDrawdownPct","twrIndex","twrPeak","closedEvents"] if k in d}
+            out("LATEST_JOURNAL",{"strategy":name,**row})
+          for name,p in [("KILL_SWITCH","/var/lib/disdex/shared/kill-switch.json"),("ACCOUNT_LOCK","/var/lib/disdex/shared/account-order.lock"),("RATE_BUDGET","/var/lib/disdex/shared/aster-rate-budget.json"),("OPERATOR_ACTIVATION","/var/lib/disdex/shared/operator-activation/current.json")]:
+           f=Path(p)
+           if not f.exists():out("FILE_STATUS",{"name":name,"exists":False});continue
+           st=f.stat()
+           row={"name":name,"exists":True,"ageSec":round(now-st.st_mtime),"bytes":st.st_size,"isDirectory":f.is_dir()}
+           if name=="KILL_SWITCH" and f.is_file():
+            try:
+             v=json.loads(f.read_text())
+             for k in ["active","mode","stage","reason","updatedAt"]:row[k]=v.get(k)
+            except Exception:row["parse"]="FAILED"
+           out("FILE_STATUS",row)
+          for args in [["df","-h","/"],["df","-i","/"]]:
+           x=subprocess.run(args,capture_output=True,text=True)
+           out("DISK",{"command":" ".join(args),"summary":x.stdout.strip()})
+          print("AUDIT_MUTATION=0");print("AUDIT_COMPLETE")
+          PY
