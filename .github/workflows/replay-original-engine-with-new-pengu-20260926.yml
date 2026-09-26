@@ -1,0 +1,91 @@
+name: Compare actual source-native new PENGU inside restored original five-sleeve Python engine
+on:
+  push:
+    branches: [research/recover-final-governor-bt-20260926]
+    paths: [.github/workflows/replay-original-engine-with-new-pengu-20260926.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  original-engine-new-pengu:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 105
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 9f51d5876fd7c7924b3c99dc1934336bdd832852
+      - uses: actions/checkout@v4
+        with:
+          ref: research/recover-final-governor-bt-20260926
+          path: .restoration-tools
+      - uses: actions/checkout@v4
+        with:
+          ref: 04c1a369223bd27e9e42bc93604b3777b9230d92
+          path: .stock-research
+      - uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .stock-research/.v11
+      - uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .stock-research/.v13
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Restore untouched original engine
+        uses: actions/download-artifact@v4
+        with:
+          name: pengu-integrated-engine-capture
+          path: .research-state/old-engine
+          github-token: ${{ github.token }}
+          repository: dunamishajime-bit/-ai-dex-manager
+          run-id: 35934170491
+      - name: Restore old native V12 / PENGU pair
+        uses: actions/download-artifact@v4
+        with:
+          name: flat-boost-preemption-35337138289
+          path: .research-state/sep18
+          github-token: ${{ github.token }}
+          repository: dunamishajime-bit/-ai-dex-manager
+          run-id: 35337138289
+      - name: Restore successfully re-downloaded historical V52 candidates and frozen Q102
+        uses: actions/download-artifact@v4
+        with:
+          name: old-source-refreshed-stock-restoration-20260926
+          path: .research-state/old-restored
+          github-token: ${{ github.token }}
+          repository: dunamishajime-bit/-ai-dex-manager
+          run-id: 36215106356
+      - name: Restore source-native new PENGU 69/68 event ledger
+        uses: actions/download-artifact@v4
+        with:
+          name: original-new-pengu-q60-dd17-h72-ledger-20260926
+          path: .research-state/pengu-native
+          github-token: ${{ github.token }}
+          repository: dunamishajime-bit/-ai-dex-manager
+          run-id: 36215236060
+      - name: Verify downloaded files; compute old vs new PENGU in original portfolio engine
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p .research-state/replayed
+          python3 .restoration-tools/scripts/research/old_engine_new_pengu_replay.py \
+            --engine .research-state/old-engine/integrated-engine.py \
+            --v12 .research-state/sep18/flat-boost-current/v12-top2-ledger.json \
+            --old-pengu .research-state/sep18/flat-boost-preemption/pengu-hard24-ledger.json \
+            --new-pengu .research-state/pengu-native/.research-state/pengu-flat1-dd-q60-robustness/preserved-new-pengu-ledger.json \
+            --stock .research-state/old-restored/restored-results/stock/old-stock-raw.json \
+            --frozen .research-state/old-restored/original/quality102-frozen.csv \
+            --stage1-baseline .research-state/old-restored/restored-results/sep18/result.json \
+            --output .research-state/replayed/old-vs-new-pengu-portfolio.json \
+            > .research-state/replayed/replay.log 2>&1 || { tail -n 65 .research-state/replayed/replay.log; exit 1; }
+          grep -E 'SCENARIO_COMPARISON|COMPLETED' .research-state/replayed/replay.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: restored-old-engine-vs-new-pengu-native-and-gross-sensitivity-20260926
+          path: .research-state/replayed/
+          retention-days: 90
+          if-no-files-found: warn
