@@ -1,5 +1,10 @@
 name: Research original V50 current B60 OHLC candidate audit
 on:
+  push:
+    branches: [research/recover-final-governor-bt-20260926]
+    paths:
+      - scripts/research/source_original_v50_b60_aster_yahoo_20260926.py
+      - .github/workflows/source-original-current-v52-b60-20260926.yml
   workflow_dispatch:
 permissions:
   contents: read
