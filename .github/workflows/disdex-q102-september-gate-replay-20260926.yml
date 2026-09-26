@@ -1,0 +1,81 @@
+name: DisDex Q102 frozen-month causal gate research
+on:
+  issue_comment:
+    types: [created]
+permissions:
+  contents: read
+jobs:
+  audit:
+    if: >-
+      github.event.issue.number == 132 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == 'DISDEX_Q102_SEPT_GATE_REPLAY_20260926'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 28
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Configure approved VPS read-only transport
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Checkout research at audited production-lineage SHA
+        uses: actions/checkout@v4
+        with:
+          ref: 52ea70ec90d0fc28dd37f0a12aa21feb444580a1
+      - name: Set up Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install pinned research dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Transfer read-only historical public candles and ranking snapshot to ephemeral runner
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          scp -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -P "${SSH_PORT:-22}" \
+            "root@$SSH_HOST:/var/lib/disdex/quality102-causal-v1/market-history.json" q102-market-history.json
+          scp -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -P "${SSH_PORT:-22}" \
+            "root@$SSH_HOST:/var/lib/disdex/quality102-causal-v1/decision-ranking-snapshot.json" q102-ranking.json
+          test -s q102-market-history.json
+          test -s q102-ranking.json
+          echo 'Q102_DATA_READONLY_FETCH_PASS'
+      - name: Strict feature parity and frozen September monthly-rule candidate and exit comparison
+        env:
+          Q102_HISTORY_PATH: q102-market-history.json
+          Q102_SNAPSHOT_PATH: q102-ranking.json
+          Q102_RESEARCH_OUT: q102-september-gate-sensitivity-20260926.json
+        run: |
+          set -Eeuo pipefail
+          npx tsx scripts/research-q102-september-gate-sensitivity-20260926.ts
+      - name: Scrub downloaded raw market history
+        if: always()
+        run: |
+          rm -f q102-market-history.json q102-ranking.json
+      - name: Archive summary report only, never raw market history
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: disdex-q102-frozen-september-gate-20260926
+          path: q102-september-gate-sensitivity-20260926.json
+          if-no-files-found: warn
+          retention-days: 14
