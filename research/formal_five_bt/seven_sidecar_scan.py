@@ -99,7 +99,7 @@ class SevenBridge:
         self.proc.stdin.write(json.dumps(payload,separators=(",",":"),allow_nan=False)+"\n")
         self.proc.stdin.flush()
         line=self.proc.stdout.readline()
-        if not line:raise RuntimeError("SEVEN_BT_BRIDGE_NO_RESPONSE")
+        if not line:\n            stderr = self.proc.stderr.read()[-1400:] if self.proc.poll() is not None and self.proc.stderr else "UNKNOWN_NODE_BRIDGE_SHUTDOWN"\n            raise RuntimeError("SEVEN_BT_BRIDGE_NO_RESPONSE:" + stderr)
         parsed=json.loads(line)
         if parsed.get("ok") is not True:raise RuntimeError("SEVEN_BT_SOURCE:"+str(parsed.get("error")))
         return parsed["result"]
