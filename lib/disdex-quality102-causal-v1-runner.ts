@@ -35,6 +35,7 @@ import {
 import { isAsterDepositRequirementError } from "@/lib/aster-v3-client";
 import { classifyAsterRateBudgetFailure } from "@/lib/disdex-aster-rate-budget-policy";
 import { quality102GovernorGross, readPortfolioDdGovernor } from "@/lib/disdex-portfolio-dd-governor";
+import { aggregatePendingExposure, readPendingExposureRegistry } from "@/lib/disdex-pending-exposure-registry";
 import { classifyAsterSymbol } from "@/lib/disdex-aster-portfolio-classifier";
 import { findManagedFetBrk48ProtectiveOrders, findManagedPenguRecoveryV8ProtectiveOrders, findManagedV12ProtectiveOrders } from "@/lib/disdex-managed-protective-orders";
 import { reduceV12DynamicResidualForCoreConflict } from "@/lib/v12-dynamic-residual-live-reduction";
@@ -514,7 +515,7 @@ export class Quality102CausalV1Runner {
         return trim.status === "reduced" && trim.trimmedGross > EPSILON;
     }
 
-    private async integratedGrossContext(now: number, account: DirectAccountSnapshot) {
+    private async integratedGrossContext(now: number, account: DirectAccountSnapshot, excludeCurrentQ102Pending = false) {
         const riskPath = String(this.dependencies.config.sharedDailyRiskPath || "").trim();
         const risk = riskPath
             ? await readSharedCryptoDailyRisk(riskPath, now).catch(() => ({ ok: false as const }))
@@ -527,6 +528,10 @@ export class Quality102CausalV1Runner {
             availableBalanceUsd: account.availableBalance,
             sharedDailyRisk: risk.ok ? risk.state : undefined,
             portfolioDdGovernor,
+            pendingExposure: aggregatePendingExposure(
+                await readPendingExposureRegistry(),
+                excludeCurrentQ102Pending ? { excludeStrategyIds: [STRATEGY_ID] } : undefined,
+            ),
         };
     }
 
@@ -801,7 +806,7 @@ export class Quality102CausalV1Runner {
         if (!pending.reduceOnly) {
             if (live.unmanagedOpenOrders.length > 0) throw new Error("Q102_BASE_OR_OTHER_OPEN_ORDER_CONFLICT");
             const targetGross = positive(pending.targetGross, "Q102 pending targetGross");
-            const grossContext = await this.integratedGrossContext(now, live.account);
+            const grossContext = await this.integratedGrossContext(now, live.account, true);
             const planner = planStrictPortfolio({
                 equity: live.equity,
                 now,

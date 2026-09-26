@@ -582,6 +582,7 @@ export class V12LiveExecutionEngine {
         };
         state.pending = pending; await this.d.stateStore.save(state);
         let result: DirectTradeResult;
+        let releaseExposureReservation = false;
         try {
             result = await this.d.adapter.executeEntry({ signalTs: signal.referenceTs, symbol, side: signal.side, quantity, expectedPrice, clientOrderId });
         } catch (error) {
@@ -590,6 +591,7 @@ export class V12LiveExecutionEngine {
                 state.pending = undefined;
                 state.lastCompletedIdempotencyKey = clientOrderId;
                 await this.d.stateStore.save(state);
+                releaseExposureReservation = true;
                 this.log("v12-entry-capacity-blocked", {
                     reason,
                     symbol,
@@ -603,10 +605,16 @@ export class V12LiveExecutionEngine {
             }
             throw error;
         } finally {
-            await handle.releaseReservation(reservation.reservationId);
+            if (releaseExposureReservation) await handle.releaseReservation(reservation.reservationId);
         }
         if (result.status === "UNKNOWN") return this.fail(state, `V12_ENTRY_UNKNOWN:${clientOrderId}`);
-        if (!resultHasExposure(result)) { state.pending = undefined; state.lastCompletedIdempotencyKey = clientOrderId; await this.d.stateStore.save(state); return { status: "held", reason: `ENTRY_${result.status}_NO_RETRY`, signal, clientOrderId }; }
+        if (!resultHasExposure(result)) {
+            state.pending = undefined;
+            state.lastCompletedIdempotencyKey = clientOrderId;
+            await this.d.stateStore.save(state);
+            await handle.releaseReservation(reservation.reservationId);
+            return { status: "held", reason: `ENTRY_${result.status}_NO_RETRY`, signal, clientOrderId };
+        }
         const refreshed = await this.d.adapter.getPositions(); const actual = refreshed.find((row) => row.symbol.toUpperCase() === symbol && Math.abs(row.quantity) > EPS);
         if (!actual || actualSide(actual) !== signal.side) return this.fail(state, "V12_ENTRY_FILL_POSITION_MISMATCH");
         const entryPrice = actual.entryPrice > 0 ? actual.entryPrice : result.averagePrice; const protectionState = initialProtection({ symbol, side: signal.side, quantity: actualQuantity(actual), entryPrice, atr: signal.atr, positionId: clientOrderId });
@@ -639,6 +647,7 @@ export class V12LiveExecutionEngine {
         const installed = await installV12Protection(this.d.adapter, protectionState);
         if (installed.manualReview) return this.fail(state, installed.manualReview);
         syncActivePositions(state, activePositionsOf(state).map((row) => row.positionId === clientOrderId ? { ...row, protection: installed } : row)); state.pending = undefined; state.lastCompletedIdempotencyKey = clientOrderId; await this.d.stateStore.save(state);
+        await handle.releaseReservation(reservation.reservationId);
         return { status: "entered", reason: result.status === "PARTIALLY_FILLED" ? "PARTIAL_FILL_PROTECTED" : "ENTRY_FILLED_AND_PROTECTED", signal, clientOrderId };
     }
 

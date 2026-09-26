@@ -20,6 +20,7 @@ LIVE_STATE_FILES=(
   "/var/lib/disdex/v52-aster-only/runner-live.json"
 )
 RUNTIME_CONTRACT_ENV_DIR="/etc/disdex/current-runtime"
+PENDING_EXPOSURE_REGISTRY_PATH="${SHARED_ROOT}/pending-exposure.json"
 WATCHDOG_DROPIN_DIR="/etc/systemd/system/disdex-runner-watchdog.service.d"
 SNAPSHOT_DROPIN_DIR="/etc/systemd/system/disdex-runner-health-snapshot.service.d"
 POSITION_RECOVERY_DROPIN_DIR="/etc/systemd/system/disdex-runner-position-recovery.service.d"
@@ -37,6 +38,22 @@ FET_DROPIN_DIR="/etc/systemd/system/disdex-fet-brk48@CURRENT.service.d"
 MARGIN_DROPIN_DIR="/etc/systemd/system/disdex-v12-v52-margin-guard@CURRENT.service.d"
 V52_DROPIN_DIR="/etc/systemd/system/disdex-v52-aster-only@CURRENT.service.d"
 SHARED_RISK_DROPIN_DIR="/etc/systemd/system/disdex-shared-crypto-risk@CURRENT.service.d"
+# These exact legacy supervisors must never coexist with the SHA-pinned current
+# runtime. Historical source/config files remain installed for rollback and
+# research, but an active legacy service is a hard wiring conflict.
+LEGACY_LIVE_UNITS=(
+  "disdex-v96-v52-live.service"
+  "disdex-v13d-v11eq-v96.service"
+  "disdex-v46-live.service"
+  "disdex-pengu-dual-ls-v2-v20.service"
+  "disdex-v12-x1-all.service"
+  "disdex-pengu-dual-ls-v2.service"
+  "disdex-quality102-causal-v1.service"
+  "disdex-fet-brk48.service"
+  "disdex-v52-aster-only.service"
+  "disdex-shared-crypto-risk.service"
+  "disdex-v12-v52-margin-guard.service"
+)
 SELF_TEST_FIXTURE=''
 
 usage() {
@@ -83,6 +100,25 @@ resolve_current() {
     return 1
   }
   validate_release_artifacts
+  NODE_MODULES_SOURCE_SHA="$(dependency_source_sha "$CURRENT_RELEASE/node_modules")"
+  PYTHON_RUNTIME_SOURCE_SHA="$(dependency_source_sha "$CURRENT_RELEASE/.venv2")"
+}
+
+dependency_source_sha() {
+  local dependency_path="$1" resolved target_root target_marker
+  if [[ -L "$dependency_path" ]]; then
+    resolved="$(readlink -f -- "$dependency_path")"
+    target_root="$(dirname -- "$resolved")"
+    target="$(basename -- "$target_root")"
+    target_marker="$(tr -d '[:space:]' < "$target_root/.disdex-release-sha")"
+    [[ "$target" == "$target_marker" ]] || {
+      printf 'dependency source marker mismatch: %s -> %s marker=%s\n' "$dependency_path" "$target_root" "$target_marker" >&2
+      return 1
+    }
+    printf '%s' "$target"
+    return 0
+  fi
+  printf '%s' "$DEPLOYED_SHA"
 }
 
 validate_release_artifacts() {
@@ -203,6 +239,8 @@ show_plan() {
   printf 'contractEnvFile=%s\n' "$CONTRACT_ENV_FILE"
   printf 'healthSnapshotEnvFile=%s\n' "$HEALTH_SNAPSHOT_ENV_FILE"
   printf 'watchdogEnvFile=%s\n' "$WATCHDOG_ENV_FILE"
+  printf 'nodeModulesSourceSha=%s\n' "$NODE_MODULES_SOURCE_SHA"
+  printf 'pythonRuntimeSourceSha=%s\n' "$PYTHON_RUNTIME_SOURCE_SHA"
   printf 'watchdogDropin=%s/%s\n' "$WATCHDOG_DROPIN_DIR" "$CURRENT_SUPPORT_OVERRIDE"
   printf 'healthSnapshotDropin=%s/%s\n' "$SNAPSHOT_DROPIN_DIR" "$CURRENT_SUPPORT_OVERRIDE"
   printf 'positionRecoveryDropin=%s/%s\n' "$POSITION_RECOVERY_DROPIN_DIR" "$CURRENT_SUPPORT_OVERRIDE"
@@ -226,6 +264,18 @@ check_units() {
       printf 'required current unit is not loaded: %s\n' "$unit" >&2
       return 1
     }
+  done
+}
+
+assert_no_legacy_live_units() {
+  local unit load_state active_state
+  for unit in "${LEGACY_LIVE_UNITS[@]}"; do
+    load_state="$(systemctl show "$unit" -p LoadState --value 2>/dev/null || true)"
+    active_state="$(systemctl show "$unit" -p ActiveState --value 2>/dev/null || true)"
+    if [[ "$load_state" == "loaded" && "$active_state" != "" && "$active_state" != "inactive" && "$active_state" != "failed" ]]; then
+      printf 'LEGACY_LIVE_CONFLICT unit=%s loadState=%s activeState=%s\n' "$unit" "$load_state" "$active_state" >&2
+      return 1
+    fi
   done
 }
 
@@ -388,6 +438,7 @@ operator_activation_all_trading_ready() {
 
 apply_wiring() {
   require_root_for_apply
+  assert_no_legacy_live_units
   assert_current_live_target_ready
   install -d -o deploy -g deploy -m 2770 /var/lib/disdex/shared
   install -d -o root -g root -m 0755 "${SHARED_ROOT}/operator-activation"
@@ -423,6 +474,9 @@ DISDEX_SHARED_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json
 DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH=${SHARED_ROOT}/aster-rate-budget.json
 DISDEX_ASTER_GLOBAL_MIN_INTERVAL_MS=50
 DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS=5000
+DISDEX_PENDING_EXPOSURE_REGISTRY_PATH=${PENDING_EXPOSURE_REGISTRY_PATH}
+DISDEX_NODE_MODULES_SOURCE_SHA=${NODE_MODULES_SOURCE_SHA}
+DISDEX_PYTHON_RUNTIME_SOURCE_SHA=${PYTHON_RUNTIME_SOURCE_SHA}
 V12_LIVE_COMMIT_SHA=${DEPLOYED_SHA}
 V12_LIVE_ACK=${DEPLOYED_SHA}
 STRICT_PORTFOLIO_PLANNER_ACTIVE=true
@@ -459,6 +513,8 @@ FET_BRK48_MAX_GROSS=2.25
 FET_BRK48_CORE_PREEMPTION_READY=false
 DISDEX_Q102_RUNTIME_SHA=${DEPLOYED_SHA}
 QUALITY102_CAUSAL_V1_PREFLIGHT_HISTORY_CHECK=false
+# Historical selector flags intentionally remain false.  The canonical
+# QUALITY102_CAUSAL_V1_* flags above are the only live execution surface.
 QUALITY102_LIVE_SELECTOR_PARITY=false
 QUALITY102_LIVE_ENABLED=false
 QUALITY102_LIVE_BLOCKED_FAIL_CLOSED=true
@@ -891,6 +947,7 @@ main() {
       set_units
       show_plan
       check_units
+      assert_no_legacy_live_units
       if [[ "$mode" == "--apply" ]]; then
         apply_wiring
       fi

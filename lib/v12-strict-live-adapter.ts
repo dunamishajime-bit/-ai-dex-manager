@@ -10,6 +10,7 @@ import { findManagedFetBrk48ProtectiveOrders, findManagedPenguRecoveryV8Protecti
 import type { DirectMarketQuote, DirectPosition, DirectTradeResult } from "@/lib/direct-trade-executor";
 import { readSharedCryptoDailyRisk } from "@/lib/disdex-shared-crypto-daily-risk";
 import { readPortfolioDdGovernor } from "@/lib/disdex-portfolio-dd-governor";
+import { aggregatePendingExposure, readPendingExposureRegistry } from "@/lib/disdex-pending-exposure-registry";
 
 const DEFAULT_MAX_DATA_AGE_MS = 5 * 60_000;
 const EPSILON = 1e-9;
@@ -175,6 +176,7 @@ export class V12StrictAsterLiveAdapter extends V12AsterLiveAdapter {
             const active = await Promise.all(workingPositions.map(async (row) => quality102OwnsPosition(quality102Ownership, row)
                 ? toStrictPosition(row, plannerNow, quality102Ownership, await this.executor.getMarketQuote(row.symbol))
                 : toStrictPosition(row, plannerNow, quality102Ownership)));
+            const pendingExposure = aggregatePendingExposure(await readPendingExposureRegistry());
             const plan = planStrictPortfolio({
                 equity: workingAccount.walletBalance,
                 now: plannerNow,
@@ -182,6 +184,7 @@ export class V12StrictAsterLiveAdapter extends V12AsterLiveAdapter {
                 availableBalanceUsd: workingAccount.availableBalance,
                 sharedDailyRisk: sharedRisk.ok ? sharedRisk.state : undefined,
                 portfolioDdGovernor,
+                pendingExposure,
                 intents: [{
                     idempotencyKey: input.clientOrderId || `v12-strict-${input.signalTs}-${input.symbol}-${input.side}`,
                     strategy: "V12",

@@ -28,7 +28,8 @@ class AsterUpstreamRuntimeWiringTests(unittest.TestCase):
         self.assertIn('DISDEX_V52_SERVICE_UNIT=${V52_UNIT}', source)
         self.assertIn('disdex-v12-kill-switch-auto-repair.service.d', source)
         self.assertIn('systemctl reset-failed disdex-v12-kill-switch-auto-repair.service', source)
-        watchdog = source.split('write_atomic "${WATCHDOG_DROPIN_DIR}/zzzzzzzzzzzz-current-release.conf"', 1)[1].split('write_atomic "${SNAPSHOT_DROPIN_DIR}/zzzzzzzzzzzz-current-release.conf"', 1)[0]
+        self.assertIn('CURRENT_SUPPORT_OVERRIDE="zzzzzzzzzzzzzzzzzzzz-current-release.conf"', source)
+        watchdog = source.split('write_atomic "${WATCHDOG_DROPIN_DIR}/${CURRENT_SUPPORT_OVERRIDE}"', 1)[1].split('write_atomic "${SNAPSHOT_DROPIN_DIR}/${CURRENT_SUPPORT_OVERRIDE}"', 1)[0]
         self.assertIn('WorkingDirectory=${CURRENT_RELEASE}', watchdog)
         self.assertIn('ExecStart=/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-runner-watchdog-current.mjs', watchdog)
 
@@ -50,7 +51,7 @@ class AutoRepairPathWiringTests(unittest.TestCase):
         self.assertIn('PathChanged=${SHARED_ROOT}/kill-switch.json', path_block)
         self.assertNotIn('v12-x1-all/runner.json', path_block)
         self.assertIn('systemctl reset-failed disdex-v12-kill-switch-auto-repair.path', source)
-        self.assertIn('systemctl restart disdex-v12-kill-switch-auto-repair.path', source)
+        self.assertIn('systemctl enable --now disdex-v12-kill-switch-auto-repair.path', source)
 
 
 if __name__ == "__main__":

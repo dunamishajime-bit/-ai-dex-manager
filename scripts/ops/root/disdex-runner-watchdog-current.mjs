@@ -23,7 +23,19 @@ const BACKOFF_MS = [15_000, 60_000, 300_000];
 const MAX_ATTEMPTS = 3;
 const SHARED_CRYPTO_RISK_UNIT_PATTERN = "disdex-shared-crypto-risk@*.service";
 const MARGIN_GUARD_UNIT_PATTERN = "disdex-v12-v52-margin-guard@*.service";
-const LEGACY_LIVE_UNITS = ["disdex-v96-v52-live.service"];
+const LEGACY_LIVE_UNITS = [
+    "disdex-v96-v52-live.service",
+    "disdex-v13d-v11eq-v96.service",
+    "disdex-v46-live.service",
+    "disdex-pengu-dual-ls-v2-v20.service",
+    "disdex-v12-x1-all.service",
+    "disdex-pengu-dual-ls-v2.service",
+    "disdex-quality102-causal-v1.service",
+    "disdex-fet-brk48.service",
+    "disdex-v52-aster-only.service",
+    "disdex-shared-crypto-risk.service",
+    "disdex-v12-v52-margin-guard.service",
+];
 const RUNNERS = [
     {
         key: "V12_X1_ALL",

@@ -17,6 +17,7 @@ from disdex_strict_portfolio_planner import (
     self_test as strict_planner_self_test,
     validate_gross_snapshot,
 )
+from disdex_pending_exposure_registry import aggregate_pending
 
 base = legacy.base
 STRATEGY_ID = legacy.STRATEGY_ID
@@ -50,6 +51,16 @@ class V52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
     def assert_gross_safe(self, snapshot=None) -> None:
         row = snapshot or self.gross_snapshot()
         validate_gross_snapshot(row)
+
+    def _pending_adjusted_snapshot(self, snapshot: dict) -> dict:
+        pending = aggregate_pending() if self.live else {"cryptoGross": 0.0, "stockGross": 0.0}
+        return {
+            **snapshot,
+            "cryptoGross": snapshot["cryptoGross"] + float(pending["cryptoGross"]),
+            "stockGross": snapshot["stockGross"] + float(pending["stockGross"]),
+            "totalGross": snapshot["totalGross"] + float(pending["cryptoGross"]) + float(pending["stockGross"]),
+            "pendingExposure": pending,
+        }
 
     def _v12_dynamic_marked_gross(self, snapshot: dict) -> float:
         if not self.live:
@@ -101,6 +112,7 @@ class V52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
 
     def available_slot_gross(self, slot: str):
         available, snapshot = super().available_slot_gross(slot)
+        snapshot = self._pending_adjusted_snapshot(snapshot)
         slot_cap = self.v11_gross_cap if slot == V11_SLOT else self.v50_gross_cap
         reclaimable = self._v12_dynamic_marked_gross(snapshot)
         planning_snapshot = {
@@ -113,7 +125,13 @@ class V52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
             max(0.0, self.stock_gross_cap - snapshot["stockGross"]),
             max(0.0, self.portfolio_gross_cap - planning_snapshot["totalGross"]),
         )
-        strict_plan = plan_v52_stock_capacity(planning_snapshot, provisional, slot_cap)
+        max_slippage_bps = max(0.0, base.float_env("DISDEX_V52_MAX_SLIPPAGE_BPS", 20.0))
+        strict_plan = plan_v52_stock_capacity(
+            planning_snapshot,
+            provisional,
+            slot_cap,
+            candidate_worst_case_gross=provisional * (1.0 + max_slippage_bps / 10_000.0),
+        )
         accepted = min(max(0.0, provisional), strict_plan["acceptedGross"])
         return accepted, {
             **snapshot,
@@ -302,7 +320,7 @@ class V52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
             target_gross = self._prepare_fet_for_stock_entry(slot, target_gross)
             target_gross = self._prepare_quality102_for_stock_entry(slot, target_gross)
             target_gross = self._prepare_v12_dynamic_for_stock_entry(slot, target_gross)
-        snapshot = self.gross_snapshot()
+        snapshot = self._pending_adjusted_snapshot(self.gross_snapshot())
         self.assert_gross_safe(snapshot)
         slot_cap = self.v11_gross_cap if slot == V11_SLOT else self.v50_gross_cap
         strict_plan = plan_v52_stock_capacity(snapshot, target_gross, slot_cap)
@@ -383,9 +401,10 @@ def self_test() -> None:
     }
     reclaimed, reclaimed_snapshot = engine.available_slot_gross(V11_SLOT)
     # Under the final 4.25x total cap, the live planner can reclaim the
-    # dynamic V12 gross before calculating stock capacity.  The resulting
-    # available slot is 1.25x in this fixture, not the retired 0.50x value.
-    assert abs(reclaimed - 1.25) < EPSILON
+    # dynamic V12 gross before calculating stock capacity.  The nominal
+    # room is 1.25x, then the 20bps worst-case fill buffer is reserved before
+    # returning executable capacity.
+    assert abs(reclaimed - (1.25 / 1.002)) < EPSILON
     assert abs(reclaimed_snapshot["v12DynamicReclaimGross"] - 0.40) < EPSILON
 
     assert transient_reference_error("iex_quote_stale META")

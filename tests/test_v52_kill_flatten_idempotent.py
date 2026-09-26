@@ -23,7 +23,7 @@ class V52KillFlattenIdempotencyTests(unittest.TestCase):
 
     def test_same_active_kill_flattens_only_once(self):
         calls = []
-        kill = [{"active": True, "reason": "RISK_LIMIT", "updatedAt": 1}]
+        kill = [{"active": True, "action": "FLATTEN_MANAGED", "reason": "RISK_LIMIT", "updatedAt": 1}]
         engine = self.make_engine(kill, calls)
         engine.tick({})
         engine.tick({})
@@ -31,7 +31,7 @@ class V52KillFlattenIdempotencyTests(unittest.TestCase):
 
     def test_cleared_kill_allows_same_reason_to_flatten_again(self):
         calls = []
-        kill_row = {"active": True, "reason": "RISK_LIMIT", "updatedAt": 1}
+        kill_row = {"active": True, "action": "FLATTEN_MANAGED", "reason": "RISK_LIMIT", "updatedAt": 1}
         kill = [kill_row]
         engine = self.make_engine(kill, calls)
         engine.tick({})
@@ -43,7 +43,7 @@ class V52KillFlattenIdempotencyTests(unittest.TestCase):
 
     def test_completed_kill_hold_skips_shared_account_lock(self):
         calls = []
-        kill = [{"active": True, "reason": "RISK_LIMIT", "updatedAt": 1}]
+        kill = [{"active": True, "action": "FLATTEN_MANAGED", "reason": "RISK_LIMIT", "updatedAt": 1}]
         engine = self.make_engine(kill, calls)
         engine.tick({})
         prepared = engine.prepare_tick_inputs()

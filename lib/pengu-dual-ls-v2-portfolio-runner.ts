@@ -10,7 +10,7 @@ import type {
     DirectTradeExecutor,
     DirectTradeResult,
 } from "@/lib/direct-trade-executor";
-import type { LiveRunnerLock } from "@/lib/live-runner-state";
+import type { LiveRunnerLock, LiveRunnerLockHandle } from "@/lib/live-runner-state";
 import {
     buildPenguDualLsV2Signal,
     cooldownHoursForPenguExit,
@@ -31,6 +31,7 @@ import { createPenguShortV20State } from "@/lib/pengu-short-v20";
 import { classifyAsterSymbol } from "@/lib/disdex-aster-portfolio-classifier";
 import { classifyAsterRateBudgetFailure } from "@/lib/disdex-aster-rate-budget-policy";
 import { planStrictPortfolio, type StrictPortfolioIntent, type StrictPortfolioPosition } from "@/lib/disdex-strict-portfolio-planner";
+import { aggregatePendingExposure, readPendingExposureRegistry } from "@/lib/disdex-pending-exposure-registry";
 import { readQuality102CausalV1Ownership, quality102OwnsOrder, quality102OwnsPosition, type Quality102CausalV1OwnershipSnapshot } from "@/lib/disdex-quality102-causal-v1-ownership";
 import { reduceQuality102CausalV1ForBaseConflict } from "@/lib/disdex-quality102-causal-v1-live-reduction";
 import { reduceFetBrk48ForCoreConflict } from "@/lib/fet-brk48-live-reduction";
@@ -79,11 +80,28 @@ export interface PenguDualLsV2RunnerLogger {
     error(message: string, payload?: Record<string, unknown>): void;
 }
 
+export interface PenguDualLsV2ReservationInput {
+    strategyId: string;
+    symbol: string;
+    side: "LONG" | "SHORT" | "FLAT";
+    gross: number;
+    notionalUsd: number;
+}
+
+export interface PenguDualLsV2LockHandle extends LiveRunnerLockHandle {
+    reserve?(input: PenguDualLsV2ReservationInput): Promise<{ reservationId: string }>;
+    releaseReservation?(reservationId: string): Promise<void>;
+}
+
+export interface PenguDualLsV2AccountLock extends LiveRunnerLock {
+    acquire(ownerId: string): Promise<PenguDualLsV2LockHandle | null>;
+}
+
 export interface PenguDualLsV2PortfolioRunnerDependencies {
     marketData: { load(force?: boolean): Promise<PenguDualLsV2History> };
     executor: DirectTradeExecutor;
     stateStore: PenguDualLsV2RunnerStateStore;
-    lock: LiveRunnerLock;
+    lock: PenguDualLsV2AccountLock;
     config: PenguDualLsV2PortfolioRunnerConfig;
     logger?: PenguDualLsV2RunnerLogger;
     now?: () => number;
@@ -851,6 +869,7 @@ export class PenguDualLsV2PortfolioRunner {
                         availableBalanceUsd: workingAccount.availableBalance,
                         sharedDailyRisk: grossRisk.ok ? grossRisk.state : undefined,
                         portfolioDdGovernor,
+                        pendingExposure: aggregatePendingExposure(await readPendingExposureRegistry()),
                         intents: [{
                             idempotencyKey: `${signal.strategyId}|${signal.referenceTs}|${signal.side}|ENTRY`,
                             strategy: "PENGU_DUAL_LS_V2",
@@ -1020,6 +1039,19 @@ export class PenguDualLsV2PortfolioRunner {
                     ? { originalGross: 0.5, remainingGross: 0.5 }
                     : undefined,
             };
+            let exposureReservation: { reservationId: string } | undefined;
+            if (!reduceOnly) {
+                if (!lock.reserve || !lock.releaseReservation) {
+                    throw new Error("PENGU_PENDING_EXPOSURE_RESERVATION_UNAVAILABLE");
+                }
+                exposureReservation = await lock.reserve({
+                    strategyId: signal.strategyId,
+                    symbol: SYMBOL,
+                    side: signal.side > 0 ? "LONG" : "SHORT",
+                    gross: targetGross,
+                    notionalUsd: targetNotional,
+                });
+            }
             state.pending = pending;
             await this.dependencies.stateStore.save(state);
             this.log.info("PENGU Dual LS order planned", {
@@ -1034,6 +1066,12 @@ export class PenguDualLsV2PortfolioRunner {
                 referenceTs: signal.referenceTs,
             });
             const result = await this.executePending(state);
+            // A durable pending row remains active through UNKNOWN/manual-review
+            // outcomes. Release it only after the runner has cleared its pending
+            // state, which means the venue result was terminally reconciled.
+            if (exposureReservation && !state.pending && lock.releaseReservation) {
+                await lock.releaseReservation(exposureReservation.reservationId);
+            }
             return { ...result, signal, idempotencyKey: key };
         } catch (error) {
             const failedState = await this.dependencies.stateStore.load();

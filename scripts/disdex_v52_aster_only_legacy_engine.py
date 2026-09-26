@@ -16,6 +16,7 @@ from typing import Dict, List, Optional, Tuple
 import disdex_v11eq_aster_only_live_engine as legacy
 from disdex_v52_daily_loss import update_v52_strategy_daily_latch
 from disdex_account_order_lock import AccountOrderLock
+from disdex_pending_exposure_registry import release_pending, upsert_pending
 from disdex_v12_crypto_daily_risk import read_shared_crypto_daily_risk
 from disdex_strict_portfolio_planner import (
     STRICT_CAPS,
@@ -747,10 +748,26 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
             raise RuntimeError("Another V52 order is unresolved")
         self.state["pendingOrder"] = payload
         self.save()
+        if payload.get("action") == "OPEN":
+            side = "LONG" if str(payload.get("side") or "").upper() == "BUY" else "SHORT"
+            upsert_pending({
+                "reservationId": str(payload["clientId"]),
+                "strategyId": str(payload.get("slot") or STRATEGY_ID),
+                "sleeve": "STOCK",
+                "symbol": str(payload.get("symbol") or "").upper(),
+                "side": side,
+                "gross": max(0.0, base.finite(payload.get("targetGross"))),
+                "notionalUsd": max(0.0, base.finite(payload.get("quantity")) * base.finite(payload.get("price"))),
+                "createdAt": base.now_ms(),
+                "runtimeSha": os.getenv("DISDEX_RELEASE_SHA") or os.getenv("DISDEX_RUNTIME_COMMIT_SHA"),
+            })
 
     def _clear_pending(self) -> None:
+        pending = self.state.get("pendingOrder")
         self.state["pendingOrder"] = None
         self.save()
+        if isinstance(pending, dict) and pending.get("action") == "OPEN" and pending.get("clientId"):
+            release_pending(str(pending["clientId"]))
 
     def v11_candidates(self, rows):
         if self.v11_notional < self.minimum_entry_usd:

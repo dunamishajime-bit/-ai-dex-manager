@@ -81,6 +81,18 @@ class RuntimeWiringScriptTest(unittest.TestCase):
         self.assertNotIn("systemctl cancel", source)
         self.assertNotIn("pkill", source)
 
+    def test_wiring_checks_known_legacy_live_units_before_apply(self):
+        source = SCRIPT.read_text(encoding="utf-8")
+        self.assertIn("LEGACY_LIVE_UNITS", source)
+        for unit in (
+            "disdex-v96-v52-live.service",
+            "disdex-v13d-v11eq-v96.service",
+            "disdex-v46-live.service",
+            "disdex-pengu-dual-ls-v2-v20.service",
+        ):
+            self.assertIn(unit, source)
+        self.assertIn("LEGACY_LIVE_CONFLICT", source)
+
 
 if __name__ == "__main__":
     unittest.main()

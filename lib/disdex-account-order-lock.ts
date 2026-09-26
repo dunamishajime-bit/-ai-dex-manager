@@ -1,6 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 import { mkdir, open, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
+import { pendingExposurePath, releasePendingExposure, upsertPendingExposure } from "./disdex-pending-exposure-registry";
 
 export const ACCOUNT_LOCK_SCHEMA = "disdex-account-lock/v1" as const;
 export const DEFAULT_ACCOUNT_SCOPE = "ASTER_FUTURES" as const;
@@ -70,9 +71,13 @@ export class FileAccountOrderLock {
     constructor(
         path = process.env.DISDEX_ACCOUNT_LOCK_PATH || ".runtime-state/shared/account-order.lock",
         private readonly leaseMs = 120_000,
+        pendingPath = process.env.DISDEX_PENDING_EXPOSURE_REGISTRY_PATH,
     ) {
         this.path = resolve(path);
+        this.pendingPath = pendingExposurePath(pendingPath || resolve(dirname(this.path), "pending-exposure.json"));
     }
+
+    private readonly pendingPath: string;
 
     private async read(): Promise<AccountLockDocument> {
         return normalize(JSON.parse(await readFile(this.path, "utf8")));
@@ -151,6 +156,26 @@ export class FileAccountOrderLock {
                                 reservation,
                             ],
                         });
+                        try {
+                            await upsertPendingExposure({
+                                reservationId: reservation.reservationId,
+                                strategyId: reservation.strategyId,
+                                sleeve: "CRYPTO",
+                                symbol: reservation.symbol,
+                                side: reservation.side,
+                                gross: reservation.gross,
+                                notionalUsd: reservation.notionalUsd,
+                                createdAt: reservation.createdAt,
+                                runtimeSha: process.env.DISDEX_RELEASE_SHA || process.env.DISDEX_RUNTIME_COMMIT_SHA,
+                            }, this.pendingPath);
+                        } catch (error) {
+                            await atomicWrite(this.path, {
+                                ...current,
+                                expiresAt: Date.now() + this.leaseMs,
+                                reservations: current.reservations,
+                            }).catch(() => undefined);
+                            throw error;
+                        }
                         return reservation;
                     }),
                     releaseReservation: (reservationId) => enqueue(async () => {
@@ -161,9 +186,10 @@ export class FileAccountOrderLock {
                             reservations: current.reservations.map((row) => (
                                 row.reservationId === reservationId
                                     ? { ...row, status: "RELEASED" as const }
-                                    : row
+                                : row
                             )),
                         });
+                        await releasePendingExposure(reservationId, this.pendingPath);
                     }),
                     release: () => enqueue(async () => {
                         if (released) return;

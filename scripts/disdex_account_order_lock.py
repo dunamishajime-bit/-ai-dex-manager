@@ -15,6 +15,8 @@ import uuid
 from pathlib import Path
 from typing import Any
 
+from disdex_pending_exposure_registry import release_pending, upsert_pending
+
 SCHEMA = "disdex-account-lock/v1"
 DEFAULT_SCOPE = "ASTER_FUTURES"
 
@@ -59,6 +61,7 @@ class AccountOrderLock:
         self.lease_id: str | None = None
         self._operation_lock = threading.RLock()
         self._released = True
+        self.pending_path = Path(os.getenv("DISDEX_PENDING_EXPOSURE_REGISTRY_PATH", str(self.path.parent / "pending-exposure.json"))).resolve()
 
     def acquire(self, owner_id: str | None = None, account_scope: str = DEFAULT_SCOPE) -> bool:
         with self._operation_lock:
@@ -110,6 +113,22 @@ class AccountOrderLock:
             current["expiresAt"] = _now_ms() + self.lease_ms
             current["reservations"] = [row for row in current.get("reservations", []) if row.get("reservationId") != reservation_id] + [reservation]
             _atomic_write(self.path, current)
+            try:
+                upsert_pending({
+                    "reservationId": reservation_id,
+                    "strategyId": strategy_id,
+                    "sleeve": "CRYPTO" if ("V12" in strategy_id or "PENGU" in strategy_id or "FET" in strategy_id or "QUALITY102" in strategy_id) else "STOCK",
+                    "symbol": symbol,
+                    "side": side,
+                    "gross": gross,
+                    "notionalUsd": notional_usd,
+                    "createdAt": reservation["createdAt"],
+                    "runtimeSha": os.getenv("DISDEX_RELEASE_SHA") or os.getenv("DISDEX_RUNTIME_COMMIT_SHA"),
+                }, self.pending_path)
+            except Exception:
+                current["reservations"] = [row for row in current.get("reservations", []) if row.get("reservationId") != reservation_id]
+                _atomic_write(self.path, current)
+                raise
             return reservation
 
     def release_reservation(self, reservation_id: str) -> None:
@@ -118,6 +137,7 @@ class AccountOrderLock:
             current["expiresAt"] = _now_ms() + self.lease_ms
             current["reservations"] = [{**row, "status": "RELEASED"} if row.get("reservationId") == reservation_id else row for row in current.get("reservations", [])]
             _atomic_write(self.path, current)
+            release_pending(reservation_id, self.pending_path)
 
     def release(self) -> None:
         with self._operation_lock:

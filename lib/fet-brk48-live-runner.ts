@@ -27,6 +27,7 @@ import {
   type FetBrk48State,
 } from "@/lib/fet-brk48-state";
 import type { V12AsterLiveAdapter } from "@/lib/v12-aster-live-adapter";
+import { aggregatePendingExposure, readPendingExposureRegistry } from "@/lib/disdex-pending-exposure-registry";
 
 const EPS = 1e-9;
 const DEFAULT_RISK_PATH = "/var/lib/disdex/shared/crypto-daily-risk.json";
@@ -514,6 +515,9 @@ export class FetBrk48LiveRunner {
       if (!(equity > 0)) return { status: "blocked", message: "FET_EQUITY_INVALID", ordersSent: 0, signal };
       const gross = await portfolioGross(positions, equity, q102);
       if (gross.unknown.length) return { status: "blocked", message: `FET_UNKNOWN_POSITION:${gross.unknown.join(",")}`, ordersSent: 0, signal };
+      const pending = aggregatePendingExposure(await readPendingExposureRegistry());
+      gross.cryptoGross += pending.cryptoGross;
+      gross.totalGross += pending.cryptoGross + pending.stockGross;
       const residual = Math.max(0, Math.min(
         FET_BRK48_RESIDUAL.maximumGross,
         INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap - gross.cryptoGross,
@@ -572,6 +576,7 @@ export class FetBrk48LiveRunner {
         gross: targetGross,
         notionalUsd: normalized.notional,
       });
+      let releaseExposureReservation = false;
       try {
         const result = await this.deps.executor.executeMarket({
           requestId: idempotencyKey,
@@ -612,6 +617,7 @@ export class FetBrk48LiveRunner {
         state.manualReview = result.status === "FILLED" ? undefined : "FET_PARTIAL_ENTRY_PROTECTED_OPERATOR_REVIEW";
         state.lastReconciledAt = now;
         await writeFetBrk48State(this.deps.statePath, state);
+        releaseExposureReservation = true;
         return {
           status: state.manualReview ? "manual-review" : "entered",
           message: state.manualReview || "FET_ENTRY_FILLED_AND_PROTECTED",
@@ -620,7 +626,7 @@ export class FetBrk48LiveRunner {
           gross: targetGross,
         };
       } finally {
-        await lock.releaseReservation(reservation.reservationId).catch(() => undefined);
+        if (releaseExposureReservation) await lock.releaseReservation(reservation.reservationId).catch(() => undefined);
       }
     } finally {
       await lock.release();
