@@ -148,6 +148,37 @@ jobs:
                       summary["candidates"]=[{k:y.get(k) for k in ["symbol","side","score","signalEligible","signalReason","reason","entryGateReason","volumeRatio","momentum"] if k in y} for y in cand[:20] if isinstance(y,dict)]
                       summary["rejectionCounts"]=dict(collections.Counter(str(y.get("signalReason")) for y in cand if isinstance(y,dict) and not y.get("signalEligible")))
               print("STATE="+json.dumps({"label":label,"exists":True,"mtimeJST":mtime,"value":summary},ensure_ascii=False,default=str))
+          # Focused gate diagnostics: whitelist operational fields only.
+          pengu=load(ROOT/"pengu-dual-ls-v2/runner-live.json") or {}
+          overlay=pengu.get("riskOverlay") if isinstance(pengu.get("riskOverlay"),dict) else {}
+          untils=overlay.get("routeQuarantineUntilTs") if isinstance(overlay.get("routeQuarantineUntilTs"),dict) else {}
+          failures=pengu.get("failures") if isinstance(pengu.get("failures"),list) else []
+          print("PENGU_RISK_DETAIL="+json.dumps({
+              "realizedDrawdown":overlay.get("realizedDrawdown"),
+              "globalEntryHoldUntilJST":stamp(overlay.get("globalEntryHoldUntilTs")),
+              "globalHoldActive":float(overlay.get("globalEntryHoldUntilTs") or 0)>NOW,
+              "routeQuarantine":{k:{"untilJST":stamp(v),"active":float(v or 0)>NOW} for k,v in untils.items()},
+              "last10Failures":[{"at":stamp(y.get("occurredAt") or y.get("timestamp")),"message":str(y.get("message") or y.get("reason") or "")[:120]} for y in failures[-10:] if isinstance(y,dict)]
+          },ensure_ascii=False,default=str))
+          for label,filename in [("base","decision-snapshot.json"),("ranked","decision-ranking-snapshot.json")]:
+              p=ROOT/"quality102-causal-v1"/filename
+              obj=load(p)
+              if obj is None:
+                  print("Q102_DECISIONS="+json.dumps({"source":label,"exists":False}))
+                  continue
+              items=obj.get("items") if isinstance(obj.get("items"),list) else []
+              reasonCounts=collections.Counter(str(x.get("reason")) for x in items if isinstance(x,dict))
+              eligible=[x for x in items if isinstance(x,dict) and x.get("eligible")]
+              selected=[x for x in items if isinstance(x,dict) and x.get("selected")]
+              ranked=sorted([x for x in items if isinstance(x,dict)],key=lambda x:float(x.get("rankingRank") or 9999))
+              fields=["symbol","side","family","layer","eligible","reason","selected","requestedGross","rankingRank","rankingScore","rankingStage","rankingReason"]
+              print("Q102_DECISIONS="+json.dumps({"source":label,"mtimeJST":stamp(p.stat().st_mtime),
+                  "runtimeSha":obj.get("runtimeCommitSha"),"referenceJST":stamp(obj.get("referenceTs")),
+                  "selectedReason":obj.get("selectedReason"),"selectedSymbol":obj.get("selectedSymbol"),
+                  "itemCount":len(items),"eligibleCount":len(eligible),"selectedCount":len(selected),
+                  "reasonCounts":reasonCounts,
+                  "eligible":[{k:x.get(k) for k in fields if k in x} for x in eligible[:15]],
+                  "rankedTop8":[{k:x.get(k) for k in fields if k in x} for x in ranked[:8]]},ensure_ascii=False,default=str))
           qdir=ROOT/"quality102-causal-v1"
           if qdir.is_dir():
               files=[]
@@ -160,4 +191,33 @@ jobs:
           print("ACCOUNT_LOCK_PRESENT="+str(lock.exists()))
           print("TRADING_MUTATION=0")
           print("FIVE_LOGIC_ENTRY_AUDIT_COMPLETE")
+          PY
+
+      - name: Independently cross-check V12 Aster completed H2 volume ratios
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import datetime,json,urllib.parse,urllib.request
+          target=1790409600000
+          for symbol in ("BTCUSDT","LTCUSDT","ATOMUSDT"):
+              args=urllib.parse.urlencode({"symbol":symbol,"interval":"1h","limit":140})
+              url="https://fapi.asterdex.com/fapi/v3/klines?"+args
+              try:
+                  req=urllib.request.Request(url,headers={"User-Agent":"DisDex-Independent-ReadOnly-Volume-Audit/1.0"})
+                  with urllib.request.urlopen(req,timeout=13) as response: raw=json.load(response)
+                  by={int(r[0]):r for r in raw if isinstance(r,list) and len(r)>=7}
+                  volumes={}
+                  for start in sorted(k for k in by if k%7200000==0 and k+3600000 in by):
+                      end=start+7200000
+                      if end<=target:volumes[end]=float(by[start][5])+float(by[start+3600000][5])
+                  ends=sorted(volumes)
+                  prior=[volumes[e] for e in ends if e<target][-20:]
+                  matched=target in volumes and len(prior)==20
+                  result={"symbol":symbol,"referenceUTC":"2026-09-26T08:00:00Z","matched":matched,"historicalH2Count":len(ends),"prior20Count":len(prior)}
+                  if matched:
+                      result.update({"currentH2Volume":volumes[target],"prior20Mean":sum(prior)/20,
+                                     "recomputedVolumeRatio":volumes[target]/(sum(prior)/20) if sum(prior)>0 else None})
+                  print("INDEPENDENT_ASTER_VOLUME="+json.dumps(result))
+              except Exception as exc:print("INDEPENDENT_ASTER_VOLUME="+json.dumps({"symbol":symbol,"error":type(exc).__name__+":"+str(exc)[:120]}))
+          print("INDEPENDENT_ASTER_NO_PRODUCTION_MUTATION=TRUE")
           PY
