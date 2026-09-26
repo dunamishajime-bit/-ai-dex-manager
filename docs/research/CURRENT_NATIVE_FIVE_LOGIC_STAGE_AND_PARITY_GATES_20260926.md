@@ -31,3 +31,21 @@ Current source-pinned production policy (inspect exact pinned files before any f
 6. Reject any final claim if a new suite merely matches an old target final yen amount, mixes September and August ledger parameters, silently fills missing pre-listing prices, or claims current LIVE parity from only source-native signal candidates.
 
 **Until all gates pass:** report stage output only with explicit unmapped semantics. Do not use staged yen figures to configure LIVE risk or leverage.
+
+## Completed pinned staged workflow 36220153847 (PASS staging; NOT full current LIVE)
+
+The workflow consumed corrected native current VPS signals from Actions 36220005083 without refetching or fitting historical return, reloaded the **same unchanged checksum-frozen original integrated Python engine**, and reproduced both original baseline amounts exactly. Replacing only PENGU also reproduced earlier independently verified substitution amounts exactly.
+
+| Paired control, JPY | NORMAL ending JPY | NORMAL PF | NORMAL closed-event DD | SEVERE ending JPY | SEVERE PF | SEVERE closed-event DD |
+|---|---:|---:|---:|---:|---:|---:|
+| Original archived engine/ledgers, initial JPY 10k + 12 x JPY 10k | 165,415,076.54 | 4.104 | -12.84% | 22,177,854.11 | 2.929 | -26.05% |
+| Same source, only Q60/DD17 H72 COMBINED_FILTERED PENGU gross 1x | 318,749,762.47 | 4.079 | -15.67% | 33,887,246.27 | 2.868 | -33.10% |
+| Same source + source-native current V12 Top3/HC1.75 signal candidates with **H1 OHLC exit approximation**, old frozen V52/Q102, static gross crypto 3.0 / total 3.5 and old stock 1.5 | 100,502,012.86 | 3.59966748 | -15.27696675% | 11,263,933.37 | 2.47068859 | -37.01301058% |
+
+This final row is **only a partial sensitivity test**, **not a five-logic result**. It deliberately excludes FET from integrated routing (although FET source-native 26 candidates generate 19 independent H1 exit-assumption trades), uses the OLD FROZEN Q102 historical trades, uses old V52 B75 data instead of current B60, and has no profit/DD governor. Its new V12 exits are H1 OHLC assumptions, not a replay of actual LIVE order/read-back or funding. **Do not conclude from the 100.50m / 11.26m sensitivity test that the new full LIVE strategy produces those amounts or has those DDs.**
+
+Candidate-to-assumed-trade diagnostic: V12 source-native candidates 1,459; V12 H1-OHLC simulated rows NORMAL 894 / SEVERE 895, then original engine admits NORMAL V12 884 / SEVERE V12 886. FET source-native candidates 26, 19 independent H1-OHLC positions in each mode, not added to the old engine. Old original baseline gross-conflict check and stage new-V12 run both report zero Q102 supplement gross conflicts.
+
+Stage result artifact: https://github.com/dunamishajime-bit/-ai-dex-manager/actions/runs/36220153847/artifacts/10899216129
+
+**Current full-source 5-logic result remains OPEN and must not be labelled completed until native Q102 Causal V4, source-native current V52 B60, independent FET sleeve and actual dynamic profit/DD/margin governor are integrated with verified fill/protection semantics.**
