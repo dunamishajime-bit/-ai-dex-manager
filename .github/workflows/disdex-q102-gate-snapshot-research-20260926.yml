@@ -1,0 +1,71 @@
+name: DisDex Q102 high-vol gate snapshot research
+on:
+  issue_comment:
+    types: [created]
+permissions:
+  contents: read
+jobs:
+  audit:
+    if: >-
+      github.event.issue.number == 132 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == 'DISDEX_Q102_GATE_SNAPSHOT_RESEARCH_20260926'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Configure approved VPS read-only transport
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Inspect frozen current causal Q102 diagnostics and threshold-only counterfactual
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -p "${SSH_PORT:-22}" "root@$SSH_HOST" 'python3 -' <<'PY'
+          import pathlib,json,datetime
+          p=pathlib.Path("/var/lib/disdex/quality102-causal-v1/decision-ranking-snapshot.json")
+          d=json.loads(p.read_text())
+          print("Q102_SNAPSHOT_META="+json.dumps({"path":str(p),"referenceTs":d.get("referenceTs"),"itemCount":len(d.get("items",[])),"mtimeUtc":datetime.datetime.fromtimestamp(p.stat().st_mtime,datetime.timezone.utc).isoformat()}))
+          cases=[1,0.95,0.90,0.85,0.80]
+          counts={str(v):{"completeGateHighVolReady":0,"nearMissThresholdOnly":0,"candidateSymbols":[]} for v in cases}
+          for item in d.get("items",[]):
+           sym=item.get("symbol","")
+           diag=item.get("diagnostics",{})
+           hv=diag.get("highVol",{})
+           if hv:
+            f=hv.get("features") or {}
+            rule=hv.get("rule") or {}
+            market=bool(hv.get("marketValid"))
+            scanner=bool(hv.get("scannerHealthPass"))
+            direction=(f.get("ret14d",0)>=0 and bool(f.get("barUp"))) or (f.get("ret14d",0)<0 and bool(f.get("barDown")))
+            for ratio in cases:
+             lg=f.get("ret14d",0)>=0 and bool(f.get("barUp")) and f.get("ret24",0)<=-rule.get("longDrop",100)*ratio and f.get("rsi14",999)<=rule.get("longRsi",-1)
+             sh=f.get("ret14d",0)<0 and bool(f.get("barDown")) and f.get("ret24",0)>=rule.get("shortRally",100)*ratio and f.get("rsi14",0)>=rule.get("shortRsi",999)
+             if scanner and market and (lg or sh):
+              c=counts[str(ratio)];c["completeGateHighVolReady"]+=1;c["candidateSymbols"].append(sym)
+              if ratio<1 and not bool(hv.get("rawMatched")):c["nearMissThresholdOnly"]+=1
+           if sym in {"ONDOUSDT","SUIUSDT","TAOUSDT","RENDERUSDT","FETUSDT"}:
+            s34=diag.get("s34")
+            if isinstance(s34,list):s34=[{"key":x.get("key"),"family":x.get("family"),"stage":x.get("rankingStage"),"reason":x.get("reason"),"metrics":x.get("metrics"),"gates":x.get("gates")} for x in s34[:3]]
+            print("Q102_SYMBOL_DETAIL="+json.dumps({"symbol":sym,"rank":item.get("rankingRank"),"score":item.get("rankingScore"),"stage":item.get("rankingStage"),"rankingReason":item.get("rankingReason"),"naturalEligible":item.get("eligible"),"highVol":{"scannerHealthPass":hv.get("scannerHealthPass"),"marketValid":hv.get("marketValid"),"rawMatched":hv.get("rawMatched"),"proximitySide":hv.get("proximitySide"),"proximityScore":hv.get("proximityScore"),"rule":rule,"features":f,"gateProgress":hv.get("gateProgress"),"reason":hv.get("reason")} if hv else None,"s34":s34},default=str))
+          print("Q102_HV_THRESHOLD_ONLY_SNAPSHOT_SENSITIVITY="+json.dumps(counts))
+          print("Q102_SNAPSHOT_RESEARCH_ONLY_NO_ORDERS=TRUE")
+          PY
