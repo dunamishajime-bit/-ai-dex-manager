@@ -140,27 +140,75 @@ if (process.argv.includes("--list")) {
         const startMs = Number(request.startMs);
         const endMs = Number(request.endMs);
         if (!h1BySymbol || !Number.isFinite(startMs) || !Number.isFinite(endMs) || endMs < startMs) throw new Error("V12_SERIES_INPUT_INVALID");
-        const universe = Object.fromEntries(Object.entries(h1BySymbol).map(([symbol, rows]) => [
+        // Resample each native instrument independently; a missing historical
+        // pair or a later venue listing must not shift every other symbol's
+        // aligned H2 index or suppress BTC/other valid candidates.
+        const rawUniverse = Object.fromEntries(Object.entries(h1BySymbol).map(([symbol, rows]) => [
           symbol.toUpperCase().replace(/USDT$/, ""), loaded.v12.resampleV12H1ToH2(rows),
         ]));
-        const btc = universe.BTC || [];
-        const byTime = Object.fromEntries(Object.entries(universe).map(([symbol, rows]) => [symbol, new Map(rows.map((row) => [row.ts, row]))]));
-        const length = Math.min(...Object.values(universe).map((rows) => rows.length));
+        const btc = rawUniverse.BTC || [];
+        const btcIndexByTime = new Map(btc.map((bar, index) => [bar.ts, index]));
+        const requiredLookback = Math.max(
+          loaded.v12Config.V12_X1_ALL.btcRegimeSmaBars,
+          loaded.v12Config.V12_X1_ALL.btcRegimeMomentumBars,
+          loaded.v12Config.V12_X1_ALL.momentumBars,
+          loaded.v12Config.V12_X1_ALL.atrBars,
+          loaded.v12Config.V12_X1_ALL.volatilityLookbackBars,
+          22,
+        ) + 2;
+        const universe = {};
+        const consecutive = {};
+        const eligibleEvaluationWindows = {};
+        for (const [symbol, rows] of Object.entries(rawUniverse)) {
+          const aligned = new Array(btc.length);
+          for (const row of rows) {
+            const index = btcIndexByTime.get(row.ts);
+            if (index !== undefined && row.endTs === btc[index].endTs) aligned[index] = row;
+          }
+          const runs = new Array(btc.length);
+          let run = 0;
+          for (let index = 0; index < btc.length; index += 1) {
+            const row = aligned[index];
+            if (!row || (index > 0 && (!aligned[index - 1] || aligned[index - 1].endTs !== row.ts))) {
+              run = row ? 1 : 0;
+            } else run += 1;
+            runs[index] = run;
+          }
+          universe[symbol] = aligned;
+          consecutive[symbol] = runs;
+          eligibleEvaluationWindows[symbol] = 0;
+        }
         const results = [];
-        for (let index = 0; index < length; index += 1) {
+        let skippedBtcWarmupOrGap = 0;
+        for (let index = 0; index < btc.length; index += 1) {
           const ref = btc[index];
           if (!ref || ref.endTs < startMs || ref.endTs > endMs) continue;
-          const sameAxis = Object.values(byTime).every((rowMap) => rowMap.has(ref.ts));
-          if (!sameAxis) continue;
-          // V12 takes an explicit index and every signal/feature helper reads
-          // only bars at or before that index. Keep full immutable arrays here
-          // to avoid quadratic history copies; the no-lookahead golden test
-          // changes all future OHLCV and asserts earlier output is unchanged.
-          const observation = loaded.v12.buildV12DecisionObservation(universe, index, ref.endTs);
-          const signals = loaded.v12.buildV12Signals(universe, index);
+          if ((consecutive.BTC?.[index] || 0) < requiredLookback) {
+            skippedBtcWarmupOrGap += 1;
+            continue;
+          }
+          // An unavailable symbol is [] at this decision index, not a padded
+          // future bar, so LIVE source candidateMetricsFor cannot inspect it.
+          const decisionUniverse = { BTC: universe.BTC };
+          eligibleEvaluationWindows.BTC += 1;
+          for (const symbol of Object.keys(universe)) {
+            if (symbol === "BTC") continue;
+            if ((consecutive[symbol][index] || 0) < requiredLookback) continue;
+            decisionUniverse[symbol] = universe[symbol];
+            eligibleEvaluationWindows[symbol] += 1;
+          }
+          const observation = loaded.v12.buildV12DecisionObservation(decisionUniverse, index, ref.endTs);
+          const signals = loaded.v12.buildV12Signals(decisionUniverse, index);
           results.push({ index, decisionTs: ref.endTs, observation, signals });
         }
-        response = { ok: true, result: jsonSafe({ results, h2Counts: Object.fromEntries(Object.entries(universe).map(([symbol, rows]) => [symbol, rows.length])) }) };
+        response = { ok: true, result: jsonSafe({
+          results,
+          h2Counts: Object.fromEntries(Object.entries(rawUniverse).map(([symbol, rows]) => [symbol, rows.length])),
+          eligibleEvaluationWindows,
+          skippedBtcWarmupOrGap,
+          requiredLookback,
+        }) };
+
       } else if (request.op === "penguSeries") {
         const history = request.history;
         const now = Number(request.now);
