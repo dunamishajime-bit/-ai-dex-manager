@@ -105,7 +105,7 @@ async function main(){
   const indexStart=times.findIndex(t=>t>=TARGET_START);
   const indexEnd=times.findIndex(t=>t>=TARGET_END);
   const endIdx=indexEnd<0?times.length:indexEnd;
-  for(let i=Math.max(160,indexStart);i<endIdx;i++){
+  for(let i=160;i<endIdx;i++){
     if(i===0||times[i]-times[i-1]!==2*HOUR)continue;
     // Only include a currency after 160 real, contiguous H2 bars; never
     // fabricate or forward-fill a missing historical candle.
@@ -122,7 +122,7 @@ async function main(){
         if(!perSymbolAvailableFrom[sym])perSymbolAvailableFrom[sym]=new Date(times[i]).toISOString();
       }
     }
-    const signals=buildV12Signals(subset,i,3); // ACTUAL production function
+    if(times[i]<TARGET_START)continue; // Warm up every symbol before target; never discard Aug10-Aug16 signals.\n    const signals=buildV12Signals(subset,i,3); // ACTUAL production function
     for(const s of signals){
       rankCounts[String(s.rank)]=(rankCounts[String(s.rank)]||0)+1;
       gateCounts[String(s.entryGateReason||"")]=(gateCounts[String(s.entryGateReason||"")]||0)+1;
