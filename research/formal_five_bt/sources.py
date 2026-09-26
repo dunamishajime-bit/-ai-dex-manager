@@ -637,7 +637,7 @@ def fetch_fred_dexjpus(
                     continue
                 # A date-only FRED observation is conservatively timestamped at
                 # UTC day-end to prevent same-day knowledge leaking backward.
-                dt = datetime.combine(observed_date, time(), tzinfo=timezone.utc)
+                dt = datetime.combine(observed_date, datetime.min.time(), tzinfo=timezone.utc)
                 ts = int(dt.timestamp() * 1000) + 86_400_000 - 1
                 observations.append({"event_time_ms": ts, "source_time_ms": ts, "rate_jpy_per_usd": float(value)})
             if not observations:
