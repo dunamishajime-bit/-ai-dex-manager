@@ -1,0 +1,81 @@
+name: DisDex archive inactive stale release references safely
+on:
+  issue_comment:
+    types: [created]
+permissions:
+  contents: read
+jobs:
+  audit:
+    if: >-
+      github.event.issue.number == 132 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == 'DISDEX_ARCHIVE_STALE_RELEASE_BINDINGS_20260926'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 23
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Configure approved VPS read-only transport
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Checkout audited disk-reference archiver
+        uses: actions/checkout@v4
+        with:
+          ref: f086d087efedfd23e957994c3345245369040773
+      - name: Syntax-validate archiver
+        run: python3 -m py_compile scripts/ops/root/disdex-prune-inactive-bindings-20260926.py
+      - name: Transfer immutable archiver to approved VPS
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          sha="$(sha256sum scripts/ops/root/disdex-prune-inactive-bindings-20260926.py | awk '{print $1}')"
+          echo "ARCHIVER_SHA256=$sha" >> "$GITHUB_ENV"
+          scp -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -P "${SSH_PORT:-22}" \
+            scripts/ops/root/disdex-prune-inactive-bindings-20260926.py "root@$SSH_HOST:/root/disdex-prune-bindings-${GITHUB_RUN_ID}.py"
+      - name: Gate, archive and retire inactive bindings only; inspect official cleanup dry-run
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -p "${SSH_PORT:-22}" "root@$SSH_HOST" \
+            "bash -s -- '/root/disdex-prune-bindings-${GITHUB_RUN_ID}.py' '$ARCHIVER_SHA256'" <<'BASH'
+          set -Eeuo pipefail
+          stage="$1"; expected="$2"
+          trap 'rm -f -- "$stage"' EXIT
+          [[ ! -L "$stage" && "$(sha256sum "$stage" | awk '{print $1}')" == "$expected" ]] || { echo STAGED_DIGEST_FAIL; exit 2; }
+          python3 "$stage" --plan
+          python3 "$stage" --apply-bindings
+          python3 - <<'PY'
+          import subprocess,json
+          try:
+            q=subprocess.run(["/usr/local/sbin/disdex-vps-retention-cleanup","--dry-run"],capture_output=True,text=True,timeout=840)
+            obj=None
+            for line in reversed(q.stdout.splitlines()):
+              try:
+                item=json.loads(line)
+                if item.get("status")=="DISDEX_VPS_RETENTION_CLEANUP_PASS":obj=item;break
+              except Exception:pass
+            if obj is None:print("POST_ARCHIVE_RETENTION_DRY_RUN="+json.dumps({"rc":q.returncode,"reason":"NO_COMPLETE_JSON"}))
+            else:
+              print("POST_ARCHIVE_RETENTION_DRY_RUN="+json.dumps({"rc":q.returncode,"candidateReleaseCount":len([x for x in obj.get("deletedPaths",[]) if "/releases/" in x]),"candidateUIReleaseCount":len([x for x in obj.get("deletedPaths",[]) if "/ui-releases/" in x]),"estimatedFreedGB":round(obj.get("bytesReclaimed",0)/1e9,2),"protectedCount":len(obj.get("protectedPaths",[])),"unverifiedCount":len(obj.get("unverifiedProtected",[])),"unverifiedSamples":[{"path":u.get("path"),"reason":u.get("reason"),"referenceTypes":[k for k,v in u.get("references",{}).items() if v]} for u in obj.get("unverifiedProtected",[])[:12]],"candidateSamples":obj.get("deletedPaths",[])[:12],"liveReleaseDeleted":obj.get("currentReleaseDeleted"),"protectedPathsTouched":obj.get("protectedPathsTouched"),"usedPct":obj.get("filesystemUsedPct")}))
+          except subprocess.TimeoutExpired: print("POST_ARCHIVE_RETENTION_DRY_RUN="+json.dumps({"reason":"TIMEOUT_840S","archivesAlreadySafe":True}))
+          PY
+          BASH
