@@ -20,6 +20,10 @@ class SevenFrozenNodeBridgeTests(unittest.TestCase):
         btc=candles(100,.1)
         hype=candles(50,.06)
         zec=candles(100,.16)
+        for bar,close in zip(zec,[100,100.14,100.29,100.45,100.63]):
+            bar["close"]=close
+            bar["high"]=max(bar["high"],close+0.005)
+            bar["low"]=min(bar["low"],close-0.005)
         with SevenBridge(root) as bridge:
             audit=bridge.ask(op="audit")
             self.assertEqual(audit["sourceSha"],SEVEN_RESEARCH_SHA)
