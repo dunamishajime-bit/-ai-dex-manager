@@ -122,7 +122,8 @@ async function main(){
         if(!perSymbolAvailableFrom[sym])perSymbolAvailableFrom[sym]=new Date(times[i]).toISOString();
       }
     }
-    if(times[i]<TARGET_START)continue; // Warm up every symbol before target; never discard Aug10-Aug16 signals.\n    const signals=buildV12Signals(subset,i,3); // ACTUAL production function
+    if(times[i]<TARGET_START)continue; // Warm up every symbol before target; never discard Aug10-Aug16 signals.
+    const signals=buildV12Signals(subset,i,3); // ACTUAL production function
     for(const s of signals){
       rankCounts[String(s.rank)]=(rankCounts[String(s.rank)]||0)+1;
       gateCounts[String(s.entryGateReason||"")]=(gateCounts[String(s.entryGateReason||"")]||0)+1;
