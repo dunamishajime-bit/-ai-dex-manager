@@ -1,0 +1,42 @@
+name: Research V12 score-gap + independent multi-gate visibility (read-only)
+on:
+  push:
+    branches: [research/v12-score-gap-multigate-20260926]
+    paths:
+      - lib/v12-x1-all.ts
+      - lib/v12-all-gates-audit.ts
+      - scripts/research-v12-score-gap-20260926.ts
+      - tests/v12-all-gates-score-gap-audit.test.ts
+      - .github/workflows/research-v12-score-gap-multigate-20260926.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  gate-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Typecheck without touching live runner
+        run: npx tsc --noEmit
+      - name: All-gates visibility and frozen live parity regressions
+        run: |
+          npx tsx --test tests/v12-all-gates-score-gap-audit.test.ts tests/v12-winrate-entry-gate.test.ts tests/v12_decision_observation.test.ts
+          npx tsx scripts/v12-x1-all-selftest.ts
+      - name: Public Aster full-year score-gap counterfactual (NOT integrated BT)
+        env:
+          GATE_RESEARCH_OUT: v12-one-year-score-gap-20260926.json
+        run: npx tsx scripts/research-v12-score-gap-20260926.ts
+      - name: Archive evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v12-score-gap-diagnostic-20260926
+          path: v12-one-year-score-gap-20260926.json
+          if-no-files-found: warn
+          retention-days: 14
