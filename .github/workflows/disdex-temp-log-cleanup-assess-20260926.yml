@@ -1,0 +1,66 @@
+name: DisDex safe temp and log cleanup assessment
+on:
+  issue_comment:
+    types: [created]
+permissions:
+  contents: read
+jobs:
+  audit:
+    if: >-
+      github.event.issue.number == 132 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == 'DISDEX_TEMP_LOG_CLEANUP_ASSESS_20260926'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 17
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Configure approved VPS read-only transport
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Assess reclaimable stale files without deletion
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -p "${SSH_PORT:-22}" "root@$SSH_HOST" 'python3 -' <<'PY'
+          import os,pathlib,subprocess,json,time,stat,shutil
+          now=time.time()
+          for base in ["/tmp","/var/log","/home/deploy/disdex-trading/ui-releases"]:
+           p=pathlib.Path(base)
+           if not p.is_dir():continue
+           rows=[]
+           for e in p.iterdir():
+            try:
+             st=e.lstat()
+             if e.is_symlink():continue
+             size=st.st_size
+             if e.is_dir() and base!="/home/deploy/disdex-trading/ui-releases":
+              try:
+               z=subprocess.run(["du","-sxB1",str(e)],capture_output=True,text=True,timeout=7)
+               if z.returncode==0:size=int(z.stdout.strip().split()[0])
+              except Exception:pass
+             rows.append({"name":e.name,"type":"dir" if e.is_dir() else "file","size":size,"ageHours":round((now-st.st_mtime)/3600,1),"mode":oct(stat.S_IMODE(st.st_mode))})
+            except Exception:pass
+           rows.sort(key=lambda x:x["size"],reverse=True)
+           print("SAFE_CLEANUP_BUCKET="+json.dumps({"base":base,"largest":rows[:25],"totalEntries":len(rows)}))
+          print("LOGROTATE_STATUS="+json.dumps({"exists":pathlib.Path("/usr/sbin/logrotate").is_file(),"nginxConfigExists":pathlib.Path("/etc/logrotate.d/nginx").is_file()}))
+          print("SAFE_CLEANUP_DF="+json.dumps({"freeGB":round(shutil.disk_usage("/").free/1e9,3),"usedPct":round(100*shutil.disk_usage("/").used/shutil.disk_usage("/").total,2)}))
+          print("SAFE_CLEANUP_ASSESSMENT_NO_MUTATION=TRUE")
+          PY
