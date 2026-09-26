@@ -36,7 +36,7 @@ export function LiveRuntimeBadge() {
   const find = (id: string) => units?.find((unit) => unit.id === id);
   return (
     <span className="inline-flex flex-wrap items-center gap-x-2 gap-y-1 rounded-full border border-white/15 bg-white/[0.04] px-3 py-1 text-[10px] font-semibold text-white/75" aria-live="polite">
-      LIVE状態: V12 {statusText(find("V12_X1.00_ALL"))} / PENGU {statusText(find("PENGU_DUAL_LS_V2_FINAL"))} / Q102 {statusText(find("QUALITY102_CAUSAL_V1"))} / V52 {statusText(find("DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96"))}
+      LIVE状態: V12 {statusText(find("V12_X1.00_ALL"))} / PENGU {statusText(find("PENGU_DUAL_LS_V2_FINAL"))} / FET {statusText(find("FET_BRK48_RESIDUAL"))} / Q102 {statusText(find("QUALITY102_CAUSAL_V1"))} / V52 {statusText(find("DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96"))}
     </span>
   );
 }

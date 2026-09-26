@@ -146,6 +146,18 @@ export function runtimeSnapshot(
         reason: "Waiting for Q102 runner state/heartbeat.",
       },
       {
+        id: "FET_BRK48_RESIDUAL",
+        label: "FET BRK48 Residual",
+        status: "UNCONFIRMED",
+        releaseSha,
+        venue: "Aster Futures FETUSDT",
+        timeframe: "BRK48 residual signal",
+        entryPolicy: "FET BRK48の確定データだけを評価し、Core entryと競合時はpreemptibleな残余枠で判定",
+        protection: "5x Cross・reduce-only protection・reconciliation・共有risk・Kill Switch",
+        note: "flat / no-signal時もrunner heartbeatを表示し、state stale時はLIVEにしません。",
+        reason: "Waiting for FET runner state.",
+      },
+      {
         id: "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96",
         label: v52 ? `V52 ${v52.policyId}` : "V52 runtime unavailable",
         status: "UNCONFIRMED",

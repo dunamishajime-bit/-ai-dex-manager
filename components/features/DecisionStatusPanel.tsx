@@ -10,6 +10,7 @@ import type { CurrentProductionRuntime } from "@/lib/server/current-production-r
 import type { V52Top2Observability, V52Top2DecisionRow } from "@/lib/server/v52-top2-observability";
 import type { PenguRuntimeStatus } from "@/lib/server/pengu-runtime-observability";
 import type { Quality102RuntimeStatus } from "@/lib/server/quality102-runtime-observability";
+import type { FetRuntimeStatus } from "@/lib/server/fet-runtime-observability";
 
 type DecisionLogicPage = "overview" | "v12" | "pengu" | "q102" | "v52";
 
@@ -203,6 +204,7 @@ type Snapshot = {
   penguRuntime?: PenguRuntimeStatus;
   v52Top2Observability?: V52Top2Observability;
   quality102Runtime?: Quality102RuntimeStatus;
+  fetRuntime?: FetRuntimeStatus;
   error?: string;
 };
 
@@ -276,6 +278,13 @@ function RuntimeSummary({ runtime }: { runtime: Snapshot["runtime"] }) {
   const badge = verified ? "全runner LIVE確認済み" : liveCount > 0 ? `${liveCount}/${runtime.units.length} runner LIVE確認` : "LIVE未確認";
   const badgeClass = verified ? "border-emerald-400/35 bg-emerald-500/10 text-emerald-100" : liveCount > 0 ? "border-amber-400/35 bg-amber-500/10 text-amber-100" : "border-rose-400/35 bg-rose-500/10 text-rose-100";
   return <section className="panel-gold rounded-[28px] p-4 md:p-5"><div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2 text-lg font-bold text-white"><ServerCog className="h-5 w-5 text-gold-100" />VPS実稼働ロジック</div><span className={`rounded-full border px-3 py-1 text-xs font-semibold ${badgeClass}`}>{badge}</span></div><p className="mt-2 text-xs leading-5 text-white/55">確認時刻：{time(runtime.checkedAt)} / runnerごとに実stateの更新時刻・mode・保護状態を判定します。1つのrunnerが要確認でも、他runnerのLIVE状態は独立して表示します。ここから発注操作は行いません。</p><div className="mt-4 grid gap-3 xl:grid-cols-3">{runtime.units.map((unit) => <article key={unit.id} className="rounded-2xl border border-white/10 bg-black/20 p-3"><div className="flex items-start justify-between gap-2"><div><div className="font-bold text-white">{unit.label}</div><div className="mt-1 text-[11px] text-white/45">{unit.venue} / {unit.timeframe}</div></div><span className={`rounded-full border px-2 py-1 text-[10px] font-semibold ${runtimeStatusClass(unit.status)}`}>{unit.status === "UNAVAILABLE" ? "未取得" : unit.status === "UNCONFIRMED" ? "未確認" : unit.status === "STALE" ? "要確認" : "LIVE"}</span></div><div className="mt-3 space-y-2 text-xs leading-5 text-white/72"><p><span className="text-white/45">判定：</span>{unit.entryPolicy}</p><p><span className="text-white/45">保護：</span>{unit.protection}</p><p className="text-white/50">{unit.note}</p><p className="text-amber-100/80">状態根拠：{unit.reason || "未取得"}</p></div><div className="mt-3 border-t border-white/10 pt-2 text-[10px] text-white/40">release {shortSha(unit.releaseSha)}… / state更新 {time(unit.updatedAt)}</div></article>)}</div></section>;
+}
+
+function FetRuntimeDetail({ details }: { details?: FetRuntimeStatus }) {
+  if (!details) return null;
+  const statusLabel = details.status === "LIVE" ? "稼働確認済み" : details.status === "STALE" ? "要確認" : "未取得";
+  const statusClass = details.status === "LIVE" ? "border-emerald-400/35 bg-emerald-500/10 text-emerald-100" : details.status === "STALE" ? "border-amber-400/35 bg-amber-500/10 text-amber-100" : "border-rose-400/35 bg-rose-500/10 text-rose-100";
+  return <section className="panel-gold rounded-[28px] p-4 md:p-5"><div className="flex flex-wrap items-start justify-between gap-3"><div><div className="flex items-center gap-2 text-lg font-bold text-white"><Activity className="h-5 w-5 text-gold-100" />FET BRK48 Residual</div><p className="mt-1 text-xs text-white/55">FETの実runner heartbeat・release・failure状態を読み取り表示します。</p></div><div className="flex flex-wrap gap-2"><span className={`rounded-full border px-3 py-1 text-xs font-semibold ${statusClass}`}>FET {statusLabel}</span><span className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-100">tradingMutation=0</span></div></div><div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4"><div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="text-[10px] uppercase tracking-wide text-white/45">strategy</div><div className="mt-1 break-words text-sm font-semibold text-white">{details.strategyId || "未取得"}</div></div><div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="text-[10px] uppercase tracking-wide text-white/45">state更新</div><div className="mt-1 text-sm font-semibold text-white">{time(details.updatedAt)}</div></div><div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="text-[10px] uppercase tracking-wide text-white/45">runtime SHA</div><div className="mt-1 break-words text-sm font-semibold text-white">{details.runtimeSha ? `${shortSha(details.runtimeSha)}…` : "未取得"}</div></div><div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="text-[10px] uppercase tracking-wide text-white/45">判定</div><div className="mt-1 break-words text-sm font-semibold text-white">{details.reason}</div></div></div>{details.errors.length ? <div className="mt-3 rounded-xl border border-amber-400/25 bg-amber-500/10 px-3 py-2 text-xs leading-5 text-amber-100">FET観測上の注意：{details.errors.join(" / ")}</div> : null}</section>;
 }
 
 function V12Detail({ details, production }: { details?: V12Observability; production?: CurrentProductionRuntime | null }) {
@@ -828,7 +837,7 @@ export function DecisionStatusPanel({ logic = "overview" }: { logic?: DecisionLo
       { key: "q102", title: "Q102 Causal V4", href: "/decision-status/q102", detail: "通貨別Gate / Family / 1-slot selector / 実state" },
       { key: "v52", title: "V52", href: "/decision-status/v52", detail: "V50 / V11_EQ / Stock window / basis・net-edge Gate" },
     ] as const;
-    return <div className="min-w-0 space-y-4 overflow-x-hidden [overflow-wrap:anywhere]">{toolbar}{warning}<RuntimeSummary runtime={snapshot.runtime} /><section className="grid gap-4 md:grid-cols-2">{cards.map((card) => <Link key={card.key} href={card.href} className="panel-gold group rounded-[28px] p-5 transition hover:-translate-y-0.5 hover:border-gold-300/40"><div className="flex items-center justify-between gap-3"><div className="text-xl font-black text-white">{card.title}</div><span className="text-xs text-gold-100">詳細を見る →</span></div><p className="mt-3 text-sm leading-6 text-white/65">{card.detail}</p></Link>)}</section></div>;
+    return <div className="min-w-0 space-y-4 overflow-x-hidden [overflow-wrap:anywhere]">{toolbar}{warning}<RuntimeSummary runtime={snapshot.runtime} /><FetRuntimeDetail details={snapshot.fetRuntime} /><section className="grid gap-4 md:grid-cols-2">{cards.map((card) => <Link key={card.key} href={card.href} className="panel-gold group rounded-[28px] p-5 transition hover:-translate-y-0.5 hover:border-gold-300/40"><div className="flex items-center justify-between gap-3"><div className="text-xl font-black text-white">{card.title}</div><span className="text-xs text-gold-100">詳細を見る →</span></div><p className="mt-3 text-sm leading-6 text-white/65">{card.detail}</p></Link>)}</section></div>;
   }
 
   return <div className="min-w-0 space-y-4 overflow-x-hidden [overflow-wrap:anywhere]">
