@@ -1,0 +1,116 @@
+name: Formal five BT local data and runtime evidence read only
+on:
+  push:
+    branches: [research/formal-five-bt-handoff-completion-20260927]
+    paths: [.github/workflows/formal-five-bt-handoff-probe-20260927.yml]
+permissions:
+  contents: read
+concurrency:
+  group: formal-five-bt-handoff-readonly
+  cancel-in-progress: false
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Configure pinned root SSH without exposing credentials
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ -n "$SSH_HOST" && -n "$ROOT_KEY" && -n "$SSH_KNOWN_HOSTS" ]]
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k):return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Inspect only named research roots, manifests, data availability and immutable SHA
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -p "${SSH_PORT:-22}" "root@$SSH_HOST" 'python3 -' <<'PY'
+          import pathlib,json,os,stat,hashlib,subprocess
+          root=pathlib.Path("/home/deploy")
+          expected="a09ea45ca3cbd72100f9eb0eaae499039c40b6a0"
+          def emit(k,obj):print("BT_PROBE_"+k+" "+json.dumps(obj,sort_keys=True,separators=(",",":"),ensure_ascii=False))
+          current=root/"disdex-trading/current"
+          sha=(current/".disdex-release-sha").read_text().strip()
+          emit("RUNTIME",{"sha":sha,"release_matches_expected":sha==expected,
+            "current_link":str(current.resolve()),"current_dir_release":current.resolve().name})
+          roots=[
+            root/"research-runs/formal-five-logic-bt",
+            root/"disdex-trading/research-runs/formal-five-logic-bt",
+            root/"disdex-trading/current/research-runs/formal-five-logic-bt",
+            root/"ai-dex-manager/research-runs/formal-five-logic-bt",
+            root/"ai-dex-manager/research/formal_five_bt",
+            root/"disdex-trading/current/research/formal_five_bt",
+            root/"research/formal_five_bt",
+            root/"disdex-trading/research/formal_five_bt",
+            root/"disdex-trading/data",
+          ]
+          for p in roots:
+            try:
+              if not p.exists():emit("ROOT",{"path":str(p),"exists":False});continue
+              if not p.is_dir():emit("ROOT",{"path":str(p),"exists":True,"isDir":False});continue
+              direct=list(p.iterdir())[:150]
+              safe=[x.name for x in direct if "formal" in x.name.lower() or "bt" in x.name.lower() or x.name in
+                ("run-manifest.json","acquisition-manifest.json","signal-scan-manifest.json","runtime_source_manifest.json",
+                 "data-coverage.json","manifest.json","decision-gates.jsonl.gz","order-ledger.jsonl.gz",
+                 "NORMAL_ASTER_DATA_ONLY","NORMAL_PROXY_APPLIED","SEVERE_PROXY_APPLIED","SEVERE_ASTER_DATA_ONLY")]
+              emit("ROOT",{"path":str(p),"exists":True,"entries":len(direct),"relevant":safe[:45]})
+            except Exception as e:emit("ROOT",{"path":str(p),"error":type(e).__name__})
+          for p in roots:
+            if not p.is_dir():continue
+            dirs=[p]
+            for depth in range(4):
+              next_dirs=[]
+              for d in dirs[:75]:
+                try:
+                  for item in list(d.iterdir())[:150]:
+                    if item.is_symlink():continue
+                    if item.is_dir():
+                      if not any(item.name.lower().startswith(s) for s in ("node_modules","raw","data","normalized","klines",
+                        "archive","l2","cache","tmp","build",".next",".git")):next_dirs.append(item)
+                    elif item.name in ("run-manifest.json","acquisition-manifest.json","signal-scan-manifest.json",
+                           "runtime_source_manifest.json","scenario-metrics.json","data-coverage.json"):
+                      if item.stat().st_size>1000000:continue
+                      obj=json.loads(item.read_text())
+                      if not isinstance(obj,dict):continue
+                      safe={"path":str(item),"bytes":item.stat().st_size,"sha256":hashlib.sha256(item.read_bytes()).hexdigest(),
+                        "status":obj.get("status"),"runtime_sha":obj.get("runtime_sha"),"run_id":obj.get("run_id"),
+                        "period_start":obj.get("period_start") or obj.get("period_start_utc"),
+                        "scenarios":[{"id":x.get("scenario_id"),"status":x.get("status"),
+                          "verified_fills":x.get("verified_fills"),"candidate_signals":x.get("candidate_signals")}
+                          for x in obj.get("scenarios",[])[:4] if isinstance(x,dict)]}
+                      if item.name=="acquisition-manifest.json":
+                        venues=obj.get("venues",{})
+                        safe["venue_counts"]={k:{"symbols":len(v.get("klines",{})),
+                          "acquired":sum(x.get("status")=="ACQUIRED" for x in v.get("klines",{}).values())}
+                          for k,v in venues.items() if isinstance(v,dict)}
+                      if item.name=="signal-scan-manifest.json":
+                        safe["stats"]=obj.get("stats")
+                      if item.name=="data-coverage.json":
+                        safe["coverage_status"]=obj.get("status")
+                        safe["verified_symbols"]=sum(x.get("status")=="VERIFIED" for x in obj.get("symbols",[]) if isinstance(x,dict))
+                      if item.name=="runtime_source_manifest.json":
+                        safe["active_release_id"]=obj.get("active_release_id")
+                        safe["verified_repository_commit"]=obj.get("verified_repository_commit")
+                      emit("MANIFEST",safe)
+                except Exception as e:emit("DIR_ERROR",{"path":str(d),"error":type(e).__name__})
+              dirs=next_dirs[:75]
+          p=subprocess.run(["df","-Pk","/home/deploy"],capture_output=True,text=True,timeout=6)
+          fs=p.stdout.splitlines()
+          emit("DISK",{"line":fs[-1] if fs else "unavailable"})
+          print("FORMAL_FIVE_BT_READONLY_PROBE_FINISHED NO_DATA_COPIED NO_TRADING_MUTATIONS")
+          PY
