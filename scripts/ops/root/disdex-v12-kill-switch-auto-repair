@@ -134,7 +134,16 @@ write_fail_closed() {
     printf 'V12_AUTO_REPAIR_KILL_PATH_SYMLINK_REJECTED\n' >&2
     return 1
   }
-  /usr/bin/install -d -o deploy -g deploy -m 0700 "$dir"
+  if [[ -d "$dir" ]]; then
+    # Preserve a healthy shared directory's setgid/group permission contract.
+    # Only normalize ownership if an older root recovery left it root-owned.
+    if [[ "$(stat -c '%U:%G' "$dir")" != "deploy:deploy" ]]; then
+      chown deploy:deploy "$dir"
+    fi
+    chmod u+rwx,o-rwx "$dir"
+  else
+    /usr/bin/install -d -o deploy -g deploy -m 0700 "$dir"
+  fi
   runuser -u deploy -- test -x "$dir" || {
     printf 'V12_AUTO_REPAIR_KILL_PARENT_UNREADABLE\n' >&2
     return 1
