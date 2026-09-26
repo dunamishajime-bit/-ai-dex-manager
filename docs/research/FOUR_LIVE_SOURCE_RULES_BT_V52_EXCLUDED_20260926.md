@@ -9,7 +9,7 @@
 3. Quality102 causal V4 native 109 candidate outputs and native family exit-price proxy (per-symbol 5400 contiguous H1 history minimum, no future candles); exact 15 Aster public 1m Q102 resize price marks. Strict one-slot and base-idle gating: block fresh Q102 entry if V12/PENGU/FET currently holds a position, but allow existing Q102 to overlap a later FET entry on a DIFFERENT underlying if shared Gross permits. Full portfolio gross/partial Q102 reallocation and same-symbol restrictions. Native Q102 fresh DD<=0.30% boosts to3.0x only for an explicitly separate hypothetical historic-governor-data sensitivity. Missing actual historical 120sec Aster-income derived deployment-reset DD makes actual boost unprovable.
 4. FET native BRK48 signal, volume >=1.2x past72H median; 24H hold, -5% hard stop, +5% triggers +0.5% trailing floor in H1 OHLC approximation, maximum residual gross2.25, minimum residual .05. Current source on core conflict **FULL** reduceOnly sell (not a partial trim). 17/17 Aster public exact 1m conflict candles independently obtained via [Actions 36222668788](https://github.com/dunamishajime-bit/-ai-dex-manager/actions/runs/36222668788) and [Actions 36224870608](https://github.com/dunamishajime-bit/-ai-dex-manager/actions/runs/36224870608). **9/17 public 1m candles recorded ZERO venue trade volume and 7 no-volume historic 1m opens disagree with Aster H1 open.** Conservative case BLOCKS the core request when FET could not be verifiably preempted from a recorded positive-volume minute. This is a sensitivity assumption; zero reported trades do NOT prove lack of resting quotes.
 
-Shared base crypto gross3x, total gross4.25x, stock0x, V12 2x, PENGU1x, Quality102 one slot, residual FET2.25x, 5x Cross cash capacity model, daily realized crypto loss7.5% including Q102 events. Independent 13-date USDJPY causal prior bars used to screen min order notional US$5. Native `resolveIntegratedGrossGovernor` pure decision matches **8/8** TS source boundary scenarios, but historical actual income sourceComplete, 120s freshness, effective deployment-reset state/availableBalance, margin positions/reservations unknown. BASE fail-closed case never promotes profitability; separate hypothetical governor scenario supplies reconstructive proxies and MUST NOT be described as real current replay.
+Shared base crypto gross3x, total gross4.25x, stock0x, V12 2x, PENGU1x, Quality102 one slot, residual FET2.25x, 5x Cross cash capacity model, daily realized crypto loss7.5% including Q102 events. Independent historical USDJPY hourly prior bars used to screen min order notional US$5. Native `resolveIntegratedGrossGovernor` pure decision matches **8/8** TS source boundary scenarios, but historical actual income sourceComplete, 120s freshness, effective deployment-reset state/availableBalance, margin positions/reservations unknown. BASE fail-closed case never promotes profitability; separate hypothetical governor scenario supplies reconstructive proxies and MUST NOT be described as real current replay.
 
 ## Same unchanged engine: full-year result sensitivity (JPY)
 
@@ -26,9 +26,9 @@ Main H1 NEW-ENTRY daily-risk latch runs exactly 8,760 causal Aster H1 marks each
 
 | Sleeve | NORMAL realized PnL | closed PnL events | SEVERE realized PnL | closed PnL events |
 |---|---:|---:|---:|---:|
-| V12 | +5,093,181.90 | 875 | +872,097.70 | 875 |
-| PENGU | +2,136,383.99 | 67 | +523,585.46 | 65 |
-| Q102 causal V4 | **-1,723,234.88** | 36 =24 entries+12 partial-realization segments | **-481,863.39** | 36 |
+| V12 | +5,093,181.90 | 875 | +872,097.70 | 873 |
+| PENGU | +2,136,383.99 | 67 | +523,585.46 | 66 |
+| Q102 causal V4 | **-1,723,234.88** | 36 = 24 entries + 12 partial-realization segments | **-481,863.39** | 35 = 24 entries + 11 partial-realization segments |
 | FET | +441,371.62 | 18 | +187,436.93 | 18 |
 | V52 | 0 | 0 | 0 | 0 |
 
