@@ -226,13 +226,31 @@ if (process.argv.includes("--list")) {
         const startMs = Number(request.startMs);
         const endMs = Number(request.endMs);
         if (!Array.isArray(rows) || !Number.isFinite(startMs) || !Number.isFinite(endMs) || endMs < startMs) throw new Error("FET_SERIES_INPUT_INVALID");
+        // Validate the entire immutable H1 stream once. Never join disjoint
+        // historical hours: a skipped malformed/listing-gap bar invalidates
+        // the corresponding 73h lookback, not every later date.
+        const hour = 3_600_000;
+        const completed = loaded.fet.normalizeFetH1(rows, endMs + hour)
+          .filter(r => r.openTs % hour === 0 && r.closeTs === r.openTs + hour - 1
+            && r.high >= Math.max(r.open, r.close, r.low)
+            && r.low <= Math.min(r.open, r.close, r.high));
         const results = [];
-        for (let hourTs = Math.ceil(startMs / 3_600_000) * 3_600_000; hourTs <= endMs; hourTs += 3_600_000) {
-          if (Math.floor(hourTs / 3_600_000) % 4 !== 1) continue;
+        let cursor = 0;
+        for (let hourTs = Math.ceil(startMs / hour) * hour; hourTs <= endMs; hourTs += hour) {
+          if (Math.floor(hourTs / hour) % 4 !== 1) continue;
           const now = hourTs + 30_000;
-          const normalized = loaded.fet.normalizeFetH1(rows, now);
-          const signal = loaded.fet.buildFetBrk48Signal(normalized, now);
-          results.push({ decisionTs: now, signal });
+          while (cursor < completed.length && completed[cursor].closeTs < hourTs) cursor += 1;
+          const recent = completed.slice(Math.max(0, cursor - 73), cursor);
+          const aligned = recent.length === 73 && recent[72].openTs === hourTs - hour
+            && recent.every((bar, i) => i === 0 || recent[i - 1].openTs + hour === bar.openTs);
+          const signal = aligned ? loaded.fet.buildFetBrk48Signal(recent, now) : undefined;
+          results.push({
+            decisionTs: now, signal, historyReady: aligned,
+            gapReason: aligned ? null : recent.length < 73 ? "FET_INSUFFICIENT_CAUSAL_73H_HISTORY"
+              : "FET_73H_HISTORY_GAP_OR_MALFORMED",
+            lastCompletedCloseTs: recent.at(-1)?.closeTs ?? null,
+            historicalCompletedBars: recent.length,
+          });
         }
         response = { ok: true, result: jsonSafe(results) };
       } else if (request.op === "q102Series") {

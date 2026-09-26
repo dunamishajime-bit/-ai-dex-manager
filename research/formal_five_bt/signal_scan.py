@@ -132,17 +132,24 @@ def scan(data_root: str | Path, output_root: str | Path, *, strategies: tuple[st
             for row in series:
                 ts = int(row["decisionTs"])
                 signal = row.get("signal")
-                completed = [bar for bar in fet_rows if int(bar["close_time_ms"]) < ts]
+                history_ready = row.get("historyReady") is True
+                reason = row.get("gapReason")
                 decisions.append({
                     "strategy_id": "FET", "symbol": "FETUSDT", "decision_ts_ms": ts,
-                    "status": "SIGNAL" if signal else "WAIT",
+                    "status": ("SIGNAL" if signal else "WAIT" if history_ready else
+                               "WARMUP" if reason == "FET_INSUFFICIENT_CAUSAL_73H_HISTORY" else "NOT_VERIFIABLE"),
                     "signal": signal,
-                    "gate_status": {"ENTRY_SCHEDULE": "PASS", "HISTORY_DEPTH": "PASS" if len(completed) >= 73 else "FAIL", "BREAKOUT_AND_VOLUME": "PASS" if signal else "FAIL"},
-                    "data_cutoff_ms": max((int(item["close_time_ms"]) for item in completed), default=0),
+                    "gate_status": {
+                        "ENTRY_SCHEDULE": "PASS",
+                        "HISTORY_DEPTH_AND_CONTIGUITY": "PASS" if history_ready else "UNVERIFIED",
+                        "BREAKOUT_AND_VOLUME": "PASS" if signal else "FAIL" if history_ready else "NOT_REACHED",
+                    },
+                    "reason": reason,
+                    "data_cutoff_ms": int(row.get("lastCompletedCloseTs") or 0),
                     "source_runtime_sha": bridge.runtime_sha,
                 })
             paths["FET"] = _save_jsonl(output / "decisions" / "FET.jsonl", decisions)
-            stats["FET"] = {"decision_rows": len(decisions), "signal_rows": sum(row["status"] == "SIGNAL" for row in decisions), "first_bar_ms": int(fet_rows[0]["event_time_ms"]) if fet_rows else None}
+            stats["FET"] = {"decision_rows": len(decisions), "signal_rows": sum(row["status"] == "SIGNAL" for row in decisions), "first_bar_ms": int(fet_rows[0]["event_time_ms"]) if fet_rows else None, "unverified_history_windows": sum(row["status"]=="NOT_VERIFIABLE" for row in decisions), "listing_or_warmup_windows": sum(row["status"]=="WARMUP" for row in decisions)}
 
         if "Q102" in strategies:
             q102_symbols = universes["Q102"]
