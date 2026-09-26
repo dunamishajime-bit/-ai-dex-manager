@@ -36,7 +36,7 @@ registerHooks({
           existsSync(candidate) && statSync(candidate).isFile())
         return {url:pathToFileURL(candidate).href, shortCircuit:true};
     }
-    throw new Error("SEVEN_BT_IMPORT_OUTSIDE_HASHED_SOURCE");
+    throw new Error("SEVEN_BT_IMPORT_OUTSIDE_HASHED_SOURCE:" + specifier + ":" + String(ctx.parentURL).split("/").slice(-3).join("/"));
   },
   load(url, ctx, next) {
     const fp = fileURLToPath(url);
