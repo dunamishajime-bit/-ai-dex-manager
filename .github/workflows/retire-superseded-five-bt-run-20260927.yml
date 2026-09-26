@@ -1,0 +1,33 @@
+name: Retire superseded incomplete five-BT replay (research only)
+on:
+  push:
+    branches: [research/formal-five-bt-handoff-completion-20260927]
+    paths: [.github/workflows/retire-superseded-five-bt-run-20260927.yml]
+permissions:
+  actions: write
+  contents: read
+jobs:
+  retire_exact_superseded_run:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    env:
+      GH_TOKEN: ${{ github.token }}
+      OLD_RUN_ID: '36276389104'
+      EXPECTED_OLD_SHA: '55cf146c21e9f309586aa6dcaa05fe69ab8a97ac'
+    steps:
+      - name: Replace ONLY obsolete research replay; preserve new ECB replay
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          repo="$GITHUB_REPOSITORY"
+          sha="$(gh api "repos/$repo/actions/runs/$OLD_RUN_ID" --jq .head_sha)"
+          state="$(gh api "repos/$repo/actions/runs/$OLD_RUN_ID" --jq .status)"
+          echo "OLD_BT_RUN=$OLD_RUN_ID STATE=$state"
+          [[ "$sha" == "$EXPECTED_OLD_SHA" ]] || { echo WRONG_SHA_DO_NOT_CANCEL; exit 2; }
+          if [[ "$state" == queued || "$state" == in_progress || "$state" == pending ]]; then
+            gh api -X POST "repos/$repo/actions/runs/$OLD_RUN_ID/cancel" >/dev/null
+            echo OBSOLETE_BT_RUN_CANCEL_REQUESTED=TRUE
+          else
+            echo OBSOLETE_BT_ALREADY_FINISHED=TRUE
+          fi
+          echo "RESEARCH_ONLY=TRUE TRADING_MUTATIONS=0"
