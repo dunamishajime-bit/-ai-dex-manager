@@ -1,0 +1,63 @@
+name: Recover original Final Dynamic Gross BT provenance - read only
+on:
+  push:
+    branches: [research/recover-final-governor-bt-20260926]
+    paths:
+      - scripts/research/recover_original_final_governor_provenance.py
+      - .github/workflows/recover-original-final-governor-provenance.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  read-only-inventory:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure SSH without disclosing credentials
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          d=Path.home()/".ssh"
+          for file,key in (("id_root","ROOT_KEY"),("known_hosts","SSH_KNOWN_HOSTS")):
+              value=os.environ[key].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+              (d/file).write_text(value)
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Inventory archived BT sources ONLY, no trading mutations
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -p "${SSH_PORT:-22}" "root@$SSH_HOST" 'python3 -' \
+            < scripts/research/recover_original_final_governor_provenance.py > original-bt-provenance.json
+          python3 - <<'PY'
+          import json
+          d=json.load(open("original-bt-provenance.json"))
+          assert d["readOnly"] is True and d["tradingMutation"] == 0
+          print("ORIGINAL_FINAL_GOVERNOR_PROVENANCE_SCAN",json.dumps({
+              "roots":len(d["roots"]),
+              "rootsExisting":sum(x["exists"] for x in d["roots"]),
+              "visited":d["visitedFiles"],
+              "matched":len(d["matchedFiles"]),
+              "resultMarkers":d["originalResultMarkers"][:20],
+              "truncated":d["truncated"],
+          },ensure_ascii=False))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: original-14p49b-governor-bt-vps-provenance-20260926
+          path: original-bt-provenance.json
+          retention-days: 90
