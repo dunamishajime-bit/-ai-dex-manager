@@ -1,0 +1,28 @@
+name: Audit exact new four-sleeve FET preemption one-minute market mark
+on:
+  push:
+    branches: [research/recover-final-governor-bt-20260926]
+    paths:
+      - scripts/research/four_bt_fetch_single_fet_exact1m_20260926.py
+      - .github/workflows/four-bt-single-fet-exact1m-20260926.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  public-price-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Exact public Aster read only
+        run: |
+          python3 -m py_compile scripts/research/four_bt_fetch_single_fet_exact1m_20260926.py
+          python3 scripts/research/four_bt_fetch_single_fet_exact1m_20260926.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: exact-fet-four-sleeve-conflict-extra-minute-20260926
+          path: research-results/20260926/four/fet-preemption-exact-minute.json
+          retention-days: 90
