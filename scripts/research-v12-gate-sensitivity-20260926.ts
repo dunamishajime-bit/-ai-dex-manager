@@ -26,7 +26,10 @@ const CASES = [
   { name: "SCORE_125", volume: 0.9845, score: 1.25 },
   { name: "SCORE_100", volume: 0.9845, score: 1.00 },
   { name: "COMBINED_V080_S100", volume: 0.80, score: 1.00 },
+  { name: "COMBINED_V080_S085", volume: 0.80, score: 0.85 },
+  { name: "COMBINED_V080_S070_DIAGNOSTIC", volume: 0.80, score: 0.70 },
   { name: "USER_V055_S085", volume: 0.55, score: 0.85 },
+  { name: "COMBINED_V055_S070_DIAGNOSTIC", volume: 0.55, score: 0.70 },
   { name: "COMBINED_V060_S080", volume: 0.60, score: 0.80 },
   { name: "COMBINED_V040_S080", volume: 0.40, score: 0.80 },
   { name: "COMBINED_V040_S060", volume: 0.40, score: 0.60 },
@@ -123,6 +126,32 @@ async function main(){
     const added=[...x.opportunityKeys].filter(k=>!base.has(k));
     const addReturns=added.map(k=>x.returnByKey.get(k)!).filter(Number.isFinite);
     const removed=[...base].filter(k=>!x.opportunityKeys.has(k));
+    // "Opportunities" above are decisions every two hours, NOT new executable
+    // trade entries: a held symbol may be reselected on the next decision.
+    // Two de-duplicated proxy episode measures explicitly avoid silently
+    // presenting repeated observations as distinct new trades.
+    const events=[...x.opportunityKeys].map(key=>{
+      const [symbol,side,tsText]=key.split("|");
+      return {symbol,side,ts:Number(tsText),net:x.returnByKey.get(key)!};
+    }).sort((a,b)=>a.ts-b.ts||a.symbol.localeCompare(b.symbol));
+    const jstDay=(ts:number)=>new Date(ts+9*HOUR).toISOString().slice(0,10);
+    const entriesByDay=new Map<string,number>();
+    for(const e of events)entriesByDay.set(jstDay(e.ts),(entriesByDay.get(jstDay(e.ts))||0)+1);
+    const episodes=(hours:number)=>{
+      const lastBySymbol=new Map<string,number>();
+      const kept:typeof events=[];
+      for(const e of events){
+        const last=lastBySymbol.get(e.symbol);
+        if(last!==undefined&&e.ts-last<hours*HOUR)continue;
+        kept.push(e);
+        lastBySymbol.set(e.symbol,e.ts);
+      }
+      const mean=kept.length?100*kept.reduce((a,e)=>a+e.net,0)/kept.length:null;
+      const positive=kept.length?100*kept.filter(e=>e.net>0).length/kept.length:null;
+      return {episodeCount:kept.length,mean24hForwardNetPct:mean,positive24hForwardPct:positive,
+        episodeDaysJst:new Set(kept.map(e=>jstDay(e.ts))).size};
+    };
+    const daysWithSignal=[...entriesByDay.keys()].sort();
     return {
       case:x.name,volumeRatioMin:x.volume,qualityScoreThreshold:x.score,
       rawCandidatesAfterBase:x.rawCandidatesAfterBase,
@@ -135,6 +164,12 @@ async function main(){
       signed24hNetFeeProxyMeanPct:proxy.length?100*sum/proxy.length:null,
       signed24hNetFeeProxyPositivePct:proxy.length?100*proxy.filter(v=>v>0).length/proxy.length:null,
       proxyEvents:proxy.length,
+      rawRepeatedDecisionObservations:true,
+      signalDaysJst:daysWithSignal.length,
+      rawSelectedObservationsByDayJst:Object.fromEntries([...entriesByDay.entries()].sort(([a],[b])=>a.localeCompare(b))),
+      independentSymbolEpisodesMin24hApart:episodes(24),
+      independentSymbolEpisodesMin46hApart:episodes(46),
+      independentEpisodeCaveat:"24h/46h spacing per symbol ignores actual exits, shared gross and competing 5-logic positions; neither count is a live-trade forecast.",
     };
   });
   const artifact={
