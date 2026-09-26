@@ -1,0 +1,71 @@
+name: DisDex sudden disk consumption root-cause audit
+on:
+  issue_comment:
+    types: [created]
+permissions:
+  contents: read
+jobs:
+  audit:
+    if: >-
+      github.event.issue.number == 132 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == 'DISDEX_DISK_GROWTH_CAUSE_AUDIT_20260926'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 17
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Configure approved VPS read-only transport
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Find active runaway writer without touching runtime
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -p "${SSH_PORT:-22}" "root@$SSH_HOST" 'python3 -u -' <<'PY'
+          import os,pathlib,subprocess,datetime,json,time
+          def run(a,timeout=9,limit=3500):
+           try:
+            p=subprocess.run(a,capture_output=True,text=True,timeout=timeout)
+            return {"rc":p.returncode,"stdout":p.stdout.strip()[:limit],"stderr":p.stderr.strip()[:220]}
+           except Exception as e:return {"error":type(e).__name__}
+          print("DISK_GROWTH_TIME="+datetime.datetime.now(datetime.timezone.utc).isoformat(),flush=True)
+          print("DISK_GROWTH_DF="+json.dumps(run(["df","-B1","/"]),ensure_ascii=False),flush=True)
+          for path in ["/var/log","/var/lib/disdex","/tmp","/var/tmp","/home/deploy/disdex-trading/runner-watchdog","/home/deploy/disdex-trading/ui-releases","/home/deploy/disdex-trading/releases","/home/deploy/ai-dex-manager-v96-paper","/home/deploy/disdex-ops","/home/deploy/dis-dex-manager","/root/.cache"]:
+           if not os.path.exists(path):continue
+           print("DISK_GROWTH_BUCKET="+json.dumps({"p":path,"du":run(["du","-sxB1",path],10)},ensure_ascii=False),flush=True)
+          print("DISK_GROWTH_OPEN_DELETED="+json.dumps(run(["lsof","-nP","+L1"],12,6000),ensure_ascii=False),flush=True)
+          print("DISK_GROWTH_JOURNAL="+json.dumps(run(["journalctl","--disk-usage"],8),ensure_ascii=False),flush=True)
+          for p in ["/var/log","/var/lib/disdex","/tmp","/home/deploy/disdex-trading","/home/deploy/dis-dex-manager"]:
+           if not os.path.isdir(p):continue
+           # One-pass bounded freshness check. A runaway writer often appears as a young large file.
+           a=run(["find",p,"-xdev","-type","f","-mmin","-15","-size","+5M","-printf","%s %TY-%Tm-%TdT%TH:%TM %p\\n"],15,13000)
+           if "stdout" in a and a["stdout"]:
+            lines=sorted(a["stdout"].splitlines(),key=lambda s:int(s.split(" ",1)[0]) if s.split(" ",1)[0].isdigit() else 0,reverse=True)
+            a["stdout"]="\n".join(lines[:23])
+           print("DISK_GROWTH_RECENT="+json.dumps({"p":p,"result":a},ensure_ascii=False),flush=True)
+          x=pathlib.Path("/home/deploy/disdex-trading/releases")
+          if x.is_dir():
+           valid=[p for p in x.iterdir() if p.is_dir() and len(p.name)==40]
+           print("DISK_GROWTH_RELEASE_COUNT="+json.dumps({"valid":len(valid),"latest":sorted([{"sha":p.name,"mtime":int(p.stat().st_mtime)} for p in valid],key=lambda z:z["mtime"],reverse=True)[:10]}),flush=True)
+          print("DISK_GROWTH_PROCESS_TOP="+json.dumps(run(["ps","-eo","pid,ppid,comm,rss,etime,args","--sort=-rss"],7,6000)),flush=True)
+          print("DISK_GROWTH_AUDIT_NO_MUTATION=TRUE",flush=True)
+          
+          PY
