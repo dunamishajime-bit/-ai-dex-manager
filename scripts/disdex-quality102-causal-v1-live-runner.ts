@@ -14,6 +14,7 @@ import {
 } from "../config/disdexQuality102CausalV4Model";
 import { resolveSharedCryptoDailyLossPct } from "../config/sharedCryptoRiskPolicy";
 import { AsterV3Client, isAsterDepositRequirementError } from "../lib/aster-v3-client";
+import { classifyAsterRateBudgetFailure } from "../lib/disdex-aster-rate-budget-policy";
 import { AsterDirectTradeExecutor, type DirectOpenOrder, type DirectPosition } from "../lib/direct-trade-executor";
 import { FileAccountOrderLock } from "../lib/disdex-account-order-lock";
 import { createInterruptibleDelay } from "../lib/interruptible-delay";
@@ -39,6 +40,30 @@ const DEFAULT_MAX_DATA_AGE_MS = 5 * 60_000;
 const DEFAULT_HISTORY_HOURS = 225 * 24;
 const DEFAULT_MAX_ENTRY_DELAY_MS = 2 * 60 * 60_000;
 const HOUR_MS = 3_600_000;
+
+/**
+ * A temporary global Aster request-budget saturation is a safe defer, not a
+ * configuration or reconciliation pass.  Returning an explicit deferred
+ * result lets systemd start the daemon so its normal tick loop can retry while
+ * keeping all exposure mutations blocked.  Other preflight failures must
+ * continue to fail closed and prevent daemon startup.
+ */
+export function classifyQ102PreflightRateBudgetDeferral(error: unknown): Record<string, unknown> | undefined {
+    const classified = classifyAsterRateBudgetFailure(error);
+    if (!classified) return undefined;
+    return {
+        status: "QUALITY102_CAUSAL_V1_READ_ONLY_PREFLIGHT_DEFERRED_RATE_BUDGET",
+        safetyState: "DEFERRED_FAIL_CLOSED",
+        reason: classified.reason,
+        ...(classified.waitMs === undefined ? {} : { retryAfterMs: classified.waitMs }),
+        ordersSent: 0,
+        cancelSent: 0,
+        positionChangesSent: 0,
+        stateChanged: false,
+        syntheticOrders: 0,
+        testOrders: 0,
+    };
+}
 
 function q102PreflightManagedProtectiveOrderShape(
     order: DirectOpenOrder,
@@ -539,8 +564,14 @@ export function buildQuality102CausalV1Runner(env: NodeJS.ProcessEnv = process.e
 
 async function main(): Promise<void> {
     if (process.argv.includes("--preflight")) {
-        const result = await runQuality102CausalV1ReadOnlyPreflight();
-        console.log(JSON.stringify(result));
+        try {
+            const result = await runQuality102CausalV1ReadOnlyPreflight();
+            console.log(JSON.stringify(result));
+        } catch (error) {
+            const deferred = classifyQ102PreflightRateBudgetDeferral(error);
+            if (!deferred) throw error;
+            console.log(JSON.stringify(deferred));
+        }
         return;
     }
     const built = buildQuality102CausalV1Runner();
