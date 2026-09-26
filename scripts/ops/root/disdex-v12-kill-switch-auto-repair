@@ -128,12 +128,27 @@ read_kill_and_state() {
 write_fail_closed() {
   local reason="$1" dir tmp
   dir="$(dirname "$KILL_SOURCE_PATH")"
-  /usr/bin/install -d -o root -g root -m 0700 "$dir"
+  # Root recovery must not turn the shared latch into root-only state. Trading
+  # runners read it as deploy; retain fail-closed content and atomic replacement.
+  [[ ! -L "$dir" && ! -L "$KILL_SOURCE_PATH" ]] || {
+    printf 'V12_AUTO_REPAIR_KILL_PATH_SYMLINK_REJECTED\n' >&2
+    return 1
+  }
+  /usr/bin/install -d -o deploy -g deploy -m 0700 "$dir"
+  runuser -u deploy -- test -x "$dir" || {
+    printf 'V12_AUTO_REPAIR_KILL_PARENT_UNREADABLE\n' >&2
+    return 1
+  }
   tmp="$(mktemp "$dir/.disdex-auto-repair-kill.XXXXXX")"
   /usr/bin/jq -n --arg reason "$reason" --arg sourcePath "$KILL_SOURCE_PATH" --arg activatedAt "$(date -Is)" \
     '{active:true, strategyId:"DISDEX_V12_X1_ALL", action:"FLATTEN_MANAGED", reason:$reason, sourcePath:$sourcePath, operator:"V12_KILL_SWITCH_AUTO_REPAIR_V2", activatedAt:$activatedAt, automaticRepair:"FAIL_CLOSED"}' > "$tmp"
+  chown deploy:deploy "$tmp"
   chmod 0600 "$tmp"
   mv -f "$tmp" "$KILL_SOURCE_PATH"
+  runuser -u deploy -- test -r "$KILL_SOURCE_PATH" || {
+    printf 'V12_AUTO_REPAIR_KILL_READBACK_FAILED\n' >&2
+    return 1
+  }
 }
 
 run_recovery_script() {
