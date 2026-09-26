@@ -26,6 +26,7 @@ const CASES = [
   { name: "SCORE_125", volume: 0.9845, score: 1.25 },
   { name: "SCORE_100", volume: 0.9845, score: 1.00 },
   { name: "COMBINED_V080_S100", volume: 0.80, score: 1.00 },
+  { name: "USER_V055_S085", volume: 0.55, score: 0.85 },
   { name: "COMBINED_V060_S080", volume: 0.60, score: 0.80 },
   { name: "COMBINED_V040_S080", volume: 0.40, score: 0.80 },
   { name: "COMBINED_V040_S060", volume: 0.40, score: 0.60 },
@@ -74,6 +75,7 @@ async function main(){
     ...x,opportunities:0,windowsWithSignal:0,hc175Opportunities:0,
     net24hProxy:[] as number[],rawCandidatesAfterBase:0,
     observedFromFrozen:new Set<string>(),opportunityKeys:new Set<string>(),
+    returnByKey:new Map<string,number>(),
   }));
   let windows=0;
   for(let i=65;i<all.BTC.length-HOLD_BARS-1;i++){
@@ -108,7 +110,9 @@ async function main(){
         const start=symbolBars[i+1].open;
         const end=symbolBars[i+HOLD_BARS].close;
         if(!(start>0&&end>0))throw Error("INVALID_FORWARD_PRICE");
-        run.net24hProxy.push((candidate.side==="LONG" ? end/start-1 : start/end-1)-ROUND_TRIP_COST_PCT);
+        const signedNet=(candidate.side==="LONG" ? end/start-1 : start/end-1)-ROUND_TRIP_COST_PCT;
+        run.net24hProxy.push(signedNet);
+        run.returnByKey.set(name,signedNet);
       }
     }
   }
@@ -117,12 +121,17 @@ async function main(){
     const proxy=x.net24hProxy;
     const sum=proxy.reduce((a,b)=>a+b,0);
     const added=[...x.opportunityKeys].filter(k=>!base.has(k));
+    const addReturns=added.map(k=>x.returnByKey.get(k)!).filter(Number.isFinite);
+    const removed=[...base].filter(k=>!x.opportunityKeys.has(k));
     return {
       case:x.name,volumeRatioMin:x.volume,qualityScoreThreshold:x.score,
       rawCandidatesAfterBase:x.rawCandidatesAfterBase,
       potentialSignalWindows:x.windowsWithSignal,
       potentialEntries:x.opportunities,hc175Entries:x.hc175Opportunities,
       newlyAdmittedRelativeToFrozen:added.length,
+      frozenOpportunitiesDisplaced:removed.length,
+      incrementalOnlyNet24hMeanPct:addReturns.length?100*addReturns.reduce((a,b)=>a+b,0)/addReturns.length:null,
+      incrementalOnlyNet24hPositivePct:addReturns.length?100*addReturns.filter(x=>x>0).length/addReturns.length:null,
       signed24hNetFeeProxyMeanPct:proxy.length?100*sum/proxy.length:null,
       signed24hNetFeeProxyPositivePct:proxy.length?100*proxy.filter(v=>v>0).length/proxy.length:null,
       proxyEvents:proxy.length,
