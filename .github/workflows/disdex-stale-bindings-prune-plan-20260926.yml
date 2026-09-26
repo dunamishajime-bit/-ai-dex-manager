@@ -45,7 +45,7 @@ jobs:
           current=pathlib.Path("/home/deploy/disdex-trading/current").resolve()
           pattern=re.compile(r"^[0-9a-f]{40}$")
           releases=sorted([p for p in rr.iterdir() if p.is_dir() and not p.is_symlink() and pattern.fullmatch(p.name) and (p/".disdex-release-sha").is_file() and (p/".disdex-release-sha").read_text().strip()==p.name],key=lambda x:x.stat().st_mtime,reverse=True)
-          pinned={current}|set(x for x in releases if x!=current) and set([])
+          pinned={current}
           for p in releases:
            if p!=current and len(pinned)<3:pinned.add(p)
           todo=list(pinned)
