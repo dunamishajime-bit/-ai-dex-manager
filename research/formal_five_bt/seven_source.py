@@ -21,6 +21,8 @@ SIDE_CAR_FILES = (
     "config/hypeZecLongRuntime.ts",
     "config/integratedProductionRiskPolicy.ts",
     "config/v52V50Runtime.json",
+    "config/v12X1AllRuntime.ts",
+    "lib/disdex-aster-portfolio-classifier.ts",
     "lib/hype-zec-long-sleeves.ts",
     "lib/hype-zec-preemption.ts",
 )
