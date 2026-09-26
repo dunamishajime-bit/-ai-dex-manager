@@ -1,0 +1,37 @@
+name: DisDex cross-language rate budget and order-lock stress (no live orders)
+on:
+  issue_comment:
+    types: [created]
+permissions:
+  contents: read
+jobs:
+  verify:
+    if: >-
+      github.event.issue.number == 132 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == 'DISDEX_RATE_LOCK_CROSSLANGUAGE_STRESS_20260926'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    steps:
+      - name: Checkout exact live-lineage race-test candidate
+        uses: actions/checkout@v4
+        with:
+          ref: cc13c27d7e3ee0cffc117e2af5f9cf9902b6461d
+      - name: Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install pinned dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Existing rate-budget, cooldown and account-order-lock regression tests
+        run: |
+          set -Eeuo pipefail
+          npx tsx --test tests/aster-global-rate-budget.test.ts tests/aster-rate-budget-policy.test.ts tests/aster-rate-limit-cooldown.test.ts
+          npx tsx scripts/disdex-account-order-lock-selftest.ts
+          python3 -m unittest discover -s tests -p test_aster_rate_budget_policy.py
+      - name: Cross-language concurrent Node/Python and isolated account lock stress
+        run: npx tsx --test tests/disdex-rate-account-multiprocess-20260926.test.ts
+      - name: Immutable safety marker
+        run: echo 'ALL_LOCK_STRESS_NO_LIVE_STATE_NO_ASTER_ORDER=TRUE'
