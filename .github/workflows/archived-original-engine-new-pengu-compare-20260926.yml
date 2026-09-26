@@ -1,0 +1,106 @@
+name: Source-faithful original integrated BT with new native PENGU substitution
+on:
+  push:
+    branches: [research/recover-final-governor-bt-20260926]
+    paths:
+      - scripts/research/replace_pengu_in_archived_engine_20260926.py
+      - .github/workflows/archived-original-engine-new-pengu-compare-20260926.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 105
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: 9f51d5876fd7c7924b3c99dc1934336bdd832852
+          path: .original-repo
+      - uses: actions/checkout@v4
+        with:
+          ref: 04c1a369223bd27e9e42bc93604b3777b9230d92
+          path: .original-repo/.stock-research
+      - uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .original-repo/.stock-research/.v11
+      - uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .original-repo/.stock-research/.v13
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Download byte-for-byte original integrated Python engine
+        uses: actions/download-artifact@v4
+        with:
+          name: pengu-integrated-engine-capture
+          path: .original-repo/.research-state/original
+          github-token: ${{ github.token }}
+          repository: dunamishajime-bit/-ai-dex-manager
+          run-id: 35934170491
+      - name: Download completed archival restoration stock rows and baseline evidence
+        uses: actions/download-artifact@v4
+        with:
+          name: old-source-refreshed-stock-restoration-20260926
+          path: .original-artifacts/old-run
+          github-token: ${{ github.token }}
+          repository: dunamishajime-bit/-ai-dex-manager
+          run-id: 36215106356
+      - name: Download original Sep18 archived V12 and old PENGU ledgers
+        uses: actions/download-artifact@v4
+        with:
+          name: flat-boost-preemption-35337138289
+          path: .original-artifacts/old-ledger
+          github-token: ${{ github.token }}
+          repository: dunamishajime-bit/-ai-dex-manager
+          run-id: 35337138289
+      - name: Download original native Q60 DD17 H72 new PENGU trade events
+        uses: actions/download-artifact@v4
+        with:
+          name: original-new-pengu-q60-dd17-h72-ledger-20260926
+          path: .original-artifacts/new-pengu
+          github-token: ${{ github.token }}
+          repository: dunamishajime-bit/-ai-dex-manager
+          run-id: 36215236060
+      - name: Compile adapter and verify frozen provenance
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 -m py_compile scripts/research/replace_pengu_in_archived_engine_20260926.py
+          printf '%s  %s\n' cae9785492ea5dda8173853fe2cbc7d99ea451f550a739fb7f014f4773d9899d .original-repo/.research-state/original/integrated-engine.py | sha256sum -c -
+          python3 - <<'PY'
+          import json,pathlib
+          new=json.loads(pathlib.Path('.original-artifacts/new-pengu/.research-state/pengu-flat1-dd-q60-robustness/preserved-new-pengu-ledger.json').read_text())
+          assert [len(new['modes'][x]) for x in ('normal','stress')]==[69,68]
+          stock=json.loads(pathlib.Path('.original-artifacts/old-run/restored-results/stock/old-stock-raw.json').read_text())
+          assert [len(stock[x]) for x in ('v11','v50','targetDays')]==[57,165,246]
+          PY
+      - name: Replay original engine baseline then substitute native new PENGU only
+        shell: bash
+        env:
+          PYTHONPATH: .original-repo/scripts:.original-repo/.stock-research/scripts
+        run: |
+          set -o pipefail
+          python3 scripts/research/replace_pengu_in_archived_engine_20260926.py \
+            --old-engine .original-repo/.research-state/original/integrated-engine.py \
+            --old-result .original-artifacts/old-run/restored-results/sep18/result.json \
+            --new-pengu .original-artifacts/new-pengu/.research-state/pengu-flat1-dd-q60-robustness/preserved-new-pengu-ledger.json \
+            --stock-raw .original-artifacts/old-run/restored-results/stock/old-stock-raw.json \
+            --v12-ledger .original-artifacts/old-ledger/flat-boost-current/v12-top2-ledger.json \
+            --old-pengu-ledger .original-artifacts/old-ledger/flat-boost-preemption/pengu-hard24-ledger.json \
+            --quality102-frozen .original-artifacts/old-run/original/quality102-frozen.csv \
+            --output .original-artifacts/comparison \
+            2>&1 | tee .original-artifacts/comparison.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: original-integrated-source-new-pengu-comparison-20260926
+          path: |
+            .original-artifacts/comparison/
+            .original-artifacts/comparison.log
+          retention-days: 90
+          if-no-files-found: warn
