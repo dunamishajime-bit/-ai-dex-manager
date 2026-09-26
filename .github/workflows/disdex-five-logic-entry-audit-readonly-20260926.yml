@@ -193,6 +193,99 @@ jobs:
           print("FIVE_LOGIC_ENTRY_AUDIT_COMPLETE")
           PY
 
+      - name: Reconcile actual Aster orders, state permissions, and disk without writes
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -p "\${SSH_PORT:-22}" "root@$SSH_HOST" 'python3 -' <<'PY'
+          import collections,json,os,pathlib,re,stat,subprocess
+          release=pathlib.Path("/home/deploy/disdex-trading/current").resolve()
+          sha=(release/".disdex-release-sha").read_text().strip()
+          assert re.fullmatch("[0-9a-f]{40}",sha)
+          unit="disdex-v12-x1-all@"+sha+".service"
+          r=subprocess.run(["systemctl","show",unit,"-p","MainPID","--value"],capture_output=True,text=True,check=True)
+          pid=int(r.stdout.strip())
+          env={}
+          raw=pathlib.Path("/proc/"+str(pid)+"/environ").read_bytes()
+          for item in raw.split(b"\0"):
+              if b"=" in item:
+                  a,b=item.split(b"=",1)
+                  key=a.decode("utf-8","replace")
+                  if key in ["ASTER_FUTURES_BASE_URL","ASTER_USER_ADDRESS","ASTER_API_PRIVATE_KEY",
+                             "ASTER_REQUEST_TIMEOUT_MS","ASTER_RECV_WINDOW_MS",
+                             "DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH","DISDEX_ASTER_GLOBAL_RATE_MIN_INTERVAL_MS",
+                             "DISDEX_ASTER_GLOBAL_RATE_MAX_QUEUE_MS","PATH","HOME"]:
+                      env[key]=b.decode("utf-8","replace")
+          env.setdefault("PATH","/usr/local/bin:/usr/bin:/bin")
+          env.setdefault("HOME","/home/deploy")
+          env["NODE_ENV"]="production"
+          print("ASTER_READONLY_DIAGNOSTIC_CREDENTIALS_AVAILABLE="+str(bool(env.get("ASTER_API_PRIVATE_KEY") and env.get("ASTER_USER_ADDRESS"))))
+          if env.get("ASTER_API_PRIVATE_KEY") and env.get("ASTER_USER_ADDRESS"):
+              script=release/"scripts/disdex-aster-readonly-account-diagnostic.ts"
+              tsx=release/"node_modules/.bin/tsx"
+              try:
+                  result=subprocess.run([str(tsx),str(script)],cwd=release,env=env,capture_output=True,text=True,timeout=70)
+                  obj=None
+                  for line in reversed(result.stdout.splitlines()):
+                      try:
+                          d=json.loads(line)
+                          if isinstance(d,dict) and d.get("status","").startswith("ASTER_READONLY_ACCOUNT_DIAGNOSTIC_"):
+                              obj=d;break
+                      except Exception:pass
+                  if obj and result.returncode==0 and obj.get("status")=="ASTER_READONLY_ACCOUNT_DIAGNOSTIC_PASS":
+                      positions=obj.get("positions",[])
+                      orders=obj.get("openOrders",[])
+                      balances=obj.get("usdtBalance",[])
+                      available=all(float(b.get("availableBalance") or 0)>=0 for b in balances)
+                      order_types=dict(collections.Counter(str(x.get("type")) for x in orders if isinstance(x,dict)))
+                      print("ASTER_ACCOUNT_PROOF="+json.dumps({
+                          "pass":True,"positionsCount":len(positions),"openOrdersCount":len(orders),
+                          "availableBalanceNonNegative":available,"orderTypes":order_types,
+                          "nonReduceOnlyOpenOrders":sum(x.get("reduceOnly") is False for x in orders if isinstance(x,dict)),
+                          "ordersSent":obj.get("ordersSent"),"cancelsSent":obj.get("cancelsSent"),
+                          "positionChangesSent":obj.get("positionChangesSent")}))
+                  else:
+                      print("ASTER_ACCOUNT_PROOF="+json.dumps({
+                          "pass":False,"errorType":"READONLY_DIAGNOSTIC_NONZERO_OR_MISSING_RESULT",
+                          "returncode":result.returncode,
+                          "stderrCategories":dict(collections.Counter(
+                              w for w in ["RATE_BUDGET","429","418","TIMEOUT","EACCES","CREDENTIALS"]
+                              if w in result.stderr.upper()))}))
+              except Exception as exc:
+                  print("ASTER_ACCOUNT_PROOF="+json.dumps({"pass":False,"errorType":type(exc).__name__}))
+          paths=["/var/lib/disdex/shared/kill-switch.json",
+                 "/var/lib/disdex/shared/crypto-daily-risk.json",
+                 "/var/lib/disdex/quality102-causal-v1/state.json",
+                 "/var/lib/disdex/v12-x1-all/runner.json",
+                 "/var/lib/disdex/pengu-dual-ls-v2/runner-live.json"]
+          for s in paths:
+              p=pathlib.Path(s)
+              if not p.exists():print("READ_PERMISSIONS="+json.dumps({"file":s,"exists":False}));continue
+              st=p.stat()
+              chk=subprocess.run(["runuser","-u","deploy","--","test","-r",s],capture_output=True)
+              print("READ_PERMISSIONS="+json.dumps({"file":s,"mode":oct(stat.S_IMODE(st.st_mode)),"uid":st.st_uid,"gid":st.st_gid,
+                  "deployCanRead":chk.returncode==0}))
+          qpath=pathlib.Path("/var/lib/disdex/quality102-causal-v1/state.json")
+          try:
+              q=json.loads(qpath.read_text())
+              fs=q.get("failures",[])
+              last=[{"timestamp":y.get("occurredAt"),"type":str(y.get("message") or "")[:125]} for y in fs[-8:] if isinstance(y,dict)]
+              print("Q102_FAILURE_HISTORY="+json.dumps({"failureCount":len(fs),"last8":last}))
+          except Exception as exc:print("Q102_FAILURE_HISTORY="+json.dumps({"errorType":type(exc).__name__}))
+          try:
+              disk=subprocess.run(["du","-x","-B1","--max-depth=1","/home/deploy","/var/lib/disdex","/var/log"],
+                  capture_output=True,text=True,timeout=45)
+              dirs=[]
+              for l in disk.stdout.splitlines():
+                  v,_,p=l.partition("\t")
+                  if v.isdigit():dirs.append({"path":p,"gb":round(int(v)/1e9,3)})
+              print("DISK_TOP_DIRECTORIES="+json.dumps(sorted(dirs,key=lambda x:-x["gb"])[:13]))
+          except Exception as exc:print("DISK_TOP_DIRECTORIES="+json.dumps({"errorType":type(exc).__name__}))
+          print("ACCOUNT_PERMISSIONS_DISK_MUTATION=0")
+          PY
+
       - name: Independently cross-check V12 Aster completed H2 volume ratios
         shell: bash
         run: |
