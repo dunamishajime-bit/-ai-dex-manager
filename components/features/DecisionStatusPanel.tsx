@@ -124,6 +124,30 @@ type RuntimeUnit = {
   updatedAt?: number;
 };
 
+
+type MultiGateMeasure = { actual: number; pass: boolean; minimum?: number; minimumAbsolute?: number };
+type V12MultiGateChecks = {
+  volume: MultiGateMeasure;
+  momentum: MultiGateMeasure;
+  edgeToCost: MultiGateMeasure;
+  btcDirection: { regime: string; side: string; pass: boolean };
+  scoreQuality: {
+    actual:number;normalMinimum:number;strongMinimum:number;strongMaximum:number;
+    atrRatio:number;minimumAtrRatio:number;normalPass:boolean;strongBandPass:boolean;
+    relaxedMomentumPass:boolean;pass:boolean;strongScoreGap:boolean;
+  };
+  selection:{evaluated:boolean;selected:boolean;portfolioRank?:number};
+  winRate:{evaluated:boolean;pass?:boolean;reason?:string};
+  failedGates:string[];
+  qualityRoute?:string;
+};
+type V12MultiGateSummary = {
+  candidateCount?:number;baseEligibleCount?:number;top3SelectedCount?:number;
+  winRateEvaluatedCount?:number;finalSignalCount?:number;strongScoreGapCount?:number;
+  firstRejectionCounts:Record<string,number>;simultaneousFailureCounts:Record<string,number>;
+  referenceTs?:number;observedAt?:string;
+};
+
 type CandidateDetail = {
   symbol?: string;
   side?: string;
@@ -133,6 +157,8 @@ type CandidateDetail = {
   volumeRatio?: number;
   volatility?: number;
   atr?: number;
+  baseEligible?: boolean;
+  gateChecks?: V12MultiGateChecks;
   signalGate?: {
     status: "pass" | "blocked" | "unknown";
     code?: string;
@@ -163,6 +189,7 @@ type V12Observability = {
     rationale?: string;
     selectionConfirmed?: boolean;
     signalGate?: CandidateDetail["signalGate"];
+    gateDiagnostics?: V12MultiGateSummary;
     candidates: CandidateDetail[];
   } | null;
   runnerState: {
@@ -247,6 +274,7 @@ function TraceIcon({ state }: { state: V12Observability["executionTrace"]["steps
 
 function candidateOrderStatus(candidate: CandidateDetail, decision: NonNullable<V12Observability["decision"]>) {
   if (decision.selectionConfirmed && decision.symbol === candidate.symbol) return "今回Signal選定済み";
+  if (candidate.gateChecks?.selection.evaluated && !candidate.gateChecks.selection.selected) return "Top3対象外 / 発注不可";
   if (candidate.signalGate?.status === "pass") return "Signal Eligible / 今回未選定";
   if (candidate.signalGate?.status === "blocked") return `BLOCKED${candidate.signalGate.code ? ` / ${candidate.signalGate.code}` : ""}`;
   return "runner判定未取得";
@@ -287,6 +315,16 @@ function FetRuntimeDetail({ details }: { details?: FetRuntimeStatus }) {
   return <section className="panel-gold rounded-[28px] p-4 md:p-5"><div className="flex flex-wrap items-start justify-between gap-3"><div><div className="flex items-center gap-2 text-lg font-bold text-white"><Activity className="h-5 w-5 text-gold-100" />FET BRK48 Residual</div><p className="mt-1 text-xs text-white/55">FETの実runner heartbeat・release・failure状態を読み取り表示します。</p></div><div className="flex flex-wrap gap-2"><span className={`rounded-full border px-3 py-1 text-xs font-semibold ${statusClass}`}>FET {statusLabel}</span><span className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-100">tradingMutation=0</span></div></div><div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4"><div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="text-[10px] uppercase tracking-wide text-white/45">strategy</div><div className="mt-1 break-words text-sm font-semibold text-white">{details.strategyId || "未取得"}</div></div><div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="text-[10px] uppercase tracking-wide text-white/45">state更新</div><div className="mt-1 text-sm font-semibold text-white">{time(details.updatedAt)}</div></div><div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="text-[10px] uppercase tracking-wide text-white/45">runtime SHA</div><div className="mt-1 break-words text-sm font-semibold text-white">{details.runtimeSha ? `${shortSha(details.runtimeSha)}…` : "未取得"}</div></div><div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="text-[10px] uppercase tracking-wide text-white/45">判定</div><div className="mt-1 break-words text-sm font-semibold text-white">{details.reason}</div></div></div>{details.errors.length ? <div className="mt-3 rounded-xl border border-amber-400/25 bg-amber-500/10 px-3 py-2 text-xs leading-5 text-amber-100">FET観測上の注意：{details.errors.join(" / ")}</div> : null}</section>;
 }
 
+
+function V12GateResult({pass,detail}:{pass?:boolean;detail?:string}) {
+  const style=pass===true?"border-emerald-400/25 bg-emerald-500/10 text-emerald-200"
+    :pass===false?"border-rose-400/25 bg-rose-500/10 text-rose-200"
+    :"border-amber-400/20 bg-amber-500/10 text-amber-200";
+  return <span title={detail} className={"inline-block rounded border px-2 py-1 font-medium "+style}>
+    {pass===true?"通過":pass===false?"不合格":"未計測"}
+  </span>;
+}
+
 function V12Detail({ details, production }: { details?: V12Observability; production?: CurrentProductionRuntime | null }) {
   if (!details) return null;
   const decision = details.decision;
@@ -311,7 +349,7 @@ function V12Detail({ details, production }: { details?: V12Observability; produc
           ["候補", decisionLabel],
           ["Rank", decision?.rank === undefined ? "—" : String(decision.rank)],
           ["score", number(decision?.score, 4)],
-          ["momentum", number(decision?.momentum, 4) + "%"],
+          ["momentum", decision?.momentum === undefined ? "—" : number(decision.momentum * 100, 2) + "%"],
           ["volumeRatio", number(decision?.volumeRatio, 4)],
           ["BTC regime", decision?.btcRegime || "未取得"],
           ["Signal", decision?.selectionConfirmed ? "選定済み" : "未成立"],
@@ -341,7 +379,48 @@ function V12Detail({ details, production }: { details?: V12Observability; produc
       </div>
       <div className="mt-4 overflow-x-auto rounded-2xl border border-white/10 bg-black/20">
         <div className="border-b border-white/10 px-3 py-2"><div className="text-sm font-bold text-white">全候補順位と実runner Gate</div><div className="mt-1 text-[11px] text-white/55">Signal Eligible {eligibleCount}/{decision?.candidates.length ?? 0}。緑はVPS runnerの signalEligible=true のみ。最終発注には建玉枠・共有Gross・重複防止・注文Gateも別途必要です。</div></div>
-        {decision?.candidates.length ? <table className="min-w-[980px] w-full text-left text-xs"><thead className="text-white/45"><tr><th className="px-3 py-2">Rank</th><th className="px-3 py-2">候補</th><th className="px-3 py-2">score</th><th className="px-3 py-2">momentum</th><th className="px-3 py-2">volumeRatio</th><th className="px-3 py-2">実runner Gate</th><th className="px-3 py-2">今回の扱い</th></tr></thead><tbody>{decision.candidates.map((candidate, index) => <tr key={(candidate.symbol || "candidate") + "-" + index} className="border-t border-white/5"><td className="px-3 py-2"><span className={"inline-flex min-w-7 justify-center rounded-full border px-2 py-1 font-bold " + rankClass(candidate.rank || 99)}>{candidate.rank ?? "—"}</span></td><td className="px-3 py-2 font-semibold text-white">{candidate.symbol || "—"} <span className="ml-1 text-white/50">{candidate.side || "WAIT"}</span></td><td className="px-3 py-2 text-white/75">{number(candidate.score, 4)}</td><td className="px-3 py-2 text-white/75">{number(candidate.momentum, 4)}%</td><td className="px-3 py-2 text-white/75">{number(candidate.volumeRatio, 4)}</td><td className={"px-3 py-2 font-semibold " + (candidate.signalGate?.status === "pass" ? "text-emerald-200" : candidate.signalGate?.status === "blocked" ? "text-rose-200" : "text-amber-200")}>{candidate.signalGate?.detail || "未取得"}</td><td className="px-3 py-2 text-white/75">{candidateOrderStatus(candidate, decision)}</td></tr>)}</tbody></table> : <div className="px-3 py-4 text-sm text-amber-100">V12 decision snapshotに全候補がありません。順位比較だけでなく発注Signalを確定できないためFail Closedです。</div>}
+
+        {decision?.gateDiagnostics ? <div className="border-b border-white/10 px-3 py-2 text-xs text-white/65">
+          この足：全候補 {decision.gateDiagnostics.candidateCount ?? "—"} /
+          一次通過 {decision.gateDiagnostics.baseEligibleCount ?? "—"} /
+          Top3 {decision.gateDiagnostics.top3SelectedCount ?? "—"} /
+          勝率Gate評価 {decision.gateDiagnostics.winRateEvaluatedCount ?? "—"} /
+          Signal {decision.gateDiagnostics.finalSignalCount ?? "—"} /
+          <span className="text-amber-200">強Regime Score空白帯 {decision.gateDiagnostics.strongScoreGapCount ?? "—"} 件</span>
+          <p className="mt-1 text-[11px]">同時不合格：{Object.entries(decision.gateDiagnostics.simultaneousFailureCounts).map(([k,v])=>k+" "+v).join(" / ")||"なし"}</p>
+        </div> : <div className="border-b border-amber-400/20 px-3 py-2 text-xs text-amber-200">全Gate同時判定は現行Runnerのsnapshotに未実装です。従来の最初の不合格理由のみ表示中です。BT用閾値はLIVEに適用されていません。</div>}
+        {decision?.candidates.length ? <table className="min-w-[1600px] w-full text-left text-xs">
+          <thead className="text-white/45"><tr>
+            <th className="px-3 py-2">Rank</th><th className="px-3 py-2">候補</th>
+            <th className="px-3 py-2">Score</th><th className="px-3 py-2">出来高Gate</th>
+            <th className="px-3 py-2">Momentum</th><th className="px-3 py-2">Edge</th>
+            <th className="px-3 py-2">BTC方向</th><th className="px-3 py-2">Score / Entry Quality</th>
+            <th className="px-3 py-2">Top3</th><th className="px-3 py-2">勝率Gate / HC</th>
+            <th className="px-3 py-2">実runner判定</th><th className="px-3 py-2">今回の扱い</th>
+          </tr></thead>
+          <tbody>{decision.candidates.map((candidate,index)=>{
+            const g=candidate.gateChecks;
+            const pass=(v?:MultiGateMeasure)=>v?.pass;
+            return <tr key={(candidate.symbol||"candidate")+"-"+index} className="border-t border-white/5">
+              <td className="px-3 py-2"><span className={"inline-flex min-w-7 justify-center rounded-full border px-2 py-1 font-bold "+rankClass(candidate.rank||99)}>{candidate.rank??"—"}</span></td>
+              <td className="px-3 py-2 font-semibold text-white">{candidate.symbol||"—"} <span className="ml-1 text-white/50">{candidate.side||"WAIT"}</span></td>
+              <td className="px-3 py-2 text-white/75">{number(candidate.score,4)}</td>
+              <td className="px-3 py-2"><V12GateResult pass={pass(g?.volume)} detail={g?.volume?number(g.volume.actual,3)+" / 必要 "+number(g.volume.minimum,4):undefined}/><div className="mt-1 text-white/50">{number(candidate.volumeRatio,3)}</div></td>
+              <td className="px-3 py-2"><V12GateResult pass={pass(g?.momentum)} detail={g?.momentum?"最低 "+number(g.momentum.minimumAbsolute! * 100,2)+"%":undefined}/><div className="mt-1 text-white/50">{candidate.momentum===undefined?"—":number(candidate.momentum*100,2)+"%"}</div></td>
+              <td className="px-3 py-2"><V12GateResult pass={pass(g?.edgeToCost)} detail={g?.edgeToCost?"必要 "+number(g.edgeToCost.minimumAbsolute,4):undefined}/></td>
+              <td className="px-3 py-2"><V12GateResult pass={g?.btcDirection.pass} detail={g?.btcDirection.regime+" / "+g?.btcDirection.side}/></td>
+              <td className="px-3 py-2"><V12GateResult pass={g?.scoreQuality.pass} detail={g?.scoreQuality?"通常 "+number(g.scoreQuality.normalMinimum,4)+" / 強Regime "+number(g.scoreQuality.strongMinimum,2)+"〜"+number(g.scoreQuality.strongMaximum,2):undefined}/>
+                {g?.scoreQuality.strongScoreGap?<div className="mt-1 rounded bg-amber-500/15 p-1 font-semibold text-amber-200">Score上限の空白帯</div>:null}
+                {g?<div className="mt-1 text-white/50">{g.qualityRoute||"—"}</div>:null}
+              </td>
+              <td className="px-3 py-2"><V12GateResult pass={g?.selection.evaluated?g.selection.selected:undefined} detail={g?.selection.selected?"Portfolio Rank "+g.selection.portfolioRank:undefined}/></td>
+              <td className="px-3 py-2"><V12GateResult pass={g?.winRate.evaluated?g.winRate.pass:undefined} detail={g?.winRate.reason}/><div className="mt-1 text-white/50">{g?.winRate.reason||"未評価"}</div></td>
+              <td className={"px-3 py-2 font-semibold "+(candidate.signalGate?.status==="pass"?"text-emerald-200":candidate.signalGate?.status==="blocked"?"text-rose-200":"text-amber-200")}>{candidate.signalGate?.detail||"未取得"}</td>
+              <td className="px-3 py-2 text-white/75">{candidateOrderStatus(candidate,decision)}</td>
+            </tr>;
+          })}</tbody>
+        </table> : <div className="px-3 py-4 text-sm text-amber-100">V12 decision snapshotに全候補がありません。発注Signal未確認のためFail Closedです。</div>}
+        <div className="border-t border-white/10 px-3 py-2 text-[11px] text-white/50">この表は1本の完成済み2時間足の診断です。延べ候補・24h以上離れた独立候補・実際の注文は別の集計であり、同じ件数として扱いません。</div>
       </div>
       <div className="mt-4 rounded-xl border border-white/10 bg-black/20 px-3 py-3 text-xs leading-5 text-white/65">{production?.v12 && production?.caps ? <>V12 contract: per-position {production.caps.v12PerPositionGross.toFixed(2)}x / Top{production.v12.maximumPositions} / Base {production.caps.v12BaseGross.toFixed(2)}x / Dynamic {production.caps.v12DynamicGross.toFixed(2)}x / Score&gt;={production.v12.neutralScoreThreshold.toFixed(4)} / Strong {production.v12.strongRegimeQualityScoreMinimum.toFixed(2)}-{production.v12.strongRegimeQualityScoreMaximum.toFixed(2)} + ATR&gt;={(production.v12.strongRegimeQualityMinimumAtrRatio * 100).toFixed(1)}%. Recent fills: {details.recentFills.length} / positions: {details.v12Positions.length}.</> : <>Production runtime unavailable; no static contract fallback.</>}</div>
     </section>

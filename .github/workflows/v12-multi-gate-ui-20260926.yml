@@ -1,0 +1,23 @@
+name: V12 multi-gate read-only UI validation
+on:
+  push:
+    branches: [codex/v12-multi-gate-ui-20260926]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Verify TypeScript UI and sanitizer
+        run: npx tsc --noEmit -p tsconfig.json
+      - name: Verify legacy and multi-gate data isolation
+        run: npx tsx --test tests/v12-multi-gate-ui.test.ts
+      - name: Verify UI is read-only
+        run: '! grep -Eq "placeMarket|executeEntry|submitOrder|I_ACCEPT_REAL_MONEY" tests/v12-multi-gate-ui.test.ts'

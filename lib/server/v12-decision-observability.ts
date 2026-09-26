@@ -24,6 +24,23 @@ const V12_SIGNAL_POLICY = Object.freeze({
   neutralScoreThreshold: 1.4649,
 });
 
+export type V12GateMeasure = { pass: boolean; actual: number; minimum?: number; minimumAbsolute?: number };
+export type V12SafeMultiGateChecks = {
+  volume: V12GateMeasure;
+  momentum: V12GateMeasure;
+  edgeToCost: V12GateMeasure;
+  btcDirection: { regime: string; side: string; pass: boolean };
+  scoreQuality: {
+    actual: number; normalMinimum: number; strongMinimum: number; strongMaximum: number;
+    atrRatio: number; minimumAtrRatio: number; normalPass: boolean;
+    strongBandPass: boolean; relaxedMomentumPass: boolean; pass: boolean; strongScoreGap: boolean;
+  };
+  selection: { evaluated: boolean; selected: boolean; portfolioRank?: number };
+  winRate: { evaluated: boolean; pass?: boolean; reason?: string };
+  failedGates: string[];
+  qualityRoute?: string;
+};
+
 type SanitizedCandidate = {
   symbol?: string;
   side?: string;
@@ -35,6 +52,8 @@ type SanitizedCandidate = {
   atr?: number;
   signalEligible?: boolean;
   signalReason?: string;
+  baseEligible?: boolean;
+  gateChecks?: V12SafeMultiGateChecks;
   signalGate?: {
     status: "pass" | "blocked" | "unknown";
     code?: string;
@@ -127,6 +146,75 @@ export function diagnoseSignalGate(candidate: SanitizedCandidate, btcRegime?: st
   return { status: "pass" as const, detail: "記録された指標上、発注Signalの数値Gateは通過しています。" };
 }
 
+
+const safeNum = (value: unknown) => typeof value === "number" && Number.isFinite(value) ? value : undefined;
+const safeBool = (value: unknown) => typeof value === "boolean" ? value : undefined;
+
+/** Trust the runner's persisted pass/fail values; never invent multi-gate verdicts for legacy snapshots. */
+export function safeV12MultiGateChecks(value: unknown): V12SafeMultiGateChecks | undefined {
+  const root = asObject(value);
+  if (!root) return undefined;
+  function measure(key: string): V12GateMeasure | undefined {
+    const item = asObject(root![key]);
+    if (!item || typeof item.pass !== "boolean") return undefined;
+    const actual = safeNum(item.actual);
+    if (actual === undefined) return undefined;
+    return {
+      actual, pass: item.pass,
+      ...(safeNum(item.minimum) !== undefined ? { minimum: safeNum(item.minimum) } : {}),
+      ...(safeNum(item.minimumAbsolute) !== undefined ? { minimumAbsolute: safeNum(item.minimumAbsolute) } : {}),
+    };
+  }
+  const volume=measure("volume"),momentum=measure("momentum"),edgeToCost=measure("edgeToCost");
+  const btcDirection=asObject(root.btcDirection),scoreQuality=asObject(root.scoreQuality);
+  const selection=asObject(root.selection),winRate=asObject(root.winRate);
+  if(!volume||!momentum||!edgeToCost||!btcDirection||!scoreQuality||!selection||!winRate) return undefined;
+  if(typeof btcDirection.pass!=="boolean"||typeof selection.evaluated!=="boolean"
+      ||typeof selection.selected!=="boolean"||typeof winRate.evaluated!=="boolean") return undefined;
+  const requiredScoreBooleans=["normalPass","strongBandPass","relaxedMomentumPass","pass","strongScoreGap"];
+  if(requiredScoreBooleans.some(key=>typeof scoreQuality[key]!=="boolean")) return undefined;
+  const requiredScoreNumbers=["actual","normalMinimum","strongMinimum","strongMaximum","atrRatio","minimumAtrRatio"];
+  if(requiredScoreNumbers.some(key=>safeNum(scoreQuality[key])===undefined)) return undefined;
+  return {
+    volume,momentum,edgeToCost,
+    btcDirection:{
+      regime:typeof btcDirection.regime==="string"?btcDirection.regime:"UNKNOWN",
+      side:typeof btcDirection.side==="string"?btcDirection.side:"UNKNOWN",
+      pass:btcDirection.pass,
+    },
+    scoreQuality:{
+      actual:scoreQuality.actual as number,normalMinimum:scoreQuality.normalMinimum as number,
+      strongMinimum:scoreQuality.strongMinimum as number,strongMaximum:scoreQuality.strongMaximum as number,
+      atrRatio:scoreQuality.atrRatio as number,minimumAtrRatio:scoreQuality.minimumAtrRatio as number,
+      normalPass:scoreQuality.normalPass as boolean,strongBandPass:scoreQuality.strongBandPass as boolean,
+      relaxedMomentumPass:scoreQuality.relaxedMomentumPass as boolean,pass:scoreQuality.pass as boolean,
+      strongScoreGap:scoreQuality.strongScoreGap as boolean,
+    },
+    selection:{evaluated:selection.evaluated,selected:selection.selected,
+      ...(safeNum(selection.portfolioRank)!==undefined?{portfolioRank:safeNum(selection.portfolioRank)}:{})},
+    winRate:{evaluated:winRate.evaluated,
+      ...(safeBool(winRate.pass)!==undefined?{pass:winRate.pass as boolean}:{}),
+      ...(typeof winRate.reason==="string"?{reason:winRate.reason.slice(0,96)}:{})},
+    failedGates:Array.isArray(root.failedGates)?root.failedGates.filter((x):x is string=>typeof x==="string").slice(0,12).map(x=>x.slice(0,96)):[],
+    qualityRoute:typeof root.qualityRoute==="string"?root.qualityRoute.slice(0,48):undefined,
+  };
+}
+function safeV12MultiGateSummary(value:unknown) {
+  const row=asObject(value);
+  if(!row||row.schema!=="v12-multi-gate-diagnostics/v1") return undefined;
+  const countKeys=["candidateCount","baseEligibleCount","top3SelectedCount",
+    "winRateEvaluatedCount","finalSignalCount","strongScoreGapCount"] as const;
+  const counts=Object.fromEntries(countKeys.map(key=>[key,safeNum(row[key])])) as Record<(typeof countKeys)[number],number|undefined>;
+  const safeCounts=(key:string)=>{
+    const obj=asObject(row[key]);
+    if(!obj)return {};
+    return Object.fromEntries(Object.entries(obj).filter(([name,n])=>name.length<=100&&safeNum(n)!==undefined).slice(0,35));
+  };
+  return {...counts,firstRejectionCounts:safeCounts("firstRejectionCounts"),
+    simultaneousFailureCounts:safeCounts("simultaneousFailureCounts"),
+    referenceTs:safeNum(row.referenceTs),observedAt:typeof row.observedAt==="string"?row.observedAt:undefined};
+}
+
 function safeCandidate(value: unknown): SanitizedCandidate | null {
   const row = asObject(value);
   if (!row) return null;
@@ -141,6 +229,8 @@ function safeCandidate(value: unknown): SanitizedCandidate | null {
     atr: Number.isFinite(Number(row.atr)) ? Number(row.atr) : undefined,
     signalEligible: typeof row.signalEligible === "boolean" ? row.signalEligible : undefined,
     signalReason: typeof row.signalReason === "string" ? row.signalReason : undefined,
+    baseEligible: typeof row.baseEligible === "boolean" ? row.baseEligible : undefined,
+    gateChecks: safeV12MultiGateChecks(row.gateChecks),
   };
 }
 
@@ -175,6 +265,7 @@ function safeDecisionSnapshot(value: unknown) {
     rationale: typeof row.rationale === "string" ? row.rationale : typeof row.reason === "string" ? row.reason : undefined,
     selectionConfirmed,
     signalGate: selectedCandidate?.signalGate,
+    gateDiagnostics: safeV12MultiGateSummary(row.gateDiagnostics),
     candidates,
   };
 }
