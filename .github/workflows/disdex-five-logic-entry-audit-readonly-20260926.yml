@@ -1,0 +1,163 @@
+name: DisDex five-logic entry audit (read-only)
+on:
+  issue_comment:
+    types: [created]
+permissions:
+  contents: read
+jobs:
+  audit:
+    if: >-
+      github.event.issue.number == 132 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == 'DISDEX_FIVE_LOGIC_ENTRY_AUDIT_READONLY_20260926'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      SSH_HOST: \${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: \${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: \${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: \${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Configure approved VPS read-only transport
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Inspect real five-logic decision and account path without mutations
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -p "\${SSH_PORT:-22}" "root@$SSH_HOST" 'python3 -' <<'PY'
+          import collections,datetime,json,os,pathlib,re,shutil,subprocess,time
+          NOW=int(time.time()*1000)
+          ROOT=pathlib.Path("/var/lib/disdex")
+          release=pathlib.Path("/home/deploy/disdex-trading/current").resolve()
+          sha=(release/".disdex-release-sha").read_text().strip()
+          assert re.fullmatch(r"[0-9a-f]{40}",sha)
+          assert release==pathlib.Path("/home/deploy/disdex-trading/releases")/sha
+          def run(cmd,timeout=18):
+              try:
+                  p=subprocess.run(cmd,capture_output=True,text=True,timeout=timeout)
+                  return p.returncode,p.stdout,p.stderr
+              except Exception as e:
+                  return -1,"",type(e).__name__
+          def load(p):
+              try:
+                  if not p.is_file(): return None
+                  v=json.loads(p.read_text())
+                  return v if isinstance(v,dict) else None
+              except Exception: return {"PARSE_ERROR":True}
+          def stamp(v):
+              try:
+                  n=float(v)
+                  if n<10**11:n*=1000
+                  return datetime.datetime.fromtimestamp(n/1000,datetime.timezone(datetime.timedelta(hours=9))).strftime("%Y-%m-%d %H:%M:%S JST")
+              except Exception:return None
+          print("AUDIT_AT_JST="+stamp(NOW))
+          print("EXACT_CURRENT_SHA="+sha)
+          d=shutil.disk_usage("/")
+          print("DISK_USAGE_PERCENT="+str(round((d.total-d.free)/d.total*100,2)))
+          print("DISK_FREE_GB="+str(round(d.free/1e9,3)))
+          names=[
+              "disdex-v12-x1-all","disdex-pengu-dual-ls-v2",
+              "disdex-quality102-causal-v1","disdex-fet-brk48",
+              "disdex-v52-aster-only","disdex-shared-crypto-risk",
+              "disdex-v12-v52-margin-guard"
+          ]
+          for name in names:
+              unit=name+"@"+sha+".service"
+              _,show,_=run(["systemctl","show",unit,"-p","ActiveState","-p","SubState","-p","MainPID","-p","NRestarts","-p","Result","--no-pager"])
+              fields=dict(y.split("=",1) for y in show.splitlines() if "=" in y)
+              rc,raw,_=run(["journalctl","-u",unit,"--since","48 hours ago","-n","350","--no-pager","-o","cat"],timeout=24)
+              event=[]
+              for line in raw.splitlines():
+                  idx=line.find("{")
+                  if idx<0:continue
+                  try:obj=json.loads(line[idx:])
+                  except Exception:continue
+                  if not isinstance(obj,dict):continue
+                  state=obj.get("status") or obj.get("stage") or obj.get("event") or obj.get("level")
+                  if not state:continue
+                  reason=obj.get("reason") or obj.get("message") or ""
+                  if isinstance(reason,dict):reason=str(reason.get("code") or "")
+                  if not isinstance(reason,str):reason=""
+                  event.append({"time":obj.get("timestamp") or obj.get("observedAt") or obj.get("updatedAt"),
+                                "status":str(state)[:65],"reason":reason[:130],
+                                "signal_side":(obj.get("signal") or {}).get("side") if isinstance(obj.get("signal"),dict) else None,
+                                "ordersSent":obj.get("ordersSent"),
+                                "newOrdersAllowed":obj.get("newOrdersAllowed")})
+              stats=collections.Counter(x["status"] for x in event)
+              anomalies=[x for x in event if x["status"] not in ["no-signal","no-change","HEALTHY","v52-market-closed","shared-risk-refresh"]]
+              print("UNIT_SUMMARY="+json.dumps({"unit":name,"systemd":fields,"eventsLast350":stats,
+                      "latest":event[-2:],"anomalies":anomalies[-4:]},ensure_ascii=False,default=str))
+          states=[
+              ("v12",ROOT/"v12-x1-all/runner.json"),
+              ("v12_decisions",ROOT/"v12-x1-all/decision-snapshot.json"),
+              ("pengu",ROOT/"pengu-dual-ls-v2/runner-live.json"),
+              ("q102",ROOT/"quality102-causal-v1/state.json"),
+              ("fet",ROOT/"fet-brk48-residual/state.json"),
+              ("v52",ROOT/"v52-aster-only/runner-live.json"),
+              ("shared_risk",ROOT/"shared/crypto-daily-risk.json"),
+              ("dd_governor",ROOT/"shared/portfolio-dd-governor.json"),
+              ("kill_switch",ROOT/"shared/kill-switch.json"),
+              ("account_lock",ROOT/"shared/account-order.lock"),
+              ("rate_budget",ROOT/"shared/aster-rate-budget.json"),
+          ]
+          for label,path in states:
+              obj=load(path)
+              if obj is None:
+                  print("STATE="+json.dumps({"label":label,"exists":False}));continue
+              mtime=stamp(path.stat().st_mtime) if path.is_file() else None
+              keys=["schema","strategyId","mode","runtimeCommitSha","updatedAt","lastProcessedReferenceTs",
+                    "lastSignalReferenceTs","lastReferenceTs","lastReconciledAt","lastError","manualReview",
+                    "reason","status","stage","active","sourceComplete","tripped","currentDrawdownPct",
+                    "lastRateLimitStatus","cooldownUntil","nextAllowedAt","acquiredAt","expiresAt",
+                    "signalTs","referenceTs","regime","btcRegime","btcRegimeState","lastUpdatedAt"]
+              summary={k:obj.get(k) for k in keys if k in obj}
+              for key in ["position","pending"]:
+                  if isinstance(obj.get(key),dict):
+                      summary[key]={k:obj[key][k] for k in ["action","symbol","side","gross","targetGross","createdAt","updatedAt","phase","reason","lastError"] if k in obj[key]}
+              for key in ["activePositions","positions","reservations","failures"]:
+                  if isinstance(obj.get(key),list):summary[key+"Count"]=len(obj[key])
+              if label=="pengu":
+                  s=obj.get("latestSignal")
+                  if isinstance(s,dict):
+                      summary["latestSignal"]={k:s.get(k) for k in ["referenceTs","side","targetGross","reason"]}
+                      feats=s.get("features")
+                      if isinstance(feats,dict):
+                          summary["latestFeatures"]={k:feats.get(k) for k in ["penguReturn24h","penguReturn72h","btcReturn24h","relativeReturn24h","volumeRatio","rsi"] if k in feats}
+                  ov=obj.get("riskOverlay")
+                  if isinstance(ov,dict):summary["riskOverlayKeys"]=list(ov.keys())[:14]
+              if label=="v12_decisions":
+                  summary["topLevelKeys"]=list(obj.keys())[:25]
+                  cand=obj.get("candidates")
+                  if isinstance(cand,list):
+                      summary["candidateCount"]=len(cand)
+                      summary["candidates"]=[{k:y.get(k) for k in ["symbol","side","score","signalEligible","signalReason","reason","entryGateReason","volumeRatio","momentum"] if k in y} for y in cand[:20] if isinstance(y,dict)]
+                      summary["rejectionCounts"]=dict(collections.Counter(str(y.get("signalReason")) for y in cand if isinstance(y,dict) and not y.get("signalEligible")))
+              print("STATE="+json.dumps({"label":label,"exists":True,"mtimeJST":mtime,"value":summary},ensure_ascii=False,default=str))
+          qdir=ROOT/"quality102-causal-v1"
+          if qdir.is_dir():
+              files=[]
+              for p in qdir.rglob("*.json"):
+                  if len(p.parts)-len(qdir.parts)>3:continue
+                  if any(x in p.name.lower() for x in ["decision","selector","snapshot","rank"]):
+                      files.append({"file":str(p.relative_to(qdir)),"mtimeJST":stamp(p.stat().st_mtime)})
+              print("Q102_OBSERVABILITY_FILES="+json.dumps(files[:20]))
+          lock=ROOT/"shared/account-order.lock"
+          print("ACCOUNT_LOCK_PRESENT="+str(lock.exists()))
+          print("TRADING_MUTATION=0")
+          print("FIVE_LOGIC_ENTRY_AUDIT_COMPLETE")
+          PY
