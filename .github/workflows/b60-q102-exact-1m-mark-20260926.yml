@@ -1,0 +1,30 @@
+name: Verify exact Aster ENA 1m mark for current B60 Q102 interaction
+on:
+  push:
+    branches: [research/recover-final-governor-bt-20260926]
+    paths:
+      - scripts/research/fetch_b60_new_intrahour_mark_20260926.py
+      - .github/workflows/b60-q102-exact-1m-mark-20260926.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  read-only-mark:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Require exact public Aster 1-minute historical mark
+        run: |
+          set -Eeuo pipefail
+          python -m py_compile scripts/research/fetch_b60_new_intrahour_mark_20260926.py
+          python scripts/research/fetch_b60_new_intrahour_mark_20260926.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: current-B60-extra-Q102-exact-Aster-1m-20260926
+          path: research-results/b60-q102-1m-missing-mark-20260926/
+          retention-days: 90
