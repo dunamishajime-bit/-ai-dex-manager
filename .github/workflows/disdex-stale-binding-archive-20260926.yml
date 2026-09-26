@@ -61,7 +61,7 @@ jobs:
           stage="$1"; expected="$2"
           trap 'rm -f -- "$stage"' EXIT
           [[ ! -L "$stage" && "$(sha256sum "$stage" | awk '{print $1}')" == "$expected" ]] || { echo STAGED_DIGEST_FAIL; exit 2; }
-          python3 "$stage" --plan
+          python3 "$stage"
           python3 "$stage" --apply-bindings
           python3 - <<'PY'
           import subprocess,json
