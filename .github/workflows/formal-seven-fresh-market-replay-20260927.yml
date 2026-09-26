@@ -1,0 +1,245 @@
+name: Formal seven-logic 1y source-frozen market replay and coverage
+on:
+  push:
+    branches: [research/formal-seven-logic-bt-20260927]
+    paths:
+      - .github/workflows/formal-seven-fresh-market-replay-20260927.yml
+permissions:
+  contents: read
+concurrency:
+  group: disdex-formal-seven-fresh-market-replay
+  cancel-in-progress: false
+jobs:
+  seven_logic_replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 115
+    env:
+      PYTHONUNBUFFERED: '1'
+      SEVEN_BT_SOURCE_ROOT: ${{ runner.temp }}/seven-bt/source
+      BASE_SHA: a09ea45ca3cbd72100f9eb0eaae499039c40b6a0
+      SEVEN_SHA: cde62b3909a86e4791a19e78862eeaa37653e03a
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: research/formal_five_bt/requirements.txt
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Pin audited 5-logic release and exact child HYPE/ZEC research source
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          git fetch --no-tags --depth=2 origin refs/heads/codex/legacy-runtime-safety-audit-20260926
+          git fetch --no-tags --depth=2 origin refs/heads/codex/hype-zec-priority-sleeves
+          git cat-file -e "$BASE_SHA^{commit}"
+          git cat-file -e "$SEVEN_SHA^{commit}"
+          [[ "$(git show -s --format=%P "$SEVEN_SHA")" == "$BASE_SHA" ]]
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          from research.formal_five_bt.runtime_source import capture_runtime_sources
+          from research.formal_five_bt.seven_source import capture_seven_source, verify_seven_source
+          main=Path("research/formal_five_bt/runtime_source_manifest.json")
+          original=json.loads(main.read_text())
+          assert original["runtime_sha"]==original["verified_repository_commit"]=="a09ea45ca3cbd72100f9eb0eaae499039c40b6a0"
+          records=capture_runtime_sources(".","research/formal_five_bt/runtime_source_snapshot",main)
+          assert {x["path"]:x["sha256"] for x in records}=={x["path"]:x["sha256"] for x in original["files"]}
+          import os
+          seven=capture_seven_source(".",os.environ["SEVEN_BT_SOURCE_ROOT"])
+          assert len(verify_seven_source(os.environ["SEVEN_BT_SOURCE_ROOT"])["files"])==len(seven["files"])
+          print("SEVEN_BT_SOURCE_PIN_PASS five_files="+str(len(records))+" research_files="+str(len(seven["files"])))
+          print("FIVE_LIVE_SHA="+original["runtime_sha"])
+          print("HYPE_ZEC_HYPOTHETICAL_SHA="+seven["seven_research_source_sha"])
+          PY
+      - name: Install research dependencies and rerun all eight frozen provenance tests
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python -m pip install --no-cache-dir -r research/formal_five_bt/requirements.txt
+          npm ci --no-audit --no-fund
+          python -m unittest discover -s tests/formal_five_bt -p 'test_seven_*.py' -v
+          python -m unittest discover -s tests/formal_five_bt -p 'test_strategy_parity.py' -v
+      - name: Fetch HYPE/ZEC and BTC Aster-native historical 15m data (source-listing gate)
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p "$RUNNER_TEMP/seven-bt/input" "$RUNNER_TEMP/seven-bt/scans/baseline-signal-scan-hz"
+          python -m research.formal_five_bt.seven_sidecar_scan \
+            --data-root "$RUNNER_TEMP/seven-bt/input" \
+            --source-root "$SEVEN_BT_SOURCE_ROOT" \
+            --output-root "$RUNNER_TEMP/seven-bt/scans/baseline-signal-scan-hz" \
+            --pace 0.24 --acquire
+      - name: Evaluate original HYPE/ZEC code on causally closed 15m and selective 1m breakouts
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          from research.formal_five_bt.seven_sidecar_scan import scan_seven_sidecars
+          from research.formal_five_bt.seven_source import LIVE_FIVE_SHA,SEVEN_RESEARCH_SHA
+          root=Path(os.environ["RUNNER_TEMP"])/"seven-bt"
+          scan=root/"scans/baseline-signal-scan-hz"
+          try:
+            results=scan_seven_sidecars(root/"input",scan,os.environ["SEVEN_BT_SOURCE_ROOT"])
+            print("SEVEN_BT_HZ_SIGNAL_RESULTS",json.dumps(results["stats"],sort_keys=True))
+          except Exception as e:
+            # Do not misstate complete coverage if the exchange, node, or 1m
+            # history is unavailable. Preserve a provenance-correct scenario
+            # sentinel so the five other strategies can still be audited.
+            record={"schema_version":1,"runtime_sha":LIVE_FIVE_SHA,
+              "sidecar_source_sha":SEVEN_RESEARCH_SHA,"strategies":["HYPE","ZEC"],
+              "signals_are_not_fills":True,"hype_zec_live_verified":False,
+              "status":"NOT_VERIFIABLE_HZ_SOURCE_OR_DATA",
+              "stats":{"HYPE":{"status":"NOT_VERIFIABLE","candidate_count":None},
+                       "ZEC":{"status":"NOT_VERIFIABLE","candidate_count":None}},
+              "reason":type(e).__name__+":"+str(e)[:230]}
+            scan.mkdir(parents=True,exist_ok=True)
+            (scan/"signal-scan-manifest.json").write_text(
+                json.dumps(record,sort_keys=True,indent=2)+"\n")
+            print("SEVEN_BT_HZ_BLOCKED",json.dumps({"error":record["reason"],
+                "candidate_count":"UNVERIFIED_NOT_ZERO"}))
+          PY
+      - name: Acquire fresh native Aster H1/funding for all five baseline strategies; FX failure is explicit and isolated
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python -m research.formal_five_bt.acquire \
+            --data-root "$RUNNER_TEMP/seven-bt/input" --venues aster
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          p=Path(os.environ["RUNNER_TEMP"])/"seven-bt/input/acquisition-manifest.json"
+          m=json.loads(p.read_text())
+          assert m["runtime_sha"]=="a09ea45ca3cbd72100f9eb0eaae499039c40b6a0"
+          rows=m["venues"]["aster"]["klines"]
+          fund=m["venues"]["aster"]["funding"]
+          print("SEVEN_BT_FIVE_SOURCE_COVERAGE",json.dumps({
+            "acquired":sum(v.get("status")=="ACQUIRED" for v in rows.values()),
+            "requested":len(rows),
+            "missing":[x for x,v in rows.items() if v.get("status")!="ACQUIRED"],
+            "funding_acquired":sum(v.get("status")=="ACQUIRED" for v in fund.values()),
+            "fx":m.get("fred",{}).get("status"),
+            "fx_missing_blocks_equity":m.get("fred",{}).get("status")!="ACQUIRED"
+          },sort_keys=True))
+          PY
+      - name: Produce V12/PENGU/FET source-native per-instrument decision/gate records
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python -m research.formal_five_bt.signal_scan \
+            --data-root "$RUNNER_TEMP/seven-bt/input" \
+            --output-root "$RUNNER_TEMP/seven-bt/scans/baseline-signal-scan" \
+            --strategies V12 PENGU FET
+      - name: Replay causal Q102 independently, retaining evidence if insufficient
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          import json,os,subprocess
+          from research.formal_five_bt.acquire import extract_universes
+          from research.formal_five_bt.seven_source import LIVE_FIVE_SHA
+          root=Path(os.environ["RUNNER_TEMP"])/"seven-bt"
+          scan=root/"scans/baseline-signal-scan-q102"
+          scan.mkdir(parents=True,exist_ok=True)
+          command=["python","-m","research.formal_five_bt.signal_scan",
+            "--data-root",str(root/"input"),"--output-root",str(scan),
+            "--strategies","Q102"]
+          try:
+            result=subprocess.run(command,check=True,timeout=2550)
+          except (subprocess.TimeoutExpired,subprocess.CalledProcessError) as e:
+            symbols=extract_universes()["Q102"]
+            # Sentinel only: a missing full-year selector is NEVER counted as
+            # zero candidates, zero loss, or a fully checked instrument.
+            d=scan/"decisions"
+            d.mkdir(parents=True,exist_ok=True)
+            with (d/"Q102.jsonl").open("w") as f:
+              for symbol in symbols:
+                f.write(json.dumps({"strategy_id":"Q102","symbol":symbol,
+                  "decision_ts_ms":1754784000000,"status":"NOT_VERIFIABLE",
+                  "reason":"FULL_YEAR_NATIVE_Q102_REPLAY_UNAVAILABLE",
+                  "coverage":"ENTIRE_1Y_PERIOD_NOT_A_ZERO_CANDIDATE_CLAIM",
+                  "source_runtime_sha":LIVE_FIVE_SHA},sort_keys=True)+"\n")
+            m={"schema_version":1,"runtime_sha":LIVE_FIVE_SHA,
+              "strategies":["Q102"],"stats":{"Q102":{"status":"NOT_VERIFIABLE",
+                "candidate_count":None,"reason":type(e).__name__}},
+              "status":"NOT_VERIFIABLE_Q102_FULL_PERIOD"}
+            (scan/"signal-scan-manifest.json").write_text(
+              json.dumps(m,sort_keys=True,indent=2)+"\n")
+            print("SEVEN_BT_Q102_BLOCKED",json.dumps({"reason":type(e).__name__,
+              "candidate_count":"NOT_VERIFIABLE_NOT_ZERO"}))
+          else:
+            result=json.loads((scan/"signal-scan-manifest.json").read_text())
+            print("SEVEN_BT_Q102_CAUSAL",json.dumps(result.get("stats",{}),
+              ensure_ascii=False,sort_keys=True))
+          PY
+      - name: Execute the four NORMAL SEVERE seven-source integrated evidence scenarios
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p "$RUNNER_TEMP/seven-bt/l2"
+          python -m research.formal_five_bt.engine \
+            --data-root "$RUNNER_TEMP/seven-bt/input" \
+            --scan-root "$RUNNER_TEMP/seven-bt/scans" \
+            --l2-root "$RUNNER_TEMP/seven-bt/l2" \
+            --output-root "$RUNNER_TEMP/seven-bt/results"
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ["RUNNER_TEMP"])/"seven-bt"
+          m=json.loads((root/"results/run-manifest.json").read_text())
+          assert m["strategy_source_shas"]["five_live"]=="a09ea45ca3cbd72100f9eb0eaae499039c40b6a0"
+          assert m["strategy_source_shas"]["hype_zec_research"]=="cde62b3909a86e4791a19e78862eeaa37653e03a"
+          assert m["verified_economic_seven_logic_backtest"] is False
+          assert len(m["scenarios"])==4
+          result={"run_id":m["run_id"],"status":m["status"],"seven_strategies":["V12","PENGU","Q102","FET","V52","HYPE","ZEC"],
+            "five_live_sha":m["strategy_source_shas"]["five_live"],
+            "hype_zec_research_sha":m["strategy_source_shas"]["hype_zec_research"],
+            "hype_zec_not_live":True,
+            "seven_live_equity_qualified":False,
+            "scenarios":[{"id":x["scenario_id"],"status":x["status"],
+              "candidates":x["candidate_signals"],"verified_fills":x["verified_fills"],
+              "equity_jpy":"NOT_VERIFIABLE" if x.get("final_equity_usdt") is None else x["final_equity_usdt"]}
+              for x in m["scenarios"]]}
+          print("SEVEN_BT_FINAL_EVIDENCE",json.dumps(result,sort_keys=True,ensure_ascii=False))
+          target=root/"public-provenance-only-summary.json"
+          target.write_text(json.dumps(result,sort_keys=True,indent=2,ensure_ascii=False)+"\n")
+          PY
+      - name: Retain rights-safe status and source provenance when earlier steps block completion
+        if: always()
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ["RUNNER_TEMP"])/"seven-bt"
+          for p in [root/"input/sidecar-15m-acquisition.json",
+              root/"scans/baseline-signal-scan-hz/signal-scan-manifest.json",
+              root/"input/acquisition-manifest.json",
+              root/"scans/baseline-signal-scan/signal-scan-manifest.json",
+              root/"scans/baseline-signal-scan-q102/signal-scan-manifest.json",
+              root/"results/run-manifest.json"]:
+            if not p.is_file():
+              print("SEVEN_BT_STAGE",json.dumps({"stage":p.name,"exists":False}))
+              continue
+            obj=json.loads(p.read_text())
+            print("SEVEN_BT_STAGE",json.dumps({"stage":p.name,"exists":True,
+              "status":obj.get("status"),"five_sha":obj.get("runtime_sha") or obj.get("baseline_live_sha"),
+              "research_sha":obj.get("sidecar_source_sha") or obj.get("seven_model_sha"),
+              "stats":obj.get("stats"),"run_id":obj.get("run_id")},sort_keys=True,ensure_ascii=False))
+          print("SEVEN_BT_RESEARCH_ONLY NO_LIVE_ORDER_OR_RUNNER_CHANGES")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: seven-logic-provenance-only-${{ github.run_id }}
+          path: ${{ runner.temp }}/seven-bt/public-provenance-only-summary.json
+          if-no-files-found: ignore
+          retention-days: 30
