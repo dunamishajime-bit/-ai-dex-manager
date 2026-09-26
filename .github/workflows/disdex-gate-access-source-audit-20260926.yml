@@ -1,0 +1,84 @@
+name: DisDex gate and access source audit (read-only)
+on:
+  issue_comment:
+    types: [created]
+permissions:
+  contents: read
+jobs:
+  audit:
+    if: >-
+      github.event.issue.number == 132 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == 'DISDEX_GATE_ACCESS_SOURCE_AUDIT_20260926'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Configure approved VPS read-only transport
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Source and disk probe on approved VPS (read-only)
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \\
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \\
+            -o ConnectTimeout=15 -p "${SSH_PORT:-22}" "root@$SSH_HOST" 'python3 -' <<'PY'
+          import os,pathlib,re,subprocess,json,stat
+          root=pathlib.Path("/home/deploy/disdex-trading/current").resolve()
+          sha=(root/".disdex-release-sha").read_text().strip()
+          print("RELEASE_SHA="+sha)
+          def run(cmd,timeout=12):
+           try:
+            p=subprocess.run(cmd,capture_output=True,text=True,timeout=timeout)
+            return {"rc":p.returncode,"out":p.stdout[:1600],"err":p.stderr[:120]}
+           except Exception as e:return {"error":type(e).__name__}
+          print("GIT_STATUS="+json.dumps(run(["git","-C",str(root),"rev-parse","HEAD"])))
+          print("RELEASE_DIRS="+json.dumps(sorted([p.name for p in root.parent.iterdir() if p.is_dir()])[-16:]))
+          print("DISK="+json.dumps(run(["df","-h","/","/var/lib/disdex"])))
+          print("JOURNAL_DISK="+json.dumps(run(["journalctl","--disk-usage"],5)))
+          for path in ["/var/log","/var/log/journal","/home/deploy/disdex-trading","/home/deploy/disdex-trading/releases","/var/lib/disdex","/var/lib/disdex/shared"]:
+           print("DIR_META="+json.dumps({"p":path,"exists":os.path.exists(path),"children":sorted([{"name":e.name,"dir":e.is_dir(follow_symlinks=False),"size":e.stat(follow_symlinks=False).st_size} for e in os.scandir(path)],key=lambda d:-d["size"])[:14] if os.path.isdir(path) else []}))
+          for base in ["config","lib","scripts","docs","research"]:
+           d=root/base
+           if not d.is_dir():continue
+           names=[str(p.relative_to(root)) for p in d.rglob("*") if p.is_file() and re.search("v12|quality102|q102|aster.*rate|account.*lock|atomic|persist|backtest|integrated|quality|risk",p.name,re.I)]
+           print("SOURCE_INDEX="+json.dumps({"dir":base,"files":names[:100],"total":len(names)}))
+          files=["config/v12X1AllRuntime.ts","lib/v12-x1-all.ts","config/quality102CausalV1Runtime.ts","config/integratedProductionRiskPolicy.ts","lib/aster-global-rate-budget.ts","lib/aster-account-order-lock.ts"]
+          for f in files:
+           p=root/f
+           if not p.is_file():
+            print("MISSING_FILE="+f);continue
+           lines=p.read_text(errors="replace").splitlines()
+           pat=re.compile("Volume|Ratio|Score|NEUTRAL|REGIME|regime|threshold|eligible|quality|cooldown|momentum|entry|risk|gross",re.I)
+           matches=[{"n":i+1,"s":s[:200]} for i,s in enumerate(lines) if pat.search(s) and not re.search("KEY|SECRET|PRIVATE|TOKEN|PASSWORD",s,re.I)]
+           print("SOURCE_MATCHES="+json.dumps({"file":f,"lines":len(lines),"matches":matches[:55]}))
+          qfiles=[p for p in (root/"config").rglob("*") if p.is_file() and re.search("102|quality",p.name,re.I)] if (root/"config").exists() else []
+          qfiles += [p for p in (root/"lib").rglob("*") if p.is_file() and re.search("102|quality",p.name,re.I)] if (root/"lib").exists() else []
+          for p in qfiles[:9]:
+           lines=p.read_text(errors="replace").splitlines()
+           pat=re.compile("HIGH_VOL|V4|threshold|strength|relative|confidence|MIN_|MAX_|GATE|Gate|signal",re.I)
+           matches=[{"n":i+1,"s":s[:175]} for i,s in enumerate(lines) if pat.search(s) and not re.search("KEY|SECRET|PRIVATE|TOKEN|PASSWORD",s,re.I)]
+           print("Q102_SOURCE_MATCHES="+json.dumps({"file":str(p.relative_to(root)),"lines":len(lines),"matches":matches[:34]}))
+          for p in [pathlib.Path("/var/lib/disdex/shared"),pathlib.Path("/var/lib/disdex/quality102-causal-v1"),pathlib.Path("/var/lib/disdex/v12-x1-all")]:
+           for x in list(p.glob("*.json"))[:14] if p.is_dir() else []:
+            st=x.stat()
+            print("STATE_OWNER="+json.dumps({"p":str(x),"uid":st.st_uid,"gid":st.st_gid,"mode":oct(stat.S_IMODE(st.st_mode))}))
+          print("SOURCE_AUDIT_MUTATION=0")
+          PY
