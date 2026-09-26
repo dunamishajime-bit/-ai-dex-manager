@@ -7,7 +7,16 @@
     "active_systemd_working_directory_release": "a09ea45ca3cbd72100f9eb0eaae499039c40b6a0",
     "release_marker_matches_repository_commit": true,
     "active_service_inventory_read_only": true,
-    "runtime_sha_basis": "read-only runtime audit recorded before implementation; current active release ID independently matched to the service WorkingDirectory marker and public GitHub commit"
+    "runtime_sha_basis": "read-only runtime audit recorded before implementation; current active release ID independently matched to the service WorkingDirectory marker and public GitHub commit",
+    "import_closure_count": 90,
+    "import_closure_roots": [
+      "scripts/disdex-v12-x1-all-live-runner.ts",
+      "scripts/disdex-pengu-dual-ls-v2-live-runner.ts",
+      "scripts/disdex-quality102-causal-v1-live-runner.ts",
+      "scripts/disdex-fet-brk48-live-runner.ts",
+      "scripts/disdex_v52_aster_only_live_engine.py",
+      "scripts/disdex_v96_v52_margin_guard_runtime.py"
+    ]
   },
   "units": [
     "disdex-v12-x1-all@a09ea45ca3cbd72100f9eb0eaae499039c40b6a0.service",
@@ -20,223 +29,363 @@
   "files": [
     {
       "path": "config/disdexQuality102CausalV1Runtime.ts",
-      "sha256": "4569f972f906ebc85521e6ce65399b498baa8e58bcdeeea73da9c1992e836b5d"
+      "sha256": "fa2d883162d0adf752d8d2899a1b97b7d96ea49b98ae396500160188f4847414"
     },
     {
       "path": "config/disdexQuality102CausalV4Model.ts",
-      "sha256": "d4d69ad4afabdc5d89faa704c25630f36b9f724aa7007f131a18c3fbb52539e8"
+      "sha256": "4f2b3d6ad2b7fc4a6f4278cfffdfc0007a85e65afe8a03a0978187593bc23c50"
+    },
+    {
+      "path": "config/disdexStrictBt33404708902Runtime.ts",
+      "sha256": "d51a9cdfacbd3983ff4fb2d93df61a439b8126d63b7f708dea00e574484635cd"
     },
     {
       "path": "config/disdexV96Runtime.ts",
-      "sha256": "66e2512e01986e29865f83637665595e53c2a476026e869b5340e319e91e6e8a"
+      "sha256": "6d0a86fa02706aef1e40277473f3d8ea87d37e1de8cacf27bbbb2c7f3b97136e"
     },
     {
       "path": "config/fetBrk48Runtime.ts",
-      "sha256": "9412bd90534625db422aac353a4df7147b3a40740a1f124ee3f9167ebecd17b5"
+      "sha256": "59a3b754b7041387a4e3c783877fd9aa948cbe285554fb87e6e2955c27b07d51"
     },
     {
       "path": "config/integratedProductionRiskPolicy.ts",
-      "sha256": "21dbaae85234e375d1ac6b102c8946f9dbbf0ecd1cc12a4dcc0d07258714401b"
+      "sha256": "1715a6d44b402dddc0396467dab6e0ba432fcf6bc496b7c963fdddd8c43133a3"
     },
     {
       "path": "config/penguDualLsV2Runtime.ts",
-      "sha256": "936f7c01d0332e9380b955e81dab42aee686f68ceee7d8da2fbc1d9a98f7d6f2"
+      "sha256": "f67c94f35a222a25dd95dc3e82d6534b65a4899cf8c763a8c6c9e4baaba38a62"
     },
     {
       "path": "config/penguRecoveryV8.ts",
-      "sha256": "053f4578390ce3cd8547669c01142b70517969e837391608948206a672d088d8"
+      "sha256": "a24b94ab37edb50d1de216eab7e545c0d0693a5fb18c9dddaeb282693ebecc64"
     },
     {
       "path": "config/sharedCryptoRiskPolicy.ts",
-      "sha256": "a83611274a909616031c9c94faa25e44fa1d07436e09c044d2053aa88f6a7494"
-    },
-    {
-      "path": "config/strategyExecutionRoutes.ts",
-      "sha256": "4cfdd76ab630ec41b3b706aed85a2f0f06a5684ffd5187a2f53db28b8f4df742"
-    },
-    {
-      "path": "config/strategyUniverse.ts",
-      "sha256": "de0dc274b80c4ab79f2aa834068ac3444cadd44789ea5af1ab5f3e15ddac1c64"
+      "sha256": "0cc9b376814b5721d29ca47736c9ab41dfbd5f608e7cee7f56aaa4cb73edd490"
     },
     {
       "path": "config/v12X1AllRuntime.ts",
-      "sha256": "ceeda9843f94938526c5c67abc2449f764baaf2b93ceaec4e966304441b40cac"
+      "sha256": "40dff6d523e7e4eb06a66decda6e01caf78246d65eda4f62dca3f814d3170aea"
     },
     {
       "path": "config/v52V50Runtime.json",
-      "sha256": "16c24ec472df9141bbde60b993120fb0a9b9bc3739a0bb8251c6371119e3390c"
+      "sha256": "e6f15b394f33b1e37329f5998844e8839059425e16cc3d25d4a227dc4cec559b"
+    },
+    {
+      "path": "lib/aster-v3-client.ts",
+      "sha256": "834ff6836b4e86eca554fa764a668ef8feb9086c2f518da10ad21cf5da187dcf"
+    },
+    {
+      "path": "lib/direct-trade-executor.ts",
+      "sha256": "51dc4335646ae1bf51d38a5dc7cbdc2c6098bfcd82028886195c4bec4eb7e1aa"
+    },
+    {
+      "path": "lib/disdex-account-order-lock.ts",
+      "sha256": "169f9b9a7091da9467317435a331b97033383158d8d050008e60b2b52d16a10b"
+    },
+    {
+      "path": "lib/disdex-aster-global-rate-budget.ts",
+      "sha256": "b128c1b283349c1d5ef942b1e989ffc61b5bdcb087a3ff752915fee2b6e0c3a1"
+    },
+    {
+      "path": "lib/disdex-aster-portfolio-classifier.ts",
+      "sha256": "9dc26b5658fa96723e511b3685bdee15b85acc1ec5686dcc35948977cd42bb24"
+    },
+    {
+      "path": "lib/disdex-aster-rate-budget-policy.ts",
+      "sha256": "858ad467b160bb8cac5e5a95492e1ed9790069ece8df20e6fec6d934969f7a41"
+    },
+    {
+      "path": "lib/disdex-integrated-gross-governor.ts",
+      "sha256": "5a9d1a62c4f47c6f0a76a9c818520b5f177cf0ba98574ebe9b95f4a2fd988fbf"
+    },
+    {
+      "path": "lib/disdex-managed-protective-orders.ts",
+      "sha256": "4056106411d9fad61ff5e1cb2c4da75be9c6536b1de9b4f590798604c9dbf55e"
+    },
+    {
+      "path": "lib/disdex-pending-exposure-registry.ts",
+      "sha256": "53b34e763b4330b5d9c35602296d5dfb29f83aeba41585624f0471df7185305d"
+    },
+    {
+      "path": "lib/disdex-portfolio-dd-governor.ts",
+      "sha256": "fe5bce1aa0ce4b8c1c763042c39cf143573a83245e2e23d0c206aed9c61963b5"
     },
     {
       "path": "lib/disdex-quality102-causal-pipeline.ts",
-      "sha256": "7483c4ca504320ff9b4f06479c84418604d1b310aeeaa6c3574ae8ca5285ab8f"
+      "sha256": "60506624475511abfca2941f267c81d32c112c9d8bd6345995abc30cfa26aa81"
+    },
+    {
+      "path": "lib/disdex-quality102-causal-selector.ts",
+      "sha256": "6bdd82f6230d54a1c40f58d13b2719db60bda6369135da417c04563efc4fab24"
+    },
+    {
+      "path": "lib/disdex-quality102-causal-v1-live-reduction.ts",
+      "sha256": "53d8f63888706c3a4f894e72232617f31575a271eed9c9f98ccd864f779f79a7"
+    },
+    {
+      "path": "lib/disdex-quality102-causal-v1-market-data.ts",
+      "sha256": "c36fa7152b352dc2c28d28b411895a2328900c77d46ccf6a63ef35fa60f45e32"
+    },
+    {
+      "path": "lib/disdex-quality102-causal-v1-ownership.ts",
+      "sha256": "21b5aa269cab268795d4e4f12ccbe23bc45d838886f3d6a0ee9f9c6d1d445243"
     },
     {
       "path": "lib/disdex-quality102-causal-v1-runner.ts",
-      "sha256": "a6a75c810448698246ed33c87d5db135460d9818c024a13800ac522437d843a8"
+      "sha256": "5745dadea09ea6969c7d1bb7fc76a2a69ddc7f5bf8c256bdb6a0f6da72117162"
+    },
+    {
+      "path": "lib/disdex-quality102-causal-v1-signal.ts",
+      "sha256": "340139275f8ba4637eb3f9d8081118e23c027c8cbfec7b64c8889b9c012d33e5"
+    },
+    {
+      "path": "lib/disdex-quality102-causal-v1-state.ts",
+      "sha256": "dca50d853b7573029cb6d7e0f2f9d739f5afa5ae5a3ad288e566455cef8df8a2"
     },
     {
       "path": "lib/disdex-quality102-causal-v4-observability.ts",
-      "sha256": "c23777071bae6822e9d40d9038e3813da98cf668a0078c278f2abbdd5b4dfe1a"
+      "sha256": "156826e3e2f6940fe0e3cf2085f533b6354b52a7baa878598ffc4f1ec450e18c"
     },
     {
       "path": "lib/disdex-quality102-causal-v4-ranking.ts",
-      "sha256": "f4cd1f3d1dd2f0e0f8b69d0ef49236f37838e90f501771b0f2088d909dde8e37"
+      "sha256": "1e1df072a7f74d53ac4f1be334ca4ed76b7ae19177b727af124ebf3f5cade02f"
     },
     {
       "path": "lib/disdex-quality102-causal-v4-s34.ts",
-      "sha256": "333191f07ffb05e0889a2235d63c4b9f70213244efb1fde68d8e17bcecd3279f"
+      "sha256": "d549f1db65c2714854d9c9018258c43d1afc3bcbeeda9979d35aaf06c825b741"
     },
     {
       "path": "lib/disdex-quality102-causal-v4-signal.ts",
-      "sha256": "0826b61a7f5a90bb8158aaf25369343c3fcb854a87da060c27aadb5422b0df4e"
+      "sha256": "d7a1d62f41419ec23359a9a2dfdbfc04e8fdf90692811e40dd9ad6986ab96573"
     },
     {
-      "path": "lib/disdex-quality102-live-selector.ts",
-      "sha256": "f9eda592602adc6a75e1bf1c220f239fdb2c6ddffcdc9ba5271a1df592f5f728"
+      "path": "lib/disdex-resilient-profit-main-v35.ts",
+      "sha256": "9131e880654e1ea62970d17b8099df94a098c60b4bfccee90649cecb2eb18c9b"
     },
     {
       "path": "lib/disdex-shared-crypto-daily-risk.ts",
-      "sha256": "3652d9776fb798a63c5489fa61cdf31e829ced82a7b669479b495b4515fec0f4"
+      "sha256": "37cfe8878453f4dc2e0067d12b19e0b04340883af89ef4631d498bc47cbeae36"
     },
     {
-      "path": "lib/disdex-shared-crypto-risk-writer.ts",
-      "sha256": "15c67a5ecb4cbbb6debb9cbe71422d4f436e9eb9b6d59b7074e172218b46524d"
+      "path": "lib/disdex-shared-kill-switch.ts",
+      "sha256": "225b0ccebf4ddf57df9f2c059441d7e74919a3a1f260b9cb62e2506e8237b60e"
+    },
+    {
+      "path": "lib/disdex-strict-portfolio-planner.ts",
+      "sha256": "cb9605d21538a1a3023fdf5cc74bfa6c9e8fb1423a69f8878a0a313b879caba1"
+    },
+    {
+      "path": "lib/disdex-unified-portfolio-routing.ts",
+      "sha256": "42240a722cc2c22c37576d672b92767ef7117626f78616a802f04c347ae0d7ca"
+    },
+    {
+      "path": "lib/disdex-v35-signal-engine.ts",
+      "sha256": "2477c966213c86fa8719e76de0995b716df3a8fb4d40b26896c7854e521718ac"
     },
     {
       "path": "lib/disdex-v96-live-risk-controls.ts",
-      "sha256": "d58f6af89cf6c1f4c459b7f33d0ec8db5c52bab6fdb7dc10d6fd0d7ee803efb6"
+      "sha256": "9c71c6a4703147737ab093e36b40926133b03aeac556a069eae94004fb9db10e"
     },
     {
       "path": "lib/fet-brk48-live-reduction.ts",
-      "sha256": "e118847ce0f0d9d67a52aa5921bf75823871d728a17299aacce54627ae65aca7"
+      "sha256": "d889b174a57a5db4e753d37f0311646f0fe6f72d940d3fff2540ce24cb25aaa5"
     },
     {
       "path": "lib/fet-brk48-live-runner.ts",
-      "sha256": "86f7b5d2932b4cadbd53e8d1151aacfe2e6e28d764a763e06f38ad882e3627a7"
-    },
-    {
-      "path": "lib/fet-brk48-ownership.ts",
-      "sha256": "56de2334094257fff227d81a2ab11aa65a138d574ff1cbfadbb4b913ff049949"
+      "sha256": "2557426414e90629b5edc378f10f23d58e3f3642395059e772c22b70fd932b90"
     },
     {
       "path": "lib/fet-brk48-signal.ts",
-      "sha256": "c67344623b30065e285023b967808ff0faec182c0b8fb973bb929888d8fa42e9"
+      "sha256": "73a1aa519b7db69ac8f4771f422530a6d40d2ec712116be806fdebc58911f30f"
     },
     {
       "path": "lib/fet-brk48-state.ts",
-      "sha256": "d59d8048b26a4d4cc856ba9f2c6a890e29f29913f0b1cd166b9e7e48f4981f4c"
+      "sha256": "a1a5aa80f6665ca2b8c5fe7f091f4fc82cc4f14f5bb35c154bdad6810638591c"
+    },
+    {
+      "path": "lib/interruptible-delay.ts",
+      "sha256": "504f8b195f8cc5571bc6bb7c963866126546f5180f7d6a179cdfd003e9984f8c"
+    },
+    {
+      "path": "lib/live-runner-state.ts",
+      "sha256": "f252cf8f998e2310f88d9923e65fdd1ebca3917bb93e60ebd5ea9eedbd8543b0"
     },
     {
       "path": "lib/pengu-dual-ls-v2-market-data-provider.ts",
-      "sha256": "944d42778726dda0e76d498d634d2ae26fcbfaba00ab9790be5a7807b3520d12"
+      "sha256": "73f5259114798302b6ccfc729283ccfe4d980763800a296536026532a33cd195"
     },
     {
       "path": "lib/pengu-dual-ls-v2-portfolio-runner.ts",
-      "sha256": "dc7710ec7a98930426725cfbdb4725869d4d6b4c8bae33f31d2cf17d6a57ec66"
+      "sha256": "42324a1a98700dde187813c3e331558ac6e6359f130a82e52f119fe140d5f068"
     },
     {
       "path": "lib/pengu-dual-ls-v2-runner-state.ts",
-      "sha256": "6f1fd6bd62c6cdf36a3c52e0c32c1554f85e1d0b73ecc4f6e8454f61ba23625b"
+      "sha256": "35e2c3b3b367969f8ebbca3661d353a57acfb1cdd83812bd1ae4cab533e77d9c"
     },
     {
       "path": "lib/pengu-dual-ls-v2.ts",
-      "sha256": "d408e9e602e3ddc7ff9b6b4d80eaf0624e05ae28ad11b92ca60c99253d320a5a"
+      "sha256": "b5664396c83fdba9e91064acb371b17467ded6675491e09cd50ef57580efd77e"
+    },
+    {
+      "path": "lib/pengu-live-scheduling.ts",
+      "sha256": "ba84867fde31ce2d9b29546624a9a098af0893721066bc9ccea83e9f2929b0ba"
+    },
+    {
+      "path": "lib/pengu-quality102-integration-status.ts",
+      "sha256": "1f24164bc7662f91fe4601dda59a17de7dc82332b7468fc1b05b090d550aabd4"
     },
     {
       "path": "lib/pengu-recovery-v8-protective-orders.ts",
-      "sha256": "3d0a37d4ee76d00d8aeb6840bd34716e288666a071c79eb9f90d8298f3e729ce"
+      "sha256": "9a961e8c5c626c5a761e92c0aec831e63717b591b94047dc6c929abc35fdcf31"
     },
     {
       "path": "lib/pengu-recovery-v8.ts",
-      "sha256": "0a71d69ccc3e60be018e7cb00b3b4a9f6584974757923719267e5206bcd43c43"
+      "sha256": "6cefb75e7fad0ee1bff621efebe7e9ca23c424a062f4e96e936bf0028d8bcff5"
     },
     {
       "path": "lib/pengu-route-quarantine-dd-governor.ts",
-      "sha256": "9386668a0475aeadfdd1f65035b91d9a433c9710d027b1291ffc4fbf21b334cf"
+      "sha256": "37617133bc86cdbea930208e7aad1cd43a4b14c3fbbcb3ab45ff1a3888754bfa"
     },
     {
       "path": "lib/pengu-short-v20.ts",
-      "sha256": "fce39b4ff1c6b5c7e62438e9a974a9479c0ecf5b5a1b41a91a5f2edf78caee65"
+      "sha256": "b1cc8d66decba4f7ddcdd13330d31df42f8460722e17c0fea296b43c36ef9e46"
+    },
+    {
+      "path": "lib/quality102-live-scheduling.ts",
+      "sha256": "aad29320b01f8232760704072777fc1d2ea3a982de2651bac401fffcce85a358"
+    },
+    {
+      "path": "lib/signed-paper-direct-trade-executor.ts",
+      "sha256": "fceb1da0c2837e4018e2943d44cf9105459b08224594c9984acf18dbadd3c9a1"
+    },
+    {
+      "path": "lib/trade-fill-notification.ts",
+      "sha256": "6659017b978a36d37c1e397faabbf7914c314ac8c7a26b82dbb2c1bb2a17c9aa"
     },
     {
       "path": "lib/v12-aster-live-adapter.ts",
-      "sha256": "f1b59f77297e4961022935e1da858fc93bec4430a60eb75b82611ecec928947e"
+      "sha256": "fc9425f3bb8fc6d730e0af8b34dfd69001b56b40addb2f529b5ff6975de0179d"
+    },
+    {
+      "path": "lib/v12-aster-market-data-provider.ts",
+      "sha256": "00dc05a11992de05ba34936f93d8b5437c9a63afadfc7ef15b9405344c5b66c5"
+    },
+    {
+      "path": "lib/v12-decision-observation.ts",
+      "sha256": "41fa5f0f8f11bb3dea6780388374fcf365043c50a8c7f850c69732fb003fae6a"
     },
     {
       "path": "lib/v12-dynamic-residual-live-reduction.ts",
-      "sha256": "a95a7e6503b7e50b3e025e1cfcdfa0ef91f1756fd95fdab335d9a8f6564c1ff9"
+      "sha256": "39c378fec60aee7b6ae97c18d554639a75f0572ec4c8d6238174bc9e953df766"
     },
     {
       "path": "lib/v12-live-execution-engine.ts",
-      "sha256": "f15391447acd1e9ce6f1ae39d724f83e0b22e8faaf545571adba2ea07680eecd"
+      "sha256": "5ceea53e6bc34f3e315845869f803decaaa4ab4008b2a09a9a09860c70cb5f25"
     },
     {
       "path": "lib/v12-resident-stop-lifecycle.ts",
-      "sha256": "176ed2d8f04a05d98688427330d9763262ede75e6efa3e7b9400e4e976980d7a"
+      "sha256": "26b610214a221b70c7ccac62b27ad4831e59aeb73be2b48918dabd75c2fdb280"
     },
     {
       "path": "lib/v12-strict-live-adapter.ts",
-      "sha256": "b083290dd251e88a98498e507a28408aa413e865aa5e432be1969cf72f3a137b"
+      "sha256": "a09a41d8e97af04a2ab0732d5a98d9d04237559561c128007825241b9e2729d1"
     },
     {
       "path": "lib/v12-top2-residual.ts",
-      "sha256": "f549848a4d0a6604586c90131c35c772c6014b7f2bdaceeb7dda216f2dc69498"
+      "sha256": "ae1f562ceb879a9721a047e2cca46c3a370533ff0b4b1b2627f76357d460dfb7"
     },
     {
       "path": "lib/v12-x1-all-runner-state.ts",
-      "sha256": "444039749bb2f7c7e4b1e725585af0fb47b02ad42ce7c245deb353dd68eae80d"
+      "sha256": "6da842aa07d9a7fc6ae7787a2908be19a3de285388e71f70af72576aee66e2f3"
     },
     {
       "path": "lib/v12-x1-all.ts",
-      "sha256": "df25590af24128f156333021fc7539d1d3088c7a60fa380d74df357a5a08caca"
-    },
-    {
-      "path": "scripts/disdex-fet-brk48-core-preempt.ts",
-      "sha256": "1eb5a2a0348fb33fff105e3b089eb0e304050aa095f794322a9233306f37494f"
+      "sha256": "093ef2903af2336c1c2f5d1ae538253f0c6bf8bc44a95920a21c8970b6ab06b5"
     },
     {
       "path": "scripts/disdex-fet-brk48-live-runner.ts",
-      "sha256": "08e1e002955974eef26653e15d53d627d68a3e7de49906dd0264907687e73a8e"
+      "sha256": "74c9e830570cee64fd4e2f1738210d92f3aa54e0a8e615919e3432566eafa7c1"
     },
     {
       "path": "scripts/disdex-pengu-dual-ls-v2-live-runner.ts",
-      "sha256": "fba5963f4cb275dc31e42e4a306c620eba08fd2df54268cb2b799357264b0f2e"
+      "sha256": "0614dc177c2682faf98f6db9e92416b58e81d43aa8a9339d52fc701cc946da53"
     },
     {
       "path": "scripts/disdex-quality102-causal-v1-live-runner.ts",
-      "sha256": "5e6b2d2b8952d0d1f80bd7b60bee3950dec100b17de18c81674bea4e41f1024f"
+      "sha256": "e4b9177f806d2f8d54c28cb62686cf11b66829600557d5e893938a4631eb6e51"
     },
     {
       "path": "scripts/disdex-v12-x1-all-live-runner.ts",
-      "sha256": "3d911162f2e96750027e98b510bedb1e8ff60c161faebb6ce6f25ab830f2e1b4"
+      "sha256": "22ed479d91ca43d2b7eeb886633bac59bda8967f23c546ad8cbf1c4d8726ebd9"
     },
     {
-      "path": "scripts/disdex_stock_reference_alpaca_proxy.py",
-      "sha256": "da707a435fe904f875b1ea0ef236b56885b64bf7cb8491ee1116b682195a3b51"
+      "path": "scripts/disdex_account_order_lock.py",
+      "sha256": "839fff2b49b0b679d13391ee9b1a2ad6fd2df759db9128fbd47eeae6c34bb17e"
     },
     {
-      "path": "scripts/disdex_stock_reference_pyth_iex_proxy.py",
-      "sha256": "bdf9b6b0948862313cfb4db991efd0c3f039086b59d0d70ed763fc82ea11e66b"
+      "path": "scripts/disdex_aster_rate_budget_policy.py",
+      "sha256": "9061992acf95bce6964c6fb4f2ca6011a14ca2b7fee063cae164f47a05724164"
+    },
+    {
+      "path": "scripts/disdex_pending_exposure_registry.py",
+      "sha256": "6738f8f1b5acd4582699fc3bb55664ec080514543eb8a13ea489eb4552e5b3e2"
+    },
+    {
+      "path": "scripts/disdex_stock_reference_health.py",
+      "sha256": "08664bac8ebe0908292c9a370b18114cca327fae3fcb3c12cc05ff50103d238c"
+    },
+    {
+      "path": "scripts/disdex_strict_portfolio_planner.py",
+      "sha256": "217121b9a66c7e3520e9fd69703ef2755c3426bc31efaa21cd012d47fd0b7189"
+    },
+    {
+      "path": "scripts/disdex_trade_fill_notification.py",
+      "sha256": "dc888e6cb4b9ac6f0a98def1d6c922ca55305b10bff95330e830ab1c912abde6"
+    },
+    {
+      "path": "scripts/disdex_us_equity_calendar.py",
+      "sha256": "29be682cbcdf6f2a489f8fd0f3ba4386c48b4f2ce9b5c1dfc5ceb5e29450c425"
+    },
+    {
+      "path": "scripts/disdex_v11eq_aster_only_live_engine.py",
+      "sha256": "b763ae73d0e92d490e9dc254c54741ffb130953f6508d0a0a6903689adb3d9e0"
+    },
+    {
+      "path": "scripts/disdex_v12_crypto_daily_risk.py",
+      "sha256": "4963b1159aab02da1e13e3208070c9759c6a5c79d61607ce8343250b648914d4"
+    },
+    {
+      "path": "scripts/disdex_v13d_v11eq_stock_free_live_engine.py",
+      "sha256": "8ec0b22de0b68713e554cc2674a6b45207a5d0b7ae74725a16c764ac5dc4363d"
+    },
+    {
+      "path": "scripts/disdex_v13d_v11eq_stock_live_engine.py",
+      "sha256": "8b47663006dd1673db4127f9b135d84ccd8ab255e9716dda994372a0a0e84262"
+    },
+    {
+      "path": "scripts/disdex_v52_aster_only_legacy_engine.py",
+      "sha256": "bd201dfb2ccff37b406f5795158edeaaab7837b64cb165525e3a6f791007fa12"
     },
     {
       "path": "scripts/disdex_v52_aster_only_live_engine.py",
-      "sha256": "aec87b91e74137bf3f90fb313337e4dd0699f1d78f5cf1e0bef86ae9e08f36e9"
+      "sha256": "dd3497cfb0605c9574b5f9ea74b464366b7ddf7243a6490d53214c01ff2f9f05"
     },
     {
-      "path": "scripts/disdex_v52_margin_aware_live_engine.py",
-      "sha256": "4de8979e1915f672250075dc745bfa8d32d97bc5cfb7889c925c05a58fbdada1"
+      "path": "scripts/disdex_v52_daily_loss.py",
+      "sha256": "77793274ab786f8afc58d07889af2c6fc31557a9e0c76d1c9e783bd27119774a"
     },
     {
       "path": "scripts/disdex_v96_v52_margin_guard.py",
-      "sha256": "51379f7f1b64ae85fa474e06dba3becbc63a1ac33506e1cf87cc2c2701d3bc7b"
+      "sha256": "f34a6c300c874e79701598ac7261a658cb7c4ac8ed997e36f0abf939910bcb5d"
     },
     {
       "path": "scripts/disdex_v96_v52_margin_guard_runtime.py",
-      "sha256": "362ab6e0f213b5748f5b378562f49194afbcb26cc3abd8b53738321152e0e113"
+      "sha256": "3396aa15a0ee9041dc1029d612124e8891fdaa09565e1703e4e2c176a40a5b43"
     },
     {
       "path": "scripts/disdex_v96_v52_margin_risk_policy.py",
-      "sha256": "524ebe7451b95b525247e05a42b1e4c574aecf656108a671ba4b0c87f66aab29"
+      "sha256": "9aa809c589a18a434a527192c681381b9e35d2889987c5543eb01c653f556e69"
     }
   ],
   "config_allowlist": {

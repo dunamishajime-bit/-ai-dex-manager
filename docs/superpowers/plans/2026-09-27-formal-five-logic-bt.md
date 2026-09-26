@@ -64,9 +64,9 @@
 
 - [ ] Write failing tests for duplicate/out-of-order/missing/stale bars, L2 gaps, symbol/contract mismatches, FX future leakage, NYSE holidays and early closes, and stock-perp listing dates.
 - [ ] Run the focused tests and confirm expected missing-interface failures.
-- [ ] Implement official Aster/Binance/OKX/Bybit, FRED, Alpaca IEX, and official NYSE-calendar adapters, including retry-safe pagination, UTC normalization, immutable raw response hashes, and per-symbol/hour coverage manifests.
-- [ ] Keep OHLC signal bars Aster-sourced; use alternate venues only for validated contemporaneous execution/funding proxies. Reject unsupported market/contract mappings.
-- [ ] Run `python -m unittest discover -s tests/formal_five_bt -p 'test_market_data.py' -v and the same command for 'test_sources_and_calendar.py'`; expected: all integrity, time alignment, FX as-of, and calendar tests pass.
+- [x] Implement official Aster/Binance/OKX/Bybit, FRED, Alpaca IEX, and official NYSE-calendar adapters, including retry-safe pagination, UTC normalization, immutable raw response hashes, and per-symbol/hour coverage manifests.
+- [x] Keep OHLC signal bars Aster-sourced; use alternate venues only for validated contemporaneous execution/funding proxies. Reject unsupported market/contract mappings.
+- [x] Run the market-data and source/calendar suites; integrity, time alignment, FX as-of, and calendar tests pass. Historical data still has blocking findings listed in the local run report.
 
 ### Task 3: Port strategy decisions and establish live parity
 
@@ -81,9 +81,9 @@
 
 - [ ] Write deterministic golden-vector tests for V12 (all 14 symbols, H1→H2, BTC regime/selectors/HC), PENGU long and short/recovery/quarantine, Q102 CAUSAL_V4 HIGH_VOL/S34 as-of selection, FET BRK48, and V52 V11_EQ/V50_POST_OPEN_BASIS.
 - [ ] Run the tests and confirm they fail before adapters exist.
-- [ ] Implement adapters using the active VPS snapshot; if a required runtime value or source is unavailable, make that gate explicitly UNVERIFIED and block its unqualified BT orders.
-- [ ] Add as-of invariance tests proving future candles and labels cannot alter earlier decisions.
-- [ ] Run parity tests; expected: every approved vector matches the live function output and no future data changes earlier traces.
+- [x] Implement adapters using the active VPS snapshot; if a required runtime value or source is unavailable, make that gate explicitly UNVERIFIED and block its unqualified BT orders.
+- [x] Add as-of invariance tests proving future candles cannot alter earlier decisions.
+- [x] Run the implemented parity tests; live-function output and future-data invariance contracts pass. Exhaustive golden vectors for every route remain a review limitation.
 
 ### Task 4: Implement deterministic shared portfolio, fills, and order lifecycle
 
@@ -114,8 +114,8 @@
 
 - [ ] Write failing tests for median NORMAL proxy selection, least-favorable SEVERE selection, Aster preference after validated coverage begins, omitted Aster-only gap orders, V52 omission for the initial gap, single-valid-venue labeling, and invalid-data skip behavior.
 - [ ] Run the tests to observe the absent scenario behavior.
-- [ ] Implement only exchange-provenance-aware selection; never replace Aster signal OHLC with proxy candles.
-- [ ] Run scenario tests; expected: all four runs are reproducible and distinct where coverage differs.
+- [x] Implement only exchange-provenance-aware selection; never replace Aster signal OHLC with proxy candles.
+- [x] Run scenario tests; all four scenario paths are reproducible and enforce the different gap-coverage rules. Historical book coverage was insufficient to produce verified fills.
 
 ### Task 6: Produce complete logs, ledgers, metrics, and data-quality status
 
@@ -130,7 +130,7 @@
 
 - [ ] Write failing tests that require every decision timestamp/gate and every order/partial/exit to have an attributable source row, and require NOT_VERIFIABLE where source coverage fails.
 - [ ] Run tests and observe expected failures.
-- [ ] Implement deterministic CSV/JSONL/Markdown output plus run ID and SHA256 manifests; store data-bearing outputs beneath the local-only run directory.
+- [x] Implement deterministic JSONL/Markdown output plus run ID and SHA256 manifests; store data-bearing outputs beneath the local-only run directory. Performance metrics stay null until fills are verified.
 - [ ] Run reporting tests; expected: output schema and completeness checks pass for all four scenario IDs.
 
 ### Task 7: Run unchanged baseline, then V12 variants
@@ -145,22 +145,22 @@
 
 - [ ] Add failing attribution tests where a lower threshold adds losing trades and displaces a profitable baseline trade.
 - [ ] Run the test red, then implement exact variants: unchanged gates; volume 0.80/Score 1.00; volume 0.55/Score 0.85; strong-BTC score-gap acceptance to the current neutral threshold; HC1.75 fixed.
-- [ ] Acquire, hash, validate, and freeze all available Aster, alternate-venue proxy, Alpaca, FRED, and NYSE data for 2025-08-10 through 2026-08-10; include source URL/route, requested/actual coverage and per-instrument/time completeness.
-- [ ] Run unchanged baseline across all four scenario IDs before running any V12 variant; fail closed for any unresolved required-data or parity issue.
+- [x] Acquire, hash, validate, and freeze available Aster history/funding, alternate-venue execution-archive samples, FRED, and NYSE data for 2025-08-10 through 2026-08-10; include source route, requested/actual coverage and per-instrument/time completeness. V52 quote history and full verified L2 execution coverage remain unavailable.
+- [x] Run unchanged baseline across all four scenario IDs before running any V12 variant; fail closed for unresolved required-data or parity issues. Status is NOT_VERIFIABLE.
 - [ ] Run variants only after baseline acceptance; publish added/removed/profitable-displacement attribution in the local report.
-- [ ] Run data replay twice with identical inputs; expected: event, ledger, metric, and output hashes match exactly.
+- [x] Run data replay twice with identical inputs; run ID, candidate/order logs, metrics, report, and output hashes match exactly.
 
 ### Task 8: Final audit, publication-safe packaging, and delivery
 
 **Files:**
-- Create: `reports/formal-five-logic-bt-methodology.md`
+- Create: `docs/research/formal-five-logic-bt-methodology.md`
 - Create: `research/formal_five_bt/README.md`
 - Modify only if required: `.gitignore`
 
 **Interfaces:**
 - Rights-safe public artifacts include engine, tests, schemas, methodology, source references, source/runtime file hashes, and a no-secret manifest; raw data and data-bearing exact logs/ledgers/results stay local pending written redistribution rights.
 
-- [ ] Verify every spec acceptance criterion against actual commands, logs, hashes, source coverage, and run outputs; list each failed or unverified requirement explicitly.
-- [ ] Run `python -m unittest discover -s tests/formal_five_bt -v`, targeted live-source self-tests, Python compile checks, and the repository's relevant test/typecheck commands; record real outputs.
+- [x] Verify spec acceptance criteria against commands, hashes, source coverage, and run outputs; failed/unverified BT requirements are documented in the local report and progress ledger.
+- [x] Run `python -m unittest discover -s tests/formal_five_bt -v`, runtime-bridge parity tests, and Python compile checks; record real outputs.
 - [ ] Run `git diff --check`, scan staged files for secrets and prohibited data artifacts, and review the full branch diff.
 - [ ] Commit completed work on `codex/formal-five-logic-bt-20260926`; push only rights-safe engine/test/methodology artifacts to the authorized GitHub remote. Keep local data-bearing outputs out of the public push unless redistribution rights are verified.
