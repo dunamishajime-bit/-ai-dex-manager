@@ -4,6 +4,7 @@ on:
     branches: [research/recover-final-governor-bt-20260926]
     paths:
       - scripts/research/recover_original_final_governor_provenance.py
+      - scripts/research/locate_original_final_governor_20260926.py
       - .github/workflows/recover-original-final-governor-provenance.yml
   workflow_dispatch:
 permissions:
@@ -55,9 +56,28 @@ jobs:
               "truncated":d["truncated"],
           },ensure_ascii=False))
           PY
+      - name: Locate historical BT generator across all VPS worktrees, read-only
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -p "${SSH_PORT:-22}" "root@$SSH_HOST" 'python3 -' \
+            < scripts/research/locate_original_final_governor_20260926.py > original-bt-source-locator.json
+          python3 - <<'PY'
+          import json
+          d=json.load(open("original-bt-source-locator.json"))
+          assert d["readOnly"] is True and d["tradingMutation"] == 0
+          print("ORIGINAL_BT_SOURCE_LOCATOR",json.dumps({"roots":len(d["roots"]),"visited":d["visited"],
+           "exact":d["exactFileMatches"],"references":d["referenceHits"][:50],
+           "researchCandidates":len(d["researchCandidates"]),"cacheDirs":d["cacheDirs"][:25],
+           "gitHistory":d["gitHistory"],"truncated":d["stoppedByCap"]},ensure_ascii=False))
+          PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: original-14p49b-governor-bt-vps-provenance-20260926
-          path: original-bt-provenance.json
+          path: |
+            original-bt-provenance.json
+            original-bt-source-locator.json
           retention-days: 90
