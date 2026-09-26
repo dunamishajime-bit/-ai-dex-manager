@@ -168,6 +168,21 @@ class SourceAndCalendarTests(unittest.TestCase):
         self.assertEqual(okx_fetch.call_args_list[0].args[2]["after"], 3 * hour + 1)
         self.assertNotIn("before", okx_fetch.call_args_list[0].args[2])
 
+    def test_fred_uses_only_verified_official_full_history_fallback(self) -> None:
+        calls = []
+        payload = (b"observation_date,DEXJPUS\\n2025-08-09,155.2\\n"
+                   b"2025-08-10,155.9\\n2025-08-11,156.1\\n")
+        def limited_provider(url):
+            calls.append(url)
+            if "cosd=" in url:
+                raise RuntimeError("test-only date-scoped FRED unavailable")
+            return payload.replace(b"\\\\n",b"\\n")
+        result = fetch_fred_dexjpus(date(2025, 8, 10), date(2025, 8, 11), fetch=limited_provider)
+        self.assertEqual(len(calls),2)
+        self.assertTrue(result.source_url.endswith("?id=DEXJPUS"))
+        self.assertEqual(len(result.observations),2)
+        self.assertTrue(all(row["rate_jpy_per_usd"]>0 for row in result.observations))
+
     def test_fred_rates_keep_response_hash_and_ignore_missing_observations(self) -> None:
         raw = b"observation_date,DEXJPUS\n2025-08-10,147.25\n2025-08-11,.\n"
         result = fetch_fred_dexjpus(date(2025, 8, 10), date(2025, 8, 11), fetch=lambda _url: raw)

@@ -617,18 +617,35 @@ def fetch_fred_dexjpus(
         raise ValueError("end_date precedes start_date")
     query = urlencode({"id": "DEXJPUS", "cosd": start_date.isoformat(), "coed": end_date.isoformat()})
     url = f"{SUPPORTED_SOURCES['fred']}/graph/fredgraph.csv?{query}"
-    raw = (fetch or fetch_bytes)(url)
-    observations = []
-    for row in csv.DictReader(io.StringIO(raw.decode("utf-8-sig"))):
-        value = row.get("DEXJPUS")
-        if not value or value == ".":
-            continue
-        # FRED publishes date-only observations; treating them as available at
-        # 00:00 UTC would leak same-day values into earlier UTC valuations.
-        dt = datetime.strptime(row["observation_date"], "%Y-%m-%d").replace(tzinfo=timezone.utc)
-        ts = int(dt.timestamp() * 1000) + 86_400_000 - 1
-        observations.append({"event_time_ms": ts, "source_time_ms": ts, "rate_jpy_per_usd": float(value)})
-    return FxAcquisition(observations, hashlib.sha256(raw).hexdigest(), url, raw)
+    # The date-scoped FRED graph may fail from ephemeral CI networks. The
+    # unscoped endpoint is still official FRED DEXJPUS; trim locally and
+    # preserve the exact successful URL and response hash. Never substitute an
+    # unrelated FX feed without an explicit source contract.
+    official_urls = (url, f"{SUPPORTED_SOURCES['fred']}/graph/fredgraph.csv?id=DEXJPUS")
+    last_error: Exception | None = None
+    for candidate_url in official_urls:
+        try:
+            raw = (fetch or fetch_bytes)(candidate_url)
+            observations = []
+            for row in csv.DictReader(io.StringIO(raw.decode("utf-8-sig"))):
+                value = row.get("DEXJPUS")
+                date_text = row.get("observation_date") or row.get("DATE")
+                if not value or value == "." or not date_text:
+                    continue
+                observed_date = date.fromisoformat(date_text)
+                if not (start_date <= observed_date <= end_date):
+                    continue
+                # A date-only FRED observation is conservatively timestamped at
+                # UTC day-end to prevent same-day knowledge leaking backward.
+                dt = datetime.combine(observed_date, time(), tzinfo=timezone.utc)
+                ts = int(dt.timestamp() * 1000) + 86_400_000 - 1
+                observations.append({"event_time_ms": ts, "source_time_ms": ts, "rate_jpy_per_usd": float(value)})
+            if not observations:
+                raise ValueError("FRED_DEXJPUS_NO_OBSERVATIONS_IN_REQUESTED_RANGE")
+            return FxAcquisition(observations, hashlib.sha256(raw).hexdigest(), candidate_url, raw)
+        except (RuntimeError, OSError, ValueError) as error:
+            last_error = error
+    raise RuntimeError("FRED_DEXJPUS_OFFICIAL_ENDPOINTS_UNAVAILABLE") from last_error
 
 
 def alpaca_iex_quote_headers(environ: Mapping[str, str] | None = None) -> dict[str, str]:

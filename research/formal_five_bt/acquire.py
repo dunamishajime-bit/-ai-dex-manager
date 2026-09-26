@@ -209,15 +209,25 @@ def acquire(root: str | Path, *, warmup_start: date = WARMUP_START, start_date: 
         _write_json(target / "acquisition-progress.json", metadata)
 
     if "aster" in venues:
-        fx = sources.fetch_fred_dexjpus(warmup_start, end_date_exclusive)
-        fx_raw_path = Path("raw/fred/DEXJPUS.csv")
-        raw_sha = _write_bytes(target / fx_raw_path, fx.raw_response)
-        fx_path = Path("normalized/fred/DEXJPUS.jsonl")
-        fx_content = "".join(json.dumps(row, sort_keys=True, separators=(",", ":")) + "\n" for row in fx.observations).encode("utf-8")
-        fx_sha = _write_bytes(target / fx_path, fx_content)
-        metadata["fred"] = {"status": "ACQUIRED", "source_url": fx.source_url, "raw_path": fx_raw_path.as_posix(), "raw_sha256": raw_sha, "normalized_path": fx_path.as_posix(), "normalized_sha256": fx_sha, "observations": len(fx.observations)}
+        try:
+            fx = sources.fetch_fred_dexjpus(warmup_start, end_date_exclusive)
+            fx_raw_path = Path("raw/fred/DEXJPUS.csv")
+            raw_sha = _write_bytes(target / fx_raw_path, fx.raw_response)
+            fx_path = Path("normalized/fred/DEXJPUS.jsonl")
+            fx_content = "".join(json.dumps(row, sort_keys=True, separators=(",", ":")) + "\n" for row in fx.observations).encode("utf-8")
+            fx_sha = _write_bytes(target / fx_path, fx_content)
+            metadata["fred"] = {"status": "ACQUIRED", "source_url": fx.source_url, "raw_path": fx_raw_path.as_posix(), "raw_sha256": raw_sha, "normalized_path": fx_path.as_posix(), "normalized_sha256": fx_sha, "observations": len(fx.observations)}
+        except (RuntimeError, OSError, ValueError) as error:
+            # Do not discard verified 32-symbol Aster acquisition because
+            # the independent public FX provider is temporarily unavailable.
+            # Downstream deposits and every monetary result stay UNVERIFIED.
+            metadata["fred"] = {"status": "UNAVAILABLE", "provider": "FRED DEXJPUS",
+                                 "reason_code": "OFFICIAL_FX_ENDPOINTS_UNAVAILABLE",
+                                 "error_type": type(error).__name__}
 
-    metadata["status"] = "ACQUISITION_COMPLETE_REQUIRES_VALIDATION"
+    metadata["status"] = ("ACQUIRED_WITH_UNVERIFIED_FX" if
+        "aster" in venues and metadata["fred"]["status"] != "ACQUIRED" else
+        "ACQUISITION_COMPLETE_REQUIRES_VALIDATION")
     metadata["acquisition_manifest_sha256"] = _write_json(target / "acquisition-manifest.json", metadata)
     return metadata
 
