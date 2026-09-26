@@ -489,6 +489,8 @@ DISDEX_HEALTH_SNAPSHOT_FET_RELEASE_ROOT=${CURRENT_RELEASE}
 DISDEX_HEALTH_SNAPSHOT_HEALTH_ROOT=/var/lib/disdex/runner-health
 DISDEX_HEALTH_SNAPSHOT_KILL_SWITCH_PATH=${SHARED_ROOT}/kill-switch.json
 DISDEX_HEALTH_SNAPSHOT_V12_STATE_PATH=/var/lib/disdex/v12-x1-all/runner.json
+V12_DECISION_SNAPSHOT_PATH=/var/lib/disdex/v12-x1-all/decision-snapshot.json
+V12_GATE_DIAGNOSTICS_PATH=/var/lib/disdex/v12-x1-all/v12-gate-diagnostics.jsonl
 DISDEX_HEALTH_SNAPSHOT_PENGU_STATE_PATH=${PENGU_STATE_ROOT}/runner-live.json
 DISDEX_HEALTH_SNAPSHOT_V52_STATE_PATH=/var/lib/disdex/v52-aster-only/runner-live.json
 DISDEX_HEALTH_SNAPSHOT_Q102_STATE_PATH=/var/lib/disdex/quality102-causal-v1/state.json
@@ -623,6 +625,8 @@ StartLimitBurst=3
 [Service]
 RestartSec=30s
 EnvironmentFile=${CONTRACT_ENV_FILE}
+Environment=V12_DECISION_SNAPSHOT_PATH=/var/lib/disdex/v12-x1-all/decision-snapshot.json
+Environment=V12_GATE_DIAGNOSTICS_PATH=/var/lib/disdex/v12-x1-all/v12-gate-diagnostics.jsonl
 ExecStartPre=+/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root ${CURRENT_RELEASE} --sha ${DEPLOYED_SHA} --runner V12_X1_ALL --activation-path ${OPERATOR_ACTIVATION_PATH}
 Environment=DISDEX_RELEASE_SHA=${DEPLOYED_SHA}
 Environment=V12_LIVE_COMMIT_SHA=${DEPLOYED_SHA}

@@ -65,7 +65,8 @@ export async function buildV12LiveRuntime() {
         requestSpacingMs: numberEnv("V12_X1_ALL_REQUEST_SPACING_MS", 100),
     });
     const decisionSnapshotPath = String(process.env.V12_DECISION_SNAPSHOT_PATH || "/var/lib/disdex/v12-x1-all/decision-snapshot.json").trim();
-    const decisionStore = new FileV12DecisionObservationStore(decisionSnapshotPath);
+    const decisionHistoryPath = String(process.env.V12_GATE_DIAGNOSTICS_PATH || "/var/lib/disdex/v12-x1-all/v12-gate-diagnostics.jsonl").trim();
+    const decisionStore = new FileV12DecisionObservationStore(decisionSnapshotPath, decisionHistoryPath);
     const engine = new V12LiveExecutionEngine({
         adapter, marketData, stateStore, lock, riskPath: runtime.riskPath, statePath: runtime.statePath,
         decisionObserver: (snapshot) => decisionStore.save(snapshot),
