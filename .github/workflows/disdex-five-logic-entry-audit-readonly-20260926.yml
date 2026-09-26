@@ -14,10 +14,10 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 12
     env:
-      SSH_HOST: \${{ secrets.DISDEX_VPS_SSH_HOST }}
-      ROOT_KEY: \${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
-      SSH_KNOWN_HOSTS: \${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
-      SSH_PORT: \${{ vars.DISDEX_VPS_SSH_PORT }}
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
     steps:
       - name: Configure approved VPS read-only transport
         shell: bash
@@ -39,7 +39,7 @@ jobs:
           set -Eeuo pipefail
           ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
-            -o ConnectTimeout=15 -p "\${SSH_PORT:-22}" "root@$SSH_HOST" 'python3 -' <<'PY'
+            -o ConnectTimeout=15 -p "${SSH_PORT:-22}" "root@$SSH_HOST" 'python3 -' <<'PY'
           import collections,datetime,json,os,pathlib,re,shutil,subprocess,time
           NOW=int(time.time()*1000)
           ROOT=pathlib.Path("/var/lib/disdex")
