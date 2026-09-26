@@ -1,0 +1,49 @@
+name: V12 score gap simultaneous diagnostics research only
+on:
+  push:
+    branches: [codex/v12-score-gap-audit-20260926]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  diagnostics:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Typecheck isolated source
+        run: npx tsc --noEmit -p tsconfig.json
+      - name: Assert original production gate behavior and new read-only diagnostics
+        run: |
+          npx tsx --test tests/v12-winrate-entry-gate.test.ts tests/v12-score-gap-observability.test.ts tests/v12_decision_observation.test.ts
+          npx tsx scripts/v12-x1-all-selftest.ts
+      - name: Assert test commands never submit an order
+        run: '! grep -Eq "placeMarket|executeEntry|submitOrder|I_ACCEPT_REAL_MONEY" tests/v12-score-gap-observability.test.ts'
+  annual_score_gap:
+    runs-on: ubuntu-24.04
+    needs: diagnostics
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Read-only 365d frozen parity and ten score/volume variants
+        env:
+          GATE_RESEARCH_OUT: v12-score-gap-annual-20260926.json
+        run: npx tsx scripts/research-v12-annual-gate-sensitivity-20260926.ts
+      - name: Keep complete provenance and per-variant results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v12-score-gap-annual-20260926
+          path: v12-score-gap-annual-20260926.json
+          if-no-files-found: warn
+          retention-days: 14

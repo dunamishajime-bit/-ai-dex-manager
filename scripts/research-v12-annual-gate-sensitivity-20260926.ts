@@ -20,11 +20,16 @@ const START = SAMPLE_START - 11 * 24 * HOUR;
 const HOLD_BARS = 12;
 const ROUND_TRIP_COST_PCT = 0.003;
 const CASES = [
-  { name:"FROZEN",volume:0.9845,score:1.4649 },
-  { name:"VOLUME_080",volume:0.80,score:1.4649 },
-  { name:"COMBINED_V080_S100",volume:0.80,score:1.00 },
-  { name:"USER_V055_S085",volume:0.55,score:0.85 },
-  { name:"COMBINED_V060_S080",volume:0.60,score:0.80 },
+  { name:"FROZEN",volume:0.9845,score:1.4649,closeScoreGap:false },
+  { name:"SCORE_GAP_ONLY",volume:0.9845,score:1.4649,closeScoreGap:true },
+  { name:"VOLUME_080_ONLY",volume:0.80,score:1.4649,closeScoreGap:false },
+  { name:"SCORE_100_ONLY",volume:0.9845,score:1.00,closeScoreGap:false },
+  { name:"V080_S100",volume:0.80,score:1.00,closeScoreGap:false },
+  { name:"V080_S100_SCORE_GAP",volume:0.80,score:1.00,closeScoreGap:true },
+  { name:"V080_S085_SCORE_GAP",volume:0.80,score:0.85,closeScoreGap:true },
+  { name:"V055_S085",volume:0.55,score:0.85,closeScoreGap:false },
+  { name:"V055_S085_SCORE_GAP",volume:0.55,score:0.85,closeScoreGap:true },
+  { name:"V060_S080_SCORE_GAP",volume:0.60,score:0.80,closeScoreGap:true },
 ] as const;
 
 function parseKline(row: AsterKline) {
@@ -34,13 +39,13 @@ function parseKline(row: AsterKline) {
     || open <= 0 || close <= 0 || low <= 0 || high < low || volume < 0) return null;
   return {ts,open,high,low,close,volume,closed:true};
 }
-function quality(input:{regime:string;strong:boolean;side:string;score:number;momentum:number;atrRatio:number},s:number) {
+function quality(input:{regime:string;strong:boolean;side:string;score:number;momentum:number;atrRatio:number},s:number,closeScoreGap=false) {
   const {regime,strong,side,score,momentum,atrRatio}=input;
   if(regime==="NEUTRAL")return V12_X1_ALL.allowNeutralRegime && score>=s;
   if((regime==="LONG"&&side!=="LONG")||(regime==="SHORT"&&side!=="SHORT"))return false;
   if(score>=s)return true;
   if(strong)return score>=V12_X1_ALL.strongRegimeQualityScoreMinimum
-    && score<=V12_X1_ALL.strongRegimeQualityScoreMaximum
+    && (closeScoreGap || score<=V12_X1_ALL.strongRegimeQualityScoreMaximum)
     && atrRatio>=V12_X1_ALL.strongRegimeQualityMinimumAtrRatio;
   const aligned=side==="LONG"?momentum:-momentum;
   return aligned>=V12_X1_ALL.relaxedRegimeMinimumMomentumPct
@@ -81,7 +86,7 @@ async function main(){
     ...x,opportunities:0,windowsWithSignal:0,hc175Opportunities:0,
     net24hProxy:[] as number[],rawCandidatesAfterBase:0,
     observedFromFrozen:new Set<string>(),opportunityKeys:new Set<string>(),
-    returnByKey:new Map<string,number>(),
+    returnByKey:new Map<string,number>(),strongScoreGapProxy:[] as number[],strongScoreGapSelected:0,
   }));
   let windows=0;
   for(let i=65;i<all.BTC.length-HOLD_BARS-1;i++){
@@ -98,7 +103,7 @@ async function main(){
         if(c.volumeRatio<run.volume || Math.abs(c.momentum)<V12_X1_ALL.minimumMomentumPct) return false;
         const edge=Math.abs(c.momentum);
         if(edge<V12_X1_ALL.minimumEdgeToCostRatio*V12_X1_ALL.normalRoundTripCostBps/10_000)return false;
-        return quality({regime:observed.regime,strong,side:c.side,score:c.score,momentum:c.momentum,atrRatio:c.atr/all[c.symbol][i].close},run.score);
+        return quality({regime:observed.regime,strong,side:c.side,score:c.score,momentum:c.momentum,atrRatio:c.atr/all[c.symbol][i].close},run.score,run.closeScoreGap);
       }).map(c=>({symbol:c.symbol,side:c.side,score:c.score,volumeRatio:c.volumeRatio,momentum:c.momentum,volatility:c.volatility,atr:c.atr}));
       run.rawCandidatesAfterBase+=eligible.length;
       const selected=selectV12Top3Candidates(eligible).map(({candidate,rank})=>({candidate,rank,gate:evaluateV12WinRateGate(all,i,{symbol:candidate.symbol,side:candidate.side,rank})})).filter(x=>x.gate.allow);
@@ -119,6 +124,12 @@ async function main(){
         if(!(start>0&&end>0))throw Error("INVALID_FORWARD_PRICE");
         const signedNet=(candidate.side==="LONG" ? end/start-1 : 1-end/start)-ROUND_TRIP_COST_PCT;
         run.net24hProxy.push(signedNet);
+        if(strong && candidate.score>V12_X1_ALL.strongRegimeQualityScoreMaximum
+          && candidate.score<run.score
+          && candidate.atr/all[candidate.symbol][i].close>=V12_X1_ALL.strongRegimeQualityMinimumAtrRatio){
+          run.strongScoreGapSelected++;
+          run.strongScoreGapProxy.push(signedNet);
+        }
         run.returnByKey.set(name,signedNet);
       }
     }
@@ -165,6 +176,11 @@ async function main(){
       signed24hNetFeeProxyMeanPct:proxy.length?100*sum/proxy.length:null,
       signed24hNetFeeProxyPositivePct:proxy.length?100*proxy.filter(v=>v>0).length/proxy.length:null,
       proxyEvents:proxy.length,
+      strongScoreGapSelectedH2Observations:x.strongScoreGapSelected,
+      strongScoreGapSigned24hProxyMeanPct:x.strongScoreGapProxy.length
+        ?100*x.strongScoreGapProxy.reduce((a,b)=>a+b,0)/x.strongScoreGapProxy.length:null,
+      strongScoreGap24hPositivePct:x.strongScoreGapProxy.length
+        ?100*x.strongScoreGapProxy.filter(v=>v>0).length/x.strongScoreGapProxy.length:null,
       repeatedH2ObservationsNotRealEntries:true,
       yearDays:fullYearDays,signalDaysJst:days.size,zeroSignalDaysJst:fullYearDays-days.size,
       medianRepeatedObservationsPerSignalDay:dailyCounts.length?dailyCounts[Math.floor(dailyCounts.length/2)]:null,
@@ -186,6 +202,7 @@ async function main(){
     period:{firstCommonBar:new Date(all.BTC[0].ts).toISOString(),lastCommonBar:new Date(all.BTC.at(-1)!.endTs).toISOString()},
     windows,commonH2Bars:common.size,
     frozenGateExactParity:true,hcGrossMultiplierUnchanged:1.75,
+    strongRegimeScoreGapResearchOnly:true,
     feeProxyRoundTrip:ROUND_TRIP_COST_PCT,
     caveat:"Overlapping entry-notional signed 24h forward proxies are NOT realized trade PnL, WR, PF, DD, stop-aware fills or investable performance.",
     results,safety:{ordersSent:0,liveChanged:false,productionChanged:false},

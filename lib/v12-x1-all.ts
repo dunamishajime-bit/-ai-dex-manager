@@ -66,11 +66,47 @@ export interface V12Signal extends V12Candidate {
     entryGateReason?: V12EntryGateReason;
 }
 
+
+/** Pure, read-only simultaneous gate diagnosis. It never changes entry eligibility. */
+export interface V12CandidateGateChecks {
+    volume: { actual: number; minimum: number; pass: boolean };
+    momentum: { actual: number; minimumAbsolute: number; pass: boolean };
+    edgeToCost: { actual: number; minimumAbsolute: number; pass: boolean };
+    btcDirection: { regime: V12Regime; side: V12Side; pass: boolean };
+    scoreQuality: {
+        actual: number; normalMinimum: number; strongMinimum: number; strongMaximum: number;
+        atrRatio: number; minimumAtrRatio: number; normalPass: boolean;
+        strongBandPass: boolean; relaxedMomentumPass: boolean; pass: boolean;
+        /** Strong-regime score > upper band yet below ordinary score; an otherwise qualifying candidate. */
+        strongScoreGap: boolean;
+    };
+    selection: { evaluated: boolean; selected: boolean; portfolioRank?: 1 | 2 | 3 };
+    winRate: { evaluated: boolean; pass?: boolean; reason?: V12EntryGateReason };
+    failedGates: string[];
+    qualityRoute: "NORMAL_SCORE" | "STRONG_BAND" | "RELAXED_MOMENTUM" | "BLOCKED";
+}
+
+export interface V12GateDiagnostics {
+    schema: "v12-multi-gate-diagnostics/v1";
+    referenceTs: number;
+    observedAt: string;
+    candidateCount: number;
+    baseEligibleCount: number;
+    top3SelectedCount: number;
+    winRateEvaluatedCount: number;
+    finalSignalCount: number;
+    strongScoreGapCount: number;
+    firstRejectionCounts: Record<string, number>;
+    simultaneousFailureCounts: Record<string, number>;
+}
+
 export interface V12ObservedCandidate extends V12Candidate {
     rank: number;
     portfolioRank?: 1 | 2 | 3;
+    baseEligible?: boolean;
     signalEligible: boolean;
     signalReason: string;
+    gateChecks?: V12CandidateGateChecks;
     entryGateReason?: V12EntryGateReason;
     highConfidence?: boolean;
     entryGrossMultiplier?: number;
@@ -95,6 +131,7 @@ export interface V12DecisionObservation {
     volatility?: number;
     atr?: number;
     candidates: V12ObservedCandidate[];
+    gateDiagnostics?: V12GateDiagnostics;
 }
 
 export interface V12PositionSizing {
@@ -405,6 +442,101 @@ function candidateMetricsFor(symbol: string, bars: V12Bar[], index: number): { c
     };
 }
 
+
+/** All first-stage V12 gates are checked independently, even after a volume failure.
+ * The production entry path does not call this function; it is observation-only.
+ */
+export function auditV12CandidateGates(
+    candidate: V12Candidate,
+    atrRatio: number,
+    regime: { regime: V12Regime; strongRegime: boolean },
+): V12CandidateGateChecks {
+    const edgeMin = V12_X1_ALL.minimumEdgeToCostRatio * V12_X1_ALL.normalRoundTripCostBps / 10_000;
+    const volumePass = Number.isFinite(candidate.volumeRatio) && candidate.volumeRatio >= V12_X1_ALL.minimumVolumeRatio;
+    const momentumPass = Number.isFinite(candidate.momentum) && Math.abs(candidate.momentum) >= V12_X1_ALL.minimumMomentumPct;
+    const edgePass = Number.isFinite(candidate.momentum) && Math.abs(candidate.momentum) >= edgeMin;
+    const sideAligned = regime.regime === "NEUTRAL"
+        ? V12_X1_ALL.allowNeutralRegime
+        : candidate.side === regime.regime;
+    const normalPass = candidate.score >= V12_X1_ALL.neutralScoreThreshold;
+    const strongBandScore = candidate.score >= V12_X1_ALL.strongRegimeQualityScoreMinimum
+        && candidate.score <= V12_X1_ALL.strongRegimeQualityScoreMaximum;
+    const strongBandPass = regime.strongRegime && strongBandScore
+        && atrRatio >= V12_X1_ALL.strongRegimeQualityMinimumAtrRatio;
+    const alignedMomentum = candidate.side === "LONG" ? candidate.momentum : -candidate.momentum;
+    const relaxedPass = !regime.strongRegime && alignedMomentum >= V12_X1_ALL.relaxedRegimeMinimumMomentumPct
+        && atrRatio >= V12_X1_ALL.relaxedRegimeMinimumAtrRatio;
+    const scorePass = regime.regime === "NEUTRAL"
+        ? normalPass
+        : normalPass || strongBandPass || relaxedPass;
+    const qualityPass = sideAligned && scorePass;
+    const actualQuality = evaluateV12EntryQuality({
+        regime: regime.regime, strongRegime: regime.strongRegime, side: candidate.side,
+        momentum: candidate.momentum, atrRatio, score: candidate.score,
+    });
+    if (qualityPass !== actualQuality) throw new Error("V12_MULTI_GATE_QUALITY_PARITY_FAILURE");
+    const strongScoreGap = regime.strongRegime && sideAligned
+        && candidate.score > V12_X1_ALL.strongRegimeQualityScoreMaximum
+        && candidate.score < V12_X1_ALL.neutralScoreThreshold
+        && atrRatio >= V12_X1_ALL.strongRegimeQualityMinimumAtrRatio;
+    const failedGates = [
+        ...(!volumePass ? ["VOLUME_RATIO"] : []),
+        ...(!momentumPass ? ["MOMENTUM"] : []),
+        ...(!edgePass ? ["EDGE_TO_COST"] : []),
+        ...(!sideAligned ? ["BTC_REGIME_DIRECTION"] : []),
+        ...(!scorePass ? ["SCORE_OR_QUALITY"] : []),
+    ];
+    const qualityRoute = !qualityPass ? "BLOCKED" as const
+        : normalPass ? "NORMAL_SCORE" as const
+        : strongBandPass ? "STRONG_BAND" as const
+        : "RELAXED_MOMENTUM" as const;
+    return {
+        volume: { actual: candidate.volumeRatio, minimum: V12_X1_ALL.minimumVolumeRatio, pass: volumePass },
+        momentum: { actual: candidate.momentum, minimumAbsolute: V12_X1_ALL.minimumMomentumPct, pass: momentumPass },
+        edgeToCost: { actual: Math.abs(candidate.momentum), minimumAbsolute: edgeMin, pass: edgePass },
+        btcDirection: { regime: regime.regime, side: candidate.side, pass: sideAligned },
+        scoreQuality: {
+            actual: candidate.score, normalMinimum: V12_X1_ALL.neutralScoreThreshold,
+            strongMinimum: V12_X1_ALL.strongRegimeQualityScoreMinimum,
+            strongMaximum: V12_X1_ALL.strongRegimeQualityScoreMaximum,
+            atrRatio, minimumAtrRatio: V12_X1_ALL.strongRegimeQualityMinimumAtrRatio,
+            normalPass, strongBandPass, relaxedMomentumPass: relaxedPass, pass: scorePass, strongScoreGap,
+        },
+        selection: { evaluated: false, selected: false },
+        winRate: { evaluated: false },
+        failedGates, qualityRoute,
+    };
+}
+
+export function summarizeV12MultiGates(
+    candidates: readonly V12ObservedCandidate[],
+    referenceTs: number,
+    observedAt: number,
+    finalSignalCount: number,
+): V12GateDiagnostics {
+    const firstRejectionCounts: Record<string, number> = {};
+    const simultaneousFailureCounts: Record<string, number> = {};
+    for (const candidate of candidates) {
+        if (!candidate.signalEligible) {
+            const reason = candidate.signalReason || "UNKNOWN";
+            firstRejectionCounts[reason] = (firstRejectionCounts[reason] || 0) + 1;
+        }
+        for (const reason of candidate.gateChecks?.failedGates || []) {
+            simultaneousFailureCounts[reason] = (simultaneousFailureCounts[reason] || 0) + 1;
+        }
+    }
+    return {
+        schema: "v12-multi-gate-diagnostics/v1", referenceTs, observedAt: new Date(observedAt).toISOString(),
+        candidateCount: candidates.length,
+        baseEligibleCount: candidates.filter(c => c.baseEligible).length,
+        top3SelectedCount: candidates.filter(c => c.portfolioRank !== undefined).length,
+        winRateEvaluatedCount: candidates.filter(c => c.entryGateReason !== undefined).length,
+        finalSignalCount,
+        strongScoreGapCount: candidates.filter(c => c.gateChecks?.scoreQuality.strongScoreGap).length,
+        firstRejectionCounts, simultaneousFailureCounts,
+    };
+}
+
 function candidateEligibility(candidate: V12Candidate, atrRatio: number, regimeState: V12RegimeState) {
     const edgeThreshold = V12_X1_ALL.minimumEdgeToCostRatio * (V12_X1_ALL.normalRoundTripCostBps / 10_000);
     if (candidate.volumeRatio < V12_X1_ALL.minimumVolumeRatio) return { eligible: false as const, reason: "VOLUME_RATIO_BELOW_MINIMUM" };
@@ -432,7 +564,7 @@ export function buildV12DecisionObservation(universe: Record<string, V12Bar[]>, 
         .map((symbol) => {
             const metrics = candidateMetricsFor(symbol, universe[symbol] || [], index);
             if (!metrics) return null;
-            return { ...metrics.candidate, ...candidateEligibility(metrics.candidate, metrics.atrRatio, regimeState) };
+            return { ...metrics.candidate, ...candidateEligibility(metrics.candidate, metrics.atrRatio, regimeState), gateChecks: auditV12CandidateGates(metrics.candidate, metrics.atrRatio, regimeState) };
         })
         .filter((candidate): candidate is NonNullable<typeof candidate> => Boolean(candidate))
         .sort((a, b) => b.score - a.score || a.symbol.localeCompare(b.symbol));
@@ -453,8 +585,8 @@ export function buildV12DecisionObservation(universe: Record<string, V12Bar[]>, 
     );
     const ranked: V12ObservedCandidate[] = rawRanked.map((candidate, rankIndex) => {
         const portfolioRank = portfolioRanks.get(`${candidate.symbol}|${candidate.side}`);
-        let signalEligible = candidate.eligible;
-        let signalReason = candidate.reason;
+        let signalEligible = candidate.eligible && Boolean(portfolioRank);
+        let signalReason = candidate.eligible && !portfolioRank ? "NOT_TOP3_SELECTED" : candidate.reason;
         let gate: V12WinRateGateDecision | undefined;
         if (candidate.eligible && portfolioRank) {
             gate = evaluateV12WinRateGate(universe, index, {
@@ -467,6 +599,14 @@ export function buildV12DecisionObservation(universe: Record<string, V12Bar[]>, 
                 signalReason = gate.reason;
             }
         }
+        const gateChecks: V12CandidateGateChecks = {
+            ...candidate.gateChecks,
+            selection: { evaluated: candidate.eligible, selected: Boolean(portfolioRank), portfolioRank },
+            winRate: gate ? { evaluated: true, pass: gate.allow, reason: gate.reason } : { evaluated: false },
+            failedGates: [...candidate.gateChecks.failedGates,
+                ...(candidate.eligible && !portfolioRank ? ["NOT_TOP3_SELECTED"] : []),
+                ...(gate && !gate.allow ? [gate.reason] : [])],
+        };
         return {
             symbol: candidate.symbol,
             side: candidate.side,
@@ -477,6 +617,8 @@ export function buildV12DecisionObservation(universe: Record<string, V12Bar[]>, 
             score: candidate.score,
             rank: rankIndex + 1,
             portfolioRank,
+            baseEligible: candidate.eligible,
+            gateChecks,
             signalEligible,
             signalReason,
             entryGateReason: gate?.reason,
@@ -512,6 +654,7 @@ export function buildV12DecisionObservation(universe: Record<string, V12Bar[]>, 
         volatility: selectedSignal?.volatility,
         atr: selectedSignal?.atr,
         candidates: ranked,
+        gateDiagnostics: summarizeV12MultiGates(ranked, referenceTs, observedAt, signals.length),
     };
 }
 
