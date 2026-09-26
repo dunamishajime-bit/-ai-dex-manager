@@ -19,6 +19,17 @@ const SAMPLE_START = Date.parse("2025-08-10T00:00:00Z");
 const START = SAMPLE_START - 11 * 24 * HOUR;
 const HOLD_BARS = 12;
 const HOLDOUT_START = Date.parse("2026-05-10T00:00:00Z");
+// Predeclared diagnostic groups. Select only the highest-scored raw candidate
+// per group per completed H2 bar to reduce simultaneous multi-symbol inflation.
+const MISSED_GROUPS = [
+  "ONLY_VOLUME_BLOCK", "ONLY_QUALITY_BLOCK", "VOLUME_AND_QUALITY_BLOCK",
+  "STRONG_SCORE_GAP_OTHER_BASE_PASS", "NEUTRAL_S070_085_VOLUME080",
+  "NEUTRAL_S085_100_VOLUME080", "NEUTRAL_S100_146_VOLUME080",
+  "UNRANKED_BASE_ELIGIBLE", "FINAL_WINRATE_GATE_BLOCK",
+] as const;
+type MissedGroup = typeof MISSED_GROUPS[number];
+type MissedSample = { symbol:string; side:string; ts:number; net:number };
+
 const ROUND_TRIP_COST_PCT = 0.003;
 const CASES = [
   {name:"FROZEN",volume:0.9845,score:1.4649,gap:"NONE",minimumAtr:0.014},
@@ -100,6 +111,8 @@ async function main(){
   }));
   const baseGateAudit={rawCandidateRows:0,volumeBlocked:0,qualityBlocked:0,volumeAndQualityBlocked:0,
     scoreGapRaw:0,scoreGapOnlyBaseFailure:0,neutralVolume080Score070:0};
+  const nearMisses=Object.fromEntries(MISSED_GROUPS.map(name=>[name,[] as MissedSample[]]))
+    as Record<MissedGroup,MissedSample[]>;
   let windows=0;
   for(let i=65;i<all.BTC.length-HOLD_BARS-1;i++){
     if(all.BTC[i].endTs<SAMPLE_START)continue;
@@ -120,6 +133,37 @@ async function main(){
       if(audit.strongScoreGapOnlyBaseFailure)baseGateAudit.scoreGapOnlyBaseFailure++;
       if(observed.regime==="NEUTRAL" && c.volumeRatio>=0.8 && c.score>=0.70 && c.score<1.00)
          baseGateAudit.neutralVolume080Score070++;
+    }
+    // The base runner's first failed reason is not proof other gates passed.
+    // Use the independently computed allGateChecks, and do not relax real LIVE.
+    for (const group of MISSED_GROUPS) {
+      const c=observed.candidates.find(c=>{
+        const a=c.allGateChecks;
+        if(!a)return false;
+        const ch=a.checks;
+        const other=["edgeToCost","momentum","btcDirection"].every(k=>ch[k]?.status==="PASS");
+        const volume=ch.volume?.status==="BLOCK";
+        const quality=ch.entryQuality?.status==="BLOCK";
+        const baseEligible=c.baseEligible===true;
+        if(group==="ONLY_VOLUME_BLOCK")return other&&volume&&!quality;
+        if(group==="ONLY_QUALITY_BLOCK")return other&&!volume&&quality;
+        if(group==="VOLUME_AND_QUALITY_BLOCK")return other&&volume&&quality;
+        if(group==="STRONG_SCORE_GAP_OTHER_BASE_PASS")return a.strongScoreGapOnlyBaseFailure;
+        if(group==="UNRANKED_BASE_ELIGIBLE")return baseEligible&&c.portfolioRank===undefined;
+        if(group==="FINAL_WINRATE_GATE_BLOCK")return baseEligible&&c.portfolioRank!==undefined
+          &&typeof c.entryGateReason==="string"&&c.entryGateReason.startsWith("BLOCK");
+        if(observed.regime!=="NEUTRAL"||!other||c.volumeRatio<0.80)return false;
+        if(group==="NEUTRAL_S070_085_VOLUME080")return c.score>=0.70&&c.score<0.85;
+        if(group==="NEUTRAL_S085_100_VOLUME080")return c.score>=0.85&&c.score<1.00;
+        if(group==="NEUTRAL_S100_146_VOLUME080")return c.score>=1.00&&c.score<V12_X1_ALL.neutralScoreThreshold;
+        return false;
+      });
+      if(!c)continue;
+      const bars=all[c.symbol];
+      const start=bars[i+1].open,end=bars[i+HOLD_BARS].close;
+      if(!(start>0&&end>0))throw Error("NEARMISS_INVALID_FORWARD_BAR");
+      const net=(c.side==="LONG"?end/start-1:1-end/start)-ROUND_TRIP_COST_PCT;
+      nearMisses[group].push({symbol:c.symbol,side:c.side,ts:all.BTC[i].endTs,net});
     }
     const btc=all.BTC;
     const sma=btc.slice(i-V12_X1_ALL.btcRegimeSmaBars+1,i+1).reduce((t,b)=>t+b.close,0)/V12_X1_ALL.btcRegimeSmaBars;
@@ -245,18 +289,45 @@ async function main(){
       episodeCaveat:"Per-symbol spacing only; not actual trades, no stops or 5-logic gross.",
     };
   });
+  function nearMissSummary(items:MissedSample[]){
+    const sorted=[...items].sort((a,b)=>a.ts-b.ts||a.symbol.localeCompare(b.symbol));
+    const last=new Map<string,number>(),independent:MissedSample[]=[];
+    for(const e of sorted){
+      const previous=last.get(e.symbol);
+      if(previous!==undefined && e.ts-previous<46*HOUR)continue;
+      last.set(e.symbol,e.ts);
+      independent.push(e);
+    }
+    const calc=(data:MissedSample[])=>({
+      count:data.length,
+      meanNet24hProxyPct:data.length?100*data.reduce((acc,e)=>acc+e.net,0)/data.length:null,
+      positiveNet24hPct:data.length?100*data.filter(e=>e.net>0).length/data.length:null,
+      signalDaysJst:new Set(data.map(e=>new Date(e.ts+9*HOUR).toISOString().slice(0,10))).size,
+    });
+    return {
+      rawTopScoredPerH2:calc(sorted),
+      independent46h:calc(independent),
+      trainBeforeMay10:calc(independent.filter(e=>e.ts<HOLDOUT_START)),
+      finalDisjointHoldout:calc(independent.filter(e=>e.ts>=HOLDOUT_START)),
+      isExecutableOrder:false,
+      winRateOrRealizedPnL:false,
+    };
+  }
+  const rawNearMissTopRankGroups=Object.fromEntries(
+    MISSED_GROUPS.map(name=>[name,nearMissSummary(nearMisses[name])])
+  );
   const artifact={
-    schema:"v12-one-year-score-gap-sensitivity/v2",researchOnly:true,scoreGapDiagnostic:true,
+    schema:"v12-one-year-score-gap-sensitivity/v3",researchOnly:true,scoreGapDiagnostic:true,
     notABacktest:true,noIntegratedGrossOrStopSimulation:true,
     sourceSha:"e1b58060d6263a3af7ced51bec854d3e211d2f35",
     market:"ASTER_FUTURES_V3_PUBLIC_H1",
     comparisonPeriod:"2025-08-10T00Z through 2026-08-10T00Z",
     period:{firstCommonBar:new Date(all.BTC[0].ts).toISOString(),lastCommonBar:new Date(all.BTC.at(-1)!.endTs).toISOString()},
     windows,commonH2Bars:common.size,
-    holdoutStart:"2026-05-10T00:00:00Z",baseGateAudit,
+    holdoutStart:"2026-05-10T00:00:00Z",baseGateAudit,rawNearMissTopRankGroups,
     frozenGateExactParity:true,hcGrossMultiplierUnchanged:1.75,
     feeProxyRoundTrip:ROUND_TRIP_COST_PCT,
-    caveat:"Overlapping entry-notional signed 24h forward proxies are NOT realized trade PnL, WR, PF, DD, stop-aware fills or investable performance.",
+    caveat:"Overlapping entry-notional signed 24h forward proxies and highest-scored raw near-misses are NOT executable trades, realized trade PnL, WR, PF, DD, stop-aware fills, or investable performance.",
     results,safety:{ordersSent:0,liveChanged:false,productionChanged:false},
   };
   writeFileSync(process.env.GATE_RESEARCH_OUT||"v12-one-year-score-gap-20260926.json",JSON.stringify(artifact,null,2)+"\n");
