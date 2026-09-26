@@ -32,5 +32,13 @@ if write_fail_closed "MUST_REJECT_SYMLINK"; then
   exit 1
 fi
 [[ "$original" == "$(sha256sum "$tmp/shared/kill-switch.json" | cut -d' ' -f1)" ]]
+# Existing production shared directory may be setgid deploy:deploy 2770.
+# Repair must not downgrade its group/setgid access just to fix a latch.
+install -d -o deploy -g deploy -m 2770 "$tmp/healthy"
+KILL_SOURCE_PATH="$tmp/healthy/kill-switch.json"
+write_fail_closed "MUST_PRESERVE_EXISTING_SHARED_PARENT"
+[[ "$(stat -c '%U:%G:%a' "$tmp/healthy")" == "deploy:deploy:2770" ]]
+[[ "$(stat -c '%U:%G:%a' "$KILL_SOURCE_PATH")" == "deploy:deploy:600" ]]
+runuser -u deploy -- test -r "$KILL_SOURCE_PATH"
 echo "V12_AUTO_REPAIR_KILL_OWNERSHIP_REGRESSION_PASS"
 echo "liveMutation=false"
