@@ -740,3 +740,68 @@ def fetch_alpaca_iex_quotes(
         "alpaca", symbol, "iex", rows, hashes, raw_responses,
         start_utc.isoformat(), end_utc.isoformat(),
     )
+
+def fetch_ecb_usdjpy(
+    start_date: date,
+    end_date: date,
+    *,
+    fetch: Callable[[str], bytes] | None = None,
+) -> FxAcquisition:
+    """Official ECB JPY/USD cross = JPY/EUR divided by USD/EUR on the same day.
+
+    The ECB is a separate source, NEVER silently labeled FRED DEXJPUS.
+    Observations are conservatively available only at end of their UTC date.
+    """
+    if end_date < start_date:
+        raise ValueError("end_date precedes start_date")
+    query = urlencode({"startPeriod":start_date.isoformat(),"endPeriod":end_date.isoformat(),"format":"csvdata"})
+    url = f"https://data-api.ecb.europa.eu/service/data/EXR/D.JPY+USD.EUR.SP00.A?{query}"
+    if fetch is not None:
+        raw = fetch(url)
+    elif os.environ.get("FORMAL_BT_ECB_CSV_PATH"):
+        from pathlib import Path
+        file = Path(os.environ["FORMAL_BT_ECB_CSV_PATH"]).resolve()
+        if not file.is_file() or file.is_symlink() or file.stat().st_size > 3_000_000:
+            raise ValueError("ECB_CSV_LOCAL_FILE_INVALID")
+        raw = file.read_bytes()
+    else:
+        raw = fetch_bytes(url)
+    if len(raw)>3_000_000:
+        raise ValueError("ECB_CSV_TOO_LARGE")
+    series: dict[tuple[str,str], float] = {}
+    rows = csv.DictReader(io.StringIO(raw.decode("utf-8-sig")))
+    required = {"CURRENCY","CURRENCY_DENOM","TIME_PERIOD","OBS_VALUE"}
+    if not rows.fieldnames or not required.issubset(set(rows.fieldnames)):
+        raise ValueError("ECB_CSV_SCHEMA_INVALID")
+    for row in rows:
+        if row["CURRENCY_DENOM"] != "EUR" or row["CURRENCY"] not in {"JPY","USD"}:
+            continue
+        if row.get("FREQ") != "D" or row.get("EXR_TYPE") != "SP00":
+            continue
+        day = row["TIME_PERIOD"]
+        try:
+            at_day = date.fromisoformat(day)
+            rate = float(row["OBS_VALUE"])
+        except (TypeError,ValueError):
+            continue
+        if at_day < start_date or at_day > end_date or not math.isfinite(rate) or rate<=0:
+            continue
+        key=(day,row["CURRENCY"])
+        if key in series:
+            raise ValueError("ECB_DUPLICATE_CURRENCY_DAY")
+        series[key]=rate
+    observations=[]
+    for day in sorted({k[0] for k in series}):
+        jpy=series.get((day,"JPY"))
+        usd=series.get((day,"USD"))
+        if jpy is None or usd is None:
+            continue
+        utc_day=datetime.combine(date.fromisoformat(day),datetime.min.time(),tzinfo=timezone.utc)
+        ts=int(utc_day.timestamp()*1000)+86_400_000-1
+        observations.append({"event_time_ms":ts,"source_time_ms":ts,
+            "rate_jpy_per_usd":jpy/usd,"source":"ECB","exchange":"ECB",
+            "instrument":"USDJPY_ECB_CROSS",
+            "derived_from":"ECB_JPY_PER_EUR_DIVIDED_BY_USD_PER_EUR"})
+    if len(observations)<1:
+        raise ValueError("ECB_USDJPY_NO_SAME_DAY_VALID_CROSS")
+    return FxAcquisition(observations,hashlib.sha256(raw).hexdigest(),url,raw)

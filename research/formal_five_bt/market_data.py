@@ -230,14 +230,15 @@ def _utc_ms(value: datetime) -> int:
 
 
 def deposit_usdt(amount_jpy: float, at_utc: datetime, fx_series: Iterable[FxRate]) -> FxConversion:
-    """Convert JPY deposit at the latest FRED DEXJPUS value available as of time."""
+    """Convert only with a source-identified, time-causal official FRED or ECB daily USD/JPY reference."""
     if not math.isfinite(amount_jpy) or amount_jpy <= 0:
         raise ValueError("amount_jpy must be positive and finite")
     at_ms = _utc_ms(at_utc)
     eligible = [
         rate for rate in fx_series
-        if rate.instrument_id == "DEXJPUS"
-        and rate.exchange.upper() == "FRED"
+        if (rate.instrument_id,rate.exchange.upper()) in {
+            ("DEXJPUS","FRED"),("USDJPY_ECB_CROSS","ECB")
+        }
         and rate.event_time_ms <= at_ms
         and rate.source_time_ms <= at_ms
         and rate.received_time_ms is not None

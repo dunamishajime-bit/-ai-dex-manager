@@ -469,9 +469,12 @@ def run_integrated_bt(data_root: str | Path, scan_root: str | Path, l2_root: str
             "bybit_v5_orderbook": "https://bybit-exchange.github.io/docs/v5/websocket/public/orderbook",
             "nyse_calendar": NYSE_SOURCE_URL,
             "fred_dexjpus": "https://fred.stlouisfed.org/series/DEXJPUS",
+            "ecb_daily_jpy_usd_cross": "https://data-api.ecb.europa.eu/service/data/EXR/D.JPY+USD.EUR.SP00.A",
         },
         "symbols": coverage,
-        "fx": {"source": "FRED DEXJPUS", "observations": len(fx_series), "blocking_issues": [issue.code for issue in fx_issues],
+        "fx": {"source": (acquisition.get("fx") or acquisition.get("fred") or {}).get("provider", "UNAVAILABLE"),
+               "derivation": (acquisition.get("fx") or {}).get("derivation"),
+               "observations": len(fx_series), "blocking_issues": [issue.code for issue in fx_issues],
                "status": "VERIFIED" if not fx_issues and fx_series else "NOT_VERIFIABLE"},
         "l2_archives": l2_inventory,
     }

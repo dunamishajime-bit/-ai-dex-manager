@@ -100,13 +100,15 @@ def _normalize_klines(source: str, symbol: str, rows: list[list[Any]]) -> list[d
     return output
 
 
-def acquire(root: str | Path, *, warmup_start: date = WARMUP_START, start_date: date = START_DATE, end_date_exclusive: date = END_DATE, venues: tuple[str, ...] = ("aster", "binance", "bybit", "okx"), sleep_seconds: float = 0.12) -> dict[str, Any]:
+def acquire(root: str | Path, *, warmup_start: date = WARMUP_START, start_date: date = START_DATE, end_date_exclusive: date = END_DATE, venues: tuple[str, ...] = ("aster", "binance", "bybit", "okx"), sleep_seconds: float = 0.12, fx_source: str = "fred_then_ecb") -> dict[str, Any]:
     """Acquire primary Aster candles/funding plus same-contract venue metadata.
 
     Alternative OHLC is retained only for venue validation/coverage. Strategy
     signals always use Aster OHLC. Proxy L2 is fetched separately after signal
     timestamps are known, preventing thousands of unused archive downloads.
     """
+    if fx_source not in {"fred", "ecb", "fred_then_ecb"}:
+        raise ValueError("FX_SOURCE_UNSUPPORTED")
     if end_date_exclusive <= start_date or warmup_start > start_date or sleep_seconds < 0:
         raise ValueError("invalid acquisition range or pacing")
     target = Path(root).resolve()
@@ -209,24 +211,42 @@ def acquire(root: str | Path, *, warmup_start: date = WARMUP_START, start_date: 
         _write_json(target / "acquisition-progress.json", metadata)
 
     if "aster" in venues:
-        try:
-            fx = sources.fetch_fred_dexjpus(warmup_start, end_date_exclusive)
-            fx_raw_path = Path("raw/fred/DEXJPUS.csv")
-            raw_sha = _write_bytes(target / fx_raw_path, fx.raw_response)
-            fx_path = Path("normalized/fred/DEXJPUS.jsonl")
-            fx_content = "".join(json.dumps(row, sort_keys=True, separators=(",", ":")) + "\n" for row in fx.observations).encode("utf-8")
-            fx_sha = _write_bytes(target / fx_path, fx_content)
-            metadata["fred"] = {"status": "ACQUIRED", "source_url": fx.source_url, "raw_path": fx_raw_path.as_posix(), "raw_sha256": raw_sha, "normalized_path": fx_path.as_posix(), "normalized_sha256": fx_sha, "observations": len(fx.observations)}
-        except (RuntimeError, OSError, ValueError) as error:
-            # Do not discard verified 32-symbol Aster acquisition because
-            # the independent public FX provider is temporarily unavailable.
-            # Downstream deposits and every monetary result stay UNVERIFIED.
-            metadata["fred"] = {"status": "UNAVAILABLE", "provider": "FRED DEXJPUS",
-                                 "reason_code": "OFFICIAL_FX_ENDPOINTS_UNAVAILABLE",
-                                 "error_type": type(error).__name__}
+        metadata["fx"] = {"status": "UNAVAILABLE", "provider": "FRED_OR_ECB"}
+        if fx_source in {"fred", "fred_then_ecb"}:
+            try:
+                fx = sources.fetch_fred_dexjpus(warmup_start, end_date_exclusive)
+                fx_raw_path = Path("raw/fred/DEXJPUS.csv")
+                raw_sha = _write_bytes(target / fx_raw_path, fx.raw_response)
+                fx_path = Path("normalized/fred/DEXJPUS.jsonl")
+                content = "".join(json.dumps(row, sort_keys=True, separators=(",", ":")) + "\n" for row in fx.observations).encode("utf-8")
+                fx_sha = _write_bytes(target / fx_path, content)
+                metadata["fred"] = {"status":"ACQUIRED", "source_url":fx.source_url,"raw_path":fx_raw_path.as_posix(),
+                    "raw_sha256":raw_sha,"normalized_path":fx_path.as_posix(),"normalized_sha256":fx_sha,
+                    "observations":len(fx.observations),"provider":"FRED DEXJPUS"}
+                metadata["fx"] = metadata["fred"]
+            except (RuntimeError,OSError,ValueError) as error:
+                metadata["fred"] = {"status":"UNAVAILABLE","provider":"FRED DEXJPUS",
+                    "reason_code":"OFFICIAL_FRED_ENDPOINT_UNAVAILABLE","error_type":type(error).__name__}
+        if metadata["fx"]["status"]!="ACQUIRED" and fx_source in {"ecb","fred_then_ecb"}:
+            try:
+                fx = sources.fetch_ecb_usdjpy(warmup_start, end_date_exclusive)
+                raw_path = Path("raw/ecb/USDJPY_EUR_CROSS.csv")
+                raw_sha = _write_bytes(target/raw_path,fx.raw_response)
+                normalized_path = Path("normalized/ecb/USDJPY_EUR_CROSS.jsonl")
+                content = "".join(json.dumps(row,sort_keys=True,separators=(",",":"))+"\n" for row in fx.observations).encode("utf-8")
+                sha = _write_bytes(target/normalized_path,content)
+                metadata["fx"] = {"status":"ACQUIRED","provider":"ECB_DAILY_CROSS_NOT_FRED",
+                    "derivation":"JPY_EUR_DIVIDED_BY_USD_EUR","source_url":fx.source_url,
+                    "raw_path":raw_path.as_posix(),"raw_sha256":raw_sha,
+                    "normalized_path":normalized_path.as_posix(),"normalized_sha256":sha,
+                    "observations":len(fx.observations),"asof_rule":"UTC_DAY_END_CONSERVATIVE",
+                    "unverified_difference_from_fred":True}
+            except (RuntimeError,OSError,ValueError) as error:
+                metadata["fx"] = {"status":"UNAVAILABLE","provider":"ECB_DAILY_CROSS_NOT_FRED",
+                    "reason_code":"OFFICIAL_ECB_ENDPOINT_UNAVAILABLE","error_type":type(error).__name__}
 
     metadata["status"] = ("ACQUIRED_WITH_UNVERIFIED_FX" if
-        "aster" in venues and metadata["fred"]["status"] != "ACQUIRED" else
+        "aster" in venues and metadata["fx"]["status"] != "ACQUIRED" else
         "ACQUISITION_COMPLETE_REQUIRES_VALIDATION")
     metadata["acquisition_manifest_sha256"] = _write_json(target / "acquisition-manifest.json", metadata)
     return metadata
@@ -239,8 +259,10 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--period-start", type=date.fromisoformat, default=START_DATE)
     parser.add_argument("--end-exclusive", type=date.fromisoformat, default=END_DATE)
     parser.add_argument("--venues", nargs="+", default=["aster", "binance", "bybit", "okx"])
+    parser.add_argument("--fx-source",choices=["fred","ecb","fred_then_ecb"],default="fred_then_ecb",
+        help="ECB is an explicitly labeled official alternative when FRED is unreachable; never rebrand it as DEXJPUS.")
     args = parser.parse_args(argv)
-    summary = acquire(args.data_root, warmup_start=args.warmup_start, start_date=args.period_start, end_date_exclusive=args.end_exclusive, venues=tuple(args.venues))
+    summary = acquire(args.data_root, warmup_start=args.warmup_start, start_date=args.period_start, end_date_exclusive=args.end_exclusive, venues=tuple(args.venues),fx_source=args.fx_source)
     print(json.dumps({"status": summary["status"], "universe_counts": {key: len(value) for key, value in summary["universes"].items()}, "venue_status": {key: {"symbols": len(value["klines"]), "acquired": sum(item.get("status") == "ACQUIRED" for item in value["klines"].values())} for key, value in summary["venues"].items()}, "data_root": str(Path(args.data_root).resolve()), "manifest_sha256": summary["acquisition_manifest_sha256"]}, ensure_ascii=False, sort_keys=True))
     return 0
 

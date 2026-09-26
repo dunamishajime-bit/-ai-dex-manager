@@ -134,20 +134,30 @@ def load_aster_dataset(data_root: str | Path, symbol: str) -> VerifiedDataset:
 def load_fred_fx(data_root: str | Path) -> tuple[tuple[FxRate, ...], tuple[CoverageIssue, ...]]:
     root = Path(data_root).resolve()
     manifest = json.loads((root / "acquisition-manifest.json").read_text(encoding="utf-8"))
-    info = manifest.get("fred") or {}
+    info = manifest.get("fx") or manifest.get("fred") or {}
     if info.get("status") != "ACQUIRED":
-        return (), (CoverageIssue("FX_UNAVAILABLE", None, "FRED DEXJPUS series is missing"),)
-    path = root / info["normalized_path"]
+        return (), (CoverageIssue("FX_UNAVAILABLE", None, "Neither official FRED nor documented ECB cross is available"),)
+    provider = str(info.get("provider") or "FRED DEXJPUS")
+    ecb = provider == "ECB_DAILY_CROSS_NOT_FRED"
+    if not ecb and provider not in {"FRED DEXJPUS", "FRED"}:
+        raise ValueError("UNRECOGNIZED_FX_PROVIDER")
+    instrument = "USDJPY_ECB_CROSS" if ecb else "DEXJPUS"
+    exchange = "ECB" if ecb else "FRED"
+    path = (root / info["normalized_path"]).resolve()
+    path.relative_to(root)
     digest = hashlib.sha256(path.read_bytes()).hexdigest()
     if digest != info.get("normalized_sha256"):
-        raise ValueError("FRED_NORMALIZED_HASH_MISMATCH")
+        raise ValueError("OFFICIAL_FX_NORMALIZED_HASH_MISMATCH")
     rates = []
     for row in _jsonl(path):
+        if ecb and (row.get("source")!="ECB" or row.get("instrument")!=instrument or
+                    row.get("derived_from")!="ECB_JPY_PER_EUR_DIVIDED_BY_USD_PER_EUR"):
+            raise ValueError("ECB_CROSS_PROVENANCE_MISMATCH")
         ts = int(row["event_time_ms"])
         rates.append(FxRate(
-            exchange="FRED", instrument_id="DEXJPUS", contract_type="daily_reference",
+            exchange=exchange, instrument_id=instrument, contract_type="daily_reference",
             event_time_ms=ts, source_time_ms=int(row["source_time_ms"]), received_time_ms=ts,
             content_sha256=_sha_row(row), rate_jpy_per_usd=float(row["rate_jpy_per_usd"]),
         ))
-    issues = validate_series(rates, None, expected_native_instrument="DEXJPUS", expected_contract_type="daily_reference")
+    issues = validate_series(rates, None, expected_native_instrument=instrument, expected_contract_type="daily_reference")
     return tuple(rates), tuple(issues)
