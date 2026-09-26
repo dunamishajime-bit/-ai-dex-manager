@@ -1,0 +1,54 @@
+name: Recover exact original September 22 BT temporary file
+on:
+  push:
+    branches: [research/recover-final-governor-bt-20260926]
+    paths: [.github/workflows/export-original-final-monthly-fet-20260926.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  preserve:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure SSH
+        run: |
+          set -Eeuo pipefail
+          install -d -m 700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          p=Path.home()/'.ssh'
+          for f,key in [('id_root','ROOT_KEY'),('known_hosts','SSH_KNOWN_HOSTS')]:
+              (p/f).write_text(os.environ[key].lstrip('\ufeff').replace('\r\n','\n').replace('\r','\n').strip()+'\n')
+          PY
+          chmod 600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Read exact old intermediate, assert original SHA
+        run: |
+          set -Eeuo pipefail
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -p "${SSH_PORT:-22}" "root@$SSH_HOST" 'cat /tmp/final-monthly-fet.json' > original-final-monthly-fet.json
+          echo '763ee00c41f96ad3d0196c0488b1557d6c36946c266341af2c023aca54a4c6d3  original-final-monthly-fet.json' | sha256sum -c -
+          python3 - <<'PY'
+          import json
+          x=json.load(open('original-final-monthly-fet.json'))
+          assert isinstance(x,list) and len(x)==1
+          print('ORIGINAL_FINAL_TMP_STRUCT',json.dumps({'topKeys':list(x[0]),
+           'normal':x[0].get('NORMAL',{}).get('asset'),
+           'severe':x[0].get('SEVERE',{}).get('asset'),
+           'normalKeys':list(x[0].get('NORMAL',{})),
+           'severeKeys':list(x[0].get('SEVERE',{}))}))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: original-14p49b-vps-temp-result-20260926
+          path: original-final-monthly-fet.json
+          retention-days: 90
