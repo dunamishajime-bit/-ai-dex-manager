@@ -1,0 +1,45 @@
+name: DisDex V12 annual independent entry and zero-signal days
+on:
+  issue_comment:
+    types: [created]
+permissions:
+  contents: read
+jobs:
+  research:
+    if: >-
+      github.event.issue.number == 132 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == 'DISDEX_V12_ANNUAL_INDEPENDENT_ENTRIES_20260926'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Checkout production-lineage research code
+        uses: actions/checkout@v4
+        with:
+          ref: c587851095ac79448852559c5b198b8c3b2a4f88
+      - name: Set up Node.js 24 with cached dependencies
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install pinned dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Verify existing frozen win-rate and Q102 gate unit tests
+        run: |
+          set -Eeuo pipefail
+          npx tsx --test tests/v12-winrate-entry-gate.test.ts
+          npx tsx scripts/disdex-quality102-causal-v4-s34-selftest.ts
+          npx tsx scripts/disdex-quality102-causal-v4-model-selftest.ts
+      - name: Compare frozen V12 gate with isolated research variants using public Aster bars
+        env:
+          GATE_RESEARCH_OUT: v12-one-year-independent-entries-20260926.json
+        run: npx tsx scripts/research-v12-annual-gate-sensitivity-20260926.ts
+      - name: Archive source-backed short-sample results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: disdex-v12-annual-independent-entries-20260926
+          path: v12-one-year-independent-entries-20260926.json
+          if-no-files-found: warn
+          retention-days: 14
