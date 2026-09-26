@@ -1,0 +1,58 @@
+name: Locate archived final-governor BT GitHub artifacts and cache metadata
+on:
+  push:
+    branches: [research/recover-final-governor-bt-20260926]
+    paths: [.github/workflows/locate-original-bt-artifacts-20260926.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  inventory:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inventory archive and cache metadata only
+        run: |
+          python3 - <<'PY'
+          import os,json,subprocess,re
+          repo=os.environ['GITHUB_REPOSITORY']
+          def get(path):
+              p=subprocess.run(['gh','api','-X','GET',path],capture_output=True,text=True,timeout=20)
+              if p.returncode!=0:return {'error':p.stderr[:150]}
+              return json.loads(p.stdout)
+          data={'readOnly':True,'tradingMutation':0,'artifactPages':0,'artifactTotalInPeriod':0,
+                'relevantArtifacts':[],'cachePages':0,'relevantCaches':[],'errors':[]}
+          pattern=re.compile('final|integrat|govern|top3|dynamic|quality|q102|fet|pengu|research|ledger|gross',re.I)
+          for pg in range(1,31):
+              response=get(f'repos/{repo}/actions/artifacts?per_page=100&page={pg}')
+              if 'error' in response:
+                  data['errors'].append({'endpoint':'artifacts','page':pg,'error':response['error']});break
+              items=response.get('artifacts',[]);data['artifactPages']+=1
+              for row in items:
+                  created=row.get('created_at','')
+                  if '2026-09-17'<=created[:10]<='2026-09-24':
+                      data['artifactTotalInPeriod']+=1
+                      if pattern.search(row.get('name','')):
+                          data['relevantArtifacts'].append({key:row.get(key) for key in ['id','name','created_at','size_in_bytes','expired','workflow_run']})
+              if len(items)<100 or (items and items[-1].get('created_at','')[:10]<'2026-09-17'):break
+          for pg in range(1,11):
+              response=get(f'repos/{repo}/actions/caches?per_page=100&page={pg}')
+              if 'error' in response:
+                  data['errors'].append({'endpoint':'caches','page':pg,'error':response['error']});break
+              items=response.get('actions_caches',[]);data['cachePages']+=1
+              for row in items:
+                  if pattern.search(row.get('key','')):
+                      data['relevantCaches'].append({key:row.get(key) for key in ['id','key','ref','created_at','last_accessed_at','size_in_bytes']})
+              if len(items)<100:break
+          with open('original-bt-github-cache-inventory.json','w') as f:json.dump(data,f,indent=2)
+          print('ORIGINAL_GITHUB_CACHE_SCAN',json.dumps({k:(len(v) if isinstance(v,list) else v) for k,v in data.items() if k not in ('readOnly','tradingMutation')},ensure_ascii=False))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: original-final-governor-artifact-cache-inventory-20260926
+          path: original-bt-github-cache-inventory.json
+          retention-days: 90
