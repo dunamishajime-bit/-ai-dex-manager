@@ -1,0 +1,41 @@
+name: Verify source-native current VPS profit DD margin governor boundaries
+on:
+  push:
+    branches: [research/recover-final-governor-bt-20260926]
+    paths:
+      - scripts/research/current_native_governor_contract_20260926.ts
+      - .github/workflows/native-production-governor-bt-boundary-20260926.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-governor:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: e1b58060d6263a3af7ced51bec854d3e211d2f35
+          path: .live
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: .live/package-lock.json
+      - run: npm ci --no-audit --no-fund
+        working-directory: .live
+      - name: Use production source without changing its source tree
+        run: |
+          set -Eeuo pipefail
+          test "$(git -C .live rev-parse HEAD)" = e1b58060d6263a3af7ced51bec854d3e211d2f35
+          mkdir -p .live/scripts/research
+          cp scripts/research/current_native_governor_contract_20260926.ts .live/scripts/research/
+      - name: Execute native governor synthetic boundary tests
+        working-directory: .live
+        run: npx --no-install tsx scripts/research/current_native_governor_contract_20260926.ts
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-current-profit-DD-margin-governor-boundary-20260926
+          path: .live/.research-state/native-original-governor/result.json
+          retention-days: 90
