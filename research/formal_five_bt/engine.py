@@ -71,6 +71,22 @@ def _load_signal_rows(scan_root: Path) -> tuple[dict[str, list[dict[str, Any]]],
         "FET": scan_root / "baseline-signal-scan" / "decisions" / "FET.jsonl",
         "Q102": scan_root / "baseline-signal-scan-q102" / "decisions" / "Q102.jsonl",
     }
+    sidecar_scan = scan_root / "baseline-signal-scan-hz" / "signal-scan-manifest.json"
+    if sidecar_scan.is_file():
+        from .seven_source import LIVE_FIVE_SHA, SEVEN_RESEARCH_SHA
+        evidence = json.loads(sidecar_scan.read_text(encoding="utf-8"))
+        if (evidence.get("runtime_sha") != LIVE_FIVE_SHA
+            or evidence.get("sidecar_source_sha") != SEVEN_RESEARCH_SHA
+            or evidence.get("hype_zec_live_verified") is not False
+            or sorted(evidence.get("strategies", [])) != ["HYPE", "ZEC"]
+            or evidence.get("signals_are_not_fills") is not True):
+            raise ValueError("SEVEN_BT_SIDECAR_SOURCE_MANIFEST_INVALID")
+        for strategy in ("HYPE", "ZEC"):
+            pathname = scan_root / "baseline-signal-scan-hz" / "decisions" / (strategy + ".jsonl")
+            if pathname.is_file():
+                layout[strategy] = pathname
+            elif evidence.get("stats", {}).get(strategy, {}).get("status") != "NOT_VERIFIABLE":
+                raise ValueError("SEVEN_BT_SIDECAR_DECISIONS_MISSING:" + strategy)
     rows: dict[str, list[dict[str, Any]]] = {}
     hashes: dict[str, str] = {}
     for strategy, path in layout.items():
@@ -84,7 +100,7 @@ def _load_signal_rows(scan_root: Path) -> tuple[dict[str, list[dict[str, Any]]],
 def _load_signal_scan_manifests(scan_root: Path) -> tuple[dict[str, dict[str, Any]], dict[str, str]]:
     manifests: dict[str, dict[str, Any]] = {}
     hashes: dict[str, str] = {}
-    for name in ("baseline-signal-scan", "baseline-signal-scan-q102"):
+    for name in ("baseline-signal-scan", "baseline-signal-scan-q102", "baseline-signal-scan-hz"):
         path = scan_root / name / "signal-scan-manifest.json"
         if path.is_file():
             raw = path.read_bytes()
@@ -161,7 +177,7 @@ def _dataset_coverage(data_root: Path) -> tuple[list[dict[str, Any]], dict[str, 
 def _candidate_time(strategy: str, row: Mapping[str, Any]) -> int:
     if strategy == "V12":
         return int((row.get("signal") or {}).get("entryTs") or row.get("decision_ts_ms") or 0)
-    if strategy == "FET":
+    if strategy in {"FET", "HYPE", "ZEC"}:
         return int((row.get("signal") or {}).get("entryTs") or row.get("decision_ts_ms") or 0)
     return int(row.get("decision_ts_ms") or 0)
 
@@ -353,11 +369,25 @@ def run_integrated_bt(data_root: str | Path, scan_root: str | Path, l2_root: str
                                "runtime_sha": runtime_manifest["runtime_sha"], "source_hashes": source_hashes}))[:24]
     output_root.mkdir(parents=True, exist_ok=True)
 
+    sidecar_present = "baseline-signal-scan-hz" in scan_manifests
+    if sidecar_present:
+        sidecar_manifest = scan_manifests["baseline-signal-scan-hz"]
+        from .seven_source import LIVE_FIVE_SHA, SEVEN_RESEARCH_SHA
+        if (sidecar_manifest.get("runtime_sha") != LIVE_FIVE_SHA
+            or sidecar_manifest.get("sidecar_source_sha") != SEVEN_RESEARCH_SHA
+            or sidecar_manifest.get("hype_zec_live_verified") is not False):
+            raise ValueError("SEVEN_BT_RESEARCH_SOURCE_MISMATCH")
+    modeled_strategies = ("V12", "PENGU", "Q102", "FET") + (
+        ("HYPE", "ZEC") if sidecar_present else ()
+    )
     decisions_by_strategy = {
-        strategy: signal_rows.get(strategy, []) for strategy in ("V12", "PENGU", "Q102", "FET")
+        strategy: signal_rows.get(strategy, []) for strategy in modeled_strategies
     }
     input_candidate_counts = {
-        strategy: sum(row.get("status") == "SIGNAL" for row in rows)
+        strategy: (None if sidecar_present and strategy in {"HYPE", "ZEC"}
+          and scan_manifests["baseline-signal-scan-hz"]["stats"][strategy].get("status")
+          == "NOT_VERIFIABLE"
+          else sum(row.get("status") == "SIGNAL" for row in rows))
         for strategy, rows in decisions_by_strategy.items()
     }
     initial_gap_counts = {
@@ -377,11 +407,18 @@ def run_integrated_bt(data_root: str | Path, scan_root: str | Path, l2_root: str
         all_decisions: list[dict[str, Any]] = []
         order_rows: list[dict[str, Any]] = []
         route_metrics = []
-        for strategy in ("V12", "PENGU", "Q102", "FET"):
+        for strategy in modeled_strategies:
             rows = [_decision_row(strategy, row, scenario=scenario, coverage_path=coverage_path, archive_lookup=l2_lookup)
                     for row in decisions_by_strategy[strategy]]
             all_decisions.extend(rows)
-            route_metrics.append(_metric_row(strategy, rows))
+            metrics = _metric_row(strategy, rows)
+            if sidecar_present and strategy in {"HYPE", "ZEC"}:
+                metrics["source_status"] = "HYPOTHETICAL_SEVEN_RESEARCH_CODE_NOT_LIVE"
+                metrics["source_sha"] = scan_manifests["baseline-signal-scan-hz"]["sidecar_source_sha"]
+                if input_candidate_counts[strategy] is None:
+                    metrics["signal_candidates"] = None
+                    metrics["metric_status"] = "NOT_VERIFIABLE_MARKET_DATA_MISSING"
+            route_metrics.append(metrics)
             for row in rows:
                 entry = row.get("execution", {})
                 if row.get("candidate_signal"):
@@ -437,6 +474,11 @@ def run_integrated_bt(data_root: str | Path, scan_root: str | Path, l2_root: str
             "maximum_drawdown_pct": None, "win_rate_pct": None,
             "verified_fills": 0, "verified_closed_trades": 0,
             "candidate_signals": input_candidate_counts,
+            "integration_scope": ("SEVEN_LOGIC_CANDIDATE_REPLAY_NOT_EXECUTION_VERIFIED"
+                if sidecar_present else "FIVE_LOGIC_CANDIDATE_REPLAY_NOT_EXECUTION_VERIFIED"),
+            "production_status": ("AUDITED_FIVE_LIVE_PLUS_TWO_RESEARCH_NOT_DEPLOYED"
+                if sidecar_present else "AUDITED_FIVE_LIVE"),
+            "shared_portfolio_gross_conflict": "NOT_VERIFIABLE_NO_CONFIRMED_ENTRY_EXIT_TIMELINE",
             "decision_rows": len(all_decisions), "order_ledger_rows": len(order_rows),
             "strategy_metrics": route_metrics,
             "variants": {"status": "NOT_RUN_BASELINE_NOT_VERIFIED", "hc_gross_multiplier_fixed": 1.75},
@@ -490,6 +532,12 @@ def run_integrated_bt(data_root: str | Path, scan_root: str | Path, l2_root: str
         "status_reason": "Candidate signals were replayed from the audited LIVE functions, but verified same-time execution books, historical Aster crypto fee tiers, and V52 stock-perpetual book/reference parity are incomplete. No P&L is reported.",
         "runtime_sha": runtime_manifest["runtime_sha"],
         "audited_release_id": runtime_manifest["active_release_id"],
+        "strategy_source_shas": ({"five_live": runtime_manifest["runtime_sha"],
+             "hype_zec_research": scan_manifests["baseline-signal-scan-hz"]["sidecar_source_sha"]}
+            if sidecar_present else {"five_live": runtime_manifest["runtime_sha"]}),
+        "trading_mode": ("HYPOTHETICAL_SEVEN_RESEARCH_ONLY"
+            if sidecar_present else "AUDITED_FIVE_LIVE_SOURCE"),
+        "verified_economic_seven_logic_backtest": False,
         "period_start_utc": PERIOD_START.isoformat(),
         "period_end_inclusive_utc": "2026-08-10",
         "period_end_exclusive_utc": PERIOD_END_EXCLUSIVE.isoformat(),
@@ -513,6 +561,11 @@ def run_integrated_bt(data_root: str | Path, scan_root: str | Path, l2_root: str
             "The tested Binance Futures, Bybit, and Aster historical L2 candidate files have no verified event chain seeded by a valid snapshot. Missing event files are not presumed fillable.",
             "Historical crypto commission tier was not available in the audited LIVE config; actual Aster stock-perpetual history/reference quote parity for V52 was not verified.",
             "V12 variants were not run because the unchanged integrated baseline did not reach a verified fill/ledger state; HC1.75 remains fixed for later research.",
+            *([
+                "HYPE/ZEC source commit is a direct child of five-logic LIVE release; it was not confirmed running during the read-only VPS audit.",
+                "Shared capital competition and 50%-limited HYPE/ZEC preemption require verified order, exit and managed protection evidence; source-level candidate overlap is not a realized trade ledger.",
+                "HYPE/ZEC source-check signals use completed native Aster 15m/1m bars and a research-mode 1-minute polling model, NOT a verified historical sidecar tick schedule."
+            ] if sidecar_present else []),
             "No trade counts, P&L, profit factor, drawdown, or win rate in this status should be interpreted as zero-return or as investment evidence.",
         ],
     }
