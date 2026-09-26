@@ -30,7 +30,7 @@ def script() -> int:
     for arg in ["engine","v12","old-pengu","new-pengu","stock","frozen","stage1-baseline","output"]:
         p.add_argument("--"+arg,required=True)
     opts=p.parse_args()
-    a={k:Path(v) for k,v in vars(opts).items()}
+    a={k.replace("_","-"):Path(v) for k,v in vars(opts).items()}
     # This load finds the original module pinned at checkout, and then the captured,
     # unedited 53KB source. No strategy source changes permitted in this replay.
     sys.path.insert(0,str(Path("scripts").resolve()))
