@@ -1,0 +1,37 @@
+# 2026-09-26 — V52-completely-excluded FOUR source-rule historical research (NOT exact live execution parity)
+
+**Independent source-pin:** current effective VPS release `e1b58060d6263a3af7ced51bec854d3e211d2f35`; exact original archived integrated engine SHA256 `cae9785492ea5dda8173853fe2cbc7d99ea451f550a739fb7f014f4773d9899d`, NOT edited on disk; fresh Aster/Yahoo independently verified raw JSON SHA256 `8e416fe25a9c9e722c428062589151bbd0d8dda4fc98ed4bdb53154a9fe3d7fe`. Date: 2025-08-10 inclusive to 2026-08-10 exclusive; JPY10k initial + monthly JPY10k x12 = JPY130k deposits; compounding NORMAL and SEVERE. ZERO V52/V11/V50 trades in every FOUR-sleeve output.
+
+## Four sleeves and source rules modeled
+
+1. V12 current source-native Top3 entry candidates, HC1.75/rank3<=0.10, max3 entries / aggregate2.0x, BTC/regime/momentum native signal conditions, ATR source stop/take-profit/trailing and hold/rotation derived from historic H1 OHLC (approximate; NOT historic STOP/TP read-back). Source-native 1,459 signal candidates from successful [historical Aster Actions 36220005083](https://github.com/dunamishajime-bit/-ai-dex-manager/actions/runs/36220005083); 882 or fewer admitted depending gate. Exact historic 2025 BTC lot filter not recoverable; .001 BTC research-only conservative assumed screen rejects 2 candidates.
+2. PENGU native COMBINED_FILTERED Q60 same-route quarantine/17% DD H72/every entry gross1.0 native ledger, 69/68 raw NORMAL/SEVERE scenario signals. Source-native ledger already models PENGU signal/exit and cooldown; not authentic historic broker execution.
+3. Quality102 causal V4 native 109 candidate outputs and native family exit-price proxy (per-symbol 5400 contiguous H1 history minimum, no future candles); exact 15 Aster public 1m Q102 resize price marks. Strict one-slot and base-idle gating: block fresh Q102 entry if V12/PENGU/FET currently holds a position, but allow existing Q102 to overlap a later FET entry on a DIFFERENT underlying if shared Gross permits. Full portfolio gross/partial Q102 reallocation and same-symbol restrictions. Native Q102 fresh DD<=0.30% boosts to3.0x only for an explicitly separate hypothetical historic-governor-data sensitivity. Missing actual historical 120sec Aster-income derived deployment-reset DD makes actual boost unprovable.
+4. FET native BRK48 signal, volume >=1.2x past72H median; 24H hold, -5% hard stop, +5% triggers +0.5% trailing floor in H1 OHLC approximation, maximum residual gross2.25, minimum residual .05. Current source on core conflict **FULL** reduceOnly sell (not a partial trim). 17/17 Aster public exact 1m conflict candles independently obtained via [Actions 36222668788](https://github.com/dunamishajime-bit/-ai-dex-manager/actions/runs/36222668788) and [Actions 36224870608](https://github.com/dunamishajime-bit/-ai-dex-manager/actions/runs/36224870608). **9/17 public 1m candles recorded ZERO venue trade volume and 7 no-volume historic 1m opens disagree with Aster H1 open.** Conservative case BLOCKS the core request when FET could not be verifiably preempted from a recorded positive-volume minute. This is a sensitivity assumption; zero reported trades do NOT prove lack of resting quotes.
+
+Shared base crypto gross3x, total gross4.25x, stock0x, V12 2x, PENGU1x, Quality102 one slot, residual FET2.25x, 5x Cross cash capacity model, daily realized crypto loss7.5% including Q102 events. Independent 13-date USDJPY causal prior bars used to screen min order notional US$5. Native `resolveIntegratedGrossGovernor` pure decision matches **8/8** TS source boundary scenarios, but historical actual income sourceComplete, 120s freshness, effective deployment-reset state/availableBalance, margin positions/reservations unknown. BASE fail-closed case never promotes profitability; separate hypothetical governor scenario supplies reconstructive proxies and MUST NOT be described as real current replay.
+
+## Same unchanged engine: full-year result sensitivity (JPY)
+
+| Additional source-evidence/assumption | NORMAL JPY | PF | closed TWR DD | Aster H1 hourly TWR DD | SEVERE JPY | PF | closed TWR DD | Aster H1 hourly TWR DD |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| **Base cap, no-trade-minute FET preempt blocked + H1 current unrealized 7.5% daily-loss NEW-ENTRY latch only** | **6,077,702.63** | **2.64305226** | **-45.685749%** | **-46.341681%** | **1,231,256.71** | **1.84651314** | **-52.63039726%** | **-52.989602%** |
+| Same but ONLY realized daily-loss entry latch (no H1 unrealized latch) | 6,067,082.59 | 2.64086284 | -45.685749% | -46.341681% | 1,244,405.57 | 1.85704332 | -52.63021828% | -52.9895% |
+| All 17 public Aster 1m OPEN hypothetical FET conflict fills even when no trades reported; base caps and realized-day risk only | 7,789,150.62 | 2.75648560 | -45.685749% | -46.341681% | 1,557,515.63 | 1.92666182 | -52.20475832% | -52.7995% |
+| HYPOTHETICAL sourceComplete / TWR DD / margin daily-historic proxies + no-trade FET preempt blocked | 5,856,000.76 | 2.57362092 | -45.685749% | -46.341681% | 1,092,137.68 | 1.77372976 | -55.62939673% | -57.5832% |
+
+Main H1 NEW-ENTRY daily-risk latch runs exactly 8,760 causal Aster H1 marks each NORMAL/SEVERE; it trips 11 times each. It does NOT emulate native 10-min HOLD_PROTECTED, operator/fail-closed flatten, unknown actual income, actual broker protection/read-back or price discovery intra-H1. All 10 investigated scenario result event+monthly ledgers reconcile to final JPY within 0.05 JPY and V52=0 throughout; independent read-only 8,760-hour H1 position observations preserve exact scenario events, 13 month values, PF and closed DD in all variants.
+
+### Main source-staged H1 daily-risk research case: per-sleeve total JPY
+
+| Sleeve | NORMAL realized PnL | closed PnL events | SEVERE realized PnL | closed PnL events |
+|---|---:|---:|---:|---:|
+| V12 | +5,093,181.90 | 875 | +872,097.70 | 875 |
+| PENGU | +2,136,383.99 | 67 | +523,585.46 | 65 |
+| Q102 causal V4 | **-1,723,234.88** | 36 =24 entries+12 partial-realization segments | **-481,863.39** | 36 |
+| FET | +441,371.62 | 18 | +187,436.93 | 18 |
+| V52 | 0 | 0 | 0 | 0 |
+
+**Critical caution:** PENGU FET V12 raw source signal counts are NOT executions; research includes historic H1 stop/exit priority assumptions and incomplete historical venue quantity/lot filters. Even native matched source pure functions + all recoverable candle rules do not imply exact current LIVE historical execution. Historical account/protective STOP/TP fills, bid/ask/depth, 10min kill-switch/protection/read-back, true continuous/daily current-governor income states and sourceComplete are missing. NO scenario proves maximum DD<=20%. Production VPS and order execution config unchanged.
+
+Research complete and verified in the chat-delivered `BT_FOUR_LOGIC_SOURCE_RULES_V52_EXCLUDED_20260926.zip`: original checksum-frozen Python source, 12 pinned research adapter scripts, verified independent market and exact1m archives, native governor 8 boundary proof, full scenario event JSON NORMAL+SEVERE, all 13 monthly cash points with plotting PNG, each 8,760-hour H1 MTM price audit CSV, and per-file 66-entry SHA256 manifest (ZIP re-read SHA256 PASS). **The ZIP is a conversation artifact, not in GitHub; GitHub stores this plain-language reproducibility handoff and exact-1m read-only workflow.**
