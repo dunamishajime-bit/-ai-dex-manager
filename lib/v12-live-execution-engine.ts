@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 
 import { V12_X1_ALL } from "@/config/v12X1AllRuntime";
+import { INTEGRATED_PRODUCTION_RISK_POLICY } from "@/config/integratedProductionRiskPolicy";
 import { AsterApiError } from "@/lib/aster-v3-client";
 import { activeReservedGross, FileAccountOrderLock } from "@/lib/disdex-account-order-lock";
 import { classifyAsterSymbol } from "@/lib/disdex-aster-portfolio-classifier";
@@ -24,9 +25,16 @@ import { decideV12ResidualEntry, validateV12EntryGrossReservation, type V12Resid
 import { reduceV12DynamicResidualForCoreConflict } from "@/lib/v12-dynamic-residual-live-reduction";
 import type { DirectPosition, DirectTradeResult } from "@/lib/direct-trade-executor";
 import { readQuality102CausalV1Ownership, quality102OwnsPosition, type Quality102CausalV1OwnershipSnapshot } from "@/lib/disdex-quality102-causal-v1-ownership";
+import { aggregatePendingExposure, readPendingExposureRegistry } from "@/lib/disdex-pending-exposure-registry";
+import { releaseHypeZecCapacityForPriorityEntry } from "@/lib/hype-zec-priority-capacity";
+import type { StrictPortfolioIntent } from "@/lib/disdex-strict-portfolio-planner";
 
 const V12_SYMBOLS = new Set(V12_X1_ALL.universe.map((symbol) => `${symbol}USDT`));
 const EPS = 1e-12;
+
+function isCryptoPortfolioSleeve(sleeve: string) {
+    return sleeve === "V12" || sleeve === "PENGU_DUAL_LS_V2" || sleeve === "QUALITY102_CAUSAL_V1" || sleeve === "FET_RESIDUAL" || sleeve === "HYPE_LONG" || sleeve === "ZEC_LONG";
+}
 
 export type V12LiveTickStatus = "locked" | "held" | "no-signal" | "capacity-blocked" | "entered" | "exited" | "risk-blocked" | "manual-review";
 export interface V12LiveTickResult { status: V12LiveTickStatus; reason: string; signal?: V12Signal; clientOrderId?: string; }
@@ -162,6 +170,46 @@ export class V12LiveExecutionEngine {
 
     private async fail(state: V12X1AllRunnerState, reason: string): Promise<V12LiveTickResult> {
         await this.d.stateStore.tripKillSwitch(state, reason); this.log("v12-fail-closed", { reason }); return { status: "manual-review", reason };
+    }
+
+    private async releaseHypeZecCapacity(
+        handle: Awaited<ReturnType<FileAccountOrderLock["acquire"]>> extends infer T ? Exclude<T, null> : never,
+        positions: DirectPosition[],
+        equity: number,
+        candidate: StrictPortfolioIntent,
+        candidateWorstCaseGross: number,
+        pendingCryptoGross: number,
+        pendingTotalGross: number,
+    ) {
+        if (!/^(1|true|yes|on)$/i.test(String(process.env.DISDEX_HYPE_ZEC_PREEMPTION_ENABLED || "").trim())) {
+            return { status: "blocked" as const, message: "HYPE_ZEC_PREEMPTION_OPERATOR_DISABLED" };
+        }
+        const result = await releaseHypeZecCapacityForPriorityEntry({
+            adapter: this.d.adapter,
+            executor: this.d.adapter.executor,
+            lock: handle,
+            positions,
+            equityUsd: equity,
+            candidate: { ...candidate, gross: candidateWorstCaseGross, notionalUsd: candidateWorstCaseGross * equity },
+            pendingCryptoGross,
+            pendingTotalGross,
+            cryptoEntryCap: INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap,
+            totalEntryCap: INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap,
+            causeIdempotencyKey: candidate.idempotencyKey,
+            expectedRuntimeSha: process.env.DISDEX_RELEASE_SHA || process.env.DISDEX_RUNTIME_COMMIT_SHA,
+            enabled: true,
+            statePath: process.env.DISDEX_HYPE_ZEC_PREEMPTION_STATE_PATH,
+            maxSlippageBps: this.d.adapter.getMaxSlippageBps(),
+            now: this.now,
+        });
+        this.log("hype-zec-priority-capacity", {
+            status: result.status,
+            message: result.message,
+            candidate: candidate.strategy,
+            symbol: candidate.symbol,
+            ordersSent: result.status === "reduced" && result.result.status === "reduced" ? result.result.results.length : 0,
+        });
+        return result;
     }
 
     private validatePortfolioPositions(positions: DirectPosition[], quality102Ownership?: Quality102CausalV1OwnershipSnapshot) {
@@ -480,6 +528,7 @@ export class V12LiveExecutionEngine {
         sizing: ReturnType<typeof sizeV12Position>,
         decision: V12ResidualDecision,
         quality102Ownership?: Quality102CausalV1OwnershipSnapshot,
+        preemptionAttempt = 0,
     ): Promise<V12LiveTickResult> {
         const acceptedGross = decision.acceptedGross;
         const symbol = `${signal.symbol}USDT`;
@@ -516,7 +565,7 @@ export class V12LiveExecutionEngine {
                     v12Gross: freshPortfolio.filter((row) => row.sleeve === "V12").reduce((sum, row) => sum + row.gross, 0),
                     v12BaseGross: freshComponents.baseGross,
                     v12DynamicGross: freshComponents.dynamicGross,
-                    cryptoGross: freshPortfolio.filter((row) => row.sleeve === "V12" || row.sleeve === "PENGU_DUAL_LS_V2").reduce((sum, row) => sum + row.gross, 0),
+                    cryptoGross: freshPortfolio.filter((row) => isCryptoPortfolioSleeve(row.sleeve)).reduce((sum, row) => sum + row.gross, 0),
                     stockGross: freshPortfolio.filter((row) => row.sleeve === "V11_EQ" || row.sleeve === "V50_POST_OPEN_BASIS").reduce((sum, row) => sum + row.gross, 0),
                     totalGross: freshPortfolio.reduce((sum, row) => sum + row.gross, 0),
                 },
@@ -540,6 +589,49 @@ export class V12LiveExecutionEngine {
                     ordersSent: 0,
                     positionChangesSent: 0,
                 });
+                if (
+                    preemptionAttempt === 0
+                    && (reservation.reason === "V12_CRYPTO_GROSS_OVER_CAP" || reservation.reason === "V12_TOTAL_GROSS_OVER_CAP")
+                ) {
+                    const pendingExposure = aggregatePendingExposure(await readPendingExposureRegistry());
+                    const candidate: StrictPortfolioIntent = {
+                        idempotencyKey: clientOrderId,
+                        strategy: "V12",
+                        symbol,
+                        side: signal.side,
+                        gross: worstCaseGross,
+                        requestedGross: acceptedGross,
+                        notionalUsd: worstCaseGross * freshEquity,
+                        signalTs: signal.referenceTs,
+                    };
+                    const preemption = await this.releaseHypeZecCapacity(
+                        handle,
+                        freshPositions,
+                        freshEquity,
+                        candidate,
+                        worstCaseGross,
+                        Math.max(pendingExposure.cryptoGross, reservedGross),
+                        Math.max(pendingExposure.cryptoGross + pendingExposure.stockGross, reservedGross),
+                    );
+                    if (preemption.status === "reduced") {
+                        this.log("v12-entry-preemption-complete-rechecking-reservation", {
+                            symbol,
+                            cause: reservation.reason,
+                            ordersSent: 0,
+                            positionChangesSent: 0,
+                        });
+                        return await this.executeEntryForSignal(
+                            state,
+                            handle,
+                            signal,
+                            freshEquity,
+                            sizing,
+                            decision,
+                            quality102Ownership,
+                            preemptionAttempt + 1,
+                        );
+                    }
+                }
                 return { status: "capacity-blocked", reason: reservation.reason || "V12_PREORDER_GROSS_RESERVATION_BLOCKED", signal, clientOrderId };
             }
         } catch (error) {
@@ -764,7 +856,7 @@ export class V12LiveExecutionEngine {
                         v12Gross: freshActive.filter((row) => row.sleeve === "V12").reduce((sum, row) => sum + row.gross, 0),
                         v12BaseGross: v12Components.baseGross,
                         v12DynamicGross: v12Components.dynamicGross,
-                        cryptoGross: freshActive.filter((row) => row.sleeve === "V12" || row.sleeve === "PENGU_DUAL_LS_V2").reduce((sum, row) => sum + row.gross, 0),
+                        cryptoGross: freshActive.filter((row) => isCryptoPortfolioSleeve(row.sleeve)).reduce((sum, row) => sum + row.gross, 0),
                         stockGross: freshActive.filter((row) => row.sleeve === "V11_EQ" || row.sleeve === "V50_POST_OPEN_BASIS").reduce((sum, row) => sum + row.gross, 0),
                         totalGross: freshActive.reduce((sum, row) => sum + row.gross, 0),
                     };
@@ -823,7 +915,7 @@ export class V12LiveExecutionEngine {
                 const entryPrice = signal.side === "LONG" ? quote.askPrice : quote.bidPrice;
                 const sizing = applyV12SignalGrossMultiplier(sizeV12Position(entryEquity, entryPrice, signal.atr, signal.side), signal);
                 const v12Components = v12GrossComponents(state, activePortfolio);
-                const snapshot = { v12Gross: activePortfolio.filter((row) => row.sleeve === "V12").reduce((sum, row) => sum + row.gross, 0), v12BaseGross: v12Components.baseGross, v12DynamicGross: v12Components.dynamicGross, cryptoGross: activePortfolio.filter((row) => row.sleeve === "V12" || row.sleeve === "PENGU_DUAL_LS_V2").reduce((sum, row) => sum + row.gross, 0), stockGross: activePortfolio.filter((row) => row.sleeve === "V11_EQ" || row.sleeve === "V50_POST_OPEN_BASIS").reduce((sum, row) => sum + row.gross, 0), totalGross: activePortfolio.reduce((sum, row) => sum + row.gross, 0) };
+                const snapshot = { v12Gross: activePortfolio.filter((row) => row.sleeve === "V12").reduce((sum, row) => sum + row.gross, 0), v12BaseGross: v12Components.baseGross, v12DynamicGross: v12Components.dynamicGross, cryptoGross: activePortfolio.filter((row) => isCryptoPortfolioSleeve(row.sleeve)).reduce((sum, row) => sum + row.gross, 0), stockGross: activePortfolio.filter((row) => row.sleeve === "V11_EQ" || row.sleeve === "V50_POST_OPEN_BASIS").reduce((sum, row) => sum + row.gross, 0), totalGross: activePortfolio.reduce((sum, row) => sum + row.gross, 0) };
                 const rankedRequestGross = Math.min(sizing.requestedGross, v12EntryGrossCapForSignal(signal));
                 const decision = decideV12ResidualEntry(rankedRequestGross, snapshot, activePositionsOf(state).length);
                 if (!(decision.acceptedGross > 0)) {

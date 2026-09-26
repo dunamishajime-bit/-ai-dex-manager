@@ -11,6 +11,7 @@ SHARED_ROOT="${DISDEX_SHARED_ROOT:-/var/lib/disdex/shared}"
 OPERATOR_ACTIVATION_PATH="${SHARED_ROOT}/operator-activation/current.json"
 V52_LEGACY_CRYPTO_ROOT="${SHARED_ROOT}/crypto-v96"
 PENGU_STATE_ROOT="/var/lib/disdex/pengu-dual-ls-v2"
+HYPE_ZEC_STATE_ROOT="/var/lib/disdex/hype-zec-long"
 LIVE_STATE_FILES=(
   "/var/lib/disdex/v12-x1-all/runner.json"
   "/var/lib/disdex/pengu-dual-ls-v2/runner-live.json"
@@ -18,6 +19,7 @@ LIVE_STATE_FILES=(
   "/var/lib/disdex/quality102-causal-v1/market-history.json"
   "/var/lib/disdex/fet-brk48-residual/state.json"
   "/var/lib/disdex/v52-aster-only/runner-live.json"
+  "${HYPE_ZEC_STATE_ROOT}/runner.json"
 )
 RUNTIME_CONTRACT_ENV_DIR="/etc/disdex/current-runtime"
 PENDING_EXPOSURE_REGISTRY_PATH="${SHARED_ROOT}/pending-exposure.json"
@@ -134,6 +136,8 @@ validate_release_artifacts() {
     "$CURRENT_RELEASE/scripts/disdex-current-live-target-readiness.ts"
     "$CURRENT_RELEASE/scripts/ops/root/disdex-live-operator-activation-gate.mjs"
     "$CURRENT_RELEASE/scripts/disdex-fet-brk48-live-runner.ts"
+    "$CURRENT_RELEASE/scripts/disdex-hype-zec-long-live-runner.ts"
+    "$CURRENT_RELEASE/scripts/disdex-hype-zec-core-preempt.ts"
     "$CURRENT_RELEASE/scripts/disdex_v96_v52_margin_guard_runtime.py"
     "$CURRENT_RELEASE/scripts/disdex_v52_aster_only_live_engine.py"
     "$CURRENT_RELEASE/lib/aster-readonly-recovery-gate.ts"
@@ -467,6 +471,18 @@ apply_wiring() {
       return 1
     }
   fi
+  if [[ -e "$HYPE_ZEC_STATE_ROOT" && ! -d "$HYPE_ZEC_STATE_ROOT" ]]; then
+    printf 'HYPE/ZEC state path exists but is not a directory: %s\n' "$HYPE_ZEC_STATE_ROOT" >&2
+    return 1
+  fi
+  if [[ ! -e "$HYPE_ZEC_STATE_ROOT" ]]; then
+    install -d -o deploy -g deploy -m 0700 "$HYPE_ZEC_STATE_ROOT"
+  else
+    [[ "$(stat -c '%U:%G:%a' "$HYPE_ZEC_STATE_ROOT")" == "deploy:deploy:700" ]] || {
+      printf 'HYPE/ZEC state path ownership/mode is unsafe: %s\n' "$(stat -c '%U:%G:%a' "$HYPE_ZEC_STATE_ROOT")" >&2
+      return 1
+    }
+  fi
   normalize_live_state_ownership
 
   write_atomic "$CONTRACT_ENV_FILE" "DISDEX_RELEASE_SHA=${DEPLOYED_SHA}
@@ -499,6 +515,20 @@ DISDEX_V52_STOCK_GROSS_CAP=4.0
 DISDEX_V52_V11_GROSS_CAP=2.0
 DISDEX_V52_V50_GROSS_CAP=2.0
 DISDEX_V52_PORTFOLIO_GROSS_CAP=4.25
+DISDEX_HYPE_ZEC_MODE=SHADOW
+DISDEX_HYPE_ZEC_ENABLED=false
+DISDEX_HYPE_ZEC_LIVE_EXECUTION_ENABLED=false
+DISDEX_HYPE_ZEC_PRODUCTION_CONFIG_LIVE_ENABLED=false
+DISDEX_HYPE_ZEC_OPERATOR_ARMED=false
+DISDEX_HYPE_ZEC_PREEMPTION_ENABLED=false
+DISDEX_HYPE_ZEC_RUNTIME_SHA=${DEPLOYED_SHA}
+DISDEX_HYPE_ZEC_STATE_PATH=/var/lib/disdex/hype-zec-long/runner.json
+DISDEX_HYPE_ZEC_PREEMPTION_STATE_PATH=/var/lib/disdex/hype-zec-long/preemption.json
+DISDEX_HYPE_ZEC_CORE_PREEMPT_SCRIPT=${CURRENT_RELEASE}/scripts/disdex-hype-zec-core-preempt.ts
+DISDEX_HYPE_ZEC_MAX_GROSS=1.0
+HYPE_LONG_RISK_PCT=5.0
+ZEC_LONG_RISK_PCT=4.5
+HYPE_ZEC_MAX_REDUCTION_FRACTION=0.5
 QUALITY102_CAUSAL_V1_MODE=LIVE
 QUALITY102_CAUSAL_V1_ENABLED=true
 QUALITY102_CAUSAL_V1_LIVE_TRADING_ENABLED=true
@@ -860,6 +890,8 @@ self_test() {
     scripts/generated/disdex-quality102-ranking-observer.cjs \
     scripts/disdex-current-live-target-readiness.ts \
     scripts/disdex-fet-brk48-live-runner.ts \
+    scripts/disdex-hype-zec-long-live-runner.ts \
+    scripts/disdex-hype-zec-core-preempt.ts \
     scripts/disdex-pengu-presubmit-snapshot-recovery.ts \
     scripts/disdex-v12-benign-entry-gate-recovery.ts \
     scripts/disdex_v96_v52_margin_guard_runtime.py \

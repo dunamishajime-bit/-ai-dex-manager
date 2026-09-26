@@ -70,6 +70,31 @@ test("malformed active pending exposure fails closed instead of being treated as
   );
 });
 
+test("HYPE/ZEC pending reservations are classified as crypto sidecars", () => {
+  const registry = normalizePendingExposureRegistry({
+    schema: "disdex-pending-exposure/v1",
+    accountScope: "ASTER_FUTURES",
+    updatedAt: 10,
+    entries: [{
+      reservationId: "hype-entry",
+      strategyId: "HYPE_LONG",
+      sleeve: "CRYPTO",
+      symbol: "HYPEUSDT",
+      side: "LONG",
+      gross: 0.25,
+      notionalUsd: 250,
+      status: "PENDING",
+      createdAt: 1,
+      updatedAt: 10,
+    }],
+  });
+  assert.deepEqual(aggregatePendingExposure(registry), {
+    cryptoGross: 0.25,
+    stockGross: 0,
+    byStrategyGross: { HYPE_LONG: 0.25 },
+  });
+});
+
 test("strict planner caps a candidate against cross-runner pending gross", () => {
   const plan = planStrictPortfolio({
     equity: 1000,

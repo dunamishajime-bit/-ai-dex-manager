@@ -24,7 +24,9 @@ import {
     planStrictPortfolio,
     type StrictPortfolioPosition,
     type StrictPortfolioPlan,
+    type StrictPortfolioIntent,
 } from "@/lib/disdex-strict-portfolio-planner";
+import type { AccountLockHandle } from "@/lib/disdex-account-order-lock";
 import {
     readDisDexV96KillSwitch,
 } from "@/lib/disdex-v96-live-risk-controls";
@@ -37,9 +39,10 @@ import { classifyAsterRateBudgetFailure } from "@/lib/disdex-aster-rate-budget-p
 import { quality102GovernorGross, readPortfolioDdGovernor } from "@/lib/disdex-portfolio-dd-governor";
 import { aggregatePendingExposure, readPendingExposureRegistry } from "@/lib/disdex-pending-exposure-registry";
 import { classifyAsterSymbol } from "@/lib/disdex-aster-portfolio-classifier";
-import { findManagedFetBrk48ProtectiveOrders, findManagedPenguRecoveryV8ProtectiveOrders, findManagedV12ProtectiveOrders } from "@/lib/disdex-managed-protective-orders";
+import { findManagedFetBrk48ProtectiveOrders, findManagedHypeZecProtectiveOrders, findManagedPenguRecoveryV8ProtectiveOrders, findManagedV12ProtectiveOrders } from "@/lib/disdex-managed-protective-orders";
 import { reduceV12DynamicResidualForCoreConflict } from "@/lib/v12-dynamic-residual-live-reduction";
 import { reduceFetBrk48ForCoreConflict } from "@/lib/fet-brk48-live-reduction";
+import { isHypeZecSoleSharedCapacityCause, releaseHypeZecCapacityForPriorityEntry } from "@/lib/hype-zec-priority-capacity";
 import type { V12AsterLiveAdapter } from "@/lib/v12-aster-live-adapter";
 import type {
     DirectAccountSnapshot,
@@ -125,6 +128,7 @@ export interface Quality102CausalV1ReservationInput {
 }
 
 export interface Quality102CausalV1LockHandle extends LiveRunnerLockHandle {
+    document?(): Promise<Awaited<ReturnType<AccountLockHandle["document"]>>>;
     reserve?(input: Quality102CausalV1ReservationInput): Promise<{ reservationId: string }>;
     releaseReservation?(reservationId: string): Promise<void>;
 }
@@ -185,6 +189,11 @@ function finite(value: unknown, fallback = 0): number {
     return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+function isSharedCapacityBlock(reason: unknown) {
+    const value = String(reason || "");
+    return /^(CAPACITY_BLOCKED|CRYPTO_GROSS_CAP|TOTAL_GROSS_CAP|CRYPTO_ENTRY_GROSS_CAP|TOTAL_ENTRY_GROSS_CAP|PENDING_CRYPTO_GROSS|PENDING_TOTAL_GROSS|CRYPTO_GROSS_HARD_CAP|TOTAL_GROSS_HARD_CAP|.*_CAPACITY_BLOCKED)/.test(value);
+}
+
 function finiteSigned(value: unknown, name: string): number {
     const parsed = Number(value);
     if (!Number.isFinite(parsed)) throw new Error(`${name} must be finite.`);
@@ -239,6 +248,7 @@ function managedProtectiveOrders(
     positions: readonly DirectPosition[],
 ): DirectOpenOrder[] {
     const managed = new Set<DirectOpenOrder>([
+        ...findManagedHypeZecProtectiveOrders(openOrders, positions),
         ...findManagedPenguRecoveryV8ProtectiveOrders(openOrders, positions),
         ...findManagedV12ProtectiveOrders(openOrders, positions),
         ...findManagedFetBrk48ProtectiveOrders(openOrders, positions),
@@ -305,6 +315,10 @@ function strictBasePosition(position: DirectPosition, now: number): StrictPortfo
             ? "PENGU_DUAL_LS_V2"
             : classification.sleeve === "FET_RESIDUAL"
                 ? "FET_RESIDUAL"
+                : classification.sleeve === "HYPE_LONG"
+                    ? "HYPE_LONG"
+                    : classification.sleeve === "ZEC_LONG"
+                        ? "ZEC_LONG"
                 : "V52";
     const updatedAt = positive(position.updatedAt, "base position updatedAt");
     if (updatedAt > now) throw new Error(`BASE_POSITION_TIMESTAMP_IN_FUTURE:${position.symbol}`);
@@ -513,6 +527,50 @@ export class Quality102CausalV1Runner {
         });
         if (trim.status === "blocked") throw new Error("QUALITY102_V12_DYNAMIC_REDUCTION_BLOCKED:" + trim.message);
         return trim.status === "reduced" && trim.trimmedGross > EPSILON;
+    }
+
+    private async preemptHypeZecForCoreEntry(
+        lock: Quality102CausalV1LockHandle,
+        signal: Quality102CausalV1Signal,
+        positions: DirectPosition[],
+        equity: number,
+        targetGross: number,
+        pendingCryptoGross: number,
+        pendingTotalGross: number,
+    ) {
+        if (!/^(1|true|yes|on)$/i.test(String(process.env.DISDEX_HYPE_ZEC_PREEMPTION_ENABLED || "").trim())) return undefined;
+        const adapter = this.dependencies.config.v12DynamicAdapter;
+        if (!adapter || typeof lock.document !== "function") return { status: "blocked" as const, message: "QUALITY102_HYPE_ZEC_PREEMPTION_LOCK_OR_ADAPTER_REQUIRED" };
+        const candidateSymbol = String(signal.symbol || "").trim().toUpperCase();
+        if (!candidateSymbol) return { status: "blocked" as const, message: "QUALITY102_HYPE_ZEC_PREEMPTION_SYMBOL_REQUIRED" };
+        const candidate: StrictPortfolioIntent = {
+            idempotencyKey: `${STRATEGY_ID}|${signal.referenceTs}|${signal.symbol}|${signal.side}|ENTRY`,
+            strategy: STRATEGY_ID,
+            symbol: candidateSymbol,
+            side: signal.side > 0 ? "LONG" : "SHORT",
+            gross: targetGross,
+            requestedGross: targetGross,
+            notionalUsd: targetGross * equity,
+            signalTs: signal.referenceTs,
+        };
+        return releaseHypeZecCapacityForPriorityEntry({
+            adapter,
+            executor: this.dependencies.executor,
+            lock: lock as unknown as AccountLockHandle,
+            positions,
+            equityUsd: equity,
+            candidate,
+            pendingCryptoGross,
+            pendingTotalGross,
+            cryptoEntryCap: this.dependencies.config.cryptoGrossCap,
+            totalEntryCap: this.dependencies.config.totalGrossCap,
+            causeIdempotencyKey: candidate.idempotencyKey,
+            expectedRuntimeSha: this.dependencies.config.runtimeCommitSha,
+            enabled: true,
+            statePath: process.env.DISDEX_HYPE_ZEC_PREEMPTION_STATE_PATH,
+            maxSlippageBps: this.dependencies.config.maxSlippageBps,
+            now: this.now,
+        });
     }
 
     private async integratedGrossContext(now: number, account: DirectAccountSnapshot, excludeCurrentQ102Pending = false) {
@@ -1039,6 +1097,8 @@ export class Quality102CausalV1Runner {
         positions: DirectPosition[],
         quote: DirectMarketQuote,
         allowDynamicTrim = true,
+        allowHypeZecPreemption = true,
+        lock?: Quality102CausalV1LockHandle,
     ): Promise<Quality102CausalV1TickResult> {
         if (signal.side === 0 || !signal.symbol || signal.requestedGross <= 0) {
             state.lastProcessedReferenceTs = Math.max(state.lastProcessedReferenceTs || 0, signal.referenceTs);
@@ -1092,7 +1152,7 @@ export class Quality102CausalV1Runner {
                 this.dependencies.executor.getPositions(),
             ]);
             const freshQuote = await this.dependencies.executor.getMarketQuote(symbol);
-            return this.planEntry(state, signal, freshAccount, freshPositions, freshQuote, allowDynamicTrim);
+            return this.planEntry(state, signal, freshAccount, freshPositions, freshQuote, allowDynamicTrim, allowHypeZecPreemption, lock);
         }
         let accepted = planner.accepted.find((intent) => intent.strategy === STRATEGY_ID);
         const capacityShortfall = planner.status !== "planned"
@@ -1110,7 +1170,41 @@ export class Quality102CausalV1Runner {
                 this.dependencies.executor.getPositions(),
             ]);
             const freshQuote = await this.dependencies.executor.getMarketQuote(symbol);
-            return this.planEntry(state, signal, freshAccount, freshPositions, freshQuote, false);
+            return this.planEntry(state, signal, freshAccount, freshPositions, freshQuote, false, allowHypeZecPreemption, lock);
+        }
+        const plannerReason = planner.reason || planner.rejected.find((row) => row.intent.strategy === STRATEGY_ID)?.reason;
+        const explicitSharedCapacityBlock = !accepted && isSharedCapacityBlock(plannerReason);
+        const sidecarCausesCapacity = lock && allowHypeZecPreemption && explicitSharedCapacityBlock
+            ? isHypeZecSoleSharedCapacityCause({
+                positions,
+                equityUsd: equity,
+                pendingCryptoGross: grossContext.pendingExposure.cryptoGross,
+                pendingTotalGross: grossContext.pendingExposure.cryptoGross + grossContext.pendingExposure.stockGross,
+                candidateGross: targetGross,
+                candidateSymbol: symbol,
+                candidateStrategy: STRATEGY_ID,
+                cryptoEntryCap: this.dependencies.config.cryptoGrossCap,
+                totalEntryCap: this.dependencies.config.totalGrossCap,
+            })
+            : false;
+        if (capacityShortfall && sidecarCausesCapacity && lock) {
+            const reduced = await this.preemptHypeZecForCoreEntry(
+                lock,
+                signal,
+                positions,
+                equity,
+                targetGross,
+                grossContext.pendingExposure.cryptoGross,
+                grossContext.pendingExposure.cryptoGross + grossContext.pendingExposure.stockGross,
+            );
+            if (reduced?.status === "reduced") {
+                const [freshAccount, freshPositions] = await Promise.all([
+                    this.dependencies.executor.getAccountSnapshot(),
+                    this.dependencies.executor.getPositions(),
+                ]);
+                const freshQuote = await this.dependencies.executor.getMarketQuote(symbol);
+                return this.planEntry(state, signal, freshAccount, freshPositions, freshQuote, false, false, lock);
+            }
         }
         if (planner.status !== "planned" || !accepted) {
             state.lastProcessedReferenceTs = Math.max(state.lastProcessedReferenceTs || 0, signal.referenceTs);
@@ -1317,7 +1411,7 @@ export class Quality102CausalV1Runner {
                 return { status: "blocked-local", message: "Q102 entry waits for unmanaged open orders to clear; managed protective orders remain untouched.", signal, ordersSent: 0 };
             }
             const quote = await this.dependencies.executor.getMarketQuote(signal.symbol);
-            const planned = await this.planEntry(state, signal, live.account, live.positions, quote);
+            const planned = await this.planEntry(state, signal, live.account, live.positions, quote, true, true, lock);
             return planned.status === "planned" ? this.executePending(state, lock) : planned;
         } catch (error) {
             const rateBudget = classifyAsterRateBudgetFailure(error);

@@ -284,6 +284,62 @@ class V52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
             max(0.0, self.portfolio_gross_cap - final["totalGross"]),
         )
 
+    def _prepare_hype_zec_for_stock_entry(self, slot: str, candidate: dict, target_gross: float) -> float:
+        """Release only verified HYPE/ZEC sidecar capacity for a stock entry.
+
+        The TypeScript helper runs under the Python runner's already-held
+        account-lock assertion. It is deliberately opt-in; when disabled or
+        unable to prove the sidecars are the sole cause, the normal strict
+        planner remains the final fail-closed gate.
+        """
+        if not self.live or not base.bool_env("DISDEX_HYPE_ZEC_PREEMPTION_ENABLED", False):
+            return target_gross
+        requested = max(0.0, base.finite(target_gross))
+        symbol = str(candidate.get("symbol") or candidate.get("ticker") or candidate.get("asset") or "").strip().upper()
+        if requested <= EPSILON or not symbol:
+            return requested
+        tsx = os.getenv("DISDEX_TSX_BIN") or os.path.join(os.getcwd(), "node_modules", ".bin", "tsx")
+        script = os.getenv("DISDEX_HYPE_ZEC_CORE_PREEMPT_SCRIPT", "scripts/disdex-hype-zec-core-preempt.ts")
+        strategy = V11_SLOT if slot == V11_SLOT else V50_SLOT
+        cause = f"V52_CORE_HYPE_ZEC|{slot}|{symbol}|{base.now_ms()}|{requested:.12f}"
+        snapshot = self.gross_snapshot()
+        result = subprocess.run(
+            [
+                tsx,
+                script,
+                "--caller", "V52_CORE",
+                "--shared-lock-held", "true",
+                "--candidate-strategy", strategy,
+                "--candidate-symbol", symbol,
+                "--candidate-gross", f"{requested:.12f}",
+                "--equity", f"{base.finite(snapshot.get('equityUsd')):.12f}",
+                "--signal-ts", str(base.now_ms()),
+                "--cause", cause,
+            ],
+            cwd=os.getcwd(),
+            env=os.environ.copy(),
+            capture_output=True,
+            text=True,
+            timeout=60,
+            check=False,
+        )
+        lines = [line.strip() for line in result.stdout.splitlines() if line.strip()]
+        if result.returncode != 0 or not lines:
+            detail = result.stderr.strip() or result.stdout.strip() or "no-output"
+            raise RuntimeError(f"HYPE_ZEC_CORE_PREEMPT_HELPER_FAILED:rc={result.returncode}:{detail}")
+        try:
+            payload = json.loads(lines[-1])
+        except json.JSONDecodeError as error:
+            raise RuntimeError("HYPE_ZEC_CORE_PREEMPT_HELPER_INVALID_JSON") from error
+        status = str(payload.get("status") or "")
+        if status == "reduced":
+            self.log("hype-zec-sidecar-preempted-for-stock", slot=slot, symbol=symbol, requestedGross=requested, preemption=payload)
+            return requested
+        if status in {"not-needed", "blocked"}:
+            self.log("hype-zec-sidecar-preemption-not-applied", slot=slot, symbol=symbol, requestedGross=requested, preemption=payload)
+            return requested
+        raise RuntimeError(f"HYPE_ZEC_CORE_PREEMPT_HELPER_UNEXPECTED_STATUS:{status}")
+
     def require_fresh_preorder_margin_guard(self) -> None:
         if not self.live:
             return
@@ -320,6 +376,7 @@ class V52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
             target_gross = self._prepare_fet_for_stock_entry(slot, target_gross)
             target_gross = self._prepare_quality102_for_stock_entry(slot, target_gross)
             target_gross = self._prepare_v12_dynamic_for_stock_entry(slot, target_gross)
+            target_gross = self._prepare_hype_zec_for_stock_entry(slot, candidate, target_gross)
         snapshot = self._pending_adjusted_snapshot(self.gross_snapshot())
         self.assert_gross_safe(snapshot)
         slot_cap = self.v11_gross_cap if slot == V11_SLOT else self.v50_gross_cap

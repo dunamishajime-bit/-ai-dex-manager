@@ -148,3 +148,56 @@ export function findManagedFetBrk48ProtectiveOrders(
     if (candidates.length !== 1) return [];
     return [candidates[0].order];
 }
+
+type HypeZecProtectionCandidate = {
+    order: DirectOpenOrder;
+    position: DirectPosition;
+    leg: "STOP" | "TP";
+    remainingQuantity: number;
+};
+
+function hypeZecProtectionCandidate(
+    order: DirectOpenOrder,
+    positions: readonly DirectPosition[],
+): HypeZecProtectionCandidate | undefined {
+    const symbol = String(order.symbol || "").trim().toUpperCase();
+    if (symbol !== "HYPEUSDT" && symbol !== "ZECUSDT") return undefined;
+    const match = /^hz-(stop|tp)-[a-z0-9_-]+$/i.exec(String(order.clientOrderId || ""));
+    if (!match || order.reduceOnly !== true || !["NEW", "PARTIALLY_FILLED", "PENDING_NEW"].includes(String(order.status || "").toUpperCase())) return undefined;
+    const leg = match[1].toLowerCase() === "stop" ? "STOP" : "TP";
+    const type = String(order.type || "").toUpperCase();
+    if ((leg === "STOP" && type !== "STOP_MARKET") || (leg === "TP" && type !== "TAKE_PROFIT_MARKET")) return undefined;
+    if (!(Number.isFinite(order.quantity) && order.quantity > 0) || !(Number.isFinite(order.executedQuantity) && order.executedQuantity >= 0 && order.executedQuantity <= order.quantity)) return undefined;
+    const position = positions.find((row) => row.symbol.toUpperCase() === symbol && row.quantity > MIN_REMAINING_QUANTITY && row.positionSide !== "SHORT");
+    if (!position || order.side !== "SELL") return undefined;
+    const remainingQuantity = order.quantity - order.executedQuantity;
+    const tolerance = Math.max(1e-8, Math.abs(position.quantity) * PROTECTION_TOLERANCE_PCT);
+    if (remainingQuantity <= MIN_REMAINING_QUANTITY || Math.abs(remainingQuantity - position.quantity) > tolerance) return undefined;
+    return { order, position, leg, remainingQuantity };
+}
+
+export function findManagedHypeZecProtectiveOrders(
+    openOrders: readonly DirectOpenOrder[],
+    positions: readonly DirectPosition[],
+): DirectOpenOrder[] {
+    const candidates = openOrders
+        .map((order) => hypeZecProtectionCandidate(order, positions))
+        .filter((entry): entry is HypeZecProtectionCandidate => Boolean(entry));
+    const managed = new Set<DirectOpenOrder>();
+    for (const position of positions) {
+        const symbol = position.symbol.toUpperCase();
+        if ((symbol !== "HYPEUSDT" && symbol !== "ZECUSDT") || position.quantity <= MIN_REMAINING_QUANTITY) continue;
+        const matching = candidates.filter(({ position: candidatePosition }) => candidatePosition === position);
+        if (matching.filter((entry) => entry.leg === "STOP").length !== 1 || matching.filter((entry) => entry.leg === "TP").length !== 1) continue;
+        for (const entry of matching) managed.add(entry.order);
+    }
+    return openOrders.filter((order) => managed.has(order));
+}
+
+export function isManagedHypeZecProtectiveOrder(
+    order: DirectOpenOrder,
+    openOrders: readonly DirectOpenOrder[],
+    positions: readonly DirectPosition[],
+): boolean {
+    return findManagedHypeZecProtectiveOrders(openOrders, positions).some((candidate) => candidate === order);
+}

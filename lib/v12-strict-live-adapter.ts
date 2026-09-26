@@ -6,7 +6,7 @@ import { AsterV3Client } from "@/lib/aster-v3-client";
 import { readQuality102CausalV1Ownership, quality102OwnsPosition, type Quality102CausalV1OwnershipSnapshot } from "@/lib/disdex-quality102-causal-v1-ownership";
 import { reduceQuality102CausalV1ForBaseConflict } from "@/lib/disdex-quality102-causal-v1-live-reduction";
 import { reduceFetBrk48ForCoreConflict } from "@/lib/fet-brk48-live-reduction";
-import { findManagedFetBrk48ProtectiveOrders, findManagedPenguRecoveryV8ProtectiveOrders, findManagedV12ProtectiveOrders } from "@/lib/disdex-managed-protective-orders";
+import { findManagedFetBrk48ProtectiveOrders, findManagedHypeZecProtectiveOrders, findManagedPenguRecoveryV8ProtectiveOrders, findManagedV12ProtectiveOrders } from "@/lib/disdex-managed-protective-orders";
 import type { DirectMarketQuote, DirectPosition, DirectTradeResult } from "@/lib/direct-trade-executor";
 import { readSharedCryptoDailyRisk } from "@/lib/disdex-shared-crypto-daily-risk";
 import { readPortfolioDdGovernor } from "@/lib/disdex-portfolio-dd-governor";
@@ -76,7 +76,12 @@ export function assertV12StrictLiveConfiguration(env: NodeJS.ProcessEnv = proces
 
 function strictStrategy(position: DirectPosition, quality102Ownership?: Quality102CausalV1OwnershipSnapshot): StrictStrategy {
     if (quality102OwnsPosition(quality102Ownership, position)) return "QUALITY102_CAUSAL_V1";
-    const classification = classifyAsterSymbol(position.symbol);
+    const requestedSleeve = position.symbol.toUpperCase() === "HYPEUSDT"
+        ? "HYPE_LONG"
+        : position.symbol.toUpperCase() === "ZECUSDT"
+            ? "ZEC_LONG"
+            : undefined;
+    const classification = classifyAsterSymbol(position.symbol, requestedSleeve);
     if (!classification.tradable) throw new Error(`ASTER_UNKNOWN_NONZERO_POSITION:${position.symbol}`);
     if (classification.sleeve === "V12") return "V12";
     if (classification.sleeve === "PENGU_DUAL_LS_V2") return "PENGU_DUAL_LS_V2";
@@ -160,6 +165,7 @@ export class V12StrictAsterLiveAdapter extends V12AsterLiveAdapter {
             ...findManagedPenguRecoveryV8ProtectiveOrders(openOrders, positions),
             ...findManagedV12ProtectiveOrders(openOrders, positions),
             ...findManagedFetBrk48ProtectiveOrders(openOrders, positions),
+            ...findManagedHypeZecProtectiveOrders(openOrders, positions),
         ]);
         const unmanagedOpenOrders = openOrders.filter((order) => !managedProtectiveOrders.has(order));
         if (unmanagedOpenOrders.length > 0) throw new Error("STRICT_PORTFOLIO_OPEN_ORDER_CONFLICT");
@@ -217,6 +223,7 @@ export class V12StrictAsterLiveAdapter extends V12AsterLiveAdapter {
                     ...findManagedPenguRecoveryV8ProtectiveOrders(workingOpenOrders, workingPositions),
                     ...findManagedV12ProtectiveOrders(workingOpenOrders, workingPositions),
                     ...findManagedFetBrk48ProtectiveOrders(workingOpenOrders, workingPositions),
+                    ...findManagedHypeZecProtectiveOrders(workingOpenOrders, workingPositions),
                 ]);
                 if (workingOpenOrders.some((order) => !refreshedManaged.has(order))) throw new Error("STRICT_PORTFOLIO_OPEN_ORDER_CONFLICT_AFTER_FET_PREEMPT");
                 quality102Ownership = await readQuality102CausalV1Ownership({ expectedRuntimeSha: process.env.DISDEX_Q102_RUNTIME_SHA || process.env.DISDEX_RUNTIME_COMMIT_SHA });

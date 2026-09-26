@@ -1,6 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import type { AsterOrderSide } from "@/lib/aster-v3-client";
+import type { AccountLockHandle } from "@/lib/disdex-account-order-lock";
 import type {
     DirectAccountSnapshot,
     DirectMarketQuote,
@@ -32,6 +33,8 @@ import { classifyAsterSymbol } from "@/lib/disdex-aster-portfolio-classifier";
 import { classifyAsterRateBudgetFailure } from "@/lib/disdex-aster-rate-budget-policy";
 import { planStrictPortfolio, type StrictPortfolioIntent, type StrictPortfolioPosition } from "@/lib/disdex-strict-portfolio-planner";
 import { aggregatePendingExposure, readPendingExposureRegistry } from "@/lib/disdex-pending-exposure-registry";
+import { INTEGRATED_PRODUCTION_RISK_POLICY } from "@/config/integratedProductionRiskPolicy";
+import { isHypeZecSoleSharedCapacityCause, releaseHypeZecCapacityForPriorityEntry } from "@/lib/hype-zec-priority-capacity";
 import { readQuality102CausalV1Ownership, quality102OwnsOrder, quality102OwnsPosition, type Quality102CausalV1OwnershipSnapshot } from "@/lib/disdex-quality102-causal-v1-ownership";
 import { reduceQuality102CausalV1ForBaseConflict } from "@/lib/disdex-quality102-causal-v1-live-reduction";
 import { reduceFetBrk48ForCoreConflict } from "@/lib/fet-brk48-live-reduction";
@@ -89,6 +92,7 @@ export interface PenguDualLsV2ReservationInput {
 }
 
 export interface PenguDualLsV2LockHandle extends LiveRunnerLockHandle {
+    document?(): Promise<Awaited<ReturnType<AccountLockHandle["document"]>>>;
     reserve?(input: PenguDualLsV2ReservationInput): Promise<{ reservationId: string }>;
     releaseReservation?(reservationId: string): Promise<void>;
 }
@@ -129,6 +133,12 @@ function finite(value: unknown, fallback = 0) {
     const parsed = Number(value);
     return Number.isFinite(parsed) ? parsed : fallback;
 }
+
+function isSharedCapacityBlock(reason: unknown) {
+    const value = String(reason || "");
+    return /^(CAPACITY_BLOCKED|CRYPTO_GROSS_CAP|TOTAL_GROSS_CAP|CRYPTO_ENTRY_GROSS_CAP|TOTAL_ENTRY_GROSS_CAP|PENDING_CRYPTO_GROSS|PENDING_TOTAL_GROSS|CRYPTO_GROSS_HARD_CAP|TOTAL_GROSS_HARD_CAP|.*_CAPACITY_BLOCKED)/.test(value);
+}
+
 
 export function buildPenguV8StrictGrossContract(requestedGross: number, equity: number, available: number) {
     const requested = Number.isFinite(requestedGross) ? Math.max(0, requestedGross) : 0;
@@ -211,6 +221,8 @@ function strictStrategyForPosition(position: DirectPosition, quality102Ownership
     if (quality102OwnsPosition(quality102Ownership, position)) return "QUALITY102_CAUSAL_V1" as const;
     const symbol = position.symbol.toUpperCase();
     if (symbol === SYMBOL) return "PENGU_DUAL_LS_V2" as const;
+    if (symbol === "HYPEUSDT") return "HYPE_LONG" as const;
+    if (symbol === "ZECUSDT") return "ZEC_LONG" as const;
     const v12 = classifyAsterSymbol(symbol, "V12");
     if (v12.tradable && v12.sleeve === "V12") return "V12" as const;
     const fet = classifyAsterSymbol(symbol, "FET_RESIDUAL");
@@ -343,6 +355,47 @@ export class PenguDualLsV2PortfolioRunner {
         if (!config.enabled || !config.liveExecutionEnabled || !config.productionConfigLiveEnabled) {
             throw new Error("PENGU_DUAL_LS_V2_FINAL LIVE is locked: enabled, runtime and production execution gates are all required.");
         }
+    }
+
+    private async releaseHypeZecForPriorityEntry(input: {
+        lock: PenguDualLsV2LockHandle;
+        positions: DirectPosition[];
+        equity: number;
+        targetGross: number;
+        pendingCryptoGross: number;
+        pendingTotalGross: number;
+        signal: PenguDualLsV2Signal;
+    }) {
+        if (!/^(1|true|yes|on)$/i.test(String(process.env.DISDEX_HYPE_ZEC_PREEMPTION_ENABLED || "").trim())) return undefined;
+        if (!this.dependencies.v12DynamicAdapter || typeof input.lock.document !== "function") return { status: "blocked" as const, message: "PENGU_HYPE_ZEC_PREEMPTION_LOCK_OR_ADAPTER_REQUIRED" };
+        const candidate: StrictPortfolioIntent = {
+            idempotencyKey: `${input.signal.strategyId}|${input.signal.referenceTs}|${input.signal.side}|ENTRY`,
+            strategy: "PENGU_DUAL_LS_V2",
+            symbol: SYMBOL,
+            side: input.signal.side > 0 ? "LONG" : "SHORT",
+            gross: input.targetGross,
+            requestedGross: input.targetGross,
+            notionalUsd: input.targetGross * input.equity,
+            signalTs: input.signal.referenceTs,
+        };
+        return releaseHypeZecCapacityForPriorityEntry({
+            adapter: this.dependencies.v12DynamicAdapter,
+            executor: this.dependencies.executor,
+            lock: input.lock as unknown as AccountLockHandle,
+            positions: input.positions,
+            equityUsd: input.equity,
+            candidate,
+            pendingCryptoGross: input.pendingCryptoGross,
+            pendingTotalGross: input.pendingTotalGross,
+            cryptoEntryCap: INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap,
+            totalEntryCap: INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap,
+            causeIdempotencyKey: candidate.idempotencyKey,
+            expectedRuntimeSha: process.env.DISDEX_RELEASE_SHA || process.env.DISDEX_RUNTIME_COMMIT_SHA,
+            enabled: true,
+            statePath: process.env.DISDEX_HYPE_ZEC_PREEMPTION_STATE_PATH,
+            maxSlippageBps: this.dependencies.config.maxSlippageBps,
+            now: this.now,
+        });
     }
 
     private async sharedRiskStatus(): Promise<{ reason: string; flattenExisting: boolean } | undefined> {
@@ -849,6 +902,41 @@ export class PenguDualLsV2PortfolioRunner {
             let requestedGross = 0;
             let targetGross = 0;
             let targetNotional = 0;
+            // A single entry decision may perform at most one sidecar
+            // reduction cycle.  This bounds the cumulative reduction to the
+            // planner's per-sidecar 50% ceiling even when the planner is
+            // retried after a fresh venue read-back.
+            let hypeZecPreemptionUsed = false;
+            const retryAfterHypeZecPreemption = async (desiredGross: number) => {
+                if (hypeZecPreemptionUsed || !(desiredGross > 0)) return false;
+                const pendingExposure = aggregatePendingExposure(await readPendingExposureRegistry());
+                const preemption = await this.releaseHypeZecForPriorityEntry({
+                    lock,
+                    positions: workingPositions,
+                    equity: workingEquity,
+                    targetGross: desiredGross,
+                    pendingCryptoGross: pendingExposure.cryptoGross,
+                    pendingTotalGross: pendingExposure.cryptoGross + pendingExposure.stockGross,
+                    signal,
+                });
+                if (!preemption || preemption.status !== "reduced") return false;
+                hypeZecPreemptionUsed = true;
+                [workingAccount, workingPositions] = await Promise.all([
+                    this.dependencies.executor.getAccountSnapshot(),
+                    this.dependencies.executor.getPositions(),
+                ]);
+                quality102Ownership = await readQuality102CausalV1Ownership({ expectedRuntimeSha: process.env.DISDEX_Q102_RUNTIME_SHA || process.env.DISDEX_RUNTIME_COMMIT_SHA });
+                quote = await this.dependencies.executor.getMarketQuote(SYMBOL);
+                const refreshedNow = this.now();
+                if (!validLiveAccount(workingAccount, refreshedNow) || !validLiveQuote(quote, SYMBOL, refreshedNow)) {
+                    throw new Error("PENGU_HYPE_ZEC_PREEMPTION_REFRESH_STALE");
+                }
+                const refreshedOpenOrders = await this.dependencies.executor.getOpenOrders();
+                if (unmanagedCrossSleeveOpenOrders(refreshedOpenOrders, workingPositions, quality102Ownership).length > 0) {
+                    throw new Error("PENGU_HYPE_ZEC_PREEMPTION_OPEN_ORDER_CONFLICT");
+                }
+                return true;
+            };
             if (!reduceOnly) {
                 let accepted: StrictPortfolioIntent | undefined;
                 for (let attempt = 0; attempt < 3; attempt += 1) {
@@ -883,8 +971,22 @@ export class PenguDualLsV2PortfolioRunner {
                         maxDataAgeMs: 5 * 60_000,
                     });
                     if (strictPlan.status !== "planned") {
+                        const planReason = strictPlan.reason || strictPlan.rejected[0]?.reason;
+                        const pendingForCapacity = aggregatePendingExposure(await readPendingExposureRegistry());
+                        const sidecarCausesCapacity = isHypeZecSoleSharedCapacityCause({
+                            positions: workingPositions,
+                            equityUsd: workingEquity,
+                            pendingCryptoGross: pendingForCapacity.cryptoGross,
+                            pendingTotalGross: pendingForCapacity.cryptoGross + pendingForCapacity.stockGross,
+                            candidateGross: targetGross,
+                            candidateSymbol: SYMBOL,
+                            candidateStrategy: "PENGU_DUAL_LS_V2",
+                            cryptoEntryCap: INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap,
+                            totalEntryCap: INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap,
+                        });
+                        if (isSharedCapacityBlock(planReason) && sidecarCausesCapacity && await retryAfterHypeZecPreemption(targetGross)) continue;
                         await this.dependencies.stateStore.save(state);
-                        return { status: "held", message: `PENGU Dual LS strict portfolio plan blocked entry: ${strictPlan.reason || strictPlan.rejected[0]?.reason || "NO_ACCEPTED_INTENT"}.`, signal };
+                        return { status: "held", message: `PENGU Dual LS strict portfolio plan blocked entry: ${planReason || "NO_ACCEPTED_INTENT"}.`, signal };
                     }
                     const fetReduction = strictPlan.reductions.find((reduction) => reduction.strategy === "FET_RESIDUAL");
                     if (fetReduction) {
@@ -949,8 +1051,22 @@ export class PenguDualLsV2PortfolioRunner {
                     }
                     accepted = strictPlan.accepted.find((intent) => intent.strategy === "PENGU_DUAL_LS_V2");
                     if (!accepted) {
+                        const planReason = strictPlan.reason || strictPlan.rejected.find((row) => row.intent.strategy === "PENGU_DUAL_LS_V2")?.reason;
+                        const pendingForCapacity = aggregatePendingExposure(await readPendingExposureRegistry());
+                        const sidecarCausesCapacity = isHypeZecSoleSharedCapacityCause({
+                            positions: workingPositions,
+                            equityUsd: workingEquity,
+                            pendingCryptoGross: pendingForCapacity.cryptoGross,
+                            pendingTotalGross: pendingForCapacity.cryptoGross + pendingForCapacity.stockGross,
+                            candidateGross: targetGross,
+                            candidateSymbol: SYMBOL,
+                            candidateStrategy: "PENGU_DUAL_LS_V2",
+                            cryptoEntryCap: INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap,
+                            totalEntryCap: INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap,
+                        });
+                        if (isSharedCapacityBlock(planReason) && sidecarCausesCapacity && await retryAfterHypeZecPreemption(targetGross)) continue;
                         await this.dependencies.stateStore.save(state);
-                        return { status: "held", message: `PENGU Dual LS strict portfolio plan blocked entry: ${strictPlan.rejected[0]?.reason || "NO_ACCEPTED_INTENT"}.`, signal };
+                        return { status: "held", message: `PENGU Dual LS strict portfolio plan blocked entry: ${planReason || "NO_ACCEPTED_INTENT"}.`, signal };
                     }
                     if (accepted.gross + 1e-9 < targetGross && this.dependencies.v12DynamicAdapter) {
                         const trim = await reduceV12DynamicResidualForCoreConflict({
