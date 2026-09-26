@@ -22,6 +22,7 @@ const ROUND_TRIP_COST_PCT = 0.003;
 const CASES = [
   { name:"FROZEN",volume:0.9845,score:1.4649 },
   { name:"VOLUME_080",volume:0.80,score:1.4649 },
+  { name:"COMBINED_V080_S100",volume:0.80,score:1.00 },
   { name:"USER_V055_S085",volume:0.55,score:0.85 },
   { name:"COMBINED_V060_S080",volume:0.60,score:0.80 },
 ] as const;
@@ -129,6 +130,29 @@ async function main(){
     const added=[...x.opportunityKeys].filter(k=>!base.has(k));
     const addReturns=added.map(k=>x.returnByKey.get(k)!).filter(Number.isFinite);
     const removed=[...base].filter(k=>!x.opportunityKeys.has(k));
+    // Repeated H2 observations of the same symbol are not fresh live entries.
+    const events=[...x.opportunityKeys].map(key=>{
+      const [symbol,side,tsText]=key.split("|");
+      return {symbol,side,ts:Number(tsText),net:x.returnByKey.get(key)!};
+    }).sort((a,b)=>a.ts-b.ts||a.symbol.localeCompare(b.symbol));
+    const jstDay=(ts:number)=>new Date(ts+9*HOUR).toISOString().slice(0,10);
+    const days=new Map<string,number>();
+    for(const e of events)days.set(jstDay(e.ts),(days.get(jstDay(e.ts))||0)+1);
+    const episodes=(hours:number)=>{
+      const lastBySymbol=new Map<string,number>();
+      const kept:typeof events=[];
+      for(const e of events){
+        const last=lastBySymbol.get(e.symbol);
+        if(last!==undefined&&e.ts-last<hours*HOUR)continue;
+        kept.push(e);lastBySymbol.set(e.symbol,e.ts);
+      }
+      return {episodeCount:kept.length,
+        positive24hForwardPct:kept.length?100*kept.filter(e=>e.net>0).length/kept.length:null,
+        mean24hForwardNetPct:kept.length?100*kept.reduce((a,e)=>a+e.net,0)/kept.length:null,
+        episodeDaysJst:new Set(kept.map(e=>jstDay(e.ts))).size};
+    };
+    const dailyCounts=[...days.values()].sort((a,b)=>a-b);
+    const fullYearDays=365;
     return {
       case:x.name,volumeRatioMin:x.volume,qualityScoreThreshold:x.score,
       rawCandidatesAfterBase:x.rawCandidatesAfterBase,
@@ -141,6 +165,16 @@ async function main(){
       signed24hNetFeeProxyMeanPct:proxy.length?100*sum/proxy.length:null,
       signed24hNetFeeProxyPositivePct:proxy.length?100*proxy.filter(v=>v>0).length/proxy.length:null,
       proxyEvents:proxy.length,
+      repeatedH2ObservationsNotRealEntries:true,
+      yearDays:fullYearDays,signalDaysJst:days.size,zeroSignalDaysJst:fullYearDays-days.size,
+      medianRepeatedObservationsPerSignalDay:dailyCounts.length?dailyCounts[Math.floor(dailyCounts.length/2)]:null,
+      maxRepeatedObservationsOnOneSignalDay:dailyCounts.at(-1)||0,
+      perMonthSignalDaysJst:Object.fromEntries([...days.keys()].reduce((m,day)=>{
+        const month=day.slice(0,7);m.set(month,(m.get(month)||0)+1);return m;
+      },new Map<string,number>())),
+      independentSymbolEpisodesMin24hApart:episodes(24),
+      independentSymbolEpisodesMin46hApart:episodes(46),
+      episodeCaveat:"Per-symbol spacing only; not actual trades, no stops or 5-logic gross.",
     };
   });
   const artifact={
