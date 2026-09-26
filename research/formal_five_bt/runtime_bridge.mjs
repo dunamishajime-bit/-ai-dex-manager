@@ -245,7 +245,7 @@ if (process.argv.includes("--list")) {
             && recent.every((bar, i) => i === 0 || recent[i - 1].openTs + hour === bar.openTs);
           const signal = aligned ? loaded.fet.buildFetBrk48Signal(recent, now) : undefined;
           results.push({
-            decisionTs: now, signal, historyReady: aligned,
+            decisionTs: now, signal: signal ?? null, historyReady: aligned,
             gapReason: aligned ? null : recent.length < 73 ? "FET_INSUFFICIENT_CAUSAL_73H_HISTORY"
               : "FET_73H_HISTORY_GAP_OR_MALFORMED",
             lastCompletedCloseTs: recent.at(-1)?.closeTs ?? null,
