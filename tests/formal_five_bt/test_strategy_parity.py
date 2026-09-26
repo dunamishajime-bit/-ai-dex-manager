@@ -19,7 +19,7 @@ class RuntimeBridgeContractTests(unittest.TestCase):
     def test_runtime_source_exports_are_hash_verified(self):
         with RuntimeBridge() as bridge:
             exported = bridge.list_exports()
-        self.assertEqual(exported["runtimeSha"], "e1b58060d6263a3af7ced51bec854d3e211d2f35")
+        self.assertEqual(exported["runtimeSha"], "a09ea45ca3cbd72100f9eb0eaae499039c40b6a0")
         for name in ("v12", "pengu", "q102Signal", "q102Observability", "fet", "strictPlanner"):
             self.assertIn(name, exported["exports"])
 
@@ -38,7 +38,7 @@ class RuntimeBridgeContractTests(unittest.TestCase):
         self.assertIsInstance(trace, DecisionTrace)
         self.assertEqual(trace.strategy_id, "V12")
         self.assertTrue(trace.gates)
-        self.assertTrue(trace.source_runtime_sha == "e1b58060d6263a3af7ced51bec854d3e211d2f35")
+        self.assertTrue(trace.source_runtime_sha == "a09ea45ca3cbd72100f9eb0eaae499039c40b6a0")
         self.assertEqual(trace.input_sha256, hashlib.sha256(json.dumps(history, sort_keys=True, separators=(",", ":")).encode()).hexdigest())
 
     def test_v12_batched_series_cannot_see_future_bars(self):

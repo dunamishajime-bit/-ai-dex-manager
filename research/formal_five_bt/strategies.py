@@ -14,7 +14,7 @@ from .manifest import load_manifest
 
 HERE = Path(__file__).resolve().parent
 BRIDGE = HERE / "runtime_bridge.mjs"
-EXPECTED_RUNTIME_SHA = "e1b58060d6263a3af7ced51bec854d3e211d2f35"
+EXPECTED_RUNTIME_SHA = "a09ea45ca3cbd72100f9eb0eaae499039c40b6a0"
 
 
 def _canonical_json(value: Any) -> str:
