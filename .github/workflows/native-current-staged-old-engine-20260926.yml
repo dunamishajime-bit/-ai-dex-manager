@@ -1,0 +1,117 @@
+name: Stage current native V12 Top3 and FET evidence in frozen original integrated engine
+on:
+  push:
+    branches: [research/recover-final-governor-bt-20260926]
+    paths:
+      - scripts/research/stage_native_current_v12_in_old_engine_20260926.py
+      - .github/workflows/native-current-staged-old-engine-20260926.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  source-native-staging:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 110
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          ref: 9f51d5876fd7c7924b3c99dc1934336bdd832852
+          path: .original-repo
+      - uses: actions/checkout@v4
+        with:
+          ref: 04c1a369223bd27e9e42bc93604b3777b9230d92
+          path: .original-repo/.stock-research
+      - uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .original-repo/.stock-research/.v11
+      - uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .original-repo/.stock-research/.v13
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Download immutable original integrated engine SHA
+        uses: actions/download-artifact@v4
+        with:
+          name: pengu-integrated-engine-capture
+          path: .original-repo/.research-state/original
+          github-token: ${{ github.token }}
+          repository: dunamishajime-bit/-ai-dex-manager
+          run-id: 35934170491
+      - name: Download Sep18 baseline and original stock rows
+        uses: actions/download-artifact@v4
+        with:
+          name: old-source-refreshed-stock-restoration-20260926
+          path: .original-artifacts/old-run
+          github-token: ${{ github.token }}
+          repository: dunamishajime-bit/-ai-dex-manager
+          run-id: 36215106356
+      - name: Download original old V12 and PENGU historical ledgers
+        uses: actions/download-artifact@v4
+        with:
+          name: flat-boost-preemption-35337138289
+          path: .original-artifacts/old-ledger
+          github-token: ${{ github.token }}
+          repository: dunamishajime-bit/-ai-dex-manager
+          run-id: 35337138289
+      - name: Download native actual PENGU Q60 DD17 H72 history
+        uses: actions/download-artifact@v4
+        with:
+          name: original-new-pengu-q60-dd17-h72-ledger-20260926
+          path: .original-artifacts/new-pengu
+          github-token: ${{ github.token }}
+          repository: dunamishajime-bit/-ai-dex-manager
+          run-id: 36215236060
+      - name: Download corrected source-native current VPS V12 and FET H1 history
+        uses: actions/download-artifact@v4
+        with:
+          name: current-vps-source-native-v12-fet-h1-candidates-20260926
+          path: .native
+          github-token: ${{ github.token }}
+          repository: dunamishajime-bit/-ai-dex-manager
+          run-id: 36219857099
+      - name: Check pinned original source unchanged and stage only historical inputs
+        shell: bash
+        env:
+          PYTHONPATH: .original-repo/scripts:.original-repo/.stock-research/scripts
+        run: |
+          set -Eeuo pipefail
+          python3 -m py_compile scripts/research/stage_native_current_v12_in_old_engine_20260926.py
+          printf '%s  %s\n' cae9785492ea5dda8173853fe2cbc7d99ea451f550a739fb7f014f4773d9899d .original-repo/.research-state/original/integrated-engine.py | sha256sum -c -
+          mkdir -p .original-artifacts/staged
+          python3 scripts/research/stage_native_current_v12_in_old_engine_20260926.py \
+            --old-engine .original-repo/.research-state/original/integrated-engine.py \
+            --old-result .original-artifacts/old-run/restored-results/sep18/result.json \
+            --new-pengu .original-artifacts/new-pengu/.research-state/pengu-flat1-dd-q60-robustness/preserved-new-pengu-ledger.json \
+            --stock-raw .original-artifacts/old-run/restored-results/stock/old-stock-raw.json \
+            --v12-ledger .original-artifacts/old-ledger/flat-boost-current/v12-top2-ledger.json \
+            --old-pengu-ledger .original-artifacts/old-ledger/flat-boost-preemption/pengu-hard24-ledger.json \
+            --quality102-frozen .original-artifacts/old-run/original/quality102-frozen.csv \
+            --native .native/.research-state/current-vps-native-v12-fet \
+            --output .original-artifacts/staged \
+            2>&1 | tee .original-artifacts/staged.log
+          python3 - <<'PY'
+          import json
+          x=json.load(open('.original-artifacts/staged/summary.json'))
+          assert x['originalSha256']=='cae9785492ea5dda8173853fe2cbc7d99ea451f550a739fb7f014f4773d9899d'
+          assert x['fullFiveStrategyBTCompleted'] is False
+          for name,row in x['results'].items():
+              assert row['nativeV12Ledger']>0
+              assert row['fetIndependentLedger']>0
+              assert row['staged']['status'] in ('BLOCKED','PARTIAL_SENSITIVITY_NOT_LIVE')
+          print('NATIVE_STAGING_PASS_WITH_EXPLICIT_FULL_BT_BLOCKERS')
+          PY
+      - name: Save complete staged original-engine evidence
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: current-source-native-v12-fet-old-engine-staging-20260926
+          path: |
+            .original-artifacts/staged/
+            .original-artifacts/staged.log
+          retention-days: 90
+          if-no-files-found: warn
