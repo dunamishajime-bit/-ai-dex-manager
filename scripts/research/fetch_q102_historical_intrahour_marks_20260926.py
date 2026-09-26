@@ -12,12 +12,10 @@ requests=[
  ("SUIUSDT",1756135800000),("DOGEUSDT",1777473000000),
  ("DOGEUSDT",1778682600000),("ONDOUSDT",1781026200000),
  ("UNIUSDT",1783524600000),("UNIUSDT",1783611000000),
- ("ARBUSTDT",1783960200000),("ARBUSTDT",1784136600000),
+ ("ARBUSDT",1783960200000),("ARBUSDT",1784136600000),
  ("NEARUSDT",1784557800000),("UNIUSDT",1784820600000),
  ("UNIUSDT",1785346200000),
 ]
-# Correct the source-recorded ARB symbol spelling; never request a surrogate coin.
-requests=[("ARBUSDT" if s=="ARBUSTDT" else s,t) for s,t in requests]
 result=[];status=Counter()
 for symbol,ts in requests:
  if not (1754784000000<=ts<END and ts%60000==0):raise RuntimeError("INVALID_HISTORICAL_REQUEST")
