@@ -1,0 +1,88 @@
+name: DisDex archival-only stale state-reference planning
+on:
+  issue_comment:
+    types: [created]
+permissions:
+  contents: read
+jobs:
+  audit:
+    if: >-
+      github.event.issue.number == 132 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == 'DISDEX_ARCHIVAL_STATE_REFERENCE_PLAN_20260926'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Configure approved VPS read-only transport
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Identify only aged obsolete releases whose full path is referenced exclusively by backups
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -p "${SSH_PORT:-22}" "root@$SSH_HOST" 'python3 -' <<'PY'
+          import pathlib,os,re,json,collections,time,subprocess
+          R=pathlib.Path("/home/deploy/disdex-trading/releases")
+          C=pathlib.Path("/home/deploy/disdex-trading/current").resolve()
+          SHA_RE=re.compile(r"^[0-9a-f]{40}$")
+          SHA_PATH=re.compile(r"/home/deploy/disdex-trading/releases/([0-9a-f]{40})")
+          dirs=[p for p in R.iterdir() if p.is_dir() and not p.is_symlink() and SHA_RE.fullmatch(p.name) and (p/".disdex-release-sha").is_file()]
+          dirs.sort(key=lambda p:p.stat().st_mtime,reverse=True)
+          protected={C}
+          for p in dirs:
+           if len(protected)>=3:break
+           protected.add(p)
+          legacy={p.name:p for p in dirs if p not in protected and time.time()-p.stat().st_mtime>7*86400}
+          refs=collections.defaultdict(set)
+          def archival(path:str)->bool:
+           p=pathlib.Path(path)
+           if path.startswith(("/var/lib/disdex/ops-backups/","/var/lib/disdex/deploy-backups/")):return True
+           if path.startswith("/var/lib/disdex/"):
+            name=p.name
+            if (".before-" in name or ".rollback-from-" in name) and name.endswith((".json",".jsonl",".txt",".env")):return True
+           if path.startswith("/etc/systemd/system/") and (".before-" in p.name or ".disabled" in p.name):return True
+           if path.startswith("/etc/disdex/codex-backups-"):return True
+           return False
+          for root in ["/etc/systemd/system","/etc/disdex","/var/lib/disdex","/home/deploy/disdex-ops"]:
+           base=pathlib.Path(root)
+           if not base.exists():continue
+           for p in base.rglob("*"):
+            if p.is_symlink() or not p.is_file():continue
+            try:
+             if p.stat().st_size>32_000_000:continue
+             s=p.read_text(encoding="utf-8",errors="ignore")
+             for sha in set(SHA_PATH.findall(s))&legacy.keys():refs[sha].add(str(p))
+            except Exception:pass
+          possible=[]
+          rejected=[]
+          files=set()
+          for sha,p in legacy.items():
+           items=sorted(refs.get(sha,set()))
+           bad=[x for x in items if not archival(x)]
+           if bad:rejected.append({"sha":sha,"bad":bad[:3],"archival":len(items)-len(bad)})
+           elif items:
+            files.update(items)
+            possible.append({"sha":sha,"ageDays":round((time.time()-p.stat().st_mtime)/86400,1),"refs":len(items),"refSamples":items[:2]})
+           else:rejected.append({"sha":sha,"bad":["NO_FULL_PATH_REFS_SAFE_RETENTION_SHOULD_ALREADY_COVER"],"archival":0})
+          print("SAFE_ARCHIVAL_REF_PLAN="+json.dumps({"current":C.name,"oldReleasesOver7d":len(legacy),"archiveOnlyOldReleases":len(possible),"archiveOnlyFileCount":len(files),"candidateShas":[x["sha"] for x in possible],"candidateDetails":possible[:20],"blockedCount":len(rejected),"blockedExamples":rejected[:12],"preservesHistoryJsonl":True,"noOriginalBtArtifactsTouched":True,"tradingMutation":0}))
+          
+          PY
