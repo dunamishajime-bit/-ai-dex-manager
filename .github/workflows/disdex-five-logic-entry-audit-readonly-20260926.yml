@@ -239,10 +239,15 @@ jobs:
                       orders=obj.get("openOrders",[])
                       balances=obj.get("usdtBalance",[])
                       available=all(float(b.get("availableBalance") or 0)>=0 for b in balances)
+                      availableUsd=max((float(b.get("availableBalance") or 0) for b in balances),default=0)
+                      walletUsd=max((float(b.get("balance") or 0) for b in balances),default=0)
                       order_types=dict(collections.Counter(str(x.get("type")) for x in orders if isinstance(x,dict)))
                       print("ASTER_ACCOUNT_PROOF="+json.dumps({
                           "pass":True,"positionsCount":len(positions),"openOrdersCount":len(orders),
-                          "availableBalanceNonNegative":available,"orderTypes":order_types,
+                          "availableBalanceNonNegative":available,"availableMeetsFiveUsdMinimum":availableUsd>=5,
+                          "availableMeetsFiftyUsd":availableUsd>=50,"walletPositive":walletUsd>0,
+                          "availableBalancePctAtLeast15":walletUsd>0 and availableUsd/walletUsd>=0.15,
+                          "orderTypes":order_types,
                           "nonReduceOnlyOpenOrders":sum(x.get("reduceOnly") is False for x in orders if isinstance(x,dict)),
                           "ordersSent":obj.get("ordersSent"),"cancelsSent":obj.get("cancelsSent"),
                           "positionChangesSent":obj.get("positionChangesSent")}))
@@ -312,5 +317,31 @@ jobs:
                                      "recomputedVolumeRatio":volumes[target]/(sum(prior)/20) if sum(prior)>0 else None})
                   print("INDEPENDENT_ASTER_VOLUME="+json.dumps(result))
               except Exception as exc:print("INDEPENDENT_ASTER_VOLUME="+json.dumps({"symbol":symbol,"error":type(exc).__name__+":"+str(exc)[:120]}))
+          # Reproduce FET's last eligible 4-hour entry windows without touching VPS quotas.
+          try:
+              url="https://fapi.asterdex.com/fapi/v3/klines?"+urllib.parse.urlencode(
+                  {"symbol":"FETUSDT","interval":"1h","limit":170})
+              with urllib.request.urlopen(urllib.request.Request(url,headers={"User-Agent":"DisDex-Independent-FET-Signal-Audit/1.0"}),timeout=14) as response: rows=json.load(response)
+              candles=sorted([{"openTs":int(r[0]),"high":float(r[2]),"close":float(r[4]),
+                               "volume":float(r[5]),"closeTs":int(r[6])} for r in rows if isinstance(r,list) and len(r)>=7],
+                             key=lambda r:r["openTs"])
+              for entryTs in (1790370000000,1790384400000,1790398800000):
+                  completed=[r for r in candles if r["closeTs"]<entryTs]
+                  signal=completed[-1] if completed else None
+                  prior48=completed[-49:-1]
+                  prior72=completed[-73:-1]
+                  good=bool(signal and signal["openTs"]==entryTs-3600000 and len(prior48)==48 and len(prior72)==72)
+                  result={"entryUTC":datetime.datetime.fromtimestamp(entryTs/1000,datetime.timezone.utc).isoformat(),
+                          "hasCompleteHistory":good}
+                  if good:
+                      high=max(r["high"] for r in prior48)
+                      vol=sorted(r["volume"] for r in prior72)
+                      median=(vol[35]+vol[36])/2
+                      vr=signal["volume"]/median if median>0 else 0
+                      result.update({"lastCompletedClose":signal["close"],"prior48High":high,
+                                     "volumeRatio":vr,"breakoutPassed":signal["close"]>high,
+                                     "volumePassed":vr>=1.2,"wouldEmitSignal":signal["close"]>high and vr>=1.2})
+                  print("INDEPENDENT_FET_BRK48="+json.dumps(result))
+          except Exception as exc:print("INDEPENDENT_FET_BRK48="+json.dumps({"error":type(exc).__name__+":"+str(exc)[:120]}))
           print("INDEPENDENT_ASTER_NO_PRODUCTION_MUTATION=TRUE")
           PY
