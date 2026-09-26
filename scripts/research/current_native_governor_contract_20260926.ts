@@ -14,9 +14,9 @@ function assert(condition:boolean,why:string){if(!condition)throw Error(why)}
 const rows=[
   {name:"BASE_WITHOUT_PROFIT",profit:0,twr:1.4,drawdown:0,avail:1000,existing:0,tier:"BASE",crypto:3,total:4.25},
   {name:"BASE_STALE_DD",profit:10,twr:1.4,drawdown:0,avail:1000,existing:0,stale:true,tier:"BASE",crypto:3,total:4.25},
-  {name:"PROFIT_1",profit:1,twr:1.05,drawdown:3,avail:1000,existing:0,tier:"PROFIT_1",crypto:3.25,total:5},
-  {name:"PROFIT_2",profit:1,twr:1.10,drawdown:2,avail:1000,existing:0,tier:"PROFIT_2",crypto:3.5,total:5},
-  {name:"PROFIT_3",profit:1,twr:1.20,drawdown:1,avail:1000,existing:0,tier:"PROFIT_3",crypto:4,total:5},
+  {name:"PROFIT_1",profit:1,twr:1.05,drawdown:3,avail:1000,existing:0,tier:"PROFIT_1",crypto:3.25,total:4.375},
+  {name:"PROFIT_2",profit:1,twr:1.10,drawdown:2,avail:1000,existing:0,tier:"PROFIT_2",crypto:3.5,total:4.5},
+  {name:"PROFIT_3",profit:1,twr:1.20,drawdown:1,avail:1000,existing:0,tier:"PROFIT_3",crypto:4,total:4.75},
   {name:"PROFIT_4",profit:1,twr:1.30,drawdown:.5,avail:1000,existing:0,tier:"PROFIT_4",crypto:5,total:5},
   {name:"PROFIT_4_MARGIN_LIMITED",profit:1,twr:1.30,drawdown:.5,avail:200,existing:2,tier:"PROFIT_4",crypto:3,total:3},
   {name:"BASE_MARGIN_RESERVE",profit:0,twr:1.3,drawdown:0,avail:500,existing:2,tier:"BASE",crypto:3,total:3.75}
