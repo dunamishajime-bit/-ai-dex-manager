@@ -1,0 +1,116 @@
+name: HP a09 current runtime and missing surface read-only diagnostic
+on:
+  push:
+    branches: [codex/hp-a09-runtime-sync-20260927]
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 13
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Configure pinned root SSH without logging secrets
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ -n "$SSH_HOST" && -n "$ROOT_KEY" && -n "$SSH_KNOWN_HOSTS" ]]
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k):return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Read actual localhost HP APIs and page routes (no order requests)
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -p "${SSH_PORT:-22}" "root@$SSH_HOST" 'python3 -' <<'PY'
+          import datetime,json,os,pathlib,re,stat,subprocess,urllib.request,urllib.error
+          EXPECTED="a09ea45ca3cbd72100f9eb0eaae499039c40b6a0"
+          run=lambda *args:subprocess.run(args,capture_output=True,text=True,timeout=18).stdout.strip()
+          sha=(pathlib.Path("/home/deploy/disdex-trading/current/.disdex-release-sha").read_text()).strip()
+          wd=run("systemctl","show","ai-dex-manager-ui.service","--property","WorkingDirectory","--value")
+          ui_env=run("systemctl","show","ai-dex-manager-ui.service","--property","Environment","--value")
+          m=re.search(r"(?:^|\s)DISDEX_UI_RELEASE_SHA=([0-9a-f]{40})(?:\s|$)",ui_env)
+          print("ACTUAL_RELEASE",json.dumps({"tradingSha":sha,"expected":EXPECTED,"matches":sha==EXPECTED,
+            "uiWorkdir":wd,"uiSha":m.group(1) if m else None,"uiService":run("systemctl","is-active","ai-dex-manager-ui.service"),
+            "uiBuiltFetPage":(pathlib.Path(wd)/"app/decision-status/fet/page.tsx").is_file(),
+            "uiBuiltFetApi":(pathlib.Path(wd)/"app/api/system/fet-status/route.ts").is_file(),
+            "releaseEnvExists":pathlib.Path("/etc/disdex/current-runtime/"+sha+".env").is_file()}))
+          for name,path in {
+            "v12State":"/var/lib/disdex/v12-x1-all/runner.json",
+            "v12Snapshot":"/var/lib/disdex/v12-x1-all/decision-snapshot.json",
+            "pengu":"/var/lib/disdex/pengu-dual-ls-v2/runner-live.json",
+            "q102":"/var/lib/disdex/quality102-causal-v1/state.json",
+            "q102Ranking":"/var/lib/disdex/quality102-causal-v1/decision-ranking-snapshot.json",
+            "fet":"/var/lib/disdex/fet-brk48-residual/state.json",
+            "v52":"/var/lib/disdex/v52-aster-only/runner-live.json",
+          }.items():
+            p=pathlib.Path(path)
+            try:
+              if not p.is_file():raise FileNotFoundError()
+              st=p.stat()
+              rd=subprocess.run(["runuser","-u","deploy","--","test","-r",path],capture_output=True).returncode==0
+              v=json.loads(p.read_text())
+              print("STATE_ACCESS",json.dumps({"name":name,"exists":True,"owner":st.st_uid,"group":st.st_gid,
+                "mode":oct(stat.S_IMODE(st.st_mode)),"deployReadable":rd,"runtimeSha":v.get("runtimeCommitSha") or v.get("runtimeSha"),
+                "updatedAt":v.get("updatedAt"),"candidateCount":len(v.get("candidates",[])) if isinstance(v.get("candidates"),list) else None}))
+            except Exception as e:print("STATE_ACCESS",json.dumps({"name":name,"error":type(e).__name__}))
+          base="http://127.0.0.1:3001"
+          apis=("/api/system/live-runtime","/api/system/decision-status?refresh=1",
+                "/api/system/live-status","/api/system/q102-symbol-status","/api/system/fet-status")
+          for endpoint in apis:
+            req=urllib.request.Request(base+endpoint,headers={"Cookie":"disdex_auth=1",
+              "User-Agent":"DisDex-HP-ReadOnly-Run/20260927"})
+            try:
+              with urllib.request.urlopen(req,timeout=28) as res:
+                code=res.status;data=res.read(1600000)
+            except urllib.error.HTTPError as e:
+              code=e.code;data=e.read(80000)
+            except Exception as e:
+              print("API_PROBE",json.dumps({"endpoint":endpoint,"error":type(e).__name__}));continue
+            try:j=json.loads(data)
+            except ValueError:
+              print("API_PROBE",json.dumps({"endpoint":endpoint,"http":code,"nonJson":True}));continue
+            result={"endpoint":endpoint,"http":code,"ok":j.get("ok"),"error":str(j.get("error") or "")[:220],
+                    "runtimeSha":j.get("releaseSha")}
+            if "live-runtime" in endpoint:
+              result.update({"lineageSynced":(j.get("runtimeLineage") or {}).get("synchronized"),
+                "lineage":{k:{"matches":v.get("matchesCurrent"),"error":str(v.get("error") or "")[:100]}
+                  for k,v in ((j.get("runtimeLineage") or {}).get("units") or {}).items()},
+                "capFields":sorted((j.get("caps") or {}).keys())})
+            if "decision-status" in endpoint:
+              r=j.get("runtime") or {}
+              result.update({"snapshotError":str(j.get("error") or "")[:220],"units":[{"id":x.get("id"),"status":x.get("status"),
+                "sha":x.get("releaseSha"),"reason":str(x.get("reason") or "")[:110]} for x in r.get("units",[])],
+                "v12":{"errors":(j.get("v12Observability") or {}).get("errors"),"details":(j.get("v12Observability") or {}).get("decisionDetailsAvailable"),
+                  "snapshotCandidates":len(((j.get("v12Observability") or {}).get("decision") or {}).get("candidates") or [])},
+                "pengu":{"status":(j.get("penguRuntime") or {}).get("status"),"errors":(j.get("penguRuntime") or {}).get("errors")},
+                "q102":{"status":(j.get("quality102Runtime") or {}).get("status"),"errors":(j.get("quality102Runtime") or {}).get("errors")},
+                "v52":{"status":(j.get("v52Top2Observability") or {}).get("status"),
+                  "errors":(j.get("v52Top2Observability") or {}).get("errors")},
+                "fet":{"status":(j.get("fetRuntime") or {}).get("status"),"errors":(j.get("fetRuntime") or {}).get("errors"),
+                  "expectedSha":(j.get("fetRuntime") or {}).get("expectedReleaseSha"),
+                  "actualSha":(j.get("fetRuntime") or {}).get("runtimeSha")}})
+            print("API_PROBE",json.dumps(result,ensure_ascii=False))
+          for endpoint in ("/","/decision-status","/decision-status/v12","/decision-status/pengu",
+                           "/decision-status/q102","/decision-status/v52","/decision-status/fet"):
+            try:
+              with urllib.request.urlopen(urllib.request.Request(base+endpoint,headers={"Cookie":"disdex_auth=1"}),timeout=11) as res:
+                code=res.status
+            except urllib.error.HTTPError as e:code=e.code
+            except Exception as e:code=type(e).__name__
+            print("PAGE_PROBE",json.dumps({"route":endpoint,"status":code}))
+          print("HP_A09_READONLY_COMPLETE ORDERS_SENT=0 TRADING_MUTATION=0")
+          PY
