@@ -56,13 +56,15 @@ function baseSymbol(symbol: string) {
 function strategyForSymbol(symbol: string): StrategyId {
   if (/^(AMZN|META|MSFT|NVDA|TSLA)/.test(symbol)) return "V52";
   if (symbol === liveConfig.penguSymbol) return "PENGU";
-  if (symbol === "FETUSDT") return "UNKNOWN";
+  if (symbol === "FETUSDT" || symbol === "HYPEUSDT" || symbol === "ZECUSDT") return "UNKNOWN";
   if ((Q102_HISTORY_SYMBOLS as readonly string[]).includes(symbol)) return "QUALITY102";
   return "V12";
 }
 
 function strategyFromEvidence(evidence: FillLineageEvidence | undefined, fallback: StrategyId): StrategyId {
   const value = String(evidence?.strategyId || "").toUpperCase();
+  if (value === "HYPE_LONG" || value.includes("HYPE_ZEC_HYPE_LONG")) return "HYPE";
+  if (value === "ZEC_LONG" || value.includes("HYPE_ZEC_ZEC_LONG")) return "ZEC";
   if (value.includes("QUALITY102") || value === "Q102") return "QUALITY102";
   if (value.includes("PENGU")) return "PENGU";
   if (value.includes("V52") || value.includes("V11EQ") || value.includes("V50")) return "V52";

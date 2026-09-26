@@ -4,7 +4,7 @@ import { loadAsterTradeHistory } from "@/lib/server/aster-trade-history";
 import { HISTORICAL_FILL_LINEAGE_BY_ORDER_ID } from "@/lib/server/historical-fill-lineage";
 import type { TradeHistoryEntry } from "@/lib/server/trade-history-db";
 
-export const LIVE_LOGIC_KEYS = ["V12", "PENGU", "Q102", "FET", "V52", "UNATTRIBUTED"] as const;
+export const LIVE_LOGIC_KEYS = ["V12", "PENGU", "Q102", "FET", "HYPE", "ZEC", "V52", "UNATTRIBUTED"] as const;
 export type LiveLogicKey = (typeof LIVE_LOGIC_KEYS)[number];
 
 type AsterHistoryRow = {
@@ -208,7 +208,13 @@ function logicLabel(logic: LiveLogicKey) {
 
 function classifyStrategy(event?: FillEvent): { logic: LiveLogicKey; variant: string; strategyId: string } {
   const clientOrderId = String(event?.clientOrderId || "").trim().toLowerCase();
-  const clientStrategy = clientOrderId.startsWith("q102v1-")
+  // hz-* IDs are shared; symbol must be present in a matched fill event, never inferred from the portfolio alone.
+  const hzSymbol = String(event?.symbol || "").trim().toUpperCase();
+  const clientStrategy = clientOrderId.startsWith("hz-") && hzSymbol === "HYPEUSDT"
+    ? "HYPE_LONG"
+    : clientOrderId.startsWith("hz-") && hzSymbol === "ZECUSDT"
+      ? "ZEC_LONG"
+      : clientOrderId.startsWith("q102v1-")
     ? "QUALITY102_CAUSAL_V1"
     : clientOrderId.startsWith("fet-")
       ? "FET_BRK48_RESIDUAL"
@@ -244,6 +250,8 @@ function classifyStrategy(event?: FillEvent): { logic: LiveLogicKey; variant: st
     const family = ["S34_4H_GRID", "HIGH_VOL", "BRK", "REV", "PB", "MR"].find((value) => trace.includes(value));
     return { logic: "Q102", variant: family ? `Q102 ${family}` : "Q102 Causal V4", strategyId };
   }
+  if (upper === "HYPE_LONG" || upper.includes("HYPE_ZEC_HYPE_LONG")) return { logic: "HYPE", variant: "HYPE LONG", strategyId };
+  if (upper === "ZEC_LONG" || upper.includes("HYPE_ZEC_ZEC_LONG")) return { logic: "ZEC", variant: "ZEC LONG", strategyId };
   if (upper.includes("FET_BRK48") || upper === "FET") {
     return { logic: "FET", variant: "FET BRK48", strategyId };
   }
@@ -262,6 +270,8 @@ function logicFromOfficialHistory(entry: TradeHistoryEntry): { logic: LiveLogicK
   if (!explicit) return { logic: "UNATTRIBUTED", attributed: false };
   if (strategy.includes("QUALITY102") || strategy === "Q102") return { logic: "Q102", attributed: true };
   if (strategy.includes("PENGU")) return { logic: "PENGU", attributed: true };
+  if (strategy === "HYPE" || strategy === "HYPE_LONG") return { logic: "HYPE", attributed: true };
+  if (strategy === "ZEC" || strategy === "ZEC_LONG") return { logic: "ZEC", attributed: true };
   if (strategy.includes("FET")) return { logic: "FET", attributed: true };
   if (strategy.includes("V52") || strategy.includes("V11") || strategy.includes("V50")) return { logic: "V52", attributed: true };
   if (strategy.includes("V12")) return { logic: "V12", attributed: true };
@@ -274,6 +284,8 @@ function variantFromOfficialHistory(entry: TradeHistoryEntry, logic: LiveLogicKe
   if (logic === "PENGU") return route ? `PENGU ${route}` : "PENGU";
   if (logic === "Q102") return route ? `Q102 ${route}` : "Q102 Causal V4";
   if (logic === "FET") return route ? `FET ${route}` : "FET BRK48";
+  if (logic === "HYPE") return route ? `HYPE ${route}` : "HYPE LONG";
+  if (logic === "ZEC") return route ? `ZEC ${route}` : "ZEC LONG";
   if (logic === "V52") return route ? `V52 / ${route}` : "V52";
   return "未分類";
 }
@@ -338,7 +350,7 @@ function pointLabel(iso: string) {
 }
 
 function emptyLogicRecord(): Record<LiveLogicKey, number> {
-  return { V12: 0, PENGU: 0, Q102: 0, FET: 0, V52: 0, UNATTRIBUTED: 0 };
+  return { V12: 0, PENGU: 0, Q102: 0, FET: 0, HYPE: 0, ZEC: 0, V52: 0, UNATTRIBUTED: 0 };
 }
 
 function normalizeEquityHistory(raw: unknown): EquityPoint[] {
@@ -406,7 +418,20 @@ export async function loadLivePerformanceAnalytics(paths: LivePerformancePaths =
       attributed: Boolean(fill),
     };
   });
-  const officialTrades = officialHistory?.entries?.map(liveTradeFromOfficialHistoryEntry) || [];
+  // Use explicit order-ID evidence from persisted fill spool when official fills lack attribution.
+  // Never attribute all historical HYPEUSDT/ZECUSDT orders by symbol alone.
+  const officialTrades = officialHistory?.entries?.map((entry) => {
+    const trade = liveTradeFromOfficialHistoryEntry(entry);
+    if (trade.attributed || !entry.orderId) return trade;
+    const fill = fillByOrderId.get(String(entry.orderId));
+    if (!fill) return trade;
+    const classified = classifyStrategy(fill);
+    if (classified.logic === "UNATTRIBUTED") return trade;
+    return { ...trade, logic: classified.logic, logicLabel: logicLabel(classified.logic),
+      variant: classified.variant, strategyId: classified.strategyId,
+      clientOrderId: fill.clientOrderId ? String(fill.clientOrderId) : trade.clientOrderId,
+      attributed: true };
+  }) || [];
   const trades = (officialTrades.length ? officialTrades : snapshotTrades)
     .sort((a, b) => Date.parse(a.executedAt) - Date.parse(b.executedAt));
 
