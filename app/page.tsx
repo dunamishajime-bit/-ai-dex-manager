@@ -80,7 +80,7 @@ export default function HomePage() {
           <div className="panel-gold min-w-0 rounded-[30px] p-5 md:p-7 [overflow-wrap:anywhere]">
             <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.3em] text-gold-100/76"><ShieldCheck className="h-4 w-4" />DISTerminal Production</div>
             <h1 className="gold-heading mt-3 break-words text-2xl font-black leading-tight tracking-tight sm:text-3xl md:text-5xl">{v12 && pengu && v52 ? `${v12.strategyId} / ${pengu.strategyId} / Q102 ${q102?.selectorMode ?? "UNAVAILABLE"} / ${v52.policyId}` : "DISTerminal Production Runtime"}</h1>
-            <p className="mt-4 max-w-3xl text-sm leading-7 text-white/82">AsterDEXのV12 X1.00 ALL Top2、PENGU V2 / Short V20 / Recovery V8、FET BRK48 Residual、Q102 Causal V4、V52 Stockを、同一口座の実残高・実建玉・未決済注文とともに読み取り表示します。取得できない値は推測せず、未取得として表示します。</p>
+            <p className="mt-4 max-w-3xl text-sm leading-7 text-white/82">AsterDEXのV12 Top{v12?.maximumPositions ?? "—"}、PENGU Short V20 / Recovery V8、FET BRK48、Q102 Causal V4、V52 Stockを、本番Runtimeの設定とともに表示します。HPのビルドSHAと売買Runtime SHAは別々に検証し、取得できない値は推測しません。</p>
             <div className="mt-5 flex min-w-0 flex-wrap gap-2 text-[11px] font-semibold [overflow-wrap:anywhere]">
               <span className={`min-w-0 break-words rounded-full border px-3 py-1.5 ${v12RuntimeStatus?.status === "LIVE" ? "border-emerald-400/25 bg-emerald-500/10 text-emerald-100" : "border-amber-400/25 bg-amber-500/10 text-amber-100"}`}>LIVE状態: {liveStatus}</span>
               <span className="min-w-0 break-words rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">{v12?.strategyId ?? "V12 runtime未取得"}</span>

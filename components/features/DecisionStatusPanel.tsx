@@ -12,7 +12,7 @@ import type { PenguRuntimeStatus } from "@/lib/server/pengu-runtime-observabilit
 import type { Quality102RuntimeStatus } from "@/lib/server/quality102-runtime-observability";
 import type { FetRuntimeStatus } from "@/lib/server/fet-runtime-observability";
 
-type DecisionLogicPage = "overview" | "v12" | "pengu" | "q102" | "v52";
+type DecisionLogicPage = "overview" | "v12" | "pengu" | "q102" | "v52" | "fet";
 
 type Q102GateDiagnostic = {
   name?: string;
@@ -835,6 +835,7 @@ export function DecisionStatusPanel({ logic = "overview" }: { logic?: DecisionLo
       { key: "v12", title: "V12", href: "/decision-status/v12", detail: "候補Rank / signalEligible / Entry Quality / 共有risk" },
       { key: "pengu", title: "PENGU", href: "/decision-status/pengu", detail: "Long V2 / Short V20 / Recovery V8 / cooldown / 保護状態" },
       { key: "q102", title: "Q102 Causal V4", href: "/decision-status/q102", detail: "通貨別Gate / Family / 1-slot selector / 実state" },
+      { key: "fet", title: "FET BRK48", href: "/decision-status/fet", detail: "実runner稼働 / SHA / 建玉・履歴 / FET PnL" },
       { key: "v52", title: "V52", href: "/decision-status/v52", detail: "V50 / V11_EQ / Stock window / basis・net-edge Gate" },
     ] as const;
     return <div className="min-w-0 space-y-4 overflow-x-hidden [overflow-wrap:anywhere]">{toolbar}{warning}<RuntimeSummary runtime={snapshot.runtime} /><FetRuntimeDetail details={snapshot.fetRuntime} /><section className="grid gap-4 md:grid-cols-2">{cards.map((card) => <Link key={card.key} href={card.href} className="panel-gold group rounded-[28px] p-5 transition hover:-translate-y-0.5 hover:border-gold-300/40"><div className="flex items-center justify-between gap-3"><div className="text-xl font-black text-white">{card.title}</div><span className="text-xs text-gold-100">詳細を見る →</span></div><p className="mt-3 text-sm leading-6 text-white/65">{card.detail}</p></Link>)}</section></div>;
@@ -847,6 +848,7 @@ export function DecisionStatusPanel({ logic = "overview" }: { logic?: DecisionLo
     {logic === "v12" ? <><V12Detail details={snapshot.v12Observability} production={productionRuntime} /><Sleeve title="V12 補助ランキング" items={snapshot.v12.items} /></> : null}
     {logic === "pengu" ? <PenguDetail details={snapshot.penguRuntime} production={productionRuntime} /> : null}
     {logic === "q102" ? <><Quality102Detail details={snapshot.quality102Runtime} production={productionRuntime} /><Quality102SymbolTable snapshot={q102Symbols} error={q102SymbolError} /></> : null}
+    {logic === "fet" ? <FetRuntimeDetail details={snapshot.fetRuntime} /> : null}
     {logic === "v52" ? <><V52Top2Detail details={snapshot.v52Top2Observability} marketOpen={snapshot.v52.marketOpen} production={productionRuntime} /><Sleeve title="V52 Stock 補助ランキング" items={snapshot.v52.items} marketLabel={snapshot.v52.marketLabel + (snapshot.v52.marketOpen ? " / 市場時間内" : " / 市場時間外")} /></> : null}
   </div>;
 }

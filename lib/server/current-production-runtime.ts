@@ -10,6 +10,7 @@ const HEARTBEAT_PATHS = Object.freeze({
   pengu: "/var/lib/disdex/runner-health/heartbeats/pengu-v8.json",
   quality102: "/var/lib/disdex/runner-health/heartbeats/quality102-causal-v1.json",
   v52: "/var/lib/disdex/runner-health/heartbeats/v52.json",
+  fet: "/var/lib/disdex/fet-brk48-residual/state.json",
 });
 
 type EnvMap = Record<string, string>;
@@ -26,10 +27,11 @@ export type CurrentProductionRuntime = {
     pengu: string;
     quality102: string;
     v52: string;
+    fet: string;
   };
   runtimeLineage: {
     synchronized: boolean;
-    units: Record<"v12" | "pengu" | "quality102" | "v52", {
+    units: Record<"v12" | "pengu" | "quality102" | "v52" | "fet", {
       runtimeSha?: string;
       expectedSha?: string;
       mode?: string;
@@ -159,8 +161,10 @@ async function loadRuntimeLineage(releaseSha: string): Promise<CurrentProduction
   for (const [unit, path] of Object.entries(HEARTBEAT_PATHS) as Array<[RuntimeUnitKey, string]>) {
     try {
       const raw = JSON.parse(await readFile(path, "utf8")) as Record<string, unknown>;
-      const runtimeSha = typeof raw.runtimeSha === "string" ? raw.runtimeSha.trim() : undefined;
-      const expectedSha = typeof raw.expectedSha === "string" ? raw.expectedSha.trim() : undefined;
+      const runtimeSha = typeof raw.runtimeSha === "string" ? raw.runtimeSha.trim()
+        : unit === "fet" && typeof raw.runtimeCommitSha === "string" ? raw.runtimeCommitSha.trim() : undefined;
+      const expectedSha = typeof raw.expectedSha === "string" ? raw.expectedSha.trim()
+        : unit === "fet" ? releaseSha : undefined;
       units[unit] = {
         runtimeSha,
         expectedSha,
@@ -220,6 +224,7 @@ export async function loadCurrentProductionRuntime(): Promise<CurrentProductionR
       pengu: releaseSha,
       quality102: releaseSha,
       v52: releaseSha,
+      fet: releaseSha,
     },
     runtimeLineage,
     caps: {

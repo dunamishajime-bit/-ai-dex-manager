@@ -1,0 +1,30 @@
+name: HP a09 UI five-logic build verification
+on:
+  push:
+    branches: [codex/hp-a09-runtime-sync-20260927]
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Runtime-sync and FET regression
+        run: |
+          npx tsx --test tests/hp-a09-runtime-sync-20260927.test.ts
+          npx tsx --test tests/fet-decision-status.test.ts tests/fet-runtime-observability.test.ts
+      - name: Typecheck
+        run: npx tsc --noEmit -p tsconfig.json
+      - name: Compile all authenticated HP routes
+        run: npm run build
+      - name: Ensure full FET page and API routes actually built
+        run: |
+          test -d .next
+          test -d .next/server/app
+          grep -Rql 'fet-status' .next/server/app || test -f .next/server/app/api/system/fet-status/route.js

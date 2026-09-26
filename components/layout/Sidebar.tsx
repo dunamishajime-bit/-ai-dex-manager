@@ -11,6 +11,7 @@ const NAV_ITEMS = [
   { href: "/", label: "ホーム", icon: Home },
   { href: "/positions", label: "ダッシュボード", icon: BarChart3 },
   { href: "/decision-status", label: "判定状況", icon: BarChart3 },
+  { href: "/decision-status/fet", label: "FET 判定", icon: BarChart3 },
   { href: "/wallets", label: "運用ウォレット", icon: Wallet },
   { href: "/performance", label: "損益カレンダー", icon: CalendarDays },
   {
@@ -41,7 +42,7 @@ export function Sidebar() {
           <div className="min-w-0">
             <div className="truncate text-[11px] font-bold text-white">{SITE_BRAND_NAME}</div>
             <div className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#dad1a7]">Personal</div>
-            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#dad1a7]">V12 + PENGU + Q102 LIVE / V52時間外停止</div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#dad1a7]">V12 / PENGU / Q102 / FET / V52</div>
           </div>
         </div>
       </div>
