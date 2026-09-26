@@ -1,0 +1,34 @@
+name: V12 HP all-gates observability CI (no orders)
+on:
+  push:
+    branches: [codex/v12-hp-all-gates-20260926]
+    paths:
+      - lib/v12-gate-visibility.ts
+      - lib/server/v12-decision-observability.ts
+      - components/features/DecisionStatusPanel.tsx
+      - tests/v12-hp-gate-visibility.test.ts
+      - .github/workflows/v12-hp-all-gates-ci-20260926.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Typecheck UI against current production state types
+        run: npx tsc --noEmit
+      - name: Multi-gate, episode and unchanged FET UI regressions
+        run: |
+          npx tsx --test tests/v12-hp-gate-visibility.test.ts
+          npx tsx --test tests/hp-fet-display-contract.test.ts
+      - name: Static no-trading guard
+        run: |
+          ! grep -Eq 'placeMarket|submitOrder|I_ACCEPT_REAL_MONEY' \
+            lib/v12-gate-visibility.ts tests/v12-hp-gate-visibility.test.ts
