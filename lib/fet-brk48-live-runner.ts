@@ -28,6 +28,8 @@ import {
 } from "@/lib/fet-brk48-state";
 import type { V12AsterLiveAdapter } from "@/lib/v12-aster-live-adapter";
 import { aggregatePendingExposure, readPendingExposureRegistry } from "@/lib/disdex-pending-exposure-registry";
+import { isHypeZecSoleSharedCapacityCause, releaseHypeZecCapacityForPriorityEntry } from "@/lib/hype-zec-priority-capacity";
+import type { StrictPortfolioIntent } from "@/lib/disdex-strict-portfolio-planner";
 
 const EPS = 1e-9;
 const DEFAULT_RISK_PATH = "/var/lib/disdex/shared/crypto-daily-risk.json";
@@ -524,6 +526,55 @@ export class FetBrk48LiveRunner {
         INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap - gross.totalGross,
       ));
       if (residual + EPS < FET_BRK48_RESIDUAL.minimumResidualGross) {
+        const candidateGross = Math.min(
+          FET_BRK48_RESIDUAL.maximumGross,
+          Math.max(0, account.availableBalance) * FET_BRK48_RESIDUAL.requiredLeverage / equity,
+        );
+        const preemptionEnabled = /^(1|true|yes|on)$/i.test(String(process.env.DISDEX_HYPE_ZEC_PREEMPTION_ENABLED || ""));
+        const candidate: StrictPortfolioIntent = {
+          idempotencyKey: `FET_BRK48_RESIDUAL|${signal.referenceTs}|HYPE_ZEC_PREEMPTION`,
+          strategy: "FET_RESIDUAL",
+          symbol: "FETUSDT",
+          side: "LONG",
+          gross: candidateGross,
+          requestedGross: candidateGross,
+          notionalUsd: candidateGross * equity,
+          signalTs: signal.referenceTs,
+        };
+        const sidecarCausesCapacity = preemptionEnabled && isHypeZecSoleSharedCapacityCause({
+          positions,
+          equityUsd: equity,
+          pendingCryptoGross: pending.cryptoGross,
+          pendingTotalGross: pending.cryptoGross + pending.stockGross,
+          candidateGross,
+          candidateSymbol: "FETUSDT",
+          candidateStrategy: "FET_RESIDUAL",
+          cryptoEntryCap: INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap,
+          totalEntryCap: INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap,
+        });
+        if (sidecarCausesCapacity) {
+          const released = await releaseHypeZecCapacityForPriorityEntry({
+            adapter: this.deps.adapter,
+            executor: this.deps.executor,
+            lock,
+            positions,
+            equityUsd: equity,
+            candidate,
+            pendingCryptoGross: pending.cryptoGross,
+            pendingTotalGross: pending.cryptoGross + pending.stockGross,
+            cryptoEntryCap: INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap,
+            totalEntryCap: INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap,
+            causeIdempotencyKey: candidate.idempotencyKey,
+            expectedRuntimeSha: this.deps.runtimeSha,
+            enabled: true,
+            statePath: process.env.DISDEX_HYPE_ZEC_PREEMPTION_STATE_PATH,
+            maxSlippageBps: this.deps.maxSlippageBps,
+          });
+          if (released.status === "reduced") {
+            const reductionOrders = released.result?.status === "reduced" ? released.result.results.length : 0;
+            return { status: "preempted", message: "HYPE_ZEC_PREEMPTED_FOR_FET_PRIORITY_ENTRY", ordersSent: reductionOrders, signal };
+          }
+        }
         state.lastReferenceTs = Math.max(state.lastReferenceTs || 0, signal.referenceTs);
         await writeFetBrk48State(this.deps.statePath, state);
         return { status: "held", message: "FET_RESIDUAL_BELOW_MINIMUM", ordersSent: 0, signal, gross: residual };

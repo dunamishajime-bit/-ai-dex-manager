@@ -23,6 +23,12 @@ export const INTEGRATED_PRODUCTION_RISK_POLICY = Object.freeze({
   fetResidualMaximumGross: 2.25,
   fetResidualMinimumGross: 0.05,
   penguMaximumGross: 1.0,
+  // HYPE/ZEC are lower-priority, long-only sidecars. These values are risk
+  // and per-sleeve ceilings; they never multiply the strategy notional.
+  hypeLongRiskPct: 5.0,
+  zecLongRiskPct: 4.5,
+  hypeZecMaximumGross: 1.0,
+  hypeZecMaximumReductionFraction: 0.5,
   q102FamilyGross: Q102_CAUSAL_V4_FAMILY_GROSS,
   q102CausalV4MaximumGross: 3.0,
   q102MaximumPositions: 1,
@@ -58,6 +64,10 @@ export function resolveIntegratedProductionRiskPolicy(env: Record<string, string
     V12_BASE_GROSS_CAP: INTEGRATED_PRODUCTION_RISK_POLICY.v12BaseAggregateGross,
     V12_DYNAMIC_GROSS_CAP: INTEGRATED_PRODUCTION_RISK_POLICY.v12DynamicAggregateGrossCap,
     PENGU_DUAL_LS_V2_MAX_GROSS: INTEGRATED_PRODUCTION_RISK_POLICY.penguMaximumGross,
+    HYPE_LONG_RISK_PCT: INTEGRATED_PRODUCTION_RISK_POLICY.hypeLongRiskPct,
+    ZEC_LONG_RISK_PCT: INTEGRATED_PRODUCTION_RISK_POLICY.zecLongRiskPct,
+    HYPE_ZEC_MAX_GROSS: INTEGRATED_PRODUCTION_RISK_POLICY.hypeZecMaximumGross,
+    HYPE_ZEC_MAX_REDUCTION_FRACTION: INTEGRATED_PRODUCTION_RISK_POLICY.hypeZecMaximumReductionFraction,
     QUALITY102_CAUSAL_V1_MAX_GROSS: INTEGRATED_PRODUCTION_RISK_POLICY.q102CausalV4MaximumGross,
     CRYPTO_GROSS_CAP: INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap,
     CRYPTO_GROSS_HARD_CAP: INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossHardCap,

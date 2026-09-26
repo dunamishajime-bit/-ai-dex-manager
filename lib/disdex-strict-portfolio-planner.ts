@@ -1,11 +1,12 @@
 import { STRICT_BT33404708902, type StrictBtBaseStrategy } from "../config/disdexStrictBt33404708902Runtime";
 import { INTEGRATED_PRODUCTION_RISK_POLICY } from "../config/integratedProductionRiskPolicy";
+import { isHypeZecStrategy } from "../config/hypeZecLongPolicy";
 import { classifyAsterSymbol } from "./disdex-aster-portfolio-classifier";
 import { resolveIntegratedGrossGovernor } from "./disdex-integrated-gross-governor";
 import type { PortfolioDdGovernorState } from "./disdex-portfolio-dd-governor";
 import type { SharedCryptoDailyRiskState } from "./disdex-shared-crypto-daily-risk";
 
-export type StrictStrategy = StrictBtBaseStrategy | "FET_RESIDUAL" | "QUALITY102" | "QUALITY102_CAUSAL_V1";
+export type StrictStrategy = StrictBtBaseStrategy | "FET_RESIDUAL" | "QUALITY102" | "QUALITY102_CAUSAL_V1" | "HYPE_LONG" | "ZEC_LONG";
 export type StrictPositionSide = "LONG" | "SHORT";
 export type StrictMarkSource = "BINANCE_VISION_USDM_1M_OPEN" | "LIVE_MARKET_QUOTE";
 
@@ -101,7 +102,7 @@ function nonNegative(value: unknown, name: string) {
 }
 
 function isCrypto(strategy: StrictStrategy) {
-    return strategy === "V12" || strategy === "PENGU_DUAL_LS_V2" || strategy === "FET_RESIDUAL" || strategy === "QUALITY102" || strategy === "QUALITY102_CAUSAL_V1";
+    return strategy === "V12" || strategy === "PENGU_DUAL_LS_V2" || strategy === "FET_RESIDUAL" || strategy === "QUALITY102" || strategy === "QUALITY102_CAUSAL_V1" || isHypeZecStrategy(strategy);
 }
 
 function isStock(strategy: StrictStrategy) {
@@ -137,12 +138,14 @@ function strategyCap(strategy: StrictStrategy) {
     if (strategy === "FET_RESIDUAL") return INTEGRATED_PRODUCTION_RISK_POLICY.fetResidualMaximumGross;
     if (strategy === "QUALITY102_CAUSAL_V1") return INTEGRATED_PRODUCTION_RISK_POLICY.q102CausalV4MaximumGross;
     if (strategy === "QUALITY102") return STRICT_BT33404708902.quality102PositionCap;
+    if (isHypeZecStrategy(strategy)) return 1;
     return INTEGRATED_PRODUCTION_RISK_POLICY.stockSlotGrossCap;
 }
 
 function strategySymbolMatches(strategy: StrictStrategy, symbol: string) {
     if (isQuality102Strategy(strategy)) return String(symbol).trim().length > 0;
     if (strategy === "FET_RESIDUAL") return classifyAsterSymbol(symbol, "FET_RESIDUAL").sleeve === "FET_RESIDUAL";
+    if (isHypeZecStrategy(strategy)) return classifyAsterSymbol(symbol, strategy).sleeve === strategy;
     const requestedSleeve = strategy === "V52" ? "V50_POST_OPEN_BASIS" : strategy;
     const classification = classifyAsterSymbol(symbol, requestedSleeve as Parameters<typeof classifyAsterSymbol>[1]);
     return classification.tradable && (strategy === "V52"
@@ -162,6 +165,7 @@ function pendingGrossForStrategy(pending: StrictPendingExposureGross, strategy: 
             if (strategy === "PENGU_DUAL_LS_V2") return value.includes("PENGU");
             if (strategy === "QUALITY102_CAUSAL_V1") return value.includes("QUALITY102");
             if (strategy === "FET_RESIDUAL") return value.includes("FET_BRK48") || value === "FET_RESIDUAL";
+            if (isHypeZecStrategy(strategy)) return value === strategy;
             return value === strategy.toUpperCase();
         })
         .reduce((sum, [, gross]) => sum + Number(gross || 0), 0);
@@ -443,6 +447,9 @@ export function planStrictPortfolio(input: {
     portfolioDdGovernor?: PortfolioDdGovernorState;
     entryGrossCaps?: StrictPortfolioEntryGrossCaps;
     pendingExposure?: StrictPendingExposureGross;
+    /** The caller may use this as an explicit capability marker. The planner
+     * itself remains pure; the shared-lock sidecar executor is separate. */
+    allowHypeZecPreemption?: boolean;
 }): StrictPortfolioPlan {
     const equity = positive(input.equity, "portfolio equity");
     const pendingExposure: StrictPendingExposureGross = {
@@ -528,7 +535,7 @@ export function planStrictPortfolio(input: {
     const seenIntentKeys = new Set<string>();
     const seenIntentTargets = new Set<string>();
     const ordered = [...input.intents].sort((a, b) => {
-        const baseRank = (strategy: StrictStrategy) => strategy === "FET_RESIDUAL" ? 6 : strategy === "QUALITY102" ? 5 : strategy === "QUALITY102_CAUSAL_V1" ? 4 : strategy === "V52" ? 1 : strategy === "PENGU_DUAL_LS_V2" ? 2 : 3;
+        const baseRank = (strategy: StrictStrategy) => strategy === "HYPE_LONG" ? 8 : strategy === "ZEC_LONG" ? 9 : strategy === "FET_RESIDUAL" ? 6 : strategy === "QUALITY102" ? 5 : strategy === "QUALITY102_CAUSAL_V1" ? 4 : strategy === "V52" ? 1 : strategy === "PENGU_DUAL_LS_V2" ? 2 : 3;
         return baseRank(a.strategy) - baseRank(b.strategy) || a.signalTs - b.signalTs || a.idempotencyKey.localeCompare(b.idempotencyKey);
     });
     for (const intent of ordered) {
