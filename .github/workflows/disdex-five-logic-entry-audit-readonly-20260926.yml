@@ -199,7 +199,7 @@ jobs:
           set -Eeuo pipefail
           ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
-            -o ConnectTimeout=15 -p "\${SSH_PORT:-22}" "root@$SSH_HOST" 'python3 -' <<'PY'
+            -o ConnectTimeout=15 -p "${SSH_PORT:-22}" "root@$SSH_HOST" 'python3 -' <<'PY'
           import collections,json,os,pathlib,re,stat,subprocess
           release=pathlib.Path("/home/deploy/disdex-trading/current").resolve()
           sha=(release/".disdex-release-sha").read_text().strip()
