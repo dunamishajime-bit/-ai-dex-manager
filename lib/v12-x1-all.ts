@@ -1,4 +1,5 @@
 import { V12_X1_ALL } from "@/config/v12X1AllRuntime";
+import { inspectV12AllGateChecks, type V12AllGateAudit } from "./v12-all-gates-audit";
 
 export type V12Side = "LONG" | "SHORT";
 export type V12Regime = "LONG" | "SHORT" | "NEUTRAL";
@@ -67,13 +68,36 @@ export interface V12Signal extends V12Candidate {
 }
 
 export interface V12ObservedCandidate extends V12Candidate {
+    allGateChecks?: V12AllGateAudit;
     rank: number;
     portfolioRank?: 1 | 2 | 3;
+    baseEligible?: boolean;
     signalEligible: boolean;
     signalReason: string;
     entryGateReason?: V12EntryGateReason;
     highConfidence?: boolean;
     entryGrossMultiplier?: number;
+}
+
+export interface V12GateDiagnostics {
+    schema: "v12-gate-diagnostics/v1";
+    observedAt: string;
+    referenceTs: number;
+    referenceAgeMs: number;
+    freshness: "fresh" | "stale";
+    candidateCount: number;
+    baseEligibleCount: number;
+    portfolioRankedCount: number;
+    gateEvaluatedCount: number;
+    standardAcceptedCount: number;
+    hc175AcceptedCount: number;
+    finalSignalCount: number;
+    rejectedCount: number;
+    rejectionReasons: Record<string, number>;
+    allCheckBlockCounts?: Record<string, number>;
+    strongScoreGapCandidates?: number;
+    strongScoreGapOnlyBaseFailure?: number;
+    multiBaseFailureCandidates?: number;
 }
 
 export interface V12DecisionObservation {
@@ -95,6 +119,7 @@ export interface V12DecisionObservation {
     volatility?: number;
     atr?: number;
     candidates: V12ObservedCandidate[];
+    gateDiagnostics?: V12GateDiagnostics;
 }
 
 export interface V12PositionSizing {
@@ -116,6 +141,48 @@ export function selectV12Top3Candidates(ranked: readonly V12Candidate[], limit: 
         if (third) selected.push({ candidate: third, rank: 3 });
     }
     return selected;
+}
+
+export function summarizeV12GateDiagnostics(
+    candidates: readonly V12ObservedCandidate[],
+    finalSignalCount: number,
+    referenceTs: number,
+    observedAt: number,
+): V12GateDiagnostics {
+    const rejectionReasons: Record<string, number> = {};
+    for (const candidate of candidates) {
+        if (candidate.signalEligible) continue;
+        const reason = candidate.signalReason || "UNKNOWN_REJECTION";
+        rejectionReasons[reason] = (rejectionReasons[reason] || 0) + 1;
+    }
+    const allCheckBlockCounts: Record<string,number> = {};
+    for (const candidate of candidates) for (const [key,check] of Object.entries(candidate.allGateChecks?.checks || {})) {
+        if (check.status === "BLOCK") allCheckBlockCounts[key] = (allCheckBlockCounts[key] || 0) + 1;
+    }
+    const referenceAgeMs = observedAt - referenceTs;
+    return {
+        schema: "v12-gate-diagnostics/v1",
+        observedAt: new Date(observedAt).toISOString(),
+        referenceTs,
+        referenceAgeMs,
+        freshness: referenceAgeMs >= 0 && referenceAgeMs <= 3 * 60 * 60_000 ? "fresh" : "stale",
+        candidateCount: candidates.length,
+        baseEligibleCount: candidates.filter((candidate) => candidate.baseEligible === true).length,
+        portfolioRankedCount: candidates.filter((candidate) => candidate.portfolioRank !== undefined).length,
+        gateEvaluatedCount: candidates.filter((candidate) => candidate.entryGateReason !== undefined).length,
+        standardAcceptedCount: candidates.filter((candidate) => candidate.signalEligible && candidate.entryGateReason === "ALLOW_STANDARD").length,
+        hc175AcceptedCount: candidates.filter((candidate) => candidate.signalEligible && candidate.entryGateReason === "ALLOW_HC175").length,
+        finalSignalCount,
+        rejectedCount: candidates.filter((candidate) => !candidate.signalEligible).length,
+        rejectionReasons,
+        allCheckBlockCounts,
+        strongScoreGapCandidates: candidates.filter(c => c.allGateChecks?.strongScoreGap).length,
+        strongScoreGapOnlyBaseFailure: candidates.filter(c => c.allGateChecks?.strongScoreGapOnlyBaseFailure).length,
+        multiBaseFailureCandidates: candidates.filter(c => {
+            const checks = c.allGateChecks?.checks;
+            return checks && ["volume", "edgeToCost", "momentum", "btcDirection", "entryQuality"].filter(k => checks[k]?.status === "BLOCK").length >= 2;
+        }).length,
+    };
 }
 
 function directionalReturn(bars: V12Bar[], index: number, lookback: number, side: V12Side) {
@@ -477,11 +544,21 @@ export function buildV12DecisionObservation(universe: Record<string, V12Bar[]>, 
             score: candidate.score,
             rank: rankIndex + 1,
             portfolioRank,
+            baseEligible: candidate.eligible,
             signalEligible,
             signalReason,
             entryGateReason: gate?.reason,
             highConfidence: gate?.highConfidence,
             entryGrossMultiplier: gate?.entryGrossMultiplier,
+            allGateChecks: inspectV12AllGateChecks({
+                symbol: candidate.symbol, side: candidate.side, momentum: candidate.momentum,
+                volatility: candidate.volatility, atr: candidate.atr,
+                volumeRatio: candidate.volumeRatio, score: candidate.score,
+                atrRatio: candidate.atr / universe[candidate.symbol][index].close,
+                regime: regimeState.regime, strongRegime: regimeState.strongRegime,
+                portfolioRank,
+                winRate: gate ? { allow: gate.allow, reason: gate.reason } : undefined,
+            }),
         };
     });
 
@@ -512,6 +589,7 @@ export function buildV12DecisionObservation(universe: Record<string, V12Bar[]>, 
         volatility: selectedSignal?.volatility,
         atr: selectedSignal?.atr,
         candidates: ranked,
+        gateDiagnostics: summarizeV12GateDiagnostics(ranked, signals.length, referenceTs, observedAt),
     };
 }
 
