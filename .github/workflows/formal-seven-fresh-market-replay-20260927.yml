@@ -15,7 +15,7 @@ jobs:
     timeout-minutes: 115
     env:
       PYTHONUNBUFFERED: '1'
-      SEVEN_BT_SOURCE_ROOT: ${{ runner.temp }}/seven-bt/source
+      SEVEN_BT_SOURCE_ROOT: /tmp/disdex-seven-bt-source
       BASE_SHA: a09ea45ca3cbd72100f9eb0eaae499039c40b6a0
       SEVEN_SHA: cde62b3909a86e4791a19e78862eeaa37653e03a
     steps:
