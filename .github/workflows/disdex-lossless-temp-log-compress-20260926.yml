@@ -1,0 +1,105 @@
+name: DisDex lossless stale temp archive compression
+on:
+  issue_comment:
+    types: [created]
+permissions:
+  contents: read
+jobs:
+  audit:
+    if: >-
+      github.event.issue.number == 132 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == 'DISDEX_LOSSLESS_TEMP_COMPRESSION_20260926'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Configure approved VPS read-only transport
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Compress only old non-open backup tar and completed log files with exact checksum readback
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -p "${SSH_PORT:-22}" "root@$SSH_HOST" 'python3 -' <<'PY'
+          import os,pathlib,subprocess,json,time,hashlib,gzip,shutil,stat,tarfile
+          release=pathlib.Path("/home/deploy/disdex-trading/current").resolve()
+          expect="e1b58060d6263a3af7ced51bec854d3e211d2f35"
+          assert release.name==expect and (release/".disdex-release-sha").read_text().strip()==expect,"BLOCK_CURRENT_RELEASE"
+          assert pathlib.Path("/var/lib/disdex/shared/kill-switch.json").is_file() and json.loads(pathlib.Path("/var/lib/disdex/shared/kill-switch.json").read_text()).get("active") is False,"BLOCK_KILL_ACTIVE"
+          services=["disdex-v12-x1-all","disdex-pengu-dual-ls-v2","disdex-quality102-causal-v1","disdex-fet-brk48","disdex-v52-aster-only"]
+          prior={}
+          for unit in services:
+           name=unit+"@"+expect+".service"
+           s=subprocess.run(["systemctl","show",name,"-p","ActiveState","-p","MainPID","-p","NRestarts"],capture_output=True,text=True,timeout=9)
+           props=dict(x.split("=",1) for x in s.stdout.splitlines() if "=" in x)
+           assert props.get("ActiveState")=="active" and props.get("NRestarts")=="0" and int(props.get("MainPID","0"))>0,"BLOCK_UNIT:"+unit
+           prior[unit]=props["MainPID"]
+          before=shutil.disk_usage("/").free
+          now=time.time()
+          names=["/tmp/.ui-release-c2a4383f-source.tar","/tmp/.ui-release-fa5c04c4-source.tar","/tmp/.ui-release-fa5c04c4-next.tar","/var/log/nginx/access.log.1"]
+          for x in pathlib.Path("/tmp").glob("*.out"):
+           if x.name.startswith(("hc175-","v12-")) and now-x.stat().st_mtime>72*3600:names.append(str(x))
+          report=[]
+          for name in names:
+           p=pathlib.Path(name)
+           if not p.exists():continue
+           st=p.lstat()
+           if not stat.S_ISREG(st.st_mode) or st.st_nlink!=1 or p.is_symlink() or p.suffix not in (".tar",".out",".1"):
+            report.append({"name":p.name,"status":"SKIP_UNSAFE_TYPE"});continue
+           if now-st.st_mtime<24*3600:report.append({"name":p.name,"status":"SKIP_RECENT"});continue
+           target=pathlib.Path(str(p)+".gz")
+           if target.exists():report.append({"name":p.name,"status":"SKIP_COMPRESSED_EXISTS"});continue
+           opened=subprocess.run(["lsof","-n","--",str(p)],capture_output=True,text=True,timeout=6)
+           if opened.stdout.strip() or opened.returncode not in (0,1):report.append({"name":p.name,"status":"SKIP_OPEN_OR_UNCERTAIN"});continue
+           if p.suffix==".tar" and not tarfile.is_tarfile(p):report.append({"name":p.name,"status":"SKIP_NOT_TAR"});continue
+           size=st.st_size
+           tmp=pathlib.Path(str(target)+".tmp-"+str(os.getpid()))
+           srcHash=hashlib.sha256()
+           try:
+            with p.open("rb") as src,tmp.open("xb") as dst:
+             with gzip.GzipFile(fileobj=dst,mode="wb",filename="",mtime=0,compresslevel=6) as compressor:
+              while True:
+               block=src.read(1024*1024)
+               if not block:break
+               srcHash.update(block);compressor.write(block)
+             dst.flush();os.fsync(dst.fileno())
+            restored=hashlib.sha256()
+            with gzip.open(tmp,"rb") as check:
+             for block in iter(lambda:check.read(1024*1024),b""):restored.update(block)
+            assert restored.digest()==srcHash.digest(),"LOSSLESS_ROUNDTRIP_FAILED"
+            assert p.stat().st_size==size and p.stat().st_mtime_ns==st.st_mtime_ns,"INPUT_CONCURRENT_CHANGE"
+            os.chown(tmp,st.st_uid,st.st_gid);os.chmod(tmp,stat.S_IMODE(st.st_mode))
+            os.replace(tmp,target);p.unlink()
+            report.append({"name":p.name,"status":"LOSSLESS_COMPRESSED","beforeMB":round(size/1e6,2),"afterMB":round(target.stat().st_size/1e6,2),"sha256Original":srcHash.hexdigest()[:16]})
+           except Exception as e:
+            tmp.unlink(missing_ok=True)
+            report.append({"name":p.name,"status":"FAILED_PRESERVED_OR_BACKUP","errorType":type(e).__name__})
+          after=shutil.disk_usage("/").free
+          post={}
+          for unit in services:
+           name=unit+"@"+expect+".service"
+           q=subprocess.run(["systemctl","show",name,"-p","ActiveState","-p","MainPID","-p","NRestarts"],capture_output=True,text=True,timeout=8)
+           post[unit]=dict(x.split("=",1) for x in q.stdout.splitlines() if "=" in x)
+           assert post[unit].get("ActiveState")=="active" and post[unit].get("NRestarts")=="0" and post[unit].get("MainPID")==prior[unit],"BLOCK_POST_UNIT_DRIFT:"+unit
+          print("LOSSLESS_TEMP_LOG_COMPRESSION="+json.dumps({"files":report,"beforeFreeGB":round(before/1e9,3),"afterFreeGB":round(after/1e9,3),"netFreedMB":round((after-before)/1e6,2),"tradingPidsSame":True,"ordersSent":0,"liveSourceTouched":False}))
+          
+          PY
