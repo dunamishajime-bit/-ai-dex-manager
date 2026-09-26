@@ -5,6 +5,7 @@ on:
     paths:
       - scripts/research/recover_original_final_governor_provenance.py
       - scripts/research/locate_original_final_governor_20260926.py
+      - scripts/research/locate_orphan_final_governor_git_20260926.py
       - .github/workflows/recover-original-final-governor-provenance.yml
   workflow_dispatch:
 permissions:
@@ -73,6 +74,20 @@ jobs:
            "researchCandidates":len(d["researchCandidates"]),"cacheDirs":d["cacheDirs"][:25],
            "gitHistory":d["gitHistory"],"truncated":d["stoppedByCap"]},ensure_ascii=False))
           PY
+      - name: Inspect unreachable Git objects for archived original code, read-only
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -p "${SSH_PORT:-22}" "root@$SSH_HOST" 'python3 -' \
+            < scripts/research/locate_orphan_final_governor_git_20260926.py > original-bt-git-orphans.json
+          python3 - <<'PY'
+          import json
+          d=json.load(open("original-bt-git-orphans.json"))
+          assert d["readOnly"] and d["tradingMutation"]==0
+          print("ORIGINAL_BT_ORPHAN_GIT_SCAN",json.dumps(d,ensure_ascii=False))
+          PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -80,4 +95,5 @@ jobs:
           path: |
             original-bt-provenance.json
             original-bt-source-locator.json
+            original-bt-git-orphans.json
           retention-days: 90
