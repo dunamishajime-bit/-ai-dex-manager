@@ -18,10 +18,15 @@ const END = Date.parse("2026-08-10T00:00:00Z");
 const SAMPLE_START = Date.parse("2025-08-10T00:00:00Z");
 const START = SAMPLE_START - 11 * 24 * HOUR;
 const HOLD_BARS = 12;
+const HOLDOUT_START = Date.parse("2026-05-10T00:00:00Z");
 const ROUND_TRIP_COST_PCT = 0.003;
 const CASES = [
   {name:"FROZEN",volume:0.9845,score:1.4649,gap:"NONE",minimumAtr:0.014},
+  {name:"V080_ONLY",volume:0.80,score:1.4649,gap:"NONE",minimumAtr:0.014},
+  {name:"SCORE100_ONLY",volume:0.9845,score:1.00,gap:"NONE",minimumAtr:0.014},
   {name:"V080_S100",volume:0.80,score:1.00,gap:"NONE",minimumAtr:0.014},
+  {name:"V080_S085",volume:0.80,score:0.85,gap:"NONE",minimumAtr:0.014},
+  {name:"V080_S070",volume:0.80,score:0.70,gap:"NONE",minimumAtr:0.014},
   {name:"V055_S085",volume:0.55,score:0.85,gap:"NONE",minimumAtr:0.014},
   {name:"GAP_ONLY_FROZEN_VOLUME",volume:0.9845,score:1.4649,gap:"ATR",minimumAtr:0.014},
   {name:"GAP_ATR_V080_S100",volume:0.80,score:1.00,gap:"ATR",minimumAtr:0.014},
@@ -93,6 +98,8 @@ async function main(){
     observedFromFrozen:new Set<string>(),opportunityKeys:new Set<string>(),
     returnByKey:new Map<string,number>(),
   }));
+  const baseGateAudit={rawCandidateRows:0,volumeBlocked:0,qualityBlocked:0,volumeAndQualityBlocked:0,
+    scoreGapRaw:0,scoreGapOnlyBaseFailure:0,neutralVolume080Score070:0};
   let windows=0;
   for(let i=65;i<all.BTC.length-HOLD_BARS-1;i++){
     if(all.BTC[i].endTs<SAMPLE_START)continue;
@@ -100,6 +107,20 @@ async function main(){
     const observed=buildV12DecisionObservation(all,i,all.BTC[i].endTs);
     if(!observed)continue;
     windows++;
+    for (const c of observed.candidates) {
+      const audit=c.allGateChecks;
+      if (!audit) throw Error("ALL_GATE_DIAGNOSTICS_MISSING");
+      const volumeBlock=audit.checks.volume.status==="BLOCK";
+      const qualityBlock=audit.checks.entryQuality.status==="BLOCK";
+      baseGateAudit.rawCandidateRows++;
+      if(volumeBlock)baseGateAudit.volumeBlocked++;
+      if(qualityBlock)baseGateAudit.qualityBlocked++;
+      if(volumeBlock && qualityBlock)baseGateAudit.volumeAndQualityBlocked++;
+      if(audit.strongScoreGap)baseGateAudit.scoreGapRaw++;
+      if(audit.strongScoreGapOnlyBaseFailure)baseGateAudit.scoreGapOnlyBaseFailure++;
+      if(observed.regime==="NEUTRAL" && c.volumeRatio>=0.8 && c.score>=0.70 && c.score<1.00)
+         baseGateAudit.neutralVolume080Score070++;
+    }
     const btc=all.BTC;
     const sma=btc.slice(i-V12_X1_ALL.btcRegimeSmaBars+1,i+1).reduce((t,b)=>t+b.close,0)/V12_X1_ALL.btcRegimeSmaBars;
     const strong=observed.regime!=="NEUTRAL" && Math.abs(btc[i].close/sma-1)>=V12_X1_ALL.strongRegimeThresholdPct;
@@ -134,6 +155,8 @@ async function main(){
     }
   }
   const base=output[0].opportunityKeys;
+  const pairedNames:Record<string,string>={GAP_ONLY_FROZEN_VOLUME:"FROZEN",GAP_ATR_V080_S100:"V080_S100",
+    GAP_ATR_V055_S085:"V055_S085",GAP_MOM054_V080_S100:"V080_S100",GAP_ATR018_V080_S100:"V080_S100"};
   const results=output.map(x=>{
     const proxy=x.net24hProxy;
     const sum=proxy.reduce((a,b)=>a+b,0);
@@ -163,9 +186,43 @@ async function main(){
     };
     const dailyCounts=[...days.values()].sort((a,b)=>a-b);
     const fullYearDays=365;
+    const twin=output.find(y=>y.name===pairedNames[x.name]);
+    const incrementalTwin=twin ? [...x.opportunityKeys].filter(k=>!twin.opportunityKeys.has(k)) : [];
+    const displacedTwin=twin ? [...twin.opportunityKeys].filter(k=>!x.opportunityKeys.has(k)) : [];
+    const incrementalTwinReturns=incrementalTwin.map(k=>x.returnByKey.get(k)!).filter(Number.isFinite);
+    const holdoutTwin=incrementalTwin.filter(k=>Number(k.split("|")[2])>=HOLDOUT_START);
+    const holdoutTwinReturns=holdoutTwin.map(k=>x.returnByKey.get(k)!).filter(Number.isFinite);
+    const periodMetric=(items:typeof events)=>{
+      const total=items.reduce((a,e)=>a+e.net,0);
+      const bySymbol=new Map<string,number>();const episodes46:typeof events=[];
+      for(const e of items){
+        const last=bySymbol.get(e.symbol);
+        if(last!==undefined && e.ts-last<46*HOUR)continue;
+        bySymbol.set(e.symbol,e.ts);episodes46.push(e);
+      }
+      return {repeatedObservations:items.length,
+        signalDaysJst:new Set(items.map(e=>jstDay(e.ts))).size,
+        repeated24hMeanPct:items.length?100*total/items.length:null,
+        repeated24hPositivePct:items.length?100*items.filter(e=>e.net>0).length/items.length:null,
+        independent46hEpisodeCount:episodes46.length,
+        independent46hMean24hProxyPct:episodes46.length?100*episodes46.reduce((a,e)=>a+e.net,0)/episodes46.length:null,
+        independent46hPositivePct:episodes46.length?100*episodes46.filter(e=>e.net>0).length/episodes46.length:null,
+      };
+    };
     return {
       case:x.name,volumeRatioMin:x.volume,qualityScoreThreshold:x.score,
       rawCandidatesAfterBase:x.rawCandidatesAfterBase,
+      trainPeriod:periodMetric(events.filter(e=>e.ts<HOLDOUT_START)),
+      disjointFinal92DayHoldout:periodMetric(events.filter(e=>e.ts>=HOLDOUT_START)),
+      versusUngappedTwin:twin?{
+        twin:twin.name,additionalH2Observations:incrementalTwin.length,
+        displacedTwinObservations:displacedTwin.length,
+        added24hNetProxyMeanPct:incrementalTwinReturns.length?100*incrementalTwinReturns.reduce((a,b)=>a+b,0)/incrementalTwinReturns.length:null,
+        added24hProxyPositivePct:incrementalTwinReturns.length?100*incrementalTwinReturns.filter(z=>z>0).length/incrementalTwinReturns.length:null,
+        addedHoldoutObservations:holdoutTwin.length,
+        addedHoldout24hNetProxyMeanPct:holdoutTwinReturns.length?100*holdoutTwinReturns.reduce((a,b)=>a+b,0)/holdoutTwinReturns.length:null,
+        addedHoldout24hPositivePct:holdoutTwinReturns.length?100*holdoutTwinReturns.filter(z=>z>0).length/holdoutTwinReturns.length:null
+      }:null,
       strongScoreGapMode:x.gap,strongGapMinimumAtrRatio:x.minimumAtr,
       potentialSignalWindows:x.windowsWithSignal,
       potentialEntries:x.opportunities,hc175Entries:x.hc175Opportunities,
@@ -189,13 +246,14 @@ async function main(){
     };
   });
   const artifact={
-    schema:"v12-one-year-score-gap-sensitivity/v1",researchOnly:true,scoreGapDiagnostic:true,
+    schema:"v12-one-year-score-gap-sensitivity/v2",researchOnly:true,scoreGapDiagnostic:true,
     notABacktest:true,noIntegratedGrossOrStopSimulation:true,
     sourceSha:"e1b58060d6263a3af7ced51bec854d3e211d2f35",
     market:"ASTER_FUTURES_V3_PUBLIC_H1",
     comparisonPeriod:"2025-08-10T00Z through 2026-08-10T00Z",
     period:{firstCommonBar:new Date(all.BTC[0].ts).toISOString(),lastCommonBar:new Date(all.BTC.at(-1)!.endTs).toISOString()},
     windows,commonH2Bars:common.size,
+    holdoutStart:"2026-05-10T00:00:00Z",baseGateAudit,
     frozenGateExactParity:true,hcGrossMultiplierUnchanged:1.75,
     feeProxyRoundTrip:ROUND_TRIP_COST_PCT,
     caveat:"Overlapping entry-notional signed 24h forward proxies are NOT realized trade PnL, WR, PF, DD, stop-aware fills or investable performance.",
