@@ -111,8 +111,8 @@ async function main(){
   }));
   const baseGateAudit={rawCandidateRows:0,volumeBlocked:0,qualityBlocked:0,volumeAndQualityBlocked:0,
     scoreGapRaw:0,scoreGapOnlyBaseFailure:0,neutralVolume080Score070:0};
-  const nearMisses=Object.fromEntries(MISSED_GROUPS.map(name=>[name,[] as MissedSample[]]))
-    as Record<MissedGroup,MissedSample[]>;
+  const nearMisses = {} as Record<MissedGroup,MissedSample[]>;
+  for(const name of MISSED_GROUPS) nearMisses[name] = [];
   let windows=0;
   for(let i=65;i<all.BTC.length-HOLD_BARS-1;i++){
     if(all.BTC[i].endTs<SAMPLE_START)continue;
