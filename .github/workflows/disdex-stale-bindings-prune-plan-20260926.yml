@@ -1,0 +1,95 @@
+name: DisDex stale release binding protected cleanup plan
+on:
+  issue_comment:
+    types: [created]
+permissions:
+  contents: read
+jobs:
+  audit:
+    if: >-
+      github.event.issue.number == 132 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == 'DISDEX_DISK_BINDING_PRUNE_PLAN_20260926'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Configure approved VPS read-only transport
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Enumerate inactive SHA-specific systemd dropins and current-runtime references
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -p "${SSH_PORT:-22}" "root@$SSH_HOST" 'python3 -' <<'PY'
+          import pathlib,json,re,subprocess,os,time,collections
+          rr=pathlib.Path("/home/deploy/disdex-trading/releases")
+          current=pathlib.Path("/home/deploy/disdex-trading/current").resolve()
+          pattern=re.compile(r"^[0-9a-f]{40}$")
+          releases=sorted([p for p in rr.iterdir() if p.is_dir() and not p.is_symlink() and pattern.fullmatch(p.name) and (p/".disdex-release-sha").is_file() and (p/".disdex-release-sha").read_text().strip()==p.name],key=lambda x:x.stat().st_mtime,reverse=True)
+          pinned={current}|set(x for x in releases if x!=current) and set([])
+          for p in releases:
+           if p!=current and len(pinned)<3:pinned.add(p)
+          todo=list(pinned)
+          while todo:
+           p=todo.pop()
+           for name in ("node_modules",".venv2"):
+            d=p/name
+            if d.is_symlink():
+             q=d.resolve(strict=False)
+             t=q.parent
+             if t.parent==rr and t not in pinned:
+              pinned.add(t);todo.append(t)
+          units=subprocess.run(["systemctl","list-units","--all","--type=service","--plain","--no-legend"],capture_output=True,text=True,timeout=14).stdout
+          act=[]
+          for line in units.splitlines():
+           parts=line.split()
+           if len(parts)>=4 and parts[2]=="active":act.append(parts[0])
+          activeText="\n".join(act)
+          dropinRoot=pathlib.Path("/etc/systemd/system")
+          currentRuntime=pathlib.Path("/etc/disdex/current-runtime")
+          shaDirs={p.name:p for p in releases}
+          pinnedNames={p.name for p in pinned}
+          stale=[p for p in releases if p not in pinned and time.time()-p.stat().st_mtime>=86400]
+          def serviceLabel(p):
+           m=re.search(r"@([0-9a-f]{40})\.service\.d$",p.name);return p.name.split(".d")[0] if m else ""
+          plan=[]
+          skip=[]
+          for p in stale:
+           sha=p.name
+           dirs=sorted(dropinRoot.glob("*@"+sha+".service.d"))
+           envs=sorted([x for x in currentRuntime.glob(sha+"*") if x.is_file() and not x.is_symlink()]) if currentRuntime.is_dir() else []
+           hazards=[]
+           for d in dirs:
+            unit=serviceLabel(d)
+            if unit in act:hazards.append("ACTIVE:"+unit)
+            enabled=subprocess.run(["systemctl","is-enabled",unit],capture_output=True,text=True,timeout=3).stdout.strip()
+            if enabled.startswith("enabled") or enabled.startswith("linked"):hazards.append("ENABLED:"+unit)
+            if any(x.is_symlink() and x.resolve(strict=False).name==unit for x in (dropinRoot/"multi-user.target.wants").glob("*")):hazards.append("WANTED:"+unit)
+           files=[x for d in dirs for x in d.rglob("*") if x.is_file() and not x.is_symlink()]
+           if any(x.is_symlink() for d in dirs for x in d.rglob("*")):hazards.append("SYMLINK_DROPIN")
+           if any(x.is_dir() for d in dirs for x in d.rglob("*")):hazards.append("NESTED_DROPIN")
+           if hazards:skip.append({"sha":sha,"reasons":hazards,"fileCount":len(files)+len(envs)})
+           else:plan.append({"sha":sha,"unitDropins":len(dirs),"files":len(files)+len(envs),"expectedReleaseAgeDays":round((time.time()-p.stat().st_mtime)/86400,1),"refNames":[d.name for d in dirs][:3]})
+          print("STALE_BINDING_PLAN="+json.dumps({"current":current.name,"totalValidReleases":len(releases),"pinned":sorted(pinnedNames),"staleEligibleAge24h":len(stale),"activeUnits":act[:18],"safeBindingArchives":len(plan),"archiveFileCount":sum(x["files"] for x in plan),"safeSamples":plan[:18],"blocked":skip[:15],"noMutation":True}))
+          print("BINDING_PLAN_TRADING_MUTATION=0")
+          
+          PY
