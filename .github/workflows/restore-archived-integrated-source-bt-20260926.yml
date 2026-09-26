@@ -1,0 +1,134 @@
+name: Restore archived Top2 integrated engine with original ledgers and refreshed historical stock inputs
+on:
+  push:
+    branches: [research/recover-final-governor-bt-20260926]
+    paths: [.github/workflows/restore-archived-integrated-source-bt-20260926.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  historical-source-replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 110
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 9f51d5876fd7c7924b3c99dc1934336bdd832852
+      - uses: actions/checkout@v4
+        with:
+          ref: 04c1a369223bd27e9e42bc93604b3777b9230d92
+          path: .stock-research
+      - uses: actions/checkout@v4
+        with:
+          ref: 0fad24c105a7f0f61af6042ba04a8b1386ffec7c
+          path: .stock-research/.v11
+      - uses: actions/checkout@v4
+        with:
+          ref: dbfd7e026a81343a23ab97d202761f7f9bbe5755
+          path: .stock-research/.v13
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Recover byte-for-byte historical original integrated-engine.py
+        uses: actions/download-artifact@v4
+        with:
+          name: pengu-integrated-engine-capture
+          path: .research-state/original
+          github-token: ${{ github.token }}
+          repository: dunamishajime-bit/-ai-dex-manager
+          run-id: 35934170491
+      - name: Recover original August input ledgers
+        uses: actions/download-artifact@v4
+        with:
+          name: latest-v12-pengu-v8-v52-dca-1y-33257164125
+          path: .research-state/aug
+          github-token: ${{ github.token }}
+          repository: dunamishajime-bit/-ai-dex-manager
+          run-id: 33257164125
+      - name: Recover original September 18 input ledgers
+        uses: actions/download-artifact@v4
+        with:
+          name: flat-boost-preemption-35337138289
+          path: .research-state/sep18
+          github-token: ${{ github.token }}
+          repository: dunamishajime-bit/-ai-dex-manager
+          run-id: 35337138289
+      - name: Pin old source bytes and extract embedded frozen Q102 input (not independently recreated)
+        run: |
+          set -Eeuo pipefail
+          mkdir -p .research-state/restored-results .research-state/original
+          printf '%s  %s\n' cae9785492ea5dda8173853fe2cbc7d99ea451f550a739fb7f014f4773d9899d .research-state/original/integrated-engine.py | sha256sum -c -
+          python3 - <<'PY'
+          import pathlib,base64,gzip,re,hashlib,csv,io,json
+          src=pathlib.Path('scripts/research_latest_v8_dca_1y.py').read_text()
+          blobs=re.findall(r"base64\.b64decode\('([^']+)'\)",src)
+          assert len(blobs)>=2, 'Original embedded frozen source missing'
+          frozen=gzip.decompress(base64.b64decode(blobs[0]))
+          rows=list(csv.DictReader(io.StringIO(frozen.decode('utf-8'))))
+          assert len(rows)==102, len(rows)
+          p=pathlib.Path('.research-state/original/quality102-frozen.csv'); p.write_bytes(frozen)
+          for path in ['.research-state/aug/v12-top2-ledger.json','.research-state/aug/pengu-v8-ledger.json',
+                       '.research-state/sep18/flat-boost-current/v12-top2-ledger.json',
+                       '.research-state/sep18/flat-boost-preemption/pengu-hard24-ledger.json']:
+              f=pathlib.Path(path)
+              if not f.exists(): raise ValueError('missing original artifact path '+path)
+              print('ORIGINAL_LEDGER',path,len(f.read_bytes()),hashlib.sha256(f.read_bytes()).hexdigest())
+          print('Q102_FROZEN_SOURCE',len(frozen),hashlib.sha256(frozen).hexdigest())
+          PY
+          python3 -m py_compile .research-state/original/integrated-engine.py
+      - name: Re-download original frozen V52 cash/perp source from Yahoo Finance and Aster
+        run: |
+          set -o pipefail
+          mkdir -p .research-state/restored-results/stock
+          python3 - <<'PY' 2>&1 | tee .research-state/restored-results/stock-fetch.log
+          import sys,json,pathlib,traceback
+          sys.path.insert(0,'scripts')
+          import research_v12_v52_pengu_v2_combined_bt as old
+          root=pathlib.Path('.cache/aster-only-v39-overnight-open')
+          try:
+              v11,v50,days,diagnostics=old.build_stock(root)
+              out={'v11':v11,'v50':v50,'targetDays':days,'diagnostics':diagnostics}
+              pathlib.Path('.research-state/restored-results/stock/old-stock-raw.json').write_text(json.dumps(out))
+              print('ORIGINAL_V52_EXTERNAL_HISTORY_COMPLETE','v11',len(v11),'v50',len(v50),'targetDays',len(days))
+          except Exception as e:
+              print('ORIGINAL_V52_EXTERNAL_HISTORY_ERROR',type(e).__name__,str(e));traceback.print_exc()
+              raise
+          PY
+      - name: Replay the original integrated engine on both same-period archived ledger pairs
+        if: always()
+        run: |
+          mkdir -p .research-state/restored-results
+          for v in aug sep18; do
+            if [ "$v" = aug ]; then
+              v12=.research-state/aug/v12-top2-ledger.json
+              pengu=.research-state/aug/pengu-v8-ledger.json
+            else
+              v12=.research-state/sep18/flat-boost-current/v12-top2-ledger.json
+              pengu=.research-state/sep18/flat-boost-preemption/pengu-hard24-ledger.json
+            fi
+            if [ ! -f .research-state/restored-results/stock/old-stock-raw.json ]; then
+              echo ORIGINAL_STOCK_UNAVAILABLE_CANNOT_REPLAY_$v | tee .research-state/restored-results/$v-blocked.log
+              continue
+            fi
+            set +e
+            PYTHONPATH=scripts python3 .research-state/original/integrated-engine.py \
+              --stock-cache-dir .cache/aster-only-v39-overnight-open \
+              --v12-ledger "$v12" --pengu-ledger "$pengu" \
+              --supplement-csv .research-state/original/quality102-frozen.csv \
+              --output-dir .research-state/restored-results/$v \
+              > .research-state/restored-results/$v.log 2>&1
+            status=$?
+            set -e
+            echo "ORIGINAL_ARCHIVED_REPLAY $v EXIT_CODE=$status"
+            tail -n 25 .research-state/restored-results/$v.log
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: old-source-refreshed-stock-restoration-20260926
+          path: |
+            .research-state/restored-results
+            .research-state/original/quality102-frozen.csv
+          retention-days: 90
+          if-no-files-found: warn
