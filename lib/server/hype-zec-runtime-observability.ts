@@ -37,7 +37,7 @@ async function safeJson(path: string): Promise<Obj | null> {
   try { const s=await lstat(path); if (!s.isFile() || s.isSymbolicLink() || s.size > 400_000) return null;
     return obj(JSON.parse(await readFile(path,"utf8"))); } catch { return null; }
 }
-function policy(source: string,key:Key): Params | null {
+export function parseHypeZecPolicyFromSource(source: string,key:Key): Params | null {
   const section=source.split(key + ": Object.freeze({")[1]?.split("signal: Object.freeze({")[1]?.split("})")[0];
   if (!section) return null;
   const values: Record<string,number>={};
@@ -83,7 +83,7 @@ function loadMarket(now:number):Promise<Market>{
   void promise.catch(()=>{if(marketCache?.promise===promise)marketCache=null;});
   return promise;
 }
-function marketGates(data:Market,which:Key,p:Params,now:number) {
+export function evaluateHypeZecMarketGates(data:Market,which:Key,p:Params,now:number) {
   const symbol=which==="HYPE_LONG"?data.hype:data.zec,minute=which==="HYPE_LONG"?data.hypeMinute:data.zecMinute;
   const b=data.btc.at(-1)!,s=symbol.at(-1)!;
   const gates:HypeZecGate[]=[];
@@ -122,6 +122,11 @@ export async function loadHypeZecRuntimeObservability(now=Date.now()):Promise<Hy
   if(!SHA.test(releaseSha))throw new Error("CURRENT_RUNTIME_SHA_INVALID");
   const capturedAt=new Date(now).toISOString();
   const source=await readFile(POLICY,"utf8").catch(()=>null);
+  const riskSource=source?await readFile(CURRENT+"/config/integratedProductionRiskPolicy.ts","utf8").catch(()=>null):null;
+  const riskValue=(name:string)=>{
+    const match=riskSource?.match(new RegExp("\\b"+name+"\\s*:\\s*([-+]?(?:[0-9]+\\.?[0-9]*|\\.[0-9]+))"));
+    return match?num(match[1]):undefined;
+  };
   const state=await safeJson(STATE),kill=await safeJson(KILL);
   const active=source!==null && await serviceActive(releaseSha);
   const sourceDeployed=source!==null;
@@ -138,7 +143,7 @@ export async function loadHypeZecRuntimeObservability(now=Date.now()):Promise<Hy
   const results={} as Record<Key,HypeZecSleeve>;
   for(const key of ["HYPE_LONG","ZEC_LONG"] as const){
     const symbol=key==="HYPE_LONG"?"HYPEUSDT":"ZECUSDT";
-    const p=source?policy(source,key):null;
+    const p=source?parseHypeZecPolicyFromSource(source,key):null;
     const positions=Array.isArray(state?.positions)?state.positions.map(obj).filter((x):x is Obj=>x!==null):[];
     const pos=positions.find(x=>x.strategy===key && x.symbol===symbol);
     const last=obj(state?.lastDecision);
@@ -158,7 +163,7 @@ export async function loadHypeZecRuntimeObservability(now=Date.now()):Promise<Hy
     ];
     let publicSignalEligible:boolean|null=null,publicReferenceTs:number|undefined;
     if(p && market){
-      const evaluation=marketGates(market,key,p,now);
+      const evaluation=evaluateHypeZecMarketGates(market,key,p,now);
       gates.push(...evaluation.gates);publicSignalEligible=evaluation.accepted;publicReferenceTs=evaluation.reference;
     }else for(const [g,label] of [["DATA_FRESHNESS","確定15分足・鮮度"],["BTC_15M_MOVE","BTC 15分足"],["BTC_ACCEL","BTC加速度"],
       ["SYMBOL_MOMENTUM","対象通貨モメンタム"],["SYMBOL_ACCEL","対象通貨加速度"],["EMA20_DISTANCE","EMA20乖離"],
@@ -171,8 +176,10 @@ export async function loadHypeZecRuntimeObservability(now=Date.now()):Promise<Hy
         accepted:specific.accepted===true,reason:str(specific.reason)||"未取得",at:num(state?.lastDecisionTs)}:undefined,
       position:pos?{quantity:num(pos.quantity)||0,entryPrice:num(pos.entryPrice)||0,
         stopPrice:num(pos.stopPrice)||0,takeProfitPrice:num(pos.takeProfitPrice)||0}:undefined,
-      pending:!!state?.pending,manualReview:str(state?.manualReview),maxGross:sourceDeployed?1:undefined,
-      riskPct:undefined,publicSignalEligible,publicReferenceTs,publicError:marketError,
+      pending:!!state?.pending,manualReview:str(state?.manualReview),
+      maxGross:riskValue("hypeZecMaximumGross"),
+      riskPct:riskValue(key==="HYPE_LONG"?"hypeLongRiskPct":"zecLongRiskPct"),
+      publicSignalEligible,publicReferenceTs,publicError:marketError,
       gates,note:!sourceDeployed?"現在のProduction releaseにHYPE/ZECソースがありません。GitHubの研究ブランチはLIVEではありません。":
         !stateAvailable?"実Runner stateが見つかりません。":!shaOk?"stateのSHAがProductionと一致しません。":
         !active?"HYPE/ZECの実行サービスを確認できません。":

@@ -51,6 +51,8 @@ export function HypeZecDecisionPanel({strategy}:{strategy:Strategy}){
           ["本番Runtime SHA",data?.releaseSha?.slice(0,12)||"未取得"],
           ["state SHA",row?.stateSha?.slice(0,12)||"未取得"],
           ["mode",row?.stateMode||"未取得"],
+          ["実設定Gross上限",row?.maxGross===undefined?"未取得":row.maxGross+"x"],
+          ["実設定STOPリスク",row?.riskPct===undefined?"未取得":row.riskPct+"%"],
           ["state更新",dt(row?.stateUpdatedAt)],
           ["本番サービス",row?.serviceActive?"active":"未確認"],
           ["Shared Kill Switch",data?.sharedKillActive==null?"未取得":data?.sharedKillActive?"ON":"OFF"],
