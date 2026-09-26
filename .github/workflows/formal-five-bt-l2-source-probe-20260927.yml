@@ -1,0 +1,55 @@
+name: Formal five BT candidate L2 archive coverage spot probe
+on:
+  push:
+    branches: [research/formal-five-bt-handoff-completion-20260927]
+    paths: [.github/workflows/formal-five-bt-l2-source-probe-20260927.yml]
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --disable-pip-version-check --no-cache-dir -r research/formal_five_bt/requirements.txt
+      - name: Probe exactly four candidate historical hour files, no purchases, never upload or redistribute raw L2
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python - <<'PY'
+          import json,datetime,hashlib
+          from research.formal_five_bt.sources import fetch_crypto_hft_orderbook
+          from research.formal_five_bt.l2_archive import decode_zstd_parquet
+          cases=[
+            ("binance_futures","BTCUSDT","2025-08-20T12:00:00+00:00"),
+            ("bybit","BTCUSDT","2025-08-20T12:00:00+00:00"),
+            ("aster_futures","BTCUSDT","2025-10-10T12:00:00+00:00"),
+            ("aster_futures","FETUSDT","2026-03-10T12:00:00+00:00"),
+          ]
+          for venue,symbol,t in cases:
+            at=datetime.datetime.fromisoformat(t)
+            result={"venue":venue,"symbol":symbol,"utc_hour":t}
+            try:
+              file=fetch_crypto_hft_orderbook(venue,symbol,at)
+              result.update({"provider":file.provider,"status":file.status,"bytes":file.byte_count,
+                "content_sha256":file.content_sha256})
+              if file.raw_data is not None:
+                if len(file.raw_data)>25_000_000:
+                  result["validation"]="TOO_LARGE_FOR_BOUNDED_SPOT_PROBE"
+                elif file.raw_data[:4]!=bytes.fromhex("28b52ffd"):
+                  result["validation"]="NOT_ZSTD_PARQUET_EXPECTED_FORMAT"
+                else:
+                  c=decode_zstd_parquet(file.raw_data,expected_symbol=symbol,
+                    sequence_protocol="bybit_v5" if venue=="bybit" else "binance_diff")
+                  result.update({"validation":c.status,"rows":c.rows,"snapshots":c.snapshots,
+                    "updates":c.updates,"issues":{code:sum(i.code==code for i in c.issues)
+                      for code in sorted(set(i.code for i in c.issues))}})
+            except Exception as e:
+              result.update({"status":"REQUEST_OR_VALIDATION_FAILED","error_type":type(e).__name__,
+                "error_code":str(e)[:100] if not any(x in str(e).lower() for x in ("token","secret","key","password")) else "REDACTED"})
+            print("FORMAL_FIVE_BT_L2_PROBE",json.dumps(result,sort_keys=True))
+          print("READ_ONLY_TEST=PASS MARKET_DATA_LICENSE_RESPECTED=TRUE NO_LIVE_CHANGES=TRUE")
+          PY
