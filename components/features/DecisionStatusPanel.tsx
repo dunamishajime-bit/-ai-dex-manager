@@ -6,6 +6,7 @@ import { Activity, AlertCircle, CheckCircle2, CircleDashed, Clock3, RefreshCw, S
 
 import { useProductionRuntime } from "@/hooks/useProductionRuntime";
 import type { CurrentProductionRuntime } from "@/lib/server/current-production-runtime";
+import type { V12AllGateAuditView, V12GateDiagnosticsView, V12HistoryStats } from "@/lib/v12-gate-visibility";
 import type { V52Top2Observability, V52Top2DecisionRow } from "@/lib/server/v52-top2-observability";
 import type { PenguRuntimeStatus } from "@/lib/server/pengu-runtime-observability";
 import type { Quality102RuntimeStatus } from "@/lib/server/quality102-runtime-observability";
@@ -131,6 +132,9 @@ type CandidateDetail = {
   volumeRatio?: number;
   volatility?: number;
   atr?: number;
+  portfolioRank?: number;
+  entryGateReason?: string;
+  allGateChecks?: V12AllGateAuditView;
   signalGate?: {
     status: "pass" | "blocked" | "unknown";
     code?: string;
@@ -161,8 +165,10 @@ type V12Observability = {
     rationale?: string;
     selectionConfirmed?: boolean;
     signalGate?: CandidateDetail["signalGate"];
+    gateDiagnostics?: V12GateDiagnosticsView;
     candidates: CandidateDetail[];
   } | null;
+  historyStats?: V12HistoryStats;
   runnerState: {
     strategyId?: string;
     mode?: string;
@@ -228,6 +234,41 @@ function time(value?: string | number | null) {
 
 function number(value?: number, digits = 4) { return value === undefined || !Number.isFinite(value) ? "—" : value.toFixed(digits); }
 function shortSha(value: string) { return value.slice(0, 8); }
+function percentFromFraction(value?: number, digits = 2) {
+  return value === undefined || !Number.isFinite(value) ? "—" : (value * 100).toFixed(digits) + "%";
+}
+const V12_GATE_NAMES: Array<[string,string]> = [
+  ["volume","出来高"], ["edgeToCost","Edge/Cost"], ["momentum","Momentum"],
+  ["btcDirection","BTC方向"], ["scoreStandard","通常Score"],
+  ["scoreStrongAlternative","強BTC別Score"], ["atrStrongAlternative","強BTC ATR"],
+  ["momentumWeakAlternative","弱BTC Momentum"], ["atrWeakAlternative","弱BTC ATR"],
+  ["entryQuality","Entry Quality"], ["portfolioSelection","Top3"],
+  ["rank3Score","Rank3 Score"], ["winRate","勝率Gate"]
+];
+function V12GateMatrix({candidate}:{candidate:CandidateDetail}){
+  const checks=candidate.allGateChecks?.checks;
+  if(!checks)return <span className="text-amber-200">旧Runner：全Gate未取得（先頭の拒否理由のみ）</span>;
+  return <div className="flex min-w-[290px] flex-wrap gap-1" aria-label="V12 全Gate判定">
+    {V12_GATE_NAMES.map(([key,label])=>{
+      const gate=checks[key];
+      const state=gate?.status||"NOT_EVALUATED";
+      const colors=state==="PASS"?"border-emerald-500/45 bg-emerald-500/10 text-emerald-200":
+        state==="BLOCK"?"border-rose-500/45 bg-rose-500/10 text-rose-200":
+        "border-slate-400/20 bg-slate-500/10 text-slate-300";
+      const description=gate?.observed===undefined?"":(" / 実測 "+number(gate.observed,4));
+      const threshold=gate?.minimum===undefined?"":(" / 下限 "+number(gate.minimum,4));
+      const maximum=gate?.maximum===undefined?"":(" / 上限 "+number(gate.maximum,4));
+      return <span key={key} title={label+" "+state+description+threshold+maximum+(gate?.detail?" / "+gate.detail:"")}
+        className={"rounded border px-1.5 py-0.5 text-[10px] font-medium "+colors}>
+        {label}：{state==="PASS"?"通過":state==="BLOCK"?"拒否":state==="NOT_APPLICABLE"?"対象外":"未評価"}
+      </span>;
+    })}
+    {candidate.allGateChecks?.strongScoreGap &&
+      <span className="rounded border border-amber-400/50 bg-amber-500/15 px-1.5 py-0.5 text-[10px] text-amber-100">
+        Score不連続{candidate.allGateChecks.strongScoreGapOnlyBaseFailure?"（他のBase Gate通過）":"（他の不足もあり）"}
+      </span>}
+  </div>;
+}
 
 function traceStateClass(state: V12Observability["executionTrace"]["steps"][number]["state"]) {
   if (state === "pass") return "border-emerald-400/35 bg-emerald-500/10 text-emerald-100";
@@ -301,7 +342,7 @@ function V12Detail({ details, production }: { details?: V12Observability; produc
           ["候補", decisionLabel],
           ["Rank", decision?.rank === undefined ? "—" : String(decision.rank)],
           ["score", number(decision?.score, 4)],
-          ["momentum", number(decision?.momentum, 4) + "%"],
+          ["momentum", percentFromFraction(decision?.momentum, 2)],
           ["volumeRatio", number(decision?.volumeRatio, 4)],
           ["BTC regime", decision?.btcRegime || "未取得"],
           ["Signal", decision?.selectionConfirmed ? "選定済み" : "未成立"],
@@ -329,9 +370,52 @@ function V12Detail({ details, production }: { details?: V12Observability; produc
           </div>
         </div>
       </div>
+      <div className="mt-4 grid gap-3 lg:grid-cols-2">
+        <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
+          <h3 className="text-sm font-bold text-white">現在の確定足：全Gate拒否内訳</h3>
+          {decision?.gateDiagnostics ? <>
+            <p className="mt-1 text-[11px] text-white/55">
+              {time(decision.gateDiagnostics.referenceTs)} / raw候補 {decision.gateDiagnostics.candidateCount ?? "—"} /
+              Base通過 {decision.gateDiagnostics.baseEligibleCount ?? "—"} /
+              最終Signal {decision.gateDiagnostics.finalSignalCount ?? "—"}
+            </p>
+            <div className="mt-2 flex flex-wrap gap-1.5">
+              {Object.entries(decision.gateDiagnostics.allCheckBlockCounts).filter(([,n])=>n>0).map(([name,n])=>
+                <span key={name} className="rounded border border-rose-400/35 bg-rose-500/10 px-2 py-1 text-[11px] text-rose-100">
+                  {V12_GATE_NAMES.find(([key])=>key===name)?.[1] || name}：{n}
+                </span>)}
+            </div>
+            <p className="mt-2 text-xs text-amber-100/85">
+              強BTC Score不連続 {decision.gateDiagnostics.strongScoreGapCandidates ?? "未取得"} /
+              その区間だけがBase不合格 {decision.gateDiagnostics.strongScoreGapOnlyBaseFailure ?? "未取得"} /
+              複数Base Gate不合格 {decision.gateDiagnostics.multiBaseFailureCandidates ?? "未取得"}
+            </p>
+          </> : <p className="mt-2 text-xs text-amber-100">現行Runnerに全Gate診断が未反映です。最初の拒否理由だけを表示しても他Gateが通ったとは限りません。</p>}
+        </div>
+        <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
+          <h3 className="text-sm font-bold text-white">過去7日：独立候補と発注可能数</h3>
+          {details.historyStats?.available ? <>
+            <div className="mt-2 grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
+              {[["延べSignal観測",details.historyStats.repeatedSelectedSignals],
+                ["独立候補24h",details.historyStats.independent24hPerSymbol],
+                ["独立候補46h",details.historyStats.independent46hPerSymbol],
+                ["実注文可能", "未検証"]].map(([label,value])=>
+                <div key={label} className="rounded-lg border border-white/10 px-2 py-2">
+                  <div className="text-[10px] text-white/50">{label}</div>
+                  <div className="mt-1 font-semibold text-white">{value}</div>
+                </div>)}
+            </div>
+            <p className="mt-2 text-[11px] text-white/55">
+              {details.historyStats.daysRead}日分のrunner履歴 / シグナル日 {details.historyStats.signalDaysJst}日。
+              24h/46h隔離は同一銘柄の重複を抑えた参考値で、ポジション・Shared Gross・実約定を再現した件数ではありません。
+            </p>
+            {details.historyStats.warning && <p className="mt-1 text-xs text-amber-200">履歴注意：{details.historyStats.warning}</p>}
+          </> : <p className="mt-2 text-xs text-amber-100">runner履歴を取得できません。延べ観測・独立候補・注文可能数は未確認です。{details.historyStats?.warning}</p>}
+        </div>
+      </div>
       <div className="mt-4 overflow-x-auto rounded-2xl border border-white/10 bg-black/20">
         <div className="border-b border-white/10 px-3 py-2"><div className="text-sm font-bold text-white">全候補順位と実runner Gate</div><div className="mt-1 text-[11px] text-white/55">Signal Eligible {eligibleCount}/{decision?.candidates.length ?? 0}。緑はVPS runnerの signalEligible=true のみ。最終発注には建玉枠・共有Gross・重複防止・注文Gateも別途必要です。</div></div>
-        {decision?.candidates.length ? <table className="min-w-[980px] w-full text-left text-xs"><thead className="text-white/45"><tr><th className="px-3 py-2">Rank</th><th className="px-3 py-2">候補</th><th className="px-3 py-2">score</th><th className="px-3 py-2">momentum</th><th className="px-3 py-2">volumeRatio</th><th className="px-3 py-2">実runner Gate</th><th className="px-3 py-2">今回の扱い</th></tr></thead><tbody>{decision.candidates.map((candidate, index) => <tr key={(candidate.symbol || "candidate") + "-" + index} className="border-t border-white/5"><td className="px-3 py-2"><span className={"inline-flex min-w-7 justify-center rounded-full border px-2 py-1 font-bold " + rankClass(candidate.rank || 99)}>{candidate.rank ?? "—"}</span></td><td className="px-3 py-2 font-semibold text-white">{candidate.symbol || "—"} <span className="ml-1 text-white/50">{candidate.side || "WAIT"}</span></td><td className="px-3 py-2 text-white/75">{number(candidate.score, 4)}</td><td className="px-3 py-2 text-white/75">{number(candidate.momentum, 4)}%</td><td className="px-3 py-2 text-white/75">{number(candidate.volumeRatio, 4)}</td><td className={"px-3 py-2 font-semibold " + (candidate.signalGate?.status === "pass" ? "text-emerald-200" : candidate.signalGate?.status === "blocked" ? "text-rose-200" : "text-amber-200")}>{candidate.signalGate?.detail || "未取得"}</td><td className="px-3 py-2 text-white/75">{candidateOrderStatus(candidate, decision)}</td></tr>)}</tbody></table> : <div className="px-3 py-4 text-sm text-amber-100">V12 decision snapshotに全候補がありません。順位比較だけでなく発注Signalを確定できないためFail Closedです。</div>}
+        {decision?.candidates.length ? <table className="min-w-[1450px] w-full text-left text-xs"><thead className="text-white/45"><tr><th className="px-3 py-2">Rank</th><th className="px-3 py-2">候補</th><th className="px-3 py-2">score</th><th className="px-3 py-2">momentum</th><th className="px-3 py-2">volumeRatio</th><th className="px-3 py-2">全Gate同時判定</th><th className="px-3 py-2">実runner Gate</th><th className="px-3 py-2">今回の扱い</th></tr></thead><tbody>{decision.candidates.map((candidate, index) => <tr key={(candidate.symbol || "candidate") + "-" + index} className="border-t border-white/5"><td className="px-3 py-2"><span className={"inline-flex min-w-7 justify-center rounded-full border px-2 py-1 font-bold " + rankClass(candidate.rank || 99)}>{candidate.rank ?? "—"}</span></td><td className="px-3 py-2 font-semibold text-white">{candidate.symbol || "—"} <span className="ml-1 text-white/50">{candidate.side || "WAIT"}</span></td><td className="px-3 py-2 text-white/75">{number(candidate.score, 4)}</td><td className="px-3 py-2 text-white/75">{percentFromFraction(candidate.momentum, 2)}</td><td className="px-3 py-2 text-white/75">{number(candidate.volumeRatio, 4)}</td><td className="px-3 py-2"><V12GateMatrix candidate={candidate} /></td><td className={"px-3 py-2 font-semibold " + (candidate.signalGate?.status === "pass" ? "text-emerald-200" : candidate.signalGate?.status === "blocked" ? "text-rose-200" : "text-amber-200")}>{candidate.signalGate?.detail || "未取得"}</td><td className="px-3 py-2 text-white/75">{candidateOrderStatus(candidate, decision)}</td></tr>)}</tbody></table> : <div className="px-3 py-4 text-sm text-amber-100">V12 decision snapshotに全候補がありません。順位比較だけでなく発注Signalを確定できないためFail Closedです。</div>}
       </div>
       <div className="mt-4 rounded-xl border border-white/10 bg-black/20 px-3 py-3 text-xs leading-5 text-white/65">{production?.v12 && production?.caps ? <>V12 contract: per-position {production.caps.v12PerPositionGross.toFixed(2)}x / Top{production.v12.maximumPositions} / Base {production.caps.v12BaseGross.toFixed(2)}x / Dynamic {production.caps.v12DynamicGross.toFixed(2)}x / Score&gt;={production.v12.neutralScoreThreshold.toFixed(4)} / Strong {production.v12.strongRegimeQualityScoreMinimum.toFixed(2)}-{production.v12.strongRegimeQualityScoreMaximum.toFixed(2)} + ATR&gt;={(production.v12.strongRegimeQualityMinimumAtrRatio * 100).toFixed(1)}%. Recent fills: {details.recentFills.length} / positions: {details.v12Positions.length}.</> : <>Production runtime unavailable; no static contract fallback.</>}</div>
     </section>
