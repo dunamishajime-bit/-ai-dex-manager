@@ -83,6 +83,44 @@ def scan():
      hits=[key for key,marker in MARKERS.items() if marker in data]
      if hits:result["referenceHits"].append({"path":str(f),"matches":hits,"sha256":hashlib.sha256(data).hexdigest(),"size":size})
     except (OSError,PermissionError):pass
+ # Search previously overlooked temporary source and research-state filenames.
+ result["tempFiles"]=[]
+ temp=pathlib.Path("/tmp")
+ if temp.is_dir():
+  for parent,dirs,files in os.walk(temp,followlinks=False):
+   here=pathlib.Path(parent)
+   dirs[:]=[d for d in sorted(dirs) if d not in SKIP and not (here/d).is_symlink()]
+   if len(here.relative_to(temp).parts)>=3:dirs[:]=[]
+   for name in sorted(files):
+    p=here/name
+    if p.is_symlink() or not re.search(
+      r"final|monthly|integrat|gross|top3|fet|q102|quality|pengu|v12|backtest|bt|govern|source|ledger|cache",name,re.I):continue
+    try:
+     meta=safe_meta(p);meta["suffix"]=p.suffix
+     if p.suffix.lower()==".json" and p.stat().st_size<3_000_000:
+      try:
+       v=json.loads(p.read_bytes())
+       meta["shape"]={"type":type(v).__name__,"length":len(v) if hasattr(v,"__len__") else None,
+        "keys":list(v)[:35] if isinstance(v,dict) else None,
+        "firstKeys":list(v[0])[:35] if isinstance(v,list) and v and isinstance(v[0],dict) else None}
+      except (ValueError,UnicodeError):pass
+     result["tempFiles"].append(meta)
+    except OSError:continue
+    if len(result["tempFiles"])>=250:break
+ result["researchStateFiles"]=[]
+ for p in [pathlib.Path("/home/deploy/disdex-trading/work/v12-winrate-gates-20260923/.research-state"),
+           pathlib.Path("/home/deploy/disdex-trading/work/repair-20260918/.research-state")]:
+  if not p.is_dir():continue
+  for parent,dirs,files in os.walk(p,followlinks=False):
+   here=pathlib.Path(parent)
+   dirs[:]=[d for d in sorted(dirs) if d not in SKIP and not (here/d).is_symlink()]
+   if len(here.relative_to(p).parts)>=6:dirs[:]=[]
+   for name in files:
+    f=here/name
+    if f.is_symlink():continue
+    try:result["researchStateFiles"].append(safe_meta(f))
+    except OSError:pass
+    if len(result["researchStateFiles"])>=300:break
  # Read-only git history check for original script path, even if removed from branches.
  repos=["/home/deploy/ai-dex-manager","/home/deploy/ai-dex-manager-v96-paper",
         "/home/deploy/disdex-trading/work/v12-winrate-gates-20260923"]
