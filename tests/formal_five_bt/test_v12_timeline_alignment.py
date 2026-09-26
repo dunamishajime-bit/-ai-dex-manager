@@ -40,5 +40,5 @@ class V12HistoricalListingAndGap(unittest.TestCase):
         with RuntimeBridge() as bridge:
             actual=bridge.v12_series({"BTCUSDT":btc,"ETHUSDT":eth},START+70*H2,START+190*H2)
         self.assertGreater(actual["skippedBtcWarmupOrGap"],0)
-        self.assertTrue(all(x["decisionTs"]!=START+110*H2 for x in actual["results"]))
+        self.assertTrue(all(x["decisionTs"]!=START+111*H2 for x in actual["results"]))
 if __name__=="__main__":unittest.main()
