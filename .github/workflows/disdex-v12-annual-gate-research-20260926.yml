@@ -17,7 +17,7 @@ jobs:
       - name: Checkout production-lineage research code
         uses: actions/checkout@v4
         with:
-          ref: c28ca549e21b102c68da74317bcf89b25b174d4d
+          ref: 662a99d8e15fc43d8d4928000197bea96cf9c7c4
       - name: Set up Node.js 24 with cached dependencies
         uses: actions/setup-node@v4
         with:
