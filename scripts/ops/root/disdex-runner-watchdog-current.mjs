@@ -24,6 +24,7 @@ const MAX_ATTEMPTS = 3;
 const SHARED_CRYPTO_RISK_UNIT_PATTERN = "disdex-shared-crypto-risk@*.service";
 const MARGIN_GUARD_UNIT_PATTERN = "disdex-v12-v52-margin-guard@*.service";
 const LEGACY_LIVE_UNITS = [
+    "disdex-v96-live.service",
     "disdex-v96-v52-live.service",
     "disdex-v13d-v11eq-v96.service",
     "disdex-v46-live.service",

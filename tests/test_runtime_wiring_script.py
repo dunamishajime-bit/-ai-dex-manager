@@ -85,6 +85,7 @@ class RuntimeWiringScriptTest(unittest.TestCase):
         source = SCRIPT.read_text(encoding="utf-8")
         self.assertIn("LEGACY_LIVE_UNITS", source)
         for unit in (
+            "disdex-v96-live.service",
             "disdex-v96-v52-live.service",
             "disdex-v13d-v11eq-v96.service",
             "disdex-v46-live.service",

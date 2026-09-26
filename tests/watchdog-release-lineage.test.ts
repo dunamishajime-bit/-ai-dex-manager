@@ -18,6 +18,7 @@ test("watchdog also enforces singleton lineage for margin guard", () => {
 });
 
 test("watchdog fails closed if the legacy V96/V52 live supervisor is active", () => {
+  assert.match(source, /disdex-v96-live\.service/);
   assert.match(source, /disdex-v96-v52-live\.service/);
   assert.match(source, /LEGACY_LIVE_CONFLICT/);
 });

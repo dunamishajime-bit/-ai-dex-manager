@@ -42,6 +42,7 @@ SHARED_RISK_DROPIN_DIR="/etc/systemd/system/disdex-shared-crypto-risk@CURRENT.se
 # runtime. Historical source/config files remain installed for rollback and
 # research, but an active legacy service is a hard wiring conflict.
 LEGACY_LIVE_UNITS=(
+  "disdex-v96-live.service"
   "disdex-v96-v52-live.service"
   "disdex-v13d-v11eq-v96.service"
   "disdex-v46-live.service"
