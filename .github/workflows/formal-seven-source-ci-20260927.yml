@@ -1,0 +1,54 @@
+name: Seven-logic BT frozen source and HYPE ZEC causal signal CI
+on:
+  push:
+    branches: [research/formal-seven-logic-bt-20260927]
+    paths:
+      - research/formal_five_bt/seven_**
+      - tests/formal_five_bt/test_seven_**
+      - .github/workflows/formal-seven-source-ci-20260927.yml
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 32
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fetch exact independent HYPE ZEC research source commit
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          git fetch --no-tags --depth=2 origin refs/heads/codex/hype-zec-priority-sleeves
+          git cat-file -e "cde62b3909a86e4791a19e78862eeaa37653e03a^{commit}"
+          [[ "$(git show -s --format=%P cde62b3909a86e4791a19e78862eeaa37653e03a)" == "a09ea45ca3cbd72100f9eb0eaae499039c40b6a0" ]]
+      - name: Install no credentials; Node built-in TypeScript loader only
+        run: |
+          python -m pip install --disable-pip-version-check --no-cache-dir -r research/formal_five_bt/requirements.txt
+      - name: SHA256-lock source and run seven research-gate tests
+        shell: bash
+        env:
+          SEVEN_BT_SOURCE_ROOT: ${{ runner.temp }}/seven-bt
+        run: |
+          set -Eeuo pipefail
+          python -m research.formal_five_bt.seven_source --output-root "$SEVEN_BT_SOURCE_ROOT"
+          python -m unittest discover -s tests/formal_five_bt -p 'test_seven_*.py' -v
+          printf '%s\n' '{"op":"audit"}' | node research/formal_five_bt/seven_runtime_bridge.mjs > "$RUNNER_TEMP/seven-audit.jsonl"
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          p=Path(os.environ["RUNNER_TEMP"])/"seven-audit.jsonl"
+          obj=json.loads(p.read_text().strip())
+          assert obj["ok"] and obj["result"]["researchOnly"]
+          assert obj["result"]["sourceSha"]=="cde62b3909a86e4791a19e78862eeaa37653e03a"
+          print("SEVEN_BT_CAUSAL_BRIDGE_HASH_VERIFIED_AND_RESEARCH_ONLY=PASS")
+          PY
+          python -m compileall -q research/formal_five_bt
+          git diff --check

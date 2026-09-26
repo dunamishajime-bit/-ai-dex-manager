@@ -10,7 +10,7 @@ class SidecarScanContract(unittest.TestCase):
     def setUp(self):
         self.rules={"btcMinMoveBps":3,"btcMinAccelBps":-1,"btcMaxMoveBps":45,
             "symbolMinMoveBps":8,"symbolMinAccelBps":-1,
-            "symbolMaxDistanceBps":65,"breakoutBps":8,"breakoutConfirmMinutes":5}
+            "symbolMaxDistanceBps":120,"breakoutBps":8,"breakoutConfirmMinutes":5}
     def rows(self,prices,ts=1_700_000_100_000):
         origin=ts-ts%FIFTEEN
         return [{"ts":origin+i*FIFTEEN,"open":p,"high":p*1.001,
