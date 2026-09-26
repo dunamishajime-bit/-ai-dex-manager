@@ -1,0 +1,88 @@
+name: DisDex post-retention residual release reference census
+on:
+  issue_comment:
+    types: [created]
+permissions:
+  contents: read
+jobs:
+  audit:
+    if: >-
+      github.event.issue.number == 132 &&
+      github.actor == 'dunamishajime-bit' &&
+      github.event.comment.author_association == 'OWNER' &&
+      github.event.comment.body == 'DISDEX_POST_RETENTION_REFERENCE_CENSUS_20260926'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 18
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Configure approved VPS read-only transport
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Read-only census of remaining root state and systemd SHA references (never show file contents)
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -p "${SSH_PORT:-22}" "root@$SSH_HOST" 'python3 -' <<'PY'
+          import pathlib,os,re,json,time,collections,subprocess
+          R=pathlib.Path("/home/deploy/disdex-trading/releases")
+          pat=re.compile(r"\b[0-9a-f]{40}\b")
+          links=pathlib.Path("/home/deploy/disdex-trading/current").resolve()
+          dirs=[p for p in R.iterdir() if p.is_dir() and re.fullmatch("[0-9a-f]{40}",p.name)]
+          names={p.name for p in dirs}
+          pinned={links.name}
+          for p in sorted(dirs,key=lambda p:p.stat().st_mtime,reverse=True):
+           if len(pinned)>=3:break
+           pinned.add(p.name)
+          legacy=names-pinned
+          ref=collections.defaultdict(lambda:collections.defaultdict(list))
+          for scope,path in [("systemd","/etc/systemd/system"),("systemd","/etc/disdex"),("state","/var/lib/disdex"),("state","/home/deploy/disdex-ops")]:
+           root=pathlib.Path(path)
+           if not root.is_dir():continue
+           filesSeen=0
+           for p in root.rglob("*"):
+            if p.is_symlink() or not p.is_file():continue
+            filesSeen+=1
+            try:
+             st=p.stat()
+             if st.st_size>32_000_000:continue
+             if st.st_size<50:continue
+             txt=p.read_text(encoding="utf-8",errors="ignore")
+             hits=set(pat.findall(txt))&legacy
+             for sha in hits:ref[sha][scope].append(str(p))
+            except Exception:pass
+           print("SCANNED_REFERENCE_SCOPE="+json.dumps({"scope":scope,"root":path,"filesSeen":filesSeen}))
+          for p in pathlib.Path("/home/deploy").glob("*"):
+           if p.is_symlink():
+            try:
+             link=p.resolve(strict=False)
+             if link.parent==R and link.name in legacy:ref[link.name]["symlink"].append(str(p))
+            except Exception:pass
+          rows=[]
+          for sha in sorted(legacy):
+           o=ref[sha]
+           try:st=(R/sha).stat();age=round((time.time()-st.st_mtime)/86400,1)
+           except:age=-1
+           rows.append({"sha":sha,"ageDays":age,"references":{k:v[:6] for k,v in o.items()},"referenceCounts":{k:len(v) for k,v in o.items()},"sizeBytesDirect":(R/sha).stat().st_size})
+          summary=collections.Counter()
+          for row in rows:
+           for t in row["references"]:summary[t]+=1
+          print("POST_RETENTION_REFERENCE_CENSUS="+json.dumps({"current":links.name,"totalReleaseDirs":len(dirs),"pinnedAssumption":list(pinned),"nonPinned":len(legacy),"categories":summary,"unreferenced":sum(not row["references"] for row in rows),"rows":rows[:65],"tradingMutation":0}))
+          
+          PY
