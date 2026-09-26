@@ -183,7 +183,7 @@ class SourceAndCalendarTests(unittest.TestCase):
             result = sources.fetch_fred_dexjpus(date(2025, 8, 8), date(2025, 8, 11))
         self.assertEqual(len(result.observations), 2)
         self.assertEqual(result.observations[0]["rate_jpy_per_usd"], 147.25)
-        self.assertEqual(result.raw_sha256, hashlib.sha256(full).hexdigest())
+        self.assertEqual(result.response_sha256, hashlib.sha256(full).hexdigest())
         self.assertIn("id=DEXJPUS", result.source_url)
 
     def test_official_fed_h10_last_fallback_can_supply_verified_jpy_only(self) -> None:
