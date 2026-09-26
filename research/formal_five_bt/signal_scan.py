@@ -167,7 +167,21 @@ def scan(data_root: str | Path, output_root: str | Path, *, strategies: tuple[st
                 for item in snapshot.get("items", []):
                     decisions.append({"strategy_id": "Q102", "symbol": item["symbol"], "decision_ts_ms": ts, "status": "SIGNAL" if item.get("selected") else "CANDIDATE" if item.get("eligible") else "WAIT", "item": item, "selected_symbol": snapshot.get("selectedSymbol"), "selected_reason": snapshot.get("selectedReason"), "data_cutoff_ms": min(ts, int(item.get("referenceTs") or ts)), "source_runtime_sha": bridge.runtime_sha})
             paths["Q102"] = _save_jsonl(output / "decisions" / "Q102.jsonl", decisions)
-            stats["Q102"] = {"decision_timestamps": len(series), "decision_rows": len(decisions), "signal_rows": sum(row["status"] == "SIGNAL" for row in decisions), "error_timestamps": sum("error" in event for event in series)}
+            error_counts = {}
+            for event in series:
+                if event.get("error"):
+                    reason = str(event["error"]).split(":")[0][:100]
+                    error_counts[reason] = error_counts.get(reason, 0) + 1
+            failures = sum(error_counts.values())
+            all_blocked = bool(series) and failures == len(series)
+            stats["Q102"] = {
+                "decision_timestamps": len(series),
+                "decision_rows": len(decisions),
+                "signal_rows": (None if all_blocked else sum(row["status"] == "SIGNAL" for row in decisions)),
+                "error_timestamps": failures,
+                "error_reasons": dict(sorted(error_counts.items(), key=lambda item: -item[1])[:12]),
+                "status": "NOT_VERIFIABLE_FULL_PERIOD" if all_blocked else "PARTIALLY_VERIFIED" if failures else "SOURCE_REPLAY_COMPLETE",
+            }
 
     manifest = {
         "schema_version": 1,

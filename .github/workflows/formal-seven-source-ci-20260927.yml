@@ -9,6 +9,7 @@ on:
       - research/formal_five_bt/engine.py
       - research/formal_five_bt/acquire.py
       - research/formal_five_bt/sources.py
+      - research/formal_five_bt/signal_scan.py
       - tests/formal_five_bt/test_sources_and_calendar.py
 permissions:
   contents: read
