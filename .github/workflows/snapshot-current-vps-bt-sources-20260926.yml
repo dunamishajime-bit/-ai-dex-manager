@@ -1,0 +1,124 @@
+name: Audit exact CURRENT VPS strategies for source-faithful BT, read-only
+on:
+  push:
+    branches: [research/recover-final-governor-bt-20260926]
+    paths: [.github/workflows/snapshot-current-vps-bt-sources-20260926.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  snapshot:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up approved VPS SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          p=Path.home()/'.ssh'
+          for file,key in [('id_root','ROOT_KEY'),('known_hosts','SSH_KNOWN_HOSTS')]:
+              (p/file).write_text(os.environ[key].lstrip('\ufeff').replace('\r\n','\n').replace('\r','\n').strip()+'\n')
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Fingerprint and copy ONLY allowlisted original production .ts .json .py files, no env or credentials
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          mkdir -p current-vps-sources
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -p "${SSH_PORT:-22}" "root@$SSH_HOST" 'python3 -' \
+            > current-vps-source-manifest.json <<'PY'
+          import json,pathlib,hashlib,subprocess,datetime
+          current=pathlib.Path('/home/deploy/disdex-trading/current')
+          release=current.resolve()
+          sha=(release/'.disdex-release-sha').read_text().strip()
+          if not sha or not release.as_posix().endswith('/'+sha):raise SystemExit('RELEASE_OR_SHA_UNTRUSTED')
+          paths=[
+           'config/v12X1AllRuntime.ts','config/penguDualLsV2Runtime.ts','config/penguRecoveryV8.ts',
+           'config/fetBrk48Runtime.ts','config/disdexQuality102CausalV4Model.ts',
+           'config/disdexQuality102CausalV1Runtime.ts','config/integratedProductionRiskPolicy.ts',
+           'config/v52V50Runtime.json','config/disdexSharedRiskConfig.ts','config/disdexTop3Runtime.ts',
+           'lib/v12-x1-all.ts','lib/v12-x1-all-engine.ts','lib/v12-top2-residual.ts',
+           'lib/pengu-dual-ls-v2.ts','lib/pengu-recovery-v8.ts','lib/pengu-short-v20.ts',
+           'lib/disdex-quality102-causal-v4-signal.ts','lib/disdex-quality102-causal-v1-runner.ts',
+           'lib/disdex-portfolio-dd-governor.ts','lib/disdex-strict-portfolio-planner.ts',
+           'lib/fet-brk48-signal.ts','lib/fet-brk48-live-reduction.ts',
+           'lib/disdex-integrated-gross-governor.ts',
+           'scripts/disdex_v52_aster_only_live_engine.py',
+          ]
+          relevant=[]
+          for folder in ('config','lib','scripts'):
+           d=release/folder
+           if not d.is_dir():continue
+           for p in sorted(d.iterdir()):
+            if not p.is_file() or p.is_symlink() or p.suffix not in ('.ts','.py','.json'):continue
+            if any(k in p.name.lower() for k in ('top3','hc175','hc1p75','fet','pengu','quality102','q102','v12','v52','gross','portfolio-dd','risk-policy')):
+             rel=str(p.relative_to(release))
+             if rel not in paths:relevant.append(rel)
+          paths=sorted(set(paths+relevant))
+          manifest={'schema':'effective-current-vps-bt-sources/v1','readOnly':True,'tradingMutation':0,
+            'utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),'release':str(release),'sha':sha,'files':[]}
+          for rel in paths:
+           f=release/rel
+           if not f.is_file() or f.is_symlink():continue
+           raw=f.read_bytes()
+           if len(raw)>3_000_000:continue
+           manifest['files'].append({'relativePath':rel,'size':len(raw),'sha256':hashlib.sha256(raw).hexdigest()})
+          units=['disdex-v12-x1-all@'+sha+'.service','disdex-pengu-dual-ls-v2@'+sha+'.service',
+            'disdex-quality102-causal-v1@'+sha+'.service','disdex-v52-aster-only@'+sha+'.service']
+          # Do not expose env files, account/position data or any trading credentials.
+          manifest['serviceState']={}
+          for unit in units:
+           r=subprocess.run(['systemctl','is-active',unit],capture_output=True,text=True,timeout=3)
+           manifest['serviceState'][unit.split('@')[0]]=r.stdout.strip()
+          print(json.dumps(manifest,ensure_ascii=False,indent=2))
+          PY
+          python3 - <<'PY'
+          import json,pathlib
+          d=json.load(open('current-vps-source-manifest.json'))
+          assert d['tradingMutation']==0 and len(d['files'])>=12
+          print('CURRENT_VPS_ORIGINAL_CODE_MANIFEST',d['sha'],'fileCount',len(d['files']))
+          PY
+      - name: Assert exact release source fingerprints match corresponding committed GitHub snapshot
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 - <<'PY'
+          import subprocess,json
+          d=json.load(open('current-vps-source-manifest.json'))
+          sha=d['sha']
+          subprocess.check_call(['git','fetch','--depth=1','origin',sha],stdout=subprocess.DEVNULL)
+          mismatches=[];missing=[]
+          for item in d['files']:
+              rel=item['relativePath']
+              p=subprocess.run(['git','show',sha+':'+rel],capture_output=True)
+              if p.returncode:
+                  missing.append(rel);continue
+              import hashlib
+              h=hashlib.sha256(p.stdout).hexdigest()
+              if h!=item['sha256']:mismatches.append(rel)
+          d['gitMatchingSources']=len(d['files'])-len(mismatches)-len(missing)
+          d['gitMismatches']=mismatches
+          d['gitMissing']=missing
+          with open('current-vps-source-manifest.json','w') as f:json.dump(d,f,indent=2)
+          print('CURRENT_VPS_SHA_PARITY','matched',d['gitMatchingSources'],'mismatches',mismatches,'missing',missing)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: current-vps-bt-source-manifest-readonly-20260926
+          path: current-vps-source-manifest.json
+          retention-days: 90
+          if-no-files-found: warn
