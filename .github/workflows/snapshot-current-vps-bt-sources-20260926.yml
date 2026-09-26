@@ -100,20 +100,28 @@ jobs:
           d=json.load(open('current-vps-source-manifest.json'))
           sha=d['sha']
           subprocess.check_call(['git','fetch','--depth=1','origin',sha],stdout=subprocess.DEVNULL)
-          mismatches=[];missing=[]
+          import hashlib
+          byteExact=[];newlineOnly=[];trueMismatch=[];missing=[]
           for item in d['files']:
               rel=item['relativePath']
               p=subprocess.run(['git','show',sha+':'+rel],capture_output=True)
               if p.returncode:
                   missing.append(rel);continue
-              import hashlib
-              h=hashlib.sha256(p.stdout).hexdigest()
-              if h!=item['sha256']:mismatches.append(rel)
-          d['gitMatchingSources']=len(d['files'])-len(mismatches)-len(missing)
-          d['gitMismatches']=mismatches
+              target=item['sha256']
+              if hashlib.sha256(p.stdout).hexdigest()==target:
+                  byteExact.append(rel);continue
+              # VPS release checkout may normalize all LF lines to Windows CRLF.
+              if hashlib.sha256(p.stdout.replace(b'\r\n',b'\n').replace(b'\n',b'\r\n')).hexdigest()==target:
+                  newlineOnly.append(rel);continue
+              trueMismatch.append(rel)
+          d['gitByteExactSources']=len(byteExact)
+          d['gitNewlineOnlyDifferences']=newlineOnly
+          d['gitTrueMismatches']=trueMismatch
           d['gitMissing']=missing
+          d['gitMatchingSources']=len(byteExact)+len(newlineOnly)
           with open('current-vps-source-manifest.json','w') as f:json.dump(d,f,indent=2)
-          print('CURRENT_VPS_SHA_PARITY','matched',d['gitMatchingSources'],'mismatches',mismatches,'missing',missing)
+          print('CURRENT_VPS_SHA_PARITY','verified',d['gitMatchingSources'],
+                'newlineOnly',len(newlineOnly),'trueMismatch',trueMismatch,'missing',missing)
           PY
       - uses: actions/upload-artifact@v4
         if: always()
