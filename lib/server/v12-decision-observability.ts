@@ -1,8 +1,12 @@
-import { readFile } from "node:fs/promises";
-import { isAbsolute } from "node:path";
+import { readFile, stat } from "node:fs/promises";
+import { dirname, isAbsolute, join } from "node:path";
 
 import { AsterDexClient, loadAsterDexClientConfig } from "@/lib/server/asterdex/client";
 import { loadAsterTradeHistory } from "@/lib/server/aster-trade-history";
+import {
+  parseV12AllGateChecks, parseV12GateDiagnostics, summarizeV12DecisionHistory,
+  type V12AllGateAuditView, type V12GateDiagnosticsView,
+} from "@/lib/v12-gate-visibility";
 
 const V12_BASE_SYMBOLS = new Set([
   "BTC", "ETH", "BNB", "SOL", "LINK", "AVAX", "DOGE", "INJ", "XRP", "ADA", "LTC", "ATOM", "AAVE", "NEAR",
@@ -35,6 +39,10 @@ type SanitizedCandidate = {
   atr?: number;
   signalEligible?: boolean;
   signalReason?: string;
+  baseEligible?: boolean;
+  portfolioRank?: number;
+  entryGateReason?: string;
+  allGateChecks?: V12AllGateAuditView;
   signalGate?: {
     status: "pass" | "blocked" | "unknown";
     code?: string;
@@ -80,7 +88,12 @@ async function readJsonFromEnvPath(envName: "V12_X1_ALL_STATE_PATH" | "V12_DECIS
 
 export function diagnoseSignalGate(candidate: SanitizedCandidate, btcRegime?: string) {
   if (candidate.signalEligible === true) {
-    return { status: "pass" as const, code: "SIGNAL_ELIGIBLE", detail: "実runner判定: SIGNAL_ELIGIBLE（この候補はEntry Qualityまで通過）" };
+    const selected = candidate.portfolioRank !== undefined &&
+      (candidate.entryGateReason === "ALLOW_STANDARD" || candidate.entryGateReason === "ALLOW_HC175");
+    if (!selected) return { status: "unknown" as const, code: "BASE_ONLY_NOT_FINAL_SIGNAL",
+      detail: "Base Gate通過のみ。Top3選定・最終勝率Gate通過は未確認です。" };
+    return { status: "pass" as const, code: "SIGNAL_ELIGIBLE",
+      detail: "実runner判定: Top3選定後の最終Signal Eligible（発注可能・約定済みという意味ではありません）" };
   }
   if (candidate.signalEligible === false) {
     const reason = candidate.signalReason || "RUNNER_SIGNAL_BLOCKED";
@@ -141,6 +154,10 @@ function safeCandidate(value: unknown): SanitizedCandidate | null {
     atr: Number.isFinite(Number(row.atr)) ? Number(row.atr) : undefined,
     signalEligible: typeof row.signalEligible === "boolean" ? row.signalEligible : undefined,
     signalReason: typeof row.signalReason === "string" ? row.signalReason : undefined,
+    baseEligible: typeof row.baseEligible === "boolean" ? row.baseEligible : undefined,
+    portfolioRank: typeof row.portfolioRank === "number" && Number.isInteger(row.portfolioRank) ? row.portfolioRank : undefined,
+    entryGateReason: typeof row.entryGateReason === "string" ? row.entryGateReason : undefined,
+    allGateChecks: parseV12AllGateChecks(row.allGateChecks),
   };
 }
 
@@ -175,6 +192,7 @@ function safeDecisionSnapshot(value: unknown) {
     rationale: typeof row.rationale === "string" ? row.rationale : typeof row.reason === "string" ? row.reason : undefined,
     selectionConfirmed,
     signalGate: selectedCandidate?.signalGate,
+    gateDiagnostics: parseV12GateDiagnostics(row.gateDiagnostics),
     candidates,
   };
 }
@@ -330,13 +348,60 @@ function buildExecutionTrace(
   return { currentStage, currentStageLabel, summary, nextAction, steps };
 }
 
+/**
+ * Existing runner snapshots already append one JSONL entry per observation to
+ * daily files. Read at most the recent 7 days, no trading or state writes.
+ * This history does NOT reconstruct portfolio capacity or venue orderability.
+ */
+async function readV12HistoryStats() {
+  const snapshotPath = String(process.env.V12_DECISION_SNAPSHOT_PATH || "").trim();
+  const configured = String(process.env.V12_GATE_DIAGNOSTICS_PATH || "").trim();
+  if (!configured && (!snapshotPath || !isAbsolute(snapshotPath))) {
+    return summarizeV12DecisionHistory([], Date.now()-7*86_400_000, 0,
+      "V12 history path is not configured; actual entry orderability remains unknown.");
+  }
+  const prefix = configured || join(dirname(snapshotPath), "v12-gate-diagnostics.jsonl");
+  if (!isAbsolute(prefix)) {
+    return summarizeV12DecisionHistory([], Date.now()-7*86_400_000, 0,
+      "V12_GATE_DIAGNOSTICS_PATH must be absolute.");
+  }
+  const stem = prefix.endsWith(".jsonl") ? prefix.slice(0,-6) : prefix;
+  const now = Date.now();
+  const since = now-7*86_400_000;
+  const startDay = Math.floor(since/86_400_000);
+  const endDay = Math.floor(now/86_400_000);
+  const rows:unknown[]=[];
+  const warnings:string[]=[];
+  let readDays=0;
+  for(let day=startDay;day<=endDay;day++){
+    const utcDate=new Date(day*86_400_000).toISOString().slice(0,10);
+    const file=stem+"-"+utcDate+".jsonl";
+    try{
+      const meta=await stat(file);
+      if(meta.size>2*1024*1024){warnings.push(utcDate+": file exceeds bounded read limit");continue;}
+      const content=await readFile(file,"utf8");
+      readDays++;
+      for(const line of content.split("\n")){
+        if(!line.trim())continue;
+        try{rows.push(JSON.parse(line) as unknown);}
+        catch{warnings.push(utcDate+": malformed history line");}
+      }
+    }catch(error){
+      if((error as NodeJS.ErrnoException).code!=="ENOENT")
+        warnings.push(utcDate+": "+(error instanceof Error?error.message:"read failure").slice(0,70));
+    }
+  }
+  return summarizeV12DecisionHistory(rows,since,readDays,warnings.length?warnings.slice(0,5).join(" / "):undefined);
+}
+
 export async function loadV12DecisionObservability() {
   const errors: string[] = [];
-  const [runnerFile, decisionFile, riskFile, history] = await Promise.all([
+  const [runnerFile, decisionFile, riskFile, history, historyStats] = await Promise.all([
     readJsonFromEnvPath("V12_X1_ALL_STATE_PATH"),
     readJsonFromEnvPath("V12_DECISION_SNAPSHOT_PATH"),
     readJsonFromEnvPath("DISDEX_SHARED_CRYPTO_DAILY_RISK_PATH"),
     loadAsterTradeHistory(),
+    readV12HistoryStats(),
   ]);
   if (runnerFile.error) errors.push(`runner-state: ${runnerFile.error}`);
   if (decisionFile.error) errors.push(`decision-snapshot: ${decisionFile.error}`);
@@ -403,6 +468,7 @@ export async function loadV12DecisionObservability() {
     decision,
     runnerState,
     sharedRisk,
+    historyStats,
     executionTrace,
     v12Positions: positions,
     recentFills,
