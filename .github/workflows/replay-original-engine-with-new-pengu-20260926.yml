@@ -2,7 +2,7 @@ name: Compare actual source-native new PENGU inside restored original five-sleev
 on:
   push:
     branches: [research/recover-final-governor-bt-20260926]
-    paths: [.github/workflows/replay-original-engine-with-new-pengu-20260926.yml]
+    paths: [.github/workflows/replay-original-engine-with-new-pengu-20260926.yml, scripts/research/old_engine_new_pengu_replay.py]
   workflow_dispatch:
 permissions:
   contents: read
