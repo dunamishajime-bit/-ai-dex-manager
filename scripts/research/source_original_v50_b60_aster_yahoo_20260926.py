@@ -37,7 +37,7 @@ def source_aligned(aster,yahoo):
   for ts in bars:
    day=dt.datetime.fromtimestamp(ts/1000,dt.timezone.utc).astimezone(NY)
    if (day.hour,day.minute)==(11,30):all_dates.add(day.date())
- aligned={s:{} for s in aster};kept=[];reject=collections.Counter()
+ aligned={s+'USDT':{} for s in aster};kept=[];reject=collections.Counter()
  for day in sorted(all_dates):
   if day.weekday()>=5:continue
   if not (dt.date(2025,8,10)<=day<dt.date(2026,8,10)):continue
@@ -57,7 +57,7 @@ def source_aligned(aster,yahoo):
        "exit":entry,"exitTs":t,"asterVolumeAtOpenBar":float(bar[5])})
     refs.append({"cash":ref,"timestamp":t})
    if len(rows)!=len(ts):reject["MISSING_ALIGNED_HISTORY"]+=1;break
-   observations[s]={"day":day.isoformat(),"checkpoints":rows,
+   observations[sym]={"day":day.isoformat(),"checkpoints":rows,
      "cash":{"checkpoints":refs},"perp":{"fundingPoints":[]}}
   if len(observations)!=len(STOCKS):reject["MISSING_STOCKS_AT_DAY"]+=1;continue
   # Day is usable only when all 5 source stocks align at every checkpoint.
@@ -102,7 +102,7 @@ def main():
   # Source-native LIVE post-only book liquidity, clock skew and open-order checks
   # are unobservable in historical OHLC, so these are not executable accepted fills.
   t=int(trade["entryTs"]);sym=trade["symbol"]
-  trade["asterEntry30mVolume"]=float(aster[sym][t][5])
+  trade["asterEntry30mVolume"]=float(aster[sym[:-4]][t][5])
   trade["historicalLiquidityUnknown"]=trade["asterEntry30mVolume"]<=0
  output=pathlib.Path(a.output);output.mkdir(parents=True,exist_ok=True)
  (output/"current-v50-b60-raw-price-candidates.json").write_text(json.dumps(raw_trades,ensure_ascii=False,indent=2))
