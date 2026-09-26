@@ -1,0 +1,31 @@
+name: Q102 actual Aster one-minute gross-resize mark source recovery
+on:
+  push:
+    branches: [research/recover-final-governor-bt-20260926]
+    paths:
+      - scripts/research/fetch_q102_historical_intrahour_marks_20260926.py
+      - .github/workflows/q102-targeted-exact-1m-source-20260926.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fetch only explicitly observed 15 old-engine Q102 intrahour price marks
+        run: |
+          set -Eeuo pipefail
+          python3 -m py_compile scripts/research/fetch_q102_historical_intrahour_marks_20260926.py
+          python3 scripts/research/fetch_q102_historical_intrahour_marks_20260926.py
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: current-Q102-source-exact-one-minute-mtm-20260926
+          path: research-results/old-engine-current-q102-actual-1m-20260926/
+          retention-days: 90
+          if-no-files-found: warn
