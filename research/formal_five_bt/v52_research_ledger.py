@@ -174,12 +174,12 @@ def replay_v52_research(
         current_session = datetime.fromtimestamp(
             ts / 1000, timezone.utc).astimezone(NY).date().isoformat()
         if current_session in unresolved_sessions:
-            skipped.append({"symbol": row["symbol"], "decision_ts_ms": ts,
+            skipped.append({"status": "SKIPPED_CANDIDATE", "symbol": row["symbol"], "decision_ts_ms": ts,
                             "reason": "PREVIOUS_EXIT_UNVERIFIED_SAME_SESSION"})
             counters["BLOCKED_BY_UNRESOLVED_EXIT_SAME_SESSION"] += 1
             continue
         if position is not None:
-            skipped.append({"symbol": row["symbol"], "decision_ts_ms": ts,
+            skipped.append({"status": "SKIPPED_CANDIDATE", "symbol": row["symbol"], "decision_ts_ms": ts,
                             "reason": "SINGLE_V50_SLOT_ALREADY_OPEN"})
             counters["BLOCKED_BY_V50_SLOT"] += 1
             continue
@@ -191,7 +191,7 @@ def replay_v52_research(
                 not math.isclose(eq, float(row["yahoo_reference_usd"]), rel_tol=1e-9) or
                 not math.isclose(future, float(row["aster_price_usd"]), rel_tol=1e-9)):
             skipped.append({
-                "symbol": row["symbol"], "decision_ts_ms": ts,
+                "status": "SKIPPED_CANDIDATE", "symbol": row["symbol"], "decision_ts_ms": ts,
                 "reason": "ENTRY_PRICE_CHAIN_UNVERIFIED",
                 "yahoo_status": eq_status, "aster_status": ft_status,
                 "yahoo_end_ms": eq_end, "aster_end_ms": ft_end,
