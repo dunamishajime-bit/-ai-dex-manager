@@ -7,6 +7,8 @@ on:
       - codex/formal-five-logic-bt-20260926
     paths:
       - ".github/workflows/formal-five-bt-source-restore.yml"
+      - "research/formal_five_bt/runtime_bridge.mjs"
+      - "tests/formal_five_bt/test_v12_staggered_timeline.py"
 
 permissions:
   contents: read
