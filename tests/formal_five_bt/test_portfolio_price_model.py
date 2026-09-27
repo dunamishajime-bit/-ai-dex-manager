@@ -244,12 +244,13 @@ class PortfolioPriceModelTests(unittest.TestCase):
             (candidates / "crypto-price-model-candidates.jsonl").write_text(
                 json.dumps(trade) + "\n" + json.dumps(duplicate) + "\n")
             result = run_portfolio_model(data, candidates, output)
-            base, stress = result["scenarios"]
+            aster_taker, base, stress = result["scenarios"]
             self.assertEqual(base["contributed_jpy"], 130_000)
             self.assertEqual(base["closed_trades"], 1)
             self.assertEqual(base["strategy_trades"]["PENGU"], 1)
             self.assertEqual(base["rejected_entries"]["PENGU:SLOT_OCCUPIED"], 1)
             self.assertGreater(base["final_equity_jpy"], 130_000)
+            self.assertGreater(aster_taker["final_equity_jpy"], base["final_equity_jpy"])
             self.assertGreater(base["final_equity_jpy"], stress["final_equity_jpy"])
             self.assertTrue((output / "PRICE_MODEL_BASE_10BPS/portfolio-trades.jsonl").is_file())
 
