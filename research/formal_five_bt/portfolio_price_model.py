@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any
 
 from .crypto_price_model import HOUR, PERIOD_END_MS, PERIOD_START_MS, _funding, _rows
+from .fx_ecb import asof_jpy_per_usd, load_ecb_cross
 
 CRYPTO_CAP = 3.0
 STOCK_CAP = 4.0
@@ -123,9 +124,13 @@ def _scheduled_funding(data_root: Path, symbol: str, entry: int, exit: int) -> l
 def _portfolio_scenario(
     candidates: list[dict[str, Any]], data_root: Path, market: dict[str, dict[str, Any]],
     *, round_trip_cost_bps: float, scenario_id: str,
+    fx_series: list[tuple[int, float]] | None = None,
 ) -> dict[str, Any]:
     cost_side = round_trip_cost_bps / 2 / 10_000
     deposits = _monthly_deposits()
+    currency = "USD" if fx_series is not None else "NOMINAL_JPY"
+    rate_at = (lambda ts: asof_jpy_per_usd(fx_series, ts)) if fx_series is not None else (lambda _ts: 1.0)
+    deposited_units = 0.0
     by_entry: dict[int, list[dict[str, Any]]] = defaultdict(list)
     for row in candidates:
         if (row.get("status") == "MODELED_CLOSED_TRADE"
@@ -221,9 +226,11 @@ def _portfolio_scenario(
             break
 
         while deposit_i < len(deposit_times) and deposit_times[deposit_i] == ts:
-            amount = deposits[ts]
-            wallet += amount
-            event_cashflow[ts] += amount
+            amount_jpy = deposits[ts]
+            amount_units = amount_jpy / rate_at(ts)
+            wallet += amount_units
+            deposited_units += amount_units
+            event_cashflow[ts] += amount_units
             deposit_i += 1
         d = _day(ts)
         if d not in daily_start_equity:
@@ -438,7 +445,7 @@ def _portfolio_scenario(
             if partial and ts >= int(partial["ts"]):
                 qty *= 1 - float(partial["fraction"])
             unrealized += _side_sign(trade["side"]) * qty * (mark - float(trade["entry_price"]))
-        equity = cash + unrealized
+        equity = (cash + unrealized) * rate_at(ts)
         peak = max(peak, equity)
         dd = equity / peak - 1 if peak > 0 else 0.0
         max_dd = min(max_dd, dd)
@@ -446,25 +453,28 @@ def _portfolio_scenario(
         monthly[month] = equity
         curve.append((ts, equity))
 
+    # Internal settlement unit is USD when official ECB reference is provided;
+    # otherwise the legacy research-only nominal JPY unit is retained.
     pnls = [float(row["total_pnl_jpy"]) for row in completed]
     gains = sum(value for value in pnls if value > 0)
     losses = -sum(value for value in pnls if value < 0)
     strategy_pnl = defaultdict(float)
     strategy_trades = Counter()
     for row in completed:
-        strategy_pnl[row["strategy_id"]] += float(row["total_pnl_jpy"])
+        strategy_pnl[row["strategy_id"]] += (
+            float(row["total_pnl_jpy"]) * rate_at(int(row["exit_ts_ms"])))
         strategy_trades[row["strategy_id"]] += 1
-    final_equity = curve[-1][1] if curve else wallet
-    # Reconcile independently computed strategy ledger, settlement wallet,
-    # event ledger and H1 equity; a discrepancy invalidates the report.
+    final_equity = curve[-1][1] if curve else wallet * rate_at(PERIOD_END_MS)
+    final_rate = rate_at(PERIOD_END_MS)
+    # Reconcile in actual settlement units (USD when ECB reference exists).
     closed_pnl = sum(pnls)
     cashflow_total = sum(event_cashflow.values())
     tolerance = max(1e-6, abs(wallet) * 1e-9)
-    if abs((total_contributed + closed_pnl) - wallet) > tolerance:
+    if abs((deposited_units + closed_pnl) - wallet) > tolerance:
         raise ValueError("PORTFOLIO_TRADE_PNL_WALLET_RECONCILIATION_FAILED")
     if abs(cashflow_total - wallet) > tolerance:
         raise ValueError("PORTFOLIO_CASHFLOW_WALLET_RECONCILIATION_FAILED")
-    if not active and abs(final_equity - wallet) > tolerance:
+    if not active and abs(final_equity / final_rate - wallet) > tolerance:
         raise ValueError("PORTFOLIO_EQUITY_WALLET_RECONCILIATION_FAILED")
     return {
         "scenario_id": scenario_id,
@@ -472,6 +482,8 @@ def _portfolio_scenario(
         "missing_active_position_mtm_hours": missing_mtm,
         "missing_mtm_examples": missing_mtm_examples,
         "round_trip_cost_bps": round_trip_cost_bps,
+        "settlement_currency": currency,
+        "fx_reference": "ECB_USDJPY_EUR_CROSS_NEXT_DAY" if fx_series is not None else "NONE_NOMINAL_RESEARCH",
         "initial_jpy": 10_000.0, "monthly_jpy": 10_000.0, "contributed_jpy": total_contributed,
         "final_equity_jpy": final_equity,
         "net_profit_jpy": final_equity - total_contributed,
@@ -480,13 +492,17 @@ def _portfolio_scenario(
         "maximum_mtm_drawdown": None if missing_mtm else max_dd,
         "closed_trades": len(completed),
         "accounting_reconciliation": {
-            "status": "PASS", "wallet_nominal_jpy": wallet,
-            "closed_trade_pnl_nominal_jpy": closed_pnl,
-            "event_cashflow_nominal_jpy": cashflow_total,
-            "equity_minus_wallet_nominal_jpy": final_equity - wallet,
+            "status": "PASS", "wallet_settlement_units": wallet,
+            "closed_trade_pnl_settlement_units": closed_pnl,
+            "event_cashflow_settlement_units": cashflow_total,
+            "deposit_settlement_units": deposited_units,
+            "final_fx_jpy_per_usd": final_rate,
+            "equity_minus_wallet_jpy": final_equity - wallet * final_rate,
             "intrahour_events": sum(event_ts % HOUR != 0 for event_ts in event_times),
         },
         "strategy_pnl_jpy": dict(strategy_pnl),
+        "fx_cash_translation_pnl_jpy": (
+            final_equity - total_contributed - sum(strategy_pnl.values())),
         "strategy_trades": dict(strategy_trades),
         "rejected_entries": dict(rejected),
         "monthly_equity_jpy": monthly,
@@ -501,9 +517,11 @@ def _portfolio_scenario(
 
 
 def run_portfolio_model(data_root: Path, candidate_root: Path, output_root: Path,
-                        v52_ledger_root: Path | None = None) -> dict[str, Any]:
+                        v52_ledger_root: Path | None = None,
+                        ecb_fx_root: Path | None = None) -> dict[str, Any]:
     data_root, candidate_root, output_root = map(Path, (data_root, candidate_root, output_root))
     candidates = _rows(candidate_root / "crypto-price-model-candidates.jsonl")
+    fx_series = load_ecb_cross(ecb_fx_root) if ecb_fx_root is not None else None
     v52_unresolved = 0
     v52_skipped = 0
     unresolved_crypto = Counter(str(row["strategy_id"]) + ":" + str(row["status"])
@@ -533,7 +551,7 @@ def run_portfolio_model(data_root: Path, candidate_root: Path, output_root: Path
     market = _market(data_root, symbols)
     scenarios = []
     for scenario_id, cost in (("PRICE_MODEL_BASE_10BPS", 10.0), ("PRICE_MODEL_STRESS_70BPS", 70.0)):
-        result = _portfolio_scenario(candidates, data_root, market, round_trip_cost_bps=cost, scenario_id=scenario_id)
+        result = _portfolio_scenario(candidates, data_root, market, round_trip_cost_bps=cost, scenario_id=scenario_id, fx_series=fx_series)
         trade_rows = result.pop("trade_rows")
         scenario_dir = output_root / scenario_id
         scenario_dir.mkdir(parents=True, exist_ok=True)
@@ -550,7 +568,10 @@ def run_portfolio_model(data_root: Path, candidate_root: Path, output_root: Path
             else "ALL_FIVE_H1_PRICE_MODEL_NOT_FORMAL_L2_VERIFIED"),
         "unresolved_crypto_candidate_counts": dict(unresolved_crypto),
         "period_start_ms": PERIOD_START_MS, "period_end_exclusive_ms": PERIOD_END_MS,
-        "contribution_model": "JPY notional contributions; FX translation intentionally omitted because FRED was unavailable in runner",
+        "contribution_model": (
+            "JPY deposits converted to USD with as-of next-day ECB reference cross; "
+            "USD-marked account revalued to JPY each H1" if fx_series is not None else
+            "JPY nominal contributions; FX translation unavailable, research-only"),
         "shared_crypto_gross_cap": CRYPTO_CAP, "stock_gross_cap": STOCK_CAP, "total_gross_cap": TOTAL_CAP,
         "v52_unresolved_exit_trades_excluded": v52_unresolved,
         "v52_skipped_candidates": v52_skipped,
@@ -559,7 +580,9 @@ def run_portfolio_model(data_root: Path, candidate_root: Path, output_root: Path
         "limitations": [
             "H1 bar-price fills are modeled, not historical order-book fills",
             "NORMAL/SEVERE formal L2 scenarios remain separate from these 10/70 bps price-model sensitivities",
-            "JPY notional returns do not include USDJPY translation",
+            ("ECB daily USDJPY is a delayed reference cross, not executable USDTJPY "
+             "nor the mandated FRED DEXJPUS parity source" if fx_series is not None
+             else "JPY notional returns do not include USDJPY translation"),
             "Margin-guard liquidation-buffer mechanics are not reconstructed from H1 OHLC",
         ],
     }
@@ -576,9 +599,12 @@ def main() -> None:
     parser.add_argument("--output-root", type=Path, required=True)
     parser.add_argument("--v52-ledger-root", type=Path,
                         help="Optional modeled V52 ledger; unresolved rows remain excluded and reported")
+    parser.add_argument("--ecb-fx-root", type=Path,
+                        help="Optional official ECB EUR-cross USDJPY; FRED source parity is NOT claimed")
     args = parser.parse_args()
     result = run_portfolio_model(args.data_root, args.candidate_root, args.output_root,
-                                 v52_ledger_root=args.v52_ledger_root)
+                                 v52_ledger_root=args.v52_ledger_root,
+                                 ecb_fx_root=args.ecb_fx_root)
     print(json.dumps({"status": result["status"], "scenarios": result["scenarios"]}, sort_keys=True, allow_nan=False))
 
 
