@@ -44,6 +44,33 @@ The existing scanner computes historical V12/PENGU/Q102/FET signals using
 the audited runtime bridge; it does not yet implement this price-only V52
 basis trigger scanner. Do not convert V52 schedule rows into trade counts.
 
+## Verified additional progress (2026-09-27, GitHub Actions 36306205284)
+
+- Official public Aster stock-perpetual historical **1h price** acquisition
+  returned 8,784 bars and zero missing post-listing hours for each of
+  AMZNUSDT, METAUSDT, MSFTUSDT, NVDAUSDT, TSLAUSDT over the specified year.
+  This is **price**, not order-book depth or proof of tradable execution.
+- Together with the Yahoo underlying reference 60m series, the independently
+  labeled V50 hourly basis research scan completed successfully and reported:
+  98 selected **unallocated** candidates, 16 otherwise eligible but not
+  highest-ranked candidates, and 3,131 rejected stock-window decisions.
+  Rejection reason counts are non-mutually-exclusive: basis below threshold
+  2,524; modeled net edge insufficient 2,017; basis sign changed 1,298;
+  adverse basis movement 1,277; missing causal input 25.
+  No profit was computed; the original LIVE spread, depth, second-level
+  same-time price, and shared portfolio gates remain unverified.
+- A source-integrity bridge now checks the exact audited runtime SHA, the
+  full research decision file SHA256, total/per-status counts, monotonic
+  stock-window order, and at most one selected ticker per window. The bridge
+  rejects synthetic LIVE-fill or realized-P&L assertions. An optional
+  `--v52-research-scan-root` flag now adds these unallocated research
+  candidate rows to all four integrated scenario **decision traces** and
+  month-level research counts, **without** altering audited LIVE signal
+  counts, verified fills, closed trades, final equity, PF or DD.
+- Provenance and duplicate-guard unit tests have passed GitHub Actions.
+  Separate end-to-end four-scenario research integration regression checks
+  were added; verify their workflow run before treating them as passed.
+
 ## Current historical-source availability and next implementation gates
 
 The one-year Yahoo coverage job retrieved hourly records for all five
