@@ -61,12 +61,20 @@ def _mark(market: dict[str, dict[str, Any]], symbol: str, ts: int) -> float | No
         return None
     row = series["rows"][index]
     start = int(row["event_time_ms"])
-    if ts - start > HOUR:
+    if start == ts:
+        # The entry-time bar open is available at the H1 boundary.
+        return float(row["open"])
+    if ts >= start + HOUR:
+        # A completed last bar remains usable only at its immediate close.
+        return float(row["close"]) if ts == start + HOUR else None
+    # The current H1 close is FUTURE information until the hour has finished.
+    # Use the immediately preceding contiguous completed bar, or fail closed.
+    if index < 1:
         return None
-    # At an exact H1 boundary the open is causal; inside the hour only the
-    # preceding completed close is causal. Portfolio events are H1/funding
-    # timestamps, so use the open exactly at a boundary and prior close otherwise.
-    return float(row["open"] if start == ts else row["close"])
+    previous = series["rows"][index - 1]
+    if int(previous["event_time_ms"]) + HOUR != start:
+        return None
+    return float(previous["close"])
 
 
 def _side_sign(side: str) -> float:
