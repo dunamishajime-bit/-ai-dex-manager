@@ -56,7 +56,7 @@ jobs:
               and d.get("portfolio_v12_fills",{}).get("count")==754
               and "SOURCE_BASELINE" in d.get("cases",{}))
           with open(os.environ["GITHUB_OUTPUT"],"a") as f:
-            f.write("valid="+str(valid).lower()+"\\n")
+            f.write("valid="+str(valid).lower()+"\n")
           print("REUSABLE_ANNUAL_V12_AUDIT_VALID",valid,flush=True)
           PY
       - name: Acquire the same Aster historical year and warmup, no Binance substitution
