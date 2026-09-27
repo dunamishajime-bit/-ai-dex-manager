@@ -52,6 +52,14 @@ jobs:
                 any_valid=True
             except Exception as error:
               print(name.upper()+"_PROBE_UNAVAILABLE:",type(error).__name__,str(error).split("\\n")[0][:140])
+          if any_valid:
+            raw_h1=fetch_historical_klines("aster","BTCUSDT",hour,hour+3600000-1,interval="1h",max_pages=2)
+            native=next((x for x in raw_h1.rows if int(x[0])==hour),None)
+            if native is None:
+              print("NATIVE_1H_MISSING: True")
+            else:
+              print("NATIVE_H1_TO_1M_OPEN_DIVERGENCE_BPS:",round(abs(float(native[1])/combined["open"]-1)*10000,8))
+              print("NATIVE_H1_TO_1M_CLOSE_DIVERGENCE_BPS:",round(abs(float(native[4])/combined["close"]-1)*10000,8))
           print("OFFICIAL_ASTER_MINUTE_REPAIR_AVAILABLE:",any_valid)
           print("REPLAY_STATUS: PRIMARY_VENUE_DERIVED_RESEARCH_ONLY" if any_valid
                 else "REPLAY_STATUS: PRIMARY_VENUE_SOURCE_CORRUPT_NO_REPAIR")
