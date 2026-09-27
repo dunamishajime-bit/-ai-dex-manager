@@ -1,4 +1,5 @@
 name: Formal BT Aster Primary One-Year Research
+# Re-run marker: exact native-M1 H1 repair provenance required before final aggregate metrics.
 on:
   workflow_dispatch:
   push:
