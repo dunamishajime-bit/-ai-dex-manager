@@ -80,6 +80,7 @@ def reconcile_one_primary_hour(
     *,
     hour_ts: int = BAD_BTC_HOUR_TS,
     fetch: Callable[..., Any] = sources.fetch_historical_klines,
+    allow_valid_noop: bool = False,
 ) -> dict[str, Any]:
     """Patch a throwaway research data-root; preserve original and audit hashes.
 
@@ -107,7 +108,23 @@ def reconcile_one_primary_hour(
         raise ValueError("ASTER_REPAIR_TARGET_MISSING_OR_DUPLICATE")
     old = rows[indices[0]]
     if _ohlc_valid(old):
-        raise ValueError("ASTER_REPAIR_ORIGINAL_IS_ALREADY_VALID")
+        if not allow_valid_noop:
+            raise ValueError("ASTER_REPAIR_ORIGINAL_IS_ALREADY_VALID")
+        # The public primary venue can revise an invalid historic candle
+        # between two independent API acquisitions.  Never overwrite a
+        # currently valid bar merely to manufacture a 'repaired' sample.
+        noop = {
+            "scenario": "NATIVE_ASTER_H1_VALID_NO_RECONSTRUCTION",
+            "symbol": SYMBOL, "hour_start_ms": hour_ts,
+            "validated_contiguous_bars": 0,
+            "derived_normalized_sha256": _sha(original),
+            "original_normalized_sha256": _sha(original),
+            "minute_raw_pages": [],
+            "native_h1_ohlc_valid": True,
+            "normalized_h1_mutated": False,
+        }
+        _write_json(root / "aster-h1-reconciliation-status.json", noop)
+        return noop
     acquisition = fetch("aster", SYMBOL, hour_ts, hour_ts + HOUR_MS - 1,
                         interval="1m", max_pages=3)
     if (acquisition.source != "aster" or acquisition.native_instrument != SYMBOL
@@ -163,20 +180,25 @@ def reconcile_one_primary_hour(
     # after the full minute-page provenance checks succeed.
     candle_path.write_bytes(normalized)
     _write_json(manifest_path, manifest)
+    audit["normalized_h1_mutated"] = True
+    _write_json(root / "aster-h1-reconciliation-status.json", audit)
     return audit
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--data-root", type=Path, required=True)
+    parser.add_argument("--allow-valid-noop", action="store_true",
+                        help="Skip mutation if the native H1 is already valid; record distinct no-repair scenario")
     args = parser.parse_args()
-    result = reconcile_one_primary_hour(args.data_root)
+    result = reconcile_one_primary_hour(args.data_root, allow_valid_noop=args.allow_valid_noop)
     print(json.dumps({
         "scenario": result["scenario"], "symbol": result["symbol"],
         "hour_start_ms": result["hour_start_ms"],
         "validated_contiguous_bars": result["validated_contiguous_bars"],
         "derived_normalized_sha256": result["derived_normalized_sha256"],
         "minute_page_sha256": [row["sha256"] for row in result["minute_raw_pages"]],
+        "normalized_h1_mutated": result["normalized_h1_mutated"],
     }, sort_keys=True))
 
 
