@@ -113,6 +113,10 @@ jobs:
           print("V52_UNRESOLVED_EXITS:", d["unresolved_exit_trades"])
           print("V52_SKIPPED:", json.dumps(d["skipped_reasons"],sort_keys=True))
           PY
+      - name: Make the verified stock H1 series available to shared-gross marks
+        run: |
+          mkdir -p "$RUNNER_TEMP/formal-bt/normalized"
+          cp -a "$RUNNER_TEMP/formal-v52-data/normalized/aster_stock" "$RUNNER_TEMP/formal-bt/normalized/aster_stock"
       - name: Replay contribution-aware all-five shared-gross portfolio PRICE MODEL
         run: |
           python -m research.formal_five_bt.portfolio_price_model \
