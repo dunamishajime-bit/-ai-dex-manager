@@ -30,7 +30,8 @@ class IntegratedEngineTests(unittest.TestCase):
           'audited_release_id':'b'*40,'period_start_utc':PERIOD_START.isoformat(),
           'starting_capital_jpy':10000,'monthly_contribution_jpy':10000,
           'monthly_contribution_count':12,'total_contributions_jpy':130000,
-          'scenarios':[],'limitations':[]}
+          'scenarios':[{'scenario_id':'NORMAL_PROXY_APPLIED','status':'NOT_VERIFIABLE',
+            'candidate_signals':{},'verified_fills':0}], 'limitations':[]}
         output=render_report(manifest,{'symbols':[],
           'fx':{'source':'ECB_DAILY_CROSS_NOT_FRED','observations':410,'status':'VERIFIED'},
           'l2_archives':[]})
