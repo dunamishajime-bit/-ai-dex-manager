@@ -238,7 +238,9 @@ def replay_v52_research(
             if snap["status"] != "CHECKPOINT_VERIFIED_PRICE_ONLY":
                 trades.append({**position, **snap, "status": "UNRESOLVED_MODEL_EXIT",
                                "unresolved_ts_ms": checkpoint_ts,
-                               "modeled_return_on_equity": None})
+                               "model_checkpoint_status": snap["status"],
+                               "modeled_return_on_equity": None,
+                               "modeled_pnl_usd": None})
                 counters["UNRESOLVED_MODEL_EXIT"] += 1
                 unresolved_sessions.add(datetime.fromtimestamp(
                     checkpoint_ts / 1000, timezone.utc).astimezone(NY).date().isoformat())
