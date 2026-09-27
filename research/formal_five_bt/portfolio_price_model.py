@@ -87,7 +87,7 @@ def _equity(wallet: float, active: dict[int, dict[str, Any]],
     for position in active.values():
         mark = _mark(market, position["symbol"], ts)
         if mark is None:
-            continue
+            raise ValueError(f"UNVERIFIED_ACTIVE_POSITION_MARK:{position['symbol']}:{ts}")
         value += _side_sign(position["side"]) * position["quantity"] * (mark - position["entry_price"])
     return value
 
