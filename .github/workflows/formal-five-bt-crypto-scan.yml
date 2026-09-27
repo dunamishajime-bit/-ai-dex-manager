@@ -78,4 +78,12 @@ jobs:
           for folder in ("baseline-signal-scan", "baseline-signal-scan-q102"):
               doc = json.loads((scans / folder / "signal-scan-manifest.json").read_text())
               print(folder.upper().replace("-", "_") + "_STATS:", json.dumps(doc["stats"], sort_keys=True))
+          qfile = scans / "baseline-signal-scan-q102" / "decisions" / "Q102.jsonl"
+          from collections import Counter
+          reasons = Counter()
+          for line in qfile.read_text().splitlines():
+              row = json.loads(line)
+              if row.get("status") == "NOT_VERIFIABLE":
+                  reasons[str(row.get("reason"))] += 1
+          print("Q102_ERROR_REASONS:", json.dumps(reasons.most_common(20)))
           PY
