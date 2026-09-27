@@ -70,6 +70,26 @@ class RuntimeBridgeContractTests(unittest.TestCase):
         self.assertTrue(trace.gates)
         self.assertIn("runtime", trace.raw_result)
 
+    def test_pengu_promoted_trade_outcome_batch_uses_audited_runtime(self):
+        def candles(series):
+            return [{"openTime": row[0], "closeTime": row[6], "open": row[1], "high": row[2],
+                     "low": row[3], "close": row[4], "volume": row[5]} for row in series]
+        pengu = candles(bars(500))
+        btc = candles(bars(500))
+        with RuntimeBridge() as bridge:
+            result = bridge.pengu_trade_outcomes(
+                {"pengu1h": pengu, "btc1h": btc, "penguFunding": []},
+                pengu[-1]["closeTime"] + 1)
+        self.assertEqual(result["runtimeSha"], "e1b58060d6263a3af7ced51bec854d3e211d2f35")
+        self.assertTrue(result["recoveryV8Enabled"])
+        self.assertEqual(result["candidateCount"], len(result["candidates"]))
+        for candidate in result["candidates"]:
+            self.assertIn(candidate["entryVersion"], {"SHORT_V20", "LONG_V2_FINAL", "RECOVERY_V8"})
+            self.assertGreater(candidate["entryPrice"], 0)
+            self.assertGreater(candidate["targetGross"], 0)
+            self.assertIn(candidate["side"], {"LONG", "SHORT"})
+            self.assertEqual(candidate["sourceRuntimeSha"], result["runtimeSha"])
+
     def test_q102_requires_exact_current_entry_open_and_causal_cutoff(self):
         decision_ts = 1_700_000_000_000
         entry_ts = decision_ts - decision_ts % 3_600_000
