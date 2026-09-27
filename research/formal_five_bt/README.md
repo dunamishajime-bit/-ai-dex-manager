@@ -36,3 +36,42 @@ python -m unittest discover -s tests/formal_five_bt -v
 ```
 
 The accepted behavior, methodology, and audited-source scope are documented in `docs/research/formal-five-logic-bt-spec.md`, `docs/research/formal-five-logic-bt-methodology.md`, and `research/formal_five_bt/runtime_source_manifest.json`.
+
+## User-requested V52 Yahoo price-only research path (2026-09-27)
+
+V52 can now be evaluated **separately** with Yahoo Finance historical 60-minute
+prices, without requiring historical order-book snapshots for a *modeled* fill.
+This is deliberately not a verified Aster stock-perpetual execution or a
+production strategy change. Missing, stale, or out-of-session quotes do not
+produce a modeled fill. The initial 50-day V52 omission remains in effect.
+
+First acquire the five stock-reference series into the same ignored, local
+data root (Yahoo historical hourly retention and API availability may vary):
+
+```powershell
+python -m research.formal_five_bt.yahoo_acquire --output-root <local-data> --start 2025-08-10 --end-exclusive 2026-08-11
+```
+
+The engine reads `<local-data>/normalized/yahoo/60m/{AMZN,META,MSFT,NVDA,TSLA}.jsonl`
+by default. It consumes **actual historical V52 SIGNAL decision rows**
+and checks the accompanying `signal-scan-manifest.json` for the exact audited
+runtime SHA; a calendar schedule or Yahoo price move is **not** a V52 signal.
+Place the audited scan at
+`<local-scans-parent>/baseline-signal-scan-v52/decisions/V52.jsonl`
+with its sibling scan manifest, or supply `--v52-signal-file <local-V52.jsonl>`
+and `--v52-yahoo-root <local-Yahoo-60m-dir>`.
+
+For signals that pass the audited source gate, a fill is modeled immediately
+at the last completed, same-session Yahoo hourly close at the signal time.
+If the bar is older than 15 minutes, missing, or only available in the
+future, that candidate is not filled. All such entries are tagged
+`MODELED_PRICE_FILL` and `fill_verified=false`; fees, funding, exits, and
+combined performance remain unavailable until the audited order and risk
+replay is implemented. The four formal scenarios still preserve
+`NOT_VERIFIABLE` performance fields instead of manufacturing returns.
+
+Run the offline regression checks:
+
+```powershell
+python -m unittest discover -s tests/formal_five_bt -p 'test_yahoo_*.py' -v
+```
