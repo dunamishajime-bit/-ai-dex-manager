@@ -834,7 +834,10 @@ def run_portfolio_model(data_root: Path, candidate_root: Path, output_root: Path
     for scenario_id, cost in (
         ("PRICE_MODEL_ASTER_TAKER_8BPS", 8.0),
         ("PRICE_MODEL_BASE_10BPS", 10.0),
-        # 70bps is retained only as an intentionally extreme cost sensitivity;\n        # it is not an Aster baseline assumption.\n        ("PRICE_MODEL_EXTREME_COST_70BPS_NOT_BASELINE", 70.0),\n    ):
+        # 70bps is retained only as an intentionally extreme cost sensitivity;
+        # it is not an Aster baseline assumption.
+        ("PRICE_MODEL_EXTREME_COST_70BPS_NOT_BASELINE", 70.0),
+    ):
         result = _portfolio_scenario(candidates, data_root, market, round_trip_cost_bps=cost, scenario_id=scenario_id, fx_series=fx_series)
         trade_rows = result.pop("trade_rows")
         candidate_rows = result.pop("candidate_decision_rows_full")
