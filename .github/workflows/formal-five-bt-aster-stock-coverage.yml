@@ -5,6 +5,8 @@ on:
     branches: [codex/formal-five-logic-bt-20260926]
     paths:
       - ".github/workflows/formal-five-bt-aster-stock-coverage.yml"
+      - "research/formal_five_bt/v52_research_ledger.py"
+      - "tests/formal_five_bt/test_v52_research_ledger.py"
 permissions:
   contents: read
 jobs:
@@ -69,6 +71,7 @@ jobs:
           print("MODELED_V52_LEDGER_ENTRIES:", modeled["modeled_entries"])
           print("MODELED_V52_LEDGER_CLOSES:", modeled["modeled_closed_trades"])
           print("MODELED_V52_LEDGER_UNRESOLVED:", modeled["unresolved_exit_trades"])
+          print("MODELED_V52_UNRESOLVED_SESSIONS:", modeled["sessions_with_unresolved_exits"])
           print("MODELED_V52_LEDGER_SKIPS:", modeled["skipped_reasons"])
           print("MODELED_V52_LEDGER_EXIT_REASONS:", modeled["exit_reasons"])
           print("MODELED_V52_PRICE_ONLY_MEAN_RETURN:", modeled["price_model_closed_trade_mean_return"])
