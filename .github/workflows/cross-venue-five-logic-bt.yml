@@ -89,9 +89,7 @@ jobs:
           python -m research.formal_five_bt.signal_scan \
             --data-root "$RUNNER_TEMP/replay-data" \
             --output-root "$RUNNER_TEMP/formal-scans/baseline-signal-scan" \
-            --strategies V12 PENGU FET \
-            --start "$PERIOD_START" \
-            --end-exclusive "$END_EXCLUSIVE"
+            --strategies V12 PENGU FET
 
       - name: Replay Q102 signals on venue data
         run: |
@@ -99,9 +97,7 @@ jobs:
             --data-root "$RUNNER_TEMP/replay-data" \
             --output-root "$RUNNER_TEMP/formal-scans/baseline-signal-scan-q102" \
             --strategies Q102 \
-            --q102-fast \
-            --start "$PERIOD_START" \
-            --end-exclusive "$END_EXCLUSIVE"
+            --q102-fast
 
       - name: Build crypto candidate lifecycles
         run: |
