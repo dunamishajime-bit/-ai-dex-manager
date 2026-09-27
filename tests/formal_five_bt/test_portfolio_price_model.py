@@ -4,13 +4,46 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from research.formal_five_bt.portfolio_price_model import run_portfolio_model, _mark, _equity
+from research.formal_five_bt.portfolio_price_model import run_portfolio_model, _mark, _equity, _trade_outcome_aggregates
 
 HOUR = 3_600_000
 START = int(datetime(2025, 8, 10, tzinfo=timezone.utc).timestamp() * 1000)
 
 
 class PortfolioPriceModelTests(unittest.TestCase):
+    def test_allocated_trade_win_loss_breakdown_includes_fees_funding_and_exit_fx(self):
+        def trade(strategy, pnl, exit_reason, *, route=None, side="LONG"):
+            return {
+                "strategy_id": strategy, "total_pnl_jpy": pnl,
+                "price_pnl": pnl + 2, "funding_pnl": 0,
+                "entry_fee": 1, "exit_fee": 1,
+                "exit_ts_ms": START + HOUR, "exit_reason_actual": exit_reason,
+                "route": route, "side": side,
+            }
+
+        rows = [
+            trade("FET", 100, "FET_PROFIT_FLOOR_STOP"),
+            trade("FET", -40, "CORE_PREEMPT:V12"),
+            trade("PENGU", -25, "SHORT_HARD_STOP", route="SHORT_V20", side="SHORT"),
+            trade("PENGU", 10, "LONG_MAX_HOLD", route="BASE_V64_LONG"),
+        ]
+        out = _trade_outcome_aggregates(rows, lambda ts: 150.0)
+        fet = out["by_strategy"]["FET"]
+        self.assertEqual((fet["trades"], fet["winning_trades"], fet["losing_trades"]), (2, 1, 1))
+        self.assertEqual(fet["gross_win_jpy"], 15000.0)
+        self.assertEqual(fet["gross_loss_abs_jpy"], 6000.0)
+        self.assertEqual(fet["net_pnl_jpy"], 9000.0)
+        self.assertEqual(fet["fees_jpy"], 600.0)
+        self.assertEqual(out["fet_by_exit_reason"]["CORE_PREEMPT:V12"]["losing_trades"], 1)
+        pengu = out["by_strategy"]["PENGU"]
+        self.assertEqual((pengu["winning_trades"], pengu["losing_trades"]), (1, 1))
+        self.assertEqual(pengu["gross_win_jpy"], 1500.0)
+        self.assertEqual(pengu["gross_loss_abs_jpy"], 3750.0)
+        self.assertEqual(pengu["net_pnl_jpy"], -2250.0)
+        self.assertEqual(out["pengu_by_route"]["SHORT_V20"]["losing_trades"], 1)
+        self.assertEqual(out["pengu_by_side"]["SHORT"]["losing_trades"], 1)
+        self.assertNotIn("trade_rows", str(out))
+
     def test_intrahour_mark_uses_prior_completed_bar_not_future_close(self):
         history = {
             "PENGUUSDT": {
