@@ -89,6 +89,8 @@ class V52ResearchLedgerTests(unittest.TestCase):
         self.assertEqual(result["unresolved_exit_trades"], 1)
         self.assertEqual(result["modeled_closed_trades"], 0)
         self.assertIsNone(result["price_model_closed_trade_mean_return"])
+        self.assertEqual(trades[0]["status"], "UNRESOLVED_MODEL_EXIT")
+        self.assertEqual(trades[0]["model_checkpoint_status"], "UNRESOLVED_EXIT_PRICE")
         self.assertIsNone(trades[0]["modeled_return_on_equity"])
 
     def test_stop_overrides_time_and_reports_price_only_loss(self):
