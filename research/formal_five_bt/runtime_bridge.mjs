@@ -258,6 +258,15 @@ if (process.argv.includes("--list")) {
             continue;
           }
           try {
+            const signal = loaded.q102Signal.buildQuality102CausalV4Signal({
+              history,
+              decisionTs,
+              sleeveOccupancy: {
+                activePosition: false,
+                unresolvedPendingEntry: false,
+                basePositionActive: false,
+              },
+            }, { highVolSymbols: availableHighVol });
             const snapshot = loaded.q102Observability.buildQuality102CausalV4DecisionSnapshot({
               history,
               decisionTs,
@@ -265,7 +274,7 @@ if (process.argv.includes("--list")) {
               symbols: availableSymbols,
               runtimeCommitSha: manifest.runtime_sha,
             });
-            results.push({ decisionTs, snapshot, availableSymbols, availableHighVol });
+            results.push({ decisionTs, snapshot, signal, availableSymbols, availableHighVol });
           } catch (error) {
             results.push({
               decisionTs,
