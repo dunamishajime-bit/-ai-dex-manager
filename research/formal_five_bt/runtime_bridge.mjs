@@ -38,6 +38,8 @@ const MODULE_PATHS = {
   penguConfig: "config/penguDualLsV2Runtime.ts",
   pengu: "lib/pengu-dual-ls-v2.ts",
   penguRecovery: "lib/pengu-recovery-v8.ts",
+  penguRecoveryConfig: "config/penguRecoveryV8.ts",
+  penguRiskOverlay: "lib/pengu-route-quarantine-dd-governor.ts",
   penguShortV20: "lib/pengu-short-v20.ts",
   q102Signal: "lib/disdex-quality102-causal-v4-signal.ts",
   q102S34: "lib/disdex-quality102-causal-v4-s34.ts",
@@ -187,12 +189,54 @@ if (process.argv.includes("--list")) {
         const now = Number(request.now);
         if (!history || !Number.isFinite(now)) throw new Error("PENGU_SERIES_INPUT_INVALID");
         const rows = loaded.pengu.buildPenguDualLsV2EvaluationSeries(history, now);
-        const results = rows.map((row, index) => ({
-          ...row,
-          decision: row.features
-            ? loaded.pengu.evaluatePenguDualLsV2Decision(row.features, row.shortSignal, Boolean(rows[index - 1]?.longRaw))
-            : null,
-        }));
+        const recoveryEnabled = loaded.penguRecoveryConfig.PENGU_RECOVERY_V8_PROMOTION?.liveEnabled === true;
+        const results = rows.map((row, index) => {
+          if (!row.features) return { ...row, decision: null, currentDecision: null };
+          const baseline = loaded.pengu.evaluatePenguDualLsV2Decision(
+            row.features, row.shortSignal, Boolean(rows[index - 1]?.longRaw));
+          const v64Long = recoveryEnabled
+            ? loaded.pengu.isPenguV8V64DynamicLongSignal(rows, index)
+            : row.longSignal;
+          const baseCurrent = row.shortSignal
+            ? { side: -1, active: true, reason: "PENGU_CURRENT_SHORT_V20" }
+            : v64Long
+              ? { side: 1, active: true, reason: "PENGU_CURRENT_V64_LONG" }
+              : { side: 0, active: false, reason: "PENGU_CURRENT_BASE_IDLE" };
+          const recovery = recoveryEnabled
+            ? loaded.pengu.selectPenguRecoveryV8Entry(row.recoveryV8, true)
+            : undefined;
+          const currentDecision = !baseCurrent.active && recovery?.kind === "RECOVERY_V8"
+            ? { side: 1, active: true, reason: recovery.reason }
+            : baseCurrent;
+          const entryVersion = currentDecision.side < 0
+            ? "SHORT_V20"
+            : (!baseCurrent.active && recovery?.kind === "RECOVERY_V8")
+              ? "RECOVERY_V8"
+              : currentDecision.side > 0 ? "LONG_V2_FINAL" : undefined;
+          const targetGross = entryVersion === "RECOVERY_V8"
+            ? Number(recovery.gross)
+            : currentDecision.side > 0
+              ? loaded.pengu.penguV8V64RequestedLongGross(row.features)
+              : currentDecision.side < 0
+                ? loaded.pengu.targetGrossForAtr(row.features.atr24Ratio)
+                : 0;
+          return {
+            ...row,
+            decision: baseline,
+            currentDecision,
+            currentSignal: currentDecision.active ? {
+              side: currentDecision.side,
+              targetGross,
+              entryVersion,
+              entryTs: row.features.referenceTs + 3_600_000,
+              referenceTs: row.features.referenceTs,
+              reason: currentDecision.reason,
+              features: row.features,
+              recoveryV8: row.recoveryV8,
+            } : null,
+            recoveryV8Enabled: recoveryEnabled,
+          };
+        });
         response = { ok: true, result: jsonSafe(results) };
       } else if (request.op === "fetSeries") {
         const rows = request.rows;
