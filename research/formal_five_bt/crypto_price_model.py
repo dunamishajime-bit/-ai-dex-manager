@@ -50,22 +50,53 @@ def _rows(path: Path) -> list[dict[str, Any]]:
     return [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
 
 
-def _bars(data_root: Path, symbol: str) -> tuple[list[dict[str, Any]], dict[int, dict[str, Any]]]:
-    rows = _rows(data_root / "normalized/aster/klines" / f"{symbol}.jsonl")
-    rows.sort(key=lambda row: int(row["event_time_ms"]))
-    by_ts = {int(row["event_time_ms"]): row for row in rows}
-    if len(by_ts) != len(rows):
+# A full 30-day retrospective exclusion covers the longest currently audited
+# signal lookbacks and prevents a malformed BTC candle contaminating dependent
+# strategy decisions.  This does NOT repair or forward-fill the raw venue data.
+OHLC_QUARANTINE_MS = 30 * 24 * HOUR
+
+
+def _bars(data_root: Path, symbol: str) -> tuple[list[dict[str, Any]], dict[int, dict[str, Any]], list[int]]:
+    raw = _rows(data_root / "normalized/aster/klines" / f"{symbol}.jsonl")
+    raw.sort(key=lambda row: int(row["event_time_ms"]))
+    by_ts = {int(row["event_time_ms"]): row for row in raw}
+    if len(by_ts) != len(raw):
         raise ValueError(f"DUPLICATE_ASTER_H1:{symbol}")
     previous = None
-    for row in rows:
+    clean: list[dict[str, Any]] = []
+    rejected: list[int] = []
+    for row in raw:
         ts = int(row["event_time_ms"])
-        values = [float(row[k]) for k in ("open", "high", "low", "close")]
-        if (previous is not None and ts <= previous) or not all(math.isfinite(v) and v > 0 for v in values):
-            raise ValueError(f"INVALID_ASTER_H1:{symbol}:{ts}")
-        if values[1] < max(values[0], values[3]) or values[2] > min(values[0], values[3]):
-            raise ValueError(f"INVALID_ASTER_OHLC:{symbol}:{ts}")
+        if previous is not None and ts <= previous:
+            raise ValueError(f"NON_MONOTONIC_ASTER_H1:{symbol}:{ts}")
         previous = ts
-    return rows, by_ts
+        values = [float(row[k]) for k in ("open", "high", "low", "close")]
+        if (not all(math.isfinite(v) and v > 0 for v in values)
+                or values[1] < max(values[0], values[3])
+                or values[2] > min(values[0], values[3])
+                or values[1] < values[2]):
+            rejected.append(ts)
+            del by_ts[ts]
+            continue
+        clean.append(row)
+    return clean, by_ts, rejected
+
+
+def _source_quarantine_reason(
+    candidate: dict[str, Any], invalid_by_symbol: dict[str, list[int]],
+) -> str | None:
+    """Reject decisions exposed to corrupt own-symbol or shared BTC signal inputs."""
+    strategy = str(candidate["strategy_id"])
+    deps = {str(candidate["symbol"])}
+    if strategy in {"V12", "PENGU", "Q102"}:
+        deps.add("BTCUSDT")
+    signal_ts = int(candidate.get("signal_ts_ms") or candidate["entry_ts_ms"])
+    exit_ts = int(candidate.get("exit_ts_ms") or signal_ts)
+    for symbol in sorted(deps):
+        for bad_ts in invalid_by_symbol.get(symbol, []):
+            if signal_ts - OHLC_QUARANTINE_MS <= bad_ts <= max(signal_ts, exit_ts):
+                return f"CORRUPT_H1_DEPENDENCY:{symbol}"
+    return None
 
 
 def _funding(data_root: Path, symbol: str) -> list[tuple[int, float]]:
@@ -317,8 +348,9 @@ def build_candidate_ledger(data_root: Path, scan_root: Path, output_root: Path) 
     bars = {}
     by_ts = {}
     funding = {}
+    invalid_by_symbol: dict[str, list[int]] = {}
     for symbol in symbols:
-        bars[symbol], by_ts[symbol] = _bars(data_root, symbol)
+        bars[symbol], by_ts[symbol], invalid_by_symbol[symbol] = _bars(data_root, symbol)
         funding[symbol] = _funding(data_root, symbol)
 
     candidates: list[dict[str, Any]] = []
@@ -370,6 +402,14 @@ def build_candidate_ledger(data_root: Path, scan_root: Path, output_root: Path) 
         candidates.append(candidate)
 
     for candidate in candidates:
+        # These decisions were generated from raw source scans.  A malformed
+        # BTC bar can contaminate other symbols' regime/selection even when
+        # their own H1 is intact.  Remove them from tradable research outcomes.
+        quarantine = _source_quarantine_reason(candidate, invalid_by_symbol)
+        if quarantine:
+            candidate["pre_quarantine_status"] = candidate["status"]
+            candidate["status"] = "UNRESOLVED_SOURCE_OHLC"
+            candidate["source_quarantine_reason"] = quarantine
         if candidate.get("status") != "MODELED_CLOSED_TRADE":
             candidate["funding_return_per_gross"] = None
             continue
@@ -393,6 +433,9 @@ def build_candidate_ledger(data_root: Path, scan_root: Path, output_root: Path) 
         "formal_verified_fills": False,
         "period_start_ms": PERIOD_START_MS, "period_end_exclusive_ms": PERIOD_END_MS,
         "candidate_count": len(candidates),
+        "quarantined_ohlc_counts": {symbol: len(timestamps) for symbol, timestamps in invalid_by_symbol.items() if timestamps},
+        "quarantined_candidates": sum(row.get("status") == "UNRESOLVED_SOURCE_OHLC" for row in candidates),
+        "source_quarantine_lookback_hours": OHLC_QUARANTINE_MS // HOUR,
         "strategies": {},
         "execution_assumptions": {
             "entry": "Aster H1 open at audited signal entry timestamp",
