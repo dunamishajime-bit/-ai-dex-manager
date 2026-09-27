@@ -58,6 +58,29 @@ class YahooV52Tests(unittest.TestCase):
         self.assertTrue(all(r["price_venue"]=="YAHOO_EQUITY_REFERENCE_NOT_ASTER_PERP_FILL"
             for r in result["trades"]))
         self.assertTrue(all(r["entry_price_type"]=="YAHOO_60M_OPEN_MODEL" for r in result["trades"]))
+    def test_yahoo_reference_and_aster_perp_assumed_fills_are_separate_metrics(self):
+        # Distinct price paths, identical V11 trigger. We must never
+        # mislabel Yahoo cash-reference returns as actual Aster perp PnL.
+        stocks={sym:ybars(D,sym,100) for sym in SYMBOLS}
+        perps={sym:abars(D,sym,101 if sym=="AMZN" else 100) for sym in SYMBOLS}
+        perps["AMZN"]=tuple(HourOpen(x.symbol,x.ts,
+          101 if datetime.fromtimestamp(x.ts,NY).hour<=10 else 100,
+          x.high,x.low,x.close,x.source) for x in perps["AMZN"])
+        cash=replay_yahoo_v52(stocks,perps,fill_mode="YAHOO_REFERENCE")
+        venue=replay_yahoo_v52(stocks,perps,fill_mode="ASTER_PERP")
+        cash_v11=[x for x in cash["trades"] if x["route"]=="V11_EQ"]
+        venue_v11=[x for x in venue["trades"] if x["route"]=="V11_EQ"]
+        self.assertEqual(len(cash_v11),len(venue_v11))
+        self.assertGreater(len(venue_v11),0)
+        self.assertEqual(cash_v11[0]["fill_mode"],"YAHOO_REFERENCE")
+        self.assertEqual(venue_v11[0]["fill_mode"],"ASTER_PERP")
+        self.assertGreater(
+          venue_v11[0]["net_reference_return_after_assumed_roundtrip_cost"],
+          cash_v11[0]["net_reference_return_after_assumed_roundtrip_cost"])
+        self.assertTrue(venue["never_a_formal_verified_fill"])
+        with self.assertRaisesRegex(ValueError,"FILL_MODE"):
+          replay_yahoo_v52(stocks,perps,fill_mode="REAL_EXECUTED")
+
     def test_missing_perp_never_manufactures_basis_signals(self):
         stocks={s:ybars(D,s,100) for s in SYMBOLS}
         perps={s:tuple() for s in SYMBOLS}
