@@ -11,6 +11,7 @@ import argparse
 from datetime import date, datetime, time, timezone
 import hashlib
 import json
+import math
 from pathlib import Path
 from typing import Any, Callable, Mapping
 
@@ -34,6 +35,7 @@ def acquire_aster_stock(
     get_catalog: Callable[[], Any] = lambda: sources.fetch_instrument_catalog("aster"),
     get_klines: Callable[[str, int, int], Any] = lambda symbol, start_ms, end_ms:
         sources.fetch_historical_klines("aster", symbol, start_ms, end_ms),
+    get_funding: Callable[[str, int, int], Any] | None = None,
 ) -> dict[str, Any]:
     """Acquire only verified, already-listed stock perpetuals and hash every page."""
     if start >= end_exclusive:
@@ -112,6 +114,45 @@ def acquire_aster_stock(
                 missing_hours_after_listing=gaps, raw_page_hashes=raw_hashes,
                 normalized_sha256=hashlib.sha256(payload).hexdigest(),
             )
+            item["funding_status"] = "NOT_ACQUIRED"
+            if get_funding is not None:
+                try:
+                    funding = get_funding(native, period_begin, period_end)
+                    if funding.source != "aster" or funding.native_instrument != native:
+                        raise ValueError("ASTER_STOCK_FUNDING_NATIVE_SOURCE_MISMATCH")
+                    if len(funding.page_hashes) != len(funding.raw_responses) or any(
+                        hashlib.sha256(raw).hexdigest() != page_sha
+                        for raw, page_sha in zip(funding.raw_responses, funding.page_hashes)
+                    ):
+                        raise ValueError("ASTER_STOCK_FUNDING_RAW_PAGE_HASH_MISMATCH")
+                    funded = []
+                    prior_funding_ts = -1
+                    for observed in sorted(funding.rows, key=lambda row: int(row["fundingTime"])):
+                        event_ts = int(observed["fundingTime"])
+                        rate = float(observed["fundingRate"])
+                        if (event_ts <= prior_funding_ts or not period_begin <= event_ts <= period_end
+                                or not math.isfinite(rate)):
+                            raise ValueError("ASTER_STOCK_FUNDING_ROW_INVALID")
+                        funded.append({
+                            "source": "aster", "exchange": "ASTER", "instrument": native,
+                            "event_time_ms": event_ts, "funding_rate": rate,
+                        })
+                        prior_funding_ts = event_ts
+                    if not funded:
+                        raise ValueError("ASTER_STOCK_FUNDING_HISTORY_EMPTY")
+                    funding_path = root / "normalized" / "aster_stock" / "funding" / f"{native}.jsonl"
+                    funding_path.parent.mkdir(parents=True, exist_ok=True)
+                    funding_bytes = ("".join(json.dumps(row, sort_keys=True, separators=(",", ":")) + "\n"
+                                             for row in funded)).encode()
+                    funding_path.write_bytes(funding_bytes)
+                    item.update(
+                        funding_status="ACQUIRED_PRICE_MODEL_ONLY",
+                        funding_count=len(funded),
+                        funding_normalized_sha256=hashlib.sha256(funding_bytes).hexdigest(),
+                        funding_raw_page_hashes=list(funding.page_hashes),
+                    )
+                except Exception as error:
+                    item.update(funding_status="NOT_VERIFIABLE", funding_error_type=type(error).__name__)
             if not normalized:
                 item["status"] = "NO_HISTORICAL_BARS"
         except Exception as exc:
@@ -128,9 +169,14 @@ def main() -> None:
     parser.add_argument("--start", type=date.fromisoformat, default=START)
     parser.add_argument("--end-exclusive", type=date.fromisoformat, default=END_EXCLUSIVE)
     args = parser.parse_args()
-    result = acquire_aster_stock(args.data_root, start=args.start, end_exclusive=args.end_exclusive)
+    result = acquire_aster_stock(
+        args.data_root, start=args.start, end_exclusive=args.end_exclusive,
+        get_funding=lambda symbol, start_ms, end_ms: sources.fetch_historical_funding(
+            "aster", symbol, start_ms, end_ms),
+    )
     print(json.dumps({"symbols": {k: {"status": v["status"], "bars": v["bars"],
-                                      "listed_from_ms": v.get("listed_from_ms")}
+                                      "listed_from_ms": v.get("listed_from_ms"),
+                                      "funding_status": v.get("funding_status")}
                                   for k, v in result["symbols"].items()}}, sort_keys=True))
 
 
