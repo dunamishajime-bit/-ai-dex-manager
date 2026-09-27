@@ -1,0 +1,18 @@
+name: Formal V52 public stock H1 collector tests
+on:
+  push:
+    branches: [research/formal-five-bt-yahoo-v52-20260927]
+    paths:
+      - research/formal_five_bt/v52_stock_acquire.py
+      - tests/formal_five_bt/test_v52_stock_acquire.py
+      - .github/workflows/formal-five-bt-v52-stock-source-ci-20260927.yml
+permissions: {contents: read}
+jobs:
+  unit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m unittest discover -s tests/formal_five_bt -p test_v52_stock_acquire.py -v
