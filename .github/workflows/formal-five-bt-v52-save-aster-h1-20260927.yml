@@ -1,0 +1,75 @@
+name: V52 store public Aster stock H1 on private VPS for Yahoo BT
+on:
+  push:
+    branches: [research/formal-five-bt-yahoo-v52-20260927]
+    paths: [.github/workflows/formal-five-bt-v52-save-aster-h1-20260927.yml]
+permissions: {contents: read}
+concurrency: {group: formal-v52-store-stock-h1-readonly, cancel-in-progress: false}
+jobs:
+  acquire:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      EXPECTED_SHA: a09ea45ca3cbd72100f9eb0eaae499039c40b6a0
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Verify strict collector and source provenance
+        run: python -m unittest discover -s tests/formal_five_bt -p test_v52_stock_acquire.py -v
+      - name: Acquire native Aster stock H1 bars for full audited one-year date range
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          dest="$RUNNER_TEMP/a09-v52-stock-h1"
+          python -m research.formal_five_bt.v52_stock_acquire --output-root "$dest"
+          test -s "$dest/aster-stock-h1-manifest.json"
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ['RUNNER_TEMP'])/'a09-v52-stock-h1'
+          m=json.loads((root/'aster-stock-h1-manifest.json').read_text())
+          assert m['pin_production_sha']=='a09ea45ca3cbd72100f9eb0eaae499039c40b6a0'
+          assert len(m['symbols'])==5
+          assert all(v['bars']>1000 for v in m['symbols'].values())
+          print('ASTER_NATIVE_STOCK_H1_ACQUISITION_5_SYMBOLS=PASS')
+          PY
+      - name: Archive acquired price series in authorized private VPS research storage
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ -n "$SSH_HOST" && -n "$ROOT_KEY" && -n "$SSH_KNOWN_HOSTS" ]]
+          install -d -m 0700 "$HOME/.ssh"
+          python - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/'.ssh'
+          def norm(k):return os.environ[k].lstrip('\ufeff').replace('\r\n','\n').replace('\r','\n').strip()+'\n'
+          (p/'id_root').write_text(norm('ROOT_KEY'))
+          (p/'known_hosts').write_text(norm('SSH_KNOWN_HOSTS'))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+          archive="$RUNNER_TEMP/a09-v52-stock-h1-private.tgz"
+          tar -czf "$archive" -C "$RUNNER_TEMP" a09-v52-stock-h1
+          size="$(stat -c %s "$archive")"
+          digest="$(sha256sum "$archive" | cut -d' ' -f1)"
+          remote="/var/lib/disdex/research-bt-formal/a09-stock-h1-v52-${GITHUB_RUN_ID}.tgz"
+          port="${SSH_PORT:-22}"
+          ssh_opts=(-T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -p "$port")
+          ssh "${ssh_opts[@]}" "root@$SSH_HOST" \
+             "set -Eeuo pipefail; test \"\$(tr -d '[:space:]' < /home/deploy/disdex-trading/current/.disdex-release-sha)\" = '$EXPECTED_SHA';
+             test ! -e '$remote'; test \"\$(df -Pk /var/lib/disdex | awk 'NR==2 {print \$4}')\" -gt 1200000"
+          scp -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -P "$port" "$archive" "root@$SSH_HOST:$remote"
+          ssh "${ssh_opts[@]}" "root@$SSH_HOST" \
+            "set -Eeuo pipefail; chmod 600 '$remote'; test \"\$(sha256sum '$remote' | cut -d' ' -f1)\" = '$digest';
+             echo V52_STOCK_PRIVATE_ARCHIVE_SHA256='$digest';
+             echo V52_STOCK_PRIVATE_ARCHIVE_BYTES='$size';
+             echo V52_STOCK_PRIVATE_ARCHIVE_PATH='$remote';
+             echo NO_LIVE_TRADING_MUTATION=TRUE"
