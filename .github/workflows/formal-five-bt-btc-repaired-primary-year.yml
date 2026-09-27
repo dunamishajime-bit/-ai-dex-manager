@@ -148,6 +148,32 @@ jobs:
             --output-root "$RUNNER_TEMP/formal-portfolio-ecb-model" \
             --v52-ledger-root "$RUNNER_TEMP/formal-v52-ledger" \
             --ecb-fx-root "$RUNNER_TEMP/formal-bt"
+      - name: Compare in-sample FET PENGU SHORT Q102 gross variants under shared allocator
+        if: steps.ecb_fx.outcome == 'success'
+        shell: bash
+        run: |
+          python -m research.formal_five_bt.portfolio_price_model \
+            --data-root "$RUNNER_TEMP/formal-bt" \
+            --candidate-root "$RUNNER_TEMP/formal-crypto-price-model" \
+            --output-root "$RUNNER_TEMP/formal-risk-variants" \
+            --v52-ledger-root "$RUNNER_TEMP/formal-v52-ledger" \
+            --ecb-fx-root "$RUNNER_TEMP/formal-bt" \
+            --variants-only > "$RUNNER_TEMP/variant-run.log"
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          p=Path(os.environ["RUNNER_TEMP"])/"formal-risk-variants/portfolio-price-model-summary.json"
+          d=json.loads(p.read_text())
+          print("RISK_VARIANT_RESEARCH_STATUS:",d["status"])
+          for r in d["scenarios"]:
+              print("RISK_VARIANT:",json.dumps({
+                  k:r[k] for k in (
+                      "scenario_id","research_risk_caps","final_equity_jpy",
+                      "profit_factor","win_rate","maximum_mtm_drawdown",
+                      "closed_trades","strategy_pnl_jpy","strategy_trades",
+                      "candidate_decision_counts","strategy_trade_outcome_aggregates")},
+                  sort_keys=True))
+          PY
       - name: Print aggregate price-model lifecycle summary only
         env:
           MODEL_ROOT: ${{ runner.temp }}/formal-crypto-price-model
@@ -225,6 +251,17 @@ jobs:
           cp "$RUNNER_TEMP/formal-portfolio-ecb-model/PRICE_MODEL_BASE_10BPS/candidate-decisions.jsonl" "$tmp/10bps/candidate-decisions.jsonl"
           cp "$RUNNER_TEMP/formal-portfolio-ecb-model/PRICE_MODEL_BASE_10BPS/portfolio-events.jsonl" "$tmp/10bps/portfolio-events.jsonl"
           cp "$RUNNER_TEMP/formal-portfolio-ecb-model/PRICE_MODEL_EXTREME_COST_70BPS_NOT_BASELINE/metrics.json" "$tmp/extreme-70bps/metrics.json"
+          if [ -f "$RUNNER_TEMP/formal-risk-variants/portfolio-price-model-summary.json" ]; then
+            mkdir -p "$tmp/risk-variants"
+            cp "$RUNNER_TEMP/formal-risk-variants/portfolio-price-model-summary.json" "$tmp/risk-variants/portfolio-price-model-summary.json"
+            for path in "$RUNNER_TEMP"/formal-risk-variants/*/metrics.json; do
+              if [ -f "$path" ]; then
+                label="$(basename "$(dirname "$path")")"
+                mkdir -p "$tmp/risk-variants/$label"
+                cp "$path" "$tmp/risk-variants/$label/metrics.json"
+              fi
+            done
+          fi
           cp "$RUNNER_TEMP/formal-bt/acquisition-manifest.json" "$tmp/manifests/acquisition-manifest.json"
           cp "$RUNNER_TEMP/formal-bt/ecb-fx-cross-manifest.json" "$tmp/manifests/ecb-fx-cross-manifest.json"
           cp "$RUNNER_TEMP/formal-bt/aster-h1-reconciliation-status.json" "$tmp/manifests/aster-h1-reconciliation-status.json"
@@ -279,6 +316,8 @@ jobs:
             ${{ runner.temp }}/formal-portfolio-ecb-model/PRICE_MODEL_BASE_10BPS/candidate-decisions.jsonl
             ${{ runner.temp }}/formal-portfolio-ecb-model/PRICE_MODEL_BASE_10BPS/portfolio-events.jsonl
             ${{ runner.temp }}/formal-portfolio-ecb-model/PRICE_MODEL_EXTREME_COST_70BPS_NOT_BASELINE/metrics.json
+            ${{ runner.temp }}/formal-risk-variants/portfolio-price-model-summary.json
+            ${{ runner.temp }}/formal-risk-variants/*/metrics.json
             ${{ runner.temp }}/formal-bt/ecb-fx-cross-manifest.json
             ${{ runner.temp }}/formal-bt/acquisition-manifest.json
             ${{ runner.temp }}/formal-bt/aster-h1-reconciliation-status.json
