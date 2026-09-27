@@ -26,7 +26,7 @@ def dump(path,items):
 def atomic_archive(src,dest):
     dest.parent.mkdir(parents=True,exist_ok=True)
     body=src.read_bytes()
-    with gzip.open(dest,"wb",compresslevel=6,mtime=None) as f: f.write(body)
+    with gzip.GzipFile(filename=str(dest),mode="wb",compresslevel=6,mtime=0) as f: f.write(body)
     return hashlib.sha256(body).hexdigest(),hashlib.sha256(dest.read_bytes()).hexdigest()
 def extract_archive(src,dest,sha):
     body=gzip.decompress(src.read_bytes())
@@ -93,6 +93,8 @@ def run(venue,root,reusable):
                 dump(raw_path,[{"page":i,"payload_sha256":hashlib.sha256(b).hexdigest(),
                                 "response":b.decode()} for i,b in enumerate(kl.raw_responses)])
                 if h1: dump(norm,h1)
+                rsha,rgzsha=atomic_archive(raw_path,reusable/"raw"/(symbol+"-h1-pages.jsonl.gz"))
+                info["raw_h1_sha256"]=rsha;info["raw_h1_archive_sha256"]=rgzsha
                 else: info["h1_error"]="NO_HISTORY_RETURNED"
             except Exception as e:
                 h1=[];info["h1_error"]=type(e).__name__+":"+str(e)[:170]
@@ -134,6 +136,8 @@ def run(venue,root,reusable):
                      [{"page":i,"payload_sha256":hashlib.sha256(b).hexdigest(),
                        "response":b.decode()} for i,b in enumerate(f.raw_responses)])
                 if fund: dump(fp,fund)
+                rsha,rgzsha=atomic_archive(root/"raw"/venue/(symbol+"-funding-pages.jsonl"),reusable/"raw"/(symbol+"-funding-pages.jsonl.gz"))
+                info["raw_funding_sha256"]=rsha;info["raw_funding_archive_sha256"]=rgzsha
             except Exception as e:
                 fund=[];info["funding_error"]=type(e).__name__+":"+str(e)[:170]
         info["funding_count"]=len(fund)
