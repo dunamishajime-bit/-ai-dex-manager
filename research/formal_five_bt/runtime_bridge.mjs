@@ -144,22 +144,44 @@ if (process.argv.includes("--list")) {
         ]));
         const btc = universe.BTC || [];
         const byTime = Object.fromEntries(Object.entries(universe).map(([symbol, rows]) => [symbol, new Map(rows.map((row) => [row.ts, row]))]));
-        const length = Math.min(...Object.values(universe).map((rows) => rows.length));
+        // The LIVE scorer uses a common numeric index for BTC and every
+        // candidate symbol. Passing unaligned native arrays silently reads a
+        // different *time* on late-listed coins (sometimes a FUTURE candle).
+        // Build one completed, strictly contiguous past H2 window on the BTC
+        // clock at every decision, excluding only symbols not yet warmed up
+        // or having a gap. Do not require every configured coin to be listed.
+        const policy = loaded.v12Config.V12_X1_ALL;
+        const historyBars = Math.max(
+          policy.btcRegimeSmaBars + 1, policy.btcRegimeMomentumBars + 1,
+          policy.momentumBars + 1, policy.atrBars + 2,
+          policy.breakoutBars + 1, policy.volatilityLookbackBars + 2,
+        );
         const results = [];
-        for (let index = 0; index < length; index += 1) {
-          const ref = btc[index];
+        for (let btcIndex = historyBars - 1; btcIndex < btc.length; btcIndex += 1) {
+          const ref = btc[btcIndex];
           if (!ref || ref.endTs < startMs || ref.endTs > endMs) continue;
-          const sameAxis = Object.values(byTime).every((rowMap) => rowMap.has(ref.ts));
-          if (!sameAxis) continue;
-          // V12 takes an explicit index and every signal/feature helper reads
-          // only bars at or before that index. Keep full immutable arrays here
-          // to avoid quadratic history copies; the no-lookahead golden test
-          // changes all future OHLCV and asserts earlier output is unchanged.
-          const observation = loaded.v12.buildV12DecisionObservation(universe, index, ref.endTs);
-          const signals = loaded.v12.buildV12Signals(universe, index);
-          results.push({ index, decisionTs: ref.endTs, observation, signals });
+          const btcWindow = btc.slice(btcIndex - historyBars + 1, btcIndex + 1);
+          if (btcWindow.length !== historyBars || btcWindow.some(
+            (bar, i) => bar.endTs !== bar.ts + 7_200_000 ||
+              (i && btcWindow[i - 1].endTs !== bar.ts),
+          )) continue;
+          const aligned = Object.fromEntries(Object.entries(byTime).map(([symbol, rowMap]) => {
+            const window = btcWindow.map((bar) => rowMap.get(bar.ts));
+            const ready = window.every((bar, i) =>
+              bar && bar.endTs === btcWindow[i].endTs &&
+              (!i || window[i - 1]?.endTs === bar.ts));
+            return [symbol, ready ? window : []];
+          }));
+          const index = historyBars - 1;
+          const observation = loaded.v12.buildV12DecisionObservation(aligned, index, ref.endTs);
+          const signals = loaded.v12.buildV12Signals(aligned, index);
+          results.push({ index: btcIndex, decisionTs: ref.endTs, observation, signals });
         }
-        response = { ok: true, result: jsonSafe({ results, h2Counts: Object.fromEntries(Object.entries(universe).map(([symbol, rows]) => [symbol, rows.length])) }) };
+        response = { ok: true, result: jsonSafe({
+          results, historyBars,
+          timelineRule: "PER_DECISION_COMPLETED_CONTIGUOUS_H2_LAST_N",
+          h2Counts: Object.fromEntries(Object.entries(universe).map(([symbol, rows]) => [symbol, rows.length])),
+        }) };
       } else if (request.op === "penguSeries") {
         const history = request.history;
         const now = Number(request.now);
