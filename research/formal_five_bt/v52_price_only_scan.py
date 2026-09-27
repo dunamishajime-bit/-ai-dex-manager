@@ -133,7 +133,9 @@ def model_v50_at_window(
         gates = {}
         audit = {}
         for stage, timestamp in (("capture", capture_ms), ("entry", entry_ms)):
-            reference, ref_status, ref_ts, ref_hash = asof_price(yahoo.get(symbol, ()), symbol, timestamp)
+            reference, ref_status, ref_ts, ref_hash = asof_price(
+                yahoo.get(symbol, ()), symbol, timestamp,
+                max_age_ms=PRICE_MAX_AGE_MS if stage == "capture" else 15 * 60_000)
             future, future_status, future_ts, future_hash = asof_price(perp.get(symbol, ()), symbol, timestamp)
             audit[stage] = {
                 "yahoo_usd": reference, "aster_perp_usd": future,
