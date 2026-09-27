@@ -32,6 +32,38 @@ DAILY_LOSS_LIMIT = 0.075
 STOCK_DAILY_LOSS_LIMIT = 0.035
 PRIORITY = {"V52": 0, "PENGU": 1, "V12": 2, "Q102": 3, "FET": 4}
 
+# Hypotheses change admission/size at decision time and re-run shared Gross,
+# cashflows and compounding. Never delete losing fills after knowing outcome.
+# All tests are in-sample research and require forward validation.
+RISK_VARIANTS = (
+    ("FET_CAP_1P25", {"FET": 1.25}),
+    ("FET_CAP_1P00", {"FET": 1.0}),
+    ("FET_CAP_0P75", {"FET": 0.75}),
+    ("PENGU_SHORT_CAP_0P50", {"PENGU_SHORT": 0.5}),
+    ("PENGU_SHORT_OFF", {"PENGU_SHORT": 0.0}),
+    ("Q102_BRK_CAP_1P00_MR_0P50", {"Q102_BRK": 1.0, "Q102_MR": 0.5}),
+    ("Q102_MR_OFF_BRK_1P00", {"Q102_BRK": 1.0, "Q102_MR": 0.0}),
+    ("Q102_ALL_CAP_1P00", {"Q102_BRK": 1.0, "Q102_MR": 1.0,
+                           "Q102_HIGH_VOL": 1.0, "Q102_PB": 1.0, "Q102_REV": 1.0}),
+    ("COMBINED_FET1_SHORT0P5_Q102_BRK1_MR0P5",
+     {"FET": 1.0, "PENGU_SHORT": 0.5, "Q102_BRK": 1.0, "Q102_MR": 0.5}),
+)
+
+
+def _research_risk_cap(candidate: dict[str, Any], risk_caps: dict[str, float]) -> float:
+    base = _strategy_cap(candidate)
+    strat = str(candidate["strategy_id"])
+    key = (
+        "PENGU_SHORT" if strat == "PENGU" and candidate.get("route") == "SHORT_V20"
+        else f"Q102_{str(candidate.get('family') or '').upper()}" if strat == "Q102"
+        else strat
+    )
+    value = risk_caps.get(key, base)
+    if not isinstance(value, (float, int)) or not math.isfinite(value) or value < 0:
+        raise ValueError(f"INVALID_RESEARCH_RISK_CAP:{key}:{value}")
+    return min(base, float(value))
+
+
 
 def _monthly_deposits() -> dict[int, float]:
     result = {}
@@ -204,7 +236,9 @@ def _portfolio_scenario(
     candidates: list[dict[str, Any]], data_root: Path, market: dict[str, dict[str, Any]],
     *, round_trip_cost_bps: float, scenario_id: str,
     fx_series: list[tuple[int, float]] | None = None,
+    risk_caps: dict[str, float] | None = None,
 ) -> dict[str, Any]:
+    risk_caps = risk_caps or {}
     cost_side = round_trip_cost_bps / 2 / 10_000
     deposits = _monthly_deposits()
     currency = "USD" if fx_series is not None else "NOMINAL_JPY"
@@ -438,6 +472,12 @@ def _portfolio_scenario(
                 PRIORITY[row["strategy_id"]], int(row.get("rank") or 0), row["symbol"]))
             for candidate in rows:
                 strategy = candidate["strategy_id"]
+                research_cap = _research_risk_cap(candidate, risk_caps)
+                if research_cap == 0:
+                    record_decision(candidate, "REJECTED_RESEARCH_POLICY",
+                                    f"{strategy}:VARIANT_DISABLED", ts)
+                    rejected[f"{strategy}:VARIANT_DISABLED"] += 1
+                    continue
                 if d in daily_blocked:
                     record_decision(candidate, "REJECTED_PORTFOLIO", f"{strategy}:SHARED_DAILY_LOSS", ts)
                     rejected[f"{strategy}:SHARED_DAILY_LOSS"] += 1
@@ -496,8 +536,8 @@ def _portfolio_scenario(
                                    if p["strategy_id"] != "V52")
                 stock_gross = sum(_gross(p, market, ts, equity) for p in active.values()
                                   if p["strategy_id"] == "V52")
-                requested = min(float(candidate["requested_gross"]), _strategy_cap(candidate))
-                strategy_room = max(0.0, _strategy_cap(candidate) - strategy_gross)
+                requested = min(float(candidate["requested_gross"]), research_cap)
+                strategy_room = max(0.0, research_cap - strategy_gross)
                 sleeve_room = max(0.0, (STOCK_CAP - stock_gross) if strategy == "V52"
                                   else (CRYPTO_CAP - crypto_gross))
                 total_room = max(0.0, TOTAL_CAP - total_gross)
@@ -514,7 +554,7 @@ def _portfolio_scenario(
                                            if p["strategy_id"] != "V52")
                         stock_gross = sum(_gross(p, market, ts, equity) for p in active.values()
                                           if p["strategy_id"] == "V52")
-                        strategy_room = max(0.0, _strategy_cap(candidate) - strategy_gross)
+                        strategy_room = max(0.0, research_cap - strategy_gross)
                         sleeve_room = max(0.0, (STOCK_CAP - stock_gross) if strategy == "V52"
                                           else (CRYPTO_CAP - crypto_gross))
                         total_room = max(0.0, TOTAL_CAP - total_gross)
@@ -739,7 +779,8 @@ def _portfolio_scenario(
 def run_portfolio_model(data_root: Path, candidate_root: Path, output_root: Path,
                         v52_ledger_root: Path | None = None,
                         ecb_fx_root: Path | None = None,
-                        cost_scenarios: tuple[tuple[str, float], ...] | None = None) -> dict[str, Any]:
+                        cost_scenarios: tuple[tuple[str, float], ...] | None = None,
+                        variants_only: bool = False) -> dict[str, Any]:
     data_root, candidate_root, output_root = map(Path, (data_root, candidate_root, output_root))
     candidates = _rows(candidate_root / "crypto-price-model-candidates.jsonl")
     fx_series = load_ecb_cross(ecb_fx_root) if ecb_fx_root is not None else None
@@ -836,17 +877,24 @@ def run_portfolio_model(data_root: Path, candidate_root: Path, output_root: Path
             v52_funding_missing.append(stock)
     market = _market(data_root, symbols)
     scenarios = []
-    if cost_scenarios is None:
-        cost_scenarios = (
-            ("PRICE_MODEL_ASTER_TAKER_8BPS", 8.0),
-            ("PRICE_MODEL_BASE_10BPS", 10.0),
-            # 70bps remains an extreme sensitivity only, never the baseline.
-            ("PRICE_MODEL_EXTREME_COST_70BPS_NOT_BASELINE", 70.0),
-        )
-    if not cost_scenarios or any(not (0.0 <= cost <= 100.0) for _, cost in cost_scenarios):
-        raise ValueError("INVALID_PRICE_MODEL_COST_SCENARIOS")
-    for scenario_id, cost in cost_scenarios:
-        result = _portfolio_scenario(candidates, data_root, market, round_trip_cost_bps=cost, scenario_id=scenario_id, fx_series=fx_series)
+    if variants_only:
+        scenario_configs = [(name, 10.0, caps) for name, caps in RISK_VARIANTS]
+    else:
+        if cost_scenarios is None:
+            cost_scenarios = (
+                ("PRICE_MODEL_ASTER_TAKER_8BPS", 8.0),
+                ("PRICE_MODEL_BASE_10BPS", 10.0),
+                ("PRICE_MODEL_EXTREME_COST_70BPS_NOT_BASELINE", 70.0),
+            )
+        if not cost_scenarios or any(not (0 <= cost <= 100) for _, cost in cost_scenarios):
+            raise ValueError("INVALID_PRICE_MODEL_COST_SCENARIOS")
+        scenario_configs = [(name, cost, {}) for name, cost in cost_scenarios]
+    for scenario_id, cost, risk_caps in scenario_configs:
+        result = _portfolio_scenario(candidates, data_root, market,
+                                     round_trip_cost_bps=cost, scenario_id=scenario_id,
+                                     fx_series=fx_series, risk_caps=risk_caps)
+        result["research_risk_caps"] = risk_caps
+        result["in_sample_hypothesis_only"] = variants_only
         trade_rows = result.pop("trade_rows")
         candidate_rows = result.pop("candidate_decision_rows_full")
         event_rows = result.pop("event_rows")
@@ -884,6 +932,8 @@ def run_portfolio_model(data_root: Path, candidate_root: Path, output_root: Path
         "v52_skipped_candidates": v52_skipped,
         "v52_missing_market_data_selected_candidates_excluded": v52_missing_data_skipped,
         "daily_loss_limit": DAILY_LOSS_LIMIT,
+        "variant_replay": variants_only,
+        "variant_limitations": ("Ex-post hypotheses on frozen signal/exit candidate stream; portfolio is replayed causally with shared gross but no independent out-of-sample validation" if variants_only else None),
         "scenarios": scenarios,
         "limitations": [
             "H1 bar-price fills are modeled, not historical order-book fills",
@@ -912,10 +962,12 @@ def main() -> None:
                         help="Optional modeled V52 ledger; unresolved rows remain excluded and reported")
     parser.add_argument("--ecb-fx-root", type=Path,
                         help="Optional official ECB EUR-cross USDJPY; FRED source parity is NOT claimed")
+    parser.add_argument("--variants-only", action="store_true")
     args = parser.parse_args()
     result = run_portfolio_model(args.data_root, args.candidate_root, args.output_root,
                                  v52_ledger_root=args.v52_ledger_root,
-                                 ecb_fx_root=args.ecb_fx_root)
+                                 ecb_fx_root=args.ecb_fx_root,
+                                 variants_only=args.variants_only)
     print(json.dumps({"status": result["status"], "scenarios": result["scenarios"]}, sort_keys=True, allow_nan=False))
 
 
