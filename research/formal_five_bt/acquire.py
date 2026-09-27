@@ -17,6 +17,7 @@ import time
 from typing import Any
 
 from . import sources
+from .aster_h1_repair import reconstruct_aster_h1, valid_h1
 from .manifest import load_manifest
 
 
@@ -169,6 +170,51 @@ def acquire(root: str | Path, *, warmup_start: date = WARMUP_START, start_date: 
                     continue
                 saved = _save_collection(target, venue, "klines", symbol, acquisition)
                 normalized = _normalize_klines(venue, symbol, acquisition.rows)
+                malformed_rows = [
+                    (index, row) for index, row in enumerate(normalized)
+                    if not valid_h1(row)
+                ]
+                repair_evidence: list[dict[str, Any]] = []
+                unresolved_malformed: list[dict[str, Any]] = []
+                # Historical Aster H1 occasionally violates OHLC bounds.
+                # Only independently verified 60x Aster native M1 can replace
+                # such a bar. Preserve BOTH original H1 raw pages and native
+                # M1 pages with SHA256; a failed reconstruction stays invalid.
+                for bad_index, original in malformed_rows:
+                    hour_ms = int(original["event_time_ms"])
+                    if len(repair_evidence) + len(unresolved_malformed) >= 24:
+                        unresolved_malformed.append({
+                            "hour_ms": hour_ms, "reason": "REPAIR_ATTEMPT_LIMIT_REACHED"})
+                        continue
+                    if sleep_seconds:
+                        time.sleep(sleep_seconds)
+                    try:
+                        m1 = sources.fetch_historical_klines(
+                            "aster", symbol, hour_ms, hour_ms + HOUR_MS - 1,
+                            interval="1m")
+                        if (m1.source != "aster" or m1.native_instrument != symbol
+                                or m1.interval != "1m"):
+                            raise ValueError("M1_NATIVE_SOURCE_METADATA_MISMATCH")
+                        raw_evidence = _save_collection(
+                            target, "aster", "ohlc_m1_repair",
+                            f"{symbol}_{hour_ms}", m1)
+                        fixed = reconstruct_aster_h1(symbol, hour_ms, m1.rows)
+                        original_hash = hashlib.sha256(json.dumps(
+                            original, sort_keys=True, separators=(",", ":")
+                        ).encode()).hexdigest()
+                        fixed_hash = hashlib.sha256(json.dumps(
+                            fixed, sort_keys=True, separators=(",", ":")
+                        ).encode()).hexdigest()
+                        normalized[bad_index] = fixed
+                        repair_evidence.append({
+                            "hour_ms": hour_ms, "original_h1_sha256": original_hash,
+                            "reconstructed_h1_sha256": fixed_hash,
+                            "m1_native_rows": len(m1.rows),
+                            "raw_m1": raw_evidence,
+                        })
+                    except (RuntimeError, OSError, ValueError, TypeError, KeyError) as error:
+                        unresolved_malformed.append({
+                            "hour_ms": hour_ms, "reason": str(error)[:140]})
                 normalized_path = Path("normalized") / venue / "klines" / f"{symbol}.jsonl"
                 content = "".join(json.dumps(row, sort_keys=True, separators=(",", ":")) + "\n" for row in normalized).encode("utf-8")
                 digest = _write_bytes(target / normalized_path, content)
@@ -185,6 +231,11 @@ def acquire(root: str | Path, *, warmup_start: date = WARMUP_START, start_date: 
                     "row_count": len(normalized),
                     "period_row_count": len(in_period),
                     "hour_gaps": gaps,
+                    "malformed_source_h1": len(malformed_rows),
+                    "reconstructed_from_native_m1": len(repair_evidence),
+                    "unresolved_malformed_source_h1": len(unresolved_malformed),
+                    "ohlc_repair_evidence": repair_evidence,
+                    "unresolved_ohlc_source": unresolved_malformed,
                     "normalized_path": normalized_path.as_posix(),
                     "normalized_sha256": digest,
                     "raw": saved,
