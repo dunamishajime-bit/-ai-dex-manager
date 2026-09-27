@@ -9,7 +9,9 @@ from __future__ import annotations
 
 import argparse
 from collections import Counter
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, time, timedelta, timezone
+
+from .calendars import nyse_close_utc
 import hashlib
 import json
 import math
@@ -26,6 +28,27 @@ from .yahoo_v52 import load_yahoo_bars
 NY = ZoneInfo("America/New_York")
 HOUR_MS = 3_600_000
 CHECKPOINT_YAHOO_AGE_MS = 15 * 60_000
+
+
+def _forced_flat_ms(entry_ms: int, policy: dict) -> int:
+    """End the modeled slot by the first 3h, 15:30 NY, or official session close."""
+    entry_utc = datetime.fromtimestamp(entry_ms / 1000, timezone.utc)
+    local = entry_utc.astimezone(NY)
+    official_close = nyse_close_utc(local.date())
+    if official_close is None or entry_utc >= official_close:
+        raise ValueError("V52_ENTRY_OUTSIDE_NYSE_SESSION")
+    final_1530 = datetime.combine(local.date(), time(15, 30), NY).astimezone(timezone.utc)
+    expires = entry_utc + timedelta(hours=float(policy["maximumHoldingHours"]))
+    return int(min(official_close, final_1530, expires).timestamp() * 1000)
+
+
+def _advance_checkpoint(position: dict) -> None:
+    """Schedule the exact daily forced exit even when it is between hourly bars."""
+    previous = position["next_checkpoint_ms"]
+    limit = position["forced_flat_ms"]
+    position["next_checkpoint_ms"] = min(previous + HOUR_MS, limit)
+    if position["next_checkpoint_ms"] <= previous:
+        raise ValueError("V52_NON_ADVANCING_CHECKPOINT")
 
 
 def _load_prices(root: Path, scan_manifest: dict) -> tuple[dict, dict]:
@@ -70,10 +93,7 @@ def _checkpoint(position: dict, when_ms: int, yahoo: dict, perp: dict, policy: d
         reason = "BASIS_CONVERGED"
     elif abs(basis) >= float(policy["basisStopMultiple"]) * abs(initial):
         reason = "BASIS_STOP"
-    elif (when_ms - position["entry_ts_ms"] >=
-          float(policy["maximumHoldingHours"]) * HOUR_MS or
-          datetime.fromtimestamp(when_ms / 1000, timezone.utc).astimezone(NY).time() >=
-          datetime.strptime("15:30", "%H:%M").time()):
+    elif when_ms >= position["forced_flat_ms"]:
         reason = "TIME_OR_SESSION_FLAT"
     else:
         reason = "HOLD"
@@ -145,7 +165,7 @@ def replay_v52_research(
                     counters[snap["reason"]] += 1
                     position = None
                     break
-                position["next_checkpoint_ms"] += HOUR_MS
+                _advance_checkpoint(position)
         if unresolved:
             skipped.append({"symbol": row["symbol"], "decision_ts_ms": ts,
                             "reason": "PREVIOUS_POSITION_EXIT_NOT_VERIFIABLE"})
@@ -177,7 +197,8 @@ def replay_v52_research(
             "equity_reference_symbol": sym, "side": row["side"],
             "entry_ts_ms": ts, "entry_basis_bps": float(row["entry_basis_bps"]),
             "aster_entry_price_usd": future, "yahoo_entry_reference_usd": eq,
-            "next_checkpoint_ms": ts + HOUR_MS,
+            "forced_flat_ms": _forced_flat_ms(ts, policy),
+            "next_checkpoint_ms": min(ts + HOUR_MS, _forced_flat_ms(ts, policy)),
             "slot_gross": slot_gross, "historical_fill_verified": False,
         }
         counters["MODELED_ENTRY"] += 1
@@ -212,7 +233,7 @@ def replay_v52_research(
                 counters[snap["reason"]] += 1
                 position = None
             else:
-                position["next_checkpoint_ms"] += HOUR_MS
+                _advance_checkpoint(position)
         if position is not None and not unresolved:
             trades.append({**position, "status": "OPEN_AT_SAMPLE_END",
                            "modeled_return_on_equity": None})
