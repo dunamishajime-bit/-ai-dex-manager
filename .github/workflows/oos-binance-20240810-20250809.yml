@@ -17,8 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 170
     env:
-      DATA_ROOT: ${{ runner.temp }}/oos-binance-data
-      OUTPUT_ROOT: ${{ runner.temp }}/oos-binance-result
+      DATA_ROOT: /tmp/oos-binance-data
+      OUTPUT_ROOT: /tmp/oos-binance-result
       CACHE_PATH: docs/research/data/oos-binance-20240810-20250809
       REPORT_PATH: docs/research/results/oos-binance-20240810-20250809
     steps:
