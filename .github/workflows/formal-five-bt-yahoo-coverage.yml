@@ -7,6 +7,7 @@ on:
       - codex/formal-five-logic-bt-20260926
     paths:
       - ".github/workflows/formal-five-bt-yahoo-coverage.yml"
+      - "research/formal_five_bt/yahoo_acquire.py"
 
 permissions:
   contents: read
@@ -33,7 +34,7 @@ jobs:
           data = json.loads((root / "yahoo-v52-coverage.json").read_text())
           acceptable = True
           for symbol, row in sorted(data["symbols"].items()):
-              print(f"{symbol}: status={row['status']}, rows={row['rows']}, missing_session_hours={row.get('missing_session_hours')}, unexpected_session_hours={row.get('unexpected_session_hours')}, page_errors={row.get('page_errors')}")
+              print(f"{symbol}: status={row['status']}, rows={row['rows']}, missing_session_hours={row.get('missing_session_hours')}, unexpected_session_hours={row.get('unexpected_session_hours')}, page_errors={row.get('page_errors')}, missing_session_days={row.get('missing_session_days')}")
               acceptable &= row["status"] == "COVERAGE_COMPLETE"
           if not acceptable:
               raise SystemExit("Coverage incomplete. No full-year V52 backtest or P&L claim can be made.")
