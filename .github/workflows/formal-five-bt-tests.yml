@@ -50,5 +50,7 @@ jobs:
         run: python -m unittest discover -s tests/formal_five_bt -p 'test_v52_incomplete_coverage_portfolio.py' -v
       - name: Test FET pre-entry feature audit and no-lookahead
         run: python -m unittest discover -s tests/formal_five_bt -p 'test_fet_entry_audit.py' -v
+      - name: Test exact Q102 0.75 and FET dual-gate research contract
+        run: python -m unittest discover -s tests/formal_five_bt -p 'test_fet_dual_gate_combo_bt.py' -v
       - name: Check Python source syntax
         run: python -m compileall -q research/formal_five_bt
