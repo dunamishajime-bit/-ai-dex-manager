@@ -232,6 +232,9 @@ def _portfolio_scenario(
             "candidate_exit_reason": candidate.get("exit_reason"),
             "requested_gross": candidate.get("requested_gross"),
             "upstream_status": candidate.get("status"),
+            "v52_entry_basis_bps": candidate.get("v52_entry_basis_bps"),
+            "v52_yahoo_entry_reference_usd": candidate.get("v52_yahoo_entry_reference_usd"),
+            "v52_source_session": candidate.get("v52_source_session"),
             "decision_ts_ms": ts, "decision": status, "reason": reason,
             **details,
         })
@@ -775,6 +778,19 @@ def run_portfolio_model(data_root: Path, candidate_root: Path, output_root: Path
         )
         v52_skipped = sum(row.get("status") == "SKIPPED_CANDIDATE" for row in v52_rows)
         for row in v52_rows:
+            if row.get("status") == "SKIPPED_CANDIDATE":
+                candidates.append({
+                    "strategy_id": "V52", "symbol": row["symbol"],
+                    "side": row.get("side"), "route": "V50_POST_OPEN_BASIS",
+                    "entry_ts_ms": int(row["decision_ts_ms"]),
+                    "signal_ts_ms": int(row["decision_ts_ms"]),
+                    "status": "V52_PREALLOCATION_SKIPPED",
+                    "exclusion_reason": str(row["reason"]),
+                    "requested_gross": float(v52_summary.get("assumed_single_slot_gross") or 2.0),
+                    "entry_price": row.get("aster_entry_price_usd"),
+                    "v52_source_session": row.get("session"),
+                })
+                continue
             if row.get("status") != "MODELED_CLOSED_TRADE":
                 continue
             candidates.append({
@@ -788,6 +804,8 @@ def run_portfolio_model(data_root: Path, candidate_root: Path, output_root: Path
                 "exit_reason": row.get("reason") or row.get("exit_reason") or "V52_MODELED_EXIT",
                 "unit_price_return": float(row["gross_price_return"]),
                 "route": "V50_POST_OPEN_BASIS",
+                "v52_entry_basis_bps": row.get("entry_basis_bps"),
+                "v52_yahoo_entry_reference_usd": row.get("yahoo_entry_reference_usd"),
             })
     candidates.sort(key=lambda row: (int(row.get("entry_ts_ms") or 0),
                                      PRIORITY.get(row["strategy_id"], 99), row["symbol"]))
