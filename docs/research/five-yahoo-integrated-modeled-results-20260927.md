@@ -38,6 +38,28 @@ The **gross peaks** below are **dynamic mark-to-market** exposure, not requested
 
 These figures **must not** be compared to the older ¥740m+ integrated canonical BT or used to select production gates or leverage: the approximation can invert strategy returns. Especially, V12 uses H1-ATR instead of live H2 ATR, Q102 substitutes time exits for causal family protection, V52 hypothetical Yahoo share price returns are not the real Aster stock-perp P&L, and shared-Gross preemption and actual execution fees/margin liquidation are not fully reconstructed. They are engineering diagnostics of the requested Yahoo-price assumed-fill scenario, not a claim of actual achievable profit/loss.
 
-The complete individual modeled trade ledger and 13-month JPY NAV sequence for both scenarios are preserved as a private root-only VPS archive (see the latest successful replay run linked in the branch workflow). Raw provider data are separate and are not published here.
+## Modeled monthly net asset value (JPY), cash contributions shown separately
+
+These monthly estimates come from the five-sleeve research model above, **not from actual trading records or the historic canonical backtest**. The last row is August 10, not August 31.
+
+| As-of month | Cumulative contribution | NORMAL model NAV | SEVERE model NAV |
+|---|---:|---:|---:|
+| 2025-08 | ¥10,000 | ¥6,266.25 | ¥4,285.86 |
+| 2025-09 | ¥20,000 | ¥13,241.25 | ¥9,232.12 |
+| 2025-10 | ¥30,000 | ¥30,951.02 | ¥18,467.57 |
+| 2025-11 | ¥40,000 | ¥37,819.68 | ¥18,225.96 |
+| 2025-12 | ¥50,000 | ¥31,857.05 | ¥13,916.38 |
+| 2026-01 | ¥60,000 | ¥63,096.16 | ¥25,842.53 |
+| 2026-02 | ¥70,000 | ¥41,500.57 | ¥14,625.31 |
+| 2026-03 | ¥80,000 | ¥87,068.40 | ¥26,440.50 |
+| 2026-04 | ¥90,000 | ¥58,064.61 | ¥18,684.10 |
+| 2026-05 | ¥100,000 | ¥120,731.56 | ¥38,855.06 |
+| 2026-06 | ¥110,000 | ¥177,265.59 | ¥40,457.88 |
+| 2026-07 | ¥120,000 | ¥83,255.51 | ¥15,873.25 |
+| 2026-08 (Aug 10) | ¥130,000 | ¥81,908.92 | ¥23,307.79 |
+
+**Independent full replay passed exact ledger SHA256 parity:** NORMAL `484e0bb6fd784dad9d48ba208d3c3e133dc9211a759a642d11d48f84dc24c265`; SEVERE `6a3e12f86f849282df50c63998812f215456e854a6cee49a5ab73626c0ed3099`. Source and monthly reconstruction: https://github.com/dunamishajime-bit/-ai-dex-manager/actions/runs/36290897686
+
+The individual modeled trades and month-by-month CSVs were preserved as the **root-owned, SHA256-verified** VPS archive `/var/lib/disdex/research-bt-formal/a09-five-yahoo-integrated-36290897686.tgz`, SHA256 `2f97f6c0fdde9d3af6c99a889a6541e3556ffd08665e965e24440ac432ee3a43`. Raw Yahoo/Aster provider data stay separately archived and are not published.
 
 **Status:** the user's V52 Yahoo/no-L2 *research assumption* was implemented and modeled; the five-logic verified LIVE-parity BT remains `NOT_VERIFIABLE` until the crypto execution/exit/allocator parity and historically verifiable shared trade ledger are established. HYPE/ZEC are outside this pinned a09 five-logic cohort.
