@@ -9,6 +9,7 @@ on:
       - "research/formal_five_bt/signal_scan.py"
       - "research/formal_five_bt/runtime_bridge.mjs"
       - "research/formal_five_bt/crypto_price_model.py"
+      - "research/formal_five_bt/portfolio_price_model.py"
 permissions:
   contents: read
 jobs:
@@ -80,6 +81,12 @@ jobs:
               m=json.loads(p.read_text())
               print(name, m["runtime_sha"], json.dumps(m["stats"],sort_keys=True))
           PY
+      - name: Replay contribution-aware shared-gross crypto portfolio price model
+        run: |
+          python -m research.formal_five_bt.portfolio_price_model \
+            --data-root "$RUNNER_TEMP/formal-bt" \
+            --candidate-root "$RUNNER_TEMP/formal-crypto-price-model" \
+            --output-root "$RUNNER_TEMP/formal-portfolio-price-model"
       - name: Print aggregate price-model lifecycle summary only
         env:
           MODEL_ROOT: ${{ runner.temp }}/formal-crypto-price-model
@@ -95,4 +102,22 @@ jobs:
           print("CRYPTO_PRICE_MODEL_CANDIDATES:",m["candidate_count"])
           print("CRYPTO_PRICE_MODEL_STRATEGIES:",json.dumps(m["strategies"],sort_keys=True))
           print("FORMAL_VERIFIED_FILLS:",m["formal_verified_fills"])
+          PY
+      - name: Print modeled portfolio metrics only
+        env:
+          PORTFOLIO_ROOT: ${{ runner.temp }}/formal-portfolio-price-model
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          p=Path(os.environ["PORTFOLIO_ROOT"])/"portfolio-price-model-summary.json"
+          m=json.loads(p.read_text())
+          print("PORTFOLIO_PRICE_MODEL_STATUS:",m["status"])
+          for row in m["scenarios"]:
+              printable={k:row[k] for k in (
+                  "scenario_id","contributed_jpy","final_equity_jpy","net_profit_jpy",
+                  "profit_factor","win_rate","maximum_mtm_drawdown","closed_trades",
+                  "strategy_pnl_jpy","strategy_trades","rejected_entries")}
+              print("PORTFOLIO_SCENARIO:",json.dumps(printable,sort_keys=True))
+              print("MONTHLY_EQUITY:",row["scenario_id"],json.dumps(row["monthly_equity_jpy"],sort_keys=True))
           PY
