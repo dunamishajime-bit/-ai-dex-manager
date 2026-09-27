@@ -167,3 +167,66 @@ gates, historical margin liquidation mechanics, or same-currency FX
 accounting. **Do not rename the output a VERIFIED 5-logic BT.**
 Run conclusions and numerical results must be verified in the Actions
 logs/artifact rather than guessed.
+
+
+## Evidence checkpoint after the first complete five-sleeve H1 price-model run
+
+**Supersedes older research progress paragraphs where they conflict.** In
+GitHub Actions primary run [36316388480](https://github.com/dunamishajime-bit/-ai-dex-manager/actions/runs/36316388480)
+(source commit `b12e5c0db16902aab3d16032d222fd9f3f08af77`),
+the four-crypto Aster H1 signal/exit price models produced 1,970
+modeled candidate lifecycles (V12 1,459; PENGU 113; Q102 372;
+FET 26). The separate V52 Yahoo/Aster price-only model produced
+88 selected modeled entries and 88 closes, with **zero unresolved exit
+events for this acquisition snapshot**; another source refresh had
+a Yahoo session gap, so the result is conditioned on source coverage.
+
+The single portfolio modeled chronological entry, exit, risk, funding
+and gross competition. It used ¥10,000 upfront + ¥10,000 on twelve
+monthly deposit dates; it converted deposit cash to USD at delayed
+official ECB EUR-cross USDJPY *reference* rates available the following
+UTC calendar date, then revalued the model USD portfolio in yen
+at the sample end. These are neither executable USDTJPY rates nor
+FRED DEXJPUS parity.
+
+| Model | Closed modeled trades | Reference-model end yen | PF | Win rate | Maximum MTM DD |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| 10bps round trip | 1,037 | ¥105,474,659.40 | 1.6885 | 56.99% | -37.52% |
+| 70bps round trip | 1,032 | ¥719,645.05 | 1.1849 | 39.34% | -52.38% |
+
+The settlement wallet, trade P&L and timestamped cashflow
+reconciliations passed; 10bps and 70bps results diverged strongly.
+**Do not infer that either row is a production-executable CAGR or a
+completed formal backtest.** Historical L2 or justified proxies,
+actual executable order size, liquidation margin-buffer mechanics,
+and original LIVE V52 simultaneous spread/depth gates are missing;
+NORMAL/SEVERE × PROXY_APPLIED/ASTER_DATA_ONLY formal outputs remain
+`NOT_VERIFIABLE`. The DD<=20% research target was not met in either
+cost sensitivity. Results can change with refreshed source coverage.
+
+GitHub Actions [36316701872](https://github.com/dunamishajime-bit/-ai-dex-manager/actions/runs/36316701872)
+passed source snapshot/data-quality, repaired native 1m OHLC,
+conservative malformed-bar quarantine, delayed ECB FX and missing
+selected-V52-data guard tests. The independent Aster resolution probe
+[36316146227](https://github.com/dunamishajime-bit/-ai-dex-manager/actions/runs/36316146227)
+found one malformed native 5m bar but sixty contiguous, valid native
+1m bars for BTC H1 timestamp 1757768400000. Native hourly open,
+close and base/quote volumes match the reconstructed minute aggregate,
+but **the native hourly high is 2.70812221bps lower** than the
+minute-derived high. The primary-recovery alternative preserves
+the original source and emits an independently hashable reconstructed
+research scenario; if Aster now returns an already-valid native H1,
+the alternative explicitly records `NATIVE_ASTER_H1_VALID_NO_RECONSTRUCTION`,
+never silently modifies a valid vendor candle.
+
+The analogous repaired-BTC all-five run from the same original source
+commit [36316388482](https://github.com/dunamishajime-bit/-ai-dex-manager/actions/runs/36316388482)
+completed its accounting but flagged `INCOMPLETE_ALL_FIVE_PRICE_MODEL`:
+the alternative workflow had not copied the V52 stock funding
+provenance metadata into the shared accounting root, so its apparent
+missing funding was a **pipeline wiring error**, not proof that
+stock funding was absent. That separate workflow wiring was patched
+in `ed8411086b581fcdf8d653ea2da475a67a88fafa`. Treat any
+subsequent repaired-run figures as unpublished until its own workflow
+conclusion and aggregate summaries have been checked. None of this
+research changed VPS production, live positions or real orders.
