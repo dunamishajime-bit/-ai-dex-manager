@@ -318,6 +318,15 @@ def _metric_row(strategy: str, rows: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
+def q102_coverage_limitation(stats: Mapping[str, Any]) -> str:
+    signals=int(stats.get('signal_rows') or 0)
+    decisions=int(stats.get('decision_timestamps') or 0)
+    errors=int(stats.get('error_timestamps') or 0)
+    return (f'Q102 selected {signals} causal candidates across {decisions} decision timestamps; '
+            f'{errors} timestamps had incomplete historical input. '
+            'Candidates are not verified fills, and historical Q102 fill count is unverified.')
+
+
 def run_integrated_bt(data_root: str | Path, scan_root: str | Path, l2_root: str | Path, output_root: str | Path) -> dict[str, Any]:
     data_root = Path(data_root).resolve()
     scan_root = Path(scan_root).resolve()
@@ -344,6 +353,7 @@ def run_integrated_bt(data_root: str | Path, scan_root: str | Path, l2_root: str
 
     source_hashes = {
         "runtime_source_manifest_sha256": _sha(runtime_manifest_path.read_bytes()),
+        "formal_engine_sha256": _sha(Path(__file__).read_bytes()),
         "acquisition_manifest_sha256": _sha(acquisition_path.read_bytes()),
         "signal_scan_manifests": scan_manifest_hashes,
         "signal_logs": signal_hashes,
@@ -512,7 +522,7 @@ def run_integrated_bt(data_root: str | Path, scan_root: str | Path, l2_root: str
         "outputs": output_inventory,
         "limitations": [
             "Aster 1h/funding data was normalized and integrity-checked per native instrument; BTCUSDT includes one invalid OHLC row and RENDERUSDT includes one candle before the verified listing timestamp.",
-            "The Q102 LIVE selector returns invalid-candle or insufficient-walk-forward-history errors for the entire tested decision stream; no Q102 order was emitted.",
+            q102_coverage_limitation((scan_manifests.get("baseline-signal-scan-q102",{}).get("stats",{}).get("Q102") or {})),
             "The tested Binance Futures, Bybit, and Aster historical L2 candidate files have no verified event chain seeded by a valid snapshot. Missing event files are not presumed fillable.",
             "Historical crypto commission tier was not available in the audited LIVE config; actual Aster stock-perpetual history/reference quote parity for V52 was not verified.",
             "V12 variants were not run because the unchanged integrated baseline did not reach a verified fill/ledger state; HC1.75 remains fixed for later research.",
@@ -564,7 +574,7 @@ def render_report(manifest: Mapping[str, Any], coverage: Mapping[str, Any]) -> s
         "",
         f"Aster instrument H1/funding streams checked: {len(coverage['symbols'])} symbols. Blocking data-quality symbols: "
         + (", ".join(f"{row['native_instrument']} ({row['blocking_issue_counts']})" for row in issue_symbols) if issue_symbols else "none"),
-        f"FRED DEXJPUS rows: {coverage['fx']['observations']} ({coverage['fx']['status']}).",
+        f"FX observations ({coverage['fx'].get('source','UNSPECIFIED')}): {coverage['fx']['observations']} ({coverage['fx']['status']}).",
         f"L2 candidate files checked: {len(coverage['l2_archives'])}; verified full snapshot/sequence files: "
         f"{sum(row.get('status') in {'VERIFIED', 'VERIFIED_PROXY_RESEARCH'} for row in coverage['l2_archives'])}.",
         "",
