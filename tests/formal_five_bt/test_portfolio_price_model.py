@@ -68,6 +68,10 @@ class PortfolioPriceModelTests(unittest.TestCase):
                 "reason": "TIME_OR_SESSION_FLAT",
             }
             (v52 / "v52-model-ledger.jsonl").write_text(json.dumps(trade) + "\n")
+            (v52 / "v52-model-summary.json").write_text(json.dumps({
+                "status": "RESEARCH_PRICE_MODEL_CLOSED_SAMPLE",
+                "unresolved_exit_trades": 0,
+            }) + "\n")
             result = run_portfolio_model(data, candidates, output, v52_ledger_root=v52)
             for scenario in result["scenarios"]:
                 self.assertEqual(scenario["strategy_trades"]["V52"], 1)
