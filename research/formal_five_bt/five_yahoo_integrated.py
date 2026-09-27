@@ -297,6 +297,7 @@ def simulate(crypto_candidates:list,crypto_bars:Mapping[str,Mapping[int,Any]],
                 if c.strategy=="V12":permitted=min(permitted,V12_LIMIT-g["V12"])
                 if c.strategy=="Q102":permitted=min(permitted,3.0)
                 if c.strategy=="FET":permitted=min(permitted,FET_LIMIT)
+                if c.strategy=="PENGU":permitted=min(permitted,1.0)
                 if permitted<.05:
                     rejected["INTEGRATED_CRYPTO_OR_TOTAL_GROSS_CAP"]+=1;continue
                 if daily_start and nav<daily_start*(1-.075):
@@ -324,6 +325,11 @@ def simulate(crypto_candidates:list,crypto_bars:Mapping[str,Mapping[int,Any]],
         if ts in by_stock:
             # Only one V11/V50 slot per event, sorted on observed basis.
             for candidate in by_stock[ts]:
+                if candidate.get("gate_status")!="PASS_ASSUMED_FILL":
+                    rejected["STOCK_GATE_NOT_PASSED"]+=1;continue
+                if not (float(candidate.get("source_reference_open") or 0)>0
+                        and float(candidate.get("source_perp_open") or 0)>0):
+                    rejected["STOCK_SOURCE_PRICE_INVALID"]+=1;continue
                 if any(p["route"]==candidate["route"] for p in open_stock):
                     rejected["INTEGRATED_STOCK_ROUTE_OCCUPIED"]+=1;continue
                 if any(p["symbol"]==candidate["symbol"] for p in open_stock):

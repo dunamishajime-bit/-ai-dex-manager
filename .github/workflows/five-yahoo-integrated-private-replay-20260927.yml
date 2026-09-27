@@ -1,0 +1,161 @@
+name: Five-strategy combined Yahoo V52 + Aster crypto H1 no-book model replay
+on:
+  push:
+    branches: [research/formal-five-bt-yahoo-integrated-20260927]
+    paths: ['.github/workflows/five-yahoo-integrated-private-replay-20260927.yml']
+permissions:
+  contents: read
+concurrency:
+  group: five-yahoo-integrated-private-replay
+  cancel-in-progress: false
+jobs:
+  replay:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      SSH_HOST: \${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: \${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: \${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: \${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 8
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify independent modeled engines and isolated LIVE diff
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python -m unittest discover -s tests/formal_five_bt -p test_five_yahoo_integrated.py -v
+          python -m unittest discover -s tests/formal_five_bt -p test_v52_yahoo.py -v
+          git diff --name-only 34ada5fc3222e29a45177c5d750d3f4885a46192 HEAD | tee /tmp/yahoo5-changes
+          if grep -E '^(app/|config/|lib/|ops/|scripts/disdex|research/formal_five_bt/engine.py)' /tmp/yahoo5-changes; then
+            echo "LIVE/FORMAL_SOURCE_DIFF_UNEXPECTED"; exit 1
+          fi
+          echo "PINNED_A09_FIVE_RESEARCH_ONLY_DIFF=PASS"
+      - name: Configure pinned root SSH for private research source retrieval
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ -n "$SSH_HOST" && -n "$ROOT_KEY" && -n "$SSH_KNOWN_HOSTS" ]]
+          install -d -m 0700 "$HOME/.ssh"
+          python - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k):return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Restore four SHA256-pinned private original source and earlier replay archives
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          root="$RUNNER_TEMP/five-yahoo"
+          mkdir -p "$root"
+          port="\${SSH_PORT:-22}"
+          ssh_opts=(-T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes
+             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -p "$port")
+          ssh "\${ssh_opts[@]}" "root@$SSH_HOST" \
+            "set -Eeuo pipefail; test \"\$(tr -d '[:space:]' < /home/deploy/disdex-trading/current/.disdex-release-sha)\" = 'a09ea45ca3cbd72100f9eb0eaae499039c40b6a0';
+            echo FIVE_YAHOO_PINNED_PRODUCTION_SHA=PASS"
+          while IFS=' ' read -r label source digest; do
+            [[ -n "$label" ]] || continue
+            remote="/var/lib/disdex/research-bt-formal/$source"
+            ssh "\${ssh_opts[@]}" "root@$SSH_HOST" \
+              "set -Eeuo pipefail; test -f '$remote'; test \"\$(sha256sum '$remote' | awk '{print \$1}')\" = '$digest'"
+            scp -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+              -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+              -P "$port" "root@$SSH_HOST:$remote" "$root/$label.tgz"
+            echo "$digest  $root/$label.tgz" | sha256sum -c -
+            tar -xzf "$root/$label.tgz" -C "$root" --no-same-owner --no-same-permissions
+            rm -f "$root/$label.tgz"
+            echo "RESTORED_PINNED_ARCHIVE=$label"
+          done <<'SOURCES'
+          crypto-data a09-new-data-36276406027.tgz 90c0f55bcf72fd8fa8bebf385d51a6d7a5341e2ed2091f8c4d50a0f3383b729f
+          crypto-scans a09-private-results-36288219108.tgz e86decec5a3ab2e3286d62aacf1ad090ca5fcfd47f9e935c3499cf18c288547d
+          yahoo-stock a09-yahoo-v52-source-36290050697.tgz 4e6043237b020ae862453748ea260a251d27dcb70361413dc2264ac1074e8b7f
+          aster-stock a09-stock-h1-v52-36289853022.tgz 03705fe70a51236d3d5e12266bb3378fa2c3fbbe96f12ac90a0f887e84b1ed34
+          SOURCES
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          p=Path(os.environ["RUNNER_TEMP"])/"five-yahoo"
+          a=json.loads((p/"input/acquisition-manifest.json").read_text())
+          c=json.loads((p/"scans/baseline-signal-scan/signal-scan-manifest.json").read_text())
+          q=json.loads((p/"scans/baseline-signal-scan-q102/signal-scan-manifest.json").read_text())
+          y=json.loads((p/"v52-yahoo-first-party/acquisition-attempt.json").read_text())
+          s=json.loads((p/"a09-v52-stock-h1/aster-stock-h1-manifest.json").read_text())
+          sha="a09ea45ca3cbd72100f9eb0eaae499039c40b6a0"
+          assert a["runtime_sha"]==c["runtime_sha"]==q["runtime_sha"]==s["pin_production_sha"]==sha
+          assert len(a["venues"]["aster"]["klines"])==32
+          assert y["status"]=="ALL_5_YAHOO_PRICE_HISTORY_ACQUIRED"
+          assert c["stats"]["V12"]["signal_rows"]==1459 and c["stats"]["PENGU"]["signal_rows"]==52
+          assert c["stats"]["FET"]["signal_rows"]==26 and q["stats"]["Q102"]["signal_rows"]==101
+          print("FIVE_YAHOO_SOURCE_AND_SIGNAL_PIN=PASS")
+          PY
+      - name: Run NORMAL and SEVERE concurrent-account gross/stock conflict replay
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          root="$RUNNER_TEMP/five-yahoo"
+          python -m research.formal_five_bt.five_yahoo_integrated \
+            --crypto-data "$root/input" --scan-root "$root/scans" \
+            --yahoo-root "$root/v52-yahoo-first-party" \
+            --stock-root "$root/a09-v52-stock-h1" \
+            --output-root "$root/integrated-5-model"
+          python - <<'PY'
+          import os,json,csv
+          from pathlib import Path
+          root=Path(os.environ["RUNNER_TEMP"])/"five-yahoo/integrated-5-model"
+          r=json.loads((root/"five-yahoo-integrated-model-manifest.json").read_text())
+          assert r["status"]=="MODELED_FIVE_CHRONOLOGICAL_NOT_FORMAL"
+          assert r["production_sha"]=="a09ea45ca3cbd72100f9eb0eaae499039c40b6a0"
+          assert len(r["scenarios"])==2
+          for s in r["scenarios"]:
+            assert s["status"]=="MODELED_CHRONOLOGICAL_FIVE_NOT_LIVE_PARITY"
+            assert len(s["monthly_model"])==13 and s["contribution_events"]==13
+            assert s["contributions_jpy"]==130000
+            assert s["stock_entries_model"]>0 and s["crypto_entries_model"]>0
+            assert s["closed_trades_model"]==s["ledger_file"]["rows"]
+            with (root/(s["model"]+"-monthly-yahoo-integrated-model.csv")).open("w",newline="") as f:
+              w=csv.DictWriter(f,fieldnames=list(s["monthly_model"][0]))
+              w.writeheader();w.writerows(s["monthly_model"])
+            print("FIVE_YAHOO_INTEGRATED_FIVE_SLEEVE_RESULT",json.dumps({
+              k:s[k] for k in ("model","status","final_nav_jpy_model","final_net_jpy_model",
+                "closed_trades_model","stock_entries_model","crypto_entries_model",
+                "win_rate_pct_model","profit_factor_model",
+                "max_flow_adjusted_h1_and_30m_dd_pct_model",
+                "strategy_net_pnl_usdt_model","stock_route_net_pnl_usdt_model",
+                "gross_peaks_model","reject_counts")},sort_keys=True))
+            print("INTEGRATED_ASSUMED_LEDGER_SHA256="+s["ledger_file"]["sha256"])
+          print("FORMAL_ASTER_EXECUTION_VERIFIED=FALSE USER_V52_NO_L2_FILL_ASSUMPTION=TRUE")
+          PY
+      - name: Persist modeled five-logic results privately under root-only research archive
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          root="$RUNNER_TEMP/five-yahoo"
+          tar -czf "$RUNNER_TEMP/five-yahoo-5-results.tgz" -C "$root" integrated-5-model
+          bytes="$(stat -c '%s' "$RUNNER_TEMP/five-yahoo-5-results.tgz")"
+          test "$bytes" -gt 1000
+          test "$bytes" -lt 100000000
+          digest="$(sha256sum "$RUNNER_TEMP/five-yahoo-5-results.tgz" | cut -d ' ' -f1)"
+          remote="/var/lib/disdex/research-bt-formal/a09-five-yahoo-integrated-$GITHUB_RUN_ID.tgz"
+          port="\${SSH_PORT:-22}"
+          ssh_opts=(-T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes
+             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -p "$port")
+          ssh "\${ssh_opts[@]}" "root@$SSH_HOST" \
+            "set -Eeuo pipefail; test \"\$(tr -d '[:space:]' < /home/deploy/disdex-trading/current/.disdex-release-sha)\" = 'a09ea45ca3cbd72100f9eb0eaae499039c40b6a0';
+             test ! -e '$remote'; test \"\$(df -Pk /var/lib/disdex | awk 'NR==2 {print \$4}')\" -gt 1200000"
+          scp -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -P "$port" "$RUNNER_TEMP/five-yahoo-5-results.tgz" "root@$SSH_HOST:$remote"
+          ssh "\${ssh_opts[@]}" "root@$SSH_HOST" \
+            "set -Eeuo pipefail; chmod 600 '$remote'; test \"\$(sha256sum '$remote' | cut -d ' ' -f1)\" = '$digest';
+             echo PRIVATE_FIVE_YAHOO_INTEGRATED_ARCHIVE='$remote';
+             echo PRIVATE_FIVE_YAHOO_INTEGRATED_SHA256='$digest';
+             echo ROOT_ONLY=TRUE NO_ORDER_MUTATION=TRUE"
