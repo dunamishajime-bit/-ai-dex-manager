@@ -106,6 +106,44 @@ class RuntimeBridgeContractTests(unittest.TestCase):
         self.assertLessEqual(trace.data_cutoff_ms, decision_ts)
         self.assertTrue(trace.gates)
 
+    def test_q102_fast_selected_signal_matches_exact_source_at_same_timestamp(self):
+        hour = 3_600_000
+        start = 1_735_689_600_000  # 2025-01-01 00:00 UTC
+        count = 5_200
+        def history(multiplier):
+            rows = []
+            price = 100.0 * multiplier
+            for i in range(count):
+                ts = start + i * hour
+                # Deterministic non-flat path exercises RSI/ATR/monthly training.
+                drift = 1 + (0.0015 if i % 37 < 19 else -0.0012)
+                price *= drift
+                rows.append({
+                    "timestampMs": ts, "open": price,
+                    "high": price * 1.006, "low": price * 0.994,
+                    "close": price * (1.001 if i % 2 == 0 else 0.999),
+                    "quoteVolume": 1_000_000 + (i % 29) * 10_000,
+                    "baseVolume": 10_000 + (i % 17) * 100,
+                })
+            return rows
+        candles = {
+            "BTCUSDT": history(1.0),
+            "PENGUUSDT": history(0.01),
+        }
+        decision = start + (count - 1) * hour
+        with RuntimeBridge() as bridge:
+            exact = bridge.q102_series(
+                candles, ["PENGUUSDT"], ["PENGUUSDT"], decision, decision)[0]
+            fast = bridge.q102_fast_series(
+                candles, ["PENGUUSDT"], ["PENGUUSDT"], decision, decision)[0]
+        self.assertNotIn("error", exact)
+        self.assertNotIn("error", fast)
+        exact_signal = exact.get("signal") or {}
+        fast_signal = fast.get("signal") or {}
+        for key in ("side", "symbol", "family", "requestedGross", "reason",
+                    "hardStop", "maxHoldHours", "exitPolicy"):
+            self.assertEqual(fast_signal.get(key), exact_signal.get(key), key)
+
     def test_q102_series_activates_symbols_only_after_point_in_time_history_exists(self):
         hour = 3_600_000
         start = 1_700_000_000_000
