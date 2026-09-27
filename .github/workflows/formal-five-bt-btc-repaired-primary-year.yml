@@ -174,6 +174,15 @@ jobs:
                       "candidate_decision_counts","strategy_trade_outcome_aggregates")},
                   sort_keys=True))
           PY
+      - name: Audit FET hard-stop entries against past-only FET/BTC features
+        if: steps.ecb_fx.outcome == 'success'
+        run: |
+          python -m research.formal_five_bt.fet_entry_audit \
+            --data-root "$RUNNER_TEMP/formal-bt" \
+            --decisions "$RUNNER_TEMP/formal-portfolio-ecb-model/PRICE_MODEL_BASE_10BPS/candidate-decisions.jsonl" \
+            --trades "$RUNNER_TEMP/formal-portfolio-ecb-model/PRICE_MODEL_BASE_10BPS/portfolio-trades.jsonl" \
+            --output-root "$RUNNER_TEMP/formal-fet-entry-audit"
+
       - name: Print aggregate price-model lifecycle summary only
         env:
           MODEL_ROOT: ${{ runner.temp }}/formal-crypto-price-model
@@ -262,6 +271,11 @@ jobs:
               fi
             done
           fi
+          if [ -f "$RUNNER_TEMP/formal-fet-entry-audit/fet-preentry-summary.json" ]; then
+            mkdir -p "$tmp/fet-entry-audit"
+            cp "$RUNNER_TEMP/formal-fet-entry-audit/fet-preentry-summary.json" "$tmp/fet-entry-audit/"
+            cp "$RUNNER_TEMP/formal-fet-entry-audit/fet-preentry-feature-audit.jsonl" "$tmp/fet-entry-audit/"
+          fi
           cp "$RUNNER_TEMP/formal-bt/acquisition-manifest.json" "$tmp/manifests/acquisition-manifest.json"
           cp "$RUNNER_TEMP/formal-bt/ecb-fx-cross-manifest.json" "$tmp/manifests/ecb-fx-cross-manifest.json"
           cp "$RUNNER_TEMP/formal-bt/aster-h1-reconciliation-status.json" "$tmp/manifests/aster-h1-reconciliation-status.json"
@@ -318,6 +332,8 @@ jobs:
             ${{ runner.temp }}/formal-portfolio-ecb-model/PRICE_MODEL_EXTREME_COST_70BPS_NOT_BASELINE/metrics.json
             ${{ runner.temp }}/formal-risk-variants/portfolio-price-model-summary.json
             ${{ runner.temp }}/formal-risk-variants/*/metrics.json
+            ${{ runner.temp }}/formal-fet-entry-audit/fet-preentry-summary.json
+            ${{ runner.temp }}/formal-fet-entry-audit/fet-preentry-feature-audit.jsonl
             ${{ runner.temp }}/formal-bt/ecb-fx-cross-manifest.json
             ${{ runner.temp }}/formal-bt/acquisition-manifest.json
             ${{ runner.temp }}/formal-bt/aster-h1-reconciliation-status.json
