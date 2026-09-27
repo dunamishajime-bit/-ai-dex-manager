@@ -527,6 +527,7 @@ def run_portfolio_model(data_root: Path, candidate_root: Path, output_root: Path
     fx_series = load_ecb_cross(ecb_fx_root) if ecb_fx_root is not None else None
     v52_unresolved = 0
     v52_skipped = 0
+    v52_missing_data_skipped = 0
     v52_model_status = "NOT_PROVIDED"
     v52_model_complete = v52_ledger_root is None
     unresolved_crypto = Counter(str(row["strategy_id"]) + ":" + str(row["status"])
@@ -541,9 +542,22 @@ def run_portfolio_model(data_root: Path, candidate_root: Path, output_root: Path
         declared_unresolved = int(v52_summary.get("unresolved_exit_trades") or 0)
         if declared_unresolved > v52_unresolved:
             raise ValueError("V52_UNRESOLVED_SUMMARY_EXCEEDS_LEDGER")
+        # Closing every *observed* V52 trade is insufficient to certify
+        # the entire annual candidate sample when the vendor has missing
+        # underlying-reference sessions or unverifiable price chains.
+        v52_missing_data_skipped = sum(
+            row.get("status") == "SKIPPED_CANDIDATE"
+            and row.get("reason") in {
+                "YAHOO_SESSION_COVERAGE_INCOMPLETE",
+                "ENTRY_PRICE_CHAIN_UNVERIFIED",
+                "PREVIOUS_EXIT_UNVERIFIED_SAME_SESSION",
+            }
+            for row in v52_rows
+        )
         v52_model_complete = (
             v52_model_status == "RESEARCH_PRICE_MODEL_CLOSED_SAMPLE"
             and v52_unresolved == 0
+            and v52_missing_data_skipped == 0
         )
         v52_skipped = sum(row.get("status") == "SKIPPED_CANDIDATE" for row in v52_rows)
         for row in v52_rows:
@@ -612,6 +626,7 @@ def run_portfolio_model(data_root: Path, candidate_root: Path, output_root: Path
         "shared_crypto_gross_cap": CRYPTO_CAP, "stock_gross_cap": STOCK_CAP, "total_gross_cap": TOTAL_CAP,
         "v52_unresolved_exit_trades_excluded": v52_unresolved,
         "v52_skipped_candidates": v52_skipped,
+        "v52_missing_market_data_selected_candidates_excluded": v52_missing_data_skipped,
         "daily_loss_limit": DAILY_LOSS_LIMIT,
         "scenarios": scenarios,
         "limitations": [
