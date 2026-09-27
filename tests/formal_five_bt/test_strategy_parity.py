@@ -86,6 +86,35 @@ class RuntimeBridgeContractTests(unittest.TestCase):
         self.assertLessEqual(trace.data_cutoff_ms, decision_ts)
         self.assertTrue(trace.gates)
 
+    def test_q102_series_activates_symbols_only_after_point_in_time_history_exists(self):
+        hour = 3_600_000
+        start = 1_700_000_000_000
+        start -= start % hour
+        def rows(count, offset=0):
+            output = []
+            price = 100.0
+            for i in range(count):
+                ts = start + (i + offset) * hour
+                price *= 1.0005
+                output.append({"timestampMs": ts, "open": price, "high": price * 1.01,
+                               "low": price * 0.99, "close": price * 1.001,
+                               "quoteVolume": 1_000_000, "baseVolume": 10_000})
+            return output
+        btc = rows(420)
+        early = rows(420)
+        late = rows(60, offset=360)
+        with RuntimeBridge() as bridge:
+            result = bridge.q102_series(
+                {"BTCUSDT": btc, "SUIUSDT": early, "LATEUSDT": late},
+                ["SUIUSDT", "LATEUSDT"], ["SUIUSDT", "LATEUSDT"],
+                start + 336 * hour, start + 419 * hour)
+        self.assertTrue(result)
+        self.assertTrue(any("SUIUSDT" in row.get("availableSymbols", []) for row in result))
+        self.assertTrue(all("LATEUSDT" not in row.get("availableSymbols", [])
+                            for row in result[:20]))
+        self.assertFalse(any("error" in row and "ENTRY_OPEN_MISSING:LATEUSDT" in row["error"]
+                             for row in result))
+
     def test_fet_gate_evaluation_uses_only_completed_prior_bars(self):
         raw = bars(100)
         history = {"bars": raw, "provenance_verified": True}
