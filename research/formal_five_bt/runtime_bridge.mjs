@@ -416,7 +416,7 @@ if (process.argv.includes("--list")) {
             sourceRuntimeSha: manifest.runtime_sha,
           });
         }
-        result = {
+        response = { ok: true, result: jsonSafe({
           runtimeSha: manifest.runtime_sha,
           recoveryV8Enabled: recoveryEnabled,
           candidateCount: candidates.length,
@@ -425,7 +425,7 @@ if (process.argv.includes("--list")) {
             return acc;
           }, {}),
           candidates,
-        };
+        }) };
       } else if (request.op === "q102Series") {
         const candlesBySymbol = request.candlesBySymbol;
         const highVolSymbols = request.highVolSymbols;
