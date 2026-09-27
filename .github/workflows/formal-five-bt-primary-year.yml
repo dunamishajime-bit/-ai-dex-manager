@@ -5,6 +5,8 @@ on:
     branches: [codex/formal-five-logic-bt-20260926]
     paths:
       - ".github/workflows/formal-five-bt-primary-year.yml"
+      - "research/formal_five_bt/acquire.py"
+      - "research/formal_five_bt/signal_scan.py"
 permissions:
   contents: read
 jobs:
