@@ -200,7 +200,7 @@ def _portfolio_scenario(
         next_deposit = deposit_times[deposit_i] if deposit_i < len(deposit_times) else math.inf
         next_scheduled = scheduled[0][0] if scheduled else math.inf
         ts = min(next_candidate, next_deposit, next_scheduled)
-        if ts is math.inf or ts >= PERIOD_END_MS:
+        if not math.isfinite(ts) or ts >= PERIOD_END_MS:
             break
 
         while deposit_i < len(deposit_times) and deposit_times[deposit_i] == ts:
