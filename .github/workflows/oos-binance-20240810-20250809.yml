@@ -1,0 +1,108 @@
+name: Unseen prior-year Binance USD-M four-crypto BT (frozen rules)
+on:
+  push:
+    branches: [research/oos-binance-20240810-20250809]
+    paths:
+      - ".github/workflows/oos-binance-20240810-20250809.yml"
+      - "research/formal_five_bt/oos_binance_archive.py"
+      - "research/formal_five_bt/oos_binance_replay.py"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: oos-binance-20240810-20250809
+  cancel-in-progress: false
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 170
+    env:
+      DATA_ROOT: ${{ runner.temp }}/oos-binance-data
+      OUTPUT_ROOT: ${{ runner.temp }}/oos-binance-result
+      CACHE_PATH: docs/research/data/oos-binance-20240810-20250809
+      REPORT_PATH: docs/research/results/oos-binance-20240810-20250809
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/oos-binance-20240810-20250809
+          fetch-depth: 0
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Syntax-check frozen prior-year adapter and replay
+        run: |
+          python -m py_compile research/formal_five_bt/oos_binance_archive.py research/formal_five_bt/oos_binance_replay.py
+      - name: Restore SHA-audited production strategy source without old market data
+        run: |
+          git -c protocol.version=2 fetch --filter=blob:none --no-tags --depth=1 origin a09ea45ca3cbd72100f9eb0eaae499039c40b6a0
+          python -m research.formal_five_bt.restore_snapshot
+      - name: Download official Binance monthly USD-M H1, funding and checksum companions
+        id: acquire
+        run: |
+          python -u -m research.formal_five_bt.oos_binance_archive \
+            --root "$DATA_ROOT" --max-workers 6
+      - name: Frozen unseen-calendar-year V12 PENGU Q102 FET gate and gross comparisons
+        id: replay
+        run: |
+          python -u -m research.formal_five_bt.oos_binance_replay \
+            --root "$DATA_ROOT" --output "$OUTPUT_ROOT"
+      - name: Package reusable OHLC and funding, exact source hashes, raw original archives and ledgers
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$CACHE_PATH" "$REPORT_PATH"
+          cp "$DATA_ROOT/acquisition-manifest.json" "$CACHE_PATH/acquisition-manifest.json" 2>/dev/null || true
+          cp "$DATA_ROOT/acquisition-progress.json" "$CACHE_PATH/acquisition-progress.json" 2>/dev/null || true
+          if [ -d "$DATA_ROOT/normalized/binance" ]; then
+            tar -C "$DATA_ROOT" -czf "$RUNNER_TEMP/oos-normalized.tar.gz" normalized/binance
+            split -b 40m -d -a 3 "$RUNNER_TEMP/oos-normalized.tar.gz" "$CACHE_PATH/normalized-binance-h1-funding.tar.gz.part-"
+            sha256sum "$CACHE_PATH"/normalized-binance-h1-funding.tar.gz.part-* > "$CACHE_PATH/normalized-parts.sha256"
+          fi
+          if [ -d "$DATA_ROOT/raw/binance" ]; then
+            tar -C "$DATA_ROOT" -czf "$RUNNER_TEMP/oos-original-binance-archives.tar.gz" raw/binance
+            split -b 40m -d -a 3 "$RUNNER_TEMP/oos-original-binance-archives.tar.gz" "$CACHE_PATH/raw-original-binance-archives.tar.gz.part-"
+            sha256sum "$CACHE_PATH"/raw-original-binance-archives.tar.gz.part-* > "$CACHE_PATH/raw-parts.sha256"
+          fi
+          if [ -d "$OUTPUT_ROOT" ]; then
+            cp -a "$OUTPUT_ROOT/." "$REPORT_PATH/"
+          fi
+          cat > "$CACHE_PATH/README.md" <<'EOF'
+          # Immutable, reusable Binance USD-M prior-year source data
+          Research period: 2024-08-10 UTC through 2025-08-09 UTC inclusive.
+          Warmup: 2024-01-01 UTC. Original official monthly ZIP responses,
+          normalized H1 and funding, and SHA256 manifests are preserved separately.
+          This data was not downloaded from or filled by Aster. Missing historical
+          listings/gaps are recorded; do not synthesize candles.
+          Reassemble: cat normalized-binance-h1-funding.tar.gz.part-* > normalized.tar.gz
+          Verify: sha256sum -c normalized-parts.sha256
+          Extract: tar -xzf normalized.tar.gz -C YOUR_DATA_ROOT
+          Repeat for raw-original-binance-archives.tar.gz.part-* to inspect original ZIPs.
+          The run never modifies LIVE runners or production configuration.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$CACHE_PATH" "$REPORT_PATH"
+          if git diff --cached --quiet; then
+            echo "NO_NEW_REUSABLE_OOS_ARTIFACTS"
+          else
+            git commit -m "BT: persist genuine prior-year Binance source archives and frozen comparative replay [skip ci]"
+            git push origin HEAD:research/oos-binance-20240810-20250809
+          fi
+      - name: Preserve acquisition or error evidence independently of test outcome
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: oos-binance-20240810-20250809-validation-evidence
+          retention-days: 90
+          if-no-files-found: warn
+          path: |
+            ${{ env.CACHE_PATH }}/README.md
+            ${{ env.CACHE_PATH }}/acquisition-manifest.json
+            ${{ env.CACHE_PATH }}/acquisition-progress.json
+            ${{ env.REPORT_PATH }}/oos-summary.json
+            ${{ env.REPORT_PATH }}/oos-summary-progress.json
