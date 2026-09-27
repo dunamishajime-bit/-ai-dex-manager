@@ -23,6 +23,8 @@ jobs:
           python-version: "3.12"
       - name: Test Yahoo V52 price-only model and acquisition
         run: python -m unittest discover -s tests/formal_five_bt -p 'test_yahoo_*.py' -v
+      - name: Test public Aster stock-price acquisition and listing gates
+        run: python -m unittest discover -s tests/formal_five_bt -p 'test_aster_stock_acquire.py' -v
       - name: Test deterministic integrated-runner bookkeeping
         run: python -m unittest discover -s tests/formal_five_bt -p 'test_engine.py' -v
       - name: Check Python source syntax
