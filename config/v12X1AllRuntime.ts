@@ -36,7 +36,7 @@ export const V12_X1_ALL = Object.freeze({
     breakoutBars: 18,
     breakoutBufferPct: 0.0233,
     minimumMomentumPct: 0.0227,
-    minimumVolumeRatio: 0.9845,
+    minimumVolumeRatio: 0.80,
     minimumEdgeToCostRatio: 6.0879,
     volatilityLookbackBars: 15,
     volatilityPenalty: 2.3953,
@@ -48,7 +48,7 @@ export const V12_X1_ALL = Object.freeze({
     rebalanceBars: 20,
     cooldownBars: 1,
     allowNeutralRegime: true,
-    neutralScoreThreshold: 1.4649,
+    neutralScoreThreshold: 1.00,
     normalRoundTripCostBps: 10,
     // 2026-09-23 Aster-exact win-rate entry contract. HC is an entry-quality
     // overlay, not venue leverage; shared/aggregate gross ceilings are unchanged.
