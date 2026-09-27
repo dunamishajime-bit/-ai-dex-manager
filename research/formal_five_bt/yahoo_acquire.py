@@ -114,6 +114,8 @@ def acquire_yahoo_v52(root: Path, begin: date = date(2025, 8, 10),
                 rows, page = yahoo_hourly_page(symbol, cursor, until, fetch=fetch)
                 merged.extend(rows)
                 pages.append(page)
+                if fetch is _fetch:
+                    wallclock.sleep(0.6)  # Avoid bursty public Yahoo chart calls.
             except Exception as error:
                 pages.append({"start_utc": cursor.isoformat(), "end_utc": until.isoformat(),
                               "status": "NOT_VERIFIABLE_ACQUISITION_ERROR", "reason": str(error)[:180]})
@@ -126,13 +128,30 @@ def acquire_yahoo_v52(root: Path, begin: date = date(2025, 8, 10),
             for row in merged))
         try:
             accepted = load_yahoo_bars(output, symbol)
-            status = ("COVERAGE_PARTIAL" if any("status" in page for page in pages)
-                      else "ACQUIRED_VALIDATED_REQUIRES_HOURLY_COVERAGE_CHECK")
+            expected_starts: set[int] = set()
+            day = begin
+            while day < end_exclusive:
+                close_at = nyse_close_utc(day)
+                if close_at is not None:
+                    candle = datetime.combine(day, time(9, 30), NY).astimezone(timezone.utc)
+                    while candle < close_at:
+                        expected_starts.add(int(candle.timestamp() * 1000))
+                        candle += timedelta(hours=1)
+                day += timedelta(days=1)
+            actual_starts = {bar.start_ms for bar in accepted}
+            missing_hours = len(expected_starts - actual_starts)
+            extra_hours = len(actual_starts - expected_starts)
+            page_errors = sum("status" in page for page in pages)
+            status = ("COVERAGE_COMPLETE" if not (missing_hours or extra_hours or page_errors)
+                      else "COVERAGE_PARTIAL")
         except (ValueError, KeyError, TypeError) as error:
             accepted, status = (), f"NOT_VERIFIABLE:{error}"
+            missing_hours, extra_hours, page_errors = None, None, sum("status" in page for page in pages)
         coverage["symbols"][symbol] = {
             "status": status, "rows": len(accepted), "first_bar_ms": accepted[0].start_ms if accepted else None,
-            "last_bar_end_ms": accepted[-1].end_ms if accepted else None, "normalized_sha256":
+            "last_bar_end_ms": accepted[-1].end_ms if accepted else None,
+            "missing_session_hours": missing_hours, "unexpected_session_hours": extra_hours,
+            "page_errors": page_errors, "normalized_sha256":
             hashlib.sha256(output.read_bytes()).hexdigest(), "pages": pages,
         }
     dest = root / "yahoo-v52-coverage.json"
