@@ -2,7 +2,10 @@ name: V52 Yahoo actual sourced H1 plus Aster stock H1 no-L2 assumed-fill replay
 on:
   push:
     branches: [research/formal-five-bt-yahoo-v52-20260927]
-    paths: [.github/workflows/formal-five-bt-v52-yahoo-aster-private-replay-20260927.yml]
+    paths:
+      - .github/workflows/formal-five-bt-v52-yahoo-aster-private-replay-20260927.yml
+      - research/formal_five_bt/v52_yahoo.py
+      - tests/formal_five_bt/test_v52_yahoo.py
 permissions: {contents: read}
 concurrency: {group: formal-v52-yahoo-private-assumed-fill, cancel-in-progress: false}
 jobs:
@@ -89,14 +92,18 @@ jobs:
           print("V52_YAHOO_FIVE_ONE_YEAR_COHORT_PROVENANCE=PASS")
           output=root/"model-results"
           report=[]
-          for label,cost in (("NORMAL",20),("SEVERE",55)):
-            r=replay_yahoo_v52(yahoo,aster,assumed_cost_bps=cost)
+          for label,cost,fill_mode in (("NORMAL_REFERENCE",20,"YAHOO_REFERENCE"),
+                                       ("SEVERE_REFERENCE",55,"YAHOO_REFERENCE"),
+                                       ("NORMAL_PERP",20,"ASTER_PERP"),
+                                       ("SEVERE_PERP",55,"ASTER_PERP")):
+            r=replay_yahoo_v52(yahoo,aster,assumed_cost_bps=cost,fill_mode=fill_mode)
             summary=save_results(r,output/label)
             if summary["modeled_closed_trades"]!=summary["artifacts"]["trades.jsonl"]["rows"]:
               raise RuntimeError("V52_TRADES_RECONCILIATION_FAILED")
             route=collections.Counter(x["route"] for x in r["trades"])
             n=sum(x["net_reference_return_after_assumed_roundtrip_cost"] for x in r["trades"])
-            report.append({"model":label,"status":summary["status"],"source_sha":summary["production_source_sha"],
+            report.append({"model":label,"fill_mode":fill_mode,
+              "status":summary["status"],"source_sha":summary["production_source_sha"],
               "yahoo_60m_bars":{s:len(yahoo[s]) for s in SYMBOLS},
               "aster_stock_h1_bars":{s:len(aster[s]) for s in SYMBOLS},
               "decisions":len(r["decisions"]),
@@ -110,7 +117,7 @@ jobs:
               "shared_five_strategy_portfolio":False})
             print("V52_YAHOO_ASSUMED_FILL_RESULT",json.dumps(report[-1],sort_keys=True))
           (output/"read-only-run-summary.json").write_text(json.dumps(report,indent=2,sort_keys=True)+"\n")
-          print("V52_YAHOO_NO_L2_TWO_SCENARIOS_COMPLETE=PASS")
+          print("V52_YAHOO_NO_L2_FOUR_ASSUMED_FILL_SCENARIOS_COMPLETE=PASS")
           PY
       - name: Persist modeled V52 decision ledgers privately without publishing source stock data
         shell: bash
