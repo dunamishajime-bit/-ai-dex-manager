@@ -26,3 +26,21 @@ A second research branch `research/v12-alternate-route-review-20260928` replays 
 
 ## Deployment acceptance (pending)
 Use **the original five-logic shared allocator** with immutable original BTC/FET/PENGU/Q102 and V52 data, verified provenance and no synthetic candles. Baseline original simulation must reconcile exactly before research variants can be trusted. Run 8/10bps paired scenarios plus stressed costs, actual slot displacement, V12 route loss tails, annual monthly trade distribution, worst no-signal streak, and maximum MTM DD. Preserve Q102 BRK/MR0.75, FET1.0 with agreed FET dual rejection gates, and PENGU unchanged. No production deployment, forced fills, stop changes, or kill-switch bypass before the counterfactual risk evidence is complete.
+
+## Completed alternate route audit (2026-09-28)
+Independent same-source read-only audit PASS: https://github.com/dunamishajime-bit/-ai-dex-manager/actions/runs/36353610162 .
+Full machine-readable source: https://github.com/dunamishajime-bit/-ai-dex-manager/tree/research/v12-alternate-route-review-20260928/docs/research/results/v12-alternate-route-review-20260928 .
+Annual 2025-08-10..2026-08-10 (Aster original source SHA-audited), latest 30 fully closed UTC days 2026-08-28..2026-09-26. Baseline score1/volume0.8 Top3 H2 decisions 2,020/year,176/latest30d (exact parity against saved baseline counters). 46h same-symbol spacing is research de-duplication, NOT actual fills; price proxy is next H2 open to +24h H2 close less assumed round trip0.3% fees/slippage, without STOP/TP/funding/portfolio gross. The latest30d is not independent from all earlier rule discovery.
+
+| Alternate route experiment | Annual H2 selected vs adopted2020 | Latest30d H2 selected vs adopted176 | Latest30d 46h route proxy |
+| --- | ---: | ---: | --- |
+| Unchanged strong0.15..0.70 and relaxed no-score-min | 2020 | 176 | STRONG n20 +0.617%; RELAXED n13 -1.302% |
+| Strong minimum Score0.35 | 1621 (-399) | 147 (-29) | STRONG n15 -0.762% |
+| Strong BTC12h alignment only | 1936 (-84) | 156 (-20) | STRONG n18 +0.279% |
+| Relaxed minimum Score0.35 | 1566 (-454) | 161 (-15) | RELAXED n7 +1.733% |
+| Relaxed BTC12h alignment only | 1767 (-253) | 155 (-21) | RELAXED n11 -2.841% |
+| Open strong Score0.85..1.00 gap with BTC12h check | 1937 (+7 new/-90 displaced) | 157 (+3 new/-22 displaced) | GAP n1 +3.846%; annual GAP n2 -4.010% |
+
+Annual relaxed minimum Score0.35 **does not generalize**: the annual RELAXED 46h proxy is -1.408% (120 independent episodes), versus frozen relaxed -1.069% (240 episodes), and annual no-signal days increase 121 -> 148. Recent30d positive subset is only seven independent episodes and increases zero-signal days 12 -> 15. Strong minimum0.35 worsens final92d total proxy +0.356% -> -0.138% and latest30d. Adding short-term BTC alignment to strong also worsens recent independent-route proxy +0.617% -> +0.279%. Gap additions have sample size2 for the annual fixed horizon,1 for recent; **do not open the gap on this evidence**.
+
+**Interim direction:** implement user-chosen normal threshold in research code, leave strong alternate and relaxed alternate as-is until integrated realized-STOP/TP/DD evidence is obtained. The audit cannot establish whether any alternate-route change reduces maximum DD: run original five-logic BTC-repaired formal allocator with V12 Score1.0/Volume0.8 first, compare route-level accepted trades, loss clusters and displaced winners under 8/10bps and stress conditions, then isolate ONE additional alternate change at a time. This prevents optimizing repeated H2 signals instead of real executable trades.
