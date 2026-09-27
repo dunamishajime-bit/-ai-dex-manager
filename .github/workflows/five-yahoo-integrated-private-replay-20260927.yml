@@ -115,7 +115,13 @@ jobs:
           assert r["status"]=="MODELED_FIVE_CHRONOLOGICAL_NOT_FORMAL"
           assert r["production_sha"]=="a09ea45ca3cbd72100f9eb0eaae499039c40b6a0"
           assert len(r["scenarios"])==2
+          expected_ledger_sha256={
+            "NORMAL":"484e0bb6fd784dad9d48ba208d3c3e133dc9211a759a642d11d48f84dc24c265",
+            "SEVERE":"6a3e12f86f849282df50c63998812f215456e854a6cee49a5ab73626c0ed3099"}
           for s in r["scenarios"]:
+            assert s["ledger_file"]["sha256"]==expected_ledger_sha256[s["model"]], "NONDETERMINISTIC_STOCK_CRYPTO_SHARED_LEDGER"
+            assert s["gross_peaks_model"]["crypto"]<5.0
+            assert s["gross_peaks_model"]["total"]<8.0
             assert s["status"]=="MODELED_CHRONOLOGICAL_FIVE_NOT_LIVE_PARITY"
             assert len(s["monthly_model"])==13 and s["contribution_events"]==13
             assert s["contributions_jpy"]==130000
@@ -132,6 +138,12 @@ jobs:
                 "strategy_net_pnl_usdt_model","stock_route_net_pnl_usdt_model",
                 "gross_peaks_model","reject_counts")},sort_keys=True))
             print("INTEGRATED_ASSUMED_LEDGER_SHA256="+s["ledger_file"]["sha256"])
+            for m in s["monthly_model"]:
+              print("INTEGRATED_YAHOO_FIVE_MONTH",json.dumps({
+                "scenario":s["model"],"month":m["month"],"asof_ms":m["asof_ms"],
+                "nav_jpy_model":m["nav_jpy_model"],
+                "contributions_jpy":m["contributions_jpy"],
+                "net_after_contributions_jpy_model":m["net_after_contributions_jpy_model"]},sort_keys=True))
           print("FORMAL_ASTER_EXECUTION_VERIFIED=FALSE USER_V52_NO_L2_FILL_ASSUMPTION=TRUE")
           PY
       - name: Persist modeled five-logic results privately under root-only research archive
