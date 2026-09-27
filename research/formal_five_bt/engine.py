@@ -24,6 +24,7 @@ from .manifest import load_manifest
 from .portfolio import monthly_deposit_events
 from .scenarios import select_execution_conditions
 from .yahoo_v52 import STOCKS, load_v52_signal_scan, load_yahoo_bars, model_v52_signal
+from .v52_research_bridge import load_price_only_research
 
 
 PERIOD_START = datetime(2025, 8, 10, tzinfo=timezone.utc)
@@ -322,7 +323,8 @@ def _metric_row(strategy: str, rows: list[dict[str, Any]]) -> dict[str, Any]:
 def run_integrated_bt(data_root: str | Path, scan_root: str | Path, l2_root: str | Path,
                       output_root: str | Path, *,
                       v52_yahoo_root: str | Path | None = None,
-                      v52_signal_file: str | Path | None = None) -> dict[str, Any]:
+                      v52_signal_file: str | Path | None = None,
+                      v52_research_scan_root: str | Path | None = None) -> dict[str, Any]:
     data_root = Path(data_root).resolve()
     scan_root = Path(scan_root).resolve()
     l2_root = Path(l2_root).resolve()
@@ -500,6 +502,20 @@ def run_integrated_bt(data_root: str | Path, scan_root: str | Path, l2_root: str
             month = datetime.fromtimestamp(row["decision_ts_ms"] / 1000, timezone.utc).strftime("%Y-%m")
             monthly_by_key[(scenario_id, row["route"], month)]["scheduled_checks"] += 1
             monthly_by_key[(scenario_id, row["route"], month)]["fills_verified"] += 0
+        # V52 price-only research is not an audited LIVE signal or an allocated fill.
+        v52_research_info: dict[str, Any] = {"status": "NOT_SUPPLIED", "selection_count": 0}
+        if v52_research_scan_root is not None:
+            try:
+                research_rows, v52_research_info = load_price_only_research(
+                    Path(v52_research_scan_root), runtime_manifest["runtime_sha"])
+            except (ValueError, OSError, KeyError, TypeError) as error:
+                research_rows = []
+                v52_research_info = {"status": "NOT_VERIFIABLE", "reason": str(error)[:160], "selection_count": 0}
+            for research_row in research_rows:
+                research_row.update(execution_scenario=scenario, coverage_path=coverage_path)
+                all_decisions.append(research_row)
+                month = datetime.fromtimestamp(research_row["decision_ts_ms"] / 1000, timezone.utc).strftime("%Y-%m")
+                monthly_by_key[(scenario_id, "V52_V50_PRICE_RESEARCH", month)]["research_unallocated_candidates"] += 1
         all_decisions.sort(key=lambda row: (int(row.get("decision_ts_ms") or 0), str(row.get("strategy_id") or ""), str(row.get("symbol") or "")))
         decision_file = _write_jsonl_gz(scenario_dir / "decision-gates.jsonl.gz", all_decisions)
         order_rows.sort(key=lambda row: (row["signal_ts_ms"] or 0, row["strategy_id"], row["symbol"] or ""))
@@ -518,6 +534,7 @@ def run_integrated_bt(data_root: str | Path, scan_root: str | Path, l2_root: str
             "maximum_drawdown_pct": None, "win_rate_pct": None,
             "verified_fills": 0, "verified_closed_trades": 0,
             "candidate_signals": {**input_candidate_counts, "V52": v52_actual_candidates if v52_scan_status == "AUDITED_RUNTIME_SHA_MATCH" else None},
+            "v52_hourly_price_research": v52_research_info,
             "v52_yahoo_price_model": {
                 "status": "RESEARCH_MODELED_NOT_VERIFIED",
                 "signal_scan_status": v52_scan_status,
@@ -706,9 +723,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--output-root", required=True)
     parser.add_argument("--v52-yahoo-root", help="Local normalized Yahoo 60m JSONL directory; defaults to data-root/normalized/yahoo/60m")
     parser.add_argument("--v52-signal-file", help="Audited V52 decision scan JSONL; scanner manifest must have matching runtime SHA")
+    parser.add_argument("--v52-research-scan-root", help="Optional SHA-verified V52 1h price-only research output; not audited LIVE signals")
     args = parser.parse_args(argv)
     result = run_integrated_bt(args.data_root, args.scan_root, args.l2_root, args.output_root,
-                               v52_yahoo_root=args.v52_yahoo_root, v52_signal_file=args.v52_signal_file)
+                               v52_yahoo_root=args.v52_yahoo_root, v52_signal_file=args.v52_signal_file,
+                               v52_research_scan_root=args.v52_research_scan_root)
     print(json.dumps({"status": result["status"], "run_id": result["run_id"], "scenarios": [row["scenario_id"] for row in result["scenarios"]],
                       "outputs": list(result["outputs"]), "candidate_signals": result["scenarios"][0]["candidate_signals"]}, sort_keys=True))
     return 0
