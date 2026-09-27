@@ -32,7 +32,8 @@ assert.equal(evaluateV12EntryQuality({ regime: "LONG", strongRegime: true, side:
 assert.equal(evaluateV12EntryQuality({ regime: "LONG", strongRegime: true, side: "LONG", momentum: 0.08, atrRatio: 0.02, score: 0.1499 }), false);
 assert.equal(evaluateV12EntryQuality({ regime: "LONG", strongRegime: true, side: "LONG", momentum: 0.08, atrRatio: 0.02, score: 0.7001 }), false);
 assert.equal(evaluateV12EntryQuality({ regime: "LONG", strongRegime: true, side: "LONG", momentum: 0.03, atrRatio: 0.005, score: 1.4649 }), true);
-assert.equal(evaluateV12EntryQuality({ regime: "LONG", strongRegime: false, side: "LONG", momentum: 0.054, atrRatio: 0.014, score: 0.2 }), true);
+assert.equal(evaluateV12EntryQuality({ regime: "LONG", strongRegime: false, side: "LONG", momentum: 0.054, atrRatio: 0.014, score: 0.34999 }), false);
+assert.equal(evaluateV12EntryQuality({ regime: "LONG", strongRegime: false, side: "LONG", momentum: 0.054, atrRatio: 0.014, score: 0.35 }), true);
 assert.equal(evaluateV12EntryQuality({ regime: "LONG", strongRegime: false, side: "LONG", momentum: 0.054, atrRatio: 0.0139, score: 0.2 }), false);
 assert.equal(evaluateV12EntryQuality({ regime: "LONG", strongRegime: false, side: "LONG", momentum: 0.03, atrRatio: 0.005, score: 1.4649 }), true);
 assert.equal(evaluateV12EntryQuality({ regime: "LONG", strongRegime: false, side: "SHORT", momentum: -0.08, atrRatio: 0.02, score: 2 }), false);
