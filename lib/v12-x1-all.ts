@@ -378,7 +378,8 @@ export function evaluateV12EntryQuality(input: { regime: V12Regime; strongRegime
             && input.atrRatio >= V12_X1_ALL.strongRegimeQualityMinimumAtrRatio;
     }
     const alignedMomentum = input.side === "LONG" ? input.momentum : -input.momentum;
-    return alignedMomentum >= V12_X1_ALL.relaxedRegimeMinimumMomentumPct
+    return input.score >= V12_X1_ALL.relaxedRegimeMinimumScore
+        && alignedMomentum >= V12_X1_ALL.relaxedRegimeMinimumMomentumPct
         && input.atrRatio >= V12_X1_ALL.relaxedRegimeMinimumAtrRatio;
 }
 
