@@ -43,7 +43,7 @@ jobs:
           python -m research.formal_five_bt.acquire --data-root "$RUNNER_TEMP/formal-bt" --venues aster
       - name: Reconstruct one corrupt BTC H1 from exact Aster 1m (separate research scenario)
         run: |
-          python -m research.formal_five_bt.aster_h1_reconcile --data-root "$RUNNER_TEMP/formal-bt"
+          python -m research.formal_five_bt.aster_h1_reconcile --data-root "$RUNNER_TEMP/formal-bt" --allow-valid-noop
       - name: Show only instrument coverage counts, never raw prices
         env:
           BT_ROOT: ${{ runner.temp }}/formal-bt
@@ -211,3 +211,4 @@ jobs:
             ${{ runner.temp }}/formal-portfolio-ecb-model/portfolio-price-model-summary.json
             ${{ runner.temp }}/formal-bt/ecb-fx-cross-manifest.json
             ${{ runner.temp }}/formal-bt/acquisition-manifest.json
+            ${{ runner.temp }}/formal-bt/aster-h1-reconciliation-status.json
