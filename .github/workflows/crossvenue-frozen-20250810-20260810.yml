@@ -1,0 +1,113 @@
+name: Frozen 2025-2026 Binance OKX cross-venue crypto BT
+on:
+  push:
+    branches: [research/binance-okx-crossvenue-20250810-20260810]
+    paths:
+      - ".github/workflows/crossvenue-frozen-20250810-20260810.yml"
+      - "research/formal_five_bt/crossvenue_acquire.py"
+      - "research/formal_five_bt/crossvenue_replay.py"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: frozen-binance-okx-20250810-20260810
+  cancel-in-progress: false
+jobs:
+  replay:
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        venue: [binance, okx]
+    runs-on: ubuntu-latest
+    timeout-minutes: 170
+    env:
+      DATA_ROOT: ${{ runner.temp }}/crossvenue-${{ matrix.venue }}
+      CACHE_PATH: docs/research/data/crossvenue-20250810-20260810/${{ matrix.venue }}
+      OUT_PATH: docs/research/results/crossvenue-20250810-20260810/${{ matrix.venue }}/latest
+      VENUE: ${{ matrix.venue }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/binance-okx-crossvenue-20250810-20260810
+          fetch-depth: 1
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Verify added modules have valid Python syntax
+        run: |
+          python -m py_compile research/formal_five_bt/crossvenue_acquire.py research/formal_five_bt/crossvenue_replay.py
+      - name: Restore exact previously audited strategy source only, not historical market data
+        run: |
+          git -c protocol.version=2 fetch --filter=blob:none --no-tags --depth=1 origin a09ea45ca3cbd72100f9eb0eaae499039c40b6a0
+          python -m research.formal_five_bt.restore_snapshot
+      - name: Official venue candles and funding; save raw page and normalized gzip archives
+        id: acquire
+        run: |
+          python -m research.formal_five_bt.crossvenue_acquire --venue "$VENUE" --root "$DATA_ROOT" --reusable "$CACHE_PATH"
+      - name: Check venue coverage; never represent an unavailable instrument as a zero-signal candidate
+        run: |
+          python - <<'PY'
+          import os,json
+          from pathlib import Path
+          m=json.loads((Path(os.environ["DATA_ROOT"])/"crossvenue-acquisition-manifest.json").read_text())
+          print("VENUE",m["venue"],"COVERAGE",m["status"])
+          print("H1_PER_SYMBOL",{k:{"hours":v.get("in_period_h1",0),"gaps":v.get("gaps"),"first_h1":v.get("first_h1"),"error":v.get("h1_error")} for k,v in m["symbols"].items()})
+          print("MISSING_SYMBOLS",m["missing_symbols"])
+          print("FUNDING_MISSING",m["funding_incomplete"])
+          PY
+      - name: Recalculate venue-native frozen four-crypto-strategy portfolio and FET Gate comparison
+        id: replay
+        run: |
+          python -m research.formal_five_bt.crossvenue_replay --venue "$VENUE" --root "$DATA_ROOT" --output "$RUNNER_TEMP/crossvenue-output-$VENUE"
+      - name: Prepare inspectable reusable evidence without mixing primary venues
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$OUT_PATH"
+          cp "$DATA_ROOT/crossvenue-acquisition-manifest.json" "$OUT_PATH/acquisition-manifest.json" 2>/dev/null || true
+          cp "$RUNNER_TEMP/crossvenue-output-$VENUE/crossvenue-comparison.json" "$OUT_PATH/crossvenue-comparison.json" 2>/dev/null || true
+          if [ -f "$RUNNER_TEMP/crossvenue-output-$VENUE/candidates/crypto-price-model-candidates.jsonl" ]; then
+            gzip -n -c "$RUNNER_TEMP/crossvenue-output-$VENUE/candidates/crypto-price-model-candidates.jsonl" > "$OUT_PATH/candidates.jsonl.gz"
+          fi
+          for case_path in "$RUNNER_TEMP"/crossvenue-output-"$VENUE"/{BASELINE_CRYPTO4,CAP_ONLY_CRYPTO4,CAP_PLUS_FET_DUAL_GATE_CRYPTO4}/PRICE_MODEL_10BPS; do
+            [ -d "$case_path" ] || continue
+            name="$(basename "$(dirname "$case_path")")"
+            mkdir -p "$OUT_PATH/$name"
+            for kind in portfolio-trades candidate-decisions portfolio-events; do
+              [ -f "$case_path/$kind.jsonl" ] && gzip -n -c "$case_path/$kind.jsonl" > "$OUT_PATH/$name/$kind.jsonl.gz" || true
+            done
+          done
+          echo "Replay evidence prepared; data market venue: $VENUE"
+      - name: Commit saved reusable source data and BT ledgers back to research branch
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add "$CACHE_PATH" "$OUT_PATH" || true
+          if git diff --cached --quiet; then
+            echo "No new venue data or result to commit."
+          else
+            git commit -m "Research: freeze $VENUE 2025-2026 native OHLC/funding and auditable BT outputs [skip ci]"
+            git push origin HEAD:research/binance-okx-crossvenue-20250810-20260810
+          fi
+      - name: Keep failed-run evidence and complete raw-response archives accessible
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: 2025-2026-crossvenue-${{ matrix.venue }}-auditable-data-and-ledgers
+          path: |
+            ${{ env.DATA_ROOT }}/crossvenue-acquisition-manifest.json
+            ${{ env.DATA_ROOT }}/crossvenue-acquisition-progress.json
+            ${{ env.DATA_ROOT }}/raw
+            ${{ runner.temp }}/crossvenue-output-${{ matrix.venue }}
+            ${{ env.OUT_PATH }}
+          retention-days: 90
+          if-no-files-found: warn
