@@ -1,0 +1,28 @@
+{
+  "acquisition_manifest_sha256": "8d7d733d13f757e91e5fd8dbc679a67c71318c3bc15a7a6305c2a747635284ed",
+  "outputs": {
+    "Q102": {
+      "bytes": 580682,
+      "path": "/tmp/oos-binance-result/scans/baseline-signal-scan-q102/decisions/Q102.jsonl",
+      "rows": 797,
+      "sha256": "88f8fdf3efc0f78c4a5a425e14593cc24c381f79f5c310900e549ceca1381f98"
+    }
+  },
+  "period_end_inclusive": "2025-08-09",
+  "period_start": "2024-08-10",
+  "runtime_sha": "e1b58060d6263a3af7ced51bec854d3e211d2f35",
+  "schema_version": 1,
+  "stats": {
+    "Q102": {
+      "decision_rows": 797,
+      "decision_timestamps": 8761,
+      "error_timestamps": 0,
+      "scan_mode": "SELECTED_SIGNAL_MONTHLY_CACHED",
+      "signal_rows": 797
+    }
+  },
+  "status": "SIGNAL_SCAN_ONLY_NOT_A_BACKTEST",
+  "strategies": [
+    "Q102"
+  ]
+}

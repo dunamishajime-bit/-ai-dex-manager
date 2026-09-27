@@ -1,0 +1,72 @@
+{
+  "acquisition_manifest_sha256": "8d7d733d13f757e91e5fd8dbc679a67c71318c3bc15a7a6305c2a747635284ed",
+  "outputs": {
+    "FET": {
+      "bytes": 649118,
+      "path": "/tmp/oos-binance-result/scans/baseline-signal-scan/decisions/FET.jsonl",
+      "rows": 2190,
+      "sha256": "a53fa17a95dd2692f3994dc9026be6f5743c0ce8beff641d40be9d500fa40267"
+    },
+    "PENGU": {
+      "bytes": 8140970,
+      "path": "/tmp/oos-binance-result/scans/baseline-signal-scan/decisions/PENGU.jsonl",
+      "rows": 5480,
+      "sha256": "16f03a72bd108cec7545a890d29533490cf74d7e7f485b7abe682733ef38fa0a"
+    },
+    "V12": {
+      "bytes": 44471419,
+      "path": "/tmp/oos-binance-result/scans/baseline-signal-scan/decisions/V12.jsonl",
+      "rows": 61334,
+      "sha256": "42fa6274a92ebb69f6066f9ceba2cdc40bf44dcff85ddbf582a8ff0ac021952a"
+    }
+  },
+  "period_end_inclusive": "2025-08-09",
+  "period_start": "2024-08-10",
+  "runtime_sha": "e1b58060d6263a3af7ced51bec854d3e211d2f35",
+  "schema_version": 1,
+  "stats": {
+    "FET": {
+      "decision_rows": 2190,
+      "first_bar_ms": 1704067200000,
+      "signal_rows": 60
+    },
+    "PENGU": {
+      "decision_rows": 5480,
+      "entry_versions": {
+        "LONG_V2_FINAL": 32,
+        "RECOVERY_V8": 13,
+        "SHORT_V20": 66
+      },
+      "long_raw_rows": 22,
+      "short_rows": 66,
+      "signal_rows": 111
+    },
+    "V12": {
+      "decision_rows": 61334,
+      "h2_counts": {
+        "AAVE": 7044,
+        "ADA": 7044,
+        "ATOM": 7044,
+        "AVAX": 7044,
+        "BNB": 7044,
+        "BTC": 7044,
+        "DOGE": 7044,
+        "ETH": 7044,
+        "INJ": 7044,
+        "LINK": 7044,
+        "LTC": 7044,
+        "NEAR": 7044,
+        "SOL": 7044,
+        "XRP": 7044
+      },
+      "signal_rows": 1820,
+      "timestamps": 4381
+    }
+  },
+  "status": "SIGNAL_SCAN_ONLY_NOT_A_BACKTEST",
+  "strategies": [
+    "V12",
+    "PENGU",
+    "FET"
+  ]
+}

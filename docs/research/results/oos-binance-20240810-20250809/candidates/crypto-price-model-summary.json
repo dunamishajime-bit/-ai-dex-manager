@@ -1,0 +1,84 @@
+{
+  "candidate_count": 2788,
+  "execution_assumptions": {
+    "entry": "Aster H1 open at audited signal entry timestamp",
+    "fees_slippage": "not applied at candidate stage",
+    "funding": "Aster funding strictly after modeled entry through exit",
+    "intrabar_stop_target": "adverse stop first when order is ambiguous",
+    "shared_allocator": "not applied at candidate stage"
+  },
+  "formal_verified_fills": false,
+  "period_end_exclusive_ms": 1754784000000,
+  "period_start_ms": 1723248000000,
+  "quarantined_candidates": 0,
+  "quarantined_ohlc_counts": {},
+  "source_quarantine_lookback_hours": 720,
+  "status": "CRYPTO_H1_PRICE_MODEL_CANDIDATES_READY",
+  "strategies": {
+    "FET": {
+      "candidates": 60,
+      "exit_reasons": {
+        "FET_24H_TIME_EXIT": 33,
+        "FET_HARD_STOP": 19,
+        "FET_PROFIT_FLOOR_STOP": 7
+      },
+      "gross_price_win_rate": 0.559322033898305,
+      "mean_unit_price_return": 0.007550001500799889,
+      "modeled_closed": 59,
+      "unresolved": 1,
+      "unresolved_status_counts": {
+        "UNRESOLVED_EXIT_BAR": 1
+      }
+    },
+    "PENGU": {
+      "candidates": 111,
+      "exit_reasons": {
+        "LONG_HARD_STOP": 22,
+        "LONG_TRAILING_STOP": 9,
+        "RECOVERY_V8_HARD_STOP": 5,
+        "RECOVERY_V8_MAX_HOLD": 1,
+        "RECOVERY_V8_TRAILING_STOP": 7,
+        "SHORT_HARD_STOP": 27,
+        "SHORT_MAX_HOLD": 13,
+        "SHORT_TRAILING_STOP": 14,
+        "SHORT_V20_DEADLINE_EXIT": 6,
+        "SHORT_V20_VOL_TARGET_FAILURE_EXIT": 6
+      },
+      "gross_price_win_rate": 0.4909090909090909,
+      "mean_unit_price_return": -0.0025672594512586564,
+      "modeled_closed": 110,
+      "unresolved": 1,
+      "unresolved_status_counts": {
+        "UNRESOLVED_PENGU_EXIT": 1
+      }
+    },
+    "Q102": {
+      "candidates": 797,
+      "exit_reasons": {
+        "Q102_HARD_STOP": 178,
+        "Q102_TIME_EXIT": 533,
+        "Q102_TRAIL_5_AFTER_12": 69
+      },
+      "gross_price_win_rate": 0.532051282051282,
+      "mean_unit_price_return": 0.004077977082334576,
+      "modeled_closed": 780,
+      "unresolved": 17,
+      "unresolved_status_counts": {
+        "UNRESOLVED_EXIT_BAR": 17
+      }
+    },
+    "V12": {
+      "candidates": 1820,
+      "exit_reasons": {
+        "V12_STOP": 1773,
+        "V12_STOP_AMBIGUOUS": 14,
+        "V12_TAKE_PROFIT": 33
+      },
+      "gross_price_win_rate": 0.6137362637362638,
+      "mean_unit_price_return": 0.006992976384255523,
+      "modeled_closed": 1820,
+      "unresolved": 0,
+      "unresolved_status_counts": {}
+    }
+  }
+}
