@@ -1,0 +1,70 @@
+name: Formal BT Yahoo V52 VPS Yahoo data feasibility read only
+on:
+  push:
+    branches: [research/formal-five-bt-yahoo-v52-20260927]
+    paths: [.github/workflows/formal-five-bt-yahoo-v52-vps-probe-20260927.yml]
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 7
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Configure pinned root SSH without exposing credentials
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ -n "$SSH_HOST" && -n "$ROOT_KEY" && -n "$SSH_KNOWN_HOSTS" ]]
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k):return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Probe Yahoo V52 hourly stock source on authorized VPS IP and inspect existing stock research caches
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -p "${SSH_PORT:-22}" "root@$SSH_HOST" 'python3 -' <<'PY'
+          import urllib.request,urllib.parse,json,datetime,pathlib
+          base=pathlib.Path("/home/deploy")
+          for path in (base/".stock-research",base/"disdex-trading/.stock-research",base/"disdex-trading/.cache",
+                       base/"disdex-trading/research",pathlib.Path("/var/lib/disdex/research-bt-formal"),
+                       pathlib.Path("/root/.cache/yfinance")):
+            if not path.exists():
+              print("YAHOO_V52_CACHED_ROOT",json.dumps({"path":str(path),"exists":False}));continue
+            if not path.is_dir():
+              print("YAHOO_V52_CACHED_ROOT",json.dumps({"path":str(path),"exists":True,"dir":False}));continue
+            children=list(path.iterdir())[:150]
+            print("YAHOO_V52_CACHED_ROOT",json.dumps({"path":str(path),"exists":True,
+              "names":[p.name for p in children if any(q in p.name.lower() for q in ('stock','yahoo','v52','v50','cash','v11'))][:50],
+              "top_level_count_capped":len(children)}))
+          start=int(datetime.datetime(2025,8,1,tzinfo=datetime.timezone.utc).timestamp())
+          end=int(datetime.datetime(2026,8,11,tzinfo=datetime.timezone.utc).timestamp())
+          for sym in ("AMZN","TSLA"):
+            url="https://query1.finance.yahoo.com/v8/finance/chart/"+sym+"?"+urllib.parse.urlencode({
+              "period1":start,"period2":end,"interval":"60m","events":"history","includePrePost":"false"})
+            req=urllib.request.Request(url,headers={"User-Agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/122.0.0.0 Safari/537.36","Accept":"application/json"})
+            try:
+              with urllib.request.urlopen(req,timeout=13) as f:
+                raw=f.read(12000000)
+              body=json.loads(raw)
+              data=(body.get("chart",{}).get("result") or [None])[0]
+              stamps=(data or {}).get("timestamp") or []
+              print("YAHOO_V52_VPS_PROBE",json.dumps({"symbol":sym,"status":"AVAILABLE" if len(stamps)>500 else "TOO_FEW",
+                "rows":len(stamps),"first":stamps[0] if stamps else None,
+                "last":stamps[-1] if stamps else None,"timezone":(data or {}).get("meta",{}).get("exchangeTimezoneName")}))
+            except Exception as e:print("YAHOO_V52_VPS_PROBE",json.dumps({"symbol":sym,"status":"UNAVAILABLE","error":str(e)[:160]}))
+          print("YAHOO_V52_VPS_PROBE_COMPLETE=TRUE NO_TRADING_MUTATIONS=TRUE")
+          PY
