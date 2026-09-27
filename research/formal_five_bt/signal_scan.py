@@ -164,8 +164,19 @@ def scan(data_root: str | Path, output_root: str | Path, *, strategies: tuple[st
                     for symbol in q102_symbols:
                         decisions.append({"strategy_id": "Q102", "symbol": symbol, "decision_ts_ms": ts, "status": "NOT_VERIFIABLE", "reason": event.get("error", "Q102_SNAPSHOT_MISSING"), "data_cutoff_ms": ts, "source_runtime_sha": bridge.runtime_sha})
                     continue
+                exact_signal = event.get("signal") or {}
                 for item in snapshot.get("items", []):
-                    decisions.append({"strategy_id": "Q102", "symbol": item["symbol"], "decision_ts_ms": ts, "status": "SIGNAL" if item.get("selected") else "CANDIDATE" if item.get("eligible") else "WAIT", "item": item, "selected_symbol": snapshot.get("selectedSymbol"), "selected_reason": snapshot.get("selectedReason"), "data_cutoff_ms": min(ts, int(item.get("referenceTs") or ts)), "source_runtime_sha": bridge.runtime_sha})
+                    selected = bool(item.get("selected"))
+                    decisions.append({
+                        "strategy_id": "Q102", "symbol": item["symbol"], "decision_ts_ms": ts,
+                        "status": "SIGNAL" if selected else "CANDIDATE" if item.get("eligible") else "WAIT",
+                        "item": item,
+                        "signal": exact_signal if selected else None,
+                        "selected_symbol": snapshot.get("selectedSymbol"),
+                        "selected_reason": snapshot.get("selectedReason"),
+                        "data_cutoff_ms": min(ts, int(item.get("referenceTs") or ts)),
+                        "source_runtime_sha": bridge.runtime_sha,
+                    })
             paths["Q102"] = _save_jsonl(output / "decisions" / "Q102.jsonl", decisions)
             stats["Q102"] = {"decision_timestamps": len(series), "decision_rows": len(decisions), "signal_rows": sum(row["status"] == "SIGNAL" for row in decisions), "error_timestamps": sum("error" in event for event in series)}
 
