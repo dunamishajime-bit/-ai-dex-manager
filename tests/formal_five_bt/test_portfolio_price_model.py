@@ -4,7 +4,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from research.formal_five_bt.portfolio_price_model import run_portfolio_model, _mark, _equity, _trade_outcome_aggregates
+from research.formal_five_bt.portfolio_price_model import run_portfolio_model, _mark, _equity, _trade_outcome_aggregates, _research_risk_cap, RISK_VARIANTS
 
 HOUR = 3_600_000
 START = int(datetime(2025, 8, 10, tzinfo=timezone.utc).timestamp() * 1000)
@@ -43,6 +43,31 @@ class PortfolioPriceModelTests(unittest.TestCase):
         self.assertEqual(out["pengu_by_route"]["SHORT_V20"]["losing_trades"], 1)
         self.assertEqual(out["pengu_by_side"]["SHORT"]["losing_trades"], 1)
         self.assertNotIn("trade_rows", str(out))
+
+    def test_risk_variants_apply_by_route_and_family_at_decision_time(self):
+        policies = dict(RISK_VARIANTS)
+        self.assertEqual(_research_risk_cap(
+            {"strategy_id": "FET"}, policies["FET_CAP_1P00"]), 1.0)
+        self.assertEqual(_research_risk_cap(
+            {"strategy_id": "PENGU", "route": "SHORT_V20"},
+            policies["PENGU_SHORT_CAP_0P50"]), 0.5)
+        self.assertEqual(_research_risk_cap(
+            {"strategy_id": "PENGU", "route": "RECOVERY_V8"},
+            policies["PENGU_SHORT_CAP_0P50"]), 1.0)
+        self.assertEqual(_research_risk_cap(
+            {"strategy_id": "PENGU", "route": "SHORT_V20"},
+            policies["PENGU_SHORT_OFF"]), 0.0)
+        self.assertEqual(_research_risk_cap(
+            {"strategy_id": "Q102", "family": "BRK"},
+            policies["Q102_BRK_CAP_1P00_MR_0P50"]), 1.0)
+        self.assertEqual(_research_risk_cap(
+            {"strategy_id": "Q102", "family": "MR"},
+            policies["Q102_BRK_CAP_1P00_MR_0P50"]), 0.5)
+        self.assertEqual(_research_risk_cap(
+            {"strategy_id": "Q102", "family": "HIGH_VOL"},
+            policies["Q102_BRK_CAP_1P00_MR_0P50"]), 3.0)
+        self.assertEqual(_research_risk_cap(
+            {"strategy_id": "V12"}, policies["COMBINED_FET1_SHORT0P5_Q102_BRK1_MR0P5"]), 2.0)
 
     def test_intrahour_mark_uses_prior_completed_bar_not_future_close(self):
         history = {
