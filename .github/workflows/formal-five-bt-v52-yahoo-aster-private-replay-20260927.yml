@@ -1,0 +1,135 @@
+name: V52 Yahoo actual sourced H1 plus Aster stock H1 no-L2 assumed-fill replay
+on:
+  push:
+    branches: [research/formal-five-bt-yahoo-v52-20260927]
+    paths: [.github/workflows/formal-five-bt-v52-yahoo-aster-private-replay-20260927.yml]
+permissions: {contents: read}
+concurrency: {group: formal-v52-yahoo-private-assumed-fill, cancel-in-progress: false}
+jobs:
+  simulate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Regression-test both independent Yahoo and Aster H1 sources
+        run: |
+          set -Eeuo pipefail
+          python -m unittest discover -s tests/formal_five_bt -p test_v52_yahoo.py -v
+          python -m unittest discover -s tests/formal_five_bt -p test_v52_stock_acquire.py -v
+      - name: Restore immutable Yahoo original price H1 and native Aster H1 archives
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ -n "$SSH_HOST" && -n "$ROOT_KEY" && -n "$SSH_KNOWN_HOSTS" ]]
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/'.ssh'
+          def norm(k):return os.environ[k].lstrip('\ufeff').replace('\r\n','\n').replace('\r','\n').strip()+'\n'
+          (p/'id_root').write_text(norm('ROOT_KEY'))
+          (p/'known_hosts').write_text(norm('SSH_KNOWN_HOSTS'))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+          port="${SSH_PORT:-22}"
+          mkdir -p "$RUNNER_TEMP/v52-replay"
+          ssh_opts=(-T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -p "$port")
+          ssh "${ssh_opts[@]}" "root@$SSH_HOST" \
+            "set -Eeuo pipefail; test \"\$(tr -d '[:space:]' < /home/deploy/disdex-trading/current/.disdex-release-sha)\" = 'a09ea45ca3cbd72100f9eb0eaae499039c40b6a0';
+            test -f /var/lib/disdex/research-bt-formal/a09-yahoo-v52-source-36290050697.tgz;
+            test -f /var/lib/disdex/research-bt-formal/a09-stock-h1-v52-36289853022.tgz;
+            echo YAHOO_V52_PRIVATE_ARCHIVE_PROVENANCE_PIN=PASS"
+          scp -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -P "$port" "root@$SSH_HOST:/var/lib/disdex/research-bt-formal/a09-yahoo-v52-source-36290050697.tgz" \
+            "$RUNNER_TEMP/v52-replay/yahoo.tgz"
+          scp -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -P "$port" "root@$SSH_HOST:/var/lib/disdex/research-bt-formal/a09-stock-h1-v52-36289853022.tgz" \
+            "$RUNNER_TEMP/v52-replay/aster.tgz"
+          echo "4e6043237b020ae862453748ea260a251d27dcb70361413dc2264ac1074e8b7f  $RUNNER_TEMP/v52-replay/yahoo.tgz" | sha256sum -c -
+          echo "03705fe70a51236d3d5e12266bb3378fa2c3fbbe96f12ac90a0f887e84b1ed34  $RUNNER_TEMP/v52-replay/aster.tgz" | sha256sum -c -
+          tar -xzf "$RUNNER_TEMP/v52-replay/yahoo.tgz" -C "$RUNNER_TEMP/v52-replay" --no-same-owner --no-same-permissions
+          tar -xzf "$RUNNER_TEMP/v52-replay/aster.tgz" -C "$RUNNER_TEMP/v52-replay" --no-same-owner --no-same-permissions
+          echo VERIFIED_YAHOO_AND_NATIVE_ASTER_STOCK_SOURCE_SHA256=PASS
+      - name: Produce real-data V52 Yahoo assumed-price fills in NORMAL and SEVERE
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 - <<'PY'
+          import os,json,hashlib,collections
+          from pathlib import Path
+          from research.formal_five_bt.v52_yahoo import (
+              SYMBOLS,yahoo_chart_to_opens,aster_stock_h1_to_opens,
+              replay_yahoo_v52,save_results)
+          root=Path(os.environ["RUNNER_TEMP"])/"v52-replay"
+          yahoo={};aster={}
+          manifest=json.loads((root/"a09-v52-stock-h1/aster-stock-h1-manifest.json").read_text())
+          ymeta=json.loads((root/"v52-yahoo-first-party/acquisition-attempt.json").read_text())
+          assert manifest["pin_production_sha"]=="a09ea45ca3cbd72100f9eb0eaae499039c40b6a0"
+          assert ymeta["status"]=="ALL_5_YAHOO_PRICE_HISTORY_ACQUIRED"
+          for sym in SYMBOLS:
+            yr=(root/"v52-yahoo-first-party/raw-yahoo"/(sym+".json")).read_bytes()
+            assert hashlib.sha256(yr).hexdigest()==ymeta["symbols"][sym]["raw_sha256"]
+            yahoo[sym]=yahoo_chart_to_opens(json.loads(yr),sym)
+            info=manifest["symbols"][sym]
+            a_path=root/"a09-v52-stock-h1"/info["relative_path"]
+            raw=a_path.read_bytes()
+            assert hashlib.sha256(raw).hexdigest()==info["sha256"]
+            aster[sym]=aster_stock_h1_to_opens(json.loads(raw),sym)
+            assert len(yahoo[sym])>=1700 and len(aster[sym])>=8700
+          print("V52_YAHOO_FIVE_ONE_YEAR_COHORT_PROVENANCE=PASS")
+          output=root/"model-results"
+          report=[]
+          for label,cost in (("NORMAL",20),("SEVERE",55)):
+            r=replay_yahoo_v52(yahoo,aster,assumed_cost_bps=cost)
+            summary=save_results(r,output/label)
+            if summary["modeled_closed_trades"]!=summary["artifacts"]["trades.jsonl"]["rows"]:
+              raise RuntimeError("V52_TRADES_RECONCILIATION_FAILED")
+            route=collections.Counter(x["route"] for x in r["trades"])
+            n=sum(x["net_reference_return_after_assumed_roundtrip_cost"] for x in r["trades"])
+            report.append({"model":label,"status":summary["status"],"source_sha":summary["production_source_sha"],
+              "yahoo_60m_bars":{s:len(yahoo[s]) for s in SYMBOLS},
+              "aster_stock_h1_bars":{s:len(aster[s]) for s in SYMBOLS},
+              "decisions":len(r["decisions"]),
+              "modeled_fills":summary["modeled_closed_trades"],
+              "routes":dict(route),"win_rate_pct":summary["win_rate_pct"],
+              "unit_profit_factor":summary["unit_profit_factor"],
+              "unweighted_sum_model_unit_returns":round(n,6),
+              "rejections":summary["rejections"],
+              "ledger_sha256":summary["artifacts"]["trades.jsonl"]["sha256"],
+              "exact_venue_fills_verified":False,
+              "shared_five_strategy_portfolio":False})
+            print("V52_YAHOO_ASSUMED_FILL_RESULT",json.dumps(report[-1],sort_keys=True))
+          (output/"read-only-run-summary.json").write_text(json.dumps(report,indent=2,sort_keys=True)+"\n")
+          print("V52_YAHOO_NO_L2_TWO_SCENARIOS_COMPLETE=PASS")
+          PY
+      - name: Persist modeled V52 decision ledgers privately without publishing source stock data
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          tar -czf "$RUNNER_TEMP/v52-model-results.tgz" -C "$RUNNER_TEMP/v52-replay" model-results
+          digest="$(sha256sum "$RUNNER_TEMP/v52-model-results.tgz" | cut -d' ' -f1)"
+          remote="/var/lib/disdex/research-bt-formal/a09-v52-yahoo-model-results-${GITHUB_RUN_ID}.tgz"
+          port="${SSH_PORT:-22}"
+          ssh_opts=(-T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes
+             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -p "$port")
+          ssh "${ssh_opts[@]}" "root@$SSH_HOST" \
+            "set -Eeuo pipefail; test \"\$(tr -d '[:space:]' < /home/deploy/disdex-trading/current/.disdex-release-sha)\" = 'a09ea45ca3cbd72100f9eb0eaae499039c40b6a0';
+             test ! -e '$remote'"
+          scp -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -P "$port" "$RUNNER_TEMP/v52-model-results.tgz" "root@$SSH_HOST:$remote"
+          ssh "${ssh_opts[@]}" "root@$SSH_HOST" \
+            "set -Eeuo pipefail; chmod 600 '$remote'; test \"\$(sha256sum '$remote' | cut -d' ' -f1)\" = '$digest';
+             echo V52_YAHOO_PRIVATE_MODELED_RESULTS_PATH='$remote';
+             echo V52_YAHOO_PRIVATE_MODELED_RESULTS_SHA256='$digest';
+             echo NO_LIVE_TRADING_MUTATIONS=TRUE"
