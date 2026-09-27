@@ -120,6 +120,45 @@ def acquire_yahoo_v52(root: Path, begin: date = date(2025, 8, 10),
                 pages.append({"start_utc": cursor.isoformat(), "end_utc": until.isoformat(),
                               "status": "NOT_VERIFIABLE_ACQUISITION_ERROR", "reason": str(error)[:180]})
             cursor = until
+        expected_starts: set[int] = set()
+        day = begin
+        while day < end_exclusive:
+            close_at = nyse_close_utc(day)
+            if close_at is not None:
+                candle = datetime.combine(day, time(9, 30), NY).astimezone(timezone.utc)
+                while candle < close_at:
+                    expected_starts.add(int(candle.timestamp() * 1000))
+                    candle += timedelta(hours=1)
+            day += timedelta(days=1)
+
+        # Yahoo occasionally returns holes in broad 30-day 60m chart pages.
+        # Retry only the affected NYSE session with the *same Yahoo 60m source*.
+        # This is source recovery, not forward filling: absent bars remain absent.
+        preliminary = {int(row["event_time_ms"]) for row in merged}
+        missing_local_days = sorted({
+            datetime.fromtimestamp(ts / 1000, timezone.utc).astimezone(NY).date()
+            for ts in expected_starts - preliminary
+        })
+        for local_day in missing_local_days:
+            retry_begin = datetime.combine(local_day, time(), NY).astimezone(timezone.utc)
+            retry_end = datetime.combine(local_day + timedelta(days=1), time(), NY).astimezone(timezone.utc)
+            try:
+                retry_rows, retry_page = yahoo_hourly_page(symbol, retry_begin, retry_end, fetch=fetch)
+                retry_page["recovery"] = "MISSING_NYSE_SESSION_DAY_RETRY"
+                merged.extend(retry_rows)
+                pages.append(retry_page)
+                if fetch is _fetch:
+                    wallclock.sleep(0.6)
+            except Exception as error:
+                pages.append({
+                    "start_utc": retry_begin.isoformat(), "end_utc": retry_end.isoformat(),
+                    "status": "NOT_VERIFIABLE_MISSING_DAY_RETRY_ERROR",
+                    "recovery": "MISSING_NYSE_SESSION_DAY_RETRY",
+                    "reason": str(error)[:180],
+                })
+
+        # Deduplicate exact timestamps across broad and targeted Yahoo pages.
+        merged = list({int(row["event_time_ms"]): row for row in merged}.values())
         merged.sort(key=lambda row: row["event_time_ms"])
         output = root / "normalized" / "yahoo" / "60m" / f"{symbol}.jsonl"
         output.parent.mkdir(parents=True, exist_ok=True)
@@ -128,16 +167,6 @@ def acquire_yahoo_v52(root: Path, begin: date = date(2025, 8, 10),
             for row in merged))
         try:
             accepted = load_yahoo_bars(output, symbol)
-            expected_starts: set[int] = set()
-            day = begin
-            while day < end_exclusive:
-                close_at = nyse_close_utc(day)
-                if close_at is not None:
-                    candle = datetime.combine(day, time(9, 30), NY).astimezone(timezone.utc)
-                    while candle < close_at:
-                        expected_starts.add(int(candle.timestamp() * 1000))
-                        candle += timedelta(hours=1)
-                day += timedelta(days=1)
             actual_starts = {bar.start_ms for bar in accepted}
             missing_hours = len(expected_starts - actual_starts)
             extra_hours = len(actual_starts - expected_starts)
