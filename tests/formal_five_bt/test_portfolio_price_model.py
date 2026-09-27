@@ -38,6 +38,40 @@ class PortfolioPriceModelTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "UNVERIFIED_ACTIVE_POSITION_MARK"):
             _equity(1000, active, history, START + 2 * HOUR)
 
+    def test_missing_hourly_open_mark_invalidates_dd_instead_of_omitting_risk(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            data, candidates, output = root / "data", root / "candidates", root / "output"
+            path = data / "normalized/aster/klines/PENGUUSDT.jsonl"
+            path.parent.mkdir(parents=True)
+            candles = []
+            # An H1 gap at START+2h and +3h prevents any safe as-of
+            # position mark at +3h; the exit at +4h remains modeled.
+            for hour, price in ((0, 100), (1, 100), (4, 80)):
+                ts = START + hour * HOUR
+                candles.append({"event_time_ms": ts, "open": price,
+                                "high": price, "low": price, "close": price,
+                                "close_time_ms": ts + HOUR - 1})
+            path.write_text("".join(json.dumps(row) + "\n" for row in candles))
+            candidates.mkdir()
+            candidate = {
+                "strategy_id": "PENGU", "symbol": "PENGUUSDT", "side": "LONG",
+                "entry_ts_ms": START + HOUR, "signal_ts_ms": START,
+                "entry_price": 100, "requested_gross": 1.0,
+                "entry_version": "LONG_V2_FINAL", "route": "BASE_V64_LONG",
+                "status": "MODELED_CLOSED_TRADE", "exit_ts_ms": START + 4 * HOUR,
+                "exit_price": 80, "exit_reason": "LONG_MAX_HOLD",
+                "unit_price_return": -0.2,
+            }
+            (candidates / "crypto-price-model-candidates.jsonl").write_text(
+                json.dumps(candidate) + "\n")
+            result = run_portfolio_model(data, candidates, output)
+            row = result["scenarios"][0]
+            self.assertEqual(row["status"], "INCOMPLETE_MTM_H1_PRICE_MODEL")
+            self.assertGreater(row["missing_active_position_mtm_hours"], 0)
+            self.assertIsNone(row["maximum_mtm_drawdown"])
+            self.assertEqual(result["status"], "INCOMPLETE_ALL_FIVE_PRICE_MODEL")
+
     def test_compounds_causal_trade_and_keeps_pengu_one_slot(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
