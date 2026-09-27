@@ -34,7 +34,7 @@ def _decision_row(strategy: str, symbol: str, ts: int, gate: str, status: str, r
     return {"strategy_id": strategy, "symbol": symbol, "decision_ts_ms": ts, "gate": gate, "status": status, "reason": reason, "details": data}
 
 
-def scan(data_root: str | Path, output_root: str | Path, *, strategies: tuple[str, ...] = ("V12", "PENGU", "Q102", "FET"), start_date: date = START_DATE, end_date_exclusive: date = END_DATE) -> dict[str, Any]:
+def scan(data_root: str | Path, output_root: str | Path, *, strategies: tuple[str, ...] = ("V12", "PENGU", "Q102", "FET"), start_date: date = START_DATE, end_date_exclusive: date = END_DATE, q102_fast: bool = False) -> dict[str, Any]:
     root = Path(data_root).resolve()
     output = Path(output_root).resolve()
     source_manifest = load_manifest(Path(__file__).resolve().with_name("runtime_source_manifest.json"))
@@ -169,30 +169,65 @@ def scan(data_root: str | Path, output_root: str | Path, *, strategies: tuple[st
                     "low": row["low"], "close": row["close"], "quoteVolume": row.get("quote_volume") or 0,
                     "baseVolume": row["base_volume"],
                 } for row in rows]
-            series = bridge.q102_series(candles_by_symbol, high_vol_symbols, q102_symbols, start_ms, end_ms)
+            series = (bridge.q102_fast_series(candles_by_symbol, high_vol_symbols, q102_symbols, start_ms, end_ms)
+                      if q102_fast else
+                      bridge.q102_series(candles_by_symbol, high_vol_symbols, q102_symbols, start_ms, end_ms))
             decisions = []
-            for event in series:
-                snapshot = event.get("snapshot")
-                ts = int(event["decisionTs"])
-                if snapshot is None:
-                    for symbol in q102_symbols:
-                        decisions.append({"strategy_id": "Q102", "symbol": symbol, "decision_ts_ms": ts, "status": "NOT_VERIFIABLE", "reason": event.get("error", "Q102_SNAPSHOT_MISSING"), "data_cutoff_ms": ts, "source_runtime_sha": bridge.runtime_sha})
-                    continue
-                exact_signal = event.get("signal") or {}
-                for item in snapshot.get("items", []):
-                    selected = bool(item.get("selected"))
-                    decisions.append({
-                        "strategy_id": "Q102", "symbol": item["symbol"], "decision_ts_ms": ts,
-                        "status": "SIGNAL" if selected else "CANDIDATE" if item.get("eligible") else "WAIT",
-                        "item": item,
-                        "signal": exact_signal if selected else None,
-                        "selected_symbol": snapshot.get("selectedSymbol"),
-                        "selected_reason": snapshot.get("selectedReason"),
-                        "data_cutoff_ms": min(ts, int(item.get("referenceTs") or ts)),
-                        "source_runtime_sha": bridge.runtime_sha,
-                    })
+            if q102_fast:
+                for event in series:
+                    ts = int(event["decisionTs"])
+                    signal = event.get("signal") or {}
+                    if event.get("error"):
+                        decisions.append({
+                            "strategy_id": "Q102", "symbol": "Q102_UNIVERSE",
+                            "decision_ts_ms": ts, "status": "NOT_VERIFIABLE",
+                            "reason": event["error"], "data_cutoff_ms": ts,
+                            "source_runtime_sha": bridge.runtime_sha,
+                        })
+                        continue
+                    if signal.get("side") and signal.get("symbol"):
+                        decisions.append({
+                            "strategy_id": "Q102", "symbol": signal["symbol"],
+                            "decision_ts_ms": ts, "status": "SIGNAL",
+                            "item": {
+                                "selected": True, "eligible": True,
+                                "family": signal.get("family"), "variant": signal.get("variant"),
+                                "requestedGross": signal.get("requestedGross"),
+                                "referenceTs": signal.get("referenceTs"),
+                            },
+                            "signal": signal, "selected_symbol": signal["symbol"],
+                            "selected_reason": signal.get("reason"),
+                            "data_cutoff_ms": min(ts, int(signal.get("dataCutoffTs") or ts)),
+                            "source_runtime_sha": bridge.runtime_sha,
+                        })
+            else:
+                for event in series:
+                    snapshot = event.get("snapshot")
+                    ts = int(event["decisionTs"])
+                    if snapshot is None:
+                        for symbol in q102_symbols:
+                            decisions.append({"strategy_id": "Q102", "symbol": symbol, "decision_ts_ms": ts, "status": "NOT_VERIFIABLE", "reason": event.get("error", "Q102_SNAPSHOT_MISSING"), "data_cutoff_ms": ts, "source_runtime_sha": bridge.runtime_sha})
+                        continue
+                    exact_signal = event.get("signal") or {}
+                    for item in snapshot.get("items", []):
+                        selected = bool(item.get("selected"))
+                        decisions.append({
+                            "strategy_id": "Q102", "symbol": item["symbol"], "decision_ts_ms": ts,
+                            "status": "SIGNAL" if selected else "CANDIDATE" if item.get("eligible") else "WAIT",
+                            "item": item,
+                            "signal": exact_signal if selected else None,
+                            "selected_symbol": snapshot.get("selectedSymbol"),
+                            "selected_reason": snapshot.get("selectedReason"),
+                            "data_cutoff_ms": min(ts, int(item.get("referenceTs") or ts)),
+                            "source_runtime_sha": bridge.runtime_sha,
+                        })
             paths["Q102"] = _save_jsonl(output / "decisions" / "Q102.jsonl", decisions)
-            stats["Q102"] = {"decision_timestamps": len(series), "decision_rows": len(decisions), "signal_rows": sum(row["status"] == "SIGNAL" for row in decisions), "error_timestamps": sum("error" in event for event in series)}
+            stats["Q102"] = {
+                "decision_timestamps": len(series), "decision_rows": len(decisions),
+                "signal_rows": sum(row["status"] == "SIGNAL" for row in decisions),
+                "error_timestamps": sum("error" in event for event in series),
+                "scan_mode": "SELECTED_SIGNAL_MONTHLY_CACHED" if q102_fast else "FULL_OBSERVABILITY",
+            }
 
     manifest = {
         "schema_version": 1,
@@ -217,8 +252,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--data-root", required=True)
     parser.add_argument("--output-root", required=True)
     parser.add_argument("--strategies", nargs="+", default=["V12", "PENGU", "Q102", "FET"])
+    parser.add_argument("--q102-fast", action="store_true",
+                        help="Use cached selected-signal Q102 replay; omits observability-only rows")
     args = parser.parse_args(argv)
-    summary = scan(args.data_root, args.output_root, strategies=tuple(x.upper() for x in args.strategies))
+    summary = scan(args.data_root, args.output_root, strategies=tuple(x.upper() for x in args.strategies),
+                   q102_fast=args.q102_fast)
     print(json.dumps({"status": summary["status"], "runtime_sha": summary["runtime_sha"], "stats": summary["stats"], "manifest_sha256": summary["sha256"]}, sort_keys=True))
     return 0
 
