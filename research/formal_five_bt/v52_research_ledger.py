@@ -129,21 +129,26 @@ def replay_v52_research(
     trades: list[dict] = []
     skipped: list[dict] = []
     position: dict | None = None
-    unresolved = False
+    unresolved_sessions: set[str] = set()
     counters: Counter[str] = Counter()
     for row in selected:
         ts = int(row["decision_ts_ms"])
         if position is not None:
-            while position["next_checkpoint_ms"] <= ts and not unresolved:
+            while position["next_checkpoint_ms"] <= ts:
                 checkpoint_ts = position["next_checkpoint_ms"]
                 snap = _checkpoint(position, checkpoint_ts, yahoo, perp, policy)
                 if snap["status"] != "CHECKPOINT_VERIFIED_PRICE_ONLY":
-                    unresolved = True
+                    unresolved_sessions.add(datetime.fromtimestamp(
+                        checkpoint_ts / 1000, timezone.utc).astimezone(NY).date().isoformat())
                     trades.append({**position, "status": "UNRESOLVED_MODEL_EXIT",
                                    "unresolved_ts_ms": checkpoint_ts, **snap,
                                    "modeled_return_on_equity": None,
                                    "modeled_pnl_usd": None})
                     counters["UNRESOLVED_MODEL_EXIT"] += 1
+                    # V50 has a mandatory same-day forced-flat deadline. Unknown
+                    # settlement contaminates performance, but cannot justify
+                    # suppressing independent *next-session* candidate research.
+                    position = None
                     break
                 if snap["reason"] != "HOLD":
                     # Price-only close estimates exclude funding and actual execution.
@@ -166,10 +171,12 @@ def replay_v52_research(
                     position = None
                     break
                 _advance_checkpoint(position)
-        if unresolved:
+        current_session = datetime.fromtimestamp(
+            ts / 1000, timezone.utc).astimezone(NY).date().isoformat()
+        if current_session in unresolved_sessions:
             skipped.append({"symbol": row["symbol"], "decision_ts_ms": ts,
-                            "reason": "PREVIOUS_POSITION_EXIT_NOT_VERIFIABLE"})
-            counters["BLOCKED_BY_UNRESOLVED_EXIT"] += 1
+                            "reason": "PREVIOUS_EXIT_UNVERIFIED_SAME_SESSION"})
+            counters["BLOCKED_BY_UNRESOLVED_EXIT_SAME_SESSION"] += 1
             continue
         if position is not None:
             skipped.append({"symbol": row["symbol"], "decision_ts_ms": ts,
@@ -204,7 +211,7 @@ def replay_v52_research(
         counters["MODELED_ENTRY"] += 1
     # Drain the final in-sample open position until the earlier of NY close
     # and the approved 3h holding limit; no candles past the period are used.
-    if position is not None and not unresolved:
+    if position is not None:
         end_date = scan_manifest["period_end_exclusive"]
         end_ms = int(datetime.fromisoformat(end_date + "T00:00:00+00:00").timestamp()*1000)
         while position is not None and position["next_checkpoint_ms"] < end_ms:
@@ -215,7 +222,9 @@ def replay_v52_research(
                                "unresolved_ts_ms": checkpoint_ts,
                                "modeled_return_on_equity": None})
                 counters["UNRESOLVED_MODEL_EXIT"] += 1
-                unresolved = True
+                unresolved_sessions.add(datetime.fromtimestamp(
+                    checkpoint_ts / 1000, timezone.utc).astimezone(NY).date().isoformat())
+                position = None
                 break
             if snap["reason"] != "HOLD":
                 direction = 1 if position["side"] == "LONG" else -1
@@ -234,13 +243,14 @@ def replay_v52_research(
                 position = None
             else:
                 _advance_checkpoint(position)
-        if position is not None and not unresolved:
+        if position is not None:
             trades.append({**position, "status": "OPEN_AT_SAMPLE_END",
                            "modeled_return_on_equity": None})
             counters["OPEN_AT_SAMPLE_END"] += 1
-            unresolved = True
+            unresolved_sessions.add(datetime.fromtimestamp(
+                position["entry_ts_ms"] / 1000, timezone.utc).astimezone(NY).date().isoformat())
     closed = [trade for trade in trades if trade["status"] == "MODELED_CLOSED_TRADE"]
-    complete = (not unresolved and
+    complete = (not unresolved_sessions and
                 sum(counters[k] for k in ("MODELED_ENTRY",)) == len(closed))
     returns = [trade["modeled_return_on_equity"] for trade in closed]
     result = {
@@ -255,6 +265,8 @@ def replay_v52_research(
         "modeled_entries": counters["MODELED_ENTRY"],
         "modeled_closed_trades": len(closed),
         "unresolved_exit_trades": counters["UNRESOLVED_MODEL_EXIT"],
+        "sessions_with_unresolved_exits": sorted(unresolved_sessions),
+        "unresolved_session_policy": "skip remaining same-session entries, resume next NYSE session; whole-sample PnL remains unavailable",
         "entry_skipped": len(skipped),
         "skipped_reasons": dict(Counter(row["reason"] for row in skipped)),
         "exit_reasons": {key: counters[key] for key in
