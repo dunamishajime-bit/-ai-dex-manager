@@ -84,6 +84,63 @@ class PortfolioPriceModelTests(unittest.TestCase):
                     delta=1e-5,
                 )
 
+    def test_official_fx_cross_conversion_reconciles_usd_wallet_and_jpy_equity(self):
+        from datetime import timedelta
+        import hashlib
+
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            data, candidates, fx, output = (
+                root / "data", root / "candidates", root / "fx", root / "output")
+            stock = data / "normalized/aster_stock/klines/AMZNUSDT.jsonl"
+            stock.parent.mkdir(parents=True)
+            prices = (100, 100, 120, 120, 120)
+            rows = []
+            for hour, price in enumerate(prices):
+                ts = START + hour * HOUR
+                rows.append({"event_time_ms": ts, "close_time_ms": ts + HOUR - 1,
+                             "open": price, "high": price, "low": price, "close": price})
+            stock.write_text("".join(json.dumps(row) + "\n" for row in rows))
+            candidates.mkdir()
+            (candidates / "crypto-price-model-candidates.jsonl").write_text(
+                json.dumps({"status": "MODELED_CLOSED_TRADE", "strategy_id": "V52",
+                            "symbol": "AMZNUSDT", "side": "LONG",
+                            "entry_ts_ms": START + HOUR + HOUR // 2,
+                            "signal_ts_ms": START + HOUR + HOUR // 2,
+                            "entry_price": 100.0, "requested_gross": 2.0,
+                            "exit_ts_ms": START + 2 * HOUR + HOUR // 2,
+                            "exit_price": 120.0, "exit_reason": "TIME_OR_SESSION_FLAT",
+                            "unit_price_return": 0.2}) + "\n")
+            fx_file = fx / "normalized/ecb/usdjpy-cross.jsonl"
+            fx_file.parent.mkdir(parents=True)
+            start_day = datetime(2025, 8, 1, tzinfo=timezone.utc)
+            ecb_rows = []
+            for i in range(400):
+                day = start_day + timedelta(days=i)
+                ecb_rows.append({
+                    "source": "ECB_CROSS_EUR", "instrument": "USDJPY",
+                    "event_time_ms": int(day.timestamp() * 1000),
+                    "source_time_ms": int(day.timestamp() * 1000),
+                    "rate_jpy_per_usd": 150.0,
+                })
+            body = "".join(json.dumps(row) + "\n" for row in ecb_rows).encode()
+            fx_file.write_bytes(body)
+            (fx / "ecb-fx-cross-manifest.json").write_text(json.dumps({
+                "status": "ACQUIRED_ECB_REFERENCE_CROSS_NOT_FRED_PARITY",
+                "normalized_path": "normalized/ecb/usdjpy-cross.jsonl",
+                "normalized_sha256": hashlib.sha256(body).hexdigest(),
+                "observation_count": len(ecb_rows),
+            }))
+            report = run_portfolio_model(data, candidates, output, ecb_fx_root=fx)
+            row = report["scenarios"][0]
+            self.assertEqual(row["settlement_currency"], "USD")
+            self.assertEqual(row["fx_reference"], "ECB_USDJPY_EUR_CROSS_NEXT_DAY")
+            self.assertEqual(row["accounting_reconciliation"]["status"], "PASS")
+            self.assertAlmostEqual(
+                row["final_equity_jpy"], row["contributed_jpy"]
+                + row["strategy_pnl_jpy"]["V52"], delta=1e-5)
+            self.assertAlmostEqual(row["fx_cash_translation_pnl_jpy"], 0.0, delta=1e-5)
+
     def test_missing_hourly_open_mark_invalidates_dd_instead_of_omitting_risk(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
