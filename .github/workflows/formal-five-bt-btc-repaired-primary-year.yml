@@ -127,6 +127,11 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/formal-bt/normalized"
           cp -a "$RUNNER_TEMP/formal-v52-data/normalized/aster_stock" "$RUNNER_TEMP/formal-bt/normalized/aster_stock"
+          cp "$RUNNER_TEMP/formal-v52-data/aster-stock-hourly-coverage.json" "$RUNNER_TEMP/formal-bt/aster-stock-hourly-coverage.json"
+          mkdir -p "$RUNNER_TEMP/formal-bt/normalized/aster/funding"
+          if [ -d "$RUNNER_TEMP/formal-v52-data/normalized/aster_stock/funding" ]; then
+            cp -a "$RUNNER_TEMP/formal-v52-data/normalized/aster_stock/funding/." "$RUNNER_TEMP/formal-bt/normalized/aster/funding/"
+          fi
       - name: Replay contribution-aware all-five shared-gross portfolio PRICE MODEL
         run: |
           python -m research.formal_five_bt.portfolio_price_model \
