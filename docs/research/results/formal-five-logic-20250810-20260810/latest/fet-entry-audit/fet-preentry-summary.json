@@ -88,7 +88,7 @@
         }
       },
       "missing_feature_count": 0,
-      "modeled_pnl_jpy": -19752915.1930347
+      "modeled_pnl_jpy": -20116239.873285428
     },
     "OTHER_ACCEPTED": {
       "count": 15,
@@ -173,7 +173,7 @@
         }
       },
       "missing_feature_count": 0,
-      "modeled_pnl_jpy": 5473550.275600434
+      "modeled_pnl_jpy": 5573246.197284484
     },
     "REJECTED": {
       "count": 8,
@@ -269,7 +269,7 @@
   "lookahead_guard": "ALL_FEATURE_BARS_STRICTLY_BEFORE_ENTRY_TS",
   "pre_specified_gate_probes": {
     "BTC_12H_NOT_NEGATIVE": {
-      "blocked_static_pnl_jpy_NOT_COUNTERFACTUAL": -309235.5726967451,
+      "blocked_static_pnl_jpy_NOT_COUNTERFACTUAL": -314930.1489562822,
       "hard_stops_blocked": 1,
       "observed_accepted_with_features": 18,
       "other_accepted_blocked": 0,
@@ -277,7 +277,7 @@
       "winners_blocked": 0
     },
     "BTC_24H_NOT_NEGATIVE": {
-      "blocked_static_pnl_jpy_NOT_COUNTERFACTUAL": 1279540.6734944694,
+      "blocked_static_pnl_jpy_NOT_COUNTERFACTUAL": 1303103.4281893766,
       "hard_stops_blocked": 0,
       "observed_accepted_with_features": 18,
       "other_accepted_blocked": 1,
@@ -309,7 +309,7 @@
       "winners_blocked": 0
     },
     "FET_RELATIVE_BTC_24H_NOT_NEGATIVE": {
-      "blocked_static_pnl_jpy_NOT_COUNTERFACTUAL": -17879155.540762816,
+      "blocked_static_pnl_jpy_NOT_COUNTERFACTUAL": -18209031.889163293,
       "hard_stops_blocked": 1,
       "observed_accepted_with_features": 18,
       "other_accepted_blocked": 1,
@@ -317,7 +317,7 @@
       "winners_blocked": 1
     },
     "PREVIOUS_2H_VOLUME_AT_LEAST_MEDIAN": {
-      "blocked_static_pnl_jpy_NOT_COUNTERFACTUAL": 501193.075672229,
+      "blocked_static_pnl_jpy_NOT_COUNTERFACTUAL": 510412.99579088937,
       "hard_stops_blocked": 0,
       "observed_accepted_with_features": 18,
       "other_accepted_blocked": 1,
