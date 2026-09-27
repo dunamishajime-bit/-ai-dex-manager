@@ -105,7 +105,7 @@ def parse_chart(symbol:str,raw:bytes)->tuple[list[HourBar],dict[str,Any]]:
         timestamps=result["timestamp"]
         quote=result["indicators"]["quote"][0]
     except (KeyError,IndexError,TypeError,ValueError) as e:
-        if isinstance(e,YahooSourceBlocked):raise
+        if isinstance(e,YahooSourceBlocked) or (isinstance(e,ValueError) and str(e).startswith("YAHOO_")):raise
         raise ValueError("YAHOO_INVALID_CHART_SCHEMA") from e
     if not isinstance(timestamps,list) or not timestamps:
         raise ValueError("YAHOO_EMPTY_TIMESTAMP_ARRAY")
