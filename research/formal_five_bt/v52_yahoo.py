@@ -193,7 +193,7 @@ def _modeled_exit(record:dict,day:date,stock:tuple[HourOpen,...],perp:tuple[Hour
     for when in range(start+stride,expiry+1,stride):
         point=observe(stock,perp,when)
         if point is not None:checkpoints.append(point)
-    if not checkpoints:return None
+    if not checkpoints or checkpoints[-1]["time"]!=expiry:return None
     threshold=V50_CONVERGENCE if record["route"]=="V50_POST_OPEN_BASIS" else V11_CONVERGENCE
     multiple=V50_STOP_MULT if record["route"]=="V50_POST_OPEN_BASIS" else V11_STOP_MULT
     exit=checkpoints[-1];why="MODELED_TIME_EXIT"
@@ -237,8 +237,6 @@ def replay_yahoo_v52(yahoo:Mapping[str,tuple[HourOpen,...]],
             ("V50_POST_OPEN_BASIS","12:30",(12,29,50),(12,30,0)),
             ("V50_POST_OPEN_BASIS","13:30",(13,29,50),(13,30,0))):
             local_gate=datetime.combine(day,time(*gate_at),tzinfo=NY).astimezone(timezone.utc)
-            if not (datetime.fromtimestamp(PERIOD_START.toordinal(),timezone.utc) if False else True):
-                pass
             if nyse_close_utc(day) is None or local_gate>=nyse_close_utc(day):
                 continue
             signal_time=_ts(day,*signal_at);entry_time=_ts(day,*gate_at)
