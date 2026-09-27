@@ -8,7 +8,7 @@ import tempfile
 import unittest
 
 from research.formal_five_bt.crypto_price_model import (
-    HOUR, OHLC_QUARANTINE_MS, _bars, _source_quarantine_reason,
+    HOUR, OHLC_QUARANTINE_MS, _bars, _source_quarantine_reason, _pengu_contiguous_segments,
 )
 
 
@@ -55,6 +55,22 @@ class MalformedAsterSourceTests(unittest.TestCase):
         self.assertEqual(
             _source_quarantine_reason(candidate, {"FETUSDT": [101 * HOUR]}),
             "CORRUPT_H1_DEPENDENCY:FETUSDT",
+        )
+
+    def test_pengu_btc_segments_split_at_corrupt_or_missing_hour(self) -> None:
+        pengu = [{"event_time_ms": ts} for ts in (100, 101, 102, 103, 104, 105)]
+        btc = [{"event_time_ms": ts} for ts in (100, 101, 103, 104, 105)]
+        segments = _pengu_contiguous_segments(pengu, btc)
+        self.assertEqual(
+            [[left["event_time_ms"] for left, _ in rows] for rows in segments],
+            [[100, 101], [103, 104, 105]],
+        )
+        # A gap in PENGU itself must also cut history; no synthetic H1 is made.
+        pengu_missing = [row for row in pengu if row["event_time_ms"] != 104]
+        segments = _pengu_contiguous_segments(pengu_missing, btc)
+        self.assertEqual(
+            [[left["event_time_ms"] for left, _ in rows] for rows in segments],
+            [[100, 101], [103], [105]],
         )
 
     def test_invalid_ohlc_never_enters_execution_bar_map(self) -> None:
