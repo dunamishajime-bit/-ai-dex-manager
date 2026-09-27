@@ -1,0 +1,57 @@
+from datetime import datetime, timezone
+import json
+from pathlib import Path
+import tempfile
+import unittest
+
+from research.formal_five_bt.portfolio_price_model import run_portfolio_model
+
+HOUR = 3_600_000
+START = int(datetime(2025, 8, 10, tzinfo=timezone.utc).timestamp() * 1000)
+
+
+class PortfolioPriceModelTests(unittest.TestCase):
+    def test_compounds_causal_trade_and_keeps_pengu_one_slot(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            data = root / "data"
+            candidates = root / "candidates"
+            output = root / "output"
+            kline = data / "normalized/aster/klines/PENGUUSDT.jsonl"
+            kline.parent.mkdir(parents=True)
+            rows = []
+            for i, price in enumerate((100, 102, 110, 110, 110)):
+                ts = START + i * HOUR
+                rows.append({
+                    "source": "aster", "exchange": "ASTER", "instrument": "PENGUUSDT",
+                    "interval": "1h", "event_time_ms": ts, "close_time_ms": ts + HOUR - 1,
+                    "open": price, "high": price * 1.01, "low": price * 0.99,
+                    "close": price, "base_volume": 1_000, "quote_volume": 100_000,
+                })
+            kline.write_text("".join(json.dumps(row) + "\n" for row in rows))
+            candidates.mkdir()
+            trade = {
+                "strategy_id": "PENGU", "symbol": "PENGUUSDT", "side": "LONG",
+                "entry_ts_ms": START + HOUR, "signal_ts_ms": START,
+                "entry_price": 102.0, "requested_gross": 1.0, "entry_version": "LONG_V2_FINAL",
+                "route": "BASE_V64_LONG", "status": "MODELED_CLOSED_TRADE",
+                "exit_ts_ms": START + 2 * HOUR, "exit_price": 110.0,
+                "exit_reason": "LONG_MAX_HOLD", "unit_price_return": 110 / 102 - 1,
+            }
+            duplicate = dict(trade)
+            duplicate["signal_ts_ms"] = START + 1
+            (candidates / "crypto-price-model-candidates.jsonl").write_text(
+                json.dumps(trade) + "\n" + json.dumps(duplicate) + "\n")
+            result = run_portfolio_model(data, candidates, output)
+            base, stress = result["scenarios"]
+            self.assertEqual(base["contributed_jpy"], 130_000)
+            self.assertEqual(base["closed_trades"], 1)
+            self.assertEqual(base["strategy_trades"]["PENGU"], 1)
+            self.assertEqual(base["rejected_entries"]["PENGU:SLOT_OCCUPIED"], 1)
+            self.assertGreater(base["final_equity_jpy"], 130_000)
+            self.assertGreater(base["final_equity_jpy"], stress["final_equity_jpy"])
+            self.assertTrue((output / "PRICE_MODEL_BASE_10BPS/portfolio-trades.jsonl").is_file())
+
+
+if __name__ == "__main__":
+    unittest.main()
