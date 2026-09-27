@@ -107,22 +107,36 @@ def scan(data_root: str | Path, output_root: str | Path, *, strategies: tuple[st
                 if not (start_ms <= close_time < end_ms):
                     continue
                 decision = row.get("decision") or {}
+                current_signal = row.get("currentSignal")
+                current_decision = row.get("currentDecision") or {}
                 decision_ts = close_time + 1
                 decisions.append({
                     "strategy_id": "PENGU", "symbol": "PENGUUSDT", "decision_ts_ms": decision_ts,
                     "reference_ts_ms": features.get("referenceTs"),
-                    "status": "SIGNAL" if decision.get("side") else "WAIT",
-                    "side": decision.get("side", 0),
+                    "status": "SIGNAL" if current_signal else "WAIT",
+                    "side": current_decision.get("side", 0),
+                    "signal": current_signal,
+                    "entry_version": current_signal.get("entryVersion") if current_signal else None,
+                    "target_gross": current_signal.get("targetGross") if current_signal else 0,
                     "long_raw": row.get("longRaw", False), "long_signal": row.get("longSignal", False),
                     "short_signal": row.get("shortSignal", False), "short_setup_active": row.get("shortSetupActive", False),
                     "short_setup_armed": row.get("shortSetupArmed", False),
                     "recovery_v8": row.get("recoveryV8"), "features": features,
-                    "runtime_reason": decision.get("reason"),
+                    "runtime_reason": current_decision.get("reason"),
+                    "baseline_runtime_reason": decision.get("reason"),
+                    "recovery_v8_enabled": row.get("recoveryV8Enabled", False),
                     "data_cutoff_ms": close_time,
                     "source_runtime_sha": bridge.runtime_sha,
                 })
             paths["PENGU"] = _save_jsonl(output / "decisions" / "PENGU.jsonl", decisions)
-            stats["PENGU"] = {"decision_rows": len(decisions), "signal_rows": sum(row["status"] == "SIGNAL" for row in decisions), "long_raw_rows": sum(row["long_raw"] for row in decisions), "short_rows": sum(row["short_signal"] for row in decisions)}
+            stats["PENGU"] = {
+                "decision_rows": len(decisions),
+                "signal_rows": sum(row["status"] == "SIGNAL" for row in decisions),
+                "long_raw_rows": sum(row["long_raw"] for row in decisions),
+                "short_rows": sum(row["short_signal"] for row in decisions),
+                "entry_versions": dict(__import__("collections").Counter(
+                    row.get("entry_version") for row in decisions if row.get("entry_version"))),
+            }
 
         if "FET" in strategies:
             fet_rows = _load_jsonl(_history_path(root, "FETUSDT"))
