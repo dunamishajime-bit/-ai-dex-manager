@@ -1,0 +1,213 @@
+name: Formal BT Aster Primary-Recovered BTC One-Year Research
+on:
+  workflow_dispatch:
+  push:
+    branches: [codex/formal-five-logic-bt-20260926]
+    paths:
+      - ".github/workflows/formal-five-bt-btc-repaired-primary-year.yml"
+      - "research/formal_five_bt/aster_h1_reconcile.py"
+      - "research/formal_five_bt/acquire.py"
+      - "research/formal_five_bt/signal_scan.py"
+      - "research/formal_five_bt/runtime_bridge.mjs"
+      - "research/formal_five_bt/crypto_price_model.py"
+      - "research/formal_five_bt/portfolio_price_model.py"
+      - "research/formal_five_bt/v52_price_only_scan.py"
+      - "research/formal_five_bt/v52_research_ledger.py"
+      - "research/formal_five_bt/aster_stock_acquire.py"
+      - "research/formal_five_bt/yahoo_acquire.py"
+      - "research/formal_five_bt/fx_ecb.py"
+permissions:
+  contents: read
+jobs:
+  primary-year:
+    runs-on: ubuntu-latest
+    timeout-minutes: 115
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Restore source from audited historical runtime commit
+        shell: bash
+        run: |
+          git -c protocol.version=2 fetch --filter=blob:none --no-tags --depth=1 origin a09ea45ca3cbd72100f9eb0eaae499039c40b6a0
+          python -m research.formal_five_bt.restore_snapshot
+      - name: Acquire one-year Aster crypto candles, funding and FRED FX
+        run: |
+          python -m research.formal_five_bt.acquire --data-root "$RUNNER_TEMP/formal-bt" --venues aster
+      - name: Reconstruct one corrupt BTC H1 from exact Aster 1m (separate research scenario)
+        run: |
+          python -m research.formal_five_bt.aster_h1_reconcile --data-root "$RUNNER_TEMP/formal-bt"
+      - name: Show only instrument coverage counts, never raw prices
+        env:
+          BT_ROOT: ${{ runner.temp }}/formal-bt
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          m=json.loads((Path(os.environ["BT_ROOT"])/"acquisition-manifest.json").read_text())
+          k=m["venues"]["aster"]["klines"]
+          f=m["venues"]["aster"]["funding"]
+          print("BT_ASTER_INSTRUMENT_COUNT:",len(k))
+          print("BT_ASTER_CANDLE_STATUS:",{s:sum(x.get("status")==s for x in k.values()) for s in sorted({x.get("status") for x in k.values()})})
+          print("BT_ASTER_FUNDING_STATUS:",{s:sum(x.get("status")==s for x in f.values()) for s in sorted({x.get("status") for x in f.values()})})
+          print("BT_ASTER_MISSING_CANDLE_SYMBOLS:",[s for s,v in sorted(k.items()) if v.get("status")!="ACQUIRED"])
+          print("BT_FRED_STATUS:",m.get("fred",{}).get("status"))
+          PY
+      - name: Acquire official ECB EUR-cross USDJPY as FRED-unavailable fallback
+        id: ecb_fx
+        continue-on-error: true
+        run: |
+          python -m research.formal_five_bt.fx_ecb --data-root "$RUNNER_TEMP/formal-bt"
+      - name: Replay audited V12 PENGU FET causal signal scans
+        run: |
+          python -m research.formal_five_bt.signal_scan --data-root "$RUNNER_TEMP/formal-bt" --output-root "$RUNNER_TEMP/formal-scans/baseline-signal-scan" --strategies V12 PENGU FET
+      - name: Replay Q102 as-of causal signal scan independently
+        run: |
+          python -m research.formal_five_bt.signal_scan --data-root "$RUNNER_TEMP/formal-bt" --output-root "$RUNNER_TEMP/formal-scans/baseline-signal-scan-q102" --strategies Q102 --q102-fast
+      - name: Build causal H1 candidate trade lifecycles without shared allocation
+        run: |
+          python -m research.formal_five_bt.crypto_price_model \
+            --data-root "$RUNNER_TEMP/formal-bt" \
+            --scan-root "$RUNNER_TEMP/formal-scans" \
+            --output-root "$RUNNER_TEMP/formal-crypto-price-model"
+      - name: Print only aggregate causal scan status
+        env:
+          SCAN_ROOT: ${{ runner.temp }}/formal-scans
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          r=Path(os.environ["SCAN_ROOT"])
+          for name in ("baseline-signal-scan","baseline-signal-scan-q102"):
+              p=r/name/"signal-scan-manifest.json"
+              if not p.is_file():
+                  print(name, "MISSING")
+                  continue
+              m=json.loads(p.read_text())
+              print(name, m["runtime_sha"], json.dumps(m["stats"],sort_keys=True))
+          PY
+      - name: Acquire V52 Aster stock-perpetual history and Yahoo equities (ephemeral)
+        run: |
+          python -m research.formal_five_bt.aster_stock_acquire --data-root "$RUNNER_TEMP/formal-v52-data"
+          python -m research.formal_five_bt.yahoo_acquire --output-root "$RUNNER_TEMP/formal-v52-data"
+      - name: Replay V52 causal price-only entry candidates and exit lifecycle
+        run: |
+          python -m research.formal_five_bt.v52_price_only_scan \
+            --data-root "$RUNNER_TEMP/formal-v52-data" \
+            --output-root "$RUNNER_TEMP/formal-v52-scan"
+          python -m research.formal_five_bt.v52_research_ledger \
+            --data-root "$RUNNER_TEMP/formal-v52-data" \
+            --scan-root "$RUNNER_TEMP/formal-v52-scan" \
+            --output-root "$RUNNER_TEMP/formal-v52-ledger" \
+            --round-trip-cost-bps 11
+      - name: Print separate V52 modeled lifecycle audit
+        env:
+          V52_ROOT: ${{ runner.temp }}/formal-v52-ledger
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          d=json.loads((Path(os.environ["V52_ROOT"])/"v52-model-summary.json").read_text())
+          print("V52_RESEARCH_STATUS:", d["status"])
+          print("V52_MODELED_ENTRIES:", d["modeled_entries"])
+          print("V52_MODELED_CLOSED:", d["modeled_closed_trades"])
+          print("V52_UNRESOLVED_EXITS:", d["unresolved_exit_trades"])
+          print("V52_SKIPPED:", json.dumps(d["skipped_reasons"],sort_keys=True))
+          PY
+      - name: Make the verified stock H1 series available to shared-gross marks
+        run: |
+          mkdir -p "$RUNNER_TEMP/formal-bt/normalized"
+          cp -a "$RUNNER_TEMP/formal-v52-data/normalized/aster_stock" "$RUNNER_TEMP/formal-bt/normalized/aster_stock"
+      - name: Replay contribution-aware all-five shared-gross portfolio PRICE MODEL
+        run: |
+          python -m research.formal_five_bt.portfolio_price_model \
+            --data-root "$RUNNER_TEMP/formal-bt" \
+            --candidate-root "$RUNNER_TEMP/formal-crypto-price-model" \
+            --output-root "$RUNNER_TEMP/formal-portfolio-price-model" \
+            --v52-ledger-root "$RUNNER_TEMP/formal-v52-ledger"
+      - name: Replay five-logic portfolio with separately labeled ECB reference FX
+        if: steps.ecb_fx.outcome == 'success'
+        run: |
+          python -m research.formal_five_bt.portfolio_price_model \
+            --data-root "$RUNNER_TEMP/formal-bt" \
+            --candidate-root "$RUNNER_TEMP/formal-crypto-price-model" \
+            --output-root "$RUNNER_TEMP/formal-portfolio-ecb-model" \
+            --v52-ledger-root "$RUNNER_TEMP/formal-v52-ledger" \
+            --ecb-fx-root "$RUNNER_TEMP/formal-bt"
+      - name: Print aggregate price-model lifecycle summary only
+        env:
+          MODEL_ROOT: ${{ runner.temp }}/formal-crypto-price-model
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          p=Path(os.environ["MODEL_ROOT"])/"crypto-price-model-summary.json"
+          if not p.is_file():
+              raise SystemExit("CRYPTO_PRICE_MODEL_SUMMARY_MISSING")
+          m=json.loads(p.read_text())
+          print("CRYPTO_PRICE_MODEL_STATUS:",m["status"])
+          print("CRYPTO_PRICE_MODEL_CANDIDATES:",m["candidate_count"])
+          print("CRYPTO_PRICE_MODEL_STRATEGIES:",json.dumps(m["strategies"],sort_keys=True))
+          print("FORMAL_VERIFIED_FILLS:",m["formal_verified_fills"])
+          PY
+      - name: Print modeled portfolio metrics only
+        env:
+          PORTFOLIO_ROOT: ${{ runner.temp }}/formal-portfolio-price-model
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          p=Path(os.environ["PORTFOLIO_ROOT"])/"portfolio-price-model-summary.json"
+          m=json.loads(p.read_text())
+          print("PORTFOLIO_PRICE_MODEL_STATUS:",m["status"])
+          for row in m["scenarios"]:
+              printable={k:row[k] for k in (
+                  "scenario_id","contributed_jpy","final_equity_jpy","net_profit_jpy",
+                  "profit_factor","win_rate","maximum_mtm_drawdown","closed_trades",
+                  "strategy_pnl_jpy","strategy_trades","rejected_entries")}
+              print("PORTFOLIO_SCENARIO:",json.dumps(printable,sort_keys=True))
+              print("MONTHLY_EQUITY:",row["scenario_id"],json.dumps(row["monthly_equity_jpy"],sort_keys=True))
+          PY
+      - name: Print ECB-adjusted reference-price model metrics
+        if: steps.ecb_fx.outcome == 'success'
+        env:
+          ECB_MODEL_ROOT: ${{ runner.temp }}/formal-portfolio-ecb-model
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          p=Path(os.environ["ECB_MODEL_ROOT"])/"portfolio-price-model-summary.json"
+          m=json.loads(p.read_text())
+          print("ECB_FX_PORTFOLIO_PRICE_MODEL_STATUS:",m["status"])
+          for row in m["scenarios"]:
+              printable={k:row[k] for k in (
+                  "scenario_id","contributed_jpy","final_equity_jpy","net_profit_jpy",
+                  "profit_factor","win_rate","maximum_mtm_drawdown","closed_trades",
+                  "strategy_pnl_jpy","fx_cash_translation_pnl_jpy",
+                  "strategy_trades","accounting_reconciliation")}
+              print("ECB_FX_PORTFOLIO_SCENARIO:",json.dumps(printable,sort_keys=True))
+              print("ECB_FX_MONTHLY_EQUITY:",row["scenario_id"],json.dumps(row["monthly_equity_jpy"],sort_keys=True))
+          PY
+      - name: Preserve aggregate five-logic modeled report (no raw vendor data)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: all-five-logic-official-aster-1m-reconstructed-aggregate
+          if-no-files-found: warn
+          retention-days: 30
+          path: |
+            ${{ runner.temp }}/formal-crypto-price-model/crypto-price-model-summary.json
+            ${{ runner.temp }}/formal-v52-ledger/v52-model-summary.json
+            ${{ runner.temp }}/formal-portfolio-price-model/portfolio-price-model-summary.json
+            ${{ runner.temp }}/formal-portfolio-ecb-model/portfolio-price-model-summary.json
+            ${{ runner.temp }}/formal-bt/ecb-fx-cross-manifest.json
+            ${{ runner.temp }}/formal-bt/acquisition-manifest.json
