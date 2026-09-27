@@ -1,0 +1,35 @@
+name: V12 Score 1.00 / Volume 0.80 Alternate Route Research CI
+on:
+  push:
+    branches: [research/v12-score100-volume080-alt-review-20260928]
+    paths:
+      - "config/v12X1AllRuntime.ts"
+      - "scripts/v12-score100-volume080-alt-route-selftest.ts"
+      - "scripts/v12-x1-all-selftest.ts"
+      - ".github/workflows/v12-score100-volume080-alt-review.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate-research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Typecheck adoption branch
+        run: npx tsc --noEmit -p tsconfig.json
+      - name: Exact adopted threshold and alternate route boundary tests
+        run: npx tsx scripts/v12-score100-volume080-alt-route-selftest.ts
+      - name: Existing V12 selftest with updated boundary fixture
+        run: npx tsx scripts/v12-x1-all-selftest.ts
+      - name: Unchanged Win-rate Gate and sizing tests
+        run: npx tsx --test tests/v12-winrate-entry-gate.test.ts
+      - name: Block accidental order submission in research CI
+        shell: bash
+        run: |
+          ! grep -Eq "executeEntry|submitOrder|I_ACCEPT_REAL_MONEY|placeMarket" scripts/v12-score100-volume080-alt-route-selftest.ts
