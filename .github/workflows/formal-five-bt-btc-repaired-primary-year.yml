@@ -11,6 +11,8 @@ on:
       - "research/formal_five_bt/runtime_bridge.mjs"
       - "research/formal_five_bt/crypto_price_model.py"
       - "research/formal_five_bt/portfolio_price_model.py"
+      - "research/formal_five_bt/fet_dual_gate_combo_bt.py"
+      - "research/formal_five_bt/fet_entry_audit.py"
       - "research/formal_five_bt/v52_price_only_scan.py"
       - "research/formal_five_bt/v52_research_ledger.py"
       - "research/formal_five_bt/aster_stock_acquire.py"
@@ -148,6 +150,34 @@ jobs:
             --output-root "$RUNNER_TEMP/formal-portfolio-ecb-model" \
             --v52-ledger-root "$RUNNER_TEMP/formal-v52-ledger" \
             --ecb-fx-root "$RUNNER_TEMP/formal-bt"
+      - name: Re-run user-requested BRK/MR 0.75 FET 1.0 pre-entry dual gate vs cap-only and baseline
+        if: steps.ecb_fx.outcome == 'success'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m research.formal_five_bt.fet_dual_gate_combo_bt \
+            --data-root "$RUNNER_TEMP/formal-bt" \
+            --candidate-root "$RUNNER_TEMP/formal-crypto-price-model" \
+            --output-root "$RUNNER_TEMP/formal-user-request" \
+            --v52-ledger-root "$RUNNER_TEMP/formal-v52-ledger" \
+            --ecb-fx-root "$RUNNER_TEMP/formal-bt"
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          d=json.loads((Path(os.environ["RUNNER_TEMP"])/"formal-user-request/requested-combo-summary.json").read_text())
+          print("REQUESTED_FET_GATE_FEATURE_SAMPLE:",d["fet_gate_total_candidate_count_with_features"])
+          print("REQUESTED_FET_GATE_BLOCKED:",json.dumps(d["fet_gate_blocked_by_reason"],sort_keys=True))
+          for case,report in d["cases"].items():
+              for r in report["scenarios"]:
+                  print("REQUESTED_INTEGRATED_COMBO:",json.dumps({
+                    "case":case,"model_status":report["status"],
+                    "scenario":r["scenario_id"],"final_jpy":r["final_equity_jpy"],
+                    "dd":r["maximum_mtm_drawdown"],"pf":r["profit_factor"],
+                    "trades":r["closed_trades"],"strategy_pnl":r["strategy_pnl_jpy"],
+                    "admission_counts":r["candidate_decision_counts"].get("FET",{})},
+                    sort_keys=True))
+          PY
+
       - name: Compare in-sample FET PENGU SHORT Q102 gross variants under shared allocator
         if: steps.ecb_fx.outcome == 'success'
         shell: bash
@@ -182,34 +212,6 @@ jobs:
             --decisions "$RUNNER_TEMP/formal-portfolio-ecb-model/PRICE_MODEL_BASE_10BPS/candidate-decisions.jsonl" \
             --trades "$RUNNER_TEMP/formal-portfolio-ecb-model/PRICE_MODEL_BASE_10BPS/portfolio-trades.jsonl" \
             --output-root "$RUNNER_TEMP/formal-fet-entry-audit"
-
-      - name: Re-run user-requested BRK/MR 0.75 FET 1.0 pre-entry dual gate vs cap-only and baseline
-        if: steps.ecb_fx.outcome == 'success'
-        shell: bash
-        run: |
-          set -euo pipefail
-          python -m research.formal_five_bt.fet_dual_gate_combo_bt \
-            --data-root "$RUNNER_TEMP/formal-bt" \
-            --candidate-root "$RUNNER_TEMP/formal-crypto-price-model" \
-            --output-root "$RUNNER_TEMP/formal-user-request" \
-            --v52-ledger-root "$RUNNER_TEMP/formal-v52-ledger" \
-            --ecb-fx-root "$RUNNER_TEMP/formal-bt"
-          python - <<'PY'
-          import json,os
-          from pathlib import Path
-          d=json.loads((Path(os.environ["RUNNER_TEMP"])/"formal-user-request/requested-combo-summary.json").read_text())
-          print("REQUESTED_FET_GATE_FEATURE_SAMPLE:",d["fet_gate_total_candidate_count_with_features"])
-          print("REQUESTED_FET_GATE_BLOCKED:",json.dumps(d["fet_gate_blocked_by_reason"],sort_keys=True))
-          for case,report in d["cases"].items():
-              for r in report["scenarios"]:
-                  print("REQUESTED_INTEGRATED_COMBO:",json.dumps({
-                    "case":case,"model_status":report["status"],
-                    "scenario":r["scenario_id"],"final_jpy":r["final_equity_jpy"],
-                    "dd":r["maximum_mtm_drawdown"],"pf":r["profit_factor"],
-                    "trades":r["closed_trades"],"strategy_pnl":r["strategy_pnl_jpy"],
-                    "admission_counts":r["candidate_decision_counts"].get("FET",{})},
-                    sort_keys=True))
-          PY
 
       - name: Print aggregate price-model lifecycle summary only
         env:
