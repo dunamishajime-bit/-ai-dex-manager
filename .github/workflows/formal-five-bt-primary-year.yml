@@ -157,6 +157,7 @@ jobs:
                   "strategy_pnl_jpy","strategy_trades","rejected_entries")}
               print("PORTFOLIO_SCENARIO:",json.dumps(printable,sort_keys=True))
               print("MONTHLY_EQUITY:",row["scenario_id"],json.dumps(row["monthly_equity_jpy"],sort_keys=True))
+          PY
       - name: Preserve aggregate five-logic modeled report (no raw vendor data)
         if: always()
         uses: actions/upload-artifact@v4
@@ -168,4 +169,3 @@ jobs:
             ${{ runner.temp }}/formal-crypto-price-model/crypto-price-model-summary.json
             ${{ runner.temp }}/formal-v52-ledger/v52-model-summary.json
             ${{ runner.temp }}/formal-portfolio-price-model/portfolio-price-model-summary.json
-          PY
