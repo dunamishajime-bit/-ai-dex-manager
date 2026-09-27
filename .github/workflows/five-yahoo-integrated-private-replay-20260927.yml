@@ -13,10 +13,10 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     env:
-      SSH_HOST: \${{ secrets.DISDEX_VPS_SSH_HOST }}
-      ROOT_KEY: \${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
-      SSH_KNOWN_HOSTS: \${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
-      SSH_PORT: \${{ vars.DISDEX_VPS_SSH_PORT }}
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -56,16 +56,16 @@ jobs:
           set -Eeuo pipefail
           root="$RUNNER_TEMP/five-yahoo"
           mkdir -p "$root"
-          port="\${SSH_PORT:-22}"
+          port="${SSH_PORT:-22}"
           ssh_opts=(-T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes
              -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -p "$port")
-          ssh "\${ssh_opts[@]}" "root@$SSH_HOST" \
+          ssh "${ssh_opts[@]}" "root@$SSH_HOST" \
             "set -Eeuo pipefail; test \"\$(tr -d '[:space:]' < /home/deploy/disdex-trading/current/.disdex-release-sha)\" = 'a09ea45ca3cbd72100f9eb0eaae499039c40b6a0';
             echo FIVE_YAHOO_PINNED_PRODUCTION_SHA=PASS"
           while IFS=' ' read -r label source digest; do
             [[ -n "$label" ]] || continue
             remote="/var/lib/disdex/research-bt-formal/$source"
-            ssh "\${ssh_opts[@]}" "root@$SSH_HOST" \
+            ssh "${ssh_opts[@]}" "root@$SSH_HOST" \
               "set -Eeuo pipefail; test -f '$remote'; test \"\$(sha256sum '$remote' | awk '{print \$1}')\" = '$digest'"
             scp -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
               -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
@@ -145,16 +145,16 @@ jobs:
           test "$bytes" -lt 100000000
           digest="$(sha256sum "$RUNNER_TEMP/five-yahoo-5-results.tgz" | cut -d ' ' -f1)"
           remote="/var/lib/disdex/research-bt-formal/a09-five-yahoo-integrated-$GITHUB_RUN_ID.tgz"
-          port="\${SSH_PORT:-22}"
+          port="${SSH_PORT:-22}"
           ssh_opts=(-T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes
              -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -p "$port")
-          ssh "\${ssh_opts[@]}" "root@$SSH_HOST" \
+          ssh "${ssh_opts[@]}" "root@$SSH_HOST" \
             "set -Eeuo pipefail; test \"\$(tr -d '[:space:]' < /home/deploy/disdex-trading/current/.disdex-release-sha)\" = 'a09ea45ca3cbd72100f9eb0eaae499039c40b6a0';
              test ! -e '$remote'; test \"\$(df -Pk /var/lib/disdex | awk 'NR==2 {print \$4}')\" -gt 1200000"
           scp -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
             -P "$port" "$RUNNER_TEMP/five-yahoo-5-results.tgz" "root@$SSH_HOST:$remote"
-          ssh "\${ssh_opts[@]}" "root@$SSH_HOST" \
+          ssh "${ssh_opts[@]}" "root@$SSH_HOST" \
             "set -Eeuo pipefail; chmod 600 '$remote'; test \"\$(sha256sum '$remote' | cut -d ' ' -f1)\" = '$digest';
              echo PRIVATE_FIVE_YAHOO_INTEGRATED_ARCHIVE='$remote';
              echo PRIVATE_FIVE_YAHOO_INTEGRATED_SHA256='$digest';
