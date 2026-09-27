@@ -190,7 +190,7 @@ class V52ResearchLedgerTests(unittest.TestCase):
             self.assertIsNone(result["price_model_closed_trade_mean_return"])
             trades = [json.loads(line) for line in
                       (root / "out/v52-model-ledger.jsonl").read_text().splitlines()]
-            closed = [row for row in trades if row["status"] == "MODELED_CLOSED_TRADE"]
+            closed = [row for row in trades if row.get("status") == "MODELED_CLOSED_TRADE"]
             self.assertEqual(closed[0]["entry_ts_ms"], next_day)
             self.assertEqual(closed[0]["exit_ts_ms"], next_exit)
 
