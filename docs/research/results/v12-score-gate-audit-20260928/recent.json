@@ -1,0 +1,260 @@
+{
+  "cases": {
+    "SCORE_0P85": {
+      "btc_regime_timestamp_counts": {
+        "LONG": 75,
+        "NEUTRAL": 273,
+        "SHORT": 13
+      },
+      "candidate_first_reject_or_pass_counts": {
+        "BTC_DIRECTION_MISMATCH": 17,
+        "DIRECTIONAL_MOMENTUM_BELOW_MINIMUM": 369,
+        "EDGE_TO_COST_BELOW_MINIMUM": 128,
+        "MOMENTUM_ATR_OR_SCORE_QUALITY_GATE": 65,
+        "PASS": 296,
+        "SCORE_QUALITY_GATE": 856,
+        "VOLUME_RATIO_BELOW_MINIMUM": 3323
+      },
+      "days_without_original_signals": 14,
+      "pre_winrate_candidate_pass_count": 296,
+      "pre_winrate_dry_days": 11,
+      "pre_winrate_longest_dry_streak_days": 3,
+      "pre_winrate_monthly_slot_counts": {
+        "2026-08": 4,
+        "2026-09": 174
+      },
+      "pre_winrate_top3_slot_count": 178,
+      "raw_candidates_evaluated": 5054,
+      "score_threshold": 0.85,
+      "timestamps_without_complete_btc_53bar_sma": 0,
+      "volume_threshold": 0.9845
+    },
+    "SCORE_0P85_VOLUME_0P55": {
+      "btc_regime_timestamp_counts": {
+        "LONG": 75,
+        "NEUTRAL": 273,
+        "SHORT": 13
+      },
+      "candidate_first_reject_or_pass_counts": {
+        "BTC_DIRECTION_MISMATCH": 28,
+        "DIRECTIONAL_MOMENTUM_BELOW_MINIMUM": 625,
+        "EDGE_TO_COST_BELOW_MINIMUM": 220,
+        "MOMENTUM_ATR_OR_SCORE_QUALITY_GATE": 118,
+        "PASS": 482,
+        "SCORE_QUALITY_GATE": 1435,
+        "VOLUME_RATIO_BELOW_MINIMUM": 2146
+      },
+      "days_without_original_signals": 14,
+      "pre_winrate_candidate_pass_count": 482,
+      "pre_winrate_dry_days": 9,
+      "pre_winrate_longest_dry_streak_days": 3,
+      "pre_winrate_monthly_slot_counts": {
+        "2026-08": 8,
+        "2026-09": 224
+      },
+      "pre_winrate_top3_slot_count": 232,
+      "raw_candidates_evaluated": 5054,
+      "score_threshold": 0.85,
+      "timestamps_without_complete_btc_53bar_sma": 0,
+      "volume_threshold": 0.55
+    },
+    "SCORE_1P00": {
+      "btc_regime_timestamp_counts": {
+        "LONG": 75,
+        "NEUTRAL": 273,
+        "SHORT": 13
+      },
+      "candidate_first_reject_or_pass_counts": {
+        "BTC_DIRECTION_MISMATCH": 17,
+        "DIRECTIONAL_MOMENTUM_BELOW_MINIMUM": 369,
+        "EDGE_TO_COST_BELOW_MINIMUM": 128,
+        "MOMENTUM_ATR_OR_SCORE_QUALITY_GATE": 67,
+        "PASS": 274,
+        "SCORE_QUALITY_GATE": 876,
+        "VOLUME_RATIO_BELOW_MINIMUM": 3323
+      },
+      "days_without_original_signals": 14,
+      "pre_winrate_candidate_pass_count": 274,
+      "pre_winrate_dry_days": 12,
+      "pre_winrate_longest_dry_streak_days": 5,
+      "pre_winrate_monthly_slot_counts": {
+        "2026-08": 3,
+        "2026-09": 161
+      },
+      "pre_winrate_top3_slot_count": 164,
+      "raw_candidates_evaluated": 5054,
+      "score_threshold": 1.0,
+      "timestamps_without_complete_btc_53bar_sma": 0,
+      "volume_threshold": 0.9845
+    },
+    "SCORE_1P00_VOLUME_0P80": {
+      "btc_regime_timestamp_counts": {
+        "LONG": 75,
+        "NEUTRAL": 273,
+        "SHORT": 13
+      },
+      "candidate_first_reject_or_pass_counts": {
+        "BTC_DIRECTION_MISMATCH": 19,
+        "DIRECTIONAL_MOMENTUM_BELOW_MINIMUM": 461,
+        "EDGE_TO_COST_BELOW_MINIMUM": 154,
+        "MOMENTUM_ATR_OR_SCORE_QUALITY_GATE": 84,
+        "PASS": 318,
+        "SCORE_QUALITY_GATE": 1093,
+        "VOLUME_RATIO_BELOW_MINIMUM": 2925
+      },
+      "days_without_original_signals": 14,
+      "pre_winrate_candidate_pass_count": 318,
+      "pre_winrate_dry_days": 12,
+      "pre_winrate_longest_dry_streak_days": 5,
+      "pre_winrate_monthly_slot_counts": {
+        "2026-08": 3,
+        "2026-09": 173
+      },
+      "pre_winrate_top3_slot_count": 176,
+      "raw_candidates_evaluated": 5054,
+      "score_threshold": 1.0,
+      "timestamps_without_complete_btc_53bar_sma": 0,
+      "volume_threshold": 0.8
+    },
+    "SCORE_1P20": {
+      "btc_regime_timestamp_counts": {
+        "LONG": 75,
+        "NEUTRAL": 273,
+        "SHORT": 13
+      },
+      "candidate_first_reject_or_pass_counts": {
+        "BTC_DIRECTION_MISMATCH": 17,
+        "DIRECTIONAL_MOMENTUM_BELOW_MINIMUM": 369,
+        "EDGE_TO_COST_BELOW_MINIMUM": 128,
+        "MOMENTUM_ATR_OR_SCORE_QUALITY_GATE": 74,
+        "PASS": 250,
+        "SCORE_QUALITY_GATE": 893,
+        "VOLUME_RATIO_BELOW_MINIMUM": 3323
+      },
+      "days_without_original_signals": 14,
+      "pre_winrate_candidate_pass_count": 250,
+      "pre_winrate_dry_days": 12,
+      "pre_winrate_longest_dry_streak_days": 5,
+      "pre_winrate_monthly_slot_counts": {
+        "2026-08": 3,
+        "2026-09": 153
+      },
+      "pre_winrate_top3_slot_count": 156,
+      "raw_candidates_evaluated": 5054,
+      "score_threshold": 1.2,
+      "timestamps_without_complete_btc_53bar_sma": 0,
+      "volume_threshold": 0.9845
+    },
+    "SOURCE_BASELINE": {
+      "btc_regime_timestamp_counts": {
+        "LONG": 75,
+        "NEUTRAL": 273,
+        "SHORT": 13
+      },
+      "candidate_first_reject_or_pass_counts": {
+        "BTC_DIRECTION_MISMATCH": 17,
+        "DIRECTIONAL_MOMENTUM_BELOW_MINIMUM": 369,
+        "EDGE_TO_COST_BELOW_MINIMUM": 128,
+        "MOMENTUM_ATR_OR_SCORE_QUALITY_GATE": 77,
+        "PASS": 235,
+        "SCORE_QUALITY_GATE": 905,
+        "VOLUME_RATIO_BELOW_MINIMUM": 3323
+      },
+      "days_without_original_signals": 14,
+      "pre_winrate_candidate_pass_count": 235,
+      "pre_winrate_dry_days": 14,
+      "pre_winrate_longest_dry_streak_days": 5,
+      "pre_winrate_monthly_slot_counts": {
+        "2026-08": 3,
+        "2026-09": 147
+      },
+      "pre_winrate_top3_slot_count": 150,
+      "raw_candidates_evaluated": 5054,
+      "score_threshold": 1.4649,
+      "timestamps_without_complete_btc_53bar_sma": 0,
+      "volume_threshold": 0.9845
+    },
+    "VOLUME_0P55": {
+      "btc_regime_timestamp_counts": {
+        "LONG": 75,
+        "NEUTRAL": 273,
+        "SHORT": 13
+      },
+      "candidate_first_reject_or_pass_counts": {
+        "BTC_DIRECTION_MISMATCH": 28,
+        "DIRECTIONAL_MOMENTUM_BELOW_MINIMUM": 625,
+        "EDGE_TO_COST_BELOW_MINIMUM": 220,
+        "MOMENTUM_ATR_OR_SCORE_QUALITY_GATE": 137,
+        "PASS": 383,
+        "SCORE_QUALITY_GATE": 1515,
+        "VOLUME_RATIO_BELOW_MINIMUM": 2146
+      },
+      "days_without_original_signals": 14,
+      "pre_winrate_candidate_pass_count": 383,
+      "pre_winrate_dry_days": 13,
+      "pre_winrate_longest_dry_streak_days": 5,
+      "pre_winrate_monthly_slot_counts": {
+        "2026-08": 4,
+        "2026-09": 178
+      },
+      "pre_winrate_top3_slot_count": 182,
+      "raw_candidates_evaluated": 5054,
+      "score_threshold": 1.4649,
+      "timestamps_without_complete_btc_53bar_sma": 0,
+      "volume_threshold": 0.55
+    },
+    "VOLUME_0P80": {
+      "btc_regime_timestamp_counts": {
+        "LONG": 75,
+        "NEUTRAL": 273,
+        "SHORT": 13
+      },
+      "candidate_first_reject_or_pass_counts": {
+        "BTC_DIRECTION_MISMATCH": 19,
+        "DIRECTIONAL_MOMENTUM_BELOW_MINIMUM": 461,
+        "EDGE_TO_COST_BELOW_MINIMUM": 154,
+        "MOMENTUM_ATR_OR_SCORE_QUALITY_GATE": 95,
+        "PASS": 277,
+        "SCORE_QUALITY_GATE": 1123,
+        "VOLUME_RATIO_BELOW_MINIMUM": 2925
+      },
+      "days_without_original_signals": 14,
+      "pre_winrate_candidate_pass_count": 277,
+      "pre_winrate_dry_days": 14,
+      "pre_winrate_longest_dry_streak_days": 5,
+      "pre_winrate_monthly_slot_counts": {
+        "2026-08": 3,
+        "2026-09": 158
+      },
+      "pre_winrate_top3_slot_count": 161,
+      "raw_candidates_evaluated": 5054,
+      "score_threshold": 1.4649,
+      "timestamps_without_complete_btc_53bar_sma": 0,
+      "volume_threshold": 0.8
+    }
+  },
+  "original_status_counts": {
+    "CANDIDATE_REJECTED": 4911,
+    "SIGNAL": 143
+  },
+  "period": [
+    "2026-08-28",
+    "2026-09-27"
+  ],
+  "raw_decision_rows": 5054,
+  "source_original_daily_count": {
+    "days_with_signals": 16,
+    "days_without_signals": 14,
+    "longest_zero_signal_period": [
+      "2026-08-29",
+      "2026-09-02"
+    ],
+    "longest_zero_signal_streak_days": 5
+  },
+  "source_original_signals_by_month": {
+    "2026-08": 3,
+    "2026-09": 140
+  },
+  "source_venue": "ASTER_ONLY",
+  "status": "PRE_WINRATE_GATE_AUDIT_NOT_A_COUNTERFACTUAL_BT"
+}
