@@ -100,6 +100,9 @@ class RuntimeBridge:
     def pengu_series(self, history: Mapping[str, Any], now_ms: int) -> Any:
         return self._request({"op": "penguSeries", "history": history, "now": now_ms})["result"]
 
+    def pengu_trade_outcomes(self, history: Mapping[str, Any], end_ms: int) -> Mapping[str, Any]:
+        return self._request({"op": "penguTradeOutcomes", "args": [history, end_ms]})["result"]
+
     def fet_series(self, rows: list[list[Any]], start_ms: int, end_ms: int) -> Any:
         return self._request({"op": "fetSeries", "rows": rows, "startMs": start_ms, "endMs": end_ms})["result"]
 
