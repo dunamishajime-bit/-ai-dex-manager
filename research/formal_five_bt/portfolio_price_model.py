@@ -407,6 +407,8 @@ def _portfolio_scenario(
     peak = 0.0
     max_dd = 0.0
     monthly = {}
+    missing_mtm = 0
+    missing_mtm_examples: list[dict[str, Any]] = []
     for ts in range(PERIOD_START_MS, PERIOD_END_MS + 1, HOUR):
         cash += event_cashflow.get(ts, 0.0)
         for trade in trades_by_exit.get(ts, []):
@@ -418,6 +420,11 @@ def _portfolio_scenario(
         for trade in open_curve.values():
             mark = _mark(market, trade["symbol"], ts)
             if mark is None:
+                # Omitting this unrealized exposure would make equity/DD look
+                # better on precisely the hours whose prices are missing.
+                missing_mtm += 1
+                if len(missing_mtm_examples) < 20:
+                    missing_mtm_examples.append({"symbol": trade["symbol"], "ts_ms": ts})
                 continue
             qty = float(trade["original_quantity"])
             partial = trade.get("partial_actual")
@@ -443,14 +450,16 @@ def _portfolio_scenario(
     final_equity = curve[-1][1] if curve else wallet
     return {
         "scenario_id": scenario_id,
-        "status": "COMPLETE_H1_PRICE_MODEL_NOT_L2_VERIFIED",
+        "status": "INCOMPLETE_MTM_H1_PRICE_MODEL" if missing_mtm else "COMPLETE_H1_PRICE_MODEL_NOT_L2_VERIFIED",
+        "missing_active_position_mtm_hours": missing_mtm,
+        "missing_mtm_examples": missing_mtm_examples,
         "round_trip_cost_bps": round_trip_cost_bps,
         "initial_jpy": 10_000.0, "monthly_jpy": 10_000.0, "contributed_jpy": total_contributed,
         "final_equity_jpy": final_equity,
         "net_profit_jpy": final_equity - total_contributed,
         "profit_factor": gains / losses if losses > 0 else None,
         "win_rate": sum(value > 0 for value in pnls) / len(pnls) if pnls else None,
-        "maximum_mtm_drawdown": max_dd,
+        "maximum_mtm_drawdown": None if missing_mtm else max_dd,
         "closed_trades": len(completed),
         "strategy_pnl_jpy": dict(strategy_pnl),
         "strategy_trades": dict(strategy_trades),
@@ -472,6 +481,8 @@ def run_portfolio_model(data_root: Path, candidate_root: Path, output_root: Path
     candidates = _rows(candidate_root / "crypto-price-model-candidates.jsonl")
     v52_unresolved = 0
     v52_skipped = 0
+    unresolved_crypto = Counter(str(row["strategy_id"]) + ":" + str(row["status"])
+                                for row in candidates if row.get("status") != "MODELED_CLOSED_TRADE")
     if v52_ledger_root is not None:
         v52_rows = _rows(Path(v52_ledger_root) / "v52-model-ledger.jsonl")
         v52_unresolved = sum(row.get("status") == "UNRESOLVED_MODEL_EXIT" for row in v52_rows)
@@ -508,7 +519,11 @@ def run_portfolio_model(data_root: Path, candidate_root: Path, output_root: Path
             json.dumps(result, sort_keys=True, indent=2, allow_nan=False) + "\n", encoding="utf-8")
         scenarios.append(result)
     summary = {
-        "status": "COMPLETE_CRYPTO_H1_PRICE_MODEL_NOT_FORMAL_L2_VERIFIED",
+        "status": ("INCOMPLETE_ALL_FIVE_PRICE_MODEL" if (
+            v52_unresolved or unresolved_crypto
+            or any(row["status"] == "INCOMPLETE_MTM_H1_PRICE_MODEL" for row in scenarios))
+            else "ALL_FIVE_H1_PRICE_MODEL_NOT_FORMAL_L2_VERIFIED"),
+        "unresolved_crypto_candidate_counts": dict(unresolved_crypto),
         "period_start_ms": PERIOD_START_MS, "period_end_exclusive_ms": PERIOD_END_MS,
         "contribution_model": "JPY notional contributions; FX translation intentionally omitted because FRED was unavailable in runner",
         "shared_crypto_gross_cap": CRYPTO_CAP, "stock_gross_cap": STOCK_CAP, "total_gross_cap": TOTAL_CAP,
