@@ -57,7 +57,7 @@ jobs:
           root="$RUNNER_TEMP/five-yahoo"
           mkdir -p "$root"
           port="${SSH_PORT:-22}"
-          ssh_opts=(-T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes
+          ssh_opts=(-n -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes
              -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -p "$port")
           ssh "${ssh_opts[@]}" "root@$SSH_HOST" \
             "set -Eeuo pipefail; test \"\$(tr -d '[:space:]' < /home/deploy/disdex-trading/current/.disdex-release-sha)\" = 'a09ea45ca3cbd72100f9eb0eaae499039c40b6a0';
@@ -146,7 +146,7 @@ jobs:
           digest="$(sha256sum "$RUNNER_TEMP/five-yahoo-5-results.tgz" | cut -d ' ' -f1)"
           remote="/var/lib/disdex/research-bt-formal/a09-five-yahoo-integrated-$GITHUB_RUN_ID.tgz"
           port="${SSH_PORT:-22}"
-          ssh_opts=(-T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes
+          ssh_opts=(-n -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes
              -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -p "$port")
           ssh "${ssh_opts[@]}" "root@$SSH_HOST" \
             "set -Eeuo pipefail; test \"\$(tr -d '[:space:]' < /home/deploy/disdex-trading/current/.disdex-release-sha)\" = 'a09ea45ca3cbd72100f9eb0eaae499039c40b6a0';
