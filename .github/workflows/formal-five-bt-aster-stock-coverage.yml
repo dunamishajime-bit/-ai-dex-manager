@@ -1,0 +1,32 @@
+name: Formal BT Aster Stock Hourly Coverage
+on:
+  workflow_dispatch:
+  push:
+    branches: [codex/formal-five-logic-bt-20260926]
+    paths:
+      - ".github/workflows/formal-five-bt-aster-stock-coverage.yml"
+permissions:
+  contents: read
+jobs:
+  official-public-aster-stock-price-probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Fetch exact stock-perpetual listing metadata and historical 1h candles
+        run: python -m research.formal_five_bt.aster_stock_acquire --data-root "$RUNNER_TEMP/aster-stock-probe"
+      - name: Print only historical availability, no raw prices
+        env:
+          STOCK_DATA_ROOT: ${{ runner.temp }}/aster-stock-probe
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          doc = json.loads((Path(os.environ["STOCK_DATA_ROOT"]) / "aster-stock-hourly-coverage.json").read_text())
+          for ticker, item in sorted(doc["symbols"].items()):
+              print(ticker, "status=", item["status"], "listed_from=", item.get("listed_from_ms"),
+                    "bars=", item["bars"], "missing_hours=", item.get("missing_hours_after_listing"))
+          PY
