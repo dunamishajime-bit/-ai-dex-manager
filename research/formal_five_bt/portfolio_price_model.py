@@ -811,7 +811,11 @@ def run_portfolio_model(data_root: Path, candidate_root: Path, output_root: Path
                                      PRIORITY.get(row["strategy_id"], 99), row["symbol"]))
     for candidate_index, candidate in enumerate(candidates, start=1):
         candidate["_model_candidate_id"] = f"C{candidate_index:06d}"
-    # Pre-allocation exclusions are audit rows only and must not force market-data\n    # availability. Only candidates that can actually enter the portfolio need marks.\n    symbols = {str(row["symbol"]) for row in candidates\n               if row.get("symbol") and row.get("status") == "MODELED_CLOSED_TRADE"}\n    v52_funding_missing = []
+    # Pre-allocation exclusions are audit rows only and must not force market-data
+    # availability. Only candidates that can actually enter the portfolio need marks.
+    symbols = {str(row["symbol"]) for row in candidates
+               if row.get("symbol") and row.get("status") == "MODELED_CLOSED_TRADE"}
+    v52_funding_missing = []
     stock_coverage = data_root / "aster-stock-hourly-coverage.json"
     stock_meta = (
         json.loads(stock_coverage.read_text())["symbols"]
