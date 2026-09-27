@@ -807,7 +807,8 @@ def run_portfolio_model(data_root: Path, candidate_root: Path, output_root: Path
                         v52_ledger_root: Path | None = None,
                         ecb_fx_root: Path | None = None,
                         cost_scenarios: tuple[tuple[str, float], ...] | None = None,
-                        variants_only: bool = False) -> dict[str, Any]:
+                        variants_only: bool = False,
+                        research_risk_caps: dict[str, float] | None = None) -> dict[str, Any]:
     data_root, candidate_root, output_root = map(Path, (data_root, candidate_root, output_root))
     candidates = _rows(candidate_root / "crypto-price-model-candidates.jsonl")
     fx_series = load_ecb_cross(ecb_fx_root) if ecb_fx_root is not None else None
@@ -817,7 +818,9 @@ def run_portfolio_model(data_root: Path, candidate_root: Path, output_root: Path
     v52_model_status = "NOT_PROVIDED"
     v52_model_complete = v52_ledger_root is None
     unresolved_crypto = Counter(str(row["strategy_id"]) + ":" + str(row["status"])
-                                for row in candidates if row.get("status") != "MODELED_CLOSED_TRADE")
+                                for row in candidates
+                                if row.get("status") not in (
+                                    "MODELED_CLOSED_TRADE", "FET_RESEARCH_GATE_BLOCKED"))
     if v52_ledger_root is not None:
         v52_root = Path(v52_ledger_root)
         v52_rows = _rows(v52_root / "v52-model-ledger.jsonl")
@@ -904,6 +907,8 @@ def run_portfolio_model(data_root: Path, candidate_root: Path, output_root: Path
             v52_funding_missing.append(stock)
     market = _market(data_root, symbols)
     scenarios = []
+    if variants_only and research_risk_caps is not None:
+        raise ValueError("CANNOT_COMBINE_VARIANTS_ONLY_WITH_RESEARCH_CAPS")
     if variants_only:
         scenario_configs = [(name, 10.0, caps) for name, caps in RISK_VARIANTS]
     else:
@@ -915,7 +920,8 @@ def run_portfolio_model(data_root: Path, candidate_root: Path, output_root: Path
             )
         if not cost_scenarios or any(not (0 <= cost <= 100) for _, cost in cost_scenarios):
             raise ValueError("INVALID_PRICE_MODEL_COST_SCENARIOS")
-        scenario_configs = [(name, cost, {}) for name, cost in cost_scenarios]
+        scenario_configs = [(name, cost, research_risk_caps or {})
+                            for name, cost in cost_scenarios]
     for scenario_id, cost, risk_caps in scenario_configs:
         result = _portfolio_scenario(candidates, data_root, market,
                                      round_trip_cost_bps=cost, scenario_id=scenario_id,
