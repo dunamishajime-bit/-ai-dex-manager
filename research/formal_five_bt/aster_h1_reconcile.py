@@ -175,12 +175,13 @@ def reconcile_one_primary_hour(
         "reconstructed_h1_ohlc_valid": True,
         "original_open_close_within_2bps": True,
     }
+    audit["normalized_h1_mutated"] = True
     manifest["aster_h1_reconstruction"] = audit
     # Preserve both copies; write the transformed normalized source *only*
-    # after the full minute-page provenance checks succeed.
+    # after the full minute-page provenance checks succeed. The manifest and
+    # independent status must have identical provenance fields and hashes.
     candle_path.write_bytes(normalized)
     _write_json(manifest_path, manifest)
-    audit["normalized_h1_mutated"] = True
     _write_json(root / "aster-h1-reconciliation-status.json", audit)
     return audit
 
