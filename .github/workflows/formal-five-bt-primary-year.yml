@@ -57,7 +57,7 @@ jobs:
           python -m research.formal_five_bt.signal_scan --data-root "$RUNNER_TEMP/formal-bt" --output-root "$RUNNER_TEMP/formal-scans/baseline-signal-scan" --strategies V12 PENGU FET
       - name: Replay Q102 as-of causal signal scan independently
         run: |
-          python -m research.formal_five_bt.signal_scan --data-root "$RUNNER_TEMP/formal-bt" --output-root "$RUNNER_TEMP/formal-scans/baseline-signal-scan-q102" --strategies Q102
+          python -m research.formal_five_bt.signal_scan --data-root "$RUNNER_TEMP/formal-bt" --output-root "$RUNNER_TEMP/formal-scans/baseline-signal-scan-q102" --strategies Q102 --q102-fast
       - name: Build causal H1 candidate trade lifecycles without shared allocation
         run: |
           python -m research.formal_five_bt.crypto_price_model \
