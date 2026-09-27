@@ -43,6 +43,32 @@ class StockAcquisitionTests(unittest.TestCase):
             self.assertEqual(result["symbols"]["AMZN"]["status"], "INSTRUMENT_NOT_IN_CURRENT_CATALOG")
             self.assertTrue((root / "normalized/aster_stock/klines/NVDAUSDT.jsonl").is_file())
 
+    def test_native_stock_perp_funding_is_hash_verified(self):
+        def klines(symbol, start, end):
+            raw = b"stock-price-page"
+            row = [ms("2026-06-15T13:00:00"), "100", "101", "99", "100",
+                   "10", ms("2026-06-15T13:59:59"), "1000"]
+            return SimpleNamespace(source="aster", native_instrument=symbol, interval="1h",
+                                   rows=[row], raw_responses=[raw],
+                                   page_hashes=[hashlib.sha256(raw).hexdigest()])
+        def funding(symbol, start, end):
+            raw = b"stock-funding-page"
+            return SimpleNamespace(source="aster", native_instrument=symbol,
+                rows=[{"fundingTime": ms("2026-06-15T14:00:00"), "fundingRate": "0.0001"}],
+                raw_responses=[raw], page_hashes=[hashlib.sha256(raw).hexdigest()])
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            report = acquire_aster_stock(root, get_catalog=self._catalog,
+                                         get_klines=klines, get_funding=funding)
+            self.assertEqual(report["symbols"]["NVDA"]["funding_status"],
+                             "ACQUIRED_PRICE_MODEL_ONLY")
+            self.assertEqual(report["symbols"]["NVDA"]["funding_count"], 1)
+            path = root / "normalized/aster_stock/funding/NVDAUSDT.jsonl"
+            self.assertTrue(path.is_file())
+            self.assertEqual(
+                hashlib.sha256(path.read_bytes()).hexdigest(),
+                report["symbols"]["NVDA"]["funding_normalized_sha256"])
+
     def test_invalid_or_unverified_price_chain_is_never_accepted(self):
         def invalid(symbol, start, end):
             raw = b"wrong"
