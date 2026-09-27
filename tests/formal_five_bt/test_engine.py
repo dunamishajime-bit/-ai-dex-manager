@@ -14,10 +14,29 @@ from research.formal_five_bt.engine import (
     _v52_decisions,
     _write_jsonl_gz,
     render_report,
+    q102_coverage_limitation,
 )
 
 
 class IntegratedEngineTests(unittest.TestCase):
+    def test_q102_report_retains_selected_signals_and_incomplete_hours(self):
+        description=q102_coverage_limitation({'signal_rows':101,'decision_timestamps':8785,'error_timestamps':4345})
+        self.assertIn('101 causal candidates',description)
+        self.assertIn('4345 timestamps',description)
+        self.assertNotIn('entire tested decision stream',description)
+
+    def test_report_uses_actual_fx_provider_not_hardcoded_fred(self):
+        manifest={'run_id':'qa','status':'NOT_VERIFIABLE','runtime_sha':'a'*40,
+          'audited_release_id':'b'*40,'period_start_utc':PERIOD_START.isoformat(),
+          'starting_capital_jpy':10000,'monthly_contribution_jpy':10000,
+          'monthly_contribution_count':12,'total_contributions_jpy':130000,
+          'scenarios':[],'limitations':[]}
+        output=render_report(manifest,{'symbols':[],
+          'fx':{'source':'ECB_DAILY_CROSS_NOT_FRED','observations':410,'status':'VERIFIED'},
+          'l2_archives':[]})
+        self.assertIn('ECB_DAILY_CROSS_NOT_FRED',output)
+        self.assertNotIn('FRED DEXJPUS rows',output)
+
     def test_no_l2_turns_a_signal_into_skipped_or_not_verifiable_never_a_fill(self):
         row = {"status": "SIGNAL", "symbol": "ADAUSDT", "decision_ts_ms": 1_754_798_400_000,
                "signal": {"entryTs": 1_754_798_400_000, "side": 1}}

@@ -1,6 +1,6 @@
 # Five-Logic Integrated Backtest — Design Specification
 
-**Status:** Design approved for specification review; implementation has not started.
+**Status as of 2026-09-27:** source snapshot and candidate replay implemented; formal five-logic performance remains NOT_VERIFIABLE because contemporaneous snapshot-seeded L2 books, historical exact fees and V52 perpetual quotes are missing. Separately modeled H1 research scenarios are not live-parity backtests. See docs/research/formal-five-bt-handoff-evidence-20260927.md.
 **Created:** 2026-09-26
 **Scope:** V12, PENGU, Q102, FET, V52.
 **Production boundary:** Read-only source audit only. No VPS, production data, live order, configuration, or strategy code changes are permitted.
