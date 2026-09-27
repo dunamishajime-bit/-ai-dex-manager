@@ -10,7 +10,7 @@ permissions:
 jobs:
   official-public-aster-stock-price-probe:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -29,4 +29,30 @@ jobs:
           for ticker, item in sorted(doc["symbols"].items()):
               print(ticker, "status=", item["status"], "listed_from=", item.get("listed_from_ms"),
                     "bars=", item["bars"], "missing_hours=", item.get("missing_hours_after_listing"))
+          PY
+      - name: Restore exact SHA-matched audited V52 policy (read-only)
+        run: |
+          git fetch --filter=blob:none --no-tags --depth=1 origin a09ea45ca3cbd72100f9eb0eaae499039c40b6a0
+          python -m research.formal_five_bt.restore_snapshot
+      - name: Acquire Yahoo historical hourly underlying equity reference in ephemeral space
+        run: python -m research.formal_five_bt.yahoo_acquire --output-root "$RUNNER_TEMP/aster-stock-probe"
+      - name: Replay full-year strictly causal V50 price-only research candidates
+        run: |
+          python -m research.formal_five_bt.v52_price_only_scan \
+            --data-root "$RUNNER_TEMP/aster-stock-probe" \
+            --output-root "$RUNNER_TEMP/aster-stock-v52-model"
+      - name: Print summary without publishing raw licensed market data
+        env:
+          RESEARCH_OUTPUT: ${{ runner.temp }}/aster-stock-v52-model
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          report = json.loads((Path(os.environ["RESEARCH_OUTPUT"]) / "price-only-scan-manifest.json").read_text())
+          print("MODEL:", report["model"])
+          print("STATUS:", report["status"])
+          print("RUNTIME_SHA:", report["runtime_sha"])
+          print("COUNTS:", json.dumps(report["counts"], sort_keys=True))
+          print("UNVERIFIED_GATES:", ",".join(report["unverified_gates"]))
+          print("PROFIT_METRICS:", report["profit_metrics"])
           PY
