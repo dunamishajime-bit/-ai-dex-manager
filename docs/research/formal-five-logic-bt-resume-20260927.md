@@ -121,3 +121,49 @@ python -m research.formal_five_bt.engine --data-root <local-only-data> --scan-ro
 Do not commit or upload raw historical prices or data-bearing detailed
 trades/gate logs to the public repository without verified permission.
 No change to live VPS files, runner service state or real orders was made.
+
+
+## Latest dated execution checkpoint — 2026-09-27 evening JST
+
+This section supersedes older statements above about the absence of Q102
+causal replay and V52 price-only exits.
+
+GitHub Actions run 36314179783 (audited runtime
+`e1b58060d6263a3af7ced51bec854d3e211d2f35`) successfully acquired
+Aster H1 and funding for **32 of 32** configured cryptocurrency symbols.
+The independent source-backed signal scanners completed: V12 1,459 signal
+rows; PENGU 113 raw entry rows (LONG_V2_FINAL 19,
+RECOVERY_V8 50, SHORT_V20 44); Q102 180 selected monthly-cached
+signal rows; FET 26 signal rows. **These are raw signal observations,
+not independent fills or portfolio trades.**
+
+The first crypto trade-lifecycle pass then detected malformed OHLC in
+BTCUSDT at event timestamp 1757768400000 and failed closed with
+`INVALID_ASTER_OHLC`. The research replay now excludes malformed source
+candles without modifying acquisition data, forward-filling, or turning
+them into profitable events. A decision whose own-market or requisite BTC
+signal inputs could have been contaminated in the preceding 30 days, or
+whose execution period spans a corrupt bar, receives
+`UNRESOLVED_SOURCE_OHLC` and is excluded from modeled P&L. The source
+rejection count and excluded decision count are written to the model
+manifest for explicit review. This quarantine is intentionally conservative;
+it is not an assertion that an invalid original price can be repaired.
+
+FRED DEXJPUS returned `NOT_VERIFIABLE_FX_PROVIDER_UNAVAILABLE` in this
+runner. The separate exploratory portfolio PRICE MODEL currently uses
+nominal JPY-sized deposits against USD-market returns *without FX
+conversion*, and therefore **its JPY amount is illustrative, not a
+verified Japanese-yen equity curve or a formal BT result**.
+
+The primary-year CI now runs in order: audited source restore, 32
+cryptocurrency source acquisitions, four as-of signal scans, crypto
+entry/exit price model, independent Yahoo and Aster stock-perpetual
+V52 one-year price-only scan and exit ledger, then a single chronological
+shared-Gross nominal-price replay covering all five strategies in 10bps
+and 70bps cost scenarios. It retains only aggregate result JSON as a
+30-day Actions artifact; raw vendor time series are ephemeral and
+not uploaded. These assumptions do not reconstruct original quote/book
+gates, historical margin liquidation mechanics, or same-currency FX
+accounting. **Do not rename the output a VERIFIED 5-logic BT.**
+Run conclusions and numerical results must be verified in the Actions
+logs/artifact rather than guessed.
