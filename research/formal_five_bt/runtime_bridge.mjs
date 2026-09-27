@@ -671,6 +671,114 @@ if (process.argv.includes("--list")) {
           }, {}),
           candidates,
         }) };
+      } else if (request.op === "q102FastSeries") {
+        const candlesBySymbol = request.candlesBySymbol;
+        const highVolSymbols = request.highVolSymbols;
+        const symbols = request.symbols;
+        const startMs = Number(request.startMs);
+        const endMs = Number(request.endMs);
+        if (!candlesBySymbol || !Array.isArray(highVolSymbols) || !Array.isArray(symbols)
+            || !Number.isFinite(startMs) || !Number.isFinite(endMs) || endMs < startMs) {
+          throw new Error("Q102_FAST_SERIES_INPUT_INVALID");
+        }
+        const valid = (row) => row
+          && Number.isFinite(Number(row.timestampMs)) && Number(row.timestampMs) > 0
+          && ["open", "high", "low", "close"].every((key) => Number.isFinite(Number(row[key])) && Number(row[key]) > 0)
+          && Number.isFinite(Number(row.quoteVolume)) && Number(row.quoteVolume) >= 0
+          && Number(row.high) >= Math.max(Number(row.open), Number(row.close))
+          && Number(row.low) <= Math.min(Number(row.open), Number(row.close))
+          && Number(row.high) >= Number(row.low);
+        const meta = {};
+        for (const [symbol, rows] of Object.entries(candlesBySymbol)) {
+          const contiguousStart = new Array(rows.length);
+          let currentStart = 0;
+          for (let i = 0; i < rows.length; i += 1) {
+            if (!valid(rows[i])) currentStart = i + 1;
+            else if (i > 0 && (!valid(rows[i - 1])
+              || Number(rows[i].timestampMs) - Number(rows[i - 1].timestampMs) !== Q102_HOUR)) currentStart = i;
+            contiguousStart[i] = currentStart;
+          }
+          meta[symbol] = {
+            rows,
+            times: rows.map((row) => Number(row.timestampMs)),
+            contiguousStart,
+          };
+        }
+        const lowerBound = (times, target) => {
+          let lo = 0, hi = times.length;
+          while (lo < hi) {
+            const mid = (lo + hi) >> 1;
+            if (times[mid] < target) lo = mid + 1; else hi = mid;
+          }
+          return lo;
+        };
+        const results = [];
+        for (let decisionTs = Math.ceil(startMs / Q102_HOUR) * Q102_HOUR;
+             decisionTs <= endMs; decisionTs += Q102_HOUR) {
+          const historyRows = {};
+          const entryOpenBySymbol = {};
+          const monthStart = loaded.q102Pipeline.monthStartUtc(decisionTs - Q102_HOUR);
+          const highVolEarliest = monthStart - Q102_TRAINING_DAYS * Q102_DAY - Q102_FEATURE_WARMUP * Q102_HOUR;
+          const btcInfo = meta.BTCUSDT;
+          let btcReady = false;
+          if (btcInfo) {
+            const currentIndex = lowerBound(btcInfo.times, decisionTs) - 1;
+            if (currentIndex >= 0 && valid(btcInfo.rows[currentIndex])) {
+              const segmentStart = btcInfo.contiguousStart[currentIndex];
+              const desired = lowerBound(btcInfo.times, highVolEarliest);
+              const start = Math.max(segmentStart, Math.min(desired, currentIndex));
+              const slice = btcInfo.rows.slice(start, currentIndex + 1);
+              historyRows.BTCUSDT = slice;
+              btcReady = slice.length >= 181 * 24;
+            }
+          }
+          const availableSymbols = [];
+          const availableHighVol = [];
+          for (const symbol of symbols) {
+            const info = meta[symbol];
+            if (!info) continue;
+            const entryIndex = lowerBound(info.times, decisionTs);
+            if (entryIndex >= info.rows.length || info.times[entryIndex] !== decisionTs) continue;
+            const completedIndex = entryIndex - 1;
+            if (completedIndex < 0 || !valid(info.rows[completedIndex])) continue;
+            const segmentStart = info.contiguousStart[completedIndex];
+            const segmentLength = completedIndex - segmentStart + 1;
+            if (segmentLength < Q102_FEATURE_WARMUP) continue;
+            const isHigh = highVolSymbols.includes(symbol) && btcReady;
+            const desiredStartTs = isHigh ? highVolEarliest : decisionTs - Q102_FEATURE_WARMUP * Q102_HOUR;
+            const desired = lowerBound(info.times, desiredStartTs);
+            const start = Math.max(segmentStart, Math.min(desired, completedIndex));
+            const slice = info.rows.slice(start, completedIndex + 1);
+            historyRows[symbol] = slice;
+            entryOpenBySymbol[symbol] = { timestampMs: decisionTs, open: info.rows[entryIndex].open };
+            availableSymbols.push(symbol);
+            if (isHigh && segmentLength >= 181 * 24) availableHighVol.push(symbol);
+          }
+          if (!availableSymbols.length || !availableHighVol.length || !historyRows.BTCUSDT) {
+            results.push({
+              decisionTs,
+              signal: {
+                strategyId: "QUALITY102_CAUSAL_V1", referenceTs: decisionTs,
+                side: 0, requestedGross: 0, reason: "Q102_POINT_IN_TIME_UNIVERSE_NOT_READY",
+                dataCutoffTs: decisionTs, brkEnabled: true,
+              },
+              availableSymbols, availableHighVol,
+            });
+            continue;
+          }
+          const history = { candlesBySymbol: historyRows, entryOpenBySymbol };
+          try {
+            const signal = q102FastSignal(history, decisionTs, availableHighVol);
+            results.push({ decisionTs, signal, availableSymbols, availableHighVol });
+          } catch (error) {
+            results.push({
+              decisionTs,
+              error: error instanceof Error ? error.message.split("\n")[0] : "Q102_FAST_EVALUATION_FAILED",
+              availableSymbols, availableHighVol,
+            });
+          }
+        }
+        response = { ok: true, result: jsonSafe(results) };
       } else if (request.op === "q102Series") {
         const candlesBySymbol = request.candlesBySymbol;
         const highVolSymbols = request.highVolSymbols;
