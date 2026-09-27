@@ -27,6 +27,8 @@ jobs:
         run: python -m unittest discover -s tests/formal_five_bt -p 'test_aster_stock_acquire.py' -v
       - name: Test causal V52 price-only research signals
         run: python -m unittest discover -s tests/formal_five_bt -p 'test_v52_price_only_scan.py' -v
+      - name: Test V52 research provenance and duplicate guards
+        run: python -m unittest discover -s tests/formal_five_bt -p 'test_v52_research_bridge.py' -v
       - name: Test deterministic integrated-runner bookkeeping
         run: python -m unittest discover -s tests/formal_five_bt -p 'test_engine.py' -v
       - name: Check Python source syntax
