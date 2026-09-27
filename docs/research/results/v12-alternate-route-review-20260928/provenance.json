@@ -1,0 +1,13 @@
+{
+  "causal_closed_h2": true,
+  "five_logic_integrated_pnl_or_dd_verified": false,
+  "frozen_runtime_sha": "a09ea45ca3cbd72100f9eb0eaae499039c40b6a0",
+  "live_updated": false,
+  "original_aster_only": true,
+  "recent_acquisition_sha256": "6d39a8f52bb28f623e8b08afa2737dd9e188a9028e513f64b53e2cf9790d8b13",
+  "recent_scan_sha256": "caa436909db655ecede2e35ce6b38f35070780d19adb20c59d4b17b2183aa425",
+  "research_source_commit": "d79cf6d34b9b435c0facbda1e8717892f3d23087",
+  "status": "RESEARCH_ROUTE_PROXY_NO_INTEGRATED_BT",
+  "year_acquisition_sha256": "1d9a665c82782e8dca28810ddbcdf48d528acc232916d94e53d4937435d0f462",
+  "year_scan_sha256": "b99945de1a0a20a753c9fd90dd029b3fb4ccc82046e583ab0bec66a1df999d69"
+}

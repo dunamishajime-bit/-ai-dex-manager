@@ -1,0 +1,1503 @@
+{
+  "adopted_normal_gate": {
+    "score": 1.0,
+    "volume": 0.8
+  },
+  "cost_roundtrip_assumed": 0.003,
+  "outcome_warning": "NON_EXECUTABLE_NEXT_H2_OPEN_TO_24H_CLOSE_PROXY; NO STOP/TP/TRAIL/GROSS/FUNDING/WR OR INTEGRATED DD",
+  "period": [
+    "2026-08-28",
+    "2026-09-27"
+  ],
+  "recent_is_not_independent_from_existing_1Y_WHEN_OVERLAPPING": true,
+  "source": "ASTER_EXACT_FROZEN_V12_SCAN",
+  "status": "RESEARCH_ROUTE_PROXY_DONE_NO_EXECUTABLE_BT",
+  "variants": {
+    "ADOPTED_FROZEN_ALTS": {
+      "added_selected_vs_adopted": 0,
+      "displaced_selected_vs_adopted": 0,
+      "final92d_independent_46h_total": {
+        "average_net_24h_proxy": -0.0013019590294223993,
+        "observations": 51,
+        "positive_share_24h": 0.38,
+        "proxy_profit_factor": 0.9196847631021619,
+        "sum_abs_negative_returns": 0.8105305292683782,
+        "sum_positive_returns": 0.7454325777972582,
+        "valid_forward_24h": 50
+      },
+      "independent_46h_total": {
+        "average_net_24h_proxy": -0.0013019590294223993,
+        "observations": 51,
+        "positive_share_24h": 0.38,
+        "proxy_profit_factor": 0.9196847631021619,
+        "sum_abs_negative_returns": 0.8105305292683782,
+        "sum_positive_returns": 0.7454325777972582,
+        "valid_forward_24h": 50
+      },
+      "longest_zero_day_streak": 5,
+      "no_signal_days": 12,
+      "raw_gate_passes_by_route": {
+        "NORMAL": 62,
+        "RELAXED_ALT": 108,
+        "STRONG_ALT": 148
+      },
+      "rejected_raw_by_reason": {
+        "REJECT_DIRECTION": 19,
+        "REJECT_EDGE": 154,
+        "REJECT_MOMENTUM": 461,
+        "REJECT_NEUTRAL_SCORE": 957,
+        "REJECT_RELAXED_MOMENTUM_ATR": 84,
+        "REJECT_STRONG_QUALITY": 136,
+        "REJECT_VOLUME": 2925
+      },
+      "repeated_top3_selected": 176,
+      "route_breakdown": {
+        "NORMAL": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": -0.0011326405471606587,
+            "observations": 18,
+            "positive_share_24h": 0.35294117647058826,
+            "proxy_profit_factor": 0.8645109734440413,
+            "sum_abs_negative_returns": 0.14211401315056824,
+            "sum_positive_returns": 0.12285912384883703,
+            "valid_forward_24h": 17
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.0011326405471606587,
+            "observations": 18,
+            "positive_share_24h": 0.35294117647058826,
+            "proxy_profit_factor": 0.8645109734440413,
+            "sum_abs_negative_returns": 0.14211401315056824,
+            "sum_positive_returns": 0.12285912384883703,
+            "valid_forward_24h": 17
+          },
+          "repeated_selected": 61
+        },
+        "RELAXED_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": -0.0130181895987047,
+            "observations": 13,
+            "positive_share_24h": 0.23076923076923078,
+            "proxy_profit_factor": 0.543915427628382,
+            "sum_abs_negative_returns": 0.37106377859513984,
+            "sum_positive_returns": 0.20182731381197871,
+            "valid_forward_24h": 13
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.0130181895987047,
+            "observations": 13,
+            "positive_share_24h": 0.23076923076923078,
+            "proxy_profit_factor": 0.543915427628382,
+            "sum_abs_negative_returns": 0.37106377859513984,
+            "sum_positive_returns": 0.20182731381197871,
+            "valid_forward_24h": 13
+          },
+          "repeated_selected": 43
+        },
+        "STRONG_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": 0.0061696701306886165,
+            "observations": 20,
+            "positive_share_24h": 0.5,
+            "proxy_profit_factor": 1.4149731515566248,
+            "sum_abs_negative_returns": 0.2973527375226702,
+            "sum_positive_returns": 0.4207461401364425,
+            "valid_forward_24h": 20
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": 0.0061696701306886165,
+            "observations": 20,
+            "positive_share_24h": 0.5,
+            "proxy_profit_factor": 1.4149731515566248,
+            "sum_abs_negative_returns": 0.2973527375226702,
+            "sum_positive_returns": 0.4207461401364425,
+            "valid_forward_24h": 20
+          },
+          "repeated_selected": 72
+        },
+        "STRONG_GAP": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": null,
+            "observations": 0,
+            "positive_share_24h": null,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 0
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": null,
+            "observations": 0,
+            "positive_share_24h": null,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 0
+          },
+          "repeated_selected": 0
+        }
+      },
+      "selected_by_route": {
+        "NORMAL": 61,
+        "RELAXED_ALT": 43,
+        "STRONG_ALT": 72
+      },
+      "signal_days": 18,
+      "variant": {}
+    },
+    "BOTH_ALTS_FAST_BTC12H_ALIGNMENT": {
+      "added_selected_vs_adopted": 0,
+      "displaced_selected_vs_adopted": 41,
+      "final92d_independent_46h_total": {
+        "average_net_24h_proxy": -0.0051297541499308414,
+        "observations": 47,
+        "positive_share_24h": 0.34782608695652173,
+        "proxy_profit_factor": 0.6961340080099346,
+        "sum_abs_negative_returns": 0.7765551167849462,
+        "sum_positive_returns": 0.5405864258881274,
+        "valid_forward_24h": 46
+      },
+      "independent_46h_total": {
+        "average_net_24h_proxy": -0.0051297541499308414,
+        "observations": 47,
+        "positive_share_24h": 0.34782608695652173,
+        "proxy_profit_factor": 0.6961340080099346,
+        "sum_abs_negative_returns": 0.7765551167849462,
+        "sum_positive_returns": 0.5405864258881274,
+        "valid_forward_24h": 46
+      },
+      "longest_zero_day_streak": 5,
+      "no_signal_days": 12,
+      "raw_gate_passes_by_route": {
+        "NORMAL": 62,
+        "RELAXED_ALT": 62,
+        "STRONG_ALT": 113
+      },
+      "rejected_raw_by_reason": {
+        "REJECT_DIRECTION": 19,
+        "REJECT_EDGE": 154,
+        "REJECT_MOMENTUM": 461,
+        "REJECT_NEUTRAL_SCORE": 957,
+        "REJECT_RELAXED_FAST_BTC": 46,
+        "REJECT_RELAXED_MOMENTUM_ATR": 84,
+        "REJECT_STRONG_FAST_BTC": 35,
+        "REJECT_STRONG_QUALITY": 136,
+        "REJECT_VOLUME": 2925
+      },
+      "repeated_top3_selected": 135,
+      "route_breakdown": {
+        "NORMAL": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": -0.0011326405471606587,
+            "observations": 18,
+            "positive_share_24h": 0.35294117647058826,
+            "proxy_profit_factor": 0.8645109734440413,
+            "sum_abs_negative_returns": 0.14211401315056824,
+            "sum_positive_returns": 0.12285912384883703,
+            "valid_forward_24h": 17
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.0011326405471606587,
+            "observations": 18,
+            "positive_share_24h": 0.35294117647058826,
+            "proxy_profit_factor": 0.8645109734440413,
+            "sum_abs_negative_returns": 0.14211401315056824,
+            "sum_positive_returns": 0.12285912384883703,
+            "valid_forward_24h": 17
+          },
+          "repeated_selected": 61
+        },
+        "RELAXED_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": -0.028407076807417397,
+            "observations": 11,
+            "positive_share_24h": 0.09090909090909091,
+            "proxy_profit_factor": 0.12720529772340336,
+            "sum_abs_negative_returns": 0.35801986889531356,
+            "sum_positive_returns": 0.045542024013722204,
+            "valid_forward_24h": 11
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.028407076807417397,
+            "observations": 11,
+            "positive_share_24h": 0.09090909090909091,
+            "proxy_profit_factor": 0.12720529772340336,
+            "sum_abs_negative_returns": 0.35801986889531356,
+            "sum_positive_returns": 0.045542024013722204,
+            "valid_forward_24h": 11
+          },
+          "repeated_selected": 22
+        },
+        "STRONG_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": 0.0053202246270279896,
+            "observations": 18,
+            "positive_share_24h": 0.5,
+            "proxy_profit_factor": 1.3464424264543313,
+            "sum_abs_negative_returns": 0.27642123473906444,
+            "sum_positive_returns": 0.3721852780255682,
+            "valid_forward_24h": 18
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": 0.0053202246270279896,
+            "observations": 18,
+            "positive_share_24h": 0.5,
+            "proxy_profit_factor": 1.3464424264543313,
+            "sum_abs_negative_returns": 0.27642123473906444,
+            "sum_positive_returns": 0.3721852780255682,
+            "valid_forward_24h": 18
+          },
+          "repeated_selected": 52
+        },
+        "STRONG_GAP": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": null,
+            "observations": 0,
+            "positive_share_24h": null,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 0
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": null,
+            "observations": 0,
+            "positive_share_24h": null,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 0
+          },
+          "repeated_selected": 0
+        }
+      },
+      "selected_by_route": {
+        "NORMAL": 61,
+        "RELAXED_ALT": 22,
+        "STRONG_ALT": 52
+      },
+      "signal_days": 18,
+      "variant": {
+        "relaxed_fast": true,
+        "strong_fast": true
+      }
+    },
+    "RELAXED_FAST_BTC12H_ALIGNMENT": {
+      "added_selected_vs_adopted": 0,
+      "displaced_selected_vs_adopted": 21,
+      "final92d_independent_46h_total": {
+        "average_net_24h_proxy": -0.004591741750601415,
+        "observations": 49,
+        "positive_share_24h": 0.3541666666666667,
+        "proxy_profit_factor": 0.7277458326594243,
+        "sum_abs_negative_returns": 0.8095508920278697,
+        "sum_positive_returns": 0.5891472879990017,
+        "valid_forward_24h": 48
+      },
+      "independent_46h_total": {
+        "average_net_24h_proxy": -0.004591741750601415,
+        "observations": 49,
+        "positive_share_24h": 0.3541666666666667,
+        "proxy_profit_factor": 0.7277458326594243,
+        "sum_abs_negative_returns": 0.8095508920278697,
+        "sum_positive_returns": 0.5891472879990017,
+        "valid_forward_24h": 48
+      },
+      "longest_zero_day_streak": 5,
+      "no_signal_days": 12,
+      "raw_gate_passes_by_route": {
+        "NORMAL": 62,
+        "RELAXED_ALT": 62,
+        "STRONG_ALT": 148
+      },
+      "rejected_raw_by_reason": {
+        "REJECT_DIRECTION": 19,
+        "REJECT_EDGE": 154,
+        "REJECT_MOMENTUM": 461,
+        "REJECT_NEUTRAL_SCORE": 957,
+        "REJECT_RELAXED_FAST_BTC": 46,
+        "REJECT_RELAXED_MOMENTUM_ATR": 84,
+        "REJECT_STRONG_QUALITY": 136,
+        "REJECT_VOLUME": 2925
+      },
+      "repeated_top3_selected": 155,
+      "route_breakdown": {
+        "NORMAL": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": -0.0011326405471606587,
+            "observations": 18,
+            "positive_share_24h": 0.35294117647058826,
+            "proxy_profit_factor": 0.8645109734440413,
+            "sum_abs_negative_returns": 0.14211401315056824,
+            "sum_positive_returns": 0.12285912384883703,
+            "valid_forward_24h": 17
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.0011326405471606587,
+            "observations": 18,
+            "positive_share_24h": 0.35294117647058826,
+            "proxy_profit_factor": 0.8645109734440413,
+            "sum_abs_negative_returns": 0.14211401315056824,
+            "sum_positive_returns": 0.12285912384883703,
+            "valid_forward_24h": 17
+          },
+          "repeated_selected": 61
+        },
+        "RELAXED_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": -0.028407076807417397,
+            "observations": 11,
+            "positive_share_24h": 0.09090909090909091,
+            "proxy_profit_factor": 0.12720529772340336,
+            "sum_abs_negative_returns": 0.35801986889531356,
+            "sum_positive_returns": 0.045542024013722204,
+            "valid_forward_24h": 11
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.028407076807417397,
+            "observations": 11,
+            "positive_share_24h": 0.09090909090909091,
+            "proxy_profit_factor": 0.12720529772340336,
+            "sum_abs_negative_returns": 0.35801986889531356,
+            "sum_positive_returns": 0.045542024013722204,
+            "valid_forward_24h": 11
+          },
+          "repeated_selected": 22
+        },
+        "STRONG_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": 0.00556645650772273,
+            "observations": 20,
+            "positive_share_24h": 0.5,
+            "proxy_profit_factor": 1.3598028762573051,
+            "sum_abs_negative_returns": 0.30941700998198796,
+            "sum_positive_returns": 0.4207461401364425,
+            "valid_forward_24h": 20
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": 0.00556645650772273,
+            "observations": 20,
+            "positive_share_24h": 0.5,
+            "proxy_profit_factor": 1.3598028762573051,
+            "sum_abs_negative_returns": 0.30941700998198796,
+            "sum_positive_returns": 0.4207461401364425,
+            "valid_forward_24h": 20
+          },
+          "repeated_selected": 72
+        },
+        "STRONG_GAP": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": null,
+            "observations": 0,
+            "positive_share_24h": null,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 0
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": null,
+            "observations": 0,
+            "positive_share_24h": null,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 0
+          },
+          "repeated_selected": 0
+        }
+      },
+      "selected_by_route": {
+        "NORMAL": 61,
+        "RELAXED_ALT": 22,
+        "STRONG_ALT": 72
+      },
+      "signal_days": 18,
+      "variant": {
+        "relaxed_fast": true
+      }
+    },
+    "RELAXED_MIN_SCORE_0P15": {
+      "added_selected_vs_adopted": 0,
+      "displaced_selected_vs_adopted": 6,
+      "final92d_independent_46h_total": {
+        "average_net_24h_proxy": 0.002910849197304661,
+        "observations": 48,
+        "positive_share_24h": 0.40425531914893614,
+        "proxy_profit_factor": 1.2247860949370737,
+        "sum_abs_negative_returns": 0.6086226655239392,
+        "sum_positive_returns": 0.7454325777972582,
+        "valid_forward_24h": 47
+      },
+      "independent_46h_total": {
+        "average_net_24h_proxy": 0.002910849197304661,
+        "observations": 48,
+        "positive_share_24h": 0.40425531914893614,
+        "proxy_profit_factor": 1.2247860949370737,
+        "sum_abs_negative_returns": 0.6086226655239392,
+        "sum_positive_returns": 0.7454325777972582,
+        "valid_forward_24h": 47
+      },
+      "longest_zero_day_streak": 5,
+      "no_signal_days": 14,
+      "raw_gate_passes_by_route": {
+        "NORMAL": 62,
+        "RELAXED_ALT": 99,
+        "STRONG_ALT": 148
+      },
+      "rejected_raw_by_reason": {
+        "REJECT_DIRECTION": 19,
+        "REJECT_EDGE": 154,
+        "REJECT_MOMENTUM": 461,
+        "REJECT_NEUTRAL_SCORE": 957,
+        "REJECT_RELAXED_MOMENTUM_ATR": 84,
+        "REJECT_RELAXED_SCORE": 9,
+        "REJECT_STRONG_QUALITY": 136,
+        "REJECT_VOLUME": 2925
+      },
+      "repeated_top3_selected": 170,
+      "route_breakdown": {
+        "NORMAL": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": -0.0011326405471606587,
+            "observations": 18,
+            "positive_share_24h": 0.35294117647058826,
+            "proxy_profit_factor": 0.8645109734440413,
+            "sum_abs_negative_returns": 0.14211401315056824,
+            "sum_positive_returns": 0.12285912384883703,
+            "valid_forward_24h": 17
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.0011326405471606587,
+            "observations": 18,
+            "positive_share_24h": 0.35294117647058826,
+            "proxy_profit_factor": 0.8645109734440413,
+            "sum_abs_negative_returns": 0.14211401315056824,
+            "sum_positive_returns": 0.12285912384883703,
+            "valid_forward_24h": 17
+          },
+          "repeated_selected": 61
+        },
+        "RELAXED_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": 0.0032671398961277923,
+            "observations": 10,
+            "positive_share_24h": 0.3,
+            "proxy_profit_factor": 1.1931436981681316,
+            "sum_abs_negative_returns": 0.1691559148507008,
+            "sum_positive_returns": 0.20182731381197871,
+            "valid_forward_24h": 10
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": 0.0032671398961277923,
+            "observations": 10,
+            "positive_share_24h": 0.3,
+            "proxy_profit_factor": 1.1931436981681316,
+            "sum_abs_negative_returns": 0.1691559148507008,
+            "sum_positive_returns": 0.20182731381197871,
+            "valid_forward_24h": 10
+          },
+          "repeated_selected": 37
+        },
+        "STRONG_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": 0.0061696701306886165,
+            "observations": 20,
+            "positive_share_24h": 0.5,
+            "proxy_profit_factor": 1.4149731515566248,
+            "sum_abs_negative_returns": 0.2973527375226702,
+            "sum_positive_returns": 0.4207461401364425,
+            "valid_forward_24h": 20
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": 0.0061696701306886165,
+            "observations": 20,
+            "positive_share_24h": 0.5,
+            "proxy_profit_factor": 1.4149731515566248,
+            "sum_abs_negative_returns": 0.2973527375226702,
+            "sum_positive_returns": 0.4207461401364425,
+            "valid_forward_24h": 20
+          },
+          "repeated_selected": 72
+        },
+        "STRONG_GAP": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": null,
+            "observations": 0,
+            "positive_share_24h": null,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 0
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": null,
+            "observations": 0,
+            "positive_share_24h": null,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 0
+          },
+          "repeated_selected": 0
+        }
+      },
+      "selected_by_route": {
+        "NORMAL": 61,
+        "RELAXED_ALT": 37,
+        "STRONG_ALT": 72
+      },
+      "signal_days": 16,
+      "variant": {
+        "relaxed_min": 0.15
+      }
+    },
+    "RELAXED_MIN_SCORE_0P35": {
+      "added_selected_vs_adopted": 0,
+      "displaced_selected_vs_adopted": 15,
+      "final92d_independent_46h_total": {
+        "average_net_24h_proxy": 0.005124179827796663,
+        "observations": 45,
+        "positive_share_24h": 0.4318181818181818,
+        "proxy_profit_factor": 1.433610575861901,
+        "sum_abs_negative_returns": 0.519968665374205,
+        "sum_positive_returns": 0.7454325777972582,
+        "valid_forward_24h": 44
+      },
+      "independent_46h_total": {
+        "average_net_24h_proxy": 0.005124179827796663,
+        "observations": 45,
+        "positive_share_24h": 0.4318181818181818,
+        "proxy_profit_factor": 1.433610575861901,
+        "sum_abs_negative_returns": 0.519968665374205,
+        "sum_positive_returns": 0.7454325777972582,
+        "valid_forward_24h": 44
+      },
+      "longest_zero_day_streak": 5,
+      "no_signal_days": 15,
+      "raw_gate_passes_by_route": {
+        "NORMAL": 62,
+        "RELAXED_ALT": 67,
+        "STRONG_ALT": 148
+      },
+      "rejected_raw_by_reason": {
+        "REJECT_DIRECTION": 19,
+        "REJECT_EDGE": 154,
+        "REJECT_MOMENTUM": 461,
+        "REJECT_NEUTRAL_SCORE": 957,
+        "REJECT_RELAXED_MOMENTUM_ATR": 84,
+        "REJECT_RELAXED_SCORE": 41,
+        "REJECT_STRONG_QUALITY": 136,
+        "REJECT_VOLUME": 2925
+      },
+      "repeated_top3_selected": 161,
+      "route_breakdown": {
+        "NORMAL": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": -0.0011326405471606587,
+            "observations": 18,
+            "positive_share_24h": 0.35294117647058826,
+            "proxy_profit_factor": 0.8645109734440413,
+            "sum_abs_negative_returns": 0.14211401315056824,
+            "sum_positive_returns": 0.12285912384883703,
+            "valid_forward_24h": 17
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.0011326405471606587,
+            "observations": 18,
+            "positive_share_24h": 0.35294117647058826,
+            "proxy_profit_factor": 0.8645109734440413,
+            "sum_abs_negative_returns": 0.14211401315056824,
+            "sum_positive_returns": 0.12285912384883703,
+            "valid_forward_24h": 17
+          },
+          "repeated_selected": 61
+        },
+        "RELAXED_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": 0.017332199873001723,
+            "observations": 7,
+            "positive_share_24h": 0.42857142857142855,
+            "proxy_profit_factor": 2.5071119682269516,
+            "sum_abs_negative_returns": 0.08050191470096667,
+            "sum_positive_returns": 0.20182731381197871,
+            "valid_forward_24h": 7
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": 0.017332199873001723,
+            "observations": 7,
+            "positive_share_24h": 0.42857142857142855,
+            "proxy_profit_factor": 2.5071119682269516,
+            "sum_abs_negative_returns": 0.08050191470096667,
+            "sum_positive_returns": 0.20182731381197871,
+            "valid_forward_24h": 7
+          },
+          "repeated_selected": 28
+        },
+        "STRONG_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": 0.0061696701306886165,
+            "observations": 20,
+            "positive_share_24h": 0.5,
+            "proxy_profit_factor": 1.4149731515566248,
+            "sum_abs_negative_returns": 0.2973527375226702,
+            "sum_positive_returns": 0.4207461401364425,
+            "valid_forward_24h": 20
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": 0.0061696701306886165,
+            "observations": 20,
+            "positive_share_24h": 0.5,
+            "proxy_profit_factor": 1.4149731515566248,
+            "sum_abs_negative_returns": 0.2973527375226702,
+            "sum_positive_returns": 0.4207461401364425,
+            "valid_forward_24h": 20
+          },
+          "repeated_selected": 72
+        },
+        "STRONG_GAP": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": null,
+            "observations": 0,
+            "positive_share_24h": null,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 0
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": null,
+            "observations": 0,
+            "positive_share_24h": null,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 0
+          },
+          "repeated_selected": 0
+        }
+      },
+      "selected_by_route": {
+        "NORMAL": 61,
+        "RELAXED_ALT": 28,
+        "STRONG_ALT": 72
+      },
+      "signal_days": 15,
+      "variant": {
+        "relaxed_min": 0.35
+      }
+    },
+    "RELAXED_MIN_SCORE_0P50": {
+      "added_selected_vs_adopted": 0,
+      "displaced_selected_vs_adopted": 27,
+      "final92d_independent_46h_total": {
+        "average_net_24h_proxy": 0.006252099584253723,
+        "observations": 44,
+        "positive_share_24h": 0.4418604651162791,
+        "proxy_profit_factor": 1.5640886026966045,
+        "sum_abs_negative_returns": 0.4765922956743482,
+        "sum_positive_returns": 0.7454325777972582,
+        "valid_forward_24h": 43
+      },
+      "independent_46h_total": {
+        "average_net_24h_proxy": 0.006252099584253723,
+        "observations": 44,
+        "positive_share_24h": 0.4418604651162791,
+        "proxy_profit_factor": 1.5640886026966045,
+        "sum_abs_negative_returns": 0.4765922956743482,
+        "sum_positive_returns": 0.7454325777972582,
+        "valid_forward_24h": 43
+      },
+      "longest_zero_day_streak": 5,
+      "no_signal_days": 15,
+      "raw_gate_passes_by_route": {
+        "NORMAL": 62,
+        "RELAXED_ALT": 33,
+        "STRONG_ALT": 148
+      },
+      "rejected_raw_by_reason": {
+        "REJECT_DIRECTION": 19,
+        "REJECT_EDGE": 154,
+        "REJECT_MOMENTUM": 461,
+        "REJECT_NEUTRAL_SCORE": 957,
+        "REJECT_RELAXED_MOMENTUM_ATR": 84,
+        "REJECT_RELAXED_SCORE": 75,
+        "REJECT_STRONG_QUALITY": 136,
+        "REJECT_VOLUME": 2925
+      },
+      "repeated_top3_selected": 149,
+      "route_breakdown": {
+        "NORMAL": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": -0.0011326405471606587,
+            "observations": 18,
+            "positive_share_24h": 0.35294117647058826,
+            "proxy_profit_factor": 0.8645109734440413,
+            "sum_abs_negative_returns": 0.14211401315056824,
+            "sum_positive_returns": 0.12285912384883703,
+            "valid_forward_24h": 17
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.0011326405471606587,
+            "observations": 18,
+            "positive_share_24h": 0.35294117647058826,
+            "proxy_profit_factor": 0.8645109734440413,
+            "sum_abs_negative_returns": 0.14211401315056824,
+            "sum_positive_returns": 0.12285912384883703,
+            "valid_forward_24h": 17
+          },
+          "repeated_selected": 61
+        },
+        "RELAXED_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": 0.027450294801811492,
+            "observations": 6,
+            "positive_share_24h": 0.5,
+            "proxy_profit_factor": 5.436346154809195,
+            "sum_abs_negative_returns": 0.03712554500110975,
+            "sum_positive_returns": 0.20182731381197871,
+            "valid_forward_24h": 6
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": 0.027450294801811492,
+            "observations": 6,
+            "positive_share_24h": 0.5,
+            "proxy_profit_factor": 5.436346154809195,
+            "sum_abs_negative_returns": 0.03712554500110975,
+            "sum_positive_returns": 0.20182731381197871,
+            "valid_forward_24h": 6
+          },
+          "repeated_selected": 16
+        },
+        "STRONG_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": 0.0061696701306886165,
+            "observations": 20,
+            "positive_share_24h": 0.5,
+            "proxy_profit_factor": 1.4149731515566248,
+            "sum_abs_negative_returns": 0.2973527375226702,
+            "sum_positive_returns": 0.4207461401364425,
+            "valid_forward_24h": 20
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": 0.0061696701306886165,
+            "observations": 20,
+            "positive_share_24h": 0.5,
+            "proxy_profit_factor": 1.4149731515566248,
+            "sum_abs_negative_returns": 0.2973527375226702,
+            "sum_positive_returns": 0.4207461401364425,
+            "valid_forward_24h": 20
+          },
+          "repeated_selected": 72
+        },
+        "STRONG_GAP": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": null,
+            "observations": 0,
+            "positive_share_24h": null,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 0
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": null,
+            "observations": 0,
+            "positive_share_24h": null,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 0
+          },
+          "repeated_selected": 0
+        }
+      },
+      "selected_by_route": {
+        "NORMAL": 61,
+        "RELAXED_ALT": 16,
+        "STRONG_ALT": 72
+      },
+      "signal_days": 15,
+      "variant": {
+        "relaxed_min": 0.5
+      }
+    },
+    "STRONG_FAST_BTC12H_ALIGNMENT": {
+      "added_selected_vs_adopted": 0,
+      "displaced_selected_vs_adopted": 20,
+      "final92d_independent_46h_total": {
+        "average_net_24h_proxy": -0.0032984881762711336,
+        "observations": 50,
+        "positive_share_24h": 0.3673469387755102,
+        "proxy_profit_factor": 0.8117339945985016,
+        "sum_abs_negative_returns": 0.8584976363236695,
+        "sum_positive_returns": 0.696871715686384,
+        "valid_forward_24h": 49
+      },
+      "independent_46h_total": {
+        "average_net_24h_proxy": -0.0032984881762711336,
+        "observations": 50,
+        "positive_share_24h": 0.3673469387755102,
+        "proxy_profit_factor": 0.8117339945985016,
+        "sum_abs_negative_returns": 0.8584976363236695,
+        "sum_positive_returns": 0.696871715686384,
+        "valid_forward_24h": 49
+      },
+      "longest_zero_day_streak": 5,
+      "no_signal_days": 12,
+      "raw_gate_passes_by_route": {
+        "NORMAL": 62,
+        "RELAXED_ALT": 108,
+        "STRONG_ALT": 113
+      },
+      "rejected_raw_by_reason": {
+        "REJECT_DIRECTION": 19,
+        "REJECT_EDGE": 154,
+        "REJECT_MOMENTUM": 461,
+        "REJECT_NEUTRAL_SCORE": 957,
+        "REJECT_RELAXED_MOMENTUM_ATR": 84,
+        "REJECT_STRONG_FAST_BTC": 35,
+        "REJECT_STRONG_QUALITY": 136,
+        "REJECT_VOLUME": 2925
+      },
+      "repeated_top3_selected": 156,
+      "route_breakdown": {
+        "NORMAL": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": -0.0011326405471606587,
+            "observations": 18,
+            "positive_share_24h": 0.35294117647058826,
+            "proxy_profit_factor": 0.8645109734440413,
+            "sum_abs_negative_returns": 0.14211401315056824,
+            "sum_positive_returns": 0.12285912384883703,
+            "valid_forward_24h": 17
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.0011326405471606587,
+            "observations": 18,
+            "positive_share_24h": 0.35294117647058826,
+            "proxy_profit_factor": 0.8645109734440413,
+            "sum_abs_negative_returns": 0.14211401315056824,
+            "sum_positive_returns": 0.12285912384883703,
+            "valid_forward_24h": 17
+          },
+          "repeated_selected": 61
+        },
+        "RELAXED_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": -0.013751177268134754,
+            "observations": 14,
+            "positive_share_24h": 0.21428571428571427,
+            "proxy_profit_factor": 0.5118054755302179,
+            "sum_abs_negative_returns": 0.3943437955658653,
+            "sum_positive_returns": 0.20182731381197871,
+            "valid_forward_24h": 14
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.013751177268134754,
+            "observations": 14,
+            "positive_share_24h": 0.21428571428571427,
+            "proxy_profit_factor": 0.5118054755302179,
+            "sum_abs_negative_returns": 0.3943437955658653,
+            "sum_positive_returns": 0.20182731381197871,
+            "valid_forward_24h": 14
+          },
+          "repeated_selected": 43
+        },
+        "STRONG_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": 0.0027858583565740116,
+            "observations": 18,
+            "positive_share_24h": 0.5,
+            "proxy_profit_factor": 1.1557119527448332,
+            "sum_abs_negative_returns": 0.32203982760723604,
+            "sum_positive_returns": 0.3721852780255682,
+            "valid_forward_24h": 18
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": 0.0027858583565740116,
+            "observations": 18,
+            "positive_share_24h": 0.5,
+            "proxy_profit_factor": 1.1557119527448332,
+            "sum_abs_negative_returns": 0.32203982760723604,
+            "sum_positive_returns": 0.3721852780255682,
+            "valid_forward_24h": 18
+          },
+          "repeated_selected": 52
+        },
+        "STRONG_GAP": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": null,
+            "observations": 0,
+            "positive_share_24h": null,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 0
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": null,
+            "observations": 0,
+            "positive_share_24h": null,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 0
+          },
+          "repeated_selected": 0
+        }
+      },
+      "selected_by_route": {
+        "NORMAL": 61,
+        "RELAXED_ALT": 43,
+        "STRONG_ALT": 52
+      },
+      "signal_days": 18,
+      "variant": {
+        "strong_fast": true
+      }
+    },
+    "STRONG_GAP_0P85_WITH_FAST_BTC": {
+      "added_selected_vs_adopted": 3,
+      "displaced_selected_vs_adopted": 22,
+      "final92d_independent_46h_total": {
+        "average_net_24h_proxy": -0.0030843745640202567,
+        "observations": 50,
+        "positive_share_24h": 0.3673469387755102,
+        "proxy_profit_factor": 0.8239548401272335,
+        "sum_abs_negative_returns": 0.8584976363236695,
+        "sum_positive_returns": 0.7073632826866769,
+        "valid_forward_24h": 49
+      },
+      "independent_46h_total": {
+        "average_net_24h_proxy": -0.0030843745640202567,
+        "observations": 50,
+        "positive_share_24h": 0.3673469387755102,
+        "proxy_profit_factor": 0.8239548401272335,
+        "sum_abs_negative_returns": 0.8584976363236695,
+        "sum_positive_returns": 0.7073632826866769,
+        "valid_forward_24h": 49
+      },
+      "longest_zero_day_streak": 5,
+      "no_signal_days": 12,
+      "raw_gate_passes_by_route": {
+        "NORMAL": 62,
+        "RELAXED_ALT": 108,
+        "STRONG_ALT": 113,
+        "STRONG_GAP": 3
+      },
+      "rejected_raw_by_reason": {
+        "REJECT_DIRECTION": 19,
+        "REJECT_EDGE": 154,
+        "REJECT_MOMENTUM": 461,
+        "REJECT_NEUTRAL_SCORE": 957,
+        "REJECT_RELAXED_MOMENTUM_ATR": 84,
+        "REJECT_STRONG_FAST_BTC": 35,
+        "REJECT_STRONG_QUALITY": 133,
+        "REJECT_VOLUME": 2925
+      },
+      "repeated_top3_selected": 157,
+      "route_breakdown": {
+        "NORMAL": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": -0.0011326405471606587,
+            "observations": 18,
+            "positive_share_24h": 0.35294117647058826,
+            "proxy_profit_factor": 0.8645109734440413,
+            "sum_abs_negative_returns": 0.14211401315056824,
+            "sum_positive_returns": 0.12285912384883703,
+            "valid_forward_24h": 17
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.0011326405471606587,
+            "observations": 18,
+            "positive_share_24h": 0.35294117647058826,
+            "proxy_profit_factor": 0.8645109734440413,
+            "sum_abs_negative_returns": 0.14211401315056824,
+            "sum_positive_returns": 0.12285912384883703,
+            "valid_forward_24h": 17
+          },
+          "repeated_selected": 61
+        },
+        "RELAXED_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": -0.013751177268134754,
+            "observations": 14,
+            "positive_share_24h": 0.21428571428571427,
+            "proxy_profit_factor": 0.5118054755302179,
+            "sum_abs_negative_returns": 0.3943437955658653,
+            "sum_positive_returns": 0.20182731381197871,
+            "valid_forward_24h": 14
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.013751177268134754,
+            "observations": 14,
+            "positive_share_24h": 0.21428571428571427,
+            "proxy_profit_factor": 0.5118054755302179,
+            "sum_abs_negative_returns": 0.3943437955658653,
+            "sum_positive_returns": 0.20182731381197871,
+            "valid_forward_24h": 14
+          },
+          "repeated_selected": 43
+        },
+        "STRONG_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": 0.0013044473686798785,
+            "observations": 17,
+            "positive_share_24h": 0.47058823529411764,
+            "proxy_profit_factor": 1.0688598221913208,
+            "sum_abs_negative_returns": 0.32203982760723604,
+            "sum_positive_returns": 0.34421543287479395,
+            "valid_forward_24h": 17
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": 0.0013044473686798785,
+            "observations": 17,
+            "positive_share_24h": 0.47058823529411764,
+            "proxy_profit_factor": 1.0688598221913208,
+            "sum_abs_negative_returns": 0.32203982760723604,
+            "sum_positive_returns": 0.34421543287479395,
+            "valid_forward_24h": 17
+          },
+          "repeated_selected": 50
+        },
+        "STRONG_GAP": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": 0.03846141215106724,
+            "observations": 1,
+            "positive_share_24h": 1.0,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0.03846141215106724,
+            "valid_forward_24h": 1
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": 0.03846141215106724,
+            "observations": 1,
+            "positive_share_24h": 1.0,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0.03846141215106724,
+            "valid_forward_24h": 1
+          },
+          "repeated_selected": 3
+        }
+      },
+      "selected_by_route": {
+        "NORMAL": 61,
+        "RELAXED_ALT": 43,
+        "STRONG_ALT": 50,
+        "STRONG_GAP": 3
+      },
+      "signal_days": 18,
+      "variant": {
+        "strong_fast": true,
+        "strong_gap": 0.85
+      }
+    },
+    "STRONG_MIN_SCORE_0P35": {
+      "added_selected_vs_adopted": 0,
+      "displaced_selected_vs_adopted": 29,
+      "final92d_independent_46h_total": {
+        "average_net_24h_proxy": -0.0033134674752704806,
+        "observations": 48,
+        "positive_share_24h": 0.3404255319148936,
+        "proxy_profit_factor": 0.8133291059739024,
+        "sum_abs_negative_returns": 0.8342648817867676,
+        "sum_positive_returns": 0.678531910449055,
+        "valid_forward_24h": 47
+      },
+      "independent_46h_total": {
+        "average_net_24h_proxy": -0.0033134674752704806,
+        "observations": 48,
+        "positive_share_24h": 0.3404255319148936,
+        "proxy_profit_factor": 0.8133291059739024,
+        "sum_abs_negative_returns": 0.8342648817867676,
+        "sum_positive_returns": 0.678531910449055,
+        "valid_forward_24h": 47
+      },
+      "longest_zero_day_streak": 5,
+      "no_signal_days": 12,
+      "raw_gate_passes_by_route": {
+        "NORMAL": 62,
+        "RELAXED_ALT": 108,
+        "STRONG_ALT": 68
+      },
+      "rejected_raw_by_reason": {
+        "REJECT_DIRECTION": 19,
+        "REJECT_EDGE": 154,
+        "REJECT_MOMENTUM": 461,
+        "REJECT_NEUTRAL_SCORE": 957,
+        "REJECT_RELAXED_MOMENTUM_ATR": 84,
+        "REJECT_STRONG_QUALITY": 216,
+        "REJECT_VOLUME": 2925
+      },
+      "repeated_top3_selected": 147,
+      "route_breakdown": {
+        "NORMAL": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": -0.0011326405471606587,
+            "observations": 18,
+            "positive_share_24h": 0.35294117647058826,
+            "proxy_profit_factor": 0.8645109734440413,
+            "sum_abs_negative_returns": 0.14211401315056824,
+            "sum_positive_returns": 0.12285912384883703,
+            "valid_forward_24h": 17
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.0011326405471606587,
+            "observations": 18,
+            "positive_share_24h": 0.35294117647058826,
+            "proxy_profit_factor": 0.8645109734440413,
+            "sum_abs_negative_returns": 0.14211401315056824,
+            "sum_positive_returns": 0.12285912384883703,
+            "valid_forward_24h": 17
+          },
+          "repeated_selected": 61
+        },
+        "RELAXED_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": -0.0014801756367333852,
+            "observations": 15,
+            "positive_share_24h": 0.3333333333333333,
+            "proxy_profit_factor": 0.940164910099658,
+            "sum_abs_negative_returns": 0.37106377859513984,
+            "sum_positive_returns": 0.34886114404413904,
+            "valid_forward_24h": 15
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.0014801756367333852,
+            "observations": 15,
+            "positive_share_24h": 0.3333333333333333,
+            "proxy_profit_factor": 0.940164910099658,
+            "sum_abs_negative_returns": 0.37106377859513984,
+            "sum_positive_returns": 0.34886114404413904,
+            "valid_forward_24h": 15
+          },
+          "repeated_selected": 43
+        },
+        "STRONG_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": -0.007618363165665374,
+            "observations": 15,
+            "positive_share_24h": 0.3333333333333333,
+            "proxy_profit_factor": 0.6440982804062055,
+            "sum_abs_negative_returns": 0.3210870900410596,
+            "sum_positive_returns": 0.20681164255607898,
+            "valid_forward_24h": 15
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.007618363165665374,
+            "observations": 15,
+            "positive_share_24h": 0.3333333333333333,
+            "proxy_profit_factor": 0.6440982804062055,
+            "sum_abs_negative_returns": 0.3210870900410596,
+            "sum_positive_returns": 0.20681164255607898,
+            "valid_forward_24h": 15
+          },
+          "repeated_selected": 43
+        },
+        "STRONG_GAP": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": null,
+            "observations": 0,
+            "positive_share_24h": null,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 0
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": null,
+            "observations": 0,
+            "positive_share_24h": null,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 0
+          },
+          "repeated_selected": 0
+        }
+      },
+      "selected_by_route": {
+        "NORMAL": 61,
+        "RELAXED_ALT": 43,
+        "STRONG_ALT": 43
+      },
+      "signal_days": 18,
+      "variant": {
+        "strong_min": 0.35
+      }
+    },
+    "STRONG_MIN_SCORE_0P50": {
+      "added_selected_vs_adopted": 0,
+      "displaced_selected_vs_adopted": 56,
+      "final92d_independent_46h_total": {
+        "average_net_24h_proxy": -0.0036605153412885873,
+        "observations": 43,
+        "positive_share_24h": 0.35714285714285715,
+        "proxy_profit_factor": 0.7915208789243685,
+        "sum_abs_negative_returns": 0.7374438434933092,
+        "sum_positive_returns": 0.5837021991591885,
+        "valid_forward_24h": 42
+      },
+      "independent_46h_total": {
+        "average_net_24h_proxy": -0.0036605153412885873,
+        "observations": 43,
+        "positive_share_24h": 0.35714285714285715,
+        "proxy_profit_factor": 0.7915208789243685,
+        "sum_abs_negative_returns": 0.7374438434933092,
+        "sum_positive_returns": 0.5837021991591885,
+        "valid_forward_24h": 42
+      },
+      "longest_zero_day_streak": 5,
+      "no_signal_days": 12,
+      "raw_gate_passes_by_route": {
+        "NORMAL": 62,
+        "RELAXED_ALT": 108,
+        "STRONG_ALT": 26
+      },
+      "rejected_raw_by_reason": {
+        "REJECT_DIRECTION": 19,
+        "REJECT_EDGE": 154,
+        "REJECT_MOMENTUM": 461,
+        "REJECT_NEUTRAL_SCORE": 957,
+        "REJECT_RELAXED_MOMENTUM_ATR": 84,
+        "REJECT_STRONG_QUALITY": 258,
+        "REJECT_VOLUME": 2925
+      },
+      "repeated_top3_selected": 120,
+      "route_breakdown": {
+        "NORMAL": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": -0.004226632922495328,
+            "observations": 17,
+            "positive_share_24h": 0.3125,
+            "proxy_profit_factor": 0.5241417418261483,
+            "sum_abs_negative_returns": 0.14211401315056824,
+            "sum_positive_returns": 0.07448788639064298,
+            "valid_forward_24h": 16
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.004226632922495328,
+            "observations": 17,
+            "positive_share_24h": 0.3125,
+            "proxy_profit_factor": 0.5241417418261483,
+            "sum_abs_negative_returns": 0.14211401315056824,
+            "sum_positive_returns": 0.07448788639064298,
+            "valid_forward_24h": 16
+          },
+          "repeated_selected": 61
+        },
+        "RELAXED_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": 0.0003613624916016813,
+            "observations": 19,
+            "positive_share_24h": 0.3684210526315789,
+            "proxy_profit_factor": 1.0158665814090528,
+            "sum_abs_negative_returns": 0.43272631724654553,
+            "sum_positive_returns": 0.43959220458697745,
+            "valid_forward_24h": 19
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": 0.0003613624916016813,
+            "observations": 19,
+            "positive_share_24h": 0.3684210526315789,
+            "proxy_profit_factor": 1.0158665814090528,
+            "sum_abs_negative_returns": 0.43272631724654553,
+            "sum_positive_returns": 0.43959220458697745,
+            "valid_forward_24h": 19
+          },
+          "repeated_selected": 43
+        },
+        "STRONG_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": -0.013283057844946764,
+            "observations": 7,
+            "positive_share_24h": 0.42857142857142855,
+            "proxy_profit_factor": 0.42817099616033516,
+            "sum_abs_negative_returns": 0.16260351309619547,
+            "sum_positive_returns": 0.06962210818156812,
+            "valid_forward_24h": 7
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.013283057844946764,
+            "observations": 7,
+            "positive_share_24h": 0.42857142857142855,
+            "proxy_profit_factor": 0.42817099616033516,
+            "sum_abs_negative_returns": 0.16260351309619547,
+            "sum_positive_returns": 0.06962210818156812,
+            "valid_forward_24h": 7
+          },
+          "repeated_selected": 16
+        },
+        "STRONG_GAP": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": null,
+            "observations": 0,
+            "positive_share_24h": null,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 0
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": null,
+            "observations": 0,
+            "positive_share_24h": null,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 0
+          },
+          "repeated_selected": 0
+        }
+      },
+      "selected_by_route": {
+        "NORMAL": 61,
+        "RELAXED_ALT": 43,
+        "STRONG_ALT": 16
+      },
+      "signal_days": 18,
+      "variant": {
+        "strong_min": 0.5
+      }
+    },
+    "STRONG_SCORE_0P35_AND_FAST_BTC": {
+      "added_selected_vs_adopted": 0,
+      "displaced_selected_vs_adopted": 42,
+      "final92d_independent_46h_total": {
+        "average_net_24h_proxy": -0.003977261065472297,
+        "observations": 47,
+        "positive_share_24h": 0.32608695652173914,
+        "proxy_profit_factor": 0.7729387887708703,
+        "sum_abs_negative_returns": 0.805747525177715,
+        "sum_positive_returns": 0.6227935161659893,
+        "valid_forward_24h": 46
+      },
+      "independent_46h_total": {
+        "average_net_24h_proxy": -0.003977261065472297,
+        "observations": 47,
+        "positive_share_24h": 0.32608695652173914,
+        "proxy_profit_factor": 0.7729387887708703,
+        "sum_abs_negative_returns": 0.805747525177715,
+        "sum_positive_returns": 0.6227935161659893,
+        "valid_forward_24h": 46
+      },
+      "longest_zero_day_streak": 5,
+      "no_signal_days": 12,
+      "raw_gate_passes_by_route": {
+        "NORMAL": 62,
+        "RELAXED_ALT": 108,
+        "STRONG_ALT": 52
+      },
+      "rejected_raw_by_reason": {
+        "REJECT_DIRECTION": 19,
+        "REJECT_EDGE": 154,
+        "REJECT_MOMENTUM": 461,
+        "REJECT_NEUTRAL_SCORE": 957,
+        "REJECT_RELAXED_MOMENTUM_ATR": 84,
+        "REJECT_STRONG_FAST_BTC": 16,
+        "REJECT_STRONG_QUALITY": 216,
+        "REJECT_VOLUME": 2925
+      },
+      "repeated_top3_selected": 134,
+      "route_breakdown": {
+        "NORMAL": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": -0.0011326405471606587,
+            "observations": 18,
+            "positive_share_24h": 0.35294117647058826,
+            "proxy_profit_factor": 0.8645109734440413,
+            "sum_abs_negative_returns": 0.14211401315056824,
+            "sum_positive_returns": 0.12285912384883703,
+            "valid_forward_24h": 17
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.0011326405471606587,
+            "observations": 18,
+            "positive_share_24h": 0.35294117647058826,
+            "proxy_profit_factor": 0.8645109734440413,
+            "sum_abs_negative_returns": 0.14211401315056824,
+            "sum_positive_returns": 0.12285912384883703,
+            "valid_forward_24h": 17
+          },
+          "repeated_selected": 61
+        },
+        "RELAXED_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": 0.0012718712949645159,
+            "observations": 18,
+            "positive_share_24h": 0.3333333333333333,
+            "proxy_profit_factor": 1.0562048657929541,
+            "sum_abs_negative_returns": 0.4073256467455387,
+            "sum_positive_returns": 0.4302193300549,
+            "valid_forward_24h": 18
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": 0.0012718712949645159,
+            "observations": 18,
+            "positive_share_24h": 0.3333333333333333,
+            "proxy_profit_factor": 1.0562048657929541,
+            "sum_abs_negative_returns": 0.4073256467455387,
+            "sum_positive_returns": 0.4302193300549,
+            "valid_forward_24h": 18
+          },
+          "repeated_selected": 43
+        },
+        "STRONG_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": -0.016962982092668704,
+            "observations": 11,
+            "positive_share_24h": 0.2727272727272727,
+            "proxy_profit_factor": 0.2719973582771472,
+            "sum_abs_negative_returns": 0.2563078652816081,
+            "sum_positive_returns": 0.06971506226225234,
+            "valid_forward_24h": 11
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.016962982092668704,
+            "observations": 11,
+            "positive_share_24h": 0.2727272727272727,
+            "proxy_profit_factor": 0.2719973582771472,
+            "sum_abs_negative_returns": 0.2563078652816081,
+            "sum_positive_returns": 0.06971506226225234,
+            "valid_forward_24h": 11
+          },
+          "repeated_selected": 30
+        },
+        "STRONG_GAP": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": null,
+            "observations": 0,
+            "positive_share_24h": null,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 0
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": null,
+            "observations": 0,
+            "positive_share_24h": null,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 0
+          },
+          "repeated_selected": 0
+        }
+      },
+      "selected_by_route": {
+        "NORMAL": 61,
+        "RELAXED_ALT": 43,
+        "STRONG_ALT": 30
+      },
+      "signal_days": 18,
+      "variant": {
+        "strong_fast": true,
+        "strong_min": 0.35
+      }
+    }
+  }
+}

@@ -1,0 +1,1503 @@
+{
+  "adopted_normal_gate": {
+    "score": 1.0,
+    "volume": 0.8
+  },
+  "cost_roundtrip_assumed": 0.003,
+  "outcome_warning": "NON_EXECUTABLE_NEXT_H2_OPEN_TO_24H_CLOSE_PROXY; NO STOP/TP/TRAIL/GROSS/FUNDING/WR OR INTEGRATED DD",
+  "period": [
+    "2025-08-10",
+    "2026-08-11"
+  ],
+  "recent_is_not_independent_from_existing_1Y_WHEN_OVERLAPPING": true,
+  "source": "ASTER_EXACT_FROZEN_V12_SCAN",
+  "status": "RESEARCH_ROUTE_PROXY_DONE_NO_EXECUTABLE_BT",
+  "variants": {
+    "ADOPTED_FROZEN_ALTS": {
+      "added_selected_vs_adopted": 0,
+      "displaced_selected_vs_adopted": 0,
+      "final92d_independent_46h_total": {
+        "average_net_24h_proxy": 0.0035558154949418487,
+        "observations": 114,
+        "positive_share_24h": 0.5,
+        "proxy_profit_factor": 1.3252126439772844,
+        "sum_abs_negative_returns": 1.246455123841018,
+        "sum_positive_returns": 1.6518180902643889,
+        "valid_forward_24h": 114
+      },
+      "independent_46h_total": {
+        "average_net_24h_proxy": -0.0064853294169283085,
+        "observations": 585,
+        "positive_share_24h": 0.4188034188034188,
+        "proxy_profit_factor": 0.6538414329972644,
+        "sum_abs_negative_returns": 10.960057241261568,
+        "sum_positive_returns": 7.166139532358508,
+        "valid_forward_24h": 585
+      },
+      "longest_zero_day_streak": 6,
+      "no_signal_days": 121,
+      "raw_gate_passes_by_route": {
+        "NORMAL": 674,
+        "RELAXED_ALT": 1399,
+        "STRONG_ALT": 1627
+      },
+      "rejected_raw_by_reason": {
+        "REJECT_DIRECTION": 371,
+        "REJECT_EDGE": 2606,
+        "REJECT_MOMENTUM": 6321,
+        "REJECT_NEUTRAL_SCORE": 8952,
+        "REJECT_RELAXED_MOMENTUM_ATR": 3088,
+        "REJECT_STRONG_QUALITY": 1807,
+        "REJECT_VOLUME": 34602
+      },
+      "repeated_top3_selected": 2020,
+      "route_breakdown": {
+        "NORMAL": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": -0.004986972696241222,
+            "observations": 49,
+            "positive_share_24h": 0.40816326530612246,
+            "proxy_profit_factor": 0.5030626577230132,
+            "sum_abs_negative_returns": 0.4917353584179143,
+            "sum_positive_returns": 0.24737369630209444,
+            "valid_forward_24h": 49
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.004344002383736612,
+            "observations": 182,
+            "positive_share_24h": 0.3956043956043956,
+            "proxy_profit_factor": 0.6550625431719783,
+            "sum_abs_negative_returns": 2.2920341592077196,
+            "sum_positive_returns": 1.501425725367656,
+            "valid_forward_24h": 182
+          },
+          "repeated_selected": 578
+        },
+        "RELAXED_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": 0.00035599490497073734,
+            "observations": 36,
+            "positive_share_24h": 0.5277777777777778,
+            "proxy_profit_factor": 1.0204431079616147,
+            "sum_abs_negative_returns": 0.6269015749958509,
+            "sum_positive_returns": 0.6397173915747973,
+            "valid_forward_24h": 36
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.010692782238996964,
+            "observations": 240,
+            "positive_share_24h": 0.43333333333333335,
+            "proxy_profit_factor": 0.5371870189820723,
+            "sum_abs_negative_returns": 5.544934655278961,
+            "sum_positive_returns": 2.97866691791969,
+            "valid_forward_24h": 240
+          },
+          "repeated_selected": 788
+        },
+        "STRONG_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": 0.021962372826215312,
+            "observations": 29,
+            "positive_share_24h": 0.6206896551724138,
+            "proxy_profit_factor": 5.982927780711604,
+            "sum_abs_negative_returns": 0.12781819042725281,
+            "sum_positive_returns": 0.7647270023874969,
+            "valid_forward_24h": 29
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.0026812364276302203,
+            "observations": 163,
+            "positive_share_24h": 0.4233128834355828,
+            "proxy_profit_factor": 0.8600611068335825,
+            "sum_abs_negative_returns": 3.1230884267748875,
+            "sum_positive_returns": 2.6860468890711617,
+            "valid_forward_24h": 163
+          },
+          "repeated_selected": 654
+        },
+        "STRONG_GAP": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": null,
+            "observations": 0,
+            "positive_share_24h": null,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 0
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": null,
+            "observations": 0,
+            "positive_share_24h": null,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 0
+          },
+          "repeated_selected": 0
+        }
+      },
+      "selected_by_route": {
+        "NORMAL": 578,
+        "RELAXED_ALT": 788,
+        "STRONG_ALT": 654
+      },
+      "signal_days": 245,
+      "variant": {}
+    },
+    "BOTH_ALTS_FAST_BTC12H_ALIGNMENT": {
+      "added_selected_vs_adopted": 0,
+      "displaced_selected_vs_adopted": 337,
+      "final92d_independent_46h_total": {
+        "average_net_24h_proxy": 0.001567036582928217,
+        "observations": 107,
+        "positive_share_24h": 0.5046728971962616,
+        "proxy_profit_factor": 1.1363830928426197,
+        "sum_abs_negative_returns": 1.2294259565355854,
+        "sum_positive_returns": 1.3970988709089047,
+        "valid_forward_24h": 107
+      },
+      "independent_46h_total": {
+        "average_net_24h_proxy": -0.006103278459450076,
+        "observations": 543,
+        "positive_share_24h": 0.4180478821362799,
+        "proxy_profit_factor": 0.6617118947227508,
+        "sum_abs_negative_returns": 9.796620548527082,
+        "sum_positive_returns": 6.48254034504569,
+        "valid_forward_24h": 543
+      },
+      "longest_zero_day_streak": 6,
+      "no_signal_days": 126,
+      "raw_gate_passes_by_route": {
+        "NORMAL": 674,
+        "RELAXED_ALT": 942,
+        "STRONG_ALT": 1478
+      },
+      "rejected_raw_by_reason": {
+        "REJECT_DIRECTION": 371,
+        "REJECT_EDGE": 2606,
+        "REJECT_MOMENTUM": 6321,
+        "REJECT_NEUTRAL_SCORE": 8952,
+        "REJECT_RELAXED_FAST_BTC": 457,
+        "REJECT_RELAXED_MOMENTUM_ATR": 3088,
+        "REJECT_STRONG_FAST_BTC": 149,
+        "REJECT_STRONG_QUALITY": 1807,
+        "REJECT_VOLUME": 34602
+      },
+      "repeated_top3_selected": 1683,
+      "route_breakdown": {
+        "NORMAL": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": -0.005740261079771978,
+            "observations": 50,
+            "positive_share_24h": 0.4,
+            "proxy_profit_factor": 0.4629113580520648,
+            "sum_abs_negative_returns": 0.5343867502906933,
+            "sum_positive_returns": 0.24737369630209444,
+            "valid_forward_24h": 50
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.004714603877505414,
+            "observations": 187,
+            "positive_share_24h": 0.39572192513368987,
+            "proxy_profit_factor": 0.6381693997464839,
+            "sum_abs_negative_returns": 2.436584756722618,
+            "sum_positive_returns": 1.5549538316291058,
+            "valid_forward_24h": 187
+          },
+          "repeated_selected": 578
+        },
+        "RELAXED_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": 0.003300381589838495,
+            "observations": 30,
+            "positive_share_24h": 0.5666666666666667,
+            "proxy_profit_factor": 1.2150693489564683,
+            "sum_abs_negative_returns": 0.46036986755930276,
+            "sum_positive_returns": 0.5593813152544576,
+            "valid_forward_24h": 30
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.007316035111565126,
+            "observations": 196,
+            "positive_share_24h": 0.4387755102040816,
+            "proxy_profit_factor": 0.6432791915485812,
+            "sum_abs_negative_returns": 4.019790401607734,
+            "sum_positive_returns": 2.5858475197409696,
+            "valid_forward_24h": 196
+          },
+          "repeated_selected": 535
+        },
+        "STRONG_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": 0.013173130395065305,
+            "observations": 27,
+            "positive_share_24h": 0.6296296296296297,
+            "proxy_profit_factor": 2.515641210986225,
+            "sum_abs_negative_returns": 0.23466933868558934,
+            "sum_positive_returns": 0.5903438593523526,
+            "valid_forward_24h": 27
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.006240664978256966,
+            "observations": 160,
+            "positive_share_24h": 0.41875,
+            "proxy_profit_factor": 0.7010679516386352,
+            "sum_abs_negative_returns": 3.340245390196729,
+            "sum_positive_returns": 2.3417389936756146,
+            "valid_forward_24h": 160
+          },
+          "repeated_selected": 570
+        },
+        "STRONG_GAP": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": null,
+            "observations": 0,
+            "positive_share_24h": null,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 0
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": null,
+            "observations": 0,
+            "positive_share_24h": null,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 0
+          },
+          "repeated_selected": 0
+        }
+      },
+      "selected_by_route": {
+        "NORMAL": 578,
+        "RELAXED_ALT": 535,
+        "STRONG_ALT": 570
+      },
+      "signal_days": 240,
+      "variant": {
+        "relaxed_fast": true,
+        "strong_fast": true
+      }
+    },
+    "RELAXED_FAST_BTC12H_ALIGNMENT": {
+      "added_selected_vs_adopted": 0,
+      "displaced_selected_vs_adopted": 253,
+      "final92d_independent_46h_total": {
+        "average_net_24h_proxy": 0.0032425829840192467,
+        "observations": 110,
+        "positive_share_24h": 0.509090909090909,
+        "proxy_profit_factor": 1.290171675574496,
+        "sum_abs_negative_returns": 1.2292175917443924,
+        "sum_positive_returns": 1.5859017199865095,
+        "valid_forward_24h": 110
+      },
+      "independent_46h_total": {
+        "average_net_24h_proxy": -0.005527372548590227,
+        "observations": 553,
+        "positive_share_24h": 0.41952983725135623,
+        "proxy_profit_factor": 0.6900013383334204,
+        "sum_abs_negative_returns": 9.860161985660355,
+        "sum_positive_returns": 6.80352496628996,
+        "valid_forward_24h": 553
+      },
+      "longest_zero_day_streak": 6,
+      "no_signal_days": 125,
+      "raw_gate_passes_by_route": {
+        "NORMAL": 674,
+        "RELAXED_ALT": 942,
+        "STRONG_ALT": 1627
+      },
+      "rejected_raw_by_reason": {
+        "REJECT_DIRECTION": 371,
+        "REJECT_EDGE": 2606,
+        "REJECT_MOMENTUM": 6321,
+        "REJECT_NEUTRAL_SCORE": 8952,
+        "REJECT_RELAXED_FAST_BTC": 457,
+        "REJECT_RELAXED_MOMENTUM_ATR": 3088,
+        "REJECT_STRONG_QUALITY": 1807,
+        "REJECT_VOLUME": 34602
+      },
+      "repeated_top3_selected": 1767,
+      "route_breakdown": {
+        "NORMAL": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": -0.005469727387119691,
+            "observations": 49,
+            "positive_share_24h": 0.40816326530612246,
+            "proxy_profit_factor": 0.4799734840431587,
+            "sum_abs_negative_returns": 0.5153903382709593,
+            "sum_positive_returns": 0.24737369630209444,
+            "valid_forward_24h": 49
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.004567281210509139,
+            "observations": 186,
+            "positive_share_24h": 0.3978494623655914,
+            "proxy_profit_factor": 0.6466934653203589,
+            "sum_abs_negative_returns": 2.4044681367838057,
+            "sum_positive_returns": 1.5549538316291058,
+            "valid_forward_24h": 186
+          },
+          "repeated_selected": 578
+        },
+        "RELAXED_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": 0.003300381589838495,
+            "observations": 30,
+            "positive_share_24h": 0.5666666666666667,
+            "proxy_profit_factor": 1.2150693489564683,
+            "sum_abs_negative_returns": 0.46036986755930276,
+            "sum_positive_returns": 0.5593813152544576,
+            "valid_forward_24h": 30
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.007173109017996492,
+            "observations": 195,
+            "positive_share_24h": 0.441025641025641,
+            "proxy_profit_factor": 0.6489597620359794,
+            "sum_abs_negative_returns": 3.9846037782502854,
+            "sum_positive_returns": 2.5858475197409696,
+            "valid_forward_24h": 195
+          },
+          "repeated_selected": 535
+        },
+        "STRONG_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": 0.016957720081155717,
+            "observations": 31,
+            "positive_share_24h": 0.6129032258064516,
+            "proxy_profit_factor": 3.0740737959552984,
+            "sum_abs_negative_returns": 0.2534573859141303,
+            "sum_positive_returns": 0.7791467084299575,
+            "valid_forward_24h": 31
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.0046998049750370885,
+            "observations": 172,
+            "positive_share_24h": 0.4186046511627907,
+            "proxy_profit_factor": 0.7671145261982408,
+            "sum_abs_negative_returns": 3.471090070626264,
+            "sum_positive_returns": 2.662723614919885,
+            "valid_forward_24h": 172
+          },
+          "repeated_selected": 654
+        },
+        "STRONG_GAP": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": null,
+            "observations": 0,
+            "positive_share_24h": null,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 0
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": null,
+            "observations": 0,
+            "positive_share_24h": null,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 0
+          },
+          "repeated_selected": 0
+        }
+      },
+      "selected_by_route": {
+        "NORMAL": 578,
+        "RELAXED_ALT": 535,
+        "STRONG_ALT": 654
+      },
+      "signal_days": 241,
+      "variant": {
+        "relaxed_fast": true
+      }
+    },
+    "RELAXED_MIN_SCORE_0P15": {
+      "added_selected_vs_adopted": 0,
+      "displaced_selected_vs_adopted": 109,
+      "final92d_independent_46h_total": {
+        "average_net_24h_proxy": 0.002304920930970943,
+        "observations": 110,
+        "positive_share_24h": 0.4909090909090909,
+        "proxy_profit_factor": 1.2127795678654394,
+        "sum_abs_negative_returns": 1.1915678979437627,
+        "sum_positive_returns": 1.4451092003505666,
+        "valid_forward_24h": 110
+      },
+      "independent_46h_total": {
+        "average_net_24h_proxy": -0.007446732195331357,
+        "observations": 564,
+        "positive_share_24h": 0.4095744680851064,
+        "proxy_profit_factor": 0.6059802289567602,
+        "sum_abs_negative_returns": 10.659254349208743,
+        "sum_positive_returns": 6.459297391041856,
+        "valid_forward_24h": 564
+      },
+      "longest_zero_day_streak": 6,
+      "no_signal_days": 124,
+      "raw_gate_passes_by_route": {
+        "NORMAL": 674,
+        "RELAXED_ALT": 1118,
+        "STRONG_ALT": 1627
+      },
+      "rejected_raw_by_reason": {
+        "REJECT_DIRECTION": 371,
+        "REJECT_EDGE": 2606,
+        "REJECT_MOMENTUM": 6321,
+        "REJECT_NEUTRAL_SCORE": 8952,
+        "REJECT_RELAXED_MOMENTUM_ATR": 3088,
+        "REJECT_RELAXED_SCORE": 281,
+        "REJECT_STRONG_QUALITY": 1807,
+        "REJECT_VOLUME": 34602
+      },
+      "repeated_top3_selected": 1911,
+      "route_breakdown": {
+        "NORMAL": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": -0.004986972696241222,
+            "observations": 49,
+            "positive_share_24h": 0.40816326530612246,
+            "proxy_profit_factor": 0.5030626577230132,
+            "sum_abs_negative_returns": 0.4917353584179143,
+            "sum_positive_returns": 0.24737369630209444,
+            "valid_forward_24h": 49
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.00413684121480001,
+            "observations": 180,
+            "positive_share_24h": 0.4,
+            "proxy_profit_factor": 0.6684717391796215,
+            "sum_abs_negative_returns": 2.2460571440316577,
+            "sum_positive_returns": 1.501425725367656,
+            "valid_forward_24h": 180
+          },
+          "repeated_selected": 578
+        },
+        "RELAXED_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": -0.00456845061323015,
+            "observations": 31,
+            "positive_share_24h": 0.4838709677419355,
+            "proxy_profit_factor": 0.7524153559551285,
+            "sum_abs_negative_returns": 0.5720143490985956,
+            "sum_positive_returns": 0.430392380088461,
+            "valid_forward_24h": 31
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.013513333687310492,
+            "observations": 215,
+            "positive_share_24h": 0.4046511627906977,
+            "proxy_profit_factor": 0.43587928402320103,
+            "sum_abs_negative_returns": 5.150257135551192,
+            "sum_positive_returns": 2.244890392779436,
+            "valid_forward_24h": 215
+          },
+          "repeated_selected": 679
+        },
+        "STRONG_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": 0.021317497784425272,
+            "observations": 30,
+            "positive_share_24h": 0.6333333333333333,
+            "proxy_profit_factor": 6.003395302304339,
+            "sum_abs_negative_returns": 0.12781819042725281,
+            "sum_positive_returns": 0.767343123960011,
+            "valid_forward_24h": 30
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.0032541940634977988,
+            "observations": 169,
+            "positive_share_24h": 0.4260355029585799,
+            "proxy_profit_factor": 0.8314529887169572,
+            "sum_abs_negative_returns": 3.262940069625892,
+            "sum_positive_returns": 2.712981272894764,
+            "valid_forward_24h": 169
+          },
+          "repeated_selected": 654
+        },
+        "STRONG_GAP": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": null,
+            "observations": 0,
+            "positive_share_24h": null,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 0
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": null,
+            "observations": 0,
+            "positive_share_24h": null,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 0
+          },
+          "repeated_selected": 0
+        }
+      },
+      "selected_by_route": {
+        "NORMAL": 578,
+        "RELAXED_ALT": 679,
+        "STRONG_ALT": 654
+      },
+      "signal_days": 242,
+      "variant": {
+        "relaxed_min": 0.15
+      }
+    },
+    "RELAXED_MIN_SCORE_0P35": {
+      "added_selected_vs_adopted": 0,
+      "displaced_selected_vs_adopted": 454,
+      "final92d_independent_46h_total": {
+        "average_net_24h_proxy": 0.003915675721025342,
+        "observations": 98,
+        "positive_share_24h": 0.4897959183673469,
+        "proxy_profit_factor": 1.3978557129575275,
+        "sum_abs_negative_returns": 0.9645110228728793,
+        "sum_positive_returns": 1.3482472435333628,
+        "valid_forward_24h": 98
+      },
+      "independent_46h_total": {
+        "average_net_24h_proxy": -0.007002061224563329,
+        "observations": 497,
+        "positive_share_24h": 0.4104627766599598,
+        "proxy_profit_factor": 0.6248775505999503,
+        "sum_abs_negative_returns": 9.27703589634194,
+        "sum_positive_returns": 5.797011467733967,
+        "valid_forward_24h": 497
+      },
+      "longest_zero_day_streak": 6,
+      "no_signal_days": 148,
+      "raw_gate_passes_by_route": {
+        "NORMAL": 674,
+        "RELAXED_ALT": 492,
+        "STRONG_ALT": 1627
+      },
+      "rejected_raw_by_reason": {
+        "REJECT_DIRECTION": 371,
+        "REJECT_EDGE": 2606,
+        "REJECT_MOMENTUM": 6321,
+        "REJECT_NEUTRAL_SCORE": 8952,
+        "REJECT_RELAXED_MOMENTUM_ATR": 3088,
+        "REJECT_RELAXED_SCORE": 907,
+        "REJECT_STRONG_QUALITY": 1807,
+        "REJECT_VOLUME": 34602
+      },
+      "repeated_top3_selected": 1566,
+      "route_breakdown": {
+        "NORMAL": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": -0.004986972696241222,
+            "observations": 49,
+            "positive_share_24h": 0.40816326530612246,
+            "proxy_profit_factor": 0.5030626577230132,
+            "sum_abs_negative_returns": 0.4917353584179143,
+            "sum_positive_returns": 0.24737369630209444,
+            "valid_forward_24h": 49
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.0043168367573774855,
+            "observations": 181,
+            "positive_share_24h": 0.39779005524861877,
+            "proxy_profit_factor": 0.6577615470256245,
+            "sum_abs_negative_returns": 2.283049862733651,
+            "sum_positive_returns": 1.5017024096483258,
+            "valid_forward_24h": 181
+          },
+          "repeated_selected": 578
+        },
+        "RELAXED_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": -0.0076713829553065735,
+            "observations": 15,
+            "positive_share_24h": 0.4,
+            "proxy_profit_factor": 0.5868678404715851,
+            "sum_abs_negative_returns": 0.2785325268818347,
+            "sum_positive_returns": 0.1634617825522361,
+            "valid_forward_24h": 15
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.014083855551313923,
+            "observations": 120,
+            "positive_share_24h": 0.425,
+            "proxy_profit_factor": 0.40565903656712393,
+            "sum_abs_negative_returns": 2.843591086833347,
+            "sum_positive_returns": 1.1535284206756764,
+            "valid_forward_24h": 120
+          },
+          "repeated_selected": 334
+        },
+        "STRONG_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": 0.021857900797232408,
+            "observations": 34,
+            "positive_share_24h": 0.6470588235294118,
+            "proxy_profit_factor": 4.825971081352142,
+            "sum_abs_negative_returns": 0.19424313757313025,
+            "sum_positive_returns": 0.9374117646790322,
+            "valid_forward_24h": 34
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.005145991374311119,
+            "observations": 196,
+            "positive_share_24h": 0.413265306122449,
+            "proxy_profit_factor": 0.7569835347480073,
+            "sum_abs_negative_returns": 4.150394946774943,
+            "sum_positive_returns": 3.141780637409964,
+            "valid_forward_24h": 196
+          },
+          "repeated_selected": 654
+        },
+        "STRONG_GAP": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": null,
+            "observations": 0,
+            "positive_share_24h": null,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 0
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": null,
+            "observations": 0,
+            "positive_share_24h": null,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 0
+          },
+          "repeated_selected": 0
+        }
+      },
+      "selected_by_route": {
+        "NORMAL": 578,
+        "RELAXED_ALT": 334,
+        "STRONG_ALT": 654
+      },
+      "signal_days": 218,
+      "variant": {
+        "relaxed_min": 0.35
+      }
+    },
+    "RELAXED_MIN_SCORE_0P50": {
+      "added_selected_vs_adopted": 0,
+      "displaced_selected_vs_adopted": 620,
+      "final92d_independent_46h_total": {
+        "average_net_24h_proxy": 0.005112747408248869,
+        "observations": 89,
+        "positive_share_24h": 0.4943820224719101,
+        "proxy_profit_factor": 1.567486614119381,
+        "sum_abs_negative_returns": 0.8018418549665112,
+        "sum_positive_returns": 1.2568763743006603,
+        "valid_forward_24h": 89
+      },
+      "independent_46h_total": {
+        "average_net_24h_proxy": -0.007978103712283868,
+        "observations": 453,
+        "positive_share_24h": 0.39514348785871967,
+        "proxy_profit_factor": 0.5866795066878665,
+        "sum_abs_negative_returns": 8.744015939551518,
+        "sum_positive_returns": 5.129934957886927,
+        "valid_forward_24h": 453
+      },
+      "longest_zero_day_streak": 6,
+      "no_signal_days": 167,
+      "raw_gate_passes_by_route": {
+        "NORMAL": 674,
+        "RELAXED_ALT": 235,
+        "STRONG_ALT": 1627
+      },
+      "rejected_raw_by_reason": {
+        "REJECT_DIRECTION": 371,
+        "REJECT_EDGE": 2606,
+        "REJECT_MOMENTUM": 6321,
+        "REJECT_NEUTRAL_SCORE": 8952,
+        "REJECT_RELAXED_MOMENTUM_ATR": 3088,
+        "REJECT_RELAXED_SCORE": 1164,
+        "REJECT_STRONG_QUALITY": 1807,
+        "REJECT_VOLUME": 34602
+      },
+      "repeated_top3_selected": 1400,
+      "route_breakdown": {
+        "NORMAL": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": -0.0043009261560906205,
+            "observations": 48,
+            "positive_share_24h": 0.4166666666666667,
+            "proxy_profit_factor": 0.545094318779346,
+            "sum_abs_negative_returns": 0.45381815179444424,
+            "sum_positive_returns": 0.24737369630209444,
+            "valid_forward_24h": 48
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.003962856920495649,
+            "observations": 185,
+            "positive_share_24h": 0.40540540540540543,
+            "proxy_profit_factor": 0.6858799136258635,
+            "sum_abs_negative_returns": 2.333911653833222,
+            "sum_positive_returns": 1.6007831235415266,
+            "valid_forward_24h": 185
+          },
+          "repeated_selected": 578
+        },
+        "RELAXED_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": -0.022996873139970675,
+            "observations": 4,
+            "positive_share_24h": 0.25,
+            "proxy_profit_factor": 0.18572668870619483,
+            "sum_abs_negative_returns": 0.11296881683832061,
+            "sum_positive_returns": 0.02098132427843791,
+            "valid_forward_24h": 4
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.024753927231594065,
+            "observations": 59,
+            "positive_share_24h": 0.3220338983050847,
+            "proxy_profit_factor": 0.20124195016497473,
+            "sum_abs_negative_returns": 1.8284406735753038,
+            "sum_positive_returns": 0.3679589669112541,
+            "valid_forward_24h": 59
+          },
+          "repeated_selected": 168
+        },
+        "STRONG_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": 0.020363958578010318,
+            "observations": 37,
+            "positive_share_24h": 0.6216216216216216,
+            "proxy_profit_factor": 4.205491615760587,
+            "sum_abs_negative_returns": 0.23505488633374635,
+            "sum_positive_returns": 0.9885213537201281,
+            "valid_forward_24h": 37
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.006796510740233719,
+            "observations": 209,
+            "positive_share_24h": 0.40669856459330145,
+            "proxy_profit_factor": 0.6899661640492095,
+            "sum_abs_negative_returns": 4.581663612142993,
+            "sum_positive_returns": 3.161192867434146,
+            "valid_forward_24h": 209
+          },
+          "repeated_selected": 654
+        },
+        "STRONG_GAP": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": null,
+            "observations": 0,
+            "positive_share_24h": null,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 0
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": null,
+            "observations": 0,
+            "positive_share_24h": null,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 0
+          },
+          "repeated_selected": 0
+        }
+      },
+      "selected_by_route": {
+        "NORMAL": 578,
+        "RELAXED_ALT": 168,
+        "STRONG_ALT": 654
+      },
+      "signal_days": 199,
+      "variant": {
+        "relaxed_min": 0.5
+      }
+    },
+    "STRONG_FAST_BTC12H_ALIGNMENT": {
+      "added_selected_vs_adopted": 0,
+      "displaced_selected_vs_adopted": 84,
+      "final92d_independent_46h_total": {
+        "average_net_24h_proxy": 0.0017754929548424877,
+        "observations": 112,
+        "positive_share_24h": 0.49107142857142855,
+        "proxy_profit_factor": 1.157302245115209,
+        "sum_abs_negative_returns": 1.2641600302444251,
+        "sum_positive_returns": 1.4630152411867838,
+        "valid_forward_24h": 112
+      },
+      "independent_46h_total": {
+        "average_net_24h_proxy": -0.0069175330690467544,
+        "observations": 578,
+        "positive_share_24h": 0.4186851211072664,
+        "proxy_profit_factor": 0.6337307302302049,
+        "sum_abs_negative_returns": 10.916378860891134,
+        "sum_positive_returns": 6.91804474698211,
+        "valid_forward_24h": 578
+      },
+      "longest_zero_day_streak": 6,
+      "no_signal_days": 122,
+      "raw_gate_passes_by_route": {
+        "NORMAL": 674,
+        "RELAXED_ALT": 1399,
+        "STRONG_ALT": 1478
+      },
+      "rejected_raw_by_reason": {
+        "REJECT_DIRECTION": 371,
+        "REJECT_EDGE": 2606,
+        "REJECT_MOMENTUM": 6321,
+        "REJECT_NEUTRAL_SCORE": 8952,
+        "REJECT_RELAXED_MOMENTUM_ATR": 3088,
+        "REJECT_STRONG_FAST_BTC": 149,
+        "REJECT_STRONG_QUALITY": 1807,
+        "REJECT_VOLUME": 34602
+      },
+      "repeated_top3_selected": 1936,
+      "route_breakdown": {
+        "NORMAL": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": -0.005267161482711078,
+            "observations": 50,
+            "positive_share_24h": 0.4,
+            "proxy_profit_factor": 0.4843514945038936,
+            "sum_abs_negative_returns": 0.5107317704376483,
+            "sum_positive_returns": 0.24737369630209444,
+            "valid_forward_24h": 50
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.00439437477314292,
+            "observations": 182,
+            "positive_share_24h": 0.3956043956043956,
+            "proxy_profit_factor": 0.652452834813095,
+            "sum_abs_negative_returns": 2.301201934079667,
+            "sum_positive_returns": 1.501425725367656,
+            "valid_forward_24h": 182
+          },
+          "repeated_selected": 578
+        },
+        "RELAXED_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": -0.00012650608198020832,
+            "observations": 37,
+            "positive_share_24h": 0.5135135135135135,
+            "proxy_profit_factor": 0.9927362838086712,
+            "sum_abs_negative_returns": 0.6443981166080651,
+            "sum_positive_returns": 0.6397173915747973,
+            "valid_forward_24h": 37
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.010217945244634432,
+            "observations": 245,
+            "positive_share_24h": 0.43673469387755104,
+            "proxy_profit_factor": 0.5527746506952051,
+            "sum_abs_negative_returns": 5.597617820248624,
+            "sum_positive_returns": 3.0942212353131886,
+            "valid_forward_24h": 245
+          },
+          "repeated_selected": 788
+        },
+        "STRONG_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": 0.018675760404447208,
+            "observations": 25,
+            "positive_share_24h": 0.64,
+            "proxy_profit_factor": 5.282247059514973,
+            "sum_abs_negative_returns": 0.10903014319871182,
+            "sum_positive_returns": 0.575924153309892,
+            "valid_forward_24h": 25
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.0046037173527256735,
+            "observations": 151,
+            "positive_share_24h": 0.41721854304635764,
+            "proxy_profit_factor": 0.7696279357876764,
+            "sum_abs_negative_returns": 3.0175591065628424,
+            "sum_positive_returns": 2.3223977863012655,
+            "valid_forward_24h": 151
+          },
+          "repeated_selected": 570
+        },
+        "STRONG_GAP": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": null,
+            "observations": 0,
+            "positive_share_24h": null,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 0
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": null,
+            "observations": 0,
+            "positive_share_24h": null,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 0
+          },
+          "repeated_selected": 0
+        }
+      },
+      "selected_by_route": {
+        "NORMAL": 578,
+        "RELAXED_ALT": 788,
+        "STRONG_ALT": 570
+      },
+      "signal_days": 244,
+      "variant": {
+        "strong_fast": true
+      }
+    },
+    "STRONG_GAP_0P85_WITH_FAST_BTC": {
+      "added_selected_vs_adopted": 7,
+      "displaced_selected_vs_adopted": 90,
+      "final92d_independent_46h_total": {
+        "average_net_24h_proxy": 0.0017754929548424877,
+        "observations": 112,
+        "positive_share_24h": 0.49107142857142855,
+        "proxy_profit_factor": 1.157302245115209,
+        "sum_abs_negative_returns": 1.2641600302444251,
+        "sum_positive_returns": 1.4630152411867838,
+        "valid_forward_24h": 112
+      },
+      "independent_46h_total": {
+        "average_net_24h_proxy": -0.006815433271773373,
+        "observations": 577,
+        "positive_share_24h": 0.4194107452339688,
+        "proxy_profit_factor": 0.6388234676677595,
+        "sum_abs_negative_returns": 10.888041292217148,
+        "sum_positive_returns": 6.955536294403911,
+        "valid_forward_24h": 577
+      },
+      "longest_zero_day_streak": 6,
+      "no_signal_days": 122,
+      "raw_gate_passes_by_route": {
+        "NORMAL": 674,
+        "RELAXED_ALT": 1399,
+        "STRONG_ALT": 1478,
+        "STRONG_GAP": 14
+      },
+      "rejected_raw_by_reason": {
+        "REJECT_DIRECTION": 371,
+        "REJECT_EDGE": 2606,
+        "REJECT_MOMENTUM": 6321,
+        "REJECT_NEUTRAL_SCORE": 8952,
+        "REJECT_RELAXED_MOMENTUM_ATR": 3088,
+        "REJECT_STRONG_FAST_BTC": 152,
+        "REJECT_STRONG_QUALITY": 1790,
+        "REJECT_VOLUME": 34602
+      },
+      "repeated_top3_selected": 1937,
+      "route_breakdown": {
+        "NORMAL": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": -0.005267161482711078,
+            "observations": 50,
+            "positive_share_24h": 0.4,
+            "proxy_profit_factor": 0.4843514945038936,
+            "sum_abs_negative_returns": 0.5107317704376483,
+            "sum_positive_returns": 0.24737369630209444,
+            "valid_forward_24h": 50
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.004238839846257851,
+            "observations": 181,
+            "positive_share_24h": 0.39779005524861877,
+            "proxy_profit_factor": 0.6618129408190858,
+            "sum_abs_negative_returns": 2.268655737540327,
+            "sum_positive_returns": 1.501425725367656,
+            "valid_forward_24h": 181
+          },
+          "repeated_selected": 578
+        },
+        "RELAXED_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": -0.00012650608198020832,
+            "observations": 37,
+            "positive_share_24h": 0.5135135135135135,
+            "proxy_profit_factor": 0.9927362838086712,
+            "sum_abs_negative_returns": 0.6443981166080651,
+            "sum_positive_returns": 0.6397173915747973,
+            "valid_forward_24h": 37
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.009769544078986397,
+            "observations": 247,
+            "positive_share_24h": 0.43724696356275305,
+            "proxy_profit_factor": 0.5691227250929344,
+            "sum_abs_negative_returns": 5.600382122798442,
+            "sum_positive_returns": 3.187304735288802,
+            "valid_forward_24h": 247
+          },
+          "repeated_selected": 788
+        },
+        "STRONG_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": 0.018675760404447208,
+            "observations": 25,
+            "positive_share_24h": 0.64,
+            "proxy_profit_factor": 5.282247059514973,
+            "sum_abs_negative_returns": 0.10903014319871182,
+            "sum_positive_returns": 0.575924153309892,
+            "valid_forward_24h": 25
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.0045714125587663175,
+            "observations": 147,
+            "positive_share_24h": 0.4217687074829932,
+            "proxy_profit_factor": 0.7713363105978448,
+            "sum_abs_negative_returns": 2.9388034798861025,
+            "sum_positive_returns": 2.266805833747454,
+            "valid_forward_24h": 147
+          },
+          "repeated_selected": 564
+        },
+        "STRONG_GAP": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": null,
+            "observations": 0,
+            "positive_share_24h": null,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 0
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.04009997599613835,
+            "observations": 2,
+            "positive_share_24h": 0.0,
+            "proxy_profit_factor": 0.0,
+            "sum_abs_negative_returns": 0.0801999519922767,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 2
+          },
+          "repeated_selected": 7
+        }
+      },
+      "selected_by_route": {
+        "NORMAL": 578,
+        "RELAXED_ALT": 788,
+        "STRONG_ALT": 564,
+        "STRONG_GAP": 7
+      },
+      "signal_days": 244,
+      "variant": {
+        "strong_fast": true,
+        "strong_gap": 0.85
+      }
+    },
+    "STRONG_MIN_SCORE_0P35": {
+      "added_selected_vs_adopted": 0,
+      "displaced_selected_vs_adopted": 399,
+      "final92d_independent_46h_total": {
+        "average_net_24h_proxy": -0.0013774968692996648,
+        "observations": 101,
+        "positive_share_24h": 0.4752475247524752,
+        "proxy_profit_factor": 0.8838198341797033,
+        "sum_abs_negative_returns": 1.1975123534809118,
+        "sum_positive_returns": 1.0583851696816458,
+        "valid_forward_24h": 101
+      },
+      "independent_46h_total": {
+        "average_net_24h_proxy": -0.007417599264516069,
+        "observations": 521,
+        "positive_share_24h": 0.418426103646833,
+        "proxy_profit_factor": 0.6032625087737206,
+        "sum_abs_negative_returns": 9.740872244939192,
+        "sum_positive_returns": 5.876303028126321,
+        "valid_forward_24h": 521
+      },
+      "longest_zero_day_streak": 6,
+      "no_signal_days": 128,
+      "raw_gate_passes_by_route": {
+        "NORMAL": 674,
+        "RELAXED_ALT": 1399,
+        "STRONG_ALT": 445
+      },
+      "rejected_raw_by_reason": {
+        "REJECT_DIRECTION": 371,
+        "REJECT_EDGE": 2606,
+        "REJECT_MOMENTUM": 6321,
+        "REJECT_NEUTRAL_SCORE": 8952,
+        "REJECT_RELAXED_MOMENTUM_ATR": 3088,
+        "REJECT_STRONG_QUALITY": 2989,
+        "REJECT_VOLUME": 34602
+      },
+      "repeated_top3_selected": 1621,
+      "route_breakdown": {
+        "NORMAL": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": -0.005932654024388802,
+            "observations": 51,
+            "positive_share_24h": 0.39215686274509803,
+            "proxy_profit_factor": 0.44982020390569993,
+            "sum_abs_negative_returns": 0.5499390515459233,
+            "sum_positive_returns": 0.24737369630209444,
+            "valid_forward_24h": 51
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.00443866371036318,
+            "observations": 183,
+            "positive_share_24h": 0.39344262295081966,
+            "proxy_profit_factor": 0.6489281051132355,
+            "sum_abs_negative_returns": 2.313701184364118,
+            "sum_positive_returns": 1.501425725367656,
+            "valid_forward_24h": 183
+          },
+          "repeated_selected": 578
+        },
+        "RELAXED_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": 0.0012650540670381364,
+            "observations": 37,
+            "positive_share_24h": 0.5135135135135135,
+            "proxy_profit_factor": 1.078944476574302,
+            "sum_abs_negative_returns": 0.5929103910943864,
+            "sum_positive_returns": 0.6397173915747973,
+            "valid_forward_24h": 37
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.008110381873888487,
+            "observations": 268,
+            "positive_share_24h": 0.45149253731343286,
+            "proxy_profit_factor": 0.6220559077566699,
+            "sum_abs_negative_returns": 5.751068443220185,
+            "sum_positive_returns": 3.5774861010180703,
+            "valid_forward_24h": 268
+          },
+          "repeated_selected": 788
+        },
+        "STRONG_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": 0.008971628535703975,
+            "observations": 13,
+            "positive_share_24h": 0.6923076923076923,
+            "proxy_profit_factor": 3.133643619972044,
+            "sum_abs_negative_returns": 0.054662910840602257,
+            "sum_positive_returns": 0.17129408180475394,
+            "valid_forward_24h": 13
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.01255302022306136,
+            "observations": 70,
+            "positive_share_24h": 0.35714285714285715,
+            "proxy_profit_factor": 0.4757412782989281,
+            "sum_abs_negative_returns": 1.6761026173548894,
+            "sum_positive_returns": 0.7973912017405942,
+            "valid_forward_24h": 70
+          },
+          "repeated_selected": 255
+        },
+        "STRONG_GAP": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": null,
+            "observations": 0,
+            "positive_share_24h": null,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 0
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": null,
+            "observations": 0,
+            "positive_share_24h": null,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 0
+          },
+          "repeated_selected": 0
+        }
+      },
+      "selected_by_route": {
+        "NORMAL": 578,
+        "RELAXED_ALT": 788,
+        "STRONG_ALT": 255
+      },
+      "signal_days": 238,
+      "variant": {
+        "strong_min": 0.35
+      }
+    },
+    "STRONG_MIN_SCORE_0P50": {
+      "added_selected_vs_adopted": 0,
+      "displaced_selected_vs_adopted": 558,
+      "final92d_independent_46h_total": {
+        "average_net_24h_proxy": -0.0016302922015629538,
+        "observations": 99,
+        "positive_share_24h": 0.47474747474747475,
+        "proxy_profit_factor": 0.8667936212007471,
+        "sum_abs_negative_returns": 1.2116456389672368,
+        "sum_positive_returns": 1.0502467110125042,
+        "valid_forward_24h": 99
+      },
+      "independent_46h_total": {
+        "average_net_24h_proxy": -0.006402731084083755,
+        "observations": 503,
+        "positive_share_24h": 0.43141153081510936,
+        "proxy_profit_factor": 0.6361728455836787,
+        "sum_abs_negative_returns": 8.851933387052465,
+        "sum_positive_returns": 5.631359651758338,
+        "valid_forward_24h": 503
+      },
+      "longest_zero_day_streak": 6,
+      "no_signal_days": 134,
+      "raw_gate_passes_by_route": {
+        "NORMAL": 674,
+        "RELAXED_ALT": 1399,
+        "STRONG_ALT": 153
+      },
+      "rejected_raw_by_reason": {
+        "REJECT_DIRECTION": 371,
+        "REJECT_EDGE": 2606,
+        "REJECT_MOMENTUM": 6321,
+        "REJECT_NEUTRAL_SCORE": 8952,
+        "REJECT_RELAXED_MOMENTUM_ATR": 3088,
+        "REJECT_STRONG_QUALITY": 3281,
+        "REJECT_VOLUME": 34602
+      },
+      "repeated_top3_selected": 1462,
+      "route_breakdown": {
+        "NORMAL": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": -0.006172663414065736,
+            "observations": 52,
+            "positive_share_24h": 0.38461538461538464,
+            "proxy_profit_factor": 0.4352471917695414,
+            "sum_abs_negative_returns": 0.5683521938335127,
+            "sum_positive_returns": 0.24737369630209444,
+            "valid_forward_24h": 52
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.004598915928199395,
+            "observations": 186,
+            "positive_share_24h": 0.3870967741935484,
+            "proxy_profit_factor": 0.6370546418819264,
+            "sum_abs_negative_returns": 2.3568240880127433,
+            "sum_positive_returns": 1.501425725367656,
+            "valid_forward_24h": 186
+          },
+          "repeated_selected": 578
+        },
+        "RELAXED_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": 0.0007718640086067935,
+            "observations": 39,
+            "positive_share_24h": 0.5128205128205128,
+            "proxy_profit_factor": 1.049373028198224,
+            "sum_abs_negative_returns": 0.6096992109701627,
+            "sum_positive_returns": 0.6398019073058275,
+            "valid_forward_24h": 39
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.007800352798357859,
+            "observations": 282,
+            "positive_share_24h": 0.46099290780141844,
+            "proxy_profit_factor": 0.6227928505154156,
+            "sum_abs_negative_returns": 5.831542408839769,
+            "sum_positive_returns": 3.6318429197028523,
+            "valid_forward_24h": 282
+          },
+          "repeated_selected": 788
+        },
+        "STRONG_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": 0.016184609155127608,
+            "observations": 8,
+            "positive_share_24h": 0.875,
+            "proxy_profit_factor": 4.854139749417481,
+            "sum_abs_negative_returns": 0.03359423416356144,
+            "sum_positive_returns": 0.1630711074045823,
+            "valid_forward_24h": 8
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.004727882386060704,
+            "observations": 35,
+            "positive_share_24h": 0.42857142857142855,
+            "proxy_profit_factor": 0.7506266723732079,
+            "sum_abs_negative_returns": 0.663566890199954,
+            "sum_positive_returns": 0.49809100668782924,
+            "valid_forward_24h": 35
+          },
+          "repeated_selected": 96
+        },
+        "STRONG_GAP": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": null,
+            "observations": 0,
+            "positive_share_24h": null,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 0
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": null,
+            "observations": 0,
+            "positive_share_24h": null,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 0
+          },
+          "repeated_selected": 0
+        }
+      },
+      "selected_by_route": {
+        "NORMAL": 578,
+        "RELAXED_ALT": 788,
+        "STRONG_ALT": 96
+      },
+      "signal_days": 232,
+      "variant": {
+        "strong_min": 0.5
+      }
+    },
+    "STRONG_SCORE_0P35_AND_FAST_BTC": {
+      "added_selected_vs_adopted": 0,
+      "displaced_selected_vs_adopted": 431,
+      "final92d_independent_46h_total": {
+        "average_net_24h_proxy": -0.0014219422095611996,
+        "observations": 101,
+        "positive_share_24h": 0.48514851485148514,
+        "proxy_profit_factor": 0.8796455807042984,
+        "sum_abs_negative_returns": 1.1932770230300163,
+        "sum_positive_returns": 1.049660859864335,
+        "valid_forward_24h": 101
+      },
+      "independent_46h_total": {
+        "average_net_24h_proxy": -0.007419410126704071,
+        "observations": 519,
+        "positive_share_24h": 0.4258188824662813,
+        "proxy_profit_factor": 0.6032304897132933,
+        "sum_abs_negative_returns": 9.705064920378849,
+        "sum_positive_returns": 5.854391064619437,
+        "valid_forward_24h": 519
+      },
+      "longest_zero_day_streak": 6,
+      "no_signal_days": 128,
+      "raw_gate_passes_by_route": {
+        "NORMAL": 674,
+        "RELAXED_ALT": 1399,
+        "STRONG_ALT": 397
+      },
+      "rejected_raw_by_reason": {
+        "REJECT_DIRECTION": 371,
+        "REJECT_EDGE": 2606,
+        "REJECT_MOMENTUM": 6321,
+        "REJECT_NEUTRAL_SCORE": 8952,
+        "REJECT_RELAXED_MOMENTUM_ATR": 3088,
+        "REJECT_STRONG_FAST_BTC": 48,
+        "REJECT_STRONG_QUALITY": 2989,
+        "REJECT_VOLUME": 34602
+      },
+      "repeated_top3_selected": 1589,
+      "route_breakdown": {
+        "NORMAL": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": -0.005932654024388802,
+            "observations": 51,
+            "positive_share_24h": 0.39215686274509803,
+            "proxy_profit_factor": 0.44982020390569993,
+            "sum_abs_negative_returns": 0.5499390515459233,
+            "sum_positive_returns": 0.24737369630209444,
+            "valid_forward_24h": 51
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.00443866371036318,
+            "observations": 183,
+            "positive_share_24h": 0.39344262295081966,
+            "proxy_profit_factor": 0.6489281051132355,
+            "sum_abs_negative_returns": 2.313701184364118,
+            "sum_positive_returns": 1.501425725367656,
+            "valid_forward_24h": 183
+          },
+          "repeated_selected": 578
+        },
+        "RELAXED_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": 0.0012339872687221378,
+            "observations": 38,
+            "positive_share_24h": 0.5263157894736842,
+            "proxy_profit_factor": 1.0790870204262897,
+            "sum_abs_negative_returns": 0.5929103910943864,
+            "sum_positive_returns": 0.6398019073058275,
+            "valid_forward_24h": 38
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.008486271251373264,
+            "observations": 273,
+            "positive_share_24h": 0.45787545787545786,
+            "proxy_profit_factor": 0.6063605036979209,
+            "sum_abs_negative_returns": 5.88546645697114,
+            "sum_positive_returns": 3.5687144053462387,
+            "valid_forward_24h": 273
+          },
+          "repeated_selected": 788
+        },
+        "STRONG_ALT": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": 0.009338139655558873,
+            "observations": 12,
+            "positive_share_24h": 0.75,
+            "proxy_profit_factor": 3.2221505573085145,
+            "sum_abs_negative_returns": 0.05042758038970662,
+            "sum_positive_returns": 0.1624852562564131,
+            "valid_forward_24h": 12
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": -0.011454703891080154,
+            "observations": 63,
+            "positive_share_24h": 0.38095238095238093,
+            "proxy_profit_factor": 0.5207864738314862,
+            "sum_abs_negative_returns": 1.5058972790435912,
+            "sum_positive_returns": 0.7842509339055415,
+            "valid_forward_24h": 63
+          },
+          "repeated_selected": 223
+        },
+        "STRONG_GAP": {
+          "final92d_independent_46h": {
+            "average_net_24h_proxy": null,
+            "observations": 0,
+            "positive_share_24h": null,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 0
+          },
+          "independent_46h": {
+            "average_net_24h_proxy": null,
+            "observations": 0,
+            "positive_share_24h": null,
+            "proxy_profit_factor": null,
+            "sum_abs_negative_returns": 0,
+            "sum_positive_returns": 0,
+            "valid_forward_24h": 0
+          },
+          "repeated_selected": 0
+        }
+      },
+      "selected_by_route": {
+        "NORMAL": 578,
+        "RELAXED_ALT": 788,
+        "STRONG_ALT": 223
+      },
+      "signal_days": 238,
+      "variant": {
+        "strong_fast": true,
+        "strong_min": 0.35
+      }
+    }
+  }
+}
