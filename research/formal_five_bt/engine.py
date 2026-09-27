@@ -661,8 +661,11 @@ def render_report(manifest: Mapping[str, Any], coverage: Mapping[str, Any]) -> s
         "|---|---|---:|---:|---:|---:|---:|",
     ]
     for row in manifest["scenarios"]:
-        candidate_total = sum(int(value) for value in row["candidate_signals"].values())
-        lines.append(f"| {row['scenario_id']} | {row['status']} | {candidate_total} | {row['verified_fills']} | — | — | — |")
+        candidate_total = sum(int(value) for value in row["candidate_signals"].values() if value is not None)
+        candidate_display = (f"{candidate_total} (partial: V52 unverified)"
+                             if any(value is None for value in row["candidate_signals"].values())
+                             else str(candidate_total))
+        lines.append(f"| {row['scenario_id']} | {row['status']} | {candidate_display} | {row['verified_fills']} | — | — | — |")
     lines.extend([
         "",
         "Each signal count is a LIVE-function candidate, not a trade count: shared position-state, cooldown, and allocator allocation have not been converted into filled orders because no candidate passed historical execution-data verification.",
