@@ -1,0 +1,31 @@
+name: Yahoo V52 existing GitHub historical artifact inventory read only
+on:
+  push:
+    branches: [research/formal-five-bt-yahoo-v52-20260927]
+    paths: [.github/workflows/formal-five-bt-yahoo-old-artifact-inventory-20260927.yml]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  inventory:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Search ONLY existing artifact metadata for licensed Yahoo historical data or saved stock ledgers
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          for page in $(seq 1 8); do
+            raw="$(gh api "repos/$GITHUB_REPOSITORY/actions/artifacts?per_page=100&page=$page")"
+            count="$(printf '%s' "$raw" | jq -r '.artifacts | length')"
+            printf '%s' "$raw" | jq -cr --arg page "$page" '.artifacts[]
+              | select((.name|ascii_downcase|test("yahoo|v52|v50|v11|stock|market|historical"))
+                    or (.workflow_run.head_branch // ""|ascii_downcase|test("v52|stock|yahoo")))
+              | {page:$page,id,name,size_in_bytes,expired,created_at,run_id:.workflow_run.id}' \
+              | sed 's/^/PREVIOUS_STOCK_ARTIFACT /'
+            echo "ARTIFACT_META_PAGE=$page COUNT=$count"
+            if [[ "$count" -lt 100 ]]; then break; fi
+          done
+          echo ARTIFACT_INVENTORY_ONLY=TRUE NO_MARKET_DATA_COPIED=TRUE
