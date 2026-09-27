@@ -45,6 +45,15 @@ RISK_VARIANTS = (
     ("Q102_MR_OFF_BRK_1P00", {"Q102_BRK": 1.0, "Q102_MR": 0.0}),
     ("Q102_ALL_CAP_1P00", {"Q102_BRK": 1.0, "Q102_MR": 1.0,
                            "Q102_HIGH_VOL": 1.0, "Q102_PB": 1.0, "Q102_REV": 1.0}),
+    # User-requested ablation: disable BRK and MR at admission time while
+    # leaving ALL PENGU routes and all other Q102 families unchanged.
+    ("Q102_BRK_MR_OFF_PENGU_UNCHANGED", {"Q102_BRK": 0.0, "Q102_MR": 0.0}),
+    ("Q102_BRK_MR_OFF_FET_1P25_PENGU_UNCHANGED",
+     {"Q102_BRK": 0.0, "Q102_MR": 0.0, "FET": 1.25}),
+    ("Q102_BRK_MR_OFF_FET_1P00_PENGU_UNCHANGED",
+     {"Q102_BRK": 0.0, "Q102_MR": 0.0, "FET": 1.0}),
+    ("Q102_BRK_MR_OFF_FET_0P75_PENGU_UNCHANGED",
+     {"Q102_BRK": 0.0, "Q102_MR": 0.0, "FET": 0.75}),
     ("COMBINED_FET1_SHORT0P5_Q102_BRK1_MR0P5",
      {"FET": 1.0, "PENGU_SHORT": 0.5, "Q102_BRK": 1.0, "Q102_MR": 0.5}),
 )
