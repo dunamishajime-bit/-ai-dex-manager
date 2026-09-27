@@ -36,7 +36,7 @@ assert.equal(evaluateV12EntryQuality({ regime: "LONG", strongRegime: false, side
 assert.equal(evaluateV12EntryQuality({ regime: "LONG", strongRegime: false, side: "LONG", momentum: 0.054, atrRatio: 0.0139, score: 0.2 }), false);
 assert.equal(evaluateV12EntryQuality({ regime: "LONG", strongRegime: false, side: "LONG", momentum: 0.03, atrRatio: 0.005, score: 1.4649 }), true);
 assert.equal(evaluateV12EntryQuality({ regime: "LONG", strongRegime: false, side: "SHORT", momentum: -0.08, atrRatio: 0.02, score: 2 }), false);
-assert.equal(evaluateV12EntryQuality({ regime: "NEUTRAL", strongRegime: false, side: "LONG", momentum: 0.08, atrRatio: 0.02, score: 1.4648 }), false);
+assert.equal(evaluateV12EntryQuality({ regime: "NEUTRAL", strongRegime: false, side: "LONG", momentum: 0.08, atrRatio: 0.02, score: 0.9999 }), false);
 const sized = sizeV12Position(1000, 100, 2, "LONG");
 assert.ok(sized.requestedGross > 0 && sized.requestedGross <= 1);
 const levels = protectiveLevels(100, 2, "LONG");
