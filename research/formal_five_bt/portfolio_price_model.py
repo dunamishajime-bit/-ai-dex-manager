@@ -409,13 +409,20 @@ def _portfolio_scenario(
     monthly = {}
     missing_mtm = 0
     missing_mtm_examples: list[dict[str, Any]] = []
+    # V52 enters and exits at NY :30. Replay every intra-hour cashflow
+    # chronologically before H1 MTM, never omit its realized profit/fees.
+    event_times = sorted(set(event_cashflow) | set(trades_by_entry) | set(trades_by_exit))
+    event_index = 0
     for ts in range(PERIOD_START_MS, PERIOD_END_MS + 1, HOUR):
-        cash += event_cashflow.get(ts, 0.0)
-        for trade in trades_by_exit.get(ts, []):
-            open_curve.pop(int(trade["position_id"]), None)
-        for trade in trades_by_entry.get(ts, []):
-            if int(trade["exit_ts_ms"]) > ts:
-                open_curve[int(trade["position_id"])] = trade
+        while event_index < len(event_times) and event_times[event_index] <= ts:
+            event_ts = event_times[event_index]
+            cash += event_cashflow.get(event_ts, 0.0)
+            for trade in trades_by_exit.get(event_ts, []):
+                open_curve.pop(int(trade["position_id"]), None)
+            for trade in trades_by_entry.get(event_ts, []):
+                if int(trade["exit_ts_ms"]) > event_ts:
+                    open_curve[int(trade["position_id"])] = trade
+            event_index += 1
         unrealized = 0.0
         for trade in open_curve.values():
             mark = _mark(market, trade["symbol"], ts)
@@ -448,6 +455,17 @@ def _portfolio_scenario(
         strategy_pnl[row["strategy_id"]] += float(row["total_pnl_jpy"])
         strategy_trades[row["strategy_id"]] += 1
     final_equity = curve[-1][1] if curve else wallet
+    # Reconcile independently computed strategy ledger, settlement wallet,
+    # event ledger and H1 equity; a discrepancy invalidates the report.
+    closed_pnl = sum(pnls)
+    cashflow_total = sum(event_cashflow.values())
+    tolerance = max(1e-6, abs(wallet) * 1e-9)
+    if abs((total_contributed + closed_pnl) - wallet) > tolerance:
+        raise ValueError("PORTFOLIO_TRADE_PNL_WALLET_RECONCILIATION_FAILED")
+    if abs(cashflow_total - wallet) > tolerance:
+        raise ValueError("PORTFOLIO_CASHFLOW_WALLET_RECONCILIATION_FAILED")
+    if not active and abs(final_equity - wallet) > tolerance:
+        raise ValueError("PORTFOLIO_EQUITY_WALLET_RECONCILIATION_FAILED")
     return {
         "scenario_id": scenario_id,
         "status": "INCOMPLETE_MTM_H1_PRICE_MODEL" if missing_mtm else "COMPLETE_H1_PRICE_MODEL_NOT_L2_VERIFIED",
@@ -461,6 +479,13 @@ def _portfolio_scenario(
         "win_rate": sum(value > 0 for value in pnls) / len(pnls) if pnls else None,
         "maximum_mtm_drawdown": None if missing_mtm else max_dd,
         "closed_trades": len(completed),
+        "accounting_reconciliation": {
+            "status": "PASS", "wallet_nominal_jpy": wallet,
+            "closed_trade_pnl_nominal_jpy": closed_pnl,
+            "event_cashflow_nominal_jpy": cashflow_total,
+            "equity_minus_wallet_nominal_jpy": final_equity - wallet,
+            "intrahour_events": sum(event_ts % HOUR != 0 for event_ts in event_times),
+        },
         "strategy_pnl_jpy": dict(strategy_pnl),
         "strategy_trades": dict(strategy_trades),
         "rejected_entries": dict(rejected),
