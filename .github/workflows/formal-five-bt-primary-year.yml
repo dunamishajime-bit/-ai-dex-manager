@@ -10,6 +10,10 @@ on:
       - "research/formal_five_bt/runtime_bridge.mjs"
       - "research/formal_five_bt/crypto_price_model.py"
       - "research/formal_five_bt/portfolio_price_model.py"
+      - "research/formal_five_bt/v52_price_only_scan.py"
+      - "research/formal_five_bt/v52_research_ledger.py"
+      - "research/formal_five_bt/aster_stock_acquire.py"
+      - "research/formal_five_bt/yahoo_acquire.py"
 permissions:
   contents: read
 jobs:
@@ -81,12 +85,41 @@ jobs:
               m=json.loads(p.read_text())
               print(name, m["runtime_sha"], json.dumps(m["stats"],sort_keys=True))
           PY
-      - name: Replay contribution-aware shared-gross crypto portfolio price model
+      - name: Acquire V52 Aster stock-perpetual history and Yahoo equities (ephemeral)
+        run: |
+          python -m research.formal_five_bt.aster_stock_acquire --data-root "$RUNNER_TEMP/formal-v52-data"
+          python -m research.formal_five_bt.yahoo_acquire --output-root "$RUNNER_TEMP/formal-v52-data"
+      - name: Replay V52 causal price-only entry candidates and exit lifecycle
+        run: |
+          python -m research.formal_five_bt.v52_price_only_scan \
+            --data-root "$RUNNER_TEMP/formal-v52-data" \
+            --output-root "$RUNNER_TEMP/formal-v52-scan"
+          python -m research.formal_five_bt.v52_research_ledger \
+            --data-root "$RUNNER_TEMP/formal-v52-data" \
+            --scan-root "$RUNNER_TEMP/formal-v52-scan" \
+            --output-root "$RUNNER_TEMP/formal-v52-ledger" \
+            --round-trip-cost-bps 11
+      - name: Print separate V52 modeled lifecycle audit
+        env:
+          V52_ROOT: ${{ runner.temp }}/formal-v52-ledger
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          d=json.loads((Path(os.environ["V52_ROOT"])/"v52-model-summary.json").read_text())
+          print("V52_RESEARCH_STATUS:", d["status"])
+          print("V52_MODELED_ENTRIES:", d["modeled_entries"])
+          print("V52_MODELED_CLOSED:", d["modeled_closed_trades"])
+          print("V52_UNRESOLVED_EXITS:", d["unresolved_exit_trades"])
+          print("V52_SKIPPED:", json.dumps(d["skipped_reasons"],sort_keys=True))
+          PY
+      - name: Replay contribution-aware all-five shared-gross portfolio PRICE MODEL
         run: |
           python -m research.formal_five_bt.portfolio_price_model \
             --data-root "$RUNNER_TEMP/formal-bt" \
             --candidate-root "$RUNNER_TEMP/formal-crypto-price-model" \
-            --output-root "$RUNNER_TEMP/formal-portfolio-price-model"
+            --output-root "$RUNNER_TEMP/formal-portfolio-price-model" \
+            --v52-ledger-root "$RUNNER_TEMP/formal-v52-ledger"
       - name: Print aggregate price-model lifecycle summary only
         env:
           MODEL_ROOT: ${{ runner.temp }}/formal-crypto-price-model
