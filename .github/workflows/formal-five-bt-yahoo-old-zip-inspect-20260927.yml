@@ -1,0 +1,35 @@
+name: V52 old Yahoo research artifacts file inventory (no contents)
+on:
+  push:
+    branches: [research/formal-five-bt-yahoo-v52-20260927]
+    paths: [.github/workflows/formal-five-bt-yahoo-old-zip-inspect-20260927.yml]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Inspect three historical stock research ZIP file lists only, never export raw market data
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          for item in \
+             32784703324:v12-pengu-v52-top2-allocation-32784703324 \
+             32702490012:formal-v12-top2-pengu-v20-v52-dca-32702490012 \
+             32758283058:research-v12-pengu-v20-v52-3y-dca-32758283058; do
+            run="${item%%:*}"
+            name="${item#*:}"
+            dest="$RUNNER_TEMP/old-$run"
+            mkdir -p "$dest"
+            if gh run download "$run" --repo "$GITHUB_REPOSITORY" -n "$name" -D "$dest"; then
+              find "$dest" -type f -printf "OLD_V52_ARCHIVE_FILE run=$run bytes=%s path=%P\n" | head -60
+              echo "OLD_V52_ARCHIVE_FILE_COUNT run=$run count=$(find "$dest" -type f | wc -l)"
+            else
+              echo "OLD_V52_ARCHIVE_DOWNLOAD_FAILED run=$run"
+            fi
+          done
+          echo OLD_V52_METADATA_ONLY=TRUE MARKET_DATA_PUBLISHED=FALSE
