@@ -96,6 +96,55 @@ class V52ResearchLedgerTests(unittest.TestCase):
         self.assertEqual(result["exit_reasons"]["BASIS_STOP"], 1)
         self.assertLess(trades[0]["modeled_return_on_equity"], 0)
 
+    def test_1330_entry_forces_flat_at_1530_not_1630(self):
+        # At 13:30 New York a 3h timer would run beyond the production
+        # 15:30 forced-flat guard. The model must not hold after that guard.
+        entry = ms("2026-06-15T17:30:00Z")
+        checkpoint1 = ms("2026-06-15T18:30:00Z")
+        cutoff = ms("2026-06-15T19:30:00Z")
+        self.assertEqual(ledger._forced_flat_ms(entry, {"maximumHoldingHours": 3}), cutoff)
+        yahoo = [
+            YahooBar("NVDA", entry - 3600000, entry,
+                     100, 101, 99, 100, 10, SHA),
+            YahooBar("NVDA", entry, checkpoint1,
+                     100, 101, 99, 100, 10, SHA),
+            YahooBar("NVDA", checkpoint1, cutoff,
+                     100, 101, 99, 100, 10, SHA),
+        ]
+        perp = [
+            PerpBar("NVDA", ms("2026-06-15T17:00:00Z"), 101, SHA),
+            PerpBar("NVDA", ms("2026-06-15T18:00:00Z"), 101, SHA),
+            PerpBar("NVDA", ms("2026-06-15T19:00:00Z"), 101, SHA),
+        ]
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "price-only-scan-manifest.json").write_text(json.dumps({
+                "runtime_policy_sha256": "p" * 64,
+                "period_end_exclusive": "2026-08-11",
+            }))
+            row = {**candidate(), "decision_ts_ms": entry}
+            policy = {"convergenceBps": 20, "basisStopMultiple": 1.75,
+                      "maximumHoldingHours": 3}
+            with (patch.object(ledger, "load_manifest", return_value={"runtime_sha": "test"}),
+                  patch.object(ledger, "load_price_only_research",
+                               return_value=([row], {"model": "RESEARCH", "scan_sha256": SHA})),
+                  patch.object(ledger, "verified_policy",
+                               return_value=(policy, "p" * 64)),
+                  patch.object(ledger, "_load_prices",
+                               return_value=({"NVDA": yahoo}, {"NVDA": perp}))):
+                result = ledger.replay_v52_research(root, root, root / "out")
+            self.assertEqual(result["status"], "RESEARCH_PRICE_MODEL_CLOSED_SAMPLE")
+            self.assertEqual(result["modeled_closed_trades"], 1)
+            trade = json.loads((root / "out/v52-model-ledger.jsonl").read_text().splitlines()[0])
+            self.assertEqual(trade["exit_ts_ms"], cutoff)
+            self.assertEqual(trade["exit_reasons"] if "exit_reasons" in trade else trade["reason"],
+                             "TIME_OR_SESSION_FLAT")
+
+    def test_early_close_never_schedules_after_official_close(self):
+        entry = ms("2025-11-28T16:30:00Z")  # 11:30 EST early-close session
+        self.assertEqual(ledger._forced_flat_ms(entry, {"maximumHoldingHours": 3}),
+                         ms("2025-11-28T18:00:00Z"))
+
     def test_invalid_assumed_cost_or_gross_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
