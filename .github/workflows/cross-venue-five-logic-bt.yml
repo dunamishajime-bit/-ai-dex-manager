@@ -1,0 +1,248 @@
+name: Cross-venue five-logic robustness BT
+
+on:
+  push:
+    branches: [research/cross-venue-five-logic-bt-20260928]
+    paths:
+      - ".github/workflows/cross-venue-five-logic-bt.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  venue-bt:
+    strategy:
+      fail-fast: false
+      matrix:
+        venue: [binance, okx]
+    runs-on: ubuntu-latest
+    timeout-minutes: 115
+    env:
+      VENUE: ${{ matrix.venue }}
+      PERIOD_START: "2025-08-10"
+      END_EXCLUSIVE: "2026-08-11"
+      WARMUP_START: "2025-01-01"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Restore audited production source snapshot
+        shell: bash
+        run: |
+          git -c protocol.version=2 fetch --filter=blob:none --no-tags --depth=1 origin a09ea45ca3cbd72100f9eb0eaae499039c40b6a0
+          python -m research.formal_five_bt.restore_snapshot
+
+      - name: Acquire venue crypto H1 and funding
+        shell: bash
+        run: |
+          python -m research.formal_five_bt.acquire \
+            --data-root "$RUNNER_TEMP/venue-data" \
+            --venues "$VENUE" \
+            --warmup-start "$WARMUP_START" \
+            --period-start "$PERIOD_START" \
+            --end-exclusive "$END_EXCLUSIVE"
+
+      - name: Build replay alias without changing source provenance
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp -a "$RUNNER_TEMP/venue-data" "$RUNNER_TEMP/replay-data"
+          mkdir -p "$RUNNER_TEMP/replay-data/normalized/aster"
+          rm -rf "$RUNNER_TEMP/replay-data/normalized/aster/klines" "$RUNNER_TEMP/replay-data/normalized/aster/funding"
+          cp -a "$RUNNER_TEMP/venue-data/normalized/$VENUE/klines" "$RUNNER_TEMP/replay-data/normalized/aster/klines"
+          if [ -d "$RUNNER_TEMP/venue-data/normalized/$VENUE/funding" ]; then
+            cp -a "$RUNNER_TEMP/venue-data/normalized/$VENUE/funding" "$RUNNER_TEMP/replay-data/normalized/aster/funding"
+          else
+            mkdir -p "$RUNNER_TEMP/replay-data/normalized/aster/funding"
+          fi
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          p=Path(os.environ["RUNNER_TEMP"])/"venue-data/acquisition-manifest.json"
+          d=json.loads(p.read_text())
+          v=os.environ["VENUE"]
+          k=d["venues"][v]["klines"]
+          f=d["venues"][v]["funding"]
+          print("VENUE:",v)
+          print("KLINE_STATUS:",{s:sum(x.get("status")==s for x in k.values()) for s in sorted({x.get("status") for x in k.values()})})
+          print("FUNDING_STATUS:",{s:sum(x.get("status")==s for x in f.values()) for s in sorted({x.get("status") for x in f.values()})})
+          print("MISSING_KLINES:",[s for s,x in sorted(k.items()) if x.get("status")!="ACQUIRED"])
+          print("PERIOD:",d["requested"])
+          PY
+
+      - name: Acquire ECB FX reference
+        id: ecb_fx
+        continue-on-error: true
+        run: |
+          python -m research.formal_five_bt.fx_ecb --data-root "$RUNNER_TEMP/replay-data"
+
+      - name: Replay V12 PENGU FET signals on venue data
+        run: |
+          python -m research.formal_five_bt.signal_scan \
+            --data-root "$RUNNER_TEMP/replay-data" \
+            --output-root "$RUNNER_TEMP/formal-scans/baseline-signal-scan" \
+            --strategies V12 PENGU FET \
+            --start "$PERIOD_START" \
+            --end-exclusive "$END_EXCLUSIVE"
+
+      - name: Replay Q102 signals on venue data
+        run: |
+          python -m research.formal_five_bt.signal_scan \
+            --data-root "$RUNNER_TEMP/replay-data" \
+            --output-root "$RUNNER_TEMP/formal-scans/baseline-signal-scan-q102" \
+            --strategies Q102 \
+            --q102-fast \
+            --start "$PERIOD_START" \
+            --end-exclusive "$END_EXCLUSIVE"
+
+      - name: Build crypto candidate lifecycles
+        run: |
+          python -m research.formal_five_bt.crypto_price_model \
+            --data-root "$RUNNER_TEMP/replay-data" \
+            --scan-root "$RUNNER_TEMP/formal-scans" \
+            --output-root "$RUNNER_TEMP/formal-crypto-price-model"
+
+      - name: Rebuild V52 reference ledger
+        shell: bash
+        run: |
+          python -m research.formal_five_bt.aster_stock_acquire \
+            --data-root "$RUNNER_TEMP/formal-v52-data" \
+            --start "$PERIOD_START" \
+            --end-exclusive "$END_EXCLUSIVE"
+          python -m research.formal_five_bt.yahoo_acquire \
+            --output-root "$RUNNER_TEMP/formal-v52-data" \
+            --start "$PERIOD_START" \
+            --end-exclusive "$END_EXCLUSIVE"
+          python -m research.formal_five_bt.v52_price_only_scan \
+            --data-root "$RUNNER_TEMP/formal-v52-data" \
+            --output-root "$RUNNER_TEMP/formal-v52-scan"
+          python -m research.formal_five_bt.v52_research_ledger \
+            --data-root "$RUNNER_TEMP/formal-v52-data" \
+            --scan-root "$RUNNER_TEMP/formal-v52-scan" \
+            --output-root "$RUNNER_TEMP/formal-v52-ledger" \
+            --round-trip-cost-bps 11
+          mkdir -p "$RUNNER_TEMP/replay-data/normalized/aster_stock"
+          cp -a "$RUNNER_TEMP/formal-v52-data/normalized/aster_stock/." "$RUNNER_TEMP/replay-data/normalized/aster_stock/" || true
+          cp "$RUNNER_TEMP/formal-v52-data/aster-stock-hourly-coverage.json" "$RUNNER_TEMP/replay-data/aster-stock-hourly-coverage.json" || true
+
+      - name: Run requested caps and FET dual-gate comparison
+        if: steps.ecb_fx.outcome == 'success'
+        shell: bash
+        run: |
+          python -m research.formal_five_bt.fet_dual_gate_combo_bt \
+            --data-root "$RUNNER_TEMP/replay-data" \
+            --candidate-root "$RUNNER_TEMP/formal-crypto-price-model" \
+            --output-root "$RUNNER_TEMP/formal-user-request" \
+            --v52-ledger-root "$RUNNER_TEMP/formal-v52-ledger" \
+            --ecb-fx-root "$RUNNER_TEMP/replay-data"
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          d=json.loads((Path(os.environ["RUNNER_TEMP"])/"formal-user-request/requested-combo-summary.json").read_text())
+          for case, report in d["cases"].items():
+              for row in report["scenarios"]:
+                  print("CROSS_VENUE_RESULT", json.dumps({
+                    "venue":os.environ["VENUE"],
+                    "case":case,
+                    "scenario":row["scenario_id"],
+                    "final_jpy":row["final_equity_jpy"],
+                    "dd":row["maximum_mtm_drawdown"],
+                    "pf":row["profit_factor"],
+                    "trades":row["closed_trades"],
+                    "strategy_pnl":row["strategy_pnl_jpy"],
+                  },sort_keys=True))
+          PY
+
+      - name: Package reusable normalized market data and BT evidence
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/persist-$VENUE"
+          mkdir -p "$out/results" "$out/data"
+          cp "$RUNNER_TEMP/venue-data/acquisition-manifest.json" "$out/data/"
+          if [ -f "$RUNNER_TEMP/replay-data/ecb-fx-cross-manifest.json" ]; then
+            cp "$RUNNER_TEMP/replay-data/ecb-fx-cross-manifest.json" "$out/data/"
+          fi
+          if [ -f "$RUNNER_TEMP/formal-user-request/requested-combo-summary.json" ]; then
+            cp "$RUNNER_TEMP/formal-user-request/requested-combo-summary.json" "$out/results/"
+          fi
+          if [ -f "$RUNNER_TEMP/formal-crypto-price-model/crypto-price-model-summary.json" ]; then
+            cp "$RUNNER_TEMP/formal-crypto-price-model/crypto-price-model-summary.json" "$out/results/"
+          fi
+          if [ -f "$RUNNER_TEMP/formal-v52-ledger/v52-model-summary.json" ]; then
+            cp "$RUNNER_TEMP/formal-v52-ledger/v52-model-summary.json" "$out/results/"
+          fi
+          tar -C "$RUNNER_TEMP/venue-data" -czf "$out/data/${VENUE}-normalized-h1-funding-20250810-20260810.tar.gz" \
+            "normalized/$VENUE" acquisition-manifest.json
+          cd "$out/data"
+          split -b 45m -d -a 3 "${VENUE}-normalized-h1-funding-20250810-20260810.tar.gz" \
+            "${VENUE}-normalized-h1-funding-20250810-20260810.tar.gz.part-"
+          rm "${VENUE}-normalized-h1-funding-20250810-20260810.tar.gz"
+          sha256sum "${VENUE}-normalized-h1-funding-20250810-20260810.tar.gz.part-"* > "${VENUE}-normalized-parts.sha256"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: cross-venue-${{ matrix.venue }}-20250810-20260810
+          retention-days: 90
+          if-no-files-found: error
+          path: ${{ runner.temp }}/persist-${{ matrix.venue }}/
+
+  persist:
+    needs: venue-bt
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/cross-venue-five-logic-bt-20260928
+          fetch-depth: 0
+          persist-credentials: true
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: cross-venue-*
+          path: cross-venue-downloads
+      - name: Persist reusable data and results to research branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          dest="docs/research/results/cross-venue-five-logic-20250810-20260810"
+          rm -rf "$dest"
+          mkdir -p "$dest"
+          cp -a cross-venue-downloads/. "$dest/"
+          cat > "$dest/README.md" <<'EOF'
+          # Cross-venue five-logic robustness dataset
+
+          Period: 2025-08-10 through 2026-08-10 inclusive.
+
+          Crypto market inputs are acquired independently from Binance Futures and OKX swaps.
+          Each venue is replayed separately through the same audited V12/PENGU/Q102/FET logic.
+          Q102 BRK=0.75x, MR=0.75x, FET cap=1.0x and the two fixed pre-entry FET gates are
+          compared against cap-only and the unmodified baseline at 8bps and 10bps.
+
+          The normalized venue H1/funding archives are split into <=45MB parts for durable Git
+          storage. Reassemble in lexical part order, verify against *-normalized-parts.sha256,
+          then extract the tar.gz to reuse without reacquiring market data.
+
+          V52 is held as the same stock-reference component and is not replaced by Binance/OKX,
+          because those crypto venues do not provide the Yahoo equity reference universe.
+          This is a crypto-market robustness test with V52 methodology held fixed.
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$dest"
+          if git diff --cached --quiet; then
+            echo "No result changes to persist"
+          else
+            git commit -m "BT data: persist Binance and OKX cross-venue one-year replay [skip ci]"
+            git push origin HEAD:research/cross-venue-five-logic-bt-20260928
+          fi
