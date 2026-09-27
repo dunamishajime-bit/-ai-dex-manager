@@ -25,28 +25,34 @@ jobs:
           import hashlib, json, math
           from research.formal_five_bt.sources import fetch_historical_klines
           hour=1757768400000
-          interval=300000
-          bars=fetch_historical_klines("aster","BTCUSDT",hour,hour+3600000-1,interval="5m",max_pages=3)
-          ordered=sorted(bars.rows,key=lambda x:int(x[0]))
-          times=[int(x[0]) for x in ordered]
-          exact=(len(ordered)==12 and times==[hour+i*interval for i in range(12)])
-          valid=exact and all(
-            len(x)>=7 and all(math.isfinite(float(x[k])) and float(x[k])>0 for k in (1,2,3,4))
-            and float(x[2])>=max(float(x[1]),float(x[4]))
-            and float(x[3])<=min(float(x[1]),float(x[4]))
-            and float(x[2])>=float(x[3]) for x in ordered)
-          print("ASTER_5M_TIMES_CONTIGUOUS:",exact)
-          print("ASTER_5M_OHLC_VALID:",valid)
-          print("ASTER_5M_PAGE_SHA256:",bars.page_hashes)
-          if not valid:
-            print("OFFICIAL_ASTER_5M_REPAIR_AVAILABLE: False")
-            raise SystemExit(2)
-          open_=float(ordered[0][1]); high=max(float(x[2]) for x in ordered)
-          low=min(float(x[3]) for x in ordered); close=float(ordered[-1][4])
-          combined={"ts":hour,"open":open_,"high":high,"low":low,
-                    "close":close,"volume":sum(float(x[5]) for x in ordered)}
-          combined_hash=hashlib.sha256(json.dumps(combined,sort_keys=True).encode()).hexdigest()
-          print("OFFICIAL_ASTER_5M_REPAIRED_H1_SHA256:",combined_hash)
-          print("OFFICIAL_ASTER_5M_REPAIR_AVAILABLE:",True)
-          print("REPLAY_STATUS: PRIMARY_VENUE_DERIVED_RESEARCH_ONLY")
+          any_valid=False
+          for name, interval in (("5m",300000),("1m",60000)):
+            try:
+              bars=fetch_historical_klines("aster","BTCUSDT",hour,hour+3600000-1,interval=name,max_pages=3)
+              ordered=sorted(bars.rows,key=lambda x:int(x[0]))
+              times=[int(x[0]) for x in ordered]
+              exact=(len(ordered)==3600000//interval and times==[hour+i*interval for i in range(3600000//interval)])
+              bad=[int(x[0])-hour for x in ordered if not (
+                len(x)>=7 and all(math.isfinite(float(x[k])) and float(x[k])>0 for k in (1,2,3,4))
+                and float(x[2])>=max(float(x[1]),float(x[4]))
+                and float(x[3])<=min(float(x[1]),float(x[4]))
+                and float(x[2])>=float(x[3]))]
+              valid=exact and not bad
+              print(name.upper()+"_TIMES_CONTIGUOUS:",exact)
+              print(name.upper()+"_INVALID_BAR_OFFSETS_MS:",bad)
+              print(name.upper()+"_PAGE_SHA256:",bars.page_hashes)
+              if valid:
+                combined={"ts":hour,"open":float(ordered[0][1]),
+                          "high":max(float(x[2]) for x in ordered),
+                          "low":min(float(x[3]) for x in ordered),
+                          "close":float(ordered[-1][4]),
+                          "volume":sum(float(x[5]) for x in ordered)}
+                print(name.upper()+"_RECONSTRUCTED_H1_SHA256:",
+                      hashlib.sha256(json.dumps(combined,sort_keys=True).encode()).hexdigest())
+                any_valid=True
+            except Exception as error:
+              print(name.upper()+"_PROBE_UNAVAILABLE:",type(error).__name__,str(error).split("\\n")[0][:140])
+          print("OFFICIAL_ASTER_MINUTE_REPAIR_AVAILABLE:",any_valid)
+          print("REPLAY_STATUS: PRIMARY_VENUE_DERIVED_RESEARCH_ONLY" if any_valid
+                else "REPLAY_STATUS: PRIMARY_VENUE_SOURCE_CORRUPT_NO_REPAIR")
           PY
