@@ -209,15 +209,33 @@ def acquire(root: str | Path, *, warmup_start: date = WARMUP_START, start_date: 
         _write_json(target / "acquisition-progress.json", metadata)
 
     if "aster" in venues:
-        fx = sources.fetch_fred_dexjpus(warmup_start, end_date_exclusive)
-        fx_raw_path = Path("raw/fred/DEXJPUS.csv")
-        raw_sha = _write_bytes(target / fx_raw_path, fx.raw_response)
-        fx_path = Path("normalized/fred/DEXJPUS.jsonl")
-        fx_content = "".join(json.dumps(row, sort_keys=True, separators=(",", ":")) + "\n" for row in fx.observations).encode("utf-8")
-        fx_sha = _write_bytes(target / fx_path, fx_content)
-        metadata["fred"] = {"status": "ACQUIRED", "source_url": fx.source_url, "raw_path": fx_raw_path.as_posix(), "raw_sha256": raw_sha, "normalized_path": fx_path.as_posix(), "normalized_sha256": fx_sha, "observations": len(fx.observations)}
+        # An external FX-provider failure must not discard hours of fully
+        # acquired, independently verifiable Aster candles and funding.
+        # Preserve partial provenance and still run the audited *signal*
+        # scans. Portfolio equity/P&L remains blocked until FX is restored.
+        try:
+            fx = sources.fetch_fred_dexjpus(warmup_start, end_date_exclusive)
+            if not fx.observations:
+                raise ValueError("FRED_RETURNED_NO_USABLE_FX_OBSERVATIONS")
+            fx_raw_path = Path("raw/fred/DEXJPUS.csv")
+            raw_sha = _write_bytes(target / fx_raw_path, fx.raw_response)
+            fx_path = Path("normalized/fred/DEXJPUS.jsonl")
+            fx_content = "".join(json.dumps(row, sort_keys=True, separators=(",", ":")) + "\n" for row in fx.observations).encode("utf-8")
+            fx_sha = _write_bytes(target / fx_path, fx_content)
+            metadata["fred"] = {"status": "ACQUIRED", "source_url": fx.source_url, "raw_path": fx_raw_path.as_posix(), "raw_sha256": raw_sha, "normalized_path": fx_path.as_posix(), "normalized_sha256": fx_sha, "observations": len(fx.observations)}
+        except (RuntimeError, OSError, ValueError) as error:
+            metadata["fred"] = {
+                "status": "NOT_VERIFIABLE_FX_PROVIDER_UNAVAILABLE",
+                "source": "FRED DEXJPUS", "error_type": type(error).__name__,
+                "observations": 0, "portfolio_accounting_permitted": False,
+            }
+        _write_json(target / "acquisition-progress.json", metadata)
 
-    metadata["status"] = "ACQUISITION_COMPLETE_REQUIRES_VALIDATION"
+    metadata["status"] = (
+        "ACQUISITION_PARTIAL_FX_NOT_VERIFIABLE"
+        if "aster" in venues and (metadata.get("fred") or {}).get("status") != "ACQUIRED"
+        else "ACQUISITION_COMPLETE_REQUIRES_VALIDATION"
+    )
     metadata["acquisition_manifest_sha256"] = _write_json(target / "acquisition-manifest.json", metadata)
     return metadata
 
