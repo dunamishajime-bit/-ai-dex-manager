@@ -97,12 +97,22 @@ def run_combo(
         if any(row["accounting_reconciliation"]["status"] != "PASS"
                for row in runs[label]["scenarios"]):
             raise ValueError(f"PORTFOLIO_RECONCILIATION_FAILED:{label}")
-        if any(row["candidate_decision_rows"] != len(original) +
-               runs[label]["v52_skipped_candidates"] +
-               sum(row["strategy_id"] == "V52" and row["status"] == "MODELED_CLOSED_TRADE"
-                   for row in _rows(Path(v52_ledger_root) / "v52-model-ledger.jsonl"))
-               for row in runs[label]["scenarios"]) if v52_ledger_root else False:
-            raise ValueError(f"CANDIDATE_DECISION_COUNT_MISMATCH:{label}")
+        # The V52 research ledger is strategy-scoped and its rows do not have
+        # a strategy_id field. Count accepted modeled lifecycles by status;
+        # every skipped V52 candidate is counted separately by the portfolio.
+        if v52_ledger_root is not None:
+            v52_lifecycles = _rows(Path(v52_ledger_root) / "v52-model-ledger.jsonl")
+            expected_decisions = (
+                len(original) + runs[label]["v52_skipped_candidates"]
+                + sum(r.get("status") == "MODELED_CLOSED_TRADE" for r in v52_lifecycles)
+            )
+            if any(s["candidate_decision_rows"] != expected_decisions
+                   for s in runs[label]["scenarios"]):
+                raise ValueError(
+                    f"CANDIDATE_DECISION_COUNT_MISMATCH:{label}:"
+                    f"expected={expected_decisions}:"
+                    f"actual={[s['candidate_decision_rows'] for s in runs[label]['scenarios']]}"
+                )
 
     blocked = Counter(k for r in gate_audit for k in r["gate_reasons"])
     accepted_baseline = {}
