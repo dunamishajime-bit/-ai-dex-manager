@@ -786,49 +786,54 @@ if (process.argv.includes("--list")) {
         const startMs = Number(request.startMs);
         const endMs = Number(request.endMs);
         if (!candlesBySymbol || !Array.isArray(highVolSymbols) || !Array.isArray(symbols) || !Number.isFinite(startMs) || !Number.isFinite(endMs) || endMs < startMs) throw new Error("Q102_SERIES_INPUT_INVALID");
-        const indexBySymbol = Object.fromEntries(Object.entries(candlesBySymbol).map(([symbol, rows]) => [symbol, 0]));
+        const indexBySymbol = Object.fromEntries(Object.entries(candlesBySymbol).map(([symbol]) => [symbol, 0]));
+        // Validate each H1 candle once and cache the start of the current
+        // contiguous suffix. Each prefix index depends ONLY on its own past.
+        // Rewalking every prior candle for every symbol on all 8,784 decision
+        // hours was unnecessarily quadratic and could exhaust the CI runner.
+        const HOUR_MS = 3_600_000;
+        const validQ102Bar = (row) => row
+          && Number.isFinite(Number(row.timestampMs)) && Number(row.timestampMs) > 0
+          && ["open", "high", "low", "close"].every((key) => Number.isFinite(Number(row[key])) && Number(row[key]) > 0)
+          && Number.isFinite(Number(row.quoteVolume)) && Number(row.quoteVolume) >= 0
+          && Number(row.high) >= Math.max(Number(row.open), Number(row.close))
+          && Number(row.low) <= Math.min(Number(row.open), Number(row.close))
+          && Number(row.high) >= Number(row.low);
+        const suffixStartBySymbol = Object.fromEntries(Object.entries(candlesBySymbol).map(([symbol, rows]) => {
+          const starts = new Uint32Array(rows.length);
+          let runStart = 0;
+          let previousValid = false;
+          for (let i = 0; i < rows.length; i += 1) {
+            const valid = Boolean(validQ102Bar(rows[i]));
+            if (!valid) {
+              runStart = i + 1;
+            } else if (i > 0 && (!previousValid ||
+              Number(rows[i].timestampMs) - Number(rows[i - 1].timestampMs) !== HOUR_MS)) {
+              runStart = i;
+            }
+            starts[i] = runStart;
+            previousValid = valid;
+          }
+          return [symbol, starts];
+        }));
         const results = [];
-        for (let decisionTs = Math.ceil(startMs / 3_600_000) * 3_600_000; decisionTs <= endMs; decisionTs += 3_600_000) {
-          const asofCandles = {};
+        for (let decisionTs = Math.ceil(startMs / HOUR_MS) * HOUR_MS; decisionTs <= endMs; decisionTs += HOUR_MS) {
+          const validCandles = {};
           const entryOpenBySymbol = {};
           for (const [symbol, rows] of Object.entries(candlesBySymbol)) {
             let index = indexBySymbol[symbol];
-            while (index < rows.length && rows[index].timestampMs + 3_600_000 <= decisionTs) index += 1;
+            while (index < rows.length &&
+              Number(rows[index].timestampMs) + HOUR_MS <= decisionTs) index += 1;
             indexBySymbol[symbol] = index;
-            let end = index;
-            while (end < rows.length && rows[end].timestampMs < decisionTs) end += 1;
-            asofCandles[symbol] = rows.slice(0, end);
-            if (rows[index]?.timestampMs === decisionTs) entryOpenBySymbol[symbol] = { timestampMs: decisionTs, open: rows[index].open };
-          }
-          // Historical universes are point-in-time. A symbol may participate
-          // only after its own current-hour entry open and enough prior H1
-          // history exist. This prevents a late-listed coin from invalidating
-          // every earlier timestamp while preserving the exact audited model.
-          // Keep only the latest contiguous, structurally valid H1 suffix.
-          // One malformed provider candle must not poison every later date
-          // forever; the symbol becomes eligible again only after it rebuilds
-          // the required causal warm-up from valid hourly observations.
-          const q102ValidSuffix = (rows) => {
-            if (!Array.isArray(rows) || !rows.length) return [];
-            let start = rows.length - 1;
-            const valid = (row) => row
-              && Number.isFinite(Number(row.timestampMs)) && Number(row.timestampMs) > 0
-              && ["open", "high", "low", "close"].every((key) => Number.isFinite(Number(row[key])) && Number(row[key]) > 0)
-              && Number.isFinite(Number(row.quoteVolume)) && Number(row.quoteVolume) >= 0
-              && Number(row.high) >= Math.max(Number(row.open), Number(row.close))
-              && Number(row.low) <= Math.min(Number(row.open), Number(row.close))
-              && Number(row.high) >= Number(row.low);
-            if (!valid(rows[start])) return [];
-            while (start > 0) {
-              const left = rows[start - 1];
-              const right = rows[start];
-              if (!valid(left) || Number(right.timestampMs) - Number(left.timestampMs) !== 3_600_000) break;
-              start -= 1;
+            validCandles[symbol] = index > 0
+              ? rows.slice(suffixStartBySymbol[symbol][index - 1], index)
+              : [];
+            if (rows[index]?.timestampMs === decisionTs) {
+              entryOpenBySymbol[symbol] = { timestampMs: decisionTs, open: rows[index].open };
             }
-            return rows.slice(start);
-          };
-          const validCandles = Object.fromEntries(
-            Object.entries(asofCandles).map(([symbol, rows]) => [symbol, q102ValidSuffix(rows)]));
+          }
+          // Do not include a current H1 candle whose close lies in the future.
+          // A symbol becomes eligible only after rebuilding its causal warmup.
           const btcReady = (validCandles.BTCUSDT?.length || 0) >= 181 * 24;
           const availableSymbols = symbols.filter((symbol) =>
             Array.isArray(validCandles[symbol])
