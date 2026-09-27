@@ -198,11 +198,12 @@ jobs:
                   "scenario_id","contributed_jpy","final_equity_jpy","net_profit_jpy",
                   "profit_factor","win_rate","maximum_mtm_drawdown","closed_trades",
                   "strategy_pnl_jpy","fx_cash_translation_pnl_jpy",
-                  "strategy_trades","accounting_reconciliation")}
+                  "strategy_trades","candidate_decision_counts",
+                  "strategy_trade_outcome_aggregates","accounting_reconciliation")}
               print("ECB_FX_PORTFOLIO_SCENARIO:",json.dumps(printable,sort_keys=True))
               print("ECB_FX_MONTHLY_EQUITY:",row["scenario_id"],json.dumps(row["monthly_equity_jpy"],sort_keys=True))
           PY
-      - name: Preserve aggregate five-logic modeled report (no raw vendor data)
+      - name: Preserve reusable five-logic ledgers and modeled report (no raw candle vendor dump)
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -214,6 +215,15 @@ jobs:
             ${{ runner.temp }}/formal-v52-ledger/v52-model-summary.json
             ${{ runner.temp }}/formal-portfolio-price-model/portfolio-price-model-summary.json
             ${{ runner.temp }}/formal-portfolio-ecb-model/portfolio-price-model-summary.json
+            ${{ runner.temp }}/formal-portfolio-ecb-model/PRICE_MODEL_ASTER_TAKER_8BPS/metrics.json
+            ${{ runner.temp }}/formal-portfolio-ecb-model/PRICE_MODEL_ASTER_TAKER_8BPS/portfolio-trades.jsonl
+            ${{ runner.temp }}/formal-portfolio-ecb-model/PRICE_MODEL_ASTER_TAKER_8BPS/candidate-decisions.jsonl
+            ${{ runner.temp }}/formal-portfolio-ecb-model/PRICE_MODEL_ASTER_TAKER_8BPS/portfolio-events.jsonl
+            ${{ runner.temp }}/formal-portfolio-ecb-model/PRICE_MODEL_BASE_10BPS/metrics.json
+            ${{ runner.temp }}/formal-portfolio-ecb-model/PRICE_MODEL_BASE_10BPS/portfolio-trades.jsonl
+            ${{ runner.temp }}/formal-portfolio-ecb-model/PRICE_MODEL_BASE_10BPS/candidate-decisions.jsonl
+            ${{ runner.temp }}/formal-portfolio-ecb-model/PRICE_MODEL_BASE_10BPS/portfolio-events.jsonl
+            ${{ runner.temp }}/formal-portfolio-ecb-model/PRICE_MODEL_EXTREME_COST_70BPS_NOT_BASELINE/metrics.json
             ${{ runner.temp }}/formal-bt/ecb-fx-cross-manifest.json
             ${{ runner.temp }}/formal-bt/acquisition-manifest.json
             ${{ runner.temp }}/formal-bt/aster-h1-reconciliation-status.json
