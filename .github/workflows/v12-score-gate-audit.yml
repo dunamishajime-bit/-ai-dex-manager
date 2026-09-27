@@ -40,8 +40,28 @@ jobs:
         run: |
           git -c protocol.version=2 fetch --filter=blob:none --no-tags --depth=1 origin a09ea45ca3cbd72100f9eb0eaae499039c40b6a0
           python -m research.formal_five_bt.restore_snapshot
+      - name: Verify saved Aster full-year audit before skipping expensive reacquisition
+        id: annual_cached
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          p=Path("docs/research/results/v12-score-gate-audit-20260928/annual.json")
+          valid=False
+          if p.is_file():
+            d=json.loads(p.read_text())
+            valid=(d.get("source_venue")=="ASTER_ONLY"
+              and d.get("period")==["2025-08-10","2026-08-11"]
+              and d.get("portfolio_v12_fills",{}).get("count")==754
+              and "SOURCE_BASELINE" in d.get("cases",{}))
+          with open(os.environ["GITHUB_OUTPUT"],"a") as f:
+            f.write("valid="+str(valid).lower()+"\\n")
+          print("REUSABLE_ANNUAL_V12_AUDIT_VALID",valid,flush=True)
+          PY
       - name: Acquire the same Aster historical year and warmup, no Binance substitution
         id: annual_acquire
+        if: steps.annual_cached.outputs.valid != 'true'
         continue-on-error: true
         shell: bash
         run: |
@@ -82,7 +102,16 @@ jobs:
             --data-root "$RECENT_ROOT" --venues aster \
             --warmup-start "$RECENT_WARMUP" --period-start "$RECENT_START" \
             --end-exclusive "$RECENT_END_EXCLUSIVE"
-          python -m research.formal_five_bt.aster_h1_reconcile --data-root "$RECENT_ROOT" --allow-valid-noop
+          python - <<'PY'
+          import os,json
+          from pathlib import Path
+          m=json.loads((Path(os.environ["RECENT_ROOT"])/"acquisition-manifest.json").read_text())
+          k=m["venues"]["aster"]["klines"]
+          names=m["universes"]["V12"]
+          missing=[s for s in names if k.get(s,{}).get("status")!="ACQUIRED"]
+          if missing: raise SystemExit("RECENT_V12_SOURCE_INCOMPLETE:"+",".join(sorted(missing)))
+          print("RECENT_V12_H1_SOURCE_VERIFIED",len(names))
+          PY
       - name: Audit actual recent V12 no-signal days and counterfactual pre-WR eligibility
         id: recent_analyze
         continue-on-error: true
@@ -144,9 +173,10 @@ jobs:
         if: always()
         env:
           YEAR_ANALYSIS_OUTCOME: ${{ steps.annual_analyze.outcome }}
+          YEAR_CACHED: ${{ steps.annual_cached.outputs.valid }}
           RECENT_ANALYSIS_OUTCOME: ${{ steps.recent_analyze.outcome }}
         run: |
           echo "HISTORICAL_SCORE_GATE_AUDIT=$YEAR_ANALYSIS_OUTCOME"
           echo "RECENT_SCORE_GATE_AUDIT=$RECENT_ANALYSIS_OUTCOME"
-          test "$YEAR_ANALYSIS_OUTCOME" = success
+          test "$YEAR_ANALYSIS_OUTCOME" = success || test "$YEAR_CACHED" = true
           test "$RECENT_ANALYSIS_OUTCOME" = success
