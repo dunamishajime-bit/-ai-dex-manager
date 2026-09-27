@@ -489,6 +489,9 @@ def build_candidate_ledger(data_root: Path, scan_root: Path, output_root: Path) 
         summary["strategies"][strategy] = {
             "candidates": len(rows), "modeled_closed": len(closed),
             "unresolved": len(rows) - len(closed),
+            "unresolved_status_counts": dict(Counter(
+                str(row["status"]) for row in rows
+                if row.get("status") != "MODELED_CLOSED_TRADE")),
             "gross_price_win_rate": (sum(value > 0 for value in values) / len(values) if values else None),
             "mean_unit_price_return": (sum(values) / len(values) if values else None),
             "exit_reasons": dict(Counter(str(row.get("exit_reason")) for row in closed)),
