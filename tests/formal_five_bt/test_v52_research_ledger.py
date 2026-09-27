@@ -196,6 +196,42 @@ class V52ResearchLedgerTests(unittest.TestCase):
             self.assertEqual(closed[0]["entry_ts_ms"], next_day)
             self.assertEqual(closed[0]["exit_ts_ms"], next_exit)
 
+    def test_known_yahoo_missing_session_is_data_coverage_exclusion_not_unresolved_trade(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "price-only-scan-manifest.json").write_text(json.dumps({
+                "runtime_policy_sha256": "p" * 64,
+                "period_end_exclusive": "2026-08-11",
+            }))
+            (root / "yahoo-v52-coverage.json").write_text(json.dumps({
+                "symbols": {
+                    "NVDA": {"missing_session_days": {"2026-06-15": 2}},
+                    "AMZN": {"missing_session_days": {}},
+                    "META": {"missing_session_days": {}},
+                    "MSFT": {"missing_session_days": {}},
+                    "TSLA": {"missing_session_days": {}},
+                }
+            }))
+            policy = {"convergenceBps": 20, "basisStopMultiple": 1.75,
+                      "maximumHoldingHours": 3}
+            with (patch.object(ledger, "load_manifest", return_value={"runtime_sha": "test"}),
+                  patch.object(ledger, "load_price_only_research",
+                               return_value=([candidate()], {"model": "RESEARCH", "scan_sha256": SHA})),
+                  patch.object(ledger, "verified_policy",
+                               return_value=(policy, "p" * 64)),
+                  patch.object(ledger, "_load_prices", return_value=stock_data())):
+                result = ledger.replay_v52_research(root, root, root / "out")
+            self.assertEqual(result["status"], "RESEARCH_PRICE_MODEL_CLOSED_SAMPLE")
+            self.assertEqual(result["modeled_entries"], 0)
+            self.assertEqual(result["modeled_closed_trades"], 0)
+            self.assertEqual(result["unresolved_exit_trades"], 0)
+            self.assertEqual(result["skipped_reasons"]["YAHOO_SESSION_COVERAGE_INCOMPLETE"], 1)
+            self.assertEqual(result["yahoo_incomplete_sessions_excluded"]["NVDA"], ["2026-06-15"])
+            rows = [json.loads(line) for line in
+                    (root / "out/v52-model-ledger.jsonl").read_text().splitlines()]
+            self.assertEqual(rows[0]["status"], "SKIPPED_CANDIDATE")
+            self.assertEqual(rows[0]["reason"], "YAHOO_SESSION_COVERAGE_INCOMPLETE")
+
     def test_invalid_assumed_cost_or_gross_rejected(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
