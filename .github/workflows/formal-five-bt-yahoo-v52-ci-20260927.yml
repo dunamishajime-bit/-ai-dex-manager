@@ -1,0 +1,29 @@
+name: Yahoo V52 assumed-fill research contract tests
+on:
+  push:
+    branches: [research/formal-five-bt-yahoo-v52-20260927]
+    paths: [.github/workflows/formal-five-bt-yahoo-v52-ci-20260927.yml]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify Yahoo bars, causal entry, V11/V50 gates, user-assumed fill and no invented L2
+        run: |
+          python -m unittest discover -s tests/formal_five_bt -p test_yahoo_v52.py -v
+          python -m py_compile research/formal_five_bt/yahoo_v52.py
+          python - <<'PY'
+          from pathlib import Path
+          s=Path('research/formal_five_bt/yahoo_v52.py').read_text()
+          assert 'EXACT_YAHOO_60M_COMPLETED_CLOSE_AT_1030_1130_1230_1330_NY' in s
+          assert '"actual_aster_basis_measured":False' in s
+          assert '"orderbook_required":False' in s
+          assert 'YAHOO_ACCESS_BLOCKED_HTTP_' in s
+          print('YAHOO_NO_L2_ASSUMED_FILL_LIVE_PARITY_CONTRACT=PASS')
+          PY
