@@ -1,0 +1,72 @@
+name: Formal BT Aster Primary One-Year Research
+on:
+  workflow_dispatch:
+  push:
+    branches: [codex/formal-five-logic-bt-20260926]
+    paths:
+      - ".github/workflows/formal-five-bt-primary-year.yml"
+permissions:
+  contents: read
+jobs:
+  primary-year:
+    runs-on: ubuntu-latest
+    timeout-minutes: 115
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Restore source from audited historical runtime commit
+        shell: bash
+        run: |
+          git -c protocol.version=2 fetch --filter=blob:none --no-tags --depth=1 origin a09ea45ca3cbd72100f9eb0eaae499039c40b6a0
+          python -m research.formal_five_bt.restore_snapshot
+      - name: Acquire one-year Aster crypto candles, funding and FRED FX
+        run: |
+          python -m research.formal_five_bt.acquire --data-root "$RUNNER_TEMP/formal-bt" --venues aster
+      - name: Show only instrument coverage counts, never raw prices
+        env:
+          BT_ROOT: ${{ runner.temp }}/formal-bt
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          m=json.loads((Path(os.environ["BT_ROOT"])/"acquisition-manifest.json").read_text())
+          k=m["venues"]["aster"]["klines"]
+          f=m["venues"]["aster"]["funding"]
+          print("BT_ASTER_INSTRUMENT_COUNT:",len(k))
+          print("BT_ASTER_CANDLE_STATUS:",{s:sum(x.get("status")==s for x in k.values()) for s in sorted({x.get("status") for x in k.values()})})
+          print("BT_ASTER_FUNDING_STATUS:",{s:sum(x.get("status")==s for x in f.values()) for s in sorted({x.get("status") for x in f.values()})})
+          print("BT_ASTER_MISSING_CANDLE_SYMBOLS:",[s for s,v in sorted(k.items()) if v.get("status")!="ACQUIRED"])
+          print("BT_FRED_STATUS:",m.get("fred",{}).get("status"))
+          PY
+      - name: Replay audited V12 PENGU FET causal signal scans
+        run: |
+          python -m research.formal_five_bt.signal_scan --data-root "$RUNNER_TEMP/formal-bt" --output-root "$RUNNER_TEMP/formal-scans/baseline-signal-scan" --strategies V12 PENGU FET
+      - name: Replay Q102 as-of causal signal scan independently
+        run: |
+          python -m research.formal_five_bt.signal_scan --data-root "$RUNNER_TEMP/formal-bt" --output-root "$RUNNER_TEMP/formal-scans/baseline-signal-scan-q102" --strategies Q102
+      - name: Print only aggregate causal scan status
+        env:
+          SCAN_ROOT: ${{ runner.temp }}/formal-scans
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          r=Path(os.environ["SCAN_ROOT"])
+          for name in ("baseline-signal-scan","baseline-signal-scan-q102"):
+              p=r/name/"signal-scan-manifest.json"
+              if not p.is_file():
+                  print(name, "MISSING")
+                  continue
+              m=json.loads(p.read_text())
+              print(name, m["runtime_sha"], json.dumps(m["stats"],sort_keys=True))
+          PY
