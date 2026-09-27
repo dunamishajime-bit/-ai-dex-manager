@@ -1,0 +1,114 @@
+name: Aster V12 Alternative Route Review (Score 1.00 Volume 0.80)
+on:
+  push:
+    branches: [research/v12-alternate-route-review-20260928]
+    paths:
+      - "research/formal_five_bt/v12_alt_route_audit.py"
+      - ".github/workflows/v12-alt-route-review-20260928.yml"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: v12-alt-route-review-20260928
+  cancel-in-progress: false
+jobs:
+  route-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 65
+    env:
+      YEAR_ROOT: /tmp/v12-alt-year
+      YEAR_SCAN: /tmp/v12-alt-year-scan
+      RECENT_ROOT: /tmp/v12-alt-recent
+      RECENT_SCAN: /tmp/v12-alt-recent-scan
+      DEST: docs/research/results/v12-alternate-route-review-20260928
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/v12-alternate-route-review-20260928
+          fetch-depth: 1
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - run: python -m py_compile research/formal_five_bt/v12_alt_route_audit.py
+      - name: Restore exact audited 2026-09-26 production source for causal V12 scanning
+        run: |
+          git -c protocol.version=2 fetch --filter=blob:none --no-tags --depth=1 origin a09ea45ca3cbd72100f9eb0eaae499039c40b6a0
+          python -m research.formal_five_bt.restore_snapshot
+      - name: Acquire formal Aster 1Y historical H1
+        run: |
+          python -m research.formal_five_bt.acquire \
+            --data-root "$YEAR_ROOT" --venues aster \
+            --warmup-start 2025-01-01 --period-start 2025-08-10 --end-exclusive 2026-08-11
+          python -m research.formal_five_bt.aster_h1_reconcile --data-root "$YEAR_ROOT" --allow-valid-noop
+      - name: Re-run frozen V12 1Y decision observation, verify baseline, compare alternatives
+        run: |
+          python -m research.formal_five_bt.signal_scan \
+            --data-root "$YEAR_ROOT" --output-root "$YEAR_SCAN" --strategies V12
+          mkdir -p "$DEST"
+          python -m research.formal_five_bt.v12_alt_route_audit \
+            --root "$YEAR_ROOT" --scan "$YEAR_SCAN" --start 2025-08-10 \
+            --end-exclusive 2026-08-11 --output "$DEST/annual-route-proxy.json"
+      - name: Acquire fixed recent 30 complete UTC days from Aster, verify 14 V12 symbols
+        run: |
+          python -m research.formal_five_bt.acquire \
+            --data-root "$RECENT_ROOT" --venues aster \
+            --warmup-start 2026-06-14 --period-start 2026-08-28 --end-exclusive 2026-09-27
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          m=json.loads((Path(os.environ["RECENT_ROOT"])/"acquisition-manifest.json").read_text())
+          k=m["venues"]["aster"]["klines"]
+          symbols=m["universes"]["V12"]
+          missing=[s for s in symbols if k.get(s,{}).get("status")!="ACQUIRED"]
+          if missing:raise SystemExit("RECENT_V12_MISSING:"+",".join(missing))
+          print("ASTER_V12_RECENT_SOURCE_READY",len(symbols))
+          PY
+      - name: Re-run frozen V12 recent observation and compare alternate routes
+        run: |
+          python -m research.formal_five_bt.signal_scan \
+            --data-root "$RECENT_ROOT" --output-root "$RECENT_SCAN" \
+            --strategies V12 --start 2026-08-28 --end-exclusive 2026-09-27
+          python -m research.formal_five_bt.v12_alt_route_audit \
+            --root "$RECENT_ROOT" --scan "$RECENT_SCAN" --start 2026-08-28 \
+            --end-exclusive 2026-09-27 --output "$DEST/recent-route-proxy.json"
+      - name: Preserve exact source and computation provenance
+        run: |
+          python - <<'PY'
+          import os,json,hashlib
+          from pathlib import Path
+          root=Path(os.environ["DEST"])
+          sources={}
+          for label in ("YEAR","RECENT"):
+            for kind,location in (("acquisition",os.environ[label+"_ROOT"]),
+                                  ("scan",os.environ[label+"_SCAN"])):
+              filename="acquisition-manifest.json" if kind=="acquisition" else "signal-scan-manifest.json"
+              p=Path(location)/filename
+              raw=p.read_bytes()
+              sources[label.lower()+"_"+kind+"_sha256"]=hashlib.sha256(raw).hexdigest()
+          report=dict(status="RESEARCH_ROUTE_PROXY_NO_INTEGRATED_BT",
+              frozen_runtime_sha="a09ea45ca3cbd72100f9eb0eaae499039c40b6a0",
+              research_source_commit=os.environ["GITHUB_SHA"],
+              original_aster_only=True,causal_closed_h2=True,
+              five_logic_integrated_pnl_or_dd_verified=False,live_updated=False,
+              **sources)
+          (root/"provenance.json").write_text(json.dumps(report,sort_keys=True,indent=2)+"\n")
+          PY
+      - name: Commit compact alternate-route reports to research branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          if ! git diff --cached --quiet; then
+            git commit -m "Research: persist 1Y and recent Aster alternate-route proxy results [skip ci]"
+            git push origin HEAD:research/v12-alternate-route-review-20260928
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: aster-v12-alt-route-review-20260928
+          path: docs/research/results/v12-alternate-route-review-20260928/
+          if-no-files-found: warn
+          retention-days: 60
