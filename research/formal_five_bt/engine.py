@@ -23,6 +23,7 @@ from .l2_archive import decode_zstd_parquet
 from .manifest import load_manifest
 from .portfolio import monthly_deposit_events
 from .scenarios import select_execution_conditions
+from .yahoo_v52 import STOCKS, load_v52_signal_scan, load_yahoo_bars, model_v52_signal
 
 
 PERIOD_START = datetime(2025, 8, 10, tzinfo=timezone.utc)
@@ -318,7 +319,10 @@ def _metric_row(strategy: str, rows: list[dict[str, Any]]) -> dict[str, Any]:
     }
 
 
-def run_integrated_bt(data_root: str | Path, scan_root: str | Path, l2_root: str | Path, output_root: str | Path) -> dict[str, Any]:
+def run_integrated_bt(data_root: str | Path, scan_root: str | Path, l2_root: str | Path,
+                      output_root: str | Path, *,
+                      v52_yahoo_root: str | Path | None = None,
+                      v52_signal_file: str | Path | None = None) -> dict[str, Any]:
     data_root = Path(data_root).resolve()
     scan_root = Path(scan_root).resolve()
     l2_root = Path(l2_root).resolve()
@@ -338,6 +342,41 @@ def run_integrated_bt(data_root: str | Path, scan_root: str | Path, l2_root: str
     deposits = monthly_deposit_events(fx_series) if not fx_issues else ()
     l2_inventory, l2_lookup = _inventory_l2(l2_root)
 
+    # Price-only V52 is a separate user-requested RESEARCH execution model.
+    # The baseline still requires exchange-verified fills to report final P&L.
+    v52_scan = Path(v52_signal_file).resolve() if v52_signal_file else (
+        scan_root / "baseline-signal-scan-v52" / "decisions" / "V52.jsonl")
+    v52_signal_rows: list[dict[str, Any]] = []
+    v52_signal_hash: str | None = None
+    v52_scan_status = "NOT_VERIFIABLE_NO_AUDITED_V52_SIGNAL_SCAN"
+    if v52_scan.is_file():
+        try:
+            v52_signal_rows, v52_signal_hash = load_v52_signal_scan(
+                v52_scan, runtime_manifest["runtime_sha"])
+            v52_scan_status = "AUDITED_RUNTIME_SHA_MATCH"
+        except (ValueError, json.JSONDecodeError) as error:
+            v52_scan_status = f"NOT_VERIFIABLE:{error}"
+
+    yahoo_root = (Path(v52_yahoo_root).resolve() if v52_yahoo_root
+                  else data_root / "normalized" / "yahoo" / "60m")
+    yahoo_bars: dict[str, tuple[Any, ...]] = {}
+    yahoo_file_hashes: dict[str, str] = {}
+    yahoo_status: dict[str, str] = {}
+    for equity in sorted(STOCKS):
+        file = yahoo_root / f"{equity}.jsonl"
+        if not file.is_file():
+            yahoo_bars[equity] = ()
+            yahoo_status[equity] = "NOT_VERIFIABLE_MISSING_YAHOO_60M"
+            continue
+        yahoo_file_hashes[equity] = _sha(file.read_bytes())
+        try:
+            yahoo_bars[equity] = load_yahoo_bars(file, equity)
+            yahoo_status[equity] = ("AVAILABLE_ASOF_PRICE_ONLY"
+                                    if yahoo_bars[equity] else "NOT_VERIFIABLE_EMPTY_YAHOO_60M")
+        except (ValueError, TypeError, KeyError, json.JSONDecodeError) as error:
+            yahoo_bars[equity] = ()
+            yahoo_status[equity] = f"NOT_VERIFIABLE:{error}"
+
     scan_manifests, scan_manifest_hashes = _load_signal_scan_manifests(scan_root)
     if any(manifest.get("runtime_sha") != runtime_manifest["runtime_sha"] for manifest in scan_manifests.values()):
         raise ValueError("SIGNAL_SCAN_RUNTIME_SHA_MISMATCH")
@@ -348,6 +387,8 @@ def run_integrated_bt(data_root: str | Path, scan_root: str | Path, l2_root: str
         "signal_scan_manifests": scan_manifest_hashes,
         "signal_logs": signal_hashes,
         "l2_files": {item["path"]: item["sha256"] for item in l2_inventory if item.get("sha256")},
+        "v52_live_signal_scan": v52_signal_hash,
+        "yahoo_60m_files": yahoo_file_hashes,
     }
     run_id = _sha(_json_bytes({"period_start": PERIOD_START.isoformat(), "period_end_exclusive": PERIOD_END_EXCLUSIVE.isoformat(),
                                "runtime_sha": runtime_manifest["runtime_sha"], "source_hashes": source_hashes}))[:24]
@@ -407,9 +448,49 @@ def run_integrated_bt(data_root: str | Path, scan_root: str | Path, l2_root: str
 
         v52_rows = list(_v52_decisions(PERIOD_START, PERIOD_END_EXCLUSIVE, scenario=scenario, coverage_path=coverage_path))
         all_decisions.extend(v52_rows)
+        v52_price_model_statuses: Counter = Counter()
+        v52_actual_candidates = 0
+        v52_modeled_entries = 0
+        for live_row in v52_signal_rows:
+            if live_row.get("status") != "SIGNAL":
+                continue
+            v52_actual_candidates += 1
+            equity = str(live_row.get("equity_reference_symbol") or live_row.get("symbol") or "").upper().removesuffix("USDT")
+            modeled = model_v52_signal(live_row, yahoo_bars.get(equity, ()))
+            v52_price_model_statuses[modeled["status"]] += 1
+            v52_modeled_entries += modeled["status"] == "MODELED_PRICE_FILL"
+            modeled_row = dict(live_row)
+            modeled_row.update({
+                "strategy_id": "V52", "execution_scenario": scenario,
+                "coverage_path": coverage_path, "status": "PRICE_MODEL_" + modeled["status"],
+                "execution": modeled, "candidate_signal": True,
+                "realized_pnl_usdt": None, "ledger_status": "MODELED_ENTRY_ONLY_EXIT_UNVERIFIED",
+            })
+            all_decisions.append(modeled_row)
+            order_rows.append({
+                "run_id": run_id, "scenario_id": scenario_id, "strategy_id": "V52",
+                "route": modeled.get("route"), "symbol": modeled_row.get("symbol"),
+                "signal_ts_ms": modeled.get("decision_ts_ms"),
+                "entry_ts_ms": modeled.get("decision_ts_ms"),
+                "order_type": "MODELED_IMMEDIATE_AT_YAHOO_60M_COMPLETED_CLOSE",
+                "intent_status": "AUDITED_V52_SIGNAL_PRICE_MODEL_ONLY",
+                "fill_status": modeled["status"], "modeled_price_usd": modeled.get("price_usd"),
+                "price_bar_end_ms": modeled.get("price_bar_end_ms"),
+                "price_source_sha256": modeled.get("price_source_sha256"),
+                "fee_bps": None, "slippage_bps": None, "funding_usdt": None,
+                "realized_pnl_usdt": None, "ledger_status": "MODELED_ONLY_NOT_VENUE_VERIFIED",
+            })
+            if modeled.get("decision_ts_ms"):
+                month = datetime.fromtimestamp(modeled["decision_ts_ms"] / 1000, timezone.utc).strftime("%Y-%m")
+                monthly_by_key[(scenario_id, "V52_" + str(modeled.get("route")), month)]["audited_signal_candidates"] += 1
+                monthly_by_key[(scenario_id, "V52_" + str(modeled.get("route")), month)]["yahoo_modeled_entries"] += (
+                    modeled["status"] == "MODELED_PRICE_FILL")
         route_metrics.append({
-            "strategy_id": "V52", "decision_rows": len(v52_rows),
-            "signal_candidates": None, "fills_verified": 0, "closed_trades_verified": 0,
+            "strategy_id": "V52", "decision_rows": len(v52_rows) + v52_actual_candidates,
+            "signal_candidates": v52_actual_candidates if v52_scan_status == "AUDITED_RUNTIME_SHA_MATCH" else None,
+            "price_model_entries": v52_modeled_entries,
+            "price_model_statuses": dict(v52_price_model_statuses),
+            "fills_verified": 0, "closed_trades_verified": 0,
             "final_equity_usdt": None, "net_profit_usdt": None, "profit_factor": None,
             "maximum_drawdown_pct": None, "win_rate_pct": None,
             "metric_status": "NOT_VERIFIABLE",
@@ -436,7 +517,17 @@ def run_integrated_bt(data_root: str | Path, scan_root: str | Path, l2_root: str
             "final_equity_usdt": None, "net_profit_usdt": None, "profit_factor": None,
             "maximum_drawdown_pct": None, "win_rate_pct": None,
             "verified_fills": 0, "verified_closed_trades": 0,
-            "candidate_signals": input_candidate_counts,
+            "candidate_signals": {**input_candidate_counts, "V52": v52_actual_candidates if v52_scan_status == "AUDITED_RUNTIME_SHA_MATCH" else None},
+            "v52_yahoo_price_model": {
+                "status": "RESEARCH_MODELED_NOT_VERIFIED",
+                "signal_scan_status": v52_scan_status,
+                "audited_signal_candidates": v52_actual_candidates,
+                "modeled_entries": v52_modeled_entries,
+                "modeled_entry_statuses": dict(v52_price_model_statuses),
+                "price_data_status": yahoo_status,
+                "verified_fills": 0, "closed_trade_pnl_usdt": None,
+                "assumption": "User-requested decision-time fill at as-of Yahoo 60m completed close; no book requirement; no verified Aster execution",
+            },
             "decision_rows": len(all_decisions), "order_ledger_rows": len(order_rows),
             "strategy_metrics": route_metrics,
             "variants": {"status": "NOT_RUN_BASELINE_NOT_VERIFIED", "hc_gross_multiplier_fixed": 1.75},
@@ -469,11 +560,19 @@ def run_integrated_bt(data_root: str | Path, scan_root: str | Path, l2_root: str
             "bybit_v5_orderbook": "https://bybit-exchange.github.io/docs/v5/websocket/public/orderbook",
             "nyse_calendar": NYSE_SOURCE_URL,
             "fred_dexjpus": "https://fred.stlouisfed.org/series/DEXJPUS",
+            "yahoo_60m": "https://query1.finance.yahoo.com/v8/finance/chart/",
         },
         "symbols": coverage,
         "fx": {"source": "FRED DEXJPUS", "observations": len(fx_series), "blocking_issues": [issue.code for issue in fx_issues],
                "status": "VERIFIED" if not fx_issues and fx_series else "NOT_VERIFIABLE"},
         "l2_archives": l2_inventory,
+        "v52_price_only_research": {
+            "signal_scan_status": v52_scan_status,
+            "yahoo_symbols": yahoo_status,
+            "yahoo_input_sha256": yahoo_file_hashes,
+            "execution_model": "YAHOO_60M_COMPLETED_CLOSE_PRICE_ONLY",
+            "price_fills_are_verified_aster_fills": False,
+        },
     }
     coverage_path.write_bytes(json.dumps(coverage_doc, sort_keys=True, indent=2, ensure_ascii=False, allow_nan=False).encode("utf-8") + b"\n")
     deposit_path = output_root / "contribution-events.jsonl"
@@ -600,8 +699,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--scan-root", required=True)
     parser.add_argument("--l2-root", required=True)
     parser.add_argument("--output-root", required=True)
+    parser.add_argument("--v52-yahoo-root", help="Local normalized Yahoo 60m JSONL directory; defaults to data-root/normalized/yahoo/60m")
+    parser.add_argument("--v52-signal-file", help="Audited V52 decision scan JSONL; scanner manifest must have matching runtime SHA")
     args = parser.parse_args(argv)
-    result = run_integrated_bt(args.data_root, args.scan_root, args.l2_root, args.output_root)
+    result = run_integrated_bt(args.data_root, args.scan_root, args.l2_root, args.output_root,
+                               v52_yahoo_root=args.v52_yahoo_root, v52_signal_file=args.v52_signal_file)
     print(json.dumps({"status": result["status"], "run_id": result["run_id"], "scenarios": [row["scenario_id"] for row in result["scenarios"]],
                       "outputs": list(result["outputs"]), "candidate_signals": result["scenarios"][0]["candidate_signals"]}, sort_keys=True))
     return 0
