@@ -55,6 +55,9 @@ jobs:
           print("BT_ASTER_CANDLE_STATUS:",{s:sum(x.get("status")==s for x in k.values()) for s in sorted({x.get("status") for x in k.values()})})
           print("BT_ASTER_FUNDING_STATUS:",{s:sum(x.get("status")==s for x in f.values()) for s in sorted({x.get("status") for x in f.values()})})
           print("BT_ASTER_MISSING_CANDLE_SYMBOLS:",[s for s,v in sorted(k.items()) if v.get("status")!="ACQUIRED"])
+          print("BT_ASTER_H1_MALFORMED:",{s:v.get("malformed_source_h1",0) for s,v in sorted(k.items()) if v.get("malformed_source_h1")})
+          print("BT_ASTER_H1_RECONSTRUCTED_NATIVE_1M:",{s:v.get("reconstructed_from_native_m1",0) for s,v in sorted(k.items()) if v.get("reconstructed_from_native_m1")})
+          print("BT_ASTER_H1_UNRESOLVED_MALFORMED:",{s:v.get("unresolved_malformed_source_h1",0) for s,v in sorted(k.items()) if v.get("unresolved_malformed_source_h1")})
           print("BT_FRED_STATUS:",m.get("fred",{}).get("status"))
           PY
       - name: Acquire official ECB EUR-cross USDJPY as FRED-unavailable fallback
