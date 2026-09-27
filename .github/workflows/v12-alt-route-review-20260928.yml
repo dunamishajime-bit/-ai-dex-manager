@@ -68,9 +68,14 @@ jobs:
           PY
       - name: Re-run frozen V12 recent observation and compare alternate routes
         run: |
-          python -m research.formal_five_bt.signal_scan \
-            --data-root "$RECENT_ROOT" --output-root "$RECENT_SCAN" \
-            --strategies V12 --start 2026-08-28 --end-exclusive 2026-09-27
+          python - <<'PY'
+          import os
+          from datetime import date
+          from research.formal_five_bt.signal_scan import scan
+          scan(os.environ["RECENT_ROOT"],os.environ["RECENT_SCAN"],
+               strategies=("V12",),start_date=date(2026,8,28),
+               end_date_exclusive=date(2026,9,27))
+          PY
           python -m research.formal_five_bt.v12_alt_route_audit \
             --root "$RECENT_ROOT" --scan "$RECENT_SCAN" --start 2026-08-28 \
             --end-exclusive 2026-09-27 --output "$DEST/recent-route-proxy.json"
