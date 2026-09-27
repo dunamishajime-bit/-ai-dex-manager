@@ -252,6 +252,180 @@ if (process.argv.includes("--list")) {
           results.push({ decisionTs: now, signal });
         }
         response = { ok: true, result: jsonSafe(results) };
+      } else if (request.op === "penguTradeOutcomes") {
+        const history = request.args?.[0];
+        const endMs = Number(request.args?.[1]);
+        if (!history || !Number.isFinite(endMs)) throw new Error("penguTradeOutcomes requires history and endMs");
+        const rows = loaded.pengu.buildPenguDualLsV2EvaluationSeries(history, endMs);
+        const recoveryEnabled = loaded.penguRecoveryConfig.PENGU_RECOVERY_V8_PROMOTION?.liveEnabled === true;
+        const candidates = [];
+        const currentSignalAt = (index) => {
+          const row = rows[index];
+          if (!row?.features) return null;
+          const v64Long = recoveryEnabled
+            ? loaded.pengu.isPenguV8V64DynamicLongSignal(rows, index)
+            : row.longSignal;
+          const base = row.shortSignal
+            ? { side: -1, active: true, reason: "PENGU_CURRENT_SHORT_V20" }
+            : v64Long
+              ? { side: 1, active: true, reason: "PENGU_CURRENT_V64_LONG" }
+              : { side: 0, active: false, reason: "PENGU_CURRENT_BASE_IDLE" };
+          const recovery = recoveryEnabled
+            ? loaded.pengu.selectPenguRecoveryV8Entry(row.recoveryV8, true)
+            : undefined;
+          const decision = !base.active && recovery?.kind === "RECOVERY_V8"
+            ? { side: 1, active: true, reason: recovery.reason }
+            : base;
+          if (!decision.active) return null;
+          const entryVersion = decision.side < 0
+            ? "SHORT_V20"
+            : (!base.active && recovery?.kind === "RECOVERY_V8")
+              ? "RECOVERY_V8" : "LONG_V2_FINAL";
+          const targetGross = entryVersion === "RECOVERY_V8"
+            ? Number(recovery.gross)
+            : decision.side > 0
+              ? loaded.pengu.penguV8V64RequestedLongGross(row.features)
+              : loaded.pengu.targetGrossForAtr(row.features.atr24Ratio);
+          return { side: decision.side, entryVersion, targetGross, reason: decision.reason };
+        };
+        for (let index = 0; index + 1 < rows.length; index += 1) {
+          const spec = currentSignalAt(index);
+          if (!spec) continue;
+          const source = rows[index];
+          const entryRow = rows[index + 1];
+          if (!entryRow?.features || Number(entryRow.candle.openTime) !== Number(source.features.referenceTs) + 3_600_000) continue;
+          const entryPrice = Number(entryRow.candle.open);
+          const entryTs = Number(entryRow.candle.openTime);
+          if (!(entryPrice > 0) || !(entryTs > 0)) continue;
+          let position = {
+            side: spec.side,
+            entryTs,
+            entryPrice,
+            quantity: 1,
+            gross: spec.targetGross,
+            highWaterMark: entryPrice,
+            lowWaterMark: entryPrice,
+            entryVersion: spec.entryVersion,
+          };
+          if (spec.entryVersion === "SHORT_V20") {
+            position.shortV20 = loaded.penguShortV20.createPenguShortV20State({
+              entryPrice,
+              requestedGross: spec.targetGross,
+              entryAtr24Ratio: source.features.atr24Ratio,
+              btcEma168Distance: source.features.btcEma168Distance,
+              btcReturn24h: source.features.btcReturn24h,
+            });
+          }
+          if (spec.entryVersion === "RECOVERY_V8") {
+            position.recoveryV8 = {
+              version: "RECOVERY_V8",
+              side: 1,
+              entryTs,
+              entryPrice,
+              logicalEntryPrice: entryPrice,
+              recoveryExecutionPrice: entryPrice,
+              quantity: 1,
+              originalQuantity: 1,
+              originalGross: spec.targetGross,
+              remainingGross: spec.targetGross,
+              partialDefenseTriggered: false,
+              highWaterMark: entryPrice,
+              protectionLifecycle: "FULL_HARD_STOP",
+            };
+          }
+          let exit = null;
+          let partial = null;
+          for (let j = index + 1; j < rows.length; j += 1) {
+            const bar = rows[j];
+            if (!bar?.features) continue;
+            if (spec.entryVersion === "RECOVERY_V8" && position.recoveryV8 && bar.recoveryV8) {
+              const evaluation = loaded.penguRecovery.evaluateRecoveryV8PositionBar(position.recoveryV8, bar.recoveryV8);
+              if (evaluation.kind === "PARTIAL_DEFENSE") {
+                const logicalEntry = Number(position.recoveryV8.logicalEntryPrice || position.entryPrice);
+                partial = partial || {
+                  ts: Number(bar.features.referenceTs),
+                  price: logicalEntry * (1 - Number(loaded.penguRecoveryConfig.PENGU_RECOVERY_V8.partial.stopPct)),
+                  quantityFraction: 0.5,
+                };
+                position = {
+                  ...position,
+                  quantity: Number(evaluation.updatedPosition.quantity),
+                  recoveryV8: { ...position.recoveryV8, ...evaluation.updatedPosition },
+                };
+                continue;
+              }
+              position = {
+                ...position,
+                quantity: Number(evaluation.updatedPosition.quantity),
+                recoveryV8: { ...position.recoveryV8, ...evaluation.updatedPosition },
+              };
+              const reason = evaluation.kind === "HARD_STOP" ? "RECOVERY_V8_HARD_STOP"
+                : evaluation.kind === "TRAILING_STOP" ? "RECOVERY_V8_TRAILING_STOP"
+                : evaluation.kind === "MAX_HOLD" ? "RECOVERY_V8_MAX_HOLD"
+                : evaluation.kind === "YIELD_BASE_LONG" ? "RECOVERY_V8_YIELD_BASE_LONG"
+                : null;
+              if (reason) {
+                exit = {
+                  ts: Number(bar.features.referenceTs) + 3_600_000,
+                  price: Number(evaluation.stopPrice || bar.features.close),
+                  reason,
+                  stopPrice: evaluation.stopPrice,
+                };
+                break;
+              }
+              continue;
+            }
+            const evaluated = loaded.pengu.evaluatePenguDualLsV2PositionBar(position, bar.features);
+            position = evaluated.updatedPosition;
+            if (evaluated.exit) {
+              exit = {
+                ts: Number(bar.features.referenceTs) + 3_600_000,
+                price: Number(evaluated.exit.stopPrice || bar.features.close),
+                reason: evaluated.exit.reason,
+                stopPrice: evaluated.exit.stopPrice,
+              };
+              break;
+            }
+          }
+          const route = loaded.penguRiskOverlay.routeForPenguEntryVersion(spec.entryVersion);
+          const sideName = spec.side > 0 ? "LONG" : "SHORT";
+          let unitPriceReturn = null;
+          if (exit && exit.price > 0) {
+            const direction = spec.side > 0 ? 1 : -1;
+            const finalFraction = partial ? 0.5 : 1;
+            const partialReturn = partial
+              ? 0.5 * direction * (partial.price / entryPrice - 1)
+              : 0;
+            unitPriceReturn = partialReturn + finalFraction * direction * (exit.price / entryPrice - 1);
+          }
+          candidates.push({
+            strategyId: "PENGU_DUAL_LS_V2",
+            symbol: "PENGUUSDT",
+            signalReferenceTs: Number(source.features.referenceTs),
+            entryTs,
+            entryPrice,
+            side: sideName,
+            targetGross: spec.targetGross,
+            entryVersion: spec.entryVersion,
+            route,
+            reason: spec.reason,
+            exit,
+            partial,
+            unitPriceReturn,
+            hardStopExit: Boolean(exit?.reason?.includes("HARD_STOP")),
+            sourceRuntimeSha: manifest.runtime_sha,
+          });
+        }
+        result = {
+          runtimeSha: manifest.runtime_sha,
+          recoveryV8Enabled: recoveryEnabled,
+          candidateCount: candidates.length,
+          entryVersions: candidates.reduce((acc, row) => {
+            acc[row.entryVersion] = (acc[row.entryVersion] || 0) + 1;
+            return acc;
+          }, {}),
+          candidates,
+        };
       } else if (request.op === "q102Series") {
         const candlesBySymbol = request.candlesBySymbol;
         const highVolSymbols = request.highVolSymbols;
