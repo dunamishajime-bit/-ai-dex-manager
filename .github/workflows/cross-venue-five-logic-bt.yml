@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        venue: [binance, okx]
+        venue: [binance, okx, bybit]
     runs-on: ubuntu-latest
     timeout-minutes: 115
     env:
