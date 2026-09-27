@@ -23,9 +23,8 @@ assert.equal(evaluateV12EntryQuality({...strong,score:1.0}),true);
 assert.equal(evaluateV12EntryQuality({...strong,score:.20,atrRatio:.01399}),false);
 assert.equal(evaluateV12EntryQuality({...strong,score:.50,side:"SHORT",momentum:-.06}),false);
 
-// Non-strong directional path below normal score uses momentum >=5.4%
-// and ATR/price >=1.4%, with NO minimum Score. This is a review finding,
-// not an accidental change in this branch.
+// User-selected non-strong directional rescue: score >=0.35, momentum >=5.4%
+// and ATR/price >=1.4%. Strong-Regime rescue remains exactly unchanged.
 const relaxed={regime:"LONG" as const,strongRegime:false,side:"LONG" as const,momentum:.054,atrRatio:.014};
 assert.equal(V12_X1_ALL.relaxedRegimeMinimumScore,.35);
 assert.equal(evaluateV12EntryQuality({...relaxed,score:.01}),false);
