@@ -1,0 +1,152 @@
+name: Aster V12 Score and Volume Gate Research (Frozen 1Y plus Recent 30D)
+on:
+  push:
+    branches: [research/v12-score-gate-audit-20260928]
+    paths:
+      - ".github/workflows/v12-score-gate-audit.yml"
+      - "research/formal_five_bt/v12_score_gate_audit.py"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: aster-v12-score-gate-audit-20260928
+  cancel-in-progress: false
+jobs:
+  score-gate-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 160
+    env:
+      YEAR_ROOT: ${{ runner.temp }}/v12-aster-year
+      YEAR_SCAN: ${{ runner.temp }}/v12-year-scan
+      RECENT_ROOT: ${{ runner.temp }}/v12-aster-recent
+      RECENT_SCAN: ${{ runner.temp }}/v12-recent-scan
+      REPORT_ROOT: docs/research/results/v12-score-gate-audit-20260928
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/v12-score-gate-audit-20260928
+          fetch-depth: 1
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Verify research analyzer syntax
+        run: python -m py_compile research/formal_five_bt/v12_score_gate_audit.py
+      - name: Restore original 90-source SHA-audited production snapshot (research-only)
+        shell: bash
+        run: |
+          git -c protocol.version=2 fetch --filter=blob:none --no-tags --depth=1 origin a09ea45ca3cbd72100f9eb0eaae499039c40b6a0
+          python -m research.formal_five_bt.restore_snapshot
+      - name: Acquire the same Aster historical year and warmup, no Binance substitution
+        id: annual_acquire
+        continue-on-error: true
+        shell: bash
+        run: |
+          python -m research.formal_five_bt.acquire \
+            --data-root "$YEAR_ROOT" --venues aster \
+            --warmup-start 2025-01-01 --period-start 2025-08-10 --end-exclusive 2026-08-11
+          python -m research.formal_five_bt.aster_h1_reconcile --data-root "$YEAR_ROOT" --allow-valid-noop
+      - name: Run actual frozen V12 logic once and audit 8 Score/Volume threshold cases
+        id: annual_analyze
+        continue-on-error: true
+        if: steps.annual_acquire.outcome == 'success'
+        shell: bash
+        run: |
+          python -m research.formal_five_bt.signal_scan \
+            --data-root "$YEAR_ROOT" --output-root "$YEAR_SCAN" --strategies V12
+          python -m research.formal_five_bt.v12_score_gate_audit \
+            --root "$YEAR_ROOT" --scan "$YEAR_SCAN" \
+            --period-start 2025-08-10 --period-end-exclusive 2026-08-11 \
+            --portfolio-trades docs/research/results/formal-five-logic-20250810-20260810/latest/requested-combo/BRK0P75_MR0P75_FET1_DUAL_GATE/PRICE_MODEL_10BPS/portfolio-trades.jsonl \
+            --output "$RUNNER_TEMP/v12-audit-annual.json"
+      - name: Resolve dates of 30 completed UTC days (never include unclosed live bar)
+        id: dates
+        shell: bash
+        run: |
+          python - <<'PY' >> "$GITHUB_ENV"
+          from datetime import date,datetime,timezone,timedelta
+          day=datetime.now(timezone.utc).date()
+          print("RECENT_START="+str(day-timedelta(days=30)))
+          print("RECENT_END_EXCLUSIVE="+str(day))
+          print("RECENT_WARMUP="+str(day-timedelta(days=105)))
+          PY
+      - name: Acquire recent Aster H1 with warmup and no future bars
+        id: recent_acquire
+        continue-on-error: true
+        shell: bash
+        run: |
+          python -m research.formal_five_bt.acquire \
+            --data-root "$RECENT_ROOT" --venues aster \
+            --warmup-start "$RECENT_WARMUP" --period-start "$RECENT_START" \
+            --end-exclusive "$RECENT_END_EXCLUSIVE"
+          python -m research.formal_five_bt.aster_h1_reconcile --data-root "$RECENT_ROOT" --allow-valid-noop
+      - name: Audit actual recent V12 no-signal days and counterfactual pre-WR eligibility
+        id: recent_analyze
+        continue-on-error: true
+        if: steps.recent_acquire.outcome == 'success'
+        shell: bash
+        run: |
+          python - <<'PY'
+          import os
+          from datetime import date
+          from pathlib import Path
+          from research.formal_five_bt.signal_scan import scan
+          scan(os.environ["RECENT_ROOT"], os.environ["RECENT_SCAN"],
+               strategies=("V12",),
+               start_date=date.fromisoformat(os.environ["RECENT_START"]),
+               end_date_exclusive=date.fromisoformat(os.environ["RECENT_END_EXCLUSIVE"]))
+          PY
+          python -m research.formal_five_bt.v12_score_gate_audit \
+            --root "$RECENT_ROOT" --scan "$RECENT_SCAN" \
+            --period-start "$RECENT_START" --period-end-exclusive "$RECENT_END_EXCLUSIVE" \
+            --output "$RUNNER_TEMP/v12-audit-recent.json"
+      - name: Commit compact reproducible diagnostics and provenance without changing LIVE
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$REPORT_ROOT"
+          for label in annual recent; do
+            f="$RUNNER_TEMP/v12-audit-$label.json"
+            if [ -f "$f" ]; then cp "$f" "$REPORT_ROOT/$label.json"; fi
+          done
+          python - <<'PY'
+          import os,json
+          from pathlib import Path
+          root=Path(os.environ["REPORT_ROOT"])
+          (root/"run-status.json").write_text(json.dumps({
+            "source":"ASTER_ONLY","annual":"2025-08-10..2026-08-10",
+            "recent_start":os.environ.get("RECENT_START"),
+            "recent_end_exclusive":os.environ.get("RECENT_END_EXCLUSIVE"),
+            "annual_report":(root/"annual.json").is_file(),
+            "recent_report":(root/"recent.json").is_file(),
+            "scope":"V12 pre-WinRate raw eligibility audit, NOT full counterfactual BT",
+            "production_updated":False},indent=2)+"\n")
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$REPORT_ROOT"
+          if ! git diff --cached --quiet; then
+            git commit -m "Research: save 1Y and recent Aster V12 score gate diagnostics [skip ci]"
+            git push origin HEAD:research/v12-score-gate-audit-20260928
+          fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v12-aster-score-gate-research-evidence
+          retention-days: 90
+          if-no-files-found: warn
+          path: docs/research/results/v12-score-gate-audit-20260928/
+      - name: Fail if historical or recent primary audit was not completed
+        if: always()
+        env:
+          YEAR_ANALYSIS_OUTCOME: ${{ steps.annual_analyze.outcome }}
+          RECENT_ANALYSIS_OUTCOME: ${{ steps.recent_analyze.outcome }}
+        run: |
+          echo "HISTORICAL_SCORE_GATE_AUDIT=$YEAR_ANALYSIS_OUTCOME"
+          echo "RECENT_SCORE_GATE_AUDIT=$RECENT_ANALYSIS_OUTCOME"
+          test "$YEAR_ANALYSIS_OUTCOME" = success
+          test "$RECENT_ANALYSIS_OUTCOME" = success
