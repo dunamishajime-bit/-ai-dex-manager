@@ -1,0 +1,35 @@
+name: Five-sleeve Yahoo-V52 assumed-fill chronological model CI
+on:
+  push:
+    branches: [research/formal-five-bt-yahoo-integrated-20260927]
+    paths:
+      - 'research/formal_five_bt/five_yahoo_integrated.py'
+      - 'tests/formal_five_bt/test_five_yahoo_integrated.py'
+      - '.github/workflows/five-yahoo-integrated-ci-20260927.yml'
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile and run no-network synthetic portfolio and original V52 gates
+        run: |
+          python -m py_compile research/formal_five_bt/five_yahoo_integrated.py
+          python -m unittest discover -s tests/formal_five_bt -p 'test_five_yahoo_integrated.py' -v
+          python -m unittest discover -s tests/formal_five_bt -p 'test_v52_yahoo.py' -v
+          python -m unittest discover -s tests/formal_five_bt -p 'test_ohlc_proxy.py' -v
+      - name: Ensure formal production and live config remain unchanged
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          git diff --name-only 34ada5fc3222e29a45177c5d750d3f4885a46192 HEAD | tee /tmp/research-changed-files
+          if grep -E '^(app/|config/|lib/|ops/|scripts/disdex|research/formal_five_bt/engine.py)' /tmp/research-changed-files; then
+            echo 'Production or formal verified engine unexpectedly changed' >&2
+            exit 1
+          fi
+          echo 'STRICT_RESEARCH_ISOLATION=PASS'
