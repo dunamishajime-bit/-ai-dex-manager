@@ -30,6 +30,7 @@ export const V12_X1_ALL = Object.freeze({
     strongRegimeQualityScoreMinimum: 0.15,
     strongRegimeQualityScoreMaximum: 0.70,
     strongRegimeQualityMinimumAtrRatio: 0.014,
+    relaxedRegimeMinimumScore: 0.35,
     relaxedRegimeMinimumMomentumPct: 0.054,
     relaxedRegimeMinimumAtrRatio: 0.014,
     momentumBars: 45,
