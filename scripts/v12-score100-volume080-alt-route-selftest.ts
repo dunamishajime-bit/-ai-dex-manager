@@ -27,7 +27,10 @@ assert.equal(evaluateV12EntryQuality({...strong,score:.50,side:"SHORT",momentum:
 // and ATR/price >=1.4%, with NO minimum Score. This is a review finding,
 // not an accidental change in this branch.
 const relaxed={regime:"LONG" as const,strongRegime:false,side:"LONG" as const,momentum:.054,atrRatio:.014};
-assert.equal(evaluateV12EntryQuality({...relaxed,score:.01}),true);
+assert.equal(V12_X1_ALL.relaxedRegimeMinimumScore,.35);
+assert.equal(evaluateV12EntryQuality({...relaxed,score:.01}),false);
+assert.equal(evaluateV12EntryQuality({...relaxed,score:.349999}),false);
+assert.equal(evaluateV12EntryQuality({...relaxed,score:.35}),true);
 assert.equal(evaluateV12EntryQuality({...relaxed,score:.20,momentum:.05399}),false);
 assert.equal(evaluateV12EntryQuality({...relaxed,score:.20,atrRatio:.01399}),false);
 assert.equal(evaluateV12EntryQuality({...relaxed,score:1.0,momentum:.023,atrRatio:.006}),true);
@@ -55,6 +58,6 @@ minimumVolumeRatio:V12_X1_ALL.minimumVolumeRatio,
 unchangedStrongScore:[V12_X1_ALL.strongRegimeQualityScoreMinimum,V12_X1_ALL.strongRegimeQualityScoreMaximum],
 strongScoreGapAbove:.70,
 relaxedMomentumPct:V12_X1_ALL.relaxedRegimeMinimumMomentumPct,
-relaxedScoreMin:"NONE (review required)",
+relaxedScoreMin:V12_X1_ALL.relaxedRegimeMinimumScore,
 winRateGate:"UNCHANGED",liveActivation:false
 }));
