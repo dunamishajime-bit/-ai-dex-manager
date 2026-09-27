@@ -16,10 +16,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 160
     env:
-      YEAR_ROOT: ${{ runner.temp }}/v12-aster-year
-      YEAR_SCAN: ${{ runner.temp }}/v12-year-scan
-      RECENT_ROOT: ${{ runner.temp }}/v12-aster-recent
-      RECENT_SCAN: ${{ runner.temp }}/v12-recent-scan
+      YEAR_ROOT: /tmp/v12-aster-year
+      YEAR_SCAN: /tmp/v12-year-scan
+      RECENT_ROOT: /tmp/v12-aster-recent
+      RECENT_SCAN: /tmp/v12-recent-scan
       REPORT_ROOT: docs/research/results/v12-score-gate-audit-20260928
     steps:
       - uses: actions/checkout@v4
