@@ -1,0 +1,29 @@
+name: Formal five BT supplemental OHLC proxy unit tests
+on:
+  push:
+    branches: [research/formal-five-bt-handoff-completion-20260927]
+    paths: [.github/workflows/formal-five-bt-ohlc-proxy-ci-20260927.yml]
+permissions:
+  contents: read
+jobs:
+  unit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Verify model is isolated from formal engine and tests enforce no fake fills
+        run: |
+          python -m unittest discover -s tests/formal_five_bt -p test_ohlc_proxy.py -v
+          python -m py_compile research/formal_five_bt/ohlc_proxy.py
+          python - <<'PY'
+          from pathlib import Path
+          formal=Path('research/formal_five_bt/engine.py').read_text()
+          modeled=Path('research/formal_five_bt/ohlc_proxy.py').read_text()
+          assert '"status": "NOT_VERIFIABLE"' in formal
+          assert 'MODEL_NAME="INDEPENDENT_ASTER_H1_OHLC_PROXY_NOT_FORMAL_BT"' in modeled
+          assert 'NOT_A_FORMAL_FIVE_LOGIC_BACKTEST' in modeled
+          print('RESEARCH_PROXY_DISTINCT_FROM_FORMAL_REPLAY=PASS')
+          PY
