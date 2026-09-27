@@ -25,3 +25,27 @@ Raw market data and detailed market-derived outputs are intentionally excluded f
 ## Reproduction
 
 See `research/formal_five_bt/README.md` for the Python/Node requirements, local-only input layout, commands, four scenarios, and test command. Runtime source and data hashes must match the local run manifest before comparing results.
+
+## Price-only V52 modeling addendum (2026-09-27)
+
+At the user's request, an additional V52 research execution model uses Yahoo
+Finance 60-minute historical OHLCV for AMZN, META, MSFT, NVDA, and TSLA.
+Historical order-book depth is not required in **this** model: a confirmed
+V52 production decision signal is hypothetically filled at the last completed
+Yahoo 60-minute candle close at the decision timestamp. The scanner must
+provide a matching audited runtime SHA; scheduled checks are never promoted
+to signals. The signal and price history remain separate inputs.
+
+The model enforces the official NYSE session and early-close calendar,
+completed-bar as-of timestamps, a maximum 15-minute reference-price age,
+source hashes, duplicate validation, exact ticker/currency/interval checks,
+and the existing first-50-day omission. Corporate actions remain visible in
+the Yahoo source coverage manifest. If hourly history is unavailable for a
+symbol/time, skip the proposed fill rather than forward-fill a daily quote.
+
+These are explicit research assumptions and **cannot establish** actual
+stock-perpetual fills, basis/spread/depth parity, maker-queue behavior, fees,
+or executable order size. `MODELED_PRICE_FILL` is counted separately from
+`fills_verified`. In particular, an entry-model improvement alone does
+not make the integrated one-year final asset value, profit factor, drawdown,
+or win rate calculable without matching audited exits and shared allocation.
