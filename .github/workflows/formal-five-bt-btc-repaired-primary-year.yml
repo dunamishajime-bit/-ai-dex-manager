@@ -17,7 +17,7 @@ on:
       - "research/formal_five_bt/yahoo_acquire.py"
       - "research/formal_five_bt/fx_ecb.py"
 permissions:
-  contents: read
+  contents: write
 jobs:
   primary-year:
     runs-on: ubuntu-latest
@@ -26,7 +26,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 1
-          persist-credentials: false
+          persist-credentials: true
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -203,6 +203,61 @@ jobs:
               print("ECB_FX_PORTFOLIO_SCENARIO:",json.dumps(printable,sort_keys=True))
               print("ECB_FX_MONTHLY_EQUITY:",row["scenario_id"],json.dumps(row["monthly_equity_jpy"],sort_keys=True))
           PY
+      - name: Commit reusable BT ledgers and modeled prices to branch
+        if: steps.ecb_fx.outcome == 'success' && github.ref_name == 'codex/formal-five-logic-bt-20260926'
+        env:
+          DEST: docs/research/results/formal-five-logic-20250810-20260810/latest
+          MODEL_SHA: ${{ github.sha }}
+          RUN_ID: ${{ github.run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          tmp="$RUNNER_TEMP/ledger-commit"
+          rm -rf "$tmp"
+          mkdir -p "$tmp/8bps" "$tmp/10bps" "$tmp/extreme-70bps" "$tmp/manifests"
+          cp "$RUNNER_TEMP/formal-portfolio-ecb-model/portfolio-price-model-summary.json" "$tmp/portfolio-price-model-summary.json"
+          cp "$RUNNER_TEMP/formal-portfolio-ecb-model/PRICE_MODEL_ASTER_TAKER_8BPS/metrics.json" "$tmp/8bps/metrics.json"
+          cp "$RUNNER_TEMP/formal-portfolio-ecb-model/PRICE_MODEL_ASTER_TAKER_8BPS/portfolio-trades.jsonl" "$tmp/8bps/portfolio-trades.jsonl"
+          cp "$RUNNER_TEMP/formal-portfolio-ecb-model/PRICE_MODEL_ASTER_TAKER_8BPS/candidate-decisions.jsonl" "$tmp/8bps/candidate-decisions.jsonl"
+          cp "$RUNNER_TEMP/formal-portfolio-ecb-model/PRICE_MODEL_ASTER_TAKER_8BPS/portfolio-events.jsonl" "$tmp/8bps/portfolio-events.jsonl"
+          cp "$RUNNER_TEMP/formal-portfolio-ecb-model/PRICE_MODEL_BASE_10BPS/metrics.json" "$tmp/10bps/metrics.json"
+          cp "$RUNNER_TEMP/formal-portfolio-ecb-model/PRICE_MODEL_BASE_10BPS/portfolio-trades.jsonl" "$tmp/10bps/portfolio-trades.jsonl"
+          cp "$RUNNER_TEMP/formal-portfolio-ecb-model/PRICE_MODEL_BASE_10BPS/candidate-decisions.jsonl" "$tmp/10bps/candidate-decisions.jsonl"
+          cp "$RUNNER_TEMP/formal-portfolio-ecb-model/PRICE_MODEL_BASE_10BPS/portfolio-events.jsonl" "$tmp/10bps/portfolio-events.jsonl"
+          cp "$RUNNER_TEMP/formal-portfolio-ecb-model/PRICE_MODEL_EXTREME_COST_70BPS_NOT_BASELINE/metrics.json" "$tmp/extreme-70bps/metrics.json"
+          cp "$RUNNER_TEMP/formal-bt/acquisition-manifest.json" "$tmp/manifests/acquisition-manifest.json"
+          cp "$RUNNER_TEMP/formal-bt/ecb-fx-cross-manifest.json" "$tmp/manifests/ecb-fx-cross-manifest.json"
+          cp "$RUNNER_TEMP/formal-bt/aster-h1-reconciliation-status.json" "$tmp/manifests/aster-h1-reconciliation-status.json"
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          root=Path(os.environ["RUNNER_TEMP"])/"ledger-commit"
+          (root/"run-provenance.json").write_text(json.dumps({
+              "github_run_id": int(os.environ["RUN_ID"]),
+              "model_source_sha": os.environ["MODEL_SHA"],
+              "audited_runtime_repository_commit": "a09ea45ca3cbd72100f9eb0eaae499039c40b6a0",
+              "period": ["2025-08-10","2026-08-10"],
+              "primary_cost_scenarios_bps": [8,10],
+              "extreme_cost_sensitivity_bps": 70,
+              "extreme_70bps_is_baseline": False,
+              "historical_l2_fill_verified": False,
+          },sort_keys=True,indent=2)+"\n")
+          PY
+          git fetch origin codex/formal-five-logic-bt-20260926
+          git checkout -B codex/formal-five-logic-bt-20260926 origin/codex/formal-five-logic-bt-20260926
+          rm -rf "$DEST"
+          mkdir -p "$(dirname "$DEST")"
+          cp -a "$tmp" "$DEST"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$DEST"
+          if git diff --cached --quiet; then
+            echo "Reusable ledger snapshot unchanged; nothing to commit."
+          else
+            git commit -m "BT ledger: persist reusable 8/10bps allocation and trade history [skip ci]"
+            git push origin HEAD:codex/formal-five-logic-bt-20260926
+          fi
+
       - name: Preserve reusable five-logic ledgers and modeled report (no raw candle vendor dump)
         if: always()
         uses: actions/upload-artifact@v4
