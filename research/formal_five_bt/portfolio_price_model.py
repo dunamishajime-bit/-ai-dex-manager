@@ -122,6 +122,84 @@ def _scheduled_funding(data_root: Path, symbol: str, entry: int, exit: int) -> l
     return [(ts, rate) for ts, rate in _funding(data_root, symbol) if entry < ts <= exit]
 
 
+
+def _trade_outcome_aggregates(
+    completed: list[dict[str, Any]], rate_at,
+) -> dict[str, dict[str, dict[str, Any]]]:
+    """Aggregate modeled *allocated and closed* trades without exposing trade rows.
+
+    Positive/negative classifications include modeled entry and exit costs and
+    funding. The same as-of exit FX rate as strategy_pnl_jpy is used; this is a
+    delayed ECB reference conversion, not an executable FX rate.
+    """
+    def new_bucket() -> dict[str, Any]:
+        return {
+            "trades": 0, "winning_trades": 0, "losing_trades": 0,
+            "flat_trades": 0, "gross_win_jpy": 0.0, "gross_loss_abs_jpy": 0.0,
+            "net_pnl_jpy": 0.0, "price_pnl_jpy": 0.0,
+            "funding_pnl_jpy": 0.0, "fees_jpy": 0.0,
+            "largest_win_jpy": 0.0, "largest_loss_abs_jpy": 0.0,
+        }
+
+    strategy: dict[str, dict[str, Any]] = {}
+    fet_reason: dict[str, dict[str, Any]] = {}
+    pengu_route: dict[str, dict[str, Any]] = {}
+    pengu_reason: dict[str, dict[str, Any]] = {}
+    pengu_side: dict[str, dict[str, Any]] = {}
+
+    def accumulate(group: dict[str, dict[str, Any]], key: str,
+                   trade: dict[str, Any], rate: float) -> None:
+        bucket = group.setdefault(key, new_bucket())
+        pnl = float(trade["total_pnl_jpy"]) * rate
+        bucket["trades"] += 1
+        bucket["net_pnl_jpy"] += pnl
+        bucket["price_pnl_jpy"] += float(trade["price_pnl"]) * rate
+        bucket["funding_pnl_jpy"] += float(trade["funding_pnl"]) * rate
+        bucket["fees_jpy"] += (float(trade["entry_fee"]) + float(trade["exit_fee"])) * rate
+        if pnl > 0:
+            bucket["winning_trades"] += 1
+            bucket["gross_win_jpy"] += pnl
+            bucket["largest_win_jpy"] = max(bucket["largest_win_jpy"], pnl)
+        elif pnl < 0:
+            loss = -pnl
+            bucket["losing_trades"] += 1
+            bucket["gross_loss_abs_jpy"] += loss
+            bucket["largest_loss_abs_jpy"] = max(bucket["largest_loss_abs_jpy"], loss)
+        else:
+            bucket["flat_trades"] += 1
+
+    for trade in completed:
+        kind = str(trade["strategy_id"])
+        rate = float(rate_at(int(trade["exit_ts_ms"])))
+        accumulate(strategy, kind, trade, rate)
+        if kind == "FET":
+            accumulate(fet_reason, str(trade.get("exit_reason_actual") or "UNKNOWN"), trade, rate)
+        elif kind == "PENGU":
+            accumulate(pengu_route, str(trade.get("route") or "UNKNOWN"), trade, rate)
+            accumulate(pengu_reason, str(trade.get("exit_reason_actual") or "UNKNOWN"), trade, rate)
+            accumulate(pengu_side, str(trade.get("side") or "UNKNOWN"), trade, rate)
+
+    def finish(group: dict[str, dict[str, Any]]) -> dict[str, dict[str, Any]]:
+        for bucket in group.values():
+            wins, losses = bucket["winning_trades"], bucket["losing_trades"]
+            bucket["average_win_jpy"] = bucket["gross_win_jpy"] / wins if wins else None
+            bucket["average_loss_abs_jpy"] = bucket["gross_loss_abs_jpy"] / losses if losses else None
+            bucket["win_rate"] = wins / bucket["trades"] if bucket["trades"] else None
+            bucket["profit_factor"] = (
+                bucket["gross_win_jpy"] / bucket["gross_loss_abs_jpy"]
+                if bucket["gross_loss_abs_jpy"] > 0 else None
+            )
+        return dict(sorted(group.items()))
+
+    return {
+        "by_strategy": finish(strategy),
+        "fet_by_exit_reason": finish(fet_reason),
+        "pengu_by_route": finish(pengu_route),
+        "pengu_by_exit_reason": finish(pengu_reason),
+        "pengu_by_side": finish(pengu_side),
+    }
+
+
 def _portfolio_scenario(
     candidates: list[dict[str, Any]], data_root: Path, market: dict[str, dict[str, Any]],
     *, round_trip_cost_bps: float, scenario_id: str,
@@ -461,6 +539,7 @@ def _portfolio_scenario(
     losses = -sum(value for value in pnls if value < 0)
     strategy_pnl = defaultdict(float)
     strategy_trades = Counter()
+    trade_outcome_aggregates = _trade_outcome_aggregates(completed, rate_at)
     for row in completed:
         strategy_pnl[row["strategy_id"]] += (
             float(row["total_pnl_jpy"]) * rate_at(int(row["exit_ts_ms"])))
@@ -507,6 +586,7 @@ def _portfolio_scenario(
         "fx_cash_translation_pnl_jpy": (
             final_equity - total_contributed - sum(strategy_pnl.values())),
         "strategy_trades": dict(strategy_trades),
+        "strategy_trade_outcome_aggregates": trade_outcome_aggregates,
         "rejected_entries": dict(rejected),
         "monthly_equity_jpy": monthly,
         "pengu_risk_overlay": {
