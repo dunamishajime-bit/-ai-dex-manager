@@ -1,0 +1,81 @@
+name: Formal BT Crypto 1Y Signal Scan
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [codex/formal-five-logic-bt-20260926]
+    paths:
+      - ".github/workflows/formal-five-bt-crypto-scan.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  audited-one-year-signal-scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Restore exact audited production source snapshot
+        shell: bash
+        run: |
+          sha=$(python - <<'PY'
+          import json
+          print(json.load(open("research/formal_five_bt/runtime_source_manifest.json"))["verified_repository_commit"])
+          PY
+          )
+          git -c protocol.version=2 fetch --filter=blob:none --no-tags --depth=1 origin "$sha"
+          python -m research.formal_five_bt.restore_snapshot
+      - name: Acquire Aster H1 and funding to ephemeral runner storage
+        run: |
+          python -m research.formal_five_bt.acquire \
+            --data-root "$RUNNER_TEMP/formal-five-data" \
+            --venues aster \
+            --warmup-start 2025-01-01 \
+            --period-start 2025-08-10 \
+            --end-exclusive 2026-08-11
+      - name: Replay V12 PENGU FET audited signal functions
+        run: |
+          python -m research.formal_five_bt.signal_scan \
+            --data-root "$RUNNER_TEMP/formal-five-data" \
+            --output-root "$RUNNER_TEMP/formal-five-scans/baseline-signal-scan" \
+            --strategies V12 PENGU FET
+      - name: Replay Q102 audited signal functions
+        run: |
+          python -m research.formal_five_bt.signal_scan \
+            --data-root "$RUNNER_TEMP/formal-five-data" \
+            --output-root "$RUNNER_TEMP/formal-five-scans/baseline-signal-scan-q102" \
+            --strategies Q102
+      - name: Print source coverage and signal counts only
+        env:
+          DATA_ROOT: ${{ runner.temp }}/formal-five-data
+          SCAN_ROOT: ${{ runner.temp }}/formal-five-scans
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          data = Path(os.environ["DATA_ROOT"])
+          scans = Path(os.environ["SCAN_ROOT"])
+          acq = json.loads((data / "acquisition-manifest.json").read_text())
+          print("RUNTIME_SHA:", acq["runtime_sha"])
+          klines = acq["venues"]["aster"]["klines"]
+          funding = acq["venues"]["aster"]["funding"]
+          print("ASTER_KLINES_ACQUIRED:", sum(v.get("status") == "ACQUIRED" for v in klines.values()), "/", len(klines))
+          print("ASTER_FUNDING_ACQUIRED:", sum(v.get("status") == "ACQUIRED" for v in funding.values()), "/", len(funding))
+          bad = {k: {"kline": klines[k].get("status"), "funding": funding.get(k, {}).get("status"),
+                     "period_rows": klines[k].get("period_row_count"), "gaps": klines[k].get("hour_gaps")}
+                 for k in klines if klines[k].get("status") != "ACQUIRED" or klines[k].get("hour_gaps")}
+          print("ASTER_COVERAGE_ISSUES:", json.dumps(bad, sort_keys=True))
+          for folder in ("baseline-signal-scan", "baseline-signal-scan-q102"):
+              doc = json.loads((scans / folder / "signal-scan-manifest.json").read_text())
+              print(folder.upper().replace("-", "_") + "_STATS:", json.dumps(doc["stats"], sort_keys=True))
+          PY
