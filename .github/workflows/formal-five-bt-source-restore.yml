@@ -1,0 +1,43 @@
+name: Formal BT Audited Source Restore
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - codex/formal-five-logic-bt-20260926
+    paths:
+      - ".github/workflows/formal-five-bt-source-restore.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  exact-source-reconstruction:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Fetch only the audited production historical Git tree
+        shell: bash
+        run: |
+          sha=$(python - <<'PY'
+          import json
+          print(json.load(open("research/formal_five_bt/runtime_source_manifest.json"))["verified_repository_commit"])
+          PY
+          )
+          git -c protocol.version=2 fetch --filter=blob:none --no-tags --depth=1 origin "$sha"
+      - name: Restore exactly hash-matching nonsecret audited sources
+        run: python -m research.formal_five_bt.restore_snapshot
+      - name: Run deterministic source reconstruction tests
+        run: python -m unittest discover -s tests/formal_five_bt -p 'test_restore_snapshot.py' -v
+      - name: Run audited runtime bridge parity tests
+        run: python -m unittest discover -s tests/formal_five_bt -p 'test_strategy_parity.py' -v
