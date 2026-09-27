@@ -2,7 +2,7 @@ name: Yahoo V52 assumed-fill research contract tests
 on:
   push:
     branches: [research/formal-five-bt-yahoo-v52-20260927]
-    paths: [.github/workflows/formal-five-bt-yahoo-v52-ci-20260927.yml]
+    paths: [.github/workflows/formal-five-bt-yahoo-v52-ci-20260927.yml, research/formal_five_bt/yahoo_v52.py, tests/formal_five_bt/test_yahoo_v52.py]
 permissions:
   contents: read
 jobs:
