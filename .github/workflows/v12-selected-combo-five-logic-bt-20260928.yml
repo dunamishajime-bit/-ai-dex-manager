@@ -1,0 +1,130 @@
+name: Research V12 Selected Score1 Vol0.8 Relaxed0.35 Full Five Logic Aster 1Y
+on:
+  push:
+    branches: [research/v12-selected-combo-five-logic-bt-20260928]
+    paths:
+      - "research/formal_five_bt/v12_selected_combo_integrated.py"
+      - ".github/workflows/v12-selected-combo-five-logic-bt-20260928.yml"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: v12-selected-combo-five-logic-bt-20260928
+  cancel-in-progress: false
+jobs:
+  full-five-logic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 125
+    env:
+      DATA: /tmp/v12-combo-five-logic/aster
+      BASE_SCANS: /tmp/v12-combo-five-logic/base-scans
+      BASE_CAND: /tmp/v12-combo-five-logic/base-candidates
+      VAR_SCANS: /tmp/v12-combo-five-logic/variant-scans
+      VAR_CAND: /tmp/v12-combo-five-logic/variant-candidates
+      V52_DATA: /tmp/v12-combo-five-logic/stock-data
+      V52_SCAN: /tmp/v12-combo-five-logic/stock-scan
+      V52_LEDGER: /tmp/v12-combo-five-logic/stock-ledger
+      REPORT: docs/research/results/v12-score100-volume080-relaxed035-five-logic-20260928
+      BASE_REPORT: /tmp/v12-combo-five-logic/baseline-all-cases
+      VAR_REPORT: /tmp/v12-combo-five-logic/selected-all-cases
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/v12-selected-combo-five-logic-bt-20260928
+          fetch-depth: 1
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Verify research script and restore immutable 90-file production source
+        run: |
+          python -m py_compile research/formal_five_bt/v12_selected_combo_integrated.py
+          git -c protocol.version=2 fetch --filter=blob:none --no-tags --depth=1 origin a09ea45ca3cbd72100f9eb0eaae499039c40b6a0
+          python -m research.formal_five_bt.restore_snapshot
+      - name: Acquire unchanged historical Aster candles/funding and repair only source-proven malformed BTC H1
+        run: |
+          python -m research.formal_five_bt.acquire --data-root "$DATA" --venues aster
+          python -m research.formal_five_bt.aster_h1_reconcile --data-root "$DATA" --allow-valid-noop
+      - name: Acquire official ECB EUR cross as historical FX reference
+        run: python -m research.formal_five_bt.fx_ecb --data-root "$DATA"
+      - name: Replay original production V12 PENGU FET and Q102 causal scans
+        run: |
+          python -m research.formal_five_bt.signal_scan \
+            --data-root "$DATA" --output-root "$BASE_SCANS/baseline-signal-scan" --strategies V12 PENGU FET
+          python -m research.formal_five_bt.signal_scan \
+            --data-root "$DATA" --output-root "$BASE_SCANS/baseline-signal-scan-q102" --strategies Q102 --q102-fast
+      - name: Build original production crypto candidate lifecycles from historical Aster H1
+        run: |
+          python -m research.formal_five_bt.crypto_price_model \
+            --data-root "$DATA" --scan-root "$BASE_SCANS" --output-root "$BASE_CAND"
+      - name: Acquire V52 stock futures/funding and Yahoo underlying price only, unchanged
+        run: |
+          python -m research.formal_five_bt.aster_stock_acquire --data-root "$V52_DATA"
+          python -m research.formal_five_bt.yahoo_acquire --output-root "$V52_DATA"
+          python -m research.formal_five_bt.v52_price_only_scan \
+            --data-root "$V52_DATA" --output-root "$V52_SCAN"
+          python -m research.formal_five_bt.v52_research_ledger \
+            --data-root "$V52_DATA" --scan-root "$V52_SCAN" \
+            --output-root "$V52_LEDGER" --round-trip-cost-bps 11
+          mkdir -p "$DATA/normalized" "$DATA/normalized/aster/funding"
+          cp -a "$V52_DATA/normalized/aster_stock" "$DATA/normalized/aster_stock"
+          cp "$V52_DATA/aster-stock-hourly-coverage.json" "$DATA/aster-stock-hourly-coverage.json"
+          if [ -d "$V52_DATA/normalized/aster_stock/funding" ]; then
+            cp -a "$V52_DATA/normalized/aster_stock/funding/." "$DATA/normalized/aster/funding/"
+          fi
+      - name: Full five-logic original baseline with Q102 size and both FET gates
+        run: |
+          python -m research.formal_five_bt.fet_dual_gate_combo_bt \
+            --data-root "$DATA" --candidate-root "$BASE_CAND" \
+            --output-root "$BASE_REPORT" --v52-ledger-root "$V52_LEDGER" --ecb-fx-root "$DATA"
+      - name: Fail closed unless original source's baseline equals archived 8bps and 10bps metrics
+        run: |
+          mkdir -p "$REPORT"
+          python -m research.formal_five_bt.v12_selected_combo_integrated certify-baseline \
+            --summary "$BASE_REPORT/requested-combo-summary.json" \
+            --output "$REPORT/original-baseline-parity.json"
+      - name: Fetch user-selected research source SHA and apply ONLY two audited V12 TypeScript changes
+        run: |
+          git -c protocol.version=2 fetch --filter=blob:none --no-tags --depth=1 origin ed57c0a7f6d0b5bf47cfcfb9f45fd5eb6e02add5
+          python -m research.formal_five_bt.v12_selected_combo_integrated patch \
+            --repo . --data-root "$DATA" --output "$REPORT/research-source-provenance.json"
+      - name: Rescan all 4 crypto strategies with selected V12 and identical underlying Aster H1
+        run: |
+          python -m research.formal_five_bt.signal_scan \
+            --data-root "$DATA" --output-root "$VAR_SCANS/baseline-signal-scan" --strategies V12 PENGU FET
+          python -m research.formal_five_bt.signal_scan \
+            --data-root "$DATA" --output-root "$VAR_SCANS/baseline-signal-scan-q102" --strategies Q102 --q102-fast
+          python -m research.formal_five_bt.crypto_price_model \
+            --data-root "$DATA" --scan-root "$VAR_SCANS" --output-root "$VAR_CAND"
+      - name: Run selected V12 with all five strategies at 8 and 10bps shared gross and FET gates
+        run: |
+          python -m research.formal_five_bt.fet_dual_gate_combo_bt \
+            --data-root "$DATA" --candidate-root "$VAR_CAND" \
+            --output-root "$VAR_REPORT" --v52-ledger-root "$V52_LEDGER" --ecb-fx-root "$DATA"
+      - name: Strictly compare original and selected all-five output, preserve accounting and monthly equity
+        run: |
+          python -m research.formal_five_bt.v12_selected_combo_integrated compare \
+            --baseline "$BASE_REPORT/requested-combo-summary.json" \
+            --variant "$VAR_REPORT/requested-combo-summary.json" \
+            --source-report "$REPORT/research-source-provenance.json" \
+            --output "$REPORT/selected-v12-five-logic-comparison.json"
+      - name: Persist completed research only; never modify production config
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$REPORT"
+          git commit -m "Research: strict Aster five-logic V12 selected route 8/10bps paired results [skip ci]"
+          git push origin HEAD:research/v12-selected-combo-five-logic-bt-20260928
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v12-selected-score100-vol080-relaxed035-aster-five-logic-evidence
+          if-no-files-found: warn
+          retention-days: 90
+          path: |
+            docs/research/results/v12-score100-volume080-relaxed035-five-logic-20260928/
+            /tmp/v12-combo-five-logic/baseline-all-cases/requested-combo-summary.json
+            /tmp/v12-combo-five-logic/selected-all-cases/requested-combo-summary.json
