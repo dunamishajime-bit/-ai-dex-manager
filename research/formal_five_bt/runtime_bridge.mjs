@@ -233,13 +233,42 @@ if (process.argv.includes("--list")) {
           // only after its own current-hour entry open and enough prior H1
           // history exist. This prevents a late-listed coin from invalidating
           // every earlier timestamp while preserving the exact audited model.
+          // Keep only the latest contiguous, structurally valid H1 suffix.
+          // One malformed provider candle must not poison every later date
+          // forever; the symbol becomes eligible again only after it rebuilds
+          // the required causal warm-up from valid hourly observations.
+          const q102ValidSuffix = (rows) => {
+            if (!Array.isArray(rows) || !rows.length) return [];
+            let start = rows.length - 1;
+            const valid = (row) => row
+              && Number.isFinite(Number(row.timestampMs)) && Number(row.timestampMs) > 0
+              && ["open", "high", "low", "close"].every((key) => Number.isFinite(Number(row[key])) && Number(row[key]) > 0)
+              && Number.isFinite(Number(row.quoteVolume)) && Number(row.quoteVolume) >= 0
+              && Number(row.high) >= Math.max(Number(row.open), Number(row.close))
+              && Number(row.low) <= Math.min(Number(row.open), Number(row.close))
+              && Number(row.high) >= Number(row.low);
+            if (!valid(rows[start])) return [];
+            while (start > 0) {
+              const left = rows[start - 1];
+              const right = rows[start];
+              if (!valid(left) || Number(right.timestampMs) - Number(left.timestampMs) !== 3_600_000) break;
+              start -= 1;
+            }
+            return rows.slice(start);
+          };
+          const validCandles = Object.fromEntries(
+            Object.entries(asofCandles).map(([symbol, rows]) => [symbol, q102ValidSuffix(rows)]));
+          const btcReady = (validCandles.BTCUSDT?.length || 0) >= 181 * 24;
           const availableSymbols = symbols.filter((symbol) =>
-            Array.isArray(asofCandles[symbol])
-            && asofCandles[symbol].length >= 336
+            Array.isArray(validCandles[symbol])
+            && validCandles[symbol].length >= 336
             && entryOpenBySymbol[symbol]?.timestampMs === decisionTs);
-          const availableHighVol = highVolSymbols.filter((symbol) => availableSymbols.includes(symbol));
+          const availableHighVol = highVolSymbols.filter((symbol) =>
+            availableSymbols.includes(symbol)
+            && validCandles[symbol].length >= 181 * 24
+            && btcReady);
           const filteredCandles = Object.fromEntries(
-            Object.entries(asofCandles).filter(([symbol]) =>
+            Object.entries(validCandles).filter(([symbol]) =>
               symbol === "BTCUSDT" || availableSymbols.includes(symbol)));
           const filteredEntryOpen = Object.fromEntries(
             Object.entries(entryOpenBySymbol).filter(([symbol]) => availableSymbols.includes(symbol)));
