@@ -1,0 +1,10 @@
+{
+  "source": "ASTER_ONLY",
+  "annual": "2025-08-10..2026-08-10",
+  "recent_start": "2026-08-28",
+  "recent_end_exclusive": "2026-09-27",
+  "annual_report": true,
+  "recent_report": false,
+  "scope": "V12 pre-WinRate raw eligibility audit, NOT full counterfactual BT",
+  "production_updated": false
+}
