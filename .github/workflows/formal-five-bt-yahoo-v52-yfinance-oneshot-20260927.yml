@@ -1,0 +1,108 @@
+name: Yahoo Finance yfinance one-shot provenance-safe V52 H1 acquisition
+on:
+  push:
+    branches: [research/formal-five-bt-yahoo-v52-20260927]
+    paths: [.github/workflows/formal-five-bt-yahoo-v52-yfinance-oneshot-20260927.yml]
+permissions: {contents: read}
+jobs:
+  source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Install only Yahoo Finance Python HTTP client
+        run: python -m pip install --disable-pip-version-check --no-cache-dir yfinance==0.2.65
+      - name: Fetch each public Yahoo chart once with supported session cookies; no alternative provider
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python - <<'PY'
+          import json,time,math,os
+          from pathlib import Path
+          import yfinance as yf
+          from research.formal_five_bt.yahoo_v52 import TICKERS,parse_chart
+          root=Path(os.environ['RUNNER_TEMP'])/'v52-yahoo-first-party'
+          raw_dir=root/'raw-yahoo';raw_dir.mkdir(parents=True,exist_ok=True)
+          result={'source':'YAHOO_FINANCE_VIA_YFINANCE_60M_UNADJUSTED','symbols':{},'raw_upload_public':False}
+          for ticker in TICKERS:
+            try:
+              frame=yf.Ticker(ticker).history(start='2025-08-01',end='2026-08-11',interval='60m',
+                       auto_adjust=False,actions=True,prepost=False,raise_errors=False)
+              if frame.empty:raise ValueError('YAHOO_HISTORY_EMPTY_OR_RATE_LIMIT')
+              stamps=[];prices={z:[] for z in ('open','high','low','close','volume')}
+              splits={}
+              for idx,series in frame.iterrows():
+                time_value=idx.to_pydatetime()
+                if time_value.tzinfo is None:raise ValueError('YAHOO_NAIVE_SESSION_TIME')
+                ts=int(time_value.timestamp())
+                stamps.append(ts)
+                for source,target in [('Open','open'),('High','high'),('Low','low'),('Close','close'),('Volume','volume')]:
+                  x=float(series[source])
+                  prices[target].append(x if math.isfinite(x) else None)
+                split=float(series.get('Stock Splits',0) or 0)
+                if split>0:splits[str(ts)]={'date':ts,'numerator':split,'denominator':1}
+              chart={'chart':{'error':None,'result':[{
+                'meta':{'symbol':ticker,'currency':'USD','exchangeTimezoneName':'America/New_York',
+                  'dataGranularity':'60m','source':'Yahoo Finance via yfinance/0.2.65'},
+                'timestamp':stamps,'indicators':{'quote':[prices]},'events':{'splits':splits}}]}}
+              raw=json.dumps(chart,separators=(',',':'),allow_nan=False).encode()
+              # Validate the same source contract the independent V52 model consumes.
+              rows,meta=parse_chart(ticker,raw)
+              if len(rows)<1250:raise ValueError('YAHOO_YEAR_HOURLY_COVERAGE_INSUFFICIENT')
+              if rows[0].ny_day>'2025-08-11' or rows[-1].ny_day<'2026-08-07':
+                raise ValueError('YAHOO_YEAR_FIRST_LAST_COVERAGE_INSUFFICIENT')
+              (raw_dir/(ticker+'.json')).write_bytes(raw)
+              result['symbols'][ticker]={'status':'ACQUIRED','rows':len(rows),
+                'firstDay':rows[0].ny_day,'lastDay':rows[-1].ny_day,
+                'raw_sha256':meta['raw_sha256'],'source':'YAHOO_FINANCE_VIA_YFINANCE_60M'}
+              print('YAHOO_V52_OFFICIAL_ACQUIRED',json.dumps(result['symbols'][ticker],sort_keys=True))
+            except Exception as e:
+              print('YAHOO_V52_ONESHOT_UNAVAILABLE',json.dumps({'symbol':ticker,
+                'status':'UNAVAILABLE','error':type(e).__name__+':'+str(e)[:170]},sort_keys=True))
+              result['status']='INCOMPLETE_DO_NOT_INFER_PRICES'
+              (root/'acquisition-attempt.json').write_text(json.dumps(result,indent=2))
+              raise SystemExit('YAHOO_SOURCE_BLOCKED_OR_INCOMPLETE_ABORT_NO_ALTERNATE_PROVIDER')
+            time.sleep(3)
+          result['status']='ALL_5_YAHOO_PRICE_HISTORY_ACQUIRED'
+          (root/'acquisition-attempt.json').write_text(json.dumps(result,indent=2))
+          print('YAHOO_V52_ALL_FIVE_FULL_YEAR=PASS')
+          PY
+      - name: Archive original Yahoo-derived hourly chart series to private authorized research VPS
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ -n "$SSH_HOST" && -n "$ROOT_KEY" && -n "$SSH_KNOWN_HOSTS" ]]
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/'.ssh'
+          def norm(k):return os.environ[k].lstrip('\ufeff').replace('\r\n','\n').replace('\r','\n').strip()+'\n'
+          (p/'id_root').write_text(norm('ROOT_KEY'))
+          (p/'known_hosts').write_text(norm('SSH_KNOWN_HOSTS'))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+          tar -czf "$RUNNER_TEMP/a09-yahoo-v52-source.tgz" -C "$RUNNER_TEMP" v52-yahoo-first-party
+          digest="$(sha256sum "$RUNNER_TEMP/a09-yahoo-v52-source.tgz" | cut -d' ' -f1)"
+          port="${SSH_PORT:-22}"
+          remote="/var/lib/disdex/research-bt-formal/a09-yahoo-v52-source-${GITHUB_RUN_ID}.tgz"
+          ssh_opts=(-T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -p "$port")
+          ssh "${ssh_opts[@]}" "root@$SSH_HOST" \
+            "set -Eeuo pipefail; test \"\$(tr -d '[:space:]' < /home/deploy/disdex-trading/current/.disdex-release-sha)\" = 'a09ea45ca3cbd72100f9eb0eaae499039c40b6a0';
+             test ! -e '$remote'; test \"\$(df -Pk /var/lib/disdex | awk 'NR==2 {print \$4}')\" -gt 1200000"
+          scp -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -P "$port" "$RUNNER_TEMP/a09-yahoo-v52-source.tgz" "root@$SSH_HOST:$remote"
+          ssh "${ssh_opts[@]}" "root@$SSH_HOST" \
+            "set -Eeuo pipefail; chmod 600 '$remote'; test \"\$(sha256sum '$remote' | cut -d' ' -f1)\" = '$digest';
+             echo YAHOO_FINANCE_PRIVATE_SOURCE_ARCHIVE='$remote';
+             echo YAHOO_FINANCE_PRIVATE_SOURCE_SHA256='$digest';
+             echo TRADING_MUTATIONS=0"
