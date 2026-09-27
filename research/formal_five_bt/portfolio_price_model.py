@@ -18,14 +18,17 @@ from typing import Any
 from .crypto_price_model import HOUR, PERIOD_END_MS, PERIOD_START_MS, _funding, _rows
 
 CRYPTO_CAP = 3.0
+STOCK_CAP = 4.0
 TOTAL_CAP = 4.25
 V12_CAP = 2.0
 PENGU_CAP = 1.0
 Q102_CAP = 3.0
 FET_CAP = 2.25
 FET_MIN = 0.05
+V52_CAP = 4.0
 DAILY_LOSS_LIMIT = 0.075
-PRIORITY = {"PENGU": 0, "V12": 1, "Q102": 2, "FET": 3}
+STOCK_DAILY_LOSS_LIMIT = 0.035
+PRIORITY = {"V52": 0, "PENGU": 1, "V12": 2, "Q102": 3, "FET": 4}
 
 
 def _monthly_deposits() -> dict[int, float]:
@@ -45,7 +48,10 @@ def _monthly_deposits() -> dict[int, float]:
 def _market(data_root: Path, symbols: set[str]) -> dict[str, dict[str, Any]]:
     output = {}
     for symbol in sorted(symbols):
-        rows = _rows(data_root / "normalized/aster/klines" / f"{symbol}.jsonl")
+        crypto = data_root / "normalized/aster/klines" / f"{symbol}.jsonl"
+        stock = data_root / "normalized/aster_stock/klines" / f"{symbol}.jsonl"
+        source = crypto if crypto.is_file() else stock
+        rows = _rows(source)
         rows.sort(key=lambda row: int(row["event_time_ms"]))
         times = [int(row["event_time_ms"]) for row in rows]
         if len(times) != len(set(times)):
@@ -100,7 +106,7 @@ def _gross(position: dict[str, Any], market: dict[str, dict[str, Any]], ts: int,
 
 
 def _strategy_cap(candidate: dict[str, Any]) -> float:
-    return {"V12": V12_CAP, "PENGU": PENGU_CAP, "Q102": Q102_CAP, "FET": FET_CAP}[candidate["strategy_id"]]
+    return {"V12": V12_CAP, "PENGU": PENGU_CAP, "Q102": Q102_CAP, "FET": FET_CAP, "V52": V52_CAP}[candidate["strategy_id"]]
 
 
 def _day(ts: int) -> str:
@@ -108,6 +114,9 @@ def _day(ts: int) -> str:
 
 
 def _scheduled_funding(data_root: Path, symbol: str, entry: int, exit: int) -> list[tuple[int, float]]:
+    path = data_root / "normalized/aster/funding" / f"{symbol}.jsonl"
+    if not path.is_file():
+        return []
     return [(ts, rate) for ts, rate in _funding(data_root, symbol) if entry < ts <= exit]
 
 
@@ -280,7 +289,7 @@ def _portfolio_scenario(
                     continue
 
                 active_same_strategy = [p for p in active.values() if p["strategy_id"] == strategy]
-                if strategy in {"PENGU", "Q102", "FET"} and active_same_strategy:
+                if strategy in {"PENGU", "Q102", "FET", "V52"} and active_same_strategy:
                     rejected[f"{strategy}:SLOT_OCCUPIED"] += 1
                     continue
                 if strategy == "V12":
@@ -304,10 +313,16 @@ def _portfolio_scenario(
                     continue
                 strategy_gross = sum(_gross(p, market, ts, equity) for p in active_same_strategy)
                 total_gross = sum(_gross(p, market, ts, equity) for p in active.values())
+                crypto_gross = sum(_gross(p, market, ts, equity) for p in active.values()
+                                   if p["strategy_id"] != "V52")
+                stock_gross = sum(_gross(p, market, ts, equity) for p in active.values()
+                                  if p["strategy_id"] == "V52")
                 requested = min(float(candidate["requested_gross"]), _strategy_cap(candidate))
                 strategy_room = max(0.0, _strategy_cap(candidate) - strategy_gross)
-                global_room = max(0.0, min(CRYPTO_CAP, TOTAL_CAP) - total_gross)
-                room = min(strategy_room, global_room)
+                sleeve_room = max(0.0, (STOCK_CAP - stock_gross) if strategy == "V52"
+                                  else (CRYPTO_CAP - crypto_gross))
+                total_room = max(0.0, TOTAL_CAP - total_gross)
+                room = min(strategy_room, sleeve_room, total_room)
 
                 # FET is the residual sleeve and is preemptible by core crypto.
                 if strategy in {"PENGU", "V12", "Q102"} and room + 1e-12 < requested:
@@ -316,9 +331,15 @@ def _portfolio_scenario(
                         active_same_strategy = [p for p in active.values() if p["strategy_id"] == strategy]
                         strategy_gross = sum(_gross(p, market, ts, equity) for p in active_same_strategy)
                         total_gross = sum(_gross(p, market, ts, equity) for p in active.values())
+                        crypto_gross = sum(_gross(p, market, ts, equity) for p in active.values()
+                                           if p["strategy_id"] != "V52")
+                        stock_gross = sum(_gross(p, market, ts, equity) for p in active.values()
+                                          if p["strategy_id"] == "V52")
                         strategy_room = max(0.0, _strategy_cap(candidate) - strategy_gross)
-                        global_room = max(0.0, min(CRYPTO_CAP, TOTAL_CAP) - total_gross)
-                        room = min(strategy_room, global_room)
+                        sleeve_room = max(0.0, (STOCK_CAP - stock_gross) if strategy == "V52"
+                                          else (CRYPTO_CAP - crypto_gross))
+                        total_room = max(0.0, TOTAL_CAP - total_gross)
+                        room = min(strategy_room, sleeve_room, total_room)
 
                 accepted_gross = min(requested, room)
                 if strategy == "PENGU" and accepted_gross + 1e-9 < requested:
@@ -445,9 +466,33 @@ def _portfolio_scenario(
     }
 
 
-def run_portfolio_model(data_root: Path, candidate_root: Path, output_root: Path) -> dict[str, Any]:
+def run_portfolio_model(data_root: Path, candidate_root: Path, output_root: Path,
+                        v52_ledger_root: Path | None = None) -> dict[str, Any]:
     data_root, candidate_root, output_root = map(Path, (data_root, candidate_root, output_root))
     candidates = _rows(candidate_root / "crypto-price-model-candidates.jsonl")
+    v52_unresolved = 0
+    v52_skipped = 0
+    if v52_ledger_root is not None:
+        v52_rows = _rows(Path(v52_ledger_root) / "v52-model-ledger.jsonl")
+        v52_unresolved = sum(row.get("status") == "UNRESOLVED_MODEL_EXIT" for row in v52_rows)
+        v52_skipped = sum(row.get("status") == "SKIPPED_CANDIDATE" for row in v52_rows)
+        for row in v52_rows:
+            if row.get("status") != "MODELED_CLOSED_TRADE":
+                continue
+            candidates.append({
+                "strategy_id": "V52", "symbol": row["symbol"], "side": row["side"],
+                "entry_ts_ms": int(row["entry_ts_ms"]), "signal_ts_ms": int(row["entry_ts_ms"]),
+                "entry_price": float(row["aster_entry_price_usd"]),
+                "requested_gross": float(row.get("slot_gross") or 2.0),
+                "status": "MODELED_CLOSED_TRADE",
+                "exit_ts_ms": int(row["exit_ts_ms"]),
+                "exit_price": float(row["aster_exit_price_usd"]),
+                "exit_reason": row.get("reason") or row.get("exit_reason") or "V52_MODELED_EXIT",
+                "unit_price_return": float(row["gross_price_return"]),
+                "route": "V50_POST_OPEN_BASIS",
+            })
+    candidates.sort(key=lambda row: (int(row.get("entry_ts_ms") or 0),
+                                     PRIORITY.get(row["strategy_id"], 99), row["symbol"]))
     symbols = {str(row["symbol"]) for row in candidates if row.get("symbol")}
     market = _market(data_root, symbols)
     scenarios = []
@@ -466,7 +511,9 @@ def run_portfolio_model(data_root: Path, candidate_root: Path, output_root: Path
         "status": "COMPLETE_CRYPTO_H1_PRICE_MODEL_NOT_FORMAL_L2_VERIFIED",
         "period_start_ms": PERIOD_START_MS, "period_end_exclusive_ms": PERIOD_END_MS,
         "contribution_model": "JPY notional contributions; FX translation intentionally omitted because FRED was unavailable in runner",
-        "shared_crypto_gross_cap": CRYPTO_CAP, "total_gross_cap": TOTAL_CAP,
+        "shared_crypto_gross_cap": CRYPTO_CAP, "stock_gross_cap": STOCK_CAP, "total_gross_cap": TOTAL_CAP,
+        "v52_unresolved_exit_trades_excluded": v52_unresolved,
+        "v52_skipped_candidates": v52_skipped,
         "daily_loss_limit": DAILY_LOSS_LIMIT,
         "scenarios": scenarios,
         "limitations": [
@@ -487,8 +534,11 @@ def main() -> None:
     parser.add_argument("--data-root", type=Path, required=True)
     parser.add_argument("--candidate-root", type=Path, required=True)
     parser.add_argument("--output-root", type=Path, required=True)
+    parser.add_argument("--v52-ledger-root", type=Path,
+                        help="Optional modeled V52 ledger; unresolved rows remain excluded and reported")
     args = parser.parse_args()
-    result = run_portfolio_model(args.data_root, args.candidate_root, args.output_root)
+    result = run_portfolio_model(args.data_root, args.candidate_root, args.output_root,
+                                 v52_ledger_root=args.v52_ledger_root)
     print(json.dumps({"status": result["status"], "scenarios": result["scenarios"]}, sort_keys=True, allow_nan=False))
 
 
