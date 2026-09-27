@@ -141,16 +141,22 @@ def acquire_yahoo_v52(root: Path, begin: date = date(2025, 8, 10),
             actual_starts = {bar.start_ms for bar in accepted}
             missing_hours = len(expected_starts - actual_starts)
             extra_hours = len(actual_starts - expected_starts)
+            missing_days: dict[str, int] = {}
+            for ts in sorted(expected_starts - actual_starts):
+                day_name = datetime.fromtimestamp(ts / 1000, timezone.utc).astimezone(NY).date().isoformat()
+                missing_days[day_name] = missing_days.get(day_name, 0) + 1
             page_errors = sum("status" in page for page in pages)
             status = ("COVERAGE_COMPLETE" if not (missing_hours or extra_hours or page_errors)
                       else "COVERAGE_PARTIAL")
         except (ValueError, KeyError, TypeError) as error:
             accepted, status = (), f"NOT_VERIFIABLE:{error}"
             missing_hours, extra_hours, page_errors = None, None, sum("status" in page for page in pages)
+            missing_days = {}
         coverage["symbols"][symbol] = {
             "status": status, "rows": len(accepted), "first_bar_ms": accepted[0].start_ms if accepted else None,
             "last_bar_end_ms": accepted[-1].end_ms if accepted else None,
             "missing_session_hours": missing_hours, "unexpected_session_hours": extra_hours,
+            "missing_session_days": missing_days,
             "page_errors": page_errors, "normalized_sha256":
             hashlib.sha256(output.read_bytes()).hexdigest(), "pages": pages,
         }
