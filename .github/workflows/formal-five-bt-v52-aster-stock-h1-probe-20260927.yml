@@ -1,0 +1,51 @@
+name: V52 Aster stock-perpetual historical H1 read-only availability
+on:
+  push:
+    branches: [research/formal-five-bt-yahoo-v52-20260927]
+    paths: [.github/workflows/formal-five-bt-v52-aster-stock-h1-probe-20260927.yml]
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - name: Inspect exact stock perpetual instrument and history coverage without L2
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python3 - <<'PY'
+          import json,urllib.request,urllib.parse,urllib.error,datetime
+          from datetime import timezone
+          endpoint="https://fapi.asterdex.com/fapi/v3/"
+          headers={"User-Agent":"DisDex-formal-five-v52-research-metadata-only/1","Accept":"application/json"}
+          def public(path,params={}):
+            url=endpoint+path+("?"+urllib.parse.urlencode(params) if params else "")
+            req=urllib.request.Request(url,headers=headers)
+            with urllib.request.urlopen(req,timeout=15) as response:return json.load(response)
+          try:
+            data=public("exchangeInfo")
+            universe={str(x.get("symbol","")):x for x in data.get("symbols",[])}
+            print("ASTER_STOCK_EXCHANGE_INFO_COUNT",len(universe))
+          except (ValueError,urllib.error.HTTPError,urllib.error.URLError) as e:
+            print("ASTER_STOCK_EXCHANGE_INFO_UNAVAILABLE",type(e).__name__,str(e)[:180])
+            universe={}
+          start=int(datetime.datetime(2025,8,10,tzinfo=timezone.utc).timestamp()*1000)
+          end=int(datetime.datetime(2026,8,11,tzinfo=timezone.utc).timestamp()*1000)
+          for symbol in ("AMZNUSDT","METAUSDT","MSFTUSDT","NVDAUSDT","TSLAUSDT"):
+            meta=universe.get(symbol)
+            info={"symbol":symbol,"exchangeInfoListed":meta is not None,
+                  "status":meta.get("status") if meta else None,
+                  "onboardDate":meta.get("onboardDate") if meta else None,
+                  "method":"PUBLIC_CANDLE_H1_NO_ORDERBOOK"}
+            if meta is not None:
+              try:
+                candles=public("klines",{"symbol":symbol,"interval":"1h","startTime":start,
+                    "endTime":end,"limit":2})
+                info.update({"historicalRowsSample":len(candles),
+                  "firstSampleTs":candles[0][0] if candles else None,
+                  "sampleStatus":"ACQUIRED" if candles else "MISSING"})
+              except Exception as e:info["sampleStatus"]="UNAVAILABLE:"+type(e).__name__+":"+str(e)[:100]
+            print("ASTER_V52_PERP_H1_SAMPLE",json.dumps(info,sort_keys=True))
+          print("ASTER_STOCK_PRICE_SOURCE_PROBE_READ_ONLY=PASS")
+          PY
