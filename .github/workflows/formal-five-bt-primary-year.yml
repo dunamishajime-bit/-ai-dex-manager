@@ -8,6 +8,7 @@ on:
       - "research/formal_five_bt/acquire.py"
       - "research/formal_five_bt/signal_scan.py"
       - "research/formal_five_bt/runtime_bridge.mjs"
+      - "research/formal_five_bt/crypto_price_model.py"
 permissions:
   contents: read
 jobs:
@@ -56,6 +57,12 @@ jobs:
       - name: Replay Q102 as-of causal signal scan independently
         run: |
           python -m research.formal_five_bt.signal_scan --data-root "$RUNNER_TEMP/formal-bt" --output-root "$RUNNER_TEMP/formal-scans/baseline-signal-scan-q102" --strategies Q102
+      - name: Build causal H1 candidate trade lifecycles without shared allocation
+        run: |
+          python -m research.formal_five_bt.crypto_price_model \
+            --data-root "$RUNNER_TEMP/formal-bt" \
+            --scan-root "$RUNNER_TEMP/formal-scans" \
+            --output-root "$RUNNER_TEMP/formal-crypto-price-model"
       - name: Print only aggregate causal scan status
         env:
           SCAN_ROOT: ${{ runner.temp }}/formal-scans
@@ -72,4 +79,20 @@ jobs:
                   continue
               m=json.loads(p.read_text())
               print(name, m["runtime_sha"], json.dumps(m["stats"],sort_keys=True))
+          PY
+      - name: Print aggregate price-model lifecycle summary only
+        env:
+          MODEL_ROOT: ${{ runner.temp }}/formal-crypto-price-model
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          p=Path(os.environ["MODEL_ROOT"])/"crypto-price-model-summary.json"
+          if not p.is_file():
+              raise SystemExit("CRYPTO_PRICE_MODEL_SUMMARY_MISSING")
+          m=json.loads(p.read_text())
+          print("CRYPTO_PRICE_MODEL_STATUS:",m["status"])
+          print("CRYPTO_PRICE_MODEL_CANDIDATES:",m["candidate_count"])
+          print("CRYPTO_PRICE_MODEL_STRATEGIES:",json.dumps(m["strategies"],sort_keys=True))
+          print("FORMAL_VERIFIED_FILLS:",m["formal_verified_fills"])
           PY
