@@ -193,6 +193,59 @@ jobs:
           print("FORMAL_FIVE_LOGIC_RESULTS_STILL_UNVERIFIED=TRUE; V52_HISTORICAL_EXECUTION_MISSING=TRUE")
           print("RAW_DATA_ARTIFACTS_EXPORTED=0; LIVE_RUNNERS_RESTARTED=0")
           PY
+      - name: Preserve exact research ledgers and monthly proxy outputs in a separate private root-only VPS archive
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+          SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -Eeuo pipefail
+          root="$RUNNER_TEMP/formal-five-bt"
+          test -s "$root/results/run-manifest.json"
+          test -s "$root/ohlc-proxy/ohlc-proxy-run-manifest.json"
+          python - <<'PY'
+          import os,json,hashlib
+          from pathlib import Path
+          root=Path(os.environ["RUNNER_TEMP"])/"formal-five-bt"
+          a=json.loads((root/"results/run-manifest.json").read_text())
+          b=json.loads((root/"ohlc-proxy/ohlc-proxy-run-manifest.json").read_text())
+          sha="a09ea45ca3cbd72100f9eb0eaae499039c40b6a0"
+          assert a["runtime_sha"]==b["runtime_sha"]==sha
+          assert a["status"]=="NOT_VERIFIABLE"
+          assert b["status"]=="MODELED_RESEARCH_ONLY_NOT_FORMAL_VERIFIED"
+          expected={"NORMAL":"fa7d5bae4eae98cb17984c38e5ceffbef1ebc8699447e0d2b20582827913d8b8",
+            "SEVERE":"c70fab585a9f0a358a18e9cf4c81bf7182ac4711a544c2487ff302fbb6524498"}
+          for row in b["scenarios"]:
+            actual=row["ledger_file"]["sha256"]
+            assert actual==expected[row["model"]],(row["model"],actual)
+          print("MODEL_REPLAY_EXACT_LEDGER_PARITY=PASS")
+          PY
+          tar -czf "$RUNNER_TEMP/a09-five-bt-private-results.tgz" -C "$root" scans results ohlc-proxy
+          bytes="$(stat -c %s "$RUNNER_TEMP/a09-five-bt-private-results.tgz")"
+          [[ "$bytes" -gt 10000 && "$bytes" -lt 200000000 ]]
+          digest="$(sha256sum "$RUNNER_TEMP/a09-five-bt-private-results.tgz" | awk '{print $1}')"
+          remote_dir="/var/lib/disdex/research-bt-formal"
+          remote_file="$remote_dir/a09-private-results-$GITHUB_RUN_ID.tgz"
+          port="$SSH_PORT"; [[ -n "$port" ]] || port=22
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -p "$port" "root@$SSH_HOST" \
+            "set -Eeuo pipefail; test \"\$(tr -d '[:space:]' < /home/deploy/disdex-trading/current/.disdex-release-sha)\" = 'a09ea45ca3cbd72100f9eb0eaae499039c40b6a0';
+            test -d '$remote_dir'; test ! -e '$remote_file';
+            free=\$(df -Pk '$remote_dir' | awk 'NR==2 {print \$4}'); test \"\$free\" -gt 1200000;
+            echo PRIVATE_RESEARCH_PERSISTENCE_PREFLIGHT=PASS"
+          scp -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -P "$port" "$RUNNER_TEMP/a09-five-bt-private-results.tgz" "root@$SSH_HOST:$remote_file"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -p "$port" "root@$SSH_HOST" \
+            "set -Eeuo pipefail; chmod 0600 '$remote_file';
+            test \"\$(sha256sum '$remote_file' | awk '{print \$1}')\" = '$digest';
+            echo PRIVATE_FIVE_BT_RESULTS_ARCHIVE_VERIFIED_SHA256='$digest';
+            echo PRIVATE_FIVE_BT_RESULTS_ARCHIVE_BYTES='$bytes';
+            echo PRIVATE_FIVE_BT_RESULTS_VPS_PATH='$remote_file';
+            echo ROOT_ONLY=TRUE NO_TRADING_MUTATIONS=TRUE"
       - name: Post-run rights-safe source coverage only, no raw prices or private trade data
         if: always()
         shell: bash
