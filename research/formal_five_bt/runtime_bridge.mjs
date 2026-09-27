@@ -46,6 +46,7 @@ const MODULE_PATHS = {
   q102Ranking: "lib/disdex-quality102-causal-v4-ranking.ts",
   q102Selector: "lib/disdex-quality102-causal-selector.ts",
   q102Observability: "lib/disdex-quality102-causal-v4-observability.ts",
+  q102Pipeline: "lib/disdex-quality102-causal-pipeline.ts",
   fet: "lib/fet-brk48-signal.ts",
   riskConfig: "config/integratedProductionRiskPolicy.ts",
   strictPlanner: "lib/disdex-strict-portfolio-planner.ts",
@@ -110,6 +111,250 @@ function jsonSafe(value) {
     if (typeof child === "number" && !Number.isFinite(child)) return null;
     return child;
   }));
+}
+
+const Q102_HOUR = 3_600_000;
+const Q102_DAY = 24 * Q102_HOUR;
+const Q102_FEATURE_WARMUP = 336;
+const Q102_TRAINING_DAYS = 180;
+const Q102_MAX_HOLD = 72;
+const Q102_CORRELATION_HOURS = 30 * 24;
+const Q102_MIN_CORRELATION_HOURS = 10 * 24;
+
+function q102RuleGrid(symbol) {
+  const grid = loaded.q102Pipeline.QUALITY102_HIGH_VOL_GRID;
+  const pengu = symbol === "PENGUUSDT";
+  const longDrops = pengu ? grid.longDrops : [0.08, 0.10, 0.12];
+  const longRsis = pengu ? grid.longRsis : [35, 40];
+  const shortRallies = pengu ? grid.shortRallies : [0.05, 0.08, 0.10];
+  const shortRsis = pengu ? grid.shortRsis : [60, 65];
+  const rules = [];
+  for (const longDrop of longDrops) for (const longRsi of longRsis)
+    for (const shortRally of shortRallies) for (const shortRsi of shortRsis)
+      for (const hardStop of grid.hardStops)
+        rules.push({ longDrop, longRsi, shortRally, shortRsi, hardStop });
+  return rules;
+}
+
+function q102MatchedSide(features, rule) {
+  const found = loaded.q102Pipeline.matchQuality102HighVolGrid(features).find((candidate) =>
+    candidate.hardStop === rule.hardStop && (
+      candidate.side === 1
+        ? candidate.threshold === rule.longDrop && candidate.rsi === rule.longRsi
+        : candidate.threshold === rule.shortRally && candidate.rsi === rule.shortRsi
+    ));
+  return found?.side;
+}
+
+function q102SummarizeReturns(returns) {
+  if (!returns.length) return { trades: 0, wins: 0, totalReturn: 0, winRate: 0, profitFactor: 0, expectancy: 0, maxDrawdown: 0 };
+  let equity = 1, peak, maxDrawdown = 0, gains = 0, losses = 0, wins = 0;
+  for (const value of returns) {
+    equity *= 1 + value;
+    peak = peak === undefined ? equity : Math.max(peak, equity);
+    maxDrawdown = Math.min(maxDrawdown, equity / peak - 1);
+    if (value > 0) { wins += 1; gains += value; } else losses += value;
+  }
+  return {
+    trades: returns.length, wins, totalReturn: equity - 1, winRate: wins / returns.length,
+    profitFactor: losses < 0 ? gains / -losses : 999,
+    expectancy: returns.reduce((a, b) => a + b, 0) / returns.length,
+    maxDrawdown,
+  };
+}
+
+function q102TrainRule(rows, features, rule, firstSignalIndex, trainingEndIndex) {
+  const returns = [];
+  let signalIndex = firstSignalIndex;
+  const costs = loaded.q102Pipeline.QUALITY102_RESEARCH_COSTS.normal;
+  while (signalIndex < trainingEndIndex - Q102_MAX_HOLD) {
+    const side = q102MatchedSide(features.get(signalIndex), rule);
+    if (side === undefined) { signalIndex += 1; continue; }
+    const entryIndex = signalIndex + 1;
+    const entryPrice = rows[entryIndex].open;
+    const stopPrice = side === 1 ? entryPrice * (1 - rule.hardStop) : entryPrice * (1 + rule.hardStop);
+    let exitIndex = signalIndex + Q102_MAX_HOLD;
+    let exitPrice = rows[exitIndex].close;
+    for (let index = entryIndex; index <= exitIndex; index += 1) {
+      if ((side === 1 && rows[index].low <= stopPrice) || (side === -1 && rows[index].high >= stopPrice)) {
+        exitIndex = index; exitPrice = stopPrice; break;
+      }
+    }
+    const holdHours = exitIndex - entryIndex + 1;
+    const grossReturn = side * (exitPrice / entryPrice - 1);
+    returns.push(grossReturn - 2 * costs.perSide - costs.fundingPerDay * holdHours / 24);
+    signalIndex = exitIndex + 1;
+  }
+  return q102SummarizeReturns(returns);
+}
+
+const q102MonthlyCache = new Map();
+function q102MonthlySelection(symbol, rows, dataCutoffTs) {
+  if (!rows.length) return undefined;
+  const monthStartTs = loaded.q102Pipeline.monthStartUtc(dataCutoffTs);
+  const cacheKey = [symbol, monthStartTs, rows[0].timestampMs].join("|");
+  if (q102MonthlyCache.has(cacheKey)) return q102MonthlyCache.get(cacheKey) || undefined;
+  const trainingStartTs = monthStartTs - Q102_TRAINING_DAYS * Q102_DAY;
+  const trainingEndTs = monthStartTs - Q102_HOUR;
+  const firstTs = rows[0].timestampMs;
+  if (firstTs > trainingStartTs - Q102_FEATURE_WARMUP * Q102_HOUR || rows.at(-1).timestampMs < trainingEndTs) {
+    q102MonthlyCache.set(cacheKey, null); return undefined;
+  }
+  const firstSignalIndex = (trainingStartTs - firstTs) / Q102_HOUR;
+  const trainingEndIndex = (trainingEndTs - firstTs) / Q102_HOUR;
+  if (!Number.isInteger(firstSignalIndex) || !Number.isInteger(trainingEndIndex)) {
+    q102MonthlyCache.set(cacheKey, null); return undefined;
+  }
+  const features = new Map();
+  for (let index = firstSignalIndex; index < trainingEndIndex - Q102_MAX_HOLD; index += 1) {
+    features.set(index, loaded.q102Pipeline.computeQuality102HighVolFeatures(rows, index));
+  }
+  const evaluations = q102RuleGrid(symbol).map((rule) => ({
+    rule,
+    ...q102TrainRule(rows, features, rule, firstSignalIndex, trainingEndIndex),
+    trainingStartTs, trainingEndTs, availableAtTs: trainingEndTs,
+  }));
+  const selected = loaded.q102Pipeline.selectQuality102HighVolMonthlyRule({ monthStartTs, evaluations }).selected;
+  const result = selected ? {
+    rule: selected.rule,
+    metrics: {
+      trades: selected.trades, wins: selected.wins, totalReturn: selected.totalReturn,
+      winRate: selected.winRate, profitFactor: selected.profitFactor,
+      expectancy: selected.expectancy, maxDrawdown: selected.maxDrawdown,
+    },
+  } : undefined;
+  q102MonthlyCache.set(cacheKey, result || null);
+  return result;
+}
+
+function q102ScannerHealthPass(metrics) {
+  return metrics.winRate >= 0.58 && metrics.profitFactor >= 1.30 && metrics.expectancy > 0
+    && metrics.maxDrawdown >= -0.30 && metrics.trades >= 5;
+}
+
+function q102CandidateFor(symbol, rows, dataCutoffTs) {
+  const selection = q102MonthlySelection(symbol, rows, dataCutoffTs);
+  if (!selection || (symbol !== "PENGUUSDT" && !q102ScannerHealthPass(selection.metrics))) return { selection };
+  const features = loaded.q102Pipeline.computeQuality102HighVolFeatures(rows, rows.length - 1);
+  const side = q102MatchedSide(features, selection.rule);
+  if (side === undefined) return { selection };
+  const metrics = selection.metrics;
+  const score = 30 * metrics.winRate
+    + 10 * Math.min(metrics.profitFactor, 3)
+    + 200 * Math.max(-0.05, Math.min(0.10, metrics.expectancy))
+    + 60 * Math.min(Math.abs(features.ret24), 0.25)
+    + 30 * Math.min(features.atrPct, 0.08)
+    + 2 * Math.min(features.volumeRatio, 3)
+    + (symbol === "PENGUUSDT" ? 3 : 0);
+  return { selection, candidate: { id: `HIGH_VOL:${symbol}:${features.signalTs}`, symbol, side, score } };
+}
+
+function q102TrailingCorrelation(left, right, cutoffTs) {
+  const rightByTs = new Map(right.map((row, index) => [row.timestampMs, index > 0 ? row.close / right[index - 1].close - 1 : undefined]));
+  const pairs = [];
+  for (let index = 1; index < left.length; index += 1) {
+    if (left[index].timestampMs > cutoffTs) break;
+    const other = rightByTs.get(left[index].timestampMs);
+    if (other !== undefined) pairs.push([left[index].close / left[index - 1].close - 1, other]);
+  }
+  const tail = pairs.slice(-Q102_CORRELATION_HOURS);
+  if (tail.length < Q102_MIN_CORRELATION_HOURS) return 0;
+  const lm = tail.reduce((s, p) => s + p[0], 0) / tail.length;
+  const rm = tail.reduce((s, p) => s + p[1], 0) / tail.length;
+  let cov = 0, lv = 0, rv = 0;
+  for (const [l, r] of tail) { cov += (l-lm)*(r-rm); lv += (l-lm)**2; rv += (r-rm)**2; }
+  const denominator = Math.sqrt(lv * rv);
+  return denominator > 0 ? cov / denominator : 0;
+}
+
+function q102ActivePenguSide(rows, rule, dataCutoffTs) {
+  const monthStartTs = loaded.q102Pipeline.monthStartUtc(dataCutoffTs);
+  const firstIndex = Math.max(Q102_FEATURE_WARMUP, Math.ceil((monthStartTs - rows[0].timestampMs) / Q102_HOUR));
+  let signalIndex = firstIndex;
+  while (signalIndex < rows.length) {
+    const side = q102MatchedSide(loaded.q102Pipeline.computeQuality102HighVolFeatures(rows, signalIndex), rule);
+    if (side === undefined) { signalIndex += 1; continue; }
+    const entryIndex = signalIndex + 1;
+    if (entryIndex >= rows.length) return side;
+    const entryPrice = rows[entryIndex].open;
+    const stopPrice = side === 1 ? entryPrice * (1 - rule.hardStop) : entryPrice * (1 + rule.hardStop);
+    const lastObservedIndex = Math.min(rows.length - 1, entryIndex + Q102_MAX_HOLD - 1);
+    let stopIndex;
+    for (let index = entryIndex; index <= lastObservedIndex; index += 1) {
+      if ((side === 1 && rows[index].low <= stopPrice) || (side === -1 && rows[index].high >= stopPrice)) { stopIndex = index; break; }
+    }
+    if (stopIndex !== undefined) { signalIndex = stopIndex + 1; continue; }
+    if (lastObservedIndex < entryIndex + Q102_MAX_HOLD - 1) return side;
+    signalIndex = lastObservedIndex + 1;
+  }
+  return undefined;
+}
+
+function q102FastSignal(history, decisionTs, highVolSymbols) {
+  const entries = Object.entries(history.candlesBySymbol).sort(([a],[b]) => a.localeCompare(b));
+  const highSet = new Set(highVolSymbols);
+  const highEntries = entries.filter(([symbol]) => symbol === "BTCUSDT" || highSet.has(symbol));
+  if (highVolSymbols.length && highEntries.length) {
+    const dataCutoffTs = Math.min(...highEntries.map(([, rows]) => rows.at(-1).timestampMs));
+    const normalized = highEntries.map(([symbol, rows]) => [symbol, rows.filter((row) => row.timestampMs <= dataCutoffTs)]);
+    const generated = normalized.filter(([symbol]) => symbol !== "BTCUSDT").map(([symbol, rows]) => ({
+      symbol, rows, ...q102CandidateFor(symbol, rows, dataCutoffTs),
+    }));
+    const penguState = generated.find((item) => item.symbol === "PENGUUSDT");
+    const penguRows = penguState?.rows;
+    const activePengu = penguRows && penguState.selection
+      ? q102ActivePenguSide(penguRows, penguState.selection.rule, dataCutoffTs) : undefined;
+    const candidates = generated.flatMap((item) => item.candidate ? [{ ...item.candidate, rows: item.rows }] : [])
+      .filter((item) => activePengu === undefined || item.symbol === "PENGUUSDT" || item.side !== activePengu || !penguRows
+        || Math.abs(q102TrailingCorrelation(item.rows, penguRows, dataCutoffTs)) < 0.80)
+      .sort((left, right) => right.score - left.score || left.symbol.localeCompare(right.symbol) || left.id.localeCompare(right.id));
+    const selected = candidates[0];
+    if (selected) {
+      const source = generated.find((item) => item.candidate?.id === selected.id);
+      return {
+        strategyId: "QUALITY102_CAUSAL_V1", referenceTs: dataCutoffTs, side: selected.side,
+        symbol: selected.symbol, family: "HIGH_VOL",
+        requestedGross: loaded.riskConfig.quality102GrossForFamily("HIGH_VOL"),
+        reason: "QUALITY102_CAUSAL_V1_HIGH_VOL_SIGNAL", dataCutoffTs,
+        hardStop: source?.selection?.rule.hardStop, maxHoldHours: Q102_MAX_HOLD,
+        exitPolicy: "HIGH_VOL_TRAIL72", brkEnabled: true,
+      };
+    }
+  }
+  const layerRank = { S3: 1, S4: 2 };
+  const familyRank = { BRK: 1, PB: 2, MR: 3, REV: 4 };
+  const s34 = [];
+  for (const [symbol, rows] of entries) {
+    if (symbol === "BTCUSDT") continue;
+    const entryOpen = history.entryOpenBySymbol?.[symbol];
+    if (!entryOpen) continue;
+    for (const candidate of loaded.q102S34.generateQuality102CausalV4S34Candidates({ symbol, rows, entryOpen })) s34.push(candidate);
+  }
+  s34.sort((a,b) => layerRank[a.layer] - layerRank[b.layer]
+    || familyRank[a.family] - familyRank[b.family]
+    || b.margin - a.margin || a.key.localeCompare(b.key));
+  const candidate = s34[0];
+  if (!candidate) return {
+    strategyId: "QUALITY102_CAUSAL_V1", referenceTs: decisionTs, side: 0, requestedGross: 0,
+    reason: "QUALITY102_CAUSAL_V4_NO_SIGNAL", dataCutoffTs: decisionTs, brkEnabled: true,
+  };
+  const improvement = loaded.q102Selector.evaluateQuality102CausalV4ImprovementGate({
+    family: candidate.family, side: candidate.side, ret14: candidate.ret14,
+  });
+  if (!improvement.accepted) return {
+    strategyId: "QUALITY102_CAUSAL_V1", referenceTs: decisionTs, side: 0, requestedGross: 0,
+    reason: "QUALITY102_CAUSAL_V4_REV_LONG_RET14_BELOW_24PCT_NO_BACKFILL",
+    dataCutoffTs: candidate.dataCutoffTs, brkEnabled: true,
+  };
+  return {
+    strategyId: "QUALITY102_CAUSAL_V1", referenceTs: candidate.entryTs,
+    side: candidate.side, symbol: candidate.symbol, family: candidate.family,
+    variant: candidate.variant, layer: candidate.layer,
+    requestedGross: loaded.riskConfig.quality102GrossForFamily(candidate.family),
+    reason: "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL", dataCutoffTs: candidate.dataCutoffTs,
+    hardStop: candidate.hardStop, maxHoldHours: candidate.maxHoldHours,
+    exitPolicy: candidate.exitPolicy, brkEnabled: true,
+  };
 }
 
 await loadLogic();
