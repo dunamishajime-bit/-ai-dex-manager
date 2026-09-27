@@ -296,7 +296,7 @@ def replay(universe:Mapping[str,list[HourBar]],fx_series:Iterable[Any],cost_bps:
     model_name=next((k for k,v in ASSUMED_COSTS.items() if v==cost_bps),str(cost_bps))
     net_by_slot=Counter();realized_stock_today=0;daily_equity_base=0;current_day=None
     units=0.0;high_unit_nav=1.0;dd=0.0;monthly=[];peak_gross=0.0
-    previous_fees=0
+    v50_trade_days=Counter()
     for ts in event_times:
         local=datetime.fromtimestamp(ts/1000,timezone.utc).astimezone(NY)
         today=local.date().isoformat()
@@ -357,6 +357,8 @@ def replay(universe:Mapping[str,list[HourBar]],fx_series:Iterable[Any],cost_bps:
                     rejected["SYMBOL_ALREADY_OWNED"]+=1;continue
                 if daily_equity_base>0 and realized_stock_today<=-0.035*daily_equity_base:
                     rejected["STOCK_DAILY_LOSS_GATE"]+=1;continue
+                if c.slot=="V50_POST_OPEN_BASIS" and v50_trade_days[today]>=3:
+                    rejected["V50_MAX_THREE_TRADES_PER_DAY"]+=1;continue
                 if any(p["side"] not in ("LONG","SHORT") for p in positions.values()):
                     raise ValueError("CORRUPT_POSITION_SIDE")
                 if c.entry_ms!=ts or c.entry_price<=0:
@@ -364,12 +366,14 @@ def replay(universe:Mapping[str,list[HourBar]],fx_series:Iterable[Any],cost_bps:
                 mark=marks.get(c.symbol)
                 if mark is None or abs(mark-c.entry_price)>1e-7:
                     rejected["YAHOO_PRICE_NOT_ASOF_DECISION"]+=1;continue
+                marked_equity=equity+sum((1 if p["side"]=="LONG" else -1)*p["qty"]*
+                    (marks[p["symbol"]]-p["entry_price"]) for p in positions.values())
                 gross_other=sum(p["qty"]*marks[p["symbol"]] for p in positions.values())
-                available=max(0,4.0-gross_other/max(equity,1e-9))
+                available=max(0,4.0-gross_other/max(marked_equity,1e-9)-0.02)
                 desired=min(2.0,available)
                 if desired<0.1 or equity<=0:
                     rejected["STOCK_GROSS_CAP_OR_EQUITY"]+=1;continue
-                notional=equity*desired
+                notional=marked_equity*desired
                 qty=notional/c.entry_price
                 fee=notional*(cost_bps/2)/10000
                 if fee>=equity:rejected["FEE_GREATER_THAN_EQUITY"]+=1;continue
@@ -378,23 +382,21 @@ def replay(universe:Mapping[str,list[HourBar]],fx_series:Iterable[Any],cost_bps:
                     "entry_ms":ts,"entry_price":c.entry_price,"reference_price":c.reference_price,
                     "entry_basis_bps":c.yahoo_displacement_bps,"qty":qty,"gross_at_entry":desired,
                     "entry_fee":fee,"route":c.route,"runtime_sha":RUNTIME_SHA,"model_id":PROXY_ID}
-                if c.slot=="V50_POST_OPEN_BASIS":
-                    count=sum(x["slot"]=="V50_POST_OPEN_BASIS" and
-                              datetime.fromtimestamp(x["entry_ms"]/1000,timezone.utc).astimezone(NY).date()==local.date()
-                              for x in ledger)+1
-                    if count>3:raise ValueError("V50_DAILY_ROUTE_COUNT_OVER_LIMIT")
+                if c.slot=="V50_POST_OPEN_BASIS":v50_trade_days[today]+=1
         stock_notional=sum(p["qty"]*marks[p["symbol"]] for p in positions.values())
-        if equity>0:peak_gross=max(peak_gross,stock_notional/equity)
-        unit_nav=equity/max(units,1e-12)
+        marked_nav=equity+sum((1 if p["side"]=="LONG" else -1)*p["qty"]*
+          (marks[p["symbol"]]-p["entry_price"]) for p in positions.values())
+        if marked_nav>0:peak_gross=max(peak_gross,stock_notional/marked_nav)
+        unit_nav=marked_nav/max(units,1e-12)
         high_unit_nav=max(high_unit_nav,unit_nav)
         dd=min(dd,unit_nav/high_unit_nav-1)
         # Save as-of previous available FX, never assume a later ECB observation.
         month=local.strftime("%Y-%m")
         if not monthly or monthly[-1]["month"]!=month:
-            monthly.append({"month":month,"last_event_ms":ts,"nav_usd_model":round(equity,6),
+            monthly.append({"month":month,"last_event_ms":ts,"nav_usd_model":round(marked_nav,6),
                 "contributions_usd":round(contributed,6),
                 "open_stock_positions":len(positions),"nav_per_unit":round(unit_nav,8)})
-        else:monthly[-1].update({"last_event_ms":ts,"nav_usd_model":round(equity,6),
+        else:monthly[-1].update({"last_event_ms":ts,"nav_usd_model":round(marked_nav,6),
             "contributions_usd":round(contributed,6),
             "open_stock_positions":len(positions),"nav_per_unit":round(unit_nav,8)})
     if positions:raise ValueError("V52_POSITIONS_OPEN_AT_BT_END_NO_SYNTHETIC_LIQUIDATION")
@@ -423,7 +425,7 @@ def replay(universe:Mapping[str,list[HourBar]],fx_series:Iterable[Any],cost_bps:
         "final_usd_model":round(equity,6),
         "final_jpy_model":round(equity*final_fx.rate_jpy_per_usd,2),
         "net_after_contributions_usd_model":round(equity-contributed,6),
-        "contributions_jpy":130000,"contributions_usd":round(contributed,6),
+        "contributions_jpy":deposit_count*10000,"contributions_usd":round(contributed,6),
         "max_drawdown_pct_model":round(dd*100,5),"max_stock_gross_model":round(peak_gross,5),
         "by_slot_net_pnl_usd_model":{k:round(net_by_slot[k],6) for k in SLOTS},
         "monthly":monthly,"ledger":ledger}
