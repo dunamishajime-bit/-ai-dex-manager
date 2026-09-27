@@ -10,6 +10,7 @@ from bisect import bisect_right
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 import heapq
+import hashlib
 import json
 import math
 from pathlib import Path
@@ -550,6 +551,23 @@ def run_portfolio_model(data_root: Path, candidate_root: Path, output_root: Path
     candidates.sort(key=lambda row: (int(row.get("entry_ts_ms") or 0),
                                      PRIORITY.get(row["strategy_id"], 99), row["symbol"]))
     symbols = {str(row["symbol"]) for row in candidates if row.get("symbol")}
+    v52_funding_missing = []
+    stock_coverage = data_root / "aster-stock-hourly-coverage.json"
+    stock_meta = (
+        json.loads(stock_coverage.read_text())["symbols"]
+        if stock_coverage.is_file() else {}
+    )
+    for stock in sorted({row["symbol"] for row in candidates
+                         if row.get("strategy_id") == "V52"}):
+        meta = stock_meta.get(stock.removesuffix("USDT"), {})
+        fpath = data_root / "normalized/aster/funding" / f"{stock}.jsonl"
+        funding_hash = (
+            hashlib.sha256(fpath.read_bytes()).hexdigest()
+            if fpath.is_file() else None
+        )
+        if (meta.get("funding_status") != "ACQUIRED_PRICE_MODEL_ONLY"
+                or funding_hash != meta.get("funding_normalized_sha256")):
+            v52_funding_missing.append(stock)
     market = _market(data_root, symbols)
     scenarios = []
     for scenario_id, cost in (("PRICE_MODEL_BASE_10BPS", 10.0), ("PRICE_MODEL_STRESS_70BPS", 70.0)):
@@ -565,10 +583,12 @@ def run_portfolio_model(data_root: Path, candidate_root: Path, output_root: Path
         scenarios.append(result)
     summary = {
         "status": ("INCOMPLETE_ALL_FIVE_PRICE_MODEL" if (
-            v52_unresolved or unresolved_crypto
+            v52_unresolved or v52_funding_missing or unresolved_crypto
             or any(row["status"] == "INCOMPLETE_MTM_H1_PRICE_MODEL" for row in scenarios))
             else "ALL_FIVE_H1_PRICE_MODEL_NOT_FORMAL_L2_VERIFIED"),
         "unresolved_crypto_candidate_counts": dict(unresolved_crypto),
+        "v52_funding_verified": not v52_funding_missing,
+        "v52_missing_funding_symbols": v52_funding_missing,
         "period_start_ms": PERIOD_START_MS, "period_end_exclusive_ms": PERIOD_END_MS,
         "contribution_model": (
             "JPY deposits converted to USD with as-of next-day ECB reference cross; "
@@ -586,6 +606,9 @@ def run_portfolio_model(data_root: Path, candidate_root: Path, output_root: Path
              "nor the mandated FRED DEXJPUS parity source" if fx_series is not None
              else "JPY notional returns do not include USDJPY translation"),
             "Margin-guard liquidation-buffer mechanics are not reconstructed from H1 OHLC",
+            ("V52 stock-perpetual historical funding verified from official Aster"
+             if not v52_funding_missing else
+             "V52 missing stock-perpetual funding; portfolio PnL is incomplete"),
         ],
     }
     output_root.mkdir(parents=True, exist_ok=True)
