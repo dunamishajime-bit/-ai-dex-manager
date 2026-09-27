@@ -1,0 +1,30 @@
+name: V52 archived Yahoo research cache provenance inventory (read only)
+on:
+  push:
+    branches: [research/formal-five-bt-yahoo-v52-20260927]
+    paths: [.github/workflows/formal-five-bt-yahoo-cache-provenance-20260927.yml]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  inventory:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Check whether old Yahoo Finance stock bars survive as GitHub cache
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          for prefix in 'aster-only-v52-v39cache' 'aster-only-v39' 'v12-v52-pengu-v2-combined' 'current-v12-top2-pengu-v20-v52-dca'; do
+            encoded="$(python3 -c 'import urllib.parse,sys;print(urllib.parse.quote(sys.argv[1]))' "$prefix")"
+            if ! response="$(gh api "repos/$GITHUB_REPOSITORY/actions/caches?per_page=100&key=$encoded" 2>&1)"; then
+              echo "YAHOO_CACHE_INVENTORY_UNAVAILABLE_PREFIX=$prefix"
+              continue
+            fi
+            printf '%s' "$response" | jq -cr --arg p "$prefix" '{prefix:$p,total_count,
+              hits:[.actions_caches[] | {id,key,ref,size_in_bytes,created_at,last_accessed_at}]
+              | .hits=.hits[:35]}' | sed 's/^/YAHOO_EXISTING_CACHE_INVENTORY /'
+          done
+          echo YAHOO_CACHE_ONLY_READ_NO_CROSS_BRANCH_MUTATION=TRUE
