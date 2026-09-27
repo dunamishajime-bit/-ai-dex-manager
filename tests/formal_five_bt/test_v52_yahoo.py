@@ -53,6 +53,7 @@ class YahooV52Tests(unittest.TestCase):
         self.assertEqual(result["status"],"MODELED_YAHOO_REFERENCE_NOT_FORMAL_ASTER_EXECUTION")
         self.assertEqual(result["production_source_sha"],"a09ea45ca3cbd72100f9eb0eaae499039c40b6a0")
         self.assertTrue(any(r["route"]=="V11_EQ" and r["symbol"]=="AMZN" for r in result["trades"]))
+        print("V50_TEST_DEBUG",[(r["symbol"],r.get("window_ny"),r.get("gate_status"),r.get("gate_reasons")) for r in result["decisions"] if r["route"]=="V50_POST_OPEN_BASIS" and r["symbol"]=="META"])
         self.assertTrue(any(r["route"]=="V50_POST_OPEN_BASIS" and r["symbol"]=="META" for r in result["trades"]))
         self.assertTrue(all(r["price_venue"]=="YAHOO_EQUITY_REFERENCE_NOT_ASTER_PERP_FILL"
             for r in result["trades"]))
