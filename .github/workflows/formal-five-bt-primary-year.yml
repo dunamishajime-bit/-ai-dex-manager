@@ -14,6 +14,7 @@ on:
       - "research/formal_five_bt/v52_research_ledger.py"
       - "research/formal_five_bt/aster_stock_acquire.py"
       - "research/formal_five_bt/yahoo_acquire.py"
+      - "research/formal_five_bt/fx_ecb.py"
 permissions:
   contents: read
 jobs:
@@ -56,6 +57,11 @@ jobs:
           print("BT_ASTER_MISSING_CANDLE_SYMBOLS:",[s for s,v in sorted(k.items()) if v.get("status")!="ACQUIRED"])
           print("BT_FRED_STATUS:",m.get("fred",{}).get("status"))
           PY
+      - name: Acquire official ECB EUR-cross USDJPY as FRED-unavailable fallback
+        id: ecb_fx
+        continue-on-error: true
+        run: |
+          python -m research.formal_five_bt.fx_ecb --data-root "$RUNNER_TEMP/formal-bt"
       - name: Replay audited V12 PENGU FET causal signal scans
         run: |
           python -m research.formal_five_bt.signal_scan --data-root "$RUNNER_TEMP/formal-bt" --output-root "$RUNNER_TEMP/formal-scans/baseline-signal-scan" --strategies V12 PENGU FET
@@ -124,6 +130,15 @@ jobs:
             --candidate-root "$RUNNER_TEMP/formal-crypto-price-model" \
             --output-root "$RUNNER_TEMP/formal-portfolio-price-model" \
             --v52-ledger-root "$RUNNER_TEMP/formal-v52-ledger"
+      - name: Replay five-logic portfolio with separately labeled ECB reference FX
+        if: steps.ecb_fx.outcome == 'success'
+        run: |
+          python -m research.formal_five_bt.portfolio_price_model \
+            --data-root "$RUNNER_TEMP/formal-bt" \
+            --candidate-root "$RUNNER_TEMP/formal-crypto-price-model" \
+            --output-root "$RUNNER_TEMP/formal-portfolio-ecb-model" \
+            --v52-ledger-root "$RUNNER_TEMP/formal-v52-ledger" \
+            --ecb-fx-root "$RUNNER_TEMP/formal-bt"
       - name: Print aggregate price-model lifecycle summary only
         env:
           MODEL_ROOT: ${{ runner.temp }}/formal-crypto-price-model
@@ -158,6 +173,26 @@ jobs:
               print("PORTFOLIO_SCENARIO:",json.dumps(printable,sort_keys=True))
               print("MONTHLY_EQUITY:",row["scenario_id"],json.dumps(row["monthly_equity_jpy"],sort_keys=True))
           PY
+      - name: Print ECB-adjusted reference-price model metrics
+        if: steps.ecb_fx.outcome == 'success'
+        env:
+          ECB_MODEL_ROOT: ${{ runner.temp }}/formal-portfolio-ecb-model
+        run: |
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          p=Path(os.environ["ECB_MODEL_ROOT"])/"portfolio-price-model-summary.json"
+          m=json.loads(p.read_text())
+          print("ECB_FX_PORTFOLIO_PRICE_MODEL_STATUS:",m["status"])
+          for row in m["scenarios"]:
+              printable={k:row[k] for k in (
+                  "scenario_id","contributed_jpy","final_equity_jpy","net_profit_jpy",
+                  "profit_factor","win_rate","maximum_mtm_drawdown","closed_trades",
+                  "strategy_pnl_jpy","fx_cash_translation_pnl_jpy",
+                  "strategy_trades","accounting_reconciliation")}
+              print("ECB_FX_PORTFOLIO_SCENARIO:",json.dumps(printable,sort_keys=True))
+              print("ECB_FX_MONTHLY_EQUITY:",row["scenario_id"],json.dumps(row["monthly_equity_jpy"],sort_keys=True))
+          PY
       - name: Preserve aggregate five-logic modeled report (no raw vendor data)
         if: always()
         uses: actions/upload-artifact@v4
@@ -169,3 +204,5 @@ jobs:
             ${{ runner.temp }}/formal-crypto-price-model/crypto-price-model-summary.json
             ${{ runner.temp }}/formal-v52-ledger/v52-model-summary.json
             ${{ runner.temp }}/formal-portfolio-price-model/portfolio-price-model-summary.json
+            ${{ runner.temp }}/formal-portfolio-ecb-model/portfolio-price-model-summary.json
+            ${{ runner.temp }}/formal-bt/ecb-fx-cross-manifest.json
