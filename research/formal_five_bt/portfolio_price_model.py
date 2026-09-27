@@ -498,6 +498,8 @@ def _portfolio_scenario(
             "deposit_settlement_units": deposited_units,
             "final_fx_jpy_per_usd": final_rate,
             "equity_minus_wallet_jpy": final_equity - wallet * final_rate,
+            "equity_minus_wallet_nominal_jpy": (
+                final_equity - wallet if fx_series is None else None),
             "intrahour_events": sum(event_ts % HOUR != 0 for event_ts in event_times),
         },
         "strategy_pnl_jpy": dict(strategy_pnl),
