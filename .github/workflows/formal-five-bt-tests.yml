@@ -1,0 +1,27 @@
+name: Formal five-logic BT isolated tests
+on:
+  push:
+    branches:
+      - codex/formal-five-logic-bt-20260926
+    paths:
+      - "research/formal_five_bt/**"
+      - "tests/formal_five_bt/**"
+      - ".github/workflows/formal-five-bt-tests.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  yahoo-v52-price-model:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Test Yahoo V52 price-only model and acquisition
+        run: python -m unittest discover -s tests/formal_five_bt -p 'test_yahoo_*.py' -v
+      - name: Check Python source syntax
+        run: python -m compileall -q research/formal_five_bt
