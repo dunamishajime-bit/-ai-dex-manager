@@ -123,6 +123,13 @@ def replay_v52_research(
     if scan_manifest.get("runtime_policy_sha256") != policy_hash:
         raise ValueError("V52_SCAN_POLICY_SHA_MISMATCH")
     yahoo, perp = _load_prices(data_root, scan_manifest)
+    coverage_path = Path(data_root) / "yahoo-v52-coverage.json"
+    coverage = json.loads(coverage_path.read_text()) if coverage_path.is_file() else {}
+    coverage_symbols = coverage.get("symbols") or {}
+    incomplete_yahoo_sessions: dict[str, set[str]] = {}
+    for ticker in sorted(STOCKS):
+        missing = (coverage_symbols.get(ticker) or {}).get("missing_session_days") or {}
+        incomplete_yahoo_sessions[ticker] = {str(day) for day, count in missing.items() if int(count or 0) > 0}
     selected = sorted(candidates, key=lambda row: (
         row["decision_ts_ms"], row["equity_reference_symbol"] if "equity_reference_symbol" in row
         else row["symbol"]))
@@ -175,6 +182,15 @@ def replay_v52_research(
                 _advance_checkpoint(position)
         current_session = datetime.fromtimestamp(
             ts / 1000, timezone.utc).astimezone(NY).date().isoformat()
+        ticker = row["symbol"].removesuffix("USDT")
+        if current_session in incomplete_yahoo_sessions.get(ticker, set()):
+            skipped.append({
+                "status": "SKIPPED_CANDIDATE", "symbol": row["symbol"], "decision_ts_ms": ts,
+                "reason": "YAHOO_SESSION_COVERAGE_INCOMPLETE",
+                "session": current_session,
+            })
+            counters["YAHOO_SESSION_COVERAGE_INCOMPLETE"] += 1
+            continue
         if current_session in unresolved_sessions:
             skipped.append({"status": "SKIPPED_CANDIDATE", "symbol": row["symbol"], "decision_ts_ms": ts,
                             "reason": "PREVIOUS_EXIT_UNVERIFIED_SAME_SESSION"})
@@ -270,6 +286,9 @@ def replay_v52_research(
         "sessions_with_unresolved_exits": sorted(unresolved_sessions),
         "unresolved_session_policy": "skip remaining same-session entries, resume next NYSE session; whole-sample PnL remains unavailable",
         "entry_skipped": len(skipped),
+        "yahoo_incomplete_sessions_excluded": {
+            ticker: sorted(days) for ticker, days in incomplete_yahoo_sessions.items() if days
+        },
         "skipped_reasons": dict(Counter(row["reason"] for row in skipped)),
         "exit_reasons": {key: counters[key] for key in
                           ("BASIS_CONVERGED", "BASIS_STOP", "TIME_OR_SESSION_FLAT")},
