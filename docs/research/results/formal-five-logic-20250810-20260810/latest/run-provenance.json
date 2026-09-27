@@ -1,0 +1,16 @@
+{
+  "audited_runtime_repository_commit": "a09ea45ca3cbd72100f9eb0eaae499039c40b6a0",
+  "extreme_70bps_is_baseline": false,
+  "extreme_cost_sensitivity_bps": 70,
+  "github_run_id": 36320007678,
+  "historical_l2_fill_verified": false,
+  "model_source_sha": "cfd6b38dcd59607042bc9aa1888538dfca4d7a9b",
+  "period": [
+    "2025-08-10",
+    "2026-08-10"
+  ],
+  "primary_cost_scenarios_bps": [
+    8,
+    10
+  ]
+}

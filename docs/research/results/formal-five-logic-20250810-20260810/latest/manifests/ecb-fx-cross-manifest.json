@@ -1,0 +1,16 @@
+{
+  "availability_rule": "NEXT_CALENDAR_DAY_00_UTC_NO_SAME_DAY_LOOKAHEAD",
+  "first_observed_date": "2025-01-02",
+  "last_observed_date": "2026-08-11",
+  "normalized_path": "normalized/ecb/usdjpy-cross.jsonl",
+  "normalized_sha256": "f3afa637fb457b68c257b7b2581f2d966984c0837e82739eddfd2c9751eba1da",
+  "observation_count": 410,
+  "official_source_url": "https://data-api.ecb.europa.eu/service/data/EXR/D.USD+JPY.EUR.SP00.A?startPeriod=2025-01-01&endPeriod=2026-08-11&format=csvdata",
+  "raw_path": "raw/ecb/EXR_USD_JPY_EUR.csv",
+  "raw_sha256": "2a35a6a8ecd714b034dd68c0240bdc4b550a09841589a0ea17b22761a086cf47",
+  "series": [
+    "EXR.D.USD.EUR.SP00.A",
+    "EXR.D.JPY.EUR.SP00.A"
+  ],
+  "status": "ACQUIRED_ECB_REFERENCE_CROSS_NOT_FRED_PARITY"
+}
