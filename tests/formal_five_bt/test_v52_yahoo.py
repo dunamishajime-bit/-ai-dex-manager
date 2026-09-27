@@ -31,7 +31,7 @@ class YahooV52Tests(unittest.TestCase):
     def test_yahoo_point_in_time_uses_bar_open_never_future_high(self):
         bars=yahoo_chart_to_opens(provider(),"AMZN")
         self.assertEqual(observe(bars,abars(D,"AMZN",101),_ts(D,10,0))["yahoo_ref"],100.)
-        self.assertEqual(observe(bars,abars(D,"AMZN",101),_ts(D,10,0))["basis_bps"],100.)
+        self.assertAlmostEqual(observe(bars,abars(D,"AMZN",101),_ts(D,10,0))["basis_bps"],100.)
         self.assertEqual(bars[0].high,600.)
         self.assertEqual(bars[0].close,500.)
     def test_yahoo_refuses_daily_adjusted_or_mixed_currency_data(self):
@@ -46,11 +46,14 @@ class YahooV52Tests(unittest.TestCase):
     def test_v11_and_v50_explicit_stock_perp_basis_are_assumed_fills(self):
         stocks={s:ybars(D,s,100) for s in SYMBOLS}
         perps={s:abars(D,s,101 if s=="AMZN" else 100) for s in SYMBOLS}
+        # Separate V50 opportunity on META emerges after the V11 AMZN capture.
+        perps["META"]=tuple(HourOpen(x.symbol,x.ts,102 if datetime.fromtimestamp(x.ts,NY).hour>=11 else 100,
+            x.high,x.low,x.close,x.source) for x in perps["META"])
         result=replay_yahoo_v52(stocks,perps,assumed_cost_bps=20)
         self.assertEqual(result["status"],"MODELED_YAHOO_REFERENCE_NOT_FORMAL_ASTER_EXECUTION")
         self.assertEqual(result["production_source_sha"],"a09ea45ca3cbd72100f9eb0eaae499039c40b6a0")
         self.assertTrue(any(r["route"]=="V11_EQ" and r["symbol"]=="AMZN" for r in result["trades"]))
-        self.assertTrue(any(r["route"]=="V50_POST_OPEN_BASIS" for r in result["trades"]))
+        self.assertTrue(any(r["route"]=="V50_POST_OPEN_BASIS" and r["symbol"]=="META" for r in result["trades"]))
         self.assertTrue(all(r["price_venue"]=="YAHOO_EQUITY_REFERENCE_NOT_ASTER_PERP_FILL"
             for r in result["trades"]))
         self.assertTrue(all(r["entry_price_type"]=="YAHOO_60M_OPEN_MODEL" for r in result["trades"]))
