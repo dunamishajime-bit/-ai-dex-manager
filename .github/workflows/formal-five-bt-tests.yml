@@ -39,5 +39,14 @@ jobs:
         run: python -m unittest discover -s tests/formal_five_bt -p 'test_portfolio_price_model.py' -v
       - name: Test deterministic integrated-runner bookkeeping
         run: python -m unittest discover -s tests/formal_five_bt -p 'test_engine.py' -v
+      - name: Check independent BTC source recovery and malformed H1 quarantine
+        run: |
+          python -m unittest discover -s tests/formal_five_bt -p 'test_aster_h1_reconcile.py' -v
+          python -m unittest discover -s tests/formal_five_bt -p 'test_aster_h1_repair.py' -v
+          python -m unittest discover -s tests/formal_five_bt -p 'test_crypto_price_model_source_quality.py' -v
+      - name: Test no-lookahead official ECB FX fallback and accounting
+        run: python -m unittest discover -s tests/formal_five_bt -p 'test_fx_ecb.py' -v
+      - name: Reject annual completeness when selected Yahoo reference prices are absent
+        run: python -m unittest discover -s tests/formal_five_bt -p 'test_v52_incomplete_coverage_portfolio.py' -v
       - name: Check Python source syntax
         run: python -m compileall -q research/formal_five_bt
