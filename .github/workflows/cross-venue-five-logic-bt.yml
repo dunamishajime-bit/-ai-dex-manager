@@ -5,6 +5,7 @@ on:
     branches: [research/cross-venue-five-logic-bt-20260928]
     paths:
       - ".github/workflows/cross-venue-five-logic-bt.yml"
+      - "research/formal_five_bt/acquire.py"
   workflow_dispatch:
 
 permissions:
