@@ -1,0 +1,331 @@
+{
+  "candidate_counts": {
+    "HARD_STOP": 3,
+    "OTHER_ACCEPTED": 15,
+    "REJECTED": 8
+  },
+  "group_stats": {
+    "HARD_STOP": {
+      "count": 3,
+      "feature_ranges": {
+        "btc_return_12h": {
+          "count": 3,
+          "max": 0.008637092199568208,
+          "median": 0.0007887236504218187,
+          "min": -0.0010149189013400894
+        },
+        "btc_return_24h": {
+          "count": 3,
+          "max": 0.03703080978579476,
+          "median": 0.03251282166195635,
+          "min": 0.01158753042211158
+        },
+        "btc_return_6h": {
+          "count": 3,
+          "max": 0.007308070831197,
+          "median": -0.0003105211059432067,
+          "min": -0.0016369992426965574
+        },
+        "fet_atr_24h_pct": {
+          "count": 3,
+          "max": 0.026882944586610665,
+          "median": 0.023233029263919028,
+          "min": 0.0029306763971236834
+        },
+        "fet_close_vs_prev_48h_high": {
+          "count": 3,
+          "max": 0.0,
+          "median": -0.005282405526208955,
+          "min": -0.006628003314001596
+        },
+        "fet_minus_btc_24h": {
+          "count": 3,
+          "max": 0.2001155771295844,
+          "median": 0.12931160266556718,
+          "min": -0.009709008192931856
+        },
+        "fet_prev_1h_return": {
+          "count": 3,
+          "max": 0.06527415143603132,
+          "median": 0.020425531914893824,
+          "min": 0.000625390869293474
+        },
+        "fet_prev_1h_volume_ratio": {
+          "count": 3,
+          "max": 28.67263408111722,
+          "median": 19.792792792792792,
+          "min": 4.731564448749773
+        },
+        "fet_prev_2h_volume_ratio": {
+          "count": 3,
+          "max": 24.311655028970435,
+          "median": 20.059684684684683,
+          "min": 3.948477326390991
+        },
+        "fet_return_12h": {
+          "count": 3,
+          "max": 0.2270676691729323,
+          "median": 0.08506787330316756,
+          "min": 0.012658227848101333
+        },
+        "fet_return_24h": {
+          "count": 3,
+          "max": 0.23262839879154074,
+          "median": 0.16634241245136194,
+          "min": 0.0018785222291797243
+        },
+        "fet_return_48h": {
+          "count": 3,
+          "max": 0.38854225751559834,
+          "median": 0.08703535811423402,
+          "min": 0.056803170409511106
+        },
+        "fet_return_6h": {
+          "count": 3,
+          "max": 0.1487564523697793,
+          "median": 0.02171136653895278,
+          "min": 0.010961214165261524
+        }
+      },
+      "missing_feature_count": 0,
+      "modeled_pnl_jpy": -20116239.873285428
+    },
+    "OTHER_ACCEPTED": {
+      "count": 15,
+      "feature_ranges": {
+        "btc_return_12h": {
+          "count": 15,
+          "max": 0.020897481389909656,
+          "median": 0.010325387774711148,
+          "min": 0.0007929076556252301
+        },
+        "btc_return_24h": {
+          "count": 15,
+          "max": 0.03149743820463358,
+          "median": 0.011690865162843345,
+          "min": -0.006422080737157998
+        },
+        "btc_return_6h": {
+          "count": 15,
+          "max": 0.014227267328584148,
+          "median": 0.0037605962827051975,
+          "min": -0.0028248101543009163
+        },
+        "fet_atr_24h_pct": {
+          "count": 15,
+          "max": 0.027989929402413224,
+          "median": 0.008703614978687,
+          "min": 0.0029251635419034095
+        },
+        "fet_close_vs_prev_48h_high": {
+          "count": 15,
+          "max": 0.0,
+          "median": -0.0012019230769231282,
+          "min": -0.02447552447552448
+        },
+        "fet_minus_btc_24h": {
+          "count": 15,
+          "max": 0.150872526122366,
+          "median": 0.04517208073715784,
+          "min": -0.00206902582518409
+        },
+        "fet_prev_1h_return": {
+          "count": 15,
+          "max": 0.03145611364789458,
+          "median": 0.0123281175912755,
+          "min": 0.0024405125076267797
+        },
+        "fet_prev_1h_volume_ratio": {
+          "count": 15,
+          "max": 139.03614457831324,
+          "median": 10.640236686390532,
+          "min": 1.6142274598560085
+        },
+        "fet_prev_2h_volume_ratio": {
+          "count": 15,
+          "max": 648.4698795180723,
+          "median": 9.580459770114942,
+          "min": 0.8644107903454804
+        },
+        "fet_return_12h": {
+          "count": 15,
+          "max": 0.14344262295081966,
+          "median": 0.04610951008645525,
+          "min": 0.013044747300118953
+        },
+        "fet_return_24h": {
+          "count": 15,
+          "max": 0.15633074935400537,
+          "median": 0.039312039312039415,
+          "min": 0.009621839337659255
+        },
+        "fet_return_48h": {
+          "count": 15,
+          "max": 0.26530612244897966,
+          "median": 0.05065123010130246,
+          "min": 0.011843460350154489
+        },
+        "fet_return_6h": {
+          "count": 15,
+          "max": 0.10131255127153427,
+          "median": 0.02662116040955631,
+          "min": 0.012946979038224393
+        }
+      },
+      "missing_feature_count": 0,
+      "modeled_pnl_jpy": 5573246.197284484
+    },
+    "REJECTED": {
+      "count": 8,
+      "feature_ranges": {
+        "btc_return_12h": {
+          "count": 8,
+          "max": 0.03442676485480001,
+          "median": 0.0033490692251131327,
+          "min": -0.012469675227315014
+        },
+        "btc_return_24h": {
+          "count": 8,
+          "max": 0.02793176337491432,
+          "median": 0.0002927171925686256,
+          "min": -0.01155289668990045
+        },
+        "btc_return_6h": {
+          "count": 8,
+          "max": 0.024892693670856003,
+          "median": 0.0028528407154704283,
+          "min": -0.004567762056050695
+        },
+        "fet_atr_24h_pct": {
+          "count": 8,
+          "max": 0.026110291403727323,
+          "median": 0.011755210084404874,
+          "min": 0.010341257014851548
+        },
+        "fet_close_vs_prev_48h_high": {
+          "count": 8,
+          "max": 0.0,
+          "median": -0.004803087916945281,
+          "min": -0.02443609022556381
+        },
+        "fet_minus_btc_24h": {
+          "count": 8,
+          "max": 0.16183810656699504,
+          "median": 0.0928808257797093,
+          "min": 0.009105273662122881
+        },
+        "fet_prev_1h_return": {
+          "count": 8,
+          "max": 0.0436058700209645,
+          "median": 0.0242750400284647,
+          "min": 0.004943820224718953
+        },
+        "fet_prev_1h_volume_ratio": {
+          "count": 8,
+          "max": 105.6314419573139,
+          "median": 10.370049390526118,
+          "min": 2.640161380577682
+        },
+        "fet_prev_2h_volume_ratio": {
+          "count": 8,
+          "max": 103.53383654346695,
+          "median": 7.722703825753628,
+          "min": 1.6369351507070762
+        },
+        "fet_return_12h": {
+          "count": 8,
+          "max": 0.15043695380774014,
+          "median": 0.06160565546110808,
+          "min": 0.03379451122703547
+        },
+        "fet_return_24h": {
+          "count": 8,
+          "max": 0.1526538280883043,
+          "median": 0.08845185378136666,
+          "min": 0.03426367143181297
+        },
+        "fet_return_48h": {
+          "count": 8,
+          "max": 0.19548511047070138,
+          "median": 0.10879250205915592,
+          "min": 0.023959646910466592
+        },
+        "fet_return_6h": {
+          "count": 8,
+          "max": 0.1447204968944098,
+          "median": 0.07028325862945328,
+          "min": 0.030889810972798415
+        }
+      },
+      "missing_feature_count": 0,
+      "modeled_pnl_jpy": 0
+    }
+  },
+  "limitations": [
+    "Probes are retrospective and use the same in-sample year",
+    "Blocked static PnL is NOT shared-Gross portfolio replay",
+    "No L2 actual fill verification"
+  ],
+  "lookahead_guard": "ALL_FEATURE_BARS_STRICTLY_BEFORE_ENTRY_TS",
+  "pre_specified_gate_probes": {
+    "BTC_12H_NOT_NEGATIVE": {
+      "blocked_static_pnl_jpy_NOT_COUNTERFACTUAL": -314930.1489562822,
+      "hard_stops_blocked": 1,
+      "observed_accepted_with_features": 18,
+      "other_accepted_blocked": 0,
+      "unknown_due_to_missing_preentry_bars": 0,
+      "winners_blocked": 0
+    },
+    "BTC_24H_NOT_NEGATIVE": {
+      "blocked_static_pnl_jpy_NOT_COUNTERFACTUAL": 1303103.4281893766,
+      "hard_stops_blocked": 0,
+      "observed_accepted_with_features": 18,
+      "other_accepted_blocked": 1,
+      "unknown_due_to_missing_preentry_bars": 0,
+      "winners_blocked": 1
+    },
+    "FET_24H_NOT_NEGATIVE": {
+      "blocked_static_pnl_jpy_NOT_COUNTERFACTUAL": 0,
+      "hard_stops_blocked": 0,
+      "observed_accepted_with_features": 18,
+      "other_accepted_blocked": 0,
+      "unknown_due_to_missing_preentry_bars": 0,
+      "winners_blocked": 0
+    },
+    "FET_6H_NOT_NEGATIVE": {
+      "blocked_static_pnl_jpy_NOT_COUNTERFACTUAL": 0,
+      "hard_stops_blocked": 0,
+      "observed_accepted_with_features": 18,
+      "other_accepted_blocked": 0,
+      "unknown_due_to_missing_preentry_bars": 0,
+      "winners_blocked": 0
+    },
+    "FET_PRIOR_1H_NOT_NEGATIVE": {
+      "blocked_static_pnl_jpy_NOT_COUNTERFACTUAL": 0,
+      "hard_stops_blocked": 0,
+      "observed_accepted_with_features": 18,
+      "other_accepted_blocked": 0,
+      "unknown_due_to_missing_preentry_bars": 0,
+      "winners_blocked": 0
+    },
+    "FET_RELATIVE_BTC_24H_NOT_NEGATIVE": {
+      "blocked_static_pnl_jpy_NOT_COUNTERFACTUAL": -18209031.889163293,
+      "hard_stops_blocked": 1,
+      "observed_accepted_with_features": 18,
+      "other_accepted_blocked": 1,
+      "unknown_due_to_missing_preentry_bars": 0,
+      "winners_blocked": 1
+    },
+    "PREVIOUS_2H_VOLUME_AT_LEAST_MEDIAN": {
+      "blocked_static_pnl_jpy_NOT_COUNTERFACTUAL": 510412.99579088937,
+      "hard_stops_blocked": 0,
+      "observed_accepted_with_features": 18,
+      "other_accepted_blocked": 1,
+      "unknown_due_to_missing_preentry_bars": 0,
+      "winners_blocked": 1
+    }
+  },
+  "sample_size_warning": "Only 3 allocated hard stops; do not optimize a gate on these alone",
+  "source": "Aster native H1 candles and saved 10bps allocated decisions/trades",
+  "status": "FET_PREENTRY_DIAGNOSTIC_NOT_VALIDATED_GATE"
+}
