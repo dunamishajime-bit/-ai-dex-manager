@@ -7,6 +7,7 @@ on:
       - ".github/workflows/formal-five-bt-primary-year.yml"
       - "research/formal_five_bt/acquire.py"
       - "research/formal_five_bt/signal_scan.py"
+      - "research/formal_five_bt/runtime_bridge.mjs"
 permissions:
   contents: read
 jobs:
