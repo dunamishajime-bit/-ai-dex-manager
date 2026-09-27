@@ -41,6 +41,13 @@ jobs:
           python -m research.formal_five_bt.v52_price_only_scan \
             --data-root "$RUNNER_TEMP/aster-stock-probe" \
             --output-root "$RUNNER_TEMP/aster-stock-v52-model"
+      - name: Research-only V52 1-year modeled one-slot entry and exit lifecycle
+        run: |
+          python -m research.formal_five_bt.v52_research_ledger \
+            --data-root "$RUNNER_TEMP/aster-stock-probe" \
+            --scan-root "$RUNNER_TEMP/aster-stock-v52-model" \
+            --output-root "$RUNNER_TEMP/aster-stock-v52-ledger" \
+            --round-trip-cost-bps 11
       - name: Print summary without publishing raw licensed market data
         env:
           RESEARCH_OUTPUT: ${{ runner.temp }}/aster-stock-v52-model
@@ -55,4 +62,14 @@ jobs:
           print("COUNTS:", json.dumps(report["counts"], sort_keys=True))
           print("UNVERIFIED_GATES:", ",".join(report["unverified_gates"]))
           print("PROFIT_METRICS:", report["profit_metrics"])
+          modeled = json.loads((Path(os.environ["RESEARCH_OUTPUT"]).parent / "aster-stock-v52-ledger" / "v52-model-summary.json").read_text())
+          print("MODELED_V52_LEDGER_STATUS:", modeled["status"])
+          print("MODELED_V52_LEDGER_ENTRIES:", modeled["modeled_entries"])
+          print("MODELED_V52_LEDGER_CLOSES:", modeled["modeled_closed_trades"])
+          print("MODELED_V52_LEDGER_UNRESOLVED:", modeled["unresolved_exit_trades"])
+          print("MODELED_V52_LEDGER_SKIPS:", modeled["skipped_reasons"])
+          print("MODELED_V52_LEDGER_EXIT_REASONS:", modeled["exit_reasons"])
+          print("MODELED_V52_PRICE_ONLY_MEAN_RETURN:", modeled["price_model_closed_trade_mean_return"])
+          print("MODELED_V52_PRICE_ONLY_WIN_RATE:", modeled["price_model_closed_trade_win_rate"])
+          print("VERIFIED_FIVE_LOGIC_PROFIT: NOT_VERIFIABLE")
           PY
