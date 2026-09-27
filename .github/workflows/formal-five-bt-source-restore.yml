@@ -8,6 +8,9 @@ on:
     paths:
       - ".github/workflows/formal-five-bt-source-restore.yml"
       - "research/formal_five_bt/runtime_bridge.mjs"
+      - "research/formal_five_bt/strategies.py"
+      - "tests/formal_five_bt/test_strategy_parity.py"
+      - "research/formal_five_bt/runtime_bridge.mjs"
       - "tests/formal_five_bt/test_v12_staggered_timeline.py"
 
 permissions:
