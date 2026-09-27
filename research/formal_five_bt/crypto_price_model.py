@@ -99,6 +99,41 @@ def _source_quarantine_reason(
     return None
 
 
+def _pengu_runtime_bar(row: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "openTime": int(row["event_time_ms"]), "closeTime": int(row["close_time_ms"]),
+        "open": row["open"], "high": row["high"], "low": row["low"],
+        "close": row["close"], "volume": row["base_volume"],
+    }
+
+
+def _pengu_contiguous_segments(
+    pengu_rows: list[dict[str, Any]], btc_rows: list[dict[str, Any]],
+) -> list[list[tuple[dict[str, Any], dict[str, Any]]]]:
+    btc = {int(row["event_time_ms"]): row for row in btc_rows}
+    segments: list[list[tuple[dict[str, Any], dict[str, Any]]]] = []
+    current: list[tuple[dict[str, Any], dict[str, Any]]] = []
+    prior = None
+    for pengu in pengu_rows:
+        ts = int(pengu["event_time_ms"])
+        paired = btc.get(ts)
+        if paired is None:
+            if current:
+                segments.append(current)
+                current = []
+            prior = None
+            continue
+        if prior is not None and ts != prior + HOUR:
+            if current:
+                segments.append(current)
+            current = []
+        current.append((pengu, paired))
+        prior = ts
+    if current:
+        segments.append(current)
+    return segments
+
+
 def _funding(data_root: Path, symbol: str) -> list[tuple[int, float]]:
     path = data_root / "normalized/aster/funding" / f"{symbol}.jsonl"
     if not path.is_file():
@@ -365,22 +400,23 @@ def build_candidate_ledger(data_root: Path, scan_root: Path, output_root: Path) 
         if row.get("status") == "SIGNAL":
             candidates.append(_fet_outcome(row, by_ts["FETUSDT"]))
 
-    # PENGU candidate exits are replayed by the exact SHA-verified TypeScript
-    # source functions; Python only attaches Aster funding and common schema.
-    p_rows = bars["PENGUUSDT"]
-    b_rows = bars["BTCUSDT"]
-    history = {
-        "pengu1h": [{"openTime": int(row["event_time_ms"]), "closeTime": int(row["close_time_ms"]),
-                     "open": row["open"], "high": row["high"], "low": row["low"],
-                     "close": row["close"], "volume": row["base_volume"]} for row in p_rows],
-        "btc1h": [{"openTime": int(row["event_time_ms"]), "closeTime": int(row["close_time_ms"]),
-                   "open": row["open"], "high": row["high"], "low": row["low"],
-                   "close": row["close"], "volume": row["base_volume"]} for row in b_rows],
-        "penguFunding": [],
-    }
-    with RuntimeBridge() as bridge:
-        pengu = bridge.pengu_trade_outcomes(history, PERIOD_END_MS)
-    for item in pengu["candidates"]:
+    # The audited PENGU evaluator requires contiguous aligned PENGU and BTC
+    # H1. Splitting at a rejected or missing bar is mandatory; joining the
+    # remaining rows would silently treat an earlier hour as the next hour.
+    pengu_candidates = []
+    for segment in _pengu_contiguous_segments(bars["PENGUUSDT"], bars["BTCUSDT"]):
+        if len(segment) < 220:  # >180 H1 signal warmup plus a conservative buffer
+            continue
+        history = {
+            "pengu1h": [_pengu_runtime_bar(p) for p, _ in segment],
+            "btc1h": [_pengu_runtime_bar(b) for _, b in segment],
+            "penguFunding": [],
+        }
+        cutoff = min(PERIOD_END_MS, int(segment[-1][0]["event_time_ms"]) + HOUR)
+        with RuntimeBridge() as bridge:
+            replay = bridge.pengu_trade_outcomes(history, cutoff)
+        pengu_candidates.extend(replay["candidates"])
+    for item in pengu_candidates:
         entry_ts = int(item["entryTs"])
         if not (PERIOD_START_MS <= entry_ts < PERIOD_END_MS):
             continue
