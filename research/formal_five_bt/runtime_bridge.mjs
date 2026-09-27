@@ -229,18 +229,50 @@ if (process.argv.includes("--list")) {
             asofCandles[symbol] = rows.slice(0, end);
             if (rows[index]?.timestampMs === decisionTs) entryOpenBySymbol[symbol] = { timestampMs: decisionTs, open: rows[index].open };
           }
-          const history = { candlesBySymbol: asofCandles, entryOpenBySymbol };
+          // Historical universes are point-in-time. A symbol may participate
+          // only after its own current-hour entry open and enough prior H1
+          // history exist. This prevents a late-listed coin from invalidating
+          // every earlier timestamp while preserving the exact audited model.
+          const availableSymbols = symbols.filter((symbol) =>
+            Array.isArray(asofCandles[symbol])
+            && asofCandles[symbol].length >= 336
+            && entryOpenBySymbol[symbol]?.timestampMs === decisionTs);
+          const availableHighVol = highVolSymbols.filter((symbol) => availableSymbols.includes(symbol));
+          const filteredCandles = Object.fromEntries(
+            Object.entries(asofCandles).filter(([symbol]) =>
+              symbol === "BTCUSDT" || availableSymbols.includes(symbol)));
+          const filteredEntryOpen = Object.fromEntries(
+            Object.entries(entryOpenBySymbol).filter(([symbol]) => availableSymbols.includes(symbol)));
+          const history = { candlesBySymbol: filteredCandles, entryOpenBySymbol: filteredEntryOpen };
+          if (!availableSymbols.length || !availableHighVol.length) {
+            results.push({
+              decisionTs,
+              snapshot: {
+                items: [], selectedSymbol: null,
+                selectedReason: "Q102_POINT_IN_TIME_UNIVERSE_NOT_READY",
+                decisionTs, referenceTs: decisionTs,
+              },
+              availableSymbols,
+              availableHighVol,
+            });
+            continue;
+          }
           try {
             const snapshot = loaded.q102Observability.buildQuality102CausalV4DecisionSnapshot({
               history,
               decisionTs,
-              highVolSymbols,
-              symbols,
+              highVolSymbols: availableHighVol,
+              symbols: availableSymbols,
               runtimeCommitSha: manifest.runtime_sha,
             });
-            results.push({ decisionTs, snapshot });
+            results.push({ decisionTs, snapshot, availableSymbols, availableHighVol });
           } catch (error) {
-            results.push({ decisionTs, error: error instanceof Error ? error.message.split("\n")[0] : "Q102_EVALUATION_FAILED" });
+            results.push({
+              decisionTs,
+              error: error instanceof Error ? error.message.split("\n")[0] : "Q102_EVALUATION_FAILED",
+              availableSymbols,
+              availableHighVol,
+            });
           }
         }
         response = { ok: true, result: jsonSafe(results) };
