@@ -126,6 +126,30 @@ class AsterOneMinuteRecoveryTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "INVALID_NATIVE_MINUTE_OHLC"):
             aggregate_exact_aster_minute_hour(minute, BAD_BTC_HOUR_TS)
 
+    def test_healthy_native_h1_remains_byte_identical_on_explicit_noop(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            candle, manifest, original = fixtures(root)
+            row = json.loads(candle.read_text())
+            row["high"] = 107
+            valid = (json.dumps(row) + "\n").encode()
+            candle.write_bytes(valid)
+            metadata = json.loads(manifest.read_text())
+            metadata["venues"]["aster"]["klines"]["BTCUSDT"]["normalized_sha256"] = hashlib.sha256(valid).hexdigest()
+            manifest.write_text(json.dumps(metadata))
+            before_manifest = manifest.read_bytes()
+            result = reconcile_one_primary_hour(
+                root, fetch=lambda *a, **kw: self.fail("no venue data needed for valid original"),
+                allow_valid_noop=True,
+            )
+            self.assertEqual(result["scenario"], "NATIVE_ASTER_H1_VALID_NO_RECONSTRUCTION")
+            self.assertFalse(result["normalized_h1_mutated"])
+            self.assertEqual(candle.read_bytes(), valid)
+            self.assertEqual(manifest.read_bytes(), before_manifest)
+            self.assertEqual(
+                json.loads((root / "aster-h1-reconciliation-status.json").read_text()), result,
+            )
+
     def test_only_known_invalid_aster_hour_can_be_changed(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
