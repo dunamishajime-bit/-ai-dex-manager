@@ -1,0 +1,33 @@
+name: Yahoo V52 prior Actions cache availability metadata
+on:
+  push:
+    branches: [research/formal-five-bt-yahoo-v52-20260927]
+    paths: [.github/workflows/formal-five-bt-yahoo-prior-cache-inventory-20260927.yml]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  inventory:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Inventory existing stock Yahoo and Aster research cache keys (no market-data contents)
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          count=0
+          for page in $(seq 1 12); do
+            response="$(gh api "repos/$GITHUB_REPOSITORY/actions/caches?per_page=100&page=$page")"
+            number="$(printf '%s' "$response" | jq '.actions_caches | length')"
+            printf '%s' "$response" | jq -cr '.actions_caches[]
+              | select(.key|ascii_downcase|test("aster-only-v52|v52|stock|v12-v52-pengu|v39cache|perp-research|three-year"))
+              | {id,key,ref,size_in_bytes,created_at,last_accessed_at}' |
+                sed 's/^/REUSABLE_YAHOO_STOCK_CACHE /'
+            count=$((count + number))
+            echo "CACHE_INVENTORY_PAGE=$page ITEMS=$number"
+            if [[ "$number" -lt 100 ]]; then break; fi
+          done
+          echo "CACHE_META_COUNT_INSPECTED=$count"
+          echo "READ_ONLY_NO_CACHED_PRICE_EXPORTED=TRUE"
