@@ -183,6 +183,34 @@ jobs:
             --trades "$RUNNER_TEMP/formal-portfolio-ecb-model/PRICE_MODEL_BASE_10BPS/portfolio-trades.jsonl" \
             --output-root "$RUNNER_TEMP/formal-fet-entry-audit"
 
+      - name: Re-run user-requested BRK/MR 0.75 FET 1.0 pre-entry dual gate vs cap-only and baseline
+        if: steps.ecb_fx.outcome == 'success'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m research.formal_five_bt.fet_dual_gate_combo_bt \
+            --data-root "$RUNNER_TEMP/formal-bt" \
+            --candidate-root "$RUNNER_TEMP/formal-crypto-price-model" \
+            --output-root "$RUNNER_TEMP/formal-user-request" \
+            --v52-ledger-root "$RUNNER_TEMP/formal-v52-ledger" \
+            --ecb-fx-root "$RUNNER_TEMP/formal-bt"
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          d=json.loads((Path(os.environ["RUNNER_TEMP"])/"formal-user-request/requested-combo-summary.json").read_text())
+          print("REQUESTED_FET_GATE_FEATURE_SAMPLE:",d["fet_gate_total_candidate_count_with_features"])
+          print("REQUESTED_FET_GATE_BLOCKED:",json.dumps(d["fet_gate_blocked_by_reason"],sort_keys=True))
+          for case,report in d["cases"].items():
+              for r in report["scenarios"]:
+                  print("REQUESTED_INTEGRATED_COMBO:",json.dumps({
+                    "case":case,"model_status":report["status"],
+                    "scenario":r["scenario_id"],"final_jpy":r["final_equity_jpy"],
+                    "dd":r["maximum_mtm_drawdown"],"pf":r["profit_factor"],
+                    "trades":r["closed_trades"],"strategy_pnl":r["strategy_pnl_jpy"],
+                    "admission_counts":r["candidate_decision_counts"].get("FET",{})},
+                    sort_keys=True))
+          PY
+
       - name: Print aggregate price-model lifecycle summary only
         env:
           MODEL_ROOT: ${{ runner.temp }}/formal-crypto-price-model
@@ -276,6 +304,15 @@ jobs:
             cp "$RUNNER_TEMP/formal-fet-entry-audit/fet-preentry-summary.json" "$tmp/fet-entry-audit/"
             cp "$RUNNER_TEMP/formal-fet-entry-audit/fet-preentry-feature-audit.jsonl" "$tmp/fet-entry-audit/"
           fi
+          # Save the exact user-requested comparison independently from general variants.
+          if [ -f "$RUNNER_TEMP/formal-user-request/requested-combo-summary.json" ]; then
+            cp -a "$RUNNER_TEMP/formal-user-request" "$tmp/requested-combo"
+            # Avoid duplicating the full unmodified baseline trade/event ledgers:
+            # they already exist under latest/8bps and latest/10bps.
+            rm -f "$tmp/requested-combo/CURRENT_BASELINE_UNMODIFIED/"*/portfolio-trades.jsonl
+            rm -f "$tmp/requested-combo/CURRENT_BASELINE_UNMODIFIED/"*/candidate-decisions.jsonl
+            rm -f "$tmp/requested-combo/CURRENT_BASELINE_UNMODIFIED/"*/portfolio-events.jsonl
+          fi
           cp "$RUNNER_TEMP/formal-bt/acquisition-manifest.json" "$tmp/manifests/acquisition-manifest.json"
           cp "$RUNNER_TEMP/formal-bt/ecb-fx-cross-manifest.json" "$tmp/manifests/ecb-fx-cross-manifest.json"
           cp "$RUNNER_TEMP/formal-bt/aster-h1-reconciliation-status.json" "$tmp/manifests/aster-h1-reconciliation-status.json"
@@ -334,6 +371,10 @@ jobs:
             ${{ runner.temp }}/formal-risk-variants/*/metrics.json
             ${{ runner.temp }}/formal-fet-entry-audit/fet-preentry-summary.json
             ${{ runner.temp }}/formal-fet-entry-audit/fet-preentry-feature-audit.jsonl
+            ${{ runner.temp }}/formal-user-request/requested-combo-summary.json
+            ${{ runner.temp }}/formal-user-request/gated-candidates/*
+            ${{ runner.temp }}/formal-user-request/BRK0P75_MR0P75_FET1_CAP_ONLY/*/*
+            ${{ runner.temp }}/formal-user-request/BRK0P75_MR0P75_FET1_DUAL_GATE/*/*
             ${{ runner.temp }}/formal-bt/ecb-fx-cross-manifest.json
             ${{ runner.temp }}/formal-bt/acquisition-manifest.json
             ${{ runner.temp }}/formal-bt/aster-h1-reconciliation-status.json
