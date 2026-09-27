@@ -527,11 +527,24 @@ def run_portfolio_model(data_root: Path, candidate_root: Path, output_root: Path
     fx_series = load_ecb_cross(ecb_fx_root) if ecb_fx_root is not None else None
     v52_unresolved = 0
     v52_skipped = 0
+    v52_model_status = "NOT_PROVIDED"
+    v52_model_complete = v52_ledger_root is None
     unresolved_crypto = Counter(str(row["strategy_id"]) + ":" + str(row["status"])
                                 for row in candidates if row.get("status") != "MODELED_CLOSED_TRADE")
     if v52_ledger_root is not None:
-        v52_rows = _rows(Path(v52_ledger_root) / "v52-model-ledger.jsonl")
-        v52_unresolved = sum(row.get("status") == "UNRESOLVED_MODEL_EXIT" for row in v52_rows)
+        v52_root = Path(v52_ledger_root)
+        v52_rows = _rows(v52_root / "v52-model-ledger.jsonl")
+        v52_summary = json.loads((v52_root / "v52-model-summary.json").read_text())
+        v52_model_status = str(v52_summary.get("status") or "UNKNOWN")
+        v52_unresolved = sum(row.get("status") in {"UNRESOLVED_MODEL_EXIT", "OPEN_AT_SAMPLE_END"}
+                             for row in v52_rows)
+        declared_unresolved = int(v52_summary.get("unresolved_exit_trades") or 0)
+        if declared_unresolved > v52_unresolved:
+            raise ValueError("V52_UNRESOLVED_SUMMARY_EXCEEDS_LEDGER")
+        v52_model_complete = (
+            v52_model_status == "RESEARCH_PRICE_MODEL_CLOSED_SAMPLE"
+            and v52_unresolved == 0
+        )
         v52_skipped = sum(row.get("status") == "SKIPPED_CANDIDATE" for row in v52_rows)
         for row in v52_rows:
             if row.get("status") != "MODELED_CLOSED_TRADE":
@@ -583,10 +596,12 @@ def run_portfolio_model(data_root: Path, candidate_root: Path, output_root: Path
         scenarios.append(result)
     summary = {
         "status": ("INCOMPLETE_ALL_FIVE_PRICE_MODEL" if (
-            v52_unresolved or v52_funding_missing or unresolved_crypto
+            not v52_model_complete or v52_unresolved or v52_funding_missing or unresolved_crypto
             or any(row["status"] == "INCOMPLETE_MTM_H1_PRICE_MODEL" for row in scenarios))
             else "ALL_FIVE_H1_PRICE_MODEL_NOT_FORMAL_L2_VERIFIED"),
         "unresolved_crypto_candidate_counts": dict(unresolved_crypto),
+        "v52_model_status": v52_model_status,
+        "v52_model_complete": v52_model_complete,
         "v52_funding_verified": not v52_funding_missing,
         "v52_missing_funding_symbols": v52_funding_missing,
         "period_start_ms": PERIOD_START_MS, "period_end_exclusive_ms": PERIOD_END_MS,
