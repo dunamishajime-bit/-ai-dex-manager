@@ -183,7 +183,7 @@ def _decision(symbol:str,day:date,route:str,window:str,signal:dict|None,
     return record
 
 def _modeled_exit(record:dict,day:date,stock:tuple[HourOpen,...],perp:tuple[HourOpen,...],
-                 cost_bps:float)->dict|None:
+                 cost_bps:float,fill_mode:str="YAHOO_REFERENCE")->dict|None:
     start=int(record["decision_ts"]);eb=float(record["entry_basis_bps"])
     expiry=min(start+(3 if record["route"]=="V50_POST_OPEN_BASIS" else 5)*3600,
                _ts(day,15,30))
@@ -204,23 +204,36 @@ def _modeled_exit(record:dict,day:date,stock:tuple[HourOpen,...],perp:tuple[Hour
         if abs(b)>=multiple*abs(eb):
             exit=point;why="MODELED_BASIS_STOP";break
     side=-1 if record["side"]=="SHORT" else 1
-    # User-authorized fill on Yahoo equity reference price, NOT an Aster order.
-    entry=float(record["source_reference_open"])
-    exit_price=exit["yahoo_ref"]
+    # Historical OHLC opens are research assumed prices, never observed venue fills.
+    # Keep the user's Yahoo-only stock-reference price scenario as a separate
+    # sensitivity from a venue-aligned Aster perpetual H1 mark scenario.
+    if fill_mode=="YAHOO_REFERENCE":
+        entry=float(record["source_reference_open"])
+        exit_price=exit["yahoo_ref"]
+        entry_type="YAHOO_60M_OPEN_MODEL"
+        venue="YAHOO_EQUITY_REFERENCE_NOT_ASTER_PERP_FILL"
+    elif fill_mode=="ASTER_PERP":
+        entry=float(record["source_perp_open"])
+        exit_price=exit["aster_perp"]
+        entry_type="ASTER_STOCK_PERP_H1_OPEN_MODEL"
+        venue="ASTER_PERP_H1_STALE_UP_TO_60M_NOT_LIVE_VENUE_FILL"
+    else:raise ValueError("V52_UNSUPPORTED_ASSUMED_FILL_MODE")
     raw=side*(exit_price/entry-1.)
     cost=cost_bps/10000.
     return {**record,"exit_ts":exit["time"],"exit_reference_open":exit_price,
       "gross_reference_return":raw,"net_reference_return_after_assumed_roundtrip_cost":raw-cost,
       "assumed_roundtrip_cost_bps":cost_bps,"exit_reason":why,
-      "entry_price_type":"YAHOO_60M_OPEN_MODEL","exit_price_type":"YAHOO_60M_OPEN_MODEL",
-      "price_venue":"YAHOO_EQUITY_REFERENCE_NOT_ASTER_PERP_FILL",
+      "entry_price_type":entry_type,"exit_price_type":entry_type,
+      "price_venue":venue,"fill_mode":fill_mode,
       "funding_unverified":True}
 
 def replay_yahoo_v52(yahoo:Mapping[str,tuple[HourOpen,...]],
                      aster:Mapping[str,tuple[HourOpen,...]],
-                     *,assumed_cost_bps:float=ASSUMED_NORMAL_COST_BPS)->dict:
+                     *,assumed_cost_bps:float=ASSUMED_NORMAL_COST_BPS,
+                     fill_mode:str="YAHOO_REFERENCE")->dict:
     """Rebuild all V11/V50 decisions; each user-specified eligible entry assumes fill."""
     if not (0<=assumed_cost_bps<=60):raise ValueError("ASSUMED_COST_OUT_OF_RANGE")
+    if fill_mode not in ("YAHOO_REFERENCE","ASTER_PERP"):raise ValueError("V52_UNSUPPORTED_ASSUMED_FILL_MODE")
     if set(yahoo)!=set(SYMBOLS):raise ValueError("YAHOO_FIVE_EQUITIES_REQUIRED")
     if set(aster)!=set(SYMBOLS):raise ValueError("ASTER_PERP_FIVE_EQUITIES_REQUIRED")
     decisions=[];trades=[];blocked=Counter();positions={}
@@ -259,7 +272,7 @@ def replay_yahoo_v52(yahoo:Mapping[str,tuple[HourOpen,...]],
                        and not (int(x["exit_ts"])<=entry_time) for x in trades):
                     r["gate_status"]="BLOCKED";r["gate_reasons"]=["V52_ROUTE_SLOT_OCCUPIED"]
                     decisions.append(r);blocked.update(r["gate_reasons"]);continue
-                completed=_modeled_exit(r,day,yahoo[sym],aster[sym],assumed_cost_bps)
+                completed=_modeled_exit(r,day,yahoo[sym],aster[sym],assumed_cost_bps,fill_mode)
                 if completed is None:
                     r["gate_status"]="NOT_VERIFIABLE";r["gate_reasons"]=["FUTURE_YAHOO_OR_PERP_EXIT_MARK_UNAVAILABLE"]
                     decisions.append(r);blocked.update(r["gate_reasons"]);continue
@@ -271,7 +284,9 @@ def replay_yahoo_v52(yahoo:Mapping[str,tuple[HourOpen,...]],
       "production_source_sha":LIVE_SHA,
       "stock_price_source":SOURCE,"basis_source":"ASTER_STOCK_PERP_H1_OPEN",
       "roundtrip_cost_bps_assumed":assumed_cost_bps,
+      "fill_mode":fill_mode,
       "not_real_v52_tick_parity":True,
+      "never_a_formal_verified_fill":True,
       "assumptions":[USD_NOTE,"YAHOO_60M_OPEN_BOTH_ENTRY_EXIT","ASTER_H1_OPEN_BASIS",
                      "NO_BOOK_SPREAD_DEPTH_REJECTION","V50_10SEC_CAPTURE_APPROXIMATED",
                      "SAME_HOUR_QUOTES_ARE_LAST_KNOWN_BAR_OPEN","NO_STOCK_FUNDING",
