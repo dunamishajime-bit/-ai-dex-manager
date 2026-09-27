@@ -109,6 +109,14 @@ class RuntimeBridge:
     def q102_series(self, candles_by_symbol: Mapping[str, Any], high_vol_symbols: list[str], symbols: list[str], start_ms: int, end_ms: int) -> Any:
         return self._request({"op": "q102Series", "candlesBySymbol": candles_by_symbol, "highVolSymbols": high_vol_symbols, "symbols": symbols, "startMs": start_ms, "endMs": end_ms})["result"]
 
+    def q102_fast_series(self, candles_by_symbol: Mapping[str, Any], high_vol_symbols: list[str], symbols: list[str], start_ms: int, end_ms: int) -> Any:
+        """Replay only exact selected Q102 signal metadata with cached monthly training.
+
+        This omits observability-only per-symbol diagnostics; it does not change
+        the strategy signal contract used for the portfolio backtest.
+        """
+        return self._request({"op": "q102FastSeries", "candlesBySymbol": candles_by_symbol, "highVolSymbols": high_vol_symbols, "symbols": symbols, "startMs": start_ms, "endMs": end_ms})["result"]
+
     def plan_strict_portfolio(self, input: Mapping[str, Any]) -> Mapping[str, Any]:
         return self._request({"op": "planStrictPortfolio", "input": input})["result"]
 
