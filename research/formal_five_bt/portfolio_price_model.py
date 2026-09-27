@@ -738,7 +738,8 @@ def _portfolio_scenario(
 
 def run_portfolio_model(data_root: Path, candidate_root: Path, output_root: Path,
                         v52_ledger_root: Path | None = None,
-                        ecb_fx_root: Path | None = None) -> dict[str, Any]:
+                        ecb_fx_root: Path | None = None,
+                        cost_scenarios: tuple[tuple[str, float], ...] | None = None) -> dict[str, Any]:
     data_root, candidate_root, output_root = map(Path, (data_root, candidate_root, output_root))
     candidates = _rows(candidate_root / "crypto-price-model-candidates.jsonl")
     fx_series = load_ecb_cross(ecb_fx_root) if ecb_fx_root is not None else None
@@ -835,13 +836,16 @@ def run_portfolio_model(data_root: Path, candidate_root: Path, output_root: Path
             v52_funding_missing.append(stock)
     market = _market(data_root, symbols)
     scenarios = []
-    for scenario_id, cost in (
-        ("PRICE_MODEL_ASTER_TAKER_8BPS", 8.0),
-        ("PRICE_MODEL_BASE_10BPS", 10.0),
-        # 70bps is retained only as an intentionally extreme cost sensitivity;
-        # it is not an Aster baseline assumption.
-        ("PRICE_MODEL_EXTREME_COST_70BPS_NOT_BASELINE", 70.0),
-    ):
+    if cost_scenarios is None:
+        cost_scenarios = (
+            ("PRICE_MODEL_ASTER_TAKER_8BPS", 8.0),
+            ("PRICE_MODEL_BASE_10BPS", 10.0),
+            # 70bps remains an extreme sensitivity only, never the baseline.
+            ("PRICE_MODEL_EXTREME_COST_70BPS_NOT_BASELINE", 70.0),
+        )
+    if not cost_scenarios or any(not (0.0 <= cost <= 100.0) for _, cost in cost_scenarios):
+        raise ValueError("INVALID_PRICE_MODEL_COST_SCENARIOS")
+    for scenario_id, cost in cost_scenarios:
         result = _portfolio_scenario(candidates, data_root, market, round_trip_cost_bps=cost, scenario_id=scenario_id, fx_series=fx_series)
         trade_rows = result.pop("trade_rows")
         candidate_rows = result.pop("candidate_decision_rows_full")
