@@ -150,3 +150,17 @@ This is a delivery constraint, not a Production change. The requested public pus
 - V12 variants run only after baseline acceptance and include profitable-trade displacement analysis with HC1.75 fixed.
 - Tests prove data-integrity checks and deterministic replay; final outputs include exact commands and hashes.
 - No VPS, Production, live order, or live strategy condition is modified.
+
+## 2026-09-27 user-directed V52 modeled-price amendment
+
+The user requested that V52 use Yahoo Finance stock price data instead of
+historical order books, assuming an immediate fill whenever its actual
+strategy entry gates pass. This **adds** a labeled price-only modeled research
+path; it does not retrospectively prove that an Aster stock-perpetual order
+would have filled. The model uses the last *completed* Yahoo 60m candle as
+of each audited LIVE V52 decision timestamp, requires the matching runtime
+source manifest, and refuses stale or future bars, closed NYSE sessions,
+missing historical data, and unverified decisions. Retain the pre-existing
+initial-50-day V52 omission. Publish modeled counts separately from verified
+fills and leave unresolved exit/fee/funding/P&L metrics null. Do not rewrite
+old baseline result anchors to reflect modeled results.
