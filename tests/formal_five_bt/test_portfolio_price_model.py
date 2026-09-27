@@ -4,13 +4,40 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from research.formal_five_bt.portfolio_price_model import run_portfolio_model
+from research.formal_five_bt.portfolio_price_model import run_portfolio_model, _mark, _equity
 
 HOUR = 3_600_000
 START = int(datetime(2025, 8, 10, tzinfo=timezone.utc).timestamp() * 1000)
 
 
 class PortfolioPriceModelTests(unittest.TestCase):
+    def test_intrahour_mark_uses_prior_completed_bar_not_future_close(self):
+        history = {
+            "PENGUUSDT": {
+                "times": [START, START + HOUR],
+                "rows": [
+                    {"event_time_ms": START, "open": 100, "close": 200},
+                    {"event_time_ms": START + HOUR, "open": 101, "close": 999},
+                ],
+            }
+        }
+        self.assertEqual(_mark(history, "PENGUUSDT", START + HOUR), 101)
+        self.assertEqual(_mark(history, "PENGUUSDT", START + HOUR + 1), 200)
+        self.assertIsNone(_mark(history, "PENGUUSDT", START + 1))
+        self.assertEqual(_mark(history, "PENGUUSDT", START + 2 * HOUR), 999)
+
+    def test_missing_active_mark_blocks_equity_instead_of_dropping_open_loss(self):
+        history = {
+            "PENGUUSDT": {
+                "times": [START],
+                "rows": [{"event_time_ms": START, "open": 100, "close": 100}],
+            }
+        }
+        active = {1: {"symbol": "PENGUUSDT", "side": "LONG",
+                      "quantity": 10.0, "entry_price": 110.0}}
+        with self.assertRaisesRegex(ValueError, "UNVERIFIED_ACTIVE_POSITION_MARK"):
+            _equity(1000, active, history, START + 2 * HOUR)
+
     def test_compounds_causal_trade_and_keeps_pengu_one_slot(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
