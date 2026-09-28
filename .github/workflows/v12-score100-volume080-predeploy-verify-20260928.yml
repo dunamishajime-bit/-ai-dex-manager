@@ -5,6 +5,11 @@ on:
     paths:
       - "config/v12X1AllRuntime.ts"
       - "scripts/v12-x1-all-selftest.ts"
+      - "config/integratedProductionRiskPolicy.ts"
+      - "config/fetBrk48Runtime.ts"
+      - "lib/fet-brk48-preentry-gates.ts"
+      - "lib/fet-brk48-live-runner.ts"
+      - "scripts/fet-brk48-preentry-gates-selftest.ts"
       - ".github/workflows/v12-score100-volume080-predeploy-verify-20260928.yml"
   workflow_dispatch:
 permissions:
@@ -50,5 +55,21 @@ jobs:
         run: |
           npx tsx scripts/v12-live-execution-selftest.ts
           npx tsx scripts/disdex-unified-portfolio-routing-selftest.ts
+      - name: Verify FET and Q102 BT research admission-risk contract
+        run: |
+          npx tsx scripts/fet-brk48-preentry-gates-selftest.ts
+          npx tsx scripts/disdex-quality102-causal-v4-signal-selftest.ts
+          npx tsx scripts/disdex-quality102-causal-v4-model-selftest.ts
+          python - <<'PY'
+          from pathlib import Path
+          p=Path("config/integratedProductionRiskPolicy.ts").read_text()
+          assert "  MR: 0.75," in p and "  BRK: 0.75," in p
+          assert "fetResidualMaximumGross: 1.0," in p
+          fet=Path("config/fetBrk48Runtime.ts").read_text()
+          assert "maximumGross: 1.00," in fet
+          runner=Path("lib/fet-brk48-live-runner.ts").read_text()
+          assert "evaluateFetBrk48PreEntryGates" in runner
+          print("BT_FIXED_RISK_CAPS_FET_GATES_SOURCE_WIRED_PASS")
+          PY
       - name: Check patch whitespace
         run: git diff --check
