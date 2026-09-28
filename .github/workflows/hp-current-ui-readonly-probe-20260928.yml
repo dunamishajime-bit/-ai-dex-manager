@@ -1,0 +1,47 @@
+name: HP current UI/trading read-only probe before ZEC removal deploy
+on:
+  push:
+    branches: [codex/hp-remove-zec-20260928]
+    paths: [.github/workflows/hp-current-ui-readonly-probe-20260928.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Initialize restricted root SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ -n "$SSH_HOST" && -n "$ROOT_KEY" && -n "$SSH_KNOWN_HOSTS" ]]
+          install -d -m 0700 "$HOME/.ssh"
+          printf '%s\n' "$ROOT_KEY" | tr -d '\r' > "$HOME/.ssh/id_root"
+          printf '%s\n' "$SSH_KNOWN_HOSTS" | tr -d '\r' > "$HOME/.ssh/known_hosts"
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Read current trading/UI identity without mutation
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts"             -o ConnectTimeout=15 -p "$PORT" "root@$SSH_HOST" 'bash -s' <<'REMOTE'
+          set -Eeuo pipefail
+          ui=ai-dex-manager-ui.service
+          trading="$(tr -d '[:space:]' < /home/deploy/disdex-trading/current/.disdex-release-sha)"
+          wd="$(systemctl show "$ui" --property WorkingDirectory --value)"
+          env="$(systemctl show "$ui" --property Environment --value)"
+          echo "CURRENT_TRADING_SHA=$trading"
+          echo "CURRENT_UI_WORKDIR=$wd"
+          echo "CURRENT_UI_ENV=$env"
+          echo "CURRENT_UI_ACTIVE=$(systemctl is-active "$ui")"
+          echo "LOCAL_HOME_HTTP=$(curl -sS --max-time 6 -o /dev/null -w '%{http_code}' http://127.0.0.1:3001/)"
+          echo "FREE_KB=$(df -Pk /home/deploy | awk 'NR==2 {print $4}')"
+          echo "TRADING_MUTATION=0"
+          REMOTE
