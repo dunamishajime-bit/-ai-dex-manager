@@ -1,0 +1,1235 @@
+{
+  "base_IS_NOT_original_1P4649_VOLUME_0P9845": true,
+  "baseline_contract": "V12 normal Score>=1.00 Volume>=0.80, strong [0.15,0.70] ATR>=1.4%, relaxed Score>=0.35 Momentum>=5.4% ATR>=1.4%",
+  "baseline_v12_candidate_count": 1533,
+  "control_30bps": {
+    "accounting_pass": true,
+    "base_selected_signal_count": 1533,
+    "by_strategy_pnl_jpy": {
+      "FET": 976403.8267420838,
+      "PENGU": 1276385.176745387,
+      "Q102": 5274782.531549514,
+      "V12": -424409.3889581394,
+      "V52": 3720249.345938768
+    },
+    "by_strategy_trades": {
+      "FET": 15,
+      "PENGU": 63,
+      "Q102": 130,
+      "V12": 789,
+      "V52": 85
+    },
+    "candidate_decisions": {
+      "FET": {
+        "ACCEPTED_MODELED_ENTRY": {
+          "GROSS_ALLOCATED": 15
+        },
+        "EXCLUDED_PREALLOCATION": {
+          "FET_PREENTRY_OVERHEAT_24H_15PCT_ATR_2PCT": 4,
+          "FET_PREENTRY_RELATIVE_WEAK_BTC_AND_FET24H_LT_1PCT": 2
+        },
+        "REJECTED_PORTFOLIO": {
+          "FET:RESIDUAL_LT_MIN": 1,
+          "FET:SLOT_OCCUPIED": 4
+        }
+      },
+      "PENGU": {
+        "ACCEPTED_MODELED_ENTRY": {
+          "GROSS_ALLOCATED": 63
+        },
+        "REJECTED_PORTFOLIO": {
+          "PENGU:COOLDOWN": 8,
+          "PENGU:NO_LOT_SHRINK": 3,
+          "PENGU:ROUTE_QUARANTINE": 3,
+          "PENGU:SHARED_DAILY_LOSS": 2,
+          "PENGU:SLOT_OCCUPIED": 34
+        }
+      },
+      "Q102": {
+        "ACCEPTED_MODELED_ENTRY": {
+          "GROSS_ALLOCATED": 130
+        },
+        "REJECTED_PORTFOLIO": {
+          "Q102:SHARED_DAILY_LOSS": 14,
+          "Q102:SLOT_OCCUPIED": 228
+        }
+      },
+      "V12": {
+        "ACCEPTED_MODELED_ENTRY": {
+          "GROSS_ALLOCATED": 789
+        },
+        "REJECTED_PORTFOLIO": {
+          "V12:BASE_SLOTS_FULL": 164,
+          "V12:NO_GROSS_ROOM": 48,
+          "V12:RANK3_SLOT_OCCUPIED": 4,
+          "V12:SAME_SYMBOL_ACTIVE": 304,
+          "V12:SHARED_DAILY_LOSS": 31,
+          "V12:SYMBOL_COOLDOWN": 193
+        }
+      },
+      "V52": {
+        "ACCEPTED_MODELED_ENTRY": {
+          "GROSS_ALLOCATED": 85
+        },
+        "EXCLUDED_PREALLOCATION": {
+          "SINGLE_V50_SLOT_ALREADY_OPEN": 11
+        },
+        "REJECTED_PORTFOLIO": {
+          "V52:SHARED_DAILY_LOSS": 3
+        }
+      }
+    },
+    "closed_trades": 1082,
+    "extra_accepted": 0,
+    "final_equity_jpy": 10943638.141093167,
+    "maximum_mtm_drawdown": -0.27611427087347507,
+    "monthly_equity_jpy": {
+      "2025-08": 10434.291676601082,
+      "2025-09": 21226.25492819601,
+      "2025-10": 112210.42095265687,
+      "2025-11": 365882.2004479913,
+      "2025-12": 415413.50723121583,
+      "2026-01": 832539.3190687337,
+      "2026-02": 1575935.057829725,
+      "2026-03": 2985674.3231061907,
+      "2026-04": 4045717.2899129083,
+      "2026-05": 5157670.560290234,
+      "2026-06": 14126155.38287841,
+      "2026-07": 11087247.466574812,
+      "2026-08": 10943638.141093167
+    },
+    "profit_factor": 1.6183664153779054,
+    "win_rate": 0.48151571164510165
+  },
+  "l2_execution_verified": false,
+  "period": "2025-08-10..2026-08-10",
+  "production_updated": false,
+  "selected_base": {
+    "PRICE_MODEL_10BPS": [
+      68350059.3203925,
+      -0.22914064363871933,
+      1.9867239897087217,
+      1083
+    ],
+    "PRICE_MODEL_8BPS": [
+      82305462.98540382,
+      -0.22784512208384422,
+      2.0306733799286967,
+      1083
+    ]
+  },
+  "source_venue": "ASTERDEX",
+  "status": "SELECTED_V12_SCORE100_VOL080_RESCUE_GRID_DONE_SOURCE_PARITY_PASS",
+  "variants": {
+    "HC_NEUTRAL_SCORE085_099_VOLUME080": {
+      "extra_candidate_lifecycles": 0,
+      "policy": {
+        "cap": 0.25,
+        "kind": "hc_neutral_gap",
+        "minscore": 0.85,
+        "minvol": 0.8
+      },
+      "scenarios": {
+        "PRICE_MODEL_10BPS": {
+          "by_strategy_pnl_jpy": {
+            "FET": 3528325.7465041224,
+            "PENGU": 4215084.207737444,
+            "Q102": 26332640.53982031,
+            "V12": 11155955.99862406,
+            "V52": 23421131.987799924
+          },
+          "by_strategy_trades": {
+            "FET": 15,
+            "PENGU": 63,
+            "Q102": 130,
+            "V12": 790,
+            "V52": 85
+          },
+          "closed_trades": 1083,
+          "delta_closed_trades": 0,
+          "delta_dd_points": 0.0,
+          "delta_ending_jpy": 0.0,
+          "ending_jpy": 68350059.3203925,
+          "extra_accepted": 0,
+          "max_dd": -0.22914064363871933,
+          "pf": 1.9867239897087217,
+          "win_rate": 0.5530932594644506
+        },
+        "PRICE_MODEL_8BPS": {
+          "by_strategy_pnl_jpy": {
+            "FET": 4029640.874494677,
+            "PENGU": 4809690.602762828,
+            "Q102": 31068924.54827655,
+            "V12": 14640557.00212622,
+            "V52": 28182127.09141132
+          },
+          "by_strategy_trades": {
+            "FET": 15,
+            "PENGU": 63,
+            "Q102": 130,
+            "V12": 790,
+            "V52": 85
+          },
+          "closed_trades": 1083,
+          "delta_closed_trades": 0,
+          "delta_dd_points": 0.0,
+          "delta_ending_jpy": 0.0,
+          "ending_jpy": 82305462.98540382,
+          "extra_accepted": 0,
+          "max_dd": -0.22784512208384422,
+          "pf": 2.0306733799286967,
+          "win_rate": 0.5577100646352724
+        },
+        "PRICE_MODEL_STRESS_30BPS": {
+          "by_strategy_pnl_jpy": {
+            "FET": 976403.8267420838,
+            "PENGU": 1276385.176745387,
+            "Q102": 5274782.531549514,
+            "V12": -424409.3889581394,
+            "V52": 3720249.345938768
+          },
+          "by_strategy_trades": {
+            "FET": 15,
+            "PENGU": 63,
+            "Q102": 130,
+            "V12": 789,
+            "V52": 85
+          },
+          "closed_trades": 1082,
+          "delta_closed_trades": 0,
+          "delta_dd_points": 0.0,
+          "delta_ending_jpy": 0.0,
+          "ending_jpy": 10943638.141093167,
+          "extra_accepted": 0,
+          "max_dd": -0.27611427087347507,
+          "pf": 1.6183664153779054,
+          "win_rate": 0.48151571164510165
+        }
+      },
+      "signal_audit": {
+        "ELIGIBLE_BEFORE_WINRATE": 198,
+        "FEATURES_INVALID": 7,
+        "NON_HC_NOT_ELIGIBLE": 190,
+        "ORIGINAL_WINRATE_BLOCK": 8
+      }
+    },
+    "HC_SCORE070_099_VOLUME080": {
+      "extra_candidate_lifecycles": 27,
+      "policy": {
+        "cap": 0.25,
+        "kind": "hc_score_gap",
+        "minscore": 0.7,
+        "minvol": 0.8
+      },
+      "scenarios": {
+        "PRICE_MODEL_10BPS": {
+          "by_strategy_pnl_jpy": {
+            "FET": 3527457.0940852296,
+            "PENGU": 4214690.758711254,
+            "Q102": 26375870.7895391,
+            "V12": 11158442.884983778,
+            "V52": 23463399.952947054
+          },
+          "by_strategy_trades": {
+            "FET": 15,
+            "PENGU": 63,
+            "Q102": 130,
+            "V12": 805,
+            "V52": 85
+          },
+          "closed_trades": 1098,
+          "delta_closed_trades": 15,
+          "delta_dd_points": 0.0,
+          "delta_ending_jpy": 86986.82114684582,
+          "ending_jpy": 68437046.14153935,
+          "extra_accepted": 17,
+          "max_dd": -0.22914064363871933,
+          "pf": 1.9854477229953185,
+          "win_rate": 0.5537340619307832
+        },
+        "PRICE_MODEL_8BPS": {
+          "by_strategy_pnl_jpy": {
+            "FET": 4030317.468486496,
+            "PENGU": 4811180.13522786,
+            "Q102": 31135090.86390654,
+            "V12": 14657818.815614073,
+            "V52": 28247301.23945155
+          },
+          "by_strategy_trades": {
+            "FET": 15,
+            "PENGU": 63,
+            "Q102": 130,
+            "V12": 805,
+            "V52": 85
+          },
+          "closed_trades": 1098,
+          "delta_closed_trades": 15,
+          "delta_dd_points": 5.551115123125783e-14,
+          "delta_ending_jpy": 150610.83584722877,
+          "ending_jpy": 82456073.82125105,
+          "extra_accepted": 17,
+          "max_dd": -0.22784512208384367,
+          "pf": 2.02942562627347,
+          "win_rate": 0.558287795992714
+        },
+        "PRICE_MODEL_STRESS_30BPS": {
+          "by_strategy_pnl_jpy": {
+            "FET": 972425.7572110274,
+            "PENGU": 1271992.8935615271,
+            "Q102": 5259505.5785017945,
+            "V12": -435836.8069990797,
+            "V52": 3708749.7449911744
+          },
+          "by_strategy_trades": {
+            "FET": 15,
+            "PENGU": 63,
+            "Q102": 130,
+            "V12": 804,
+            "V52": 85
+          },
+          "closed_trades": 1097,
+          "delta_closed_trades": 15,
+          "delta_dd_points": -0.09700863449123576,
+          "delta_ending_jpy": -46141.83680217713,
+          "ending_jpy": 10897496.30429099,
+          "extra_accepted": 17,
+          "max_dd": -0.2770843572183874,
+          "pf": 1.616948585671385,
+          "win_rate": 0.4813126709206928
+        }
+      },
+      "signal_audit": {
+        "ELIGIBLE_BEFORE_WINRATE": 956,
+        "EXTRA_SELECTED": 27,
+        "FEATURES_INVALID": 7,
+        "NON_HC_NOT_ELIGIBLE": 889,
+        "ORIGINAL_WINRATE_BLOCK": 32
+      }
+    },
+    "HC_SCORE070_099_VOLUME080_SATELLITE": {
+      "extra_candidate_lifecycles": 14,
+      "policy": {
+        "cap": 0.1,
+        "kind": "hc_score_gap",
+        "minscore": 0.7,
+        "minvol": 0.8,
+        "satellite_only": true
+      },
+      "scenarios": {
+        "PRICE_MODEL_10BPS": {
+          "by_strategy_pnl_jpy": {
+            "FET": 3531843.0760462945,
+            "PENGU": 4219024.544819115,
+            "Q102": 26359098.039296366,
+            "V12": 11167188.801033763,
+            "V52": 23444466.00037805
+          },
+          "by_strategy_trades": {
+            "FET": 15,
+            "PENGU": 63,
+            "Q102": 130,
+            "V12": 794,
+            "V52": 85
+          },
+          "closed_trades": 1087,
+          "delta_closed_trades": 4,
+          "delta_dd_points": 0.0,
+          "delta_ending_jpy": 68049.86135780811,
+          "ending_jpy": 68418109.18175031,
+          "extra_accepted": 6,
+          "max_dd": -0.22914064363871933,
+          "pf": 1.9866760170468456,
+          "win_rate": 0.5528978840846366
+        },
+        "PRICE_MODEL_8BPS": {
+          "by_strategy_pnl_jpy": {
+            "FET": 4034085.003465534,
+            "PENGU": 4814675.354660582,
+            "Q102": 31103374.956622038,
+            "V12": 14656910.515264735,
+            "V52": 28213181.10322768
+          },
+          "by_strategy_trades": {
+            "FET": 15,
+            "PENGU": 63,
+            "Q102": 130,
+            "V12": 794,
+            "V52": 85
+          },
+          "closed_trades": 1087,
+          "delta_closed_trades": 4,
+          "delta_dd_points": 6.661338147750939e-14,
+          "delta_ending_jpy": 90672.11825035512,
+          "ending_jpy": 82396135.10365418,
+          "extra_accepted": 6,
+          "max_dd": -0.22784512208384355,
+          "pf": 2.030628471237023,
+          "win_rate": 0.5574977000919963
+        },
+        "PRICE_MODEL_STRESS_30BPS": {
+          "by_strategy_pnl_jpy": {
+            "FET": 976336.8789498066,
+            "PENGU": 1276370.4647979487,
+            "Q102": 5274719.6072508935,
+            "V12": -424817.1943749724,
+            "V52": 3720045.9416492055
+          },
+          "by_strategy_trades": {
+            "FET": 15,
+            "PENGU": 63,
+            "Q102": 130,
+            "V12": 793,
+            "V52": 85
+          },
+          "closed_trades": 1086,
+          "delta_closed_trades": 4,
+          "delta_dd_points": 3.892905930946711e-06,
+          "delta_ending_jpy": -745.8627080339938,
+          "ending_jpy": 10942892.278385133,
+          "extra_accepted": 6,
+          "max_dd": -0.27611423194441576,
+          "pf": 1.6182792020128025,
+          "win_rate": 0.48066298342541436
+        }
+      },
+      "signal_audit": {
+        "ELIGIBLE_BEFORE_WINRATE": 192,
+        "EXTRA_SELECTED": 14,
+        "NON_HC_NOT_ELIGIBLE": 172
+      }
+    },
+    "HC_SCORE085_099_VOLUME080": {
+      "extra_candidate_lifecycles": 9,
+      "policy": {
+        "cap": 0.25,
+        "kind": "hc_score_gap",
+        "minscore": 0.85,
+        "minvol": 0.8
+      },
+      "scenarios": {
+        "PRICE_MODEL_10BPS": {
+          "by_strategy_pnl_jpy": {
+            "FET": 3543958.5448546438,
+            "PENGU": 4233382.470514409,
+            "Q102": 26465777.68724515,
+            "V12": 11167155.861404952,
+            "V52": 23538858.701426893
+          },
+          "by_strategy_trades": {
+            "FET": 15,
+            "PENGU": 63,
+            "Q102": 130,
+            "V12": 793,
+            "V52": 85
+          },
+          "closed_trades": 1086,
+          "delta_closed_trades": 3,
+          "delta_dd_points": 6.661338147750939e-14,
+          "delta_ending_jpy": 295349.2904447764,
+          "ending_jpy": 68645408.61083728,
+          "extra_accepted": 5,
+          "max_dd": -0.22914064363871867,
+          "pf": 1.9852962859030128,
+          "win_rate": 0.5524861878453039
+        },
+        "PRICE_MODEL_8BPS": {
+          "by_strategy_pnl_jpy": {
+            "FET": 4047894.78493584,
+            "PENGU": 4831269.031389945,
+            "Q102": 31230090.14865359,
+            "V12": 14665924.309592804,
+            "V52": 28327631.2915089
+          },
+          "by_strategy_trades": {
+            "FET": 15,
+            "PENGU": 63,
+            "Q102": 130,
+            "V12": 793,
+            "V52": 85
+          },
+          "closed_trades": 1086,
+          "delta_closed_trades": 3,
+          "delta_dd_points": 5.551115123125783e-14,
+          "delta_ending_jpy": 370718.3758075386,
+          "ending_jpy": 82676181.36121136,
+          "extra_accepted": 5,
+          "max_dd": -0.22784512208384367,
+          "pf": 2.029249311616756,
+          "win_rate": 0.5570902394106814
+        },
+        "PRICE_MODEL_STRESS_30BPS": {
+          "by_strategy_pnl_jpy": {
+            "FET": 979783.9594980772,
+            "PENGU": 1280186.493724342,
+            "Q102": 5294428.701800903,
+            "V12": -438332.8952963109,
+            "V52": 3733857.699475954
+          },
+          "by_strategy_trades": {
+            "FET": 15,
+            "PENGU": 63,
+            "Q102": 130,
+            "V12": 792,
+            "V52": 85
+          },
+          "closed_trades": 1085,
+          "delta_closed_trades": 3,
+          "delta_dd_points": -0.09738949588765644,
+          "delta_ending_jpy": 26901.266251578927,
+          "ending_jpy": 10970539.407344745,
+          "extra_accepted": 5,
+          "max_dd": -0.27708816583235163,
+          "pf": 1.6171357342360706,
+          "win_rate": 0.48110599078341015
+        }
+      },
+      "signal_audit": {
+        "ELIGIBLE_BEFORE_WINRATE": 325,
+        "EXTRA_SELECTED": 9,
+        "FEATURES_INVALID": 7,
+        "NON_HC_NOT_ELIGIBLE": 304,
+        "ORIGINAL_WINRATE_BLOCK": 11
+      }
+    },
+    "HC_SCORE085_099_VOLUME080_BTC12": {
+      "extra_candidate_lifecycles": 9,
+      "policy": {
+        "btc12_min": 0.0,
+        "cap": 0.25,
+        "kind": "hc_score_gap",
+        "minscore": 0.85,
+        "minvol": 0.8
+      },
+      "scenarios": {
+        "PRICE_MODEL_10BPS": {
+          "by_strategy_pnl_jpy": {
+            "FET": 3543958.5448546438,
+            "PENGU": 4233382.470514409,
+            "Q102": 26465777.68724515,
+            "V12": 11167155.861404952,
+            "V52": 23538858.701426893
+          },
+          "by_strategy_trades": {
+            "FET": 15,
+            "PENGU": 63,
+            "Q102": 130,
+            "V12": 793,
+            "V52": 85
+          },
+          "closed_trades": 1086,
+          "delta_closed_trades": 3,
+          "delta_dd_points": 6.661338147750939e-14,
+          "delta_ending_jpy": 295349.2904447764,
+          "ending_jpy": 68645408.61083728,
+          "extra_accepted": 5,
+          "max_dd": -0.22914064363871867,
+          "pf": 1.9852962859030128,
+          "win_rate": 0.5524861878453039
+        },
+        "PRICE_MODEL_8BPS": {
+          "by_strategy_pnl_jpy": {
+            "FET": 4047894.78493584,
+            "PENGU": 4831269.031389945,
+            "Q102": 31230090.14865359,
+            "V12": 14665924.309592804,
+            "V52": 28327631.2915089
+          },
+          "by_strategy_trades": {
+            "FET": 15,
+            "PENGU": 63,
+            "Q102": 130,
+            "V12": 793,
+            "V52": 85
+          },
+          "closed_trades": 1086,
+          "delta_closed_trades": 3,
+          "delta_dd_points": 5.551115123125783e-14,
+          "delta_ending_jpy": 370718.3758075386,
+          "ending_jpy": 82676181.36121136,
+          "extra_accepted": 5,
+          "max_dd": -0.22784512208384367,
+          "pf": 2.029249311616756,
+          "win_rate": 0.5570902394106814
+        },
+        "PRICE_MODEL_STRESS_30BPS": {
+          "by_strategy_pnl_jpy": {
+            "FET": 979783.9594980772,
+            "PENGU": 1280186.493724342,
+            "Q102": 5294428.701800903,
+            "V12": -438332.8952963109,
+            "V52": 3733857.699475954
+          },
+          "by_strategy_trades": {
+            "FET": 15,
+            "PENGU": 63,
+            "Q102": 130,
+            "V12": 792,
+            "V52": 85
+          },
+          "closed_trades": 1085,
+          "delta_closed_trades": 3,
+          "delta_dd_points": -0.09738949588765644,
+          "delta_ending_jpy": 26901.266251578927,
+          "ending_jpy": 10970539.407344745,
+          "extra_accepted": 5,
+          "max_dd": -0.27708816583235163,
+          "pf": 1.6171357342360706,
+          "win_rate": 0.48110599078341015
+        }
+      },
+      "signal_audit": {
+        "ELIGIBLE_BEFORE_WINRATE": 204,
+        "EXTRA_SELECTED": 9,
+        "FEATURES_INVALID": 7,
+        "NON_HC_NOT_ELIGIBLE": 194
+      }
+    },
+    "HC_SCORE085_099_VOLUME080_RS2": {
+      "extra_candidate_lifecycles": 2,
+      "policy": {
+        "cap": 0.25,
+        "kind": "hc_score_gap",
+        "minscore": 0.85,
+        "minvol": 0.8,
+        "relative24_min": 0.02
+      },
+      "scenarios": {
+        "PRICE_MODEL_10BPS": {
+          "by_strategy_pnl_jpy": {
+            "FET": 3532476.752400965,
+            "PENGU": 4219495.213230297,
+            "Q102": 26362757.80289558,
+            "V12": 11170734.985000486,
+            "V52": 23448466.21466399
+          },
+          "by_strategy_trades": {
+            "FET": 15,
+            "PENGU": 63,
+            "Q102": 130,
+            "V12": 792,
+            "V52": 85
+          },
+          "closed_trades": 1085,
+          "delta_closed_trades": 2,
+          "delta_dd_points": 0.0,
+          "delta_ending_jpy": 80309.61341264844,
+          "ending_jpy": 68430368.93380515,
+          "extra_accepted": 2,
+          "max_dd": -0.22914064363871933,
+          "pf": 1.9867392110086564,
+          "win_rate": 0.5529953917050692
+        },
+        "PRICE_MODEL_8BPS": {
+          "by_strategy_pnl_jpy": {
+            "FET": 4034540.9849664466,
+            "PENGU": 4814936.513872653,
+            "Q102": 31105752.24842245,
+            "V12": 14660180.770347236,
+            "V52": 28216151.09196001
+          },
+          "by_strategy_trades": {
+            "FET": 15,
+            "PENGU": 63,
+            "Q102": 130,
+            "V12": 792,
+            "V52": 85
+          },
+          "closed_trades": 1085,
+          "delta_closed_trades": 2,
+          "delta_dd_points": 3.3306690738754696e-14,
+          "delta_ending_jpy": 99975.3605375737,
+          "ending_jpy": 82405438.3459414,
+          "extra_accepted": 2,
+          "max_dd": -0.2278451220838439,
+          "pf": 2.0306884416708786,
+          "win_rate": 0.5576036866359447
+        },
+        "PRICE_MODEL_STRESS_30BPS": {
+          "by_strategy_pnl_jpy": {
+            "FET": 977164.8003107279,
+            "PENGU": 1277179.186521161,
+            "Q102": 5278584.841729596,
+            "V12": -424124.10420390277,
+            "V52": 3723081.685883654
+          },
+          "by_strategy_trades": {
+            "FET": 15,
+            "PENGU": 63,
+            "Q102": 130,
+            "V12": 791,
+            "V52": 85
+          },
+          "closed_trades": 1084,
+          "delta_closed_trades": 2,
+          "delta_dd_points": -4.4212053351699865e-05,
+          "delta_ending_jpy": 8477.976455640048,
+          "ending_jpy": 10952116.117548807,
+          "extra_accepted": 2,
+          "max_dd": -0.2761147129940086,
+          "pf": 1.6183815710023648,
+          "win_rate": 0.48154981549815495
+        }
+      },
+      "signal_audit": {
+        "ELIGIBLE_BEFORE_WINRATE": 56,
+        "EXTRA_SELECTED": 2,
+        "FEATURES_INVALID": 7,
+        "NON_HC_NOT_ELIGIBLE": 54
+      }
+    },
+    "HC_STRONG_GAP_SCORE070_099_VOLUME080": {
+      "extra_candidate_lifecycles": 6,
+      "policy": {
+        "cap": 0.25,
+        "kind": "hc_strong_gap",
+        "minscore": 0.7,
+        "minvol": 0.8
+      },
+      "scenarios": {
+        "PRICE_MODEL_10BPS": {
+          "by_strategy_pnl_jpy": {
+            "FET": 3524298.4381329743,
+            "PENGU": 4210859.608943802,
+            "Q102": 26303773.674278595,
+            "V12": 11141190.916023772,
+            "V52": 23394640.418656237
+          },
+          "by_strategy_trades": {
+            "FET": 15,
+            "PENGU": 63,
+            "Q102": 130,
+            "V12": 794,
+            "V52": 85
+          },
+          "closed_trades": 1087,
+          "delta_closed_trades": 4,
+          "delta_dd_points": -1.1102230246251565e-14,
+          "delta_ending_jpy": -77916.43433326483,
+          "ending_jpy": 68272142.88605924,
+          "extra_accepted": 4,
+          "max_dd": -0.22914064363871944,
+          "pf": 1.9866406087485957,
+          "win_rate": 0.5528978840846366
+        },
+        "PRICE_MODEL_8BPS": {
+          "by_strategy_pnl_jpy": {
+            "FET": 4025404.0568503286,
+            "PENGU": 4805218.203979051,
+            "Q102": 31037482.13002453,
+            "V12": 14623103.96542197,
+            "V52": 28152743.51596083
+          },
+          "by_strategy_trades": {
+            "FET": 15,
+            "PENGU": 63,
+            "Q102": 130,
+            "V12": 794,
+            "V52": 85
+          },
+          "closed_trades": 1087,
+          "delta_closed_trades": 4,
+          "delta_dd_points": 3.3306690738754696e-14,
+          "delta_ending_jpy": -86442.41266962886,
+          "ending_jpy": 82219020.57273419,
+          "extra_accepted": 4,
+          "max_dd": -0.2278451220838439,
+          "pf": 2.030595697843029,
+          "win_rate": 0.5574977000919963
+        },
+        "PRICE_MODEL_STRESS_30BPS": {
+          "by_strategy_pnl_jpy": {
+            "FET": 974421.7509586483,
+            "PENGU": 1274314.5484912128,
+            "Q102": 5264907.6671166085,
+            "V12": -425186.05810806045,
+            "V52": 3712864.540970722
+          },
+          "by_strategy_trades": {
+            "FET": 15,
+            "PENGU": 63,
+            "Q102": 130,
+            "V12": 793,
+            "V52": 85
+          },
+          "closed_trades": 1086,
+          "delta_closed_trades": 4,
+          "delta_dd_points": 0.00011548005064421218,
+          "delta_ending_jpy": -22082.227974154055,
+          "ending_jpy": 10921555.913119012,
+          "extra_accepted": 4,
+          "max_dd": -0.2761131160729686,
+          "pf": 1.618212535894474,
+          "win_rate": 0.48066298342541436
+        }
+      },
+      "signal_audit": {
+        "ELIGIBLE_BEFORE_WINRATE": 46,
+        "EXTRA_SELECTED": 6,
+        "FEATURES_INVALID": 7,
+        "NON_HC_NOT_ELIGIBLE": 37
+      }
+    },
+    "HC_VOLUME055_079_SCORE100": {
+      "extra_candidate_lifecycles": 4,
+      "policy": {
+        "cap": 0.25,
+        "kind": "hc_low_volume",
+        "maxvol": 0.8,
+        "minvol": 0.55,
+        "scoremin": 1.0
+      },
+      "scenarios": {
+        "PRICE_MODEL_10BPS": {
+          "by_strategy_pnl_jpy": {
+            "FET": 3547791.280545024,
+            "PENGU": 4236596.305705573,
+            "Q102": 26475945.24697484,
+            "V12": 11222126.500110734,
+            "V52": 23549746.993639246
+          },
+          "by_strategy_trades": {
+            "FET": 15,
+            "PENGU": 63,
+            "Q102": 130,
+            "V12": 791,
+            "V52": 85
+          },
+          "closed_trades": 1084,
+          "delta_closed_trades": 1,
+          "delta_dd_points": -4.440892098500626e-14,
+          "delta_ending_jpy": 376600.1669329405,
+          "ending_jpy": 68726659.48732544,
+          "extra_accepted": 3,
+          "max_dd": -0.22914064363871978,
+          "pf": 1.9868739903825883,
+          "win_rate": 0.551660516605166
+        },
+        "PRICE_MODEL_8BPS": {
+          "by_strategy_pnl_jpy": {
+            "FET": 4051628.7561197956,
+            "PENGU": 4834061.592161418,
+            "Q102": 31236335.311585523,
+            "V12": 14725380.702733316,
+            "V52": 28335260.22715801
+          },
+          "by_strategy_trades": {
+            "FET": 15,
+            "PENGU": 63,
+            "Q102": 130,
+            "V12": 791,
+            "V52": 85
+          },
+          "closed_trades": 1084,
+          "delta_closed_trades": 1,
+          "delta_dd_points": 6.661338147750939e-14,
+          "delta_ending_jpy": 448611.5987789333,
+          "ending_jpy": 82754074.58418275,
+          "extra_accepted": 3,
+          "max_dd": -0.22784512208384355,
+          "pf": 2.0308189539521275,
+          "win_rate": 0.5562730627306273
+        },
+        "PRICE_MODEL_STRESS_30BPS": {
+          "by_strategy_pnl_jpy": {
+            "FET": 982234.5624970938,
+            "PENGU": 1283164.4502264871,
+            "Q102": 5305317.392555324,
+            "V12": -424434.927696328,
+            "V52": 3742188.35334718
+          },
+          "by_strategy_trades": {
+            "FET": 15,
+            "PENGU": 63,
+            "Q102": 130,
+            "V12": 790,
+            "V52": 85
+          },
+          "closed_trades": 1083,
+          "delta_closed_trades": 1,
+          "delta_dd_points": -0.00033702079402786467,
+          "delta_ending_jpy": 64959.996623510495,
+          "ending_jpy": 11008598.137716677,
+          "extra_accepted": 3,
+          "max_dd": -0.27611764108141534,
+          "pf": 1.6185701943707538,
+          "win_rate": 0.4801477377654663
+        }
+      },
+      "signal_audit": {
+        "ELIGIBLE_BEFORE_WINRATE": 225,
+        "EXTRA_SELECTED": 4,
+        "FEATURES_INVALID": 7,
+        "NON_HC_NOT_ELIGIBLE": 212,
+        "ORIGINAL_WINRATE_BLOCK": 9
+      }
+    },
+    "HC_VOLUME055_079_SCORE146": {
+      "extra_candidate_lifecycles": 1,
+      "policy": {
+        "cap": 0.25,
+        "kind": "hc_low_volume",
+        "maxvol": 0.8,
+        "minvol": 0.55,
+        "scoremin": 1.4649
+      },
+      "scenarios": {
+        "PRICE_MODEL_10BPS": {
+          "by_strategy_pnl_jpy": {
+            "FET": 3532455.309433889,
+            "PENGU": 4220034.059766986,
+            "Q102": 26363463.51728868,
+            "V12": 11169054.668979194,
+            "V52": 23448530.559030324
+          },
+          "by_strategy_trades": {
+            "FET": 15,
+            "PENGU": 63,
+            "Q102": 130,
+            "V12": 790,
+            "V52": 85
+          },
+          "closed_trades": 1083,
+          "delta_closed_trades": 0,
+          "delta_dd_points": 2.220446049250313e-14,
+          "delta_ending_jpy": 79894.75579993427,
+          "ending_jpy": 68429954.07619244,
+          "extra_accepted": 1,
+          "max_dd": -0.2291406436387191,
+          "pf": 1.986725752964224,
+          "win_rate": 0.5530932594644506
+        },
+        "PRICE_MODEL_8BPS": {
+          "by_strategy_pnl_jpy": {
+            "FET": 4033957.260601101,
+            "PENGU": 4814857.392478641,
+            "Q102": 31102206.448440764,
+            "V12": 14656276.62467607,
+            "V52": 28212301.359940726
+          },
+          "by_strategy_trades": {
+            "FET": 15,
+            "PENGU": 63,
+            "Q102": 130,
+            "V12": 790,
+            "V52": 85
+          },
+          "closed_trades": 1083,
+          "delta_closed_trades": 0,
+          "delta_dd_points": 8.881784197001252e-14,
+          "delta_ending_jpy": 88065.8221269548,
+          "ending_jpy": 82393528.80753078,
+          "extra_accepted": 1,
+          "max_dd": -0.22784512208384333,
+          "pf": 2.030674793785698,
+          "win_rate": 0.5577100646352724
+        },
+        "PRICE_MODEL_STRESS_30BPS": {
+          "by_strategy_pnl_jpy": {
+            "FET": 978382.4062905208,
+            "PENGU": 1279005.6977513812,
+            "Q102": 5285491.744942311,
+            "V12": -425186.3717660204,
+            "V52": 3727777.9799807644
+          },
+          "by_strategy_trades": {
+            "FET": 15,
+            "PENGU": 63,
+            "Q102": 130,
+            "V12": 789,
+            "V52": 85
+          },
+          "closed_trades": 1082,
+          "delta_closed_trades": 0,
+          "delta_dd_points": -0.0001148116950844269,
+          "delta_ending_jpy": 22043.276558261365,
+          "ending_jpy": 10965681.417651428,
+          "extra_accepted": 1,
+          "max_dd": -0.2761154189904259,
+          "pf": 1.6183775250550838,
+          "win_rate": 0.48151571164510165
+        }
+      },
+      "signal_audit": {
+        "ELIGIBLE_BEFORE_WINRATE": 64,
+        "EXTRA_SELECTED": 1,
+        "FEATURES_INVALID": 7,
+        "NON_HC_NOT_ELIGIBLE": 61,
+        "ORIGINAL_WINRATE_BLOCK": 2
+      }
+    },
+    "HC_VOLUME065_079_SCORE100": {
+      "extra_candidate_lifecycles": 3,
+      "policy": {
+        "cap": 0.25,
+        "kind": "hc_low_volume",
+        "maxvol": 0.8,
+        "minvol": 0.65,
+        "scoremin": 1.0
+      },
+      "scenarios": {
+        "PRICE_MODEL_10BPS": {
+          "by_strategy_pnl_jpy": {
+            "FET": 3556642.51978761,
+            "PENGU": 4246155.296142811,
+            "Q102": 26540864.689810034,
+            "V12": 11252757.485949976,
+            "V52": 23608164.61007265
+          },
+          "by_strategy_trades": {
+            "FET": 15,
+            "PENGU": 63,
+            "Q102": 130,
+            "V12": 790,
+            "V52": 85
+          },
+          "closed_trades": 1083,
+          "delta_closed_trades": 0,
+          "delta_dd_points": -5.551115123125783e-14,
+          "delta_ending_jpy": 547845.310750261,
+          "ending_jpy": 68897904.63114277,
+          "extra_accepted": 3,
+          "max_dd": -0.2291406436387199,
+          "pf": 1.9869051995625668,
+          "win_rate": 0.5530932594644506
+        },
+        "PRICE_MODEL_8BPS": {
+          "by_strategy_pnl_jpy": {
+            "FET": 4060980.887022588,
+            "PENGU": 4844224.862673907,
+            "Q102": 31307319.155858673,
+            "V12": 14761952.33298807,
+            "V52": 28400332.67225237
+          },
+          "by_strategy_trades": {
+            "FET": 15,
+            "PENGU": 63,
+            "Q102": 130,
+            "V12": 790,
+            "V52": 85
+          },
+          "closed_trades": 1083,
+          "delta_closed_trades": 0,
+          "delta_dd_points": 5.551115123125783e-14,
+          "delta_ending_jpy": 639420.0844632834,
+          "ending_jpy": 82944883.0698671,
+          "extra_accepted": 3,
+          "max_dd": -0.22784512208384367,
+          "pf": 2.0308416213583818,
+          "win_rate": 0.5577100646352724
+        },
+        "PRICE_MODEL_STRESS_30BPS": {
+          "by_strategy_pnl_jpy": {
+            "FET": 986490.7796717533,
+            "PENGU": 1287759.423213176,
+            "Q102": 5327222.595081967,
+            "V12": -423604.3751363149,
+            "V52": 3758110.261838513
+          },
+          "by_strategy_trades": {
+            "FET": 15,
+            "PENGU": 63,
+            "Q102": 130,
+            "V12": 789,
+            "V52": 85
+          },
+          "closed_trades": 1082,
+          "delta_closed_trades": 0,
+          "delta_dd_points": -0.000580528458904439,
+          "delta_ending_jpy": 112378.34396624193,
+          "ending_jpy": 11056016.485059408,
+          "extra_accepted": 3,
+          "max_dd": -0.2761200761580641,
+          "pf": 1.6187266105595906,
+          "win_rate": 0.48151571164510165
+        }
+      },
+      "signal_audit": {
+        "ELIGIBLE_BEFORE_WINRATE": 120,
+        "EXTRA_SELECTED": 3,
+        "FEATURES_INVALID": 7,
+        "NON_HC_NOT_ELIGIBLE": 111,
+        "ORIGINAL_WINRATE_BLOCK": 6
+      }
+    },
+    "RANK4_HC_SCORE100_VOLUME080": {
+      "extra_candidate_lifecycles": 0,
+      "policy": {
+        "cap": 0.1,
+        "kind": "rank4_hc",
+        "minvol": 0.8
+      },
+      "scenarios": {
+        "PRICE_MODEL_10BPS": {
+          "by_strategy_pnl_jpy": {
+            "FET": 3528325.7465041224,
+            "PENGU": 4215084.207737444,
+            "Q102": 26332640.53982031,
+            "V12": 11155955.99862406,
+            "V52": 23421131.987799924
+          },
+          "by_strategy_trades": {
+            "FET": 15,
+            "PENGU": 63,
+            "Q102": 130,
+            "V12": 790,
+            "V52": 85
+          },
+          "closed_trades": 1083,
+          "delta_closed_trades": 0,
+          "delta_dd_points": 0.0,
+          "delta_ending_jpy": 0.0,
+          "ending_jpy": 68350059.3203925,
+          "extra_accepted": 0,
+          "max_dd": -0.22914064363871933,
+          "pf": 1.9867239897087217,
+          "win_rate": 0.5530932594644506
+        },
+        "PRICE_MODEL_8BPS": {
+          "by_strategy_pnl_jpy": {
+            "FET": 4029640.874494677,
+            "PENGU": 4809690.602762828,
+            "Q102": 31068924.54827655,
+            "V12": 14640557.00212622,
+            "V52": 28182127.09141132
+          },
+          "by_strategy_trades": {
+            "FET": 15,
+            "PENGU": 63,
+            "Q102": 130,
+            "V12": 790,
+            "V52": 85
+          },
+          "closed_trades": 1083,
+          "delta_closed_trades": 0,
+          "delta_dd_points": 0.0,
+          "delta_ending_jpy": 0.0,
+          "ending_jpy": 82305462.98540382,
+          "extra_accepted": 0,
+          "max_dd": -0.22784512208384422,
+          "pf": 2.0306733799286967,
+          "win_rate": 0.5577100646352724
+        },
+        "PRICE_MODEL_STRESS_30BPS": {
+          "by_strategy_pnl_jpy": {
+            "FET": 976403.8267420838,
+            "PENGU": 1276385.176745387,
+            "Q102": 5274782.531549514,
+            "V12": -424409.3889581394,
+            "V52": 3720249.345938768
+          },
+          "by_strategy_trades": {
+            "FET": 15,
+            "PENGU": 63,
+            "Q102": 130,
+            "V12": 789,
+            "V52": 85
+          },
+          "closed_trades": 1082,
+          "delta_closed_trades": 0,
+          "delta_dd_points": 0.0,
+          "delta_ending_jpy": 0.0,
+          "ending_jpy": 10943638.141093167,
+          "extra_accepted": 0,
+          "max_dd": -0.27611427087347507,
+          "pf": 1.6183664153779054,
+          "win_rate": 0.48151571164510165
+        }
+      },
+      "signal_audit": {}
+    },
+    "STRONG_GAP_CONFIRMED_BREAKOUT": {
+      "extra_candidate_lifecycles": 5,
+      "policy": {
+        "cap": 0.25,
+        "hc_required": false,
+        "kind": "strong_breakout_gap",
+        "minvol": 0.8
+      },
+      "scenarios": {
+        "PRICE_MODEL_10BPS": {
+          "by_strategy_pnl_jpy": {
+            "FET": 3574487.489114304,
+            "PENGU": 4267210.400024583,
+            "Q102": 26672442.466764964,
+            "V12": 11311386.025092565,
+            "V52": 23726241.31664359
+          },
+          "by_strategy_trades": {
+            "FET": 15,
+            "PENGU": 63,
+            "Q102": 130,
+            "V12": 792,
+            "V52": 85
+          },
+          "closed_trades": 1085,
+          "delta_closed_trades": 2,
+          "delta_dd_points": -4.440892098500626e-14,
+          "delta_ending_jpy": 893092.3722091615,
+          "ending_jpy": 69243151.69260167,
+          "extra_accepted": 2,
+          "max_dd": -0.22914064363871978,
+          "pf": 1.9868319908182384,
+          "win_rate": 0.5539170506912442
+        },
+        "PRICE_MODEL_8BPS": {
+          "by_strategy_pnl_jpy": {
+            "FET": 4082839.087243507,
+            "PENGU": 4869949.183883983,
+            "Q102": 31473999.453018226,
+            "V12": 14843977.140987962,
+            "V52": 28552751.676098768
+          },
+          "by_strategy_trades": {
+            "FET": 15,
+            "PENGU": 63,
+            "Q102": 130,
+            "V12": 792,
+            "V52": 85
+          },
+          "closed_trades": 1085,
+          "delta_closed_trades": 2,
+          "delta_dd_points": 6.661338147750939e-14,
+          "delta_ending_jpy": 1085385.8357218355,
+          "ending_jpy": 83390848.82112566,
+          "extra_accepted": 2,
+          "max_dd": -0.22784512208384355,
+          "pf": 2.0307746106729634,
+          "win_rate": 0.5585253456221199
+        },
+        "PRICE_MODEL_STRESS_30BPS": {
+          "by_strategy_pnl_jpy": {
+            "FET": 987948.104115345,
+            "PENGU": 1289950.3015602115,
+            "Q102": 5334916.886999951,
+            "V12": -424394.9361721483,
+            "V52": 3763674.324770328
+          },
+          "by_strategy_trades": {
+            "FET": 15,
+            "PENGU": 63,
+            "Q102": 130,
+            "V12": 791,
+            "V52": 85
+          },
+          "closed_trades": 1084,
+          "delta_closed_trades": 2,
+          "delta_dd_points": -0.0006634250956594201,
+          "delta_ending_jpy": 128614.33800072409,
+          "ending_jpy": 11072252.47909389,
+          "extra_accepted": 2,
+          "max_dd": -0.27612090512443166,
+          "pf": 1.6185713054584245,
+          "win_rate": 0.48247232472324725
+        }
+      },
+      "signal_audit": {
+        "ELIGIBLE_BEFORE_WINRATE": 5,
+        "EXTRA_SELECTED": 5,
+        "FEATURES_INVALID": 7
+      }
+    }
+  },
+  "winrate_parity": {
+    "checked": 1566
+  }
+}
