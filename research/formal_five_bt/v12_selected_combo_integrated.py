@@ -1,7 +1,7 @@
 """Fail-closed provenance and baseline parity for the selected V12 five-logic research BT.
 
-This deliberately patches only the *research copy* of two audited TypeScript
-sources after a complete original-source replay. All market data, other strategy
+This deliberately patches only the *research copy* of one audited TypeScript
+sources after a complete original-source replay. Only config is changed. All market data, other strategy
 sources, and shared-portfolio logic remain identical. No LIVE writes/orders.
 """
 from __future__ import annotations
@@ -16,8 +16,8 @@ from typing import Any
 HERE=Path(__file__).resolve().parent
 ORIGINAL_SOURCE_SHA="a09ea45ca3cbd72100f9eb0eaae499039c40b6a0"
 ORIGINAL_RUNTIME_SHA="e1b58060d6263a3af7ced51bec854d3e211d2f35"
-SELECTED_SOURCE_SHA="ed57c0a7f6d0b5bf47cfcfb9f45fd5eb6e02add5"
-CHANGED=("config/v12X1AllRuntime.ts","lib/v12-x1-all.ts")
+SELECTED_SOURCE_SHA="dbf84542311c15f69508f91a0e7311ff7e686d96"
+CHANGED=("config/v12X1AllRuntime.ts",)
 CAP_CASE="BRK0P75_MR0P75_FET1_DUAL_GATE"
 EXPECTED_BASE={
     "PRICE_MODEL_8BPS":dict(final=155417832.2837019,dd=-.2283242854192271,pf=2.464228135438672,trades=1046),
@@ -101,13 +101,14 @@ def patch_research_copy(repo:Path,data_root:Path,report_path:Path)->dict:
     config=(snapshot/CHANGED[0]).read_text(encoding="utf-8")
     logic=(snapshot/CHANGED[1]).read_text(encoding="utf-8")
     for literal in ("minimumVolumeRatio: 0.80","neutralScoreThreshold: 1.00",
-                    "relaxedRegimeMinimumScore: 0.35",
                     "strongRegimeQualityScoreMinimum: 0.15",
                     "strongRegimeQualityScoreMaximum: 0.70"):
         if literal not in config:raise ValueError("SELECTED_V12_SOURCE_CONTRACT_NOT_PRESENT:"+literal)
-    if ("input.score >= V12_X1_ALL.relaxedRegimeMinimumScore" not in logic or
-        "input.score >= V12_X1_ALL.strongRegimeQualityScoreMinimum" not in logic):
-        raise ValueError("SELECTED_V12_ROUTE_NOT_IMPLEMENTED")
+    if ("input.score >= V12_X1_ALL.relaxedRegimeMinimumScore" in logic or
+        "relaxedRegimeMinimumScore:" in config):
+        raise ValueError("NORMAL_GATE_ONLY_RESCUE_MUST_REMAIN_ORIGINAL")
+    if "input.score >= V12_X1_ALL.strongRegimeQualityScoreMinimum" not in logic:
+        raise ValueError("STRONG_ROUTE_CHANGED_UNEXPECTEDLY")
     if len({r["path"] for r in manifest["files"]})!=90:
         raise ValueError("SOURCE_MANIFEST_DUPLICATE_PATH")
     for r in manifest["files"]:
@@ -117,7 +118,7 @@ def patch_research_copy(repo:Path,data_root:Path,report_path:Path)->dict:
     manifest["research_source_commit"]=SELECTED_SOURCE_SHA
     manifest["original_frozen_runtime_sha"]=ORIGINAL_RUNTIME_SHA
     write_json(manifest_path,manifest)
-    # Re-verify complete manifest; 88 audited files must remain byte-identical.
+    # Re-verify complete manifest; 89 audited files must remain byte-identical.
     for r in manifest["files"]:
         if digest((snapshot/r["path"]).read_bytes())!=r["sha256"]:
             raise ValueError("PATCHED_MANIFEST_SHA_MISMATCH:"+r["path"])
@@ -143,11 +144,11 @@ def patch_research_copy(repo:Path,data_root:Path,report_path:Path)->dict:
         x=original_data_manifest["venues"]["aster"]["klines"][name]
         if x.get("status")!="ACQUIRED" or x.get("hour_gaps")!=0 or x.get("unresolved_malformed_source_h1"):
             raise ValueError("MANDATORY_MARKET_H1_NOT_VERIFIED:"+name)
-    out={"status":"RESEARCH_PATCHED_2_OF_90_ONLY_NOT_PRODUCTION",
+    out={"status":"RESEARCH_PATCHED_1_OF_90_ONLY_NOT_PRODUCTION",
          "original_commit":ORIGINAL_SOURCE_SHA,
          "original_runtime_sha":ORIGINAL_RUNTIME_SHA,
          "research_source_commit":SELECTED_SOURCE_SHA,
-         "changed_sources":changed,"unchanged_source_count":88,
+         "changed_sources":changed,"unchanged_source_count":89,
          "original_market_manifest_sha256":digest(original_blob),
          "patched_market_manifest_sha256":digest(acquired.read_bytes()),
          "snapshot_manifest_sha256":digest(manifest_path.read_bytes()),
@@ -160,7 +161,7 @@ def compare_outputs(baseline:Path,variant:Path,source_report:Path,output:Path)->
     if not source_report.is_file():
         raise ValueError("RESEARCH_PROVENANCE_MISSING")
     source=read_json(source_report)
-    if source.get("status")!="RESEARCH_PATCHED_2_OF_90_ONLY_NOT_PRODUCTION":
+    if source.get("status")!="RESEARCH_PATCHED_1_OF_90_ONLY_NOT_PRODUCTION":
         raise ValueError("RESEARCH_VARIANT_SOURCE_NOT_CERTIFIED")
     b=read_json(baseline)
     v=read_json(variant)
@@ -188,7 +189,7 @@ def compare_outputs(baseline:Path,variant:Path,source_report:Path,output:Path)->
             "period":"2025-08-10_to_2026-08-10",
             "baseline_source_runtime_sha":ORIGINAL_RUNTIME_SHA,
             "research_variant_source_commit":SELECTED_SOURCE_SHA,
-            "research_change":"V12 Score1.00 volume0.80, STRONG [0.15,0.70] ATR1.4% unchanged, nonstrong RELAXED Score>=0.35 Momentum5.4% ATR1.4%",
+            "research_change":"NORMAL GATE ONLY: V12 Score1.00 volume0.80. Strong [0.15,0.70] and nonstrong RELAXED original with NO score floor unchanged.",
             "q102":"BRK0.75/MR0.75",
             "fet":"1.00 and both existing preentry rejection gates",
             "pengu":"COMBINED_FILTERED unchanged gross1.0 each entry",
