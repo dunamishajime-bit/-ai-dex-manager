@@ -1,0 +1,196 @@
+name: Research V12 Selected Score1 Vol0.8 Plus Incremental Rescue Grid Aster Five Logic
+on:
+  push:
+    branches: [research/v12-score100-vol080-rescue-grid-20260928]
+    paths:
+      - "research/formal_five_bt/v12_selected_combo_integrated.py"
+      - "research/formal_five_bt/v12_rescue_grid_selected_base.py"
+      - ".github/workflows/v12-selected-base-rescue-grid-20260928.yml"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: v12-selected-base-rescue-grid-20260928
+  cancel-in-progress: false
+jobs:
+  full-five-logic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 125
+    env:
+      DATA: /tmp/v12-selected-rescue-grid/aster
+      BASE_SCANS: /tmp/v12-selected-rescue-grid/base-scans
+      BASE_CAND: /tmp/v12-selected-rescue-grid/base-candidates
+      VAR_SCANS: /tmp/v12-selected-rescue-grid/variant-scans
+      VAR_CAND: /tmp/v12-selected-rescue-grid/variant-candidates
+      V52_DATA: /tmp/v12-selected-rescue-grid/stock-data
+      V52_SCAN: /tmp/v12-selected-rescue-grid/stock-scan
+      V52_LEDGER: /tmp/v12-selected-rescue-grid/stock-ledger
+      REPORT: docs/research/results/v12-score100-volume080-plus-rescue-20260928
+      BASE_REPORT: /tmp/v12-selected-rescue-grid/baseline-all-cases
+      VAR_REPORT: /tmp/v12-selected-rescue-grid/selected-all-cases
+      GRID: /tmp/v12-selected-rescue-grid/rescue-variants
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/v12-score100-vol080-rescue-grid-20260928
+          fetch-depth: 1
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Verify research script and restore immutable 90-file production source
+        run: |
+          python -m py_compile research/formal_five_bt/v12_selected_combo_integrated.py research/formal_five_bt/v12_rescue_grid_selected_base.py
+          git -c protocol.version=2 fetch --filter=blob:none --no-tags --depth=1 origin a09ea45ca3cbd72100f9eb0eaae499039c40b6a0
+          python -m research.formal_five_bt.restore_snapshot
+      - name: Acquire unchanged historical Aster candles/funding and repair only source-proven malformed BTC H1
+        run: |
+          python -m research.formal_five_bt.acquire --data-root "$DATA" --venues aster
+          python -m research.formal_five_bt.aster_h1_reconcile --data-root "$DATA" --allow-valid-noop
+      - name: Acquire official ECB EUR cross as historical FX reference
+        run: python -m research.formal_five_bt.fx_ecb --data-root "$DATA"
+      - name: Replay original production V12 PENGU FET and Q102 causal scans
+        run: |
+          python -m research.formal_five_bt.signal_scan \
+            --data-root "$DATA" --output-root "$BASE_SCANS/baseline-signal-scan" --strategies V12 PENGU FET
+          python -m research.formal_five_bt.signal_scan \
+            --data-root "$DATA" --output-root "$BASE_SCANS/baseline-signal-scan-q102" --strategies Q102 --q102-fast
+      - name: Build original production crypto candidate lifecycles from historical Aster H1
+        run: |
+          python -m research.formal_five_bt.crypto_price_model \
+            --data-root "$DATA" --scan-root "$BASE_SCANS" --output-root "$BASE_CAND"
+      - name: Acquire V52 stock futures/funding and Yahoo underlying price only, unchanged
+        run: |
+          python -m research.formal_five_bt.aster_stock_acquire --data-root "$V52_DATA"
+          python -m research.formal_five_bt.yahoo_acquire --output-root "$V52_DATA"
+          python -m research.formal_five_bt.v52_price_only_scan \
+            --data-root "$V52_DATA" --output-root "$V52_SCAN"
+          python -m research.formal_five_bt.v52_research_ledger \
+            --data-root "$V52_DATA" --scan-root "$V52_SCAN" \
+            --output-root "$V52_LEDGER" --round-trip-cost-bps 11
+          mkdir -p "$DATA/normalized" "$DATA/normalized/aster/funding"
+          cp -a "$V52_DATA/normalized/aster_stock" "$DATA/normalized/aster_stock"
+          cp "$V52_DATA/aster-stock-hourly-coverage.json" "$DATA/aster-stock-hourly-coverage.json"
+          if [ -d "$V52_DATA/normalized/aster_stock/funding" ]; then
+            cp -a "$V52_DATA/normalized/aster_stock/funding/." "$DATA/normalized/aster/funding/"
+          fi
+      - name: Full five-logic original baseline with Q102 size and both FET gates
+        run: |
+          python -m research.formal_five_bt.fet_dual_gate_combo_bt \
+            --data-root "$DATA" --candidate-root "$BASE_CAND" \
+            --output-root "$BASE_REPORT" --v52-ledger-root "$V52_LEDGER" --ecb-fx-root "$DATA"
+      - name: Fail closed unless original source's baseline equals archived 8bps and 10bps metrics
+        run: |
+          mkdir -p "$REPORT"
+          python -m research.formal_five_bt.v12_selected_combo_integrated certify-baseline \
+            --summary "$BASE_REPORT/requested-combo-summary.json" \
+            --output "$REPORT/original-baseline-parity.json"
+      - name: Fetch user-selected research source SHA and apply ONLY two audited V12 TypeScript changes
+        run: |
+          git -c protocol.version=2 fetch --filter=blob:none --no-tags --depth=1 origin ed57c0a7f6d0b5bf47cfcfb9f45fd5eb6e02add5
+          python -m research.formal_five_bt.v12_selected_combo_integrated patch \
+            --repo . --data-root "$DATA" --output "$REPORT/research-source-provenance.json"
+      - name: Rescan all 4 crypto strategies with selected V12 and identical underlying Aster H1
+        run: |
+          python -m research.formal_five_bt.signal_scan \
+            --data-root "$DATA" --output-root "$VAR_SCANS/baseline-signal-scan" --strategies V12 PENGU FET
+          python -m research.formal_five_bt.signal_scan \
+            --data-root "$DATA" --output-root "$VAR_SCANS/baseline-signal-scan-q102" --strategies Q102 --q102-fast
+          python -m research.formal_five_bt.crypto_price_model \
+            --data-root "$DATA" --scan-root "$VAR_SCANS" --output-root "$VAR_CAND"
+      - name: Run selected V12 with all five strategies at 8 and 10bps shared gross and FET gates
+        run: |
+          python -m research.formal_five_bt.fet_dual_gate_combo_bt \
+            --data-root "$DATA" --candidate-root "$VAR_CAND" \
+            --output-root "$VAR_REPORT" --v52-ledger-root "$V52_LEDGER" --ecb-fx-root "$DATA"
+      - name: Strictly compare original and selected all-five output, preserve accounting and monthly equity
+        run: |
+          python -m research.formal_five_bt.v12_selected_combo_integrated compare \
+            --baseline "$BASE_REPORT/requested-combo-summary.json" \
+            --variant "$VAR_REPORT/requested-combo-summary.json" \
+            --source-report "$REPORT/research-source-provenance.json" \
+            --output "$REPORT/selected-v12-five-logic-comparison.json"
+      - name: Run 12 predefined rescue routes ONLY AFTER Score1.00 Volume0.80 Strong unchanged Relaxed0.35 baseline
+        timeout-minutes: 85
+        run: |
+          python -m research.formal_five_bt.v12_rescue_grid_selected_base \
+            --root "$DATA" --baseline-scans "$VAR_SCANS" --baseline-candidates "$VAR_CAND" \
+            --v52-ledger "$V52_LEDGER" --ecb "$DATA" --output "$GRID"
+      - name: Require exact selected-base parity and save side-by-side rescue metrics
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,math,os
+          from pathlib import Path
+          grid=json.loads((Path(os.environ["GRID"])/"grid-summary.json").read_text())
+          selected=json.loads((Path(os.environ["VAR_REPORT"])/"requested-combo-summary.json").read_text())
+          selected_case=selected["cases"]["BRK0P75_MR0P75_FET1_DUAL_GATE"]
+          assert selected_case["status"]=="ALL_FIVE_H1_PRICE_MODEL_NOT_FORMAL_L2_VERIFIED"
+          assert grid["status"]=="ALL_PREDECLARED_VARIANTS_FINISHED_RESEARCH_ONLY"
+          assert grid["selected_baseline"]=={"score":1.0,"volume":0.8,"strong_score":[.15,.7],"relaxed_score_min":.35}
+          assert grid["win_rate_gate_reconstruction"].get("mismatches",0)==0
+          control=grid["variants"]["CONTROL_NO_RESCUE"]["scenarios"]
+          anchors={"PRICE_MODEL_8BPS":(82305462.98540382,-.22784512208384422,2.0306733799286967,1083),
+                   "PRICE_MODEL_10BPS":(68350059.3203925,-.22914064363871933,1.9867239897087217,1083)}
+          for sid,expected in anchors.items():
+            c=control[sid]
+            original=next(x for x in selected_case["scenarios"] if x["scenario_id"]==sid)
+            assert math.isclose(c["final_equity_jpy"],expected[0],abs_tol=.10,rel_tol=0),(sid,c)
+            assert math.isclose(c["maximum_mtm_drawdown"],expected[1],abs_tol=1e-8,rel_tol=0)
+            assert math.isclose(c["profit_factor"],expected[2],abs_tol=1e-8,rel_tol=0)
+            assert c["closed_trades"]==expected[3]
+            for source,target in (("final_equity_jpy","final_equity_jpy"),("maximum_mtm_drawdown","maximum_mtm_drawdown"),
+                                  ("profit_factor","profit_factor")):
+              assert math.isclose(c[source],original[target],abs_tol=.10 if source=="final_equity_jpy" else 1e-8,rel_tol=0)
+            assert c["extra_accepted"]==0
+          dest=Path(os.environ["REPORT"]);dest.mkdir(parents=True,exist_ok=True)
+          summary={"status":"SELECTED_V12_SCORE100_VOL080_RESCUE_GRID_DONE_SOURCE_PARITY_PASS",
+                   "baseline_contract":"V12 normal Score>=1.00 Volume>=0.80, strong [0.15,0.70] ATR>=1.4%, relaxed Score>=0.35 Momentum>=5.4% ATR>=1.4%",
+                   "base_IS_NOT_original_1P4649_VOLUME_0P9845":True,
+                   "selected_base":anchors,"control_30bps":control["PRICE_MODEL_STRESS_30BPS"],
+                   "source_venue":"ASTERDEX","period":"2025-08-10..2026-08-10",
+                   "winrate_parity":grid["win_rate_gate_reconstruction"],
+                   "baseline_v12_candidate_count":grid["baseline_v12_candidates_exact_replay"],
+                   "variants":{},"l2_execution_verified":False,"production_updated":False}
+          for name,row in grid["variants"].items():
+            if name=="CONTROL_NO_RESCUE":continue
+            scenarios={}
+            for sid,metrics in row["scenarios"].items():
+              base=control[sid]
+              scenarios[sid]={"ending_jpy":metrics["final_equity_jpy"],
+                 "delta_ending_jpy":metrics["final_equity_jpy"]-base["final_equity_jpy"],
+                 "max_dd":metrics["maximum_mtm_drawdown"],
+                 "delta_dd_points":100*(metrics["maximum_mtm_drawdown"]-base["maximum_mtm_drawdown"]),
+                 "pf":metrics["profit_factor"],"closed_trades":metrics["closed_trades"],
+                 "delta_closed_trades":metrics["closed_trades"]-base["closed_trades"],
+                 "extra_accepted":metrics["extra_accepted"],
+                 "win_rate":metrics["win_rate"],
+                 "by_strategy_trades":metrics["by_strategy_trades"],
+                 "by_strategy_pnl_jpy":metrics["by_strategy_pnl_jpy"]}
+            summary["variants"][name]={"policy":row["policy"],"signal_audit":row["signal_audit"],
+                "extra_candidate_lifecycles":row["extra_candidates_frozen_lifecycle"],"scenarios":scenarios}
+            print("SELECTED_BASE_RESCUE_10BPS",json.dumps({"variant":name,**scenarios["PRICE_MODEL_10BPS"]},sort_keys=True))
+          (dest/"rescue-grid-comparison.json").write_text(json.dumps(summary,indent=2,sort_keys=True,ensure_ascii=False)+"\n")
+          print("SCORE100_VOLUME080_SELECTED_BASE_RESCUE_GRID_PASS",len(summary["variants"]))
+          PY
+      - name: Persist completed research only; never modify production config
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$REPORT"
+          git commit -m "Research: selected V12 Score1 Volume0.8 plus rescue 5-logic grid [skip ci]"
+          git push origin HEAD:research/v12-score100-vol080-rescue-grid-20260928
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v12-score100-vol080-base-plus-rescue-five-logic-evidence
+          if-no-files-found: warn
+          retention-days: 90
+          path: |
+            docs/research/results/v12-score100-volume080-plus-rescue-20260928/
+            /tmp/v12-selected-rescue-grid/baseline-all-cases/requested-combo-summary.json
+            /tmp/v12-selected-rescue-grid/selected-all-cases/requested-combo-summary.json
+            /tmp/v12-selected-rescue-grid/rescue-variants/grid-summary.json
