@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import { RefreshCw, ShieldCheck } from "lucide-react";
 import type { HypeZecOverview, HypeZecSleeve } from "@/lib/server/hype-zec-runtime-observability";
-type Strategy="HYPE_LONG"|"ZEC_LONG";
+type Strategy="HYPE_LONG";
 const badge=(s:HypeZecSleeve["status"])=>s==="LIVE"?"border-emerald-400/40 bg-emerald-500/10 text-emerald-200":
   s==="SHADOW"?"border-sky-400/40 bg-sky-500/10 text-sky-200":
   "border-amber-400/40 bg-amber-500/10 text-amber-200";
@@ -29,12 +29,11 @@ export function HypeZecDecisionPanel({strategy}:{strategy:Strategy}){
     finally{setLoading(false);}
   },[]);
   useEffect(()=>{void load();const timer=window.setInterval(()=>void load(),30_000);return()=>window.clearInterval(timer);},[load]);
-  const row=data?.sleeves[strategy],logic=strategy==="HYPE_LONG"?"HYPE":"ZEC";
+  const row=data?.sleeves[strategy],logic="HYPE";
   return <div className="space-y-4">
     <nav className="flex min-w-0 flex-wrap gap-2 text-xs font-bold">
       <Link className="rounded-lg border border-white/20 px-3 py-2 text-white/75" href="/decision-status">← 判定状況</Link>
       <Link className="rounded-lg border border-white/20 px-3 py-2 text-white/75" href="/decision-status/hype">HYPE</Link>
-      <Link className="rounded-lg border border-white/20 px-3 py-2 text-white/75" href="/decision-status/zec">ZEC</Link>
       <button onClick={()=>void load()} className="inline-flex items-center gap-2 rounded-lg border border-white/20 px-3 py-2 text-white/75">
         <RefreshCw size={14} className={loading?"animate-spin":""}/>更新
       </button>
