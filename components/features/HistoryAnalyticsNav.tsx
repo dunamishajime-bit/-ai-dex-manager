@@ -14,7 +14,6 @@ const ITEMS = [
   { href: "/history/q102", label: "Q102", icon: BarChart3, exact: false },
   { href: "/history/fet", label: "FET", icon: BarChart3, exact: false },
   { href: "/history/hype", label: "HYPE", icon: BarChart3, exact: false },
-  { href: "/history/zec", label: "ZEC", icon: BarChart3, exact: false },
   { href: "/history/v52", label: "V52", icon: BarChart3, exact: false },
 ] as const;
 
