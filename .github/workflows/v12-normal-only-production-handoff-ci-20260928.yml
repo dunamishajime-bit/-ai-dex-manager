@@ -1,0 +1,60 @@
+name: Production handoff V12 normal Score1.00 Vol0.80 safety validation
+on:
+  push:
+    branches: [codex/v12-normal-gate-only-production-handoff-20260928]
+    paths:
+      - "config/v12X1AllRuntime.ts"
+      - "scripts/v12-x1-all-selftest.ts"
+      - "scripts/v12-normal-gate-only-adoption-selftest.ts"
+      - ".github/workflows/v12-normal-only-production-handoff-ci-20260928.yml"
+      - "docs/implementation/V12_NORMAL_GATE_ONLY_PRODUCTION_HANDOFF_20260928.md"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-v12-source-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - name: Install locked dependencies without lifecycle hooks
+        run: npm ci --ignore-scripts
+      - name: Enforce EXACT two-number production code diff relative to verified LIVE baseline
+        shell: bash
+        run: |
+          git fetch --filter=blob:none --depth=1 origin a09ea45ca3cbd72100f9eb0eaae499039c40b6a0
+          python3 - <<'PY'
+          import pathlib,subprocess
+          old=subprocess.check_output(["git","show","a09ea45ca3cbd72100f9eb0eaae499039c40b6a0:config/v12X1AllRuntime.ts"],text=True)
+          new=pathlib.Path("config/v12X1AllRuntime.ts").read_text()
+          assert old.count("minimumVolumeRatio: 0.9845")==1
+          assert old.count("neutralScoreThreshold: 1.4649")==1
+          expected=old.replace("minimumVolumeRatio: 0.9845","minimumVolumeRatio: 0.80").replace("neutralScoreThreshold: 1.4649","neutralScoreThreshold: 1.00")
+          assert new==expected,"PRODUCTION_RUNTIME_SOURCE_HAS_UNAPPROVED_DIFF"
+          changed=subprocess.check_output(["git","diff","--name-only","a09ea45ca3cbd72100f9eb0eaae499039c40b6a0","HEAD"],text=True).splitlines()
+          runtime=[p for p in changed if p.startswith(("config/","lib/","scripts/disdex-"))]
+          assert runtime==["config/v12X1AllRuntime.ts"],runtime
+          assert "relaxedRegimeMinimumScore" not in new
+          print("PRODUCTION_SOURCE_ONLY_TWO_THRESHOLDS_EXACT_PASS")
+          PY
+      - name: TypeScript production and PENGU compile
+        run: npm run strategy:v12-x1-all:typecheck
+      - name: SHA-tested V12 normal threshold and unchanged strong/relaxed/HC routes
+        run: npx tsx scripts/v12-normal-gate-only-adoption-selftest.ts
+      - name: Updated original V12 existing strategy selftest
+        run: npx tsx scripts/v12-x1-all-selftest.ts
+      - name: Existing WinRateGate exact regression tests
+        run: npx tsx --test tests/v12-winrate-entry-gate.test.ts
+      - name: Existing V12 LIVE execution safety selftest (no external orders)
+        run: npx tsx scripts/v12-live-execution-selftest.ts
+      - name: Existing shared gross and risk selftests
+        run: npm run strategy:shared-crypto-risk:selftest
+      - name: Fail if tests accidentally submit live orders
+        run: |
+          ! grep -Eq "submitOrder|placeMarket|I_ACCEPT_REAL_MONEY" scripts/v12-normal-gate-only-adoption-selftest.ts
