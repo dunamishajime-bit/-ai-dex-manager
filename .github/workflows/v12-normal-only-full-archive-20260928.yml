@@ -93,6 +93,7 @@ jobs:
           python -m research.formal_five_bt.v12_selected_combo_integrated certify-baseline \
             --summary "$BASE_REPORT/requested-combo-summary.json" \
             --output "$REPORT/original-baseline-parity.json"
+          cp "$DATA/acquisition-manifest.json" "$RUNNER_TEMP/original-aster-acquisition-manifest.json"
       - name: Fetch normal-only study SHA and change exactly one V12 config file (rescue unchanged)
         run: |
           git -c protocol.version=2 fetch --filter=blob:none --no-tags --depth=1 origin dbf84542311c15f69508f91a0e7311ff7e686d96
@@ -121,7 +122,7 @@ jobs:
       - name: Build and SHA-verify EVERY model fill, candidate decision, cashflow, signal, V52 original tape and all historical input market files
         run: |
           python -m research.formal_five_bt.archive_normal_only_full_evidence \
-            --data "$DATA" --base-scans "$BASE_SCANS" --base-candidates "$BASE_CAND" \
+            --data "$DATA" --original-acquisition-manifest "$RUNNER_TEMP/original-aster-acquisition-manifest.json" --base-scans "$BASE_SCANS" --base-candidates "$BASE_CAND" \
             --selected-scans "$VAR_SCANS" --selected-candidates "$VAR_CAND" \
             --v52-ledger "$V52_LEDGER" --v52-source-archive "$RUNNER_TEMP/original-v52-artifact" \
             --base-report "$BASE_REPORT" --selected-report "$VAR_REPORT" --reports "$REPORT" \

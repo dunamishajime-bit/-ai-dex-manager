@@ -43,7 +43,7 @@ def checked_scenario(root,scenario,label):
 def main():
  p=argparse.ArgumentParser()
  for name in ("data","base_scans","base_candidates","selected_scans","selected_candidates","v52_ledger","v52_source_archive",
-              "base_report","selected_report","reports","repo","output"):
+              "base_report","selected_report","reports","original_acquisition_manifest","repo","output"):
   p.add_argument("--"+name.replace("_","-"),required=True,type=Path)
  a=p.parse_args()
  comparison=read(a.reports/"selected-v12-five-logic-comparison.json")
@@ -72,14 +72,12 @@ def main():
  extra.mkdir(exist_ok=True)
  (extra/"original-v12-config.ts").write_bytes(original_config)
  (extra/"adopted-v12-config.ts").write_bytes(selected_config.read_bytes())
- market=read(a.data/"acquisition-manifest.json")
- restored=dict(market)
- restored["runtime_sha"]=proof["original_runtime_sha"]
- restored.pop("research_data_manifest_parent_sha256",None)
- blob=(json.dumps(restored,sort_keys=True,indent=2,ensure_ascii=False,allow_nan=False)+"\n").encode()
- if hashlib.sha256(blob).hexdigest()!=proof["original_market_manifest_sha256"]:
-  raise ValueError("ORIGINAL_MARKET_MANIFEST_NOT_RECONSTRUCTIBLE")
- (extra/"original-acquisition-manifest.json").write_bytes(blob)
+ original_market=a.original_acquisition_manifest.read_bytes()
+ if hashlib.sha256(original_market).hexdigest()!=proof["original_market_manifest_sha256"]:
+  raise ValueError("ORIGINAL_MARKET_MANIFEST_SHA256_MISMATCH")
+ if sha(a.data/"acquisition-manifest.json")!=proof["patched_market_manifest_sha256"]:
+  raise ValueError("SELECTED_MARKET_MANIFEST_SHA256_MISMATCH")
+ (extra/"original-acquisition-manifest.json").write_bytes(original_market)
  roots={
  "market-Aster-H1-funding-and-manifests":a.data,
  "baseline-complete-signal-and-gate-decisions":a.base_scans,
