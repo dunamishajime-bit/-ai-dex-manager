@@ -1,0 +1,18 @@
+{
+  "changed_sources": {
+    "config/v12X1AllRuntime.ts": {
+      "original_sha256": "40dff6d523e7e4eb06a66decda6e01caf78246d65eda4f62dca3f814d3170aea",
+      "research_sha256": "a2f92b5676d553ac15370be2aeeaabe5cdb8d690e2f4ebb0c971a2f85769668f"
+    }
+  },
+  "live_updated": false,
+  "original_commit": "a09ea45ca3cbd72100f9eb0eaae499039c40b6a0",
+  "original_market_manifest_sha256": "643dc7540944f55ccdbec865701c5f4d8a94a3d5d613743153f9fc00878a100f",
+  "original_runtime_sha": "e1b58060d6263a3af7ced51bec854d3e211d2f35",
+  "patched_market_manifest_sha256": "91043ddfe3692385276c9b59cd8647b938d360daff1e6ffa60fe5e9e9e2e7c3b",
+  "research_source_commit": "dbf84542311c15f69508f91a0e7311ff7e686d96",
+  "snapshot_manifest_sha256": "215f94039f8bd41cdccb58495c0573f7b2b133e3f762e63eedaad48e8efa28b4",
+  "source_data_identical": true,
+  "status": "RESEARCH_PATCHED_1_OF_90_ONLY_NOT_PRODUCTION",
+  "unchanged_source_count": 89
+}
