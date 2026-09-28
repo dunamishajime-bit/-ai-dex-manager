@@ -21,8 +21,15 @@ test("all HP app/components source removes excluded strategy wording and routes"
     return /\bZEC\b|\/zec\b/i.test(source) ? [file] : [];
   });
   assert.deepEqual(matches, []);
-  assert.equal(existsSync("app/decision-status/zec/page.tsx"), false);
   assert.equal(existsSync("app/api/system/hype-zec-status/route.ts"), false);
+  for (const [file, target] of [
+    ["app/decision-status/zec/page.tsx", "/decision-status"],
+    ["app/history/zec/page.tsx", "/history"],
+  ] as const) {
+    const source = readFileSync(file, "utf8");
+    assert.doesNotMatch(source, /\bZEC\b/i);
+    assert.match(source, new RegExp(`redirect\\("${target}"\\)`));
+  }
 });
 
 test("HYPE decision/status route remains read-only and does not expose the excluded sleeve", () => {
