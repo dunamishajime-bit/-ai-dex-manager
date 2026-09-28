@@ -26,12 +26,12 @@ function exactSha(value: unknown, label: string) {
   return sha;
 }
 
-export function assertRecoverableHypeMarketDataState(value: unknown, targetSha: string): HypeZecLongRunnerState {
+export function assertRecoverableHypeMarketDataState(value: unknown, targetSha: string, sourceSha = targetSha): HypeZecLongRunnerState {
   const state = value as HypeZecLongRunnerState;
   if (!state || state.schema !== HYPE_ZEC_LONG_STATE_SCHEMA || state.mode !== "LIVE") {
     throw new Error("HYPE_MARKET_DATA_RECOVERY_STATE_SCHEMA");
   }
-  if (!SHA.test(targetSha) || String(state.runtimeCommitSha || "").toLowerCase() !== targetSha.toLowerCase()) {
+  if (!SHA.test(targetSha) || !SHA.test(sourceSha) || String(state.runtimeCommitSha || "").toLowerCase() !== sourceSha.toLowerCase()) {
     throw new Error("HYPE_MARKET_DATA_RECOVERY_RUNTIME_SHA_MISMATCH");
   }
   if ((state.positions || []).length > 0 || state.pending) {
@@ -44,8 +44,8 @@ export function assertRecoverableHypeMarketDataState(value: unknown, targetSha: 
   return state;
 }
 
-export function buildRecoveredHypeMarketDataState(state: HypeZecLongRunnerState, targetSha: string, updatedAt = Date.now()): HypeZecLongRunnerState {
-  assertRecoverableHypeMarketDataState(state, targetSha);
+export function buildRecoveredHypeMarketDataState(state: HypeZecLongRunnerState, targetSha: string, updatedAt = Date.now(), sourceSha = targetSha): HypeZecLongRunnerState {
+  assertRecoverableHypeMarketDataState(state, targetSha, sourceSha);
   const reason = "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY";
   return {
     ...state,
@@ -102,6 +102,7 @@ async function main() {
   }
 
   const targetSha = exactSha(arg("--sha"), "TARGET");
+  const sourceSha = exactSha(arg("--from-sha") || targetSha, "SOURCE");
   if (arg("--ack") !== HYPE_MARKET_DATA_RECOVERY_ACK) throw new Error("HYPE_MARKET_DATA_RECOVERY_ACK_REQUIRED");
   const currentSha = (await readFile("/home/deploy/disdex-trading/current/.disdex-release-sha", "utf8")).trim().toLowerCase();
   if (currentSha !== targetSha) throw new Error("HYPE_MARKET_DATA_RECOVERY_CURRENT_SHA_MISMATCH");
@@ -109,7 +110,7 @@ async function main() {
 
   const statePath = resolve(process.env.DISDEX_HYPE_ZEC_STATE_PATH || "/var/lib/disdex/hype-zec-long/runner.json");
   const before = JSON.parse(await readFile(statePath, "utf8")) as HypeZecLongRunnerState;
-  assertRecoverableHypeMarketDataState(before, targetSha);
+  assertRecoverableHypeMarketDataState(before, targetSha, sourceSha);
   const client = new AsterV3Client({
     baseUrl: process.env.ASTER_FUTURES_BASE_URL,
     userAddress: process.env.ASTER_USER_ADDRESS,
@@ -129,12 +130,12 @@ async function main() {
     if (sidecarPositions.length) throw new Error(`HYPE_MARKET_DATA_RECOVERY_POSITION_PRESENT:${sidecarPositions.map((row) => row.symbol).join(",")}`);
     if (sidecarOrders.length) throw new Error(`HYPE_MARKET_DATA_RECOVERY_OPEN_ORDER_PRESENT:${sidecarOrders.map((row) => row.clientOrderId).join(",")}`);
     const backupPath = await archiveState(statePath, targetSha);
-    const recovered = buildRecoveredHypeMarketDataState(before, targetSha);
+    const recovered = buildRecoveredHypeMarketDataState(before, targetSha, Date.now(), sourceSha);
     await atomicWrite(statePath, recovered);
     await normalizeLiveStateOwnership(statePath, { label: "HYPE_MARKET_DATA_RECOVERY_STATE" });
     const after = JSON.parse(await readFile(statePath, "utf8")) as HypeZecLongRunnerState;
     if (after.manualReview || after.pending || (after.positions || []).length) throw new Error("HYPE_MARKET_DATA_RECOVERY_POSTCHECK_FAILED");
-    console.log(JSON.stringify({ ...gate, status: "HYPE_MARKET_DATA_RECOVERY_PASS", targetSha, statePath, backupPath, sidecarPositions: 0, sidecarOpenOrders: 0, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 }));
+    console.log(JSON.stringify({ ...gate, status: "HYPE_MARKET_DATA_RECOVERY_PASS", sourceSha, targetSha, statePath, backupPath, sidecarPositions: 0, sidecarOpenOrders: 0, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 }));
   } finally {
     await handle.release();
   }
