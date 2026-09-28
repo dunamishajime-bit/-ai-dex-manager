@@ -1,0 +1,173 @@
+name: Research Aster V12 Additive Alternative Route Grid Five Logic
+on:
+  push:
+    branches: [research/v12-additive-route-grid-20260928]
+    paths:
+      - "research/formal_five_bt/v12_additive_route_grid.py"
+      - ".github/workflows/v12-additive-route-grid-five-logic-20260928.yml"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: v12-additive-route-grid-five-logic-20260928
+  cancel-in-progress: false
+jobs:
+  five-logic:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    env:
+      DATA: /tmp/v12-additive-research/aster
+      SCANS: /tmp/v12-additive-research/scans
+      CAND: /tmp/v12-additive-research/candidates
+      V52_DATA: /tmp/v12-additive-research/stock-data
+      V52_SCAN: /tmp/v12-additive-research/stock-scan
+      V52_LEDGER: /tmp/v12-additive-research/stock-ledger
+      BASE: /tmp/v12-additive-research/formal-original-combo
+      GRID: /tmp/v12-additive-research/grid
+      REPORT: docs/research/results/v12-additive-route-grid-20260928
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/v12-additive-route-grid-20260928
+          fetch-depth: 1
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Verify research code and restore exact audited 90-file V12 production source
+        run: |
+          python -m py_compile research/formal_five_bt/v12_additive_route_grid.py
+          git -c protocol.version=2 fetch --filter=blob:none --no-tags --depth=1 origin a09ea45ca3cbd72100f9eb0eaae499039c40b6a0
+          python -m research.formal_five_bt.restore_snapshot
+      - name: Acquire original Aster historical H1 and funding with exact BTC 1m-backed repair
+        run: |
+          python -m research.formal_five_bt.acquire --data-root "$DATA" --venues aster
+          python -m research.formal_five_bt.aster_h1_reconcile --data-root "$DATA" --allow-valid-noop
+      - name: Fetch unchanged official ECB historical USDJPY proxy, not market FX fills
+        run: python -m research.formal_five_bt.fx_ecb --data-root "$DATA"
+      - name: Run immutable original V12/PENGU/FET and Q102 causal signal/exit engine
+        run: |
+          python -m research.formal_five_bt.signal_scan \
+            --data-root "$DATA" --output-root "$SCANS/baseline-signal-scan" --strategies V12 PENGU FET
+          python -m research.formal_five_bt.signal_scan \
+            --data-root "$DATA" --output-root "$SCANS/baseline-signal-scan-q102" --strategies Q102 --q102-fast
+          python -m research.formal_five_bt.crypto_price_model \
+            --data-root "$DATA" --scan-root "$SCANS" --output-root "$CAND"
+      - name: Independently reconstruct same V52 Yahoo and Aster stock future execution price model
+        run: |
+          python -m research.formal_five_bt.aster_stock_acquire --data-root "$V52_DATA"
+          python -m research.formal_five_bt.yahoo_acquire --output-root "$V52_DATA"
+          python -m research.formal_five_bt.v52_price_only_scan \
+            --data-root "$V52_DATA" --output-root "$V52_SCAN"
+          python -m research.formal_five_bt.v52_research_ledger \
+            --data-root "$V52_DATA" --scan-root "$V52_SCAN" \
+            --output-root "$V52_LEDGER" --round-trip-cost-bps 11
+          mkdir -p "$DATA/normalized" "$DATA/normalized/aster/funding"
+          cp -a "$V52_DATA/normalized/aster_stock" "$DATA/normalized/aster_stock"
+          cp "$V52_DATA/aster-stock-hourly-coverage.json" "$DATA/aster-stock-hourly-coverage.json"
+          if [ -d "$V52_DATA/normalized/aster_stock/funding" ]; then
+            cp -a "$V52_DATA/normalized/aster_stock/funding/." "$DATA/normalized/aster/funding/"
+          fi
+      - name: Exact baseline formal 5-logic integration with frozen Q102 caps, FET gates, and PENGU
+        run: |
+          python -m research.formal_five_bt.fet_dual_gate_combo_bt \
+            --data-root "$DATA" --candidate-root "$CAND" \
+            --output-root "$BASE" --v52-ledger-root "$V52_LEDGER" --ecb-fx-root "$DATA"
+      - name: Require exact original five-logic baseline reproduction BEFORE variant research
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,math,os
+          from pathlib import Path
+          p=Path(os.environ["BASE"])/"requested-combo-summary.json"
+          s=json.loads(p.read_text())["cases"]["BRK0P75_MR0P75_FET1_DUAL_GATE"]
+          assert s["status"]=="ALL_FIVE_H1_PRICE_MODEL_NOT_FORMAL_L2_VERIFIED"
+          assert s["v52_model_complete"] is True
+          assert s["v52_missing_market_data_selected_candidates_excluded"]==0
+          anchor={"PRICE_MODEL_8BPS":(155417832.2837019,-.2283242854192271,2.464228135438672,1046),
+                  "PRICE_MODEL_10BPS":(130287867.06655651,-.22944963848991073,2.4176125792561076,1046)}
+          proof={}
+          for row in s["scenarios"]:
+            exp=anchor[row["scenario_id"]]
+            got=(row["final_equity_jpy"],row["maximum_mtm_drawdown"],row["profit_factor"],row["closed_trades"])
+            assert math.isclose(got[0],exp[0],abs_tol=.10,rel_tol=0),(row["scenario_id"],got)
+            assert math.isclose(got[1],exp[1],abs_tol=1e-8,rel_tol=0)
+            assert math.isclose(got[2],exp[2],abs_tol=1e-8,rel_tol=0)
+            assert got[3]==exp[3]
+            assert row["accounting_reconciliation"]["status"]=="PASS"
+            proof[row["scenario_id"]]=dict(ending_jpy=got[0],dd=got[1],pf=got[2],trades=got[3])
+          d=Path(os.environ["REPORT"]);d.mkdir(parents=True,exist_ok=True)
+          (d/"baseline-parity.json").write_text(json.dumps({"status":"ORIGINAL_FIVE_LOGIC_EXACT_PASS",
+            "period":"2025-08-10..2026-08-10","scenarios":proof,
+            "l2_orderbook_fill_verified":False,"research_only":True},indent=2)+"\n")
+          print("FROZEN_FIVE_LOGIC_BASELINE_EXACT_PARITY_PASS",proof,flush=True)
+          PY
+      - name: Analyze predeclared additive V12 extra routes with exact original WR and full five-logic fills, 8/10/30bps
+        run: |
+          python -m research.formal_five_bt.v12_additive_route_grid \
+            --root "$DATA" --baseline-scans "$SCANS" --baseline-candidates "$CAND" \
+            --v52-ledger "$V52_LEDGER" --ecb "$DATA" --output "$GRID"
+      - name: Produce compact unambiguous results and preserve provenance for all candidates
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          root=Path(os.environ["GRID"]);dst=Path(os.environ["REPORT"])
+          d=json.loads((root/"grid-summary.json").read_text())
+          base=json.loads((dst/"baseline-parity.json").read_text())["scenarios"]
+          rows=[]
+          for name,item in d["variants"].items():
+            metrics={}
+            for scenario,values in item["scenarios"].items():
+              anchor=base.get(scenario)
+              metrics[scenario]={
+                "ending_jpy":values["final_equity_jpy"],"max_dd":values["maximum_mtm_drawdown"],
+                "pf":values["profit_factor"],"win_rate":values["win_rate"],
+                "trades":values["closed_trades"],"extra_accepted":values["extra_accepted"],
+                "strategy_trades":values["by_strategy_trades"],
+                "strategy_pnl_jpy":values["by_strategy_pnl_jpy"],
+                "vs_baseline_profit_positive":values["final_equity_jpy"]>anchor["ending_jpy"] if anchor else None,
+                "vs_baseline_trade_count_positive":values["closed_trades"]>anchor["trades"] if anchor else None,
+                "vs_baseline_dd_nonworsening":values["maximum_mtm_drawdown"]>=anchor["dd"] if anchor else None}
+            rows.append({"variant":name,"policy":item["policy"],"extra_candidates":item["extra_candidates_frozen_lifecycle"],
+                         "signals":item["signal_audit"],"scenarios":metrics})
+          out={"status":"COMPLETED_FULL_FIVE_LOGIC_RESEARCH_GRID_NOT_L2_VERIFIED",
+               "source_runtime_sha":d["source_runtime_sha"],
+               "market_manifest_sha256":d["market_data_manifest_sha256"],
+               "original_raw_v12_sha256":d["raw_v12_sha256"],
+               "baseline_source_candidates_exact_replay":d["baseline_v12_candidates_exact_replay"],
+               "win_rate_gate_source_parity":d["win_rate_gate_reconstruction"],
+               "baseline":base,"variants":rows,
+               "limitations":["Same-period hypothesis grid, not independent out-of-sample confirmation",
+                              "All candidate features computed from past closed Aster H2 bars",
+                              "Historical Aster order-book fills/margin-buffer simulation not verified",
+                              "Eight/ten/thirty bps price-model costs, thirty not SEVERE orderbook"] }
+          (dst/"additive-route-grid-results.json").write_text(json.dumps(out,indent=2,sort_keys=True,ensure_ascii=False)+"\n")
+          for row in rows:
+            s=row["scenarios"]["PRICE_MODEL_10BPS"]
+            print("ADDITIVE_GRID_10BPS",json.dumps({"variant":row["variant"],
+                 "ending_jpy":s["ending_jpy"],"max_dd":s["max_dd"],"trades":s["trades"],
+                 "extra_accepted":s["extra_accepted"],
+                 "profit_and_trade_both_up":s["vs_baseline_profit_positive"] and s["vs_baseline_trade_count_positive"],
+                 "dd_nonworsening":s["vs_baseline_dd_nonworsening"]}),flush=True)
+          PY
+      - name: Commit ONLY fully completed compact research findings, never overwrite production
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$REPORT"
+          git commit -m "Research: Aster five-logic additive V12 alternative route 8/10/30bps verified grid [skip ci]"
+          git push origin HEAD:research/v12-additive-route-grid-20260928
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v12-additive-route-five-logic-complete-evidence
+          if-no-files-found: warn
+          retention-days: 90
+          path: |
+            docs/research/results/v12-additive-route-grid-20260928/
+            /tmp/v12-additive-research/grid/
