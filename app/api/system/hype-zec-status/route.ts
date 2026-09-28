@@ -11,7 +11,7 @@ export async function GET(req:NextRequest){
     return NextResponse.json(data,{headers:{"Cache-Control":"private, no-store"}});
   }catch(error){
     return NextResponse.json({ok:false,readOnly:true,tradingMutation:0,
-      error:error instanceof Error?error.message:"HYPE/ZEC stateを取得できません"},
+      error:error instanceof Error?error.message:"HYPE stateを取得できません"},
       {status:503,headers:{"Cache-Control":"private, no-store"}});
   }
 }
