@@ -39,7 +39,6 @@ export type TradeHistoryAttributionTone =
   | "v52-v50"
   | "fet"
   | "hype"
-  | "zec"
   | "alternate-route"
   | "test-order"
   | "logic"
@@ -93,7 +92,6 @@ export function getTradeHistoryAttributionTone(attribution?: TradeHistoryAttribu
   if (labels.includes("PENGU")) return "pengu";
   if (labels.includes("V52")) return "v52";
   if (labels.includes("HYPE_LONG") || /\bHYPE\b/.test(labels)) return "hype";
-  if (labels.includes("ZEC_LONG") || /\bZEC\b/.test(labels)) return "zec";
   if (labels.includes("FET")) return "fet";
   if (labels.includes("V12")) return "v12";
   return attribution.classification === "alternate-route" ? "alternate-route" : attribution.classification === "logic" ? "logic" : "unknown";
@@ -113,7 +111,6 @@ function extractRanking(reason: string) {
 function logicLabel(strategyId: string, reason: string) {
   const normalized = strategyId.toUpperCase();
   if (normalized === "HYPE_LONG" || normalized === "HYPE") return "HYPE";
-  if (normalized === "ZEC_LONG" || normalized === "ZEC") return "ZEC";
   if (normalized.includes("QUALITY102") || normalized === "Q102") {
     return reason.toUpperCase().includes("CAUSAL_V4") ? "Q102 / CAUSAL_V4" : "Q102";
   }
@@ -130,7 +127,6 @@ function explicitLogicId(strategyId: string, reason: string) {
   if (label) return label;
   const upper = reason.toUpperCase();
   if (/HYPE_ZEC_HYPE_LONG|\bHYPE_LONG\b/.test(upper)) return "HYPE";
-  if (/HYPE_ZEC_ZEC_LONG|\bZEC_LONG\b/.test(upper)) return "ZEC";
   if (/QUALITY102|Q102/.test(upper)) return upper.includes("CAUSAL_V4") ? "Q102 / CAUSAL_V4" : "Q102";
   if (/PENGU/.test(upper)) return "PENGU";
   if (/V12/.test(upper)) return "V12";
