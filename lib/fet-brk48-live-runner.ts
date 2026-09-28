@@ -19,6 +19,7 @@ import {
 } from "@/lib/disdex-managed-protective-orders";
 import type { DirectOpenOrder, DirectPosition, DirectTradeExecutor } from "@/lib/direct-trade-executor";
 import { buildFetBrk48Signal, normalizeFetH1, type FetBrk48Signal } from "@/lib/fet-brk48-signal";
+import { evaluateFetBrk48PreEntryGates } from "@/lib/fet-brk48-preentry-gates";
 import {
   readFetBrk48State,
   writeFetBrk48State,
@@ -500,6 +501,35 @@ export class FetBrk48LiveRunner {
       if (!signal) return { status: "no-signal", message: "FET_NO_BRK48_SIGNAL", ordersSent: 0 };
       if (state.lastReferenceTs && signal.referenceTs <= state.lastReferenceTs) {
         return { status: "held", message: "FET_SIGNAL_ALREADY_PROCESSED", ordersSent: 0, signal };
+      }
+
+      // Match the accepted annual BT: both FET blocks use only contiguous
+      // finalized FET/BTC H1 bars strictly BEFORE this entry boundary.
+      // A data failure blocks ONLY new FET entries; never exits held positions
+      // and never activates the cross-strategy kill switch.
+      let entryGate: ReturnType<typeof evaluateFetBrk48PreEntryGates>;
+      try {
+        const btcH1 = normalizeFetH1(
+          await this.deps.client.getKlines("BTCUSDT", "1h", 32),
+          now,
+        );
+        entryGate = evaluateFetBrk48PreEntryGates(
+          normalizeFetH1(klines, now),
+          btcH1,
+          signal.entryTs,
+        );
+      } catch (error) {
+        return {
+          status: "blocked",
+          message: "FET_PREENTRY_GATE_SOURCE_UNVERIFIED:" + String(error),
+          ordersSent: 0,
+          signal,
+        };
+      }
+      if (!entryGate.allow) {
+        state.lastReferenceTs = Math.max(state.lastReferenceTs || 0, signal.referenceTs);
+        await writeFetBrk48State(this.deps.statePath, state);
+        return { status: "blocked", message: entryGate.reason, ordersSent: 0, signal };
       }
 
       await assertSharedKillSwitchAllowsNewEntry();
