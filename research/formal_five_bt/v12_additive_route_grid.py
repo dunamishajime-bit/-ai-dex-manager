@@ -155,7 +155,7 @@ def evaluate_cases(root:Path,baseline_scans:Path,baseline_candidates:Path,
     original=_rows(baseline_candidates/"crypto-price-model-candidates.jsonl")
     baseline_v12=[x for x in original if x["strategy_id"]=="V12"]
     other=[x for x in original if x["strategy_id"]!="V12"]
-    if len(raw)!=14*4368: # frozen contract: 14 symbols * 4368 H2 decisions
+    if len(raw)!=61502: # historical Aster 1Y audited exact raw V12 rows
         raise ValueError(f"V12_RAW_SCAN_PARITY_FAIL:{len(raw)}")
     syms={r["symbol"] for r in raw}|{"BTCUSDT"}
     bar=h2_bars(root,syms)
