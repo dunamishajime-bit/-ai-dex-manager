@@ -13,6 +13,7 @@ export const TRADING_RUNNERS = Object.freeze([
   "QUALITY102_CAUSAL_V1",
   "V52",
   "FET_BRK48_RESIDUAL",
+  "HYPE_TREND_LONG",
 ]);
 
 function exactSha(value) {

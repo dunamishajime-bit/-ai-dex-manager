@@ -1,0 +1,108 @@
+name: V12 normal gate plus HYPE live validation
+
+on:
+  push:
+    branches: [codex/v12-normal-gate-hype-live-20260928]
+    paths:
+      - "config/v12X1AllRuntime.ts"
+      - "config/hypeTrendLongPolicy.ts"
+      - "config/hypeZecLongRuntime.ts"
+      - "config/integratedProductionRiskPolicy.ts"
+      - "lib/hype-trend-long-*.ts"
+      - "lib/hype-zec-long-*.ts"
+      - "scripts/disdex-hype-trend-live-runner.ts"
+      - "scripts/disdex-hype-zec-long-live-runner.ts"
+      - "ops/systemd/disdex-hype-long@.service"
+      - "scripts/ops/root/disdex-current-runtime-wiring"
+      - "scripts/ops/root/disdex-live-operator-activation-gate.mjs"
+      - "scripts/ops/root/disdex-runner-health-snapshot-current.mjs"
+      - "scripts/ops/root/disdex-runner-watchdog-current.mjs"
+      - "tests/hype-*.test.*"
+      - ".github/workflows/v12-normal-gate-hype-live-ci-20260928.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-v12-and-hype:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - name: Install locked dependencies without lifecycle hooks
+        run: npm ci --ignore-scripts
+      - name: Verify V12 normal-only thresholds and approved HYPE delta
+        shell: bash
+        run: |
+          git fetch --filter=blob:none --depth=1 origin 5f58b02fb679dba48a398139ddb3076ba7f6ea39
+          python3 - <<'PY'
+          import pathlib, subprocess
+          old = subprocess.check_output(["git", "show", "a09ea45ca3cbd72100f9eb0eaae499039c40b6a0:config/v12X1AllRuntime.ts"], text=True)
+          new = pathlib.Path("config/v12X1AllRuntime.ts").read_text()
+          assert new == old.replace("minimumVolumeRatio: 0.9845", "minimumVolumeRatio: 0.80").replace("neutralScoreThreshold: 1.4649", "neutralScoreThreshold: 1.00")
+          assert "minimumVolumeRatio: 0.80" in new and "neutralScoreThreshold: 1.00" in new
+          assert "relaxedRegimeMinimumScore" not in new
+          changed = subprocess.check_output(["git", "diff", "--name-only", "5f58b02fb679dba48a398139ddb3076ba7f6ea39", "HEAD"], text=True).splitlines()
+          allowed = {
+            ".github/workflows/v12-normal-gate-hype-live-ci-20260928.yml",
+            "package.json",
+            "docs/superpowers/plans/2026-09-28-v12-normal-gate-hype-live.md",
+            "config/hypeTrendLongPolicy.ts", "config/hypeZecLongPolicy.ts", "config/hypeZecLongRuntime.ts", "config/integratedProductionRiskPolicy.ts",
+            "docs/implementation/HYPE_ZEC_PRIORITY_SIDECAR_CONTRACT_20260927.md",
+            "docs/superpowers/plans/2026-09-27-hype-zec-priority-sleeves.md",
+            "lib/disdex-aster-portfolio-classifier.ts", "lib/disdex-managed-protective-orders.ts", "lib/disdex-pending-exposure-registry.ts",
+            "lib/disdex-quality102-causal-v1-runner.ts", "lib/disdex-strict-portfolio-planner.ts",
+            "lib/fet-brk48-live-runner.ts", "lib/hype-trend-long-runner.ts", "lib/hype-trend-long-signal.ts",
+            "lib/hype-zec-long-market-data.ts", "lib/hype-zec-long-runner.ts", "lib/hype-zec-long-sleeves.ts",
+            "lib/hype-zec-long-runner-state.ts", "lib/hype-zec-preemption-executor.ts", "lib/hype-zec-preemption.ts",
+            "lib/hype-zec-priority-capacity.ts", "lib/pengu-dual-ls-v2-portfolio-runner.ts",
+            "lib/v12-live-execution-engine.ts", "lib/v12-strict-live-adapter.ts",
+            "ops/systemd/disdex-hype-long@.service", "scripts/disdex-hype-trend-live-runner.ts",
+            "scripts/disdex-hype-zec-core-preempt.ts", "scripts/disdex-hype-zec-long-live-runner.ts",
+            "scripts/ops/root/disdex-current-runtime-wiring",
+            "scripts/ops/root/disdex-live-operator-activation-gate.mjs", "scripts/ops/root/disdex-runner-health-snapshot-current.mjs",
+            "scripts/ops/root/disdex-runner-watchdog-current.mjs",
+            "scripts/disdex_v52_aster_only_live_engine.py",
+            "scripts/v12-x1-all-frozen-artifact-parity-selftest.ts",
+            "tests/hype-systemd-contract.test.mjs", "tests/hype-trend-live-contract.test.ts", "tests/hype-trend-runner-gate.test.ts",
+            "tests/hype-zec-long-sleeves.test.ts", "tests/hype-zec-long-state.test.ts", "tests/hype-zec-policy.test.ts",
+            "tests/hype-zec-preemption-executor.test.ts", "tests/hype-zec-preemption.test.ts", "tests/hype-zec-priority-capacity.test.ts",
+            "tests/hype-zec-runner-gate.test.ts", "tests/pending-exposure-registry.test.ts",
+            "tests/final-integrated-logic-contract.test.ts", "tests/live_strategy_contract_parity.test.ts",
+          }
+          unexpected = sorted(set(changed) - allowed)
+          assert not unexpected, unexpected
+          print("V12_NORMAL_GATE_AND_APPROVED_HYPE_DELTA_PASS")
+          PY
+      - name: TypeScript compile
+        run: npm run strategy:v12-x1-all:typecheck
+      - name: V12 normal threshold and unchanged rescue routes
+        run: npx tsx scripts/v12-normal-gate-only-adoption-selftest.ts
+      - name: V12 production safety selftest
+        run: npm run strategy:v12-x1-all:selftest
+      - name: V12 current contract and historical artifact parity
+        run: |
+          npx tsx scripts/v12-x1-all-frozen-artifact-parity-selftest.ts
+          npx tsx --test tests/final-integrated-logic-contract.test.ts tests/live_strategy_contract_parity.test.ts
+      - name: HYPE trend contract and runner gate tests
+        run: npx tsx --test tests/hype-systemd-contract.test.mjs tests/hype-trend-live-contract.test.ts tests/hype-trend-runner-gate.test.ts
+      - name: Existing HYPE/ZEC safety regression tests
+        run: npm run strategy:hype-zec-long:selftest
+      - name: Shared Risk and Q102 safety selftests
+        run: npm run strategy:shared-crypto-risk:selftest && npm run strategy:quality102-causal-v1:runner:selftest
+      - name: Runtime wiring and no-order assertions
+        run: |
+          node --check scripts/ops/root/disdex-live-operator-activation-gate.mjs
+          node --check scripts/ops/root/disdex-runner-health-snapshot-current.mjs
+          node --check scripts/ops/root/disdex-runner-watchdog-current.mjs
+          bash -n scripts/ops/root/disdex-current-runtime-wiring
+          ! grep -Eq "submitOrder|placeMarket|I_ACCEPT_REAL_MONEY" scripts/v12-normal-gate-only-adoption-selftest.ts
+      - name: Production build
+        run: npm run build

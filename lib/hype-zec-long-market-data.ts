@@ -3,7 +3,9 @@ import type { HypeZecCandle } from "./hype-zec-long-sleeves";
 
 export interface HypeZecLongMarketData {
   btc15m: HypeZecCandle[];
+  btc1h: HypeZecCandle[];
   hype15m: HypeZecCandle[];
+  hype1h: HypeZecCandle[];
   hype1m: HypeZecCandle[];
   zec15m: HypeZecCandle[];
   zec1m: HypeZecCandle[];
@@ -31,22 +33,27 @@ function normalize(rows: AsterKline[], symbol: string, intervalMs: number, now: 
 }
 
 export class HypeZecAsterMarketDataProvider {
-  constructor(private readonly client: AsterV3Client, private readonly options: { fifteenMinuteLimit?: number; oneMinuteLimit?: number; now?: () => number } = {}) {}
+  constructor(private readonly client: AsterV3Client, private readonly options: { fifteenMinuteLimit?: number; oneHourLimit?: number; oneMinuteLimit?: number; now?: () => number } = {}) {}
 
   async load(): Promise<HypeZecLongMarketData> {
     const now = (this.options.now || Date.now)();
     const fifteenLimit = Math.max(80, Math.min(1500, this.options.fifteenMinuteLimit ?? 240));
+    const oneHourLimit = Math.max(300, Math.min(1500, this.options.oneHourLimit ?? 360));
     const oneLimit = Math.max(30, Math.min(1500, this.options.oneMinuteLimit ?? 240));
-    const [btc15, hype15, hype1, zec15, zec1] = await Promise.all([
+    const [btc15, btc1h, hype15, hype1h, hype1, zec15, zec1] = await Promise.all([
       this.client.getKlines("BTCUSDT", "15m", fifteenLimit),
+      this.client.getKlines("BTCUSDT", "1h", oneHourLimit),
       this.client.getKlines("HYPEUSDT", "15m", fifteenLimit),
+      this.client.getKlines("HYPEUSDT", "1h", oneHourLimit),
       this.client.getKlines("HYPEUSDT", "1m", oneLimit),
       this.client.getKlines("ZECUSDT", "15m", fifteenLimit),
       this.client.getKlines("ZECUSDT", "1m", oneLimit),
     ]);
     return {
       btc15m: normalize(btc15, "BTCUSDT:15m", 15 * 60_000, now),
+      btc1h: normalize(btc1h, "BTCUSDT:1h", 60 * 60_000, now),
       hype15m: normalize(hype15, "HYPEUSDT:15m", 15 * 60_000, now),
+      hype1h: normalize(hype1h, "HYPEUSDT:1h", 60 * 60_000, now),
       hype1m: normalize(hype1, "HYPEUSDT:1m", 60_000, now),
       zec15m: normalize(zec15, "ZECUSDT:15m", 15 * 60_000, now),
       zec1m: normalize(zec1, "ZECUSDT:1m", 60_000, now),

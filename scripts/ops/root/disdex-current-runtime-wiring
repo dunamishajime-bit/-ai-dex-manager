@@ -136,6 +136,7 @@ validate_release_artifacts() {
     "$CURRENT_RELEASE/scripts/disdex-current-live-target-readiness.ts"
     "$CURRENT_RELEASE/scripts/ops/root/disdex-live-operator-activation-gate.mjs"
     "$CURRENT_RELEASE/scripts/disdex-fet-brk48-live-runner.ts"
+    "$CURRENT_RELEASE/scripts/disdex-hype-trend-live-runner.ts"
     "$CURRENT_RELEASE/scripts/disdex-hype-zec-long-live-runner.ts"
     "$CURRENT_RELEASE/scripts/disdex-hype-zec-core-preempt.ts"
     "$CURRENT_RELEASE/scripts/disdex_v96_v52_margin_guard_runtime.py"
@@ -211,6 +212,7 @@ set_units() {
   Q102_RANKING_OBSERVER_SERVICE="disdex-quality102-ranking-observer@${DEPLOYED_SHA}.service"
   Q102_RANKING_OBSERVER_TIMER="disdex-quality102-ranking-observer@${DEPLOYED_SHA}.timer"
   FET_UNIT="disdex-fet-brk48@${DEPLOYED_SHA}.service"
+  HYPE_UNIT="disdex-hype-long@${DEPLOYED_SHA}.service"
   V52_UNIT="disdex-v52-aster-only@${DEPLOYED_SHA}.service"
   MARGIN_UNIT="disdex-v12-v52-margin-guard@${DEPLOYED_SHA}.service"
   SHARED_RISK_UNIT="disdex-shared-crypto-risk@${DEPLOYED_SHA}.service"
@@ -237,6 +239,7 @@ show_plan() {
   printf 'q102RankingObserverService=%s\n' "$Q102_RANKING_OBSERVER_SERVICE"
   printf 'q102RankingObserverTimer=%s\n' "$Q102_RANKING_OBSERVER_TIMER"
   printf 'fetUnit=%s\n' "$FET_UNIT"
+  printf 'hypeUnit=%s\n' "$HYPE_UNIT"
   printf 'v52Unit=%s\n' "$V52_UNIT"
   printf 'marginUnit=%s\n' "$MARGIN_UNIT"
   printf 'v52LegacyCryptoState=%s\n' "$V52_LEGACY_CRYPTO_ROOT"
@@ -261,7 +264,7 @@ show_plan() {
 
 check_units() {
   local unit state load_state
-  for unit in "$V12_UNIT" "$PENGU_UNIT" "$Q102_UNIT" "$FET_UNIT" "$V52_UNIT" "$MARGIN_UNIT" "$SHARED_RISK_UNIT"; do
+  for unit in "$V12_UNIT" "$PENGU_UNIT" "$Q102_UNIT" "$FET_UNIT" "$HYPE_UNIT" "$V52_UNIT" "$MARGIN_UNIT" "$SHARED_RISK_UNIT"; do
     load_state="$(systemctl show "$unit" -p LoadState --value 2>/dev/null || true)"
     state="$(systemctl show "$unit" -p ActiveState --value 2>/dev/null || true)"
     printf 'unit=%s loadState=%s activeState=%s\n' "$unit" "${load_state:-unknown}" "${state:-unknown}"
@@ -359,7 +362,7 @@ reset_stale_release_failed_units() {
   local unit
   while read -r unit _; do
     [[ -n "$unit" ]] || continue
-    [[ "$unit" =~ ^disdex-(v12-x1-all|pengu-dual-ls-v2|quality102-causal-v1|v52-aster-only|shared-crypto-risk|v12-v52-margin-guard)@[0-9a-f]{40}\.service$ ]] || continue
+    [[ "$unit" =~ ^disdex-(v12-x1-all|pengu-dual-ls-v2|quality102-causal-v1|fet-brk48|hype-long|v52-aster-only|shared-crypto-risk|v12-v52-margin-guard)@[0-9a-f]{40}\.service$ ]] || continue
     [[ "$unit" == *"@${DEPLOYED_SHA}.service" ]] && continue
     systemctl reset-failed "$unit" >/dev/null 2>&1 || true
   done < <(systemctl list-units --all --type=service --state=failed --no-legend 2>/dev/null || true)
@@ -435,7 +438,7 @@ assert_current_live_target_ready() {
 operator_activation_all_trading_ready() {
   local runner
   local gate="$CURRENT_RELEASE/scripts/ops/root/disdex-live-operator-activation-gate.mjs"
-  for runner in V12_X1_ALL PENGU_V8 QUALITY102_CAUSAL_V1 V52 FET_BRK48_RESIDUAL; do
+  for runner in V12_X1_ALL PENGU_V8 QUALITY102_CAUSAL_V1 V52 FET_BRK48_RESIDUAL HYPE_TREND_LONG; do
     /usr/bin/node "$gate"       --release-root "$CURRENT_RELEASE"       --sha "$DEPLOYED_SHA"       --runner "$runner"       --activation-path "$OPERATOR_ACTIVATION_PATH" >/dev/null 2>&1 || return 1
   done
   return 0
@@ -515,20 +518,23 @@ DISDEX_V52_STOCK_GROSS_CAP=4.0
 DISDEX_V52_V11_GROSS_CAP=2.0
 DISDEX_V52_V50_GROSS_CAP=2.0
 DISDEX_V52_PORTFOLIO_GROSS_CAP=4.25
-DISDEX_HYPE_ZEC_MODE=SHADOW
-DISDEX_HYPE_ZEC_ENABLED=false
-DISDEX_HYPE_ZEC_LIVE_EXECUTION_ENABLED=false
-DISDEX_HYPE_ZEC_PRODUCTION_CONFIG_LIVE_ENABLED=false
 DISDEX_HYPE_ZEC_OPERATOR_ARMED=false
 DISDEX_HYPE_ZEC_PREEMPTION_ENABLED=false
 DISDEX_HYPE_ZEC_RUNTIME_SHA=${DEPLOYED_SHA}
 DISDEX_HYPE_ZEC_STATE_PATH=/var/lib/disdex/hype-zec-long/runner.json
 DISDEX_HYPE_ZEC_PREEMPTION_STATE_PATH=/var/lib/disdex/hype-zec-long/preemption.json
 DISDEX_HYPE_ZEC_CORE_PREEMPT_SCRIPT=${CURRENT_RELEASE}/scripts/disdex-hype-zec-core-preempt.ts
-DISDEX_HYPE_ZEC_MAX_GROSS=1.0
+DISDEX_HYPE_ZEC_MAX_GROSS=1.5
+HYPE_LONG_MAX_GROSS=1.5
 HYPE_LONG_RISK_PCT=5.0
 ZEC_LONG_RISK_PCT=4.5
 HYPE_ZEC_MAX_REDUCTION_FRACTION=0.5
+DISDEX_HYPE_ZEC_MODE=LIVE
+DISDEX_HYPE_ZEC_ENABLED=true
+DISDEX_HYPE_ZEC_LIVE_EXECUTION_ENABLED=true
+DISDEX_HYPE_ZEC_PRODUCTION_CONFIG_LIVE_ENABLED=true
+DISDEX_HYPE_ZEC_SIGNAL_MODE=TREND
+DISDEX_HYPE_ZEC_SYMBOLS=HYPEUSDT
 QUALITY102_CAUSAL_V1_MODE=LIVE
 QUALITY102_CAUSAL_V1_ENABLED=true
 QUALITY102_CAUSAL_V1_LIVE_TRADING_ENABLED=true
@@ -573,6 +579,8 @@ DISDEX_HEALTH_SNAPSHOT_Q102_EXPECTED_SHA=${DEPLOYED_SHA}
 DISDEX_HEALTH_SNAPSHOT_Q102_RELEASE_ROOT=${CURRENT_RELEASE}
 DISDEX_HEALTH_SNAPSHOT_FET_EXPECTED_SHA=${DEPLOYED_SHA}
 DISDEX_HEALTH_SNAPSHOT_FET_RELEASE_ROOT=${CURRENT_RELEASE}
+DISDEX_HEALTH_SNAPSHOT_HYPE_EXPECTED_SHA=${DEPLOYED_SHA}
+DISDEX_HEALTH_SNAPSHOT_HYPE_RELEASE_ROOT=${CURRENT_RELEASE}
 DISDEX_HEALTH_SNAPSHOT_HEALTH_ROOT=/var/lib/disdex/runner-health
 DISDEX_HEALTH_SNAPSHOT_KILL_SWITCH_PATH=${SHARED_ROOT}/kill-switch.json
 DISDEX_HEALTH_SNAPSHOT_V12_STATE_PATH=/var/lib/disdex/v12-x1-all/runner.json
@@ -580,6 +588,7 @@ DISDEX_HEALTH_SNAPSHOT_PENGU_STATE_PATH=${PENGU_STATE_ROOT}/runner-live.json
 DISDEX_HEALTH_SNAPSHOT_V52_STATE_PATH=/var/lib/disdex/v52-aster-only/runner-live.json
 DISDEX_HEALTH_SNAPSHOT_Q102_STATE_PATH=/var/lib/disdex/quality102-causal-v1/state.json
 DISDEX_HEALTH_SNAPSHOT_FET_STATE_PATH=/var/lib/disdex/fet-brk48-residual/state.json
+DISDEX_HEALTH_SNAPSHOT_HYPE_STATE_PATH=/var/lib/disdex/hype-zec-long/runner.json
 DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_STATE_PATH=/var/lib/disdex/shared/crypto-daily-risk.json
 DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_SERVICE_UNIT=${SHARED_RISK_UNIT}
 DISDEX_HEALTH_SNAPSHOT_MARGIN_STATE_PATH=/var/lib/disdex/shared/margin-risk/guard-live.json
@@ -600,6 +609,8 @@ DISDEX_WATCHDOG_Q102_EXPECTED_SHA=${DEPLOYED_SHA}
 DISDEX_WATCHDOG_Q102_RELEASE_ROOT=${CURRENT_RELEASE}
 DISDEX_WATCHDOG_FET_EXPECTED_SHA=${DEPLOYED_SHA}
 DISDEX_WATCHDOG_FET_RELEASE_ROOT=${CURRENT_RELEASE}
+DISDEX_WATCHDOG_HYPE_EXPECTED_SHA=${DEPLOYED_SHA}
+DISDEX_WATCHDOG_HYPE_RELEASE_ROOT=${CURRENT_RELEASE}
 DISDEX_WATCHDOG_SHARED_RISK_EXPECTED_SHA=${DEPLOYED_SHA}
 DISDEX_WATCHDOG_HEALTH_ROOT=/var/lib/disdex/runner-health
 DISDEX_WATCHDOG_STATE_PATH=/var/lib/disdex/runner-health/private/watchdog-current-state.json
@@ -610,7 +621,8 @@ DISDEX_WATCHDOG_V12_SERVICE_UNIT=${V12_UNIT}
 DISDEX_WATCHDOG_PENGU_SERVICE_UNIT=${PENGU_UNIT}
 DISDEX_WATCHDOG_V52_SERVICE_UNIT=${V52_UNIT}
 DISDEX_WATCHDOG_Q102_SERVICE_UNIT=${Q102_UNIT}
-DISDEX_WATCHDOG_FET_SERVICE_UNIT=${FET_UNIT}"
+DISDEX_WATCHDOG_FET_SERVICE_UNIT=${FET_UNIT}
+DISDEX_WATCHDOG_HYPE_SERVICE_UNIT=${HYPE_UNIT}"
 
   # EnvironmentFile entries from the base monitor units are historical and
   # must be cleared; otherwise systemd loads them after Environment= values
@@ -845,12 +857,14 @@ Environment=DISDEX_V96_KILL_SWITCH_FILE=/var/lib/disdex/shared/kill-switch.json"
   retarget_quality102_ranking_observer
 
   if operator_activation_all_trading_ready; then
+    systemctl enable --now "$HYPE_UNIT"
     systemctl enable --now disdex-v12-kill-switch-auto-repair.path
     systemctl enable --now disdex-runner-watchdog.timer
     systemctl enable --now disdex-runner-position-recovery.timer
     systemctl enable --now disdex-v12-three-hour-health-check.timer
     printf 'DISDEX_CURRENT_RUNTIME_OPERATOR_AUTOMATION_ENABLED\n'
   else
+    systemctl disable --now "$HYPE_UNIT" || true
     systemctl disable --now disdex-v12-kill-switch-auto-repair.path || true
     systemctl stop disdex-v12-kill-switch-auto-repair.service || true
     systemctl disable --now disdex-runner-watchdog.timer || true
@@ -890,6 +904,7 @@ self_test() {
     scripts/generated/disdex-quality102-ranking-observer.cjs \
     scripts/disdex-current-live-target-readiness.ts \
     scripts/disdex-fet-brk48-live-runner.ts \
+    scripts/disdex-hype-trend-live-runner.ts \
     scripts/disdex-hype-zec-long-live-runner.ts \
     scripts/disdex-hype-zec-core-preempt.ts \
     scripts/disdex-pengu-presubmit-snapshot-recovery.ts \

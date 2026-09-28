@@ -25,7 +25,7 @@ test("V12 Top3 preserves strong-quality signal while Rank3 residual sizing is ex
   assert.equal(V12_X1_ALL.strongRegimeQualityMinimumAtrRatio, 0.014);
   assert.equal(V12_X1_ALL.relaxedRegimeMinimumMomentumPct, 0.054);
   assert.equal(V12_X1_ALL.relaxedRegimeMinimumAtrRatio, 0.014);
-  assert.equal(V12_X1_ALL.neutralScoreThreshold, 1.4649);
+  assert.equal(V12_X1_ALL.neutralScoreThreshold, 1.00);
 });
 
 test("PENGU allocation is the formal 1.0x COMBINED_FILTERED Q60/DD17/H72 contract", () => {

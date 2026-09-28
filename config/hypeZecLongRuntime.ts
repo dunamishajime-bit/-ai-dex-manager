@@ -1,4 +1,5 @@
 import { HYPE_ZEC_LONG_POLICY } from "./hypeZecLongPolicy";
+import { HYPE_TREND_LONG_POLICY } from "./hypeTrendLongPolicy";
 import { INTEGRATED_PRODUCTION_RISK_POLICY } from "./integratedProductionRiskPolicy";
 
 export type HypeZecLongMode = "LIVE" | "SHADOW" | "PAPER";
@@ -22,6 +23,8 @@ export interface HypeZecLongRuntime {
   fundingBps: number;
   cryptoGrossCap: number;
   totalGrossCap: number;
+  signalMode: "LEGACY" | "TREND";
+  symbols: ReadonlyArray<"HYPEUSDT" | "ZECUSDT">;
 }
 
 function bool(value: unknown, fallback = false) {
@@ -39,7 +42,20 @@ function mode(value: unknown): HypeZecLongMode {
   return normalized === "LIVE" || normalized === "PAPER" ? normalized : "SHADOW";
 }
 
+function signalMode(value: unknown): "LEGACY" | "TREND" {
+  return String(value || "LEGACY").trim().toUpperCase() === "TREND" ? "TREND" : "LEGACY";
+}
+
+function symbols(value: unknown): ReadonlyArray<"HYPEUSDT" | "ZECUSDT"> {
+  const parsed = String(value || "HYPEUSDT,ZECUSDT")
+    .split(",")
+    .map((item) => item.trim().toUpperCase())
+    .filter((item): item is "HYPEUSDT" | "ZECUSDT" => item === "HYPEUSDT" || item === "ZECUSDT");
+  return parsed.length > 0 ? [...new Set(parsed)] : ["HYPEUSDT", "ZECUSDT"];
+}
+
 export function resolveHypeZecLongRuntime(env: NodeJS.ProcessEnv = process.env): HypeZecLongRuntime {
+  const resolvedSignalMode = signalMode(env.DISDEX_HYPE_ZEC_SIGNAL_MODE);
   return {
     mode: mode(env.DISDEX_HYPE_ZEC_MODE),
     enabled: bool(env.DISDEX_HYPE_ZEC_ENABLED, false),
@@ -49,7 +65,7 @@ export function resolveHypeZecLongRuntime(env: NodeJS.ProcessEnv = process.env):
     runtimeSha: String(env.DISDEX_HYPE_ZEC_RUNTIME_SHA || env.DISDEX_RELEASE_SHA || env.DISDEX_RUNTIME_COMMIT_SHA || "").trim().toLowerCase(),
     statePath: String(env.DISDEX_HYPE_ZEC_STATE_PATH || "/var/lib/disdex/hype-zec-long/runner.json"),
     pendingExposurePath: String(env.DISDEX_PENDING_EXPOSURE_REGISTRY_PATH || "/var/lib/disdex/shared/pending-exposure.json"),
-    maximumGross: HYPE_ZEC_LONG_POLICY.HYPE_LONG.maximumGross,
+    maximumGross: Math.max(0, number(env.DISDEX_HYPE_ZEC_MAX_GROSS, resolvedSignalMode === "TREND" ? HYPE_TREND_LONG_POLICY.maximumGross : HYPE_ZEC_LONG_POLICY.HYPE_LONG.maximumGross)),
     maximumReductionFraction: HYPE_ZEC_LONG_POLICY.HYPE_LONG.maximumReductionFraction,
     hypeRiskPct: HYPE_ZEC_LONG_POLICY.HYPE_LONG.riskPct,
     zecRiskPct: HYPE_ZEC_LONG_POLICY.ZEC_LONG.riskPct,
@@ -59,6 +75,8 @@ export function resolveHypeZecLongRuntime(env: NodeJS.ProcessEnv = process.env):
     fundingBps: Math.max(0, number(env.DISDEX_HYPE_ZEC_FUNDING_BPS, 2)),
     cryptoGrossCap: INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap,
     totalGrossCap: INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap,
+    signalMode: resolvedSignalMode,
+    symbols: symbols(env.DISDEX_HYPE_ZEC_SYMBOLS),
   };
 }
 
@@ -68,7 +86,9 @@ export function assertHypeZecLiveGate(runtime: HypeZecLongRuntime) {
     throw new Error("OPERATOR_LIVE_ACTIVATION_REQUIRED:HYPE_ZEC_LONG");
   }
   if (!/^[0-9a-f]{40}$/i.test(runtime.runtimeSha)) throw new Error("HYPE_ZEC_RUNTIME_SHA_REQUIRED");
-  if (Math.abs(runtime.maximumGross - 1) > 1e-9) throw new Error("HYPE_ZEC_GROSS_CONTRACT_MISMATCH");
+  const expectedGross = runtime.signalMode === "TREND" ? HYPE_TREND_LONG_POLICY.maximumGross : INTEGRATED_PRODUCTION_RISK_POLICY.hypeZecMaximumGross;
+  if (runtime.signalMode === "TREND" && (runtime.symbols.length !== 1 || runtime.symbols[0] !== "HYPEUSDT")) throw new Error("HYPE_TREND_SYMBOL_SCOPE_MISMATCH");
+  if (Math.abs(runtime.maximumGross - expectedGross) > 1e-9) throw new Error("HYPE_ZEC_GROSS_CONTRACT_MISMATCH");
   if (Math.abs(runtime.maximumReductionFraction - 0.5) > 1e-9) throw new Error("HYPE_ZEC_REDUCTION_CONTRACT_MISMATCH");
   if (Math.abs(runtime.hypeRiskPct - 5.0) > 1e-9 || Math.abs(runtime.zecRiskPct - 4.5) > 1e-9) throw new Error("HYPE_ZEC_RISK_CONTRACT_MISMATCH");
 }

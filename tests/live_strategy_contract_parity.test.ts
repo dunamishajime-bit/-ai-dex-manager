@@ -17,7 +17,7 @@ test("current LIVE target preserves the validated V12 signal contract with Top3 
   assert.equal(V12_X1_ALL.strongRegimeQualityMinimumAtrRatio, 0.014);
   assert.equal(V12_X1_ALL.relaxedRegimeMinimumMomentumPct, 0.054);
   assert.equal(V12_X1_ALL.relaxedRegimeMinimumAtrRatio, 0.014);
-  assert.equal(V12_X1_ALL.neutralScoreThreshold, 1.4649);
+  assert.equal(V12_X1_ALL.neutralScoreThreshold, 1.00);
   assert.equal(V12_X1_ALL.maximumPositions, 3);
   assert.equal(V12_X1_ALL.perPositionEntryGrossCap, 1);
   assert.equal(V12_X1_ALL.rank3EntryGrossCap, 0.10);

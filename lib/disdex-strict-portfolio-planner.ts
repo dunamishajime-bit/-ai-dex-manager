@@ -138,7 +138,8 @@ function strategyCap(strategy: StrictStrategy) {
     if (strategy === "FET_RESIDUAL") return INTEGRATED_PRODUCTION_RISK_POLICY.fetResidualMaximumGross;
     if (strategy === "QUALITY102_CAUSAL_V1") return INTEGRATED_PRODUCTION_RISK_POLICY.q102CausalV4MaximumGross;
     if (strategy === "QUALITY102") return STRICT_BT33404708902.quality102PositionCap;
-    if (isHypeZecStrategy(strategy)) return 1;
+    if (strategy === "HYPE_LONG") return INTEGRATED_PRODUCTION_RISK_POLICY.hypeLongMaximumGross;
+    if (strategy === "ZEC_LONG") return INTEGRATED_PRODUCTION_RISK_POLICY.hypeZecMaximumGross;
     return INTEGRATED_PRODUCTION_RISK_POLICY.stockSlotGrossCap;
 }
 

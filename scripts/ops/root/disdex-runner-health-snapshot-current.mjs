@@ -32,6 +32,7 @@ const PENGU_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_PENGU_EXPECTED_SHA", "DISDEX
 const V52_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_V52_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_V52_RELEASE_ROOT");
 const Q102_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_Q102_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_Q102_RELEASE_ROOT");
 const FET_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_FET_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_FET_RELEASE_ROOT");
+const HYPE_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_HYPE_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_HYPE_RELEASE_ROOT");
 
 const RUNNERS = [
     {
@@ -87,6 +88,17 @@ const RUNNERS = [
         script: "scripts/disdex-fet-brk48-live-runner.ts",
         statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_FET_STATE_PATH", "/var/lib/disdex/fet-brk48-residual/state.json"),
         heartbeatFile: "fet-brk48-residual.json",
+        maxStateAgeMs: 3 * 60 * 60_000,
+    },
+    {
+        key: "HYPE_TREND_LONG",
+        runnerId: "HYPE_TREND_LONG",
+        unit: `disdex-hype-long@${HYPE_PIN.expectedSha}.service`,
+        expectedSha: HYPE_PIN.expectedSha,
+        releaseRoot: HYPE_PIN.releaseRoot,
+        script: "scripts/disdex-hype-trend-live-runner.ts",
+        statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_HYPE_STATE_PATH", "/var/lib/disdex/hype-zec-long/runner.json"),
+        heartbeatFile: "hype-trend-long.json",
         maxStateAgeMs: 3 * 60 * 60_000,
     },
 ];
@@ -258,7 +270,8 @@ function stateIdentityMatches(runner, state) {
     return strategyId === runner.runnerId
         || (runner.key === "V12_X1_ALL" && strategyId === "V12_X1.00_ALL")
         || (runner.key === "PENGU_V8" && strategyId === "PENGU_DUAL_LS_V2_FINAL")
-        || (runner.key === "V52" && strategyId === "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96");
+        || (runner.key === "V52" && strategyId === "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96")
+        || (runner.key === "HYPE_TREND_LONG" && state?.schema === "disdex-hype-zec-long/v1" && state?.mode === "LIVE" && String(state?.runtimeCommitSha || "").toLowerCase() === runner.expectedSha);
 }
 
 async function buildHeartbeat(runner, now, globalBlockReason) {

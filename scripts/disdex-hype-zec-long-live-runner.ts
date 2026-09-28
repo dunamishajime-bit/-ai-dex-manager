@@ -65,6 +65,7 @@ async function main() {
     marketData: new HypeZecAsterMarketDataProvider(client, {
       fifteenMinuteLimit: numberEnv("DISDEX_HYPE_ZEC_15M_LIMIT", 240),
       oneMinuteLimit: numberEnv("DISDEX_HYPE_ZEC_1M_LIMIT", 240),
+      oneHourLimit: numberEnv("DISDEX_HYPE_ZEC_1H_LIMIT", 360),
     }),
     executor,
     adapter,

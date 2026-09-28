@@ -30,7 +30,9 @@ export type HypeZecSignalResult = {
   signalTs: number | null;
   entryPrice: number | null;
   stopPrice: number | null;
+  stopDistance?: number | null;
   takeProfitPrice: number | null;
+  trailingDistance?: number | null;
   reason: string;
 };
 
@@ -43,6 +45,7 @@ export type HypeZecQuantityInput = {
   slippageBps: number;
   fundingBps: number;
   stepSize: number;
+  maximumGross?: number;
 };
 
 export type HypeZecQuantityResult = {
@@ -64,6 +67,8 @@ export type HypeZecProtectionInput = {
   tickSize: number;
   quantity: number;
   stepSize: number;
+  stopPriceOverride?: number | null;
+  takeProfitPriceOverride?: number | null;
 };
 
 export type HypeZecProtectionResult = {
@@ -206,7 +211,7 @@ export function calculateHypeZecQuantity(input: HypeZecQuantityInput): HypeZecQu
   const bufferPerUnit = entry * (2 * input.feeBpsPerSide + input.slippageBps + input.fundingBps) / 10_000;
   const lossPerUnit = (entry - stop) + bufferPerUnit;
   const riskQuantity = riskBudgetUsd / lossPerUnit;
-  const grossQuantity = equity * policy.maximumGross / entry;
+  const grossQuantity = equity * (input.maximumGross ?? policy.maximumGross) / entry;
   const quantity = roundStable(floorToStep(Math.min(riskQuantity, grossQuantity), step), step);
   const worstCaseLossUsd = quantity * lossPerUnit;
   const gross = quantity * entry / equity;
@@ -230,8 +235,12 @@ export function buildHypeZecProtection(input: HypeZecProtectionInput): HypeZecPr
   const tick = finitePositive(input.tickSize, "tick_size");
   const step = finitePositive(input.stepSize, "step_size");
   const quantity = roundStable(floorToStep(finitePositive(input.quantity, "quantity"), step), step);
-  const stopPrice = roundStable(floorToStep(entry * (1 - policy.signal.stopLossPct), tick), tick);
-  const takeProfitPrice = roundStable(ceilToStep(entry * (1 + policy.signal.takeProfitPct), tick), tick);
+  const stopPrice = input.stopPriceOverride != null
+    ? roundStable(floorToStep(finitePositive(input.stopPriceOverride, "stop_price_override"), tick), tick)
+    : roundStable(floorToStep(entry * (1 - policy.signal.stopLossPct), tick), tick);
+  const takeProfitPrice = input.takeProfitPriceOverride != null
+    ? roundStable(ceilToStep(finitePositive(input.takeProfitPriceOverride, "take_profit_price_override"), tick), tick)
+    : roundStable(ceilToStep(entry * (1 + policy.signal.takeProfitPct), tick), tick);
   if (!(quantity > 0 && stopPrice > 0 && stopPrice < entry && takeProfitPrice > entry)) throw new Error("PROTECTION_LEVELS_INVALID");
   return { strategy: input.strategy, symbol: policy.symbol, quantity, stopPrice, takeProfitPrice, reduceOnly: true };
 }

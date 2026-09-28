@@ -27,7 +27,11 @@ async function main() {
   assert.equal(artifact.logic.v12.strongRegimeThresholdPct, V12_X1_ALL.strongRegimeThresholdPct);
   assert.equal(artifact.logic.v12.relaxedRegimeMinimumMomentumPct, V12_X1_ALL.relaxedRegimeMinimumMomentumPct);
   assert.equal(artifact.logic.v12.relaxedRegimeMinimumAtrRatio, V12_X1_ALL.relaxedRegimeMinimumAtrRatio);
-  assert.equal(artifact.logic.v12.scoreThreshold, V12_X1_ALL.neutralScoreThreshold);
+  // This archived artifact is the pre-adoption parity baseline.  Its
+  // historical neutral score is intentionally preserved; the current
+  // production normal gate is asserted separately by the adoption self-test.
+  assert.equal(artifact.logic.v12.scoreThreshold, 1.4649);
+  assert.equal(V12_X1_ALL.neutralScoreThreshold, 1.00);
   assert.equal(artifact.logic.pengu.normalCooldownHours, PENGU_DUAL_LS_V2.cooldownHours);
   assert.equal(artifact.logic.pengu.hardStopCooldownHours, PENGU_DUAL_LS_V2.hardStopCooldownHours);
   // This artifact is historical evidence for the prior Q102 1.0x/2.0x/2.5x

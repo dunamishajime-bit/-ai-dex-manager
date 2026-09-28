@@ -26,6 +26,9 @@ export const INTEGRATED_PRODUCTION_RISK_POLICY = Object.freeze({
   // HYPE/ZEC are lower-priority, long-only sidecars. These values are risk
   // and per-sleeve ceilings; they never multiply the strategy notional.
   hypeLongRiskPct: 5.0,
+  // The approved HYPE trend overlay has its own 1.50x sleeve ceiling.  ZEC
+  // remains a separate, disabled research sidecar at the legacy 1.00x cap.
+  hypeLongMaximumGross: 1.5,
   zecLongRiskPct: 4.5,
   hypeZecMaximumGross: 1.0,
   hypeZecMaximumReductionFraction: 0.5,
@@ -65,6 +68,7 @@ export function resolveIntegratedProductionRiskPolicy(env: Record<string, string
     V12_DYNAMIC_GROSS_CAP: INTEGRATED_PRODUCTION_RISK_POLICY.v12DynamicAggregateGrossCap,
     PENGU_DUAL_LS_V2_MAX_GROSS: INTEGRATED_PRODUCTION_RISK_POLICY.penguMaximumGross,
     HYPE_LONG_RISK_PCT: INTEGRATED_PRODUCTION_RISK_POLICY.hypeLongRiskPct,
+    HYPE_LONG_MAX_GROSS: INTEGRATED_PRODUCTION_RISK_POLICY.hypeLongMaximumGross,
     ZEC_LONG_RISK_PCT: INTEGRATED_PRODUCTION_RISK_POLICY.zecLongRiskPct,
     HYPE_ZEC_MAX_GROSS: INTEGRATED_PRODUCTION_RISK_POLICY.hypeZecMaximumGross,
     HYPE_ZEC_MAX_REDUCTION_FRACTION: INTEGRATED_PRODUCTION_RISK_POLICY.hypeZecMaximumReductionFraction,
