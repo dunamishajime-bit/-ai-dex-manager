@@ -1,0 +1,35 @@
+{
+  "adopted_10bps": [
+    141845207.7243423,
+    -0.22873351303266531,
+    2.0771737482823114,
+    1284
+  ],
+  "archive_bytes": 51556747,
+  "archive_filename": "bt-v12-score100-volume080-normalonly-20260928.tar.gz",
+  "archive_sha256": "891c36d8a5957cafe3aae65656a98b7c02a3c437c4f520fe63756d550f08b4fb",
+  "category_counts": {
+    "all-reconstruction-code-plus-90-file-audited-source": 126,
+    "baseline-complete-signal-and-gate-decisions": 6,
+    "baseline-crypto-modeled-entry-exit-ledgers": 2,
+    "baseline-five-logic-all-cases-all-costs": 30,
+    "certification-and-paired-monthly-equity": 3,
+    "market-Aster-H1-funding-and-manifests": 494,
+    "original-versus-selected-V12-config": 3,
+    "selected-complete-signal-and-gate-decisions": 6,
+    "selected-crypto-modeled-entry-exit-ledgers": 2,
+    "selected-five-logic-all-cases-all-costs": 30,
+    "v52-SHA-verified-original-ledger": 3,
+    "v52-SHA-verified-source-evidence": 59
+  },
+  "modeled_not_live_fills": true,
+  "original_10bps": [
+    130287867.06655651,
+    -0.22944963848991073,
+    2.4176125792561076,
+    1046
+  ],
+  "provenance_sha_verified": true,
+  "tag": "bt-v12-score100-volume080-normalonly-20260928",
+  "verified_file_count": 764
+}
