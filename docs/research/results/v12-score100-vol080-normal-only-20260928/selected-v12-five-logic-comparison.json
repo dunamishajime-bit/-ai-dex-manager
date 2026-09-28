@@ -1,0 +1,334 @@
+{
+  "baseline_source_runtime_sha": "e1b58060d6263a3af7ced51bec854d3e211d2f35",
+  "fet": "1.00 and both existing preentry rejection gates",
+  "five_logic": true,
+  "limitations": [
+    "In-sample only; historical Aster H1 price-model fills not order-book verified",
+    "ECB daily FX reference not tradable USDTJPY",
+    "No standalone independently validated out-of-sample period",
+    "NORMAL cost 8/10bps only; not formal SEVERE orderbook/margin stress"
+  ],
+  "live_updated": false,
+  "pengu": "COMBINED_FILTERED unchanged gross1.0 each entry",
+  "period": "2025-08-10_to_2026-08-10",
+  "q102": "BRK0.75/MR0.75",
+  "research_change": "NORMAL GATE ONLY: V12 Score1.00 volume0.80. Strong [0.15,0.70] and nonstrong RELAXED original with NO score floor unchanged.",
+  "research_variant_source_commit": "dbf84542311c15f69508f91a0e7311ff7e686d96",
+  "scenarios": {
+    "PRICE_MODEL_10BPS": {
+      "delta": {
+        "closed_trades": 238,
+        "ending_jpy": 11557340.657785773,
+        "maximum_mtm_dd": 0.0007161254572454201,
+        "profit_factor": -0.34043883097379624,
+        "win_rate": -0.023167920516073748
+      },
+      "monthly_equity_original": {
+        "2025-08": 12440.699502098789,
+        "2025-09": 27023.96345811703,
+        "2025-10": 163481.65575938908,
+        "2025-11": 649595.4663570661,
+        "2025-12": 891079.2161407844,
+        "2026-01": 2436607.0434754454,
+        "2026-02": 5516601.810349047,
+        "2026-03": 11814433.667487966,
+        "2026-04": 18346637.334982716,
+        "2026-05": 27985557.86891786,
+        "2026-06": 114323758.79822692,
+        "2026-07": 129706172.50042967,
+        "2026-08": 130287867.06655651
+      },
+      "monthly_equity_selected": {
+        "2025-08": 12503.174601511071,
+        "2025-09": 27365.453678358594,
+        "2025-10": 176760.05602564005,
+        "2025-11": 767752.6942518513,
+        "2025-12": 1083107.2848040776,
+        "2026-01": 2797258.450222729,
+        "2026-02": 6530381.721860468,
+        "2026-03": 15135893.24435538,
+        "2026-04": 23032040.982696213,
+        "2026-05": 33605817.237176806,
+        "2026-06": 146933639.0384005,
+        "2026-07": 140020559.28619736,
+        "2026-08": 141845207.7243423
+      },
+      "original": {
+        "closed_trades": 1046,
+        "ending_jpy": 130287867.06655651,
+        "maximum_mtm_dd": -0.22944963848991073,
+        "profit_factor": 2.4176125792561076,
+        "win_rate": 0.5745697896749522
+      },
+      "original_strategy_pnl_jpy": {
+        "FET": 3821655.9679796332,
+        "PENGU": 4286709.765443881,
+        "Q102": 48395452.035399586,
+        "V12": 41378175.23780564,
+        "V52": 33626999.95822788
+      },
+      "original_strategy_trades": {
+        "FET": 15,
+        "PENGU": 62,
+        "Q102": 130,
+        "V12": 754,
+        "V52": 85
+      },
+      "selected": {
+        "closed_trades": 1284,
+        "ending_jpy": 141845207.7243423,
+        "maximum_mtm_dd": -0.22873351303266531,
+        "profit_factor": 2.0771737482823114,
+        "win_rate": 0.5514018691588785
+      },
+      "selected_admission_counts": {
+        "FET": {
+          "ACCEPTED_MODELED_ENTRY": {
+            "GROSS_ALLOCATED": 15
+          },
+          "EXCLUDED_PREALLOCATION": {
+            "FET_PREENTRY_OVERHEAT_24H_15PCT_ATR_2PCT": 4,
+            "FET_PREENTRY_RELATIVE_WEAK_BTC_AND_FET24H_LT_1PCT": 2
+          },
+          "REJECTED_PORTFOLIO": {
+            "FET:RESIDUAL_LT_MIN": 1,
+            "FET:SLOT_OCCUPIED": 4
+          }
+        },
+        "PENGU": {
+          "ACCEPTED_MODELED_ENTRY": {
+            "GROSS_ALLOCATED": 63
+          },
+          "REJECTED_PORTFOLIO": {
+            "PENGU:COOLDOWN": 8,
+            "PENGU:NO_LOT_SHRINK": 2,
+            "PENGU:ROUTE_QUARANTINE": 3,
+            "PENGU:SHARED_DAILY_LOSS": 2,
+            "PENGU:SLOT_OCCUPIED": 35
+          }
+        },
+        "Q102": {
+          "ACCEPTED_MODELED_ENTRY": {
+            "GROSS_ALLOCATED": 130
+          },
+          "REJECTED_PORTFOLIO": {
+            "Q102:SHARED_DAILY_LOSS": 14,
+            "Q102:SLOT_OCCUPIED": 228
+          }
+        },
+        "V12": {
+          "ACCEPTED_MODELED_ENTRY": {
+            "GROSS_ALLOCATED": 991
+          },
+          "REJECTED_PORTFOLIO": {
+            "V12:BASE_SLOTS_FULL": 230,
+            "V12:NO_GROSS_ROOM": 53,
+            "V12:RANK3_SLOT_OCCUPIED": 4,
+            "V12:SAME_SYMBOL_ACTIVE": 412,
+            "V12:SHARED_DAILY_LOSS": 41,
+            "V12:SYMBOL_COOLDOWN": 247
+          }
+        },
+        "V52": {
+          "ACCEPTED_MODELED_ENTRY": {
+            "GROSS_ALLOCATED": 85
+          },
+          "EXCLUDED_PREALLOCATION": {
+            "SINGLE_V50_SLOT_ALREADY_OPEN": 11
+          },
+          "REJECTED_PORTFOLIO": {
+            "V52:SHARED_DAILY_LOSS": 3
+          }
+        }
+      },
+      "selected_strategy_pnl_jpy": {
+        "FET": 2897060.852877272,
+        "PENGU": 4974356.117837548,
+        "Q102": 44639724.02664084,
+        "V12": 48028237.298737615,
+        "V52": 42390616.325319074
+      },
+      "selected_strategy_trades": {
+        "FET": 15,
+        "PENGU": 63,
+        "Q102": 130,
+        "V12": 991,
+        "V52": 85
+      },
+      "strategy_pnl_difference_jpy": {
+        "FET": -924595.1151023614,
+        "PENGU": 687646.3523936672,
+        "Q102": -3755728.008758746,
+        "V12": 6650062.060931973,
+        "V52": 8763616.367091194
+      }
+    },
+    "PRICE_MODEL_8BPS": {
+      "delta": {
+        "closed_trades": 238,
+        "ending_jpy": 19641696.105232418,
+        "maximum_mtm_dd": 0.0008952087312067425,
+        "profit_factor": -0.34015171916407105,
+        "win_rate": -0.02214190835284091
+      },
+      "monthly_equity_original": {
+        "2025-08": 12549.526524603038,
+        "2025-09": 27457.377505022818,
+        "2025-10": 169185.67397142932,
+        "2025-11": 687099.3260741793,
+        "2025-12": 952950.7522826225,
+        "2026-01": 2652805.798668515,
+        "2026-02": 6124448.8616085425,
+        "2026-03": 13326497.288896786,
+        "2026-04": 20934405.80784858,
+        "2026-05": 32294693.550742477,
+        "2026-06": 134598368.7162835,
+        "2026-07": 154526189.392432,
+        "2026-08": 155417832.2837019
+      },
+      "monthly_equity_selected": {
+        "2025-08": 12635.378533261315,
+        "2025-09": 27967.727355366063,
+        "2025-10": 184430.6478354235,
+        "2025-11": 820300.212905754,
+        "2025-12": 1172188.8210172846,
+        "2026-01": 3089457.9495142577,
+        "2026-02": 7368455.385461346,
+        "2026-03": 17428238.39528865,
+        "2026-04": 26890741.49496027,
+        "2026-05": 39787710.55545098,
+        "2026-06": 177774462.42996928,
+        "2026-07": 172347609.5402264,
+        "2026-08": 175059528.3889343
+      },
+      "original": {
+        "closed_trades": 1046,
+        "ending_jpy": 155417832.2837019,
+        "maximum_mtm_dd": -0.2283242854192271,
+        "profit_factor": 2.464228135438672,
+        "win_rate": 0.5774378585086042
+      },
+      "original_strategy_pnl_jpy": {
+        "FET": 4395011.90277252,
+        "PENGU": 4880004.704414202,
+        "Q102": 57191568.49642759,
+        "V12": 50038539.95410397,
+        "V52": 40433392.84768598
+      },
+      "original_strategy_trades": {
+        "FET": 15,
+        "PENGU": 62,
+        "Q102": 130,
+        "V12": 754,
+        "V52": 85
+      },
+      "selected": {
+        "closed_trades": 1284,
+        "ending_jpy": 175059528.3889343,
+        "maximum_mtm_dd": -0.22742907668802037,
+        "profit_factor": 2.124076416274601,
+        "win_rate": 0.5552959501557633
+      },
+      "selected_admission_counts": {
+        "FET": {
+          "ACCEPTED_MODELED_ENTRY": {
+            "GROSS_ALLOCATED": 15
+          },
+          "EXCLUDED_PREALLOCATION": {
+            "FET_PREENTRY_OVERHEAT_24H_15PCT_ATR_2PCT": 4,
+            "FET_PREENTRY_RELATIVE_WEAK_BTC_AND_FET24H_LT_1PCT": 2
+          },
+          "REJECTED_PORTFOLIO": {
+            "FET:RESIDUAL_LT_MIN": 1,
+            "FET:SLOT_OCCUPIED": 4
+          }
+        },
+        "PENGU": {
+          "ACCEPTED_MODELED_ENTRY": {
+            "GROSS_ALLOCATED": 63
+          },
+          "REJECTED_PORTFOLIO": {
+            "PENGU:COOLDOWN": 8,
+            "PENGU:NO_LOT_SHRINK": 2,
+            "PENGU:ROUTE_QUARANTINE": 3,
+            "PENGU:SHARED_DAILY_LOSS": 2,
+            "PENGU:SLOT_OCCUPIED": 35
+          }
+        },
+        "Q102": {
+          "ACCEPTED_MODELED_ENTRY": {
+            "GROSS_ALLOCATED": 130
+          },
+          "REJECTED_PORTFOLIO": {
+            "Q102:SHARED_DAILY_LOSS": 14,
+            "Q102:SLOT_OCCUPIED": 228
+          }
+        },
+        "V12": {
+          "ACCEPTED_MODELED_ENTRY": {
+            "GROSS_ALLOCATED": 991
+          },
+          "REJECTED_PORTFOLIO": {
+            "V12:BASE_SLOTS_FULL": 230,
+            "V12:NO_GROSS_ROOM": 53,
+            "V12:RANK3_SLOT_OCCUPIED": 4,
+            "V12:SAME_SYMBOL_ACTIVE": 412,
+            "V12:SHARED_DAILY_LOSS": 41,
+            "V12:SYMBOL_COOLDOWN": 247
+          }
+        },
+        "V52": {
+          "ACCEPTED_MODELED_ENTRY": {
+            "GROSS_ALLOCATED": 85
+          },
+          "EXCLUDED_PREALLOCATION": {
+            "SINGLE_V50_SLOT_ALREADY_OPEN": 11
+          },
+          "REJECTED_PORTFOLIO": {
+            "V52:SHARED_DAILY_LOSS": 3
+          }
+        }
+      },
+      "selected_strategy_pnl_jpy": {
+        "FET": 3280994.546660997,
+        "PENGU": 5733013.301569598,
+        "Q102": 53948332.96226664,
+        "V12": 61210457.22048068,
+        "V52": 52317403.27993021
+      },
+      "selected_strategy_trades": {
+        "FET": 15,
+        "PENGU": 63,
+        "Q102": 130,
+        "V12": 991,
+        "V52": 85
+      },
+      "strategy_pnl_difference_jpy": {
+        "FET": -1114017.3561115228,
+        "PENGU": 853008.5971553959,
+        "Q102": -3243235.5341609493,
+        "V12": 11171917.266376711,
+        "V52": 11884010.432244234
+      }
+    }
+  },
+  "source_verification": {
+    "changed_sources": {
+      "config/v12X1AllRuntime.ts": {
+        "original_sha256": "40dff6d523e7e4eb06a66decda6e01caf78246d65eda4f62dca3f814d3170aea",
+        "research_sha256": "a2f92b5676d553ac15370be2aeeaabe5cdb8d690e2f4ebb0c971a2f85769668f"
+      }
+    },
+    "live_updated": false,
+    "original_commit": "a09ea45ca3cbd72100f9eb0eaae499039c40b6a0",
+    "original_market_manifest_sha256": "643dc7540944f55ccdbec865701c5f4d8a94a3d5d613743153f9fc00878a100f",
+    "original_runtime_sha": "e1b58060d6263a3af7ced51bec854d3e211d2f35",
+    "patched_market_manifest_sha256": "91043ddfe3692385276c9b59cd8647b938d360daff1e6ffa60fe5e9e9e2e7c3b",
+    "research_source_commit": "dbf84542311c15f69508f91a0e7311ff7e686d96",
+    "snapshot_manifest_sha256": "215f94039f8bd41cdccb58495c0573f7b2b133e3f762e63eedaad48e8efa28b4",
+    "source_data_identical": true,
+    "status": "RESEARCH_PATCHED_1_OF_90_ONLY_NOT_PRODUCTION",
+    "unchanged_source_count": 89
+  },
+  "status": "RESEARCH_5LOGIC_SELECTED_V12_COMPARISON_COMPLETE_NOT_L2_VERIFIED"
+}
