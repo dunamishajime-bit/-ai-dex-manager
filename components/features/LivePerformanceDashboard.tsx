@@ -21,7 +21,7 @@ import { HistoryAnalyticsNav } from "@/components/features/HistoryAnalyticsNav";
 import { Card } from "@/components/ui/Card";
 import { useCurrency } from "@/context/CurrencyContext";
 
-type LogicKey = "V12" | "PENGU" | "Q102" | "FET" | "HYPE" | "ZEC" | "V52" | "UNATTRIBUTED";
+type LogicKey = "V12" | "PENGU" | "Q102" | "FET" | "HYPE" | "V52" | "UNATTRIBUTED";
 
 type Trade = {
   id: string;
