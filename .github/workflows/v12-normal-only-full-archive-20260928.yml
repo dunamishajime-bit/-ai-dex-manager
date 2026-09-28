@@ -1,0 +1,167 @@
+name: Permanent Archive Exact V12 Normal-Only Five Logic Year Full Ledgers
+on:
+  push:
+    branches: [research/v12-normal-gate-only-five-logic-20260928]
+    paths:
+      - "research/formal_five_bt/archive_normal_only_full_evidence.py"
+      - ".github/workflows/v12-normal-only-full-archive-20260928.yml"
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: v12-normal-only-full-archive-20260928
+  cancel-in-progress: false
+jobs:
+  complete-frozen-replay:
+    runs-on: ubuntu-latest
+    timeout-minutes: 165
+    env:
+      DATA: /tmp/v12-combo-five-logic/aster
+      BASE_SCANS: /tmp/v12-combo-five-logic/base-scans
+      BASE_CAND: /tmp/v12-combo-five-logic/base-candidates
+      VAR_SCANS: /tmp/v12-combo-five-logic/variant-scans
+      VAR_CAND: /tmp/v12-combo-five-logic/variant-candidates
+      V52_DATA: /tmp/v12-combo-five-logic/stock-data
+      V52_SCAN: /tmp/v12-combo-five-logic/stock-scan
+      V52_LEDGER: /tmp/v12-combo-five-logic/stock-ledger
+      REPORT: docs/research/results/v12-score100-vol080-normal-only-20260928
+      BASE_REPORT: /tmp/v12-combo-five-logic/baseline-all-cases
+      VAR_REPORT: /tmp/v12-combo-five-logic/selected-all-cases
+      ARCHIVE_DIR: /tmp/v12-combo-five-logic/permanent-archive
+      RELEASE_TAG: bt-v12-score100-volume080-normalonly-20260928
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: research/v12-normal-gate-only-five-logic-20260928
+          fetch-depth: 1
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Verify research script and restore immutable 90-file production source
+        run: |
+          python -m py_compile research/formal_five_bt/v12_selected_combo_integrated.py research/formal_five_bt/restore_original_v52_tape.py research/formal_five_bt/archive_normal_only_full_evidence.py
+          git -c protocol.version=2 fetch --filter=blob:none --no-tags --depth=1 origin a09ea45ca3cbd72100f9eb0eaae499039c40b6a0
+          python -m research.formal_five_bt.restore_snapshot
+      - name: Acquire unchanged historical Aster candles/funding and repair only source-proven malformed BTC H1
+        run: |
+          python -m research.formal_five_bt.acquire --data-root "$DATA" --venues aster
+          python -m research.formal_five_bt.aster_h1_reconcile --data-root "$DATA" --allow-valid-noop
+      - name: Acquire official ECB EUR cross as historical FX reference
+        run: python -m research.formal_five_bt.fx_ecb --data-root "$DATA"
+      - name: Replay original production V12 PENGU FET and Q102 causal scans
+        run: |
+          python -m research.formal_five_bt.signal_scan \
+            --data-root "$DATA" --output-root "$BASE_SCANS/baseline-signal-scan" --strategies V12 PENGU FET
+          python -m research.formal_five_bt.signal_scan \
+            --data-root "$DATA" --output-root "$BASE_SCANS/baseline-signal-scan-q102" --strategies Q102 --q102-fast
+      - name: Build original production crypto candidate lifecycles from historical Aster H1
+        run: |
+          python -m research.formal_five_bt.crypto_price_model \
+            --data-root "$DATA" --scan-root "$BASE_SCANS" --output-root "$BASE_CAND"
+      - name: Acquire V52 Aster stock H1/funding and SHA-restore ORIGINAL Yahoo-reference source tape
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          python -m research.formal_five_bt.aster_stock_acquire --data-root "$V52_DATA"
+          mkdir -p "$RUNNER_TEMP/original-v52-artifact"
+          gh run download 36325740751 \
+            --repo dunamishajime-bit/-ai-dex-manager \
+            --name all-five-logic-official-aster-1m-reconstructed-aggregate \
+            --dir "$RUNNER_TEMP/original-v52-artifact"
+          python -m research.formal_five_bt.restore_original_v52_tape \
+            --archive-root "$RUNNER_TEMP/original-v52-artifact" \
+            --output "$V52_LEDGER"
+          mkdir -p "$DATA/normalized" "$DATA/normalized/aster/funding"
+          cp -a "$V52_DATA/normalized/aster_stock" "$DATA/normalized/aster_stock"
+          cp "$V52_DATA/aster-stock-hourly-coverage.json" "$DATA/aster-stock-hourly-coverage.json"
+          if [ -d "$V52_DATA/normalized/aster_stock/funding" ]; then
+            cp -a "$V52_DATA/normalized/aster_stock/funding/." "$DATA/normalized/aster/funding/"
+          fi
+      - name: Full five-logic original baseline with Q102 size and both FET gates
+        run: |
+          python -m research.formal_five_bt.fet_dual_gate_combo_bt \
+            --data-root "$DATA" --candidate-root "$BASE_CAND" \
+            --output-root "$BASE_REPORT" --v52-ledger-root "$V52_LEDGER" --ecb-fx-root "$DATA"
+      - name: Fail closed unless original source's baseline equals archived 8bps and 10bps metrics
+        run: |
+          mkdir -p "$REPORT"
+          python -m research.formal_five_bt.v12_selected_combo_integrated certify-baseline \
+            --summary "$BASE_REPORT/requested-combo-summary.json" \
+            --output "$REPORT/original-baseline-parity.json"
+      - name: Fetch normal-only study SHA and change exactly one V12 config file (rescue unchanged)
+        run: |
+          git -c protocol.version=2 fetch --filter=blob:none --no-tags --depth=1 origin dbf84542311c15f69508f91a0e7311ff7e686d96
+          python -m research.formal_five_bt.v12_selected_combo_integrated patch \
+            --repo . --data-root "$DATA" --output "$REPORT/research-source-provenance.json"
+      - name: Rescan all 4 crypto strategies with selected V12 and identical underlying Aster H1
+        run: |
+          python -m research.formal_five_bt.signal_scan \
+            --data-root "$DATA" --output-root "$VAR_SCANS/baseline-signal-scan" --strategies V12 PENGU FET
+          python -m research.formal_five_bt.signal_scan \
+            --data-root "$DATA" --output-root "$VAR_SCANS/baseline-signal-scan-q102" --strategies Q102 --q102-fast
+          python -m research.formal_five_bt.crypto_price_model \
+            --data-root "$DATA" --scan-root "$VAR_SCANS" --output-root "$VAR_CAND"
+      - name: Run selected V12 with all five strategies at 8 and 10bps shared gross and FET gates
+        run: |
+          python -m research.formal_five_bt.fet_dual_gate_combo_bt \
+            --data-root "$DATA" --candidate-root "$VAR_CAND" \
+            --output-root "$VAR_REPORT" --v52-ledger-root "$V52_LEDGER" --ecb-fx-root "$DATA"
+      - name: Strictly compare original and normal-gate-only all-five output, preserve accounting and monthly equity
+        run: |
+          python -m research.formal_five_bt.v12_selected_combo_integrated compare \
+            --baseline "$BASE_REPORT/requested-combo-summary.json" \
+            --variant "$VAR_REPORT/requested-combo-summary.json" \
+            --source-report "$REPORT/research-source-provenance.json" \
+            --output "$REPORT/selected-v12-five-logic-comparison.json"
+      - name: Build and SHA-verify EVERY model fill, candidate decision, cashflow, signal, V52 original tape and all historical input market files
+        run: |
+          python -m research.formal_five_bt.archive_normal_only_full_evidence \
+            --data "$DATA" --base-scans "$BASE_SCANS" --base-candidates "$BASE_CAND" \
+            --selected-scans "$VAR_SCANS" --selected-candidates "$VAR_CAND" \
+            --v52-ledger "$V52_LEDGER" --v52-source-archive "$RUNNER_TEMP/original-v52-artifact" \
+            --base-report "$BASE_REPORT" --selected-report "$VAR_REPORT" --reports "$REPORT" \
+            --repo . --output "$ARCHIVE_DIR"
+          (cd "$ARCHIVE_DIR" && sha256sum -c "$RELEASE_TAG.sha256")
+          tar -tzf "$ARCHIVE_DIR/$RELEASE_TAG.tar.gz" | grep -F "$RELEASE_TAG/selected-five-logic-all-cases-all-costs/BRK0P75_MR0P75_FET1_DUAL_GATE/PRICE_MODEL_10BPS/portfolio-trades.jsonl"
+      - name: Commit small immutable release manifest and direct replay entrypoint to research branch
+        run: |
+          cp "$ARCHIVE_DIR/RELEASE_MANIFEST.json" "$REPORT/full-evidence-release-manifest.json"
+          cp "$ARCHIVE_DIR/HOW_TO_REUSE.md" "$REPORT/FULL_LEDGER_REPLAY_README.md"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "$REPORT"
+          git diff --cached --check
+          git commit -m "Archive: exact 141845207 JPY five-logic full-source complete modeled fills and SHA manifest [skip ci]"
+          git push origin HEAD:research/v12-normal-gate-only-five-logic-20260928
+      - name: Publish PERMANENT GitHub release (workflow artifacts alone expire)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          test "$(jq -r '.verified_file_count' "$ARCHIVE_DIR/RELEASE_MANIFEST.json")" -ge 60
+          if gh release view "$RELEASE_TAG" --repo dunamishajime-bit/-ai-dex-manager >/dev/null 2>&1; then
+            echo "Refusing to overwrite an existing immutable BT release"; exit 1
+          fi
+          gh release create "$RELEASE_TAG" \
+            "$ARCHIVE_DIR/$RELEASE_TAG.tar.gz" \
+            "$ARCHIVE_DIR/$RELEASE_TAG.sha256" \
+            "$ARCHIVE_DIR/RELEASE_MANIFEST.json" \
+            "$ARCHIVE_DIR/HOW_TO_REUSE.md" \
+            --repo dunamishajime-bit/-ai-dex-manager \
+            --target "$(git rev-parse HEAD)" \
+            --title "Immutable V12 Score1.00 Volume0.80 Full Five-Logic BT 2025-08 to 2026-08" \
+            --notes-file "$ARCHIVE_DIR/HOW_TO_REUSE.md"
+          gh release view "$RELEASE_TAG" --repo dunamishajime-bit/-ai-dex-manager --json tagName,url,assets | jq '{tagName,url,assets:[.assets[]|{name,size,digest}]}'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v12-normal-only-complete-replay-backup
+          if-no-files-found: warn
+          retention-days: 90
+          path: |
+            /tmp/v12-combo-five-logic/permanent-archive/
+            docs/research/results/v12-score100-vol080-normal-only-20260928/
