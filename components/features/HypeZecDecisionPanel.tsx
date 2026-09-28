@@ -21,7 +21,7 @@ export function HypeZecDecisionPanel({strategy}:{strategy:Strategy}){
   const [loading,setLoading]=useState(true);
   const load=useCallback(async()=>{
     try{
-      const r=await fetch("/api/system/hype-zec-status",{cache:"no-store"});
+      const r=await fetch("/api/system/hype-status",{cache:"no-store"});
       const j=await r.json() as HypeZecOverview&{error?:string};
       if(!r.ok||j.readOnly!==true)throw new Error(j.error||"実Runnerの取得失敗");
       setData(j);setError(null);
