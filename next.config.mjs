@@ -20,6 +20,12 @@ const nextConfig = {
     typescript: {
         ignoreBuildErrors: process.env.DISDEX_UI_VERIFIED_TSC === "1",
     },
+    async redirects() {
+        return [
+            { source: "/decision-status/zec", destination: "/decision-status", permanent: false },
+            { source: "/history/zec", destination: "/history", permanent: false },
+        ];
+    },
     webpack: (config) => {
         config.parallelism = 1;
         config.resolve.alias = {
