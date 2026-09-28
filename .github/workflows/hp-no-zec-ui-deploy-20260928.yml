@@ -2,7 +2,7 @@ name: HP no-ZEC UI-only production deploy 2026-09-28
 on:
   push:
     branches: [codex/hp-remove-zec-20260928]
-    paths: [.github/workflows/hp-no-zec-ui-deploy-20260928.yml]
+    paths: [.github/workflows/hp-no-zec-ui-deploy-20260928.yml, next.config.mjs]
 permissions:
   contents: read
 concurrency:
