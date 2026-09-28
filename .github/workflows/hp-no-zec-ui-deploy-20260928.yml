@@ -1,0 +1,212 @@
+name: HP no-ZEC UI-only production deploy 2026-09-28
+on:
+  push:
+    branches: [codex/hp-remove-zec-20260928]
+    paths: [.github/workflows/hp-no-zec-ui-deploy-20260928.yml]
+permissions:
+  contents: read
+concurrency:
+  group: disdex-hp-no-zec-ui-deploy
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      EXPECTED_TRADING_SHA: 54ed0cd5c066c1b652008b3718c1b3bb5720081d
+      EXPECTED_OLD_UI_SHA: 6da191bd60c5101ff26074119fe8561719d082f3
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Reverify source, tests, typecheck and full build
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ "$(git rev-parse HEAD)" == "$GITHUB_SHA" ]]
+          git diff --check HEAD^ HEAD
+          npm ci --no-audit --no-fund
+          npx tsx --test tests/hp-hype-only-20260928.test.ts tests/hp-a09-runtime-sync-20260927.test.ts tests/fet-decision-status.test.ts tests/fet-runtime-observability.test.ts
+          npx tsc --noEmit -p tsconfig.json
+          NEXT_TELEMETRY_DISABLED=1 npm run build
+          test -f .next/BUILD_ID
+          test -f .next/server/app/api/system/hype-status/route.js
+          test -f .next/server/app/decision-status/hype/page.js || test -f .next/server/app/decision-status/hype.html
+          if find .next/server/app \( -path '*decision-status/zec*' -o -path '*history/zec*' -o -path '*hype-zec-status*' \) | grep -q .; then
+            echo REMOVED_ZEC_ROUTE_STILL_COMPILED; exit 20
+          fi
+          if grep -RniE '(^|[^A-Za-z0-9_])ZEC([^A-Za-z0-9_]|$)|/zec([^A-Za-z0-9_-]|$)' app components; then
+            echo HP_ZEC_WORDING_REMAINS; exit 21
+          fi
+          tar --exclude='./.git' --exclude='./node_modules' --exclude='./.next' --exclude='./.research-state' -czf /tmp/hp-no-zec-source.tgz .
+          tar --exclude='.next/cache' -czf /tmp/hp-no-zec-next.tgz .next
+      - name: Initialize restricted root SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ -n "$SSH_HOST" && -n "$ROOT_KEY" && -n "$SSH_KNOWN_HOSTS" ]]
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Preflight current trading and UI without mutation
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -p "$PORT" "root@$SSH_HOST" \
+            "EXPECTED_TRADING_SHA='$EXPECTED_TRADING_SHA' EXPECTED_OLD_UI_SHA='$EXPECTED_OLD_UI_SHA' bash -s" <<'REMOTE'
+          set -Eeuo pipefail
+          current="$(tr -d '[:space:]' < /home/deploy/disdex-trading/current/.disdex-release-sha)"
+          [[ "$current" == "$EXPECTED_TRADING_SHA" ]]
+          [[ "$(readlink -f /home/deploy/disdex-trading/current)" == "/home/deploy/disdex-trading/releases/$EXPECTED_TRADING_SHA" ]]
+          ui=ai-dex-manager-ui.service
+          [[ "$(systemctl is-active "$ui")" == active ]]
+          oldwd="$(systemctl show "$ui" --property WorkingDirectory --value)"
+          oldenv="$(systemctl show "$ui" --property Environment --value)"
+          [[ "$oldwd" == /home/deploy/disdex-trading/ui-releases/* ]]
+          [[ " $oldenv " == *" DISDEX_UI_RELEASE_SHA=$EXPECTED_OLD_UI_SHA "* ]]
+          [[ "$(curl -sS --max-time 7 -o /dev/null -w '%{http_code}' http://127.0.0.1:3001/)" == 200 ]]
+          free="$(df -Pk /home/deploy | awk 'NR==2 {print $4}')"
+          [[ "$free" -ge 900000 ]]
+          names=(disdex-v12-x1-all disdex-pengu-dual-ls-v2 disdex-quality102-causal-v1 disdex-v52-aster-only disdex-fet-brk48 disdex-shared-crypto-risk disdex-v12-v52-margin-guard)
+          for n in "${names[@]}"; do
+            [[ "$(systemctl is-active "$n@$EXPECTED_TRADING_SHA.service" 2>/dev/null || true)" == active ]] || exit 31
+          done
+          echo "PREFLIGHT_CURRENT_TRADING_SHA=$current"
+          echo "PREFLIGHT_CURRENT_UI=$oldwd"
+          echo "TRADING_MUTATION=0"
+          REMOTE
+      - name: Transfer immutable UI source/build only
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          scp -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -P "$PORT" /tmp/hp-no-zec-source.tgz "root@$SSH_HOST:/tmp/hp-no-zec-source-$GITHUB_RUN_ID.tgz"
+          scp -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -P "$PORT" /tmp/hp-no-zec-next.tgz "root@$SSH_HOST:/tmp/hp-no-zec-next-$GITHUB_RUN_ID.tgz"
+      - name: Install isolated UI release and verify every page
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -p "$PORT" "root@$SSH_HOST" \
+            "EXPECTED_TRADING_SHA='$EXPECTED_TRADING_SHA' EXPECTED_OLD_UI_SHA='$EXPECTED_OLD_UI_SHA' NEW_UI_SHA='$GITHUB_SHA' REQUEST_ID='$GITHUB_RUN_ID' bash -s" <<'REMOTE'
+          set -Eeuo pipefail
+          umask 022
+          exec 9>/run/lock/disdex-hp-no-zec-ui-deploy.lock
+          flock -n 9 || exit 40
+          ui=ai-dex-manager-ui.service
+          root=/home/deploy/disdex-trading/ui-releases
+          oldwd="$(systemctl show "$ui" --property WorkingDirectory --value)"
+          oldenv="$(systemctl show "$ui" --property Environment --value)"
+          [[ " $oldenv " == *" DISDEX_UI_RELEASE_SHA=$EXPECTED_OLD_UI_SHA "* ]]
+          [[ "$(tr -d '[:space:]' < /home/deploy/disdex-trading/current/.disdex-release-sha)" == "$EXPECTED_TRADING_SHA" ]]
+          names=(disdex-v12-x1-all disdex-pengu-dual-ls-v2 disdex-quality102-causal-v1 disdex-v52-aster-only disdex-fet-brk48 disdex-shared-crypto-risk disdex-v12-v52-margin-guard)
+          pids=()
+          for n in "${names[@]}"; do pids+=("$(systemctl show "$n@$EXPECTED_TRADING_SHA.service" -p MainPID --value)"); done
+          short="$(printf '%s' "$NEW_UI_SHA" | cut -c1-12)"
+          release="$root/ui-no-zec-$short"
+          stage="$root/.ui-no-zec-$short.stage-$REQUEST_ID"
+          src="/tmp/hp-no-zec-source-$REQUEST_ID.tgz"
+          nxt="/tmp/hp-no-zec-next-$REQUEST_ID.tgz"
+          [[ -f "$src" && -f "$nxt" && ! -e "$release" && ! -e "$stage" ]]
+          install -d -o deploy -g deploy -m 0755 "$stage"
+          tar --no-same-owner -xzf "$src" -C "$stage"
+          python3 - "$oldwd/package.json" "$stage/package.json" "$oldwd/package-lock.json" "$stage/package-lock.json" <<'PY'
+          import json,sys
+          a,b,c,d=sys.argv[1:]
+          with open(a,encoding="utf-8-sig") as f:pa=json.load(f)
+          with open(b,encoding="utf-8-sig") as f:pb=json.load(f)
+          with open(c,encoding="utf-8-sig") as f:la=json.load(f)
+          with open(d,encoding="utf-8-sig") as f:lb=json.load(f)
+          if pa!=pb or la!=lb: raise SystemExit("UI_DEPENDENCY_MANIFEST_MISMATCH")
+          PY
+          if [[ -L "$oldwd/node_modules" ]]; then ln -s "$(readlink -f "$oldwd/node_modules")" "$stage/node_modules"; else cp -al -- "$oldwd/node_modules" "$stage/node_modules"; fi
+          tar --no-same-owner -xzf "$nxt" -C "$stage"
+          printf '%s\n' "$NEW_UI_SHA" > "$stage/.disdex-release-sha"
+          chown -R deploy:deploy "$stage/.next"; chown -h deploy:deploy "$stage/node_modules" "$stage/.disdex-release-sha"
+          mv "$stage" "$release"
+          prefix="$(printf '%228s' ' ' | tr ' ' z)"
+          dropin="/etc/systemd/system/ai-dex-manager-ui.service.d/$prefix-no-zec-20260928.conf"
+          [[ ! -e "$dropin" ]]
+          rollback(){ rc=$?; trap - ERR; set +e; rm -f "$dropin"; systemctl daemon-reload; systemctl restart "$ui"; echo HP_NO_ZEC_ROLLBACK_ATTEMPTED=TRUE; exit "$rc"; }
+          trap rollback ERR
+          printf '[Service]\nWorkingDirectory=%s\nEnvironment=DISDEX_UI_RELEASE_SHA=%s\n' "$release" "$NEW_UI_SHA" > "$dropin"
+          chmod 0644 "$dropin"; chown root:root "$dropin"
+          systemctl daemon-reload
+          systemctl restart "$ui"
+          ready=false
+          for _ in $(seq 1 35); do
+            if [[ "$(systemctl is-active "$ui" 2>/dev/null || true)" == active ]] && [[ "$(curl -sS --max-time 4 -o /dev/null -w '%{http_code}' http://127.0.0.1:3001/ 2>/dev/null || true)" == 200 ]]; then ready=true; break; fi
+            sleep 2
+          done
+          [[ "$ready" == true ]]
+          [[ "$(systemctl show "$ui" --property WorkingDirectory --value)" == "$release" ]]
+          [[ " $(systemctl show "$ui" --property Environment --value) " == *" DISDEX_UI_RELEASE_SHA=$NEW_UI_SHA "* ]]
+          [[ "$(tr -d '[:space:]' < /home/deploy/disdex-trading/current/.disdex-release-sha)" == "$EXPECTED_TRADING_SHA" ]]
+          python3 - "$EXPECTED_TRADING_SHA" "$NEW_UI_SHA" <<'PY'
+          import re,sys,urllib.request,urllib.error
+          trading,ui=sys.argv[1:]; base="http://127.0.0.1:3001"
+          headers={"Cookie":"disdex_auth=1","User-Agent":"DisDex-no-ZEC-verify"}
+          routes=["/","/positions","/wallets","/performance","/settings","/decision-status","/decision-status/v12","/decision-status/pengu","/decision-status/q102","/decision-status/v52","/decision-status/fet","/decision-status/hype","/history","/history/performance","/history/v12","/history/pengu","/history/q102","/history/fet","/history/hype","/history/v52"]
+          token=re.compile(r"(?<![A-Za-z0-9_])ZEC(?![A-Za-z0-9_])",re.I)
+          for path in routes:
+            with urllib.request.urlopen(urllib.request.Request(base+path,headers=headers),timeout=20) as r:
+              body=r.read(1800000).decode("utf-8","ignore")
+              if r.status!=200: raise RuntimeError("HP_PAGE_"+path+"_"+str(r.status))
+              if token.search(body) or re.search(r"/zec(?:[^A-Za-z0-9_-]|$)",body,re.I): raise RuntimeError("HP_ZEC_WORDING_RENDERED_"+path)
+          for path in ["/decision-status/zec","/history/zec","/api/system/hype-zec-status"]:
+            try:
+              urllib.request.urlopen(urllib.request.Request(base+path,headers=headers),timeout=15)
+              raise RuntimeError("REMOVED_ROUTE_STILL_EXISTS_"+path)
+            except urllib.error.HTTPError as e:
+              if e.code!=404: raise
+          with urllib.request.urlopen(urllib.request.Request(base+"/api/system/hype-status",headers=headers),timeout=20) as r:
+            body=r.read(500000).decode("utf-8","ignore")
+            if r.status!=200 or token.search(body): raise RuntimeError("HYPE_API_EXPOSES_EXCLUDED_LABEL")
+          print("HP_ALL_PAGES_NO_ZEC=PASS")
+          print("HP_REMOVED_ZEC_ROUTES_404=PASS")
+          print("TRADING_SHA="+trading)
+          print("UI_SHA="+ui)
+          PY
+          for i in "${!names[@]}"; do
+            [[ "$(systemctl show "${names[$i]}@$EXPECTED_TRADING_SHA.service" -p MainPID --value)" == "${pids[$i]}" ]] || { echo TRADING_PID_CHANGED; false; }
+          done
+          trap - ERR
+          rm -f "$src" "$nxt"
+          echo STATUS=HP_NO_ZEC_UI_DEPLOYED_VERIFIED
+          echo "UI_RELEASE=$release"
+          echo "TRADING_SHA=$EXPECTED_TRADING_SHA"
+          echo "UI_SHA=$NEW_UI_SHA"
+          echo TRADING_RUNNERS_RESTARTED=0
+          echo TRADING_MUTATION=0
+          REMOTE
+      - name: Verify public HP remains reachable
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          for route in / /decision-status /decision-status/hype /history /history/hype; do
+            code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 15 "https://professional-dismanager.net$route")"
+            echo "PUBLIC_ROUTE=$route HTTP=$code"
+            [[ "$code" =~ ^(200|30[1278]|401|403)$ ]]
+          done
+          code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 15 https://professional-dismanager.net/api/system/hype-status)"
+          [[ "$code" == 401 ]]
