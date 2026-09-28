@@ -2,8 +2,8 @@ import v52V50Runtime from "./v52V50Runtime.json";
 
 export const Q102_CAUSAL_V4_FAMILY_GROSS = Object.freeze({
   HIGH_VOL: 1.661,
-  MR: 1.0,
-  BRK: 2.465,
+  MR: 0.75,
+  BRK: 0.75,
   REV: 2.5,
   PB: 2.5,
 } as const);
@@ -20,7 +20,7 @@ export const INTEGRATED_PRODUCTION_RISK_POLICY = Object.freeze({
   v12DynamicAggregateGrossCap: 2.0,
   v12PerPositionGrossCap: 1.0,
   v12MaximumPositions: 3,
-  fetResidualMaximumGross: 2.25,
+  fetResidualMaximumGross: 1.0,
   fetResidualMinimumGross: 0.05,
   penguMaximumGross: 1.0,
   q102FamilyGross: Q102_CAUSAL_V4_FAMILY_GROSS,
