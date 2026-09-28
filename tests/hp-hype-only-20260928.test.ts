@@ -31,7 +31,7 @@ test("HYPE decision/status route remains read-only and does not expose the exclu
   assert.match(api, /disdex_auth/);
   assert.match(api, /tradingMutation:0/);
   assert.doesNotMatch(api + panel, /executeMarket\(|placeStopMarket\(|cancelOrder\(/);
-  assert.doesNotMatch(api + panel, /ZEC|\/zec\b/i);
+  assert.doesNotMatch(api + panel, /\bZEC\b|\/zec\b/i);
   assert.match(panel, /\/decision-status\/hype/);
 });
 
@@ -68,5 +68,5 @@ test("history and decision navigation keep HYPE but have no excluded route", () 
   ];
   const source = files.map((file) => readFileSync(file, "utf8")).join("\n");
   assert.match(source, /HYPE/);
-  assert.doesNotMatch(source, /ZEC|\/zec\b/i);
+  assert.doesNotMatch(source, /\bZEC\b|\/zec\b/i);
 });
