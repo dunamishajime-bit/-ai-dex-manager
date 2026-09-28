@@ -224,6 +224,7 @@ set_units() {
   V52_DROPIN_DIR="/etc/systemd/system/${V52_UNIT}.d"
   SHARED_RISK_DROPIN_DIR="/etc/systemd/system/${SHARED_RISK_UNIT}.d"
   CONTRACT_ENV_FILE="${RUNTIME_CONTRACT_ENV_DIR}/${DEPLOYED_SHA}.env"
+  HYPE_OPERATOR_ENV_FILE="${RUNTIME_CONTRACT_ENV_DIR}/${DEPLOYED_SHA}.hype-operator.env"
   HEALTH_SNAPSHOT_ENV_FILE="${RUNTIME_CONTRACT_ENV_DIR}/${DEPLOYED_SHA}.health-snapshot.env"
   WATCHDOG_ENV_FILE="${RUNTIME_CONTRACT_ENV_DIR}/${DEPLOYED_SHA}.watchdog.env"
 }
@@ -245,6 +246,7 @@ show_plan() {
   printf 'v52LegacyCryptoState=%s\n' "$V52_LEGACY_CRYPTO_ROOT"
   printf 'penguStateRoot=%s\n' "$PENGU_STATE_ROOT"
   printf 'contractEnvFile=%s\n' "$CONTRACT_ENV_FILE"
+  printf 'hypeOperatorEnvFile=%s\n' "$HYPE_OPERATOR_ENV_FILE"
   printf 'healthSnapshotEnvFile=%s\n' "$HEALTH_SNAPSHOT_ENV_FILE"
   printf 'watchdogEnvFile=%s\n' "$WATCHDOG_ENV_FILE"
   printf 'nodeModulesSourceSha=%s\n' "$NODE_MODULES_SOURCE_SHA"
@@ -819,6 +821,13 @@ Environment=DISDEX_V96_V52_MARGIN_GUARD_STATE_FILE=/var/lib/disdex/shared/margin
 Environment=DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED=true
 Environment=DISDEX_V96_STATE_DIR=${V52_LEGACY_CRYPTO_ROOT}
 Environment=DISDEX_V96_KILL_SWITCH_FILE=/var/lib/disdex/shared/kill-switch.json"
+
+  # The HYPE runner has its own runtime gate in addition to the root-owned
+  # operator activation artifact.  Keep the shared contract fail-closed, but
+  # provide a SHA-pinned override file loaded last by the HYPE unit.  The unit
+  # ExecStartPre still requires the exact operator artifact, so this flag alone
+  # can never activate real-money trading.
+  write_atomic "$HYPE_OPERATOR_ENV_FILE" "DISDEX_HYPE_ZEC_OPERATOR_ARMED=true"
 
   write_atomic "${V52_DROPIN_DIR}/zzzzzzzzzzzz-current-release-paths.conf" "[Unit]
 StartLimitIntervalSec=300s

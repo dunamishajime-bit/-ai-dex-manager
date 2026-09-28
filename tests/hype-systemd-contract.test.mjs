@@ -9,6 +9,6 @@ test("HYPE systemd unit is operator-gated and release-pinned", async () => {
   assert.match(unit, /disdex-hype-trend-live-runner/);
   assert.match(unit, /Restart=on-failure/);
   const envFile = unit.indexOf("EnvironmentFile=-/etc/disdex/current-runtime/%i.env");
-  const armedOverride = unit.indexOf("Environment=DISDEX_HYPE_ZEC_OPERATOR_ARMED=true");
-  assert.ok(envFile >= 0 && armedOverride > envFile, "operator armed override must follow the shared contract EnvironmentFile");
+  const armedOverride = unit.indexOf("EnvironmentFile=-/etc/disdex/current-runtime/%i.hype-operator.env");
+  assert.ok(envFile >= 0 && armedOverride > envFile, "HYPE operator override EnvironmentFile must follow the shared contract EnvironmentFile");
 });
