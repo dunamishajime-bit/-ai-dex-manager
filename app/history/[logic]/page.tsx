@@ -8,7 +8,6 @@ const LOGICS = {
   q102: "Q102",
   fet: "FET",
   hype: "HYPE",
-  zec: "ZEC",
   v52: "V52",
 } as const;
 
