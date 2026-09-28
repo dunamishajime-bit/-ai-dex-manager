@@ -180,9 +180,9 @@ export async function loadHypeZecRuntimeObservability(now=Date.now()):Promise<Hy
       maxGross:riskValue("hypeZecMaximumGross"),
       riskPct:riskValue(key==="HYPE_LONG"?"hypeLongRiskPct":"zecLongRiskPct"),
       publicSignalEligible,publicReferenceTs,publicError:marketError,
-      gates,note:!sourceDeployed?"現在のProduction releaseにHYPE/ZECソースがありません。GitHubの研究ブランチはLIVEではありません。":
+      gates,note:!sourceDeployed?"現在のProduction releaseにHYPEソースがありません。GitHubの研究ブランチはLIVEではありません。":
         !stateAvailable?"実Runner stateが見つかりません。":!shaOk?"stateのSHAがProductionと一致しません。":
-        !active?"HYPE/ZECの実行サービスを確認できません。":
+        !active?"HYPEの実行サービスを確認できません。":
         mode!=="LIVE"?"SHADOW/PAPERモードのため実注文は無効です。":
         "発火には公開足Gate以外にRisk・5x Cross・口座ロック・保護注文の実Runner判定が必要です。"};
   }
