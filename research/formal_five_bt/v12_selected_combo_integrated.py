@@ -16,7 +16,7 @@ from typing import Any
 HERE=Path(__file__).resolve().parent
 ORIGINAL_SOURCE_SHA="a09ea45ca3cbd72100f9eb0eaae499039c40b6a0"
 ORIGINAL_RUNTIME_SHA="e1b58060d6263a3af7ced51bec854d3e211d2f35"
-SELECTED_SOURCE_SHA="ed57c0a7f6d0b5bf47cfcfb9f45fd5eb6e02add5"
+SELECTED_SOURCE_SHA="802eca4748ace26a4faa2caa01e58e02a2b7b968"
 CHANGED=("config/v12X1AllRuntime.ts","lib/v12-x1-all.ts")
 CAP_CASE="BRK0P75_MR0P75_FET1_DUAL_GATE"
 EXPECTED_BASE={
@@ -100,7 +100,7 @@ def patch_research_copy(repo:Path,data_root:Path,report_path:Path)->dict:
         changed[rel]={"original_sha256":digest(before),"research_sha256":digest(raw)}
     config=(snapshot/CHANGED[0]).read_text(encoding="utf-8")
     logic=(snapshot/CHANGED[1]).read_text(encoding="utf-8")
-    for literal in ("minimumVolumeRatio: 0.80","neutralScoreThreshold: 1.00",
+    for literal in ("minimumVolumeRatio: 0.9845","neutralScoreThreshold: 1.4649",
                     "relaxedRegimeMinimumScore: 0.35",
                     "strongRegimeQualityScoreMinimum: 0.15",
                     "strongRegimeQualityScoreMaximum: 0.70"):
@@ -188,7 +188,7 @@ def compare_outputs(baseline:Path,variant:Path,source_report:Path,output:Path)->
             "period":"2025-08-10_to_2026-08-10",
             "baseline_source_runtime_sha":ORIGINAL_RUNTIME_SHA,
             "research_variant_source_commit":SELECTED_SOURCE_SHA,
-            "research_change":"V12 Score1.00 volume0.80, STRONG [0.15,0.70] ATR1.4% unchanged, nonstrong RELAXED Score>=0.35 Momentum5.4% ATR1.4%",
+            "research_change":"RESCUE ONLY: V12 ORIGINAL normal Score1.4649 volume0.9845 unchanged; STRONG [0.15,0.70] unchanged; nonstrong RELAXED Score>=0.35 is the sole behavioral change.",
             "q102":"BRK0.75/MR0.75",
             "fet":"1.00 and both existing preentry rejection gates",
             "pengu":"COMBINED_FILTERED unchanged gross1.0 each entry",
