@@ -12,6 +12,11 @@ EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env
 EnvironmentFile=/etc/disdex/disdex-v12-pengu-v2-v52.env
 EnvironmentFile=-/etc/disdex/disdex-quality102-causal-v1.env
 EnvironmentFile=-/etc/disdex/current-runtime/%i.env
+# The shared contract file deliberately defaults this flag to false.  The
+# exact-SHA unit must override it only after all EnvironmentFile entries have
+# loaded; otherwise systemd lets the safety default overwrite the approved
+# operator activation and the runner loops without ever reaching LIVE.
+Environment=DISDEX_HYPE_ZEC_OPERATOR_ARMED=true
 Environment=NODE_ENV=production
 Environment=DISDEX_RUNTIME_COMMIT_SHA=%i
 Environment=DISDEX_RELEASE_SHA=%i
@@ -19,7 +24,6 @@ Environment=DISDEX_HYPE_ZEC_MODE=LIVE
 Environment=DISDEX_HYPE_ZEC_ENABLED=true
 Environment=DISDEX_HYPE_ZEC_LIVE_EXECUTION_ENABLED=true
 Environment=DISDEX_HYPE_ZEC_PRODUCTION_CONFIG_LIVE_ENABLED=true
-Environment=DISDEX_HYPE_ZEC_OPERATOR_ARMED=true
 Environment=DISDEX_HYPE_ZEC_SIGNAL_MODE=TREND
 Environment=DISDEX_HYPE_ZEC_SYMBOLS=HYPEUSDT
 Environment=DISDEX_HYPE_ZEC_MAX_GROSS=1.5
