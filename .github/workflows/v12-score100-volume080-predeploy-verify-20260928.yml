@@ -1,0 +1,54 @@
+name: Predeploy V12 Score1.00 Volume0.80 Contract Guard
+on:
+  push:
+    branches: [codex/v12-score100-volume080-production-handoff-20260928]
+    paths:
+      - "config/v12X1AllRuntime.ts"
+      - "scripts/v12-x1-all-selftest.ts"
+      - ".github/workflows/v12-score100-volume080-predeploy-verify-20260928.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: v12-score100-volume080-predeploy-verify
+  cancel-in-progress: false
+jobs:
+  readonly-predeploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - name: Require SHA-identical research-proven config and unchanged V12 evaluator
+        run: |
+          python - <<'PY'
+          import hashlib
+          from pathlib import Path
+          cfg=Path("config/v12X1AllRuntime.ts").read_bytes()
+          logic=Path("lib/v12-x1-all.ts").read_text()
+          assert hashlib.sha256(cfg).hexdigest()=="a2f92b5676d553ac15370be2aeeaabe5cdb8d690e2f4ebb0c971a2f85769668f"
+          assert "input.score >= V12_X1_ALL.relaxedRegimeMinimumScore" not in logic
+          assert "relaxedRegimeMinimumScore:" not in cfg.decode()
+          assert "minimumVolumeRatio: 0.80" in cfg.decode()
+          assert "neutralScoreThreshold: 1.00" in cfg.decode()
+          assert "strongRegimeQualityScoreMinimum: 0.15" in cfg.decode()
+          assert "strongRegimeQualityScoreMaximum: 0.70" in cfg.decode()
+          assert "relaxedRegimeMinimumMomentumPct: 0.054" in cfg.decode()
+          print("NORMAL_ONLY_RESEARCH_CONFIG_SHA_MATCHED; ORIGINAL_RESCUE_PRESERVED")
+          PY
+      - run: npm ci --no-audit --no-fund
+      - name: Validate TypeScript and revised V12 threshold boundaries
+        run: |
+          npx tsc --noEmit -p tsconfig.json
+          npx tsx scripts/v12-x1-all-selftest.ts
+      - name: Validate protective orders and shared execution path without placing orders
+        run: |
+          npx tsx scripts/v12-live-execution-selftest.ts
+          npx tsx scripts/disdex-unified-portfolio-routing-selftest.ts
+      - name: Check patch whitespace
+        run: git diff --check
