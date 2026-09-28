@@ -1,0 +1,1137 @@
+{
+  "baseline": {
+    "PRICE_MODEL_10BPS": {
+      "dd": -0.22944963848991073,
+      "ending_jpy": 130287867.06655651,
+      "pf": 2.4176125792561076,
+      "trades": 1046
+    },
+    "PRICE_MODEL_8BPS": {
+      "dd": -0.2283242854192271,
+      "ending_jpy": 155417832.2837019,
+      "pf": 2.464228135438672,
+      "trades": 1046
+    }
+  },
+  "baseline_source_candidates_exact_replay": 1459,
+  "limitations": [
+    "Same-period hypothesis grid, not independent out-of-sample confirmation",
+    "All candidate features computed from past closed Aster H2 bars",
+    "Historical Aster order-book fills/margin-buffer simulation not verified",
+    "Eight/ten/thirty bps price-model costs, thirty not SEVERE orderbook"
+  ],
+  "market_manifest_sha256": "a253505be9602a692a3ab76ea05d45c539e308b7bd5f89b546c9d6fe25d35d32",
+  "original_raw_v12_sha256": "a47911e6c23107b1627f9d78e828fe064ea68af7a3e638e342f8d7d3b9cad12e",
+  "source_runtime_sha": "e1b58060d6263a3af7ced51bec854d3e211d2f35",
+  "status": "COMPLETED_FULL_FIVE_LOGIC_RESEARCH_GRID_NOT_L2_VERIFIED",
+  "variants": [
+    {
+      "extra_candidates": 11,
+      "policy": {
+        "cap": 0.25,
+        "kind": "hc_directional",
+        "satellite_only": false
+      },
+      "scenarios": {
+        "PRICE_MODEL_10BPS": {
+          "ending_jpy": 130609680.27015813,
+          "extra_accepted": 7,
+          "max_dd": -0.2294496384899104,
+          "pf": 2.417614041043792,
+          "strategy_pnl_jpy": {
+            "FET": 3831105.752964033,
+            "PENGU": 4296501.64021042,
+            "Q102": 48513932.70074405,
+            "V12": 41482768.768072665,
+            "V52": 33709859.46449883
+          },
+          "strategy_trades": {
+            "FET": 15,
+            "PENGU": 62,
+            "Q102": 130,
+            "V12": 761,
+            "V52": 85
+          },
+          "trades": 1053,
+          "vs_baseline_dd_nonworsening": true,
+          "vs_baseline_profit_positive": true,
+          "vs_baseline_trade_count_positive": true,
+          "win_rate": 0.5745489078822412
+        },
+        "PRICE_MODEL_8BPS": {
+          "ending_jpy": 155832231.66159883,
+          "extra_accepted": 7,
+          "max_dd": -0.2283242854192269,
+          "pf": 2.4642313436574215,
+          "strategy_pnl_jpy": {
+            "FET": 4406741.422103614,
+            "PENGU": 4892116.509804752,
+            "Q102": 57342843.00993238,
+            "V12": 50174671.77329965,
+            "V52": 40540971.12159411
+          },
+          "strategy_trades": {
+            "FET": 15,
+            "PENGU": 62,
+            "Q102": 130,
+            "V12": 761,
+            "V52": 85
+          },
+          "trades": 1053,
+          "vs_baseline_dd_nonworsening": true,
+          "vs_baseline_profit_positive": true,
+          "vs_baseline_trade_count_positive": true,
+          "win_rate": 0.577397910731244
+        },
+        "PRICE_MODEL_STRESS_30BPS": {
+          "ending_jpy": 22469736.59384117,
+          "extra_accepted": 5,
+          "max_dd": -0.2445474565594027,
+          "pf": 1.9912721263878774,
+          "strategy_pnl_jpy": {
+            "FET": 1002871.9374492138,
+            "PENGU": 1329850.6623027038,
+            "Q102": 9279880.549375758,
+            "V12": 5652830.972490017,
+            "V52": 5236133.643924256
+          },
+          "strategy_trades": {
+            "FET": 15,
+            "PENGU": 62,
+            "Q102": 130,
+            "V12": 759,
+            "V52": 84
+          },
+          "trades": 1050,
+          "vs_baseline_dd_nonworsening": null,
+          "vs_baseline_profit_positive": null,
+          "vs_baseline_trade_count_positive": null,
+          "win_rate": 0.5114285714285715
+        }
+      },
+      "signals": {
+        "ELIGIBLE_BEFORE_WINRATE": 213,
+        "EXTRA_SELECTED": 11,
+        "FEATURES_INVALID": 7,
+        "NON_HC_NOT_ELIGIBLE": 191,
+        "ORIGINAL_WINRATE_BLOCK": 6
+      },
+      "variant": "HC_DIRECTIONAL_SCORE100"
+    },
+    {
+      "extra_candidates": 9,
+      "policy": {
+        "cap": 0.25,
+        "kind": "hc_all",
+        "relative24_min": 0.02
+      },
+      "scenarios": {
+        "PRICE_MODEL_10BPS": {
+          "ending_jpy": 127817290.5299118,
+          "extra_accepted": 8,
+          "max_dd": -0.22944963848991062,
+          "pf": 2.3879014862485617,
+          "strategy_pnl_jpy": {
+            "FET": 1639975.9501746497,
+            "PENGU": 4389076.670931645,
+            "Q102": 48349137.4462758,
+            "V12": 40499239.440772906,
+            "V52": 34112687.35143952
+          },
+          "strategy_trades": {
+            "FET": 15,
+            "PENGU": 62,
+            "Q102": 130,
+            "V12": 759,
+            "V52": 85
+          },
+          "trades": 1051,
+          "vs_baseline_dd_nonworsening": true,
+          "vs_baseline_profit_positive": false,
+          "vs_baseline_trade_count_positive": true,
+          "win_rate": 0.5737392959086585
+        },
+        "PRICE_MODEL_8BPS": {
+          "ending_jpy": 152458345.004895,
+          "extra_accepted": 8,
+          "max_dd": -0.22832428541922656,
+          "pf": 2.433986106730684,
+          "strategy_pnl_jpy": {
+            "FET": 1813002.0987084731,
+            "PENGU": 4997559.771551055,
+            "Q102": 57119491.50452262,
+            "V12": 48995652.00490201,
+            "V52": 40995687.74000245
+          },
+          "strategy_trades": {
+            "FET": 15,
+            "PENGU": 62,
+            "Q102": 130,
+            "V12": 759,
+            "V52": 85
+          },
+          "trades": 1051,
+          "vs_baseline_dd_nonworsening": true,
+          "vs_baseline_profit_positive": false,
+          "vs_baseline_trade_count_positive": true,
+          "win_rate": 0.576593720266413
+        },
+        "PRICE_MODEL_STRESS_30BPS": {
+          "ending_jpy": 22042540.654521156,
+          "extra_accepted": 8,
+          "max_dd": -0.24454745655940324,
+          "pf": 1.967824237677503,
+          "strategy_pnl_jpy": {
+            "FET": 596382.7896809749,
+            "PENGU": 1354957.422518464,
+            "Q102": 9291440.585247468,
+            "V12": 5483574.486924126,
+            "V52": 5339447.865029033
+          },
+          "strategy_trades": {
+            "FET": 15,
+            "PENGU": 62,
+            "Q102": 130,
+            "V12": 759,
+            "V52": 84
+          },
+          "trades": 1050,
+          "vs_baseline_dd_nonworsening": null,
+          "vs_baseline_profit_positive": null,
+          "vs_baseline_trade_count_positive": null,
+          "win_rate": 0.5085714285714286
+        }
+      },
+      "signals": {
+        "ELIGIBLE_BEFORE_WINRATE": 186,
+        "EXTRA_SELECTED": 9,
+        "FEATURES_INVALID": 7,
+        "NON_HC_NOT_ELIGIBLE": 157,
+        "ORIGINAL_WINRATE_BLOCK": 3
+      },
+      "variant": "HC_LOW_SCORE_WITH_RELSTRENGTH"
+    },
+    {
+      "extra_candidates": 0,
+      "policy": {
+        "cap": 0.25,
+        "kind": "hc_neutral",
+        "satellite_only": false
+      },
+      "scenarios": {
+        "PRICE_MODEL_10BPS": {
+          "ending_jpy": 130287867.06655651,
+          "extra_accepted": 0,
+          "max_dd": -0.22944963848991073,
+          "pf": 2.4176125792561076,
+          "strategy_pnl_jpy": {
+            "FET": 3821655.9679796332,
+            "PENGU": 4286709.765443881,
+            "Q102": 48395452.035399586,
+            "V12": 41378175.23780564,
+            "V52": 33626999.95822788
+          },
+          "strategy_trades": {
+            "FET": 15,
+            "PENGU": 62,
+            "Q102": 130,
+            "V12": 754,
+            "V52": 85
+          },
+          "trades": 1046,
+          "vs_baseline_dd_nonworsening": true,
+          "vs_baseline_profit_positive": false,
+          "vs_baseline_trade_count_positive": false,
+          "win_rate": 0.5745697896749522
+        },
+        "PRICE_MODEL_8BPS": {
+          "ending_jpy": 155417832.2837019,
+          "extra_accepted": 0,
+          "max_dd": -0.2283242854192271,
+          "pf": 2.464228135438672,
+          "strategy_pnl_jpy": {
+            "FET": 4395011.90277252,
+            "PENGU": 4880004.704414202,
+            "Q102": 57191568.49642759,
+            "V12": 50038539.95410397,
+            "V52": 40433392.84768598
+          },
+          "strategy_trades": {
+            "FET": 15,
+            "PENGU": 62,
+            "Q102": 130,
+            "V12": 754,
+            "V52": 85
+          },
+          "trades": 1046,
+          "vs_baseline_dd_nonworsening": true,
+          "vs_baseline_profit_positive": false,
+          "vs_baseline_trade_count_positive": false,
+          "win_rate": 0.5774378585086042
+        },
+        "PRICE_MODEL_STRESS_30BPS": {
+          "ending_jpy": 22451885.919782147,
+          "extra_accepted": 0,
+          "max_dd": -0.24454745655940313,
+          "pf": 1.9912973211217482,
+          "strategy_pnl_jpy": {
+            "FET": 1002071.2284346888,
+            "PENGU": 1328970.6590270735,
+            "Q102": 9272689.314065693,
+            "V12": 5647836.766256145,
+            "V52": 5232005.408483563
+          },
+          "strategy_trades": {
+            "FET": 15,
+            "PENGU": 62,
+            "Q102": 130,
+            "V12": 754,
+            "V52": 84
+          },
+          "trades": 1045,
+          "vs_baseline_dd_nonworsening": null,
+          "vs_baseline_profit_positive": null,
+          "vs_baseline_trade_count_positive": null,
+          "win_rate": 0.5110047846889952
+        }
+      },
+      "signals": {
+        "ELIGIBLE_BEFORE_WINRATE": 226,
+        "FEATURES_INVALID": 7,
+        "NON_HC_NOT_ELIGIBLE": 215,
+        "ORIGINAL_WINRATE_BLOCK": 11
+      },
+      "variant": "HC_NEUTRAL_SCORE100"
+    },
+    {
+      "extra_candidates": 4,
+      "policy": {
+        "cap": 0.25,
+        "kind": "hc_relaxed",
+        "satellite_only": false
+      },
+      "scenarios": {
+        "PRICE_MODEL_10BPS": {
+          "ending_jpy": 130466128.70552073,
+          "extra_accepted": 2,
+          "max_dd": -0.2294496384899104,
+          "pf": 2.4177399479900004,
+          "strategy_pnl_jpy": {
+            "FET": 3826890.477130686,
+            "PENGU": 4291824.406008817,
+            "Q102": 48459996.56352107,
+            "V12": 41437574.39047231,
+            "V52": 33672746.90279935
+          },
+          "strategy_trades": {
+            "FET": 15,
+            "PENGU": 62,
+            "Q102": 130,
+            "V12": 756,
+            "V52": 85
+          },
+          "trades": 1048,
+          "vs_baseline_dd_nonworsening": true,
+          "vs_baseline_profit_positive": true,
+          "vs_baseline_trade_count_positive": true,
+          "win_rate": 0.5744274809160306
+        },
+        "PRICE_MODEL_8BPS": {
+          "ending_jpy": 155636944.64453524,
+          "extra_accepted": 2,
+          "max_dd": -0.22832428541922745,
+          "pf": 2.4643538904699356,
+          "strategy_pnl_jpy": {
+            "FET": 4401213.849032961,
+            "PENGU": 4886068.470206617,
+            "Q102": 57270335.90012702,
+            "V12": 50112157.66850297,
+            "V52": 40490102.30625517
+          },
+          "strategy_trades": {
+            "FET": 15,
+            "PENGU": 62,
+            "Q102": 130,
+            "V12": 756,
+            "V52": 85
+          },
+          "trades": 1048,
+          "vs_baseline_dd_nonworsening": false,
+          "vs_baseline_profit_positive": true,
+          "vs_baseline_trade_count_positive": true,
+          "win_rate": 0.5772900763358778
+        },
+        "PRICE_MODEL_STRESS_30BPS": {
+          "ending_jpy": 22474022.181308318,
+          "extra_accepted": 2,
+          "max_dd": -0.2445474565594028,
+          "pf": 1.9914355474523817,
+          "strategy_pnl_jpy": {
+            "FET": 1003064.1715635235,
+            "PENGU": 1329954.9675036427,
+            "Q102": 9281261.043751143,
+            "V12": 5654480.491429163,
+            "V52": 5237087.491699729
+          },
+          "strategy_trades": {
+            "FET": 15,
+            "PENGU": 62,
+            "Q102": 130,
+            "V12": 756,
+            "V52": 84
+          },
+          "trades": 1047,
+          "vs_baseline_dd_nonworsening": null,
+          "vs_baseline_profit_positive": null,
+          "vs_baseline_trade_count_positive": null,
+          "win_rate": 0.5100286532951289
+        }
+      },
+      "signals": {
+        "ELIGIBLE_BEFORE_WINRATE": 101,
+        "EXTRA_SELECTED": 4,
+        "FEATURES_INVALID": 7,
+        "NON_HC_NOT_ELIGIBLE": 87,
+        "ORIGINAL_WINRATE_BLOCK": 6
+      },
+      "variant": "HC_RELAXED_SCORE035_VOLUME080"
+    },
+    {
+      "extra_candidates": 40,
+      "policy": {
+        "cap": 0.1,
+        "kind": "hc_all"
+      },
+      "scenarios": {
+        "PRICE_MODEL_10BPS": {
+          "ending_jpy": 123550097.74692103,
+          "extra_accepted": 27,
+          "max_dd": -0.22944963848991096,
+          "pf": 2.38078838774641,
+          "strategy_pnl_jpy": {
+            "FET": 1639004.612299379,
+            "PENGU": 4310673.576952992,
+            "Q102": 46800573.35489993,
+            "V12": 38883943.21244566,
+            "V52": 33042408.19238607
+          },
+          "strategy_trades": {
+            "FET": 15,
+            "PENGU": 62,
+            "Q102": 130,
+            "V12": 773,
+            "V52": 85
+          },
+          "trades": 1065,
+          "vs_baseline_dd_nonworsening": false,
+          "vs_baseline_profit_positive": false,
+          "vs_baseline_trade_count_positive": true,
+          "win_rate": 0.5755868544600939
+        },
+        "PRICE_MODEL_8BPS": {
+          "ending_jpy": 147301090.8441267,
+          "extra_accepted": 27,
+          "max_dd": -0.22832428541922656,
+          "pf": 2.4268798463561705,
+          "strategy_pnl_jpy": {
+            "FET": 1813592.972256008,
+            "PENGU": 4905554.397319522,
+            "Q102": 55269336.59470795,
+            "V12": 47029219.902772605,
+            "V52": 39689258.564318925
+          },
+          "strategy_trades": {
+            "FET": 15,
+            "PENGU": 62,
+            "Q102": 130,
+            "V12": 773,
+            "V52": 85
+          },
+          "trades": 1065,
+          "vs_baseline_dd_nonworsening": true,
+          "vs_baseline_profit_positive": false,
+          "vs_baseline_trade_count_positive": true,
+          "win_rate": 0.5774647887323944
+        },
+        "PRICE_MODEL_STRESS_30BPS": {
+          "ending_jpy": 21405209.790239386,
+          "extra_accepted": 25,
+          "max_dd": -0.24454745655940324,
+          "pf": 1.9609907794897412,
+          "strategy_pnl_jpy": {
+            "FET": 592532.5097202754,
+            "PENGU": 1337317.655049699,
+            "Q102": 9022947.948891973,
+            "V12": 5271614.261961705,
+            "V52": 5198997.544779467
+          },
+          "strategy_trades": {
+            "FET": 15,
+            "PENGU": 62,
+            "Q102": 130,
+            "V12": 771,
+            "V52": 84
+          },
+          "trades": 1062,
+          "vs_baseline_dd_nonworsening": null,
+          "vs_baseline_profit_positive": null,
+          "vs_baseline_trade_count_positive": null,
+          "win_rate": 0.5084745762711864
+        }
+      },
+      "signals": {
+        "ELIGIBLE_BEFORE_WINRATE": 839,
+        "EXTRA_SELECTED": 40,
+        "FEATURES_INVALID": 7,
+        "NON_HC_NOT_ELIGIBLE": 716,
+        "ORIGINAL_WINRATE_BLOCK": 36
+      },
+      "variant": "HC_SCORE100_SMALL_GROSS"
+    },
+    {
+      "extra_candidates": 27,
+      "policy": {
+        "cap": 0.25,
+        "kind": "hc_strong",
+        "satellite_only": false
+      },
+      "scenarios": {
+        "PRICE_MODEL_10BPS": {
+          "ending_jpy": 126260268.79412587,
+          "extra_accepted": 19,
+          "max_dd": -0.22944963848991085,
+          "pf": 2.381271333148332,
+          "strategy_pnl_jpy": {
+            "FET": 1663157.046017556,
+            "PENGU": 4389912.9517073855,
+            "Q102": 47780885.93081699,
+            "V12": 39830898.687785685,
+            "V52": 33750519.66812356
+          },
+          "strategy_trades": {
+            "FET": 15,
+            "PENGU": 62,
+            "Q102": 130,
+            "V12": 765,
+            "V52": 85
+          },
+          "trades": 1057,
+          "vs_baseline_dd_nonworsening": false,
+          "vs_baseline_profit_positive": false,
+          "vs_baseline_trade_count_positive": true,
+          "win_rate": 0.575212866603595
+        },
+        "PRICE_MODEL_8BPS": {
+          "ending_jpy": 150593539.82837582,
+          "extra_accepted": 19,
+          "max_dd": -0.22832428541922667,
+          "pf": 2.427387023986536,
+          "strategy_pnl_jpy": {
+            "FET": 1840170.9754217928,
+            "PENGU": 4997502.6701696785,
+            "Q102": 56450143.24877547,
+            "V12": 48190935.45177966,
+            "V52": 40556218.07146022
+          },
+          "strategy_trades": {
+            "FET": 15,
+            "PENGU": 62,
+            "Q102": 130,
+            "V12": 765,
+            "V52": 85
+          },
+          "trades": 1057,
+          "vs_baseline_dd_nonworsening": true,
+          "vs_baseline_profit_positive": false,
+          "vs_baseline_trade_count_positive": true,
+          "win_rate": 0.5771050141911069
+        },
+        "PRICE_MODEL_STRESS_30BPS": {
+          "ending_jpy": 21782059.229491513,
+          "extra_accepted": 19,
+          "max_dd": -0.2445474565594029,
+          "pf": 1.9612264280840228,
+          "strategy_pnl_jpy": {
+            "FET": 600905.6296833062,
+            "PENGU": 1357093.5561942612,
+            "Q102": 9172542.035006603,
+            "V12": 5384327.61961443,
+            "V52": 5288198.645736318
+          },
+          "strategy_trades": {
+            "FET": 15,
+            "PENGU": 62,
+            "Q102": 130,
+            "V12": 765,
+            "V52": 84
+          },
+          "trades": 1056,
+          "vs_baseline_dd_nonworsening": null,
+          "vs_baseline_profit_positive": null,
+          "vs_baseline_trade_count_positive": null,
+          "win_rate": 0.5085227272727273
+        }
+      },
+      "signals": {
+        "ELIGIBLE_BEFORE_WINRATE": 277,
+        "EXTRA_SELECTED": 27,
+        "FEATURES_INVALID": 7,
+        "NON_HC_NOT_ELIGIBLE": 204,
+        "ORIGINAL_WINRATE_BLOCK": 8
+      },
+      "variant": "HC_STRONG_VOLUME080"
+    },
+    {
+      "extra_candidates": 40,
+      "policy": {
+        "cap": 0.25,
+        "kind": "hc_all",
+        "satellite_only": false
+      },
+      "scenarios": {
+        "PRICE_MODEL_10BPS": {
+          "ending_jpy": 126574310.87991863,
+          "extra_accepted": 27,
+          "max_dd": -0.2294496384899105,
+          "pf": 2.381272877614758,
+          "strategy_pnl_jpy": {
+            "FET": 1667303.2288758075,
+            "PENGU": 4400023.259711148,
+            "Q102": 47898666.70720171,
+            "V12": 39932378.31839052,
+            "V52": 33834265.69240991
+          },
+          "strategy_trades": {
+            "FET": 15,
+            "PENGU": 62,
+            "Q102": 130,
+            "V12": 773,
+            "V52": 85
+          },
+          "trades": 1065,
+          "vs_baseline_dd_nonworsening": true,
+          "vs_baseline_profit_positive": false,
+          "vs_baseline_trade_count_positive": true,
+          "win_rate": 0.5755868544600939
+        },
+        "PRICE_MODEL_8BPS": {
+          "ending_jpy": 151000893.6242731,
+          "extra_accepted": 27,
+          "max_dd": -0.2283242854192271,
+          "pf": 2.427390321830101,
+          "strategy_pnl_jpy": {
+            "FET": 1845158.7301807012,
+            "PENGU": 5010107.48129677,
+            "Q102": 56601615.181319304,
+            "V12": 48324028.208484456,
+            "V52": 40665690.03949394
+          },
+          "strategy_trades": {
+            "FET": 15,
+            "PENGU": 62,
+            "Q102": 130,
+            "V12": 773,
+            "V52": 85
+          },
+          "trades": 1065,
+          "vs_baseline_dd_nonworsening": true,
+          "vs_baseline_profit_positive": false,
+          "vs_baseline_trade_count_positive": true,
+          "win_rate": 0.5774647887323944
+        },
+        "PRICE_MODEL_STRESS_30BPS": {
+          "ending_jpy": 21795776.399971418,
+          "extra_accepted": 25,
+          "max_dd": -0.2445474565594029,
+          "pf": 1.9612009488374316,
+          "strategy_pnl_jpy": {
+            "FET": 601287.0051805837,
+            "PENGU": 1357764.8796865786,
+            "Q102": 9178131.317271663,
+            "V12": 5388216.676268881,
+            "V52": 5291495.299135054
+          },
+          "strategy_trades": {
+            "FET": 15,
+            "PENGU": 62,
+            "Q102": 130,
+            "V12": 771,
+            "V52": 84
+          },
+          "trades": 1062,
+          "vs_baseline_dd_nonworsening": null,
+          "vs_baseline_profit_positive": null,
+          "vs_baseline_trade_count_positive": null,
+          "win_rate": 0.5084745762711864
+        }
+      },
+      "signals": {
+        "ELIGIBLE_BEFORE_WINRATE": 839,
+        "EXTRA_SELECTED": 40,
+        "FEATURES_INVALID": 7,
+        "NON_HC_NOT_ELIGIBLE": 716,
+        "ORIGINAL_WINRATE_BLOCK": 36
+      },
+      "variant": "HC_VOLUME080_SCORE100"
+    },
+    {
+      "extra_candidates": 9,
+      "policy": {
+        "cap": 0.1,
+        "kind": "hc_all",
+        "satellite_only": true
+      },
+      "scenarios": {
+        "PRICE_MODEL_10BPS": {
+          "ending_jpy": 130520013.72346322,
+          "extra_accepted": 5,
+          "max_dd": -0.2294496384899104,
+          "pf": 2.4176143508303887,
+          "strategy_pnl_jpy": {
+            "FET": 3828472.767191301,
+            "PENGU": 4293552.597549932,
+            "Q102": 48480627.08669184,
+            "V12": 41454201.13168286,
+            "V52": 33686717.494826235
+          },
+          "strategy_trades": {
+            "FET": 15,
+            "PENGU": 62,
+            "Q102": 130,
+            "V12": 759,
+            "V52": 85
+          },
+          "trades": 1051,
+          "vs_baseline_dd_nonworsening": true,
+          "vs_baseline_profit_positive": true,
+          "vs_baseline_trade_count_positive": true,
+          "win_rate": 0.5746907706945766
+        },
+        "PRICE_MODEL_8BPS": {
+          "ending_jpy": 155710202.07829228,
+          "extra_accepted": 5,
+          "max_dd": -0.2283242854192269,
+          "pf": 2.4642314735506554,
+          "strategy_pnl_jpy": {
+            "FET": 4403287.390961901,
+            "PENGU": 4888286.791354742,
+            "Q102": 57297940.02647936,
+            "V12": 50135277.53645324,
+            "V52": 40509225.439439096
+          },
+          "strategy_trades": {
+            "FET": 15,
+            "PENGU": 62,
+            "Q102": 130,
+            "V12": 759,
+            "V52": 85
+          },
+          "trades": 1051,
+          "vs_baseline_dd_nonworsening": true,
+          "vs_baseline_profit_positive": true,
+          "vs_baseline_trade_count_positive": true,
+          "win_rate": 0.5775451950523312
+        },
+        "PRICE_MODEL_STRESS_30BPS": {
+          "ending_jpy": 22469736.59384117,
+          "extra_accepted": 5,
+          "max_dd": -0.2445474565594027,
+          "pf": 1.9912721263878774,
+          "strategy_pnl_jpy": {
+            "FET": 1002871.9374492138,
+            "PENGU": 1329850.6623027038,
+            "Q102": 9279880.549375758,
+            "V12": 5652830.972490017,
+            "V52": 5236133.643924256
+          },
+          "strategy_trades": {
+            "FET": 15,
+            "PENGU": 62,
+            "Q102": 130,
+            "V12": 759,
+            "V52": 84
+          },
+          "trades": 1050,
+          "vs_baseline_dd_nonworsening": null,
+          "vs_baseline_profit_positive": null,
+          "vs_baseline_trade_count_positive": null,
+          "win_rate": 0.5114285714285715
+        }
+      },
+      "signals": {
+        "ELIGIBLE_BEFORE_WINRATE": 308,
+        "EXTRA_SELECTED": 9,
+        "NON_HC_NOT_ELIGIBLE": 255,
+        "ORIGINAL_WINRATE_BLOCK": 2
+      },
+      "variant": "HC_VOLUME080_SCORE100_SATELLITE"
+    },
+    {
+      "extra_candidates": 21,
+      "policy": {
+        "base_empty": true,
+        "cap": 0.25,
+        "kind": "hc_all"
+      },
+      "scenarios": {
+        "PRICE_MODEL_10BPS": {
+          "ending_jpy": 127105114.11578053,
+          "extra_accepted": 19,
+          "max_dd": -0.22944963848991062,
+          "pf": 2.3837413154408087,
+          "strategy_pnl_jpy": {
+            "FET": 1674311.2299597114,
+            "PENGU": 4409756.091295163,
+            "Q102": 48182613.74838254,
+            "V12": 40030187.374418214,
+            "V52": 33972152.612182505
+          },
+          "strategy_trades": {
+            "FET": 15,
+            "PENGU": 62,
+            "Q102": 130,
+            "V12": 767,
+            "V52": 85
+          },
+          "trades": 1059,
+          "vs_baseline_dd_nonworsening": true,
+          "vs_baseline_profit_positive": false,
+          "vs_baseline_trade_count_positive": true,
+          "win_rate": 0.5750708215297451
+        },
+        "PRICE_MODEL_8BPS": {
+          "ending_jpy": 151640456.04111698,
+          "extra_accepted": 19,
+          "max_dd": -0.22832428541922678,
+          "pf": 2.4298181516228965,
+          "strategy_pnl_jpy": {
+            "FET": 1852989.7127819424,
+            "PENGU": 5022007.535935555,
+            "Q102": 56932500.99000349,
+            "V12": 48452133.949443184,
+            "V52": 40833417.1600881
+          },
+          "strategy_trades": {
+            "FET": 15,
+            "PENGU": 62,
+            "Q102": 130,
+            "V12": 767,
+            "V52": 85
+          },
+          "trades": 1059,
+          "vs_baseline_dd_nonworsening": true,
+          "vs_baseline_profit_positive": false,
+          "vs_baseline_trade_count_positive": true,
+          "win_rate": 0.5769593956562795
+        },
+        "PRICE_MODEL_STRESS_30BPS": {
+          "ending_jpy": 21880211.998373896,
+          "extra_accepted": 17,
+          "max_dd": -0.24454745655940335,
+          "pf": 1.9639923814184117,
+          "strategy_pnl_jpy": {
+            "FET": 603634.5496960812,
+            "PENGU": 1358535.1610582215,
+            "Q102": 9246661.939847788,
+            "V12": 5382235.722981298,
+            "V52": 5310856.043947059
+          },
+          "strategy_trades": {
+            "FET": 15,
+            "PENGU": 62,
+            "Q102": 130,
+            "V12": 765,
+            "V52": 84
+          },
+          "trades": 1056,
+          "vs_baseline_dd_nonworsening": null,
+          "vs_baseline_profit_positive": null,
+          "vs_baseline_trade_count_positive": null,
+          "win_rate": 0.5085227272727273
+        }
+      },
+      "signals": {
+        "ELIGIBLE_BEFORE_WINRATE": 362,
+        "EXTRA_SELECTED": 21,
+        "FEATURES_INVALID": 5,
+        "NON_HC_NOT_ELIGIBLE": 315,
+        "ORIGINAL_WINRATE_BLOCK": 22
+      },
+      "variant": "HC_WHEN_BASE_EMPTY"
+    },
+    {
+      "extra_candidates": 11,
+      "policy": {
+        "cap": 0.25,
+        "kind": "neutral_breakout"
+      },
+      "scenarios": {
+        "PRICE_MODEL_10BPS": {
+          "ending_jpy": 129630827.10749812,
+          "extra_accepted": 9,
+          "max_dd": -0.22944963848991073,
+          "pf": 2.414710635417596,
+          "strategy_pnl_jpy": {
+            "FET": 3810930.7902495447,
+            "PENGU": 4287745.059459898,
+            "Q102": 48187301.63157937,
+            "V12": 41082383.30751913,
+            "V52": 33477551.963366058
+          },
+          "strategy_trades": {
+            "FET": 15,
+            "PENGU": 62,
+            "Q102": 130,
+            "V12": 762,
+            "V52": 85
+          },
+          "trades": 1054,
+          "vs_baseline_dd_nonworsening": true,
+          "vs_baseline_profit_positive": false,
+          "vs_baseline_trade_count_positive": true,
+          "win_rate": 0.5721062618595826
+        },
+        "PRICE_MODEL_8BPS": {
+          "ending_jpy": 154674456.7593854,
+          "extra_accepted": 9,
+          "max_dd": -0.22832428541922722,
+          "pf": 2.461357174995822,
+          "strategy_pnl_jpy": {
+            "FET": 4383267.743332711,
+            "PENGU": 4881488.023233441,
+            "Q102": 56958010.737611875,
+            "V12": 49702512.91632628,
+            "V52": 40262870.82477126
+          },
+          "strategy_trades": {
+            "FET": 15,
+            "PENGU": 62,
+            "Q102": 130,
+            "V12": 762,
+            "V52": 85
+          },
+          "trades": 1054,
+          "vs_baseline_dd_nonworsening": false,
+          "vs_baseline_profit_positive": false,
+          "vs_baseline_trade_count_positive": true,
+          "win_rate": 0.5749525616698292
+        },
+        "PRICE_MODEL_STRESS_30BPS": {
+          "ending_jpy": 22280674.994437855,
+          "extra_accepted": 9,
+          "max_dd": -0.24454745655940302,
+          "pf": 1.9881755221716717,
+          "strategy_pnl_jpy": {
+            "FET": 998039.803533028,
+            "PENGU": 1328016.4716613097,
+            "Q102": 9214406.759763498,
+            "V12": 5573224.045902616,
+            "V52": 5197558.290896989
+          },
+          "strategy_trades": {
+            "FET": 15,
+            "PENGU": 62,
+            "Q102": 130,
+            "V12": 762,
+            "V52": 84
+          },
+          "trades": 1053,
+          "vs_baseline_dd_nonworsening": null,
+          "vs_baseline_profit_positive": null,
+          "vs_baseline_trade_count_positive": null,
+          "win_rate": 0.5090218423551757
+        }
+      },
+      "signals": {
+        "ELIGIBLE_BEFORE_WINRATE": 13,
+        "EXTRA_SELECTED": 11,
+        "FEATURES_INVALID": 7
+      },
+      "variant": "NEUTRAL_BREAKOUT_CONFIRMED"
+    },
+    {
+      "extra_candidates": 23,
+      "policy": {
+        "cap": 0.25,
+        "kind": "base_score_low_vol"
+      },
+      "scenarios": {
+        "PRICE_MODEL_10BPS": {
+          "ending_jpy": 132822893.54737091,
+          "extra_accepted": 14,
+          "max_dd": -0.22944963848991107,
+          "pf": 2.417653998685735,
+          "strategy_pnl_jpy": {
+            "FET": 3853780.0213042195,
+            "PENGU": 4355170.319669362,
+            "Q102": 49774766.95389887,
+            "V12": 41724504.26953232,
+            "V52": 34363996.47455588
+          },
+          "strategy_trades": {
+            "FET": 15,
+            "PENGU": 62,
+            "Q102": 130,
+            "V12": 766,
+            "V52": 85
+          },
+          "trades": 1058,
+          "vs_baseline_dd_nonworsening": false,
+          "vs_baseline_profit_positive": true,
+          "vs_baseline_trade_count_positive": true,
+          "win_rate": 0.5737240075614367
+        },
+        "PRICE_MODEL_8BPS": {
+          "ending_jpy": 158448603.7572804,
+          "extra_accepted": 14,
+          "max_dd": -0.228324285419227,
+          "pf": 2.4640464870974967,
+          "strategy_pnl_jpy": {
+            "FET": 4433448.2833661735,
+            "PENGU": 4960685.687888813,
+            "Q102": 58801025.68786157,
+            "V12": 50490525.30399947,
+            "V52": 41318026.14219996
+          },
+          "strategy_trades": {
+            "FET": 15,
+            "PENGU": 62,
+            "Q102": 130,
+            "V12": 766,
+            "V52": 85
+          },
+          "trades": 1058,
+          "vs_baseline_dd_nonworsening": true,
+          "vs_baseline_profit_positive": true,
+          "vs_baseline_trade_count_positive": true,
+          "win_rate": 0.5765595463137996
+        },
+        "PRICE_MODEL_STRESS_30BPS": {
+          "ending_jpy": 23222674.741958722,
+          "extra_accepted": 14,
+          "max_dd": -0.24454745655940335,
+          "pf": 1.9935018505261368,
+          "strategy_pnl_jpy": {
+            "FET": 1022567.2995287157,
+            "PENGU": 1364604.2820404614,
+            "Q102": 9722113.36122036,
+            "V12": 5720609.054245119,
+            "V52": 5430595.283466066
+          },
+          "strategy_trades": {
+            "FET": 15,
+            "PENGU": 62,
+            "Q102": 130,
+            "V12": 766,
+            "V52": 85
+          },
+          "trades": 1058,
+          "vs_baseline_dd_nonworsening": null,
+          "vs_baseline_profit_positive": null,
+          "vs_baseline_trade_count_positive": null,
+          "win_rate": 0.5103969754253308
+        }
+      },
+      "signals": {
+        "ELIGIBLE_BEFORE_WINRATE": 29,
+        "EXTRA_SELECTED": 23,
+        "FEATURES_INVALID": 7,
+        "ORIGINAL_WINRATE_BLOCK": 5
+      },
+      "variant": "SCORE146_VOLUME080"
+    },
+    {
+      "extra_candidates": 8,
+      "policy": {
+        "cap": 0.25,
+        "kind": "strong_breakout"
+      },
+      "scenarios": {
+        "PRICE_MODEL_10BPS": {
+          "ending_jpy": 130853253.76738875,
+          "extra_accepted": 4,
+          "max_dd": -0.2294496384899105,
+          "pf": 2.4176468476255963,
+          "strategy_pnl_jpy": {
+            "FET": 3838258.092119089,
+            "PENGU": 4302924.596900767,
+            "Q102": 48601110.20651666,
+            "V12": 41565617.22279294,
+            "V52": 33772120.71809929
+          },
+          "strategy_trades": {
+            "FET": 15,
+            "PENGU": 62,
+            "Q102": 130,
+            "V12": 758,
+            "V52": 85
+          },
+          "trades": 1050,
+          "vs_baseline_dd_nonworsening": true,
+          "vs_baseline_profit_positive": true,
+          "vs_baseline_trade_count_positive": true,
+          "win_rate": 0.5742857142857143
+        },
+        "PRICE_MODEL_8BPS": {
+          "ending_jpy": 156109036.69695175,
+          "extra_accepted": 4,
+          "max_dd": -0.22832428541922656,
+          "pf": 2.4642612370996364,
+          "strategy_pnl_jpy": {
+            "FET": 4414576.3518508235,
+            "PENGU": 4899103.1513786055,
+            "Q102": 57441151.35630402,
+            "V12": 50269682.0681984,
+            "V52": 40612318.6705707
+          },
+          "strategy_trades": {
+            "FET": 15,
+            "PENGU": 62,
+            "Q102": 130,
+            "V12": 758,
+            "V52": 85
+          },
+          "trades": 1050,
+          "vs_baseline_dd_nonworsening": true,
+          "vs_baseline_profit_positive": true,
+          "vs_baseline_trade_count_positive": true,
+          "win_rate": 0.5771428571428572
+        },
+        "PRICE_MODEL_STRESS_30BPS": {
+          "ending_jpy": 22525041.77390356,
+          "extra_accepted": 4,
+          "max_dd": -0.24454745655940335,
+          "pf": 1.9913344331565308,
+          "strategy_pnl_jpy": {
+            "FET": 1005352.7040622548,
+            "PENGU": 1332332.830046293,
+            "Q102": 9301182.437962957,
+            "V12": 5669490.542645137,
+            "V52": 5248810.237557199
+          },
+          "strategy_trades": {
+            "FET": 15,
+            "PENGU": 62,
+            "Q102": 130,
+            "V12": 758,
+            "V52": 84
+          },
+          "trades": 1049,
+          "vs_baseline_dd_nonworsening": null,
+          "vs_baseline_profit_positive": null,
+          "vs_baseline_trade_count_positive": null,
+          "win_rate": 0.5100095328884652
+        }
+      },
+      "signals": {
+        "ELIGIBLE_BEFORE_WINRATE": 9,
+        "EXTRA_SELECTED": 8,
+        "FEATURES_INVALID": 7
+      },
+      "variant": "STRONG_BREAKOUT_CONFIRMED"
+    }
+  ],
+  "win_rate_gate_source_parity": {
+    "checked": 1488
+  }
+}

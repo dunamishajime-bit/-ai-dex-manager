@@ -1,0 +1,20 @@
+{
+  "status": "ORIGINAL_FIVE_LOGIC_EXACT_PASS",
+  "period": "2025-08-10..2026-08-10",
+  "scenarios": {
+    "PRICE_MODEL_8BPS": {
+      "ending_jpy": 155417832.2837019,
+      "dd": -0.2283242854192271,
+      "pf": 2.464228135438672,
+      "trades": 1046
+    },
+    "PRICE_MODEL_10BPS": {
+      "ending_jpy": 130287867.06655651,
+      "dd": -0.22944963848991073,
+      "pf": 2.4176125792561076,
+      "trades": 1046
+    }
+  },
+  "l2_orderbook_fill_verified": false,
+  "research_only": true
+}
