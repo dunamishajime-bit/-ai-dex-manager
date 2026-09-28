@@ -4,10 +4,12 @@ on:
     branches: [research/v12-normal-gate-only-five-logic-20260928]
     paths:
       - "research/formal_five_bt/v12_selected_combo_integrated.py"
+      - "research/formal_five_bt/restore_original_v52_tape.py"
       - ".github/workflows/v12-normal-only-five-logic-bt-20260928.yml"
   workflow_dispatch:
 permissions:
   contents: write
+  actions: read
 concurrency:
   group: v12-selected-combo-five-logic-bt-20260928
   cancel-in-progress: false
@@ -41,7 +43,7 @@ jobs:
           node-version: "24"
       - name: Verify research script and restore immutable 90-file production source
         run: |
-          python -m py_compile research/formal_five_bt/v12_selected_combo_integrated.py
+          python -m py_compile research/formal_five_bt/v12_selected_combo_integrated.py research/formal_five_bt/restore_original_v52_tape.py
           git -c protocol.version=2 fetch --filter=blob:none --no-tags --depth=1 origin a09ea45ca3cbd72100f9eb0eaae499039c40b6a0
           python -m research.formal_five_bt.restore_snapshot
       - name: Acquire unchanged historical Aster candles/funding and repair only source-proven malformed BTC H1
@@ -60,15 +62,19 @@ jobs:
         run: |
           python -m research.formal_five_bt.crypto_price_model \
             --data-root "$DATA" --scan-root "$BASE_SCANS" --output-root "$BASE_CAND"
-      - name: Acquire V52 stock futures/funding and Yahoo underlying price only, unchanged
+      - name: Acquire V52 Aster stock H1/funding and SHA-restore ORIGINAL Yahoo-reference source tape
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           python -m research.formal_five_bt.aster_stock_acquire --data-root "$V52_DATA"
-          python -m research.formal_five_bt.yahoo_acquire --output-root "$V52_DATA"
-          python -m research.formal_five_bt.v52_price_only_scan \
-            --data-root "$V52_DATA" --output-root "$V52_SCAN"
-          python -m research.formal_five_bt.v52_research_ledger \
-            --data-root "$V52_DATA" --scan-root "$V52_SCAN" \
-            --output-root "$V52_LEDGER" --round-trip-cost-bps 11
+          mkdir -p "$RUNNER_TEMP/original-v52-artifact"
+          gh run download 36325740751 \
+            --repo dunamishajime-bit/-ai-dex-manager \
+            --name all-five-logic-official-aster-1m-reconstructed-aggregate \
+            --dir "$RUNNER_TEMP/original-v52-artifact"
+          python -m research.formal_five_bt.restore_original_v52_tape \
+            --archive-root "$RUNNER_TEMP/original-v52-artifact" \
+            --output "$V52_LEDGER"
           mkdir -p "$DATA/normalized" "$DATA/normalized/aster/funding"
           cp -a "$V52_DATA/normalized/aster_stock" "$DATA/normalized/aster_stock"
           cp "$V52_DATA/aster-stock-hourly-coverage.json" "$DATA/aster-stock-hourly-coverage.json"
