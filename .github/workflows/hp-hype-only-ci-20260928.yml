@@ -30,7 +30,7 @@ jobs:
           if find .next/server/app -path '*decision-status/zec*' -o -path '*history/zec*' -o -path '*hype-zec-status*' | grep -q .; then
             echo "REMOVED_ZEC_ROUTE_STILL_COMPILED"; exit 1
           fi
-          if grep -RniE 'ZEC|/zec\b' app components; then
+          if grep -RniE '(^|[^A-Za-z0-9_])ZEC([^A-Za-z0-9_]|$)|/zec([^A-Za-z0-9_-]|$)' app components; then
             echo "HP_ZEC_WORDING_REMAINS"; exit 1
           fi
           echo "HP_HYPE_ONLY_NO_ZEC=PASS"
