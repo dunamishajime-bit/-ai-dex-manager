@@ -65,7 +65,7 @@ jobs:
             "lib/hype-zec-priority-capacity.ts", "lib/pengu-dual-ls-v2-portfolio-runner.ts",
             "lib/v12-live-execution-engine.ts", "lib/v12-strict-live-adapter.ts",
             "ops/systemd/disdex-hype-long@.service", "scripts/disdex-hype-trend-live-runner.ts",
-            "scripts/disdex-hype-zec-core-preempt.ts", "scripts/disdex-hype-zec-long-live-runner.ts",
+            "scripts/disdex-hype-zec-core-preempt.ts", "scripts/disdex-hype-zec-long-live-runner.ts", "scripts/disdex-hype-market-data-recovery.ts",
             "scripts/ops/root/disdex-current-runtime-wiring",
             "scripts/ops/root/disdex-live-operator-activation-gate.mjs", "scripts/ops/root/disdex-runner-health-snapshot-current.mjs",
             "scripts/ops/root/disdex-runner-watchdog-current.mjs",
@@ -75,6 +75,7 @@ jobs:
             "tests/hype-zec-long-sleeves.test.ts", "tests/hype-zec-long-state.test.ts", "tests/hype-zec-policy.test.ts",
             "tests/hype-zec-preemption-executor.test.ts", "tests/hype-zec-preemption.test.ts", "tests/hype-zec-priority-capacity.test.ts",
             "tests/hype-zec-runner-gate.test.ts", "tests/pending-exposure-registry.test.ts",
+            "tests/hype-zec-market-data-resilience.test.ts", "tests/hype-market-data-recovery.test.ts",
             "tests/final-integrated-logic-contract.test.ts", "tests/live_strategy_contract_parity.test.ts",
           }
           unexpected = sorted(set(changed) - allowed)
