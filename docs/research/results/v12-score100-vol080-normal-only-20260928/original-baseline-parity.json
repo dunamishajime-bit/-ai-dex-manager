@@ -1,0 +1,49 @@
+{
+  "baseline_summary_path": "/tmp/v12-combo-five-logic/baseline-all-cases/requested-combo-summary.json",
+  "cases": {
+    "PRICE_MODEL_10BPS": {
+      "actual": {
+        "dd": -0.22944963848991073,
+        "final": 130287867.06655651,
+        "pf": 2.4176125792561076,
+        "trades": 1046
+      },
+      "checks": {
+        "dd": true,
+        "final": true,
+        "pf": true,
+        "trades": true
+      }
+    },
+    "PRICE_MODEL_8BPS": {
+      "actual": {
+        "dd": -0.2283242854192271,
+        "final": 155417832.2837019,
+        "pf": 2.464228135438672,
+        "trades": 1046
+      },
+      "checks": {
+        "dd": true,
+        "final": true,
+        "pf": true,
+        "trades": true
+      }
+    }
+  },
+  "expected": {
+    "PRICE_MODEL_10BPS": {
+      "dd": -0.22944963848991073,
+      "final": 130287867.06655651,
+      "pf": 2.4176125792561076,
+      "trades": 1046
+    },
+    "PRICE_MODEL_8BPS": {
+      "dd": -0.2283242854192271,
+      "final": 155417832.2837019,
+      "pf": 2.464228135438672,
+      "trades": 1046
+    }
+  },
+  "source": "ASTER_H1_2025_08_10_TO_2026_08_10",
+  "status": "ORIGINAL_5LOGIC_BASELINE_EXACT_PARITY_PASS"
+}
