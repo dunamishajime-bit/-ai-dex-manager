@@ -41,6 +41,8 @@ jobs:
           echo "CURRENT_UI_WORKDIR=$wd"
           echo "CURRENT_UI_ENV=$env"
           echo "CURRENT_UI_ACTIVE=$(systemctl is-active "$ui")"
+          echo "HYPE_RUNNER_ACTIVE=$(systemctl is-active "disdex-hype-zec-long@$trading.service" 2>/dev/null || true)"
+          echo "HYPE_RUNNER_PID=$(systemctl show "disdex-hype-zec-long@$trading.service" -p MainPID --value 2>/dev/null || true)"
           echo "LOCAL_HOME_HTTP=$(curl -sS --max-time 6 -o /dev/null -w '%{http_code}' http://127.0.0.1:3001/)"
           echo "FREE_KB=$(df -Pk /home/deploy | awk 'NR==2 {print $4}')"
           echo "TRADING_MUTATION=0"
