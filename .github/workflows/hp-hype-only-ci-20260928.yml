@@ -21,14 +21,16 @@ jobs:
         run: npx tsc --noEmit
       - name: Build all Next.js pages
         run: npm run build
-      - name: Verify compiled HYPE routes exist and ZEC routes do not
+      - name: Verify HYPE routes and retired deep-link redirects compile
         shell: bash
         run: |
           set -Eeuo pipefail
           test -f .next/server/app/api/system/hype-status/route.js
           test -f .next/server/app/decision-status/hype/page.js || test -f .next/server/app/decision-status/hype.html
-          if find .next/server/app -path '*decision-status/zec*' -o -path '*history/zec*' -o -path '*hype-zec-status*' | grep -q .; then
-            echo "REMOVED_ZEC_ROUTE_STILL_COMPILED"; exit 1
+          test -f .next/server/app/decision-status/zec/page.js || test -f .next/server/app/decision-status/zec.html
+          test -f .next/server/app/history/zec/page.js || test -f .next/server/app/history/zec.html
+          if find .next/server/app -path '*hype-zec-status*' | grep -q .; then
+            echo "REMOVED_COMBINED_STATUS_ROUTE_STILL_COMPILED"; exit 1
           fi
           if grep -RniE '(^|[^A-Za-z0-9_])ZEC([^A-Za-z0-9_]|$)|/zec([^A-Za-z0-9_-]|$)' app components; then
             echo "HP_ZEC_WORDING_REMAINS"; exit 1
