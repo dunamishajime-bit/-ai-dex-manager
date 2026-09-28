@@ -1,0 +1,36 @@
+name: HP HYPE-only no-ZEC CI
+on:
+  push:
+    branches: [codex/hp-remove-zec-20260928]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Verify HYPE remains and every HP app/component source has no ZEC wording
+        run: npx tsx --test tests/hp-hype-only-20260928.test.ts
+      - name: Typecheck all UI/server source
+        run: npx tsc --noEmit
+      - name: Build all Next.js pages
+        run: npm run build
+      - name: Verify compiled HYPE routes exist and ZEC routes do not
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          test -f .next/server/app/api/system/hype-status/route.js
+          test -f .next/server/app/decision-status/hype/page.js || test -f .next/server/app/decision-status/hype.html
+          if find .next/server/app -path '*decision-status/zec*' -o -path '*history/zec*' -o -path '*hype-zec-status*' | grep -q .; then
+            echo "REMOVED_ZEC_ROUTE_STILL_COMPILED"; exit 1
+          fi
+          if grep -RniE 'ZEC|/zec\b' app components; then
+            echo "HP_ZEC_WORDING_REMAINS"; exit 1
+          fi
+          echo "HP_HYPE_ONLY_NO_ZEC=PASS"
