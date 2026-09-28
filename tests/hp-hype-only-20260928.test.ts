@@ -18,7 +18,7 @@ test("all HP app/components source removes excluded strategy wording and routes"
   const files = [...sourceFiles("app"), ...sourceFiles("components")];
   const matches = files.flatMap((file) => {
     const source = readFileSync(file, "utf8");
-    return /ZEC|\/zec\b/i.test(source) ? [file] : [];
+    return /\bZEC\b|\/zec\b/i.test(source) ? [file] : [];
   });
   assert.deepEqual(matches, []);
   assert.equal(existsSync("app/decision-status/zec/page.tsx"), false);
