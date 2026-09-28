@@ -173,12 +173,20 @@ jobs:
               body=r.read(1800000).decode("utf-8","ignore")
               if r.status!=200: raise RuntimeError("HP_PAGE_"+path+"_"+str(r.status))
               if token.search(body) or re.search(r"/zec(?:[^A-Za-z0-9_-]|$)",body,re.I): raise RuntimeError("HP_ZEC_WORDING_RENDERED_"+path)
-          for path in ["/decision-status/zec","/history/zec","/api/system/hype-zec-status"]:
+          for path in ["/decision-status/zec","/api/system/hype-zec-status"]:
             try:
               urllib.request.urlopen(urllib.request.Request(base+path,headers=headers),timeout=15)
               raise RuntimeError("REMOVED_ROUTE_STILL_EXISTS_"+path)
             except urllib.error.HTTPError as e:
               if e.code!=404: raise
+          # /history/[logic] is a generic dynamic Next route. Unknown logic may render the
+          # framework NotFound shell with HTTP 200, so validate content rather than status.
+          try:
+            with urllib.request.urlopen(urllib.request.Request(base+"/history/zec",headers=headers),timeout=15) as r:
+              body=r.read(800000).decode("utf-8","ignore")
+              if token.search(body) or "ZEC 実績集計" in body: raise RuntimeError("REMOVED_HISTORY_DEEP_LINK_EXPOSES_ZEC")
+          except urllib.error.HTTPError as e:
+            if e.code!=404: raise
           with urllib.request.urlopen(urllib.request.Request(base+"/api/system/hype-status",headers=headers),timeout=20) as r:
             body=r.read(500000).decode("utf-8","ignore")
             if r.status!=200 or token.search(body): raise RuntimeError("HYPE_API_EXPOSES_EXCLUDED_LABEL")
