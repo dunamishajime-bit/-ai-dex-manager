@@ -45,6 +45,18 @@ export interface PenguDualLsV2RunnerFailure {
     idempotencyKey?: string;
 }
 
+export interface PenguExternalExitReconciliationAudit {
+    source: "aster-official-order-and-userTrades";
+    route: "RECOVERY_V8";
+    reconciledAt: number;
+    exitTs: number;
+    orderId?: number | string;
+    clientOrderId: string;
+    executedQuantity: number;
+    averagePrice: number;
+    realizedPnl: number;
+}
+
 export interface PenguDualLsV2RunnerState {
     version: 2;
     strategyId: "PENGU_DUAL_LS_V2_FINAL";
@@ -61,6 +73,7 @@ export interface PenguDualLsV2RunnerState {
     position?: PenguDualLsV2Position;
     pending?: PenguDualLsV2PendingOrder;
     failures: PenguDualLsV2RunnerFailure[];
+    lastExternalExitReconciliation?: PenguExternalExitReconciliationAudit;
 }
 
 function defaultState(mode: PenguDualLsV2Mode): PenguDualLsV2RunnerState {
@@ -156,6 +169,9 @@ function normalize(value: unknown, mode: PenguDualLsV2Mode): PenguDualLsV2Runner
         failures: Array.isArray(raw.failures)
             ? raw.failures.filter((item): item is PenguDualLsV2RunnerFailure => Boolean(item && typeof item.message === "string")).slice(-100)
             : [],
+        lastExternalExitReconciliation: raw.lastExternalExitReconciliation && typeof raw.lastExternalExitReconciliation === "object"
+            ? raw.lastExternalExitReconciliation as PenguExternalExitReconciliationAudit
+            : undefined,
     };
 }
 

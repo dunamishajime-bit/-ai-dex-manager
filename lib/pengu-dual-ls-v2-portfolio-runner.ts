@@ -3,6 +3,8 @@ import { readFile } from "node:fs/promises";
 import type { AsterOrderSide } from "@/lib/aster-v3-client";
 import type { AccountLockHandle } from "@/lib/disdex-account-order-lock";
 import type {
+    DirectReadonlyOrder,
+    DirectReadonlyTrade,
     DirectAccountSnapshot,
     DirectMarketQuote,
     DirectOpenOrder,
@@ -53,6 +55,7 @@ import {
     recordPenguHardStop,
     routeForPenguEntryVersion,
 } from "@/lib/pengu-route-quarantine-dd-governor";
+import { reconcileExternallyClosedRecoveryV8Position } from "@/lib/pengu-external-exit-reconciliation";
 
 const SYMBOL = "PENGUUSDT";
 
@@ -487,6 +490,58 @@ export class PenguDualLsV2PortfolioRunner {
         return { status: "manual-review", message, idempotencyKey };
     }
 
+    private async reconcileExternallyClosedRecoveryV8(
+        state: PenguDualLsV2RunnerState,
+        actual: DirectPosition | undefined,
+        openOrders: DirectOpenOrder[],
+    ) {
+        const readonlyOrder = this.dependencies.executor.getReadonlyOrder;
+        const userTrades = this.dependencies.executor.getUserTrades;
+        const position = state.position;
+        const expectedClientOrderId = position?.recoveryV8?.fullHardStopClientOrderId;
+        if (!readonlyOrder || !userTrades || !position || position.entryVersion !== "RECOVERY_V8" || !expectedClientOrderId) return undefined;
+        const symbolOpenOrders = openOrders.filter((order) => order.symbol.toUpperCase() === SYMBOL && String(order.status || "NEW").toUpperCase() === "NEW");
+        try {
+            const order: DirectReadonlyOrder = await readonlyOrder.call(this.dependencies.executor, SYMBOL, expectedClientOrderId);
+            const trades: DirectReadonlyTrade[] = await userTrades.call(this.dependencies.executor, SYMBOL, {
+                startTime: Math.max(0, position.entryTs - 5 * 60_000),
+                endTime: this.now() + 60_000,
+                limit: 1000,
+            });
+            const result = reconcileExternallyClosedRecoveryV8Position({
+                state,
+                currentPosition: actual ? { symbol: actual.symbol, quantity: actual.quantity } : undefined,
+                symbolOpenOrders,
+                order,
+                trades,
+                now: this.now(),
+            });
+            if (!result.ok) {
+                this.log.warn("PENGU external exit proof was insufficient; manual review remains fail-closed", { reason: result.reason, clientOrderId: expectedClientOrderId });
+                return undefined;
+            }
+            await this.dependencies.stateStore.save(result.state);
+            this.log.info("PENGU Recovery V8 external hard-stop exit reconciled from official Aster read-only evidence", {
+                source: "aster-official-order-and-userTrades",
+                clientOrderId: result.exit.clientOrderId,
+                orderId: result.exit.orderId,
+                executedQuantity: result.exit.executedQuantity,
+                averagePrice: result.exit.averagePrice,
+                exitTs: result.exit.exitTs,
+                ordersSent: result.ordersSent,
+                cancelsSent: result.cancelsSent,
+                positionChangesSent: result.positionChangesSent,
+            });
+            return result;
+        } catch (error) {
+            this.log.warn("PENGU external exit read-only reconciliation failed; manual review remains fail-closed", {
+                message: error instanceof Error ? error.message : String(error),
+                clientOrderId: expectedClientOrderId,
+            });
+            return undefined;
+        }
+    }
+
     private async applyResult(state: PenguDualLsV2RunnerState, pending: PenguDualLsV2PendingOrder, result: DirectTradeResult): Promise<PenguDualLsV2TickResult> {
         if (!resultMatchesPending(result, pending)) return this.manualReview(state, "PENGU_DUAL_LS_EXECUTION_RESULT_IDENTITY_MISMATCH", pending.idempotencyKey);
         if (result.status === "UNKNOWN" || result.executionUnknown) {
@@ -758,6 +813,13 @@ export class PenguDualLsV2PortfolioRunner {
                 return { status: "manual-review", message: "PENGU Dual LS found an unmanaged existing PENGU position; no takeover is allowed." };
             }
             if (state.position && !actual) {
+                const externallyReconciled = await this.reconcileExternallyClosedRecoveryV8(state, actual, openOrders);
+                if (externallyReconciled?.ok) {
+                    return {
+                        status: "no-change",
+                        message: "PENGU Recovery V8 position was flat at Aster and its reduce-only hard-stop fill was proven by official read-only order/trade history; state reconciled without mutation.",
+                    };
+                }
                 return { status: "manual-review", message: "PENGU Dual LS state expects a position but Aster returned none." };
             }
             const recoveredPartial = state.position && actual

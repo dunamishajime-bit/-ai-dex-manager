@@ -13,6 +13,7 @@ import {
     type AsterOrderSide,
     type AsterPositionRiskRow,
     type AsterPositionSide,
+    type AsterUserTradeRow,
 } from "@/lib/aster-v3-client";
 import {
     buildTradeFillNotificationEvent,
@@ -91,6 +92,31 @@ export interface DirectOpenOrder {
     executedQuantity: number;
 }
 
+export interface DirectReadonlyOrder {
+    symbol: string;
+    orderId?: number;
+    clientOrderId: string;
+    status?: string;
+    type?: string;
+    side?: AsterOrderSide;
+    reduceOnly?: boolean;
+    origQty: number;
+    executedQty: number;
+    avgPrice: number;
+    stopPrice: number;
+    updateTime?: number;
+}
+
+export interface DirectReadonlyTrade {
+    orderId?: number | string;
+    symbol: string;
+    side?: AsterOrderSide;
+    quantity: number;
+    price: number;
+    time: number;
+    realizedPnl?: number;
+}
+
 export interface DirectMarketQuote {
     symbol: string;
     bidPrice: number;
@@ -121,6 +147,9 @@ export interface DirectTradeExecutor {
     normalizeMarketQuantity(symbol: string, requestedQuantity: number, referencePrice: number, options?: { allowBelowMinNotional?: boolean }): Promise<NormalizedOrderQuantity>;
     executeMarket(command: DirectTradeCommand): Promise<DirectTradeResult>;
     reconcileOrder(symbol: string, clientOrderId: string): Promise<DirectTradeResult>;
+    /** Signed GET-only evidence used to reconcile a venue-triggered protective exit. */
+    getReadonlyOrder?(symbol: string, clientOrderId: string): Promise<DirectReadonlyOrder>;
+    getUserTrades?(symbol: string, input?: { startTime?: number; endTime?: number; limit?: number }): Promise<DirectReadonlyTrade[]>;
 }
 
 export interface AsterDirectTradeExecutorOptions {
@@ -361,6 +390,37 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
             reduceOnly: row.reduceOnly,
             quantity: safeNumber(row.origQty),
             executedQuantity: safeNumber(row.executedQty),
+        }));
+    }
+
+    async getReadonlyOrder(symbol: string, clientOrderId: string): Promise<DirectReadonlyOrder> {
+        const row = await this.client.getOrder(symbol.toUpperCase(), clientOrderId);
+        return {
+            symbol: row.symbol.toUpperCase(),
+            orderId: row.orderId,
+            clientOrderId: String(row.clientOrderId || clientOrderId),
+            status: row.status,
+            type: row.type,
+            side: row.side,
+            reduceOnly: row.reduceOnly,
+            origQty: safeNumber(row.origQty),
+            executedQty: safeNumber(row.executedQty),
+            avgPrice: safeNumber(row.avgPrice),
+            stopPrice: safeNumber(row.stopPrice),
+            updateTime: row.updateTime,
+        };
+    }
+
+    async getUserTrades(symbol: string, input: { startTime?: number; endTime?: number; limit?: number } = {}): Promise<DirectReadonlyTrade[]> {
+        const rows: AsterUserTradeRow[] = await this.client.getUserTrades(symbol.toUpperCase(), input);
+        return rows.map((row) => ({
+            orderId: row.orderId,
+            symbol: row.symbol.toUpperCase(),
+            side: row.side,
+            quantity: safeNumber(row.qty),
+            price: safeNumber(row.price),
+            time: safeNumber(row.time),
+            realizedPnl: row.realizedPnl === undefined ? undefined : safeNumber(row.realizedPnl),
         }));
     }
 
