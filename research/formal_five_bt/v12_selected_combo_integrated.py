@@ -99,7 +99,7 @@ def patch_research_copy(repo:Path,data_root:Path,report_path:Path)->dict:
         (snapshot/rel).write_bytes(raw)
         changed[rel]={"original_sha256":digest(before),"research_sha256":digest(raw)}
     config=(snapshot/CHANGED[0]).read_text(encoding="utf-8")
-    logic=(snapshot/CHANGED[1]).read_text(encoding="utf-8")
+    logic=(snapshot/"lib/v12-x1-all.ts").read_text(encoding="utf-8")
     for literal in ("minimumVolumeRatio: 0.80","neutralScoreThreshold: 1.00",
                     "strongRegimeQualityScoreMinimum: 0.15",
                     "strongRegimeQualityScoreMaximum: 0.70"):
