@@ -34,6 +34,10 @@ export type HypeZecLongTickResult =
   | { status: "disabled" | "locked" | "shadow" | "held" | "no-change" | "planned" | "completed" | "manual-review"; message: string; strategy?: HypeZecStrategy }
   | { status: "failed"; message: string };
 
+export function isRecoverableHypeZecMarketDataError(message: string) {
+  return /^HYPE_ZEC_MARKET_DATA_(?:ROW_INVALID|DUPLICATE|GAP|INSUFFICIENT)(?::|$)/.test(message);
+}
+
 function defaultLogger() {
   return {
     info: (message: string, payload?: Record<string, unknown>) => console.log(JSON.stringify({ level: "info", message, ...(payload || {}) })),
@@ -161,6 +165,17 @@ export class HypeZecLongRunner {
     await this.dependencies.stateStore.save(state);
     this.log.error("hype-zec-live-manual-review", { reason, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 });
     return { status: "manual-review", message: reason };
+  }
+
+  private async marketDataHold(state: HypeZecLongRunnerState, reason: string): Promise<HypeZecLongTickResult> {
+    const message = `HYPE_ZEC_MARKET_DATA_HOLD:${reason}`;
+    const strategy = this.dependencies.runtime.symbols.includes("HYPEUSDT") ? "HYPE_LONG" : "ZEC_LONG";
+    state.lastDecision = { strategy, signalTs: null, accepted: false, reason: message };
+    state.lastDecisionTs = this.now();
+    state.failures = [...state.failures, { message, occurredAt: this.now() }].slice(-100);
+    await this.dependencies.stateStore.save(state);
+    this.log.warn("hype-zec-market-data-hold", { reason, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 });
+    return { status: "held", message, strategy };
   }
 
   private async reconcileOwnership(state: HypeZecLongRunnerState, positions: DirectPosition[], openOrders: DirectOpenOrder[]) {
@@ -367,6 +382,9 @@ export class HypeZecLongRunner {
       return { status: "no-change", message: "HYPE_ZEC_NO_ACCEPTED_ENTRY" };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
+      if (isRecoverableHypeZecMarketDataError(message)) {
+        return this.marketDataHold(await this.dependencies.stateStore.load(), message);
+      }
       return this.manualReview(await this.dependencies.stateStore.load(), `HYPE_ZEC_RUNNER_FAIL_CLOSED:${message}`);
     } finally {
       await lock.release();
