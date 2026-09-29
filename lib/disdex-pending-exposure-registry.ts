@@ -58,6 +58,7 @@ function expectedSleeve(strategyId: string): PendingExposureSleeve {
         || owner.includes("QUALITY102")
         || owner === "HYPE_LONG"
         || owner === "ZEC_LONG"
+        || owner === "IDLE_PRIORITY_SHORT"
     ) return "CRYPTO";
     throw new Error(`PENDING_EXPOSURE_OWNER_UNKNOWN:${strategyId || "EMPTY"}`);
 }
