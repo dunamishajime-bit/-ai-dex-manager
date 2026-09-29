@@ -72,3 +72,20 @@ Final status only:
 - or `BLOCKED_<EXACT_REASON>`
 
 Never report LIVE from GitHub/CI alone.
+
+## Additional recovered baseline identity evidence (2026-09-29)
+
+The controlling local Idle replay baseline metrics recovered from prior-session records are:
+- 10bps baseline final equity: approximately JPY 141.85M
+- baseline PF: approximately 2.077
+- baseline max DD: approximately -22.87%
+- baseline closed trades: 1,284
+- Idle integrated closed trades: 1,342
+- Idle integrated PF: approximately 2.055
+- Idle integrated max DD: approximately -23.24%
+
+Important consequence: 1,342 - 1,284 = 58, while Idle admitted 61. Therefore the integrated replay changed three baseline trade outcomes/admissions as a portfolio-path consequence. It is NOT valid to append 61 independent Idle returns onto a frozen baseline equity curve.
+
+Recovered older source bundle proves the evaluation capital convention was 2025-08-10 through 2026-08-10, initial JPY10,000 + JPY10,000 monthly x12 = JPY130,000 total contributed, but its old-engine NORMAL baseline JPY165.415M and native-new-PENGU paired JPY318.750M are NOT the controlling JPY141.85M run. Likewise the later formal-five 10bps JPY105.475M / PF1.6885 / DD-37.52% / 1,037 trades is NOT the controlling run. Do not substitute any of these.
+
+A source bundle recovered from the research workspace contains the immutable old integrated engine SHA256 `cae9785492ea5dda8173853fe2cbc7d99ea451f550a739fb7f014f4773d9899d`, historical V12/PENGU ledgers, and the 2025-08-10..2026-08-10 capital convention. Use these only as reconstruction inputs; the JPY141.85M identity must still be matched before LIVE certification.
