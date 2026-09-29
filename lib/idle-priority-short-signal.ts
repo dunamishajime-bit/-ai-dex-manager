@@ -38,8 +38,8 @@ export function evaluateIdlePriorityShort(symbol:IdlePrioritySymbol, features:Id
   if(r.archetype==="MOMENTUM") generic=features.ret12<=p.generic.momentum.ret12Max && features.volumeRatio>=p.generic.momentum.volumeRatioMin && features.atrRatio>=p.generic.momentum.atrRatioMin;
   if(r.archetype==="RELATIVE") generic=features.rel24<=p.generic.relative.rel24Max && features.volumeRatio>=p.generic.relative.volumeRatioMin && features.atrRatio>=p.generic.relative.atrRatioMin;
   if(!generic) return {accepted:false,symbol,route:r.route,side:"FLAT",holdHours:r.holdHours,features,reason:"GENERIC_CANDIDATE_GATE_NOT_MET"};
-  if(symbol==="TAOUSDT" && features.rel24>r.rel24Max) return {accepted:false,symbol,route:r.route,side:"FLAT",holdHours:r.holdHours,features,reason:"TAO_REL24_NOT_MET"};
-  if(symbol==="TIAUSDT" && features.volumeRatio>r.volumeRatioMax) return {accepted:false,symbol,route:r.route,side:"FLAT",holdHours:r.holdHours,features,reason:"TIA_VOLUME_CAP_NOT_MET"};
-  if(symbol==="DOTUSDT" && (features.btc24>r.btc24Max || features.rel24>r.rel24Max)) return {accepted:false,symbol,route:r.route,side:"FLAT",holdHours:r.holdHours,features,reason:"DOT_BTCREL_NOT_MET"};
+  if(symbol==="TAOUSDT" && features.rel24>p.routes.TAOUSDT.rel24Max) return {accepted:false,symbol,route:r.route,side:"FLAT",holdHours:r.holdHours,features,reason:"TAO_REL24_NOT_MET"};
+  if(symbol==="TIAUSDT" && features.volumeRatio>p.routes.TIAUSDT.volumeRatioMax) return {accepted:false,symbol,route:r.route,side:"FLAT",holdHours:r.holdHours,features,reason:"TIA_VOLUME_CAP_NOT_MET"};
+  if(symbol==="DOTUSDT" && (features.btc24>p.routes.DOTUSDT.btc24Max || features.rel24>p.routes.DOTUSDT.rel24Max)) return {accepted:false,symbol,route:r.route,side:"FLAT",holdHours:r.holdHours,features,reason:"DOT_BTCREL_NOT_MET"};
   return {accepted:true,symbol,route:r.route,side:"SHORT",holdHours:r.holdHours,features,reason:r.route};
 }
