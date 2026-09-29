@@ -24,7 +24,7 @@ Archive SHA256:
 
 `891c36d8a5957cafe3aae65656a98b7c02a3c437c4f520fe63756d550f08b4fb`
 
-The archive has a `RELEASE_MANIFEST.json` covering 764 files and a `REPLAY_INDEX.json` with per-file SHA256/size.
+`REPLAY_INDEX.json` is inside the archive and covers the 764 archived files with per-file SHA256/size. `RELEASE_MANIFEST.json` is a separate asset on the same GitHub Release (not a member of the tar.gz); verify both the archive SHA256 and the release-side manifest asset.
 
 Primary adopted 10bps baseline path inside the archive:
 
@@ -54,7 +54,7 @@ Do not substitute the nearby JPY130,287,867 / 1,046-trade run.
 
 Two exact CSVs exist outside Git in the preserved ChatGPT Library and have been exported as the user-supplied package:
 
-`IDLE_PRIORITY_CANONICAL_EVIDENCE_20260930.zip`
+`IDLE_CANONICAL_EVIDENCE.zip` (the earlier equivalent export name `IDLE_PRIORITY_CANONICAL_EVIDENCE_20260930.zip` is also acceptable only if the two inner CSV SHA256 values match)
 
 Inside:
 
@@ -68,7 +68,7 @@ Inside:
 - rows: `63`
 - SHA256: `5029baad39bd07c9fc40ec4ba75941cb089697d5cebc437c29838cbc924f3e48`
 
-Verify both SHA256 values before use. Do not normalize, round, re-save, or substitute them before verification.
+Verify both SHA256 values before use. The current transfer ZIP `IDLE_CANONICAL_EVIDENCE.zip` is 172344 bytes with SHA256 `3c79839edb61abd9f4d24efd05e1a6b95131a0f4ff715cbbc1f51f115c11064f`. ZIP identity is secondary to the two inner CSV identities. Do not normalize, round, re-save, or substitute the CSVs before verification.
 
 ## 3. integrated-idle-ledger.csv is an output, not a prerequisite input
 
