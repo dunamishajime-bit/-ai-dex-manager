@@ -1,3 +1,5 @@
+> **2026-09-30 parity correction:** Historical JPY268.05M parity is governed by `docs/implementation/IDLE_PRIORITY_HISTORICAL_OVERLAY_PARITY_CORRECTION_20260930.md`. The 63 Idle rows were prequalified from baseline-only idle windows and the 63→61 exclusions are same-symbol Idle occupancy at DOT 1780318800000 and TIA 1784250000000. Do not re-gate those rows against a newly path-dependent integrated baseline candidate state when reproducing the historical overlay.
+
 # Idle Priority SHORT — ¥268.05M BT Parity Design
 
 Date: 2026-09-29  
