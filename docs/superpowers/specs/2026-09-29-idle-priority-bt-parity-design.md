@@ -126,15 +126,33 @@ No current/incomplete candle may influence entry.
 
 Feature calculations must be deterministic and covered by parity fixtures from the 63-row candidate evidence.
 
-Definitions:
+Definitions are anchored to the candidate evidence timestamps. For a decision timestamp `t`, the signal bar is the H1 bar whose open/event time is `t - 1h`; the H1 bar opening at `t` is not yet part of the signal.
 
-- `ret12`: symbol close return over 12 completed H1 bars
-- `ret24`: symbol close return over 24 completed H1 bars
-- `btc24`: BTCUSDT close return over 24 completed H1 bars
-- `rel24 = symbol ret24 - btc24`
-- `ATR ratio`: ATR14 divided by current closed-bar close, using the same TR convention as the research replay
-- `Volume Ratio`: the research-replay volume-ratio definition must be reproduced exactly by fixture parity before LIVE activation
-- Breakdown: the exact research-replay 24h breakdown predicate must be reproduced exactly by fixture parity before LIVE activation
+- `ret12 = close[t-1h] / close[t-13h] - 1`
+- `ret24 = close[t-1h] / close[t-25h] - 1`
+- `btc24 = BTC close[t-1h] / BTC close[t-25h] - 1`
+- `rel24 = ret24 - btc24`
+- True Range for an H1 bar = `max(high-low, abs(high-prevClose), abs(low-prevClose))`
+- `ATR ratio = mean(TR over the 14 completed H1 bars ending at t-1h) / close[t-1h]`
+- `Volume Ratio = quoteVolume[t-1h] / median(quoteVolume over the 72 completed H1 bars immediately before t-1h)`
+- 24h breakdown SHORT = `close[t-1h] < min(close of the 24 completed H1 bars immediately before t-1h)`
+
+The generic research candidate archetype gates that precede the symbol-specific filters are also part of parity:
+
+- BREAKOUT SHORT candidate:
+  - 24h breakdown SHORT = true
+  - `Volume Ratio >= 1.30`
+  - `ATR ratio >= 0.007`
+- MOMENTUM SHORT candidate:
+  - `ret12 <= -0.03`
+  - `Volume Ratio >= 1.00`
+  - `ATR ratio >= 0.007`
+- RELATIVE SHORT candidate:
+  - `rel24 <= -0.03`
+  - `Volume Ratio >= 0.80`
+  - `ATR ratio >= 0.007`
+
+The 63-row filtered evidence was produced from a broader 495-row research candidate stream. Applying only the simplified per-symbol filters directly to every idle H1 bar produces extra signals, so LIVE must not omit the generic candidate-generation layer or its per-symbol candidate lifecycle/cooldown semantics. The implementation is not accepted until replay fixtures reproduce the exact 63 filtered candidates and no extras.
 
 No alternate Binance data source, changing vendor history, or approximate indicator implementation may be substituted for the live signal calculation without a parity proof.
 
@@ -145,9 +163,9 @@ No alternate Binance data source, changing vendor history, or approximate indica
 Route: `IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2`
 
 Required:
-- 24h breakdown SHORT predicate = true
+- generic BREAKOUT SHORT candidate gate passes
 - `rel24 <= -0.02`
-- same-symbol cooldown satisfied
+- same-symbol candidate lifecycle/cooldown satisfied
 
 Hold:
 - **12 hours**
@@ -157,9 +175,9 @@ Hold:
 Route: `IDLE_TIA_BREAKDOWN_SHORT_VOLCAP100`
 
 Required:
-- 24h breakdown SHORT predicate = true
+- generic BREAKOUT SHORT candidate gate passes
 - `Volume Ratio <= 100`
-- same-symbol cooldown satisfied
+- same-symbol candidate lifecycle/cooldown satisfied
 
 Hold:
 - **24 hours**
@@ -169,10 +187,10 @@ Hold:
 Route: `IDLE_DOT_MOMENTUM_SHORT_BTCREL`
 
 Required:
-- `ret12 <= -0.03`
+- generic MOMENTUM SHORT candidate gate passes
 - `btc24 <= 0`
 - `rel24 <= 0`
-- same-symbol cooldown satisfied
+- same-symbol candidate lifecycle/cooldown satisfied
 
 Hold:
 - **24 hours**
@@ -182,8 +200,8 @@ Hold:
 Route: `IDLE_JUP_RELATIVE_SHORT`
 
 Required:
-- `rel24 <= -0.03`
-- same-symbol cooldown satisfied
+- generic RELATIVE SHORT candidate gate passes
+- same-symbol candidate lifecycle/cooldown satisfied
 
 Hold:
 - **12 hours**
@@ -204,10 +222,13 @@ Hold:
 Per-symbol cooldown:
 
 - **12 hours**
-- measured from the research-equivalent decision/entry lifecycle used in the parity replay
-- implementation tests must pin the exact boundary behavior
+- applies per symbol across the broader candidate-generation lifecycle, not only across the final selected route
+- the evidence stream has a minimum observed same-symbol candidate spacing of 12h
+- implementation tests must reproduce the exact evidence timestamps before the cooldown is considered understood
 
 No global cooldown across all five symbols.
+
+Because direct route-only scanning yields extra candidate timestamps, the implementation must first reconstruct and test the broader candidate-generation/cooldown lifecycle against the saved evidence before production code is allowed to arm LIVE.
 
 ## 10. Multi-Symbol Same-Timestamp Behavior
 
