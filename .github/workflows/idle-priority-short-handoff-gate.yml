@@ -1,0 +1,30 @@
+name: Idle Priority SHORT handoff gate
+on:
+  push:
+    branches: [design/idle-priority-bt-parity-20260929]
+    paths:
+      - "config/idlePriorityShort*.ts"
+      - "lib/idle-priority-short-*.ts"
+      - "scripts/idle-priority-short-*.ts"
+      - "tests/idle-priority-short-*.test.ts"
+      - "docs/implementation/IDLE_PRIORITY_SHORT_CODEX_PRODUCTION_HANDOFF_20260929.md"
+      - "package.json"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: "24"}
+      - run: npm ci
+      - run: npm run strategy:idle-priority-short:selftest
+      - run: npx tsc --noEmit
+      - name: Verify fail-closed handoff artifacts
+        shell: bash
+        run: |
+          test -f docs/implementation/IDLE_PRIORITY_SHORT_CODEX_PRODUCTION_HANDOFF_20260929.md
+          test -f systemd/disdex-idle-priority-short.service
+          grep -q IDLE_LIVE_EXECUTION_NOT_ARMED_UNTIL_CODEX_COMPLETES_PARITY_AND_EXECUTION_ADAPTER scripts/idle-priority-short-runner.ts
