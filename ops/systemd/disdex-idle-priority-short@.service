@@ -1,0 +1,25 @@
+[Unit]
+Description=DisDex Idle Priority SHORT (%i)
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=/home/deploy/disdex-trading/current
+
+[Service]
+Type=simple
+User=deploy
+Group=deploy
+WorkingDirectory=/home/deploy/disdex-trading/current
+Environment=NODE_ENV=production
+Environment=DISDEX_IDLE_PRIORITY_MODE=SHADOW
+Environment=DISDEX_IDLE_PRIORITY_ENABLED=true
+ExecStart=/usr/bin/env npx tsx scripts/disdex-idle-priority-short-live-runner.ts --daemon
+Restart=on-failure
+RestartSec=15
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/var/lib/disdex/idle-priority /var/lib/disdex/shared
+
+[Install]
+WantedBy=multi-user.target
