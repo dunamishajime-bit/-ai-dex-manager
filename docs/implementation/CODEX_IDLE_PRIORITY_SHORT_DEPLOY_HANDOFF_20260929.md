@@ -16,7 +16,7 @@ Do not retune, reinterpret priority, add partial sizing, revive ZEC, or reset Pr
 - integrated anchors: baseline ~JPY141.85M, final ~JPY268.05M, PF ~2.055, max DD ~-23.24%, total integrated trades ~1342
 - 63 -> 61 historical exclusion identity is constrained to one DOT and one TIA; do not guess which timestamps.
 
-The two CSV files were recovered from the prior ChatGPT research workspace/library and independently hash-verified. If they are not present in the checkout, obtain the exact bytes matching the hashes above; do not regenerate approximate evidence.
+The two CSV files were recovered from the prior ChatGPT research workspace/library and independently hash-verified. The JPY141.85M -> JPY268.05M integrated replay itself was a prior-thread local analysis run; its exact baseline ledger is not present in the GitHub formal-five `latest` artifacts. The inspected formal-five 10bps `latest` artifact is a DIFFERENT run: JPY105,474,659.39616707 / PF 1.6884972891846897 / DD -37.521093%. Never substitute that ledger or claim it is the JPY141.85M anchor. If the exact JPY141.85M ledger cannot be recovered, the 61-trade/final-equity acceptance gate remains unproven and LIVE must stay blocked.
 
 ## Mandatory pre-deployment block
 LIVE activation remains BLOCKED until the exact baseline ledger used by the JPY141.85M anchor is recovered and replay proves:
