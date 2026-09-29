@@ -1,3 +1,5 @@
+> **2026-09-30 controlling correction:** Before using this handoff, read `docs/implementation/IDLE_PRIORITY_HISTORICAL_OVERLAY_PARITY_CORRECTION_20260930.md`. The historical JPY268.05M run used a frozen accepted-baseline-ledger overlay, not a full regeneration of all baseline candidate decisions. Where this handoff conflicts with the correction, the correction controls.
+
 # Idle Priority SHORT — Codex Production Handoff
 
 Status: **IMPLEMENTATION HANDOFF — LIVE activation is forbidden until every acceptance gate below passes.**
