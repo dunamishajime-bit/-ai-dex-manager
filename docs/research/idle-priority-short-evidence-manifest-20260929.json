@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "status": "EVIDENCE_RECOVERED_VERIFIED",
+  "recoveredAt": "2026-09-29",
+  "source": "prior-thread preserved artifact",
+  "candidateStream": {
+    "filename": "idle_candidate_events.csv",
+    "sha256": "09e97db7a812728f5e54c1179c8e39ac30c6dba4fea241a9d415fa4810f8adbb",
+    "bytes": 149207,
+    "rows": 495,
+    "archetypeCounts": {"BREAKOUT":165,"MOMENTUM":118,"RELATIVE":212},
+    "symbolCounts": {"DOTUSDT":102,"TAOUSDT":91,"JUPUSDT":74,"FILUSDT":66,"RENDERUSDT":65,"TIAUSDT":61,"LDOUSDT":35,"TRXUSDT":1}
+  },
+  "filtered": {
+    "filename": "idle_candidate_filtered.csv",
+    "sha256": "5029baad39bd07c9fc40ec4ba75941cb089697d5cebc437c29838cbc924f3e48",
+    "bytes": 22234,
+    "rows": 63,
+    "allShort": true,
+    "routeCounts": {
+      "DOT_MOMENTUM_SHORT_BTCREL":15,
+      "JUP_RELATIVE_SHORT":14,
+      "RENDER_RELATIVE_SHORT":15,
+      "TAO_BREAKDOWN_SHORT_RELWEAK2":9,
+      "TIA_BREAKDOWN_SHORT_VOLCAP100":10
+    }
+  },
+  "membershipCheck": {
+    "key": ["symbol","t","archetype"],
+    "filteredRowsPresentInCandidateStream": 63,
+    "missingFilteredRows": 0
+  },
+  "livePromotion": {
+    "allowed": false,
+    "reason": "Requires deterministic candidate-generator parity plus integrated 61-admission/48-win/equity-DD replay and fresh VPS probe."
+  }
+}
