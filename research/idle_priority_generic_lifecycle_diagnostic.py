@@ -157,16 +157,18 @@ for offset_hours in (-1,0,1):
         except KeyError: continue
         compared+=1
         for k in errors: errors[k].append(abs(calc[k]-src[k]))
+    near_exact=0
+    for s,t,src in feature_rows:
+        try: calc=features(market[s],btc,t+offset_hours*HOUR)
+        except KeyError: continue
+        if (abs(calc["ret12"]-src["ret12"])<1e-10 and abs(calc["ret24"]-src["ret24"])<1e-10
+            and abs(calc["rel24"]-src["rel24"])<1e-10 and abs(calc["vr"]-src["vr"])<1e-8 and abs(calc["atr"]-src["atr"])<1e-10):
+            near_exact+=1
     feature_diag[str(offset_hours)]={
         "compared":compared,
         "mean_abs":{k:(sum(v)/len(v) if v else None) for k,v in errors.items()},
         "max_abs":{k:(max(v) if v else None) for k,v in errors.items()},
-        "near_exact":sum(
-            1 for s,t,src in feature_rows
-            if (lambda calc: abs(calc["ret12"]-src["ret12"])<1e-10 and abs(calc["ret24"]-src["ret24"])<1e-10
-                and abs(calc["rel24"]-src["rel24"])<1e-10 and abs(calc["vr"]-src["vr"])<1e-8 and abs(calc["atr"]-src["atr"])<1e-10)
-               (features(market[s],btc,t+offset_hours*HOUR))
-        )
+        "near_exact":near_exact
     }
 print(json.dumps({"event":"SOURCE_FEATURE_PARITY","offset_hours":feature_diag},sort_keys=True))
 
