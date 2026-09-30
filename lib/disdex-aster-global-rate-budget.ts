@@ -1,4 +1,4 @@
-import { chmod, mkdir, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
+import { chmod, chown, mkdir, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import { dirname, join, resolve } from "node:path";
 
@@ -177,6 +177,15 @@ async function atomicWriteBudget(path: string, state: BudgetState) {
   const temporary = `${path}.${process.pid}.${Date.now()}.tmp`;
   try {
     await writeFile(temporary, `${JSON.stringify(state, null, 2)}\n`, { encoding: "utf8", mode: 0o660 });
+    // Root-owned diagnostics/recovery helpers must never steal the shared
+    // rate-budget file from deploy-owned trading daemons via atomic rename.
+    // When running as root, inherit the parent directory ownership before the
+    // rename. Normal deploy-owned writers already create the temp file with
+    // the correct uid/gid and do not need chown privileges.
+    if (process.platform !== "win32" && typeof process.geteuid === "function" && process.geteuid() === 0) {
+      const parent = await stat(dirname(path));
+      await chown(temporary, parent.uid, parent.gid);
+    }
     await rename(temporary, path);
     await chmod(path, 0o660);
   } finally {
