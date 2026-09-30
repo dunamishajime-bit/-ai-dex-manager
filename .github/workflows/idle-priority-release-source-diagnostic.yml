@@ -26,8 +26,10 @@ jobs:
         run: |
           set -euo pipefail
           echo '=== candidate source files ==='
+          : > /tmp/hits.txt
           find evidence -type f \( -name '*.py' -o -name '*.ts' -o -name '*.js' -o -name '*.md' -o -name '*.json' \) -print0 |
-            xargs -0 grep -IlE 'idle_candidate_events|gross12|net12|candidate_events' | head -80 | tee /tmp/hits.txt
+            xargs -0 -r grep -IlE 'idle_candidate_events|gross12|net12|candidate_events' 2>/dev/null |
+            head -80 | tee /tmp/hits.txt || true
           echo '=== source snippets ==='
           while IFS= read -r f; do
             echo "##### FILE: $f"
