@@ -76,10 +76,8 @@ function acceptedByFet(snapshot: JsonRecord, decisionTs: number) {
     if (finite(snapshot.lastEvaluationDecisionTs) !== decisionTs || (finite(snapshot.updatedAt) ?? 0) < decisionTs) {
         throw new Error("BASELINE_ADMISSION_SOURCE_STALE_OR_TS_MISMATCH");
     }
-    if (snapshot.pending && typeof snapshot.pending === "object") {
-        const pending = record(snapshot.pending, "BASELINE_ADMISSION_SOURCE_MALFORMED");
-        return pending.action === "ENTRY" && finite(pending.entryTs) === decisionTs;
-    }
+    if (snapshot.lastEvaluationCandidate === true) return true;
+    if (snapshot.lastEvaluationCandidate !== false) throw new Error("BASELINE_ADMISSION_SOURCE_INCOMPLETE");
     return false;
 }
 
