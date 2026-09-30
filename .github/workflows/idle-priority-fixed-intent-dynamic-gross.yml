@@ -4,6 +4,7 @@ on:
     branches: [design/idle-priority-bt-parity-20260929]
     paths:
       - ".github/workflows/idle-priority-fixed-intent-dynamic-gross.yml"
+      - "research/idle_priority_fixed_intent_dynamic_gross.py"
   workflow_dispatch:
 permissions:
   contents: read
@@ -30,11 +31,12 @@ jobs:
           echo "DATA=$DATA"
           COMMON="--baseline-trades $LEDGER --baseline-events $DIR/portfolio-events.jsonl --baseline-metrics $DIR/metrics.json --idle-intents research/idle_priority_61_intents.json --idle-target-net research/idle_priority_61_target_net.json --data-root $DATA"
           python research/idle_priority_fixed_intent_dynamic_gross.py $COMMON --request-mode accepted --without-idle --output baseline-only.json | tee baseline-only.log
+          python research/idle_priority_fixed_intent_dynamic_gross.py $COMMON --request-mode candidate --without-idle --output baseline-only-candidate.json | tee baseline-only-candidate.log
           python research/idle_priority_fixed_intent_dynamic_gross.py $COMMON --request-mode accepted --output integrated-accepted.json | tee integrated-accepted.log
           python research/idle_priority_fixed_intent_dynamic_gross.py $COMMON --request-mode candidate --output integrated-candidate.json | tee integrated-candidate.log
           python - <<'PY'
           import json
-          for p in ["baseline-only.json","integrated-accepted.json","integrated-candidate.json"]:
+          for p in ["baseline-only.json","baseline-only-candidate.json","integrated-accepted.json","integrated-candidate.json"]:
               x=json.load(open(p))
               print("SUMMARY",p,{k:x[k] for k in ["baseline_completed","idle_completed","baseline_rejected","idle_rejected","combined_completed","final_equity_jpy","rejections_by_strategy","idle_price_return_max_abs_error"]})
           PY
@@ -44,6 +46,8 @@ jobs:
           path: |
             baseline-only.json
             baseline-only.log
+            baseline-only-candidate.json
+            baseline-only-candidate.log
             integrated-accepted.json
             integrated-accepted.log
             integrated-candidate.json
