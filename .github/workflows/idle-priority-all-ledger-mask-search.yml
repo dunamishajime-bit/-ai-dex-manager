@@ -1,0 +1,33 @@
+name: Idle Priority exhaustive baseline-mask search
+on:
+  push:
+    branches: [design/idle-priority-bt-parity-20260929]
+    paths:
+      - ".github/workflows/idle-priority-all-ledger-mask-search.yml"
+      - "research/idle_priority_all_ledger_mask_search.py"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  search:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download immutable release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release download bt-v12-score100-volume080-normalonly-20260928 --repo dunamishajime-bit/-ai-dex-manager --pattern 'bt-v12-score100-volume080-normalonly-20260928.tar.gz'
+          echo '891c36d8a5957cafe3aae65656a98b7c02a3c437c4f520fe63756d550f08b4fb  bt-v12-score100-volume080-normalonly-20260928.tar.gz' | sha256sum -c -
+          mkdir evidence
+          tar -xzf bt-v12-score100-volume080-normalonly-20260928.tar.gz -C evidence
+      - name: Search every release portfolio ledger for exact 393 candidate mask
+        run: |
+          set -euo pipefail
+          ROOT="$(find evidence -mindepth 1 -maxdepth 1 -type d | head -1)"
+          BTC="$(find "$ROOT" -type f -path '*/market-Aster-H1-funding-and-manifests/normalized/aster/klines/BTCUSDT.jsonl' | head -1)"
+          test -n "$ROOT"
+          test -n "$BTC"
+          DATA="$(python -c "from pathlib import Path; print(Path('$BTC').resolve().parents[3])")"
+          python research/idle_priority_all_ledger_mask_search.py --release-root "$ROOT" --data-root "$DATA"
