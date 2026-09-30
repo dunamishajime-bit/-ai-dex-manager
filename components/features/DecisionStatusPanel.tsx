@@ -838,6 +838,7 @@ export function DecisionStatusPanel({ logic = "overview" }: { logic?: DecisionLo
       { key: "fet", title: "FET BRK48", href: "/decision-status/fet", detail: "実runner稼働 / SHA / 建玉・履歴 / FET PnL" },
       { key: "hype", title: "HYPE LONG", href: "/decision-status/hype", detail: "BTC・HYPE 15m / EMA20 / 1m Breakout / state / 保護STOP" },
       { key: "zec", title: "ZEC LONG", href: "/decision-status/zec", detail: "BTC・ZEC 15m / EMA20 / 1m Breakout / state / 保護STOP" },
+      { key: "idle-priority", title: "Idle Priority SHORT", href: "/decision-status/idle-priority", detail: "TAO/TIA/DOT/JUP/RENDER / generic lifecycle / baseline優先 / state / protection" },
       { key: "v52", title: "V52", href: "/decision-status/v52", detail: "V50 / V11_EQ / Stock window / basis・net-edge Gate" },
     ] as const;
     return <div className="min-w-0 space-y-4 overflow-x-hidden [overflow-wrap:anywhere]">{toolbar}{warning}<RuntimeSummary runtime={snapshot.runtime} /><FetRuntimeDetail details={snapshot.fetRuntime} /><section className="grid gap-4 md:grid-cols-2">{cards.map((card) => <Link key={card.key} href={card.href} className="panel-gold group rounded-[28px] p-5 transition hover:-translate-y-0.5 hover:border-gold-300/40"><div className="flex items-center justify-between gap-3"><div className="text-xl font-black text-white">{card.title}</div><span className="text-xs text-gold-100">詳細を見る →</span></div><p className="mt-3 text-sm leading-6 text-white/65">{card.detail}</p></Link>)}</section></div>;
