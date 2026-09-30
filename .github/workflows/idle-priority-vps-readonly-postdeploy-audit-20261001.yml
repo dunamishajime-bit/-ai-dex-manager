@@ -1,0 +1,144 @@
+name: Idle Priority VPS post-deploy read-only audit
+on:
+  push:
+    branches: [design/idle-priority-bt-parity-20260929]
+    paths: [.github/workflows/idle-priority-vps-readonly-postdeploy-audit-20261001.yml]
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Initialize restricted root SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ -n "$SSH_HOST" && -n "$ROOT_KEY" && -n "$SSH_KNOWN_HOSTS" ]]
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+
+      - name: Audit actual VPS current runtime without trading mutation
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts"             -o ConnectTimeout=15 -p "$PORT" "root@$SSH_HOST" 'bash -s' <<'REMOTE'
+          set -Eeuo pipefail
+          [[ "$(id -un)" == root ]]
+          trading_root=/home/deploy/disdex-trading
+          current="$trading_root/current"
+          marker="$current/.disdex-release-sha"
+          sha="$(tr -d '[:space:]' < "$marker")"
+          [[ "$sha" =~ ^[a-f0-9]{40}$ ]]
+          target="$(readlink -f "$current")"
+          [[ "$target" == "$trading_root/releases/$sha" ]]
+          echo "STATUS=VPS_READONLY_AUDIT"
+          echo "CURRENT_TRADING_SHA=$sha"
+          echo "CURRENT_RELEASE=$target"
+          echo "SOURCE_AUDIT_SHA=$GITHUB_SHA"
+          echo "TRADING_MUTATION=0"
+
+          ui=ai-dex-manager-ui.service
+          echo "UI_ACTIVE=$(systemctl is-active "$ui" 2>/dev/null || true)"
+          echo "UI_WORKDIR=$(systemctl show "$ui" -p WorkingDirectory --value 2>/dev/null || true)"
+          echo "UI_SHA=$(systemctl show "$ui" -p Environment --value 2>/dev/null | tr ' ' '\n' | sed -n 's/^DISDEX_UI_RELEASE_SHA=//p' | tail -1)"
+
+          families=(disdex-v12-x1-all disdex-pengu-dual-ls-v2 disdex-quality102-causal-v1
+                    disdex-v52-aster-only disdex-fet-brk48 disdex-hype-long disdex-idle-priority-short
+                    disdex-shared-crypto-risk disdex-v12-v52-margin-guard)
+          for name in "${families[@]}"; do
+            unit="$name@$sha.service"
+            active="$(systemctl is-active "$unit" 2>/dev/null || true)"
+            pid="$(systemctl show "$unit" -p MainPID --value 2>/dev/null || true)"
+            restarts="$(systemctl show "$unit" -p NRestarts --value 2>/dev/null || true)"
+            result="$(systemctl show "$unit" -p Result --value 2>/dev/null || true)"
+            cwd=""
+            if [[ "$pid" =~ ^[0-9]+$ && "$pid" -gt 0 && -e "/proc/$pid/cwd" ]]; then cwd="$(readlink -f "/proc/$pid/cwd" || true)"; fi
+            printf 'RUNNER unit=%s active=%s pid=%s nRestarts=%s result=%s cwd=%s\n' "$unit" "$active" "$pid" "$restarts" "$result" "$cwd"
+          done
+
+          legacy=(disdex-v96-live.service disdex-v96-v52-live.service disdex-v13d-v11eq-v96.service
+                  disdex-v46-live.service disdex-pengu-dual-ls-v2-v20.service disdex-v12-x1-all.service
+                  disdex-pengu-dual-ls-v2.service disdex-quality102-causal-v1.service disdex-fet-brk48.service
+                  disdex-v52-aster-only.service disdex-shared-crypto-risk.service disdex-v12-v52-margin-guard.service
+                  disdex-idle-priority-short.service)
+          for unit in "${legacy[@]}"; do
+            printf 'LEGACY unit=%s active=%s enabled=%s\n' "$unit"               "$(systemctl is-active "$unit" 2>/dev/null || true)" "$(systemctl is-enabled "$unit" 2>/dev/null || true)"
+          done
+
+          python3 - <<'PY'
+          import json,os
+          paths={
+            "kill_switch":"/var/lib/disdex/shared/kill-switch.json",
+            "shared_risk":"/var/lib/disdex/shared/crypto-daily-risk.json",
+            "margin_guard":"/var/lib/disdex/shared/margin-risk/guard-live.json",
+            "pending_exposure":"/var/lib/disdex/shared/pending-exposure.json",
+            "idle_state":"/var/lib/disdex/idle-priority/state.json",
+            "idle_heartbeat":"/var/lib/disdex/runner-health/heartbeats/idle-priority-short.json",
+            "idle_parity":"/var/lib/disdex/shared/idle-priority-parity-cert.json",
+            "operator_activation":"/var/lib/disdex/shared/operator-activation/current.json",
+          }
+          def load(path):
+            try:
+              with open(path,encoding="utf-8") as f:return json.load(f)
+            except Exception as e:return {"_error":type(e).__name__}
+          for name,path in paths.items():
+            v=load(path)
+            out={"path":path}
+            if name=="kill_switch":
+              out.update(active=v.get("active"),reason=v.get("reason"),updatedAt=v.get("updatedAt") or v.get("checkedAt"))
+            elif name=="shared_risk":
+              out.update(runtimeSha=v.get("runtimeSha") or v.get("runtimeCommitSha"),tripped=v.get("tripped"),lossPct=v.get("lossPct"),updatedAt=v.get("updatedAt"))
+            elif name=="margin_guard":
+              out.update(runtimeSha=v.get("runtimeSha") or v.get("runtimeCommitSha"),stage=v.get("stage"),ordersAllowed=v.get("ordersAllowed"),checkedAt=v.get("checkedAt"),consecutiveFailures=v.get("consecutiveFailures"))
+            elif name=="pending_exposure":
+              entries=v.get("entries") if isinstance(v,dict) else None
+              if isinstance(entries,dict):
+                out.update(count=len(entries),owners=sorted({str((x or {}).get("strategyId","")) for x in entries.values() if isinstance(x,dict)}))
+              elif isinstance(v,list):
+                out.update(count=len(v))
+              else: out.update(count=0,error=v.get("_error") if isinstance(v,dict) else None)
+            elif name=="idle_state":
+              positions=v.get("positions") if isinstance(v.get("positions"),list) else []
+              pending=v.get("pending") if isinstance(v.get("pending"),dict) else None
+              decision=v.get("lastDecision") if isinstance(v.get("lastDecision"),dict) else None
+              out.update(schema=v.get("schema"),runtimeSha=v.get("runtimeSha"),updatedAt=v.get("updatedAt"),
+                         manualReview=v.get("manualReview"),positions=len(positions),
+                         positionSymbols=[p.get("symbol") for p in positions if isinstance(p,dict)],
+                         pendingAction=pending.get("action") if pending else None,
+                         pendingPhase=pending.get("phase") if pending else None,
+                         lastDecision=decision)
+            elif name=="idle_heartbeat":
+              out.update(runtimeSha=v.get("runtimeSha"),expectedSha=v.get("expectedSha"),serviceUnit=v.get("serviceUnit"),
+                         safetyState=v.get("safetyState"),mode=v.get("mode"),liveEnabled=v.get("liveEnabled"),
+                         heartbeatAt=v.get("heartbeatAt"),lastTickAt=v.get("lastTickAt"),
+                         mainPid=v.get("mainPid"),nRestarts=v.get("nRestarts"),serviceResult=v.get("serviceResult"))
+            elif name=="idle_parity":
+              out.update(schema=v.get("schema"),runtimeSha=v.get("runtimeSha"),priceModelBps=v.get("priceModelBps"),
+                         genericLifecycleModel=v.get("genericLifecycleModel"),genericCandidateCount=v.get("genericCandidateCount"),
+                         candidateCount=v.get("candidateCount"),admittedCount=v.get("admittedCount"),integratedTradeCount=v.get("integratedTradeCount"))
+            elif name=="operator_activation":
+              out.update(schema=v.get("schema"),runtimeSha=v.get("runtimeSha") or v.get("approvedSha"),
+                         approved=v.get("approved") if "approved" in v else v.get("enabled"),updatedAt=v.get("updatedAt") or v.get("approvedAt"))
+            if isinstance(v,dict) and v.get("_error"):out["error"]=v["_error"]
+            print("JSON_AUDIT "+name+"="+json.dumps(out,separators=(",",":"),ensure_ascii=False))
+          PY
+
+          echo "DISK_FREE_KB=$(df -Pk /home/deploy | awk 'NR==2 {print $4}')"
+          echo "AUDIT_COMPLETE=TRUE"
+          REMOTE
