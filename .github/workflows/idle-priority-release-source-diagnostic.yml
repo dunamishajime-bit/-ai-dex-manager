@@ -5,6 +5,7 @@ on:
     paths:
       - ".github/workflows/idle-priority-release-source-diagnostic.yml"
       - "research/idle_priority_generic_lifecycle_diagnostic.py"
+      - "research/idle_priority_all_ledger_mask_search.py"
   workflow_dispatch:
 permissions:
   contents: read
@@ -32,6 +33,16 @@ jobs:
           test -n "$BTC"
           DATA="$(python -c "from pathlib import Path; print(Path('$BTC').resolve().parents[3])")"
           python research/idle_priority_generic_lifecycle_diagnostic.py --release-root "$ROOT" --data-root "$DATA"
+      - name: Exhaustively identify the baseline ledger mask
+        shell: bash
+        run: |
+          set -euo pipefail
+          ROOT="$(find evidence -mindepth 1 -maxdepth 1 -type d | head -1)"
+          BTC="$(find "$ROOT" -type f -path '*/market-Aster-H1-funding-and-manifests/normalized/aster/klines/BTCUSDT.jsonl' | head -1)"
+          test -n "$ROOT"
+          test -n "$BTC"
+          DATA="$(python -c "from pathlib import Path; print(Path('$BTC').resolve().parents[3])")"
+          python research/idle_priority_all_ledger_mask_search.py --release-root "$ROOT" --data-root "$DATA"
       - name: Locate original Idle candidate generator
         shell: bash
         run: |
