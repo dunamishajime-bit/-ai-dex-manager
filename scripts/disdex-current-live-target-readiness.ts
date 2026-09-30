@@ -1,4 +1,8 @@
 import { readFile } from "node:fs/promises";
+import { dirname, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
 type Readiness = {
   schema: string;
@@ -11,7 +15,7 @@ type Readiness = {
 };
 
 async function text(path: string) {
-  return readFile(path, "utf8");
+  return readFile(resolve(REPO_ROOT, path), "utf8");
 }
 
 async function main() {
