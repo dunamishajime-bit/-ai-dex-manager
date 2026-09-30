@@ -1,0 +1,49 @@
+name: Idle Priority overlay reconciliation diagnostic
+on:
+  push:
+    branches: [design/idle-priority-bt-parity-20260929]
+    paths:
+      - "research/idle_priority_61_intents.json"
+      - "research/idle_priority_overlay_reservation_intents_diagnostic.py"
+      - ".github/workflows/idle-priority-overlay-reconciliation-diagnostic.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  reconcile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download canonical baseline release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download bt-v12-score100-volume080-normalonly-20260928 \
+            --repo dunamishajime-bit/-ai-dex-manager \
+            --pattern 'bt-v12-score100-volume080-normalonly-20260928.tar.gz'
+          echo '891c36d8a5957cafe3aae65656a98b7c02a3c437c4f520fe63756d550f08b4fb  bt-v12-score100-volume080-normalonly-20260928.tar.gz' | sha256sum -c -
+      - name: Extract and locate adopted 10bps ledger
+        run: |
+          mkdir evidence
+          tar -xzf bt-v12-score100-volume080-normalonly-20260928.tar.gz -C evidence
+          find evidence -type f | sort > evidence-files.txt
+          LEDGER="$(find evidence -type f -path '*/selected-five-logic-all-cases-all-costs/BRK0P75_MR0P75_FET1_DUAL_GATE/PRICE_MODEL_10BPS/portfolio-trades.jsonl' | head -1)"
+          test -n "$LEDGER"
+          echo "LEDGER=$LEDGER" >> "$GITHUB_ENV"
+          echo "baseline rows=$(wc -l < "$LEDGER")"
+          test "$(wc -l < "$LEDGER")" -eq 1284
+      - name: Run accepted-gross reservation diagnostic
+        run: |
+          python research/idle_priority_overlay_reservation_intents_diagnostic.py \
+            --baseline-trades "$LEDGER" \
+            --idle-intents research/idle_priority_61_intents.json \
+            --output idle-overlay-reservation-diagnostic.json | tee idle-overlay-reservation-diagnostic.log
+          cat idle-overlay-reservation-diagnostic.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: idle-overlay-reservation-diagnostic
+          path: |
+            idle-overlay-reservation-diagnostic.json
+            idle-overlay-reservation-diagnostic.log
+            evidence-files.txt
+          retention-days: 30
