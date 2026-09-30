@@ -48,6 +48,11 @@ class V52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
         if self.live:
             assert_strict_live_configuration()
 
+    def tick(self, prepared: dict | None = None) -> None:
+        super().tick(prepared)
+        self.state["idleAdmissionDecisionTs"] = (base.now_ms() // 3_600_000) * 3_600_000
+        self.save()
+
     def assert_gross_safe(self, snapshot=None) -> None:
         row = snapshot or self.gross_snapshot()
         validate_gross_snapshot(row)
