@@ -243,9 +243,11 @@ jobs:
           print("RECOVERY_SHARED_SAFETY=PASS")
           PY
 
-          # Run account diagnostic as deploy so shared rate-budget ownership cannot be stolen.
+          # Use an isolated rate-budget path so this root diagnostic cannot mutate
+          # the Production shared rate-budget ownership or scheduling state.
           post="$(mktemp)"
-          runuser -u deploy --preserve-environment -- \
+          diag_budget="/tmp/disdex-aster-readonly-budget-recovery-$RANDOM-$.json"
+          DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH="$diag_budget" \
             "$current/node_modules/.bin/tsx" "$current/scripts/disdex-aster-readonly-account-diagnostic.ts" | tee "$post"
           python3 - "$post" <<'PY'
           import json,sys
@@ -257,6 +259,7 @@ jobs:
           print("RECOVERY_POST_ASTER_FLAT=PASS")
           PY
           rm -f "$post"
+          rm -rf -- "$diag_budget" "$diag_budget.lock" "$diag_budget.lock.recovery"
           [[ "$(stat -c '%U:%G:%a' "$budget")" == "deploy:deploy:660" ]]
 
           # Restore monitor/recovery timers only after every LIVE unit is healthy.
