@@ -1,0 +1,276 @@
+name: Recover Aster shared rate-budget ownership and LIVE runners
+on:
+  push:
+    branches: [design/idle-priority-bt-parity-20260929]
+    paths: [.github/workflows/aster-rate-budget-permission-recovery-20261001.yml]
+permissions:
+  contents: read
+concurrency:
+  group: disdex-rate-budget-permission-recovery
+  cancel-in-progress: false
+
+jobs:
+  recover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Initialize restricted root SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+
+      - name: Repair shared rate-budget ownership and restart exact current lineage
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -p "$PORT" "root@$SSH_HOST" 'bash -s' <<'REMOTE'
+          set -Eeuo pipefail
+          root=/home/deploy/disdex-trading
+          current="$root/current"
+          sha="$(tr -d '[:space:]' < "$current/.disdex-release-sha")"
+          [[ "$sha" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$(readlink -f "$current")" == "$root/releases/$sha" ]]
+          echo "RECOVERY_CURRENT_SHA=$sha"
+
+          names=(disdex-v12-x1-all disdex-pengu-dual-ls-v2 disdex-quality102-causal-v1
+                 disdex-v52-aster-only disdex-fet-brk48 disdex-hype-long disdex-idle-priority-short
+                 disdex-shared-crypto-risk disdex-v12-v52-margin-guard)
+
+          set -a
+          for f in /etc/disdex/disdex-v13d-v11eq-v96.env /etc/disdex/disdex-v12-pengu-v2-v52.env \
+                   /etc/disdex/disdex-v12-x1-all.env /etc/disdex/disdex-quality102-causal-v1.env \
+                   /etc/disdex/current-runtime/$sha.env; do
+            [[ -f "$f" ]] && . "$f"
+          done
+          set +a
+
+          # Root diagnostic is allowed only before ownership repair; it may replace the
+          # shared budget file as root. We repair ownership immediately afterwards.
+          pre="$(mktemp)"
+          "$current/node_modules/.bin/tsx" "$current/scripts/disdex-aster-readonly-account-diagnostic.ts" | tee "$pre"
+          python3 - "$pre" <<'PY'
+          import json,sys
+          rows=[x for x in open(sys.argv[1],encoding="utf-8") if x.lstrip().startswith("{")]
+          x=json.loads(rows[-1])
+          assert x["status"]=="ASTER_READONLY_ACCOUNT_DIAGNOSTIC_PASS"
+          if x.get("positions"): raise SystemExit("RECOVERY_ABORT_POSITIONS_PRESENT")
+          if x.get("openOrders"): raise SystemExit("RECOVERY_ABORT_OPEN_ORDERS_PRESENT")
+          assert x.get("ordersSent")==0 and x.get("cancelsSent")==0 and x.get("positionChangesSent")==0
+          print("RECOVERY_PREFLIGHT_ASTER_FLAT=PASS")
+          PY
+          rm -f "$pre"
+
+          systemctl disable --now disdex-runner-watchdog.timer >/dev/null 2>&1 || true
+          systemctl stop disdex-runner-watchdog.service >/dev/null 2>&1 || true
+          systemctl disable --now disdex-runner-position-recovery.timer >/dev/null 2>&1 || true
+          systemctl stop disdex-runner-position-recovery.service >/dev/null 2>&1 || true
+          systemctl disable --now disdex-v12-kill-switch-auto-repair.path >/dev/null 2>&1 || true
+          systemctl stop disdex-v12-kill-switch-auto-repair.service >/dev/null 2>&1 || true
+          systemctl disable --now disdex-v12-three-hour-health-check.timer >/dev/null 2>&1 || true
+          systemctl stop disdex-v12-three-hour-health-check.service >/dev/null 2>&1 || true
+
+          for name in "${names[@]}"; do
+            systemctl stop "$name@$sha.service" >/dev/null 2>&1 || true
+          done
+
+          # No daemon is now allowed to mutate venue or shared state. Reconfirm flat.
+          stopped="$(mktemp)"
+          "$current/node_modules/.bin/tsx" "$current/scripts/disdex-aster-readonly-account-diagnostic.ts" | tee "$stopped"
+          python3 - "$stopped" <<'PY'
+          import json,sys
+          rows=[x for x in open(sys.argv[1],encoding="utf-8") if x.lstrip().startswith("{")]
+          x=json.loads(rows[-1])
+          assert x["status"]=="ASTER_READONLY_ACCOUNT_DIAGNOSTIC_PASS"
+          if x.get("positions") or x.get("openOrders"):
+              raise SystemExit("RECOVERY_ABORT_NOT_FLAT_AFTER_STOP")
+          print("RECOVERY_STOPPED_ASTER_FLAT=PASS")
+          PY
+          rm -f "$stopped"
+
+          budget=/var/lib/disdex/shared/aster-rate-budget.json
+          install -d -o deploy -g deploy -m 0755 /var/lib/disdex/shared
+          if [[ -f "$budget" && ! -L "$budget" ]]; then
+            chown deploy:deploy "$budget"
+            chmod 0660 "$budget"
+          else
+            echo "RECOVERY_RATE_BUDGET_NOT_REGULAR"
+            exit 51
+          fi
+          rm -rf -- "$budget.lock" "$budget.lock.recovery"
+          stat -c 'RECOVERY_RATE_BUDGET owner=%U group=%G mode=%a' "$budget"
+          [[ "$(stat -c '%U:%G:%a' "$budget")" == "deploy:deploy:660" ]]
+
+          backup=/var/lib/disdex/deploy-backups/rate-budget-recovery-$(date +%Y%m%dT%H%M%S)
+          install -d -o root -g root -m 0700 "$backup"
+
+          python3 - "$sha" "$backup" <<'PY'
+          import json,os,shutil,sys,tempfile,time
+          sha,backup=sys.argv[1:]
+          rate_msg="EACCES: permission denied, open '/var/lib/disdex/shared/aster-rate-budget.json'"
+          idle_msg="IDLE_RUNNER_FAIL_CLOSED:"+rate_msg
+
+          def atomic(path,data,uid,gid,mode):
+              directory=os.path.dirname(path)
+              fd,tmp=tempfile.mkstemp(prefix=".rate-budget-recovery.",dir=directory,text=True)
+              try:
+                  with os.fdopen(fd,"w",encoding="utf-8") as f:
+                      json.dump(data,f,indent=2,sort_keys=False);f.write("\n");f.flush();os.fsync(f.fileno())
+                  os.chown(tmp,uid,gid);os.chmod(tmp,mode);os.replace(tmp,path)
+              finally:
+                  try: os.unlink(tmp)
+                  except FileNotFoundError: pass
+
+          def load_regular(path):
+              st=os.lstat(path)
+              if not os.path.isfile(path) or os.path.islink(path):
+                  raise SystemExit("RECOVERY_STATE_NOT_REGULAR:"+path)
+              with open(path,encoding="utf-8") as f:data=json.load(f)
+              return st,data
+
+          # V12: only exact shared-rate-budget EACCES, flat, no pending.
+          vp="/var/lib/disdex/v12-x1-all/runner.json"
+          st,v=load_regular(vp)
+          active=v.get("activePositions") or ([] if not v.get("active") else [v.get("active")])
+          if active or v.get("pending"):
+              raise SystemExit("RECOVERY_V12_NOT_FLAT")
+          if v.get("manualReview") not in (None,rate_msg):
+              raise SystemExit("RECOVERY_V12_MANUAL_REVIEW_NOT_EXACT:"+str(v.get("manualReview")))
+          ks=v.get("killSwitch") if isinstance(v.get("killSwitch"),dict) else None
+          if ks and ks.get("active") is True and ks.get("reason") != rate_msg:
+              raise SystemExit("RECOVERY_V12_KILL_REASON_NOT_EXACT:"+str(ks.get("reason")))
+          if v.get("manualReview")==rate_msg or ks:
+              dst=os.path.join(backup,"v12-runner.json")
+              shutil.copy2(vp,dst)
+              v.pop("manualReview",None)
+              if ks and ks.get("reason")==rate_msg: v.pop("killSwitch",None)
+              v["updatedAt"]=int(time.time()*1000)
+              v["reconciliationStatus"]="PASS"
+              atomic(vp,v,st.st_uid,st.st_gid,st.st_mode & 0o777)
+              print("RECOVERY_V12_EACCES_CLEARED=PASS")
+          else:
+              print("RECOVERY_V12_EACCES_CLEARED=NOOP")
+
+          # Idle: exact rate-budget EACCES only, flat, no pending.
+          ip="/var/lib/disdex/idle-priority/state.json"
+          st,i=load_regular(ip)
+          if i.get("runtimeSha")!=sha: raise SystemExit("RECOVERY_IDLE_SHA_MISMATCH")
+          if i.get("positions") or i.get("pending"): raise SystemExit("RECOVERY_IDLE_NOT_FLAT")
+          if i.get("manualReview") not in (None,idle_msg):
+              raise SystemExit("RECOVERY_IDLE_REVIEW_NOT_EXACT:"+str(i.get("manualReview")))
+          if i.get("manualReview")==idle_msg:
+              dst=os.path.join(backup,"idle-state.json")
+              shutil.copy2(ip,dst)
+              i["manualReview"]=None
+              now=int(time.time()*1000)
+              i["updatedAt"]=now
+              i["lastDecision"]={"decisionTs":now,"accepted":False,"reason":"IDLE_BENIGN_RATE_BUDGET_PERMISSION_RECOVERY"}
+              atomic(ip,i,st.st_uid,st.st_gid,st.st_mode & 0o777)
+              print("RECOVERY_IDLE_EACCES_CLEARED=PASS")
+          else:
+              print("RECOVERY_IDLE_EACCES_CLEARED=NOOP")
+          PY
+
+          # Reset failure counters before restart.
+          for name in "${names[@]}"; do
+            systemctl reset-failed "$name@$sha.service" >/dev/null 2>&1 || true
+          done
+
+          # Safety services first.
+          systemctl start "disdex-shared-crypto-risk@$sha.service"
+          systemctl start "disdex-v12-v52-margin-guard@$sha.service"
+          sleep 8
+          [[ "$(systemctl is-active "disdex-shared-crypto-risk@$sha.service")" == active ]]
+          [[ "$(systemctl is-active "disdex-v12-v52-margin-guard@$sha.service")" == active ]]
+
+          # Then strategy runners.
+          for name in disdex-v12-x1-all disdex-pengu-dual-ls-v2 disdex-quality102-causal-v1 \
+                      disdex-v52-aster-only disdex-fet-brk48 disdex-hype-long disdex-idle-priority-short; do
+            systemctl enable --now "$name@$sha.service"
+          done
+          sleep 12
+
+          # Let one margin/risk cycle stabilize, then validate rate-budget ownership survived.
+          [[ "$(stat -c '%U:%G:%a' "$budget")" == "deploy:deploy:660" ]] || {
+            stat -c 'RECOVERY_RATE_BUDGET_POSTSTART owner=%U group=%G mode=%a' "$budget"
+            exit 52
+          }
+
+          for name in "${names[@]}"; do
+            unit="$name@$sha.service"
+            state="$(systemctl is-active "$unit" 2>/dev/null || true)"
+            result="$(systemctl show "$unit" -p Result --value 2>/dev/null || true)"
+            pid="$(systemctl show "$unit" -p MainPID --value 2>/dev/null || true)"
+            restarts="$(systemctl show "$unit" -p NRestarts --value 2>/dev/null || true)"
+            echo "RECOVERY_RUNNER unit=$unit active=$state pid=$pid nRestarts=$restarts result=$result"
+            [[ "$state" == active ]]
+            [[ "$pid" =~ ^[0-9]+$ && "$pid" -gt 0 ]]
+          done
+
+          python3 - <<'PY'
+          import json,time
+          kill=json.load(open("/var/lib/disdex/shared/kill-switch.json"))
+          if kill.get("active") is not False: raise SystemExit("RECOVERY_KILL_SWITCH_ACTIVE")
+          guard=json.load(open("/var/lib/disdex/shared/margin-risk/guard-live.json"))
+          # guard can still contain the previous DATA_UNAVAILABLE snapshot until the
+          # next daemon poll. Service identity is checked above; wait boundedly here.
+          deadline=time.time()+45
+          while time.time()<deadline:
+              guard=json.load(open("/var/lib/disdex/shared/margin-risk/guard-live.json"))
+              if guard.get("stage")=="HEALTHY" and guard.get("ordersAllowed") is True:
+                  break
+              time.sleep(3)
+          if guard.get("stage")!="HEALTHY" or guard.get("ordersAllowed") is not True:
+              raise SystemExit("RECOVERY_MARGIN_NOT_HEALTHY:"+str(guard))
+          print("RECOVERY_SHARED_SAFETY=PASS")
+          PY
+
+          # Run account diagnostic as deploy so shared rate-budget ownership cannot be stolen.
+          post="$(mktemp)"
+          runuser -u deploy --preserve-environment -- \
+            "$current/node_modules/.bin/tsx" "$current/scripts/disdex-aster-readonly-account-diagnostic.ts" | tee "$post"
+          python3 - "$post" <<'PY'
+          import json,sys
+          rows=[x for x in open(sys.argv[1],encoding="utf-8") if x.lstrip().startswith("{")]
+          x=json.loads(rows[-1])
+          assert x["status"]=="ASTER_READONLY_ACCOUNT_DIAGNOSTIC_PASS"
+          if x.get("positions") or x.get("openOrders"):
+              raise SystemExit("RECOVERY_POST_ASTER_NOT_FLAT")
+          print("RECOVERY_POST_ASTER_FLAT=PASS")
+          PY
+          rm -f "$post"
+          [[ "$(stat -c '%U:%G:%a' "$budget")" == "deploy:deploy:660" ]]
+
+          # Restore monitor/recovery timers only after every LIVE unit is healthy.
+          systemctl enable --now disdex-runner-health-snapshot.timer
+          systemctl enable --now disdex-runner-health-alert.timer
+          systemctl enable --now disdex-trade-fill-notifier.timer
+          systemctl enable --now disdex-runner-watchdog.timer
+          systemctl enable --now disdex-runner-position-recovery.timer
+          systemctl enable --now disdex-v12-kill-switch-auto-repair.path
+          systemctl enable --now disdex-v12-three-hour-health-check.timer
+          systemctl reset-failed disdex-runner-health-snapshot.service >/dev/null 2>&1 || true
+          systemctl start disdex-runner-health-snapshot.service
+          echo "STATUS=RATE_BUDGET_PERMISSION_RECOVERY_VERIFIED"
+          echo "CURRENT_SHA=$sha"
+          echo "ASTER_POSITIONS=0"
+          echo "ASTER_OPEN_ORDERS=0"
+          REMOTE
