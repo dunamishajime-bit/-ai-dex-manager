@@ -163,7 +163,10 @@ jobs:
           echo "FAILED_UNIT_JOURNAL_END"
 
           echo "ASTER_READONLY_DIAGNOSTIC_BEGIN"
-          "$current/node_modules/.bin/tsx" "$current/scripts/disdex-aster-readonly-account-diagnostic.ts"
+          audit_budget="/tmp/disdex-aster-readonly-budget-audit-$.json"
+          DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH="$audit_budget" \
+            "$current/node_modules/.bin/tsx" "$current/scripts/disdex-aster-readonly-account-diagnostic.ts"
+          rm -rf -- "$audit_budget" "$audit_budget.lock" "$audit_budget.lock.recovery"
           echo "ASTER_READONLY_DIAGNOSTIC_END"
 
           python3 - <<'PY'
