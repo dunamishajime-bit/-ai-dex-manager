@@ -3,6 +3,7 @@ on:
   push:
     branches: [design/idle-priority-bt-parity-20260929]
     paths:
+      - ".github/workflows/idle-priority-short-handoff-gate.yml"
       - "config/idlePriorityShort*.ts"
       - "lib/idle-priority-short-*.ts"
       - "scripts/idle-priority-short-*.ts"
@@ -33,6 +34,16 @@ jobs:
       - uses: actions/setup-node@v4
         with: {node-version: "24"}
       - run: npm ci
+      - run: npm run strategy:idle-priority-short:selftest
+      - run: npm run strategy:idle-priority-short:live:selftest
+      - run: npm run strategy:idle-priority-short:benign-recovery:selftest
+      - run: npx tsc --noEmit
+      - run: npx tsx --test tests/hype-zec-long-state-migration.test.ts tests/idle-priority-short-systemd-contract.test.mjs
+      - run: npm run strategy:hype-zec-long:state:migrate:selftest
+      - run: npx tsx --test tests/hype-zec-benign-market-data-recovery.test.ts tests/hype-zec-runner-gate.test.ts
+      - run: npx tsx --test tests/idle-priority-short-benign-state-recovery.test.ts
+      - run: npx tsx --test tests/q102-symbol-ownership-contract.test.ts
+      - run: bash scripts/ops/root/disdex-current-runtime-wiring --self-test
       - name: Replay LIVE signal evaluator against exact 63-candidate fixture
         env:
           GH_TOKEN: ${{ github.token }}
@@ -46,16 +57,6 @@ jobs:
           test -n "$BTC"
           DATA="$(python -c "from pathlib import Path; print(Path('$BTC').resolve().parents[3])")"
           npx tsx scripts/idle-priority-short-live-signal-replay.ts --data-root "$DATA" --expected research/idle_priority_63_candidate_keys.json
-      - run: npm run strategy:idle-priority-short:selftest
-      - run: npm run strategy:idle-priority-short:live:selftest
-      - run: npm run strategy:idle-priority-short:benign-recovery:selftest
-      - run: npx tsc --noEmit
-      - run: npx tsx --test tests/hype-zec-long-state-migration.test.ts tests/idle-priority-short-systemd-contract.test.mjs
-      - run: npm run strategy:hype-zec-long:state:migrate:selftest
-      - run: npx tsx --test tests/hype-zec-benign-market-data-recovery.test.ts tests/hype-zec-runner-gate.test.ts
-      - run: npx tsx --test tests/idle-priority-short-benign-state-recovery.test.ts
-      - run: npx tsx --test tests/q102-symbol-ownership-contract.test.ts
-      - run: bash scripts/ops/root/disdex-current-runtime-wiring --self-test
       - name: Verify fail-closed handoff artifacts
         shell: bash
         run: |
