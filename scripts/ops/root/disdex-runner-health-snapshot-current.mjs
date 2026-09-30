@@ -121,7 +121,7 @@ function json(path) {
 
 async function serviceSnapshot(unit) {
     const { stdout } = await execFile(SYSTEMCTL, [
-        "show", unit, "-p", "ActiveState", "-p", "MainPID", "-p", "WorkingDirectory", "-p", "ExecStart", "--no-pager",
+        "show", unit, "-p", "ActiveState", "-p", "MainPID", "-p", "NRestarts", "-p", "Result", "-p", "WorkingDirectory", "-p", "ExecStart", "--no-pager",
     ], { encoding: "utf8" });
     const values = {};
     for (const line of stdout.split(/\r?\n/)) {
@@ -138,6 +138,8 @@ async function serviceSnapshot(unit) {
     return {
         active: values.ActiveState === "active",
         pid,
+        nRestarts: Number(values.NRestarts || 0),
+        result: String(values.Result || ""),
         cwd,
         command,
         execStart: values.ExecStart || "",
@@ -338,6 +340,9 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
         safetyState: blockedReason ? "BLOCKED" : "HEALTHY",
         heartbeatAt: now,
         lastTickAt: updatedAt > 0 ? updatedAt : now,
+        mainPid: Number(service?.pid || 0),
+        nRestarts: Number(service?.nRestarts || 0),
+        serviceResult: String(service?.result || ""),
     };
     if (runner.key === "QUALITY102_CAUSAL_V1") {
         heartbeat.quality102 = {
@@ -349,7 +354,7 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
     if (blockedReason) heartbeat.healthReason = blockedReason;
     return {
         heartbeat,
-        diagnostics: { active: serviceActive, processPresent, cwdCurrent, commandCurrent, execCurrent, stateFresh, strategyOk: stateIdentityMatches(runner, state) },
+        diagnostics: { active: serviceActive, processPresent, cwdCurrent, commandCurrent, execCurrent, stateFresh, strategyOk: stateIdentityMatches(runner, state), mainPid: Number(service?.pid || 0), nRestarts: Number(service?.nRestarts || 0), serviceResult: String(service?.result || "") },
     };
 }
 
