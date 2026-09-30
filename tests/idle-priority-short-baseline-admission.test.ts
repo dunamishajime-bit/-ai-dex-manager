@@ -41,7 +41,7 @@ async function fixture(overrides: Record<string, unknown> = {}) {
         lastRunAt: decisionTs,
         latestSignal: { referenceTs: decisionTs, side: 0, targetGross: 0 },
     }));
-    await writeFile(paths.fetPath, JSON.stringify({ schema: "fet-brk48-residual-state/v1", updatedAt: decisionTs, lastEvaluationDecisionTs: decisionTs, failures: [] }));
+    await writeFile(paths.fetPath, JSON.stringify({ schema: "fet-brk48-residual-state/v1", updatedAt: decisionTs, lastEvaluationDecisionTs: decisionTs, lastEvaluationCandidate: false, failures: [] }));
     await writeFile(paths.v52Path, JSON.stringify({ strategyId: "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96", updatedAt: decisionTs, idleAdmissionDecisionTs: decisionTs }));
     return {
         root,
@@ -156,6 +156,7 @@ test("Idle fails closed until every asynchronous baseline source completed the c
             schema: "fet-brk48-residual-state/v1",
             updatedAt: f.input.decisionTs,
             lastEvaluationDecisionTs: f.input.decisionTs - 3_600_000,
+            lastEvaluationCandidate: false,
             failures: [],
         }));
         await assert.rejects(() => buildBaselineAdmissionEvidence(f.input), /BASELINE_ADMISSION_SOURCE_STALE_OR_TS_MISMATCH/);
@@ -164,6 +165,7 @@ test("Idle fails closed until every asynchronous baseline source completed the c
             schema: "fet-brk48-residual-state/v1",
             updatedAt: f.input.decisionTs,
             lastEvaluationDecisionTs: f.input.decisionTs,
+            lastEvaluationCandidate: false,
             failures: [],
         }));
         await writeFile(f.paths.v52Path, JSON.stringify({
@@ -172,6 +174,23 @@ test("Idle fails closed until every asynchronous baseline source completed the c
             idleAdmissionDecisionTs: f.input.decisionTs - 3_600_000,
         }));
         await assert.rejects(() => buildBaselineAdmissionEvidence(f.input), /BASELINE_ADMISSION_SOURCE_STALE_OR_TS_MISMATCH/);
+    } finally {
+        await rm(f.root, { recursive: true, force: true });
+    }
+});
+
+test("current FET candidate blocks Idle before FET order resolution", async () => {
+    const f = await fixture();
+    try {
+        await writeFile(f.paths.fetPath, JSON.stringify({
+            schema: "fet-brk48-residual-state/v1",
+            updatedAt: f.input.decisionTs,
+            lastEvaluationDecisionTs: f.input.decisionTs,
+            lastEvaluationCandidate: true,
+            failures: [],
+        }));
+        const result = await buildBaselineAdmissionEvidence(f.input);
+        assert.equal(result.baselineAcceptedThisTimestamp, 1);
     } finally {
         await rm(f.root, { recursive: true, force: true });
     }
