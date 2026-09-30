@@ -36,6 +36,7 @@ const LEGACY_LIVE_UNITS = [
     "disdex-v52-aster-only.service",
     "disdex-shared-crypto-risk.service",
     "disdex-v12-v52-margin-guard.service",
+    "disdex-idle-priority-short.service",
 ];
 const RUNNERS = [
     {
@@ -120,6 +121,19 @@ const RUNNERS = [
         script: "scripts/disdex-hype-trend-live-runner.ts",
         heartbeatTimeoutMs: 5_400_000,
         tickTimeoutMs: 5_400_000,
+    },
+    {
+        key: "IDLE_PRIORITY_SHORT",
+        expectedShaEnv: "DISDEX_WATCHDOG_IDLE_EXPECTED_SHA",
+        releaseRootEnv: "DISDEX_WATCHDOG_IDLE_RELEASE_ROOT",
+        heartbeatFile: "idle-priority-short.json",
+        unitEnv: "DISDEX_WATCHDOG_IDLE_SERVICE_UNIT",
+        expectedUnit: (sha) => `disdex-idle-priority-short@${sha}.service`,
+        unitPattern: "disdex-idle-priority-short@*.service",
+        unitPrefix: "disdex-idle-priority-short",
+        script: "scripts/disdex-idle-priority-short-live-runner.ts",
+        heartbeatTimeoutMs: 20 * 60_000,
+        tickTimeoutMs: 15 * 60_000,
     },
 ];
 
@@ -630,6 +644,7 @@ function selfTest() {
     const q102 = RUNNERS[3];
     const fet = RUNNERS[4];
     const hype = RUNNERS[5];
+    const idle = RUNNERS[6];
     if (!serviceAllowed(v12, v12.expectedUnit(sha), sha)) throw new Error("V12 allowlist self-test failed");
     if (!serviceAllowed(pengu, pengu.expectedUnit(sha), sha)) throw new Error("PENGU release-pinned allowlist self-test failed");
     if (serviceAllowed(pengu, "disdex-pengu-dual-ls-v2-v20.service", sha)) throw new Error("PENGU legacy unit fail-closed self-test failed");
@@ -638,6 +653,8 @@ function selfTest() {
     if (serviceAllowed(q102, "disdex-quality102-causal-v1@f59347fad11553b833e75f6f35a0c545464fdf5.service", sha)) throw new Error("39/40 SHA fail-closed self-test failed");
     if (!serviceAllowed(fet, fet.expectedUnit(sha), sha)) throw new Error("FET release-pinned allowlist self-test failed");
     if (!serviceAllowed(hype, hype.expectedUnit(sha), sha)) throw new Error("HYPE release-pinned allowlist self-test failed");
+    if (!serviceAllowed(idle, idle.expectedUnit(sha), sha)) throw new Error("IDLE release-pinned allowlist self-test failed");
+    if (serviceAllowed(idle, "disdex-idle-priority-short.service", sha)) throw new Error("IDLE legacy unit fail-closed self-test failed");
     const baseConfigEnv = {
         DISDEX_WATCHDOG_HEALTH_ROOT: join(process.cwd(), "self-test-health"),
         DISDEX_WATCHDOG_RELEASE_ROOT: join(process.cwd(), "self-test-releases", sha),
@@ -649,6 +666,7 @@ function selfTest() {
         DISDEX_WATCHDOG_Q102_SERVICE_UNIT: q102.expectedUnit(sha),
         DISDEX_WATCHDOG_FET_SERVICE_UNIT: fet.expectedUnit(sha),
         DISDEX_WATCHDOG_HYPE_SERVICE_UNIT: hype.expectedUnit(sha),
+        DISDEX_WATCHDOG_IDLE_SERVICE_UNIT: idle.expectedUnit(sha),
     };
     try {
         buildConfig(baseConfigEnv);
@@ -759,6 +777,7 @@ function selfTest() {
     }
     console.log("DISDEX_CURRENT_WATCHDOG_RUNNER_TICK_FRESHNESS_SELFTEST_PASS");
     console.log("DISDEX_CURRENT_WATCHDOG_V52_RELEASE_PIN_SELFTEST_PASS");
+    console.log("DISDEX_CURRENT_WATCHDOG_IDLE_RELEASE_PIN_SELFTEST_PASS");
     const restartRequested = decision("RESTART", "service is not active", v12);
     const activationBlocked = applyOperatorActivationGateToRestart(restartRequested, { allowed: false, reason: "OPERATOR_LIVE_ACTIVATION_REQUIRED:ARTIFACT_ABSENT" }, v12, decision);
     if (activationBlocked.action !== "HOLD_FAIL_CLOSED" || activationBlocked.operatorActivationBlocked !== true || !activationBlocked.reason.includes("OPERATOR_LIVE_ACTIVATION_REQUIRED")) throw new Error("operator activation restart-block self-test failed");
