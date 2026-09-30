@@ -16,11 +16,6 @@ jobs:
       SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
     steps:
       - uses: actions/checkout@v4
-      - name: Capture target dependency manifest
-        shell: bash
-        run: |
-          set -Eeuo pipefail
-          echo "TARGET_PACKAGE_LOCK_SHA256=$(sha256sum package-lock.json | awk '{print $1}')" >> "$GITHUB_ENV"
       - name: Initialize restricted root SSH
         shell: bash
         run: |
@@ -42,18 +37,19 @@ jobs:
           ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
             -o ConnectTimeout=15 -p "$PORT" "root@$SSH_HOST" \
-            "TARGET_PACKAGE_LOCK_SHA256='$TARGET_PACKAGE_LOCK_SHA256' bash -s" <<'REMOTE'
+            "bash -s" <<'REMOTE'
           set -Eeuo pipefail
           root=/home/deploy/disdex-trading
           current="$root/current"
           sha="$(tr -d '[:space:]' < "$current/.disdex-release-sha")"
           [[ "$sha" =~ ^[a-f0-9]{40}$ ]]
           [[ "$(readlink -f "$current")" == "$root/releases/$sha" ]]
-          remote_lock="$(sha256sum "$current/package-lock.json" | awk '{print $1}')"
-          echo "CURRENT_PACKAGE_LOCK_SHA256=$remote_lock"
-          echo "TARGET_PACKAGE_LOCK_SHA256=$TARGET_PACKAGE_LOCK_SHA256"
-          [[ "$remote_lock" == "$TARGET_PACKAGE_LOCK_SHA256" ]]
-          echo "PACKAGE_LOCK_VPS_TARGET_PARITY=PASS"
+
+          lock_before="$(sha256sum "$current/package-lock.json" | awk '{print $1}')"
+          package_before="$(sha256sum "$current/package.json" | awk '{print $1}')"
+          echo "CURRENT_SHA=$sha"
+          echo "PACKAGE_LOCK_BEFORE=$lock_before"
+          echo "PACKAGE_JSON_BEFORE=$package_before"
 
           names=(disdex-v12-x1-all disdex-pengu-dual-ls-v2 disdex-quality102-causal-v1
                  disdex-v52-aster-only disdex-fet-brk48 disdex-hype-long disdex-idle-priority-short
@@ -62,7 +58,9 @@ jobs:
           for name in "${names[@]}"; do
             unit="$name@$sha.service"
             [[ "$(systemctl is-active "$unit" 2>/dev/null || true)" == active ]]
-            pids+=("$(systemctl show "$unit" -p MainPID --value)")
+            pid="$(systemctl show "$unit" -p MainPID --value)"
+            [[ "$pid" =~ ^[1-9][0-9]*$ ]]
+            pids+=("$pid")
           done
 
           dir=/var/lib/disdex/pengu-dual-ls-v2
@@ -80,7 +78,10 @@ jobs:
               exit 41
             }
           done
+
           [[ "$(tr -d '[:space:]' < "$current/.disdex-release-sha")" == "$sha" ]]
+          [[ "$(sha256sum "$current/package-lock.json" | awk '{print $1}')" == "$lock_before" ]]
+          [[ "$(sha256sum "$current/package.json" | awk '{print $1}')" == "$package_before" ]]
+          echo "PRODUCTION_DEPENDENCY_MANIFEST_UNCHANGED=PASS"
           echo "STATUS=PENGU_STATE_DIR_NORMALIZED_WITHOUT_RUNNER_RESTART"
-          echo "CURRENT_SHA=$sha"
           REMOTE
