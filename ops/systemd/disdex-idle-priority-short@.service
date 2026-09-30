@@ -14,6 +14,7 @@ EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env
 EnvironmentFile=/etc/disdex/disdex-v12-pengu-v2-v52.env
 EnvironmentFile=-/etc/disdex/disdex-quality102-causal-v1.env
 EnvironmentFile=-/etc/disdex/current-runtime/%i.env
+EnvironmentFile=-/etc/disdex/current-runtime/%i.idle-operator.env
 Environment=DISDEX_RELEASE_ROOT=/home/deploy/disdex-trading/current
 Environment=DISDEX_RUNTIME_SHA=%i
 Environment=DISDEX_IDLE_PRIORITY_MODE=LIVE

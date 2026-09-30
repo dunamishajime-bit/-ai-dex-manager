@@ -355,6 +355,7 @@ set_units() {
   SHARED_RISK_DROPIN_DIR="/etc/systemd/system/${SHARED_RISK_UNIT}.d"
   IDLE_DROPIN_DIR="/etc/systemd/system/${IDLE_UNIT}.d"
   CONTRACT_ENV_FILE="${RUNTIME_CONTRACT_ENV_DIR}/${DEPLOYED_SHA}.env"
+  IDLE_OPERATOR_ENV_FILE="${RUNTIME_CONTRACT_ENV_DIR}/${DEPLOYED_SHA}.idle-operator.env"
   HYPE_OPERATOR_ENV_FILE="${RUNTIME_CONTRACT_ENV_DIR}/${DEPLOYED_SHA}.hype-operator.env"
   HEALTH_SNAPSHOT_ENV_FILE="${RUNTIME_CONTRACT_ENV_DIR}/${DEPLOYED_SHA}.health-snapshot.env"
   WATCHDOG_ENV_FILE="${RUNTIME_CONTRACT_ENV_DIR}/${DEPLOYED_SHA}.watchdog.env"
@@ -378,6 +379,7 @@ show_plan() {
   printf 'v52LegacyCryptoState=%s\n' "$V52_LEGACY_CRYPTO_ROOT"
   printf 'penguStateRoot=%s\n' "$PENGU_STATE_ROOT"
   printf 'contractEnvFile=%s\n' "$CONTRACT_ENV_FILE"
+  printf 'idleOperatorEnvFile=%s\n' "$IDLE_OPERATOR_ENV_FILE"
   printf 'hypeOperatorEnvFile=%s\n' "$HYPE_OPERATOR_ENV_FILE"
   printf 'healthSnapshotEnvFile=%s\n' "$HEALTH_SNAPSHOT_ENV_FILE"
   printf 'watchdogEnvFile=%s\n' "$WATCHDOG_ENV_FILE"
@@ -744,6 +746,12 @@ DISDEX_V52_ASTER_ONLY_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json
 PENGU_DUAL_LS_V2_STATE_DIR=${PENGU_STATE_ROOT}
 PENGU_DUAL_LS_V2_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json"
 
+  # The shared contract env intentionally points at the root-only canonical
+  # approval artifact for root-owned helpers.  Idle runs as deploy, so load a
+  # final service-specific env file after that contract to force the
+  # root-generated read-only projection for the application-side check.
+  write_atomic "$IDLE_OPERATOR_ENV_FILE" "DISDEX_OPERATOR_ACTIVATION_PATH=${OPERATOR_ACTIVATION_RUNTIME_PATH}"
+
   write_atomic "$HEALTH_SNAPSHOT_ENV_FILE" "DISDEX_HEALTH_SNAPSHOT_EXPECTED_SHA=${DEPLOYED_SHA}
 DISDEX_HEALTH_SNAPSHOT_RELEASE_ROOT=${CURRENT_RELEASE}
 DISDEX_HEALTH_SNAPSHOT_V12_EXPECTED_SHA=${DEPLOYED_SHA}
@@ -1034,6 +1042,7 @@ StartLimitBurst=3
 [Service]
 RestartSec=30s
 EnvironmentFile=${CONTRACT_ENV_FILE}
+EnvironmentFile=${IDLE_OPERATOR_ENV_FILE}
 Environment=DISDEX_RUNTIME_SHA=${DEPLOYED_SHA}
 Environment=DISDEX_RELEASE_SHA=${DEPLOYED_SHA}
 Environment=DISDEX_RELEASE_ROOT=${CURRENT_RELEASE}

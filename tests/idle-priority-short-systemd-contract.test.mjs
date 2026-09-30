@@ -11,6 +11,7 @@ test("Idle LIVE unit loads the same Aster credential env sources as existing LIV
   ];
   for (const entry of required) assert.ok(unit.includes(entry), `missing credential source: ${entry}`);
   assert.match(unit, /EnvironmentFile=-\/etc\/disdex\/current-runtime\/%i\.env/);
+  assert.match(unit, /EnvironmentFile=-\/etc\/disdex\/current-runtime\/%i\.idle-operator\.env/);
   assert.match(unit, /Environment=DISDEX_OPERATOR_ACTIVATION_PATH=\/var\/lib\/disdex\/shared\/operator-activation\/runtime\.json/);
   assert.match(unit, /ExecStartPre=\+\/usr\/bin\/install -o root -g deploy -m 0640 \/var\/lib\/disdex\/shared\/operator-activation\/current\.json \/var\/lib\/disdex\/shared\/operator-activation\/runtime\.json/);
   assert.match(unit, /ExecStart=.*disdex-idle-priority-short-live-runner\.ts/);
@@ -30,6 +31,10 @@ test("runtime wiring performs formal HYPE state lineage migration before activat
   assert.match(wiring, /disdex-v12-runtime-lineage-recovery\.ts/);
   assert.match(wiring, /migrate_quality102_state_lineage\s+migrate_v12_state_lineage\s+migrate_fet_state_lineage\s+recover_hype_benign_state/);
   assert.match(wiring, /scripts\/disdex-idle-priority-short-state-migrate\.ts/);
+  assert.match(wiring, /IDLE_OPERATOR_ENV_FILE=.*\.idle-operator\.env/);
+  assert.match(wiring, /write_atomic "\$IDLE_OPERATOR_ENV_FILE" "DISDEX_OPERATOR_ACTIVATION_PATH=\$\{OPERATOR_ACTIVATION_RUNTIME_PATH\}"/);
+  assert.match(wiring, /EnvironmentFile=\$\{IDLE_OPERATOR_ENV_FILE\}/);
+  assert.match(wiring, /EnvironmentFile=\$\{CONTRACT_ENV_FILE\}[\s\S]*EnvironmentFile=\$\{IDLE_OPERATOR_ENV_FILE\}/);
   assert.match(wiring, /migrate_idle_state_lineage\s+systemctl daemon-reload/);
 });
 
