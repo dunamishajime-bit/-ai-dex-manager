@@ -9,6 +9,7 @@ END=1786280400000
 SYMBOLS=["DOTUSDT","JUPUSDT","RENDERUSDT","TAOUSDT","TIAUSDT"]
 EXPECTED_COUNT=393
 EXPECTED_SHA="d32ed3a07a6338e8fae792ec6d9071ea27a1dee548eed6a3825dfbda3270019a"
+EXPECTED_KEYS_PATH=Path("research/idle_priority_393_generic_candidate_keys.txt")
 
 def rows(path):
     out=[]
@@ -145,9 +146,15 @@ for t in range(START,END+1,HOUR):
         try: all_states[(s,t)]=gates(features(market[s],btc,t))
         except KeyError: pass
 
+expected_keys=set(
+    line.strip() for line in EXPECTED_KEYS_PATH.read_text().splitlines()
+    if line.strip() and not line.startswith("#")
+)
+if len(expected_keys)!=393: raise SystemExit(f"EXPECTED_KEYS_COUNT:{len(expected_keys)}")
 results=[]
 best_rows=None
 best_row=None
+best_symdiff=None
 for (exit_before,same_entry_blocks),idle in idle_variants.items():
   for mode in ("LEVEL","EDGE"):
     for priority in itertools.permutations(("BREAKOUT","MOMENTUM","RELATIVE")):
@@ -161,12 +168,23 @@ for (exit_before,same_entry_blocks),idle in idle_variants.items():
             "count":len(out),"sha256":sha,"match":len(out)==EXPECTED_COUNT and sha==EXPECTED_SHA
           }
           distance=abs(len(out)-EXPECTED_COUNT)
-          if best_row is None or distance < abs(best_row["count"]-EXPECTED_COUNT):
+          out_keys=set(f"{s}|{t}|{a}|{side}" for s,t,a,side in out)
+          symdiff=len(out_keys ^ expected_keys)
+          row["symmetric_diff"]=symdiff
+          if best_symdiff is None or symdiff < best_symdiff:
+              best_symdiff=symdiff
               best_row=dict(row)
               best_rows=list(out)
-          if row["match"] or distance<=20: results.append(row)
+          if row["match"] or distance<=20 or symdiff<=20: results.append(row)
 matches=[x for x in results if x["match"]]
 print(json.dumps({"event":"GENERIC_LIFECYCLE_SEARCH","expected_count":EXPECTED_COUNT,"expected_sha":EXPECTED_SHA,"matches":matches,"near":results[:120]},sort_keys=True))
 if len(matches)!=1:
-    print(json.dumps({"event":"GENERIC_LIFECYCLE_BEST_NEAR","model":best_row,"rows":best_rows},sort_keys=True))
+    best_keys=set(f"{s}|{t}|{a}|{side}" for s,t,a,side in (best_rows or []))
+    print(json.dumps({
+        "event":"GENERIC_LIFECYCLE_BEST_NEAR",
+        "model":best_row,
+        "missing":sorted(expected_keys-best_keys),
+        "extras":sorted(best_keys-expected_keys),
+        "rows":best_rows,
+    },sort_keys=True))
     raise SystemExit(f"GENERIC_MODEL_MATCH_COUNT:{len(matches)}")
