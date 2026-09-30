@@ -57,6 +57,8 @@ if (fixture.schema !== "disdex-idle-priority-candidate-keys/v1" || fixture.rows.
 }
 
 const symbols = Object.keys(IDLE_PRIORITY_SHORT_POLICY.routes) as IdlePrioritySymbol[];
+const HOUR = 3_600_000;
+const cooldownMs = IDLE_PRIORITY_SHORT_POLICY.cooldownHours * HOUR;
 const market = Object.fromEntries(["BTCUSDT", ...symbols].map((symbol) => [symbol, loadH1(dataRoot, symbol)])) as Record<string, IdleH1Candle[]>;
 
 type GenericArchetype = "BREAKOUT" | "MOMENTUM" | "RELATIVE";
@@ -159,8 +161,6 @@ console.log(JSON.stringify({ event: "IDLE_GENERIC_CANDIDATE_LIFECYCLE_DIAGNOSTIC
 const accepted: ExpectedRow[] = [];
 const diagnostics = new Map<string, unknown>();
 const lastBySymbol = new Map<IdlePrioritySymbol, number>();
-const HOUR = 3_600_000;
-const cooldownMs = IDLE_PRIORITY_SHORT_POLICY.cooldownHours * HOUR;
 
 for (let decisionTs = fixture.windowStart; decisionTs <= fixture.windowEnd; decisionTs += HOUR) {
     for (const symbol of symbols) {
