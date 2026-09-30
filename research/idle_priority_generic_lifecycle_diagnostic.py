@@ -10,6 +10,7 @@ SYMBOLS=["DOTUSDT","JUPUSDT","RENDERUSDT","TAOUSDT","TIAUSDT"]
 EXPECTED_COUNT=393
 EXPECTED_SHA="d32ed3a07a6338e8fae792ec6d9071ea27a1dee548eed6a3825dfbda3270019a"
 EXPECTED_KEYS_PATH=Path("research/idle_priority_393_generic_candidate_keys.txt")
+EXPECTED_FEATURES_PATH=Path("research/idle_priority_393_generic_candidate_features.csv")
 
 def rows(path):
     out=[]
@@ -140,6 +141,35 @@ base=find_baseline(root)
 idle_variants=idle_masks(base)
 btc=load_market(data_root,"BTCUSDT")
 market={s:load_market(data_root,s) for s in SYMBOLS}
+# Verify source feature timestamp/formula parity independently of lifecycle selection.
+feature_rows=[]
+for raw in EXPECTED_FEATURES_PATH.read_text().splitlines():
+    raw=raw.strip()
+    if not raw or raw.startswith("#") or raw.startswith("symbol,"): continue
+    s,t,a0,side,r12,r24,rel,vr,atr=raw.split(",")
+    feature_rows.append((s,int(t),{"ret12":float(r12),"ret24":float(r24),"rel24":float(rel),"vr":float(vr),"atr":float(atr)}))
+feature_diag={}
+for offset_hours in (-1,0,1):
+    errors={k:[] for k in ("ret12","ret24","rel24","vr","atr")}
+    compared=0
+    for s,t,src in feature_rows:
+        try: calc=features(market[s],btc,t+offset_hours*HOUR)
+        except KeyError: continue
+        compared+=1
+        for k in errors: errors[k].append(abs(calc[k]-src[k]))
+    feature_diag[str(offset_hours)]={
+        "compared":compared,
+        "mean_abs":{k:(sum(v)/len(v) if v else None) for k,v in errors.items()},
+        "max_abs":{k:(max(v) if v else None) for k,v in errors.items()},
+        "near_exact":sum(
+            1 for s,t,src in feature_rows
+            if (lambda calc: abs(calc["ret12"]-src["ret12"])<1e-10 and abs(calc["ret24"]-src["ret24"])<1e-10
+                and abs(calc["rel24"]-src["rel24"])<1e-10 and abs(calc["vr"]-src["vr"])<1e-8 and abs(calc["atr"]-src["atr"])<1e-10)
+               (features(market[s],btc,t+offset_hours*HOUR))
+        )
+    }
+print(json.dumps({"event":"SOURCE_FEATURE_PARITY","offset_hours":feature_diag},sort_keys=True))
+
 all_states={}
 for t in range(START,END+1,HOUR):
     for s in SYMBOLS:
