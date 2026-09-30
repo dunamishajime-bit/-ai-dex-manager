@@ -1,0 +1,47 @@
+name: Idle Priority canonical archive path probe
+on:
+  push:
+    branches: [design/idle-priority-bt-parity-20260929]
+    paths:
+      - ".github/workflows/idle-priority-canonical-archive-path-probe.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Probe canonical archive paths
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release download bt-v12-score100-volume080-normalonly-20260928 --repo dunamishajime-bit/-ai-dex-manager --pattern 'bt-v12-score100-volume080-normalonly-20260928.tar.gz'
+          echo '891c36d8a5957cafe3aae65656a98b7c02a3c437c4f520fe63756d550f08b4fb  bt-v12-score100-volume080-normalonly-20260928.tar.gz' | sha256sum -c -
+          mkdir evidence
+          tar -xzf bt-v12-score100-volume080-normalonly-20260928.tar.gz -C evidence
+          echo '=== portfolio_price_model ==='
+          find evidence -type f -name 'portfolio_price_model.py' -print
+          echo '=== BTC candidates ==='
+          find evidence -type f | grep -E 'BTCUSDT|BTC.*jsonl' | head -100 || true
+          echo '=== normalized aster dirs ==='
+          find evidence -type d | grep -E 'normalized/.*/klines|aster.*klines|market.*data' | head -100 || true
+          echo '=== REPLAY_INDEX ==='
+          find evidence -type f -name 'REPLAY_INDEX.json' -print
+          IDX="$(find evidence -type f -name 'REPLAY_INDEX.json' | head -1)"
+          if [ -n "$IDX" ]; then
+            python - "$IDX" <<'PY'
+          import json,sys,re
+          p=sys.argv[1]
+          x=json.load(open(p))
+          def walk(o,prefix=''):
+              if isinstance(o,dict):
+                  for k,v in o.items(): walk(v,prefix+'/'+str(k))
+              elif isinstance(o,list):
+                  for i,v in enumerate(o): walk(v,prefix+f'/{i}')
+              elif isinstance(o,str) and ('BTCUSDT' in o or 'portfolio_price_model.py' in o or 'normalized/aster' in o):
+                  print(prefix,o)
+          walk(x)
+          PY
+          fi
