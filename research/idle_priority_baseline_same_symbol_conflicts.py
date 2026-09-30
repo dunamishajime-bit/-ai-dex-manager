@@ -12,7 +12,17 @@ for b in base:
         conf.append({"candidate_id":b.get("candidate_id"),"position_id":b.get("position_id"),"strategy_id":b.get("strategy_id"),"symbol":sym,
                      "baseline_entry_ts_ms":bt,"baseline_exit_ts_ms":int(b["exit_ts_ms"]),"baseline_accepted_gross":b.get("accepted_gross"),
                      "idle_hits":hits})
-out={"status":"DIAGNOSTIC","baseline_rows":len(base),"idle_rows":len(idle),"same_symbol_baseline_entry_conflicts":len(conf),"conflicts":conf}
+overlap=[]
+for b in base:
+    bt=int(b["entry_ts_ms"])
+    hits=[i for i in idle if int(i["entry_ts_ms"])<bt<int(i["exit_ts_ms"])]
+    if hits:
+        overlap.append({"candidate_id":b.get("candidate_id"),"position_id":b.get("position_id"),"strategy_id":b.get("strategy_id"),"symbol":b.get("symbol"),
+                        "baseline_entry_ts_ms":bt,"baseline_exit_ts_ms":int(b["exit_ts_ms"]),"baseline_accepted_gross":b.get("accepted_gross"),
+                        "idle_hits":hits})
+out={"status":"DIAGNOSTIC","baseline_rows":len(base),"idle_rows":len(idle),
+     "same_symbol_baseline_entry_conflicts":len(conf),"conflicts":conf,
+     "baseline_entries_during_any_idle_hold":len(overlap),"baseline_overlap_entries":overlap}
 Path(z.output).write_text(json.dumps(out,indent=2,sort_keys=True)+"\n")
-print(json.dumps({"baseline_rows":len(base),"idle_rows":len(idle),"same_symbol_baseline_entry_conflicts":len(conf)}))
-print("CONFLICTS="+json.dumps(conf,sort_keys=True))
+print(json.dumps({"baseline_rows":len(base),"idle_rows":len(idle),"same_symbol_baseline_entry_conflicts":len(conf),"baseline_entries_during_any_idle_hold":len(overlap)}))
+print("CONFLICTS="+json.dumps(conf,sort_keys=True))\nprint("OVERLAP_ENTRIES="+json.dumps(overlap,sort_keys=True))
