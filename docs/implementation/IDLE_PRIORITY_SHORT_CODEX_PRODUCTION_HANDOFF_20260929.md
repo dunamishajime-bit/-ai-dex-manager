@@ -6,6 +6,11 @@
 
 # Idle Priority SHORT — Codex Production Handoff
 
+> **2026-10-01 post-audit redeploy requirement:** The previous VPS deployment predates the source repair series. Only the current branch HEAD after the successful post-audit handoff gate may be used as the repair source. Production must first read the actual VPS `current/.disdex-release-sha` and port the repair onto that lineage; never reset Production to the design branch or assume `a09ea45c...` is still current without readback.
+>
+> The only permitted Idle systemd source unit is `ops/systemd/disdex-idle-priority-short@.service`. The legacy unpinned `systemd/disdex-idle-priority-short.service` has been removed and CI fails if it reappears. Any loaded/active `disdex-idle-priority-short.service` on VPS is a hard deployment conflict and must be stopped/disabled before the SHA-pinned instance is activated.
+
+
 Status: **IMPLEMENTATION HANDOFF — LIVE activation is forbidden until every acceptance gate below passes.**
 
 ## Controlling source
