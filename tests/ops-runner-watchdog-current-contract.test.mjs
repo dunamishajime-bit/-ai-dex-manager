@@ -54,3 +54,12 @@ test("current watchdog includes non-inactive shared risk writers", async () => {
   });
   assert.match(stdout, /DISDEX_CURRENT_WATCHDOG_NONINACTIVE_RISK_SELFTEST_PASS/);
 });
+
+
+test("current watchdog pins Idle service identity to the expected release", async () => {
+  const { stdout } = await execFileAsync(process.execPath, [fileURLToPath(watchdog), "--self-test"], {
+    encoding: "utf8",
+    windowsHide: true,
+  });
+  assert.match(stdout, /DISDEX_CURRENT_WATCHDOG_IDLE_RELEASE_PIN_SELFTEST_PASS/);
+});
