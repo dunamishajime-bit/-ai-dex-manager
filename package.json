@@ -115,7 +115,7 @@
     "strategy:strict-bt33404708902:pipeline:selftest": "tsx scripts/disdex-quality102-causal-pipeline-selftest.ts",
     "strategy:strict-bt33404708902:contract": "tsx --test tests/strict_bt33404708902_contract.test.ts",
     "strategy:pengu-dual-ls-v2:v8-v64:selftest": "tsx scripts/pengu-v8-v64-dynamic-selftest.ts && tsx scripts/pengu-v8-gross-contract-selftest.ts",
-    "strategy:idle-priority-short:selftest": "tsx --test tests/idle-priority-short-signal.test.ts tests/idle-priority-short-idle-gate.test.ts tests/idle-priority-short-state.test.ts tests/idle-priority-short-parity-cert.test.ts",
+    "strategy:idle-priority-short:selftest": "tsx --test tests/idle-priority-short-signal.test.ts tests/idle-priority-short-idle-gate.test.ts tests/idle-priority-short-state.test.ts tests/idle-priority-short-market-data.test.ts tests/idle-priority-short-parity-cert.test.ts",
     "strategy:idle-priority-short:parity:evidence": "tsx scripts/idle-priority-short-parity-evidence.ts",
     "strategy:idle-priority-short:parity:495-63": "tsx scripts/idle-priority-short-495-63-parity.ts",
     "strategy:idle-priority-short:predeploy": "npm run strategy:idle-priority-short:selftest && npm run strategy:idle-priority-short:parity:evidence && npm run strategy:idle-priority-short:parity:495-63",
