@@ -34,4 +34,22 @@ jobs:
             grep -n -E -C 12 'idle_candidate_events|gross12|net12|candidate_events|archetype|cooldown' "$f" | head -220 || true
           done < /tmp/hits.txt
           echo '=== baseline trade ledgers ==='
-          find evidence -type f -name 'portfolio-trades.jsonl' | grep -E 'baseline-five-logic-all-cases-all-costs|PRICE_MODEL_10BPS' | head -40
+          find evidence -type f -name 'portfolio-trades.jsonl' | grep -E 'baseline-five-logic-all-cases-all-costs/.*/PRICE_MODEL_10BPS' | head -40 | tee /tmp/baselines.txt
+          while IFS= read -r f; do
+            echo "##### BASELINE: $f"
+            wc -l "$f"
+            d="$(dirname "$f")"
+            if test -f "$d/metrics.json"; then
+              python - "$d/metrics.json" <<'PY'
+import json,sys
+p=sys.argv[1]
+x=json.load(open(p))
+print(json.dumps({
+ "closed_trades":x.get("closed_trades"),
+ "final_equity_jpy":x.get("final_equity_jpy"),
+ "profit_factor":x.get("profit_factor"),
+ "max_drawdown_pct":x.get("max_drawdown_pct") or x.get("max_mtm_drawdown_pct")
+},sort_keys=True))
+PY
+            fi
+          done < /tmp/baselines.txt
