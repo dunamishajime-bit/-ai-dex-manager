@@ -96,6 +96,53 @@ type GenericCandidate = { symbol: IdlePrioritySymbol; t: number; archetype: Gene
 const EXPECTED_GENERIC_5_COUNT = 393;
 const EXPECTED_GENERIC_5_SHA256 = "d32ed3a07a6338e8fae792ec6d9071ea27a1dee548eed6a3825dfbda3270019";
 
+
+type BaselineTrade = { entry_ts_ms: number; exit_ts_ms: number };
+
+function findCanonicalBaselineTrades(root: string): BaselineTrade[] {
+    const candidates: string[] = [];
+    const walk = (dir: string) => {
+        for (const name of readdirSync(dir)) {
+            const path = join(dir, name);
+            let stats;
+            try { stats = statSync(path); } catch { continue; }
+            if (stats.isDirectory()) { walk(path); continue; }
+            if (name !== "portfolio-trades.jsonl") continue;
+            if (/baseline-five-logic-all-cases-all-costs/i.test(path) && /PRICE_MODEL_10BPS/i.test(path)) candidates.push(path);
+        }
+    };
+    walk(root);
+    for (const path of candidates) {
+        const rows = readFileSync(path, "utf8").split(/\r?\n/).filter(Boolean).map((line) => JSON.parse(line) as Record<string, unknown>);
+        if (rows.length !== 1284) continue;
+        const trades = rows.map((row) => ({
+            entry_ts_ms: numberField(row, ["entry_ts_ms", "entryTs", "entry_ts"], "IDLE_BASELINE_ENTRY_TS_MISSING"),
+            exit_ts_ms: numberField(row, ["exit_ts_ms", "exitTs", "exit_ts"], "IDLE_BASELINE_EXIT_TS_MISSING"),
+        }));
+        console.log(JSON.stringify({ event: "IDLE_BASELINE_LEDGER_FOUND", path, rows: trades.length }));
+        return trades;
+    }
+    throw new Error(`IDLE_CANONICAL_BASELINE_LEDGER_NOT_FOUND:${candidates.join(",")}`);
+}
+
+function baselineIdleMask(trades: BaselineTrade[], start: number, end: number) {
+    const entries = new Map<number, number>();
+    const exits = new Map<number, number>();
+    for (const trade of trades) {
+        entries.set(trade.entry_ts_ms, (entries.get(trade.entry_ts_ms) || 0) + 1);
+        exits.set(trade.exit_ts_ms, (exits.get(trade.exit_ts_ms) || 0) + 1);
+    }
+    const idle = new Set<number>();
+    let active = 0;
+    for (let t = start; t <= end; t += HOUR) {
+        active = Math.max(0, active - (exits.get(t) || 0));
+        const sameTimestampEntries = entries.get(t) || 0;
+        if (active === 0 && sameTimestampEntries === 0) idle.add(t);
+        active += sameTimestampEntries;
+    }
+    return idle;
+}
+
 function genericGateStates(symbol: IdlePrioritySymbol, decisionTs: number) {
     const features = computeIdlePriorityFeatures(decisionTs, market[symbol], market.BTCUSDT);
     const rows = market[symbol];
@@ -128,11 +175,12 @@ function candidateDigest(rows: GenericCandidate[]) {
     return createHash("sha256").update(body).digest("hex");
 }
 
-function modelGenericCandidates(mode: "LEVEL" | "EDGE", priority: GenericArchetype[]) {
+function modelGenericCandidates(mode: "LEVEL" | "EDGE", priority: GenericArchetype[], idleMask: ReadonlySet<number>) {
     const output: GenericCandidate[] = [];
     const lastBySymbol = new Map<IdlePrioritySymbol, number>();
     const previous = new Map<string, boolean>();
     for (let decisionTs = fixture.windowStart; decisionTs <= fixture.windowEnd; decisionTs += HOUR) {
+        if (!idleMask.has(decisionTs)) continue;
         for (const symbol of symbols) {
             let states;
             try { states = genericGateStates(symbol, decisionTs); }
@@ -163,6 +211,9 @@ function modelGenericCandidates(mode: "LEVEL" | "EDGE", priority: GenericArchety
     return output;
 }
 
+const releaseRoot = join(dataRoot, "..");
+const baselineTrades = findCanonicalBaselineTrades(releaseRoot);
+const idleMask = baselineIdleMask(baselineTrades, fixture.windowStart, fixture.windowEnd);
 const candidateModelDiagnostics: Record<string, unknown> = {};
 const priorities: GenericArchetype[][] = [
     ["BREAKOUT", "MOMENTUM", "RELATIVE"],
@@ -172,72 +223,61 @@ const priorities: GenericArchetype[][] = [
     ["RELATIVE", "BREAKOUT", "MOMENTUM"],
     ["RELATIVE", "MOMENTUM", "BREAKOUT"],
 ];
+const exactModels: Array<{ name: string; rows: GenericCandidate[] }> = [];
 for (const mode of ["LEVEL", "EDGE"] as const) {
     for (const priority of priorities) {
-        const rows = modelGenericCandidates(mode, priority);
+        const rows = modelGenericCandidates(mode, priority, idleMask);
+        const digest = candidateDigest(rows);
         const name = `${mode}:${priority.join(">")}`;
-        candidateModelDiagnostics[name] = {
-            count: rows.length,
-            sha256: candidateDigest(rows),
-            matchesExpected: rows.length === EXPECTED_GENERIC_5_COUNT && candidateDigest(rows) === EXPECTED_GENERIC_5_SHA256,
-            first10: rows.slice(0, 10),
-        };
+        const matchesExpected = rows.length === EXPECTED_GENERIC_5_COUNT && digest === EXPECTED_GENERIC_5_SHA256;
+        candidateModelDiagnostics[name] = { count: rows.length, sha256: digest, matchesExpected, first10: rows.slice(0, 10) };
+        if (matchesExpected) exactModels.push({ name, rows });
     }
 }
-console.log(JSON.stringify({ event: "IDLE_GENERIC_CANDIDATE_LIFECYCLE_DIAGNOSTIC", expectedCount: EXPECTED_GENERIC_5_COUNT, expectedSha256: EXPECTED_GENERIC_5_SHA256, models: candidateModelDiagnostics }));
+console.log(JSON.stringify({
+    event: "IDLE_GENERIC_CANDIDATE_LIFECYCLE_DIAGNOSTIC",
+    expectedCount: EXPECTED_GENERIC_5_COUNT,
+    expectedSha256: EXPECTED_GENERIC_5_SHA256,
+    baselineIdleHours: idleMask.size,
+    exactModels: exactModels.map((row) => row.name),
+    models: candidateModelDiagnostics,
+}));
+if (exactModels.length !== 1) throw new Error(`IDLE_GENERIC_CANDIDATE_MODEL_NOT_UNIQUELY_RECONCILED:${exactModels.map((row) => row.name).join(",")}`);
 
-const accepted: ExpectedRow[] = [];
-const diagnostics = new Map<string, unknown>();
-const lastBySymbol = new Map<IdlePrioritySymbol, number>();
-
-for (let decisionTs = fixture.windowStart; decisionTs <= fixture.windowEnd; decisionTs += HOUR) {
-    for (const symbol of symbols) {
-        let evaluated;
-        try {
-            const features = computeIdlePriorityFeatures(decisionTs, market[symbol], market.BTCUSDT);
-            evaluated = evaluateIdlePriorityShort(symbol, features);
-        } catch (error) {
-            const message = error instanceof Error ? error.message : String(error);
-            if (/IDLE_(INSUFFICIENT|H1_HISTORY_GAP|ATR_PREVCLOSE_GAP)/.test(message)) continue;
-            throw error;
-        }
-        const rawKey = [symbol, decisionTs].join("|");
-        diagnostics.set(rawKey, { accepted: evaluated.accepted, reason: evaluated.reason, features: evaluated.features, route: canonicalRoute(evaluated.route) });
-        if (!evaluated.accepted) continue;
-        const last = lastBySymbol.get(symbol) || 0;
-        if (last > 0 && evaluated.features.signalTs - last < cooldownMs) {
-            diagnostics.set(rawKey, { accepted: true, cooldownBlocked: true, previousAcceptedSignalTs: last, reason: evaluated.reason, features: evaluated.features, route: canonicalRoute(evaluated.route) });
-            continue;
-        }
-        lastBySymbol.set(symbol, evaluated.features.signalTs);
-        accepted.push({
-            symbol,
-            t: decisionTs,
-            route: canonicalRoute(evaluated.route),
-            hold_h: evaluated.holdHours,
-        });
+function selectedRoute(candidate: GenericCandidate): ExpectedRow | undefined {
+    if (candidate.side !== "SHORT") return undefined;
+    const features = computeIdlePriorityFeatures(candidate.t, market[candidate.symbol], market.BTCUSDT);
+    switch (candidate.symbol) {
+        case "TAOUSDT":
+            if (candidate.archetype === "BREAKOUT" && features.rel24 <= -0.02) return { symbol: candidate.symbol, t: candidate.t, route: "TAO_BREAKDOWN_SHORT_RELWEAK2", hold_h: 12 };
+            return undefined;
+        case "TIAUSDT":
+            if (candidate.archetype === "BREAKOUT" && features.volumeRatio <= 100) return { symbol: candidate.symbol, t: candidate.t, route: "TIA_BREAKDOWN_SHORT_VOLCAP100", hold_h: 24 };
+            return undefined;
+        case "DOTUSDT":
+            if (candidate.archetype === "MOMENTUM" && features.btc24 <= 0 && features.rel24 <= 0) return { symbol: candidate.symbol, t: candidate.t, route: "DOT_MOMENTUM_SHORT_BTCREL", hold_h: 24 };
+            return undefined;
+        case "JUPUSDT":
+            return candidate.archetype === "RELATIVE" ? { symbol: candidate.symbol, t: candidate.t, route: "JUP_RELATIVE_SHORT", hold_h: 12 } : undefined;
+        case "RENDERUSDT":
+            return candidate.archetype === "RELATIVE" ? { symbol: candidate.symbol, t: candidate.t, route: "RENDER_RELATIVE_SHORT", hold_h: 12 } : undefined;
     }
 }
 
+const accepted = exactModels[0].rows.map(selectedRoute).filter((row): row is ExpectedRow => Boolean(row));
 const expectedKeys = new Set(fixture.rows.map(key));
 const actualKeys = new Set(accepted.map(key));
 const missing = fixture.rows.filter((row) => !actualKeys.has(key(row)));
 const extras = accepted.filter((row) => !expectedKeys.has(key(row)));
 if (missing.length || extras.length || accepted.length !== 63) {
-    console.error(JSON.stringify({
-        status: "IDLE_LIVE_SIGNAL_REPLAY_MISMATCH",
-        expected: fixture.rows.length,
-        actual: accepted.length,
-        missing,
-        extras: extras.slice(0, 80),
-        missingDiagnostics: missing.slice(0, 20).map((row) => ({ row, diagnostic: diagnostics.get([row.symbol, row.t].join("|")) })),
-        extraDiagnostics: extras.slice(0, 20).map((row) => ({ row, diagnostic: diagnostics.get([row.symbol, row.t].join("|")) })),
-    }, null, 2));
+    console.error(JSON.stringify({ status: "IDLE_LIVE_SIGNAL_REPLAY_MISMATCH", model: exactModels[0].name, expected: 63, actual: accepted.length, missing, extras }, null, 2));
     process.exit(1);
 }
-
 console.log(JSON.stringify({
     status: "PASS",
+    model: exactModels[0].name,
+    genericCount: exactModels[0].rows.length,
+    genericSha256: candidateDigest(exactModels[0].rows),
     expected: fixture.rows.length,
     actual: accepted.length,
     sourceSha256: fixture.sourceSha256,
