@@ -5,6 +5,7 @@ on:
     paths:
       - "research/idle_priority_61_intents.json"
       - "research/idle_priority_overlay_reservation_intents_diagnostic.py"
+      - "research/idle_priority_baseline_same_symbol_conflicts.py"
       - ".github/workflows/idle-priority-overlay-reconciliation-diagnostic.yml"
   workflow_dispatch:
 permissions:
@@ -38,20 +39,20 @@ jobs:
             --baseline-trades "$LEDGER" \
             --idle-intents research/idle_priority_61_intents.json \
             --output idle-overlay-reservation-diagnostic.json | tee idle-overlay-reservation-diagnostic.log
-          cat idle-overlay-reservation-diagnostic.json
-      - name: Diagnose baseline same-symbol conflicts during Idle holds
+      - name: Diagnose later baseline entries during Idle holds
         run: |
           python research/idle_priority_baseline_same_symbol_conflicts.py \
             --baseline-trades "$LEDGER" \
             --idle-intents research/idle_priority_61_intents.json \
             --output idle-baseline-same-symbol-conflicts.json | tee idle-baseline-same-symbol-conflicts.log
-          cat idle-baseline-same-symbol-conflicts.json
       - uses: actions/upload-artifact@v4
         with:
-          name: idle-overlay-reservation-diagnostic
+          name: idle-overlay-reconciliation-diagnostic
           path: |
             idle-overlay-reservation-diagnostic.json
             idle-overlay-reservation-diagnostic.log
-            evidence-files.txt\n            idle-baseline-same-symbol-conflicts.json\n            idle-baseline-same-symbol-conflicts.log
+            idle-baseline-same-symbol-conflicts.json
+            idle-baseline-same-symbol-conflicts.log
+            evidence-files.txt
             bt-v12-score100-volume080-normalonly-20260928.tar.gz
           retention-days: 30
