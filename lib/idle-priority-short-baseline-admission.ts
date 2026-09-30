@@ -62,30 +62,32 @@ function acceptedByQ102(snapshot: JsonRecord, decisionTs: number) {
 
 function acceptedByPengu(snapshot: JsonRecord, decisionTs: number) {
     if (snapshot.strategyId !== "PENGU_DUAL_LS_V2_FINAL") throw new Error("BASELINE_ADMISSION_SOURCE_MALFORMED");
-    // A valid LIVE snapshot may explicitly report no current signal.  That is
-    // evidence of "not accepted at this timestamp", not malformed input.  Any
-    // non-null, non-record value remains fail-closed.
+    if ((finite(snapshot.lastRunAt) ?? 0) < decisionTs || (finite(snapshot.updatedAt) ?? 0) < decisionTs) {
+        throw new Error("BASELINE_ADMISSION_SOURCE_STALE_OR_TS_MISMATCH");
+    }
     if (snapshot.latestSignal == null) return false;
     const signal = record(snapshot.latestSignal, "BASELINE_ADMISSION_SOURCE_MALFORMED");
-    if (signal.referenceTs === undefined) return false;
-    // latestSignal is a retained observation, not necessarily a signal for
-    // the current bar.  An older observation therefore means "not accepted at
-    // this timestamp"; it must not make the Idle sidecar fail permanently.
-    if (finite(signal.referenceTs) !== decisionTs) return false;
+    if (signal.referenceTs === undefined || finite(signal.referenceTs) !== decisionTs) return false;
     return Number(signal.targetGross) > 0 && Number(signal.side) !== 0;
 }
 
 function acceptedByFet(snapshot: JsonRecord, decisionTs: number) {
     if (snapshot.schema !== "fet-brk48-residual-state/v1") throw new Error("BASELINE_ADMISSION_SOURCE_MALFORMED");
+    if (finite(snapshot.lastEvaluationDecisionTs) !== decisionTs || (finite(snapshot.updatedAt) ?? 0) < decisionTs) {
+        throw new Error("BASELINE_ADMISSION_SOURCE_STALE_OR_TS_MISMATCH");
+    }
     if (snapshot.pending && typeof snapshot.pending === "object") {
         const pending = record(snapshot.pending, "BASELINE_ADMISSION_SOURCE_MALFORMED");
-        return pending.action === "ENTRY" && finite(pending.referenceTs) === decisionTs;
+        return pending.action === "ENTRY" && finite(pending.entryTs) === decisionTs;
     }
     return false;
 }
 
 function acceptedByV52(snapshot: JsonRecord, decisionTs: number) {
     if (snapshot.strategyId !== "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96") throw new Error("BASELINE_ADMISSION_SOURCE_MALFORMED");
+    if (finite(snapshot.idleAdmissionDecisionTs) !== decisionTs || (finite(snapshot.updatedAt) ?? 0) < decisionTs) {
+        throw new Error("BASELINE_ADMISSION_SOURCE_STALE_OR_TS_MISMATCH");
+    }
     const diagnostics = snapshot.v52GateDiagnostics;
     if (diagnostics && typeof diagnostics === "object") {
         const lastDecision = (diagnostics as JsonRecord).lastDecision;
