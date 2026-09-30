@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Download canonical release and run fixed-intent variants
+      - name: Download canonical release and run coherent 8bps/10bps comparison
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -22,40 +22,53 @@ jobs:
           echo '891c36d8a5957cafe3aae65656a98b7c02a3c437c4f520fe63756d550f08b4fb  bt-v12-score100-volume080-normalonly-20260928.tar.gz' | sha256sum -c -
           mkdir evidence
           tar -xzf bt-v12-score100-volume080-normalonly-20260928.tar.gz -C evidence
-          LEDGER="$(find evidence -type f -path '*/selected-five-logic-all-cases-all-costs/BRK0P75_MR0P75_FET1_DUAL_GATE/PRICE_MODEL_10BPS/portfolio-trades.jsonl' | head -1)"
-          test -n "$LEDGER"
-          DIR="$(dirname "$LEDGER")"
+          DIR10="$(find evidence -type d -path '*/selected-five-logic-all-cases-all-costs/BRK0P75_MR0P75_FET1_DUAL_GATE/PRICE_MODEL_10BPS' | head -1)"
+          DIR8="$(find evidence -type d -path '*/selected-five-logic-all-cases-all-costs/BRK0P75_MR0P75_FET1_DUAL_GATE/PRICE_MODEL_8BPS' | head -1)"
+          test -n "$DIR10"
+          test -n "$DIR8"
           BTC="$(find evidence -type f -path '*/market-Aster-H1-funding-and-manifests/normalized/aster/klines/BTCUSDT.jsonl' | head -1)"
           test -n "$BTC"
           DATA="$(python -c "from pathlib import Path; print(Path('$BTC').resolve().parents[3])")"
-          echo "DATA=$DATA"
-          COMMON="--baseline-trades $LEDGER --baseline-events $DIR/portfolio-events.jsonl --baseline-metrics $DIR/metrics.json --idle-intents research/idle_priority_61_intents.json --idle-target-net research/idle_priority_61_target_net.json --data-root $DATA"
-          python research/idle_priority_fixed_intent_dynamic_gross.py $COMMON --request-mode accepted --without-idle --output baseline-only.json | tee baseline-only.log
-          python research/idle_priority_fixed_intent_dynamic_gross.py $COMMON --request-mode candidate --without-idle --output baseline-only-candidate.json | tee baseline-only-candidate.log
-          python research/idle_priority_fixed_intent_dynamic_gross.py $COMMON --request-mode accepted --output integrated-accepted.json | tee integrated-accepted.log
-          python research/idle_priority_fixed_intent_dynamic_gross.py $COMMON --request-mode candidate --output integrated-candidate.json | tee integrated-candidate.log
-          python research/idle_priority_fixed_intent_dynamic_gross.py $COMMON --request-mode accepted --idle-fee-path net_exit --output integrated-accepted-netexit.json | tee integrated-accepted-netexit.log
-          python research/idle_priority_fixed_intent_dynamic_gross.py $COMMON --request-mode candidate --idle-fee-path net_exit --output integrated-candidate-netexit.json | tee integrated-candidate-netexit.log
+          BASE_ARGS="--idle-intents research/idle_priority_61_intents.json --idle-target-net research/idle_priority_61_target_net.json --data-root $DATA --request-mode candidate --idle-fee-path split"
+
+          python research/idle_priority_fixed_intent_dynamic_gross.py \
+            --baseline-trades "$DIR10/portfolio-trades.jsonl" --baseline-events "$DIR10/portfolio-events.jsonl" --baseline-metrics "$DIR10/metrics.json" \
+            $BASE_ARGS --roundtrip-bps 10 --without-idle --output coherent-10bps-baseline.json | tee coherent-10bps-baseline.log
+          python research/idle_priority_fixed_intent_dynamic_gross.py \
+            --baseline-trades "$DIR10/portfolio-trades.jsonl" --baseline-events "$DIR10/portfolio-events.jsonl" --baseline-metrics "$DIR10/metrics.json" \
+            $BASE_ARGS --roundtrip-bps 10 --output coherent-10bps-integrated.json | tee coherent-10bps-integrated.log
+
+          python research/idle_priority_fixed_intent_dynamic_gross.py \
+            --baseline-trades "$DIR8/portfolio-trades.jsonl" --baseline-events "$DIR8/portfolio-events.jsonl" --baseline-metrics "$DIR8/metrics.json" \
+            $BASE_ARGS --roundtrip-bps 8 --without-idle --output coherent-8bps-baseline.json | tee coherent-8bps-baseline.log
+          python research/idle_priority_fixed_intent_dynamic_gross.py \
+            --baseline-trades "$DIR8/portfolio-trades.jsonl" --baseline-events "$DIR8/portfolio-events.jsonl" --baseline-metrics "$DIR8/metrics.json" \
+            $BASE_ARGS --roundtrip-bps 8 --output coherent-8bps-integrated.json | tee coherent-8bps-integrated.log
+
           python - <<'PY'
           import json
-          for p in ["baseline-only.json","baseline-only-candidate.json","integrated-accepted.json","integrated-candidate.json","integrated-accepted-netexit.json","integrated-candidate-netexit.json"]:
+          files=["coherent-10bps-baseline.json","coherent-10bps-integrated.json","coherent-8bps-baseline.json","coherent-8bps-integrated.json"]
+          keys=["roundtrip_bps","baseline_completed","idle_completed","baseline_rejected","idle_rejected","combined_completed",
+                "final_equity_jpy","baseline_anchor_jpy","profit_factor","max_mtm_drawdown","idle_pnl_jpy_final_fx",
+                "idle_profit_factor","strategy_counts","rejections_by_strategy"]
+          rows={}
+          for p in files:
               x=json.load(open(p))
-              print("SUMMARY",p,{k:x[k] for k in ["baseline_completed","idle_completed","baseline_rejected","idle_rejected","combined_completed","final_equity_jpy","rejections_by_strategy","idle_price_return_max_abs_error"]})
+              rows[p]={k:x.get(k) for k in keys}
+              print("COST_RECONCILIATION",p,rows[p])
+          json.dump(rows,open("idle-priority-cost-reconciliation.json","w"),indent=2,sort_keys=True)
           PY
       - uses: actions/upload-artifact@v4
         with:
           name: idle-priority-fixed-intent-dynamic-gross
           path: |
-            baseline-only.json
-            baseline-only.log
-            baseline-only-candidate.json
-            baseline-only-candidate.log
-            integrated-accepted.json
-            integrated-accepted.log
-            integrated-candidate.json
-            integrated-candidate.log
-            integrated-accepted-netexit.json
-            integrated-accepted-netexit.log
-            integrated-candidate-netexit.json
-            integrated-candidate-netexit.log
+            coherent-10bps-baseline.json
+            coherent-10bps-baseline.log
+            coherent-10bps-integrated.json
+            coherent-10bps-integrated.log
+            coherent-8bps-baseline.json
+            coherent-8bps-baseline.log
+            coherent-8bps-integrated.json
+            coherent-8bps-integrated.log
+            idle-priority-cost-reconciliation.json
           retention-days: 30
