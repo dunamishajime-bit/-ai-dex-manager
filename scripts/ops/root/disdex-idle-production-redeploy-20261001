@@ -179,7 +179,7 @@ rollback() {
     rm -f "$tmp_link"
     ln -s "$OLD_RELEASE" "$tmp_link"
     mv -Tf "$tmp_link" "$CURRENT"
-    bash "$OLD_RELEASE/scripts/ops/root/disdex-current-runtime-wiring" --apply || true
+    (cd "$OLD_RELEASE" && bash scripts/ops/root/disdex-current-runtime-wiring --apply) || true
     for name in "${NAMES[@]}"; do
       systemctl enable --now "$name@$FROM_SHA.service" >/dev/null 2>&1 || true
     done
@@ -210,6 +210,7 @@ done
 
 require_flat_account "$OLD_RELEASE"
 
+echo "CUTOVER_RELEASE_PREP_BEGIN"
 install -d -o deploy -g deploy -m 0755 "$STAGE"
 tar --no-same-owner -xzf "$SOURCE_FILE" -C "$STAGE"
 [[ -f "$STAGE/package.json" && -f "$STAGE/package-lock.json" ]]
@@ -220,6 +221,7 @@ ln -s "$(readlink -f "$OLD_RELEASE/node_modules")" "$STAGE/node_modules"
 ln -s "$(readlink -f "$OLD_RELEASE/.venv2")" "$STAGE/.venv2"
 chown -h deploy:deploy "$STAGE/node_modules" "$STAGE/.venv2"
 mv -- "$STAGE" "$RELEASE"
+echo "CUTOVER_RELEASE_PREP_PASS release=$RELEASE"
 
 install -o root -g root -m 0644 "$CERT_FILE" "$SHARED/idle-priority-parity-cert.json"
 
@@ -260,7 +262,9 @@ mv -Tf "$tmp_link" "$CURRENT"
 [[ "$(tr -d '[:space:]' < "$CURRENT/.disdex-release-sha")" == "$TARGET_SHA" ]]
 [[ "$(readlink -f "$CURRENT")" == "$RELEASE" ]]
 
-bash "$RELEASE/scripts/ops/root/disdex-current-runtime-wiring" --apply
+echo "CUTOVER_WIRING_BEGIN release=$RELEASE"
+(cd "$RELEASE" && bash scripts/ops/root/disdex-current-runtime-wiring --apply)
+echo "CUTOVER_WIRING_PASS"
 
 for name in "${CORE[@]}"; do
   systemctl enable --now "$name@$TARGET_SHA.service"
