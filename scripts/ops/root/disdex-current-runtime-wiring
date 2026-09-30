@@ -614,8 +614,10 @@ apply_wiring() {
   if [[ ! -e "$PENGU_STATE_ROOT" ]]; then
     install -d -o deploy -g deploy -m 0700 "$PENGU_STATE_ROOT"
   else
+    chown deploy:deploy "$PENGU_STATE_ROOT"
+    chmod 0700 "$PENGU_STATE_ROOT"
     [[ "$(stat -c '%U:%G:%a' "$PENGU_STATE_ROOT")" == "deploy:deploy:700" ]] || {
-      printf 'PENGU state path ownership/mode is unsafe: %s\n' "$(stat -c '%U:%G:%a' "$PENGU_STATE_ROOT")" >&2
+      printf 'PENGU state path ownership/mode is unsafe after normalization: %s\n' "$(stat -c '%U:%G:%a' "$PENGU_STATE_ROOT")" >&2
       return 1
     }
   fi
