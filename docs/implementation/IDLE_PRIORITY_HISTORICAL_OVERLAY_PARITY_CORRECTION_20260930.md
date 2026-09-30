@@ -1,3 +1,5 @@
+> **SUPERSEDED FOR ECONOMIC PARITY (2026-09-30):** `docs/implementation/IDLE_PRIORITY_COST_RECONCILIATION_20260930.md` is controlling. This file remains authoritative for the exact 63→61 same-symbol exclusions, but its former JPY268.05M / 1,342 acceptance target was disproven as a coherent 10bps run.
+
 # Idle Priority SHORT — Historical Overlay Parity Correction (2026-09-30)
 
 Status: **CONTROLLING PARITY CORRECTION** for the historical JPY268.05M research result.
@@ -77,15 +79,11 @@ To reproduce the original JPY268.05M research experiment:
 9. Do not promote any baseline-only rejected candidate as a replacement.
 10. Recompute wallet, funding, fees, FX translation, MTM equity, compounding, PF, DD, monthly equity and strategy attribution chronologically.
 
-The expected historical result is approximately:
-- Idle 61 trades / 48W 13L
-- integrated closed trades 1342
-- therefore baseline accepted trades retained in the overlay path = 1281
-- final equity approximately JPY268.05M
-- PF approximately 2.055
-- max MTM DD approximately -23.24%
+The old combined acceptance bundle is no longer valid. Cost/replay reconciliation proves the coherent fixed-intent overlays both retain 1,278 baseline trades and 61 Idle trades, for 1,339 total:
+- 10bps: approximately JPY214.78M / PF 2.04643 / diagnostic hourly DD -22.84%
+- 8bps sensitivity: approximately JPY268.15M / PF 2.09255 / diagnostic hourly DD -22.69%
 
-The exact three baseline trades removed by the overlay must be obtained causally from shared-Gross conflict in this corrected fixed-baseline-ledger overlay replay. Do not select them from outcome.
+The historical 1,342 count and JPY268.05M-as-10bps target must not be forced. The exact six baseline rejects are documented in the controlling cost/replay correction.
 
 ## 5. Why the 51/63 replay is not the historical experiment
 
@@ -131,8 +129,8 @@ Inputs:
 Acceptance:
 - exact same-symbol exclusions at DOT 1780318800000 and TIA 1784250000000
 - 61 Idle / 48W13L
-- identify exactly 3 later baseline accepted-trade intents rejected after Idle exposure
-- total 1342 closed trades
-- reproduce the JPY268.05M/PF2.055/DD-23.24% anchors within original output precision
+- identify the six later baseline accepted-trade intents rejected under the coherent 10bps dynamic-Gross overlay
+- total 1,339 closed trades
+- reproduce the coherent 10bps cost/replay reference and separately report the 8bps sensitivity
 
 Only after this passes should Production adapter work resume.
