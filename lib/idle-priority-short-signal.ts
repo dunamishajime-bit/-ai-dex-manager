@@ -1,7 +1,29 @@
 import { IDLE_PRIORITY_SHORT_POLICY, type IdlePrioritySymbol } from "../config/idlePriorityShortPolicy";
 
 export type IdleH1Candle = { ts:number; open:number; high:number; low:number; close:number; quoteVolume:number };
-export type IdleFeatures = { decisionTs:number; signalTs:number; ret12:number; ret24:number; btc24:number; rel24:number; atrRatio:number; volumeRatio:number; breakdown24:boolean };
+export type IdleFeatures = {
+  decisionTs:number;
+  signalTs:number;
+  ret12:number;
+  ret24:number;
+  btc24:number;
+  rel24:number;
+  atrRatio:number;
+  volumeRatio:number;
+  breakoutLong24:boolean;
+  breakoutShort24:boolean;
+  /** Backward-compatible alias for the historical SHORT breakdown flag. */
+  breakdown24:boolean;
+};
+export type IdleGenericArchetype = "BREAKOUT" | "MOMENTUM" | "RELATIVE";
+export type IdleGenericSide = "LONG" | "SHORT";
+export type IdleGenericCandidate = {
+  accepted:boolean;
+  archetype:IdleGenericArchetype|null;
+  side:IdleGenericSide|"FLAT";
+  features:IdleFeatures;
+  reason:string;
+};
 export type IdleSignal = { accepted:boolean; symbol:IdlePrioritySymbol; route:string; side:"SHORT"|"FLAT"; holdHours:number; features:IdleFeatures; reason:string };
 
 const HOUR=3_600_000;
@@ -24,20 +46,79 @@ export function computeIdlePriorityFeatures(decisionTs:number, symbolRows:readon
     const prev=exact(s,row!.ts-HOUR); if(!valid(prev)) throw new Error("IDLE_ATR_PREVCLOSE_GAP");
     return Math.max(row!.high-row!.low,Math.abs(row!.high-prev!.close),Math.abs(row!.low-prev!.close));
   });
+  const quoteMedian=median(prior72.map(x=>x!.quoteVolume));
+  if (!(quoteMedian>0)) throw new Error("IDLE_VOLUME_MEDIAN_INVALID");
   const ret12=s1!.close/s13!.close-1, ret24=s1!.close/s25!.close-1, btc24=b1!.close/b25!.close-1;
-  return { decisionTs, signalTs, ret12, ret24, btc24, rel24:ret24-btc24,
+  const breakoutLong24=s1!.close>Math.max(...prior24.map(x=>x!.high));
+  const breakoutShort24=s1!.close<Math.min(...prior24.map(x=>x!.low));
+  return {
+    decisionTs,
+    signalTs,
+    ret12,
+    ret24,
+    btc24,
+    rel24:ret24-btc24,
     atrRatio:tr.reduce((a,x)=>a+x,0)/14/s1!.close,
-    volumeRatio:s1!.quoteVolume/median(prior72.map(x=>x!.quoteVolume)),
-    breakdown24:s1!.close<Math.min(...prior24.map(x=>x!.close)) };
+    volumeRatio:s1!.quoteVolume/quoteMedian,
+    breakoutLong24,
+    breakoutShort24,
+    breakdown24:breakoutShort24,
+  };
 }
 
-export function evaluateIdlePriorityShort(symbol:IdlePrioritySymbol, features:IdleFeatures):IdleSignal {
+function genericCommon(features:IdleFeatures, volumeRatioMin:number, atrRatioMin:number) {
+  return features.volumeRatio>=volumeRatioMin && features.atrRatio>=atrRatioMin;
+}
+
+/**
+ * Reconstruct the historical generic candidate stream BEFORE route filtering.
+ * Priority is BREAKOUT -> RELATIVE -> MOMENTUM.  This candidate, including a
+ * LONG candidate that will never become an Idle SHORT order, owns the
+ * per-symbol 12h candidate lifecycle slot when baseline Idle admission holds.
+ */
+export function evaluateIdleGenericCandidate(features:IdleFeatures):IdleGenericCandidate {
+  const p=IDLE_PRIORITY_SHORT_POLICY.generic;
+
+  if (genericCommon(features,p.breakout.volumeRatioMin,p.breakout.atrRatioMin)) {
+    if (features.breakoutLong24 && features.ret24>=p.breakout.ret24AbsMin) {
+      return {accepted:true,archetype:"BREAKOUT",side:"LONG",features,reason:"GENERIC_BREAKOUT_LONG"};
+    }
+    if (features.breakoutShort24 && features.ret24<=-p.breakout.ret24AbsMin) {
+      return {accepted:true,archetype:"BREAKOUT",side:"SHORT",features,reason:"GENERIC_BREAKOUT_SHORT"};
+    }
+  }
+
+  if (genericCommon(features,p.relative.volumeRatioMin,p.relative.atrRatioMin)
+      && Math.abs(features.ret24)>=p.relative.ret24AbsMin) {
+    if (features.rel24>=p.relative.rel24AbsMin) {
+      return {accepted:true,archetype:"RELATIVE",side:"LONG",features,reason:"GENERIC_RELATIVE_LONG"};
+    }
+    if (features.rel24<=-p.relative.rel24AbsMin) {
+      return {accepted:true,archetype:"RELATIVE",side:"SHORT",features,reason:"GENERIC_RELATIVE_SHORT"};
+    }
+  }
+
+  if (genericCommon(features,p.momentum.volumeRatioMin,p.momentum.atrRatioMin)) {
+    if (features.ret12>=p.momentum.ret12AbsMin) {
+      return {accepted:true,archetype:"MOMENTUM",side:"LONG",features,reason:"GENERIC_MOMENTUM_LONG"};
+    }
+    if (features.ret12<=-p.momentum.ret12AbsMin) {
+      return {accepted:true,archetype:"MOMENTUM",side:"SHORT",features,reason:"GENERIC_MOMENTUM_SHORT"};
+    }
+  }
+
+  return {accepted:false,archetype:null,side:"FLAT",features,reason:"GENERIC_CANDIDATE_GATE_NOT_MET"};
+}
+
+export function evaluateIdlePriorityShort(
+  symbol:IdlePrioritySymbol,
+  features:IdleFeatures,
+  generic:IdleGenericCandidate=evaluateIdleGenericCandidate(features),
+):IdleSignal {
   const p=IDLE_PRIORITY_SHORT_POLICY, r=p.routes[symbol];
-  let generic=false;
-  if(r.archetype==="BREAKOUT") generic=features.breakdown24 && features.volumeRatio>=p.generic.breakout.volumeRatioMin && features.atrRatio>=p.generic.breakout.atrRatioMin;
-  if(r.archetype==="MOMENTUM") generic=features.ret12<=p.generic.momentum.ret12Max && features.volumeRatio>=p.generic.momentum.volumeRatioMin && features.atrRatio>=p.generic.momentum.atrRatioMin;
-  if(r.archetype==="RELATIVE") generic=features.rel24<=p.generic.relative.rel24Max && features.volumeRatio>=p.generic.relative.volumeRatioMin && features.atrRatio>=p.generic.relative.atrRatioMin;
-  if(!generic) return {accepted:false,symbol,route:r.route,side:"FLAT",holdHours:r.holdHours,features,reason:"GENERIC_CANDIDATE_GATE_NOT_MET"};
+  if(!generic.accepted || generic.side!=="SHORT" || generic.archetype!==r.archetype) {
+    return {accepted:false,symbol,route:r.route,side:"FLAT",holdHours:r.holdHours,features,reason:"GENERIC_ROUTE_MISMATCH"};
+  }
   if(symbol==="TAOUSDT" && features.rel24>p.routes.TAOUSDT.rel24Max) return {accepted:false,symbol,route:r.route,side:"FLAT",holdHours:r.holdHours,features,reason:"TAO_REL24_NOT_MET"};
   if(symbol==="TIAUSDT" && features.volumeRatio>p.routes.TIAUSDT.volumeRatioMax) return {accepted:false,symbol,route:r.route,side:"FLAT",holdHours:r.holdHours,features,reason:"TIA_VOLUME_CAP_NOT_MET"};
   if(symbol==="DOTUSDT" && (features.btc24>p.routes.DOTUSDT.btc24Max || features.rel24>p.routes.DOTUSDT.rel24Max)) return {accepted:false,symbol,route:r.route,side:"FLAT",holdHours:r.holdHours,features,reason:"DOT_BTCREL_NOT_MET"};
