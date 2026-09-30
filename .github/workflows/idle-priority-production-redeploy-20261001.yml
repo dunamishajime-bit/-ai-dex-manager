@@ -1,0 +1,172 @@
+name: Idle Priority exact-SHA Production redeploy
+on:
+  push:
+    branches: [design/idle-priority-bt-parity-20260929]
+    paths: [.github/workflows/idle-priority-production-redeploy-20261001.yml]
+permissions:
+  contents: read
+concurrency:
+  group: disdex-idle-priority-production-redeploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Reverify exact contract and generate exact-SHA v3 parity certificate
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -Eeuo pipefail
+          [[ "$(git rev-parse HEAD)" == "$GITHUB_SHA" ]]
+          bash -n scripts/ops/root/disdex-idle-production-redeploy-20261001
+          npm ci --no-audit --no-fund
+          npm run strategy:idle-priority-short:selftest
+          npm run strategy:idle-priority-short:live:selftest
+          npm run strategy:idle-priority-short:benign-recovery:selftest
+          npx tsc --noEmit
+          npx tsx --test \
+            tests/idle-priority-short-systemd-contract.test.mjs \
+            tests/ops-runner-watchdog-current-contract.test.mjs \
+            tests/watchdog-release-lineage.test.ts \
+            tests/hype-zec-long-state-migration.test.ts \
+            tests/hype-zec-benign-market-data-recovery.test.ts \
+            tests/hype-zec-runner-gate.test.ts \
+            tests/q102-symbol-ownership-contract.test.ts
+          bash scripts/ops/root/disdex-current-runtime-wiring --self-test
+
+          gh release download bt-v12-score100-volume080-normalonly-20260928 \
+            --repo dunamishajime-bit/-ai-dex-manager \
+            --pattern 'bt-v12-score100-volume080-normalonly-20260928.tar.gz'
+          echo '891c36d8a5957cafe3aae65656a98b7c02a3c437c4f520fe63756d550f08b4fb  bt-v12-score100-volume080-normalonly-20260928.tar.gz' | sha256sum -c -
+          mkdir evidence
+          tar -xzf bt-v12-score100-volume080-normalonly-20260928.tar.gz -C evidence
+          DIR10="$(find evidence -type d -path '*/selected-five-logic-all-cases-all-costs/BRK0P75_MR0P75_FET1_DUAL_GATE/PRICE_MODEL_10BPS' | head -1)"
+          BTC="$(find evidence -type f -path '*/market-Aster-H1-funding-and-manifests/normalized/aster/klines/BTCUSDT.jsonl' | head -1)"
+          test -n "$DIR10"
+          test -n "$BTC"
+          DATA="$(python -c "from pathlib import Path; print(Path('$BTC').resolve().parents[3])")"
+
+          npx tsx scripts/idle-priority-short-live-signal-replay.ts \
+            --data-root "$DATA" \
+            --expected research/idle_priority_63_candidate_keys.json
+
+          python research/idle_priority_fixed_intent_dynamic_gross.py \
+            --baseline-trades "$DIR10/portfolio-trades.jsonl" \
+            --baseline-events "$DIR10/portfolio-events.jsonl" \
+            --baseline-metrics "$DIR10/metrics.json" \
+            --idle-intents research/idle_priority_61_intents.json \
+            --idle-target-net research/idle_priority_61_target_net.json \
+            --data-root "$DATA" \
+            --request-mode candidate \
+            --idle-fee-path split \
+            --roundtrip-bps 10 \
+            --output coherent-10bps-integrated.json | tee coherent-10bps-integrated.log
+
+          npx tsx scripts/idle-priority-short-generate-parity-cert.ts \
+            coherent-10bps-integrated.json "$GITHUB_SHA" idle-priority-parity-cert-v3.json
+
+          python3 - "$GITHUB_SHA" <<'PY'
+          import json,sys
+          sha=sys.argv[1]
+          c=json.load(open("idle-priority-parity-cert-v3.json"))
+          assert c["schema"]=="disdex-idle-priority-parity-cert/v3"
+          assert c["runtimeSha"]==sha
+          assert c["genericCandidateRows"]==393 and c["genericSourceGapRows"]==2
+          assert c["filteredRows"]==63 and c["admittedRows"]==61
+          assert c["wins"]==48 and c["losses"]==13
+          assert c["roundtripBps"]==10 and c["integratedTradeCount"]==1339
+          assert abs(c["finalJpy"]-214775230.26444945)<1
+          print("IDLE_PARITY_V3_EXACT_SHA=PASS")
+          PY
+
+          git archive --format=tar.gz --output=/tmp/disdex-trading-source.tgz HEAD
+          echo "SOURCE_SHA256=$(sha256sum /tmp/disdex-trading-source.tgz | awk '{print $1}')" >> "$GITHUB_ENV"
+          echo "CERT_SHA256=$(sha256sum idle-priority-parity-cert-v3.json | awk '{print $1}')" >> "$GITHUB_ENV"
+          echo "TARGET_SHA=$GITHUB_SHA" >> "$GITHUB_ENV"
+
+      - name: Initialize restricted root SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ -n "$SSH_HOST" && -n "$ROOT_KEY" && -n "$SSH_KNOWN_HOSTS" ]]
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+
+      - name: Prove current Production is an ancestor and dependencies are unchanged
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          from_sha="$(ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -p "$PORT" "root@$SSH_HOST" \
+            "tr -d '[:space:]' < /home/deploy/disdex-trading/current/.disdex-release-sha")"
+          [[ "$from_sha" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$from_sha" != "$TARGET_SHA" ]]
+          git merge-base --is-ancestor "$from_sha" "$TARGET_SHA"
+          git diff --quiet "$from_sha" "$TARGET_SHA" -- package-lock.json
+          echo "FROM_SHA=$from_sha" >> "$GITHUB_ENV"
+          echo "PRODUCTION_LINEAGE_DIRECT_DESCENDANT=PASS"
+          echo "FROM_SHA=$from_sha"
+          echo "TARGET_SHA=$TARGET_SHA"
+
+      - name: Transfer immutable source, v3 parity certificate, and audited cutover script
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          common=(-i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts")
+          scp "${common[@]}" -P "$PORT" /tmp/disdex-trading-source.tgz \
+            "root@$SSH_HOST:/tmp/disdex-source-$GITHUB_RUN_ID.tgz"
+          scp "${common[@]}" -P "$PORT" idle-priority-parity-cert-v3.json \
+            "root@$SSH_HOST:/tmp/idle-parity-v3-$GITHUB_RUN_ID.json"
+          scp "${common[@]}" -P "$PORT" scripts/ops/root/disdex-idle-production-redeploy-20261001 \
+            "root@$SSH_HOST:/tmp/disdex-idle-cutover-$GITHUB_RUN_ID.sh"
+
+      - name: Cut over all runners to exact SHA and verify LIVE
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -p "$PORT" "root@$SSH_HOST" \
+            "FROM_SHA='$FROM_SHA' TARGET_SHA='$TARGET_SHA' REQUEST_ID='$GITHUB_RUN_ID' SOURCE_SHA256='$SOURCE_SHA256' CERT_SHA256='$CERT_SHA256' bash /tmp/disdex-idle-cutover-$GITHUB_RUN_ID.sh"
+
+      - name: Verify public HP remains safe
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          for route in /decision-status /decision-status/idle-priority /history; do
+            code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 15 "https://professional-dismanager.net$route")"
+            echo "PUBLIC_ROUTE=$route HTTP=$code"
+            [[ "$code" =~ ^(200|30[1278]|401|403)$ ]]
+          done
+          code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 15 https://professional-dismanager.net/api/system/idle-priority-status)"
+          echo "PUBLIC_IDLE_UNAUTHORIZED_HTTP=$code"
+          [[ "$code" == 401 ]]
