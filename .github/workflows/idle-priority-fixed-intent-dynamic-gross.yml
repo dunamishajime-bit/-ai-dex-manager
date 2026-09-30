@@ -1,0 +1,55 @@
+name: Idle Priority fixed intent dynamic gross diagnostic
+on:
+  push:
+    branches: [design/idle-priority-bt-parity-20260929]
+    paths:
+      - ".github/workflows/idle-priority-fixed-intent-dynamic-gross.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download canonical release and run fixed-intent variants
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release download bt-v12-score100-volume080-normalonly-20260928 --repo dunamishajime-bit/-ai-dex-manager --pattern 'bt-v12-score100-volume080-normalonly-20260928.tar.gz'
+          echo '891c36d8a5957cafe3aae65656a98b7c02a3c437c4f520fe63756d550f08b4fb  bt-v12-score100-volume080-normalonly-20260928.tar.gz' | sha256sum -c -
+          mkdir evidence
+          tar -xzf bt-v12-score100-volume080-normalonly-20260928.tar.gz -C evidence
+          LEDGER="$(find evidence -type f -path '*/selected-five-logic-all-cases-all-costs/BRK0P75_MR0P75_FET1_DUAL_GATE/PRICE_MODEL_10BPS/portfolio-trades.jsonl' | head -1)"
+          test -n "$LEDGER"
+          DIR="$(dirname "$LEDGER")"
+          CODE="$(find evidence -type f -path '*/research/formal_five_bt/portfolio_price_model.py' | head -1)"
+          BTC="$(find evidence -type f -path '*/normalized/aster/klines/BTCUSDT.jsonl' | head -1)"
+          test -n "$CODE"
+          test -n "$BTC"
+          ROOT="$(python -c "from pathlib import Path; print(Path('$CODE').resolve().parents[2])")"
+          DATA="$(python -c "from pathlib import Path; print(Path('$BTC').resolve().parents[3])")"
+          echo "ROOT=$ROOT"
+          echo "DATA=$DATA"
+          COMMON="--baseline-trades $LEDGER --baseline-events $DIR/portfolio-events.jsonl --baseline-metrics $DIR/metrics.json --idle-intents research/idle_priority_61_intents.json --idle-target-net research/idle_priority_61_target_net.json --release-root $ROOT --data-root $DATA"
+          python research/idle_priority_fixed_intent_dynamic_gross.py $COMMON --request-mode accepted --without-idle --output baseline-only.json | tee baseline-only.log
+          python research/idle_priority_fixed_intent_dynamic_gross.py $COMMON --request-mode accepted --output integrated-accepted.json | tee integrated-accepted.log
+          python research/idle_priority_fixed_intent_dynamic_gross.py $COMMON --request-mode candidate --output integrated-candidate.json | tee integrated-candidate.log
+          python - <<'PY'
+          import json
+          for p in ["baseline-only.json","integrated-accepted.json","integrated-candidate.json"]:
+              x=json.load(open(p))
+              print("SUMMARY",p,{k:x[k] for k in ["baseline_completed","idle_completed","baseline_rejected","idle_rejected","combined_completed","final_equity_jpy","rejections_by_strategy","idle_price_return_max_abs_error"]})
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: idle-priority-fixed-intent-dynamic-gross
+          path: |
+            baseline-only.json
+            baseline-only.log
+            integrated-accepted.json
+            integrated-accepted.log
+            integrated-candidate.json
+            integrated-candidate.log
+          retention-days: 30
