@@ -1,0 +1,384 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+umask 022
+
+: "${FROM_SHA:?FROM_SHA required}"
+: "${TARGET_SHA:?TARGET_SHA required}"
+: "${REQUEST_ID:?REQUEST_ID required}"
+: "${SOURCE_SHA256:?SOURCE_SHA256 required}"
+: "${CERT_SHA256:?CERT_SHA256 required}"
+
+ROOT=/home/deploy/disdex-trading
+RELEASES="$ROOT/releases"
+CURRENT="$ROOT/current"
+OLD_RELEASE="$RELEASES/$FROM_SHA"
+RELEASE="$RELEASES/$TARGET_SHA"
+STAGE="$RELEASES/.${TARGET_SHA}.stage-$REQUEST_ID"
+SOURCE_FILE="/tmp/disdex-source-$REQUEST_ID.tgz"
+CERT_FILE="/tmp/idle-parity-v3-$REQUEST_ID.json"
+SHARED=/var/lib/disdex/shared
+BACKUP="/var/lib/disdex/deploy-backups/idle-$REQUEST_ID"
+LOCK=/run/lock/disdex-idle-production-redeploy.lock
+
+[[ "$FROM_SHA" =~ ^[a-f0-9]{40}$ ]]
+[[ "$TARGET_SHA" =~ ^[a-f0-9]{40}$ ]]
+[[ "$REQUEST_ID" =~ ^[0-9]+$ ]]
+
+exec 9>"$LOCK"
+flock -n 9 || { echo "DEPLOY_CONCURRENT_LOCK"; exit 40; }
+
+[[ "$(tr -d '[:space:]' < "$CURRENT/.disdex-release-sha")" == "$FROM_SHA" ]]
+[[ "$(readlink -f "$CURRENT")" == "$OLD_RELEASE" ]]
+[[ -f "$SOURCE_FILE" && -f "$CERT_FILE" ]]
+echo "$SOURCE_SHA256  $SOURCE_FILE" | sha256sum -c -
+echo "$CERT_SHA256  $CERT_FILE" | sha256sum -c -
+[[ ! -e "$RELEASE" && ! -e "$STAGE" ]]
+
+NAMES=(
+  disdex-v12-x1-all
+  disdex-pengu-dual-ls-v2
+  disdex-quality102-causal-v1
+  disdex-v52-aster-only
+  disdex-fet-brk48
+  disdex-hype-long
+  disdex-idle-priority-short
+  disdex-shared-crypto-risk
+  disdex-v12-v52-margin-guard
+)
+CORE=(
+  disdex-v12-x1-all
+  disdex-pengu-dual-ls-v2
+  disdex-quality102-causal-v1
+  disdex-v52-aster-only
+  disdex-fet-brk48
+)
+STATE_PATHS=(
+  /var/lib/disdex/v12-x1-all/runner.json
+  /var/lib/disdex/pengu-dual-ls-v2/runner-live.json
+  /var/lib/disdex/quality102-causal-v1/state.json
+  /var/lib/disdex/v52-aster-only/runner-live.json
+  /var/lib/disdex/fet-brk48-residual/state.json
+  /var/lib/disdex/hype-zec-long/runner.json
+  /var/lib/disdex/idle-priority/state.json
+  /var/lib/disdex/shared/operator-activation/current.json
+  /var/lib/disdex/shared/operator-activation/runtime.json
+  /var/lib/disdex/shared/idle-priority-parity-cert.json
+)
+
+load_runtime_env() {
+  set -a
+  for f in \
+    /etc/disdex/disdex-v13d-v11eq-v96.env \
+    /etc/disdex/disdex-v12-pengu-v2-v52.env \
+    /etc/disdex/disdex-v12-x1-all.env \
+    /etc/disdex/disdex-quality102-causal-v1.env \
+    "/etc/disdex/current-runtime/$FROM_SHA.env"; do
+    [[ -f "$f" ]] && . "$f"
+  done
+  set +a
+}
+
+require_shared_safe() {
+  python3 - <<'PY'
+import json
+def load(p):
+    with open(p,encoding="utf-8") as f:
+        return json.load(f)
+kill=load("/var/lib/disdex/shared/kill-switch.json")
+if kill.get("active") is not False:
+    raise SystemExit("CUTOVER_KILL_SWITCH_ACTIVE")
+guard=load("/var/lib/disdex/shared/margin-risk/guard-live.json")
+if guard.get("stage")!="HEALTHY" or guard.get("ordersAllowed") is not True:
+    raise SystemExit("CUTOVER_MARGIN_NOT_HEALTHY")
+try:
+    pending=load("/var/lib/disdex/shared/pending-exposure.json")
+except FileNotFoundError:
+    pending={}
+entries=pending.get("entries",{}) if isinstance(pending,dict) else {}
+if isinstance(entries,dict) and entries:
+    raise SystemExit("CUTOVER_PENDING_EXPOSURE_PRESENT")
+idle=load("/var/lib/disdex/idle-priority/state.json")
+if idle.get("positions") or idle.get("pending") or idle.get("manualReview"):
+    raise SystemExit("CUTOVER_IDLE_NOT_FLAT")
+print("CUTOVER_SHARED_STATE=PASS")
+PY
+}
+
+require_flat_account() {
+  local runner_root="$1"
+  local tmp
+  tmp="$(mktemp)"
+  "$runner_root/node_modules/.bin/tsx" \
+    "$runner_root/scripts/disdex-aster-readonly-account-diagnostic.ts" | tee "$tmp"
+  python3 - "$tmp" <<'PY'
+import json,sys
+rows=[x for x in open(sys.argv[1],encoding="utf-8") if x.lstrip().startswith("{")]
+x=json.loads(rows[-1])
+assert x["status"]=="ASTER_READONLY_ACCOUNT_DIAGNOSTIC_PASS"
+if x.get("positions"):
+    raise SystemExit("CUTOVER_ASTER_POSITIONS_PRESENT")
+if x.get("openOrders"):
+    raise SystemExit("CUTOVER_ASTER_OPEN_ORDERS_PRESENT")
+assert x.get("ordersSent")==0 and x.get("cancelsSent")==0 and x.get("positionChangesSent")==0
+print("CUTOVER_ASTER_FLAT=PASS")
+PY
+  rm -f "$tmp"
+}
+
+load_runtime_env
+require_shared_safe
+require_flat_account "$OLD_RELEASE"
+
+for name in "${NAMES[@]}"; do
+  unit="$name@$FROM_SHA.service"
+  [[ "$(systemctl is-active "$unit" 2>/dev/null || true)" == active ]] || {
+    echo "CUTOVER_OLD_UNIT_NOT_ACTIVE=$unit"
+    exit 41
+  }
+  [[ "$(systemctl show "$unit" -p NRestarts --value)" == 0 ]] || {
+    echo "CUTOVER_OLD_UNIT_RESTARTED=$unit"
+    exit 42
+  }
+done
+
+install -d -o root -g root -m 0700 "$BACKUP"
+for p in "${STATE_PATHS[@]}"; do
+  if [[ -f "$p" && ! -L "$p" ]]; then
+    dest="$BACKUP$p"
+    install -d -m 0700 "$(dirname "$dest")"
+    cp -a -- "$p" "$dest"
+  fi
+done
+
+rollback() {
+  rc=$?
+  trap - ERR
+  set +e
+  echo "DEPLOY_ROLLBACK_TRIGGERED rc=$rc"
+  flat=yes
+  load_runtime_env
+  runner_root="$(readlink -f "$CURRENT" 2>/dev/null || true)"
+  if [[ -z "$runner_root" || ! -x "$runner_root/node_modules/.bin/tsx" ]]; then
+    runner_root="$OLD_RELEASE"
+  fi
+  require_flat_account "$runner_root" >/tmp/disdex-rollback-account.log 2>&1 || flat=no
+  cat /tmp/disdex-rollback-account.log || true
+  if [[ "$flat" == yes ]]; then
+    for name in "${NAMES[@]}"; do
+      systemctl disable --now "$name@$TARGET_SHA.service" >/dev/null 2>&1 || true
+    done
+    for p in "${STATE_PATHS[@]}"; do
+      src="$BACKUP$p"
+      if [[ -f "$src" ]]; then
+        install -d "$(dirname "$p")"
+        cp -a -- "$src" "$p"
+      fi
+    done
+    rm -f /var/lib/disdex/runner-health/heartbeats/idle-priority-short.json
+    tmp_link="$ROOT/.current-rollback-$REQUEST_ID"
+    rm -f "$tmp_link"
+    ln -s "$OLD_RELEASE" "$tmp_link"
+    mv -Tf "$tmp_link" "$CURRENT"
+    bash "$OLD_RELEASE/scripts/ops/root/disdex-current-runtime-wiring" --apply || true
+    for name in "${NAMES[@]}"; do
+      systemctl enable --now "$name@$FROM_SHA.service" >/dev/null 2>&1 || true
+    done
+    rm -rf -- "$RELEASE" "$STAGE"
+    echo "DEPLOY_ROLLBACK_FLAT_ACCOUNT=PASS"
+  else
+    echo "DEPLOY_ROLLBACK_SKIPPED_EXPOSURE_PRESENT"
+  fi
+  exit "$rc"
+}
+trap rollback ERR
+
+systemctl disable --now disdex-runner-watchdog.timer >/dev/null 2>&1 || true
+systemctl stop disdex-runner-watchdog.service >/dev/null 2>&1 || true
+systemctl disable --now disdex-runner-position-recovery.timer >/dev/null 2>&1 || true
+systemctl stop disdex-runner-position-recovery.service >/dev/null 2>&1 || true
+systemctl disable --now disdex-v12-kill-switch-auto-repair.path >/dev/null 2>&1 || true
+systemctl stop disdex-v12-kill-switch-auto-repair.service >/dev/null 2>&1 || true
+systemctl disable --now disdex-v12-three-hour-health-check.timer >/dev/null 2>&1 || true
+systemctl stop disdex-v12-three-hour-health-check.service >/dev/null 2>&1 || true
+
+for name in "${NAMES[@]}"; do
+  systemctl stop "$name@$FROM_SHA.service"
+done
+for name in "${NAMES[@]}"; do
+  [[ "$(systemctl is-active "$name@$FROM_SHA.service" 2>/dev/null || true)" != active ]]
+done
+
+require_flat_account "$OLD_RELEASE"
+
+install -d -o deploy -g deploy -m 0755 "$STAGE"
+tar --no-same-owner -xzf "$SOURCE_FILE" -C "$STAGE"
+[[ -f "$STAGE/package.json" && -f "$STAGE/package-lock.json" ]]
+cmp -s "$OLD_RELEASE/package-lock.json" "$STAGE/package-lock.json"
+printf '%s\n' "$TARGET_SHA" > "$STAGE/.disdex-release-sha"
+chown -R deploy:deploy "$STAGE"
+ln -s "$(readlink -f "$OLD_RELEASE/node_modules")" "$STAGE/node_modules"
+ln -s "$(readlink -f "$OLD_RELEASE/.venv2")" "$STAGE/.venv2"
+chown -h deploy:deploy "$STAGE/node_modules" "$STAGE/.venv2"
+mv -- "$STAGE" "$RELEASE"
+
+install -o root -g root -m 0644 "$CERT_FILE" "$SHARED/idle-priority-parity-cert.json"
+
+python3 - "$RELEASE" "$TARGET_SHA" "$SHARED/operator-activation/current.json" <<'PY'
+import datetime,json,os,sys,tempfile
+release,sha,target_path=sys.argv[1:]
+readiness=json.load(open(os.path.join(release,"docs/production/current-implementation-readiness.json"),encoding="utf-8"))
+if readiness.get("implementationStatus")!="READY":
+    raise SystemExit("OPERATOR_ARTIFACT_IMPLEMENTATION_NOT_READY")
+artifact={
+    "schema":"disdex-live-operator-activation/v1",
+    "target":readiness["target"],
+    "approvedSha":sha,
+    "approvedRunners":[
+        "V12_X1_ALL","PENGU_V8","QUALITY102_CAUSAL_V1","V52",
+        "FET_BRK48_RESIDUAL","HYPE_TREND_LONG","IDLE_PRIORITY_SHORT"
+    ],
+    "ordersEnabled":True,
+    "operatorAcknowledgement":"I_ACK_REAL_MONEY_LIVE_ACTIVATION",
+    "approvedAt":datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00","Z"),
+}
+directory=os.path.dirname(target_path)
+fd,tmp=tempfile.mkstemp(prefix=".operator-activation.",dir=directory,text=True)
+with os.fdopen(fd,"w",encoding="utf-8") as f:
+    json.dump(artifact,f,indent=2,sort_keys=True)
+    f.write("\n")
+    f.flush()
+    os.fsync(f.fileno())
+os.chmod(tmp,0o644)
+os.chown(tmp,0,0)
+os.replace(tmp,target_path)
+print("OPERATOR_ARTIFACT_EXACT_SHA=PASS")
+PY
+
+tmp_link="$ROOT/.current-$REQUEST_ID"
+ln -s "$RELEASE" "$tmp_link"
+mv -Tf "$tmp_link" "$CURRENT"
+[[ "$(tr -d '[:space:]' < "$CURRENT/.disdex-release-sha")" == "$TARGET_SHA" ]]
+[[ "$(readlink -f "$CURRENT")" == "$RELEASE" ]]
+
+bash "$RELEASE/scripts/ops/root/disdex-current-runtime-wiring" --apply
+
+for name in "${CORE[@]}"; do
+  systemctl enable --now "$name@$TARGET_SHA.service"
+done
+systemctl enable --now "disdex-hype-long@$TARGET_SHA.service"
+systemctl enable --now "disdex-idle-priority-short@$TARGET_SHA.service"
+systemctl enable --now "disdex-shared-crypto-risk@$TARGET_SHA.service"
+systemctl enable --now "disdex-v12-v52-margin-guard@$TARGET_SHA.service"
+
+for name in "${NAMES[@]}"; do
+  systemctl disable "$name@$FROM_SHA.service" >/dev/null 2>&1 || true
+done
+
+sleep 5
+systemctl reset-failed disdex-runner-health-snapshot.service >/dev/null 2>&1 || true
+systemctl start disdex-runner-health-snapshot.service
+sleep 3
+
+for name in "${NAMES[@]}"; do
+  unit="$name@$TARGET_SHA.service"
+  [[ "$(systemctl is-active "$unit" 2>/dev/null || true)" == active ]] || {
+    echo "POSTDEPLOY_RUNNER_NOT_ACTIVE=$unit"
+    false
+  }
+  pid="$(systemctl show "$unit" -p MainPID --value)"
+  [[ "$pid" =~ ^[0-9]+$ && "$pid" -gt 0 ]]
+  [[ "$(readlink -f "/proc/$pid/cwd")" == "$RELEASE" ]] || {
+    echo "POSTDEPLOY_CWD_MISMATCH=$unit"
+    false
+  }
+  [[ "$(systemctl show "$unit" -p NRestarts --value)" == 0 ]] || {
+    echo "POSTDEPLOY_RESTART_COUNT_NONZERO=$unit"
+    false
+  }
+  echo "POSTDEPLOY_RUNNER unit=$unit pid=$pid nRestarts=0"
+done
+
+/usr/bin/node "$RELEASE/scripts/ops/root/disdex-live-operator-activation-gate.mjs" \
+  --release-root "$RELEASE" --sha "$TARGET_SHA" --all \
+  --activation-path "$SHARED/operator-activation/current.json"
+
+python3 - "$TARGET_SHA" <<'PY'
+import json,sys
+sha=sys.argv[1]
+cert=json.load(open("/var/lib/disdex/shared/idle-priority-parity-cert.json"))
+assert cert["schema"]=="disdex-idle-priority-parity-cert/v3"
+assert cert["runtimeSha"]==sha
+assert cert["genericCandidateRows"]==393
+assert cert["genericSourceGapRows"]==2
+assert cert["filteredRows"]==63 and cert["admittedRows"]==61
+assert cert["wins"]==48 and cert["losses"]==13
+assert cert["roundtripBps"]==10 and cert["integratedTradeCount"]==1339
+hb=json.load(open("/var/lib/disdex/runner-health/heartbeats/idle-priority-short.json"))
+assert hb["runtimeSha"]==sha and hb["expectedSha"]==sha
+assert hb["serviceUnit"]==f"disdex-idle-priority-short@{sha}.service"
+assert hb["mode"]=="LIVE" and hb["liveEnabled"] is True and hb["safetyState"]=="HEALTHY"
+assert int(hb.get("mainPid",0))>0 and int(hb.get("nRestarts",0))==0
+state=json.load(open("/var/lib/disdex/idle-priority/state.json"))
+assert state["schema"]=="disdex-idle-priority-state/v2"
+assert state["runtimeSha"]==sha
+assert state.get("manualReview") in (None,"")
+print("POSTDEPLOY_IDLE_PARITY_HEARTBEAT_STATE=PASS")
+PY
+
+python3 - <<'PY'
+import json
+kill=json.load(open("/var/lib/disdex/shared/kill-switch.json"))
+if kill.get("active") is not False:
+    raise SystemExit("POSTDEPLOY_KILL_SWITCH_ACTIVE")
+guard=json.load(open("/var/lib/disdex/shared/margin-risk/guard-live.json"))
+if guard.get("stage")!="HEALTHY" or guard.get("ordersAllowed") is not True:
+    raise SystemExit("POSTDEPLOY_MARGIN_NOT_HEALTHY")
+print("POSTDEPLOY_SHARED_SAFETY=PASS")
+PY
+
+set -a
+for f in \
+  /etc/disdex/disdex-v13d-v11eq-v96.env \
+  /etc/disdex/disdex-v12-pengu-v2-v52.env \
+  /etc/disdex/disdex-v12-x1-all.env \
+  /etc/disdex/disdex-quality102-causal-v1.env \
+  "/etc/disdex/current-runtime/$TARGET_SHA.env"; do
+  [[ -f "$f" ]] && . "$f"
+done
+set +a
+"$RELEASE/node_modules/.bin/tsx" "$RELEASE/scripts/disdex-aster-readonly-account-diagnostic.ts"
+
+python3 - "$TARGET_SHA" <<'PY'
+import json,sys,urllib.request
+sha=sys.argv[1]
+base="http://127.0.0.1:3001"
+def get(path):
+    req=urllib.request.Request(base+path,headers={
+        "Cookie":"disdex_auth=1",
+        "User-Agent":"DisDex-Production-Cutover-Verify",
+    })
+    with urllib.request.urlopen(req,timeout=30) as r:
+        if r.status!=200:
+            raise RuntimeError("HP_HTTP_"+path+"_"+str(r.status))
+        return json.loads(r.read(1500000))
+live=get("/api/system/live-runtime")
+if live.get("releaseSha")!=sha:
+    raise RuntimeError("HP_LIVE_RUNTIME_SHA_MISMATCH")
+idle=get("/api/system/idle-priority-status")
+if idle.get("releaseSha")!=sha or idle.get("status")!="LIVE":
+    raise RuntimeError("HP_IDLE_NOT_LIVE")
+decision=get("/api/system/decision-status?refresh=1")
+units=(decision.get("runtime") or {}).get("units",[])
+row=[x for x in units if x.get("id")=="IDLE_PRIORITY_SHORT"]
+if len(row)!=1 or row[0].get("releaseSha")!=sha or row[0].get("status")!="LIVE":
+    raise RuntimeError("HP_IDLE_OVERVIEW_NOT_LIVE")
+print("POSTDEPLOY_HP_IDLE_LIVE=PASS")
+PY
+
+trap - ERR
+rm -f -- "$SOURCE_FILE" "$CERT_FILE"
+echo "STATUS=LIVE_ACTIVATED_VERIFIED"
+echo "PRODUCTION_SHA=$TARGET_SHA"
+echo "ROLLBACK_SHA=$FROM_SHA"
+echo "IDLE_PARITY_SCHEMA=disdex-idle-priority-parity-cert/v3"
+echo "TRADING_MUTATION_DURING_PREFLIGHT=0"
