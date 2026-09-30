@@ -58,6 +58,7 @@ if (fixture.schema !== "disdex-idle-priority-candidate-keys/v1" || fixture.rows.
 const symbols = Object.keys(IDLE_PRIORITY_SHORT_POLICY.routes) as IdlePrioritySymbol[];
 const market = Object.fromEntries(["BTCUSDT", ...symbols].map((symbol) => [symbol, loadH1(dataRoot, symbol)])) as Record<string, IdleH1Candle[]>;
 const accepted: ExpectedRow[] = [];
+const diagnostics = new Map<string, unknown>();
 const lastBySymbol = new Map<IdlePrioritySymbol, number>();
 const HOUR = 3_600_000;
 const cooldownMs = IDLE_PRIORITY_SHORT_POLICY.cooldownHours * HOUR;
@@ -73,9 +74,14 @@ for (let decisionTs = fixture.windowStart; decisionTs <= fixture.windowEnd; deci
             if (/IDLE_(INSUFFICIENT|H1_HISTORY_GAP|ATR_PREVCLOSE_GAP)/.test(message)) continue;
             throw error;
         }
+        const rawKey = [symbol, decisionTs].join("|");
+        diagnostics.set(rawKey, { accepted: evaluated.accepted, reason: evaluated.reason, features: evaluated.features, route: canonicalRoute(evaluated.route) });
         if (!evaluated.accepted) continue;
         const last = lastBySymbol.get(symbol) || 0;
-        if (last > 0 && evaluated.features.signalTs - last < cooldownMs) continue;
+        if (last > 0 && evaluated.features.signalTs - last < cooldownMs) {
+            diagnostics.set(rawKey, { accepted: true, cooldownBlocked: true, previousAcceptedSignalTs: last, reason: evaluated.reason, features: evaluated.features, route: canonicalRoute(evaluated.route) });
+            continue;
+        }
         lastBySymbol.set(symbol, evaluated.features.signalTs);
         accepted.push({
             symbol,
@@ -96,7 +102,9 @@ if (missing.length || extras.length || accepted.length !== 63) {
         expected: fixture.rows.length,
         actual: accepted.length,
         missing,
-        extras,
+        extras: extras.slice(0, 80),
+        missingDiagnostics: missing.slice(0, 20).map((row) => ({ row, diagnostic: diagnostics.get([row.symbol, row.t].join("|")) })),
+        extraDiagnostics: extras.slice(0, 20).map((row) => ({ row, diagnostic: diagnostics.get([row.symbol, row.t].join("|")) })),
     }, null, 2));
     process.exit(1);
 }
