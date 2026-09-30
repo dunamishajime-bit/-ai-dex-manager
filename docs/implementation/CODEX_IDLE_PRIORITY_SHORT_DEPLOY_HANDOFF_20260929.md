@@ -1,3 +1,5 @@
+> **2026-09-30 LIVE unblock:** Historical overlay reconciliation is resolved. Read `docs/implementation/CODEX_IDLE_PRIORITY_LIVE_UNBLOCK_20260930.md` first. The old status `BLOCKED_HISTORICAL_OVERLAY_REPLAY_NOT_RECONCILED` is superseded; use the coherent 10bps 1,339-trade / JPY214.775M replay as the Production parity target and proceed through Production implementation and VPS LIVE gates.
+
 > **2026-09-30 cost/replay correction:** `docs/implementation/IDLE_PRIORITY_COST_RECONCILIATION_20260930.md` controls economic parity. The historical JPY268.05M / 1,342 bundle is not a coherent single 10bps run and must not be used as a Production/LIVE acceptance target. Primary coherent 10bps reference: 61 Idle, 1,339 total trades, ~JPY214.78M.
 
 # Codex Handoff — Idle Priority SHORT Production Deployment
