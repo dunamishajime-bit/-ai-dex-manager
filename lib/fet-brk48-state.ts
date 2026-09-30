@@ -43,6 +43,7 @@ export interface FetBrk48State {
   runtimeCommitSha: string;
   updatedAt: number;
   lastReferenceTs?: number;
+  lastEvaluationDecisionTs?: number;
   position?: FetBrk48PositionState;
   pending?: FetBrk48PendingState;
   lastCompletedIdempotencyKey?: string;
