@@ -13,6 +13,7 @@ on:
       - "scripts/ops/root/disdex-current-runtime-wiring"
       - "scripts/ops/root/disdex-live-operator-activation-gate.mjs"
       - "ops/systemd/disdex-idle-priority-short@.service"
+      - "systemd/disdex-idle-priority-short.service"
       - "scripts/disdex-hype-zec-long-state-migrate.ts"
       - "scripts/disdex-hype-zec-benign-market-data-recovery.ts"
       - "tests/hype-zec-long-state-migration.test.ts"
@@ -62,6 +63,7 @@ jobs:
         run: |
           test -f docs/implementation/IDLE_PRIORITY_SHORT_CODEX_PRODUCTION_HANDOFF_20260929.md
           test -f ops/systemd/disdex-idle-priority-short@.service
+          test ! -e systemd/disdex-idle-priority-short.service
           grep -q IDLE_PRIORITY_SHORT scripts/disdex-idle-priority-short-live-runner.ts
           grep -q requireVenueMargin5xCross lib/idle-priority-short-runner.ts
           grep -q placeStopMarket lib/idle-priority-short-runner.ts
