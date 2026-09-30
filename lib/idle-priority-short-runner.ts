@@ -22,7 +22,7 @@ const EPSILON = 1e-9;
 const MAX_QUOTE_AGE_MS = 5 * 60_000;
 const ACTIVE_ORDER_STATUSES = new Set(["NEW", "PARTIALLY_FILLED", "PENDING_NEW"]);
 const CORE_SLEEVES = new Set(["V12", "PENGU_DUAL_LS_V2", "FET_RESIDUAL", "V11_EQ", "V50_POST_OPEN_BASIS", "QUALITY102_CAUSAL_V1"]);
-const SIDEcar_SLEEVES = new Set(["HYPE_LONG", "ZEC_LONG", "IDLE_PRIORITY_SHORT"]);
+const SIDEcar_SLEEVES = new Set(["HYPE_LONG", "ZEC_LONG"]);
 
 export type IdlePriorityShortTickResult = {
     status: "disabled" | "locked" | "shadow" | "held" | "no-change" | "completed" | "manual-review";
@@ -134,7 +134,7 @@ function pendingExposureByOwner(entries: Awaited<ReturnType<typeof readPendingEx
     for (const entry of entries.entries) {
         if (!["PENDING", "SUBMITTED", "UNKNOWN"].includes(entry.status)) continue;
         const owner = entry.strategyId.toUpperCase();
-        if (owner === IDLE_PRIORITY_SHORT_STRATEGY || owner.includes("HYPE") || owner.includes("ZEC")) nonBaselinePendingExposure += Number(entry.gross || 0);
+        if (owner.includes("HYPE") || owner.includes("ZEC")) nonBaselinePendingExposure += Number(entry.gross || 0);
         else baselinePendingExposure += Number(entry.gross || 0);
     }
     return { baselinePendingExposure, nonBaselinePendingExposure };
@@ -168,6 +168,16 @@ export class IdlePriorityShortRunner {
             if (Number(row.leverage) !== 5 || !cross) return false;
         }
         return (await this.dependencies.client.getOpenOrders(symbol)).length === 0;
+    }
+
+    private candidateLifecycleAllows(state: IdleState, signal: IdleSignal) {
+        const last = Number(state.lastAcceptedBySymbol[signal.symbol] || 0);
+        const cooldownMs = IDLE_PRIORITY_SHORT_POLICY.cooldownHours * 3_600_000;
+        return last <= 0 || signal.features.signalTs - last >= cooldownMs;
+    }
+
+    private markCandidateLifecycle(state: IdleState, signal: IdleSignal) {
+        state.lastAcceptedBySymbol = { ...state.lastAcceptedBySymbol, [signal.symbol]: signal.features.signalTs };
     }
 
     private async protectionReadBack(symbol: string, plan: ReturnType<typeof buildIdleProtectionPlan>, expectedQty: number) {
@@ -258,7 +268,7 @@ export class IdlePriorityShortRunner {
     private async reconcilePending(state: IdleState, lock: AccountLockHandle): Promise<IdlePriorityShortTickResult | undefined> {
         const pending = state.pending;
         if (!pending) return undefined;
-        if (!pending.reservationId) return this.manualReview(state, "IDLE_PENDING_RESERVATION_MISSING");
+        if (pending.action === "ENTRY" && !pending.reservationId) return this.manualReview(state, "IDLE_PENDING_RESERVATION_MISSING");
         const result = await this.dependencies.executor.reconcileOrder(pending.symbol, pending.clientOrderId);
         if (result.status === "UNKNOWN" || result.executionUnknown) return this.manualReview(state, `IDLE_PENDING_EXECUTION_UNKNOWN:${pending.clientOrderId}`);
         if (pending.action === "ENTRY") return this.finalizeEntry(state, pending, result, lock);
@@ -280,14 +290,14 @@ export class IdlePriorityShortRunner {
         const quote = await this.dependencies.executor.getMarketQuote(owned.symbol);
         if (!quoteFresh(quote, this.now())) return { status: "held", message: `IDLE_EXIT_QUOTE_STALE:${owned.symbol}`, symbol: owned.symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
         const clientOrderId = deterministicIdleClientOrderId({ action: "EXIT", symbol: owned.symbol, signalTs: owned.signalTs });
-        const pending: IdlePending = { action: "EXIT", phase: "planned", symbol: owned.symbol, route: owned.route, clientOrderId, idempotencyKey: clientOrderId, quantity: positionQuantity(actual), expectedPrice: quote.bidPrice, signalTs: owned.signalTs, decisionTs: this.now(), holdHours: owned.holdHours, createdAt: this.now(), updatedAt: this.now(), reason };
+        const pending: IdlePending = { action: "EXIT", phase: "planned", symbol: owned.symbol, route: owned.route, clientOrderId, idempotencyKey: clientOrderId, quantity: positionQuantity(actual), expectedPrice: quote.askPrice, signalTs: owned.signalTs, decisionTs: this.now(), holdHours: owned.holdHours, createdAt: this.now(), updatedAt: this.now(), reason };
         state.pending = pending;
         await this.dependencies.stateStore.save(state);
         let result: DirectTradeResult;
         try {
             state.pending.phase = "submitted";
             await this.dependencies.stateStore.save(state);
-            result = await this.dependencies.executor.executeMarket({ requestId: clientOrderId, clientOrderId, symbol: owned.symbol, side: "BUY", positionSide: "BOTH", quantity: positionQuantity(actual), reduceOnly: true, expectedPrice: quote.bidPrice, maxSlippageBps: this.dependencies.runtime.maximumSlippageBps, reason: `IDLE_PRIORITY_SHORT_EXIT:${reason}` });
+            result = await this.dependencies.executor.executeMarket({ requestId: clientOrderId, clientOrderId, symbol: owned.symbol, side: "BUY", positionSide: "BOTH", quantity: positionQuantity(actual), reduceOnly: true, expectedPrice: quote.askPrice, maxSlippageBps: this.dependencies.runtime.maximumSlippageBps, reason: `IDLE_PRIORITY_SHORT_EXIT:${reason}` });
         } catch (error) { return this.manualReview(state, `IDLE_EXIT_ERROR:${error instanceof Error ? error.message : String(error)}`); }
         if (result.status === "UNKNOWN" || result.executionUnknown) return this.manualReview(state, `IDLE_EXIT_UNKNOWN:${clientOrderId}`);
         if (activePosition(await this.dependencies.executor.getPositions(), owned.symbol)) return this.manualReview(state, `IDLE_EXIT_POSITION_REMAINS:${owned.symbol}`);
