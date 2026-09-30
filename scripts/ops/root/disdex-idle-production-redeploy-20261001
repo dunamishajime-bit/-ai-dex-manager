@@ -173,10 +173,15 @@ rollback() {
     for p in "${STATE_PATHS[@]}"; do
       src="$BACKUP$p"
       if [[ -f "$src" ]]; then
-        install -d "$(dirname "$p")"
+        mkdir -p -- "$(dirname "$p")"
         cp -a -- "$src" "$p"
       fi
     done
+    if [[ -d /var/lib/disdex/pengu-dual-ls-v2 && ! -L /var/lib/disdex/pengu-dual-ls-v2 ]]; then
+      chown deploy:deploy /var/lib/disdex/pengu-dual-ls-v2
+      chmod 0700 /var/lib/disdex/pengu-dual-ls-v2
+      echo "ROLLBACK_PENGU_STATE_DIR=deploy:deploy:700"
+    fi
     rm -f /var/lib/disdex/runner-health/heartbeats/idle-priority-short.json
     tmp_link="$ROOT/.current-rollback-$REQUEST_ID"
     rm -f "$tmp_link"
@@ -214,15 +219,42 @@ done
 require_flat_account "$OLD_RELEASE"
 
 echo "CUTOVER_RELEASE_PREP_BEGIN"
+echo "CUTOVER_RELEASE_PREP_STEP=stage_dir"
 install -d -o deploy -g deploy -m 0755 "$STAGE"
+echo "CUTOVER_RELEASE_PREP_STEP=extract"
 tar --no-same-owner -xzf "$SOURCE_FILE" -C "$STAGE"
+echo "CUTOVER_RELEASE_PREP_STEP=manifest_check"
 [[ -f "$STAGE/package.json" && -f "$STAGE/package-lock.json" ]]
-cmp -s "$OLD_RELEASE/package-lock.json" "$STAGE/package-lock.json"
+old_lock_sha="$(sha256sum "$OLD_RELEASE/package-lock.json" | awk '{print $1}')"
+stage_lock_sha="$(sha256sum "$STAGE/package-lock.json" | awk '{print $1}')"
+echo "CUTOVER_OLD_PACKAGE_LOCK_SHA256=$old_lock_sha"
+echo "CUTOVER_STAGE_PACKAGE_LOCK_SHA256=$stage_lock_sha"
+[[ "$old_lock_sha" == "$stage_lock_sha" ]] || {
+  echo "CUTOVER_PACKAGE_LOCK_MISMATCH"
+  false
+}
+echo "CUTOVER_RELEASE_PREP_STEP=release_marker"
 printf '%s\n' "$TARGET_SHA" > "$STAGE/.disdex-release-sha"
+echo "CUTOVER_RELEASE_PREP_STEP=ownership"
 chown -R deploy:deploy "$STAGE"
-ln -s "$(readlink -f "$OLD_RELEASE/node_modules")" "$STAGE/node_modules"
-ln -s "$(readlink -f "$OLD_RELEASE/.venv2")" "$STAGE/.venv2"
+echo "CUTOVER_RELEASE_PREP_STEP=dependency_targets"
+node_modules_target="$(readlink -f "$OLD_RELEASE/node_modules" 2>/dev/null || true)"
+venv_target="$(readlink -f "$OLD_RELEASE/.venv2" 2>/dev/null || true)"
+echo "CUTOVER_NODE_MODULES_TARGET=$node_modules_target"
+echo "CUTOVER_VENV_TARGET=$venv_target"
+[[ -n "$node_modules_target" && -d "$node_modules_target" ]] || {
+  echo "CUTOVER_NODE_MODULES_TARGET_INVALID"
+  false
+}
+[[ -n "$venv_target" && -d "$venv_target" ]] || {
+  echo "CUTOVER_VENV_TARGET_INVALID"
+  false
+}
+echo "CUTOVER_RELEASE_PREP_STEP=dependency_links"
+ln -s "$node_modules_target" "$STAGE/node_modules"
+ln -s "$venv_target" "$STAGE/.venv2"
 chown -h deploy:deploy "$STAGE/node_modules" "$STAGE/.venv2"
+echo "CUTOVER_RELEASE_PREP_STEP=publish"
 mv -- "$STAGE" "$RELEASE"
 echo "CUTOVER_RELEASE_PREP_PASS release=$RELEASE"
 
