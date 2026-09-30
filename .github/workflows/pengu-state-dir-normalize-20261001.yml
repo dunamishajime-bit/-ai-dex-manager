@@ -1,0 +1,86 @@
+name: Normalize Production PENGU state directory
+on:
+  push:
+    branches: [design/idle-priority-bt-parity-20260929]
+    paths: [.github/workflows/pengu-state-dir-normalize-20261001.yml]
+permissions:
+  contents: read
+jobs:
+  normalize:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Capture target dependency manifest
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          echo "TARGET_PACKAGE_LOCK_SHA256=$(sha256sum package-lock.json | awk '{print $1}')" >> "$GITHUB_ENV"
+      - name: Initialize restricted root SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+      - name: Normalize PENGU directory without restarting trading services
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -p "$PORT" "root@$SSH_HOST" \
+            "TARGET_PACKAGE_LOCK_SHA256='$TARGET_PACKAGE_LOCK_SHA256' bash -s" <<'REMOTE'
+          set -Eeuo pipefail
+          root=/home/deploy/disdex-trading
+          current="$root/current"
+          sha="$(tr -d '[:space:]' < "$current/.disdex-release-sha")"
+          [[ "$sha" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$(readlink -f "$current")" == "$root/releases/$sha" ]]
+          remote_lock="$(sha256sum "$current/package-lock.json" | awk '{print $1}')"
+          echo "CURRENT_PACKAGE_LOCK_SHA256=$remote_lock"
+          echo "TARGET_PACKAGE_LOCK_SHA256=$TARGET_PACKAGE_LOCK_SHA256"
+          [[ "$remote_lock" == "$TARGET_PACKAGE_LOCK_SHA256" ]]
+          echo "PACKAGE_LOCK_VPS_TARGET_PARITY=PASS"
+
+          names=(disdex-v12-x1-all disdex-pengu-dual-ls-v2 disdex-quality102-causal-v1
+                 disdex-v52-aster-only disdex-fet-brk48 disdex-hype-long disdex-idle-priority-short
+                 disdex-shared-crypto-risk disdex-v12-v52-margin-guard)
+          pids=()
+          for name in "${names[@]}"; do
+            unit="$name@$sha.service"
+            [[ "$(systemctl is-active "$unit" 2>/dev/null || true)" == active ]]
+            pids+=("$(systemctl show "$unit" -p MainPID --value)")
+          done
+
+          dir=/var/lib/disdex/pengu-dual-ls-v2
+          [[ -d "$dir" && ! -L "$dir" ]]
+          chown deploy:deploy "$dir"
+          chmod 0700 "$dir"
+          [[ "$(stat -c '%U:%G:%a' "$dir")" == "deploy:deploy:700" ]]
+          echo "PENGU_STATE_DIR_NORMALIZED=deploy:deploy:700"
+
+          for i in "${!names[@]}"; do
+            unit="${names[$i]}@$sha.service"
+            [[ "$(systemctl is-active "$unit" 2>/dev/null || true)" == active ]]
+            [[ "$(systemctl show "$unit" -p MainPID --value)" == "${pids[$i]}" ]] || {
+              echo "UNEXPECTED_RUNNER_PID_CHANGE=$unit"
+              exit 41
+            }
+          done
+          [[ "$(tr -d '[:space:]' < "$current/.disdex-release-sha")" == "$sha" ]]
+          echo "STATUS=PENGU_STATE_DIR_NORMALIZED_WITHOUT_RUNNER_RESTART"
+          echo "CURRENT_SHA=$sha"
+          REMOTE
