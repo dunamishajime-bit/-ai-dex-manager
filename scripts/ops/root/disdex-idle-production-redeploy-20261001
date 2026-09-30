@@ -106,9 +106,11 @@ PY
 
 require_flat_account() {
   local runner_root="$1"
-  local tmp
+  local tmp budget_tmp
   tmp="$(mktemp)"
-  "$runner_root/node_modules/.bin/tsx" \
+  budget_tmp="/tmp/disdex-aster-readonly-budget-cutover-$RANDOM-$.json"
+  DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH="$budget_tmp" \
+    "$runner_root/node_modules/.bin/tsx" \
     "$runner_root/scripts/disdex-aster-readonly-account-diagnostic.ts" | tee "$tmp"
   python3 - "$tmp" <<'PY'
 import json,sys
@@ -123,6 +125,7 @@ assert x.get("ordersSent")==0 and x.get("cancelsSent")==0 and x.get("positionCha
 print("CUTOVER_ASTER_FLAT=PASS")
 PY
   rm -f "$tmp"
+  rm -rf -- "$budget_tmp" "$budget_tmp.lock" "$budget_tmp.lock.recovery"
 }
 
 load_runtime_env
@@ -350,7 +353,10 @@ for f in \
   [[ -f "$f" ]] && . "$f"
 done
 set +a
-"$RELEASE/node_modules/.bin/tsx" "$RELEASE/scripts/disdex-aster-readonly-account-diagnostic.ts"
+post_budget="/tmp/disdex-aster-readonly-budget-postdeploy-$RANDOM-$.json"
+DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH="$post_budget" \
+  "$RELEASE/node_modules/.bin/tsx" "$RELEASE/scripts/disdex-aster-readonly-account-diagnostic.ts"
+rm -rf -- "$post_budget" "$post_budget.lock" "$post_budget.lock.recovery"
 
 python3 - "$TARGET_SHA" <<'PY'
 import json,sys,urllib.request
