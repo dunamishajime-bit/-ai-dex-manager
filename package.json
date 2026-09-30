@@ -115,7 +115,7 @@
     "strategy:strict-bt33404708902:pipeline:selftest": "tsx scripts/disdex-quality102-causal-pipeline-selftest.ts",
     "strategy:strict-bt33404708902:contract": "tsx --test tests/strict_bt33404708902_contract.test.ts",
     "strategy:pengu-dual-ls-v2:v8-v64:selftest": "tsx scripts/pengu-v8-v64-dynamic-selftest.ts && tsx scripts/pengu-v8-gross-contract-selftest.ts",
-    "strategy:idle-priority-short:selftest": "tsx --test tests/idle-priority-short-signal.test.ts tests/idle-priority-short-idle-gate.test.ts tests/idle-priority-short-state.test.ts tests/idle-priority-short-market-data.test.ts tests/idle-priority-short-parity-cert.test.ts tests/idle-priority-short-live-path.test.ts tests/idle-priority-short-baseline-admission.test.ts",
+    "strategy:idle-priority-short:selftest": "tsx --test tests/idle-priority-short-signal.test.ts tests/idle-priority-short-idle-gate.test.ts tests/idle-priority-short-state.test.ts tests/idle-priority-short-market-data.test.ts tests/idle-priority-short-parity-cert.test.ts tests/idle-priority-short-live-path.test.ts tests/idle-priority-short-baseline-admission.test.ts tests/idle-priority-short-postdeploy-regression.test.ts",
     "strategy:idle-priority-short:live:selftest": "tsx scripts/disdex-idle-priority-short-live-runner.ts --self-test",
     "strategy:idle-priority-short:benign-recovery:selftest": "tsx scripts/disdex-idle-priority-short-benign-state-recovery.ts --self-test",
     "strategy:hype-zec-long:state:migrate:selftest": "tsx scripts/disdex-hype-zec-long-state-migrate.ts --self-test",
