@@ -14,7 +14,7 @@ import type { IdlePriorityShortRuntime } from "../config/idlePriorityShortRuntim
 import { buildIdleProtectionPlan, deterministicIdleClientOrderId, evaluateIdleLiveAdmission, type IdleBaselineAdmission } from "./idle-priority-short-live";
 import { buildBaselineAdmissionEvidence } from "./idle-priority-short-baseline-admission";
 import { assertIdleParityCertificate } from "./idle-priority-short-parity-cert";
-import { computeIdlePriorityFeatures, evaluateIdleGenericCandidate, evaluateIdlePriorityShort, type IdleFeatures, type IdleGenericCandidate, type IdleSignal } from "./idle-priority-short-signal";
+import { computeIdlePriorityFeatures, evaluateIdleGenericCandidate, evaluateIdlePriorityShort, type IdleFeatures, type IdleSignal } from "./idle-priority-short-signal";
 import { FileIdlePriorityShortStateStore, type IdleOwnedPosition, type IdlePending, type IdleState } from "./idle-priority-short-state";
 import type { IdlePriorityMarketSnapshot } from "./idle-priority-short-market-data";
 
