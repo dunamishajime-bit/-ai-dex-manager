@@ -112,6 +112,7 @@ release=Path(a.release_root); data=Path(a.data_root)
 
 expected=set(line.strip() for line in EXPECTED_KEYS.read_text().splitlines() if line.strip() and not line.startswith("#"))
 if len(expected)!=EXPECTED_COUNT: raise SystemExit(f"EXPECTED_COUNT_BAD:{len(expected)}")
+expected_events=set("|".join(k.split("|")[:2]) for k in expected)
 
 btc=load_market(data,"BTCUSDT"); market={s:load_market(data,s) for s in SYMBOLS}
 states={}
@@ -139,7 +140,7 @@ for p in ledger_paths:
               "exit_before":exit_before,"same_entry_blocks":same_entry_blocks})
 
 print(json.dumps({"event":"UNIQUE_IDLE_MASKS","count":len(mask_sources)}))
-best=None; exact=[]
+best=None; exact=[]; best_event=None; exact_event=[]
 priorities=list(itertools.permutations(("BREAKOUT","MOMENTUM","RELATIVE")))
 for mi,(ms,payload) in enumerate(mask_sources.items()):
     idle=payload["idle"]
@@ -150,14 +151,19 @@ for mi,(ms,payload) in enumerate(mask_sources.items()):
           rows=run(states,idle,mode,priority,side_order,mask_mode)
           keys=set(f"{s}|{t}|{ar}|{side}" for s,t,ar,side in rows)
           diff=len(keys^expected); sha=digest(rows)
+          event_keys=set(f"{s}|{t}" for s,t,ar,side in rows)
+          event_diff=len(event_keys ^ expected_events)
           row={"maskSha":ms,"idleHours":len(idle),"sources":payload["sources"],"mode":mode,
                "priority":">".join(priority),"sideOrder":">".join(side_order),"maskMode":mask_mode,
-               "count":len(rows),"sha256":sha,"symmetricDiff":diff}
+               "count":len(rows),"sha256":sha,"symmetricDiff":diff,"eventCount":len(event_keys),"eventSymmetricDiff":event_diff}
           if best is None or (diff,abs(len(rows)-EXPECTED_COUNT))<(best["symmetricDiff"],abs(best["count"]-EXPECTED_COUNT)):
               best=row
+          if best_event is None or (event_diff,abs(len(event_keys)-len(expected_events)))<(best_event["eventSymmetricDiff"],abs(best_event["eventCount"]-len(expected_events))):
+              best_event=row
+          if event_keys==expected_events: exact_event.append(row)
           if len(rows)==EXPECTED_COUNT and sha==EXPECTED_SHA: exact.append(row)
     if (mi+1)%100==0:
         print(json.dumps({"event":"LEDGER_MASK_PROGRESS","done":mi+1,"total":len(mask_sources),"best":best}))
-print(json.dumps({"event":"LEDGER_EXHAUSTIVE_RESULT","exact":exact,"best":best},sort_keys=True))
+print(json.dumps({"event":"LEDGER_EXHAUSTIVE_RESULT","exact":exact,"best":best,"exactEventModels":exact_event,"bestEvent":best_event},sort_keys=True))
 if len(exact)!=1:
     raise SystemExit(f"EXACT_LEDGER_MODEL_COUNT:{len(exact)}")
