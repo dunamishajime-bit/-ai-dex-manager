@@ -314,6 +314,20 @@ mv -Tf "$tmp_link" "$CURRENT"
 [[ "$(tr -d '[:space:]' < "$CURRENT/.disdex-release-sha")" == "$TARGET_SHA" ]]
 [[ "$(readlink -f "$CURRENT")" == "$RELEASE" ]]
 
+for state_dir in /var/lib/disdex/pengu-dual-ls-v2 /var/lib/disdex/idle-priority; do
+  [[ -d "$state_dir" && ! -L "$state_dir" ]] || {
+    echo "CUTOVER_STATE_DIR_INVALID=$state_dir"
+    false
+  }
+  chown deploy:deploy "$state_dir"
+  chmod 0700 "$state_dir"
+  [[ "$(stat -c '%U:%G:%a' "$state_dir")" == "deploy:deploy:700" ]] || {
+    echo "CUTOVER_STATE_DIR_MODE_FAILED=$state_dir"
+    false
+  }
+  echo "CUTOVER_STATE_DIR_NORMALIZED=$state_dir:deploy:deploy:700"
+done
+
 echo "CUTOVER_WIRING_BEGIN release=$RELEASE"
 (cd "$RELEASE" && bash scripts/ops/root/disdex-current-runtime-wiring --apply)
 echo "CUTOVER_WIRING_PASS"
