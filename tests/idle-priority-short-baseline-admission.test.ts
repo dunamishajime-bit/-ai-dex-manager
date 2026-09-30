@@ -38,10 +38,11 @@ async function fixture(overrides: Record<string, unknown> = {}) {
     await writeFile(paths.penguPath, JSON.stringify({
         strategyId: "PENGU_DUAL_LS_V2_FINAL",
         updatedAt: decisionTs,
+        lastRunAt: decisionTs,
         latestSignal: { referenceTs: decisionTs, side: 0, targetGross: 0 },
     }));
-    await writeFile(paths.fetPath, JSON.stringify({ schema: "fet-brk48-residual-state/v1", updatedAt: decisionTs, failures: [] }));
-    await writeFile(paths.v52Path, JSON.stringify({ strategyId: "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96", updatedAt: decisionTs }));
+    await writeFile(paths.fetPath, JSON.stringify({ schema: "fet-brk48-residual-state/v1", updatedAt: decisionTs, lastEvaluationDecisionTs: decisionTs, failures: [] }));
+    await writeFile(paths.v52Path, JSON.stringify({ strategyId: "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96", updatedAt: decisionTs, idleAdmissionDecisionTs: decisionTs }));
     return {
         root,
         paths,
@@ -95,6 +96,7 @@ test("retained older PENGU signal and an unselected Q102 item are not current ac
         await writeFile(f.paths.penguPath, JSON.stringify({
             strategyId: "PENGU_DUAL_LS_V2_FINAL",
             updatedAt: f.input.decisionTs,
+            lastRunAt: f.input.decisionTs,
             latestSignal: { referenceTs: f.input.decisionTs - 3_600_000, side: 1, targetGross: 1 },
         }));
         await writeFile(f.paths.q102Path, JSON.stringify({
@@ -132,3 +134,45 @@ test("missing or mismatched baseline source fails closed", async () => {
     }
 });
 
+
+test("Idle fails closed until every asynchronous baseline source completed the current cycle", async () => {
+    const f = await fixture();
+    try {
+        await writeFile(f.paths.penguPath, JSON.stringify({
+            strategyId: "PENGU_DUAL_LS_V2_FINAL",
+            updatedAt: f.input.decisionTs - 1,
+            lastRunAt: f.input.decisionTs - 1,
+            latestSignal: null,
+        }));
+        await assert.rejects(() => buildBaselineAdmissionEvidence(f.input), /BASELINE_ADMISSION_SOURCE_STALE_OR_TS_MISMATCH/);
+
+        await writeFile(f.paths.penguPath, JSON.stringify({
+            strategyId: "PENGU_DUAL_LS_V2_FINAL",
+            updatedAt: f.input.decisionTs,
+            lastRunAt: f.input.decisionTs,
+            latestSignal: null,
+        }));
+        await writeFile(f.paths.fetPath, JSON.stringify({
+            schema: "fet-brk48-residual-state/v1",
+            updatedAt: f.input.decisionTs,
+            lastEvaluationDecisionTs: f.input.decisionTs - 3_600_000,
+            failures: [],
+        }));
+        await assert.rejects(() => buildBaselineAdmissionEvidence(f.input), /BASELINE_ADMISSION_SOURCE_STALE_OR_TS_MISMATCH/);
+
+        await writeFile(f.paths.fetPath, JSON.stringify({
+            schema: "fet-brk48-residual-state/v1",
+            updatedAt: f.input.decisionTs,
+            lastEvaluationDecisionTs: f.input.decisionTs,
+            failures: [],
+        }));
+        await writeFile(f.paths.v52Path, JSON.stringify({
+            strategyId: "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96",
+            updatedAt: f.input.decisionTs,
+            idleAdmissionDecisionTs: f.input.decisionTs - 3_600_000,
+        }));
+        await assert.rejects(() => buildBaselineAdmissionEvidence(f.input), /BASELINE_ADMISSION_SOURCE_STALE_OR_TS_MISMATCH/);
+    } finally {
+        await rm(f.root, { recursive: true, force: true });
+    }
+});
