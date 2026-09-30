@@ -1,0 +1,37 @@
+name: Idle Priority baseline factor overlay diagnostic
+on:
+  push:
+    branches: [design/idle-priority-bt-parity-20260929]
+    paths:
+      - ".github/workflows/idle-priority-baseline-factor-overlay.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download canonical release and replay H1 factor overlay
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release download bt-v12-score100-volume080-normalonly-20260928 --repo dunamishajime-bit/-ai-dex-manager --pattern 'bt-v12-score100-volume080-normalonly-20260928.tar.gz'
+          echo '891c36d8a5957cafe3aae65656a98b7c02a3c437c4f520fe63756d550f08b4fb  bt-v12-score100-volume080-normalonly-20260928.tar.gz' | sha256sum -c -
+          mkdir evidence
+          tar -xzf bt-v12-score100-volume080-normalonly-20260928.tar.gz -C evidence
+          LEDGER="$(find evidence -type f -path '*/selected-five-logic-all-cases-all-costs/BRK0P75_MR0P75_FET1_DUAL_GATE/PRICE_MODEL_10BPS/portfolio-trades.jsonl' | head -1)"
+          test -n "$LEDGER"
+          DIR="$(dirname "$LEDGER")"
+          BTC="$(find evidence -type f -path '*/market-Aster-H1-funding-and-manifests/normalized/aster/klines/BTCUSDT.jsonl' | head -1)"
+          test -n "$BTC"
+          DATA="$(python -c "from pathlib import Path; print(Path('$BTC').resolve().parents[3])")"
+          python research/idle_priority_baseline_factor_overlay.py             --baseline-trades "$LEDGER"             --baseline-events "$DIR/portfolio-events.jsonl"             --baseline-metrics "$DIR/metrics.json"             --idle-intents research/idle_priority_61_intents.json             --idle-target-net research/idle_priority_61_target_net.json             --data-root "$DATA"             --output baseline-factor-overlay.json | tee baseline-factor-overlay.log
+      - uses: actions/upload-artifact@v4
+        with:
+          name: idle-priority-baseline-factor-overlay
+          path: |
+            baseline-factor-overlay.json
+            baseline-factor-overlay.log
+          retention-days: 30
