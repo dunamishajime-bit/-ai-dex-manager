@@ -498,6 +498,9 @@ export class FetBrk48LiveRunner {
       if (unmanaged.length) return { status: "blocked", message: "FET_UNMANAGED_OPEN_ORDER_CONFLICT", ordersSent: 0 };
 
       const klines = await this.deps.client.getKlines("FETUSDT", "1h", 120);
+      const evaluationDecisionTs = Math.floor(now / 3_600_000) * 3_600_000;
+      state.lastEvaluationDecisionTs = evaluationDecisionTs;
+      await writeFetBrk48State(this.deps.statePath, state);
       const signal = buildFetBrk48Signal(normalizeFetH1(klines, now), now);
       if (!signal) return { status: "no-signal", message: "FET_NO_BRK48_SIGNAL", ordersSent: 0 };
       if (state.lastReferenceTs && signal.referenceTs <= state.lastReferenceTs) {
