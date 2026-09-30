@@ -144,6 +144,24 @@ jobs:
             [[ -f "$env_file" ]] && . "$env_file"
           done
           set +a
+          echo "PERMISSION_AUDIT_BEGIN"
+          for p in /var/lib/disdex/shared /var/lib/disdex/shared/aster-rate-budget.json /var/lib/disdex/shared/aster-rate-budget.json.lock /var/lib/disdex/shared/operator-activation/current.json /var/lib/disdex/shared/operator-activation/runtime.json /var/lib/disdex/shared/kill-switch.json /var/lib/disdex/shared/crypto-daily-risk.json /var/lib/disdex/shared/margin-risk /var/lib/disdex/idle-priority /var/lib/disdex/idle-priority/state.json; do
+            if [[ -e "$p" || -L "$p" ]]; then
+              stat -c 'PERM path=%n type=%F owner=%U group=%G mode=%a uid=%u gid=%g size=%s' "$p" || true
+            else
+              echo "PERM_MISSING path=$p"
+            fi
+          done
+          echo "PERMISSION_AUDIT_END"
+
+          echo "FAILED_UNIT_JOURNAL_BEGIN"
+          for name in disdex-v12-x1-all disdex-pengu-dual-ls-v2 disdex-fet-brk48 disdex-idle-priority-short disdex-shared-crypto-risk disdex-v12-v52-margin-guard; do
+            unit="$name@$sha.service"
+            echo "JOURNAL_UNIT=$unit"
+            journalctl -u "$unit" --no-pager -n 80 -o short-iso 2>/dev/null | tail -80 || true
+          done
+          echo "FAILED_UNIT_JOURNAL_END"
+
           echo "ASTER_READONLY_DIAGNOSTIC_BEGIN"
           "$current/node_modules/.bin/tsx" "$current/scripts/disdex-aster-readonly-account-diagnostic.ts"
           echo "ASTER_READONLY_DIAGNOSTIC_END"
