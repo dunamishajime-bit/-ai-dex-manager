@@ -1,3 +1,5 @@
+> **2026-09-30 controlling cost/replay correction:** Economic parity is governed by `docs/implementation/IDLE_PRIORITY_COST_RECONCILIATION_20260930.md`. The historical JPY268.05M / 1,342 / PF~2.055 / DD~-23.24% bundle mixes incompatible cost/replay outputs and is not a valid single-run 10bps certificate. Signal/candidate semantics in this design remain controlling unless explicitly corrected.
+
 > **2026-09-30 parity correction:** Historical JPY268.05M parity is governed by `docs/implementation/IDLE_PRIORITY_HISTORICAL_OVERLAY_PARITY_CORRECTION_20260930.md`. The 63 Idle rows were prequalified from baseline-only idle windows and the 63→61 exclusions are same-symbol Idle occupancy at DOT 1780318800000 and TIA 1784250000000. Do not re-gate those rows against a newly path-dependent integrated baseline candidate state when reproducing the historical overlay.
 
 # Idle Priority SHORT — ¥268.05M BT Parity Design
@@ -8,7 +10,7 @@ Repository: `dunamishajime-bit/-ai-dex-manager`
 
 ## 1. Purpose
 
-Add a production-safe, dedicated Aster crypto sleeve that reproduces the behavior of the integrated Idle-Regime backtest that finished at approximately **¥268.05M** from the adopted five-logic baseline of approximately **¥141.85M**.
+Add a production-safe, dedicated Aster crypto sleeve that preserves the verified Idle signal/admission behavior from the historical research while using a coherent, explicitly identified cost/replay model. The adopted primary economic reference is the 10bps fixed-intent dynamic-Gross overlay; the old ¥268.05M headline is retained only as a historical mixed-report label.
 
 The governing requirement is **BT parity first**. The implementation must not introduce a different priority rule, partial sizing rule, preemption behavior, entry route, hold time, or signal threshold just because it seems operationally convenient.
 
@@ -39,12 +41,21 @@ The integrated replay admitted **61** of those candidates. The actual admitted t
 | RENDER | 15 | 11 | 4 | 73.3% |
 | **Total** | **61** | **48** | **13** | **78.7%** |
 
-The integrated 10bps result previously verified for this Idle-only add-on was approximately:
+The historical report previously labeled the integrated result as “10bps ¥268.05M”, but cost/replay reconciliation disproved that as a coherent single run.
 
-- final equity: **¥268.05M**
-- baseline final equity: **¥141.85M**
-- max DD: approximately **-23.24%**
-- Idle sleeve win rate: approximately **78.7%**
+Primary coherent 10bps fixed-intent dynamic-Gross reference:
+- final equity: approximately **¥214.78M**
+- integrated trades: **1,339**
+- PF: approximately **2.04643**
+- diagnostic hourly DD: approximately **-22.84%**
+- Idle sleeve: **61 trades / 48W 13L**
+- Idle PF: approximately **6.583**
+
+8bps sensitivity:
+- final equity: approximately **¥268.15M**
+- integrated trades: **1,339**
+- PF: approximately **2.09255**
+- diagnostic hourly DD: approximately **-22.69%**
 
 These numbers are acceptance anchors, not permission to retune until the result matches. If implementation-parity replay materially differs, stop and explain the discrepancy.
 
@@ -392,7 +403,7 @@ LIVE activation is blocked until all are true:
 4. Per-route target-hold win counts reproduce the evidence.
 5. Integrated replay reproduces **61 admitted Idle trades** under the same baseline-five ledger.
 6. Integrated replay reproduces the Idle trade win count **48 / 61**.
-7. Final equity and DD reconcile to the previously verified ¥268.05M run within a documented deterministic tolerance.
+7. Cost and replay identity are explicit. The primary 10bps run reconciles to the coherent 1,339-trade / ~¥214.78M reference; 8bps is reported separately and must never be combined with 10bps baseline/PF/DD.
 8. Every divergence is explained; no threshold is retuned to force parity.
 9. Explicit tests prove same-timestamp baseline-five accepted entry blocks Idle.
 10. Explicit tests prove open Idle is not preempted by later baseline-five signal.
