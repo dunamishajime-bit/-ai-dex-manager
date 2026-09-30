@@ -33,6 +33,7 @@ const V52_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_V52_EXPECTED_SHA", "DISDEX_HEA
 const Q102_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_Q102_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_Q102_RELEASE_ROOT");
 const FET_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_FET_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_FET_RELEASE_ROOT");
 const HYPE_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_HYPE_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_HYPE_RELEASE_ROOT");
+const IDLE_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_IDLE_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_IDLE_RELEASE_ROOT");
 
 const RUNNERS = [
     {
@@ -100,6 +101,17 @@ const RUNNERS = [
         statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_HYPE_STATE_PATH", "/var/lib/disdex/hype-zec-long/runner.json"),
         heartbeatFile: "hype-trend-long.json",
         maxStateAgeMs: 3 * 60 * 60_000,
+    },
+    {
+        key: "IDLE_PRIORITY_SHORT",
+        runnerId: "IDLE_PRIORITY_SHORT",
+        unit: `disdex-idle-priority-short@${IDLE_PIN.expectedSha}.service`,
+        expectedSha: IDLE_PIN.expectedSha,
+        releaseRoot: IDLE_PIN.releaseRoot,
+        script: "scripts/disdex-idle-priority-short-live-runner.ts",
+        statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_IDLE_STATE_PATH", "/var/lib/disdex/idle-priority/state.json"),
+        heartbeatFile: "idle-priority-short.json",
+        maxStateAgeMs: 20 * 60_000,
     },
 ];
 
@@ -271,7 +283,8 @@ function stateIdentityMatches(runner, state) {
         || (runner.key === "V12_X1_ALL" && strategyId === "V12_X1.00_ALL")
         || (runner.key === "PENGU_V8" && strategyId === "PENGU_DUAL_LS_V2_FINAL")
         || (runner.key === "V52" && strategyId === "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96")
-        || (runner.key === "HYPE_TREND_LONG" && state?.schema === "disdex-hype-zec-long/v1" && state?.mode === "LIVE" && String(state?.runtimeCommitSha || "").toLowerCase() === runner.expectedSha);
+        || (runner.key === "HYPE_TREND_LONG" && state?.schema === "disdex-hype-zec-long/v1" && state?.mode === "LIVE" && String(state?.runtimeCommitSha || "").toLowerCase() === runner.expectedSha)
+        || (runner.key === "IDLE_PRIORITY_SHORT" && state?.schema === "disdex-idle-priority-state/v2" && String(state?.runtimeSha || "").toLowerCase() === runner.expectedSha);
 }
 
 async function buildHeartbeat(runner, now, globalBlockReason) {
