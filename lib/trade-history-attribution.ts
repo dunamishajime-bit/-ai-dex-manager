@@ -40,6 +40,7 @@ export type TradeHistoryAttributionTone =
   | "fet"
   | "hype"
   | "zec"
+  | "idle-priority"
   | "alternate-route"
   | "test-order"
   | "logic"
@@ -94,6 +95,7 @@ export function getTradeHistoryAttributionTone(attribution?: TradeHistoryAttribu
   if (labels.includes("V52")) return "v52";
   if (labels.includes("HYPE_LONG") || /\bHYPE\b/.test(labels)) return "hype";
   if (labels.includes("ZEC_LONG") || /\bZEC\b/.test(labels)) return "zec";
+  if (labels.includes("IDLE_PRIORITY_SHORT") || labels.includes("IDLE PRIORITY")) return "idle-priority";
   if (labels.includes("FET")) return "fet";
   if (labels.includes("V12")) return "v12";
   return attribution.classification === "alternate-route" ? "alternate-route" : attribution.classification === "logic" ? "logic" : "unknown";
@@ -114,6 +116,7 @@ function logicLabel(strategyId: string, reason: string) {
   const normalized = strategyId.toUpperCase();
   if (normalized === "HYPE_LONG" || normalized === "HYPE") return "HYPE";
   if (normalized === "ZEC_LONG" || normalized === "ZEC") return "ZEC";
+  if (normalized === "IDLE_PRIORITY_SHORT" || normalized === "IDLE_PRIORITY") return "Idle Priority SHORT";
   if (normalized.includes("QUALITY102") || normalized === "Q102") {
     return reason.toUpperCase().includes("CAUSAL_V4") ? "Q102 / CAUSAL_V4" : "Q102";
   }
@@ -131,6 +134,7 @@ function explicitLogicId(strategyId: string, reason: string) {
   const upper = reason.toUpperCase();
   if (/HYPE_ZEC_HYPE_LONG|\bHYPE_LONG\b/.test(upper)) return "HYPE";
   if (/HYPE_ZEC_ZEC_LONG|\bZEC_LONG\b/.test(upper)) return "ZEC";
+  if (/IDLE_PRIORITY_SHORT/.test(upper)) return "Idle Priority SHORT";
   if (/QUALITY102|Q102/.test(upper)) return upper.includes("CAUSAL_V4") ? "Q102 / CAUSAL_V4" : "Q102";
   if (/PENGU/.test(upper)) return "PENGU";
   if (/V12/.test(upper)) return "V12";
@@ -156,6 +160,9 @@ function routeLabel(reason: string) {
   if (/normal[_\s-]*score/i.test(reason)) return "Normal Score";
   if (/v11[_\s-]*eq/i.test(reason)) return "V11_EQ";
   if (/v50/i.test(reason)) return "V50";
+  const idleRoute = reason.match(/IDLE_PRIORITY_SHORT_(?:ENTRY|EXIT):([A-Z0-9_]+)/i)?.[1]
+    || reason.match(/\b(IDLE_(?:TAO|TIA|DOT|JUP|RENDER)_[A-Z0-9_]+)\b/i)?.[1];
+  if (idleRoute) return idleRoute.toUpperCase();
   const route = reason.match(/(?:route|経路)\s*(?:=|:)\s*([^/]+)/i)?.[1]?.trim();
   return route || undefined;
 }
