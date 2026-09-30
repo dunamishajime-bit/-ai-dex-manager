@@ -16,6 +16,7 @@ import { buildHypeTrendSignal, type HypeTrendCandle } from "./hype-trend-long-si
 import { evaluateHypeTrendEntryGate } from "./hype-trend-long-runner";
 import type { HypeZecLongMarketData } from "./hype-zec-long-market-data";
 import { FileHypeZecLongRunnerStateStore, type HypeZecLongPositionState, type HypeZecLongRunnerState } from "./hype-zec-long-runner-state";
+import { BENIGN_HYPE_ZEC_MARKET_DATA_REVIEW } from "./hype-zec-long-recovery-contract";
 
 const EPSILON = 1e-9;
 
@@ -40,6 +41,14 @@ function defaultLogger() {
     warn: (message: string, payload?: Record<string, unknown>) => console.warn(JSON.stringify({ level: "warn", message, ...(payload || {}) })),
     error: (message: string, payload?: Record<string, unknown>) => console.error(JSON.stringify({ level: "error", message, ...(payload || {}) })),
   };
+}
+
+export function isRecoverableHypeZecMarketDataFailure(message: string) {
+  return message === "HYPE_ZEC_MARKET_DATA_ROW_INVALID";
+}
+
+function isBenignMarketDataReview(message: unknown) {
+  return message === BENIGN_HYPE_ZEC_MARKET_DATA_REVIEW;
 }
 
 function positionSide(position: DirectPosition): "LONG" | "SHORT" {
@@ -324,17 +333,41 @@ export class HypeZecLongRunner {
     if (!lock) return { status: "locked", message: "HYPE_ZEC_LONG_ACCOUNT_LOCK_BUSY" };
     try {
       const state = await this.dependencies.stateStore.load();
-      if (state.manualReview) return { status: "manual-review", message: state.manualReview };
+      const benignReview = isBenignMarketDataReview(state.manualReview);
+      if (state.manualReview && !benignReview) return { status: "manual-review", message: state.manualReview };
       if (state.pending) return this.manualReview(state, "HYPE_ZEC_PENDING_REQUIRES_RECONCILIATION");
-      const [account, positions, openOrders, market] = await Promise.all([
+      const [account, positions, openOrders] = await Promise.all([
         this.dependencies.executor.getAccountSnapshot(),
         this.dependencies.executor.getPositions(),
         this.dependencies.executor.getOpenOrders(),
-        this.dependencies.marketData.load(),
       ]);
       const ownershipIssue = await this.reconcileOwnership(state, positions, openOrders);
       if (ownershipIssue) return this.manualReview(state, ownershipIssue);
-      if ((await this.unmanagedOrders(openOrders, positions)).length > 0) return { status: "held", message: "HYPE_ZEC_UNMANAGED_OPEN_ORDER_BLOCK", };
+      if ((await this.unmanagedOrders(openOrders, positions)).length > 0) return { status: "held", message: "HYPE_ZEC_UNMANAGED_OPEN_ORDER_BLOCK" };
+      let market: HypeZecLongMarketData;
+      try {
+        market = await this.dependencies.marketData.load();
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        const hasSidecarPosition = positions.some((position) => (
+          (position.symbol.toUpperCase() === "HYPEUSDT" || position.symbol.toUpperCase() === "ZECUSDT")
+          && Math.abs(position.quantity) > EPSILON
+        ));
+        if (isRecoverableHypeZecMarketDataFailure(message) && !hasSidecarPosition && !(state.positions || []).length && !state.pending) {
+          state.manualReview = undefined;
+          state.lastDecision = { strategy: "HYPE_LONG", signalTs: null, accepted: false, reason: BENIGN_HYPE_ZEC_MARKET_DATA_REVIEW };
+          state.lastDecisionTs = this.now();
+          state.failures = [...state.failures, { message: "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY", occurredAt: this.now() }].slice(-100);
+          await this.dependencies.stateStore.save(state);
+          this.log.warn("hype-zec-benign-market-data-recovery", { reason: message, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 });
+          return { status: "held", message: "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY" };
+        }
+        throw error;
+      }
+      if (benignReview) {
+        state.manualReview = undefined;
+        state.failures = [...state.failures, { message: "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY", occurredAt: this.now() }].slice(-100);
+      }
       for (const owned of state.positions || []) {
         const actual = actualPosition(positions, owned.symbol);
         if (!actual) return this.manualReview(state, `HYPE_ZEC_POSITION_MISSING:${owned.symbol}`);

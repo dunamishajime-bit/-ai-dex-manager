@@ -16,6 +16,8 @@ test("Idle LIVE unit loads the same Aster credential env sources as existing LIV
 
 test("runtime wiring performs formal HYPE state lineage migration before activation", async () => {
   const wiring = await readFile("scripts/ops/root/disdex-current-runtime-wiring", "utf8");
+  assert.match(wiring, /disdex-hype-zec-benign-market-data-recovery\.ts/);
+  assert.match(wiring, /recover_hype_benign_state\s+migrate_hype_state_lineage/);
   assert.match(wiring, /disdex-hype-zec-long-state-migrate\.ts/);
   assert.match(wiring, /--state-path \"\$HYPE_ZEC_STATE_ROOT\/runner\.json\"/);
   assert.match(wiring, /--to-sha \"\$DEPLOYED_SHA\"/);

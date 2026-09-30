@@ -2,6 +2,13 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import { assertHypeZecLiveGate, resolveHypeZecLongRuntime } from "../config/hypeZecLongRuntime";
+import { isRecoverableHypeZecMarketDataFailure } from "../lib/hype-zec-long-runner";
+
+test("only the known malformed market row is a retryable HYPE data failure", () => {
+  assert.equal(isRecoverableHypeZecMarketDataFailure("HYPE_ZEC_MARKET_DATA_ROW_INVALID"), true);
+  assert.equal(isRecoverableHypeZecMarketDataFailure("HYPE_ZEC_MARKET_DATA_GAP:HYPEUSDT:1:2"), false);
+  assert.equal(isRecoverableHypeZecMarketDataFailure("permission denied"), false);
+});
 
 test("HYPE/ZEC runtime defaults to fail-closed shadow mode", () => {
   const runtime = resolveHypeZecLongRuntime({ NODE_ENV: "test" });
