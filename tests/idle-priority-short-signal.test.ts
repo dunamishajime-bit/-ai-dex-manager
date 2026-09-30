@@ -82,6 +82,6 @@ test("symbol filters remain additional to generic gates",()=>{
  const tia={...base,breakoutShort24:true,breakdown24:true,ret24:-0.05,rel24:-0.01,volumeRatio:100.01};
  assert.equal(evaluateIdlePriorityShort("TIAUSDT",tia,evaluateIdleGenericCandidate(tia)).accepted,false);
 
- const dot={...base,breakoutShort24:false,ret12:-0.04,ret24:-0.02,rel24:-0.03,btc24:0.01,volumeRatio:1.2};
+ const dot={...base,breakoutShort24:false,ret12:-0.04,ret24:-0.02,rel24:-0.01,btc24:0.01,volumeRatio:1.2};
  assert.equal(evaluateIdlePriorityShort("DOTUSDT",dot,evaluateIdleGenericCandidate(dot)).accepted,false);
 });
