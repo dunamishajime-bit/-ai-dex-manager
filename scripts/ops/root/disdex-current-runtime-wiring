@@ -1004,6 +1004,7 @@ self_test() {
     scripts/disdex-fet-brk48-live-runner.ts \
     scripts/disdex-hype-trend-live-runner.ts \
     scripts/disdex-hype-zec-long-live-runner.ts \
+    scripts/disdex-hype-zec-long-state-migrate.ts \
     scripts/disdex-hype-zec-core-preempt.ts \
     scripts/disdex-idle-priority-short-live-runner.ts \
     lib/idle-priority-short-runner.ts \
