@@ -94,7 +94,7 @@ type GenericSide = "LONG" | "SHORT";
 type GenericCandidate = { symbol: IdlePrioritySymbol; t: number; archetype: GenericArchetype; side: GenericSide };
 
 const EXPECTED_GENERIC_5_COUNT = 393;
-const EXPECTED_GENERIC_5_SHA256 = "d32ed3a07a6338e8fae792ec6d9071ea27a1dee548eed6a3825dfbda3270019";
+const EXPECTED_GENERIC_5_SHA256 = "d32ed3a07a6338e8fae792ec6d9071ea27a1dee548eed6a3825dfbda3270019a";
 
 
 type BaselineTrade = { entry_ts_ms: number; exit_ts_ms: number };
