@@ -29,15 +29,50 @@ ap.add_argument("--baseline-events",required=True)
 ap.add_argument("--baseline-metrics",required=True)
 ap.add_argument("--idle-intents",required=True)
 ap.add_argument("--idle-target-net",required=True)
-ap.add_argument("--release-root",required=True)
 ap.add_argument("--data-root",required=True)
 ap.add_argument("--request-mode",choices=["accepted","candidate"],default="accepted")
 ap.add_argument("--without-idle",action="store_true")
 ap.add_argument("--output",required=True)
 a=ap.parse_args()
 
-sys.path.insert(0,str(Path(a.release_root).resolve()))
-from research.formal_five_bt.portfolio_price_model import _market,_mark,_side_sign  # type: ignore
+def _rows(path):
+    out=[]
+    for line in Path(path).read_text(encoding="utf-8").splitlines():
+        if line.strip(): out.append(json.loads(line))
+    return out
+
+def _market(data_root,symbols):
+    output={}
+    root=Path(data_root)
+    for symbol in sorted(symbols):
+        crypto=root/"normalized/aster/klines"/f"{symbol}.jsonl"
+        stock=root/"normalized/aster_stock/klines"/f"{symbol}.jsonl"
+        source=crypto if crypto.is_file() else stock
+        if not source.is_file():
+            raise RuntimeError(f"MARKET_FILE_MISSING:{symbol}:{crypto}:{stock}")
+        rows=_rows(source)
+        rows.sort(key=lambda r:int(r["event_time_ms"]))
+        output[symbol]={"rows":rows,"times":[int(r["event_time_ms"]) for r in rows]}
+    return output
+
+def _mark(market,symbol,ts):
+    import bisect
+    series=market[symbol]
+    idx=bisect.bisect_right(series["times"],int(ts))-1
+    if idx<0:return None
+    row=series["rows"][idx]
+    start=int(row["event_time_ms"])
+    HOUR=3600_000
+    if start==ts:return float(row["open"])
+    if ts>=start+HOUR:
+        return float(row["close"]) if ts==start+HOUR else None
+    if idx<1:return None
+    prev=series["rows"][idx-1]
+    if int(prev["event_time_ms"])+HOUR!=start:return None
+    return float(prev["close"])
+
+def _side_sign(side):
+    return 1.0 if side=="LONG" else -1.0
 
 base=jl(a.baseline_trades)
 events=jl(a.baseline_events)
