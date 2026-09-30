@@ -151,8 +151,9 @@ jobs:
           [[ -f "$source_file" && -f "$next_file" ]]
           [[ ! -e "$release" && ! -L "$release" && ! -e "$stage" ]]
 
-          prefix="$(printf '%240s' ' ' | tr ' ' z)"
-          dropin="/etc/systemd/system/ai-dex-manager-ui.service.d/$prefix-hp-idle-20261001.conf"
+          prefix="$(printf '%230s' ' ' | tr ' ' z)"
+          dropin="/etc/systemd/system/ai-dex-manager-ui.service.d/$prefix.conf"
+          [[ "$(basename "$dropin" | wc -c)" -le 255 ]]
           [[ ! -e "$dropin" ]]
           mapfile -t old_dropins < <(systemctl show "$ui" --property DropInPaths --value | tr ' ' '\n')
           for f in "${old_dropins[@]}"; do
@@ -211,6 +212,11 @@ jobs:
             fi
             sleep 2
           done
+          echo "HP_IDLE_UI_READY=$ready"
+          echo "HP_IDLE_UI_ACTIVE=$(systemctl is-active "$ui" 2>/dev/null || true)"
+          echo "HP_IDLE_UI_WORKDIR=$(systemctl show "$ui" --property WorkingDirectory --value)"
+          echo "HP_IDLE_UI_DROPINS=$(systemctl show "$ui" --property DropInPaths --value)"
+          echo "HP_IDLE_UI_ENV=$(systemctl show "$ui" --property Environment --value | tr ' ' '\n' | grep '^DISDEX_UI_RELEASE_SHA=' | tail -1)"
           [[ "$ready" == true ]]
           [[ "$(systemctl show "$ui" --property WorkingDirectory --value)" == "$release" ]]
           new_ui="$(systemctl show "$ui" --property Environment --value | tr ' ' '\n' | sed -n 's/^DISDEX_UI_RELEASE_SHA=//p' | tail -1)"
