@@ -34,8 +34,10 @@ ap.add_argument("--data-root",required=True)
 ap.add_argument("--request-mode",choices=["accepted","candidate"],default="accepted")
 ap.add_argument("--without-idle",action="store_true")
 ap.add_argument("--idle-fee-path",choices=["split","net_exit"],default="split")
+ap.add_argument("--roundtrip-bps",type=float,choices=[8.0,10.0],default=10.0)
 ap.add_argument("--output",required=True)
 a=ap.parse_args()
+COST_SIDE=float(a.roundtrip_bps)/20000.0
 
 def _rows(path):
     out=[]
@@ -83,7 +85,11 @@ idle=j(a.idle_intents)
 rets=j(a.idle_target_net)
 if len(base)!=1284: raise SystemExit(f"BASELINE_ROWS_MISMATCH:{len(base)}")
 if len(idle)!=61 or len(rets)!=61: raise SystemExit("IDLE_ROWS_MISMATCH")
-for x,r in zip(idle,rets): x["target_net"]=float(r)
+for x,r in zip(idle,rets):
+    x["target_net_10bps"]=float(r)
+    # Canonical CSV target_net is a 10bps round-trip research return.
+    # Keep the same gross price path and adjust only the round-trip cost.
+    x["target_net"]=float(r)+(10.0-float(a.roundtrip_bps))/10000.0
 if a.without_idle: idle=[]
 
 by_pid={}
@@ -146,8 +152,21 @@ for t in sorted(base,key=lambda x:(int(x["entry_ts_ms"]),PRIORITY[x["strategy_id
 for x in idle:
     push(int(x["entry_ts_ms"]),3,"IDLE_ENTRY",x)
 
+# Hourly marks are research-only and do not affect admission ordering.
+# They let this diagnostic report MTM drawdown on the same H1 cadence.
+all_starts=[ts for ts,_,_ in contrib]+[int(t["entry_ts_ms"]) for t in base]+[int(x["entry_ts_ms"]) for x in idle]
+all_ends=[int(t["exit_ts_ms"]) for t in base]+[int(x["exit_ts_ms"]) for x in idle]
+mark_start=min(all_starts)
+mark_end=max(all_ends)
+HOUR=3600_000
+mark_start=(mark_start//HOUR)*HOUR
+mark_end=((mark_end+HOUR-1)//HOUR)*HOUR
+for mts in range(mark_start,mark_end+1,HOUR):
+    push(mts,9,"MARK",{})
+
 wallet=0.0
 active={}
+equity_marks=[]
 next_idle_pid=-1
 completed=[]
 rejected=[]
@@ -157,6 +176,10 @@ idle_return_price_check=[]
 # Track original-baseline replay expected quantity for baseline-only validation.
 while heap:
     ts,phase,_,kind,payload=heapq.heappop(heap)
+    if kind=="MARK":
+        eqmark=active_equity(wallet,active,ts)
+        equity_marks.append((ts,eqmark))
+        continue
     if kind=="CONTRIB":
         wallet+=float(payload["amount"])
         continue
@@ -323,13 +346,37 @@ base_completed=[x for x in completed if x["kind"]=="BASELINE"]
 idle_completed=[x for x in completed if x["kind"]=="IDLE"]
 rej_base=[x for x in rejected if x["kind"]=="BASELINE"]
 rej_idle=[x for x in rejected if x["kind"]=="IDLE"]
+
+pnls=[float(x["trade_pnl_settlement"]) for x in completed]
+gains=sum(x for x in pnls if x>0)
+losses=-sum(x for x in pnls if x<0)
+profit_factor=(gains/losses) if losses>0 else math.inf
+idle_pnls=[float(x["trade_pnl_settlement"]) for x in idle_completed]
+idle_gains=sum(x for x in idle_pnls if x>0)
+idle_losses=-sum(x for x in idle_pnls if x<0)
+idle_profit_factor=(idle_gains/idle_losses) if idle_losses>0 else math.inf
+peak=None
+max_dd=0.0
+for _,v in equity_marks:
+    if peak is None or v>peak: peak=v
+    if peak and peak>0:
+        max_dd=min(max_dd,v/peak-1.0)
+strategy_counts=dict(Counter(x["strategy"] for x in completed))
 out={
  "status":"DIAGNOSTIC_NOT_PRODUCTION_CERTIFICATE",
  "request_mode":a.request_mode,"without_idle":a.without_idle,"idle_fee_path":a.idle_fee_path,
+ "roundtrip_bps":a.roundtrip_bps,
  "baseline_input":len(base),"idle_input":len(idle),
  "baseline_completed":len(base_completed),"idle_completed":len(idle_completed),
  "baseline_rejected":len(rej_base),"idle_rejected":len(rej_idle),
  "combined_completed":len(completed),
+ "profit_factor":profit_factor,
+ "max_mtm_drawdown":max_dd,
+ "idle_profit_factor":idle_profit_factor,
+ "idle_pnl_settlement":sum(idle_pnls),
+ "idle_pnl_jpy_final_fx":sum(idle_pnls)*final_fx,
+ "strategy_counts":strategy_counts,
+ "equity_mark_count":len(equity_marks),
  "final_wallet_settlement":wallet,"final_fx_jpy_per_usd":final_fx,"final_equity_jpy":final_jpy,
  "baseline_anchor_jpy":float(metrics["final_equity_jpy"]),
  "baseline_anchor_trades":int(metrics["closed_trades"]),
@@ -339,5 +386,5 @@ out={
  "idle_price_return_max_abs_error":max(idle_return_price_check) if idle_return_price_check else None,
 }
 Path(a.output).write_text(json.dumps(out,indent=2,sort_keys=True)+"\n",encoding="utf-8")
-print(json.dumps({k:out[k] for k in ["request_mode","without_idle","idle_fee_path","baseline_input","idle_input","baseline_completed","idle_completed","baseline_rejected","idle_rejected","combined_completed","final_equity_jpy","baseline_anchor_jpy","rejections_by_strategy","idle_price_return_max_abs_error"]},sort_keys=True))
+print(json.dumps({k:out[k] for k in ["request_mode","without_idle","idle_fee_path","roundtrip_bps","baseline_input","idle_input","baseline_completed","idle_completed","baseline_rejected","idle_rejected","combined_completed","final_equity_jpy","baseline_anchor_jpy","profit_factor","max_mtm_drawdown","idle_pnl_jpy_final_fx","idle_profit_factor","strategy_counts","rejections_by_strategy","idle_price_return_max_abs_error"]},sort_keys=True))
 print("REJECTIONS="+json.dumps(rejected,sort_keys=True))
