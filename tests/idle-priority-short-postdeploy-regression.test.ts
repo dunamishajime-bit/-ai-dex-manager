@@ -23,7 +23,7 @@ function position(symbol: string, notionalUsd: number, quantity = -1) {
     } as any;
 }
 
-function signal(symbol: "TAOUSDT" | "TIAUSDT" | "DOTUSDT" | "JUPUSDT" | "RENDERUSDT", signalTs: number): IdleSignal {
+function signal(symbol: "TAOUSDT" | "TIAUSDT" | "DOTUSDT" | "JUPUSDT" | "RENDERUSDT", decisionTs: number): IdleSignal {
     return {
         accepted: true,
         symbol,
@@ -38,14 +38,16 @@ function signal(symbol: "TAOUSDT" | "TIAUSDT" | "DOTUSDT" | "JUPUSDT" | "RENDERU
         holdHours: symbol === "TIAUSDT" || symbol === "DOTUSDT" ? 24 : 12,
         reason: "fixture",
         features: {
-            decisionTs: signalTs + 3_600_000,
-            signalTs,
+            decisionTs,
+            signalTs: decisionTs - 3_600_000,
             ret12: -0.04,
             ret24: -0.05,
             btc24: -0.01,
             rel24: -0.04,
             atrRatio: 0.01,
             volumeRatio: 2,
+            breakoutLong24: false,
+            breakoutShort24: true,
             breakdown24: true,
         },
     };
