@@ -49,6 +49,11 @@ jobs:
             tests/hype-zec-runner-gate.test.ts \
             tests/q102-symbol-ownership-contract.test.ts
           bash scripts/ops/root/disdex-current-runtime-wiring --self-test
+          (
+            cd /tmp
+            "$GITHUB_WORKSPACE/node_modules/.bin/tsx"               "$GITHUB_WORKSPACE/scripts/disdex-current-live-target-readiness.ts"               --require-implementation-ready
+          )
+          echo "CURRENT_LIVE_READINESS_CWD_INDEPENDENT=PASS"
 
           gh release download bt-v12-score100-volume080-normalonly-20260928 \
             --repo dunamishajime-bit/-ai-dex-manager \
