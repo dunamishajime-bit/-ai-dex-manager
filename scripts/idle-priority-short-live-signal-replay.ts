@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 
 import { IDLE_PRIORITY_SHORT_POLICY, type IdlePrioritySymbol } from "../config/idlePriorityShortPolicy";
@@ -51,6 +51,34 @@ const dataRoot = arg("--data-root");
 const expectedPath = arg("--expected") || "research/idle_priority_63_candidate_keys.json";
 if (!dataRoot) throw new Error("USAGE: --data-root PATH [--expected PATH]");
 
+function diagnoseReleaseCandidateSources(root: string) {
+    const hits: Array<{ path: string; snippets: string[] }> = [];
+    const wanted = /idle_candidate_events|gross12|net12|candidate_events/i;
+    const allowed = /\.(py|ts|js|mjs|cjs|md|txt|json)$/i;
+    const walk = (dir: string) => {
+        for (const name of readdirSync(dir)) {
+            if (hits.length >= 20) return;
+            const path = join(dir, name);
+            let stats;
+            try { stats = statSync(path); } catch { continue; }
+            if (stats.isDirectory()) { walk(path); continue; }
+            if (!allowed.test(name) || stats.size > 2_000_000) continue;
+            let text = "";
+            try { text = readFileSync(path, "utf8"); } catch { continue; }
+            if (!wanted.test(text)) continue;
+            const lines = text.split(/\r?\n/);
+            const indexes = lines.map((line, index) => wanted.test(line) ? index : -1).filter((index) => index >= 0).slice(0, 4);
+            hits.push({
+                path,
+                snippets: indexes.map((index) => lines.slice(Math.max(0, index - 8), Math.min(lines.length, index + 16)).join("\n")),
+            });
+        }
+    };
+    try { walk(root); } catch {}
+    console.log(JSON.stringify({ event: "IDLE_RELEASE_CANDIDATE_SOURCE_DIAGNOSTIC", root, hits }));
+}
+
+diagnoseReleaseCandidateSources(join(dataRoot, ".."));
 const fixture = JSON.parse(readFileSync(expectedPath, "utf8")) as Fixture;
 if (fixture.schema !== "disdex-idle-priority-candidate-keys/v1" || fixture.rows.length !== 63) {
     throw new Error("IDLE_LIVE_SIGNAL_REPLAY_FIXTURE_INVALID");
