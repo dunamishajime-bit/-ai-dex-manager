@@ -1,0 +1,282 @@
+name: HP Idle Priority UI-only production deploy
+on:
+  push:
+    branches: [codex/hp-hype-zec-live-sync-20260927]
+    paths: [.github/workflows/hp-idle-priority-ui-production-deploy-20261001.yml]
+permissions:
+  contents: read
+concurrency:
+  group: disdex-hp-idle-priority-ui-deploy
+  cancel-in-progress: false
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 2 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Reverify read-only UI source and build
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ "$(git rev-parse HEAD)" == "$GITHUB_SHA" ]]
+          git diff --check HEAD^ HEAD
+          npm ci --no-audit --no-fund
+          npx tsx --test             tests/hp-a09-runtime-sync-20260927.test.ts             tests/hp-hype-zec-decision-history-20260927.test.ts             tests/hp-idle-priority-decision-history-20261001.test.ts             tests/fet-decision-status.test.ts             tests/fet-runtime-observability.test.ts
+          npx tsc --noEmit -p tsconfig.json
+          NEXT_TELEMETRY_DISABLED=1 npm run build
+          test -f .next/BUILD_ID
+          test -f .next/server/app/api/system/idle-priority-status/route.js
+          test -f .next/server/app/decision-status/idle-priority/page.js || test -f .next/server/app/decision-status/idle-priority.html
+          tar --exclude='./.git' --exclude='./node_modules' --exclude='./.next' --exclude='./.research-state' -czf /tmp/hp-idle-source.tgz .
+          tar --exclude='.next/cache' -czf /tmp/hp-idle-next.tgz .next
+          echo "HP_IDLE_SOURCE_ARCHIVE_BYTES=$(stat -c %s /tmp/hp-idle-source.tgz)"
+          echo "HP_IDLE_BUILD_ARCHIVE_BYTES=$(stat -c %s /tmp/hp-idle-next.tgz)"
+
+      - name: Initialize restricted root SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ -n "$SSH_HOST" && -n "$ROOT_KEY" && -n "$SSH_KNOWN_HOSTS" ]]
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+
+      - name: Read actual current trading and UI lineage before upload
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          remote="$(ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts"             -o ConnectTimeout=15 -p "$PORT" "root@$SSH_HOST" 'bash -s' <<'REMOTE'
+          set -Eeuo pipefail
+          [[ "$(id -un)" == root ]]
+          marker=/home/deploy/disdex-trading/current/.disdex-release-sha
+          trading="$(tr -d '[:space:]' < "$marker")"
+          [[ "$trading" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$(readlink -f /home/deploy/disdex-trading/current)" == "/home/deploy/disdex-trading/releases/$trading" ]]
+          ui=ai-dex-manager-ui.service
+          [[ "$(systemctl is-active "$ui")" == active ]]
+          wd="$(systemctl show "$ui" --property WorkingDirectory --value)"
+          [[ "$wd" == /home/deploy/disdex-trading/ui-releases/* && -d "$wd" && ! -L "$wd" ]]
+          old_ui="$(systemctl show "$ui" --property Environment --value | tr ' ' '\n' | sed -n 's/^DISDEX_UI_RELEASE_SHA=//p' | tail -1)"
+          [[ "$old_ui" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$(curl -sS --max-time 7 -o /dev/null -w '%{http_code}' http://127.0.0.1:3001/)" == 200 ]]
+          for n in disdex-v12-x1-all disdex-pengu-dual-ls-v2 disdex-quality102-causal-v1                    disdex-v52-aster-only disdex-fet-brk48 disdex-shared-crypto-risk disdex-v12-v52-margin-guard; do
+            u="$n@$trading.service"
+            [[ "$(systemctl is-active "$u" 2>/dev/null || true)" == active ]] || { echo "TRADING_UNIT_NOT_ACTIVE=$u" >&2; exit 33; }
+          done
+          free="$(df -Pk /home/deploy | awk 'NR==2 {print $4}')"
+          [[ "$free" -ge 950000 ]] || { echo "UI_DEPLOY_DISK_TOO_LOW_KB=$free" >&2; exit 32; }
+          echo "TRADING_SHA=$trading"
+          echo "OLD_UI_SHA=$old_ui"
+          echo "CURRENT_UI_WORKDIR=$wd"
+          echo "FREE_KB=$free"
+          echo "TRADING_MUTATION=0"
+          REMOTE
+          )"
+          echo "$remote"
+          trading="$(printf '%s\n' "$remote" | sed -n 's/^TRADING_SHA=//p' | tail -1)"
+          old_ui="$(printf '%s\n' "$remote" | sed -n 's/^OLD_UI_SHA=//p' | tail -1)"
+          [[ "$trading" =~ ^[a-f0-9]{40}$ && "$old_ui" =~ ^[a-f0-9]{40}$ ]]
+          echo "TRADING_SHA=$trading" >> "$GITHUB_ENV"
+          echo "OLD_UI_SHA=$old_ui" >> "$GITHUB_ENV"
+
+      - name: Transfer immutable UI archives
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          scp -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts"             -P "$PORT" /tmp/hp-idle-source.tgz "root@$SSH_HOST:/tmp/hp-idle-source-$GITHUB_RUN_ID.tgz"
+          scp -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts"             -P "$PORT" /tmp/hp-idle-next.tgz "root@$SSH_HOST:/tmp/hp-idle-next-$GITHUB_RUN_ID.tgz"
+
+      - name: Install isolated UI-only release and verify trading PIDs unchanged
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts"             -o ConnectTimeout=15 -p "$PORT" "root@$SSH_HOST"             "EXPECTED_TRADING_SHA='$TRADING_SHA' EXPECTED_OLD_UI_SHA='$OLD_UI_SHA' NEW_UI_SHA='$GITHUB_SHA' REQUEST_ID='$GITHUB_RUN_ID' bash -s" <<'REMOTE'
+          set -Eeuo pipefail
+          umask 022
+          [[ "$EXPECTED_TRADING_SHA" =~ ^[a-f0-9]{40}$ && "$EXPECTED_OLD_UI_SHA" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$NEW_UI_SHA" =~ ^[a-f0-9]{40}$ && "$REQUEST_ID" =~ ^[0-9]+$ ]]
+          exec 9>/run/lock/disdex-hp-idle-ui-deploy.lock
+          flock -n 9 || { echo "HP_IDLE_DEPLOY_CONCURRENT_LOCK"; exit 40; }
+
+          current_trading="$(tr -d '[:space:]' < /home/deploy/disdex-trading/current/.disdex-release-sha)"
+          [[ "$current_trading" == "$EXPECTED_TRADING_SHA" ]]
+          [[ "$(readlink -f /home/deploy/disdex-trading/current)" == "/home/deploy/disdex-trading/releases/$EXPECTED_TRADING_SHA" ]]
+
+          ui=ai-dex-manager-ui.service
+          root=/home/deploy/disdex-trading/ui-releases
+          oldwd="$(systemctl show "$ui" --property WorkingDirectory --value)"
+          old_ui="$(systemctl show "$ui" --property Environment --value | tr ' ' '\n' | sed -n 's/^DISDEX_UI_RELEASE_SHA=//p' | tail -1)"
+          [[ "$old_ui" == "$EXPECTED_OLD_UI_SHA" ]]
+          [[ "$oldwd" == "$root/"* && -d "$oldwd" && ! -L "$oldwd" ]]
+
+          names=(disdex-v12-x1-all disdex-pengu-dual-ls-v2 disdex-quality102-causal-v1
+            disdex-v52-aster-only disdex-fet-brk48 disdex-hype-long disdex-idle-priority-short
+            disdex-shared-crypto-risk disdex-v12-v52-margin-guard)
+          units=()
+          pids=()
+          for n in "${names[@]}"; do
+            unit="$n@$EXPECTED_TRADING_SHA.service"
+            if [[ "$(systemctl is-active "$unit" 2>/dev/null || true)" == active ]]; then
+              units+=("$unit")
+              pids+=("$(systemctl show "$unit" -p MainPID --value)")
+            fi
+          done
+          [[ "${#units[@]}" -ge 7 ]]
+
+          release="$root/ui-idle-$(printf '%s' "$NEW_UI_SHA" | cut -c1-12)"
+          stage="$root/.ui-idle-$(printf '%s' "$NEW_UI_SHA" | cut -c1-12).stage-$REQUEST_ID"
+          source_file="/tmp/hp-idle-source-$REQUEST_ID.tgz"
+          next_file="/tmp/hp-idle-next-$REQUEST_ID.tgz"
+          [[ -f "$source_file" && -f "$next_file" ]]
+          [[ ! -e "$release" && ! -L "$release" && ! -e "$stage" ]]
+
+          prefix="$(printf '%240s' ' ' | tr ' ' z)"
+          dropin="/etc/systemd/system/ai-dex-manager-ui.service.d/$prefix-hp-idle-20261001.conf"
+          [[ ! -e "$dropin" ]]
+          mapfile -t old_dropins < <(systemctl show "$ui" --property DropInPaths --value | tr ' ' '\n')
+          for f in "${old_dropins[@]}"; do
+            [[ -z "$f" || "$(basename "$f")" < "$(basename "$dropin")" ]] || { echo "LATER_UI_DROPIN_PRESENT=$f"; exit 41; }
+          done
+
+          install -d -o deploy -g deploy -m 0755 "$stage"
+          tar --no-same-owner -xzf "$source_file" -C "$stage"
+          [[ -f "$stage/package.json" && -f "$stage/package-lock.json" ]]
+          python3 - "$oldwd/package.json" "$stage/package.json" "$oldwd/package-lock.json" "$stage/package-lock.json" <<'PY'
+          import json,sys
+          a,b,c,d=sys.argv[1:]
+          with open(a,encoding="utf-8-sig") as f: pa=json.load(f)
+          with open(b,encoding="utf-8-sig") as f: pb=json.load(f)
+          with open(c,encoding="utf-8-sig") as f: la=json.load(f)
+          with open(d,encoding="utf-8-sig") as f: lb=json.load(f)
+          if pa!=pb or la!=lb: raise SystemExit("UI_DEPENDENCY_MANIFEST_MISMATCH")
+          print("UI_DEPENDENCY_SEMANTIC_PARITY=PASS")
+          PY
+          [[ -e "$oldwd/node_modules" && -x "$oldwd/node_modules/.bin/next" ]]
+          if [[ -L "$oldwd/node_modules" ]]; then
+            ln -s "$(readlink -f "$oldwd/node_modules")" "$stage/node_modules"
+          else
+            cp -al -- "$oldwd/node_modules" "$stage/node_modules"
+          fi
+          tar --no-same-owner -xzf "$next_file" -C "$stage"
+          test -f "$stage/.next/BUILD_ID"
+          printf '%s\n' "$NEW_UI_SHA" > "$stage/.disdex-release-sha"
+          chown -R deploy:deploy "$stage/.next"
+          chown -h deploy:deploy "$stage/node_modules" "$stage/.disdex-release-sha"
+          mv -- "$stage" "$release"
+
+          rollback() {
+            rc=$?
+            trap - ERR
+            set +e
+            rm -f -- "$dropin"
+            systemctl daemon-reload
+            systemctl restart "$ui"
+            echo "HP_IDLE_UI_ROLLBACK_ATTEMPTED=TRUE"
+            exit "$rc"
+          }
+          trap rollback ERR
+
+          printf '[Service]\nWorkingDirectory=%s\nEnvironment=DISDEX_UI_RELEASE_SHA=%s\n' "$release" "$NEW_UI_SHA" > "$dropin"
+          chown root:root "$dropin"
+          chmod 0644 "$dropin"
+          systemctl daemon-reload
+          systemctl restart "$ui"
+
+          ready=false
+          for _ in $(seq 1 35); do
+            if [[ "$(systemctl is-active "$ui" 2>/dev/null || true)" == active ]]; then
+              code="$(curl -sS --max-time 4 -o /dev/null -w '%{http_code}' http://127.0.0.1:3001/ 2>/dev/null || true)"
+              if [[ "$code" == 200 ]]; then ready=true; break; fi
+            fi
+            sleep 2
+          done
+          [[ "$ready" == true ]]
+          [[ "$(systemctl show "$ui" --property WorkingDirectory --value)" == "$release" ]]
+          new_ui="$(systemctl show "$ui" --property Environment --value | tr ' ' '\n' | sed -n 's/^DISDEX_UI_RELEASE_SHA=//p' | tail -1)"
+          [[ "$new_ui" == "$NEW_UI_SHA" ]]
+          [[ "$(tr -d '[:space:]' < "$release/.disdex-release-sha")" == "$NEW_UI_SHA" ]]
+          [[ "$(tr -d '[:space:]' < /home/deploy/disdex-trading/current/.disdex-release-sha)" == "$EXPECTED_TRADING_SHA" ]]
+
+          python3 - "$EXPECTED_TRADING_SHA" "$NEW_UI_SHA" <<'PY'
+          import json,sys,urllib.request
+          trading,ui=sys.argv[1:]
+          base="http://127.0.0.1:3001"
+          def request(path,json_result=False):
+            req=urllib.request.Request(base+path,headers={"Cookie":"disdex_auth=1","User-Agent":"DisDex-Idle-UI-Verify"})
+            with urllib.request.urlopen(req,timeout=30) as r:
+              if r.status!=200: raise RuntimeError("HTTP_"+path+"_"+str(r.status))
+              data=r.read(1500000)
+              return json.loads(data) if json_result else data
+          for path in ("/","/decision-status","/decision-status/v12","/decision-status/pengu",
+                       "/decision-status/q102","/decision-status/v52","/decision-status/fet",
+                       "/decision-status/hype","/decision-status/zec","/decision-status/idle-priority","/history"):
+            request(path)
+          live=request("/api/system/live-runtime",True)
+          if live.get("releaseSha")!=trading:
+            raise RuntimeError("HP_TRADING_SHA_MISMATCH")
+          idle=request("/api/system/idle-priority-status",True)
+          if not idle.get("readOnly") or idle.get("tradingMutation")!=0 or idle.get("releaseSha")!=trading:
+            raise RuntimeError("HP_IDLE_READONLY_CONTRACT_FAILED")
+          if idle.get("status") not in {"LIVE","STALE","BLOCKED","UNAVAILABLE"}:
+            raise RuntimeError("HP_IDLE_STATUS_INVALID")
+          decision=request("/api/system/decision-status?refresh=1",True)
+          units=(decision.get("runtime") or {}).get("units",[])
+          idle_units=[x for x in units if x.get("id")=="IDLE_PRIORITY_SHORT"]
+          if len(idle_units)!=1 or idle_units[0].get("releaseSha")!=trading:
+            raise RuntimeError("HP_IDLE_OVERVIEW_RUNTIME_MISSING")
+          print("HP_IDLE_API_STATUS="+str(idle.get("status")))
+          print("HP_IDLE_UI_BUILD_SHA="+ui)
+          print("HP_TRADING_SHA="+trading)
+          print("HP_IDLE_API_AND_PAGES=PASS")
+          PY
+
+          for i in "${!units[@]}"; do
+            [[ "$(systemctl is-active "${units[$i]}" 2>/dev/null || true)" == active ]]
+            [[ "$(systemctl show "${units[$i]}" -p MainPID --value)" == "${pids[$i]}" ]] || {
+              echo "TRADING_PID_CHANGED=${units[$i]}"
+              false
+            }
+          done
+
+          trap - ERR
+          rm -f -- "$source_file" "$next_file"
+          echo "STATUS=HP_IDLE_UI_DEPLOYED_VERIFIED"
+          echo "TRADING_SHA=$EXPECTED_TRADING_SHA"
+          echo "UI_SHA=$NEW_UI_SHA"
+          echo "TRADING_RUNNERS_RESTARTED=0"
+          echo "TRADING_MUTATION=0"
+          REMOTE
+
+      - name: Verify public HTTPS routes and unauthorized Idle API
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          for route in / /decision-status /decision-status/idle-priority /history; do
+            code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 15 "https://professional-dismanager.net$route")"
+            echo "PUBLIC_ROUTE=$route HTTP=$code"
+            [[ "$code" =~ ^(200|30[1278]|401|403)$ ]]
+          done
+          code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 15 https://professional-dismanager.net/api/system/idle-priority-status)"
+          echo "PUBLIC_IDLE_UNAUTHORIZED_HTTP=$code"
+          [[ "$code" == 401 ]]
