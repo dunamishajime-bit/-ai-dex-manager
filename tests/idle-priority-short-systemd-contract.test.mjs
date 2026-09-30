@@ -62,6 +62,11 @@ test("Idle is wired into release-pinned health snapshot and watchdog", async () 
   assert.match(snapshot, /DISDEX_HEALTH_SNAPSHOT_IDLE_STATE_PATH/);
   assert.match(snapshot, /idle-priority-short\.json/);
   assert.match(snapshot, /disdex-idle-priority-state\/v2/);
+  assert.match(snapshot, /"-p", "NRestarts"/);
+  assert.match(snapshot, /"-p", "Result"/);
+  assert.match(snapshot, /mainPid:/);
+  assert.match(snapshot, /nRestarts:/);
+  assert.match(snapshot, /serviceResult:/);
 
   assert.match(watchdog, /key: "IDLE_PRIORITY_SHORT"/);
   assert.match(watchdog, /DISDEX_WATCHDOG_IDLE_EXPECTED_SHA/);
