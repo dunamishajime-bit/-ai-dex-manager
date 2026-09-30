@@ -7,6 +7,7 @@ on:
       - "lib/idle-priority-short-*.ts"
       - "scripts/idle-priority-short-*.ts"
       - "scripts/disdex-idle-priority-short-live-runner.ts"
+      - "scripts/disdex-idle-priority-short-benign-state-recovery.ts"
       - "scripts/ops/root/disdex-current-runtime-wiring"
       - "scripts/ops/root/disdex-live-operator-activation-gate.mjs"
       - "ops/systemd/disdex-idle-priority-short@.service"
@@ -33,10 +34,12 @@ jobs:
       - run: npm ci
       - run: npm run strategy:idle-priority-short:selftest
       - run: npm run strategy:idle-priority-short:live:selftest
+      - run: npm run strategy:idle-priority-short:benign-recovery:selftest
       - run: npx tsc --noEmit
       - run: npx tsx --test tests/hype-zec-long-state-migration.test.ts tests/idle-priority-short-systemd-contract.test.mjs
       - run: npm run strategy:hype-zec-long:state:migrate:selftest
       - run: npx tsx --test tests/hype-zec-benign-market-data-recovery.test.ts tests/hype-zec-runner-gate.test.ts
+      - run: npx tsx --test tests/idle-priority-short-benign-state-recovery.test.ts
       - run: npx tsx --test tests/q102-symbol-ownership-contract.test.ts
       - run: bash scripts/ops/root/disdex-current-runtime-wiring --self-test
       - name: Verify fail-closed handoff artifacts

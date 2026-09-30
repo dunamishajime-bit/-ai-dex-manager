@@ -23,7 +23,8 @@ test("runtime wiring performs formal HYPE state lineage migration before activat
   assert.match(wiring, /disdex-hype-zec-long-state-migrate\.ts/);
   assert.match(wiring, /--state-path \"\$HYPE_ZEC_STATE_ROOT\/runner\.json\"/);
   assert.match(wiring, /--to-sha \"\$DEPLOYED_SHA\"/);
-  assert.match(wiring, /migrate_hype_state_lineage\s+migrate_idle_state_lineage\s+systemctl daemon-reload/);
+  assert.match(wiring, /migrate_hype_state_lineage\s+recover_idle_benign_state\s+migrate_idle_state_lineage\s+systemctl daemon-reload/);
+  assert.match(wiring, /disdex-idle-priority-short-benign-state-recovery\.ts/);
   assert.match(wiring, /scripts\/disdex-idle-priority-short-state-migrate\.ts/);
   assert.match(wiring, /migrate_idle_state_lineage\s+systemctl daemon-reload/);
 });

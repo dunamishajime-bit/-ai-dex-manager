@@ -159,6 +159,7 @@ validate_release_artifacts() {
     "$CURRENT_RELEASE/lib/hype-zec-long-recovery-contract.ts"
     "$CURRENT_RELEASE/scripts/disdex-hype-zec-core-preempt.ts"
     "$CURRENT_RELEASE/scripts/disdex-idle-priority-short-live-runner.ts"
+    "$CURRENT_RELEASE/scripts/disdex-idle-priority-short-benign-state-recovery.ts"
     "$CURRENT_RELEASE/scripts/disdex-idle-priority-short-state-migrate.ts"
     "$CURRENT_RELEASE/lib/idle-priority-short-runner.ts"
     "$CURRENT_RELEASE/lib/idle-priority-short-baseline-admission.ts"
@@ -245,6 +246,13 @@ migrate_idle_state_lineage() {
     "$CURRENT_RELEASE/scripts/disdex-idle-priority-short-state-migrate.ts" \
     --state-path "$IDLE_PRIORITY_STATE_ROOT/state.json" \
     --to-sha "$DEPLOYED_SHA"
+}
+
+recover_idle_benign_state() {
+  "$CURRENT_RELEASE/node_modules/.bin/tsx" \
+    "$CURRENT_RELEASE/scripts/disdex-idle-priority-short-benign-state-recovery.ts" \
+    --apply \
+    --state-path "$IDLE_PRIORITY_STATE_ROOT/state.json"
 }
 
 recover_hype_benign_state() {
@@ -971,6 +979,7 @@ ReadWritePaths=${IDLE_PRIORITY_STATE_ROOT} ${SHARED_ROOT}"
 
   recover_hype_benign_state
   migrate_hype_state_lineage
+  recover_idle_benign_state
   migrate_idle_state_lineage
   systemctl daemon-reload
   reset_stale_release_failed_units
@@ -1043,6 +1052,7 @@ self_test() {
     lib/hype-zec-long-recovery-contract.ts \
     scripts/disdex-hype-zec-core-preempt.ts \
     scripts/disdex-idle-priority-short-live-runner.ts \
+    scripts/disdex-idle-priority-short-benign-state-recovery.ts \
     scripts/disdex-idle-priority-short-state-migrate.ts \
     lib/idle-priority-short-runner.ts \
     lib/idle-priority-short-baseline-admission.ts \
