@@ -48,3 +48,29 @@ test("legacy unpinned Idle service unit is not shipped", async () => {
     "legacy non-SHA-pinned Idle unit must not exist; only ops/systemd/disdex-idle-priority-short@.service is allowed",
   );
 });
+
+
+test("Idle is wired into release-pinned health snapshot and watchdog", async () => {
+  const [snapshot, watchdog, wiring] = await Promise.all([
+    readFile("scripts/ops/root/disdex-runner-health-snapshot-current.mjs", "utf8"),
+    readFile("scripts/ops/root/disdex-runner-watchdog-current.mjs", "utf8"),
+    readFile("scripts/ops/root/disdex-current-runtime-wiring", "utf8"),
+  ]);
+
+  assert.match(snapshot, /key: "IDLE_PRIORITY_SHORT"/);
+  assert.match(snapshot, /disdex-idle-priority-short@\$\{IDLE_PIN\.expectedSha\}\.service/);
+  assert.match(snapshot, /DISDEX_HEALTH_SNAPSHOT_IDLE_STATE_PATH/);
+  assert.match(snapshot, /idle-priority-short\.json/);
+  assert.match(snapshot, /disdex-idle-priority-state\/v2/);
+
+  assert.match(watchdog, /key: "IDLE_PRIORITY_SHORT"/);
+  assert.match(watchdog, /DISDEX_WATCHDOG_IDLE_EXPECTED_SHA/);
+  assert.match(watchdog, /DISDEX_WATCHDOG_IDLE_SERVICE_UNIT/);
+  assert.match(watchdog, /disdex-idle-priority-short@\*\.service/);
+  assert.match(watchdog, /disdex-idle-priority-short\.service/);
+
+  assert.match(wiring, /DISDEX_HEALTH_SNAPSHOT_IDLE_EXPECTED_SHA=\$\{DEPLOYED_SHA\}/);
+  assert.match(wiring, /DISDEX_HEALTH_SNAPSHOT_IDLE_STATE_PATH=\$\{IDLE_PRIORITY_STATE_ROOT\}\/state\.json/);
+  assert.match(wiring, /DISDEX_WATCHDOG_IDLE_EXPECTED_SHA=\$\{DEPLOYED_SHA\}/);
+  assert.match(wiring, /DISDEX_WATCHDOG_IDLE_SERVICE_UNIT=\$\{IDLE_UNIT\}/);
+});
