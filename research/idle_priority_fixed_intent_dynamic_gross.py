@@ -33,6 +33,7 @@ ap.add_argument("--idle-target-net",required=True)
 ap.add_argument("--data-root",required=True)
 ap.add_argument("--request-mode",choices=["accepted","candidate"],default="accepted")
 ap.add_argument("--without-idle",action="store_true")
+ap.add_argument("--idle-fee-path",choices=["split","net_exit"],default="split")
 ap.add_argument("--output",required=True)
 a=ap.parse_args()
 
@@ -225,7 +226,7 @@ while heap:
         approx_net=raw-COST_SIDE-(exit_price/entry_price)*COST_SIDE
         idle_return_price_check.append(abs(approx_net-float(payload["target_net"])))
         qty=eq/entry_price
-        fee=eq*COST_SIDE
+        fee=eq*COST_SIDE if a.idle_fee_path=="split" else 0.0
         wallet-=fee
         pid=next_idle_pid; next_idle_pid-=1
         active[pid]={
@@ -324,7 +325,7 @@ rej_base=[x for x in rejected if x["kind"]=="BASELINE"]
 rej_idle=[x for x in rejected if x["kind"]=="IDLE"]
 out={
  "status":"DIAGNOSTIC_NOT_PRODUCTION_CERTIFICATE",
- "request_mode":a.request_mode,"without_idle":a.without_idle,
+ "request_mode":a.request_mode,"without_idle":a.without_idle,"idle_fee_path":a.idle_fee_path,
  "baseline_input":len(base),"idle_input":len(idle),
  "baseline_completed":len(base_completed),"idle_completed":len(idle_completed),
  "baseline_rejected":len(rej_base),"idle_rejected":len(rej_idle),
@@ -338,5 +339,5 @@ out={
  "idle_price_return_max_abs_error":max(idle_return_price_check) if idle_return_price_check else None,
 }
 Path(a.output).write_text(json.dumps(out,indent=2,sort_keys=True)+"\n",encoding="utf-8")
-print(json.dumps({k:out[k] for k in ["request_mode","without_idle","baseline_input","idle_input","baseline_completed","idle_completed","baseline_rejected","idle_rejected","combined_completed","final_equity_jpy","baseline_anchor_jpy","rejections_by_strategy","idle_price_return_max_abs_error"]},sort_keys=True))
+print(json.dumps({k:out[k] for k in ["request_mode","without_idle","idle_fee_path","baseline_input","idle_input","baseline_completed","idle_completed","baseline_rejected","idle_rejected","combined_completed","final_equity_jpy","baseline_anchor_jpy","rejections_by_strategy","idle_price_return_max_abs_error"]},sort_keys=True))
 print("REJECTIONS="+json.dumps(rejected,sort_keys=True))
