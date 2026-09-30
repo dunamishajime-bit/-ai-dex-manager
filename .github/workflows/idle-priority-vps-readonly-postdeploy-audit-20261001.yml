@@ -144,6 +144,11 @@ jobs:
             [[ -f "$env_file" ]] && . "$env_file"
           done
           set +a
+          echo "CURRENT_PACKAGE_LOCK_SHA256=$(sha256sum "$current/package-lock.json" | awk '{print $1}')"
+          echo "CURRENT_PACKAGE_JSON_SHA256=$(sha256sum "$current/package.json" | awk '{print $1}')"
+          if [[ -d /var/lib/disdex/pengu-dual-ls-v2 ]]; then
+            echo "PENGU_STATE_DIR_PERM=$(stat -c '%U:%G:%a' /var/lib/disdex/pengu-dual-ls-v2)"
+          fi
           echo "PERMISSION_AUDIT_BEGIN"
           for p in /var/lib/disdex/shared /var/lib/disdex/shared/aster-rate-budget.json /var/lib/disdex/shared/aster-rate-budget.json.lock /var/lib/disdex/shared/operator-activation/current.json /var/lib/disdex/shared/operator-activation/runtime.json /var/lib/disdex/shared/kill-switch.json /var/lib/disdex/shared/crypto-daily-risk.json /var/lib/disdex/shared/margin-risk /var/lib/disdex/idle-priority /var/lib/disdex/idle-priority/state.json; do
             if [[ -e "$p" || -L "$p" ]]; then
