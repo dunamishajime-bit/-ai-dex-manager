@@ -1,4 +1,5 @@
 name: Idle Priority exact-SHA Production redeploy
+# redeploy-sequence: rollback-permission-hardening-v1
 on:
   push:
     branches: [design/idle-priority-bt-parity-20260929]
