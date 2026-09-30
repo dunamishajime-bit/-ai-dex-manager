@@ -34,9 +34,11 @@ jobs:
           python research/idle_priority_fixed_intent_dynamic_gross.py $COMMON --request-mode candidate --without-idle --output baseline-only-candidate.json | tee baseline-only-candidate.log
           python research/idle_priority_fixed_intent_dynamic_gross.py $COMMON --request-mode accepted --output integrated-accepted.json | tee integrated-accepted.log
           python research/idle_priority_fixed_intent_dynamic_gross.py $COMMON --request-mode candidate --output integrated-candidate.json | tee integrated-candidate.log
+          python research/idle_priority_fixed_intent_dynamic_gross.py $COMMON --request-mode accepted --idle-fee-path net_exit --output integrated-accepted-netexit.json | tee integrated-accepted-netexit.log
+          python research/idle_priority_fixed_intent_dynamic_gross.py $COMMON --request-mode candidate --idle-fee-path net_exit --output integrated-candidate-netexit.json | tee integrated-candidate-netexit.log
           python - <<'PY'
           import json
-          for p in ["baseline-only.json","baseline-only-candidate.json","integrated-accepted.json","integrated-candidate.json"]:
+          for p in ["baseline-only.json","baseline-only-candidate.json","integrated-accepted.json","integrated-candidate.json","integrated-accepted-netexit.json","integrated-candidate-netexit.json"]:
               x=json.load(open(p))
               print("SUMMARY",p,{k:x[k] for k in ["baseline_completed","idle_completed","baseline_rejected","idle_rejected","combined_completed","final_equity_jpy","rejections_by_strategy","idle_price_return_max_abs_error"]})
           PY
@@ -52,4 +54,8 @@ jobs:
             integrated-accepted.log
             integrated-candidate.json
             integrated-candidate.log
+            integrated-accepted-netexit.json
+            integrated-accepted-netexit.log
+            integrated-candidate-netexit.json
+            integrated-candidate-netexit.log
           retention-days: 30
