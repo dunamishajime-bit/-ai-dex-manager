@@ -1,3 +1,5 @@
+> **2026-09-30 cost/replay correction:** `docs/implementation/IDLE_PRIORITY_COST_RECONCILIATION_20260930.md` controls economic parity. The historical JPY268.05M / 1,342 bundle is not a coherent single 10bps run and must not be used as a Production/LIVE acceptance target. Primary coherent 10bps reference: 61 Idle, 1,339 total trades, ~JPY214.78M.
+
 # Codex Handoff — Idle Priority SHORT Production Deployment
 
 Date: 2026-09-29
@@ -13,7 +15,7 @@ Do not retune, reinterpret priority, add partial sizing, revive ZEC, or reset Pr
 - raw filtered outcomes: 50W / 13L
 - exact route counts: DOT 15 / JUP 14 / RENDER 15 / TAO 9 / TIA 10
 - integrated acceptance anchor: 61 trades / 48W / 13L
-- integrated anchors: baseline ~JPY141.85M, final ~JPY268.05M, PF ~2.055, max DD ~-23.24%, total integrated trades ~1342
+- historical mixed-report bundle (not a valid acceptance target): baseline ~JPY141.85M, final ~JPY268.05M, PF ~2.055, max DD ~-23.24%, total ~1342
 - 63 -> 61 historical exclusion identity is constrained to one DOT and one TIA; do not guess which timestamps.
 
 The two CSV files were recovered from the prior ChatGPT research workspace/library and independently hash-verified. The JPY141.85M -> JPY268.05M integrated replay itself was a prior-thread local analysis run; its exact baseline ledger is not present in the GitHub formal-five `latest` artifacts. The inspected formal-five 10bps `latest` artifact is a DIFFERENT run: JPY105,474,659.39616707 / PF 1.6884972891846897 / DD -37.521093%. Never substitute that ledger or claim it is the JPY141.85M anchor. If the exact JPY141.85M ledger cannot be recovered, the 61-trade/final-equity acceptance gate remains unproven and LIVE must stay blocked.
@@ -24,7 +26,7 @@ LIVE activation remains BLOCKED until the exact baseline ledger used by the JPY1
 2. exact one DOT + one TIA historical baseline exclusion
 3. 61 admitted
 4. 48W/13L
-5. integrated final ~JPY268.05M and DD ~-23.24% within documented deterministic tolerance
+5. coherent 10bps fixed-intent replay: 61 Idle / 1,339 total trades / ~JPY214.78M, with 8bps reported separately
 6. emergency -10%/+25% does not alter historical paths
 
 Do not choose the two exclusions by outcome, proximity, or by forcing final equity.
@@ -80,11 +82,11 @@ The controlling local Idle replay baseline metrics recovered from prior-session 
 - baseline PF: approximately 2.077
 - baseline max DD: approximately -22.87%
 - baseline closed trades: 1,284
-- Idle integrated closed trades: 1,342
+- Historical mixed-report integrated count: 1,342 (unsupported; do not certify)
 - Idle integrated PF: approximately 2.055
 - Idle integrated max DD: approximately -23.24%
 
-Important consequence: 1,342 - 1,284 = 58, while Idle admitted 61. Therefore the integrated replay changed three baseline trade outcomes/admissions as a portfolio-path consequence. It is NOT valid to append 61 independent Idle returns onto a frozen baseline equity curve.
+The former inference that exactly three baseline trades changed was based only on the unsupported 1,342 count and is withdrawn. The coherent 10bps replay causally rejects six baseline intents.
 
 Recovered older source bundle proves the evaluation capital convention was 2025-08-10 through 2026-08-10, initial JPY10,000 + JPY10,000 monthly x12 = JPY130,000 total contributed, but its old-engine NORMAL baseline JPY165.415M and native-new-PENGU paired JPY318.750M are NOT the controlling JPY141.85M run. Likewise the later formal-five 10bps JPY105.475M / PF1.6885 / DD-37.52% / 1,037 trades is NOT the controlling run. Do not substitute any of these.
 
