@@ -120,7 +120,8 @@
     "strategy:idle-priority-short:parity:495-63": "tsx scripts/idle-priority-short-495-63-parity.ts",
     "strategy:idle-priority-short:predeploy": "npm run strategy:idle-priority-short:selftest && npm run strategy:idle-priority-short:parity:evidence && npm run strategy:idle-priority-short:parity:495-63",
     "strategy:idle-priority-short:parity:integrated": "tsx scripts/idle-priority-short-integrated-parity.ts",
-    "strategy:idle-priority-short:parity:63-61-overlay": "tsx scripts/idle-priority-short-63-61-overlay-parity.ts"
+    "strategy:idle-priority-short:parity:63-61-overlay": "tsx scripts/idle-priority-short-63-61-overlay-parity.ts",
+    "strategy:idle-priority-short:parity:certify": "tsx scripts/idle-priority-short-generate-parity-cert.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
