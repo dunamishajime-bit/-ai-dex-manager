@@ -1,3 +1,5 @@
+> **2026-09-30 cost/replay correction:** `docs/implementation/IDLE_PRIORITY_COST_RECONCILIATION_20260930.md` controls economic parity. The historical JPY268.05M / 1,342 bundle is not a coherent single 10bps run and must not be used as a Production/LIVE acceptance target. Primary coherent 10bps reference: 61 Idle, 1,339 total trades, ~JPY214.78M.
+
 # Idle Priority SHORT — Canonical Source Recovery Addendum (2026-09-30)
 
 This document supersedes the blocker claim that the JPY141.845M baseline source does not exist.
@@ -92,8 +94,8 @@ The integrated replay must prove rather than assume:
 - baseline same-timestamp priority
 - no partial Idle sizing
 - full shared-portfolio re-admission, including the baseline trades changed by Idle exposure
-- total integrated closed trades approximately `1342`
-- final equity approximately `JPY268.05M`
+- coherent 10bps integrated closed trades: `1339`
+- coherent 10bps final equity: approximately `JPY214.78M` (8bps sensitivity approximately JPY268.15M)
 - PF approximately `2.055`
 - max MTM DD approximately `-23.24%`
 
