@@ -25,6 +25,10 @@ test("runtime wiring performs formal HYPE state lineage migration before activat
   assert.match(wiring, /--to-sha \"\$DEPLOYED_SHA\"/);
   assert.match(wiring, /migrate_hype_state_lineage\s+recover_idle_benign_state\s+migrate_idle_state_lineage\s+systemctl daemon-reload/);
   assert.match(wiring, /disdex-idle-priority-short-benign-state-recovery\.ts/);
+  assert.match(wiring, /disdex-quality102-causal-v1-state-migrate\.ts/);
+  assert.match(wiring, /disdex-flat-state-sha-migrate\.ts/);
+  assert.match(wiring, /disdex-v12-runtime-lineage-recovery\.ts/);
+  assert.match(wiring, /migrate_quality102_state_lineage\s+migrate_v12_state_lineage\s+migrate_fet_state_lineage\s+recover_hype_benign_state/);
   assert.match(wiring, /scripts\/disdex-idle-priority-short-state-migrate\.ts/);
   assert.match(wiring, /migrate_idle_state_lineage\s+systemctl daemon-reload/);
 });
