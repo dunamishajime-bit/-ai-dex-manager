@@ -13,7 +13,8 @@ test("Idle LIVE unit loads the same Aster credential env sources as existing LIV
   assert.match(unit, /EnvironmentFile=-\/etc\/disdex\/current-runtime\/%i\.env/);
   assert.match(unit, /EnvironmentFile=-\/etc\/disdex\/current-runtime\/%i\.idle-operator\.env/);
   assert.match(unit, /Environment=DISDEX_OPERATOR_ACTIVATION_PATH=\/var\/lib\/disdex\/shared\/operator-activation\/runtime\.json/);
-  assert.match(unit, /ExecStartPre=\+\/usr\/bin\/install -o root -g deploy -m 0640 \/var\/lib\/disdex\/shared\/operator-activation\/current\.json \/var\/lib\/disdex\/shared\/operator-activation\/runtime\.json/);
+  assert.match(unit, /ExecStartPre=\+\/usr\/bin\/install -o root -g root -m 0644 \/var\/lib\/disdex\/shared\/operator-activation\/current\.json \/var\/lib\/disdex\/shared\/operator-activation\/runtime\.json/);
+  assert.doesNotMatch(unit, /ExecStartPre=\+\/usr\/bin\/install -o root -g deploy -m 0640 \/var\/lib\/disdex\/shared\/operator-activation\/current\.json \/var\/lib\/disdex\/shared\/operator-activation\/runtime\.json/);
   assert.match(unit, /ExecStart=.*disdex-idle-priority-short-live-runner\.ts/);
 });
 
