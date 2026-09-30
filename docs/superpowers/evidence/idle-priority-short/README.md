@@ -1,3 +1,5 @@
+> **2026-09-30 cost/replay correction:** `docs/implementation/IDLE_PRIORITY_COST_RECONCILIATION_20260930.md` controls economic parity. The historical JPY268.05M / 1,342 bundle is not a coherent single 10bps run and must not be used as a Production/LIVE acceptance target. Primary coherent 10bps reference: 61 Idle, 1,339 total trades, ~JPY214.78M.
+
 # Idle Priority SHORT evidence manifest
 
 This directory documents the immutable research evidence required by the production handoff.
@@ -26,7 +28,7 @@ The CSV payloads are intentionally not invented or regenerated in Git. Validator
 - RENDER 15 (11W/4L)
 - total 48W/13L
 - controlling baseline: approximately JPY141.85M / 1,284 closed trades
-- integrated: approximately JPY268.05M / 1,342 closed trades
+- coherent 10bps integrated reference: approximately JPY214.78M / 1,339 closed trades; 8bps sensitivity approximately JPY268.15M / 1,339 trades
 - max MTM DD approximately -23.24%
 
 A nearby 2026-09-28 10bps replay at JPY130,287,867 / 1,046 trades is not the controlling baseline and must not be substituted.
