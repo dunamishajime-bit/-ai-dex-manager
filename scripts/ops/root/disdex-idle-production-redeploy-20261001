@@ -177,11 +177,13 @@ rollback() {
         cp -a -- "$src" "$p"
       fi
     done
-    if [[ -d /var/lib/disdex/pengu-dual-ls-v2 && ! -L /var/lib/disdex/pengu-dual-ls-v2 ]]; then
-      chown deploy:deploy /var/lib/disdex/pengu-dual-ls-v2
-      chmod 0700 /var/lib/disdex/pengu-dual-ls-v2
-      echo "ROLLBACK_PENGU_STATE_DIR=deploy:deploy:700"
-    fi
+    for state_dir in /var/lib/disdex/pengu-dual-ls-v2 /var/lib/disdex/idle-priority; do
+      if [[ -d "$state_dir" && ! -L "$state_dir" ]]; then
+        chown deploy:deploy "$state_dir"
+        chmod 0700 "$state_dir"
+        echo "ROLLBACK_STATE_DIR_NORMALIZED=$state_dir:deploy:deploy:700"
+      fi
+    done
     rm -f /var/lib/disdex/runner-health/heartbeats/idle-priority-short.json
     tmp_link="$ROOT/.current-rollback-$REQUEST_ID"
     rm -f "$tmp_link"
@@ -229,10 +231,25 @@ old_lock_sha="$(sha256sum "$OLD_RELEASE/package-lock.json" | awk '{print $1}')"
 stage_lock_sha="$(sha256sum "$STAGE/package-lock.json" | awk '{print $1}')"
 echo "CUTOVER_OLD_PACKAGE_LOCK_SHA256=$old_lock_sha"
 echo "CUTOVER_STAGE_PACKAGE_LOCK_SHA256=$stage_lock_sha"
-[[ "$old_lock_sha" == "$stage_lock_sha" ]] || {
-  echo "CUTOVER_PACKAGE_LOCK_MISMATCH"
-  false
-}
+python3 - "$OLD_RELEASE/package-lock.json" "$STAGE/package-lock.json" <<'PY'
+import json,sys
+old_path,new_path=sys.argv[1:]
+old=json.load(open(old_path,encoding="utf-8"))
+new=json.load(open(new_path,encoding="utf-8"))
+if old.get("lockfileVersion") != new.get("lockfileVersion"):
+    raise SystemExit("CUTOVER_LOCKFILE_VERSION_MISMATCH")
+def resolved_graph(doc):
+    packages=doc.get("packages")
+    if not isinstance(packages,dict):
+        raise SystemExit("CUTOVER_PACKAGE_LOCK_PACKAGES_MISSING")
+    # The root package entry contains requested semver ranges. Runtime reuse is
+    # safe only when every resolved node_modules package entry is byte-equivalent
+    # as parsed JSON; a root range-only relaxation is allowed.
+    return {k:v for k,v in packages.items() if k}
+if resolved_graph(old) != resolved_graph(new):
+    raise SystemExit("CUTOVER_RESOLVED_DEPENDENCY_GRAPH_MISMATCH")
+print("CUTOVER_RESOLVED_DEPENDENCY_GRAPH=PASS")
+PY
 echo "CUTOVER_RELEASE_PREP_STEP=release_marker"
 printf '%s\n' "$TARGET_SHA" > "$STAGE/.disdex-release-sha"
 echo "CUTOVER_RELEASE_PREP_STEP=ownership"
