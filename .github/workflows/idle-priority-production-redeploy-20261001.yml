@@ -1,5 +1,5 @@
 name: Idle Priority exact-SHA Production redeploy
-# redeploy-sequence: resolved-dependency-graph-v3
+# redeploy-sequence: prewiring-state-mode-v4
 on:
   push:
     branches: [design/idle-priority-bt-parity-20260929]
