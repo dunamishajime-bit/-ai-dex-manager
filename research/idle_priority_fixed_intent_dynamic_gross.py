@@ -245,6 +245,43 @@ while heap:
     sleeve_room=max(0.0,(STOCK_CAP-stock_g) if strat=="V52" else (CRYPTO_CAP-crypto_g))
     total_room=max(0.0,TOTAL_CAP-total_g)
     room=min(strat_room,sleeve_room,total_room)
+
+    # Canonical allocator contract: FET is residual and preemptible by core
+    # crypto before a PENGU/V12/Q102 accepted intent is rejected or shrunk.
+    if strat in {"PENGU","V12","Q102"} and room+1e-12<req:
+        fet_rows=[(fp,pp) for fp,pp in active.items() if pp["strategy_id"]=="FET"]
+        if fet_rows:
+            fpid,fpos=fet_rows[0]
+            fmark=_mark(market,fpos["symbol"],ts)
+            if fmark is not None:
+                fqty=float(fpos["quantity"])
+                fprice_pnl=_side_sign(fpos["side"])*fqty*(fmark-float(fpos["entry_price"]))
+                fexit_fee=abs(fqty*fmark)*COST_SIDE
+                wallet+=fprice_pnl-fexit_fee
+                ftotal=(
+                    float(fpos.get("price_pnl") or 0.0)+fprice_pnl+
+                    float(fpos.get("funding_pnl") or 0.0)-
+                    float(fpos.get("entry_fee") or 0.0)-
+                    float(fpos.get("exit_fee") or 0.0)-fexit_fee
+                )
+                completed.append({
+                    "kind":"BASELINE","strategy":"FET","symbol":fpos["symbol"],
+                    "position_id":fpid,"candidate_id":fpos.get("candidate_id"),
+                    "entry_ts_ms":fpos["entry_ts_ms"],"exit_ts_ms":ts,
+                    "accepted_gross":fpos["accepted_gross"],"scale":fpos["scale"],
+                    "trade_pnl_settlement":ftotal,"exit_reason":"CORE_PREEMPT:"+strat,
+                })
+                active.pop(fpid,None)
+                eq=active_equity(wallet,active,ts)
+                strat_g=sum(pgross(p,ts,eq) for p in active.values() if p["strategy_id"]==strat)
+                total_g=sum(pgross(p,ts,eq) for p in active.values())
+                crypto_g=sum(pgross(p,ts,eq) for p in active.values() if p["strategy_id"]!="V52")
+                stock_g=sum(pgross(p,ts,eq) for p in active.values() if p["strategy_id"]=="V52")
+                strat_room=max(0.0,STRATEGY_CAP[strat]-strat_g)
+                sleeve_room=max(0.0,(STOCK_CAP-stock_g) if strat=="V52" else (CRYPTO_CAP-crypto_g))
+                total_room=max(0.0,TOTAL_CAP-total_g)
+                room=min(strat_room,sleeve_room,total_room)
+
     ag=min(req,room)
     if strat=="PENGU" and ag+1e-9<req:
         rejected.append({"kind":"BASELINE","strategy":strat,"symbol":t["symbol"],"ts":ts,"position_id":pid,"candidate_id":t.get("candidate_id"),"reason":"PENGU_NO_LOT_SHRINK","requested":req,"room":room,"crypto_gross":crypto_g,"total_gross":total_g})
@@ -268,6 +305,8 @@ while heap:
         "strategy_id":strat,"symbol":t["symbol"],"side":t["side"],
         "entry_ts_ms":ts,"entry_price":entry_price,"quantity":qty,
         "accepted_gross":ag,"entry_equity":eq,"scale":scale,
+        "candidate_id":t.get("candidate_id"),"entry_fee":fee,
+        "price_pnl":0.0,"funding_pnl":0.0,"exit_fee":0.0,
     }
     accepted.append({"kind":"BASELINE","strategy":strat,"symbol":t["symbol"],"ts":ts,"position_id":pid,"candidate_id":t.get("candidate_id"),"requested":req,"accepted_gross":ag,"equity":eq,"scale":scale,"crypto_before":crypto_g,"total_before":total_g})
     # Preserve exact original position cashflow schedule, scaled by quantity.
