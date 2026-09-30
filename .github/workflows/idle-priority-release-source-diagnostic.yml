@@ -42,16 +42,6 @@ jobs:
             wc -l "$f"
             d="$(dirname "$f")"
             if test -f "$d/metrics.json"; then
-              python - "$d/metrics.json" <<'PY'
-import json,sys
-p=sys.argv[1]
-x=json.load(open(p))
-print(json.dumps({
- "closed_trades":x.get("closed_trades"),
- "final_equity_jpy":x.get("final_equity_jpy"),
- "profit_factor":x.get("profit_factor"),
- "max_drawdown_pct":x.get("max_drawdown_pct") or x.get("max_mtm_drawdown_pct")
-},sort_keys=True))
-PY
+              python -c 'import json,sys; x=json.load(open(sys.argv[1])); print(json.dumps({"closed_trades":x.get("closed_trades"),"final_equity_jpy":x.get("final_equity_jpy"),"profit_factor":x.get("profit_factor"),"max_drawdown_pct":x.get("max_drawdown_pct") or x.get("max_mtm_drawdown_pct")},sort_keys=True))' "$d/metrics.json"
             fi
           done < /tmp/baselines.txt
