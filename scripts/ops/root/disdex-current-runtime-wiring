@@ -159,6 +159,7 @@ validate_release_artifacts() {
     "$CURRENT_RELEASE/lib/hype-zec-long-recovery-contract.ts"
     "$CURRENT_RELEASE/scripts/disdex-hype-zec-core-preempt.ts"
     "$CURRENT_RELEASE/scripts/disdex-idle-priority-short-live-runner.ts"
+    "$CURRENT_RELEASE/scripts/disdex-idle-priority-short-state-migrate.ts"
     "$CURRENT_RELEASE/lib/idle-priority-short-runner.ts"
     "$CURRENT_RELEASE/lib/idle-priority-short-baseline-admission.ts"
     "$CURRENT_RELEASE/lib/idle-priority-short-live.ts"
@@ -236,6 +237,13 @@ migrate_hype_state_lineage() {
     "$CURRENT_RELEASE/scripts/disdex-hype-zec-long-state-migrate.ts" \
     --apply \
     --state-path "$HYPE_ZEC_STATE_ROOT/runner.json" \
+    --to-sha "$DEPLOYED_SHA"
+}
+
+migrate_idle_state_lineage() {
+  "$CURRENT_RELEASE/node_modules/.bin/tsx" \
+    "$CURRENT_RELEASE/scripts/disdex-idle-priority-short-state-migrate.ts" \
+    --state-path "$IDLE_PRIORITY_STATE_ROOT/state.json" \
     --to-sha "$DEPLOYED_SHA"
 }
 
@@ -963,6 +971,7 @@ ReadWritePaths=${IDLE_PRIORITY_STATE_ROOT} ${SHARED_ROOT}"
 
   recover_hype_benign_state
   migrate_hype_state_lineage
+  migrate_idle_state_lineage
   systemctl daemon-reload
   reset_stale_release_failed_units
   systemctl reset-failed aster-trade-history-git-sync.service || true
@@ -1034,6 +1043,7 @@ self_test() {
     lib/hype-zec-long-recovery-contract.ts \
     scripts/disdex-hype-zec-core-preempt.ts \
     scripts/disdex-idle-priority-short-live-runner.ts \
+    scripts/disdex-idle-priority-short-state-migrate.ts \
     lib/idle-priority-short-runner.ts \
     lib/idle-priority-short-baseline-admission.ts \
     lib/idle-priority-short-live.ts \
