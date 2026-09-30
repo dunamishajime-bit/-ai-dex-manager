@@ -35,7 +35,7 @@ type TradeHistoryEntry = {
   tradeStatus?: "open" | "closed" | "unmatched_exit";
   positionVerified?: boolean;
   positionSide?: "BOTH" | "LONG" | "SHORT";
-  strategyId?: "V12" | "V52" | "PENGU" | "QUALITY102" | "FET" | "HYPE" | "ZEC" | "UNKNOWN";
+  strategyId?: "V12" | "V52" | "PENGU" | "QUALITY102" | "FET" | "HYPE" | "ZEC" | "IDLE_PRIORITY_SHORT" | "UNKNOWN";
   commission?: number;
   netPnlUsd?: number;
   attribution?: {
@@ -122,6 +122,8 @@ function attributionClass(entry: TradeHistoryEntry) {
       return "border-teal-300/35 bg-teal-400/10 text-teal-100";
     case "zec":
       return "border-yellow-300/35 bg-yellow-400/10 text-yellow-100";
+    case "idle-priority":
+      return "border-orange-300/35 bg-orange-400/10 text-orange-100";
     case "test-order":
       return "border-amber-400/30 bg-amber-500/10 text-amber-200";
     case "alternate-route":
@@ -150,6 +152,7 @@ const LOGIC_COLOR_LEGEND = [
   ["V52", "border-sky-400/35 bg-sky-500/10 text-sky-200"],
   ["HYPE LONG", "border-teal-300/35 bg-teal-400/10 text-teal-100"],
   ["ZEC LONG", "border-yellow-300/35 bg-yellow-400/10 text-yellow-100"],
+  ["Idle Priority SHORT", "border-orange-300/35 bg-orange-400/10 text-orange-100"],
   ["テスト注文", "border-amber-400/30 bg-amber-500/10 text-amber-200"],
 ] as const;
 
