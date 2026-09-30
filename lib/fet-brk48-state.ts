@@ -44,6 +44,7 @@ export interface FetBrk48State {
   updatedAt: number;
   lastReferenceTs?: number;
   lastEvaluationDecisionTs?: number;
+  lastEvaluationCandidate?: boolean;
   position?: FetBrk48PositionState;
   pending?: FetBrk48PendingState;
   lastCompletedIdempotencyKey?: string;
