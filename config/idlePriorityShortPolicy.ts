@@ -15,9 +15,13 @@ export const IDLE_PRIORITY_SHORT_POLICY = {
     RENDERUSDT: { route: "IDLE_RENDER_RELATIVE_SHORT", archetype: "RELATIVE", holdHours: 12 },
   },
   generic: {
-    breakout: { volumeRatioMin: 1.30, atrRatioMin: 0.007 },
-    momentum: { ret12Max: -0.03, volumeRatioMin: 1.00, atrRatioMin: 0.007 },
-    relative: { rel24Max: -0.03, volumeRatioMin: 0.80, atrRatioMin: 0.007 },
+    // Historical 495-row candidate lifecycle.  Generic archetype selection
+    // happens BEFORE the five-symbol route filter and advances the per-symbol
+    // 12h lifecycle for both LONG and SHORT candidates.
+    priority: ["BREAKOUT", "RELATIVE", "MOMENTUM"] as const,
+    breakout: { ret24AbsMin: 0.02, volumeRatioMin: 1.30, atrRatioMin: 0.007 },
+    momentum: { ret12AbsMin: 0.03, volumeRatioMin: 1.00, atrRatioMin: 0.007 },
+    relative: { rel24AbsMin: 0.03, ret24AbsMin: 0.015, volumeRatioMin: 0.80, atrRatioMin: 0.007 },
   },
 } as const;
 
