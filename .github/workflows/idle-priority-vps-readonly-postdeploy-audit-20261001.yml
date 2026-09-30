@@ -37,7 +37,7 @@ jobs:
         run: |
           set -Eeuo pipefail
           PORT="${SSH_PORT:-22}"
-          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts"             -o ConnectTimeout=15 -p "$PORT" "root@$SSH_HOST" 'bash -s' <<'REMOTE'
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts"             -o ConnectTimeout=15 -p "$PORT" "root@$SSH_HOST" "SOURCE_AUDIT_SHA='$GITHUB_SHA' bash -s" <<'REMOTE'
           set -Eeuo pipefail
           [[ "$(id -un)" == root ]]
           trading_root=/home/deploy/disdex-trading
@@ -50,7 +50,7 @@ jobs:
           echo "STATUS=VPS_READONLY_AUDIT"
           echo "CURRENT_TRADING_SHA=$sha"
           echo "CURRENT_RELEASE=$target"
-          echo "SOURCE_AUDIT_SHA=$GITHUB_SHA"
+          echo "SOURCE_AUDIT_SHA=$SOURCE_AUDIT_SHA"
           echo "TRADING_MUTATION=0"
 
           ui=ai-dex-manager-ui.service
