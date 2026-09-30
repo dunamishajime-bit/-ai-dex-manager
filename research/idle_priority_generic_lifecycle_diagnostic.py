@@ -79,6 +79,12 @@ def features(m, btc, t):
         "break_close_hilo_long":s1["c"]>max(x["h"] for x in prior24),
         "break_wick_hilo_short":s1["l"]<min(x["l"] for x in prior24),
         "break_wick_hilo_long":s1["h"]>max(x["h"] for x in prior24),
+        "pen_close_close_short":max(0.0,(min(x["c"] for x in prior24)-s1["c"])/s1["c"]),
+        "pen_close_close_long":max(0.0,(s1["c"]-max(x["c"] for x in prior24))/s1["c"]),
+        "pen_close_hilo_short":max(0.0,(min(x["l"] for x in prior24)-s1["c"])/s1["c"]),
+        "pen_close_hilo_long":max(0.0,(s1["c"]-max(x["h"] for x in prior24))/s1["c"]),
+        "pen_wick_hilo_short":max(0.0,(min(x["l"] for x in prior24)-s1["l"])/s1["c"]),
+        "pen_wick_hilo_long":max(0.0,(s1["h"]-max(x["h"] for x in prior24))/s1["c"]),
     }
 
 def gates(f, breakout_mode):
@@ -195,6 +201,56 @@ for t in range(START,END+1,HOUR):
             for mode in breakout_modes: all_states[mode][(s,t)]=gates(ff,mode)
         except KeyError: pass
 
+def strength_candidates(f, breakout_mode, score_mode):
+    rows=[]
+    specs=[
+      ("BREAKOUT","LONG",f[f"break_{breakout_mode}_long"],f[f"pen_{breakout_mode}_long"],1.30),
+      ("BREAKOUT","SHORT",f[f"break_{breakout_mode}_short"],f[f"pen_{breakout_mode}_short"],1.30),
+      ("MOMENTUM","LONG",f["ret12"]>=0.03,max(0.0,f["ret12"]-0.03),1.00),
+      ("MOMENTUM","SHORT",f["ret12"]<=-0.03,max(0.0,-f["ret12"]-0.03),1.00),
+      ("RELATIVE","LONG",f["rel24"]>=0.03,max(0.0,f["rel24"]-0.03),0.80),
+      ("RELATIVE","SHORT",f["rel24"]<=-0.03,max(0.0,-f["rel24"]-0.03),0.80),
+    ]
+    for a,side,directional,edge,vrmin in specs:
+        if not directional or f["vr"]<vrmin or f["atr"]<0.007: continue
+        # Price/return edge is measured against each gate's boundary.  Breakout
+        # has a zero crossing boundary, so scale penetration by ATR to keep it
+        # comparable to return/relative excess.
+        primary=(edge/max(f["atr"],1e-12)) if a=="BREAKOUT" else edge/0.03
+        vr=f["vr"]/vrmin
+        atr=f["atr"]/0.007
+        if score_mode=="PRIMARY": score=primary
+        elif score_mode=="PRIMARY_PLUS_ONE": score=1.0+primary
+        elif score_mode=="PRIMARY_X_VR": score=(1.0+primary)*vr
+        elif score_mode=="PRIMARY_X_SQRT_VR": score=(1.0+primary)*(vr**0.5)
+        elif score_mode=="PRIMARY_X_ATR": score=(1.0+primary)*atr
+        elif score_mode=="PRODUCT": score=(1.0+primary)*vr*atr
+        elif score_mode=="GEOMEAN": score=((1.0+primary)*vr*atr)**(1/3)
+        elif score_mode=="SUM": score=(1.0+primary)+vr+atr
+        elif score_mode=="MIN": score=min(1.0+primary,vr,atr)
+        elif score_mode=="MAX": score=max(1.0+primary,vr,atr)
+        else: raise ValueError(score_mode)
+        rows.append((score,a,side))
+    return sorted(rows,key=lambda x:(-x[0],x[1],x[2]))
+
+def run_strength_model(feature_states,idle,breakout_mode,score_mode,mask_mode):
+    out=[]; last={}
+    for t in range(START,END+1,HOUR):
+        is_idle=t in idle
+        for sym in SYMBOLS:
+            f=feature_states.get((sym,t))
+            if f is None: continue
+            candidates=strength_candidates(f,breakout_mode,score_mode)
+            if not candidates: continue
+            if mask_mode=="IDLE_BEFORE" and not is_idle: continue
+            lt=last.get(sym,0)
+            if lt and t-lt<12*HOUR: continue
+            last[sym]=t
+            if mask_mode=="EMIT_IDLE_ONLY" and not is_idle: continue
+            _,a,side=candidates[0]
+            out.append((sym,t,a,side))
+    return out
+
 expected_keys=set(
     line.strip() for line in EXPECTED_KEYS_PATH.read_text().splitlines()
     if line.strip() and not line.startswith("#")
@@ -231,6 +287,41 @@ for baseline_name,idle_variants in idle_variants_by_baseline.items():
        if row["match"] or distance<=20 or symdiff<=20: results.append(row)
 matches=[x for x in results if x["match"]]
 print(json.dumps({"event":"GENERIC_LIFECYCLE_SEARCH","expected_count":EXPECTED_COUNT,"expected_sha":EXPECTED_SHA,"matches":matches,"near":results[:120]},sort_keys=True))
+# Search strength-ranked causal winner selection after fixed-priority models.
+feature_states={}
+for t in range(START,END+1,HOUR):
+    for s in SYMBOLS:
+        try: feature_states[(s,t)]=features(market[s],btc,t)
+        except KeyError: pass
+strength_results=[]
+strength_best=None
+strength_best_rows=None
+strength_best_diff=None
+for baseline_name,idle_variants in idle_variants_by_baseline.items():
+ for breakout_mode in breakout_modes:
+  for (exit_before,same_entry_blocks),idle in idle_variants.items():
+   for score_mode in ("PRIMARY","PRIMARY_PLUS_ONE","PRIMARY_X_VR","PRIMARY_X_SQRT_VR","PRIMARY_X_ATR","PRODUCT","GEOMEAN","SUM","MIN","MAX"):
+    for mask_mode in ("IDLE_BEFORE","EMIT_IDLE_ONLY"):
+      out=run_strength_model(feature_states,idle,breakout_mode,score_mode,mask_mode)
+      out_keys=set(f"{s}|{t}|{a}|{side}" for s,t,a,side in out)
+      symdiff=len(out_keys ^ expected_keys)
+      row={"baseline":baseline_name,"breakout_mode":breakout_mode,"exit_before":exit_before,"same_entry_blocks":same_entry_blocks,
+           "idle_hours":len(idle),"score_mode":score_mode,"mask_mode":mask_mode,"count":len(out),
+           "sha256":digest(out),"symmetric_diff":symdiff}
+      row["match"]=len(out)==EXPECTED_COUNT and row["sha256"]==EXPECTED_SHA
+      if strength_best_diff is None or symdiff<strength_best_diff:
+          strength_best_diff=symdiff; strength_best=row; strength_best_rows=list(out)
+      if row["match"] or symdiff<=80 or abs(len(out)-EXPECTED_COUNT)<=10: strength_results.append(row)
+strength_matches=[r for r in strength_results if r["match"]]
+print(json.dumps({"event":"GENERIC_STRENGTH_SEARCH","matches":strength_matches,"best":strength_best,"near":sorted(strength_results,key=lambda r:(r["symmetric_diff"],abs(r["count"]-EXPECTED_COUNT)))[:80]},sort_keys=True))
+if strength_best_rows is not None:
+    strength_keys=set(f"{s}|{t}|{a}|{side}" for s,t,a,side in strength_best_rows)
+    print(json.dumps({"event":"GENERIC_STRENGTH_BEST_DIFF","model":strength_best,
+                      "missing":sorted(expected_keys-strength_keys),"extras":sorted(strength_keys-expected_keys)},sort_keys=True))
+if len(strength_matches)==1:
+    print("GENERIC_STRENGTH_MODEL_EXACT_MATCH")
+    raise SystemExit(0)
+
 if len(matches)!=1:
     best_keys=set(f"{s}|{t}|{a}|{side}" for s,t,a,side in (best_rows or []))
     print(json.dumps({
