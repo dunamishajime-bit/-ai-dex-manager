@@ -48,6 +48,8 @@ def feat(m,btc,t):
     ret24=s1["c"]/s25["c"]-1
     btc24=b1["c"]/b25["c"]-1
     med=statistics.median(x["q"] for x in prior72)
+    if med <= 0 or s1["c"] <= 0:
+        raise KeyError("ZERO_MEDIAN_OR_CLOSE")
     rel=ret24-btc24
     return {
       ("BREAKOUT","LONG"): s1["c"]>max(x["c"] for x in prior24) and s1["q"]/med>=1.30 and sum(tr)/14/s1["c"]>=.007,
