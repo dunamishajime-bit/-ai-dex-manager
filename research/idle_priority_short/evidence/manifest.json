@@ -23,13 +23,35 @@
     "admitted": 61,
     "wins": 48,
     "losses": 13,
-    "status": "REQUIRES_BASELINE_REPLAY_PROOF"
+    "baselineRetained": 1278,
+    "baselineRejected": 6,
+    "integratedTrades": 1339,
+    "status": "COHERENT_10BPS_REPLAY_PROVEN"
   },
   "portfolioAnchor": {
-    "baselineJpyApprox": 141850000,
-    "idleIntegratedJpyApprox": 268050000,
-    "maxDrawdownPctApprox": -23.24,
-    "status": "REQUIRES_DETERMINISTIC_REPLAY_PROOF"
+    "primary10bps": {
+      "baselineJpy": 141845207.7243423,
+      "integratedJpy": 214775230.26444945,
+      "profitFactor": 2.046425970772986,
+      "maxDrawdownPct": -22.84059748015793,
+      "idleProfitFactor": 6.582814623608791,
+      "status": "CI_REPRODUCED_RUN_36664690807"
+    },
+    "sensitivity8bps": {
+      "baselineJpy": 175059528.3889343,
+      "integratedJpy": 268148071.9251832,
+      "profitFactor": 2.0925476176754634,
+      "maxDrawdownPct": -22.68853843401535,
+      "idleProfitFactor": 6.739641037227033,
+      "status": "CI_REPRODUCED_RUN_36664690807"
+    },
+    "historicalMixedReport": {
+      "integratedJpyApprox": 268050000,
+      "integratedTradesApprox": 1342,
+      "profitFactorApprox": 2.055,
+      "maxDrawdownPctApprox": -23.24,
+      "status": "INVALID_AS_SINGLE_RUN_PRODUCTION_CERTIFICATE"
+    }
   },
   "liveActivationAllowed": false
 }
