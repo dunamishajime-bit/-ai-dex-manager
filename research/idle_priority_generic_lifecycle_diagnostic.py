@@ -146,6 +146,8 @@ for t in range(START,END+1,HOUR):
         except KeyError: pass
 
 results=[]
+best_rows=None
+best_row=None
 for (exit_before,same_entry_blocks),idle in idle_variants.items():
   for mode in ("LEVEL","EDGE"):
     for priority in itertools.permutations(("BREAKOUT","MOMENTUM","RELATIVE")):
@@ -158,8 +160,13 @@ for (exit_before,same_entry_blocks),idle in idle_variants.items():
             "mode":mode,"priority":">".join(priority),"side_order":">".join(side_order),"mask_mode":mask_mode,
             "count":len(out),"sha256":sha,"match":len(out)==EXPECTED_COUNT and sha==EXPECTED_SHA
           }
-          if row["match"] or abs(len(out)-EXPECTED_COUNT)<=20: results.append(row)
+          distance=abs(len(out)-EXPECTED_COUNT)
+          if best_row is None or distance < abs(best_row["count"]-EXPECTED_COUNT):
+              best_row=dict(row)
+              best_rows=list(out)
+          if row["match"] or distance<=20: results.append(row)
 matches=[x for x in results if x["match"]]
 print(json.dumps({"event":"GENERIC_LIFECYCLE_SEARCH","expected_count":EXPECTED_COUNT,"expected_sha":EXPECTED_SHA,"matches":matches,"near":results[:120]},sort_keys=True))
 if len(matches)!=1:
+    print(json.dumps({"event":"GENERIC_LIFECYCLE_BEST_NEAR","model":best_row,"rows":best_rows},sort_keys=True))
     raise SystemExit(f"GENERIC_MODEL_MATCH_COUNT:{len(matches)}")
