@@ -62,6 +62,12 @@ LEGACY_LIVE_UNITS=(
   "disdex-idle-priority-short.service"
 )
 SELF_TEST_FIXTURE=''
+# Q102's configurable HIGH_VOL universe must remain disjoint from sleeves that
+# own symbols in the current production portfolio.  The historical env file
+# may still contain the former Idle-owned symbols; pin the safe ownership
+# boundary in the SHA-bound runtime contract so a stale env cannot reintroduce
+# a cross-sleeve symbol collision.
+QUALITY102_DISJOINT_HIGH_VOL_SYMBOLS="SUIUSDT,SEIUSDT,APTUSDT,ARBUSDT,OPUSDT,ENAUSDT,ONDOUSDT,FILUSDT,TRXUSDT"
 
 usage() {
   printf '%s\n' \
@@ -618,6 +624,7 @@ QUALITY102_CAUSAL_V1_LIVE_EXECUTION_ENABLED=true
 QUALITY102_CAUSAL_V1_OPERATOR_ARMED=true
 QUALITY102_CAUSAL_V1_MAX_GROSS=3.0
 QUALITY102_CAUSAL_V1_SELECTOR_MODE=CAUSAL_V4
+QUALITY102_CAUSAL_V1_SYMBOLS=${QUALITY102_DISJOINT_HIGH_VOL_SYMBOLS}
 QUALITY102_CAUSAL_V1_LIVE_ACK=${DEPLOYED_SHA}
 QUALITY102_CAUSAL_V1_STATE_PATH=/var/lib/disdex/quality102-causal-v1/state.json
 FET_BRK48_LIVE_ENABLED=true
