@@ -19,6 +19,7 @@ TOTAL_CAP=4.25
 STRATEGY_CAP={"V12":2.0,"PENGU":1.0,"Q102":3.0,"FET":2.25,"V52":4.0}
 FET_MIN=0.05
 COST_SIDE=0.0005
+PRIORITY={"V52":0,"PENGU":1,"V12":2,"Q102":3,"FET":4}
 
 def jl(p): return [json.loads(x) for x in Path(p).read_text(encoding="utf-8").splitlines() if x.strip()]
 def j(p): return json.loads(Path(p).read_text(encoding="utf-8"))
@@ -139,7 +140,7 @@ def push(ts,phase,kind,payload):
 
 for ts,order,amt in contrib:
     push(ts,0,"CONTRIB",{"amount":amt,"order":order})
-for t in base:
+for t in sorted(base,key=lambda x:(int(x["entry_ts_ms"]),PRIORITY[x["strategy_id"]],int(x.get("rank") or 0),x["symbol"],int(x["position_id"]))):
     push(int(t["entry_ts_ms"]),2,"BASE_ENTRY",t)
 for x in idle:
     push(int(x["entry_ts_ms"]),3,"IDLE_ENTRY",x)
@@ -164,10 +165,15 @@ while heap:
         if not p: continue
         e=payload["event"]; scale=float(p["scale"]); et=e["event_type"]
         if et=="FUNDING":
-            wallet+=float(e["cashflow_settlement"])*scale
+            cash=float(e["cashflow_settlement"])*scale
+            wallet+=cash
+            p["funding_pnl"]=float(p.get("funding_pnl") or 0.0)+cash
         elif et=="MODELED_PARTIAL_EXIT":
-            wallet+=float(e["net_cashflow_settlement"])*scale
+            cash=float(e["net_cashflow_settlement"])*scale
+            wallet+=cash
             close_qty=float(e["quantity"])*scale
+            p["price_pnl"]=float(p.get("price_pnl") or 0.0)+float(e.get("price_pnl_settlement") or 0.0)*scale
+            p["exit_fee"]=float(p.get("exit_fee") or 0.0)+float(e.get("fee_settlement") or 0.0)*scale
             p["quantity"]=max(0.0,float(p["quantity"])-close_qty)
         elif et=="MODELED_EXIT":
             wallet+=float(e["net_cashflow_settlement"])*scale
