@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { IDLE_PRIORITY_SHORT_POLICY, type IdlePrioritySymbol } from "../config/idlePriorityShortPolicy";
 import { computeIdlePriorityFeatures, evaluateIdlePriorityShort, type IdleH1Candle } from "../lib/idle-priority-short-signal";
 
+// CI contract: exact 63 candidate keys, zero extras.
 type ExpectedRow = { symbol: IdlePrioritySymbol; t: number; route: string; hold_h: number };
 type Fixture = { schema: string; sourceSha256: string; windowStart: number; windowEnd: number; rows: ExpectedRow[] };
 
