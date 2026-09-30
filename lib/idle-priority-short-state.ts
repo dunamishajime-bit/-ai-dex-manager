@@ -39,6 +39,7 @@ export type IdlePending={
   createdAt:number;
   updatedAt:number;
   reason:string;
+  reservationId?:string;
 };
 
 export type IdleDecision={
@@ -88,6 +89,7 @@ function validatePending(p:IdlePending){
  if(!validSymbol(p.symbol)||p.route!==routeFor(p.symbol)||p.holdHours!==holdFor(p.symbol))throw new Error("IDLE_STATE_PENDING_INVALID");
  if(!p.clientOrderId||!p.idempotencyKey||!finitePositive(p.quantity)||!finitePositive(p.expectedPrice))throw new Error("IDLE_STATE_PENDING_INVALID");
  if(!validTs(p.signalTs)||!validTs(p.decisionTs)||!validTs(p.createdAt)||!validTs(p.updatedAt)||!p.reason)throw new Error("IDLE_STATE_PENDING_INVALID");
+ if(p.reservationId!=null&&typeof p.reservationId!=="string")throw new Error("IDLE_STATE_PENDING_INVALID");
 }
 
 export function normalizeIdleState(raw:unknown,runtimeSha:string):IdleState{
@@ -137,4 +139,10 @@ export async function writeIdleState(path:string,state:IdleState){
   await rename(tmp,path);
   await chmod(path,0o600);
  }catch(e){await unlink(tmp).catch(()=>{});throw e;}
+}
+
+export class FileIdlePriorityShortStateStore {
+  constructor(private readonly path:string, private readonly runtimeSha:string) {}
+  load(){ return readIdleState(this.path,this.runtimeSha); }
+  save(state:IdleState){ return writeIdleState(this.path,state); }
 }

@@ -254,7 +254,7 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
         return row;
     }
 
-    private async ensureVenueMargin5xCross(symbol: string): Promise<void> {
+    async prepareVenueMargin5xCross(symbol: string): Promise<void> {
         const normalized = symbol.toUpperCase();
         const rows = await this.client.getPositions(normalized);
         const matchingRows = rows.filter((candidate) => candidate.symbol.toUpperCase() === normalized);
@@ -529,7 +529,7 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
         const symbol = command.symbol.toUpperCase();
         const clientOrderId = sanitizeClientOrderId(command.clientOrderId);
         if (command.reduceOnly !== true) {
-            if (command.requireVenueMargin5xCross === true) await this.ensureVenueMargin5xCross(symbol);
+            if (command.requireVenueMargin5xCross === true) await this.prepareVenueMargin5xCross(symbol);
             await runFreshMarginGuardBeforeExposureOrder(symbol);
         }
         const quote = await this.getMarketQuote(symbol);

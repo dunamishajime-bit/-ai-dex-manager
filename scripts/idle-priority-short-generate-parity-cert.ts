@@ -1,5 +1,5 @@
 import { readFileSync, writeFileSync } from "node:fs";
-import { assertIdleParityCertificate, IDLE_PARITY_CERT_REPLAY_MODEL, IDLE_PARITY_CERT_SCHEMA } from "../lib/idle-priority-short-parity-cert";
+import { assertIdleParityCertificate, IDLE_PARITY_REPLAY_MODEL, IDLE_PARITY_CERT_SCHEMA } from "../lib/idle-priority-short-parity-cert";
 
 const [replayPath,runtimeSha,outPath]=process.argv.slice(2);
 if(!replayPath||!runtimeSha||!outPath) throw new Error("USAGE coherent-10bps-integrated.json <runtime-sha> <out.json>");
@@ -16,7 +16,7 @@ const cert={
  wins:48,
  losses:13,
  roundtripBps:Number(r.roundtrip_bps),
- replayModelVersion:IDLE_PARITY_CERT_REPLAY_MODEL,
+ replayModelVersion:IDLE_PARITY_REPLAY_MODEL,
  baselineTradeCount:Number(r.baseline_input),
  baselineRejectedRows:Number(r.baseline_rejected),
  integratedTradeCount:Number(r.combined_completed),

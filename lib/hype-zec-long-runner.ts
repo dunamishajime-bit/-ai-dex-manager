@@ -79,7 +79,7 @@ function trendSignalAsLegacy(signal: ReturnType<typeof buildHypeTrendSignal>): H
 }
 
 function strategyForClassification(sleeve: string): StrictPortfolioPosition["strategy"] | undefined {
-  if (sleeve === "V12" || sleeve === "PENGU_DUAL_LS_V2" || sleeve === "FET_RESIDUAL" || sleeve === "V11_EQ" || sleeve === "V50_POST_OPEN_BASIS" || sleeve === "HYPE_LONG" || sleeve === "ZEC_LONG") return sleeve;
+  if (sleeve === "V12" || sleeve === "PENGU_DUAL_LS_V2" || sleeve === "FET_RESIDUAL" || sleeve === "V11_EQ" || sleeve === "V50_POST_OPEN_BASIS" || sleeve === "HYPE_LONG" || sleeve === "ZEC_LONG" || sleeve === "IDLE_PRIORITY_SHORT") return sleeve;
   return undefined;
 }
 

@@ -10,9 +10,15 @@ User=deploy
 Group=deploy
 WorkingDirectory=/home/deploy/disdex-trading/current
 Environment=NODE_ENV=production
-Environment=DISDEX_IDLE_PRIORITY_MODE=SHADOW
+EnvironmentFile=-/etc/disdex/current-runtime/%i.env
+Environment=DISDEX_RELEASE_ROOT=/home/deploy/disdex-trading/current
+Environment=DISDEX_RUNTIME_SHA=%i
+Environment=DISDEX_IDLE_PRIORITY_MODE=LIVE
 Environment=DISDEX_IDLE_PRIORITY_ENABLED=true
-ExecStart=/usr/bin/env npx tsx scripts/disdex-idle-priority-short-live-runner.ts --daemon
+ExecStartPre=/usr/bin/test -f /home/deploy/disdex-trading/current/.disdex-release-sha
+ExecStartPre=/usr/bin/grep -Fxq %i /home/deploy/disdex-trading/current/.disdex-release-sha
+ExecStartPre=+/usr/bin/node /home/deploy/disdex-trading/current/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root /home/deploy/disdex-trading/current --sha %i --runner IDLE_PRIORITY_SHORT --activation-path /var/lib/disdex/shared/operator-activation/current.json
+ExecStart=/home/deploy/disdex-trading/current/node_modules/.bin/tsx /home/deploy/disdex-trading/current/scripts/disdex-idle-priority-short-live-runner.ts --daemon
 Restart=on-failure
 RestartSec=15
 NoNewPrivileges=true

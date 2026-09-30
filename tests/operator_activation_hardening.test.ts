@@ -119,7 +119,7 @@ test("runtime wiring places activation gate in every trading runner prestart", a
 test("activation gate prestart runs as root so root-owned 0600 artifact remains fail-closed", async () => {
   const source = await readFile("scripts/ops/root/disdex-current-runtime-wiring", "utf8");
   const gateLines = source.split(/\r?\n/).filter((line) => line.includes("disdex-live-operator-activation-gate.mjs") && line.includes("ExecStartPre="));
-  assert.equal(gateLines.length, 6, "all-runner gate plus five runner gates must be rendered");
+  assert.equal(gateLines.length, 7, "all-runner gate plus six runner gates must be rendered");
   for (const line of gateLines) assert.match(line, /ExecStartPre=\+\/usr\/bin\/node /);
   for (const path of [
     "ops/systemd/disdex-fet-brk48@.service",

@@ -229,6 +229,8 @@ function strictStrategyForPosition(position: DirectPosition, quality102Ownership
     if (fet.tradable && fet.sleeve === "FET_RESIDUAL") return "FET_RESIDUAL" as const;
     const stock = classifyAsterSymbol(symbol, "V50_POST_OPEN_BASIS");
     if (stock.tradable && stock.assetClass === "STOCK") return "V52" as const;
+    const idle = classifyAsterSymbol(symbol, "IDLE_PRIORITY_SHORT");
+    if (idle.tradable && idle.sleeve === "IDLE_PRIORITY_SHORT") return "IDLE_PRIORITY_SHORT" as const;
     throw new Error(`MANUAL_REVIEW_UNKNOWN_STRATEGY_OWNERSHIP:${symbol}`);
 }
 

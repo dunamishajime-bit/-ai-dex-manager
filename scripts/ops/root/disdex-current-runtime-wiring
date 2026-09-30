@@ -12,6 +12,7 @@ OPERATOR_ACTIVATION_PATH="${SHARED_ROOT}/operator-activation/current.json"
 V52_LEGACY_CRYPTO_ROOT="${SHARED_ROOT}/crypto-v96"
 PENGU_STATE_ROOT="/var/lib/disdex/pengu-dual-ls-v2"
 HYPE_ZEC_STATE_ROOT="/var/lib/disdex/hype-zec-long"
+IDLE_PRIORITY_STATE_ROOT="/var/lib/disdex/idle-priority"
 LIVE_STATE_FILES=(
   "/var/lib/disdex/v12-x1-all/runner.json"
   "/var/lib/disdex/pengu-dual-ls-v2/runner-live.json"
@@ -20,6 +21,7 @@ LIVE_STATE_FILES=(
   "/var/lib/disdex/fet-brk48-residual/state.json"
   "/var/lib/disdex/v52-aster-only/runner-live.json"
   "${HYPE_ZEC_STATE_ROOT}/runner.json"
+  "${IDLE_PRIORITY_STATE_ROOT}/state.json"
 )
 RUNTIME_CONTRACT_ENV_DIR="/etc/disdex/current-runtime"
 PENDING_EXPOSURE_REGISTRY_PATH="${SHARED_ROOT}/pending-exposure.json"
@@ -40,6 +42,7 @@ FET_DROPIN_DIR="/etc/systemd/system/disdex-fet-brk48@CURRENT.service.d"
 MARGIN_DROPIN_DIR="/etc/systemd/system/disdex-v12-v52-margin-guard@CURRENT.service.d"
 V52_DROPIN_DIR="/etc/systemd/system/disdex-v52-aster-only@CURRENT.service.d"
 SHARED_RISK_DROPIN_DIR="/etc/systemd/system/disdex-shared-crypto-risk@CURRENT.service.d"
+IDLE_DROPIN_DIR="/etc/systemd/system/disdex-idle-priority-short@CURRENT.service.d"
 # These exact legacy supervisors must never coexist with the SHA-pinned current
 # runtime. Historical source/config files remain installed for rollback and
 # research, but an active legacy service is a hard wiring conflict.
@@ -56,6 +59,7 @@ LEGACY_LIVE_UNITS=(
   "disdex-v52-aster-only.service"
   "disdex-shared-crypto-risk.service"
   "disdex-v12-v52-margin-guard.service"
+  "disdex-idle-priority-short.service"
 )
 SELF_TEST_FIXTURE=''
 
@@ -139,6 +143,13 @@ validate_release_artifacts() {
     "$CURRENT_RELEASE/scripts/disdex-hype-trend-live-runner.ts"
     "$CURRENT_RELEASE/scripts/disdex-hype-zec-long-live-runner.ts"
     "$CURRENT_RELEASE/scripts/disdex-hype-zec-core-preempt.ts"
+    "$CURRENT_RELEASE/scripts/disdex-idle-priority-short-live-runner.ts"
+    "$CURRENT_RELEASE/lib/idle-priority-short-runner.ts"
+    "$CURRENT_RELEASE/lib/idle-priority-short-baseline-admission.ts"
+    "$CURRENT_RELEASE/lib/idle-priority-short-live.ts"
+    "$CURRENT_RELEASE/config/idlePriorityShortPolicy.ts"
+    "$CURRENT_RELEASE/config/idlePriorityShortRuntime.ts"
+    "$CURRENT_RELEASE/ops/systemd/disdex-idle-priority-short@.service"
     "$CURRENT_RELEASE/scripts/disdex_v96_v52_margin_guard_runtime.py"
     "$CURRENT_RELEASE/scripts/disdex_v52_aster_only_live_engine.py"
     "$CURRENT_RELEASE/lib/aster-readonly-recovery-gate.ts"
@@ -213,6 +224,7 @@ set_units() {
   Q102_RANKING_OBSERVER_TIMER="disdex-quality102-ranking-observer@${DEPLOYED_SHA}.timer"
   FET_UNIT="disdex-fet-brk48@${DEPLOYED_SHA}.service"
   HYPE_UNIT="disdex-hype-long@${DEPLOYED_SHA}.service"
+  IDLE_UNIT="disdex-idle-priority-short@${DEPLOYED_SHA}.service"
   V52_UNIT="disdex-v52-aster-only@${DEPLOYED_SHA}.service"
   MARGIN_UNIT="disdex-v12-v52-margin-guard@${DEPLOYED_SHA}.service"
   SHARED_RISK_UNIT="disdex-shared-crypto-risk@${DEPLOYED_SHA}.service"
@@ -223,6 +235,7 @@ set_units() {
   MARGIN_DROPIN_DIR="/etc/systemd/system/${MARGIN_UNIT}.d"
   V52_DROPIN_DIR="/etc/systemd/system/${V52_UNIT}.d"
   SHARED_RISK_DROPIN_DIR="/etc/systemd/system/${SHARED_RISK_UNIT}.d"
+  IDLE_DROPIN_DIR="/etc/systemd/system/${IDLE_UNIT}.d"
   CONTRACT_ENV_FILE="${RUNTIME_CONTRACT_ENV_DIR}/${DEPLOYED_SHA}.env"
   HYPE_OPERATOR_ENV_FILE="${RUNTIME_CONTRACT_ENV_DIR}/${DEPLOYED_SHA}.hype-operator.env"
   HEALTH_SNAPSHOT_ENV_FILE="${RUNTIME_CONTRACT_ENV_DIR}/${DEPLOYED_SHA}.health-snapshot.env"
@@ -241,6 +254,7 @@ show_plan() {
   printf 'q102RankingObserverTimer=%s\n' "$Q102_RANKING_OBSERVER_TIMER"
   printf 'fetUnit=%s\n' "$FET_UNIT"
   printf 'hypeUnit=%s\n' "$HYPE_UNIT"
+  printf 'idleUnit=%s\n' "$IDLE_UNIT"
   printf 'v52Unit=%s\n' "$V52_UNIT"
   printf 'marginUnit=%s\n' "$MARGIN_UNIT"
   printf 'v52LegacyCryptoState=%s\n' "$V52_LEGACY_CRYPTO_ROOT"
@@ -262,11 +276,12 @@ show_plan() {
   printf 'fetDropin=%s/zzzzzzzzzzzz-current-release-contract.conf\n' "$FET_DROPIN_DIR"
   printf 'marginDropin=%s/zzzzzzzzzzzz-current-release-paths.conf\n' "$MARGIN_DROPIN_DIR"
   printf 'v52Dropin=%s/zzzzzzzzzzzz-current-release-paths.conf\n' "$V52_DROPIN_DIR"
+  printf 'idleDropin=%s/zzzzzzzzzzzz-current-release-paths.conf\n' "$IDLE_DROPIN_DIR"
 }
 
 check_units() {
   local unit state load_state
-  for unit in "$V12_UNIT" "$PENGU_UNIT" "$Q102_UNIT" "$FET_UNIT" "$HYPE_UNIT" "$V52_UNIT" "$MARGIN_UNIT" "$SHARED_RISK_UNIT"; do
+  for unit in "$V12_UNIT" "$PENGU_UNIT" "$Q102_UNIT" "$FET_UNIT" "$HYPE_UNIT" "$V52_UNIT" "$MARGIN_UNIT" "$SHARED_RISK_UNIT" "$IDLE_UNIT"; do
     load_state="$(systemctl show "$unit" -p LoadState --value 2>/dev/null || true)"
     state="$(systemctl show "$unit" -p ActiveState --value 2>/dev/null || true)"
     printf 'unit=%s loadState=%s activeState=%s\n' "$unit" "${load_state:-unknown}" "${state:-unknown}"
@@ -275,6 +290,14 @@ check_units() {
       return 1
     }
   done
+}
+
+prepare_idle_unit_for_apply() {
+  require_root_for_apply
+  install -o root -g root -m 0644 \
+    "$CURRENT_RELEASE/ops/systemd/disdex-idle-priority-short@.service" \
+    /etc/systemd/system/disdex-idle-priority-short@.service
+  systemctl daemon-reload
 }
 
 assert_no_legacy_live_units() {
@@ -364,7 +387,7 @@ reset_stale_release_failed_units() {
   local unit
   while read -r unit _; do
     [[ -n "$unit" ]] || continue
-    [[ "$unit" =~ ^disdex-(v12-x1-all|pengu-dual-ls-v2|quality102-causal-v1|fet-brk48|hype-long|v52-aster-only|shared-crypto-risk|v12-v52-margin-guard)@[0-9a-f]{40}\.service$ ]] || continue
+    [[ "$unit" =~ ^disdex-(v12-x1-all|pengu-dual-ls-v2|quality102-causal-v1|fet-brk48|hype-long|v52-aster-only|shared-crypto-risk|v12-v52-margin-guard|idle-priority-short)@[0-9a-f]{40}\.service$ ]] || continue
     [[ "$unit" == *"@${DEPLOYED_SHA}.service" ]] && continue
     systemctl reset-failed "$unit" >/dev/null 2>&1 || true
   done < <(systemctl list-units --all --type=service --state=failed --no-legend 2>/dev/null || true)
@@ -440,7 +463,7 @@ assert_current_live_target_ready() {
 operator_activation_all_trading_ready() {
   local runner
   local gate="$CURRENT_RELEASE/scripts/ops/root/disdex-live-operator-activation-gate.mjs"
-  for runner in V12_X1_ALL PENGU_V8 QUALITY102_CAUSAL_V1 V52 FET_BRK48_RESIDUAL HYPE_TREND_LONG; do
+  for runner in V12_X1_ALL PENGU_V8 QUALITY102_CAUSAL_V1 V52 FET_BRK48_RESIDUAL HYPE_TREND_LONG IDLE_PRIORITY_SHORT; do
     /usr/bin/node "$gate"       --release-root "$CURRENT_RELEASE"       --sha "$DEPLOYED_SHA"       --runner "$runner"       --activation-path "$OPERATOR_ACTIVATION_PATH" >/dev/null 2>&1 || return 1
   done
   return 0
@@ -488,15 +511,32 @@ apply_wiring() {
       return 1
     }
   fi
+  if [[ -e "$IDLE_PRIORITY_STATE_ROOT" && ! -d "$IDLE_PRIORITY_STATE_ROOT" ]]; then
+    printf 'Idle state path exists but is not a directory: %s\n' "$IDLE_PRIORITY_STATE_ROOT" >&2
+    return 1
+  fi
+  if [[ ! -e "$IDLE_PRIORITY_STATE_ROOT" ]]; then
+    install -d -o deploy -g deploy -m 0700 "$IDLE_PRIORITY_STATE_ROOT"
+  else
+    [[ "$(stat -c '%U:%G:%a' "$IDLE_PRIORITY_STATE_ROOT")" == "deploy:deploy:700" ]] || {
+      printf 'Idle state path ownership/mode is unsafe: %s\n' "$(stat -c '%U:%G:%a' "$IDLE_PRIORITY_STATE_ROOT")" >&2
+      return 1
+    }
+  fi
   normalize_live_state_ownership
 
   write_atomic "$CONTRACT_ENV_FILE" "DISDEX_RELEASE_SHA=${DEPLOYED_SHA}
+DISDEX_RUNTIME_SHA=${DEPLOYED_SHA}
+DISDEX_RELEASE_ROOT=${CURRENT_RELEASE}
 DISDEX_RUNTIME_COMMIT_SHA=${DEPLOYED_SHA}
 DISDEX_SHARED_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json
 DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH=${SHARED_ROOT}/aster-rate-budget.json
 DISDEX_ASTER_GLOBAL_MIN_INTERVAL_MS=50
 DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS=5000
 DISDEX_PENDING_EXPOSURE_REGISTRY_PATH=${PENDING_EXPOSURE_REGISTRY_PATH}
+DISDEX_ACCOUNT_LOCK_PATH=${SHARED_ROOT}/account-order.lock
+DISDEX_OPERATOR_ACTIVATION_PATH=${OPERATOR_ACTIVATION_PATH}
+DISDEX_SHARED_CRYPTO_DAILY_RISK_PATH=${SHARED_ROOT}/crypto-daily-risk.json
 DISDEX_NODE_MODULES_SOURCE_SHA=${NODE_MODULES_SOURCE_SHA}
 DISDEX_PYTHON_RUNTIME_SOURCE_SHA=${PYTHON_RUNTIME_SOURCE_SHA}
 V12_LIVE_COMMIT_SHA=${DEPLOYED_SHA}
@@ -537,6 +577,22 @@ DISDEX_HYPE_ZEC_LIVE_EXECUTION_ENABLED=true
 DISDEX_HYPE_ZEC_PRODUCTION_CONFIG_LIVE_ENABLED=true
 DISDEX_HYPE_ZEC_SIGNAL_MODE=TREND
 DISDEX_HYPE_ZEC_SYMBOLS=HYPEUSDT
+DISDEX_IDLE_PRIORITY_MODE=LIVE
+DISDEX_IDLE_PRIORITY_ENABLED=true
+DISDEX_IDLE_PRIORITY_OPERATOR_ARMED=true
+DISDEX_IDLE_PRIORITY_RUNTIME_SHA=${DEPLOYED_SHA}
+DISDEX_IDLE_PRIORITY_PARITY_CERT_PATH=${SHARED_ROOT}/idle-priority-parity-cert.json
+DISDEX_IDLE_PRIORITY_STATE_PATH=${IDLE_PRIORITY_STATE_ROOT}/state.json
+DISDEX_IDLE_PRIORITY_DECISION_PATH=${IDLE_PRIORITY_STATE_ROOT}/decision.json
+V12_DECISION_SNAPSHOT_PATH=/var/lib/disdex/v12-x1-all/decision-snapshot.json
+QUALITY102_CAUSAL_V1_DECISION_SNAPSHOT_PATH=/var/lib/disdex/quality102-causal-v1/decision-snapshot.json
+PENGU_DUAL_LS_V2_STATE_PATH=${PENGU_STATE_ROOT}/runner-live.json
+FET_BRK48_STATE_PATH=/var/lib/disdex/fet-brk48-residual/state.json
+DISDEX_V52_ASTER_ONLY_STATE_PATH=/var/lib/disdex/v52-aster-only/runner-live.json
+DISDEX_IDLE_PRIORITY_BASELINE_MAX_AGE_MS=90000
+DISDEX_IDLE_PRIORITY_MARGIN_MAX_AGE_MS=90000
+DISDEX_IDLE_PRIORITY_MAX_SLIPPAGE_BPS=20
+DISDEX_IDLE_PRIORITY_POLL_MS=300000
 QUALITY102_CAUSAL_V1_MODE=LIVE
 QUALITY102_CAUSAL_V1_ENABLED=true
 QUALITY102_CAUSAL_V1_LIVE_TRADING_ENABLED=true
@@ -853,6 +909,25 @@ Environment=DISDEX_V52_PORTFOLIO_GROSS_CAP=4.25
 Environment=DISDEX_V96_STATE_DIR=${V52_LEGACY_CRYPTO_ROOT}
 Environment=DISDEX_V96_KILL_SWITCH_FILE=/var/lib/disdex/shared/kill-switch.json"
 
+  write_atomic "${IDLE_DROPIN_DIR}/zzzzzzzzzzzz-current-release-paths.conf" "[Unit]
+StartLimitIntervalSec=300s
+StartLimitBurst=3
+[Service]
+RestartSec=30s
+EnvironmentFile=${CONTRACT_ENV_FILE}
+Environment=DISDEX_RUNTIME_SHA=${DEPLOYED_SHA}
+Environment=DISDEX_RELEASE_SHA=${DEPLOYED_SHA}
+Environment=DISDEX_RELEASE_ROOT=${CURRENT_RELEASE}
+Environment=DISDEX_TRADE_FILL_STRATEGY_ID=IDLE_PRIORITY_SHORT
+WorkingDirectory=${CURRENT_RELEASE}
+ExecStartPre=
+ExecStartPre=/usr/bin/test -f ${CURRENT_RELEASE}/.disdex-release-sha
+ExecStartPre=/usr/bin/grep -Fxq ${DEPLOYED_SHA} ${CURRENT_RELEASE}/.disdex-release-sha
+ExecStartPre=+/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root ${CURRENT_RELEASE} --sha ${DEPLOYED_SHA} --runner IDLE_PRIORITY_SHORT --activation-path ${OPERATOR_ACTIVATION_PATH}
+ExecStart=
+ExecStart=${CURRENT_RELEASE}/node_modules/.bin/tsx scripts/disdex-idle-priority-short-live-runner.ts --daemon
+ReadWritePaths=${IDLE_PRIORITY_STATE_ROOT} ${SHARED_ROOT}"
+
   systemctl daemon-reload
   reset_stale_release_failed_units
   systemctl reset-failed aster-trade-history-git-sync.service || true
@@ -867,6 +942,7 @@ Environment=DISDEX_V96_KILL_SWITCH_FILE=/var/lib/disdex/shared/kill-switch.json"
 
   if operator_activation_all_trading_ready; then
     systemctl enable --now "$HYPE_UNIT"
+    systemctl enable --now "$IDLE_UNIT"
     systemctl enable --now disdex-v12-kill-switch-auto-repair.path
     systemctl enable --now disdex-runner-watchdog.timer
     systemctl enable --now disdex-runner-position-recovery.timer
@@ -874,6 +950,8 @@ Environment=DISDEX_V96_KILL_SWITCH_FILE=/var/lib/disdex/shared/kill-switch.json"
     printf 'DISDEX_CURRENT_RUNTIME_OPERATOR_AUTOMATION_ENABLED\n'
   else
     systemctl disable --now "$HYPE_UNIT" || true
+    systemctl disable --now "$IDLE_UNIT" || true
+    systemctl stop "$IDLE_UNIT" || true
     systemctl disable --now disdex-v12-kill-switch-auto-repair.path || true
     systemctl stop disdex-v12-kill-switch-auto-repair.service || true
     systemctl disable --now disdex-runner-watchdog.timer || true
@@ -900,12 +978,13 @@ self_test() {
   [[ "disdex-quality102-ranking-observer@${sample_sha}.service" == *"@${sample_sha}.service" ]]
   [[ "disdex-quality102-ranking-observer@${sample_sha}.timer" == *"@${sample_sha}.timer" ]]
   [[ "disdex-fet-brk48@${sample_sha}.service" == *"@${sample_sha}.service" ]]
+  [[ "disdex-idle-priority-short@${sample_sha}.service" == *"@${sample_sha}.service" ]]
   [[ "scripts/disdex_v96_v52_margin_guard_runtime.py" == scripts/* ]]
   [[ "scripts/disdex_v52_aster_only_live_engine.py" == scripts/* ]]
   SELF_TEST_FIXTURE="$(mktemp -d)"
   trap 'rm -rf -- "$SELF_TEST_FIXTURE"' RETURN
   CURRENT_RELEASE="$SELF_TEST_FIXTURE"
-  mkdir -p "$SELF_TEST_FIXTURE/scripts/ops/root" "$SELF_TEST_FIXTURE/scripts/generated" "$SELF_TEST_FIXTURE/lib" "$SELF_TEST_FIXTURE/node_modules/.bin" "$SELF_TEST_FIXTURE/.venv2/bin"
+  mkdir -p "$SELF_TEST_FIXTURE/scripts/ops/root" "$SELF_TEST_FIXTURE/scripts/generated" "$SELF_TEST_FIXTURE/lib" "$SELF_TEST_FIXTURE/config" "$SELF_TEST_FIXTURE/ops/systemd" "$SELF_TEST_FIXTURE/node_modules/.bin" "$SELF_TEST_FIXTURE/.venv2/bin"
   for required_file in \
     scripts/disdex-v12-x1-all-live-runner.ts \
     scripts/disdex-pengu-dual-ls-v2-live-runner.ts \
@@ -916,6 +995,13 @@ self_test() {
     scripts/disdex-hype-trend-live-runner.ts \
     scripts/disdex-hype-zec-long-live-runner.ts \
     scripts/disdex-hype-zec-core-preempt.ts \
+    scripts/disdex-idle-priority-short-live-runner.ts \
+    lib/idle-priority-short-runner.ts \
+    lib/idle-priority-short-baseline-admission.ts \
+    lib/idle-priority-short-live.ts \
+    config/idlePriorityShortPolicy.ts \
+    config/idlePriorityShortRuntime.ts \
+    ops/systemd/disdex-idle-priority-short@.service \
     scripts/disdex-pengu-presubmit-snapshot-recovery.ts \
     scripts/disdex-v12-benign-entry-gate-recovery.ts \
     scripts/disdex_v96_v52_margin_guard_runtime.py \
@@ -989,6 +1075,8 @@ self_test() {
   grep -q 'systemctl disable --now disdex-v12-three-hour-health-check.timer' "$0"
   grep -q 'systemctl enable --now disdex-runner-position-recovery.timer' "$0"
   grep -q 'systemctl enable --now disdex-v12-three-hour-health-check.timer' "$0"
+  grep -q 'systemctl enable --now "$IDLE_UNIT"' "$0"
+  grep -q 'IDLE_PRIORITY_SHORT' "$0"
   printf 'DISDEX_CURRENT_RUNTIME_OPERATOR_AUTOMATION_SELFTEST_PASS\n'
   printf 'DISDEX_CURRENT_RUNTIME_WIRING_SELFTEST_PASS\n'
 }
@@ -1002,6 +1090,9 @@ main() {
     --check|--apply)
       resolve_current
       set_units
+      if [[ "$mode" == "--apply" ]]; then
+        prepare_idle_unit_for_apply
+      fi
       show_plan
       check_units
       assert_no_legacy_live_units

@@ -319,6 +319,8 @@ function strictBasePosition(position: DirectPosition, now: number): StrictPortfo
                     ? "HYPE_LONG"
                     : classification.sleeve === "ZEC_LONG"
                         ? "ZEC_LONG"
+                    : classification.sleeve === "IDLE_PRIORITY_SHORT"
+                        ? "IDLE_PRIORITY_SHORT"
                 : "V52";
     const updatedAt = positive(position.updatedAt, "base position updatedAt");
     if (updatedAt > now) throw new Error(`BASE_POSITION_TIMESTAMP_IN_FUTURE:${position.symbol}`);

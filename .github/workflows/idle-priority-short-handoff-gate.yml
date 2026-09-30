@@ -6,6 +6,10 @@ on:
       - "config/idlePriorityShort*.ts"
       - "lib/idle-priority-short-*.ts"
       - "scripts/idle-priority-short-*.ts"
+      - "scripts/disdex-idle-priority-short-live-runner.ts"
+      - "scripts/ops/root/disdex-current-runtime-wiring"
+      - "scripts/ops/root/disdex-live-operator-activation-gate.mjs"
+      - "ops/systemd/disdex-idle-priority-short@.service"
       - "tests/idle-priority-short-*.test.ts"
       - "docs/implementation/IDLE_PRIORITY_SHORT_CODEX_PRODUCTION_HANDOFF_20260929.md"
       - "package.json"
@@ -21,10 +25,21 @@ jobs:
         with: {node-version: "24"}
       - run: npm ci
       - run: npm run strategy:idle-priority-short:selftest
+      - run: npm run strategy:idle-priority-short:live:selftest
       - run: npx tsc --noEmit
+      - run: bash scripts/ops/root/disdex-current-runtime-wiring --self-test
       - name: Verify fail-closed handoff artifacts
         shell: bash
         run: |
           test -f docs/implementation/IDLE_PRIORITY_SHORT_CODEX_PRODUCTION_HANDOFF_20260929.md
-          test -f systemd/disdex-idle-priority-short.service
-          grep -q IDLE_LIVE_EXECUTION_NOT_ARMED_UNTIL_CODEX_COMPLETES_PARITY_AND_EXECUTION_ADAPTER scripts/idle-priority-short-runner.ts
+          test -f ops/systemd/disdex-idle-priority-short@.service
+          grep -q IDLE_PRIORITY_SHORT scripts/disdex-idle-priority-short-live-runner.ts
+          grep -q requireVenueMargin5xCross lib/idle-priority-short-runner.ts
+          grep -q placeStopMarket lib/idle-priority-short-runner.ts
+          grep -q IDLE_LIVE_ORDER_PATH_NOT_CERTIFIED scripts/idle-priority-short-runner.ts
+      - name: Verify no unguarded LIVE order path
+        shell: bash
+        run: |
+          ! grep -q IDLE_LIVE_ORDER_PATH_NOT_CERTIFIED scripts/disdex-idle-priority-short-live-runner.ts
+          grep -q 'IDLE_LIVE_ACTIVATION_REQUIRED' lib/idle-priority-short-live.ts
+          grep -q 'FULL_1X_CAPACITY_UNAVAILABLE' lib/idle-priority-short-live.ts

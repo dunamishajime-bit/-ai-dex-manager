@@ -33,7 +33,7 @@ const V12_SYMBOLS = new Set(V12_X1_ALL.universe.map((symbol) => `${symbol}USDT`)
 const EPS = 1e-12;
 
 function isCryptoPortfolioSleeve(sleeve: string) {
-    return sleeve === "V12" || sleeve === "PENGU_DUAL_LS_V2" || sleeve === "QUALITY102_CAUSAL_V1" || sleeve === "FET_RESIDUAL" || sleeve === "HYPE_LONG" || sleeve === "ZEC_LONG";
+    return sleeve === "V12" || sleeve === "PENGU_DUAL_LS_V2" || sleeve === "QUALITY102_CAUSAL_V1" || sleeve === "FET_RESIDUAL" || sleeve === "HYPE_LONG" || sleeve === "ZEC_LONG" || sleeve === "IDLE_PRIORITY_SHORT";
 }
 
 export type V12LiveTickStatus = "locked" | "held" | "no-signal" | "capacity-blocked" | "entered" | "exited" | "risk-blocked" | "manual-review";

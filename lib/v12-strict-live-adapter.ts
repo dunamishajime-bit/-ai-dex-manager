@@ -87,6 +87,7 @@ function strictStrategy(position: DirectPosition, quality102Ownership?: Quality1
     if (classification.sleeve === "PENGU_DUAL_LS_V2") return "PENGU_DUAL_LS_V2";
     if (classification.sleeve === "FET_RESIDUAL") return "FET_RESIDUAL";
     if (classification.sleeve === "V11_EQ" || classification.sleeve === "V50_POST_OPEN_BASIS") return "V52";
+    if (classification.sleeve === "IDLE_PRIORITY_SHORT") return "IDLE_PRIORITY_SHORT";
     throw new Error(`STRICT_PORTFOLIO_UNKNOWN_STRATEGY_OWNERSHIP:${position.symbol}`);
 }
 

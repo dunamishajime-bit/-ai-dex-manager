@@ -45,7 +45,7 @@ function sortPriority(intent: PortfolioIntent) {
 export function planUnifiedPortfolio(intents: PortfolioIntent[], active: ActivePortfolioPosition[] = []): PortfolioPlan {
     const accepted: PortfolioIntent[] = [];
     const rejected: Array<{ intent: PortfolioIntent; reason: string }> = [];
-    let cryptoGross = active.filter((row) => row.sleeve === "V12" || row.sleeve === "PENGU_DUAL_LS_V2" || row.sleeve === "QUALITY102_CAUSAL_V1").reduce((sum, row) => sum + Math.abs(row.gross), 0);
+    let cryptoGross = active.filter((row) => row.sleeve === "V12" || row.sleeve === "PENGU_DUAL_LS_V2" || row.sleeve === "QUALITY102_CAUSAL_V1" || row.sleeve === "IDLE_PRIORITY_SHORT").reduce((sum, row) => sum + Math.abs(row.gross), 0);
     let stockGross = active.filter((row) => row.sleeve === "V11_EQ" || row.sleeve === "V50_POST_OPEN_BASIS").reduce((sum, row) => sum + Math.abs(row.gross), 0);
     let occupiedV12 = active.filter((row) => row.sleeve === "V12").length;
     let v12Gross = active.filter((row) => row.sleeve === "V12").reduce((sum, row) => sum + Math.abs(row.gross), 0);
