@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFile } from "node:fs/promises";
+import { access, readFile } from "node:fs/promises";
 
 test("Idle LIVE unit loads the same Aster credential env sources as existing LIVE runners", async () => {
   const unit = await readFile("ops/systemd/disdex-idle-priority-short@.service", "utf8");
@@ -39,3 +39,12 @@ test("runtime wiring performs formal HYPE state lineage migration before activat
   assert.match(wiring, /migrate_idle_state_lineage\s+systemctl daemon-reload/);
 });
 
+
+
+test("legacy unpinned Idle service unit is not shipped", async () => {
+  await assert.rejects(
+    access("systemd/disdex-idle-priority-short.service"),
+    /ENOENT/,
+    "legacy non-SHA-pinned Idle unit must not exist; only ops/systemd/disdex-idle-priority-short@.service is allowed",
+  );
+});
