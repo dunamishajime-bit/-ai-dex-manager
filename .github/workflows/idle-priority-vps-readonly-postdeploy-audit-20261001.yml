@@ -139,6 +139,46 @@ jobs:
             print("JSON_AUDIT "+name+"="+json.dumps(out,separators=(",",":"),ensure_ascii=False))
           PY
 
+          set -a
+          for env_file in /etc/disdex/disdex-v13d-v11eq-v96.env /etc/disdex/disdex-v12-pengu-v2-v52.env /etc/disdex/disdex-v12-x1-all.env /etc/disdex/disdex-quality102-causal-v1.env /etc/disdex/current-runtime/$sha.env; do
+            [[ -f "$env_file" ]] && . "$env_file"
+          done
+          set +a
+          echo "ASTER_READONLY_DIAGNOSTIC_BEGIN"
+          "$current/node_modules/.bin/tsx" "$current/scripts/disdex-aster-readonly-account-diagnostic.ts"
+          echo "ASTER_READONLY_DIAGNOSTIC_END"
+
+          python3 - <<'PY'
+          import json,os
+          files={
+            "v12":"/var/lib/disdex/v12-x1-all/runner.json",
+            "pengu":"/var/lib/disdex/pengu-dual-ls-v2/runner-live.json",
+            "q102":"/var/lib/disdex/quality102-causal-v1/state.json",
+            "v52":"/var/lib/disdex/v52-aster-only/runner-live.json",
+            "fet":"/var/lib/disdex/fet-brk48-residual/state.json",
+            "hype":"/var/lib/disdex/hype-zec-long/runner.json",
+          }
+          for name,path in files.items():
+            try:
+              with open(path,encoding="utf-8") as f:v=json.load(f)
+              active=v.get("active") if isinstance(v.get("active"),dict) else None
+              positions=v.get("positions") if isinstance(v.get("positions"),list) else None
+              pending=v.get("pending") if isinstance(v.get("pending"),dict) else None
+              out={
+                "path":path,
+                "runtimeSha":v.get("runtimeSha") or v.get("runtimeCommitSha"),
+                "updatedAt":v.get("updatedAt"),
+                "manualReview":v.get("manualReview") or v.get("manualReviewReason"),
+                "pending":bool(pending),
+                "activeSymbol":active.get("symbol") if active else None,
+                "positionCount":len(positions) if positions is not None else None,
+                "positionSymbols":[p.get("symbol") for p in positions if isinstance(p,dict)] if positions is not None else None,
+              }
+            except Exception as e:
+              out={"path":path,"error":type(e).__name__}
+            print("STATE_AUDIT "+name+"="+json.dumps(out,separators=(",",":"),ensure_ascii=False))
+          PY
+
           echo "DISK_FREE_KB=$(df -Pk /home/deploy | awk 'NR==2 {print $4}')"
           echo "AUDIT_COMPLETE=TRUE"
           REMOTE
