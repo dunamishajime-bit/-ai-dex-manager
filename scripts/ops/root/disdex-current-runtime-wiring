@@ -142,6 +142,7 @@ validate_release_artifacts() {
     "$CURRENT_RELEASE/scripts/disdex-fet-brk48-live-runner.ts"
     "$CURRENT_RELEASE/scripts/disdex-hype-trend-live-runner.ts"
     "$CURRENT_RELEASE/scripts/disdex-hype-zec-long-live-runner.ts"
+    "$CURRENT_RELEASE/scripts/disdex-hype-zec-long-state-migrate.ts"
     "$CURRENT_RELEASE/scripts/disdex-hype-zec-core-preempt.ts"
     "$CURRENT_RELEASE/scripts/disdex-idle-priority-short-live-runner.ts"
     "$CURRENT_RELEASE/lib/idle-priority-short-runner.ts"
@@ -214,6 +215,14 @@ validate_release_dependency() {
       return 1
     }
   fi
+}
+
+migrate_hype_state_lineage() {
+  "$CURRENT_RELEASE/node_modules/.bin/tsx" \
+    "$CURRENT_RELEASE/scripts/disdex-hype-zec-long-state-migrate.ts" \
+    --apply \
+    --state-path "$HYPE_ZEC_STATE_ROOT/runner.json" \
+    --to-sha "$DEPLOYED_SHA"
 }
 
 set_units() {
@@ -928,6 +937,7 @@ ExecStart=
 ExecStart=${CURRENT_RELEASE}/node_modules/.bin/tsx scripts/disdex-idle-priority-short-live-runner.ts --daemon
 ReadWritePaths=${IDLE_PRIORITY_STATE_ROOT} ${SHARED_ROOT}"
 
+  migrate_hype_state_lineage
   systemctl daemon-reload
   reset_stale_release_failed_units
   systemctl reset-failed aster-trade-history-git-sync.service || true

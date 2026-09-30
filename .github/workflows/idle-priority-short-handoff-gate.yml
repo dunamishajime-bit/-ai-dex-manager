@@ -10,6 +10,9 @@ on:
       - "scripts/ops/root/disdex-current-runtime-wiring"
       - "scripts/ops/root/disdex-live-operator-activation-gate.mjs"
       - "ops/systemd/disdex-idle-priority-short@.service"
+      - "scripts/disdex-hype-zec-long-state-migrate.ts"
+      - "tests/hype-zec-long-state-migration.test.ts"
+      - "tests/idle-priority-short-systemd-contract.test.mjs"
       - "tests/idle-priority-short-*.test.ts"
       - "docs/implementation/IDLE_PRIORITY_SHORT_CODEX_PRODUCTION_HANDOFF_20260929.md"
       - "package.json"
@@ -27,6 +30,8 @@ jobs:
       - run: npm run strategy:idle-priority-short:selftest
       - run: npm run strategy:idle-priority-short:live:selftest
       - run: npx tsc --noEmit
+      - run: npx tsx --test tests/hype-zec-long-state-migration.test.ts tests/idle-priority-short-systemd-contract.test.mjs
+      - run: npm run strategy:hype-zec-long:state:migrate:selftest
       - run: bash scripts/ops/root/disdex-current-runtime-wiring --self-test
       - name: Verify fail-closed handoff artifacts
         shell: bash
