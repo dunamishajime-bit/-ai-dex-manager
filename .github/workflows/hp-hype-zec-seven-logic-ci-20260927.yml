@@ -15,13 +15,14 @@ jobs:
           node-version: '24'
           cache: npm
       - run: npm ci --no-audit --no-fund
-      - run: npx tsx --test tests/hp-hype-zec-decision-history-20260927.test.ts
+      - run: npx tsx --test tests/hp-hype-zec-decision-history-20260927.test.ts tests/hp-idle-priority-decision-history-20261001.test.ts
       - run: npx tsc --noEmit
       - name: Build all Next.js pages
         run: npm run build
-      - name: Ensure dynamic HYPE/ZEC APIs, pages and history compiled
+      - name: Ensure dynamic HYPE/ZEC/Idle APIs, pages and history compiled
         run: |
           test -f .next/server/app/api/system/hype-zec-status/route.js
-          for name in hype zec; do
+          test -f .next/server/app/api/system/idle-priority-status/route.js
+          for name in hype zec idle-priority; do
             test -f ".next/server/app/decision-status/$name/page.js" || test -f ".next/server/app/decision-status/$name.html"
           done
