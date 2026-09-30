@@ -6,7 +6,7 @@ import { resolve } from "node:path";
 const source = readFileSync(resolve("scripts/ops/root/disdex-runner-watchdog-current.mjs"), "utf8");
 
 test("watchdog enforces singleton release lineage for every live runner family", () => {
-  for (const pattern of ["disdex-v12-x1-all@*.service", "disdex-pengu-dual-ls-v2@*.service", "disdex-v52-aster-only@*.service", "disdex-quality102-causal-v1@*.service", "disdex-fet-brk48@*.service"]) {
+  for (const pattern of ["disdex-v12-x1-all@*.service", "disdex-pengu-dual-ls-v2@*.service", "disdex-v52-aster-only@*.service", "disdex-quality102-causal-v1@*.service", "disdex-fet-brk48@*.service", "disdex-hype-long@*.service", "disdex-idle-priority-short@*.service"]) {
     assert.match(source, new RegExp(pattern.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
   }
   assert.match(source, /assertReleasePinnedRunnerSingleton/);
@@ -35,6 +35,7 @@ test("watchdog rejects every known unpinned legacy trading supervisor", () => {
     "disdex-v52-aster-only.service",
     "disdex-shared-crypto-risk.service",
     "disdex-v12-v52-margin-guard.service",
+    "disdex-idle-priority-short.service",
   ]) {
     assert.match(source, new RegExp(unit.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
   }
