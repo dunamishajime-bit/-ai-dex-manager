@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
@@ -57,6 +58,104 @@ if (fixture.schema !== "disdex-idle-priority-candidate-keys/v1" || fixture.rows.
 
 const symbols = Object.keys(IDLE_PRIORITY_SHORT_POLICY.routes) as IdlePrioritySymbol[];
 const market = Object.fromEntries(["BTCUSDT", ...symbols].map((symbol) => [symbol, loadH1(dataRoot, symbol)])) as Record<string, IdleH1Candle[]>;
+
+type GenericArchetype = "BREAKOUT" | "MOMENTUM" | "RELATIVE";
+type GenericSide = "LONG" | "SHORT";
+type GenericCandidate = { symbol: IdlePrioritySymbol; t: number; archetype: GenericArchetype; side: GenericSide };
+
+const EXPECTED_GENERIC_5_COUNT = 393;
+const EXPECTED_GENERIC_5_SHA256 = "d32ed3a07a6338e8fae792ec6d9071ea27a1dee548eed6a3825dfbda3270019";
+
+function genericGateStates(symbol: IdlePrioritySymbol, decisionTs: number) {
+    const features = computeIdlePriorityFeatures(decisionTs, market[symbol], market.BTCUSDT);
+    const rows = market[symbol];
+    const signalTs = decisionTs - HOUR;
+    const signal = rows.find((row) => row.ts === signalTs);
+    const prior24 = Array.from({ length: 24 }, (_, i) => rows.find((row) => row.ts === decisionTs - (i + 2) * HOUR));
+    if (!signal || prior24.some((row) => !row)) throw new Error(`IDLE_GENERIC_HISTORY_MISSING:${symbol}:${decisionTs}`);
+    const priorHigh = Math.max(...prior24.map((row) => row!.close));
+    const priorLow = Math.min(...prior24.map((row) => row!.close));
+    const p = IDLE_PRIORITY_SHORT_POLICY.generic;
+    return {
+        features,
+        gates: {
+            "BREAKOUT:LONG": signal.close > priorHigh && features.volumeRatio >= p.breakout.volumeRatioMin && features.atrRatio >= p.breakout.atrRatioMin,
+            "BREAKOUT:SHORT": signal.close < priorLow && features.volumeRatio >= p.breakout.volumeRatioMin && features.atrRatio >= p.breakout.atrRatioMin,
+            "MOMENTUM:LONG": features.ret12 >= -p.momentum.ret12Max && features.volumeRatio >= p.momentum.volumeRatioMin && features.atrRatio >= p.momentum.atrRatioMin,
+            "MOMENTUM:SHORT": features.ret12 <= p.momentum.ret12Max && features.volumeRatio >= p.momentum.volumeRatioMin && features.atrRatio >= p.momentum.atrRatioMin,
+            "RELATIVE:LONG": features.rel24 >= -p.relative.rel24Max && features.volumeRatio >= p.relative.volumeRatioMin && features.atrRatio >= p.relative.atrRatioMin,
+            "RELATIVE:SHORT": features.rel24 <= p.relative.rel24Max && features.volumeRatio >= p.relative.volumeRatioMin && features.atrRatio >= p.relative.atrRatioMin,
+        } as Record<string, boolean>,
+    };
+}
+
+function candidateDigest(rows: GenericCandidate[]) {
+    const body = rows
+        .slice()
+        .sort((a, b) => a.t - b.t || a.symbol.localeCompare(b.symbol))
+        .map((row) => [row.symbol, row.t, row.archetype, row.side].join("|"))
+        .join("\n") + "\n";
+    return createHash("sha256").update(body).digest("hex");
+}
+
+function modelGenericCandidates(mode: "LEVEL" | "EDGE", priority: GenericArchetype[]) {
+    const output: GenericCandidate[] = [];
+    const lastBySymbol = new Map<IdlePrioritySymbol, number>();
+    const previous = new Map<string, boolean>();
+    for (let decisionTs = fixture.windowStart; decisionTs <= fixture.windowEnd; decisionTs += HOUR) {
+        for (const symbol of symbols) {
+            let states;
+            try { states = genericGateStates(symbol, decisionTs); }
+            catch (error) {
+                const message = error instanceof Error ? error.message : String(error);
+                if (/IDLE_(INSUFFICIENT|H1_HISTORY_GAP|ATR_PREVCLOSE_GAP|GENERIC_HISTORY_MISSING)/.test(message)) continue;
+                throw error;
+            }
+            const eligible: Array<{ archetype: GenericArchetype; side: GenericSide }> = [];
+            for (const archetype of priority) {
+                for (const side of ["LONG", "SHORT"] as const) {
+                    const gateKey = `${archetype}:${side}`;
+                    const active = states.gates[gateKey] === true;
+                    const stateKey = `${symbol}|${gateKey}`;
+                    const was = previous.get(stateKey) === true;
+                    previous.set(stateKey, active);
+                    if (active && (mode === "LEVEL" || !was)) eligible.push({ archetype, side });
+                }
+            }
+            if (!eligible.length) continue;
+            const last = lastBySymbol.get(symbol) || 0;
+            if (last > 0 && decisionTs - last < cooldownMs) continue;
+            const chosen = eligible[0];
+            lastBySymbol.set(symbol, decisionTs);
+            output.push({ symbol, t: decisionTs, archetype: chosen.archetype, side: chosen.side });
+        }
+    }
+    return output;
+}
+
+const candidateModelDiagnostics: Record<string, unknown> = {};
+const priorities: GenericArchetype[][] = [
+    ["BREAKOUT", "MOMENTUM", "RELATIVE"],
+    ["BREAKOUT", "RELATIVE", "MOMENTUM"],
+    ["MOMENTUM", "BREAKOUT", "RELATIVE"],
+    ["MOMENTUM", "RELATIVE", "BREAKOUT"],
+    ["RELATIVE", "BREAKOUT", "MOMENTUM"],
+    ["RELATIVE", "MOMENTUM", "BREAKOUT"],
+];
+for (const mode of ["LEVEL", "EDGE"] as const) {
+    for (const priority of priorities) {
+        const rows = modelGenericCandidates(mode, priority);
+        const name = `${mode}:${priority.join(">")}`;
+        candidateModelDiagnostics[name] = {
+            count: rows.length,
+            sha256: candidateDigest(rows),
+            matchesExpected: rows.length === EXPECTED_GENERIC_5_COUNT && candidateDigest(rows) === EXPECTED_GENERIC_5_SHA256,
+            first10: rows.slice(0, 10),
+        };
+    }
+}
+console.log(JSON.stringify({ event: "IDLE_GENERIC_CANDIDATE_LIFECYCLE_DIAGNOSTIC", expectedCount: EXPECTED_GENERIC_5_COUNT, expectedSha256: EXPECTED_GENERIC_5_SHA256, models: candidateModelDiagnostics }));
+
 const accepted: ExpectedRow[] = [];
 const diagnostics = new Map<string, unknown>();
 const lastBySymbol = new Map<IdlePrioritySymbol, number>();
