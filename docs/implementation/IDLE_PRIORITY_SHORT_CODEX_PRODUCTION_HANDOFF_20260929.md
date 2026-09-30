@@ -1,3 +1,5 @@
+> **2026-09-30 controlling cost/replay correction:** Read `docs/implementation/IDLE_PRIORITY_COST_RECONCILIATION_20260930.md` first. The historical `JPY268.05M / 1,342 / PF~2.055 / DD~-23.24%` bundle is not a coherent single 10bps run and MUST NOT be used as a LIVE parity certificate. The primary coherent research reference is the 10bps fixed-intent dynamic-Gross overlay (61 Idle, 1,339 total trades, ~JPY214.78M). Where older text conflicts, the cost/replay correction controls.
+
 > **2026-09-30 controlling correction:** Before using this handoff, read `docs/implementation/IDLE_PRIORITY_HISTORICAL_OVERLAY_PARITY_CORRECTION_20260930.md`. The historical JPY268.05M run used a frozen accepted-baseline-ledger overlay, not a full regeneration of all baseline candidate decisions. Where this handoff conflicts with the correction, the correction controls.
 
 # Idle Priority SHORT — Codex Production Handoff
@@ -19,7 +21,7 @@ Do not retune to hit the anchors. Rebuild the exact causal replay and fail close
 4. integrated admission = exactly 61
 5. admitted symbol counts: DOT14/JUP14/RENDER15/TAO9/TIA9
 6. wins = 48, losses = 13, WR 78.7%
-7. integrated final equity approximately JPY268.05M and max MTM DD approximately -23.24%
+7. primary 10bps coherent overlay reconciles to 61 Idle / 1,339 total trades / approximately JPY214.78M; 8bps sensitivity is approximately JPY268.15M. Never combine metrics across cost cases
 8. identify the exact rejected DOT and TIA rows and their contemporaneous portfolio/admission reason; never choose them by future PnL
 9. baseline-five same-timestamp acceptance always beats Idle
 10. an already-open Idle position is not preempted by a later baseline signal
@@ -30,7 +32,7 @@ Do not retune to hit the anchors. Rebuild the exact causal replay and fail close
 15. emergency reduce-only stop 10% / TP25% must be shown not to change the historical 63 candidate exits
 
 ## Baseline replay provenance
-Do not substitute the nearby 2026-09-28 10bps baseline (JPY130,287,867 / 1,046 trades). The controlling Idle experiment used the later approximately JPY141.85M / 1,284-trade baseline. Recover/rebuild that exact baseline from its source lineage and portfolio admission semantics. The integrated result has 1,342 closed trades, so the Idle exposure changes baseline admission; do not compute 1,284+61 independently.
+Do not substitute the nearby 2026-09-28 10bps baseline (JPY130,287,867 / 1,046 trades). The controlling baseline is the exact 10bps JPY141.845M / 1,284-trade Release case. The coherent fixed-intent dynamic-Gross overlay retains 1,278 baseline trades and 61 Idle trades for 1,339 total. The historical 1,342 count is unsupported and must not be forced.
 
 The known audited replay pipeline is:
 Aster H1/funding -> V12/PENGU/FET causal scan -> Q102 causal scan -> crypto candidate lifecycle -> V52 Aster/Yahoo price-only ledger -> contribution-aware shared-gross portfolio -> Idle candidate/admission integration.
