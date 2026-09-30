@@ -11,6 +11,10 @@ on:
       - "scripts/disdex-idle-priority-short-live-runner.ts"
       - "scripts/disdex-idle-priority-short-benign-state-recovery.ts"
       - "scripts/ops/root/disdex-current-runtime-wiring"
+      - "tests/watchdog-release-lineage.test.ts"
+      - "tests/ops-runner-watchdog-current-contract.test.mjs"
+      - "scripts/ops/root/disdex-runner-watchdog-current.mjs"
+      - "scripts/ops/root/disdex-runner-health-snapshot-current.mjs"
       - "scripts/ops/root/disdex-live-operator-activation-gate.mjs"
       - "ops/systemd/disdex-idle-priority-short@.service"
       - "systemd/disdex-idle-priority-short.service"
@@ -45,6 +49,7 @@ jobs:
       - run: npx tsx --test tests/idle-priority-short-benign-state-recovery.test.ts
       - run: npx tsx --test tests/q102-symbol-ownership-contract.test.ts
       - run: bash scripts/ops/root/disdex-current-runtime-wiring --self-test
+      - run: npx tsx --test tests/ops-runner-watchdog-current-contract.test.mjs tests/watchdog-release-lineage.test.ts
       - name: Replay LIVE signal evaluator against exact 63-candidate fixture
         env:
           GH_TOKEN: ${{ github.token }}
