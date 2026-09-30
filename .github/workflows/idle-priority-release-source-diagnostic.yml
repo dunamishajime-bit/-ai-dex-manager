@@ -1,0 +1,37 @@
+name: Idle Priority Release source diagnostic
+on:
+  push:
+    branches: [design/idle-priority-bt-parity-20260929]
+    paths:
+      - ".github/workflows/idle-priority-release-source-diagnostic.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download immutable release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh release download bt-v12-score100-volume080-normalonly-20260928 --repo dunamishajime-bit/-ai-dex-manager --pattern 'bt-v12-score100-volume080-normalonly-20260928.tar.gz'
+          echo '891c36d8a5957cafe3aae65656a98b7c02a3c437c4f520fe63756d550f08b4fb  bt-v12-score100-volume080-normalonly-20260928.tar.gz' | sha256sum -c -
+          mkdir evidence
+          tar -xzf bt-v12-score100-volume080-normalonly-20260928.tar.gz -C evidence
+      - name: Locate original Idle candidate generator
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo '=== candidate source files ==='
+          find evidence -type f \( -name '*.py' -o -name '*.ts' -o -name '*.js' -o -name '*.md' -o -name '*.json' \) -print0 |
+            xargs -0 grep -IlE 'idle_candidate_events|gross12|net12|candidate_events' | head -80 | tee /tmp/hits.txt
+          echo '=== source snippets ==='
+          while IFS= read -r f; do
+            echo "##### FILE: $f"
+            grep -n -E -C 12 'idle_candidate_events|gross12|net12|candidate_events|archetype|cooldown' "$f" | head -220 || true
+          done < /tmp/hits.txt
+          echo '=== baseline trade ledgers ==='
+          find evidence -type f -name 'portfolio-trades.jsonl' | grep -E 'baseline-five-logic-all-cases-all-costs|PRICE_MODEL_10BPS' | head -40
