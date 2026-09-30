@@ -18,14 +18,24 @@ def rows(path):
         if line.strip(): out.append(json.loads(line))
     return out
 
-def find_baseline(root: Path):
-    hits=list(root.glob("**/selected-five-logic-all-cases-all-costs/BRK0P75_MR0P75_FET1_DUAL_GATE/PRICE_MODEL_10BPS/portfolio-trades.jsonl"))
-    for p in hits:
-        r=rows(p)
-        if len(r)==1284:
-            print(json.dumps({"event":"BASELINE_FOUND","path":str(p),"rows":len(r)}))
-            return r
-    raise SystemExit(f"BASELINE_1284_NOT_FOUND:{[str(x) for x in hits]}")
+def find_baselines(root: Path):
+    specs=[
+      ("selected1284","**/selected-five-logic-all-cases-all-costs/BRK0P75_MR0P75_FET1_DUAL_GATE/PRICE_MODEL_10BPS/portfolio-trades.jsonl",1284),
+      ("historical1046","**/baseline-five-logic-all-cases-all-costs/BRK0P75_MR0P75_FET1_DUAL_GATE/PRICE_MODEL_10BPS/portfolio-trades.jsonl",1046),
+      ("historical1050_cap","**/baseline-five-logic-all-cases-all-costs/BRK0P75_MR0P75_FET1_CAP_ONLY/PRICE_MODEL_10BPS/portfolio-trades.jsonl",1050),
+      ("historical1037_unmodified","**/baseline-five-logic-all-cases-all-costs/CURRENT_BASELINE_UNMODIFIED/PRICE_MODEL_10BPS/portfolio-trades.jsonl",1037),
+    ]
+    out={}
+    for name,pattern,count in specs:
+        hits=list(root.glob(pattern))
+        for p in hits:
+            r=rows(p)
+            if len(r)==count:
+                out[name]=r
+                print(json.dumps({"event":"BASELINE_FOUND","name":name,"path":str(p),"rows":len(r)}))
+                break
+    if not out: raise SystemExit("NO_BASELINES_FOUND")
+    return out
 
 def load_market(data_root: Path, sym: str):
     p=data_root/"normalized"/"aster"/"klines"/f"{sym}.jsonl"
@@ -141,8 +151,8 @@ ap.add_argument("--release-root",required=True)
 ap.add_argument("--data-root",required=True)
 a=ap.parse_args()
 root=Path(a.release_root); data_root=Path(a.data_root)
-base=find_baseline(root)
-idle_variants=idle_masks(base)
+baselines=find_baselines(root)
+idle_variants_by_baseline={name:idle_masks(trades) for name,trades in baselines.items()}
 btc=load_market(data_root,"BTCUSDT")
 market={s:load_market(data_root,s) for s in SYMBOLS}
 # Verify source feature timestamp/formula parity independently of lifecycle selection.
@@ -194,15 +204,17 @@ results=[]
 best_rows=None
 best_row=None
 best_symdiff=None
-for breakout_mode in breakout_modes:
- for (exit_before,same_entry_blocks),idle in idle_variants.items():
-  for mode in ("LEVEL","EDGE"):
+for baseline_name,idle_variants in idle_variants_by_baseline.items():
+ for breakout_mode in breakout_modes:
+  for (exit_before,same_entry_blocks),idle in idle_variants.items():
+   for mode in ("LEVEL","EDGE"):
     for priority in itertools.permutations(("BREAKOUT","MOMENTUM","RELATIVE")):
-      for side_order in (("LONG","SHORT"),("SHORT","LONG")):
-        for mask_mode in ("IDLE_BEFORE","EMIT_IDLE_ONLY","IDLE_ONLY_EDGE_STATE"):
-          out=run_model(all_states[breakout_mode],idle,mode,priority,side_order,mask_mode)
-          sha=digest(out)
-          row={
+     for side_order in (("LONG","SHORT"),("SHORT","LONG")):
+      for mask_mode in ("IDLE_BEFORE","EMIT_IDLE_ONLY","IDLE_ONLY_EDGE_STATE"):
+       out=run_model(all_states[breakout_mode],idle,mode,priority,side_order,mask_mode)
+       sha=digest(out)
+       row={
+            "baseline":baseline_name,
             "breakout_mode":breakout_mode,
             "exit_before":exit_before,"same_entry_blocks":same_entry_blocks,"idle_hours":len(idle),
             "mode":mode,"priority":">".join(priority),"side_order":">".join(side_order),"mask_mode":mask_mode,
