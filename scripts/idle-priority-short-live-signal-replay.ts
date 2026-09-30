@@ -108,7 +108,9 @@ function findCanonicalBaselineTrades(root: string): BaselineTrade[] {
             try { stats = statSync(path); } catch { continue; }
             if (stats.isDirectory()) { walk(path); continue; }
             if (name !== "portfolio-trades.jsonl") continue;
-            if (/baseline-five-logic-all-cases-all-costs/i.test(path) && /PRICE_MODEL_10BPS/i.test(path)) candidates.push(path);
+            if (/selected-five-logic-all-cases-all-costs/i.test(path)
+                && /BRK0P75_MR0P75_FET1_DUAL_GATE/i.test(path)
+                && /PRICE_MODEL_10BPS/i.test(path)) candidates.push(path);
         }
     };
     walk(root);
