@@ -214,21 +214,21 @@ for baseline_name,idle_variants in idle_variants_by_baseline.items():
        out=run_model(all_states[breakout_mode],idle,mode,priority,side_order,mask_mode)
        sha=digest(out)
        row={
-            "baseline":baseline_name,
-            "breakout_mode":breakout_mode,
-            "exit_before":exit_before,"same_entry_blocks":same_entry_blocks,"idle_hours":len(idle),
-            "mode":mode,"priority":">".join(priority),"side_order":">".join(side_order),"mask_mode":mask_mode,
-            "count":len(out),"sha256":sha,"match":len(out)==EXPECTED_COUNT and sha==EXPECTED_SHA
-          }
-          distance=abs(len(out)-EXPECTED_COUNT)
-          out_keys=set(f"{s}|{t}|{a}|{side}" for s,t,a,side in out)
-          symdiff=len(out_keys ^ expected_keys)
-          row["symmetric_diff"]=symdiff
-          if best_symdiff is None or symdiff < best_symdiff:
-              best_symdiff=symdiff
-              best_row=dict(row)
-              best_rows=list(out)
-          if row["match"] or distance<=20 or symdiff<=20: results.append(row)
+        "baseline":baseline_name,
+        "breakout_mode":breakout_mode,
+        "exit_before":exit_before,"same_entry_blocks":same_entry_blocks,"idle_hours":len(idle),
+        "mode":mode,"priority":">".join(priority),"side_order":">".join(side_order),"mask_mode":mask_mode,
+        "count":len(out),"sha256":sha,"match":len(out)==EXPECTED_COUNT and sha==EXPECTED_SHA
+       }
+       distance=abs(len(out)-EXPECTED_COUNT)
+       out_keys=set(f"{s}|{t}|{a}|{side}" for s,t,a,side in out)
+       symdiff=len(out_keys ^ expected_keys)
+       row["symmetric_diff"]=symdiff
+       if best_symdiff is None or symdiff < best_symdiff:
+        best_symdiff=symdiff
+        best_row=dict(row)
+        best_rows=list(out)
+       if row["match"] or distance<=20 or symdiff<=20: results.append(row)
 matches=[x for x in results if x["match"]]
 print(json.dumps({"event":"GENERIC_LIFECYCLE_SEARCH","expected_count":EXPECTED_COUNT,"expected_sha":EXPECTED_SHA,"matches":matches,"near":results[:120]},sort_keys=True))
 if len(matches)!=1:
