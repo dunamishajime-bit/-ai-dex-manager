@@ -14,6 +14,9 @@ Status: **IMPLEMENTATION HANDOFF — LIVE activation is forbidden until every ac
 - Candidate evidence SHA256: `5029baad39bd07c9fc40ec4ba75941cb089697d5cebc437c29838cbc924f3e48`
 - Candidate rows: 63
 - Broader candidate stream: 495 rows, SHA256 `09e97db7a812728f5e54c1179c8e39ac30c6dba4fea241a9d415fa4810f8adbb`
+- Five-symbol generic lifecycle subset: 393 rows, SHA256 `d32ed3a07a6338e8fae792ec6d9071ea27a1dee548eed6a3825dfbda3270019a`
+- Generic lifecycle model: `BASELINE_CONTINUOUS_IDLE__BREAKOUT_RELATIVE_MOMENTUM__12H_PER_SYMBOL`
+- Immutable Release H1 reproduces 391/393 rows causally; the only source gaps are RENDERUSDT at `1767798000000` and `1767841200000`, both pinned to the source CSV and selected as `RENDER_RELATIVE_SHORT`.
 
 ## Non-negotiable BT parity
 Do not retune to hit the anchors. Rebuild the exact causal replay and fail closed on divergence.
@@ -30,8 +33,12 @@ Do not retune to hit the anchors. Rebuild the exact causal replay and fail close
 11. residual 0.5x or any partial gross must skip; accepted gross is exactly 1.00x
 12. any HYPE/other crypto sidecar exposure or pending exposure blocks a new Idle entry
 13. venue must read back 5x Cross and all shared safety gates must pass
-14. per-symbol broader-candidate lifecycle cooldown = 12h
-15. emergency reduce-only stop 10% / TP25% must be shown not to change the historical 63 candidate exits
+14. per-symbol broader-candidate lifecycle cooldown = 12h. The lifecycle is consumed by the generic candidate BEFORE the five-route filter; generic LONG and route-unselected candidates consume the same per-symbol lifecycle slot when the baseline is fully Idle.
+15. generic candidate priority is BREAKOUT -> RELATIVE -> MOMENTUM. BREAKOUT uses closed-H1 close versus prior-24H high/low plus |24h return| >= 2%; RELATIVE uses |rel24| >= 3% plus |24h return| >= 1.5%; MOMENTUM uses |ret12| >= 3%; all retain their source volume/ATR gates.
+16. baseline Idle is evaluated on the exact continuous entry/exit intervals of the 1,284-trade baseline, not a rounded hourly position counter. Same-timestamp baseline entry blocks Idle; an exit at t is flat for t.
+17. parity certificate schema must be `disdex-idle-priority-parity-cert/v3` and must pin 393 rows / generic SHA / exactly two source-gap rows / the lifecycle model above.
+18. emergency reduce-only stop 10% / TP25% must be shown not to change the historical 63 candidate exits
+
 
 ## Baseline replay provenance
 Do not substitute the nearby 2026-09-28 10bps baseline (JPY130,287,867 / 1,046 trades). The controlling baseline is the exact 10bps JPY141.845M / 1,284-trade Release case. The coherent fixed-intent dynamic-Gross overlay retains 1,278 baseline trades and 61 Idle trades for 1,339 total. The historical 1,342 count is unsupported and must not be forced.
