@@ -41,6 +41,7 @@ jobs:
           npm run strategy:idle-priority-short:benign-recovery:selftest
           npx tsc --noEmit
           npx tsx --test \
+            tests/aster-global-rate-budget.test.ts \
             tests/idle-priority-short-systemd-contract.test.mjs \
             tests/ops-runner-watchdog-current-contract.test.mjs \
             tests/watchdog-release-lineage.test.ts \
@@ -49,6 +50,9 @@ jobs:
             tests/hype-zec-runner-gate.test.ts \
             tests/q102-symbol-ownership-contract.test.ts
           bash scripts/ops/root/disdex-current-runtime-wiring --self-test
+          grep -q 'chown(temporary, parent.uid, parent.gid)' lib/disdex-aster-global-rate-budget.ts
+          grep -q 'DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH="$budget_tmp"' scripts/ops/root/disdex-idle-production-redeploy-20261001
+          echo "RATE_BUDGET_ROOT_OWNERSHIP_REGRESSION=PASS"
           (
             cd /tmp
             "$GITHUB_WORKSPACE/node_modules/.bin/tsx"               "$GITHUB_WORKSPACE/scripts/disdex-current-live-target-readiness.ts"               --require-implementation-ready
