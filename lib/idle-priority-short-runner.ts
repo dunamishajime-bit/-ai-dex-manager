@@ -14,7 +14,7 @@ import type { IdlePriorityShortRuntime } from "../config/idlePriorityShortRuntim
 import { buildIdleProtectionPlan, deterministicIdleClientOrderId, evaluateIdleLiveAdmission, type IdleBaselineAdmission } from "./idle-priority-short-live";
 import { buildBaselineAdmissionEvidence } from "./idle-priority-short-baseline-admission";
 import { assertIdleParityCertificate } from "./idle-priority-short-parity-cert";
-import { computeIdlePriorityFeatures, evaluateIdlePriorityShort, type IdleSignal } from "./idle-priority-short-signal";
+import { computeIdlePriorityFeatures, evaluateIdleGenericCandidate, evaluateIdlePriorityShort, type IdleFeatures, type IdleGenericCandidate, type IdleSignal } from "./idle-priority-short-signal";
 import { FileIdlePriorityShortStateStore, type IdleOwnedPosition, type IdlePending, type IdleState } from "./idle-priority-short-state";
 import type { IdlePriorityMarketSnapshot } from "./idle-priority-short-market-data";
 
@@ -178,14 +178,14 @@ export class IdlePriorityShortRunner {
         return (await this.dependencies.client.getOpenOrders(symbol)).length === 0;
     }
 
-    private candidateLifecycleAllows(state: IdleState, signal: IdleSignal) {
-        const last = Number(state.lastAcceptedBySymbol[signal.symbol] || 0);
+    private candidateLifecycleAllows(state: IdleState, candidate: { symbol: IdlePrioritySymbol; features: Pick<IdleFeatures, "decisionTs"> }) {
+        const last = Number(state.lastAcceptedBySymbol[candidate.symbol] || 0);
         const cooldownMs = IDLE_PRIORITY_SHORT_POLICY.cooldownHours * 3_600_000;
-        return last <= 0 || signal.features.signalTs - last >= cooldownMs;
+        return last <= 0 || candidate.features.decisionTs - last >= cooldownMs;
     }
 
-    private markCandidateLifecycle(state: IdleState, signal: IdleSignal) {
-        state.lastAcceptedBySymbol = { ...state.lastAcceptedBySymbol, [signal.symbol]: signal.features.signalTs };
+    private markCandidateLifecycle(state: IdleState, candidate: { symbol: IdlePrioritySymbol; features: Pick<IdleFeatures, "decisionTs"> }) {
+        state.lastAcceptedBySymbol = { ...state.lastAcceptedBySymbol, [candidate.symbol]: candidate.features.decisionTs };
     }
 
     private async protectionReadBack(symbol: string, plan: ReturnType<typeof buildIdleProtectionPlan>, expectedQty: number) {
@@ -511,15 +511,95 @@ export class IdlePriorityShortRunner {
                 if (exitReason && this.dependencies.runtime.mode === "LIVE") return await this.exitPosition(state, owned, actual, lock, exitReason);
                 if (exitReason) return { status: "shadow", message: `IDLE_SHADOW_EXIT:${owned.symbol}:${exitReason}`, symbol: owned.symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
             }
-            const rawSignals = (Object.keys(market.symbols) as IdlePrioritySymbol[])
-                .map((symbol) => evaluateIdlePriorityShort(symbol, computeIdlePriorityFeatures(market.decisionTs, market.symbols[symbol], market.btc)))
+            // Historical parity order:
+            // 1) build the generic LONG/SHORT candidate stream,
+            // 2) apply the per-symbol 12h lifecycle while the baseline is fully Idle,
+            // 3) only then apply the five-symbol SHORT route filter.
+            // A generic LONG or route-unselected candidate still advances the
+            // lifecycle because that is how the source 495-row stream was built.
+            const rawGeneric = (Object.keys(market.symbols) as IdlePrioritySymbol[])
+                .map((symbol) => {
+                    const features = computeIdlePriorityFeatures(market.decisionTs, market.symbols[symbol], market.btc);
+                    return { symbol, features, generic: evaluateIdleGenericCandidate(features) };
+                })
+                .filter((row) => row.generic.accepted);
+            const lifecycleCandidates = rawGeneric.filter((row) => this.candidateLifecycleAllows(state, row));
+            if (!lifecycleCandidates.length) {
+                await this.dependencies.stateStore.save({
+                    ...state,
+                    lastDecision: {
+                        decisionTs: market.decisionTs,
+                        accepted: false,
+                        reason: rawGeneric.length ? "IDLE_PER_SYMBOL_COOLDOWN_ACTIVE" : "NO_GENERIC_IDLE_CANDIDATE",
+                    },
+                });
+                return {
+                    status: "no-change",
+                    message: rawGeneric.length ? "IDLE_PER_SYMBOL_COOLDOWN_ACTIVE" : "IDLE_NO_GENERIC_CANDIDATE",
+                    ordersSent: 0,
+                    cancelsSent: 0,
+                    positionChangesSent: 0,
+                };
+            }
+
+            // Candidate lifecycle is baseline-Idle-only.  Do not consume a
+            // lifecycle slot when the five core strategies are still active,
+            // pending, accepted at this timestamp, or have not completed the
+            // current decision cycle.
+            const lifecycleEquity = account.walletBalance + positions.reduce((sum, position) => sum + Number(position.unrealizedPnl || 0), 0);
+            if (!(lifecycleEquity > 0)) {
+                return { status: "held", message: "IDLE_GENERIC_EQUITY_INVALID", ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+            }
+            const lifecycleExposure = coreAndSidecarExposure(positions, lifecycleEquity, new Set(state.positions.map((row) => row.symbol)));
+            const lifecycleOwnerPending = pendingExposureByOwner(pendingRegistry);
+            let lifecycleBaseline: IdleBaselineAdmission;
+            try {
+                lifecycleBaseline = await buildBaselineAdmissionEvidence({
+                    runtimeSha: this.dependencies.runtime.runtimeSha,
+                    decisionTs: market.decisionTs,
+                    now: this.now(),
+                    baselineOpenPositions: lifecycleExposure.baselineOpenPositions,
+                    baselinePendingExposure: lifecycleOwnerPending.baselinePendingExposure,
+                    decisionPath: this.dependencies.runtime.decisionPath,
+                    v12Path: this.dependencies.runtime.v12DecisionPath,
+                    q102Path: this.dependencies.runtime.q102DecisionPath,
+                    penguPath: this.dependencies.runtime.penguStatePath,
+                    fetPath: this.dependencies.runtime.fetStatePath,
+                    v52Path: this.dependencies.runtime.v52StatePath,
+                });
+            } catch (error) {
+                return {
+                    status: "held",
+                    message: `IDLE_GENERIC_BASELINE_ADMISSION_BLOCKED:${error instanceof Error ? error.message : String(error)}`,
+                    ordersSent: 0,
+                    cancelsSent: 0,
+                    positionChangesSent: 0,
+                };
+            }
+            if (Math.max(lifecycleBaseline.baselineOpenPositions, lifecycleExposure.baselineOpenPositions) > EPSILON
+                || Math.max(lifecycleBaseline.baselinePendingExposure, lifecycleOwnerPending.baselinePendingExposure) > EPSILON
+                || lifecycleBaseline.baselineAcceptedThisTimestamp > 0) {
+                state.lastDecision = {
+                    decisionTs: market.decisionTs,
+                    accepted: false,
+                    reason: lifecycleBaseline.baselineAcceptedThisTimestamp > 0
+                        ? "BASELINE_ACCEPTED_SAME_TIMESTAMP"
+                        : "BASELINE_OPEN_OR_PENDING",
+                };
+                await this.dependencies.stateStore.save(state);
+                return { status: "no-change", message: "IDLE_GENERIC_BASELINE_NOT_IDLE", ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+            }
+
+            for (const candidate of lifecycleCandidates) this.markCandidateLifecycle(state, candidate);
+            await this.dependencies.stateStore.save(state);
+
+            const signals = lifecycleCandidates
+                .map((row) => evaluateIdlePriorityShort(row.symbol, row.features, row.generic))
                 .filter((signal) => signal.accepted);
-            const signals = rawSignals.filter((signal) => this.candidateLifecycleAllows(state, signal));
-            for (const signal of signals) this.markCandidateLifecycle(state, signal);
-            if (rawSignals.length > 0) await this.dependencies.stateStore.save(state);
             if (!signals.length) {
-                await this.dependencies.stateStore.save({ ...state, lastDecision: { decisionTs: market.decisionTs, accepted: false, reason: rawSignals.length ? "IDLE_PER_SYMBOL_COOLDOWN_ACTIVE" : "NO_ACCEPTED_IDLE_SIGNAL" } });
-                return { status: "no-change", message: rawSignals.length ? "IDLE_PER_SYMBOL_COOLDOWN_ACTIVE" : "IDLE_NO_ACCEPTED_SIGNAL", ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+                state.lastDecision = { decisionTs: market.decisionTs, accepted: false, reason: "GENERIC_CANDIDATE_NOT_SELECTED_ROUTE" };
+                await this.dependencies.stateStore.save(state);
+                return { status: "no-change", message: "IDLE_GENERIC_CANDIDATE_NOT_SELECTED_ROUTE", ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
             }
 
             if (signals.length > 1) {
