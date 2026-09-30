@@ -211,3 +211,12 @@ test("shared Aster budget propagates venue cooldown across daemons", async () =>
     await assert.rejects(reserveAsterGlobalRateSlot({ path, minIntervalMs: 50, maxQueueMs: 5_000, nowMs: 1_000 }), /ASTER_GLOBAL_RATE_BUDGET_SATURATED/);
   } finally { await rm(directory, { recursive: true, force: true }); }
 });
+
+
+test("root-owned rate-budget writers preserve parent ownership before atomic rename", () => {
+  const source = readFileSync(resolve("lib/disdex-aster-global-rate-budget.ts"), "utf8");
+  assert.match(source, /process\.geteuid\(\) === 0/);
+  assert.match(source, /stat\(dirname\(path\)\)/);
+  assert.match(source, /chown\(temporary, parent\.uid, parent\.gid\)/);
+  assert.match(source, /rename\(temporary, path\)/);
+});
