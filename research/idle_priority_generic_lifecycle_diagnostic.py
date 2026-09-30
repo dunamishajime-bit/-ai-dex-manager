@@ -63,14 +63,18 @@ def features(m, btc, t):
     return {
         "ret12":ret12,"ret24":ret24,"btc24":btc24,"rel24":ret24-btc24,
         "atr":sum(tr)/14/s1["c"],"vr":s1["q"]/med if med else float("inf"),
-        "break_short":s1["c"]<min(x["c"] for x in prior24),
-        "break_long":s1["c"]>max(x["c"] for x in prior24),
+        "break_close_close_short":s1["c"]<min(x["c"] for x in prior24),
+        "break_close_close_long":s1["c"]>max(x["c"] for x in prior24),
+        "break_close_hilo_short":s1["c"]<min(x["l"] for x in prior24),
+        "break_close_hilo_long":s1["c"]>max(x["h"] for x in prior24),
+        "break_wick_hilo_short":s1["l"]<min(x["l"] for x in prior24),
+        "break_wick_hilo_long":s1["h"]>max(x["h"] for x in prior24),
     }
 
-def gates(f):
+def gates(f, breakout_mode):
     return {
-        ("BREAKOUT","LONG"): f["break_long"] and f["vr"]>=1.30 and f["atr"]>=0.007,
-        ("BREAKOUT","SHORT"):f["break_short"] and f["vr"]>=1.30 and f["atr"]>=0.007,
+        ("BREAKOUT","LONG"): f[f"break_{breakout_mode}_long"] and f["vr"]>=1.30 and f["atr"]>=0.007,
+        ("BREAKOUT","SHORT"):f[f"break_{breakout_mode}_short"] and f["vr"]>=1.30 and f["atr"]>=0.007,
         ("MOMENTUM","LONG"):f["ret12"]>=0.03 and f["vr"]>=1.00 and f["atr"]>=0.007,
         ("MOMENTUM","SHORT"):f["ret12"]<=-0.03 and f["vr"]>=1.00 and f["atr"]>=0.007,
         ("RELATIVE","LONG"):f["rel24"]>=0.03 and f["vr"]>=0.80 and f["atr"]>=0.007,
@@ -101,12 +105,12 @@ def idle_masks(trades):
             variants[(exit_before,same_entry_blocks)]=idle
     return variants
 
-def run_model(all_states, idle, mode, priority, side_order, mask_mode):
+def run_model(states, idle, mode, priority, side_order, mask_mode):
     out=[]; last={}; prev={}
     for t in range(START,END+1,HOUR):
         is_idle=t in idle
         for sym in SYMBOLS:
-            st=all_states.get((sym,t))
+            st=states.get((sym,t))
             if st is None: continue
             eligible=[]
             for a in priority:
@@ -172,10 +176,13 @@ for offset_hours in (-1,0,1):
     }
 print(json.dumps({"event":"SOURCE_FEATURE_PARITY","offset_hours":feature_diag},sort_keys=True))
 
-all_states={}
+breakout_modes=("close_close","close_hilo","wick_hilo")
+all_states={mode:{} for mode in breakout_modes}
 for t in range(START,END+1,HOUR):
     for s in SYMBOLS:
-        try: all_states[(s,t)]=gates(features(market[s],btc,t))
+        try:
+            ff=features(market[s],btc,t)
+            for mode in breakout_modes: all_states[mode][(s,t)]=gates(ff,mode)
         except KeyError: pass
 
 expected_keys=set(
@@ -187,14 +194,16 @@ results=[]
 best_rows=None
 best_row=None
 best_symdiff=None
-for (exit_before,same_entry_blocks),idle in idle_variants.items():
+for breakout_mode in breakout_modes:
+ for (exit_before,same_entry_blocks),idle in idle_variants.items():
   for mode in ("LEVEL","EDGE"):
     for priority in itertools.permutations(("BREAKOUT","MOMENTUM","RELATIVE")):
       for side_order in (("LONG","SHORT"),("SHORT","LONG")):
         for mask_mode in ("IDLE_BEFORE","EMIT_IDLE_ONLY","IDLE_ONLY_EDGE_STATE"):
-          out=run_model(all_states,idle,mode,priority,side_order,mask_mode)
+          out=run_model(all_states[breakout_mode],idle,mode,priority,side_order,mask_mode)
           sha=digest(out)
           row={
+            "breakout_mode":breakout_mode,
             "exit_before":exit_before,"same_entry_blocks":same_entry_blocks,"idle_hours":len(idle),
             "mode":mode,"priority":">".join(priority),"side_order":">".join(side_order),"mask_mode":mask_mode,
             "count":len(out),"sha256":sha,"match":len(out)==EXPECTED_COUNT and sha==EXPECTED_SHA
