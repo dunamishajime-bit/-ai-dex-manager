@@ -4,6 +4,7 @@ on:
     branches: [design/idle-priority-bt-parity-20260929]
     paths:
       - ".github/workflows/idle-priority-release-source-diagnostic.yml"
+      - "research/idle_priority_generic_lifecycle_diagnostic.py"
   workflow_dispatch:
 permissions:
   contents: read
