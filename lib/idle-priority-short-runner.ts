@@ -108,7 +108,7 @@ async function assertOperatorActivation(runtime: IdlePriorityShortRuntime) {
     if (!Number.isFinite(approvedAt) || approvedAt <= 0 || approvedAt > Date.now() + 300_000) throw new Error("OPERATOR_LIVE_ACTIVATION_REQUIRED:APPROVED_AT_INVALID");
 }
 
-function coreAndSidecarExposure(positions: readonly DirectPosition[], equity: number) {
+export function coreAndSidecarExposure(positions: readonly DirectPosition[], equity: number, idleOwnedSymbols: ReadonlySet<string> = new Set()) {
     let baselineOpenPositions = 0;
     let nonBaselineCryptoExposure = 0;
     let totalGross = 0;
@@ -116,14 +116,22 @@ function coreAndSidecarExposure(positions: readonly DirectPosition[], equity: nu
     let stockGross = 0;
     for (const position of positions) {
         const classification = classifyAsterSymbol(position.symbol);
-        if (!classification.tradable || classification.sleeve === "UNKNOWN") throw new Error(`IDLE_UNKNOWN_ACTIVE_POSITION:${position.symbol}`);
+        if (!classification.tradable || classification.assetClass === "UNKNOWN") throw new Error(`IDLE_UNKNOWN_ACTIVE_POSITION:${position.symbol}`);
         const gross = equity > 0 ? Math.abs(position.notionalUsd) / equity : Number.POSITIVE_INFINITY;
         totalGross += gross;
         if (classification.assetClass === "CRYPTO") cryptoGross += gross;
         else if (classification.assetClass === "STOCK") stockGross += gross;
-        if (SIDEcar_SLEEVES.has(classification.sleeve)) nonBaselineCryptoExposure += gross;
-        else if (CORE_SLEEVES.has(classification.sleeve)) baselineOpenPositions += 1;
-        else throw new Error(`IDLE_UNSUPPORTED_ACTIVE_SLEEVE:${classification.sleeve}`);
+
+        const symbol = position.symbol.toUpperCase();
+        if (idleOwnedSymbols.has(symbol)) continue;
+        if (symbol === "HYPEUSDT" || symbol === "ZECUSDT" || SIDEcar_SLEEVES.has(classification.sleeve)) {
+            nonBaselineCryptoExposure += gross;
+            continue;
+        }
+        // Ownership is deliberately not inferred from symbol->sleeve classification.
+        // Any non-Idle-owned, non-HYPE/ZEC live position is baseline/core exposure
+        // for Idle-admission purposes, including Q102 positions in an Idle symbol.
+        baselineOpenPositions += 1;
     }
     return { baselineOpenPositions, nonBaselineCryptoExposure, totalGross, cryptoGross, stockGross };
 }
@@ -386,7 +394,7 @@ export class IdlePriorityShortRunner {
         if (!quoteFresh(quote, this.now())) return { status: "held", message: `IDLE_ENTRY_QUOTE_STALE:${symbol}`, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
         const equity = account.walletBalance + positions.reduce((sum, position) => sum + Number(position.unrealizedPnl || 0), 0);
         if (!(equity > 0)) return { status: "held", message: "IDLE_EQUITY_INVALID", symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
-        const exposure = coreAndSidecarExposure(positions, equity);
+        const exposure = coreAndSidecarExposure(positions, equity, new Set(state.positions.map((row) => row.symbol)));
         const ownerPending = pendingExposureByOwner(await readPendingExposureRegistry(this.dependencies.runtime.pendingExposurePath));
         let baseline: IdleBaselineAdmission;
         try {
@@ -516,7 +524,7 @@ export class IdlePriorityShortRunner {
 
             if (signals.length > 1) {
                 const equity = account.walletBalance + positions.reduce((sum, position) => sum + Number(position.unrealizedPnl || 0), 0);
-                const exposure = coreAndSidecarExposure(positions, equity);
+                const exposure = coreAndSidecarExposure(positions, equity, new Set(state.positions.map((row) => row.symbol)));
                 const fullCryptoGrossAvailable = INTEGRATED_CRYPTO_CAP - exposure.cryptoGross - pendingAggregate.cryptoGross;
                 const fullTotalGrossAvailable = INTEGRATED_TOTAL_CAP - exposure.totalGross - pendingAggregate.cryptoGross - pendingAggregate.stockGross;
                 if (fullCryptoGrossAvailable + EPSILON < signals.length || fullTotalGrossAvailable + EPSILON < signals.length) {
