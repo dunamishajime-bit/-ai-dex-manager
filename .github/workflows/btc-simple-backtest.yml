@@ -1,0 +1,133 @@
+name: Aster-Binance microstructure backtest
+
+on:
+  push:
+    branches:
+      - analysis/btc-simple-backtest-20260715
+      - analysis/microstructure-on-known-workflow-20260715
+    paths:
+      - "research/microstructure_parts/**"
+      - "research/microstructure_validation.py"
+      - "research/microstructure_execution_stress.py"
+      - "research/microstructure_strict_revalidation.py"
+      - ".github/workflows/btc-simple-backtest.yml"
+  pull_request:
+    branches:
+      - master
+      - analysis/btc-simple-backtest-20260715
+    paths:
+      - "research/microstructure_parts/**"
+      - "research/microstructure_validation.py"
+      - "research/microstructure_execution_stress.py"
+      - "research/microstructure_strict_revalidation.py"
+      - ".github/workflows/btc-simple-backtest.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip pandas numpy requests
+      - name: Restore market-data cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/aster_binance_microstructure
+          key: aster-binance-microstructure-202510-202606-v1
+      - name: Assemble research script
+        run: cat research/microstructure_parts/*.part > research/aster_binance_microstructure.py
+      - name: Validate syntax
+        run: |
+          python -m py_compile research/aster_binance_microstructure.py
+          python -m py_compile research/microstructure_validation.py
+          python -m py_compile research/microstructure_execution_stress.py
+          python -m py_compile research/microstructure_strict_revalidation.py
+      - name: Run holdout backtest
+        id: research
+        continue-on-error: true
+        env:
+          PYTHONUNBUFFERED: "1"
+        run: |
+          set -o pipefail
+          python research/aster_binance_microstructure.py 2>&1 | tee microstructure_run.log
+      - name: Run robustness validation
+        id: validation
+        continue-on-error: true
+        env:
+          PYTHONUNBUFFERED: "1"
+        run: |
+          set -o pipefail
+          python - <<'PY' 2>&1 | tee microstructure_validation.log
+          import pandas as pd
+          from research import aster_binance_microstructure as m
+          original_align = m.align_funding
+          def normalized_align(frame, index, name):
+              normalized = frame.copy()
+              normalized.index = pd.to_datetime(normalized.index, utc=True, format="mixed")
+              normalized_index = pd.DatetimeIndex(pd.to_datetime(index, utc=True, format="mixed"))
+              return original_align(normalized, normalized_index, name)
+          m.align_funding = normalized_align
+          from research import microstructure_validation as validation
+          validation.main()
+          PY
+      - name: Run execution stress
+        id: stress
+        continue-on-error: true
+        env:
+          PYTHONUNBUFFERED: "1"
+        run: |
+          set -o pipefail
+          python -m research.microstructure_execution_stress 2>&1 | tee microstructure_execution_stress.log
+      - name: Run strict revalidation
+        id: strict
+        continue-on-error: true
+        env:
+          PYTHONUNBUFFERED: "1"
+        run: |
+          set -o pipefail
+          python -m research.microstructure_strict_revalidation 2>&1 | tee microstructure_strict_revalidation.log
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: aster-binance-microstructure-report
+          path: |
+            backtest_output_microstructure/
+            microstructure_run.log
+            microstructure_validation.log
+            microstructure_execution_stress.log
+            microstructure_strict_revalidation.log
+          if-no-files-found: warn
+      - name: Commit research outputs
+        if: always() && github.event_name == 'push'
+        run: |
+          mkdir -p research_results/microstructure
+          cp -f microstructure_run.log research_results/microstructure/ || true
+          cp -f microstructure_validation.log research_results/microstructure/ || true
+          cp -f microstructure_execution_stress.log research_results/microstructure/ || true
+          cp -f microstructure_strict_revalidation.log research_results/microstructure/ || true
+          if [ -d backtest_output_microstructure ]; then
+            for f in report.md validation_report.md execution_stress_report.md strict_revalidation_report.md strategy_results.csv event_studies.csv data_coverage.csv feature_availability.csv variant_selection.csv live_depth_probe.csv holdout_monthly_returns.csv ridge_model.json robustness_ablations.csv spread_construction_results.csv gap_alignment_diagnostics.csv pengu_execution_diagnostics.csv pengu_execution_stress.csv strict_revalidation_scenarios.csv strict_revalidation_trades.csv; do
+              cp -f "backtest_output_microstructure/$f" research_results/microstructure/ 2>/dev/null || true
+            done
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f research_results/microstructure
+          if ! git diff --cached --quiet; then
+            git commit -m "research: publish microstructure backtest outputs"
+            git push origin HEAD:${GITHUB_REF_NAME}
+          fi
+      - name: Preserve failure status
+        if: steps.research.outcome == 'failure' || steps.validation.outcome == 'failure' || steps.stress.outcome == 'failure' || steps.strict.outcome == 'failure'
+        run: exit 1

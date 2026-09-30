@@ -1,0 +1,244 @@
+#!/usr/bin/env python3
+"""Aster/Binance event-driven microstructure research backtest.
+
+Research only. The script uses only information available at each timestamp,
+executes on the next bar, and keeps 2026-04 onward as an untouched holdout.
+"""
+from __future__ import annotations
+
+import io
+import json
+import math
+import os
+import time
+import zipfile
+from dataclasses import dataclass, asdict
+from pathlib import Path
+from typing import Iterable
+
+import numpy as np
+import pandas as pd
+import requests
+
+ASTER = "https://fapi.asterdex.com"
+BINANCE = "https://fapi.binance.com"
+VISION = "https://data.binance.vision/data/futures/um/monthly"
+SYMBOLS = ["BTCUSDT", "ETHUSDT", "SOLUSDT", "PENGUUSDT"]
+INTERVAL = "5m"
+BAR_MS = 5 * 60 * 1000
+START = pd.Timestamp(os.getenv("MICRO_START", "2025-10-01"), tz="UTC")
+END = pd.Timestamp(os.getenv("MICRO_END", "2026-07-01"), tz="UTC")
+HOLDOUT = pd.Timestamp(os.getenv("MICRO_HOLDOUT", "2026-04-01"), tz="UTC")
+OUT = Path("backtest_output_microstructure")
+CACHE = Path(".cache/aster_binance_microstructure")
+ASTER_TAKER_FEE = 0.0004
+SLIPPAGE_PER_SIDE = 0.0001
+ROUND_TRIP_COST = 2 * (ASTER_TAKER_FEE + SLIPPAGE_PER_SIDE)
+ANNUAL_BARS = 365.25 * 24 * 12
+
+SESSION = requests.Session()
+SESSION.headers.update({"User-Agent": "disdex-microstructure-research/1.0"})
+
+
+def get_json(url: str, params: dict | None = None, attempts: int = 5):
+    last = None
+    for n in range(attempts):
+        try:
+            r = SESSION.get(url, params=params, timeout=60)
+            if r.status_code in (404, 400):
+                return None
+            if r.status_code in (418, 429):
+                time.sleep(2.0 * (n + 1))
+                continue
+            r.raise_for_status()
+            return r.json()
+        except Exception as exc:
+            last = exc
+            time.sleep(min(8.0, 0.8 * (n + 1)))
+    print(f"WARN request failed {url} {params}: {last}")
+    return None
+
+
+def fetch_klines(base: str, endpoint: str, symbol: str, start: pd.Timestamp, end: pd.Timestamp) -> pd.DataFrame:
+    CACHE.mkdir(parents=True, exist_ok=True)
+    venue = "aster" if "asterdex" in base else "binance"
+    key = endpoint.strip("/").replace("/", "_")
+    cached = CACHE / f"{venue}_{symbol}_{key}_{start.date()}_{end.date()}.csv"
+    if cached.exists() and cached.stat().st_size > 100:
+        return pd.read_csv(cached, parse_dates=["timestamp"]).set_index("timestamp")
+    rows: list[list] = []
+    cursor = int(start.timestamp() * 1000)
+    end_ms = int(end.timestamp() * 1000) - 1
+    while cursor <= end_ms:
+        payload = get_json(
+            base + endpoint,
+            {"symbol": symbol, "interval": INTERVAL, "startTime": cursor, "endTime": end_ms, "limit": 1500},
+        )
+        if not payload:
+            break
+        rows.extend(payload)
+        nxt = int(payload[-1][0]) + BAR_MS
+        if nxt <= cursor:
+            break
+        cursor = nxt
+        if len(rows) % 15000 < 1500:
+            print(f"{venue} {symbol} {key}: {len(rows):,} bars")
+        time.sleep(0.015)
+    if not rows:
+        return pd.DataFrame()
+    cols = ["open_time", "open", "high", "low", "close", "volume", "close_time", "quote_volume", "trades", "taker_buy_base", "taker_buy_quote", "ignore"]
+    frame = pd.DataFrame(rows)
+    frame = frame.iloc[:, : min(frame.shape[1], len(cols))]
+    frame.columns = cols[: frame.shape[1]]
+    frame["timestamp"] = pd.to_datetime(pd.to_numeric(frame["open_time"], errors="coerce"), unit="ms", utc=True)
+    for c in ["open", "high", "low", "close", "volume", "quote_volume", "trades", "taker_buy_base", "taker_buy_quote"]:
+        if c in frame:
+            frame[c] = pd.to_numeric(frame[c], errors="coerce")
+    keep = [c for c in ["timestamp", "open", "high", "low", "close", "volume", "quote_volume", "trades", "taker_buy_base", "taker_buy_quote"] if c in frame]
+    frame = frame[keep].dropna(subset=["timestamp", "close"]).drop_duplicates("timestamp").sort_values("timestamp")
+    frame.to_csv(cached, index=False)
+    return frame.set_index("timestamp")
+
+
+def fetch_funding(base: str, symbol: str, start: pd.Timestamp, end: pd.Timestamp) -> pd.DataFrame:
+    CACHE.mkdir(parents=True, exist_ok=True)
+    venue = "aster" if "asterdex" in base else "binance"
+    cached = CACHE / f"{venue}_{symbol}_funding_{start.date()}_{end.date()}.csv"
+    if cached.exists() and cached.stat().st_size > 50:
+        return pd.read_csv(cached, parse_dates=["timestamp"]).set_index("timestamp")
+    rows: list[dict] = []
+    cursor = int(start.timestamp() * 1000)
+    end_ms = int(end.timestamp() * 1000) - 1
+    while cursor <= end_ms:
+        payload = get_json(base + "/fapi/v1/fundingRate", {"symbol": symbol, "startTime": cursor, "endTime": end_ms, "limit": 1000})
+        if not payload:
+            break
+        rows.extend(payload)
+        nxt = int(payload[-1].get("fundingTime", cursor)) + 1
+        if nxt <= cursor:
+            break
+        cursor = nxt
+        time.sleep(0.03)
+    if not rows:
+        return pd.DataFrame()
+    f = pd.DataFrame(rows)
+    f["timestamp"] = pd.to_datetime(pd.to_numeric(f["fundingTime"], errors="coerce"), unit="ms", utc=True)
+    f["funding_rate"] = pd.to_numeric(f["fundingRate"], errors="coerce")
+    f = f[["timestamp", "funding_rate"]].dropna().drop_duplicates("timestamp").sort_values("timestamp")
+    f.to_csv(cached, index=False)
+    return f.set_index("timestamp")
+
+
+def month_iter(start: pd.Timestamp, end: pd.Timestamp) -> Iterable[pd.Period]:
+    return pd.period_range(start=start.tz_localize(None).to_period("M"), end=(end - pd.Timedelta(days=1)).tz_localize(None).to_period("M"), freq="M")
+
+
+def read_zip_csv(url: str) -> pd.DataFrame | None:
+    for n in range(3):
+        try:
+            r = SESSION.get(url, timeout=90)
+            if r.status_code == 404:
+                return None
+            r.raise_for_status()
+            with zipfile.ZipFile(io.BytesIO(r.content)) as zf:
+                names = [x for x in zf.namelist() if x.lower().endswith(".csv")]
+                if not names:
+                    return None
+                return pd.read_csv(io.BytesIO(zf.read(names[0])))
+        except Exception as exc:
+            if n == 2:
+                print(f"WARN zip failed {url}: {exc}")
+                return None
+            time.sleep(1.0 + n)
+    return None
+
+
+def fetch_binance_metrics(symbol: str, start: pd.Timestamp, end: pd.Timestamp) -> pd.DataFrame:
+    cached = CACHE / f"binance_{symbol}_metrics_{start.date()}_{end.date()}.csv"
+    if cached.exists() and cached.stat().st_size > 100:
+        return pd.read_csv(cached, parse_dates=["timestamp"]).set_index("timestamp")
+    frames = []
+    for p in month_iter(start, end):
+        stamp = p.strftime("%Y-%m")
+        candidates = [
+            f"{VISION}/metrics/{symbol}/{symbol}-metrics-{stamp}.zip",
+            f"{VISION}/metrics/{symbol}/5m/{symbol}-metrics-5m-{stamp}.zip",
+        ]
+        raw = None
+        for url in candidates:
+            raw = read_zip_csv(url)
+            if raw is not None:
+                break
+        if raw is None or raw.empty:
+            continue
+        raw.columns = [str(c).strip().lower() for c in raw.columns]
+        tcol = next((c for c in raw.columns if "time" in c), raw.columns[0])
+        vals = pd.to_numeric(raw[tcol], errors="coerce")
+        unit = "us" if vals.dropna().median() > 1e14 else "ms"
+        raw["timestamp"] = pd.to_datetime(vals, unit=unit, utc=True, errors="coerce")
+        rename = {}
+        for c in raw.columns:
+            key = c.replace("_", "").lower()
+            if "sumopeninterestvalue" in key:
+                rename[c] = "open_interest_value"
+            elif "sumopeninterest" in key:
+                rename[c] = "open_interest"
+            elif "sumtakerlongshortvolratio" in key:
+                rename[c] = "taker_long_short_ratio"
+            elif "counttoptraderlongshortratio" in key:
+                rename[c] = "top_trader_account_ratio"
+            elif "sumtoptraderlongshortratio" in key:
+                rename[c] = "top_trader_position_ratio"
+            elif "countlongshortratio" in key:
+                rename[c] = "global_account_ratio"
+        raw = raw.rename(columns=rename)
+        keep = ["timestamp"] + [c for c in ["open_interest", "open_interest_value", "taker_long_short_ratio", "top_trader_account_ratio", "top_trader_position_ratio", "global_account_ratio"] if c in raw]
+        for c in keep[1:]:
+            raw[c] = pd.to_numeric(raw[c], errors="coerce")
+        frames.append(raw[keep])
+    if not frames:
+        return pd.DataFrame()
+    out = pd.concat(frames, ignore_index=True).dropna(subset=["timestamp"]).drop_duplicates("timestamp").sort_values("timestamp")
+    out.to_csv(cached, index=False)
+    return out.set_index("timestamp")
+
+
+def fetch_binance_liquidations(symbol: str, start: pd.Timestamp, end: pd.Timestamp) -> pd.DataFrame:
+    cached = CACHE / f"binance_{symbol}_liquidations_{start.date()}_{end.date()}.csv"
+    if cached.exists() and cached.stat().st_size > 50:
+        return pd.read_csv(cached, parse_dates=["timestamp"]).set_index("timestamp")
+    frames = []
+    for p in month_iter(start, end):
+        stamp = p.strftime("%Y-%m")
+        urls = [
+            f"{VISION}/liquidationSnapshot/{symbol}/{symbol}-liquidationSnapshot-{stamp}.zip",
+            f"{VISION}/liquidationSnapshot/{symbol}/1m/{symbol}-liquidationSnapshot-1m-{stamp}.zip",
+        ]
+        raw = None
+        for url in urls:
+            raw = read_zip_csv(url)
+            if raw is not None:
+                break
+        if raw is None or raw.empty:
+            continue
+        raw.columns = [str(c).strip().lower() for c in raw.columns]
+        tcol = next((c for c in raw.columns if "time" in c), raw.columns[0])
+        vals = pd.to_numeric(raw[tcol], errors="coerce")
+        unit = "us" if vals.dropna().median() > 1e14 else "ms"
+        raw["timestamp"] = pd.to_datetime(vals, unit=unit, utc=True, errors="coerce")
+        sidecol = next((c for c in raw.columns if "side" in c), None)
+        pricecol = next((c for c in raw.columns if "average" in c and "price" in c), next((c for c in raw.columns if c == "price" or c.endswith("_price")), None))
+        qtycol = next((c for c in raw.columns if "filled" in c and "quantity" in c), next((c for c in raw.columns if "original" in c and "quantity" in c), next((c for c in raw.columns if "qty" in c), None)))
+        if not sidecol or not pricecol or not qtycol:
+            continue
+        raw["notional"] = pd.to_numeric(raw[pricecol], errors="coerce") * pd.to_numeric(raw[qtycol], errors="coerce")
+        side = raw[sidecol].astype(str).str.upper()
+        raw["long_liq"] = np.where(side.eq("SELL"), raw["notional"], 0.0)
+        raw["short_liq"] = np.where(side.eq("BUY"), raw["notional"], 0.0)
+        agg = raw.set_index("timestamp")[["long_liq", "short_liq"]].resample("5min").sum()
+        frames.append(agg.reset_index())
+    if not frames:
+        return pd.DataFrame()
+    out = pd.concat(frames, ignore_index=True).groupby("timestamp", as_index=False)[["long_liq", "short_liq"]].sum().sort_values("timestamp")
+    out.to_csv(cached, index=False)
+    return out.set_index("timestamp")
