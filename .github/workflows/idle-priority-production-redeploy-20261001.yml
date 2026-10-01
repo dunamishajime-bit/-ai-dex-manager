@@ -1,5 +1,5 @@
 name: Idle Priority exact-SHA Production redeploy
-# redeploy-sequence: post-stock-reference-hardening-v11
+# redeploy-sequence: q102-hour-boundary-cache-fix-v12
 on:
   push:
     branches: [design/idle-priority-bt-parity-20260929]
