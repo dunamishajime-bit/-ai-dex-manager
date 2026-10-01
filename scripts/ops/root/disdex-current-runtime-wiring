@@ -622,7 +622,11 @@ retarget_quality102_ranking_observer() {
   done < <(
     {
       find /etc/systemd/system/timers.target.wants -maxdepth 1 -type l -name 'disdex-quality102-ranking-observer@*.timer' -printf '%f\n' 2>/dev/null || true
-      systemctl list-units --all --type=timer --no-legend --no-pager 2>/dev/null | awk '{print $1}' | grep -E '^disdex-quality102-ranking-observer@[0-9a-f]{40}\.timer
+      systemctl list-units --all --type=timer --no-legend --no-pager 2>/dev/null | awk '{print $1}' | grep -E '^disdex-quality102-ranking-observer@[0-9a-f]{40}\.timer$' || true
+    } | sort -u
+  )
+
+  systemctl enable --now "$Q102_RANKING_OBSERVER_TIMER" >/dev/null
   ensure_monitor_timer_active "$Q102_RANKING_OBSERVER_TIMER"
 
   # Ranking generation is read-only with tradingMutation=0. Run it once now so
@@ -634,7 +638,6 @@ retarget_quality102_ranking_observer() {
     printf 'Q102 ranking observer immediate refresh failed; timer remains armed: %s\n' "$Q102_RANKING_OBSERVER_SERVICE" >&2
   fi
 }
-
 assert_current_live_target_ready() {
   local tsx="$CURRENT_RELEASE/node_modules/.bin/tsx"
   "$tsx" "$CURRENT_RELEASE/scripts/disdex-current-live-target-readiness.ts" --require-implementation-ready
