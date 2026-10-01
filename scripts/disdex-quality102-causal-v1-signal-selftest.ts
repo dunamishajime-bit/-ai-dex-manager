@@ -219,6 +219,25 @@ async function providerTests(): Promise<void> {
     assert.notEqual((await provider.load()).candlesBySymbol.FETUSDT, fet);
     assert.equal(paged.urls.length, requestCount * 2);
 
+    // Regression: a cache filled just before an hourly rollover must never be
+    // reused after the next 1h candle closes. Otherwise the signal layer sees
+    // a >2h-old final candle and fails closed with QUALITY102_STALE_CANDLE.
+    let rolloverClock = NOW + HOUR - 5_000;
+    const rolloverClient = pagedClient();
+    const rolloverProvider = new Quality102CausalV1AsterMarketDataProvider(rolloverClient.client, {
+        symbols: ["FETUSDT"], historyHours: MINIMUM_HISTORY_HOURS, pageLimit: 500,
+        cacheTtlMs: 5 * 60_000, now: () => rolloverClock,
+    });
+    const beforeRollover = await rolloverProvider.load();
+    assert.equal(beforeRollover.candlesBySymbol.FETUSDT.at(-1)?.timestampMs, NOW - HOUR);
+    assert.equal(beforeRollover.entryOpenBySymbol.FETUSDT.timestampMs, NOW);
+    const beforeRolloverRequests = rolloverClient.urls.length;
+    rolloverClock += 10_000;
+    const afterRollover = await rolloverProvider.load();
+    assert.equal(afterRollover.candlesBySymbol.FETUSDT.at(-1)?.timestampMs, NOW);
+    assert.equal(afterRollover.entryOpenBySymbol.FETUSDT.timestampMs, NOW + HOUR);
+    assert.ok(rolloverClient.urls.length > beforeRolloverRequests, "hour rollover must invalidate the in-memory cache");
+
     const duplicate = pagedClient((payload, symbol, page) => symbol === "FETUSDT" && page === 0 ? [...payload.slice(0, 2), payload[1], ...payload.slice(2)] : payload);
     await assert.rejects(() => new Quality102CausalV1AsterMarketDataProvider(duplicate.client, {
         symbols: ["FETUSDT"], historyHours: MINIMUM_HISTORY_HOURS, pageLimit: 500, now: () => NOW,
