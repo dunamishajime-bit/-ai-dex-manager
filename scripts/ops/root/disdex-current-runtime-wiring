@@ -188,6 +188,10 @@ validate_release_artifacts() {
     "$CURRENT_RELEASE/scripts/ops/root/disdex-v12-three-hour-health-check"
     "$CURRENT_RELEASE/scripts/ops/root/disdex-runner-watchdog-current.mjs"
     "$CURRENT_RELEASE/scripts/ops/root/disdex-runner-health-snapshot-current.mjs"
+    "$CURRENT_RELEASE/scripts/ops/root/disdex-runner-health-alert.ts"
+    "$CURRENT_RELEASE/lib/server/runtime-alert-policy.ts"
+    "$CURRENT_RELEASE/lib/server/runner-health-notification.ts"
+    "$CURRENT_RELEASE/lib/server/runner-service-resolution.ts"
     "$CURRENT_RELEASE/scripts/ops/root/disdex-trade-fill-notifier.ts"
     "$CURRENT_RELEASE/scripts/ops/root/disdex-vps-retention-cleanup"
     "$CURRENT_RELEASE/scripts/ops/root/disdex-ui-retention-cleanup"
@@ -913,7 +917,17 @@ ExecStart=${CURRENT_RELEASE}/node_modules/.bin/tsx ${CURRENT_RELEASE}/scripts/op
   remove_stale_support_release_pin_dropins
 
   write_atomic "${HEALTH_ALERT_DROPIN_DIR}/${CURRENT_SUPPORT_OVERRIDE}" "[Service]
+WorkingDirectory=${CURRENT_RELEASE}
+ExecStart=
+ExecStart=${CURRENT_RELEASE}/node_modules/.bin/tsx ${CURRENT_RELEASE}/scripts/ops/root/disdex-runner-health-alert.ts
 Environment=DISDEX_ALERT_OPERATOR_ACTIVATION_PATH=${OPERATOR_ACTIVATION_PATH}
+Environment=DISDEX_ALERT_V12_SERVICE_UNIT=${V12_UNIT}
+Environment=DISDEX_ALERT_PENGU_V8_SERVICE_UNIT=${PENGU_UNIT}
+Environment=DISDEX_ALERT_QUALITY102_SERVICE_UNIT=${Q102_UNIT}
+Environment=DISDEX_ALERT_V52_SERVICE_UNIT=${V52_UNIT}
+Environment=DISDEX_ALERT_FET_BRK48_SERVICE_UNIT=${FET_UNIT}
+Environment=DISDEX_ALERT_HYPE_SERVICE_UNIT=${HYPE_UNIT}
+Environment=DISDEX_ALERT_IDLE_SERVICE_UNIT=${IDLE_UNIT}
 Environment=DISDEX_ALERT_SHARED_CRYPTO_RISK_SERVICE_UNIT=${SHARED_RISK_UNIT}
 Environment=DISDEX_ALERT_MARGIN_GUARD_SERVICE_UNIT=${MARGIN_UNIT}"
 
