@@ -1,0 +1,62 @@
+﻿{
+    "created_utc":  "2026-10-01T17:13:11.6874653Z",
+    "source_branch":  "research/v12-trail020-bt-20261002",
+    "source_commit":  "223a168f7547bc1188ebc21e5ff581775a56f69b",
+    "files":  [
+                  {
+                      "path":  "10bps/candidate-decisions.jsonl",
+                      "bytes":  2166783,
+                      "sha256":  "c99a7b9817b0fd868b50cdce4e9ebefe78efb15facc0a5d8a9a12a51fb499bc0"
+                  },
+                  {
+                      "path":  "10bps/metrics.json",
+                      "bytes":  20870,
+                      "sha256":  "d4192ab544038a7a9a89a717010999ccd1a9b74385058bfa8e1b2e279f12b31c"
+                  },
+                  {
+                      "path":  "10bps/portfolio-events.jsonl",
+                      "bytes":  2090349,
+                      "sha256":  "5de8e857fc200eaa4caddb34d4ee9d05e73189910445514168119895a27e67dd"
+                  },
+                  {
+                      "path":  "10bps/portfolio-trades.jsonl",
+                      "bytes":  1478401,
+                      "sha256":  "d5d0da5296fc7f79bb8136c0dbc35687ffd2c5d2893ca550f94a35c9b7a5d099"
+                  },
+                  {
+                      "path":  "8bps/candidate-decisions.jsonl",
+                      "bytes":  2166662,
+                      "sha256":  "feeef8ef4b8e073b8ef5d805216f9521ee4eeeb9f0aa3cd8b27e05a3b0ad616b"
+                  },
+                  {
+                      "path":  "8bps/metrics.json",
+                      "bytes":  20871,
+                      "sha256":  "381a9640a0a114a6eaff584a644530770142840d6c300de63ef7719a9221b974"
+                  },
+                  {
+                      "path":  "8bps/portfolio-events.jsonl",
+                      "bytes":  2090054,
+                      "sha256":  "60728a15d6469b63aee14314c21d77ac78432625f4fe5a9829ff1bde58a54190"
+                  },
+                  {
+                      "path":  "8bps/portfolio-trades.jsonl",
+                      "bytes":  1478350,
+                      "sha256":  "2756a7c2cea7919e1ad93e10c7b673ab386bc533abcf48389475311bf86b919e"
+                  },
+                  {
+                      "path":  "cost-stress.txt",
+                      "bytes":  600,
+                      "sha256":  "3ee29448533545972815358e033654659afeaa9e8469876914e9334e362ed744"
+                  },
+                  {
+                      "path":  "README.md",
+                      "bytes":  3950,
+                      "sha256":  "f110046fa75ebd2c6c766f41450e8dabd36f1e45f03c0ef76b10a975180c6238"
+                  },
+                  {
+                      "path":  "research-config.json",
+                      "bytes":  514,
+                      "sha256":  "4ab56dd34c37f863cf1dbf3ade27b8439ba3230699ae931aa2af77f8fda8ba1e"
+                  }
+              ]
+}

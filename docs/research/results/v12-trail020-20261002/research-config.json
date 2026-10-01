@@ -1,0 +1,17 @@
+﻿{
+    "status":  "RESEARCH_COMPLETE_NOT_LIVE",
+    "period":  "2025-08-10_to_2026-08-10",
+    "v12_trailing_atr":  0.2,
+    "v12_stop_atr":  2.477,
+    "v12_take_profit_atr":  3.1995,
+    "q102_brk_gross":  0.75,
+    "q102_mr_gross":  0.75,
+    "fet_gross":  1,
+    "fet_dual_gate":  true,
+    "pengu":  "UNCHANGED",
+    "cost_models_bps":  [
+                            8,
+                            10
+                        ],
+    "primary_reuse_ledger":  "10bps/portfolio-trades.jsonl"
+}
