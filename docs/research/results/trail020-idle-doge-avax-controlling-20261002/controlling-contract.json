@@ -1,0 +1,109 @@
+{
+  "schema": "disdex-trail020-idle-doge-avax-controlling/v1",
+  "status": "CONTROLLING_PRODUCTION_CANDIDATE_NOT_LIVE",
+  "period": "2025-08-10_to_2026-08-10",
+  "priority": [
+    "FORMAL_EXISTING",
+    "IDLE_PRIORITY_SHORT",
+    "DOGE_REL_VOL",
+    "AVAX_REL_LONG"
+  ],
+  "v12": {
+    "trailingAtr": 0.2,
+    "stopAtr": 2.477,
+    "takeProfitAtr": 3.1995,
+    "entryLogicChanged": false
+  },
+  "idleShort": {
+    "trades10bps": 61
+  },
+  "doge": {
+    "side": "LONG",
+    "rel24Min": 0.03,
+    "volumeRatioMin": 1.2,
+    "atrRatioMin": 0.007,
+    "holdHours": 12,
+    "stopPct": 0.1,
+    "takeProfitPct": 0.25
+  },
+  "avax": {
+    "side": "LONG",
+    "rel24Min": 0.03,
+    "volumeRatioMin": 0.8,
+    "atrRatioMin": 0.007,
+    "holdHours": 12,
+    "stopPct": 0.1,
+    "takeProfitPct": 0.25
+  },
+  "costs": {
+    "8": {
+      "finalJpy": 1664976130.4924824,
+      "trades": 1390,
+      "pf": 2.3839076001310042,
+      "dd": -0.21243883153542265,
+      "wr": 0.679136690647482,
+      "strategyCounts": {
+        "FET": 15,
+        "IDLE_PRIORITY_SHORT": 61,
+        "PENGU": 61,
+        "Q102": 130,
+        "RESCUE_NEW": 16,
+        "RESCUE_TOP3": 11,
+        "V12": 1011,
+        "V52": 85
+      }
+    },
+    "10": {
+      "finalJpy": 1319918378.8124561,
+      "trades": 1390,
+      "pf": 2.332297694545306,
+      "dd": -0.21359613575534397,
+      "wr": 0.6705035971223021,
+      "strategyCounts": {
+        "FET": 15,
+        "IDLE_PRIORITY_SHORT": 61,
+        "PENGU": 61,
+        "Q102": 130,
+        "RESCUE_NEW": 16,
+        "RESCUE_TOP3": 11,
+        "V12": 1011,
+        "V52": 85
+      }
+    },
+    "20": {
+      "finalJpy": 418296811.09379786,
+      "trades": 1388,
+      "pf": 2.0916297067527774,
+      "dd": -0.22276612236678262,
+      "wr": 0.6181556195965417,
+      "strategyCounts": {
+        "FET": 15,
+        "IDLE_PRIORITY_SHORT": 61,
+        "PENGU": 61,
+        "Q102": 130,
+        "RESCUE_NEW": 16,
+        "RESCUE_TOP3": 11,
+        "V12": 1009,
+        "V52": 85
+      }
+    },
+    "30": {
+      "finalJpy": 118566758.73919226,
+      "trades": 1382,
+      "pf": 1.8747436370321768,
+      "dd": -0.23360565008282586,
+      "wr": 0.5680173661360347,
+      "strategyCounts": {
+        "FET": 15,
+        "IDLE_PRIORITY_SHORT": 61,
+        "PENGU": 61,
+        "Q102": 130,
+        "RESCUE_NEW": 16,
+        "RESCUE_TOP3": 11,
+        "V12": 1004,
+        "V52": 84
+      }
+    }
+  },
+  "note": "Residual LONG is subordinate to Formal and Idle SHORT. Six DOGE/AVAX historical intents are suppressed by active Idle SHORT."
+}

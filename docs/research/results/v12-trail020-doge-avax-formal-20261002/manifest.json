@@ -1,0 +1,115 @@
+{
+  "schema": "disdex-research-artifact-manifest/v1",
+  "files": [
+    {
+      "path": "10bps/integrated-result.json",
+      "bytes": 490392,
+      "sha256": "311b30c846dea46936db60829ed9a9e549fdc8a318dfa8d328b9844c292f126e"
+    },
+    {
+      "path": "10bps/metrics.json",
+      "bytes": 2797,
+      "sha256": "141ded7a4a5c35b50cf291ac6a4ecb8b0a4c8b305fe5ab39743b0cc2b7c0c093"
+    },
+    {
+      "path": "10bps/portfolio-trades.jsonl",
+      "bytes": 340211,
+      "sha256": "7cd05d9ac4fc8933181cc0b090da30de70fd9422e6a06434c0f746ef477d868b"
+    },
+    {
+      "path": "20bps/integrated-result.json",
+      "bytes": 489107,
+      "sha256": "461f2cfdaf8a3269c9ff4c66c4a7c8f0685d00553d3c8eba8c27263de30e6c4a"
+    },
+    {
+      "path": "20bps/metrics.json",
+      "bytes": 2783,
+      "sha256": "b90b96b77c09e008c21ebc7bdafec91d30d52a0c8fc0fa935d8221480d3623e9"
+    },
+    {
+      "path": "20bps/portfolio-trades.jsonl",
+      "bytes": 339305,
+      "sha256": "d91b706104d9440903df8cae1d02878b00e46a48d7eefea4f497fbd9d5207f4c"
+    },
+    {
+      "path": "30bps/integrated-result.json",
+      "bytes": 487487,
+      "sha256": "b01ed719275dc69f3240550d3970aa5ce89ebfc70f71f1ef0ee2e5efc0ea4254"
+    },
+    {
+      "path": "30bps/metrics.json",
+      "bytes": 2800,
+      "sha256": "5a54045ee071ac068976780e459093c40efd609f396bfde3aaf51b422c9b347d"
+    },
+    {
+      "path": "30bps/portfolio-trades.jsonl",
+      "bytes": 338189,
+      "sha256": "260612bc37666eab0c68d961668d1748fae5f87eaf7f618fca242c2f9b3a26ad"
+    },
+    {
+      "path": "8bps/integrated-result.json",
+      "bytes": 490384,
+      "sha256": "fc3aa6b86fc1b87b58fb352276f2192cde565d83c9cca4188e5f4f00522b8a55"
+    },
+    {
+      "path": "8bps/metrics.json",
+      "bytes": 2798,
+      "sha256": "c63c50f845d3d2d5fa39af412b2df18fba755dc01e7e8763be2e54738f901559"
+    },
+    {
+      "path": "8bps/portfolio-trades.jsonl",
+      "bytes": 340214,
+      "sha256": "2a02f85fb6ad1e513449d5364b293e177d2cd2cbd7428a91ff4966dd9f2cd1dd"
+    },
+    {
+      "path": "ASTER_UNSEEN_SEARCH_FINAL.md",
+      "bytes": 2885,
+      "sha256": "106718f47586a771f02fd8a25f9c3a699de76ffc23f4ff443e6b52a0ccf94fc1"
+    },
+    {
+      "path": "avax-intents.json",
+      "bytes": 7728,
+      "sha256": "090176865a46638ee933aa2e3181600502a3bc3828e6a1e8795c429815e72359"
+    },
+    {
+      "path": "doge-avax-overlay-intents.json",
+      "bytes": 13050,
+      "sha256": "46f9d39e1ccc7432f6c6fc493263cf75510021b393b387eb6123b953a01cd8a5"
+    },
+    {
+      "path": "doge-avax-overlay-target-net-10bps.json",
+      "bytes": 736,
+      "sha256": "b4507ff3bcf19daee4f45328d7bfc3b6765a83dfb96772817083e74023bba2f7"
+    },
+    {
+      "path": "doge-intents.json",
+      "bytes": 5327,
+      "sha256": "488e21c7424d1987eae8b73c8cddcdee031062d065072112da0bf1a05b676b4d"
+    },
+    {
+      "path": "DOGE_AVAX_RESEARCH_FINAL.md",
+      "bytes": 3023,
+      "sha256": "8bae051fb847f6017842385c782155d02fa0e1c74757d346263671985cda780e"
+    },
+    {
+      "path": "formal-candidate-config.json",
+      "bytes": 793,
+      "sha256": "645ace1508339dc9198601f633e2db5f9b8534525f6b1d4b7af6cf1884f5543d"
+    },
+    {
+      "path": "fresh-oos-comparison.txt",
+      "bytes": 4123,
+      "sha256": "4257075b9eb488b012db77f8509dc5ce4ae76ce9314022b5b427d9512583bc07"
+    },
+    {
+      "path": "fresh-oos-detail.txt",
+      "bytes": 9484,
+      "sha256": "19c0ac1a597aff371fec0d10b9fabbaf455eb7206a96dad25c205198421a68a9"
+    },
+    {
+      "path": "liquidity-snapshot.txt",
+      "bytes": 784,
+      "sha256": "3a70f2bdd95f8c3e6d04c9f47b3c337153fd44913345e71053de7627890c562c"
+    }
+  ]
+}

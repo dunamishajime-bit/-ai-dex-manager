@@ -1,0 +1,39 @@
+{
+  "status": "FORMAL_CANDIDATE_NOT_LIVE",
+  "period": "2025-08-10_to_2026-08-10",
+  "priority": [
+    "FORMAL_EXISTING",
+    "DOGE_REL_VOL",
+    "AVAX_REL_LONG"
+  ],
+  "v12": {
+    "trailingAtr": 0.2,
+    "stopAtr": 2.477,
+    "takeProfitAtr": 3.1995
+  },
+  "doge": {
+    "side": "LONG",
+    "rel24Min": 0.03,
+    "volumeRatioMin": 1.2,
+    "atrRatioMin": 0.007,
+    "holdHours": 12,
+    "stopPct": 0.1,
+    "takeProfitPct": 0.25
+  },
+  "avax": {
+    "side": "LONG",
+    "rel24Min": 0.03,
+    "volumeRatioMin": 0.8,
+    "atrRatioMin": 0.007,
+    "holdHours": 12,
+    "stopPct": 0.1,
+    "takeProfitPct": 0.25
+  },
+  "costBps": [
+    8,
+    10,
+    20,
+    30
+  ],
+  "note": "DOGE and AVAX are supplemental only; existing formal signals preempt them."
+}
