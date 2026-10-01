@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { QUALITY102_CAUSAL_V4_S34_MODEL } from "@/config/disdexQuality102CausalV4Model";
 import {
     buildSharedCryptoDailyRiskState,
+    SHARED_CRYPTO_STRATEGIES,
     validateSharedCryptoDailyRisk,
 } from "@/lib/disdex-shared-crypto-daily-risk";
 import {
@@ -14,7 +15,7 @@ const now = Date.now();
 const state = buildSharedCryptoDailyRiskState({
     accountScope: "ASTER_FUTURES",
     utcDay: new Date(now).toISOString().slice(0, 10),
-    strategyIds: ["V12_X1.00_ALL", "PENGU_DUAL_LS_V2_FINAL", "QUALITY102_CAUSAL_V1", "FET_BRK48_RESIDUAL"],
+    strategyIds: [...SHARED_CRYPTO_STRATEGIES],
     lossPct: 0,
     maximumLossPct: 7.5,
     tripped: false,
@@ -32,6 +33,8 @@ assert.equal(validateSharedCryptoDailyRisk(state, now).ok, true);
 assert.ok(QUALITY102_CAUSAL_V1_SHARED_SYMBOLS.every((symbol) => SHARED_CRYPTO_SYMBOLS.has(symbol)));
 const v4S34Symbols = [...new Set(QUALITY102_CAUSAL_V4_S34_MODEL.map((row) => row.symbol))];
 assert.ok(v4S34Symbols.every((symbol) => SHARED_CRYPTO_SYMBOLS.has(symbol)), "all V4 S34 symbols must participate in shared crypto risk");
+assert.ok(SHARED_CRYPTO_SYMBOLS.has("HYPEUSDT"), "HYPE must participate in shared crypto risk");
+assert.ok(SHARED_CRYPTO_SYMBOLS.has("DOTUSDT"), "Idle DOT must participate in shared crypto risk");
 const tampered = { ...state, lossPct: 1 };
 assert.equal(validateSharedCryptoDailyRisk(tampered, now).reason, "HASH_MISMATCH");
 console.log("SHARED_CRYPTO_RISK_SELFTEST_PASS", JSON.stringify({
