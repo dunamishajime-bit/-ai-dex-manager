@@ -340,6 +340,25 @@ systemctl enable --now "disdex-idle-priority-short@$TARGET_SHA.service"
 systemctl enable --now "disdex-shared-crypto-risk@$TARGET_SHA.service"
 systemctl enable --now "disdex-v12-v52-margin-guard@$TARGET_SHA.service"
 
+for name in disdex-v12-x1-all disdex-pengu-dual-ls-v2; do
+  unit="$name@$TARGET_SHA.service"
+  requires="$(systemctl show "$unit" -p Requires --value)"
+  wants="$(systemctl show "$unit" -p Wants --value)"
+  [[ " $requires " != *" disdex-shared-crypto-risk@$TARGET_SHA.service "* ]] || {
+    echo "POSTDEPLOY_SHARED_RISK_HARD_DEPENDENCY_PRESENT=$unit"
+    false
+  }
+  [[ " $wants " == *" disdex-shared-crypto-risk@$TARGET_SHA.service "* ]] || {
+    echo "POSTDEPLOY_SHARED_RISK_SOFT_DEPENDENCY_MISSING=$unit"
+    false
+  }
+  [[ " $requires " == *" disdex-v12-v52-margin-guard@$TARGET_SHA.service "* ]] || {
+    echo "POSTDEPLOY_MARGIN_GUARD_HARD_DEPENDENCY_MISSING=$unit"
+    false
+  }
+  echo "POSTDEPLOY_SHARED_RISK_LIFECYCLE_DECOUPLED unit=$unit"
+done
+
 for name in "${NAMES[@]}"; do
   systemctl disable "$name@$FROM_SHA.service" >/dev/null 2>&1 || true
 done
