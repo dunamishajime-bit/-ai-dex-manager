@@ -119,3 +119,23 @@ test("managed Production templates preserve the existing sandbox and launch cont
   assert.match(v12, /^RestartPreventExitStatus=2$/m);
   assert.match(pengu, /tsx scripts\/disdex-pengu-dual-ls-v2-live-runner\.ts --daemon/);
 });
+
+
+test("cutover waits for fresh safety daemons before starting trading runners", async () => {
+  const cutover = await read(CUTOVER);
+  assert.match(cutover, /wait_safety_daemons_ready\(\)/);
+  assert.match(cutover, /risk\.get\("sourceComplete"\) is not True/);
+  assert.match(cutover, /now-risk_at>120000/);
+  assert.match(cutover, /guard\.get\("stage"\)!="HEALTHY"/);
+  assert.match(cutover, /guard\.get\("ordersAllowed"\) is not True/);
+  assert.match(cutover, /now-guard_at>120000/);
+  assert.match(cutover, /required_consecutive=2/);
+
+  const sharedStart = cutover.indexOf('systemctl enable --now "disdex-shared-crypto-risk@$TARGET_SHA.service"');
+  const marginStart = cutover.indexOf('systemctl enable --now "disdex-v12-v52-margin-guard@$TARGET_SHA.service"');
+  const safetyWait = cutover.indexOf("wait_safety_daemons_ready", Math.max(sharedStart, marginStart));
+  const coreStart = cutover.indexOf('for name in "${CORE[@]}"', safetyWait);
+  assert.ok(sharedStart >= 0 && marginStart >= 0, "safety daemons must be explicitly started");
+  assert.ok(safetyWait > sharedStart && safetyWait > marginStart, "freshness gate must run after both safety daemons start");
+  assert.ok(coreStart > safetyWait, "core trading runners must start only after safety snapshots are fresh and HEALTHY");
+});
