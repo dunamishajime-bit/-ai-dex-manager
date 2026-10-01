@@ -8,8 +8,8 @@ TRADING_ROOT="${DISDEX_TRADING_ROOT:-/home/deploy/disdex-trading}"
 TRADING_RELEASES="${TRADING_ROOT}/releases"
 TRADING_CURRENT="${TRADING_ROOT}/current"
 RUNTIME_ENV_DIR="/etc/disdex/current-runtime"
-HEALTH_DROPIN="/etc/systemd/system/disdex-runner-health-snapshot.service.d/zzzzzzzzzzzz-current-release.conf"
-WATCHDOG_DROPIN="/etc/systemd/system/disdex-runner-watchdog.service.d/zzzzzzzzzzzz-current-release.conf"
+HEALTH_DROPIN="/etc/systemd/system/disdex-runner-health-snapshot.service.d/zzzzzzzzzzzzzzzzzzzz-current-release.conf"
+WATCHDOG_DROPIN="/etc/systemd/system/disdex-runner-watchdog.service.d/zzzzzzzzzzzzzzzzzzzz-current-release.conf"
 
 FAMILIES=(
   "disdex-v12-x1-all"
