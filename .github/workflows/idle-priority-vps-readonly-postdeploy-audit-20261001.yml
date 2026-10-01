@@ -262,5 +262,44 @@ jobs:
           PY
 
           echo "DISK_FREE_KB=$(df -Pk /home/deploy | awk 'NR==2 {print $4}')"
+          python3 - "$sha" <<'PY'
+import json,sys,time
+sha=sys.argv[1]
+now=int(time.time()*1000)
+def load(path):
+    with open(path,encoding="utf-8") as f:return json.load(f)
+kill=load("/var/lib/disdex/shared/kill-switch.json")
+if kill.get("active") is not False: raise SystemExit("FINAL_KILL_SWITCH_NOT_FALSE")
+risk=load("/var/lib/disdex/shared/crypto-daily-risk.json")
+if risk.get("tripped") is True or risk.get("sourceComplete") is not True: raise SystemExit("FINAL_SHARED_RISK_NOT_HEALTHY")
+if now-int(risk.get("updatedAt") or 0)>120000: raise SystemExit("FINAL_SHARED_RISK_STALE")
+guard=load("/var/lib/disdex/shared/margin-risk/guard-live.json")
+if guard.get("stage")!="HEALTHY" or guard.get("ordersAllowed") is not True: raise SystemExit("FINAL_MARGIN_NOT_HEALTHY")
+if now-int(guard.get("checkedAt") or 0)>120000: raise SystemExit("FINAL_MARGIN_STALE")
+pending=load("/var/lib/disdex/shared/pending-exposure.json")
+entries=pending.get("entries",{}) if isinstance(pending,dict) else {}
+if isinstance(entries,dict) and entries: raise SystemExit("FINAL_PENDING_EXPOSURE_PRESENT")
+cert=load("/var/lib/disdex/shared/idle-priority-parity-cert.json")
+if cert.get("schema")!="disdex-idle-priority-parity-cert/v3" or cert.get("runtimeSha")!=sha:
+    raise SystemExit("FINAL_IDLE_PARITY_V3_MISMATCH")
+if cert.get("genericLifecycleModel")!="BASELINE_CONTINUOUS_IDLE__BREAKOUT_RELATIVE_MOMENTUM__12H_PER_SYMBOL":
+    raise SystemExit("FINAL_IDLE_GENERIC_MODEL_MISMATCH")
+if cert.get("integratedTradeCount")!=1339: raise SystemExit("FINAL_IDLE_INTEGRATED_COUNT_MISMATCH")
+hb=load("/var/lib/disdex/runner-health/heartbeats/idle-priority-short.json")
+if hb.get("runtimeSha")!=sha or hb.get("expectedSha")!=sha: raise SystemExit("FINAL_IDLE_HEARTBEAT_SHA_MISMATCH")
+if hb.get("safetyState")!="HEALTHY" or hb.get("mode")!="LIVE" or hb.get("liveEnabled") is not True:
+    raise SystemExit("FINAL_IDLE_HEARTBEAT_NOT_HEALTHY")
+if int(hb.get("nRestarts") or -1)!=0 or int(hb.get("mainPid") or 0)<=0:
+    raise SystemExit("FINAL_IDLE_HEARTBEAT_RESTART_OR_PID_INVALID")
+print("FINAL_IDLE_PARITY_V3_VERIFIED=PASS")
+print("FINAL_SHARED_SAFETY_VERIFIED=PASS")
+PY
+          for name in disdex-v12-x1-all disdex-pengu-dual-ls-v2 disdex-quality102-causal-v1 disdex-v52-aster-only disdex-fet-brk48 disdex-hype-long disdex-idle-priority-short disdex-shared-crypto-risk disdex-v12-v52-margin-guard; do
+            unit="$name@$sha.service"
+            [[ "$(systemctl is-active "$unit" 2>/dev/null || true)" == active ]] || { echo "FINAL_UNIT_NOT_ACTIVE=$unit"; exit 61; }
+            [[ "$(systemctl show "$unit" -p NRestarts --value)" == 0 ]] || { echo "FINAL_UNIT_RESTARTED=$unit"; exit 62; }
+            [[ "$(systemctl show "$unit" -p Result --value)" == success ]] || { echo "FINAL_UNIT_RESULT_BAD=$unit"; exit 63; }
+          done
+          echo "FINAL_ALL_NINE_RUNNERS_ACTIVE_NRESTARTS_ZERO=PASS"
           echo "AUDIT_COMPLETE=TRUE"
           REMOTE
