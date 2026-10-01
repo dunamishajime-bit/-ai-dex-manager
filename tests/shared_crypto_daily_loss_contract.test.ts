@@ -66,3 +66,25 @@ test("legacy production launch surfaces cannot re-inject a stale 5% PENGU cap", 
         assert.match(source, /PENGU_DUAL_LS_V2_MAX_DAILY_LOSS_PCT(?:=|:\s*)["']?7\.5\b/, file);
     }
 });
+
+
+test("shared daily-risk scope includes every current LIVE crypto sleeve and Idle/HYPE symbols", async () => {
+    const dailyRisk = await readFile("lib/disdex-shared-crypto-daily-risk.ts", "utf8");
+    const writer = await readFile("lib/disdex-shared-crypto-risk-writer.ts", "utf8");
+    assert.match(dailyRisk, /"HYPE_LONG"/);
+    assert.match(dailyRisk, /"IDLE_PRIORITY_SHORT"/);
+    assert.match(writer, /"HYPEUSDT"/);
+    assert.match(writer, /"DOTUSDT"/);
+    for (const symbol of ["TAOUSDT", "TIAUSDT", "JUPUSDT", "RENDERUSDT"]) {
+        assert.match(writer, new RegExp(`"${symbol}"`), symbol);
+    }
+});
+
+test("HYPE entry path fails closed on the shared daily-risk snapshot", async () => {
+    const runtime = await readFile("config/hypeZecLongRuntime.ts", "utf8");
+    const runner = await readFile("lib/hype-zec-long-runner.ts", "utf8");
+    assert.match(runtime, /sharedRiskPath/);
+    assert.match(runtime, /DISDEX_SHARED_CRYPTO_DAILY_RISK_PATH/);
+    assert.match(runner, /readSharedCryptoDailyRisk/);
+    assert.match(runner, /HYPE_ZEC_SHARED_RISK_BLOCKED/);
+});
