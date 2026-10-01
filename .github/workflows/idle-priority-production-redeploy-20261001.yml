@@ -1,5 +1,5 @@
 name: Idle Priority exact-SHA Production redeploy
-# redeploy-sequence: post-audit-fixes-v10-shared-risk-timers-q102-hype
+# redeploy-sequence: post-stock-reference-hardening-v11
 on:
   push:
     branches: [design/idle-priority-bt-parity-20260929]
