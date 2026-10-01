@@ -117,6 +117,7 @@ class RuntimeWiringHygieneTest(unittest.TestCase):
         self.assertIn("q102_observer_singleton", guard)
         self.assertIn("support_runtime_current", guard)
         self.assertIn("verify_current_units_active || return 20", guard)
+        self.assertIn("zzzzzzzzzzzzzzzzzzzz-current-release.conf", guard)
 
     def test_coherence_guard_timer_is_restart_safe_and_wired(self):
         timer = (ROOT / "ops" / "systemd" / "disdex-current-runtime-coherence-guard.timer").read_text(encoding="utf-8")
