@@ -1,6 +1,6 @@
 name: Idle Priority VPS post-deploy read-only audit
 # audit-trigger: final-postdeploy-8e033af7-20261001
-# audit-sequence: post-live-cutover-v1
+# audit-sequence: pre-trail020-cutover-idle-state-diagnostic-v2
 on:
   push:
     branches: [design/idle-priority-bt-parity-20260929]
