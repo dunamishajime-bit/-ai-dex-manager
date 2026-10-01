@@ -175,6 +175,9 @@ validate_release_artifacts() {
     "$CURRENT_RELEASE/ops/systemd/disdex-runner-health-alert.timer"
     "$CURRENT_RELEASE/ops/systemd/disdex-runner-position-recovery.timer"
     "$CURRENT_RELEASE/ops/systemd/disdex-trade-fill-notifier.timer"
+    "$CURRENT_RELEASE/scripts/ops/root/disdex-current-runtime-coherence-guard"
+    "$CURRENT_RELEASE/ops/systemd/disdex-current-runtime-coherence-guard.service"
+    "$CURRENT_RELEASE/ops/systemd/disdex-current-runtime-coherence-guard.timer"
     "$CURRENT_RELEASE/scripts/disdex_v96_v52_margin_guard_runtime.py"
     "$CURRENT_RELEASE/scripts/disdex_v52_aster_only_live_engine.py"
     "$CURRENT_RELEASE/lib/aster-readonly-recovery-gate.ts"
@@ -441,6 +444,15 @@ prepare_managed_unit_templates_for_apply() {
   install -o root -g root -m 0644 \
     "$CURRENT_RELEASE/ops/systemd/disdex-trade-fill-notifier.timer" \
     /etc/systemd/system/disdex-trade-fill-notifier.timer
+  install -o root -g root -m 0755 \
+    "$CURRENT_RELEASE/scripts/ops/root/disdex-current-runtime-coherence-guard" \
+    /usr/local/sbin/disdex-current-runtime-coherence-guard
+  install -o root -g root -m 0644 \
+    "$CURRENT_RELEASE/ops/systemd/disdex-current-runtime-coherence-guard.service" \
+    /etc/systemd/system/disdex-current-runtime-coherence-guard.service
+  install -o root -g root -m 0644 \
+    "$CURRENT_RELEASE/ops/systemd/disdex-current-runtime-coherence-guard.timer" \
+    /etc/systemd/system/disdex-current-runtime-coherence-guard.timer
   systemctl daemon-reload
 }
 
@@ -1190,6 +1202,8 @@ ReadWritePaths=${IDLE_PRIORITY_STATE_ROOT} ${SHARED_ROOT}"
   ensure_monitor_timer_active "disdex-runner-health-snapshot.timer"
   ensure_monitor_timer_active "disdex-runner-health-alert.timer"
   ensure_monitor_timer_active "disdex-trade-fill-notifier.timer"
+  systemctl enable --now disdex-current-runtime-coherence-guard.timer
+  ensure_monitor_timer_active "disdex-current-runtime-coherence-guard.timer"
   printf 'DISDEX_CURRENT_RUNTIME_WIRING_APPLIED\n'
 }
 
