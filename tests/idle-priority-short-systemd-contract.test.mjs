@@ -25,7 +25,7 @@ test("runtime wiring performs formal HYPE state lineage migration before activat
   assert.match(wiring, /disdex-hype-zec-long-state-migrate\.ts/);
   assert.match(wiring, /--state-path \"\$HYPE_ZEC_STATE_ROOT\/runner\.json\"/);
   assert.match(wiring, /--to-sha \"\$DEPLOYED_SHA\"/);
-  assert.match(wiring, /migrate_hype_state_lineage\s+recover_idle_benign_state\s+migrate_idle_state_lineage\s+systemctl daemon-reload/);
+  assert.match(wiring, /migrate_hype_state_lineage\s+recover_idle_benign_state\s+migrate_idle_state_lineage\s+normalize_position_recovery_state_lineage\s+systemctl daemon-reload/);
   assert.match(wiring, /disdex-idle-priority-short-benign-state-recovery\.ts/);
   assert.match(wiring, /disdex-quality102-causal-v1-state-migrate\.ts/);
   assert.match(wiring, /disdex-flat-state-sha-migrate\.ts/);
@@ -36,7 +36,7 @@ test("runtime wiring performs formal HYPE state lineage migration before activat
   assert.match(wiring, /write_atomic "\$IDLE_OPERATOR_ENV_FILE" "DISDEX_OPERATOR_ACTIVATION_PATH=\$\{OPERATOR_ACTIVATION_RUNTIME_PATH\}"/);
   assert.match(wiring, /EnvironmentFile=\$\{IDLE_OPERATOR_ENV_FILE\}/);
   assert.match(wiring, /EnvironmentFile=\$\{CONTRACT_ENV_FILE\}[\s\S]*EnvironmentFile=\$\{IDLE_OPERATOR_ENV_FILE\}/);
-  assert.match(wiring, /migrate_idle_state_lineage\s+systemctl daemon-reload/);
+  assert.match(wiring, /migrate_idle_state_lineage\s+normalize_position_recovery_state_lineage\s+systemctl daemon-reload/);
 });
 
 
