@@ -91,3 +91,15 @@ test("Production cutover retargets the stock reference proxy to the new current 
   assert.match(cutover, /\$\{phase\}_STOCK_REFERENCE_CURRENT=PASS/);
   assert.match(cutover, /restart_stock_reference_current POSTDEPLOY/);
 });
+
+
+test("HYPE and Idle daemon loops retry transient account-lock collisions without waiting the full poll interval", async () => {
+  const [hype, idle] = await Promise.all([
+    readFile("scripts/disdex-hype-zec-long-live-runner.ts", "utf8"),
+    readFile("scripts/disdex-idle-priority-short-live-runner.ts", "utf8"),
+  ]);
+  assert.match(hype, /nextAccountLockAwareWaitMs\(result\.status, normalWaitMs, lockRetryMs\)/);
+  assert.match(hype, /DISDEX_HYPE_ZEC_LOCK_RETRY_MS/);
+  assert.match(idle, /nextAccountLockAwareWaitMs\(result\.status, normalWaitMs, lockRetryMs\)/);
+  assert.match(idle, /DISDEX_IDLE_PRIORITY_LOCK_RETRY_MS/);
+});
