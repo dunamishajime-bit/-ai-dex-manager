@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import { assertHypeZecLiveGate, resolveHypeZecLongRuntime } from "../config/hypeZecLongRuntime";
 import { isRecoverableHypeZecMarketDataFailure } from "../lib/hype-zec-long-runner";
+import { nextAccountLockAwareWaitMs } from "../lib/disdex-account-lock-retry-scheduling";
 
 test("only the known malformed market row is a retryable HYPE data failure", () => {
   assert.equal(isRecoverableHypeZecMarketDataFailure("HYPE_ZEC_MARKET_DATA_ROW_INVALID"), true);
@@ -40,4 +41,13 @@ test("HYPE/ZEC live gate requires an exact runtime SHA", () => {
     DISDEX_HYPE_ZEC_RUNTIME_SHA: "not-a-sha",
   });
   assert.throws(() => assertHypeZecLiveGate(runtime), /RUNTIME_SHA/);
+});
+
+
+test("transient account lock collisions use a bounded short retry without changing normal cadence", () => {
+  assert.equal(nextAccountLockAwareWaitMs("locked", 15 * 60_000, 5_000), 5_000);
+  assert.equal(nextAccountLockAwareWaitMs("locked", 15 * 60_000, 500), 1_000);
+  assert.equal(nextAccountLockAwareWaitMs("locked", 15 * 60_000, 90_000), 30_000);
+  assert.equal(nextAccountLockAwareWaitMs("no-change", 15 * 60_000, 5_000), 15 * 60_000);
+  assert.throws(() => nextAccountLockAwareWaitMs("locked", 999, 5_000), /NORMAL_WAIT_INVALID/);
 });
