@@ -53,5 +53,19 @@ class RuntimeWiringHygieneTest(unittest.TestCase):
         self.assertIn('HEALTH_ALERT_DROPIN_DIR', source[start:end])
 
 
+    def test_monitor_timers_must_be_waiting_not_merely_active(self):
+        source = WIRING.read_text(encoding="utf-8")
+        self.assertIn('sub_state="$(systemctl show "$unit" -p SubState --value', source)
+        self.assertIn('"$sub_state" != "waiting"', source)
+        self.assertIn('systemctl restart "$unit"', source)
+        self.assertIn('ensure_monitor_timer_active "disdex-runner-position-recovery.timer"', source)
+
+    def test_q102_observer_cleanup_enumerates_real_instances(self):
+        source = WIRING.read_text(encoding="utf-8")
+        self.assertIn("timers.target.wants", source)
+        self.assertIn("systemctl list-units --all --type=timer", source)
+        self.assertIn('systemctl reset-failed "\${unit%.timer}.service"', source)
+
+
 if __name__ == "__main__":
     unittest.main()
