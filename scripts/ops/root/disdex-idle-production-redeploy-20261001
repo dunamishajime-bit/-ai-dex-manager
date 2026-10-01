@@ -67,6 +67,10 @@ STATE_PATHS=(
 SYSTEMD_TEMPLATE_PATHS=(
   /etc/systemd/system/disdex-v12-x1-all@.service
   /etc/systemd/system/disdex-pengu-dual-ls-v2@.service
+  /etc/systemd/system/disdex-idle-priority-short@.service
+  /etc/systemd/system/disdex-runner-health-alert.timer
+  /etc/systemd/system/disdex-runner-position-recovery.timer
+  /etc/systemd/system/disdex-trade-fill-notifier.timer
 )
 
 load_runtime_env() {
