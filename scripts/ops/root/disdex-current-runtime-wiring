@@ -172,6 +172,9 @@ validate_release_artifacts() {
     "$CURRENT_RELEASE/deploy/systemd/disdex-v12-x1-all@.service"
     "$CURRENT_RELEASE/deploy/systemd/disdex-pengu-dual-ls-v2@.service"
     "$CURRENT_RELEASE/ops/systemd/disdex-idle-priority-short@.service"
+    "$CURRENT_RELEASE/ops/systemd/disdex-runner-health-alert.timer"
+    "$CURRENT_RELEASE/ops/systemd/disdex-runner-position-recovery.timer"
+    "$CURRENT_RELEASE/ops/systemd/disdex-trade-fill-notifier.timer"
     "$CURRENT_RELEASE/scripts/disdex_v96_v52_margin_guard_runtime.py"
     "$CURRENT_RELEASE/scripts/disdex_v52_aster_only_live_engine.py"
     "$CURRENT_RELEASE/lib/aster-readonly-recovery-gate.ts"
@@ -425,6 +428,15 @@ prepare_managed_unit_templates_for_apply() {
   install -o root -g root -m 0644 \
     "$CURRENT_RELEASE/ops/systemd/disdex-idle-priority-short@.service" \
     /etc/systemd/system/disdex-idle-priority-short@.service
+  install -o root -g root -m 0644 \
+    "$CURRENT_RELEASE/ops/systemd/disdex-runner-health-alert.timer" \
+    /etc/systemd/system/disdex-runner-health-alert.timer
+  install -o root -g root -m 0644 \
+    "$CURRENT_RELEASE/ops/systemd/disdex-runner-position-recovery.timer" \
+    /etc/systemd/system/disdex-runner-position-recovery.timer
+  install -o root -g root -m 0644 \
+    "$CURRENT_RELEASE/ops/systemd/disdex-trade-fill-notifier.timer" \
+    /etc/systemd/system/disdex-trade-fill-notifier.timer
   systemctl daemon-reload
 }
 
