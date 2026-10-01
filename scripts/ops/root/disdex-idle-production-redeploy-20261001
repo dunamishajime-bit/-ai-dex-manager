@@ -98,9 +98,12 @@ if kill.get("active") is not False:
 guard=load("/var/lib/disdex/shared/margin-risk/guard-live.json")
 if guard.get("stage")!="HEALTHY" or guard.get("ordersAllowed") is not True:
     raise SystemExit("CUTOVER_MARGIN_NOT_HEALTHY")
+now=int(__import__("time").time()*1000)
+guard_at=int(guard.get("checkedAt") or 0)
+if guard_at<=0 or guard_at>now+60_000 or now-guard_at>360_000:
+    raise SystemExit("CUTOVER_MARGIN_STALE")
 risk=load("/var/lib/disdex/shared/crypto-daily-risk.json")
 updated=int(risk.get("updatedAt") or 0)
-now=int(__import__("time").time()*1000)
 if risk.get("tripped") is not False:
     raise SystemExit("CUTOVER_SHARED_RISK_TRIPPED_OR_UNKNOWN")
 if risk.get("sourceComplete") is not True:
