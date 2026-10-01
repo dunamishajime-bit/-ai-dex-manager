@@ -509,6 +509,20 @@ for name in "${NAMES[@]}"; do
   systemctl disable "$name@$FROM_SHA.service" >/dev/null 2>&1 || true
 done
 
+# The stock reference proxy resolves /home/deploy/disdex-trading/current only at
+# process start. Restart it after the current symlink has moved so it cannot
+# keep an old release directory pinned as its cwd across future cutovers.
+if systemctl is-active --quiet disdex-stock-reference-free.service; then
+  systemctl restart disdex-stock-reference-free.service
+  stock_pid="$(systemctl show disdex-stock-reference-free.service -p MainPID --value)"
+  [[ "$stock_pid" =~ ^[0-9]+$ && "$stock_pid" -gt 0 ]]
+  [[ "$(readlink -f "/proc/$stock_pid/cwd")" == "$RELEASE" ]] || {
+    echo "POSTDEPLOY_STOCK_REFERENCE_CWD_MISMATCH pid=$stock_pid"
+    false
+  }
+  echo "POSTDEPLOY_STOCK_REFERENCE_CURRENT=PASS pid=$stock_pid"
+fi
+
 sleep 5
 systemctl reset-failed disdex-runner-health-snapshot.service >/dev/null 2>&1 || true
 systemctl start disdex-runner-health-snapshot.service
