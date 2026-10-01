@@ -110,9 +110,19 @@ if updated<=0 or updated>now+60_000 or now-updated>90_000:
 try:
     pending=load("/var/lib/disdex/shared/pending-exposure.json")
 except FileNotFoundError:
-    pending={}
-entries=pending.get("entries",{}) if isinstance(pending,dict) else {}
-if isinstance(entries,dict) and entries:
+    pending={"schema":"disdex-pending-exposure/v1","entries":[]}
+if not isinstance(pending,dict) or pending.get("schema")!="disdex-pending-exposure/v1":
+    raise SystemExit("CUTOVER_PENDING_EXPOSURE_MALFORMED")
+entries=pending.get("entries")
+if not isinstance(entries,list):
+    raise SystemExit("CUTOVER_PENDING_EXPOSURE_MALFORMED")
+active_statuses={"PENDING","SUBMITTED","UNKNOWN"}
+valid_statuses=active_statuses|{"RELEASED"}
+for row in entries:
+    if not isinstance(row,dict) or str(row.get("status") or "").upper() not in valid_statuses:
+        raise SystemExit("CUTOVER_PENDING_EXPOSURE_MALFORMED")
+active=[row for row in entries if str(row.get("status") or "").upper() in active_statuses]
+if active:
     raise SystemExit("CUTOVER_PENDING_EXPOSURE_PRESENT")
 idle=load("/var/lib/disdex/idle-priority/state.json")
 if idle.get("positions") or idle.get("pending") or idle.get("manualReview"):
