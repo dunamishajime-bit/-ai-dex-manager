@@ -1,9 +1,9 @@
-# CURRENT LIVE TARGET — Trail0.20 + Idle + DOGE/AVAX residual
+# CURRENT LIVE TARGET 窶・Trail0.20 + Idle + DOGE/AVAX residual
 
-**Status:** CURRENT_CANONICAL_PRODUCTION_TARGET  
-**Date:** 2026-10-02  
-**Production base before this promotion:** `8e341956b3c5c5d825029d18ba083029d919126b`  
-**Implementation readiness:** READY  
+**Status:** CURRENT_CANONICAL_PRODUCTION_TARGET
+**Date:** 2026-10-02
+**Production base before this promotion:** `8e341956b3c5c5d825029d18ba083029d919126b`
+**Implementation readiness:** READY
 **Real-money activation:** BLOCKED until the exact-SHA Production workflow creates the root-owned operator activation artifact and verifies the cutover.
 
 This file and `docs/production/current-live-target.json` are the single current Production activation target. Older backtests remain historical evidence only.
