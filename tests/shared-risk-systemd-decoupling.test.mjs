@@ -6,6 +6,9 @@ const V12 = "deploy/systemd/disdex-v12-x1-all@.service";
 const PENGU = "deploy/systemd/disdex-pengu-dual-ls-v2@.service";
 const WIRING = "scripts/ops/root/disdex-current-runtime-wiring";
 const CUTOVER = "scripts/ops/root/disdex-idle-production-redeploy-20261001";
+const DIRECT_EXECUTOR = "lib/direct-trade-executor.ts";
+const V12_ENGINE = "lib/v12-live-execution-engine.ts";
+const PENGU_RUNNER = "lib/pengu-dual-ls-v2-portfolio-runner.ts";
 
 async function read(path) {
   return readFile(path, "utf8");
@@ -79,4 +82,21 @@ test("cutover verifies the effective dependency graph and can restore prior temp
   assert.match(cutover, /CUTOVER_SHARED_RISK_STALE/);
   assert.match(cutover, /CUTOVER_KNOWN_SHARED_RISK_TRANSIENT_RESTART_ACCEPTED/);
   assert.match(cutover, /name" == disdex-shared-crypto-risk && "\$restart_count" == 1/);
+});
+
+
+test("soft lifecycle dependencies preserve independent fail-closed order gates", async () => {
+  const [executor, v12, pengu, wiring] = await Promise.all([
+    read(DIRECT_EXECUTOR),
+    read(V12_ENGINE),
+    read(PENGU_RUNNER),
+    read(WIRING),
+  ]);
+  assert.match(wiring, /DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED=true/);
+  assert.match(executor, /runFreshMarginGuardBeforeExposureOrder\(symbol\)/);
+  assert.match(executor, /Margin Guard did not return a HEALTHY order-time result/);
+  assert.match(v12, /readSharedCryptoDailyRisk\(/);
+  assert.match(v12, /SHARED_CRYPTO_RISK:/);
+  assert.match(pengu, /readSharedCryptoDailyRisk\(/);
+  assert.match(pengu, /Shared crypto daily-risk state blocked PENGU entry/);
 });
