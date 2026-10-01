@@ -10,6 +10,7 @@ import { FileHypeZecLongRunnerStateStore } from "../lib/hype-zec-long-runner-sta
 import { resolveHypeZecLongRuntime } from "../config/hypeZecLongRuntime";
 import { V12AsterLiveAdapter } from "../lib/v12-aster-live-adapter";
 import { createInterruptibleDelay } from "../lib/interruptible-delay";
+import { nextAccountLockAwareWaitMs } from "../lib/disdex-account-lock-retry-scheduling";
 
 function numberEnv(name: string, fallback: number) {
   const parsed = Number(process.env[name]);
@@ -86,7 +87,9 @@ async function main() {
     const result = await runner.tick();
     console.log(JSON.stringify({ timestamp: new Date().toISOString(), event: "hype-zec-runner-tick", mode: runtime.mode, ...result, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 }));
     if (!daemon || stopping || result.status === "manual-review") break;
-    await delay.wait(Math.max(5_000, Math.min(15 * 60_000, runtime.maximumEntryDelayMs)));
+    const normalWaitMs = Math.max(5_000, Math.min(15 * 60_000, runtime.maximumEntryDelayMs));
+    const lockRetryMs = numberEnv("DISDEX_HYPE_ZEC_LOCK_RETRY_MS", 5_000);
+    await delay.wait(nextAccountLockAwareWaitMs(result.status, normalWaitMs, lockRetryMs));
   } while (!stopping);
 }
 
