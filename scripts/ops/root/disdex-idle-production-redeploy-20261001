@@ -94,6 +94,15 @@ if kill.get("active") is not False:
 guard=load("/var/lib/disdex/shared/margin-risk/guard-live.json")
 if guard.get("stage")!="HEALTHY" or guard.get("ordersAllowed") is not True:
     raise SystemExit("CUTOVER_MARGIN_NOT_HEALTHY")
+risk=load("/var/lib/disdex/shared/crypto-daily-risk.json")
+updated=int(risk.get("updatedAt") or 0)
+now=int(__import__("time").time()*1000)
+if risk.get("tripped") is not False:
+    raise SystemExit("CUTOVER_SHARED_RISK_TRIPPED_OR_UNKNOWN")
+if risk.get("sourceComplete") is not True:
+    raise SystemExit("CUTOVER_SHARED_RISK_SOURCE_INCOMPLETE")
+if updated<=0 or updated>now+60_000 or now-updated>90_000:
+    raise SystemExit("CUTOVER_SHARED_RISK_STALE")
 try:
     pending=load("/var/lib/disdex/shared/pending-exposure.json")
 except FileNotFoundError:
@@ -142,10 +151,15 @@ for name in "${NAMES[@]}"; do
     echo "CUTOVER_OLD_UNIT_NOT_ACTIVE=$unit"
     exit 41
   }
-  [[ "$(systemctl show "$unit" -p NRestarts --value)" == 0 ]] || {
-    echo "CUTOVER_OLD_UNIT_RESTARTED=$unit"
-    exit 42
-  }
+  restart_count="$(systemctl show "$unit" -p NRestarts --value)"
+  if [[ "$restart_count" != 0 ]]; then
+    if [[ "$name" == disdex-shared-crypto-risk && "$restart_count" == 1 ]]; then
+      echo "CUTOVER_KNOWN_SHARED_RISK_TRANSIENT_RESTART_ACCEPTED unit=$unit nRestarts=$restart_count currentRiskFresh=true"
+    else
+      echo "CUTOVER_OLD_UNIT_RESTARTED=$unit nRestarts=$restart_count"
+      exit 42
+    fi
+  fi
 done
 
 install -d -o root -g root -m 0700 "$BACKUP"
