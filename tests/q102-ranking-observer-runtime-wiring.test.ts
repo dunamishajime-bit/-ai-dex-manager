@@ -9,7 +9,8 @@ test("current runtime wiring retargets Q102 ranking observer to the deployed SHA
   assert.match(source, /Q102_RANKING_OBSERVER_TIMER="disdex-quality102-ranking-observer@\$\{DEPLOYED_SHA\}\.timer"/);
   assert.match(source, /scripts\/generated\/disdex-quality102-ranking-observer\.cjs/);
   assert.match(source, /retarget_quality102_ranking_observer\(\)/);
-  assert.match(source, /systemctl list-unit-files 'disdex-quality102-ranking-observer@\*\.timer'/);
+  assert.match(source, /timers\.target\.wants/);
+  assert.match(source, /systemctl list-units --all --type=timer/);
   assert.match(source, /systemctl disable --now "\$unit"/);
   assert.match(source, /systemctl enable --now "\$Q102_RANKING_OBSERVER_TIMER"/);
   assert.match(source, /systemctl start "\$Q102_RANKING_OBSERVER_SERVICE"/);
