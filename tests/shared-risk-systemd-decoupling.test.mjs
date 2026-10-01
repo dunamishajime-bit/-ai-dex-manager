@@ -100,3 +100,22 @@ test("soft lifecycle dependencies preserve independent fail-closed order gates",
   assert.match(pengu, /readSharedCryptoDailyRisk\(/);
   assert.match(pengu, /Shared crypto daily-risk state blocked PENGU entry/);
 });
+
+
+test("managed Production templates preserve the existing sandbox and launch contract", async () => {
+  const [v12, pengu] = await Promise.all([read(V12), read(PENGU)]);
+  for (const [label, source] of [["V12", v12], ["PENGU", pengu]]) {
+    assert.match(source, /^User=deploy$/m, `${label} user`);
+    assert.match(source, /^Group=deploy$/m, `${label} group`);
+    assert.match(source, /^NoNewPrivileges=true$/m, `${label} no-new-privileges`);
+    assert.match(source, /^PrivateTmp=true$/m, `${label} private tmp`);
+    assert.match(source, /^ProtectSystem=strict$/m, `${label} protect system`);
+    assert.match(source, /^ProtectHome=read-only$/m, `${label} protect home`);
+    assert.match(source, /^UMask=0077$/m, `${label} umask`);
+    assert.match(source, /^Restart=on-failure$/m, `${label} restart policy`);
+  }
+  assert.match(v12, /disdex-v12-mutual-exclusion-preflight\.sh %i runtime/);
+  assert.match(v12, /tsx scripts\/disdex-v12-x1-all-live-runner\.ts --daemon/);
+  assert.match(v12, /^RestartPreventExitStatus=2$/m);
+  assert.match(pengu, /tsx scripts\/disdex-pengu-dual-ls-v2-live-runner\.ts --daemon/);
+});
