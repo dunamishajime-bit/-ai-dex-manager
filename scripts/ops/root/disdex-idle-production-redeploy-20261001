@@ -667,6 +667,13 @@ if len(row)!=1 or row[0].get("releaseSha")!=sha or row[0].get("status")!="LIVE":
 print("POSTDEPLOY_HP_IDLE_LIVE=PASS")
 PY
 
+previous_tmp="$ROOT/.previous-$REQUEST_ID"
+rm -f "$previous_tmp"
+ln -s "$OLD_RELEASE" "$previous_tmp"
+mv -Tf "$previous_tmp" "$ROOT/previous"
+[[ "$(readlink -f "$ROOT/previous")" == "$OLD_RELEASE" ]]
+echo "POSTDEPLOY_PREVIOUS_UPDATED=PASS target=$OLD_RELEASE"
+
 trap - ERR
 rm -f -- "$SOURCE_FILE" "$CERT_FILE"
 echo "STATUS=LIVE_ACTIVATED_VERIFIED"
