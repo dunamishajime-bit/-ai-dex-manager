@@ -770,6 +770,10 @@ apply_wiring() {
     }
   fi
   normalize_live_state_ownership
+  if [[ -f /etc/systemd/system/disdex-stock-reference-free.service.d/zzzz-v56-release.conf ]]; then
+    rm -f -- /etc/systemd/system/disdex-stock-reference-free.service.d/zzzz-v56-release.conf
+    printf 'DISDEX_STOCK_REFERENCE_LEGACY_RELEASE_PIN_REMOVED\n'
+  fi
 
   write_atomic "$CONTRACT_ENV_FILE" "DISDEX_RELEASE_SHA=${DEPLOYED_SHA}
 DISDEX_RUNTIME_SHA=${DEPLOYED_SHA}
