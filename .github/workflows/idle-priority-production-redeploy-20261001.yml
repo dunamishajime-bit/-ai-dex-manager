@@ -1,5 +1,5 @@
 name: Idle Priority exact-SHA Production redeploy
-# redeploy-sequence: q102-hour-boundary-cache-fix-v12
+# redeploy-sequence: coherence-guard-runtime-contract-v13
 on:
   push:
     branches: [design/idle-priority-bt-parity-20260929]
