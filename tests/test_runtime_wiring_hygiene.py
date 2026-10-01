@@ -112,7 +112,7 @@ class RuntimeWiringHygieneTest(unittest.TestCase):
             "disdex-v12-v52-margin-guard",
         ]:
             self.assertIn(f'"{family}"', guard)
-        for heartbeat in ["fet-brk48.json", "hype-zec-long.json", "idle-priority-short.json"]:
+        for heartbeat in ["fet-brk48-residual.json", "hype-trend-long.json", "idle-priority-short.json"]:
             self.assertIn(heartbeat, guard)
         self.assertIn("q102_observer_singleton", guard)
         self.assertIn("support_runtime_current", guard)
