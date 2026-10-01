@@ -33,30 +33,37 @@ function normalize(rows: AsterKline[], symbol: string, intervalMs: number, now: 
 }
 
 export class HypeZecAsterMarketDataProvider {
-  constructor(private readonly client: AsterV3Client, private readonly options: { fifteenMinuteLimit?: number; oneHourLimit?: number; oneMinuteLimit?: number; now?: () => number } = {}) {}
+  constructor(private readonly client: AsterV3Client, private readonly options: { fifteenMinuteLimit?: number; oneHourLimit?: number; oneMinuteLimit?: number; now?: () => number; signalMode?: "LEGACY" | "TREND"; symbols?: ReadonlyArray<"HYPEUSDT" | "ZECUSDT"> } = {}) {}
 
   async load(): Promise<HypeZecLongMarketData> {
     const now = (this.options.now || Date.now)();
     const fifteenLimit = Math.max(80, Math.min(1500, this.options.fifteenMinuteLimit ?? 240));
     const oneHourLimit = Math.max(300, Math.min(1500, this.options.oneHourLimit ?? 360));
     const oneLimit = Math.max(30, Math.min(1500, this.options.oneMinuteLimit ?? 240));
+    const signalMode = this.options.signalMode || "LEGACY";
+    const symbols = this.options.symbols || ["HYPEUSDT", "ZECUSDT"];
+    const needHype = symbols.includes("HYPEUSDT");
+    const needZec = symbols.includes("ZECUSDT");
+    const trend = signalMode === "TREND";
+    const empty = async (): Promise<AsterKline[]> => [];
     const [btc15, btc1h, hype15, hype1h, hype1, zec15, zec1] = await Promise.all([
-      this.client.getKlines("BTCUSDT", "15m", fifteenLimit),
-      this.client.getKlines("BTCUSDT", "1h", oneHourLimit),
-      this.client.getKlines("HYPEUSDT", "15m", fifteenLimit),
-      this.client.getKlines("HYPEUSDT", "1h", oneHourLimit),
-      this.client.getKlines("HYPEUSDT", "1m", oneLimit),
-      this.client.getKlines("ZECUSDT", "15m", fifteenLimit),
-      this.client.getKlines("ZECUSDT", "1m", oneLimit),
+      trend ? empty() : this.client.getKlines("BTCUSDT", "15m", fifteenLimit),
+      trend ? this.client.getKlines("BTCUSDT", "1h", oneHourLimit) : empty(),
+      needHype && !trend ? this.client.getKlines("HYPEUSDT", "15m", fifteenLimit) : empty(),
+      needHype && trend ? this.client.getKlines("HYPEUSDT", "1h", oneHourLimit) : empty(),
+      needHype && !trend ? this.client.getKlines("HYPEUSDT", "1m", oneLimit) : empty(),
+      needZec && !trend ? this.client.getKlines("ZECUSDT", "15m", fifteenLimit) : empty(),
+      needZec && !trend ? this.client.getKlines("ZECUSDT", "1m", oneLimit) : empty(),
     ]);
+    const optional = (rows: AsterKline[], symbol: string, intervalMs: number) => rows.length ? normalize(rows, symbol, intervalMs, now) : [];
     return {
-      btc15m: normalize(btc15, "BTCUSDT:15m", 15 * 60_000, now),
-      btc1h: normalize(btc1h, "BTCUSDT:1h", 60 * 60_000, now),
-      hype15m: normalize(hype15, "HYPEUSDT:15m", 15 * 60_000, now),
-      hype1h: normalize(hype1h, "HYPEUSDT:1h", 60 * 60_000, now),
-      hype1m: normalize(hype1, "HYPEUSDT:1m", 60_000, now),
-      zec15m: normalize(zec15, "ZECUSDT:15m", 15 * 60_000, now),
-      zec1m: normalize(zec1, "ZECUSDT:1m", 60_000, now),
+      btc15m: optional(btc15, "BTCUSDT:15m", 15 * 60_000),
+      btc1h: optional(btc1h, "BTCUSDT:1h", 60 * 60_000),
+      hype15m: optional(hype15, "HYPEUSDT:15m", 15 * 60_000),
+      hype1h: optional(hype1h, "HYPEUSDT:1h", 60 * 60_000),
+      hype1m: optional(hype1, "HYPEUSDT:1m", 60_000),
+      zec15m: optional(zec15, "ZECUSDT:15m", 15 * 60_000),
+      zec1m: optional(zec1, "ZECUSDT:1m", 60_000),
     };
   }
 }
