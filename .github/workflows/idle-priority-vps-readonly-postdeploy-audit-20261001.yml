@@ -294,7 +294,7 @@ jobs:
               raise SystemExit("FINAL_IDLE_HEARTBEAT_RESTART_OR_PID_INVALID")
           print("FINAL_IDLE_PARITY_V3_VERIFIED=PASS")
           print("FINAL_SHARED_SAFETY_VERIFIED=PASS")
-                    PY
+          PY
           for name in disdex-v12-x1-all disdex-pengu-dual-ls-v2 disdex-quality102-causal-v1 disdex-v52-aster-only disdex-fet-brk48 disdex-hype-long disdex-idle-priority-short disdex-shared-crypto-risk disdex-v12-v52-margin-guard; do
             unit="$name@$sha.service"
             [[ "$(systemctl is-active "$unit" 2>/dev/null || true)" == active ]] || { echo "FINAL_UNIT_NOT_ACTIVE=$unit"; exit 61; }
