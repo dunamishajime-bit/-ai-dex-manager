@@ -467,6 +467,38 @@ write_atomic() {
   trap - RETURN
 }
 
+normalize_position_recovery_state_lineage() {
+  local root=/var/lib/disdex/runner-recovery
+  local state="$root/position-recovery.json"
+  local prior_sha backup tmp
+  install -d -o root -g root -m 0700 "$root"
+  [[ -e "$state" ]] || return 0
+  [[ -f "$state" && ! -L "$state" ]] || {
+    printf 'position recovery state is not a regular file: %s\n' "$state" >&2
+    return 1
+  }
+  if /usr/bin/jq -e --arg sha "$DEPLOYED_SHA" 'type == "object" and .schema == "disdex-runner-position-recovery/v1" and .releaseSha == $sha and (.runners | type == "object")' "$state" >/dev/null 2>&1; then
+    chown root:root "$state"
+    chmod 0600 "$state"
+    return 0
+  fi
+  prior_sha="$(/usr/bin/jq -r 'if type == "object" and .schema == "disdex-runner-position-recovery/v1" and (.releaseSha | type == "string") and (.runners | type == "object") then .releaseSha else empty end' "$state" 2>/dev/null || true)"
+  [[ "$prior_sha" =~ ^[0-9a-f]{40}$ ]] || {
+    printf 'position recovery state is malformed and will not be rewritten: %s\n' "$state" >&2
+    return 1
+  }
+  backup="$state.before-$DEPLOYED_SHA-$(date -u +%Y%m%dT%H%M%SZ)"
+  cp -a -- "$state" "$backup"
+  chown root:root "$backup"
+  chmod 0600 "$backup"
+  tmp="$state.$$.tmp"
+  printf '{"schema":"disdex-runner-position-recovery/v1","releaseSha":"%s","runners":{}}\n' "$DEPLOYED_SHA" > "$tmp"
+  chown root:root "$tmp"
+  chmod 0600 "$tmp"
+  mv -f -- "$tmp" "$state"
+  printf 'DISDEX_POSITION_RECOVERY_STATE_MIGRATED fromSha=%s toSha=%s backup=%s\n' "$prior_sha" "$DEPLOYED_SHA" "$backup"
+}
+
 normalize_live_state_ownership() {
   local state_path
   for state_path in "${LIVE_STATE_FILES[@]}"; do
@@ -1097,6 +1129,7 @@ ReadWritePaths=${IDLE_PRIORITY_STATE_ROOT} ${SHARED_ROOT}"
   migrate_hype_state_lineage
   recover_idle_benign_state
   migrate_idle_state_lineage
+  normalize_position_recovery_state_lineage
   systemctl daemon-reload
   reset_stale_release_failed_units
   systemctl reset-failed aster-trade-history-git-sync.service || true
