@@ -542,33 +542,750 @@ ensure_safety_daemon_active() {
 }
 
 ensure_monitor_timer_active() {
-  local unit="$1" load_state active_state
+  local unit="$1" load_state active_state sub_state
   load_state="$(systemctl show "$unit" -p LoadState --value 2>/dev/null || true)"
   [[ "$load_state" == "loaded" ]] || {
     printf 'required monitor timer is not loaded: %s\n' "$unit" >&2
     return 1
   }
   active_state="$(systemctl show "$unit" -p ActiveState --value 2>/dev/null || true)"
-  if [[ "$active_state" != "active" ]]; then
+  sub_state="$(systemctl show "$unit" -p SubState --value 2>/dev/null || true)"
+  if [[ "$active_state" != "active" || "$sub_state" != "waiting" ]]; then
     systemctl reset-failed "$unit" >/dev/null 2>&1 || true
-    systemctl start "$unit"
+    systemctl restart "$unit"
     active_state="$(systemctl show "$unit" -p ActiveState --value 2>/dev/null || true)"
+    sub_state="$(systemctl show "$unit" -p SubState --value 2>/dev/null || true)"
   fi
-  [[ "$active_state" == "active" ]] || {
-    printf 'required monitor timer failed to become active: %s state=%s\n' "$unit" "$active_state" >&2
+  [[ "$active_state" == "active" && "$sub_state" == "waiting" ]] || {
+    printf 'required monitor timer failed to arm: %s state=%s subState=%s\n' "$unit" "$active_state" "$sub_state" >&2
     return 1
   }
-  printf 'DISDEX_MONITOR_TIMER_ACTIVE unit=%s ordersSent=0 cancelSent=0 positionChangesSent=0\n' "$unit"
+  printf 'DISDEX_MONITOR_TIMER_ARMED unit=%s state=%s subState=%s ordersSent=0 cancelSent=0 positionChangesSent=0\n' "$unit" "$active_state" "$sub_state"
 }
 
 retarget_quality102_ranking_observer() {
-  local unit state
-  while read -r unit state _; do
+  local unit
+  while read -r unit; do
     [[ "$unit" =~ ^disdex-quality102-ranking-observer@[0-9a-f]{40}\.timer$ ]] || continue
     [[ "$unit" == "$Q102_RANKING_OBSERVER_TIMER" ]] && continue
     systemctl disable --now "$unit" >/dev/null 2>&1 || true
-    printf 'DISDEX_Q102_RANKING_OBSERVER_STALE_TIMER_DISABLED unit=%s previousState=%s\n' "$unit" "${state:-unknown}"
-  done < <(systemctl list-unit-files 'disdex-quality102-ranking-observer@*.timer' --no-legend 2>/dev/null || true)
+    systemctl reset-failed "${unit%.timer}.service" >/dev/null 2>&1 || true
+    printf 'DISDEX_Q102_RANKING_OBSERVER_STALE_TIMER_DISABLED unit=%s\n' "$unit"
+  done < <(
+    {
+      find /etc/systemd/system/timers.target.wants -maxdepth 1 -type l -name 'disdex-quality102-ranking-observer@*.timer' -printf '%f\n' 2>/dev/null || true
+      systemctl list-units --all --type=timer --no-legend --no-pager 2>/dev/null | awk '{print $1}' | grep -E '^disdex-quality102-ranking-observer@[0-9a-f]{40}\.timer
+  ensure_monitor_timer_active "$Q102_RANKING_OBSERVER_TIMER"
+
+  # Ranking generation is read-only with tradingMutation=0. Run it once now so
+  # the HP never waits until the next hourly tick after a Production promotion.
+  systemctl reset-failed "$Q102_RANKING_OBSERVER_SERVICE" >/dev/null 2>&1 || true
+  if systemctl start "$Q102_RANKING_OBSERVER_SERVICE"; then
+    printf 'DISDEX_Q102_RANKING_OBSERVER_REFRESHED service=%s ordersSent=0 cancelSent=0 positionChangesSent=0\n' "$Q102_RANKING_OBSERVER_SERVICE"
+  else
+    printf 'Q102 ranking observer immediate refresh failed; timer remains armed: %s\n' "$Q102_RANKING_OBSERVER_SERVICE" >&2
+  fi
+}
+
+assert_current_live_target_ready() {
+  local tsx="$CURRENT_RELEASE/node_modules/.bin/tsx"
+  "$tsx" "$CURRENT_RELEASE/scripts/disdex-current-live-target-readiness.ts" --require-implementation-ready
+}
+
+operator_activation_all_trading_ready() {
+  local runner
+  local gate="$CURRENT_RELEASE/scripts/ops/root/disdex-live-operator-activation-gate.mjs"
+  for runner in V12_X1_ALL PENGU_V8 QUALITY102_CAUSAL_V1 V52 FET_BRK48_RESIDUAL HYPE_TREND_LONG IDLE_PRIORITY_SHORT; do
+    /usr/bin/node "$gate"       --release-root "$CURRENT_RELEASE"       --sha "$DEPLOYED_SHA"       --runner "$runner"       --activation-path "$OPERATOR_ACTIVATION_PATH" >/dev/null 2>&1 || return 1
+  done
+  return 0
+}
+
+apply_wiring() {
+  require_root_for_apply
+  assert_no_legacy_live_units
+  assert_current_live_target_ready
+  install -d -o deploy -g deploy -m 2770 /var/lib/disdex/shared
+  install -d -o root -g root -m 0755 "${SHARED_ROOT}/operator-activation"
+  if [[ -e "$V52_LEGACY_CRYPTO_ROOT" && ! -d "$V52_LEGACY_CRYPTO_ROOT" ]]; then
+    printf 'V52 legacy crypto state path exists but is not a directory: %s\n' "$V52_LEGACY_CRYPTO_ROOT" >&2
+    return 1
+  fi
+  if [[ ! -e "$V52_LEGACY_CRYPTO_ROOT" ]]; then
+    install -d -o deploy -g deploy -m 0700 "$V52_LEGACY_CRYPTO_ROOT"
+  else
+    [[ "$(stat -c '%U:%G:%a' "$V52_LEGACY_CRYPTO_ROOT")" == "deploy:deploy:700" ]] || {
+      printf 'V52 legacy crypto state path ownership/mode is unsafe: %s\n' "$(stat -c '%U:%G:%a' "$V52_LEGACY_CRYPTO_ROOT")" >&2
+      return 1
+    }
+  fi
+  if [[ -e "$PENGU_STATE_ROOT" && ! -d "$PENGU_STATE_ROOT" ]]; then
+    printf 'PENGU state path exists but is not a directory: %s\n' "$PENGU_STATE_ROOT" >&2
+    return 1
+  fi
+  if [[ ! -e "$PENGU_STATE_ROOT" ]]; then
+    install -d -o deploy -g deploy -m 0700 "$PENGU_STATE_ROOT"
+  else
+    chown deploy:deploy "$PENGU_STATE_ROOT"
+    chmod 0700 "$PENGU_STATE_ROOT"
+    [[ "$(stat -c '%U:%G:%a' "$PENGU_STATE_ROOT")" == "deploy:deploy:700" ]] || {
+      printf 'PENGU state path ownership/mode is unsafe after normalization: %s\n' "$(stat -c '%U:%G:%a' "$PENGU_STATE_ROOT")" >&2
+      return 1
+    }
+  fi
+  if [[ -e "$HYPE_ZEC_STATE_ROOT" && ! -d "$HYPE_ZEC_STATE_ROOT" ]]; then
+    printf 'HYPE/ZEC state path exists but is not a directory: %s\n' "$HYPE_ZEC_STATE_ROOT" >&2
+    return 1
+  fi
+  if [[ ! -e "$HYPE_ZEC_STATE_ROOT" ]]; then
+    install -d -o deploy -g deploy -m 0700 "$HYPE_ZEC_STATE_ROOT"
+  else
+    [[ "$(stat -c '%U:%G:%a' "$HYPE_ZEC_STATE_ROOT")" == "deploy:deploy:700" ]] || {
+      printf 'HYPE/ZEC state path ownership/mode is unsafe: %s\n' "$(stat -c '%U:%G:%a' "$HYPE_ZEC_STATE_ROOT")" >&2
+      return 1
+    }
+  fi
+  if [[ -e "$IDLE_PRIORITY_STATE_ROOT" && ! -d "$IDLE_PRIORITY_STATE_ROOT" ]]; then
+    printf 'Idle state path exists but is not a directory: %s\n' "$IDLE_PRIORITY_STATE_ROOT" >&2
+    return 1
+  fi
+  if [[ ! -e "$IDLE_PRIORITY_STATE_ROOT" ]]; then
+    install -d -o deploy -g deploy -m 0700 "$IDLE_PRIORITY_STATE_ROOT"
+  else
+    [[ "$(stat -c '%U:%G:%a' "$IDLE_PRIORITY_STATE_ROOT")" == "deploy:deploy:700" ]] || {
+      printf 'Idle state path ownership/mode is unsafe: %s\n' "$(stat -c '%U:%G:%a' "$IDLE_PRIORITY_STATE_ROOT")" >&2
+      return 1
+    }
+  fi
+  normalize_live_state_ownership
+
+  write_atomic "$CONTRACT_ENV_FILE" "DISDEX_RELEASE_SHA=${DEPLOYED_SHA}
+DISDEX_RUNTIME_SHA=${DEPLOYED_SHA}
+DISDEX_RELEASE_ROOT=${CURRENT_RELEASE}
+DISDEX_RUNTIME_COMMIT_SHA=${DEPLOYED_SHA}
+DISDEX_SHARED_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json
+DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH=${SHARED_ROOT}/aster-rate-budget.json
+DISDEX_ASTER_GLOBAL_MIN_INTERVAL_MS=50
+DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS=5000
+DISDEX_PENDING_EXPOSURE_REGISTRY_PATH=${PENDING_EXPOSURE_REGISTRY_PATH}
+DISDEX_ACCOUNT_LOCK_PATH=${SHARED_ROOT}/account-order.lock
+DISDEX_OPERATOR_ACTIVATION_PATH=${OPERATOR_ACTIVATION_PATH}
+DISDEX_SHARED_CRYPTO_DAILY_RISK_PATH=${SHARED_ROOT}/crypto-daily-risk.json
+DISDEX_NODE_MODULES_SOURCE_SHA=${NODE_MODULES_SOURCE_SHA}
+DISDEX_PYTHON_RUNTIME_SOURCE_SHA=${PYTHON_RUNTIME_SOURCE_SHA}
+V12_LIVE_COMMIT_SHA=${DEPLOYED_SHA}
+V12_LIVE_ACK=${DEPLOYED_SHA}
+STRICT_PORTFOLIO_PLANNER_ACTIVE=true
+V12_BASE_GROSS_CAP=2.0
+V12_DYNAMIC_GROSS_CAP=2.0
+V12_GROSS_CAP=2.0
+PENGU_GROSS_CAP=1.0
+PENGU_DUAL_LS_V2_MAX_GROSS=1.0
+DISDEX_SHARED_CRYPTO_MAX_DAILY_LOSS_PCT=7.5
+DISDEX_PORTFOLIO_DD_GOVERNOR_PATH=/var/lib/disdex/shared/portfolio-dd-governor.json
+DISDEX_KILL_SWITCH_RECOVERY_GRACE_MS=600000
+PENGU_DUAL_LS_V2_MAX_DAILY_LOSS_PCT=7.5
+QUALITY102_CAUSAL_V1_MAX_DAILY_LOSS_PCT=7.5
+STOCK_GROSS_CAP=4.0
+CRYPTO_GROSS_CAP=3.0
+TOTAL_GROSS_CAP=4.25
+DISDEX_V52_CRYPTO_GROSS_CAP=3.0
+DISDEX_V52_STOCK_GROSS_CAP=4.0
+DISDEX_V52_V11_GROSS_CAP=2.0
+DISDEX_V52_V50_GROSS_CAP=2.0
+DISDEX_V52_PORTFOLIO_GROSS_CAP=4.25
+DISDEX_HYPE_ZEC_OPERATOR_ARMED=false
+DISDEX_HYPE_ZEC_PREEMPTION_ENABLED=false
+DISDEX_HYPE_ZEC_RUNTIME_SHA=${DEPLOYED_SHA}
+DISDEX_HYPE_ZEC_STATE_PATH=/var/lib/disdex/hype-zec-long/runner.json
+DISDEX_HYPE_ZEC_PREEMPTION_STATE_PATH=/var/lib/disdex/hype-zec-long/preemption.json
+DISDEX_HYPE_ZEC_CORE_PREEMPT_SCRIPT=${CURRENT_RELEASE}/scripts/disdex-hype-zec-core-preempt.ts
+DISDEX_HYPE_ZEC_MAX_GROSS=1.5
+HYPE_LONG_MAX_GROSS=1.5
+HYPE_LONG_RISK_PCT=5.0
+ZEC_LONG_RISK_PCT=4.5
+HYPE_ZEC_MAX_REDUCTION_FRACTION=0.5
+DISDEX_HYPE_ZEC_MODE=LIVE
+DISDEX_HYPE_ZEC_ENABLED=true
+DISDEX_HYPE_ZEC_LIVE_EXECUTION_ENABLED=true
+DISDEX_HYPE_ZEC_PRODUCTION_CONFIG_LIVE_ENABLED=true
+DISDEX_HYPE_ZEC_SIGNAL_MODE=TREND
+DISDEX_HYPE_ZEC_SYMBOLS=HYPEUSDT
+DISDEX_IDLE_PRIORITY_MODE=LIVE
+DISDEX_IDLE_PRIORITY_ENABLED=true
+DISDEX_IDLE_PRIORITY_OPERATOR_ARMED=true
+DISDEX_IDLE_PRIORITY_RUNTIME_SHA=${DEPLOYED_SHA}
+DISDEX_IDLE_PRIORITY_PARITY_CERT_PATH=${SHARED_ROOT}/idle-priority-parity-cert.json
+DISDEX_IDLE_PRIORITY_STATE_PATH=${IDLE_PRIORITY_STATE_ROOT}/state.json
+DISDEX_IDLE_PRIORITY_DECISION_PATH=${IDLE_PRIORITY_STATE_ROOT}/decision.json
+V12_DECISION_SNAPSHOT_PATH=/var/lib/disdex/v12-x1-all/decision-snapshot.json
+QUALITY102_CAUSAL_V1_DECISION_SNAPSHOT_PATH=/var/lib/disdex/quality102-causal-v1/decision-snapshot.json
+PENGU_DUAL_LS_V2_STATE_PATH=${PENGU_STATE_ROOT}/runner-live.json
+FET_BRK48_STATE_PATH=/var/lib/disdex/fet-brk48-residual/state.json
+DISDEX_V52_ASTER_ONLY_STATE_PATH=/var/lib/disdex/v52-aster-only/runner-live.json
+DISDEX_IDLE_PRIORITY_BASELINE_MAX_AGE_MS=90000
+DISDEX_IDLE_PRIORITY_MARGIN_MAX_AGE_MS=90000
+DISDEX_IDLE_PRIORITY_MAX_SLIPPAGE_BPS=20
+DISDEX_IDLE_PRIORITY_POLL_MS=300000
+QUALITY102_CAUSAL_V1_MODE=LIVE
+QUALITY102_CAUSAL_V1_ENABLED=true
+QUALITY102_CAUSAL_V1_LIVE_TRADING_ENABLED=true
+QUALITY102_CAUSAL_V1_LIVE_EXECUTION_ENABLED=true
+QUALITY102_CAUSAL_V1_OPERATOR_ARMED=true
+QUALITY102_CAUSAL_V1_MAX_GROSS=3.0
+QUALITY102_CAUSAL_V1_SELECTOR_MODE=CAUSAL_V4
+QUALITY102_CAUSAL_V1_SYMBOLS=${QUALITY102_DISJOINT_HIGH_VOL_SYMBOLS}
+QUALITY102_CAUSAL_V1_LIVE_ACK=${DEPLOYED_SHA}
+QUALITY102_CAUSAL_V1_STATE_PATH=/var/lib/disdex/quality102-causal-v1/state.json
+FET_BRK48_LIVE_ENABLED=true
+FET_BRK48_STATE_PATH=/var/lib/disdex/fet-brk48-residual/state.json
+FET_BRK48_MAX_GROSS=2.25
+FET_BRK48_CORE_PREEMPTION_READY=false
+DISDEX_Q102_RUNTIME_SHA=${DEPLOYED_SHA}
+QUALITY102_CAUSAL_V1_PREFLIGHT_HISTORY_CHECK=false
+# Historical selector flags intentionally remain false.  The canonical
+# QUALITY102_CAUSAL_V1_* flags above are the only live execution surface.
+QUALITY102_LIVE_SELECTOR_PARITY=false
+QUALITY102_LIVE_ENABLED=false
+QUALITY102_LIVE_BLOCKED_FAIL_CLOSED=true
+DISDEX_V96_V52_MARGIN_GUARD_STATE_DIR=/var/lib/disdex/shared/margin-risk
+DISDEX_V96_V52_MARGIN_GUARD_STATE_FILE=/var/lib/disdex/shared/margin-risk/guard-live.json
+DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED=true
+DISDEX_V96_STATE_DIR=${V52_LEGACY_CRYPTO_ROOT}
+DISDEX_V96_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json
+DISDEX_V13D_V11EQ_V96_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json
+DISDEX_V13D_V11EQ_V96_STATE_DIR=/var/lib/disdex/v52-aster-only
+DISDEX_V52_ASTER_ONLY_STATE_DIR=/var/lib/disdex/v52-aster-only
+DISDEX_V52_ASTER_ONLY_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json
+PENGU_DUAL_LS_V2_STATE_DIR=${PENGU_STATE_ROOT}
+PENGU_DUAL_LS_V2_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json"
+
+  # The shared contract env intentionally points at the root-only canonical
+  # approval artifact for root-owned helpers.  Idle runs as deploy, so load a
+  # final service-specific env file after that contract to force the
+  # root-generated read-only projection for the application-side check.
+  write_atomic "$IDLE_OPERATOR_ENV_FILE" "DISDEX_OPERATOR_ACTIVATION_PATH=${OPERATOR_ACTIVATION_RUNTIME_PATH}"
+
+  write_atomic "$HEALTH_SNAPSHOT_ENV_FILE" "DISDEX_HEALTH_SNAPSHOT_EXPECTED_SHA=${DEPLOYED_SHA}
+DISDEX_HEALTH_SNAPSHOT_RELEASE_ROOT=${CURRENT_RELEASE}
+DISDEX_HEALTH_SNAPSHOT_V12_EXPECTED_SHA=${DEPLOYED_SHA}
+DISDEX_HEALTH_SNAPSHOT_V12_RELEASE_ROOT=${CURRENT_RELEASE}
+DISDEX_HEALTH_SNAPSHOT_PENGU_EXPECTED_SHA=${DEPLOYED_SHA}
+DISDEX_HEALTH_SNAPSHOT_PENGU_RELEASE_ROOT=${CURRENT_RELEASE}
+DISDEX_HEALTH_SNAPSHOT_V52_EXPECTED_SHA=${DEPLOYED_SHA}
+DISDEX_HEALTH_SNAPSHOT_V52_RELEASE_ROOT=${CURRENT_RELEASE}
+DISDEX_HEALTH_SNAPSHOT_Q102_EXPECTED_SHA=${DEPLOYED_SHA}
+DISDEX_HEALTH_SNAPSHOT_Q102_RELEASE_ROOT=${CURRENT_RELEASE}
+DISDEX_HEALTH_SNAPSHOT_FET_EXPECTED_SHA=${DEPLOYED_SHA}
+DISDEX_HEALTH_SNAPSHOT_FET_RELEASE_ROOT=${CURRENT_RELEASE}
+DISDEX_HEALTH_SNAPSHOT_HYPE_EXPECTED_SHA=${DEPLOYED_SHA}
+DISDEX_HEALTH_SNAPSHOT_HYPE_RELEASE_ROOT=${CURRENT_RELEASE}
+DISDEX_HEALTH_SNAPSHOT_IDLE_EXPECTED_SHA=${DEPLOYED_SHA}
+DISDEX_HEALTH_SNAPSHOT_IDLE_RELEASE_ROOT=${CURRENT_RELEASE}
+DISDEX_HEALTH_SNAPSHOT_HEALTH_ROOT=/var/lib/disdex/runner-health
+DISDEX_HEALTH_SNAPSHOT_KILL_SWITCH_PATH=${SHARED_ROOT}/kill-switch.json
+DISDEX_HEALTH_SNAPSHOT_V12_STATE_PATH=/var/lib/disdex/v12-x1-all/runner.json
+DISDEX_HEALTH_SNAPSHOT_PENGU_STATE_PATH=${PENGU_STATE_ROOT}/runner-live.json
+DISDEX_HEALTH_SNAPSHOT_V52_STATE_PATH=/var/lib/disdex/v52-aster-only/runner-live.json
+DISDEX_HEALTH_SNAPSHOT_Q102_STATE_PATH=/var/lib/disdex/quality102-causal-v1/state.json
+DISDEX_HEALTH_SNAPSHOT_FET_STATE_PATH=/var/lib/disdex/fet-brk48-residual/state.json
+DISDEX_HEALTH_SNAPSHOT_HYPE_STATE_PATH=/var/lib/disdex/hype-zec-long/runner.json
+DISDEX_HEALTH_SNAPSHOT_IDLE_STATE_PATH=${IDLE_PRIORITY_STATE_ROOT}/state.json
+DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_STATE_PATH=/var/lib/disdex/shared/crypto-daily-risk.json
+DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_SERVICE_UNIT=${SHARED_RISK_UNIT}
+DISDEX_HEALTH_SNAPSHOT_MARGIN_STATE_PATH=/var/lib/disdex/shared/margin-risk/guard-live.json
+DISDEX_HEALTH_SNAPSHOT_MARGIN_SERVICE_UNIT=${MARGIN_UNIT}"
+
+  write_atomic "$WATCHDOG_ENV_FILE" "DISDEX_WATCHDOG_RELEASE_ROOT=${CURRENT_RELEASE}
+DISDEX_WATCHDOG_EXPECTED_SHA=${DEPLOYED_SHA}
+DISDEX_WATCHDOG_APPROVED_SHA=${DEPLOYED_SHA}
+DISDEX_WATCHDOG_RUNNER_SHA=${DEPLOYED_SHA}
+DISDEX_WATCHDOG_RUNNER_ROOT=${CURRENT_RELEASE}
+DISDEX_WATCHDOG_V12_EXPECTED_SHA=${DEPLOYED_SHA}
+DISDEX_WATCHDOG_V12_RELEASE_ROOT=${CURRENT_RELEASE}
+DISDEX_WATCHDOG_PENGU_EXPECTED_SHA=${DEPLOYED_SHA}
+DISDEX_WATCHDOG_PENGU_RELEASE_ROOT=${CURRENT_RELEASE}
+DISDEX_WATCHDOG_V52_EXPECTED_SHA=${DEPLOYED_SHA}
+DISDEX_WATCHDOG_V52_RELEASE_ROOT=${CURRENT_RELEASE}
+DISDEX_WATCHDOG_Q102_EXPECTED_SHA=${DEPLOYED_SHA}
+DISDEX_WATCHDOG_Q102_RELEASE_ROOT=${CURRENT_RELEASE}
+DISDEX_WATCHDOG_FET_EXPECTED_SHA=${DEPLOYED_SHA}
+DISDEX_WATCHDOG_FET_RELEASE_ROOT=${CURRENT_RELEASE}
+DISDEX_WATCHDOG_HYPE_EXPECTED_SHA=${DEPLOYED_SHA}
+DISDEX_WATCHDOG_HYPE_RELEASE_ROOT=${CURRENT_RELEASE}
+DISDEX_WATCHDOG_IDLE_EXPECTED_SHA=${DEPLOYED_SHA}
+DISDEX_WATCHDOG_IDLE_RELEASE_ROOT=${CURRENT_RELEASE}
+DISDEX_WATCHDOG_SHARED_RISK_EXPECTED_SHA=${DEPLOYED_SHA}
+DISDEX_WATCHDOG_HEALTH_ROOT=/var/lib/disdex/runner-health
+DISDEX_WATCHDOG_STATE_PATH=/var/lib/disdex/runner-health/private/watchdog-current-state.json
+DISDEX_WATCHDOG_AUDIT_PATH=/var/lib/disdex/runner-health/private/watchdog-current-audit.json
+DISDEX_WATCHDOG_LOCK_PATH=/var/lib/disdex/runner-health/private/watchdog-current.lock
+DISDEX_WATCHDOG_OPERATOR_ACTIVATION_PATH=${OPERATOR_ACTIVATION_PATH}
+DISDEX_WATCHDOG_V12_SERVICE_UNIT=${V12_UNIT}
+DISDEX_WATCHDOG_PENGU_SERVICE_UNIT=${PENGU_UNIT}
+DISDEX_WATCHDOG_V52_SERVICE_UNIT=${V52_UNIT}
+DISDEX_WATCHDOG_Q102_SERVICE_UNIT=${Q102_UNIT}
+DISDEX_WATCHDOG_FET_SERVICE_UNIT=${FET_UNIT}
+DISDEX_WATCHDOG_HYPE_SERVICE_UNIT=${HYPE_UNIT}
+DISDEX_WATCHDOG_IDLE_SERVICE_UNIT=${IDLE_UNIT}"
+
+  # EnvironmentFile entries from the base monitor units are historical and
+  # must be cleared; otherwise systemd loads them after Environment= values
+  # and silently restores the previous release pin.
+  write_atomic "${WATCHDOG_DROPIN_DIR}/${CURRENT_SUPPORT_OVERRIDE}" "[Service]
+EnvironmentFile=
+EnvironmentFile=${WATCHDOG_ENV_FILE}
+WorkingDirectory=${CURRENT_RELEASE}
+ExecStartPre=
+ExecStartPre=/usr/bin/test -f ${CURRENT_RELEASE}/.disdex-release-sha
+ExecStartPre=/usr/bin/grep -Fxq ${DEPLOYED_SHA} ${CURRENT_RELEASE}/.disdex-release-sha
+ExecStart=
+ExecStart=/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-runner-watchdog-current.mjs"
+
+  write_atomic "${SNAPSHOT_DROPIN_DIR}/${CURRENT_SUPPORT_OVERRIDE}" "[Service]
+EnvironmentFile=
+EnvironmentFile=${HEALTH_SNAPSHOT_ENV_FILE}
+WorkingDirectory=${CURRENT_RELEASE}
+ExecStartPre=
+ExecStartPre=/usr/bin/test -f ${CURRENT_RELEASE}/.disdex-release-sha
+ExecStartPre=/usr/bin/grep -Fxq ${DEPLOYED_SHA} ${CURRENT_RELEASE}/.disdex-release-sha
+ExecStart=
+ExecStart=/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-runner-health-snapshot-current.mjs"
+
+  write_atomic "${POSITION_RECOVERY_DROPIN_DIR}/${CURRENT_SUPPORT_OVERRIDE}" "[Service]
+WorkingDirectory=${CURRENT_RELEASE}
+ExecStartPre=
+ExecStartPre=/usr/bin/test -f ${CURRENT_RELEASE}/.disdex-release-sha
+ExecStartPre=/usr/bin/grep -Fxq ${DEPLOYED_SHA} ${CURRENT_RELEASE}/.disdex-release-sha
+ExecStartPre=+/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root ${CURRENT_RELEASE} --sha ${DEPLOYED_SHA} --all --activation-path ${OPERATOR_ACTIVATION_PATH}
+ExecStart=
+ExecStart=/usr/local/libexec/disdex-runner-position-recovery"
+
+  write_atomic "${FILL_NOTIFIER_DROPIN_DIR}/${CURRENT_SUPPORT_OVERRIDE}" "[Service]
+WorkingDirectory=${CURRENT_RELEASE}
+ExecStart=
+ExecStart=${CURRENT_RELEASE}/node_modules/.bin/tsx ${CURRENT_RELEASE}/scripts/ops/root/disdex-trade-fill-notifier.ts"
+
+  remove_stale_support_release_pin_dropins
+
+  write_atomic "${HEALTH_ALERT_DROPIN_DIR}/${CURRENT_SUPPORT_OVERRIDE}" "[Service]
+Environment=DISDEX_ALERT_OPERATOR_ACTIVATION_PATH=${OPERATOR_ACTIVATION_PATH}
+Environment=DISDEX_ALERT_SHARED_CRYPTO_RISK_SERVICE_UNIT=${SHARED_RISK_UNIT}
+Environment=DISDEX_ALERT_MARGIN_GUARD_SERVICE_UNIT=${MARGIN_UNIT}"
+
+  remove_stale_health_alert_unit_pin_dropins
+
+  install -d -o root -g root -m 0755 /usr/local/libexec /usr/local/sbin
+  install -m 0755 "$CURRENT_RELEASE/scripts/ops/root/disdex-v12-kill-switch-auto-repair" /usr/local/libexec/disdex-v12-kill-switch-auto-repair
+  install -m 0755 "$CURRENT_RELEASE/scripts/ops/root/disdex-v12-three-hour-health-check" /usr/local/libexec/disdex-v12-three-hour-health-check
+  install -m 0755 "$CURRENT_RELEASE/scripts/ops/root/disdex-vps-retention-cleanup" /usr/local/sbin/disdex-vps-retention-cleanup
+  install -m 0755 "$CURRENT_RELEASE/scripts/ops/root/disdex-ui-retention-cleanup" /usr/local/sbin/disdex-ui-retention-cleanup
+  write_atomic "${AUTO_REPAIR_DROPIN_DIR}/zzzzzzzzzzzz-current-release.conf" "[Service]
+EnvironmentFile=${CONTRACT_ENV_FILE}
+Environment=DISDEX_SHARED_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json
+Environment=DISDEX_V52_SERVICE_UNIT=${V52_UNIT}
+WorkingDirectory=${CURRENT_RELEASE}"
+
+  remove_stale_auto_repair_unit_pin_dropins
+
+  # runner.json changes on normal V12 ticks, so watching it can exhaust the
+  # oneshot service start limit and permanently kill the path watcher. Shared
+  # Kill Switch changes are the event-driven recovery trigger; local V12 state
+  # remains covered by the periodic three-hour health inspection.
+  write_atomic "${AUTO_REPAIR_PATH_DROPIN_DIR}/zzzzzzzzzzzz-current-release.conf" "[Path]
+PathChanged=
+PathChanged=${SHARED_ROOT}/kill-switch.json"
+
+  write_atomic "${THREE_HOUR_HEALTH_DROPIN_DIR}/zzzzzzzzzzzz-current-release.conf" "[Service]
+EnvironmentFile=
+EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env
+EnvironmentFile=/etc/disdex/disdex-v12-pengu-v2-v52.env
+EnvironmentFile=/etc/disdex/disdex-v12-x1-all.env
+EnvironmentFile=${CONTRACT_ENV_FILE}
+Environment=DISDEX_SHARED_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json
+Environment=DISDEX_V12_STATE_FILE=/var/lib/disdex/v12-x1-all/runner.json
+WorkingDirectory=${CURRENT_RELEASE}
+ExecStart=
+ExecStart=/usr/local/libexec/disdex-v12-three-hour-health-check"
+
+  write_atomic "${HISTORY_SYNC_DROPIN_DIR}/${CURRENT_SUPPORT_OVERRIDE}" "[Service]
+EnvironmentFile=/etc/disdex/disdex-quality102-causal-v1.env
+WorkingDirectory=${CURRENT_RELEASE}
+Environment=DISDEX_GIT_HISTORY_SNAPSHOT_PATH=/home/deploy/ai-dex-manager/data/trade-history-git.json
+Environment=DISDEX_GIT_HISTORY_SYNC_STATUS_PATH=/home/deploy/ai-dex-manager/data/trade-history-git-sync-status.json
+ExecStartPre=
+ExecStartPre=/usr/bin/test -f ${CURRENT_RELEASE}/.disdex-release-sha
+ExecStartPre=/usr/bin/grep -Fxq ${DEPLOYED_SHA} ${CURRENT_RELEASE}/.disdex-release-sha
+ExecStart=
+ExecStart=${CURRENT_RELEASE}/node_modules/.bin/tsx scripts/disdex-aster-trade-history-git-sync.ts
+ReadWritePaths=
+ReadWritePaths=/home/deploy/ai-dex-manager/data"
+
+  write_atomic "${V12_DROPIN_DIR}/zzzzzzzzzzzz-current-release-contract.conf" "[Unit]
+StartLimitIntervalSec=300s
+StartLimitBurst=3
+[Service]
+RestartSec=30s
+EnvironmentFile=${CONTRACT_ENV_FILE}
+ExecStartPre=+/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root ${CURRENT_RELEASE} --sha ${DEPLOYED_SHA} --runner V12_X1_ALL --activation-path ${OPERATOR_ACTIVATION_PATH}
+Environment=DISDEX_RELEASE_SHA=${DEPLOYED_SHA}
+Environment=V12_LIVE_COMMIT_SHA=${DEPLOYED_SHA}
+Environment=V12_LIVE_ACK=${DEPLOYED_SHA}
+Environment=STRICT_PORTFOLIO_PLANNER_ACTIVE=true
+Environment=V12_BASE_GROSS_CAP=2.0
+Environment=V12_DYNAMIC_GROSS_CAP=2.0
+Environment=V12_GROSS_CAP=2.0
+Environment=PENGU_GROSS_CAP=1.0
+Environment=STOCK_GROSS_CAP=4.0
+Environment=CRYPTO_GROSS_CAP=3.0
+Environment=TOTAL_GROSS_CAP=4.25
+Environment=QUALITY102_LIVE_ENABLED=false
+Environment=QUALITY102_LIVE_SELECTOR_PARITY=false"
+
+  write_atomic "${PENGU_DROPIN_DIR}/zzzzzzzzzzzz-current-release-contract.conf" "[Unit]
+StartLimitIntervalSec=300s
+StartLimitBurst=3
+[Service]
+RestartSec=30s
+EnvironmentFile=${CONTRACT_ENV_FILE}
+ExecStartPre=+/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root ${CURRENT_RELEASE} --sha ${DEPLOYED_SHA} --runner PENGU_V8 --activation-path ${OPERATOR_ACTIVATION_PATH}
+ExecStartPre=+/bin/sh -c 'if [ -e /var/lib/disdex/pengu-dual-ls-v2/runner-live.json ]; then chown deploy:deploy /var/lib/disdex/pengu-dual-ls-v2/runner-live.json && chmod 600 /var/lib/disdex/pengu-dual-ls-v2/runner-live.json; fi'
+ReadWritePaths=${PENGU_STATE_ROOT}
+Environment=PENGU_DUAL_LS_V2_STATE_DIR=${PENGU_STATE_ROOT}
+Environment=PENGU_DUAL_LS_V2_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json
+Environment=STRICT_PORTFOLIO_PLANNER_ACTIVE=true
+Environment=V12_BASE_GROSS_CAP=2.0
+Environment=V12_DYNAMIC_GROSS_CAP=2.0
+Environment=V12_GROSS_CAP=2.0
+Environment=PENGU_GROSS_CAP=1.0
+Environment=STOCK_GROSS_CAP=4.0
+Environment=CRYPTO_GROSS_CAP=3.0
+Environment=TOTAL_GROSS_CAP=4.25
+Environment=QUALITY102_LIVE_ENABLED=false
+Environment=QUALITY102_LIVE_SELECTOR_PARITY=false"
+
+  write_atomic "${Q102_DROPIN_DIR}/zzzzzzzzzzzz-current-release-contract.conf" "[Unit]
+StartLimitIntervalSec=300s
+StartLimitBurst=3
+[Service]
+RestartSec=30s
+EnvironmentFile=${CONTRACT_ENV_FILE}
+ExecStartPre=+/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root ${CURRENT_RELEASE} --sha ${DEPLOYED_SHA} --runner QUALITY102_CAUSAL_V1 --activation-path ${OPERATOR_ACTIVATION_PATH}
+ExecStartPre=+/bin/sh -c 'if [ -e /var/lib/disdex/quality102-causal-v1/state.json ]; then chown deploy:deploy /var/lib/disdex/quality102-causal-v1/state.json && chmod 600 /var/lib/disdex/quality102-causal-v1/state.json; fi'
+Environment=DISDEX_RUNTIME_COMMIT_SHA=${DEPLOYED_SHA}
+Environment=DISDEX_RELEASE_SHA=${DEPLOYED_SHA}
+Environment=QUALITY102_CAUSAL_V1_MAX_GROSS=3.0
+Environment=QUALITY102_CAUSAL_V1_SELECTOR_MODE=CAUSAL_V4
+Environment=QUALITY102_CAUSAL_V1_LIVE_ACK=${DEPLOYED_SHA}
+Environment=QUALITY102_CAUSAL_V1_PREFLIGHT_HISTORY_CHECK=false
+Environment=QUALITY102_LIVE_SELECTOR_PARITY=false
+Environment=QUALITY102_LIVE_ENABLED=false
+Environment=QUALITY102_LIVE_BLOCKED_FAIL_CLOSED=true
+Environment=STRICT_PORTFOLIO_PLANNER_ACTIVE=true
+Environment=CRYPTO_GROSS_CAP=3.0
+Environment=TOTAL_GROSS_CAP=4.25"
+
+  write_atomic "${FET_DROPIN_DIR}/zzzzzzzzzzzz-current-release-contract.conf" "[Unit]
+StartLimitIntervalSec=300s
+StartLimitBurst=3
+[Service]
+RestartSec=30s
+EnvironmentFile=${CONTRACT_ENV_FILE}
+ExecStartPre=+/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root ${CURRENT_RELEASE} --sha ${DEPLOYED_SHA} --runner FET_BRK48_RESIDUAL --activation-path ${OPERATOR_ACTIVATION_PATH}
+ExecStartPre=+/usr/bin/install -d -o deploy -g deploy -m 0700 /var/lib/disdex/fet-brk48-residual
+ExecStartPre=+/bin/sh -c 'if [ -e /var/lib/disdex/fet-brk48-residual/state.json ]; then chown deploy:deploy /var/lib/disdex/fet-brk48-residual/state.json && chmod 600 /var/lib/disdex/fet-brk48-residual/state.json; fi'
+Environment=DISDEX_RUNTIME_COMMIT_SHA=${DEPLOYED_SHA}
+Environment=DISDEX_RELEASE_SHA=${DEPLOYED_SHA}
+Environment=FET_BRK48_LIVE_ENABLED=true
+Environment=FET_BRK48_STATE_PATH=/var/lib/disdex/fet-brk48-residual/state.json
+Environment=FET_BRK48_MAX_GROSS=2.25
+Environment=CRYPTO_GROSS_CAP=3.0
+Environment=TOTAL_GROSS_CAP=4.25
+ReadWritePaths=/var/lib/disdex/fet-brk48-residual /var/lib/disdex/shared"
+
+  write_atomic "${SHARED_RISK_DROPIN_DIR}/zzzzzzzzzzzz-current-release-contract.conf" "[Service]
+EnvironmentFile=${CONTRACT_ENV_FILE}
+Restart=always
+RestartSec=5s"
+
+  write_atomic "${MARGIN_DROPIN_DIR}/zzzzzzzzzzzz-current-release-paths.conf" "[Service]
+EnvironmentFile=${CONTRACT_ENV_FILE}
+WorkingDirectory=${CURRENT_RELEASE}
+ExecStartPre=
+ExecStartPre=/usr/bin/test -f ${CURRENT_RELEASE}/.disdex-release-sha
+ExecStartPre=/usr/bin/grep -Fxq ${DEPLOYED_SHA} ${CURRENT_RELEASE}/.disdex-release-sha
+ExecStart=
+ExecStart=/usr/bin/python3 scripts/disdex_v96_v52_margin_guard_runtime.py --mode live --daemon
+Restart=always
+RestartSec=15s
+Environment=DISDEX_RUNTIME_COMMIT_SHA=${DEPLOYED_SHA}
+Environment=DISDEX_V96_V52_MARGIN_GUARD_STATE_DIR=/var/lib/disdex/shared/margin-risk
+Environment=DISDEX_V96_V52_MARGIN_GUARD_STATE_FILE=/var/lib/disdex/shared/margin-risk/guard-live.json
+Environment=DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED=true
+Environment=DISDEX_V96_STATE_DIR=${V52_LEGACY_CRYPTO_ROOT}
+Environment=DISDEX_V96_KILL_SWITCH_FILE=/var/lib/disdex/shared/kill-switch.json"
+
+  # The HYPE runner has its own runtime gate in addition to the root-owned
+  # operator activation artifact.  Keep the shared contract fail-closed, but
+  # provide a SHA-pinned override file loaded last by the HYPE unit.  The unit
+  # ExecStartPre still requires the exact operator artifact, so this flag alone
+  # can never activate real-money trading.
+  write_atomic "$HYPE_OPERATOR_ENV_FILE" "DISDEX_HYPE_ZEC_OPERATOR_ARMED=true"
+
+  write_atomic "${V52_DROPIN_DIR}/zzzzzzzzzzzz-current-release-paths.conf" "[Unit]
+StartLimitIntervalSec=300s
+StartLimitBurst=3
+[Service]
+RestartSec=30s
+EnvironmentFile=${CONTRACT_ENV_FILE}
+WorkingDirectory=${CURRENT_RELEASE}
+ExecStartPre=
+ExecStartPre=/usr/bin/test -f ${CURRENT_RELEASE}/.disdex-release-sha
+ExecStartPre=/usr/bin/grep -Fxq ${DEPLOYED_SHA} ${CURRENT_RELEASE}/.disdex-release-sha
+ExecStartPre=+/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root ${CURRENT_RELEASE} --sha ${DEPLOYED_SHA} --runner V52 --activation-path ${OPERATOR_ACTIVATION_PATH}
+ExecStart=
+ExecStart=${CURRENT_RELEASE}/.venv2/bin/python scripts/disdex_v52_aster_only_live_engine.py --mode live --daemon
+Environment=DISDEX_V13D_V11EQ_V96_STATE_DIR=/var/lib/disdex/v52-aster-only
+Environment=DISDEX_V52_ASTER_ONLY_STATE_DIR=/var/lib/disdex/v52-aster-only
+Environment=DISDEX_V52_ASTER_ONLY_KILL_SWITCH_FILE=/var/lib/disdex/shared/kill-switch.json
+Environment=DISDEX_V52_CRYPTO_GROSS_CAP=3.0
+Environment=DISDEX_V52_STOCK_GROSS_CAP=4.0
+Environment=DISDEX_V52_V11_GROSS_CAP=2.0
+Environment=DISDEX_V52_V50_GROSS_CAP=2.0
+Environment=DISDEX_V52_PORTFOLIO_GROSS_CAP=4.25
+Environment=DISDEX_V96_STATE_DIR=${V52_LEGACY_CRYPTO_ROOT}
+Environment=DISDEX_V96_KILL_SWITCH_FILE=/var/lib/disdex/shared/kill-switch.json"
+
+  write_atomic "${IDLE_DROPIN_DIR}/zzzzzzzzzzzz-current-release-paths.conf" "[Unit]
+StartLimitIntervalSec=300s
+StartLimitBurst=3
+[Service]
+RestartSec=30s
+EnvironmentFile=${CONTRACT_ENV_FILE}
+EnvironmentFile=${IDLE_OPERATOR_ENV_FILE}
+Environment=DISDEX_RUNTIME_SHA=${DEPLOYED_SHA}
+Environment=DISDEX_RELEASE_SHA=${DEPLOYED_SHA}
+Environment=DISDEX_RELEASE_ROOT=${CURRENT_RELEASE}
+Environment=DISDEX_TRADE_FILL_STRATEGY_ID=IDLE_PRIORITY_SHORT
+Environment=DISDEX_OPERATOR_ACTIVATION_PATH=${OPERATOR_ACTIVATION_RUNTIME_PATH}
+WorkingDirectory=${CURRENT_RELEASE}
+ExecStartPre=
+ExecStartPre=/usr/bin/test -f ${CURRENT_RELEASE}/.disdex-release-sha
+ExecStartPre=/usr/bin/grep -Fxq ${DEPLOYED_SHA} ${CURRENT_RELEASE}/.disdex-release-sha
+ExecStartPre=+/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root ${CURRENT_RELEASE} --sha ${DEPLOYED_SHA} --runner IDLE_PRIORITY_SHORT --activation-path ${OPERATOR_ACTIVATION_PATH}
+ExecStartPre=+/usr/bin/install -o root -g root -m 0644 ${OPERATOR_ACTIVATION_PATH} ${OPERATOR_ACTIVATION_RUNTIME_PATH}
+ExecStart=
+ExecStart=${CURRENT_RELEASE}/node_modules/.bin/tsx scripts/disdex-idle-priority-short-live-runner.ts --daemon
+ReadWritePaths=${IDLE_PRIORITY_STATE_ROOT} ${SHARED_ROOT}"
+
+  migrate_quality102_state_lineage
+  migrate_v12_state_lineage
+  migrate_fet_state_lineage
+  recover_hype_benign_state
+  migrate_hype_state_lineage
+  recover_idle_benign_state
+  migrate_idle_state_lineage
+  systemctl daemon-reload
+  reset_stale_release_failed_units
+  systemctl reset-failed aster-trade-history-git-sync.service || true
+  systemctl reset-failed disdex-v12-kill-switch-auto-repair.service || true
+  systemctl reset-failed disdex-v12-kill-switch-auto-repair.path || true
+  systemctl reset-failed disdex-runner-watchdog.service || true
+  systemctl reset-failed disdex-v12-three-hour-health-check.service || true
+  systemctl reset-failed disdex-ui-retention.service || true
+  ensure_safety_daemon_active "$SHARED_RISK_UNIT"
+  ensure_safety_daemon_active "$MARGIN_UNIT"
+  retarget_quality102_ranking_observer
+
+  if operator_activation_all_trading_ready; then
+    systemctl enable --now "$HYPE_UNIT"
+    systemctl enable --now "$IDLE_UNIT"
+    systemctl enable --now disdex-v12-kill-switch-auto-repair.path
+    systemctl enable --now disdex-runner-watchdog.timer
+    systemctl enable --now disdex-runner-position-recovery.timer
+    ensure_monitor_timer_active "disdex-runner-position-recovery.timer"
+    systemctl enable --now disdex-v12-three-hour-health-check.timer
+    printf 'DISDEX_CURRENT_RUNTIME_OPERATOR_AUTOMATION_ENABLED\n'
+  else
+    systemctl disable --now "$HYPE_UNIT" || true
+    systemctl disable --now "$IDLE_UNIT" || true
+    systemctl stop "$IDLE_UNIT" || true
+    systemctl disable --now disdex-v12-kill-switch-auto-repair.path || true
+    systemctl stop disdex-v12-kill-switch-auto-repair.service || true
+    systemctl disable --now disdex-runner-watchdog.timer || true
+    systemctl stop disdex-runner-watchdog.service || true
+    systemctl disable --now disdex-runner-position-recovery.timer || true
+    systemctl stop disdex-runner-position-recovery.service || true
+    systemctl disable --now disdex-v12-three-hour-health-check.timer || true
+    systemctl stop disdex-v12-three-hour-health-check.service || true
+    printf 'DISDEX_CURRENT_RUNTIME_OPERATOR_AUTOMATION_BLOCKED\n'
+  fi
+
+  ensure_monitor_timer_active "disdex-runner-health-snapshot.timer"
+  ensure_monitor_timer_active "disdex-runner-health-alert.timer"
+  ensure_monitor_timer_active "disdex-trade-fill-notifier.timer"
+  printf 'DISDEX_CURRENT_RUNTIME_WIRING_APPLIED\n'
+}
+
+self_test() {
+  local sample_sha="0123456789abcdef0123456789abcdef01234567"
+  local fixture required_file
+  [[ "$sample_sha" =~ ^[0-9a-f]{40}$ ]]
+  [[ "disdex-v12-x1-all@${sample_sha}.service" == *"@${sample_sha}.service" ]]
+  [[ "disdex-quality102-causal-v1@${sample_sha}.service" == *"@${sample_sha}.service" ]]
+  [[ "disdex-quality102-ranking-observer@${sample_sha}.service" == *"@${sample_sha}.service" ]]
+  [[ "disdex-quality102-ranking-observer@${sample_sha}.timer" == *"@${sample_sha}.timer" ]]
+  [[ "disdex-fet-brk48@${sample_sha}.service" == *"@${sample_sha}.service" ]]
+  [[ "disdex-idle-priority-short@${sample_sha}.service" == *"@${sample_sha}.service" ]]
+  [[ "scripts/disdex_v96_v52_margin_guard_runtime.py" == scripts/* ]]
+  [[ "scripts/disdex_v52_aster_only_live_engine.py" == scripts/* ]]
+  SELF_TEST_FIXTURE="$(mktemp -d)"
+  trap 'rm -rf -- "$SELF_TEST_FIXTURE"' RETURN
+  CURRENT_RELEASE="$SELF_TEST_FIXTURE"
+  mkdir -p "$SELF_TEST_FIXTURE/scripts/ops/root" "$SELF_TEST_FIXTURE/scripts/generated" "$SELF_TEST_FIXTURE/lib" "$SELF_TEST_FIXTURE/config" "$SELF_TEST_FIXTURE/ops/systemd" "$SELF_TEST_FIXTURE/deploy/systemd" "$SELF_TEST_FIXTURE/node_modules/.bin" "$SELF_TEST_FIXTURE/.venv2/bin"
+  for required_file in \
+    scripts/disdex-v12-x1-all-live-runner.ts \
+    scripts/disdex-pengu-dual-ls-v2-live-runner.ts \
+    scripts/disdex-quality102-causal-v1-live-runner.ts \
+    scripts/generated/disdex-quality102-ranking-observer.cjs \
+    scripts/disdex-current-live-target-readiness.ts \
+    scripts/disdex-fet-brk48-live-runner.ts \
+    scripts/disdex-hype-trend-live-runner.ts \
+    scripts/disdex-hype-zec-long-live-runner.ts \
+    scripts/disdex-hype-zec-long-state-migrate.ts \
+    scripts/disdex-hype-zec-benign-market-data-recovery.ts \
+    lib/hype-zec-long-recovery-contract.ts \
+    scripts/disdex-hype-zec-core-preempt.ts \
+    scripts/disdex-idle-priority-short-live-runner.ts \
+    scripts/disdex-idle-priority-short-benign-state-recovery.ts \
+    scripts/disdex-idle-priority-short-state-migrate.ts \
+    lib/idle-priority-short-runner.ts \
+    lib/idle-priority-short-baseline-admission.ts \
+    lib/idle-priority-short-live.ts \
+    config/idlePriorityShortPolicy.ts \
+    config/idlePriorityShortRuntime.ts \
+    deploy/systemd/disdex-v12-x1-all@.service \
+    deploy/systemd/disdex-pengu-dual-ls-v2@.service \
+    ops/systemd/disdex-idle-priority-short@.service \
+    scripts/disdex-pengu-presubmit-snapshot-recovery.ts \
+    scripts/disdex-v12-benign-entry-gate-recovery.ts \
+    scripts/disdex-v12-runtime-lineage-recovery.ts \
+    scripts/disdex-flat-state-sha-migrate.ts \
+    scripts/disdex-quality102-causal-v1-state-migrate.ts \
+    scripts/disdex_v96_v52_margin_guard_runtime.py \
+    scripts/disdex_v52_aster_only_live_engine.py \
+    lib/aster-readonly-recovery-gate.ts \
+    lib/aster-upstream-recovery-policy.ts \
+    lib/disdex-aster-global-rate-budget.ts \
+    scripts/disdex-aster-readonly-recovery-gate.ts \
+    scripts/disdex-aster-upstream-live-recovery.ts \
+    scripts/disdex-aster-trade-history-git-sync.ts \
+    lib/disdex-aster-trade-history-sync.ts \
+    scripts/ops/root/disdex-v12-kill-switch-auto-repair \
+    scripts/ops/root/disdex-v12-three-hour-health-check \
+    scripts/ops/root/disdex-runner-watchdog-current.mjs \
+    scripts/ops/root/disdex-live-operator-activation-gate.mjs \
+    scripts/ops/root/disdex-runner-health-snapshot-current.mjs \
+    scripts/ops/root/disdex-trade-fill-notifier.ts \
+    scripts/ops/root/disdex-vps-retention-cleanup \
+    scripts/ops/root/disdex-ui-retention-cleanup; do
+    : > "$SELF_TEST_FIXTURE/$required_file"
+  done
+  printf '#!/bin/sh\n' > "$SELF_TEST_FIXTURE/node_modules/.bin/tsx"
+  printf '#!/bin/sh\n' > "$SELF_TEST_FIXTURE/.venv2/bin/python"
+  chmod +x "$SELF_TEST_FIXTURE/node_modules/.bin/tsx" "$SELF_TEST_FIXTURE/.venv2/bin/python"
+  validate_release_artifacts
+  AUTO_REPAIR_DROPIN_DIR="$SELF_TEST_FIXTURE/auto-repair-dropins"
+  V52_UNIT="disdex-v52-aster-only@${sample_sha}.service"
+  mkdir -p "$AUTO_REPAIR_DROPIN_DIR"
+  printf '[Service]\nEnvironment=DISDEX_V52_SERVICE_UNIT=%s\n' "$V52_UNIT" > "$AUTO_REPAIR_DROPIN_DIR/zzzzzzzzzzzz-current-release.conf"
+  printf '[Service]\nEnvironment=DISDEX_V52_SERVICE_UNIT=disdex-v52-aster-only@aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.service\n' > "$AUTO_REPAIR_DROPIN_DIR/stale.conf"
+  printf '[Service]\nEnvironment=UNRELATED=true\n' > "$AUTO_REPAIR_DROPIN_DIR/unrelated.conf"
+  remove_stale_auto_repair_unit_pin_dropins
+  [[ -f "$AUTO_REPAIR_DROPIN_DIR/zzzzzzzzzzzz-current-release.conf" ]]
+  [[ ! -e "$AUTO_REPAIR_DROPIN_DIR/stale.conf" ]]
+  [[ -f "$AUTO_REPAIR_DROPIN_DIR/unrelated.conf" ]]
+  printf 'DISDEX_CURRENT_RUNTIME_WIRING_STALE_AUTO_REPAIR_DROPIN_SELFTEST_PASS\n'
+  WATCHDOG_DROPIN_DIR="$SELF_TEST_FIXTURE/watchdog-dropins"
+  SNAPSHOT_DROPIN_DIR="$SELF_TEST_FIXTURE/snapshot-dropins"
+  POSITION_RECOVERY_DROPIN_DIR="$SELF_TEST_FIXTURE/position-recovery-dropins"
+  FILL_NOTIFIER_DROPIN_DIR="$SELF_TEST_FIXTURE/fill-notifier-dropins"
+  for fixture in "$WATCHDOG_DROPIN_DIR" "$SNAPSHOT_DROPIN_DIR" "$POSITION_RECOVERY_DROPIN_DIR" "$FILL_NOTIFIER_DROPIN_DIR"; do
+    mkdir -p "$fixture"
+    printf '[Service]\nWorkingDirectory=%s\n' "$CURRENT_RELEASE" > "$fixture/$CURRENT_SUPPORT_OVERRIDE"
+    printf '[Service]\nWorkingDirectory=/home/deploy/disdex-trading/releases/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n' > "$fixture/stale-release.conf"
+    printf '[Service]\nEnvironment=UNRELATED=true\n' > "$fixture/unrelated.conf"
+  done
+  printf '[Service]\nWorkingDirectory=/home/deploy/disdex-trading/position-recovery/releases/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\n' > "$POSITION_RECOVERY_DROPIN_DIR/stale-position-release.conf"
+  remove_stale_support_release_pin_dropins
+  for fixture in "$WATCHDOG_DROPIN_DIR" "$SNAPSHOT_DROPIN_DIR" "$POSITION_RECOVERY_DROPIN_DIR" "$FILL_NOTIFIER_DROPIN_DIR"; do
+    [[ -f "$fixture/$CURRENT_SUPPORT_OVERRIDE" ]]
+    [[ ! -e "$fixture/stale-release.conf" ]]
+    [[ -f "$fixture/unrelated.conf" ]]
+  done
+  [[ ! -e "$POSITION_RECOVERY_DROPIN_DIR/stale-position-release.conf" ]]
+  printf 'DISDEX_CURRENT_RUNTIME_WIRING_STALE_SUPPORT_DROPIN_SELFTEST_PASS\n'
+  mv "$SELF_TEST_FIXTURE/node_modules" "$SELF_TEST_FIXTURE/node_modules-real"
+  ln -s "$SELF_TEST_FIXTURE/node_modules-real" "$SELF_TEST_FIXTURE/node_modules"
+  if [[ -L "$SELF_TEST_FIXTURE/node_modules" ]]; then
+    if validate_release_artifacts; then
+      printf 'artifact symlink validation unexpectedly passed\n' >&2
+      return 1
+    fi
+    rm "$SELF_TEST_FIXTURE/node_modules"
+  else
+    rm -rf "$SELF_TEST_FIXTURE/node_modules"
+  fi
+  mv "$SELF_TEST_FIXTURE/node_modules-real" "$SELF_TEST_FIXTURE/node_modules"
+  printf 'DISDEX_CURRENT_RUNTIME_WIRING_ARTIFACT_SELFTEST_PASS\n'
+  grep -q -- '--all --activation-path ${OPERATOR_ACTIVATION_PATH}' "$0"
+  grep -q 'systemctl disable --now disdex-runner-position-recovery.timer' "$0"
+  grep -q 'systemctl disable --now disdex-v12-three-hour-health-check.timer' "$0"
+  grep -q 'systemctl enable --now disdex-runner-position-recovery.timer' "$0"
+  grep -q 'systemctl enable --now disdex-v12-three-hour-health-check.timer' "$0"
+  grep -q 'systemctl enable --now "$IDLE_UNIT"' "$0"
+  grep -q 'IDLE_PRIORITY_SHORT' "$0"
+  grep -q 'DISDEX_HEALTH_SNAPSHOT_IDLE_EXPECTED_SHA=${DEPLOYED_SHA}' "$0"
+  grep -q 'DISDEX_HEALTH_SNAPSHOT_IDLE_STATE_PATH=${IDLE_PRIORITY_STATE_ROOT}/state.json' "$0"
+  grep -q 'DISDEX_WATCHDOG_IDLE_EXPECTED_SHA=${DEPLOYED_SHA}' "$0"
+  grep -q 'DISDEX_WATCHDOG_IDLE_SERVICE_UNIT=${IDLE_UNIT}' "$0"
+  printf 'DISDEX_CURRENT_RUNTIME_OPERATOR_AUTOMATION_SELFTEST_PASS\n'
+  printf 'DISDEX_CURRENT_RUNTIME_WIRING_SELFTEST_PASS\n'
+}
+
+main() {
+  local mode="${1:---check}"
+  case "$mode" in
+    --self-test)
+      self_test
+      ;;
+    --check|--apply)
+      resolve_current
+      set_units
+      if [[ "$mode" == "--apply" ]]; then
+        prepare_managed_unit_templates_for_apply
+      fi
+      show_plan
+      check_units
+      assert_no_legacy_live_units
+      if [[ "$mode" == "--apply" ]]; then
+        apply_wiring
+      fi
+      ;;
+    -h|--help)
+      usage
+      ;;
+    *)
+      usage >&2
+      exit 2
+      ;;
+  esac
+}
+
+main "$@"
+ || true
+    } | sort -u
+  )
 
   systemctl enable --now "$Q102_RANKING_OBSERVER_TIMER" >/dev/null
   ensure_monitor_timer_active "$Q102_RANKING_OBSERVER_TIMER"
