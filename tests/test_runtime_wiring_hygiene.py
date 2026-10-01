@@ -128,5 +128,14 @@ class RuntimeWiringHygieneTest(unittest.TestCase):
         self.assertIn('ensure_monitor_timer_active "disdex-current-runtime-coherence-guard.timer"', wiring)
 
 
+    def test_wiring_retires_stale_enabled_sha_instances(self):
+        source = WIRING.read_text(encoding="utf-8")
+        self.assertIn("retire_stale_release_enabled_units()", source)
+        self.assertIn("/etc/systemd/system/multi-user.target.wants/disdex-*@*.service", source)
+        self.assertIn('systemctl disable --now "$unit"', source)
+        self.assertIn('[[ "$sha" == "$DEPLOYED_SHA" ]] && continue', source)
+        self.assertIn("retire_stale_release_enabled_units", source)
+
+
 if __name__ == "__main__":
     unittest.main()
