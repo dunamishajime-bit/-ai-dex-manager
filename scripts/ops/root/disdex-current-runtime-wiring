@@ -1143,14 +1143,18 @@ ReadWritePaths=${IDLE_PRIORITY_STATE_ROOT} ${SHARED_ROOT}"
   retarget_quality102_ranking_observer
 
   if operator_activation_all_trading_ready; then
-    systemctl enable --now "$HYPE_UNIT"
-    systemctl enable --now "$IDLE_UNIT"
-    systemctl enable --now disdex-v12-kill-switch-auto-repair.path
-    systemctl enable --now disdex-runner-watchdog.timer
-    systemctl enable --now disdex-runner-position-recovery.timer
-    ensure_monitor_timer_active "disdex-runner-position-recovery.timer"
-    systemctl enable --now disdex-v12-three-hour-health-check.timer
-    printf 'DISDEX_CURRENT_RUNTIME_OPERATOR_AUTOMATION_ENABLED\n'
+    if [[ "${DISDEX_CURRENT_RUNTIME_DEFER_OPERATOR_AUTOMATION:-false}" == "true" ]]; then
+      printf 'DISDEX_CURRENT_RUNTIME_OPERATOR_AUTOMATION_DEFERRED\n'
+    else
+      systemctl enable --now "$HYPE_UNIT"
+      systemctl enable --now "$IDLE_UNIT"
+      systemctl enable --now disdex-v12-kill-switch-auto-repair.path
+      systemctl enable --now disdex-runner-watchdog.timer
+      systemctl enable --now disdex-runner-position-recovery.timer
+      ensure_monitor_timer_active "disdex-runner-position-recovery.timer"
+      systemctl enable --now disdex-v12-three-hour-health-check.timer
+      printf 'DISDEX_CURRENT_RUNTIME_OPERATOR_AUTOMATION_ENABLED\n'
+    fi
   else
     systemctl disable --now "$HYPE_UNIT" || true
     systemctl disable --now "$IDLE_UNIT" || true
