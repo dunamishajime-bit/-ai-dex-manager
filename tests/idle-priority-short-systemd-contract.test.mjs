@@ -83,9 +83,11 @@ test("Idle is wired into release-pinned health snapshot and watchdog", async () 
 
 test("Production cutover retargets the stock reference proxy to the new current release", async () => {
   const cutover = await readFile("scripts/ops/root/disdex-idle-production-redeploy-20261001", "utf8");
+  assert.match(cutover, /restart_stock_reference_current\(\)/);
   assert.match(cutover, /systemctl is-active --quiet disdex-stock-reference-free\.service/);
   assert.match(cutover, /systemctl restart disdex-stock-reference-free\.service/);
-  assert.match(cutover, /POSTDEPLOY_STOCK_REFERENCE_CWD_MISMATCH/);
-  assert.match(cutover, /readlink -f "\/proc\/\$stock_pid\/cwd"/);
-  assert.match(cutover, /POSTDEPLOY_STOCK_REFERENCE_CURRENT=PASS/);
+  assert.match(cutover, /\$\{phase\}_STOCK_REFERENCE_CWD_MISMATCH/);
+  assert.match(cutover, /readlink -f "\/proc\/\$pid\/cwd"/);
+  assert.match(cutover, /\$\{phase\}_STOCK_REFERENCE_CURRENT=PASS/);
+  assert.match(cutover, /restart_stock_reference_current POSTDEPLOY/);
 });
