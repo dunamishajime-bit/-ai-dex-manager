@@ -158,6 +158,32 @@ PY
   rm -rf -- "$budget_tmp" "$budget_tmp.lock" "$budget_tmp.lock.recovery"
 }
 
+restart_stock_reference_current() {
+  local phase="${1:-CUTOVER}"
+  local expected pid cwd attempt
+  if ! systemctl is-active --quiet disdex-stock-reference-free.service; then
+    echo "${phase}_STOCK_REFERENCE_INACTIVE=SKIP"
+    return 0
+  fi
+  expected="$(readlink -f "$CURRENT")"
+  systemctl restart disdex-stock-reference-free.service
+  cwd=""
+  pid=""
+  for attempt in $(seq 1 15); do
+    pid="$(systemctl show disdex-stock-reference-free.service -p MainPID --value 2>/dev/null || true)"
+    if [[ "$pid" =~ ^[0-9]+$ && "$pid" -gt 0 ]]; then
+      cwd="$(readlink -f "/proc/$pid/cwd" 2>/dev/null || true)"
+      if [[ "$cwd" == "$expected" ]]; then
+        echo "${phase}_STOCK_REFERENCE_CURRENT=PASS pid=$pid cwd=$cwd"
+        return 0
+      fi
+    fi
+    sleep 1
+  done
+  echo "${phase}_STOCK_REFERENCE_CWD_MISMATCH pid=${pid:-unknown} expected=$expected actual=${cwd:-unknown}"
+  return 1
+}
+
 load_runtime_env
 require_shared_safe
 require_flat_account "$OLD_RELEASE"
@@ -299,7 +325,11 @@ rollback() {
     for name in "${NAMES[@]}"; do
       systemctl enable --now "$name@$FROM_SHA.service" >/dev/null 2>&1 || true
     done
-    rm -rf -- "$RELEASE" "$STAGE"
+    if restart_stock_reference_current ROLLBACK; then
+      rm -rf -- "$RELEASE" "$STAGE"
+    else
+      echo "ROLLBACK_TARGET_RELEASE_PRESERVED_FOR_STOCK_REFERENCE=$RELEASE"
+    fi
     echo "DEPLOY_ROLLBACK_FLAT_ACCOUNT=PASS"
   else
     echo "DEPLOY_ROLLBACK_SKIPPED_EXPOSURE_PRESENT"
@@ -529,18 +559,9 @@ for name in "${NAMES[@]}"; do
 done
 
 # The stock reference proxy resolves /home/deploy/disdex-trading/current only at
-# process start. Restart it after the current symlink has moved so it cannot
-# keep an old release directory pinned as its cwd across future cutovers.
-if systemctl is-active --quiet disdex-stock-reference-free.service; then
-  systemctl restart disdex-stock-reference-free.service
-  stock_pid="$(systemctl show disdex-stock-reference-free.service -p MainPID --value)"
-  [[ "$stock_pid" =~ ^[0-9]+$ && "$stock_pid" -gt 0 ]]
-  [[ "$(readlink -f "/proc/$stock_pid/cwd")" == "$RELEASE" ]] || {
-    echo "POSTDEPLOY_STOCK_REFERENCE_CWD_MISMATCH pid=$stock_pid"
-    false
-  }
-  echo "POSTDEPLOY_STOCK_REFERENCE_CURRENT=PASS pid=$stock_pid"
-fi
+# process start. Restart it after the current symlink has moved and wait for
+# systemd to publish the new MainPID/cwd before asserting release ownership.
+restart_stock_reference_current POSTDEPLOY
 
 sleep 5
 systemctl reset-failed disdex-runner-health-snapshot.service >/dev/null 2>&1 || true
