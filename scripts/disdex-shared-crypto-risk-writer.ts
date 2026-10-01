@@ -3,6 +3,7 @@ import "dotenv/config";
 import { resolveSharedCryptoDailyLossPct } from "../config/sharedCryptoRiskPolicy";
 import { AsterV3Client } from "../lib/aster-v3-client";
 import { refreshSharedCryptoDailyRisk } from "../lib/disdex-shared-crypto-risk-writer";
+import { runSharedRiskRefreshLoop } from "../lib/disdex-shared-crypto-risk-refresh-loop";
 import { createInterruptibleDelay } from "../lib/interruptible-delay";
 
 function numberEnv(name: string, fallback: number): number {
@@ -25,40 +26,60 @@ async function main(): Promise<void> {
 
     const daemon = process.argv.includes("--daemon");
     const intervalMs = Math.max(15_000, numberEnv("DISDEX_SHARED_CRYPTO_RISK_REFRESH_MS", 30_000));
+    const retryMs = Math.max(1_000, Math.min(intervalMs, numberEnv("DISDEX_SHARED_CRYPTO_RISK_RETRY_MS", 5_000)));
     const delay = createInterruptibleDelay();
     let stopping = false;
     const stop = () => { stopping = true; delay.interrupt(); };
     process.on("SIGINT", stop);
     process.on("SIGTERM", stop);
 
-    do {
-        const state = await refreshSharedCryptoDailyRisk({
+    await runSharedRiskRefreshLoop({
+        daemon,
+        intervalMs,
+        retryMs,
+        wait: (milliseconds) => delay.wait(milliseconds),
+        shouldStop: () => stopping,
+        refresh: () => refreshSharedCryptoDailyRisk({
             client,
             path,
             maximumLossPct: resolveSharedCryptoDailyLossPct(process.env.DISDEX_SHARED_CRYPTO_MAX_DAILY_LOSS_PCT),
             portfolioDdGovernorPath,
-        });
-        console.log(JSON.stringify({
-            timestamp: new Date().toISOString(),
-            component: "shared-crypto-risk",
-            strategyIds: state.strategyIds,
-            lossPct: state.lossPct,
-            maximumLossPct: state.maximumLossPct,
-            tripped: state.tripped,
-            realizedPnl: state.realizedPnl,
-            unrealizedPnl: state.unrealizedPnl,
-            fees: state.fees,
-            funding: state.funding,
-            portfolioDdGovernor: state.portfolioDdGovernor ? {
-                currentDrawdownPct: state.portfolioDdGovernor.currentDrawdownPct,
-                twrIndex: state.portfolioDdGovernor.twrIndex,
-                twrPeak: state.portfolioDdGovernor.twrPeak,
-                closedEvents: state.portfolioDdGovernor.closedEvents,
-            } : undefined,
-        }));
-        if (!daemon || stopping) break;
-        await delay.wait(intervalMs);
-    } while (!stopping);
+        }),
+        onSuccess: (state) => {
+            console.log(JSON.stringify({
+                timestamp: new Date().toISOString(),
+                component: "shared-crypto-risk",
+                strategyIds: state.strategyIds,
+                lossPct: state.lossPct,
+                maximumLossPct: state.maximumLossPct,
+                tripped: state.tripped,
+                realizedPnl: state.realizedPnl,
+                unrealizedPnl: state.unrealizedPnl,
+                fees: state.fees,
+                funding: state.funding,
+                portfolioDdGovernor: state.portfolioDdGovernor ? {
+                    currentDrawdownPct: state.portfolioDdGovernor.currentDrawdownPct,
+                    twrIndex: state.portfolioDdGovernor.twrIndex,
+                    twrPeak: state.portfolioDdGovernor.twrPeak,
+                    closedEvents: state.portfolioDdGovernor.closedEvents,
+                } : undefined,
+            }));
+        },
+        onFailure: (error, context) => {
+            console.error(JSON.stringify({
+                timestamp: new Date(context.observedAt).toISOString(),
+                level: "warn",
+                event: "shared-crypto-risk-refresh-failed",
+                component: "shared-crypto-risk",
+                message: error instanceof Error ? error.message : String(error),
+                consecutiveFailures: context.consecutiveFailures,
+                lastSuccessAt: context.lastSuccessAt,
+                retryMs,
+                processRetained: daemon,
+                failClosedOnStaleSnapshot: true,
+            }));
+        },
+    });
 }
 
 main().catch((error) => {
