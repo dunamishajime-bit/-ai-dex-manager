@@ -1237,7 +1237,7 @@ self_test() {
   SELF_TEST_FIXTURE="$(mktemp -d)"
   trap 'rm -rf -- "$SELF_TEST_FIXTURE"' RETURN
   CURRENT_RELEASE="$SELF_TEST_FIXTURE"
-  mkdir -p "$SELF_TEST_FIXTURE/scripts/ops/root" "$SELF_TEST_FIXTURE/scripts/generated" "$SELF_TEST_FIXTURE/lib" "$SELF_TEST_FIXTURE/config" "$SELF_TEST_FIXTURE/ops/systemd" "$SELF_TEST_FIXTURE/deploy/systemd" "$SELF_TEST_FIXTURE/node_modules/.bin" "$SELF_TEST_FIXTURE/.venv2/bin"
+  mkdir -p "$SELF_TEST_FIXTURE/scripts/ops/root" "$SELF_TEST_FIXTURE/scripts/generated" "$SELF_TEST_FIXTURE/lib/server" "$SELF_TEST_FIXTURE/config" "$SELF_TEST_FIXTURE/ops/systemd" "$SELF_TEST_FIXTURE/deploy/systemd" "$SELF_TEST_FIXTURE/node_modules/.bin" "$SELF_TEST_FIXTURE/.venv2/bin"
   for required_file in \
     scripts/disdex-v12-x1-all-live-runner.ts \
     scripts/disdex-pengu-dual-ls-v2-live-runner.ts \
@@ -1262,6 +1262,12 @@ self_test() {
     deploy/systemd/disdex-v12-x1-all@.service \
     deploy/systemd/disdex-pengu-dual-ls-v2@.service \
     ops/systemd/disdex-idle-priority-short@.service \
+    ops/systemd/disdex-runner-health-alert.timer \
+    ops/systemd/disdex-runner-position-recovery.timer \
+    ops/systemd/disdex-trade-fill-notifier.timer \
+    scripts/ops/root/disdex-current-runtime-coherence-guard \
+    ops/systemd/disdex-current-runtime-coherence-guard.service \
+    ops/systemd/disdex-current-runtime-coherence-guard.timer \
     scripts/disdex-pengu-presubmit-snapshot-recovery.ts \
     scripts/disdex-v12-benign-entry-gate-recovery.ts \
     scripts/disdex-v12-runtime-lineage-recovery.ts \
@@ -1281,6 +1287,10 @@ self_test() {
     scripts/ops/root/disdex-runner-watchdog-current.mjs \
     scripts/ops/root/disdex-live-operator-activation-gate.mjs \
     scripts/ops/root/disdex-runner-health-snapshot-current.mjs \
+    scripts/ops/root/disdex-runner-health-alert.ts \
+    lib/server/runtime-alert-policy.ts \
+    lib/server/runner-health-notification.ts \
+    lib/server/runner-service-resolution.ts \
     scripts/ops/root/disdex-trade-fill-notifier.ts \
     scripts/ops/root/disdex-vps-retention-cleanup \
     scripts/ops/root/disdex-ui-retention-cleanup; do
