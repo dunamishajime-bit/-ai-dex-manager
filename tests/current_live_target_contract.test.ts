@@ -1,4 +1,4 @@
-﻿import assert from "node:assert/strict";
+import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
@@ -8,27 +8,37 @@ import { V12_X1_ALL } from "../config/v12X1AllRuntime";
 import { FET_BRK48_RESIDUAL } from "../config/fetBrk48Runtime";
 
 const targetPath = "docs/production/current-live-target.json";
-const artifactPath = "docs/research-results/final-live-governor-20260922.json";
+const artifactPath = "docs/research/results/trail020-idle-doge-avax-controlling-20261002/controlling-contract.json";
 
-test("current live target is the sole Top3/FET/Q102 governor acceptance anchor", async () => {
+test("current live target pins Trail0.20 + Idle + DOGE/AVAX controlling stack", async () => {
   const target = JSON.parse(await readFile(targetPath, "utf8"));
   assert.equal(target.status, "CURRENT_CANONICAL_PRODUCTION_TARGET");
-  assert.equal(target.productionBaseSha, "2f22282e5ea3cddcb6005b9c9f4e043553cf0f7d");
+  assert.equal(target.productionBaseSha, "8e341956b3c5c5d825029d18ba083029d919126b");
 
   assert.equal(target.strategy.v12.maximumPositions, 3);
   assert.equal(target.strategy.v12.baseMaximumPositions, 2);
   assert.equal(target.strategy.v12.rank3GrossCap, 0.10);
   assert.equal(target.strategy.v12.rank3MinimumScore, 0.70);
   assert.equal(target.strategy.v12.additionalRank3BtcDistanceGate, false);
+  assert.equal(target.strategy.v12.trailingAtr, 0.20);
+  assert.equal(target.strategy.v12.stopAtr, 2.477);
+  assert.equal(target.strategy.v12.takeProfitAtr, 3.1995);
   assert.equal(target.strategy.fet.maximumGross, 2.25);
   assert.equal(target.strategy.q102.portfolioDdGovernorEntryThresholdPct, 0.30);
   assert.equal(target.strategy.q102.boostMaximumGross, 3.0);
   assert.equal(target.strategy.portfolio.cryptoGrossCap, 3.0);
   assert.equal(target.strategy.portfolio.totalGrossCap, 4.25);
 
+  assert.equal(target.strategy.idlePriorityShort.formal10bpsTrades, 61);
+  assert.deepEqual(target.strategy.idleResidualLong.subordinateTo, ["FORMAL_EXISTING","IDLE_PRIORITY_SHORT"]);
+  assert.deepEqual(target.strategy.idleResidualLong.priority, ["DOGE_REL_VOL","AVAX_REL_LONG"]);
+  assert.equal(target.strategy.idleResidualLong.routes.DOGEUSDT.volumeRatioMin, 1.2);
+  assert.equal(target.strategy.idleResidualLong.routes.AVAXUSDT.volumeRatioMin, 0.8);
+
   assert.equal(V12_X1_ALL.maximumPositions, target.strategy.v12.maximumPositions);
   assert.equal(V12_X1_ALL.rank3EntryGrossCap, target.strategy.v12.rank3GrossCap);
   assert.equal(V12_X1_ALL.rank3MinimumScore, target.strategy.v12.rank3MinimumScore);
+  assert.equal(V12_X1_ALL.trailingAtr, target.strategy.v12.trailingAtr);
   assert.equal(FET_BRK48_RESIDUAL.maximumGross, target.strategy.fet.maximumGross);
   assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.q102CausalV4MaximumGross, target.strategy.q102.boostMaximumGross);
   assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap, target.strategy.portfolio.cryptoGrossCap);
@@ -36,31 +46,31 @@ test("current live target is the sole Top3/FET/Q102 governor acceptance anchor",
   assert.deepEqual(Q102_CAUSAL_V4_FAMILY_GROSS, target.strategy.q102.baseFamilyGross);
 });
 
-test("selected formal replay is the final 2026-09-22 LIVE governor case", async () => {
+test("current formal acceptance is bound to the controlling ledger and cost stress", async () => {
   const target = JSON.parse(await readFile(targetPath, "utf8"));
   const bytes = await readFile(artifactPath);
-  const canonicalText = bytes.toString("utf8").replace(/\r\n/g, "\n");
-  const sha = createHash("sha256").update(Buffer.from(canonicalText, "utf8")).digest("hex").toUpperCase();
+  const sha = createHash("sha256").update(bytes).digest("hex").toUpperCase();
   assert.equal(sha, target.formalBacktest.sourceArtifactSha256);
+  assert.equal(target.formalBacktest.selectedCase, "trail020_idle_doge_avax_20261002");
 
-  const cases = JSON.parse(canonicalText);
-  const selected = cases.find((row: any) => row.case === target.formalBacktest.selectedCase);
-  assert.ok(selected, "selected current formal replay case must exist");
-
-  for (const scenario of ["NORMAL", "SEVERE"] as const) {
-    const expected = target.formalBacktest[scenario];
-    const actual = selected[scenario];
-    assert.equal(actual.asset, expected.endingAssetJpy);
-    assert.equal(actual.pf, expected.profitFactor);
-    assert.equal(actual.dd, expected.maxDrawdownPct);
-    assert.equal(actual.trades, expected.trades);
-    assert.equal(actual.maxCrypto, expected.maxCryptoGross);
-    assert.equal(actual.maxTotal, expected.maxTotalGross);
-    assert.equal(actual.maxFet, expected.maxFetGross);
-    assert.equal(actual.conflicts, 0);
-    assert.ok(actual.dd >= target.acceptance.maximumDrawdownFloorPct);
+  const contract = JSON.parse(bytes.toString("utf8"));
+  assert.deepEqual(target.formalBacktest.priority, contract.priority);
+  for (const [label,bps] of [["NORMAL",10],["COST_8BPS",8],["COST_20BPS",20],["COST_30BPS",30]] as const) {
+    const expected = target.formalBacktest[label];
+    const actual = contract.costs[String(bps)];
+    assert.equal(expected.roundtripBps, bps);
+    assert.equal(expected.endingAssetJpy, actual.finalJpy);
+    assert.equal(expected.profitFactor, actual.pf);
+    assert.equal(expected.maxDrawdownPct, actual.dd * 100);
+    assert.equal(expected.winRatePct, actual.wr * 100);
+    assert.equal(expected.trades, actual.trades);
+    assert.deepEqual(expected.routing, actual.strategyCounts);
   }
 
-  assert.equal(target.supersedesForCurrentActivation[0].researchSha, "27f934424b201e4c63986b9b7db64b89ff69b4bb");
-  assert.equal(target.supersedesForCurrentActivation[1].implementationSha, "f9b0861816b8a70f6158e98f00893457f83e81bb");
+  assert.ok(target.formalBacktest.NORMAL.maxDrawdownPct >= target.acceptance.maximumDrawdownFloorPct);
+  assert.ok(target.formalBacktest.COST_30BPS.maxDrawdownPct >= target.acceptance.maximumDrawdownFloorPct);
+  assert.equal(target.acceptance.requireIdlePriorityShortParity, true);
+  assert.equal(target.acceptance.requireTrail020, true);
+  assert.equal(target.acceptance.requireResidualExactShaParity, true);
+  assert.equal(target.acceptance.requireFormalResidualPreemption, true);
 });

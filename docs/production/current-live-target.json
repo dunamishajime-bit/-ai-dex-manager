@@ -1,8 +1,8 @@
 {
   "schema": "disdex-current-live-target/v1",
-  "date": "2026-09-22",
+  "date": "2026-10-02",
   "status": "CURRENT_CANONICAL_PRODUCTION_TARGET",
-  "productionBaseSha": "2f22282e5ea3cddcb6005b9c9f4e043553cf0f7d",
+  "productionBaseSha": "8e341956b3c5c5d825029d18ba083029d919126b",
   "strategy": {
     "v12": {
       "maximumPositions": 3,
@@ -13,7 +13,10 @@
       "btcRegimeContract": "PRESERVE_EXISTING_V12_REGIME_AND_ENTRY_QUALITY_LOGIC",
       "baseAggregateGross": 2,
       "dynamicResidualAggregateGrossCap": 2,
-      "perPositionGrossCap": 1
+      "perPositionGrossCap": 1,
+      "trailingAtr": 0.2,
+      "stopAtr": 2.477,
+      "takeProfitAtr": 3.1995
     },
     "fet": {
       "strategyId": "FET_BRK48_LONG",
@@ -103,12 +106,56 @@
           }
         ]
       }
+    },
+    "idlePriorityShort": {
+      "strategyId": "IDLE_PRIORITY_SHORT",
+      "priority": "LOWER_THAN_FORMAL_EXISTING",
+      "symbols": [
+        "TAOUSDT",
+        "TIAUSDT",
+        "DOTUSDT",
+        "JUPUSDT",
+        "RENDERUSDT"
+      ],
+      "formal10bpsTrades": 61,
+      "preserveExactParity": true
+    },
+    "idleResidualLong": {
+      "strategyId": "IDLE_RESIDUAL_LONG",
+      "priority": [
+        "DOGE_REL_VOL",
+        "AVAX_REL_LONG"
+      ],
+      "subordinateTo": [
+        "FORMAL_EXISTING",
+        "IDLE_PRIORITY_SHORT"
+      ],
+      "gross": 1.0,
+      "leverage": 5,
+      "marginMode": "CROSS",
+      "holdHours": 12,
+      "hardStopPct": 0.1,
+      "takeProfitPct": 0.25,
+      "routes": {
+        "DOGEUSDT": {
+          "route": "DOGE_REL_VOL",
+          "rel24Min": 0.03,
+          "volumeRatioMin": 1.2,
+          "atrRatioMin": 0.007
+        },
+        "AVAXUSDT": {
+          "route": "AVAX_REL_LONG",
+          "rel24Min": 0.03,
+          "volumeRatioMin": 0.8,
+          "atrRatioMin": 0.007
+        }
+      }
     }
   },
   "formalBacktest": {
-    "sourceArtifact": "docs/research-results/final-live-governor-20260922.json",
-    "sourceArtifactSha256": "F14079E54874934C6BE0CAE4C37272659AB22D5A1A035416EA424BB55227CD1D",
-    "selectedCase": "top3_q102gov030_fet2.25",
+    "sourceArtifact": "docs/research/results/trail020-idle-doge-avax-controlling-20261002/controlling-contract.json",
+    "sourceArtifactSha256": "FEDE715DAB4822417B1F052F36478EE2BF883A70DAE1E4161CA400AF07D02729",
+    "selectedCase": "trail020_idle_doge_avax_20261002",
     "period": {
       "startInclusive": "2025-08-10T00:00:00.000Z",
       "endExclusive": "2026-08-10T00:00:00.000Z"
@@ -119,38 +166,82 @@
       "monthlyCount": 12,
       "compounding": true
     },
+    "priority": [
+      "FORMAL_EXISTING",
+      "IDLE_PRIORITY_SHORT",
+      "DOGE_REL_VOL",
+      "AVAX_REL_LONG"
+    ],
     "NORMAL": {
-      "endingAssetJpy": 1448665533.0239232,
-      "profitFactor": 4.14112335,
-      "maxDrawdownPct": -19.61179353,
-      "trades": 1164,
-      "maxCryptoGross": 4.67947803,
-      "maxTotalGross": 5,
-      "maxFetGross": 2.25,
-      "grossConflicts": 0,
+      "roundtripBps": 10,
+      "endingAssetJpy": 1319918378.8124561,
+      "profitFactor": 2.332297694545306,
+      "maxDrawdownPct": -21.359613575534397,
+      "winRatePct": 67.05035971223022,
+      "trades": 1390,
       "routing": {
-        "V12": 791,
-        "PENGU": 66,
-        "Q102": 71,
-        "FET": 26,
-        "V11_EQ": 50,
-        "V50_POST_OPEN_BASIS": 93
+        "FET": 15,
+        "IDLE_PRIORITY_SHORT": 61,
+        "PENGU": 61,
+        "Q102": 130,
+        "RESCUE_NEW": 16,
+        "RESCUE_TOP3": 11,
+        "V12": 1011,
+        "V52": 85
       }
     },
-    "SEVERE": {
-      "endingAssetJpy": 75982803.52048858,
-      "profitFactor": 3.01497717,
-      "maxDrawdownPct": -19.97886021,
-      "trades": 1020,
-      "maxCryptoGross": 4.63551394,
-      "maxTotalGross": 4.63551394,
-      "maxFetGross": 2.25,
-      "grossConflicts": 0,
+    "COST_8BPS": {
+      "roundtripBps": 8,
+      "endingAssetJpy": 1664976130.4924824,
+      "profitFactor": 2.3839076001310042,
+      "maxDrawdownPct": -21.243883153542264,
+      "winRatePct": 67.9136690647482,
+      "trades": 1390,
       "routing": {
-        "V12": 795,
-        "PENGU": 65,
-        "Q102": 71,
-        "FET": 29
+        "FET": 15,
+        "IDLE_PRIORITY_SHORT": 61,
+        "PENGU": 61,
+        "Q102": 130,
+        "RESCUE_NEW": 16,
+        "RESCUE_TOP3": 11,
+        "V12": 1011,
+        "V52": 85
+      }
+    },
+    "COST_20BPS": {
+      "roundtripBps": 20,
+      "endingAssetJpy": 418296811.09379786,
+      "profitFactor": 2.0916297067527774,
+      "maxDrawdownPct": -22.27661223667826,
+      "winRatePct": 61.815561959654175,
+      "trades": 1388,
+      "routing": {
+        "FET": 15,
+        "IDLE_PRIORITY_SHORT": 61,
+        "PENGU": 61,
+        "Q102": 130,
+        "RESCUE_NEW": 16,
+        "RESCUE_TOP3": 11,
+        "V12": 1009,
+        "V52": 85
+      }
+    },
+    "COST_30BPS": {
+      "roundtripBps": 30,
+      "endingAssetJpy": 118566758.73919226,
+      "profitFactor": 1.8747436370321768,
+      "maxDrawdownPct": -23.360565008282585,
+      "winRatePct": 56.801736613603474,
+      "trades": 1382,
+      "routing": {
+        "FET": 15,
+        "IDLE_PRIORITY_SHORT": 61,
+        "PENGU": 61,
+        "Q102": 130,
+        "RESCUE_NEW": 16,
+        "RESCUE_TOP3": 11,
+        "V12": 1004,
+        "V52": 84
       }
     }
   },
@@ -164,11 +255,16 @@
       "name": "codex/v12-dynamic-residual-live-20260920-clean",
       "implementationSha": "f9b0861816b8a70f6158e98f00893457f83e81bb",
       "note": "Superseded implementation path for current activation."
+    },
+    {
+      "name": "top3_q102gov030_fet2.25_20260922",
+      "implementationSha": "2f22282e5ea3cddcb6005b9c9f4e043553cf0f7d",
+      "note": "Superseded as the current activation acceptance anchor by Trail0.20 + existing Idle SHORT + DOGE/AVAX residual controlling stack. Retained as historical evidence."
     }
   ],
   "acceptance": {
     "requireExactSelectedBacktestParity": true,
-    "maximumDrawdownFloorPct": -20,
+    "maximumDrawdownFloorPct": -25,
     "maximumCryptoGross": 5,
     "maximumTotalGross": 8,
     "maximumGrossConflicts": 0,
@@ -179,6 +275,11 @@
     "requireUnifiedRuntimeSha": true,
     "requireMigrationAndReconciliation": true,
     "requireProtectionReadback": true,
-    "requireKillSwitchFalseAtActivation": true
+    "requireKillSwitchFalseAtActivation": true,
+    "requireIdlePriorityShortParity": true,
+    "requireTrail020": true,
+    "requireResidualExactShaParity": true,
+    "requireFormalResidualPreemption": true,
+    "requireDogAvaxFreshOosSupport": true
   }
 }

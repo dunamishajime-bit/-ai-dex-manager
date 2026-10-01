@@ -1,51 +1,77 @@
-# CURRENT LIVE TARGET — Top3 + FET + Q102 DD Governor
+# CURRENT LIVE TARGET — Trail0.20 + Idle + DOGE/AVAX residual
 
-**Status:** CURRENT_CANONICAL_PRODUCTION_TARGET
-**Date:** 2026-09-20
-**Current LIVE base:** `b664a11725b5f8f1463651fb47d71efc177e538b`
-**Implementation readiness:** READY
-**Real-money activation:** BLOCKED — `OPERATOR_LIVE_ACTIVATION_REQUIRED`
+**Status:** CURRENT_CANONICAL_PRODUCTION_TARGET  
+**Date:** 2026-10-02  
+**Production base before this promotion:** `8e341956b3c5c5d825029d18ba083029d919126b`  
+**Implementation readiness:** READY  
+**Real-money activation:** BLOCKED until the exact-SHA Production workflow creates the root-owned operator activation artifact and verifies the cutover.
 
-This file is the single current Production activation target. GPT, Work, Codex and deployment procedures must read this file and `docs/production/current-live-target.json` before using any older implementation or backtest contract.
+This file and `docs/production/current-live-target.json` are the single current Production activation target. Older backtests remain historical evidence only.
 
-## Current configuration
+## Current strategy contract
 
-- V12: maximum 3 positions. Rank1/Rank2 preserve the current V12 logic. Rank3 is a lower-priority 0.10x slot and requires score >= 0.70.
-- V12 BTC logic: preserve the existing V12 BTC regime and entry-quality logic. The selected 740.77M backtest case is `r3_score070`; it does **not** add the separate `btc03` Rank3-only distance gate.
-- V12 base aggregate gross 1.50x, Dynamic Residual ceiling 2.00x, per-position ceiling 1.00x.
-- FET: `FET_BRK48_LONG`, FETUSDT LONG, BRK48, 72h median volume x1.2 minimum, 4h decision grid, 24h hold, 5% hard stop, maximum 1.25x, minimum residual 0.05x. FET is lower priority than Core and is preemptible.
-- Q102: Causal V4 / one slot. Portfolio DD <= 0.30% permits entry-time boost up to 3.0x. Above 0.30%, or when governor evidence is stale/missing/malformed, use the base family gross.
-- Q102 base family gross: HIGH_VOL 1.661x / MR 1.0x / BRK 2.465x / REV 2.5x / PB 2.5x.
-- PENGU/V52: preserve current Production behavior.
-- Portfolio: Crypto <= 3.0x / Total <= 3.5x / Shared Crypto Daily Loss 7.5%.
-- Venue: Aster 5x Cross remains mandatory.
+- V12: existing entry logic retained; maximum 3 positions; Rank3 0.10x and score >= 0.70.
+- V12 exit: initial STOP 2.477 ATR, TP 3.1995 ATR, trailing ATR **0.20**. Trailing replacement is computed from the completed 2H favourable high/low for the next block.
+- PENGU: current COMBINED_FILTERED production behavior retained.
+- Q102: current Causal V4 / one-slot / DD-governor behavior retained.
+- FET: current BRK48 residual behavior retained.
+- V52: current Production stock behavior retained.
+- Idle Priority SHORT: exact historical 61-trade parity is preserved for TAO/TIA/DOT/JUP/RENDER.
+- Residual LONG:
+  - DOGE: BTC-relative 24h >= +3%, Volume Ratio >= 1.20, ATR Ratio >= 0.7%.
+  - AVAX: BTC-relative 24h >= +3%, Volume Ratio >= 0.80, ATR Ratio >= 0.7%.
+  - both are LONG, Gross 1.00x, Aster 5x Cross, 12h natural hold, 10% emergency STOP, 25% TP.
+- Priority is fixed: **Formal existing > Idle Priority SHORT > DOGE > AVAX**.
+- V12/PENGU/Q102/FET/V52 all have explicit residual preemption wiring. Residual preemption is reduce-only and fail-closed.
+- Portfolio caps remain Crypto 3.0x / Total 4.25x, with existing hard/govenor protections and Shared Crypto Daily Loss 7.5%.
 
-## Formal backtest acceptance
+## Controlling formal evidence
 
-Source artifact: `docs/research-results/top3-fet-q102gov-integrated-20260920.json`
-SHA256: `9E522E7D93A4C3E7023065825D6D5F41688CDD47410C6223D97ED016DBBDD995`
-Selected case: `top3_q102gov030_fet1.25`
+Source:
+`docs/research/results/trail020-idle-doge-avax-controlling-20261002/controlling-contract.json`
 
-| Scenario | Ending asset | PF | Max DD | Trades | Crypto max | Total max | FET max | Conflicts |
-|---|---:|---:|---:|---:|---:|---:|---:|---:|
-| NORMAL | JPY 740,771,278.0140501 | 4.12008119 | -19.88452049% | 1,195 | 3.0x | 3.5x | 1.25x | 0 |
-| SEVERE | JPY 65,669,109.00323203 | 3.05645475 | -19.99033133% | 1,036 | 3.0x | 3.0x | 1.25x | 0 |
+SHA256:
+`FEDE715DAB4822417B1F052F36478EE2BF883A70DAE1E4161CA400AF07D02729`
 
-NORMAL routing: V12 793 / PENGU 66 / Q102 71 / FET 26 / V11 50 / V50 93.
-SEVERE routing: V12 793 / PENGU 66 / Q102 71 / FET 29.
+Selected case:
+`trail020_idle_doge_avax_20261002`
 
-## Superseded for current activation
+Period: 2025-08-10 through 2026-08-10.
 
-The following remain historical evidence but are **not** the current Production activation acceptance anchor:
+| Cost | Ending asset | Win rate | PF | Max MTM DD | Trades |
+|---|---:|---:|---:|---:|---:|
+| 8bps | JPY 1,664,976,130.49 | 67.9137% | 2.383908 | -21.2439% | 1,390 |
+| **10bps controlling** | **JPY 1,319,918,378.81** | **67.0504%** | **2.332298** | **-21.3596%** | **1,390** |
+| 20bps | JPY 418,296,811.09 | 61.8156% | 2.091630 | -22.2766% | 1,388 |
+| 30bps | JPY 118,566,758.74 | 56.8017% | 1.874744 | -23.3606% | 1,382 |
 
-- `V12_DYNAMIC_RESIDUAL_LIVE_CONTRACT_20260919`
-- Research SHA `27f934424b201e4c63986b9b7db64b89ff69b4bb`
-- Old Formal BT NORMAL JPY 270,126,566.3772751 / SEVERE JPY 24,184,641.27364947
-- Branch `codex/v12-dynamic-residual-live-20260920-clean`
-- SHA `f9b0861816b8a70f6158e98f00893457f83e81bb`
+10bps routing:
+V12 1,011 / PENGU 61 / Q102 130 / V52 85 / FET 15 / Idle SHORT 61 / DOGE 11 / AVAX 16.
 
-Do not use those old acceptance values to block or authorize the current Top3 + FET + Q102 Governor activation.
+The promotion drawdown floor for this operator-approved target is **-25%**. The actual controlling result is -21.36%, and the 30bps stress remains above the floor at -23.36%.
+
+## Reuse
+
+The controlling artifact directory contains 8/10/20/30bps:
+- full integrated result,
+- `portfolio-trades.jsonl`,
+- metrics,
+- frozen priority overlay intents,
+- exact machine-readable contract,
+- SHA256 manifest.
+
+Run:
+`python scripts/replay-trail020-idle-doge-avax-ledger-20261002.py --bps 10`
+to revalidate the frozen ledger.
 
 ## Activation rule
 
-Implementation is complete only when code and replay match this current contract, all relevant regressions pass, FET Core preemption/ownership/protection are verified, and the readiness checker reports `implementationReady=true`. Real-money Production activation remains separately blocked until an operator explicitly authorizes the cutover, removes `OPERATOR_LIVE_ACTIVATION_REQUIRED`, enables the FET Core-preemption runtime gate in the exact release contract, and then verifies one runtime SHA, Margin Guard HEALTHY, Kill Switch false for a resolved reason, Aster 5x Cross, and read-only venue reconciliation. Never use a synthetic LIVE order merely to prove activation.
+No source commit is LIVE merely because it is merged or pushed. The exact-SHA Production workflow must:
+1. regenerate both Idle parity certificates for that SHA,
+2. prove current Production is an ancestor,
+3. verify no unsafe pending exposure, Kill Switch false, fresh Margin Guard and Shared Risk,
+4. create the root-owned operator activation artifact for that exact SHA/target,
+5. cut over all runners,
+6. verify one runtime SHA, LIVE services, and HP/API safety.
+
+Do not bypass a failed gate or use a synthetic LIVE order to prove activation.

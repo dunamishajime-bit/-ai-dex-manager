@@ -43,6 +43,7 @@ jobs:
           npx tsc --noEmit
           npx tsx --test \
             tests/aster-global-rate-budget.test.ts \
+            tests/current_live_target_contract.test.ts \
             tests/idle-residual-long-contract.test.ts \
             tests/idle-residual-long-preemption.test.ts \
             tests/idle-priority-short-systemd-contract.test.mjs \
