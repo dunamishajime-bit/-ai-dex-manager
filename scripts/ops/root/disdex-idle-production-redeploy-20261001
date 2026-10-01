@@ -418,8 +418,8 @@ for state_dir in /var/lib/disdex/pengu-dual-ls-v2 /var/lib/disdex/idle-priority;
 done
 
 echo "CUTOVER_WIRING_BEGIN release=$RELEASE"
-(cd "$RELEASE" && bash scripts/ops/root/disdex-current-runtime-wiring --apply)
-echo "CUTOVER_WIRING_PASS"
+(cd "$RELEASE" && DISDEX_CURRENT_RUNTIME_DEFER_OPERATOR_AUTOMATION=true bash scripts/ops/root/disdex-current-runtime-wiring --apply)
+echo "CUTOVER_WIRING_PASS automation=deferred"
 
 wait_safety_daemons_ready() {
   local required_consecutive=2
@@ -473,6 +473,10 @@ for name in "${CORE[@]}"; do
 done
 systemctl enable --now "disdex-hype-long@$TARGET_SHA.service"
 systemctl enable --now "disdex-idle-priority-short@$TARGET_SHA.service"
+
+echo "CUTOVER_POSTSTART_WIRING_BEGIN"
+(cd "$RELEASE" && bash scripts/ops/root/disdex-current-runtime-wiring --apply)
+echo "CUTOVER_POSTSTART_WIRING_PASS"
 
 for name in disdex-v12-x1-all disdex-pengu-dual-ls-v2; do
   unit="$name@$TARGET_SHA.service"
