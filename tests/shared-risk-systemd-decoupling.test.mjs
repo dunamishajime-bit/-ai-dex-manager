@@ -183,3 +183,15 @@ test("cutover waits for the exact six-sleeve shared-risk contract before trader 
   const traders = cutover.indexOf('systemctl enable --now "$name@$TARGET_SHA.service"');
   assert.ok(safety >= 0 && traders > safety);
 });
+
+
+test("cutover blocks only active pending reservations and fails closed on malformed registry", async () => {
+  const cutover = await readFile("scripts/ops/root/disdex-idle-production-redeploy-20261001", "utf8");
+  assert.match(cutover, /pending\.get\("entries"\)/);
+  assert.match(cutover, /if not isinstance\(entries,list\)/);
+  assert.match(cutover, /active_statuses=\{"PENDING","SUBMITTED","UNKNOWN"\}/);
+  assert.match(cutover, /valid_statuses=active_statuses\|\{"RELEASED"\}/);
+  assert.match(cutover, /CUTOVER_PENDING_EXPOSURE_MALFORMED/);
+  assert.match(cutover, /CUTOVER_PENDING_EXPOSURE_PRESENT/);
+  assert.doesNotMatch(cutover, /isinstance\(entries,dict\) and entries/);
+});
