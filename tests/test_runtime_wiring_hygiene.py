@@ -85,7 +85,7 @@ class RuntimeWiringHygieneTest(unittest.TestCase):
         source = WIRING.read_text(encoding="utf-8")
         self.assertIn("normalize_position_recovery_state_lineage()", source)
         self.assertIn("disdex-runner-position-recovery/v1", source)
-        self.assertIn("position-recovery.json.before-", source)
+        self.assertIn('backup="$state.before-$DEPLOYED_SHA-', source)
         self.assertIn("position recovery state is malformed and will not be rewritten", source)
         self.assertIn("normalize_position_recovery_state_lineage", source)
 
