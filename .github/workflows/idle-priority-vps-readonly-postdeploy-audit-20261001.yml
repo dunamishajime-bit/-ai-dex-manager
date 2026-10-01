@@ -1,4 +1,5 @@
 name: Idle Priority VPS post-deploy read-only audit
+# audit-trigger: final-postdeploy-8e033af7-20261001
 # audit-sequence: post-live-cutover-v1
 on:
   push:
