@@ -219,3 +219,11 @@ test("runtime wiring removes the obsolete fixed V56 stock-reference release pin"
   assert.match(wiring, /disdex-stock-reference-free\.service\.d\/zzzz-v56-release\.conf/);
   assert.match(wiring, /DISDEX_STOCK_REFERENCE_LEGACY_RELEASE_PIN_REMOVED/);
 });
+
+
+test("successful cutover repoints previous to the immediate prior Production release", async () => {
+  const cutover = await read(CUTOVER);
+  assert.match(cutover, /previous_tmp="\$ROOT\/\.previous-\$REQUEST_ID"/);
+  assert.match(cutover, /ln -s "\$OLD_RELEASE" "\$previous_tmp"/);
+  assert.match(cutover, /POSTDEPLOY_PREVIOUS_UPDATED=PASS/);
+});
