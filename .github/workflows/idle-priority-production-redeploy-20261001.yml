@@ -1,5 +1,5 @@
 name: Idle Priority exact-SHA Production redeploy
-# redeploy-sequence: coherence-guard-runtime-contract-v13
+# redeploy-sequence: watchdog-heartbeat-lock-retry-v14
 on:
   push:
     branches: [design/idle-priority-bt-parity-20260929]
