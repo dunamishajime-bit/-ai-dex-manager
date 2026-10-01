@@ -27,6 +27,9 @@ on:
       - "tests/idle-priority-short-systemd-contract.test.mjs"
       - "tests/idle-priority-short-*.test.ts"
       - "docs/implementation/IDLE_PRIORITY_SHORT_CODEX_PRODUCTION_HANDOFF_20260929.md"
+      - "lib/disdex-shared-crypto-risk-refresh-loop.ts"
+      - "scripts/disdex-shared-crypto-risk-writer.ts"
+      - "tests/shared-risk-transient-refresh-retry.test.ts"
       - "package.json"
   workflow_dispatch:
 permissions:
@@ -50,6 +53,7 @@ jobs:
       - run: npx tsx --test tests/q102-symbol-ownership-contract.test.ts
       - run: bash scripts/ops/root/disdex-current-runtime-wiring --self-test
       - run: npx tsx --test tests/ops-runner-watchdog-current-contract.test.mjs tests/watchdog-release-lineage.test.ts
+      - run: npx tsx --test tests/shared-risk-transient-refresh-retry.test.ts tests/shared-risk-rollover-retry.test.ts
       - name: Replay LIVE signal evaluator against exact 63-candidate fixture
         env:
           GH_TOKEN: ${{ github.token }}
