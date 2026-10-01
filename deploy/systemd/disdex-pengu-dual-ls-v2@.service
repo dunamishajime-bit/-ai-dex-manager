@@ -1,8 +1,7 @@
 [Unit]
 Description=DisDex PENGU Dual LS V2 LIVE runner (%i)
 After=network-online.target disdex-shared-crypto-risk@%i.service disdex-v12-v52-margin-guard@%i.service
-Wants=network-online.target disdex-shared-crypto-risk@%i.service
-Requires=disdex-v12-v52-margin-guard@%i.service
+Wants=network-online.target disdex-shared-crypto-risk@%i.service disdex-v12-v52-margin-guard@%i.service
 
 [Service]
 Type=simple
