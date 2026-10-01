@@ -184,7 +184,9 @@ jobs:
           echo "SUPERVISOR_JOURNAL_END"
 
           echo "SYSTEMD_DEPENDENCY_AUDIT_BEGIN"
-          for name in disdex-v12-x1-all disdex-pengu-dual-ls-v2 disdex-shared-crypto-risk; do
+          for name in disdex-v12-x1-all disdex-pengu-dual-ls-v2 disdex-quality102-causal-v1 \
+                      disdex-v52-aster-only disdex-fet-brk48 disdex-hype-long disdex-idle-priority-short \
+                      disdex-shared-crypto-risk disdex-v12-v52-margin-guard; do
             unit="$name@$sha.service"
             echo "SYSTEMD_DEPENDENCY_UNIT=$unit"
             systemctl show "$unit" --no-pager \
