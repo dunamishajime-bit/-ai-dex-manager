@@ -209,8 +209,9 @@ test("cutover rebinds stock reference to current release and preserves target on
   const cutover = await read(CUTOVER);
   assert.match(cutover, /restart_stock_reference_current\(\)/);
   assert.match(cutover, /for attempt in \$\(seq 1 15\)/);
-  assert.match(cutover, /POSTDEPLOY_STOCK_REFERENCE_CURRENT=PASS/);
-  assert.match(cutover, /ROLLBACK_STOCK_REFERENCE_CURRENT=PASS/);
+  assert.match(cutover, /\$\{phase\}_STOCK_REFERENCE_CURRENT=PASS/);
+  assert.match(cutover, /restart_stock_reference_current POSTDEPLOY/);
+  assert.match(cutover, /restart_stock_reference_current ROLLBACK/);
   assert.match(cutover, /ROLLBACK_TARGET_RELEASE_PRESERVED_FOR_STOCK_REFERENCE/);
 });
 
