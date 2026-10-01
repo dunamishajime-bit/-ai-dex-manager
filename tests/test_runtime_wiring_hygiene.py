@@ -137,5 +137,17 @@ class RuntimeWiringHygieneTest(unittest.TestCase):
         self.assertIn("retire_stale_release_enabled_units", source)
 
 
+    def test_wiring_prunes_only_inactive_unprotected_release_metadata(self):
+        source = WIRING.read_text(encoding="utf-8")
+        self.assertIn("prune_stale_runtime_metadata()", source)
+        self.assertIn('"$TRADING_ROOT/previous"', source)
+        self.assertIn('"$NODE_MODULES_SOURCE_SHA"', source)
+        self.assertIn('"$PYTHON_RUNTIME_SOURCE_SHA"', source)
+        self.assertIn('stale runtime metadata still belongs to a live unit', source)
+        self.assertIn('rm -f -- "$path"', source)
+        self.assertIn('rm -rf -- "$path"', source)
+        self.assertIn("prune_stale_runtime_metadata", source)
+
+
 if __name__ == "__main__":
     unittest.main()
