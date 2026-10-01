@@ -370,13 +370,58 @@ echo "CUTOVER_WIRING_BEGIN release=$RELEASE"
 (cd "$RELEASE" && bash scripts/ops/root/disdex-current-runtime-wiring --apply)
 echo "CUTOVER_WIRING_PASS"
 
+wait_safety_daemons_ready() {
+  local required_consecutive=2
+  local consecutive=0
+  local attempts=0
+  while (( attempts < 45 )); do
+    attempts=$((attempts + 1))
+    if python3 - <<'PY'
+import json,time
+now=int(time.time()*1000)
+with open("/var/lib/disdex/shared/crypto-daily-risk.json",encoding="utf-8") as f:
+    risk=json.load(f)
+with open("/var/lib/disdex/shared/margin-risk/guard-live.json",encoding="utf-8") as f:
+    guard=json.load(f)
+risk_at=int(risk.get("updatedAt") or 0)
+guard_at=int(guard.get("checkedAt") or 0)
+if risk.get("tripped") is True or risk.get("sourceComplete") is not True:
+    raise SystemExit(1)
+if risk_at<=0 or now-risk_at>120000 or risk_at>now+60000:
+    raise SystemExit(1)
+if guard.get("stage")!="HEALTHY" or guard.get("ordersAllowed") is not True:
+    raise SystemExit(1)
+if guard_at<=0 or now-guard_at>120000 or guard_at>now+60000:
+    raise SystemExit(1)
+PY
+    then
+      consecutive=$((consecutive + 1))
+      echo "CUTOVER_SAFETY_DAEMONS_HEALTHY attempt=$attempts consecutive=$consecutive"
+      if (( consecutive >= required_consecutive )); then
+        return 0
+      fi
+    else
+      consecutive=0
+      echo "CUTOVER_SAFETY_DAEMONS_WAIT attempt=$attempts"
+    fi
+    sleep 2
+  done
+  echo "CUTOVER_SAFETY_DAEMONS_NOT_READY"
+  return 1
+}
+
+# Start safety daemons first.  Wants/After only orders unit startup; it does not
+# guarantee their persisted safety snapshots are already fresh when a trader's
+# ExecStartPre or first tick reads them.
+systemctl enable --now "disdex-shared-crypto-risk@$TARGET_SHA.service"
+systemctl enable --now "disdex-v12-v52-margin-guard@$TARGET_SHA.service"
+wait_safety_daemons_ready
+
 for name in "${CORE[@]}"; do
   systemctl enable --now "$name@$TARGET_SHA.service"
 done
 systemctl enable --now "disdex-hype-long@$TARGET_SHA.service"
 systemctl enable --now "disdex-idle-priority-short@$TARGET_SHA.service"
-systemctl enable --now "disdex-shared-crypto-risk@$TARGET_SHA.service"
-systemctl enable --now "disdex-v12-v52-margin-guard@$TARGET_SHA.service"
 
 for name in disdex-v12-x1-all disdex-pengu-dual-ls-v2; do
   unit="$name@$TARGET_SHA.service"
