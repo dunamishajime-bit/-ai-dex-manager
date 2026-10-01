@@ -5,6 +5,7 @@ import { HYPE_ZEC_LONG_POLICY, type HypeZecStrategy } from "../config/hypeZecLon
 import { HYPE_TREND_LONG_POLICY } from "../config/hypeTrendLongPolicy";
 import { classifyAsterSymbol } from "./disdex-aster-portfolio-classifier";
 import { aggregatePendingExposure, readPendingExposureRegistry } from "./disdex-pending-exposure-registry";
+import { readSharedCryptoDailyRisk } from "./disdex-shared-crypto-daily-risk";
 import { findManagedHypeZecProtectiveOrders } from "./disdex-managed-protective-orders";
 import { readQuality102CausalV1Ownership, quality102OwnsPosition } from "./disdex-quality102-causal-v1-ownership";
 import { planStrictPortfolio, type StrictPortfolioIntent, type StrictPortfolioPosition } from "./disdex-strict-portfolio-planner";
@@ -222,6 +223,13 @@ export class HypeZecLongRunner {
 
   private async enter(state: HypeZecLongRunnerState, signal: HypeZecSignalResult, account: DirectAccountSnapshot, positions: DirectPosition[], lock: AccountLockHandle): Promise<HypeZecLongTickResult> {
     if (!signal.accepted || !signal.entryPrice || !signal.stopPrice || !signal.signalTs) return { status: "no-change", message: signal.reason, strategy: signal.strategy };
+    const sharedRisk = await readSharedCryptoDailyRisk(this.dependencies.runtime.sharedRiskPath, this.now());
+    if (!sharedRisk.ok) {
+      state.lastDecision = { strategy: signal.strategy, signalTs: signal.signalTs, accepted: false, reason: `SHARED_CRYPTO_RISK:${sharedRisk.reason || "INVALID"}` };
+      state.lastDecisionTs = this.now();
+      await this.dependencies.stateStore.save(state);
+      return { status: "held", message: `HYPE_ZEC_SHARED_RISK_BLOCKED:${sharedRisk.reason || "INVALID"}`, strategy: signal.strategy };
+    }
     const symbol = signal.symbol;
     const quote = await this.dependencies.executor.getMarketQuote(symbol);
     if (quote.updatedAt > this.now() || this.now() - quote.updatedAt > 5 * 60_000) return { status: "held", message: `HYPE_ZEC_QUOTE_STALE:${symbol}`, strategy: signal.strategy };
