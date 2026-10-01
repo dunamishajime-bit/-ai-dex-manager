@@ -527,6 +527,38 @@ done
 systemctl enable --now "disdex-hype-long@$TARGET_SHA.service"
 systemctl enable --now "disdex-idle-priority-short@$TARGET_SHA.service"
 
+# The first wiring pass intentionally keeps operator automation deferred. Refresh
+# every trading heartbeat against the new release before enabling watchdog or
+# recovery timers, otherwise a timer can observe the previous release's
+# serviceUnit/runtimeSha during the cutover window and fail closed spuriously.
+sleep 5
+systemctl reset-failed disdex-runner-health-snapshot.service >/dev/null 2>&1 || true
+systemctl start disdex-runner-health-snapshot.service
+sleep 3
+python3 - "$TARGET_SHA" <<'PY'
+import json,sys
+sha=sys.argv[1]
+expected={
+    "v12-x1-all.json":f"disdex-v12-x1-all@{sha}.service",
+    "pengu-v8.json":f"disdex-pengu-dual-ls-v2@{sha}.service",
+    "quality102-causal-v1.json":f"disdex-quality102-causal-v1@{sha}.service",
+    "v52.json":f"disdex-v52-aster-only@{sha}.service",
+    "fet-brk48-residual.json":f"disdex-fet-brk48@{sha}.service",
+    "hype-trend-long.json":f"disdex-hype-long@{sha}.service",
+    "idle-priority-short.json":f"disdex-idle-priority-short@{sha}.service",
+}
+root="/var/lib/disdex/runner-health/heartbeats"
+for name,unit in expected.items():
+    row=json.load(open(f"{root}/{name}",encoding="utf-8"))
+    if row.get("runtimeSha")!=sha or row.get("expectedSha")!=sha:
+        raise SystemExit(f"CUTOVER_HEARTBEAT_SHA_MISMATCH:{name}")
+    if row.get("serviceUnit")!=unit:
+        raise SystemExit(f"CUTOVER_HEARTBEAT_SERVICE_UNIT_MISMATCH:{name}")
+    if row.get("safetyState")!="HEALTHY":
+        raise SystemExit(f"CUTOVER_HEARTBEAT_NOT_HEALTHY:{name}")
+print("CUTOVER_PRE_AUTOMATION_HEARTBEAT_REFRESH_PASS")
+PY
+
 echo "CUTOVER_POSTSTART_WIRING_BEGIN"
 (cd "$RELEASE" && bash scripts/ops/root/disdex-current-runtime-wiring --apply)
 echo "CUTOVER_POSTSTART_WIRING_PASS"
@@ -562,11 +594,6 @@ done
 # process start. Restart it after the current symlink has moved and wait for
 # systemd to publish the new MainPID/cwd before asserting release ownership.
 restart_stock_reference_current POSTDEPLOY
-
-sleep 5
-systemctl reset-failed disdex-runner-health-snapshot.service >/dev/null 2>&1 || true
-systemctl start disdex-runner-health-snapshot.service
-sleep 3
 
 for name in "${NAMES[@]}"; do
   unit="$name@$TARGET_SHA.service"
