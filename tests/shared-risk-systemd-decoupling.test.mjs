@@ -152,3 +152,15 @@ test("cutover permits only one diagnosed healthy historical V12 restart", async 
   assert.match(cutover, /CUTOVER_KNOWN_V12_SINGLE_RESTART_ACCEPTED/);
   assert.doesNotMatch(cutover, /restart_count" -le [2-9]/);
 });
+
+
+test("cutover permits only one diagnosed healthy historical Q102 restart", async () => {
+  const cutover = await read(CUTOVER);
+  assert.match(cutover, /name" == disdex-quality102-causal-v1 && "\$restart_count" == 1/);
+  assert.match(cutover, /CUTOVER_KNOWN_Q102_RESTART_NOT_CURRENTLY_HEALTHY/);
+  assert.match(cutover, /CUTOVER_KNOWN_Q102_RESTART_STATE_SHA_MISMATCH/);
+  assert.match(cutover, /CUTOVER_KNOWN_Q102_RESTART_STATE_STALE/);
+  assert.match(cutover, /CUTOVER_KNOWN_Q102_RESTART_MANUAL_REVIEW_ACTIVE/);
+  assert.match(cutover, /CUTOVER_KNOWN_Q102_RESTART_PENDING_ACTIVE/);
+  assert.match(cutover, /CUTOVER_KNOWN_Q102_SINGLE_RESTART_ACCEPTED/);
+});
