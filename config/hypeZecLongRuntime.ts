@@ -13,6 +13,7 @@ export interface HypeZecLongRuntime {
   runtimeSha: string;
   statePath: string;
   pendingExposurePath: string;
+  sharedRiskPath: string;
   maximumGross: number;
   maximumReductionFraction: number;
   hypeRiskPct: number;
@@ -65,6 +66,7 @@ export function resolveHypeZecLongRuntime(env: NodeJS.ProcessEnv = process.env):
     runtimeSha: String(env.DISDEX_HYPE_ZEC_RUNTIME_SHA || env.DISDEX_RELEASE_SHA || env.DISDEX_RUNTIME_COMMIT_SHA || "").trim().toLowerCase(),
     statePath: String(env.DISDEX_HYPE_ZEC_STATE_PATH || "/var/lib/disdex/hype-zec-long/runner.json"),
     pendingExposurePath: String(env.DISDEX_PENDING_EXPOSURE_REGISTRY_PATH || "/var/lib/disdex/shared/pending-exposure.json"),
+    sharedRiskPath: String(env.DISDEX_SHARED_CRYPTO_DAILY_RISK_PATH || "/var/lib/disdex/shared/crypto-daily-risk.json"),
     maximumGross: Math.max(0, number(env.DISDEX_HYPE_ZEC_MAX_GROSS, resolvedSignalMode === "TREND" ? HYPE_TREND_LONG_POLICY.maximumGross : HYPE_ZEC_LONG_POLICY.HYPE_LONG.maximumGross)),
     maximumReductionFraction: HYPE_ZEC_LONG_POLICY.HYPE_LONG.maximumReductionFraction,
     hypeRiskPct: HYPE_ZEC_LONG_POLICY.HYPE_LONG.riskPct,
