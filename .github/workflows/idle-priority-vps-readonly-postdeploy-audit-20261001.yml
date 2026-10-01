@@ -168,6 +168,21 @@ jobs:
           done
           echo "FAILED_UNIT_JOURNAL_END"
 
+          echo "SUPERVISOR_JOURNAL_BEGIN"
+          systemctl list-unit-files --no-legend 2>/dev/null | grep -E 'disdex-(runner-watchdog|runner-health|v12-kill-switch-auto-repair|v12-three-hour-health-check)' || true
+          systemctl list-timers --all --no-legend 2>/dev/null | grep -E 'disdex-(runner-watchdog|runner-health|v12-kill-switch-auto-repair|v12-three-hour-health-check)' || true
+          for unit in disdex-runner-watchdog.service disdex-runner-health-snapshot.service disdex-v12-kill-switch-auto-repair.service disdex-v12-three-hour-health-check.service; do
+            echo "SUPERVISOR_UNIT=$unit"
+            journalctl -u "$unit" --since "2026-10-01 08:40:00" --until "2026-10-01 08:50:00" --no-pager -o short-iso 2>/dev/null | tail -200 || true
+          done
+          for p in /var/lib/disdex/runner-health/watchdog-current-audit.json /var/lib/disdex/runner-health/watchdog-current-state.json /var/lib/disdex/runner-health/current.json; do
+            if [[ -f "$p" ]]; then
+              echo "SUPERVISOR_JSON path=$p"
+              cat "$p"
+            fi
+          done
+          echo "SUPERVISOR_JOURNAL_END"
+
           echo "ASTER_READONLY_DIAGNOSTIC_BEGIN"
           audit_budget="/tmp/disdex-aster-readonly-budget-audit-$.json"
           DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH="$audit_budget" \
