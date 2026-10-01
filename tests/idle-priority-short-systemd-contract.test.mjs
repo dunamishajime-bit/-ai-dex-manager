@@ -79,3 +79,13 @@ test("Idle is wired into release-pinned health snapshot and watchdog", async () 
   assert.match(wiring, /DISDEX_WATCHDOG_IDLE_EXPECTED_SHA=\$\{DEPLOYED_SHA\}/);
   assert.match(wiring, /DISDEX_WATCHDOG_IDLE_SERVICE_UNIT=\$\{IDLE_UNIT\}/);
 });
+
+
+test("Production cutover retargets the stock reference proxy to the new current release", async () => {
+  const cutover = await readFile("scripts/ops/root/disdex-idle-production-redeploy-20261001", "utf8");
+  assert.match(cutover, /systemctl is-active --quiet disdex-stock-reference-free\.service/);
+  assert.match(cutover, /systemctl restart disdex-stock-reference-free\.service/);
+  assert.match(cutover, /POSTDEPLOY_STOCK_REFERENCE_CWD_MISMATCH/);
+  assert.match(cutover, /readlink -f "\/proc\/\$stock_pid\/cwd"/);
+  assert.match(cutover, /POSTDEPLOY_STOCK_REFERENCE_CURRENT=PASS/);
+});
