@@ -7,5 +7,5 @@ Type=oneshot
 User=root
 Group=root
 WorkingDirectory=/home/deploy/disdex-trading/current
-ExecStart=/home/deploy/disdex-trading/current/scripts/ops/root/disdex-current-runtime-coherence-guard --auto
+ExecStart=/usr/local/sbin/disdex-current-runtime-coherence-guard --auto
 Nice=10
