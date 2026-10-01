@@ -1,5 +1,5 @@
 name: Idle Priority exact-SHA Production redeploy
-# redeploy-sequence: post-recovery-cutover-v6-safety-daemon-lifecycle
+# redeploy-sequence: post-recovery-cutover-v7-safety-daemon-readiness
 on:
   push:
     branches: [design/idle-priority-bt-parity-20260929]
