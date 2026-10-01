@@ -195,3 +195,11 @@ test("cutover blocks only active pending reservations and fails closed on malfor
   assert.match(cutover, /CUTOVER_PENDING_EXPOSURE_PRESENT/);
   assert.doesNotMatch(cutover, /isinstance\(entries,dict\) and entries/);
 });
+
+
+test("pre-cutover Margin Guard state must be fresh within one poll plus grace", async () => {
+  const cutover = await readFile("scripts/ops/root/disdex-idle-production-redeploy-20261001", "utf8");
+  assert.match(cutover, /guard_at=int\(guard\.get\("checkedAt"\) or 0\)/);
+  assert.match(cutover, /now-guard_at>360_000/);
+  assert.match(cutover, /CUTOVER_MARGIN_STALE/);
+});
