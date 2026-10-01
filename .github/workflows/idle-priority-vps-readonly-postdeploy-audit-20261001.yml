@@ -168,6 +168,16 @@ jobs:
           done
           echo "FAILED_UNIT_JOURNAL_END"
 
+          echo "FAILED_RELEASE_UNIT_DIAGNOSTIC_BEGIN"
+          while read -r unit _; do
+            [[ "$unit" =~ ^disdex-(v12-x1-all|pengu-dual-ls-v2|quality102-causal-v1|v52-aster-only|fet-brk48|hype-long|idle-priority-short|shared-crypto-risk|v12-v52-margin-guard)@[0-9a-f]{40}\.service$ ]] || continue
+            [[ "$unit" == *"@$sha.service" ]] && continue
+            echo "FAILED_RELEASE_UNIT=$unit"
+            systemctl show "$unit" --no-pager -p ActiveState -p SubState -p Result -p ExecMainStatus -p ExecMainCode -p NRestarts -p ControlPID || true
+            journalctl -u "$unit" --no-pager -n 120 -o short-iso 2>/dev/null | tail -120 || true
+          done < <(systemctl list-units --all --type=service --state=failed --no-legend 2>/dev/null || true)
+          echo "FAILED_RELEASE_UNIT_DIAGNOSTIC_END"
+
           echo "SUPERVISOR_JOURNAL_BEGIN"
           systemctl list-unit-files --no-legend 2>/dev/null | grep -E 'disdex-(runner-watchdog|runner-health|v12-kill-switch-auto-repair|v12-three-hour-health-check)' || true
           systemctl list-timers --all --no-legend 2>/dev/null | grep -E 'disdex-(runner-watchdog|runner-health|v12-kill-switch-auto-repair|v12-three-hour-health-check)' || true
