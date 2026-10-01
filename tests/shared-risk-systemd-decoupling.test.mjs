@@ -203,3 +203,19 @@ test("pre-cutover Margin Guard state must be fresh within one poll plus grace", 
   assert.match(cutover, /now-guard_at>360_000/);
   assert.match(cutover, /CUTOVER_MARGIN_STALE/);
 });
+
+
+test("cutover rebinds stock reference to current release and preserves target on rollback mismatch", async () => {
+  const cutover = await read(CUTOVER);
+  assert.match(cutover, /restart_stock_reference_current\(\)/);
+  assert.match(cutover, /for attempt in \$\(seq 1 15\)/);
+  assert.match(cutover, /POSTDEPLOY_STOCK_REFERENCE_CURRENT=PASS/);
+  assert.match(cutover, /ROLLBACK_STOCK_REFERENCE_CURRENT=PASS/);
+  assert.match(cutover, /ROLLBACK_TARGET_RELEASE_PRESERVED_FOR_STOCK_REFERENCE/);
+});
+
+test("runtime wiring removes the obsolete fixed V56 stock-reference release pin", async () => {
+  const wiring = await read(WIRING);
+  assert.match(wiring, /disdex-stock-reference-free\.service\.d\/zzzz-v56-release\.conf/);
+  assert.match(wiring, /DISDEX_STOCK_REFERENCE_LEGACY_RELEASE_PIN_REMOVED/);
+});
