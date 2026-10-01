@@ -276,7 +276,13 @@ jobs:
           if now-int(risk.get("updatedAt") or 0)>120000: raise SystemExit("FINAL_SHARED_RISK_STALE")
           guard=load("/var/lib/disdex/shared/margin-risk/guard-live.json")
           if guard.get("stage")!="HEALTHY" or guard.get("ordersAllowed") is not True: raise SystemExit("FINAL_MARGIN_NOT_HEALTHY")
-          if now-int(guard.get("checkedAt") or 0)>120000: raise SystemExit("FINAL_MARGIN_STALE")
+          guard_checked=int(guard.get("checkedAt") or 0)
+          guard_next=int(guard.get("nextCheckAt") or 0)
+          if guard_checked<=0: raise SystemExit("FINAL_MARGIN_CHECKED_AT_INVALID")
+          if guard_next>0:
+              if now>guard_next+60000: raise SystemExit("FINAL_MARGIN_STALE")
+          elif now-guard_checked>360000:
+              raise SystemExit("FINAL_MARGIN_STALE")
           pending=load("/var/lib/disdex/shared/pending-exposure.json")
           entries=pending.get("entries",{}) if isinstance(pending,dict) else {}
           if isinstance(entries,dict) and entries: raise SystemExit("FINAL_PENDING_EXPOSURE_PRESENT")
