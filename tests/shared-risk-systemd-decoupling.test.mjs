@@ -164,3 +164,22 @@ test("cutover permits only one diagnosed healthy historical Q102 restart", async
   assert.match(cutover, /CUTOVER_KNOWN_Q102_RESTART_PENDING_ACTIVE/);
   assert.match(cutover, /CUTOVER_KNOWN_Q102_SINGLE_RESTART_ACCEPTED/);
 });
+
+
+test("cutover waits for the exact six-sleeve shared-risk contract before trader startup", async () => {
+  const cutover = await readFile("scripts/ops/root/disdex-idle-production-redeploy-20261001", "utf8");
+  for (const strategy of [
+    "V12_X1.00_ALL",
+    "PENGU_DUAL_LS_V2_FINAL",
+    "QUALITY102_CAUSAL_V1",
+    "FET_BRK48_RESIDUAL",
+    "HYPE_LONG",
+    "IDLE_PRIORITY_SHORT",
+  ]) {
+    assert.match(cutover, new RegExp(strategy));
+  }
+  assert.match(cutover, /set\(risk\.get\("strategyIds"\) or \[\]\) != expected_strategies/);
+  const safety = cutover.indexOf("wait_safety_daemons_ready");
+  const traders = cutover.indexOf('systemctl enable --now "$name@$TARGET_SHA.service"');
+  assert.ok(safety >= 0 && traders > safety);
+});
