@@ -178,6 +178,21 @@ jobs:
           done < <(systemctl list-units --all --type=service --state=failed --no-legend 2>/dev/null || true)
           echo "FAILED_RELEASE_UNIT_DIAGNOSTIC_END"
 
+          echo "NONCURRENT_V12_JOURNAL_BEGIN"
+          while read -r unit _; do
+            [[ "$unit" =~ ^disdex-v12-x1-all@([0-9a-f]{40})\.service$ ]] || continue
+            [[ "$unit" == *"@$sha.service" ]] && continue
+            echo "NONCURRENT_V12_UNIT=$unit"
+            systemctl show "$unit" --no-pager -p ActiveState -p SubState -p Result -p ExecMainStatus -p NRestarts || true
+            journalctl -u "$unit" --since "2026-10-01 09:23:30" --until "2026-10-01 09:25:30" --no-pager -o short-iso 2>/dev/null | tail -120 || true
+          done < <(systemctl list-units --all 'disdex-v12-x1-all@*.service' --no-legend 2>/dev/null || true)
+          if [[ -f /var/lib/disdex/shared/account-order.lock ]]; then
+            echo "ACCOUNT_LOCK_CURRENT=$(cat /var/lib/disdex/shared/account-order.lock)"
+          else
+            echo "ACCOUNT_LOCK_CURRENT=ABSENT"
+          fi
+          echo "NONCURRENT_V12_JOURNAL_END"
+
           echo "SUPERVISOR_JOURNAL_BEGIN"
           systemctl list-unit-files --no-legend 2>/dev/null | grep -E 'disdex-(runner-watchdog|runner-health|v12-kill-switch-auto-repair|v12-three-hour-health-check)' || true
           systemctl list-timers --all --no-legend 2>/dev/null | grep -E 'disdex-(runner-watchdog|runner-health|v12-kill-switch-auto-repair|v12-three-hour-health-check)' || true
