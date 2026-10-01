@@ -139,3 +139,16 @@ test("cutover waits for fresh safety daemons before starting trading runners", a
   assert.ok(safetyWait > sharedStart && safetyWait > marginStart, "freshness gate must run after both safety daemons start");
   assert.ok(coreStart > safetyWait, "core trading runners must start only after safety snapshots are fresh and HEALTHY");
 });
+
+
+test("cutover permits only one diagnosed healthy historical V12 restart", async () => {
+  const cutover = await read(CUTOVER);
+  assert.match(cutover, /name" == disdex-v12-x1-all && "\$restart_count" == 1/);
+  assert.match(cutover, /CUTOVER_KNOWN_V12_RESTART_NOT_CURRENTLY_HEALTHY/);
+  assert.match(cutover, /CUTOVER_KNOWN_V12_RESTART_STATE_SHA_MISMATCH/);
+  assert.match(cutover, /CUTOVER_KNOWN_V12_RESTART_STATE_STALE/);
+  assert.match(cutover, /CUTOVER_KNOWN_V12_RESTART_MANUAL_REVIEW_ACTIVE/);
+  assert.match(cutover, /CUTOVER_KNOWN_V12_RESTART_PENDING_ACTIVE/);
+  assert.match(cutover, /CUTOVER_KNOWN_V12_SINGLE_RESTART_ACCEPTED/);
+  assert.doesNotMatch(cutover, /restart_count" -le [2-9]/);
+});
