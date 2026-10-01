@@ -183,6 +183,19 @@ jobs:
           done
           echo "SUPERVISOR_JOURNAL_END"
 
+          echo "SYSTEMD_DEPENDENCY_AUDIT_BEGIN"
+          for name in disdex-v12-x1-all disdex-pengu-dual-ls-v2 disdex-shared-crypto-risk; do
+            unit="$name@$sha.service"
+            echo "SYSTEMD_DEPENDENCY_UNIT=$unit"
+            systemctl show "$unit" --no-pager \
+              -p Requires -p Wants -p Requisite -p BindsTo -p PartOf \
+              -p ConsistsOf -p BoundBy -p PropagatesReloadTo -p ReloadPropagatedFrom \
+              -p After -p Before -p Restart -p RestartMode -p RestartUSec \
+              -p StopWhenUnneeded -p RefuseManualStop -p RefuseManualStart || true
+            systemctl cat "$unit" --no-pager || true
+          done
+          echo "SYSTEMD_DEPENDENCY_AUDIT_END"
+
           echo "ASTER_READONLY_DIAGNOSTIC_BEGIN"
           audit_budget="/tmp/disdex-aster-readonly-budget-audit-$.json"
           DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH="$audit_budget" \
