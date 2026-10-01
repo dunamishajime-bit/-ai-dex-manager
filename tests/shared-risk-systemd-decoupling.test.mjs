@@ -68,4 +68,8 @@ test("cutover verifies the effective dependency graph and can restore prior temp
   assert.match(cutover, /POSTDEPLOY_SHARED_RISK_HARD_DEPENDENCY_PRESENT/);
   assert.match(cutover, /POSTDEPLOY_SHARED_RISK_SOFT_DEPENDENCY_MISSING/);
   assert.match(cutover, /POSTDEPLOY_MARGIN_GUARD_HARD_DEPENDENCY_MISSING/);
+  assert.match(cutover, /CUTOVER_SHARED_RISK_SOURCE_INCOMPLETE/);
+  assert.match(cutover, /CUTOVER_SHARED_RISK_STALE/);
+  assert.match(cutover, /CUTOVER_KNOWN_SHARED_RISK_TRANSIENT_RESTART_ACCEPTED/);
+  assert.match(cutover, /name" == disdex-shared-crypto-risk && "\$restart_count" == 1/);
 });
