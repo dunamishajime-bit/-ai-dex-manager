@@ -1,5 +1,5 @@
 name: Idle Priority exact-SHA Production redeploy
-# redeploy-sequence: post-recovery-cutover-v9-known-v12-q102-restarts
+# redeploy-sequence: post-audit-fixes-v10-shared-risk-timers-q102-hype
 on:
   push:
     branches: [design/idle-priority-bt-parity-20260929]
