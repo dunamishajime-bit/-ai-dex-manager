@@ -4,6 +4,7 @@ import { AsterV3Client } from "../lib/aster-v3-client";
 import { AsterDirectTradeExecutor } from "../lib/direct-trade-executor";
 import { FileAccountOrderLock } from "../lib/disdex-account-order-lock";
 import { createInterruptibleDelay } from "../lib/interruptible-delay";
+import { nextAccountLockAwareWaitMs } from "../lib/disdex-account-lock-retry-scheduling";
 import { IdlePriorityAsterMarketDataProvider } from "../lib/idle-priority-short-market-data";
 import { IdlePriorityShortRunner, idleRunnerSelfTest } from "../lib/idle-priority-short-runner";
 import { FileIdlePriorityShortStateStore } from "../lib/idle-priority-short-state";
@@ -73,7 +74,9 @@ async function main() {
         const result = await runner.tick();
         console.log(JSON.stringify({ timestamp: new Date().toISOString(), event: "idle-priority-short-tick", strategyId: "IDLE_PRIORITY_SHORT", mode: runtime.mode, runtimeSha: runtime.runtimeSha, ...result }));
         if (!daemon || stopping || result.status === "manual-review") break;
-        await delay.wait(Math.max(5_000, Math.min(15 * 60_000, runtime.pollMs)));
+        const normalWaitMs = Math.max(5_000, Math.min(15 * 60_000, runtime.pollMs));
+        const lockRetryMs = numberEnv("DISDEX_IDLE_PRIORITY_LOCK_RETRY_MS", 8_000);
+        await delay.wait(nextAccountLockAwareWaitMs(result.status, normalWaitMs, lockRetryMs));
     } while (!stopping);
 }
 
