@@ -296,7 +296,9 @@ jobs:
           if hb.get("runtimeSha")!=sha or hb.get("expectedSha")!=sha: raise SystemExit("FINAL_IDLE_HEARTBEAT_SHA_MISMATCH")
           if hb.get("safetyState")!="HEALTHY" or hb.get("mode")!="LIVE" or hb.get("liveEnabled") is not True:
               raise SystemExit("FINAL_IDLE_HEARTBEAT_NOT_HEALTHY")
-          if int(hb.get("nRestarts") or -1)!=0 or int(hb.get("mainPid") or 0)<=0:
+          hb_restarts=hb.get("nRestarts")
+          hb_pid=hb.get("mainPid")
+          if hb_restarts is None or int(hb_restarts)!=0 or hb_pid is None or int(hb_pid)<=0:
               raise SystemExit("FINAL_IDLE_HEARTBEAT_RESTART_OR_PID_INVALID")
           print("FINAL_IDLE_PARITY_V3_VERIFIED=PASS")
           print("FINAL_SHARED_SAFETY_VERIFIED=PASS")
