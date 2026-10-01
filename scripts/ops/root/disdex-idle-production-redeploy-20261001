@@ -442,6 +442,12 @@ risk_at=int(risk.get("updatedAt") or 0)
 guard_at=int(guard.get("checkedAt") or 0)
 if risk.get("tripped") is True or risk.get("sourceComplete") is not True:
     raise SystemExit(1)
+expected_strategies={
+    "V12_X1.00_ALL","PENGU_DUAL_LS_V2_FINAL","QUALITY102_CAUSAL_V1",
+    "FET_BRK48_RESIDUAL","HYPE_LONG","IDLE_PRIORITY_SHORT",
+}
+if set(risk.get("strategyIds") or []) != expected_strategies:
+    raise SystemExit(1)
 if risk_at<=0 or now-risk_at>120000 or risk_at>now+60000:
     raise SystemExit(1)
 if guard.get("stage")!="HEALTHY" or guard.get("ordersAllowed") is not True:
