@@ -145,6 +145,55 @@ class V52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
             "strictPortfolioPlan": strict_plan,
         }
 
+    def _prepare_idle_residual_for_stock_entry(self, slot: str, target_gross: float) -> float:
+        if not self.live:
+            return target_gross
+        requested = max(0.0, base.finite(target_gross))
+        if requested <= EPSILON:
+            return 0.0
+        tsx = os.getenv("DISDEX_TSX_BIN") or os.path.join(os.getcwd(), "node_modules", ".bin", "tsx")
+        script = os.getenv(
+            "DISDEX_IDLE_RESIDUAL_CORE_PREEMPT_SCRIPT",
+            "scripts/disdex-idle-residual-long-core-preempt.ts",
+        )
+        cause = f"V52_CORE_IDLE_RESIDUAL|{slot}|{base.now_ms()}|{requested:.12f}"
+        result = subprocess.run(
+            [
+                tsx,
+                script,
+                "--caller", "V52_CORE",
+                "--shared-lock-held", "true",
+                "--cause", cause,
+            ],
+            cwd=os.getcwd(),
+            env=os.environ.copy(),
+            capture_output=True,
+            text=True,
+            timeout=60,
+            check=False,
+        )
+        lines = [line.strip() for line in result.stdout.splitlines() if line.strip()]
+        if result.returncode != 0 or not lines:
+            detail = result.stderr.strip() or result.stdout.strip() or "no-output"
+            raise RuntimeError(f"IDLE_RESIDUAL_CORE_PREEMPT_HELPER_FAILED:rc={result.returncode}:{detail}")
+        try:
+            payload = json.loads(lines[-1])
+        except json.JSONDecodeError as error:
+            raise RuntimeError("IDLE_RESIDUAL_CORE_PREEMPT_HELPER_INVALID_JSON") from error
+        status = str(payload.get("status") or "")
+        if status == "blocked":
+            raise RuntimeError(f"IDLE_RESIDUAL_CORE_PREEMPT_HELPER_BLOCKED:{payload.get('message')}")
+        if status not in {"reduced", "not-needed"}:
+            raise RuntimeError(f"IDLE_RESIDUAL_CORE_PREEMPT_HELPER_UNEXPECTED_STATUS:{status}")
+        if status == "reduced":
+            self.log(
+                "idle-residual-preempted-for-stock",
+                slot=slot,
+                requestedGross=requested,
+                preemption=payload,
+            )
+        return requested
+
     def _prepare_fet_for_stock_entry(self, slot: str, target_gross: float) -> float:
         if not self.live:
             return target_gross
@@ -378,6 +427,7 @@ class V52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
         # The tick loop may safely retry such a decision inside the same entry window.
         self._v52_last_entry_blocked_before_order = False
         if self.live:
+            target_gross = self._prepare_idle_residual_for_stock_entry(slot, target_gross)
             target_gross = self._prepare_fet_for_stock_entry(slot, target_gross)
             target_gross = self._prepare_quality102_for_stock_entry(slot, target_gross)
             target_gross = self._prepare_v12_dynamic_for_stock_entry(slot, target_gross)

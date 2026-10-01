@@ -1,5 +1,6 @@
 import type { AsterKline, AsterV3Client } from "./aster-v3-client";
 import { IDLE_PRIORITY_SHORT_POLICY, type IdlePrioritySymbol } from "../config/idlePriorityShortPolicy";
+import { IDLE_RESIDUAL_LONG_POLICY, type IdleResidualLongSymbol } from "../config/idleResidualLongPolicy";
 import type { IdleH1Candle } from "./idle-priority-short-signal";
 
 const HOUR = 3_600_000;
@@ -47,6 +48,7 @@ export type IdlePriorityMarketSnapshot = {
   decisionTs: number;
   btc: IdleH1Candle[];
   symbols: Record<IdlePrioritySymbol, IdleH1Candle[]>;
+  residualSymbols: Record<IdleResidualLongSymbol, IdleH1Candle[]>;
 };
 
 export class IdlePriorityAsterMarketDataProvider {
@@ -59,7 +61,8 @@ export class IdlePriorityAsterMarketDataProvider {
     const now = (this.options.now || Date.now)();
     const limit = Math.max(MIN_BARS + 5, Math.min(1500, this.options.limit ?? 160));
     const symbols = Object.keys(IDLE_PRIORITY_SHORT_POLICY.routes) as IdlePrioritySymbol[];
-    const requested = ["BTCUSDT", ...symbols];
+    const residualSymbols = Object.keys(IDLE_RESIDUAL_LONG_POLICY.routes) as IdleResidualLongSymbol[];
+    const requested = ["BTCUSDT", ...symbols, ...residualSymbols];
     const result = await Promise.all(requested.map((symbol) => this.client.getKlines(symbol, "1h", limit)));
     const btc = normalizeIdlePriorityH1(result[0], "BTCUSDT", now);
     const mapped = {} as Record<IdlePrioritySymbol, IdleH1Candle[]>;
@@ -68,8 +71,14 @@ export class IdlePriorityAsterMarketDataProvider {
       if (normalized.decisionTs !== btc.decisionTs) throw new Error("IDLE_MARKET_DATA_DECISION_TS_MISMATCH");
       mapped[symbols[i]] = normalized.rows;
     }
+    const residualMapped = {} as Record<IdleResidualLongSymbol, IdleH1Candle[]>;
+    for (let i = 0; i < residualSymbols.length; i += 1) {
+      const normalized = normalizeIdlePriorityH1(result[1 + symbols.length + i], residualSymbols[i], now);
+      if (normalized.decisionTs !== btc.decisionTs) throw new Error("IDLE_RESIDUAL_MARKET_DATA_DECISION_TS_MISMATCH");
+      residualMapped[residualSymbols[i]] = normalized.rows;
+    }
     // Force an explicit positive close at the signal boundary before signal math.
     finitePositive(btc.rows.at(-1)?.close, "IDLE_MARKET_DATA_BTC_CLOSE_INVALID");
-    return { decisionTs: btc.decisionTs, btc: btc.rows, symbols: mapped };
+    return { decisionTs: btc.decisionTs, btc: btc.rows, symbols: mapped, residualSymbols: residualMapped };
   }
 }

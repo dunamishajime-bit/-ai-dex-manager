@@ -17,6 +17,8 @@ import { assertIdleParityCertificate } from "./idle-priority-short-parity-cert";
 import { computeIdlePriorityFeatures, evaluateIdleGenericCandidate, evaluateIdlePriorityShort, type IdleFeatures, type IdleSignal } from "./idle-priority-short-signal";
 import { FileIdlePriorityShortStateStore, type IdleOwnedPosition, type IdlePending, type IdleState } from "./idle-priority-short-state";
 import type { IdlePriorityMarketSnapshot } from "./idle-priority-short-market-data";
+import { writeIdleDecisionDetails, IDLE_DECISION_DETAILS_SCHEMA } from "./idle-priority-decision-diagnostics";
+import { evaluateIdleResidualLong } from "./idle-residual-long-signal";
 
 const EPSILON = 1e-9;
 const MAX_QUOTE_AGE_MS = 5 * 60_000;
@@ -496,6 +498,40 @@ export class IdlePriorityShortRunner {
                 this.dependencies.executor.getOpenOrders(),
                 this.dependencies.marketData.load(),
             ]);
+            const diagnosticSymbols = (Object.keys(market.symbols) as IdlePrioritySymbol[]).map((symbol) => {
+                const features = computeIdlePriorityFeatures(market.decisionTs, market.symbols[symbol], market.btc);
+                const generic = evaluateIdleGenericCandidate(features);
+                const routeDecision = evaluateIdlePriorityShort(symbol, features, generic);
+                const lastLifecycleTs = Number(state.lastAcceptedBySymbol[symbol] || 0) || null;
+                const cooldownAllowed = lastLifecycleTs == null || market.decisionTs - lastLifecycleTs >= IDLE_PRIORITY_SHORT_POLICY.cooldownHours * 3_600_000;
+                return {
+                    symbol,
+                    route: IDLE_PRIORITY_SHORT_POLICY.routes[symbol].route,
+                    features,
+                    generic: { accepted: generic.accepted, archetype: generic.archetype, side: generic.side, reason: generic.reason },
+                    routeDecision: { accepted: routeDecision.accepted, side: routeDecision.side, reason: routeDecision.reason, holdHours: routeDecision.holdHours },
+                    cooldownAllowed,
+                    lastLifecycleTs,
+                };
+            });
+            const diagnosticResidual = (Object.keys(market.residualSymbols) as Array<keyof typeof market.residualSymbols>).map((symbol) => {
+                const decision = evaluateIdleResidualLong(symbol, market.decisionTs, market.residualSymbols[symbol], market.btc);
+                return {
+                    symbol,
+                    route: decision.route,
+                    features: decision.features,
+                    decision: { accepted: decision.accepted, side: decision.side, reason: decision.reason, holdHours: decision.holdHours, priority: decision.priority },
+                };
+            });
+            await writeIdleDecisionDetails(this.dependencies.runtime.decisionDetailsPath, {
+                schema: IDLE_DECISION_DETAILS_SCHEMA,
+                runtimeSha: this.dependencies.runtime.runtimeSha,
+                decisionTs: market.decisionTs,
+                updatedAt: this.now(),
+                symbols: diagnosticSymbols,
+                residual: diagnosticResidual,
+                finalReason: state.lastDecision?.reason,
+            });
             const protectionReconciled = await this.reconcileVenueProtectiveFills(state, positions, openOrders);
             const ownershipOrders = protectionReconciled ? await this.dependencies.executor.getOpenOrders() : openOrders;
             const ownershipIssue = await this.reconcileOwnership(state, positions, ownershipOrders);

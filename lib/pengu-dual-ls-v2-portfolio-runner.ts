@@ -35,6 +35,7 @@ import { planStrictPortfolio, type StrictPortfolioIntent, type StrictPortfolioPo
 import { aggregatePendingExposure, readPendingExposureRegistry } from "@/lib/disdex-pending-exposure-registry";
 import { INTEGRATED_PRODUCTION_RISK_POLICY } from "@/config/integratedProductionRiskPolicy";
 import { isHypeZecSoleSharedCapacityCause, releaseHypeZecCapacityForPriorityEntry } from "@/lib/hype-zec-priority-capacity";
+import { releaseIdleResidualLongForFormalEntry } from "@/lib/idle-residual-long-preemption";
 import { readQuality102CausalV1Ownership, quality102OwnsOrder, quality102OwnsPosition, type Quality102CausalV1OwnershipSnapshot } from "@/lib/disdex-quality102-causal-v1-ownership";
 import { reduceQuality102CausalV1ForBaseConflict } from "@/lib/disdex-quality102-causal-v1-live-reduction";
 import { reduceFetBrk48ForCoreConflict } from "@/lib/fet-brk48-live-reduction";
@@ -899,7 +900,32 @@ export class PenguDualLsV2PortfolioRunner {
                 await this.dependencies.stateStore.save(state);
                 return { status: "held", message: "PENGU Dual LS strict planner requires positive mark-to-market account equity.", signal };
             }
-            let workingEquity = accountEquity;
+            if (!reduceOnly && this.dependencies.v12DynamicAdapter) {
+                const residualPreemption = await releaseIdleResidualLongForFormalEntry({
+                    executor: this.dependencies.executor,
+                    adapter: this.dependencies.v12DynamicAdapter,
+                    lock: lock as unknown as AccountLockHandle,
+                    positions: workingPositions,
+                    causeIdempotencyKey: `${signal.strategyId}|${signal.referenceTs}|${signal.side}|ENTRY`,
+                    expectedRuntimeSha: String(process.env.DISDEX_RELEASE_SHA || process.env.DISDEX_RUNTIME_COMMIT_SHA || process.env.DISDEX_RUNTIME_SHA || ""),
+                    statePath: process.env.DISDEX_IDLE_RESIDUAL_LONG_STATE_PATH,
+                    enabled: /^(1|true|yes|on)$/i.test(String(process.env.DISDEX_IDLE_RESIDUAL_LONG_ENABLED || "")),
+                    maxSlippageBps: this.dependencies.config.maxSlippageBps,
+                    now: this.now,
+                });
+                if (residualPreemption.status === "blocked") {
+                    await this.dependencies.stateStore.save(state);
+                    return { status: "held", message: residualPreemption.message, signal };
+                }
+                if (residualPreemption.status === "reduced") {
+                    [workingAccount, workingPositions] = await Promise.all([
+                        this.dependencies.executor.getAccountSnapshot(),
+                        this.dependencies.executor.getPositions(),
+                    ]);
+                    quote = await this.dependencies.executor.getMarketQuote(SYMBOL);
+                }
+            }
+            let workingEquity = Math.max(0, finite(workingAccount.walletBalance, workingAccount.availableBalance) + workingPositions.reduce((sum, position) => sum + finite(position.unrealizedPnl), 0));
             let available = 0;
             let requestedGross = 0;
             let targetGross = 0;

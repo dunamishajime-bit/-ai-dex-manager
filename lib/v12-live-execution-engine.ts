@@ -27,6 +27,7 @@ import type { DirectPosition, DirectTradeResult } from "@/lib/direct-trade-execu
 import { readQuality102CausalV1Ownership, quality102OwnsPosition, type Quality102CausalV1OwnershipSnapshot } from "@/lib/disdex-quality102-causal-v1-ownership";
 import { aggregatePendingExposure, readPendingExposureRegistry } from "@/lib/disdex-pending-exposure-registry";
 import { releaseHypeZecCapacityForPriorityEntry } from "@/lib/hype-zec-priority-capacity";
+import { releaseIdleResidualLongForFormalEntry } from "@/lib/idle-residual-long-preemption";
 import type { StrictPortfolioIntent } from "@/lib/disdex-strict-portfolio-planner";
 
 const V12_SYMBOLS = new Set(V12_X1_ALL.universe.map((symbol) => `${symbol}USDT`));
@@ -548,6 +549,45 @@ export class V12LiveExecutionEngine {
             ]);
             const freshEquity = Math.max(0, finite(freshAccount.walletBalance));
             if (!(freshEquity > 0)) return this.fail(state, "V12_ENTRY_GROSS_RESERVATION_EQUITY_INVALID");
+            if (preemptionAttempt === 0) {
+                const residualPreemption = await releaseIdleResidualLongForFormalEntry({
+                    executor: this.d.adapter.executor,
+                    adapter: this.d.adapter,
+                    lock: handle,
+                    positions: freshPositions,
+                    causeIdempotencyKey: clientOrderId,
+                    expectedRuntimeSha: String(process.env.DISDEX_RELEASE_SHA || process.env.DISDEX_RUNTIME_COMMIT_SHA || process.env.DISDEX_RUNTIME_SHA || ""),
+                    statePath: process.env.DISDEX_IDLE_RESIDUAL_LONG_STATE_PATH,
+                    enabled: /^(1|true|yes|on)$/i.test(String(process.env.DISDEX_IDLE_RESIDUAL_LONG_ENABLED || "")),
+                    maxSlippageBps: this.d.adapter.getMaxSlippageBps(),
+                    now: this.now,
+                });
+                if (residualPreemption.status === "blocked") return this.fail(state, residualPreemption.message);
+                if (residualPreemption.status === "reduced") {
+                    const [afterAccount, afterPositions] = await Promise.all([
+                        this.d.adapter.getAccountSnapshot(),
+                        this.d.adapter.getPositions(),
+                    ]);
+                    const afterEquity = Math.max(0, finite(afterAccount.walletBalance));
+                    if (!(afterEquity > 0)) return this.fail(state, "V12_RESIDUAL_PREEMPTION_EQUITY_INVALID");
+                    const afterQuote = await this.d.adapter.executor.getMarketQuote(symbol);
+                    const afterEntryPrice = signal.side === "LONG" ? afterQuote.askPrice : afterQuote.bidPrice;
+                    const afterSizing = applyV12SignalGrossMultiplier(sizeV12Position(afterEquity, afterEntryPrice, signal.atr, signal.side), signal);
+                    const afterPortfolio = this.activePortfolio(afterPositions, afterEquity, quality102Ownership);
+                    const afterComponents = v12GrossComponents(state, afterPortfolio);
+                    const afterSnapshot = {
+                        v12Gross: afterPortfolio.filter((row) => row.sleeve === "V12").reduce((sum, row) => sum + row.gross, 0),
+                        v12BaseGross: afterComponents.baseGross,
+                        v12DynamicGross: afterComponents.dynamicGross,
+                        cryptoGross: afterPortfolio.filter((row) => isCryptoPortfolioSleeve(row.sleeve)).reduce((sum, row) => sum + row.gross, 0),
+                        stockGross: afterPortfolio.filter((row) => row.sleeve === "V11_EQ" || row.sleeve === "V50_POST_OPEN_BASIS").reduce((sum, row) => sum + row.gross, 0),
+                        totalGross: afterPortfolio.reduce((sum, row) => sum + row.gross, 0),
+                    };
+                    const afterRankedRequestGross = Math.min(afterSizing.requestedGross, v12EntryGrossCapForSignal(signal));
+                    const afterDecision = decideV12ResidualEntry(afterRankedRequestGross, afterSnapshot, activePositionsOf(state).length);
+                    return this.executeEntryForSignal(state, handle, signal, afterEquity, afterSizing, afterDecision, quality102Ownership, preemptionAttempt + 1);
+                }
+            }
             const freshPortfolio = this.activePortfolio(freshPositions, freshEquity, quality102Ownership);
             const freshComponents = v12GrossComponents(state, freshPortfolio);
             const pendingBaseGross = state.pending?.action === "ENTRY"
@@ -788,7 +828,11 @@ export class V12LiveExecutionEngine {
                     for (const active of actives) {
                         const activeBars = data[active.symbol.replace(/USDT$/, "")]; if (!activeBars) return this.fail(state, "V12_ACTIVE_SYMBOL_MARKET_DATA_MISSING");
                         const activeBar = activeBars[index];
-                        const planned = await planV12TrailingStop(this.d.adapter, active.protection, activeBar.close);
+                        // Formal Trail0.20 parity: the completed 2H block updates the favourable
+                        // extreme from its H/L only after the old resident STOP has protected
+                        // the whole block. The replacement STOP is therefore for the next block.
+                        const completedBlockExtreme = active.side === "LONG" ? activeBar.high : activeBar.low;
+                        const planned = await planV12TrailingStop(this.d.adapter, active.protection, completedBlockExtreme);
                         let protection = planned.state;
                         if (planned.plan) {
                             const liveQuote = await this.d.adapter.executor.getMarketQuote(active.symbol);

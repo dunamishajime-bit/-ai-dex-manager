@@ -43,6 +43,7 @@ import { findManagedFetBrk48ProtectiveOrders, findManagedHypeZecProtectiveOrders
 import { reduceV12DynamicResidualForCoreConflict } from "@/lib/v12-dynamic-residual-live-reduction";
 import { reduceFetBrk48ForCoreConflict } from "@/lib/fet-brk48-live-reduction";
 import { isHypeZecSoleSharedCapacityCause, releaseHypeZecCapacityForPriorityEntry } from "@/lib/hype-zec-priority-capacity";
+import { releaseIdleResidualLongForFormalEntry } from "@/lib/idle-residual-long-preemption";
 import type { V12AsterLiveAdapter } from "@/lib/v12-aster-live-adapter";
 import type {
     DirectAccountSnapshot,
@@ -1129,6 +1130,33 @@ export class Quality102CausalV1Runner {
         }
         const entrySide = signal.side > 0 ? "LONG" : "SHORT";
         const targetGross = Math.min(signal.requestedGross, QUALITY102_CAUSAL_V1.maximumGross);
+        if (lock && this.dependencies.config.v12DynamicAdapter) {
+            const residualPreemption = await releaseIdleResidualLongForFormalEntry({
+                executor: this.dependencies.executor,
+                adapter: this.dependencies.config.v12DynamicAdapter,
+                lock: lock as unknown as AccountLockHandle,
+                positions,
+                causeIdempotencyKey: `${STRATEGY_ID}|${signal.referenceTs}|${symbol}|${signal.side}|ENTRY`,
+                expectedRuntimeSha: String(this.dependencies.config.runtimeCommitSha || process.env.DISDEX_RUNTIME_SHA || ""),
+                statePath: process.env.DISDEX_IDLE_RESIDUAL_LONG_STATE_PATH,
+                enabled: /^(1|true|yes|on)$/i.test(String(process.env.DISDEX_IDLE_RESIDUAL_LONG_ENABLED || "")),
+                maxSlippageBps: this.dependencies.config.maxSlippageBps,
+                now: this.now,
+            });
+            if (residualPreemption.status === "blocked") {
+                state.lastProcessedReferenceTs = Math.max(state.lastProcessedReferenceTs || 0, signal.referenceTs);
+                await this.dependencies.stateStore.save(state);
+                return { status: "held", message: residualPreemption.message, signal, ordersSent: 0 };
+            }
+            if (residualPreemption.status === "reduced") {
+                const [freshAccount, freshPositions] = await Promise.all([
+                    this.dependencies.executor.getAccountSnapshot(),
+                    this.dependencies.executor.getPositions(),
+                ]);
+                const freshQuote = await this.dependencies.executor.getMarketQuote(symbol);
+                return this.planEntry(state, signal, freshAccount, freshPositions, freshQuote, allowDynamicTrim, allowHypeZecPreemption, lock);
+            }
+        }
         const grossContext = await this.integratedGrossContext(quote.updatedAt, account);
         const planner: StrictPortfolioPlan = planStrictPortfolio({
             equity,

@@ -43,7 +43,7 @@ export const V12_X1_ALL = Object.freeze({
     atrBars: 31,
     stopAtr: 2.477,
     takeProfitAtr: 3.1995,
-    trailingAtr: 0.4,
+    trailingAtr: 0.20,
     maxHoldBars: 23,
     rebalanceBars: 20,
     cooldownBars: 1,

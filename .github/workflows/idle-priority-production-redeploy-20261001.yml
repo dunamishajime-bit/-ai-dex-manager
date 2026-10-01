@@ -43,6 +43,8 @@ jobs:
           npx tsc --noEmit
           npx tsx --test \
             tests/aster-global-rate-budget.test.ts \
+            tests/idle-residual-long-contract.test.ts \
+            tests/idle-residual-long-preemption.test.ts \
             tests/idle-priority-short-systemd-contract.test.mjs \
             tests/ops-runner-watchdog-current-contract.test.mjs \
             tests/watchdog-release-lineage.test.ts \
@@ -108,9 +110,26 @@ jobs:
           print("IDLE_PARITY_V3_EXACT_SHA=PASS")
           PY
 
+          npx tsx scripts/idle-residual-long-generate-parity-cert.ts             docs/research/results/trail020-idle-doge-avax-controlling-20261002/controlling-contract.json             "$GITHUB_SHA" idle-residual-long-parity-cert.json
+
+          python3 - "$GITHUB_SHA" <<'PY'
+          import json,sys
+          sha=sys.argv[1]
+          c=json.load(open("idle-residual-long-parity-cert.json"))
+          assert c["schema"]=="disdex-idle-residual-long-parity-cert/v1"
+          assert c["runtimeSha"]==sha
+          assert c["priority"]==["FORMAL_EXISTING","IDLE_PRIORITY_SHORT","DOGE_REL_VOL","AVAX_REL_LONG"]
+          assert c["trailAtr"]==0.20 and c["stopAtr"]==2.477 and c["takeProfitAtr"]==3.1995
+          assert c["integratedTradeCount"]==1390
+          assert c["idleTrades"]==61 and c["dogeTrades"]==11 and c["avaxTrades"]==16
+          assert abs(c["finalJpy"]-1319918378.8124561)<1
+          print("IDLE_RESIDUAL_LONG_EXACT_SHA=PASS")
+          PY
+
           git archive --format=tar.gz --output=/tmp/disdex-trading-source.tgz HEAD
           echo "SOURCE_SHA256=$(sha256sum /tmp/disdex-trading-source.tgz | awk '{print $1}')" >> "$GITHUB_ENV"
           echo "CERT_SHA256=$(sha256sum idle-priority-parity-cert-v3.json | awk '{print $1}')" >> "$GITHUB_ENV"
+          echo "RESIDUAL_CERT_SHA256=$(sha256sum idle-residual-long-parity-cert.json | awk '{print $1}')" >> "$GITHUB_ENV"
           echo "TARGET_SHA=$GITHUB_SHA" >> "$GITHUB_ENV"
 
       - name: Initialize restricted root SSH
@@ -158,6 +177,8 @@ jobs:
             "root@$SSH_HOST:/tmp/disdex-source-$GITHUB_RUN_ID.tgz"
           scp "${common[@]}" -P "$PORT" idle-priority-parity-cert-v3.json \
             "root@$SSH_HOST:/tmp/idle-parity-v3-$GITHUB_RUN_ID.json"
+          scp "${common[@]}" -P "$PORT" idle-residual-long-parity-cert.json \
+            "root@$SSH_HOST:/tmp/idle-residual-long-parity-$GITHUB_RUN_ID.json"
           scp "${common[@]}" -P "$PORT" scripts/ops/root/disdex-idle-production-redeploy-20261001 \
             "root@$SSH_HOST:/tmp/disdex-idle-cutover-$GITHUB_RUN_ID.sh"
 
@@ -169,7 +190,7 @@ jobs:
           ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
             -o ConnectTimeout=15 -p "$PORT" "root@$SSH_HOST" \
-            "FROM_SHA='$FROM_SHA' TARGET_SHA='$TARGET_SHA' REQUEST_ID='$GITHUB_RUN_ID' SOURCE_SHA256='$SOURCE_SHA256' CERT_SHA256='$CERT_SHA256' bash /tmp/disdex-idle-cutover-$GITHUB_RUN_ID.sh"
+            "FROM_SHA='$FROM_SHA' TARGET_SHA='$TARGET_SHA' REQUEST_ID='$GITHUB_RUN_ID' SOURCE_SHA256='$SOURCE_SHA256' CERT_SHA256='$CERT_SHA256' RESIDUAL_CERT_SHA256='$RESIDUAL_CERT_SHA256' bash /tmp/disdex-idle-cutover-$GITHUB_RUN_ID.sh"
 
       - name: Verify public HP remains safe
         shell: bash

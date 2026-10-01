@@ -1,8 +1,8 @@
 {
   "schema": "disdex-current-implementation-readiness/v1",
-  "date": "2026-09-22",
-  "target": "top3_q102gov030_fet2.25",
-  "canonicalTarget": "docs/production/current-live-target.json",
+  "date": "2026-10-02",
+  "target": "trail020_idle_doge_avax_20261002",
+  "canonicalTarget": "docs/research/results/trail020-idle-doge-avax-controlling-20261002/controlling-contract.json",
   "implementationStatus": "READY",
   "status": "BLOCKED",
   "ordersEnabled": false,
@@ -34,7 +34,24 @@
     "FET_CORE_PREEMPTION_V52_WIRED",
     "FET_PROTECTIVE_ORDER_V12_RECOGNITION_WIRED",
     "FET_PROTECTIVE_ORDER_PENGU_RECOGNITION_WIRED",
-    "FET_CORE_PREEMPTION_REDUCE_ONLY_IDEMPOTENCY_TESTED"
+    "FET_CORE_PREEMPTION_REDUCE_ONLY_IDEMPOTENCY_TESTED",
+    "V12_TRAIL_ATR_0P20",
+    "V12_FORMAL_2H_FAVOURABLE_EXTREME_PARITY",
+    "V12_STOP_2P477_TP_3P1995_UNCHANGED",
+    "IDLE_PRIORITY_SHORT_61_PARITY_PRESERVED",
+    "DOGE_REL_VOL_RESIDUAL_LONG",
+    "AVAX_REL_LONG_RESIDUAL",
+    "FORMAL_IDLE_DOGE_AVAX_PRIORITY_FIXED",
+    "IDLE_RESIDUAL_EXACT_SHA_CERT",
+    "IDLE_RESIDUAL_PREEMPTION_V12_WIRED",
+    "IDLE_RESIDUAL_PREEMPTION_PENGU_WIRED",
+    "IDLE_RESIDUAL_PREEMPTION_Q102_WIRED",
+    "IDLE_RESIDUAL_PREEMPTION_FET_WIRED",
+    "IDLE_RESIDUAL_PREEMPTION_V52_WIRED",
+    "IDLE_RESIDUAL_PREEMPTION_REDUCE_ONLY_TESTED",
+    "IDLE_ALL_SYMBOL_DECISION_DIAGNOSTICS_HP",
+    "HP_ZEC_REMOVED",
+    "CONTROLLING_8_10_20_30BPS_LEDGER_FROZEN"
   ],
-  "activationRule": "Implementation is ready, but real-money activation remains blocked until an operator explicitly authorizes the LIVE cutover, removes OPERATOR_LIVE_ACTIVATION_REQUIRED, sets status READY/ordersEnabled true, and enables FET_BRK48_CORE_PREEMPTION_READY in the exact release contract."
+  "activationRule": "Implementation is READY but real-money activation remains blocked until the exact-SHA GitHub production workflow revalidates both Idle parity certificates, proves the current Production SHA is an ancestor, verifies flat/pending state and shared safety, creates the root-owned operator activation artifact for this exact SHA/target, cuts over all runners, and passes post-deploy LIVE/HP verification."
 }

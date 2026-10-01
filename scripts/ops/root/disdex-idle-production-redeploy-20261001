@@ -7,6 +7,7 @@ umask 022
 : "${REQUEST_ID:?REQUEST_ID required}"
 : "${SOURCE_SHA256:?SOURCE_SHA256 required}"
 : "${CERT_SHA256:?CERT_SHA256 required}"
+: "${RESIDUAL_CERT_SHA256:?RESIDUAL_CERT_SHA256 required}"
 
 ROOT=/home/deploy/disdex-trading
 RELEASES="$ROOT/releases"
@@ -16,6 +17,7 @@ RELEASE="$RELEASES/$TARGET_SHA"
 STAGE="$RELEASES/.${TARGET_SHA}.stage-$REQUEST_ID"
 SOURCE_FILE="/tmp/disdex-source-$REQUEST_ID.tgz"
 CERT_FILE="/tmp/idle-parity-v3-$REQUEST_ID.json"
+RESIDUAL_CERT_FILE="/tmp/idle-residual-long-parity-$REQUEST_ID.json"
 SHARED=/var/lib/disdex/shared
 BACKUP="/var/lib/disdex/deploy-backups/idle-$REQUEST_ID"
 LOCK=/run/lock/disdex-idle-production-redeploy.lock
@@ -29,9 +31,10 @@ flock -n 9 || { echo "DEPLOY_CONCURRENT_LOCK"; exit 40; }
 
 [[ "$(tr -d '[:space:]' < "$CURRENT/.disdex-release-sha")" == "$FROM_SHA" ]]
 [[ "$(readlink -f "$CURRENT")" == "$OLD_RELEASE" ]]
-[[ -f "$SOURCE_FILE" && -f "$CERT_FILE" ]]
+[[ -f "$SOURCE_FILE" && -f "$CERT_FILE" && -f "$RESIDUAL_CERT_FILE" ]]
 echo "$SOURCE_SHA256  $SOURCE_FILE" | sha256sum -c -
 echo "$CERT_SHA256  $CERT_FILE" | sha256sum -c -
+echo "$RESIDUAL_CERT_SHA256  $RESIDUAL_CERT_FILE" | sha256sum -c -
 [[ ! -e "$RELEASE" && ! -e "$STAGE" ]]
 
 NAMES=(
@@ -63,6 +66,9 @@ STATE_PATHS=(
   /var/lib/disdex/shared/operator-activation/current.json
   /var/lib/disdex/shared/operator-activation/runtime.json
   /var/lib/disdex/shared/idle-priority-parity-cert.json
+  /var/lib/disdex/shared/idle-residual-long-parity-cert.json
+  /var/lib/disdex/idle-priority/residual-long-state.json
+  /var/lib/disdex/idle-priority/decision-details.json
 )
 SYSTEMD_TEMPLATE_PATHS=(
   /etc/systemd/system/disdex-v12-x1-all@.service
@@ -130,6 +136,12 @@ if active:
 idle=load("/var/lib/disdex/idle-priority/state.json")
 if idle.get("positions") or idle.get("pending") or idle.get("manualReview"):
     raise SystemExit("CUTOVER_IDLE_NOT_FLAT")
+try:
+    residual=load("/var/lib/disdex/idle-priority/residual-long-state.json")
+except FileNotFoundError:
+    residual=None
+if residual and (residual.get("position") or residual.get("pending") or residual.get("manualReview")):
+    raise SystemExit("CUTOVER_IDLE_RESIDUAL_NOT_FLAT")
 print("CUTOVER_SHARED_STATE=PASS")
 PY
 }
@@ -412,6 +424,7 @@ mv -- "$STAGE" "$RELEASE"
 echo "CUTOVER_RELEASE_PREP_PASS release=$RELEASE"
 
 install -o root -g root -m 0644 "$CERT_FILE" "$SHARED/idle-priority-parity-cert.json"
+install -o root -g root -m 0644 "$RESIDUAL_CERT_FILE" "$SHARED/idle-residual-long-parity-cert.json"
 
 python3 - "$RELEASE" "$TARGET_SHA" "$SHARED/operator-activation/current.json" <<'PY'
 import datetime,json,os,sys,tempfile
@@ -629,6 +642,13 @@ assert cert["genericSourceGapRows"]==2
 assert cert["filteredRows"]==63 and cert["admittedRows"]==61
 assert cert["wins"]==48 and cert["losses"]==13
 assert cert["roundtripBps"]==10 and cert["integratedTradeCount"]==1339
+residual_cert=json.load(open("/var/lib/disdex/shared/idle-residual-long-parity-cert.json"))
+assert residual_cert["schema"]=="disdex-idle-residual-long-parity-cert/v1"
+assert residual_cert["runtimeSha"]==sha
+assert residual_cert["priority"]==["FORMAL_EXISTING","IDLE_PRIORITY_SHORT","DOGE_REL_VOL","AVAX_REL_LONG"]
+assert residual_cert["integratedTradeCount"]==1390
+assert residual_cert["idleTrades"]==61 and residual_cert["dogeTrades"]==11 and residual_cert["avaxTrades"]==16
+assert abs(residual_cert["finalJpy"]-1319918378.8124561)<1
 hb=json.load(open("/var/lib/disdex/runner-health/heartbeats/idle-priority-short.json"))
 assert hb["runtimeSha"]==sha and hb["expectedSha"]==sha
 assert hb["serviceUnit"]==f"disdex-idle-priority-short@{sha}.service"
@@ -702,7 +722,7 @@ mv -Tf "$previous_tmp" "$ROOT/previous"
 echo "POSTDEPLOY_PREVIOUS_UPDATED=PASS target=$OLD_RELEASE"
 
 trap - ERR
-rm -f -- "$SOURCE_FILE" "$CERT_FILE"
+rm -f -- "$SOURCE_FILE" "$CERT_FILE" "$RESIDUAL_CERT_FILE"
 echo "STATUS=LIVE_ACTIVATED_VERIFIED"
 echo "PRODUCTION_SHA=$TARGET_SHA"
 echo "ROLLBACK_SHA=$FROM_SHA"

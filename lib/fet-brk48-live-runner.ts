@@ -29,6 +29,7 @@ import {
 import type { V12AsterLiveAdapter } from "@/lib/v12-aster-live-adapter";
 import { aggregatePendingExposure, readPendingExposureRegistry } from "@/lib/disdex-pending-exposure-registry";
 import { isHypeZecSoleSharedCapacityCause, releaseHypeZecCapacityForPriorityEntry } from "@/lib/hype-zec-priority-capacity";
+import { releaseIdleResidualLongForFormalEntry } from "@/lib/idle-residual-long-preemption";
 import type { StrictPortfolioIntent } from "@/lib/disdex-strict-portfolio-planner";
 
 const EPS = 1e-9;
@@ -517,6 +518,25 @@ export class FetBrk48LiveRunner {
       );
       if (!sharedRisk.ok || !sharedRisk.state || sharedRisk.state.tripped) {
         return { status: "blocked", message: `FET_SHARED_RISK_BLOCKED:${sharedRisk.reason || "TRIPPED"}`, ordersSent: 0, signal };
+      }
+
+      const residualPreemption = await releaseIdleResidualLongForFormalEntry({
+        executor: this.deps.executor,
+        adapter: this.deps.adapter,
+        lock,
+        positions,
+        causeIdempotencyKey: `FET_BRK48_RESIDUAL|${signal.referenceTs}|ENTRY`,
+        expectedRuntimeSha: this.deps.runtimeSha,
+        statePath: process.env.DISDEX_IDLE_RESIDUAL_LONG_STATE_PATH,
+        enabled: /^(1|true|yes|on)$/i.test(String(process.env.DISDEX_IDLE_RESIDUAL_LONG_ENABLED || "")),
+        maxSlippageBps: this.deps.maxSlippageBps,
+        now: this.deps.now,
+      });
+      if (residualPreemption.status === "blocked") {
+        return { status: "blocked", message: residualPreemption.message, ordersSent: 0, signal };
+      }
+      if (residualPreemption.status === "reduced") {
+        return { status: "preempted", message: `IDLE_RESIDUAL_PREEMPTED_FOR_FET_PRIORITY_ENTRY:${residualPreemption.symbol}`, ordersSent: 1, signal };
       }
 
       const equity = portfolioEquity(account.walletBalance, positions);

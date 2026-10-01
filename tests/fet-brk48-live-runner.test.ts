@@ -5,7 +5,7 @@ import { join } from "node:path";
 import test from "node:test";
 
 import { FileAccountOrderLock } from "../lib/disdex-account-order-lock";
-import { buildSharedCryptoDailyRiskState, writeSharedCryptoDailyRisk } from "../lib/disdex-shared-crypto-daily-risk";
+import { buildSharedCryptoDailyRiskState, SHARED_CRYPTO_STRATEGIES, writeSharedCryptoDailyRisk } from "../lib/disdex-shared-crypto-daily-risk";
 import { FetBrk48LiveRunner } from "../lib/fet-brk48-live-runner";
 import { readFetBrk48State } from "../lib/fet-brk48-state";
 
@@ -56,7 +56,7 @@ test("FET live runner enters once, protects, survives restart, and exits after 2
     await writeSharedCryptoDailyRisk(riskPath, buildSharedCryptoDailyRiskState({
       accountScope: "ASTER_FUTURES",
       utcDay: new Date(now).toISOString().slice(0, 10),
-      strategyIds: ["V12_X1.00_ALL", "PENGU_DUAL_LS_V2_FINAL", "QUALITY102_CAUSAL_V1", "FET_BRK48_RESIDUAL"],
+      strategyIds: [...SHARED_CRYPTO_STRATEGIES],
       lossPct: 0,
       maximumLossPct: 7.5,
       tripped: false,
@@ -260,7 +260,7 @@ test("FET live runner enters once, protects, survives restart, and exits after 2
     await writeSharedCryptoDailyRisk(riskPath, buildSharedCryptoDailyRiskState({
       accountScope: "ASTER_FUTURES",
       utcDay: new Date(now).toISOString().slice(0, 10),
-      strategyIds: ["V12_X1.00_ALL", "PENGU_DUAL_LS_V2_FINAL", "QUALITY102_CAUSAL_V1", "FET_BRK48_RESIDUAL"],
+      strategyIds: [...SHARED_CRYPTO_STRATEGIES],
       lossPct: 0,
       maximumLossPct: 7.5,
       tripped: false,

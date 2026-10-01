@@ -16,6 +16,7 @@ export function resolveIdlePriorityShortRuntime(){
   parityCertificatePath:resolve(process.env.DISDEX_IDLE_PRIORITY_PARITY_CERT_PATH||"/var/lib/disdex/shared/idle-priority-parity-cert.json"),
   statePath:resolve(process.env.DISDEX_IDLE_PRIORITY_STATE_PATH||"/var/lib/disdex/idle-priority/state.json"),
   decisionPath:resolve(process.env.DISDEX_IDLE_PRIORITY_DECISION_PATH||"/var/lib/disdex/idle-priority/decision.json"),
+  decisionDetailsPath:resolve(process.env.DISDEX_IDLE_PRIORITY_DECISION_DETAILS_PATH||"/var/lib/disdex/idle-priority/decision-details.json"),
   v12DecisionPath:resolve(process.env.V12_DECISION_SNAPSHOT_PATH||"/var/lib/disdex/v12-x1-all/decision-snapshot.json"),
   q102DecisionPath:resolve(process.env.QUALITY102_CAUSAL_V1_DECISION_SNAPSHOT_PATH||"/var/lib/disdex/quality102-causal-v1/decision-snapshot.json"),
   penguStatePath:resolve(process.env.PENGU_DUAL_LS_V2_STATE_PATH||"/var/lib/disdex/pengu-dual-ls-v2/runner-live.json"),

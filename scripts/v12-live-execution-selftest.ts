@@ -5,7 +5,7 @@ import { join } from "node:path";
 
 import type { DirectPosition, DirectTradeResult } from "@/lib/direct-trade-executor";
 import { FileAccountOrderLock } from "@/lib/disdex-account-order-lock";
-import { buildSharedCryptoDailyRiskState, writeSharedCryptoDailyRisk } from "@/lib/disdex-shared-crypto-daily-risk";
+import { buildSharedCryptoDailyRiskState, SHARED_CRYPTO_STRATEGIES, writeSharedCryptoDailyRisk } from "@/lib/disdex-shared-crypto-daily-risk";
 import type { V12AsterLiveAdapter, V12AsterOrderView } from "@/lib/v12-aster-live-adapter";
 import { V12LiveExecutionEngine } from "@/lib/v12-live-execution-engine";
 import { planV12TrailingStop, type ResidentOrderView } from "@/lib/v12-resident-stop-lifecycle";
@@ -177,7 +177,7 @@ async function risk(path: string) {
     await writeSharedCryptoDailyRisk(path, buildSharedCryptoDailyRiskState({
         accountScope: "ASTER_FUTURES",
         utcDay: new Date(NOW).toISOString().slice(0, 10),
-        strategyIds: ["V12_X1.00_ALL", "PENGU_DUAL_LS_V2_FINAL", "QUALITY102_CAUSAL_V1", "FET_BRK48_RESIDUAL"],
+        strategyIds: [...SHARED_CRYPTO_STRATEGIES],
         lossPct: 0,
         maximumLossPct: 7.5,
         tripped: false,
@@ -196,7 +196,7 @@ async function blockedRisk(path: string) {
     await writeSharedCryptoDailyRisk(path, buildSharedCryptoDailyRiskState({
         accountScope: "ASTER_FUTURES",
         utcDay: new Date(NOW).toISOString().slice(0, 10),
-        strategyIds: ["V12_X1.00_ALL", "PENGU_DUAL_LS_V2_FINAL", "QUALITY102_CAUSAL_V1", "FET_BRK48_RESIDUAL"],
+        strategyIds: [...SHARED_CRYPTO_STRATEGIES],
         lossPct: 8,
         maximumLossPct: 7.5,
         tripped: true,
@@ -268,18 +268,24 @@ async function main() {
             atrAtEntry: 2,
             entrySignalTs: NOW - BAR_MS,
             holdingBars: 0,
-            peakPrice: 1000,
+            peakPrice: 112.5,
             troughPrice: 112.5,
             protection: {
                 strategyId: "V12_X1.00_ALL", symbol: "LTCUSDT", side: "LONG", positionId: existingId,
-                quantity: 8, entryPrice: 112.5, atrAtEntry: 2, initialStop: 107.5, lastAckStop: 999.2,
-                takeProfit: 118.9, peakOrTrough: 1000, stopClientOrderId: existingStopId, takeProfitClientOrderId: existingTpId,
+                quantity: 8, entryPrice: 112.5, atrAtEntry: 2, initialStop: 107.5, lastAckStop: 107.5,
+                takeProfit: 118.9, peakOrTrough: 112.5, stopClientOrderId: existingStopId, takeProfitClientOrderId: existingTpId,
             },
         };
         preorderCap.adapter.positions = [position("LTCUSDT", 8, 112.5)];
-        preorderCap.adapter.resident.set(existingStopId, { symbol: "LTCUSDT", clientOrderId: existingStopId, status: "NEW", side: "SELL", type: "STOP_MARKET", reduceOnly: true, quantity: 8, stopPrice: 999.2 });
+        preorderCap.adapter.resident.set(existingStopId, { symbol: "LTCUSDT", clientOrderId: existingStopId, status: "NEW", side: "SELL", type: "STOP_MARKET", reduceOnly: true, quantity: 8, stopPrice: 107.5 });
         preorderCap.adapter.resident.set(existingTpId, { symbol: "LTCUSDT", clientOrderId: existingTpId, status: "NEW", side: "SELL", type: "TAKE_PROFIT_MARKET", reduceOnly: true, quantity: 8, stopPrice: 118.9 });
         await preorderCap.stateStore.save({ ...(await preorderCap.stateStore.load()), active: existing, activePositions: [existing] });
+        const originalPreorderQuote = preorderCap.adapter.executor.getMarketQuote;
+        preorderCap.adapter.executor.getMarketQuote = async (symbol: string) => {
+            if (symbol.toUpperCase() !== existing.symbol.toUpperCase()) return originalPreorderQuote(symbol);
+            const activeBar = preorderCap.marketData.LTC.at(-1)!;
+            return { symbol, bidPrice: activeBar.high + 1, askPrice: activeBar.high + 1.2, bidQuantity: 100, askQuantity: 100, midPrice: activeBar.high + 1.1, spreadBps: 2, updatedAt: NOW };
+        };
         const preorderCapResult = await preorderCap.engine.tick();
         assert.equal(preorderCapResult.status, "capacity-blocked");
         assert.match(preorderCapResult.reason, /^V12_(POSITION|BASE_AGGREGATE)_GROSS_OVER_CAP$/);
@@ -349,10 +355,9 @@ async function main() {
         deferred.adapter.executor.getMarketQuote = async (symbol: string) => {
             if (symbol.toUpperCase() !== retained.symbol.toUpperCase()) return originalDeferredQuote(symbol);
             const bar = deferred.marketData[retained.symbol.replace(/USDT$/, "")].at(-1)!;
-            const mid = bar.close;
             return retained.side === "LONG"
-                ? { symbol, bidPrice: mid * 1.001, askPrice: mid * 1.002, bidQuantity: 100, askQuantity: 100, midPrice: mid * 1.0015, spreadBps: 10, updatedAt: NOW }
-                : { symbol, bidPrice: mid * 0.998, askPrice: mid * 0.999, bidQuantity: 100, askQuantity: 100, midPrice: mid * 0.9985, spreadBps: 10, updatedAt: NOW };
+                ? { symbol, bidPrice: bar.high * 1.01, askPrice: bar.high * 1.011, bidQuantity: 100, askQuantity: 100, midPrice: bar.high * 1.0105, spreadBps: 10, updatedAt: NOW }
+                : { symbol, bidPrice: bar.low * 0.989, askPrice: bar.low * 0.99, bidQuantity: 100, askQuantity: 100, midPrice: bar.low * 0.9895, spreadBps: 10, updatedAt: NOW };
         };
         deferredState.lastReferenceTs = deferred.marketData.BTC.at(-1)!.endTs - BAR_MS;
         deferredState.deferredEntryReferenceTs = undefined;
