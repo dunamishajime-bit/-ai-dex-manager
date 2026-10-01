@@ -571,6 +571,20 @@ remove_stale_health_alert_unit_pin_dropins() {
   done < <(find "$HEALTH_ALERT_DROPIN_DIR" -maxdepth 1 -type f -name '*.conf' -print0)
 }
 
+retire_stale_release_enabled_units() {
+  local link unit sha
+  for link in /etc/systemd/system/multi-user.target.wants/disdex-*@*.service; do
+    [[ -L "$link" ]] || continue
+    unit="$(basename "$link")"
+    [[ "$unit" =~ ^disdex-(v12-x1-all|pengu-dual-ls-v2|quality102-causal-v1|fet-brk48|hype-long|v52-aster-only|shared-crypto-risk|v12-v52-margin-guard|idle-priority-short)@([0-9a-f]{40})\.service$ ]] || continue
+    sha="${BASH_REMATCH[2]}"
+    [[ "$sha" == "$DEPLOYED_SHA" ]] && continue
+    systemctl disable --now "$unit" >/dev/null 2>&1 || true
+    systemctl reset-failed "$unit" >/dev/null 2>&1 || true
+    printf 'DISDEX_STALE_RELEASE_UNIT_RETIRED unit=%s\n' "$unit"
+  done
+}
+
 reset_stale_release_failed_units() {
   local unit
   while read -r unit _; do
@@ -1160,6 +1174,7 @@ ReadWritePaths=${IDLE_PRIORITY_STATE_ROOT} ${SHARED_ROOT}"
   migrate_idle_state_lineage
   normalize_position_recovery_state_lineage
   systemctl daemon-reload
+  retire_stale_release_enabled_units
   reset_stale_release_failed_units
   systemctl reset-failed aster-trade-history-git-sync.service || true
   systemctl reset-failed disdex-v12-kill-switch-auto-repair.service || true
