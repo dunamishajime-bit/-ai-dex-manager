@@ -585,6 +585,41 @@ retire_stale_release_enabled_units() {
   done
 }
 
+prune_stale_runtime_metadata() {
+  local previous_sha="" target base sha unit state path
+  if [[ -L "$TRADING_ROOT/previous" ]]; then
+    target="$(readlink -f -- "$TRADING_ROOT/previous" 2>/dev/null || true)"
+    if [[ "$target" == "$TRADING_RELEASES"/* ]]; then
+      base="$(basename -- "$target")"
+      [[ "$base" =~ ^[0-9a-f]{40}$ ]] && previous_sha="$base"
+    fi
+  fi
+  for path in "$RUNTIME_CONTRACT_ENV_DIR"/*; do
+    [[ -f "$path" && ! -L "$path" ]] || continue
+    base="$(basename -- "$path")"
+    sha="${base:0:40}"
+    [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || continue
+    [[ "$sha" == "$DEPLOYED_SHA" || "$sha" == "$NODE_MODULES_SOURCE_SHA" || "$sha" == "$PYTHON_RUNTIME_SOURCE_SHA" || ( -n "$previous_sha" && "$sha" == "$previous_sha" ) ]] && continue
+    rm -f -- "$path"
+    printf 'DISDEX_STALE_RUNTIME_ENV_REMOVED path=%s\n' "$path"
+  done
+  for path in /etc/systemd/system/disdex-*@*.service.d; do
+    [[ -d "$path" && ! -L "$path" ]] || continue
+    base="$(basename -- "$path")"
+    [[ "$base" =~ @([0-9a-f]{40})\.service\.d$ ]] || continue
+    sha="${BASH_REMATCH[1]}"
+    [[ "$sha" == "$DEPLOYED_SHA" || "$sha" == "$NODE_MODULES_SOURCE_SHA" || "$sha" == "$PYTHON_RUNTIME_SOURCE_SHA" || ( -n "$previous_sha" && "$sha" == "$previous_sha" ) ]] && continue
+    unit="${base%.d}"
+    state="$(systemctl show "$unit" -p ActiveState --value 2>/dev/null || true)"
+    [[ "$state" != "active" && "$state" != "activating" && "$state" != "deactivating" ]] || {
+      printf 'stale runtime metadata still belongs to a live unit: %s state=%s\n' "$unit" "$state" >&2
+      return 1
+    }
+    rm -rf -- "$path"
+    printf 'DISDEX_STALE_RUNTIME_DROPIN_REMOVED path=%s\n' "$path"
+  done
+}
+
 reset_stale_release_failed_units() {
   local unit
   while read -r unit _; do
@@ -1176,6 +1211,8 @@ ReadWritePaths=${IDLE_PRIORITY_STATE_ROOT} ${SHARED_ROOT}"
   systemctl daemon-reload
   retire_stale_release_enabled_units
   reset_stale_release_failed_units
+  prune_stale_runtime_metadata
+  systemctl daemon-reload
   systemctl reset-failed aster-trade-history-git-sync.service || true
   systemctl reset-failed disdex-v12-kill-switch-auto-repair.service || true
   systemctl reset-failed disdex-v12-kill-switch-auto-repair.path || true
