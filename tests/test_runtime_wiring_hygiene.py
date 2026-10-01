@@ -64,7 +64,7 @@ class RuntimeWiringHygieneTest(unittest.TestCase):
         source = WIRING.read_text(encoding="utf-8")
         self.assertIn("timers.target.wants", source)
         self.assertIn("systemctl list-units --all --type=timer", source)
-        self.assertIn('systemctl reset-failed "\${unit%.timer}.service"', source)
+        self.assertIn('systemctl reset-failed "${unit%.timer}.service"', source)
 
 
     def test_support_timer_units_rearm_from_activation_not_boot(self):
