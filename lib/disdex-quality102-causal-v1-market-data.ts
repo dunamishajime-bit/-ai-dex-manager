@@ -307,7 +307,15 @@ export class Quality102CausalV1AsterMarketDataProvider {
     async load(): Promise<Quality102CausalV1History> {
         const now = this.now();
         if (!Number.isFinite(now) || now <= 0) throw new Error("QUALITY102_INVALID_MARKET_CLOCK");
-        if (this.cached && this.cached.expiresAt > now) return this.cached.history;
+        const currentHourOpenTs = Math.floor(now / QUALITY102_HOUR_MS) * QUALITY102_HOUR_MS;
+        const expectedLatestClosedOpenTs = currentHourOpenTs - QUALITY102_HOUR_MS;
+        if (this.cached && this.cached.expiresAt > now) {
+            const cacheMatchesCurrentHour = this.symbols.every((symbol) =>
+                this.cached?.history.candlesBySymbol[symbol]?.at(-1)?.timestampMs === expectedLatestClosedOpenTs
+                && this.cached?.history.entryOpenBySymbol?.[symbol]?.timestampMs === currentHourOpenTs
+            );
+            if (cacheMatchesCurrentHour) return this.cached.history;
+        }
         const persisted = await this.readPersistentHistory();
         const entries: Array<{ symbol: string; candles: Quality102Candle[]; entryOpen: { timestampMs: number; open: number } }> = [];
         // Keep the initial catch-up bounded and sequential. A cold start may
@@ -323,7 +331,8 @@ export class Quality102CausalV1AsterMarketDataProvider {
             entryOpenBySymbol: Object.fromEntries(entries.map(({ symbol, entryOpen }) => [symbol, entryOpen])),
         };
         await this.writePersistentHistory(history, now);
-        this.cached = { expiresAt: now + this.cacheTtlMs, history };
+        const nextHourBoundary = currentHourOpenTs + QUALITY102_HOUR_MS;
+        this.cached = { expiresAt: Math.min(now + this.cacheTtlMs, nextHourBoundary), history };
         return history;
     }
 }
