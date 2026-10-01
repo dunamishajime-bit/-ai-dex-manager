@@ -120,8 +120,10 @@ class RuntimeWiringHygieneTest(unittest.TestCase):
 
     def test_coherence_guard_timer_is_restart_safe_and_wired(self):
         timer = (ROOT / "ops" / "systemd" / "disdex-current-runtime-coherence-guard.timer").read_text(encoding="utf-8")
+        service = (ROOT / "ops" / "systemd" / "disdex-current-runtime-coherence-guard.service").read_text(encoding="utf-8")
         self.assertIn("OnActiveSec=2min", timer)
         self.assertNotIn("OnBootSec=", timer)
+        self.assertIn("ExecStart=/usr/local/sbin/disdex-current-runtime-coherence-guard --auto", service)
         wiring = WIRING.read_text(encoding="utf-8")
         self.assertIn("ops/systemd/disdex-current-runtime-coherence-guard.service", wiring)
         self.assertIn("ops/systemd/disdex-current-runtime-coherence-guard.timer", wiring)
