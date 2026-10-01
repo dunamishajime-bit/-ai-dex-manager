@@ -1,0 +1,11 @@
+[Unit]
+Description=DisDex current runtime coherence guard
+After=local-fs.target network-online.target
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+WorkingDirectory=/home/deploy/disdex-trading/current
+ExecStart=/home/deploy/disdex-trading/current/scripts/ops/root/disdex-current-runtime-coherence-guard --auto
+Nice=10
