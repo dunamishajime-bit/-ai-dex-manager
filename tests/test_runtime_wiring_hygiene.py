@@ -98,5 +98,35 @@ class RuntimeWiringHygieneTest(unittest.TestCase):
         self.assertLess(safety_wait, post_start)
 
 
+    def test_coherence_guard_tracks_full_current_runtime(self):
+        guard = (ROOT / "scripts" / "ops" / "root" / "disdex-current-runtime-coherence-guard").read_text(encoding="utf-8")
+        for family in [
+            "disdex-v12-x1-all",
+            "disdex-pengu-dual-ls-v2",
+            "disdex-quality102-causal-v1",
+            "disdex-v52-aster-only",
+            "disdex-fet-brk48",
+            "disdex-hype-long",
+            "disdex-idle-priority-short",
+            "disdex-shared-crypto-risk",
+            "disdex-v12-v52-margin-guard",
+        ]:
+            self.assertIn(f'"{family}"', guard)
+        for heartbeat in ["fet-brk48.json", "hype-zec-long.json", "idle-priority-short.json"]:
+            self.assertIn(heartbeat, guard)
+        self.assertIn("q102_observer_singleton", guard)
+        self.assertIn("support_runtime_current", guard)
+        self.assertIn("verify_current_units_active || return 20", guard)
+
+    def test_coherence_guard_timer_is_restart_safe_and_wired(self):
+        timer = (ROOT / "ops" / "systemd" / "disdex-current-runtime-coherence-guard.timer").read_text(encoding="utf-8")
+        self.assertIn("OnActiveSec=2min", timer)
+        self.assertNotIn("OnBootSec=", timer)
+        wiring = WIRING.read_text(encoding="utf-8")
+        self.assertIn("ops/systemd/disdex-current-runtime-coherence-guard.service", wiring)
+        self.assertIn("ops/systemd/disdex-current-runtime-coherence-guard.timer", wiring)
+        self.assertIn('ensure_monitor_timer_active "disdex-current-runtime-coherence-guard.timer"', wiring)
+
+
 if __name__ == "__main__":
     unittest.main()
