@@ -155,6 +155,32 @@ for name in "${NAMES[@]}"; do
   if [[ "$restart_count" != 0 ]]; then
     if [[ "$name" == disdex-shared-crypto-risk && "$restart_count" == 1 ]]; then
       echo "CUTOVER_KNOWN_SHARED_RISK_TRANSIENT_RESTART_ACCEPTED unit=$unit nRestarts=$restart_count currentRiskFresh=true"
+    elif [[ "$name" == disdex-v12-x1-all && "$restart_count" == 1 ]]; then
+      pid="$(systemctl show "$unit" -p MainPID --value)"
+      result="$(systemctl show "$unit" -p Result --value)"
+      [[ "$pid" =~ ^[0-9]+$ && "$pid" -gt 0 && "$result" == success ]] || {
+        echo "CUTOVER_KNOWN_V12_RESTART_NOT_CURRENTLY_HEALTHY unit=$unit pid=$pid result=$result"
+        exit 42
+      }
+      python3 - "$FROM_SHA" "$pid" <<'PY'
+import json,sys,time
+sha=sys.argv[1]
+pid=int(sys.argv[2])
+now=int(time.time()*1000)
+state=json.load(open("/var/lib/disdex/v12-x1-all/runner.json",encoding="utf-8"))
+runtime=str(state.get("runtimeSha") or state.get("runtimeCommitSha") or "")
+updated=int(state.get("updatedAt") or 0)
+if runtime!=sha:
+    raise SystemExit("CUTOVER_KNOWN_V12_RESTART_STATE_SHA_MISMATCH")
+if updated<=0 or updated>now+60000 or now-updated>3*60*60*1000:
+    raise SystemExit("CUTOVER_KNOWN_V12_RESTART_STATE_STALE")
+if state.get("manualReview"):
+    raise SystemExit("CUTOVER_KNOWN_V12_RESTART_MANUAL_REVIEW_ACTIVE")
+if state.get("pending"):
+    raise SystemExit("CUTOVER_KNOWN_V12_RESTART_PENDING_ACTIVE")
+print("CUTOVER_KNOWN_V12_RESTART_STATE_HEALTHY=PASS")
+PY
+      echo "CUTOVER_KNOWN_V12_SINGLE_RESTART_ACCEPTED unit=$unit nRestarts=$restart_count pid=$pid result=$result"
     else
       echo "CUTOVER_OLD_UNIT_RESTARTED=$unit nRestarts=$restart_count"
       exit 42
