@@ -49,6 +49,7 @@ on:
       - "docs/implementation/IDLE_PRIORITY_SHORT_CODEX_PRODUCTION_HANDOFF_20260929.md"
       - "lib/disdex-shared-crypto-risk-refresh-loop.ts"
       - "scripts/disdex-shared-crypto-risk-writer.ts"
+      - "scripts/disdex-shared-crypto-risk-selftest.ts"
       - "tests/shared-risk-transient-refresh-retry.test.ts"
       - "deploy/systemd/disdex-v12-x1-all@.service"
       - "deploy/systemd/disdex-pengu-dual-ls-v2@.service"
