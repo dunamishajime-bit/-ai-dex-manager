@@ -8,6 +8,7 @@ import { aggregatePendingExposure, readPendingExposureRegistry } from "./disdex-
 import { readSharedCryptoDailyRisk } from "./disdex-shared-crypto-daily-risk";
 import { readSharedKillSwitch } from "./disdex-shared-kill-switch";
 import { classifyAsterSymbol } from "./disdex-aster-portfolio-classifier";
+import { classifyAsterRateBudgetFailure } from "./disdex-aster-rate-budget-policy";
 import { V12AsterLiveAdapter } from "./v12-aster-live-adapter";
 import { IDLE_PRIORITY_SHORT_POLICY, IDLE_PRIORITY_SHORT_STRATEGY, type IdlePrioritySymbol } from "../config/idlePriorityShortPolicy";
 import type { IdlePriorityShortRuntime } from "../config/idlePriorityShortRuntime";
@@ -25,6 +26,12 @@ const MAX_QUOTE_AGE_MS = 5 * 60_000;
 const ACTIVE_ORDER_STATUSES = new Set(["NEW", "PARTIALLY_FILLED", "PENDING_NEW"]);
 const CORE_SLEEVES = new Set(["V12", "PENGU_DUAL_LS_V2", "FET_RESIDUAL", "V11_EQ", "V50_POST_OPEN_BASIS", "QUALITY102_CAUSAL_V1"]);
 const SIDEcar_SLEEVES = new Set(["HYPE_LONG", "ZEC_LONG"]);
+
+export function classifyIdleFlatRateBudgetDeferral(state: IdleState, error: unknown) {
+    const deferred = classifyAsterRateBudgetFailure(error);
+    if (!deferred || state.manualReview || state.pending || state.positions.length > 0) return undefined;
+    return `IDLE_RATE_BUDGET_DEFERRED:${deferred.reason}`;
+}
 
 export type IdlePriorityShortTickResult = {
     status: "disabled" | "locked" | "shadow" | "held" | "no-change" | "completed" | "manual-review";
@@ -673,7 +680,13 @@ export class IdlePriorityShortRunner {
                 return { status: "held", message: error instanceof Error ? error.message : String(error), ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
             }
             const state = await this.dependencies.stateStore.load().catch(() => undefined);
-            if (state) return this.manualReview(state, `IDLE_RUNNER_FAIL_CLOSED:${error instanceof Error ? error.message : String(error)}`);
+            if (state) {
+                const deferred = classifyIdleFlatRateBudgetDeferral(state, error);
+                if (deferred) {
+                    return { status: "held", message: deferred, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+                }
+                return this.manualReview(state, `IDLE_RUNNER_FAIL_CLOSED:${error instanceof Error ? error.message : String(error)}`);
+            }
             throw error;
         } finally {
             await lock.release();

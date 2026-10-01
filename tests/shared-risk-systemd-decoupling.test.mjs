@@ -250,3 +250,19 @@ test("successful cutover repoints previous to the immediate prior Production rel
   assert.match(cutover, /ln -s "\$OLD_RELEASE" "\$previous_tmp"/);
   assert.match(cutover, /POSTDEPLOY_PREVIOUS_UPDATED=PASS/);
 });
+
+
+test("cutover recovers only a flat known Idle rate-budget review after venue-flat proof", async () => {
+  const cutover = await read(CUTOVER);
+  assert.match(cutover, /recover_old_idle_known_rate_budget_state\(\)/);
+  assert.match(cutover, /IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:\\d\+/);
+  assert.match(cutover, /CUTOVER_IDLE_PREFLIGHT_UNKNOWN_MANUAL_REVIEW/);
+  assert.match(cutover, /CUTOVER_IDLE_PREFLIGHT_POSITION_PRESENT/);
+  assert.match(cutover, /CUTOVER_IDLE_PREFLIGHT_PENDING_PRESENT/);
+  assert.match(cutover, /CUTOVER_KNOWN_IDLE_BENIGN_INACTIVE_ACCEPTED/);
+  const firstVenueFlat = cutover.indexOf('require_flat_account "$OLD_RELEASE"');
+  const recovery = cutover.indexOf('IDLE_PREFLIGHT_RECOVERY_STATUS="$(recover_old_idle_known_rate_budget_state)"');
+  const sharedSafe = cutover.indexOf("require_shared_safe", recovery);
+  assert.ok(firstVenueFlat >= 0 && recovery > firstVenueFlat, "venue flat proof must precede any Idle state recovery");
+  assert.ok(sharedSafe > recovery, "shared safety must be rechecked after the exact benign state recovery");
+});

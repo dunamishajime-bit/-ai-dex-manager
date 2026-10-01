@@ -20,6 +20,7 @@ CERT_FILE="/tmp/idle-parity-v3-$REQUEST_ID.json"
 RESIDUAL_CERT_FILE="/tmp/idle-residual-long-parity-$REQUEST_ID.json"
 SHARED=/var/lib/disdex/shared
 BACKUP="/var/lib/disdex/deploy-backups/idle-$REQUEST_ID"
+PREFLIGHT_BACKUP="/var/lib/disdex/deploy-backups/idle-preflight-$REQUEST_ID"
 LOCK=/run/lock/disdex-idle-production-redeploy.lock
 
 [[ "$FROM_SHA" =~ ^[a-f0-9]{40}$ ]]
@@ -170,6 +171,82 @@ PY
   rm -rf -- "$budget_tmp" "$budget_tmp.lock" "$budget_tmp.lock.recovery"
 }
 
+recover_old_idle_known_rate_budget_state() {
+  local state_path="/var/lib/disdex/idle-priority/state.json"
+  local backup_path="$PREFLIGHT_BACKUP/state.json"
+  install -d -o root -g root -m 0700 "$PREFLIGHT_BACKUP"
+  python3 - "$state_path" "$FROM_SHA" "$backup_path" <<'PY'
+import json,os,re,stat,sys,tempfile,time
+state_path,expected_sha,backup_path=sys.argv[1:]
+with open(state_path,"rb") as f:
+    before_bytes=f.read()
+before=json.loads(before_bytes.decode("utf-8"))
+if before.get("schema")!="disdex-idle-priority-state/v2":
+    raise SystemExit("CUTOVER_IDLE_PREFLIGHT_SCHEMA_MISMATCH")
+if str(before.get("runtimeSha") or "").lower()!=expected_sha:
+    raise SystemExit("CUTOVER_IDLE_PREFLIGHT_SHA_MISMATCH")
+positions=before.get("positions")
+if not isinstance(positions,list) or positions:
+    raise SystemExit("CUTOVER_IDLE_PREFLIGHT_POSITION_PRESENT")
+if before.get("pending"):
+    raise SystemExit("CUTOVER_IDLE_PREFLIGHT_PENDING_PRESENT")
+review=before.get("manualReview")
+if not review:
+    print("NOOP")
+    raise SystemExit(0)
+if not re.fullmatch(r"IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:\d+",str(review)):
+    raise SystemExit("CUTOVER_IDLE_PREFLIGHT_UNKNOWN_MANUAL_REVIEW")
+st=os.stat(state_path,follow_symlinks=False)
+if stat.S_ISLNK(st.st_mode) or not stat.S_ISREG(st.st_mode):
+    raise SystemExit("CUTOVER_IDLE_PREFLIGHT_STATE_NOT_REGULAR")
+os.makedirs(os.path.dirname(backup_path),exist_ok=True)
+fd=os.open(backup_path,os.O_WRONLY|os.O_CREAT|os.O_EXCL,stat.S_IMODE(st.st_mode))
+try:
+    with os.fdopen(fd,"wb",closefd=True) as f:
+        f.write(before_bytes); f.flush(); os.fsync(f.fileno())
+except:
+    try: os.close(fd)
+    except OSError: pass
+    raise
+os.chown(backup_path,st.st_uid,st.st_gid)
+os.chmod(backup_path,stat.S_IMODE(st.st_mode))
+with open(backup_path,"rb") as f:
+    if f.read()!=before_bytes:
+        raise SystemExit("CUTOVER_IDLE_PREFLIGHT_BACKUP_MISMATCH")
+now=int(time.time()*1000)
+after=dict(before)
+after["updatedAt"]=now
+after["manualReview"]=None
+after["lastDecision"]={"decisionTs":now,"accepted":False,"reason":"IDLE_BENIGN_RATE_BUDGET_RECOVERY"}
+failures=list(before.get("failures") or [])
+failures.append({"message":"IDLE_BENIGN_RATE_BUDGET_RECOVERY","occurredAt":now})
+after["failures"]=failures[-100:]
+parent=os.path.dirname(state_path)
+tmp=f"{state_path}.{os.getpid()}.{now}.preflight-recovery.tmp"
+fd=os.open(tmp,os.O_WRONLY|os.O_CREAT|os.O_EXCL,stat.S_IMODE(st.st_mode))
+try:
+    with os.fdopen(fd,"w",encoding="utf-8",closefd=True) as f:
+        json.dump(after,f,ensure_ascii=False,indent=2); f.write("\n"); f.flush(); os.fsync(f.fileno())
+except:
+    try: os.close(fd)
+    except OSError: pass
+    raise
+os.chown(tmp,st.st_uid,st.st_gid)
+os.chmod(tmp,stat.S_IMODE(st.st_mode))
+os.replace(tmp,state_path)
+dirfd=os.open(parent,os.O_RDONLY)
+try: os.fsync(dirfd)
+finally: os.close(dirfd)
+with open(state_path,encoding="utf-8") as f:
+    readback=json.load(f)
+if readback.get("manualReview") is not None or readback.get("positions") or readback.get("pending"):
+    raise SystemExit("CUTOVER_IDLE_PREFLIGHT_READBACK_MISMATCH")
+if (readback.get("lastDecision") or {}).get("reason")!="IDLE_BENIGN_RATE_BUDGET_RECOVERY":
+    raise SystemExit("CUTOVER_IDLE_PREFLIGHT_REASON_MISMATCH")
+print("PASS:"+backup_path)
+PY
+}
+
 restart_stock_reference_current() {
   local phase="${1:-CUTOVER}"
   local expected pid cwd attempt
@@ -197,15 +274,22 @@ restart_stock_reference_current() {
 }
 
 load_runtime_env
-require_shared_safe
 require_flat_account "$OLD_RELEASE"
+IDLE_PREFLIGHT_RECOVERY_STATUS="$(recover_old_idle_known_rate_budget_state)"
+echo "CUTOVER_IDLE_PREFLIGHT_RECOVERY=$IDLE_PREFLIGHT_RECOVERY_STATUS"
+require_shared_safe
 
 for name in "${NAMES[@]}"; do
   unit="$name@$FROM_SHA.service"
-  [[ "$(systemctl is-active "$unit" 2>/dev/null || true)" == active ]] || {
-    echo "CUTOVER_OLD_UNIT_NOT_ACTIVE=$unit"
+  active_state="$(systemctl is-active "$unit" 2>/dev/null || true)"
+  if [[ "$active_state" != active ]]; then
+    if [[ "$name" == disdex-idle-priority-short && "$active_state" == inactive && "$IDLE_PREFLIGHT_RECOVERY_STATUS" == PASS:* ]]; then
+      echo "CUTOVER_KNOWN_IDLE_BENIGN_INACTIVE_ACCEPTED unit=$unit recovery=$IDLE_PREFLIGHT_RECOVERY_STATUS"
+      continue
+    fi
+    echo "CUTOVER_OLD_UNIT_NOT_ACTIVE=$unit state=$active_state"
     exit 41
-  }
+  fi
   restart_count="$(systemctl show "$unit" -p NRestarts --value)"
   if [[ "$restart_count" != 0 ]]; then
     if [[ "$name" == disdex-shared-crypto-risk && "$restart_count" == 1 ]]; then

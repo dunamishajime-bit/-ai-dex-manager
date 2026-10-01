@@ -7,6 +7,7 @@ import { normalizeIdleState } from "../lib/idle-priority-short-state";
 const SHA = /^[0-9a-f]{40}$/i;
 export const BENIGN_IDLE_OPERATOR_ACTIVATION_EACCES =
   "IDLE_RUNNER_FAIL_CLOSED:EACCES: permission denied, open '/var/lib/disdex/shared/operator-activation/current.json'";
+export const BENIGN_IDLE_RATE_BUDGET_REVIEW = /^IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:\d+$/;
 
 function exactSha(value: unknown, field: string): string {
   const normalized = String(value || "").trim().toLowerCase();
@@ -51,12 +52,17 @@ export async function recoverIdlePriorityShortBenignState(input: {
   if (!checked.x.manualReview) {
     return { status: "IDLE_BENIGN_STATE_RECOVERY_NOOP" as const, statePath, runtimeSha: checked.stateSha, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
   }
-  if (checked.x.manualReview !== BENIGN_IDLE_OPERATOR_ACTIVATION_EACCES) {
-    throw new Error("IDLE_BENIGN_STATE_RECOVERY_UNKNOWN_REVIEW");
-  }
+  const review = String(checked.x.manualReview);
+  const recoveryReason = checked.x.manualReview === BENIGN_IDLE_OPERATOR_ACTIVATION_EACCES
+    ? "IDLE_BENIGN_OPERATOR_ACTIVATION_RECOVERY"
+    : BENIGN_IDLE_RATE_BUDGET_REVIEW.test(review)
+      ? "IDLE_BENIGN_RATE_BUDGET_RECOVERY"
+      : undefined;
+  if (!recoveryReason) throw new Error("IDLE_BENIGN_STATE_RECOVERY_UNKNOWN_REVIEW");
 
   const now = Date.now();
-  const backupPath = resolve(input.backupPath || `${statePath}.before-benign-operator-activation-recovery-${checked.stateSha}`);
+  const backupSuffix = recoveryReason === "IDLE_BENIGN_RATE_BUDGET_RECOVERY" ? "rate-budget" : "operator-activation";
+  const backupPath = resolve(input.backupPath || `${statePath}.before-benign-${backupSuffix}-recovery-${checked.stateSha}`);
   try {
     await stat(backupPath);
     throw new Error("IDLE_BENIGN_STATE_RECOVERY_BACKUP_EXISTS");
@@ -76,8 +82,8 @@ export async function recoverIdlePriorityShortBenignState(input: {
     ...before,
     updatedAt: now,
     manualReview: null,
-    lastDecision: { decisionTs: now, accepted: false, reason: "IDLE_BENIGN_OPERATOR_ACTIVATION_RECOVERY" },
-    failures: [...(Array.isArray(before.failures) ? before.failures : []), { message: "IDLE_BENIGN_OPERATOR_ACTIVATION_RECOVERY", occurredAt: now }].slice(-100),
+    lastDecision: { decisionTs: now, accepted: false, reason: recoveryReason },
+    failures: [...(Array.isArray(before.failures) ? before.failures : []), { message: recoveryReason, occurredAt: now }].slice(-100),
   };
   const temporary = `${statePath}.${process.pid}.${now}.benign-recovery.tmp`;
   const handle = await open(temporary, "wx", metadata.mode & 0o777);
@@ -94,10 +100,10 @@ export async function recoverIdlePriorityShortBenignState(input: {
   await rename(temporary, statePath);
   const readback = JSON.parse(await readFile(statePath, "utf8"));
   const checkedReadback = assertFlatState(readback, expectedSha);
-  if (checkedReadback.x.manualReview !== null || (readback.lastDecision as Record<string, unknown> | undefined)?.reason !== "IDLE_BENIGN_OPERATOR_ACTIVATION_RECOVERY") {
+  if (checkedReadback.x.manualReview !== null || (readback.lastDecision as Record<string, unknown> | undefined)?.reason !== recoveryReason) {
     throw new Error("IDLE_BENIGN_STATE_RECOVERY_READBACK_MISMATCH");
   }
-  return { status: "IDLE_BENIGN_STATE_RECOVERY_PASS" as const, statePath, backupPath, runtimeSha: checkedReadback.stateSha, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+  return { status: "IDLE_BENIGN_STATE_RECOVERY_PASS" as const, recoveryReason, statePath, backupPath, runtimeSha: checkedReadback.stateSha, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
 }
 
 function arg(name: string) {

@@ -1,5 +1,5 @@
 name: Idle Priority exact-SHA Production redeploy
-# redeploy-sequence: trail020-doge-avax-canonical-ledger-v15
+# redeploy-sequence: idle-rate-budget-benign-recovery-v16
 on:
   push:
     branches: [design/idle-priority-bt-parity-20260929]
@@ -46,6 +46,8 @@ jobs:
             tests/current_live_target_contract.test.ts \
             tests/idle-residual-long-contract.test.ts \
             tests/idle-residual-long-preemption.test.ts \
+            tests/idle-priority-short-benign-state-recovery.test.ts \
+            tests/idle-priority-rate-budget-deferral.test.ts \
             tests/idle-priority-short-systemd-contract.test.mjs \
             tests/ops-runner-watchdog-current-contract.test.mjs \
             tests/watchdog-release-lineage.test.ts \
