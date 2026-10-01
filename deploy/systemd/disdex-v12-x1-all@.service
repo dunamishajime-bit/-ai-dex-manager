@@ -1,8 +1,7 @@
 [Unit]
 Description=DisDex V12 X1 ALL LIVE runner (%i)
 After=network-online.target disdex-shared-crypto-risk@%i.service disdex-v12-v52-margin-guard@%i.service
-Wants=network-online.target disdex-shared-crypto-risk@%i.service
-Requires=disdex-v12-v52-margin-guard@%i.service
+Wants=network-online.target disdex-shared-crypto-risk@%i.service disdex-v12-v52-margin-guard@%i.service
 
 [Service]
 Type=simple
