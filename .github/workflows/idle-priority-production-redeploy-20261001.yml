@@ -1,5 +1,5 @@
 name: Idle Priority exact-SHA Production redeploy
-# redeploy-sequence: post-recovery-cutover-v5
+# redeploy-sequence: post-recovery-cutover-v6-safety-daemon-lifecycle
 on:
   push:
     branches: [design/idle-priority-bt-parity-20260929]
@@ -49,7 +49,10 @@ jobs:
             tests/hype-zec-long-state-migration.test.ts \
             tests/hype-zec-benign-market-data-recovery.test.ts \
             tests/hype-zec-runner-gate.test.ts \
-            tests/q102-symbol-ownership-contract.test.ts
+            tests/q102-symbol-ownership-contract.test.ts \
+            tests/shared-risk-transient-refresh-retry.test.ts \
+            tests/shared-risk-rollover-retry.test.ts
+          node --test tests/shared-risk-systemd-decoupling.test.mjs
           bash scripts/ops/root/disdex-current-runtime-wiring --self-test
           grep -q 'chown(temporary, parent.uid, parent.gid)' lib/disdex-aster-global-rate-budget.ts
           grep -q 'DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH="$budget_tmp"' scripts/ops/root/disdex-idle-production-redeploy-20261001
