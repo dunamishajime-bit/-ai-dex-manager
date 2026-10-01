@@ -24,13 +24,18 @@ function assertSoftSharedRiskHardMargin(source, label) {
   );
   assert.match(
     source,
-    /^Requires=disdex-v12-v52-margin-guard@%i\.service$/m,
-    `${label} must keep Margin Guard as a hard dependency`,
+    /^Wants=.*\bdisdex-v12-v52-margin-guard@%i\.service\b/m,
+    `${label} must pull Margin Guard in as a soft dependency`,
   );
   assert.doesNotMatch(
     source,
     /^Requires=.*\bdisdex-shared-crypto-risk@%i\.service\b/m,
     `${label} must not stop/restart when Shared Risk transiently restarts`,
+  );
+  assert.doesNotMatch(
+    source,
+    /^Requires=.*\bdisdex-v12-v52-margin-guard@%i\.service\b/m,
+    `${label} must not hard-couple process lifecycle to Margin Guard`,
   );
 }
 
@@ -46,6 +51,7 @@ test("runtime wiring installs the managed V12 and PENGU templates before daemon 
   assert.match(wiring, /deploy\/systemd\/disdex-v12-x1-all@\.service/);
   assert.match(wiring, /\/etc\/systemd\/system\/disdex-v12-x1-all@\.service/);
   assert.match(wiring, /deploy\/systemd\/disdex-pengu-dual-ls-v2@\.service/);
+  assert.match(wiring, /DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED=true/);
   assert.match(wiring, /\/etc\/systemd\/system\/disdex-pengu-dual-ls-v2@\.service/);
   const prepareStart = wiring.indexOf("prepare_managed_unit_templates_for_apply()");
   const reload = wiring.indexOf("systemctl daemon-reload", prepareStart);
@@ -67,7 +73,8 @@ test("cutover verifies the effective dependency graph and can restore prior temp
   assert.match(cutover, /ROLLBACK_SYSTEMD_TEMPLATE_RESTORED/);
   assert.match(cutover, /POSTDEPLOY_SHARED_RISK_HARD_DEPENDENCY_PRESENT/);
   assert.match(cutover, /POSTDEPLOY_SHARED_RISK_SOFT_DEPENDENCY_MISSING/);
-  assert.match(cutover, /POSTDEPLOY_MARGIN_GUARD_HARD_DEPENDENCY_MISSING/);
+  assert.match(cutover, /POSTDEPLOY_MARGIN_GUARD_HARD_DEPENDENCY_PRESENT/);
+  assert.match(cutover, /POSTDEPLOY_MARGIN_GUARD_SOFT_DEPENDENCY_MISSING/);
   assert.match(cutover, /CUTOVER_SHARED_RISK_SOURCE_INCOMPLETE/);
   assert.match(cutover, /CUTOVER_SHARED_RISK_STALE/);
   assert.match(cutover, /CUTOVER_KNOWN_SHARED_RISK_TRANSIENT_RESTART_ACCEPTED/);
