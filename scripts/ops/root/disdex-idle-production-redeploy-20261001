@@ -390,11 +390,15 @@ for name in disdex-v12-x1-all disdex-pengu-dual-ls-v2; do
     echo "POSTDEPLOY_SHARED_RISK_SOFT_DEPENDENCY_MISSING=$unit"
     false
   }
-  [[ " $requires " == *" disdex-v12-v52-margin-guard@$TARGET_SHA.service "* ]] || {
-    echo "POSTDEPLOY_MARGIN_GUARD_HARD_DEPENDENCY_MISSING=$unit"
+  [[ " $requires " != *" disdex-v12-v52-margin-guard@$TARGET_SHA.service "* ]] || {
+    echo "POSTDEPLOY_MARGIN_GUARD_HARD_DEPENDENCY_PRESENT=$unit"
     false
   }
-  echo "POSTDEPLOY_SHARED_RISK_LIFECYCLE_DECOUPLED unit=$unit"
+  [[ " $wants " == *" disdex-v12-v52-margin-guard@$TARGET_SHA.service "* ]] || {
+    echo "POSTDEPLOY_MARGIN_GUARD_SOFT_DEPENDENCY_MISSING=$unit"
+    false
+  }
+  echo "POSTDEPLOY_SAFETY_DAEMON_LIFECYCLE_DECOUPLED unit=$unit"
 done
 
 for name in "${NAMES[@]}"; do
