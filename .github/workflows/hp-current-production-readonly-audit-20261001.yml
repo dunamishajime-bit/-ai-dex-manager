@@ -1,0 +1,101 @@
+name: HP current Production read-only audit
+on:
+  push:
+    branches: [codex/hp-hype-zec-live-sync-20260927]
+    paths: [.github/workflows/hp-current-production-readonly-audit-20261001.yml]
+permissions:
+  contents: read
+concurrency:
+  group: disdex-hp-current-production-readonly-audit
+  cancel-in-progress: false
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Initialize restricted root SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ -n "$SSH_HOST" && -n "$ROOT_KEY" && -n "$SSH_KNOWN_HOSTS" ]]
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Audit current Trading, HP, PENGU state and Idle linkage without mutation
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -p "$PORT" "root@$SSH_HOST" 'bash -s' <<'REMOTE'
+          set -Eeuo pipefail
+          trading="$(tr -d '[:space:]' < /home/deploy/disdex-trading/current/.disdex-release-sha)"
+          [[ "$trading" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$(readlink -f /home/deploy/disdex-trading/current)" == "/home/deploy/disdex-trading/releases/$trading" ]]
+          echo "TRADING_SHA=$trading"
+          ui=ai-dex-manager-ui.service
+          [[ "$(systemctl is-active "$ui")" == active ]]
+          ui_sha="$(systemctl show "$ui" --property Environment --value | tr ' ' '\n' | sed -n 's/^DISDEX_UI_RELEASE_SHA=//p' | tail -1)"
+          ui_wd="$(systemctl show "$ui" --property WorkingDirectory --value)"
+          [[ "$ui_sha" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$ui_wd" == /home/deploy/disdex-trading/ui-releases/* && -d "$ui_wd" && ! -L "$ui_wd" ]]
+          [[ "$(tr -d '[:space:]' < "$ui_wd/.disdex-release-sha")" == "$ui_sha" ]]
+          echo "UI_SHA=$ui_sha"
+          echo "UI_WORKDIR=$ui_wd"
+          [[ "$(stat -c '%U:%G:%a' /var/lib/disdex/pengu-dual-ls-v2)" == "deploy:deploy:700" ]]
+          echo "PENGU_STATE_DIR=deploy:deploy:700"
+          names=(disdex-v12-x1-all disdex-pengu-dual-ls-v2 disdex-quality102-causal-v1
+            disdex-v52-aster-only disdex-fet-brk48 disdex-hype-long disdex-idle-priority-short
+            disdex-shared-crypto-risk disdex-v12-v52-margin-guard)
+          for name in "${names[@]}"; do
+            unit="$name@$trading.service"
+            [[ "$(systemctl is-active "$unit" 2>/dev/null || true)" == active ]]
+            nr="$(systemctl show "$unit" -p NRestarts --value)"
+            [[ "$nr" == 0 ]]
+            echo "RUNNER_OK=$unit NRestarts=$nr"
+          done
+          python3 - "$trading" "$ui_sha" <<'PY'
+          import json,sys,urllib.request
+          trading,ui=sys.argv[1:]
+          base="http://127.0.0.1:3001"
+          def get(path,json_result=False):
+              req=urllib.request.Request(base+path,headers={"Cookie":"disdex_auth=1","User-Agent":"DisDex-Final-Readonly-Audit"})
+              with urllib.request.urlopen(req,timeout=30) as r:
+                  if r.status != 200: raise RuntimeError(f"{path}:HTTP_{r.status}")
+                  data=r.read(1500000)
+                  return json.loads(data) if json_result else data
+          for path in ("/","/decision-status","/decision-status/v12","/decision-status/pengu",
+                       "/decision-status/q102","/decision-status/v52","/decision-status/fet",
+                       "/decision-status/hype","/decision-status/idle-priority","/history"):
+              get(path)
+          live=get("/api/system/live-runtime",True)
+          assert live.get("releaseSha")==trading, ("HP_TRADING_SHA_MISMATCH",live.get("releaseSha"),trading)
+          idle=get("/api/system/idle-priority-status",True)
+          assert idle.get("releaseSha")==trading
+          assert idle.get("readOnly") is True and idle.get("tradingMutation")==0
+          decision=get("/api/system/decision-status?refresh=1",True)
+          units=(decision.get("runtime") or {}).get("units",[])
+          matches=[x for x in units if x.get("id")=="IDLE_PRIORITY_SHORT"]
+          assert len(matches)==1 and matches[0].get("releaseSha")==trading
+          print("HP_CURRENT_TRADING_LINKAGE=PASS")
+          print("HP_IDLE_CURRENT_LINKAGE=PASS")
+          print("HP_UI_SHA="+ui)
+          print("HP_TRADING_SHA="+trading)
+          PY
+          echo "TRADING_MUTATION=0"
+          echo "STATUS=HP_CURRENT_PRODUCTION_READONLY_AUDIT_PASS"
+          REMOTE
