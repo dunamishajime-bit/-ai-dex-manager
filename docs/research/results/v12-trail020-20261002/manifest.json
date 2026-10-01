@@ -1,7 +1,7 @@
 ﻿{
-    "created_utc":  "2026-10-01T17:13:11.6874653Z",
-    "source_branch":  "research/v12-trail020-bt-20261002",
-    "source_commit":  "223a168f7547bc1188ebc21e5ff581775a56f69b",
+    "created_utc":  "2026-10-01T17:25:55.2784471Z",
+    "branch":  "research/v12-trail020-bt-20261002",
+    "parent_commit":  "42acb79e66a33c431411892fa73d2b9965e34f38",
     "files":  [
                   {
                       "path":  "10bps/candidate-decisions.jsonl",
@@ -54,9 +54,54 @@
                       "sha256":  "f110046fa75ebd2c6c766f41450e8dabd36f1e45f03c0ef76b10a975180c6238"
                   },
                   {
+                      "path":  "replay-check.json",
+                      "bytes":  2202,
+                      "sha256":  "bf4edfe19191c9738f4f2327f71a9b3bf9157318472e5dd54c6c2ef78ad9d8bc"
+                  },
+                  {
                       "path":  "research-config.json",
                       "bytes":  514,
                       "sha256":  "4ab56dd34c37f863cf1dbf3ade27b8439ba3230699ae931aa2af77f8fda8ba1e"
+                  },
+                  {
+                      "path":  "top3-comparison/comparison-20-30bps.txt",
+                      "bytes":  883,
+                      "sha256":  "fb3feb558cc70e9f4eed8f3c872ab90ff263d708637fba50e82c59c6ad7424c4"
+                  },
+                  {
+                      "path":  "top3-comparison/comparison-8-10bps.txt",
+                      "bytes":  886,
+                      "sha256":  "09f7bdb4f516a2321dbdb4da52b5327baec470e3d89992ab6b871cf8c5aea044"
+                  },
+                  {
+                      "path":  "top3-comparison/comparison-8-10bps-full.json",
+                      "bytes":  3337125,
+                      "sha256":  "d570947018069dc151d24b0714b378e8524ca381beca9d15954f760009dcac46"
+                  },
+                  {
+                      "path":  "top3-comparison/doge-only-coststress.txt",
+                      "bytes":  426,
+                      "sha256":  "ae2a61b34d73d517bd063156a3fccae531f3accd103800279656c34ee5a82d50"
+                  },
+                  {
+                      "path":  "top3-comparison/near-excluded-top3-intents.json",
+                      "bytes":  27157,
+                      "sha256":  "57f5d1d7a8e1f6c2f02dbba74ec5c1ad9a1ab829c479fa063cd4bdecd9f50a2e"
+                  },
+                  {
+                      "path":  "top3-comparison/pengu-brk-top3-intents.json",
+                      "bytes":  29139,
+                      "sha256":  "b3b6321f7b9d5e7bf4b2d6fd1f10c79fc9d136e920b5323dc79ad6bacef60b7c"
+                  },
+                  {
+                      "path":  "top3-comparison/README.md",
+                      "bytes":  2992,
+                      "sha256":  "8baa10bd62688367345003b717e2ac01456a0bfc0f8c0dc57071dda5cb840b73"
+                  },
+                  {
+                      "path":  "top3-comparison/route-subset-diagnostic.txt",
+                      "bytes":  1073,
+                      "sha256":  "27dae12c37a9a633d7fb8260c426deb311fe8a503d26f0b3fae6543e0697c351"
                   }
               ]
 }
