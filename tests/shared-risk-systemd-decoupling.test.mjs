@@ -5,6 +5,7 @@ import test from "node:test";
 const V12 = "deploy/systemd/disdex-v12-x1-all@.service";
 const PENGU = "deploy/systemd/disdex-pengu-dual-ls-v2@.service";
 const WIRING = "scripts/ops/root/disdex-current-runtime-wiring";
+const CUTOVER = "scripts/ops/root/disdex-idle-production-redeploy-20261001";
 
 async function read(path) {
   return readFile(path, "utf8");
@@ -56,4 +57,15 @@ test("Shared Risk transient handling and lifecycle decoupling are both release a
   assert.match(wiring, /validate_release_artifacts/);
   assert.match(wiring, /deploy\/systemd\/disdex-v12-x1-all@\.service/);
   assert.match(wiring, /deploy\/systemd\/disdex-pengu-dual-ls-v2@\.service/);
+});
+
+
+test("cutover verifies the effective dependency graph and can restore prior templates", async () => {
+  const cutover = await read(CUTOVER);
+  assert.match(cutover, /SYSTEMD_TEMPLATE_PATHS=/);
+  assert.match(cutover, /CUTOVER_SYSTEMD_TEMPLATE_BACKED_UP/);
+  assert.match(cutover, /ROLLBACK_SYSTEMD_TEMPLATE_RESTORED/);
+  assert.match(cutover, /POSTDEPLOY_SHARED_RISK_HARD_DEPENDENCY_PRESENT/);
+  assert.match(cutover, /POSTDEPLOY_SHARED_RISK_SOFT_DEPENDENCY_MISSING/);
+  assert.match(cutover, /POSTDEPLOY_MARGIN_GUARD_HARD_DEPENDENCY_MISSING/);
 });
