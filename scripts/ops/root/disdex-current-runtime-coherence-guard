@@ -27,8 +27,8 @@ HEARTBEATS=(
   "pengu-v8.json"
   "quality102-causal-v1.json"
   "v52.json"
-  "fet-brk48.json"
-  "hype-zec-long.json"
+  "fet-brk48-residual.json"
+  "hype-trend-long.json"
   "idle-priority-short.json"
 )
 LEGACY_LIVE_UNITS=(
