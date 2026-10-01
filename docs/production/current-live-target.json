@@ -154,7 +154,7 @@
   },
   "formalBacktest": {
     "sourceArtifact": "docs/research/results/trail020-idle-doge-avax-controlling-20261002/controlling-contract.json",
-    "sourceArtifactSha256": "FEDE715DAB4822417B1F052F36478EE2BF883A70DAE1E4161CA400AF07D02729",
+    "sourceArtifactSha256": "B1F31C152D831131320E8E0159593A34B4679AF7609715A0DD6EFCD51B9DE616",
     "selectedCase": "trail020_idle_doge_avax_20261002",
     "period": {
       "startInclusive": "2025-08-10T00:00:00.000Z",

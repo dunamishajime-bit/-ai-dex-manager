@@ -1,65 +1,86 @@
 {
   "schema": "disdex-research-artifact-manifest/v1",
+  "hashMode": "CANONICAL_LF_BYTES",
   "files": [
     {
       "path": "10bps/integrated-result.json",
-      "bytes": 506701,
-      "sha256": "112b594d24b94a7233ff19bd7b59034da4b2c5bd4eac6d0648037d846a16906f"
+      "bytes": 489549,
+      "sha256": "aa1c1f0f71fd82e4b40a04fb9907e02a3bca3d8ca313252007b6b1cfd78bc097"
     },
     {
       "path": "10bps/metrics.json",
-      "bytes": 3119,
-      "sha256": "22adc0a4ece390eaf4f1d3c2b97c1fb97d0f9be357ffcd4e864ad2f134343dd2"
+      "bytes": 3007,
+      "sha256": "b2cf5dbbf1b08649e7b2f11be1ed8b600f249ac9313de5f55e3dce0735d82ff0"
     },
     {
       "path": "10bps/portfolio-trades.jsonl",
-      "bytes": 349757,
-      "sha256": "9bdf71bd72356af415d4aec6c04b6762c812aef7b8cc7556c26ec8ca22402fde"
+      "bytes": 348367,
+      "sha256": "5bdea5e406218f366186634ba64de4116a7d219d9200f995978384333c838ea3"
+    },
+    {
+      "path": "10bps/rejections.jsonl",
+      "bytes": 2030,
+      "sha256": "2eb4e4eccba145ea2099fec7c008d570f7fca136068269a12b4c43031738a939"
     },
     {
       "path": "20bps/integrated-result.json",
-      "bytes": 505292,
-      "sha256": "d3226c70b89098fbb43eb113bd4c5c944e6b9f48841bf60c03486de156d087d4"
+      "bytes": 488190,
+      "sha256": "fa21ec502d37a562134e1875d93e1c196ec4e2e0bcf7c51ae8c292c3ac2b0669"
     },
     {
       "path": "20bps/metrics.json",
-      "bytes": 3108,
-      "sha256": "fc36c814a695e26dc3ce97d5b3816300905a46dd4be6242f42346ea26597597c"
+      "bytes": 2996,
+      "sha256": "0f1e6af5550c9afdc8ad2eb81b7b0f939eae4ff39086245a01f49ed83a0eaea6"
     },
     {
       "path": "20bps/portfolio-trades.jsonl",
-      "bytes": 349256,
-      "sha256": "e33be1d4b1620f4aca0cf9a98a365e3d8a4dfdc811a69b8e3f68d917e5d460f0"
+      "bytes": 347868,
+      "sha256": "7de39c92f75e842442394d513df7be3ba00b1e5c09fccebd37196ba3fa45c586"
+    },
+    {
+      "path": "20bps/rejections.jsonl",
+      "bytes": 1514,
+      "sha256": "23948283c1596c3b9349112aff0e03e4882fbcbca0cdff8e6efdfa68b8d49bf5"
     },
     {
       "path": "30bps/integrated-result.json",
-      "bytes": 503693,
-      "sha256": "5024406550a6a783cc91791b579c550afa14bb3b2ae342092eeabac11664b197"
+      "bytes": 486650,
+      "sha256": "1311c7d34ee60ef8ce114c849870863086b82d6bc430dd6624028429e63c84c1"
     },
     {
       "path": "30bps/metrics.json",
-      "bytes": 3125,
-      "sha256": "5791a64a8e0a368596119643d2cd3c96a4abb04c2afd1da0d87370988a31fcfe"
+      "bytes": 3013,
+      "sha256": "618f200315024634ff56292f0e9a34b273e337b478aed0672c25b7fc7d164bd6"
     },
     {
       "path": "30bps/portfolio-trades.jsonl",
-      "bytes": 347899,
-      "sha256": "92d5c731b7a65e58feead2b2dc291e4be4f969ab0ee819d8bba9236d73792ea1"
+      "bytes": 346517,
+      "sha256": "c989948782e7782f767282c1da85d598556aefa6916d884dd833c829d7e8ec76"
+    },
+    {
+      "path": "30bps/rejections.jsonl",
+      "bytes": 1774,
+      "sha256": "3072b17f6a54f02e01dcd047165e5544d9f53b3afd40839fee2566f1b0838d92"
     },
     {
       "path": "8bps/integrated-result.json",
-      "bytes": 506713,
-      "sha256": "4cdb0249dab61570ccf268c15b615938e0f6cd11f133deb4fbceeaae686f18eb"
+      "bytes": 489561,
+      "sha256": "7e722c10577ad7f65f14a3f98e19013642f3eff5ec6a7039d2910c324605f0fd"
     },
     {
       "path": "8bps/metrics.json",
-      "bytes": 3124,
-      "sha256": "4f037904082e7588a8799b5f31679db395cff23b51f4a50b3fcd571ffc002595"
+      "bytes": 3012,
+      "sha256": "3700fd62139e4026bd6de476baaf4c964f906dde84ccaa706b0a1d94aa667059"
     },
     {
       "path": "8bps/portfolio-trades.jsonl",
-      "bytes": 349731,
-      "sha256": "cba82d1de63e2edf92cddb2eef3908dd70b9c878d3f5e5ed36809cae022f8ea8"
+      "bytes": 348341,
+      "sha256": "5d85965560b5fd4312d6735dd7e97fbf0123f27247d863f5f1230fc01fa29be2"
+    },
+    {
+      "path": "8bps/rejections.jsonl",
+      "bytes": 2021,
+      "sha256": "7e26016fd4718d5e33ea3db4f20e7b4932947dc2b600ceff2d3cf0435a90ba5c"
     },
     {
       "path": "aster-unseen-symbol-search-final.md",
@@ -68,8 +89,8 @@
     },
     {
       "path": "controlling-contract.json",
-      "bytes": 2653,
-      "sha256": "fede715dab4822417b1f052f36478ee2bf883a70dae1e4161ca400af07d02729"
+      "bytes": 2544,
+      "sha256": "b1f31c152d831131320e8e0159593a34b4679af7609715a0dd6efcd51b9de616"
     },
     {
       "path": "doge-avax-research-final.md",
@@ -78,28 +99,33 @@
     },
     {
       "path": "priority-overlay-intents.json",
-      "bytes": 27529,
-      "sha256": "da5d83e270e68926655d95145939bc0d702dc9c8e040a55cc2b2cc1ee5ce49ee"
+      "bytes": 26528,
+      "sha256": "d6f1a929eb198a545dc5e584b99f7fa255ac570aea8b57227f469860fdef4ed7"
     },
     {
       "path": "priority-overlay-target-net-10bps.json",
-      "bytes": 1824,
-      "sha256": "d90c6989ab5ac25a2a700d61817fc75a65bc4acb36069b52791a8e84f3dc8724"
+      "bytes": 1823,
+      "sha256": "8974c54647fd040c8c58b6272267a65591ac807df2d225984469341baded7787"
     },
     {
       "path": "priority-reconciliation.txt",
-      "bytes": 427,
-      "sha256": "ebf4ed9604284b5e81978c2bcf945edf99471192ec43f3443c88abbb28a00168"
+      "bytes": 424,
+      "sha256": "c61eed47f3de5e5bb1da4359d1d51227e34ae1cbedfa3d9e4dd379037380dffb"
     },
     {
       "path": "README.md",
-      "bytes": 1055,
-      "sha256": "dd89a4fc1ca23224867440e78aa5f032efa2f51b4b612f6bf48e2b9439510a7f"
+      "bytes": 1451,
+      "sha256": "bb6272cffb7e0f3f147d078e055580fd3844b21f22b61368b252dc0f06eed7c4"
+    },
+    {
+      "path": "replay-ledger.py",
+      "bytes": 1846,
+      "sha256": "2c545a1704359306f7030ea9ff3bc5b72072847c2298d7e015bfca6413c578be"
     },
     {
       "path": "trail020-plus-idle-10bps.json",
-      "bytes": 498946,
-      "sha256": "0f442e2a6cd86a7fb5afd845a7817763ad626e8b63e94aa0d1c5c6a3a7268986"
+      "bytes": 482075,
+      "sha256": "18d498cf51c41a713df78f74e28ffca29c036b3cdce93e213315f758e9c8680b"
     }
   ]
 }

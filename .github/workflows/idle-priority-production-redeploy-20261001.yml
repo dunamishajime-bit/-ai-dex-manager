@@ -1,5 +1,5 @@
 name: Idle Priority exact-SHA Production redeploy
-# redeploy-sequence: watchdog-heartbeat-lock-retry-v14
+# redeploy-sequence: trail020-doge-avax-canonical-ledger-v15
 on:
   push:
     branches: [design/idle-priority-bt-parity-20260929]

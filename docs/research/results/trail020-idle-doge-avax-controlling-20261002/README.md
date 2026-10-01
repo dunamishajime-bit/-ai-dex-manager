@@ -18,9 +18,12 @@ Priority: Formal existing > Idle Priority SHORT > DOGE Relative+Volume LONG > AV
 - 30bps JPY 118566758.74 / PF 1.874744 / DD -23.3606%
 
 Reuse:
-- each cost folder contains full integrated-result.json, portfolio-trades.jsonl and metrics.json.
+- each cost folder contains full integrated-result.json, portfolio-trades.jsonl, metrics.json and rejections.jsonl.
+- portfolio-trades.jsonl is the frozen closed-trade ledger used for instant replay and strategy-level aggregation.
+- rejections.jsonl preserves the rejected candidate/audit trail for the same cost run.
+- replay-ledger.py rebuilds trade count, win rate, profit factor and strategy counts directly from the frozen ledger and asserts parity with metrics.json.
 - priority-overlay-intents.json is the frozen 61 Idle + accepted DOGE/AVAX schedule.
 - controlling-contract.json is the machine-readable promotion contract.
-- manifest.json binds every artifact by SHA256.
+- manifest.json binds every artifact by canonical LF SHA256 so verification is OS-independent.
 
 No LIVE status is asserted by this research package.

@@ -49,11 +49,13 @@ test("current live target pins Trail0.20 + Idle + DOGE/AVAX controlling stack", 
 test("current formal acceptance is bound to the controlling ledger and cost stress", async () => {
   const target = JSON.parse(await readFile(targetPath, "utf8"));
   const bytes = await readFile(artifactPath);
-  const sha = createHash("sha256").update(bytes).digest("hex").toUpperCase();
+  const canonicalText = bytes.toString("utf8").replace(/\r\n/g, "\n");
+  const canonicalBytes = Buffer.from(canonicalText, "utf8");
+  const sha = createHash("sha256").update(canonicalBytes).digest("hex").toUpperCase();
   assert.equal(sha, target.formalBacktest.sourceArtifactSha256);
   assert.equal(target.formalBacktest.selectedCase, "trail020_idle_doge_avax_20261002");
 
-  const contract = JSON.parse(bytes.toString("utf8"));
+  const contract = JSON.parse(canonicalText);
   assert.deepEqual(target.formalBacktest.priority, contract.priority);
   for (const [label,bps] of [["NORMAL",10],["COST_8BPS",8],["COST_20BPS",20],["COST_30BPS",30]] as const) {
     const expected = target.formalBacktest[label];
