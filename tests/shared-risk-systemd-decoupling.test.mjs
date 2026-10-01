@@ -141,6 +141,28 @@ test("cutover waits for fresh safety daemons before starting trading runners", a
 });
 
 
+test("cutover refreshes current runner heartbeats before enabling watchdog automation", async () => {
+  const cutover = await read(CUTOVER);
+  assert.match(cutover, /CUTOVER_PRE_AUTOMATION_HEARTBEAT_REFRESH_PASS/);
+  assert.match(cutover, /CUTOVER_HEARTBEAT_SHA_MISMATCH/);
+  assert.match(cutover, /CUTOVER_HEARTBEAT_SERVICE_UNIT_MISMATCH/);
+  assert.match(cutover, /CUTOVER_HEARTBEAT_NOT_HEALTHY/);
+  for (const heartbeat of [
+    "v12-x1-all.json",
+    "pengu-v8.json",
+    "quality102-causal-v1.json",
+    "v52.json",
+    "fet-brk48-residual.json",
+    "hype-trend-long.json",
+    "idle-priority-short.json",
+  ]) assert.match(cutover, new RegExp(heartbeat.replaceAll(".", "\\.")));
+
+  const refresh = cutover.indexOf('CUTOVER_PRE_AUTOMATION_HEARTBEAT_REFRESH_PASS');
+  const automation = cutover.indexOf('CUTOVER_POSTSTART_WIRING_BEGIN');
+  assert.ok(refresh >= 0 && automation > refresh, "runner heartbeats must be current before watchdog/recovery automation is enabled");
+});
+
+
 test("cutover permits only one diagnosed healthy historical V12 restart", async () => {
   const cutover = await read(CUTOVER);
   assert.match(cutover, /name" == disdex-v12-x1-all && "\$restart_count" == 1/);
