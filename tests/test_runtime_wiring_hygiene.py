@@ -67,5 +67,36 @@ class RuntimeWiringHygieneTest(unittest.TestCase):
         self.assertIn('systemctl reset-failed "\${unit%.timer}.service"', source)
 
 
+    def test_support_timer_units_rearm_from_activation_not_boot(self):
+        for name in [
+            "disdex-runner-health-alert.timer",
+            "disdex-runner-position-recovery.timer",
+            "disdex-trade-fill-notifier.timer",
+        ]:
+            source = (ROOT / "ops" / "systemd" / name).read_text(encoding="utf-8")
+            self.assertIn("OnActiveSec=", source, name)
+            self.assertNotIn("OnBootSec=", source, name)
+        wiring = WIRING.read_text(encoding="utf-8")
+        self.assertIn("ops/systemd/disdex-runner-health-alert.timer", wiring)
+        self.assertIn("ops/systemd/disdex-runner-position-recovery.timer", wiring)
+        self.assertIn("ops/systemd/disdex-trade-fill-notifier.timer", wiring)
+
+    def test_position_recovery_state_is_release_scoped_and_backed_up(self):
+        source = WIRING.read_text(encoding="utf-8")
+        self.assertIn("normalize_position_recovery_state_lineage()", source)
+        self.assertIn("disdex-runner-position-recovery/v1", source)
+        self.assertIn("position-recovery.json.before-", source)
+        self.assertIn("position recovery state is malformed and will not be rewritten", source)
+        self.assertIn("normalize_position_recovery_state_lineage", source)
+
+    def test_cutover_defers_operator_automation_until_safety_ready(self):
+        cutover = (ROOT / "scripts" / "ops" / "root" / "disdex-idle-production-redeploy-20261001").read_text(encoding="utf-8")
+        self.assertIn("DISDEX_CURRENT_RUNTIME_DEFER_OPERATOR_AUTOMATION=true", cutover)
+        self.assertIn("CUTOVER_POSTSTART_WIRING_PASS", cutover)
+        safety_wait = cutover.index("wait_safety_daemons_ready")
+        post_start = cutover.index("CUTOVER_POSTSTART_WIRING_BEGIN")
+        self.assertLess(safety_wait, post_start)
+
+
 if __name__ == "__main__":
     unittest.main()
