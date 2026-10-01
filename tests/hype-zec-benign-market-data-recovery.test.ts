@@ -19,6 +19,7 @@ function shadowRuntime() {
     runtimeSha: SHA,
     statePath: "unused",
     pendingExposurePath: "unused",
+    sharedRiskPath: "unused",
     maximumGross: 1,
     maximumReductionFraction: 0.5,
     hypeRiskPct: 5,
