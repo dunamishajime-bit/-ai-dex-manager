@@ -4,7 +4,6 @@
   "official_cost_model_roundtrip_bps": 10,
   "initial_equity_jpy": 10000,
   "monthly_contribution_jpy": 10000,
-  "contribution_count": 13,
   "official_10bps": {
     "final_equity_jpy": 1229065462.0472791,
     "profit_factor": 2.4887028036012624,
@@ -134,5 +133,8 @@
       "Retrospective annual backtest",
       "V52 uses its verified stock ledger path"
     ]
-  }
+  },
+  "additional_monthly_contributions": 12,
+  "contribution_event_count_including_initial": 13,
+  "total_contributed_jpy": 130000
 }
