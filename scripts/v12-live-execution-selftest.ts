@@ -79,6 +79,7 @@ function tradeResult(input: { clientOrderId: string; symbol: string; status?: Di
         quoteQuantity: executedQuantity * price,
         executionUnknown: input.status === "UNKNOWN",
         reconciled: input.status !== "UNKNOWN",
+        updatedAt: NOW,
     };
 }
 
@@ -394,7 +395,7 @@ async function main() {
         );
         protectionFill.adapter.queryOrderSameId = async (_symbol: string, clientOrderId: string) => (
             clientOrderId === exitedActive.protection.takeProfitClientOrderId
-                ? { symbol: exitedActive.symbol, clientOrderId, status: "FILLED", side: "SELL", type: "TAKE_PROFIT_MARKET", reduceOnly: true, quantity: exitedActive.quantity, executedQuantity: exitedActive.quantity, stopPrice: exitedActive.protection.takeProfit }
+                ? { symbol: exitedActive.symbol, clientOrderId, status: "FILLED", side: "SELL", type: "TAKE_PROFIT_MARKET", reduceOnly: true, quantity: exitedActive.quantity, executedQuantity: exitedActive.quantity, stopPrice: exitedActive.protection.takeProfit, updatedAt: NOW }
                 : null
         ) as never;
         const entryCallsBeforeProtectionReconcile = protectionFill.adapter.entryCalls;
