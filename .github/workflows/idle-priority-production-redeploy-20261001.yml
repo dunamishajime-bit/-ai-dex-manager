@@ -1,5 +1,5 @@
 name: Idle Priority exact-SHA Production redeploy
-# redeploy-sequence: fet-symbol-scoped-flatpath-v27
+# redeploy-sequence: rate-budget-startup-gate-v28
 on:
   push:
     branches: [design/idle-priority-bt-parity-20260929]
