@@ -40,7 +40,7 @@ import { quality102GovernorGross, readPortfolioDdGovernor } from "@/lib/disdex-p
 import { aggregatePendingExposure, readPendingExposureRegistry } from "@/lib/disdex-pending-exposure-registry";
 import { classifyAsterSymbol } from "@/lib/disdex-aster-portfolio-classifier";
 import { findManagedFetBrk48ProtectiveOrders, findManagedHypeZecProtectiveOrders, findManagedPenguRecoveryV8ProtectiveOrders, findManagedV12ProtectiveOrders } from "@/lib/disdex-managed-protective-orders";
-import { reduceV12DynamicResidualForCoreConflict } from "@/lib/v12-dynamic-residual-live-reduction";
+import { preemptV12ForQ102Priority } from "@/lib/v12-q102-priority-preemption";
 import { reduceFetBrk48ForCoreConflict } from "@/lib/fet-brk48-live-reduction";
 import { isHypeZecSoleSharedCapacityCause, releaseHypeZecCapacityForPriorityEntry } from "@/lib/hype-zec-priority-capacity";
 import { releaseIdleResidualLongForFormalEntry } from "@/lib/idle-residual-long-preemption";
@@ -502,10 +502,11 @@ export class Quality102CausalV1Runner {
         return result.status === "reduced";
     }
 
-    private async trimDynamicForCoreEntry(
+    private async preemptV12ForFormalQ102Entry(
         positions: readonly DirectPosition[],
         equity: number,
         requestedGross: number,
+        signal: Quality102CausalV1Signal,
         causeIdempotencyKey: string,
     ): Promise<boolean> {
         const adapter = this.dependencies.config.v12DynamicAdapter;
@@ -519,17 +520,18 @@ export class Quality102CausalV1Runner {
             this.dependencies.config.totalGrossCap,
         );
         if (!(requiredGross > EPSILON)) return false;
-        const trim = await reduceV12DynamicResidualForCoreConflict({
+        const result = await preemptV12ForQ102Priority({
             adapter,
             requiredGross,
             equity,
+            q102Family: signal.family,
             causeIdempotencyKey,
             statePath,
             maxDataAgeMs: this.dependencies.config.maxDataAgeMs,
             now: this.now,
         });
-        if (trim.status === "blocked") throw new Error("QUALITY102_V12_DYNAMIC_REDUCTION_BLOCKED:" + trim.message);
-        return trim.status === "reduced" && trim.trimmedGross > EPSILON;
+        if (result.status === "blocked") throw new Error("QUALITY102_V12_PRIORITY_PREEMPT_BLOCKED:" + result.message);
+        return result.status === "reduced" && result.freedGross > EPSILON;
     }
 
     private async preemptHypeZecForCoreEntry(
@@ -1189,10 +1191,11 @@ export class Quality102CausalV1Runner {
             || !accepted
             || accepted.gross + EPSILON < targetGross;
         if (capacityShortfall && allowDynamicTrim
-            && await this.trimDynamicForCoreEntry(
+            && await this.preemptV12ForFormalQ102Entry(
                 positions,
                 equity,
                 targetGross,
+                signal,
                 `${STRATEGY_ID}|${signal.referenceTs}|${symbol}|${signal.side}|ENTRY`,
             )) {
             const [freshAccount, freshPositions] = await Promise.all([
