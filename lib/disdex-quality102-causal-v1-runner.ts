@@ -904,7 +904,9 @@ export class Quality102CausalV1Runner {
                     pending.family,
                     pending.idempotencyKey,
                 )) {
-                return this.validatePendingExecutionWindow(state, pending, false);
+                // Re-plan with fresh equity/Gross and keep formal V12 handoff
+                // enabled until the Q102 target fits or no eligible V12 victim remains.
+                return this.validatePendingExecutionWindow(state, pending, true);
             }
             if (planner.status !== "planned" || !accepted || accepted.gross + EPSILON < targetGross) {
                 throw new Error(`Q102_PENDING_CAPACITY_CHANGED:${planner.reason || planner.rejected.find((row) => row.intent.strategy === STRATEGY_ID)?.reason || "NO_ACCEPTED_INTENT"}`);
@@ -1210,7 +1212,10 @@ export class Quality102CausalV1Runner {
                 this.dependencies.executor.getPositions(),
             ]);
             const freshQuote = await this.dependencies.executor.getMarketQuote(symbol);
-            return this.planEntry(state, signal, freshAccount, freshPositions, freshQuote, false, allowHypeZecPreemption, lock);
+            // Forced exits change realized equity and therefore Gross. Re-plan
+            // from fresh venue state and allow another Rank3->Rank2->Rank1 handoff
+            // if the requested Q102 target still does not fit.
+            return this.planEntry(state, signal, freshAccount, freshPositions, freshQuote, true, allowHypeZecPreemption, lock);
         }
         const plannerReason = planner.reason || planner.rejected.find((row) => row.intent.strategy === STRATEGY_ID)?.reason;
         const explicitSharedCapacityBlock = !accepted && isSharedCapacityBlock(plannerReason);
