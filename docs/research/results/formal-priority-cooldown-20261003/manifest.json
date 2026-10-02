@@ -1,0 +1,13 @@
+{
+  "schema": "formal-priority-cooldown-bt-manifest/v1",
+  "status": "PENDING_LEDGER_UPLOAD",
+  "official_scenario": "PRICE_MODEL_10BPS",
+  "official_result_file": "formal-bt-summary.json",
+  "expected_ledger_files": [
+    "PRICE_MODEL_10BPS/portfolio-trades.jsonl",
+    "PRICE_MODEL_10BPS/candidate-decisions.jsonl"
+  ],
+  "base_production_sha": "53eeff5417636369d4709fddfd47d7916ddcf3b1",
+  "implementation_branch": "research/formal-priority-cooldown-20261003",
+  "note": "Do not treat handoff as ledger-complete until status is COMPLETE and SHA256 values are populated."
+}
