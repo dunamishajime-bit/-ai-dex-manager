@@ -5,6 +5,7 @@ import { AsterDirectTradeExecutor } from "../lib/direct-trade-executor";
 import { FileAccountOrderLock } from "../lib/disdex-account-order-lock";
 import { createInterruptibleDelay } from "../lib/interruptible-delay";
 import { nextAccountLockAwareWaitMs } from "../lib/disdex-account-lock-retry-scheduling";
+import { runWithBoundedAccountLockRetry } from "../lib/disdex-account-lock-bounded-retry";
 import { IdlePriorityAsterMarketDataProvider } from "../lib/idle-priority-short-market-data";
 import { IdlePriorityShortRunner, idleRunnerSelfTest } from "../lib/idle-priority-short-runner";
 import { FileIdlePriorityShortStateStore } from "../lib/idle-priority-short-state";
@@ -98,27 +99,36 @@ async function main() {
     const stop = () => { stopping = true; delay.interrupt(); };
     process.on("SIGINT", stop);
     process.on("SIGTERM", stop);
+    const lockAcquireAttempts = Math.max(1, Math.min(10, Math.trunc(numberEnv("DISDEX_IDLE_PRIORITY_LOCK_ACQUIRE_ATTEMPTS", 8))));
+    const lockAcquireRetryMs = Math.max(250, Math.min(2_000, Math.trunc(numberEnv("DISDEX_IDLE_PRIORITY_LOCK_ACQUIRE_RETRY_MS", 1_000))));
+    const runTick = <T extends { status: string }>(operation: () => Promise<T>) => runWithBoundedAccountLockRetry({
+        operation,
+        attempts: lockAcquireAttempts,
+        retryMs: lockAcquireRetryMs,
+        wait: (milliseconds) => delay.wait(milliseconds),
+        shouldStop: () => stopping,
+    });
     do {
         marketCache = undefined;
         const residualState = residualRuntime.enabled ? await residualStateStore.load() : undefined;
         let result;
         let residualResult;
         if (residualRuntime.enabled && residualState && (residualState.position || residualState.pending)) {
-            residualResult = await residualRunner.tick();
+            residualResult = await runTick(() => residualRunner.tick());
             console.log(JSON.stringify({ timestamp: new Date().toISOString(), event: "idle-residual-long-tick", strategyId: "IDLE_RESIDUAL_LONG", mode: runtime.mode, runtimeSha: runtime.runtimeSha, ...residualResult }));
             if (residualResult.status === "manual-review") {
                 result = residualResult;
             } else if (residualResult.status === "held" && residualResult.message.startsWith("IDLE_RESIDUAL_POSITION_HELD:")) {
                 result = residualResult;
             } else {
-                result = await runner.tick();
+                result = await runTick(() => runner.tick());
                 console.log(JSON.stringify({ timestamp: new Date().toISOString(), event: "idle-priority-short-tick", strategyId: "IDLE_PRIORITY_SHORT", mode: runtime.mode, runtimeSha: runtime.runtimeSha, ...result }));
             }
         } else {
-            result = await runner.tick();
+            result = await runTick(() => runner.tick());
             console.log(JSON.stringify({ timestamp: new Date().toISOString(), event: "idle-priority-short-tick", strategyId: "IDLE_PRIORITY_SHORT", mode: runtime.mode, runtimeSha: runtime.runtimeSha, ...result }));
             if (residualRuntime.enabled && result.status === "no-change") {
-                residualResult = await residualRunner.tick();
+                residualResult = await runTick(() => residualRunner.tick());
                 console.log(JSON.stringify({ timestamp: new Date().toISOString(), event: "idle-residual-long-tick", strategyId: "IDLE_RESIDUAL_LONG", mode: runtime.mode, runtimeSha: runtime.runtimeSha, ...residualResult }));
                 if (residualResult.status === "manual-review" || residualResult.status === "completed" || residualResult.status === "locked") result = residualResult;
             }
