@@ -1,6 +1,6 @@
 name: Idle Priority VPS post-deploy read-only audit
 # audit-trigger: final-postdeploy-8e033af7-20261001
-# audit-sequence: final-no-order-postdeploy-fb521d5-v5
+# audit-sequence: live-v12-avax-entry-full-path-v6
 on:
   push:
     branches: [design/idle-priority-bt-parity-20260929]
@@ -266,6 +266,7 @@ jobs:
           python3 - <<'PY'
           import json,os,re
           files={
+            "v12_state":"/var/lib/disdex/v12-x1-all/runner.json",
             "v12_decision":"/var/lib/disdex/v12-x1-all/decision-snapshot.json",
             "q102_decision":"/var/lib/disdex/quality102-causal-v1/decision-snapshot.json",
             "pengu_state":"/var/lib/disdex/pengu-dual-ls-v2/runner-live.json",
