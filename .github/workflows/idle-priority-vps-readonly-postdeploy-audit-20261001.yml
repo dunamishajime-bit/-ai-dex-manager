@@ -341,26 +341,22 @@ jobs:
           echo "NO_ORDER_72H_STATUS_COUNTS_BEGIN"
           for name in disdex-v12-x1-all disdex-pengu-dual-ls-v2 disdex-quality102-causal-v1 disdex-v52-aster-only disdex-fet-brk48 disdex-hype-long disdex-idle-priority-short; do
             echo "STATUS_COUNT_RUNNER=$name"
-            journalctl -u "$name@*.service" --since "2026-09-29 00:00:00" --no-pager -o cat 2>/dev/null | python3 -c 'import sys,re,collections,json; c=collections.Counter(); first=None; last=None; orders=0; completed=[]; 
-for line in sys.stdin:
- s=line.strip()
- if not s: continue
- try:
-  j=json.loads(s[s.find("{"):]) if "{" in s else None
- except: j=None
- if isinstance(j,dict):
-  st=str(j.get("status") or j.get("event") or "")
-  msg=str(j.get("message") or j.get("reason") or "")
-  if st: c["status:"+st]+=1
-  if "LOCK_BUSY" in msg or "ACCOUNT_LOCK" in msg: c["lock_busy"]+=1
-  if "RATE_BUDGET" in msg: c["rate_budget"]+=1
-  o=int(j.get("ordersSent") or 0) if str(j.get("ordersSent") or "0").lstrip("-").isdigit() else 0
-  orders+=max(0,o)
-  ts=j.get("timestamp") or j.get("observedAt") or j.get("updatedAt")
-  if ts and first is None:first=ts
-  if ts:last=ts
-  if st in ("completed","filled","entry-filled") or o>0: completed.append({"ts":ts,"status":st,"message":msg,"ordersSent":o,"symbol":j.get("symbol") or (j.get("signal") or {}).get("symbol")})
-print(json.dumps({"counts":c,"ordersSentTotal":orders,"first":first,"last":last,"executionEvents":completed[-20:]},default=dict,separators=(",",":")))' || true
+            tmp_log="$(mktemp)"
+            journalctl -u "$name@*.service" --since "2026-09-29 00:00:00" --no-pager -o cat 2>/dev/null >"$tmp_log" || true
+            printf 'STATUS_COUNTS total=%s completed=%s no_signal=%s no_change=%s blocked=%s held=%s lock_busy=%s rate_budget=%s orders_positive=%s\n' \
+              "$(wc -l <"$tmp_log")" \
+              "$(grep -Ec '"status":"(completed|filled|entry-filled)"' "$tmp_log" || true)" \
+              "$(grep -Ec '"status":"no-signal"' "$tmp_log" || true)" \
+              "$(grep -Ec '"status":"no-change"' "$tmp_log" || true)" \
+              "$(grep -Ec '"status":"blocked"' "$tmp_log" || true)" \
+              "$(grep -Ec '"status":"held"' "$tmp_log" || true)" \
+              "$(grep -Ec 'LOCK_BUSY|ACCOUNT_LOCK' "$tmp_log" || true)" \
+              "$(grep -Ec 'RATE_BUDGET' "$tmp_log" || true)" \
+              "$(grep -Ec '"ordersSent":[1-9]' "$tmp_log" || true)"
+            echo "LAST_EXECUTION_EVENT_BEGIN"
+            grep -E '"status":"(completed|filled|entry-filled)"|"ordersSent":[1-9]' "$tmp_log" | tail -20 || true
+            echo "LAST_EXECUTION_EVENT_END"
+            rm -f "$tmp_log"
           done
           echo "NO_ORDER_72H_STATUS_COUNTS_END"
 
