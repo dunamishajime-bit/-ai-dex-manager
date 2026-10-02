@@ -1,6 +1,6 @@
 name: Idle Priority VPS post-deploy read-only audit
 # audit-trigger: final-postdeploy-8e033af7-20261001
-# audit-sequence: live-v12-avax-postdeploy-full-path-v7
+# audit-sequence: idle-freshness-post-ae0450e-v8
 on:
   push:
     branches: [design/idle-priority-bt-parity-20260929]
