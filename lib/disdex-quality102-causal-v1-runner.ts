@@ -107,8 +107,9 @@ export interface Quality102CausalV1RunnerConfig {
     portfolioDdGovernorPath?: string;
     accountScope?: string;
     /**
-     * Optional shared V12 adapter/state path. When present, Q102 may reclaim
-     * only lower-priority V12 Dynamic residual capacity before a Core entry.
+     * Optional shared V12 adapter/state path. Under the formal 2026-10-03
+     * contract, PB/REV/HIGH_VOL may reclaim V12 capacity by whole-position
+     * Rank3 -> Rank2 -> Rank1 exits. MR/BRK may not preempt V12.
      */
     v12DynamicAdapter?: V12AsterLiveAdapter;
     v12StatePath?: string;
