@@ -1,5 +1,5 @@
 name: Idle Priority exact-SHA Production redeploy
-# redeploy-sequence: idle-activation-projection-permissions-v30
+# redeploy-sequence: idle-activation-projection-permissions-v31
 on:
   push:
     branches: [design/idle-priority-bt-parity-20260929]
@@ -50,6 +50,7 @@ jobs:
             tests/idle-priority-short-benign-state-recovery.test.ts \
             tests/idle-priority-rate-budget-deferral.test.ts \
             tests/idle-priority-short-systemd-contract.test.mjs \
+            tests/operator_activation_hardening.test.ts \
             tests/ops-runner-watchdog-current-contract.test.mjs \
             tests/watchdog-release-lineage.test.ts \
             tests/fet-brk48-live-runner.test.ts \
