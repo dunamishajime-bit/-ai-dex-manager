@@ -92,16 +92,20 @@ async function newLockOwner(): Promise<BudgetLockOwner> {
   };
 }
 
-async function lockIsStale(lockPath: string): Promise<boolean> {
-  // Fresh lock generations are never candidates for recovery.  Besides being
-  // safer, this avoids a thundering herd of contenders repeatedly opening
-  // owner.json while the current owner is trying to rename/release the
-  // directory (notably expensive and share-lock prone on Windows).
-  try {
-    const metadata = await stat(lockPath);
-    if (Date.now() - metadata.mtimeMs <= LOCK_RECOVERY_GRACE_MS) return false;
-  } catch (error) {
-    return errorCode(error) === "ENOENT";
+async function lockIsStale(lockPath: string, trustFreshGeneration = false): Promise<boolean> {
+  // Recovery mutexes are deliberately short-lived.  While one is fresh, trust
+  // that generation without repeatedly opening owner.json; on Windows that
+  // thundering herd can prevent the owner from renaming/releasing the mutex.
+  // The primary budget lock does NOT use this shortcut because it must detect
+  // PID reuse immediately via processStartTicks, even on a freshly created
+  // lock directory.
+  if (trustFreshGeneration) {
+    try {
+      const metadata = await stat(lockPath);
+      if (Date.now() - metadata.mtimeMs <= LOCK_RECOVERY_GRACE_MS) return false;
+    } catch (error) {
+      return errorCode(error) === "ENOENT";
+    }
   }
 
   const owner = await readLockOwner(lockPath);
@@ -113,7 +117,12 @@ async function lockIsStale(lockPath: string): Promise<boolean> {
     }
     return false;
   }
-  return true;
+  try {
+    const metadata = await stat(lockPath);
+    return Date.now() - metadata.mtimeMs > LOCK_RECOVERY_GRACE_MS;
+  } catch (error) {
+    return errorCode(error) === "ENOENT";
+  }
 }
 
 async function acquireLockGenerationMutex(lockPath: string, deadline: number): Promise<{ path: string; owner: BudgetLockOwner }> {
@@ -131,7 +140,7 @@ async function acquireLockGenerationMutex(lockPath: string, deadline: number): P
       }
     } catch (error) {
       if (errorCode(error) !== "EEXIST" && !transientLockRace(error)) throw error;
-      if (errorCode(error) === "EEXIST" && await lockIsStale(recoveryPath)) {
+      if (errorCode(error) === "EEXIST" && await lockIsStale(recoveryPath, true)) {
         try {
           await rm(recoveryPath, { recursive: true, force: true });
           continue;
@@ -221,10 +230,11 @@ async function acquireBudgetLock(lockPath: string, maxQueueMs: number): Promise<
       }
     } catch (error) {
       if (errorCode(error) !== "EEXIST" && !transientLockRace(error)) throw error;
-      if (errorCode(error) === "EEXIST" && await lockIsStale(lockPath)) {
+      const trustFreshBudgetLock = process.platform === "win32";
+      if (errorCode(error) === "EEXIST" && await lockIsStale(lockPath, trustFreshBudgetLock)) {
         const recovery = await acquireLockGenerationMutex(lockPath, deadline);
         try {
-          if (await lockIsStale(lockPath)) {
+          if (await lockIsStale(lockPath, trustFreshBudgetLock)) {
             const stalePath = `${lockPath}.stale.${randomUUID()}`;
             try {
               await rename(lockPath, stalePath);
