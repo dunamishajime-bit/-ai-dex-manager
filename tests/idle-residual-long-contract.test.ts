@@ -5,6 +5,8 @@ import test from "node:test";
 import { V12_X1_ALL } from "../config/v12X1AllRuntime";
 import { IDLE_RESIDUAL_LONG_POLICY } from "../config/idleResidualLongPolicy";
 import { chooseIdleResidualLong, evaluateIdleResidualLongFeatures } from "../lib/idle-residual-long-signal";
+import { classifyIdleResidualFlatRateBudgetDeferral } from "../lib/idle-residual-long-runner";
+import { emptyIdleResidualLongState } from "../lib/idle-residual-long-state";
 import { assertIdleResidualLongParityCert, IDLE_RESIDUAL_LONG_CERT_SCHEMA } from "../lib/idle-residual-long-parity-cert";
 import type { IdleFeatures } from "../lib/idle-priority-short-signal";
 
@@ -94,4 +96,18 @@ test("combined exact-SHA residual certificate rejects drift", () => {
   assert.equal(assertIdleResidualLongParityCert(cert, sha).runtimeSha, sha);
   assert.throws(() => assertIdleResidualLongParityCert({ ...cert, dogeTrades: 12 }, sha), /TRADE_CONTRACT_MISMATCH/);
   assert.throws(() => assertIdleResidualLongParityCert({ ...cert, finalJpy: 1 }, sha), /FINAL_JPY_MISMATCH/);
+});
+
+
+test("flat residual LONG defers only Aster rate-budget saturation", () => {
+  const state = emptyIdleResidualLongState("a".repeat(40), Date.now());
+  const error = new Error("ASTER_GLOBAL_RATE_BUDGET_SATURATED:5007");
+  assert.equal(
+    classifyIdleResidualFlatRateBudgetDeferral(state, error),
+    "IDLE_RESIDUAL_RATE_BUDGET_DEFERRED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:5007",
+  );
+  assert.equal(classifyIdleResidualFlatRateBudgetDeferral({ ...state, position: {} as any }, error), undefined);
+  assert.equal(classifyIdleResidualFlatRateBudgetDeferral({ ...state, pending: {} as any }, error), undefined);
+  assert.equal(classifyIdleResidualFlatRateBudgetDeferral({ ...state, manualReview: "review" }, error), undefined);
+  assert.equal(classifyIdleResidualFlatRateBudgetDeferral(state, new Error("OTHER")), undefined);
 });

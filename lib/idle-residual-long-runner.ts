@@ -11,6 +11,7 @@ import type { FileAccountOrderLock, AccountLockHandle } from "./disdex-account-o
 import { aggregatePendingExposure, readPendingExposureRegistry } from "./disdex-pending-exposure-registry";
 import { readSharedCryptoDailyRisk } from "./disdex-shared-crypto-daily-risk";
 import { readSharedKillSwitch } from "./disdex-shared-kill-switch";
+import { classifyAsterRateBudgetFailure } from "./disdex-aster-rate-budget-policy";
 import { buildBaselineAdmissionEvidence } from "./idle-priority-short-baseline-admission";
 import { coreAndSidecarExposure } from "./idle-priority-short-runner";
 import { evaluateIdleGenericCandidate, evaluateIdlePriorityShort, computeIdlePriorityFeatures } from "./idle-priority-short-signal";
@@ -24,6 +25,12 @@ const EPS=1e-9;
 const CRYPTO_CAP=3.0;
 const TOTAL_CAP=4.25;
 const ACTIVE_ORDER_STATUSES=new Set(["NEW","PARTIALLY_FILLED","PENDING_NEW"]);
+
+export function classifyIdleResidualFlatRateBudgetDeferral(state:IdleResidualLongState,error:unknown){
+  const deferred=classifyAsterRateBudgetFailure(error);
+  if(!deferred||state.manualReview||state.pending||state.position)return undefined;
+  return `IDLE_RESIDUAL_RATE_BUDGET_DEFERRED:${deferred.reason}`;
+}
 
 export type IdleResidualLongTickResult={
   status:"disabled"|"locked"|"shadow"|"held"|"no-change"|"completed"|"manual-review";
@@ -317,7 +324,11 @@ export class IdleResidualLongRunner{
       return this.enter(state,signal,freshPositions,equity,lock,pendingAggregate);
     }catch(error){
       const state=await this.d.stateStore.load().catch(()=>undefined);
-      if(state)return this.manual(state,`IDLE_RESIDUAL_RUNNER_FAIL_CLOSED:${error instanceof Error?error.message:String(error)}`);
+      if(state){
+        const deferred=classifyIdleResidualFlatRateBudgetDeferral(state,error);
+        if(deferred)return {status:"held",message:deferred,ordersSent:0,cancelsSent:0,positionChangesSent:0};
+        return this.manual(state,`IDLE_RESIDUAL_RUNNER_FAIL_CLOSED:${error instanceof Error?error.message:String(error)}`);
+      }
       throw error;
     }finally{await lock.release();}
   }

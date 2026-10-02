@@ -126,7 +126,9 @@ async function main() {
         if (!daemon || stopping || result.status === "manual-review") break;
         const normalWaitMs = Math.max(5_000, Math.min(15 * 60_000, runtime.pollMs));
         const lockRetryMs = numberEnv("DISDEX_IDLE_PRIORITY_LOCK_RETRY_MS", 8_000);
-        const rateBudgetDeferred = result.status === "held" && result.message.startsWith("IDLE_RATE_BUDGET_DEFERRED:");
+        const rateBudgetDeferred = result.status === "held"
+            && (result.message.startsWith("IDLE_RATE_BUDGET_DEFERRED:")
+                || result.message.startsWith("IDLE_RESIDUAL_RATE_BUDGET_DEFERRED:"));
         await delay.wait(rateBudgetDeferred ? lockRetryMs : nextAccountLockAwareWaitMs(result.status, normalWaitMs, lockRetryMs));
     } while (!stopping);
 }

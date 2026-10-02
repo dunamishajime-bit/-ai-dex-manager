@@ -717,6 +717,24 @@ for name in "${NAMES[@]}"; do
   unit="$name@$TARGET_SHA.service"
   [[ "$(systemctl is-active "$unit" 2>/dev/null || true)" == active ]] || {
     echo "POSTDEPLOY_RUNNER_NOT_ACTIVE=$unit"
+    if [[ "$name" == disdex-idle-priority-short ]]; then
+      echo "POSTDEPLOY_IDLE_FAILURE_DIAGNOSTIC_BEGIN"
+      systemctl status "$unit" --no-pager -l || true
+      journalctl -u "$unit" --since "-5 min" --no-pager -n 160 -o short-iso || true
+      python3 - <<'PY'
+import json
+for label,path in [
+    ("idle","/var/lib/disdex/idle-priority/state.json"),
+    ("residual","/var/lib/disdex/idle-priority/residual-long-state.json"),
+]:
+    try:
+        with open(path,encoding="utf-8") as f: value=json.load(f)
+        print("POSTDEPLOY_IDLE_STATE "+label+"="+json.dumps(value,separators=(",",":"),ensure_ascii=False))
+    except Exception as exc:
+        print("POSTDEPLOY_IDLE_STATE "+label+"="+json.dumps({"error":type(exc).__name__},separators=(",",":")))
+PY
+      echo "POSTDEPLOY_IDLE_FAILURE_DIAGNOSTIC_END"
+    fi
     false
   }
   pid="$(systemctl show "$unit" -p MainPID --value)"

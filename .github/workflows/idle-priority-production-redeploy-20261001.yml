@@ -1,5 +1,5 @@
 name: Idle Priority exact-SHA Production redeploy
-# redeploy-sequence: bounded-initial-heartbeat-wait-v18
+# redeploy-sequence: residual-rate-budget-deferral-v19
 on:
   push:
     branches: [design/idle-priority-bt-parity-20260929]
