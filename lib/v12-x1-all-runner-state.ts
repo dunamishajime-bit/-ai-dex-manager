@@ -68,7 +68,10 @@ export interface V12X1AllRunnerState {
     /** Latest completed bar whose entry opportunity was deferred only because shared risk was temporarily unavailable. */
     deferredEntryReferenceTs?: number;
     lastCompletedIdempotencyKey?: string;
+    /** Legacy aggregate cooldown retained for backward-compatible state reads. */
     cooldownUntilTs?: number;
+    /** Formal 2026-10-03: actual-exit + 2h cooldown is tracked per symbol. */
+    symbolCooldownUntilTs?: Record<string, number>;
     activePositions?: V12ActivePositionState[];
     active?: V12ActivePositionState;
     pending?: V12PendingOrderState;
@@ -118,6 +121,12 @@ export class FileV12X1AllRunnerStateStore {
                 throw new Error("V12_STATE_SCHEMA_MISMATCH");
             }
             if (value.deferredEntryReferenceTs !== undefined && !Number.isFinite(Number(value.deferredEntryReferenceTs))) throw new Error("V12_STATE_DEFERRED_ENTRY_REFERENCE_INVALID");
+            if (value.symbolCooldownUntilTs !== undefined) {
+                if (!value.symbolCooldownUntilTs || typeof value.symbolCooldownUntilTs !== "object" || Array.isArray(value.symbolCooldownUntilTs)) throw new Error("V12_STATE_SYMBOL_COOLDOWN_INVALID");
+                for (const [symbol, until] of Object.entries(value.symbolCooldownUntilTs)) {
+                    if (!symbol || symbol !== symbol.toUpperCase() || !Number.isFinite(Number(until)) || Number(until) <= 0) throw new Error("V12_STATE_SYMBOL_COOLDOWN_INVALID");
+                }
+            }
             const legacyActive = value.active ? normalizeActive(value.active) : undefined;
             if (legacyActive) {
                 if (!(legacyActive.quantity > 0 && legacyActive.entryPrice > 0 && legacyActive.atrAtEntry > 0)) throw new Error("V12_STATE_ACTIVE_INVALID");
