@@ -164,6 +164,7 @@ validate_release_artifacts() {
     "$CURRENT_RELEASE/scripts/disdex-idle-priority-short-live-runner.ts"
     "$CURRENT_RELEASE/scripts/disdex-idle-priority-short-benign-state-recovery.ts"
     "$CURRENT_RELEASE/scripts/disdex-idle-priority-short-state-migrate.ts"
+    "$CURRENT_RELEASE/scripts/disdex-idle-residual-long-state-migrate.ts"
     "$CURRENT_RELEASE/lib/idle-priority-short-runner.ts"
     "$CURRENT_RELEASE/lib/idle-priority-short-baseline-admission.ts"
     "$CURRENT_RELEASE/lib/idle-priority-short-live.ts"
@@ -260,6 +261,13 @@ migrate_idle_state_lineage() {
   "$CURRENT_RELEASE/node_modules/.bin/tsx" \
     "$CURRENT_RELEASE/scripts/disdex-idle-priority-short-state-migrate.ts" \
     --state-path "$IDLE_PRIORITY_STATE_ROOT/state.json" \
+    --to-sha "$DEPLOYED_SHA"
+}
+
+migrate_idle_residual_state_lineage() {
+  "$CURRENT_RELEASE/node_modules/.bin/tsx" \
+    "$CURRENT_RELEASE/scripts/disdex-idle-residual-long-state-migrate.ts" \
+    --state-path "$IDLE_PRIORITY_STATE_ROOT/residual-long-state.json" \
     --to-sha "$DEPLOYED_SHA"
 }
 
@@ -1217,6 +1225,7 @@ ReadWritePaths=${IDLE_PRIORITY_STATE_ROOT} ${SHARED_ROOT}"
   migrate_hype_state_lineage
   recover_idle_benign_state
   migrate_idle_state_lineage
+  migrate_idle_residual_state_lineage
   normalize_position_recovery_state_lineage
   systemctl daemon-reload
   retire_stale_release_enabled_units
@@ -1301,6 +1310,7 @@ self_test() {
     scripts/disdex-idle-priority-short-live-runner.ts \
     scripts/disdex-idle-priority-short-benign-state-recovery.ts \
     scripts/disdex-idle-priority-short-state-migrate.ts \
+    scripts/disdex-idle-residual-long-state-migrate.ts \
     lib/idle-priority-short-runner.ts \
     lib/idle-priority-short-baseline-admission.ts \
     lib/idle-priority-short-live.ts \

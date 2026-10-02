@@ -1,5 +1,5 @@
 name: Idle Priority exact-SHA Production redeploy
-# redeploy-sequence: residual-rate-budget-deferral-v19
+# redeploy-sequence: residual-state-lineage-migration-v20
 on:
   push:
     branches: [design/idle-priority-bt-parity-20260929]
@@ -46,6 +46,7 @@ jobs:
             tests/current_live_target_contract.test.ts \
             tests/idle-residual-long-contract.test.ts \
             tests/idle-residual-long-preemption.test.ts \
+            tests/idle-residual-long-state-migrate.test.ts \
             tests/idle-priority-short-benign-state-recovery.test.ts \
             tests/idle-priority-rate-budget-deferral.test.ts \
             tests/idle-priority-short-systemd-contract.test.mjs \
