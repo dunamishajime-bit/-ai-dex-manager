@@ -1,4 +1,4 @@
-# Formal H1 causal BT ? V12/Q102 priority + actual-exit cooldown
+# Formal H1 causal BT - V12/Q102 priority + actual-exit cooldown
 
 Status: **official 10bps research result selected; canonical ledgers uploaded and SHA256-pinned.**
 
