@@ -1,5 +1,5 @@
 name: Idle Priority exact-SHA Production redeploy
-# redeploy-sequence: no-order-audit-lock-contention-remediation-v17
+# redeploy-sequence: bounded-initial-heartbeat-wait-v18
 on:
   push:
     branches: [design/idle-priority-bt-parity-20260929]

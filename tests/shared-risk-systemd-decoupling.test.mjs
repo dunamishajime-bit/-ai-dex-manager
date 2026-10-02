@@ -147,6 +147,9 @@ test("cutover refreshes current runner heartbeats before enabling watchdog autom
   assert.match(cutover, /CUTOVER_HEARTBEAT_SHA_MISMATCH/);
   assert.match(cutover, /CUTOVER_HEARTBEAT_SERVICE_UNIT_MISMATCH/);
   assert.match(cutover, /CUTOVER_HEARTBEAT_NOT_HEALTHY/);
+  assert.match(cutover, /for heartbeat_attempt in \$\(seq 1 24\)/);
+  assert.match(cutover, /CUTOVER_HEARTBEAT_TIMEOUT/);
+  assert.match(cutover, /CUTOVER_HEARTBEAT_ALL_HEALTHY/);
   for (const heartbeat of [
     "v12-x1-all.json",
     "pengu-v8.json",

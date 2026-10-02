@@ -626,15 +626,19 @@ systemctl enable --now "disdex-idle-priority-short@$TARGET_SHA.service"
 
 # The first wiring pass intentionally keeps operator automation deferred. Refresh
 # every trading heartbeat against the new release before enabling watchdog or
-# recovery timers, otherwise a timer can observe the previous release's
-# serviceUnit/runtimeSha during the cutover window and fail closed spuriously.
-sleep 5
-systemctl reset-failed disdex-runner-health-snapshot.service >/dev/null 2>&1 || true
-systemctl start disdex-runner-health-snapshot.service
-sleep 3
-python3 - "$TARGET_SHA" <<'PY'
+# recovery timers. Idle now evaluates seven symbols (five SHORT routes plus
+# DOGE/AVAX residual LONG), so its first completed market-data tick can exceed
+# the former fixed 8-second window. Poll only for a bounded 120 seconds and
+# require a genuinely HEALTHY heartbeat; otherwise fail closed and roll back.
+heartbeat_ready=0
+for heartbeat_attempt in $(seq 1 24); do
+  systemctl reset-failed disdex-runner-health-snapshot.service >/dev/null 2>&1 || true
+  systemctl start disdex-runner-health-snapshot.service
+  sleep 5
+  if python3 - "$TARGET_SHA" "$heartbeat_attempt" <<'PY'
 import json,sys
 sha=sys.argv[1]
+attempt=int(sys.argv[2])
 expected={
     "v12-x1-all.json":f"disdex-v12-x1-all@{sha}.service",
     "pengu-v8.json":f"disdex-pengu-dual-ls-v2@{sha}.service",
@@ -645,16 +649,33 @@ expected={
     "idle-priority-short.json":f"disdex-idle-priority-short@{sha}.service",
 }
 root="/var/lib/disdex/runner-health/heartbeats"
+blocked=[]
 for name,unit in expected.items():
-    row=json.load(open(f"{root}/{name}",encoding="utf-8"))
+    try:
+        row=json.load(open(f"{root}/{name}",encoding="utf-8"))
+    except Exception as exc:
+        blocked.append(f"CUTOVER_HEARTBEAT_UNAVAILABLE:{name}:{type(exc).__name__}")
+        continue
     if row.get("runtimeSha")!=sha or row.get("expectedSha")!=sha:
-        raise SystemExit(f"CUTOVER_HEARTBEAT_SHA_MISMATCH:{name}")
+        blocked.append(f"CUTOVER_HEARTBEAT_SHA_MISMATCH:{name}")
+        continue
     if row.get("serviceUnit")!=unit:
-        raise SystemExit(f"CUTOVER_HEARTBEAT_SERVICE_UNIT_MISMATCH:{name}")
+        blocked.append(f"CUTOVER_HEARTBEAT_SERVICE_UNIT_MISMATCH:{name}")
+        continue
     if row.get("safetyState")!="HEALTHY":
-        raise SystemExit(f"CUTOVER_HEARTBEAT_NOT_HEALTHY:{name}")
-print("CUTOVER_PRE_AUTOMATION_HEARTBEAT_REFRESH_PASS")
+        blocked.append(f"CUTOVER_HEARTBEAT_NOT_HEALTHY:{name}:{row.get('safetyState')}:{row.get('healthReason','')}")
+if blocked:
+    print(f"CUTOVER_HEARTBEAT_WAIT attempt={attempt} blocked={'|'.join(blocked)}")
+    raise SystemExit(1)
+print(f"CUTOVER_HEARTBEAT_ALL_HEALTHY attempt={attempt}")
 PY
+  then
+    heartbeat_ready=1
+    break
+  fi
+done
+[[ "$heartbeat_ready" == 1 ]] || { echo "CUTOVER_HEARTBEAT_TIMEOUT"; exit 47; }
+echo "CUTOVER_PRE_AUTOMATION_HEARTBEAT_REFRESH_PASS"
 
 echo "CUTOVER_POSTSTART_WIRING_BEGIN"
 (cd "$RELEASE" && bash scripts/ops/root/disdex-current-runtime-wiring --apply)
