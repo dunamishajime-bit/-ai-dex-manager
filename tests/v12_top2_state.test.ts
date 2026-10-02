@@ -47,12 +47,12 @@ test("three distinct positions persist but duplicate, fourth, or aggregate over-
         const store = new FileV12X1AllRunnerStateStore(path, "LIVE");
         const first = active("ETHUSDT", 1);
         const second = active("SOLUSDT", 0.5);
-        const third = { ...active("LINKUSDT", 0.1), entryRank: 3 as const, baseQuantity: 0, baseGross: 0, dynamicQuantity: 1, dynamicGross: 0.1 };
+        const third = { ...active("LINKUSDT", 0.5), entryRank: 3 as const, baseQuantity: 0, baseGross: 0, dynamicQuantity: 1, dynamicGross: 0.5 };
         await store.save({ schema: "v12-x1-all-runner-state/v1", strategyId: "V12_X1.00_ALL", mode: "LIVE", updatedAt: 1, active: first, activePositions: [first, second, third] });
         assert.equal((await store.load()).activePositions?.length, 3);
         const thirdBase = active("LINKUSDT", 0.1);
         const secondRank3 = { ...active("AAVEUSDT", 0.05), entryRank: 3 as const, baseQuantity: 0, baseGross: 0, dynamicQuantity: 1, dynamicGross: 0.05 };
-        const oversizedRank3 = { ...third, gross: 0.11, dynamicGross: 0.11 };
+        const oversizedRank3 = { ...third, gross: 0.51, dynamicGross: 0.51 };
         for (const invalid of [[first, first], [first, second, third, active("AAVEUSDT", 0.1)], [first, active("SOLUSDT", 1.0), third], [first, second, thirdBase], [first, third, secondRank3], [first, second, oversizedRank3]]) {
             await writeFile(path, JSON.stringify({ schema: "v12-x1-all-runner-state/v1", strategyId: "V12_X1.00_ALL", mode: "LIVE", updatedAt: 1, active: first, activePositions: invalid }));
             await assert.rejects(() => store.load(), /V12_STATE_/);
