@@ -13,6 +13,11 @@ Read first:
 1. `docs/implementation/FORMAL_PRIORITY_COOLDOWN_CONTRACT_20261003.md`
 2. `docs/research/results/formal-priority-cooldown-20261003/formal-bt-summary.json`
 
+## Ledger completion gate
+
+Before deploy, read `docs/research/results/formal-priority-cooldown-20261003/manifest.json`.
+If its `status` is not exactly `COMPLETE`, or either canonical 10bps ledger SHA256 is missing, **do not deploy**. The formal result summary is already frozen, but the canonical transaction/candidate ledgers must be present and hash-pinned first.
+
 ## Goal
 
 The research branch already contains the requested source-level delta. Codex should **validate the delta, fix only integration/compile/test defects if found, deploy it safely, activate LIVE under the existing operator-gate contract, and update the HP**. Do not redesign the strategy or substitute a different sizing/cooldown rule.
