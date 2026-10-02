@@ -8,6 +8,7 @@ umask 022
 : "${SOURCE_SHA256:?SOURCE_SHA256 required}"
 : "${CERT_SHA256:?CERT_SHA256 required}"
 : "${RESIDUAL_CERT_SHA256:?RESIDUAL_CERT_SHA256 required}"
+V12_ACTIVE_MIGRATION_CODE_PARITY="${V12_ACTIVE_MIGRATION_CODE_PARITY:-0}"
 
 ROOT=/home/deploy/disdex-trading
 RELEASES="$ROOT/releases"
@@ -26,6 +27,7 @@ LOCK=/run/lock/disdex-idle-production-redeploy.lock
 [[ "$FROM_SHA" =~ ^[a-f0-9]{40}$ ]]
 [[ "$TARGET_SHA" =~ ^[a-f0-9]{40}$ ]]
 [[ "$REQUEST_ID" =~ ^[0-9]+$ ]]
+[[ "$V12_ACTIVE_MIGRATION_CODE_PARITY" =~ ^[01]$ ]]
 
 exec 9>"$LOCK"
 flock -n 9 || { echo "DEPLOY_CONCURRENT_LOCK"; exit 40; }
@@ -171,6 +173,107 @@ PY
   rm -rf -- "$budget_tmp" "$budget_tmp.lock" "$budget_tmp.lock.recovery"
 }
 
+CUTOVER_ACCOUNT_MODE="UNKNOWN"
+TRADING_TARGET_STARTED=0
+classify_cutover_account_mode() {
+  local runner_root="$1"
+  local tmp budget_tmp mode
+  tmp="$(mktemp)"
+  budget_tmp="/tmp/disdex-aster-readonly-budget-cutover-mode-$RANDOM-$.json"
+  DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH="$budget_tmp" \
+    "$runner_root/node_modules/.bin/tsx" \
+    "$runner_root/scripts/disdex-aster-readonly-account-diagnostic.ts" | tee "$tmp"
+  mode="$(python3 - "$tmp" "$FROM_SHA" "$V12_ACTIVE_MIGRATION_CODE_PARITY" <<'PY'
+import json,math,sys
+diag_path,from_sha,code_parity=sys.argv[1:]
+rows=[x for x in open(diag_path,encoding="utf-8") if x.lstrip().startswith("{")]
+x=json.loads(rows[-1])
+if x.get("status")!="ASTER_READONLY_ACCOUNT_DIAGNOSTIC_PASS":
+    raise SystemExit("CUTOVER_ACCOUNT_MODE_DIAGNOSTIC_FAILED")
+if x.get("ordersSent")!=0 or x.get("cancelsSent")!=0 or x.get("positionChangesSent")!=0:
+    raise SystemExit("CUTOVER_ACCOUNT_MODE_DIAGNOSTIC_MUTATED")
+positions=x.get("positions") or []
+orders=x.get("openOrders") or []
+if not positions and not orders:
+    print("FLAT")
+    raise SystemExit(0)
+if code_parity!="1":
+    raise SystemExit("CUTOVER_V12_ACTIVE_CODE_PARITY_BLOCKED")
+state=json.load(open("/var/lib/disdex/v12-x1-all/runner.json",encoding="utf-8"))
+if state.get("schema") not in {"v12-x1-all-runner-state/v1","v12-x1-all-runner-state/v2"}:
+    raise SystemExit("CUTOVER_V12_ACTIVE_STATE_SCHEMA")
+if state.get("strategyId")!="V12_X1.00_ALL" or state.get("mode")!="LIVE":
+    raise SystemExit("CUTOVER_V12_ACTIVE_STATE_IDENTITY")
+if str(state.get("runtimeCommitSha") or "").lower()!=from_sha:
+    raise SystemExit("CUTOVER_V12_ACTIVE_STATE_SHA_MISMATCH")
+if state.get("pending") or state.get("manualReview") or (state.get("killSwitch") or {}).get("active") is True:
+    raise SystemExit("CUTOVER_V12_ACTIVE_STATE_NOT_MIGRATABLE")
+managed=state.get("activePositions")
+if not isinstance(managed,list) or not managed:
+    managed=[state["active"]] if isinstance(state.get("active"),dict) else []
+if not managed:
+    raise SystemExit("CUTOVER_V12_ACTIVE_STATE_POSITION_MISSING")
+if sum(float(p.get("gross") or 0) for p in managed) > 2.0+1e-9:
+    raise SystemExit("CUTOVER_V12_ACTIVE_GROSS_INVALID")
+actual=[p for p in positions if abs(float(p.get("positionAmt") or 0))>1e-12]
+if len(actual)!=len(managed):
+    raise SystemExit("CUTOVER_V12_ACTIVE_POSITION_COUNT_MISMATCH")
+managed_symbols={str(p.get("symbol") or "").upper() for p in managed}
+order_ids=set()
+for p in managed:
+    symbol=str(p.get("symbol") or "").upper()
+    qty=float(p.get("quantity") or 0)
+    side=str(p.get("side") or "")
+    protection=p.get("protection") or {}
+    if protection.get("positionId")!=p.get("positionId"):
+        raise SystemExit("CUTOVER_V12_ACTIVE_PROTECTION_ID_MISMATCH")
+    if abs(float(protection.get("quantity") or 0)-qty)>max(1e-8,qty*0.001):
+        raise SystemExit("CUTOVER_V12_ACTIVE_PROTECTION_QTY_MISMATCH")
+    row=next((r for r in actual if str(r.get("symbol") or "").upper()==symbol),None)
+    if row is None:
+        raise SystemExit("CUTOVER_V12_ACTIVE_POSITION_SYMBOL_MISMATCH")
+    actual_qty=float(row.get("positionAmt") or 0)
+    actual_side="LONG" if actual_qty>=0 else "SHORT"
+    if actual_side!=side or abs(abs(actual_qty)-qty)>max(1e-8,qty*0.01):
+        raise SystemExit("CUTOVER_V12_ACTIVE_POSITION_MISMATCH")
+    for key in ("stopClientOrderId","takeProfitClientOrderId"):
+        cid=str(protection.get(key) or "")
+        if not cid:
+            raise SystemExit("CUTOVER_V12_ACTIVE_PROTECTION_ORDER_ID_MISSING")
+        order_ids.add(cid)
+        order=next((o for o in orders if str(o.get("clientOrderId") or "")==cid),None)
+        if order is None or order.get("reduceOnly") is not True or str(order.get("status") or "").upper() not in {"NEW","OPEN"}:
+            raise SystemExit("CUTOVER_V12_ACTIVE_PROTECTION_ORDER_MISMATCH")
+        if abs(float(order.get("origQty") or 0)-qty)>max(1e-8,qty*0.001):
+            raise SystemExit("CUTOVER_V12_ACTIVE_PROTECTION_ORDER_QTY_MISMATCH")
+if any(str(r.get("symbol") or "").upper() not in managed_symbols for r in actual):
+    raise SystemExit("CUTOVER_V12_ACTIVE_UNKNOWN_POSITION")
+if any(str(o.get("clientOrderId") or "") not in order_ids for o in orders):
+    raise SystemExit("CUTOVER_V12_ACTIVE_UNKNOWN_OPEN_ORDER")
+q102=json.load(open("/var/lib/disdex/quality102-causal-v1/state.json",encoding="utf-8"))
+if str(q102.get("runtimeCommitSha") or "").lower()!=from_sha or q102.get("pending") or q102.get("position"):
+    raise SystemExit("CUTOVER_V12_ACTIVE_Q102_NOT_FLAT_CURRENT")
+print("V12_ACTIVE")
+PY
+)"
+  rm -f "$tmp"
+  rm -rf -- "$budget_tmp" "$budget_tmp.lock" "$budget_tmp.lock.recovery"
+  case "$mode" in
+    FLAT)
+      CUTOVER_ACCOUNT_MODE="FLAT"
+      echo "CUTOVER_ACCOUNT_MODE=FLAT"
+      ;;
+    V12_ACTIVE)
+      CUTOVER_ACCOUNT_MODE="V12_ACTIVE"
+      echo "CUTOVER_ACCOUNT_MODE=V12_ACTIVE"
+      ;;
+    *)
+      echo "CUTOVER_ACCOUNT_MODE_UNKNOWN=$mode"
+      return 1
+      ;;
+  esac
+}
+
 recover_old_idle_known_rate_budget_state() {
   local state_path="/var/lib/disdex/idle-priority/state.json"
   local backup_path="$PREFLIGHT_BACKUP/state.json"
@@ -274,7 +377,12 @@ restart_stock_reference_current() {
 }
 
 load_runtime_env
-require_flat_account "$OLD_RELEASE"
+classify_cutover_account_mode "$OLD_RELEASE"
+if [[ "$CUTOVER_ACCOUNT_MODE" == V12_ACTIVE ]]; then
+  export DISDEX_ALLOW_V12_ACTIVE_SHA_MIGRATION=true
+else
+  export DISDEX_ALLOW_V12_ACTIVE_SHA_MIGRATION=false
+fi
 IDLE_PREFLIGHT_RECOVERY_STATUS="$(recover_old_idle_known_rate_budget_state)"
 echo "CUTOVER_IDLE_PREFLIGHT_RECOVERY=$IDLE_PREFLIGHT_RECOVERY_STATUS"
 require_shared_safe
@@ -376,15 +484,37 @@ rollback() {
   trap - ERR
   set +e
   echo "DEPLOY_ROLLBACK_TRIGGERED rc=$rc"
-  flat=yes
+  rollback_mode=""
   load_runtime_env
   runner_root="$(readlink -f "$CURRENT" 2>/dev/null || true)"
   if [[ -z "$runner_root" || ! -x "$runner_root/node_modules/.bin/tsx" ]]; then
     runner_root="$OLD_RELEASE"
   fi
-  require_flat_account "$runner_root" >/tmp/disdex-rollback-account.log 2>&1 || flat=no
-  cat /tmp/disdex-rollback-account.log || true
-  if [[ "$flat" == yes ]]; then
+  if require_flat_account "$runner_root" >/tmp/disdex-rollback-account.log 2>&1; then
+    rollback_mode="FLAT"
+  elif [[ "$CUTOVER_ACCOUNT_MODE" == V12_ACTIVE && "$V12_ACTIVE_MIGRATION_CODE_PARITY" == 1 ]]; then
+    cat /tmp/disdex-rollback-account.log || true
+    if [[ "$TRADING_TARGET_STARTED" == 0 ]]; then
+      rollback_mode="V12_ACTIVE"
+      echo "DEPLOY_ROLLBACK_V12_ACTIVE_PRESTART_REUSE_PREFLIGHT=PASS"
+    elif [[ -x "$RELEASE/node_modules/.bin/tsx" && -f "$RELEASE/scripts/disdex-v12-active-state-sha-migrate.ts" ]]; then
+      state_sha="$(/usr/bin/jq -r '.runtimeCommitSha // ""' /var/lib/disdex/v12-x1-all/runner.json 2>/dev/null || true)"
+      if [[ "$state_sha" == "$TARGET_SHA" ]]; then
+        rollback_other_sha="$FROM_SHA"
+      elif [[ "$state_sha" == "$FROM_SHA" ]]; then
+        rollback_other_sha="$TARGET_SHA"
+      else
+        rollback_other_sha=""
+      fi
+      if [[ -n "$rollback_other_sha" ]] && "$RELEASE/node_modules/.bin/tsx"           "$RELEASE/scripts/disdex-v12-active-state-sha-migrate.ts"           --from-sha "$state_sha"           --to-sha "$rollback_other_sha"           --state-path /var/lib/disdex/v12-x1-all/runner.json           --verify-only           --ack I_ACK_V12_ACTIVE_STATE_SHA_MIGRATION_AFTER_READONLY_RECONCILIATION; then
+        rollback_mode="V12_ACTIVE"
+        echo "DEPLOY_ROLLBACK_V12_ACTIVE_READONLY_REVERIFY=PASS stateSha=$state_sha"
+      fi
+    fi
+  else
+    cat /tmp/disdex-rollback-account.log || true
+  fi
+  if [[ -n "$rollback_mode" ]]; then
     for name in "${NAMES[@]}"; do
       systemctl disable --now "$name@$TARGET_SHA.service" >/dev/null 2>&1 || true
     done
@@ -417,6 +547,13 @@ rollback() {
     rm -f "$tmp_link"
     ln -s "$OLD_RELEASE" "$tmp_link"
     mv -Tf "$tmp_link" "$CURRENT"
+    if [[ "$rollback_mode" == V12_ACTIVE && -x "$RELEASE/node_modules/.bin/tsx" && -f "$RELEASE/scripts/disdex-v12-active-state-sha-migrate.ts" ]]; then
+      "$RELEASE/node_modules/.bin/tsx"         "$RELEASE/scripts/disdex-v12-active-state-sha-migrate.ts"         --from-sha "$FROM_SHA"         --to-sha "$TARGET_SHA"         --state-path /var/lib/disdex/v12-x1-all/runner.json         --verify-only         --ack I_ACK_V12_ACTIVE_STATE_SHA_MIGRATION_AFTER_READONLY_RECONCILIATION || {
+          echo "DEPLOY_ROLLBACK_V12_ACTIVE_RESTORED_STATE_REVERIFY_FAILED"
+          exit "$rc"
+        }
+      echo "DEPLOY_ROLLBACK_V12_ACTIVE_RESTORED_STATE_REVERIFY=PASS"
+    fi
     (cd "$OLD_RELEASE" && bash scripts/ops/root/disdex-current-runtime-wiring --apply) || true
     for name in "${NAMES[@]}"; do
       systemctl enable --now "$name@$FROM_SHA.service" >/dev/null 2>&1 || true
@@ -426,9 +563,9 @@ rollback() {
     else
       echo "ROLLBACK_TARGET_RELEASE_PRESERVED_FOR_STOCK_REFERENCE=$RELEASE"
     fi
-    echo "DEPLOY_ROLLBACK_FLAT_ACCOUNT=PASS"
+    echo "DEPLOY_ROLLBACK_MODE=$rollback_mode PASS"
   else
-    echo "DEPLOY_ROLLBACK_SKIPPED_EXPOSURE_PRESENT"
+    echo "DEPLOY_ROLLBACK_SKIPPED_UNVERIFIED_EXPOSURE"
   fi
   exit "$rc"
 }
@@ -450,7 +587,17 @@ for name in "${NAMES[@]}"; do
   [[ "$(systemctl is-active "$name@$FROM_SHA.service" 2>/dev/null || true)" != active ]]
 done
 
-require_flat_account "$OLD_RELEASE"
+if [[ "$CUTOVER_ACCOUNT_MODE" == FLAT ]]; then
+  require_flat_account "$OLD_RELEASE"
+else
+  expected_cutover_mode="$CUTOVER_ACCOUNT_MODE"
+  classify_cutover_account_mode "$OLD_RELEASE"
+  [[ "$CUTOVER_ACCOUNT_MODE" == "$expected_cutover_mode" ]] || {
+    echo "CUTOVER_ACCOUNT_MODE_CHANGED_AFTER_STOP expected=$expected_cutover_mode actual=$CUTOVER_ACCOUNT_MODE"
+    false
+  }
+  echo "CUTOVER_V12_ACTIVE_REVERIFY_AFTER_STOP=PASS"
+fi
 
 echo "CUTOVER_RELEASE_PREP_BEGIN"
 echo "CUTOVER_RELEASE_PREP_STEP=stage_dir"
@@ -618,6 +765,7 @@ systemctl enable --now "disdex-shared-crypto-risk@$TARGET_SHA.service"
 systemctl enable --now "disdex-v12-v52-margin-guard@$TARGET_SHA.service"
 wait_safety_daemons_ready
 
+TRADING_TARGET_STARTED=1
 for name in "${CORE[@]}"; do
   systemctl enable --now "$name@$TARGET_SHA.service"
 done

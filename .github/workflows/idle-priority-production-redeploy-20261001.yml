@@ -1,5 +1,5 @@
 name: Idle Priority exact-SHA Production redeploy
-# redeploy-sequence: timer-running-transient-wait-v23
+# redeploy-sequence: active-v12-q102-lock-safe-cutover-v24
 on:
   push:
     branches: [design/idle-priority-bt-parity-20260929]
@@ -58,10 +58,15 @@ jobs:
             tests/hype-zec-benign-market-data-recovery.test.ts \
             tests/hype-zec-runner-gate.test.ts \
             tests/q102-symbol-ownership-contract.test.ts \
+            tests/quality102-pending-recovery-wiring.test.ts \
+            tests/quality102-pending-order-recovery.test.ts \
+            tests/v12-active-state-sha-migration.test.ts \
             tests/shared-risk-transient-refresh-retry.test.ts \
             tests/shared-risk-rollover-retry.test.ts
           node --test tests/shared-risk-systemd-decoupling.test.mjs
+          npx tsx scripts/disdex-v12-active-state-sha-migrate.ts --self-test
           python3 scripts/disdex_v52_aster_only_live_engine.py --self-test
+          bash -n scripts/ops/root/disdex-current-runtime-wiring
           bash scripts/ops/root/disdex-current-runtime-wiring --self-test
           grep -q 'chown(temporary, parent.uid, parent.gid)' lib/disdex-aster-global-rate-budget.ts
           grep -q 'DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH="$budget_tmp"' scripts/ops/root/disdex-idle-production-redeploy-20261001
@@ -168,6 +173,24 @@ jobs:
           [[ "$from_sha" != "$TARGET_SHA" ]]
           git merge-base --is-ancestor "$from_sha" "$TARGET_SHA"
           git diff --quiet "$from_sha" "$TARGET_SHA" -- package-lock.json
+          v12_critical=(
+            config/v12X1AllRuntime.ts
+            lib/v12-x1-all.ts
+            lib/v12-live-execution-engine.ts
+            lib/v12-resident-stop-lifecycle.ts
+            lib/v12-aster-live-adapter.ts
+            lib/v12-x1-all-runner-state.ts
+            scripts/disdex-v12-x1-all-live-runner.ts
+            lib/direct-trade-executor.ts
+            lib/aster-v3-client.ts
+          )
+          if git diff --quiet "$from_sha" "$TARGET_SHA" -- "${v12_critical[@]}"; then
+            echo "V12_ACTIVE_MIGRATION_CODE_PARITY=1" >> "$GITHUB_ENV"
+            echo "V12_ACTIVE_MIGRATION_CODE_PARITY=PASS"
+          else
+            echo "V12_ACTIVE_MIGRATION_CODE_PARITY=0" >> "$GITHUB_ENV"
+            echo "V12_ACTIVE_MIGRATION_CODE_PARITY=BLOCKED"
+          fi
           echo "FROM_SHA=$from_sha" >> "$GITHUB_ENV"
           echo "PRODUCTION_LINEAGE_DIRECT_DESCENDANT=PASS"
           echo "FROM_SHA=$from_sha"
@@ -197,7 +220,7 @@ jobs:
           ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
             -o ConnectTimeout=15 -p "$PORT" "root@$SSH_HOST" \
-            "FROM_SHA='$FROM_SHA' TARGET_SHA='$TARGET_SHA' REQUEST_ID='$GITHUB_RUN_ID' SOURCE_SHA256='$SOURCE_SHA256' CERT_SHA256='$CERT_SHA256' RESIDUAL_CERT_SHA256='$RESIDUAL_CERT_SHA256' bash /tmp/disdex-idle-cutover-$GITHUB_RUN_ID.sh"
+            "FROM_SHA='$FROM_SHA' TARGET_SHA='$TARGET_SHA' REQUEST_ID='$GITHUB_RUN_ID' SOURCE_SHA256='$SOURCE_SHA256' CERT_SHA256='$CERT_SHA256' RESIDUAL_CERT_SHA256='$RESIDUAL_CERT_SHA256' V12_ACTIVE_MIGRATION_CODE_PARITY='$V12_ACTIVE_MIGRATION_CODE_PARITY' bash /tmp/disdex-idle-cutover-$GITHUB_RUN_ID.sh"
 
       - name: Verify public HP remains safe
         shell: bash

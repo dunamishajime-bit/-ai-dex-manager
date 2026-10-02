@@ -37,17 +37,32 @@ async function main() {
   const backupPath = resolve(archiveDir, `${new Date().toISOString().replace(/[:.]/g, "-")}-${sha.slice(0, 12)}-pending-recovery.json`);
   if (apply) await mkdir(archiveDir, { recursive: true, mode: 0o700 });
 
+  const initial = await store.load();
+  if (!initial.pending) {
+    if (!process.argv.includes("--allow-no-pending")) throw new Error("Q102_PENDING_RECOVERY_PENDING_REQUIRED");
+    console.log(JSON.stringify({
+      status: "Q102_PENDING_RECOVERY_NOT_REQUIRED",
+      statePath,
+      runtimeCommitSha: sha,
+      lockRequired: false,
+      ordersSent: 0,
+      cancelsSent: 0,
+      positionChangesSent: 0,
+    }));
+    return;
+  }
+
   const lock = new FileAccountOrderLock(resolve(process.env.DISDEX_ACCOUNT_LOCK_PATH || "/var/lib/disdex/shared/account-order.lock"), 120_000);
   const handle = await lock.acquire(`Q102_PENDING_RECOVERY:${process.pid}`);
   if (!handle) throw new Error("Q102_PENDING_RECOVERY_ACCOUNT_LOCK_UNAVAILABLE");
   try {
     const before = await store.load();
     if (!before.pending) {
-      if (!process.argv.includes("--allow-no-pending")) throw new Error("Q102_PENDING_RECOVERY_PENDING_REQUIRED");
       console.log(JSON.stringify({
-        status: "Q102_PENDING_RECOVERY_NOT_REQUIRED",
+        status: "Q102_PENDING_RECOVERY_NOT_REQUIRED_AFTER_LOCK",
         statePath,
         runtimeCommitSha: sha,
+        lockRequired: true,
         ordersSent: 0,
         cancelsSent: 0,
         positionChangesSent: 0,

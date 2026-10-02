@@ -153,6 +153,7 @@ validate_release_artifacts() {
     "$CURRENT_RELEASE/scripts/disdex-quality102-causal-v1-live-runner.ts"
     "$CURRENT_RELEASE/scripts/generated/disdex-quality102-ranking-observer.cjs"
     "$CURRENT_RELEASE/scripts/disdex-current-live-target-readiness.ts"
+    "$CURRENT_RELEASE/scripts/disdex-v12-active-state-sha-migrate.ts"
     "$CURRENT_RELEASE/scripts/ops/root/disdex-live-operator-activation-gate.mjs"
     "$CURRENT_RELEASE/scripts/disdex-fet-brk48-live-runner.ts"
     "$CURRENT_RELEASE/scripts/disdex-hype-trend-live-runner.ts"
@@ -323,6 +324,20 @@ migrate_v12_state_lineage() {
       "$CURRENT_RELEASE/scripts/disdex-v12-runtime-lineage-recovery.ts" \
       --sha "$DEPLOYED_SHA" \
       --ack I_ACK_V12_RUNTIME_LINEAGE_RECOVERY_AFTER_READONLY_FLAT
+    return 0
+  fi
+  if /usr/bin/jq -e '((.activePositions // (if .active then [.active] else [] end)) | length) > 0' "$state_path" >/dev/null; then
+    [[ "${DISDEX_ALLOW_V12_ACTIVE_SHA_MIGRATION:-false}" == "true" ]] || {
+      printf 'V12 active state migration is not explicitly authorized for this cutover\n' >&2
+      return 1
+    }
+    load_runtime_migration_environment
+    "$CURRENT_RELEASE/node_modules/.bin/tsx" \
+      "$CURRENT_RELEASE/scripts/disdex-v12-active-state-sha-migrate.ts" \
+      --from-sha "$from_sha" \
+      --to-sha "$DEPLOYED_SHA" \
+      --state-path "$state_path" \
+      --ack I_ACK_V12_ACTIVE_STATE_SHA_MIGRATION_AFTER_READONLY_RECONCILIATION
     return 0
   fi
   "$CURRENT_RELEASE/node_modules/.bin/tsx" \
@@ -1314,6 +1329,7 @@ self_test() {
     scripts/disdex-quality102-causal-v1-live-runner.ts \
     scripts/generated/disdex-quality102-ranking-observer.cjs \
     scripts/disdex-current-live-target-readiness.ts \
+    scripts/disdex-v12-active-state-sha-migrate.ts \
     scripts/disdex-fet-brk48-live-runner.ts \
     scripts/disdex-hype-trend-live-runner.ts \
     scripts/disdex-hype-zec-long-live-runner.ts \

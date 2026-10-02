@@ -263,9 +263,31 @@ test("cutover recovers only a flat known Idle rate-budget review after venue-fla
   assert.match(cutover, /CUTOVER_IDLE_PREFLIGHT_POSITION_PRESENT/);
   assert.match(cutover, /CUTOVER_IDLE_PREFLIGHT_PENDING_PRESENT/);
   assert.match(cutover, /CUTOVER_KNOWN_IDLE_BENIGN_INACTIVE_ACCEPTED/);
-  const firstVenueFlat = cutover.indexOf('require_flat_account "$OLD_RELEASE"');
+  const accountMode = cutover.indexOf('classify_cutover_account_mode "$OLD_RELEASE"');
   const recovery = cutover.indexOf('IDLE_PREFLIGHT_RECOVERY_STATUS="$(recover_old_idle_known_rate_budget_state)"');
   const sharedSafe = cutover.indexOf("require_shared_safe", recovery);
-  assert.ok(firstVenueFlat >= 0 && recovery > firstVenueFlat, "venue flat proof must precede any Idle state recovery");
+  assert.ok(accountMode >= 0 && recovery > accountMode, "read-only account classification must precede any Idle state recovery");
   assert.ok(sharedSafe > recovery, "shared safety must be rechecked after the exact benign state recovery");
+});
+
+
+test("monitor timers tolerate the transient active/running window but fail closed if they never re-arm", async () => {
+  const wiring = await read(WIRING);
+  assert.match(wiring, /for attempt in \$\(seq 1 15\)/);
+  assert.match(wiring, /DISDEX_MONITOR_TIMER_BUSY_WAIT/);
+  assert.match(wiring, /DISDEX_MONITOR_TIMER_ACTIVATING_WAIT/);
+  assert.match(wiring, /required monitor timer failed to arm/);
+});
+
+
+test("active V12 cutover and rollback require code parity and read-only exchange/state reconciliation", async () => {
+  const cutover = await read(CUTOVER);
+  assert.match(cutover, /V12_ACTIVE_MIGRATION_CODE_PARITY/);
+  assert.match(cutover, /CUTOVER_ACCOUNT_MODE=V12_ACTIVE/);
+  assert.match(cutover, /scripts\/disdex-v12-active-state-sha-migrate\.ts/);
+  assert.match(cutover, /--verify-only/);
+  assert.match(cutover, /TRADING_TARGET_STARTED=1/);
+  assert.match(cutover, /DEPLOY_ROLLBACK_V12_ACTIVE_READONLY_REVERIFY=PASS/);
+  assert.match(cutover, /DEPLOY_ROLLBACK_V12_ACTIVE_RESTORED_STATE_REVERIFY=PASS/);
+  assert.match(cutover, /DEPLOY_ROLLBACK_SKIPPED_UNVERIFIED_EXPOSURE/);
 });

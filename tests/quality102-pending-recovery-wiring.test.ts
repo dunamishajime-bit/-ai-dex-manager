@@ -17,3 +17,13 @@ test("Q102 service auto-recovers only a proven no-exposure planned pending befor
   assert.match(unit, /--ack I_ACK_Q102_NO_EXPOSURE_PENDING_RECOVERY_AFTER_THREE_READONLY_ROUNDS/);
   assert.match(unit, /--apply --sha %i[\s\S]*--ack I_ACK_Q102_NO_EXPOSURE_PENDING_RECOVERY_AFTER_THREE_READONLY_ROUNDS/);
 });
+
+test("Q102 no-pending startup path proves state before taking the shared order lock", () => {
+  const script = readFileSync("scripts/disdex-quality102-pending-order-recovery.ts", "utf8");
+  const initialLoad = script.indexOf("const initial = await store.load()");
+  const earlyReturn = script.indexOf("Q102_PENDING_RECOVERY_NOT_REQUIRED");
+  const lockAcquire = script.indexOf("Q102_PENDING_RECOVERY:" + "$" + "{process.pid}");
+  assert.ok(initialLoad >= 0 && earlyReturn > initialLoad, "state must be read before no-pending early return");
+  assert.ok(lockAcquire > earlyReturn, "shared account lock must not be required when no pending recovery exists");
+  assert.match(script, /Q102_PENDING_RECOVERY_NOT_REQUIRED_AFTER_LOCK/);
+});

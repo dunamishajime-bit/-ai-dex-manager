@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import {
   assertActiveV12StateForShaMigration,
+  assertExchangeMatchesState,
   buildMigratedV12State,
 } from "../scripts/disdex-v12-active-state-sha-migrate";
 import type { V12X1AllRunnerState } from "../lib/v12-x1-all-runner-state";
@@ -71,4 +72,23 @@ test("active V12 migration rejects pending or missing protection state", () => {
   const broken = state();
   (broken.activePositions[0] as { protection?: unknown }).protection = undefined;
   assert.throws(() => assertActiveV12StateForShaMigration(broken, FROM, TO), /PROTECTION/);
+});
+
+
+test("active V12 exchange reconciliation requires exact protective order type, quantity, and price", () => {
+  const before = state() as unknown as V12X1AllRunnerState;
+  const positions = [{ symbol: "DOGEUSDT", positionAmt: "529" }];
+  const orders = [
+    { clientOrderId: "v12-stop-doge", reduceOnly: true, status: "NEW", type: "STOP_MARKET", origQty: "529", stopPrice: "0.097" },
+    { clientOrderId: "v12-tp-doge", reduceOnly: true, status: "NEW", type: "TAKE_PROFIT_MARKET", origQty: "529", stopPrice: "0.103" },
+  ];
+  assert.doesNotThrow(() => assertExchangeMatchesState(before, positions, orders));
+  assert.throws(
+    () => assertExchangeMatchesState(before, positions, [{ ...orders[0], stopPrice: "0.09" }, orders[1]]),
+    /PROTECTION_PRICE_MISMATCH/,
+  );
+  assert.throws(
+    () => assertExchangeMatchesState(before, positions, [{ ...orders[0], type: "TAKE_PROFIT_MARKET" }, orders[1]]),
+    /PROTECTION_TYPE_MISMATCH/,
+  );
 });

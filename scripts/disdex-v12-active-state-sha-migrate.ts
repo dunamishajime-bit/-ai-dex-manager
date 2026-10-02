@@ -91,7 +91,7 @@ function finite(value: unknown, field: string): number {
   return number;
 }
 
-function assertExchangeMatchesState(
+export function assertExchangeMatchesState(
   state: V12X1AllRunnerState,
   positionRows: readonly Record<string, unknown>[],
   openOrders: readonly Record<string, unknown>[],
@@ -107,15 +107,28 @@ function assertExchangeMatchesState(
       throw new Error(`V12_ACTIVE_STATE_SHA_MIGRATE_POSITION_MISMATCH:${position.symbol}`);
     }
     const protection = position.protection;
-    for (const clientOrderId of [protection.stopClientOrderId, protection.takeProfitClientOrderId]) {
-      if (!clientOrderId) throw new Error(`V12_ACTIVE_STATE_SHA_MIGRATE_PROTECTION_ID_MISSING:${position.symbol}`);
+    const protectionOrders = [
+      { clientOrderId: protection.stopClientOrderId, expectedType: "STOP_MARKET", expectedPrice: protection.lastAckStop, label: "STOP" },
+      { clientOrderId: protection.takeProfitClientOrderId, expectedType: "TAKE_PROFIT_MARKET", expectedPrice: protection.takeProfit, label: "TAKE_PROFIT" },
+    ];
+    for (const expected of protectionOrders) {
+      const clientOrderId = expected.clientOrderId;
+      if (!clientOrderId) throw new Error(`V12_ACTIVE_STATE_SHA_MIGRATE_PROTECTION_ID_MISSING:${position.symbol}:${expected.label}`);
       managedOrderIds.add(clientOrderId);
       const order = openOrders.find((candidate) => String(candidate.clientOrderId || "") === clientOrderId);
       if (!order || order.reduceOnly !== true || !["NEW", "OPEN"].includes(String(order.status || "").toUpperCase())) {
-        throw new Error(`V12_ACTIVE_STATE_SHA_MIGRATE_PROTECTION_MISMATCH:${position.symbol}`);
+        throw new Error(`V12_ACTIVE_STATE_SHA_MIGRATE_PROTECTION_MISMATCH:${position.symbol}:${expected.label}`);
+      }
+      if (String(order.type || "").toUpperCase() !== expected.expectedType) {
+        throw new Error(`V12_ACTIVE_STATE_SHA_MIGRATE_PROTECTION_TYPE_MISMATCH:${position.symbol}:${expected.label}`);
       }
       if (Math.abs(finite(order.origQty, "ORDER_QTY") - position.quantity) > Math.max(1e-8, position.quantity * 0.001)) {
-        throw new Error(`V12_ACTIVE_STATE_SHA_MIGRATE_PROTECTION_QTY_MISMATCH:${position.symbol}`);
+        throw new Error(`V12_ACTIVE_STATE_SHA_MIGRATE_PROTECTION_QTY_MISMATCH:${position.symbol}:${expected.label}`);
+      }
+      const expectedPrice = finite(expected.expectedPrice, "PROTECTION_PRICE");
+      const actualPrice = finite(order.stopPrice, "ORDER_STOP_PRICE");
+      if (expectedPrice <= 0 || actualPrice <= 0 || Math.abs(actualPrice - expectedPrice) > Math.max(1e-8, expectedPrice * 0.001)) {
+        throw new Error(`V12_ACTIVE_STATE_SHA_MIGRATE_PROTECTION_PRICE_MISMATCH:${position.symbol}:${expected.label}`);
       }
     }
   }
@@ -161,19 +174,26 @@ async function main(): Promise<void> {
   const fromSha = exactSha(arg("--from-sha"), "FROM_SHA");
   const toSha = exactSha(arg("--to-sha"), "TO_SHA");
   if (arg("--ack") !== ACK) throw new Error("V12_ACTIVE_STATE_SHA_MIGRATE_ACK_REQUIRED");
-  const currentSha = (await readFile("/home/deploy/disdex-trading/current/.disdex-release-sha", "utf8")).trim().toLowerCase();
-  if (currentSha !== toSha) throw new Error("V12_ACTIVE_STATE_SHA_MIGRATE_CURRENT_SHA_MISMATCH");
-  const unit = `disdex-v12-x1-all@${toSha}.service`;
-  const props = systemdProps(unit);
-  if (!(props.ActiveState === "inactive" || props.ActiveState === "failed") || props.MainPID !== "0") throw new Error("V12_ACTIVE_STATE_SHA_MIGRATE_RUNNER_NOT_STOPPED");
+  const verifyOnly = process.argv.includes("--verify-only");
 
   const statePath = resolve(arg("--state-path") || "/var/lib/disdex/v12-x1-all/runner.json");
   const q102Path = resolve(process.env.QUALITY102_CAUSAL_V1_STATE_PATH || "/var/lib/disdex/quality102-causal-v1/state.json");
   const stateStore = new FileV12X1AllRunnerStateStore(statePath, "LIVE");
   const before = await stateStore.load();
   assertActiveV12StateForShaMigration(before, fromSha, toSha);
-  const q102 = await new FileQuality102CausalV1StateStore(q102Path, "LIVE", toSha).load();
-  if (q102.runtimeCommitSha.toLowerCase() !== toSha || q102.pending || q102.position) throw new Error("V12_ACTIVE_STATE_SHA_MIGRATE_Q102_NOT_FLAT_CURRENT");
+
+  if (verifyOnly) {
+    const q102 = JSON.parse(await readFile(q102Path, "utf8")) as { runtimeCommitSha?: unknown; runtimeSha?: unknown; pending?: unknown; position?: unknown };
+    const q102Sha = String(q102.runtimeCommitSha || q102.runtimeSha || "").toLowerCase();
+    if (![fromSha, toSha].includes(q102Sha) || q102.pending || q102.position) {
+      throw new Error("V12_ACTIVE_STATE_SHA_MIGRATE_Q102_NOT_FLAT_CURRENT");
+    }
+  } else {
+    const q102 = await new FileQuality102CausalV1StateStore(q102Path, "LIVE", toSha).load();
+    if (q102.runtimeCommitSha.toLowerCase() !== toSha || q102.pending || q102.position) {
+      throw new Error("V12_ACTIVE_STATE_SHA_MIGRATE_Q102_NOT_FLAT_CURRENT");
+    }
+  }
   const kill = await readSharedKillSwitch();
   if (kill.active) throw new Error("V12_ACTIVE_STATE_SHA_MIGRATE_SHARED_KILL_ACTIVE");
   const risk = await readSharedCryptoDailyRisk(resolve(process.env.DISDEX_SHARED_CRYPTO_DAILY_RISK_PATH || "/var/lib/disdex/shared/crypto-daily-risk.json"));
@@ -191,6 +211,28 @@ async function main(): Promise<void> {
   if (!client.hasTradingCredentials()) throw new Error("V12_ACTIVE_STATE_SHA_MIGRATE_ASTER_CREDENTIALS_MISSING");
   const [positionRows, openOrders] = await Promise.all([client.getPositions(), client.getOpenOrders()]);
   assertExchangeMatchesState(before, positionRows as unknown as Record<string, unknown>[], openOrders as unknown as Record<string, unknown>[]);
+
+  if (verifyOnly) {
+    console.log(JSON.stringify({
+      status: "V12_ACTIVE_STATE_SHA_MIGRATE_PREFLIGHT_PASS",
+      statePath,
+      fromRuntimeSha: fromSha,
+      toRuntimeSha: toSha,
+      activePositions: activePositions(before).map((position) => ({ symbol: position.symbol, quantity: position.quantity, gross: position.gross })),
+      protectiveOrderCount: activePositions(before).length * 2,
+      ordersSent: 0,
+      cancelsSent: 0,
+      positionChangesSent: 0,
+    }));
+    return;
+  }
+
+  const currentSha = (await readFile("/home/deploy/disdex-trading/current/.disdex-release-sha", "utf8")).trim().toLowerCase();
+  if (currentSha !== toSha) throw new Error("V12_ACTIVE_STATE_SHA_MIGRATE_CURRENT_SHA_MISMATCH");
+  const unit = `disdex-v12-x1-all@${toSha}.service`;
+  const props = systemdProps(unit);
+  if (!(props.ActiveState === "inactive" || props.ActiveState === "failed") || props.MainPID !== "0") throw new Error("V12_ACTIVE_STATE_SHA_MIGRATE_RUNNER_NOT_STOPPED");
+
   const backupPath = await archiveState(statePath, toSha);
   const migrated = buildMigratedV12State(before, toSha);
   await stateStore.save(migrated);
