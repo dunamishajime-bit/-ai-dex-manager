@@ -1,5 +1,5 @@
 name: Idle Priority exact-SHA Production redeploy
-# redeploy-sequence: idle-baseline-source-clock-parity-v22
+# redeploy-sequence: timer-running-transient-wait-v23
 on:
   push:
     branches: [design/idle-priority-bt-parity-20260929]

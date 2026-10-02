@@ -659,7 +659,7 @@ ensure_safety_daemon_active() {
 }
 
 ensure_monitor_timer_active() {
-  local unit="$1" load_state active_state sub_state
+  local unit="$1" load_state active_state sub_state attempt
   load_state="$(systemctl show "$unit" -p LoadState --value 2>/dev/null || true)"
   [[ "$load_state" == "loaded" ]] || {
     printf 'required monitor timer is not loaded: %s\n' "$unit" >&2
@@ -667,17 +667,31 @@ ensure_monitor_timer_active() {
   }
   active_state="$(systemctl show "$unit" -p ActiveState --value 2>/dev/null || true)"
   sub_state="$(systemctl show "$unit" -p SubState --value 2>/dev/null || true)"
-  if [[ "$active_state" != "active" || "$sub_state" != "waiting" ]]; then
+  if [[ "$active_state" != "active" ]]; then
     systemctl reset-failed "$unit" >/dev/null 2>&1 || true
     systemctl restart "$unit"
+  fi
+  for attempt in $(seq 1 15); do
     active_state="$(systemctl show "$unit" -p ActiveState --value 2>/dev/null || true)"
     sub_state="$(systemctl show "$unit" -p SubState --value 2>/dev/null || true)"
-  fi
-  [[ "$active_state" == "active" && "$sub_state" == "waiting" ]] || {
-    printf 'required monitor timer failed to arm: %s state=%s subState=%s\n' "$unit" "$active_state" "$sub_state" >&2
-    return 1
-  }
-  printf 'DISDEX_MONITOR_TIMER_ARMED unit=%s state=%s subState=%s ordersSent=0 cancelSent=0 positionChangesSent=0\n' "$unit" "$active_state" "$sub_state"
+    if [[ "$active_state" == "active" && "$sub_state" == "waiting" ]]; then
+      printf 'DISDEX_MONITOR_TIMER_ARMED unit=%s state=%s subState=%s attempt=%s ordersSent=0 cancelSent=0 positionChangesSent=0\n' "$unit" "$active_state" "$sub_state" "$attempt"
+      return 0
+    fi
+    if [[ "$active_state" == "active" && "$sub_state" == "running" ]]; then
+      printf 'DISDEX_MONITOR_TIMER_BUSY_WAIT unit=%s attempt=%s\n' "$unit" "$attempt"
+      sleep 1
+      continue
+    fi
+    if [[ "$active_state" == "activating" ]]; then
+      printf 'DISDEX_MONITOR_TIMER_ACTIVATING_WAIT unit=%s attempt=%s subState=%s\n' "$unit" "$attempt" "$sub_state"
+      sleep 1
+      continue
+    fi
+    break
+  done
+  printf 'required monitor timer failed to arm: %s state=%s subState=%s\n' "$unit" "$active_state" "$sub_state" >&2
+  return 1
 }
 
 retarget_quality102_ranking_observer() {
@@ -1411,6 +1425,8 @@ self_test() {
   grep -q 'DISDEX_HEALTH_SNAPSHOT_IDLE_STATE_PATH=${IDLE_PRIORITY_STATE_ROOT}/state.json' "$0"
   grep -q 'DISDEX_WATCHDOG_IDLE_EXPECTED_SHA=${DEPLOYED_SHA}' "$0"
   grep -q 'DISDEX_WATCHDOG_IDLE_SERVICE_UNIT=${IDLE_UNIT}' "$0"
+  grep -q 'DISDEX_MONITOR_TIMER_BUSY_WAIT' "$0"
+  grep -q 'for attempt in $(seq 1 15)' "$0"
   printf 'DISDEX_CURRENT_RUNTIME_OPERATOR_AUTOMATION_SELFTEST_PASS\n'
   printf 'DISDEX_CURRENT_RUNTIME_WIRING_SELFTEST_PASS\n'
 }
