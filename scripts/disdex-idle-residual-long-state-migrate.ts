@@ -15,7 +15,7 @@ export type IdleResidualStateMigrationResult=
  | {status:"IDLE_RESIDUAL_STATE_SHA_MIGRATE_PASS";statePath:string;backupPath:string;fromSha:string;toSha:string;ordersSent:0;cancelsSent:0;positionChangesSent:0}
  | {status:"IDLE_RESIDUAL_STATE_SHA_MIGRATE_ALREADY_CURRENT";statePath:string;toSha:string;ordersSent:0;cancelsSent:0;positionChangesSent:0};
 
-export async function migrateIdleResidualLongState(input:{statePath:string;toSha:string;backupPath?:string}):Promise<IdleResidualStateMigrationResult>{
+export async function migrateIdleResidualLongState(input:{statePath:string;toSha:string;backupPath?:string;normalizeOwnership?:boolean}):Promise<IdleResidualStateMigrationResult>{
   const toSha=exactSha(input.toSha,"TO_SHA");
   const statePath=resolve(input.statePath);
   let metadata;
@@ -47,7 +47,7 @@ export async function migrateIdleResidualLongState(input:{statePath:string;toSha
 
   const target={...before,runtimeSha:toSha,updatedAt:Date.now()};
   await writeIdleResidualLongState(statePath,target);
-  if(process.platform!=="win32")await normalizeLiveStateOwnership(statePath,{label:"IDLE_RESIDUAL_STATE_SHA_MIGRATE_STATE"});
+  if(process.platform!=="win32"&&input.normalizeOwnership!==false)await normalizeLiveStateOwnership(statePath,{label:"IDLE_RESIDUAL_STATE_SHA_MIGRATE_STATE"});
   const after=normalizeIdleResidualLongState(JSON.parse(await readFile(statePath,"utf8")),toSha);
   if(after.runtimeSha!==toSha||after.position||after.pending||after.manualReview)throw new Error("IDLE_RESIDUAL_STATE_SHA_MIGRATE_READBACK_FAILED");
   return {status:"IDLE_RESIDUAL_STATE_SHA_MIGRATE_PASS",statePath,backupPath,fromSha,toSha,ordersSent:0,cancelsSent:0,positionChangesSent:0};

@@ -1,5 +1,5 @@
 name: Idle Priority exact-SHA Production redeploy
-# redeploy-sequence: residual-state-lineage-migration-v20
+# redeploy-sequence: residual-state-lineage-migration-v21
 on:
   push:
     branches: [design/idle-priority-bt-parity-20260929]

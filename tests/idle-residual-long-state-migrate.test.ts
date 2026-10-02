@@ -18,7 +18,7 @@ test("flat residual state migrates SHA with exact backup and no exposure mutatio
     before.lastDecision={decisionTs:123456789,accepted:false,reason:"NO_IDLE_RESIDUAL_LONG_SIGNAL"};
     await writeFile(statePath,JSON.stringify(before,null,2)+"\n");
     const original=await readFile(statePath);
-    const result=await migrateIdleResidualLongState({statePath,toSha:TO});
+    const result=await migrateIdleResidualLongState({statePath,toSha:TO,normalizeOwnership:false});
     assert.equal(result.status,"IDLE_RESIDUAL_STATE_SHA_MIGRATE_PASS");
     if(result.status!=="IDLE_RESIDUAL_STATE_SHA_MIGRATE_PASS")return;
     assert.ok((await readFile(result.backupPath)).equals(original));
@@ -44,7 +44,7 @@ test("residual state migration refuses exposure, pending, and manual review", as
       mutate(state);
       await writeFile(statePath,JSON.stringify(state,null,2)+"\n");
       await assert.rejects(
-        migrateIdleResidualLongState({statePath,toSha:TO}),
+        migrateIdleResidualLongState({statePath,toSha:TO,normalizeOwnership:false}),
         /IDLE_RESIDUAL_STATE_SHA_MIGRATE_REVIEW_OR_EXPOSURE_PRESENT/,
       );
     }finally{await rm(root,{recursive:true,force:true});}
