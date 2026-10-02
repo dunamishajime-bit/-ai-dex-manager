@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   deriveTradeHistoryAttribution,
   formatTradeHistoryAttributionLabel,
+  getTradeHistoryAttributionTone,
 } from "../lib/trade-history-attribution";
 
 test("explicit low-ranking alternate route is shown as an alternate route", () => {
@@ -91,4 +92,20 @@ test("history label makes a low-ranking alternate route visible", () => {
     }),
     "別ルート発火: V12 / Recovery V8 / Rank13",
   );
+});
+
+test("history logic names receive distinct stable color tones", () => {
+  const cases = [
+    ["V12", "v12"],
+    ["Q102 / CAUSAL_V4", "q102"],
+    ["PENGU / Recovery V8", "recovery-v8"],
+    ["PENGU / Short V20", "short-v20"],
+    ["PENGU / V64 Dynamic Long", "v64-dynamic"],
+    ["V52", "v52"],
+  ] as const;
+  for (const [logicLabel, expected] of cases) {
+    assert.equal(getTradeHistoryAttributionTone({ classification: "logic", logicLabel, evidence: "explicit" }), expected);
+  }
+  assert.equal(getTradeHistoryAttributionTone({ classification: "test-order", evidence: "explicit" }), "test-order");
+  assert.equal(getTradeHistoryAttributionTone({ classification: "unknown", evidence: "unavailable" }), "unknown");
 });

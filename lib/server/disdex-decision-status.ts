@@ -51,7 +51,7 @@ export type DecisionStatusSnapshot = {
 };
 
 let cache: { expiresAt: number; snapshot: DecisionStatusSnapshot } | null = null;
-const CACHE_TTL_MS = 55 * 60 * 1000;
+const CACHE_TTL_MS = 2 * 60 * 1000;
 
 function object(value: unknown): JsonObject | null {
   return value && typeof value === "object" && !Array.isArray(value) ? value as JsonObject : null;
@@ -94,10 +94,10 @@ export function runtimeSnapshot(checkedAt: string): DecisionStatusSnapshot["runt
         releaseSha: config.vpsObservedReleases.v12,
         venue: "Aster Futures V3",
         timeframe: "完成済み1時間足 → 2時間足",
-        entryPolicy: "BTC regime + 全候補score順位から上位最大2候補。合計1.50x / 1件1.00x",
-        protection: "ATR/リスク sizing、resident protection、共有daily-risk、Kill Switch。Crypto共有2.00x / Total2.50x",
-        note: "VPS stateを実読取できた場合のみLIVE表示。未接続・停止・古いstateはLIVEにしません。",
-        reason: "V12 runner stateの実読取結果を待機中です。",
+        entryPolicy: "BTC相場と候補スコアで上位2件を判定。最大2建玉、合計1.50x",
+        protection: "ATR・リスク・共有daily risk・Kill Switch。Crypto 2.00x / Total 2.50x",
+        note: "VPSの最新stateを確認できた場合だけLIVE表示します。",
+        reason: "V12 runnerの状態を確認中です。",
       },
       {
         id: "PENGU_DUAL_LS_V2_FINAL",
@@ -106,22 +106,34 @@ export function runtimeSnapshot(checkedAt: string): DecisionStatusSnapshot["runt
         releaseSha: config.vpsObservedReleases.pengu,
         venue: "Aster PENGUUSDT",
         timeframe: "完成済みPENGU/BTC 1時間足",
-        entryPolicy: "Long/Short条件成立後、次の1時間足。Long最大0.9375x（base0.75×1.25）、Short最大0.75x、保有中の追加・反転なし",
-        protection: "Long/Short hard stop・trailing・max hold。新規ShortのみV20 failure/deadline exit。Crypto Gross上限2.00x / Global Gross上限2.50x",
-        note: "VPS stateを実読取できた場合のみLIVE表示。未接続・停止・古いstateはLIVEにしません。",
-        reason: "PENGU runner stateの実読取結果を待機中です。",
+        entryPolicy: "確定した1時間足でLong / Shortを判定。保有中の追加・反転なし",
+        protection: "Hard stop・trailing・max hold・V20 exit。Crypto 2.00x / Total 2.50x",
+        note: "VPSの最新stateを確認できた場合だけLIVE表示します。",
+        reason: "PENGU runnerの状態を確認中です。",
       },
       {
         id: "QUALITY102_CAUSAL_V1",
-        label: "Quality102 derived high-vol sleeve",
+        label: "Quality102 Causal V4 high-vol sleeve",
         status: "UNCONFIRMED",
         releaseSha: config.vpsObservedReleases.quality102,
         venue: "Aster Futures crypto sleeve",
         timeframe: "LIVE時点の利用可能データのみ",
-        entryPolicy: "Derived HIGH_VOL selector。1 slot / 最大0.50x。V12・PENGU・V52を優先し、残余Crypto/Total Grossだけを使用",
-        protection: "Crypto Gross最大2.00x / Total Gross最大2.50x、shared risk、Kill Switch、reconciliation、stale-data Fail Closed",
-        note: "歴史的102件selector parity未証明部分とBRKはLIVEに流用せずFail Closed。derived sleeveの実state/heartbeatだけを表示します。",
-        reason: "Quality102 runner state/heartbeatの実読取結果を待機中です。",
+        entryPolicy: "Causal V4で判定する1枠の補完ロジック。主力を優先し、余剰枠だけを使用",
+        protection: "Crypto 2.00x / Total 2.50x、共有risk、Kill Switch、照合、古いデータの停止",
+        note: "未証明の経路は安全側で停止し、実stateだけを表示します。",
+        reason: "Quality102 runnerの状態を確認中です。",
+      },
+      {
+        id: "FET_BRK48_RESIDUAL",
+        label: "FET BRK48 Residual",
+        status: "UNCONFIRMED",
+        releaseSha: process.env.FET_BRK48_EXPECTED_RELEASE_SHA || config.vpsObservedReleases.v12,
+        venue: "Aster Futures FETUSDT",
+        timeframe: "BRK48 residual signal",
+        entryPolicy: "FET BRK48の確定データだけを評価し、Core entryと競合時はpreemptibleな残余枠で判定",
+        protection: "5x Cross・reduce-only protection・reconciliation・共有risk・Kill Switch",
+        note: "flat / no-signal時もrunner heartbeatを表示し、state stale時はLIVEにしません。",
+        reason: "FET runner stateを確認中です。",
       },
       {
         id: "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96",
@@ -130,10 +142,10 @@ export function runtimeSnapshot(checkedAt: string): DecisionStatusSnapshot["runt
         releaseSha: config.vpsObservedReleases.v52,
         venue: "Aster-only stock sleeves",
         timeframe: "米国株時間・V11_EQ / V50 window",
-        entryPolicy: "固定snapshotのV50候補をRank1通常=1.00x（basis≥65/net≥5）、強=1.25x（100/15）、Rank2=0.25x（85/10）で最大2建玉。各20秒窓（11:30/12:30/13:30 NY）",
-        protection: "V50 max hold4h・basis stop1.75x・adverse10bps、V11 tiers 0.75/1.00/1.25/1.50、日次損失・建玉照合・共有Kill Switch。Stock1.50x / Crypto2.00x / Global2.50x",
-        note: "VPS stateを実読取できた場合のみLIVE表示。一時的なデータ品質・板・spread拒否だけ窓内retryし、最終拒否はFail Closedです。",
-        reason: "V52 runner stateの実読取結果を待機中です。",
+        entryPolicy: "V50候補を順位付けし、条件を満たす上位2件を各20秒窓で判定",
+        protection: "V50 / V11の保護・日次損失・建玉照合・Kill Switch。Stock 1.50x / Total 2.50x",
+        note: "VPSの最新stateを確認できた場合だけLIVE表示します。",
+        reason: "V52 runnerの状態を確認中です。",
       },
     ],
   };
@@ -148,7 +160,7 @@ function unavailableItem(symbol: string, sleeve: Sleeve, checkedAt: string, reas
     scoreMax: 1,
     status: "取得不能",
     side: "WAIT",
-    reason: `${reason} VPSのsanitized snapshotがない場合、過去データから推測表示しません。`,
+    reason,
     checkedAt,
     source: "VPS runner state / sanitized decision snapshot",
   };
@@ -289,7 +301,7 @@ export async function loadDecisionStatus(options: { force?: boolean } = {}): Pro
   const snapshot: DecisionStatusSnapshot = {
     ok: errors.length === 0,
     readOnly: true,
-    refreshIntervalMinutes: 180,
+    refreshIntervalMinutes: 10,
     checkedAt,
     source: "VPS runner state / sanitized decision snapshot",
     runtime: runtimeSnapshot(checkedAt),

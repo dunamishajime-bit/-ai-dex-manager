@@ -167,6 +167,7 @@ function safeRunnerState(value: unknown) {
   const killSwitch = asObject(row.killSwitch);
   return {
     strategyId: typeof row.strategyId === "string" ? row.strategyId : undefined,
+    releaseSha: typeof row.releaseSha === "string" ? row.releaseSha : typeof row.runtimeCommitSha === "string" ? row.runtimeCommitSha : undefined,
     mode: typeof row.mode === "string" ? row.mode : undefined,
     updatedAt: Number.isFinite(Number(row.updatedAt)) ? Number(row.updatedAt) : undefined,
     lastReferenceTs: Number.isFinite(Number(row.lastReferenceTs)) ? Number(row.lastReferenceTs) : undefined,
@@ -312,6 +313,7 @@ function buildExecutionTrace(
 
 export async function loadV12DecisionObservability() {
   const errors: string[] = [];
+  const warnings: string[] = [];
   const [runnerFile, decisionFile, riskFile, history] = await Promise.all([
     readJsonFromEnvPath("V12_X1_ALL_STATE_PATH"),
     readJsonFromEnvPath("V12_DECISION_SNAPSHOT_PATH"),
@@ -321,7 +323,7 @@ export async function loadV12DecisionObservability() {
   if (runnerFile.error) errors.push(`runner-state: ${runnerFile.error}`);
   if (decisionFile.error) errors.push(`decision-snapshot: ${decisionFile.error}`);
   if (riskFile.error) errors.push(`shared-risk: ${riskFile.error}`);
-  if (history.error) errors.push(`trade-history: ${history.error}`);
+  if (history.error) warnings.push(`trade-history: ${history.error}`);
 
   const recentFills = history.entries
     .filter((entry) => V12_BASE_SYMBOLS.has(entry.action === "BUY" ? entry.destSymbol : entry.sourceSymbol))
@@ -388,5 +390,6 @@ export async function loadV12DecisionObservability() {
     recentFills,
     wiring: { runnerStateConfigured: runnerFile.configured, decisionSnapshotConfigured: decisionFile.configured },
     errors,
+    warnings,
   };
 }

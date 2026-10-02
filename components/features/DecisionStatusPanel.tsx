@@ -4,9 +4,11 @@ import { useEffect, useState } from "react";
 import { Activity, AlertCircle, CheckCircle2, CircleDashed, Clock3, RefreshCw, ServerCog, ShieldCheck } from "lucide-react";
 
 import { DIST_TERMINAL_LIVE_CONFIG as config } from "@/lib/disterminal-live-config";
+import { v12ObservationStatus } from "@/lib/v12-observation-status";
 import type { V52Top2Observability, V52Top2DecisionRow } from "@/lib/server/v52-top2-observability";
 import type { PenguRuntimeStatus } from "@/lib/server/pengu-runtime-observability";
 import type { Quality102RuntimeStatus } from "@/lib/server/quality102-runtime-observability";
+import type { FetRuntimeStatus } from "@/lib/server/fet-runtime-observability";
 
 type DecisionStatusItem = {
   symbol: string;
@@ -101,6 +103,7 @@ type V12Observability = {
   recentFills: Array<{ id?: string; executedAt?: string; symbol: string; action: string; side?: string; tradeStatus?: string; positionVerified?: boolean; entryPriceUsd?: number; exitPriceUsd?: number; realizedPnlUsd?: number; netPnlUsd?: number; orderId?: string }>;
   wiring: { runnerStateConfigured: boolean; decisionSnapshotConfigured: boolean };
   errors: string[];
+  warnings: string[];
 };
 
 type Snapshot = {
@@ -116,6 +119,7 @@ type Snapshot = {
   penguRuntime?: PenguRuntimeStatus;
   v52Top2Observability?: V52Top2Observability;
   quality102Runtime?: Quality102RuntimeStatus;
+  fetRuntime?: FetRuntimeStatus;
   error?: string;
 };
 
@@ -197,26 +201,26 @@ function V12Detail({ details }: { details?: V12Observability }) {
   const runner = details.runnerState;
   const decisionLabel = decision ? (decision.symbol || "候補未取得") + " " + (decision.side || "WAIT") : "候補未取得";
   const selectedCandidate = decision?.candidates.find((candidate) => candidate.symbol === decision.symbol) || decision?.candidates[0];
-  const statusLabel = details.errors.length ? "要確認" : details.decisionDetailsAvailable ? "観測済み" : "未取得";
-  const statusClass = details.errors.length ? "border-amber-400/35 bg-amber-500/10 text-amber-100" : details.decisionDetailsAvailable ? "border-emerald-400/35 bg-emerald-500/10 text-emerald-100" : "border-rose-400/35 bg-rose-500/10 text-rose-100";
+  const statusLabel = v12ObservationStatus(details);
+  const statusClass = statusLabel === "要確認" ? "border-amber-400/35 bg-amber-500/10 text-amber-100" : statusLabel === "確認済み" ? "border-emerald-400/35 bg-emerald-500/10 text-emerald-100" : "border-rose-400/35 bg-rose-500/10 text-rose-100";
   return (
     <section className="panel-gold rounded-[28px] p-4 md:p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <div className="flex items-center gap-2 text-lg font-bold text-white"><Activity className="h-5 w-5 text-gold-100" />V12 X1.00 ALL Top2 発火経路</div>
-          <p className="mt-1 text-xs text-white/55">VPSのV12 runner state / sanitized decision snapshot / 共有riskを読み取り、候補順位から発注・約定までを段階表示</p>
+          <div className="flex items-center gap-2 text-lg font-bold text-white"><Activity className="h-5 w-5 text-gold-100" />V12 X1.00 ALL Top2 判定</div>
+          <p className="mt-1 text-xs text-white/55">VPSの候補・Gate・発注状態を読み取り表示します。</p>
         </div>
         <div className="flex flex-wrap gap-2"><span className={"rounded-full border px-3 py-1 text-xs font-semibold " + statusClass}>V12 {statusLabel}</span><span className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-100">tradingMutation=0</span></div>
       </div>
       <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
         {[
-          ["判定段階", trace.currentStageLabel],
+          ["判定", trace.currentStageLabel],
           ["候補", decisionLabel],
-          ["Rank", decision?.rank === undefined ? "—" : String(decision.rank)],
-          ["score", number(decision?.score, 4)],
-          ["momentum", number(decision?.momentum, 4) + "%"],
-          ["volumeRatio", number(decision?.volumeRatio, 4)],
-          ["BTC regime", decision?.btcRegime || "未取得"],
+          ["順位", decision?.rank === undefined ? "—" : String(decision.rank)],
+          ["スコア", number(decision?.score, 4)],
+          ["勢い", number(decision?.momentum, 4) + "%"],
+          ["出来高比", number(decision?.volumeRatio, 4)],
+          ["BTC相場", decision?.btcRegime || "未取得"],
           ["Signal", decision?.selectionConfirmed ? "選定済み" : "未成立"],
         ].map(([label, value]) => <div key={label} className="rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="text-[10px] uppercase tracking-wide text-white/45">{label}</div><div className={"mt-1 break-words text-sm font-semibold " + (value === "未成立" || value === "未取得" ? "text-rose-200" : "text-white")}>{value}</div></div>)}
       </div>
@@ -228,8 +232,8 @@ function V12Detail({ details }: { details?: V12Observability }) {
           <div className="mt-3 space-y-2">{trace.steps.map((step) => <div key={step.key} className={"flex items-start gap-2 rounded-xl border px-3 py-2 text-xs " + traceStateClass(step.state)}><TraceIcon state={step.state} /><div><div className="font-semibold">{step.label}</div><div className="mt-0.5 leading-5 opacity-85">{step.detail}</div></div></div>)}</div>
         </div>
         <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
-          <div className="text-sm font-bold text-white">実state / Gate詳細</div>
-          <div className="mt-3 space-y-2 text-xs leading-5 text-white/75">
+          <div className="text-sm font-bold text-white">実行状態・Gate</div>
+          <div className="mt-3 space-y-2 break-words text-xs leading-5 text-white/75">
             <p>runner更新：{time(runner?.updatedAt)}</p>
             <p>strategyId：{runner?.strategyId || decision?.strategyId || "未取得"}</p>
             <p>mode：{runner?.mode || "未取得"} / 同一足idempotency：{runner?.lastCompletedIdempotencyKey ? "記録あり" : "未取得"}</p>
@@ -238,12 +242,13 @@ function V12Detail({ details }: { details?: V12Observability }) {
             <p>state接続：{details.wiring.runnerStateConfigured ? "絶対パス設定済み" : "未設定"} / decision snapshot：{details.wiring.decisionSnapshotConfigured ? "絶対パス設定済み" : "未設定"}</p>
             <p>建玉：{runner?.active ? (runner.active.symbol || "—") + " " + (runner.active.side || "—") + " / gross " + number(runner.active.gross, 3) + "x" : "なし"}</p>
             <p>pending：{runner?.pending ? (runner.pending.action || "ORDER") + " " + (runner.pending.symbol || "—") + " / " + (runner.pending.reason || "—") : "なし"}</p>
-            <p>観測エラー：{details.errors.length ? details.errors.join(" / ") : "なし"}</p>
+            <p>観測状態：{details.errors.length ? details.errors.join(" / ") : "正常"}</p>
+            {details.warnings.length ? <p>補助情報：{details.warnings.join(" / ")}</p> : null}
           </div>
         </div>
       </div>
       <div className="mt-4 overflow-x-auto rounded-2xl border border-white/10 bg-black/20">
-        <div className="border-b border-white/10 px-3 py-2 text-sm font-bold text-white">全候補順位とSignal Gate</div>
+        <div className="border-b border-white/10 px-3 py-2 text-sm font-bold text-white">候補と判定</div>
         {decision?.candidates.length ? <table className="min-w-[980px] w-full text-left text-xs"><thead className="text-white/45"><tr><th className="px-3 py-2">Rank</th><th className="px-3 py-2">候補</th><th className="px-3 py-2">score</th><th className="px-3 py-2">momentum</th><th className="px-3 py-2">volumeRatio</th><th className="px-3 py-2">Gate</th><th className="px-3 py-2">発注段階</th></tr></thead><tbody>{decision.candidates.map((candidate, index) => <tr key={(candidate.symbol || "candidate") + "-" + index} className="border-t border-white/5"><td className="px-3 py-2"><span className={"inline-flex min-w-7 justify-center rounded-full border px-2 py-1 font-bold " + rankClass(candidate.rank || 99)}>{candidate.rank ?? "—"}</span></td><td className="px-3 py-2 font-semibold text-white">{candidate.symbol || "—"} <span className="ml-1 text-white/50">{candidate.side || "WAIT"}</span></td><td className="px-3 py-2 text-white/75">{number(candidate.score, 4)}</td><td className="px-3 py-2 text-white/75">{number(candidate.momentum, 4)}%</td><td className="px-3 py-2 text-white/75">{number(candidate.volumeRatio, 4)}</td><td className={"px-3 py-2 font-semibold " + (candidate.signalGate?.status === "pass" ? "text-emerald-200" : candidate.signalGate?.status === "blocked" ? "text-rose-200" : "text-amber-200")}>{candidate.signalGate?.detail || "未取得"}</td><td className="px-3 py-2 text-white/75">{decision.selectionConfirmed && selectedCandidate?.symbol === candidate.symbol ? "Signal選定済み" : candidateOrderStatus(candidate, decision)}</td></tr>)}</tbody></table> : <div className="px-3 py-4 text-sm text-amber-100">V12 decision snapshotに全候補がありません。順位比較だけでなく発注Signalを確定できないためFail Closedです。</div>}
       </div>
       <div className="mt-4 rounded-xl border border-white/10 bg-black/20 px-3 py-3 text-xs leading-5 text-white/65">V12仕様：1建玉最大1.00x / 最大2建玉 / 合計最大1.50x。候補順位1位でも、確定2時間足・BTC regime・score・momentum・volumeRatio・共有risk・容量・注文Gateをすべて通過するまで発注しません。直近約定履歴：{details.recentFills.length}件、現在のV12建玉：{details.v12Positions.length}件。</div>
@@ -266,8 +271,8 @@ function PenguDetail({ details }: { details?: PenguRuntimeStatus }) {
     <section className="panel-gold rounded-[28px] p-4 md:p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <div className="flex items-center gap-2 text-lg font-bold text-white"><Activity className="h-5 w-5 text-gold-100" />PENGU V2 / Short V20 / Recovery V8 発火経路</div>
-          <p className="mt-1 text-xs text-white/55">実PENGU runner-live.jsonの確定H1、通常Long/Short、Recovery V8補助Entry、共有Gate、建玉・注文Windowを読み取り表示</p>
+          <div className="flex items-center gap-2 text-lg font-bold text-white"><Activity className="h-5 w-5 text-gold-100" />PENGU V2 / V20 / Recovery V8 判定</div>
+          <p className="mt-1 text-xs text-white/55">PENGUの候補・Gate・注文状態を読み取り表示します。</p>
         </div>
         <div className="flex flex-wrap gap-2"><span className={`rounded-full border px-3 py-1 text-xs font-semibold ${penguStatusClass(details.status)}`}>PENGU {details.status === "LIVE" ? "稼働確認済み" : details.status === "STALE" ? "要確認" : "状態未取得"}</span><span className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-100">tradingMutation=0</span></div>
       </div>
@@ -307,10 +312,10 @@ function V52Top2Detail({ details, marketOpen }: { details?: V52Top2Observability
     <section className="panel-gold rounded-[28px] p-4 md:p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <div className="flex items-center gap-2 text-lg font-bold text-white"><Activity className="h-5 w-5 text-gold-100" />V52 Top2 発火候補 → 発注判断</div>
-          <p className="mt-1 text-xs text-white/55">VPSのrunner-live.jsonを読み取り専用で観測。候補の再生成・注文操作は行いません。</p>
+          <div className="flex items-center gap-2 text-lg font-bold text-white"><Activity className="h-5 w-5 text-gold-100" />V52 Top2 判定</div>
+          <p className="mt-1 text-xs text-white/55">V52の候補・Gate・注文状態を読み取り表示します。</p>
         </div>
-        <div className="flex flex-wrap gap-2"><span className={`rounded-full border px-3 py-1 text-xs font-semibold ${v52StatusClass(displayStatus)}`}>V52 {marketClosed ? "市場時間外・意図的停止" : details.status === "LIVE" ? "稼働確認済み" : details.status === "STALE" ? "状態はあるが要確認" : "状態未取得"}</span><span className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-100">tradingMutation=0</span></div>
+        <div className="flex flex-wrap gap-2"><span className={`rounded-full border px-3 py-1 text-xs font-semibold ${v52StatusClass(displayStatus)}`}>V52 {marketClosed ? "市場時間外" : details.status === "LIVE" ? "確認済み" : details.status === "STALE" ? "要確認" : "未取得"}</span><span className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-100">tradingMutation=0</span></div>
       </div>
       <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-8">
         {[["Top2配分", `R1 ${gross(policy.rank1RequestedGross)} / R2 ${gross(policy.rank2RequestedGross)}`], ["建玉", `${details.activeV50Slots}/${policy.maxConcurrentPositions}`], ["日次entry", `${details.v50DailyEntries}/${policy.maxDailyEntries}`], ["basis Gate", `≥${policy.minEntryBasisBps}bps`], ["net edge Gate", `≥${policy.minNetEdgeBps}bps`], ["reference", details.referenceStatus || "未取得"], ["orders", details.referenceOrdersAllowed === true ? "許可条件内" : "Fail Closed"], ["Kill Switch", details.killSwitchActive ? "ACTIVE" : "inactive"]].map(([label, value]) => <div key={label} className="rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="text-[10px] uppercase tracking-wide text-white/45">{label}</div><div className={`mt-1 break-words text-sm font-semibold ${label === "Kill Switch" && value === "ACTIVE" ? "text-rose-200" : "text-white"}`}>{value}</div></div>)}
@@ -329,14 +334,14 @@ function V52Top2Detail({ details, marketOpen }: { details?: V52Top2Observability
 
 function Quality102Detail({ details }: { details?: Quality102RuntimeStatus }) {
   if (!details) return null;
-  const statusLabel = details.status === "LIVE" ? "稼働確認済み（derived）" : details.status === "STALE" ? "要確認" : "状態未取得";
+  const statusLabel = details.status === "LIVE" ? "確認済み" : details.status === "STALE" ? "要確認" : "未取得";
   const statusClass = details.status === "LIVE" ? "border-emerald-400/35 bg-emerald-500/10 text-emerald-100" : details.status === "STALE" ? "border-amber-400/35 bg-amber-500/10 text-amber-100" : "border-rose-400/35 bg-rose-500/10 text-rose-100";
   return (
     <section className="panel-gold rounded-[28px] p-4 md:p-5">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <div className="flex items-center gap-2 text-lg font-bold text-white"><Activity className="h-5 w-5 text-gold-100" />Quality102 derived HIGH_VOL 独立スリーブ</div>
-          <p className="mt-1 text-xs text-white/55">V12・PENGU・V52を優先し、余剰Crypto/Total Grossだけを使う1-slot補完ロジック。HPは読み取り専用です。</p>
+          <div className="flex items-center gap-2 text-lg font-bold text-white"><Activity className="h-5 w-5 text-gold-100" />Quality102 Causal V4 独立スリーブ</div>
+          <p className="mt-1 text-xs text-white/55">V12・PENGU・V52を優先して余剰枠を使う補完ロジックです。</p>
         </div>
         <div className="flex flex-wrap gap-2"><span className={`rounded-full border px-3 py-1 text-xs font-semibold ${statusClass}`}>Q102 {statusLabel}</span><span className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-100">tradingMutation=0</span></div>
       </div>
@@ -350,28 +355,86 @@ function Quality102Detail({ details }: { details?: Quality102RuntimeStatus }) {
       </div>
       <div className="mt-4 grid gap-4 xl:grid-cols-[0.85fr_1.15fr]">
         <div className="rounded-2xl border border-white/10 bg-black/20 p-3 text-xs leading-5 text-white/75">
-          <div className="text-sm font-bold text-white">実state / 安全Gate</div>
+          <div className="text-sm font-bold text-white">実行状態・安全Gate</div>
           <p className="mt-2">runner更新：{time(details.updatedAt)} / state：{time(details.stateUpdatedAt)} / heartbeat：{time(details.heartbeatUpdatedAt)}</p>
           <p>mode：{details.mode || "未取得"} / safety：{details.safetyState || "未取得"}</p>
           <p>release：{details.runtimeSha ? `${shortSha(details.runtimeSha)}… / ${details.releaseShaVerified === true ? "一致" : "要確認"}` : "未取得"}</p>
           <p>建玉：{details.position ? `${details.position.symbol || "—"} ${details.position.side || "—"} / gross ${number(details.position.gross, 3)}x` : "なし"}</p>
           <p>pending：{details.pending ? `${details.pending.phase || "ORDER"} / ${details.pending.symbol || "—"} / ${details.pending.reason || "—"}` : "なし"}</p>
           <p className="mt-2 text-amber-100/85">状態根拠：{details.reason}</p>
-          {details.errors.length ? <p className="mt-2 text-amber-100/75">観測注意：{details.errors.join(" / ")}</p> : null}
+          {details.errors.length ? <p className="mt-2 text-amber-100/75">注意：{details.errors.join(" / ")}</p> : null}
         </div>
         <div className="rounded-2xl border border-amber-400/20 bg-amber-500/5 p-3 text-xs leading-5 text-amber-100/85">
           <div className="text-sm font-bold text-amber-100">適用対象通貨</div>
           <p className="mt-2 break-words">{details.symbols.join(" / ")}</p>
-          <p className="mt-2">歴史的102件selector parity：{details.historicalSelectorParity ? "確認済み" : "未証明（該当経路はFAIL CLOSED）"} / BRK live式：{details.brkLiveEnabled ? "有効" : "未証明（FAIL CLOSED）"}</p>
-          <p className="mt-2">Q102は最大0.50x、Crypto最大2.00x、Total最大2.50x。主力発火時はQ102だけを残余Grossまで縮小し、主力の注文機会をblockしません。</p>
+          <p className="mt-2">未証明の経路は安全側で停止します。</p>
+          <p className="mt-2">上限：Q102 0.50x / Crypto 2.00x / Total 2.50x。主力の注文を優先します。</p>
         </div>
       </div>
     </section>
   );
 }
 
+function FetDetail({ details, unit }: { details?: FetRuntimeStatus; unit?: RuntimeUnit }) {
+  if (!details) return null;
+  const statusLabel = details.status === "LIVE" ? "確認済み" : details.status === "STALE" ? "要確認" : "未取得";
+  const statusClass = details.status === "LIVE" ? "border-emerald-400/35 bg-emerald-500/10 text-emerald-100" : details.status === "STALE" ? "border-amber-400/35 bg-amber-500/10 text-amber-100" : "border-rose-400/35 bg-rose-500/10 text-rose-100";
+  const verification = details.releaseShaVerified === undefined ? "未確認" : details.releaseShaVerified ? "一致" : "不一致";
+  const freshness = details.stateFresh === undefined ? "未確認" : details.stateFresh ? "最新" : "古い";
+  const strategy = details.strategyOk === undefined ? "未確認" : details.strategyOk ? "一致・failureなし" : "不一致またはfailureあり";
+  return (
+    <section className="panel-gold rounded-[28px] p-4 md:p-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2 text-lg font-bold text-white"><Activity className="h-5 w-5 text-gold-100" />FET BRK48 Residual 判定</div>
+          <p className="mt-1 text-xs text-white/55">BRK48残余枠の判定仕様と、実runnerのheartbeat・release・failure状態を読み取り表示します。</p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${statusClass}`}>FET {statusLabel}</span>
+          <span className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-100">tradingMutation=0</span>
+        </div>
+      </div>
+
+      <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+        {[
+          ["市場", unit?.venue || "未取得"],
+          ["時間足・シグナル", unit?.timeframe || "未取得"],
+          ["判定ロジック", unit?.label || details.strategyId || "未取得"],
+          ["建玉枠", "Core entry優先・残余枠"],
+        ].map(([label, value]) => <div key={label} className="rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="text-[10px] uppercase tracking-wide text-white/45">{label}</div><div className="mt-1 break-words text-sm font-semibold text-white">{value}</div></div>)}
+      </div>
+
+      <div className="mt-4 grid gap-4 xl:grid-cols-2">
+        <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
+          <div className="text-sm font-bold text-white">判定・保護仕様</div>
+          <div className="mt-3 space-y-2 break-words text-xs leading-5 text-white/75">
+            <p><span className="text-white/45">エントリー判定：</span>{unit?.entryPolicy || "未取得"}</p>
+            <p><span className="text-white/45">保護：</span>{unit?.protection || "未取得"}</p>
+            <p><span className="text-white/45">運用メモ：</span>{unit?.note || "未取得"}</p>
+            <p><span className="text-white/45">runner判定：</span>{unit?.reason || details.reason || "未取得"}</p>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-white/10 bg-black/20 p-3">
+          <div className="text-sm font-bold text-white">実データ・照合状態</div>
+          <div className="mt-3 space-y-2 text-xs leading-5 text-white/75">
+            <p>strategyId：{details.strategyId || "未取得"} / {strategy}</p>
+            <p>state更新：{time(details.updatedAt)} / heartbeat：{freshness}</p>
+            <p>runtime SHA：{details.runtimeSha ? `${shortSha(details.runtimeSha)}…` : "未取得"}</p>
+            <p>expected SHA：{details.expectedReleaseSha ? `${shortSha(details.expectedReleaseSha)}…` : "未設定"} / 照合：{verification}</p>
+            <p>runner state：{details.configured ? "取得済み" : "未取得"}</p>
+            <p>判定理由：{details.reason}</p>
+          </div>
+        </div>
+      </div>
+
+      {details.errors.length ? <div className="mt-3 rounded-xl border border-amber-400/25 bg-amber-500/10 px-3 py-2 text-xs leading-5 text-amber-100">FET観測上の注意：{details.errors.join(" / ")}</div> : <div className="mt-3 rounded-xl border border-emerald-400/20 bg-emerald-500/5 px-3 py-2 text-xs leading-5 text-emerald-100/80">現在の観測エラー：なし。注文操作は行わない読み取り専用表示です。</div>}
+    </section>
+  );
+}
+
 function Sleeve({ title, items, marketLabel }: { title: string; items: DecisionStatusItem[]; marketLabel?: string }) {
-  return <section className="panel-gold rounded-[28px] p-4 md:p-5"><div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2 text-lg font-bold text-white"><Activity className="h-5 w-5 text-gold-100" />{title}</div>{marketLabel ? <div className="text-xs text-white/55">{marketLabel}</div> : null}</div><p className="mt-2 text-xs leading-5 text-white/50">公開データによる補助ランキングです。V12の実Runner詳細は上の実スナップショットを参照します。</p><div className="mt-4 space-y-2">{items.map((item) => <article key={item.symbol} className="rounded-2xl border border-white/10 bg-black/20 p-3 md:p-4"><div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-3"><span className={`flex h-8 min-w-8 items-center justify-center rounded-full border px-2 text-sm font-bold ${rankClass(item.rank)}`}>{item.rank || "-"}</span><div><div className="font-bold text-white">{item.symbol}</div><div className="text-xs text-white/50">{item.side === "LONG" ? "ロング候補" : item.side === "SHORT" ? "ショート候補" : "待機"} / 判定スコア {item.score}/{item.scoreMax}</div></div></div><span className={`rounded-full border px-3 py-1 text-xs font-semibold ${statusClass(item.status)}`}>{item.status}</span></div><p className="mt-3 text-sm leading-6 text-white/80">判定理由：{item.reason}</p><div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-white/45"><span>データ時刻：{time(item.dataUpdatedAt)}</span><span>確認時刻：{time(item.checkedAt)}</span></div></article>)}</div></section>;
+  return <section className="panel-gold rounded-[28px] p-4 md:p-5"><div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2 text-lg font-bold text-white"><Activity className="h-5 w-5 text-gold-100" />{title}</div>{marketLabel ? <div className="text-xs text-white/55">{marketLabel}</div> : null}</div><p className="mt-2 text-xs leading-5 text-white/50">最新のrunnerデータに基づく候補一覧です。発注可否は実runnerのGateで決まります。</p><div className="mt-4 space-y-2">{items.map((item) => <article key={item.symbol} className="rounded-2xl border border-white/10 bg-black/20 p-3 md:p-4"><div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-3"><span className={`flex h-8 min-w-8 items-center justify-center rounded-full border px-2 text-sm font-bold ${rankClass(item.rank)}`}>{item.rank || "-"}</span><div><div className="font-bold text-white">{item.symbol}</div><div className="text-xs text-white/50">{item.side === "LONG" ? "ロング候補" : item.side === "SHORT" ? "ショート候補" : "待機"} / スコア {item.score}/{item.scoreMax}</div></div></div><span className={`rounded-full border px-3 py-1 text-xs font-semibold ${statusClass(item.status)}`}>{item.status}</span></div><p className="mt-3 text-sm leading-6 text-white/80">理由：{item.reason}</p><div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-white/45"><span>データ：{time(item.dataUpdatedAt)}</span><span>確認：{time(item.checkedAt)}</span></div></article>)}</div></section>;
 }
 
 export function DecisionStatusPanel() {
@@ -394,8 +457,8 @@ export function DecisionStatusPanel() {
     }
   }
 
-  useEffect(() => { void load(); const timer = window.setInterval(() => void load(), 3 * 60 * 60 * 1000); return () => window.clearInterval(timer); }, []);
+  useEffect(() => { void load(); const timer = window.setInterval(() => void load(), 10 * 60 * 1000); return () => window.clearInterval(timer); }, []);
   if (loading && !snapshot) return <div className="rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-8 text-center text-sm text-white/60">判定状況を取得しています…</div>;
   if (!snapshot) return <div className="rounded-2xl border border-rose-400/25 bg-rose-500/10 px-4 py-8 text-center text-sm text-rose-100">{error || "判定データを取得できません。"}</div>;
-  return <div className="space-y-4"><div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-xs text-white/60"><span className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-emerald-300" />HPは読み取り専用 / 発注・取消・決済操作なし</span><span className="flex items-center gap-2"><Clock3 className="h-4 w-4" />最終確認：{time(snapshot.checkedAt)} / 自動再確認：3時間ごと</span><button type="button" onClick={() => void load(true)} disabled={loading} className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-white/80 hover:bg-white/[0.08] disabled:cursor-wait disabled:opacity-60"><RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />{loading ? "更新中" : "再確認"}</button></div>{error ? <div className="rounded-xl border border-amber-400/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">一部データを取得できません：{error}</div> : null}<RuntimeSummary runtime={snapshot.runtime} /><V12Detail details={snapshot.v12Observability} /><PenguDetail details={snapshot.penguRuntime} /><Quality102Detail details={snapshot.quality102Runtime} /><V52Top2Detail details={snapshot.v52Top2Observability} marketOpen={snapshot.v52.marketOpen} /><div className="grid gap-4 xl:grid-cols-2"><Sleeve title="V12 Top2 補助候補ランキング" items={snapshot.v12.items} /><Sleeve title="V52 Stock 補助候補ランキング" items={snapshot.v52.items} marketLabel={snapshot.v52.marketLabel + (snapshot.v52.marketOpen ? " / 取引時間内" : " / 対象時間外")} /></div></div>;
+  return <div className="space-y-4"><div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.03] px-4 py-3 text-xs text-white/60"><span className="flex items-center gap-2"><ShieldCheck className="h-4 w-4 text-emerald-300" />読み取り専用。注文操作はありません。</span><span className="flex items-center gap-2"><Clock3 className="h-4 w-4" />最終確認：{time(snapshot.checkedAt)} / 10分ごとに更新</span><button type="button" onClick={() => void load(true)} disabled={loading} className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-white/80 hover:bg-white/[0.08] disabled:cursor-wait disabled:opacity-60"><RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />{loading ? "更新中" : "再確認"}</button></div>{error ? <div className="rounded-xl border border-amber-400/25 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">一部データを取得できません：{error}</div> : null}<RuntimeSummary runtime={snapshot.runtime} /><V12Detail details={snapshot.v12Observability} /><PenguDetail details={snapshot.penguRuntime} /><Quality102Detail details={snapshot.quality102Runtime} /><FetDetail details={snapshot.fetRuntime} unit={snapshot.runtime.units.find((unit) => unit.id === "FET_BRK48_RESIDUAL")} /><V52Top2Detail details={snapshot.v52Top2Observability} marketOpen={snapshot.v52.marketOpen} /><div className="grid gap-4 xl:grid-cols-2"><Sleeve title="V12 Top2 候補" items={snapshot.v12.items} /><Sleeve title="V52 Stock 候補" items={snapshot.v52.items} marketLabel={snapshot.v52.marketLabel + (snapshot.v52.marketOpen ? " / 取引時間内" : " / 対象時間外")} /></div></div>;
 }
