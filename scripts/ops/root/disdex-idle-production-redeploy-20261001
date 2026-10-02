@@ -765,12 +765,91 @@ systemctl enable --now "disdex-shared-crypto-risk@$TARGET_SHA.service"
 systemctl enable --now "disdex-v12-v52-margin-guard@$TARGET_SHA.service"
 wait_safety_daemons_ready
 
+CUTOVER_TRADING_START_EPOCH="$(date +%s)"
 TRADING_TARGET_STARTED=1
-for name in "${CORE[@]}"; do
+CUTOVER_TRADING_START_OBSERVE_SEC=6
+CUTOVER_RATE_BUDGET_PATH="$SHARED/aster-rate-budget.json"
+CUTOVER_RATE_BUDGET_QUIET_HORIZON_MS=500
+CUTOVER_RATE_BUDGET_QUIET_CONSECUTIVE=3
+CUTOVER_RATE_BUDGET_QUIET_MAX_ATTEMPTS=40
+
+wait_aster_rate_budget_quiet() {
+  local label="$1"
+  local consecutive=0
+  local attempt=0
+  while (( attempt < CUTOVER_RATE_BUDGET_QUIET_MAX_ATTEMPTS )); do
+    attempt=$((attempt + 1))
+    if python3 - "$CUTOVER_RATE_BUDGET_PATH" "$CUTOVER_RATE_BUDGET_QUIET_HORIZON_MS" <<'PY'
+import json,math,os,sys,time
+path=sys.argv[1]
+quiet_horizon_ms=int(sys.argv[2])
+lock_path=path+".lock"
+recovery_lock_path=lock_path+".recovery"
+if os.path.exists(lock_path) or os.path.exists(recovery_lock_path):
+    raise SystemExit(2)
+try:
+    with open(path,encoding="utf-8") as handle:
+        state=json.load(handle)
+except FileNotFoundError:
+    raise SystemExit(3)
+except Exception:
+    raise SystemExit(3)
+if not isinstance(state,dict) or state.get("schema")!="disdex-aster-rate-budget/v1":
+    raise SystemExit(3)
+if "nextAllowedAt" not in state:
+    raise SystemExit(3)
+try:
+    next_allowed_at=float(state["nextAllowedAt"])
+    cooldown_until=float(state["cooldownUntil"]) if "cooldownUntil" in state else 0.0
+except (TypeError,ValueError):
+    raise SystemExit(3)
+if (not math.isfinite(next_allowed_at) or next_allowed_at < 0
+        or not math.isfinite(cooldown_until) or cooldown_until < 0):
+    raise SystemExit(3)
+now_ms=time.time()*1000
+blocked_until=max(next_allowed_at,cooldown_until)
+horizon_ms=max(0,blocked_until-now_ms)
+raise SystemExit(0 if horizon_ms <= quiet_horizon_ms else 2)
+PY
+    then
+      consecutive=$((consecutive + 1))
+      echo "CUTOVER_RATE_BUDGET_QUIET label=$label attempt=$attempt consecutive=$consecutive"
+      if (( consecutive >= CUTOVER_RATE_BUDGET_QUIET_CONSECUTIVE )); then
+        return 0
+      fi
+    else
+      rc=$?
+      if (( rc == 3 )); then
+        echo "CUTOVER_RATE_BUDGET_INVALID label=$label attempt=$attempt path=$CUTOVER_RATE_BUDGET_PATH"
+        return 1
+      fi
+      consecutive=0
+      echo "CUTOVER_RATE_BUDGET_BUSY label=$label attempt=$attempt"
+    fi
+    sleep 1
+  done
+  echo "CUTOVER_RATE_BUDGET_NOT_QUIET label=$label"
+  return 1
+}
+
+start_trading_unit_rate_budget_gated() {
+  local name="$1"
   systemctl enable --now "$name@$TARGET_SHA.service"
+  echo "CUTOVER_TRADING_UNIT_STARTED unit=$name@$TARGET_SHA.service observeSec=$CUTOVER_TRADING_START_OBSERVE_SEC"
+  # Give the unit enough time to enter its first authenticated tick, then require
+  # actual shared-budget headroom rather than assuming a fixed sleep was enough.
+  sleep "$CUTOVER_TRADING_START_OBSERVE_SEC"
+  wait_aster_rate_budget_quiet "$name"
+}
+
+# Safety daemons are already fresh; make sure their own initial account reads
+# have drained before the first trader is admitted.
+wait_aster_rate_budget_quiet "safety-daemons"
+for name in "${CORE[@]}"; do
+  start_trading_unit_rate_budget_gated "$name"
 done
-systemctl enable --now "disdex-hype-long@$TARGET_SHA.service"
-systemctl enable --now "disdex-idle-priority-short@$TARGET_SHA.service"
+start_trading_unit_rate_budget_gated "disdex-hype-long"
+start_trading_unit_rate_budget_gated "disdex-idle-priority-short"
 
 # The first wiring pass intentionally keeps operator automation deferred. Refresh
 # every trading heartbeat against the new release before enabling watchdog or
@@ -824,6 +903,22 @@ PY
 done
 [[ "$heartbeat_ready" == 1 ]] || { echo "CUTOVER_HEARTBEAT_TIMEOUT"; exit 47; }
 echo "CUTOVER_PRE_AUTOMATION_HEARTBEAT_REFRESH_PASS"
+
+# A healthy final heartbeat is not enough: the previous Production cutover
+# recovered from startup saturation and still passed the end-state audit.
+# Reject the cutover if any target trading unit actually hit the canonical
+# shared-budget saturation during this startup window.
+wait_aster_rate_budget_quiet "post-heartbeat"
+for name in "${CORE[@]}" disdex-hype-long disdex-idle-priority-short; do
+  unit="$name@$TARGET_SHA.service"
+  startup_rate_log="$(journalctl -u "$unit" --since "@$CUTOVER_TRADING_START_EPOCH" --no-pager -o cat 2>/dev/null || true)"
+  if grep -Eq 'ASTER_GLOBAL_RATE_BUDGET_SATURATED:[0-9]+' <<<"$startup_rate_log"; then
+    echo "CUTOVER_STARTUP_RATE_BUDGET_SATURATION=$unit"
+    grep -E 'ASTER_GLOBAL_RATE_BUDGET_SATURATED:[0-9]+' <<<"$startup_rate_log" | tail -20
+    exit 48
+  fi
+done
+echo "CUTOVER_STARTUP_RATE_BUDGET_SATURATION=0"
 
 echo "CUTOVER_POSTSTART_WIRING_BEGIN"
 (cd "$RELEASE" && bash scripts/ops/root/disdex-current-runtime-wiring --apply)

@@ -270,6 +270,30 @@ test("cutover recovers only a flat known Idle rate-budget review after venue-fla
   assert.ok(sharedSafe > recovery, "shared safety must be rechecked after the exact benign state recovery");
 });
 
+test("cutover gates every trading startup on observed shared Aster rate-budget headroom", async () => {
+  const cutover = await read(CUTOVER);
+  assert.match(cutover, /CUTOVER_RATE_BUDGET_PATH="\$SHARED\/aster-rate-budget\.json"/);
+  assert.match(cutover, /CUTOVER_RATE_BUDGET_QUIET_HORIZON_MS=500/);
+  assert.match(cutover, /CUTOVER_RATE_BUDGET_QUIET_CONSECUTIVE=3/);
+  assert.match(cutover, /state\.get\("schema"\)!="disdex-aster-rate-budget\/v1"/);
+  assert.match(cutover, /if "nextAllowedAt" not in state:/);
+  assert.match(cutover, /next_allowed_at=float\(state\["nextAllowedAt"\]\)/);
+  assert.match(cutover, /cooldown_until=float\(state\["cooldownUntil"\]\) if "cooldownUntil" in state else 0\.0/);
+  assert.match(cutover, /math\.isfinite\(next_allowed_at\)/);
+  assert.match(cutover, /math\.isfinite\(cooldown_until\)/);
+  assert.match(cutover, /blocked_until=max\(next_allowed_at,cooldown_until\)/);
+  assert.match(cutover, /os\.path\.exists\(lock_path\) or os\.path\.exists\(recovery_lock_path\)/);
+  assert.match(cutover, /wait_aster_rate_budget_quiet "safety-daemons"/);
+  assert.match(cutover, /start_trading_unit_rate_budget_gated "\$name"/);
+  assert.match(cutover, /start_trading_unit_rate_budget_gated "disdex-hype-long"/);
+  assert.match(cutover, /start_trading_unit_rate_budget_gated "disdex-idle-priority-short"/);
+  assert.match(cutover, /CUTOVER_TRADING_START_EPOCH="\$\(date \+%s\)"/);
+  assert.match(cutover, /journalctl -u "\$unit" --since "@\$CUTOVER_TRADING_START_EPOCH"/);
+  assert.match(cutover, /CUTOVER_STARTUP_RATE_BUDGET_SATURATION=0/);
+  assert.match(cutover, /exit 48/);
+  assert.doesNotMatch(cutover, /start_trading_unit_staggered/);
+});
+
 
 test("monitor timers tolerate the transient active/running window but fail closed if they never re-arm", async () => {
   const wiring = await read(WIRING);

@@ -93,6 +93,17 @@ async function newLockOwner(): Promise<BudgetLockOwner> {
 }
 
 async function lockIsStale(lockPath: string): Promise<boolean> {
+  // Fresh lock generations are never candidates for recovery.  Besides being
+  // safer, this avoids a thundering herd of contenders repeatedly opening
+  // owner.json while the current owner is trying to rename/release the
+  // directory (notably expensive and share-lock prone on Windows).
+  try {
+    const metadata = await stat(lockPath);
+    if (Date.now() - metadata.mtimeMs <= LOCK_RECOVERY_GRACE_MS) return false;
+  } catch (error) {
+    return errorCode(error) === "ENOENT";
+  }
+
   const owner = await readLockOwner(lockPath);
   if (owner) {
     if (!processAlive(owner.pid)) return true;
@@ -102,12 +113,7 @@ async function lockIsStale(lockPath: string): Promise<boolean> {
     }
     return false;
   }
-  try {
-    const metadata = await stat(lockPath);
-    return Date.now() - metadata.mtimeMs > LOCK_RECOVERY_GRACE_MS;
-  } catch (error) {
-    return errorCode(error) === "ENOENT";
-  }
+  return true;
 }
 
 async function acquireLockGenerationMutex(lockPath: string, deadline: number): Promise<{ path: string; owner: BudgetLockOwner }> {
