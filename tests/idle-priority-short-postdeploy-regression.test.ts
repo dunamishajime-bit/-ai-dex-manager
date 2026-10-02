@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 import { IdlePriorityShortRunner, coreAndSidecarExposure } from "../lib/idle-priority-short-runner";
 import { emptyIdleState, type IdlePending, type IdleState } from "../lib/idle-priority-short-state";
@@ -211,4 +213,42 @@ test("unprotected filled entry is safety-closed with BUY ask reference", async (
     assert.equal(result.status, "manual-review");
     assert.equal(state.pending, null);
     assert.match(String(state.manualReview), /SAFETY_CLOSED/);
+});
+
+
+test("open formal position short-circuits baseline snapshot clocks and refreshes durable Idle decision", async () => {
+    const pendingPath = join(tmpdir(), `idle-pending-missing-${process.pid}-${Date.now()}.json`);
+    const { instance, stateStore } = runner({
+        executor: {
+            async getMarketQuote() {
+                return { symbol: "TAOUSDT", bidPrice: 99.9, askPrice: 100, bidQuantity: 100, askQuantity: 100, midPrice: 99.95, spreadBps: 10, updatedAt: now };
+            },
+        },
+        runtime: {
+            runtimeSha: SHA,
+            mode: "LIVE",
+            enabled: true,
+            maximumSlippageBps: 20,
+            pendingExposurePath: pendingPath,
+            decisionPath: "/definitely/not/read/decision.json",
+            v12DecisionPath: "/definitely/not/read/v12.json",
+            q102DecisionPath: "/definitely/not/read/q102.json",
+            penguStatePath: "/definitely/not/read/pengu.json",
+            fetStatePath: "/definitely/not/read/fet.json",
+            v52StatePath: "/definitely/not/read/v52.json",
+        },
+    });
+    const state = emptyIdleState(SHA, now);
+    const result = await (instance as any).enter(
+        state,
+        signal("TAOUSDT", now),
+        { walletBalance: 100, availableBalance: 100 },
+        [position("AVAXUSDT", 50, 1)],
+        { async document() {} },
+        { cryptoGross: 0, stockGross: 0, byStrategyGross: {} },
+    );
+    assert.equal(result.status, "no-change");
+    assert.equal(result.message, "IDLE_BASELINE_NOT_IDLE");
+    assert.equal(stateStore.saved?.lastDecision?.reason, "BASELINE_OPEN_OR_PENDING");
+    assert.equal(stateStore.saved?.lastDecision?.decisionTs, now);
 });

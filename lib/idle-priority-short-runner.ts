@@ -405,6 +405,11 @@ export class IdlePriorityShortRunner {
         if (!(equity > 0)) return { status: "held", message: "IDLE_EQUITY_INVALID", symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
         const exposure = coreAndSidecarExposure(positions, equity, new Set(state.positions.map((row) => row.symbol)));
         const ownerPending = pendingExposureByOwner(await readPendingExposureRegistry(this.dependencies.runtime.pendingExposurePath));
+        if (exposure.baselineOpenPositions > EPSILON || ownerPending.baselinePendingExposure > EPSILON) {
+            state.lastDecision = { decisionTs: signal.features.decisionTs, symbol, route: signal.route, accepted: false, reason: "BASELINE_OPEN_OR_PENDING" };
+            await this.dependencies.stateStore.save(state);
+            return { status: "no-change", message: "IDLE_BASELINE_NOT_IDLE", symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+        }
         let baseline: IdleBaselineAdmission;
         try {
             baseline = await buildBaselineAdmissionEvidence({
@@ -421,7 +426,10 @@ export class IdlePriorityShortRunner {
                 v52Path: this.dependencies.runtime.v52StatePath,
             });
         } catch (error) {
-            return { status: "held", message: `IDLE_BASELINE_ADMISSION_BLOCKED:${error instanceof Error ? error.message : String(error)}`, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+            const reason = `BASELINE_ADMISSION_BLOCKED:${error instanceof Error ? error.message : String(error)}`;
+            state.lastDecision = { decisionTs: signal.features.decisionTs, symbol, route: signal.route, accepted: false, reason };
+            await this.dependencies.stateStore.save(state);
+            return { status: "held", message: `IDLE_${reason}`, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
         }
         let venueFiveXCrossConfirmed = true;
         if (this.dependencies.runtime.mode === "LIVE") {
@@ -595,6 +603,11 @@ export class IdlePriorityShortRunner {
             }
             const lifecycleExposure = coreAndSidecarExposure(positions, lifecycleEquity, new Set(state.positions.map((row) => row.symbol)));
             const lifecycleOwnerPending = pendingExposureByOwner(pendingRegistry);
+            if (lifecycleExposure.baselineOpenPositions > EPSILON || lifecycleOwnerPending.baselinePendingExposure > EPSILON) {
+                state.lastDecision = { decisionTs: market.decisionTs, accepted: false, reason: "BASELINE_OPEN_OR_PENDING" };
+                await this.dependencies.stateStore.save(state);
+                return { status: "no-change", message: "IDLE_GENERIC_BASELINE_NOT_IDLE", ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+            }
             let lifecycleBaseline: IdleBaselineAdmission;
             try {
                 lifecycleBaseline = await buildBaselineAdmissionEvidence({
@@ -611,9 +624,12 @@ export class IdlePriorityShortRunner {
                     v52Path: this.dependencies.runtime.v52StatePath,
                 });
             } catch (error) {
+                const reason = `BASELINE_ADMISSION_BLOCKED:${error instanceof Error ? error.message : String(error)}`;
+                state.lastDecision = { decisionTs: market.decisionTs, accepted: false, reason };
+                await this.dependencies.stateStore.save(state);
                 return {
                     status: "held",
-                    message: `IDLE_GENERIC_BASELINE_ADMISSION_BLOCKED:${error instanceof Error ? error.message : String(error)}`,
+                    message: `IDLE_GENERIC_${reason}`,
                     ordersSent: 0,
                     cancelsSent: 0,
                     positionChangesSent: 0,

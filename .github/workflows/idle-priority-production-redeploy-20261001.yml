@@ -1,5 +1,5 @@
 name: Idle Priority exact-SHA Production redeploy
-# redeploy-sequence: active-v12-q102-lock-safe-cutover-v24
+# redeploy-sequence: idle-state-freshness-open-formal-v25
 on:
   push:
     branches: [design/idle-priority-bt-parity-20260929]
