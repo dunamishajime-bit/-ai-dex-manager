@@ -1,0 +1,138 @@
+{
+  "status": "FORMAL_H1_CAUSAL_BT_OFFICIAL_20261003_NOT_L2_VERIFIED",
+  "period": "2025-08-10_to_2026-08-10",
+  "official_cost_model_roundtrip_bps": 10,
+  "initial_equity_jpy": 10000,
+  "monthly_contribution_jpy": 10000,
+  "contribution_count": 13,
+  "official_10bps": {
+    "final_equity_jpy": 1229065462.0472791,
+    "profit_factor": 2.4887028036012624,
+    "maximum_mtm_drawdown": -0.21296368751349548,
+    "win_rate": 0.6517647058823529,
+    "closed_trades": 1275,
+    "strategy_trades": {
+      "FET": 15,
+      "PENGU": 62,
+      "Q102": 130,
+      "V12": 984,
+      "V52": 84
+    },
+    "strategy_pnl_jpy": {
+      "V12": 569268186.0383552,
+      "Q102": 388784191.777268,
+      "PENGU": 2606389.2444851175,
+      "V52": 279548555.86890477,
+      "FET": 2681034.1979467347
+    },
+    "q102_v12_preemptions": 19,
+    "q102_v12_preempt_by_rank": {
+      "R1": 11,
+      "R2": 8
+    },
+    "q102_v12_preempt_by_family": {
+      "REV": 11,
+      "PB": 5,
+      "HIGH_VOL": 3,
+      "MR": 0,
+      "BRK": 0
+    },
+    "accounting_reconciliation": "PASS"
+  },
+  "cost_sensitivity": [
+    {
+      "roundtrip_bps": 8,
+      "final_equity_jpy": 1544226239.1,
+      "profit_factor": 2.5433,
+      "maximum_mtm_drawdown": -0.21178,
+      "closed_trades": 1275
+    },
+    {
+      "roundtrip_bps": 10,
+      "final_equity_jpy": 1229065462.0472791,
+      "profit_factor": 2.4887028036012624,
+      "maximum_mtm_drawdown": -0.21296368751349548,
+      "closed_trades": 1275
+    },
+    {
+      "roundtrip_bps": 20,
+      "final_equity_jpy": 396206355.54,
+      "profit_factor": 2.2295,
+      "maximum_mtm_drawdown": -0.21977,
+      "closed_trades": 1274
+    },
+    {
+      "roundtrip_bps": 30,
+      "final_equity_jpy": 128891643.64,
+      "profit_factor": 1.9983,
+      "maximum_mtm_drawdown": -0.22745,
+      "closed_trades": 1274
+    }
+  ],
+  "cooldown_sweep_10bps": [
+    {
+      "hours": 2,
+      "final_equity_jpy": 1229065462.0472791,
+      "profit_factor": 2.4887028036012624,
+      "maximum_mtm_drawdown": -0.21296368751349548,
+      "v12_trades": 984
+    },
+    {
+      "hours": 4,
+      "final_equity_jpy": 941341415.858708,
+      "profit_factor": 2.481409606479722,
+      "maximum_mtm_drawdown": -0.21296368751349581,
+      "v12_trades": 917
+    },
+    {
+      "hours": 6,
+      "final_equity_jpy": 592002092.1658946,
+      "profit_factor": 2.5032153978515637,
+      "maximum_mtm_drawdown": -0.21296368751349581,
+      "v12_trades": 867
+    },
+    {
+      "hours": 12,
+      "final_equity_jpy": 422954936.8810059,
+      "profit_factor": 2.4763511671035734,
+      "maximum_mtm_drawdown": -0.21333702933455567,
+      "v12_trades": 749
+    },
+    {
+      "hours": 24,
+      "final_equity_jpy": 209063754.15255448,
+      "profit_factor": 2.382480135160593,
+      "maximum_mtm_drawdown": -0.2149861992565144,
+      "v12_trades": 634
+    }
+  ],
+  "formal_contract": {
+    "v12_rank1_rank2_default_gross": 1,
+    "v12_doge_ltc_rank1_rank2_gross": 0.5,
+    "v12_rank3_residual_gross": 0.5,
+    "v12_rank3_idle_only": true,
+    "v12_rank3_preemptible": true,
+    "q102_handoff_families": [
+      "PB",
+      "REV",
+      "HIGH_VOL"
+    ],
+    "q102_v12_preemption_order": [
+      "Rank3",
+      "Rank2",
+      "Rank1"
+    ],
+    "same_symbol_cooldown": "actual_exit_timestamp_plus_2h",
+    "venue_leverage": "5x_cross_margin_only_not_pnl_multiplier"
+  },
+  "provenance": {
+    "base_production_sha": "53eeff5417636369d4709fddfd47d7916ddcf3b1",
+    "candidate_stream": "v12_trail02_candidates/crypto-price-model-candidates.jsonl",
+    "market_source": "Aster H1 + funding; V52 verified stock ledger/price model",
+    "model_limitations": [
+      "H1 causal price model; not historical L2 order-book fills",
+      "Retrospective annual backtest",
+      "V52 uses its verified stock ledger path"
+    ]
+  }
+}
