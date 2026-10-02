@@ -60,6 +60,46 @@ jobs:
           echo "UI_WORKDIR=$(systemctl show "$ui" -p WorkingDirectory --value 2>/dev/null || true)"
           echo "UI_SHA=$(systemctl show "$ui" -p Environment --value 2>/dev/null | tr ' ' '\n' | sed -n 's/^DISDEX_UI_RELEASE_SHA=//p' | tail -1)"
 
+          "$current/scripts/ops/root/disdex-current-runtime-coherence-guard" --check
+          echo "CURRENT_COHERENCE_CHECK=PASS"
+          for support in disdex-runner-watchdog.timer disdex-runner-position-recovery.timer disdex-v12-three-hour-health-check.timer disdex-v12-kill-switch-auto-repair.path disdex-current-runtime-coherence-guard.timer; do
+            printf 'SUPPORT_RUNTIME unit=%s active=%s enabled=%s\n' "$support" \
+              "$(systemctl is-active "$support" 2>/dev/null || true)" "$(systemctl is-enabled "$support" 2>/dev/null || true)"
+          done
+          python3 - "$sha" <<'PY'
+          import json,sys,time,urllib.request
+          sha=sys.argv[1]
+          base="http://127.0.0.1:3001"
+          def get(path):
+              req=urllib.request.Request(base+path,headers={"Cookie":"disdex_auth=1","User-Agent":"DisDex-Fresh-ReadOnly-Audit"})
+              with urllib.request.urlopen(req,timeout=30) as response:
+                  if response.status != 200: raise RuntimeError(f"HP_HTTP_{path}_{response.status}")
+                  return json.loads(response.read(1500000))
+          live=get("/api/system/live-runtime")
+          idle=get("/api/system/idle-priority-status")
+          decision=get("/api/system/decision-status?refresh=1")
+          if live.get("releaseSha") != sha: raise SystemExit("CURRENT_HP_LIVE_RUNTIME_SHA_MISMATCH")
+          if idle.get("releaseSha") != sha or idle.get("status") != "LIVE": raise SystemExit("CURRENT_HP_IDLE_NOT_LIVE")
+          units=(decision.get("runtime") or {}).get("units",[])
+          idle_rows=[row for row in units if row.get("id")=="IDLE_PRIORITY_SHORT"]
+          if len(idle_rows)!=1 or idle_rows[0].get("releaseSha")!=sha or idle_rows[0].get("status")!="LIVE":
+              raise SystemExit("CURRENT_HP_IDLE_OVERVIEW_NOT_LIVE")
+          summary=[{"id":row.get("id"),"status":row.get("status"),"releaseSha":row.get("releaseSha")} for row in units]
+          print("CURRENT_HP_RUNTIME="+json.dumps({"liveReleaseSha":live.get("releaseSha"),"idleStatus":idle.get("status"),"idleReleaseSha":idle.get("releaseSha"),"units":summary},separators=(",",":")))
+          budget_path="/var/lib/disdex/shared/aster-rate-budget.json"
+          try:
+              budget=json.load(open(budget_path,encoding="utf-8"))
+          except Exception as exc:
+              budget={"error":type(exc).__name__}
+          now=int(time.time()*1000)
+          print("CURRENT_RATE_BUDGET="+json.dumps({
+              "schema":budget.get("schema"),"nextAllowedAt":budget.get("nextAllowedAt"),"updatedAt":budget.get("updatedAt"),
+              "cooldownUntil":budget.get("cooldownUntil"),"lastRateLimitStatus":budget.get("lastRateLimitStatus"),
+              "queueAheadMs":max(0,int(budget.get("nextAllowedAt") or 0)-now),
+              "cooldownRemainingMs":max(0,int(budget.get("cooldownUntil") or 0)-now),
+              "error":budget.get("error")},separators=(",",":")))
+          PY
+
           families=(disdex-v12-x1-all disdex-pengu-dual-ls-v2 disdex-quality102-causal-v1
                     disdex-v52-aster-only disdex-fet-brk48 disdex-hype-long disdex-idle-priority-short
                     disdex-shared-crypto-risk disdex-v12-v52-margin-guard)
