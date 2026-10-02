@@ -1,5 +1,5 @@
 name: Idle Priority exact-SHA Production redeploy
-# redeploy-sequence: q102-retry-hype-managed-protection-v26
+# redeploy-sequence: fet-symbol-scoped-flatpath-v27
 on:
   push:
     branches: [design/idle-priority-bt-parity-20260929]
