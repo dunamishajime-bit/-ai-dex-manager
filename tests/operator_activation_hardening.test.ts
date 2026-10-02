@@ -133,9 +133,10 @@ test("activation gate prestart runs as root so root-owned 0600 artifact remains 
 test("Idle application receives a root-generated read-only activation projection without weakening the approval artifact", async () => {
   const source = await readFile("scripts/ops/root/disdex-current-runtime-wiring", "utf8");
   assert.match(source, /OPERATOR_ACTIVATION_RUNTIME_PATH=/);
-  assert.match(source, /install -o root -g deploy -m 0640 .*OPERATOR_ACTIVATION_PATH.*OPERATOR_ACTIVATION_RUNTIME_PATH/);
+  assert.match(source, /install -o root -g root -m 0644 .*OPERATOR_ACTIVATION_PATH.*OPERATOR_ACTIVATION_RUNTIME_PATH/);
   assert.match(source, /Environment=DISDEX_OPERATOR_ACTIVATION_PATH=\$\{OPERATOR_ACTIVATION_RUNTIME_PATH\}/);
-  assert.match(source, /ExecStartPre=\+\/usr\/bin\/install -o root -g deploy -m 0640/);
+  assert.match(source, /ExecStartPre=\+\/usr\/bin\/install -o root -g root -m 0644/);
+  assert.doesNotMatch(source, /ExecStartPre=\+\/usr\/bin\/install -o root -g deploy -m 0640/);
   assert.match(source, /current\.json/);
 });
 
