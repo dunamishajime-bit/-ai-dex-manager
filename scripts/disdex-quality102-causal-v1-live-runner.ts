@@ -608,7 +608,7 @@ async function main(): Promise<void> {
         const now = Date.now();
         const boundaryDelayMs = Math.min(30_000, Math.max(1_000, numberEnv(process.env, "QUALITY102_CAUSAL_V1_BOUNDARY_DELAY_MS", 5_000)));
         const lockRetryMs = Math.min(30_000, Math.max(1_000, numberEnv(process.env, "QUALITY102_CAUSAL_V1_LOCK_RETRY_MS", 5_000)));
-        await delay.wait(nextQuality102DaemonWaitMs(result.status, now, boundaryDelayMs, lockRetryMs));
+        await delay.wait(nextQuality102DaemonWaitMs(result.status, now, boundaryDelayMs, lockRetryMs, result.message));
     } while (!stopping);
 }
 

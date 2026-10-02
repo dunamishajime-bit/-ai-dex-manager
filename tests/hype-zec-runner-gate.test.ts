@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import { assertHypeZecLiveGate, resolveHypeZecLongRuntime } from "../config/hypeZecLongRuntime";
-import { isRecoverableHypeZecMarketDataFailure, refreshHypeZecNoEntryDecision } from "../lib/hype-zec-long-runner";
+import { isRecoverableHypeZecMarketDataFailure, refreshHypeZecNoEntryDecision, unmanagedHypeZecOrders } from "../lib/hype-zec-long-runner";
 import { nextAccountLockAwareWaitMs } from "../lib/disdex-account-lock-retry-scheduling";
 
 test("only the known malformed market row is a retryable HYPE data failure", () => {
@@ -93,4 +93,42 @@ test("no-entry observability preserves a more specific decision written during t
   const refreshed = refreshHypeZecNoEntryDecision(state, [], 100, 300);
   assert.equal(refreshed.lastDecision?.reason, "CAPACITY_BLOCKED");
   assert.equal(refreshed.lastDecisionTs, 300);
+});
+
+
+test("HYPE does not misclassify exact V12 protective orders as unmanaged account orders", () => {
+  const position: any = {
+    symbol: "AVAXUSDT",
+    quantity: 4,
+    entryPrice: 11.009,
+    markPrice: 11.07,
+    unrealizedPnl: 0.2,
+    pnlPct: 0.004,
+    notionalUsd: 44.28,
+    positionSide: "BOTH",
+    leverage: 5,
+    updatedAt: Date.now(),
+  };
+  const stop: any = {
+    symbol: "AVAXUSDT",
+    clientOrderId: "v12-stop-93eca1a90b4b49059e8ecc",
+    side: "SELL",
+    status: "NEW",
+    type: "STOP_MARKET",
+    reduceOnly: true,
+    quantity: 4,
+    executedQuantity: 0,
+  };
+  const tp: any = {
+    symbol: "AVAXUSDT",
+    clientOrderId: "v12-tp-0c9b6f664f58fa0cf80840",
+    side: "SELL",
+    status: "NEW",
+    type: "TAKE_PROFIT_MARKET",
+    reduceOnly: true,
+    quantity: 4,
+    executedQuantity: 0,
+  };
+  assert.deepEqual(unmanagedHypeZecOrders([stop, tp], [position]), []);
+  assert.equal(unmanagedHypeZecOrders([stop, { ...tp, clientOrderId: "manual-order" }], [position]).length, 2);
 });

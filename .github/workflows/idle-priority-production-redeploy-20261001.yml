@@ -1,5 +1,5 @@
 name: Idle Priority exact-SHA Production redeploy
-# redeploy-sequence: idle-state-freshness-open-formal-v25
+# redeploy-sequence: q102-retry-hype-managed-protection-v26
 on:
   push:
     branches: [design/idle-priority-bt-parity-20260929]
@@ -57,7 +57,9 @@ jobs:
             tests/hype-zec-long-state-migration.test.ts \
             tests/hype-zec-benign-market-data-recovery.test.ts \
             tests/hype-zec-runner-gate.test.ts \
+            tests/managed-protective-orders.test.ts \
             tests/q102-symbol-ownership-contract.test.ts \
+            tests/quality102-live-scheduling.test.ts \
             tests/quality102-pending-recovery-wiring.test.ts \
             tests/quality102-pending-order-recovery.test.ts \
             tests/v12-active-state-sha-migration.test.ts \

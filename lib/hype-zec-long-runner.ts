@@ -6,7 +6,7 @@ import { HYPE_TREND_LONG_POLICY } from "../config/hypeTrendLongPolicy";
 import { classifyAsterSymbol } from "./disdex-aster-portfolio-classifier";
 import { aggregatePendingExposure, readPendingExposureRegistry } from "./disdex-pending-exposure-registry";
 import { readSharedCryptoDailyRisk } from "./disdex-shared-crypto-daily-risk";
-import { findManagedHypeZecProtectiveOrders } from "./disdex-managed-protective-orders";
+import { findManagedFetBrk48ProtectiveOrders, findManagedHypeZecProtectiveOrders, findManagedPenguRecoveryV8ProtectiveOrders, findManagedV12ProtectiveOrders } from "./disdex-managed-protective-orders";
 import { readQuality102CausalV1Ownership, quality102OwnsPosition } from "./disdex-quality102-causal-v1-ownership";
 import { planStrictPortfolio, type StrictPortfolioIntent, type StrictPortfolioPosition } from "./disdex-strict-portfolio-planner";
 import type { AccountLockHandle, FileAccountOrderLock } from "./disdex-account-order-lock";
@@ -84,6 +84,16 @@ function gross(position: DirectPosition, equity: number) { return equity > 0 ? M
 function hashId(parts: readonly unknown[], prefix: string) { return `${prefix}-${createHash("sha256").update(parts.join("|")).digest("hex").slice(0, 27)}`.slice(0, 36); }
 function active(order: DirectOpenOrder) { return ["NEW", "PARTIALLY_FILLED", "PENDING_NEW"].includes(String(order.status || "").toUpperCase()); }
 function hasExposure(result: DirectTradeResult) { return ["FILLED", "PARTIALLY_FILLED"].includes(result.status) && result.executedQuantity > EPSILON; }
+
+export function unmanagedHypeZecOrders(openOrders: DirectOpenOrder[], positions: DirectPosition[]) {
+  const managed = new Set<DirectOpenOrder>([
+    ...findManagedHypeZecProtectiveOrders(openOrders, positions),
+    ...findManagedPenguRecoveryV8ProtectiveOrders(openOrders, positions),
+    ...findManagedV12ProtectiveOrders(openOrders, positions),
+    ...findManagedFetBrk48ProtectiveOrders(openOrders, positions),
+  ]);
+  return openOrders.filter((order) => active(order) && !managed.has(order));
+}
 
 function trendCandle(row: { ts: number; open: number; high: number; low: number; close: number; volume: number }): HypeTrendCandle {
   return { openTime: row.ts, open: row.open, high: row.high, low: row.low, close: row.close, volume: row.volume };
@@ -178,8 +188,7 @@ export class HypeZecLongRunner {
   }
 
   private async unmanagedOrders(openOrders: DirectOpenOrder[], positions: DirectPosition[]) {
-    const managed = new Set(findManagedHypeZecProtectiveOrders(openOrders, positions));
-    return openOrders.filter((order) => active(order) && !managed.has(order));
+    return unmanagedHypeZecOrders(openOrders, positions);
   }
 
   private async manualReview(state: HypeZecLongRunnerState, reason: string): Promise<HypeZecLongTickResult> {
