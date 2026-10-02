@@ -308,6 +308,61 @@ jobs:
             journalctl -u "$unit" --since "2026-10-02 08:15:00" --no-pager -n 220 -o short-iso 2>/dev/null | tail -220 || true
           done
           echo "NO_ORDER_RUNNER_JOURNALS_END"
+          echo "NO_ORDER_HISTORY_AUDIT_BEGIN"
+          python3 - <<'PY'
+          import json,os
+          history="/home/deploy/ai-dex-manager/data/trade-history-git.json"
+          status="/home/deploy/ai-dex-manager/data/trade-history-git-sync-status.json"
+          for name,path in [("history_status",status),("fill_notifier_state","/var/lib/disdex/shared/trade-fill-notifications/state.json")]:
+              try:
+                  with open(path,encoding="utf-8") as f: v=json.load(f)
+                  print("NO_ORDER_HISTORY "+name+"="+json.dumps(v,separators=(",",":"),ensure_ascii=False))
+              except Exception as e:
+                  print("NO_ORDER_HISTORY "+name+"="+json.dumps({"path":path,"error":type(e).__name__},separators=(",",":")))
+          try:
+              with open(history,encoding="utf-8") as f: v=json.load(f)
+              entries=v.get("entries") if isinstance(v,dict) else []
+              entries=entries if isinstance(entries,list) else []
+              print("NO_ORDER_HISTORY summary="+json.dumps({
+                  "generatedAt":v.get("generatedAt"),
+                  "entryCount":len(entries),
+                  "latest":entries[:40],
+              },separators=(",",":"),ensure_ascii=False))
+          except Exception as e:
+              print("NO_ORDER_HISTORY summary="+json.dumps({"path":history,"error":type(e).__name__},separators=(",",":")))
+          PY
+          echo "NO_ORDER_FILL_SPOOL_TAIL_BEGIN"
+          if [[ -f /var/lib/disdex/shared/trade-fill-notifications/inbox.jsonl ]]; then
+            tail -120 /var/lib/disdex/shared/trade-fill-notifications/inbox.jsonl || true
+          else
+            echo "FILL_SPOOL_ABSENT"
+          fi
+          echo "NO_ORDER_FILL_SPOOL_TAIL_END"
+          echo "NO_ORDER_72H_STATUS_COUNTS_BEGIN"
+          for name in disdex-v12-x1-all disdex-pengu-dual-ls-v2 disdex-quality102-causal-v1 disdex-v52-aster-only disdex-fet-brk48 disdex-hype-long disdex-idle-priority-short; do
+            echo "STATUS_COUNT_RUNNER=$name"
+            journalctl -u "$name@*.service" --since "2026-09-29 00:00:00" --no-pager -o cat 2>/dev/null | python3 -c 'import sys,re,collections,json; c=collections.Counter(); first=None; last=None; orders=0; completed=[]; 
+for line in sys.stdin:
+ s=line.strip()
+ if not s: continue
+ try:
+  j=json.loads(s[s.find("{"):]) if "{" in s else None
+ except: j=None
+ if isinstance(j,dict):
+  st=str(j.get("status") or j.get("event") or "")
+  msg=str(j.get("message") or j.get("reason") or "")
+  if st: c["status:"+st]+=1
+  if "LOCK_BUSY" in msg or "ACCOUNT_LOCK" in msg: c["lock_busy"]+=1
+  if "RATE_BUDGET" in msg: c["rate_budget"]+=1
+  o=int(j.get("ordersSent") or 0) if str(j.get("ordersSent") or "0").lstrip("-").isdigit() else 0
+  orders+=max(0,o)
+  ts=j.get("timestamp") or j.get("observedAt") or j.get("updatedAt")
+  if ts and first is None:first=ts
+  if ts:last=ts
+  if st in ("completed","filled","entry-filled") or o>0: completed.append({"ts":ts,"status":st,"message":msg,"ordersSent":o,"symbol":j.get("symbol") or (j.get("signal") or {}).get("symbol")})
+print(json.dumps({"counts":c,"ordersSentTotal":orders,"first":first,"last":last,"executionEvents":completed[-20:]},default=dict,separators=(",",":")))' || true
+          done
+          echo "NO_ORDER_72H_STATUS_COUNTS_END"
 
           echo "DISK_FREE_KB=$(df -Pk /home/deploy | awk 'NR==2 {print $4}')"
           python3 - "$sha" <<'PY'
