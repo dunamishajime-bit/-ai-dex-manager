@@ -106,6 +106,8 @@ function normalizedText(value: unknown) {
 }
 
 function extractRanking(reason: string) {
+  const victim = reason.match(/Q102_PRIORITY_PREEMPT:(?:PB|REV|HIGH_VOL):V12_R([123])/i);
+  if (victim) return Number(victim[1]);
   const match = reason.match(/(?:ranking|rank|候補rank|順位)\s*(?:=|:)?\s*#?(\d+)/i);
   if (!match) return undefined;
   const ranking = Number(match[1]);
@@ -145,6 +147,9 @@ function explicitLogicId(strategyId: string, reason: string) {
 }
 
 function routeLabel(reason: string) {
+  const handoff = reason.match(/Q102_PRIORITY_PREEMPT:(PB|REV|HIGH_VOL):V12_R([123])/i);
+  if (handoff) return `Q102 Priority Handoff ${handoff[1].toUpperCase()} / V12 Rank${handoff[2]}`;
+  if (/RANK3.*PREEMPT|PREEMPT.*RANK3/i.test(reason)) return "Rank3 Residual Priority Exit";
   if (/recovery[_\s-]*v8|recv8-/i.test(reason)) return "Recovery V8";
   if (/v64[_\s-]*dynamic[_\s-]*long/i.test(reason)) return "V64 Dynamic Long";
   if (/short[_\s-]*v20/i.test(reason)) return "Short V20";

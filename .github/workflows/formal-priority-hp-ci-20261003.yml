@@ -1,0 +1,22 @@
+name: Formal priority read-only HP CI
+on:
+  push:
+    branches: [codex/formal-priority-hp-20261003]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  ui:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Priority, history, Idle and mobile read-only regression
+        run: npx tsx --test tests/formal-priority-ui.test.ts tests/hp-idle-priority-decision-history-20261001.test.ts tests/trade-history-attribution.test.ts tests/mobile-layout-regression.test.ts tests/decision-status-layout-regression.test.ts
+      - run: npx tsc --noEmit
+      - run: npm run build
