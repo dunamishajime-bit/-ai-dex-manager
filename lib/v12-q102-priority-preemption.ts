@@ -22,6 +22,7 @@ export interface V12Q102PriorityPreemptionInput {
     requiredGross: number;
     equity: number;
     q102Family?: string;
+    expectedRuntimeSha?: string;
     causeIdempotencyKey: string;
     statePath?: string;
     maxDataAgeMs?: number;
@@ -92,6 +93,14 @@ export async function preemptV12ForQ102Priority(
     ).trim();
     const store = new FileV12X1AllRunnerStateStore(statePath, "LIVE");
     const state = await store.load();
+    const expectedSha = String(input.expectedRuntimeSha || process.env.DISDEX_RELEASE_SHA || "").trim();
+    if (expectedSha && (!/^[a-f0-9]{40}$/i.test(expectedSha)
+        || String(state.runtimeCommitSha || "").toLowerCase() !== expectedSha.toLowerCase())) {
+        return { status: "blocked", message: "Q102_V12_PRIORITY_RUNTIME_SHA_MISMATCH", freedGross: 0, exits: 0 };
+    }
+    if (state.killSwitch?.active) {
+        return { status: "blocked", message: "Q102_V12_PRIORITY_LOCAL_KILL_SWITCH_ACTIVE", freedGross: 0, exits: 0 };
+    }
     if (state.manualReview) {
         return { status: "blocked", message: "Q102_V12_PRIORITY_STATE_MANUAL_REVIEW:" + state.manualReview, freedGross: 0, exits: 0 };
     }
@@ -118,6 +127,17 @@ export async function preemptV12ForQ102Priority(
         if (![1, 2, 3].includes(Number(original.entryRank || 1))) continue;
         if (original.protection.manualReview) {
             return failClosed(store, state, "Q102_V12_PRIORITY_PROTECTION_ALREADY_MANUAL_REVIEW", freedGross, exits);
+        }
+
+        const owned = (await input.adapter.getPositions()).filter(
+            row => row.symbol.toUpperCase() === original.symbol.toUpperCase() && Math.abs(row.quantity) > EPS,
+        );
+        const actual = owned[0];
+        const actualSide = actual?.positionSide === "LONG" || actual?.positionSide === "SHORT"
+            ? actual.positionSide : Number(actual?.quantity) < 0 ? "SHORT" : "LONG";
+        if (owned.length !== 1 || actualSide !== original.side
+            || Math.abs(Math.abs(Number(actual?.quantity)) - original.quantity) > Math.max(1e-8, original.quantity * 1e-6)) {
+            return failClosed(store, state, "Q102_V12_PRIORITY_VENUE_OWNERSHIP_MISMATCH:" + original.symbol, freedGross, exits);
         }
 
         const quote = await input.adapter.executor.getMarketQuote(original.symbol);
@@ -171,6 +191,7 @@ export async function preemptV12ForQ102Priority(
             quantity: original.quantity,
             expectedPrice,
             clientOrderId,
+            reason: pending.reason,
         });
         if (result.status === "UNKNOWN" || result.executionUnknown) {
             return failClosed(store, state, "Q102_V12_PRIORITY_EXIT_UNKNOWN:" + clientOrderId, freedGross, exits);
@@ -181,8 +202,12 @@ export async function preemptV12ForQ102Priority(
         if (venueRows.length) {
             return failClosed(store, state, "Q102_V12_PRIORITY_EXIT_POSITION_REMAINS:" + original.symbol, freedGross, exits);
         }
+        if (result.status !== "FILLED"
+            || Math.abs(result.executedQuantity - original.quantity) > Math.max(1e-8, original.quantity * 1e-6)) {
+            return failClosed(store, state, "Q102_V12_PRIORITY_EXIT_FILL_NOT_VERIFIED:" + clientOrderId, freedGross, exits);
+        }
         const actualExitTs = Number(result.updatedAt || 0);
-        if (!(actualExitTs > 0)) {
+        if (!Number.isFinite(actualExitTs) || !(actualExitTs > 0) || actualExitTs > now()) {
             return failClosed(store, state, "Q102_V12_PRIORITY_EXIT_TIMESTAMP_MISSING:" + clientOrderId, freedGross, exits);
         }
 
@@ -191,11 +216,20 @@ export async function preemptV12ForQ102Priority(
         state.pending = undefined;
         state.lastCompletedIdempotencyKey = clientOrderId;
         setV12SymbolCooldown(state, original.symbol, actualExitTs);
+        state.lastPriorityHandoff = {
+            family: String(input.q102Family).toUpperCase(), symbol: original.symbol,
+            victimRank: Number(original.entryRank || 1), quantity: original.quantity,
+            freedGross: currentGross, actualExitTs, reason: pending.reason!, clientOrderId,
+        };
         state.reconciliationStatus = "PASS";
         await store.save(state);
 
         freedGross += currentGross;
         exits += 1;
+        // The caller re-fetches equity, all positions, Q102 quote and Governor
+        // capacity after this confirmed fill. Never close a second victim from
+        // the pre-exit equity/Gross snapshot.
+        break;
     }
 
     if (!(freedGross > EPS)) {

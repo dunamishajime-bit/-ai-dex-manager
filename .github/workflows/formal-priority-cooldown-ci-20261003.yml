@@ -36,5 +36,11 @@ jobs:
           npx tsx --test             tests/v12_formal_priority_policy.test.ts             tests/v12-winrate-entry-gate.test.ts             tests/v12_top3_rank3_contract.test.ts             tests/v12_top2_state.test.ts             tests/v12-entry-quantity-gate.test.ts             tests/v12-preorder-gross-reservation.test.ts             tests/v12-protection-failure-recovery.test.ts             tests/v12-runtime-lineage-recovery.test.ts             tests/quality102_causal_v1_portfolio.test.ts
       - name: Existing V12 selftest
         run: npm run strategy:v12-x1-all:selftest
+      - name: Realized handoff and invalid exit timestamp safety
+        run: npx tsx --test tests/v12-q102-priority-preemption.test.ts tests/v12-exit-fill-timestamp.test.ts tests/current_live_target_contract.test.ts tests/current_live_target_readiness.test.ts
       - name: Existing Q102 runner selftest
         run: npm run strategy:quality102-causal-v1:runner:selftest
+      - name: Shared risk, operator, margin and retained Overlay safety
+        run: |
+          npx tsx --test tests/operator_activation_hardening.test.ts tests/dynamic-margin-gate.test.ts tests/watchdog-release-lineage.test.ts tests/shared-risk-rollover-retry.test.ts tests/shared_crypto_daily_loss_contract.test.ts tests/idle-residual-long-preemption.test.ts
+          npm run strategy:shared-crypto-risk:selftest

@@ -72,6 +72,11 @@ export interface V12X1AllRunnerState {
     cooldownUntilTs?: number;
     /** Formal 2026-10-03: actual-exit + 2h cooldown is tracked per symbol. */
     symbolCooldownUntilTs?: Record<string, number>;
+    symbolLastExitTs?: Record<string, number>;
+    lastPriorityHandoff?: {
+        family: string; symbol: string; victimRank: number; quantity: number;
+        freedGross: number; actualExitTs: number; reason: string; clientOrderId: string;
+    };
     activePositions?: V12ActivePositionState[];
     active?: V12ActivePositionState;
     pending?: V12PendingOrderState;

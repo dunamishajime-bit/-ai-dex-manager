@@ -526,6 +526,7 @@ export class Quality102CausalV1Runner {
             requiredGross,
             equity,
             q102Family,
+            expectedRuntimeSha: this.dependencies.config.runtimeCommitSha,
             causeIdempotencyKey,
             statePath,
             maxDataAgeMs: this.dependencies.config.maxDataAgeMs,

@@ -1,8 +1,8 @@
 {
   "schema": "disdex-current-implementation-readiness/v1",
-  "date": "2026-10-02",
-  "target": "trail020_idle_doge_avax_20261002",
-  "canonicalTarget": "docs/research/results/trail020-idle-doge-avax-controlling-20261002/controlling-contract.json",
+  "date": "2026-10-03",
+  "target": "formal_priority_cooldown_20261003",
+  "canonicalTarget": "docs/research/results/formal-priority-cooldown-20261003/formal-bt-summary.json",
   "implementationStatus": "READY",
   "status": "BLOCKED",
   "ordersEnabled": false,
@@ -16,7 +16,9 @@
     "FET_BRK48_MAX_GROSS_2P25",
     "V52_STOCK_AGGREGATE_4P0_SLOT_2P0",
     "PORTFOLIO_BASE_4P25_HARD_8P0_GOVERNOR",
-    "V12_TOP3_RANK3_010_SCORE070",
+    "V12_FORMAL_RANK12_100_DOGE_LTC_050_RANK3_RESIDUAL_050",
+    "Q102_PB_REV_HIGH_VOL_WHOLE_POSITION_HANDOFF",
+    "V12_ACTUAL_VENUE_EXIT_SYMBOL_COOLDOWN_2H",
     "Q102_DD_GOVERNOR_030_TO_300",
     "Q102_5X_MARGIN_NOTIONAL_SIZING",
     "Q102_CORE_COEXISTENCE_RESTORED",
@@ -53,5 +55,5 @@
     "HP_ZEC_REMOVED",
     "CONTROLLING_8_10_20_30BPS_LEDGER_FROZEN"
   ],
-  "activationRule": "Implementation is READY but real-money activation remains blocked until the exact-SHA GitHub production workflow revalidates both Idle parity certificates, proves the current Production SHA is an ancestor, verifies flat/pending state and shared safety, creates the root-owned operator activation artifact for this exact SHA/target, cuts over all runners, and passes post-deploy LIVE/HP verification."
+  "activationRule": "Real-money activation requires exact-SHA CI, flat/pending state and shared safety verification, valid operator approval and post-deploy verification. Retained Idle/Overlay exact-SHA certificates must be valid for their actual contract; the five-logic 1275-trade formal artifact must not be represented as combined Overlay parity. Historical certificates cannot be relabeled to certify changed baseline admission semantics."
 }

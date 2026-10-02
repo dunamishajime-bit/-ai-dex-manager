@@ -1,13 +1,20 @@
 {
   "schema": "disdex-current-live-target/v1",
-  "date": "2026-10-02",
+  "date": "2026-10-03",
   "status": "CURRENT_CANONICAL_PRODUCTION_TARGET",
-  "productionBaseSha": "8e341956b3c5c5d825029d18ba083029d919126b",
+  "productionBaseSha": "53eeff5417636369d4709fddfd47d7916ddcf3b1",
   "strategy": {
     "v12": {
       "maximumPositions": 3,
       "baseMaximumPositions": 2,
-      "rank3GrossCap": 0.1,
+      "rank3GrossCap": 0.5,
+      "rank12DefaultGross": 1.0,
+      "rank12ReducedGross": 0.5,
+      "rank12ReducedSymbols": ["DOGEUSDT", "LTCUSDT"],
+      "rank3ResidualOnly": true,
+      "sameSymbolCooldown": "ACTUAL_VENUE_EXIT_FILL_TIMESTAMP_PLUS_2H",
+      "q102PriorityHandoffFamilies": ["PB", "REV", "HIGH_VOL"],
+      "q102PriorityHandoffRankOrder": [3, 2, 1],
       "rank3MinimumScore": 0.7,
       "additionalRank3BtcDistanceGate": false,
       "btcRegimeContract": "PRESERVE_EXISTING_V12_REGIME_AND_ENTRY_QUALITY_LOGIC",
@@ -153,6 +160,26 @@
     }
   },
   "formalBacktest": {
+    "sourceArtifact": "docs/research/results/formal-priority-cooldown-20261003/formal-bt-summary.json",
+    "sourceArtifactSha256": "CC1922CE84134F4E8BF02446CA3FA971795BEEB24C76A545C9C0B14A44CDF103",
+    "selectedCase": "formal_priority_cooldown_20261003",
+    "model": "FORMAL_H1_CAUSAL_PRICE_MODEL_NOT_HISTORICAL_L2_VERIFIED",
+    "scope": ["V12", "PENGU", "Q102", "FET", "V52"],
+    "period": {"startInclusive": "2025-08-10T00:00:00.000Z", "endExclusive": "2026-08-10T00:00:00.000Z"},
+    "capital": {"initialJpy": 10000, "monthlyJpy": 10000, "monthlyCount": 12, "totalContributedJpy": 130000, "compounding": true},
+    "NORMAL": {
+      "roundtripBps": 10,
+      "endingAssetJpy": 1229065462.0472791,
+      "profitFactor": 2.4887028036012624,
+      "maxDrawdownPct": -21.296368751349548,
+      "winRatePct": 65.17647058823529,
+      "trades": 1275,
+      "routing": {"FET": 15, "PENGU": 62, "Q102": 130, "V12": 984, "V52": 84}
+    },
+    "accountingReconciliation": "PASS",
+    "retainedOverlayCombinedParity": "NOT_ESTABLISHED_BY_THIS_FIVE_LOGIC_ARTIFACT"
+  },
+  "historicalOverlayBacktest": {
     "sourceArtifact": "docs/research/results/trail020-idle-doge-avax-controlling-20261002/controlling-contract.json",
     "sourceArtifactSha256": "B1F31C152D831131320E8E0159593A34B4679AF7609715A0DD6EFCD51B9DE616",
     "selectedCase": "trail020_idle_doge_avax_20261002",
@@ -268,7 +295,7 @@
     "maximumCryptoGross": 5,
     "maximumTotalGross": 8,
     "maximumGrossConflicts": 0,
-    "requireExistingV12Rank1Rank2Parity": true,
+    "requireFormalV12SizingParity": true,
     "requireFetCorePreemption": true,
     "requireGovernorFailSafe": true,
     "requireFiveXCross": true,

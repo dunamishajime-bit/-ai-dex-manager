@@ -51,7 +51,7 @@ export function v12SymbolCooldownUntil(
 }
 
 export function setV12SymbolCooldown(
-    state: { cooldownUntilTs?: number; symbolCooldownUntilTs?: Record<string, number> },
+    state: { cooldownUntilTs?: number; symbolCooldownUntilTs?: Record<string, number>; symbolLastExitTs?: Record<string, number> },
     symbol: string,
     actualExitTs: number,
 ) {
@@ -62,6 +62,7 @@ export function setV12SymbolCooldown(
     const next = { ...(state.symbolCooldownUntilTs || {}) };
     next[normalized] = Math.max(Number(next[normalized] || 0), until);
     state.symbolCooldownUntilTs = next;
+    state.symbolLastExitTs = { ...(state.symbolLastExitTs || {}), [normalized]: Math.max(Number(state.symbolLastExitTs?.[normalized] || 0), exitTs) };
     state.cooldownUntilTs = Math.max(0, ...Object.values(next).filter(Number.isFinite));
     return until;
 }

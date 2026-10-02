@@ -254,7 +254,7 @@ export class V12LiveExecutionEngine {
             const order = await this.d.adapter.queryOrderSameId(active.symbol, clientOrderId);
             if (order?.status === "FILLED") {
                 const filledAt = Number(order.updatedAt || 0);
-                if (!(filledAt > 0)) throw new Error(`V12_PROTECTION_FILL_TIMESTAMP_MISSING:${active.symbol}:${clientOrderId}`);
+                if (!Number.isFinite(filledAt) || !(filledAt > 0) || filledAt > this.now()) throw new Error(`V12_PROTECTION_FILL_TIMESTAMP_MISSING:${active.symbol}:${clientOrderId}`);
                 return { clientOrderId, filledAt };
             }
         }
@@ -389,11 +389,15 @@ export class V12LiveExecutionEngine {
         if (result.status === "UNKNOWN") return this.fail(state, `V12_PENDING_EXIT_UNKNOWN:${pending.clientOrderId}`);
         const actual = positions.find((row) => row.symbol.toUpperCase() === pending.symbol && Math.abs(row.quantity) > EPS);
         if (actual) return this.fail(state, `V12_PENDING_EXIT_POSITION_REMAINS:${result.status}`);
+        if (result.status !== "FILLED" || !Number.isFinite(result.executedQuantity)
+            || Math.abs(result.executedQuantity - pending.quantity) > Math.max(1e-8, pending.quantity * 1e-6)) {
+            return this.fail(state, `V12_PENDING_EXIT_FILL_NOT_VERIFIED:${pending.clientOrderId}`);
+        }
         const remaining = activePositionsOf(state).filter((active) => active.symbol.toUpperCase() !== pending.symbol.toUpperCase());
         const exiting = activePositionsOf(state).find((active) => active.symbol.toUpperCase() === pending.symbol.toUpperCase());
-        if (exiting) await cancelV12Protection(this.d.adapter, exiting.protection);
         const actualExitTs = Number(result.updatedAt || 0);
-        if (!(actualExitTs > 0)) return this.fail(state, `V12_PENDING_EXIT_TIMESTAMP_MISSING:${pending.clientOrderId}`);
+        if (!Number.isFinite(actualExitTs) || !(actualExitTs > 0) || actualExitTs > this.now()) return this.fail(state, `V12_PENDING_EXIT_TIMESTAMP_MISSING:${pending.clientOrderId}`);
+        if (exiting) await cancelV12Protection(this.d.adapter, exiting.protection);
         syncActivePositions(state, remaining);
         state.pending = undefined;
         state.lastCompletedIdempotencyKey = pending.idempotencyKey;
@@ -542,12 +546,14 @@ export class V12LiveExecutionEngine {
         const clientOrderId = deterministicV12ClientOrderId({ action: "EXIT", signalTs, symbol: active.symbol, side: active.side, version: reason });
         const pending: V12PendingOrderState = { idempotencyKey: clientOrderId, action: "EXIT", clientOrderId, symbol: active.symbol, side: active.side, quantity: active.quantity, signalTs, expectedPrice: active.side === "LONG" ? quote.bidPrice : quote.askPrice, reason, createdAt: this.now() };
         state.pending = pending; await this.d.stateStore.save(state);
-        const result = await this.d.adapter.executeExit({ signalTs, symbol: active.symbol, positionSide: active.side, quantity: active.quantity, expectedPrice: pending.expectedPrice!, clientOrderId });
+        const result = await this.d.adapter.executeExit({ signalTs, symbol: active.symbol, positionSide: active.side, quantity: active.quantity, expectedPrice: pending.expectedPrice!, clientOrderId, reason });
         if (result.status === "UNKNOWN") return this.fail(state, `V12_EXIT_UNKNOWN:${clientOrderId}`);
         const positions = await this.d.adapter.getPositions(); const remains = positions.some((row) => row.symbol.toUpperCase() === active.symbol && Math.abs(row.quantity) > EPS);
         if (remains) return this.fail(state, `V12_EXIT_NOT_FLAT:${result.status}`);
+        if (result.status !== "FILLED" || !Number.isFinite(result.executedQuantity)
+            || Math.abs(result.executedQuantity - active.quantity) > Math.max(1e-8, active.quantity * 1e-6)) return this.fail(state, `V12_EXIT_FILL_NOT_VERIFIED:${clientOrderId}`);
         const actualExitTs = Number(result.updatedAt || 0);
-        if (!(actualExitTs > 0)) return this.fail(state, `V12_EXIT_TIMESTAMP_MISSING:${clientOrderId}`);
+        if (!Number.isFinite(actualExitTs) || !(actualExitTs > 0) || actualExitTs > this.now()) return this.fail(state, `V12_EXIT_TIMESTAMP_MISSING:${clientOrderId}`);
         await cancelV12Protection(this.d.adapter, active.protection);
         syncActivePositions(state, activePositionsOf(state).filter((row) => row.positionId !== active.positionId));
         state.pending = undefined;
