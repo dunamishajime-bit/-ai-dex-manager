@@ -1,6 +1,6 @@
 name: Idle Priority VPS post-deploy read-only audit
 # audit-trigger: final-postdeploy-8e033af7-20261001
-# audit-sequence: post-live-no-order-full-path-diagnostic-v3
+# audit-sequence: failed-idle-cutover-journal-v4
 on:
   push:
     branches: [design/idle-priority-bt-parity-20260929]
@@ -308,6 +308,12 @@ jobs:
             journalctl -u "$unit" --since "2026-10-02 08:15:00" --no-pager -n 220 -o short-iso 2>/dev/null | tail -220 || true
           done
           echo "NO_ORDER_RUNNER_JOURNALS_END"
+          echo "FAILED_IDLE_CUTOVER_JOURNAL_BEGIN"
+          failed_idle_sha="85d73b20f85668440959587291f368a4f1fcd71e"
+          failed_idle_unit="disdex-idle-priority-short@$failed_idle_sha.service"
+          systemctl show "$failed_idle_unit" -p LoadState -p ActiveState -p SubState -p Result -p MainPID -p ExecMainStatus -p ExecMainCode -p NRestarts || true
+          journalctl -u "$failed_idle_unit" --since "2026-10-02 11:15:00" --no-pager -n 300 -o short-iso 2>/dev/null || true
+          echo "FAILED_IDLE_CUTOVER_JOURNAL_END"
           echo "NO_ORDER_HISTORY_AUDIT_BEGIN"
           python3 - <<'PY'
           import json,os
