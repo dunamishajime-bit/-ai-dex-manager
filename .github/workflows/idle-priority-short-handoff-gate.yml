@@ -78,7 +78,7 @@ jobs:
       - run: npm run strategy:idle-priority-short:live:selftest
       - run: npm run strategy:idle-priority-short:benign-recovery:selftest
       - run: npx tsc --noEmit
-      - run: npx tsx --test tests/hype-zec-long-state-migration.test.ts tests/idle-priority-short-systemd-contract.test.mjs
+      - run: npx tsx --test tests/hype-zec-long-state-migration.test.ts tests/idle-priority-short-systemd-contract.test.mjs tests/operator_activation_hardening.test.ts
       - run: npm run strategy:hype-zec-long:state:migrate:selftest
       - run: npx tsx --test tests/hype-zec-benign-market-data-recovery.test.ts tests/hype-zec-runner-gate.test.ts
       - run: npx tsx --test tests/hype-zec-market-data-scope.test.ts tests/shared_crypto_daily_loss_contract.test.ts tests/runtime-alert-policy.test.ts

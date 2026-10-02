@@ -993,6 +993,14 @@ PY
   echo "POSTDEPLOY_RUNNER unit=$unit pid=$pid nRestarts=0"
 done
 
+idle_activation_projection="$SHARED/operator-activation/runtime.json"
+idle_activation_projection_meta="$(stat -c '%u:%g:%a' "$idle_activation_projection")"
+[[ "$idle_activation_projection_meta" == "0:0:644" ]] || {
+  echo "POSTDEPLOY_IDLE_ACTIVATION_PROJECTION_INVALID=$idle_activation_projection_meta"
+  false
+}
+echo "POSTDEPLOY_IDLE_ACTIVATION_PROJECTION_ROOT_OWNED=PASS meta=$idle_activation_projection_meta"
+
 /usr/bin/node "$RELEASE/scripts/ops/root/disdex-live-operator-activation-gate.mjs" \
   --release-root "$RELEASE" --sha "$TARGET_SHA" --all \
   --activation-path "$SHARED/operator-activation/current.json"
