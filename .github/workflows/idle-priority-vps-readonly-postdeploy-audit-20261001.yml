@@ -262,6 +262,53 @@ jobs:
             print("STATE_AUDIT "+name+"="+json.dumps(out,separators=(",",":"),ensure_ascii=False))
           PY
 
+          echo "NO_ORDER_DECISION_AUDIT_BEGIN"
+          python3 - <<'PY'
+          import json,os,re
+          files={
+            "v12_decision":"/var/lib/disdex/v12-x1-all/decision-snapshot.json",
+            "q102_decision":"/var/lib/disdex/quality102-causal-v1/decision-snapshot.json",
+            "pengu_state":"/var/lib/disdex/pengu-dual-ls-v2/runner-live.json",
+            "v52_state":"/var/lib/disdex/v52-aster-only/runner-live.json",
+            "fet_state":"/var/lib/disdex/fet-brk48-residual/state.json",
+            "hype_state":"/var/lib/disdex/hype-zec-long/runner.json",
+            "idle_state":"/var/lib/disdex/idle-priority/state.json",
+            "idle_details":"/var/lib/disdex/idle-priority/decision-details.json",
+            "idle_residual":"/var/lib/disdex/idle-priority/residual-long-state.json",
+          }
+          secret=re.compile(r"(secret|private|password|token|credential|api.?key)",re.I)
+          def scrub(v):
+              if isinstance(v,dict):
+                  return {k:("***REDACTED***" if secret.search(str(k)) else scrub(x)) for k,x in v.items()}
+              if isinstance(v,list): return [scrub(x) for x in v]
+              return v
+          for name,path in files.items():
+              try:
+                  with open(path,encoding="utf-8") as fh: value=json.load(fh)
+                  print("NO_ORDER_JSON "+name+"="+json.dumps(scrub(value),separators=(",",":"),ensure_ascii=False))
+              except Exception as e:
+                  print("NO_ORDER_JSON "+name+"="+json.dumps({"path":path,"error":type(e).__name__},separators=(",",":")))
+          PY
+          echo "NO_ORDER_LOCK_SAMPLES_BEGIN"
+          for i in $(seq 1 6); do
+            printf 'LOCK_SAMPLE i=%s nowMs=%s ' "$i" "$(date +%s%3N)"
+            if [[ -f /var/lib/disdex/shared/account-order.lock ]]; then
+              tr '\n' ' ' </var/lib/disdex/shared/account-order.lock || true
+              echo
+            else
+              echo 'ABSENT'
+            fi
+            sleep 1
+          done
+          echo "NO_ORDER_LOCK_SAMPLES_END"
+          echo "NO_ORDER_RUNNER_JOURNALS_BEGIN"
+          for name in disdex-v12-x1-all disdex-pengu-dual-ls-v2 disdex-quality102-causal-v1 disdex-v52-aster-only disdex-fet-brk48 disdex-hype-long disdex-idle-priority-short; do
+            unit="$name@$sha.service"
+            echo "NO_ORDER_JOURNAL_UNIT=$unit"
+            journalctl -u "$unit" --since "2026-10-02 08:15:00" --no-pager -n 220 -o short-iso 2>/dev/null | tail -220 || true
+          done
+          echo "NO_ORDER_RUNNER_JOURNALS_END"
+
           echo "DISK_FREE_KB=$(df -Pk /home/deploy | awk 'NR==2 {print $4}')"
           python3 - "$sha" <<'PY'
           import json,sys,time
