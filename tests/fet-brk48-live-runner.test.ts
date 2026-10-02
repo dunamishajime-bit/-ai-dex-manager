@@ -173,7 +173,18 @@ test("FET live runner enters once, protects, survives restart, and exits after 2
     };
 
     let signalEnabled = false;
+    const scopedVenueReads: Array<{ kind: string; symbol?: string }> = [];
     const client: any = {
+      getPositions: async (symbol?: string) => {
+        scopedVenueReads.push({ kind: "positions", symbol });
+        return positions
+          .filter((row) => !symbol || row.symbol === symbol)
+          .map((row) => ({ symbol: row.symbol, positionAmt: String(row.quantity) }));
+      },
+      getOpenOrders: async (symbol?: string) => {
+        scopedVenueReads.push({ kind: "openOrders", symbol });
+        return openOrders.filter((row) => !symbol || row.symbol === symbol).map((row) => ({ ...row }));
+      },
       getKlines: async () => makeKlines(entryTs, signalEnabled),
     };
 
@@ -196,6 +207,10 @@ test("FET live runner enters once, protects, survives restart, and exits after 2
     assert.equal(idle.status, "no-signal");
     assert.equal(idle.ordersSent, 0);
     assert.equal(tradeCalls.length, 0);
+    assert.deepEqual(scopedVenueReads.slice(0, 2), [
+      { kind: "positions", symbol: "FETUSDT" },
+      { kind: "openOrders", symbol: "FETUSDT" },
+    ]);
     await blocker.release();
     const idleState = await readFetBrk48State(statePath, RUNTIME_SHA);
     assert.equal(idleState.runtimeCommitSha, RUNTIME_SHA);

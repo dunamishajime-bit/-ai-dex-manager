@@ -406,11 +406,17 @@ export class FetBrk48LiveRunner {
     // through the original locked path below.
     const preState = await readFetBrk48State(this.deps.statePath, this.deps.runtimeSha);
     if (!preState.position && !preState.pending && !preState.manualReview) {
-      const [prePositions, preOpenOrders] = await Promise.all([
-        this.deps.executor.getPositions(),
-        this.deps.executor.getOpenOrders(),
+      // The flat/no-signal fast path only needs to prove that FET itself has
+      // no venue exposure.  Reading account-wide openOrders here costs weight
+      // 40 every 30 seconds and can starve shared-risk/account reads.  A real
+      // candidate still falls through to the locked path below, which keeps
+      // the authoritative account-wide positions/orders/risk reconciliation.
+      const [prePositionRows, preOpenOrders] = await Promise.all([
+        this.deps.client.getPositions("FETUSDT"),
+        this.deps.client.getOpenOrders("FETUSDT"),
       ]);
-      const venueFlat = activePosition(prePositions).length === 0 && preOpenOrders.length === 0;
+      const venueFlat = prePositionRows.every((row) => Math.abs(finite(row.positionAmt)) <= EPS)
+        && preOpenOrders.length === 0;
       if (venueFlat) {
         const preKlines = await this.deps.client.getKlines("FETUSDT", "1h", 120);
         const preDecisionTs = Math.floor(now / 3_600_000) * 3_600_000;
