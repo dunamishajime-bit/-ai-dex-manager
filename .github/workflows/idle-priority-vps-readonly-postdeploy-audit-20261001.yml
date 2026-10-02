@@ -60,7 +60,7 @@ jobs:
           echo "UI_WORKDIR=$(systemctl show "$ui" -p WorkingDirectory --value 2>/dev/null || true)"
           echo "UI_SHA=$(systemctl show "$ui" -p Environment --value 2>/dev/null | tr ' ' '\n' | sed -n 's/^DISDEX_UI_RELEASE_SHA=//p' | tail -1)"
 
-          "$current/scripts/ops/root/disdex-current-runtime-coherence-guard" --check
+          bash "$current/scripts/ops/root/disdex-current-runtime-coherence-guard" --check
           echo "CURRENT_COHERENCE_CHECK=PASS"
           for support in disdex-runner-watchdog.timer disdex-runner-position-recovery.timer disdex-v12-three-hour-health-check.timer disdex-v12-kill-switch-auto-repair.path disdex-current-runtime-coherence-guard.timer; do
             printf 'SUPPORT_RUNTIME unit=%s active=%s enabled=%s\n' "$support" \
