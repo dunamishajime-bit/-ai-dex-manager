@@ -572,7 +572,11 @@ export class V12LiveExecutionEngine {
         const quote = await this.d.adapter.executor.getMarketQuote(symbol);
         const expectedPrice = signal.side === "LONG" ? quote.askPrice : quote.bidPrice;
         const scale = sizing.requestedGross > 0 ? acceptedGross / sizing.requestedGross : 0;
-        const quantity = sizing.quantity * scale;
+        // Keep the formal Gross target as the admission target while sizing the
+        // submitted quantity so even the configured maximum adverse slippage
+        // cannot push the filled position beyond that target/cap.
+        const slippageBuffer = 1 + this.d.adapter.getMaxSlippageBps() / 10_000;
+        const quantity = sizing.quantity * scale / slippageBuffer;
         if (!(quantity > 0)) return { status: "capacity-blocked", reason: "ZERO_EXECUTABLE_QUANTITY", signal };
         const clientOrderId = deterministicV12ClientOrderId({ action: "ENTRY", signalTs: signal.referenceTs, symbol, side: signal.side });
         if (state.lastCompletedIdempotencyKey === clientOrderId) return { status: "held", reason: "SAME_SIGNAL_ALREADY_COMPLETED", signal, clientOrderId };
