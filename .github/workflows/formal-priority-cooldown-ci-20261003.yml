@@ -1,0 +1,40 @@
+name: Formal Priority Cooldown 20261003 CI
+
+on:
+  pull_request:
+    branches:
+      - design/idle-priority-bt-parity-20260929
+    paths:
+      - "config/v12X1AllRuntime.ts"
+      - "lib/v12-*.ts"
+      - "lib/disdex-quality102-causal-v1-runner.ts"
+      - "tests/v12*.test.ts"
+      - "tests/quality102_causal_v1_portfolio.test.ts"
+      - "docs/implementation/*20261003.md"
+      - "docs/research/results/formal-priority-cooldown-20261003/**"
+      - ".github/workflows/formal-priority-cooldown-ci-20261003.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - name: V12 / Q102 TypeScript compile
+        run: npm run strategy:v12-x1-all:typecheck
+      - name: Formal priority contract tests
+        run: |
+          npx tsx --test             tests/v12_formal_priority_policy.test.ts             tests/v12-winrate-entry-gate.test.ts             tests/v12_top3_rank3_contract.test.ts             tests/v12_top2_state.test.ts             tests/v12-entry-quantity-gate.test.ts             tests/v12-preorder-gross-reservation.test.ts             tests/v12-protection-failure-recovery.test.ts             tests/v12-runtime-lineage-recovery.test.ts             tests/quality102_causal_v1_portfolio.test.ts
+      - name: Existing V12 selftest
+        run: npm run strategy:v12-x1-all:selftest
+      - name: Existing Q102 runner selftest
+        run: npm run strategy:quality102-causal-v1:runner:selftest
