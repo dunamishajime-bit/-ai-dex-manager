@@ -16,7 +16,7 @@ export const V12_X1_ALL = Object.freeze({
     entryPolicy: "ALL" as const,
     maximumPositions: 3,
     perPositionEntryGrossCap: INTEGRATED_PRODUCTION_RISK_POLICY.v12PerPositionGrossCap,
-    rank3EntryGrossCap: 0.10,
+    rank3EntryGrossCap: 0.50,
     rank3MinimumScore: 0.70,
     aggregateEntryGrossCap: INTEGRATED_PRODUCTION_RISK_POLICY.v12BaseAggregateGross,
     dynamicResidualAggregateGrossCap: INTEGRATED_PRODUCTION_RISK_POLICY.v12DynamicAggregateGrossCap,
@@ -47,6 +47,8 @@ export const V12_X1_ALL = Object.freeze({
     maxHoldBars: 23,
     rebalanceBars: 20,
     cooldownBars: 1,
+    // Formal 2026-10-03 contract: cooldown begins at actual fill exit time and
+    // applies only to the exited symbol. 1 bar = 2 hours.
     allowNeutralRegime: true,
     neutralScoreThreshold: 1.00,
     normalRoundTripCostBps: 10,
