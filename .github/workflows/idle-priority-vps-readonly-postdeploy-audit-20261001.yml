@@ -366,6 +366,29 @@ jobs:
             rm -f "$tmp_log"
           done
           echo "NO_ORDER_72H_STATUS_COUNTS_END"
+          echo "CURRENT_RUNTIME_STATUS_COUNTS_BEGIN"
+          for name in disdex-v12-x1-all disdex-pengu-dual-ls-v2 disdex-quality102-causal-v1 disdex-v52-aster-only disdex-fet-brk48 disdex-hype-long disdex-idle-priority-short; do
+            unit="$name@$sha.service"
+            started="$(systemctl show "$unit" -p ActiveEnterTimestamp --value 2>/dev/null || true)"
+            echo "CURRENT_STATUS_RUNNER=$name started=$started"
+            tmp_log="$(mktemp)"
+            journalctl -u "$unit" --since "$started" --no-pager -o cat 2>/dev/null >"$tmp_log" || true
+            printf 'CURRENT_STATUS_COUNTS total=%s lock_busy=%s rate_budget=%s fail_closed=%s fatal=%s manual_review=%s blocked=%s held=%s orders_positive=%s\n' \
+              "$(wc -l <"$tmp_log")" \
+              "$(grep -Ec 'LOCK_BUSY|ACCOUNT_LOCK' "$tmp_log" || true)" \
+              "$(grep -Ec 'RATE_BUDGET' "$tmp_log" || true)" \
+              "$(grep -Eci 'FAIL_CLOSED' "$tmp_log" || true)" \
+              "$(grep -Eci 'fatal' "$tmp_log" || true)" \
+              "$(grep -Eci 'manual[-_ ]review' "$tmp_log" || true)" \
+              "$(grep -Ec '"'"'"status"'"'":"'"'"blocked"'"'"' "$tmp_log" || true)" \
+              "$(grep -Ec '"'"'"status"'"'":"'"'"held"'"'"' "$tmp_log" || true)" \
+              "$(grep -Ec '"'"'"ordersSent"'"'":[1-9]' "$tmp_log" || true)"
+            echo "CURRENT_RELEVANT_TAIL_BEGIN"
+            grep -Ei 'LOCK_BUSY|ACCOUNT_LOCK|RATE_BUDGET|FAIL_CLOSED|fatal|manual[-_ ]review|"status":"blocked"|"status":"held"|"ordersSent":[1-9]' "$tmp_log" | tail -30 || true
+            echo "CURRENT_RELEVANT_TAIL_END"
+            rm -f "$tmp_log"
+          done
+          echo "CURRENT_RUNTIME_STATUS_COUNTS_END"
 
           echo "DISK_FREE_KB=$(df -Pk /home/deploy | awk 'NR==2 {print $4}')"
           python3 - "$sha" <<'PY'
