@@ -1,5 +1,5 @@
 name: Idle Priority exact-SHA Production redeploy
-# redeploy-sequence: rate-budget-startup-gate-v28
+# redeploy-sequence: idle-account-lock-bounded-retry-v29
 on:
   push:
     branches: [design/idle-priority-bt-parity-20260929]
