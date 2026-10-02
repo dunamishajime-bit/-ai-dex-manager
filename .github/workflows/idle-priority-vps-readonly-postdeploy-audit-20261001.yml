@@ -1,6 +1,6 @@
 name: Idle Priority VPS post-deploy read-only audit
 # audit-trigger: final-postdeploy-8e033af7-20261001
-# audit-sequence: post-c4db996-fet-load-recheck-v10
+# audit-sequence: post-d941a5c-rate-budget-startup-gate-v11
 on:
   push:
     branches: [design/idle-priority-bt-parity-20260929]
