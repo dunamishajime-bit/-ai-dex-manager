@@ -1,5 +1,5 @@
 name: Idle Priority exact-SHA Production redeploy
-# redeploy-sequence: idle-rate-budget-benign-recovery-v16
+# redeploy-sequence: no-order-audit-lock-contention-remediation-v17
 on:
   push:
     branches: [design/idle-priority-bt-parity-20260929]
@@ -51,6 +51,8 @@ jobs:
             tests/idle-priority-short-systemd-contract.test.mjs \
             tests/ops-runner-watchdog-current-contract.test.mjs \
             tests/watchdog-release-lineage.test.ts \
+            tests/fet-brk48-live-runner.test.ts \
+            tests/fet-brk48-signal.test.ts \
             tests/hype-zec-long-state-migration.test.ts \
             tests/hype-zec-benign-market-data-recovery.test.ts \
             tests/hype-zec-runner-gate.test.ts \

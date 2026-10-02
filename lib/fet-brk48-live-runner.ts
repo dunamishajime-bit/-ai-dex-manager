@@ -398,6 +398,32 @@ export class FetBrk48LiveRunner {
 
   async tick(): Promise<FetBrk48TickResult> {
     const now = (this.deps.now || Date.now)();
+
+    // Flat/no-pending/no-review ticks are read-only until a BRK48 candidate
+    // actually exists. Avoid monopolizing the shared account-order lock for
+    // the overwhelmingly common no-signal path. Candidate=true, position
+    // management, pending reconciliation and every order mutation continue
+    // through the original locked path below.
+    const preState = await readFetBrk48State(this.deps.statePath, this.deps.runtimeSha);
+    if (!preState.position && !preState.pending && !preState.manualReview) {
+      const [prePositions, preOpenOrders] = await Promise.all([
+        this.deps.executor.getPositions(),
+        this.deps.executor.getOpenOrders(),
+      ]);
+      const venueFlat = activePosition(prePositions).length === 0 && preOpenOrders.length === 0;
+      if (venueFlat) {
+        const preKlines = await this.deps.client.getKlines("FETUSDT", "1h", 120);
+        const preDecisionTs = Math.floor(now / 3_600_000) * 3_600_000;
+        const preSignal = buildFetBrk48Signal(normalizeFetH1(preKlines, now), now);
+        if (!preSignal) {
+          preState.lastEvaluationDecisionTs = preDecisionTs;
+          preState.lastEvaluationCandidate = false;
+          await writeFetBrk48State(this.deps.statePath, preState);
+          return { status: "no-signal", message: "FET_NO_BRK48_SIGNAL", ordersSent: 0 };
+        }
+      }
+    }
+
     const accountLock = this.deps.accountLock || new FileAccountOrderLock();
     const lock = await accountLock.acquire(`FET_BRK48_RESIDUAL:${this.deps.runtimeSha}`, "ASTER_FUTURES");
     if (!lock) return { status: "blocked", message: "FET_ACCOUNT_ORDER_LOCK_BUSY", ordersSent: 0 };

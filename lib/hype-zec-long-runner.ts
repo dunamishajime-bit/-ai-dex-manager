@@ -21,6 +21,23 @@ import { BENIGN_HYPE_ZEC_MARKET_DATA_REVIEW } from "./hype-zec-long-recovery-con
 
 const EPSILON = 1e-9;
 
+export function refreshHypeZecNoEntryDecision(
+  state: HypeZecLongRunnerState,
+  signals: readonly HypeZecSignalResult[],
+  priorLastDecisionTs: number | undefined,
+  now: number,
+): HypeZecLongRunnerState {
+  if (state.lastDecisionTs !== priorLastDecisionTs) return { ...state, lastDecisionTs: now };
+  const evaluated = signals[0];
+  return {
+    ...state,
+    lastDecisionTs: now,
+    lastDecision: evaluated
+      ? { strategy: evaluated.strategy, signalTs: evaluated.signalTs, accepted: false, reason: evaluated.reason }
+      : { strategy: "HYPE_LONG", signalTs: null, accepted: false, reason: "HYPE_ZEC_NO_SIGNAL_EVALUATED" },
+  };
+}
+
 export interface HypeZecLongRunnerDependencies {
   marketData: { load(): Promise<HypeZecLongMarketData> };
   executor: DirectTradeExecutor;
@@ -390,6 +407,7 @@ export class HypeZecLongRunner {
         if (exit) return this.exitPosition(state, owned, actual, quote, exit, lock);
       }
       const existingStrategies = new Set((state.positions || []).map((row) => row.strategy));
+      const priorLastDecisionTs = state.lastDecisionTs;
       const signals: HypeZecSignalResult[] = [];
       if (this.dependencies.runtime.symbols.includes("HYPEUSDT")) {
         signals.push(this.dependencies.runtime.signalMode === "TREND"
@@ -404,7 +422,7 @@ export class HypeZecLongRunner {
         const result = await this.enter(state, signal, account, positions, lock);
         if (result.status === "completed" || result.status === "manual-review") return result;
       }
-      await this.dependencies.stateStore.save({ ...state, lastDecisionTs: this.now() });
+      await this.dependencies.stateStore.save(refreshHypeZecNoEntryDecision(state, signals, priorLastDecisionTs, this.now()));
       return { status: "no-change", message: "HYPE_ZEC_NO_ACCEPTED_ENTRY" };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);

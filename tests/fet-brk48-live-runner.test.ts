@@ -190,15 +190,28 @@ test("FET live runner enters once, protects, survives restart, and exits after 2
       now: () => now,
     };
 
+    const blocker = await deps.accountLock.acquire("TEST_BLOCKER", "ASTER_FUTURES");
+    assert.ok(blocker, "test must hold the shared account lock");
     const idle = await new FetBrk48LiveRunner(deps).tick();
     assert.equal(idle.status, "no-signal");
     assert.equal(idle.ordersSent, 0);
     assert.equal(tradeCalls.length, 0);
+    await blocker.release();
     const idleState = await readFetBrk48State(statePath, RUNTIME_SHA);
     assert.equal(idleState.runtimeCommitSha, RUNTIME_SHA);
     assert.ok(idleState.updatedAt > 0);
 
     signalEnabled = true;
+    now += 1_000;
+    const candidateBlocker = await deps.accountLock.acquire("TEST_CANDIDATE_BLOCKER", "ASTER_FUTURES");
+    assert.ok(candidateBlocker, "candidate test must hold the shared account lock");
+    const blockedCandidate = await new FetBrk48LiveRunner(deps).tick();
+    assert.equal(blockedCandidate.status, "blocked");
+    assert.equal(blockedCandidate.message, "FET_ACCOUNT_ORDER_LOCK_BUSY");
+    assert.equal(blockedCandidate.ordersSent, 0);
+    assert.equal(tradeCalls.length, 0);
+    await candidateBlocker.release();
+
     now += 1_000;
     const first = await new FetBrk48LiveRunner(deps).tick();
     assert.equal(first.status, "entered");
