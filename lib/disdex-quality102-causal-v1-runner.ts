@@ -507,7 +507,7 @@ export class Quality102CausalV1Runner {
         positions: readonly DirectPosition[],
         equity: number,
         requestedGross: number,
-        signal: Quality102CausalV1Signal,
+        q102Family: string | undefined,
         causeIdempotencyKey: string,
     ): Promise<boolean> {
         const adapter = this.dependencies.config.v12DynamicAdapter;
@@ -525,7 +525,7 @@ export class Quality102CausalV1Runner {
             adapter,
             requiredGross,
             equity,
-            q102Family: signal.family,
+            q102Family,
             causeIdempotencyKey,
             statePath,
             maxDataAgeMs: this.dependencies.config.maxDataAgeMs,
@@ -897,7 +897,13 @@ export class Quality102CausalV1Runner {
                 || !accepted
                 || accepted.gross + EPSILON < targetGross;
             if (capacityShortfall && allowDynamicTrim
-                && await this.trimDynamicForCoreEntry(live.positions, live.equity, targetGross, pending.idempotencyKey)) {
+                && await this.preemptV12ForFormalQ102Entry(
+                    live.positions,
+                    live.equity,
+                    targetGross,
+                    pending.family,
+                    pending.idempotencyKey,
+                )) {
                 return this.validatePendingExecutionWindow(state, pending, false);
             }
             if (planner.status !== "planned" || !accepted || accepted.gross + EPSILON < targetGross) {
@@ -1196,7 +1202,7 @@ export class Quality102CausalV1Runner {
                 positions,
                 equity,
                 targetGross,
-                signal,
+                signal.family,
                 `${STRATEGY_ID}|${signal.referenceTs}|${symbol}|${signal.side}|ENTRY`,
             )) {
             const [freshAccount, freshPositions] = await Promise.all([
