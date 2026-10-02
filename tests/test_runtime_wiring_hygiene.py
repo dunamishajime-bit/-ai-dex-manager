@@ -56,7 +56,10 @@ class RuntimeWiringHygieneTest(unittest.TestCase):
     def test_monitor_timers_must_be_waiting_not_merely_active(self):
         source = WIRING.read_text(encoding="utf-8")
         self.assertIn('sub_state="$(systemctl show "$unit" -p SubState --value', source)
-        self.assertIn('"$sub_state" != "waiting"', source)
+        self.assertIn('"$sub_state" == "waiting"', source)
+        self.assertIn('"$sub_state" == "running"', source)
+        self.assertIn('for attempt in $(seq 1 15)', source)
+        self.assertIn('DISDEX_MONITOR_TIMER_BUSY_WAIT', source)
         self.assertIn('systemctl restart "$unit"', source)
         self.assertIn('ensure_monitor_timer_active "disdex-runner-position-recovery.timer"', source)
 
