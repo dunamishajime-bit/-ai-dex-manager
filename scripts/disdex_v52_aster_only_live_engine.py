@@ -48,10 +48,22 @@ class V52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
         if self.live:
             assert_strict_live_configuration()
 
-    def tick(self, prepared: dict | None = None) -> None:
-        super().tick(prepared)
+    def _refresh_idle_admission_heartbeat(self) -> None:
         self.state["idleAdmissionDecisionTs"] = (base.now_ms() // 3_600_000) * 3_600_000
         self.save()
+
+    def idle_tick(self, prepared: dict) -> None:
+        super().idle_tick(prepared)
+        # V52 is a stock sleeve, but Idle Priority is a 24/7 crypto sleeve.
+        # Even while US equities are closed (or a safe prelock skip is used),
+        # publish a current explicit "no V52 acceptance this hour" heartbeat so
+        # Idle can prove Formal > Idle priority without depending on stale stock
+        # session state.
+        self._refresh_idle_admission_heartbeat()
+
+    def tick(self, prepared: dict | None = None) -> None:
+        super().tick(prepared)
+        self._refresh_idle_admission_heartbeat()
 
     def assert_gross_safe(self, snapshot=None) -> None:
         row = snapshot or self.gross_snapshot()
@@ -521,6 +533,17 @@ def self_test() -> None:
 
     assert transient_reference_error("iex_quote_stale META")
     assert not transient_reference_error("Managed Stock position reconciliation mismatch")
+
+    heartbeat_engine = object.__new__(V52AsterOnlyEngine)
+    heartbeat_engine.state = {}
+    saved = []
+    heartbeat_engine.save = lambda: saved.append(dict(heartbeat_engine.state))
+    before_hour = (base.now_ms() // 3_600_000) * 3_600_000
+    heartbeat_engine._refresh_idle_admission_heartbeat()
+    after_hour = (base.now_ms() // 3_600_000) * 3_600_000
+    assert heartbeat_engine.state["idleAdmissionDecisionTs"] in {before_hour, after_hour}
+    assert saved and saved[-1]["idleAdmissionDecisionTs"] == heartbeat_engine.state["idleAdmissionDecisionTs"]
+    print("V52_IDLE_ADMISSION_HEARTBEAT_SELFTEST_PASS")
     print("V52_STRICT_ASTER_ONLY_SELFTEST_PASS")
 
 

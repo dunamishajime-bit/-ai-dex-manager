@@ -44,10 +44,35 @@ function assertCurrentTimestamp(value: unknown, decisionTs: number) {
     if (finite(value) !== decisionTs) throw new Error("BASELINE_ADMISSION_SOURCE_STALE_OR_TS_MISMATCH");
 }
 
-function acceptedByV12(snapshot: JsonRecord, decisionTs: number) {
+function parsedTimeMs(value: unknown) {
+    if (typeof value === "number" && Number.isFinite(value)) return value;
+    if (typeof value === "string") {
+        const parsed = Date.parse(value);
+        if (Number.isFinite(parsed)) return parsed;
+    }
+    return undefined;
+}
+
+function acceptedByV12(snapshot: JsonRecord, decisionTs: number, now: number) {
     if (snapshot.schema !== "v12-decision-observation/v1" || snapshot.strategyId !== "V12_X1.00_ALL") throw new Error("BASELINE_ADMISSION_SOURCE_MALFORMED");
-    assertCurrentTimestamp(snapshot.referenceTs, decisionTs);
-    return snapshot.reason === "SIGNAL_AVAILABLE";
+    const referenceTs = finite(snapshot.referenceTs);
+    if (referenceTs === decisionTs) return snapshot.reason === "SIGNAL_AVAILABLE";
+
+    // V12 is a 2H strategy while Idle is evaluated on completed H1 boundaries.
+    // On the alternating H1 boundary, V12 can legitimately have no newly
+    // completed 2H bar. The observation writer still refreshes observedAt and
+    // explicitly reports NO_COMPLETED_BAR_SIGNAL. Treat that as a current
+    // no-acceptance, but only for the immediately preceding H1 reference.
+    const observedAt = parsedTimeMs(snapshot.observedAt ?? snapshot.selectedAt);
+    if (
+        snapshot.reason === "NO_COMPLETED_BAR_SIGNAL"
+        && referenceTs === decisionTs - 3_600_000
+        && observedAt !== undefined
+        && observedAt >= decisionTs
+        && observedAt <= now + 60_000
+        && now - observedAt <= 90_000
+    ) return false;
+    throw new Error("BASELINE_ADMISSION_SOURCE_STALE_OR_TS_MISMATCH");
 }
 
 function acceptedByQ102(snapshot: JsonRecord, decisionTs: number) {
@@ -121,7 +146,7 @@ export async function buildBaselineAdmissionEvidence(input: BaselineAdmissionEvi
         readJson(input.v52Path),
     ]);
     const baselineAcceptedThisTimestamp = [
-        acceptedByV12(v12, input.decisionTs),
+        acceptedByV12(v12, input.decisionTs, now),
         acceptedByQ102(q102, input.decisionTs),
         acceptedByPengu(pengu, input.decisionTs),
         acceptedByFet(fet, input.decisionTs),

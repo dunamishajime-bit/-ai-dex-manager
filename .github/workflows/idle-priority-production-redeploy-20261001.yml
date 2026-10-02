@@ -1,5 +1,5 @@
 name: Idle Priority exact-SHA Production redeploy
-# redeploy-sequence: residual-state-lineage-migration-v21
+# redeploy-sequence: idle-baseline-source-clock-parity-v22
 on:
   push:
     branches: [design/idle-priority-bt-parity-20260929]
@@ -61,6 +61,7 @@ jobs:
             tests/shared-risk-transient-refresh-retry.test.ts \
             tests/shared-risk-rollover-retry.test.ts
           node --test tests/shared-risk-systemd-decoupling.test.mjs
+          python3 scripts/disdex_v52_aster_only_live_engine.py --self-test
           bash scripts/ops/root/disdex-current-runtime-wiring --self-test
           grep -q 'chown(temporary, parent.uid, parent.gid)' lib/disdex-aster-global-rate-budget.ts
           grep -q 'DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH="$budget_tmp"' scripts/ops/root/disdex-idle-production-redeploy-20261001

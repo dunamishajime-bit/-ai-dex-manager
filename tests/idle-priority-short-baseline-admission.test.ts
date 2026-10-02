@@ -195,3 +195,47 @@ test("current FET candidate blocks Idle before FET order resolution", async () =
         await rm(f.root, { recursive: true, force: true });
     }
 });
+
+
+test("fresh V12 alternating-H1 no-bar observation is current no-acceptance, never a carried signal", async () => {
+    const f = await fixture();
+    try {
+        const currentNow = f.input.decisionTs + 30_000;
+        const observedAt = new Date(f.input.decisionTs + 10_000).toISOString();
+        await writeFile(f.paths.v12Path, JSON.stringify({
+            schema: "v12-decision-observation/v1",
+            strategyId: "V12_X1.00_ALL",
+            observedAt,
+            selectedAt: observedAt,
+            referenceTs: f.input.decisionTs - 3_600_000,
+            entryTs: f.input.decisionTs,
+            reason: "NO_COMPLETED_BAR_SIGNAL",
+        }));
+        const result = await buildBaselineAdmissionEvidence({ ...f.input, now: currentNow });
+        assert.equal(result.baselineAcceptedThisTimestamp, 0);
+
+        await writeFile(f.paths.v12Path, JSON.stringify({
+            schema: "v12-decision-observation/v1",
+            strategyId: "V12_X1.00_ALL",
+            observedAt,
+            selectedAt: observedAt,
+            referenceTs: f.input.decisionTs - 3_600_000,
+            entryTs: f.input.decisionTs,
+            reason: "SIGNAL_AVAILABLE",
+        }));
+        await assert.rejects(() => buildBaselineAdmissionEvidence(f.input), /BASELINE_ADMISSION_SOURCE_STALE_OR_TS_MISMATCH/);
+
+        await writeFile(f.paths.v12Path, JSON.stringify({
+            schema: "v12-decision-observation/v1",
+            strategyId: "V12_X1.00_ALL",
+            observedAt,
+            selectedAt: observedAt,
+            referenceTs: f.input.decisionTs - 7_200_000,
+            entryTs: f.input.decisionTs,
+            reason: "NO_COMPLETED_BAR_SIGNAL",
+        }));
+        await assert.rejects(() => buildBaselineAdmissionEvidence(f.input), /BASELINE_ADMISSION_SOURCE_STALE_OR_TS_MISMATCH/);
+    } finally {
+        await rm(f.root, { recursive: true, force: true });
+    }
+});
