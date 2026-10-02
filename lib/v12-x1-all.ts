@@ -1,4 +1,5 @@
 import { V12_X1_ALL } from "@/config/v12X1AllRuntime";
+import { v12FormalTargetGross } from "@/lib/v12-formal-priority-policy";
 
 export type V12Side = "LONG" | "SHORT";
 export type V12Regime = "LONG" | "SHORT" | "NEUTRAL";
@@ -58,7 +59,7 @@ export interface V12Signal extends V12Candidate {
     referenceTs: number;
     entryTs: number;
     regime: V12Regime;
-    /** Portfolio slot rank. Rank3 is the lower-priority 0.10x residual slot. */
+    /** Portfolio slot rank. Rank3 is the lower-priority 0.50x residual slot. */
     rank: 1 | 2 | 3;
     /** Research-validated entry quality metadata used by LIVE sizing/attribution. */
     entryQualityClass?: "HC175" | "STANDARD";
@@ -258,8 +259,12 @@ export function v12EntryGrossMultiplierForSignal(signal: Pick<V12Signal, "rank" 
     return Number.isFinite(multiplier) && multiplier > 0 ? multiplier : 1;
 }
 
-export function v12EntryGrossCapForSignal(signal: Pick<V12Signal, "rank" | "entryGrossMultiplier">): number {
-    return v12EntryGrossCapForRank(signal.rank) * v12EntryGrossMultiplierForSignal(signal);
+export function v12EntryGrossCapForSignal(signal: Pick<V12Signal, "symbol" | "rank" | "entryGrossMultiplier">): number {
+    // Formal 2026-10-03 sizing contract supersedes the former risk-sized/HC
+    // multiplier exposure at the portfolio layer: Rank1/2 target 1.00x,
+    // DOGE/LTC target 0.50x, Rank3 residual targets 0.50x.
+    // The HC metadata remains available for attribution/gating.
+    return v12FormalTargetGross(signal);
 }
 
 function finite(value: unknown, fallback = NaN) {
