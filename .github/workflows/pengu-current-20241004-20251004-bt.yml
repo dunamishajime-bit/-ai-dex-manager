@@ -1,0 +1,81 @@
+name: PENGU Current Production 20241004-20251004 BT
+
+on:
+  push:
+    branches:
+      - research/pengu-current-20241004-20251004-bt-20261004
+    paths:
+      - "scripts/research_pengu_current_20241004_20251004_bt.ts"
+      - ".github/workflows/pengu-current-20241004-20251004-bt.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pengu-current-20241004-20251004-bt
+  cancel-in-progress: false
+
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Verify source lineage
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          test "$(git rev-parse HEAD^)" = "53eeff5417636369d4709fddfd47d7916ddcf3b1" || {
+            echo "Research commit is not directly based on Production SHA"; git log --oneline -3; exit 1;
+          }
+          grep -q 'logicProfile: "COMBINED_FILTERED_Q60_DD17_H72"' config/penguDualLsV2Runtime.ts
+          grep -q 'liveEnabled: true' config/penguRecoveryV8.ts
+          grep -q 'rule: "R_BTC3"' config/penguRecoveryV8.ts
+
+      - name: Install
+        run: npm ci --no-audit --no-fund
+
+      - name: Run exact-current PENGU research replay
+        env:
+          PENGU_CURRENT_BT_OUT: .research-state/pengu-current-20241004-20251004-bt.json
+        run: |
+          set -o pipefail
+          npx tsx scripts/research_pengu_current_20241004_20251004_bt.ts 2>&1 | tee .research-state-pengu-current-bt.log
+
+      - name: Validate output
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          p=json.load(open('.research-state/pengu-current-20241004-20251004-bt.json'))
+          assert p['productionSourceSha']=='53eeff5417636369d4709fddfd47d7916ddcf3b1'
+          assert p['strategyId']=='PENGU_DUAL_LS_V2_FINAL'
+          assert p['logicProfile']=='COMBINED_FILTERED_Q60_DD17_H72'
+          assert p['period']=={'startInclusive':'2024-10-04T00:00:00.000Z','endExclusive':'2025-10-04T00:00:00.000Z'}
+          assert p['productionContract']['recoveryV8Enabled'] is True
+          assert p['productionContract']['v64DynamicLongEnabled'] is True
+          assert p['productionContract']['recoveryRule']=='R_BTC3'
+          assert p['productionContract']['routeQuarantineHours']==60
+          assert p['productionContract']['realizedDdThresholdPct']==17
+          assert p['productionContract']['realizedDdHoldHours']==72
+          assert p['safety']=={'researchOnly':True,'ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print('PENGU_CURRENT_BT_CONTRACT=PASS')
+          print(json.dumps({'data':p['data'],'normal':p['normal']['metrics'],'stress':p['stress']['metrics'],'routes':p['normal']['routes'],'shortDiagnostics':p['normal']['shortDiagnostics'],'blocked':p['normal']['blocked']},ensure_ascii=False,separators=(',',':')))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-current-20241004-20251004-bt-${{ github.run_id }}
+          path: |
+            .research-state/pengu-current-20241004-20251004-bt.json
+            .research-state-pengu-current-bt.log
+          include-hidden-files: true
+          retention-days: 30
