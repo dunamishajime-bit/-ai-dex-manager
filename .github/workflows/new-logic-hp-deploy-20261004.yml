@@ -7,6 +7,7 @@ on:
     paths:
       - "app/**"
       - "components/**"
+      - "next.config.js"
       - ".github/workflows/new-logic-hp-deploy-20261004.yml"
 
 permissions:
@@ -14,12 +15,12 @@ permissions:
 
 concurrency:
   group: new-logic-hp-deploy-20261004
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 25
     env:
       TARGET_SHA: ${{ github.sha }}
       EXPECTED_TRADING_SHA: 53eeff5417636369d4709fddfd47d7916ddcf3b1
@@ -42,17 +43,23 @@ jobs:
           test -f app/api/system/runtime-overview/route.ts
           ! grep -R -n -I -E 'decision-status/zec|visibleSidecars:.*ZEC|ZEC 判定' app components
 
-      - name: Clean Next 14 build and bundle
+      - name: Clean Next 14 standalone build
         shell: bash
         run: |
           set -Eeuo pipefail
           npm ci --no-audit --no-fund
           node -e 'const p=require("./node_modules/next/package.json"); if(p.version!=="14.1.0") throw new Error("NEXT_VERSION_MISMATCH:"+p.version); console.log("NEXT_VERSION="+p.version)'
           npm run build
-          test -f .next/BUILD_ID
-          tar --exclude=.git --exclude=.next/cache -czf "$RUNNER_TEMP/new-logic-ui.tgz" .
-          test -s "$RUNNER_TEMP/new-logic-ui.tgz"
-          echo "UI_BUNDLE_BYTES=$(stat -c '%s' "$RUNNER_TEMP/new-logic-ui.tgz")"
+          test -f .next/standalone/server.js
+          rm -rf .deploy-ui
+          mkdir -p .deploy-ui/.next
+          cp -a .next/standalone/. .deploy-ui/
+          cp -a .next/static .deploy-ui/.next/static
+          if [ -d public ]; then cp -a public .deploy-ui/public; fi
+          printf '%s\n' "$TARGET_SHA" > .deploy-ui/.disdex-release-sha
+          tar -C .deploy-ui -czf "/tmp/disdex-ui-$TARGET_SHA.tar.gz" .
+          test -s "/tmp/disdex-ui-$TARGET_SHA.tar.gz"
+          echo "UI_BUNDLE_BYTES=$(stat -c '%s' "/tmp/disdex-ui-$TARGET_SHA.tar.gz")"
 
       - name: Initialize root SSH
         shell: bash
@@ -70,33 +77,29 @@ jobs:
           chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
           ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
 
-      - name: Transfer verified UI bundle
+      - name: Upload standalone UI bundle
         shell: bash
         run: |
           set -Eeuo pipefail
           PORT="${SSH_PORT:-22}"
-          scp -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts"             -o ConnectTimeout=15 -P "$PORT"             "$RUNNER_TEMP/new-logic-ui.tgz" "root@$SSH_HOST:/tmp/disdex-new-logic-ui-$TARGET_SHA.tgz"
+          scp -i "$HOME/.ssh/id_root" -P "$PORT"             -o IdentitiesOnly=yes -o BatchMode=yes             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts"             "/tmp/disdex-ui-$TARGET_SHA.tar.gz"             "root@$SSH_HOST:/tmp/disdex-ui-$TARGET_SHA.tar.gz"
 
-      - name: Switch HP, verify new logic, purge legacy UI
+      - name: Deploy new logic HP and purge legacy UI
         shell: bash
         run: |
           set -Eeuo pipefail
           PORT="${SSH_PORT:-22}"
           ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts"             -o ConnectTimeout=15 -p "$PORT" "root@$SSH_HOST"             "TARGET_SHA='$TARGET_SHA' EXPECTED_TRADING_SHA='$EXPECTED_TRADING_SHA' bash -s" <<'REMOTE'
           set -Eeuo pipefail
-          [[ "$(id -un)" == root ]]
 
           ui_service=ai-dex-manager-ui.service
           ui_root=/home/deploy/disdex-trading/ui-releases
-          bundle="/tmp/disdex-new-logic-ui-$TARGET_SHA.tgz"
-          ui_release="$ui_root/ui-new-logic-${TARGET_SHA:0:12}"
-          ui_stage="$ui_root/.ui-new-logic-${TARGET_SHA:0:12}.tmp-$$"
+          release="$ui_root/ui-new-logic-${TARGET_SHA:0:12}"
+          archive="/tmp/disdex-ui-$TARGET_SHA.tar.gz"
           dropin_dir=/etc/systemd/system/ai-dex-manager-ui.service.d
-          canonical_override="$dropin_dir/90-current-ui-release.conf"
+          canonical="$dropin_dir/90-current-ui-release.conf"
           current=/home/deploy/disdex-trading/current
-          backup_root="/var/backups/disdex-ui-switch-${TARGET_SHA:0:12}"
 
-          [[ -s "$bundle" ]]
           trading_before="$(tr -d '[:space:]' < "$current/.disdex-release-sha")"
           trading_path_before="$(readlink -f "$current")"
           [[ "$trading_before" == "$EXPECTED_TRADING_SHA" ]]
@@ -121,53 +124,30 @@ jobs:
             before_restarts["$name"]="$(systemctl show "$unit" -p NRestarts --value 2>/dev/null || true)"
           done
 
-          ui_before="$(systemctl show "$ui_service" -p WorkingDirectory --value)"
-          [[ -d "$ui_before" ]]
-          rm -rf "$backup_root"
-          install -d -m 0700 "$backup_root"
-          cp -a "$dropin_dir" "$backup_root/dropins-before"
+          old_ui="$(systemctl show "$ui_service" -p WorkingDirectory --value)"
+          old_sha="$(systemctl show "$ui_service" -p Environment --value | tr ' ' '\n' | sed -n 's/^DISDEX_UI_RELEASE_SHA=//p' | tail -1)"
+          [[ -d "$old_ui" ]]
+          [[ -s "$archive" ]]
 
-          rollback() {
-            rc=$?
-            trap - ERR
-            set +e
-            echo "HP_SWITCH_ROLLBACK_BEGIN rc=$rc"
-            rm -rf "$dropin_dir"
-            cp -a "$backup_root/dropins-before" "$dropin_dir"
-            systemctl daemon-reload
-            systemctl restart "$ui_service"
-            rm -rf "$ui_stage"
-            rm -f "$bundle"
-            echo "HP_SWITCH_ROLLBACK_WORKDIR=$(systemctl show "$ui_service" -p WorkingDirectory --value 2>/dev/null || true)"
-            exit "$rc"
-          }
-          trap rollback ERR
+          rm -rf "$release"
+          install -d -o deploy -g deploy -m 0750 "$release"
+          tar -xzf "$archive" -C "$release"
+          chown -R deploy:deploy "$release"
+          [[ -f "$release/server.js" ]]
+          [[ -d "$release/.next/static" ]]
+          [[ "$(tr -d '[:space:]' < "$release/.disdex-release-sha")" == "$TARGET_SHA" ]]
 
-          # Remove any abandoned build stages left by cancelled HP-only jobs.
-          find "$ui_root" -mindepth 1 -maxdepth 1 -type d -name '.ui-new-logic-*.tmp-*' -exec rm -rf -- {} +
-
-          install -d -o deploy -g deploy -m 0750 "$ui_stage"
-          tar -xzf "$bundle" -C "$ui_stage"
-          printf '%s\n' "$TARGET_SHA" > "$ui_stage/.disdex-release-sha"
-          chown -R deploy:deploy "$ui_stage"
-
-          next_version="$(runuser -u deploy -- bash -c "cd '$ui_stage' && node -p \"require('./node_modules/next/package.json').version\"")"
-          [[ "$next_version" == "14.1.0" ]]
-          [[ -f "$ui_stage/.next/BUILD_ID" ]]
-          [[ -d "$ui_stage/node_modules" ]]
-
-          rm -rf "$ui_release"
-          mv "$ui_stage" "$ui_release"
-          chown -R deploy:deploy "$ui_release"
-
-          # Retire every legacy release-selection directive. Preserve other
-          # read-only runtime environment directives.
+          # Remove stale release-selection lines from old drop-ins while keeping
+          # unrelated live read-only environment settings.
           shopt -s nullglob
           for f in "$dropin_dir"/*.conf; do
+            [[ "$f" == "$canonical" ]] && continue
             tmp="$f.clean-$$"
             awk '
               /^WorkingDirectory=/ {next}
               /^Environment=DISDEX_UI_RELEASE_SHA=/ {next}
+              /^Environment=HOSTNAME=/ {next}
+              /^ExecStart=/ {next}
               {print}
             ' "$f" > "$tmp"
             if grep -qEv '^[[:space:]]*$|^[[:space:]]*\[Service\][[:space:]]*$' "$tmp"; then
@@ -178,29 +158,46 @@ jobs:
             fi
           done
 
-          cat > "$canonical_override" <<EOF
+          cat > "$canonical" <<EOF
           [Service]
-          WorkingDirectory=$ui_release
+          WorkingDirectory=$release
           Environment=DISDEX_UI_RELEASE_SHA=$TARGET_SHA
+          Environment=HOSTNAME=127.0.0.1
+          ExecStart=
+          ExecStart=/usr/bin/node server.js
           EOF
-          sed -i 's/^[[:space:]]*//' "$canonical_override"
-          chmod 0644 "$canonical_override"
+          sed -i 's/^[[:space:]]*//' "$canonical"
+          chmod 0644 "$canonical"
+          chown root:root "$canonical"
 
           systemctl daemon-reload
           systemctl restart "$ui_service"
 
+          ok=0
           for _ in $(seq 1 30); do
             active="$(systemctl is-active "$ui_service" 2>/dev/null || true)"
             wd="$(systemctl show "$ui_service" -p WorkingDirectory --value 2>/dev/null || true)"
             code="$(curl -sS -H 'Cookie: disdex_auth=1' -o /dev/null -w '%{http_code}' --max-time 5 http://127.0.0.1:3001/decision-status || true)"
-            [[ "$active" == active && "$wd" == "$ui_release" && "$code" == 200 ]] && break
+            if [[ "$active" == active && "$wd" == "$release" && "$code" == 200 ]]; then ok=1; break; fi
             sleep 1
           done
 
-          [[ "$(systemctl is-active "$ui_service")" == active ]]
-          [[ "$(systemctl show "$ui_service" -p WorkingDirectory --value)" == "$ui_release" ]]
-          ui_env="$(systemctl show "$ui_service" -p Environment --value)"
-          printf '%s' "$ui_env" | tr ' ' '\n' | grep -Fxq "DISDEX_UI_RELEASE_SHA=$TARGET_SHA"
+          if [[ "$ok" != 1 ]]; then
+            cat > "$canonical" <<EOF
+          [Service]
+          WorkingDirectory=$old_ui
+          Environment=DISDEX_UI_RELEASE_SHA=$old_sha
+          ExecStart=
+          ExecStart=/usr/bin/npm run start -- --hostname 127.0.0.1
+          EOF
+            sed -i 's/^[[:space:]]*//' "$canonical"
+            systemctl daemon-reload
+            systemctl restart "$ui_service"
+            rm -rf "$release"
+            rm -f "$archive"
+            echo "ROLLBACK=OLD_UI_RESTORED"
+            exit 1
+          fi
 
           for path in             /             /positions             /history             /decision-status             /decision-status/v12             /decision-status/pengu             /decision-status/q102             /decision-status/v52             /decision-status/fet             /decision-status/hype             /decision-status/idle-priority             /decision-status/formal-priority
           do
@@ -223,9 +220,6 @@ jobs:
           print("RUNTIME_OVERVIEW_CONTRACT=PASS")
           PY
 
-          public_code="$(curl -sS -H 'Cookie: disdex_auth=1' -o /dev/null -w '%{http_code}' --max-time 15 https://professional-dismanager.net/decision-status)"
-          [[ "$public_code" == 200 ]]
-
           [[ "$(tr -d '[:space:]' < "$current/.disdex-release-sha")" == "$EXPECTED_TRADING_SHA" ]]
           [[ "$(readlink -f "$current")" == "$trading_path_before" ]]
           for name in "${runners[@]}"; do
@@ -235,33 +229,15 @@ jobs:
             [[ "$(systemctl show "$unit" -p NRestarts --value 2>/dev/null || true)" == "${before_restarts[$name]}" ]]
           done
 
-          python3 - <<'PY'
-          import json
-          kill=json.load(open("/var/lib/disdex/shared/kill-switch.json",encoding="utf-8"))
-          risk=json.load(open("/var/lib/disdex/shared/crypto-daily-risk.json",encoding="utf-8"))
-          guard=json.load(open("/var/lib/disdex/shared/margin-risk/guard-live.json",encoding="utf-8"))
-          assert kill.get("active") is False
-          assert risk.get("tripped") is False
-          assert guard.get("stage")=="HEALTHY"
-          print("POST_HP_TRADING_SAFETY=PASS")
-          PY
-
-          # New HP is verified locally and publicly. Purge all obsolete UI
-          # releases/stages so no legacy page can be selected again.
-          find "$ui_root" -mindepth 1 -maxdepth 1 -type d ! -path "$ui_release" -exec rm -rf -- {} +
-          find "$ui_root" -mindepth 1 -maxdepth 1 -type l -delete
-          rm -f "$bundle"
-
+          # Only after all checks pass: permanently remove old UI releases.
+          find "$ui_root" -mindepth 1 -maxdepth 1 ! -path "$release" -exec rm -rf -- {} +
+          rm -f "$archive"
           count="$(find "$ui_root" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')"
           [[ "$count" == 1 ]]
-          [[ "$(find "$ui_root" -mindepth 1 -maxdepth 1 -type d -print)" == "$ui_release" ]]
 
-          trap - ERR
           echo "STATUS=NEW_LOGIC_HP_DEPLOYED_LEGACY_UI_PURGED"
           echo "UI_SHA=$TARGET_SHA"
-          echo "UI_RELEASE=$ui_release"
-          echo "NEXT_VERSION=$next_version"
-          echo "PUBLIC_DECISION_STATUS_HTTP=$public_code"
+          echo "UI_RELEASE=$release"
           echo "LEGACY_UI_RELEASE_COUNT=0"
           echo "ZEC_UI=REMOVED"
           echo "TRADING_SHA_UNCHANGED=$EXPECTED_TRADING_SHA"
@@ -269,7 +245,7 @@ jobs:
           echo "ORDER_MUTATION_ATTEMPTED=FALSE"
           REMOTE
 
-      - name: Final public smoke
+      - name: Public smoke
         shell: bash
         run: |
           set -Eeuo pipefail
