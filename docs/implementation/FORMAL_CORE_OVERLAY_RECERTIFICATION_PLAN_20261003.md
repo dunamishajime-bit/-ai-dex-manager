@@ -28,3 +28,24 @@
 ユーザー承認により、旧1275件とのexact一致は歴史的再現に限定し、新LIVE-equivalent候補の認証条件から分離する。ownershipによる拒否以外にSizing/Signalをretuneしない。元原本エンジンは編集せずSHA固定の派生モジュールへadmission hookを追加する。
 
 Task 3のデータ不足はhistorical timestamp membershipで埋めない。全closed-lifecycle candidateによる比較を実行できても、current-H1 baseline eligibility/pending/marginが証明されるまではDIAGNOSTICとして保存し、certification/operator/deployをしない。
+
+## 2026-10-03 continuation: certification evidence gates
+
+1. Official Aster listing metadata and boundary klines: completed; raw responses
+   and source/signal ledger are in formal-venue-availability-20261003.
+2. Overlay 8,784 × 7 source/signal ledger: completed, independently regenerated.
+   This does not claim a full Core baseline decision ledger.
+3. Full Core H1 decisions: pending actual causal signal/ranking regeneration.
+   Absence from archived candidate lifecycle is not NO_SIGNAL evidence.
+4. Execution/margin emulator: pending Production-order-path equivalence proof;
+   current exchangeInfo is not historical margin/filter/account evidence.
+5. Re-run 20 cases and paired overlay attribution only after gates 3/4.
+6. Full Python discovery: stale expectations corrected, Linux whole-suite CI
+   required; Windows fcntl import errors must not be suppressed as PASS.
+7. No certificate/operator/Production/HP action until all evidence gates PASS.
+
+Ruling: actual Production feature functions consume d-1 through d-73. Only
+pre-listing-history start-up failures become explicit NO_SIGNAL warmup; no
+invented 74-bar gate may suppress accepted signals or mask volume failures.
+Missing required post-listing bars/BTC remain SOURCE_ERROR. Cost if wrong:
+classification remains blocked rather than silently certifying missing data.

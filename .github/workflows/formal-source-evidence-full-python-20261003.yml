@@ -1,0 +1,31 @@
+name: Formal source evidence and full Python discovery (no LIVE certification)
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/formal-priority-cooldown-20261003]
+    paths:
+      - scripts/research/formal_venue_availability.py
+      - tests/**
+      - .github/workflows/formal-source-evidence-full-python-20261003.yml
+permissions:
+  contents: read
+jobs:
+  full-python-discovery:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Full Python test discovery on Production OS family
+        run: |
+          set -o pipefail
+          python -u -B -m unittest discover -s tests -v 2>&1 | tee full-python-discovery.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: full-python-discovery-${{ github.sha }}
+          retention-days: 90
+          path: full-python-discovery.log
+          if-no-files-found: error

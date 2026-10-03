@@ -56,6 +56,7 @@ deploy-xserver-*.zip
 resend-button-fix-*.tar.gz
 *.tar.gz
 *.zip
+!docs/research/results/formal-venue-availability-20261003/source-evidence.zip
 !docs/research/results/formal-core-overlay-ownership-diagnostic-20261003/replay-ledgers.zip
 !docs/research/results/formal-core-overlay-ownership-diagnostic-20261003/production-feature-stream.zip
 .bt-*/
