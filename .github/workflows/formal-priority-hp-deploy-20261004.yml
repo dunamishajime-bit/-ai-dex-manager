@@ -94,12 +94,13 @@ jobs:
           runners=(disdex-v12-x1-all disdex-pengu-dual-ls-v2 disdex-quality102-causal-v1
                    disdex-v52-aster-only disdex-fet-brk48 disdex-hype-long disdex-idle-priority-short
                    disdex-shared-crypto-risk disdex-v12-v52-margin-guard)
-          declare -A runner_pid_before runner_restart_before
+          declare -A runner_state_before runner_pid_before runner_restart_before
           for name in "${runners[@]}"; do
             unit="$name@$EXPECTED_TRADING_SHA.service"
-            [[ "$(systemctl is-active "$unit" 2>/dev/null || true)" == active ]]
-            runner_pid_before["$name"]="$(systemctl show "$unit" -p MainPID --value)"
-            runner_restart_before["$name"]="$(systemctl show "$unit" -p NRestarts --value)"
+            runner_state_before["$name"]="$(systemctl is-active "$unit" 2>/dev/null || true)"
+            runner_pid_before["$name"]="$(systemctl show "$unit" -p MainPID --value 2>/dev/null || true)"
+            runner_restart_before["$name"]="$(systemctl show "$unit" -p NRestarts --value 2>/dev/null || true)"
+            printf 'RUNNER_BEFORE name=%s state=%s pid=%s restarts=%s\n' "$name" "${runner_state_before[$name]}" "${runner_pid_before[$name]}" "${runner_restart_before[$name]}"
           done
 
           rollback() {
@@ -206,9 +207,13 @@ jobs:
           [[ "$(readlink -f "$current")" == "$trading_path_before" ]]
           for name in "${runners[@]}"; do
             unit="$name@$EXPECTED_TRADING_SHA.service"
-            [[ "$(systemctl is-active "$unit" 2>/dev/null || true)" == active ]]
-            [[ "$(systemctl show "$unit" -p MainPID --value)" == "${runner_pid_before[$name]}" ]]
-            [[ "$(systemctl show "$unit" -p NRestarts --value)" == "${runner_restart_before[$name]}" ]]
+            state_after="$(systemctl is-active "$unit" 2>/dev/null || true)"
+            pid_after="$(systemctl show "$unit" -p MainPID --value 2>/dev/null || true)"
+            restarts_after="$(systemctl show "$unit" -p NRestarts --value 2>/dev/null || true)"
+            [[ "$state_after" == "${runner_state_before[$name]}" ]]
+            [[ "$pid_after" == "${runner_pid_before[$name]}" ]]
+            [[ "$restarts_after" == "${runner_restart_before[$name]}" ]]
+            printf 'RUNNER_AFTER name=%s state=%s pid=%s restarts=%s\n' "$name" "$state_after" "$pid_after" "$restarts_after"
           done
 
           python3 - <<'PY'
