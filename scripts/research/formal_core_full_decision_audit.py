@@ -14,7 +14,7 @@ from __future__ import annotations
 import argparse
 from collections import Counter
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, timedelta
 import hashlib
 import importlib
 import json
@@ -180,65 +180,42 @@ def regenerate_q102_full(paths: ReleasePaths, output_root: Path) -> dict[str, An
     ledger: list[dict[str, Any]] = []
     raw_event_count = 0
     raw_error_count = 0
-    empty_snapshot_count = 0
     with scan_mod.RuntimeBridge() as bridge:
-        series = bridge.q102_series(candles_by_symbol, high_vol_symbols, q102_symbols, start_ms, end_ms)
+        # q102_fast_series uses the same audited Production signal functions and
+        # monthly-rule cache, but avoids the observability-only per-symbol
+        # snapshot expansion that is quadratic over the 8,784-hour period.
+        series = bridge.q102_fast_series(candles_by_symbol, high_vol_symbols, q102_symbols, start_ms, end_ms)
         raw_event_count = len(series)
         for event in series:
             ts = int(event["decisionTs"])
-            snapshot = event.get("snapshot")
-            if event.get("error") or snapshot is None:
-                raw_error_count += 1
-                reason = str(event.get("error") or "Q102_SNAPSHOT_MISSING")
-                for symbol in q102_symbols:
-                    ledger.append({
-                        "strategy_id": "Q102",
-                        "symbol": symbol,
-                        "decision_ts_ms": ts,
-                        "status": "NOT_VERIFIABLE",
-                        "reason": reason,
-                        "available_symbols": event.get("availableSymbols", []),
-                        "available_high_vol": event.get("availableHighVol", []),
-                        "data_cutoff_ms": ts,
-                        "source_runtime_sha": bridge.runtime_sha,
-                    })
-                continue
-
-            items = list(snapshot.get("items") or [])
-            if not items:
-                empty_snapshot_count += 1
-                ledger.append({
-                    "strategy_id": "Q102",
-                    "symbol": "Q102_UNIVERSE",
-                    "decision_ts_ms": ts,
-                    "status": "NO_SIGNAL",
-                    "reason": snapshot.get("selectedReason") or "Q102_POINT_IN_TIME_UNIVERSE_NOT_READY",
-                    "available_symbols": event.get("availableSymbols", []),
-                    "available_high_vol": event.get("availableHighVol", []),
-                    "selected_symbol": snapshot.get("selectedSymbol"),
-                    "data_cutoff_ms": ts,
-                    "source_runtime_sha": bridge.runtime_sha,
-                })
-                continue
-
             exact_signal = event.get("signal") or {}
-            for item in items:
-                selected = bool(item.get("selected"))
-                ref = item.get("referenceTs")
-                ledger.append({
-                    "strategy_id": "Q102",
-                    "symbol": item["symbol"],
-                    "decision_ts_ms": ts,
-                    "status": "SIGNAL" if selected else "CANDIDATE" if item.get("eligible") else "WAIT",
-                    "item": item,
-                    "signal": exact_signal if selected else None,
-                    "selected_symbol": snapshot.get("selectedSymbol"),
-                    "selected_reason": snapshot.get("selectedReason"),
-                    "available_symbols": event.get("availableSymbols", []),
-                    "available_high_vol": event.get("availableHighVol", []),
-                    "data_cutoff_ms": min(ts, int(ref or ts)),
-                    "source_runtime_sha": bridge.runtime_sha,
-                })
+            error = event.get("error")
+            selected_symbol = str(exact_signal.get("symbol") or "").upper()
+            side = int(exact_signal.get("side") or 0)
+            if error:
+                raw_error_count += 1
+                status = "SOURCE_ERROR"
+                reason = str(error)
+            elif side != 0 and selected_symbol:
+                status = "SIGNAL"
+                reason = str(exact_signal.get("reason") or "Q102_SIGNAL")
+            else:
+                status = "NO_SIGNAL"
+                reason = str(exact_signal.get("reason") or "Q102_POINT_IN_TIME_NO_SIGNAL")
+            data_cutoff = min(ts, int(exact_signal.get("dataCutoffTs") or ts))
+            ledger.append({
+                "strategy_id": "Q102",
+                "symbol": selected_symbol if status == "SIGNAL" else "Q102_UNIVERSE",
+                "decision_ts_ms": ts,
+                "status": status,
+                "reason": reason,
+                "signal": exact_signal if status == "SIGNAL" else None,
+                "selected_symbol": selected_symbol or None,
+                "available_symbols": event.get("availableSymbols", []),
+                "available_high_vol": event.get("availableHighVol", []),
+                "data_cutoff_ms": data_cutoff,
+                "source_runtime_sha": bridge.runtime_sha,
+            })
 
     decision_times = sorted({int(row["decision_ts_ms"]) for row in ledger})
     require(len(decision_times) == raw_event_count, "Q102_FULL_LEDGER_LOST_DECISION_TIMESTAMPS")
@@ -251,7 +228,7 @@ def regenerate_q102_full(paths: ReleasePaths, output_root: Path) -> dict[str, An
     require(raw_error_count == 0, f"Q102_FULL_RUNTIME_ERRORS:{raw_error_count}")
     require(all(int(row["data_cutoff_ms"]) <= int(row["decision_ts_ms"]) for row in ledger), "Q102_FULL_FUTURE_DATA")
 
-    ledger_meta = write_jsonl(output_root / "Q102.full-observability.jsonl", ledger)
+    ledger_meta = write_jsonl(output_root / "Q102.global-h1-decisions.jsonl", ledger)
 
     fast_rows = load_jsonl(paths.q102_fast_scan / "decisions" / "Q102.jsonl")
     fast_signals = {
@@ -272,7 +249,9 @@ def regenerate_q102_full(paths: ReleasePaths, output_root: Path) -> dict[str, An
     require(not mismatches, f"Q102_FAST_FULL_SIGNAL_SEMANTIC_MISMATCH:{mismatches[:5]}")
 
     return {
-        "status": "PASS",
+        "status": "PARTIAL_GLOBAL_H1_PASS_PER_SYMBOL_RANKING_MISSING",
+        "global_h1_decision_evidence": "PASS",
+        "per_symbol_full_ranking_evidence": "MISSING",
         "runtime_sha": source_manifest["runtime_sha"],
         "verified_repository_commit": source_manifest.get("verified_repository_commit"),
         "raw_event_count": raw_event_count,
@@ -281,14 +260,119 @@ def regenerate_q102_full(paths: ReleasePaths, output_root: Path) -> dict[str, An
         "right_boundary_decision_timestamps": len(right_boundary_times),
         "right_boundary_ts": end_ms,
         "ledger_rows": len(ledger),
-        "empty_snapshot_explicit_rows": empty_snapshot_count,
         "error_timestamps": raw_error_count,
         "signal_rows": len(full_signals),
-        "fast_signal_rows": len(fast_signals),
-        "fast_full_signal_semantic_parity": "PASS",
+        "archived_signal_rows": len(fast_signals),
+        "archived_signal_semantic_parity": "PASS",
         "output": ledger_meta,
         "first_ts": decision_times[0],
         "last_ts": decision_times[-1],
+        "ruling": (
+            "Every hourly global Q102 decision is regenerated from the audited Production signal "
+            "functions with zero runtime errors, and all archived 372 SIGNAL rows match semantically. "
+            "Per-symbol observability/ranking for every non-selected hour is not promoted to PASS "
+            "because the archived full observer expands quadratically and is not itself the trading path."
+        ),
+    }
+
+
+
+def merge_q102_chunks(paths: ReleasePaths, chunks_root: Path, output_root: Path) -> dict[str, Any]:
+    manifests = sorted(chunks_root.rglob("q102-chunk-manifest.json"))
+    require(bool(manifests), "Q102_CHUNK_MANIFESTS_MISSING")
+    baseline = load_json(paths.baseline_scan / "signal-scan-manifest.json")
+    expected_start = date.fromisoformat(str(baseline["period_start"]))
+    expected_end_exclusive = date.fromisoformat(str(baseline["period_end_inclusive"])) + timedelta(days=1)
+    expected_start_ms = int(__import__("datetime").datetime(
+        expected_start.year, expected_start.month, expected_start.day, tzinfo=__import__("datetime").timezone.utc
+    ).timestamp() * 1000)
+    expected_end_ms = int(__import__("datetime").datetime(
+        expected_end_exclusive.year, expected_end_exclusive.month, expected_end_exclusive.day,
+        tzinfo=__import__("datetime").timezone.utc
+    ).timestamp() * 1000)
+
+    ordered: list[tuple[dict[str, Any], Path]] = []
+    for manifest_path in manifests:
+        manifest = load_json(manifest_path)
+        require(manifest.get("status") == "PASS", f"Q102_CHUNK_NOT_PASS:{manifest_path}")
+        ordered.append((manifest, manifest_path))
+    ordered.sort(key=lambda pair: int(pair[0]["start_ms"]))
+
+    runtime_shas = {str(manifest["source_runtime_sha"]) for manifest, _ in ordered}
+    require(len(runtime_shas) == 1, "Q102_CHUNK_RUNTIME_SHA_MISMATCH")
+    cursor = expected_start_ms
+    rows: list[dict[str, Any]] = []
+    chunk_summaries: list[dict[str, Any]] = []
+    for manifest, manifest_path in ordered:
+        start_ms = int(manifest["start_ms"])
+        end_ms = int(manifest["end_exclusive_ms"])
+        require(start_ms == cursor, f"Q102_CHUNK_GAP_OR_OVERLAP:{cursor}:{start_ms}")
+        ledger_path = manifest_path.parent / "Q102.full-observability.jsonl"
+        require(ledger_path.is_file(), f"Q102_CHUNK_LEDGER_MISSING:{ledger_path}")
+        chunk_rows = load_jsonl(ledger_path)
+        require(len(chunk_rows) == int(manifest["ledger_rows"]), f"Q102_CHUNK_ROW_COUNT_MISMATCH:{manifest_path}")
+        require(sha256_bytes(ledger_path.read_bytes()) == manifest["output"]["sha256"], f"Q102_CHUNK_SHA_MISMATCH:{manifest_path}")
+        rows.extend(chunk_rows)
+        chunk_summaries.append({
+            "start": manifest["start"], "end_exclusive": manifest["end_exclusive"],
+            "hours": manifest["expected_hours"], "rows": manifest["ledger_rows"],
+            "signals": manifest["signal_rows"], "manifest": str(manifest_path),
+        })
+        cursor = end_ms
+    require(cursor == expected_end_ms, f"Q102_CHUNK_FINAL_BOUNDARY:{cursor}:{expected_end_ms}")
+
+    decision_times = sorted({int(row["decision_ts_ms"]) for row in rows})
+    expected_hours = (expected_end_ms - expected_start_ms) // HOUR_MS
+    require(len(decision_times) == expected_hours, f"Q102_MERGED_HOUR_COUNT:{len(decision_times)}:{expected_hours}")
+    require(decision_times[0] == expected_start_ms, "Q102_MERGED_START_MISMATCH")
+    require(decision_times[-1] == expected_end_ms - HOUR_MS, "Q102_MERGED_END_MISMATCH")
+    assert_regular_schedule(decision_times, HOUR_MS, "Q102_MERGED")
+
+    keys: set[tuple[int, str]] = set()
+    for row in rows:
+        key = (int(row["decision_ts_ms"]), str(row["symbol"]))
+        require(key not in keys, f"Q102_MERGED_DUPLICATE:{key[0]}:{key[1]}")
+        keys.add(key)
+        require(int(row.get("data_cutoff_ms") or row["decision_ts_ms"]) <= int(row["decision_ts_ms"]),
+                "Q102_MERGED_FUTURE_DATA")
+
+    fast_rows = load_jsonl(paths.q102_fast_scan / "decisions" / "Q102.jsonl")
+    fast_signals = {
+        (int(row["decision_ts_ms"]), str(row["symbol"])): signal_semantics(row)
+        for row in fast_rows
+        if row.get("status") == "SIGNAL"
+        and expected_start_ms <= int(row["decision_ts_ms"]) < expected_end_ms
+    }
+    full_signals = {
+        (int(row["decision_ts_ms"]), str(row["symbol"])): signal_semantics(row)
+        for row in rows if row.get("status") == "SIGNAL"
+    }
+    require(set(fast_signals) == set(full_signals), "Q102_MERGED_FAST_FULL_SIGNAL_KEY_MISMATCH")
+    mismatches = [
+        key for key in sorted(fast_signals)
+        if canonical_json(fast_signals[key]) != canonical_json(full_signals[key])
+    ]
+    require(not mismatches, f"Q102_MERGED_FAST_FULL_SIGNAL_SEMANTIC_MISMATCH:{mismatches[:5]}")
+
+    merged_meta = write_jsonl(output_root / "Q102.full-observability.jsonl", rows)
+    statuses = Counter(str(row.get("status")) for row in rows)
+    return {
+        "status": "PASS",
+        "global_h1_decision_evidence": "PASS",
+        "per_symbol_full_ranking_evidence": "PASS",
+        "source_runtime_sha": next(iter(runtime_shas)),
+        "period_start": expected_start.isoformat(),
+        "period_end_exclusive": expected_end_exclusive.isoformat(),
+        "decision_timestamps": len(decision_times),
+        "period_hours": expected_hours,
+        "ledger_rows": len(rows),
+        "status_counts": dict(sorted(statuses.items())),
+        "signal_rows": len(full_signals),
+        "archived_signal_rows": len(fast_signals),
+        "archived_signal_semantic_parity": "PASS",
+        "chunk_count": len(ordered),
+        "chunks": chunk_summaries,
+        "output": merged_meta,
     }
 
 
@@ -319,6 +403,7 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--release-root", required=True, type=Path)
     parser.add_argument("--output-root", required=True, type=Path)
+    parser.add_argument("--q102-chunks-root", type=Path)
     args = parser.parse_args(argv)
 
     release = ReleasePaths.from_root(args.release_root.resolve())
@@ -341,13 +426,24 @@ def main(argv: list[str] | None = None) -> int:
     require(pengu["rows"] == len(pengu_times), "PENGU_NOT_ONE_ROW_PER_DECISION")
     require(fet["rows"] == len(fet_times), "FET_NOT_ONE_ROW_PER_DECISION")
 
-    q102 = regenerate_q102_full(release, output)
+    q102 = (
+        merge_q102_chunks(release, args.q102_chunks_root.resolve(), output)
+        if args.q102_chunks_root
+        else regenerate_q102_full(release, output)
+    )
     v52 = audit_v52(release)
 
-    crypto_core_pass = all(item.get("status") == "PASS" for item in (
-        {"status": "PASS"}, {"status": "PASS"}, {"status": "PASS"}, q102
-    ))
-    overall = "BLOCKED_V52_FULL_LIVE_DECISION_EVIDENCE_MISSING" if v52["status"] != "PASS" else "PASS"
+    crypto_global_decision_pass = q102.get("global_h1_decision_evidence") == "PASS"
+    q102_per_symbol_pass = q102.get("per_symbol_full_ranking_evidence") == "PASS"
+    v52_full_live_pass = v52["status"] == "PASS"
+    if not q102_per_symbol_pass and not v52_full_live_pass:
+        overall = "BLOCKED_Q102_PER_SYMBOL_RANKING_AND_V52_FULL_LIVE_DECISION_EVIDENCE_MISSING"
+    elif not q102_per_symbol_pass:
+        overall = "BLOCKED_Q102_PER_SYMBOL_RANKING_EVIDENCE_MISSING"
+    elif not v52_full_live_pass:
+        overall = "BLOCKED_V52_FULL_LIVE_DECISION_EVIDENCE_MISSING"
+    else:
+        overall = "PASS"
 
     manifest = {
         "schema_version": 1,
@@ -383,19 +479,22 @@ def main(argv: list[str] | None = None) -> int:
             "Q102": q102,
             "V52": v52,
         },
-        "crypto_core_full_decision_evidence": "PASS" if crypto_core_pass else "FAIL",
+        "crypto_core_global_h1_decision_evidence": "PASS" if crypto_global_decision_pass else "FAIL",
+        "crypto_core_full_per_symbol_decision_evidence": "PASS" if q102_per_symbol_pass else "MISSING",
         "ruling": (
-            "V12/PENGU/FET full scheduled decision evidence and Q102 full causal observability "
-            "may pass independently. V52 remains uncertified until a complete historical LIVE "
-            "decision input stream (including required quote/depth/filter evidence) is proven. "
-            "No missing candidate interval is treated as NO_SIGNAL."
+            "V12/PENGU/FET scheduled decision evidence and the global hourly Q102 trading decision "
+            "stream are proven. Q102 per-symbol ranking for every non-selected hour remains a separate "
+            "observability gap, and V52 remains uncertified until a complete historical LIVE "
+            "decision input stream (including quote/depth/filter evidence) is proven. Missing "
+            "candidate intervals are never converted to fabricated NO_SIGNAL evidence."
         ),
     }
     manifest_sha = write_json(output / "core-full-decision-audit-manifest.json", manifest)
     print(canonical_json({
         "status": overall,
-        "crypto_core_full_decision_evidence": manifest["crypto_core_full_decision_evidence"],
-        "q102_signal_parity": q102["fast_full_signal_semantic_parity"],
+        "crypto_core_global_h1_decision_evidence": manifest["crypto_core_global_h1_decision_evidence"],
+        "crypto_core_full_per_symbol_decision_evidence": manifest["crypto_core_full_per_symbol_decision_evidence"],
+        "q102_signal_parity": q102["archived_signal_semantic_parity"],
         "v52": v52["status"],
         "manifest_sha256": manifest_sha,
     }))
