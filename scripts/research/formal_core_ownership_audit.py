@@ -19,6 +19,12 @@ EXPECTED = {
     "portfolio-trades.jsonl": (1275, "3433c0b033bb048b1aca22b21d97ff253bbb160edb47d00eb7a8fac6a1ac9915"),
     "candidate-decisions.jsonl": (2588, "48b68012f7e9dea1fc83b98119b7318e48193abe57ca9c27efb6062ea3b76b53"),
 }
+# These are the exact LF Git blobs at source runtime 1ad60851. The original
+# handoff SHA256 above is CRLF; only these two verified identities are accepted.
+GIT_LF_SHA = {
+    "portfolio-trades.jsonl": "57231c264a97177b5a753bba2660d6cdf15eddce65f37b65467c16e0cdb0a839",
+    "candidate-decisions.jsonl": "48b7b40fb7b807a9cc9e403fa325e551260ebd208d021fd31bb9dfcb24956836",
+}
 RAW_SHA = "35d5259ee890c7d1ac19d8d433940f05a8d0c94f793b9d3005d770ea2e8dc10c"
 GATED_SHA = "ecc8103dea9ce392ea72fe918ca362416b762f0072a1a43d7f0d496b6755b935"
 ENGINE_SHA = "761d88a34ddda536bcf0a88547b1f438ff58b17086b1a89388dc805df6aeba06"
@@ -143,9 +149,10 @@ def main():
         canonical_rows, fresh_rows = rows(original), rows(fresh)
         checked = semantic_parity(canonical_rows, fresh_rows)
         checked.update({"canonical_sha256": file_sha(original), "fresh_bytes_sha256": file_sha(fresh),
+                        "original_crlf_sha256": digest, "git_lf_blob_sha256": GIT_LF_SHA[name],
                         "canonical_expected_rows": count, "fresh_rows": len(fresh_rows),
                         "byte_identity": original.read_bytes() == fresh.read_bytes()})
-        source_pass &= file_sha(original) == digest and len(canonical_rows) == count
+        source_pass &= file_sha(original) in {digest, GIT_LF_SHA[name]} and len(canonical_rows) == count
         report["ledger_parity"][name] = checked
     for label, path, digest in (("raw_candidates", args.raw_candidates, RAW_SHA),
                                  ("fet_dual_gate_candidates", args.gated_candidates, GATED_SHA)):

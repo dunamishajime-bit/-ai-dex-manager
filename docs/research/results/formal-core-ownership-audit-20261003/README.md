@@ -17,6 +17,8 @@
 
 Fresh trade ledger **1,275全行**・decision ledger **2,588全行** は canonical と JSON field 全一致。Windows local file は bytes SHA も一致。Linux serialization の改行差は semantic parity と明示的に分離する。
 
+元handoffのSHAはCRLF原本。`git show 1ad60851:<ledger>` のGit正本LF SHAも独立取得し固定した。trades LF `57231c264a97177b5a753bba2660d6cdf15eddce65f37b65467c16e0cdb0a839` / decisions LF `48b7b40fb7b807a9cc9e403fa325e551260ebd208d021fd31bb9dfcb24956836`。任意の「改行を直せば一致するファイル」ではなく、この2組のexact digestと全JSON型・field・行順で検証する。
+
 | Metric | Fresh / canonical exact |
 |---|---:|
 | Final JPY | 1,229,065,462.0472791 |
@@ -66,11 +68,12 @@ Workflow `formal-core-ownership-audit-20261003.yml` は Core を実際に再実�
 
 ## Fresh test evidence
 
-- Ownership/source archive regressions: RED確認後 **19/19 PASS** (engine hash mismatch / JSON型差の回帰も含む)。
+- Ownership/source archive regressions: RED確認後 **20/20 PASS** (engine hash mismatch / JSON型差 / 固定Git LF identityの回帰も含む)。
 - Whole Python discovery on Windows: **162 tests / 156 PASS / 2 failures / 2 import errors / 2 skips**。
 - 未変更の `test_q102_1p0_lump100k_implementation_contract` が古い Q102 `1.50` を要求する failure。
 - 未変更の `test_runtime_wiring_script.test_wiring_restores_required_monitor_timers` が削除済み文字列 `DISDEX_MONITOR_TIMER_ACTIVE` を要求する failure。
 - `test_ui_retention_contract` / `test_vps_retention_dependency_protection` は Windows に `fcntl` がない import error。
 - 新監査追加以外の対象ソース・上記テストには HEAD `1ad60851` との差分なし。既存failureを握り潰して全体PASSとは報告しない。今回のscope外の runtime cap・monitor implementation を変更してこれらを通すことはしない。
+- 上記全体集計は新監査17test時点の取得結果。最終20test後の全体再実行はWindowsのconcurrent rate-budget testでKeyboardInterruptとなり集計未完了。最終の全体GREENも主張しない。
 
 既存 LIVE / operator artifact / certificate / current symlink / state / protective orders / HP を変更していない。Orders / cancels / position mutation はすべて0。

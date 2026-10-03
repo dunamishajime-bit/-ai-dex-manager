@@ -152,6 +152,35 @@ class OwnershipAuditTests(unittest.TestCase):
             self.assertFalse(result["source_identity_pass"])
             self.assertEqual(result["status"], "BLOCKED_CANONICAL_SOURCE_IDENTITY")
 
+    def test_git_lf_blob_is_verified_without_weakening_original_crlf_identity(self):
+        repo = MODULE.parents[2]
+        frozen = repo / "docs/research/results/formal-core-ownership-audit-20261003"
+        original = repo / "docs/research/results/formal-priority-cooldown-20261003/PRICE_MODEL_10BPS"
+        with tempfile.TemporaryDirectory(dir=MODULE.parent) as directory:
+            root = Path(directory)
+            self.module().extract_verified_zip(frozen / "candidate-inputs.zip", root / "input", None)
+            self.module().extract_verified_zip(frozen / "engine-source.zip", root / "engine", None)
+            canonical, fresh = root / "canonical", root / "fresh"
+            canonical.mkdir()
+            fresh.mkdir()
+            for name in ("portfolio-trades.jsonl", "candidate-decisions.jsonl"):
+                payload = (original / name).read_bytes().replace(b"\r\n", b"\n")
+                (canonical / name).write_bytes(payload)
+                (fresh / name).write_bytes(payload)
+            (fresh / "metrics.json").write_text(json.dumps({
+                "final_equity_jpy": 1229065462.0472791, "profit_factor": 2.4887028036012624,
+                "maximum_mtm_drawdown": -0.21296368751349548, "closed_trades": 1275}))
+            output = root / "report.json"
+            argv = ["audit", "--canonical", str(canonical), "--fresh", str(fresh),
+                    "--raw-candidates", str(root / "input/v12_trail02_candidates/crypto-price-model-candidates.jsonl"),
+                    "--gated-candidates", str(root / "input/gated-candidates/crypto-price-model-candidates.jsonl"),
+                    "--engine-source", str(root / "engine/portfolio_price_model.py"), "--output", str(output)]
+            with patch.object(sys, "argv", argv):
+                self.assertEqual(self.module().main(), 2)
+            result = json.loads(output.read_text())
+            self.assertTrue(result["source_identity_pass"])
+            self.assertEqual(result["status"], "BLOCKED_FORMAL_CORE_SYMBOL_OWNERSHIP_PARITY_CONFLICT")
+
 
 if __name__ == "__main__":
     unittest.main()

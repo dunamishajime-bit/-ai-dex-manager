@@ -31,6 +31,8 @@
       "first_divergence_index": null,
       "fresh_bytes_sha256": "48b68012f7e9dea1fc83b98119b7318e48193abe57ca9c27efb6062ea3b76b53",
       "fresh_rows": 2588,
+      "git_lf_blob_sha256": "48b7b40fb7b807a9cc9e403fa325e551260ebd208d021fd31bb9dfcb24956836",
+      "original_crlf_sha256": "48b68012f7e9dea1fc83b98119b7318e48193abe57ca9c27efb6062ea3b76b53",
       "pass": true,
       "rows": 2588
     },
@@ -41,6 +43,8 @@
       "first_divergence_index": null,
       "fresh_bytes_sha256": "3433c0b033bb048b1aca22b21d97ff253bbb160edb47d00eb7a8fac6a1ac9915",
       "fresh_rows": 1275,
+      "git_lf_blob_sha256": "57231c264a97177b5a753bba2660d6cdf15eddce65f37b65467c16e0cdb0a839",
+      "original_crlf_sha256": "3433c0b033bb048b1aca22b21d97ff253bbb160edb47d00eb7a8fac6a1ac9915",
       "pass": true,
       "rows": 1275
     }
