@@ -11,6 +11,7 @@ const HEARTBEAT_PATHS = Object.freeze({
   quality102: "/var/lib/disdex/runner-health/heartbeats/quality102-causal-v1.json",
   v52: "/var/lib/disdex/runner-health/heartbeats/v52.json",
   fet: "/var/lib/disdex/fet-brk48-residual/state.json",
+  hype: "/var/lib/disdex/runner-health/heartbeats/hype-trend-long.json",
 });
 
 type EnvMap = Record<string, string>;
@@ -28,14 +29,19 @@ export type CurrentProductionRuntime = {
     quality102: string;
     v52: string;
     fet: string;
+    hype: string;
   };
   runtimeLineage: {
     synchronized: boolean;
-    units: Record<"v12" | "pengu" | "quality102" | "v52" | "fet", {
+    units: Record<"v12" | "pengu" | "quality102" | "v52" | "fet" | "hype", {
       runtimeSha?: string;
       expectedSha?: string;
       mode?: string;
       safetyState?: string;
+      liveEnabled?: boolean;
+      mainPid?: number;
+      updatedAt?: number;
+      healthReason?: string;
       matchesCurrent: boolean;
       error?: string;
     }>;
@@ -170,6 +176,14 @@ async function loadRuntimeLineage(releaseSha: string): Promise<CurrentProduction
         expectedSha,
         mode: typeof raw.mode === "string" ? raw.mode : undefined,
         safetyState: typeof raw.safetyState === "string" ? raw.safetyState : undefined,
+        liveEnabled: typeof raw.liveEnabled === "boolean" ? raw.liveEnabled : undefined,
+        mainPid: Number.isFinite(Number(raw.mainPid)) ? Number(raw.mainPid) : undefined,
+        updatedAt: Number.isFinite(Number(raw.heartbeatAt))
+          ? Number(raw.heartbeatAt)
+          : Number.isFinite(Number(raw.updatedAt))
+            ? Number(raw.updatedAt)
+            : undefined,
+        healthReason: typeof raw.healthReason === "string" ? raw.healthReason : undefined,
         matchesCurrent: runtimeSha === releaseSha && expectedSha === releaseSha,
       };
     } catch (error) {
@@ -225,6 +239,7 @@ export async function loadCurrentProductionRuntime(): Promise<CurrentProductionR
       quality102: releaseSha,
       v52: releaseSha,
       fet: releaseSha,
+      hype: releaseSha,
     },
     runtimeLineage,
     caps: {

@@ -53,6 +53,7 @@ export async function GET(req: NextRequest) {
         if (unit.id === "PENGU_DUAL_LS_V2_FINAL") return { ...unit, status: penguRuntime.status, updatedAt: penguRuntime.updatedAt, reason: penguRuntime.reason };
         if (unit.id === "QUALITY102_CAUSAL_V1") return { ...unit, status: quality102Runtime.status, updatedAt: quality102Runtime.updatedAt, reason: quality102Runtime.reason };
         if (unit.id === "FET_BRK48_RESIDUAL") return { ...unit, releaseSha: fetRuntime.runtimeSha || unit.releaseSha, status: fetRuntime.status, updatedAt: fetRuntime.updatedAt, reason: fetRuntime.reason };
+        if (unit.id === "HYPE_TREND_LONG") return unit;
         if (!snapshot.v52.marketOpen) return { ...unit, status: "UNCONFIRMED" as const, updatedAt: v52Top2Observability.updatedAt, reason: "米国株式市場の対象時間外です。V52は市場時間外のため意図的停止で、新規判定・発注は行いません。" };
         return { ...unit, status: v52Top2Observability.status === "LIVE" ? "LIVE" : v52Top2Observability.status === "STALE" ? "STALE" : "UNAVAILABLE", updatedAt: v52Top2Observability.updatedAt, reason: v52Top2Observability.errors[0] || v52Top2Observability.reason || (v52Top2Observability.status === "LIVE" ? "V52 runner state更新済み、Kill Switch inactiveを確認しました。" : "V52 runner stateがLIVE確認条件を満たしていません。") };
       }),

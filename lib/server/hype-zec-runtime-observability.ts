@@ -114,7 +114,7 @@ export function evaluateHypeZecMarketGates(data:Market,which:Key,p:Params,now:nu
   return {gates,accepted,reference:s.ts};
 }
 async function serviceActive(sha:string):Promise<boolean>{
-  try { const r=await execFileAsync("systemctl",["is-active","disdex-hype-zec-long@"+sha+".service"],{timeout:2200});
+  try { const r=await execFileAsync("systemctl",["is-active","disdex-hype-long@"+sha+".service"],{timeout:2200});
     return r.stdout.trim()==="active"; }catch {return false;}
 }
 export async function loadHypeZecRuntimeObservability(now=Date.now()):Promise<HypeZecOverview>{

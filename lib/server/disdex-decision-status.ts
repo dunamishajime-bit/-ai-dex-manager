@@ -94,6 +94,7 @@ export function runtimeSnapshot(
   const pengu = currentRuntime?.pengu;
   const q102 = currentRuntime?.quality102;
   const v52 = currentRuntime?.v52;
+  const hype = currentRuntime?.runtimeLineage.units.hype;
   return {
     checkedAt,
     units: [
@@ -156,6 +157,27 @@ export function runtimeSnapshot(
         protection: "5x Cross・reduce-only protection・reconciliation・共有risk・Kill Switch",
         note: "flat / no-signal時もrunner heartbeatを表示し、state stale時はLIVEにしません。",
         reason: "Waiting for FET runner state.",
+      },
+      {
+        id: "HYPE_TREND_LONG",
+        label: "HYPE Trend Long",
+        status: !hype
+          ? "UNAVAILABLE"
+          : hype.safetyState === "BLOCKED" || hype.liveEnabled === false || hype.mainPid === 0
+            ? "UNAVAILABLE"
+            : hype.matchesCurrent && hype.mode?.toUpperCase() === "LIVE"
+              ? "LIVE"
+              : "UNCONFIRMED",
+        releaseSha: hype?.runtimeSha || releaseSha,
+        venue: "Aster Futures HYPEUSDT",
+        timeframe: "closed H1 trend / breakout",
+        entryPolicy: "HYPE Trend Long Production runner / current heartbeat authoritative",
+        protection: caps
+          ? `Crypto ${caps.cryptoGross.toFixed(2)}x / Total ${caps.totalGross.toFixed(2)}x / shared risk / Kill Switch / Aster 5x Cross`
+          : "Production runtime unavailable.",
+        note: "6番目のProduction Runner。停止・manual review時も一覧から消さず状態を表示します。",
+        reason: hype?.healthReason || (hype?.matchesCurrent ? "HYPE heartbeatを取得しました。" : "HYPE heartbeatがcurrent Productionと一致しません。"),
+        updatedAt: hype?.updatedAt,
       },
       {
         id: "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96",
