@@ -1,0 +1,65 @@
+name: PENGU Current Production OKX Proxy 20241004-20251004 BT
+
+on:
+  push:
+    branches:
+      - research/pengu-current-20241004-20251004-bt-20261004
+    paths:
+      - "scripts/research_fetch_okx_pengu_20241004_20251004.py"
+      - "scripts/research_pengu_current_okx_proxy_20241004_20251004_bt.ts"
+      - ".github/workflows/pengu-current-okx-proxy-20241004-20251004-bt.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify production ancestry
+        run: git merge-base --is-ancestor 53eeff5417636369d4709fddfd47d7916ddcf3b1 HEAD
+      - name: Install
+        run: npm ci --no-audit --no-fund
+      - name: Fetch OKX proxy data
+        run: python scripts/research_fetch_okx_pengu_20241004_20251004.py
+      - name: Run current Production logic on OKX proxy
+        env:
+          PENGU_LOCAL_DATA_DIR: .research-state/okx-pengu-proxy
+          PENGU_CURRENT_BT_OUT: .research-state/pengu-current-okx-proxy-20241004-20251004-bt.json
+        run: |
+          set -o pipefail
+          npx tsx scripts/research_pengu_current_okx_proxy_20241004_20251004_bt.ts 2>&1 | tee .research-state-pengu-okx-proxy.log
+      - name: Validate
+        run: |
+          python3 - <<'PY'
+          import json
+          p=json.load(open('.research-state/pengu-current-okx-proxy-20241004-20251004-bt.json'))
+          assert p['schema']=='pengu-current-production-okx-proxy-window-bt/v1'
+          assert p['productionSourceSha']=='53eeff5417636369d4709fddfd47d7916ddcf3b1'
+          assert 'SUPPLEMENTARY_PROXY_ONLY' in p['data']['note']
+          assert p['safety']=={'researchOnly':True,'ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print('PENGU_OKX_PROXY_CONTRACT=PASS')
+          print(json.dumps({'data':p['data'],'normal':p['normal']['metrics'],'stress':p['stress']['metrics'],'routes':p['normal']['routes'],'shortDiagnostics':p['normal']['shortDiagnostics'],'blocked':p['normal']['blocked']},ensure_ascii=False,separators=(',',':')))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-okx-proxy-20241004-20251004-bt-${{ github.run_id }}
+          path: |
+            .research-state/okx-pengu-proxy
+            .research-state/pengu-current-okx-proxy-20241004-20251004-bt.json
+            .research-state-pengu-okx-proxy.log
+          include-hidden-files: true
+          retention-days: 30
