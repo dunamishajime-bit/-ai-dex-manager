@@ -16,7 +16,6 @@ concurrency:
 
 jobs:
   deploy-hp-only:
-    if: github.event.head_commit.message == 'ops: deploy formal priority HP a23edd76'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
