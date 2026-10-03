@@ -1,0 +1,59 @@
+name: PENGU Current Production Binance Proxy 20241004-20251004 BT
+
+on:
+  push:
+    branches:
+      - research/pengu-current-20241004-20251004-bt-20261004
+    paths:
+      - "scripts/research_pengu_current_binance_proxy_20241004_20251004_bt.ts"
+      - ".github/workflows/pengu-current-binance-proxy-20241004-20251004-bt.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - name: Verify production ancestry
+        run: |
+          set -Eeuo pipefail
+          git merge-base --is-ancestor 53eeff5417636369d4709fddfd47d7916ddcf3b1 HEAD
+      - name: Install
+        run: npm ci --no-audit --no-fund
+      - name: Run supplementary Binance proxy replay
+        env:
+          PENGU_CURRENT_BT_OUT: .research-state/pengu-current-binance-proxy-20241004-20251004-bt.json
+        run: |
+          set -o pipefail
+          npx tsx scripts/research_pengu_current_binance_proxy_20241004_20251004_bt.ts 2>&1 | tee .research-state-pengu-binance-proxy.log
+      - name: Validate
+        run: |
+          python3 - <<'PY'
+          import json
+          p=json.load(open('.research-state/pengu-current-binance-proxy-20241004-20251004-bt.json'))
+          assert p['schema']=='pengu-current-production-binance-proxy-window-bt/v1'
+          assert p['productionSourceSha']=='53eeff5417636369d4709fddfd47d7916ddcf3b1'
+          assert 'SUPPLEMENTARY_PROXY_ONLY' in p['data']['note']
+          assert p['safety']=={'researchOnly':True,'ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print('PENGU_BINANCE_PROXY_CONTRACT=PASS')
+          print(json.dumps({'data':p['data'],'normal':p['normal']['metrics'],'stress':p['stress']['metrics'],'routes':p['normal']['routes'],'shortDiagnostics':p['normal']['shortDiagnostics']},ensure_ascii=False,separators=(',',':')))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-binance-proxy-20241004-20251004-bt-${{ github.run_id }}
+          path: |
+            .research-state/pengu-current-binance-proxy-20241004-20251004-bt.json
+            .research-state-pengu-binance-proxy.log
+          include-hidden-files: true
+          retention-days: 30
