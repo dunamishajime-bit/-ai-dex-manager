@@ -1,6 +1,15 @@
 name: Formal Priority HP build and VPS read-only preflight 20261004
 
 on:
+  push:
+    branches:
+      - research/formal-priority-cooldown-20261003
+    paths:
+      - ".github/workflows/formal-priority-hp-preflight-20261004.yml"
+      - "app/api/system/formal-priority-status/**"
+      - "app/decision-status/formal-priority/**"
+      - "app/positions/page.tsx"
+      - "app/history/page.tsx"
   workflow_dispatch:
 
 permissions:
