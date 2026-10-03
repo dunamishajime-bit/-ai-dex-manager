@@ -128,7 +128,9 @@ jobs:
               echo "STAGE_RELEASE_REFERENCED_BY_SYSTEMD"
               exit 1
             fi
-            rm -rf -- "$release"
+            [[ -d "$release/node_modules" ]]
+            [[ -x "$release/node_modules/@esbuild/linux-x64/bin/esbuild" ]]
+            echo "REUSE_VERIFIED_STAGE_RELEASE=$release"
           fi
 
           if [[ ! -d "$release" ]]; then
