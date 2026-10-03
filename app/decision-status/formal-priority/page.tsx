@@ -77,9 +77,9 @@ export default function FormalPriorityDecisionPage() {
     <main className="space-y-4 p-4 md:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <Link href="/positions" className="inline-flex items-center gap-2 text-sm text-gold-200 hover:text-gold-100">
+          <Link href="/decision-status" className="inline-flex items-center gap-2 text-sm text-gold-200 hover:text-gold-100">
             <ArrowLeft className="h-4 w-4" />
-            ダッシュボードへ戻る
+            判定状況一覧へ戻る
           </Link>
           <h1 className="mt-2 text-2xl font-black text-white md:text-3xl">Formal Priority / Cooldown</h1>
           <p className="mt-2 text-sm text-white/65">V12 Gross、Q102 handoff、symbol別cooldown、正式10bps BTを同じ画面で確認します。</p>

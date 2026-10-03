@@ -70,10 +70,10 @@ export default function PositionsPage() {
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <Link
-                href="/decision-status/formal-priority"
+                href="/decision-status"
                 className="rounded-full border border-gold-400/24 bg-gold-400/10 px-4 py-2 text-[11px] font-bold text-gold-100 transition hover:bg-gold-400/15"
               >
-                Formal Priority判定
+                新ロジック判定状況
               </Link>
               <div className="flex items-center gap-2 rounded-full border border-gold-400/18 bg-white/[0.03] px-4 py-2 text-[11px] text-gold-100">
                 <Activity className="h-4 w-4" />

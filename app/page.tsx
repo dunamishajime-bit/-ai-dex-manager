@@ -120,7 +120,8 @@ export default function HomePage() {
 
         <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           <QuickLink href="/wallets" title="運用ウォレット" text="入金確認、保有資産、ウォレット状態を確認します。" icon={Wallet} />
-          <QuickLink href="/positions" title="ダッシュボード" text="自動売買の判定内容と現在の状態を確認します。" icon={BarChart3} />
+          <QuickLink href="/decision-status" title="判定状況" text="V12 / PENGU / Q102 / V52 / FET / HYPE / Idle / Formal を現在のrunner状態から確認します。" icon={BarChart3} />
+          <QuickLink href="/positions" title="ダッシュボード" text="保有資産、自動売買状態、現在の運用状況を確認します。" icon={BarChart3} />
           <QuickLink href="/history" title="トレード履歴" text="約定履歴、取得単価、損益の流れを確認します。" icon={Coins} />
           <QuickLink href="/settings" title="設定" text="認証設定や運用に必要な基本設定を整理します。" icon={Settings} />
         </section>
