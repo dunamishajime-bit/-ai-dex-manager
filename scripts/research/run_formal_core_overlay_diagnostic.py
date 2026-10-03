@@ -73,7 +73,7 @@ def overlay_candidates(features, data, include_doge, include_avax, end):
     return out,dict(issues)
 
 
-def run(data, candidate_root, v52, features_path, output, costs=(8,10,20,30)):
+def run(data, candidate_root, v52, features_path, output, costs=(8,10,20,30), *, postfee_margin_guard=False):
     features=rows(features_path)
     cases=[('CORE',False,False,False),('CORE_IDLE',True,False,False),
            ('CORE_IDLE_DOGE',True,True,False),('CORE_IDLE_AVAX',True,False,True),
@@ -82,7 +82,7 @@ def run(data, candidate_root, v52, features_path, output, costs=(8,10,20,30)):
     if hashlib.sha256((candidate_root/'crypto-price-model-candidates.jsonl').read_bytes()).hexdigest()!=GATED_SHA:
         raise ValueError('CORE_CANDIDATE_INPUT_SHA_MISMATCH')
     for case,idle,doge,avax in cases:
-        m=load_ownership_engine()
+        m=load_ownership_engine(postfee_margin_guard=postfee_margin_guard)
         extra,issues=overlay_candidates(features,data,doge,avax,m.PERIOD_END_MS) if idle else ([],{})
         source_issues[case]=issues
         original_rows=m._rows
@@ -100,7 +100,8 @@ def run(data, candidate_root, v52, features_path, output, costs=(8,10,20,30)):
             summaries.append(summary);print(json.dumps({k:v for k,v in summary.items() if k not in ('monthly_equity_jpy','rejected_entries','strategy_pnl_jpy')}),flush=True)
     report={'status':'BLOCKED_OVERLAY_FULL_H1_BASELINE_EVIDENCE_AND_MARGIN_PARITY_NOT_PROVEN',
             'scope':'DIAGNOSTIC_PRICE_MODEL_NOT_LIVE_CERTIFICATION',
-            'historical_1275_anchor_unchanged':True,'source_incomplete_hours':sum(bool(f['errors']) for f in features),
+            'historical_1275_anchor_unchanged':True,'postfee_margin_guard':bool(postfee_margin_guard),
+            'source_incomplete_hours':sum(bool(f['errors']) for f in features),
             'source_error_counts':dict(Counter(e['symbol']+':'+e['reason'] for f in features for e in f['errors'])),
             'lifecycle_source_issues':source_issues,'scenarios':summaries,
             'unproven':['complete current-H1 baseline eligibility/no-signal evidence, not just lifecycle candidate stream',
@@ -118,6 +119,8 @@ if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('--baseline-root',type=Path,required=True)
     p.add_argument('--candidate-root',type=Path,required=True);p.add_argument('--features',type=Path,required=True)
     p.add_argument('--output',type=Path,required=True);p.add_argument('--costs',nargs='+',type=int,default=[8,10,20,30])
+    p.add_argument('--postfee-margin-guard',action='store_true')
     a=p.parse_args();a.output.mkdir(parents=True,exist_ok=True)
     run(a.baseline_root/'market-Aster-H1-funding-and-manifests',a.candidate_root,
-        a.baseline_root/'v52-SHA-verified-original-ledger',a.features,a.output,tuple(a.costs))
+        a.baseline_root/'v52-SHA-verified-original-ledger',a.features,a.output,tuple(a.costs),
+        postfee_margin_guard=a.postfee_margin_guard)

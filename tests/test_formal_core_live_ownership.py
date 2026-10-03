@@ -52,6 +52,39 @@ class OwnershipReplayTest(unittest.TestCase):
         exits=[x for x in result['event_rows'] if x['event_type']=='MODELED_EXIT']
         self.assertEqual(exits[0]['exit_reason'],'RANK3_PREEMPT:Q102')
 
+    def test_postfee_margin_guard_keeps_5x_base_reserve(self):
+        market = dict(self.market)
+        market['TSLAUSDT'] = {'times': self.market['DOGEUSDT']['times'], 'rows': [
+            {'event_time_ms': t, 'open': 100., 'close': 100.}
+            for t in self.market['DOGEUSDT']['times']
+        ]}
+        stock = self.candidate('V52', 1, 4, index=1)
+        stock['symbol'] = 'TSLAUSDT'
+        stock['requested_gross'] = 1.25
+        core = self.candidate('Q102', 1, 4, index=2)
+        core['requested_gross'] = 3.0
+
+        def run(guard):
+            engine = load_ownership_engine(postfee_margin_guard=guard)
+            result = engine._portfolio_scenario(
+                [stock.copy(), core.copy()], Path('.'), market,
+                round_trip_cost_bps=10., scenario_id='TEST',
+            )
+            entries = [row for row in result['event_rows'] if row['event_type'] == 'MODELED_ENTRY']
+            self.assertEqual(len(entries), 2)
+            total_notional = sum(float(row['notional_settlement']) for row in entries)
+            final_wallet = float(entries[-1]['wallet_after_event'])
+            return total_notional / final_wallet, entries
+
+        legacy_gross, legacy_entries = run(False)
+        guarded_gross, guarded_entries = run(True)
+        self.assertGreater(legacy_gross, 4.25)
+        self.assertLessEqual(guarded_gross, 4.25 + 1e-9)
+        self.assertLess(
+            float(guarded_entries[-1]['accepted_gross']),
+            float(legacy_entries[-1]['accepted_gross']),
+        )
+
     def test_unknown_engine_bytes_are_not_executable(self):
         with self.assertRaisesRegex(ValueError,'SOURCE_SHA_MISMATCH'):
             load_ownership_engine(source_bytes=b'print("untrusted")')

@@ -52,7 +52,7 @@ def prepare_overlay_batch(rows, active, completed, ts, market, equity, gross, fi
             for r in idle:r['_overlay_block']='MULTI_SIGNAL_CAPACITY_AMBIGUOUS'
 
 
-def load_ownership_engine(source_bytes=None):
+def load_ownership_engine(source_bytes=None, *, postfee_margin_guard: bool = False):
     archive=FROZEN/'engine-source.zip'
     if hashlib.sha256(archive.read_bytes()).hexdigest() != 'ba39690a3b125f274571132c2992211bee6a30259e7b832cbf27208544ab4a78':
         raise ValueError('ENGINE_ARCHIVE_SHA_MISMATCH')
@@ -115,7 +115,27 @@ def load_ownership_engine(source_bytes=None):
                         continue
                     requested = 1.0
 '''+full)
+    # Optional research-only margin parity hook. It does not change signal
+    # selection or the frozen engine bytes. It reduces only the incremental
+    # total-Gross room so the modeled entry fee cannot push a 5x Cross account
+    # below the Production BASE 15% available-balance reserve. Under 5x,
+    # that reserve is algebraically equivalent to the 4.25x total Gross cap.
+    def _postfee_room(pre_gross, cap, entry_fee_rate):
+        pre = max(0.0, float(pre_gross))
+        ceiling = max(0.0, float(cap))
+        fee = max(0.0, float(entry_fee_rate))
+        return max(0.0, (ceiling - pre) / (1.0 + ceiling * fee))
+
+    total_room_line = '                total_room = max(0.0, TOTAL_CAP - total_gross)\n'
+    if source.count(total_room_line) != 3:
+        raise ValueError(f'POSTFEE_TOTAL_ROOM_HOOK_IDENTITY_MISMATCH:{source.count(total_room_line)}')
+    if postfee_margin_guard:
+        source = source.replace(
+            total_room_line,
+            '                total_room = _postfee_room(total_gross, TOTAL_CAP, cost_side)\n',
+        )
     module._prepare_overlay=prepare_overlay_batch
+    module._postfee_room=_postfee_room
     exec(compile(source,str(archive)+'!ownership', 'exec'),module.__dict__)
     module.PRIORITY.update(IDLE=5,RESIDUAL=6)
     old_cap=module._strategy_cap
