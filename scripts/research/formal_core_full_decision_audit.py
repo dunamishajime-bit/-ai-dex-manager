@@ -431,21 +431,43 @@ def merge_q102_chunks(paths: ReleasePaths, chunks_root: Path, output_root: Path)
     }
 
 
-def audit_v52(paths: ReleasePaths) -> dict[str, Any]:
+def audit_v52(paths: ReleasePaths, full_h1_manifest: Path | None = None) -> dict[str, Any]:
     provenance = load_json(paths.v52 / "restore-provenance.json")
     summary = load_json(paths.v52 / "v52-model-summary.json")
     ledger = load_jsonl(paths.v52 / "v52-model-ledger.jsonl")
     require(provenance.get("status") == "ARCHIVED_ORIGINAL_V52_TAPE_RESTORED_EXACT_SHA256", "V52_ARCHIVE_PROVENANCE_FAILED")
     require(len(ledger) == int(provenance.get("model_closed", 0)) + int(provenance.get("model_skipped", 0)), "V52_ARCHIVE_ROW_COUNT_MISMATCH")
     require(summary.get("audited_live_execution_parity") is False, "V52_ARCHIVE_UNEXPECTEDLY_ASSERTS_LIVE_PARITY")
-    return {
-        "status": "MISSING_FULL_LIVE_DECISION_STREAM",
+
+    base = {
         "candidate_rows": len(ledger),
         "modeled_closed": summary.get("modeled_closed_trades"),
         "candidate_tape_sha256": provenance.get("reconstructed_v52_ledger_sha256"),
         "source_runtime_sha": summary.get("source_runtime_sha"),
         "audited_live_execution_parity": summary.get("audited_live_execution_parity"),
         "limitations": summary.get("limitations", []),
+    }
+    if full_h1_manifest is not None:
+        model = load_json(full_h1_manifest.resolve())
+        require(model.get("status") == "PASS_V52_PRICE_ONLY_FULL_H1_LEDGER", "V52_PRICE_ONLY_FULL_H1_MANIFEST_NOT_PASS")
+        require(model.get("full_h1_model_decision_evidence") == "PASS", "V52_PRICE_ONLY_FULL_H1_DECISION_EVIDENCE_NOT_PASS")
+        require(model.get("live_execution_parity") is False, "V52_PRICE_ONLY_LIVE_PARITY_UNEXPECTED")
+        return {
+            **base,
+            "status": "PASS_PRICE_ONLY_FULL_H1_MODEL_DECISIONS",
+            "full_h1_model_decision_evidence": "PASS",
+            "decision_evidence_scope": model.get("decision_evidence_scope"),
+            "price_model_manifest": model,
+            "reason": (
+                "The approved Yahoo/Aster price-only V52 backtest layer has an explicit full-H1 "
+                "decision ledger. Historical LIVE spread/depth/filter/margin/fill parity remains "
+                "separate and is not claimed by this decision-layer PASS."
+            ),
+        }
+    return {
+        **base,
+        "status": "MISSING_FULL_LIVE_DECISION_STREAM",
+        "full_h1_model_decision_evidence": "MISSING",
         "reason": (
             "The authenticated artifact retains selected V52 candidate/model lifecycle rows, "
             "not the complete historical LIVE quote/depth/filter decision stream. Candidate absence "
@@ -460,6 +482,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--output-root", required=True, type=Path)
     parser.add_argument("--q102-chunks-root", type=Path)
     parser.add_argument("--q102-source-parity", type=Path)
+    parser.add_argument("--v52-full-h1-manifest", type=Path)
     args = parser.parse_args(argv)
 
     release = ReleasePaths.from_root(args.release_root.resolve())
@@ -495,7 +518,7 @@ def main(argv: list[str] | None = None) -> int:
             "Q102_SOURCE_PARITY_NOT_PASS",
         )
         q102["decision_source_byte_parity"] = q102_source_parity
-    v52 = audit_v52(release)
+    v52 = audit_v52(release, args.v52_full_h1_manifest)
 
     crypto_global_decision_pass = q102.get("global_h1_decision_evidence") == "PASS"
     q102_per_symbol_pass = (
@@ -506,28 +529,29 @@ def main(argv: list[str] | None = None) -> int:
             == "PASS_Q102_DECISION_SOURCE_BYTE_PARITY"
         )
     )
-    v52_full_live_pass = v52["status"] == "PASS"
-    if not q102_per_symbol_pass and not v52_full_live_pass:
-        overall = "BLOCKED_Q102_PER_SYMBOL_RANKING_AND_V52_FULL_LIVE_DECISION_EVIDENCE_MISSING"
+    v52_model_decision_pass = v52.get("full_h1_model_decision_evidence") == "PASS"
+    if not q102_per_symbol_pass and not v52_model_decision_pass:
+        overall = "BLOCKED_Q102_PER_SYMBOL_RANKING_AND_V52_MODEL_FULL_H1_EVIDENCE_MISSING"
     elif not q102_per_symbol_pass:
         overall = "BLOCKED_Q102_PER_SYMBOL_RANKING_EVIDENCE_MISSING"
-    elif not v52_full_live_pass:
-        overall = "BLOCKED_V52_FULL_LIVE_DECISION_EVIDENCE_MISSING"
+    elif not v52_model_decision_pass:
+        overall = "BLOCKED_V52_MODEL_FULL_H1_DECISION_EVIDENCE_MISSING"
     else:
-        overall = "PASS"
+        overall = "PASS_CORE_FULL_DECISION_EVIDENCE_PRICE_ONLY_V52"
     decision_ruling = (
         "V12/PENGU/FET scheduled decisions and Q102 all-hour per-symbol ranking/selection "
         "are proven from the audited frozen Production source. The archived Q102 fast scan "
         "matches selected signal keys and economic semantics; its HIGH_VOL referenceTs uses "
         "the prior H1 data cutoff while the full Production signal uses the decision timestamp, "
-        "and that timestamp-only divergence is explicitly inventoried. V52 remains uncertified "
-        "until complete historical LIVE quote/depth/filter decision inputs are proven."
+        "and that timestamp-only divergence is explicitly inventoried. V52 full-H1 decision "
+        "coverage is proven only for the approved Yahoo/Aster price-only backtest model; historical "
+        "LIVE quote/depth/filter/margin/fill parity remains a separate execution-evidence question."
         if q102_per_symbol_pass
         else
         "V12/PENGU/FET scheduled decision evidence and the global hourly Q102 trading decision "
         "stream are proven. Q102 per-symbol ranking for every non-selected hour remains a separate "
-        "observability gap, and V52 remains uncertified until a complete historical LIVE decision "
-        "input stream is proven."
+        "observability gap. V52 price-only full-H1 model coverage is evaluated separately from "
+        "historical LIVE execution parity."
     )
 
     manifest = {
@@ -566,6 +590,7 @@ def main(argv: list[str] | None = None) -> int:
         },
         "crypto_core_global_h1_decision_evidence": "PASS" if crypto_global_decision_pass else "FAIL",
         "crypto_core_full_per_symbol_decision_evidence": "PASS" if q102_per_symbol_pass else "MISSING",
+        "v52_full_h1_price_model_decision_evidence": "PASS" if v52_model_decision_pass else "MISSING",
         "ruling": decision_ruling,
     }
     manifest_sha = write_json(output / "core-full-decision-audit-manifest.json", manifest)

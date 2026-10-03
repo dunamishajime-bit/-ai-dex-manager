@@ -9,6 +9,8 @@ on:
       - "scripts/research/formal_q102_full_decision_chunk.py"
       - "scripts/research/formal_q102_decision_source_parity.py"
       - "scripts/research/formal_core_full_decision_audit.py"
+      - "scripts/research/formal_v52_price_source_audit.py"
+      - "scripts/research/formal_v52_full_h1_price_ledger.py"
       - "scripts/research/formal_execution_margin_evidence_audit.py"
       - ".github/workflows/formal-core-full-decision-and-margin-evidence-20261003.yml"
       - "lib/disdex-quality102-causal-v1-runner.ts"
@@ -196,6 +198,24 @@ jobs:
             --repo-root "$GITHUB_WORKSPACE" \
             --release-root "$RUNNER_TEMP/release/$RELEASE_TAG" \
             --output "$RUNNER_TEMP/core-full-decision-audit/q102-decision-source-parity.json"
+      - name: Build V52 complete price-only H1 decision evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/core-full-decision-audit/v52"
+          python -m py_compile \
+            scripts/research/formal_v52_price_source_audit.py \
+            scripts/research/formal_v52_full_h1_price_ledger.py
+          python scripts/research/formal_v52_price_source_audit.py \
+            --release-root "$RUNNER_TEMP/release/$RELEASE_TAG" \
+            --work-root "$RUNNER_TEMP/v52-price-source-work" \
+            --output "$RUNNER_TEMP/core-full-decision-audit/v52/v52-price-source-audit.json"
+          python scripts/research/formal_v52_full_h1_price_ledger.py \
+            --release-root "$RUNNER_TEMP/release/$RELEASE_TAG" \
+            --price-scan "$RUNNER_TEMP/v52-price-source-work/scan/decisions/V52-hourly-price-model.jsonl" \
+            --price-source-audit "$RUNNER_TEMP/core-full-decision-audit/v52/v52-price-source-audit.json" \
+            --output-root "$RUNNER_TEMP/core-full-decision-audit/v52"
+
       - name: Merge and verify full causal Core decision evidence
         shell: bash
         run: |
@@ -207,6 +227,7 @@ jobs:
             --release-root "$RUNNER_TEMP/release/$RELEASE_TAG" \
             --q102-chunks-root "$RUNNER_TEMP/q102-chunks" \
             --q102-source-parity "$RUNNER_TEMP/core-full-decision-audit/q102-decision-source-parity.json" \
+            --v52-full-h1-manifest "$RUNNER_TEMP/core-full-decision-audit/v52/v52-price-only-full-h1-manifest.json" \
             --output-root "$RUNNER_TEMP/core-full-decision-audit"
       - name: Execution and margin evidence audit
         shell: bash
@@ -223,7 +244,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          find "$RUNNER_TEMP/core-full-decision-audit" -maxdepth 1 -type f -print0 \
+          find "$RUNNER_TEMP/core-full-decision-audit" -type f -print0 \
             | sort -z \
             | xargs -0 sha256sum \
             | tee "$RUNNER_TEMP/core-full-decision-audit/SHA256SUMS.txt"
