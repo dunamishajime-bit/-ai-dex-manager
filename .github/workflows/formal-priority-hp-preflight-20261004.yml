@@ -1,0 +1,124 @@
+name: Formal Priority HP build and VPS read-only preflight 20261004
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  hp-build-and-preflight:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Formal priority focused regression
+        run: |
+          npx tsx --test             tests/v12_formal_priority_policy.test.ts             tests/v12-q102-priority-preemption.test.ts             tests/v12-exit-fill-timestamp.test.ts             tests/current_live_target_contract.test.ts
+
+      - name: Production HP build with existing webpack contract
+        run: npx next build --webpack
+
+      - name: Initialize restricted root SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ -n "$SSH_HOST" && -n "$ROOT_KEY" && -n "$SSH_KNOWN_HOSTS" ]]
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+
+      - name: Read-only VPS/UI preflight
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts"             -o ConnectTimeout=15 -p "$PORT" "root@$SSH_HOST" "TARGET_SHA='$GITHUB_SHA' bash -s" <<'REMOTE'
+          set -Eeuo pipefail
+          [[ "$(id -un)" == root ]]
+          trading_root=/home/deploy/disdex-trading
+          current="$trading_root/current"
+          current_sha="$(tr -d '[:space:]' < "$current/.disdex-release-sha")"
+          current_release="$(readlink -f "$current")"
+          [[ "$current_sha" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$current_release" == "$trading_root/releases/$current_sha" ]]
+
+          ui=ai-dex-manager-ui.service
+          ui_active="$(systemctl is-active "$ui" 2>/dev/null || true)"
+          ui_workdir="$(systemctl show "$ui" -p WorkingDirectory --value 2>/dev/null || true)"
+          ui_env="$(systemctl show "$ui" -p Environment --value 2>/dev/null || true)"
+          ui_sha="$(printf '%s' "$ui_env" | tr ' ' '\n' | sed -n 's/^DISDEX_UI_RELEASE_SHA=//p' | tail -1)"
+          ui_pid="$(systemctl show "$ui" -p MainPID --value 2>/dev/null || true)"
+          ui_restarts="$(systemctl show "$ui" -p NRestarts --value 2>/dev/null || true)"
+          ui_result="$(systemctl show "$ui" -p Result --value 2>/dev/null || true)"
+          ui_cwd=""
+          if [[ "$ui_pid" =~ ^[0-9]+$ && "$ui_pid" -gt 0 && -e "/proc/$ui_pid/cwd" ]]; then
+            ui_cwd="$(readlink -f "/proc/$ui_pid/cwd")"
+          fi
+
+          echo "STATUS=FORMAL_PRIORITY_HP_READONLY_PREFLIGHT"
+          echo "TARGET_SOURCE_SHA=$TARGET_SHA"
+          echo "CURRENT_TRADING_SHA=$current_sha"
+          echo "CURRENT_TRADING_RELEASE=$current_release"
+          echo "UI_ACTIVE=$ui_active"
+          echo "UI_WORKDIR=$ui_workdir"
+          echo "UI_PROCESS_CWD=$ui_cwd"
+          echo "UI_SHA=$ui_sha"
+          echo "UI_PID=$ui_pid"
+          echo "UI_NRESTARTS=$ui_restarts"
+          echo "UI_RESULT=$ui_result"
+
+          [[ "$ui_active" == active ]]
+          [[ -n "$ui_workdir" && "$ui_workdir" == "$ui_cwd" ]]
+          [[ "$ui_workdir" == /home/deploy/* ]]
+          [[ -f "$ui_workdir/package.json" ]]
+          [[ -d "$ui_workdir/.next" ]]
+
+          python3 - <<'PY'
+          import json
+          paths={
+            "kill":"/var/lib/disdex/shared/kill-switch.json",
+            "risk":"/var/lib/disdex/shared/crypto-daily-risk.json",
+            "guard":"/var/lib/disdex/shared/margin-risk/guard-live.json",
+            "pending":"/var/lib/disdex/shared/pending-exposure.json",
+          }
+          values={}
+          for k,p in paths.items():
+            try:
+              values[k]=json.load(open(p,encoding="utf-8"))
+            except Exception as e:
+              raise SystemExit(f"READONLY_STATE_UNAVAILABLE:{k}:{type(e).__name__}")
+          print("KILL_SWITCH_ACTIVE="+str(values["kill"].get("active")))
+          print("SHARED_RISK_TRIPPED="+str(values["risk"].get("tripped")))
+          print("SHARED_RISK_SOURCE_COMPLETE="+str(values["risk"].get("sourceComplete")))
+          print("MARGIN_STAGE="+str(values["guard"].get("stage")))
+          print("MARGIN_ORDERS_ALLOWED="+str(values["guard"].get("ordersAllowed")))
+          entries=values["pending"].get("entries",[]) if isinstance(values["pending"],dict) else []
+          active=[x for x in entries if isinstance(x,dict) and str(x.get("status","")).upper() in {"PENDING","SUBMITTED","UNKNOWN"}]
+          print("PENDING_EXPOSURE_ACTIVE="+str(len(active)))
+          PY
+
+          code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 15 http://127.0.0.1:3001/decision-status/formal-priority || true)"
+          echo "CURRENT_FORMAL_PRIORITY_ROUTE_HTTP=$code"
+          echo "TRADING_MUTATION=0"
+          REMOTE
