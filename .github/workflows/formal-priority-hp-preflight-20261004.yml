@@ -38,8 +38,8 @@ jobs:
         run: |
           npx tsx --test             tests/v12_formal_priority_policy.test.ts             tests/v12-q102-priority-preemption.test.ts             tests/v12-exit-fill-timestamp.test.ts             tests/current_live_target_contract.test.ts
 
-      - name: Production HP build with existing webpack contract
-        run: npx next build --webpack
+      - name: Production HP build with repository-pinned Next 14
+        run: npm run build
 
       - name: Initialize restricted root SSH
         shell: bash
