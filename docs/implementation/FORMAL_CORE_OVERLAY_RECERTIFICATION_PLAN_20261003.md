@@ -35,14 +35,33 @@ Task 3のデータ不足はhistorical timestamp membershipで埋めない。全c
    and source/signal ledger are in formal-venue-availability-20261003.
 2. Overlay 8,784 × 7 source/signal ledger: completed, independently regenerated.
    This does not claim a full Core baseline decision ledger.
-3. Full Core H1 decisions: pending actual causal signal/ranking regeneration.
-   Absence from archived candidate lifecycle is not NO_SIGNAL evidence.
-4. Execution/margin emulator: pending Production-order-path equivalence proof;
-   current exchangeInfo is not historical margin/filter/account evidence.
-5. Re-run 20 cases and paired overlay attribution only after gates 3/4.
-6. Full Python discovery: stale expectations corrected, Linux whole-suite CI
-   required; Windows fcntl import errors must not be suppressed as PASS.
-7. No certificate/operator/Production/HP action until all evidence gates PASS.
+3. Full Core H1 decisions: COMPLETE at research SHA `0d21b21fff23d58001bcbe1e7f4377d1013fe304`.
+   GitHub Actions run `37122391842` completed SUCCESS. Q102 exact full-observability
+   replay completed 74/74 chunks with no failures; 8,784 decision hours,
+   166,834 per-symbol rows, 372 SIGNAL, 77 CANDIDATE and 166,385 WAIT.
+   V12/PENGU/FET scheduled decision ledgers and Q102 all-hour per-symbol
+   ranking/selection are PASS. Archived Q102 fast-scan HIGH_VOL referenceTs
+   differs from the full Production signal on 116 rows only by the explicitly
+   inventoried prior-H1 data-cutoff vs decision-timestamp convention; selected
+   signal keys and economic semantics match.
+4. V52 full H1 decision layer: COMPLETE for the approved price-only backtest
+   model only. 8,784 H1 rows; 649 expected scheduled windows all observed;
+   98 SIGNAL, 546 WAIT, 5 SOURCE_ERROR, 0 missing scheduled windows.
+   Historical LIVE spread/depth/filter/margin/fill parity is NOT implied.
+5. Execution/margin historical parity: BLOCKED. Production order-path contract
+   tests PASS, but the fixed release contains no point-in-time account
+   availableBalance/equity/margin snapshots, historical symbol filters,
+   account-specific 5x Cross read-back, pending/account-lock chronology,
+   partial/unknown execution reconciliation, or resident-protection fill
+   chronology. Current exchangeInfo and synthetic margin emulation are not
+   substitutes for those historical primary inputs.
+6. Re-run 20 cases and paired overlay attribution only after execution/margin
+   historical evidence is proven. Decision-layer PASS alone does not authorize
+   recertification.
+7. Full Python discovery: Linux whole-suite CI PASS at the same research SHA,
+   213/213 tests, FAIL 0 / ERROR 0 / SKIP 0.
+8. No certificate/operator/Production/HP action until the remaining historical
+   execution/margin evidence gate PASSes.
 
 Ruling: actual Production feature functions consume d-1 through d-73. Only
 pre-listing-history start-up failures become explicit NO_SIGNAL warmup; no

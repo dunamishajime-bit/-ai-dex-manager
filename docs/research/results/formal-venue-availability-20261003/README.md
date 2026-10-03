@@ -1,6 +1,6 @@
 # Official venue availability evidence — research only
 
-STATUS: BLOCKED_OVERLAY_FULL_H1_BASELINE_EVIDENCE_AND_MARGIN_PARITY_NOT_PROVEN
+STATUS: BLOCKED_HISTORICAL_EXECUTION_MARGIN_INPUTS_MISSING
 
 Continues diagnostic source SHA `123df49950e3d5aba61e2d50e9ee1a37fae620d7`.
 Production `53eeff5417636369d4709fddfd47d7916ddcf3b1` is NOT changed.
@@ -73,23 +73,52 @@ The two stale failures were:
 The new workflow executes **all Python test discovery on Ubuntu**, including
 retention/fcntl tests. Local Windows failures are not claimed as a green suite.
 
-## Certification remains blocked
+## 2026-10-03 continuation: Core decision evidence completed
 
-This is an Overlay source/signal ledger, not the requested full Core H1
-eligibility/admission ledger. The existing archived Core candidate lifecycle
-cannot explain every absent hourly signal, ranking and no-signal decision.
-Do not manufacture NO_SIGNAL for hours absent from its candidate list.
+Research SHA `0d21b21fff23d58001bcbe1e7f4377d1013fe304` and GitHub Actions
+run `37122391842` completed successfully without Production mutation.
 
-No execution/margin certificate is issued. Current exchangeInfo cannot supply
-historical margin availability, maintenance tiers, account-specific leverage,
-partial/unknown fill chronology, pending/order lock timing, or historical filters.
-The current price-model's candidate/exit schedule is not evidence for those.
-Those missing proofs must remain explicit rather than selecting arbitrary
-fills/margin assumptions to achieve the previous diagnostic PnL.
+The prior Core-decision evidence gap is now closed:
 
-The prior 20-case results remain diagnostics. They are NOT re-certified by this
-availability ledger. Overlay direct PnL, downstream compounding, foregone Core
-PnL and incremental fee/funding/slippage attribution still require a certified
-causal paired run; do not add the old PnL summaries as a substitute.
+- Q102 exact full-observability replay: 74/74 chunks PASS, 8,784 H1 decision
+  timestamps, 166,834 per-symbol rows, 372 SIGNAL, 77 CANDIDATE, 166,385 WAIT.
+- Q102 per-symbol full ranking evidence: PASS.
+- Q102 decision-source byte parity: PASS across the archived scan commit,
+  audited frozen snapshot and manifest-verified repository commit.
+- V12 scheduled ledger: 61,502 rows / 1,459 SIGNAL.
+- PENGU scheduled ledger: 8,784 rows / 113 SIGNAL.
+- FET scheduled ledger: 2,196 rows / 26 SIGNAL.
+- V52 approved price-only model: 8,784 H1 rows, all 649 scheduled windows
+  observed, 98 SIGNAL, 546 WAIT, 5 SOURCE_ERROR, 0 missing scheduled windows.
+- Linux full Python discovery at the same SHA: 213/213 PASS.
 
-No Production code/config or current symlink was changed.
+The combined decision-layer ruling is
+`PASS_CORE_FULL_DECISION_EVIDENCE_PRICE_ONLY_V52`. This is explicitly not a
+historical LIVE execution certificate.
+
+## Certification remains blocked only on historical execution/margin inputs
+
+Production order-path safety contract tests PASS, including account-lock bounded
+retry, cross-runner pending exposure reservation, exact 5x Cross mutation/readback
+before exposure, Q102 post-preemption replanning, resident-protection recovery,
+unknown/partial-exit fail-closed behavior and V12 worst-case gross reservation.
+
+However, the fixed historical release has no primary tapes for:
+
+- point-in-time account availableBalance/equity/margin at each exposure decision;
+- historical symbol filters and account-specific leverage/margin-mode read-back;
+- pending-order and shared account-lock chronology;
+- actual partial/unknown execution reconciliation timestamps;
+- resident protection fill and actual exit chronology.
+
+Current exchangeInfo, current read-only account checks, synthetic margin emulation,
+archived candidate schedules and price-only fills cannot reconstruct those missing
+historical facts. The remaining status is therefore
+`BLOCKED_HISTORICAL_EXECUTION_MARGIN_INPUTS_MISSING`.
+
+The prior 20-case results remain diagnostics and are NOT re-certified. They may be
+re-run for diagnosis, but no certification/operator/deploy/HP action is authorized
+until the missing historical execution/margin evidence is proven.
+
+No Production code/config, operator artifact, current symlink, order, cancel or
+position was changed.
