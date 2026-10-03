@@ -1,0 +1,79 @@
+name: Formal Core retained Overlay ownership diagnostic (NOT LIVE certification)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [research/formal-priority-cooldown-20261003]
+    paths:
+      - scripts/research/formal_core_live_ownership.py
+      - scripts/research/formal_overlay_feature_stream.ts
+      - scripts/research/run_formal_core_overlay_diagnostic.py
+      - tests/test_formal_core_live_ownership.py
+      - tests/test_formal_overlay_allocator.py
+      - .github/workflows/formal-core-overlay-ownership-diagnostic-20261003.yml
+
+permissions:
+  contents: read
+
+jobs:
+  causal-diagnostic:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install locked offline signal evaluator dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Real allocator ownership / Overlay regressions
+        run: |
+          python -B -m unittest discover -s tests -p test_formal_core_live_ownership.py -v
+          python -B -m unittest discover -s tests -p test_formal_overlay_allocator.py -v
+          python -B -m unittest discover -s tests -p test_formal_core_ownership_audit.py -v
+      - name: Restore verified immutable market and candidate sources
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p .bt-overlay-ci/input
+          gh release download bt-v12-score100-volume080-normalonly-20260928 --repo dunamishajime-bit/-ai-dex-manager --pattern bt-v12-score100-volume080-normalonly-20260928.tar.gz --dir .bt-overlay-ci/input
+          python -B - <<'PY'
+          from pathlib import Path
+          import hashlib, tarfile
+          from scripts.research.formal_core_ownership_audit import extract_verified_zip
+          path=Path('.bt-overlay-ci/input/bt-v12-score100-volume080-normalonly-20260928.tar.gz')
+          assert hashlib.sha256(path.read_bytes()).hexdigest()=='891c36d8a5957cafe3aae65656a98b7c02a3c437c4f520fe63756d550f08b4fb'
+          with tarfile.open(path) as archive:archive.extractall('.bt-overlay-ci/input/baseline',filter='data')
+          extract_verified_zip('docs/research/results/formal-core-ownership-audit-20261003/candidate-inputs.zip','.bt-overlay-ci/candidates','c69fde854b8516394519be5a7f8f08ec458b4ef802d4181294f60fe1c992096e')
+          PY
+      - name: Reconstruct closed-H1 Overlay features using retained Production signal functions
+        run: ./node_modules/.bin/tsx scripts/research/formal_overlay_feature_stream.ts .bt-overlay-ci/input/baseline/bt-v12-score100-volume080-normalonly-20260928/market-Aster-H1-funding-and-manifests .bt-overlay-ci/features.jsonl
+      - name: Five causal configurations / four execution costs
+        run: python -B -m scripts.research.run_formal_core_overlay_diagnostic --baseline-root .bt-overlay-ci/input/baseline/bt-v12-score100-volume080-normalonly-20260928 --candidate-root .bt-overlay-ci/candidates/gated-candidates --features .bt-overlay-ci/features.jsonl --output .bt-overlay-ci/comparison
+      - name: Require zero ownership conflicts and preserve incomplete-certification BLOCK
+        run: |
+          python -B - <<'PY'
+          import json
+          from pathlib import Path
+          report=json.loads(Path('.bt-overlay-ci/comparison/comparison-manifest.json').read_text())
+          assert len(report['scenarios'])==20
+          assert all(s['ownership_conflicts']==0 for s in report['scenarios'])
+          core=next(s for s in report['scenarios'] if s['configuration']=='CORE' and s['scenario_id']=='PRICE_MODEL_10BPS')
+          assert abs(core['final_equity_jpy']-924164577.384132)<1e-5 and core['closed_trades']==1264
+          assert report['source_incomplete_hours']>0
+          assert report['scope']=='DIAGNOSTIC_PRICE_MODEL_NOT_LIVE_CERTIFICATION'
+          assert report['status']=='BLOCKED_OVERLAY_FULL_H1_BASELINE_EVIDENCE_AND_MARGIN_PARITY_NOT_PROVEN'
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: formal-core-overlay-ownership-diagnostic-${{ github.sha }}
+          retention-days: 90
+          include-hidden-files: true
+          path: |
+            .bt-overlay-ci/comparison/**
+            .bt-overlay-ci/features.jsonl
+          if-no-files-found: error

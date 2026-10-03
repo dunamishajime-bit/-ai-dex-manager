@@ -1,6 +1,6 @@
 # Formal Core / retained Overlay 再認証計画
 
-仕様: 2026-10-03のユーザー依頼。LIVE 53eeff54を変更せず、Formal Core の exact parity と実口座 ownership の両方が成立した後だけ Idle/DOGE/AVAX の統合認証へ進む。
+仕様: 2026-10-03のユーザー依頼と追加承認。LIVE 53eeff54を変更せず、旧1275件は歴史的モデルとして固定保存し、現LIVEのownership Gateを適用した別Core基準からIdle/DOGE/AVAXを再検証する。
 
 ## Task 1: 原本・Core exact parity
 
@@ -25,4 +25,6 @@
 
 ## Ruling
 
-Core exact parity と same-symbol occupancy 違反ゼロが両立しない場合、数値を合わせるために guard を弱めず、Core を無断 retune せず、具体的 competing intents を証拠として停止する。失敗した認証を PASS にする修正は許可されていない。
+ユーザー承認により、旧1275件とのexact一致は歴史的再現に限定し、新LIVE-equivalent候補の認証条件から分離する。ownershipによる拒否以外にSizing/Signalをretuneしない。元原本エンジンは編集せずSHA固定の派生モジュールへadmission hookを追加する。
+
+Task 3のデータ不足はhistorical timestamp membershipで埋めない。全closed-lifecycle candidateによる比較を実行できても、current-H1 baseline eligibility/pending/marginが証明されるまではDIAGNOSTICとして保存し、certification/operator/deployをしない。
