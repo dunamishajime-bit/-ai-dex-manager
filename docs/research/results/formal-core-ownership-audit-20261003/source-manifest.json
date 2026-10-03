@@ -1,0 +1,254 @@
+{
+  "schema": "disdex/formal-core-audit-provenance/v1",
+  "status": "BLOCKED_FORMAL_CORE_SYMBOL_OWNERSHIP_PARITY_CONFLICT",
+  "handoff_source_sha": "c7280876ecc3037cf9446e5e58a094e889a96d28",
+  "runtime_implementation_sha": "1ad60851b65e185ffd9b54511145a822201625f8",
+  "unchanged_production_sha": "53eeff5417636369d4709fddfd47d7916ddcf3b1",
+  "archives": {
+    "engine-source.zip": {
+      "bytes": 31422,
+      "sha256": "ba39690a3b125f274571132c2992211bee6a30259e7b832cbf27208544ab4a78",
+      "members": {
+        "__init__.py": "e10f09a0c49d1db360254e0a5870fbfc5d68fcbf0058b1bd3a4aeab668d68961",
+        "portfolio_price_model.py": "761d88a34ddda536bcf0a88547b1f438ff58b17086b1a89388dc805df6aeba06",
+        "crypto_price_model.py": "c5a8afa54f350fe4ee16f47e313081a1a8415491e4ac9fe299121297b8f245da",
+        "fx_ecb.py": "b09579ace5b42ca90e5b7b52e234e19b6c3445da73e67b2fbbb73d982f5a642b",
+        "strategies.py": "3ac61ff5cdddea878ff197cdd70a2f1ce5e6e8be73e84ae015553c556a5bd66a",
+        "manifest.py": "f9e516a8731e18a43ca6821954cc20cc2055eb87ada7227b30acd6893528836b"
+      }
+    },
+    "candidate-inputs.zip": {
+      "bytes": 250927,
+      "sha256": "c69fde854b8516394519be5a7f8f08ec458b4ef802d4181294f60fe1c992096e",
+      "members": {
+        "v12_trail02_candidates/crypto-price-model-candidates.jsonl": "35d5259ee890c7d1ac19d8d433940f05a8d0c94f793b9d3005d770ea2e8dc10c",
+        "v12_trail02_candidates/crypto-price-model-summary.json": "5a6307bfe1e3f65d93f7e82e656d6c60f4d9a058b49626e78427a4b38accb0f2",
+        "gated-candidates/crypto-price-model-candidates.jsonl": "ecc8103dea9ce392ea72fe918ca362416b762f0072a1a43d7f0d496b6755b935",
+        "gated-candidates/fet-gate-preentry-decisions.jsonl": "6fb580803e0577c12c6f70872c1cbf8e493ba4f6f65ddcaacb701bda2d8ebf1e"
+      }
+    },
+    "core-replay-ledgers.zip": {
+      "bytes": 2776623,
+      "sha256": "ca6f951a31364622fdc2051b2c34f8f7f6d413eac286f8b3639357825be5d6bf",
+      "members": {
+        "PRICE_MODEL_8BPS/candidate-decisions.jsonl": "832ac5ba8a9550584dc553e1a05c688b733e586a6ad526e50f144c6d34165b05",
+        "PRICE_MODEL_8BPS/metrics.json": "a2f319498d44de194570e2e73f8c7c9b3c3c8346bf7293e3ebcec4f63d665ca0",
+        "PRICE_MODEL_8BPS/portfolio-events.jsonl": "12caf436c58d47f7824fb78c2325cb4ad320fa7b11beb428f1ed95b4ca555e65",
+        "PRICE_MODEL_8BPS/portfolio-trades.jsonl": "22618af08646ed7caf7fd55081e908000a609084eecc6c99bf70dada38510dd1",
+        "PRICE_MODEL_10BPS/candidate-decisions.jsonl": "48b68012f7e9dea1fc83b98119b7318e48193abe57ca9c27efb6062ea3b76b53",
+        "PRICE_MODEL_10BPS/metrics.json": "74a1fb9328d224116043958c01a13c01906ab202c7d971d4a3ea4424777cc549",
+        "PRICE_MODEL_10BPS/portfolio-events.jsonl": "2dc5542b8ce6a7936ff7ecabd05c70a8132878c47f999945f625afc11ed47a4f",
+        "PRICE_MODEL_10BPS/portfolio-trades.jsonl": "3433c0b033bb048b1aca22b21d97ff253bbb160edb47d00eb7a8fac6a1ac9915",
+        "PRICE_MODEL_20BPS/candidate-decisions.jsonl": "a16bf0e32547980677b856d6ca7e4999a57fad9c59b453f7a09c25bfb96cc6ce",
+        "PRICE_MODEL_20BPS/metrics.json": "17f891ff727d864404f1bbf125a6e13490b4ee7f596aa6a8a0e569042fbcf87c",
+        "PRICE_MODEL_20BPS/portfolio-events.jsonl": "4a33722e5c7a9bf96e8ad2fc812bafca13771535234c659b06b53a5cec5df7bd",
+        "PRICE_MODEL_20BPS/portfolio-trades.jsonl": "3683802f0ed0706cbf5f76b74f5064a79268754125d477459d839559381ee765",
+        "PRICE_MODEL_30BPS/candidate-decisions.jsonl": "58baffac44d1af02c3465b04686d23f7f7fbffdc4e7c787dcfc432281004e610",
+        "PRICE_MODEL_30BPS/metrics.json": "67c5bb644440507f8ecd99c361e9f68a35f2168a39af61982535822157621db9",
+        "PRICE_MODEL_30BPS/portfolio-events.jsonl": "eb6c41ee251cff5cdd54f17afc3a14df41c09923e75c6444628fed31f4b5493a",
+        "PRICE_MODEL_30BPS/portfolio-trades.jsonl": "b8b7d15ee75d6f4dd326addef0802e214a2107142cf850565671ce0367bb1ad1",
+        "portfolio-price-model-summary.json": "f66701a7eea4918fbcd94e3c0ce614d41fb76e57ad82e4382ef69e2e782d87ae"
+      }
+    }
+  },
+  "market_v52_release": {
+    "tag": "bt-v12-score100-volume080-normalonly-20260928",
+    "bytes": 51556747,
+    "sha256": "891c36d8a5957cafe3aae65656a98b7c02a3c437c4f520fe63756d550f08b4fb"
+  },
+  "core_only_stress": [
+    {
+      "scenario_id": "PRICE_MODEL_8BPS",
+      "final_equity_jpy": 1544226239.0968785,
+      "profit_factor": 2.543313930085822,
+      "maximum_mtm_drawdown": -0.21178298423594966,
+      "closed_trades": 1275,
+      "monthly_equity_jpy": {
+        "2025-08": 14052.377986490319,
+        "2025-09": 30142.87563084777,
+        "2025-10": 208378.00221125202,
+        "2025-11": 1396185.814985689,
+        "2025-12": 2272174.4985654876,
+        "2026-01": 7279367.39480877,
+        "2026-02": 29217444.754683644,
+        "2026-03": 83443972.4073046,
+        "2026-04": 137987814.45228827,
+        "2026-05": 225814912.78511977,
+        "2026-06": 1273583914.9494202,
+        "2026-07": 1497984904.4608395,
+        "2026-08": 1544226239.0968785
+      },
+      "strategy_trades": {
+        "FET": 15,
+        "PENGU": 62,
+        "Q102": 130,
+        "V12": 984,
+        "V52": 84
+      },
+      "strategy_pnl_jpy": {
+        "FET": 2323077.775518395,
+        "PENGU": 2379302.110818669,
+        "Q102": 481480013.47392386,
+        "V12": 722976571.6761357,
+        "V52": 352846599.2804009
+      },
+      "accounting_reconciliation": {
+        "closed_trade_pnl_settlement_units": 9733240.771130463,
+        "deposit_settlement_units": 834.9436501853417,
+        "equity_minus_wallet_jpy": -0.0000011920928955078125,
+        "equity_minus_wallet_nominal_jpy": null,
+        "event_cashflow_settlement_units": 9734075.714780647,
+        "final_fx_jpy_per_usd": 158.64128083080917,
+        "intrahour_events": 724,
+        "status": "PASS",
+        "wallet_settlement_units": 9734075.71478067
+      }
+    },
+    {
+      "scenario_id": "PRICE_MODEL_10BPS",
+      "final_equity_jpy": 1229065462.0472791,
+      "profit_factor": 2.4887028036012624,
+      "maximum_mtm_drawdown": -0.21296368751349548,
+      "closed_trades": 1275,
+      "monthly_equity_jpy": {
+        "2025-08": 13900.526145766065,
+        "2025-09": 29447.988848731387,
+        "2025-10": 198971.78010252552,
+        "2025-11": 1295222.5495315057,
+        "2025-12": 2079496.027106633,
+        "2026-01": 6521665.672650531,
+        "2026-02": 25542157.039873004,
+        "2026-03": 71389417.60149322,
+        "2026-04": 116412728.5779852,
+        "2026-05": 187893910.44275114,
+        "2026-06": 1033612625.5076492,
+        "2026-07": 1195256804.1929057,
+        "2026-08": 1229065462.0472791
+      },
+      "strategy_trades": {
+        "FET": 15,
+        "PENGU": 62,
+        "Q102": 130,
+        "V12": 984,
+        "V52": 84
+      },
+      "strategy_pnl_jpy": {
+        "FET": 2681034.1979467347,
+        "PENGU": 2606389.2444851175,
+        "Q102": 388784191.777268,
+        "V12": 569268186.0383552,
+        "V52": 279548555.86890477
+      },
+      "accounting_reconciliation": {
+        "closed_trade_pnl_settlement_units": 7746615.503110112,
+        "deposit_settlement_units": 834.9436501853417,
+        "equity_minus_wallet_jpy": -0.000001430511474609375,
+        "equity_minus_wallet_nominal_jpy": null,
+        "event_cashflow_settlement_units": 7747450.446760297,
+        "final_fx_jpy_per_usd": 158.64128083080917,
+        "intrahour_events": 724,
+        "status": "PASS",
+        "wallet_settlement_units": 7747450.446760312
+      }
+    },
+    {
+      "scenario_id": "PRICE_MODEL_20BPS",
+      "final_equity_jpy": 396206355.5415546,
+      "profit_factor": 2.2294804332103557,
+      "maximum_mtm_drawdown": -0.2197697493865285,
+      "closed_trades": 1274,
+      "monthly_equity_jpy": {
+        "2025-08": 13165.345715494206,
+        "2025-09": 26221.247865736626,
+        "2025-10": 158952.24868927634,
+        "2025-11": 896488.7705290058,
+        "2025-12": 1345955.3957679544,
+        "2026-01": 3796731.847512645,
+        "2026-02": 13156412.223817246,
+        "2026-03": 33011490.97770028,
+        "2026-04": 50198847.384655826,
+        "2026-05": 75617053.51213892,
+        "2026-06": 367255556.1294009,
+        "2026-07": 390172727.32272273,
+        "2026-08": 396206355.5415546
+      },
+      "strategy_trades": {
+        "FET": 15,
+        "PENGU": 62,
+        "Q102": 130,
+        "V12": 983,
+        "V52": 84
+      },
+      "strategy_pnl_jpy": {
+        "FET": 2698794.7454795744,
+        "PENGU": 2613861.071242581,
+        "Q102": 135306425.5671015,
+        "V12": 171681070.48816887,
+        "V52": 87719245.96260113
+      },
+      "accounting_reconciliation": {
+        "closed_trade_pnl_settlement_units": 2496663.522490594,
+        "deposit_settlement_units": 834.9436501853417,
+        "equity_minus_wallet_jpy": 0,
+        "equity_minus_wallet_nominal_jpy": null,
+        "event_cashflow_settlement_units": 2497498.4661407797,
+        "final_fx_jpy_per_usd": 158.64128083080917,
+        "intrahour_events": 724,
+        "status": "PASS",
+        "wallet_settlement_units": 2497498.4661407797
+      }
+    },
+    {
+      "scenario_id": "PRICE_MODEL_30BPS",
+      "final_equity_jpy": 128891643.63693748,
+      "profit_factor": 1.9983401605845945,
+      "maximum_mtm_drawdown": -0.22744608429990987,
+      "closed_trades": 1274,
+      "monthly_equity_jpy": {
+        "2025-08": 12468.760263433254,
+        "2025-09": 23370.326411145015,
+        "2025-10": 127310.87928801215,
+        "2025-11": 623405.1041238441,
+        "2025-12": 876552.2442195815,
+        "2026-01": 2226947.2843509805,
+        "2026-02": 6830780.362015143,
+        "2026-03": 15390519.350495119,
+        "2026-04": 21830876.87810468,
+        "2026-05": 30694647.220709406,
+        "2026-06": 131644077.46989499,
+        "2026-07": 128529206.95876713,
+        "2026-08": 128891643.63693748
+      },
+      "strategy_trades": {
+        "FET": 15,
+        "PENGU": 62,
+        "Q102": 130,
+        "V12": 983,
+        "V52": 84
+      },
+      "strategy_pnl_jpy": {
+        "FET": 1822756.843072622,
+        "PENGU": 1897622.4629882833,
+        "Q102": 47930557.28481988,
+        "V12": 50644974.53124944,
+        "V52": 27521004.16575175
+      },
+      "accounting_reconciliation": {
+        "closed_trade_pnl_settlement_units": 811637.3394902945,
+        "deposit_settlement_units": 834.9436501853417,
+        "equity_minus_wallet_jpy": 0,
+        "equity_minus_wallet_nominal_jpy": null,
+        "event_cashflow_settlement_units": 812472.2831404797,
+        "final_fx_jpy_per_usd": 158.64128083080917,
+        "intrahour_events": 724,
+        "status": "PASS",
+        "wallet_settlement_units": 812472.2831404794
+      }
+    }
+  ],
+  "overlay_integrated_certified": false,
+  "live_certified": false,
+  "ordersSent": 0,
+  "cancelsSent": 0,
+  "positionChangesSent": 0
+}

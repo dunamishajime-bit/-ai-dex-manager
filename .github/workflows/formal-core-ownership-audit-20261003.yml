@@ -1,0 +1,85 @@
+name: Formal Core exact replay and ownership audit (not LIVE certification)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/formal-priority-cooldown-20261003
+    paths:
+      - scripts/research/formal_core_ownership_audit.py
+      - tests/test_formal_core_ownership_audit.py
+      - docs/research/results/formal-core-ownership-audit-20261003/**
+      - .github/workflows/formal-core-ownership-audit-20261003.yml
+
+permissions:
+  contents: read
+
+jobs:
+  replay-and-fail-closed-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Ownership / source-archive regression tests
+        run: python -B -m unittest discover -s tests -p test_formal_core_ownership_audit.py -v
+      - name: Fetch frozen market / V52 original Release (not LIVE)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p .bt-recert/input
+          gh release download bt-v12-score100-volume080-normalonly-20260928 --repo dunamishajime-bit/-ai-dex-manager --pattern bt-v12-score100-volume080-normalonly-20260928.tar.gz --dir .bt-recert/input
+          python -B - <<'PY'
+          from pathlib import Path
+          import hashlib, tarfile
+          path = Path('.bt-recert/input/bt-v12-score100-volume080-normalonly-20260928.tar.gz')
+          assert hashlib.sha256(path.read_bytes()).hexdigest() == '891c36d8a5957cafe3aae65656a98b7c02a3c437c4f520fe63756d550f08b4fb'
+          with tarfile.open(path) as archive:
+              archive.extractall('.bt-recert/input/baseline', filter='data')
+          PY
+      - name: Re-run original causal Core with exact candidate input, 8/10/20/30bps
+        run: |
+          python -B - <<'PY'
+          from pathlib import Path
+          import sys, json
+          from scripts.research.formal_core_ownership_audit import extract_verified_zip
+          frozen = Path('docs/research/results/formal-core-ownership-audit-20261003')
+          extract_verified_zip(frozen/'engine-source.zip', '.bt-recert/source/reconpkg', 'ba39690a3b125f274571132c2992211bee6a30259e7b832cbf27208544ab4a78')
+          extract_verified_zip(frozen/'candidate-inputs.zip', '.bt-recert/candidates', 'c69fde854b8516394519be5a7f8f08ec458b4ef802d4181294f60fe1c992096e')
+          sys.path.insert(0, '.bt-recert/source')
+          from reconpkg import portfolio_price_model as m
+          m.set_priority_policy('PB_REV_HIGHVOL_R2R1')
+          m.set_v12_cooldown_hours(2)
+          m.set_v12_cooldown_policy('BASE_2H')
+          root = Path('.bt-recert/input/baseline/bt-v12-score100-volume080-normalonly-20260928')
+          result = m.run_portfolio_model(root/'market-Aster-H1-funding-and-manifests', Path('.bt-recert/candidates/gated-candidates'), Path('.bt-recert/replay'), v52_ledger_root=root/'v52-SHA-verified-original-ledger', ecb_fx_root=root/'market-Aster-H1-funding-and-manifests', cost_scenarios=tuple((f'PRICE_MODEL_{n}BPS', float(n)) for n in (8,10,20,30)), research_risk_caps={'Q102_BRK': .75, 'Q102_MR': .75, 'FET': 1.0})
+          for scenario in result['scenarios']:
+              print(json.dumps({k: scenario[k] for k in ('scenario_id','final_equity_jpy','profit_factor','maximum_mtm_drawdown','closed_trades','accounting_reconciliation')}))
+          PY
+      - name: Require exact Core parity and demonstrate ownership certification BLOCK
+        run: |
+          python -B - <<'PY'
+          import subprocess, sys, json
+          command = [sys.executable, '-B', 'scripts/research/formal_core_ownership_audit.py', '--canonical', 'docs/research/results/formal-priority-cooldown-20261003/PRICE_MODEL_10BPS', '--fresh', '.bt-recert/replay/PRICE_MODEL_10BPS', '--raw-candidates', '.bt-recert/candidates/v12_trail02_candidates/crypto-price-model-candidates.jsonl', '--gated-candidates', '.bt-recert/candidates/gated-candidates/crypto-price-model-candidates.jsonl', '--engine-source', '.bt-recert/source/reconpkg/portfolio_price_model.py', '--output', '.bt-recert/core-ownership-audit.json']
+          result = subprocess.run(command, check=False)
+          assert result.returncode == 2, 'Expected certification to remain fail-closed, not an arbitrary tool failure'
+          report = json.load(open('.bt-recert/core-ownership-audit.json'))
+          assert report['source_identity_pass'] is True
+          assert report['core_exact_semantic_parity_pass'] is True
+          assert report['ownership_summary']['overlapping_pairs'] == 15
+          assert report['status'] == 'BLOCKED_FORMAL_CORE_SYMBOL_OWNERSHIP_PARITY_CONFLICT'
+          PY
+      - name: Preserve executed Core ledgers / audit / stress (not integrated Overlay certification)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: formal-core-exact-parity-ownership-block-${{ github.sha }}
+          retention-days: 90
+          include-hidden-files: true
+          path: |
+            .bt-recert/replay/**
+            .bt-recert/core-ownership-audit.json
+            docs/research/results/formal-core-ownership-audit-20261003/core-ownership-audit.json
+          if-no-files-found: error

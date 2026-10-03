@@ -56,3 +56,4 @@ deploy-xserver-*.zip
 resend-button-fix-*.tar.gz
 *.tar.gz
 *.zip
+.bt-*/
