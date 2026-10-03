@@ -173,7 +173,7 @@ jobs:
             chown -h deploy:deploy "$stage/.venv2"
 
             test -x "$stage/node_modules/@esbuild/linux-x64/bin/esbuild"
-            runuser -u deploy -- "$stage/node_modules/@esbuild/linux-x64/bin/esbuild" --version
+            runuser -u deploy -- sh -c 'cd "$1" && ./node_modules/@esbuild/linux-x64/bin/esbuild --version' sh "$stage"
 
             mv -- "$stage" "$release"
           fi
@@ -188,14 +188,10 @@ jobs:
           print("STAGE_MARKER=PASS")
           PY
 
-          runuser -u deploy -- "$release/node_modules/.bin/tsx" --test \
-            "$release/tests/v12_formal_priority_policy.test.ts" \
-            "$release/tests/v12-q102-priority-preemption.test.ts" \
-            "$release/tests/v12-exit-fill-timestamp.test.ts" \
-            "$release/tests/current_live_target_contract.test.ts"
+          runuser -u deploy -- sh -c 'cd "$1" && ./node_modules/.bin/tsx --test tests/v12_formal_priority_policy.test.ts tests/v12-q102-priority-preemption.test.ts tests/v12-exit-fill-timestamp.test.ts tests/current_live_target_contract.test.ts' sh "$release"
 
-          runuser -u deploy -- npm --prefix "$release" run strategy:v12-x1-all:selftest
-          runuser -u deploy -- npm --prefix "$release" run strategy:quality102-causal-v1:runner:selftest
+          runuser -u deploy -- sh -c 'cd "$1" && npm run strategy:v12-x1-all:selftest' sh "$release"
+          runuser -u deploy -- sh -c 'cd "$1" && npm run strategy:quality102-causal-v1:runner:selftest' sh "$release"
 
           "$current/scripts/ops/root/disdex-current-runtime-coherence-guard" --check
 
