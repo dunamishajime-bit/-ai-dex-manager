@@ -115,6 +115,22 @@ jobs:
             restarts_before["$name"]="$(systemctl show "$unit" -p NRestarts --value 2>/dev/null || true)"
           done
 
+          if [[ -d "$release" ]]; then
+            [[ "$release" != "$before_path" ]]
+            [[ -f "$release/.disdex-stage-only.json" ]]
+            python3 - "$release/.disdex-stage-only.json" "$TARGET_SHA" <<'PY'
+          import json,sys
+          d=json.load(open(sys.argv[1],encoding="utf-8"))
+          assert d.get("targetSha")==sys.argv[2]
+          assert d.get("activated") is False and d.get("ordersEnabled") is False
+          PY
+            if systemctl list-units --all --no-legend 2>/dev/null | grep -Fq "$TARGET_SHA"; then
+              echo "STAGE_RELEASE_REFERENCED_BY_SYSTEMD"
+              exit 1
+            fi
+            rm -rf -- "$release"
+          fi
+
           if [[ ! -d "$release" ]]; then
             [[ -f "$source_cfg" && ! -L "$source_cfg" ]]
             source "$source_cfg"
@@ -150,12 +166,14 @@ jobs:
           EOF
             chown -R deploy:deploy "$stage"
 
-            node_modules_target="$(readlink -f "$before_path/node_modules")"
             venv_target="$(readlink -f "$before_path/.venv2")"
-            [[ -d "$node_modules_target" && -d "$venv_target" ]]
-            ln -s "$node_modules_target" "$stage/node_modules"
+            [[ -d "$venv_target" ]]
+            runuser -u deploy -- npm --prefix "$stage" ci --no-audit --no-fund
             ln -s "$venv_target" "$stage/.venv2"
-            chown -h deploy:deploy "$stage/node_modules" "$stage/.venv2"
+            chown -h deploy:deploy "$stage/.venv2"
+
+            test -x "$stage/node_modules/@esbuild/linux-x64/bin/esbuild"
+            runuser -u deploy -- "$stage/node_modules/@esbuild/linux-x64/bin/esbuild" --version
 
             mv -- "$stage" "$release"
           fi
