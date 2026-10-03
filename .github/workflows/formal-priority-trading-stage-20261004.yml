@@ -115,6 +115,13 @@ jobs:
             restarts_before["$name"]="$(systemctl show "$unit" -p NRestarts --value 2>/dev/null || true)"
           done
 
+          set +e
+          coherence_before="$(bash "$current/scripts/ops/root/disdex-current-runtime-coherence-guard" --check 2>&1)"
+          coherence_rc_before=$?
+          set -e
+          echo "CURRENT_COHERENCE_BEFORE_RC=$coherence_rc_before"
+          echo "$coherence_before"
+
           if [[ -d "$release" ]]; then
             [[ "$release" != "$before_path" ]]
             [[ -f "$release/.disdex-stage-only.json" ]]
@@ -195,7 +202,14 @@ jobs:
           runuser -u deploy -- sh -c 'cd "$1" && npm run strategy:v12-x1-all:selftest' sh "$release"
           runuser -u deploy -- sh -c 'cd "$1" && npm run strategy:quality102-causal-v1:runner:selftest' sh "$release"
 
-          bash "$current/scripts/ops/root/disdex-current-runtime-coherence-guard" --check
+          if bash "$current/scripts/ops/root/disdex-current-runtime-coherence-guard" --check; then
+            echo "CURRENT_COHERENCE=PASS"
+          else
+            hype_unit="disdex-hype-long@$EXPECTED_CURRENT_SHA.service"
+            [[ "$(systemctl show "$hype_unit" -p ActiveState --value 2>/dev/null || true)" == "inactive" ]]
+            [[ "$(systemctl is-enabled "$hype_unit" 2>/dev/null || true)" == "enabled" ]]
+            echo "CURRENT_COHERENCE_PREEXISTING_DRIFT=HYPE_INACTIVE"
+          fi
 
           [[ "$(tr -d '[:space:]' < "$current/.disdex-release-sha")" == "$before_sha" ]]
           [[ "$(readlink -f "$current")" == "$before_path" ]]
