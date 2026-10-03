@@ -52,7 +52,7 @@ def prepare_overlay_batch(rows, active, completed, ts, market, equity, gross, fi
             for r in idle:r['_overlay_block']='MULTI_SIGNAL_CAPACITY_AMBIGUOUS'
 
 
-def load_ownership_engine(source_bytes=None):
+def load_ownership_engine(source_bytes=None, source_transform=None):
     archive=FROZEN/'engine-source.zip'
     if hashlib.sha256(archive.read_bytes()).hexdigest() != 'ba39690a3b125f274571132c2992211bee6a30259e7b832cbf27208544ab4a78':
         raise ValueError('ENGINE_ARCHIVE_SHA_MISMATCH')
@@ -116,6 +116,8 @@ def load_ownership_engine(source_bytes=None):
                     requested = 1.0
 '''+full)
     module._prepare_overlay=prepare_overlay_batch
+    if source_transform is not None:
+        source=source_transform(source)
     exec(compile(source,str(archive)+'!ownership', 'exec'),module.__dict__)
     module.PRIORITY.update(IDLE=5,RESIDUAL=6)
     old_cap=module._strategy_cap
