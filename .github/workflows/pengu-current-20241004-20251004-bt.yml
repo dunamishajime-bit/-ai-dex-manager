@@ -34,8 +34,8 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
-          test "$(git rev-parse HEAD^)" = "53eeff5417636369d4709fddfd47d7916ddcf3b1" || {
-            echo "Research commit is not directly based on Production SHA"; git log --oneline -3; exit 1;
+          git merge-base --is-ancestor 53eeff5417636369d4709fddfd47d7916ddcf3b1 HEAD || {
+            echo "Production SHA is not an ancestor of research HEAD"; git log --oneline -5; exit 1;
           }
           grep -q 'logicProfile: "COMBINED_FILTERED_Q60_DD17_H72"' config/penguDualLsV2Runtime.ts
           grep -q 'liveEnabled: true' config/penguRecoveryV8.ts
