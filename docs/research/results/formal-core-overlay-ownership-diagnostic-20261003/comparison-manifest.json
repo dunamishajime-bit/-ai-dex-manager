@@ -1884,7 +1884,7 @@
     "config\\idleResidualLongPolicy.ts": "476242d787494f8c260c8a1b63ffdc8abd266f611df5dc55ca6a0d3af2cc01f9",
     "lib\\idle-priority-short-signal.ts": "76f68ba1ec78f5adb34c68718a28b199f58bd29dd6651a404631326906c2f827",
     "lib\\idle-residual-long-signal.ts": "b88435a1fb2a9c98d851c658a3a1e5a665f8e9421d6183875daa330c48841670",
-    "scripts\\research\\formal_core_live_ownership.py": "41d176bdfaf77509e3556aea58ccc3d81b0b3df45c5106ccb48468ee8a33e592",
+    "scripts\\research\\formal_core_live_ownership.py": "5965909f5654d7f6a098989f800630cce142ccb13e21711344b01b73735b1463",
     "scripts\\research\\formal_overlay_feature_stream.ts": "399cfeeffd0fa93a1ea364f2f07a64ff8c98bc4438ff4334f751c8c87fead4d9",
     "scripts\\research\\run_formal_core_overlay_diagnostic.py": "b978f7230746772587ca3751fb50c219ca2461bb08a44f6a4b98dadf5f8310f9"
   },

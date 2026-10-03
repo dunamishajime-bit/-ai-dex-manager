@@ -10,6 +10,7 @@ on:
       - scripts/research/run_formal_core_overlay_diagnostic.py
       - tests/test_formal_core_live_ownership.py
       - tests/test_formal_overlay_allocator.py
+      - docs/research/results/formal-core-overlay-ownership-diagnostic-20261003/**
       - .github/workflows/formal-core-overlay-ownership-diagnostic-20261003.yml
 
 permissions:
