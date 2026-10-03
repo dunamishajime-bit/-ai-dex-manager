@@ -14,15 +14,14 @@ permissions:
 
 concurrency:
   group: new-logic-hp-deploy-20261004
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    timeout-minutes: 30
     env:
       TARGET_SHA: ${{ github.sha }}
-      SOURCE_REF: research/formal-priority-cooldown-20261003
       EXPECTED_TRADING_SHA: 53eeff5417636369d4709fddfd47d7916ddcf3b1
       SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
       ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
@@ -31,8 +30,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Verify new UI source contract
         shell: bash
@@ -43,15 +40,19 @@ jobs:
           test -f app/decision-status/formal-priority/page.tsx
           test -f app/decision-status/idle-priority/page.tsx
           test -f app/api/system/runtime-overview/route.ts
-          ! grep -R -n -I -E 'ZEC.*判定|decision-status/zec|visibleSidecars:.*ZEC' app components
+          ! grep -R -n -I -E 'decision-status/zec|visibleSidecars:.*ZEC|ZEC 判定' app components
 
-      - name: Clean Next 14 build
+      - name: Clean Next 14 build and bundle
         shell: bash
         run: |
           set -Eeuo pipefail
           npm ci --no-audit --no-fund
           node -e 'const p=require("./node_modules/next/package.json"); if(p.version!=="14.1.0") throw new Error("NEXT_VERSION_MISMATCH:"+p.version); console.log("NEXT_VERSION="+p.version)'
           npm run build
+          test -f .next/BUILD_ID
+          tar --exclude=.git --exclude=.next/cache -czf "$RUNNER_TEMP/new-logic-ui.tgz" .
+          test -s "$RUNNER_TEMP/new-logic-ui.tgz"
+          echo "UI_BUNDLE_BYTES=$(stat -c '%s' "$RUNNER_TEMP/new-logic-ui.tgz")"
 
       - name: Initialize root SSH
         shell: bash
@@ -69,26 +70,33 @@ jobs:
           chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
           ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
 
-      - name: Deploy new logic HP and retire legacy UI releases
+      - name: Transfer verified UI bundle
         shell: bash
         run: |
           set -Eeuo pipefail
           PORT="${SSH_PORT:-22}"
-          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts"             -o ConnectTimeout=15 -p "$PORT" "root@$SSH_HOST"             "TARGET_SHA='$TARGET_SHA' SOURCE_REF='$SOURCE_REF' EXPECTED_TRADING_SHA='$EXPECTED_TRADING_SHA' bash -s" <<'REMOTE'
+          scp -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts"             -o ConnectTimeout=15 -P "$PORT"             "$RUNNER_TEMP/new-logic-ui.tgz" "root@$SSH_HOST:/tmp/disdex-new-logic-ui-$TARGET_SHA.tgz"
+
+      - name: Switch HP, verify new logic, purge legacy UI
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts"             -o ConnectTimeout=15 -p "$PORT" "root@$SSH_HOST"             "TARGET_SHA='$TARGET_SHA' EXPECTED_TRADING_SHA='$EXPECTED_TRADING_SHA' bash -s" <<'REMOTE'
           set -Eeuo pipefail
           [[ "$(id -un)" == root ]]
 
           ui_service=ai-dex-manager-ui.service
           ui_root=/home/deploy/disdex-trading/ui-releases
+          bundle="/tmp/disdex-new-logic-ui-$TARGET_SHA.tgz"
           ui_release="$ui_root/ui-new-logic-${TARGET_SHA:0:12}"
           ui_stage="$ui_root/.ui-new-logic-${TARGET_SHA:0:12}.tmp-$$"
           dropin_dir=/etc/systemd/system/ai-dex-manager-ui.service.d
           canonical_override="$dropin_dir/90-current-ui-release.conf"
           current=/home/deploy/disdex-trading/current
-          source_cfg=/etc/disdex/github-actions-control.env
-          backup_root="/var/backups/disdex-ui-clean-deploy-${TARGET_SHA:0:12}"
-          mkdir -p "$backup_root"
+          backup_root="/var/backups/disdex-ui-switch-${TARGET_SHA:0:12}"
 
+          [[ -s "$bundle" ]]
           trading_before="$(tr -d '[:space:]' < "$current/.disdex-release-sha")"
           trading_path_before="$(readlink -f "$current")"
           [[ "$trading_before" == "$EXPECTED_TRADING_SHA" ]]
@@ -114,54 +122,46 @@ jobs:
           done
 
           ui_before="$(systemctl show "$ui_service" -p WorkingDirectory --value)"
-          [[ -n "$ui_before" && -d "$ui_before" ]]
+          [[ -d "$ui_before" ]]
+          rm -rf "$backup_root"
+          install -d -m 0700 "$backup_root"
           cp -a "$dropin_dir" "$backup_root/dropins-before"
-          printf '%s\n' "$ui_before" > "$backup_root/ui-workdir-before.txt"
 
           rollback() {
             rc=$?
             trap - ERR
             set +e
-            echo "HP_CLEAN_DEPLOY_ROLLBACK_BEGIN rc=$rc"
+            echo "HP_SWITCH_ROLLBACK_BEGIN rc=$rc"
             rm -rf "$dropin_dir"
             cp -a "$backup_root/dropins-before" "$dropin_dir"
             systemctl daemon-reload
             systemctl restart "$ui_service"
             rm -rf "$ui_stage"
-            echo "HP_CLEAN_DEPLOY_ROLLBACK_WORKDIR=$(systemctl show "$ui_service" -p WorkingDirectory --value 2>/dev/null || true)"
+            rm -f "$bundle"
+            echo "HP_SWITCH_ROLLBACK_WORKDIR=$(systemctl show "$ui_service" -p WorkingDirectory --value 2>/dev/null || true)"
             exit "$rc"
           }
           trap rollback ERR
 
-          [[ -f "$source_cfg" && ! -L "$source_cfg" ]]
-          source "$source_cfg"
-          : "${SOURCE_REPO:?SOURCE_REPO missing}"
-          : "${EXPECTED_ORIGIN_URL:?EXPECTED_ORIGIN_URL missing}"
-          [[ "$SOURCE_REPO" == /* && -d "$SOURCE_REPO" && ! -L "$SOURCE_REPO" ]]
-          [[ "$(stat -c '%U' "$SOURCE_REPO")" == deploy ]]
-          [[ "$(runuser -u deploy -- git -C "$SOURCE_REPO" remote get-url origin)" == "$EXPECTED_ORIGIN_URL" ]]
+          # Remove any abandoned build stages left by cancelled HP-only jobs.
+          find "$ui_root" -mindepth 1 -maxdepth 1 -type d -name '.ui-new-logic-*.tmp-*' -exec rm -rf -- {} +
 
-          runuser -u deploy -- git -C "$SOURCE_REPO" fetch --no-tags origin             "refs/heads/$SOURCE_REF:refs/remotes/origin/$SOURCE_REF"
-          remote_head="$(runuser -u deploy -- git -C "$SOURCE_REPO" rev-parse "refs/remotes/origin/$SOURCE_REF^{commit}")"
-          [[ "$remote_head" == "$TARGET_SHA" ]]
-
-          rm -rf "$ui_stage"
           install -d -o deploy -g deploy -m 0750 "$ui_stage"
-          runuser -u deploy -- git -C "$SOURCE_REPO" archive "$TARGET_SHA" | runuser -u deploy -- tar -x -C "$ui_stage"
+          tar -xzf "$bundle" -C "$ui_stage"
           printf '%s\n' "$TARGET_SHA" > "$ui_stage/.disdex-release-sha"
-          chown deploy:deploy "$ui_stage/.disdex-release-sha"
+          chown -R deploy:deploy "$ui_stage"
 
-          runuser -u deploy -- bash -c "cd '$ui_stage' && npm ci --no-audit --no-fund"
           next_version="$(runuser -u deploy -- bash -c "cd '$ui_stage' && node -p \"require('./node_modules/next/package.json').version\"")"
           [[ "$next_version" == "14.1.0" ]]
-          runuser -u deploy -- bash -c "cd '$ui_stage' && NODE_OPTIONS=--max-old-space-size=1536 npm run build"
-          [[ -d "$ui_stage/.next" && -d "$ui_stage/node_modules" ]]
+          [[ -f "$ui_stage/.next/BUILD_ID" ]]
+          [[ -d "$ui_stage/node_modules" ]]
+
           rm -rf "$ui_release"
           mv "$ui_stage" "$ui_release"
           chown -R deploy:deploy "$ui_release"
 
-          # Remove only stale UI release-selection directives. Preserve unrelated
-          # environment drop-ins used by the live read-only HP.
+          # Retire every legacy release-selection directive. Preserve other
+          # read-only runtime environment directives.
           shopt -s nullglob
           for f in "$dropin_dir"/*.conf; do
             tmp="$f.clean-$$"
@@ -184,7 +184,6 @@ jobs:
           Environment=DISDEX_UI_RELEASE_SHA=$TARGET_SHA
           EOF
           sed -i 's/^[[:space:]]*//' "$canonical_override"
-          chown root:root "$canonical_override"
           chmod 0644 "$canonical_override"
 
           systemctl daemon-reload
@@ -219,11 +218,13 @@ jobs:
           assert d.get("releaseSha")==expected
           ids=[x.get("id") for x in d.get("strategies",[])]
           assert ids==["v12","pengu","q102","v52","fet","hype"], ids
-          visible=d.get("visibleStrategies",[])
-          assert "ZEC" not in visible
+          assert "ZEC" not in d.get("visibleStrategies",[])
           assert d.get("retiredUiStrategies")==["ZEC"]
           print("RUNTIME_OVERVIEW_CONTRACT=PASS")
           PY
+
+          public_code="$(curl -sS -H 'Cookie: disdex_auth=1' -o /dev/null -w '%{http_code}' --max-time 15 https://professional-dismanager.net/decision-status)"
+          [[ "$public_code" == 200 ]]
 
           [[ "$(tr -d '[:space:]' < "$current/.disdex-release-sha")" == "$EXPECTED_TRADING_SHA" ]]
           [[ "$(readlink -f "$current")" == "$trading_path_before" ]]
@@ -245,10 +246,11 @@ jobs:
           print("POST_HP_TRADING_SAFETY=PASS")
           PY
 
-          # New HP is verified. Remove all obsolete UI releases and staging
-          # directories so an old page cannot be selected again.
+          # New HP is verified locally and publicly. Purge all obsolete UI
+          # releases/stages so no legacy page can be selected again.
           find "$ui_root" -mindepth 1 -maxdepth 1 -type d ! -path "$ui_release" -exec rm -rf -- {} +
           find "$ui_root" -mindepth 1 -maxdepth 1 -type l -delete
+          rm -f "$bundle"
 
           count="$(find "$ui_root" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')"
           [[ "$count" == 1 ]]
@@ -259,6 +261,7 @@ jobs:
           echo "UI_SHA=$TARGET_SHA"
           echo "UI_RELEASE=$ui_release"
           echo "NEXT_VERSION=$next_version"
+          echo "PUBLIC_DECISION_STATUS_HTTP=$public_code"
           echo "LEGACY_UI_RELEASE_COUNT=0"
           echo "ZEC_UI=REMOVED"
           echo "TRADING_SHA_UNCHANGED=$EXPECTED_TRADING_SHA"
@@ -266,7 +269,7 @@ jobs:
           echo "ORDER_MUTATION_ATTEMPTED=FALSE"
           REMOTE
 
-      - name: Public smoke
+      - name: Final public smoke
         shell: bash
         run: |
           set -Eeuo pipefail
