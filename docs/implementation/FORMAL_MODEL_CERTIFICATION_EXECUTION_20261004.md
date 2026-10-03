@@ -63,6 +63,13 @@ intermediate and invalidated by the subsequent fixed-Idle admission check.
 See FORMAL_MODEL_SCOPE_GAPS_20261004.md for unresolved scope discrepancies.
 These are not cleared by CI success and prohibit Production certification.
 
+Follow-up review strengthened the fixed-Idle test to require admission on a
+flat account with sufficient portfolio headroom (observed RED). Strategy
+allocation room now retains its original intent units; crypto/stock/total
+marked exposure still uses post-fee headroom. GREEN ownership8/8 and Overlay23
+test executions. CI additionally requires actual Idle and residual trades,
+so zero Overlay execution cannot accidentally satisfy the retained-scope audit.
+
 Read-only VPS recheck: current/marker 53eeff5417636369d4709fddfd47d7916ddcf3b1;
 HYPE remains intentionally unmodified in manual review. Existing core, Idle
 and safety services are running. No Production mutations were executed.

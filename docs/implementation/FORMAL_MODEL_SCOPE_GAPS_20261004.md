@@ -15,11 +15,14 @@ Idle SHORT and residual LONG require fixed 1.0x in their actual runners. Both
 normalize equity / quote and HOLD if normalized notional / equity is below
 1 - 1e-6. Their durable allocation and reservation gross are exactly 1.
 Reducing an accepted allocation silently in the model would not match this
-contract. The guarded diagnostic therefore rejects an intent if full 1x is
-unavailable; it must not be presented as certification of retained Overlay when
-this fee-adjusted strategy room prevents Overlay admission. The distinction
-between allocation gross and post-fee marked exposure requires an explicit,
-tested model/runtime-equivalence contract, not a cap relaxation.
+contract. The first guarded run rejected every Overlay by applying post-fee
+equity shrinkage to the strategy allocation ceiling. A stronger regression
+then required a flat 1x intent to be admitted when crypto3x/total4.25x have
+sufficient room. The corrected model keeps strategy allocation room in its
+original intent units and guards sleeve/total marked exposure after fees.
+It still rejects a fixed intent when the portfolio cannot fit the whole 1x.
+This correction changes no nominal strategy or portfolio cap. Full model /
+runtime scope certification still requires the evidence described below.
 
 Source locations: lib/idle-priority-short-runner.ts enter; lib/idle-residual-long-runner.ts enter;
 scripts/research/formal_core_live_ownership.py optional postfee_margin_guard.

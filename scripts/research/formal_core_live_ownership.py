@@ -135,14 +135,16 @@ def load_ownership_engine(source_bytes=None, *, postfee_margin_guard: bool = Fal
             '                total_room = _postfee_room(total_gross, TOTAL_CAP, cost_side)\n',
         )
         # Final admission follows any completed preemption and fresh gross
-        # recomputation. Entry fees shrink the denominator for sleeve and
-        # strategy gross as well as total margin; guard all three here.
+        # recomputation. Fees shrink marked portfolio equity, so sleeve and
+        # total exposure need post-fee headroom. Strategy caps constrain the
+        # allocation intent; do not change a fixed 1x allocation into a
+        # fractional intent by treating its own entry fee as extra allocation.
         if source.count(full) != 1:
             raise ValueError('POSTFEE_SLEEVE_ROOM_HOOK_IDENTITY_MISMATCH')
         source = source.replace(full, '''                sleeve_room = _postfee_room(
                     stock_gross if strategy == "V52" else crypto_gross,
                     STOCK_CAP if strategy == "V52" else CRYPTO_CAP, cost_side)
-                strategy_room = _postfee_room(strategy_gross, research_cap, cost_side)
+                strategy_room = max(0.0, research_cap - strategy_gross)
                 room = min(strategy_room, sleeve_room, total_room)
                 if strategy in {"IDLE", "RESIDUAL"} and room + 1e-9 < 1.0:
                     reason = f"{strategy}:POSTFEE_FULL_1X_UNAVAILABLE"

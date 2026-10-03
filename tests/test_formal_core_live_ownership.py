@@ -115,8 +115,10 @@ class OwnershipReplayTest(unittest.TestCase):
         result = engine._portfolio_scenario([entry], Path('.'), self.market,
                                             round_trip_cost_bps=10., scenario_id='TEST')
         entries = [r for r in result['event_rows'] if r['event_type'] == 'MODELED_ENTRY']
-        self.assertTrue(not entries or abs(float(entries[0]['accepted_gross']) - 1.0) < 1e-9,
-                        'fixed 1x intent must not be silently reduced by a later fee-room hook')
+        self.assertEqual(len(entries), 1,
+                         'a fixed 1x allocation fits the flat 3x crypto / 4.25x portfolio')
+        self.assertAlmostEqual(float(entries[0]['accepted_gross']), 1.0,
+                               msg='allocation must not be silently reduced by a fee-room hook')
 
 
 if __name__ == '__main__':
