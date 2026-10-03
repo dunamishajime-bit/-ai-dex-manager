@@ -2,7 +2,7 @@ name: Formal source evidence and full Python discovery (no LIVE certification)
 on:
   workflow_dispatch:
   push:
-    branches: [research/formal-priority-cooldown-20261003]
+    branches: [research/formal-priority-cooldown-20261003, codex/formal-model-certification-hype-20261004]
     paths:
       - scripts/research/formal_venue_availability.py
       - tests/**

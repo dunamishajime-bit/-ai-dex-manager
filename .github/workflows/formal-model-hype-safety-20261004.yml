@@ -1,0 +1,33 @@
+name: Formal model and HYPE safety (no activation)
+on:
+  push:
+    branches: [codex/formal-model-certification-hype-20261004]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  safety:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: HYPE and shared budget real contract tests
+        run: |
+          npx tsx --test tests/hype*.test.ts tests/aster-global-rate-budget.test.ts tests/aster-rate-budget-policy.test.ts tests/operator_activation_hardening.test.ts tests/v12_formal_priority_policy.test.ts tests/v12-q102-priority-preemption.test.ts tests/v12-exit-fill-timestamp.test.ts tests/quality102_causal_v1_portfolio.test.ts tests/shared_crypto_daily_loss_contract.test.ts tests/dynamic-margin-gate.test.ts
+          node --test tests/hype-systemd-contract.test.mjs
+      - name: TypeScript
+        run: npx tsc --noEmit
+      - name: Formal core selftests
+        run: |
+          npm run strategy:v12-x1-all:selftest
+          npm run strategy:quality102-causal-v1:runner:selftest
+          npm run strategy:shared-crypto-risk:selftest
+      - name: Production build
+        env:
+          NEXT_TELEMETRY_DISABLED: '1'
+        run: npm run build

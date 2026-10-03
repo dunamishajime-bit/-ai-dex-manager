@@ -89,6 +89,35 @@ class OwnershipReplayTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError,'SOURCE_SHA_MISMATCH'):
             load_ownership_engine(source_bytes=b'print("untrusted")')
 
+    def test_postfee_guard_also_preserves_crypto_sleeve_cap(self):
+        market = dict(self.market)
+        market['BTCUSDT'] = {'times': self.market['DOGEUSDT']['times'],
+                            'rows': self.market['DOGEUSDT']['rows']}
+        base = self.candidate('V12', 1, 4)
+        base['symbol'] = 'BTCUSDT'
+        base['requested_gross'] = 1.0
+        next_entry = self.candidate('Q102', 1, 4, index=2)
+        next_entry['requested_gross'] = 3.0
+        engine = load_ownership_engine(postfee_margin_guard=True)
+        result = engine._portfolio_scenario([base, next_entry], Path('.'), market,
+                                            round_trip_cost_bps=10., scenario_id='TEST')
+        entries = [r for r in result['event_rows'] if r['event_type'] == 'MODELED_ENTRY']
+        self.assertEqual(len(entries), 2)
+        post_fee_wallet = float(entries[-1]['wallet_after_event'])
+        marked_notional = sum(float(r['notional_settlement']) for r in entries)
+        self.assertLessEqual(marked_notional / post_fee_wallet, 3.0 + 1e-9)
+
+    def test_postfee_guard_never_partially_allocates_fixed_one_x_idle(self):
+        entry = self.candidate('IDLE', 1, 4)
+        entry.update(requested_gross=1.0, overlay_source_current=True,
+                     route_selected=True, generic_accepted=True)
+        engine = load_ownership_engine(postfee_margin_guard=True)
+        result = engine._portfolio_scenario([entry], Path('.'), self.market,
+                                            round_trip_cost_bps=10., scenario_id='TEST')
+        entries = [r for r in result['event_rows'] if r['event_type'] == 'MODELED_ENTRY']
+        self.assertTrue(not entries or abs(float(entries[0]['accepted_gross']) - 1.0) < 1e-9,
+                        'fixed 1x intent must not be silently reduced by a later fee-room hook')
+
 
 if __name__ == '__main__':
     unittest.main()

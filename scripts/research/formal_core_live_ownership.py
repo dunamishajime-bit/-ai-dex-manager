@@ -134,6 +134,22 @@ def load_ownership_engine(source_bytes=None, *, postfee_margin_guard: bool = Fal
             total_room_line,
             '                total_room = _postfee_room(total_gross, TOTAL_CAP, cost_side)\n',
         )
+        # Final admission follows any completed preemption and fresh gross
+        # recomputation. Entry fees shrink the denominator for sleeve and
+        # strategy gross as well as total margin; guard all three here.
+        if source.count(full) != 1:
+            raise ValueError('POSTFEE_SLEEVE_ROOM_HOOK_IDENTITY_MISMATCH')
+        source = source.replace(full, '''                sleeve_room = _postfee_room(
+                    stock_gross if strategy == "V52" else crypto_gross,
+                    STOCK_CAP if strategy == "V52" else CRYPTO_CAP, cost_side)
+                strategy_room = _postfee_room(strategy_gross, research_cap, cost_side)
+                room = min(strategy_room, sleeve_room, total_room)
+                if strategy in {"IDLE", "RESIDUAL"} and room + 1e-9 < 1.0:
+                    reason = f"{strategy}:POSTFEE_FULL_1X_UNAVAILABLE"
+                    record_decision(candidate, "REJECTED_PORTFOLIO", reason, ts)
+                    rejected[reason] += 1
+                    continue
+'''+full)
     module._prepare_overlay=prepare_overlay_batch
     module._postfee_room=_postfee_room
     exec(compile(source,str(archive)+'!ownership', 'exec'),module.__dict__)

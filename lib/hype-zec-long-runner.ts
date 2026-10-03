@@ -18,6 +18,7 @@ import { evaluateHypeTrendEntryGate } from "./hype-trend-long-runner";
 import type { HypeZecLongMarketData } from "./hype-zec-long-market-data";
 import { FileHypeZecLongRunnerStateStore, type HypeZecLongPositionState, type HypeZecLongRunnerState } from "./hype-zec-long-runner-state";
 import { BENIGN_HYPE_ZEC_MARKET_DATA_REVIEW } from "./hype-zec-long-recovery-contract";
+import { classifyAsterRateBudgetFailure } from "./disdex-aster-rate-budget-policy";
 
 const EPSILON = 1e-9;
 
@@ -365,6 +366,7 @@ export class HypeZecLongRunner {
     this.liveGate();
     const lock = await this.dependencies.lock.acquire(`HYPE_ZEC_LONG:${process.pid}:${Date.now()}`);
     if (!lock) return { status: "locked", message: "HYPE_ZEC_LONG_ACCOUNT_LOCK_BUSY" };
+    let readOnlyBudgetPhase = true;
     try {
       const state = await this.dependencies.stateStore.load();
       const benignReview = isBenignMarketDataReview(state.manualReview);
@@ -387,6 +389,18 @@ export class HypeZecLongRunner {
           (position.symbol.toUpperCase() === "HYPEUSDT" || position.symbol.toUpperCase() === "ZECUSDT")
           && Math.abs(position.quantity) > EPSILON
         ));
+        // All account/ownership reads completed and no order path has started.
+        // A known local pre-request budget denial can hold this flat tick, but
+        // must never clear an old review or recover pending/owned exposure.
+        const budget = classifyAsterRateBudgetFailure(error);
+        if (budget && !state.manualReview && !hasSidecarPosition && !(state.positions || []).length && !state.pending) {
+          const reason = `HYPE_ZEC_RATE_BUDGET_DEFERRED:${budget.reason}`;
+          state.lastDecision = { strategy: "HYPE_LONG", signalTs: null, accepted: false, reason };
+          state.lastDecisionTs = this.now();
+          await this.dependencies.stateStore.save(state);
+          this.log.warn("hype-zec-rate-budget-deferred", { reason, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 });
+          return { status: "held", message: reason };
+        }
         if (isRecoverableHypeZecMarketDataFailure(message) && !hasSidecarPosition && !(state.positions || []).length && !state.pending) {
           state.manualReview = undefined;
           state.lastDecision = { strategy: "HYPE_LONG", signalTs: null, accepted: false, reason: BENIGN_HYPE_ZEC_MARKET_DATA_REVIEW };
@@ -398,6 +412,9 @@ export class HypeZecLongRunner {
         }
         throw error;
       }
+      // From this point an entry/exit/protection path may run. Budget errors
+      // can no longer be classified as harmless pre-request flat deferral.
+      readOnlyBudgetPhase = false;
       if (benignReview) {
         state.manualReview = undefined;
         state.failures = [...state.failures, { message: "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY", occurredAt: this.now() }].slice(-100);
@@ -435,7 +452,19 @@ export class HypeZecLongRunner {
       return { status: "no-change", message: "HYPE_ZEC_NO_ACCEPTED_ENTRY" };
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error);
-      return this.manualReview(await this.dependencies.stateStore.load(), `HYPE_ZEC_RUNNER_FAIL_CLOSED:${message}`);
+      const state = await this.dependencies.stateStore.load();
+      const budget = classifyAsterRateBudgetFailure(error);
+      if (readOnlyBudgetPhase && budget && !state.manualReview && !(state.positions || []).length && !state.pending) {
+        // Reconciliation is deferred, not declared successful: no signal or
+        // order may execute until a subsequent tick completes fresh reads.
+        const reason = `HYPE_ZEC_RATE_BUDGET_DEFERRED:${budget.reason}`;
+        state.lastDecision = { strategy: "HYPE_LONG", signalTs: null, accepted: false, reason };
+        state.lastDecisionTs = this.now();
+        await this.dependencies.stateStore.save(state);
+        this.log.warn("hype-zec-rate-budget-deferred", { reason, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 });
+        return { status: "held", message: reason };
+      }
+      return this.manualReview(state, `HYPE_ZEC_RUNNER_FAIL_CLOSED:${message}`);
     } finally {
       await lock.release();
     }
