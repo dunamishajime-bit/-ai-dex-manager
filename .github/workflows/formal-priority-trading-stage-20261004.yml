@@ -1,0 +1,238 @@
+name: Formal Priority trading immutable stage 20261004
+
+on:
+  push:
+    branches:
+      - research/formal-priority-cooldown-20261003
+    paths:
+      - ".github/workflows/formal-priority-trading-stage-20261004.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: formal-priority-trading-stage-20261004
+  cancel-in-progress: false
+
+jobs:
+  stage-trading-release:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      TARGET_SHA: a798cf9f531956a68bcaff5d316e4f0afc3d5c08
+      SOURCE_REF: research/formal-priority-cooldown-20261003
+      EXPECTED_CURRENT_SHA: 53eeff5417636369d4709fddfd47d7916ddcf3b1
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify exact target readiness
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ "$(git rev-parse "$TARGET_SHA^{commit}")" == "$TARGET_SHA" ]]
+          git merge-base --is-ancestor "$TARGET_SHA" HEAD
+          python3 - "$TARGET_SHA" <<'PY'
+          import json,subprocess,sys
+          sha=sys.argv[1]
+          raw=subprocess.check_output(["git","show",f"{sha}:docs/production/current-implementation-readiness.json"],text=True)
+          d=json.loads(raw)
+          assert d["implementationStatus"]=="READY"
+          assert d["ordersEnabled"] is False
+          assert d["blockers"]==["OPERATOR_LIVE_ACTIVATION_REQUIRED"]
+          print("READINESS_STAGE_ONLY=PASS")
+          PY
+
+      - name: Initialize restricted root SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ -n "$SSH_HOST" && -n "$ROOT_KEY" && -n "$SSH_KNOWN_HOSTS" ]]
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+
+      - name: Stage exact immutable trading release without activation
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -p "$PORT" "root@$SSH_HOST" \
+            "TARGET_SHA='$TARGET_SHA' SOURCE_REF='$SOURCE_REF' EXPECTED_CURRENT_SHA='$EXPECTED_CURRENT_SHA' bash -s" <<'REMOTE'
+          set -Eeuo pipefail
+          [[ "$(id -un)" == root ]]
+
+          root=/home/deploy/disdex-trading
+          current="$root/current"
+          releases="$root/releases"
+          release="$releases/$TARGET_SHA"
+          stage="$releases/.stage-$TARGET_SHA-$$"
+          source_cfg=/etc/disdex/github-actions-control.env
+          operator=/var/lib/disdex/shared/operator-activation/current.json
+
+          before_sha="$(tr -d '[:space:]' < "$current/.disdex-release-sha")"
+          before_path="$(readlink -f "$current")"
+          [[ "$before_sha" == "$EXPECTED_CURRENT_SHA" ]]
+          [[ "$before_path" == "$releases/$EXPECTED_CURRENT_SHA" ]]
+
+          operator_sha_before=""
+          operator_sum_before=""
+          if [[ -f "$operator" ]]; then
+            operator_sum_before="$(sha256sum "$operator" | awk '{print $1}')"
+            operator_sha_before="$(python3 - "$operator" <<'PY'
+          import json,sys
+          try:
+              d=json.load(open(sys.argv[1],encoding="utf-8"))
+              print(d.get("approvedSha") or d.get("runtimeSha") or "")
+          except Exception:
+              print("")
+          PY
+          )"
+          fi
+
+          runners=(disdex-v12-x1-all disdex-pengu-dual-ls-v2 disdex-quality102-causal-v1
+                   disdex-v52-aster-only disdex-fet-brk48 disdex-hype-long disdex-idle-priority-short
+                   disdex-shared-crypto-risk disdex-v12-v52-margin-guard)
+          declare -A state_before pid_before restarts_before
+          for name in "${runners[@]}"; do
+            unit="$name@$EXPECTED_CURRENT_SHA.service"
+            state_before["$name"]="$(systemctl is-active "$unit" 2>/dev/null || true)"
+            pid_before["$name"]="$(systemctl show "$unit" -p MainPID --value 2>/dev/null || true)"
+            restarts_before["$name"]="$(systemctl show "$unit" -p NRestarts --value 2>/dev/null || true)"
+          done
+
+          set +e
+          coherence_before="$(bash "$current/scripts/ops/root/disdex-current-runtime-coherence-guard" --check 2>&1)"
+          coherence_rc_before=$?
+          set -e
+          echo "CURRENT_COHERENCE_BEFORE_RC=$coherence_rc_before"
+          echo "$coherence_before"
+
+          if [[ -d "$release" ]]; then
+            [[ "$release" != "$before_path" ]]
+            [[ -f "$release/.disdex-stage-only.json" ]]
+            python3 - "$release/.disdex-stage-only.json" "$TARGET_SHA" <<'PY'
+          import json,sys
+          d=json.load(open(sys.argv[1],encoding="utf-8"))
+          assert d.get("targetSha")==sys.argv[2]
+          assert d.get("activated") is False and d.get("ordersEnabled") is False
+          PY
+            if systemctl list-units --all --no-legend 2>/dev/null | grep -Fq "$TARGET_SHA"; then
+              echo "STAGE_RELEASE_REFERENCED_BY_SYSTEMD"
+              exit 1
+            fi
+            [[ -d "$release/node_modules" ]]
+            [[ -x "$release/node_modules/@esbuild/linux-x64/bin/esbuild" ]]
+            echo "REUSE_VERIFIED_STAGE_RELEASE=$release"
+          fi
+
+          if [[ ! -d "$release" ]]; then
+            [[ -f "$source_cfg" && ! -L "$source_cfg" ]]
+            source "$source_cfg"
+            : "${SOURCE_REPO:?SOURCE_REPO missing}"
+            : "${EXPECTED_ORIGIN_URL:?EXPECTED_ORIGIN_URL missing}"
+            [[ "$SOURCE_REPO" == /* && -d "$SOURCE_REPO" && ! -L "$SOURCE_REPO" ]]
+            [[ "$(stat -c '%U' "$SOURCE_REPO")" == deploy ]]
+            [[ "$(runuser -u deploy -- git -C "$SOURCE_REPO" remote get-url origin)" == "$EXPECTED_ORIGIN_URL" ]]
+            runuser -u deploy -- git -C "$SOURCE_REPO" fetch --no-tags origin \
+              "refs/heads/$SOURCE_REF:refs/remotes/origin/$SOURCE_REF"
+            remote_head="$(runuser -u deploy -- git -C "$SOURCE_REPO" rev-parse "refs/remotes/origin/$SOURCE_REF^{commit}")"
+            runuser -u deploy -- git -C "$SOURCE_REPO" merge-base --is-ancestor "$TARGET_SHA" "$remote_head"
+            [[ "$(runuser -u deploy -- git -C "$SOURCE_REPO" rev-parse "$TARGET_SHA^{commit}")" == "$TARGET_SHA" ]]
+
+            install -d -o deploy -g deploy -m 0750 "$stage"
+            runuser -u deploy -- git -C "$SOURCE_REPO" archive "$TARGET_SHA" | runuser -u deploy -- tar -x -C "$stage"
+
+            python3 - "$before_path/package-lock.json" "$stage/package-lock.json" <<'PY'
+          import json,sys
+          old,new=(json.load(open(p,encoding="utf-8")) for p in sys.argv[1:])
+          assert old.get("lockfileVersion")==new.get("lockfileVersion")
+          def graph(d):
+              p=d.get("packages")
+              assert isinstance(p,dict)
+              return {k:v for k,v in p.items() if k}
+          assert graph(old)==graph(new)
+          print("RESOLVED_DEPENDENCY_GRAPH=PASS")
+          PY
+
+            printf '%s\n' "$TARGET_SHA" > "$stage/.disdex-release-sha"
+            cat > "$stage/.disdex-stage-only.json" <<EOF
+          {"schema":"disdex-stage-only/v1","targetSha":"$TARGET_SHA","activated":false,"ordersEnabled":false}
+          EOF
+            chown -R deploy:deploy "$stage"
+
+            venv_target="$(readlink -f "$before_path/.venv2")"
+            [[ -d "$venv_target" ]]
+            runuser -u deploy -- npm --prefix "$stage" ci --no-audit --no-fund
+            ln -s "$venv_target" "$stage/.venv2"
+            chown -h deploy:deploy "$stage/.venv2"
+
+            test -x "$stage/node_modules/@esbuild/linux-x64/bin/esbuild"
+            runuser -u deploy -- sh -c 'cd "$1" && ./node_modules/@esbuild/linux-x64/bin/esbuild --version' sh "$stage"
+
+            mv -- "$stage" "$release"
+          fi
+
+          [[ -d "$release" && ! -L "$release" ]]
+          [[ "$(tr -d '[:space:]' < "$release/.disdex-release-sha")" == "$TARGET_SHA" ]]
+          python3 - "$release/.disdex-stage-only.json" "$TARGET_SHA" <<'PY'
+          import json,sys
+          d=json.load(open(sys.argv[1],encoding="utf-8"))
+          assert d["targetSha"]==sys.argv[2]
+          assert d["activated"] is False and d["ordersEnabled"] is False
+          print("STAGE_MARKER=PASS")
+          PY
+
+          runuser -u deploy -- sh -c 'cd "$1" && ./node_modules/.bin/tsx --test tests/v12_formal_priority_policy.test.ts tests/v12-q102-priority-preemption.test.ts tests/v12-exit-fill-timestamp.test.ts tests/current_live_target_contract.test.ts' sh "$release"
+
+          runuser -u deploy -- sh -c 'cd "$1" && npm run strategy:v12-x1-all:selftest' sh "$release"
+          runuser -u deploy -- sh -c 'cd "$1" && npm run strategy:quality102-causal-v1:runner:selftest' sh "$release"
+
+          if bash "$current/scripts/ops/root/disdex-current-runtime-coherence-guard" --check; then
+            echo "CURRENT_COHERENCE=PASS"
+          else
+            hype_unit="disdex-hype-long@$EXPECTED_CURRENT_SHA.service"
+            [[ "$(systemctl show "$hype_unit" -p ActiveState --value 2>/dev/null || true)" == "inactive" ]]
+            [[ "$(systemctl is-enabled "$hype_unit" 2>/dev/null || true)" == "enabled" ]]
+            echo "CURRENT_COHERENCE_PREEXISTING_DRIFT=HYPE_INACTIVE"
+          fi
+
+          [[ "$(tr -d '[:space:]' < "$current/.disdex-release-sha")" == "$before_sha" ]]
+          [[ "$(readlink -f "$current")" == "$before_path" ]]
+
+          for name in "${runners[@]}"; do
+            unit="$name@$EXPECTED_CURRENT_SHA.service"
+            [[ "$(systemctl is-active "$unit" 2>/dev/null || true)" == "${state_before[$name]}" ]]
+            [[ "$(systemctl show "$unit" -p MainPID --value 2>/dev/null || true)" == "${pid_before[$name]}" ]]
+            [[ "$(systemctl show "$unit" -p NRestarts --value 2>/dev/null || true)" == "${restarts_before[$name]}" ]]
+          done
+
+          if [[ -n "$operator_sum_before" ]]; then
+            [[ -f "$operator" ]]
+            [[ "$(sha256sum "$operator" | awk '{print $1}')" == "$operator_sum_before" ]]
+          fi
+
+          echo "STATUS=FORMAL_PRIORITY_TRADING_RELEASE_STAGED"
+          echo "STAGED_RELEASE=$release"
+          echo "STAGED_SHA=$TARGET_SHA"
+          echo "CURRENT_SHA_UNCHANGED=$before_sha"
+          echo "CURRENT_SYMLINK_UNCHANGED=PASS"
+          echo "RUNNER_PIDS_UNCHANGED=PASS"
+          echo "OPERATOR_ARTIFACT_UNCHANGED=PASS"
+          echo "ORDERS_ENABLED_BY_STAGE=FALSE"
+          echo "TRADING_MUTATION=0"
+          REMOTE

@@ -40,7 +40,7 @@ import { quality102GovernorGross, readPortfolioDdGovernor } from "@/lib/disdex-p
 import { aggregatePendingExposure, readPendingExposureRegistry } from "@/lib/disdex-pending-exposure-registry";
 import { classifyAsterSymbol } from "@/lib/disdex-aster-portfolio-classifier";
 import { findManagedFetBrk48ProtectiveOrders, findManagedHypeZecProtectiveOrders, findManagedPenguRecoveryV8ProtectiveOrders, findManagedV12ProtectiveOrders } from "@/lib/disdex-managed-protective-orders";
-import { reduceV12DynamicResidualForCoreConflict } from "@/lib/v12-dynamic-residual-live-reduction";
+import { preemptV12ForQ102Priority } from "@/lib/v12-q102-priority-preemption";
 import { reduceFetBrk48ForCoreConflict } from "@/lib/fet-brk48-live-reduction";
 import { isHypeZecSoleSharedCapacityCause, releaseHypeZecCapacityForPriorityEntry } from "@/lib/hype-zec-priority-capacity";
 import { releaseIdleResidualLongForFormalEntry } from "@/lib/idle-residual-long-preemption";
@@ -107,8 +107,9 @@ export interface Quality102CausalV1RunnerConfig {
     portfolioDdGovernorPath?: string;
     accountScope?: string;
     /**
-     * Optional shared V12 adapter/state path. When present, Q102 may reclaim
-     * only lower-priority V12 Dynamic residual capacity before a Core entry.
+     * Optional shared V12 adapter/state path. Under the formal 2026-10-03
+     * contract, PB/REV/HIGH_VOL may reclaim V12 capacity by whole-position
+     * Rank3 -> Rank2 -> Rank1 exits. MR/BRK may not preempt V12.
      */
     v12DynamicAdapter?: V12AsterLiveAdapter;
     v12StatePath?: string;
@@ -502,10 +503,11 @@ export class Quality102CausalV1Runner {
         return result.status === "reduced";
     }
 
-    private async trimDynamicForCoreEntry(
+    private async preemptV12ForFormalQ102Entry(
         positions: readonly DirectPosition[],
         equity: number,
         requestedGross: number,
+        q102Family: string | undefined,
         causeIdempotencyKey: string,
     ): Promise<boolean> {
         const adapter = this.dependencies.config.v12DynamicAdapter;
@@ -519,17 +521,19 @@ export class Quality102CausalV1Runner {
             this.dependencies.config.totalGrossCap,
         );
         if (!(requiredGross > EPSILON)) return false;
-        const trim = await reduceV12DynamicResidualForCoreConflict({
+        const result = await preemptV12ForQ102Priority({
             adapter,
             requiredGross,
             equity,
+            q102Family,
+            expectedRuntimeSha: this.dependencies.config.runtimeCommitSha,
             causeIdempotencyKey,
             statePath,
             maxDataAgeMs: this.dependencies.config.maxDataAgeMs,
             now: this.now,
         });
-        if (trim.status === "blocked") throw new Error("QUALITY102_V12_DYNAMIC_REDUCTION_BLOCKED:" + trim.message);
-        return trim.status === "reduced" && trim.trimmedGross > EPSILON;
+        if (result.status === "blocked") throw new Error("QUALITY102_V12_PRIORITY_PREEMPT_BLOCKED:" + result.message);
+        return result.status === "reduced" && result.freedGross > EPSILON;
     }
 
     private async preemptHypeZecForCoreEntry(
@@ -894,8 +898,16 @@ export class Quality102CausalV1Runner {
                 || !accepted
                 || accepted.gross + EPSILON < targetGross;
             if (capacityShortfall && allowDynamicTrim
-                && await this.trimDynamicForCoreEntry(live.positions, live.equity, targetGross, pending.idempotencyKey)) {
-                return this.validatePendingExecutionWindow(state, pending, false);
+                && await this.preemptV12ForFormalQ102Entry(
+                    live.positions,
+                    live.equity,
+                    targetGross,
+                    pending.family,
+                    pending.idempotencyKey,
+                )) {
+                // Re-plan with fresh equity/Gross and keep formal V12 handoff
+                // enabled until the Q102 target fits or no eligible V12 victim remains.
+                return this.validatePendingExecutionWindow(state, pending, true);
             }
             if (planner.status !== "planned" || !accepted || accepted.gross + EPSILON < targetGross) {
                 throw new Error(`Q102_PENDING_CAPACITY_CHANGED:${planner.reason || planner.rejected.find((row) => row.intent.strategy === STRATEGY_ID)?.reason || "NO_ACCEPTED_INTENT"}`);
@@ -1189,10 +1201,11 @@ export class Quality102CausalV1Runner {
             || !accepted
             || accepted.gross + EPSILON < targetGross;
         if (capacityShortfall && allowDynamicTrim
-            && await this.trimDynamicForCoreEntry(
+            && await this.preemptV12ForFormalQ102Entry(
                 positions,
                 equity,
                 targetGross,
+                signal.family,
                 `${STRATEGY_ID}|${signal.referenceTs}|${symbol}|${signal.side}|ENTRY`,
             )) {
             const [freshAccount, freshPositions] = await Promise.all([
@@ -1200,7 +1213,10 @@ export class Quality102CausalV1Runner {
                 this.dependencies.executor.getPositions(),
             ]);
             const freshQuote = await this.dependencies.executor.getMarketQuote(symbol);
-            return this.planEntry(state, signal, freshAccount, freshPositions, freshQuote, false, allowHypeZecPreemption, lock);
+            // Forced exits change realized equity and therefore Gross. Re-plan
+            // from fresh venue state and allow another Rank3->Rank2->Rank1 handoff
+            // if the requested Q102 target still does not fit.
+            return this.planEntry(state, signal, freshAccount, freshPositions, freshQuote, true, allowHypeZecPreemption, lock);
         }
         const plannerReason = planner.reason || planner.rejected.find((row) => row.intent.strategy === STRATEGY_ID)?.reason;
         const explicitSharedCapacityBlock = !accepted && isSharedCapacityBlock(plannerReason);

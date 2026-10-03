@@ -28,6 +28,7 @@ import { readQuality102CausalV1Ownership, quality102OwnsPosition, type Quality10
 import { aggregatePendingExposure, readPendingExposureRegistry } from "@/lib/disdex-pending-exposure-registry";
 import { releaseHypeZecCapacityForPriorityEntry } from "@/lib/hype-zec-priority-capacity";
 import { releaseIdleResidualLongForFormalEntry } from "@/lib/idle-residual-long-preemption";
+import { pruneExpiredV12SymbolCooldowns, setV12SymbolCooldown, v12SymbolCooldownUntil } from "@/lib/v12-formal-priority-policy";
 import type { StrictPortfolioIntent } from "@/lib/disdex-strict-portfolio-planner";
 
 const V12_SYMBOLS = new Set(V12_X1_ALL.universe.map((symbol) => `${symbol}USDT`));
@@ -66,6 +67,15 @@ export function classifyV12InfrastructureFailure(error: unknown): V12LiveTickRes
 function finite(value: unknown, fallback = 0) { const n = Number(value); return Number.isFinite(n) ? n : fallback; }
 function actualSide(position: DirectPosition): "LONG" | "SHORT" { if (position.positionSide === "LONG") return "LONG"; if (position.positionSide === "SHORT") return "SHORT"; return position.quantity < 0 ? "SHORT" : "LONG"; }
 function actualQuantity(position: DirectPosition) { return Math.abs(position.quantity); }
+function formalizeRank3Decision(signal: V12Signal, decision: V12ResidualDecision): V12ResidualDecision {
+    if (signal.rank !== 3) return decision;
+    return {
+        ...decision,
+        baseAcceptedGross: 0,
+        dynamicAcceptedGross: decision.acceptedGross,
+    };
+}
+
 function applyV12SignalGrossMultiplier(sizing: V12PositionSizing, signal: V12Signal): V12PositionSizing {
     const multiplier = v12EntryGrossMultiplierForSignal(signal);
     if (Math.abs(multiplier - 1) <= EPS) return sizing;
@@ -242,9 +252,13 @@ export class V12LiveExecutionEngine {
         const ids = [active.protection.stopClientOrderId, active.protection.takeProfitClientOrderId].filter((value): value is string => Boolean(value));
         for (const clientOrderId of ids) {
             const order = await this.d.adapter.queryOrderSameId(active.symbol, clientOrderId);
-            if (order?.status === "FILLED") return true;
+            if (order?.status === "FILLED") {
+                const filledAt = Number(order.updatedAt || 0);
+                if (!Number.isFinite(filledAt) || !(filledAt > 0) || filledAt > this.now()) throw new Error(`V12_PROTECTION_FILL_TIMESTAMP_MISSING:${active.symbol}:${clientOrderId}`);
+                return { clientOrderId, filledAt };
+            }
         }
-        return false;
+        return undefined;
     }
 
     /**
@@ -273,19 +287,21 @@ export class V12LiveExecutionEngine {
             const missing = actives.filter((active) => !actualSymbols.has(active.symbol.toUpperCase()));
             if (!missing.length) return undefined;
 
+            const protectionExitEvidence = new Map<string, { clientOrderId: string; filledAt: number }>();
             for (const active of missing) {
-                if (!(await this.completedProtectionExit(active))) {
+                const evidence = await this.completedProtectionExit(active);
+                if (!evidence) {
                     return this.fail(state, `V12_STATE_ONLY_POSITION_MISMATCH:${active.symbol}`);
                 }
+                protectionExitEvidence.set(active.positionId, evidence);
             }
 
             for (const active of missing) await cancelV12Protection(this.d.adapter, active.protection);
             const missingIds = new Set(missing.map((row) => row.positionId));
             syncActivePositions(state, actives.filter((row) => !missingIds.has(row.positionId)));
-            state.cooldownUntilTs = Math.max(
-                Number(state.cooldownUntilTs || 0),
-                (state.lastReferenceTs || this.now()) + V12_X1_ALL.cooldownBars * V12_X1_ALL.timeframeHours * 3_600_000,
-            );
+            for (const active of missing) {
+                setV12SymbolCooldown(state, active.symbol, protectionExitEvidence.get(active.positionId)!.filledAt);
+            }
             await this.d.stateStore.save(state);
             const symbols = missing.map((row) => row.symbol).sort();
             this.log("v12-protection-fill-reconciled", {
@@ -373,10 +389,20 @@ export class V12LiveExecutionEngine {
         if (result.status === "UNKNOWN") return this.fail(state, `V12_PENDING_EXIT_UNKNOWN:${pending.clientOrderId}`);
         const actual = positions.find((row) => row.symbol.toUpperCase() === pending.symbol && Math.abs(row.quantity) > EPS);
         if (actual) return this.fail(state, `V12_PENDING_EXIT_POSITION_REMAINS:${result.status}`);
+        if (result.status !== "FILLED" || !Number.isFinite(result.executedQuantity)
+            || Math.abs(result.executedQuantity - pending.quantity) > Math.max(1e-8, pending.quantity * 1e-6)) {
+            return this.fail(state, `V12_PENDING_EXIT_FILL_NOT_VERIFIED:${pending.clientOrderId}`);
+        }
         const remaining = activePositionsOf(state).filter((active) => active.symbol.toUpperCase() !== pending.symbol.toUpperCase());
         const exiting = activePositionsOf(state).find((active) => active.symbol.toUpperCase() === pending.symbol.toUpperCase());
+        const actualExitTs = Number(result.updatedAt || 0);
+        if (!Number.isFinite(actualExitTs) || !(actualExitTs > 0) || actualExitTs > this.now()) return this.fail(state, `V12_PENDING_EXIT_TIMESTAMP_MISSING:${pending.clientOrderId}`);
         if (exiting) await cancelV12Protection(this.d.adapter, exiting.protection);
-        syncActivePositions(state, remaining); state.pending = undefined; state.lastCompletedIdempotencyKey = pending.idempotencyKey; state.cooldownUntilTs = pending.signalTs + V12_X1_ALL.cooldownBars * V12_X1_ALL.timeframeHours * 3_600_000; await this.d.stateStore.save(state);
+        syncActivePositions(state, remaining);
+        state.pending = undefined;
+        state.lastCompletedIdempotencyKey = pending.idempotencyKey;
+        setV12SymbolCooldown(state, pending.symbol, actualExitTs);
+        await this.d.stateStore.save(state);
         return { status: "exited" as const, reason: "EXIT_RECONCILED", clientOrderId: pending.clientOrderId };
     }
 
@@ -486,12 +512,19 @@ export class V12LiveExecutionEngine {
                 const actualSymbols = new Set(v12Actual.map((row) => row.symbol.toUpperCase()));
                 const missing = stateActives.filter((active) => !actualSymbols.has(active.symbol.toUpperCase()));
                 if (!missing.length || v12Actual.length > stateActives.length) return this.fail(state, "V12_POSITION_COUNT_MISMATCH");
+                const protectionExitEvidence = new Map<string, { clientOrderId: string; filledAt: number }>();
                 for (const active of missing) {
-                    if (!(await this.completedProtectionExit(active))) return this.fail(state, `V12_STATE_ONLY_POSITION_MISMATCH:${active.symbol}`);
+                    const evidence = await this.completedProtectionExit(active);
+                    if (!evidence) return this.fail(state, `V12_STATE_ONLY_POSITION_MISMATCH:${active.symbol}`);
+                    protectionExitEvidence.set(active.positionId, evidence);
                 }
                 const remaining = stateActives.filter((active) => actualSymbols.has(active.symbol.toUpperCase()));
                 for (const active of missing) await cancelV12Protection(this.d.adapter, active.protection);
-                syncActivePositions(state, remaining); state.cooldownUntilTs = (state.lastReferenceTs || this.now()) + V12_X1_ALL.cooldownBars * V12_X1_ALL.timeframeHours * 3_600_000; await this.d.stateStore.save(state);
+                syncActivePositions(state, remaining);
+                for (const active of missing) {
+                    setV12SymbolCooldown(state, active.symbol, protectionExitEvidence.get(active.positionId)!.filledAt);
+                }
+                await this.d.stateStore.save(state);
             } else {
                 const refreshed: V12ActivePositionState[] = [];
                 for (const active of stateActives) {
@@ -513,11 +546,20 @@ export class V12LiveExecutionEngine {
         const clientOrderId = deterministicV12ClientOrderId({ action: "EXIT", signalTs, symbol: active.symbol, side: active.side, version: reason });
         const pending: V12PendingOrderState = { idempotencyKey: clientOrderId, action: "EXIT", clientOrderId, symbol: active.symbol, side: active.side, quantity: active.quantity, signalTs, expectedPrice: active.side === "LONG" ? quote.bidPrice : quote.askPrice, reason, createdAt: this.now() };
         state.pending = pending; await this.d.stateStore.save(state);
-        const result = await this.d.adapter.executeExit({ signalTs, symbol: active.symbol, positionSide: active.side, quantity: active.quantity, expectedPrice: pending.expectedPrice!, clientOrderId });
+        const result = await this.d.adapter.executeExit({ signalTs, symbol: active.symbol, positionSide: active.side, quantity: active.quantity, expectedPrice: pending.expectedPrice!, clientOrderId, reason });
         if (result.status === "UNKNOWN") return this.fail(state, `V12_EXIT_UNKNOWN:${clientOrderId}`);
         const positions = await this.d.adapter.getPositions(); const remains = positions.some((row) => row.symbol.toUpperCase() === active.symbol && Math.abs(row.quantity) > EPS);
         if (remains) return this.fail(state, `V12_EXIT_NOT_FLAT:${result.status}`);
-        await cancelV12Protection(this.d.adapter, active.protection); syncActivePositions(state, activePositionsOf(state).filter((row) => row.positionId !== active.positionId)); state.pending = undefined; state.lastCompletedIdempotencyKey = pending.idempotencyKey; state.cooldownUntilTs = signalTs + V12_X1_ALL.cooldownBars * V12_X1_ALL.timeframeHours * 3_600_000; await this.d.stateStore.save(state);
+        if (result.status !== "FILLED" || !Number.isFinite(result.executedQuantity)
+            || Math.abs(result.executedQuantity - active.quantity) > Math.max(1e-8, active.quantity * 1e-6)) return this.fail(state, `V12_EXIT_FILL_NOT_VERIFIED:${clientOrderId}`);
+        const actualExitTs = Number(result.updatedAt || 0);
+        if (!Number.isFinite(actualExitTs) || !(actualExitTs > 0) || actualExitTs > this.now()) return this.fail(state, `V12_EXIT_TIMESTAMP_MISSING:${clientOrderId}`);
+        await cancelV12Protection(this.d.adapter, active.protection);
+        syncActivePositions(state, activePositionsOf(state).filter((row) => row.positionId !== active.positionId));
+        state.pending = undefined;
+        state.lastCompletedIdempotencyKey = pending.idempotencyKey;
+        setV12SymbolCooldown(state, active.symbol, actualExitTs);
+        await this.d.stateStore.save(state);
         return { status: "exited", reason, clientOrderId };
     }
 
@@ -536,7 +578,11 @@ export class V12LiveExecutionEngine {
         const quote = await this.d.adapter.executor.getMarketQuote(symbol);
         const expectedPrice = signal.side === "LONG" ? quote.askPrice : quote.bidPrice;
         const scale = sizing.requestedGross > 0 ? acceptedGross / sizing.requestedGross : 0;
-        const quantity = sizing.quantity * scale;
+        // Keep the formal Gross target as the admission target while sizing the
+        // submitted quantity so even the configured maximum adverse slippage
+        // cannot push the filled position beyond that target/cap.
+        const slippageBuffer = 1 + this.d.adapter.getMaxSlippageBps() / 10_000;
+        const quantity = sizing.quantity * scale / slippageBuffer;
         if (!(quantity > 0)) return { status: "capacity-blocked", reason: "ZERO_EXECUTABLE_QUANTITY", signal };
         const clientOrderId = deterministicV12ClientOrderId({ action: "ENTRY", signalTs: signal.referenceTs, symbol, side: signal.side });
         if (state.lastCompletedIdempotencyKey === clientOrderId) return { status: "held", reason: "SAME_SIGNAL_ALREADY_COMPLETED", signal, clientOrderId };
@@ -810,8 +856,14 @@ export class V12LiveExecutionEngine {
             state = await this.d.stateStore.load();
             const data = preloadedData ?? await this.d.marketData.load(); const index = latestIndex(data); const latestTs = data[V12_X1_ALL.universe[0]][index].endTs;
 
+            pruneExpiredV12SymbolCooldowns(state, latestTs);
             const actives = activePositionsOf(state);
-            const signals = buildV12Signals(data, index);
+            const rawSignals = buildV12Signals(data, index);
+            // Rank3 is a pure 0.50x residual signal: if any Rank1/2 signal is
+            // simultaneously eligible, Rank3 is not an entry candidate.
+            const signals = rawSignals.some((signal) => signal.rank !== 3)
+                ? rawSignals.filter((signal) => signal.rank !== 3)
+                : rawSignals;
             if (this.d.decisionObserver) {
                 try {
                     const observation = buildV12DecisionObservation(data, index, this.now());
@@ -858,6 +910,13 @@ export class V12LiveExecutionEngine {
                         const reason = active.holdingBars >= V12_X1_ALL.maxHoldBars ? "max-hold" : active.holdingBars >= V12_X1_ALL.rebalanceBars && changed ? "signal-rotation" : undefined;
                         if (reason) return await this.executeExit(state, active, latestTs, reason);
                     }
+                    const heldRank3 = activePositionsOf(state).find((active) => active.entryRank === 3);
+                    const strongerSignal = signals.find((signal) => signal.rank !== 3);
+                    if (heldRank3 && strongerSignal) {
+                        state.deferredEntryReferenceTs = latestTs;
+                        await this.d.stateStore.save(state);
+                        return await this.executeExit(state, heldRank3, latestTs, `higher-priority-signal-preempt-rank3:${strongerSignal.rank}`);
+                    }
                 }
                 if (activePositionsOf(state).length >= V12_X1_ALL.maximumPositions) {
                     state.deferredEntryReferenceTs = undefined; await this.d.stateStore.save(state);
@@ -865,7 +924,12 @@ export class V12LiveExecutionEngine {
                 }
                 const currentActives = activePositionsOf(state);
                 const existingSymbols = new Set(currentActives.map((row) => row.symbol.toUpperCase()));
-                const next = signals.find((candidate) => !existingSymbols.has(`${candidate.symbol}USDT`) && v12SlotAvailable(currentActives, candidate.rank));
+                const next = signals.find((candidate) => {
+                    const symbol = `${candidate.symbol}USDT`;
+                    return v12SymbolCooldownUntil(state, symbol) <= latestTs
+                        && !existingSymbols.has(symbol)
+                        && v12SlotAvailable(currentActives, candidate.rank);
+                });
                 if (!next) {
                     state.deferredEntryReferenceTs = undefined; await this.d.stateStore.save(state);
                     return { status: "held", reason: "V12_POSITION_HELD", signal: signals[0] };
@@ -904,9 +968,9 @@ export class V12LiveExecutionEngine {
                         stockGross: freshActive.filter((row) => row.sleeve === "V11_EQ" || row.sleeve === "V50_POST_OPEN_BASIS").reduce((sum, row) => sum + row.gross, 0),
                         totalGross: freshActive.reduce((sum, row) => sum + row.gross, 0),
                     };
-                    const rankedRequestGross = Math.min(sizing.requestedGross, v12EntryGrossCapForSignal(next));
-                    decision = decideV12ResidualEntry(rankedRequestGross, snapshot, activePositionsOf(state).length);
-                    const requestedBase = Math.min(
+                    const rankedRequestGross = v12EntryGrossCapForSignal(next);
+                    decision = formalizeRank3Decision(next, decideV12ResidualEntry(rankedRequestGross, snapshot, activePositionsOf(state).length));
+                    const requestedBase = next.rank === 3 ? 0 : Math.min(
                         rankedRequestGross,
                         v12EntryGrossCapForSignal(next),
                         Math.max(0, V12_X1_ALL.aggregateEntryGrossCap - v12Components.baseGross),
@@ -944,13 +1008,17 @@ export class V12LiveExecutionEngine {
             state.lastReferenceTs = latestTs;
             state.deferredEntryReferenceTs = undefined;
             if (!signals.length) { await this.d.stateStore.save(state); return { status: "no-signal", reason: "NO_COMPLETED_BAR_SIGNAL" }; }
-            if ((state.cooldownUntilTs || 0) > latestTs) { await this.d.stateStore.save(state); return { status: "held", reason: "V12_COOLDOWN_ACTIVE", signal: signals[0] }; }
             let latestPositions = positions;
             let lastResult: V12LiveTickResult = { status: "no-signal", reason: "NO_ENTRY" };
             let enteredCount = 0;
             for (const signal of signals.slice(0, V12_X1_ALL.maximumPositions)) {
+                const signalSymbol = `${signal.symbol}USDT`;
+                if (v12SymbolCooldownUntil(state, signalSymbol) > latestTs) {
+                    if (enteredCount === 0) lastResult = { status: "held", reason: "V12_SYMBOL_COOLDOWN_ACTIVE", signal };
+                    continue;
+                }
                 const currentActives = activePositionsOf(state);
-                if (currentActives.some((position) => position.symbol.toUpperCase() === `${signal.symbol}USDT`) || !v12SlotAvailable(currentActives, signal.rank)) continue;
+                if (currentActives.some((position) => position.symbol.toUpperCase() === signalSymbol) || !v12SlotAvailable(currentActives, signal.rank)) continue;
                 const [freshAccount, freshPositions] = await Promise.all([this.d.adapter.getAccountSnapshot(), this.d.adapter.getPositions()]);
                 latestPositions = freshPositions;
                 const entryEquity = Math.max(0, finite(freshAccount.walletBalance)); if (!(entryEquity > 0)) return this.fail(state, "V12_ACCOUNT_EQUITY_INVALID");
@@ -960,8 +1028,8 @@ export class V12LiveExecutionEngine {
                 const sizing = applyV12SignalGrossMultiplier(sizeV12Position(entryEquity, entryPrice, signal.atr, signal.side), signal);
                 const v12Components = v12GrossComponents(state, activePortfolio);
                 const snapshot = { v12Gross: activePortfolio.filter((row) => row.sleeve === "V12").reduce((sum, row) => sum + row.gross, 0), v12BaseGross: v12Components.baseGross, v12DynamicGross: v12Components.dynamicGross, cryptoGross: activePortfolio.filter((row) => isCryptoPortfolioSleeve(row.sleeve)).reduce((sum, row) => sum + row.gross, 0), stockGross: activePortfolio.filter((row) => row.sleeve === "V11_EQ" || row.sleeve === "V50_POST_OPEN_BASIS").reduce((sum, row) => sum + row.gross, 0), totalGross: activePortfolio.reduce((sum, row) => sum + row.gross, 0) };
-                const rankedRequestGross = Math.min(sizing.requestedGross, v12EntryGrossCapForSignal(signal));
-                const decision = decideV12ResidualEntry(rankedRequestGross, snapshot, activePositionsOf(state).length);
+                const rankedRequestGross = v12EntryGrossCapForSignal(signal);
+                const decision = formalizeRank3Decision(signal, decideV12ResidualEntry(rankedRequestGross, snapshot, activePositionsOf(state).length));
                 if (!(decision.acceptedGross > 0)) {
                     if (enteredCount === 0) lastResult = { status: "capacity-blocked", reason: `V12_RANK${activePositionsOf(state).length + 1}_${decision.reason || "NO_RESIDUAL"}`, signal };
                     break;

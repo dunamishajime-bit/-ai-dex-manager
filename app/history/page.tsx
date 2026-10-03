@@ -46,6 +46,13 @@ function explorerTxUrl(chainId: number, txHash: string) {
   return `https://bscscan.com/tx/${txHash}`;
 }
 
+function historyReasonLabel(reason: string) {
+  const match = /^Q102_PRIORITY_PREEMPT:(PB|REV|HIGH_VOL):V12_R([123])$/.exec(String(reason || "").toUpperCase());
+  if (match) return `Q102 ${match[1]} 優先により V12 Rank${match[2]} を決済`;
+  if (String(reason || "").includes("Q102_V12_PRIORITY")) return `Q102 priority handoff: ${reason}`;
+  return reason;
+}
+
 export default function HistoryPage() {
   const [entries, setEntries] = useState<TradeHistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -221,7 +228,7 @@ export default function HistoryPage() {
                     <div className="font-semibold text-white">
                       {entry.destSymbol} / {entry.sourceSymbol}
                     </div>
-                    <div className="mt-1 text-xs text-gray-500">{entry.reason}</div>
+                    <div className="mt-1 text-xs text-gray-500">{historyReasonLabel(entry.reason)}</div>
                   </td>
                   <td className="px-3 py-4 font-mono text-xs">
                     <div>

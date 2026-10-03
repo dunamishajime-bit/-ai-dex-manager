@@ -1,0 +1,66 @@
+{
+  "status": "BLOCKED_OVERLAY_FULL_H1_BASELINE_EVIDENCE_AND_MARGIN_PARITY_NOT_PROVEN",
+  "files": [
+    {
+      "name": "exchange-info.json",
+      "bytes": 847716,
+      "sha256": "f60d778c2cc08ed3cc942b84be860f69a56501bc98632702c18c8b1bfe209201"
+    },
+    {
+      "name": "JUPUSDT-after.json",
+      "bytes": 494,
+      "sha256": "aabac2681f68e48fc153ad012fa6723a77a9769ebdf84f8ea5629343b8deaaea"
+    },
+    {
+      "name": "JUPUSDT-before.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "listing-evidence.json",
+      "bytes": 19610,
+      "sha256": "e5c00ca4fd1043e7abbdf85af145f3d05fc144bbbedc3a28559aaf99d24616d2"
+    },
+    {
+      "name": "RENDERUSDT-after.json",
+      "bytes": 414,
+      "sha256": "eb63ebfee33862854385ed24906e45b5a8f2cf100438af4c0bab724ae7892262"
+    },
+    {
+      "name": "RENDERUSDT-before.json",
+      "bytes": 127,
+      "sha256": "2516b1f70ea9e38c6a0427b73ffe25288a1cca1bfb5b625229df6d24c39f9ed9"
+    },
+    {
+      "name": "TAOUSDT-after.json",
+      "bytes": 494,
+      "sha256": "d4ea952e3ce2f7eeccab8260c52e440c80aacd71ad65f5430bd7f946fb79ec47"
+    },
+    {
+      "name": "TAOUSDT-before.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "TIAUSDT-after.json",
+      "bytes": 349,
+      "sha256": "9e186fa660b6f3328e2e19166080ff067de25a107ab1dfc2054458ab6bea4a40"
+    },
+    {
+      "name": "TIAUSDT-before.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "name": "coverage-manifest.json",
+      "bytes": 3535,
+      "sha256": "dab13532290380672ec4989d78725c24a2018ca885511b4e52c6bf400a5acaef"
+    },
+    {
+      "name": "overlay-full-H1-source-decisions.jsonl",
+      "bytes": 13090295,
+      "sha256": "a88cc8fac5731818026139384f90020bf3493611f2477b228fb3ab5b8fe68639"
+    }
+  ],
+  "archiveSha256": "0277431c64b3e6c6f867a9c414cf98cfa0febb418784485bb8737c366d150e14"
+}

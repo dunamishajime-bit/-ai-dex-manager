@@ -62,7 +62,9 @@ class RuntimeWiringScriptTest(unittest.TestCase):
         self.assertIn("ensure_monitor_timer_active()", source)
         self.assertIn('ensure_monitor_timer_active "disdex-runner-health-snapshot.timer"', source)
         self.assertIn('ensure_monitor_timer_active "disdex-runner-health-alert.timer"', source)
-        self.assertIn("DISDEX_MONITOR_TIMER_ACTIVE", source)
+        self.assertIn("DISDEX_MONITOR_TIMER_ARMED", source)
+        self.assertIn('"$sub_state" == "waiting"', source)
+        self.assertIn("required monitor timer failed to arm", source)
         # Recovery/watchdog automation is intentionally conditional on the
         # operator activation artifact after the premature-activation incident.
         self.assertIn("if operator_activation_all_trading_ready; then", source)

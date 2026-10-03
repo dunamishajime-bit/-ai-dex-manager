@@ -169,8 +169,8 @@ async function run(): Promise<void> {
     );
     assert.match(
         runnerSource,
-        /reduceV12DynamicResidualForCoreConflict/,
-        "Q102 Core entry must be able to reclaim lower-priority V12 Dynamic residual capacity",
+        /preemptV12ForQ102Priority/,
+        "Q102 PB/REV/HIGH_VOL entry must be able to reclaim V12 capacity under the formal priority contract",
     );
     assert.match(
         runnerSource,

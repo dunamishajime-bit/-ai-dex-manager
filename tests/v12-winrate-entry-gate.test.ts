@@ -22,7 +22,7 @@ function f(overrides: Partial<V12WinRateGateFeatures> = {}): V12WinRateGateFeatu
   };
 }
 
-test("HC175 remains exempt and receives 1.75 gross multiplier", () => {
+test("HC175 remains gate metadata but formal sizing caps exposure", () => {
   const decision = evaluateV12WinRateGateFromFeatures(f({
     ret6h: 0.03,
     ret24h: 0.025,
@@ -38,8 +38,10 @@ test("HC175 remains exempt and receives 1.75 gross multiplier", () => {
   assert.equal(decision.highConfidence, true);
   assert.equal(decision.entryGrossMultiplier, 1.75);
   assert.equal(v12EntryGrossMultiplierForSignal({ rank: 1, entryGrossMultiplier: decision.entryGrossMultiplier }), 1.75);
-  assert.equal(v12EntryGrossCapForSignal({ rank: 1, entryGrossMultiplier: decision.entryGrossMultiplier }), 1.75);
-  assert.equal(v12EntryGrossCapForSignal({ rank: 3, entryGrossMultiplier: decision.entryGrossMultiplier }), 0.10);
+  assert.equal(v12EntryGrossCapForSignal({ symbol: "ETH", rank: 1, entryGrossMultiplier: decision.entryGrossMultiplier }), 1.0);
+  assert.equal(v12EntryGrossCapForSignal({ symbol: "ETH", rank: 3, entryGrossMultiplier: decision.entryGrossMultiplier }), 0.50);
+  assert.equal(v12EntryGrossCapForSignal({ symbol: "DOGE", rank: 1, entryGrossMultiplier: decision.entryGrossMultiplier }), 0.50);
+  assert.equal(v12EntryGrossCapForSignal({ symbol: "LTC", rank: 2, entryGrossMultiplier: decision.entryGrossMultiplier }), 0.50);
 });
 
 test("Sep23 XRP04 false burst is blocked", () => {

@@ -16,7 +16,7 @@ assert.equal(resolveV12X1AllRuntime({}).mode, "SHADOW");
 assert.equal(resolveV12X1AllRuntime({}).enabled, false);
 assert.equal(V12_X1_ALL.multiplier, 1);
 assert.equal(V12_X1_ALL.maximumPositions, 3);
-assert.equal(V12_X1_ALL.rank3EntryGrossCap, 0.10);
+assert.equal(V12_X1_ALL.rank3EntryGrossCap, 0.50);
 assert.equal(V12_X1_ALL.rank3MinimumScore, 0.70);
 assert.equal(V12_X1_ALL.neutralScoreThreshold, 1.00);
 assert.equal(V12_X1_ALL.minimumVolumeRatio, 0.80);

@@ -1,0 +1,262 @@
+name: New Logic HP clean deploy 20261004
+
+on:
+  push:
+    branches:
+      - research/formal-priority-cooldown-20261003
+    paths:
+      - "app/**"
+      - "components/**"
+      - "next.config.js"
+      - ".github/workflows/new-logic-hp-deploy-20261004.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: new-logic-hp-deploy-20261004
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      TARGET_SHA: ${{ github.sha }}
+      EXPECTED_TRADING_SHA: 53eeff5417636369d4709fddfd47d7916ddcf3b1
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify new UI source contract
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          test -f app/decision-status/page.tsx
+          test -f 'app/decision-status/[logic]/page.tsx'
+          test -f app/decision-status/formal-priority/page.tsx
+          test -f app/decision-status/idle-priority/page.tsx
+          test -f app/api/system/runtime-overview/route.ts
+          ! grep -R -n -I -E 'decision-status/zec|visibleSidecars:.*ZEC|ZEC 判定' app components
+
+      - name: Clean Next 14 standalone build
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          npm ci --no-audit --no-fund
+          node -e 'const p=require("./node_modules/next/package.json"); if(p.version!=="14.1.0") throw new Error("NEXT_VERSION_MISMATCH:"+p.version); console.log("NEXT_VERSION="+p.version)'
+          npm run build
+          test -f .next/standalone/server.js
+          rm -rf .deploy-ui
+          mkdir -p .deploy-ui/.next
+          cp -a .next/standalone/. .deploy-ui/
+          cp -a .next/static .deploy-ui/.next/static
+          if [ -d public ]; then cp -a public .deploy-ui/public; fi
+          printf '%s\n' "$TARGET_SHA" > .deploy-ui/.disdex-release-sha
+          tar -C .deploy-ui -czf "/tmp/disdex-ui-$TARGET_SHA.tar.gz" .
+          test -s "/tmp/disdex-ui-$TARGET_SHA.tar.gz"
+          echo "UI_BUNDLE_BYTES=$(stat -c '%s' "/tmp/disdex-ui-$TARGET_SHA.tar.gz")"
+
+      - name: Initialize root SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ -n "$SSH_HOST" && -n "$ROOT_KEY" && -n "$SSH_KNOWN_HOSTS" ]]
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+
+      - name: Upload standalone UI bundle
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          scp -i "$HOME/.ssh/id_root" -P "$PORT"             -o IdentitiesOnly=yes -o BatchMode=yes             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts"             "/tmp/disdex-ui-$TARGET_SHA.tar.gz"             "root@$SSH_HOST:/tmp/disdex-ui-$TARGET_SHA.tar.gz"
+
+      - name: Deploy new logic HP and purge legacy UI
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts"             -o ConnectTimeout=15 -p "$PORT" "root@$SSH_HOST"             "TARGET_SHA='$TARGET_SHA' EXPECTED_TRADING_SHA='$EXPECTED_TRADING_SHA' bash -s" <<'REMOTE'
+          set -Eeuo pipefail
+
+          ui_service=ai-dex-manager-ui.service
+          ui_root=/home/deploy/disdex-trading/ui-releases
+          release="$ui_root/ui-new-logic-${TARGET_SHA:0:12}"
+          archive="/tmp/disdex-ui-$TARGET_SHA.tar.gz"
+          dropin_dir=/etc/systemd/system/ai-dex-manager-ui.service.d
+          canonical="$dropin_dir/90-current-ui-release.conf"
+          current=/home/deploy/disdex-trading/current
+
+          trading_before="$(tr -d '[:space:]' < "$current/.disdex-release-sha")"
+          trading_path_before="$(readlink -f "$current")"
+          [[ "$trading_before" == "$EXPECTED_TRADING_SHA" ]]
+          [[ "$trading_path_before" == "/home/deploy/disdex-trading/releases/$EXPECTED_TRADING_SHA" ]]
+
+          runners=(
+            disdex-v12-x1-all
+            disdex-pengu-dual-ls-v2
+            disdex-quality102-causal-v1
+            disdex-v52-aster-only
+            disdex-fet-brk48
+            disdex-hype-long
+            disdex-idle-priority-short
+            disdex-shared-crypto-risk
+            disdex-v12-v52-margin-guard
+          )
+          declare -A before_state before_pid before_restarts
+          for name in "${runners[@]}"; do
+            unit="$name@$EXPECTED_TRADING_SHA.service"
+            before_state["$name"]="$(systemctl is-active "$unit" 2>/dev/null || true)"
+            before_pid["$name"]="$(systemctl show "$unit" -p MainPID --value 2>/dev/null || true)"
+            before_restarts["$name"]="$(systemctl show "$unit" -p NRestarts --value 2>/dev/null || true)"
+          done
+
+          old_ui="$(systemctl show "$ui_service" -p WorkingDirectory --value)"
+          old_sha="$(systemctl show "$ui_service" -p Environment --value | tr ' ' '\n' | sed -n 's/^DISDEX_UI_RELEASE_SHA=//p' | tail -1)"
+          [[ -d "$old_ui" ]]
+          [[ -s "$archive" ]]
+
+          rm -rf "$release"
+          install -d -o deploy -g deploy -m 0750 "$release"
+          tar -xzf "$archive" -C "$release"
+          chown -R deploy:deploy "$release"
+          [[ -f "$release/server.js" ]]
+          [[ -d "$release/.next/static" ]]
+          [[ "$(tr -d '[:space:]' < "$release/.disdex-release-sha")" == "$TARGET_SHA" ]]
+
+          # Remove stale UI release selectors from old drop-ins without creating
+          # longer temporary filenames (several legacy names are already near
+          # Linux NAME_MAX=255). Preserve unrelated read-only environment lines.
+          python3 - "$dropin_dir" "$canonical" <<'PY'
+          from pathlib import Path
+          import sys
+          root=Path(sys.argv[1])
+          canonical=Path(sys.argv[2])
+          strip_prefixes=(
+              "WorkingDirectory=",
+              "Environment=DISDEX_UI_RELEASE_SHA=",
+              "Environment=HOSTNAME=",
+              "ExecStart=",
+          )
+          for path in sorted(root.glob("*.conf"), key=lambda p:p.name):
+              if path == canonical:
+                  continue
+              lines=path.read_text(encoding="utf-8", errors="replace").splitlines()
+              kept=[line for line in lines if not line.startswith(strip_prefixes)]
+              meaningful=[line for line in kept if line.strip() and line.strip()!="[Service]"]
+              if meaningful:
+                  path.write_text("\n".join(kept).rstrip()+"\n", encoding="utf-8")
+                  path.chmod(0o644)
+              else:
+                  path.unlink()
+          PY
+
+          cat > "$canonical" <<EOF
+          [Service]
+          WorkingDirectory=$release
+          Environment=DISDEX_UI_RELEASE_SHA=$TARGET_SHA
+          Environment=HOSTNAME=127.0.0.1
+          ExecStart=
+          ExecStart=/usr/bin/node server.js
+          EOF
+          sed -i 's/^[[:space:]]*//' "$canonical"
+          chmod 0644 "$canonical"
+          chown root:root "$canonical"
+
+          systemctl daemon-reload
+          systemctl restart "$ui_service"
+
+          ok=0
+          for _ in $(seq 1 30); do
+            active="$(systemctl is-active "$ui_service" 2>/dev/null || true)"
+            wd="$(systemctl show "$ui_service" -p WorkingDirectory --value 2>/dev/null || true)"
+            code="$(curl -sS -H 'Cookie: disdex_auth=1' -o /dev/null -w '%{http_code}' --max-time 5 http://127.0.0.1:3001/decision-status || true)"
+            if [[ "$active" == active && "$wd" == "$release" && "$code" == 200 ]]; then ok=1; break; fi
+            sleep 1
+          done
+
+          if [[ "$ok" != 1 ]]; then
+            cat > "$canonical" <<EOF
+          [Service]
+          WorkingDirectory=$old_ui
+          Environment=DISDEX_UI_RELEASE_SHA=$old_sha
+          ExecStart=
+          ExecStart=/usr/bin/npm run start -- --hostname 127.0.0.1
+          EOF
+            sed -i 's/^[[:space:]]*//' "$canonical"
+            systemctl daemon-reload
+            systemctl restart "$ui_service"
+            rm -rf "$release"
+            rm -f "$archive"
+            echo "ROLLBACK=OLD_UI_RESTORED"
+            exit 1
+          fi
+
+          for path in             /             /positions             /history             /decision-status             /decision-status/v12             /decision-status/pengu             /decision-status/q102             /decision-status/v52             /decision-status/fet             /decision-status/hype             /decision-status/idle-priority             /decision-status/formal-priority
+          do
+            code="$(curl -sS -H 'Cookie: disdex_auth=1' -o /dev/null -w '%{http_code}' --max-time 10 "http://127.0.0.1:3001$path")"
+            echo "HP_ROUTE path=$path http=$code"
+            [[ "$code" == 200 ]]
+          done
+
+          curl -sS -H 'Cookie: disdex_auth=1' --max-time 10             http://127.0.0.1:3001/api/system/runtime-overview > /tmp/runtime-overview.json
+          python3 - "$EXPECTED_TRADING_SHA" <<'PY'
+          import json,sys
+          expected=sys.argv[1]
+          d=json.load(open("/tmp/runtime-overview.json",encoding="utf-8"))
+          assert d.get("ok") is True
+          assert d.get("releaseSha")==expected
+          ids=[x.get("id") for x in d.get("strategies",[])]
+          assert ids==["v12","pengu","q102","v52","fet","hype"], ids
+          assert "ZEC" not in d.get("visibleStrategies",[])
+          assert d.get("retiredUiStrategies")==["ZEC"]
+          print("RUNTIME_OVERVIEW_CONTRACT=PASS")
+          PY
+
+          [[ "$(tr -d '[:space:]' < "$current/.disdex-release-sha")" == "$EXPECTED_TRADING_SHA" ]]
+          [[ "$(readlink -f "$current")" == "$trading_path_before" ]]
+          for name in "${runners[@]}"; do
+            unit="$name@$EXPECTED_TRADING_SHA.service"
+            [[ "$(systemctl is-active "$unit" 2>/dev/null || true)" == "${before_state[$name]}" ]]
+            [[ "$(systemctl show "$unit" -p MainPID --value 2>/dev/null || true)" == "${before_pid[$name]}" ]]
+            [[ "$(systemctl show "$unit" -p NRestarts --value 2>/dev/null || true)" == "${before_restarts[$name]}" ]]
+          done
+
+          # Only after all checks pass: permanently remove old UI releases.
+          find "$ui_root" -mindepth 1 -maxdepth 1 ! -path "$release" -exec rm -rf -- {} +
+          rm -f "$archive"
+          count="$(find "$ui_root" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')"
+          [[ "$count" == 1 ]]
+
+          echo "STATUS=NEW_LOGIC_HP_DEPLOYED_LEGACY_UI_PURGED"
+          echo "UI_SHA=$TARGET_SHA"
+          echo "UI_RELEASE=$release"
+          echo "LEGACY_UI_RELEASE_COUNT=0"
+          echo "ZEC_UI=REMOVED"
+          echo "TRADING_SHA_UNCHANGED=$EXPECTED_TRADING_SHA"
+          echo "TRADING_RUNNER_PIDS_UNCHANGED=PASS"
+          echo "ORDER_MUTATION_ATTEMPTED=FALSE"
+          REMOTE
+
+      - name: Public smoke
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          for path in / /decision-status /decision-status/formal-priority /decision-status/idle-priority; do
+            code="$(curl -sS -H 'Cookie: disdex_auth=1' -o /dev/null -w '%{http_code}' --max-time 20 "https://professional-dismanager.net$path")"
+            echo "PUBLIC path=$path http=$code"
+            [[ "$code" == 200 ]]
+          done

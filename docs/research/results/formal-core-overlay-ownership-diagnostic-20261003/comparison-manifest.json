@@ -1,0 +1,1914 @@
+{
+  "aster_public_get_probe": {
+    "endTime": 1754794800000,
+    "interval": "1h",
+    "limit": 4,
+    "method": "GET",
+    "results": {
+      "RENDERUSDT": 0,
+      "TAOUSDT": 0,
+      "TIAUSDT": 0
+    },
+    "startTime": 1754784000000,
+    "tradingMutation": 0,
+    "url": "https://fapi.asterdex.com/fapi/v1/klines"
+  },
+  "bundles": [
+    {
+      "bytes": 3043658,
+      "name": "production-feature-stream.zip",
+      "sha256": "66a4208db878d86ea490bc6cb365bda9ad309a0d936389ea977d48a41b8d982f"
+    },
+    {
+      "bytes": 19843281,
+      "name": "replay-ledgers.zip",
+      "sha256": "228dd878dc33cee38c89c1a39d9ccb23e0f978c961120b4c2a42e9935746d599"
+    }
+  ],
+  "files": [
+    {
+      "bytes": 94943,
+      "path": "CORE/portfolio-price-model-summary.json",
+      "sha256": "b0f94a7d17943c7b55877579abc67d3c5aefe46bc5352c90f94050a823059c9b"
+    },
+    {
+      "bytes": 2146034,
+      "path": "CORE/PRICE_MODEL_10BPS/candidate-decisions.jsonl",
+      "sha256": "96390f032d79f0f06d9f1390ed05ee4f8d5d2f0f56c7c3a5270c9a00b7970f4d"
+    },
+    {
+      "bytes": 20993,
+      "path": "CORE/PRICE_MODEL_10BPS/metrics.json",
+      "sha256": "3e50019c10ff0d6407ffca1d573786e7a8b6382bff91532e263aea29819c2e4d"
+    },
+    {
+      "bytes": 2005500,
+      "path": "CORE/PRICE_MODEL_10BPS/portfolio-events.jsonl",
+      "sha256": "924f73c333a8674bf889b33989db54e0f31d060739e2635763664479bb6d9fad"
+    },
+    {
+      "bytes": 1410949,
+      "path": "CORE/PRICE_MODEL_10BPS/portfolio-trades.jsonl",
+      "sha256": "6bef357188805cdf7311ba57563f4f611cab4cc38921fdb2412a81b7f90e06bd"
+    },
+    {
+      "bytes": 2145879,
+      "path": "CORE/PRICE_MODEL_20BPS/candidate-decisions.jsonl",
+      "sha256": "1643b14aaad655b81bc1c3dfca147f15d245ab7b4665745558e39ce8356936b3"
+    },
+    {
+      "bytes": 21022,
+      "path": "CORE/PRICE_MODEL_20BPS/metrics.json",
+      "sha256": "995ce9800ffa018d5bdcaee06362b30dad267f24396ec8574b9080fb06feacc8"
+    },
+    {
+      "bytes": 2004934,
+      "path": "CORE/PRICE_MODEL_20BPS/portfolio-events.jsonl",
+      "sha256": "474748c57336f3d154261a781c69b0bfb913e1f4175c8c757f1baab8fa3928c6"
+    },
+    {
+      "bytes": 1410264,
+      "path": "CORE/PRICE_MODEL_20BPS/portfolio-trades.jsonl",
+      "sha256": "6422095a2488e9031b72c465b24978d9f4ae85fd31ad0129a5df9e26eee2ee73"
+    },
+    {
+      "bytes": 2145599,
+      "path": "CORE/PRICE_MODEL_30BPS/candidate-decisions.jsonl",
+      "sha256": "5c5463fb579dbd4073f9213166b8206f993695be696e4ba1640029bd411603b0"
+    },
+    {
+      "bytes": 20979,
+      "path": "CORE/PRICE_MODEL_30BPS/metrics.json",
+      "sha256": "435e4810b0e0352cd7947b4d3996ee811f3da4f7f09aaab52df1d57595edbc01"
+    },
+    {
+      "bytes": 2004302,
+      "path": "CORE/PRICE_MODEL_30BPS/portfolio-events.jsonl",
+      "sha256": "8afcbe704cd456b39131ab636f8f288a4f7492198c2040c5347af41a94b9537b"
+    },
+    {
+      "bytes": 1409934,
+      "path": "CORE/PRICE_MODEL_30BPS/portfolio-trades.jsonl",
+      "sha256": "8d07d5ceab5506a12473343ccd361411eb006b8df387f22ebb06f8f56a5a3a19"
+    },
+    {
+      "bytes": 2146089,
+      "path": "CORE/PRICE_MODEL_8BPS/candidate-decisions.jsonl",
+      "sha256": "490c033c7e9dff5fea3890167d27180cc571c716ba566fe6ebb10bd43bb4c1df"
+    },
+    {
+      "bytes": 20985,
+      "path": "CORE/PRICE_MODEL_8BPS/metrics.json",
+      "sha256": "6be3fec968e5d6baef6a76e19aa94d801d63278e36b804c512d4510b329987da"
+    },
+    {
+      "bytes": 2005535,
+      "path": "CORE/PRICE_MODEL_8BPS/portfolio-events.jsonl",
+      "sha256": "66b1b19ec991d6269eee7abed554317ee5c11af5ca1eb96e3ec974a58efe2930"
+    },
+    {
+      "bytes": 1411029,
+      "path": "CORE/PRICE_MODEL_8BPS/portfolio-trades.jsonl",
+      "sha256": "ed391dfd7b3049f05b015ee369815547389e255140ce096e56bac02be3a08fc7"
+    },
+    {
+      "bytes": 101158,
+      "path": "CORE_IDLE/portfolio-price-model-summary.json",
+      "sha256": "815a3b64e72633afbf7ad79a58ebe19523c1b5e04d0cd4f8199daeeb0019bbe5"
+    },
+    {
+      "bytes": 9251550,
+      "path": "CORE_IDLE/PRICE_MODEL_10BPS/candidate-decisions.jsonl",
+      "sha256": "d4ab1a1f5f45e12e5b18058e1fe6341305312e8e4d68e6d2ddce83231444097c"
+    },
+    {
+      "bytes": 22378,
+      "path": "CORE_IDLE/PRICE_MODEL_10BPS/metrics.json",
+      "sha256": "c0418ca46fca880e705d2c279adbd78f10ed18802ca4c3561355e0f8b75212c9"
+    },
+    {
+      "bytes": 2201918,
+      "path": "CORE_IDLE/PRICE_MODEL_10BPS/portfolio-events.jsonl",
+      "sha256": "730ef2cb61b2baca5c1ab758577deba34e6ff517cf1de9fafb8cab68b5d73897"
+    },
+    {
+      "bytes": 1450291,
+      "path": "CORE_IDLE/PRICE_MODEL_10BPS/portfolio-trades.jsonl",
+      "sha256": "e44ac75f91316b0935aee2125ba6b0f3764bdd038a76aa3fe7ee7b0d75098d38"
+    },
+    {
+      "bytes": 9251527,
+      "path": "CORE_IDLE/PRICE_MODEL_20BPS/candidate-decisions.jsonl",
+      "sha256": "ac002db46babec1c11038c3091d4af601c7d5731eca706292e4967388029198f"
+    },
+    {
+      "bytes": 22386,
+      "path": "CORE_IDLE/PRICE_MODEL_20BPS/metrics.json",
+      "sha256": "3ab8db732fa2b24ee338f0db977d0b50e8e3e093f05151e51e20f2088d9406ea"
+    },
+    {
+      "bytes": 2201365,
+      "path": "CORE_IDLE/PRICE_MODEL_20BPS/portfolio-events.jsonl",
+      "sha256": "37c8b3a1e7b54903467bc17c374bab2d9b153751fbebff614849c7d2fe2534de"
+    },
+    {
+      "bytes": 1449800,
+      "path": "CORE_IDLE/PRICE_MODEL_20BPS/portfolio-trades.jsonl",
+      "sha256": "188cd02548cb3fb3700e24dcd6ef98a9628ba4f67d919faf2f20ef8357581422"
+    },
+    {
+      "bytes": 9251258,
+      "path": "CORE_IDLE/PRICE_MODEL_30BPS/candidate-decisions.jsonl",
+      "sha256": "583547d828ddb73c04e1b8b6cdc7cf9976fe14ee20d475cf2ca83dd2a19cda28"
+    },
+    {
+      "bytes": 22410,
+      "path": "CORE_IDLE/PRICE_MODEL_30BPS/metrics.json",
+      "sha256": "307439c77fec58356e350470e10565a6be40c34f95878e482f133f3ec2d1c5c4"
+    },
+    {
+      "bytes": 2201043,
+      "path": "CORE_IDLE/PRICE_MODEL_30BPS/portfolio-events.jsonl",
+      "sha256": "cea282ded841028f862b311a00f4ab9f5b87ec8c4dc1a6d44d74d2be47c9640a"
+    },
+    {
+      "bytes": 1449473,
+      "path": "CORE_IDLE/PRICE_MODEL_30BPS/portfolio-trades.jsonl",
+      "sha256": "ca028c69a13d7783d8731810e1cd00fa71b2d7d80b498982189f2c5dd12ebac3"
+    },
+    {
+      "bytes": 9251805,
+      "path": "CORE_IDLE/PRICE_MODEL_8BPS/candidate-decisions.jsonl",
+      "sha256": "3ae0a0f3b1582d9974a903e50ed583d9dd6b100163dfb7bcb1fa639e65ec2289"
+    },
+    {
+      "bytes": 22396,
+      "path": "CORE_IDLE/PRICE_MODEL_8BPS/metrics.json",
+      "sha256": "6f52a3c3670df4b785ee3d17747305ecc99f8a1a52f8ca1f20d29cb0d5f52080"
+    },
+    {
+      "bytes": 2202651,
+      "path": "CORE_IDLE/PRICE_MODEL_8BPS/portfolio-events.jsonl",
+      "sha256": "c79f2319a5d9ffcc86b7be3aeba500de5ddeb82530370ec5bc45dedaf9dd4556"
+    },
+    {
+      "bytes": 1450687,
+      "path": "CORE_IDLE/PRICE_MODEL_8BPS/portfolio-trades.jsonl",
+      "sha256": "7b265c761088f96565beafd8c3468f57b2c245b2afad69d73ee150e9fdbabae7"
+    },
+    {
+      "bytes": 106972,
+      "path": "CORE_IDLE_AVAX/portfolio-price-model-summary.json",
+      "sha256": "5f50c651254203fbfda45aa1f6d36e3bda52db956fbb8ddd2d26aac0bca49913"
+    },
+    {
+      "bytes": 9550898,
+      "path": "CORE_IDLE_AVAX/PRICE_MODEL_10BPS/candidate-decisions.jsonl",
+      "sha256": "09ef21f46aa2661e9db47f9eeb7801fb4e5d40c786f12358450c10e6bb278c53"
+    },
+    {
+      "bytes": 23700,
+      "path": "CORE_IDLE_AVAX/PRICE_MODEL_10BPS/metrics.json",
+      "sha256": "f0be02289596551773469c58cd5abb02c48bdc1836f1d077753a00f13fb09448"
+    },
+    {
+      "bytes": 2212163,
+      "path": "CORE_IDLE_AVAX/PRICE_MODEL_10BPS/portfolio-events.jsonl",
+      "sha256": "d9cfc9b6e8d4b793235c9b65db8fa6998778ed3be4dddcf8b2cbe47e47cb151a"
+    },
+    {
+      "bytes": 1459238,
+      "path": "CORE_IDLE_AVAX/PRICE_MODEL_10BPS/portfolio-trades.jsonl",
+      "sha256": "a4f724cc27c2f5e92d37778d31bf42e881a6ca8420a217f7addbe4c74aeca37a"
+    },
+    {
+      "bytes": 9550859,
+      "path": "CORE_IDLE_AVAX/PRICE_MODEL_20BPS/candidate-decisions.jsonl",
+      "sha256": "d71c132d354bf09605931f366728b7b5af3fe67de41ef0699457618c0dc81b14"
+    },
+    {
+      "bytes": 23701,
+      "path": "CORE_IDLE_AVAX/PRICE_MODEL_20BPS/metrics.json",
+      "sha256": "6e2f618e051728ff83e55fce9758b57a37c2195c8ab61ec53fe9bfb7d4fe718b"
+    },
+    {
+      "bytes": 2211598,
+      "path": "CORE_IDLE_AVAX/PRICE_MODEL_20BPS/portfolio-events.jsonl",
+      "sha256": "81a71c46be2ebbf76ea59d4dc05e0c4fc25c72ca2a72bea2dee793e9fbfe908b"
+    },
+    {
+      "bytes": 1458711,
+      "path": "CORE_IDLE_AVAX/PRICE_MODEL_20BPS/portfolio-trades.jsonl",
+      "sha256": "65d49b8bb36a8ba7905f2f911bd866fbbad8195698b3aa7e117f4ee009fb134f"
+    },
+    {
+      "bytes": 9550605,
+      "path": "CORE_IDLE_AVAX/PRICE_MODEL_30BPS/candidate-decisions.jsonl",
+      "sha256": "78ecf23d2f943e27fbb2734a5477b3a7c4ec2a5c1d60b92728df37a8ce8f37ab"
+    },
+    {
+      "bytes": 23698,
+      "path": "CORE_IDLE_AVAX/PRICE_MODEL_30BPS/metrics.json",
+      "sha256": "9206d857d935e000aa6913c4de04818fb05ea296d3880e7083c5499313073d61"
+    },
+    {
+      "bytes": 2211134,
+      "path": "CORE_IDLE_AVAX/PRICE_MODEL_30BPS/portfolio-events.jsonl",
+      "sha256": "f5ab620656851487c12ccb9da7953c7ffbd7d6afe7fa2efdf92f08232343028e"
+    },
+    {
+      "bytes": 1458435,
+      "path": "CORE_IDLE_AVAX/PRICE_MODEL_30BPS/portfolio-trades.jsonl",
+      "sha256": "794feae8155fa984d95777e24b81c867d4d8be52fd142234b8e01324b9514d89"
+    },
+    {
+      "bytes": 9551050,
+      "path": "CORE_IDLE_AVAX/PRICE_MODEL_8BPS/candidate-decisions.jsonl",
+      "sha256": "63c5c5819795da7825e6fa8e61749efc464c1d8aeaecbbc3b71e8ebd90c2bf07"
+    },
+    {
+      "bytes": 23693,
+      "path": "CORE_IDLE_AVAX/PRICE_MODEL_8BPS/metrics.json",
+      "sha256": "1dcd6ba1d5efa5de946b9c9880a88028de04aa2f6af528f340579d7e6558fd4b"
+    },
+    {
+      "bytes": 2212735,
+      "path": "CORE_IDLE_AVAX/PRICE_MODEL_8BPS/portfolio-events.jsonl",
+      "sha256": "af96211896a5ea9f124131c5b900ce5433894f3fd23517d394d6952340ba3795"
+    },
+    {
+      "bytes": 1459589,
+      "path": "CORE_IDLE_AVAX/PRICE_MODEL_8BPS/portfolio-trades.jsonl",
+      "sha256": "aa0f36ba0c5f52364d00ef0c861d335410ebe4db57f6527a6973658d5e0ec77c"
+    },
+    {
+      "bytes": 107016,
+      "path": "CORE_IDLE_DOGE/portfolio-price-model-summary.json",
+      "sha256": "bf3b285216edf7b76acd37c7ab6c6425ad250158393d1ddc2058e0201caa22d8"
+    },
+    {
+      "bytes": 9507674,
+      "path": "CORE_IDLE_DOGE/PRICE_MODEL_10BPS/candidate-decisions.jsonl",
+      "sha256": "047361d0bb79ed8ee1c215440da5cf256a8d35e78c823f7dd306598bd6e5a985"
+    },
+    {
+      "bytes": 23703,
+      "path": "CORE_IDLE_DOGE/PRICE_MODEL_10BPS/metrics.json",
+      "sha256": "a7b2252941324664f68e2f055d3a43290791d7822101444f4ebf8ec28537dae9"
+    },
+    {
+      "bytes": 2205563,
+      "path": "CORE_IDLE_DOGE/PRICE_MODEL_10BPS/portfolio-events.jsonl",
+      "sha256": "015ce8a99da7dadf2b78846bfa439c4ced4db006634044ef2282ebe276a2a2ef"
+    },
+    {
+      "bytes": 1453805,
+      "path": "CORE_IDLE_DOGE/PRICE_MODEL_10BPS/portfolio-trades.jsonl",
+      "sha256": "550aa6f24d61aa7380b1f8540105c4652423c73a676f1fac0d8e0172f4142dc4"
+    },
+    {
+      "bytes": 9507543,
+      "path": "CORE_IDLE_DOGE/PRICE_MODEL_20BPS/candidate-decisions.jsonl",
+      "sha256": "bf414bae57a83f67faa68a64d819df4afa27a5fb05dfe7fc4220e852c94e8e01"
+    },
+    {
+      "bytes": 23713,
+      "path": "CORE_IDLE_DOGE/PRICE_MODEL_20BPS/metrics.json",
+      "sha256": "c1f64c1ad6f13eea192a7219d2b5aac2bcd069018098292738dd774beab1c1f1"
+    },
+    {
+      "bytes": 2204700,
+      "path": "CORE_IDLE_DOGE/PRICE_MODEL_20BPS/portfolio-events.jsonl",
+      "sha256": "20de7bd1c8580be02c79257ded2346a062e20e30d2f07bcaf24e31ab34755104"
+    },
+    {
+      "bytes": 1453073,
+      "path": "CORE_IDLE_DOGE/PRICE_MODEL_20BPS/portfolio-trades.jsonl",
+      "sha256": "3f063c42af2d1cd6e7b0d4758c2f8d948fe89e45d7da2a23384a002360266ae4"
+    },
+    {
+      "bytes": 9507342,
+      "path": "CORE_IDLE_DOGE/PRICE_MODEL_30BPS/candidate-decisions.jsonl",
+      "sha256": "90cf11b469ca625a274230a2c5d7859219b482789834603fbd564fbf045cab40"
+    },
+    {
+      "bytes": 23707,
+      "path": "CORE_IDLE_DOGE/PRICE_MODEL_30BPS/metrics.json",
+      "sha256": "36707ea39507e173f4d7d3657bb2954f04465a876c24cf37ffe51e4a76bd1b62"
+    },
+    {
+      "bytes": 2204566,
+      "path": "CORE_IDLE_DOGE/PRICE_MODEL_30BPS/portfolio-events.jsonl",
+      "sha256": "e07da4b895453a1d0c34500e4ca4967f1b32ad68d54cff84c979154f666aa298"
+    },
+    {
+      "bytes": 1452932,
+      "path": "CORE_IDLE_DOGE/PRICE_MODEL_30BPS/portfolio-trades.jsonl",
+      "sha256": "adc211a7c916c6d6b931b0f920c69d7c52804c73f80bdc655f23f90162643796"
+    },
+    {
+      "bytes": 9507858,
+      "path": "CORE_IDLE_DOGE/PRICE_MODEL_8BPS/candidate-decisions.jsonl",
+      "sha256": "9dbcbaf59a04f22a1bcf49015910220073fc22a27b5b411832c5da71b0bc50f0"
+    },
+    {
+      "bytes": 23713,
+      "path": "CORE_IDLE_DOGE/PRICE_MODEL_8BPS/metrics.json",
+      "sha256": "4f49a4f2fcce1301ae5d43d58afc16596c320d7f5e6893cd3ef6da8d8df0c86d"
+    },
+    {
+      "bytes": 2205994,
+      "path": "CORE_IDLE_DOGE/PRICE_MODEL_8BPS/portfolio-events.jsonl",
+      "sha256": "697045faa9620f4f765dbf5eff5645f67c6e7b16faa3276b25858571f3f11fcb"
+    },
+    {
+      "bytes": 1454051,
+      "path": "CORE_IDLE_DOGE/PRICE_MODEL_8BPS/portfolio-trades.jsonl",
+      "sha256": "5368828d905b516c2a530056cc4bab2f1cbe49a701283c4ff2d170525979c50b"
+    },
+    {
+      "bytes": 107310,
+      "path": "CORE_IDLE_DOGE_AVAX/portfolio-price-model-summary.json",
+      "sha256": "4332be3b488a1b2b4da16bef9ab166dcfb87585ff548cc000fb9c3db3105808e"
+    },
+    {
+      "bytes": 9806694,
+      "path": "CORE_IDLE_DOGE_AVAX/PRICE_MODEL_10BPS/candidate-decisions.jsonl",
+      "sha256": "8091230c0c05b71b56e38a3733cc692c762594cccb86bd3dc1bb4e0572f44c63"
+    },
+    {
+      "bytes": 23770,
+      "path": "CORE_IDLE_DOGE_AVAX/PRICE_MODEL_10BPS/metrics.json",
+      "sha256": "4d9954c6eb55c6fcfc3350da81e0714ff92ebf24b7d169a65464649c1a91ad8f"
+    },
+    {
+      "bytes": 2214448,
+      "path": "CORE_IDLE_DOGE_AVAX/PRICE_MODEL_10BPS/portfolio-events.jsonl",
+      "sha256": "c689ec89068f19e5efced7d42536c839145dfc93715940c187c2a6d6d1d0d4a4"
+    },
+    {
+      "bytes": 1461642,
+      "path": "CORE_IDLE_DOGE_AVAX/PRICE_MODEL_10BPS/portfolio-trades.jsonl",
+      "sha256": "85f659778ab57e1e5af9aaeb3e912a44f7f43f9f8d33160a4634bc88c0fc541c"
+    },
+    {
+      "bytes": 9806564,
+      "path": "CORE_IDLE_DOGE_AVAX/PRICE_MODEL_20BPS/candidate-decisions.jsonl",
+      "sha256": "d8b3b0de8df1660941e181a2a40de1d07d76da78f37f5e91f21423b16aa99f9e"
+    },
+    {
+      "bytes": 23799,
+      "path": "CORE_IDLE_DOGE_AVAX/PRICE_MODEL_20BPS/metrics.json",
+      "sha256": "7fb8f1572ed4fe6478843f5f87fb5e58614a69166df7736da5dcbdb12d7dc4ec"
+    },
+    {
+      "bytes": 2213609,
+      "path": "CORE_IDLE_DOGE_AVAX/PRICE_MODEL_20BPS/portfolio-events.jsonl",
+      "sha256": "a951dd454b72ae0f03c295a5f3822f8215af740c0c3e6522967408c429601fde"
+    },
+    {
+      "bytes": 1460918,
+      "path": "CORE_IDLE_DOGE_AVAX/PRICE_MODEL_20BPS/portfolio-trades.jsonl",
+      "sha256": "d33dafb652b007f9f740ab3f13c05dcde088511309536dc0c19a18c16fd4dd32"
+    },
+    {
+      "bytes": 9806300,
+      "path": "CORE_IDLE_DOGE_AVAX/PRICE_MODEL_30BPS/candidate-decisions.jsonl",
+      "sha256": "07ff6913eb7a93f348e6a982169188b01e2344c495ccea98d824d90f67f86adf"
+    },
+    {
+      "bytes": 23746,
+      "path": "CORE_IDLE_DOGE_AVAX/PRICE_MODEL_30BPS/metrics.json",
+      "sha256": "246cfb4ac60dd143f161148f5332d01f8582f3c52ff2ed6d196bb772926733e3"
+    },
+    {
+      "bytes": 2213341,
+      "path": "CORE_IDLE_DOGE_AVAX/PRICE_MODEL_30BPS/portfolio-events.jsonl",
+      "sha256": "ddae7588ea653f50daa142f887578a3c25a16be7b69d4330bde514836cceb117"
+    },
+    {
+      "bytes": 1460714,
+      "path": "CORE_IDLE_DOGE_AVAX/PRICE_MODEL_30BPS/portfolio-trades.jsonl",
+      "sha256": "fded4f1eb6d79199f5cff9aa86bb70337e4003a421aa8c76665d13409d662a3e"
+    },
+    {
+      "bytes": 9806740,
+      "path": "CORE_IDLE_DOGE_AVAX/PRICE_MODEL_8BPS/candidate-decisions.jsonl",
+      "sha256": "225617bc3780bf154e62b90f90131b4b5b44bb2dd67c9fdae3432e1576780f92"
+    },
+    {
+      "bytes": 23783,
+      "path": "CORE_IDLE_DOGE_AVAX/PRICE_MODEL_8BPS/metrics.json",
+      "sha256": "ace427b8ac8b168bb22c55ec27ba0762ae82154af5369d34f66c2a71c6b6abd8"
+    },
+    {
+      "bytes": 2214863,
+      "path": "CORE_IDLE_DOGE_AVAX/PRICE_MODEL_8BPS/portfolio-events.jsonl",
+      "sha256": "49468f1bc425d11cecbda8b7d0468ea2267b46045cbb694d8d1879ba280cee64"
+    },
+    {
+      "bytes": 1461780,
+      "path": "CORE_IDLE_DOGE_AVAX/PRICE_MODEL_8BPS/portfolio-trades.jsonl",
+      "sha256": "e2cb553b6ab01792298c960f31f188f9e7c3552b8850d470166fdf38fada1dbc"
+    }
+  ],
+  "historical_1275_anchor_unchanged": true,
+  "lifecycle_source_issues": {
+    "CORE": {},
+    "CORE_IDLE": {},
+    "CORE_IDLE_AVAX": {},
+    "CORE_IDLE_DOGE": {},
+    "CORE_IDLE_DOGE_AVAX": {}
+  },
+  "scenarios": [
+    {
+      "closed_trades": 1264,
+      "configuration": "CORE",
+      "final_equity_jpy": 1160540021.097544,
+      "maximum_mtm_drawdown": -0.21178298423594943,
+      "monthly_equity_jpy": {
+        "2025-08": 14052.377986490319,
+        "2025-09": 30202.3669905021,
+        "2025-10": 226916.5876075442,
+        "2025-11": 1517202.3795317886,
+        "2025-12": 2468099.9477635,
+        "2026-01": 7906899.793479083,
+        "2026-02": 30108008.618282013,
+        "2026-03": 73370808.15571521,
+        "2026-04": 127498882.08418353,
+        "2026-05": 199953825.43364584,
+        "2026-06": 957138476.5111398,
+        "2026-07": 1125785626.1157353,
+        "2026-08": 1160540021.097544
+      },
+      "ownership_conflicts": 0,
+      "profit_factor": 2.4866245512817935,
+      "rejected_entries": {
+        "FET:RESIDUAL_LT_MIN": 1,
+        "FET:SLOT_OCCUPIED": 3,
+        "FET:SYMBOL_OWNED_BY_Q102": 4,
+        "PENGU:COOLDOWN": 8,
+        "PENGU:NO_LOT_SHRINK": 4,
+        "PENGU:ROUTE_QUARANTINE": 3,
+        "PENGU:SHARED_DAILY_LOSS": 2,
+        "PENGU:SLOT_OCCUPIED": 33,
+        "Q102:SHARED_DAILY_LOSS": 10,
+        "Q102:SLOT_OCCUPIED": 229,
+        "Q102:SYMBOL_OWNED_BY_FET": 2,
+        "Q102:SYMBOL_OWNED_BY_V12": 4,
+        "V12:BASE_SLOTS_FULL": 199,
+        "V12:NO_GROSS_ROOM": 65,
+        "V12:RANK3_NOT_IDLE_SIGNAL_SLOT": 69,
+        "V12:SAME_SYMBOL_ACTIVE": 364,
+        "V12:SHARED_DAILY_LOSS": 39,
+        "V12:SYMBOL_COOLDOWN": 250,
+        "V12:SYMBOL_OWNED_BY_Q102": 14,
+        "V52:SHARED_DAILY_LOSS": 4
+      },
+      "scenario_id": "PRICE_MODEL_8BPS",
+      "strategy_pnl_jpy": {
+        "FET": 1088569.8499484174,
+        "PENGU": 9665432.363532353,
+        "Q102": 313681036.1651739,
+        "V12": 559677339.6537641,
+        "V52": 288790467.3163104
+      },
+      "strategy_trades": {
+        "FET": 12,
+        "PENGU": 63,
+        "Q102": 127,
+        "V12": 978,
+        "V52": 84
+      }
+    },
+    {
+      "closed_trades": 1264,
+      "configuration": "CORE",
+      "final_equity_jpy": 924164577.384132,
+      "maximum_mtm_drawdown": -0.21296368751349548,
+      "monthly_equity_jpy": {
+        "2025-08": 13900.526145766065,
+        "2025-09": 29509.025884765873,
+        "2025-10": 216404.7496382032,
+        "2025-11": 1405631.8660952125,
+        "2025-12": 2255764.4112354917,
+        "2026-01": 7074286.602174768,
+        "2026-02": 26287868.24129204,
+        "2026-03": 62714913.616047636,
+        "2026-04": 107500354.80201617,
+        "2026-05": 166296145.55687985,
+        "2026-06": 777194350.9699818,
+        "2026-07": 898740598.0671211,
+        "2026-08": 924164577.384132
+      },
+      "ownership_conflicts": 0,
+      "profit_factor": 2.432055367261132,
+      "rejected_entries": {
+        "FET:RESIDUAL_LT_MIN": 1,
+        "FET:SLOT_OCCUPIED": 3,
+        "FET:SYMBOL_OWNED_BY_Q102": 4,
+        "PENGU:COOLDOWN": 8,
+        "PENGU:NO_LOT_SHRINK": 4,
+        "PENGU:ROUTE_QUARANTINE": 3,
+        "PENGU:SHARED_DAILY_LOSS": 2,
+        "PENGU:SLOT_OCCUPIED": 33,
+        "Q102:SHARED_DAILY_LOSS": 10,
+        "Q102:SLOT_OCCUPIED": 229,
+        "Q102:SYMBOL_OWNED_BY_FET": 2,
+        "Q102:SYMBOL_OWNED_BY_V12": 4,
+        "V12:BASE_SLOTS_FULL": 199,
+        "V12:NO_GROSS_ROOM": 65,
+        "V12:RANK3_NOT_IDLE_SIGNAL_SLOT": 69,
+        "V12:SAME_SYMBOL_ACTIVE": 364,
+        "V12:SHARED_DAILY_LOSS": 39,
+        "V12:SYMBOL_COOLDOWN": 250,
+        "V12:SYMBOL_OWNED_BY_Q102": 14,
+        "V52:SHARED_DAILY_LOSS": 4
+      },
+      "scenario_id": "PRICE_MODEL_10BPS",
+      "strategy_pnl_jpy": {
+        "FET": 1325862.2421742082,
+        "PENGU": 8540082.564604387,
+        "Q102": 253749086.21953195,
+        "V12": 440817845.03332573,
+        "V52": 229293321.01485243
+      },
+      "strategy_trades": {
+        "FET": 12,
+        "PENGU": 63,
+        "Q102": 127,
+        "V12": 978,
+        "V52": 84
+      }
+    },
+    {
+      "closed_trades": 1263,
+      "configuration": "CORE",
+      "final_equity_jpy": 298685301.257315,
+      "maximum_mtm_drawdown": -0.21976974938652882,
+      "monthly_equity_jpy": {
+        "2025-08": 13165.345715494206,
+        "2025-09": 26288.60269688428,
+        "2025-10": 171815.87815669383,
+        "2025-11": 966529.0320041467,
+        "2025-12": 1450229.6403002075,
+        "2026-01": 4090510.152792083,
+        "2026-02": 13455724.785338748,
+        "2026-03": 28868733.68381401,
+        "2026-04": 46217581.0664322,
+        "2026-05": 66763314.74305572,
+        "2026-06": 276855659.10705316,
+        "2026-07": 294134343.7182886,
+        "2026-08": 298685301.257315
+      },
+      "ownership_conflicts": 0,
+      "profit_factor": 2.1739178192163173,
+      "rejected_entries": {
+        "FET:RESIDUAL_LT_MIN": 1,
+        "FET:SLOT_OCCUPIED": 3,
+        "FET:SYMBOL_OWNED_BY_Q102": 4,
+        "PENGU:COOLDOWN": 8,
+        "PENGU:NO_LOT_SHRINK": 4,
+        "PENGU:ROUTE_QUARANTINE": 3,
+        "PENGU:SHARED_DAILY_LOSS": 2,
+        "PENGU:SLOT_OCCUPIED": 33,
+        "Q102:SHARED_DAILY_LOSS": 10,
+        "Q102:SLOT_OCCUPIED": 229,
+        "Q102:SYMBOL_OWNED_BY_FET": 2,
+        "Q102:SYMBOL_OWNED_BY_V12": 4,
+        "V12:BASE_SLOTS_FULL": 199,
+        "V12:NO_GROSS_ROOM": 66,
+        "V12:RANK3_NOT_IDLE_SIGNAL_SLOT": 69,
+        "V12:SAME_SYMBOL_ACTIVE": 364,
+        "V12:SHARED_DAILY_LOSS": 39,
+        "V12:SYMBOL_COOLDOWN": 250,
+        "V12:SYMBOL_OWNED_BY_Q102": 14,
+        "V52:SHARED_DAILY_LOSS": 4
+      },
+      "scenario_id": "PRICE_MODEL_20BPS",
+      "strategy_pnl_jpy": {
+        "FET": 1441000.0959202778,
+        "PENGU": 4705626.666304011,
+        "Q102": 89252815.08663526,
+        "V12": 133043486.76285776,
+        "V52": 72769022.17241345
+      },
+      "strategy_trades": {
+        "FET": 12,
+        "PENGU": 63,
+        "Q102": 127,
+        "V12": 977,
+        "V52": 84
+      }
+    },
+    {
+      "closed_trades": 1263,
+      "configuration": "CORE",
+      "final_equity_jpy": 97410693.38580827,
+      "maximum_mtm_drawdown": -0.22744608429990953,
+      "monthly_equity_jpy": {
+        "2025-08": 12468.760263433254,
+        "2025-09": 23441.97734478472,
+        "2025-10": 136772.55357986828,
+        "2025-11": 667696.5126482183,
+        "2025-12": 938054.0921617146,
+        "2026-01": 2382701.2009789646,
+        "2026-02": 6941458.553004993,
+        "2026-03": 13396196.283394637,
+        "2026-04": 20037174.22953418,
+        "2026-05": 27032345.05721399,
+        "2026-06": 99485856.61006014,
+        "2026-07": 97134339.06130835,
+        "2026-08": 97410693.38580827
+      },
+      "ownership_conflicts": 0,
+      "profit_factor": 1.9450453433241743,
+      "rejected_entries": {
+        "FET:RESIDUAL_LT_MIN": 1,
+        "FET:SLOT_OCCUPIED": 3,
+        "FET:SYMBOL_OWNED_BY_Q102": 4,
+        "PENGU:COOLDOWN": 8,
+        "PENGU:NO_LOT_SHRINK": 4,
+        "PENGU:ROUTE_QUARANTINE": 3,
+        "PENGU:SHARED_DAILY_LOSS": 2,
+        "PENGU:SLOT_OCCUPIED": 33,
+        "Q102:SHARED_DAILY_LOSS": 10,
+        "Q102:SLOT_OCCUPIED": 229,
+        "Q102:SYMBOL_OWNED_BY_FET": 2,
+        "Q102:SYMBOL_OWNED_BY_V12": 4,
+        "V12:BASE_SLOTS_FULL": 199,
+        "V12:NO_GROSS_ROOM": 66,
+        "V12:RANK3_NOT_IDLE_SIGNAL_SLOT": 69,
+        "V12:SAME_SYMBOL_ACTIVE": 364,
+        "V12:SHARED_DAILY_LOSS": 39,
+        "V12:SYMBOL_COOLDOWN": 250,
+        "V12:SYMBOL_OWNED_BY_Q102": 14,
+        "V52:SHARED_DAILY_LOSS": 4
+      },
+      "scenario_id": "PRICE_MODEL_30BPS",
+      "strategy_pnl_jpy": {
+        "FET": 986377.4033578332,
+        "PENGU": 2608587.8525735843,
+        "Q102": 32045133.623409446,
+        "V12": 39195996.546822354,
+        "V52": 23114221.448943865
+      },
+      "strategy_trades": {
+        "FET": 12,
+        "PENGU": 63,
+        "Q102": 127,
+        "V12": 977,
+        "V52": 84
+      }
+    },
+    {
+      "closed_trades": 1299,
+      "configuration": "CORE_IDLE",
+      "final_equity_jpy": 1944553666.2592182,
+      "maximum_mtm_drawdown": -0.22635846761941947,
+      "monthly_equity_jpy": {
+        "2025-08": 14052.377986490319,
+        "2025-09": 30202.3669905021,
+        "2025-10": 226916.5876075442,
+        "2025-11": 1517202.3795317886,
+        "2025-12": 2468099.9477635,
+        "2026-01": 8650754.20807052,
+        "2026-02": 34687384.60283488,
+        "2026-03": 93146344.30661215,
+        "2026-04": 186256559.59875143,
+        "2026-05": 307762538.7759947,
+        "2026-06": 1458306327.6171186,
+        "2026-07": 1886327181.3049717,
+        "2026-08": 1944553666.2592182
+      },
+      "ownership_conflicts": 0,
+      "profit_factor": 2.5452137338842005,
+      "rejected_entries": {
+        "FET:RESIDUAL_LT_MIN": 1,
+        "FET:SLOT_OCCUPIED": 3,
+        "FET:SYMBOL_OWNED_BY_Q102": 4,
+        "IDLE:CORE_SIGNAL_OR_POSITION": 4097,
+        "IDLE:FULL_1X_UNAVAILABLE": 11,
+        "IDLE:GENERIC_LIFECYCLE_ACTIVE": 664,
+        "IDLE:GENERIC_ROUTE_NOT_SELECTED": 645,
+        "IDLE:SOURCE_INCOMPLETE": 5303,
+        "IDLE:SYMBOL_OWNED_BY_IDLE": 1,
+        "PENGU:COOLDOWN": 8,
+        "PENGU:NO_LOT_SHRINK": 4,
+        "PENGU:ROUTE_QUARANTINE": 3,
+        "PENGU:SHARED_DAILY_LOSS": 2,
+        "PENGU:SLOT_OCCUPIED": 33,
+        "Q102:SHARED_DAILY_LOSS": 10,
+        "Q102:SLOT_OCCUPIED": 229,
+        "Q102:SYMBOL_OWNED_BY_FET": 2,
+        "Q102:SYMBOL_OWNED_BY_V12": 4,
+        "V12:BASE_SLOTS_FULL": 197,
+        "V12:NO_GROSS_ROOM": 72,
+        "V12:RANK3_NOT_IDLE_SIGNAL_SLOT": 69,
+        "V12:SAME_SYMBOL_ACTIVE": 363,
+        "V12:SHARED_DAILY_LOSS": 39,
+        "V12:SYMBOL_COOLDOWN": 249,
+        "V12:SYMBOL_OWNED_BY_Q102": 14,
+        "V52:SHARED_DAILY_LOSS": 4
+      },
+      "scenario_id": "PRICE_MODEL_8BPS",
+      "strategy_pnl_jpy": {
+        "FET": -5630217.15247976,
+        "IDLE": 350613637.7347271,
+        "PENGU": 1288391.6164801233,
+        "Q102": 355353666.1279785,
+        "V12": 830893584.4991236,
+        "V52": 435552549.0911068
+      },
+      "strategy_trades": {
+        "FET": 12,
+        "IDLE": 38,
+        "PENGU": 63,
+        "Q102": 127,
+        "V12": 975,
+        "V52": 84
+      }
+    },
+    {
+      "closed_trades": 1299,
+      "configuration": "CORE_IDLE",
+      "final_equity_jpy": 1537800452.767332,
+      "maximum_mtm_drawdown": -0.22712596458622347,
+      "monthly_equity_jpy": {
+        "2025-08": 13900.526145766065,
+        "2025-09": 29509.025884765873,
+        "2025-10": 216404.7496382032,
+        "2025-11": 1405631.8660952125,
+        "2025-12": 2255764.4112354917,
+        "2026-01": 7731866.33534571,
+        "2026-02": 30202032.16554066,
+        "2026-03": 79321727.02422307,
+        "2026-04": 156401962.9877798,
+        "2026-05": 254767149.13758752,
+        "2026-06": 1178030000.4063616,
+        "2026-07": 1495501679.6635957,
+        "2026-08": 1537800452.767332
+      },
+      "ownership_conflicts": 0,
+      "profit_factor": 2.4876122235709524,
+      "rejected_entries": {
+        "FET:RESIDUAL_LT_MIN": 1,
+        "FET:SLOT_OCCUPIED": 3,
+        "FET:SYMBOL_OWNED_BY_Q102": 4,
+        "IDLE:CORE_SIGNAL_OR_POSITION": 4097,
+        "IDLE:FULL_1X_UNAVAILABLE": 11,
+        "IDLE:GENERIC_LIFECYCLE_ACTIVE": 664,
+        "IDLE:GENERIC_ROUTE_NOT_SELECTED": 645,
+        "IDLE:SOURCE_INCOMPLETE": 5303,
+        "IDLE:SYMBOL_OWNED_BY_IDLE": 1,
+        "PENGU:COOLDOWN": 8,
+        "PENGU:NO_LOT_SHRINK": 4,
+        "PENGU:ROUTE_QUARANTINE": 3,
+        "PENGU:SHARED_DAILY_LOSS": 2,
+        "PENGU:SLOT_OCCUPIED": 33,
+        "Q102:SHARED_DAILY_LOSS": 10,
+        "Q102:SLOT_OCCUPIED": 229,
+        "Q102:SYMBOL_OWNED_BY_FET": 2,
+        "Q102:SYMBOL_OWNED_BY_V12": 4,
+        "V12:BASE_SLOTS_FULL": 197,
+        "V12:NO_GROSS_ROOM": 72,
+        "V12:RANK3_NOT_IDLE_SIGNAL_SLOT": 69,
+        "V12:SAME_SYMBOL_ACTIVE": 363,
+        "V12:SHARED_DAILY_LOSS": 39,
+        "V12:SYMBOL_COOLDOWN": 249,
+        "V12:SYMBOL_OWNED_BY_Q102": 14,
+        "V52:SHARED_DAILY_LOSS": 4
+      },
+      "scenario_id": "PRICE_MODEL_10BPS",
+      "strategy_pnl_jpy": {
+        "FET": -3945761.9552123845,
+        "IDLE": 279605318.7948289,
+        "PENGU": 1862304.9316181503,
+        "Q102": 286073229.1848945,
+        "V12": 648987036.6777545,
+        "V52": 343393622.52901316
+      },
+      "strategy_trades": {
+        "FET": 12,
+        "IDLE": 38,
+        "PENGU": 63,
+        "Q102": 127,
+        "V12": 975,
+        "V52": 84
+      }
+    },
+    {
+      "closed_trades": 1298,
+      "configuration": "CORE_IDLE",
+      "final_equity_jpy": 479990257.3407335,
+      "maximum_mtm_drawdown": -0.23094345459237897,
+      "monthly_equity_jpy": {
+        "2025-08": 13165.345715494206,
+        "2025-09": 26288.60269688428,
+        "2025-10": 171815.87815669383,
+        "2025-11": 966529.0320041467,
+        "2025-12": 1450229.6403002075,
+        "2026-01": 4447705.672486223,
+        "2026-02": 15244444.484362371,
+        "2026-03": 35834896.403167665,
+        "2026-04": 65876929.37078517,
+        "2026-05": 99914128.0284123,
+        "2026-06": 408856383.71025985,
+        "2026-07": 472682812.554299,
+        "2026-08": 479990257.3407335
+      },
+      "ownership_conflicts": 0,
+      "profit_factor": 2.2159577790478764,
+      "rejected_entries": {
+        "FET:RESIDUAL_LT_MIN": 1,
+        "FET:SLOT_OCCUPIED": 3,
+        "FET:SYMBOL_OWNED_BY_Q102": 4,
+        "IDLE:CORE_SIGNAL_OR_POSITION": 4097,
+        "IDLE:FULL_1X_UNAVAILABLE": 11,
+        "IDLE:GENERIC_LIFECYCLE_ACTIVE": 664,
+        "IDLE:GENERIC_ROUTE_NOT_SELECTED": 645,
+        "IDLE:SOURCE_INCOMPLETE": 5303,
+        "IDLE:SYMBOL_OWNED_BY_IDLE": 1,
+        "PENGU:COOLDOWN": 8,
+        "PENGU:NO_LOT_SHRINK": 4,
+        "PENGU:ROUTE_QUARANTINE": 3,
+        "PENGU:SHARED_DAILY_LOSS": 2,
+        "PENGU:SLOT_OCCUPIED": 33,
+        "Q102:SHARED_DAILY_LOSS": 10,
+        "Q102:SLOT_OCCUPIED": 229,
+        "Q102:SYMBOL_OWNED_BY_FET": 2,
+        "Q102:SYMBOL_OWNED_BY_V12": 4,
+        "V12:BASE_SLOTS_FULL": 197,
+        "V12:NO_GROSS_ROOM": 73,
+        "V12:RANK3_NOT_IDLE_SIGNAL_SLOT": 69,
+        "V12:SAME_SYMBOL_ACTIVE": 363,
+        "V12:SHARED_DAILY_LOSS": 39,
+        "V12:SYMBOL_COOLDOWN": 249,
+        "V12:SYMBOL_OWNED_BY_Q102": 14,
+        "V52:SHARED_DAILY_LOSS": 4
+      },
+      "scenario_id": "PRICE_MODEL_20BPS",
+      "strategy_pnl_jpy": {
+        "FET": -73688.24807889946,
+        "IDLE": 91357498.5997948,
+        "PENGU": 2656392.754505898,
+        "Q102": 98244281.53545159,
+        "V12": 187498809.19493374,
+        "V52": 105182885.92172891
+      },
+      "strategy_trades": {
+        "FET": 12,
+        "IDLE": 38,
+        "PENGU": 63,
+        "Q102": 127,
+        "V12": 974,
+        "V52": 84
+      }
+    },
+    {
+      "closed_trades": 1298,
+      "configuration": "CORE_IDLE",
+      "final_equity_jpy": 151124380.49743193,
+      "maximum_mtm_drawdown": -0.2347277706585057,
+      "monthly_equity_jpy": {
+        "2025-08": 12468.760263433254,
+        "2025-09": 23441.97734478472,
+        "2025-10": 136772.55357986828,
+        "2025-11": 667696.5126482183,
+        "2025-12": 938054.0921617146,
+        "2026-01": 2577291.1858789804,
+        "2026-02": 7753933.034065213,
+        "2026-03": 16317363.371222468,
+        "2026-04": 27975443.285737183,
+        "2026-05": 39509480.73831141,
+        "2026-06": 143100040.17418116,
+        "2026-07": 150701150.02802518,
+        "2026-08": 151124380.49743193
+      },
+      "ownership_conflicts": 0,
+      "profit_factor": 1.9770092618893496,
+      "rejected_entries": {
+        "FET:RESIDUAL_LT_MIN": 1,
+        "FET:SLOT_OCCUPIED": 3,
+        "FET:SYMBOL_OWNED_BY_Q102": 4,
+        "IDLE:CORE_SIGNAL_OR_POSITION": 4097,
+        "IDLE:FULL_1X_UNAVAILABLE": 11,
+        "IDLE:GENERIC_LIFECYCLE_ACTIVE": 664,
+        "IDLE:GENERIC_ROUTE_NOT_SELECTED": 645,
+        "IDLE:SOURCE_INCOMPLETE": 5303,
+        "IDLE:SYMBOL_OWNED_BY_IDLE": 1,
+        "PENGU:COOLDOWN": 8,
+        "PENGU:NO_LOT_SHRINK": 4,
+        "PENGU:ROUTE_QUARANTINE": 3,
+        "PENGU:SHARED_DAILY_LOSS": 2,
+        "PENGU:SLOT_OCCUPIED": 33,
+        "Q102:SHARED_DAILY_LOSS": 11,
+        "Q102:SLOT_OCCUPIED": 228,
+        "Q102:SYMBOL_OWNED_BY_FET": 2,
+        "Q102:SYMBOL_OWNED_BY_V12": 4,
+        "V12:BASE_SLOTS_FULL": 197,
+        "V12:NO_GROSS_ROOM": 73,
+        "V12:RANK3_NOT_IDLE_SIGNAL_SLOT": 69,
+        "V12:SAME_SYMBOL_ACTIVE": 363,
+        "V12:SHARED_DAILY_LOSS": 39,
+        "V12:SYMBOL_COOLDOWN": 249,
+        "V12:SYMBOL_OWNED_BY_Q102": 14,
+        "V52:SHARED_DAILY_LOSS": 4
+      },
+      "scenario_id": "PRICE_MODEL_30BPS",
+      "strategy_pnl_jpy": {
+        "FET": 586340.0315214461,
+        "IDLE": 30352202.551762834,
+        "PENGU": 2045603.1201460855,
+        "Q102": 34447086.80375477,
+        "V12": 52633582.677238256,
+        "V52": 32224106.896709356
+      },
+      "strategy_trades": {
+        "FET": 12,
+        "IDLE": 38,
+        "PENGU": 63,
+        "Q102": 127,
+        "V12": 974,
+        "V52": 84
+      }
+    },
+    {
+      "closed_trades": 1302,
+      "configuration": "CORE_IDLE_DOGE",
+      "final_equity_jpy": 1976413358.2574542,
+      "maximum_mtm_drawdown": -0.22635846761941958,
+      "monthly_equity_jpy": {
+        "2025-08": 14052.377986490319,
+        "2025-09": 30202.3669905021,
+        "2025-10": 226916.5876075442,
+        "2025-11": 1517202.3795317886,
+        "2025-12": 2468099.9477635,
+        "2026-01": 8650754.20807052,
+        "2026-02": 34125442.14380583,
+        "2026-03": 94672700.06101431,
+        "2026-04": 189308439.6498516,
+        "2026-05": 312805070.8369228,
+        "2026-06": 1482199584.0638,
+        "2026-07": 1917233046.0813315,
+        "2026-08": 1976413358.2574542
+      },
+      "ownership_conflicts": 0,
+      "profit_factor": 2.545308135629466,
+      "rejected_entries": {
+        "FET:RESIDUAL_LT_MIN": 1,
+        "FET:SLOT_OCCUPIED": 3,
+        "FET:SYMBOL_OWNED_BY_Q102": 4,
+        "IDLE:CORE_SIGNAL_OR_POSITION": 4097,
+        "IDLE:FULL_1X_UNAVAILABLE": 11,
+        "IDLE:GENERIC_LIFECYCLE_ACTIVE": 664,
+        "IDLE:GENERIC_ROUTE_NOT_SELECTED": 645,
+        "IDLE:SOURCE_INCOMPLETE": 5303,
+        "IDLE:SYMBOL_OWNED_BY_IDLE": 1,
+        "PENGU:COOLDOWN": 8,
+        "PENGU:NO_LOT_SHRINK": 4,
+        "PENGU:ROUTE_QUARANTINE": 3,
+        "PENGU:SHARED_DAILY_LOSS": 2,
+        "PENGU:SLOT_OCCUPIED": 33,
+        "Q102:SHARED_DAILY_LOSS": 10,
+        "Q102:SLOT_OCCUPIED": 229,
+        "Q102:SYMBOL_OWNED_BY_FET": 2,
+        "Q102:SYMBOL_OWNED_BY_V12": 4,
+        "RESIDUAL:CORE_SIGNAL_OR_POSITION": 93,
+        "RESIDUAL:IDLE_PRIORITY": 11,
+        "RESIDUAL:RESIDUAL_SLOT_OCCUPIED": 4,
+        "RESIDUAL:SHARED_DAILY_LOSS": 5,
+        "RESIDUAL:SOURCE_INCOMPLETE": 272,
+        "V12:BASE_SLOTS_FULL": 197,
+        "V12:NO_GROSS_ROOM": 72,
+        "V12:RANK3_NOT_IDLE_SIGNAL_SLOT": 69,
+        "V12:SAME_SYMBOL_ACTIVE": 363,
+        "V12:SHARED_DAILY_LOSS": 39,
+        "V12:SYMBOL_COOLDOWN": 249,
+        "V12:SYMBOL_OWNED_BY_Q102": 14,
+        "V52:SHARED_DAILY_LOSS": 4
+      },
+      "scenario_id": "PRICE_MODEL_8BPS",
+      "strategy_pnl_jpy": {
+        "FET": -5722436.794080533,
+        "IDLE": 356300920.3907412,
+        "PENGU": 1202279.8391370177,
+        "Q102": 360719218.6699658,
+        "RESIDUAL": 1326418.2955581136,
+        "V12": 843936131.4239954,
+        "V52": 442581920.8069526
+      },
+      "strategy_trades": {
+        "FET": 12,
+        "IDLE": 38,
+        "PENGU": 63,
+        "Q102": 127,
+        "RESIDUAL": 3,
+        "V12": 975,
+        "V52": 84
+      }
+    },
+    {
+      "closed_trades": 1302,
+      "configuration": "CORE_IDLE_DOGE",
+      "final_equity_jpy": 1562061878.1192062,
+      "maximum_mtm_drawdown": -0.2271259645862237,
+      "monthly_equity_jpy": {
+        "2025-08": 13900.526145766065,
+        "2025-09": 29509.025884765873,
+        "2025-10": 216404.7496382032,
+        "2025-11": 1405631.8660952125,
+        "2025-12": 2255764.4112354917,
+        "2026-01": 7731866.33534571,
+        "2026-02": 29700838.389457405,
+        "2026-03": 80573397.75177465,
+        "2026-04": 158869705.9283609,
+        "2026-05": 258786664.40338326,
+        "2026-06": 1196615698.9657927,
+        "2026-07": 1519095923.44052,
+        "2026-08": 1562061878.1192062
+      },
+      "ownership_conflicts": 0,
+      "profit_factor": 2.487703184615187,
+      "rejected_entries": {
+        "FET:RESIDUAL_LT_MIN": 1,
+        "FET:SLOT_OCCUPIED": 3,
+        "FET:SYMBOL_OWNED_BY_Q102": 4,
+        "IDLE:CORE_SIGNAL_OR_POSITION": 4097,
+        "IDLE:FULL_1X_UNAVAILABLE": 11,
+        "IDLE:GENERIC_LIFECYCLE_ACTIVE": 664,
+        "IDLE:GENERIC_ROUTE_NOT_SELECTED": 645,
+        "IDLE:SOURCE_INCOMPLETE": 5303,
+        "IDLE:SYMBOL_OWNED_BY_IDLE": 1,
+        "PENGU:COOLDOWN": 8,
+        "PENGU:NO_LOT_SHRINK": 4,
+        "PENGU:ROUTE_QUARANTINE": 3,
+        "PENGU:SHARED_DAILY_LOSS": 2,
+        "PENGU:SLOT_OCCUPIED": 33,
+        "Q102:SHARED_DAILY_LOSS": 10,
+        "Q102:SLOT_OCCUPIED": 229,
+        "Q102:SYMBOL_OWNED_BY_FET": 2,
+        "Q102:SYMBOL_OWNED_BY_V12": 4,
+        "RESIDUAL:CORE_SIGNAL_OR_POSITION": 93,
+        "RESIDUAL:IDLE_PRIORITY": 11,
+        "RESIDUAL:RESIDUAL_SLOT_OCCUPIED": 4,
+        "RESIDUAL:SHARED_DAILY_LOSS": 5,
+        "RESIDUAL:SOURCE_INCOMPLETE": 272,
+        "V12:BASE_SLOTS_FULL": 197,
+        "V12:NO_GROSS_ROOM": 72,
+        "V12:RANK3_NOT_IDLE_SIGNAL_SLOT": 69,
+        "V12:SAME_SYMBOL_ACTIVE": 363,
+        "V12:SHARED_DAILY_LOSS": 39,
+        "V12:SYMBOL_COOLDOWN": 249,
+        "V12:SYMBOL_OWNED_BY_Q102": 14,
+        "V52:SHARED_DAILY_LOSS": 4
+      },
+      "scenario_id": "PRICE_MODEL_10BPS",
+      "strategy_pnl_jpy": {
+        "FET": -4007987.3619684502,
+        "IDLE": 283968574.1018892,
+        "PENGU": 1799150.0101295337,
+        "Q102": 290195130.6429807,
+        "RESIDUAL": 1128322.4262677226,
+        "V12": 658744453.3042849,
+        "V52": 348720463.5796342
+      },
+      "strategy_trades": {
+        "FET": 12,
+        "IDLE": 38,
+        "PENGU": 63,
+        "Q102": 127,
+        "RESIDUAL": 3,
+        "V12": 975,
+        "V52": 84
+      }
+    },
+    {
+      "closed_trades": 1301,
+      "configuration": "CORE_IDLE_DOGE",
+      "final_equity_jpy": 486108581.7177253,
+      "maximum_mtm_drawdown": -0.23094345459237875,
+      "monthly_equity_jpy": {
+        "2025-08": 13165.345715494206,
+        "2025-09": 26288.60269688428,
+        "2025-10": 171815.87815669383,
+        "2025-11": 966529.0320041467,
+        "2025-12": 1450229.6403002075,
+        "2026-01": 4447705.672486223,
+        "2026-02": 14961446.188244283,
+        "2026-03": 36291883.52087855,
+        "2026-04": 66716852.99057134,
+        "2026-05": 101187827.17381561,
+        "2026-06": 414068212.2018386,
+        "2026-07": 478708116.4012116,
+        "2026-08": 486108581.7177253
+      },
+      "ownership_conflicts": 0,
+      "profit_factor": 2.216021453794901,
+      "rejected_entries": {
+        "FET:RESIDUAL_LT_MIN": 1,
+        "FET:SLOT_OCCUPIED": 3,
+        "FET:SYMBOL_OWNED_BY_Q102": 4,
+        "IDLE:CORE_SIGNAL_OR_POSITION": 4097,
+        "IDLE:FULL_1X_UNAVAILABLE": 11,
+        "IDLE:GENERIC_LIFECYCLE_ACTIVE": 664,
+        "IDLE:GENERIC_ROUTE_NOT_SELECTED": 645,
+        "IDLE:SOURCE_INCOMPLETE": 5303,
+        "IDLE:SYMBOL_OWNED_BY_IDLE": 1,
+        "PENGU:COOLDOWN": 8,
+        "PENGU:NO_LOT_SHRINK": 4,
+        "PENGU:ROUTE_QUARANTINE": 3,
+        "PENGU:SHARED_DAILY_LOSS": 2,
+        "PENGU:SLOT_OCCUPIED": 33,
+        "Q102:SHARED_DAILY_LOSS": 10,
+        "Q102:SLOT_OCCUPIED": 229,
+        "Q102:SYMBOL_OWNED_BY_FET": 2,
+        "Q102:SYMBOL_OWNED_BY_V12": 4,
+        "RESIDUAL:CORE_SIGNAL_OR_POSITION": 93,
+        "RESIDUAL:IDLE_PRIORITY": 11,
+        "RESIDUAL:RESIDUAL_SLOT_OCCUPIED": 4,
+        "RESIDUAL:SHARED_DAILY_LOSS": 5,
+        "RESIDUAL:SOURCE_INCOMPLETE": 272,
+        "V12:BASE_SLOTS_FULL": 197,
+        "V12:NO_GROSS_ROOM": 73,
+        "V12:RANK3_NOT_IDLE_SIGNAL_SLOT": 69,
+        "V12:SAME_SYMBOL_ACTIVE": 363,
+        "V12:SHARED_DAILY_LOSS": 39,
+        "V12:SYMBOL_COOLDOWN": 249,
+        "V12:SYMBOL_OWNED_BY_Q102": 14,
+        "V52:SHARED_DAILY_LOSS": 4
+      },
+      "scenario_id": "PRICE_MODEL_20BPS",
+      "strategy_pnl_jpy": {
+        "FET": -74604.47584301233,
+        "IDLE": 92502307.76789002,
+        "PENGU": 2645721.6860545557,
+        "Q102": 99314603.89046755,
+        "RESIDUAL": 502766.0747628715,
+        "V12": 189684927.4115768,
+        "V52": 106483177.20459852
+      },
+      "strategy_trades": {
+        "FET": 12,
+        "IDLE": 38,
+        "PENGU": 63,
+        "Q102": 127,
+        "RESIDUAL": 3,
+        "V12": 974,
+        "V52": 84
+      }
+    },
+    {
+      "closed_trades": 1301,
+      "configuration": "CORE_IDLE_DOGE",
+      "final_equity_jpy": 152595249.10428733,
+      "maximum_mtm_drawdown": -0.23472777065850514,
+      "monthly_equity_jpy": {
+        "2025-08": 12468.760263433254,
+        "2025-09": 23441.97734478472,
+        "2025-10": 136772.55357986828,
+        "2025-11": 667696.5126482183,
+        "2025-12": 938054.0921617146,
+        "2026-01": 2577291.1858789804,
+        "2026-02": 7594778.218994577,
+        "2026-03": 16476352.997580413,
+        "2026-04": 28247895.214686405,
+        "2026-05": 39894120.84359212,
+        "2026-06": 144492999.2074086,
+        "2026-07": 152167996.65236074,
+        "2026-08": 152595249.10428733
+      },
+      "ownership_conflicts": 0,
+      "profit_factor": 1.9770311615246536,
+      "rejected_entries": {
+        "FET:RESIDUAL_LT_MIN": 1,
+        "FET:SLOT_OCCUPIED": 3,
+        "FET:SYMBOL_OWNED_BY_Q102": 4,
+        "IDLE:CORE_SIGNAL_OR_POSITION": 4097,
+        "IDLE:FULL_1X_UNAVAILABLE": 11,
+        "IDLE:GENERIC_LIFECYCLE_ACTIVE": 664,
+        "IDLE:GENERIC_ROUTE_NOT_SELECTED": 645,
+        "IDLE:SOURCE_INCOMPLETE": 5303,
+        "IDLE:SYMBOL_OWNED_BY_IDLE": 1,
+        "PENGU:COOLDOWN": 8,
+        "PENGU:NO_LOT_SHRINK": 4,
+        "PENGU:ROUTE_QUARANTINE": 3,
+        "PENGU:SHARED_DAILY_LOSS": 2,
+        "PENGU:SLOT_OCCUPIED": 33,
+        "Q102:SHARED_DAILY_LOSS": 11,
+        "Q102:SLOT_OCCUPIED": 228,
+        "Q102:SYMBOL_OWNED_BY_FET": 2,
+        "Q102:SYMBOL_OWNED_BY_V12": 4,
+        "RESIDUAL:CORE_SIGNAL_OR_POSITION": 93,
+        "RESIDUAL:IDLE_PRIORITY": 11,
+        "RESIDUAL:RESIDUAL_SLOT_OCCUPIED": 4,
+        "RESIDUAL:SHARED_DAILY_LOSS": 5,
+        "RESIDUAL:SOURCE_INCOMPLETE": 272,
+        "V12:BASE_SLOTS_FULL": 197,
+        "V12:NO_GROSS_ROOM": 73,
+        "V12:RANK3_NOT_IDLE_SIGNAL_SLOT": 69,
+        "V12:SAME_SYMBOL_ACTIVE": 363,
+        "V12:SHARED_DAILY_LOSS": 39,
+        "V12:SYMBOL_COOLDOWN": 249,
+        "V12:SYMBOL_OWNED_BY_Q102": 14,
+        "V52:SHARED_DAILY_LOSS": 4
+      },
+      "scenario_id": "PRICE_MODEL_30BPS",
+      "strategy_pnl_jpy": {
+        "FET": 592066.572518169,
+        "IDLE": 30639873.064471606,
+        "PENGU": 2044144.999194507,
+        "Q102": 34697804.30578473,
+        "RESIDUAL": 221940.34965600743,
+        "V12": 53061855.22797638,
+        "V52": 32519813.775362995
+      },
+      "strategy_trades": {
+        "FET": 12,
+        "IDLE": 38,
+        "PENGU": 63,
+        "Q102": 127,
+        "RESIDUAL": 3,
+        "V12": 974,
+        "V52": 84
+      }
+    },
+    {
+      "closed_trades": 1307,
+      "configuration": "CORE_IDLE_AVAX",
+      "final_equity_jpy": 1944548682.816002,
+      "maximum_mtm_drawdown": -0.22635846761941947,
+      "monthly_equity_jpy": {
+        "2025-08": 14052.377986490319,
+        "2025-09": 30202.3669905021,
+        "2025-10": 226916.5876075442,
+        "2025-11": 1517202.3795317886,
+        "2025-12": 2468099.9477635,
+        "2026-01": 8650754.20807052,
+        "2026-02": 34147710.45010274,
+        "2026-03": 91012316.86427893,
+        "2026-04": 181989667.19115087,
+        "2026-05": 300712477.3693866,
+        "2026-06": 1441675741.047312,
+        "2026-07": 1884007165.0900826,
+        "2026-08": 1944548682.816002
+      },
+      "ownership_conflicts": 0,
+      "profit_factor": 2.552402834316348,
+      "rejected_entries": {
+        "FET:RESIDUAL_LT_MIN": 1,
+        "FET:SLOT_OCCUPIED": 3,
+        "FET:SYMBOL_OWNED_BY_Q102": 4,
+        "IDLE:CORE_SIGNAL_OR_POSITION": 4097,
+        "IDLE:FULL_1X_UNAVAILABLE": 11,
+        "IDLE:GENERIC_LIFECYCLE_ACTIVE": 664,
+        "IDLE:GENERIC_ROUTE_NOT_SELECTED": 645,
+        "IDLE:SOURCE_INCOMPLETE": 5303,
+        "IDLE:SYMBOL_OWNED_BY_IDLE": 1,
+        "PENGU:COOLDOWN": 8,
+        "PENGU:NO_LOT_SHRINK": 4,
+        "PENGU:ROUTE_QUARANTINE": 3,
+        "PENGU:SHARED_DAILY_LOSS": 2,
+        "PENGU:SLOT_OCCUPIED": 33,
+        "Q102:SHARED_DAILY_LOSS": 10,
+        "Q102:SLOT_OCCUPIED": 229,
+        "Q102:SYMBOL_OWNED_BY_FET": 2,
+        "Q102:SYMBOL_OWNED_BY_V12": 4,
+        "RESIDUAL:CORE_SIGNAL_OR_POSITION": 109,
+        "RESIDUAL:IDLE_PRIORITY": 4,
+        "RESIDUAL:RESIDUAL_SLOT_OCCUPIED": 14,
+        "RESIDUAL:SHARED_DAILY_LOSS": 5,
+        "RESIDUAL:SOURCE_INCOMPLETE": 314,
+        "V12:BASE_SLOTS_FULL": 197,
+        "V12:NO_GROSS_ROOM": 72,
+        "V12:RANK3_NOT_IDLE_SIGNAL_SLOT": 69,
+        "V12:SAME_SYMBOL_ACTIVE": 363,
+        "V12:SHARED_DAILY_LOSS": 39,
+        "V12:SYMBOL_COOLDOWN": 249,
+        "V12:SYMBOL_OWNED_BY_Q102": 14,
+        "V52:SHARED_DAILY_LOSS": 4
+      },
+      "scenario_id": "PRICE_MODEL_8BPS",
+      "strategy_pnl_jpy": {
+        "FET": -6416577.598028809,
+        "IDLE": 346275054.7027112,
+        "PENGU": 1069895.6346391477,
+        "Q102": 345780068.33770853,
+        "RESIDUAL": 37118069.86611343,
+        "V12": 816315257.0928998,
+        "V52": 428443560.44661415
+      },
+      "strategy_trades": {
+        "FET": 12,
+        "IDLE": 38,
+        "PENGU": 63,
+        "Q102": 127,
+        "RESIDUAL": 8,
+        "V12": 975,
+        "V52": 84
+      }
+    },
+    {
+      "closed_trades": 1307,
+      "configuration": "CORE_IDLE_AVAX",
+      "final_equity_jpy": 1535339098.068683,
+      "maximum_mtm_drawdown": -0.2271259645862237,
+      "monthly_equity_jpy": {
+        "2025-08": 13900.526145766065,
+        "2025-09": 29509.025884765873,
+        "2025-10": 216404.7496382032,
+        "2025-11": 1405631.8660952125,
+        "2025-12": 2255764.4112354917,
+        "2026-01": 7731866.33534571,
+        "2026-02": 29726146.19263737,
+        "2026-03": 77473299.97294365,
+        "2026-04": 152757679.62589556,
+        "2026-05": 248831258.34236053,
+        "2026-06": 1163198731.9699204,
+        "2026-07": 1491573707.884164,
+        "2026-08": 1535339098.068683
+      },
+      "ownership_conflicts": 0,
+      "profit_factor": 2.4936522461719703,
+      "rejected_entries": {
+        "FET:RESIDUAL_LT_MIN": 1,
+        "FET:SLOT_OCCUPIED": 3,
+        "FET:SYMBOL_OWNED_BY_Q102": 4,
+        "IDLE:CORE_SIGNAL_OR_POSITION": 4097,
+        "IDLE:FULL_1X_UNAVAILABLE": 11,
+        "IDLE:GENERIC_LIFECYCLE_ACTIVE": 664,
+        "IDLE:GENERIC_ROUTE_NOT_SELECTED": 645,
+        "IDLE:SOURCE_INCOMPLETE": 5303,
+        "IDLE:SYMBOL_OWNED_BY_IDLE": 1,
+        "PENGU:COOLDOWN": 8,
+        "PENGU:NO_LOT_SHRINK": 4,
+        "PENGU:ROUTE_QUARANTINE": 3,
+        "PENGU:SHARED_DAILY_LOSS": 2,
+        "PENGU:SLOT_OCCUPIED": 33,
+        "Q102:SHARED_DAILY_LOSS": 10,
+        "Q102:SLOT_OCCUPIED": 229,
+        "Q102:SYMBOL_OWNED_BY_FET": 2,
+        "Q102:SYMBOL_OWNED_BY_V12": 4,
+        "RESIDUAL:CORE_SIGNAL_OR_POSITION": 109,
+        "RESIDUAL:IDLE_PRIORITY": 4,
+        "RESIDUAL:RESIDUAL_SLOT_OCCUPIED": 14,
+        "RESIDUAL:SHARED_DAILY_LOSS": 5,
+        "RESIDUAL:SOURCE_INCOMPLETE": 314,
+        "V12:BASE_SLOTS_FULL": 197,
+        "V12:NO_GROSS_ROOM": 72,
+        "V12:RANK3_NOT_IDLE_SIGNAL_SLOT": 69,
+        "V12:SAME_SYMBOL_ACTIVE": 363,
+        "V12:SHARED_DAILY_LOSS": 39,
+        "V12:SYMBOL_COOLDOWN": 249,
+        "V12:SYMBOL_OWNED_BY_Q102": 14,
+        "V52:SHARED_DAILY_LOSS": 4
+      },
+      "scenario_id": "PRICE_MODEL_10BPS",
+      "strategy_pnl_jpy": {
+        "FET": -4556634.524418943,
+        "IDLE": 275837526.2689331,
+        "PENGU": 1676918.7999445982,
+        "Q102": 278277334.030007,
+        "RESIDUAL": 28157437.237792585,
+        "V12": 637031258.6221086,
+        "V52": 337467646.19554615
+      },
+      "strategy_trades": {
+        "FET": 12,
+        "IDLE": 38,
+        "PENGU": 63,
+        "Q102": 127,
+        "RESIDUAL": 8,
+        "V12": 975,
+        "V52": 84
+      }
+    },
+    {
+      "closed_trades": 1306,
+      "configuration": "CORE_IDLE_AVAX",
+      "final_equity_jpy": 475405721.3741915,
+      "maximum_mtm_drawdown": -0.23094345459237886,
+      "monthly_equity_jpy": {
+        "2025-08": 13165.345715494206,
+        "2025-09": 26288.60269688428,
+        "2025-10": 171815.87815669383,
+        "2025-11": 966529.0320041467,
+        "2025-12": 1450229.6403002075,
+        "2026-01": 4447705.672486223,
+        "2026-02": 14989109.29684296,
+        "2026-03": 34929659.80029654,
+        "2026-04": 64213141.54224609,
+        "2026-05": 97391082.97357473,
+        "2026-06": 401294200.179382,
+        "2026-07": 468155065.11569357,
+        "2026-08": 475405721.3741915
+      },
+      "ownership_conflicts": 0,
+      "profit_factor": 2.217085753729513,
+      "rejected_entries": {
+        "FET:RESIDUAL_LT_MIN": 1,
+        "FET:SLOT_OCCUPIED": 3,
+        "FET:SYMBOL_OWNED_BY_Q102": 4,
+        "IDLE:CORE_SIGNAL_OR_POSITION": 4097,
+        "IDLE:FULL_1X_UNAVAILABLE": 11,
+        "IDLE:GENERIC_LIFECYCLE_ACTIVE": 664,
+        "IDLE:GENERIC_ROUTE_NOT_SELECTED": 645,
+        "IDLE:SOURCE_INCOMPLETE": 5303,
+        "IDLE:SYMBOL_OWNED_BY_IDLE": 1,
+        "PENGU:COOLDOWN": 8,
+        "PENGU:NO_LOT_SHRINK": 4,
+        "PENGU:ROUTE_QUARANTINE": 3,
+        "PENGU:SHARED_DAILY_LOSS": 2,
+        "PENGU:SLOT_OCCUPIED": 33,
+        "Q102:SHARED_DAILY_LOSS": 10,
+        "Q102:SLOT_OCCUPIED": 229,
+        "Q102:SYMBOL_OWNED_BY_FET": 2,
+        "Q102:SYMBOL_OWNED_BY_V12": 4,
+        "RESIDUAL:CORE_SIGNAL_OR_POSITION": 109,
+        "RESIDUAL:IDLE_PRIORITY": 4,
+        "RESIDUAL:RESIDUAL_SLOT_OCCUPIED": 14,
+        "RESIDUAL:SHARED_DAILY_LOSS": 5,
+        "RESIDUAL:SOURCE_INCOMPLETE": 314,
+        "V12:BASE_SLOTS_FULL": 197,
+        "V12:NO_GROSS_ROOM": 73,
+        "V12:RANK3_NOT_IDLE_SIGNAL_SLOT": 69,
+        "V12:SAME_SYMBOL_ACTIVE": 363,
+        "V12:SHARED_DAILY_LOSS": 39,
+        "V12:SYMBOL_COOLDOWN": 249,
+        "V12:SYMBOL_OWNED_BY_Q102": 14,
+        "V52:SHARED_DAILY_LOSS": 4
+      },
+      "scenario_id": "PRICE_MODEL_20BPS",
+      "strategy_pnl_jpy": {
+        "FET": -248914.87162545137,
+        "IDLE": 89635646.59697613,
+        "PENGU": 2572440.867993788,
+        "Q102": 95460063.9816897,
+        "RESIDUAL": 6702751.070244955,
+        "V12": 183317434.8436576,
+        "V52": 102911863.22976801
+      },
+      "strategy_trades": {
+        "FET": 12,
+        "IDLE": 38,
+        "PENGU": 63,
+        "Q102": 127,
+        "RESIDUAL": 8,
+        "V12": 974,
+        "V52": 84
+      }
+    },
+    {
+      "closed_trades": 1306,
+      "configuration": "CORE_IDLE_AVAX",
+      "final_equity_jpy": 148490677.4937601,
+      "maximum_mtm_drawdown": -0.23472777065850536,
+      "monthly_equity_jpy": {
+        "2025-08": 12468.760263433254,
+        "2025-09": 23441.97734478472,
+        "2025-10": 136772.55357986828,
+        "2025-11": 667696.5126482183,
+        "2025-12": 938054.0921617146,
+        "2026-01": 2577291.1858789804,
+        "2026-02": 7616362.505657604,
+        "2026-03": 15873367.077819962,
+        "2026-04": 27214590.83671337,
+        "2026-05": 38435330.27358801,
+        "2026-06": 139614816.54425815,
+        "2026-07": 148218937.22329846,
+        "2026-08": 148490677.4937601
+      },
+      "ownership_conflicts": 0,
+      "profit_factor": 1.9728210999380151,
+      "rejected_entries": {
+        "FET:RESIDUAL_LT_MIN": 1,
+        "FET:SLOT_OCCUPIED": 3,
+        "FET:SYMBOL_OWNED_BY_Q102": 4,
+        "IDLE:CORE_SIGNAL_OR_POSITION": 4097,
+        "IDLE:FULL_1X_UNAVAILABLE": 11,
+        "IDLE:GENERIC_LIFECYCLE_ACTIVE": 664,
+        "IDLE:GENERIC_ROUTE_NOT_SELECTED": 645,
+        "IDLE:SOURCE_INCOMPLETE": 5303,
+        "IDLE:SYMBOL_OWNED_BY_IDLE": 1,
+        "PENGU:COOLDOWN": 8,
+        "PENGU:NO_LOT_SHRINK": 4,
+        "PENGU:ROUTE_QUARANTINE": 3,
+        "PENGU:SHARED_DAILY_LOSS": 2,
+        "PENGU:SLOT_OCCUPIED": 33,
+        "Q102:SHARED_DAILY_LOSS": 11,
+        "Q102:SLOT_OCCUPIED": 228,
+        "Q102:SYMBOL_OWNED_BY_FET": 2,
+        "Q102:SYMBOL_OWNED_BY_V12": 4,
+        "RESIDUAL:CORE_SIGNAL_OR_POSITION": 109,
+        "RESIDUAL:IDLE_PRIORITY": 4,
+        "RESIDUAL:RESIDUAL_SLOT_OCCUPIED": 14,
+        "RESIDUAL:SHARED_DAILY_LOSS": 5,
+        "RESIDUAL:SOURCE_INCOMPLETE": 314,
+        "V12:BASE_SLOTS_FULL": 197,
+        "V12:NO_GROSS_ROOM": 73,
+        "V12:RANK3_NOT_IDLE_SIGNAL_SLOT": 69,
+        "V12:SAME_SYMBOL_ACTIVE": 363,
+        "V12:SHARED_DAILY_LOSS": 39,
+        "V12:SYMBOL_COOLDOWN": 249,
+        "V12:SYMBOL_OWNED_BY_Q102": 14,
+        "V52:SHARED_DAILY_LOSS": 4
+      },
+      "scenario_id": "PRICE_MODEL_30BPS",
+      "strategy_pnl_jpy": {
+        "FET": 533075.569058571,
+        "IDLE": 29625620.657061215,
+        "PENGU": 2003823.4182714778,
+        "Q102": 33461233.569444206,
+        "RESIDUAL": 1315679.3291125188,
+        "V12": 51315847.40460075,
+        "V52": 31409091.369229622
+      },
+      "strategy_trades": {
+        "FET": 12,
+        "IDLE": 38,
+        "PENGU": 63,
+        "Q102": 127,
+        "RESIDUAL": 8,
+        "V12": 974,
+        "V52": 84
+      }
+    },
+    {
+      "closed_trades": 1309,
+      "configuration": "CORE_IDLE_DOGE_AVAX",
+      "final_equity_jpy": 2007632221.5572104,
+      "maximum_mtm_drawdown": -0.2263584676194199,
+      "monthly_equity_jpy": {
+        "2025-08": 14052.377986490319,
+        "2025-09": 30202.3669905021,
+        "2025-10": 226916.5876075442,
+        "2025-11": 1517202.3795317886,
+        "2025-12": 2468099.9477635,
+        "2026-01": 8650754.20807052,
+        "2026-02": 34125442.14380583,
+        "2026-03": 93965342.57483335,
+        "2026-04": 187894109.99908352,
+        "2026-05": 310468215.36118126,
+        "2026-06": 1488446002.0725086,
+        "2026-07": 1945126977.8345206,
+        "2026-08": 2007632221.5572104
+      },
+      "ownership_conflicts": 0,
+      "profit_factor": 2.5532987201849173,
+      "rejected_entries": {
+        "FET:RESIDUAL_LT_MIN": 1,
+        "FET:SLOT_OCCUPIED": 3,
+        "FET:SYMBOL_OWNED_BY_Q102": 4,
+        "IDLE:CORE_SIGNAL_OR_POSITION": 4097,
+        "IDLE:FULL_1X_UNAVAILABLE": 11,
+        "IDLE:GENERIC_LIFECYCLE_ACTIVE": 664,
+        "IDLE:GENERIC_ROUTE_NOT_SELECTED": 645,
+        "IDLE:SOURCE_INCOMPLETE": 5303,
+        "IDLE:SYMBOL_OWNED_BY_IDLE": 1,
+        "PENGU:COOLDOWN": 8,
+        "PENGU:NO_LOT_SHRINK": 4,
+        "PENGU:ROUTE_QUARANTINE": 3,
+        "PENGU:SHARED_DAILY_LOSS": 2,
+        "PENGU:SLOT_OCCUPIED": 33,
+        "Q102:SHARED_DAILY_LOSS": 10,
+        "Q102:SLOT_OCCUPIED": 229,
+        "Q102:SYMBOL_OWNED_BY_FET": 2,
+        "Q102:SYMBOL_OWNED_BY_V12": 4,
+        "RESIDUAL:CORE_SIGNAL_OR_POSITION": 202,
+        "RESIDUAL:IDLE_PRIORITY": 15,
+        "RESIDUAL:RESIDUAL_SLOT_OCCUPIED": 18,
+        "RESIDUAL:SHARED_DAILY_LOSS": 10,
+        "RESIDUAL:SLOT_OCCUPIED": 1,
+        "RESIDUAL:SOURCE_INCOMPLETE": 586,
+        "V12:BASE_SLOTS_FULL": 197,
+        "V12:NO_GROSS_ROOM": 72,
+        "V12:RANK3_NOT_IDLE_SIGNAL_SLOT": 69,
+        "V12:SAME_SYMBOL_ACTIVE": 363,
+        "V12:SHARED_DAILY_LOSS": 39,
+        "V12:SYMBOL_COOLDOWN": 249,
+        "V12:SYMBOL_OWNED_BY_Q102": 14,
+        "V52:SHARED_DAILY_LOSS": 4
+      },
+      "scenario_id": "PRICE_MODEL_8BPS",
+      "strategy_pnl_jpy": {
+        "FET": -6624687.582505293,
+        "IDLE": 357428623.5317516,
+        "PENGU": 979686.2874248475,
+        "Q102": 356415570.0203821,
+        "RESIDUAL": 40079555.495984435,
+        "V12": 841981190.4635037,
+        "V52": 442222765.0325474
+      },
+      "strategy_trades": {
+        "FET": 12,
+        "IDLE": 38,
+        "PENGU": 63,
+        "Q102": 127,
+        "RESIDUAL": 10,
+        "V12": 975,
+        "V52": 84
+      }
+    },
+    {
+      "closed_trades": 1309,
+      "configuration": "CORE_IDLE_DOGE_AVAX",
+      "final_equity_jpy": 1584517987.2094781,
+      "maximum_mtm_drawdown": -0.22712596458622325,
+      "monthly_equity_jpy": {
+        "2025-08": 13900.526145766065,
+        "2025-09": 29509.025884765873,
+        "2025-10": 216404.7496382032,
+        "2025-11": 1405631.8660952125,
+        "2025-12": 2255764.4112354917,
+        "2026-01": 7731866.33534571,
+        "2026-02": 29700838.389457405,
+        "2026-03": 79955346.47195904,
+        "2026-04": 157651181.2404303,
+        "2026-05": 256801903.9551442,
+        "2026-06": 1200458022.7306302,
+        "2026-07": 1539351046.9838524,
+        "2026-08": 1584517987.2094781
+      },
+      "ownership_conflicts": 0,
+      "profit_factor": 2.494581557780963,
+      "rejected_entries": {
+        "FET:RESIDUAL_LT_MIN": 1,
+        "FET:SLOT_OCCUPIED": 3,
+        "FET:SYMBOL_OWNED_BY_Q102": 4,
+        "IDLE:CORE_SIGNAL_OR_POSITION": 4097,
+        "IDLE:FULL_1X_UNAVAILABLE": 11,
+        "IDLE:GENERIC_LIFECYCLE_ACTIVE": 664,
+        "IDLE:GENERIC_ROUTE_NOT_SELECTED": 645,
+        "IDLE:SOURCE_INCOMPLETE": 5303,
+        "IDLE:SYMBOL_OWNED_BY_IDLE": 1,
+        "PENGU:COOLDOWN": 8,
+        "PENGU:NO_LOT_SHRINK": 4,
+        "PENGU:ROUTE_QUARANTINE": 3,
+        "PENGU:SHARED_DAILY_LOSS": 2,
+        "PENGU:SLOT_OCCUPIED": 33,
+        "Q102:SHARED_DAILY_LOSS": 10,
+        "Q102:SLOT_OCCUPIED": 229,
+        "Q102:SYMBOL_OWNED_BY_FET": 2,
+        "Q102:SYMBOL_OWNED_BY_V12": 4,
+        "RESIDUAL:CORE_SIGNAL_OR_POSITION": 202,
+        "RESIDUAL:IDLE_PRIORITY": 15,
+        "RESIDUAL:RESIDUAL_SLOT_OCCUPIED": 18,
+        "RESIDUAL:SHARED_DAILY_LOSS": 10,
+        "RESIDUAL:SLOT_OCCUPIED": 1,
+        "RESIDUAL:SOURCE_INCOMPLETE": 586,
+        "V12:BASE_SLOTS_FULL": 197,
+        "V12:NO_GROSS_ROOM": 72,
+        "V12:RANK3_NOT_IDLE_SIGNAL_SLOT": 69,
+        "V12:SAME_SYMBOL_ACTIVE": 363,
+        "V12:SHARED_DAILY_LOSS": 39,
+        "V12:SYMBOL_COOLDOWN": 249,
+        "V12:SYMBOL_OWNED_BY_Q102": 14,
+        "V52:SHARED_DAILY_LOSS": 4
+      },
+      "scenario_id": "PRICE_MODEL_10BPS",
+      "strategy_pnl_jpy": {
+        "FET": -4702537.402083725,
+        "IDLE": 284604956.78782827,
+        "PENGU": 1621658.587886747,
+        "Q102": 286688610.3438229,
+        "RESIDUAL": 30568403.15843266,
+        "V12": 656738659.2281325,
+        "V52": 348174825.6183485
+      },
+      "strategy_trades": {
+        "FET": 12,
+        "IDLE": 38,
+        "PENGU": 63,
+        "Q102": 127,
+        "RESIDUAL": 10,
+        "V12": 975,
+        "V52": 84
+      }
+    },
+    {
+      "closed_trades": 1308,
+      "configuration": "CORE_IDLE_DOGE_AVAX",
+      "final_equity_jpy": 489659419.34963065,
+      "maximum_mtm_drawdown": -0.23094345459237897,
+      "monthly_equity_jpy": {
+        "2025-08": 13165.345715494206,
+        "2025-09": 26288.60269688428,
+        "2025-10": 171815.87815669383,
+        "2025-11": 966529.0320041467,
+        "2025-12": 1450229.6403002075,
+        "2026-01": 4447705.672486223,
+        "2026-02": 14961446.188244283,
+        "2026-03": 35977415.75095255,
+        "2026-04": 66138874.099294566,
+        "2026-05": 100311353.16768175,
+        "2026-06": 413326414.72730017,
+        "2026-07": 482191668.4650452,
+        "2026-08": 489659419.34963065
+      },
+      "ownership_conflicts": 0,
+      "profit_factor": 2.2181783262028247,
+      "rejected_entries": {
+        "FET:RESIDUAL_LT_MIN": 1,
+        "FET:SLOT_OCCUPIED": 3,
+        "FET:SYMBOL_OWNED_BY_Q102": 4,
+        "IDLE:CORE_SIGNAL_OR_POSITION": 4097,
+        "IDLE:FULL_1X_UNAVAILABLE": 11,
+        "IDLE:GENERIC_LIFECYCLE_ACTIVE": 664,
+        "IDLE:GENERIC_ROUTE_NOT_SELECTED": 645,
+        "IDLE:SOURCE_INCOMPLETE": 5303,
+        "IDLE:SYMBOL_OWNED_BY_IDLE": 1,
+        "PENGU:COOLDOWN": 8,
+        "PENGU:NO_LOT_SHRINK": 4,
+        "PENGU:ROUTE_QUARANTINE": 3,
+        "PENGU:SHARED_DAILY_LOSS": 2,
+        "PENGU:SLOT_OCCUPIED": 33,
+        "Q102:SHARED_DAILY_LOSS": 10,
+        "Q102:SLOT_OCCUPIED": 229,
+        "Q102:SYMBOL_OWNED_BY_FET": 2,
+        "Q102:SYMBOL_OWNED_BY_V12": 4,
+        "RESIDUAL:CORE_SIGNAL_OR_POSITION": 202,
+        "RESIDUAL:IDLE_PRIORITY": 15,
+        "RESIDUAL:RESIDUAL_SLOT_OCCUPIED": 18,
+        "RESIDUAL:SHARED_DAILY_LOSS": 10,
+        "RESIDUAL:SLOT_OCCUPIED": 1,
+        "RESIDUAL:SOURCE_INCOMPLETE": 586,
+        "V12:BASE_SLOTS_FULL": 197,
+        "V12:NO_GROSS_ROOM": 73,
+        "V12:RANK3_NOT_IDLE_SIGNAL_SLOT": 69,
+        "V12:SAME_SYMBOL_ACTIVE": 363,
+        "V12:SHARED_DAILY_LOSS": 39,
+        "V12:SYMBOL_COOLDOWN": 249,
+        "V12:SYMBOL_OWNED_BY_Q102": 14,
+        "V52:SHARED_DAILY_LOSS": 4
+      },
+      "scenario_id": "PRICE_MODEL_20BPS",
+      "strategy_pnl_jpy": {
+        "FET": -256323.81947432458,
+        "IDLE": 92293066.73344329,
+        "PENGU": 2593589.92683335,
+        "Q102": 98079740.52611332,
+        "RESIDUAL": 7612778.335538439,
+        "V12": 188495668.80008894,
+        "V52": 105951174.37436584
+      },
+      "strategy_trades": {
+        "FET": 12,
+        "IDLE": 38,
+        "PENGU": 63,
+        "Q102": 127,
+        "RESIDUAL": 10,
+        "V12": 974,
+        "V52": 84
+      }
+    },
+    {
+      "closed_trades": 1308,
+      "configuration": "CORE_IDLE_DOGE_AVAX",
+      "final_equity_jpy": 152638385.46280393,
+      "maximum_mtm_drawdown": -0.23472777065850525,
+      "monthly_equity_jpy": {
+        "2025-08": 12468.760263433254,
+        "2025-09": 23441.97734478472,
+        "2025-10": 136772.55357986828,
+        "2025-11": 667696.5126482183,
+        "2025-12": 938054.0921617146,
+        "2026-01": 2577291.1858789804,
+        "2026-02": 7594778.218994577,
+        "2026-03": 16317252.128903078,
+        "2026-04": 27975252.655787334,
+        "2026-05": 39509211.612215444,
+        "2026-06": 143515143.42624077,
+        "2026-07": 152359334.19225857,
+        "2026-08": 152638385.46280393
+      },
+      "ownership_conflicts": 0,
+      "profit_factor": 1.9740710734719797,
+      "rejected_entries": {
+        "FET:RESIDUAL_LT_MIN": 1,
+        "FET:SLOT_OCCUPIED": 3,
+        "FET:SYMBOL_OWNED_BY_Q102": 4,
+        "IDLE:CORE_SIGNAL_OR_POSITION": 4097,
+        "IDLE:FULL_1X_UNAVAILABLE": 11,
+        "IDLE:GENERIC_LIFECYCLE_ACTIVE": 664,
+        "IDLE:GENERIC_ROUTE_NOT_SELECTED": 645,
+        "IDLE:SOURCE_INCOMPLETE": 5303,
+        "IDLE:SYMBOL_OWNED_BY_IDLE": 1,
+        "PENGU:COOLDOWN": 8,
+        "PENGU:NO_LOT_SHRINK": 4,
+        "PENGU:ROUTE_QUARANTINE": 3,
+        "PENGU:SHARED_DAILY_LOSS": 2,
+        "PENGU:SLOT_OCCUPIED": 33,
+        "Q102:SHARED_DAILY_LOSS": 11,
+        "Q102:SLOT_OCCUPIED": 228,
+        "Q102:SYMBOL_OWNED_BY_FET": 2,
+        "Q102:SYMBOL_OWNED_BY_V12": 4,
+        "RESIDUAL:CORE_SIGNAL_OR_POSITION": 202,
+        "RESIDUAL:IDLE_PRIORITY": 15,
+        "RESIDUAL:RESIDUAL_SLOT_OCCUPIED": 18,
+        "RESIDUAL:SHARED_DAILY_LOSS": 10,
+        "RESIDUAL:SLOT_OCCUPIED": 1,
+        "RESIDUAL:SOURCE_INCOMPLETE": 586,
+        "V12:BASE_SLOTS_FULL": 197,
+        "V12:NO_GROSS_ROOM": 73,
+        "V12:RANK3_NOT_IDLE_SIGNAL_SLOT": 69,
+        "V12:SAME_SYMBOL_ACTIVE": 363,
+        "V12:SHARED_DAILY_LOSS": 39,
+        "V12:SYMBOL_COOLDOWN": 249,
+        "V12:SYMBOL_OWNED_BY_Q102": 14,
+        "V52:SHARED_DAILY_LOSS": 4
+      },
+      "scenario_id": "PRICE_MODEL_30BPS",
+      "strategy_pnl_jpy": {
+        "FET": 548022.3579178182,
+        "IDLE": 30440102.20201375,
+        "PENGU": 2030420.0162769826,
+        "Q102": 34278106.49628412,
+        "RESIDUAL": 1686624.2628593547,
+        "V12": 52605676.14523547,
+        "V52": 32265707.990854308
+      },
+      "strategy_trades": {
+        "FET": 12,
+        "IDLE": 38,
+        "PENGU": 63,
+        "Q102": 127,
+        "RESIDUAL": 10,
+        "V12": 974,
+        "V52": 84
+      }
+    }
+  ],
+  "scope": "DIAGNOSTIC_PRICE_MODEL_NOT_LIVE_CERTIFICATION",
+  "signal_source_sha256": {
+    "config\\idlePriorityShortPolicy.ts": "4af0463cc51147eaa1a10592c100333601db30a36c64273fc18b7fb434564a41",
+    "config\\idleResidualLongPolicy.ts": "476242d787494f8c260c8a1b63ffdc8abd266f611df5dc55ca6a0d3af2cc01f9",
+    "lib\\idle-priority-short-signal.ts": "76f68ba1ec78f5adb34c68718a28b199f58bd29dd6651a404631326906c2f827",
+    "lib\\idle-residual-long-signal.ts": "b88435a1fb2a9c98d851c658a3a1e5a665f8e9421d6183875daa330c48841670",
+    "scripts\\research\\formal_core_live_ownership.py": "5965909f5654d7f6a098989f800630cce142ccb13e21711344b01b73735b1463",
+    "scripts\\research\\formal_overlay_feature_stream.ts": "399cfeeffd0fa93a1ea364f2f07a64ff8c98bc4438ff4334f751c8c87fead4d9",
+    "scripts\\research\\run_formal_core_overlay_diagnostic.py": "b978f7230746772587ca3751fb50c219ca2461bb08a44f6a4b98dadf5f8310f9"
+  },
+  "source_error_counts": {
+    "AVAXUSDT:IDLE_VOLUME_MEDIAN_INVALID": 61,
+    "DOTUSDT:IDLE_VOLUME_MEDIAN_INVALID": 265,
+    "JUPUSDT:IDLE_H1_HISTORY_GAP": 48,
+    "JUPUSDT:IDLE_INSUFFICIENT_EXACT_CLOSED_H1_HISTORY": 3687,
+    "JUPUSDT:IDLE_VOLUME_MEDIAN_INVALID": 463,
+    "RENDERUSDT:IDLE_H1_HISTORY_GAP": 48,
+    "RENDERUSDT:IDLE_INSUFFICIENT_EXACT_CLOSED_H1_HISTORY": 3614,
+    "RENDERUSDT:IDLE_VOLUME_MEDIAN_INVALID": 169,
+    "TAOUSDT:IDLE_H1_HISTORY_GAP": 48,
+    "TAOUSDT:IDLE_INSUFFICIENT_EXACT_CLOSED_H1_HISTORY": 3687,
+    "TIAUSDT:IDLE_H1_HISTORY_GAP": 48,
+    "TIAUSDT:IDLE_INSUFFICIENT_EXACT_CLOSED_H1_HISTORY": 3691,
+    "TIAUSDT:IDLE_VOLUME_MEDIAN_INVALID": 902
+  },
+  "source_incomplete_hours": 4993,
+  "status": "BLOCKED_OVERLAY_FULL_H1_BASELINE_EVIDENCE_AND_MARGIN_PARITY_NOT_PROVEN",
+  "unproven": [
+    "complete current-H1 baseline eligibility/no-signal evidence, not just lifecycle candidate stream",
+    "LIVE pending reservations, asynchronous fill and account-lock ordering",
+    "historical account available margin, liquidation buffer and venue filters",
+    "all-symbol source errors hold existing residual LONG in LIVE; diagnostic only models blocked admission"
+  ]
+}

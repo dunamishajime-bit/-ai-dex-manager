@@ -1,0 +1,33 @@
+{
+  "schema": "formal-priority-cooldown-bt-manifest/v1",
+  "status": "COMPLETE",
+  "official_scenario": "PRICE_MODEL_10BPS",
+  "official_result_file": "formal-bt-summary.json",
+  "base_production_sha": "53eeff5417636369d4709fddfd47d7916ddcf3b1",
+  "implementation_branch": "research/formal-priority-cooldown-20261003",
+  "candidate_source_sha256": "35d5259ee890c7d1ac19d8d433940f05a8d0c94f793b9d3005d770ea2e8dc10c",
+  "ledger_files": [
+    {
+      "path": "PRICE_MODEL_10BPS/portfolio-trades.jsonl",
+      "size_bytes": 1423379,
+      "line_count": 1275,
+      "sha256": "3433c0b033bb048b1aca22b21d97ff253bbb160edb47d00eb7a8fac6a1ac9915"
+    },
+    {
+      "path": "PRICE_MODEL_10BPS/candidate-decisions.jsonl",
+      "size_bytes": 2148750,
+      "line_count": 2588,
+      "sha256": "48b68012f7e9dea1fc83b98119b7318e48193abe57ca9c27efb6062ea3b76b53"
+    }
+  ],
+  "verification": {
+    "portfolio_trades_expected_lines": 1275,
+    "candidate_decisions_expected_lines": 2588,
+    "official_final_equity_jpy": 1229065462.0472791,
+    "official_profit_factor": 2.4887028036012624,
+    "official_maximum_mtm_drawdown": -0.21296368751349548,
+    "official_win_rate": 0.6517647058823529,
+    "accounting_reconciliation": "PASS"
+  },
+  "note": "Canonical 10bps ledgers are present and SHA256-pinned. Codex may use this package as the formal BT evidence source, subject to the implementation handoff safety gates."
+}

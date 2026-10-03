@@ -1,0 +1,89 @@
+name: Formal Priority HP rollback diagnosis 20261004
+
+on:
+  push:
+    branches:
+      - research/formal-priority-cooldown-20261003
+    paths:
+      - ".github/workflows/formal-priority-hp-diagnose-20261004.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+      TARGET_SHA: a23edd7628100faf314f2b341b03215f178d5cdc
+    steps:
+      - uses: actions/checkout@v4
+      - name: Initialize SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+      - name: Read-only systemd and staged UI diagnosis
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts"             -o ConnectTimeout=15 -p "$PORT" "root@$SSH_HOST" "TARGET_SHA='$TARGET_SHA' bash -s" <<'REMOTE'
+          set -Eeuo pipefail
+          ui=ai-dex-manager-ui.service
+          release="/home/deploy/disdex-trading/ui-releases/ui-formal-${TARGET_SHA:0:12}"
+          echo "STATUS=HP_ROLLBACK_DIAGNOSIS"
+          echo "CURRENT_WORKDIR=$(systemctl show "$ui" -p WorkingDirectory --value)"
+          echo "CURRENT_ACTIVE=$(systemctl is-active "$ui" || true)"
+          echo "CURRENT_PID=$(systemctl show "$ui" -p MainPID --value)"
+          echo "CURRENT_RESULT=$(systemctl show "$ui" -p Result --value)"
+          echo "CURRENT_EXECSTART=$(systemctl show "$ui" -p ExecStart --value)"
+          echo "CURRENT_USER=$(systemctl show "$ui" -p User --value)"
+          echo "CURRENT_GROUP=$(systemctl show "$ui" -p Group --value)"
+          echo "CURRENT_ENV=$(systemctl show "$ui" -p Environment --value)"
+          echo "DROPINS=$(systemctl show "$ui" -p DropInPaths --value)"
+          echo "TARGET_RELEASE=$release"
+          if [[ -d "$release" ]]; then
+            echo "TARGET_RELEASE_EXISTS=TRUE"
+            echo "TARGET_MARKER=$(tr -d '[:space:]' < "$release/.disdex-release-sha" 2>/dev/null || true)"
+            stat -c 'TARGET_STAT=%U:%G:%a:%n' "$release" "$release/.next" "$release/node_modules" 2>/dev/null || true
+          else
+            echo "TARGET_RELEASE_EXISTS=FALSE"
+          fi
+          echo "--- SYSTEMD CAT ---"
+          systemctl cat "$ui" || true
+          echo "--- JOURNAL LAST 160 ---"
+          journalctl -u "$ui" -n 160 --no-pager -o short-iso || true
+          echo "--- MANUAL START PORT 3011 ---"
+          if [[ -d "$release/.next" ]]; then
+            diag=/tmp/formal-ui-manual-start.log
+            rm -f "$diag"
+            runuser -u deploy -- env NODE_ENV=production PORT=3011 npm --prefix "$release" run start >"$diag" 2>&1 &
+            pid=$!
+            ok=0
+            for _ in $(seq 1 20); do
+              code="$(curl -sS -H 'Cookie: disdex_auth=1' -o /dev/null -w '%{http_code}' --max-time 2 http://127.0.0.1:3011/decision-status/formal-priority || true)"
+              if [[ "$code" == 200 ]]; then ok=1; break; fi
+              if ! kill -0 "$pid" 2>/dev/null; then break; fi
+              sleep 1
+            done
+            echo "MANUAL_START_HTTP=$code"
+            echo "MANUAL_START_OK=$ok"
+            kill "$pid" 2>/dev/null || true
+            wait "$pid" 2>/dev/null || true
+            tail -120 "$diag" || true
+          fi
+          echo "TRADING_MUTATION=0"
+          REMOTE
