@@ -5,6 +5,7 @@ const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+    output: "standalone",
     // Keep an isolated worktree/release from traversing sibling worktrees.
     outputFileTracingRoot: projectRoot,
     experimental: {

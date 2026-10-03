@@ -1,0 +1,259 @@
+name: Modern New Logic HP deploy 20261004
+
+on:
+  push:
+    branches:
+      - codex/hp-modern-newlogic-20261004
+    paths:
+      - "app/**"
+      - "components/**"
+      - "hooks/**"
+      - "lib/server/**"
+      - "next.config.mjs"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/hp-modern-newlogic-deploy-20261004.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hp-modern-newlogic-deploy-20261004
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      TARGET_SHA: ${{ github.sha }}
+      EXPECTED_TRADING_SHA: 53eeff5417636369d4709fddfd47d7916ddcf3b1
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify modern HP source contract
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          test -f app/page.tsx
+          test -f app/positions/page.tsx
+          test -f app/history/page.tsx
+          test -f app/performance/page.tsx
+          test -f app/decision-status/page.tsx
+          test -f app/decision-status/idle-priority/page.tsx
+          test -f app/decision-status/formal-priority/page.tsx
+          test -f app/api/system/live-status/route.ts
+          test -f app/api/system/live-portfolio/route.ts
+          test -f app/api/system/live-runtime/route.ts
+          test -f app/api/system/decision-status/route.ts
+          test -f app/api/system/live-performance/route.ts
+          test -f app/api/system/trade-history/route.ts
+          test -f app/api/system/idle-priority-status/route.ts
+          test -f app/api/system/formal-priority-status/route.ts
+          test -f components/features/DecisionStatusPanel.tsx
+          test -f lib/server/current-production-runtime.ts
+
+      - name: Clean Next 16 standalone build
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          npm ci --no-audit --no-fund
+          node -e 'const p=require("./node_modules/next/package.json"); if(p.version!=="16.2.6") throw new Error("NEXT_VERSION_MISMATCH:"+p.version); console.log("NEXT_VERSION="+p.version)'
+          npm run build
+          test -f .next/standalone/server.js
+          rm -rf .deploy-ui
+          mkdir -p .deploy-ui/.next
+          cp -a .next/standalone/. .deploy-ui/
+          cp -a .next/static .deploy-ui/.next/static
+          if [ -d public ]; then cp -a public .deploy-ui/public; fi
+          printf '%s\n' "$TARGET_SHA" > .deploy-ui/.disdex-release-sha
+          tar -C .deploy-ui -czf "/tmp/disdex-modern-ui-$TARGET_SHA.tar.gz" .
+          test -s "/tmp/disdex-modern-ui-$TARGET_SHA.tar.gz"
+          echo "UI_BUNDLE_BYTES=$(stat -c '%s' "/tmp/disdex-modern-ui-$TARGET_SHA.tar.gz")"
+
+      - name: Initialize root SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ -n "$SSH_HOST" && -n "$ROOT_KEY" && -n "$SSH_KNOWN_HOSTS" ]]
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+
+      - name: Upload modern UI bundle
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          scp -i "$HOME/.ssh/id_root" -P "$PORT"             -o IdentitiesOnly=yes -o BatchMode=yes             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts"             "/tmp/disdex-modern-ui-$TARGET_SHA.tar.gz"             "root@$SSH_HOST:/tmp/disdex-modern-ui-$TARGET_SHA.tar.gz"
+
+      - name: Deploy modern HP and verify legacy data surfaces
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts"             -o ConnectTimeout=15 -p "$PORT" "root@$SSH_HOST"             "TARGET_SHA='$TARGET_SHA' EXPECTED_TRADING_SHA='$EXPECTED_TRADING_SHA' bash -s" <<'REMOTE'
+          set -Eeuo pipefail
+
+          ui_service=ai-dex-manager-ui.service
+          ui_root=/home/deploy/disdex-trading/ui-releases
+          release="$ui_root/ui-modern-newlogic-${TARGET_SHA:0:12}"
+          archive="/tmp/disdex-modern-ui-$TARGET_SHA.tar.gz"
+          dropin_dir=/etc/systemd/system/ai-dex-manager-ui.service.d
+          canonical="$dropin_dir/90-current-ui-release.conf"
+          current=/home/deploy/disdex-trading/current
+
+          trading_before="$(tr -d '[:space:]' < "$current/.disdex-release-sha")"
+          trading_path_before="$(readlink -f "$current")"
+          [[ "$trading_before" == "$EXPECTED_TRADING_SHA" ]]
+
+          runners=(
+            disdex-v12-x1-all
+            disdex-pengu-dual-ls-v2
+            disdex-quality102-causal-v1
+            disdex-v52-aster-only
+            disdex-fet-brk48
+            disdex-hype-long
+            disdex-idle-priority-short
+            disdex-shared-crypto-risk
+            disdex-v12-v52-margin-guard
+          )
+          declare -A before_state before_pid before_restarts
+          for name in "${runners[@]}"; do
+            unit="$name@$EXPECTED_TRADING_SHA.service"
+            before_state["$name"]="$(systemctl is-active "$unit" 2>/dev/null || true)"
+            before_pid["$name"]="$(systemctl show "$unit" -p MainPID --value 2>/dev/null || true)"
+            before_restarts["$name"]="$(systemctl show "$unit" -p NRestarts --value 2>/dev/null || true)"
+          done
+
+          old_ui="$(systemctl show "$ui_service" -p WorkingDirectory --value)"
+          old_env="$(systemctl show "$ui_service" -p Environment --value)"
+          old_sha="$(printf '%s' "$old_env" | tr ' ' '\n' | sed -n 's/^DISDEX_UI_RELEASE_SHA=//p' | tail -1)"
+          [[ -n "$old_ui" && -d "$old_ui" ]]
+          [[ -n "$old_sha" ]]
+          [[ -s "$archive" ]]
+
+          rm -rf "$release"
+          install -d -o deploy -g deploy -m 0750 "$release"
+          tar -xzf "$archive" -C "$release"
+          chown -R deploy:deploy "$release"
+          [[ -f "$release/server.js" ]]
+          [[ -d "$release/.next/static" ]]
+          [[ "$(tr -d '[:space:]' < "$release/.disdex-release-sha")" == "$TARGET_SHA" ]]
+
+          cat > "$canonical" <<EOF
+          [Service]
+          WorkingDirectory=$release
+          Environment=DISDEX_UI_RELEASE_SHA=$TARGET_SHA
+          Environment=HOSTNAME=127.0.0.1
+          ExecStart=
+          ExecStart=/usr/bin/node server.js
+          EOF
+          sed -i 's/^[[:space:]]*//' "$canonical"
+          chmod 0644 "$canonical"
+          chown root:root "$canonical"
+
+          rollback() {
+            rc=$?
+            set +e
+            cat > "$canonical" <<EOF
+          [Service]
+          WorkingDirectory=$old_ui
+          Environment=DISDEX_UI_RELEASE_SHA=$old_sha
+          Environment=HOSTNAME=127.0.0.1
+          ExecStart=
+          ExecStart=/usr/bin/node server.js
+          EOF
+            sed -i 's/^[[:space:]]*//' "$canonical"
+            systemctl daemon-reload
+            systemctl restart "$ui_service"
+            rm -rf "$release"
+            rm -f "$archive"
+            echo "ROLLBACK=PREVIOUS_UI_RESTORED"
+            exit "$rc"
+          }
+          trap rollback ERR
+
+          systemctl daemon-reload
+          systemctl restart "$ui_service"
+
+          ok=0
+          for _ in $(seq 1 30); do
+            active="$(systemctl is-active "$ui_service" 2>/dev/null || true)"
+            wd="$(systemctl show "$ui_service" -p WorkingDirectory --value 2>/dev/null || true)"
+            code="$(curl -sS -H 'Cookie: disdex_auth=1' -o /dev/null -w '%{http_code}' --max-time 5 http://127.0.0.1:3001/ || true)"
+            if [[ "$active" == active && "$wd" == "$release" && "$code" == 200 ]]; then ok=1; break; fi
+            sleep 1
+          done
+          [[ "$ok" == 1 ]]
+
+          for path in             /             /positions             /history             /performance             /decision-status             /decision-status/v12             /decision-status/pengu             /decision-status/q102             /decision-status/v52             /decision-status/fet             /decision-status/hype             /decision-status/idle-priority             /decision-status/formal-priority
+          do
+            code="$(curl -sS -H 'Cookie: disdex_auth=1' -o /dev/null -w '%{http_code}' --max-time 15 "http://127.0.0.1:3001$path")"
+            echo "HP_ROUTE path=$path http=$code"
+            [[ "$code" == 200 ]]
+          done
+
+          for api in             /api/system/live-status             /api/system/live-portfolio             /api/system/live-runtime             /api/system/decision-status             /api/system/live-performance             /api/system/trade-history             /api/system/idle-priority-status             /api/system/formal-priority-status
+          do
+            out="/tmp/ui-api-$(echo "$api" | tr '/' '_').json"
+            code="$(curl -sS -H 'Cookie: disdex_auth=1' -o "$out" -w '%{http_code}' --max-time 20 "http://127.0.0.1:3001$api")"
+            echo "HP_API path=$api http=$code bytes=$(wc -c < "$out" | tr -d ' ')"
+            [[ "$code" == 200 ]]
+            python3 - "$out" <<'PY'
+          import json,sys,os
+          p=sys.argv[1]
+          assert os.path.getsize(p) > 2, p
+          json.load(open(p,encoding="utf-8"))
+          PY
+          done
+
+          [[ "$(tr -d '[:space:]' < "$current/.disdex-release-sha")" == "$EXPECTED_TRADING_SHA" ]]
+          [[ "$(readlink -f "$current")" == "$trading_path_before" ]]
+          for name in "${runners[@]}"; do
+            unit="$name@$EXPECTED_TRADING_SHA.service"
+            [[ "$(systemctl is-active "$unit" 2>/dev/null || true)" == "${before_state[$name]}" ]]
+            [[ "$(systemctl show "$unit" -p MainPID --value 2>/dev/null || true)" == "${before_pid[$name]}" ]]
+            [[ "$(systemctl show "$unit" -p NRestarts --value 2>/dev/null || true)" == "${before_restarts[$name]}" ]]
+          done
+
+          # After modern UI and all existing data surfaces are verified, remove
+          # obsolete UI releases so the old-design release cannot reappear.
+          find "$ui_root" -mindepth 1 -maxdepth 1 ! -path "$release" -exec rm -rf -- {} +
+          rm -f "$archive"
+          [[ "$(find "$ui_root" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')" == 1 ]]
+
+          trap - ERR
+          echo "STATUS=MODERN_HP_WITH_NEW_LOGIC_DEPLOYED"
+          echo "UI_SHA=$TARGET_SHA"
+          echo "UI_RELEASE=$release"
+          echo "NEXT_VERSION=16.2.6"
+          echo "LEGACY_UI_RELEASE_COUNT=0"
+          echo "EXISTING_DATA_APIS=PASS"
+          echo "IDLE_FORMAL_UI=PASS"
+          echo "TRADING_SHA_UNCHANGED=$EXPECTED_TRADING_SHA"
+          echo "TRADING_RUNNER_PIDS_UNCHANGED=PASS"
+          echo "ORDER_MUTATION_ATTEMPTED=FALSE"
+          REMOTE
+
+      - name: Public smoke
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          for path in / /positions /history /performance /decision-status /decision-status/idle-priority /decision-status/formal-priority; do
+            code="$(curl -sS -H 'Cookie: disdex_auth=1' -o /dev/null -w '%{http_code}' --max-time 20 "https://professional-dismanager.net$path")"
+            echo "PUBLIC path=$path http=$code"
+            [[ "$code" == 200 ]]
+          done
