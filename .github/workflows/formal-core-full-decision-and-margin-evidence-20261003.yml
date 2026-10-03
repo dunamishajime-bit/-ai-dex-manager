@@ -1,0 +1,122 @@
+name: Formal Core full-decision and execution-margin evidence (no deploy)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/formal-priority-cooldown-20261003
+    paths:
+      - "scripts/research/formal_core_full_decision_audit.py"
+      - "scripts/research/formal_execution_margin_evidence_audit.py"
+      - ".github/workflows/formal-core-full-decision-and-margin-evidence-20261003.yml"
+      - "lib/disdex-quality102-causal-v1-runner.ts"
+      - "lib/v12-live-execution-engine.ts"
+      - "tests/**"
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  formal-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      RESEARCH_ANCHOR_SHA: a9940871d2dfaba4c83af347458678bf5d5f41ca
+      PRODUCTION_SHA: 53eeff5417636369d4709fddfd47d7916ddcf3b1
+      RELEASE_TAG: bt-v12-score100-volume080-normalonly-20260928
+      RELEASE_ASSET: bt-v12-score100-volume080-normalonly-20260928.tar.gz
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Verify research anchor and workflow SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git merge-base --is-ancestor "$RESEARCH_ANCHOR_SHA" HEAD
+
+      - name: Install JS dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Download fixed historical release asset
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/release-download" "$RUNNER_TEMP/release"
+          gh release download "$RELEASE_TAG" \
+            --repo "${{ github.repository }}" \
+            --pattern "$RELEASE_ASSET" \
+            --dir "$RUNNER_TEMP/release-download"
+          tar -xzf "$RUNNER_TEMP/release-download/$RELEASE_ASSET" -C "$RUNNER_TEMP/release"
+          test -d "$RUNNER_TEMP/release/$RELEASE_TAG"
+
+      - name: Production-order-path safety contract tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx tsx --test \
+            tests/dynamic-margin-gate.test.ts \
+            tests/integrated_gross_governor.test.ts \
+            tests/v12-preorder-gross-reservation.test.ts \
+            tests/v12-exit-fill-timestamp.test.ts \
+            tests/pending-exposure-registry.test.ts \
+            tests/account-lock-bounded-retry.test.ts \
+            tests/quality102-pending-order-recovery.test.ts \
+            tests/v12-protection-failure-recovery.test.ts \
+            tests/aster-418-fail-closed.test.ts \
+            tests/fet-brk48-live-runner.test.ts \
+            tests/trade_fill_notification.test.ts \
+            tests/v12-q102-priority-preemption.test.ts
+          npm run strategy:pengu-dual-ls-v2:selftest
+          npm run strategy:quality102-causal-v1:runner:selftest
+
+      - name: Full causal Core decision evidence audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile scripts/research/formal_core_full_decision_audit.py
+          python scripts/research/formal_core_full_decision_audit.py \
+            --release-root "$RUNNER_TEMP/release/$RELEASE_TAG" \
+            --output-root "$RUNNER_TEMP/core-full-decision-audit"
+
+      - name: Execution and margin evidence audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile scripts/research/formal_execution_margin_evidence_audit.py
+          python scripts/research/formal_execution_margin_evidence_audit.py \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --release-root "$RUNNER_TEMP/release/$RELEASE_TAG" \
+            --output "$RUNNER_TEMP/core-full-decision-audit/execution-margin-evidence-audit.json" \
+            --target-sha "$GITHUB_SHA" \
+            --production-sha "$PRODUCTION_SHA" \
+            --rule-contract-tests-passed
+
+      - name: Evidence SHA256
+        shell: bash
+        run: |
+          set -euo pipefail
+          find "$RUNNER_TEMP/core-full-decision-audit" -maxdepth 1 -type f -print0 \
+            | sort -z \
+            | xargs -0 sha256sum \
+            | tee "$RUNNER_TEMP/core-full-decision-audit/SHA256SUMS.txt"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: formal-core-full-decision-and-margin-evidence-${{ github.sha }}
+          path: ${{ runner.temp }}/core-full-decision-audit/
+          if-no-files-found: error
+          retention-days: 30
