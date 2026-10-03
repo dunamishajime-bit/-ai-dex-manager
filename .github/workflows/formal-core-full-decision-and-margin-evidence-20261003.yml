@@ -7,12 +7,12 @@ on:
       - research/formal-priority-cooldown-20261003
     paths:
       - "scripts/research/formal_q102_full_decision_chunk.py"
+      - "scripts/research/formal_q102_decision_source_parity.py"
       - "scripts/research/formal_core_full_decision_audit.py"
       - "scripts/research/formal_execution_margin_evidence_audit.py"
       - ".github/workflows/formal-core-full-decision-and-margin-evidence-20261003.yml"
       - "lib/disdex-quality102-causal-v1-runner.ts"
       - "lib/v12-live-execution-engine.ts"
-      - "tests/**"
 
 permissions:
   contents: read
@@ -187,6 +187,15 @@ jobs:
           set -euo pipefail
           actual="$(find "$RUNNER_TEMP/q102-chunks" -name q102-chunk-manifest.json | wc -l | tr -d ' ')"
           test "$actual" = "${{ needs.plan-q102.outputs.chunk_count }}"
+      - name: Prove Q102 decision source byte parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile scripts/research/formal_q102_decision_source_parity.py
+          python scripts/research/formal_q102_decision_source_parity.py \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --release-root "$RUNNER_TEMP/release/$RELEASE_TAG" \
+            --output "$RUNNER_TEMP/core-full-decision-audit/q102-decision-source-parity.json"
       - name: Merge and verify full causal Core decision evidence
         shell: bash
         run: |
@@ -197,6 +206,7 @@ jobs:
           python scripts/research/formal_core_full_decision_audit.py \
             --release-root "$RUNNER_TEMP/release/$RELEASE_TAG" \
             --q102-chunks-root "$RUNNER_TEMP/q102-chunks" \
+            --q102-source-parity "$RUNNER_TEMP/core-full-decision-audit/q102-decision-source-parity.json" \
             --output-root "$RUNNER_TEMP/core-full-decision-audit"
       - name: Execution and margin evidence audit
         shell: bash

@@ -60,13 +60,31 @@ def load_release_module(code_root: Path):
 def signal_semantics(signal: dict[str, Any] | None) -> dict[str, Any] | None:
     if not signal:
         return None
-    # Exact decision/execution-relevant signal semantics; JSON key ordering is normalized later.
     keys = (
         "strategyId", "referenceTs", "side", "symbol", "family", "variant", "layer",
         "requestedGross", "reason", "dataCutoffTs", "hardStop", "maxHoldHours",
         "exitPolicy", "brkEnabled",
     )
     return {key: signal.get(key) for key in keys if key in signal}
+
+
+def economic_signal_semantics(signal: dict[str, Any]) -> dict[str, Any]:
+    return {key: value for key, value in signal.items() if key != "referenceTs"}
+
+
+def allowed_fast_reference_ts_divergence(
+    key: tuple[int, str],
+    fast: dict[str, Any],
+    full: dict[str, Any],
+) -> bool:
+    decision_ts, _ = key
+    return (
+        fast.get("referenceTs") != full.get("referenceTs")
+        and str(full.get("family") or "").upper() == "HIGH_VOL"
+        and full.get("referenceTs") == decision_ts
+        and fast.get("referenceTs") == fast.get("dataCutoffTs")
+        and full.get("dataCutoffTs") == fast.get("dataCutoffTs")
+    )
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -186,11 +204,33 @@ def main(argv: list[str] | None = None) -> int:
         if row.get("status") == "SIGNAL" and start_ms <= int(row["decision_ts_ms"]) < end_exclusive_ms
     }
     require(set(fast_signals) == set(selected_signals), "Q102_CHUNK_FAST_FULL_SIGNAL_KEY_MISMATCH")
-    mismatches = [
+    economic_mismatches = [
         key for key in sorted(fast_signals)
-        if canonical(fast_signals[key]) != canonical(selected_signals[key])
+        if canonical(economic_signal_semantics(fast_signals[key]))
+        != canonical(economic_signal_semantics(selected_signals[key]))
     ]
-    require(not mismatches, f"Q102_CHUNK_FAST_FULL_SIGNAL_SEMANTIC_MISMATCH:{mismatches[:5]}")
+    require(
+        not economic_mismatches,
+        f"Q102_CHUNK_FAST_FULL_SIGNAL_ECONOMIC_SEMANTIC_MISMATCH:{economic_mismatches[:5]}",
+    )
+    reference_ts_divergences = []
+    for key in sorted(fast_signals):
+        fast_ref = fast_signals[key].get("referenceTs")
+        full_ref = selected_signals[key].get("referenceTs")
+        if fast_ref == full_ref:
+            continue
+        require(
+            allowed_fast_reference_ts_divergence(key, fast_signals[key], selected_signals[key]),
+            f"Q102_CHUNK_UNEXPECTED_REFERENCE_TS_DIVERGENCE:{key}:{fast_ref}:{full_ref}",
+        )
+        reference_ts_divergences.append({
+            "decision_ts_ms": key[0],
+            "symbol": key[1],
+            "fast_reference_ts": fast_ref,
+            "full_reference_ts": full_ref,
+            "data_cutoff_ts": selected_signals[key].get("dataCutoffTs"),
+            "family": selected_signals[key].get("family"),
+        })
 
     out = args.output_root.resolve()
     ledger_meta = write_jsonl(out / "Q102.full-observability.jsonl", ledger)
@@ -208,7 +248,14 @@ def main(argv: list[str] | None = None) -> int:
         "ledger_rows": len(ledger),
         "signal_rows": len(selected_signals),
         "fast_signal_rows": len(fast_signals),
-        "fast_full_signal_semantic_parity": "PASS",
+        "fast_full_signal_key_parity": "PASS",
+        "fast_full_signal_economic_semantic_parity": "PASS",
+        "fast_full_reference_ts_parity": (
+            "PASS" if not reference_ts_divergences
+            else "KNOWN_FAST_SCAN_HIGH_VOL_REFERENCE_TS_DIVERGENCE"
+        ),
+        "fast_full_reference_ts_divergence_count": len(reference_ts_divergences),
+        "fast_full_reference_ts_divergences": reference_ts_divergences,
         "runtime_error_timestamps": 0,
         "output": ledger_meta,
     }

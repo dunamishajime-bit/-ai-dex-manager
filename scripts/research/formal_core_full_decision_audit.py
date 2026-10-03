@@ -119,6 +119,30 @@ def signal_semantics(row: dict[str, Any]) -> dict[str, Any]:
     }
 
 
+def economic_signal_semantics(row: dict[str, Any]) -> dict[str, Any]:
+    wrapped = signal_semantics(row)
+    signal = dict(wrapped.get("signal") or {})
+    signal.pop("referenceTs", None)
+    return {**wrapped, "signal": signal}
+
+
+def allowed_q102_fast_reference_ts_divergence(
+    key: tuple[int, str],
+    fast_row: dict[str, Any],
+    full_row: dict[str, Any],
+) -> bool:
+    fast = fast_row.get("signal") or {}
+    full = full_row.get("signal") or {}
+    decision_ts, _ = key
+    return (
+        fast.get("referenceTs") != full.get("referenceTs")
+        and str(full.get("family") or "").upper() == "HIGH_VOL"
+        and full.get("referenceTs") == decision_ts
+        and fast.get("referenceTs") == fast.get("dataCutoffTs")
+        and full.get("dataCutoffTs") == fast.get("dataCutoffTs")
+    )
+
+
 @dataclass(frozen=True)
 class ReleasePaths:
     root: Path
@@ -337,22 +361,46 @@ def merge_q102_chunks(paths: ReleasePaths, chunks_root: Path, output_root: Path)
                 "Q102_MERGED_FUTURE_DATA")
 
     fast_rows = load_jsonl(paths.q102_fast_scan / "decisions" / "Q102.jsonl")
-    fast_signals = {
-        (int(row["decision_ts_ms"]), str(row["symbol"])): signal_semantics(row)
+    fast_signal_rows = {
+        (int(row["decision_ts_ms"]), str(row["symbol"])): row
         for row in fast_rows
         if row.get("status") == "SIGNAL"
         and expected_start_ms <= int(row["decision_ts_ms"]) < expected_end_ms
     }
-    full_signals = {
-        (int(row["decision_ts_ms"]), str(row["symbol"])): signal_semantics(row)
+    full_signal_rows = {
+        (int(row["decision_ts_ms"]), str(row["symbol"])): row
         for row in rows if row.get("status") == "SIGNAL"
     }
-    require(set(fast_signals) == set(full_signals), "Q102_MERGED_FAST_FULL_SIGNAL_KEY_MISMATCH")
-    mismatches = [
-        key for key in sorted(fast_signals)
-        if canonical_json(fast_signals[key]) != canonical_json(full_signals[key])
+    require(set(fast_signal_rows) == set(full_signal_rows), "Q102_MERGED_FAST_FULL_SIGNAL_KEY_MISMATCH")
+    economic_mismatches = [
+        key for key in sorted(fast_signal_rows)
+        if canonical_json(economic_signal_semantics(fast_signal_rows[key]))
+        != canonical_json(economic_signal_semantics(full_signal_rows[key]))
     ]
-    require(not mismatches, f"Q102_MERGED_FAST_FULL_SIGNAL_SEMANTIC_MISMATCH:{mismatches[:5]}")
+    require(
+        not economic_mismatches,
+        f"Q102_MERGED_FAST_FULL_SIGNAL_ECONOMIC_SEMANTIC_MISMATCH:{economic_mismatches[:5]}",
+    )
+    reference_ts_divergences = []
+    for key in sorted(fast_signal_rows):
+        fast_signal = fast_signal_rows[key].get("signal") or {}
+        full_signal = full_signal_rows[key].get("signal") or {}
+        if fast_signal.get("referenceTs") == full_signal.get("referenceTs"):
+            continue
+        require(
+            allowed_q102_fast_reference_ts_divergence(
+                key, fast_signal_rows[key], full_signal_rows[key]
+            ),
+            f"Q102_MERGED_UNEXPECTED_REFERENCE_TS_DIVERGENCE:{key}",
+        )
+        reference_ts_divergences.append({
+            "decision_ts_ms": key[0],
+            "symbol": key[1],
+            "fast_reference_ts": fast_signal.get("referenceTs"),
+            "full_reference_ts": full_signal.get("referenceTs"),
+            "data_cutoff_ts": full_signal.get("dataCutoffTs"),
+            "family": full_signal.get("family"),
+        })
 
     merged_meta = write_jsonl(output_root / "Q102.full-observability.jsonl", rows)
     statuses = Counter(str(row.get("status")) for row in rows)
@@ -367,9 +415,16 @@ def merge_q102_chunks(paths: ReleasePaths, chunks_root: Path, output_root: Path)
         "period_hours": expected_hours,
         "ledger_rows": len(rows),
         "status_counts": dict(sorted(statuses.items())),
-        "signal_rows": len(full_signals),
-        "archived_signal_rows": len(fast_signals),
-        "archived_signal_semantic_parity": "PASS",
+        "signal_rows": len(full_signal_rows),
+        "archived_signal_rows": len(fast_signal_rows),
+        "archived_signal_key_parity": "PASS",
+        "archived_signal_economic_semantic_parity": "PASS",
+        "archived_fast_reference_ts_parity": (
+            "PASS" if not reference_ts_divergences
+            else "KNOWN_FAST_SCAN_HIGH_VOL_REFERENCE_TS_DIVERGENCE"
+        ),
+        "archived_fast_reference_ts_divergence_count": len(reference_ts_divergences),
+        "archived_fast_reference_ts_divergences": reference_ts_divergences,
         "chunk_count": len(ordered),
         "chunks": chunk_summaries,
         "output": merged_meta,
@@ -404,6 +459,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--release-root", required=True, type=Path)
     parser.add_argument("--output-root", required=True, type=Path)
     parser.add_argument("--q102-chunks-root", type=Path)
+    parser.add_argument("--q102-source-parity", type=Path)
     args = parser.parse_args(argv)
 
     release = ReleasePaths.from_root(args.release_root.resolve())
@@ -431,10 +487,25 @@ def main(argv: list[str] | None = None) -> int:
         if args.q102_chunks_root
         else regenerate_q102_full(release, output)
     )
+    if args.q102_chunks_root:
+        require(args.q102_source_parity is not None, "Q102_SOURCE_PARITY_EVIDENCE_REQUIRED")
+        q102_source_parity = load_json(args.q102_source_parity.resolve())
+        require(
+            q102_source_parity.get("status") == "PASS_Q102_DECISION_SOURCE_BYTE_PARITY",
+            "Q102_SOURCE_PARITY_NOT_PASS",
+        )
+        q102["decision_source_byte_parity"] = q102_source_parity
     v52 = audit_v52(release)
 
     crypto_global_decision_pass = q102.get("global_h1_decision_evidence") == "PASS"
-    q102_per_symbol_pass = q102.get("per_symbol_full_ranking_evidence") == "PASS"
+    q102_per_symbol_pass = (
+        q102.get("per_symbol_full_ranking_evidence") == "PASS"
+        and (
+            not args.q102_chunks_root
+            or (q102.get("decision_source_byte_parity") or {}).get("status")
+            == "PASS_Q102_DECISION_SOURCE_BYTE_PARITY"
+        )
+    )
     v52_full_live_pass = v52["status"] == "PASS"
     if not q102_per_symbol_pass and not v52_full_live_pass:
         overall = "BLOCKED_Q102_PER_SYMBOL_RANKING_AND_V52_FULL_LIVE_DECISION_EVIDENCE_MISSING"
@@ -444,6 +515,20 @@ def main(argv: list[str] | None = None) -> int:
         overall = "BLOCKED_V52_FULL_LIVE_DECISION_EVIDENCE_MISSING"
     else:
         overall = "PASS"
+    decision_ruling = (
+        "V12/PENGU/FET scheduled decisions and Q102 all-hour per-symbol ranking/selection "
+        "are proven from the audited frozen Production source. The archived Q102 fast scan "
+        "matches selected signal keys and economic semantics; its HIGH_VOL referenceTs uses "
+        "the prior H1 data cutoff while the full Production signal uses the decision timestamp, "
+        "and that timestamp-only divergence is explicitly inventoried. V52 remains uncertified "
+        "until complete historical LIVE quote/depth/filter decision inputs are proven."
+        if q102_per_symbol_pass
+        else
+        "V12/PENGU/FET scheduled decision evidence and the global hourly Q102 trading decision "
+        "stream are proven. Q102 per-symbol ranking for every non-selected hour remains a separate "
+        "observability gap, and V52 remains uncertified until a complete historical LIVE decision "
+        "input stream is proven."
+    )
 
     manifest = {
         "schema_version": 1,
@@ -481,20 +566,20 @@ def main(argv: list[str] | None = None) -> int:
         },
         "crypto_core_global_h1_decision_evidence": "PASS" if crypto_global_decision_pass else "FAIL",
         "crypto_core_full_per_symbol_decision_evidence": "PASS" if q102_per_symbol_pass else "MISSING",
-        "ruling": (
-            "V12/PENGU/FET scheduled decision evidence and the global hourly Q102 trading decision "
-            "stream are proven. Q102 per-symbol ranking for every non-selected hour remains a separate "
-            "observability gap, and V52 remains uncertified until a complete historical LIVE "
-            "decision input stream (including quote/depth/filter evidence) is proven. Missing "
-            "candidate intervals are never converted to fabricated NO_SIGNAL evidence."
-        ),
+        "ruling": decision_ruling,
     }
     manifest_sha = write_json(output / "core-full-decision-audit-manifest.json", manifest)
     print(canonical_json({
         "status": overall,
         "crypto_core_global_h1_decision_evidence": manifest["crypto_core_global_h1_decision_evidence"],
         "crypto_core_full_per_symbol_decision_evidence": manifest["crypto_core_full_per_symbol_decision_evidence"],
-        "q102_signal_parity": q102["archived_signal_semantic_parity"],
+        "q102_signal_economic_parity": q102.get(
+            "archived_signal_economic_semantic_parity",
+            q102.get("archived_signal_semantic_parity", "UNKNOWN"),
+        ),
+        "q102_fast_reference_ts_parity": q102.get(
+            "archived_fast_reference_ts_parity", "NOT_AUDITED"
+        ),
         "v52": v52["status"],
         "manifest_sha256": manifest_sha,
     }))
