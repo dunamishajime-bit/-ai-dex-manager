@@ -193,7 +193,7 @@ jobs:
           runuser -u deploy -- sh -c 'cd "$1" && npm run strategy:v12-x1-all:selftest' sh "$release"
           runuser -u deploy -- sh -c 'cd "$1" && npm run strategy:quality102-causal-v1:runner:selftest' sh "$release"
 
-          "$current/scripts/ops/root/disdex-current-runtime-coherence-guard" --check
+          bash "$current/scripts/ops/root/disdex-current-runtime-coherence-guard" --check
 
           [[ "$(tr -d '[:space:]' < "$current/.disdex-release-sha")" == "$before_sha" ]]
           [[ "$(readlink -f "$current")" == "$before_path" ]]
