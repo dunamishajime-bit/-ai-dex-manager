@@ -137,26 +137,32 @@ jobs:
           [[ -d "$release/.next/static" ]]
           [[ "$(tr -d '[:space:]' < "$release/.disdex-release-sha")" == "$TARGET_SHA" ]]
 
-          # Remove stale release-selection lines from old drop-ins while keeping
-          # unrelated live read-only environment settings.
-          shopt -s nullglob
-          for f in "$dropin_dir"/*.conf; do
-            [[ "$f" == "$canonical" ]] && continue
-            tmp="$f.clean-$$"
-            awk '
-              /^WorkingDirectory=/ {next}
-              /^Environment=DISDEX_UI_RELEASE_SHA=/ {next}
-              /^Environment=HOSTNAME=/ {next}
-              /^ExecStart=/ {next}
-              {print}
-            ' "$f" > "$tmp"
-            if grep -qEv '^[[:space:]]*$|^[[:space:]]*\[Service\][[:space:]]*$' "$tmp"; then
-              mv "$tmp" "$f"
-              chmod 0644 "$f"
-            else
-              rm -f "$tmp" "$f"
-            fi
-          done
+          # Remove stale UI release selectors from old drop-ins without creating
+          # longer temporary filenames (several legacy names are already near
+          # Linux NAME_MAX=255). Preserve unrelated read-only environment lines.
+          python3 - "$dropin_dir" "$canonical" <<'PY'
+          from pathlib import Path
+          import sys
+          root=Path(sys.argv[1])
+          canonical=Path(sys.argv[2])
+          strip_prefixes=(
+              "WorkingDirectory=",
+              "Environment=DISDEX_UI_RELEASE_SHA=",
+              "Environment=HOSTNAME=",
+              "ExecStart=",
+          )
+          for path in sorted(root.glob("*.conf"), key=lambda p:p.name):
+              if path == canonical:
+                  continue
+              lines=path.read_text(encoding="utf-8", errors="replace").splitlines()
+              kept=[line for line in lines if not line.startswith(strip_prefixes)]
+              meaningful=[line for line in kept if line.strip() and line.strip()!="[Service]"]
+              if meaningful:
+                  path.write_text("\n".join(kept).rstrip()+"\n", encoding="utf-8")
+                  path.chmod(0o644)
+              else:
+                  path.unlink()
+          PY
 
           cat > "$canonical" <<EOF
           [Service]
