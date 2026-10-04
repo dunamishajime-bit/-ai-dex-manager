@@ -1,0 +1,221 @@
+
+
+def fmt_pct(x) -> str:
+    return "n/a" if x is None or not np.isfinite(x) else f"{100 * x:.2f}%"
+
+
+def fmt_num(x) -> str:
+    return "n/a" if x is None or not np.isfinite(x) else f"{x:.2f}"
+
+
+def live_probe(samples: int = 20, pause: float = 1.0) -> pd.DataFrame:
+    rows = []
+    for _ in range(samples):
+        now = pd.Timestamp.now(tz="UTC")
+        for venue, base in [("aster", ASTER), ("binance", BINANCE)]:
+            depth = get_json(base + "/fapi/v1/depth", {"symbol": "BTCUSDT", "limit": 20}, attempts=2)
+            premium = get_json(base + "/fapi/v1/premiumIndex", {"symbol": "BTCUSDT"}, attempts=2)
+            if not depth or not depth.get("bids") or not depth.get("asks"):
+                continue
+            bids = [(float(p), float(q)) for p, q in depth["bids"]]
+            asks = [(float(p), float(q)) for p, q in depth["asks"]]
+            bid, ask = bids[0][0], asks[0][0]
+            mid = 0.5 * (bid + ask)
+            bid_depth = sum(p * q for p, q in bids)
+            ask_depth = sum(p * q for p, q in asks)
+            rows.append({
+                "timestamp": now, "venue": venue, "bid": bid, "ask": ask, "mid": mid,
+                "spread_bps": 1e4 * (ask - bid) / mid,
+                "bid_depth_20_usd": bid_depth, "ask_depth_20_usd": ask_depth,
+                "depth_imbalance": (bid_depth - ask_depth) / max(bid_depth + ask_depth, 1.0),
+                "mark_price": float(premium.get("markPrice", np.nan)) if premium else np.nan,
+                "funding_rate": float(premium.get("lastFundingRate", np.nan)) if premium else np.nan,
+            })
+        time.sleep(pause)
+    return pd.DataFrame(rows)
+
+
+def markdown_table(rows: list[dict], columns: list[tuple[str, str, str]]) -> str:
+    lines = ["| " + " | ".join(x[1] for x in columns) + " |", "| " + " | ".join("---" for _ in columns) + " |"]
+    for row in rows:
+        vals = []
+        for key, _, kind in columns:
+            value = row.get(key)
+            if kind == "pct":
+                vals.append(fmt_pct(value))
+            elif kind == "num":
+                vals.append(fmt_num(value))
+            else:
+                vals.append(str(value if value is not None else "n/a"))
+        lines.append("| " + " | ".join(vals) + " |")
+    return "\n".join(lines)
+
+
+def main() -> None:
+    OUT.mkdir(parents=True, exist_ok=True)
+    data: dict[str, pd.DataFrame] = {}
+    coverage_rows = []
+    for symbol in SYMBOLS:
+        print(f"\n=== Loading {symbol} ===")
+        frame, cov = load_symbol(symbol)
+        coverage_rows.append(cov)
+        if not frame.empty:
+            data[symbol] = frame
+    pd.DataFrame(coverage_rows).to_csv(OUT / "data_coverage.csv", index=False)
+    if not data:
+        (OUT / "report.md").write_text("# Microstructure Backtest\n\nNo overlapping Aster/Binance historical data could be loaded.\n", encoding="utf-8")
+        raise RuntimeError("No usable symbol data")
+
+    event_rows = []
+    availability_rows = []
+    for symbol, df in data.items():
+        event_rows.extend(event_studies(symbol, df))
+        for feature in SLEEVES:
+            availability_rows.append({"symbol": symbol, "feature": feature, "available_ratio": float(df.get(feature, pd.Series(index=df.index, dtype=float)).notna().mean())})
+    events = pd.DataFrame(event_rows)
+    events.to_csv(OUT / "event_studies.csv", index=False)
+    pd.DataFrame(availability_rows).to_csv(OUT / "feature_availability.csv", index=False)
+
+    eq_scores = {symbol: equal_score(df) for symbol, df in data.items()}
+    model = fit_ridge_model(data, horizon=6)
+    (OUT / "ridge_model.json").write_text(json.dumps(model, indent=2), encoding="utf-8")
+    fit_scores = {symbol: model_score(df, model) for symbol, df in data.items()}
+
+    eq_best, eq_grid = select_variant(data, eq_scores, [0.20, 0.30, 0.40, 0.55])
+    fit_best, fit_grid = select_variant(data, fit_scores, [0.75, 1.00, 1.50, 2.00])
+    grid_rows = [{"strategy": "fixed_equal", **x} for x in eq_grid] + [{"strategy": "selection_ridge", **x} for x in fit_grid]
+    pd.DataFrame(grid_rows).to_csv(OUT / "variant_selection.csv", index=False)
+
+    strategy_rows = []
+    all_positions = []
+    all_trades = []
+    monthly_exports = []
+    chosen = [("fixed_equal", eq_scores, eq_best), ("selection_ridge", fit_scores, fit_best)]
+    for name, scores, params in chosen:
+        port, positions, trades = portfolio_result(data, scores, float(params["threshold"]), int(params["horizon"]))
+        positions.columns = [f"{name}_{c}" for c in positions.columns]
+        all_positions.append(positions)
+        if not trades.empty:
+            trades.insert(0, "strategy", name)
+            all_trades.append(trades)
+        monthly = (1 + port.loc[port.index >= HOLDOUT]).resample("ME").prod() - 1
+        monthly_exports.append(monthly.rename(name))
+        for period_name, period_start, period_end in [("selection", START, HOLDOUT), ("holdout", HOLDOUT, END)]:
+            segment = port[(port.index >= period_start) & (port.index < period_end)]
+            stats = summarize_returns(segment, period_start)
+            strategy_rows.append({"strategy": name, "period": period_name, "threshold": params["threshold"], "horizon_minutes": int(params["horizon"]) * 5, **stats})
+        for leverage in [1.0, 1.5, 2.0, 3.0]:
+            stats = summarize_returns(port, HOLDOUT, leverage=leverage)
+            strategy_rows.append({"strategy": name, "period": f"holdout_{leverage:.1f}x", "threshold": params["threshold"], "horizon_minutes": int(params["horizon"]) * 5, **stats})
+    results = pd.DataFrame(strategy_rows)
+    results.to_csv(OUT / "strategy_results.csv", index=False)
+    if all_trades:
+        pd.concat(all_trades, ignore_index=True).to_csv(OUT / "trades.csv", index=False)
+    if all_positions:
+        pd.concat(all_positions, axis=1).to_csv(OUT / "positions.csv")
+    if monthly_exports:
+        pd.concat(monthly_exports, axis=1).to_csv(OUT / "holdout_monthly_returns.csv")
+
+    # Current live probe validates public depth/mark/funding endpoints, but is not
+    # presented as a historical backtest of spread or depth.
+    live = live_probe()
+    live.to_csv(OUT / "live_depth_probe.csv", index=False)
+    live_summary = []
+    if not live.empty:
+        for venue, g in live.groupby("venue"):
+            live_summary.append({
+                "venue": venue, "samples": len(g), "avg_spread_bps": float(g["spread_bps"].mean()),
+                "median_depth_20_usd": float((g["bid_depth_20_usd"] + g["ask_depth_20_usd"]).median()),
+                "avg_depth_imbalance": float(g["depth_imbalance"].mean()),
+            })
+
+    holdout_rows = results[results["period"].eq("holdout")].to_dict("records")
+    leverage_rows = results[results["period"].str.startswith("holdout_")].to_dict("records")
+    best_holdout = max(holdout_rows, key=lambda x: np.nan_to_num(x.get("cagr"), nan=-9.0))
+    pass_gate = (
+        np.nan_to_num(best_holdout.get("cagr"), nan=-1) >= 0.40
+        and np.nan_to_num(best_holdout.get("max_drawdown"), nan=-1) >= -0.30
+        and np.nan_to_num(best_holdout.get("sharpe"), nan=-9) >= 1.0
+    )
+    verdict = "PASS for paper-trading research" if pass_gate else "FAIL deployment gate"
+
+    event_holdout = events[events["period"].eq("holdout")].copy() if not events.empty else pd.DataFrame()
+    if not event_holdout.empty:
+        event_best = event_holdout.sort_values("net_mean", ascending=False).head(15).to_dict("records")
+    else:
+        event_best = []
+
+    report = f"""# Aster–Binance Event-Driven Microstructure Backtest
+
+## Mechanical verdict
+
+**{verdict}.**
+
+The deployment gate is deliberately demanding: holdout CAGR at least 40%, maximum drawdown no worse than -30%, and Sharpe at least 1.0 after Aster taker fees and slippage.
+
+## Test design
+
+- Symbols requested/tested: {', '.join(SYMBOLS)}
+- Usable symbols: {', '.join(data.keys())}
+- Historical window: {START.date()} through {(END - pd.Timedelta(days=1)).date()}
+- Untouched holdout: {HOLDOUT.date()} onward
+- Bar interval: {INTERVAL}; signal on completed bar, execution from next bar open
+- Aster taker fee: {ASTER_TAKER_FEE * 100:.3f}% per side
+- Slippage allowance: {SLIPPAGE_PER_SIDE * 100:.3f}% per side
+- Round-trip friction: {ROUND_TRIP_COST * 100:.3f}%
+- Fixed logic: equal-weight sleeves with pre-specified directions
+- Adaptive logic: ridge weights fitted only before the holdout
+
+## Strategy results
+
+{markdown_table(holdout_rows, [("strategy", "Strategy", "str"), ("period", "Period", "str"), ("horizon_minutes", "Hold min", "str"), ("threshold", "Threshold", "num"), ("total_return", "Return", "pct"), ("cagr", "CAGR", "pct"), ("max_drawdown", "Max DD", "pct"), ("sharpe", "Sharpe", "num"), ("best_month", "Best month", "pct"), ("worst_month", "Worst month", "pct")])}
+
+## Leverage sensitivity — holdout
+
+{markdown_table(leverage_rows, [("strategy", "Strategy", "str"), ("period", "Scale", "str"), ("cagr", "CAGR", "pct"), ("max_drawdown", "Max DD", "pct"), ("sharpe", "Sharpe", "num"), ("best_month", "Best month", "pct"), ("worst_month", "Worst month", "pct")])}
+
+## Strongest individual event studies in the holdout
+
+{markdown_table(event_best, [("symbol", "Symbol", "str"), ("feature", "Feature", "str"), ("horizon_minutes", "Horizon", "str"), ("threshold", "Threshold", "num"), ("events", "Events", "str"), ("gross_mean", "Gross/event", "pct"), ("net_mean", "Net/event", "pct"), ("win_rate", "Win rate", "pct"), ("trade_sharpe", "Trade t-like", "num")]) if event_best else 'No feature had enough holdout events.'}
+
+## Current public-order-book endpoint probe
+
+{markdown_table(live_summary, [("venue", "Venue", "str"), ("samples", "Samples", "str"), ("avg_spread_bps", "Avg spread bps", "num"), ("median_depth_20_usd", "Median top-20 depth USD", "num"), ("avg_depth_imbalance", "Depth imbalance", "num")]) if live_summary else 'Live depth probe was unavailable.'}
+
+This short probe confirms endpoint accessibility only. It is not enough observations to establish a tradable spread/depth edge.
+
+## What was and was not historically tested
+
+Historically tested where data existed:
+
+- Aster versus Binance traded-price dislocation
+- Aster/Binance mark-versus-trade basis dislocation
+- settled/latest funding-rate differences and jumps
+- Binance open-interest changes from public metrics archives
+- taker-buy/taker-sell flow imbalance from both venues' klines
+- Binance-to-Aster lead/lag residual
+- Binance public liquidation snapshots when the archive contained them
+- range/volume illiquidity as a separately labelled proxy
+
+Not historically proven from official Aster archives:
+
+- full historical Aster order-book thinning and spread expansion
+- full historical Aster liquidation stream
+- the complete intra-funding-period predicted funding path
+
+Aster exposes these as live public streams/endpoints, so production research must record them prospectively before deployment. Missing archive fields are not silently replaced by fabricated values.
+
+## Important limitations
+
+1. Five-minute bars cannot reproduce queue position, sub-second latency, partial fills, or adverse selection.
+2. Aster historical availability begins later than Binance and may differ by symbol.
+3. Binance metrics and liquidation archives are used only when actually downloadable; coverage is exported separately.
+4. The strategy assumes taker execution. Maker execution may lower fees but introduces fill-selection risk.
+5. Results are a research screen, not a promise of future returns.
+"""
+    (OUT / "report.md").write_text(report, encoding="utf-8")
+    print(report)
+
+
+if __name__ == "__main__":
+    main()

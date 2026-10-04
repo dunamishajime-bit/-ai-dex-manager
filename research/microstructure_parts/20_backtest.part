@@ -1,0 +1,203 @@
+
+SLEEVES = [
+    "sig_price_mr", "sig_basis_mr", "sig_funding_contra", "sig_flow_cont",
+    "sig_lead_follow", "sig_oi_cont", "sig_liq_cont", "sig_liq_reversal",
+]
+
+
+def forward_trade_return(df: pd.DataFrame, horizon: int) -> pd.Series:
+    entry = df["a_open"].shift(-1)
+    exit_price = df["a_open"].shift(-(horizon + 1))
+    return exit_price / entry - 1.0
+
+
+def event_studies(symbol: str, df: pd.DataFrame) -> list[dict]:
+    rows = []
+    for feature in SLEEVES:
+        if feature not in df or df[feature].notna().sum() < 500:
+            continue
+        for horizon in [3, 6, 12]:
+            gross_fwd = forward_trade_return(df, horizon)
+            for threshold in [1.5, 2.0, 2.5]:
+                direction = np.sign(df[feature])
+                active = df[feature].abs() >= threshold
+                net = direction * gross_fwd - ROUND_TRIP_COST
+                for label, mask in [("selection", df.index < HOLDOUT), ("holdout", df.index >= HOLDOUT)]:
+                    sample = net[active & mask].dropna()
+                    gross_sample = (direction * gross_fwd)[active & mask].dropna()
+                    if len(sample) < 5:
+                        continue
+                    sd = sample.std(ddof=1)
+                    rows.append({
+                        "symbol": symbol,
+                        "feature": feature,
+                        "period": label,
+                        "horizon_minutes": horizon * 5,
+                        "threshold": threshold,
+                        "events": int(len(sample)),
+                        "gross_mean": float(gross_sample.mean()),
+                        "net_mean": float(sample.mean()),
+                        "median_net": float(sample.median()),
+                        "win_rate": float((sample > 0).mean()),
+                        "trade_sharpe": float(sample.mean() / sd * math.sqrt(len(sample))) if sd > 0 else np.nan,
+                    })
+    return rows
+
+
+def equal_score(df: pd.DataFrame) -> pd.Series:
+    available = [c for c in SLEEVES if c in df and df[c].notna().sum() >= 500]
+    if not available:
+        return pd.Series(0.0, index=df.index)
+    x = pd.concat([np.tanh(df[c] / 2.0).rename(c) for c in available], axis=1)
+    score = x.mean(axis=1, skipna=True).fillna(0.0)
+    return score * df["liquidity_multiplier"].fillna(1.0)
+
+
+def fit_ridge_model(data: dict[str, pd.DataFrame], horizon: int = 6) -> dict:
+    feature_names = []
+    for c in SLEEVES:
+        if sum(int(c in d and d[c].notna().sum() >= 500) for d in data.values()) >= 1:
+            feature_names.append(c)
+    blocks_x, blocks_y = [], []
+    for symbol, df in data.items():
+        y = forward_trade_return(df, horizon)
+        x = df.reindex(columns=feature_names).clip(-6, 6)
+        mask = (df.index < HOLDOUT) & y.notna() & x.notna().sum(axis=1).ge(max(2, len(feature_names) // 3))
+        # Subsample every 30 minutes to reduce overlapping-label dependence.
+        idx = np.flatnonzero(mask.to_numpy())[::6]
+        if len(idx):
+            blocks_x.append(x.iloc[idx])
+            blocks_y.append(y.iloc[idx])
+    if not blocks_x:
+        return {"features": feature_names, "coef": [0.0] * len(feature_names), "mean": [0.0] * len(feature_names), "std": [1.0] * len(feature_names), "pred_mean": 0.0, "pred_std": 1.0}
+    Xdf = pd.concat(blocks_x, ignore_index=True)
+    y = pd.concat(blocks_y, ignore_index=True).to_numpy(float)
+    means = Xdf.mean().fillna(0.0)
+    stds = Xdf.std(ddof=0).replace(0, 1.0).fillna(1.0)
+    X = ((Xdf.fillna(means) - means) / stds).to_numpy(float)
+    X = np.column_stack([np.ones(len(X)), X])
+    lam = 25.0
+    reg = np.eye(X.shape[1]) * lam
+    reg[0, 0] = 0.0
+    coef = np.linalg.solve(X.T @ X + reg, X.T @ y)
+    pred = X @ coef
+    return {
+        "features": feature_names,
+        "intercept": float(coef[0]),
+        "coef": [float(v) for v in coef[1:]],
+        "mean": [float(means[c]) for c in feature_names],
+        "std": [float(stds[c]) for c in feature_names],
+        "pred_mean": float(np.mean(pred)),
+        "pred_std": float(max(np.std(pred), 1e-8)),
+        "train_rows": int(len(X)),
+    }
+
+
+def model_score(df: pd.DataFrame, model: dict) -> pd.Series:
+    feats = model["features"]
+    x = df.reindex(columns=feats).copy()
+    for n, c in enumerate(feats):
+        x[c] = (x[c].fillna(model["mean"][n]) - model["mean"][n]) / model["std"][n]
+    pred = model.get("intercept", 0.0) + x.to_numpy(float) @ np.asarray(model["coef"], float)
+    z = (pred - model["pred_mean"]) / model["pred_std"]
+    return pd.Series(z, index=df.index).clip(-8, 8) * df["liquidity_multiplier"].fillna(1.0)
+
+
+@dataclass
+class SimResult:
+    returns: pd.Series
+    position: pd.Series
+    trades: pd.DataFrame
+
+
+def simulate_symbol(df: pd.DataFrame, score: pd.Series, threshold: float, horizon: int) -> SimResult:
+    idx = df.index
+    opens = df["a_open"].to_numpy(float)
+    s = score.reindex(idx).fillna(0.0).to_numpy(float)
+    pos = np.zeros(len(df), dtype=float)
+    trades = []
+    i = 0
+    while i < len(df) - horizon - 2:
+        if abs(s[i]) < threshold or not np.isfinite(opens[i + 1]):
+            i += 1
+            continue
+        direction = 1.0 if s[i] > 0 else -1.0
+        entry_i = i + 1
+        exit_i = entry_i + horizon
+        if exit_i >= len(df) or not np.isfinite(opens[exit_i]):
+            break
+        pos[entry_i:exit_i] = direction
+        gross = direction * (opens[exit_i] / opens[entry_i] - 1.0)
+        trades.append({
+            "signal_time": idx[i], "entry_time": idx[entry_i], "exit_time": idx[exit_i],
+            "direction": int(direction), "score": float(s[i]), "gross_return": float(gross),
+            "net_return": float(gross - ROUND_TRIP_COST), "horizon_minutes": horizon * 5,
+        })
+        i = exit_i
+    forward_open_ret = pd.Series(np.r_[opens[1:] / opens[:-1] - 1.0, 0.0], index=idx).replace([np.inf, -np.inf], 0).fillna(0)
+    p = pd.Series(pos, index=idx)
+    turn = p.diff().abs().fillna(p.abs())
+    returns = p * forward_open_ret - (ASTER_TAKER_FEE + SLIPPAGE_PER_SIDE) * turn
+    return SimResult(returns=returns, position=p, trades=pd.DataFrame(trades))
+
+
+def max_drawdown(ret: pd.Series) -> float:
+    eq = (1 + ret.fillna(0)).cumprod()
+    return float((eq / eq.cummax() - 1.0).min()) if len(eq) else np.nan
+
+
+def summarize_returns(ret: pd.Series, start: pd.Timestamp, leverage: float = 1.0) -> dict:
+    r = (ret.loc[ret.index >= start] * leverage).clip(lower=-0.95).dropna()
+    if len(r) < 2:
+        return {"total_return": np.nan, "cagr": np.nan, "max_drawdown": np.nan, "sharpe": np.nan}
+    eq_total = float((1 + r).prod())
+    days = max((r.index[-1] - r.index[0]).total_seconds() / 86400, 1.0)
+    cagr = eq_total ** (365.25 / days) - 1.0 if eq_total > 0 else -1.0
+    sd = r.std(ddof=1)
+    monthly = (1 + r).resample("ME").prod() - 1
+    return {
+        "total_return": eq_total - 1.0,
+        "cagr": float(cagr),
+        "max_drawdown": max_drawdown(r),
+        "sharpe": float(r.mean() / sd * math.sqrt(ANNUAL_BARS)) if sd > 0 else np.nan,
+        "average_month": float(monthly.mean()),
+        "median_month": float(monthly.median()),
+        "best_month": float(monthly.max()),
+        "worst_month": float(monthly.min()),
+        "positive_month_ratio": float((monthly > 0).mean()),
+    }
+
+
+def portfolio_result(data: dict[str, pd.DataFrame], scores: dict[str, pd.Series], threshold: float, horizon: int) -> tuple[pd.Series, pd.DataFrame, pd.DataFrame]:
+    returns = []
+    positions = []
+    trade_frames = []
+    for symbol, df in data.items():
+        sim = simulate_symbol(df, scores[symbol], threshold, horizon)
+        returns.append(sim.returns.rename(symbol))
+        positions.append(sim.position.rename(symbol))
+        if not sim.trades.empty:
+            t = sim.trades.copy()
+            t.insert(0, "symbol", symbol)
+            trade_frames.append(t)
+    rmat = pd.concat(returns, axis=1).fillna(0.0)
+    # Capital is split equally across eligible symbols; idle symbols remain cash.
+    port = rmat.mean(axis=1)
+    pmat = pd.concat(positions, axis=1).fillna(0.0)
+    trades = pd.concat(trade_frames, ignore_index=True) if trade_frames else pd.DataFrame()
+    return port, pmat, trades
+
+
+def select_variant(data: dict[str, pd.DataFrame], scores: dict[str, pd.Series], thresholds: list[float]) -> tuple[dict, list[dict]]:
+    rows = []
+    for horizon in [3, 6, 12]:
+        for threshold in thresholds:
+            port, _, trades = portfolio_result(data, scores, threshold, horizon)
+            stats = summarize_returns(port, START)
+            train = port[(port.index >= START) & (port.index < HOLDOUT)]
+            train_stats = summarize_returns(train, START)
+            trade_count = int(len(trades[trades["entry_time"] < HOLDOUT])) if not trades.empty else 0
+            score = np.nan_to_num(train_stats.get("sharpe"), nan=-5.0) + 1.5 * np.nan_to_num(train_stats.get("cagr"), nan=-1.0) + 1.2 * np.nan_to_num(train_stats.get("max_drawdown"), nan=-1.0) - (0.5 if trade_count < 30 else 0.0)
+            rows.append({"horizon": horizon, "threshold": threshold, "selection_score": float(score), "selection_trades": trade_count, **{f"selection_{k}": v for k, v in train_stats.items()}})
+    ranked = sorted(rows, key=lambda x: x["selection_score"], reverse=True)
+    return ranked[0], ranked
