@@ -1,0 +1,31 @@
+{
+  "strategyId": "V96_STOCK_INTRADAY_THEME_FLOW_V1",
+  "status": "NO_ROBUST_INTRADAY_THEME_FLOW_EDGE",
+  "selectedForProduction": false,
+  "selectedForLive": false,
+  "forwardMedian": {
+    "trades": 126,
+    "compoundedReturnPct": -6.785924,
+    "profitFactor": 0.550275,
+    "winRatePct": 38.888889,
+    "maxDrawdownPct": -7.187664
+  },
+  "severe": {
+    "trades": 126,
+    "compoundedReturnPct": -25.234284,
+    "profitFactor": 0.126027,
+    "winRatePct": 18.253968,
+    "maxDrawdownPct": -25.252465
+  },
+  "holdout": {
+    "forwardMedianReturnPct": -1.35367,
+    "severeReturnPct": -4.633282
+  },
+  "safety": {
+    "productionChanged": false,
+    "liveChanged": false,
+    "vpsChanged": false,
+    "cryptoV96Changed": false,
+    "ordersSent": false
+  }
+}
