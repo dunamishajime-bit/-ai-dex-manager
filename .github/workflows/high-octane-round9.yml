@@ -1,0 +1,64 @@
+name: High-octane round-nine fixed audit
+
+on:
+  push:
+    branches:
+      - analysis/high-octane-iterative-20260716
+    paths:
+      - "research/high_octane_round9_audit.py"
+      - "research/high_octane_followup.py"
+      - "research/high_octane_iterative.py"
+      - "research/integrated_profit_parts/**"
+      - "research/multiperp_cross_section.py"
+      - ".github/workflows/high-octane-round9.yml"
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "research/high_octane_round9_audit.py"
+      - "research/high_octane_followup.py"
+      - "research/high_octane_iterative.py"
+      - "research/integrated_profit_parts/**"
+      - "research/multiperp_cross_section.py"
+      - ".github/workflows/high-octane-round9.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip pandas numpy requests
+      - name: Restore cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache/multiperp_4h
+            .cache/integrated_funding
+          key: integrated-profit-202101-202606-v1
+      - name: Assemble dependency
+        run: cat research/integrated_profit_parts/*.part > research/integrated_profit_portfolio.py
+      - name: Normalize mixed cached timestamps
+        run: sed -i 's/pd.to_datetime(frame\["timestamp"\], utc=True)/pd.to_datetime(frame["timestamp"], utc=True, format="mixed")/' research/integrated_profit_portfolio.py
+      - name: Validate syntax
+        run: python -m py_compile research/integrated_profit_portfolio.py research/high_octane_iterative.py research/high_octane_followup.py research/high_octane_round9_audit.py
+      - name: Run fixed audit
+        run: |
+          set -o pipefail
+          python -m research.high_octane_round9_audit 2>&1 | tee high_octane_round9.log
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: high-octane-round9-audit
+          path: |
+            backtest_output_high_octane_round9/
+            high_octane_round9.log
+          if-no-files-found: warn

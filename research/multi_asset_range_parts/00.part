@@ -1,0 +1,250 @@
+#!/usr/bin/env python3
+"""Multi-asset, risk-sized leveraged range-reversion research.
+
+The exchange leverage setting (10x/15x/20x) is treated as a margin ceiling, not
+as permission to risk the whole account. Position notional is sized from a
+fixed account-risk budget and an ATR stop, then capped by isolated-margin and
+portfolio-gross limits.
+
+Selection periods:
+- development: 2021-01-01 through 2022-12-31
+- validation: 2023-01-01 through 2023-12-31
+- untouched holdout: 2024-01-01 through 2026-06-30
+
+Execution assumptions:
+- signals use completed 15-minute bars;
+- entry occurs at the next valid 15-minute open;
+- if stop and target are touched in the same bar, stop is assumed first;
+- actual settled funding is charged at the funding event;
+- no averaging down, no martingale, maximum three simultaneous positions;
+- daily loss and consecutive-loss gates block new entries.
+"""
+from __future__ import annotations
+
+import io
+import json
+import math
+import time
+import zipfile
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from dataclasses import asdict, dataclass
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+import requests
+
+OUT = Path("backtest_output_multi_asset_range")
+CACHE = Path(".cache/range_15m")
+FUNDING_CACHE = Path(".cache/range_funding")
+START_MONTH = "2021-01"
+END_MONTH = "2026-06"
+START = pd.Timestamp("2021-01-01", tz="UTC")
+DEV_END = pd.Timestamp("2023-01-01", tz="UTC")
+VAL_END = pd.Timestamp("2024-01-01", tz="UTC")
+FINAL_END = pd.Timestamp("2026-07-01", tz="UTC")
+BARS_PER_DAY = 96
+ANNUAL_BARS = BARS_PER_DAY * 365.25
+BASE_COST = 0.0006
+MAINT_MARGIN = 0.005
+
+# Includes failed/delisted contracts where public files exist, reducing pure
+# survivor-only selection. Symbols are selected point-in-time by liquidity.
+UNIVERSE = [
+    "BTCUSDT", "ETHUSDT", "BNBUSDT", "XRPUSDT", "ADAUSDT", "DOGEUSDT",
+    "SOLUSDT", "LINKUSDT", "LTCUSDT", "DOTUSDT", "AVAXUSDT", "BCHUSDT",
+    "LUNAUSDT", "FTTUSDT",
+]
+
+
+@dataclass(frozen=True)
+class SignalSpec:
+    name: str
+    range_hours: int
+    z_entry: float
+    adx_max: float
+    edge_fraction: float
+    max_vol_ratio: float
+    taker_threshold: float
+    width_ratio_max: float
+
+
+@dataclass(frozen=True)
+class ExitSpec:
+    name: str
+    stop_atr: float
+    max_hold_bars: int
+    min_reward_risk: float
+    target_fraction: float
+
+
+@dataclass(frozen=True)
+class RiskSpec:
+    name: str
+    leverage: int
+    risk_per_trade: float
+    margin_fraction: float
+    max_positions: int
+    max_gross: float
+
+
+@dataclass(frozen=True)
+class Candidate:
+    name: str
+    signal: str
+    exit: str
+    risk: str
+
+
+@dataclass
+class Trade:
+    symbol: str
+    direction: int
+    entry_i: int
+    entry_time: pd.Timestamp
+    entry: float
+    mark: float
+    stop: float
+    target: float
+    notional: float
+    leverage: int
+    margin_used: float
+    signal_score: float
+    initial_risk: float
+    entry_cost: float
+    bars_held: int = 0
+    funding_paid: float = 0.0
+    gross_pnl: float = 0.0
+
+
+@dataclass
+class Simulation:
+    returns: pd.Series
+    equity: pd.Series
+    gross: pd.Series
+    margin: pd.Series
+    trades: pd.DataFrame
+    costs: pd.Series
+    funding: pd.Series
+    liquidations: int
+
+
+def months() -> list[pd.Period]:
+    return list(pd.period_range(START_MONTH, END_MONTH, freq="M"))
+
+
+def parse_timestamp(values: pd.Series) -> pd.Series:
+    x = pd.to_numeric(values, errors="coerce")
+    if x.notna().sum() == 0:
+        return pd.to_datetime(values, utc=True, errors="coerce", format="mixed")
+    med = x.dropna().median()
+    if med > 1e16:
+        unit = "ns"
+    elif med > 1e13:
+        unit = "us"
+    elif med > 1e11:
+        unit = "ms"
+    else:
+        unit = "s"
+    return pd.to_datetime(x, unit=unit, utc=True, errors="coerce")
+
+
+def read_zip_csv(raw: bytes) -> bytes | None:
+    with zipfile.ZipFile(io.BytesIO(raw)) as archive:
+        names = [n for n in archive.namelist() if n.lower().endswith(".csv")]
+        return archive.read(names[0]) if names else None
+
+
+def parse_kline(raw: bytes) -> pd.DataFrame:
+    cols = [
+        "open_time", "open", "high", "low", "close", "volume",
+        "close_time", "quote_volume", "trades", "taker_buy_base",
+        "taker_buy_quote", "ignore",
+    ]
+    df = pd.read_csv(io.BytesIO(raw), header=None)
+    # Newer archive files can include a header row.
+    if str(df.iloc[0, 0]).lower() in {"open_time", "open time"}:
+        df = pd.read_csv(io.BytesIO(raw))
+        df.columns = [str(c).strip().lower().replace(" ", "_") for c in df.columns]
+    else:
+        df = df.iloc[:, : min(len(cols), df.shape[1])]
+        df.columns = cols[: df.shape[1]]
+    tcol = "open_time" if "open_time" in df else df.columns[0]
+    out = pd.DataFrame({"timestamp": parse_timestamp(df[tcol])})
+    for col in ["open", "high", "low", "close", "volume", "quote_volume", "taker_buy_quote"]:
+        if col in df:
+            out[col] = pd.to_numeric(df[col], errors="coerce")
+    if "quote_volume" not in out:
+        out["quote_volume"] = out["volume"] * out["close"]
+    if "taker_buy_quote" not in out:
+        out["taker_buy_quote"] = np.nan
+    out = out.dropna(subset=["timestamp", "open", "high", "low", "close", "quote_volume"])
+    out = out.loc[(out[["open", "high", "low", "close"]] > 0).all(axis=1)]
+    out = out.loc[out["quote_volume"] > 0]
+    return out.drop_duplicates("timestamp", keep="last").sort_values("timestamp")
+
+
+def download_kline(symbol: str, period: pd.Period) -> tuple[str, pd.DataFrame | None]:
+    CACHE.mkdir(parents=True, exist_ok=True)
+    stamp = period.strftime("%Y-%m")
+    cached = CACHE / f"{symbol}-15m-{stamp}.csv"
+    if cached.exists() and cached.stat().st_size > 0:
+        frame = pd.read_csv(cached)
+        frame["timestamp"] = pd.to_datetime(frame["timestamp"], utc=True, format="mixed")
+        return symbol, frame
+    url = (
+        "https://data.binance.vision/data/futures/um/monthly/klines/"
+        f"{symbol}/15m/{symbol}-15m-{stamp}.zip"
+    )
+    session = requests.Session()
+    session.headers.update({"User-Agent": "disdex-range-research/1.0"})
+    for attempt in range(3):
+        try:
+            response = session.get(url, timeout=75)
+            if response.status_code == 404:
+                return symbol, None
+            response.raise_for_status()
+            content = read_zip_csv(response.content)
+            if content is None:
+                return symbol, None
+            frame = parse_kline(content)
+            if not frame.empty:
+                frame.to_csv(cached, index=False)
+            return symbol, frame
+        except Exception as exc:
+            if attempt == 2:
+                print(f"WARN kline {symbol} {stamp}: {exc}")
+                return symbol, None
+            time.sleep(0.75 * (attempt + 1))
+    return symbol, None
+
+
+def parse_funding(raw: bytes) -> pd.DataFrame:
+    named = pd.read_csv(io.BytesIO(raw))
+    named.columns = [str(c).strip().lower() for c in named.columns]
+    tcols = [c for c in named if "time" in c]
+    rcols = [c for c in named if "rate" in c and "interval" not in c]
+    if tcols and rcols:
+        times, rates = named[tcols[0]], named[rcols[0]]
+    else:
+        pos = pd.read_csv(io.BytesIO(raw), header=None)
+        if pos.shape[1] < 2:
+            return pd.DataFrame(columns=["timestamp", "funding_rate"])
+        times = pos.iloc[:, 0]
+        rates = pos.iloc[:, 2 if pos.shape[1] >= 3 else 1]
+    out = pd.DataFrame({
+        "timestamp": parse_timestamp(times),
+        "funding_rate": pd.to_numeric(rates, errors="coerce"),
+    }).dropna()
+    out = out.loc[out["funding_rate"].abs() < 0.05]
+    return out.drop_duplicates("timestamp", keep="last").sort_values("timestamp")
+
+
+def download_funding(symbol: str, period: pd.Period) -> tuple[str, pd.DataFrame | None]:
+    FUNDING_CACHE.mkdir(parents=True, exist_ok=True)
+    stamp = period.strftime("%Y-%m")
+    cached = FUNDING_CACHE / f"{symbol}-funding-{stamp}.csv"
+    if cached.exists() and cached.stat().st_size > 0:
+        frame = pd.read_csv(cached)
+        frame["timestamp"] = pd.to_datetime(frame["timestamp"], utc=True, format="mixed")
+        return symbol, frame
