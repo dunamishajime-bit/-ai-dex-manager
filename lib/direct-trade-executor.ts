@@ -1,3 +1,6 @@
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+
 import {
     AsterApiError,
     AsterV3Client,
@@ -9,6 +12,8 @@ import {
     type AsterPositionRiskRow,
     type AsterPositionSide,
 } from "@/lib/aster-v3-client";
+
+const execFileAsync = promisify(execFile);
 
 export type DirectTradeStatus = "FILLED" | "PARTIALLY_FILLED" | "NEW" | "REJECTED" | "CANCELED" | "EXPIRED" | "UNKNOWN";
 
@@ -100,7 +105,7 @@ export interface DirectTradeExecutor {
     getPositions(): Promise<DirectPosition[]>;
     getOpenOrders(): Promise<DirectOpenOrder[]>;
     getMarketQuote(symbol: string): Promise<DirectMarketQuote>;
-    normalizeMarketQuantity(symbol: string, requestedQuantity: number, referencePrice: number): Promise<NormalizedOrderQuantity>;
+    normalizeMarketQuantity(symbol: string, requestedQuantity: number, referencePrice: number, options?: { allowBelowMinNotional?: boolean }): Promise<NormalizedOrderQuantity>;
     executeMarket(command: DirectTradeCommand): Promise<DirectTradeResult>;
     reconcileOrder(symbol: string, clientOrderId: string): Promise<DirectTradeResult>;
 }
@@ -115,6 +120,38 @@ export interface AsterDirectTradeExecutorOptions {
 function safeNumber(value: unknown, fallback = 0) {
     const number = Number(value);
     return Number.isFinite(number) ? number : fallback;
+}
+
+function boolEnvironment(name: string, fallback = false) {
+    const value = process.env[name];
+    if (value === undefined) return fallback;
+    return /^(1|true|yes|on)$/i.test(value.trim());
+}
+
+async function runFreshMarginGuardBeforeExposureOrder() {
+    if (!boolEnvironment("DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED", false)) return;
+    const python = process.env.DISDEX_PYTHON_BIN || "python3";
+    const script = process.env.DISDEX_V96_V52_MARGIN_GUARD_SCRIPT
+        || "scripts/disdex_v96_v52_margin_guard.py";
+    try {
+        const result = await execFileAsync(
+            python,
+            [script, "--mode", "live", "--preorder-check"],
+            {
+                cwd: process.cwd(),
+                env: process.env,
+                timeout: 30_000,
+                maxBuffer: 1024 * 1024,
+            },
+        );
+        const output = `${result.stdout || ""}\n${result.stderr || ""}`;
+        if (!/"stage":"HEALTHY"/.test(output) && !/"stage":\s*"HEALTHY"/.test(output)) {
+            throw new Error("Margin Guard did not return a HEALTHY order-time result.");
+        }
+    } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        throw new Error(`Fresh V96/V52 pre-order Margin Guard blocked exposure increase: ${message}`);
+    }
 }
 
 function asArray<T>(value: T | T[]): T[] {
@@ -272,7 +309,7 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
         };
     }
 
-    async normalizeMarketQuantity(symbol: string, requestedQuantity: number, referencePrice: number): Promise<NormalizedOrderQuantity> {
+    async normalizeMarketQuantity(symbol: string, requestedQuantity: number, referencePrice: number, options: { allowBelowMinNotional?: boolean } = {}): Promise<NormalizedOrderQuantity> {
         const row = await this.getSymbolInfo(symbol);
         const marketLot = row.filters?.find((filter) => filter.filterType === "MARKET_LOT_SIZE")
             ?? row.filters?.find((filter) => filter.filterType === "LOT_SIZE");
@@ -287,7 +324,7 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
         if (quantity < minQuantity || quantity <= 0) {
             throw new Error(`Quantity ${quantity} is below Aster minQty ${minQuantity} for ${symbol}.`);
         }
-        if (minNotional > 0 && notional + 1e-9 < minNotional) {
+        if (!options.allowBelowMinNotional && minNotional > 0 && notional + 1e-9 < minNotional) {
             throw new Error(`Notional ${notional.toFixed(4)} is below Aster minimum ${minNotional} for ${symbol}.`);
         }
         const precision = Math.min(12, Math.max(decimalPlaces(stepSize), row.quantityPrecision ?? 0));
@@ -379,6 +416,9 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
     async executeMarket(command: DirectTradeCommand): Promise<DirectTradeResult> {
         const symbol = command.symbol.toUpperCase();
         const clientOrderId = sanitizeClientOrderId(command.clientOrderId);
+        if (command.reduceOnly !== true) {
+            await runFreshMarginGuardBeforeExposureOrder();
+        }
         const quote = await this.getMarketQuote(symbol);
         const executablePrice = command.side === "BUY" ? quote.askPrice : quote.bidPrice;
         const adverseSlippageBps = command.expectedPrice > 0
@@ -391,7 +431,7 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
                 `Slippage guard blocked ${symbol}: ${adverseSlippageBps.toFixed(2)}bps > ${command.maxSlippageBps.toFixed(2)}bps.`,
             );
         }
-        const normalized = await this.normalizeMarketQuantity(symbol, command.quantity, executablePrice);
+        const normalized = await this.normalizeMarketQuantity(symbol, command.quantity, executablePrice, { allowBelowMinNotional: command.reduceOnly === true });
         try {
             const raw = await this.client.placeMarketOrder({
                 symbol,

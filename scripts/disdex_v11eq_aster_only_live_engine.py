@@ -63,7 +63,7 @@ class AsterOnlyStockEngine(base.StockEngine):
         if state.get("pending") or state.get("manualReviewReason") or state.get("bootstrapRequired"):
             return True
         daily = state.get("dailyRisk") or {}
-        return bool(daily.get("killSwitchActive"))
+        return bool(daily.get("killSwitchActive") or daily.get("tripped") or state.get("portfolioDailyLossLatch", {}).get("tripped"))
 
     def current_v96_notional(self) -> float:
         total = 0.0
