@@ -47,6 +47,8 @@ export const V12_X1_ALL = Object.freeze({
     maxHoldBars: 23,
     rebalanceBars: 20,
     cooldownBars: 1,
+    sameSideLossCooldownThreshold: 6,
+    sameSideLossCooldownHours: 6,
     allowNeutralRegime: true,
     neutralScoreThreshold: 1.00,
     normalRoundTripCostBps: 10,

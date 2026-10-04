@@ -21,6 +21,7 @@ export const PENGU_DUAL_LS_V2 = {
         impulseReturn24hMaximum: -0.07,
         setupExpiryHours: 24,
         armBounceMinimum: 0.0125,
+        limitedStructuralRebreakPct: 0.02,
         invalidateBounceAbove: 0.06,
         penguReturn24hMinimum: -0.12,
         btcEma168DistanceMinimum: -0.04,

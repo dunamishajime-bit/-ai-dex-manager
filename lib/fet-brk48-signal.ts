@@ -2,7 +2,7 @@ import type { AsterKline } from "@/lib/aster-v3-client";
 import { FET_BRK48_RESIDUAL } from "@/config/fetBrk48Runtime";
 
 export interface FetBrk48Bar { openTs:number; closeTs:number; open:number; high:number; low:number; close:number; volume:number; }
-export interface FetBrk48Signal { strategyId:string; symbol:"FETUSDT"; side:"LONG"; referenceTs:number; entryTs:number; entryPrice:number; prior48hHigh:number; volumeMedian72h:number; volumeRatio:number; hardStopPrice:number; exitTs:number; }
+export interface FetBrk48Signal { strategyId:string; symbol:"FETUSDT"; side:"LONG"; referenceTs:number; entryTs:number; entryPrice:number; prior48hHigh:number; volumeMedian72h:number; volumeRatio:number; return72h:number; hardStopPrice:number; exitTs:number; }
 function n(v:unknown){const x=Number(v);return Number.isFinite(x)?x:0;}
 export function normalizeFetH1(rows: readonly AsterKline[], now:number): FetBrk48Bar[] {
   return rows.map(r=>({openTs:n(r[0]),open:n(r[1]),high:n(r[2]),low:n(r[3]),close:n(r[4]),volume:n(r[5]),closeTs:n(r[6])}))
@@ -25,7 +25,8 @@ export function buildFetBrk48Signal(rows: readonly FetBrk48Bar[], now:number): F
   const prior48hHigh=Math.max(...prior48.map(r=>r.high));
   const volumeMedian72h=median(prior72.map(r=>r.volume));
   const volumeRatio=volumeMedian72h>0?signal.volume/volumeMedian72h:0;
-  if(!(signal.close>prior48hHigh)||volumeRatio+1e-12<FET_BRK48_RESIDUAL.minimumVolumeRatio)return undefined;
+  const return72h=signal.close/prior72[0].close-1;
+  if(!(signal.close>prior48hHigh)||volumeRatio+1e-12<FET_BRK48_RESIDUAL.minimumVolumeRatio||return72h+1e-12<FET_BRK48_RESIDUAL.minimumReturn72h)return undefined;
   const entryPrice=signal.close; // live sizing uses fresh executable quote; this is causal signal anchor only.
-  return {strategyId:FET_BRK48_RESIDUAL.strategyId,symbol:"FETUSDT",side:"LONG",referenceTs:signal.closeTs,entryTs,entryPrice,prior48hHigh,volumeMedian72h,volumeRatio,hardStopPrice:entryPrice*(1-FET_BRK48_RESIDUAL.hardStopPct),exitTs:entryTs+FET_BRK48_RESIDUAL.holdHours*3_600_000};
+  return {strategyId:FET_BRK48_RESIDUAL.strategyId,symbol:"FETUSDT",side:"LONG",referenceTs:signal.closeTs,entryTs,entryPrice,prior48hHigh,volumeMedian72h,volumeRatio,return72h,hardStopPrice:entryPrice*(1-FET_BRK48_RESIDUAL.hardStopPct),exitTs:entryTs+FET_BRK48_RESIDUAL.holdHours*3_600_000};
 }

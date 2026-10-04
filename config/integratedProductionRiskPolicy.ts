@@ -10,6 +10,13 @@ export const Q102_CAUSAL_V4_FAMILY_GROSS = Object.freeze({
 
 export type Q102CausalV4GrossFamily = keyof typeof Q102_CAUSAL_V4_FAMILY_GROSS;
 
+
+export const Q102_CAUSAL_V4_SIDE_GROSS_CAP = Object.freeze({
+  HIGH_VOL_SHORT: 0.70,
+  REV_SHORT: 1.25,
+  PB_LONG: 2.0,
+} as const);
+
 /**
  * Single production contract for the integrated V12/PENGU/Q102/V52 portfolio.
  * Importing this module has no side effects and cannot enable a runner or
@@ -60,6 +67,16 @@ export function quality102GrossForFamily(family: string | undefined): number {
     throw new Error(`QUALITY102_CAUSAL_V4_FAMILY_GROSS_UNRESOLVED:${family || "UNKNOWN"}`);
   }
   return value;
+}
+
+export function quality102GrossForFamilyAndSide(family: string | undefined, side: number | "LONG" | "SHORT" | undefined): number {
+  const base = quality102GrossForFamily(family);
+  const key = String(family || "").trim().toUpperCase();
+  const normalizedSide = typeof side === "number" ? (side > 0 ? "LONG" : side < 0 ? "SHORT" : "WAIT") : String(side || "").toUpperCase();
+  if (key === "HIGH_VOL" && normalizedSide === "SHORT") return Math.min(base, Q102_CAUSAL_V4_SIDE_GROSS_CAP.HIGH_VOL_SHORT);
+  if (key === "REV" && normalizedSide === "SHORT") return Math.min(base, Q102_CAUSAL_V4_SIDE_GROSS_CAP.REV_SHORT);
+  if (key === "PB" && normalizedSide === "LONG") return Math.min(base, Q102_CAUSAL_V4_SIDE_GROSS_CAP.PB_LONG);
+  return base;
 }
 
 export function resolveIntegratedProductionRiskPolicy(env: Record<string, string | undefined> = process.env) {

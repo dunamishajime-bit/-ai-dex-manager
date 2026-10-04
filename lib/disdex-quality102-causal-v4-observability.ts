@@ -1,4 +1,4 @@
-import { quality102GrossForFamily } from "../config/integratedProductionRiskPolicy";
+import { quality102GrossForFamilyAndSide } from "../config/integratedProductionRiskPolicy";
 import { evaluateQuality102CausalV4ImprovementGate } from "./disdex-quality102-causal-selector";
 import {
     diagnoseQuality102HighVolSymbol,
@@ -139,7 +139,7 @@ function nonHighVolNaturalSignal(
         family: candidate.family,
         variant: candidate.variant,
         layer: candidate.layer,
-        requestedGross: quality102GrossForFamily(candidate.family),
+        requestedGross: quality102GrossForFamilyAndSide(candidate.family, candidate.side),
         reason: "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
         dataCutoffTs: candidate.dataCutoffTs,
         hardStop: candidate.hardStop,

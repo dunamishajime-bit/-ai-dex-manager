@@ -1,5 +1,5 @@
 import { QUALITY102_CAUSAL_V1 } from "../config/disdexQuality102CausalV1Runtime";
-import { quality102GrossForFamily } from "../config/integratedProductionRiskPolicy";
+import { quality102GrossForFamilyAndSide } from "../config/integratedProductionRiskPolicy";
 import {
     evaluateQuality102CausalV4ImprovementGate,
 } from "./disdex-quality102-causal-selector";
@@ -59,7 +59,7 @@ function materializeS34(candidate: Quality102CausalV4S34Candidate): Quality102Ca
         family: candidate.family,
         variant: candidate.variant,
         layer: candidate.layer,
-        requestedGross: quality102GrossForFamily(candidate.family),
+        requestedGross: quality102GrossForFamilyAndSide(candidate.family, candidate.side),
         reason: "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
         dataCutoffTs: candidate.dataCutoffTs,
         hardStop: candidate.hardStop,
@@ -107,7 +107,7 @@ export function buildQuality102CausalV4Signal(
             ...legacy,
             referenceTs: entryTs,
             family: "HIGH_VOL",
-            requestedGross: quality102GrossForFamily("HIGH_VOL"),
+            requestedGross: quality102GrossForFamilyAndSide("HIGH_VOL", legacy.side),
             exitPolicy: "HIGH_VOL_TRAIL72",
             maxHoldHours: 72,
             brkEnabled: true,

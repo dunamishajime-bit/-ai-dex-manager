@@ -48,6 +48,7 @@ export interface FetBrk48State {
   position?: FetBrk48PositionState;
   pending?: FetBrk48PendingState;
   lastCompletedIdempotencyKey?: string;
+  lastExitTs?: number;
   manualReview?: string;
   lastReconciledAt?: number;
   failures: Array<{ occurredAt: number; message: string }>;
@@ -106,6 +107,7 @@ export async function readFetBrk48State(path: string, runtimeCommitSha?: string)
     throw new Error(`FET_STATE_RUNTIME_SHA_MISMATCH:${raw.runtimeCommitSha}:EXPECTED_${runtimeCommitSha}`);
   }
   if (raw.position && !validPosition(raw.position)) throw new Error("FET_STATE_POSITION_INVALID");
+  if (raw.lastExitTs !== undefined && !finitePositive(raw.lastExitTs)) throw new Error("FET_STATE_LAST_EXIT_TS_INVALID");
   if (raw.pending && !validPending(raw.pending)) throw new Error("FET_STATE_PENDING_INVALID");
   return {
     ...raw,

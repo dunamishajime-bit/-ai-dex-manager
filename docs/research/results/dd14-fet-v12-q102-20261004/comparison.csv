@@ -1,0 +1,5 @@
+variant,final_equity_jpy,profit_factor,maximum_mtm_drawdown,closed_trades,notes
+current-hype75-pengu1,3283600926,2.475837499,-0.2357087899,1320,reference
+q102-dd-static,2918300000,2.573,-0.1411574947,,HVS .70 + REV short 1.25 + PB long 2.0
+q102-plus-fet,3234000000,2.775,-0.1411574947,1361,FET 72h>=2% + 24h reentry cooldown
+final-candidate,3270844178.208338,2.7752053327781114,-0.14115749472086048,1359,+ V12 same-side 6 losses => 6h cooldown

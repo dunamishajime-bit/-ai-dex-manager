@@ -5,6 +5,8 @@ export const FET_BRK48_RESIDUAL = Object.freeze({
   lookbackHours: 48,
   volumeMedianHours: 72,
   minimumVolumeRatio: 1.2,
+  minimumReturn72h: 0.02,
+  reentryCooldownHours: 24,
   holdHours: 24,
   hardStopPct: 0.05,
   profitFloorTriggerPct: 0.05,

@@ -69,6 +69,10 @@ export interface V12X1AllRunnerState {
     deferredEntryReferenceTs?: number;
     lastCompletedIdempotencyKey?: string;
     cooldownUntilTs?: number;
+    /** Consecutive realized losing exits by side; used only for the 6-loss same-side cooldown. */
+    sideLossStreak?: Partial<Record<"LONG" | "SHORT", number>>;
+    /** Side-specific entry block expiry after six consecutive realized losses. */
+    sideLossCooldownUntilTs?: Partial<Record<"LONG" | "SHORT", number>>;
     activePositions?: V12ActivePositionState[];
     active?: V12ActivePositionState;
     pending?: V12PendingOrderState;
@@ -118,6 +122,12 @@ export class FileV12X1AllRunnerStateStore {
                 throw new Error("V12_STATE_SCHEMA_MISMATCH");
             }
             if (value.deferredEntryReferenceTs !== undefined && !Number.isFinite(Number(value.deferredEntryReferenceTs))) throw new Error("V12_STATE_DEFERRED_ENTRY_REFERENCE_INVALID");
+            for (const side of ["LONG", "SHORT"] as const) {
+                const streak = value.sideLossStreak?.[side];
+                const until = value.sideLossCooldownUntilTs?.[side];
+                if (streak !== undefined && (!Number.isFinite(Number(streak)) || Number(streak) < 0)) throw new Error("V12_STATE_SIDE_LOSS_STREAK_INVALID");
+                if (until !== undefined && (!Number.isFinite(Number(until)) || Number(until) < 0)) throw new Error("V12_STATE_SIDE_LOSS_COOLDOWN_INVALID");
+            }
             const legacyActive = value.active ? normalizeActive(value.active) : undefined;
             if (legacyActive) {
                 if (!(legacyActive.quantity > 0 && legacyActive.entryPrice > 0 && legacyActive.atrAtEntry > 0)) throw new Error("V12_STATE_ACTIVE_INVALID");

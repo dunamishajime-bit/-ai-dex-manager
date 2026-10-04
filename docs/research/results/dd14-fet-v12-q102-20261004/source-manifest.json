@@ -1,0 +1,40 @@
+{
+  "schema": "dd14-fet-v12-q102-research-promotion/v1",
+  "createdAt": "2026-10-04T23:00:00+09:00",
+  "repository": "dunamishajime-bit/-ai-dex-manager",
+  "baseProductionBranch": "codex/hype75-pengu1-live-20261004",
+  "baseProductionSha": "b9a0c86d6cf72b0209e44edc8883e45e6d241c5b",
+  "researchBranch": "research/dd14-fet-v12-q102-20261004",
+  "period": { "start": "2025-08-10", "end": "2026-08-10" },
+  "costBps": 10,
+  "baselineArchiveSha256": "891c36d8a5957cafe3aae65656a98b7c02a3c437c4f520fe63756d550f08b4fb",
+  "candidateLedgerSha256": "83000b6a21ad92567e12504e4d982afb33d2f59e171ef83d1cd305c7360d5ed9",
+  "finalSummarySha256": "8d863c5cc7e8b1dadabf48b9cb019b06e9421301ccbc68d2105f0cc1c89f8446",
+  "metricsSha256": "e2608fff63c66b8a44b63f3f519a0c4589ce58de00bf5491e59ba0a8a6da6107",
+  "portfolioTradesSha256": "69f23a549dc00ec1c3e84f7be439b4119aa93da4590a3cf38b20af59bb383ffa",
+  "logic": {
+    "PENGU": { "fixedEntryGross": 1.0, "limitedStructuralRebreakPct": 0.02 },
+    "HYPE": { "ema240Slope24hMinimumBps": 75 },
+    "Q102": { "HIGH_VOL_SHORT": 0.70, "REV_SHORT": 1.25, "PB_LONG": 2.0 },
+    "FET": { "minimumReturn72h": 0.02, "reentryCooldownHours": 24 },
+    "V12": { "sameSideLossCooldownThreshold": 6, "sameSideLossCooldownHours": 6 },
+    "unchanged": ["V52", "IDLE", "RESIDUAL"]
+  },
+  "result": {
+    "finalEquityJpy": 3270844178.208338,
+    "profitFactor": 2.7752053327781114,
+    "maximumMtmDrawdown": -0.14115749472086048,
+    "closedTrades": 1359,
+    "ownershipConflicts": 0,
+    "accounting": "PASS"
+  },
+  "validation": {
+    "dd14ContractTests": "3/3 PASS",
+    "regressionTests": "26/26 PASS",
+    "additionalV12Tests": "8/8 PASS",
+    "q102V4SignalSelftest": "PASS",
+    "penguTypecheck": "PASS",
+    "fullTypecheck": "PASS"
+  },
+  "safety": { "liveChanged": false, "vpsChanged": false, "ordersSent": false }
+}

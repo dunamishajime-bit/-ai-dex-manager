@@ -327,6 +327,7 @@ async function reconcilePending(
     if (state.position?.stopClientOrderId) await deps.adapter.cancel(state.position.stopClientOrderId);
     state.position = undefined;
     state.pending = undefined;
+    state.lastExitTs = (deps.now || Date.now)();
     state.lastCompletedIdempotencyKey = pending.idempotencyKey;
     state.lastReconciledAt = (deps.now || Date.now)();
     await writeFetBrk48State(deps.statePath, state);
@@ -387,6 +388,7 @@ async function executeExit(
   if (state.position?.stopClientOrderId) await deps.adapter.cancel(state.position.stopClientOrderId);
   state.position = undefined;
   state.pending = undefined;
+  state.lastExitTs = now;
   state.lastCompletedIdempotencyKey = idempotencyKey;
   state.lastReconciledAt = now;
   await writeFetBrk48State(deps.statePath, state);
@@ -465,6 +467,7 @@ export class FetBrk48LiveRunner {
           if (stop && String(stop.status).toUpperCase() === "FILLED") {
             const completedStopClientOrderId = state.position.stopClientOrderId;
             state.position = undefined;
+            state.lastExitTs = now;
             state.lastCompletedIdempotencyKey = completedStopClientOrderId;
             state.lastReconciledAt = now;
             await writeFetBrk48State(this.deps.statePath, state);
@@ -529,6 +532,10 @@ export class FetBrk48LiveRunner {
       ]);
       const unmanaged = openOrders.filter((order) => !managed.has(order) && !quality102OwnsOrder(q102, order));
       if (unmanaged.length) return { status: "blocked", message: "FET_UNMANAGED_OPEN_ORDER_CONFLICT", ordersSent: 0 };
+
+      if (state.lastExitTs && now < state.lastExitTs + FET_BRK48_RESIDUAL.reentryCooldownHours * 3_600_000) {
+        return { status: "held", message: "FET_REENTRY_COOLDOWN_ACTIVE", ordersSent: 0 };
+      }
 
       const klines = await this.deps.client.getKlines("FETUSDT", "1h", 120);
       const evaluationDecisionTs = Math.floor(now / 3_600_000) * 3_600_000;

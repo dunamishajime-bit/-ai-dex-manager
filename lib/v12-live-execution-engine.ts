@@ -33,6 +33,30 @@ import type { StrictPortfolioIntent } from "@/lib/disdex-strict-portfolio-planne
 const V12_SYMBOLS = new Set(V12_X1_ALL.universe.map((symbol) => `${symbol}USDT`));
 const EPS = 1e-12;
 
+function recordV12SideLossOutcome(state: V12X1AllRunnerState, active: V12ActivePositionState, exitPrice: number, exitTs: number) {
+    if (!(exitPrice > 0) || !(active.entryPrice > 0)) return;
+    const loss = active.side === "LONG" ? exitPrice < active.entryPrice - EPS : exitPrice > active.entryPrice + EPS;
+    const win = active.side === "LONG" ? exitPrice > active.entryPrice + EPS : exitPrice < active.entryPrice - EPS;
+    if (!loss && !win) return;
+    const streak = { ...(state.sideLossStreak || {}) };
+    const cooldown = { ...(state.sideLossCooldownUntilTs || {}) };
+    if (loss) {
+        const next = Math.max(0, Number(streak[active.side] || 0)) + 1;
+        streak[active.side] = next;
+        if (next >= V12_X1_ALL.sameSideLossCooldownThreshold) {
+            cooldown[active.side] = Math.max(Number(cooldown[active.side] || 0), exitTs + V12_X1_ALL.sameSideLossCooldownHours * 3_600_000);
+        }
+    } else {
+        streak[active.side] = 0;
+    }
+    state.sideLossStreak = streak;
+    state.sideLossCooldownUntilTs = cooldown;
+}
+
+function v12SideLossCooldownActive(state: V12X1AllRunnerState, side: "LONG" | "SHORT", referenceTs: number) {
+    return Number(state.sideLossCooldownUntilTs?.[side] || 0) > referenceTs;
+}
+
 function isCryptoPortfolioSleeve(sleeve: string) {
     return sleeve === "V12" || sleeve === "PENGU_DUAL_LS_V2" || sleeve === "QUALITY102_CAUSAL_V1" || sleeve === "FET_RESIDUAL" || sleeve === "HYPE_LONG" || sleeve === "ZEC_LONG" || sleeve === "IDLE_PRIORITY_SHORT";
 }
@@ -242,9 +266,9 @@ export class V12LiveExecutionEngine {
         const ids = [active.protection.stopClientOrderId, active.protection.takeProfitClientOrderId].filter((value): value is string => Boolean(value));
         for (const clientOrderId of ids) {
             const order = await this.d.adapter.queryOrderSameId(active.symbol, clientOrderId);
-            if (order?.status === "FILLED") return true;
+            if (order?.status === "FILLED") return order;
         }
-        return false;
+        return undefined;
     }
 
     /**
@@ -273,13 +297,18 @@ export class V12LiveExecutionEngine {
             const missing = actives.filter((active) => !actualSymbols.has(active.symbol.toUpperCase()));
             if (!missing.length) return undefined;
 
+            const completed = new Map<string, Awaited<ReturnType<V12AsterLiveAdapter["queryOrderSameId"]>>>();
             for (const active of missing) {
-                if (!(await this.completedProtectionExit(active))) {
-                    return this.fail(state, `V12_STATE_ONLY_POSITION_MISMATCH:${active.symbol}`);
-                }
+                const order = await this.completedProtectionExit(active);
+                if (!order) return this.fail(state, `V12_STATE_ONLY_POSITION_MISMATCH:${active.symbol}`);
+                completed.set(active.positionId, order);
             }
 
-            for (const active of missing) await cancelV12Protection(this.d.adapter, active.protection);
+            for (const active of missing) {
+                const order = completed.get(active.positionId);
+                recordV12SideLossOutcome(state, active, Number(order?.averagePrice || order?.stopPrice || 0), Number(order?.updatedAt || this.now()));
+                await cancelV12Protection(this.d.adapter, active.protection);
+            }
             const missingIds = new Set(missing.map((row) => row.positionId));
             syncActivePositions(state, actives.filter((row) => !missingIds.has(row.positionId)));
             state.cooldownUntilTs = Math.max(
@@ -375,7 +404,10 @@ export class V12LiveExecutionEngine {
         if (actual) return this.fail(state, `V12_PENDING_EXIT_POSITION_REMAINS:${result.status}`);
         const remaining = activePositionsOf(state).filter((active) => active.symbol.toUpperCase() !== pending.symbol.toUpperCase());
         const exiting = activePositionsOf(state).find((active) => active.symbol.toUpperCase() === pending.symbol.toUpperCase());
-        if (exiting) await cancelV12Protection(this.d.adapter, exiting.protection);
+        if (exiting) {
+            recordV12SideLossOutcome(state, exiting, Number(result.averagePrice || pending.expectedPrice || 0), Number(result.updatedAt || this.now()));
+            await cancelV12Protection(this.d.adapter, exiting.protection);
+        }
         syncActivePositions(state, remaining); state.pending = undefined; state.lastCompletedIdempotencyKey = pending.idempotencyKey; state.cooldownUntilTs = pending.signalTs + V12_X1_ALL.cooldownBars * V12_X1_ALL.timeframeHours * 3_600_000; await this.d.stateStore.save(state);
         return { status: "exited" as const, reason: "EXIT_RECONCILED", clientOrderId: pending.clientOrderId };
     }
@@ -486,11 +518,18 @@ export class V12LiveExecutionEngine {
                 const actualSymbols = new Set(v12Actual.map((row) => row.symbol.toUpperCase()));
                 const missing = stateActives.filter((active) => !actualSymbols.has(active.symbol.toUpperCase()));
                 if (!missing.length || v12Actual.length > stateActives.length) return this.fail(state, "V12_POSITION_COUNT_MISMATCH");
+                const completed = new Map<string, Awaited<ReturnType<V12AsterLiveAdapter["queryOrderSameId"]>>>();
                 for (const active of missing) {
-                    if (!(await this.completedProtectionExit(active))) return this.fail(state, `V12_STATE_ONLY_POSITION_MISMATCH:${active.symbol}`);
+                    const order = await this.completedProtectionExit(active);
+                    if (!order) return this.fail(state, `V12_STATE_ONLY_POSITION_MISMATCH:${active.symbol}`);
+                    completed.set(active.positionId, order);
                 }
                 const remaining = stateActives.filter((active) => actualSymbols.has(active.symbol.toUpperCase()));
-                for (const active of missing) await cancelV12Protection(this.d.adapter, active.protection);
+                for (const active of missing) {
+                    const order = completed.get(active.positionId);
+                    recordV12SideLossOutcome(state, active, Number(order?.averagePrice || order?.stopPrice || 0), Number(order?.updatedAt || this.now()));
+                    await cancelV12Protection(this.d.adapter, active.protection);
+                }
                 syncActivePositions(state, remaining); state.cooldownUntilTs = (state.lastReferenceTs || this.now()) + V12_X1_ALL.cooldownBars * V12_X1_ALL.timeframeHours * 3_600_000; await this.d.stateStore.save(state);
             } else {
                 const refreshed: V12ActivePositionState[] = [];
@@ -517,6 +556,7 @@ export class V12LiveExecutionEngine {
         if (result.status === "UNKNOWN") return this.fail(state, `V12_EXIT_UNKNOWN:${clientOrderId}`);
         const positions = await this.d.adapter.getPositions(); const remains = positions.some((row) => row.symbol.toUpperCase() === active.symbol && Math.abs(row.quantity) > EPS);
         if (remains) return this.fail(state, `V12_EXIT_NOT_FLAT:${result.status}`);
+        recordV12SideLossOutcome(state, active, Number(result.averagePrice || pending.expectedPrice || 0), signalTs);
         await cancelV12Protection(this.d.adapter, active.protection); syncActivePositions(state, activePositionsOf(state).filter((row) => row.positionId !== active.positionId)); state.pending = undefined; state.lastCompletedIdempotencyKey = pending.idempotencyKey; state.cooldownUntilTs = signalTs + V12_X1_ALL.cooldownBars * V12_X1_ALL.timeframeHours * 3_600_000; await this.d.stateStore.save(state);
         return { status: "exited", reason, clientOrderId };
     }
@@ -865,7 +905,9 @@ export class V12LiveExecutionEngine {
                 }
                 const currentActives = activePositionsOf(state);
                 const existingSymbols = new Set(currentActives.map((row) => row.symbol.toUpperCase()));
-                const next = signals.find((candidate) => !existingSymbols.has(`${candidate.symbol}USDT`) && v12SlotAvailable(currentActives, candidate.rank));
+                const next = signals.find((candidate) => !existingSymbols.has(`${candidate.symbol}USDT`)
+                    && v12SlotAvailable(currentActives, candidate.rank)
+                    && !v12SideLossCooldownActive(state, candidate.side, latestTs));
                 if (!next) {
                     state.deferredEntryReferenceTs = undefined; await this.d.stateStore.save(state);
                     return { status: "held", reason: "V12_POSITION_HELD", signal: signals[0] };
@@ -949,6 +991,10 @@ export class V12LiveExecutionEngine {
             let lastResult: V12LiveTickResult = { status: "no-signal", reason: "NO_ENTRY" };
             let enteredCount = 0;
             for (const signal of signals.slice(0, V12_X1_ALL.maximumPositions)) {
+                if (v12SideLossCooldownActive(state, signal.side, latestTs)) {
+                    if (enteredCount === 0) lastResult = { status: "held", reason: "V12_SIDE_LOSS_COOLDOWN_ACTIVE", signal };
+                    continue;
+                }
                 const currentActives = activePositionsOf(state);
                 if (currentActives.some((position) => position.symbol.toUpperCase() === `${signal.symbol}USDT`) || !v12SlotAvailable(currentActives, signal.rank)) continue;
                 const [freshAccount, freshPositions] = await Promise.all([this.d.adapter.getAccountSnapshot(), this.d.adapter.getPositions()]);
