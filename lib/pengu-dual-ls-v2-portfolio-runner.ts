@@ -24,7 +24,7 @@ import type {
     PenguDualLsV2RunnerState,
     PenguDualLsV2RunnerStateStore,
 } from "@/lib/pengu-dual-ls-v2-runner-state";
-import type { PenguDualLsV2Mode } from "@/config/penguDualLsV2Runtime";
+import { PENGU_DUAL_LS_V2, type PenguDualLsV2Mode } from "@/config/penguDualLsV2Runtime";
 import { readDisDexV96KillSwitch } from "@/lib/disdex-v96-live-risk-controls";
 import { readSharedCryptoDailyRisk, readSharedCryptoDailyRiskWithRolloverRetry } from "@/lib/disdex-shared-crypto-daily-risk";
 import { readPortfolioDdGovernor } from "@/lib/disdex-portfolio-dd-governor";
@@ -142,10 +142,18 @@ function isSharedCapacityBlock(reason: unknown) {
 
 
 export function buildPenguV8StrictGrossContract(requestedGross: number, equity: number, available: number) {
-    const requested = Number.isFinite(requestedGross) ? Math.max(0, requestedGross) : 0;
+    const requested = Number.isFinite(requestedGross) && requestedGross > 0 ? PENGU_DUAL_LS_V2.fixedEntryGross : 0;
     const safeEquity = Number.isFinite(equity) ? Math.max(0, equity) : 0;
-    const safeAvailable = Number.isFinite(available) ? Math.max(0, available) : 0;
-    return { requestedGross: requested, intentGross: requested, intentNotionalUsd: Math.min(requested * safeEquity, safeAvailable) };
+    // Available balance is collateral, not a notional cap. The executor's
+    // existing 5x-cross margin gate validates collateral before submission.
+    void available;
+    return { requestedGross: requested, intentGross: requested, intentNotionalUsd: requested * safeEquity };
+}
+
+export function isPenguFixedEntryAllocation(gross: number, maximumGross: number) {
+    return Number.isFinite(gross) && Number.isFinite(maximumGross)
+        && Math.abs(gross - PENGU_DUAL_LS_V2.fixedEntryGross) <= 1e-9
+        && maximumGross + 1e-9 >= PENGU_DUAL_LS_V2.fixedEntryGross;
 }
 
 function validLiveQuote(quote: DirectMarketQuote, symbol: string, now: number, maxAgeMs = 5 * 60_000) {
@@ -324,7 +332,7 @@ function statePositionFromActual(actual: DirectPosition, previous?: PenguDualLsV
         entryTs: previous?.entryTs || actual.updatedAt || Date.now(),
         entryPrice: actual.entryPrice,
         quantity: Math.abs(actual.quantity),
-        gross: previous?.recoveryV8?.partialDefenseTriggered ? 0.25 : previous?.gross || 0,
+        gross: previous?.recoveryV8?.partialDefenseTriggered ? previous.recoveryV8.remainingGross : previous?.gross || 0,
         highWaterMark: side > 0 ? Math.max(previous?.highWaterMark || actual.entryPrice, actual.markPrice) : previous?.highWaterMark || actual.markPrice,
         lowWaterMark: side < 0 ? Math.min(previous?.lowWaterMark || actual.entryPrice, actual.markPrice) : previous?.lowWaterMark || actual.markPrice,
         entryVersion: previous?.entryVersion || "LEGACY_V2",
@@ -458,11 +466,11 @@ export class PenguDualLsV2PortfolioRunner {
         state.position = {
             ...position,
             quantity: actualQuantity,
-            gross: 0.25,
+            gross: recovery.originalGross * actualQuantity / recovery.originalQuantity,
             recoveryV8: {
                 ...recovery,
                 quantity: actualQuantity,
-                remainingGross: 0.25,
+                remainingGross: recovery.originalGross * actualQuantity / recovery.originalQuantity,
                 partialDefenseTriggered: true,
                 actualPartialFill: {
                     filledAtTs: this.now(),
@@ -551,8 +559,8 @@ export class PenguDualLsV2PortfolioRunner {
                         entryPrice,
                         quantity: result.executedQuantity,
                         originalQuantity: result.executedQuantity,
-                        originalGross: 0.5,
-                        remainingGross: 0.5,
+                        originalGross: pending.targetGross,
+                        remainingGross: pending.targetGross,
                         partialDefenseTriggered: false,
                         highWaterMark: entryPrice,
                         logicalEntryPrice: entryPrice,
@@ -1124,8 +1132,12 @@ export class PenguDualLsV2PortfolioRunner {
                         }
                     }
                     requestedGross = accepted.requestedGross ?? requestedGross;
-                    targetGross = Math.min(accepted.gross, this.dependencies.config.maximumGross);
-                    targetNotional = Math.min(targetGross * workingEquity, available);
+                    if (!isPenguFixedEntryAllocation(accepted.gross, this.dependencies.config.maximumGross)) {
+                        await this.dependencies.stateStore.save(state);
+                        return { status: "held", message: "PENGU_FIXED1_NO_LOT_SHRINK: full1.0 allocation is unavailable.", signal };
+                    }
+                    targetGross = PENGU_DUAL_LS_V2.fixedEntryGross;
+                    targetNotional = targetGross * workingEquity;
                     break;
                 }
                 if (!accepted) throw new Error("PENGU_STRICT_PORTFOLIO_REDUCTION_RETRY_EXHAUSTED");
@@ -1180,7 +1192,7 @@ export class PenguDualLsV2PortfolioRunner {
                     }
                     : undefined,
                 recoveryV8Seed: !reduceOnly && signal.entryVersion === "RECOVERY_V8"
-                    ? { originalGross: 0.5, remainingGross: 0.5 }
+                    ? { originalGross: targetGross, remainingGross: targetGross }
                     : undefined,
             };
             let exposureReservation: { reservationId: string } | undefined;

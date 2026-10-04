@@ -12,7 +12,7 @@ test("HYPE live policy matches the approved high-win Aster fixed-ledger contract
   assert.equal(HYPE_TREND_LONG_POLICY.minimumBreakoutBps, 30);
   assert.equal(HYPE_TREND_LONG_POLICY.maximumDistanceFromSlowEmaBps, 900);
   assert.equal(HYPE_TREND_LONG_POLICY.regimeEmaPeriod, 240);
-  assert.equal(HYPE_TREND_LONG_POLICY.minimumRegimeSlopeBps, 25);
+  assert.equal(HYPE_TREND_LONG_POLICY.minimumRegimeSlopeBps, 75);
   assert.equal(HYPE_TREND_LONG_POLICY.atrPeriod, 14);
   assert.equal(HYPE_TREND_LONG_POLICY.stopAtrMultiple, 2.5);
   assert.equal(HYPE_TREND_LONG_POLICY.trailingAtrMultiple, 3);

@@ -17,7 +17,7 @@ export const HYPE_TREND_LONG_POLICY = Object.freeze({
   minimumBreakoutBps: 30,
   maximumDistanceFromSlowEmaBps: 900,
   regimeEmaPeriod: 240,
-  minimumRegimeSlopeBps: 25,
+  minimumRegimeSlopeBps: 75,
   atrPeriod: 14,
   stopAtrMultiple: 2.5,
   trailingAtrMultiple: 3,

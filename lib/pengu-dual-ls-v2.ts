@@ -611,11 +611,7 @@ export function buildPenguDualLsV2Signal(history: PenguDualLsV2History, position
         strategyId: PENGU_DUAL_LS_V2.id,
         referenceTs: latest.features.referenceTs,
         side: decision.side,
-        targetGross: recoveryDecision?.kind === "RECOVERY_V8" && !baseDecision.active
-            ? recoveryDecision.gross
-            : options.v64DynamicLongEnabled === true && decision.side > 0
-                ? penguV8V64RequestedLongGross(latest.features)
-                : targetGrossForAtr(latest.features.atr24Ratio),
+        targetGross: PENGU_DUAL_LS_V2.fixedEntryGross,
         entryTs: latest.features.referenceTs + HOUR,
         reason: decision.reason,
         features: latest.features,

@@ -109,11 +109,10 @@ function validRecoveryV8State(value: unknown, position: PenguDualLsV2Position): 
         && (state.logicalEntryPrice === undefined || Number.isFinite(state.logicalEntryPrice) && state.logicalEntryPrice > 0)
         && (state.recoveryExecutionPrice === undefined || Number.isFinite(state.recoveryExecutionPrice) && state.recoveryExecutionPrice > 0)
         && Number.isFinite(originalQuantity) && originalQuantity > 0
-        && Number.isFinite(originalGross) && Math.abs(originalGross - 0.5) <= 1e-12
+        && Number.isFinite(originalGross) && (Math.abs(originalGross - 0.5) <= 1e-12 || Math.abs(originalGross - 1.0) <= 1e-12)
         && Number.isFinite(remainingGross)
-        && (Math.abs(remainingGross - 0.5) <= 1e-12 || Math.abs(remainingGross - 0.25) <= 1e-12)
         && typeof state.partialDefenseTriggered === "boolean"
-        && (partialDefenseTriggered ? Math.abs(remainingGross - 0.25) <= 1e-12 : Math.abs(remainingGross - 0.5) <= 1e-12)
+        && Math.abs(remainingGross - originalGross * (partialDefenseTriggered ? 0.5 : 1)) <= 1e-12
         && (state.protectionLifecycle === "FULL_HARD_STOP" || state.protectionLifecycle === "SPLIT_PROTECTION" || state.protectionLifecycle === "MANUAL_REVIEW")
         && (state.protectionLifecycle === "MANUAL_REVIEW"
             || state.protectionLifecycle === "FULL_HARD_STOP" && typeof state.fullHardStopClientOrderId === "string" && state.fullHardStopClientOrderId.length > 0

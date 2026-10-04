@@ -125,7 +125,7 @@ function partialPosition(position: RecoveryV8Position) {
     return {
         ...position,
         quantity: position.quantity - partialQuantity,
-        remainingGross: PENGU_RECOVERY_V8.partial.remainingGross,
+        remainingGross: position.remainingGross * (1 - ratio),
         partialDefenseTriggered: true,
     };
 }
@@ -156,7 +156,7 @@ export function evaluateRecoveryV8PositionBar(position: RecoveryV8Position, row:
             events,
             triggerPrice: partialEligible ? partialPrice : undefined,
             partialQuantity: partialEligible ? position.quantity * (PENGU_RECOVERY_V8.partial.gross / PENGU_RECOVERY_V8.initialGross) : undefined,
-            partialGross: partialEligible ? PENGU_RECOVERY_V8.partial.gross : undefined,
+            partialGross: partialEligible ? position.remainingGross * (PENGU_RECOVERY_V8.partial.gross / PENGU_RECOVERY_V8.initialGross) : undefined,
             stopPrice: hardPrice,
         };
     }
@@ -184,7 +184,7 @@ export function evaluateRecoveryV8PositionBar(position: RecoveryV8Position, row:
             events,
             triggerPrice: partialPrice,
             partialQuantity: position.quantity * (PENGU_RECOVERY_V8.partial.gross / PENGU_RECOVERY_V8.initialGross),
-            partialGross: PENGU_RECOVERY_V8.partial.gross,
+            partialGross: position.remainingGross * (PENGU_RECOVERY_V8.partial.gross / PENGU_RECOVERY_V8.initialGross),
         };
     }
     return { kind: "NONE", updatedPosition, events };
