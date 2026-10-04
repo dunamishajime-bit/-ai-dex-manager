@@ -10,6 +10,7 @@ import { SITE_BRAND_NAME } from "@/lib/site-access";
 const NAV_ITEMS = [
   { href: "/", label: "ホーム", icon: Home },
   { href: "/positions", label: "ダッシュボード", icon: BarChart3 },
+  { href: "/realtime", label: "リアルタイム", icon: BarChart3 },
   { href: "/decision-status", label: "判定状況", icon: BarChart3 },
   { href: "/decision-status/fet", label: "FET 判定", icon: BarChart3 },
   { href: "/decision-status/hype", label: "HYPE 判定", icon: BarChart3 },

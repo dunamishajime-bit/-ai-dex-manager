@@ -103,7 +103,7 @@ export function LivePerformanceOverviewCharts() {
                 <YAxis stroke="#7f8a99" fontSize={10} tickFormatter={compact} width={68} />
                 <Tooltip
                   contentStyle={{ backgroundColor: "#0b1017", borderColor: "#374151" }}
-                  formatter={(value) => [money(numeric(value)), "資産"]}
+                  formatter={(value: unknown) => [money(numeric(value)), "資産"]}
                 />
                 <Area type="monotone" dataKey="assetUsd" stroke="#e8c65a" fill="url(#performanceAssetFill)" strokeWidth={2} />
               </AreaChart>
@@ -135,7 +135,7 @@ export function LivePerformanceOverviewCharts() {
                 <YAxis stroke="#7f8a99" fontSize={10} tickFormatter={compact} width={68} />
                 <Tooltip
                   contentStyle={{ backgroundColor: "#0b1017", borderColor: "#374151" }}
-                  formatter={(value) => [money(numeric(value), true), "累積損益"]}
+                  formatter={(value: unknown) => [money(numeric(value), true), "累積損益"]}
                 />
                 <ReferenceLine y={0} stroke="#5d6673" />
                 <Line type="monotone" dataKey="cumulativePnlUsd" stroke="#4ade80" strokeWidth={2} dot={false} />

@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 const NAV_ITEMS = [
   { icon: Home, label: "ホーム", href: "/" },
   { icon: BarChart3, label: "ダッシュ", href: "/positions" },
+  { icon: BarChart3, label: "リアルタイム", href: "/realtime" },
   { icon: BarChart3, label: "判定状況", href: "/decision-status" },
   { icon: Wallet, label: "ウォレット", href: "/wallets" },
   { icon: CalendarDays, label: "損益", href: "/performance" },

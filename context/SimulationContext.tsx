@@ -7359,7 +7359,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
                                 args: [address as `0x${string}`],
                             })),
                         });
-                        chunkResults = results.map((result) => (
+                        chunkResults = results.map((result: { status: string; result?: unknown }) => (
                             result.status === "success"
                                 ? { status: "success", result: result.result as bigint }
                                 : { status: "failure" }

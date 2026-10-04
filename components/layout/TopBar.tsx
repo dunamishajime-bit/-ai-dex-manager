@@ -10,6 +10,7 @@ import { SITE_BRAND_NAME } from "@/lib/site-access";
 import { useLiveStatus } from "@/hooks/useLiveStatus";
 
 const PAGE_TITLES: Record<string, string> = {
+  "/realtime": "リアルタイム判定 Ranking",
   "/": "ホーム",
   "/positions": "\u30c0\u30c3\u30b7\u30e5\u30dc\u30fc\u30c9",
   "/decision-status": "判定状況",

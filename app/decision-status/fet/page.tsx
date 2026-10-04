@@ -1,5 +1,6 @@
 import { DecisionStatusPanel } from "@/components/features/DecisionStatusPanel";
 import { LivePerformanceDashboard } from "@/components/features/LivePerformanceDashboard";
+import { FetGatePanel } from "@/components/features/FetGatePanel";
 
 /** Same 30-second runner snapshot as the five-logic overview. This page cannot submit orders. */
 export default function FetDecisionPage() {
@@ -10,6 +11,7 @@ export default function FetDecisionPage() {
         <h1 className="gold-heading mt-2 text-2xl font-black md:text-3xl">FET 稼働・判定・実績</h1>
         <p className="mt-3 break-words text-sm text-white/70">本番FETのstate・稼働SHAを現在のProduction SHAと照合し、約定履歴に基づく損益を表示します。未取得情報は推測せず表示しません。</p>
       </header>
+      <FetGatePanel />
       <DecisionStatusPanel logic="fet" />
       <div className="min-w-0 overflow-x-auto rounded-[28px] border border-white/10 bg-black/20 p-3">
         <LivePerformanceDashboard logic="FET" title="FET 実約定損益・月次履歴" />
