@@ -1,0 +1,124 @@
+name: PENGU Targeted Entry Repair Forward
+
+on:
+  push:
+    branches:
+      - research/pengu-current-20241004-20251004-bt-20261004
+    paths:
+      - "scripts/research_pengu_targeted_entry_repair_study.ts"
+      - "scripts/research_select_pengu_targeted_repairs.py"
+      - "scripts/research_fetch_aster_pengu_targeted_forward.py"
+      - ".github/workflows/pengu-targeted-entry-repair-forward.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pengu-targeted-entry-repair-forward
+  cancel-in-progress: false
+
+jobs:
+  study:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Verify Production ancestry
+        run: |
+          set -Eeuo pipefail
+          git merge-base --is-ancestor 53eeff5417636369d4709fddfd47d7916ddcf3b1 HEAD
+          grep -q 'logicProfile: "COMBINED_FILTERED_Q60_DD17_H72"' config/penguDualLsV2Runtime.ts
+          grep -q 'rule: "R_BTC3"' config/penguRecoveryV8.ts
+
+      - name: Install
+        run: npm ci --no-audit --no-fund
+
+      - name: Fetch OKX historical development
+        run: |
+          python scripts/research_fetch_okx_pengu_20241004_20251004.py
+          mv .research-state/okx-pengu-proxy .research-state/okx-pengu-targeted-development
+
+      - name: Fetch Aster through pre-current-trade forward cutoff
+        run: python scripts/research_fetch_aster_pengu_targeted_forward.py
+
+      - name: Run OKX development matrix
+        env:
+          PENGU_LOCAL_DATA_DIR: .research-state/okx-pengu-targeted-development
+          PENGU_STUDY_DATA_LABEL: OKX_DEVELOPMENT
+          PENGU_STUDY_EVAL_START: "2024-12-25T00:00:00Z"
+          PENGU_STUDY_EVAL_END: "2025-08-10T00:00:00Z"
+          PENGU_STUDY_OUT: .research-state/pengu-targeted-development.json
+        run: npx tsx scripts/research_pengu_targeted_entry_repair_study.ts
+
+      - name: Run Aster validation matrix
+        env:
+          PENGU_LOCAL_DATA_DIR: .research-state/aster-pengu-targeted-forward
+          PENGU_STUDY_DATA_LABEL: ASTER_VALIDATION
+          PENGU_STUDY_EVAL_START: "2025-08-10T00:00:00Z"
+          PENGU_STUDY_EVAL_END: "2026-08-10T00:00:00Z"
+          PENGU_STUDY_OUT: .research-state/pengu-targeted-validation.json
+        run: npx tsx scripts/research_pengu_targeted_entry_repair_study.ts
+
+      - name: Run pre-incident forward matrix
+        env:
+          PENGU_LOCAL_DATA_DIR: .research-state/aster-pengu-targeted-forward
+          PENGU_STUDY_DATA_LABEL: ASTER_FORWARD_PRE_INCIDENT
+          PENGU_STUDY_EVAL_START: "2026-08-10T00:00:00Z"
+          PENGU_STUDY_EVAL_END: "2026-10-02T00:00:00Z"
+          PENGU_STUDY_OUT: .research-state/pengu-targeted-forward.json
+        run: npx tsx scripts/research_pengu_targeted_entry_repair_study.ts
+
+      - name: Freeze targeted choice before reading forward result
+        run: |
+          python scripts/research_select_pengu_targeted_repairs.py             .research-state/pengu-targeted-development.json             .research-state/pengu-targeted-validation.json             .research-state/pengu-targeted-forward.json             .research-state/pengu-targeted-selection.json
+
+      - name: Validate and print
+        run: |
+          python3 - <<'PY'
+          import json
+          for f in ['pengu-targeted-development.json','pengu-targeted-validation.json','pengu-targeted-forward.json']:
+              p=json.load(open('.research-state/'+f))
+              assert p['schema']=='pengu-targeted-entry-repair-study/v1'
+              assert p['productionSourceSha']=='53eeff5417636369d4709fddfd47d7916ddcf3b1'
+              assert len(p['results'])==84
+              assert p['safety']=={'researchOnly':True,'ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          s=json.load(open('.research-state/pengu-targeted-selection.json'))
+          assert s['schema']=='pengu-targeted-entry-repair-selection/v1'
+          assert s['forwardPeriod']=={'startInclusive':'2026-08-10T00:00:00.000Z','endExclusive':'2026-10-02T00:00:00.000Z'}
+          assert s['safety']=={'researchOnly':True,'ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print('PENGU_TARGETED_REPAIR_CONTRACT=PASS')
+          print(json.dumps({
+             'frozenLong':s['frozenLong'],
+             'selectedShort':s['shortSelection']['selected'],
+             'shortCandidates':s['shortSelection']['candidates'],
+             'development':s['development'],
+             'validation':s['validation'],
+             'forward':s['forward'],
+             'currentTradeCheck':s['currentTradeCheck'],
+          },ensure_ascii=False,separators=(',',':')))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-targeted-entry-repair-forward-${{ github.run_id }}
+          path: |
+            .research-state/pengu-targeted-development.json
+            .research-state/pengu-targeted-validation.json
+            .research-state/pengu-targeted-forward.json
+            .research-state/pengu-targeted-selection.json
+            .research-state/aster-pengu-targeted-forward/meta.json
+            .research-state/okx-pengu-targeted-development/meta.json
+          include-hidden-files: true
+          retention-days: 90
