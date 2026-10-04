@@ -13,7 +13,7 @@
 - [x] Implement aggregate ranking adapters for V12, PENGU, Q102, FET, V52, HYPE and Idle routes; preserve unavailable coverage and source timestamps.
 - [x] Implement FET gate panel, ranking page with top three, filters, expanded gates, countdown and reduced-motion gold flash; link below dashboard.
 - [x] Run tests/typecheck/build and inspect isolated preview: 11 tests passed; Linux typecheck and Next production build passed; desktop/mobile browser passed, no horizontal overflow/page errors; simulated rank movement flash and reduced-motion fallback passed; auth 401 and 49 live rows verified.
-- [ ] Deploy isolated UI release, verify endpoints and unchanged trading release, document deployment.
+- [x] Deploy isolated UI release, verify public endpoints and unchanged trading release, document deployment. Public pages200, unauthorized APIs401, authenticated49 rows with no source errors; deployed desktop/mobile and simulated flash checks passed.
 
 ## Review focus
 
