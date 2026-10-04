@@ -1,0 +1,150 @@
+        if any((x.cross, x.trend, x.event, round(x.target_vol, 2)) == signature for x in selected):
+            continue
+        selected.append(c)
+        if len(selected) == count:
+            break
+    return selected
+
+
+def bootstrap_monthly(monthly: pd.Series, n: int = 20000) -> dict:
+    values = monthly.dropna().to_numpy(float)
+    if len(values) == 0:
+        return {}
+    rng = np.random.default_rng(20260716)
+    samples = rng.choice(values, size=(n, len(values)), replace=True)
+    totals = np.prod(1.0 + samples, axis=1) - 1.0
+    annual = np.prod(1.0 + samples, axis=1) ** (12.0 / len(values)) - 1.0
+    return {
+        "p_total_positive": float((totals > 0).mean()),
+        "total_p05": float(np.quantile(totals, 0.05)),
+        "total_p50": float(np.quantile(totals, 0.50)),
+        "total_p95": float(np.quantile(totals, 0.95)),
+        "annual_p10": float(np.quantile(annual, 0.10)),
+        "annual_p50": float(np.quantile(annual, 0.50)),
+        "annual_p90": float(np.quantile(annual, 0.90)),
+    }
+
+
+def fmt_pct(x: float) -> str:
+    return "n/a" if not np.isfinite(x) else f"{x * 100:.2f}%"
+
+
+def main() -> None:
+    OUT.mkdir(parents=True, exist_ok=True)
+    base.SYMBOLS = UNIVERSE
+    base.START_MONTH = START_MONTH
+    base.END_MONTH = END_MONTH
+    base.CACHE_DIR = PRICE_CACHE
+    print(f"Loading {len(UNIVERSE)}-symbol point-in-time price universe")
+    data = base.load_universe()
+    panel = build_panel(data)
+    index = panel["close"].index
+    index = index[(index >= START) & (index < FINAL_END)]
+    for key in panel:
+        panel[key] = panel[key].loc[index]
+    symbols = list(panel["close"].columns)
+    funding_event, funding_latest, funding_coverage = load_funding(index, symbols)
+    fx = build_features(panel, funding_latest)
+
+    crosses, trends, events, grid = candidate_grid()
+    cross_targets = {c.name: cross_target(fx, c) for c in crosses}
+    trend_targets = {t.name: trend_target(fx, t) for t in trends}
+    event_targets = {e.name: event_target(fx, e) for e in events}
+
+    rows = []
+
+    def make_target(candidate: Candidate) -> pd.DataFrame:
+        raw = (
+            candidate.trend_weight * trend_targets[candidate.trend]
+            + candidate.cross_weight * cross_targets[candidate.cross]
+            + candidate.event_weight * event_targets[candidate.event]
+        )
+        return risk_scale_target(raw, fx, candidate.target_vol, candidate.max_gross)
+    cmap = {c.name: c for c in grid}
+    print(f"Evaluating {len(grid)} integrated candidates")
+    for n, candidate in enumerate(grid, start=1):
+        target = make_target(candidate)
+        sim = simulate(fx, target, funding_event)
+        dev = summarize(sim, START, DEV_END)
+        val = summarize(sim, DEV_END, VAL_END)
+        rows.append({
+            **asdict(candidate),
+            **{f"dev_{k}": v for k, v in dev.items()},
+            **{f"val_{k}": v for k, v in val.items()},
+            "selection_score": selection_score(dev, val),
+        })
+        if n % 100 == 0:
+            print(f"Evaluated {n}/{len(grid)}")
+    ranking = pd.DataFrame(rows).sort_values(["selection_score", "val_cagr"], ascending=False)
+    passed = ranking[
+        (ranking["dev_total_return"] > 0)
+        & (ranking["val_total_return"] > 0)
+        & (ranking["dev_max_drawdown"] >= -0.35)
+        & (ranking["val_max_drawdown"] >= -0.35)
+    ]
+    source = passed if len(passed) >= 3 else ranking
+    chosen = choose_diverse(source, cmap, 5)
+    names = [c.name for c in chosen]
+    print("Chosen:", names, "pre-holdout passed:", len(passed))
+    chosen_targets = {c.name: make_target(c) for c in chosen}
+    ensemble_target = sum(chosen_targets[name] for name in names) / len(names)
+    ensemble = simulate(fx, ensemble_target, funding_event)
+
+    dev_stats = summarize(ensemble, START, DEV_END)
+    val_stats = summarize(ensemble, DEV_END, VAL_END)
+    holdout_stats = summarize(ensemble, VAL_END, FINAL_END)
+    full_stats = summarize(ensemble, START, FINAL_END)
+
+    members = []
+    for c in chosen:
+        sim = simulate(fx, chosen_targets[c.name], funding_event)
+        members.append({**asdict(c), **summarize(sim, VAL_END, FINAL_END)})
+
+    sensitivity = []
+    for cost_bps in [4, 6, 8, 10, 12]:
+        for funding_mult in [1.0, 1.5, 2.0]:
+            sim = simulate(
+                fx, ensemble_target, funding_event,
+                one_way_cost=cost_bps / 10000.0,
+                funding_multiplier=funding_mult,
+            )
+            sensitivity.append({
+                "cost_bps": cost_bps, "funding_multiplier": funding_mult,
+                **summarize(sim, VAL_END, FINAL_END),
+            })
+    delay_rows = []
+    for delay in [1, 2, 3]:
+        delay_rows.append({"delay_bars": delay, **summarize(
+            simulate(fx, ensemble_target, funding_event, delay_bars=delay), VAL_END, FINAL_END
+        )})
+    scales = []
+    for scale in [0.75, 1.0, 1.25, 1.5, 2.0]:
+        scales.append({"scale": scale, **summarize(
+            simulate(fx, ensemble_target, funding_event, risk_scale=scale), VAL_END, FINAL_END
+        )})
+
+    # Sleeve ablation uses the selected members' average component parameters and weights.
+    sleeve_rows = []
+    for sleeve_name, target in [
+        ("trend_only", sum(trend_targets[c.trend] for c in chosen) / len(chosen)),
+        ("cross_only", sum(cross_targets[c.cross] for c in chosen) / len(chosen)),
+        ("event_only", sum(event_targets[c.event] for c in chosen) / len(chosen)),
+        ("integrated", ensemble_target),
+    ]:
+        t = target if sleeve_name == "integrated" else risk_scale_target(target, fx, 0.35, 1.75)
+        sleeve_rows.append({"sleeve": sleeve_name, **summarize(
+            simulate(fx, t, funding_event), VAL_END, FINAL_END
+        )})
+
+    holdout_ret = cut(ensemble.returns, VAL_END, FINAL_END)
+    monthly = (1.0 + holdout_ret).resample("ME").prod() - 1.0
+    bootstrap = bootstrap_monthly(monthly)
+
+    # Neighborhood around selected specifications.
+    selected_set = set(names)
+    neighborhood = ranking[
+        ranking.apply(lambda r: any(
+            r["cross"] == c.cross and r["trend"] == c.trend and r["event"] == c.event
+            and abs(float(r["target_vol"]) - c.target_vol) <= 0.10
+            for c in chosen
+        ), axis=1)
