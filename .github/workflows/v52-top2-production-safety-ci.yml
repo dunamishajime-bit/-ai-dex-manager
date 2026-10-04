@@ -1,0 +1,136 @@
+name: V52 Top2 Production Safety CI
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/disdex_v12_v52_live_engine.py'
+      - 'scripts/disdex_v12_v52_live_engine_retry.py'
+      - 'scripts/disdex_v56_policy.py'
+      - 'scripts/disdex_account_order_lock.py'
+      - 'ops/env/disdex-v12-pengu-v2-v52.env.example'
+      - 'ops/systemd/disdex-v52-aster-only@.service'
+      - 'docs/implementation/V52_TOP2_PRODUCTION_CONTRACT_20260825.md'
+      - '.github/workflows/v52-top2-production-safety-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  offline-safety:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Compile production V52 lineage
+        run: |
+          python -m py_compile \
+            scripts/disdex_account_order_lock.py \
+            scripts/disdex_v56_policy.py \
+            scripts/disdex_v52_aster_only_live_engine.py \
+            scripts/disdex_v12_v52_live_engine.py \
+            scripts/disdex_v12_v52_live_engine_retry.py
+
+      - name: Run offline V12 V52 self-tests
+        env:
+          PYTHONPATH: scripts
+        run: |
+          python scripts/disdex_v56_policy_selftest.py
+          python scripts/disdex_v12_v52_live_engine.py --self-test
+          python scripts/disdex_v12_v52_live_engine_retry.py --self-test
+
+      - name: Verify Top2 allocation and safety contract
+        env:
+          PYTHONPATH: scripts
+        run: |
+          python - <<'PY'
+          import os
+          from pathlib import Path
+          os.environ.pop('ASTER_API_KEY', None)
+          os.environ.pop('ASTER_API_SECRET', None)
+          os.environ.pop('DISDEX_V52_ASTER_ONLY_LIVE_ACKNOWLEDGEMENT', None)
+          for name in (
+              'DISDEX_V52_V50_RANK1_REQUESTED_GROSS',
+              'DISDEX_V52_V50_RANK2_REQUESTED_GROSS',
+              'DISDEX_V52_V50_MAX_CONCURRENT_POSITIONS',
+              'DISDEX_V52_V50_MAX_DAILY_ENTRIES',
+          ):
+              os.environ.pop(name, None)
+          import disdex_v12_v52_live_engine as current
+          import disdex_v12_v52_live_engine_retry as retry
+          from disdex_v56_policy import v11_requested_gross, v50_requested_gross
+
+          assert current.V50_RANK1_REQUESTED_GROSS == 1.0
+          assert current.V50_RANK1_STRONG_REQUESTED_GROSS == 1.25
+          assert current.V50_RANK2_REQUESTED_GROSS == 0.25
+          assert current.V50_MAX_CONCURRENT_POSITIONS == 2
+          assert current.V50_MAX_DAILY_ENTRIES == 3
+          assert current.V50_MAX_HOLDING_HOURS == 4
+          assert current.V50_BASIS_STOP_MULTIPLE == 1.75
+          assert current.V50_MAX_ADVERSE_BASIS_MOVE_BPS == 10.0
+          assert v50_requested_gross(1, 65, 5) == 1.0
+          assert v50_requested_gross(1, 100, 15) == 1.25
+          assert v50_requested_gross(2, 85, 10) == 0.25
+          assert v50_requested_gross(2, 84.99, 10) is None
+          assert [v11_requested_gross(*row) for row in ((50, 0), (80, 10), (110, 20), (140, 30))] == [0.75, 1.0, 1.25, 1.5]
+          assert retry.V50_ENTRY_WINDOW_SECONDS == 20
+          assert retry.RETRYABLE_ENTRY_REASONS == frozenset({
+              'STALE_DATA', 'SOURCE_CLOCK_MISMATCH',
+              'ROUND_TRIP_COST_OVER_60', 'DEPTH_BELOW_2X', 'SPREAD_OVER_20',
+          })
+
+          # Pure contract model: rank 2 is all-or-nothing and never displaces
+          # existing exposure. The production mutation path is not called.
+          global_cap = 2.5
+          current_open = 1.75
+          current_reserved = 0.25
+          pending_reservations = 0.0
+          available = global_cap - current_open - current_reserved - pending_reservations
+          assert available == 0.5
+          assert available >= current.V50_RANK2_REQUESTED_GROSS
+          assert current_open + current_reserved + pending_reservations + 0.25 <= global_cap
+          assert 0.24 < current.V50_RANK2_REQUESTED_GROSS <= 0.25
+
+          insufficient = global_cap - 1.75 - 0.25 - 0.26
+          assert insufficient < current.V50_RANK2_REQUESTED_GROSS
+          assert 'INSUFFICIENT_AVAILABLE_GROSS' in Path(
+              'scripts/disdex_v12_v52_live_engine_retry.py'
+          ).read_text()
+
+          service = Path('ops/systemd/disdex-v52-aster-only@.service').read_text()
+          assert 'scripts/disdex_v12_v52_live_engine_retry.py --mode live --daemon' in service
+          env = Path('ops/env/disdex-v12-pengu-v2-v52.env.example').read_text()
+          for line in (
+              'DISDEX_V52_V50_RANK1_REQUESTED_GROSS=1.0',
+              'DISDEX_V52_V50_RANK1_STRONG_REQUESTED_GROSS=1.25',
+              'DISDEX_V52_V50_RANK2_REQUESTED_GROSS=0.25',
+              'DISDEX_V52_V50_MAX_CONCURRENT_POSITIONS=2',
+              'DISDEX_V52_V50_MAX_DAILY_ENTRIES=3',
+              'DISDEX_V52_V11_GROSS_CAP=1.5',
+              'DISDEX_V52_V50_GROSS_CAP=1.25',
+              'DISDEX_V52_STOCK_GROSS_CAP=1.5',
+              'DISDEX_V52_PORTFOLIO_GROSS_CAP=2.5',
+              'PENGU_DUAL_LS_V2_MAX_GROSS=0.9375',
+              'PENGU_DUAL_LS_V2_PORTFOLIO_GROSS_CAP=1.5',
+          ):
+              assert line in env, line
+
+          current_text = Path('scripts/disdex_v12_v52_live_engine.py').read_text()
+          retry_text = Path('scripts/disdex_v12_v52_live_engine_retry.py').read_text()
+          assert 'V12' in current_text and 'PENGU' in current_text
+          assert 'self.account_order_lock.reserve' in current_text
+          assert 'V50_RANK2_SLOT' in retry_text
+          assert 'synthetic' not in service.lower()
+          print('V52 Top2 Production safety contract: PASS')
+          print('PRODUCTION_TEST_ORDERS=0')
+          PY
+
+      - name: Assert CI has no production credentials or order acknowledgement
+        run: |
+          ! rg -n 'ASTER_API_KEY|ASTER_API_SECRET|I_ACCEPT_REAL_MONEY|LIVE_ACKNOWLEDGEMENT' \
+            .github/workflows/v52-top2-production-safety-ci.yml
+          echo 'OFFLINE_ONLY_CI=TRUE'

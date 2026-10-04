@@ -1,0 +1,32 @@
+[Unit]
+Description=DisDex shared crypto daily-risk refresher (%i)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=deploy
+Group=deploy
+WorkingDirectory=/home/deploy/disdex-trading/releases/%i
+EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env
+EnvironmentFile=/etc/disdex/disdex-v12-pengu-v2-v52.env
+EnvironmentFile=-/etc/disdex/disdex-shared-crypto-risk.env
+Environment=NODE_ENV=production
+Environment=DISDEX_SHARED_CRYPTO_MAX_DAILY_LOSS_PCT=7.5
+ExecStartPre=/usr/bin/test -f /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
+ExecStartPre=/usr/bin/grep -Fxq %i /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
+ExecStart=/home/deploy/disdex-trading/releases/%i/node_modules/.bin/tsx scripts/disdex-shared-crypto-risk-writer.ts --daemon
+Restart=on-failure
+RestartSec=5s
+TimeoutStopSec=30s
+KillSignal=SIGTERM
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadOnlyPaths=/home/deploy/disdex-trading/releases
+ReadWritePaths=/var/lib/disdex/shared
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

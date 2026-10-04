@@ -1,0 +1,76 @@
+name: V52 LIVE Window Retry CI
+
+on:
+  pull_request:
+    paths:
+      - 'scripts/disdex_v12_v52_live_engine.py'
+      - 'scripts/disdex_v12_v52_live_engine_retry.py'
+      - 'scripts/disdex_v52_aster_only_live_engine.py'
+      - 'scripts/disdex_v52_margin_aware_live_engine.py'
+      - 'ops/systemd/disdex-v52-aster-only@.service'
+      - '.github/workflows/v52-live-window-retry-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  safety:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Compile V52 live lineage
+        run: |
+          python -m py_compile \
+            scripts/disdex_v52_aster_only_live_engine.py \
+            scripts/disdex_v52_margin_aware_live_engine.py \
+            scripts/disdex_v12_v52_live_engine.py \
+            scripts/disdex_v12_v52_live_engine_retry.py
+
+      - name: Run offline V52 safety self-tests
+        env:
+          PYTHONPATH: scripts
+        run: |
+          python scripts/disdex_v12_v52_live_engine.py --self-test
+          python scripts/disdex_v12_v52_live_engine_retry.py --self-test
+
+      - name: Verify retry contract is bounded and fail closed
+        run: |
+          python - <<'PY'
+          import sys
+          from pathlib import Path
+          sys.path.insert(0, 'scripts')
+          import disdex_v12_v52_live_engine as current
+          text = Path('scripts/disdex_v12_v52_live_engine_retry.py').read_text()
+          service = Path('ops/systemd/disdex-v52-aster-only@.service').read_text()
+          assert 'V11_ENTRY_WINDOW_SECONDS = 20' in text
+          assert 'V50_ENTRY_WINDOW_SECONDS = 20' in text
+          assert 'BASIS_BELOW_65' in text
+          assert 'NET_EDGE_BELOW_5' in text
+          assert 'STALE_DATA' in text
+          assert 'SOURCE_CLOCK_MISMATCH' in text
+          assert 'DEPTH_BELOW_2X' in text
+          assert 'SPREAD_OVER_20' in text
+          assert 'MISSING_V50_SIGNAL_SNAPSHOT' in text
+          assert 'scripts/disdex_v12_v52_live_engine_retry.py --mode live --daemon' in service
+          assert current.V50_MIN_ENTRY_BASIS_BPS == 65.0
+          assert current.V50_MIN_NET_EDGE_BPS == 5.0
+          print('bounded retry contract: PASS')
+          PY
+
+      - name: Assert tests cannot submit production orders
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          wf = Path('.github/workflows/v52-live-window-retry-ci.yml').read_text()
+          lines = [line.strip() for line in wf.splitlines()]
+          forbidden_env_names = ['ASTER_API_KEY', 'ASTER_API_SECRET', 'DISDEX_LIVE_ACKNOWLEDGEMENT']
+          for name in forbidden_env_names:
+              assert not any(line.startswith(name + ':') for line in lines)
+          print('offline-only CI contract: PASS')
+          PY

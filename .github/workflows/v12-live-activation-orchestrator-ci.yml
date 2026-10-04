@@ -1,0 +1,50 @@
+name: V12 LIVE activation orchestrator CI
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'scripts/ops/root/disdex-v12-live-activate-from-sha-final'
+      - 'scripts/ops/root/create-disdex-v12-immutable-release'
+      - 'scripts/ops/disdex-v12-current-release-delta-audit.sh'
+      - 'scripts/ops/root/install-disdex-v12-live'
+      - 'scripts/ops/root/disdex-v96-to-v12-live-migrate'
+      - 'scripts/ops/root/disdex-v12-live-status-report'
+      - 'scripts/ops/root/disdex-v96-refuse-while-v12-active'
+      - '.github/workflows/v12-live-activation-orchestrator-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate exact-SHA activation contract
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          script=scripts/ops/root/disdex-v12-live-activate-from-sha-final
+          bash -n "$script"
+          grep -Fq 'I_ACKNOWLEDGE_V12_EXACT_SHA_LIVE_ACTIVATION' "$script"
+          grep -Fq 'rev-parse --verify "${commit}^{commit}"' "$script"
+          grep -Fq 'git -C "$source_repo" archive "$sha"' "$script"
+          grep -Fq 'V12_ACTIVATION_PHASE=IMMUTABLE_RELEASE_BUILD' "$script"
+          grep -Fq 'V12_ACTIVATION_PHASE=EXTENDED_OFFLINE_VALIDATION' "$script"
+          grep -Fq 'V12_ACTIVATION_PHASE=VPS_THREE_WAY_DELTA_AUDIT' "$script"
+          grep -Fq 'V12_ACTIVATION_PHASE=INERT_COMPONENT_INSTALL' "$script"
+          grep -Fq 'V12_ACTIVATION_PHASE=LIVE_MIGRATION' "$script"
+          grep -Fq 'V12_ACTIVATION_PHASE=FINAL_READ_ONLY_VERIFICATION' "$script"
+          grep -Fq 'disdex-v12-current-release-delta-audit.sh' "$script"
+          grep -Fq 'disdex-v96-to-v12-live-migrate' "$script"
+          grep -Fq 'disdex-v12-live-status-report' "$script"
+          grep -Fq 'ORDERS_SENT_FOR_TESTING=0' "$script"
+          grep -Fq 'realExchangeCalls=0' "$script"
+          grep -Fq 'scripts/disdex-account-order-lock-cross-language-selftest.ts' "$script"
+          grep -Fq 'scripts/pengu-dual-ls-v2-selftest.ts' "$script"
+          grep -Fq 'scripts/pengu-dual-ls-v2-parity.ts' "$script"
+          ! grep -Eq '\beval\b|\b(bash|sh)[[:space:]]+-c\b' "$script"
+          ! grep -Eq 'placeMarket|place_limit|submitOrder|curl[[:space:]].*(order|fapi)' "$script"
+          echo 'V12_LIVE_ACTIVATION_ORCHESTRATOR_CI_PASS'

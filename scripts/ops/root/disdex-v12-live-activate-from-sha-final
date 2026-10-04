@@ -1,0 +1,123 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+umask 077
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+[[ "$(id -u)" == "0" ]] || { printf 'V12_ACTIVATE_FROM_SHA_REQUIRES_ROOT\n' >&2; exit 1; }
+source_repo="${1:-}"
+sha="${2:-}"
+base_sha="${3:-}"
+ack="${4:-}"
+required_ack="I_ACKNOWLEDGE_V12_EXACT_SHA_LIVE_ACTIVATION"
+
+[[ "$source_repo" == /* && -d "$source_repo" && ! -L "$source_repo" ]] || {
+  printf 'usage: %s /absolute/trusted/git/repo <candidate-sha> <base-sha> %s\n' "$0" "$required_ack" >&2
+  exit 2
+}
+[[ "$sha" =~ ^[0-9a-f]{40}$ ]] || { printf 'V12_ACTIVATE_FROM_SHA_INVALID_CANDIDATE_SHA\n' >&2; exit 2; }
+[[ "$base_sha" =~ ^[0-9a-f]{40}$ ]] || { printf 'V12_ACTIVATE_FROM_SHA_INVALID_BASE_SHA\n' >&2; exit 2; }
+[[ "$ack" == "$required_ack" ]] || { printf 'V12_ACTIVATE_FROM_SHA_ACK_REQUIRED expected=%s\n' "$required_ack" >&2; exit 2; }
+
+for commit in "$sha" "$base_sha"; do
+  resolved="$(runuser -u deploy -- git -C "$source_repo" rev-parse --verify "${commit}^{commit}" 2>/dev/null || true)"
+  [[ "$resolved" == "$commit" ]] || { printf 'V12_ACTIVATE_FROM_SHA_COMMIT_NOT_LOCAL sha=%s\n' "$commit" >&2; exit 3; }
+done
+
+# Extract pre-release helpers from the exact candidate Git object. No dirty
+# worktree content enters the trusted activation path.
+tool_root="/home/deploy/disdex-v12-activation-tool/$sha"
+if [[ -e "$tool_root" || -L "$tool_root" ]]; then
+  [[ -d "$tool_root" && ! -L "$tool_root" ]] || { printf 'V12_ACTIVATE_FROM_SHA_TOOL_ROOT_INVALID\n' >&2; exit 3; }
+else
+  install -d -o deploy -g deploy -m 0700 "$tool_root"
+  runuser -u deploy -- git -C "$source_repo" archive "$sha" \
+    scripts/ops/root/create-disdex-v12-immutable-release \
+    scripts/ops/disdex-v12-current-release-delta-audit.sh | \
+    runuser -u deploy -- tar -x -C "$tool_root"
+fi
+builder="$tool_root/scripts/ops/root/create-disdex-v12-immutable-release"
+audit="$tool_root/scripts/ops/disdex-v12-current-release-delta-audit.sh"
+[[ -f "$builder" && ! -L "$builder" ]] || { printf 'V12_ACTIVATE_FROM_SHA_BUILDER_MISSING\n' >&2; exit 3; }
+[[ -f "$audit" && ! -L "$audit" ]] || { printf 'V12_ACTIVATE_FROM_SHA_AUDIT_MISSING\n' >&2; exit 3; }
+bash -n "$builder"
+bash -n "$audit"
+
+printf 'V12_ACTIVATION_PHASE=IMMUTABLE_RELEASE_BUILD\n'
+bash "$builder" "$source_repo" "$sha"
+release="/home/deploy/disdex-trading/releases/$sha"
+[[ -d "$release" && ! -L "$release" ]] || { printf 'V12_ACTIVATE_FROM_SHA_RELEASE_NOT_CREATED\n' >&2; exit 4; }
+[[ -x "$release/node_modules/.bin/tsx" && -d "$release/.next" ]] || { printf 'V12_ACTIVATE_FROM_SHA_RELEASE_BUILD_INVALID\n' >&2; exit 4; }
+
+printf 'V12_ACTIVATION_PHASE=EXTENDED_OFFLINE_VALIDATION\n'
+# Production credentials and LIVE gates are explicitly removed. These tests use
+# mocks/parity fixtures only and cannot send exchange orders.
+(
+  cd "$release"
+  runuser -u deploy -- env -u ASTER_API_PRIVATE_KEY -u ASTER_USER_ADDRESS -u DISDEX_V12_LIVE_ALLOW_REAL_ORDERS \
+    HOME=/home/deploy ./node_modules/.bin/tsc --noEmit -p tsconfig.json
+  runuser -u deploy -- env -u ASTER_API_PRIVATE_KEY -u ASTER_USER_ADDRESS -u DISDEX_V12_LIVE_ALLOW_REAL_ORDERS \
+    HOME=/home/deploy ./node_modules/.bin/tsc --noEmit -p tsconfig.pengu-dual-ls-v2.json
+  for test_script in \
+    scripts/v12-x1-all-selftest.ts \
+    scripts/v12-x1-all-frozen-artifact-parity-selftest.ts \
+    scripts/v12-resident-stop-selftest.ts \
+    scripts/disdex-shared-crypto-risk-selftest.ts \
+    scripts/disdex-account-order-lock-selftest.ts \
+    scripts/disdex-account-order-lock-cross-language-selftest.ts \
+    scripts/disdex-unified-portfolio-routing-selftest.ts \
+    scripts/v12-live-execution-selftest.ts \
+    scripts/pengu-dual-ls-v2-selftest.ts \
+    scripts/pengu-dual-ls-v2-parity.ts; do
+    runuser -u deploy -- env -u ASTER_API_PRIVATE_KEY -u ASTER_USER_ADDRESS -u DISDEX_V12_LIVE_ALLOW_REAL_ORDERS \
+      HOME=/home/deploy ./node_modules/.bin/tsx "$test_script"
+  done
+)
+
+# Python account-lock self-test writes a local .codex-tmp directory. Change cwd
+# in the root shell first, then execute Python directly as deploy; no shell
+# command string is evaluated under deploy.
+scratch="/home/deploy/disdex-v12-activation-tool/$sha/python-selftest"
+install -d -o deploy -g deploy -m 0700 "$scratch"
+(
+  cd "$scratch"
+  runuser -u deploy -- env -u ASTER_API_PRIVATE_KEY -u ASTER_USER_ADDRESS \
+    HOME=/home/deploy PYTHONPATH="$release/scripts" \
+    python "$release/scripts/disdex_account_order_lock.py" --self-test
+)
+runuser -u deploy -- env -u ASTER_API_PRIVATE_KEY -u ASTER_USER_ADDRESS \
+  HOME=/home/deploy PYTHONPATH="$release/scripts" \
+  python "$release/scripts/disdex_v12_crypto_daily_risk.py" --self-test
+runuser -u deploy -- env -u ASTER_API_PRIVATE_KEY -u ASTER_USER_ADDRESS \
+  HOME=/home/deploy PYTHONPATH="$release/scripts" \
+  python "$release/scripts/disdex_v12_v52_margin_guard_runtime.py" --self-test
+runuser -u deploy -- env -u ASTER_API_PRIVATE_KEY -u ASTER_USER_ADDRESS \
+  HOME=/home/deploy PYTHONPATH="$release/scripts" \
+  python "$release/scripts/disdex_v12_v52_live_engine.py" --self-test
+printf 'V12_EXTENDED_OFFLINE_VALIDATION_PASS\nordersSent=0\nrealExchangeCalls=0\n'
+
+printf 'V12_ACTIVATION_PHASE=VPS_THREE_WAY_DELTA_AUDIT\n'
+# The unresolved `80a4...` release is a hard boundary. The audit exits before
+# installer/service mutation if any current VPS production behavior would be
+# lost or overlaps a candidate change and needs explicit source integration.
+bash "$audit" \
+  /home/deploy/disdex-trading/current \
+  "$release" \
+  "$source_repo" \
+  "$base_sha"
+
+printf 'V12_ACTIVATION_PHASE=INERT_COMPONENT_INSTALL\n'
+bash "$release/scripts/ops/root/install-disdex-v12-live" "$release"
+
+printf 'V12_ACTIVATION_PHASE=LIVE_MIGRATION\n'
+bash "$release/scripts/ops/root/disdex-v96-to-v12-live-migrate" \
+  "$sha" \
+  I_ACKNOWLEDGE_V96_TO_V12_LIVE_MIGRATION
+
+printf 'V12_ACTIVATION_PHASE=FINAL_READ_ONLY_VERIFICATION\n'
+bash "$release/scripts/ops/root/disdex-v12-live-status-report" "$sha" final
+
+printf 'STATUS: LIVE_ACTIVATED_VERIFIED\n'
+printf 'releaseSha=%s\nbaseSha=%s\ncurrentRelease=%s\n' "$sha" "$base_sha" "$(readlink -f /home/deploy/disdex-trading/current)"
+printf 'SOURCE_VALIDATION=PASS\nVPS_DELTA_PRESERVATION=PASS\nIMMUTABLE_RELEASE=PASS\nLIVE_MIGRATION=PASS\n'
+printf 'V96_V12_SIMULTANEOUS_LIVE=FALSE\nORDERS_SENT_FOR_TESTING=0\n'

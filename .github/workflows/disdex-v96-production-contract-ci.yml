@@ -123,7 +123,7 @@ jobs:
         run: |
           set -euo pipefail
           grep -q 'strategyId: DISDEX_V96_STRATEGY_ID' config/disdexV96Runtime.ts
-          grep -q 'productionRevision: "CORE_VOLUME50_TURNOVER075_LIVE_R1"' config/disdexV96Runtime.ts
+          grep -q 'productionRevision: "CORE_VOLUME50_TURNOVER075_LIVE_R3_CRYPTO_GROSS_1P5_PENGU_1P15"' config/disdexV96Runtime.ts
           grep -q 'componentVolumeFloor: 0.50' config/disdexV96Runtime.ts
           grep -q 'portfolioRebalanceThresholdPct: 7.5' config/disdexV96Runtime.ts
           grep -q 'weightBandTolerancePct: 5' config/disdexV96Runtime.ts
@@ -132,8 +132,11 @@ jobs:
           grep -q 'liveTradingEnabled: true' config/disdexV96Runtime.ts
           grep -q 'forwardEvidenceStatus: "NOT_APPROVED"' config/disdexV96Runtime.ts
           grep -q 'operatorOverrideEnabled: true' config/disdexV96Runtime.ts
-          grep -q 'maximumOverridePenguGross: 0.15' config/disdexV96Runtime.ts
-          grep -q 'maximumDailyLossPct: 2' config/disdexV96Runtime.ts
+          grep -q 'maximumOverridePenguGross: 1.15' config/disdexV96Runtime.ts
+          grep -q 'maximumPortfolioGross: 1.5' config/disdexV96Runtime.ts
+          grep -q 'maximumDailyLossPct: 5' config/disdexV96Runtime.ts
+          grep -q 'requiredInitialLeverage: 5' config/disdexV96Runtime.ts
+          grep -q 'requiredMarginType: "cross"' config/disdexV96Runtime.ts
           grep -q 'killSwitchAction: "FLATTEN_MANAGED"' config/disdexV96Runtime.ts
           grep -q 'status: "APPROVED"' config/disdexV96Runtime.ts
           grep -q 'V95_WEIGHT_BAND_STRONG_BOOST_TYPESCRIPT_GOLDEN_VECTOR_PASS' config/disdexV96Runtime.ts

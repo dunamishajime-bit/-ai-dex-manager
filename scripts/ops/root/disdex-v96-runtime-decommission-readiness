@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+umask 077
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+[[ "$(id -u)" == "0" ]] || { printf 'V96_DECOMMISSION_READINESS_REQUIRES_ROOT\n' >&2; exit 1; }
+sha="${1:-}"
+[[ "$sha" =~ ^[0-9a-f]{40}$ ]] || { printf 'V96_DECOMMISSION_READINESS_INVALID_SHA\n' >&2; exit 2; }
+release="/home/deploy/disdex-trading/releases/$sha"
+current="/home/deploy/disdex-trading/current"
+[[ -d "$release" && ! -L "$release" ]] || { printf 'V96_DECOMMISSION_READINESS_RELEASE_INVALID\n' >&2; exit 2; }
+[[ -L "$current" && "$(readlink -f "$current")" == "$release" ]] || { printf 'V96_DECOMMISSION_READINESS_CURRENT_MISMATCH\n' >&2; exit 2; }
+
+# First prove the replacement composition is genuinely live and reconciled.
+/usr/bin/bash "$release/scripts/ops/root/disdex-v12-live-status-report" "$sha" final
+
+known_v96_units=(disdex-v96-v52-live.service disdex-v13d-v11eq-v96.service)
+for unit in "${known_v96_units[@]}"; do
+  if systemctl list-unit-files --type=service --all 2>/dev/null | awk '{print $1}' | grep -Fxq "$unit"; then
+    state="$(systemctl is-active "$unit" 2>/dev/null || true)"
+    pid="$(systemctl show "$unit" --property MainPID --value 2>/dev/null || printf '0')"
+    [[ "$state" != "active" && "$pid" == "0" ]] || { printf 'V96_DECOMMISSION_READINESS_V96_ACTIVE unit=%s state=%s pid=%s\n' "$unit" "$state" "$pid" >&2; exit 3; }
+    if systemctl is-enabled --quiet "$unit" 2>/dev/null; then
+      printf 'V96_DECOMMISSION_READINESS_V96_STILL_ENABLED unit=%s\n' "$unit" >&2
+      exit 3
+    fi
+  fi
+done
+
+if pgrep -af '[d]isdex-v96-live-runner\.ts' >/dev/null 2>&1 || pgrep -af '[d]isdex-v13d-v11eq-v96-live-runner\.ts' >/dev/null 2>&1; then
+  printf 'V96_DECOMMISSION_READINESS_ORPHAN_V96_PROCESS\n' >&2
+  exit 3
+fi
+
+# Do not attempt an Aster symbol-based "V96 flat" check after V12 is live: V12
+# legitimately trades overlapping symbols. The migration already proved V96
+# flat before V12 start, and the mutual-exclusion interlocks prevent V96 from
+# reopening exposure afterwards. This gate therefore relies on the immutable
+# activation evidence plus V96 process/unit absence.
+printf 'STATUS: V96_RUNTIME_DECOMMISSION_READY\n'
+printf 'releaseSha=%s\n' "$sha"
+printf 'V12_LIVE_ACTIVATED_VERIFIED=TRUE\n'
+printf 'V96_SERVICES_INACTIVE=TRUE\nV96_SERVICES_DISABLED=TRUE\nV96_PROCESSES_ZERO=TRUE\n'
+printf 'V96_NEW_EXPOSURE_SINCE_MIGRATION=IMPOSSIBLE_BY_INTERLOCK\n'
+printf 'ORDERS_SENT_FOR_READINESS=0\n'
