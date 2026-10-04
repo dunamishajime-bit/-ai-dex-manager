@@ -1,0 +1,501 @@
+#!/usr/bin/env python3
+from __future__ import annotations
+
+import argparse
+import fcntl
+import gzip
+import json
+import os
+import re
+import shutil
+import stat
+import tempfile
+import time
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Iterable, Optional
+
+SHA_RE = re.compile(r"^[0-9a-f]{40}$")
+RELEASE_KEEP_NONCURRENT = 2
+RELEASE_MIN_AGE_SECONDS = 24 * 60 * 60
+AUDIT_RETENTION_DAYS = 14
+PM2_RETENTION_DAYS = 7
+V11_BACKUP_RETENTION_DAYS = 30
+SYSTEMD_BACKUP_KEEP = 5
+PROMOTION_FAILURE_RETENTION_DAYS = 90
+PROMOTION_FAILURE_KEEP = 3
+STALE_TEMP_RETENTION_SECONDS = 24 * 60 * 60
+
+
+@dataclass(frozen=True)
+class CleanupPaths:
+    trading_root: Path = Path("/home/deploy/disdex-trading")
+    shared_root: Path = Path("/home/deploy/ai-dex-manager-v96-paper")
+    ops_root: Path = Path("/home/deploy/disdex-ops")
+    systemd_backup_root: Path = Path("/etc/disdex/systemd-backup")
+    pm2_log_root: Path = Path("/home/deploy/.pm2/logs")
+
+    @property
+    def releases_root(self) -> Path:
+        return self.trading_root / "releases"
+
+    @property
+    def current_link(self) -> Path:
+        return self.trading_root / "current"
+
+    @property
+    def state_root(self) -> Path:
+        return self.shared_root / ".runtime-state" / "disdex-v13d-v11eq-v96"
+
+    @property
+    def approval_root(self) -> Path:
+        return self.shared_root / ".runtime-approval"
+
+    @property
+    def promotion_root(self) -> Path:
+        return self.ops_root / "promotion-transactions"
+
+    @property
+    def promotion_lock(self) -> Path:
+        return self.ops_root / "promotion.lock"
+
+
+@dataclass
+class CleanupReport:
+    dry_run: bool
+    deleted_paths: list[str] = field(default_factory=list)
+    rotated_paths: list[str] = field(default_factory=list)
+    compressed_paths: list[str] = field(default_factory=list)
+    protected_paths: list[str] = field(default_factory=list)
+    skipped_paths: list[str] = field(default_factory=list)
+    bytes_reclaimed: int = 0
+    promotion_lock_busy: bool = False
+
+    def payload(self) -> dict:
+        return {
+            "status": "DISDEX_VPS_RETENTION_CLEANUP_PASS",
+            "dryRun": self.dry_run,
+            "deletedPaths": self.deleted_paths,
+            "rotatedPaths": self.rotated_paths,
+            "compressedPaths": self.compressed_paths,
+            "protectedPaths": self.protected_paths,
+            "skippedPaths": self.skipped_paths,
+            "bytesReclaimed": self.bytes_reclaimed,
+            "promotionLockBusy": self.promotion_lock_busy,
+            "protectedPathsTouched": False,
+            "currentReleaseDeleted": False,
+            "runtimeStateDeleted": False,
+            "approvalDeleted": False,
+            "killSwitchDeleted": False,
+            "ordersSent": False,
+            "cancelSent": False,
+            "positionChangesSent": False,
+        }
+
+
+def now_seconds() -> float:
+    return time.time()
+
+
+def path_size(path: Path) -> int:
+    try:
+        if path.is_symlink():
+            return 0
+        if path.is_file():
+            return path.stat().st_size
+        if path.is_dir():
+            return sum(
+                child.stat().st_size
+                for child in path.rglob("*")
+                if child.is_file() and not child.is_symlink()
+            )
+    except FileNotFoundError:
+        return 0
+    return 0
+
+
+def restore_owner(path: Path, uid: Optional[int], gid: Optional[int]) -> None:
+    """Keep runtime files owned by their service user after root rotation."""
+    chown = getattr(os, "chown", None)
+    if chown is not None and uid is not None and gid is not None:
+        chown(path, uid, gid)
+
+
+def is_within(path: Path, root: Path) -> bool:
+    try:
+        path.resolve(strict=False).relative_to(root.resolve(strict=False))
+        return True
+    except ValueError:
+        return False
+
+
+def unlink_or_rmtree(path: Path, report: CleanupReport) -> None:
+    size = path_size(path)
+    report.deleted_paths.append(str(path))
+    report.bytes_reclaimed += size
+    if report.dry_run:
+        return
+    if path.is_symlink() or path.is_file():
+        path.unlink(missing_ok=True)
+    elif path.is_dir():
+        shutil.rmtree(path)
+
+
+def exact_release_dirs(paths: CleanupPaths) -> list[Path]:
+    if not paths.releases_root.is_dir():
+        return []
+    result = []
+    for child in paths.releases_root.iterdir():
+        if child.is_symlink() or not child.is_dir() or not SHA_RE.fullmatch(child.name):
+            continue
+        marker = child / ".disdex-release-sha"
+        if not marker.is_file() or marker.is_symlink():
+            continue
+        try:
+            if marker.read_text(encoding="utf-8").strip() != child.name:
+                continue
+        except OSError:
+            continue
+        result.append(child)
+    return sorted(result, key=lambda path: path.stat().st_mtime, reverse=True)
+
+
+def current_release(paths: CleanupPaths) -> Optional[Path]:
+    if not paths.current_link.is_symlink():
+        return None
+    target = paths.current_link.resolve(strict=False)
+    if not is_within(target, paths.releases_root) or not SHA_RE.fullmatch(target.name):
+        raise RuntimeError("current release symlink is outside the fixed release root or not an exact SHA")
+    return target
+
+
+def cleanup_releases(paths: CleanupPaths, report: CleanupReport, now: float) -> None:
+    releases = exact_release_dirs(paths)
+    current = current_release(paths)
+    protected: set[Path] = set()
+    if current is not None:
+        protected.add(current)
+    noncurrent_kept = 0
+    for release in releases:
+        if release == current:
+            continue
+        if noncurrent_kept < RELEASE_KEEP_NONCURRENT:
+            protected.add(release)
+            noncurrent_kept += 1
+    for release in sorted(protected):
+        report.protected_paths.append(str(release))
+    for release in releases:
+        if release in protected:
+            continue
+        age = now - release.stat().st_mtime
+        if age < RELEASE_MIN_AGE_SECONDS:
+            report.skipped_paths.append(str(release))
+            continue
+        unlink_or_rmtree(release, report)
+
+
+def rotate_file(path: Path, archive_days: int, report: CleanupReport, now: float, copytruncate: bool) -> None:
+    if not path.is_file() or path.is_symlink() or path.stat().st_size <= 0:
+        return
+    timestamp = time.strftime("%Y%m%dT%H%M%SZ", time.gmtime(now))
+    archive = path.with_name(f"{path.name}.{timestamp}.gz")
+    report.rotated_paths.append(str(path))
+    report.compressed_paths.append(str(archive))
+    if not report.dry_run:
+        original = path.stat()
+        mode = stat.S_IMODE(original.st_mode)
+        uid = getattr(original, "st_uid", None)
+        gid = getattr(original, "st_gid", None)
+        if copytruncate:
+            with path.open("rb") as source, gzip.open(archive, "wb", compresslevel=6) as target:
+                shutil.copyfileobj(source, target)
+            path.open("w", encoding="utf-8").close()
+            restore_owner(archive, uid, gid)
+            os.chmod(path, mode)
+        else:
+            temporary = path.with_name(f".{path.name}.rotate.{os.getpid()}")
+            os.replace(path, temporary)
+            path.touch(mode=mode, exist_ok=False)
+            restore_owner(path, uid, gid)
+            os.chmod(path, mode)
+            with temporary.open("rb") as source, gzip.open(archive, "wb", compresslevel=6) as target:
+                shutil.copyfileobj(source, target)
+            temporary.unlink(missing_ok=True)
+            restore_owner(archive, uid, gid)
+        os.chmod(archive, 0o600)
+    cutoff = now - archive_days * 24 * 60 * 60
+    for old in path.parent.glob(f"{path.name}.*.gz"):
+        if old.is_symlink() or not old.is_file() or old == archive:
+            continue
+        if old.stat().st_mtime < cutoff:
+            unlink_or_rmtree(old, report)
+
+
+def cleanup_audits(paths: CleanupPaths, report: CleanupReport, now: float) -> None:
+    if paths.state_root.is_dir():
+        for path in sorted(paths.state_root.rglob("*.jsonl")):
+            if path.is_symlink() or not path.is_file():
+                continue
+            if not is_within(path, paths.state_root):
+                raise RuntimeError(f"audit path escaped state root: {path}")
+            rotate_file(path, AUDIT_RETENTION_DAYS, report, now, copytruncate=False)
+    if paths.pm2_log_root.is_dir():
+        for path in sorted(paths.pm2_log_root.glob("*.log")):
+            if path.is_symlink() or not path.is_file():
+                continue
+            rotate_file(path, PM2_RETENTION_DAYS, report, now, copytruncate=True)
+
+
+def keep_newest_then_age_delete(
+    candidates: Iterable[Path],
+    keep: int,
+    maximum_age_days: int,
+    report: CleanupReport,
+    now: float,
+) -> None:
+    rows = sorted(
+        [path for path in candidates if path.exists() and not path.is_symlink()],
+        key=lambda path: path.stat().st_mtime,
+        reverse=True,
+    )
+    for path in rows[:keep]:
+        report.protected_paths.append(str(path))
+    cutoff = now - maximum_age_days * 24 * 60 * 60
+    for path in rows[keep:]:
+        if path.stat().st_mtime < cutoff:
+            unlink_or_rmtree(path, report)
+        else:
+            report.skipped_paths.append(str(path))
+
+
+def cleanup_backups(paths: CleanupPaths, report: CleanupReport, now: float) -> None:
+    if paths.state_root.is_dir():
+        backups = [
+            path
+            for path in paths.state_root.rglob("*.v11-backup-*")
+            if path.is_file() and not path.is_symlink() and is_within(path, paths.state_root)
+        ]
+        keep_newest_then_age_delete(backups, 3, V11_BACKUP_RETENTION_DAYS, report, now)
+    if paths.systemd_backup_root.is_dir():
+        backups = [path for path in paths.systemd_backup_root.iterdir() if path.is_dir() and not path.is_symlink()]
+        keep_newest_then_age_delete(backups, SYSTEMD_BACKUP_KEEP, 30, report, now)
+    if paths.promotion_root.is_dir():
+        transactions = [
+            path
+            for path in paths.promotion_root.iterdir()
+            if path.is_dir() and not path.is_symlink() and not (path / ".retain").exists()
+        ]
+        keep_newest_then_age_delete(
+            transactions,
+            PROMOTION_FAILURE_KEEP,
+            PROMOTION_FAILURE_RETENTION_DAYS,
+            report,
+            now,
+        )
+
+
+def cleanup_stale_temporary_files(paths: CleanupPaths, report: CleanupReport, now: float) -> None:
+    cutoff = now - STALE_TEMP_RETENTION_SECONDS
+    roots = [paths.state_root, paths.approval_root, paths.ops_root]
+    patterns = ("*.rollback.*", "*.tmp.*", ".write-probe", ".*.rotate.*")
+    for root in roots:
+        if not root.is_dir():
+            continue
+        for pattern in patterns:
+            for path in root.rglob(pattern):
+                if path.is_symlink() or not path.is_file() or not is_within(path, root):
+                    continue
+                if path.stat().st_mtime < cutoff:
+                    unlink_or_rmtree(path, report)
+
+
+def protected_runtime_paths(paths: CleanupPaths) -> list[Path]:
+    return [
+        paths.current_link,
+        paths.state_root / "kill-switch.json",
+        paths.state_root / "crypto-v96" / "runner-live.json",
+        paths.state_root / "stock" / "runner-live.json",
+        paths.state_root / "margin-risk" / "guard-live.json",
+        paths.approval_root / "disdex-v96-parity.json",
+        paths.approval_root / "disdex-v96-operator-override.json",
+        paths.approval_root / "disdex-v96-forward.json",
+    ]
+
+
+def path_lexists(path: Path) -> bool:
+    return os.path.lexists(path)
+
+
+def existing_protected_paths(paths: CleanupPaths) -> set[str]:
+    return {str(path) for path in protected_runtime_paths(paths) if path_lexists(path)}
+
+
+def verify_protected_paths(
+    paths: CleanupPaths,
+    existed_before: set[str],
+    current_before: Optional[Path],
+    report: CleanupReport,
+) -> None:
+    deleted = set(report.deleted_paths)
+    for path_text in existed_before:
+        path = Path(path_text)
+        if path_text in deleted or not path_lexists(path):
+            raise RuntimeError(f"protected runtime path was removed by cleanup: {path}")
+    current_after = current_release(paths)
+    if current_before != current_after:
+        raise RuntimeError("current release target changed during retention cleanup")
+    if current_before is not None and str(current_before) in deleted:
+        raise RuntimeError("current release was selected for deletion")
+
+
+def run_cleanup(paths: CleanupPaths, dry_run: bool, acquire_lock: bool = True) -> CleanupReport:
+    report = CleanupReport(dry_run=dry_run)
+    lock_handle = None
+    if acquire_lock:
+        paths.promotion_lock.parent.mkdir(parents=True, exist_ok=True)
+        lock_handle = paths.promotion_lock.open("a+")
+        try:
+            fcntl.flock(lock_handle.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except BlockingIOError:
+            report.promotion_lock_busy = True
+            report.skipped_paths.append("promotion lock busy; cleanup skipped")
+            lock_handle.close()
+            return report
+    existed_before = existing_protected_paths(paths)
+    current_before = current_release(paths)
+    try:
+        current_time = now_seconds()
+        cleanup_releases(paths, report, current_time)
+        cleanup_audits(paths, report, current_time)
+        cleanup_backups(paths, report, current_time)
+        cleanup_stale_temporary_files(paths, report, current_time)
+        verify_protected_paths(paths, existed_before, current_before, report)
+    finally:
+        if lock_handle is not None:
+            fcntl.flock(lock_handle.fileno(), fcntl.LOCK_UN)
+            lock_handle.close()
+    return report
+
+
+def set_old(path: Path, age_days: int) -> None:
+    timestamp = now_seconds() - age_days * 24 * 60 * 60
+    os.utime(path, (timestamp, timestamp), follow_symlinks=False)
+
+
+def self_test() -> None:
+    with tempfile.TemporaryDirectory(prefix="disdex-retention-selftest-") as temporary:
+        root = Path(temporary)
+        paths = CleanupPaths(
+            trading_root=root / "trading",
+            shared_root=root / "shared",
+            ops_root=root / "ops",
+            systemd_backup_root=root / "systemd-backup",
+            pm2_log_root=root / "pm2-logs",
+        )
+        for path in [
+            paths.releases_root,
+            paths.state_root / "stock",
+            paths.state_root / "crypto-v96",
+            paths.state_root / "margin-risk",
+            paths.approval_root,
+            paths.promotion_root,
+            paths.systemd_backup_root,
+            paths.pm2_log_root,
+        ]:
+            path.mkdir(parents=True, exist_ok=True)
+        releases = []
+        for index in range(6):
+            sha = f"{index + 1:040x}"
+            release = paths.releases_root / sha
+            release.mkdir()
+            (release / ".disdex-release-sha").write_text(sha + "\n", encoding="utf-8")
+            (release / "payload.bin").write_bytes(b"x" * 100)
+            set_old(release, index + 2)
+            releases.append(release)
+        paths.current_link.symlink_to(releases[3])
+        for protected in protected_runtime_paths(paths):
+            if protected == paths.current_link:
+                continue
+            protected.parent.mkdir(parents=True, exist_ok=True)
+            protected.write_text("protected\n", encoding="utf-8")
+        audit = paths.state_root / "stock" / "audit-live.jsonl"
+        audit.write_text('{"event":"one"}\n', encoding="utf-8")
+        audit_before = audit.stat()
+        pm2 = paths.pm2_log_root / "ui-out.log"
+        pm2.write_text("line\n", encoding="utf-8")
+        for index in range(8):
+            backup = paths.systemd_backup_root / f"backup-{index}"
+            backup.mkdir()
+            set_old(backup, 40 + index)
+        retained_txn = paths.promotion_root / "retained"
+        retained_txn.mkdir()
+        (retained_txn / ".retain").write_text("keep\n", encoding="utf-8")
+        set_old(retained_txn, 200)
+        for index in range(5):
+            transaction = paths.promotion_root / f"txn-{index}"
+            transaction.mkdir()
+            set_old(transaction, 100 + index)
+
+        protected_before = existing_protected_paths(paths)
+        current_before = current_release(paths)
+        dry = run_cleanup(paths, dry_run=True, acquire_lock=False)
+        assert dry.deleted_paths
+        assert all(path.exists() for path in releases)
+        applied = run_cleanup(paths, dry_run=False, acquire_lock=False)
+        verify_protected_paths(paths, protected_before, current_before, applied)
+        assert paths.current_link.resolve() == releases[3]
+        assert retained_txn.exists()
+        remaining = exact_release_dirs(paths)
+        assert releases[3] in remaining
+        assert len(remaining) <= 3
+        assert audit.exists() and audit.stat().st_size == 0
+        audit_after = audit.stat()
+        assert stat.S_IMODE(audit_after.st_mode) == stat.S_IMODE(audit_before.st_mode)
+        for field in ("st_uid", "st_gid"):
+            if hasattr(audit_before, field):
+                assert getattr(audit_after, field) == getattr(audit_before, field)
+        archive = next(path for path in audit.parent.glob("audit-live.jsonl.*.gz") if path.is_file())
+        for field in ("st_uid", "st_gid"):
+            if hasattr(audit_before, field):
+                assert getattr(archive.stat(), field) == getattr(audit_before, field)
+        assert pm2.exists() and pm2.stat().st_size == 0
+        assert applied.deleted_paths
+    print("DISDEX_VPS_RETENTION_CLEANUP_SELFTEST_PASS")
+    print("runtimeAuditOwnerPreserved=true")
+    print("protectedPathsTouched=false")
+    print("currentReleaseDeleted=false")
+    print("runtimeStateDeleted=false")
+    print("approvalDeleted=false")
+    print("killSwitchDeleted=false")
+    print("ordersSent=false")
+    print("cancelSent=false")
+    print("positionChangesSent=false")
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    mode = parser.add_mutually_exclusive_group(required=True)
+    mode.add_argument("--dry-run", action="store_true")
+    mode.add_argument("--apply", action="store_true")
+    mode.add_argument("--self-test", action="store_true")
+    args = parser.parse_args()
+    if args.self_test:
+        self_test()
+        return 0
+    if args.apply and os.geteuid() != 0:
+        raise RuntimeError("retention cleanup --apply requires root")
+    report = run_cleanup(CleanupPaths(), dry_run=args.dry_run)
+    payload = report.payload()
+    try:
+        usage = shutil.disk_usage("/")
+        payload["filesystemUsedPct"] = round((usage.used / usage.total) * 100, 2) if usage.total else 0.0
+        payload["filesystemFreeBytes"] = usage.free
+    except OSError:
+        payload["filesystemUsedPct"] = None
+        payload["filesystemFreeBytes"] = None
+    print(json.dumps(payload, ensure_ascii=False, separators=(",", ":")))
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

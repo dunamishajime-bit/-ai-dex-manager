@@ -1,27 +1,33 @@
-name: Dis-Dex V13D V11-EQ V96 LIVE Runner CI
+name: Dis-Dex V96 V52 LIVE Runner CI
 
 on:
   pull_request:
     paths:
+      - 'config/disdexV96Runtime.ts'
       - 'config/disdexStockRouterV13DV11EqRuntime.ts'
+      - 'lib/direct-trade-executor.ts'
       - 'lib/disdex-v13d-v11eq-stock-router-contract.ts'
       - 'lib/disdex-v96-combined-state-migration.ts'
+      - 'lib/disdex-v96-execution-capacity.ts'
+      - 'lib/disdex-v96-portfolio-runner.ts'
+      - 'lib/disdex-v96-runner-state.ts'
       - 'scripts/disdex-v13d-v11eq-v96-contract-selftest.ts'
       - 'scripts/disdex-v13d-v11eq-v96-live-runner.ts'
       - 'scripts/disdex-v13d-v11eq-v96-live-preflight.ts'
-      - 'scripts/disdex-v13d-v11eq-v96-kill-switch.ts'
-      - 'scripts/disdex-v96-combined-state-migrate.ts'
+      - 'scripts/disdex-v96-gross-2p5-selftest.ts'
       - 'scripts/disdex-v96-live-preflight.ts'
-      - 'scripts/disdex_v13d_v11eq_stock_live_engine.py'
-      - 'scripts/disdex_v11eq_aster_only_live_engine.py'
-      - 'scripts/disdex_stock_reference_pyth_iex_proxy.py'
+      - 'scripts/disdex-v96-v52-readonly-preflight.ts'
+      - 'scripts/disdex_v96_v52_margin_risk_policy.py'
+      - 'scripts/disdex_v96_v52_margin_guard.py'
+      - 'scripts/disdex_v96_v52_margin_guard_runtime.py'
+      - 'scripts/disdex_v96_v52_margin_guard_selftest.py'
+      - 'scripts/disdex_v52_margin_aware_live_engine.py'
       - 'requirements-stock-aster-only.txt'
-      - 'ops/systemd/disdex-v13d-v11eq-v96.service'
-      - 'ops/systemd/disdex-v13d-v11eq-v96-preflight.service'
-      - 'ops/systemd/disdex-v96-combined-migration.service'
-      - 'ops/systemd/disdex-stock-reference-free.service'
+      - 'ops/systemd/disdex-v96-v52-live.service'
+      - 'ops/systemd/disdex-v96-v52-preflight@.service'
+      - 'ops/systemd/disdex-v96-v52-approval@.service'
       - 'ops/env/disdex-v13d-v11eq-v96.env.example'
-      - 'docs/implementation/FREE_PYTH_IEX_AND_V96_COMBINED_MIGRATION.md'
+      - 'tsconfig.v96-runner.json'
       - 'tsconfig.v13d-v11eq-router.json'
       - 'package.json'
       - '.github/workflows/disdex-v13d-v11eq-v96-contract-ci.yml'
@@ -31,7 +37,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: dis-dex-v13d-v11eq-v96-live-${{ github.ref }}
+  group: dis-dex-v96-v52-live-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -51,46 +57,75 @@ jobs:
           cache-dependency-path: requirements-stock-aster-only.txt
       - run: npm ci
       - run: python -m pip install -r requirements-stock-aster-only.txt
-      - name: Validate combined LIVE contract, migration and free reference
+
+      - name: Validate V96 plus V52 contracts
         run: |
-          npm run strategy:disdex-v13d-v11eq-v96:contract
-          python -c "import websocket; print('Aster-only Reference dependencies: PASS')"
+          set -Eeuo pipefail
+          npm run strategy:disdex-v52:contract
+          npx tsx scripts/disdex-v96-gross-2p5-selftest.ts
+          npm run strategy:disdex-v13d-v11eq-v96:supervisor:selftest
+          npm run strategy:disdex-v96-v52:preflight:readonly:selftest
+          python3 scripts/disdex_v96_v52_margin_risk_policy.py
+          python3 scripts/disdex_v96_v52_margin_guard.py --self-test
+          python3 scripts/disdex_v96_v52_margin_guard_runtime.py --self-test
+          python3 scripts/disdex_v96_v52_margin_guard_selftest.py
+          python3 scripts/disdex_v52_margin_aware_live_engine.py --self-test
+          python -c "import websocket; print('V52 reference dependencies: PASS')"
+
       - name: Protect existing Crypto V96 behavior
         run: |
+          set -Eeuo pipefail
           npm run strategy:disdex-v96:typecheck
           npm run strategy:disdex-v96:selftest
           npm run strategy:disdex-v96:frequency:selftest
-      - name: Assert LIVE remains fail-closed and migration-gated
+          npm run strategy:disdex-v96:execution:selftest
+
+      - name: Assert separated sleeves and fail-closed LIVE boundaries
         run: |
+          set -Eeuo pipefail
           node - <<'NODE'
           const fs = require('node:fs');
-          const config = fs.readFileSync('config/disdexStockRouterV13DV11EqRuntime.ts', 'utf8');
+          const v96Config = fs.readFileSync('config/disdexV96Runtime.ts', 'utf8');
+          const combinedConfig = fs.readFileSync('config/disdexStockRouterV13DV11EqRuntime.ts', 'utf8');
           const supervisor = fs.readFileSync('scripts/disdex-v13d-v11eq-v96-live-runner.ts', 'utf8');
-          const preflight = fs.readFileSync('scripts/disdex-v13d-v11eq-v96-live-preflight.ts', 'utf8');
-          const migration = fs.readFileSync('scripts/disdex-v96-combined-state-migrate.ts', 'utf8');
-          const reference = fs.readFileSync('scripts/disdex_stock_reference_pyth_iex_proxy.py', 'utf8');
-          const asterOnlyEngine = fs.readFileSync('scripts/disdex_v11eq_aster_only_live_engine.py', 'utf8');
-          const env = fs.readFileSync('ops/env/disdex-v13d-v11eq-v96.env.example', 'utf8');
-          const migrationUnit = fs.readFileSync('ops/systemd/disdex-v96-combined-migration.service', 'utf8');
-          const preflightUnit = fs.readFileSync('ops/systemd/disdex-v13d-v11eq-v96-preflight.service', 'utf8');
-          if (!config.includes('mode: "LIVE_READY"')) throw new Error('combined runtime must be LIVE_READY');
-          if (!config.includes('liveTradingEnabled: true')) throw new Error('LIVE implementation flag missing');
-          if (!config.includes('orderSubmissionAllowed: true')) throw new Error('order implementation flag missing');
-          if (!config.includes('sleeveLendingEnabled: false')) throw new Error('sleeve lending must remain disabled');
-          if (!supervisor.includes('markCombinedV96MigrationActivated')) throw new Error('combined activation migration gate missing');
-          if (!supervisor.includes('DISDEX_V11EQ_ASTER_ONLY_LIVE_EXECUTION_ENABLED')) throw new Error('combined environment gate missing');
-          if (!preflight.includes('DISDEX_V96_CONFIG_MIGRATION_MODE')) throw new Error('combined preflight migration mode missing');
-          if (!migration.includes('systemctl') || !migration.includes('reconcileOrder')) throw new Error('verified V96 migration checks missing');
-          if (!migration.includes('Pending V96 order cannot be safely migrated')) throw new Error('pending fail-closed path missing');
-          if (!reference.includes('hermes.pyth.network')) throw new Error('Pyth Core reference missing');
-          if (!reference.includes('stream.data.alpaca.markets/v2/iex')) throw new Error('Alpaca IEX validator missing');
-          if (!reference.includes('cross_source_divergence')) throw new Error('cross-source fail-closed gate missing');
-          if (!asterOnlyEngine.includes('REFERENCE_FRESHNESS_DEFERRED_MARKET_CLOSED')) throw new Error('market-closed startup handling missing');
-          if (!asterOnlyEngine.includes('excess_margin_usd') || !asterOnlyEngine.includes('DISDEX_V96_SAFETY_RESERVE_PCT')) throw new Error('Aster-only excess-margin guard missing');
-          if (asterOnlyEngine.includes('HyperliquidXYZClient') || asterOnlyEngine.includes('self.xyz')) throw new Error('Hyperliquid must be excluded from Aster-only engine');
-          if (!config.includes('strategyId: "V13D_DISABLED"') || !config.includes('enabledForLive: false')) throw new Error('V13D must be disabled');
-          if (!env.includes('ALPACA_DATA_FEED=iex')) throw new Error('free IEX environment missing');
-          if (!env.includes('DISDEX_STOCK_REFERENCE_URL_TEMPLATE=http://127.0.0.1:8797/quote?symbol={symbol}')) throw new Error('local reference URL missing');
-          if (!migrationUnit.includes('EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env')) throw new Error('secure migration unit missing environment file');
-          if (!preflightUnit.includes('EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env')) throw new Error('secure preflight unit missing environment file');
+          const integratedPreflight = fs.readFileSync('scripts/disdex-v13d-v11eq-v96-live-preflight.ts', 'utf8');
+          const readonlyPreflight = fs.readFileSync('scripts/disdex-v96-v52-readonly-preflight.ts', 'utf8');
+          const capacity = fs.readFileSync('lib/disdex-v96-execution-capacity.ts', 'utf8');
+          const executor = fs.readFileSync('lib/direct-trade-executor.ts', 'utf8');
+          const marginPolicy = fs.readFileSync('scripts/disdex_v96_v52_margin_risk_policy.py', 'utf8');
+          const marginRuntime = fs.readFileSync('scripts/disdex_v96_v52_margin_guard_runtime.py', 'utf8');
+          const v52 = fs.readFileSync('scripts/disdex_v52_margin_aware_live_engine.py', 'utf8');
+          const livePolicy = fs.readFileSync('scripts/ops/disdex-v96-v52-live-policy.sh', 'utf8');
+          const liveLauncher = fs.readFileSync('scripts/ops/disdex-v96-v52-live.sh', 'utf8');
+          const liveUnit = fs.readFileSync('ops/systemd/disdex-v96-v52-live.service', 'utf8');
+          const approvalUnit = fs.readFileSync('ops/systemd/disdex-v96-v52-approval@.service', 'utf8');
+
+          if (!v96Config.includes('penguTargetGross: 1.15')) throw new Error('PENGU target 1.15 missing');
+          if (!v96Config.includes('totalGrossCap: 1.5')) throw new Error('V96 Crypto sleeve Gross 1.5 missing');
+          if (!v96Config.includes('maximumPortfolioGross: 1.5')) throw new Error('Operator Override V96 Gross 1.5 missing');
+          if (!v96Config.includes('requiredInitialLeverage: 5')) throw new Error('fixed 5x leverage missing');
+          if (!combinedConfig.includes('cryptoSleeveGrossCap: 1.5')) throw new Error('Crypto sleeve 1.5 missing');
+          if (!combinedConfig.includes('stockSleeveGrossCap: 1.5')) throw new Error('Stock sleeve 1.5 missing');
+          if (!combinedConfig.includes('portfolioGrossCap: 2.5')) throw new Error('Combined Gross 2.5 missing');
+          if (!combinedConfig.includes('reservedFirstStockGross: 1.0')) throw new Error('first Stock slot reservation missing');
+          if (!combinedConfig.includes('minimumSecondStockGross: 0.25')) throw new Error('second Stock minimum missing');
+          if (!combinedConfig.includes('maximumConcurrentStockPositions: 2')) throw new Error('two Stock slots missing');
+          if (!combinedConfig.includes('requiredMarginType: "cross"')) throw new Error('cross margin requirement missing');
+          if (!supervisor.includes('scripts/disdex_v52_margin_aware_live_engine.py')) throw new Error('margin-aware V52 supervisor path missing');
+          if (!integratedPreflight.includes('scripts/disdex_v52_margin_aware_live_engine.py')) throw new Error('margin-aware V52 preflight path missing');
+          if (!readonlyPreflight.includes('READ_ONLY_PREFLIGHT_LEVERAGE_BELOW_')) throw new Error('authenticated leverage gate missing');
+          if (!capacity.includes('managedGrossCap') || !capacity.includes('portfolioGrossCap')) throw new Error('separated Gross capacity gates missing');
+          if (!capacity.includes('maximumInitialMarginFraction')) throw new Error('initial-margin capacity gate missing');
+          if (!executor.includes('--preorder-check') || !executor.includes('command.reduceOnly !== true')) throw new Error('fresh exposure-order Margin Guard missing');
+          if (!marginPolicy.includes('HEALTHY_POLL_INTERVAL_MS = 5 * 60_000')) throw new Error('healthy 5-minute polling missing');
+          if (!marginPolicy.includes('WARNING_POLL_INTERVAL_MS = 60_000')) throw new Error('warning 1-minute polling missing');
+          if (!marginPolicy.includes('REDUCE_MARGIN_RATIO_PCT = 65.0')) throw new Error('pre-liquidation stop-loss threshold missing');
+          if (!marginRuntime.includes('reduceOnly": "true"')) throw new Error('serialized emergency reduce-only orders missing');
+          if (!marginRuntime.includes('emergency-flatten.lock')) throw new Error('emergency action lock missing');
+          if (!marginRuntime.includes('CONCURRENT_FLATTEN_ALREADY_COMPLETED')) throw new Error('concurrent flatten reconciliation missing');
+          if (!v52.includes('V52 adaptive margin-aware concurrent Stock runner self-test: PASS')) throw new Error('adaptive V52 runner missing');
+          if (!livePolicy.includes('DISDEX_V96_V52_MARGIN_GUARD_SCRIPT=scripts/disdex_v96_v52_margin_guard_runtime.py')) throw new Error('fixed serialized Guard path missing');
+          if (!liveLauncher.includes('scripts/disdex_v96_v52_margin_guard_runtime.py --mode live --daemon')) throw new Error('serialized Guard launcher missing');
+          if (!liveUnit.includes('DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED=true')) throw new Error('LIVE unit Margin Guard missing');
+          if (!approvalUnit.includes('DISDEX_V96_MAX_GROSS=1.5')) throw new Error('approval unit V96 Gross 1.5 missing');
           NODE
