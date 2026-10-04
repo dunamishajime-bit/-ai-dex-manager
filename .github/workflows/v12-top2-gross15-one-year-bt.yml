@@ -1,0 +1,106 @@
+name: V12 Top2 Residual Gross 1.5 One-Year Backtest
+
+on:
+  push:
+    branches:
+      - research/v12-top2-gross15-balance-20260821
+    paths:
+      - 'scripts/research_v12_top2_gross15_one_year.ts'
+      - '.github/workflows/v12-top2-gross15-one-year-bt.yml'
+  pull_request:
+    branches:
+      - research/v12-gross-compare-clean-20260821
+    paths:
+      - 'scripts/research_v12_top2_gross15_one_year.ts'
+      - '.github/workflows/v12-top2-gross15-one-year-bt.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: v12-top2-gross15-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backtest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Restore perp research cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/perp-research-usdm
+          key: v12-top2-gross15-${{ runner.os }}-${{ hashFiles('scripts/research_v12_top2_gross15_one_year.ts') }}
+          restore-keys: |
+            perp-research-usdm-
+            v26-latency-aware-3y-usdm-v1-20260816
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Pin latest complete monthly-archive year
+        run: |
+          cp scripts/research_v12_top2_gross15_one_year.ts scripts/.research_v12_top2_gross15_complete_year.ts
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('scripts/.research_v12_top2_gross15_complete_year.ts')
+          s = p.read_text()
+          s = s.replace('const START = Date.UTC(2025, 7, 21);', 'const START = Date.UTC(2025, 7, 1);')
+          s = s.replace('const END = Date.UTC(2026, 7, 21);', 'const END = Date.UTC(2026, 7, 1);')
+          p.write_text(s)
+          PY
+
+      - name: Run latest complete one-year V12 Top2 residual comparison
+        run: |
+          set -o pipefail
+          mkdir -p .research-state/v12-top2-gross15
+          npx tsx scripts/.research_v12_top2_gross15_complete_year.ts 2>&1 | tee .research-state/v12-top2-gross15/run.log
+
+      - name: Validate research boundary and requested variant
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from 'node:fs';
+          const p = JSON.parse(fs.readFileSync('.research-state/v12-top2-gross15/result.json', 'utf8'));
+          if (p.status !== 'PASS_RESEARCH_ONLY') throw new Error('research status failed');
+          if (p.ordersSent !== false || p.productionChanged !== false || p.vpsChanged !== false) throw new Error('research boundary failed');
+          if (p.period.calendarDays !== 365) throw new Error(`unexpected days ${p.period.calendarDays}`);
+          if (!p.period.startInclusive.startsWith('2025-08-01') || !p.period.endExclusive.startsWith('2026-08-01')) throw new Error(`unexpected complete-year period ${JSON.stringify(p.period)}`);
+          if (!p.results.top2_residual_cap1p50) throw new Error('missing requested Top2 1.50 result');
+          for (const mode of ['normal','stress']) {
+            const r = p.results.top2_residual_cap1p50[mode];
+            if (r.maximumGross > 1.500000001) throw new Error(`gross cap exceeded ${mode}: ${r.maximumGross}`);
+          }
+          console.log(JSON.stringify({period:p.period, requested:p.results.top2_residual_cap1p50, ranking:p.ranking.map(x=>({variant:x.variant,stressReturnPct:x.stress.returnPct,stressPF:x.stress.profitFactor,stressDDPct:x.stress.maxDrawdownPct}))}, null, 2));
+          NODE
+
+      - name: Publish branch research results
+        if: github.event_name == 'push'
+        run: |
+          mkdir -p docs/research-results
+          cp .research-state/v12-top2-gross15/result.json docs/research-results/v12-top2-gross15-one-year-latest.json
+          cp .research-state/v12-top2-gross15/report.md docs/research-results/v12-top2-gross15-one-year-latest.md
+          cp .research-state/v12-top2-gross15/summary.csv docs/research-results/v12-top2-gross15-one-year-summary-latest.csv
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/research-results/v12-top2-gross15-one-year-latest.json docs/research-results/v12-top2-gross15-one-year-latest.md docs/research-results/v12-top2-gross15-one-year-summary-latest.csv
+          if ! git diff --cached --quiet; then
+            git commit -m "research: record V12 Top2 gross 1.5 one-year results [skip ci]"
+            git push
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: v12-top2-gross15-${{ github.run_id }}
+          path: .research-state/v12-top2-gross15
+          include-hidden-files: true
+          retention-days: 90
+          if-no-files-found: warn
