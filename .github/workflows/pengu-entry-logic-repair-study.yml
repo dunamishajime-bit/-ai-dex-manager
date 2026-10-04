@@ -1,0 +1,150 @@
+name: PENGU Entry Logic Repair Study
+
+on:
+  push:
+    branches:
+      - research/pengu-current-20241004-20251004-bt-20261004
+    paths:
+      - "scripts/research_pengu_entry_logic_repair_study.ts"
+      - "scripts/research_select_pengu_entry_logic_repairs.py"
+      - "scripts/research_fetch_aster_pengu_repair_validation.py"
+      - "scripts/research_fetch_okx_pengu_20241004_20251004.py"
+      - ".github/workflows/pengu-entry-logic-repair-study.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pengu-entry-logic-repair-study
+  cancel-in-progress: false
+
+jobs:
+  study:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Verify Production ancestry and frozen contract
+        run: |
+          set -Eeuo pipefail
+          git merge-base --is-ancestor 53eeff5417636369d4709fddfd47d7916ddcf3b1 HEAD
+          grep -q 'logicProfile: "COMBINED_FILTERED_Q60_DD17_H72"' config/penguDualLsV2Runtime.ts
+          grep -q 'rule: "R_BTC3"' config/penguRecoveryV8.ts
+          grep -q 'liveEnabled: true' config/penguRecoveryV8.ts
+
+      - name: Install
+        run: npm ci --no-audit --no-fund
+
+      - name: Fetch historical OKX development data
+        env:
+          PENGU_CROSS_VENUE: OKX
+        run: |
+          python scripts/research_fetch_okx_pengu_20241004_20251004.py
+          mv .research-state/okx-pengu-proxy .research-state/okx-pengu-repair-development 2>/dev/null || true
+          if [ ! -d .research-state/okx-pengu-repair-development ]; then
+            mkdir -p .research-state/okx-pengu-repair-development
+            cp .research-state/okx-pengu-proxy/* .research-state/okx-pengu-repair-development/
+          fi
+
+      - name: Normalize OKX development directory
+        run: |
+          set -Eeuo pipefail
+          if [ -d .research-state/okx-pengu-proxy ]; then
+            mkdir -p .research-state/okx-pengu-repair-development
+            cp .research-state/okx-pengu-proxy/* .research-state/okx-pengu-repair-development/
+          fi
+          test -s .research-state/okx-pengu-repair-development/PENGUUSDT-candles.json
+          test -s .research-state/okx-pengu-repair-development/BTCUSDT-candles.json
+          test -f .research-state/okx-pengu-repair-development/PENGUUSDT-funding.json
+
+      - name: Fetch untouched Aster validation year
+        run: python scripts/research_fetch_aster_pengu_repair_validation.py
+
+      - name: Run historical development candidate matrix
+        env:
+          PENGU_LOCAL_DATA_DIR: .research-state/okx-pengu-repair-development
+          PENGU_STUDY_DATA_LABEL: OKX_DEVELOPMENT
+          PENGU_STUDY_EVAL_START: "2024-12-25T00:00:00Z"
+          PENGU_STUDY_EVAL_END: "2025-08-10T00:00:00Z"
+          PENGU_STUDY_OUT: .research-state/pengu-repair-development.json
+        run: |
+          set -o pipefail
+          npx tsx scripts/research_pengu_entry_logic_repair_study.ts 2>&1 | tee .research-state/pengu-repair-development.log
+
+      - name: Run untouched Aster validation candidate matrix
+        env:
+          PENGU_LOCAL_DATA_DIR: .research-state/aster-pengu-repair-validation
+          PENGU_STUDY_DATA_LABEL: ASTER_VALIDATION
+          PENGU_STUDY_EVAL_START: "2025-08-10T00:00:00Z"
+          PENGU_STUDY_EVAL_END: "2026-08-10T00:00:00Z"
+          PENGU_STUDY_OUT: .research-state/pengu-repair-validation.json
+        run: |
+          set -o pipefail
+          npx tsx scripts/research_pengu_entry_logic_repair_study.ts 2>&1 | tee .research-state/pengu-repair-validation.log
+
+      - name: Select on development only and evaluate validation
+        run: |
+          python scripts/research_select_pengu_entry_logic_repairs.py             .research-state/pengu-repair-development.json             .research-state/pengu-repair-validation.json             .research-state/pengu-repair-selection.json
+
+      - name: Validate research contract
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.load(open('.research-state/pengu-repair-development.json'))
+          v=json.load(open('.research-state/pengu-repair-validation.json'))
+          s=json.load(open('.research-state/pengu-repair-selection.json'))
+          for p in (d,v):
+              assert p['schema']=='pengu-entry-logic-repair-study/v1'
+              assert p['productionSourceSha']=='53eeff5417636369d4709fddfd47d7916ddcf3b1'
+              assert p['baselineKey']=='S0_CURRENT__L0_CURRENT'
+              assert len(p['results'])==49
+              assert p['design']['exitsUnchanged'] is True
+              assert p['design']['riskOverlayUnchanged'] is True
+              assert p['safety']=={'researchOnly':True,'ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          assert d['dataLabel']=='OKX_DEVELOPMENT'
+          assert v['dataLabel']=='ASTER_VALIDATION'
+          assert s['schema']=='pengu-entry-logic-repair-selection/v1'
+          assert s['validation']['period']=={'startInclusive':'2025-08-10T00:00:00.000Z','endExclusive':'2026-08-10T00:00:00.000Z'}
+          assert s['safety']=={'researchOnly':True,'ordersSent':False,'liveChanged':False,'vpsChanged':False,'productionChanged':False}
+          print('PENGU_ENTRY_REPAIR_CONTRACT=PASS')
+          print(json.dumps({
+            'developmentBaseline':d['results']['S0_CURRENT__L0_CURRENT'],
+            'selectedShort':s['development']['selectedShort'],
+            'selectedLong':s['development']['selectedLong'],
+            'developmentCombined':s['development']['combined'],
+            'validationBaseline':s['validation']['baseline'],
+            'validationCombined':s['validation']['combined'],
+            'validationDeltaNormal':s['validation']['deltaNormal'],
+            'validationDeltaStress':s['validation']['deltaStress'],
+            'promotionCandidate':s['promotionCandidate'],
+          },ensure_ascii=False,separators=(',',':')))
+          PY
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pengu-entry-logic-repair-study-${{ github.run_id }}
+          path: |
+            .research-state/pengu-repair-development.json
+            .research-state/pengu-repair-validation.json
+            .research-state/pengu-repair-selection.json
+            .research-state/pengu-repair-development.log
+            .research-state/pengu-repair-validation.log
+            .research-state/aster-pengu-repair-validation/meta.json
+            .research-state/okx-pengu-repair-development/meta.json
+          include-hidden-files: true
+          retention-days: 90
