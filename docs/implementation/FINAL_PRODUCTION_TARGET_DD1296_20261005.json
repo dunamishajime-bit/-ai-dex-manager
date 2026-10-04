@@ -82,7 +82,22 @@
         "causal": true
       }
     },
-    "V52": {"unchanged": true},
+    "V52": {
+      "unchanged": true,
+      "basisStopMultiple": 1.75,
+      "residentStopPhase1": {
+        "entryReferenceFixedEmergencyStopEnabled": false,
+        "keepCurrentDynamicBasisStop": true,
+        "keepExistingMarginGuardDailyLossKillSwitch": true,
+        "reason": "2026-10-05 comparison showed no max-DD improvement and the H1 entry-bar upper-bound model reduced final equity/PF by prematurely stopping trades that later basis-converged."
+      },
+      "residentStopPhase2ResearchOnly": {
+        "required": true,
+        "minimumDataResolution": "1m_or_better_tick_equivalent_where_available",
+        "compare": ["current_dynamic_basis_stop", "reference_updated_resident_stop", "distant_disaster_only_stop"],
+        "productionPromotionBlockedUntilValidated": true
+      }
+    },
     "IDLE": {"unchanged": true},
     "RESIDUAL": {"unchanged": true}
   },

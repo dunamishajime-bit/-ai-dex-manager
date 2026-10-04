@@ -114,7 +114,45 @@ Critical causal requirement:
 - the final BT uses the price available at the entry boundary and causal lookbacks from that boundary.
 - no current/future H1 close may be used before it is known.
 
-### V52 / IDLE / RESIDUAL
+### V52
+
+Keep the current Production V52 strategy and **current dynamic Basis Stop** unchanged.
+
+For this deployment, **do not add an entry-reference-fixed venue-resident emergency STOP to V52**.
+
+Reason: the resident-stop comparison performed on 2026-10-05 showed no drawdown improvement from the fixed V52 emergency STOP, while an intrabar upper-bound reconstruction showed material profit degradation when temporary adverse Aster moves were stopped before the basis later converged.
+
+Resident-stop comparison evidence:
+
+Current-production-equivalent portfolio:
+- current V52 exit model: final equity JPY 3.283600927bn / PF 2.4758 / max DD -23.5709%
+- resident-stop conservative model: exactly equivalent
+- entry-bar upper-bound fixed emergency STOP model: final equity JPY 3.236161965bn / PF 2.4443 / max DD -23.5709%
+
+DD12.96 final portfolio:
+- current V52 exit model: final equity JPY 4.067358397bn / PF 2.9602 / max DD -12.9646%
+- resident-stop conservative model: exactly equivalent
+- entry-bar upper-bound fixed emergency STOP model: final equity JPY 3.715409685bn / PF 2.9190 / max DD -12.9646%
+
+The V52 upper-bound model hit seven additional fixed emergency STOPs. Several were trades that later converged profitably under the existing dynamic basis logic. Because the V52 entry occurs at NY :30 while the available research market series is H1, the exact intrabar ordering cannot be proven from the current dataset.
+
+Therefore the Production rule is:
+
+- retain the existing V52 dynamic basis calculation and Basis Stop behavior;
+- retain the current `basisStopMultiple = 1.75`;
+- do not place a new fixed emergency STOP derived from the entry-time Yahoo/reference price in Phase 1;
+- do not claim that an entry-reference-fixed V52 STOP is BT-equivalent to the current V52 strategy;
+- keep existing Margin Guard / daily-loss / kill-switch protections;
+- treat a V52 venue-resident disaster STOP as a separate **Phase 2 research item** only.
+
+Phase 2 must compare, using 1-minute data or better/tick-equivalent evidence where available:
+1. current dynamic Basis Stop;
+2. reference-updated resident STOP;
+3. distant disaster-only STOP intended solely for runner/VPS failure.
+
+No Phase 2 V52 STOP may be promoted to Production unless it shows acceptable profit/DD behavior and causal intrabar evidence.
+
+### IDLE / RESIDUAL
 No strategy-rule changes. Preserve current Production behavior and ownership priority.
 
 ## Backtest acceptance anchor
