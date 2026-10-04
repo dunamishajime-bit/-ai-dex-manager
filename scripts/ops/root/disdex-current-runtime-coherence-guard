@@ -153,7 +153,10 @@ PY
 timer_waiting() {
   local unit="$1"
   [[ "$(systemctl show "$unit" -p ActiveState --value 2>/dev/null || true)" == "active" ]] || return 1
-  [[ "$(systemctl show "$unit" -p SubState --value 2>/dev/null || true)" == "waiting" ]] || return 1
+  local sub_state
+  sub_state="$(systemctl show "$unit" -p SubState --value 2>/dev/null || true)"
+  # A timer is also armed while its triggered oneshot is executing.
+  [[ "$sub_state" == "waiting" || "$sub_state" == "running" ]] || return 1
 }
 
 operator_ready() {
@@ -231,7 +234,7 @@ retire_stale_units() {
 repair_coherence() {
   [[ "$(id -u)" == "0" ]] || { echo "repair requires root" >&2; return 1; }
   verify_current_units_active || return 20
-  "$CURRENT_RELEASE/scripts/ops/root/disdex-current-runtime-wiring" --apply
+  /usr/local/sbin/disdex-current-runtime-wiring --apply
   retire_stale_units
   systemctl daemon-reload
   systemctl reset-failed >/dev/null 2>&1 || true

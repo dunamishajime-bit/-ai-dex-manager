@@ -695,8 +695,10 @@ ensure_monitor_timer_active() {
     fi
     if [[ "$active_state" == "active" && "$sub_state" == "running" ]]; then
       printf 'DISDEX_MONITOR_TIMER_BUSY_WAIT unit=%s attempt=%s\n' "$unit" "$attempt"
-      sleep 1
-      continue
+      # Its oneshot is executing. Waiting here deadlocks the coherence
+      # guard when it revalidates its own timer during a repair.
+      printf 'DISDEX_MONITOR_TIMER_RUNNING unit=%s state=%s subState=%s ordersSent=0 cancelSent=0 positionChangesSent=0\n' "$unit" "$active_state" "$sub_state"
+      return 0
     fi
     if [[ "$active_state" == "activating" ]]; then
       printf 'DISDEX_MONITOR_TIMER_ACTIVATING_WAIT unit=%s attempt=%s subState=%s\n' "$unit" "$attempt" "$sub_state"
