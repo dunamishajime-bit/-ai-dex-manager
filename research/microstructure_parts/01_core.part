@@ -1,0 +1,124 @@
+#!/usr/bin/env python3
+"""Event-driven perpetual-futures research.
+
+Historical layer: Binance USD-M public archives for BTC/ETH/SOL.
+Forward layer: separate Aster/Binance live collector.
+No synthetic Aster history is fabricated.
+"""
+from __future__ import annotations
+import io, json, math, time, zipfile
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from dataclasses import dataclass, asdict
+from pathlib import Path
+import numpy as np
+import pandas as pd
+import requests
+
+SYMBOLS=["BTCUSDT","ETHUSDT","SOLUSDT"]
+START_MONTH="2023-01"; END_MONTH="2026-06"
+TRAIN_END=pd.Timestamp("2025-01-01",tz="UTC")
+END_TS=pd.Timestamp("2026-07-01",tz="UTC")
+BARS_DAY=288; ANNUAL=365.25*BARS_DAY
+ONE_WAY_COST=0.0006
+OUT=Path("backtest_output_microstructure")
+CACHE=Path(".cache/microstructure")
+
+@dataclass(frozen=True)
+class Rule:
+    name:str; family:str; threshold:float; hold_bars:int; mode:str
+
+@dataclass
+class Sim:
+    returns:pd.Series; positions:pd.Series; events:pd.Series
+
+def periods(): return list(pd.period_range(START_MONTH,END_MONTH,freq="M"))
+def to_ts(x):
+    n=pd.to_numeric(x,errors="coerce"); med=n.dropna().median()
+    if pd.isna(med): return pd.to_datetime(x,utc=True,errors="coerce")
+    return pd.to_datetime(n,unit="us" if med>1e14 else "ms",utc=True,errors="coerce")
+
+def get_zip(url:str, cache:Path):
+    cache.parent.mkdir(parents=True,exist_ok=True)
+    if cache.exists() and cache.stat().st_size>0: return cache.read_bytes()
+    for a in range(3):
+        try:
+            r=requests.get(url,timeout=90,headers={"User-Agent":"disdex-microstructure-research/1.0"})
+            if r.status_code==404: return None
+            r.raise_for_status(); cache.write_bytes(r.content); return r.content
+        except Exception as e:
+            if a==2: print("WARN",url,e); return None
+            time.sleep(1+a)
+
+def read_zip_csv(raw):
+    if raw is None:return None
+    with zipfile.ZipFile(io.BytesIO(raw)) as z:
+        names=[n for n in z.namelist() if n.lower().endswith(".csv")]
+        return pd.read_csv(z.open(names[0])) if names else None
+
+def fetch_dataset(symbol,period,kind,interval=None):
+    stamp=period.strftime("%Y-%m")
+    if kind in {"klines","premiumIndexKlines"}:
+        name=f"{symbol}-{interval}-{stamp}.zip"
+        url=f"https://data.binance.vision/data/futures/um/monthly/{kind}/{symbol}/{interval}/{name}"
+    else:
+        name=f"{symbol}-{kind}-{stamp}.zip"
+        url=f"https://data.binance.vision/data/futures/um/monthly/{kind}/{symbol}/{name}"
+    raw=get_zip(url,CACHE/kind/symbol/name)
+    return kind,symbol,period,read_zip_csv(raw)
+
+def parse_kline(df):
+    if df is None or df.empty:return None
+    cols=["open_time","open","high","low","close","volume","close_time","quote_volume","trades","taker_buy_base","taker_buy_quote","ignore"]
+    if not any(str(c).lower() in {"open_time","open time"} for c in df.columns):
+        df=df.iloc[:,:min(len(cols),df.shape[1])]; df.columns=cols[:df.shape[1]]
+    else: df.columns=[str(c).strip().lower().replace(" ","_") for c in df.columns]
+    tcol="open_time" if "open_time" in df else df.columns[0]
+    out=pd.DataFrame(index=to_ts(df[tcol]))
+    for c in ["open","high","low","close","volume","quote_volume","taker_buy_quote"]:
+        if c in df: out[c]=pd.to_numeric(df[c],errors="coerce").to_numpy()
+    if "quote_volume" not in out: out["quote_volume"]=out["volume"]*out["close"]
+    if "taker_buy_quote" not in out: out["taker_buy_quote"]=np.nan
+    return out[~out.index.duplicated()].sort_index().dropna(subset=["close"])
+
+def parse_metrics(df):
+    if df is None or df.empty:return None
+    df.columns=[str(c).strip() for c in df.columns]
+    tcols=[c for c in df if "time" in c.lower() or "create" in c.lower()]
+    if not tcols:return None
+    idx=to_ts(df[tcols[0]]); out=pd.DataFrame(index=idx)
+    def pick(parts):
+        for c in df:
+            lc=c.lower()
+            if all(p in lc for p in parts): return c
+    oi=pick(["openinterest","value"]) or pick(["open_interest","value"])
+    if oi is None: oi=pick(["openinterest"])
+    taker=pick(["taker","long","short","ratio"])
+    ls=pick(["long","short","ratio"])
+    if oi: out["oi"]=pd.to_numeric(df[oi],errors="coerce").to_numpy()
+    if taker: out["taker_ratio"]=pd.to_numeric(df[taker],errors="coerce").to_numpy()
+    if ls: out["ls_ratio"]=pd.to_numeric(df[ls],errors="coerce").to_numpy()
+    return out[~out.index.duplicated()].sort_index() if len(out.columns) else None
+
+def parse_funding(df):
+    if df is None or df.empty:return None
+    df.columns=[str(c).strip() for c in df.columns]
+    tc=[c for c in df if "time" in c.lower() or "calc" in c.lower()]
+    rc=[c for c in df if "rate" in c.lower()]
+    if not tc or not rc:return None
+    return pd.Series(pd.to_numeric(df[rc[0]],errors="coerce").to_numpy(),index=to_ts(df[tc[0]]),name="funding").dropna().sort_index()
+
+def parse_liq(df):
+    if df is None or df.empty:return None
+    df.columns=[str(c).strip() for c in df.columns]
+    tc=[c for c in df if "time" in c.lower()]
+    if not tc:return None
+    side=next((c for c in df if "side" in c.lower()),None)
+    qty=next((c for c in df if "qty" in c.lower() or "quantity" in c.lower()),None)
+    price=next((c for c in df if "price" in c.lower()),None)
+    if not side or not qty:return None
+    q=pd.to_numeric(df[qty],errors="coerce")
+    p=pd.to_numeric(df[price],errors="coerce") if price else 1.0
+    notion=q*p
+    s=df[side].astype(str).str.upper()
+    out=pd.DataFrame({"long_liq":np.where(s.eq("SELL"),notion,0.0),"short_liq":np.where(s.eq("BUY"),notion,0.0)},index=to_ts(df[tc[0]]))
+    return out.resample("5min").sum()
