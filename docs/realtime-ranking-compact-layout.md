@@ -18,3 +18,7 @@ The board uses available height with a560px minimum for legibility. Short or zoo
 Detail modal, Escape dismissal, symbol search including multiple FET routes, simulated rank-change gold flash, and390×844 mobile scrolling passed. Browser page errors: none. Verification browser blocked mutation requests and used a synthetic local profile. Trading and score calculation are unchanged.
 
 Final isolated Linux TypeScript check and Next.js production build passed. At1280×500, the page scrolls vertically without compressing or clipping ranking rows. Final browser verification confirms all49 routes, detail dialog, search, gold flash and mobile fallback; page errors: none.
+
+## Deployment
+
+Deployed source4e5bbc9ce32f23dfe7dfefc229b503ad5aca73ae to XServer UI release ui-realtime-compact-4e5bbc9ce32f. Production browser repeated the viewport,49-row, modal, search, flash, short-screen and mobile checks successfully. Public HTTPS page returned200; unauthenticated ranking API401; authenticated API200 with49 rows, readOnly=true and tradingMutation=0. Trading runtime remained b9a0c86d6cf72b0209e44edc8883e45e6d241c5b. Only the UI service was restarted.
