@@ -41,10 +41,10 @@ function BannerContent() {
   );
 }
 
-export function LiveProductionBanner() {
+export function LiveProductionBanner({ compact = false }: { compact?: boolean } = {}) {
   return (
     <>
-      <details className="group border-b border-emerald-400/15 bg-[linear-gradient(90deg,rgba(6,30,27,0.96),rgba(7,13,21,0.96))] md:hidden">
+      <details className={"group shrink-0 border-b border-emerald-400/15 bg-[linear-gradient(90deg,rgba(6,30,27,0.96),rgba(7,13,21,0.96))] " + (compact ? "" : "md:hidden")}>
         <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-4 py-2.5 text-[11px] text-white/80 [&::-webkit-details-marker]:hidden">
           <span className="inline-flex items-center gap-2 font-bold text-emerald-200">
             <Activity className="h-3.5 w-3.5" />
@@ -60,7 +60,7 @@ export function LiveProductionBanner() {
         </div>
       </details>
 
-      <section className="hidden border-b border-emerald-400/15 bg-[linear-gradient(90deg,rgba(6,30,27,0.96),rgba(7,13,21,0.96))] px-3 py-2 md:block md:px-6">
+      <section className={"hidden shrink-0 border-b border-emerald-400/15 bg-[linear-gradient(90deg,rgba(6,30,27,0.96),rgba(7,13,21,0.96))] px-3 py-2 md:px-6 " + (compact ? "" : "md:block")}>
         <BannerContent />
       </section>
     </>

@@ -76,12 +76,12 @@ function AppLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthGuard>
-      <div className="flex h-screen overflow-hidden bg-cyber-black text-white">
+      <div className="flex h-dvh min-h-0 overflow-hidden bg-cyber-black text-white">
         <Sidebar />
-        <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
           <TopBar />
-          <LiveProductionBanner />
-          <main className="custom-scrollbar min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-4 pb-16 md:p-6 md:pb-4">{children}</main>
+          <LiveProductionBanner compact={pathname === "/realtime"} />
+          <main className={pathname === "/realtime" ? "custom-scrollbar min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-2 pb-16 md:pb-2" : "custom-scrollbar min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-4 pb-16 md:p-6 md:pb-4"}>{children}</main>
         </div>
         <FlashEffect />
         <TradeNotificationToast />

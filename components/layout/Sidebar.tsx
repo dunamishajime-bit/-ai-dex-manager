@@ -38,7 +38,7 @@ export function Sidebar() {
   const { logout } = useAuth();
 
   return (
-    <aside className="hidden w-[188px] shrink-0 bg-[#04070c] px-3 py-4 md:flex md:flex-col">
+    <aside className="custom-scrollbar hidden min-h-0 w-[188px] shrink-0 overflow-y-auto bg-[#04070c] px-3 py-4 md:flex md:flex-col [&>*]:shrink-0">
       <div className="rounded-[20px] border border-[#8f8551] bg-[linear-gradient(180deg,rgba(35,35,24,0.92),rgba(16,18,18,0.96))] px-4 py-3 shadow-[0_0_24px_rgba(0,0,0,0.28)]">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-full border border-[#6d653f] bg-[#11150f] text-sm font-bold text-[#efe8c6]">D</div>
