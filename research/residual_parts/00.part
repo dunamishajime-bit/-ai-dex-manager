@@ -1,0 +1,120 @@
+#!/usr/bin/env python3
+"""Residual/beta-neutral multi-perpetual backtest.
+
+Unlike legacy DisDex logic, BTC direction is not an entry gate. Alt returns are
+split into BTC, orthogonal ETH, and residual components. The strategy trades
+residual alpha and uses BTC/ETH perpetuals as dynamic factor hedges.
+"""
+from __future__ import annotations
+
+import io
+import json
+import math
+import time
+import zipfile
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from dataclasses import asdict, dataclass
+from pathlib import Path
+
+import numpy as np
+import pandas as pd
+import requests
+
+import multiperp_cross_section as base
+
+SYMBOLS = base.SYMBOLS
+HEDGES = ["BTCUSDT", "ETHUSDT"]
+ALTS = [s for s in SYMBOLS if s not in HEDGES]
+START = pd.Timestamp("2021-01-01", tz="UTC")
+HOLDOUT = pd.Timestamp("2024-01-01", tz="UTC")
+END = pd.Timestamp("2026-07-01", tz="UTC")
+BPD = 6
+ANNUAL = 365.25 * BPD
+COST = 0.0006
+OUT = Path("backtest_output_residual_neutral")
+FCACHE = Path(".cache/residual_funding")
+
+
+@dataclass(frozen=True)
+class Candidate:
+    name: str
+    family: str
+    beta_days: int
+    fast_days: int
+    slow_days: int
+    shock_days: int
+    rebalance_days: int
+    target_vol: float
+    k: int = 2
+    max_gross: float = 2.5
+    max_weight: float = 0.45
+
+
+@dataclass
+class Sim:
+    returns: pd.Series
+    equity: pd.Series
+    positions: pd.DataFrame
+    turnover: pd.Series
+    trading_cost: pd.Series
+    funding_pnl: pd.Series
+    dd_mult: pd.Series
+
+
+def periods() -> list[pd.Period]:
+    return list(pd.period_range(base.START_MONTH, base.END_MONTH, freq="M"))
+
+
+def parse_ts(s: pd.Series) -> pd.Series:
+    x = pd.to_numeric(s, errors="coerce")
+    med = x.dropna().median()
+    if pd.isna(med):
+        return pd.to_datetime(s, utc=True, errors="coerce")
+    return pd.to_datetime(x, unit="us" if med > 10**14 else "ms", utc=True, errors="coerce")
+
+
+def parse_funding(raw: bytes) -> pd.DataFrame:
+    df = pd.read_csv(io.BytesIO(raw))
+    rate_cols = [c for c in df.columns if "rate" in str(c).lower()]
+    time_cols = [c for c in df.columns if "time" in str(c).lower()]
+    if not rate_cols or not time_cols:
+        df = pd.read_csv(io.BytesIO(raw), header=None)
+        if df.shape[1] < 2:
+            return pd.DataFrame(columns=["timestamp", "funding_rate"])
+        df = df.iloc[:, :3]
+        df.columns = ["timestamp_raw", "interval", "funding_rate"][: df.shape[1]]
+        df["timestamp"] = parse_ts(df["timestamp_raw"])
+    else:
+        df["timestamp"] = parse_ts(df[time_cols[0]])
+        df["funding_rate"] = pd.to_numeric(df[rate_cols[0]], errors="coerce")
+    df["funding_rate"] = pd.to_numeric(df["funding_rate"], errors="coerce")
+    return df[["timestamp", "funding_rate"]].dropna()
+
+
+def fetch_funding(symbol: str, period: pd.Period) -> tuple[str, pd.DataFrame | None]:
+    FCACHE.mkdir(parents=True, exist_ok=True)
+    stamp = period.strftime("%Y-%m")
+    cached = FCACHE / f"{symbol}-{stamp}.csv"
+    if cached.exists() and cached.stat().st_size:
+        return symbol, pd.read_csv(cached, parse_dates=["timestamp"])
+    url = (
+        "https://data.binance.vision/data/futures/um/monthly/fundingRate/"
+        f"{symbol}/{symbol}-fundingRate-{stamp}.zip"
+    )
+    for attempt in range(3):
+        try:
+            r = requests.get(url, timeout=60, headers={"User-Agent": "disdex-residual-research/1.0"})
+            if r.status_code == 404:
+                return symbol, None
+            r.raise_for_status()
+            with zipfile.ZipFile(io.BytesIO(r.content)) as zf:
+                names = [n for n in zf.namelist() if n.lower().endswith(".csv")]
+                if not names:
+                    return symbol, None
+                df = parse_funding(zf.read(names[0]))
+                if not df.empty:
+                    df.to_csv(cached, index=False)
+                return symbol, df
+        except Exception as exc:
+            if attempt == 2:
+                print(f"WARN funding {symbol} {stamp}: {exc}")

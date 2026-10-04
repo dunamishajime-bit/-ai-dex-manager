@@ -1,0 +1,120 @@
+                return symbol, None
+            time.sleep(0.7 * (attempt + 1))
+    return symbol, None
+
+
+def load_funding(index: pd.DatetimeIndex, columns: list[str]) -> pd.DataFrame:
+    collected: dict[str, list[pd.DataFrame]] = {s: [] for s in columns}
+    jobs = [(s, p) for s in columns for p in periods()]
+    with ThreadPoolExecutor(max_workers=18) as pool:
+        fs = [pool.submit(fetch_funding, *j) for j in jobs]
+        for n, f in enumerate(as_completed(fs), 1):
+            symbol, df = f.result()
+            if df is not None and not df.empty:
+                collected[symbol].append(df)
+            if n % 150 == 0:
+                print(f"Funding files {n}/{len(jobs)}")
+    out = pd.DataFrame(0.0, index=index, columns=columns)
+    for symbol, frames in collected.items():
+        if not frames:
+            continue
+        df = pd.concat(frames, ignore_index=True)
+        df["timestamp"] = pd.to_datetime(df["timestamp"], utc=True)
+        s = df.drop_duplicates("timestamp", keep="last").set_index("timestamp")["funding_rate"].sort_index()
+        common = out.index.intersection(s.index)
+        out.loc[common, symbol] = s.reindex(common).to_numpy(float)
+    return out
+
+
+def rz(s: pd.Series) -> pd.Series:
+    x = s.replace([np.inf, -np.inf], np.nan)
+    med = x.median()
+    mad = (x - med).abs().median()
+    if np.isfinite(mad) and mad > 1e-12:
+        return (x - med) / (1.4826 * mad)
+    sd = x.std(ddof=0)
+    return (x - x.mean()) / sd if np.isfinite(sd) and sd > 1e-12 else x * 0.0
+
+
+def factors(hist: pd.DataFrame, symbols: list[str]) -> tuple[dict[str, tuple[float, float]], dict[str, pd.Series], float]:
+    pair = hist[["BTCUSDT", "ETHUSDT"]].dropna()
+    if len(pair) < 80:
+        return {}, {}, 0.0
+    b = pair["BTCUSDT"]
+    e = pair["ETHUSDT"]
+    vb = float(b.var())
+    eth_beta = float(e.cov(b) / vb) if vb > 1e-12 else 0.0
+    f = pd.DataFrame({"btc": b, "eth_resid": e - eth_beta * b})
+    betas: dict[str, tuple[float, float]] = {}
+    residuals: dict[str, pd.Series] = {}
+    for s in symbols:
+        j = pd.concat([hist[s].rename("y"), f], axis=1).dropna()
+        if len(j) < 80:
+            continue
+        x = j[["btc", "eth_resid"]].to_numpy(float)
+        y = j["y"].to_numpy(float)
+        beta = np.linalg.solve(x.T @ x + 1e-5 * np.eye(2), x.T @ y)
+        betas[s] = (float(beta[0]), float(beta[1]))
+        residuals[s] = pd.Series(y - x @ beta, index=j.index)
+    return betas, residuals, eth_beta
+
+
+def candidates() -> list[Candidate]:
+    profiles = [
+        (7, 28, 1, 1, 0.35),
+        (14, 42, 2, 3, 0.45),
+        (21, 63, 3, 7, 0.55),
+    ]
+    out: list[Candidate] = []
+    n = 1
+    for family in ["resmom", "reversal", "carry", "hybrid"]:
+        for beta_days in [60, 90]:
+            for fast, slow, shock, reb, vol in profiles:
+                out.append(Candidate(f"R{n:03d}", family, beta_days, fast, slow, shock, reb, vol))
+                n += 1
+    return out
+
+
+def score_snapshot(
+    residuals: dict[str, pd.Series],
+    funding: pd.DataFrame,
+    volume: pd.DataFrame,
+    i: int,
+    c: Candidate,
+) -> tuple[pd.Series, pd.Series]:
+    fast, slow, shock, rv = {}, {}, {}, {}
+    for s, r in residuals.items():
+        if len(r) < c.slow_days * BPD:
+            continue
+        v = float(r.tail(30 * BPD).std(ddof=1) * math.sqrt(ANNUAL))
+        if not np.isfinite(v) or v < 0.08:
+            continue
+        rv[s] = v
+        fast[s] = float(r.tail(c.fast_days * BPD).sum() / (v * math.sqrt(c.fast_days / 365.25)))
+        slow[s] = float(r.tail(c.slow_days * BPD).sum() / (v * math.sqrt(c.slow_days / 365.25)))
+        shock[s] = float(r.tail(c.shock_days * BPD).sum() / (v * math.sqrt(c.shock_days / 365.25)))
+    if len(rv) < 4:
+        return pd.Series(dtype=float), pd.Series(dtype=float)
+    mom = 0.45 * rz(pd.Series(fast)) + 0.55 * rz(pd.Series(slow))
+    rev = -rz(pd.Series(shock))
+    f7 = funding.iloc[:i].tail(7 * BPD).reindex(columns=list(rv)).sum()
+    carry = rz(-f7)
+    vol_med = volume.iloc[:i].tail(30 * BPD).reindex(columns=list(rv)).median()
+    part = rz(np.log((volume.iloc[i].reindex(list(rv)) / vol_med).replace([np.inf, -np.inf], np.nan)))
+    rev = rev.where(part > -0.25, rev * 0.25)
+    dispersion = float(pd.Series(shock).std(ddof=0))
+    if c.family == "resmom":
+        score = mom
+    elif c.family == "reversal":
+        score = rev.where(pd.Series(shock).abs() >= 0.45, 0.0)
+    elif c.family == "carry":
+        score = 0.70 * carry + 0.30 * mom
+    else:
+        score = 0.65 * rev + 0.20 * carry + 0.15 * mom if dispersion >= 1.10 else 0.60 * mom + 0.40 * carry
+    return score.dropna(), pd.Series(rv)
+
+
+def invvol(selected: list[str], vols: pd.Series, gross: float, sign: float) -> pd.Series:
+    x = vols.reindex(selected).dropna().clip(lower=0.10)
+    if x.empty:
+        return pd.Series(dtype=float)
