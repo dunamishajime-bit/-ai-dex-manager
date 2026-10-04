@@ -1,0 +1,38 @@
+{
+  "accounting": "PASS",
+  "files": {
+    "final-summary.json": {
+      "bytes": 2272,
+      "sha256": "840cfc33b61c2eeaa2de6315ae2f221aa6240cf022911f8418cf9a909bcb1f95"
+    },
+    "portfolio-trades.csv": {
+      "bytes": 577767,
+      "sha256": "9fc77d9e2ad3de9ee6cd3e47b260de685232e5268bd47b5dd64d1b1849247840"
+    },
+    "portfolio-trades.jsonl": {
+      "bytes": 1517655,
+      "sha256": "181ccbf04c0c82f7381276d4fda40e629504e7bcc01f4deedeb046b91337821a"
+    },
+    "research-final-allin-bt.py": {
+      "bytes": 10603,
+      "sha256": "bff7e903521bd688067238c214f897ae9153f2e28919f44a9adb519e76fac853"
+    },
+    "research-q102-fet-brk-exhaustion-bt.py": {
+      "bytes": 9445,
+      "sha256": "f025536210b16536e329d8f23a17952f58e8586c50db995470399d452a457c25"
+    },
+    "research-q102-revl-bt.py": {
+      "bytes": 9642,
+      "sha256": "141d8e5f6a624a6e1598dbc19113b846e532a02df4c4eb1e9df43b06a3bc0a75"
+    },
+    "research-v12-causal-gate-bt.py": {
+      "bytes": 8675,
+      "sha256": "e348f69a2ef3d0e94ff3f90891f04048cf7bbbba2bfea47da0cdd74bc6f2a70e"
+    }
+  },
+  "ownershipConflicts": 0,
+  "rowCount": 1358,
+  "scenario": "DD1296_FINAL_ALLIN_10BPS",
+  "schema": "disdex-bt-ledger-manifest/v1",
+  "sourceScenarioPath": "C:\\tmp\\final-allin-bt\\ALLIN_BOTH\\PRICE_MODEL_10BPS\\portfolio-trades.jsonl"
+}
