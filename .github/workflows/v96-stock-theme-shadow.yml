@@ -1,0 +1,69 @@
+name: V96 Stock Theme Shadow Screen
+
+on:
+  pull_request:
+    paths:
+      - "research/research_lab_v96_stock_theme_shadow.py"
+      - "research/research_lab_v96_stock_theme_neutral.py"
+      - ".github/workflows/v96-stock-theme-shadow.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Syntax and isolation self-test
+        run: |
+          python -m py_compile \
+            research/research_lab_v96_stock_theme_shadow.py \
+            research/research_lab_v96_stock_theme_neutral.py
+          python research/research_lab_v96_stock_theme_shadow.py \
+            --self-test \
+            --output-dir .research-state/v96-stock-theme-shadow
+          python research/research_lab_v96_stock_theme_neutral.py \
+            --self-test \
+            --output-dir .research-state/v96-stock-theme-shadow
+      - name: Run fixed directional theme screen
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state/v96-stock-theme-shadow
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3; do
+            if python research/research_lab_v96_stock_theme_shadow.py; then
+              exit 0
+            fi
+            echo "Aster data request failed; retry $attempt/3"
+            sleep $((attempt * 10))
+          done
+          exit 1
+      - name: Run fixed market-neutral theme screen
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state/v96-stock-theme-shadow
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in 1 2 3; do
+            if python research/research_lab_v96_stock_theme_neutral.py; then
+              exit 0
+            fi
+            echo "Aster data request failed; retry $attempt/3"
+            sleep $((attempt * 10))
+          done
+          exit 1
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v96-stock-theme-shadow
+          path: .research-state/v96-stock-theme-shadow
+          retention-days: 90
+          if-no-files-found: warn
