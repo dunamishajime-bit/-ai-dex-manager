@@ -26,3 +26,5 @@ Deployed source4e5bbc9ce32f23dfe7dfefc229b503ad5aca73ae to XServer UI release ui
 ## Ranking explanation
 
 The existing order prioritizes rows with no known execution NO, then rows with known execution NO, then unscored rows; within each scored group, Score descending and ID ties. Added an inline explanation and execution block summaries for every row, including FET and Q102. The detail dialog explains the group position using the current number of unblocked scored routes. At the inspected snapshot FET was22nd with Score100 because its reception window was closed and an existing FET position was being managed. Q102 rows had reception-window and Runner-selection constraints. Ranking calculations and trading conditions are unchanged.
+
+Ranking explanation deployed as05e3fd30f9f7dedc556f82bea0055597f2acfa08. TypeScript and production build passed. Production browser confirmed FET and Q102 per-row reason dialogs,49-route fit at all four desktop viewports, filters, flash, mobile and short-screen fallback with no page errors. Currency names retain their full width beside truncated reasons. Trading runtime SHA unchanged.
