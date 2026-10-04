@@ -22,3 +22,7 @@ Final isolated Linux TypeScript check and Next.js production build passed. At128
 ## Deployment
 
 Deployed source4e5bbc9ce32f23dfe7dfefc229b503ad5aca73ae to XServer UI release ui-realtime-compact-4e5bbc9ce32f. Production browser repeated the viewport,49-row, modal, search, flash, short-screen and mobile checks successfully. Public HTTPS page returned200; unauthenticated ranking API401; authenticated API200 with49 rows, readOnly=true and tradingMutation=0. Trading runtime remained b9a0c86d6cf72b0209e44edc8883e45e6d241c5b. Only the UI service was restarted.
+
+## Ranking explanation
+
+The existing order prioritizes rows with no known execution NO, then rows with known execution NO, then unscored rows; within each scored group, Score descending and ID ties. Added an inline explanation and execution block summaries for every row, including FET and Q102. The detail dialog explains the group position using the current number of unblocked scored routes. At the inspected snapshot FET was22nd with Score100 because its reception window was closed and an existing FET position was being managed. Q102 rows had reception-window and Runner-selection constraints. Ranking calculations and trading conditions are unchanged.
