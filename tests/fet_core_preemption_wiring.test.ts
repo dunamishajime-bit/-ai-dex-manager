@@ -37,7 +37,9 @@ test("FET Core preemption is wired through all four Core families", async () => 
   assert.ok(fet >= 0 && callFet > open && callQ102 > callFet && callV12 > callQ102, "V52 must preempt FET before Q102/V12 residual preparation");
   assert.match(v52, /scripts\/disdex-fet-brk48-core-preempt\.ts/);
 
-  assert.match(wiring, /FET_BRK48_CORE_PREEMPTION_READY=false/);
+  assert.match(wiring, /FET_BRK48_CORE_PREEMPTION_READY=\$\{fet_core_preemption_ready\}/);
+  assert.match(wiring, /--approved-ready --sha "\$DEPLOYED_SHA"/);
+  assert.match(wiring, /ExecCondition=.*--prestart --sha \$\{DEPLOYED_SHA\}/);
 });
 
 test("preemption implementations re-read live state before continuing Core entry", async () => {

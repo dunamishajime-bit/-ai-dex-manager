@@ -69,5 +69,7 @@ test("standalone FET Core preemption helper is independently fail-closed", async
   const gate = helper.indexOf("FET_BRK48_CORE_PREEMPTION_READY");
   const client = helper.indexOf("new AsterV3Client");
   assert.ok(gate >= 0 && client > gate, "preemption readiness must be checked before venue client construction");
-  assert.match(wiring, /FET_BRK48_CORE_PREEMPTION_READY=false/);
+  assert.match(wiring, /FET_BRK48_CORE_PREEMPTION_READY=\$\{fet_core_preemption_ready\}/);
+  assert.match(wiring, /--approved-ready --sha "\$DEPLOYED_SHA"/);
+  assert.match(wiring, /ExecCondition=.*--prestart --sha \$\{DEPLOYED_SHA\}/);
 });
