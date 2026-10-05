@@ -253,6 +253,34 @@ def quality102_crypto_notional_from_positions(
         if symbol in known_crypto:
             total += abs(quantity) * price
             continue
+        if symbol == "FETUSDT" and (owned is None or owned.symbol != symbol):
+            # FET is owned by a separate sleeve, not by Q102. Only accept an
+            # exact, fresh LIVE state/venue match; unknown positions still hold.
+            path = Path(os.environ.get("FET_BRK48_STATE_PATH") or "/var/lib/disdex/fet-brk48-residual/state.json")
+            try:
+                fet = json.loads(path.read_text(encoding="utf-8"))
+                p = fet.get("position")
+                expected = str(os.environ.get("DISDEX_RUNTIME_COMMIT_SHA") or "")
+                clock = now_ms if now_ms is not None else time.time() * 1000
+                age = clock - float(fet["updatedAt"])
+                sha = str(fet.get("runtimeCommitSha") or "")
+                valid = (fet.get("schema") == "fet-brk48-residual-state/v1" and fet.get("strategyId") == "FET_BRK48_RESIDUAL"
+                         and _SHA256_RE.fullmatch(sha) and _SHA256_RE.fullmatch(expected)
+                         and (not expected or sha.lower() == expected.lower())
+                         and -5000 <= age <= 75 * 60_000
+                         and fet.get("pending") is None and fet.get("manualReview") is None
+                         and isinstance(p, dict) and p.get("symbol") == symbol and p.get("side") == 1
+                         and quantity > 0 and math.isfinite(float(p["quantity"]))
+                         and abs(quantity - float(p["quantity"])) <= max(1e-8, quantity * 1e-8)
+                         and math.isfinite(float(p["entryPrice"])) and float(p["entryPrice"]) > 0
+                         and abs(float(row.get("entryPrice")) - float(p["entryPrice"])) <= float(p["entryPrice"]) * 1e-6
+                         and sum(str(r.get("symbol") or "").upper() == symbol and abs(float(r.get("positionAmt", 0))) > EPSILON for r in rows) == 1)
+                if not valid:
+                    raise ValueError("mismatch")
+            except (OSError, ValueError, TypeError, KeyError, AttributeError) as error:
+                raise RuntimeError("Unknown non-flat Aster symbol requires manual review: FETUSDT:FET_STATE_POSITION_MISMATCH") from error
+            total += abs(quantity) * price
+            continue
         if owned is None or symbol != owned.symbol:
             raise RuntimeError(f"Unknown non-flat Aster symbol requires manual review: {symbol}")
         q102_rows.append(row)
