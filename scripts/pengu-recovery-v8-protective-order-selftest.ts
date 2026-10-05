@@ -10,7 +10,7 @@ const activeOrders: Array<{ symbol: string; clientOrderId: string; status: strin
 const gateway: RecoveryV8ProtectiveOrderGateway = {
     async placeStopMarket(input) {
         events.push(`place:${input.clientOrderId}:${input.quantity}:${input.stopPrice}`);
-        const order = { symbol: input.symbol, clientOrderId: input.clientOrderId, status: "NEW", reduceOnly: true, quantity: input.quantity, stopPrice: input.stopPrice };
+        const order = { side: input.side, symbol: input.symbol, clientOrderId: input.clientOrderId, status: "NEW", reduceOnly: true, quantity: input.quantity, stopPrice: input.stopPrice };
         activeOrders.push(order);
         return order;
     },
@@ -59,7 +59,7 @@ async function main() {
         async placeStopMarket(input) {
             failureEvents.push(`place:${input.reason}`);
             if (input.reason === "RECOVERY_V8_PARTIAL_DEFENSE") throw new Error("partial acknowledgement timeout");
-            return { symbol: input.symbol, clientOrderId: input.clientOrderId, status: "NEW", reduceOnly: true, quantity: input.quantity, stopPrice: input.stopPrice };
+            return { side: input.side, symbol: input.symbol, clientOrderId: input.clientOrderId, status: "NEW", reduceOnly: true, quantity: input.quantity, stopPrice: input.stopPrice };
         },
         async cancel(clientOrderId) { failureEvents.push(`cancel:${clientOrderId}`); },
         async getOpenOrders() { return []; },

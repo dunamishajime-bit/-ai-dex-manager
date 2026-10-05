@@ -1,3 +1,5 @@
+import { validateStopLedger } from "./resident-stop-ledger";
+import { validateResidentStopProtection } from "./venue-resident-stop";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import type { PenguDualLsV2Mode } from "@/config/penguDualLsV2Runtime";
@@ -134,6 +136,8 @@ function normalize(value: unknown, mode: PenguDualLsV2Mode): PenguDualLsV2Runner
     const position = rawPosition
         ? {
             ...rawPosition,
+            residentStop: validateResidentStopProtection(rawPosition.residentStop),
+            stopLedger: validateStopLedger(rawPosition.stopLedger),
             // State written before Short V20 is explicitly legacy and never
             // receives the new Short state machine after restart.
             entryVersion: rawPosition.entryVersion || "LEGACY_V2",

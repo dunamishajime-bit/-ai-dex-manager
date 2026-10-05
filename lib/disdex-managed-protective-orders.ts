@@ -201,3 +201,15 @@ export function isManagedHypeZecProtectiveOrder(
 ): boolean {
     return findManagedHypeZecProtectiveOrders(openOrders, positions).some((candidate) => candidate === order);
 }
+
+/** Shape recognition is only an ownership filter. Each owner independently verifies durable ID/price via venue read-back. */
+export function findManagedOrdinaryResidentStops(orders:readonly DirectOpenOrder[], positions:readonly DirectPosition[]):DirectOpenOrder[]{
+ return orders.filter(o=>{
+  if(!/^(pengu|q102)-stop-[a-f0-9]{22}$/.test(o.clientOrderId)||o.type!=="STOP_MARKET"||o.reduceOnly!==true||!["NEW","PARTIALLY_FILLED"].includes(o.status||"")||!(Number.isFinite(o.stopPrice)&&o.stopPrice!>0))return false;
+  if(o.clientOrderId.startsWith("pengu-")&&o.symbol!=="PENGUUSDT")return false;
+  const p=positions.find(p=>p.symbol===o.symbol&&Math.abs(p.quantity)>1e-12);
+  if(!p||o.side!==(p.quantity>0?"SELL":"BUY")||!Number.isFinite(o.executedQuantity)||o.executedQuantity<0)return false;
+  if(Math.abs(o.quantity-o.executedQuantity-Math.abs(p.quantity))>Math.max(1e-8,Math.abs(p.quantity)*1e-9))return false;
+  return orders.filter(row=>row.symbol===o.symbol&&/^(pengu|q102)-stop-/.test(row.clientOrderId)).length===1;
+ });
+}

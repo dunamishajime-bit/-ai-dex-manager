@@ -1,0 +1,42 @@
+[
+  {
+    "symbol": "BNB",
+    "name": "BNB",
+    "providerId": "binance-coin",
+    "address": "0xEeeeeEeeeEeEeeEeEeEeeEEEeeeeEeeeeeeeEEeE",
+    "decimals": 18,
+    "origin": "manual-registry"
+  },
+  {
+    "symbol": "ETH",
+    "name": "Binance-Peg Ethereum Token",
+    "providerId": "ethereum",
+    "address": "0x2170Ed0880ac9A755fd29B2688956BD959F933F8",
+    "decimals": 18,
+    "origin": "manual-registry"
+  },
+  {
+    "symbol": "SOL",
+    "name": "Wrapped SOL",
+    "providerId": "solana",
+    "address": "0x570A5D26f7765Ecb712C0924E4De545B89fD43dF",
+    "decimals": 18,
+    "origin": "manual-registry"
+  },
+  {
+    "symbol": "LINK",
+    "name": "BNB Pegged ChainLink",
+    "providerId": "chainlink",
+    "address": "0xF8A0BF9cF54Bb92F17374d9e9A321E6a111a51bD",
+    "decimals": 18,
+    "origin": "manual-registry"
+  },
+  {
+    "symbol": "AVAX",
+    "name": "Binance-Peg Avalanche",
+    "providerId": "avalanche",
+    "address": "0x1CE0c2827e2eF14D5C4f29a091d735A204794041",
+    "decimals": 18,
+    "origin": "manual-registry"
+  }
+]

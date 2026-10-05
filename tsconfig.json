@@ -39,6 +39,7 @@
         ".next/dev/types/**/*.ts"
     ],
     "exclude": [
+    "apps/production-ui",
         "node_modules",
         "scripts",
         "backups",

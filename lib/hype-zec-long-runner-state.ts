@@ -16,6 +16,10 @@ export interface HypeZecLongPositionState {
   signalTs: number;
   stopPrice: number;
   takeProfitPrice: number;
+  stopClientOrderId?: string;
+  takeProfitClientOrderId?: string;
+  stopOrderId?: number;
+  stopReadBackAt?: number;
   peakPrice: number;
   updatedAt: number;
 }

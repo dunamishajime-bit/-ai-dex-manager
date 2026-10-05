@@ -1,3 +1,4 @@
+import { appendStopIntent, reconcileStopLedger, retireStopLedger } from "./resident-stop-ledger";
 import { createHash, randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import type { AsterOrderSide } from "@/lib/aster-v3-client";
@@ -39,7 +40,7 @@ import { releaseIdleResidualLongForFormalEntry } from "@/lib/idle-residual-long-
 import { readQuality102CausalV1Ownership, quality102OwnsOrder, quality102OwnsPosition, type Quality102CausalV1OwnershipSnapshot } from "@/lib/disdex-quality102-causal-v1-ownership";
 import { reduceQuality102CausalV1ForBaseConflict } from "@/lib/disdex-quality102-causal-v1-live-reduction";
 import { reduceFetBrk48ForCoreConflict } from "@/lib/fet-brk48-live-reduction";
-import { findManagedFetBrk48ProtectiveOrders, findManagedPenguRecoveryV8ProtectiveOrders, findManagedV12ProtectiveOrders } from "@/lib/disdex-managed-protective-orders";
+import { findManagedOrdinaryResidentStops, findManagedFetBrk48ProtectiveOrders, findManagedPenguRecoveryV8ProtectiveOrders, findManagedV12ProtectiveOrders } from "@/lib/disdex-managed-protective-orders";
 import type { V12AsterLiveAdapter } from "@/lib/v12-aster-live-adapter";
 import { reduceV12DynamicResidualForCoreConflict } from "@/lib/v12-dynamic-residual-live-reduction";
 import {
@@ -54,6 +55,8 @@ import {
     recordPenguHardStop,
     routeForPenguEntryVersion,
 } from "@/lib/pengu-route-quarantine-dd-governor";
+
+import { residentStopPlan, verifyResidentStopPartial, retireResidentStop, ensureResidentStop, type ResidentStopGateway } from "./venue-resident-stop";
 
 const SYMBOL = "PENGUUSDT";
 
@@ -74,6 +77,7 @@ export interface PenguDualLsV2PortfolioRunnerConfig {
     maximumDailyLossPct: number;
     killSwitchPath?: string;
     portfolioDailyLossStatePath?: string;
+    residentStopRequired?: boolean;
     recoveryV8Enabled?: boolean;
     v64DynamicLongEnabled?: boolean;
 }
@@ -110,6 +114,7 @@ export interface PenguDualLsV2PortfolioRunnerDependencies {
     config: PenguDualLsV2PortfolioRunnerConfig;
     logger?: PenguDualLsV2RunnerLogger;
     now?: () => number;
+    residentStopGateway?: ResidentStopGateway;
     recoveryV8Protection?: RecoveryV8ProtectiveOrderGateway;
     v12DynamicAdapter?: V12AsterLiveAdapter;
     v12StatePath?: string;
@@ -183,6 +188,7 @@ function unmanagedCrossSleeveOpenOrders(
     quality102Ownership?: Quality102CausalV1OwnershipSnapshot,
 ): DirectOpenOrder[] {
     const managedProtectiveOrders = new Set<DirectOpenOrder>([
+        ...findManagedOrdinaryResidentStops(openOrders, positions),
         ...findManagedPenguRecoveryV8ProtectiveOrders(openOrders, positions),
         ...findManagedV12ProtectiveOrders(openOrders, positions),
         ...findManagedFetBrk48ProtectiveOrders(openOrders, positions),
@@ -519,13 +525,33 @@ export class PenguDualLsV2PortfolioRunner {
         if (pending.reduceOnly) {
             if (actual) return this.manualReview(state, "PENGU_DUAL_LS_EXIT_POSITION_REMAINS_AFTER_FILL", pending.idempotencyKey);
             if (!closedPosition) return this.manualReview(state, "PENGU_DUAL_LS_EXIT_STATE_MISSING_AFTER_FILL", pending.idempotencyKey);
+            let exitAverage=result.averagePrice, accountingGross=closedPosition.gross, hadStopFill=false;
+            if(closedPosition.stopLedger){
+                try {
+                    if(!(result as any).residentLedgerAggregated)await reconcileStopLedger(closedPosition.stopLedger,0,id=>this.dependencies.executor.reconcileOrder(SYMBOL,id),pending,result);
+                    const l=closedPosition.stopLedger;const qty=l.fills.reduce((n,f)=>n+f.quantity,0);
+                    if(Math.abs(qty-l.originalQuantity)>1e-8)throw Error("PENGU_STOP_ACCOUNTING_QUANTITY");
+                    exitAverage=l.fills.reduce((n,f)=>n+f.quantity*f.averagePrice,0)/qty;accountingGross=l.originalGross;hadStopFill=l.fills.some(f=>f.hardStop);
+                    await this.dependencies.stateStore.save(state);
+                    await retireStopLedger(this.dependencies.residentStopGateway!,l,this.now());
+                }catch(error){return this.manualReview(state,"PENGU_STOP_ACCOUNTING_RECONCILIATION:"+(error instanceof Error?error.message:String(error)));}
+            }else if((result as any).residentLedgerAggregated && closedPosition.recoveryV8){ accountingGross=closedPosition.recoveryV8.originalGross;
+            }else if(closedPosition.recoveryV8?.actualPartialFill){
+                const r=closedPosition.recoveryV8,f=r.actualPartialFill!;const qty=f.executedQuantity+result.executedQuantity;
+                if(Math.abs(qty-r.originalQuantity)>1e-8)return this.manualReview(state,"PENGU_RECOVERY_EXIT_QUANTITY_UNRECONCILED");
+                exitAverage=(f.executedQuantity*f.averagePrice+result.executedQuantity*result.averagePrice)/qty;accountingGross=r.originalGross;
+            }else if (closedPosition.residentStop) {
+                if (!this.dependencies.residentStopGateway) return this.manualReview(state, "PENGU_RESIDENT_STOP_RETIRE_GATEWAY_MISSING");
+                try { await retireResidentStop(this.dependencies.residentStopGateway, closedPosition.residentStop); }
+                catch (error) { return this.manualReview(state, `PENGU_RESIDENT_STOP_RETIRE_FAILED:${error instanceof Error ? error.message : String(error)}`); }
+            }
             const directionalReturn = closedPosition.side > 0
-                ? result.averagePrice / closedPosition.entryPrice - 1
-                : closedPosition.entryPrice / result.averagePrice - 1;
-            const netAccountReturn = closedPosition.gross * (directionalReturn - 2 * 0.0006);
+                ? exitAverage / closedPosition.entryPrice - 1
+                : closedPosition.entryPrice / exitAverage - 1;
+            const netAccountReturn = accountingGross * (directionalReturn - 2 * 0.0006);
             const route = routeForPenguEntryVersion(closedPosition.entryVersion === "LEGACY_V2" ? "LONG_V2_FINAL" : closedPosition.entryVersion);
             state.riskOverlay = recordPenguClosedTrade(state.riskOverlay || createPenguRiskOverlayState(), route, netAccountReturn, this.now());
-            if (pending.exitReason === "LONG_HARD_STOP" || pending.exitReason === "SHORT_HARD_STOP" || pending.exitReason === "RECOVERY_V8_HARD_STOP") {
+            if (hadStopFill || pending.exitReason === "LONG_HARD_STOP" || pending.exitReason === "SHORT_HARD_STOP" || pending.exitReason === "RECOVERY_V8_HARD_STOP") {
                 state.riskOverlay = recordPenguHardStop(state.riskOverlay, route, this.now());
             }
         } else if (!actual
@@ -537,13 +563,13 @@ export class PenguDualLsV2PortfolioRunner {
             state.position = undefined;
             state.cooldownUntilTs = pending.referenceTs + cooldownHoursForPenguExit(pending.exitReason) * 3_600_000;
         } else {
-            const entryPrice = result.averagePrice;
+            const entryPrice = actual!.entryPrice > 0 ? actual!.entryPrice : result.averagePrice;
             const isRecoveryV8 = pending.entryVersion === "RECOVERY_V8";
             state.position = {
                 side: pending.side === "BUY" ? 1 : -1,
                 entryTs: pending.referenceTs + 3_600_000,
                 entryPrice,
-                quantity: result.executedQuantity,
+                quantity: Math.abs(actual!.quantity),
                 gross: pending.targetGross,
                 highWaterMark: entryPrice,
                 lowWaterMark: entryPrice,
@@ -601,6 +627,10 @@ export class PenguDualLsV2PortfolioRunner {
                 return { status: "manual-review", message: `PENGU Recovery V8 entry protection failed: ${message}`, idempotencyKey: pending.idempotencyKey };
             }
         }
+        if (!pending.reduceOnly && state.position?.entryVersion !== "RECOVERY_V8" && this.dependencies.config.residentStopRequired) {
+            const blocked = await this.protectOrdinaryPosition(state);
+            if (blocked) return blocked;
+        }
         this.log.info("PENGU Dual LS order completed", {
             strategyId: "PENGU_DUAL_LS_V2_FINAL",
             symbol: SYMBOL,
@@ -611,6 +641,70 @@ export class PenguDualLsV2PortfolioRunner {
             reason: pending.reason,
         });
         return { status: "completed", message: `PENGU Dual LS ${pending.side} ${pending.reduceOnly ? "exit" : "entry"} completed.`, idempotencyKey: pending.idempotencyKey };
+    }
+
+    private async reconcileRecoveryV8StopFill(state:PenguDualLsV2RunnerState):Promise<PenguDualLsV2TickResult|undefined>{
+        const p=state.position,r=p?.recoveryV8,g=this.dependencies.recoveryV8Protection;
+        if(!p||p.entryVersion!=="RECOVERY_V8"||!r||!g?.getOrder)return;
+        if(actualPosition(await this.dependencies.executor.getPositions()))return;
+        try{
+            const ids=[r.fullHardStopClientOrderId,r.partialStopClientOrderId,r.remainingHardStopClientOrderId].filter((v):v is string=>!!v);
+            if(!ids.length)throw Error("RECOVERY_STOP_IDS_MISSING");
+            const fills:DirectTradeResult[]=[];
+            for(const id of ids){const f=await this.dependencies.executor.reconcileOrder(SYMBOL,id);if(f.executionUnknown||f.status==="UNKNOWN"||f.symbol!==SYMBOL||f.clientOrderId!==id||f.side!=="SELL"||f.reduceOnly!==true)throw Error("RECOVERY_STOP_IDENTITY_UNKNOWN");if(f.executedQuantity>0){if(!(f.averagePrice>0))throw Error("RECOVERY_STOP_FILL_PRICE");fills.push(f);}}
+            if(state.pending && state.pending.phase!=="planned"){const f=await this.dependencies.executor.reconcileOrder(SYMBOL,state.pending.clientOrderId);if(f.executionUnknown||f.status==="UNKNOWN"||f.side!=="SELL"||f.reduceOnly!==true||f.symbol!==SYMBOL)throw Error("RECOVERY_EXIT_RACE_UNKNOWN");if(f.executedQuantity>0)fills.push(f);}
+            const qty=fills.reduce((n,f)=>n+f.executedQuantity,0);
+            if(Math.abs(qty-r.originalQuantity)>1e-8)throw Error("RECOVERY_STOP_FILL_QUANTITY");
+            for(const id of ids){const o=await g.getOrder(SYMBOL,id);if(o.symbol!==SYMBOL||o.clientOrderId!==id||o.side!=="SELL"||o.reduceOnly!==true)throw Error("RECOVERY_STOP_CLEANUP_IDENTITY");if(["NEW","PARTIALLY_FILLED"].includes(o.status)){await g.cancel(id,SYMBOL);const after=await g.getOrder(SYMBOL,id);if(!["FILLED","CANCELED","EXPIRED"].includes(after.status))throw Error("RECOVERY_STOP_CLEANUP_UNVERIFIED");}}
+            const ts=Math.max(this.now(),...fills.map(f=>f.updatedAt||0)),id=ids[0];
+            const pending:PenguDualLsV2PendingOrder={idempotencyKey:id,clientOrderId:id,phase:"submitted",side:"SELL",quantity:qty,reduceOnly:true,expectedPrice:1,reason:"VENUE_RESIDENT_STOP_FILLED",exitReason:"RECOVERY_V8_HARD_STOP",referenceTs:ts,targetGross:r.originalGross,createdAt:ts,updatedAt:ts,retryCount:0};
+            const fill:any={symbol:SYMBOL,clientOrderId:id,side:"SELL",status:"FILLED",executedQuantity:qty,averagePrice:fills.reduce((n,f)=>n+f.executedQuantity*f.averagePrice,0)/qty,reduceOnly:true,executionUnknown:false,residentLedgerAggregated:true};
+            return this.applyResult(state,pending,fill);
+        }catch(error){return this.manualReview(state,"PENGU_RECOVERY_STOP_FILL_RECONCILIATION:"+(error instanceof Error?error.message:String(error)));}
+    }
+
+    private async reconcileOrdinaryStopFill(state: PenguDualLsV2RunnerState): Promise<PenguDualLsV2TickResult | undefined> {
+        const p=state.position;if(!p||p.entryVersion==="RECOVERY_V8")return;
+        const actual=actualPosition(await this.dependencies.executor.getPositions());const remaining=actual?Math.abs(actual.quantity):0;
+        if(actual && (remaining>p.quantity+1e-8 || positionSide(actual)!==p.side))return this.manualReview(state,"PENGU_RESIDENT_STOP_POSITION_MISMATCH");
+        if(actual&&Math.abs(remaining-p.quantity)<=1e-8)return;
+        const g=this.dependencies.residentStopGateway!;
+        const plan=residentStopPlan({strategy:"PENGU",symbol:SYMBOL,side:p.side,entryTs:p.entryTs,entryPrice:p.entryPrice,quantity:p.quantity,stopFraction:p.side>0?PENGU_DUAL_LS_V2.long.hardStopPct:PENGU_DUAL_LS_V2.short.hardStopPct});
+        p.stopLedger=p.stopLedger??appendStopIntent(undefined,plan,p.quantity,p.gross);
+        try{
+            const proof=await reconcileStopLedger(p.stopLedger,remaining,id=>this.dependencies.executor.reconcileOrder(SYMBOL,id),state.pending);
+            await this.dependencies.stateStore.save(state);
+            if(remaining>0){
+                const active=await g.openOrders(SYMBOL);
+                const owned=active.filter(o=>p.stopLedger!.plans.some(a=>a.clientOrderId===o.clientOrderId)&&o.symbol===SYMBOL&&o.side===(p.side>0?"SELL":"BUY")&&o.reduceOnly&&Math.abs(o.quantity-o.executedQuantity-remaining)<=1e-8);
+                if(owned.length!==1)return this.manualReview(state,"PENGU_RESIDENT_STOP_REMAINING_PROTECTION_AMBIGUOUS");
+                const o=owned[0];
+                for(const old of active.filter(a=>a.clientOrderId!==o.clientOrderId&&p.stopLedger!.plans.some(plan=>plan.clientOrderId===a.clientOrderId))){
+                    if(old.symbol!==o.symbol||old.side!==o.side||!old.reduceOnly)throw Error("STOP_REPLACEMENT_OLD_IDENTITY");
+                    await g.cancel(old.symbol,old.clientOrderId);const check=await g.getOrder(old.symbol,old.clientOrderId);if(!["CANCELED","FILLED","EXPIRED"].includes(check.status))throw Error("STOP_REPLACEMENT_CANCEL_UNVERIFIED");
+                }
+                const current=await g.getOrder(o.symbol,o.clientOrderId);if(!["NEW","PARTIALLY_FILLED"].includes(current.status)||Math.abs(current.quantity-current.executedQuantity-remaining)>1e-8)throw Error("STOP_REPLACEMENT_CHANGED_DURING_RECONCILIATION");
+                p.residentStop={protected:true,clientOrderId:o.clientOrderId,orderId:o.orderId,symbol:o.symbol,side:o.side,quantity:remaining,originalQuantity:o.quantity,stopPrice:o.stopPrice,readBackStatus:"VERIFIED",lastReconciledAt:this.now()};
+                if(state.pending?.phase==="planned"&&state.pending.reduceOnly)state.pending.quantity=remaining;
+                p.quantity=remaining;p.gross=p.stopLedger.originalGross*remaining/p.stopLedger.originalQuantity;
+                await this.dependencies.stateStore.save(state);
+                return this.protectOrdinaryPosition(state);
+            }
+            const ts=proof.updatedAt||this.now();const pending:PenguDualLsV2PendingOrder={idempotencyKey:plan.clientOrderId,clientOrderId:plan.clientOrderId,phase:"submitted",side:plan.side,quantity:p.stopLedger.originalQuantity,reduceOnly:true,referenceTs:ts,createdAt:ts,updatedAt:ts,expectedPrice:proof.averagePrice,reason:"VENUE_RESIDENT_STOP_FILLED",exitReason:p.side>0?"LONG_HARD_STOP":"SHORT_HARD_STOP",targetGross:p.stopLedger.originalGross,retryCount:0};
+            const fill:any={symbol:SYMBOL,clientOrderId:pending.clientOrderId,side:plan.side,status:"FILLED",executedQuantity:p.stopLedger.originalQuantity,averagePrice:proof.averagePrice,residentLedgerAggregated:true,reduceOnly:true,executionUnknown:false,updatedAt:ts};
+            return this.applyResult(state,pending,fill);
+        }catch(error){return this.manualReview(state,"PENGU_RESIDENT_STOP_FILL_RECONCILIATION:"+(error instanceof Error?error.message:String(error)));}
+    }
+
+    private async protectOrdinaryPosition(state: PenguDualLsV2RunnerState): Promise<PenguDualLsV2TickResult | undefined> {
+        const position = state.position;
+        if (!position || position.entryVersion === "RECOVERY_V8" || !this.dependencies.config.residentStopRequired) return;
+        const gateway = this.dependencies.residentStopGateway;
+        if (!gateway) return this.manualReview(state, "PENGU_RESIDENT_STOP_GATEWAY_UNAVAILABLE");
+        try {
+            position.residentStop = await ensureResidentStop(gateway, { strategy: "PENGU", symbol: SYMBOL, side: position.side, entryTs: position.entryTs, entryPrice: position.entryPrice, quantity: position.quantity, stopFraction: position.side > 0 ? PENGU_DUAL_LS_V2.long.hardStopPct : PENGU_DUAL_LS_V2.short.hardStopPct }, position.residentStop, this.now(), async plan=>{ position.stopLedger=appendStopIntent(position.stopLedger,plan,position.quantity,position.gross);await this.dependencies.stateStore.save(state); });
+            await this.dependencies.stateStore.save(state);
+        } catch (error) { if(position.residentStop)position.residentStop={...position.residentStop,protected:false,readBackStatus:"UNVERIFIED"}; return this.manualReview(state, `PENGU_RESIDENT_STOP_UNVERIFIED:${error instanceof Error ? error.message : String(error)}`); }
     }
 
     private async reconcilePending(state: PenguDualLsV2RunnerState): Promise<PenguDualLsV2TickResult> {
@@ -735,6 +829,11 @@ export class PenguDualLsV2PortfolioRunner {
         try {
             const state = await this.dependencies.stateStore.load();
             state.lastRunAt = this.now();
+            if (state.position && state.position.entryVersion!=="RECOVERY_V8" && this.dependencies.config.residentStopRequired && this.dependencies.residentStopGateway) {
+                const stopResult = await this.reconcileOrdinaryStopFill(state);
+                if (stopResult) return stopResult;
+            }
+            if(state.position?.entryVersion==="RECOVERY_V8"){const recoveryFill=await this.reconcileRecoveryV8StopFill(state);if(recoveryFill)return recoveryFill;}
             if (state.pending) return await this.reconcilePending(state);
             const history = preloadedHistory ?? await this.dependencies.marketData.load();
             if (this.dependencies.config.mode === "SHADOW") {
@@ -814,6 +913,8 @@ export class PenguDualLsV2PortfolioRunner {
                     }
                 }
             }
+            const protectionBlocked = await this.protectOrdinaryPosition(state);
+            if (protectionBlocked) return protectionBlocked;
             if (quality102OpenOrder) {
                 await this.dependencies.stateStore.save(state);
                 return { status: "held", message: "Quality102 causal-v1 has an in-flight order; PENGU waits for reconciliation." };
@@ -1061,6 +1162,7 @@ export class PenguDualLsV2PortfolioRunner {
                         for (const reduction of reductions) {
                             const reduced = await reduceQuality102CausalV1ForBaseConflict({
                                 executor: this.dependencies.executor,
+                                residentStopGateway: this.dependencies.residentStopGateway,
                                 reduction,
                                 causeIdempotencyKey: `${signal.strategyId}|${signal.referenceTs}|${signal.side}|ENTRY`,
                                 maxSlippageBps: this.dependencies.config.maxSlippageBps,

@@ -1,3 +1,6 @@
+import { appendStopIntent, reconcileStopLedger } from "./resident-stop-ledger";
+import { quality102GrossForFamily } from "../config/integratedProductionRiskPolicy";
+import { ensureResidentStop, retireResidentStop, type ResidentStopGateway } from "./venue-resident-stop";
 import { createHash } from "node:crypto";
 import { resolve } from "node:path";
 
@@ -25,6 +28,7 @@ const DEFAULT_MAX_DATA_AGE_MS = 5 * 60_000;
 
 export interface Quality102CausalV1LiveReductionInput {
     executor: DirectTradeExecutor;
+    residentStopGateway?: ResidentStopGateway;
     reduction: MarkToMarketReduction;
     causeIdempotencyKey: string;
     maxSlippageBps: number;
@@ -245,8 +249,16 @@ export async function reduceQuality102CausalV1ForBaseConflict(
             markSourceEvidence: { source: "LIVE_MARKET_QUOTE", timestamp: pending.referenceTs, price: executionPrice, crossChecked: true },
         });
         const actual = actualRows[0];
+        if(statePosition.stopLedger){await reconcileStopLedger(statePosition.stopLedger,expectedRemaining,id=>input.executor.reconcileOrder(statePosition.symbol,id),pending,result);await store.save(state);}
+        let nextStop = statePosition.residentStop;
+        if (statePosition.residentStop) {
+            const gateway = input.residentStopGateway;
+            if (!gateway) return manualReview(state, store, "Q102_BASE_REDUCTION_RESIDENT_STOP_GATEWAY_UNAVAILABLE", idempotencyKey, now());
+            if (expectedRemaining > EPSILON && actual) nextStop = await ensureResidentStop(gateway, { strategy: "Q102", symbol: statePosition.symbol, side: statePosition.side, entryTs: statePosition.entryTs, entryPrice: statePosition.entryPrice, quantity: Math.abs(actual.quantity), stopFraction: statePosition.hardStop! }, statePosition.residentStop, now(), async plan=>{statePosition.stopLedger=appendStopIntent(statePosition.stopLedger,plan,statePosition.quantity,statePosition.acceptedEntryGross??quality102GrossForFamily(statePosition.family,statePosition.side));await store.save(state);});
+            else await retireResidentStop(gateway, statePosition.residentStop);
+        }
         state.position = expectedRemaining > EPSILON && actual
-            ? { ...statePosition, quantity: Math.abs(actual.quantity) }
+            ? { ...statePosition, quantity: Math.abs(actual.quantity), residentStop: nextStop }
             : undefined;
         state.lastReduction = {
             idempotencyKey,

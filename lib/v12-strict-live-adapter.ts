@@ -1,3 +1,4 @@
+import { AsterResidentStopGateway } from "./venue-resident-stop";
 import { INTEGRATED_PRODUCTION_RISK_POLICY } from "@/config/integratedProductionRiskPolicy";
 import { classifyAsterSymbol } from "@/lib/disdex-aster-portfolio-classifier";
 import { planStrictPortfolio, type StrictPortfolioIntent, type StrictPortfolioPosition, type StrictStrategy } from "@/lib/disdex-strict-portfolio-planner";
@@ -6,7 +7,7 @@ import { AsterV3Client } from "@/lib/aster-v3-client";
 import { readQuality102CausalV1Ownership, quality102OwnsPosition, type Quality102CausalV1OwnershipSnapshot } from "@/lib/disdex-quality102-causal-v1-ownership";
 import { reduceQuality102CausalV1ForBaseConflict } from "@/lib/disdex-quality102-causal-v1-live-reduction";
 import { reduceFetBrk48ForCoreConflict } from "@/lib/fet-brk48-live-reduction";
-import { findManagedFetBrk48ProtectiveOrders, findManagedHypeZecProtectiveOrders, findManagedPenguRecoveryV8ProtectiveOrders, findManagedV12ProtectiveOrders } from "@/lib/disdex-managed-protective-orders";
+import { findManagedOrdinaryResidentStops, findManagedFetBrk48ProtectiveOrders, findManagedHypeZecProtectiveOrders, findManagedPenguRecoveryV8ProtectiveOrders, findManagedV12ProtectiveOrders } from "@/lib/disdex-managed-protective-orders";
 import type { DirectMarketQuote, DirectPosition, DirectTradeResult } from "@/lib/direct-trade-executor";
 import { readSharedCryptoDailyRisk } from "@/lib/disdex-shared-crypto-daily-risk";
 import { readPortfolioDdGovernor } from "@/lib/disdex-portfolio-dd-governor";
@@ -163,6 +164,7 @@ export class V12StrictAsterLiveAdapter extends V12AsterLiveAdapter {
             ? await readPortfolioDdGovernor(ddGovernorPath).catch(() => undefined)
             : undefined;
         const managedProtectiveOrders = new Set([
+            ...findManagedOrdinaryResidentStops(openOrders, positions),
             ...findManagedPenguRecoveryV8ProtectiveOrders(openOrders, positions),
             ...findManagedV12ProtectiveOrders(openOrders, positions),
             ...findManagedFetBrk48ProtectiveOrders(openOrders, positions),
@@ -221,6 +223,7 @@ export class V12StrictAsterLiveAdapter extends V12AsterLiveAdapter {
                     this.getOpenOrders(),
                 ]);
                 const refreshedManaged = new Set([
+                    ...findManagedOrdinaryResidentStops(workingOpenOrders, workingPositions),
                     ...findManagedPenguRecoveryV8ProtectiveOrders(workingOpenOrders, workingPositions),
                     ...findManagedV12ProtectiveOrders(workingOpenOrders, workingPositions),
                     ...findManagedFetBrk48ProtectiveOrders(workingOpenOrders, workingPositions),
@@ -236,6 +239,7 @@ export class V12StrictAsterLiveAdapter extends V12AsterLiveAdapter {
                 for (const reduction of reductions) {
                     const reduced = await reduceQuality102CausalV1ForBaseConflict({
                         executor: this.executor,
+                        residentStopGateway: new AsterResidentStopGateway(this.client),
                         reduction,
                         causeIdempotencyKey: input.clientOrderId || `v12-strict-${input.signalTs}-${input.symbol}-${input.side}`,
                         maxSlippageBps: this.maxSlippageBps,

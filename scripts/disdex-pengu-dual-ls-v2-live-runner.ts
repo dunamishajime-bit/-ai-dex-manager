@@ -1,3 +1,4 @@
+import { AsterResidentStopGateway } from "../lib/venue-resident-stop";
 import "dotenv/config";
 import { resolve } from "node:path";
 import { AsterV3Client } from "../lib/aster-v3-client";
@@ -90,6 +91,7 @@ async function main() {
         stateStore: new FilePenguDualLsV2RunnerStateStore(resolve(stateRoot, `runner-${runtime.mode.toLowerCase()}.json`), runtime.mode),
         lock: accountLock,
         config: {
+            residentStopRequired: runtime.mode === "LIVE",
             mode: runtime.mode,
             enabled: runtime.enabled,
             liveExecutionEnabled: runtime.liveExecutionEnabled,
@@ -111,6 +113,7 @@ async function main() {
             recoveryV8Enabled,
             v64DynamicLongEnabled: recoveryV8Enabled,
         },
+        residentStopGateway: runtime.mode === "LIVE" ? new AsterResidentStopGateway(client) : undefined,
         recoveryV8Protection,
         v12DynamicAdapter,
         v12StatePath: process.env.V12_X1_ALL_STATE_PATH || ".runtime-state/v12-x1-all/runner.json",

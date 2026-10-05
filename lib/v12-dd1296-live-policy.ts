@@ -19,7 +19,7 @@ export async function evaluateV12Dd1296Entry(adapter:V12AsterLiveAdapter,state:V
   const convert=(rows:typeof asset)=>rows.map(r=>({timestampMs:Number(r[0]),open:Number(r[1]),close:Number(r[4])}));
   const a=convert(asset),b=convert(btc),ae=a.find(r=>r.timestampMs===ts),be=b.find(r=>r.timestampMs===ts);
   if(!ae||!be) return 'V12_DD1296_CAUSAL_BOUNDARY_MISSING';
-  try {return v12EntryReason(symbol,signal.side,signal.rank,causalReturn(a,ae,3),causalReturn(b,be,3),symbol==='AVAXUSDT'&&signal.side==='LONG'?causalReturn(a,ae,24):0);} catch {return 'V12_DD1296_CAUSAL_LOOKBACK_MISSING';}
+  try {const asset3h=causalReturn(a,ae,3),btc3h=causalReturn(b,be,3),asset24h=symbol==='AVAXUSDT'&&signal.side==='LONG'?causalReturn(a,ae,24):0,sign=signal.side==='LONG'?1:-1;state.latestDd1296GateMetrics={symbol,side:signal.side,entryTs:ts,asset3h,btc3h,directionalRelative3h:sign*(asset3h-btc3h),directional24h:sign*asset24h};return v12EntryReason(symbol,signal.side,signal.rank,asset3h,btc3h,asset24h);} catch {return 'V12_DD1296_CAUSAL_LOOKBACK_MISSING';}
 }
 
 /** Venue fills cover entry fees, all partial reductions, final close and funding. */

@@ -6,7 +6,7 @@ import { HYPE_TREND_LONG_POLICY } from "../config/hypeTrendLongPolicy";
 import { classifyAsterSymbol } from "./disdex-aster-portfolio-classifier";
 import { aggregatePendingExposure, readPendingExposureRegistry } from "./disdex-pending-exposure-registry";
 import { readSharedCryptoDailyRisk } from "./disdex-shared-crypto-daily-risk";
-import { findManagedFetBrk48ProtectiveOrders, findManagedHypeZecProtectiveOrders, findManagedPenguRecoveryV8ProtectiveOrders, findManagedV12ProtectiveOrders } from "./disdex-managed-protective-orders";
+import { findManagedOrdinaryResidentStops, findManagedFetBrk48ProtectiveOrders, findManagedHypeZecProtectiveOrders, findManagedPenguRecoveryV8ProtectiveOrders, findManagedV12ProtectiveOrders } from "./disdex-managed-protective-orders";
 import { readQuality102CausalV1Ownership, quality102OwnsPosition } from "./disdex-quality102-causal-v1-ownership";
 import { planStrictPortfolio, type StrictPortfolioIntent, type StrictPortfolioPosition } from "./disdex-strict-portfolio-planner";
 import type { AccountLockHandle, FileAccountOrderLock } from "./disdex-account-order-lock";
@@ -89,6 +89,7 @@ function hasExposure(result: DirectTradeResult) { return ["FILLED", "PARTIALLY_F
 export function unmanagedHypeZecOrders(openOrders: DirectOpenOrder[], positions: DirectPosition[]) {
   const managed = new Set<DirectOpenOrder>([
     ...findManagedHypeZecProtectiveOrders(openOrders, positions),
+    ...findManagedOrdinaryResidentStops(openOrders, positions),
     ...findManagedPenguRecoveryV8ProtectiveOrders(openOrders, positions),
     ...findManagedV12ProtectiveOrders(openOrders, positions),
     ...findManagedFetBrk48ProtectiveOrders(openOrders, positions),
@@ -200,6 +201,24 @@ export class HypeZecLongRunner {
     return { status: "manual-review", message: reason };
   }
 
+  private async reconcileVenueProtectionFills(state:HypeZecLongRunnerState,positions:DirectPosition[]):Promise<HypeZecLongTickResult|undefined>{
+    for(const owned of state.positions||[]){
+      if(actualPosition(positions,owned.symbol))continue;
+      const ids=[owned.stopClientOrderId,owned.takeProfitClientOrderId].filter((v):v is string=>!!v);
+      if(ids.length!==2)return this.manualReview(state,"HYPE_STOP_FILL_IDS_MISSING");
+      try{
+        const fills:DirectTradeResult[]=[];
+        for(const id of ids){const f=await this.dependencies.executor.reconcileOrder(owned.symbol,id);if(f.executionUnknown||f.status==="UNKNOWN"||f.symbol!==owned.symbol||f.clientOrderId!==id||f.side!=="SELL"||f.reduceOnly!==true)throw Error("HYPE_STOP_FILL_IDENTITY_UNKNOWN");if(f.executedQuantity>0){if(!(f.averagePrice>0))throw Error("HYPE_STOP_FILL_PRICE");fills.push(f);}}
+        if(state.pending&&state.pending.phase!=="planned"){const f=await this.dependencies.executor.reconcileOrder(owned.symbol,state.pending.clientOrderId);if(f.executionUnknown||f.status==="UNKNOWN"||f.side!=="SELL"||f.reduceOnly!==true||f.symbol!==owned.symbol)throw Error("HYPE_STOP_EXIT_RACE");if(f.executedQuantity>0)fills.push(f);}
+        if(Math.abs(fills.reduce((n,f)=>n+f.executedQuantity,0)-owned.quantity)>1e-8)throw Error("HYPE_STOP_FILL_QUANTITY");
+        for(const id of ids){const f=await this.dependencies.executor.reconcileOrder(owned.symbol,id);if(["NEW","PARTIALLY_FILLED"].includes(f.status)){await this.dependencies.adapter.cancel(id);const after=await this.dependencies.executor.reconcileOrder(owned.symbol,id);if(!["CANCELED","FILLED","EXPIRED"].includes(after.status))throw Error("HYPE_STOP_SIBLING_CANCEL_UNVERIFIED");}}
+        if((await this.dependencies.executor.getOpenOrders()).some(o=>ids.includes(o.clientOrderId)))throw Error("HYPE_STOP_SIBLING_STILL_OPEN");
+        state.positions=(state.positions||[]).filter(p=>p.positionId!==owned.positionId);state.pending=undefined;state.manualReview=undefined;state.lastDecision={strategy:owned.strategy,signalTs:owned.signalTs,accepted:true,reason:"EXIT:VENUE_RESIDENT_PROTECTION"};state.lastDecisionTs=this.now();await this.dependencies.stateStore.save(state);
+        return {status:"completed",message:"HYPE_VENUE_PROTECTION_FILL_RECONCILED",strategy:owned.strategy};
+      }catch(error){return this.manualReview(state,"HYPE_STOP_FILL_RECONCILIATION:"+(error instanceof Error?error.message:String(error)));}
+    }
+  }
+
   private async reconcileOwnership(state: HypeZecLongRunnerState, positions: DirectPosition[], openOrders: DirectOpenOrder[]) {
     const statePositions = state.positions || [];
     const actualSidecars = positions.filter((position) => (position.symbol.toUpperCase() === "HYPEUSDT" || position.symbol.toUpperCase() === "ZECUSDT") && Math.abs(position.quantity) > EPSILON);
@@ -212,6 +231,11 @@ export class HypeZecLongRunner {
       if (!actual || positionSide(actual) !== "LONG") return `HYPE_ZEC_STATE_EXPECTS_MISSING_POSITION:${owned.symbol}`;
       const protections = findManagedHypeZecProtectiveOrders(openOrders, [actual]);
       if (protections.length !== 2) return `HYPE_ZEC_PROTECTION_NOT_VERIFIED:${owned.symbol}`;
+      const stop = protections.find(o=>o.type==="STOP_MARKET")!, takeProfit = protections.find(o=>o.type==="TAKE_PROFIT_MARKET")!;
+      owned.stopClientOrderId = stop.clientOrderId;
+      owned.takeProfitClientOrderId = takeProfit.clientOrderId;
+      owned.stopOrderId = stop.orderId;
+      owned.stopReadBackAt = this.now();
     }
     return undefined;
   }
@@ -353,7 +377,7 @@ export class HypeZecLongRunner {
     } catch (error) {
       return this.manualReview(state, `HYPE_ZEC_PROTECTION_INSTALL_FAILED:${error instanceof Error ? error.message : String(error)}`);
     }
-    const position: HypeZecLongPositionState = { strategy: signal.strategy, symbol, side: "LONG", positionId: idempotencyKey, quantity: actualQty, entryPrice: actual.entryPrice || signal.entryPrice, entryTs: this.now(), signalTs: signal.signalTs, stopPrice: levels.stopPrice, takeProfitPrice: levels.takeProfitPrice, peakPrice: actual.markPrice || signal.entryPrice, updatedAt: this.now() };
+    const position: HypeZecLongPositionState = { strategy: signal.strategy, symbol, side: "LONG", positionId: idempotencyKey, quantity: actualQty, entryPrice: actual.entryPrice || signal.entryPrice, entryTs: this.now(), signalTs: signal.signalTs, stopPrice: levels.stopPrice, takeProfitPrice: levels.takeProfitPrice, stopClientOrderId: stopId, takeProfitClientOrderId: tpId, stopReadBackAt: this.now(), peakPrice: actual.markPrice || signal.entryPrice, updatedAt: this.now() };
     state.positions = [...(state.positions || []).filter((row) => row.strategy !== signal.strategy), position];
     state.pending = undefined;
     await stateStoreSave(this.dependencies.stateStore, state);
@@ -371,12 +395,14 @@ export class HypeZecLongRunner {
       const state = await this.dependencies.stateStore.load();
       const benignReview = isBenignMarketDataReview(state.manualReview);
       if (state.manualReview && !benignReview) return { status: "manual-review", message: state.manualReview };
-      if (state.pending) return this.manualReview(state, "HYPE_ZEC_PENDING_REQUIRES_RECONCILIATION");
+
       const [account, positions, openOrders] = await Promise.all([
         this.dependencies.executor.getAccountSnapshot(),
         this.dependencies.executor.getPositions(),
         this.dependencies.executor.getOpenOrders(),
       ]);
+      const protectionFill=await this.reconcileVenueProtectionFills(state,positions);if(protectionFill)return protectionFill;
+      if(state.pending)return this.manualReview(state,"HYPE_ZEC_PENDING_REQUIRES_RECONCILIATION");
       const ownershipIssue = await this.reconcileOwnership(state, positions, openOrders);
       if (ownershipIssue) return this.manualReview(state, ownershipIssue);
       if ((await this.unmanagedOrders(openOrders, positions)).length > 0) return { status: "held", message: "HYPE_ZEC_UNMANAGED_OPEN_ORDER_BLOCK" };

@@ -1,0 +1,7 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {HypeZecLongRunner} from '../lib/hype-zec-long-runner';
+test('HYPE venue STOP fill read-back clears once and removes verified sibling TP',async()=>{
+ const p={strategy:'HYPE_LONG',symbol:'HYPEUSDT',side:'LONG',positionId:'entry',quantity:2,entryPrice:10,entryTs:1000,signalTs:1000,stopPrice:9,takeProfitPrice:12,stopClientOrderId:'hype-stop',takeProfitClientOrderId:'hype-tp'};const state:any={positions:[p],failures:[]};let saved:any,cancels=0;
+ const stop={symbol:p.symbol,clientOrderId:'hype-stop',side:'SELL',reduceOnly:true,status:'FILLED',executedQuantity:2,averagePrice:9,executionUnknown:false,updatedAt:5000};const tp={symbol:p.symbol,clientOrderId:'hype-tp',side:'SELL',reduceOnly:true,status:'NEW',executedQuantity:0,averagePrice:0,executionUnknown:false};
+ const r:any=new HypeZecLongRunner({stateStore:{save:async(s:any)=>{saved=structuredClone(s);}},executor:{reconcileOrder:async(_:string,id:string)=>id==='hype-stop'?stop:tp,getOpenOrders:async()=>cancels?[]:[tp]},adapter:{cancel:async()=>{cancels++;tp.status='CANCELED';}},runtime:{mode:'LIVE'},now:()=>5000,logger:{info:()=>{},error:()=>{}}} as any);
+ assert.equal((await r.reconcileVenueProtectionFills(state,[])).status,'completed');assert.deepEqual(saved.positions,[]);assert.equal(cancels,1);assert.equal(await r.reconcileVenueProtectionFills(state,[]),undefined);assert.equal(cancels,1);
+});

@@ -1,0 +1,65 @@
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "incremental": true,
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ],
+    "paths": {
+      "@/*": [
+        "./*"
+      ]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "scripts",
+    "backups",
+    "restoretmp",
+    "**/*-worktree/**",
+    "**/*-worktrees/**",
+    ".bt-*/**",
+    ".codex-*/**",
+    ".fix-worktree/**",
+    ".hp-*/**",
+    ".pengu-*/**",
+    ".tmp-*/**",
+    ".ui-*/**",
+    "ui-update/**",
+    ".v46-*/**",
+    ".v52-*/**",
+    ".v56-*/**",
+    ".worktrees/**",
+    "pengu-*/**",
+    "prod-clone/**",
+    "v12-fix-worktree/**",
+    "v52-strategy-specific-preflight*/**",
+    "worktree-*/**",
+    "runner*.ts",
+    "strategy-preflight*.ts"
+  ]
+}

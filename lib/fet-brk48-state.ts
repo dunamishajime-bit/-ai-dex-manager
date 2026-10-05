@@ -45,6 +45,8 @@ export interface FetBrk48State {
   lastReferenceTs?: number;
   lastExitTs?: number;
   cooldownUntilTs?: number;
+  lastEvaluationReturn72h?: number;
+  lastEvaluationReturn72hObservedTs?: number;
   lastEvaluationReason?: string;
   lastEvaluationDecisionTs?: number;
   lastEvaluationCandidate?: boolean;
@@ -108,7 +110,8 @@ export async function readFetBrk48State(path: string, runtimeCommitSha?: string)
   if (runtimeCommitSha && raw.runtimeCommitSha !== runtimeCommitSha) {
     throw new Error(`FET_STATE_RUNTIME_SHA_MISMATCH:${raw.runtimeCommitSha}:EXPECTED_${runtimeCommitSha}`);
   }
-  for(const field of ["lastExitTs","cooldownUntilTs"]) if(raw[field]!==undefined&&(!Number.isFinite(raw[field])||raw[field]<0)) throw new Error(`FET_STATE_${field}_INVALID`);
+  for(const field of ["lastExitTs","cooldownUntilTs","lastEvaluationReturn72hObservedTs"]) if(raw[field]!==undefined&&(!Number.isFinite(raw[field])||raw[field]<0)) throw new Error(`FET_STATE_${field}_INVALID`);
+  if(raw.lastEvaluationReturn72h!==undefined&&!Number.isFinite(raw.lastEvaluationReturn72h))throw new Error("FET_RETURN72_TELEMETRY_INVALID");
   if (raw.position && !validPosition(raw.position)) throw new Error("FET_STATE_POSITION_INVALID");
   if (raw.pending && !validPending(raw.pending)) throw new Error("FET_STATE_PENDING_INVALID");
   return {

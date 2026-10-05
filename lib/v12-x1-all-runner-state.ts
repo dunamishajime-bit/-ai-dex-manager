@@ -72,6 +72,7 @@ export interface V12X1AllRunnerState {
     cooldownUntilTs?: number;
     sideLossLedger?: SideLossLedger;
     dd1296UnaccountedExits?: V12ActivePositionState[];
+    latestDd1296GateMetrics?: {symbol:string;side:string;entryTs:number;asset3h:number;btc3h:number;directionalRelative3h:number;directional24h:number};
     latestDd1296Decision?: {symbol:string;side:string;rank:number;entryTs:number;reason:string};
     activePositions?: V12ActivePositionState[];
     active?: V12ActivePositionState;

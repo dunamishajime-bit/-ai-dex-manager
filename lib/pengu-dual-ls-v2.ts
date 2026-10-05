@@ -35,6 +35,8 @@ export interface PenguDualLsV2History {
 }
 
 export interface PenguDualLsV2Position {
+    stopLedger?: import("./resident-stop-ledger").StopLedger;
+    residentStop?: import("./venue-resident-stop").ResidentStopProtection;
     side: -1 | 1;
     entryTs: number;
     entryPrice: number;

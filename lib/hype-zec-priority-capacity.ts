@@ -1,3 +1,4 @@
+import { FileHypeZecLongRunnerStateStore, type HypeZecLongRunnerState } from "./hype-zec-long-runner-state";
 import { HYPE_ZEC_LONG_POLICY, isHypeZecStrategy, type HypeZecStrategy } from "../config/hypeZecLongPolicy";
 import { classifyAsterSymbol } from "./disdex-aster-portfolio-classifier";
 import type { AccountLockHandle } from "./disdex-account-order-lock";
@@ -9,6 +10,12 @@ import { executeHypeZecPreemption, FileHypeZecPreemptionStateStore, type HypeZec
 import type { V12AsterLiveAdapter } from "./v12-aster-live-adapter";
 
 const EPSILON = 1e-9;
+export function ownedHypeProtectionLevels(state:HypeZecLongRunnerState,position:DirectPosition){
+ const p=state.positions?.find(p=>p.symbol===position.symbol);
+ if(!p||Math.abs(p.quantity-Math.abs(position.quantity))>1e-8||!(p.stopPrice>0)||!(p.takeProfitPrice>0)||state.pending||state.manualReview)throw Error("HYPE_PRIORITY_OWNER_PROOF_REQUIRED");
+ return {stopPrice:p.stopPrice,takeProfitPrice:p.takeProfitPrice};
+}
+
 
 export function isHypeZecSoleSharedCapacityCause(input: {
     positions: readonly DirectPosition[];
@@ -163,6 +170,9 @@ export async function releaseHypeZecCapacityForPriorityEntry(input: {
     const expectedRuntimeSha = String(input.expectedRuntimeSha || process.env.DISDEX_RELEASE_SHA || process.env.DISDEX_RUNTIME_COMMIT_SHA || "").trim();
     if (!/^[0-9a-f]{40}$/i.test(expectedRuntimeSha)) return { status: "blocked", message: "HYPE_ZEC_PREEMPTION_RUNTIME_SHA_REQUIRED" };
 
+    const ownerStore=new FileHypeZecLongRunnerStateStore(process.env.DISDEX_HYPE_ZEC_STATE_PATH,expectedRuntimeSha,"LIVE");
+    let ownerState:HypeZecLongRunnerState;
+    try{ownerState=await ownerStore.load();for(const position of active.filter(p=>plan.reductions.some(r=>r.symbol===p.symbol)))ownedHypeProtectionLevels(ownerState,position);}catch(error){return {status:"blocked",message:"HYPE_PRIORITY_OWNER_STATE:"+(error instanceof Error?error.message:String(error))};}
     let exchangeInfo;
     try { exchangeInfo = await input.adapter.client.getExchangeInfo(); } catch (error) { return { status: "blocked", message: `HYPE_ZEC_PREEMPTION_EXCHANGE_INFO_UNAVAILABLE:${error instanceof Error ? error.message : String(error)}` }; }
     const protection: Partial<Record<HypeZecStrategy, { stopPrice: number; takeProfitPrice: number; tickSize: number; stepSize: number }>> = {};
@@ -175,7 +185,8 @@ export async function releaseHypeZecCapacityForPriorityEntry(input: {
         const tickSize = Number(priceFilter?.tickSize);
         const stepSize = Number(quantityFilter?.stepSize);
         if (!(tickSize > 0) || !(stepSize > 0)) return { status: "blocked", message: `HYPE_ZEC_PREEMPTION_FILTERS_UNAVAILABLE:${position.symbol}` };
-        const levels = buildHypeZecProtection({ strategy, entryPrice: position.entryPrice, tickSize, quantity: Math.abs(position.quantity), stepSize });
+        const existing=ownedHypeProtectionLevels(ownerState,position);
+        const levels = buildHypeZecProtection({ strategy, entryPrice: position.entryPrice, tickSize, quantity: Math.abs(position.quantity), stepSize, stopPriceOverride:existing.stopPrice,takeProfitPriceOverride:existing.takeProfitPrice });
         protection[strategy] = { stopPrice: levels.stopPrice, takeProfitPrice: levels.takeProfitPrice, tickSize, stepSize };
     }
     const result = await executeHypeZecPreemption({
@@ -196,6 +207,13 @@ export async function releaseHypeZecCapacityForPriorityEntry(input: {
             return { leverage: Number(row.leverage), marginType: marginType(row.marginType, row.isolated) };
         },
     });
-    if (result.status === "reduced") return { status: "reduced", message: result.message, result };
+    if (result.status === "reduced") {
+        try{
+            const orders=await input.executor.getOpenOrders();
+            for(const r of result.results){const p=ownerState.positions!.find(p=>p.symbol===r.reduction.symbol)!;const legs=orders.filter(o=>o.symbol===p.symbol&&o.reduceOnly&&o.side==="SELL"&&Math.abs(o.quantity-r.remainingQuantity)<=1e-8);const stop=legs.filter(o=>o.type==="STOP_MARKET"),tp=legs.filter(o=>o.type==="TAKE_PROFIT_MARKET");if(stop.length!==1||tp.length!==1||Math.abs(Number(stop[0].stopPrice)-p.stopPrice)>Math.max(1e-8,p.stopPrice*1e-9)||Math.abs(Number(tp[0].stopPrice)-p.takeProfitPrice)>Math.max(1e-8,p.takeProfitPrice*1e-9))throw Error("HYPE_PRIORITY_OWNER_REPLACEMENT_PROOF");p.quantity=r.remainingQuantity;p.stopClientOrderId=stop[0].clientOrderId;p.takeProfitClientOrderId=tp[0].clientOrderId;p.stopOrderId=stop[0].orderId;p.stopReadBackAt=now();p.updatedAt=now();}
+            await ownerStore.save(ownerState);
+        }catch(error){return {status:"blocked",message:"HYPE_PRIORITY_OWNER_RECONCILIATION:"+(error instanceof Error?error.message:String(error)),result};}
+        return {status:"reduced",message:result.message,result};
+    }
     return { status: result.status === "not-needed" ? "not-needed" : "blocked", message: result.message, result };
 }

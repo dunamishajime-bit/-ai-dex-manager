@@ -1,3 +1,5 @@
+import { AsterResidentStopGateway } from "../lib/venue-resident-stop";
+import { findManagedOrdinaryResidentStops } from "../lib/disdex-managed-protective-orders";
 import "dotenv/config";
 
 import { readFile, rename, stat, writeFile } from "node:fs/promises";
@@ -119,7 +121,7 @@ export function findQ102PreflightManagedProtectiveOrders(
 }
 
 export function findQ102PreflightAllManagedProtectiveOrders(openOrders: readonly DirectOpenOrder[], positions: readonly DirectPosition[]): DirectOpenOrder[] {
-    return [...findQ102PreflightManagedProtectiveOrders(openOrders, positions),
+    return [...findManagedOrdinaryResidentStops(openOrders, positions), ...findQ102PreflightManagedProtectiveOrders(openOrders, positions),
         ...findManagedV12ProtectiveOrders(openOrders, positions),
         ...findManagedFetBrk48ProtectiveOrders(openOrders, positions)];
 }
@@ -366,6 +368,7 @@ export async function runQuality102CausalV1ReadOnlyPreflight(
     if (config.mode !== "LIVE") {
         return {
             status: "QUALITY102_CAUSAL_V1_NON_LIVE_PREFLIGHT_PASS",
+
             mode: config.mode,
             selectorMode: config.selectorMode,
             highVolSymbols: config.highVolSymbols,
@@ -520,6 +523,7 @@ export function buildQuality102CausalV1Runner(env: NodeJS.ProcessEnv = process.e
             rateLimitAttempts: numberEnv(env, "QUALITY102_CAUSAL_V1_HISTORY_RATE_LIMIT_ATTEMPTS", 3),
         }),
         executor,
+        residentStopGateway: config.mode === "LIVE" ? new AsterResidentStopGateway(client) : undefined,
         stateStore: new FileQuality102CausalV1StateStore(config.statePath, config.mode, config.expectedRuntimeCommitSha),
         lock: new FileAccountOrderLock(config.accountLockPath, numberEnv(env, "DISDEX_ACCOUNT_LOCK_LEASE_MS", 120_000)),
         signalBuilder: (input) => buildQuality102CausalV4Signal(input, { highVolSymbols: config.highVolSymbols }),
@@ -537,6 +541,7 @@ export function buildQuality102CausalV1Runner(env: NodeJS.ProcessEnv = process.e
             await rename(temporary, target);
         },
         config: {
+            residentStopRequired: config.mode === "LIVE",
             mode: config.mode,
             enabled: config.enabled,
             liveTradingEnabled: config.liveTradingEnabled,

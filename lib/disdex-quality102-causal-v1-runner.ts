@@ -1,3 +1,6 @@
+import { quality102GrossForFamily } from "../config/integratedProductionRiskPolicy";
+import { appendStopIntent, reconcileStopLedger, retireStopLedger } from "./resident-stop-ledger";
+import { residentStopPlan, verifyResidentStopPartial, retireResidentStop, ensureResidentStop, type ResidentStopGateway } from "./venue-resident-stop";
 import { createHash, randomUUID } from "node:crypto";
 
 import {
@@ -39,7 +42,7 @@ import { classifyAsterRateBudgetFailure } from "@/lib/disdex-aster-rate-budget-p
 import { quality102GovernorGross, readPortfolioDdGovernor } from "@/lib/disdex-portfolio-dd-governor";
 import { aggregatePendingExposure, readPendingExposureRegistry } from "@/lib/disdex-pending-exposure-registry";
 import { classifyAsterSymbol } from "@/lib/disdex-aster-portfolio-classifier";
-import { findManagedFetBrk48ProtectiveOrders, findManagedHypeZecProtectiveOrders, findManagedPenguRecoveryV8ProtectiveOrders, findManagedV12ProtectiveOrders } from "@/lib/disdex-managed-protective-orders";
+import { findManagedOrdinaryResidentStops, findManagedFetBrk48ProtectiveOrders, findManagedHypeZecProtectiveOrders, findManagedPenguRecoveryV8ProtectiveOrders, findManagedV12ProtectiveOrders } from "@/lib/disdex-managed-protective-orders";
 import { reduceV12DynamicResidualForCoreConflict } from "@/lib/v12-dynamic-residual-live-reduction";
 import { reduceFetBrk48ForCoreConflict } from "@/lib/fet-brk48-live-reduction";
 import { isHypeZecSoleSharedCapacityCause, releaseHypeZecCapacityForPriorityEntry } from "@/lib/hype-zec-priority-capacity";
@@ -85,6 +88,7 @@ export interface Quality102CausalV1TickResult {
 }
 
 export interface Quality102CausalV1RunnerConfig {
+    residentStopRequired?: boolean;
     mode: Quality102CausalV1Mode;
     enabled: boolean;
     liveTradingEnabled: boolean;
@@ -139,6 +143,7 @@ export interface Quality102CausalV1AccountLock extends LiveRunnerLock {
 }
 
 export interface Quality102CausalV1RunnerDependencies {
+    residentStopGateway?: ResidentStopGateway;
     marketData: { load(force?: boolean): Promise<Quality102CausalV1History> };
     executor: DirectTradeExecutor;
     stateStore: Quality102CausalV1StateStore;
@@ -250,6 +255,7 @@ function managedProtectiveOrders(
 ): DirectOpenOrder[] {
     const managed = new Set<DirectOpenOrder>([
         ...findManagedHypeZecProtectiveOrders(openOrders, positions),
+        ...findManagedOrdinaryResidentStops(openOrders, positions),
         ...findManagedPenguRecoveryV8ProtectiveOrders(openOrders, positions),
         ...findManagedV12ProtectiveOrders(openOrders, positions),
         ...findManagedFetBrk48ProtectiveOrders(openOrders, positions),
@@ -660,6 +666,50 @@ export class Quality102CausalV1Runner {
             !== this.dependencies.config.runtimeCommitSha.toLowerCase();
     }
 
+    private async reconcileStopFill(state: Quality102CausalV1State): Promise<Quality102CausalV1TickResult | undefined> {
+        const p=state.position;if(!p||!p.hardStop)return;
+        const actual=q102ActualPositions(await this.dependencies.executor.getPositions(),p)[0];const remaining=actual?Math.abs(actual.quantity):0;
+        if(actual && (remaining>p.quantity+1e-8 || actualSide(actual)!==p.side))return this.manualReview(state,"Q102_RESIDENT_STOP_POSITION_MISMATCH");
+        if(actual&&Math.abs(remaining-p.quantity)<=1e-8)return;
+        const g=this.dependencies.residentStopGateway!;
+        const plan=residentStopPlan({strategy:"Q102",symbol:p.symbol,side:p.side,entryTs:p.entryTs,entryPrice:p.entryPrice,quantity:p.quantity,stopFraction:p.hardStop!});
+        p.stopLedger=p.stopLedger??appendStopIntent(undefined,plan,p.quantity,(p.acceptedEntryGross ?? quality102GrossForFamily(p.family,p.side)));
+        try{
+            const proof=await reconcileStopLedger(p.stopLedger,remaining,id=>this.dependencies.executor.reconcileOrder(p.symbol,id),state.pending);
+            await this.dependencies.stateStore.save(state);
+            if(remaining>0){
+                const active=await g.openOrders(p.symbol);
+                const owned=active.filter(o=>p.stopLedger!.plans.some(a=>a.clientOrderId===o.clientOrderId)&&o.symbol===p.symbol&&o.side===(p.side>0?"SELL":"BUY")&&o.reduceOnly&&Math.abs(o.quantity-o.executedQuantity-remaining)<=1e-8);
+                if(owned.length!==1)return this.manualReview(state,"Q102_RESIDENT_STOP_REMAINING_PROTECTION_AMBIGUOUS");
+                const o=owned[0];
+                for(const old of active.filter(a=>a.clientOrderId!==o.clientOrderId&&p.stopLedger!.plans.some(plan=>plan.clientOrderId===a.clientOrderId))){
+                    if(old.symbol!==o.symbol||old.side!==o.side||!old.reduceOnly)throw Error("STOP_REPLACEMENT_OLD_IDENTITY");
+                    await g.cancel(old.symbol,old.clientOrderId);const check=await g.getOrder(old.symbol,old.clientOrderId);if(!["CANCELED","FILLED","EXPIRED"].includes(check.status))throw Error("STOP_REPLACEMENT_CANCEL_UNVERIFIED");
+                }
+                const current=await g.getOrder(o.symbol,o.clientOrderId);if(!["NEW","PARTIALLY_FILLED"].includes(current.status)||Math.abs(current.quantity-current.executedQuantity-remaining)>1e-8)throw Error("STOP_REPLACEMENT_CHANGED_DURING_RECONCILIATION");
+                p.residentStop={protected:true,clientOrderId:o.clientOrderId,orderId:o.orderId,symbol:o.symbol,side:o.side,quantity:remaining,originalQuantity:o.quantity,stopPrice:o.stopPrice,readBackStatus:"VERIFIED",lastReconciledAt:this.now()};
+                if(state.pending?.phase==="planned"&&state.pending.reduceOnly)state.pending.quantity=remaining;
+                p.quantity=remaining;
+                await this.dependencies.stateStore.save(state);
+                return this.protectPosition(state);
+            }
+            const ts=proof.updatedAt||this.now();const pending:Quality102CausalV1PendingOrder={idempotencyKey:plan.clientOrderId,clientOrderId:plan.clientOrderId,phase:"submitted",side:plan.side,quantity:p.stopLedger.originalQuantity,reduceOnly:true,referenceTs:ts,createdAt:ts,updatedAt:ts,symbol:p.symbol,reason:"hard_stop"};
+            const fill:any={symbol:p.symbol,clientOrderId:pending.clientOrderId,side:plan.side,status:"FILLED",executedQuantity:p.stopLedger.originalQuantity,averagePrice:proof.averagePrice,residentLedgerAggregated:true,reduceOnly:true,executionUnknown:false,updatedAt:ts};
+            return this.applyFilledExit(state,pending,fill);
+        }catch(error){return this.manualReview(state,"Q102_RESIDENT_STOP_FILL_RECONCILIATION:"+(error instanceof Error?error.message:String(error)));}
+    }
+
+    private async protectPosition(state: Quality102CausalV1State): Promise<Quality102CausalV1TickResult | undefined> {
+        const p = state.position;
+        if (!p || !this.dependencies.config.residentStopRequired) return;
+        const g = this.dependencies.residentStopGateway;
+        if (!g) return this.manualReview(state, "Q102_RESIDENT_STOP_GATEWAY_UNAVAILABLE");
+        try {
+            p.residentStop = await ensureResidentStop(g, { strategy: "Q102", symbol: p.symbol, side: p.side, entryTs: p.entryTs, entryPrice: p.entryPrice, quantity: p.quantity, stopFraction: p.hardStop! }, p.residentStop, this.now(), async plan=>{ p.stopLedger=appendStopIntent(p.stopLedger,plan,p.quantity,(p.acceptedEntryGross ?? quality102GrossForFamily(p.family,p.side)));await this.dependencies.stateStore.save(state); });
+            await this.dependencies.stateStore.save(state);
+        } catch (error) { if(p.residentStop)p.residentStop={...p.residentStop,protected:false,readBackStatus:"UNVERIFIED"}; return this.manualReview(state, `Q102_RESIDENT_STOP_UNVERIFIED:${error instanceof Error ? error.message : String(error)}`); }
+    }
+
     private async applyFilledEntry(state: Quality102CausalV1State, pending: Quality102CausalV1PendingOrder, result: DirectTradeResult): Promise<Quality102CausalV1TickResult> {
         const positions = await this.dependencies.executor.getPositions();
         const q102Positions = positions.filter((position) => position.symbol.toUpperCase() === pending.symbol.toUpperCase() && nonZero(position));
@@ -678,6 +728,7 @@ export class Quality102CausalV1Runner {
             hardStop,
             bestPrice: entryPrice,
             trailActive: false,
+            acceptedEntryGross: pending.targetGross,
             family: pending.family,
             variant: pending.variant,
             layer: pending.layer,
@@ -689,6 +740,8 @@ export class Quality102CausalV1Runner {
         state.pending = undefined;
         state.lastReconciledAt = this.now();
         await this.dependencies.stateStore.save(state);
+        const protectionBlocked = await this.protectPosition(state);
+        if (protectionBlocked) return protectionBlocked;
         return { status: "completed", message: "QUALITY102_CAUSAL_V1_ENTRY_FILLED", idempotencyKey: pending.idempotencyKey, ordersSent: 1 };
     }
 
@@ -737,7 +790,20 @@ export class Quality102CausalV1Runner {
             markSourceEvidence: { source: "LIVE_MARKET_QUOTE", timestamp: pending.referenceTs, price: executionPrice, crossChecked: true },
         });
         const actual = actualRows[0];
-        state.position = expectedRemaining > EPSILON && actual ? { ...position, quantity: Math.abs(actual.quantity) } : undefined;
+        if(position.stopLedger){
+            try{await reconcileStopLedger(position.stopLedger,expectedRemaining,id=>this.dependencies.executor.reconcileOrder(position.symbol,id),pending,result);await this.dependencies.stateStore.save(state);}
+            catch(error){return this.manualReview(state,"Q102_REDUCTION_FILL_LEDGER:"+(error instanceof Error?error.message:String(error)));}
+        }
+        let nextStop = position.residentStop;
+        if (position.residentStop) {
+            const gateway = this.dependencies.residentStopGateway;
+            if (!gateway) return this.manualReview(state, "Q102_BASE_REDUCTION_RESIDENT_STOP_GATEWAY_UNAVAILABLE");
+            try {
+                if (expectedRemaining > EPSILON && actual) nextStop = await ensureResidentStop(gateway, { strategy: "Q102", symbol: position.symbol, side: position.side, entryTs: position.entryTs, entryPrice: position.entryPrice, quantity: Math.abs(actual.quantity), stopFraction: position.hardStop! }, position.residentStop, this.now(), async plan=>{position.stopLedger=appendStopIntent(position.stopLedger,plan,position.quantity,position.acceptedEntryGross??quality102GrossForFamily(position.family,position.side));await this.dependencies.stateStore.save(state);});
+                else await retireResidentStop(gateway, position.residentStop);
+            } catch (error) { return this.manualReview(state, `Q102_BASE_REDUCTION_STOP_RECONCILIATION:${error instanceof Error ? error.message : String(error)}`); }
+        }
+        state.position = expectedRemaining > EPSILON && actual ? { ...position, quantity: Math.abs(actual.quantity), residentStop: nextStop } : undefined;
         state.lastReduction = {
             idempotencyKey: pending.idempotencyKey,
             symbol: position.symbol,
@@ -754,6 +820,8 @@ export class Quality102CausalV1Runner {
         state.lastCompletedIdempotencyKey = pending.idempotencyKey;
         state.lastReconciledAt = this.now();
         await this.dependencies.stateStore.save(state);
+        const protectionBlocked = await this.protectPosition(state);
+        if (protectionBlocked) return protectionBlocked;
         return { status: "completed", message: "QUALITY102_CAUSAL_V1_BASE_PRIORITY_MTM_REDUCTION_RECONCILED", idempotencyKey: pending.idempotencyKey, ordersSent: 1 };
     }
 
@@ -761,6 +829,17 @@ export class Quality102CausalV1Runner {
         const priorPosition = state.position;
         const positions = await this.dependencies.executor.getPositions();
         if (priorPosition && q102ActualPositions(positions, priorPosition).length) return this.manualReview(state, "Q102_EXIT_POSITION_REMAINS_AFTER_FILL", pending.idempotencyKey);
+        if(priorPosition?.stopLedger){
+            try{
+                if(!(result as any).residentLedgerAggregated)await reconcileStopLedger(priorPosition.stopLedger,0,id=>this.dependencies.executor.reconcileOrder(priorPosition.symbol,id),pending,result);
+                await this.dependencies.stateStore.save(state);
+                await retireStopLedger(this.dependencies.residentStopGateway!,priorPosition.stopLedger,this.now());
+            }catch(error){return this.manualReview(state,"Q102_STOP_EXIT_RECONCILIATION:"+(error instanceof Error?error.message:String(error)));}
+        }else if (priorPosition?.residentStop) {
+            if (!this.dependencies.residentStopGateway) return this.manualReview(state, "Q102_RESIDENT_STOP_RETIRE_GATEWAY_MISSING");
+            try { await retireResidentStop(this.dependencies.residentStopGateway, priorPosition.residentStop); }
+            catch (error) { return this.manualReview(state, `Q102_RESIDENT_STOP_RETIRE_FAILED:${error instanceof Error ? error.message : String(error)}`); }
+        }
         state.position = undefined;
         state.lastCompletedIdempotencyKey = pending.idempotencyKey;
         state.lastProcessedReferenceTs = Math.max(state.lastProcessedReferenceTs || 0, pending.referenceTs);
@@ -1341,6 +1420,10 @@ export class Quality102CausalV1Runner {
             if (this.dependencies.config.mode === "LIVE" && state.runtimeCommitSha.toLowerCase() !== this.dependencies.config.runtimeCommitSha.toLowerCase()) {
                 return this.manualReview(state, "Q102 runtime state SHA mismatch.");
             }
+            if (state.position && this.dependencies.config.residentStopRequired && this.dependencies.residentStopGateway) {
+                const stopResult = await this.reconcileStopFill(state);
+                if (stopResult) return stopResult;
+            }
             if (state.pending) return state.pending.phase === "planned" || state.pending.phase === "submitted" || state.pending.phase === "manual_review"
                 ? this.reconcilePending(state)
                 : this.manualReview(state, "Q102 pending phase is invalid.", state.pending.idempotencyKey);
@@ -1382,6 +1465,8 @@ export class Quality102CausalV1Runner {
             if (state.position && !actual) return this.manualReview(state, "Q102 state expects a position but exchange returned none.");
             if (!state.position && actual) return this.manualReview(state, "Q102 exchange position is unmanaged.");
             if (state.position) {
+                const protectionBlocked = await this.protectPosition(state);
+                if (protectionBlocked) return protectionBlocked;
                 if (!state.position.hardStop || !state.position.bestPrice || state.position.trailActive === undefined) return this.manualReview(state, "Q102 active state lacks recovered exit metadata.");
                 const quote = await this.dependencies.executor.getMarketQuote(state.position.symbol);
                 if (!validQuote(quote, state.position.symbol, this.now(), this.dependencies.config.maxDataAgeMs ?? MAX_DATA_AGE_MS)) return { status: "blocked-local", message: "Q102 active mark quote is stale or invalid.", ordersSent: 0 };

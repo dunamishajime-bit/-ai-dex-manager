@@ -44,6 +44,8 @@ async function main(): Promise<void> {
             path,
             maximumLossPct: resolveSharedCryptoDailyLossPct(process.env.DISDEX_SHARED_CRYPTO_MAX_DAILY_LOSS_PCT),
             portfolioDdGovernorPath,
+            protectionObservationPath: process.env.DISDEX_RESIDENT_STOP_OBSERVATION_PATH || "/var/lib/disdex/shared/resident-stop-observation.json",
+            runtimeSha: process.env.DISDEX_RUNTIME_COMMIT_SHA,
         }),
         onSuccess: (state) => {
             console.log(JSON.stringify({

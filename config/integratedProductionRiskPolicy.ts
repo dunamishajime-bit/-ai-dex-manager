@@ -1,3 +1,4 @@
+import familySideGross from "./q102FamilySideGross.json";
 import v52V50Runtime from "./v52V50Runtime.json";
 
 export const Q102_CAUSAL_V4_FAMILY_GROSS = Object.freeze({
@@ -56,11 +57,13 @@ export const INTEGRATED_PRODUCTION_RISK_POLICY = Object.freeze({
 export function quality102GrossForFamily(family: string | undefined, side?: number): number {
   const key = String(family || "").trim().toUpperCase() as Q102CausalV4GrossFamily;
   if ((key === "HIGH_VOL" || key === "REV" || key === "PB") && side !== 1 && side !== -1) throw new Error(`Q102_SIDE_GROSS_REQUIRED:${key}`);
-  const value = key === "HIGH_VOL" && side === -1 ? 0.6 : key === "REV" && side === -1 ? 1.25 : Q102_CAUSAL_V4_FAMILY_GROSS[key];
-  if (!Number.isFinite(value) || value <= 0) {
+  const table = familySideGross as Record<string, {LONG?:number;SHORT?:number;default?:number}>;
+  const row = table[key];
+  const value = row?.default ?? (side === 1 ? row?.LONG : row?.SHORT);
+  if (value === undefined || !Number.isFinite(value) || value <= 0) {
     throw new Error(`QUALITY102_CAUSAL_V4_FAMILY_GROSS_UNRESOLVED:${family || "UNKNOWN"}`);
   }
-  return value;
+  return value!;
 }
 
 export function resolveIntegratedProductionRiskPolicy(env: Record<string, string | undefined> = process.env) {

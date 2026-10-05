@@ -1,0 +1,5 @@
+{
+  "modernUiBaseSha": "05e3fd30f9f7dedc556f82bea0055597f2acfa08",
+  "productionBaseSha": "e9f69394dacbf9abac63829529462714e8316c56",
+  "purpose": "Preserve deployed modern UI independently of trading dependency lock. Build/deploy from this same production commit."
+}

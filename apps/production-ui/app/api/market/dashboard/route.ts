@@ -1,0 +1,146 @@
+﻿import { NextResponse } from "next/server";
+import { kvGet } from "@/lib/kv";
+import { Universe, PricePoint, TokenRef } from "@/lib/types/market";
+import { fetchPricesBatch, fetchUsdJpy, priceKey, toJpy } from "@/lib/providers/market-providers";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+const DEFAULT_USD_JPY_RATE = 157;
+const FALLBACK_UNIVERSE: Universe = {
+    majorsTop10: [
+        { symbol: "BTC", name: "Bitcoin", chain: "MAJOR", provider: "coincap", providerId: "bitcoin" },
+        { symbol: "ETH", name: "Ethereum", chain: "MAJOR", provider: "coincap", providerId: "ethereum" },
+        { symbol: "SOL", name: "Solana", chain: "MAJOR", provider: "coincap", providerId: "solana" },
+        { symbol: "BNB", name: "BNB", chain: "MAJOR", provider: "coincap", providerId: "binance-coin" },
+        { symbol: "DOGE", name: "Dogecoin", chain: "MAJOR", provider: "coincap", providerId: "dogecoin" },
+        { symbol: "AVAX", name: "Avalanche", chain: "MAJOR", provider: "coincap", providerId: "avalanche" },
+        { symbol: "INJ", name: "Injective", chain: "MAJOR", provider: "coincap", providerId: "injective-protocol" },
+        { symbol: "TWT", name: "Trust Wallet Token", chain: "MAJOR", provider: "coincap", providerId: "trust-wallet-token" },
+        { symbol: "PENGU", name: "Pudgy Penguins", chain: "MAJOR", provider: "coincap", providerId: "pudgy-penguins" },
+        { symbol: "APE", name: "ApeCoin", chain: "MAJOR", provider: "coincap", providerId: "apecoin" },
+        { symbol: "COS", name: "Contentos", chain: "MAJOR", provider: "coincap", providerId: "contentos" },
+        { symbol: "MITO", name: "Mitosis", chain: "MAJOR", provider: "coincap", providerId: "mitosis" },
+    ],
+    bnbTop15: [
+        { symbol: "PENGU", name: "Pudgy Penguins", chain: "BNB", provider: "coincap", providerId: "pudgy-penguins" },
+        { symbol: "APE", name: "ApeCoin", chain: "BNB", provider: "coincap", providerId: "apecoin" },
+        { symbol: "COS", name: "Contentos", chain: "BNB", provider: "coincap", providerId: "contentos" },
+        { symbol: "MITO", name: "Mitosis", chain: "BNB", provider: "coincap", providerId: "mitosis" },
+        { symbol: "DOGE", name: "Dogecoin", chain: "BNB", provider: "coincap", providerId: "dogecoin" },
+        { symbol: "TWT", name: "Trust Wallet Token", chain: "BNB", provider: "coincap", providerId: "trust-wallet-token" },
+        { symbol: "INJ", name: "Injective", chain: "BNB", provider: "coincap", providerId: "injective-protocol" },
+        { symbol: "AVAX", name: "Avalanche", chain: "BNB", provider: "coincap", providerId: "avalanche" },
+        { symbol: "SOL", name: "Solana", chain: "BNB", provider: "coincap", providerId: "solana" },
+        { symbol: "UNI", name: "Uniswap", chain: "BNB", provider: "coincap", providerId: "uniswap" },
+        { symbol: "BIO", name: "Bio Protocol", chain: "BNB", provider: "coincap", providerId: "bio-protocol" },
+        { symbol: "DUSK", name: "Dusk", chain: "BNB", provider: "coincap", providerId: "dusk-network" },
+    ],
+    polygonTop15: [],
+    favoritesByUser: {},
+    updatedAt: 0,
+};
+
+function attachPrice(list: TokenRef[], prices: Record<string, PricePoint>) {
+    return list.map(t => {
+        const p = prices[priceKey(t)];
+        return {
+            ...t,
+            id: t.providerId,
+            usdPrice: p?.usd || 0,
+            jpyPrice: p?.jpy || 0,
+            priceChange24h: p?.change24hPct || 0,
+            updatedAt: p?.updatedAt || 0,
+        };
+    });
+}
+
+export async function GET(request: Request) {
+    try {
+        let universe = await kvGet<Universe>("universe:v1");
+
+        // Self-seed if empty
+        if (!universe) {
+            try {
+                const configuredOrigin = process.env.NEXT_PUBLIC_APP_URL?.trim();
+                const requestOrigin = new URL(request.url).origin;
+                const refreshUrl = new URL("/api/agents/refresh-universe", configuredOrigin || requestOrigin);
+                const refreshRes = await fetch(refreshUrl, { method: "POST" });
+                if (refreshRes.ok) {
+                    universe = await kvGet<Universe>("universe:v1");
+                }
+            } catch (error) {
+                console.warn("[Dashboard] Universe seed failed, serving fallback if cache is empty:", error);
+            }
+        }
+
+        if (!universe) {
+            console.warn("[Dashboard] Universe not ready, serving fallback universe.");
+            universe = { ...FALLBACK_UNIVERSE, updatedAt: Date.now() };
+        }
+
+        let prices = (await kvGet<Record<string, PricePoint>>("prices:v1")) ?? {};
+        let fx = await kvGet<{ rate: number; updatedAt?: number }>("fx:usd_jpy");
+
+        try {
+            const liveFx = await fetchUsdJpy();
+            fx = liveFx;
+        } catch (error) {
+            console.warn("[Dashboard] Live FX fetch failed, using cached rate if available:", error);
+            if (!fx || !Number.isFinite(fx.rate) || fx.rate <= 0) {
+                fx = { rate: DEFAULT_USD_JPY_RATE, updatedAt: Date.now() };
+            }
+        }
+
+        const allTokens = [...universe.majorsTop10, ...universe.bnbTop15, ...universe.polygonTop15];
+        const hasAnyPrice = allTokens.some((token) => {
+            const p = prices[priceKey(token)];
+            return !!p && Number.isFinite(p.usd) && p.usd > 0;
+        });
+
+        if (!hasAnyPrice) {
+            const latest = await fetchPricesBatch(allTokens);
+            const normalized: Record<string, PricePoint> = {};
+            allTokens.forEach((token) => {
+                const p = latest[token.providerId];
+                if (!p || !Number.isFinite(p.usd) || p.usd <= 0) return;
+                normalized[priceKey(token)] = {
+                    usd: p.usd,
+                    jpy: toJpy(p.usd, fx!.rate),
+                    change24hPct: Number(p.change24hPct || 0),
+                    updatedAt: Date.now(),
+                    source: token.provider,
+                };
+            });
+            if (Object.keys(normalized).length > 0) {
+                prices = normalized;
+            }
+        }
+
+        const majors = attachPrice(universe.majorsTop10, prices);
+        const bnb = attachPrice(universe.bnbTop15, prices);
+        const polygon = attachPrice(universe.polygonTop15, prices);
+
+        const sortedMovers = [...majors].filter(x => typeof x.priceChange24h === "number")
+            .sort((a, b) => b.priceChange24h - a.priceChange24h);
+
+        const up = sortedMovers.slice(0, 3);
+        const down = [...sortedMovers].reverse().slice(0, 3);
+
+        return NextResponse.json({
+            ok: true,
+            updatedAt: Date.now(),
+            fxRate: fx?.rate || DEFAULT_USD_JPY_RATE,
+            fxUpdatedAt: fx?.updatedAt || Date.now(),
+            trendTop3: { up, down },
+            dexTradableMajorsTop10: majors,
+            bnbTop15: bnb,
+            polygonTop15: polygon,
+            favoritesByUser: Object.fromEntries(
+                Object.entries(universe.favoritesByUser ?? {}).map(([uid, list]) => [uid, attachPrice(list, prices)])
+            ),
+        });
+    } catch (error: any) {
+        console.error("[DashboardAPI] Failed:", error);
+        return NextResponse.json({ ok: false, error: error.message }, { status: 500 });
+    }
+}

@@ -34,3 +34,10 @@ export function buildFetBrk48Signal(rows: readonly FetBrk48Bar[], now:number): F
   const entryPrice=signal.close; // live sizing uses fresh executable quote; this is causal signal anchor only.
   return {strategyId:FET_BRK48_RESIDUAL.strategyId,symbol:"FETUSDT",side:"LONG",referenceTs:signal.closeTs,entryTs,entryPrice,prior48hHigh,volumeMedian72h,volumeRatio,return72h,hardStopPrice:entryPrice*(1-FET_BRK48_RESIDUAL.hardStopPct),exitTs:entryTs+FET_BRK48_RESIDUAL.holdHours*3_600_000};
 }
+
+/** UI/decision telemetry uses the exact same completed-close endpoints as the entry gate. */
+export function fetCompletedReturn72h(rows:readonly FetBrk48Bar[],entryTs:number):number|undefined {
+ const last=rows.find(r=>r.openTs===entryTs-3_600_000&&r.closeTs===entryTs-1);
+ const prior=rows.find(r=>r.openTs===entryTs-73*3_600_000&&r.closeTs===entryTs-72*3_600_000-1);
+ return last&&prior&&prior.close>0?last.close/prior.close-1:undefined;
+}

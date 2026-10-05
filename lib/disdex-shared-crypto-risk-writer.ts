@@ -1,3 +1,4 @@
+import { refreshResidentProtectionObservation } from "./resident-stop-observation";
 import { readFile } from "node:fs/promises";
 
 import { QUALITY102_CAUSAL_V4_S34_MODEL } from "@/config/disdexQuality102CausalV4Model";
@@ -66,6 +67,8 @@ export async function refreshSharedCryptoDailyRisk(input: {
     now?: number;
     maximumLossPct?: number;
     portfolioDdGovernorPath?: string;
+    protectionObservationPath?: string;
+    runtimeSha?: string;
 }): Promise<SharedCryptoDailyRiskState & { portfolioDdGovernor?: PortfolioDdGovernorState }> {
     const now = input.now ?? Date.now();
     const startTime = utcStart(now);
@@ -135,6 +138,10 @@ export async function refreshSharedCryptoDailyRisk(input: {
             // Daily risk remains independent. Q102 boost fails closed to family gross
             // when the governor state is missing or stale.
         }
+    }
+    if (input.protectionObservationPath && input.runtimeSha) {
+        // Read-only projection failure never changes the already written daily-risk latch.
+        await refreshResidentProtectionObservation(input.client, positions, input.protectionObservationPath, input.runtimeSha).catch(error => console.warn("RESIDENT_STOP_OBSERVATION_WRITE_FAILED", error instanceof Error ? error.message : String(error)));
     }
     return Object.assign(state, { portfolioDdGovernor });
 }

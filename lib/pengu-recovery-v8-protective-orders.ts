@@ -106,10 +106,11 @@ function deterministicClientOrderId(symbol: string, entryTs: number, role: strin
 function assertAcknowledged(order: RecoveryV8ProtectiveOrder, expected: RecoveryV8StopOrderInput) {
     if (order.symbol.toUpperCase() !== expected.symbol.toUpperCase()) throw new Error("Recovery V8 protective order symbol acknowledgement mismatch.");
     if (order.clientOrderId !== expected.clientOrderId) throw new Error("Recovery V8 protective order client ID acknowledgement mismatch.");
+    if (order.side !== expected.side) throw new Error("Recovery V8 protective order side acknowledgement mismatch.");
     if (order.reduceOnly !== true) throw new Error("Recovery V8 protective order is not reduce-only.");
     if (Math.abs(order.quantity - expected.quantity) > Math.max(1e-12, expected.quantity * 1e-9)) throw new Error("Recovery V8 protective order quantity acknowledgement mismatch.");
     if (order.venueNormalizedStopPrice === undefined && Math.abs(order.stopPrice - expected.stopPrice) > Math.max(1e-9, expected.stopPrice * 1e-9)) throw new Error("Recovery V8 protective order trigger acknowledgement mismatch.");
-    if (/^(CANCELED|REJECTED|EXPIRED)$/i.test(order.status)) throw new Error(`Recovery V8 protective order is not active: ${order.status}.`);
+    if (!/^(NEW|PARTIALLY_FILLED)$/i.test(order.status)) throw new Error(`Recovery V8 protective order is not active: ${order.status}.`);
 }
 
 export function buildRecoveryV8HardStopPlan(input: { symbol: string; entryTs: number; entryPrice: number; quantity: number }): RecoveryV8StopOrderInput {
@@ -150,7 +151,10 @@ export async function placeRecoveryV8EntryHardStop(gateway: RecoveryV8Protective
     const plan = buildRecoveryV8HardStopPlan(input);
     const order = await gateway.placeStopMarket(plan);
     assertAcknowledged(order, plan);
-    return order;
+    const readBack = (await gateway.getOpenOrders(input.symbol)).filter(row => row.clientOrderId === plan.clientOrderId);
+    if (readBack.length !== 1) throw new Error("Recovery V8 entry protective read-back failed.");
+    assertAcknowledged(readBack[0], { ...plan, quantity: order.quantity, stopPrice: order.stopPrice });
+    return readBack[0];
 }
 
 export async function replaceRecoveryV8Stops(gateway: RecoveryV8ProtectiveOrderGateway, input: RecoveryV8ProtectionPosition) {
@@ -178,6 +182,13 @@ export async function replaceRecoveryV8Stops(gateway: RecoveryV8ProtectiveOrderG
         if (partial) await gateway.cancel(partial.clientOrderId, input.symbol).catch(() => undefined);
         if (remaining) await gateway.cancel(remaining.clientOrderId, input.symbol).catch(() => undefined);
         throw error;
+    }
+    // Acknowledgements can be ambiguous. Read back both replacements before touching the old full stop.
+    const beforeCancel = await gateway.getOpenOrders(input.symbol);
+    for (const [order, plan] of [[partial, partialPlan], [remaining, remainingPlan]] as const) {
+        const matches = beforeCancel.filter(row => row.clientOrderId === order!.clientOrderId);
+        if (matches.length !== 1) throw new Error("Recovery V8 replacement protective read-back failed; old full stop retained.");
+        assertAcknowledged(matches[0], { ...plan, quantity: order!.quantity, stopPrice: order!.stopPrice });
     }
     try {
         // The old full stop is cancelled only after both replacement orders

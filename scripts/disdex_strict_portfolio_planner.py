@@ -135,7 +135,7 @@ def load_quality102_live_state(path: Path | None = None, *, now_ms: float | None
     if position is None:
         return None
     position = _quality102_object(position, "position")
-    if set(position) - {"symbol", "side", "quantity", "entryPrice", "entryTs", "hardStop", "bestPrice", "trailActive"}:
+    if set(position) - {"symbol", "side", "quantity", "entryPrice", "entryTs", "hardStop", "bestPrice", "trailActive", "family", "variant", "layer", "exitPolicy", "maxHoldHours", "residentStop", "acceptedEntryGross", "stopLedger"}:
         raise RuntimeError("QUALITY102_STATE_MALFORMED:position_field")
     symbol = str(position.get("symbol") or "").upper()
     if not symbol.endswith("USDT") or not symbol[:-4] or symbol in KNOWN_BASE_SYMBOLS:
@@ -154,11 +154,50 @@ def load_quality102_live_state(path: Path | None = None, *, now_ms: float | None
         _quality102_finite(position["bestPrice"], "position.bestPrice", positive=True)
     if "trailActive" in position and not isinstance(position["trailActive"], bool):
         raise RuntimeError("QUALITY102_STATE_MALFORMED:position.trailActive")
+    for key, choices in {"family": {"HIGH_VOL", "PB", "MR", "BRK", "REV"}, "layer": {"S1", "S2", "S3", "S4"}, "exitPolicy": {"HIGH_VOL_TRAIL72", "FIXED_HOLD_STOP"}}.items():
+        if key in position and position[key] not in choices:
+            raise RuntimeError(f"QUALITY102_STATE_MALFORMED:position.{key}")
+    if "variant" in position and (not isinstance(position["variant"], str) or not position["variant"]):
+        raise RuntimeError("QUALITY102_STATE_MALFORMED:position.variant")
+    if "maxHoldHours" in position and _quality102_finite(position["maxHoldHours"], "position.maxHoldHours", positive=True) > 72:
+        raise RuntimeError("QUALITY102_STATE_MALFORMED:position.maxHoldHours")
+    if "acceptedEntryGross" in position and _quality102_finite(position["acceptedEntryGross"], "position.acceptedEntryGross", positive=True) > 3:
+        raise RuntimeError("QUALITY102_STATE_MALFORMED:position.acceptedEntryGross")
+    if "stopLedger" in position:
+        ledger = _quality102_object(position["stopLedger"], "stopLedger")
+        if set(ledger) != {"originalQuantity", "originalGross", "plans", "fills"}:
+            raise RuntimeError("QUALITY102_STATE_MALFORMED:stopLedger.fields")
+        for key in ("originalQuantity", "originalGross"):
+            _quality102_finite(ledger[key], f"stopLedger.{key}", positive=True)
+        if not isinstance(ledger["plans"], list) or not 0 < len(ledger["plans"]) <= 100 or not isinstance(ledger["fills"], list) or len(ledger["fills"]) > 100:
+            raise RuntimeError("QUALITY102_STATE_MALFORMED:stopLedger.arrays")
+        for plan in ledger["plans"]:
+            if set(plan) != {"symbol", "side", "quantity", "stopPrice", "reduceOnly", "clientOrderId"} or plan["symbol"] != symbol or plan["side"] != ("SELL" if side == 1 else "BUY") or plan["reduceOnly"] is not True or not re.fullmatch(r"q102-stop-[a-f0-9]{22}", str(plan["clientOrderId"])):
+                raise RuntimeError("QUALITY102_STATE_MALFORMED:stopLedger.plan")
+            for key in ("quantity", "stopPrice"):
+                _quality102_finite(plan[key], f"stopLedger.plan.{key}", positive=True)
+        for fill in ledger["fills"]:
+            if set(fill) != {"clientOrderId", "quantity", "averagePrice", "updatedAt", "hardStop"} or not isinstance(fill["clientOrderId"], str) or not fill["clientOrderId"] or not isinstance(fill["hardStop"], bool):
+                raise RuntimeError("QUALITY102_STATE_MALFORMED:stopLedger.fill")
+            for key in ("quantity", "averagePrice", "updatedAt"):
+                _quality102_finite(fill[key], f"stopLedger.fill.{key}", positive=True)
+    if "residentStop" in position:
+        stop = _quality102_object(position["residentStop"], "position.residentStop")
+        if set(stop) != {"protected", "clientOrderId", "orderId", "symbol", "side", "quantity", "originalQuantity", "stopPrice", "readBackStatus", "lastReconciledAt"}:
+            raise RuntimeError("QUALITY102_STATE_MALFORMED:residentStop.fields")
+        if not isinstance(stop["protected"], bool) or stop["readBackStatus"] not in {"VERIFIED", "UNVERIFIED"} or stop["protected"] != (stop["readBackStatus"] == "VERIFIED") or not re.fullmatch(r"q102-stop-[a-f0-9]{22}", str(stop["clientOrderId"])) or stop["symbol"] != symbol or stop["side"] != ("SELL" if side == 1 else "BUY"):
+            raise RuntimeError("QUALITY102_STATE_MALFORMED:residentStop.identity")
+        for key in ("quantity", "originalQuantity", "stopPrice", "orderId", "lastReconciledAt"):
+            _quality102_finite(stop[key], f"residentStop.{key}", positive=True)
+        if stop["originalQuantity"] < stop["quantity"]:
+            raise RuntimeError("QUALITY102_STATE_MALFORMED:residentStop.originalQuantity")
+        if abs(stop["quantity"]-quantity) > max(1e-8, quantity*1e-9):
+            raise RuntimeError("QUALITY102_STATE_MALFORMED:residentStop.quantity")
     pending = root.get("pending")
     if pending is not None:
         pending = _quality102_object(pending, "pending")
         required_pending = {"idempotencyKey", "clientOrderId", "phase", "symbol", "side", "quantity", "reduceOnly", "referenceTs", "createdAt", "updatedAt"}
-        if not required_pending.issubset(pending) or set(pending) - required_pending - {"expectedPrice", "targetGross", "hardStop", "reason", "lastError"}:
+        if not required_pending.issubset(pending) or set(pending) - required_pending - {"expectedPrice", "targetGross", "hardStop", "reason", "lastError", "family", "variant", "layer", "exitPolicy", "maxHoldHours"}:
             raise RuntimeError("QUALITY102_STATE_MALFORMED:pending")
         if pending.get("phase") not in {"planned", "submitted", "manual_review"} or pending.get("side") not in {"BUY", "SELL"} or not isinstance(pending.get("reduceOnly"), bool):
             raise RuntimeError("QUALITY102_STATE_MALFORMED:pending_identity")

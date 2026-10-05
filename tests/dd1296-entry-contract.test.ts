@@ -102,3 +102,8 @@ test('simultaneous finalized exits count in actual fill-time order instead of re
  await recordV12ConfirmedExitBatch(a,s,[{symbol:'ATOMUSDT',side:'LONG',positionId:'later-loss',entrySignalTs:100*H},{symbol:'SOLUSDT',side:'LONG',positionId:'earlier-win',entrySignalTs:100*H}] as any,103*H);
  assert.equal(s.sideLossLedger.LONG.losses,1);assert.equal(s.sideLossLedger.LONG.until,0);
 });
+
+test('formal handoff PB SHORT inherits 2.50 independently of PB LONG 2.00',()=>{
+ assert.equal(quality102GrossForFamily('PB',-1),2.5);
+ assert.equal(quality102GrossForFamily('PB',1),2.0);
+});

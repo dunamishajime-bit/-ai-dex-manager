@@ -1,0 +1,402 @@
+[
+  {
+    "symbol": "SOL.SOL",
+    "displaySymbol": "SOL",
+    "name": "Wrapped SOL",
+    "providerId": "solana",
+    "address": "So11111111111111111111111111111111111111112",
+    "decimals": 9,
+    "origin": "solana-seed+core",
+    "chain": "SOLANA"
+  },
+  {
+    "symbol": "JUP.SOL",
+    "displaySymbol": "JUP",
+    "name": "Jupiter",
+    "providerId": "jupiter-exchange-solana",
+    "address": "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN",
+    "decimals": 6,
+    "origin": "solana-seed+core",
+    "chain": "SOLANA"
+  },
+  {
+    "symbol": "PYTH.SOL",
+    "displaySymbol": "PYTH",
+    "name": "Pyth Network",
+    "providerId": "pyth-network",
+    "address": "HZ1JovNiVvGrGNiiYvEozEVgZ58xaU3RKwX8eACQBCt3",
+    "decimals": 6,
+    "origin": "solana-seed+core",
+    "chain": "SOLANA"
+  },
+  {
+    "symbol": "RENDER.SOL",
+    "displaySymbol": "RENDER",
+    "name": "Render Token",
+    "providerId": "render-token",
+    "address": "rndrizKT3MK1iimdxRdWabcF7Zg7AR5T4nud4EkHBof",
+    "decimals": 8,
+    "origin": "solana-seed+core",
+    "chain": "SOLANA"
+  },
+  {
+    "symbol": "BONK.SOL",
+    "displaySymbol": "BONK",
+    "name": "Bonk",
+    "providerId": "bonk",
+    "address": "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263",
+    "decimals": 5,
+    "origin": "solana-seed+meme",
+    "chain": "SOLANA"
+  },
+  {
+    "symbol": "WIF.SOL",
+    "displaySymbol": "WIF",
+    "name": "dogwifhat",
+    "providerId": "dogwifcoin",
+    "address": "EKpQGSJtjMFqKZ9KQanSqYXRcF8fBopzLHYxdM65zcjm",
+    "decimals": 6,
+    "origin": "solana-seed+meme",
+    "chain": "SOLANA"
+  },
+  {
+    "symbol": "JTO.SOL",
+    "displaySymbol": "JTO",
+    "name": "JITO",
+    "providerId": "jito-governance-token",
+    "address": "jtojtomepa8beP8AuQc6eXt5FriJwfFMwQx2v2f9mCL",
+    "decimals": 9,
+    "origin": "solana-seed+core",
+    "chain": "SOLANA"
+  },
+  {
+    "symbol": "KMNO.SOL",
+    "displaySymbol": "KMNO",
+    "name": "Kamino",
+    "providerId": "kamino",
+    "address": "KMNo3nJsBXfcpJTVhZcXLW7RmTwTt4GVFE7suUBo9sS",
+    "decimals": 6,
+    "origin": "solana-seed+core",
+    "chain": "SOLANA"
+  },
+  {
+    "symbol": "RAY.SOL",
+    "displaySymbol": "RAY",
+    "name": "Raydium",
+    "providerId": "raydium",
+    "address": "4k3Dyjzvzp8eMZWUXbBCjEvwSkkk59S5iCNLY3QrkX6R",
+    "decimals": 6,
+    "origin": "solana-seed+secondary",
+    "chain": "SOLANA"
+  },
+  {
+    "symbol": "ORCA.SOL",
+    "displaySymbol": "ORCA",
+    "name": "Orca",
+    "providerId": "orca",
+    "address": "orcaEKTdK7LKz57vaAYr9QeNsVEPfiu6QeMU1kektZE",
+    "decimals": 6,
+    "origin": "solana-seed+secondary",
+    "chain": "SOLANA"
+  },
+  {
+    "symbol": "DRIFT.SOL",
+    "displaySymbol": "DRIFT",
+    "name": "Drift",
+    "providerId": "drift-protocol",
+    "address": "DriFtupJYLTosbwoN8koMbEYSx54aFAVLddWsbksjwg7",
+    "decimals": 6,
+    "origin": "solana-seed+secondary",
+    "chain": "SOLANA"
+  },
+  {
+    "symbol": "W.SOL",
+    "displaySymbol": "W",
+    "name": "Wormhole Token",
+    "providerId": "wormhole",
+    "address": "85VBFQZC9TZkfaptBWjvUw7YbZjy52A6mjtPGjstQAmQ",
+    "decimals": 6,
+    "origin": "solana-seed+secondary",
+    "chain": "SOLANA"
+  },
+  {
+    "symbol": "FIDA.SOL",
+    "displaySymbol": "FIDA",
+    "name": "Bonfida",
+    "providerId": "bonfida",
+    "address": "EchesyfXePKdLtoiZSL8pBe8Myagyy8ZRqsACNCFGnvp",
+    "decimals": 6,
+    "origin": "solana-seed+secondary",
+    "chain": "SOLANA"
+  },
+  {
+    "symbol": "CLOUD.SOL",
+    "displaySymbol": "CLOUD",
+    "name": "Cloud",
+    "providerId": "sanctum-2",
+    "address": "CLoUDKc4Ane7HeQcPpE3YHnznRxhMimJ4MyaUqyHFzAu",
+    "decimals": 9,
+    "origin": "solana-seed+secondary",
+    "chain": "SOLANA"
+  },
+  {
+    "symbol": "HONEY.SOL",
+    "displaySymbol": "HONEY",
+    "name": "Hivemapper HONEY",
+    "providerId": "hivemapper",
+    "address": "4vMsoUT2BWatFweudnQM1xedRLfJgJ7hswhcpz4xgBTy",
+    "decimals": 9,
+    "origin": "solana-seed+experimental",
+    "chain": "SOLANA"
+  },
+  {
+    "symbol": "PUMP.SOL",
+    "displaySymbol": "PUMP",
+    "name": "Pump.fun",
+    "providerId": "pump-fun",
+    "address": "pumpCmXqMfrsAkQ5r49WcJnRayYRqmXz6ae8H7H9Dfn",
+    "decimals": 6,
+    "origin": "solana-seed+expansion+meme",
+    "chain": "SOLANA"
+  },
+  {
+    "symbol": "PENGU.SOL",
+    "displaySymbol": "PENGU",
+    "name": "Pudgy Penguins",
+    "providerId": "pudgy-penguins",
+    "address": "2zMMhcVQEXDtdE6vsFS7S7D5oUodfJHE8vd1gnBouauv",
+    "decimals": 6,
+    "origin": "solana-seed+expansion+meme",
+    "chain": "SOLANA"
+  },
+  {
+    "symbol": "TRUMP.SOL",
+    "displaySymbol": "TRUMP",
+    "name": "OFFICIAL TRUMP",
+    "providerId": "official-trump",
+    "address": "6p6xgHyF7AeE6TZkSmFsko444wqoP15icUSqi2jfGiPN",
+    "decimals": 6,
+    "origin": "solana-seed+expansion+meme",
+    "chain": "SOLANA"
+  },
+  {
+    "symbol": "MELANIA.SOL",
+    "displaySymbol": "MELANIA",
+    "name": "Melania Meme",
+    "providerId": "melania-meme",
+    "address": "FUAfBo2jgks6gB4Z4LfZkqSZgzNucisEHqnNebaRxM1P",
+    "decimals": 6,
+    "origin": "solana-seed+expansion+meme",
+    "chain": "SOLANA"
+  },
+  {
+    "symbol": "FARTCOIN.SOL",
+    "displaySymbol": "FARTCOIN",
+    "name": "Fartcoin",
+    "providerId": "fartcoin",
+    "address": "9BB6NFEcjBCtnNLFko2FqVQBq8HHM13kCyYcdQbgpump",
+    "decimals": 6,
+    "origin": "solana-seed+expansion+meme",
+    "chain": "SOLANA"
+  },
+  {
+    "symbol": "MEW.SOL",
+    "displaySymbol": "MEW",
+    "name": "cat in a dogs world",
+    "providerId": "cat-in-a-dogs-world",
+    "address": "MEW1gQWJ3nEXg2qgERiKu7FAFj79PHvQVREQUzScPP5",
+    "decimals": 5,
+    "origin": "solana-seed+expansion+meme",
+    "chain": "SOLANA"
+  },
+  {
+    "symbol": "POPCAT.SOL",
+    "displaySymbol": "POPCAT",
+    "name": "Popcat",
+    "providerId": "popcat",
+    "address": "7GCihgDB8fe6KNjn2MYtkzZcRjQy3t9GHdC8uHYmW2hr",
+    "decimals": 9,
+    "origin": "solana-seed+expansion+meme",
+    "chain": "SOLANA"
+  },
+  {
+    "symbol": "GRASS.SOL",
+    "displaySymbol": "GRASS",
+    "name": "Grass",
+    "providerId": "grass",
+    "address": "Grass7B4RdKfBCjTKgSqnXkqjwiGvQyFbuSCUJr3XXjs",
+    "decimals": 9,
+    "origin": "solana-seed+expansion+secondary",
+    "chain": "SOLANA"
+  },
+  {
+    "symbol": "ZBCN.SOL",
+    "displaySymbol": "ZBCN",
+    "name": "Zebec Network",
+    "providerId": "zebec-network",
+    "address": "Gp87MLQ6SiqFXT7JoRBYV52RNqsMsz5jKXVActm3US9m",
+    "decimals": 6,
+    "origin": "solana-seed+expansion+secondary",
+    "chain": "SOLANA"
+  },
+  {
+    "symbol": "HNT.SOL",
+    "displaySymbol": "HNT",
+    "name": "Helium",
+    "providerId": "helium",
+    "address": "hntyVP6YFm1Hg25TN9WGLqM12b8TQmcknKrdu1oxWux",
+    "decimals": 8,
+    "origin": "solana-seed+expansion+secondary",
+    "chain": "SOLANA"
+  },
+  {
+    "symbol": "JLP.SOL",
+    "displaySymbol": "JLP",
+    "name": "Jupiter Perps LP",
+    "providerId": "jupiter-perpetuals-liquidity-provider-token",
+    "address": "27G8MtK7VtTcCHkpASjSDdkWWYfoqT6ggEuKidVJidD4",
+    "decimals": 6,
+    "origin": "solana-seed+expansion+secondary",
+    "chain": "SOLANA"
+  },
+  {
+    "symbol": "JITOSOL.SOL",
+    "displaySymbol": "JITOSOL",
+    "name": "Jito Staked SOL",
+    "providerId": "jito-staked-sol",
+    "address": "J1toso1uCk3RLmjorhTtrVwY9HJ7X8V9yYac6Y7kGCPn",
+    "decimals": 9,
+    "origin": "solana-seed+expansion+secondary",
+    "chain": "SOLANA"
+  },
+  {
+    "symbol": "JUPSOL.SOL",
+    "displaySymbol": "JUPSOL",
+    "name": "Jupiter Staked SOL",
+    "providerId": "jupiter-staked-sol",
+    "address": "jupSoLaHXQiZZTSfEWMTRRgpnyFm8f6sZdosWBjx93v",
+    "decimals": 9,
+    "origin": "solana-seed+expansion+secondary",
+    "chain": "SOLANA"
+  },
+  {
+    "symbol": "MSOL.SOL",
+    "displaySymbol": "MSOL",
+    "name": "Marinade Staked SOL",
+    "providerId": "msol",
+    "address": "mSoLzYCxHdYgdzU16g5QSh3i5K3z3KZK7ytfqcJm7So",
+    "decimals": 9,
+    "origin": "solana-seed+expansion+secondary",
+    "chain": "SOLANA"
+  },
+  {
+    "symbol": "PIPPIN.SOL",
+    "displaySymbol": "PIPPIN",
+    "name": "Pippin",
+    "providerId": "pippin",
+    "address": "Dfh5DzRgSvvCFDoYc2ciTkMrbDfRKybA4SoFbPmApump",
+    "decimals": 6,
+    "origin": "solana-seed+expansion+meme",
+    "chain": "SOLANA"
+  },
+  {
+    "symbol": "BOME.SOL",
+    "displaySymbol": "BOME",
+    "name": "BOOK OF MEME",
+    "providerId": "book-of-meme",
+    "address": "ukHH6c7mMyiWCf1b9pnWe25TSpkDDt3H5pQZgZ74J82",
+    "decimals": 6,
+    "origin": "solana-seed+dexscreener-screened+meme",
+    "chain": "SOLANA"
+  },
+  {
+    "symbol": "PONKE.SOL",
+    "displaySymbol": "PONKE",
+    "name": "PONKE",
+    "providerId": "ponke",
+    "address": "5z3EqYQo9HiCEs3R84RCDMu2n7anpDMxRhdK8PSWmrRC",
+    "decimals": 6,
+    "origin": "solana-seed+dexscreener-screened+meme",
+    "chain": "SOLANA"
+  },
+  {
+    "symbol": "TNSR.SOL",
+    "displaySymbol": "TNSR",
+    "name": "Tensor",
+    "providerId": "tensor",
+    "address": "TNSRxcUxoT9xBG3de7PiJyTDYu7kskLqcpddxnEJAS6",
+    "decimals": 6,
+    "origin": "solana-seed+dexscreener-screened+secondary",
+    "chain": "SOLANA"
+  },
+  {
+    "symbol": "GOAT.SOL",
+    "displaySymbol": "GOAT",
+    "name": "Goatseus Maximus",
+    "providerId": "goatseus-maximus",
+    "address": "CzLSujWBLFsSjncfkh59rUFqvafWcY5tzedWJSuypump",
+    "decimals": 6,
+    "origin": "solana-seed+dexscreener-screened+meme",
+    "chain": "SOLANA"
+  },
+  {
+    "symbol": "JELLYJELLY.SOL",
+    "displaySymbol": "JELLYJELLY",
+    "name": "jelly-my-jelly",
+    "providerId": "jelly-my-jelly",
+    "address": "FeR8VBqNRSUD5NtXAj2n3j1dAHkZHfyDktKuLXD4pump",
+    "decimals": 6,
+    "origin": "solana-seed+dexscreener-screened+meme",
+    "chain": "SOLANA"
+  },
+  {
+    "symbol": "GRIFFAIN.SOL",
+    "displaySymbol": "GRIFFAIN",
+    "name": "GRIFFAIN",
+    "providerId": "griffain",
+    "address": "KENJSUYLASHUMfHyy5o4Hp2FdNqZg1AsUPhfH2kYvEP",
+    "decimals": 6,
+    "origin": "solana-seed+dexscreener-screened+meme",
+    "chain": "SOLANA"
+  },
+  {
+    "symbol": "MOODENG.SOL",
+    "displaySymbol": "MOODENG",
+    "name": "Moo Deng",
+    "providerId": "moo-deng",
+    "address": "ED5nyyWEzpPPiWimP8vYm7sD7TD3LAt3Q3gRTWHzPJBY",
+    "decimals": 6,
+    "origin": "solana-seed+dexscreener-screened+meme",
+    "chain": "SOLANA"
+  },
+  {
+    "symbol": "ACT.SOL",
+    "displaySymbol": "ACT",
+    "name": "Act I : The AI Prophecy",
+    "providerId": "act-i-the-ai-prophecy",
+    "address": "GJAFwWjJ3vnTsrQVabjBVK2TYB1YtRCQXRDfDgUnpump",
+    "decimals": 6,
+    "origin": "solana-seed+dexscreener-screened+meme",
+    "chain": "SOLANA"
+  },
+  {
+    "symbol": "PYTHIA.SOL",
+    "displaySymbol": "PYTHIA",
+    "name": "PYTHIA",
+    "providerId": "pythia",
+    "address": "CreiuhfwdWCN5mJbMJtA9bBpYQrQF2tCBuZwSPWfpump",
+    "decimals": 6,
+    "origin": "solana-seed+dexscreener-screened+meme",
+    "chain": "SOLANA"
+  },
+  {
+    "symbol": "AURA.SOL",
+    "displaySymbol": "AURA",
+    "name": "aura",
+    "providerId": "aura",
+    "address": "DtR4D9FtVoTX2569gaL837ZgrB6wNjj6tkmnX9Rdk9B2",
+    "decimals": 6,
+    "origin": "solana-seed+dexscreener-screened+meme",
+    "chain": "SOLANA"
+  }
+]

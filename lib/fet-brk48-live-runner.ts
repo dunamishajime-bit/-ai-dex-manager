@@ -15,11 +15,12 @@ import { readSharedCryptoDailyRiskWithRolloverRetry } from "@/lib/disdex-shared-
 import { assertSharedKillSwitchAllowsNewEntry } from "@/lib/disdex-shared-kill-switch";
 import {
   findManagedFetBrk48ProtectiveOrders,
+  findManagedOrdinaryResidentStops,
   findManagedPenguRecoveryV8ProtectiveOrders,
   findManagedV12ProtectiveOrders,
 } from "@/lib/disdex-managed-protective-orders";
 import type { DirectOpenOrder, DirectPosition, DirectTradeExecutor } from "@/lib/direct-trade-executor";
-import { buildFetBrk48Signal, normalizeFetH1, type FetBrk48Signal } from "@/lib/fet-brk48-signal";
+import { fetCompletedReturn72h, buildFetBrk48Signal, normalizeFetH1, type FetBrk48Signal } from "@/lib/fet-brk48-signal";
 import {
   readFetBrk48State,
   writeFetBrk48State,
@@ -410,6 +411,12 @@ export class FetBrk48LiveRunner {
     // management, pending reconciliation and every order mutation continue
     // through the original locked path below.
     const preState = await readFetBrk48State(this.deps.statePath, this.deps.runtimeSha);
+    const boundaryTs = Math.floor(now/3_600_000)*3_600_000;
+    let heldReturnTelemetry: {value:number|undefined;boundaryTs:number}|undefined;
+    if (preState.position && preState.lastEvaluationReturn72hObservedTs !== boundaryTs) {
+      try { const rows = normalizeFetH1(await this.deps.client.getKlines("FETUSDT", "1h", 120), now); heldReturnTelemetry = {value:fetCompletedReturn72h(rows,boundaryTs),boundaryTs}; }
+      catch { heldReturnTelemetry = {value:undefined,boundaryTs}; }
+    }
     if (!preState.position && !preState.pending && !preState.manualReview) {
 
       // The flat/no-signal fast path only needs to prove that FET itself has
@@ -428,6 +435,8 @@ export class FetBrk48LiveRunner {
         const preDecisionTs = Math.floor(now / 3_600_000) * 3_600_000;
         const preSignal = buildFetBrk48Signal(normalizeFetH1(preKlines, now), now);
         if (!preSignal) {
+          preState.lastEvaluationReturn72h = fetCompletedReturn72h(normalizeFetH1(preKlines,now),preDecisionTs);
+          preState.lastEvaluationReturn72hObservedTs = preDecisionTs;
           preState.lastEvaluationDecisionTs = preDecisionTs;
           preState.lastEvaluationCandidate = false;
           preState.lastEvaluationReason="FET_NO_BRK48_R72_SIGNAL";
@@ -443,6 +452,7 @@ export class FetBrk48LiveRunner {
 
     try {
       let state = await readFetBrk48State(this.deps.statePath, this.deps.runtimeSha);
+      if(heldReturnTelemetry){state.lastEvaluationReturn72h=heldReturnTelemetry.value;state.lastEvaluationReturn72hObservedTs=heldReturnTelemetry.boundaryTs;}
       // Persist a heartbeat even while flat/no-signal so health monitoring can
       // distinguish a healthy idle runner from a missing/stale state store.
       await writeFetBrk48State(this.deps.statePath, state);
@@ -531,6 +541,7 @@ export class FetBrk48LiveRunner {
       if (q102Fet.length) return { status: "held", message: "FET_SYMBOL_CURRENTLY_OWNED_BY_Q102", ordersSent: 0 };
 
       const managed = new Set([
+        ...findManagedOrdinaryResidentStops(openOrders, positions),
         ...findManagedPenguRecoveryV8ProtectiveOrders(openOrders, positions),
         ...findManagedV12ProtectiveOrders(openOrders, positions),
         ...findManagedFetBrk48ProtectiveOrders(openOrders, positions),
@@ -546,6 +557,8 @@ export class FetBrk48LiveRunner {
       const evaluationDecisionTs = Math.floor(now / 3_600_000) * 3_600_000;
       const signal = now < (state.cooldownUntilTs||0) ? undefined : buildFetBrk48Signal(normalizeFetH1(klines, now), now);
       state.lastEvaluationReason=now < (state.cooldownUntilTs||0)?"FET_POST_EXIT_COOLDOWN_24H":signal?"FET_BRK48_R72_SIGNAL":"FET_NO_BRK48_R72_SIGNAL";
+      state.lastEvaluationReturn72h = fetCompletedReturn72h(normalizeFetH1(klines,now),evaluationDecisionTs);
+      state.lastEvaluationReturn72hObservedTs = evaluationDecisionTs;
       state.lastEvaluationDecisionTs = evaluationDecisionTs;
       state.lastEvaluationCandidate = Boolean(signal);
       await writeFetBrk48State(this.deps.statePath, state);

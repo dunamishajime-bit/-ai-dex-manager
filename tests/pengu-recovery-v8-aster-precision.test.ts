@@ -6,8 +6,9 @@ test("PENGU Recovery V8 formats protective stop values to the venue filters", as
     assert.equal(normalizeRecoveryV8OrderValue(0.00652172, "0.0000010", 7), "0.006521");
     assert.equal(normalizeRecoveryV8OrderValue(4354, "1", 0), "4354");
 
-    let submitted: { quantity?: string; stopPrice?: string } | undefined;
+    let submitted: { quantity?: string; stopPrice?: string; newClientOrderId?: string } | undefined;
     const client = {
+        getOpenOrders: async () => [{symbol:"PENGUUSDT",side:"SELL",clientOrderId:submitted?.newClientOrderId,status:"NEW",reduceOnly:true,origQty:submitted?.quantity,stopPrice:submitted?.stopPrice}],
         getExchangeInfo: async () => ({
             symbols: [{
                 symbol: "PENGUUSDT",
@@ -23,6 +24,7 @@ test("PENGU Recovery V8 formats protective stop values to the venue filters", as
             submitted = input;
             return {
                 symbol: "PENGUUSDT",
+                side: "SELL",
                 clientOrderId: input.newClientOrderId,
                 status: "NEW",
                 reduceOnly: true,

@@ -80,6 +80,7 @@ export interface DirectPosition {
 }
 
 export interface DirectOpenOrder {
+    orderId?: number;
     symbol: string;
     clientOrderId: string;
     side?: AsterOrderSide;
@@ -353,6 +354,7 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
         const rows = await this.client.getOpenOrders();
         return rows.map((row) => ({
             symbol: row.symbol.toUpperCase(),
+            orderId: row.orderId,
             clientOrderId: String(row.clientOrderId || ""),
             side: row.side,
             status: row.status,
