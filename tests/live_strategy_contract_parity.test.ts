@@ -46,8 +46,8 @@ test("Q102 one-slot LIVE target uses DD-governed sizing up to 3.00x under shared
   assert.equal(QUALITY102_CAUSAL_V1.maximumPositions, 1);
   assert.equal(QUALITY102_CAUSAL_V1.cryptoGrossCap, 3);
   assert.equal(QUALITY102_CAUSAL_V1.totalGrossCap, 4.25);
-  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.q102FamilyGross.HIGH_VOL, 1.661);
-  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.q102FamilyGross.BRK, 2.465);
+  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.q102FamilyGross.HIGH_VOL, 1);
+  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.q102FamilyGross.BRK, .75);
   assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.stockGrossCap, 4);
   assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.stockSlotGrossCap, 2);
 });

@@ -329,6 +329,7 @@ export function evaluatePenguDualLsV2ShortSignals(featuresRows: Array<PenguDualL
     let active = false;
     let armed = false;
     let localLow = 0;
+    let armedLow = 0;
     let expiry = -1;
     for (let index = startIndex; index < featuresRows.length; index += 1) {
         const features = featuresRows[index];
@@ -337,12 +338,14 @@ export function evaluatePenguDualLsV2ShortSignals(featuresRows: Array<PenguDualL
             active = false;
             armed = false;
             localLow = 0;
+            armedLow = 0;
         }
         if (features.penguReturn24h <= rule.impulseReturn24hMaximum) {
             if (!active) {
                 active = true;
                 armed = false;
                 localLow = features.low;
+                armedLow = 0;
                 expiry = index + rule.setupExpiryHours;
             } else {
                 localLow = Math.min(localLow, features.low);
@@ -356,11 +359,14 @@ export function evaluatePenguDualLsV2ShortSignals(featuresRows: Array<PenguDualL
                 active = false;
                 armed = false;
                 localLow = 0;
+            armedLow = 0;
                 continue;
             }
-            if (bounce + 1e-12 >= rule.armBounceMinimum) armed = true;
+            if (!armed && bounce + 1e-12 >= rule.armBounceMinimum) { armed = true; armedLow = localLow; }
             if (armed) {
-                const eligible = features.penguReturn72h <= rule.regimeReturn72hMaximum
+                const limitedStructuralRebreakRequired = features.btcEma168Distance >= 0 && features.btcReturn24h < 0;
+                const limitedStructuralRebreakPass = !limitedStructuralRebreakRequired || features.close <= armedLow * 1.02 + 1e-12;
+                const eligible = limitedStructuralRebreakPass && features.penguReturn72h <= rule.regimeReturn72hMaximum
                     && features.close < features.previousLow
                     && features.close < features.ema72
                     && features.ema72 < features.ema168
@@ -376,6 +382,7 @@ export function evaluatePenguDualLsV2ShortSignals(featuresRows: Array<PenguDualL
                     active = false;
                     armed = false;
                     localLow = 0;
+            armedLow = 0;
                 }
             }
         }

@@ -1,0 +1,136 @@
+{
+  "schema": "disdex-final-production-target/v1",
+  "asOf": "2026-10-05",
+  "status": "RESEARCH_VALIDATED_PRODUCTION_HANDOFF_NOT_DEPLOYED",
+  "sourceResearchBranch": "research/dd1296-final-production-handoff-20261005",
+  "backtest": {
+    "periodUtc": {
+      "firstEntry": "2025-08-10T04:00:00+00:00",
+      "lastEntry": "2026-08-09T22:00:00+00:00",
+      "lastExit": "2026-08-10T00:00:00+00:00"
+    },
+    "costModelRoundTripBps": 10,
+    "finalEquityJpy": 4067358397.424793,
+    "profitFactor": 2.960180377096512,
+    "maximumMtmDrawdownPct": -12.96457052048714,
+    "closedTrades": 1358,
+    "ownershipConflicts": 0,
+    "accounting": "PASS"
+  },
+  "strategy": {
+    "PENGU": {
+      "gross": 1.0,
+      "logicProfile": "COMBINED_FILTERED",
+      "limitedStructuralRebreakPct": 0.02,
+      "note": "Keep existing validated PENGU 1.0 plus limited 2% structural re-break. Do not add the rejected broad -4% gate."
+    },
+    "HYPE": {
+      "profile": "HYPE75",
+      "maximumGross": 1.5,
+      "unchangedFromValidatedHype75": true
+    },
+    "Q102": {
+      "familySideGrossCaps": {
+        "HIGH_VOL": {"LONG": 1.0, "SHORT": 0.6},
+        "REV": {"LONG": 1.5, "SHORT": 1.25},
+        "PB": {"LONG": 2.0},
+        "MR": {"default": 0.75},
+        "BRK": {"default": 0.75}
+      },
+      "fetBrkShortExhaustion": {
+        "symbol": "FETUSDT",
+        "family": "BRK",
+        "side": "SHORT",
+        "blockWhenReturn72hLte": -0.12,
+        "causal": true
+      }
+    },
+    "FET_BRK48_LONG": {
+      "minimumReturn72h": 0.02,
+      "postExitReentryCooldownHours": 24,
+      "existingVolumeRatioMinimum": 1.2,
+      "existingHoldHours": 24,
+      "existingHardStopPct": 0.05,
+      "existingProfitFloorTriggerPct": 0.05,
+      "existingProfitFloorStopPct": 0.005
+    },
+    "V12": {
+      "sameSideLossCooldown": {
+        "consecutiveLosses": 6,
+        "cooldownHours": 6,
+        "scope": "same-side-only"
+      },
+      "avaxRank1ShortReboundGate": {
+        "symbol": "AVAXUSDT",
+        "side": "SHORT",
+        "rank": 1,
+        "btcReturn3hMustBeNegative": true,
+        "directionalRelative3hLte": -0.0075,
+        "definition": "directionalRelative3h = sideSign * (assetReturn3h - btcReturn3h), sideSign=-1 for SHORT"
+      },
+      "atomExhaustionGate": {
+        "symbol": "ATOMUSDT",
+        "directionalRelative3hGte": 0.00603,
+        "definition": "directionalRelative3h = sideSign * (assetReturn3h - btcReturn3h)",
+        "causal": true
+      },
+      "avaxLongWeakMomentumGate": {
+        "symbol": "AVAXUSDT",
+        "side": "LONG",
+        "rank": 1,
+        "directionalReturn24hLte": 0.0165,
+        "causal": true
+      }
+    },
+    "V52": {
+      "unchanged": true,
+      "basisStopMultiple": 1.75,
+      "residentStopPhase1": {
+        "entryReferenceFixedEmergencyStopEnabled": false,
+        "keepCurrentDynamicBasisStop": true,
+        "keepExistingMarginGuardDailyLossKillSwitch": true,
+        "reason": "2026-10-05 comparison showed no max-DD improvement and the H1 entry-bar upper-bound model reduced final equity/PF by prematurely stopping trades that later basis-converged."
+      },
+      "residentStopPhase2ResearchOnly": {
+        "required": true,
+        "minimumDataResolution": "1m_or_better_tick_equivalent_where_available",
+        "compare": ["current_dynamic_basis_stop", "reference_updated_resident_stop", "distant_disaster_only_stop"],
+        "productionPromotionBlockedUntilValidated": true
+      }
+    },
+    "IDLE": {"unchanged": true},
+    "RESIDUAL": {"unchanged": true}
+  },
+  "finalV12Outcome": {
+    "trades": 995,
+    "wins": 643,
+    "losses": 352,
+    "winRatePct": 64.62311557788945
+  },
+  "strategyTrades": {
+    "V12": 995,
+    "Q102": 129,
+    "PENGU": 66,
+    "V52": 86,
+    "HYPE_LONG": 27,
+    "IDLE": 36,
+    "RESIDUAL": 11,
+    "FET": 8
+  },
+  "strategyPnlJpy": {
+    "V12": 1494763113.376527,
+    "Q102": 724001822.5836381,
+    "PENGU": 181883587.3770706,
+    "V52": 736927793.0325155,
+    "HYPE_LONG": 200253872.30101055,
+    "IDLE": 633583350.8213232,
+    "RESIDUAL": 41155917.493764095,
+    "FET": 105252924.89640824
+  },
+  "safety": {
+    "thisCommitMustNotEnableLiveByDefault": true,
+    "operatorExactCommitApprovalRequired": true,
+    "killSwitchMustBeFalseBeforeActivation": true,
+    "existingGrossMarginAndSharedRiskSafetyMustRemainFailClosed": true
+  }
+}

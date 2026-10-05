@@ -22,8 +22,8 @@ test("V12 strong regime uses the validated bounded quality gate", () => {
 });
 
 test("current integrated production risk uses the selected Top3/FET/Q102 governor family sizing", () => {
-  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.q102FamilyGross.HIGH_VOL, 1.661);
-  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.q102FamilyGross.BRK, 2.465);
+  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.q102FamilyGross.HIGH_VOL, 1);
+  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.q102FamilyGross.BRK, .75);
   assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.v12DynamicAggregateGrossCap, 2);
 });
 

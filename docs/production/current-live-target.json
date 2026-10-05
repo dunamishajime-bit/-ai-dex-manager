@@ -1,8 +1,8 @@
 {
   "schema": "disdex-current-live-target/v1",
-  "date": "2026-10-02",
+  "date": "2026-10-05",
   "status": "CURRENT_CANONICAL_PRODUCTION_TARGET",
-  "productionBaseSha": "8e341956b3c5c5d825029d18ba083029d919126b",
+  "productionBaseSha": "b9a0c86d6cf72b0209e44edc8883e45e6d241c5b",
   "strategy": {
     "v12": {
       "maximumPositions": 3,
@@ -16,7 +16,24 @@
       "perPositionGrossCap": 1,
       "trailingAtr": 0.2,
       "stopAtr": 2.477,
-      "takeProfitAtr": 3.1995
+      "takeProfitAtr": 3.1995,
+      "dd1296Filters": {
+        "sideLossCount": 6,
+        "sideCooldownHours": 6,
+        "allFinalizedExitsCount": true,
+        "netPnl": "ACTUAL_REALIZED_PNL_MINUS_FEES_PLUS_FUNDING",
+        "causalBoundary": "H1_OPEN",
+        "AVAX_R1_SHORT": {
+          "btcReturn3hLessThan": 0,
+          "directionalRelative3hMax": -0.0075
+        },
+        "ATOM": {
+          "directionalRelative3hMin": 0.00603
+        },
+        "AVAX_R1_LONG": {
+          "directionalReturn24hMax": 0.0165
+        }
+      }
     },
     "fet": {
       "strategyId": "FET_BRK48_LONG",
@@ -29,9 +46,13 @@
       "decisionHourRemainderUtc": 1,
       "holdHours": 24,
       "hardStopPct": 0.05,
-      "maximumGross": 2.25,
+      "maximumGross": 1,
       "minimumResidualGross": 0.05,
-      "priority": "LOWER_THAN_CORE"
+      "priority": "LOWER_THAN_CORE",
+      "minimumReturn72h": 0.02,
+      "postExitCooldownHours": 24,
+      "causalReturnBasis": "COMPLETED_CLOSE_TO_COMPLETED_CLOSE_72H",
+      "existingPositionSizing": "PRESERVE_UNTIL_CONFIRMED_EXIT"
     },
     "q102": {
       "selector": "CAUSAL_V4",
@@ -39,13 +60,28 @@
       "portfolioDdGovernorEntryThresholdPct": 0.3,
       "boostMaximumGross": 3,
       "baseFamilyGross": {
-        "HIGH_VOL": 1.661,
-        "MR": 1,
-        "BRK": 2.465,
-        "REV": 2.5,
-        "PB": 2.5
+        "HIGH_VOL": 1,
+        "MR": 0.75,
+        "BRK": 0.75,
+        "REV": 1.5,
+        "PB": 2
       },
-      "failSafe": "STALE_MISSING_MALFORMED_GOVERNOR_USES_BASE_FAMILY_GROSS"
+      "failSafe": "STALE_MISSING_MALFORMED_GOVERNOR_USES_BASE_FAMILY_GROSS",
+      "sideFamilyGross": {
+        "HIGH_VOL": {
+          "LONG": 1,
+          "SHORT": 0.6
+        },
+        "REV": {
+          "LONG": 1.5,
+          "SHORT": 1.25
+        },
+        "PB": {
+          "LONG": 2
+        }
+      },
+      "familyCapsOverrideGovernorBoost": true,
+      "fetBrkShortReturn72hMinimum": -0.12
     },
     "pengu": {
       "policy": "COMBINED_FILTERED_Q60_DD17_H72",
@@ -54,12 +90,16 @@
       "sameRouteHardStopQuarantineHours": 60,
       "realizedDrawdownThresholdPct": 17,
       "realizedDrawdownHoldHours": 72,
-      "preserveExistingProtectionAndExits": true
+      "preserveExistingProtectionAndExits": true,
+      "limitedStructuralRebreakPct": 0.02
     },
     "v52": {
       "policy": "PRESERVE_CURRENT_PRODUCTION",
       "stockAggregateGross": 4,
-      "slotGross": 2
+      "slotGross": 2,
+      "basisStopMultiple": 1.75,
+      "fixedEntryReferenceStopPhase1": false,
+      "residentStopResearchPhase": 2
     },
     "portfolio": {
       "cryptoGrossCap": 3,
@@ -117,8 +157,9 @@
         "JUPUSDT",
         "RENDERUSDT"
       ],
-      "formal10bpsTrades": 61,
-      "preserveExactParity": true
+      "preserveExactParity": true,
+      "historicalFormal10bpsTrades": 61,
+      "integratedDd1296Trades": 36
     },
     "idleResidualLong": {
       "strategyId": "IDLE_RESIDUAL_LONG",
@@ -153,6 +194,81 @@
     }
   },
   "formalBacktest": {
+    "selectedCase": "DD1296_FINAL_ALLIN_10BPS",
+    "sourceArtifact": "docs/research/results/dd1296-final-20261005/final-summary.json",
+    "sourceArtifactSha256": "D2C9A5F375C6BA248D6537B1B419F16138F8FDC845D7B03F6D7FDE5CE1FDA333",
+    "researchSourceSha": "db0ee5def97e8194f55aa77fa5b7326fa938d456",
+    "model": "FORMAL_H1_CAUSAL_PRICE_MODEL_NOT_HISTORICAL_L2_VERIFIED",
+    "NORMAL": {
+      "roundtripBps": 10,
+      "endingAssetJpy": 4067358397.424793,
+      "profitFactor": 2.960180377096512,
+      "maxDrawdownPct": -12.96457052048714,
+      "trades": 1358,
+      "routing": {
+        "FET": 8,
+        "HYPE_LONG": 27,
+        "IDLE": 36,
+        "PENGU": 66,
+        "Q102": 129,
+        "RESIDUAL": 11,
+        "V12": 995,
+        "V52": 86
+      },
+      "winRatePct": 66.49484536082474
+    },
+    "accountingReconciliation": "PASS",
+    "ownershipConflicts": 0,
+    "reproduction": "EXACT_RESEARCH_ANCHOR_REPRODUCED_20261005; LIVE_SOURCE_TESTS_SEPARATE",
+    "period": {
+      "startInclusive": "2025-08-10T00:00:00.000Z",
+      "endExclusive": "2026-08-10T00:00:00.000Z"
+    },
+    "capital": {
+      "initialJpy": 10000,
+      "monthlyJpy": 10000,
+      "monthlyCount": 12,
+      "compounding": true
+    }
+  },
+  "supersedesForCurrentActivation": [
+    {
+      "name": "V12_DYNAMIC_RESIDUAL_LIVE_CONTRACT_20260919",
+      "researchSha": "27f934424b201e4c63986b9b7db64b89ff69b4bb",
+      "note": "Historical evidence only. Do not use its 270126566/24184641 formal acceptance as the current Production activation target."
+    },
+    {
+      "name": "codex/v12-dynamic-residual-live-20260920-clean",
+      "implementationSha": "f9b0861816b8a70f6158e98f00893457f83e81bb",
+      "note": "Superseded implementation path for current activation."
+    },
+    {
+      "name": "top3_q102gov030_fet2.25_20260922",
+      "implementationSha": "2f22282e5ea3cddcb6005b9c9f4e043553cf0f7d",
+      "note": "Superseded as the current activation acceptance anchor by Trail0.20 + existing Idle SHORT + DOGE/AVAX residual controlling stack. Retained as historical evidence."
+    }
+  ],
+  "acceptance": {
+    "requireExactSelectedBacktestParity": true,
+    "maximumDrawdownFloorPct": -25,
+    "maximumCryptoGross": 5,
+    "maximumTotalGross": 8,
+    "maximumGrossConflicts": 0,
+    "requireExistingV12Rank1Rank2Parity": true,
+    "requireFetCorePreemption": true,
+    "requireGovernorFailSafe": true,
+    "requireFiveXCross": true,
+    "requireUnifiedRuntimeSha": true,
+    "requireMigrationAndReconciliation": true,
+    "requireProtectionReadback": true,
+    "requireKillSwitchFalseAtActivation": true,
+    "requireIdlePriorityShortParity": true,
+    "requireTrail020": true,
+    "requireResidualExactShaParity": true,
+    "requireFormalResidualPreemption": true,
+    "requireDogAvaxFreshOosSupport": true
+  },
+  "historicalFormalBacktest": {
     "sourceArtifact": "docs/research/results/trail020-idle-doge-avax-controlling-20261002/controlling-contract.json",
     "sourceArtifactSha256": "B1F31C152D831131320E8E0159593A34B4679AF7609715A0DD6EFCD51B9DE616",
     "selectedCase": "trail020_idle_doge_avax_20261002",
@@ -245,41 +361,5 @@
       }
     }
   },
-  "supersedesForCurrentActivation": [
-    {
-      "name": "V12_DYNAMIC_RESIDUAL_LIVE_CONTRACT_20260919",
-      "researchSha": "27f934424b201e4c63986b9b7db64b89ff69b4bb",
-      "note": "Historical evidence only. Do not use its 270126566/24184641 formal acceptance as the current Production activation target."
-    },
-    {
-      "name": "codex/v12-dynamic-residual-live-20260920-clean",
-      "implementationSha": "f9b0861816b8a70f6158e98f00893457f83e81bb",
-      "note": "Superseded implementation path for current activation."
-    },
-    {
-      "name": "top3_q102gov030_fet2.25_20260922",
-      "implementationSha": "2f22282e5ea3cddcb6005b9c9f4e043553cf0f7d",
-      "note": "Superseded as the current activation acceptance anchor by Trail0.20 + existing Idle SHORT + DOGE/AVAX residual controlling stack. Retained as historical evidence."
-    }
-  ],
-  "acceptance": {
-    "requireExactSelectedBacktestParity": true,
-    "maximumDrawdownFloorPct": -25,
-    "maximumCryptoGross": 5,
-    "maximumTotalGross": 8,
-    "maximumGrossConflicts": 0,
-    "requireExistingV12Rank1Rank2Parity": true,
-    "requireFetCorePreemption": true,
-    "requireGovernorFailSafe": true,
-    "requireFiveXCross": true,
-    "requireUnifiedRuntimeSha": true,
-    "requireMigrationAndReconciliation": true,
-    "requireProtectionReadback": true,
-    "requireKillSwitchFalseAtActivation": true,
-    "requireIdlePriorityShortParity": true,
-    "requireTrail020": true,
-    "requireResidualExactShaParity": true,
-    "requireFormalResidualPreemption": true,
-    "requireDogAvaxFreshOosSupport": true
-  }
+  "researchSourceSha": "db0ee5def97e8194f55aa77fa5b7326fa938d456"
 }

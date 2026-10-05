@@ -149,6 +149,7 @@ validate_release_artifacts() {
     "$CURRENT_RELEASE/scripts/disdex-v12-benign-entry-gate-recovery.ts"
     "$CURRENT_RELEASE/scripts/disdex-v12-runtime-lineage-recovery.ts"
     "$CURRENT_RELEASE/scripts/disdex-flat-state-sha-migrate.ts"
+    "$CURRENT_RELEASE/scripts/disdex-fet-active-state-sha-migrate.ts"
     "$CURRENT_RELEASE/scripts/disdex-quality102-causal-v1-state-migrate.ts"
     "$CURRENT_RELEASE/scripts/disdex-quality102-causal-v1-live-runner.ts"
     "$CURRENT_RELEASE/scripts/generated/disdex-quality102-ranking-observer.cjs"
@@ -354,9 +355,9 @@ migrate_fet_state_lineage() {
   local from_sha
   from_sha="$(state_runtime_sha "$state_path")"
   [[ "$from_sha" == "$DEPLOYED_SHA" ]] && return 0
+  load_runtime_migration_environment
   "$CURRENT_RELEASE/node_modules/.bin/tsx" \
-    "$CURRENT_RELEASE/scripts/disdex-flat-state-sha-migrate.ts" \
-    --strategy FET \
+    "$CURRENT_RELEASE/scripts/disdex-fet-active-state-sha-migrate.ts" \
     --state-path "$state_path" \
     --from-sha "$from_sha" \
     --to-sha "$DEPLOYED_SHA"
@@ -1361,6 +1362,7 @@ self_test() {
     scripts/disdex-v12-benign-entry-gate-recovery.ts \
     scripts/disdex-v12-runtime-lineage-recovery.ts \
     scripts/disdex-flat-state-sha-migrate.ts \
+    scripts/disdex-fet-active-state-sha-migrate.ts \
     scripts/disdex-quality102-causal-v1-state-migrate.ts \
     scripts/disdex_v96_v52_margin_guard_runtime.py \
     scripts/disdex_v52_aster_only_live_engine.py \

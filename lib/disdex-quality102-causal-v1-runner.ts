@@ -1415,7 +1415,7 @@ export class Quality102CausalV1Runner {
                 const governed = quality102GovernorGross(baseSignal.requestedGross, governor, this.now());
                 signal = {
                     ...baseSignal,
-                    requestedGross: Math.min(this.dependencies.config.maximumGross, governed.gross),
+                    requestedGross: Math.min(baseSignal.requestedGross, this.dependencies.config.maximumGross, governed.gross),
                     reason: `${baseSignal.reason}:PORTFOLIO_DD_GOVERNOR:${governed.reason}`,
                 };
                 this.log.info("Q102 portfolio DD governor decision", {

@@ -1,11 +1,11 @@
 import v52V50Runtime from "./v52V50Runtime.json";
 
 export const Q102_CAUSAL_V4_FAMILY_GROSS = Object.freeze({
-  HIGH_VOL: 1.661,
-  MR: 1.0,
-  BRK: 2.465,
-  REV: 2.5,
-  PB: 2.5,
+  HIGH_VOL: 1.0,
+  MR: 0.75,
+  BRK: 0.75,
+  REV: 1.5,
+  PB: 2.0,
 } as const);
 
 export type Q102CausalV4GrossFamily = keyof typeof Q102_CAUSAL_V4_FAMILY_GROSS;
@@ -20,7 +20,7 @@ export const INTEGRATED_PRODUCTION_RISK_POLICY = Object.freeze({
   v12DynamicAggregateGrossCap: 2.0,
   v12PerPositionGrossCap: 1.0,
   v12MaximumPositions: 3,
-  fetResidualMaximumGross: 2.25,
+  fetResidualMaximumGross: 1.0,
   fetResidualMinimumGross: 0.05,
   penguMaximumGross: 1.0,
   // HYPE/ZEC are lower-priority, long-only sidecars. These values are risk
@@ -53,9 +53,10 @@ export const INTEGRATED_PRODUCTION_RISK_POLICY = Object.freeze({
   v50: Object.freeze(v52V50Runtime),
 });
 
-export function quality102GrossForFamily(family: string | undefined): number {
+export function quality102GrossForFamily(family: string | undefined, side?: number): number {
   const key = String(family || "").trim().toUpperCase() as Q102CausalV4GrossFamily;
-  const value = Q102_CAUSAL_V4_FAMILY_GROSS[key];
+  if ((key === "HIGH_VOL" || key === "REV" || key === "PB") && side !== 1 && side !== -1) throw new Error(`Q102_SIDE_GROSS_REQUIRED:${key}`);
+  const value = key === "HIGH_VOL" && side === -1 ? 0.6 : key === "REV" && side === -1 ? 1.25 : Q102_CAUSAL_V4_FAMILY_GROSS[key];
   if (!Number.isFinite(value) || value <= 0) {
     throw new Error(`QUALITY102_CAUSAL_V4_FAMILY_GROSS_UNRESOLVED:${family || "UNKNOWN"}`);
   }

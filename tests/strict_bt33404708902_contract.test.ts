@@ -40,6 +40,7 @@ test("all five simultaneous intents admit base strategies before blocking histor
         equity: 1_000,
         now: NOW,
         active: [],
+        entryGrossCaps: {cryptoGrossCap:3,totalGrossCap:3.5},
         intents: [
             { idempotencyKey: "q", strategy: "QUALITY102", symbol: "SOLUSDT", side: "LONG", gross: 0.5, notionalUsd: 500, signalTs: NOW },
             { idempotencyKey: "v12", strategy: "V12", symbol: "ETHUSDT", side: "LONG", gross: 1.5, notionalUsd: 1_500, signalTs: NOW },
@@ -115,6 +116,7 @@ test("a quality position is reduced at its current mark when a base order needs 
         equity: 1_000,
         now: NOW,
         researchMode: true,
+        entryGrossCaps: {cryptoGrossCap:3,totalGrossCap:3.5},
         active: [
             position({ id: "q102", strategy: "QUALITY102", symbol: "SOLUSDT", quantity: 50, entryPrice: 10, markPrice: 10 }),
             position({ id: "pengu", strategy: "PENGU_DUAL_LS_V2", symbol: "PENGUUSDT", quantity: 85, entryPrice: 10, markPrice: 10 }),

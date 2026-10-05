@@ -488,11 +488,11 @@ test("Core intents fully preempt FET residual before capacity allocation", () =>
 });
 
 test("FET residual intent does not preempt itself", () => {
-    const result = plan([], [intent("FET_RESIDUAL", 1.25, "FETUSDT")]);
+    const result = plan([], [intent("FET_RESIDUAL", 1, "FETUSDT")]);
     assert.equal(result.status, "planned");
     assert.equal(result.reductions.length, 0);
     assert.equal(result.accepted[0]?.strategy, "FET_RESIDUAL");
-    assert.equal(result.accepted[0]?.gross, 1.25);
+    assert.equal(result.accepted[0]?.gross, 1);
 });
 
 test("stale or unverified FET residual mark fails closed", () => {

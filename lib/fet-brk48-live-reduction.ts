@@ -1,3 +1,4 @@
+import { recordFetExit } from "./fet-brk48-state";
 import { createHash } from "node:crypto";
 
 import type { DirectTradeExecutor } from "@/lib/direct-trade-executor";
@@ -62,6 +63,7 @@ export async function reduceFetBrk48ForCoreConflict(input: FetCoreReductionInput
                 return { status: "blocked" as const, message: state.manualReview };
             }
         }
+        recordFetExit(state, now());
         state.position = undefined;
         state.lastReconciledAt = now();
         await writeFetBrk48State(path, state);
@@ -129,6 +131,7 @@ export async function reduceFetBrk48ForCoreConflict(input: FetCoreReductionInput
         return { status: "blocked" as const, message: state.manualReview };
     }
 
+    recordFetExit(state, now());
     state.position = undefined;
     state.pending = undefined;
     state.lastCompletedIdempotencyKey = key;

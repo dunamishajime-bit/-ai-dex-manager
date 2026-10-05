@@ -321,6 +321,7 @@ def reconcile_emergency_flatten_states(
     v12 = states.get("V12")
     if v12 is not None and any(c["strategy"] == "V12" for c in claims_list):
         payload = dict(v12)
+        payload["dd1296UnaccountedExits"] = payload.get("dd1296UnaccountedExits", []) + (payload.get("activePositions") or ([payload["active"]] if payload.get("active") else []))
         payload.pop("active", None)
         payload.pop("activePositions", None)
         payload.pop("pending", None)
@@ -371,6 +372,10 @@ def reconcile_emergency_flatten_states(
     fet = states.get("FET")
     if fet is not None and any(c["strategy"] == "FET" for c in claims_list):
         payload = dict(fet)
+        payload["lastExitTs"] = max(int(payload.get("lastExitTs") or 0), now)
+        payload["cooldownUntilTs"] = max(int(payload.get("cooldownUntilTs") or 0), now + 24 * 3600000)
+        payload["lastEvaluationCandidate"] = False
+        payload["lastEvaluationReason"] = "FET_POST_EXIT_COOLDOWN_24H"
         payload.pop("position", None)
         payload.pop("pending", None)
         payload["updatedAt"] = now

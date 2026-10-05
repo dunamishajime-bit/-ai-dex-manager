@@ -1,3 +1,4 @@
+import { recordFetExit } from "./fet-brk48-state";
 import { createHash } from "node:crypto";
 
 import { FET_BRK48_RESIDUAL } from "@/config/fetBrk48Runtime";
@@ -260,7 +261,9 @@ async function emergencyFlattenProtectedFailure(
     quantity: Math.abs(actual.quantity),
     clientOrderId,
   });
+  if (activePosition(await deps.executor.getPositions()).length) throw new Error("FET_PROTECTION_FAILURE_FLATTEN_NOT_CONFIRMED");
   state.failures.push({ occurredAt: now, message: reason });
+  recordFetExit(state, (deps.now || Date.now)());
   state.position = undefined;
   state.pending = undefined;
   state.manualReview = `FET_PROTECTION_FAILURE_FLATTENED:${reason}`;
@@ -325,6 +328,7 @@ async function reconcilePending(
 
   if (ours.length === 0 && (orderFilled(result.status) || terminalNoFill(result.status))) {
     if (state.position?.stopClientOrderId) await deps.adapter.cancel(state.position.stopClientOrderId);
+    recordFetExit(state, (deps.now || Date.now)());
     state.position = undefined;
     state.pending = undefined;
     state.lastCompletedIdempotencyKey = pending.idempotencyKey;
@@ -385,6 +389,7 @@ async function executeExit(
     return { status: "manual-review", message: state.manualReview, ordersSent: 1 };
   }
   if (state.position?.stopClientOrderId) await deps.adapter.cancel(state.position.stopClientOrderId);
+  recordFetExit(state, (deps.now || Date.now)());
   state.position = undefined;
   state.pending = undefined;
   state.lastCompletedIdempotencyKey = idempotencyKey;
@@ -406,6 +411,7 @@ export class FetBrk48LiveRunner {
     // through the original locked path below.
     const preState = await readFetBrk48State(this.deps.statePath, this.deps.runtimeSha);
     if (!preState.position && !preState.pending && !preState.manualReview) {
+
       // The flat/no-signal fast path only needs to prove that FET itself has
       // no venue exposure.  Reading account-wide openOrders here costs weight
       // 40 every 30 seconds and can starve shared-risk/account reads.  A real
@@ -417,13 +423,14 @@ export class FetBrk48LiveRunner {
       ]);
       const venueFlat = prePositionRows.every((row) => Math.abs(finite(row.positionAmt)) <= EPS)
         && preOpenOrders.length === 0;
-      if (venueFlat) {
+      if (venueFlat && now >= (preState.cooldownUntilTs || 0)) {
         const preKlines = await this.deps.client.getKlines("FETUSDT", "1h", 120);
         const preDecisionTs = Math.floor(now / 3_600_000) * 3_600_000;
         const preSignal = buildFetBrk48Signal(normalizeFetH1(preKlines, now), now);
         if (!preSignal) {
           preState.lastEvaluationDecisionTs = preDecisionTs;
           preState.lastEvaluationCandidate = false;
+          preState.lastEvaluationReason="FET_NO_BRK48_R72_SIGNAL";
           await writeFetBrk48State(this.deps.statePath, preState);
           return { status: "no-signal", message: "FET_NO_BRK48_SIGNAL", ordersSent: 0 };
         }
@@ -464,6 +471,7 @@ export class FetBrk48LiveRunner {
           const stop = await this.deps.adapter.queryOrderSameId("FETUSDT", state.position.stopClientOrderId);
           if (stop && String(stop.status).toUpperCase() === "FILLED") {
             const completedStopClientOrderId = state.position.stopClientOrderId;
+            recordFetExit(state, Number(stop.updatedAt)>0?Number(stop.updatedAt):now);
             state.position = undefined;
             state.lastCompletedIdempotencyKey = completedStopClientOrderId;
             state.lastReconciledAt = now;
@@ -530,9 +538,14 @@ export class FetBrk48LiveRunner {
       const unmanaged = openOrders.filter((order) => !managed.has(order) && !quality102OwnsOrder(q102, order));
       if (unmanaged.length) return { status: "blocked", message: "FET_UNMANAGED_OPEN_ORDER_CONFLICT", ordersSent: 0 };
 
+      if(now < (state.cooldownUntilTs||0)) {
+        state.lastEvaluationDecisionTs=Math.floor(now/3_600_000)*3_600_000;state.lastEvaluationCandidate=false;state.lastEvaluationReason="FET_POST_EXIT_COOLDOWN_24H";
+        await writeFetBrk48State(this.deps.statePath,state);return {status:"held",message:"FET_POST_EXIT_COOLDOWN_24H",ordersSent:0};
+      }
       const klines = await this.deps.client.getKlines("FETUSDT", "1h", 120);
       const evaluationDecisionTs = Math.floor(now / 3_600_000) * 3_600_000;
-      const signal = buildFetBrk48Signal(normalizeFetH1(klines, now), now);
+      const signal = now < (state.cooldownUntilTs||0) ? undefined : buildFetBrk48Signal(normalizeFetH1(klines, now), now);
+      state.lastEvaluationReason=now < (state.cooldownUntilTs||0)?"FET_POST_EXIT_COOLDOWN_24H":signal?"FET_BRK48_R72_SIGNAL":"FET_NO_BRK48_R72_SIGNAL";
       state.lastEvaluationDecisionTs = evaluationDecisionTs;
       state.lastEvaluationCandidate = Boolean(signal);
       await writeFetBrk48State(this.deps.statePath, state);

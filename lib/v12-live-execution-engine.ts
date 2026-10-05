@@ -1,3 +1,4 @@
+import { evaluateV12Dd1296Entry, recordV12ConfirmedExitBatch, type V12BoundaryCache } from "./v12-dd1296-live-policy";
 import { randomUUID } from "node:crypto";
 
 import { V12_X1_ALL } from "@/config/v12X1AllRuntime";
@@ -165,9 +166,16 @@ function syncActivePositions(state: V12X1AllRunnerState, positions: V12ActivePos
 }
 
 export class V12LiveExecutionEngine {
+    private readonly boundaryCache: V12BoundaryCache = new Map();
     private readonly now: () => number;
     private readonly log: (message: string, payload?: Record<string, unknown>) => void;
     constructor(private readonly d: V12LiveExecutionDependencies) { this.now = d.now || Date.now; this.log = d.log || ((message, payload) => console.log(JSON.stringify({ message, ...(payload || {}) }))); }
+
+    private async recordConfirmedFlatExits(state:V12X1AllRunnerState) {
+        const actual=await this.d.adapter.getPositions();
+        const flat=activePositionsOf(state).filter(p=>!actual.some(a=>a.symbol.toUpperCase()===p.symbol.toUpperCase()&&Math.abs(a.quantity)>EPS));
+        await recordV12ConfirmedExitBatch(this.d.adapter,state,[...(state.dd1296UnaccountedExits||[]),...flat],this.now());
+    }
 
     private async fail(state: V12X1AllRunnerState, reason: string): Promise<V12LiveTickResult> {
         await this.d.stateStore.tripKillSwitch(state, reason); this.log("v12-fail-closed", { reason }); return { status: "manual-review", reason };
@@ -279,6 +287,7 @@ export class V12LiveExecutionEngine {
                 }
             }
 
+            await this.recordConfirmedFlatExits(state);
             for (const active of missing) await cancelV12Protection(this.d.adapter, active.protection);
             const missingIds = new Set(missing.map((row) => row.positionId));
             syncActivePositions(state, actives.filter((row) => !missingIds.has(row.positionId)));
@@ -375,7 +384,7 @@ export class V12LiveExecutionEngine {
         if (actual) return this.fail(state, `V12_PENDING_EXIT_POSITION_REMAINS:${result.status}`);
         const remaining = activePositionsOf(state).filter((active) => active.symbol.toUpperCase() !== pending.symbol.toUpperCase());
         const exiting = activePositionsOf(state).find((active) => active.symbol.toUpperCase() === pending.symbol.toUpperCase());
-        if (exiting) await cancelV12Protection(this.d.adapter, exiting.protection);
+        if (exiting) { await this.recordConfirmedFlatExits(state); await cancelV12Protection(this.d.adapter, exiting.protection); }
         syncActivePositions(state, remaining); state.pending = undefined; state.lastCompletedIdempotencyKey = pending.idempotencyKey; state.cooldownUntilTs = pending.signalTs + V12_X1_ALL.cooldownBars * V12_X1_ALL.timeframeHours * 3_600_000; await this.d.stateStore.save(state);
         return { status: "exited" as const, reason: "EXIT_RECONCILED", clientOrderId: pending.clientOrderId };
     }
@@ -444,6 +453,7 @@ export class V12LiveExecutionEngine {
         const updated = venueQuantity > EPS
             ? { ...active, quantity: venueQuantity, gross: active.baseGross + nextDynamicGross, baseQuantity: Math.min(active.baseQuantity, venueQuantity), dynamicQuantity: nextDynamicQuantity, dynamicGross: nextDynamicGross, dynamicUpdatedAt: this.now(), protection }
             : undefined;
+        if (!updated) await this.recordConfirmedFlatExits(state);
         const remaining = activePositionsOf(state).filter((row) => row.positionId !== active.positionId);
         syncActivePositions(state, updated ? [...remaining, updated] : remaining);
         state.pending = undefined;
@@ -490,7 +500,8 @@ export class V12LiveExecutionEngine {
                     if (!(await this.completedProtectionExit(active))) return this.fail(state, `V12_STATE_ONLY_POSITION_MISMATCH:${active.symbol}`);
                 }
                 const remaining = stateActives.filter((active) => actualSymbols.has(active.symbol.toUpperCase()));
-                for (const active of missing) await cancelV12Protection(this.d.adapter, active.protection);
+                await this.recordConfirmedFlatExits(state);
+            for (const active of missing) await cancelV12Protection(this.d.adapter, active.protection);
                 syncActivePositions(state, remaining); state.cooldownUntilTs = (state.lastReferenceTs || this.now()) + V12_X1_ALL.cooldownBars * V12_X1_ALL.timeframeHours * 3_600_000; await this.d.stateStore.save(state);
             } else {
                 const refreshed: V12ActivePositionState[] = [];
@@ -517,6 +528,7 @@ export class V12LiveExecutionEngine {
         if (result.status === "UNKNOWN") return this.fail(state, `V12_EXIT_UNKNOWN:${clientOrderId}`);
         const positions = await this.d.adapter.getPositions(); const remains = positions.some((row) => row.symbol.toUpperCase() === active.symbol && Math.abs(row.quantity) > EPS);
         if (remains) return this.fail(state, `V12_EXIT_NOT_FLAT:${result.status}`);
+        await this.recordConfirmedFlatExits(state);
         await cancelV12Protection(this.d.adapter, active.protection); syncActivePositions(state, activePositionsOf(state).filter((row) => row.positionId !== active.positionId)); state.pending = undefined; state.lastCompletedIdempotencyKey = pending.idempotencyKey; state.cooldownUntilTs = signalTs + V12_X1_ALL.cooldownBars * V12_X1_ALL.timeframeHours * 3_600_000; await this.d.stateStore.save(state);
         return { status: "exited", reason, clientOrderId };
     }
@@ -531,6 +543,10 @@ export class V12LiveExecutionEngine {
         quality102Ownership?: Quality102CausalV1OwnershipSnapshot,
         preemptionAttempt = 0,
     ): Promise<V12LiveTickResult> {
+        const gateReason=await evaluateV12Dd1296Entry(this.d.adapter,state,signal,this.now(),this.boundaryCache);
+        state.latestDd1296Decision={symbol:signal.symbol,side:signal.side,rank:signal.rank,entryTs:signal.entryTs,reason:gateReason||"DD1296_ENTRY_ALLOWED"};
+        await this.d.stateStore.save(state);
+        if(gateReason)return {status:"risk-blocked",reason:gateReason,signal};
         const acceptedGross = decision.acceptedGross;
         const symbol = `${signal.symbol}USDT`;
         const quote = await this.d.adapter.executor.getMarketQuote(symbol);
@@ -808,6 +824,8 @@ export class V12LiveExecutionEngine {
             const quality102Ownership = await readQuality102CausalV1Ownership({ expectedRuntimeSha: process.env.DISDEX_Q102_RUNTIME_SHA || process.env.DISDEX_RUNTIME_COMMIT_SHA });
             const recovery = await this.restartReconcile(state, positions, quality102Ownership); if (recovery) return recovery;
             state = await this.d.stateStore.load();
+            if(state.dd1296UnaccountedExits?.length) await this.recordConfirmedFlatExits(state);
+            if(state.dd1296UnaccountedExits?.length) {state.dd1296UnaccountedExits=[];await this.d.stateStore.save(state);}
             const data = preloadedData ?? await this.d.marketData.load(); const index = latestIndex(data); const latestTs = data[V12_X1_ALL.universe[0]][index].endTs;
 
             const actives = activePositionsOf(state);
@@ -815,7 +833,15 @@ export class V12LiveExecutionEngine {
             if (this.d.decisionObserver) {
                 try {
                     const observation = buildV12DecisionObservation(data, index, this.now());
-                    if (observation) await this.d.decisionObserver(observation);
+                    if (observation) {
+                        observation.dd1296SideLossLedger=state.sideLossLedger;
+                        for(const candidate of observation.candidates) {
+                            if(!candidate.signalEligible || !candidate.portfolioRank)continue;
+                            const reason=await evaluateV12Dd1296Entry(this.d.adapter,state,{symbol:candidate.symbol,side:candidate.side,rank:candidate.portfolioRank,entryTs:observation.entryTs},this.now(),this.boundaryCache);
+                            if(reason){candidate.signalEligible=false;candidate.signalReason=reason;}
+                        }
+                        await this.d.decisionObserver(observation);
+                    }
                 } catch (error) {
                     this.log("v12-decision-observation-write-failed", { reason: safeV12ErrorMessage(error), referenceTs: latestTs });
                 }
@@ -865,7 +891,13 @@ export class V12LiveExecutionEngine {
                 }
                 const currentActives = activePositionsOf(state);
                 const existingSymbols = new Set(currentActives.map((row) => row.symbol.toUpperCase()));
-                const next = signals.find((candidate) => !existingSymbols.has(`${candidate.symbol}USDT`) && v12SlotAvailable(currentActives, candidate.rank));
+                let next: V12Signal | undefined;
+                for(const candidate of signals) {
+                    if(existingSymbols.has(`${candidate.symbol}USDT`) || !v12SlotAvailable(currentActives,candidate.rank)) continue;
+                    const reason=await evaluateV12Dd1296Entry(this.d.adapter,state,candidate,this.now(),this.boundaryCache);
+                    if(reason){state.latestDd1296Decision={symbol:candidate.symbol,side:candidate.side,rank:candidate.rank,entryTs:candidate.entryTs,reason};await this.d.stateStore.save(state);continue;}
+                    next=candidate;break;
+                }
                 if (!next) {
                     state.deferredEntryReferenceTs = undefined; await this.d.stateStore.save(state);
                     return { status: "held", reason: "V12_POSITION_HELD", signal: signals[0] };
@@ -951,6 +983,8 @@ export class V12LiveExecutionEngine {
             for (const signal of signals.slice(0, V12_X1_ALL.maximumPositions)) {
                 const currentActives = activePositionsOf(state);
                 if (currentActives.some((position) => position.symbol.toUpperCase() === `${signal.symbol}USDT`) || !v12SlotAvailable(currentActives, signal.rank)) continue;
+                const ddReason=await evaluateV12Dd1296Entry(this.d.adapter,state,signal,this.now(),this.boundaryCache);
+                if(ddReason){state.latestDd1296Decision={symbol:signal.symbol,side:signal.side,rank:signal.rank,entryTs:signal.entryTs,reason:ddReason};await this.d.stateStore.save(state);if(enteredCount===0)lastResult={status:"risk-blocked",reason:ddReason,signal};continue;}
                 const [freshAccount, freshPositions] = await Promise.all([this.d.adapter.getAccountSnapshot(), this.d.adapter.getPositions()]);
                 latestPositions = freshPositions;
                 const entryEquity = Math.max(0, finite(freshAccount.walletBalance)); if (!(entryEquity > 0)) return this.fail(state, "V12_ACCOUNT_EQUITY_INVALID");
@@ -968,7 +1002,7 @@ export class V12LiveExecutionEngine {
                 }
                 const entryResult = await this.executeEntryForSignal(state, handle, signal, entryEquity, sizing, decision, quality102Ownership);
                 if (entryResult.status === "manual-review") return entryResult;
-                if (entryResult.status !== "entered") { if (enteredCount === 0) lastResult = entryResult; break; }
+                if (entryResult.status !== "entered") { if (enteredCount === 0) lastResult = entryResult; if(entryResult.status === "risk-blocked" && /^(V12_SIDE_LOSS|V12_DD1296|V12_AVAX|V12_ATOM)/.test(entryResult.reason))continue; break; }
                 enteredCount += 1;
                 lastResult = { ...entryResult, reason: `V12_ENTRIES_COMPLETED:${enteredCount}` };
             }

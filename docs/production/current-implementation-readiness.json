@@ -1,8 +1,8 @@
 {
   "schema": "disdex-current-implementation-readiness/v1",
-  "date": "2026-10-02",
-  "target": "trail020_idle_doge_avax_20261002",
-  "canonicalTarget": "docs/research/results/trail020-idle-doge-avax-controlling-20261002/controlling-contract.json",
+  "date": "2026-10-05",
+  "target": "DD1296_FINAL_ALLIN_10BPS",
+  "canonicalTarget": "docs/implementation/FINAL_PRODUCTION_TARGET_DD1296_20261005.json",
   "implementationStatus": "READY",
   "status": "BLOCKED",
   "ordersEnabled": false,
@@ -13,7 +13,6 @@
     "FINAL_LIVE_GOVERNOR_BT_DD_LT20_FIXED",
     "STATIC_4P25_BASELINE_BT_DD_LT20_FIXED",
     "V12_BASE_AGGREGATE_GROSS_2P0",
-    "FET_BRK48_MAX_GROSS_2P25",
     "V52_STOCK_AGGREGATE_4P0_SLOT_2P0",
     "PORTFOLIO_BASE_4P25_HARD_8P0_GOVERNOR",
     "V12_TOP3_RANK3_010_SCORE070",
@@ -51,7 +50,12 @@
     "IDLE_RESIDUAL_PREEMPTION_REDUCE_ONLY_TESTED",
     "IDLE_ALL_SYMBOL_DECISION_DIAGNOSTICS_HP",
     "HP_ZEC_REMOVED",
-    "CONTROLLING_8_10_20_30BPS_LEDGER_FROZEN"
+    "CONTROLLING_8_10_20_30BPS_LEDGER_FROZEN",
+    "DD1296_SIDE_GROSS_AND_CAUSAL_GATES",
+    "DD1296_RESEARCH_BT_ANCHOR_REPRODUCED",
+    "V52_DYNAMIC_BASIS_STOP_1P75_NO_NEW_FIXED_STOP",
+    "FET_NEW_ENTRY_MAX_GROSS_1P0_EXISTING_POSITION_PRESERVED"
   ],
-  "activationRule": "Implementation is READY but real-money activation remains blocked until the exact-SHA GitHub production workflow revalidates both Idle parity certificates, proves the current Production SHA is an ancestor, verifies flat/pending state and shared safety, creates the root-owned operator activation artifact for this exact SHA/target, cuts over all runners, and passes post-deploy LIVE/HP verification."
+  "activationRule": "Implementation is READY but real-money activation remains blocked until the exact-SHA GitHub production workflow revalidates both Idle parity certificates, proves the current Production SHA is an ancestor, verifies flat/pending state and shared safety, creates the root-owned operator activation artifact for this exact SHA/target, cuts over all runners, and passes post-deploy LIVE/HP verification.",
+  "researchSourceSha": "db0ee5def97e8194f55aa77fa5b7326fa938d456"
 }

@@ -43,6 +43,9 @@ export interface FetBrk48State {
   runtimeCommitSha: string;
   updatedAt: number;
   lastReferenceTs?: number;
+  lastExitTs?: number;
+  cooldownUntilTs?: number;
+  lastEvaluationReason?: string;
   lastEvaluationDecisionTs?: number;
   lastEvaluationCandidate?: boolean;
   position?: FetBrk48PositionState;
@@ -105,6 +108,7 @@ export async function readFetBrk48State(path: string, runtimeCommitSha?: string)
   if (runtimeCommitSha && raw.runtimeCommitSha !== runtimeCommitSha) {
     throw new Error(`FET_STATE_RUNTIME_SHA_MISMATCH:${raw.runtimeCommitSha}:EXPECTED_${runtimeCommitSha}`);
   }
+  for(const field of ["lastExitTs","cooldownUntilTs"]) if(raw[field]!==undefined&&(!Number.isFinite(raw[field])||raw[field]<0)) throw new Error(`FET_STATE_${field}_INVALID`);
   if (raw.position && !validPosition(raw.position)) throw new Error("FET_STATE_POSITION_INVALID");
   if (raw.pending && !validPending(raw.pending)) throw new Error("FET_STATE_PENDING_INVALID");
   return {
@@ -119,4 +123,12 @@ export async function writeFetBrk48State(path: string, state: FetBrk48State) {
   const tmp = `${target}.${process.pid}.${Date.now()}.tmp`;
   await writeFile(tmp, `${JSON.stringify({ ...state, updatedAt: Date.now() }, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
   await rename(tmp, target);
+}
+
+export function recordFetExit(state:FetBrk48State,exitTs:number) {
+  if(!Number.isFinite(exitTs)||!(exitTs>0)) throw new Error("FET_EXIT_TIMESTAMP_INVALID");
+  state.lastExitTs=Math.max(state.lastExitTs||0,exitTs);
+  state.cooldownUntilTs=Math.max(state.cooldownUntilTs||0,exitTs+24*3_600_000);
+  state.lastEvaluationCandidate=false;
+  state.lastEvaluationReason="FET_POST_EXIT_COOLDOWN_24H";
 }

@@ -122,6 +122,9 @@ class MarginGuardStateReconcileTest(unittest.TestCase):
         self.assertEqual(self.read("v12")["cooldownUntilTs"], 7_210_000)
         self.assertNotIn("position", self.read("pengu"))
         self.assertEqual(self.read("pengu")["cooldownUntilTs"], 21_620_000)
+        self.assertEqual(self.read("fet")["cooldownUntilTs"], 86430000)
+        self.assertEqual(self.read("fet")["lastEvaluationReason"], "FET_POST_EXIT_COOLDOWN_24H")
+        self.assertEqual(self.read("v12")["dd1296UnaccountedExits"][0]["symbol"], "LINKUSDT")
         self.assertNotIn("position", self.read("q102"))
         self.assertEqual(self.read("v52")["positions"], {})
         for key, before in original_stats.items():

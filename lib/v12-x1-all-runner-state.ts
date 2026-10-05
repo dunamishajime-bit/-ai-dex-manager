@@ -1,3 +1,4 @@
+import type { SideLossLedger } from "./dd1296-entry-policy";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 
@@ -69,6 +70,9 @@ export interface V12X1AllRunnerState {
     deferredEntryReferenceTs?: number;
     lastCompletedIdempotencyKey?: string;
     cooldownUntilTs?: number;
+    sideLossLedger?: SideLossLedger;
+    dd1296UnaccountedExits?: V12ActivePositionState[];
+    latestDd1296Decision?: {symbol:string;side:string;rank:number;entryTs:number;reason:string};
     activePositions?: V12ActivePositionState[];
     active?: V12ActivePositionState;
     pending?: V12PendingOrderState;
@@ -118,6 +122,7 @@ export class FileV12X1AllRunnerStateStore {
                 throw new Error("V12_STATE_SCHEMA_MISMATCH");
             }
             if (value.deferredEntryReferenceTs !== undefined && !Number.isFinite(Number(value.deferredEntryReferenceTs))) throw new Error("V12_STATE_DEFERRED_ENTRY_REFERENCE_INVALID");
+            for(const side of ["LONG","SHORT"] as const) {const row=value.sideLossLedger?.[side]; if(row && (!Number.isInteger(row.losses)||row.losses<0||!Number.isFinite(row.until)||row.until<0))throw new Error("V12_SIDE_LOSS_LEDGER_INVALID");}
             const legacyActive = value.active ? normalizeActive(value.active) : undefined;
             if (legacyActive) {
                 if (!(legacyActive.quantity > 0 && legacyActive.entryPrice > 0 && legacyActive.atrAtEntry > 0)) throw new Error("V12_STATE_ACTIVE_INVALID");

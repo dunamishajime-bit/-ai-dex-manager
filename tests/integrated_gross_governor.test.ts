@@ -104,7 +104,7 @@ test("existing exposure above a reduced effective cap is preserved, not force-tr
 test("final integrated production constants stay pinned", () => {
   assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.v12BaseAggregateGross, 2);
   assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.penguMaximumGross, 1.0);
-  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.fetResidualMaximumGross, 2.25);
+  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.fetResidualMaximumGross, 1);
   assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.q102CausalV4MaximumGross, 3);
   assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap, 3);
   assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossHardCap, 5);

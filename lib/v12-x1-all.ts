@@ -77,6 +77,7 @@ export interface V12ObservedCandidate extends V12Candidate {
 }
 
 export interface V12DecisionObservation {
+    dd1296SideLossLedger?: import("./dd1296-entry-policy").SideLossLedger;
     schema: "v12-decision-observation/v1";
     strategyId: "V12_X1.00_ALL";
     observedAt: string;

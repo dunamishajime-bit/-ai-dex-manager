@@ -5,3 +5,9 @@ test("BRK48 uses previous completed H1 at entry hour%4==1",()=>{const b=bars(); 
 test("no lookahead and threshold gates",()=>{const b=bars(); b[72]={...b[72],close:1.2,high:1.21,volume:119}; const entry=base+73*H; assert.equal(buildFetBrk48Signal(b,entry+1000),undefined); const future={...b[72],openTs:entry,closeTs:entry+H-1,close:2,high:2,volume:999}; assert.equal(buildFetBrk48Signal([...b,future],entry+1000),undefined);});
 
 test("late entry window is rejected instead of chasing the H1 open",()=>{const b=bars(); b[72]={...b[72],close:1.2,high:1.21,volume:121}; const entry=base+73*H; assert.ok(buildFetBrk48Signal(b,entry+1000)); assert.equal(buildFetBrk48Signal(b,entry+5*60_000+1),undefined);});
+
+test('DD1296 FET causal +2% minimum rejects a otherwise valid +1.99% breakout',()=>{
+  const b=bars().map(x=>({...x,high:1.01})); b[72]={...b[72],close:1.0199,high:1.03,volume:121}; const entry=base+73*H;
+  assert.equal(buildFetBrk48Signal(b,entry+1000),undefined);
+  b[72].close=1.02; assert.ok(buildFetBrk48Signal(b,entry+1000));
+});

@@ -84,6 +84,8 @@ function tradeResult(input: { clientOrderId: string; symbol: string; status?: Di
 
 type FakeAdapter = V12AsterLiveAdapter & {
     positions: DirectPosition[];
+    entryFills:Map<string, any>;
+    exitFills:Map<string, any>;
     resident: Map<string, ResidentOrderView>;
     entryCalls: number;
     exitCalls: number;
@@ -100,12 +102,25 @@ function fakeAdapter(): FakeAdapter {
     const fake = {
         positions: [] as DirectPosition[],
         resident: new Map<string, ResidentOrderView>(),
+        entryFills: new Map<string, any>(),
+        exitFills: new Map<string, any>(),
         entryCalls: 0,
         exitCalls: 0,
         stopPlacements: 0,
         tpPlacements: 0,
         pendingObservedBeforeSend: false,
         maxSlippageBps: 0,
+        client: {
+            getKlines: async (_symbol:string,_interval:string,_limit:number,range:{startTime:number;endTime:number})=>Array.from({length:Math.round((range.endTime-range.startTime)/3600000)+1},(_,i)=>[range.startTime+i*3600000, String(100*Math.exp(.001*i)), '110','90','999','100',range.startTime+(i+1)*3600000-1]),
+            getOrder: async (symbol:string)=>({orderId:7,executedQty:String(fake.entryFills.get(symbol)?.qty||0)}),
+            getUserTrades: async (symbol:string)=>{
+                const entry=fake.entryFills.get(symbol);if(!entry)return [];
+                const completedProtection=[...fake.resident.values()].find(r=>(r as any).symbol===symbol&&r.status==='FILLED');
+                const exit=fake.exitFills.get(symbol)|| (completedProtection?{...entry,id:2,orderId:8,side:entry.side==='BUY'?'SELL':'BUY',realizedPnl:'-1'}:undefined);
+                return exit?[entry,exit]:[entry];
+            },
+            getIncomeHistory: async()=>[],
+        },
         executor: {
             getMarketQuote: async (symbol: string) => ({ symbol, bidPrice: 99.9, askPrice: 100.1, bidQuantity: 100, askQuantity: 100, midPrice: 100, spreadBps: 20, updatedAt: NOW }),
             normalizeMarketQuantity: async (symbol: string, quantity: number, referencePrice: number) => ({
@@ -156,6 +171,7 @@ function fakeAdapter(): FakeAdapter {
         reconcileOrder: async (symbol: string, clientOrderId: string) => fake.reconcileResult ?? tradeResult({ clientOrderId, symbol }),
         executeEntry: async (input: { symbol: string; side: "LONG" | "SHORT"; quantity: number; expectedPrice: number; clientOrderId: string }) => {
             fake.entryCalls += 1;
+            fake.entryFills.set(input.symbol,{id:1,orderId:7,symbol:input.symbol,side:input.side==="LONG"?"BUY":"SELL",qty:String(input.quantity),time:NOW,realizedPnl:"0",commission:"0",commissionAsset:"USDT"});
             if (fake.stateStore) {
                 const disk = await fake.stateStore.load();
                 fake.pendingObservedBeforeSend = disk.pending?.clientOrderId === input.clientOrderId;
@@ -166,6 +182,7 @@ function fakeAdapter(): FakeAdapter {
         },
         executeExit: async (input: { symbol: string; clientOrderId: string; quantity: number }) => {
             fake.exitCalls += 1;
+            const entry=fake.entryFills.get(input.symbol);if(entry)fake.exitFills.set(input.symbol,{...entry,id:2,orderId:8,side:entry.side==="BUY"?"SELL":"BUY",realizedPnl:"1"});
             fake.positions = fake.positions.filter((row) => row.symbol.toUpperCase() !== input.symbol.toUpperCase());
             return tradeResult({ clientOrderId: input.clientOrderId, symbol: input.symbol, executedQuantity: input.quantity });
         },
@@ -238,6 +255,13 @@ async function main() {
     const root = await mkdtemp(join(tmpdir(), "v12-live-execution-"));
     try {
         // Normal entry: durable pending must exist before the exchange send.
+        const gates=await makeHarness(root,"dd1296-skip-atom");
+        for(const symbol of V12_X1_ALL.universe)gates.marketData[symbol]=Array.from({length:120},(_,i)=>{const rate=symbol==='ATOM'?.004:symbol==='SOL'?.003:symbol==='BTC'?.001:0;const close=100*Math.pow(1+rate,i);return {ts:NOW-(120-i)*BAR_MS,endTs:NOW-(119-i)*BAR_MS,open:close,high:close*1.02,low:close*.98,close,volume:100,sourceCount:2 as const,closed:true};});
+        const baseGetKlines=gates.adapter.client.getKlines.bind(gates.adapter.client);
+        gates.adapter.client.getKlines=(async(symbol:string,interval:string,limit:number,range:any)=>{const rows=await baseGetKlines(symbol,interval,limit,range);if(symbol==='ATOMUSDT')rows[rows.length-1][1]='105';return rows;}) as any;
+        const gateResult=await gates.engine.tick();assert.equal(gateResult.status,'entered',JSON.stringify(gateResult));
+        assert.equal(gates.adapter.entryFills.has('ATOMUSDT'),false,'rejected strongest candidate must never send an order');
+        assert.equal(gates.adapter.entryFills.has('SOLUSDT'),true,'later eligible rank2 must execute after rank1 refusal');
         const normal = await enterHarness(root, "normal");
         assert.equal(normal.adapter.entryCalls, 2);
         assert.equal(normal.adapter.pendingObservedBeforeSend, true, "durable pending must be saved before order send");
@@ -397,6 +421,8 @@ async function main() {
                 ? { symbol: exitedActive.symbol, clientOrderId, status: "FILLED", side: "SELL", type: "TAKE_PROFIT_MARKET", reduceOnly: true, quantity: exitedActive.quantity, executedQuantity: exitedActive.quantity, stopPrice: exitedActive.protection.takeProfit }
                 : null
         ) as never;
+        const provenEntry=protectionFill.adapter.entryFills.get(exitedActive.symbol);
+        protectionFill.adapter.exitFills.set(exitedActive.symbol,{...provenEntry,id:2,orderId:8,side:provenEntry.side==="BUY"?"SELL":"BUY",realizedPnl:"1"});
         const entryCallsBeforeProtectionReconcile = protectionFill.adapter.entryCalls;
         const exitCallsBeforeProtectionReconcile = protectionFill.adapter.exitCalls;
         const protectionReconcile = await protectionFill.engine.reconcileProtectionFillsOnly();

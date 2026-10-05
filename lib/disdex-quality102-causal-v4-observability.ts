@@ -1,3 +1,4 @@
+import { causalReturn, q102ExhaustionReason } from "./dd1296-entry-policy";
 import { quality102GrossForFamily } from "../config/integratedProductionRiskPolicy";
 import { evaluateQuality102CausalV4ImprovementGate } from "./disdex-quality102-causal-selector";
 import {
@@ -115,6 +116,12 @@ function nonHighVolNaturalSignal(
             brkEnabled: true,
         };
     }
+    if (candidate.symbol === "FETUSDT" && candidate.family === "BRK" && candidate.side === -1) {
+        let ret72: number | undefined;
+        try { ret72 = causalReturn(history.candlesBySymbol.FETUSDT, history.entryOpenBySymbol!.FETUSDT, 72); } catch { /* missing causal boundaries reject this selected route */ }
+        const exhaustion = q102ExhaustionReason(candidate.symbol, candidate.family, candidate.side, ret72);
+        if (exhaustion) { return {strategyId:"QUALITY102_CAUSAL_V1",referenceTs:entryTs,side:0,requestedGross:0,reason:exhaustion,dataCutoffTs:candidate.dataCutoffTs,brkEnabled:true}; }
+    }
     const improvement = evaluateQuality102CausalV4ImprovementGate({
         family: candidate.family,
         side: candidate.side,
@@ -139,7 +146,7 @@ function nonHighVolNaturalSignal(
         family: candidate.family,
         variant: candidate.variant,
         layer: candidate.layer,
-        requestedGross: quality102GrossForFamily(candidate.family),
+        requestedGross: quality102GrossForFamily(candidate.family, candidate.side),
         reason: "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
         dataCutoffTs: candidate.dataCutoffTs,
         hardStop: candidate.hardStop,
@@ -204,7 +211,7 @@ export function augmentQuality102DecisionSnapshotWithRanking(input: {
                 : rankingFamily === "HIGH_VOL"
                     ? (highVolDiagnostic?.rawMatched ? "HIGH_VOL_RAW_READY" : "HIGH_VOL_APPROACH")
                     : bestS34?.rankingStage || "NO_MODEL";
-            const rankingReason = naturalEligible
+            const rankingReason = item.reason.startsWith("Q102_BRK_FET_SHORT_") ? item.reason : naturalEligible
                 ? item.reason
                 : rankingFamily === "HIGH_VOL"
                     ? highVolDiagnostic?.reason || item.reason

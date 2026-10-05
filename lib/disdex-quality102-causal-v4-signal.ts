@@ -1,3 +1,4 @@
+import { causalReturn, q102ExhaustionReason } from "./dd1296-entry-policy";
 import { QUALITY102_CAUSAL_V1 } from "../config/disdexQuality102CausalV1Runtime";
 import { quality102GrossForFamily } from "../config/integratedProductionRiskPolicy";
 import {
@@ -59,7 +60,7 @@ function materializeS34(candidate: Quality102CausalV4S34Candidate): Quality102Ca
         family: candidate.family,
         variant: candidate.variant,
         layer: candidate.layer,
-        requestedGross: quality102GrossForFamily(candidate.family),
+        requestedGross: quality102GrossForFamily(candidate.family, candidate.side),
         reason: "QUALITY102_CAUSAL_V4_NATURAL_SIGNAL",
         dataCutoffTs: candidate.dataCutoffTs,
         hardStop: candidate.hardStop,
@@ -107,7 +108,7 @@ export function buildQuality102CausalV4Signal(
             ...legacy,
             referenceTs: entryTs,
             family: "HIGH_VOL",
-            requestedGross: quality102GrossForFamily("HIGH_VOL"),
+            requestedGross: quality102GrossForFamily("HIGH_VOL", legacy.side),
             exitPolicy: "HIGH_VOL_TRAIL72",
             maxHoldHours: 72,
             brkEnabled: true,
@@ -116,6 +117,12 @@ export function buildQuality102CausalV4Signal(
 
     const candidate = selectedS34(input);
     if (!candidate) return idleSignal(legacy, "QUALITY102_CAUSAL_V4_NO_SIGNAL", entryTs);
+    if (candidate.symbol === "FETUSDT" && candidate.family === "BRK" && candidate.side === -1) {
+        let ret72: number | undefined;
+        try { ret72 = causalReturn(input.history.candlesBySymbol.FETUSDT, input.history.entryOpenBySymbol!.FETUSDT, 72); } catch { /* missing causal boundaries reject this selected route */ }
+        const exhaustion = q102ExhaustionReason(candidate.symbol, candidate.family, candidate.side, ret72);
+        if (exhaustion) { return idleSignal(legacy, exhaustion, entryTs); }
+    }
     const improvement = evaluateQuality102CausalV4ImprovementGate({
         family: candidate.family,
         side: candidate.side,

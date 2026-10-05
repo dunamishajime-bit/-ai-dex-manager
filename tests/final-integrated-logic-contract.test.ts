@@ -41,15 +41,15 @@ test("PENGU allocation is the formal 1.0x COMBINED_FILTERED Q60/DD17/H72 contrac
 
 test("LIVE integrated risk contract uses final Q102/FET/stock/shared caps", () => {
   assert.deepEqual(INTEGRATED_PRODUCTION_RISK_POLICY.q102FamilyGross, {
-    HIGH_VOL: 1.661,
-    MR: 1,
-    BRK: 2.465,
-    REV: 2.5,
-    PB: 2.5,
+    HIGH_VOL: 1,
+    MR: .75,
+    BRK: .75,
+    REV: 1.5,
+    PB: 2,
   });
   assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.q102CausalV4MaximumGross, 3.0);
   assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.q102MaximumPositions, 1);
-  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.fetResidualMaximumGross, 2.25);
+  assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.fetResidualMaximumGross, 1);
   assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.fetResidualMinimumGross, 0.05);
   assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.cryptoGrossCap, 3);
   assert.equal(INTEGRATED_PRODUCTION_RISK_POLICY.stockGrossCap, 4);

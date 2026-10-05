@@ -74,7 +74,7 @@ export async function migrateFlatRuntimeState(input: {
   await copyFile(statePath, backupPath);
   if (!beforeBytes.equals(await readFile(backupPath))) throw new Error("FLAT_STATE_SHA_MIGRATE_BACKUP_NOT_EXACT");
 
-  const after = { ...before, runtimeCommitSha: toSha };
+  const after = { ...before, runtimeCommitSha: toSha, ...(input.strategy === "V12" && !before.sideLossLedger ? {sideLossLedger:{LONG:{losses:0,until:0},SHORT:{losses:0,until:0},completed:[],initializedAt:Date.now()}} : {}) };
   const tempPath = `${statePath}.${process.pid}.${Date.now()}.migrate.tmp`;
   const handle = await open(tempPath, "wx", metadata.mode & 0o777);
   try {
