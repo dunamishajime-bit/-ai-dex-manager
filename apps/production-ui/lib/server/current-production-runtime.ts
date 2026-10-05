@@ -77,6 +77,13 @@ export type CurrentProductionRuntime = {
     recoveryRule: string;
     recoveryPriority: string;
     recoveryInitialGross: number;
+    recoveryBaseSignalGross: number;
+    logicProfile: string;
+    normalCooldownHours: number;
+    routeHardStopQuarantineHours: number;
+    realizedDrawdownThresholdPct: number;
+    realizedDrawdownHoldHours: number;
+    limitedStructuralRebreakPct: number;
     recoveryRsiDelta6Min: number;
     recoveryEma168DistanceMinPct: number;
     recoveryBtcReturn6hMinPct: number;
@@ -89,6 +96,7 @@ export type CurrentProductionRuntime = {
     longMultiplier: number;
     lowGross: number;
   };
+  hype: { profile: string; maximumGross: number };
   quality102: {
     selectorMode: string;
     familySideGross: Record<string, Record<string,number>>;
@@ -218,6 +226,8 @@ export async function loadCurrentProductionRuntime(): Promise<CurrentProductionR
   const penguSource = await readFile(join(CURRENT_RELEASE_ROOT, "config", "penguDualLsV2Runtime.ts"), "utf8");
   const penguRecoverySource = await readFile(join(CURRENT_RELEASE_ROOT, "config", "penguRecoveryV8.ts"), "utf8");
   const runtimeLineage = await loadRuntimeLineage(releaseSha);
+  const target = JSON.parse(await readFile(join(CURRENT_RELEASE_ROOT,"docs/implementation/FINAL_PRODUCTION_TARGET_DD1296_20261005.json"),"utf8"));
+  const hypeSource = await readFile(join(CURRENT_RELEASE_ROOT,"config/hypeTrendLongPolicy.ts"),"utf8");
   const v52Raw = JSON.parse(await readFile(join(CURRENT_RELEASE_ROOT, "config", "v52V50Runtime.json"), "utf8")) as Record<string, unknown>;
   const windowsNy = Array.isArray(v52Raw.windowsNy)
     ? v52Raw.windowsNy.map((value) => String(value)).filter(Boolean)
@@ -273,7 +283,14 @@ export async function loadCurrentProductionRuntime(): Promise<CurrentProductionR
       hardStopCooldownHours: extractObjectNumber(penguSource, "hardStopCooldownHours"),
       recoveryRule: extractObjectText(penguRecoverySource, "rule"),
       recoveryPriority: extractObjectText(penguRecoverySource, "priority"),
-      recoveryInitialGross: extractObjectNumber(penguRecoverySource, "initialGross"),
+      recoveryInitialGross: extractObjectNumber(penguSource, "fixedEntryGross"),
+      recoveryBaseSignalGross: extractObjectNumber(penguRecoverySource, "initialGross"),
+      logicProfile: extractObjectText(penguSource,"logicProfile"),
+      normalCooldownHours: extractObjectNumber(penguSource,"cooldownHours"),
+      routeHardStopQuarantineHours: extractObjectNumber(penguSource,"routeHardStopQuarantineHours"),
+      realizedDrawdownThresholdPct: extractObjectNumber(penguSource,"realizedDrawdownThresholdPct"),
+      realizedDrawdownHoldHours: extractObjectNumber(penguSource,"realizedDrawdownHoldHours"),
+      limitedStructuralRebreakPct: target.strategy.PENGU.limitedStructuralRebreakPct,
       recoveryRsiDelta6Min: extractObjectNumber(penguRecoverySource, "rsiDelta6Min"),
       recoveryEma168DistanceMinPct: extractObjectNumber(penguRecoverySource, "ema168DistanceMinPct"),
       recoveryBtcReturn6hMinPct: extractObjectNumber(penguRecoverySource, "btcReturn6hMinPct"),
@@ -286,6 +303,7 @@ export async function loadCurrentProductionRuntime(): Promise<CurrentProductionR
       longMultiplier: extractObjectNumber(penguRecoverySource, "longMultiplier"),
       lowGross: extractObjectNumber(penguRecoverySource, "lowGross"),
     },
+    hype: {profile: target.strategy.HYPE.profile, maximumGross: extractObjectNumber(hypeSource,"maximumGross")},
     quality102: {
       selectorMode: requiredText(env, "QUALITY102_CAUSAL_V1_SELECTOR_MODE"),
       familySideGross: JSON.parse(await readFile(join(CURRENT_RELEASE_ROOT, "config", "q102FamilySideGross.json"), "utf8")),

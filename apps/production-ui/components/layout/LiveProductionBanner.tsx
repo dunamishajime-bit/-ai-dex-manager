@@ -1,4 +1,5 @@
 "use client";
+import { formatQ102SideGross } from "@/lib/production-display";
 
 import { Activity, ChevronDown, ShieldCheck } from "lucide-react";
 
@@ -28,10 +29,12 @@ function BannerContent() {
       <span>{caps ? `Portfolio Gross上限 ${caps.totalGross.toFixed(1)}x` : "Gross runtime未取得"}</span>
       <span>{caps && v12 ? `V12 Top${v12.maximumPositions} / 1件${caps.v12PerPositionGross.toFixed(2)}x / Base ${caps.v12BaseGross.toFixed(2)}x / Dynamic ${caps.v12DynamicGross.toFixed(2)}x / Crypto ${caps.cryptoGross.toFixed(2)}x` : "V12 runtime未取得"}</span>
       <span>{v12 ? `V12 Entry Score≥${v12.neutralScoreThreshold.toFixed(4)} / Strong ${v12.strongRegimeQualityScoreMinimum.toFixed(2)}–${v12.strongRegimeQualityScoreMaximum.toFixed(2)} + ATR≥${(v12.strongRegimeQualityMinimumAtrRatio * 100).toFixed(1)}%` : "V12 Entry runtime未取得"}</span>
-      <span>{pengu && caps ? `PENGU ${pengu.strategyId} / ${caps.penguGross.toFixed(2)}x / Recovery ${pengu.recoveryRule} ${pengu.recoveryInitialGross.toFixed(2)}x / hard-stop後${pengu.hardStopCooldownHours}h` : "PENGU runtime未取得"}</span>
+      <span>{pengu && caps ? `PENGU ${pengu.logicProfile} / 限定${(pengu.limitedStructuralRebreakPct*100).toFixed(0)}% re-break / ${caps.penguGross.toFixed(2)}x / Recovery ${pengu.recoveryRule} ${pengu.recoveryInitialGross.toFixed(2)}x / 通常${pengu.normalCooldownHours}h / hard-stop ${pengu.hardStopCooldownHours}h / Q${pengu.routeHardStopQuarantineHours} / DD ${pengu.realizedDrawdownThresholdPct}%→${pengu.realizedDrawdownHoldHours}h` : "PENGU runtime未取得"}</span>
       <span>{v52 && caps ? `V52 ${v52.policyId} / Slot ${caps.v52V50Gross.toFixed(2)}x / Stock ${caps.stockGross.toFixed(2)}x / Hold≤${v52.maximumHoldingHours}h` : "V52 runtime未取得"}</span>
       <span>{v52 ? `V52 Basis≥${v52.minimumEntryBasisBps}bps / Conv ${v52.convergenceBps}bps / Stop ${v52.basisStopMultiple}x / Edge≥${v52.minimumNetEdgeBps}bps / Cost≤${v52.maximumRoundTripCostBps}bps / Spread≤${v52.maximumSpreadBps}bps` : "V52 policy runtime未取得"}</span>
-      <span className="text-amber-200">{q102 && caps ? `Q102 ${q102.selectorMode}: 1 Slot / ≤ ${caps.quality102Gross.toFixed(2)}x / HV L ${q102.familySideGross.HIGH_VOL.LONG.toFixed(2)}x / S ${q102.familySideGross.HIGH_VOL.SHORT.toFixed(2)}x / MR ${q102.familyGross.MR.toFixed(2)}x / BRK ${q102.familyGross.BRK.toFixed(3)}x / REV L ${q102.familySideGross.REV.LONG.toFixed(2)}x / S ${q102.familySideGross.REV.SHORT.toFixed(2)}x / PB L ${q102.familySideGross.PB.LONG.toFixed(2)}x / Crypto ≤ ${caps.cryptoGross.toFixed(2)}x / Total ≤ ${caps.totalGross.toFixed(2)}x` : "Q102 runtime未取得"}</span>
+      <span className="text-amber-200">{q102 && caps ? `Q102 ${q102.selectorMode}: 1 Slot / ≤ ${caps.quality102Gross.toFixed(2)}x / ${formatQ102SideGross(q102.familySideGross)} / Crypto ≤ ${caps.cryptoGross.toFixed(2)}x / Total ≤ ${caps.totalGross.toFixed(2)}x` : "Q102 runtime未取得"}</span>
+      <span>{runtime?.hype ? `${runtime.hype.profile} / Gross ${runtime.hype.maximumGross.toFixed(2)}x` : "HYPE runtime未取得"}</span>
+      <span>FET 72h ≥ +2% / 決済後24h cooldown・V12 同Side6連敗→6h / V52 固定緊急STOP無効</span>
       <LiveRuntimeBadge />
       <span className="inline-flex items-center gap-1 text-emerald-200">
         <ShieldCheck className="h-3.5 w-3.5" />

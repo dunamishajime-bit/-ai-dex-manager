@@ -1,4 +1,5 @@
 "use client";
+import { formatQ102SideGross } from "@/lib/production-display";
 
 import Link from "next/link";
 import { Activity, ArrowRight, BarChart3, Coins, Settings, ShieldCheck, Wallet } from "lucide-react";
@@ -92,7 +93,8 @@ export default function HomePage() {
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">{caps && v12 ? `V12 Base ${caps.v12BaseGross.toFixed(2)}x / Dynamic ${caps.v12DynamicGross.toFixed(2)}x / Top${v12.maximumPositions}` : "V12 runtime未取得"}</span>
               <span className="rounded-full border border-sky-400/25 bg-sky-500/10 px-3 py-1.5 text-sky-100">{v12 ? `V12 Entry: Score≥${v12.neutralScoreThreshold.toFixed(4)} / Strong ${v12.strongRegimeQualityScoreMinimum.toFixed(2)}–${v12.strongRegimeQualityScoreMaximum.toFixed(2)} + ATR≥${(v12.strongRegimeQualityMinimumAtrRatio * 100).toFixed(1)}%` : "V12 Entry runtime未取得"}</span>
               <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">{caps && v52 ? `V52 ${v52.policyId} / Stock ${caps.stockGross.toFixed(2)}x / Slot ${caps.v52V50Gross.toFixed(2)}x` : "V52 runtime未取得"}</span>
-              <span className="rounded-full border border-amber-400/30 bg-amber-500/10 px-3 py-1.5 text-amber-100">{q102 && caps ? `Q102 ${q102.selectorMode}: 1 Slot / ${caps.quality102Gross.toFixed(2)}x / HV ${q102.familyGross.HIGH_VOL.toFixed(3)}x` : "Q102 runtime未取得"}</span>
+              <span className="rounded-full border border-gold-400/20 bg-gold-400/10 px-3 py-1.5 text-gold-50">DD12.96最終ロジック / PENGU1.0＋限定2% re-break / {productionRuntime?.hype.profile ?? "HYPE runtime未取得"} / FET72h・V12 Side cooldown</span>
+              <span className="rounded-full border border-amber-400/30 bg-amber-500/10 px-3 py-1.5 text-amber-100">{q102 && caps ? `Q102 ${q102.selectorMode}: 1 Slot / ${caps.quality102Gross.toFixed(2)}x / ${formatQ102SideGross(q102.familySideGross)}` : "Q102 runtime未取得"}</span>
             </div>
           </div>
           <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
@@ -110,7 +112,7 @@ export default function HomePage() {
         <section className="rounded-[24px] border border-amber-400/25 bg-amber-500/5 p-4 text-sm leading-6 text-amber-100">
           <div className="font-bold">Q102 {q102?.selectorMode ?? "runtime未取得"} の公開状態</div>
           <p className="mt-1 text-[12px] text-amber-100/80">Q102は固定CSV playback/replayではなく、Causal V4 generator / selector / planner / reconciliation / live adapterの実stateを読み取る1-slot補完スリーブです。</p>
-          {q102 && caps ? <p className="mt-1 text-[11px] text-amber-100/65">Policy: Quality102 ≤ {caps.quality102Gross.toFixed(2)}x / HIGH_VOL {q102.familyGross.HIGH_VOL.toFixed(3)}x / MR {q102.familyGross.MR.toFixed(2)}x / BRK {q102.familyGross.BRK.toFixed(3)}x / REV {q102.familyGross.REV.toFixed(2)}x / PB {q102.familyGross.PB.toFixed(2)}x / Crypto ≤ {caps.cryptoGross.toFixed(2)}x / Total ≤ {caps.totalGross.toFixed(2)}x</p> : <p className="mt-1 text-[11px] text-amber-100/65">Production runtime未取得のため、旧固定値は表示しません。</p>}
+          {q102 && caps ? <p className="mt-1 text-[11px] text-amber-100/65">Policy: Quality102 ≤ {caps.quality102Gross.toFixed(2)}x / {formatQ102SideGross(q102.familySideGross)} / Crypto ≤ {caps.cryptoGross.toFixed(2)}x / Total ≤ {caps.totalGross.toFixed(2)}x</p> : <p className="mt-1 text-[11px] text-amber-100/65">Production runtime未取得のため、旧固定値は表示しません。</p>}
         </section>
         <section className="panel-gold rounded-[30px] p-4 md:p-5">
           <div className="flex items-center justify-between gap-3"><div className="flex items-center gap-2 text-sm font-bold"><BarChart3 className="h-4 w-4 text-gold-100" />現在のAster実建玉</div><span className="text-[11px] text-white/55">30秒ごとに再取得</span></div>

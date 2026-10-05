@@ -29,7 +29,7 @@ export function HypeDecisionPanel({strategy}:{strategy:Strategy}){
     finally{setLoading(false);}
   },[]);
   useEffect(()=>{void load();const timer=window.setInterval(()=>void load(),30_000);return()=>window.clearInterval(timer);},[load]);
-  const row=data?.sleeves[strategy],logic="HYPE";
+  const row=data?.sleeves[strategy],logic="HYPE75";
   return <div className="space-y-4">
     <nav className="flex min-w-0 flex-wrap gap-2 text-xs font-bold">
       <Link className="rounded-lg border border-white/20 px-3 py-2 text-white/75" href="/decision-status">← 判定状況</Link>
@@ -51,11 +51,11 @@ export function HypeDecisionPanel({strategy}:{strategy:Strategy}){
           ["state SHA",row?.stateSha?.slice(0,12)||"未取得"],
           ["mode",row?.stateMode||"未取得"],
           ["実設定Gross上限",row?.maxGross===undefined?"未取得":row.maxGross+"x"],
-          ["実設定STOPリスク",row?.riskPct===undefined?"未取得":row.riskPct+"%"],
+          ["実設定risk budget",row?.riskPct===undefined?"未取得":row.riskPct+"%"],
           ["state更新",dt(row?.stateUpdatedAt)],
           ["本番サービス",row?.serviceActive?"active":"未確認"],
           ["Shared Kill Switch",data?.sharedKillActive==null?"未取得":data?.sharedKillActive?"ON":"OFF"],
-          ["公開足の発火条件",row?.publicSignalEligible===null?"未取得":row?.publicSignalEligible?"成立（発注とは別）":"未成立"],
+          ["実Runner確定H1判定",row?.publicSignalEligible===null?"未取得":row?.publicSignalEligible?"成立（発注とは別）":"未成立"],
           ["実Runner最終判定",row?.lastDecision?.reason||"対象通貨の最新記録なし"],
         ].map(([label,value])=><div key={label} className="min-w-0 rounded-xl border border-white/10 bg-black/20 px-3 py-3">
           <div className="text-[11px] text-white/45">{label}</div><div className="mt-1 break-all text-sm font-semibold text-white/85">{value}</div>
@@ -67,9 +67,9 @@ export function HypeDecisionPanel({strategy}:{strategy:Strategy}){
     </section>
     <section className="panel-gold min-w-0 overflow-hidden rounded-[26px] p-4 md:p-5">
       <div className="flex items-center gap-2 text-sm font-bold text-white">
-        <ShieldCheck size={17}/>エントリーまでのGate（各条件を独立評価）
+        <ShieldCheck size={17}/>HYPE75 Entry Gate・Runner判定
       </div>
-      <p className="mt-2 text-xs leading-5 text-white/55">公開足由来のPASSは注文可能や実約定を意味しません。5x Cross・共有Gross・保護注文は実Runnerの事前照合が必要です。</p>
+      <p className="mt-2 text-xs leading-5 text-white/55">Runner未記録の個別実測・PASSは推測しません。条件成立は実約定を意味しません。5x Cross・共有Gross・保護注文は実Runnerの事前照合が必要です。</p>
       <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {(row?.gates||[]).map(g=><article key={g.key} className={"min-w-0 rounded-xl border p-3 "+tone(g.status)}>
           <div className="flex flex-wrap items-center justify-between gap-1 text-xs font-bold"><span>{g.label}</span><span>{g.status==="PASS"?"合格":g.status==="BLOCKED"?"不合格":"未確認"}</span></div>

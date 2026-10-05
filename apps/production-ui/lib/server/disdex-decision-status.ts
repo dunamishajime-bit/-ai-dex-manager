@@ -1,3 +1,4 @@
+import { formatQ102SideGross } from "@/lib/production-display";
 import { readFile } from "node:fs/promises";
 import { isAbsolute } from "node:path";
 
@@ -122,7 +123,7 @@ export function runtimeSnapshot(
         venue: "Aster PENGUUSDT",
         timeframe: "closed PENGU/BTC H1",
         entryPolicy: pengu && caps
-          ? `Gross ${caps.penguGross.toFixed(2)}x / Recovery ${pengu.recoveryRule} ${pengu.recoveryInitialGross.toFixed(2)}x / cooldown ${pengu.hardStopCooldownHours}h`
+          ? `${pengu.logicProfile} / Gross ${caps.penguGross.toFixed(2)}x / 限定${(pengu.limitedStructuralRebreakPct*100).toFixed(0)}% re-break / Recovery ${pengu.recoveryRule} ${pengu.recoveryInitialGross.toFixed(2)}x / 通常cooldown ${pengu.normalCooldownHours}h / hard-stop ${pengu.hardStopCooldownHours}h / Q${pengu.routeHardStopQuarantineHours} / DD ${pengu.realizedDrawdownThresholdPct}%→${pengu.realizedDrawdownHoldHours}h`
           : "Production runtime unavailable; no static contract fallback.",
         protection: pengu && caps
           ? `Recovery hard stop ${(pengu.recoveryHardStopPct * 100).toFixed(1)}% / trail activation ${(pengu.recoveryTrailActivationPct * 100).toFixed(1)}% / retrace ${(pengu.recoveryTrailRetracePct * 100).toFixed(1)}% / Crypto ${caps.cryptoGross.toFixed(2)}x`
@@ -138,7 +139,7 @@ export function runtimeSnapshot(
         venue: "Aster Futures crypto sleeve",
         timeframe: "causal LIVE data only",
         entryPolicy: q102 && caps
-          ? `${q102.selectorMode} / 1 slot / max ${caps.quality102Gross.toFixed(2)}x / HIGH_VOL ${q102.familyGross.HIGH_VOL.toFixed(3)}x / BRK ${q102.familyGross.BRK.toFixed(3)}x`
+          ? `${q102.selectorMode} / 1 slot / max ${caps.quality102Gross.toFixed(2)}x / ${formatQ102SideGross(q102.familySideGross)}`
           : "Production runtime unavailable; no static contract fallback.",
         protection: caps
           ? `Crypto ${caps.cryptoGross.toFixed(2)}x / Total ${caps.totalGross.toFixed(2)}x / shared risk / Kill Switch / Aster 5x Cross`
@@ -153,14 +154,14 @@ export function runtimeSnapshot(
         releaseSha,
         venue: "Aster Futures FETUSDT",
         timeframe: "BRK48 residual signal",
-        entryPolicy: "FET BRK48の確定データだけを評価し、Core entryと競合時はpreemptibleな残余枠で判定",
+        entryPolicy: "FET BRK48 / 確定72h return ≥ +2% / 決済後24h再Entry禁止 / hold24h / Hard Stop5% / +5%到達後floor+0.5%",
         protection: "5x Cross・reduce-only protection・reconciliation・共有risk・Kill Switch",
         note: "flat / no-signal時もrunner heartbeatを表示し、state stale時はLIVEにしません。",
         reason: "Waiting for FET runner state.",
       },
       {
         id: "HYPE_TREND_LONG",
-        label: "HYPE Trend Long",
+        label: currentRuntime?.hype.profile ?? "HYPE runtime unavailable",
         status: !hype
           ? "UNAVAILABLE"
           : hype.safetyState === "BLOCKED" || hype.liveEnabled === false || hype.mainPid === 0
@@ -171,7 +172,7 @@ export function runtimeSnapshot(
         releaseSha: hype?.runtimeSha || releaseSha,
         venue: "Aster Futures HYPEUSDT",
         timeframe: "closed H1 trend / breakout",
-        entryPolicy: "HYPE Trend Long Production runner / current heartbeat authoritative",
+        entryPolicy: currentRuntime?.hype ? `${currentRuntime.hype.profile} / Gross ${currentRuntime.hype.maximumGross.toFixed(2)}x / Entry・Exit・stop logic維持` : "Production runtime unavailable.",
         protection: caps
           ? `Crypto ${caps.cryptoGross.toFixed(2)}x / Total ${caps.totalGross.toFixed(2)}x / shared risk / Kill Switch / Aster 5x Cross`
           : "Production runtime unavailable.",
@@ -190,7 +191,7 @@ export function runtimeSnapshot(
           ? `${v52.policyId}: Basis>=${v52.minimumEntryBasisBps}bps / Convergence ${v52.convergenceBps}bps / Net Edge>=${v52.minimumNetEdgeBps}bps / ${v52.windowsNy.join(" / ")} NY`
           : "Production runtime unavailable; no static contract fallback.",
         protection: v52 && caps
-          ? `Hold<=${v52.maximumHoldingHours}h / basis stop ${v52.basisStopMultiple}x / Cost<=${v52.maximumRoundTripCostBps}bps / Spread<=${v52.maximumSpreadBps}bps / Stock ${caps.stockGross.toFixed(2)}x / Total ${caps.totalGross.toFixed(2)}x`
+          ? `Hold<=${v52.maximumHoldingHours}h / dynamic Basis Stop ${v52.basisStopMultiple}x / 固定Entry参照STOP無効 / Cost<=${v52.maximumRoundTripCostBps}bps / Spread<=${v52.maximumSpreadBps}bps / Stock ${caps.stockGross.toFixed(2)}x / Total ${caps.totalGross.toFixed(2)}x`
           : "Production runtime unavailable.",
         note: "LIVE is shown only when VPS state and current Production contract are both readable.",
         reason: "Waiting for V52 runner state.",
