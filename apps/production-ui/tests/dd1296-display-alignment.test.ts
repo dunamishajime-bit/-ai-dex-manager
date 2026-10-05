@@ -27,3 +27,7 @@ test('Every policy summary consumes Side sizing; formal page no old fixed BT',as
  const s=await readFile('app/api/system/formal-priority-status/route.ts','utf8');
  assert.match(s,/loadFormalBtAnchor/);assert.doesNotMatch(s,/1229065462|1275|21\.296/);
 });
+test('Home and performance current-logic labels no longer use old Top2 / sidecar descriptions',async()=>{
+ const home=await readFile('app/page.tsx','utf8'),performance=await readFile('app/performance/page.tsx','utf8');
+ assert.doesNotMatch(home,/HYPEサイドカー/);assert.doesNotMatch(performance,/liveConfig\.strategyLabel/);assert.match(performance,/useProductionRuntime/);
+});
