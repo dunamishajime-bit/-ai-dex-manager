@@ -51,11 +51,32 @@ function commentaryGate(g:Gate){
  if(g.state==='NO'&&typeof g.actual==='number'&&Number.isFinite(g.actual)&&minimum!==undefined&&minimum>g.actual)detail+='あと'+displayGateNumber(minimum-g.actual)+(match?.[2]?'ポイント':'')+'。';
  return detail+(g.detail||'');
 }
+function naturalSpeechGate(g:Gate){
+ if(g.state==='UNKNOWN')return g.label+'は、まだ確認できていません。';
+ const actual=g.actual!==undefined?(typeof g.actual==='number'?displayGateNumber(g.actual):String(g.actual)):'';
+ const required=g.required!==undefined?String(g.required):'';
+ const match=typeof g.required==='string'?g.required.match(/^\s*(?:≥|>=)\s*(-?\d+(?:\.\d+)?)(%)?\s*$/):null;
+ const minimum=match?Number(match[1]):g.key==='volume'&&typeof g.required==='number'?g.required:undefined;
+ if(g.state==='NO'&&typeof g.actual==='number'&&Number.isFinite(g.actual)&&minimum!==undefined&&minimum>g.actual){
+  const gap=displayGateNumber(minimum-g.actual)+(match?.[2]?'ポイント':'');
+  return g.label+'は現在'+actual+'です。基準は'+required+'で、あと'+gap+'です。';
+ }
+ if(actual&&required)return g.label+'は現在'+actual+'、基準は'+required+'です。';
+ return g.label+'が未達です。';
+}
 export function rankCommentary(row:RankRow,from?:number,to?:number){
- const name=row.symbol.replace(/USDT$/,'')+' / '+row.logic;
+ const symbol=row.symbol.replace(/USDT$/,'');
+ const name=symbol+' / '+row.logic;
  const headline=from!==undefined&&to!==undefined?name+'が'+from+'位から'+to+'位へ上昇（↑'+(from-to)+'）':name+'の判定状況';
  const signalGates=row.gates.filter(g=>g.kind!=='execution'&&g.state!=='OK'),executionGates=row.gates.filter(g=>g.kind==='execution'&&g.state==='NO');
  const signal=!row.fresh||row.score===null?'観測更新待ち。現在の条件充足は未確認です。':signalGates.length?signalGates.map(commentaryGate).join(' / '):'市場条件は通過。実Runnerの最終確認が必要です。';
  const execution=executionGates.length?'発注制約：'+executionGates.map(commentaryGate).join(' / '):'発注制約：確認済みの停止条件なし。余力・競合・実発注はRunner確認待ち。';
- return {headline,signal,execution,speech:headline+'。'+(signalGates.length&&row.fresh&&row.score!==null?commentaryGate(signalGates[0]):signal)+(executionGates.length?'。発注制約は'+executionGates.map(g=>g.label).join('、')+'。':'')};
+ let speech=from!==undefined&&to!==undefined
+  ? symbol+'、'+row.logic+'が、'+from+'位から'+to+'位まで上昇しました。'
+  : symbol+'、'+row.logic+'の現在の判定です。';
+ if(!row.fresh||row.score===null)speech+='最新の観測を待っています。';
+ else if(signalGates.length)speech+=naturalSpeechGate(signalGates[0]);
+ else speech+='市場条件は通過しています。Runnerの最終判定を待っています。';
+ if(executionGates.length)speech+='ただし、'+executionGates.map(g=>g.label).join('、')+'の制約があるため、現時点では発注待機です。';
+ return {headline,signal,execution,speech};
 }
