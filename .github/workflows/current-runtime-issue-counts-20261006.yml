@@ -1,0 +1,81 @@
+name: Current Runtime Issue Counts 20261006
+on:
+  push:
+    branches: [fix/cutover-rollback-safety-20261006]
+    paths: [".github/workflows/current-runtime-issue-counts-20261006.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: SSH setup
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def n(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id").write_text(n("ROOT_KEY"));(p/"known_hosts").write_text(n("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 600 "$HOME/.ssh/id" "$HOME/.ssh/known_hosts"
+      - name: Aggregate current runtime issues read-only
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -p "$PORT" root@"$SSH_HOST" 'python3 -' <<'PY'
+          import json,re,subprocess,time,glob,os
+          sha=open("/home/deploy/disdex-trading/current/.disdex-release-sha").read().strip()
+          print("CURRENT_SHA="+sha)
+          units=[
+            "disdex-v12-x1-all@"+sha+".service",
+            "disdex-pengu-dual-ls-v2@"+sha+".service",
+            "disdex-quality102-causal-v1@"+sha+".service",
+            "disdex-v52-aster-only@"+sha+".service",
+            "disdex-fet-brk48@"+sha+".service",
+            "disdex-hype-long@"+sha+".service",
+            "disdex-idle-priority-short@"+sha+".service",
+            "disdex-shared-crypto-risk@"+sha+".service",
+            "disdex-v12-v52-margin-guard@"+sha+".service",
+          ]
+          pats={
+            "ACCOUNT_LOCK_BUSY":re.compile(r"ACCOUNT_LOCK_BUSY|ACCOUNT_ORDER_LOCK_BUSY|LOCK_BUSY_OR_STALE",re.I),
+            "RATE_LIMIT":re.compile(r"429|RATE.?LIMIT|RATE_BUDGET_SATURATED",re.I),
+            "KILL_SWITCH":re.compile(r"KILL.?SWITCH",re.I),
+            "STALE_OR_MISMATCH":re.compile(r"STALE|SHA_MISMATCH|TS_MISMATCH|STATE.*MISMATCH|IDENTITY.*NOT CURRENT",re.I),
+            "MARGIN_OR_REJECT":re.compile(r"INSUFFICIENT|MARGIN|REJECTED",re.I),
+            "PERMISSION":re.compile(r"EACCES|PERMISSION DENIED",re.I),
+            "UNKNOWN_EXECUTION":re.compile(r"EXECUTION_UNKNOWN|ORDER.*UNKNOWN|UNKNOWN.*ORDER",re.I),
+            "FATAL_EXCEPTION":re.compile(r"FATAL|UNHANDLED|TRACEBACK|EXCEPTION",re.I),
+          }
+          for u in units:
+            show=subprocess.run(["systemctl","show",u,"-p","ActiveState","-p","SubState","-p","Result","-p","MainPID","-p","NRestarts","--value"],capture_output=True,text=True).stdout.splitlines()
+            log=subprocess.run(["journalctl","-u",u,"--since","6 hours ago","--no-pager","-o","cat"],capture_output=True,text=True).stdout
+            counts={k:len(p.findall(log)) for k,p in pats.items()}
+            print(json.dumps({"unit":u,"state":show,"counts":counts},ensure_ascii=False))
+          for path in ["/var/lib/disdex/shared/kill-switch.json","/var/lib/disdex/shared/pending-exposure.json","/var/lib/disdex/shared/crypto-daily-risk.json","/var/lib/disdex/shared/margin-risk/guard-live.json"]:
+            try:
+              d=json.load(open(path))
+            except Exception as e:
+              print(json.dumps({"path":path,"error":type(e).__name__}))
+              continue
+            out={"path":path}
+            for k in ["active","tripped","sourceComplete","lossPct","maximumLossPct","stage","ordersAllowed","updatedAt","checkedAt"]:
+              if k in d: out[k]=d[k]
+            if path.endswith("pending-exposure.json"):
+              entries=d.get("entries") or []
+              out["entries"]=len(entries)
+              out["activeEntries"]=sum(1 for x in entries if str(x.get("status","")).upper() in {"PENDING","SUBMITTED","UNKNOWN"})
+            print(json.dumps(out,ensure_ascii=False))
+          for path in ["/var/lib/disdex/shared/account-order.lock","/var/lib/disdex/shared/aster-rate-budget.json.lock"]:
+            print(json.dumps({"path":path,"exists":os.path.lexists(path),"mtime":os.path.getmtime(path) if os.path.lexists(path) else None}))
+          print("ISSUE_COUNT_AUDIT=PASS")
+          PY
