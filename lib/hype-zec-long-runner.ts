@@ -388,6 +388,22 @@ export class HypeZecLongRunner {
   async tick(): Promise<HypeZecLongTickResult> {
     if (!this.dependencies.runtime.enabled) return { status: "disabled", message: "HYPE_ZEC_LONG_DISABLED" };
     this.liveGate();
+
+    // HYPE is the lowest-priority sidecar and must not hold the shared
+    // account-order lock while downloading signal history.  Preload market
+    // data only when the local state is flat and clean; any preload failure is
+    // deliberately retried inside the authoritative locked path so ownership,
+    // pending reconciliation, and position management remain fail-closed.
+    let preloadedMarket: HypeZecLongMarketData | undefined;
+    try {
+      const preState = await this.dependencies.stateStore.load();
+      if (!preState.manualReview && !preState.pending && !(preState.positions || []).length) {
+        preloadedMarket = await this.dependencies.marketData.load();
+      }
+    } catch {
+      preloadedMarket = undefined;
+    }
+
     const lock = await this.dependencies.lock.acquire(`HYPE_ZEC_LONG:${process.pid}:${Date.now()}`);
     if (!lock) return { status: "locked", message: "HYPE_ZEC_LONG_ACCOUNT_LOCK_BUSY" };
     let readOnlyBudgetPhase = true;
@@ -408,7 +424,7 @@ export class HypeZecLongRunner {
       if ((await this.unmanagedOrders(openOrders, positions)).length > 0) return { status: "held", message: "HYPE_ZEC_UNMANAGED_OPEN_ORDER_BLOCK" };
       let market: HypeZecLongMarketData;
       try {
-        market = await this.dependencies.marketData.load();
+        market = preloadedMarket || await this.dependencies.marketData.load();
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         const hasSidecarPosition = positions.some((position) => (
