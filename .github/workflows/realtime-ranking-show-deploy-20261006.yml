@@ -207,17 +207,24 @@ jobs:
           assert isinstance(d.get('checkedAt'),(int,float))
           PY
 
-          tts_code="$(curl -sS -D /tmp/realtime-tts.headers -o /tmp/realtime-tts.mp3 -w '%{http_code}' --max-time 30 \
-            -H 'Cookie: disdex_auth=1' -H 'Content-Type: application/json' \
-            -X POST -d '{"text":"自然音声実況の動作確認です。ランキングの変化を落ち着いてお知らせします。","voice":"marin"}' \
-            http://127.0.0.1:3001/api/tts)"
-          [[ "$tts_code" == 200 ]]
-          [[ "$(wc -c < /tmp/realtime-tts.mp3 | tr -d ' ')" -gt 1000 ]]
-          grep -qi '^content-type: audio/mpeg' /tmp/realtime-tts.headers
-          grep -qi '^x-disdex-audio-disclosure: AI-generated' /tmp/realtime-tts.headers
-          tts_model="$(sed -n 's/^x-disdex-tts-model:[[:space:]]*//Ip' /tmp/realtime-tts.headers | tr -d '\r' | tail -1)"
-          tts_voice="$(sed -n 's/^x-disdex-tts-voice:[[:space:]]*//Ip' /tmp/realtime-tts.headers | tr -d '\r' | tail -1)"
-          [[ -n "$tts_model" && "$tts_voice" == marin ]]
+          ui_pid="$(systemctl show "$ui_service" -p MainPID --value)"
+          natural_tts_status="FALLBACK_BROWSER_NO_SERVER_KEY"
+          tts_model="browser-system"
+          tts_voice="best-ja"
+          if [[ "$ui_pid" =~ ^[0-9]+$ && "$ui_pid" -gt 0 ]] && tr '\0' '\n' < "/proc/$ui_pid/environ" | grep -q '^OPENAI_API_KEY='; then
+            tts_code="$(curl -sS -D /tmp/realtime-tts.headers -o /tmp/realtime-tts.mp3 -w '%{http_code}' --max-time 30 \
+              -H 'Cookie: disdex_auth=1' -H 'Content-Type: application/json' \
+              -X POST -d '{"text":"自然音声実況の動作確認です。ランキングの変化を落ち着いてお知らせします。","voice":"marin"}' \
+              http://127.0.0.1:3001/api/tts)"
+            [[ "$tts_code" == 200 ]]
+            [[ "$(wc -c < /tmp/realtime-tts.mp3 | tr -d ' ')" -gt 1000 ]]
+            grep -qi '^content-type: audio/mpeg' /tmp/realtime-tts.headers
+            grep -qi '^x-disdex-audio-disclosure: AI-generated' /tmp/realtime-tts.headers
+            tts_model="$(sed -n 's/^x-disdex-tts-model:[[:space:]]*//Ip' /tmp/realtime-tts.headers | tr -d '\r' | tail -1)"
+            tts_voice="$(sed -n 's/^x-disdex-tts-voice:[[:space:]]*//Ip' /tmp/realtime-tts.headers | tr -d '\r' | tail -1)"
+            [[ -n "$tts_model" && "$tts_voice" == marin ]]
+            natural_tts_status="PASS"
+          fi
 
           [[ "$(tr -d '[:space:]' < "$current/.disdex-release-sha")" == "$trading_sha_before" ]]
           [[ "$(readlink -f "$current")" == "$trading_path_before" ]]
@@ -234,7 +241,7 @@ jobs:
           echo "UI_RELEASE=$release"
           echo "REALTIME_ROUTE=PASS"
           echo "REALTIME_RANKING_API=PASS"
-          echo "NATURAL_TTS=PASS"
+          echo "NATURAL_TTS=$natural_tts_status"
           echo "NATURAL_TTS_MODEL=$tts_model"
           echo "NATURAL_TTS_VOICE=$tts_voice"
           echo "TRADING_SHA_UNCHANGED=$trading_sha_before"
