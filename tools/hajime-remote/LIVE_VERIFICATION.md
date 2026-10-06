@@ -16,3 +16,9 @@ One independent fresh code review identified screenshot format, descendant proce
 Minor review observations deferred: redirected/Unicode Windows desktop installer portability; unauthenticated DCR registration exhaustion; standardization of OAuth error identifiers. The current ASCII Windows paths and successful OAuth flow were verified directly. These are not a claim that all deployments/client error paths were validated.
 
 No Chat tool invocation has yet occurred: manual creation/install and PC-code authorization in the owner's Chat account remain required. Follow README.md.
+
+## Browser authorization correction
+
+User-reported form submission at 12:32:40 JST received HTTP403. The page's no-referrer policy makes browsers serialize form POST Origin as null (Fetch Standard); the Origin guard rejects it. The old form-action self policy also omitted the registered Chat callback origin. HTML authorization responses now use strict-origin (no URL/query leakage), and CSP includes only self and the validated registered callback origin. Null/foreign Origin rejection remains intact.
+
+Regression suite: 62 PASS. Public HTTPS flow reverified with browser-equivalent same-origin POST and corrected policy headers: OAuth approval/token exchange and authenticated PC screenshot/file/PowerShell smoke PASS. Deployed server source SHA256: 5d66978debeeb641cc3ec356074c990ca3f2d501089f1e68cf92156cbd261c1c; runtime release742cd86cd34270cf3179e1eb1f202b6a00ba2625. Owner should restart Chat's connection flow and generate a fresh PC code; actual owner Chat completion remains unverified.
