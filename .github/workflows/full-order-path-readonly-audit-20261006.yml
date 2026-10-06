@@ -6,6 +6,11 @@ on:
       - codex/full-order-path-audit-20261006
     paths:
       - ".github/workflows/full-order-path-readonly-audit-20261006.yml"
+      - "lib/fet-brk48-live-runner.ts"
+      - "lib/hype-zec-long-runner.ts"
+      - "scripts/disdex-fet-brk48-live-runner.ts"
+      - "tests/fet-brk48-live-runner.test.ts"
+      - "tests/live-order-lock-scope-v2.test.mjs"
   workflow_dispatch:
 
 permissions:
@@ -55,7 +60,9 @@ jobs:
           npm run strategy:quality102-causal-v1:runner:selftest
           npm run strategy:hype-trend-long:selftest
           npm run strategy:shared-crypto-risk:selftest
-          npx tsx scripts/disdex-fet-brk48-live-runner.ts --self-test
+          # FET has no standalone --self-test entrypoint. Its synthetic
+          # decision->order->protection->restart->exit path is covered by
+          # tests/fet-brk48-live-runner.test.ts above, with zero exchange I/O.
       - name: Compile critical runtime files
         shell: bash
         run: |
