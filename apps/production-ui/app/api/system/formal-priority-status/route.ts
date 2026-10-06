@@ -1,3 +1,4 @@
+import { loadFormalBtAnchor } from "@/lib/server/formal-bt-anchor";
 import { readFile } from "node:fs/promises";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -47,16 +48,7 @@ export async function GET(req: NextRequest) {
         noHandoffFamilies: ["MR", "BRK"],
         victimOrder: ["Rank3", "Rank2", "Rank1"],
       },
-      formalBt: {
-        model: "H1_CAUSAL_PRICE_MODEL_NOT_HISTORICAL_L2_VERIFIED",
-        roundtripBps: 10,
-        finalEquityJpy: 1229065462.0472791,
-        profitFactor: 2.4887028036012624,
-        maxDrawdownPct: -21.296368751349548,
-        winRatePct: 65.17647058823529,
-        trades: 1275,
-        accounting: "PASS",
-      },
+      formalBt: await loadFormalBtAnchor(),
     },
     live: {
       v12Mode: v12?.mode || null,

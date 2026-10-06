@@ -43,7 +43,7 @@ test("Quality102 observability reports the fresh derived sleeve without claiming
     updatedAt: now,
     runtimeSha: "ad7",
     expectedSha: "ad7",
-    quality102: { selectorMode: "DERIVED_HIGH_VOL_ONLY", historicalSelectorParity: false, brkLiveEnabled: false },
+    quality102: { selectorMode: "DERIVED_HIGH_VOL_ONLY", historicalSelectorParity: false, brkLiveEnabled: false, strategyGrossCap: 2.5 },
     symbols: [{ symbol: "SUIUSDT" }],
   }));
   const previous = {

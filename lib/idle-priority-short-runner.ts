@@ -193,7 +193,8 @@ export class IdlePriorityShortRunner {
         return last <= 0 || candidate.features.decisionTs - last >= cooldownMs;
     }
 
-    private markCandidateLifecycle(state: IdleState, candidate: { symbol: IdlePrioritySymbol; features: Pick<IdleFeatures, "decisionTs"> }) {
+    private markCandidateLifecycle(state: IdleState, candidate: { symbol: IdlePrioritySymbol; accepted: boolean; side: string | null; features: Pick<IdleFeatures, "decisionTs"> }) {
+        if (!candidate.accepted || candidate.side !== "SHORT") return;
         state.lastAcceptedBySymbol = { ...state.lastAcceptedBySymbol, [candidate.symbol]: candidate.features.decisionTs };
     }
 
@@ -332,6 +333,8 @@ export class IdlePriorityShortRunner {
             if (pending.reservationId) await lock.releaseReservation(pending.reservationId);
             return { status: "held", message: `IDLE_ENTRY_${result.status}_NO_EXPOSURE`, symbol: pending.symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
         }
+        this.markCandidateLifecycle(state, { symbol: pending.symbol, accepted: true, side: "SHORT", features: { decisionTs: pending.decisionTs } });
+        await this.dependencies.stateStore.save(state);
         const positions = await this.dependencies.executor.getPositions();
         const actual = activePosition(positions, pending.symbol);
         if (!actual || !shortPosition(actual)) return this.manualReview(state, `IDLE_ENTRY_POSITION_MISMATCH:${pending.symbol}`);
@@ -562,31 +565,29 @@ export class IdlePriorityShortRunner {
                 if (exitReason && this.dependencies.runtime.mode === "LIVE") return await this.exitPosition(state, owned, actual, lock, exitReason);
                 if (exitReason) return { status: "shadow", message: `IDLE_SHADOW_EXIT:${owned.symbol}:${exitReason}`, symbol: owned.symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
             }
-            // Historical parity order:
-            // 1) build the generic LONG/SHORT candidate stream,
-            // 2) apply the per-symbol 12h lifecycle while the baseline is fully Idle,
-            // 3) only then apply the five-symbol SHORT route filter.
-            // A generic LONG or route-unselected candidate still advances the
-            // lifecycle because that is how the source 495-row stream was built.
+            // LIVE cooldown is consumed by a filled SHORT entry, never by a
+            // generic candidate or a route/risk/capacity rejection.
             const rawGeneric = (Object.keys(market.symbols) as IdlePrioritySymbol[])
                 .map((symbol) => {
                     const features = computeIdlePriorityFeatures(market.decisionTs, market.symbols[symbol], market.btc);
                     return { symbol, features, generic: evaluateIdleGenericCandidate(features) };
                 })
                 .filter((row) => row.generic.accepted);
-            const lifecycleCandidates = rawGeneric.filter((row) => this.candidateLifecycleAllows(state, row));
+            const routeCandidates = rawGeneric
+                .filter((row) => evaluateIdlePriorityShort(row.symbol, row.features, row.generic).accepted);
+            const lifecycleCandidates = routeCandidates.filter((row) => this.candidateLifecycleAllows(state, row));
             if (!lifecycleCandidates.length) {
                 await this.dependencies.stateStore.save({
                     ...state,
                     lastDecision: {
                         decisionTs: market.decisionTs,
                         accepted: false,
-                        reason: rawGeneric.length ? "IDLE_PER_SYMBOL_COOLDOWN_ACTIVE" : "NO_GENERIC_IDLE_CANDIDATE",
+                        reason: routeCandidates.length ? "IDLE_PER_SYMBOL_COOLDOWN_ACTIVE" : rawGeneric.length ? "GENERIC_CANDIDATE_NOT_SELECTED_ROUTE" : "NO_GENERIC_IDLE_CANDIDATE",
                     },
                 });
                 return {
                     status: "no-change",
-                    message: rawGeneric.length ? "IDLE_PER_SYMBOL_COOLDOWN_ACTIVE" : "IDLE_NO_GENERIC_CANDIDATE",
+                    message: routeCandidates.length ? "IDLE_PER_SYMBOL_COOLDOWN_ACTIVE" : rawGeneric.length ? "IDLE_GENERIC_CANDIDATE_NOT_SELECTED_ROUTE" : "IDLE_NO_GENERIC_CANDIDATE",
                     ordersSent: 0,
                     cancelsSent: 0,
                     positionChangesSent: 0,
@@ -648,9 +649,6 @@ export class IdlePriorityShortRunner {
                 await this.dependencies.stateStore.save(state);
                 return { status: "no-change", message: "IDLE_GENERIC_BASELINE_NOT_IDLE", ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
             }
-
-            for (const candidate of lifecycleCandidates) this.markCandidateLifecycle(state, candidate);
-            await this.dependencies.stateStore.save(state);
 
             const signals = lifecycleCandidates
                 .map((row) => evaluateIdlePriorityShort(row.symbol, row.features, row.generic))

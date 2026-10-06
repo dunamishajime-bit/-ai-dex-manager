@@ -12,7 +12,7 @@ type StatusResponse = {
     q102: { handoffFamilies: string[]; noHandoffFamilies: string[]; victimOrder: string[] };
     formalBt: {
       model: string; roundtripBps: number; finalEquityJpy: number; profitFactor: number;
-      maxDrawdownPct: number; winRatePct: number; trades: number; accounting: string;
+      maxDrawdownPct: number; winRatePct: number; trades: number; accounting: string; v12WinRatePct: number; v12Trades: number; v12Wins: number;
     };
   };
   live?: {
@@ -190,7 +190,7 @@ export default function FormalPriorityDecisionPage() {
           </section>
 
           <section className="panel-gold rounded-2xl p-4">
-            <div className="text-sm font-bold text-white">正式10bps Formal BT</div>
+            <div className="text-sm font-bold text-white">DD12.96 正式10bps BT</div>
             <div className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
               <div><div className="text-xs text-white/55">Final</div><div className="font-black text-white">{fmtJpy(contract.formalBt.finalEquityJpy)}</div></div>
               <div><div className="text-xs text-white/55">PF</div><div className="font-black text-white">{contract.formalBt.profitFactor.toFixed(4)}</div></div>
@@ -199,7 +199,7 @@ export default function FormalPriorityDecisionPage() {
               <div><div className="text-xs text-white/55">Trades</div><div className="font-black text-white">{contract.formalBt.trades}</div></div>
             </div>
             <div className="mt-3 text-xs leading-5 text-white/55">
-              H1 causal price-model formal BT / 10bps round trip / accounting {contract.formalBt.accounting}。historical L2 fill verificationではありません。
+              DD12.96研究BT / 2025-08-10〜2026-08-10 / 10bps round trip / accounting {contract.formalBt.accounting}。V12 {contract.formalBt.v12Wins}/{contract.formalBt.v12Trades}勝（{contract.formalBt.v12WinRatePct.toFixed(2)}%）。LIVE実約定・tick単位の同値性は未検証です。
             </div>
           </section>
         </>

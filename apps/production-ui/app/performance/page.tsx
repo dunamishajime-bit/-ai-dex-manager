@@ -9,7 +9,7 @@ import { useCurrency } from "@/context/CurrencyContext";
 import { useOperationalWallet } from "@/hooks/useOperationalWallet";
 import { useLivePortfolio } from "@/hooks/useLivePortfolio";
 import { cn } from "@/lib/utils";
-import { DIST_TERMINAL_LIVE_CONFIG as liveConfig } from "@/lib/disterminal-live-config";
+import { useProductionRuntime } from "@/hooks/useProductionRuntime";
 import { displayTradePnlUsd } from "@/lib/trade-pnl";
 
 type TradeHistoryEntry = {
@@ -184,6 +184,7 @@ function toneClass(value: number) {
 }
 
 export default function PerformancePage() {
+  const { snapshot: productionRuntime } = useProductionRuntime();
   const { formatPrice } = useCurrency();
   const { wallet } = useOperationalWallet();
   const { snapshot: livePortfolio } = useLivePortfolio();
@@ -426,7 +427,7 @@ export default function PerformancePage() {
                   {trades.length > 3 ? <div className="text-[11px] text-gray-500">+{trades.length - 3} more</div> : null}
                   {isLogicChangeDay ? (
                     <div className="rounded-lg border border-amber-300/35 bg-amber-300/10 px-2 py-1.5 text-[10px] font-semibold leading-4 text-amber-100">
-                      現行構成: {liveConfig.strategyLabel}
+                      現行構成: {productionRuntime ? `DD12.96 / V12 Top${productionRuntime.v12.maximumPositions} / PENGU ${productionRuntime.pengu.logicProfile} ${productionRuntime.caps.penguGross.toFixed(2)}x / Q102 ${productionRuntime.quality102.selectorMode} Family × Side / ${productionRuntime.hype.profile} / FET・V52・IDLE / Overlay` : "Production runtime未取得"}
                     </div>
                   ) : null}
                 </div>

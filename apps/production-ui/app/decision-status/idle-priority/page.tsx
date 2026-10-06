@@ -97,9 +97,9 @@ export default function IdlePriorityDecisionPage(){
             <Gate label="Breakdown ↓" ok={row.features.breakoutShort24} value={row.features.breakoutShort24?"YES":"NO"} />
             <Gate label="Generic" ok={row.generic.accepted} value={`${row.generic.side} / ${row.generic.archetype||"—"}`} />
             <Gate label="Route Gate" ok={row.routeDecision.accepted} value={row.routeDecision.reason} />
-            <Gate label="Cooldown" ok={row.cooldownAllowed} value={row.cooldownAllowed?"PASS":"ACTIVE"} />
+            <Gate label="約定後12h待機" ok={row.cooldownAllowed} value={row.cooldownAllowed?"PASS":"ACTIVE"} />
           </div>
-          <div className="mt-2 text-[10px] text-white/45">Last lifecycle: {ts(row.lastLifecycleTs)}</div>
+          <div className="mt-2 text-[10px] text-white/75">直近SHORT約定の判定時刻: {ts(row.lastLifecycleTs)}</div>
         </article>)}
       </div>
     </section>

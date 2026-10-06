@@ -27,3 +27,7 @@ export function evaluateFet(raw:unknown,now:number,policy=FET_POLICY):{valid:boo
  gates.push({key:'return72h',label:'72h return ≥ +2%',state:ret72+1e-12>=policy.minimumReturn72h?'OK':'NO',actual:ret72*100,required:policy.minimumReturn72h*100+'%',detail:'確定closeから72h前の確定closeのみ使用 / '+(ret72*100).toFixed(3)+'%',progress:ret72/policy.minimumReturn72h});
  return {valid:true,gates,referenceTs:last.end};
 }
+
+export function hypeRankingFresh(row:{status:string;stateSha?:string;lastDecision?:{at?:number}},releaseSha:string,now:number){
+ return row.status==='LIVE'&&row.stateSha===releaseSha&&freshTimestamp(row.lastDecision?.at,now,3*3600000);
+}

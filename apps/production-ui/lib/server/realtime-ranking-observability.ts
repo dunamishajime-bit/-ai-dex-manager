@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises';
-import { fetObservationExpiry,freshTimestamp,gateScore,rankRows,type Gate,type RankRow } from '@/lib/realtime-ranking';
+import { fetObservationExpiry,freshTimestamp,hypeRankingFresh,gateScore,rankRows,type Gate,type RankRow } from '@/lib/realtime-ranking';
 import { loadCurrentProductionRuntime,extractObjectNumber } from './current-production-runtime';
 import { loadDecisionStatus } from './disdex-decision-status';
 import { loadQuality102SymbolObservability } from './quality102-symbol-observability';
@@ -65,9 +65,9 @@ async function observe(){
   async()=>{const d=await loadFetGates();rows.push(make(d.symbol,'FET',d.side,d.gates,d.fresh,d.checkedAt,d.reason));},
   async()=>{
    const d=await loadHypeRuntimeObservability(),s=d.sleeves.HYPE_LONG;
-   const gates:Gate[]=s.gates.map(g=>({key:g.key,label:g.label,state:g.status==='PASS'?'OK':g.status==='BLOCKED'?'NO':'UNKNOWN',actual:g.actual,required:g.threshold,detail:g.reason,kind:g.source==='PUBLIC_CANDLES'?'signal':'execution'}));
+   const gates:Gate[]=s.gates.map(g=>({key:g.key,label:g.label,state:g.status==='PASS'?'OK':g.status==='BLOCKED'?'NO':'UNKNOWN',actual:g.actual,required:g.threshold,detail:g.reason,kind:g.source==='PUBLIC_CANDLES'||['TREND_ALIGNMENT_NOT_MET','REGIME_SLOPE_NOT_MET','BREAKOUT_NOT_MET','DISTANCE_FROM_SLOW_EMA_TOO_LARGE'].includes(g.key)?'signal':'execution'}));
    gates.push(flag('position','新規保有枠',!s.position&&!s.pending,s.position?'HYPE保有中':s.pending?'保留注文あり':'保有なし','execution'));
-   rows.push(make('HYPEUSDT','HYPE','LONG',gates,s.status==='LIVE'&&s.stateSha===current.releaseSha&&s.gates.some(g=>g.key==='DATA_FRESHNESS'&&g.status==='PASS'),s.publicReferenceTs||0,s.note));
+   rows.push(make('HYPEUSDT','HYPE','LONG',gates,hypeRankingFresh(s,current.releaseSha,now),s.lastDecision?.at||0,s.note));
   },
   async()=>{
    const d=await json(process.env.DISDEX_IDLE_PRIORITY_DECISION_DETAILS_PATH||'/var/lib/disdex/idle-priority/decision-details.json');
@@ -77,7 +77,7 @@ async function observe(){
     const isLong=!!r.decision,decision=obj(r.decision||r.routeDecision),generic=obj(r.generic),gates:Gate[]=[];
     if(!isLong)gates.push(flag('generic','汎用候補の成立',generic.accepted,text(generic.reason)));
     gates.push(flag('route','通貨専用 '+text(r.route),decision.accepted,text(decision.reason)));
-    if(!isLong)gates.push(flag('cooldown','通貨Cooldown',r.cooldownAllowed,'同一通貨の候補間隔','execution'));
+    if(!isLong)gates.push(flag('cooldown','通貨Cooldown',r.cooldownAllowed,'実約定したSHORTエントリーから12時間（未達・未約定候補では開始しない）','execution'));
     const holding=obj(isLong?residual:state),hasPosition=!!holding.position||list(holding.positions).length>0,holdingFresh=holding.runtimeSha===current.releaseSha&&now-Number(holding.updatedAt)>=-60000&&now-Number(holding.updatedAt)<2*3600000;
     gates.push(flag('holding','Idle保有・保留なし',holdingFresh?!hasPosition&&!holding.pending&&!holding.manualReview:undefined,hasPosition?'Idle保有中':holding.pending?'Idle注文処理中':holdingFresh?'保有状態確認済み（共有枠は別途確認）':'保有状態の観測未確認','execution'));
     gates.push(flag('capacity','優先ロジック空き・残余Gross',undefined,'優先ロジックの保有・同時候補・証拠金をRunnerが最終確認','execution'));
