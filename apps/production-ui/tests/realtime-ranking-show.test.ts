@@ -30,3 +30,24 @@ test('unknown, stale, strict breakout and upper limits never invent minimum defi
  const atBoundary={...row('FET'),gates:[{key:'breakout',label:'高値',state:'NO' as const,actual:100,required:'終値 > 100',detail:'同値はNO'}]};
  assert.doesNotMatch(ranking.rankCommentary(atBoundary).signal,/あと0/);
 });
+
+test('PC alerts only fire for changed high-score leader or an entry from below top 3',()=>{
+ assert.equal(typeof ranking.rankingPcAlert,'function');
+ const base=[row('a',95),row('b',88),row('c',80),row('d',70)];
+ assert.equal(ranking.rankingPcAlert([],base),null);
+ assert.equal(ranking.rankingPcAlert(base,base),null);
+
+ const leaderStillHighButOrderChanged=[row('a',95),row('c',90),row('b',88),row('d',70)];
+ const high=ranking.rankingPcAlert(base,leaderStillHighButOrderChanged);
+ assert.equal(high?.reason,'TOP_SCORE');
+ assert.match(high?.body||'',/1位 a \/ V12 Score 95/);
+
+ const top3Entry=[row('a',85),row('d',84),row('b',83),row('c',70)];
+ const entry=ranking.rankingPcAlert(base,top3Entry);
+ assert.equal(entry?.reason,'TOP3_ENTRY');
+ assert.match(entry?.body||'',/d \/ V12 4位→2位/);
+
+ const alreadyTop3=[row('a',85),row('c',84),row('b',83),row('d',70)];
+ const noEntry=ranking.rankingPcAlert([row('a',85),row('b',84),row('c',83),row('d',70)],alreadyTop3);
+ assert.equal(noEntry,null);
+});
