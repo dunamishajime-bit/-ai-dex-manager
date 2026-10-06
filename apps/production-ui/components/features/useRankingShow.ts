@@ -90,17 +90,22 @@ export function useRankingShow(rows:RankRow[],version:number,viewKey:string,erro
   const before=capture.current||previous.current,after=measure();capture.current=null;previous.current=after;
   if(!before)return;
   const rises=risingRankEvents(before.rows,current.current).filter(r=>nodes.current.has(r.row.id));
-  if(!rises.length){setHighlights({});setEvent(null);return;}
-  setEvent(rises[0]);setHighlights(Object.fromEntries(rises.map(r=>[r.row.id,r.delta])));
+  setEvent(rises[0]??null);setHighlights(Object.fromEntries(rises.map(r=>[r.row.id,r.delta])));
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   if(prefs.current.motion&&!reduced){
-   // Fixed overlays travel across ranking columns without clipping or resizing the table.
-   rises.filter(r=>nodes.current.has(r.row.id)).slice(0,3).forEach((rise,index)=>{
-    const node=nodes.current.get(rise.row.id)!,old=before.rects.get(rise.row.id),end=node.getBoundingClientRect();
+   // Animate every visible displaced row and leader card, in either direction.
+   // Leader registration uses a separate key so cards cannot overwrite row measurements.
+   const oldRows=new Map(before.rows.map(row=>[row.id,row]));
+   const newRows=new Map(current.current.map(row=>[row.id,row]));
+   [...nodes.current].forEach(([key,node])=>{
+    const id=key.startsWith('leader:')?key.slice(7):key;
+    const oldRow=oldRows.get(id),newRow=newRows.get(id),old=before.rects.get(key),end=node.getBoundingClientRect();
+    if(!oldRow?.fresh||!newRow?.fresh||oldRow.score===null||newRow.score===null)return;
     if(!old||!end.width||old.bottom<0||old.top>innerHeight||end.bottom<0||end.top>innerHeight)return;
+    if(Math.abs(old.left+before.scrollX-window.scrollX-end.left)<.5&&Math.abs(old.top+before.scrollY-window.scrollY-end.top)<.5)return;
     const startX=old.left+before.scrollX-window.scrollX,startY=old.top+before.scrollY-window.scrollY;
     const clone=node.cloneNode(true) as HTMLElement;
-    clone.removeAttribute('id');clone.removeAttribute('data-ranking-row');clone.setAttribute('aria-hidden','true');clone.setAttribute('inert','');
+    clone.removeAttribute('id');clone.removeAttribute('data-ranking-row');clone.removeAttribute('data-ranking-leader');clone.setAttribute('aria-hidden','true');clone.setAttribute('inert','');
     clone.classList.add('ranking-flyer');
     Object.assign(clone.style,{position:'fixed',left:end.left+'px',top:end.top+'px',width:end.width+'px',height:end.height+'px',zIndex:'100',pointerEvents:'none',background:'#20291c',border:'1px solid #efd58c',borderRadius:'6px',margin:'0'});
     document.body.appendChild(clone);clones.current.push(clone);node.style.opacity='0';hiddenNodes.current.push(node);
@@ -110,12 +115,12 @@ export function useRankingShow(rows:RankRow[],version:number,viewKey:string,erro
      {transform:`translate(${dx}px,${dy-6}px) scale(1.04)`,boxShadow:'0 14px 32px #000b, 0 0 16px #e8ce7e66',offset:.2},
      {transform:'translate(0,-4px) scale(1.04)',boxShadow:'0 14px 32px #000b, 0 0 16px #e8ce7e66',offset:.82},
      {transform:'translate(0,0) scale(1)',boxShadow:'0 0 24px #e8ce7e55',offset:1}
-    ],{duration:1150,delay:index*100,easing:'cubic-bezier(.22,.7,.25,1)',fill:'both'});
+    ],{duration:1150,easing:'cubic-bezier(.22,.7,.25,1)',fill:'both'});
     animations.current.push(a);
-    a.onfinish=()=>{clone.remove();node.style.opacity='';if(index===0&&prefs.current.motion&&!reduced)node.animate([{backgroundColor:'#e5d38d66'},{backgroundColor:'#ffffff01'}],{duration:1400});};
+    a.onfinish=()=>{clone.remove();node.style.opacity='';if(rises[0]?.row.id===id&&prefs.current.motion&&!reduced)node.animate([{backgroundColor:'#e5d38d66'},{backgroundColor:'#ffffff01'}],{duration:1400});};
    });
   }
-  notify(rises[0],prefs.current.motion&&!reduced?1400:0);
+  if(rises[0])notify(rises[0],prefs.current.motion&&!reduced?1400:0);
   timer.current=setTimeout(()=>{stopVisuals();setHighlights({});setEvent(null);},12000);
  },[version,viewKey,error,measure,stopVisuals,notify]);
  const register=useCallback((id:string,node:HTMLElement|null)=>{if(node)nodes.current.set(id,node);else nodes.current.delete(id);},[]);
