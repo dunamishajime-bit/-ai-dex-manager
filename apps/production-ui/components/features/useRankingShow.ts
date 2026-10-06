@@ -26,9 +26,13 @@ export function useRankingShow(rows:RankRow[],version:number,viewKey:string,erro
  const fallbackSpeech=useCallback((text:string)=>{
   if(!('speechSynthesis' in window))return;
   window.speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(text);u.lang='ja-JP';u.rate=.96;u.pitch=1;
+  const u=new SpeechSynthesisUtterance(text);u.lang='ja-JP';u.rate=.92;u.pitch=.98;u.volume=1;
   const ja=window.speechSynthesis.getVoices().filter(v=>v.lang.toLowerCase().startsWith('ja'));
-  const preferred=ja.find(v=>/natural|neural|nanami|ayumi/i.test(v.name))||ja.find(v=>!v.localService)||ja[0];
+  const preferred=
+   ja.find(v=>/google.*日本語|google.*japanese/i.test(v.name))||
+   ja.find(v=>/nanami|keita|ayumi|natural|neural/i.test(v.name))||
+   ja.find(v=>!v.localService)||
+   ja[0];
   if(preferred)u.voice=preferred;
   window.speechSynthesis.speak(u);
  },[]);
