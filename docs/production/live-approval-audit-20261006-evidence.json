@@ -1,0 +1,598 @@
+{
+  "runtime": {
+    "schema": "disdex-final-live-audit/v1",
+    "checkedAt": "2026-10-06T09:32:16.812053+00:00",
+    "liveSha": "8ed7c2266af33758b0a0f301aefc2457a7a7eab6",
+    "previousSha": "4c57efbb86ae0bbfe94bbe7dea4d09f0e1ec6c19",
+    "units": [
+      {
+        "unit": "disdex-v12-x1-all@8ed7c2266af33758b0a0f301aefc2457a7a7eab6.service",
+        "mainPid": 320831,
+        "cwd": "/home/deploy/disdex-trading/releases/8ed7c2266af33758b0a0f301aefc2457a7a7eab6",
+        "activeState": "active",
+        "nRestarts": 0,
+        "unusedMaxGrossPresent": false
+      },
+      {
+        "unit": "disdex-pengu-dual-ls-v2@8ed7c2266af33758b0a0f301aefc2457a7a7eab6.service",
+        "mainPid": 321104,
+        "cwd": "/home/deploy/disdex-trading/releases/8ed7c2266af33758b0a0f301aefc2457a7a7eab6",
+        "activeState": "active",
+        "nRestarts": 0,
+        "unusedMaxGrossPresent": false
+      },
+      {
+        "unit": "disdex-quality102-causal-v1@8ed7c2266af33758b0a0f301aefc2457a7a7eab6.service",
+        "mainPid": 321421,
+        "cwd": "/home/deploy/disdex-trading/releases/8ed7c2266af33758b0a0f301aefc2457a7a7eab6",
+        "activeState": "active",
+        "nRestarts": 0,
+        "unusedMaxGrossPresent": false
+      },
+      {
+        "unit": "disdex-v52-aster-only@8ed7c2266af33758b0a0f301aefc2457a7a7eab6.service",
+        "mainPid": 321614,
+        "cwd": "/home/deploy/disdex-trading/releases/8ed7c2266af33758b0a0f301aefc2457a7a7eab6",
+        "activeState": "active",
+        "nRestarts": 0,
+        "unusedMaxGrossPresent": false
+      },
+      {
+        "unit": "disdex-fet-brk48@8ed7c2266af33758b0a0f301aefc2457a7a7eab6.service",
+        "mainPid": 321842,
+        "cwd": "/home/deploy/disdex-trading/releases/8ed7c2266af33758b0a0f301aefc2457a7a7eab6",
+        "activeState": "active",
+        "nRestarts": 0,
+        "unusedMaxGrossPresent": false,
+        "fetCorePreemptionReady": true
+      },
+      {
+        "unit": "disdex-hype-long@8ed7c2266af33758b0a0f301aefc2457a7a7eab6.service",
+        "mainPid": 322060,
+        "cwd": "/home/deploy/disdex-trading/releases/8ed7c2266af33758b0a0f301aefc2457a7a7eab6",
+        "activeState": "active",
+        "nRestarts": 0,
+        "unusedMaxGrossPresent": false
+      },
+      {
+        "unit": "disdex-idle-priority-short@8ed7c2266af33758b0a0f301aefc2457a7a7eab6.service",
+        "mainPid": 322313,
+        "cwd": "/home/deploy/disdex-trading/releases/8ed7c2266af33758b0a0f301aefc2457a7a7eab6",
+        "activeState": "active",
+        "nRestarts": 0,
+        "unusedMaxGrossPresent": false
+      },
+      {
+        "unit": "disdex-shared-crypto-risk@8ed7c2266af33758b0a0f301aefc2457a7a7eab6.service",
+        "mainPid": 320255,
+        "cwd": "/home/deploy/disdex-trading/releases/8ed7c2266af33758b0a0f301aefc2457a7a7eab6",
+        "activeState": "active",
+        "nRestarts": 0,
+        "unusedMaxGrossPresent": false
+      },
+      {
+        "unit": "disdex-v12-v52-margin-guard@8ed7c2266af33758b0a0f301aefc2457a7a7eab6.service",
+        "mainPid": 320278,
+        "cwd": "/home/deploy/disdex-trading/releases/8ed7c2266af33758b0a0f301aefc2457a7a7eab6",
+        "activeState": "active",
+        "nRestarts": 0,
+        "unusedMaxGrossPresent": false
+      }
+    ],
+    "duplicateActiveRunners": false,
+    "heartbeats": [
+      {
+        "runnerId": "V12_X1_ALL",
+        "runtimeSha": "8ed7c2266af33758b0a0f301aefc2457a7a7eab6",
+        "safetyState": "HEALTHY",
+        "heartbeatAt": 1791279097331,
+        "lastTickAt": 1791273613812,
+        "mainPid": 320831,
+        "nRestarts": 0,
+        "liveEnabled": true
+      },
+      {
+        "runnerId": "PENGU_V8",
+        "runtimeSha": "8ed7c2266af33758b0a0f301aefc2457a7a7eab6",
+        "safetyState": "HEALTHY",
+        "heartbeatAt": 1791279097331,
+        "lastTickAt": 1791278687534,
+        "mainPid": 321104,
+        "nRestarts": 0,
+        "liveEnabled": true
+      },
+      {
+        "runnerId": "QUALITY102_CAUSAL_V1",
+        "runtimeSha": "8ed7c2266af33758b0a0f301aefc2457a7a7eab6",
+        "safetyState": "HEALTHY",
+        "heartbeatAt": 1791279097331,
+        "lastTickAt": 1791278710062,
+        "mainPid": 321421,
+        "nRestarts": 0,
+        "liveEnabled": true
+      },
+      {
+        "runnerId": "V52",
+        "runtimeSha": "8ed7c2266af33758b0a0f301aefc2457a7a7eab6",
+        "safetyState": "HEALTHY",
+        "heartbeatAt": 1791279097331,
+        "lastTickAt": 1791279093482,
+        "mainPid": 321614,
+        "nRestarts": 0,
+        "liveEnabled": true
+      },
+      {
+        "runnerId": "FET_BRK48_RESIDUAL",
+        "runtimeSha": "8ed7c2266af33758b0a0f301aefc2457a7a7eab6",
+        "safetyState": "HEALTHY",
+        "heartbeatAt": 1791279097331,
+        "lastTickAt": 1791279070685,
+        "mainPid": 321842,
+        "nRestarts": 0,
+        "liveEnabled": true
+      },
+      {
+        "runnerId": "HYPE_TREND_LONG",
+        "runtimeSha": "8ed7c2266af33758b0a0f301aefc2457a7a7eab6",
+        "safetyState": "HEALTHY",
+        "heartbeatAt": 1791279097331,
+        "lastTickAt": 1791278738354,
+        "mainPid": 322060,
+        "nRestarts": 0,
+        "liveEnabled": true
+      },
+      {
+        "runnerId": "IDLE_PRIORITY_SHORT",
+        "runtimeSha": "8ed7c2266af33758b0a0f301aefc2457a7a7eab6",
+        "safetyState": "HEALTHY",
+        "heartbeatAt": 1791279097331,
+        "lastTickAt": 1791279058869,
+        "mainPid": 322313,
+        "nRestarts": 0,
+        "liveEnabled": true
+      }
+    ],
+    "safety": {
+      "killActive": false,
+      "riskTripped": false,
+      "riskSourceComplete": true,
+      "riskUpdatedAt": 1791279118670,
+      "marginStage": "HEALTHY",
+      "marginOrdersAllowed": true,
+      "marginCheckedAt": 1791278967082,
+      "pendingExposureEntries": 9,
+      "activePendingExposure": 0
+    },
+    "approval": {
+      "approvedSha": "8ed7c2266af33758b0a0f301aefc2457a7a7eab6",
+      "fetCorePreemptionReady": true,
+      "approvedRunners": [
+        "V12_X1_ALL",
+        "PENGU_V8",
+        "QUALITY102_CAUSAL_V1",
+        "V52",
+        "FET_BRK48_RESIDUAL",
+        "HYPE_TREND_LONG",
+        "IDLE_PRIORITY_SHORT"
+      ],
+      "uid": 0,
+      "mode": "0600"
+    },
+    "state": [
+      {
+        "path": "/var/lib/disdex/v12-x1-all/runner.json",
+        "runtimeSha": "8ed7c2266af33758b0a0f301aefc2457a7a7eab6",
+        "updatedAt": 1791273613812,
+        "manualReview": null,
+        "pending": false
+      },
+      {
+        "path": "/var/lib/disdex/pengu-dual-ls-v2/runner-live.json",
+        "runtimeSha": null,
+        "updatedAt": 1791278687534,
+        "manualReview": null,
+        "pending": false
+      },
+      {
+        "path": "/var/lib/disdex/quality102-causal-v1/state.json",
+        "runtimeSha": "8ed7c2266af33758b0a0f301aefc2457a7a7eab6",
+        "updatedAt": 1791278710062,
+        "manualReview": null,
+        "pending": false
+      },
+      {
+        "path": "/var/lib/disdex/v52-aster-only/runner-live.json",
+        "runtimeSha": null,
+        "updatedAt": 1791279133350,
+        "manualReview": null,
+        "pending": false
+      },
+      {
+        "path": "/var/lib/disdex/fet-brk48-residual/state.json",
+        "runtimeSha": "8ed7c2266af33758b0a0f301aefc2457a7a7eab6",
+        "updatedAt": 1791279136375,
+        "manualReview": null,
+        "pending": false
+      },
+      {
+        "path": "/var/lib/disdex/hype-zec-long/runner.json",
+        "runtimeSha": "8ed7c2266af33758b0a0f301aefc2457a7a7eab6",
+        "updatedAt": 1791278738354,
+        "manualReview": null,
+        "pending": false
+      },
+      {
+        "path": "/var/lib/disdex/idle-priority/state.json",
+        "runtimeSha": "8ed7c2266af33758b0a0f301aefc2457a7a7eab6",
+        "updatedAt": 1791279058869,
+        "manualReview": null,
+        "pending": false
+      },
+      {
+        "path": "/var/lib/disdex/idle-priority/residual-long-state.json",
+        "runtimeSha": "8ed7c2266af33758b0a0f301aefc2457a7a7eab6",
+        "updatedAt": 1791279062784,
+        "manualReview": null,
+        "pending": false
+      }
+    ],
+    "automation": [
+      {
+        "unit": "disdex-runner-watchdog.timer",
+        "activeState": "active"
+      },
+      {
+        "unit": "disdex-runner-position-recovery.timer",
+        "activeState": "active"
+      },
+      {
+        "unit": "disdex-v12-three-hour-health-check.timer",
+        "activeState": "active"
+      },
+      {
+        "unit": "disdex-current-runtime-coherence-guard.timer",
+        "activeState": "active"
+      },
+      {
+        "unit": "disdex-runner-health-snapshot.timer",
+        "activeState": "active"
+      },
+      {
+        "unit": "disdex-fet-preemption-readiness-audit.timer",
+        "activeState": "active"
+      }
+    ],
+    "fetReadiness": {
+      "schema": "fet-preemption-readiness/v1",
+      "status": "HEALTHY",
+      "productionSha": "8ed7c2266af33758b0a0f301aefc2457a7a7eab6",
+      "reasons": [],
+      "checkedAt": 1791279077321,
+      "ordersSent": 0,
+      "cancelsSent": 0,
+      "killSwitchChanges": 0
+    },
+    "journal": {
+      "v12-x1-all": {
+        "accountLockBusy": 0,
+        "rateBudgetHold": 0,
+        "http429": 0,
+        "shaMismatch": 0,
+        "fatal": 0,
+        "protectiveFailure": 0
+      },
+      "pengu-dual-ls-v2": {
+        "accountLockBusy": 0,
+        "rateBudgetHold": 0,
+        "http429": 0,
+        "shaMismatch": 0,
+        "fatal": 0,
+        "protectiveFailure": 0
+      },
+      "quality102-causal-v1": {
+        "accountLockBusy": 0,
+        "rateBudgetHold": 0,
+        "http429": 0,
+        "shaMismatch": 0,
+        "fatal": 0,
+        "protectiveFailure": 0
+      },
+      "v52-aster-only": {
+        "accountLockBusy": 0,
+        "rateBudgetHold": 0,
+        "http429": 0,
+        "shaMismatch": 0,
+        "fatal": 0,
+        "protectiveFailure": 0
+      },
+      "fet-brk48": {
+        "accountLockBusy": 0,
+        "rateBudgetHold": 0,
+        "http429": 0,
+        "shaMismatch": 0,
+        "fatal": 0,
+        "protectiveFailure": 0
+      },
+      "hype-long": {
+        "accountLockBusy": 0,
+        "rateBudgetHold": 0,
+        "http429": 0,
+        "shaMismatch": 0,
+        "fatal": 0,
+        "protectiveFailure": 0
+      },
+      "idle-priority-short": {
+        "accountLockBusy": 0,
+        "rateBudgetHold": 0,
+        "http429": 0,
+        "shaMismatch": 0,
+        "fatal": 0,
+        "protectiveFailure": 0
+      },
+      "shared-crypto-risk": {
+        "accountLockBusy": 0,
+        "rateBudgetHold": 0,
+        "http429": 0,
+        "shaMismatch": 0,
+        "fatal": 0,
+        "protectiveFailure": 0
+      },
+      "v12-v52-margin-guard": {
+        "accountLockBusy": 0,
+        "rateBudgetHold": 0,
+        "http429": 0,
+        "shaMismatch": 0,
+        "fatal": 0,
+        "protectiveFailure": 0
+      }
+    },
+    "hp": {
+      "liveRuntimeSha": "8ed7c2266af33758b0a0f301aefc2457a7a7eab6",
+      "lineageSynchronized": true,
+      "idleStatus": "HEALTHY",
+      "q102Symbols": 19,
+      "q102Diagnostics": 19,
+      "rankingRows": 49,
+      "score100Rows": 0,
+      "score100InvariantPassed": true,
+      "avax": [
+        {
+          "id": "Idle Long:AVAXUSDT:LONG",
+          "score": 80,
+          "fresh": true
+        },
+        {
+          "id": "V12:AVAXUSDT:LONG",
+          "score": 59,
+          "fresh": true
+        },
+        {
+          "id": "Q102:AVAXUSDT:SHORT",
+          "score": 56,
+          "fresh": true
+        }
+      ]
+    },
+    "publicPages": {
+      "/decision-status": {
+        "httpStatus": 200,
+        "finalUrl": "https://professional-dismanager.net/decision-status"
+      },
+      "/realtime": {
+        "httpStatus": 200,
+        "finalUrl": "https://professional-dismanager.net/realtime"
+      },
+      "/history": {
+        "httpStatus": 200,
+        "finalUrl": "https://professional-dismanager.net/history"
+      }
+    }
+  },
+  "account": {
+    "status": "ASTER_READONLY_ACCOUNT_DIAGNOSTIC_PASS",
+    "observedAt": 1791279177426,
+    "venueTime": 1791279177121,
+    "positions": [],
+    "openOrders": [],
+    "ordersSent": 0,
+    "cancelsSent": 0,
+    "positionChangesSent": 0,
+    "negativeShaGateExitCode": 2
+  },
+  "activationGate": {
+    "status": "OPERATOR_ACTIVATION_READY",
+    "allowed": true,
+    "reason": "OPERATOR_LIVE_ACTIVATION_CONFIRMED_ALL",
+    "results": [
+      {
+        "runner": "V12_X1_ALL",
+        "allowed": true,
+        "reason": "OPERATOR_LIVE_ACTIVATION_CONFIRMED",
+        "approvedAt": 1791278518072
+      },
+      {
+        "runner": "PENGU_V8",
+        "allowed": true,
+        "reason": "OPERATOR_LIVE_ACTIVATION_CONFIRMED",
+        "approvedAt": 1791278518072
+      },
+      {
+        "runner": "QUALITY102_CAUSAL_V1",
+        "allowed": true,
+        "reason": "OPERATOR_LIVE_ACTIVATION_CONFIRMED",
+        "approvedAt": 1791278518072
+      },
+      {
+        "runner": "V52",
+        "allowed": true,
+        "reason": "OPERATOR_LIVE_ACTIVATION_CONFIRMED",
+        "approvedAt": 1791278518072
+      },
+      {
+        "runner": "FET_BRK48_RESIDUAL",
+        "allowed": true,
+        "reason": "OPERATOR_LIVE_ACTIVATION_CONFIRMED",
+        "approvedAt": 1791278518072
+      },
+      {
+        "runner": "HYPE_TREND_LONG",
+        "allowed": true,
+        "reason": "OPERATOR_LIVE_ACTIVATION_CONFIRMED",
+        "approvedAt": 1791278518072
+      },
+      {
+        "runner": "IDLE_PRIORITY_SHORT",
+        "allowed": true,
+        "reason": "OPERATOR_LIVE_ACTIVATION_CONFIRMED",
+        "approvedAt": 1791278518072
+      }
+    ],
+    "ordersSent": 0,
+    "cancelsSent": 0,
+    "positionChangesSent": 0
+  },
+  "negativeShaGate": {
+    "status": "OPERATOR_ACTIVATION_BLOCKED",
+    "allowed": false,
+    "reason": "OPERATOR_LIVE_ACTIVATION_REQUIRED:SHA_MISMATCH",
+    "blockedRunner": "V12_X1_ALL",
+    "results": [
+      {
+        "runner": "V12_X1_ALL",
+        "allowed": false,
+        "reason": "OPERATOR_LIVE_ACTIVATION_REQUIRED:SHA_MISMATCH"
+      }
+    ],
+    "ordersSent": 0,
+    "cancelsSent": 0,
+    "positionChangesSent": 0
+  },
+  "cleanup": {
+    "schema": "disdex-superseded-remnant-cleanup/v1",
+    "checkedAt": 1791278973.5719724,
+    "liveSha": "8ed7c2266af33758b0a0f301aefc2457a7a7eab6",
+    "deletedPaths": [
+      {
+        "path": "/tmp/disdex-wiring-37441485173.sh",
+        "size": 75167,
+        "sha256": "b1d66da55611793ddbd40640d7049fe14d7a9c9f8787285cb43448511f618368",
+        "operationalReferences": [],
+        "reproducibleFrom": "Git commit and preserved published release; durable cutover/runtime-wiring backup retained"
+      },
+      {
+        "path": "/tmp/disdex-idle-cutover-37441485173.sh",
+        "size": 52688,
+        "sha256": "d8afe07758f7eca7f88497171f3efd3599fc8f71dba03abe9872da1b40b175e4",
+        "operationalReferences": [],
+        "reproducibleFrom": "Git commit and preserved published release; durable cutover/runtime-wiring backup retained"
+      },
+      {
+        "path": "/tmp/disdex-idle-cutover-37440371951.sh",
+        "size": 52232,
+        "sha256": "543bf1d2a3e5f1a69274b69ba64d76f9a886d9451b85aaad645a3710eac8251e",
+        "operationalReferences": [],
+        "reproducibleFrom": "Git commit and preserved published release; durable cutover/runtime-wiring backup retained"
+      },
+      {
+        "path": "/tmp/disdex-source-37440371951.tgz",
+        "size": 19090819,
+        "sha256": "2a43ca523a71db808626b3a29937d2ab4fcb28a243900f5513a57672071b9795",
+        "operationalReferences": [],
+        "reproducibleFrom": "Git commit and preserved published release; durable cutover/runtime-wiring backup retained"
+      },
+      {
+        "path": "/tmp/disdex-wiring-37442463051.sh",
+        "size": 75167,
+        "sha256": "b1d66da55611793ddbd40640d7049fe14d7a9c9f8787285cb43448511f618368",
+        "operationalReferences": [],
+        "reproducibleFrom": "Git commit and preserved published release; durable cutover/runtime-wiring backup retained"
+      },
+      {
+        "path": "/tmp/disdex-source-37441485173.tgz",
+        "size": 19092077,
+        "sha256": "faeb4c3f978c878a4ad0376e4011484336fc1fe85f7fcb8cb71e75a6ed78bb16",
+        "operationalReferences": [],
+        "reproducibleFrom": "Git commit and preserved published release; durable cutover/runtime-wiring backup retained"
+      },
+      {
+        "path": "/tmp/disdex-wiring-37440371951.sh",
+        "size": 75167,
+        "sha256": "b1d66da55611793ddbd40640d7049fe14d7a9c9f8787285cb43448511f618368",
+        "operationalReferences": [],
+        "reproducibleFrom": "Git commit and preserved published release; durable cutover/runtime-wiring backup retained"
+      },
+      {
+        "path": "/tmp/disdex-idle-cutover-37442463051.sh",
+        "size": 53714,
+        "sha256": "8c5875e54c1330aab7d55ca087574c6cef1931abb31e86389d9cd46000dd9839",
+        "operationalReferences": [],
+        "reproducibleFrom": "Git commit and preserved published release; durable cutover/runtime-wiring backup retained"
+      },
+      {
+        "path": "/tmp/idle-parity-v3-37440371951.json",
+        "size": 1776,
+        "sha256": "2274b28e3ae7558688299a3ce71a8bcb094917392cce60fefb61ef219f3b0db9",
+        "operationalReferences": [],
+        "reproducibleFrom": "Installed parity certificate and preserved control-plane backup"
+      },
+      {
+        "path": "/tmp/idle-residual-long-parity-37440371951.json",
+        "size": 1134,
+        "sha256": "ac5de452f17f30b444f6b498ac6f0e707b9933d5af6a43f51ef46703ed27860b",
+        "operationalReferences": [],
+        "reproducibleFrom": "Installed parity certificate and preserved control-plane backup"
+      },
+      {
+        "path": "/tmp/idle-parity-v3-37441485173.json",
+        "size": 1776,
+        "sha256": "3d60024bede276c0cafdb125fc208a61293841e7ab3fedbdabaf5b057473ec09",
+        "operationalReferences": [],
+        "reproducibleFrom": "Installed parity certificate and preserved control-plane backup"
+      },
+      {
+        "path": "/tmp/idle-residual-long-parity-37441485173.json",
+        "size": 1134,
+        "sha256": "b21b2ef4a9b467f1d1ee9c24d2c663da10ee3f0b2cd4efb4c1519b1e01171986",
+        "operationalReferences": [],
+        "reproducibleFrom": "Installed parity certificate and preserved control-plane backup"
+      },
+      {
+        "path": "/var/lib/disdex/shared/operator-activation/approved-ebcef8297a30517f3f42c97b80fb0661dc7dc03b.json",
+        "size": 678,
+        "sha256": "b678922c4ea7fca6169c6ddffc2c00579a486a85fa04ca621671899c75e7951a",
+        "operationalReferences": [],
+        "approvalAuditArchive": "/var/lib/disdex/operator-actions/live-approval-20261006-173512/superseded-activation/approved-ebcef8297a30517f3f42c97b80fb0661dc7dc03b.json"
+      },
+      {
+        "path": "/var/lib/disdex/shared/operator-activation/approved-00d2c749afc9dffa5cf395825c1499322a317b98.json",
+        "size": 835,
+        "sha256": "9146369f0527505053148386cc2033c73e8556f5946b18e40a2af45d8924fcc2",
+        "operationalReferences": [],
+        "approvalAuditArchive": "/var/lib/disdex/operator-actions/live-approval-20261006-173512/superseded-activation/approved-00d2c749afc9dffa5cf395825c1499322a317b98.json"
+      },
+      {
+        "path": "/var/lib/disdex/shared/operator-activation/approved-147aeea0f9cf59cf6ecf7d6b84e542828fa81030.json",
+        "size": 835,
+        "sha256": "35f04597e776d4f7eb3aa76962197ce00f064496ec2aa79f4e6425455b58efcb",
+        "operationalReferences": [],
+        "approvalAuditArchive": "/var/lib/disdex/operator-actions/live-approval-20261006-173512/superseded-activation/approved-147aeea0f9cf59cf6ecf7d6b84e542828fa81030.json"
+      }
+    ],
+    "protectedLockRetained": "/run/lock/disdex-idle-production-redeploy.lock",
+    "activeRuntimeStateTouched": false,
+    "canonicalApprovalTouched": false,
+    "ordersSent": 0,
+    "cancelsSent": 0,
+    "positionChangesSent": 0
+  },
+  "deployment": {
+    "runId": 37442463051,
+    "result": "success",
+    "productionSha": "8ed7c2266af33758b0a0f301aefc2457a7a7eab6",
+    "rollbackSha": "4c57efbb86ae0bbfe94bbe7dea4d09f0e1ec6c19",
+    "failedRunsRolledBack": [
+      37440371951,
+      37441485173
+    ]
+  }
+}
