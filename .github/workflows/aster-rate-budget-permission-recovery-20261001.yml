@@ -1,8 +1,6 @@
 name: Recover Aster shared rate-budget ownership and LIVE runners
 on:
-  push:
-    branches: [design/idle-priority-bt-parity-20260929]
-    paths: [.github/workflows/aster-rate-budget-permission-recovery-20261001.yml]
+  workflow_dispatch:
 permissions:
   contents: read
 concurrency:
