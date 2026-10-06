@@ -1,0 +1,79 @@
+name: Realtime Natural TTS diagnostic 20261006
+
+on:
+  push:
+    branches:
+      - codex/realtime-ranking-show-20261006
+    paths:
+      - ".github/workflows/realtime-natural-tts-diagnostic-20261006.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Initialize root SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+
+      - name: Verify current production natural TTS without mutation
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -p "$PORT" "root@$SSH_HOST" 'bash -s' <<'REMOTE'
+          set -Eeuo pipefail
+          ui=ai-dex-manager-ui.service
+          current=/home/deploy/disdex-trading/current
+          echo "UI_ACTIVE=$(systemctl is-active "$ui" 2>/dev/null || true)"
+          echo "UI_WD=$(systemctl show "$ui" -p WorkingDirectory --value)"
+          echo "UI_PID=$(systemctl show "$ui" -p MainPID --value)"
+          echo "UI_RESTARTS=$(systemctl show "$ui" -p NRestarts --value)"
+          echo "TRADING_SHA=$(tr -d '[:space:]' < "$current/.disdex-release-sha")"
+          pid="$(systemctl show "$ui" -p MainPID --value)"
+          if [[ "$pid" =~ ^[0-9]+$ && "$pid" -gt 0 ]]; then
+            if tr '\0' '\n' < "/proc/$pid/environ" | grep -q '^OPENAI_API_KEY='; then
+              echo "OPENAI_API_KEY_PRESENT=TRUE"
+            else
+              echo "OPENAI_API_KEY_PRESENT=FALSE"
+            fi
+          fi
+          code="$(curl -sS -D /tmp/tts.headers -o /tmp/tts.mp3 -w '%{http_code}' --max-time 30 \
+            -H 'Cookie: disdex_auth=1' -H 'Content-Type: application/json' \
+            -X POST -d '{"text":"ランキングが変化しました。自然な音声で落ち着いてお知らせします。","voice":"marin"}' \
+            http://127.0.0.1:3001/api/tts || true)"
+          echo "TTS_HTTP=$code"
+          echo "TTS_BYTES=$(wc -c < /tmp/tts.mp3 2>/dev/null | tr -d ' ' || echo 0)"
+          sed -n 's/^content-type:[[:space:]]*/TTS_CONTENT_TYPE=/Ip;s/^x-disdex-tts-model:[[:space:]]*/TTS_MODEL=/Ip;s/^x-disdex-tts-voice:[[:space:]]*/TTS_VOICE=/Ip;s/^x-disdex-audio-disclosure:[[:space:]]*/TTS_DISCLOSURE=/Ip' /tmp/tts.headers | tr -d '\r'
+          if [[ "$code" != 200 ]]; then
+            echo "=== TTS ERROR BODY ==="
+            head -c 500 /tmp/tts.mp3 || true
+            echo
+            echo "=== UI JOURNAL TAIL ==="
+            journalctl -u "$ui" -n 60 --no-pager -o short-iso | tail -60
+            exit 1
+          fi
+          [[ "$(wc -c < /tmp/tts.mp3 | tr -d ' ')" -gt 1000 ]]
+          echo "NATURAL_TTS_CURRENT_PRODUCTION=PASS"
+          REMOTE
