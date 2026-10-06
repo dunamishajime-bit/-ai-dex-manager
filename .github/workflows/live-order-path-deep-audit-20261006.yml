@@ -1,0 +1,164 @@
+name: Live Order Path Deep Audit 20261006
+
+on:
+  push:
+    branches:
+      - audit/live-order-path-20261006
+    paths:
+      - ".github/workflows/live-order-path-deep-audit-20261006.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install
+        run: npm ci --no-audit --no-fund
+      - name: Typecheck critical live runners
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          npm run strategy:v12-x1-all:typecheck
+          npm run strategy:pengu-dual-ls-v2:typecheck
+      - name: Critical live selftests
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          npm run strategy:v12-x1-all:selftest
+          npm run strategy:shared-crypto-risk:selftest
+          npm run strategy:quality102-causal-v4:selftest
+          npm run strategy:hype-trend-long:selftest
+          npm run strategy:idle-priority-short:selftest
+          npx tsx --test tests/fet-brk48-live-runner.test.ts tests/fet-brk48-state.test.ts
+      - name: Static stale-path audit
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          echo "=== risky literals ==="
+          grep -RInE 'PROFIT_FLOOR_0P5|ZEC.*LIVE|ACCOUNT_LOCK_BUSY|kill.?switch|EACCES|rate.?budget|shared.*lock|cooldown' \
+            lib config scripts ops deploy --exclude-dir=node_modules | head -n 500 || true
+          echo "=== live order call sites ==="
+          grep -RInE 'placeOrder|submitOrder|createOrder|sendOrder|tradeCall|executeOrder|orderClientId|clientOrderId' \
+            lib scripts --exclude-dir=node_modules | head -n 500 || true
+
+  vps-readonly:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Initialize SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+      - name: Read-only production audit
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -p "$PORT" "root@$SSH_HOST" 'bash -s' <<'REMOTE'
+          set -Eeuo pipefail
+          current=/home/deploy/disdex-trading/current
+          echo "=== PRODUCTION IDENTITY ==="
+          echo "CURRENT_PATH=$(readlink -f "$current" 2>/dev/null || true)"
+          echo "CURRENT_SHA=$(tr -d '[:space:]' < "$current/.disdex-release-sha" 2>/dev/null || true)"
+          echo "HOST=$(hostname)"
+          echo "NOW=$(date -Is)"
+          echo
+
+          echo "=== ACTIVE DISDEX SERVICES ==="
+          mapfile -t active < <(systemctl list-units --type=service --state=active --no-legend --plain 'disdex-*.service' | awk '{print $1}' | sort -u)
+          printf 'ACTIVE_COUNT=%s\n' "${#active[@]}"
+          for u in "${active[@]}"; do
+            printf '%s|' "$u"
+            printf 'active=%s|' "$(systemctl is-active "$u" 2>/dev/null || true)"
+            printf 'pid=%s|' "$(systemctl show "$u" -p MainPID --value 2>/dev/null || true)"
+            printf 'restarts=%s|' "$(systemctl show "$u" -p NRestarts --value 2>/dev/null || true)"
+            printf 'wd=%s|' "$(systemctl show "$u" -p WorkingDirectory --value 2>/dev/null || true)"
+            printf 'fragment=%s\n' "$(systemctl show "$u" -p FragmentPath --value 2>/dev/null || true)"
+          done
+          echo
+
+          echo "=== FAILED / INACTIVE INSTALLED DISDEX UNITS ==="
+          systemctl list-unit-files 'disdex-*.service' --no-legend --no-pager | sort || true
+          echo
+          systemctl --failed --no-legend --no-pager 'disdex-*' || true
+          echo
+
+          echo "=== CURRENT RELEASE FILE IDENTITY ==="
+          find "$current" -maxdepth 2 -type f \( -name '*.js' -o -name '*.ts' -o -name '*.json' \) -printf '%P\n' 2>/dev/null | sort | head -n 250 || true
+          echo
+
+          echo "=== SHARED STATE INVENTORY (METADATA ONLY) ==="
+          find /var/lib/disdex -maxdepth 4 -type f -printf '%TY-%Tm-%TdT%TH:%TM:%TS|%u:%g|%m|%s|%p\n' 2>/dev/null | sort | tail -n 300 || true
+          echo
+
+          echo "=== LOCK INVENTORY ==="
+          find /var/lib/disdex /run/disdex /tmp -maxdepth 5 \( -type d -o -type f \) \
+            \( -iname '*lock*' -o -iname '*kill*' -o -iname '*pending*' -o -iname '*risk*' \) \
+            -printf '%TY-%Tm-%TdT%TH:%TM:%TS|%u:%g|%m|%p\n' 2>/dev/null | sort | tail -n 300 || true
+          echo
+
+          echo "=== SAFE JSON STATE SUMMARY ==="
+          python3 - <<'PY'
+          import json,glob,os,time
+          roots=['/var/lib/disdex']
+          keys={'active','enabled','runtimeSha','releaseSha','stateSha','killSwitch','reason','status','lastUpdatedAt','updatedAt','lastDecisionAt','lastReconciledAt','owner','expiresAt','cooldownUntil','dailyLossPct','gross','symbol','side'}
+          for root in roots:
+            for p in glob.glob(root+'/**/*.json',recursive=True):
+              try:
+                if os.path.getsize(p)>2_000_000: continue
+                d=json.load(open(p,encoding='utf-8'))
+              except Exception: continue
+              if isinstance(d,dict):
+                out={k:d.get(k) for k in keys if k in d}
+                if out:
+                  print(p, json.dumps(out,ensure_ascii=False,sort_keys=True))
+          PY
+          echo
+
+          echo "=== JOURNAL ERRORS / BLOCKERS LAST 48H ==="
+          journalctl --since '48 hours ago' --no-pager -o short-iso \
+            | grep -Ei 'ACCOUNT_LOCK_BUSY|KILL.?SWITCH|429|rate.?limit|EACCES|permission denied|No such file|SHA_MISMATCH|runtime.*mismatch|state.*mismatch|stale|fatal|exception|traceback|unhandled|connection reset|timed out|timeout|margin|insufficient|rejected|failed|cooldown' \
+            | tail -n 1200 || true
+          echo
+
+          echo "=== ORDER / DECISION JOURNAL LAST 24H ==="
+          journalctl --since '24 hours ago' --no-pager -o short-iso \
+            | grep -Ei 'decision|candidate|gate|selected|order|submit|filled|position|protect|stop|gross|quantity|margin|cooldown|ownership' \
+            | tail -n 1500 || true
+          echo
+
+          echo "=== RELEASE INVENTORY ==="
+          for root in /home/deploy/disdex-trading/releases /home/deploy/disdex-trading/ui-releases; do
+            echo "-- $root"
+            if [[ -d "$root" ]]; then
+              find "$root" -mindepth 1 -maxdepth 1 -type d -printf '%TY-%Tm-%TdT%TH:%TM:%TS|%p\n' | sort
+            fi
+          done
+          echo
+
+          echo "=== DISK ==="
+          df -h / /home /var 2>/dev/null || true
+          du -sh /home/deploy/disdex-trading/releases /home/deploy/disdex-trading/ui-releases /var/lib/disdex 2>/dev/null || true
+          echo "AUDIT_READ_ONLY=PASS"
+          REMOTE
