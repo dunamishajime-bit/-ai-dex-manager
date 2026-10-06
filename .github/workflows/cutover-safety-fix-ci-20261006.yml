@@ -1,0 +1,35 @@
+name: Cutover Safety Fix CI 20261006
+on:
+  push:
+    branches: [fix/cutover-rollback-safety-20261006]
+    paths:
+      - "scripts/ops/root/disdex-idle-production-redeploy-20261001"
+      - ".github/workflows/full-order-path-production-deploy-20261006.yml"
+      - "tests/production-cutover-rollback-safety.test.mjs"
+      - ".github/workflows/cutover-safety-fix-ci-20261006.yml"
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Verify cutover script syntax and regression tests
+        run: |
+          set -Eeuo pipefail
+          bash -n scripts/ops/root/disdex-idle-production-redeploy-20261001
+          npx tsx --test tests/production-cutover-rollback-safety.test.mjs
+      - name: Verify existing order-path safety contracts
+        run: |
+          set -Eeuo pipefail
+          npx tsx --test             tests/live-order-lock-scope-v2.test.mjs             tests/fet-brk48-live-runner.test.ts             tests/account-lock-bounded-retry.test.ts             tests/v12-preorder-gross-reservation.test.ts             tests/quality102-preflight-protective-order.test.ts             tests/q102-risk-block-freshness.test.ts             tests/resident-stop-runner-integration.test.ts
+          npm run strategy:v12-x1-all:selftest
+          npm run strategy:shared-crypto-risk:selftest
+          npm run strategy:quality102-causal-v4:selftest
+          npm run strategy:hype-trend-long:selftest
