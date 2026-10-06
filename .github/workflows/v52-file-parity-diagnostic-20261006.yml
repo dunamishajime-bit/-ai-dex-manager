@@ -1,0 +1,57 @@
+name: V52 File Parity Diagnostic 20261006
+on:
+  push:
+    branches: [ops/post-cutover-diagnostic-20261006]
+    paths: [.github/workflows/v52-file-parity-diagnostic-20261006.yml]
+permissions: { contents: read }
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Git proof
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          git diff --exit-code 91dc6c8f1d5c32dd201209c5e0c42644d5cdaf22 4c57efbb86ae0bbfe94bbe7dea4d09f0e1ec6c19 -- scripts/disdex_v52_aster_only_live_engine.py scripts/disdex_v52_aster_only_legacy_engine.py scripts/ops/root/disdex-fet-preemption-readiness-guard.py
+          for sha in 91dc6c8f1d5c32dd201209c5e0c42644d5cdaf22 4c57efbb86ae0bbfe94bbe7dea4d09f0e1ec6c19; do
+            for p in scripts/disdex_v52_aster_only_live_engine.py scripts/disdex_v52_aster_only_legacy_engine.py scripts/ops/root/disdex-fet-preemption-readiness-guard.py; do
+              git show "$sha:$p" | sha256sum | awk -v s="$sha" -v p="$p" '{print "GIT",s,p,$1}'
+            done
+          done
+      - name: Setup SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 ~/.ssh
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def n(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id").write_text(n("ROOT_KEY")); (p/"known_hosts").write_text(n("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 600 ~/.ssh/id ~/.ssh/known_hosts
+      - name: Release file hashes
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ssh -T -i ~/.ssh/id -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=~/.ssh/known_hosts -p "${SSH_PORT:-22}" root@"$SSH_HOST" 'bash -s' <<'REMOTE'
+          set -e
+          for sha in 91dc6c8f1d5c32dd201209c5e0c42644d5cdaf22 4c57efbb86ae0bbfe94bbe7dea4d09f0e1ec6c19; do
+            for p in scripts/disdex_v52_aster_only_live_engine.py scripts/disdex_v52_aster_only_legacy_engine.py scripts/ops/root/disdex-fet-preemption-readiness-guard.py; do
+              f="/home/deploy/disdex-trading/releases/$sha/$p"
+              if [[ -f "$f" ]]; then
+                echo "DISK $sha $p $(sha256sum "$f" | awk '{print $1}') size=$(stat -c %s "$f") mtime=$(stat -c %y "$f")"
+              else echo "MISSING $sha $p"; fi
+            done
+          done
+          echo "=== live engine diff summary ==="
+          diff -u /home/deploy/disdex-trading/releases/91dc6c8f1d5c32dd201209c5e0c42644d5cdaf22/scripts/disdex_v52_aster_only_live_engine.py /home/deploy/disdex-trading/releases/4c57efbb86ae0bbfe94bbe7dea4d09f0e1ec6c19/scripts/disdex_v52_aster_only_live_engine.py | head -80 || true
+          REMOTE
