@@ -36,7 +36,7 @@ test('initial and unchanged rankings do not flash; only movement flashes',()=>{
 test('unknown signal data and stale snapshots have no rankable score',()=>{
  assert.equal(gateScore([{key:'x',label:'x',state:'UNKNOWN',detail:''}],true),null);
  assert.equal(gateScore([{key:'x',label:'x',state:'OK',detail:''}],false),null);
- assert.equal(gateScore([{key:'x',label:'x',state:'OK',detail:''},{key:'account',label:'account',state:'UNKNOWN',detail:'',kind:'execution'}],true),100);
+ assert.equal(gateScore([{key:'x',label:'x',state:'OK',detail:''},{key:'account',label:'account',state:'UNKNOWN',detail:'',kind:'execution'}],true),50);
  assert.equal(gateScore([{key:'x',label:'x',state:'NO',progress:.99,detail:''},{key:'y',label:'y',state:'OK',detail:''}],true),99);
 });
 test('FET five-minute clock boundary and last completed bar freshness',()=>{

@@ -1,0 +1,7 @@
+[Unit]
+Description=Watch Q102 decision updates for current ranking details
+[Path]
+PathChanged=/var/lib/disdex/quality102-causal-v1/decision-snapshot.json
+Unit=disdex-quality102-ranking-refresh.service
+[Install]
+WantedBy=multi-user.target

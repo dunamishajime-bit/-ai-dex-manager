@@ -1,4 +1,4 @@
-export type Gate = { key:string; label:string; state:'OK'|'NO'|'UNKNOWN'; actual?:number|string; required?:number|string; detail:string; kind?:'signal'|'execution'; progress?:number };
+export type Gate = { key:string; label:string; state:'OK'|'NO'|'UNKNOWN'; actual?:number|string; required?:number|string; detail:string; kind?:'signal'|'execution'|'reference'; progress?:number };
 export type RankRow = { id:string; symbol:string; logic:string; side:string; score:number|null; gates:Gate[]; reason:string; fresh:boolean; checkedAt:number; rank?:number; href?:string };
 export function executionBlocked(row:RankRow){return row.gates.some(g=>g.kind==='execution'&&g.state==='NO');}
 export function rankRows(rows:RankRow[]){const tier=(r:RankRow)=>r.score===null?0:executionBlocked(r)?1:2;return [...rows].sort((a,b)=>tier(b)-tier(a)||(b.score??-1)-(a.score??-1)||a.id.localeCompare(b.id)).map((r,i)=>({...r,rank:r.score===null?undefined:i+1}));}
@@ -19,13 +19,22 @@ export function rankingPcAlert(previous:RankRow[],next:RankRow[]):RankingPcAlert
  if(entrants.length)parts.push(entrants.map(e=>e.row.symbol.replace(/USDT$/,'')+' / '+e.row.logic+' '+e.from+'位→'+e.to+'位').join('、'));
  return {title:entrants.length?'Top3入りを検知':'1位がScore 90以上',body:parts.join('。')+'。',reason:highTop&&entrants.length?'BOTH':entrants.length?'TOP3_ENTRY':'TOP_SCORE'};
 }
-export function gateScore(gates:Gate[],fresh:boolean){const signal=gates.filter(g=>g.kind!=='execution');if(!fresh||!signal.length||signal.some(g=>g.state==='UNKNOWN'))return null;const score=Math.round(100*signal.reduce((s,g)=>s+(g.state==='OK'?1:Math.max(0,Math.min(.99,g.progress??0))),0)/signal.length);return signal.every(g=>g.state==='OK')?100:Math.min(99,score);}
+export function gateScore(gates:Gate[],fresh:boolean){
+ const required=gates.filter(g=>g.kind!=='reference'),signal=required.filter(g=>g.kind!=='execution');
+ if(!fresh||!signal.length||signal.some(g=>g.state==='UNKNOWN'))return null;
+ const score=Math.round(100*required.reduce((sum,g)=>sum+(g.state==='OK'?1:g.kind==='execution'||g.state==='UNKNOWN'?0:Math.max(0,Math.min(.99,g.progress??0))),0)/required.length);
+ return required.every(g=>g.state==='OK')?100:Math.min(99,score);
+}
 export const FET_POLICY={lookbackHours:48,volumeMedianHours:72,minimumVolumeRatio:1.2,minimumReturn72h:.02,decisionEntryHourModulo:4,decisionEntryHourRemainder:1,liveEntryWindowMs:300000};
 export function freshTimestamp(at:unknown,now:number,maxAge:number){return typeof at==='number'&&Number.isFinite(at)&&at>0&&now-at>=-60000&&now-at<=maxAge;}
 export function updateFetClock(gates:Gate[],now:number){const entry=now-now%3600000,open=new Date(entry).getUTCHours()%FET_POLICY.decisionEntryHourModulo===FET_POLICY.decisionEntryHourRemainder&&now-entry<=FET_POLICY.liveEntryWindowMs;return gates.map(g=>g.key==='clock'?{...g,state:open?'OK' as const:'NO' as const,actual:new Date(now).toISOString(),detail:'現在時刻で受付時間を再評価（市場条件は記載の観測時点）'}:g);}
 export function fetObservationExpiry(at:number,ttl:number){const hour=Math.floor(at/3600000)*3600000,cutoff=hour+FET_POLICY.liveEntryWindowMs+1;return Math.min(at+ttl,hour+3600000,at<cutoff?cutoff:Infinity);}
 export function currentFetGates(gates:Gate[],checkedAt:number,now:number){return updateFetClock(gates,now).map(g=>Math.floor(checkedAt/3600000)!==Math.floor(now/3600000)&&(g.kind!=='execution'||g.key==='data')?{...g,state:'UNKNOWN' as const,detail:'新しい確定足の観測更新待ち（前回値）'}:g);}
-export function currentRankRow(row:RankRow,now:number):RankRow{if(row.logic!=='FET')return row;const fresh=row.fresh&&Math.floor(row.checkedAt/3600000)===Math.floor(now/3600000);return {...row,fresh,gates:currentFetGates(row.gates,row.checkedAt,now),score:fresh?row.score:null,rank:fresh?row.rank:undefined,reason:fresh?row.reason:'新しい確定足の観測更新待ち'};}
+export function currentRankRow(row:RankRow,now:number):RankRow{
+ if(row.logic!=='FET')return row.gates.length?{...row,score:gateScore(row.gates,row.fresh)}:row;
+ const fresh=row.fresh&&Math.floor(row.checkedAt/3600000)===Math.floor(now/3600000),gates=currentFetGates(row.gates,row.checkedAt,now);
+ return {...row,fresh,gates,score:gateScore(gates,fresh),rank:fresh?row.rank:undefined,reason:fresh?row.reason:'新しい確定足の観測更新待ち'};
+}
 export function evaluateFet(raw:unknown,now:number,policy=FET_POLICY):{valid:boolean;gates:Gate[];referenceTs?:number}{
  const H=3600000,entry=now-now%H;
  const clock=new Date(entry).getUTCHours()%policy.decisionEntryHourModulo===policy.decisionEntryHourRemainder&&now-entry<=policy.liveEntryWindowMs;
