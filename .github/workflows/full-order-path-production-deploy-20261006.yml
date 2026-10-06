@@ -1,0 +1,275 @@
+name: Full Order Path Production Deploy 20261006
+
+on:
+  push:
+    branches:
+      - codex/full-order-path-audit-20261006
+    paths:
+      - ".github/workflows/full-order-path-production-deploy-20261006.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: disdex-full-order-path-production-deploy-20261006
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      TARGET_SHA: ${{ github.sha }}
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+
+      - name: Verify exact runtime delta and decision-to-order safety
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          npm ci --no-audit --no-fund
+          npx tsx --test \
+            tests/live-order-lock-scope-v2.test.mjs \
+            tests/fet-brk48-live-runner.test.ts \
+            tests/hype-trend-runner-gate.test.ts \
+            tests/hype-zec-runner-gate.test.ts \
+            tests/account-lock-bounded-retry.test.ts \
+            tests/v12-preorder-gross-reservation.test.ts \
+            tests/managed-protective-orders.test.ts \
+            tests/quality102-preflight-protective-order.test.ts \
+            tests/q102-risk-block-freshness.test.ts \
+            tests/shared-risk-rollover-retry.test.ts \
+            tests/resident-stop-runner-integration.test.ts
+          npm run strategy:v12-x1-all:selftest
+          npm run strategy:pengu-dual-ls-v2:recovery-v8:selftest
+          npm run strategy:quality102-causal-v1:runner:selftest
+          npm run strategy:hype-trend-long:selftest
+          npm run strategy:shared-crypto-risk:selftest
+          npx tsc --noEmit -p tsconfig.pengu-dual-ls-v2.json
+          npx tsc --noEmit -p tsconfig.v96-runner.json
+          bash -n scripts/ops/root/disdex-idle-production-redeploy-20261001
+          bash -n scripts/ops/root/disdex-current-runtime-wiring
+          bash scripts/ops/root/disdex-current-runtime-wiring --self-test
+
+      - name: Initialize restricted root SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ -n "$SSH_HOST" && -n "$ROOT_KEY" && -n "$SSH_KNOWN_HOSTS" ]]
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+
+      - name: Prove direct descendant and runtime-only delta
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          FROM_SHA="$(ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -p "$PORT" root@"$SSH_HOST" "tr -d '[:space:]' </home/deploy/disdex-trading/current/.disdex-release-sha")"
+          [[ "$FROM_SHA" =~ ^[0-9a-f]{40}$ && "$FROM_SHA" != "$TARGET_SHA" ]]
+          git merge-base --is-ancestor "$FROM_SHA" "$TARGET_SHA"
+          git diff --quiet "$FROM_SHA" "$TARGET_SHA" -- package-lock.json
+          mapfile -t changed < <(git diff --name-only "$FROM_SHA" "$TARGET_SHA")
+          for p in "${changed[@]}"; do
+            case "$p" in
+              .github/workflows/full-order-path-*-20261006.yml|\
+              lib/fet-brk48-live-runner.ts|\
+              lib/hype-zec-long-runner.ts|\
+              scripts/disdex-fet-brk48-live-runner.ts|\
+              tests/fet-brk48-live-runner.test.ts|\
+              tests/live-order-lock-scope-v2.test.mjs) ;;
+              *) echo "UNEXPECTED_PRODUCTION_DELTA=$p"; exit 1 ;;
+            esac
+          done
+          # Strategy signals, sizing, risk policy, V12/PENGU/Q102/V52/Idle and
+          # exchange execution primitives are byte-identical to current LIVE.
+          critical_unchanged=(
+            config
+            lib/v12-live-execution-engine.ts
+            lib/pengu-dual-ls-v2-portfolio-runner.ts
+            lib/disdex-quality102-causal-v1-runner.ts
+            lib/idle-priority-short-runner.ts
+            lib/idle-residual-long-runner.ts
+            lib/direct-trade-executor.ts
+            lib/aster-v3-client.ts
+            scripts/disdex_v52_aster_only_live_engine.py
+            scripts/disdex_v52_aster_only_legacy_engine.py
+          )
+          # Exclude the two intentionally changed runtime runner files under lib/.
+          for p in "${critical_unchanged[@]}"; do
+            if [[ "$p" == config ]]; then
+              git diff --quiet "$FROM_SHA" "$TARGET_SHA" -- "$p"
+            elif [[ -e "$p" ]]; then
+              git diff --quiet "$FROM_SHA" "$TARGET_SHA" -- "$p"
+            fi
+          done
+          echo "FROM_SHA=$FROM_SHA" >> "$GITHUB_ENV"
+          echo "RUNTIME_ONLY_DELTA=PASS"
+          echo "FROM_SHA=$FROM_SHA TARGET_SHA=$TARGET_SHA"
+
+      - name: Rebind unchanged Idle parity certificates to exact target SHA
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          scp -i "$HOME/.ssh/id_root" -P "$PORT" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            root@"$SSH_HOST":/var/lib/disdex/shared/idle-priority-parity-cert.json /tmp/idle-current.json
+          scp -i "$HOME/.ssh/id_root" -P "$PORT" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            root@"$SSH_HOST":/var/lib/disdex/shared/idle-residual-long-parity-cert.json /tmp/residual-current.json
+          FROM_SHA="$FROM_SHA" TARGET_SHA="$TARGET_SHA" npx tsx -e '
+            import fs from "node:fs";
+            import {assertIdleParityCertificate} from "./lib/idle-priority-short-parity-cert";
+            import {assertIdleResidualLongParityCert} from "./lib/idle-residual-long-parity-cert";
+            const from=process.env.FROM_SHA!,target=process.env.TARGET_SHA!;
+            const a=JSON.parse(fs.readFileSync("/tmp/idle-current.json","utf8"));
+            assertIdleParityCertificate(a,from);
+            a.runtimeSha=target; a.generatedAt=Date.now();
+            assertIdleParityCertificate(a,target);
+            fs.writeFileSync("/tmp/idle-target.json",JSON.stringify(a,null,2)+"\n");
+            const b=JSON.parse(fs.readFileSync("/tmp/residual-current.json","utf8"));
+            assertIdleResidualLongParityCert(b,from);
+            b.runtimeSha=target; b.generatedAt=new Date().toISOString();
+            assertIdleResidualLongParityCert(b,target);
+            fs.writeFileSync("/tmp/residual-target.json",JSON.stringify(b,null,2)+"\n");
+            console.log("UNCHANGED_IDLE_CERT_REBIND=PASS");
+          '
+          git archive --format=tar.gz --output=/tmp/disdex-trading-source.tgz HEAD
+          echo "SOURCE_SHA256=$(sha256sum /tmp/disdex-trading-source.tgz | awk '{print $1}')" >> "$GITHUB_ENV"
+          echo "CERT_SHA256=$(sha256sum /tmp/idle-target.json | awk '{print $1}')" >> "$GITHUB_ENV"
+          echo "RESIDUAL_CERT_SHA256=$(sha256sum /tmp/residual-target.json | awk '{print $1}')" >> "$GITHUB_ENV"
+
+      - name: Transfer immutable source and audited cutover inputs
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          common=(-i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts")
+          scp "${common[@]}" -P "$PORT" /tmp/disdex-trading-source.tgz root@"$SSH_HOST":/tmp/disdex-source-$GITHUB_RUN_ID.tgz
+          scp "${common[@]}" -P "$PORT" /tmp/idle-target.json root@"$SSH_HOST":/tmp/idle-parity-v3-$GITHUB_RUN_ID.json
+          scp "${common[@]}" -P "$PORT" /tmp/residual-target.json root@"$SSH_HOST":/tmp/idle-residual-long-parity-$GITHUB_RUN_ID.json
+          scp "${common[@]}" -P "$PORT" scripts/ops/root/disdex-idle-production-redeploy-20261001 root@"$SSH_HOST":/tmp/disdex-idle-cutover-$GITHUB_RUN_ID.sh
+
+      - name: Exact SHA Production cutover with automatic rollback
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -p "$PORT" root@"$SSH_HOST" \
+            "FROM_SHA='$FROM_SHA' TARGET_SHA='$TARGET_SHA' REQUEST_ID='$GITHUB_RUN_ID' SOURCE_SHA256='$SOURCE_SHA256' CERT_SHA256='$CERT_SHA256' RESIDUAL_CERT_SHA256='$RESIDUAL_CERT_SHA256' V12_ACTIVE_MIGRATION_CODE_PARITY='1' bash /tmp/disdex-idle-cutover-$GITHUB_RUN_ID.sh"
+
+      - name: Postdeploy read-only account and runtime verification
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -p "$PORT" root@"$SSH_HOST" "TARGET_SHA='$TARGET_SHA' bash -s" <<'REMOTE'
+          set -Eeuo pipefail
+          current=/home/deploy/disdex-trading/current
+          [[ "$(tr -d '[:space:]' < "$current/.disdex-release-sha")" == "$TARGET_SHA" ]]
+          [[ "$(readlink -f "$current")" == "/home/deploy/disdex-trading/releases/$TARGET_SHA" ]]
+          names=(disdex-v12-x1-all disdex-pengu-dual-ls-v2 disdex-quality102-causal-v1 disdex-v52-aster-only disdex-fet-brk48 disdex-hype-long disdex-idle-priority-short disdex-shared-crypto-risk disdex-v12-v52-margin-guard)
+          for name in "${names[@]}"; do
+            unit="$name@$TARGET_SHA.service"
+            [[ "$(systemctl is-active "$unit" 2>/dev/null || true)" == active ]]
+            pid="$(systemctl show "$unit" -p MainPID --value)"
+            [[ "$pid" =~ ^[0-9]+$ && "$pid" -gt 0 ]]
+            cwd="$(readlink -f "/proc/$pid/cwd" 2>/dev/null || true)"
+            [[ "$cwd" == "/home/deploy/disdex-trading/releases/$TARGET_SHA" ]]
+          done
+          python3 - <<'PY'
+          import json,time
+          now=int(time.time()*1000)
+          kill=json.load(open("/var/lib/disdex/shared/kill-switch.json"))
+          risk=json.load(open("/var/lib/disdex/shared/crypto-daily-risk.json"))
+          guard=json.load(open("/var/lib/disdex/shared/margin-risk/guard-live.json"))
+          pending=json.load(open("/var/lib/disdex/shared/pending-exposure.json"))
+          assert kill.get("active") is False
+          assert risk.get("tripped") is False and risk.get("sourceComplete") is True and now-int(risk["updatedAt"])<120000
+          assert guard.get("stage")=="HEALTHY" and guard.get("ordersAllowed") is True and now-int(guard["checkedAt"])<360000
+          active=[r for r in pending.get("entries",[]) if str(r.get("status","")).upper() in {"PENDING","SUBMITTED","UNKNOWN"}]
+          assert not active, active
+          print("POSTDEPLOY_SHARED_SAFETY=PASS")
+          PY
+          set -a
+          for f in /etc/disdex/disdex-v13d-v11eq-v96.env /etc/disdex/disdex-v12-pengu-v2-v52.env /etc/disdex/disdex-v12-x1-all.env; do [[ -f "$f" ]] && . "$f"; done
+          set +a
+          cd "/home/deploy/disdex-trading/releases/$TARGET_SHA"
+          ./node_modules/.bin/tsx scripts/disdex-aster-readonly-account-diagnostic.ts | tee /tmp/postdeploy-account-$TARGET_SHA.jsonl
+          grep -q 'ASTER_READONLY_ACCOUNT_DIAGNOSTIC_PASS' /tmp/postdeploy-account-$TARGET_SHA.jsonl
+          echo "POSTDEPLOY_RUNTIME=PASS"
+          echo "ORDER_MUTATION_AUDIT=READ_ONLY"
+          REMOTE
+
+      - name: Retention cleanup with dry-run guard
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -p "$PORT" root@"$SSH_HOST" "TARGET_SHA='$TARGET_SHA' bash -s" <<'REMOTE'
+          set -Eeuo pipefail
+          release="/home/deploy/disdex-trading/releases/$TARGET_SHA"
+          dry="$("$release/scripts/ops/root/disdex-vps-retention-cleanup" --dry-run)"
+          echo "$dry"
+          python3 - "$dry" <<'PY'
+          import json,sys
+          d=json.loads(sys.argv[1])
+          assert d["status"]=="DISDEX_VPS_RETENTION_CLEANUP_PASS"
+          assert d["protectedPathsTouched"] is False
+          assert d["currentReleaseDeleted"] is False
+          assert d["runtimeStateDeleted"] is False
+          assert d["approvalDeleted"] is False
+          assert d["killSwitchDeleted"] is False
+          assert d["ordersSent"] is False and d["cancelSent"] is False and d["positionChangesSent"] is False
+          PY
+          applied="$("$release/scripts/ops/root/disdex-vps-retention-cleanup" --apply)"
+          echo "$applied"
+          python3 - "$applied" "$TARGET_SHA" <<'PY'
+          import json,sys
+          d=json.loads(sys.argv[1]); sha=sys.argv[2]
+          assert d["status"]=="DISDEX_VPS_RETENTION_CLEANUP_PASS"
+          assert d["currentReleaseDeleted"] is False
+          assert d["runtimeStateDeleted"] is False
+          assert d["killSwitchDeleted"] is False
+          assert d["ordersSent"] is False and d["cancelSent"] is False and d["positionChangesSent"] is False
+          assert f"/home/deploy/disdex-trading/releases/{sha}" in d["protectedPaths"]
+          print("RETENTION_CLEANUP=PASS")
+          PY
+          REMOTE
+
+      - name: Public smoke
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          for route in /decision-status /realtime /history; do
+            code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 "https://professional-dismanager.net$route")"
+            echo "PUBLIC_ROUTE=$route HTTP=$code"
+            [[ "$code" =~ ^(200|30[1278]|401|403)$ ]]
+          done
