@@ -3,6 +3,22 @@ export type RankRow = { id:string; symbol:string; logic:string; side:string; sco
 export function executionBlocked(row:RankRow){return row.gates.some(g=>g.kind==='execution'&&g.state==='NO');}
 export function rankRows(rows:RankRow[]){const tier=(r:RankRow)=>r.score===null?0:executionBlocked(r)?1:2;return [...rows].sort((a,b)=>tier(b)-tier(a)||(b.score??-1)-(a.score??-1)||a.id.localeCompare(b.id)).map((r,i)=>({...r,rank:r.score===null?undefined:i+1}));}
 export function rankChanges(previous:string[],next:string[]){const result:Record<string,number>={};if(!previous.length)return result;next.forEach((id,i)=>{const old=previous.indexOf(id);if(old<0)result[id]=0;else if(old!==i)result[id]=old-i;});return result;}
+export type RankingPcAlert={title:string;body:string;reason:'TOP_SCORE'|'TOP3_ENTRY'|'BOTH'};
+export function rankingPcAlert(previous:RankRow[],next:RankRow[]):RankingPcAlert|null{
+ if(!previous.length)return null;
+ const before=rankRows(previous).filter(r=>r.score!==null),after=rankRows(next).filter(r=>r.score!==null);
+ if(!after.length)return null;
+ const beforeIds=before.map(r=>r.id),afterIds=after.map(r=>r.id);
+ const rankingChanged=beforeIds.length!==afterIds.length||beforeIds.some((id,i)=>afterIds[i]!==id);
+ const top=after[0],highTop=rankingChanged&&top.score!==null&&top.score>=90;
+ const oldPos=new Map(before.map((r,i)=>[r.id,i+1]));
+ const entrants=after.slice(0,3).flatMap((r,i)=>{const from=oldPos.get(r.id);return from&&from>3?[{row:r,from,to:i+1}]:[];});
+ if(!highTop&&!entrants.length)return null;
+ const parts:string[]=[];
+ if(highTop)parts.push('1位 '+top.symbol.replace(/USDT$/,'')+' / '+top.logic+' Score '+top.score);
+ if(entrants.length)parts.push(entrants.map(e=>e.row.symbol.replace(/USDT$/,'')+' / '+e.row.logic+' '+e.from+'位→'+e.to+'位').join('、'));
+ return {title:entrants.length?'Top3入りを検知':'1位がScore 90以上',body:parts.join('。')+'。',reason:highTop&&entrants.length?'BOTH':entrants.length?'TOP3_ENTRY':'TOP_SCORE'};
+}
 export function gateScore(gates:Gate[],fresh:boolean){const signal=gates.filter(g=>g.kind!=='execution');if(!fresh||!signal.length||signal.some(g=>g.state==='UNKNOWN'))return null;const score=Math.round(100*signal.reduce((s,g)=>s+(g.state==='OK'?1:Math.max(0,Math.min(.99,g.progress??0))),0)/signal.length);return signal.every(g=>g.state==='OK')?100:Math.min(99,score);}
 export const FET_POLICY={lookbackHours:48,volumeMedianHours:72,minimumVolumeRatio:1.2,minimumReturn72h:.02,decisionEntryHourModulo:4,decisionEntryHourRemainder:1,liveEntryWindowMs:300000};
 export function freshTimestamp(at:unknown,now:number,maxAge:number){return typeof at==='number'&&Number.isFinite(at)&&at>0&&now-at>=-60000&&now-at<=maxAge;}
