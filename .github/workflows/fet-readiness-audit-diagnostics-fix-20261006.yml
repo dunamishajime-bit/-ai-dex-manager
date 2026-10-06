@@ -55,9 +55,10 @@ jobs:
           mapfile -t trading_units < <(systemctl list-units --type=service --state=active --no-legend --plain 'disdex-*.service' | awk '{print $1}' | sort)
           declare -A before_pid before_restart
           for u in "${trading_units[@]}"; do before_pid["$u"]="$(systemctl show "$u" -p MainPID --value)"; before_restart["$u"]="$(systemctl show "$u" -p NRestarts --value)"; done
-          units="$(systemctl list-unit-files --no-legend | awk '/fet-preemption-readiness/ {print $1}')"
+          units="$(systemctl list-unit-files --no-legend | awk '/fet-preemption-readiness.*\.service/ {print $1}')"
           [[ -n "$units" ]]
           while read -r unit; do
+            [[ "$unit" == *.service ]] || continue
             systemctl cat "$unit" --no-pager | grep -Fq "$target"
           done <<<"$units"
           cp -a "$target" "$target.before-20261006-audit-diagnostics"
