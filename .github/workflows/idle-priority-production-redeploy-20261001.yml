@@ -1,9 +1,7 @@
 name: Idle Priority exact-SHA Production redeploy
 # redeploy-sequence: idle-activation-projection-permissions-v31
 on:
-  push:
-    branches: [design/idle-priority-bt-parity-20260929]
-    paths: [.github/workflows/idle-priority-production-redeploy-20261001.yml]
+  workflow_dispatch:
 permissions:
   contents: read
 concurrency:
