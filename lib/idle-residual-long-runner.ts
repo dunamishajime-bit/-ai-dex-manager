@@ -142,7 +142,7 @@ export class IdleResidualLongRunner{
       return {status:"held",message:`IDLE_RESIDUAL_ENTRY_${result.status}_NO_EXPOSURE`,symbol:pending.symbol,ordersSent:0,cancelsSent:0,positionChangesSent:0};
     }
     const actual=activePosition(await this.d.executor.getPositions(),pending.symbol);
-    if(!actual||actual.quantity<0||actual.positionSide==="SHORT")return this.manual(state,`IDLE_RESIDUAL_ENTRY_POSITION_MISMATCH:${pending.symbol}`);
+    if(!actual||actual.quantity<0||actual.positionSide==="SHORT")return await this.manual(state,`IDLE_RESIDUAL_ENTRY_POSITION_MISMATCH:${pending.symbol}`);
     let owned:IdleResidualLongPosition;
     try{owned=await this.installProtection(pending,actual);}
     catch(error){
@@ -151,23 +151,23 @@ export class IdleResidualLongRunner{
         const closeId=id([pending.clientOrderId,"UNPROTECTED_CLOSE"],"res-safe");
         await this.d.executor.executeMarket({requestId:closeId,clientOrderId:closeId,symbol:pending.symbol,side:"SELL",positionSide:"BOTH",quantity:Math.abs(actual.quantity),reduceOnly:true,expectedPrice:quote.bidPrice,maxSlippageBps:this.d.runtime.maximumSlippageBps,reason:"IDLE_RESIDUAL_UNPROTECTED_SAFETY_CLOSE"});
       }catch{}
-      return this.manual(state,`IDLE_RESIDUAL_PROTECTION_FAILED:${error instanceof Error?error.message:String(error)}`);
+      return await this.manual(state,`IDLE_RESIDUAL_PROTECTION_FAILED:${error instanceof Error?error.message:String(error)}`);
     }
     state.position=owned;state.pending=null;
     state.lastDecision={decisionTs:pending.decisionTs,symbol:pending.symbol,route:pending.route,accepted:true,reason:"IDLE_RESIDUAL_ENTRY_FILLED"};
     await this.d.stateStore.save(state);
     if(pending.reservationId)await lock.releaseReservation(pending.reservationId);
     await lock.document();
-    if(result.status==="PARTIALLY_FILLED")return this.manual(state,"IDLE_RESIDUAL_PARTIAL_FILL_REQUIRES_REVIEW");
+    if(result.status==="PARTIALLY_FILLED")return await this.manual(state,"IDLE_RESIDUAL_PARTIAL_FILL_REQUIRES_REVIEW");
     return {status:"completed",message:`IDLE_RESIDUAL_ENTRY_COMPLETED:${pending.symbol}`,symbol:pending.symbol,ordersSent:1,cancelsSent:0,positionChangesSent:1};
   }
 
   private async reconcilePending(state:IdleResidualLongState,lock:AccountLockHandle):Promise<IdleResidualLongTickResult|undefined>{
     const p=state.pending;if(!p)return undefined;
     const result=await this.d.executor.reconcileOrder(p.symbol,p.clientOrderId);
-    if(result.status==="UNKNOWN"||result.executionUnknown)return this.manual(state,`IDLE_RESIDUAL_PENDING_UNKNOWN:${p.clientOrderId}`);
-    if(p.action==="ENTRY")return this.finalizeEntry(state,p,result,lock);
-    if(activePosition(await this.d.executor.getPositions(),p.symbol))return this.manual(state,`IDLE_RESIDUAL_EXIT_POSITION_REMAINS:${p.symbol}`);
+    if(result.status==="UNKNOWN"||result.executionUnknown)return await this.manual(state,`IDLE_RESIDUAL_PENDING_UNKNOWN:${p.clientOrderId}`);
+    if(p.action==="ENTRY")return await this.finalizeEntry(state,p,result,lock);
+    if(activePosition(await this.d.executor.getPositions(),p.symbol))return await this.manual(state,`IDLE_RESIDUAL_EXIT_POSITION_REMAINS:${p.symbol}`);
     const owned=state.position;
     if(owned){
       await this.d.adapter.cancel(owned.stopClientOrderId).catch(()=>undefined);
@@ -186,9 +186,9 @@ export class IdleResidualLongRunner{
     state.pending.phase="submitted";await this.d.stateStore.save(state);
     let result:DirectTradeResult;
     try{result=await this.d.executor.executeMarket({requestId:clientOrderId,clientOrderId,symbol:owned.symbol,side:"SELL",positionSide:"BOTH",quantity:Math.abs(actual.quantity),reduceOnly:true,expectedPrice:quote.bidPrice,maxSlippageBps:this.d.runtime.maximumSlippageBps,reason:`IDLE_RESIDUAL_LONG_EXIT:${reason}`});}
-    catch(error){return this.manual(state,`IDLE_RESIDUAL_EXIT_ERROR:${error instanceof Error?error.message:String(error)}`);}
-    if(result.status==="UNKNOWN"||result.executionUnknown)return this.manual(state,`IDLE_RESIDUAL_EXIT_UNKNOWN:${clientOrderId}`);
-    if(activePosition(await this.d.executor.getPositions(),owned.symbol))return this.manual(state,`IDLE_RESIDUAL_EXIT_POSITION_REMAINS:${owned.symbol}`);
+    catch(error){return await this.manual(state,`IDLE_RESIDUAL_EXIT_ERROR:${error instanceof Error?error.message:String(error)}`);}
+    if(result.status==="UNKNOWN"||result.executionUnknown)return await this.manual(state,`IDLE_RESIDUAL_EXIT_UNKNOWN:${clientOrderId}`);
+    if(activePosition(await this.d.executor.getPositions(),owned.symbol))return await this.manual(state,`IDLE_RESIDUAL_EXIT_POSITION_REMAINS:${owned.symbol}`);
     await this.d.adapter.cancel(owned.stopClientOrderId).catch(()=>undefined);
     await this.d.adapter.cancel(owned.takeProfitClientOrderId).catch(()=>undefined);
     state.position=null;state.pending=null;
@@ -247,7 +247,17 @@ export class IdleResidualLongRunner{
     await readAndAssertIdleResidualLongParityCert(this.d.runtime.parityCertificatePath,this.d.runtime.runtimeSha);
     const coreState=await readIdleState(this.d.coreRuntime.statePath,this.d.coreRuntime.runtimeSha);
     if(coreState.positions.length||coreState.pending)return {status:"held",message:"IDLE_RESIDUAL_BLOCKED_BY_IDLE_SHORT_STATE",ordersSent:0,cancelsSent:0,positionChangesSent:0};
-    const context=await this.baselineContext(positions,equity,signal.features.decisionTs,new Set());
+    let context:Awaited<ReturnType<IdleResidualLongRunner["baselineContext"]>>;
+    try{
+      context=await this.baselineContext(positions,equity,signal.features.decisionTs,new Set());
+    }catch(error){
+      // Unavailable baseline evidence blocks entry, but is retried on the next
+      // tick. Do not turn a stale observation into a sticky manual review.
+      const reason=`BASELINE_ADMISSION_BLOCKED:${error instanceof Error?error.message:String(error)}`;
+      state.lastDecision={decisionTs:signal.features.decisionTs,symbol:signal.symbol,route:signal.route,accepted:false,reason};
+      await this.d.stateStore.save(state);
+      return {status:"held",message:`IDLE_RESIDUAL_${reason}`,symbol:signal.symbol,ordersSent:0,cancelsSent:0,positionChangesSent:0};
+    }
     if(context.baseline.baselineAcceptedThisTimestamp>0||context.baseline.baselineOpenPositions>EPS||context.baseline.baselinePendingExposure>EPS){
       return {status:"held",message:"IDLE_RESIDUAL_BLOCKED_BY_FORMAL_BASELINE",ordersSent:0,cancelsSent:0,positionChangesSent:0};
     }
@@ -272,8 +282,8 @@ export class IdleResidualLongRunner{
     state.pending.phase="submitted";await this.d.stateStore.save(state);
     try{
       const result=await this.d.executor.executeMarket({requestId:clientOrderId,clientOrderId,symbol:signal.symbol,side:"BUY",positionSide:"BOTH",quantity:normalized.quantity,expectedPrice:quote.askPrice,maxSlippageBps:this.d.runtime.maximumSlippageBps,reason:`IDLE_RESIDUAL_LONG_ENTRY:${signal.route}`,requireVenueMargin5xCross:true});
-      return this.finalizeEntry(state,pending,result,lock);
-    }catch(error){return this.manual(state,`IDLE_RESIDUAL_ENTRY_ERROR:${error instanceof Error?error.message:String(error)}`);}
+      return await this.finalizeEntry(state,pending,result,lock);
+    }catch(error){return await this.manual(state,`IDLE_RESIDUAL_ENTRY_ERROR:${error instanceof Error?error.message:String(error)}`);}
   }
 
   async tick():Promise<IdleResidualLongTickResult>{
@@ -295,19 +305,19 @@ export class IdleResidualLongRunner{
       if(state.position){
         const owned=state.position;
         const actual=activePosition(freshPositions,owned.symbol);
-        if(!actual)return this.manual(state,`IDLE_RESIDUAL_POSITION_MISSING:${owned.symbol}`);
+        if(!actual)return await this.manual(state,`IDLE_RESIDUAL_POSITION_MISSING:${owned.symbol}`);
         const coreState=await readIdleState(this.d.coreRuntime.statePath,this.d.coreRuntime.runtimeSha);
         let formalPriority=false;
         try{
           const context=await this.baselineContext(freshPositions,equity,market.decisionTs,new Set([owned.symbol]));
           formalPriority=context.baseline.baselineAcceptedThisTimestamp>0||context.baseline.baselineOpenPositions>EPS||context.baseline.baselinePendingExposure>EPS;
         }catch{formalPriority=true;}
-        if(formalPriority)return this.exit(state,owned,actual,lock,"FORMAL_PRIORITY");
-        if(coreState.positions.length||coreState.pending||this.coreIdleSignal(market,coreState))return this.exit(state,owned,actual,lock,"IDLE_SHORT_PRIORITY");
+        if(formalPriority)return await this.exit(state,owned,actual,lock,"FORMAL_PRIORITY");
+        if(coreState.positions.length||coreState.pending||this.coreIdleSignal(market,coreState))return await this.exit(state,owned,actual,lock,"IDLE_SHORT_PRIORITY");
         const quote=await this.d.executor.getMarketQuote(owned.symbol);
         if(!freshQuote(quote,this.now()))return {status:"held",message:`IDLE_RESIDUAL_HELD_QUOTE_STALE:${owned.symbol}`,symbol:owned.symbol,ordersSent:0,cancelsSent:0,positionChangesSent:0};
         const reason=quote.bidPrice<=owned.stopPrice?"HARD_STOP":quote.askPrice>=owned.takeProfitPrice?"TAKE_PROFIT":this.now()>=owned.exitTs?"FIXED_HOLD_EXIT":undefined;
-        if(reason)return this.exit(state,owned,actual,lock,reason);
+        if(reason)return await this.exit(state,owned,actual,lock,reason);
         return {status:"held",message:`IDLE_RESIDUAL_POSITION_HELD:${owned.symbol}`,symbol:owned.symbol,ordersSent:0,cancelsSent:0,positionChangesSent:0};
       }
 
@@ -321,13 +331,13 @@ export class IdleResidualLongRunner{
         return {status:"no-change",message:"NO_IDLE_RESIDUAL_LONG_SIGNAL",ordersSent:0,cancelsSent:0,positionChangesSent:0};
       }
       const pendingAggregate=aggregatePendingExposure(await readPendingExposureRegistry(this.d.coreRuntime.pendingExposurePath));
-      return this.enter(state,signal,freshPositions,equity,lock,pendingAggregate);
+      return await this.enter(state,signal,freshPositions,equity,lock,pendingAggregate);
     }catch(error){
       const state=await this.d.stateStore.load().catch(()=>undefined);
       if(state){
         const deferred=classifyIdleResidualFlatRateBudgetDeferral(state,error);
         if(deferred)return {status:"held",message:deferred,ordersSent:0,cancelsSent:0,positionChangesSent:0};
-        return this.manual(state,`IDLE_RESIDUAL_RUNNER_FAIL_CLOSED:${error instanceof Error?error.message:String(error)}`);
+        return await this.manual(state,`IDLE_RESIDUAL_RUNNER_FAIL_CLOSED:${error instanceof Error?error.message:String(error)}`);
       }
       throw error;
     }finally{await lock.release();}
