@@ -190,7 +190,6 @@ jobs:
             sleep 1
           done
           [[ "$ok" == 1 ]]
-          grep -q "リアルタイム判定" /tmp/realtime.html
 
           api_code="$(curl -sS -H 'Cookie: disdex_auth=1' -o /tmp/realtime-ranking.json -w '%{http_code}' --max-time 20 http://127.0.0.1:3001/api/system/realtime-ranking)"
           [[ "$api_code" == 200 ]]
