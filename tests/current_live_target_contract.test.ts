@@ -10,14 +10,19 @@ import { FET_BRK48_RESIDUAL } from "../config/fetBrk48Runtime";
 const targetPath = "docs/production/current-live-target.json";
 const artifactPath = "docs/research/results/trail020-idle-doge-avax-controlling-20261002/controlling-contract.json";
 
-test("current live target pins Trail0.20 + Idle + DOGE/AVAX controlling stack", async () => {
+test("current live target pins formal priority sizing and preserves Overlay configuration", async () => {
   const target = JSON.parse(await readFile(targetPath, "utf8"));
   assert.equal(target.status, "CURRENT_CANONICAL_PRODUCTION_TARGET");
-  assert.equal(target.productionBaseSha, "8e341956b3c5c5d825029d18ba083029d919126b");
+  assert.equal(target.productionBaseSha, "53eeff5417636369d4709fddfd47d7916ddcf3b1");
 
   assert.equal(target.strategy.v12.maximumPositions, 3);
   assert.equal(target.strategy.v12.baseMaximumPositions, 2);
-  assert.equal(target.strategy.v12.rank3GrossCap, 0.10);
+  assert.equal(target.strategy.v12.rank3GrossCap, 0.50);
+  assert.equal(target.strategy.v12.rank12DefaultGross, 1);
+  assert.deepEqual(target.strategy.v12.rank12ReducedSymbols, ["DOGEUSDT", "LTCUSDT"]);
+  assert.equal(target.strategy.v12.rank12ReducedGross, 0.5);
+  assert.deepEqual(target.strategy.v12.q102PriorityHandoffFamilies, ["PB", "REV", "HIGH_VOL"]);
+  assert.deepEqual(target.strategy.v12.q102PriorityHandoffRankOrder, [3, 2, 1]);
   assert.equal(target.strategy.v12.rank3MinimumScore, 0.70);
   assert.equal(target.strategy.v12.additionalRank3BtcDistanceGate, false);
   assert.equal(target.strategy.v12.trailingAtr, 0.20);
@@ -46,19 +51,19 @@ test("current live target pins Trail0.20 + Idle + DOGE/AVAX controlling stack", 
   assert.deepEqual(Q102_CAUSAL_V4_FAMILY_GROSS, target.strategy.q102.baseFamilyGross);
 });
 
-test("current formal acceptance is bound to the controlling ledger and cost stress", async () => {
+test("historical Overlay evidence remains unchanged and is not the new formal anchor", async () => {
   const target = JSON.parse(await readFile(targetPath, "utf8"));
   const bytes = await readFile(artifactPath);
   const canonicalText = bytes.toString("utf8").replace(/\r\n/g, "\n");
   const canonicalBytes = Buffer.from(canonicalText, "utf8");
   const sha = createHash("sha256").update(canonicalBytes).digest("hex").toUpperCase();
-  assert.equal(sha, target.formalBacktest.sourceArtifactSha256);
-  assert.equal(target.formalBacktest.selectedCase, "trail020_idle_doge_avax_20261002");
+  assert.equal(sha, target.historicalOverlayBacktest.sourceArtifactSha256);
+  assert.equal(target.historicalOverlayBacktest.selectedCase, "trail020_idle_doge_avax_20261002");
 
   const contract = JSON.parse(canonicalText);
-  assert.deepEqual(target.formalBacktest.priority, contract.priority);
+  assert.deepEqual(target.historicalOverlayBacktest.priority, contract.priority);
   for (const [label,bps] of [["NORMAL",10],["COST_8BPS",8],["COST_20BPS",20],["COST_30BPS",30]] as const) {
-    const expected = target.formalBacktest[label];
+    const expected = target.historicalOverlayBacktest[label];
     const actual = contract.costs[String(bps)];
     assert.equal(expected.roundtripBps, bps);
     assert.equal(expected.endingAssetJpy, actual.finalJpy);
@@ -70,9 +75,21 @@ test("current formal acceptance is bound to the controlling ledger and cost stre
   }
 
   assert.ok(target.formalBacktest.NORMAL.maxDrawdownPct >= target.acceptance.maximumDrawdownFloorPct);
-  assert.ok(target.formalBacktest.COST_30BPS.maxDrawdownPct >= target.acceptance.maximumDrawdownFloorPct);
+  assert.ok(target.historicalOverlayBacktest.COST_30BPS.maxDrawdownPct >= target.acceptance.maximumDrawdownFloorPct);
   assert.equal(target.acceptance.requireIdlePriorityShortParity, true);
   assert.equal(target.acceptance.requireTrail020, true);
   assert.equal(target.acceptance.requireResidualExactShaParity, true);
   assert.equal(target.acceptance.requireFormalResidualPreemption, true);
+});
+
+test("formal five-logic 10bps anchor is exact and does not certify the retained Overlay", async () => {
+  const target = JSON.parse(await readFile(targetPath, "utf8"));
+  const raw = (await readFile(target.formalBacktest.sourceArtifact, "utf8")).replace(/\r\n/g, "\n");
+  assert.equal(createHash("sha256").update(raw).digest("hex").toUpperCase(), target.formalBacktest.sourceArtifactSha256);
+  const summary = JSON.parse(raw).official_10bps;
+  assert.equal(target.formalBacktest.NORMAL.endingAssetJpy, summary.final_equity_jpy);
+  assert.equal(target.formalBacktest.NORMAL.profitFactor, summary.profit_factor);
+  assert.equal(target.formalBacktest.NORMAL.trades, summary.closed_trades);
+  assert.deepEqual(target.formalBacktest.NORMAL.routing, summary.strategy_trades);
+  assert.equal(target.formalBacktest.retainedOverlayCombinedParity, "NOT_ESTABLISHED_BY_THIS_FIVE_LOGIC_ARTIFACT");
 });

@@ -6,6 +6,7 @@ import {
   Activity,
   BarChart3,
   FileText,
+  Gauge,
   Home,
   LogOut,
   MessageSquareText,
@@ -31,6 +32,7 @@ type NavItem = {
 const NAV_ITEMS: NavItem[] = [
   { href: "/", label: "ホーム", icon: Home },
   { href: "/positions", label: "ダッシュボード", icon: BarChart3 },
+  { href: "/decision-status", label: "判定状況", icon: Gauge },
   {
     href: "/research-lab",
     label: "AI研究ラボ",

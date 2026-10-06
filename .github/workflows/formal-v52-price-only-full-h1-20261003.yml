@@ -1,0 +1,112 @@
+name: Formal V52 price-only full-H1 evidence (no deploy)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/formal-priority-cooldown-20261003
+    paths:
+      - "scripts/research/formal_v52_full_h1_price_ledger.py"
+      - "scripts/research/formal_v52_price_source_audit.py"
+      - ".github/workflows/formal-v52-price-only-full-h1-20261003.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  v52-price-only-full-h1:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      RELEASE_TAG: bt-v12-score100-volume080-normalonly-20260928
+      RELEASE_ASSET: bt-v12-score100-volume080-normalonly-20260928.tar.gz
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+
+      - name: Download fixed historical release
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/release-download" "$RUNNER_TEMP/release"
+          gh release download "$RELEASE_TAG" \
+            --repo "${{ github.repository }}" \
+            --pattern "$RELEASE_ASSET" \
+            --dir "$RUNNER_TEMP/release-download"
+          tar -xzf "$RUNNER_TEMP/release-download/$RELEASE_ASSET" -C "$RUNNER_TEMP/release"
+          test -d "$RUNNER_TEMP/release/$RELEASE_TAG"
+
+      - name: Re-acquire Yahoo source and preserve historical anchor separation
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            scripts/research/formal_v52_price_source_audit.py \
+            scripts/research/formal_v52_full_h1_price_ledger.py
+          python -B scripts/research/formal_v52_price_source_audit.py \
+            --release-root "$RUNNER_TEMP/release/$RELEASE_TAG" \
+            --work-root "$RUNNER_TEMP/v52-work" \
+            --output "$RUNNER_TEMP/v52-evidence/v52-price-source-audit.json"
+
+      - name: Build complete 8,784-hour V52 price-model decision ledger
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -B scripts/research/formal_v52_full_h1_price_ledger.py \
+            --release-root "$RUNNER_TEMP/release/$RELEASE_TAG" \
+            --price-scan "$RUNNER_TEMP/v52-work/scan/decisions/V52-hourly-price-model.jsonl" \
+            --price-source-audit "$RUNNER_TEMP/v52-evidence/v52-price-source-audit.json" \
+            --output-root "$RUNNER_TEMP/v52-evidence"
+
+      - name: Assert model coverage without upgrading LIVE parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          root=Path(os.environ["RUNNER_TEMP"])/"v52-evidence"
+          d=json.loads((root/"v52-price-only-full-h1-manifest.json").read_text())
+          s=json.loads((root/"v52-price-source-audit.json").read_text())
+          assert d["status"]=="PASS_V52_PRICE_ONLY_FULL_H1_LEDGER"
+          assert d["full_h1_model_decision_evidence"]=="PASS"
+          assert d["period_hours"]==8784 and d["ledger_rows"]==8784
+          assert d["expected_price_windows"]==d["observed_price_windows"]
+          assert d["live_execution_parity"] is False
+          assert s["live_execution_parity"] is False
+          assert d["historical_anchor"]["candidate_rows"]==99
+          print(json.dumps({
+              "status": d["status"],
+              "hours": d["period_hours"],
+              "windows": d["expected_price_windows"],
+              "signals": d["signal_windows"],
+              "source_error_windows": d["source_error_windows"],
+              "historical_anchor_rows": d["historical_anchor"]["candidate_rows"],
+          }, sort_keys=True))
+          PY
+
+      - name: Evidence SHA256
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp "$RUNNER_TEMP/v52-work/data/yahoo-v52-coverage.json" "$RUNNER_TEMP/v52-evidence/"
+          mkdir -p "$RUNNER_TEMP/v52-evidence/yahoo-60m" "$RUNNER_TEMP/v52-evidence/price-scan"
+          cp "$RUNNER_TEMP/v52-work/data/normalized/yahoo/60m/"*.jsonl "$RUNNER_TEMP/v52-evidence/yahoo-60m/"
+          cp "$RUNNER_TEMP/v52-work/scan/decisions/V52-hourly-price-model.jsonl" "$RUNNER_TEMP/v52-evidence/price-scan/"
+          find "$RUNNER_TEMP/v52-evidence" -type f -print0 \
+            | sort -z \
+            | xargs -0 sha256sum \
+            | tee "$RUNNER_TEMP/v52-evidence/SHA256SUMS.txt"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: formal-v52-price-only-full-h1-${{ github.sha }}
+          path: ${{ runner.temp }}/v52-evidence/
+          if-no-files-found: error
+          retention-days: 90

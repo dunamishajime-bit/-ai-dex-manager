@@ -122,6 +122,6 @@ export default function IdlePriorityDecisionPage(){
       </div>
     </section>
 
-    <Link href="/positions" className="inline-block text-sm text-gold-100">← ダッシュボード</Link>
+    <Link href="/decision-status" className="inline-block text-sm text-gold-100">← 判定状況一覧</Link>
   </main>;
 }

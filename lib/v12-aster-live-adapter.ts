@@ -82,10 +82,10 @@ export class V12AsterLiveAdapter implements ResidentStopAdapter {
         const clientOrderId = input.clientOrderId || deterministicV12ClientOrderId({ action: "ENTRY", signalTs: input.signalTs, symbol: input.symbol, side: input.side });
         return this.executor.executeMarket({ requestId: clientOrderId, clientOrderId, symbol: input.symbol, side: input.side === "LONG" ? "BUY" : "SELL", quantity: input.quantity, expectedPrice: input.expectedPrice, maxSlippageBps: this.maxSlippageBps, reason: "V12_X1.00_ALL_ENTRY", requireVenueMargin5xCross: true });
     }
-    async executeExit(input: { signalTs: number; symbol: string; positionSide: "LONG" | "SHORT"; quantity: number; expectedPrice: number; clientOrderId?: string; failsafe?: boolean }): Promise<DirectTradeResult> {
+    async executeExit(input: { signalTs: number; symbol: string; positionSide: "LONG" | "SHORT"; quantity: number; expectedPrice: number; clientOrderId?: string; failsafe?: boolean; reason?: string }): Promise<DirectTradeResult> {
         const action = input.failsafe ? "FAILSAFE_CLOSE" : "EXIT";
         const clientOrderId = input.clientOrderId || deterministicV12ClientOrderId({ action, signalTs: input.signalTs, symbol: input.symbol, side: input.positionSide });
-        return this.executor.executeMarket({ requestId: clientOrderId, clientOrderId, symbol: input.symbol, side: input.positionSide === "LONG" ? "SELL" : "BUY", quantity: input.quantity, reduceOnly: true, expectedPrice: input.expectedPrice, maxSlippageBps: this.maxSlippageBps, reason: input.failsafe ? "V12_PROTECTION_FAILSAFE_CLOSE" : "V12_X1.00_ALL_EXIT" });
+        return this.executor.executeMarket({ requestId: clientOrderId, clientOrderId, symbol: input.symbol, side: input.positionSide === "LONG" ? "SELL" : "BUY", quantity: input.quantity, reduceOnly: true, expectedPrice: input.expectedPrice, maxSlippageBps: this.maxSlippageBps, reason: input.failsafe ? "V12_PROTECTION_FAILSAFE_CLOSE" : input.reason || "V12_X1.00_ALL_EXIT" });
     }
     async executeDynamicTrim(input: { signalTs: number; symbol: string; positionSide: "LONG" | "SHORT"; quantity: number; expectedPrice: number; clientOrderId?: string }): Promise<DirectTradeResult> {
         const clientOrderId = input.clientOrderId || deterministicV12ClientOrderId({ action: "DYNAMIC_TRIM", signalTs: input.signalTs, symbol: input.symbol, side: input.positionSide, version: input.quantity });

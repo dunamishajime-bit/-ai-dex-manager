@@ -79,6 +79,7 @@ function tradeResult(input: { clientOrderId: string; symbol: string; status?: Di
         quoteQuantity: executedQuantity * price,
         executionUnknown: input.status === "UNKNOWN",
         reconciled: input.status !== "UNKNOWN",
+        updatedAt: NOW,
     };
 }
 
@@ -245,9 +246,9 @@ async function main() {
         assert.ok(normal.state.active?.protection.stopClientOrderId);
         assert.ok(normal.state.active?.protection.takeProfitClientOrderId);
 
-        // A fresh quote/fill slippage buffer must block an entry before the
-        // exposure adapter is called when an existing V12 position leaves no
-        // safe base-cap headroom.
+        // Formal fixed-Gross sizing reserves the configured slippage inside
+        // the target quantity. A 1.00x target may therefore enter without a
+        // false per-position over-cap while the aggregate remains below 2.0x.
         const preorderCap = await makeHarness(root, "preorder-cap");
         preorderCap.adapter.maxSlippageBps = 20;
         const existingId = "v12-entry-existing-ltc";
@@ -287,9 +288,8 @@ async function main() {
             return { symbol, bidPrice: activeBar.high + 1, askPrice: activeBar.high + 1.2, bidQuantity: 100, askQuantity: 100, midPrice: activeBar.high + 1.1, spreadBps: 2, updatedAt: NOW };
         };
         const preorderCapResult = await preorderCap.engine.tick();
-        assert.equal(preorderCapResult.status, "capacity-blocked");
-        assert.match(preorderCapResult.reason, /^V12_(POSITION|BASE_AGGREGATE)_GROSS_OVER_CAP$/);
-        assert.equal(preorderCap.adapter.entryCalls, 0, "pre-order gross cap must prevent exposure submission");
+        assert.equal(preorderCapResult.status, "entered");
+        assert.equal(preorderCap.adapter.entryCalls, 1, "slippage-buffered formal target should remain executable");
 
         // Venue minimums are a benign capacity gate. They are detected before
         // pending state/order submission and must never trip the local kill switch.
@@ -394,7 +394,7 @@ async function main() {
         );
         protectionFill.adapter.queryOrderSameId = async (_symbol: string, clientOrderId: string) => (
             clientOrderId === exitedActive.protection.takeProfitClientOrderId
-                ? { symbol: exitedActive.symbol, clientOrderId, status: "FILLED", side: "SELL", type: "TAKE_PROFIT_MARKET", reduceOnly: true, quantity: exitedActive.quantity, executedQuantity: exitedActive.quantity, stopPrice: exitedActive.protection.takeProfit }
+                ? { symbol: exitedActive.symbol, clientOrderId, status: "FILLED", side: "SELL", type: "TAKE_PROFIT_MARKET", reduceOnly: true, quantity: exitedActive.quantity, executedQuantity: exitedActive.quantity, stopPrice: exitedActive.protection.takeProfit, updatedAt: NOW }
                 : null
         ) as never;
         const entryCallsBeforeProtectionReconcile = protectionFill.adapter.entryCalls;

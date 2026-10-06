@@ -1,0 +1,256 @@
+name: Formal Core full-decision and execution-margin evidence (no deploy)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - research/formal-priority-cooldown-20261003
+    paths:
+      - "scripts/research/formal_q102_full_decision_chunk.py"
+      - "scripts/research/formal_q102_decision_source_parity.py"
+      - "scripts/research/formal_core_full_decision_audit.py"
+      - "scripts/research/formal_v52_price_source_audit.py"
+      - "scripts/research/formal_v52_full_h1_price_ledger.py"
+      - "scripts/research/formal_execution_margin_evidence_audit.py"
+      - ".github/workflows/formal-core-full-decision-and-margin-evidence-20261003.yml"
+      - "lib/disdex-quality102-causal-v1-runner.ts"
+      - "lib/v12-live-execution-engine.ts"
+
+permissions:
+  contents: read
+  actions: read
+
+env:
+  RESEARCH_ANCHOR_SHA: a9940871d2dfaba4c83af347458678bf5d5f41ca
+  PRODUCTION_SHA: 53eeff5417636369d4709fddfd47d7916ddcf3b1
+  RELEASE_TAG: bt-v12-score100-volume080-normalonly-20260928
+  RELEASE_ASSET: bt-v12-score100-volume080-normalonly-20260928.tar.gz
+  GH_TOKEN: ${{ github.token }}
+
+jobs:
+  plan-q102:
+    runs-on: ubuntu-24.04
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      chunk_count: ${{ steps.plan.outputs.chunk_count }}
+    steps:
+      - id: plan
+        shell: bash
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          from datetime import date, timedelta
+          import json
+          start = date(2025, 8, 10)
+          end = date(2026, 8, 11)
+          step = timedelta(days=5)
+          chunks = []
+          cursor = start
+          index = 0
+          while cursor < end:
+              nxt = min(cursor + step, end)
+              chunks.append({
+                  "id": f"{index:03d}-{cursor.isoformat()}",
+                  "start": cursor.isoformat(),
+                  "end": nxt.isoformat(),
+              })
+              cursor = nxt
+              index += 1
+          print("matrix=" + json.dumps({"include": chunks}, separators=(",", ":")))
+          print("chunk_count=" + str(len(chunks)))
+          PY
+
+  safety-contracts:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - name: Verify research anchor and workflow SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git merge-base --is-ancestor "$RESEARCH_ANCHOR_SHA" HEAD
+      - name: Install JS dependencies
+        run: npm ci --ignore-scripts
+      - name: Production-order-path safety contract tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          npx tsx --test \
+            tests/dynamic-margin-gate.test.ts \
+            tests/integrated_gross_governor.test.ts \
+            tests/v12-preorder-gross-reservation.test.ts \
+            tests/v12-exit-fill-timestamp.test.ts \
+            tests/pending-exposure-registry.test.ts \
+            tests/account-lock-bounded-retry.test.ts \
+            tests/quality102-pending-order-recovery.test.ts \
+            tests/v12-protection-failure-recovery.test.ts \
+            tests/aster-418-fail-closed.test.ts \
+            tests/fet-brk48-live-runner.test.ts \
+            tests/trade_fill_notification.test.ts \
+            tests/v12-q102-priority-preemption.test.ts
+          npm run strategy:pengu-dual-ls-v2:selftest
+          npm run strategy:quality102-causal-v1:runner:selftest
+
+  q102-full-observability:
+    needs: plan-q102
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix: ${{ fromJSON(needs.plan-q102.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Verify research anchor and workflow SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git merge-base --is-ancestor "$RESEARCH_ANCHOR_SHA" HEAD
+      - name: Download fixed historical release asset
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/release-download" "$RUNNER_TEMP/release"
+          gh release download "$RELEASE_TAG" \
+            --repo "${{ github.repository }}" \
+            --pattern "$RELEASE_ASSET" \
+            --dir "$RUNNER_TEMP/release-download"
+          tar -xzf "$RUNNER_TEMP/release-download/$RELEASE_ASSET" -C "$RUNNER_TEMP/release"
+          test -d "$RUNNER_TEMP/release/$RELEASE_TAG"
+      - name: Exact Q102 full-observability 5-day chunk
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile scripts/research/formal_q102_full_decision_chunk.py
+          python scripts/research/formal_q102_full_decision_chunk.py \
+            --release-root "$RUNNER_TEMP/release/$RELEASE_TAG" \
+            --output-root "$RUNNER_TEMP/q102-chunk" \
+            --start "${{ matrix.start }}" \
+            --end-exclusive "${{ matrix.end }}"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: q102-full-${{ matrix.id }}-${{ github.sha }}
+          path: ${{ runner.temp }}/q102-chunk/
+          if-no-files-found: error
+          retention-days: 30
+
+  aggregate-evidence:
+    needs: [plan-q102, safety-contracts, q102-full-observability]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Verify research anchor and workflow SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          git merge-base --is-ancestor "$RESEARCH_ANCHOR_SHA" HEAD
+      - name: Download fixed historical release asset
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/release-download" "$RUNNER_TEMP/release"
+          gh release download "$RELEASE_TAG" \
+            --repo "${{ github.repository }}" \
+            --pattern "$RELEASE_ASSET" \
+            --dir "$RUNNER_TEMP/release-download"
+          tar -xzf "$RUNNER_TEMP/release-download/$RELEASE_ASSET" -C "$RUNNER_TEMP/release"
+          test -d "$RUNNER_TEMP/release/$RELEASE_TAG"
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: q102-full-*-${{ github.sha }}
+          path: ${{ runner.temp }}/q102-chunks
+          merge-multiple: false
+      - name: Assert all planned Q102 chunks were downloaded
+        shell: bash
+        run: |
+          set -euo pipefail
+          actual="$(find "$RUNNER_TEMP/q102-chunks" -name q102-chunk-manifest.json | wc -l | tr -d ' ')"
+          test "$actual" = "${{ needs.plan-q102.outputs.chunk_count }}"
+      - name: Prove Q102 decision source byte parity
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile scripts/research/formal_q102_decision_source_parity.py
+          python scripts/research/formal_q102_decision_source_parity.py \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --release-root "$RUNNER_TEMP/release/$RELEASE_TAG" \
+            --output "$RUNNER_TEMP/core-full-decision-audit/q102-decision-source-parity.json"
+      - name: Build V52 complete price-only H1 decision evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/core-full-decision-audit/v52"
+          python -m py_compile \
+            scripts/research/formal_v52_price_source_audit.py \
+            scripts/research/formal_v52_full_h1_price_ledger.py
+          python scripts/research/formal_v52_price_source_audit.py \
+            --release-root "$RUNNER_TEMP/release/$RELEASE_TAG" \
+            --work-root "$RUNNER_TEMP/v52-price-source-work" \
+            --output "$RUNNER_TEMP/core-full-decision-audit/v52/v52-price-source-audit.json"
+          python scripts/research/formal_v52_full_h1_price_ledger.py \
+            --release-root "$RUNNER_TEMP/release/$RELEASE_TAG" \
+            --price-scan "$RUNNER_TEMP/v52-price-source-work/scan/decisions/V52-hourly-price-model.jsonl" \
+            --price-source-audit "$RUNNER_TEMP/core-full-decision-audit/v52/v52-price-source-audit.json" \
+            --output-root "$RUNNER_TEMP/core-full-decision-audit/v52"
+
+      - name: Merge and verify full causal Core decision evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          python -m py_compile \
+            scripts/research/formal_core_full_decision_audit.py \
+            scripts/research/formal_execution_margin_evidence_audit.py
+          python scripts/research/formal_core_full_decision_audit.py \
+            --release-root "$RUNNER_TEMP/release/$RELEASE_TAG" \
+            --q102-chunks-root "$RUNNER_TEMP/q102-chunks" \
+            --q102-source-parity "$RUNNER_TEMP/core-full-decision-audit/q102-decision-source-parity.json" \
+            --v52-full-h1-manifest "$RUNNER_TEMP/core-full-decision-audit/v52/v52-price-only-full-h1-manifest.json" \
+            --output-root "$RUNNER_TEMP/core-full-decision-audit"
+      - name: Execution and margin evidence audit
+        shell: bash
+        run: |
+          set -euo pipefail
+          python scripts/research/formal_execution_margin_evidence_audit.py \
+            --repo-root "$GITHUB_WORKSPACE" \
+            --release-root "$RUNNER_TEMP/release/$RELEASE_TAG" \
+            --output "$RUNNER_TEMP/core-full-decision-audit/execution-margin-evidence-audit.json" \
+            --target-sha "$GITHUB_SHA" \
+            --production-sha "$PRODUCTION_SHA" \
+            --rule-contract-tests-passed
+      - name: Evidence SHA256
+        shell: bash
+        run: |
+          set -euo pipefail
+          find "$RUNNER_TEMP/core-full-decision-audit" -type f -print0 \
+            | sort -z \
+            | xargs -0 sha256sum \
+            | tee "$RUNNER_TEMP/core-full-decision-audit/SHA256SUMS.txt"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: formal-core-full-decision-and-margin-evidence-${{ github.sha }}
+          path: ${{ runner.temp }}/core-full-decision-audit/
+          if-no-files-found: error
+          retention-days: 30
