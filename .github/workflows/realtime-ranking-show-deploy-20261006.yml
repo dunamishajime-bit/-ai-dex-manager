@@ -134,6 +134,9 @@ jobs:
           old_ui="$(systemctl show "$ui_service" -p WorkingDirectory --value)"
           old_env="$(systemctl show "$ui_service" -p Environment --value)"
           old_sha="$(printf '%s' "$old_env" | tr ' ' '\n' | sed -n 's/^DISDEX_UI_RELEASE_SHA=//p' | tail -1)"
+          if [[ -z "$old_sha" && -f "$old_ui/.disdex-release-sha" ]]; then
+            old_sha="$(tr -d '[:space:]' < "$old_ui/.disdex-release-sha")"
+          fi
           [[ -n "$old_ui" && -d "$old_ui" && -n "$old_sha" && -s "$archive" ]]
 
           rm -rf "$release"
