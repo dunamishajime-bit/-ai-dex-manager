@@ -56,6 +56,6 @@
     "V52_DYNAMIC_BASIS_STOP_1P75_NO_NEW_FIXED_STOP",
     "FET_NEW_ENTRY_MAX_GROSS_1P0_EXISTING_POSITION_PRESERVED"
   ],
-  "activationRule": "Implementation is READY but real-money activation remains blocked until the exact-SHA GitHub production workflow revalidates both Idle parity certificates, proves the current Production SHA is an ancestor, verifies flat/pending state and shared safety, creates the root-owned operator activation artifact for this exact SHA/target, cuts over all runners, and passes post-deploy LIVE/HP verification.",
+  "activationRule": "Implementation is READY but real-money activation remains blocked until a root-owned exact-SHA staged operator approval artifact exists for the target SHA/target, the GitHub Production workflow revalidates Idle parity certificates, proves the current Production SHA is an ancestor, verifies flat/pending state and shared safety, promotes that staged approval atomically during cutover, cuts over all runners, and passes post-deploy LIVE/HP verification. The Production workflow must never fabricate operator approval.",
   "researchSourceSha": "db0ee5def97e8194f55aa77fa5b7326fa938d456"
 }
