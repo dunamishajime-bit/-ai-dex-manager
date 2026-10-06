@@ -18,6 +18,9 @@ test('commentary states numeric minimum gap and keeps execution blocks separate'
  assert.match(c.signal,/あと0.08/);
  assert.match(c.execution,/Cooldown/);
  assert.doesNotMatch(c.signal,/発注できます|発火します/);
+ assert.match(c.speech,/10位から5位まで上昇しました/);
+ assert.match(c.speech,/あと0.08です/);
+ assert.doesNotMatch(c.speech,/\s\/\s/);
 });
 test('unknown, stale, strict breakout and upper limits never invent minimum deficits',()=>{
  assert.equal(typeof ranking.rankCommentary,'function');
