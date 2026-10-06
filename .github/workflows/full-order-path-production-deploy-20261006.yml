@@ -1,11 +1,6 @@
 name: Full Order Path Production Deploy 20261006
 
 on:
-  push:
-    branches:
-      - codex/full-order-path-audit-20261006
-    paths:
-      - ".github/workflows/full-order-path-production-deploy-20261006.yml"
   workflow_dispatch:
 
 permissions:
