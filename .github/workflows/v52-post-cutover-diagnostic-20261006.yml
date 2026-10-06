@@ -1,0 +1,68 @@
+name: V52 Post Cutover Diagnostic 20261006
+on:
+  push:
+    branches: [ops/post-cutover-diagnostic-20261006]
+    paths: [.github/workflows/v52-post-cutover-diagnostic-20261006.yml]
+permissions: { contents: read }
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Setup SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 ~/.ssh
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 600 ~/.ssh/id_root ~/.ssh/known_hosts
+      - name: Inspect V52 and stock reference
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ssh -T -i ~/.ssh/id_root -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=~/.ssh/known_hosts -p "${SSH_PORT:-22}" root@"$SSH_HOST" 'bash -s' <<'REMOTE'
+          set -Eeuo pipefail
+          sha="$(tr -d '[:space:]' </home/deploy/disdex-trading/current/.disdex-release-sha)"
+          unit="disdex-v52-aster-only@$sha.service"
+          echo "SHA=$sha UNIT=$unit"
+          echo "=== SYSTEMD SHOW ==="
+          systemctl show "$unit" -p LoadState -p ActiveState -p SubState -p Result -p ExecMainStatus -p MainPID -p NRestarts -p WorkingDirectory -p ExecStart -p ExecStartPre -p EnvironmentFiles --no-pager || true
+          echo "=== SYSTEMD CAT ==="
+          systemctl cat "$unit" --no-pager || true
+          echo "=== JOURNAL ==="
+          journalctl -u "$unit" --since '2026-10-06 05:26:00 UTC' --no-pager -o short-iso | tail -160 || true
+          echo "=== V52 STATE ==="
+          python3 - <<'PY'
+          import json,os,time
+          p="/var/lib/disdex/v52-aster-only/runner-live.json"
+          try:
+            d=json.load(open(p))
+            print(json.dumps(d,ensure_ascii=False,default=str)[:30000])
+            print("mtime_age",round(time.time()-os.stat(p).st_mtime,3))
+          except Exception as e: print(type(e).__name__,str(e))
+          PY
+          echo "=== STOCK REF ==="
+          systemctl show disdex-stock-reference-free.service -p ActiveState -p SubState -p MainPID -p WorkingDirectory -p ExecStart --no-pager || true
+          pid="$(systemctl show disdex-stock-reference-free.service -p MainPID --value 2>/dev/null || true)"
+          if [[ "$pid" =~ ^[0-9]+$ && "$pid" -gt 0 ]]; then
+            echo "STOCK_REF_CWD=$(readlink -f /proc/$pid/cwd 2>/dev/null || true)"
+            tr '\0' '\n' < /proc/$pid/environ | grep -Ei '^(DISDEX_RELEASE_SHA|DISDEX_RUNTIME_COMMIT_SHA|DISDEX_RELEASE_ROOT|V52_|DISDEX_V52_)=' | grep -Eiv '(KEY|SECRET|TOKEN|PASSWORD|CREDENTIAL)' || true
+          fi
+          echo "=== HEALTH SNAPSHOT CONFIG ==="
+          systemctl cat disdex-runner-health-snapshot.service --no-pager || true
+          echo "=== HEARTBEAT V52 ==="
+          cat /var/lib/disdex/runner-health/heartbeats/v52.json || true
+          echo
+          echo "V52_DIAGNOSTIC=PASS"
+          REMOTE
