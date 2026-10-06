@@ -1,0 +1,149 @@
+name: Production Remnant Readonly Diagnostic 20261006
+
+on:
+  push:
+    branches:
+      - codex/full-order-path-audit-20261006
+    paths:
+      - ".github/workflows/production-remnant-readonly-diagnostic-20261006.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Initialize SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+      - name: Inspect cleanup candidates without mutation
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -p "$PORT" "root@$SSH_HOST" 'bash -s' <<'REMOTE'
+          set -Eeuo pipefail
+          CURRENT=/home/deploy/disdex-trading/current
+          echo "CURRENT=$(readlink -f "$CURRENT")"
+          echo "PREVIOUS=$(readlink -f /home/deploy/disdex-trading/previous 2>/dev/null || true)"
+          echo
+
+          echo "=== PENDING EXPOSURE REGISTRY ==="
+          python3 - <<'PY'
+          import json,os,time
+          p="/var/lib/disdex/shared/pending-exposure.json"
+          try:
+            d=json.load(open(p,encoding="utf-8"))
+            print("schema",d.get("schema"))
+            rows=d.get("entries") or d.get("reservations") or d.get("pending") or []
+            if isinstance(rows,dict): rows=list(rows.values())
+            print("row_count",len(rows) if isinstance(rows,list) else "UNKNOWN")
+            if isinstance(rows,list):
+              for r in rows:
+                if isinstance(r,dict):
+                  print({k:r.get(k) for k in ("reservationId","strategyId","sleeve","symbol","side","gross","notionalUsd","createdAt","updatedAt","runtimeSha","status") if k in r})
+            print("mtime_age_sec",round(time.time()-os.stat(p).st_mtime,1))
+          except FileNotFoundError: print("MISSING")
+          except Exception as e: print("ERROR",type(e).__name__,str(e))
+          PY
+          echo
+
+          echo "=== ACCOUNT ORDER LOCK ==="
+          python3 - <<'PY'
+          import json,os,time
+          p="/var/lib/disdex/shared/account-order.lock"
+          try:
+            d=json.load(open(p,encoding="utf-8"))
+            print({k:d.get(k) for k in ("schema","accountScope","ownerId","leaseId","acquiredAt","expiresAt")})
+            print("reservations",[{k:r.get(k) for k in ("reservationId","strategyId","symbol","side","gross","notionalUsd","status","createdAt")} for r in d.get("reservations",[])])
+            print("expired",d.get("expiresAt",0)<=int(time.time()*1000))
+            print("mtime_age_sec",round(time.time()-os.stat(p).st_mtime,1))
+          except FileNotFoundError: print("MISSING")
+          except Exception as e: print("ERROR",type(e).__name__,str(e))
+          PY
+          echo
+
+          echo "=== TIMERS ==="
+          systemctl list-timers --all --no-pager | grep -E 'disdex|NEXT|LEFT' || true
+          echo
+          for unit in disdex-vps-retention.service disdex-vps-retention.timer disdex-ui-retention.service disdex-ui-retention.timer; do
+            echo "--- $unit ---"
+            systemctl cat "$unit" 2>/dev/null || true
+          done
+          echo
+
+          echo "=== RELEASE SIZE/AGE ==="
+          find /home/deploy/disdex-trading/releases -mindepth 1 -maxdepth 1 \( -type d -o -type l \) -print0 |
+            while IFS= read -r -d '' p; do
+              if [[ -L "$p" ]]; then
+                echo "LINK $p -> $(readlink "$p") real=$(readlink -f "$p" 2>/dev/null || true)"
+              else
+                size="$(du -sm "$p" 2>/dev/null | awk '{print $1}')"
+                mt="$(stat -c %Y "$p")"
+                echo "DIR $p MB=$size AGE_SEC=$(( $(date +%s)-mt ))"
+              fi
+            done | sort
+          echo
+
+          echo "=== OLD INSTANCE ENABLEMENT ==="
+          for sha in f8c70d3d3144478afff0a8faf6dfc8405d304532 228fb8e9fb4895ced39628758afbabcdecae5d7d; do
+            for prefix in disdex-v12-x1-all disdex-pengu-dual-ls-v2 disdex-quality102-causal-v1 disdex-v52-aster-only disdex-shared-crypto-risk disdex-v12-v52-margin-guard; do
+              u="$prefix@$sha.service"
+              if systemctl cat "$u" >/dev/null 2>&1; then
+                echo "$u active=$(systemctl is-active "$u" 2>/dev/null || true) enabled=$(systemctl is-enabled "$u" 2>/dev/null || true)"
+              fi
+            done
+          done
+          echo
+
+          echo "=== OLD SHA REFERENCES OUTSIDE RELEASE STORE ==="
+          for sha in f8c70d3d3144478afff0a8faf6dfc8405d304532 228fb8e9fb4895ced39628758afbabcdecae5d7d f59347fad11553b833e75f6f35a0c545464fdf5; do
+            echo "--- $sha ---"
+            grep -RIl --exclude='*.env' -- "$sha" /etc/systemd/system /usr/local/sbin /usr/local/libexec /home/deploy/disdex-trading/auto-repair 2>/dev/null || true
+          done
+          echo
+
+          echo "=== V52 CURRENT PROCESS STATE PATH HINTS ==="
+          u="disdex-v52-aster-only@$(tr -d '[:space:]' < "$CURRENT/.disdex-release-sha").service"
+          pid="$(systemctl show "$u" -p MainPID --value 2>/dev/null || true)"
+          echo "unit=$u pid=$pid"
+          if [[ "$pid" =~ ^[0-9]+$ && "$pid" -gt 0 ]]; then
+            tr '\0' '\n' < "/proc/$pid/environ" |
+              grep -Ei '^(DISDEX_.*STATE|V52_.*STATE|V52_.*PATH|DISDEX_RUNTIME_COMMIT_SHA|DISDEX_RELEASE_SHA)=' |
+              grep -Eiv '(KEY|SECRET|TOKEN|ADDRESS|PASSWORD|CREDENTIAL)' || true
+          fi
+          echo "--- candidate V52 state files ---"
+          find /var/lib/disdex /home/deploy/ai-dex-manager-v96-paper/.runtime-state -xdev -type f \
+            \( -iname '*v52*' -o -path '*/v52/*' \) -printf '%T@ %p\n' 2>/dev/null | sort -nr | head -40
+          echo
+
+          echo "=== TMP CLEANUP CANDIDATES ==="
+          now="$(date +%s)"
+          find /tmp -maxdepth 1 -type f \( -name 'disdex-*.tar.gz' -o -name '*deploy*.sh' -o -name '*deploy*.log' -o -name '*deploy*.exit' -o -name '*rollback*.log' -o -name '*rollback*.sh' \) -print0 2>/dev/null |
+            while IFS= read -r -d '' p; do
+              mt="$(stat -c %Y "$p")"; age=$((now-mt)); sz="$(stat -c %s "$p")"
+              echo "$age $sz $p"
+            done | sort -nr
+          echo
+          echo "READONLY_REMNANT_DIAGNOSTIC=PASS"
+          REMOTE
