@@ -51,3 +51,22 @@ test('PC alerts only fire for changed high-score leader or an entry from below t
  const noEntry=ranking.rankingPcAlert([row('a',85),row('b',84),row('c',83),row('d',70)],alreadyTop3);
  assert.equal(noEntry,null);
 });
+
+test('PC alert requires a ranking change with top score 90+, or a prior rank below top3 entering top3',()=>{
+ assert.equal(typeof ranking.rankingPcAlert,'function');
+ const base=[row('A',95),row('B',89),row('C',88),row('D',87),row('E',86)];
+ assert.equal(ranking.rankingPcAlert([],base),null,'first snapshot must not notify');
+ assert.equal(ranking.rankingPcAlert(base,base),null,'unchanged ranking must not notify even with top score >= 90');
+ const swapped=[row('A',95),row('C',90),row('B',89),row('D',87),row('E',86)];
+ const highTop=ranking.rankingPcAlert(base,swapped);
+ assert.equal(highTop?.reason,'TOP_SCORE');
+ assert.match(highTop?.body||'',/1位 A .*Score 95/);
+ const top3Entry=[row('A',85),row('D',84),row('B',83),row('C',82),row('E',81)];
+ const entered=ranking.rankingPcAlert(base,top3Entry);
+ assert.equal(entered?.reason,'TOP3_ENTRY');
+ assert.match(entered?.body||'',/D .*4位→2位/);
+ const both=[row('D',97),row('A',95),row('B',89),row('C',88),row('E',86)];
+ const combined=ranking.rankingPcAlert(base,both);
+ assert.equal(combined?.reason,'BOTH');
+ assert.match(combined?.body||'',/D .*4位→1位/);
+});
