@@ -22,3 +22,19 @@ test("successful cutover disarms EXIT rollback before cleanup and success marker
   const success = text.indexOf("STATUS=LIVE_ACTIVATED_VERIFIED");
   assert.ok(disarm >= 0 && success > disarm);
 });
+
+
+test("production cutover never fabricates operator approval", async () => {
+  const text = await readFile(sourceUrl, "utf8");
+  assert.match(text, /OPERATOR_ARTIFACT_EXACT_SHA_REQUIRED/);
+  assert.match(text, /OPERATOR_FET_PREEMPTION_APPROVAL_REQUIRED/);
+  assert.doesNotMatch(text, /tempfile\.mkstemp\(prefix="\.operator-activation/);
+  assert.doesNotMatch(text, /"ordersEnabled":True/);
+  assert.doesNotMatch(text, /"operatorAcknowledgement":"I_ACK_REAL_MONEY_LIVE_ACTIVATION"/);
+});
+
+test("production deploy workflow is manual-dispatch only", async () => {
+  const workflow = await readFile(new URL("../.github/workflows/full-order-path-production-deploy-20261006.yml", import.meta.url), "utf8");
+  assert.match(workflow, /on:\s*\n\s*workflow_dispatch:/);
+  assert.doesNotMatch(workflow, /\n\s+push:\s*\n/);
+});
