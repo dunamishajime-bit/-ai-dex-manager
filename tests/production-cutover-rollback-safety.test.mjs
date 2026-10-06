@@ -24,10 +24,14 @@ test("successful cutover disarms EXIT rollback before cleanup and success marker
 });
 
 
-test("production cutover never fabricates operator approval", async () => {
+test("production cutover consumes a staged exact-SHA approval and never fabricates one", async () => {
   const text = await readFile(sourceUrl, "utf8");
-  assert.match(text, /OPERATOR_ARTIFACT_EXACT_SHA_REQUIRED/);
-  assert.match(text, /OPERATOR_FET_PREEMPTION_APPROVAL_REQUIRED/);
+  assert.match(text, /approved-\$TARGET_SHA\.json/);
+  assert.match(text, /OPERATOR_STAGED_ACTIVATION_REQUIRED/);
+  assert.match(text, /disdex-live-operator-activation-gate\.mjs/);
+  assert.match(text, /disdex-fet-preemption-readiness-guard\.py/);
+  assert.match(text, /OPERATOR_STAGED_ACTIVATION_PROMOTED=PASS/);
+  assert.match(text, /install -o root -g root -m 0600 "\$staged_operator_activation"/);
   assert.doesNotMatch(text, /tempfile\.mkstemp\(prefix="\.operator-activation/);
   assert.doesNotMatch(text, /"ordersEnabled":True/);
   assert.doesNotMatch(text, /"operatorAcknowledgement":"I_ACK_REAL_MONEY_LIVE_ACTIVATION"/);
