@@ -15,3 +15,8 @@ class InstallTest(unittest.TestCase):
         self.assertIn('8798',value)
     def test_unknown_site_fails_without_modifying(self):
         with self.assertRaises(ValueError): self.module().nginx_config('server { listen 80; }')
+    def test_http_redirect_before_tls_virtual_host(self):
+        prefix='server {\n listen 80;\n server_name professional-dismanager.net;\n return 301 https://professional-dismanager.net$request_uri;\n}\n'
+        value=self.module().nginx_config(prefix+CONFIG)
+        self.assertTrue(value.startswith(prefix))
+        self.assertEqual(value.count('# BEGIN HAJIME REMOTE'),1)

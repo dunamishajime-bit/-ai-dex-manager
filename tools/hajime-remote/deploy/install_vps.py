@@ -30,11 +30,14 @@ ROUTES='''
 def nginx_config(text):
     if '# BEGIN HAJIME REMOTE' in text: return text
     # Match this known TLS virtual host, leaving all existing locations intact.
-    host=re.search(r'server_name\s+professional-dismanager\.net[^;]*;',text)
-    if not host: raise ValueError('EXPECTED_NGINX_HOST_NOT_FOUND')
-    start=text.rfind('server {',0,host.start())
-    if start<0 or not re.search(r'listen\s+443\b',text[start:host.start()]): raise ValueError('EXPECTED_TLS_SERVER_NOT_FOUND')
-    return text[:host.end()]+ROUTES+text[host.end():]
+    hosts=list(re.finditer(r'server_name\s+professional-dismanager\.net[^;]*;',text))
+    if not hosts: raise ValueError('EXPECTED_NGINX_HOST_NOT_FOUND')
+    for host in hosts:
+        start=text.rfind('server {',0,host.start())
+        if start>=0 and re.search(r'listen\s+443\b',text[start:host.start()]):
+            return text[:host.end()]+ROUTES+text[host.end():]
+    raise ValueError('EXPECTED_TLS_SERVER_NOT_FOUND')
+
 
 def run(*args): subprocess.run(args,check=True,stdout=subprocess.DEVNULL)
 
