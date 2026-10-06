@@ -89,6 +89,7 @@ jobs:
             case "$p" in
               .github/workflows/full-order-path-*-20261006.yml|\
               .github/workflows/production-remnant-readonly-diagnostic-20261006.yml|\
+              docs/production/current-implementation-readiness.json|\
               lib/fet-brk48-live-runner.ts|\
               lib/hype-zec-long-runner.ts|\
               scripts/disdex-fet-brk48-live-runner.ts|\
