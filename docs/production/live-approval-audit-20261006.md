@@ -30,3 +30,7 @@ Active HYPE_ZEC compatibility names remain because HYPE still references them. R
 
 ## Completion boundary
 This document records predeployment findings. A candidate commit or passing test does not establish deployment completion. Final completion requires an observed LIVE SHA, all runner PIDs/cwd/heartbeats, fresh account and protection reconciliation, guard state, journals and public API evidence. Any unverified rollback is reported incomplete.
+
+## First production attempt and verified rollback
+Run 37440371951 switched to 00d2c749 and achieved seven healthy heartbeats with zero startup budget saturation. It correctly failed because the subsequent stock-reference restart propagated a stop to its Requires-dependent V52. Automatic rollback stopped writers, reconciled the flat account, preserved latest financial state, restored all runners and verified source SHA 4c57efbb at 09:09:10 UTC; rollback completed 09:09:19 UTC.
+The reference proxy now switches before trading startup. POSTDEPLOY checks ownership without restarting it. Executable regression reproduces the previous extra restart and verifies the corrected order. A separate fixture regression fixes the Idle HP contract: its healthy status is HEALTHY, backed by an exact-SHA LIVE healthy heartbeat, rather than the overview's LIVE label. Updated Linux regressions: 16/16 passed.

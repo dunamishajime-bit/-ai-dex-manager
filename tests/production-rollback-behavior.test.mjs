@@ -9,6 +9,43 @@ const source = await readFile(new URL('../scripts/ops/root/disdex-idle-productio
 const helper = source.slice(source.indexOf('require_flat_account() {'), source.indexOf('\nCUTOVER_ACCOUNT_MODE='));
 const flat = {status:'ASTER_READONLY_ACCOUNT_DIAGNOSTIC_PASS',positions:[],openOrders:[],ordersSent:0,cancelsSent:0,positionChangesSent:0};
 
+test('stock reference switches before traders and postdeploy verification does not stop V52', () => {
+  const fn=source.slice(source.indexOf('restart_stock_reference_current() {'),source.indexOf('\nif [[ "$ROLLBACK_ONLY" != true ]]',source.indexOf('restart_stock_reference_current() {')));
+  for (const phase of ['CUTOVER','POSTDEPLOY','ROLLBACK']) {
+    const result=spawnSync('bash',['-c',`set -Eeuo pipefail
+CURRENT=/current
+systemctl() { if [[ "$1" == restart ]]; then echo RESTART_CALLED; elif [[ "$1" == show ]]; then echo 42; fi; }
+readlink() { echo /expected; }
+${fn}
+restart_stock_reference_current ${phase}
+`],{encoding:'utf8'});
+    assert.equal(result.status,0,result.stdout+result.stderr);
+    assert.equal(result.stdout.includes('RESTART_CALLED'),phase!=='POSTDEPLOY',result.stdout);
+  }
+  const normal=source.slice(source.indexOf('echo "CUTOVER_WIRING_BEGIN'));
+  assert.ok(normal.indexOf('restart_stock_reference_current CUTOVER')>0);
+  assert.ok(normal.indexOf('restart_stock_reference_current CUTOVER')<normal.indexOf('start_trading_unit_rate_budget_gated "'));
+});
+
+test('postdeploy HP uses the actual HEALTHY Idle API contract and verifies its live heartbeat', () => {
+  const block=source.match(/python3 - "\$TARGET_SHA" <<'PY'\n(import json,sys,urllib.request[\s\S]*?)\nPY/)[1];
+  for (const [status,pid,heartbeatSha,accepted] of [['HEALTHY',42,'target',true],['BLOCKED',42,'target',false],['HEALTHY',0,'target',false],['HEALTHY',42,'old',false]]) {
+    const prefix=`import urllib.request,json
+class Response:
+ status=200
+ def __init__(self,path):
+  hb={'runtimeSha':'${heartbeatSha}','expectedSha':'target','mode':'LIVE','liveEnabled':True,'safetyState':'HEALTHY','mainPid':${pid}}
+  self.value={'releaseSha':'target','status':'${status}','heartbeat':hb} if 'idle-priority-status' in path else {'runtime':{'units':[{'id':'IDLE_PRIORITY_SHORT','releaseSha':'target','status':'LIVE'}]}} if 'decision-status' in path else {'releaseSha':'target'}
+ def __enter__(self): return self
+ def __exit__(self,*args): return False
+ def read(self,*args): return json.dumps(self.value).encode()
+urllib.request.urlopen=lambda req,**kwargs:Response(req.full_url)
+`;
+    const result=spawnSync('python3',['-c',prefix+block,'target'],{encoding:'utf8'});
+    assert.equal(result.status===0,accepted,result.stdout+result.stderr);
+  }
+});
+
 for (const [name, row, code, accepted] of [
   ['flat account',flat,0,true],
   ['position present',{...flat,positions:[{symbol:'FETUSDT',positionAmt:1}]},0,false],

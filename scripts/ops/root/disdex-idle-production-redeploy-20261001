@@ -367,7 +367,11 @@ restart_stock_reference_current() {
     return 0
   fi
   expected="$(readlink -f "$CURRENT")"
-  systemctl restart disdex-stock-reference-free.service
+  # Restarting this required unit stops V52. Switch it while trading writers
+  # are stopped; POSTDEPLOY verifies ownership without restarting dependents.
+  if [[ "$phase" != POSTDEPLOY ]]; then
+    systemctl restart disdex-stock-reference-free.service
+  fi
   cwd=""
   pid=""
   for attempt in $(seq 1 15); do
@@ -819,6 +823,7 @@ done
 echo "CUTOVER_WIRING_BEGIN release=$RELEASE"
 (cd "$RELEASE" && DISDEX_CURRENT_RUNTIME_DEFER_OPERATOR_AUTOMATION=true bash scripts/ops/root/disdex-current-runtime-wiring --apply)
 echo "CUTOVER_WIRING_PASS automation=deferred"
+restart_stock_reference_current CUTOVER
 
 wait_safety_daemons_ready() {
   local required_consecutive=2
@@ -1060,8 +1065,8 @@ for name in "${NAMES[@]}"; do
 done
 
 # The stock reference proxy resolves /home/deploy/disdex-trading/current only at
-# process start. Restart it after the current symlink has moved and wait for
-# systemd to publish the new MainPID/cwd before asserting release ownership.
+# process start. It was switched before trading startup. Verify current
+# ownership here without stopping the already healthy V52 dependency.
 restart_stock_reference_current POSTDEPLOY
 
 for name in "${NAMES[@]}"; do
@@ -1186,7 +1191,8 @@ live=get("/api/system/live-runtime")
 if live.get("releaseSha")!=sha:
     raise RuntimeError("HP_LIVE_RUNTIME_SHA_MISMATCH")
 idle=get("/api/system/idle-priority-status")
-if idle.get("releaseSha")!=sha or idle.get("status")!="LIVE":
+hb=idle.get("heartbeat") or {}
+if idle.get("releaseSha")!=sha or idle.get("status")!="HEALTHY" or hb.get("runtimeSha")!=sha or hb.get("expectedSha")!=sha or hb.get("mode")!="LIVE" or hb.get("liveEnabled") is not True or hb.get("safetyState")!="HEALTHY" or int(hb.get("mainPid") or 0)<=0:
     raise RuntimeError("HP_IDLE_NOT_LIVE")
 decision=get("/api/system/decision-status?refresh=1")
 units=(decision.get("runtime") or {}).get("units",[])
