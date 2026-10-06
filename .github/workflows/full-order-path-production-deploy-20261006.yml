@@ -89,6 +89,9 @@ jobs:
             case "$p" in
               .github/workflows/full-order-path-*-20261006.yml|\
               .github/workflows/production-remnant-readonly-diagnostic-20261006.yml|\
+              .github/workflows/idle-priority-production-redeploy-20261001.yml|\
+              .github/workflows/pengu-state-dir-normalize-20261001.yml|\
+              .github/workflows/aster-rate-budget-permission-recovery-20261001.yml|\
               docs/production/current-implementation-readiness.json|\
               lib/fet-brk48-live-runner.ts|\
               lib/hype-zec-long-runner.ts|\
