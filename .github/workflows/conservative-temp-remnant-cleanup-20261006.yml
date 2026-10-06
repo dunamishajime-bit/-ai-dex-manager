@@ -1,0 +1,74 @@
+name: Conservative Temp Remnant Cleanup 20261006
+on:
+  push:
+    branches: [fix/cutover-rollback-safety-20261006]
+    paths: [".github/workflows/conservative-temp-remnant-cleanup-20261006.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  cleanup:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: SSH setup
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def n(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id").write_text(n("ROOT_KEY"));(p/"known_hosts").write_text(n("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 600 "$HOME/.ssh/id" "$HOME/.ssh/known_hosts"
+      - name: Delete only proven unreferenced temp remnants
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -p "$PORT" root@"$SSH_HOST" 'bash -s' <<'REMOTE'
+          set -Eeuo pipefail
+          current=/home/deploy/disdex-trading/current
+          sha_before="$(tr -d '[:space:]' < "$current/.disdex-release-sha")"
+          current_path="$(readlink -f "$current")"
+          previous_path="$(readlink -f /home/deploy/disdex-trading/previous 2>/dev/null || true)"
+          reclaimed=0
+          deleted=0
+          safe_unreferenced() {
+            p="$1"
+            [[ "$p" != "$current_path" && "$p" != "$previous_path" ]] || return 1
+            if grep -RIlF -- "$p" /etc/systemd/system /etc/disdex 2>/dev/null | grep -q .; then return 1; fi
+            if find /home/deploy -xdev -type l \( -lname "$p" -o -lname "$p/*" \) -print -quit 2>/dev/null | grep -q .; then return 1; fi
+            for cwd in /proc/[0-9]*/cwd; do
+              t="$(readlink -f "$cwd" 2>/dev/null || true)"
+              [[ "$t" == "$p" || "$t" == "$p/"* ]] && return 1
+            done
+            return 0
+          }
+          delete_path() {
+            p="$1"
+            size="$(du -sb "$p" 2>/dev/null | awk '{print $1}' || echo 0)"
+            rm -rf --one-file-system -- "$p"
+            reclaimed=$((reclaimed + size))
+            deleted=$((deleted + 1))
+            echo "DELETED=$p bytes=$size"
+          }
+          root=/home/deploy/disdex-trading/releases
+          while IFS= read -r -d '' p; do
+            if safe_unreferenced "$p"; then delete_path "$p"; else echo "PROTECTED_OR_REFERENCED=$p"; fi
+          done < <(find "$root" -mindepth 1 -maxdepth 1 -type d \( -name '.staging-*' -o -name '.formal-*' -o -name '.previous-*-symlinked' \) -mtime +7 -print0)
+          while IFS= read -r -d '' p; do
+            if safe_unreferenced "$p"; then delete_path "$p"; else echo "PROTECTED_OR_REFERENCED=$p"; fi
+          done < <(find /tmp -mindepth 1 -maxdepth 1 \( -type d -o -type f \) \( -name 'disdex-audit-*' -o -name 'disdex-lock-*' \) -mmin +1440 -print0 2>/dev/null)
+          [[ "$(tr -d '[:space:]' < "$current/.disdex-release-sha")" == "$sha_before" ]]
+          [[ "$(readlink -f "$current")" == "$current_path" ]]
+          echo "TEMP_REMNANT_CLEANUP=PASS"
+          echo "DELETED_COUNT=$deleted"
+          echo "BYTES_RECLAIMED=$reclaimed"
+          df -h / | tail -1
+          REMOTE
