@@ -52,7 +52,7 @@
       "existingHoldHours": 24,
       "existingHardStopPct": 0.05,
       "existingProfitFloorTriggerPct": 0.05,
-      "existingProfitFloorStopPct": 0.005
+      "existingProfitFloorStopPct": 0.03
     },
     "V12": {
       "sameSideLossCooldown": {
