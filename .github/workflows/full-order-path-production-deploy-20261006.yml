@@ -92,8 +92,12 @@ jobs:
               lib/fet-brk48-live-runner.ts|\
               lib/hype-zec-long-runner.ts|\
               scripts/disdex-fet-brk48-live-runner.ts|\
+              scripts/ops/root/disdex-idle-production-redeploy-20261001|\
+              scripts/ops/root/disdex-fet-preemption-readiness-guard.py|\
               tests/fet-brk48-live-runner.test.ts|\
-              tests/live-order-lock-scope-v2.test.mjs) ;;
+              tests/live-order-lock-scope-v2.test.mjs|\
+              tests/production-cutover-rollback-safety.test.mjs|\
+              tests/fet-preemption-readiness-audit.test.mjs) ;;
               *) echo "UNEXPECTED_PRODUCTION_DELTA=$p"; exit 1 ;;
             esac
           done
