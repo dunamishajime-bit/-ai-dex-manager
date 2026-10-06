@@ -29,13 +29,15 @@ restart_stock_reference_current ${phase}
 
 test('postdeploy HP uses the actual HEALTHY Idle API contract and verifies its live heartbeat', () => {
   const block=source.match(/python3 - "\$TARGET_SHA" <<'PY'\n(import json,sys,urllib.request[\s\S]*?)\nPY/)[1];
-  for (const [status,pid,heartbeatSha,accepted] of [['HEALTHY',42,'target',true],['BLOCKED',42,'target',false],['HEALTHY',0,'target',false],['HEALTHY',42,'old',false]]) {
+  for (const [status,pid,heartbeatSha,overviewSha,accepted] of [['HEALTHY',42,'target','target',true],['BLOCKED',42,'target','target',false],['HEALTHY',0,'target','target',false],['HEALTHY',42,'old','target',false],['HEALTHY',42,'target','old',false]]) {
     const prefix=`import urllib.request,json
 class Response:
  status=200
  def __init__(self,path):
   hb={'runtimeSha':'${heartbeatSha}','expectedSha':'target','mode':'LIVE','liveEnabled':True,'safetyState':'HEALTHY','mainPid':${pid}}
-  self.value={'releaseSha':'target','status':'${status}','heartbeat':hb} if 'idle-priority-status' in path else {'runtime':{'units':[{'id':'IDLE_PRIORITY_SHORT','releaseSha':'target','status':'LIVE'}]}} if 'decision-status' in path else {'releaseSha':'target'}
+  overview=[{'id':k,'releaseSha':'${overviewSha}','status':'LIVE'} for k in ['V12_X1.00_ALL','PENGU_DUAL_LS_V2_FINAL','QUALITY102_CAUSAL_V1','FET_BRK48_RESIDUAL','HYPE_TREND_LONG','DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96']]
+  lineage={k:{'runtimeSha':'target','expectedSha':'target','matchesCurrent':True} for k in ['v12','pengu','quality102','v52','fet','hype']}
+  self.value={'releaseSha':'target','status':'${status}','heartbeat':hb} if 'idle-priority-status' in path else {'runtime':{'units':overview}} if 'decision-status' in path else {'releaseSha':'target','runtimeLineage':{'synchronized':True,'units':lineage}}
  def __enter__(self): return self
  def __exit__(self,*args): return False
  def read(self,*args): return json.dumps(self.value).encode()

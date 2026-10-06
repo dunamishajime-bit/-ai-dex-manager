@@ -1190,6 +1190,13 @@ def get(path):
 live=get("/api/system/live-runtime")
 if live.get("releaseSha")!=sha:
     raise RuntimeError("HP_LIVE_RUNTIME_SHA_MISMATCH")
+lineage=live.get("runtimeLineage") or {}
+if lineage.get("synchronized") is not True:
+    raise RuntimeError("HP_RUNTIME_LINEAGE_UNSYNCHRONIZED")
+for name in ["v12","pengu","quality102","v52","fet","hype"]:
+    r=(lineage.get("units") or {}).get(name) or {}
+    if r.get("runtimeSha")!=sha or r.get("expectedSha")!=sha or r.get("matchesCurrent") is not True:
+        raise RuntimeError("HP_RUNTIME_LINEAGE_INVALID:"+name)
 idle=get("/api/system/idle-priority-status")
 hb=idle.get("heartbeat") or {}
 if idle.get("releaseSha")!=sha or idle.get("status")!="HEALTHY" or hb.get("runtimeSha")!=sha or hb.get("expectedSha")!=sha or hb.get("mode")!="LIVE" or hb.get("liveEnabled") is not True or hb.get("safetyState")!="HEALTHY" or int(hb.get("mainPid") or 0)<=0:
@@ -1197,8 +1204,16 @@ if idle.get("releaseSha")!=sha or idle.get("status")!="HEALTHY" or hb.get("runti
 decision=get("/api/system/decision-status?refresh=1")
 units=(decision.get("runtime") or {}).get("units",[])
 row=[x for x in units if x.get("id")=="IDLE_PRIORITY_SHORT"]
-if len(row)!=1 or row[0].get("releaseSha")!=sha or row[0].get("status")!="LIVE":
+# The deployed overview lists the six formal strategies. Idle is verified
+# through its dedicated status endpoint and exact-SHA LIVE heartbeat above.
+for name in ["V12_X1.00_ALL","PENGU_DUAL_LS_V2_FINAL","QUALITY102_CAUSAL_V1","FET_BRK48_RESIDUAL","HYPE_TREND_LONG","DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96"]:
+    matches=[x for x in units if x.get("id")==name]
+    if len(matches)!=1 or matches[0].get("releaseSha")!=sha:
+        raise RuntimeError("HP_OVERVIEW_RUNTIME_INVALID:"+name)
+if row and (len(row)!=1 or row[0].get("releaseSha")!=sha or row[0].get("status")!="LIVE"):
     raise RuntimeError("HP_IDLE_OVERVIEW_NOT_LIVE")
+if not row:
+    print("POSTDEPLOY_HP_IDLE_DEDICATED_HEARTBEAT_VERIFIED overviewFormalStrategies=6")
 print("POSTDEPLOY_HP_IDLE_LIVE=PASS")
 PY
 
