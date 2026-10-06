@@ -757,6 +757,12 @@ apply_wiring() {
   require_root_for_apply
   assert_no_legacy_live_units
   assert_current_live_target_ready
+  local fet_readiness_guard="${CURRENT_RELEASE}/scripts/ops/root/disdex-fet-preemption-readiness-guard.py"
+  [[ -f "$fet_readiness_guard" ]] || fet_readiness_guard="/usr/local/libexec/disdex-fet-preemption-readiness-guard.py"
+  [[ -f "$fet_readiness_guard" ]] || { printf 'FET preemption readiness guard missing\n' >&2; return 1; }
+  # Read-only capability is explicit, exact-SHA, and defaults to false.
+  local fet_core_preemption_ready
+  fet_core_preemption_ready="$(/usr/bin/python3 "$fet_readiness_guard" --approved-ready --sha "$DEPLOYED_SHA" --activation-path "$OPERATOR_ACTIVATION_PATH")"
   install -d -o deploy -g deploy -m 2770 /var/lib/disdex/shared
   install -d -o root -g root -m 0755 "${SHARED_ROOT}/operator-activation"
   if [[ -e "$V52_LEGACY_CRYPTO_ROOT" && ! -d "$V52_LEGACY_CRYPTO_ROOT" ]]; then
@@ -902,7 +908,7 @@ QUALITY102_CAUSAL_V1_STATE_PATH=/var/lib/disdex/quality102-causal-v1/state.json
 FET_BRK48_LIVE_ENABLED=true
 FET_BRK48_STATE_PATH=/var/lib/disdex/fet-brk48-residual/state.json
 FET_BRK48_MAX_GROSS=2.25
-FET_BRK48_CORE_PREEMPTION_READY=false
+FET_BRK48_CORE_PREEMPTION_READY=${fet_core_preemption_ready}
 DISDEX_Q102_RUNTIME_SHA=${DEPLOYED_SHA}
 QUALITY102_CAUSAL_V1_PREFLIGHT_HISTORY_CHECK=false
 # Historical selector flags intentionally remain false.  The canonical
@@ -1210,6 +1216,7 @@ StartLimitBurst=3
 [Service]
 RestartSec=30s
 EnvironmentFile=${CONTRACT_ENV_FILE}
+ExecCondition=+/usr/bin/python3 ${fet_readiness_guard} --prestart --sha ${DEPLOYED_SHA} --activation-path ${OPERATOR_ACTIVATION_PATH}
 WorkingDirectory=${CURRENT_RELEASE}
 ExecStartPre=
 ExecStartPre=/usr/bin/test -f ${CURRENT_RELEASE}/.disdex-release-sha
