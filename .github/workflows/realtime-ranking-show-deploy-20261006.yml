@@ -51,10 +51,10 @@ jobs:
           grep -q "読み上げ" components/features/RealtimeRankingBoard.tsx
           grep -q "ranking-flyer" components/features/useRankingShow.ts
           grep -q "SpeechSynthesisUtterance" components/features/useRankingShow.ts
-          grep -q "fetch('/api/tts'" components/features/useRankingShow.ts
-          grep -q "voice:'marin'" components/features/useRankingShow.ts
-          grep -q "gpt-realtime-2.1-mini" app/api/tts/route.ts
-          grep -q "NATURAL_JA_INSTRUCTIONS" app/api/tts/route.ts
+          grep -q "googleSpeech" components/features/useRankingShow.ts
+          grep -q "testGoogleVoice" components/features/useRankingShow.ts
+          grep -q "Google音声テスト" components/features/RealtimeRankingBoard.tsx
+          grep -q "Google 日本語" components/features/useRankingShow.ts
 
       - name: Test ranking commentary contract
         shell: bash
