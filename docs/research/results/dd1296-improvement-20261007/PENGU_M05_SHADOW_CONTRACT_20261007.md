@@ -54,6 +54,29 @@ This value is observation only. It MUST NOT alter:
 - pending exposure,
 - order idempotency.
 
+## Candidate-generator implementation proof
+
+A retained candidate-generation lab was compared directly.
+
+Current generator:
+- total candidates: 1,970
+- PENGU candidates: 113
+- PENGU SHORT: 44
+
+M05 generator:
+- total candidates: 1,969
+- PENGU candidates: 112
+- PENGU SHORT: 43
+
+Semantic diff:
+- removed: 1
+- added: 0
+- shared candidate mismatches: 0
+
+The sole removed object is the same 2026-07-17 SHORT_V20 hard-stop candidate identified by the full integrated M05 root.
+
+This supports the implementation shape `PENGU_DUAL_LS_V2.short.regimeReturn72hMaximum: 0 -> -0.005` **at SHORT candidate generation** if M05 is ever promoted. A future Production patch must still regenerate the full exact candidate root and prove the same one-candidate semantic delta before deployment.
+
 ## Required telemetry fields
 
 For an otherwise-valid current SHORT candidate record:
