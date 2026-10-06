@@ -99,8 +99,22 @@ jobs:
           grep -E '^(DISDEX_HYPE_ZEC_(MODE|ENABLED|SIGNAL_MODE|SYMBOLS|LIVE_EXECUTION_ENABLED|PRODUCTION_CONFIG_LIVE_ENABLED|OPERATOR_ARMED)|DISDEX_RUNTIME_COMMIT_SHA)=' "$envfile" || true
 
           echo "=== READONLY ACCOUNT ==="
-          cd "$current"
-          ./node_modules/.bin/tsx scripts/disdex-aster-readonly-account-diagnostic.ts
+          v12unit="disdex-v12-x1-all@$sha.service"
+          mapfile -t envpaths < <(systemctl show "$v12unit" -p EnvironmentFiles --value | grep -oE '/[^ ]+' || true)
+          props=()
+          for p in "${envpaths[@]}"; do
+            [[ -f "$p" ]] && props+=(--property="EnvironmentFile=$p")
+          done
+          if [[ "${#props[@]}" -gt 0 ]]; then
+            set +e
+            readonly_out="$(systemd-run --quiet --wait --pipe --collect --uid=deploy --property="WorkingDirectory=$current" "${props[@]}" "$current/node_modules/.bin/tsx" "$current/scripts/disdex-aster-readonly-account-diagnostic.ts" 2>&1)"
+            readonly_rc=$?
+            set -e
+            echo "READONLY_ACCOUNT_RC=$readonly_rc"
+            echo "$readonly_out"
+          else
+            echo "READONLY_ACCOUNT_ENVFILES_UNAVAILABLE"
+          fi
 
           echo "=== SHARED SAFETY STATE ==="
           python3 - <<'PY'
@@ -139,21 +153,7 @@ jobs:
           systemctl reset-failed disdex-runner-health-snapshot.service >/dev/null 2>&1 || true
           systemctl start disdex-runner-health-snapshot.service || true
           sleep 2
-          python3 - <<'PY'
-          import json,glob
-          p="/var/lib/disdex/runner-health/current.json"
-          try:
-            d=json.load(open(p))
-            print(json.dumps({
-              "overallSafetyState":d.get("overallSafetyState"),
-              "newOrdersAllowed":d.get("newOrdersAllowed"),
-              "blockReasons":d.get("blockReasons"),
-              "sharedKillSwitchActive":d.get("sharedKillSwitchActive"),
-              "results":[{k:r.get(k) for k in ("runner","safetyState","active","processPresent","cwdCurrent","commandCurrent","execCurrent","stateFresh","strategyOk","nRestarts","serviceResult")} for r in (d.get("results") or [])]
-            },ensure_ascii=False))
-          except Exception as e:
-            print("HEALTH_SNAPSHOT_READ_FAILED",type(e).__name__)
-          PY
+          journalctl -u disdex-runner-health-snapshot.service -n 3 --no-pager -o cat | tail -n 3
 
           echo "=== RECENT CRITICAL EVENTS SINCE CUTOVER ==="
           journalctl --since '2026-10-06 14:26:00' --no-pager -o short-iso             | grep -Ei 'ACCOUNT_LOCK_BUSY|ACCOUNT_ORDER_LOCK_BUSY|RATE_BUDGET_SATURATED|KILL.?SWITCH|EXECUTION_UNKNOWN|ORDER.*UNKNOWN|EACCES|permission denied|SHA_MISMATCH|STATE.*MISMATCH|SOURCE_UNAVAILABLE|exec-condition|FET_PREEMPTION|BASELINE_ADMISSION_SOURCE_STALE_OR_TS_MISMATCH'             | tail -n 300 || true
