@@ -31,3 +31,31 @@ export function evaluateFet(raw:unknown,now:number,policy=FET_POLICY):{valid:boo
 export function hypeRankingFresh(row:{status:string;stateSha?:string;lastDecision?:{at?:number}},releaseSha:string,now:number){
  return row.status==='LIVE'&&row.stateSha===releaseSha&&freshTimestamp(row.lastDecision?.at,now,3*3600000);
 }
+
+export type RiseEvent={row:RankRow;from:number;to:number;delta:number};
+export function risingRankEvents(previous:RankRow[],next:RankRow[]):RiseEvent[]{
+ if(!previous.length)return [];
+ const before=rankRows(previous).filter(r=>r.score!==null),after=rankRows(next).filter(r=>r.score!==null);
+ const positions=new Map(before.map((r,i)=>[r.id,{row:r,position:i+1}]));
+ return after.flatMap((row,i)=>{const old=positions.get(row.id);return old&&old.row.fresh&&row.fresh&&old.position>i+1?[{row,from:old.position,to:i+1,delta:old.position-i-1}]:[];}).sort((a,b)=>b.delta-a.delta||a.to-b.to);
+}
+const displayGateNumber=(n:number)=>Number(n.toFixed(4)).toString();
+function commentaryGate(g:Gate){
+ let detail=g.label+'：'+(g.state==='UNKNOWN'?'未確認。':'');
+ if(g.actual!==undefined)detail+='現在 '+(typeof g.actual==='number'?displayGateNumber(g.actual):g.actual)+' / ';
+ if(g.required!==undefined)detail+='基準 '+g.required+'。';
+ // Only an explicit inclusive lower bound (or the documented volume ratio)
+ // proves that subtraction is a meaningful deficit.
+ const match=typeof g.required==='string'?g.required.match(/^\s*(?:≥|>=)\s*(-?\d+(?:\.\d+)?)(%)?\s*$/):null;
+ const minimum=match?Number(match[1]):g.key==='volume'&&typeof g.required==='number'?g.required:undefined;
+ if(g.state==='NO'&&typeof g.actual==='number'&&Number.isFinite(g.actual)&&minimum!==undefined&&minimum>g.actual)detail+='あと'+displayGateNumber(minimum-g.actual)+(match?.[2]?'ポイント':'')+'。';
+ return detail+(g.detail||'');
+}
+export function rankCommentary(row:RankRow,from?:number,to?:number){
+ const name=row.symbol.replace(/USDT$/,'')+' / '+row.logic;
+ const headline=from!==undefined&&to!==undefined?name+'が'+from+'位から'+to+'位へ上昇（↑'+(from-to)+'）':name+'の判定状況';
+ const signalGates=row.gates.filter(g=>g.kind!=='execution'&&g.state!=='OK'),executionGates=row.gates.filter(g=>g.kind==='execution'&&g.state==='NO');
+ const signal=!row.fresh||row.score===null?'観測更新待ち。現在の条件充足は未確認です。':signalGates.length?signalGates.map(commentaryGate).join(' / '):'市場条件は通過。実Runnerの最終確認が必要です。';
+ const execution=executionGates.length?'発注制約：'+executionGates.map(commentaryGate).join(' / '):'発注制約：確認済みの停止条件なし。余力・競合・実発注はRunner確認待ち。';
+ return {headline,signal,execution,speech:headline+'。'+(signalGates.length&&row.fresh&&row.score!==null?commentaryGate(signalGates[0]):signal)+(executionGates.length?'。発注制約は'+executionGates.map(g=>g.label).join('、')+'。':'')};
+}
