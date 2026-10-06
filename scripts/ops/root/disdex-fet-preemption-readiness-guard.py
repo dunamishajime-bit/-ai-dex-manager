@@ -58,20 +58,34 @@ def main():
         return 0
     env = os.environ
     config_flag = None
+    v52_running = True
     try:
         if args.audit:
+            # Read only the two non-secret readiness keys from the durable runtime
+            # contract first.  This remains available even when V52 is intentionally
+            # fail-closed by ExecCondition, so the audit can report the real blocker
+            # instead of collapsing to SOURCE_UNAVAILABLE.
+            config_env = {}
+            for line in Path('/etc/disdex/current-runtime', sha + '.env').read_text().splitlines():
+                if '=' not in line:
+                    continue
+                key, value = line.split('=', 1)
+                if key in ('DISDEX_RUNTIME_COMMIT_SHA', 'FET_BRK48_CORE_PREEMPTION_READY'):
+                    config_env[key] = value.strip()
+            config_flag = config_env.get('FET_BRK48_CORE_PREEMPTION_READY', '')
             unit = 'disdex-v52-aster-only@' + sha + '.service'
             pid = subprocess.check_output(['systemctl', 'show', unit, '-p', 'MainPID', '--value'], text=True).strip()
-            if not pid.isdigit() or int(pid) <= 0:
-                raise ValueError('V52_NOT_RUNNING')
-            # Only two non-secret keys are retained; no environment contents are logged.
-            env = {k: v for k, v in (x.split('=', 1) for x in Path('/proc', pid, 'environ').read_bytes().decode().split(chr(0)) if '=' in x)
-                   if k in ('DISDEX_RUNTIME_COMMIT_SHA', 'FET_BRK48_CORE_PREEMPTION_READY')}
-            config_flag = ''
-            for line in Path('/etc/disdex/current-runtime', sha + '.env').read_text().splitlines():
-                if line.startswith('FET_BRK48_CORE_PREEMPTION_READY='):
-                    config_flag = line.split('=', 1)[1].strip()
+            v52_running = pid.isdigit() and int(pid) > 0
+            if v52_running:
+                # A running service is authoritative for its effective environment.
+                env = {k: v for k, v in (x.split('=', 1) for x in Path('/proc', pid, 'environ').read_bytes().decode().split(chr(0)) if '=' in x)
+                       if k in ('DISDEX_RUNTIME_COMMIT_SHA', 'FET_BRK48_CORE_PREEMPTION_READY')}
+            else:
+                env = config_env
         result = evaluate(sha, approval, env, config_flag)
+        if args.audit and not v52_running and result['status'] == 'HEALTHY':
+            result['status'] = 'BLOCKED'
+            result['reasons'].append('FET_PREEMPTION_V52_NOT_RUNNING')
     except (OSError, ValueError, subprocess.SubprocessError):
         result = dict(schema='fet-preemption-readiness/v1', status='BLOCKED', productionSha=sha,
                       reasons=['FET_PREEMPTION_AUDIT_SOURCE_UNAVAILABLE'], checkedAt=int(time.time()*1000),
