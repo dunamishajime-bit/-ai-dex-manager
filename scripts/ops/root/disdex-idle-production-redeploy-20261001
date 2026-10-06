@@ -480,8 +480,8 @@ for p in "${SYSTEMD_TEMPLATE_PATHS[@]}"; do
 done
 
 rollback() {
-  rc=$?
-  trap - ERR
+  rc="${1:-$?}"
+  trap - ERR EXIT
   set +e
   echo "DEPLOY_ROLLBACK_TRIGGERED rc=$rc"
   rollback_mode=""
@@ -569,7 +569,7 @@ rollback() {
   fi
   exit "$rc"
 }
-trap rollback ERR
+trap 'rc=$?; if [[ "$rc" -ne 0 ]]; then rollback "$rc"; fi' EXIT
 
 systemctl disable --now disdex-runner-watchdog.timer >/dev/null 2>&1 || true
 systemctl stop disdex-runner-watchdog.service >/dev/null 2>&1 || true
@@ -1095,7 +1095,7 @@ mv -Tf "$previous_tmp" "$ROOT/previous"
 [[ "$(readlink -f "$ROOT/previous")" == "$OLD_RELEASE" ]]
 echo "POSTDEPLOY_PREVIOUS_UPDATED=PASS target=$OLD_RELEASE"
 
-trap - ERR
+trap - ERR EXIT
 rm -f -- "$SOURCE_FILE" "$CERT_FILE" "$RESIDUAL_CERT_FILE"
 echo "STATUS=LIVE_ACTIVATED_VERIFIED"
 echo "PRODUCTION_SHA=$TARGET_SHA"
