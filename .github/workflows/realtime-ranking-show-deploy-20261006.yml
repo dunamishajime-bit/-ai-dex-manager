@@ -53,10 +53,12 @@ jobs:
           grep -q "SpeechSynthesisUtterance" components/features/useRankingShow.ts
           grep -q "fetch('/api/tts'" components/features/useRankingShow.ts
           grep -q "voice:'marin'" components/features/useRankingShow.ts
+          grep -q "gpt-realtime-2.1-mini" app/api/tts/route.ts
+          grep -q "NATURAL_JA_INSTRUCTIONS" app/api/tts/route.ts
+          grep -q "rankingPcAlert" lib/realtime-ranking.ts
           grep -q "PC通知" components/features/RealtimeRankingBoard.tsx
           grep -q "new Notification" components/features/RealtimeRankingBoard.tsx
-          grep -q "rankingAlert" components/features/RealtimeRankingBoard.tsx
-          grep -q "1174" components/features/RealtimeRankingBoard.tsx
+          grep -q "renotify:true" components/features/RealtimeRankingBoard.tsx
 
       - name: Test ranking commentary contract
         shell: bash
