@@ -1,0 +1,86 @@
+name: FET Readiness Audit Diagnostics Fix 20261006
+on:
+  push:
+    branches: [fix/cutover-rollback-safety-20261006]
+    paths:
+      - "scripts/ops/root/disdex-fet-preemption-readiness-guard.py"
+      - "tests/fet-preemption-readiness-audit.test.mjs"
+      - ".github/workflows/fet-readiness-audit-diagnostics-fix-20261006.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-and-install:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify audit-only code path
+        run: |
+          set -Eeuo pipefail
+          python3 -m py_compile scripts/ops/root/disdex-fet-preemption-readiness-guard.py
+          npx tsx --test tests/fet-preemption-readiness-audit.test.mjs
+          grep -q "if args.audit:" scripts/ops/root/disdex-fet-preemption-readiness-guard.py
+          grep -q "FET_PREEMPTION_V52_NOT_RUNNING" scripts/ops/root/disdex-fet-preemption-readiness-guard.py
+      - name: SSH setup
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def n(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id").write_text(n("ROOT_KEY"));(p/"known_hosts").write_text(n("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 600 "$HOME/.ssh/id" "$HOME/.ssh/known_hosts"
+      - name: Upload audit guard
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          scp -i "$HOME/.ssh/id" -P "$PORT" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts"             scripts/ops/root/disdex-fet-preemption-readiness-guard.py root@"$SSH_HOST":/tmp/disdex-fet-preemption-readiness-guard.py
+      - name: Install audit-only fix and verify no trading restart
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -p "$PORT" root@"$SSH_HOST" 'bash -s' <<'REMOTE'
+          set -Eeuo pipefail
+          target=/usr/local/libexec/disdex-fet-preemption-readiness-guard.py
+          [[ -f "$target" ]]
+          sha="$(tr -d '[:space:]' </home/deploy/disdex-trading/current/.disdex-release-sha)"
+          mapfile -t trading_units < <(systemctl list-units --type=service --state=active --no-legend --plain 'disdex-*.service' | awk '{print $1}' | sort)
+          declare -A before_pid before_restart
+          for u in "${trading_units[@]}"; do before_pid["$u"]="$(systemctl show "$u" -p MainPID --value)"; before_restart["$u"]="$(systemctl show "$u" -p NRestarts --value)"; done
+          units="$(systemctl list-unit-files --no-legend | awk '/fet-preemption-readiness/ {print $1}')"
+          [[ -n "$units" ]]
+          while read -r unit; do
+            systemctl cat "$unit" --no-pager | grep -Fq "$target"
+          done <<<"$units"
+          cp -a "$target" "$target.before-20261006-audit-diagnostics"
+          install -o root -g root -m 0755 /tmp/disdex-fet-preemption-readiness-guard.py "$target"
+          rm -f /tmp/disdex-fet-preemption-readiness-guard.py
+          set +e
+          out="$("$target" --audit --sha "$sha" --status-path /var/lib/disdex/shared/fet-preemption-readiness.json 2>&1)"
+          rc=$?
+          set -e
+          echo "AUDIT_RC=$rc"
+          echo "AUDIT_OUTPUT=$out"
+          python3 - "$out" <<'PY'
+          import json,sys
+          d=json.loads(sys.argv[1].splitlines()[-1])
+          assert d["status"]=="BLOCKED"
+          assert "FET_PREEMPTION_AUDIT_SOURCE_UNAVAILABLE" not in d["reasons"]
+          assert d["ordersSent"]==0 and d["cancelsSent"]==0 and d["killSwitchChanges"]==0
+          print("AUDIT_BLOCKER_DETAIL=PASS reasons="+",".join(d["reasons"]))
+          PY
+          for u in "${trading_units[@]}"; do
+            [[ "$(systemctl show "$u" -p MainPID --value)" == "${before_pid[$u]}" ]]
+            [[ "$(systemctl show "$u" -p NRestarts --value)" == "${before_restart[$u]}" ]]
+          done
+          echo "TRADING_RUNNER_PIDS_UNCHANGED=PASS"
+          echo "ORDER_MUTATION_ATTEMPTED=FALSE"
+          REMOTE
