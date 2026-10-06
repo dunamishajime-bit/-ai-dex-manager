@@ -178,7 +178,7 @@ jobs:
             ("FET","/var/lib/disdex/fet-brk48-residual/state.json"),
             ("HYPE","/var/lib/disdex/hype-zec-long/runner.json"),
             ("IDLE","/var/lib/disdex/idle-priority/state.json"),
-            ("V52","/home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96/v52/runner-live.json"),
+            ("V52","/var/lib/disdex/v52-aster-only/runner-live.json"),
           ]
           keys=[
             "schema","strategyId","mode","runtimeCommitSha","runtimeSha","updatedAt","lastReconciledAt",
@@ -196,6 +196,24 @@ jobs:
               print("mtime_age_sec",round(time.time()-os.stat(path).st_mtime,3))
             except FileNotFoundError: print("MISSING")
             except Exception as e: print("ERROR",type(e).__name__,str(e)[:300])
+          PY
+          echo
+
+          echo "=== ACTIVE PENDING EXPOSURE REGISTRY ==="
+          python3 - <<'PY'
+          import json,os,time
+          p="/var/lib/disdex/shared/pending-exposure.json"
+          try:
+            d=json.load(open(p,encoding="utf-8"))
+            rows=d.get("entries",[])
+            print("schema",d.get("schema"),"entries",len(rows) if isinstance(rows,list) else "INVALID")
+            if isinstance(rows,list):
+              for r in rows:
+                if isinstance(r,dict) and str(r.get("status","")).upper() in {"PENDING","SUBMITTED","UNKNOWN"}:
+                  print({k:r.get(k) for k in ("reservationId","strategyId","symbol","side","gross","notionalUsd","createdAt","runtimeSha","status")})
+            print("mtime_age_sec",round(time.time()-os.stat(p).st_mtime,3))
+          except FileNotFoundError: print("MISSING")
+          except Exception as e: print("ERROR",type(e).__name__,str(e)[:200])
           PY
           echo
 
