@@ -195,3 +195,27 @@ class RefreshFamilyTest(RelayTest):
         with self.assertRaises(ValueError): self.auth.exchange(request)
         with self.assertRaises(ValueError): self.auth.validate(successor['access_token'])
         with self.assertRaises(ValueError): self.auth.exchange({**request,'refresh_token':successor['refresh_token']})
+
+class BrowserAuthorizationTest(HttpTest):
+    def test_form_policy_preserves_origin_and_allows_registered_chat_callback(self):
+        from urllib.parse import urlencode
+        client=self.auth.register({'redirect_uris':['https://chatgpt.com/connector/oauth/test']})
+        query=urlencode({'response_type':'code','client_id':client['client_id'],'redirect_uri':client['redirect_uris'][0],'code_challenge':CHALLENGE,'code_challenge_method':'S256','resource':RESOURCE,'state':'browser-test'})
+        with urllib.request.urlopen(self.url+'/hajime-remote/authorize?'+query) as response:
+            html=response.read().decode()
+            self.assertEqual(response.headers['Referrer-Policy'],'strict-origin')
+            self.assertIn("form-action 'self' https://chatgpt.com;",response.headers['Content-Security-Policy'])
+        import re
+        ticket=re.search(r'name="ticket" value="([^"]+)"',html).group(1)
+        pin=self.auth.pair('pc')
+        class NoRedirect(urllib.request.HTTPRedirectHandler):
+            def redirect_request(self,*args,**kwargs): return None
+        request=urllib.request.Request(self.url+'/hajime-remote/authorize',urlencode({'ticket':ticket,'pin':pin}).encode(),{'Content-Type':'application/x-www-form-urlencoded','Origin':'https://example.test'})
+        try: urllib.request.build_opener(NoRedirect).open(request)
+        except urllib.error.HTTPError as error:
+            self.assertEqual(error.code,303)
+            self.assertTrue(error.headers['Location'].startswith(client['redirect_uris'][0]+'?code='))
+        else: self.fail('Callback missing')
+    def test_null_origin_remains_rejected(self):
+        status,_,_=self.request('/hajime-remote/authorize',{'pin':'12345678','ticket':'invalid'},origin='null')
+        self.assertEqual(status,403)

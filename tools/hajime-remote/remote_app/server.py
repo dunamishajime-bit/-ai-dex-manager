@@ -59,7 +59,7 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header('Content-Length', str(len(raw)))
         self.send_header('Cache-Control', 'no-store')
         self.send_header('X-Content-Type-Options', 'nosniff')
-        self.send_header('Referrer-Policy', 'no-referrer')
+        self.send_header('Referrer-Policy', 'strict-origin' if mime == 'text/html' else 'no-referrer')
         for key, value in (headers or {}).items(): self.send_header(key, value)
         self.end_headers()
         self.wfile.write(raw)
@@ -113,12 +113,14 @@ class Handler(BaseHTTPRequestHandler):
                     raise ValueError('PKCE_S256_CODE_FLOW_REQUIRED')
                 if self.server.limited('authorize'): return self.reply(429, {'error': 'RATE_LIMITED'})
                 ticket = self.server.auth.begin(q.get('client_id'), q.get('redirect_uri'), q.get('code_challenge'), q.get('resource'), q.get('state', ''))
+                callback=urlparse(q['redirect_uri'])
+                callback_origin=callback.scheme+'://'+callback.netloc
                 page = '''<!doctype html><html lang="ja"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Hajime Remote 接続</title>
 <style>body{background:#101826;color:#e8edf5;font:17px system-ui;max-width:520px;margin:10vh auto;padding:24px}input,button{padding:14px;font:inherit;border-radius:8px;box-sizing:border-box;width:100%;margin:10px 0}button{background:#54d6a1;border:0}small{color:#bdcadb}</style>
 <h1>Hajime Remote</h1><p>あなたのWindows PCをChatに接続します。</p><p>PCのHajime Remoteで「Chat接続コード」を押し、表示された8桁を入力してください。</p>
 <form method="post" action="''' + html.escape(self.server.prefix + '/authorize', quote=True) + '''"><input type="hidden" name="ticket" value="''' + html.escape(ticket, quote=True) + '''"><input name="pin" pattern="[0-9]{8}" maxlength="8" inputmode="numeric" autocomplete="off" required placeholder="接続コード 8桁"><button>このPCの操作を許可して接続</button></form>
 <small>画面閲覧・入力・ファイル変更・コマンド実行を許可します。PC側の停止ボタンで操作を止められます。コードは3分で失効します。</small></html>'''
-                return self.reply(200, page, {'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; frame-ancestors 'none'"}, 'text/html')
+                return self.reply(200, page, {'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; form-action 'self' " + callback_origin + "; frame-ancestors 'none'"}, 'text/html')
             except (ValueError, TypeError): return self.reply(400, {'error': 'INVALID_AUTHORIZATION_REQUEST'})
         return self.reply(404, {'error': 'NOT_FOUND'})
 
