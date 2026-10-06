@@ -1,0 +1,249 @@
+name: Full Order Path Readonly Audit 20261006
+
+on:
+  push:
+    branches:
+      - codex/full-order-path-audit-20261006
+    paths:
+      - ".github/workflows/full-order-path-readonly-audit-20261006.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  static-order-path-tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - name: Install
+        run: npm ci --no-audit --no-fund
+      - name: Critical decision-to-order tests
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          npx tsx --test \
+            tests/live-order-lock-scope-v2.test.mjs \
+            tests/quality102-lock-scope.test.mjs \
+            tests/account-lock-bounded-retry.test.ts \
+            tests/v12-preorder-gross-reservation.test.ts \
+            tests/managed-protective-orders.test.ts \
+            tests/quality102-preflight-protective-order.test.ts \
+            tests/quality102-preflight-rate-budget.test.ts \
+            tests/q102-risk-block-freshness.test.ts \
+            tests/shared-risk-rollover-retry.test.ts \
+            tests/shared-risk-rollover-wiring.test.ts \
+            tests/shared-risk-systemd-decoupling.test.mjs \
+            tests/shared-risk-transient-refresh-retry.test.ts \
+            tests/recovery-stop-readback.test.ts \
+            tests/resident-stop-runner-integration.test.ts \
+            tests/fet-brk48-live-runner.test.ts \
+            tests/hype-trend-runner-gate.test.ts \
+            tests/v12-rate-budget-state-recovery.test.ts \
+            tests/v12-protection-failure-recovery.test.ts
+      - name: Runner self-tests
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          npm run strategy:v12-x1-all:selftest
+          npm run strategy:pengu-dual-ls-v2:recovery-v8:selftest
+          npm run strategy:quality102-causal-v1:runner:selftest
+          npm run strategy:hype-trend-long:selftest
+          npm run strategy:shared-crypto-risk:selftest
+          npx tsx scripts/disdex-fet-brk48-live-runner.ts --self-test
+      - name: Compile critical runtime files
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          npx tsc --noEmit -p tsconfig.pengu-dual-ls-v2.json
+          npx tsc --noEmit -p tsconfig.v96-runner.json
+
+  vps-readonly-audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Initialize SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ -n "$SSH_HOST" && -n "$ROOT_KEY" && -n "$SSH_KNOWN_HOSTS" ]]
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+      - name: Audit live runtime without mutation
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -p "$PORT" "root@$SSH_HOST" 'bash -s' <<'REMOTE'
+          set -Eeuo pipefail
+          set +x
+          CURRENT=/home/deploy/disdex-trading/current
+          RELEASE="$(readlink -f "$CURRENT")"
+          SHA="$(tr -d '[:space:]' < "$CURRENT/.disdex-release-sha")"
+          echo "=== IDENTITY ==="
+          echo "CURRENT_RELEASE=$RELEASE"
+          echo "CURRENT_SHA=$SHA"
+          echo "CURRENT_SHA_FILE_MATCH=$([[ "$RELEASE" == */"$SHA" ]] && echo PASS || echo FAIL)"
+          echo "HOST=$(hostname)"
+          echo "UTC_NOW=$(date -u +%FT%TZ)"
+          echo "UPTIME=$(uptime -p)"
+          echo
+
+          echo "=== DISK ==="
+          df -h / /var /home || true
+          echo
+
+          echo "=== ACTIVE/FAILED DISDEX SERVICES ==="
+          systemctl list-units --type=service --all --no-legend --plain 'disdex-*.service' || true
+          echo "--- failed ---"
+          systemctl --failed --type=service --no-legend --plain 'disdex-*.service' || true
+          echo
+
+          mapfile -t UNITS < <(systemctl list-units --type=service --all --no-legend --plain 'disdex-*.service' | awk '{print $1}' | sort -u)
+          echo "DISDEX_UNIT_COUNT=${#UNITS[@]}"
+          echo "=== UNIT IDENTITIES ==="
+          for u in "${UNITS[@]}"; do
+            echo "--- $u ---"
+            systemctl show "$u" \
+              -p ActiveState -p SubState -p Result -p MainPID -p NRestarts \
+              -p WorkingDirectory -p ExecStart -p FragmentPath --no-pager || true
+            pid="$(systemctl show "$u" -p MainPID --value 2>/dev/null || true)"
+            if [[ "$pid" =~ ^[0-9]+$ && "$pid" -gt 0 && -d "/proc/$pid" ]]; then
+              printf 'PROC_CWD='; readlink "/proc/$pid/cwd" || true
+              printf 'PROC_CMD='; tr '\0' ' ' < "/proc/$pid/cmdline" | sed 's/[[:space:]]\+/ /g' || true; echo
+            fi
+          done
+          echo
+
+          echo "=== GLOBAL SAFETY STATE ==="
+          python3 - <<'PY'
+          import json, os, time
+          paths={
+            "kill_switch":"/var/lib/disdex/shared/kill-switch.json",
+            "shared_risk":"/var/lib/disdex/shared/crypto-daily-risk.json",
+            "margin_guard":"/var/lib/disdex/shared/margin-risk/guard-live.json",
+          }
+          safe={
+            "kill_switch":["active","reason","updatedAt","activatedAt","source"],
+            "shared_risk":["schema","utcDay","updatedAt","lossPct","maximumLossPct","tripped","sourceComplete","stateHash"],
+            "margin_guard":["strategyId","mode","stage","ordersAllowed","checkedAt","nextCheckAt","consecutiveFailures","reason"],
+          }
+          for label,path in paths.items():
+            print(f"--- {label} {path} ---")
+            try:
+              d=json.load(open(path,encoding="utf-8"))
+              print(json.dumps({k:d.get(k) for k in safe[label] if k in d},ensure_ascii=False,sort_keys=True))
+              st=os.stat(path)
+              print("mtime_age_sec",round(time.time()-st.st_mtime,3))
+            except FileNotFoundError:
+              print("MISSING")
+            except Exception as e:
+              print("ERROR",type(e).__name__,str(e)[:200])
+          PY
+          echo
+
+          echo "=== RUNNER STATE SUMMARIES ==="
+          python3 - <<'PY'
+          import json, os, time
+          paths=[
+            ("V12","/var/lib/disdex/v12-x1-all/runner.json"),
+            ("PENGU","/var/lib/disdex/pengu-dual-ls-v2/runner-live.json"),
+            ("Q102","/var/lib/disdex/quality102-causal-v1/state.json"),
+            ("FET","/var/lib/disdex/fet-brk48-residual/state.json"),
+            ("HYPE","/var/lib/disdex/hype-zec-long/runner.json"),
+            ("IDLE","/var/lib/disdex/idle-priority/state.json"),
+            ("V52","/home/deploy/ai-dex-manager-v96-paper/.runtime-state/disdex-v13d-v11eq-v96/v52/runner-live.json"),
+          ]
+          keys=[
+            "schema","strategyId","mode","runtimeCommitSha","runtimeSha","updatedAt","lastReconciledAt",
+            "manualReview","manualReviewReason","pending","pendingOrder","pendingEntry","lastEvaluationReason",
+            "cooldownUntilTs","lastExitTs","dailyLossTripped","lastError","lastErrorAt","stateHash"
+          ]
+          for label,path in paths:
+            print(f"--- {label} {path} ---")
+            try:
+              d=json.load(open(path,encoding="utf-8"))
+              out={k:d.get(k) for k in keys if k in d}
+              for nested in ("initialDaemonReconciliation","latestDecision","latestDd1296Decision","dailyRisk","portfolioDailyLossLatch","v52StrategyDailyLossLatch"):
+                if nested in d: out[nested]=d[nested]
+              print(json.dumps(out,ensure_ascii=False,default=str)[:12000])
+              print("mtime_age_sec",round(time.time()-os.stat(path).st_mtime,3))
+            except FileNotFoundError: print("MISSING")
+            except Exception as e: print("ERROR",type(e).__name__,str(e)[:300])
+          PY
+          echo
+
+          echo "=== LOCKS / PENDING ARTIFACTS ==="
+          now="$(date +%s)"
+          while IFS= read -r p; do
+            [[ -e "$p" ]] || continue
+            mt="$(stat -c %Y "$p" 2>/dev/null || echo 0)"
+            age=$((now-mt))
+            echo "PATH=$p AGE_SEC=$age"
+            if [[ -f "$p/owner.json" ]]; then
+              python3 - "$p/owner.json" <<'PY'
+          import json,sys
+          try:
+            d=json.load(open(sys.argv[1],encoding="utf-8"))
+            print({k:d.get(k) for k in ("pid","owner","createdAt","updatedAt","token","purpose") if k in d})
+          except Exception as e: print("owner_error",type(e).__name__)
+          PY
+            fi
+          done < <(find /var/lib/disdex /home/deploy/ai-dex-manager-v96-paper/.runtime-state -xdev \
+            \( -type d -name '*.lock' -o -type f -iname '*pending*' -o -type f -iname '*reservation*' \) 2>/dev/null | sort)
+          echo
+
+          echo "=== RECENT ERROR SIGNATURE COUNTS (12h) ==="
+          for u in "${UNITS[@]}"; do
+            [[ "$(systemctl is-active "$u" 2>/dev/null || true)" == active ]] || continue
+            tmp="/tmp/audit-${u//\//_}.log"
+            journalctl -u "$u" --since '12 hours ago' --no-pager -o cat > "$tmp" || true
+            count="$(grep -Eic 'ACCOUNT_LOCK_BUSY|RATE_LIMIT|429|kill.?switch|fatal|uncaught|unhandled|EACCES|ENOENT|SHA_MISMATCH|PROTECTION|ORDER.*FAIL|PENDING|margin.*(stale|unavailable|blocked)|shared.*risk.*(stale|blocked)|manual.?review' "$tmp" || true)"
+            echo "$u MATCHES=$count"
+            if [[ "$count" -gt 0 ]]; then
+              grep -Ei 'ACCOUNT_LOCK_BUSY|RATE_LIMIT|429|kill.?switch|fatal|uncaught|unhandled|EACCES|ENOENT|SHA_MISMATCH|PROTECTION|ORDER.*FAIL|PENDING|margin.*(stale|unavailable|blocked)|shared.*risk.*(stale|blocked)|manual.?review' "$tmp" | tail -20 || true
+            fi
+            rm -f "$tmp"
+          done
+          echo
+
+          echo "=== AUTHENTICATED ASTER READONLY SNAPSHOT ==="
+          set -a
+          [[ -f /etc/disdex/disdex-v13d-v11eq-v96.env ]] && . /etc/disdex/disdex-v13d-v11eq-v96.env
+          [[ -f /etc/disdex/disdex-v12-pengu-v2-v52.env ]] && . /etc/disdex/disdex-v12-pengu-v2-v52.env
+          [[ -f /etc/disdex/disdex-v12-x1-all.env ]] && . /etc/disdex/disdex-v12-x1-all.env
+          set +a
+          cd "$RELEASE"
+          ./node_modules/.bin/tsx scripts/disdex-aster-readonly-account-diagnostic.ts
+          echo
+
+          echo "=== RELEASE CLEANLINESS / REMNANTS ==="
+          echo "release_count=$(find /home/deploy/disdex-trading/releases -mindepth 1 -maxdepth 1 -type d | wc -l)"
+          find /home/deploy/disdex-trading/releases -mindepth 1 -maxdepth 1 -type d -printf '%T@ %p\n' | sort -nr | head -25
+          echo "--- temp deploy artifacts ---"
+          find /tmp -maxdepth 1 -type f \( -name 'disdex-*.tar.gz' -o -name '*deploy*' -o -name '*rollback*' \) -printf '%TY-%Tm-%TdT%TH:%TM:%TS %s %p\n' 2>/dev/null | sort || true
+          echo "--- stale release symlinks ---"
+          find /home/deploy/disdex-trading -maxdepth 2 -type l -printf '%p -> %l\n' 2>/dev/null | sort || true
+          echo
+
+          echo "AUDIT_TRADING_EFFECTS ordersSent=0 cancelsSent=0 positionChangesSent=0"
+          REMOTE
