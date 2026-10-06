@@ -11,45 +11,73 @@ export function useRankingShow(rows:RankRow[],version:number,viewKey:string,erro
  const previous=useRef<Capture|null>(null),capture=useRef<Capture|null>(null),seen=useRef(''),filters=useRef(viewKey);
  const nodes=useRef(new Map<string,HTMLElement>()),clones=useRef<HTMLElement[]>([]),animations=useRef<Animation[]>([]);
  const speechTimer=useRef<ReturnType<typeof setTimeout>>(),wasBlocked=useRef(false),hiddenNodes=useRef<HTMLElement[]>([]);
- const timer=useRef<ReturnType<typeof setTimeout>>(),audio=useRef<AudioContext|null>(null),prefs=useRef({sound,voice,motion}),lastAudio=useRef(0);
+ const timer=useRef<ReturnType<typeof setTimeout>>(),audio=useRef<AudioContext|null>(null),voiceSource=useRef<AudioBufferSourceNode|null>(null),prefs=useRef({sound,voice,motion}),lastAudio=useRef(0);
  prefs.current={sound,voice,motion};
  const measure=useCallback(():Capture=>({rows:current.current,rects:new Map([...nodes.current].map(([id,n])=>[id,n.getBoundingClientRect()])),scrollX:window.scrollX,scrollY:window.scrollY}),[]);
  const prepare=useCallback(()=>{capture.current=measure();},[measure]);
  const stopVisuals=useCallback(()=>{animations.current.forEach(a=>a.cancel());animations.current=[];clones.current.forEach(n=>n.remove());clones.current=[];hiddenNodes.current.forEach(n=>{n.style.opacity='';});hiddenNodes.current=[];if(speechTimer.current)clearTimeout(speechTimer.current);if(timer.current)clearTimeout(timer.current);},[]);
+ const ensureAudio=useCallback(async()=>{
+  const Audio=window.AudioContext||(window as unknown as {webkitAudioContext?:typeof AudioContext}).webkitAudioContext;
+  if(!Audio)throw new Error('AUDIO_CONTEXT_UNAVAILABLE');
+  audio.current??=new Audio();
+  if(audio.current.state!=='running')await audio.current.resume();
+  return audio.current;
+ },[]);
+ const fallbackSpeech=useCallback((text:string)=>{
+  if(!('speechSynthesis' in window))return;
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);u.lang='ja-JP';u.rate=.96;u.pitch=1;
+  const ja=window.speechSynthesis.getVoices().filter(v=>v.lang.toLowerCase().startsWith('ja'));
+  const preferred=ja.find(v=>/natural|neural|nanami|ayumi/i.test(v.name))||ja.find(v=>!v.localService)||ja[0];
+  if(preferred)u.voice=preferred;
+  window.speechSynthesis.speak(u);
+ },[]);
+ const speakNatural=useCallback(async(text:string)=>{
+  try{
+   const ctx=await ensureAudio();
+   const res=await fetch('/api/tts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,voice:'marin'}),cache:'no-store'});
+   if(!res.ok)throw new Error('TTS_HTTP_'+res.status);
+   const buffer=await res.arrayBuffer(),decoded=await ctx.decodeAudioData(buffer.slice(0));
+   try{voiceSource.current?.stop();}catch{}
+   const source=ctx.createBufferSource();source.buffer=decoded;source.connect(ctx.destination);voiceSource.current=source;
+   source.onended=()=>{if(voiceSource.current===source)voiceSource.current=null;};
+   source.start();
+   setAudioNotice('AI生成の自然音声（marin）で実況しています。');
+  }catch{
+   setAudioNotice('AI自然音声を取得できないため、端末音声へ切り替えました。');
+   fallbackSpeech(text);
+  }
+ },[ensureAudio,fallbackSpeech]);
  useEffect(()=>{
   try{const saved=JSON.parse(localStorage.getItem('disdex-ranking-show')||'{}');setMotion(saved.motion!==false);}catch{}
-  return()=>{stopVisuals();audio.current?.close().catch(()=>{});if(prefs.current.voice&&'speechSynthesis' in window)window.speechSynthesis.cancel();};
+  return()=>{stopVisuals();try{voiceSource.current?.stop();}catch{}audio.current?.close().catch(()=>{});if('speechSynthesis' in window)window.speechSynthesis.cancel();};
  },[stopVisuals]);
  const preference=useCallback((key:'sound'|'voice'|'motion',value:boolean)=>{
   const p={...prefs.current,[key]:value};prefs.current=p;
   if(key==='sound')setSound(value);if(key==='voice')setVoice(value);if(key==='motion')setMotion(value);
   try{localStorage.setItem('disdex-ranking-show',JSON.stringify({motion:p.motion}));}catch{}
   if(key==='sound'&&value){
-   const Audio=window.AudioContext||(window as unknown as {webkitAudioContext?:typeof AudioContext}).webkitAudioContext;
-   if(!Audio){setSound(false);setAudioNotice('このブラウザは効果音に未対応です。');return;}
-   audio.current??=new Audio();void audio.current.resume().catch(()=>setAudioNotice('効果音を再度オンにしてください。'));
+   void ensureAudio().catch(()=>{setSound(false);setAudioNotice('このブラウザは効果音に未対応です。');});
   }
   if(key==='voice'){
-   if(!('speechSynthesis' in window)){setVoice(false);setAudioNotice('このブラウザは読み上げに未対応です。');return;}
-   if(!value)window.speechSynthesis.cancel();
-   else {const u=new SpeechSynthesisUtterance('ランキング実況を有効にしました。');u.lang='ja-JP';window.speechSynthesis.speak(u);}
+   if(!value){try{voiceSource.current?.stop();}catch{}if('speechSynthesis' in window)window.speechSynthesis.cancel();setAudioNotice('AI音声実況はOFFです。');}
+   else void speakNatural('自然音声実況を有効にしました。ランキングが動いたときに、変化をお知らせします。');
   }
- },[]);
+ },[ensureAudio,speakNatural]);
  const notify=useCallback((rise:RiseEvent,delay:number)=>{
   if(document.hidden||Date.now()-lastAudio.current<20000)return;
   const p=prefs.current;if(!p.sound&&!p.voice)return;lastAudio.current=Date.now();
-  if(p.sound&&audio.current?.state==='running'){
-   const ctx=audio.current,t=ctx.currentTime;
-   [660,880].forEach((frequency,i)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=frequency;o.type='sine';g.gain.setValueAtTime(0,t+i*.09);g.gain.linearRampToValueAtTime(.035,t+i*.09+.02);g.gain.exponentialRampToValueAtTime(.001,t+i*.09+.2);o.connect(g);g.connect(ctx.destination);o.start(t+i*.09);o.stop(t+i*.09+.22);});
+  if(p.sound){
+   void ensureAudio().then(ctx=>{
+    const t=ctx.currentTime;
+    [660,880].forEach((frequency,i)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=frequency;o.type='sine';g.gain.setValueAtTime(0,t+i*.09);g.gain.linearRampToValueAtTime(.035,t+i*.09+.02);g.gain.exponentialRampToValueAtTime(.001,t+i*.09+.2);o.connect(g);g.connect(ctx.destination);o.start(t+i*.09);o.stop(t+i*.09+.22);});
+   }).catch(()=>{});
   }
   if(p.voice)speechTimer.current=setTimeout(()=>{
-   if(document.hidden||!prefs.current.voice||!('speechSynthesis' in window)||window.speechSynthesis.speaking)return;
-   const u=new SpeechSynthesisUtterance(rankCommentary(rise.row,rise.from,rise.to).speech);u.lang='ja-JP';u.rate=1.05;
-   // Browser/OS voice only; no model or external speech API requests.
-   u.onerror=()=>setAudioNotice('読み上げを利用できません。ブラウザの日本語音声設定を確認してください。');
-   window.speechSynthesis.speak(u);
+   if(document.hidden||!prefs.current.voice)return;
+   void speakNatural(rankCommentary(rise.row,rise.from,rise.to).speech);
   },delay);
- },[]);
+ },[ensureAudio,speakNatural]);
  useLayoutEffect(()=>{
   const token=String(version);
   if(filters.current!==viewKey||error||document.hidden||wasBlocked.current||Number(version)<Number(seen.current)){stopVisuals();setHighlights({});setEvent(null);previous.current=measure();capture.current=null;seen.current=token;filters.current=viewKey;wasBlocked.current=!!error;return;}
