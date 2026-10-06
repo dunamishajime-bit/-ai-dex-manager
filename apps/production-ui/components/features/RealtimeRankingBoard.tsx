@@ -40,7 +40,7 @@ export function RealtimeRankingBoard(){
    <div className="ranking-commentary-tools">
     <div className="ranking-commentary-toggles">{(['motion','sound','voice'] as const).map(key=><button type="button" key={key} aria-pressed={show[key]} onClick={()=>show.preference(key,!show[key])} className={show[key]?'ranking-toggle-on':''}>{key==='motion'?'動き':key==='sound'?'効果音':'読み上げ'} {show[key]?'ON':'OFF'}</button>)}</div>
     <button type="button" disabled={!commentRow} onClick={()=>commentRow&&setSelectedId(commentRow.id)} className="ranking-detail-button">不足条件をすべて見る →</button>
-    <span className="ranking-audio-notice">{show.audioNotice||'実況は実判定から作成 · 追加のAI API利用なし'}</span>
+    <span className="ranking-audio-notice">{show.audioNotice||'読み上げ音声はAI生成 · marin自然音声 · 実判定データから実況'}</span>
    </div>
   </section>
   <div className="radar-filters"><input aria-label="通貨を検索" placeholder="通貨・ロジック検索" value={search} onChange={e=>setSearch(e.target.value)} className="min-w-0 flex-1"/><select aria-label="ロジック" value={logic} onChange={e=>setLogic(e.target.value)}><option value="ALL">全ロジック</option>{[...new Set(data?.rows.map(r=>r.logic)||[])].map(v=><option key={v}>{v}</option>)}</select><select aria-label="方向" value={side} onChange={e=>setSide(e.target.value)}><option value="ALL">全方向</option><option>LONG</option><option>SHORT</option><option>WAIT</option></select></div>
