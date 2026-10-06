@@ -1,0 +1,82 @@
+{
+  "schema": "disdex-dd1296-v12-pengu-improvement-decision/v1",
+  "asOf": "2026-10-07",
+  "status": "RESEARCH_COMPLETE_NO_PRODUCTION_LOGIC_CHANGE",
+  "formalAnchor": {
+    "finalEquityJpy": 4067358397.424793,
+    "profitFactor": 2.960180377096512,
+    "maximumMtmDrawdownPct": -12.96457052048714,
+    "closedTrades": 1358,
+    "accounting": "PASS",
+    "ownershipConflicts": 0
+  },
+  "q102": {
+    "decision": "KEEP",
+    "highVolShortGross": 0.6,
+    "reason": "Exact final DD12.96 production-target parity; 0.70x is not the final formal target."
+  },
+  "v12": {
+    "decision": "KEEP",
+    "testedChange": "BTC 12h/24h short-term directional veto",
+    "bestLightVariant": {
+      "finalEquityJpy": 3719000000,
+      "maximumMtmDrawdownPct": -12.9646,
+      "v12Losses": 336
+    },
+    "reason": "Losses fell but final equity fell materially and portfolio max DD did not improve."
+  },
+  "pengu": {
+    "productionDecision": "KEEP_CURRENT",
+    "researchCandidate": {
+      "id": "M05_COMPLETED_H1_R72",
+      "rule": "Allow PENGU SHORT only when completed signal-H1 PENGU 72h return <= -0.005",
+      "promotionStatus": "SHADOW_TELEMETRY_ONLY",
+      "exactIntegrated10bps": {
+        "finalEquityJpy": 4462295320,
+        "profitFactor": 3.37503,
+        "maximumMtmDrawdownPct": -12.9646,
+        "penguTrades": 65,
+        "removedFormalCandidates": 1
+      },
+      "costStressFinalEquityJpy": {
+        "8bps": 5764496699,
+        "10bps": 4462295320,
+        "20bps": 1101187629,
+        "30bps": 326485147
+      },
+      "validation": {
+        "asterPreFormal": {
+          "trades": 1,
+          "decisionChanges": 0
+        },
+        "asterPostFormalOos": {
+          "trades": 2,
+          "decisionChanges": 0
+        },
+        "okxProxyPreAster": {
+          "trades": 21,
+          "decisionChanges": 0
+        },
+        "thresholdPlateau": "Approximately -0.425% through -0.97% removes the same single formal candidate.",
+        "caveat": "All integrated uplift is driven by one formal-period candidate; independent windows contain no cases where M05 changes a decision."
+      }
+    },
+    "rejectedAlternatives": {
+      "r10Weak72Rebreak2": "Exact integrated result equals formal baseline; removed candidates were not portfolio-admitted.",
+      "stricterR72Filters": {
+        "-1.0%": 3867780039,
+        "-1.7%": 3431166572,
+        "-4.0%": 3431166572,
+        "-5.0%": 3367256179
+      }
+    }
+  },
+  "finalRecommendation": [
+    "Do not change Q102.",
+    "Do not add the V12 BTC 12h/24h veto.",
+    "Do not change Production PENGU yet.",
+    "Collect shadow telemetry for M05 until multiple forward cases actually differ from current logic."
+  ],
+  "productionChanged": false,
+  "liveChanged": false
+}
