@@ -33,6 +33,14 @@ jobs:
           assert "must never fabricate operator approval" in d["activationRule"]
           w=Path(".github/workflows/full-order-path-production-deploy-20261006.yml").read_text()
           assert "workflow_dispatch:" in w and "\n  push:" not in w
+          for workflow in [
+              ".github/workflows/idle-priority-production-redeploy-20261001.yml",
+              ".github/workflows/pengu-state-dir-normalize-20261001.yml",
+              ".github/workflows/aster-rate-budget-permission-recovery-20261001.yml",
+          ]:
+              text=Path(workflow).read_text()
+              assert "workflow_dispatch:" in text, workflow
+              assert "\n  push:" not in text, workflow
           s=Path("scripts/ops/root/disdex-idle-production-redeploy-20261001").read_text()
           assert 'approved-$TARGET_SHA.json' in s
           assert "OPERATOR_STAGED_ACTIVATION_REQUIRED" in s
