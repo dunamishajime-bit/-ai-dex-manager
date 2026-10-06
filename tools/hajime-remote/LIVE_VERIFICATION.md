@@ -11,7 +11,7 @@ Status: Windows agent and VPS relay installed and running; owner Chat registrati
 - Runtime service: dedicated hajime-remote user, loopback8798; nginx additive routes tested/reloaded with backup.
 - Existing trading services/source/state were not modified by this task.
 
-One independent fresh code review identified screenshot format, descendant process ownership, transient pause, refresh-family replay, and local retention defects. These were fixed and regression-tested. Runtime source hashes checked against local source on both Windows and VPS.
+One independent fresh code review identified screenshot format, descendant process ownership, transient pause, refresh-family replay, and local retention defects. These were fixed and regression-tested. Runtime source hashes checked against local source on both Windows and VPS, normalizing Windows CRLF to LF. Final checks confirmed startup/desktop shortcuts, public OAuth metadata, denial of unauthenticated MCP requests, nginx configuration, and active/running service (18,391,040 bytes reported).
 
 Minor review observations deferred: redirected/Unicode Windows desktop installer portability; unauthenticated DCR registration exhaustion; standardization of OAuth error identifiers. The current ASCII Windows paths and successful OAuth flow were verified directly. These are not a claim that all deployments/client error paths were validated.
 
