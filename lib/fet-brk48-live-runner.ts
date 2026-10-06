@@ -51,7 +51,7 @@ export interface FetBrk48LiveRunnerDependencies {
 }
 
 export interface FetBrk48TickResult {
-  status: "held" | "entered" | "exited" | "preempted" | "blocked" | "manual-review" | "no-signal";
+  status: "held" | "entered" | "exited" | "preempted" | "blocked" | "locked" | "manual-review" | "no-signal";
   message: string;
   ordersSent: number;
   signal?: FetBrk48Signal;
@@ -448,7 +448,7 @@ export class FetBrk48LiveRunner {
 
     const accountLock = this.deps.accountLock || new FileAccountOrderLock();
     const lock = await accountLock.acquire(`FET_BRK48_RESIDUAL:${this.deps.runtimeSha}`, "ASTER_FUTURES");
-    if (!lock) return { status: "blocked", message: "FET_ACCOUNT_ORDER_LOCK_BUSY", ordersSent: 0 };
+    if (!lock) return { status: "locked", message: "FET_ACCOUNT_ORDER_LOCK_BUSY", ordersSent: 0 };
 
     try {
       let state = await readFetBrk48State(this.deps.statePath, this.deps.runtimeSha);
