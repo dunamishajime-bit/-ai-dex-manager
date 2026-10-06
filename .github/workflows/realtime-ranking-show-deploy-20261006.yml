@@ -7,6 +7,7 @@ on:
     paths:
       - "apps/production-ui/app/realtime/**"
       - "apps/production-ui/app/api/system/realtime-ranking/**"
+      - "apps/production-ui/app/api/tts/**"
       - "apps/production-ui/components/features/RealtimeRankingBoard.tsx"
       - "apps/production-ui/components/features/useRankingShow.ts"
       - "apps/production-ui/lib/realtime-ranking.ts"
@@ -42,6 +43,7 @@ jobs:
           cd apps/production-ui
           test -f app/realtime/page.tsx
           test -f app/api/system/realtime-ranking/route.ts
+          test -f app/api/tts/route.ts
           test -f components/features/RealtimeRankingBoard.tsx
           test -f components/features/useRankingShow.ts
           test -f lib/realtime-ranking.ts
@@ -49,6 +51,10 @@ jobs:
           grep -q "読み上げ" components/features/RealtimeRankingBoard.tsx
           grep -q "ranking-flyer" components/features/useRankingShow.ts
           grep -q "SpeechSynthesisUtterance" components/features/useRankingShow.ts
+          grep -q "fetch('/api/tts'" components/features/useRankingShow.ts
+          grep -q "voice:'marin'" components/features/useRankingShow.ts
+          grep -q "gpt-realtime-2.1-mini" app/api/tts/route.ts
+          grep -q "NATURAL_JA_INSTRUCTIONS" app/api/tts/route.ts
 
       - name: Test ranking commentary contract
         shell: bash
@@ -201,6 +207,18 @@ jobs:
           assert isinstance(d.get('checkedAt'),(int,float))
           PY
 
+          tts_code="$(curl -sS -D /tmp/realtime-tts.headers -o /tmp/realtime-tts.mp3 -w '%{http_code}' --max-time 30 \
+            -H 'Cookie: disdex_auth=1' -H 'Content-Type: application/json' \
+            -X POST -d '{"text":"自然音声実況の動作確認です。ランキングの変化を落ち着いてお知らせします。","voice":"marin"}' \
+            http://127.0.0.1:3001/api/tts)"
+          [[ "$tts_code" == 200 ]]
+          [[ "$(wc -c < /tmp/realtime-tts.mp3 | tr -d ' ')" -gt 1000 ]]
+          grep -qi '^content-type: audio/mpeg' /tmp/realtime-tts.headers
+          grep -qi '^x-disdex-audio-disclosure: AI-generated' /tmp/realtime-tts.headers
+          tts_model="$(sed -n 's/^x-disdex-tts-model:[[:space:]]*//Ip' /tmp/realtime-tts.headers | tr -d '\r' | tail -1)"
+          tts_voice="$(sed -n 's/^x-disdex-tts-voice:[[:space:]]*//Ip' /tmp/realtime-tts.headers | tr -d '\r' | tail -1)"
+          [[ -n "$tts_model" && "$tts_voice" == marin ]]
+
           [[ "$(tr -d '[:space:]' < "$current/.disdex-release-sha")" == "$trading_sha_before" ]]
           [[ "$(readlink -f "$current")" == "$trading_path_before" ]]
           for unit in "${runner_units[@]}"; do
@@ -216,6 +234,9 @@ jobs:
           echo "UI_RELEASE=$release"
           echo "REALTIME_ROUTE=PASS"
           echo "REALTIME_RANKING_API=PASS"
+          echo "NATURAL_TTS=PASS"
+          echo "NATURAL_TTS_MODEL=$tts_model"
+          echo "NATURAL_TTS_VOICE=$tts_voice"
           echo "TRADING_SHA_UNCHANGED=$trading_sha_before"
           echo "TRADING_RUNNER_PIDS_UNCHANGED=PASS"
           echo "ORDER_MUTATION_ATTEMPTED=FALSE"
