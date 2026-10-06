@@ -42,6 +42,7 @@ async function observe(){
     for(const g of gates)if(g.key==='RAW_DETECTOR'&&g.state==='NO'&&num(best?.proximityScore)!==undefined)g.progress=Number(best.proximityScore)/100;
     gates.push(flag('eligible','実Runner最終Signal',r.eligible,r.rankingReason||r.reason));
     gates.push(flag('selection','同時候補の選定',r.selected,d.selectedReason,'execution'));
+    gates.push(flag('capacity','保有枠・残余Gross・証拠金・数量',undefined,'候補選定後に実Runnerが注文直前の余力・競合を確認','execution'));
     const rawSide=num(best?.proximitySide)??num(best?.candidateSide);
     const row=make(r.symbol,'Q102',r.side==='WAIT'?(rawSide===1?'LONG':rawSide===-1?'SHORT':'WAIT'):r.side,gates,rankingFresh,rankAt,r.rankingReason||r.reason);
     // Q102 native proximity incorporates its stage and audited detector distances.
