@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.superpowers/
+*.db
+*.log
+config.json
+dist/
