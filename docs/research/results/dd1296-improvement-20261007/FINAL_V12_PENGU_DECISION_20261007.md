@@ -133,4 +133,29 @@ Decision: **do not promote R10**.
 4. M05 is the only material research candidate. Treat it as a **shadow/telemetry candidate**, not a Production gate, until more live/forward examples accumulate where the completed-H1 72h return is in the near-flat region and the rule actually changes a decision.
 5. Do not use -1%, -4%, -5%, or other broader 72h filters; exact integrated replays show material opportunity loss without total-DD benefit.
 
+## Independent re-verification in this session
+
+The formal engine and source data were re-run again from the dedicated research worktree on 2026-10-07.
+
+- Formal 10 bps baseline reproduced exactly at JPY 4,067,358,397.424793 / PF 2.960180377096512 / max DD -12.96457052048714% / 1,358 trades.
+- Q102 HIGH_VOL SHORT 0.60x parity was reconfirmed.
+- V12 12h+24h BTC veto variants at 1.0%, 0.5%, and 0% adverse thresholds reproduced the prior rejection result: final equity fell to JPY 3.719bn / JPY 3.036bn / JPY 2.981bn respectively while portfolio max DD did not improve.
+- Exact M05 candidate-root parity was re-proven: 2,484 -> 2,483 candidates, PENGU SHORT 44 -> 43, exactly one removal, zero additions, and zero semantic changes among the 2,483 shared candidates.
+- Exact M05 10 bps integrated replay reproduced JPY 4,462,295,320.211713 / PF 3.3750309623596784 / max DD -12.96457052048714%.
+- Exact 8/10/20/30 bps cost sweeps were re-run for both baseline and M05 and reproduced the prior result that M05 wins at every tested cost with the same corresponding portfolio max DD.
+
+### Critical implementation negative control
+
+A separate negative-control replay applied the same nominal -0.50% 72h condition late at the portfolio-admission stage rather than at causal candidate generation.
+
+That implementation was **not equivalent** to M05:
+- it rejected 4 PENGU entries rather than the single formal M05 candidate,
+- final equity fell to JPY 3,561,659,479.62405,
+- PENGU trades fell to 63,
+- portfolio max DD still did not improve.
+
+Therefore, if M05 is ever promoted, it **must not** be implemented as a late portfolio/runtime admission veto. Its contract is the completed signal-H1 causal filter at PENGU SHORT candidate generation, before downstream portfolio ownership/admission. Exact candidate-root parity must be proven again before any Production promotion.
+
+The Aster post-formal OOS period was also rechecked from retained evidence and still contains no M05 decision change. The independent OKX proxy result remains part of the tracked research evidence; the original OKX proxy cache was not present at the standard local cache paths during this re-verification session, so it was not newly regenerated here.
+
 No LIVE/VPS/Production trading logic was changed by this research.
