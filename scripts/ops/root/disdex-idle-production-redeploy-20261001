@@ -657,34 +657,29 @@ echo "CUTOVER_RELEASE_PREP_PASS release=$RELEASE"
 install -o root -g root -m 0644 "$CERT_FILE" "$SHARED/idle-priority-parity-cert.json"
 install -o root -g root -m 0644 "$RESIDUAL_CERT_FILE" "$SHARED/idle-residual-long-parity-cert.json"
 
-python3 - "$RELEASE" "$TARGET_SHA" "$SHARED/operator-activation/current.json" <<'PY'
-import json,os,sys
-release,sha,target_path=sys.argv[1:]
-readiness=json.load(open(os.path.join(release,"docs/production/current-implementation-readiness.json"),encoding="utf-8"))
-if readiness.get("implementationStatus")!="READY":
-    raise SystemExit("OPERATOR_ARTIFACT_IMPLEMENTATION_NOT_READY")
-try:
-    artifact=json.load(open(target_path,encoding="utf-8"))
-except Exception as exc:
-    raise SystemExit("OPERATOR_LIVE_ACTIVATION_REQUIRED") from exc
-required={
-    "V12_X1_ALL","PENGU_V8","QUALITY102_CAUSAL_V1","V52",
-    "FET_BRK48_RESIDUAL","HYPE_TREND_LONG","IDLE_PRIORITY_SHORT"
+staged_operator_activation="$SHARED/operator-activation/approved-$TARGET_SHA.json"
+[[ -f "$staged_operator_activation" && ! -L "$staged_operator_activation" ]] || {
+  echo "OPERATOR_STAGED_ACTIVATION_REQUIRED=$staged_operator_activation"
+  false
 }
-if artifact.get("schema")!="disdex-live-operator-activation/v1":
-    raise SystemExit("OPERATOR_ARTIFACT_SCHEMA_MISMATCH")
-if artifact.get("approvedSha")!=sha:
-    raise SystemExit("OPERATOR_ARTIFACT_EXACT_SHA_REQUIRED")
-if artifact.get("ordersEnabled") is not True:
-    raise SystemExit("OPERATOR_ORDERS_NOT_ENABLED")
-if artifact.get("operatorAcknowledgement")!="I_ACK_REAL_MONEY_LIVE_ACTIVATION":
-    raise SystemExit("OPERATOR_ACKNOWLEDGEMENT_REQUIRED")
-if not required.issubset(set(artifact.get("approvedRunners") or [])):
-    raise SystemExit("OPERATOR_RUNNER_SCOPE_INCOMPLETE")
-if artifact.get("fetCorePreemptionReady") is not True:
-    raise SystemExit("OPERATOR_FET_PREEMPTION_APPROVAL_REQUIRED")
-print("OPERATOR_ARTIFACT_EXACT_SHA=PASS")
-PY
+[[ "$(stat -c '%U:%G:%a' "$staged_operator_activation")" == "root:root:600" ]] || {
+  echo "OPERATOR_STAGED_ACTIVATION_METADATA_INVALID=$(stat -c '%U:%G:%a' "$staged_operator_activation")"
+  false
+}
+/usr/bin/node "$RELEASE/scripts/ops/root/disdex-live-operator-activation-gate.mjs" \
+  --release-root "$RELEASE" \
+  --sha "$TARGET_SHA" \
+  --all \
+  --activation-path "$staged_operator_activation"
+/usr/bin/python3 "$RELEASE/scripts/ops/root/disdex-fet-preemption-readiness-guard.py" \
+  --approved-ready \
+  --sha "$TARGET_SHA" \
+  --activation-path "$staged_operator_activation" | grep -qx true
+activation_tmp="$SHARED/operator-activation/.current-$REQUEST_ID"
+rm -f -- "$activation_tmp"
+install -o root -g root -m 0600 "$staged_operator_activation" "$activation_tmp"
+mv -Tf "$activation_tmp" "$SHARED/operator-activation/current.json"
+echo "OPERATOR_STAGED_ACTIVATION_PROMOTED=PASS sha=$TARGET_SHA"
 
 tmp_link="$ROOT/.current-$REQUEST_ID"
 ln -s "$RELEASE" "$tmp_link"
