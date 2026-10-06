@@ -1,0 +1,162 @@
+name: Final Decision To Order Verification 20261006
+on:
+  push:
+    branches: [fix/cutover-rollback-safety-20261006]
+    paths: [".github/workflows/final-decision-to-order-verification-20261006.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: codex/full-order-path-audit-20261006
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Verify production safety source
+        run: |
+          set -Eeuo pipefail
+          bash -n scripts/ops/root/disdex-idle-production-redeploy-20261001
+          python3 -m py_compile scripts/ops/root/disdex-fet-preemption-readiness-guard.py
+          npx tsx --test             tests/production-cutover-rollback-safety.test.mjs             tests/fet-preemption-readiness-audit.test.mjs             tests/live-order-lock-scope-v2.test.mjs             tests/fet-brk48-live-runner.test.ts             tests/account-lock-bounded-retry.test.ts             tests/v12-preorder-gross-reservation.test.ts             tests/quality102-preflight-protective-order.test.ts             tests/q102-risk-block-freshness.test.ts             tests/resident-stop-runner-integration.test.ts
+          npm run strategy:v12-x1-all:selftest
+          npm run strategy:shared-crypto-risk:selftest
+          npm run strategy:quality102-causal-v4:selftest
+          npm run strategy:hype-trend-long:selftest
+      - name: Prove production deploy is manual and cutover cannot fabricate approval
+        run: |
+          set -Eeuo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          w=Path(".github/workflows/full-order-path-production-deploy-20261006.yml").read_text()
+          s=Path("scripts/ops/root/disdex-idle-production-redeploy-20261001").read_text()
+          assert "workflow_dispatch:" in w
+          assert "\n  push:" not in w
+          assert "OPERATOR_ARTIFACT_EXACT_SHA_REQUIRED" in s
+          assert "OPERATOR_FET_PREEMPTION_APPROVAL_REQUIRED" in s
+          assert '"ordersEnabled":True' not in s
+          assert 'tempfile.mkstemp(prefix=".operator-activation.' not in s
+          assert "trap 'rc=$?; if [[ \"$rc\" -ne 0 ]]; then rollback \"$rc\"; fi' EXIT" in s
+          print("PRODUCTION_CUTOVER_SAFETY=PASS")
+          PY
+
+  runtime:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: SSH setup
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def n(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id").write_text(n("ROOT_KEY")); (p/"known_hosts").write_text(n("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 600 "$HOME/.ssh/id" "$HOME/.ssh/known_hosts"
+      - name: Final live read-only verification
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id" -o IdentitiesOnly=yes -o BatchMode=yes             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts"             -p "$PORT" root@"$SSH_HOST" 'bash -s' <<'REMOTE'
+          set -Eeuo pipefail
+          current=/home/deploy/disdex-trading/current
+          sha="$(tr -d '[:space:]' < "$current/.disdex-release-sha")"
+          echo "CURRENT_SHA=$sha"
+          echo "CURRENT_PATH=$(readlink -f "$current")"
+
+          echo "=== ACTIVE CORE/SIDECAR/SAFETY ==="
+          units=(
+            "disdex-v12-x1-all@$sha.service"
+            "disdex-pengu-dual-ls-v2@$sha.service"
+            "disdex-quality102-causal-v1@$sha.service"
+            "disdex-v52-aster-only@$sha.service"
+            "disdex-fet-brk48@$sha.service"
+            "disdex-hype-long@$sha.service"
+            "disdex-idle-priority-short@$sha.service"
+            "disdex-shared-crypto-risk@$sha.service"
+            "disdex-v12-v52-margin-guard@$sha.service"
+          )
+          for u in "${units[@]}"; do
+            echo -n "$u|"
+            systemctl show "$u" -p ActiveState -p SubState -p Result -p MainPID -p NRestarts --value | paste -sd'|' -
+          done
+
+          echo "=== HYPE SYMBOL SCOPE ==="
+          envfile="/etc/disdex/current-runtime/$sha.env"
+          grep -E '^(DISDEX_HYPE_ZEC_(MODE|ENABLED|SIGNAL_MODE|SYMBOLS|LIVE_EXECUTION_ENABLED|PRODUCTION_CONFIG_LIVE_ENABLED|OPERATOR_ARMED)|DISDEX_RUNTIME_COMMIT_SHA)=' "$envfile" || true
+
+          echo "=== READONLY ACCOUNT ==="
+          cd "$current"
+          ./node_modules/.bin/tsx scripts/disdex-aster-readonly-account-diagnostic.ts
+
+          echo "=== SHARED SAFETY STATE ==="
+          python3 - <<'PY'
+          import json,os,time
+          rows=[
+            "/var/lib/disdex/shared/kill-switch.json",
+            "/var/lib/disdex/shared/crypto-daily-risk.json",
+            "/var/lib/disdex/shared/margin-risk/guard-live.json",
+            "/var/lib/disdex/shared/pending-exposure.json",
+            "/var/lib/disdex/shared/fet-preemption-readiness.json",
+          ]
+          for p in rows:
+            try:d=json.load(open(p))
+            except Exception as e:
+              print(p,{"error":type(e).__name__});continue
+            if p.endswith("kill-switch.json"):
+              print(p,{"active":d.get("active"),"reason":d.get("reason")})
+            elif p.endswith("crypto-daily-risk.json"):
+              print(p,{"tripped":d.get("tripped"),"sourceComplete":d.get("sourceComplete"),"lossPct":d.get("lossPct"),"maximumLossPct":d.get("maximumLossPct"),"updatedAt":d.get("updatedAt")})
+            elif p.endswith("guard-live.json"):
+              print(p,{"stage":d.get("stage"),"ordersAllowed":d.get("ordersAllowed"),"checkedAt":d.get("checkedAt"),"consecutiveFailures":d.get("consecutiveFailures")})
+            elif p.endswith("pending-exposure.json"):
+              entries=d.get("entries") or []
+              active=[x for x in entries if str(x.get("status","")).upper() in {"PENDING","SUBMITTED","UNKNOWN"}]
+              print(p,{"entries":len(entries),"activeEntries":len(active),"updatedAt":d.get("updatedAt")})
+            else:
+              print(p,{"status":d.get("status"),"reasons":d.get("reasons"),"productionSha":d.get("productionSha"),"ordersSent":d.get("ordersSent"),"cancelsSent":d.get("cancelsSent"),"killSwitchChanges":d.get("killSwitchChanges")})
+          PY
+
+          echo "=== LOCK RESIDUE ==="
+          for p in /var/lib/disdex/shared/account-order.lock /var/lib/disdex/shared/aster-rate-budget.json.lock; do
+            [[ -e "$p" ]] && echo "LOCK_PRESENT=$p" || echo "LOCK_CLEAR=$p"
+          done
+
+          echo "=== HEALTH SNAPSHOT ==="
+          systemctl reset-failed disdex-runner-health-snapshot.service >/dev/null 2>&1 || true
+          systemctl start disdex-runner-health-snapshot.service || true
+          sleep 2
+          python3 - <<'PY'
+          import json,glob
+          p="/var/lib/disdex/runner-health/current.json"
+          try:
+            d=json.load(open(p))
+            print(json.dumps({
+              "overallSafetyState":d.get("overallSafetyState"),
+              "newOrdersAllowed":d.get("newOrdersAllowed"),
+              "blockReasons":d.get("blockReasons"),
+              "sharedKillSwitchActive":d.get("sharedKillSwitchActive"),
+              "results":[{k:r.get(k) for k in ("runner","safetyState","active","processPresent","cwdCurrent","commandCurrent","execCurrent","stateFresh","strategyOk","nRestarts","serviceResult")} for r in (d.get("results") or [])]
+            },ensure_ascii=False))
+          except Exception as e:
+            print("HEALTH_SNAPSHOT_READ_FAILED",type(e).__name__)
+          PY
+
+          echo "=== RECENT CRITICAL EVENTS SINCE CUTOVER ==="
+          journalctl --since '2026-10-06 14:26:00' --no-pager -o short-iso             | grep -Ei 'ACCOUNT_LOCK_BUSY|ACCOUNT_ORDER_LOCK_BUSY|RATE_BUDGET_SATURATED|KILL.?SWITCH|EXECUTION_UNKNOWN|ORDER.*UNKNOWN|EACCES|permission denied|SHA_MISMATCH|STATE.*MISMATCH|SOURCE_UNAVAILABLE|exec-condition|FET_PREEMPTION|BASELINE_ADMISSION_SOURCE_STALE_OR_TS_MISMATCH'             | tail -n 300 || true
+
+          echo "FINAL_READONLY_VERIFICATION=PASS"
+          REMOTE
