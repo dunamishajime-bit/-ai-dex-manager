@@ -2,7 +2,7 @@
 import { useCallback,useEffect,useRef,useState } from 'react';
 import { ArrowUp,ArrowDown,RefreshCw,Trophy,X } from 'lucide-react';
 import Link from 'next/link';
-import { executionBlocked,currentRankRow,rankRows,rankChanges,rankCommentary,type RankRow } from '@/lib/realtime-ranking';
+import { executionBlocked,currentRankRow,rankRows,rankChanges,rankCommentary,rankingPcAlert,type RankRow } from '@/lib/realtime-ranking';
 import { SignalGateList } from './SignalGateList';
 import { useRankingShow } from './useRankingShow';
 type Snapshot={checkedAt:number;runtimeSha:string;rows:RankRow[];metric:string;errors:Record<string,string>};
@@ -11,54 +11,21 @@ function constraints(row:RankRow){return row.gates.filter(g=>g.kind==='execution
 function blockReason(row:RankRow){return row.gates.filter(g=>g.kind==='execution'&&g.state==='NO').map(g=>g.key==='clock'||g.label==='S34_4H_GRID'?'受付時間外':g.label==='FET保有・保留注文'?'保有・注文あり':g.label==='同時候補の選定'?'Runner選定未通過':g.label).join(' / ');}
 function rankExplanation(row:RankRow,rows:RankRow[]){if(row.score===null)return '必要なデータ・判定が未確認のため順位対象外です。';const ahead=rows.filter(r=>r.score!==null&&!executionBlocked(r)).length;return executionBlocked(row)?'確認済みの発注制約があるため、制約NOのない'+ahead+'件より後に表示しています。この制約ありグループ内ではScore順です。発注停止理由：'+blockReason(row)+'。':'確認済みの発注制約NOがないグループ内でScore順に表示しています。資金・競合など未確認の条件はRunnerの最終判定が必要です。';}
 function Movement({delta}:{delta?:number}){return delta===0?<span className="text-[9px] text-[#efd58c]">NEW</span>:delta?<span className={'inline-flex items-center text-[9px] '+(delta>0?'text-emerald-300':'text-rose-300')}>{delta>0?<ArrowUp size={10}/>:<ArrowDown size={10}/>} {Math.abs(delta)}</span>:null;}
-function alertRanking(rows:RankRow[]){return rankRows(rows).filter(r=>r.score!==null&&!executionBlocked(r));}
-function rankingAlert(previousRows:RankRow[],currentRows:RankRow[]){
- const previous=alertRanking(previousRows),current=alertRanking(currentRows);
- if(!previous.length||!current.length)return null;
- const changed=previous.length!==current.length||current.some((r,i)=>previous[i]?.id!==r.id);
- const top=current[0],previousPosition=new Map(previous.map((r,i)=>[r.id,i+1]));
- const entrants=current.slice(0,3).map((r,i)=>({row:r,from:previousPosition.get(r.id),to:i+1})).filter(x=>x.from!==undefined&&x.from>3);
- if(!(changed&&top.score!==null&&top.score>=90)&&!entrants.length)return null;
- const topText='1位 '+top.symbol.replace(/USDT$/,'')+' / '+top.logic+' / Score '+top.score;
- const entrantText=entrants.length?'。Top3入り：'+entrants.map(x=>x.row.symbol.replace(/USDT$/,'')+' '+x.from+'位→'+x.to+'位（Score '+x.row.score+'）').join('、'):'';
- return {body:'Rankingが更新されました。'+topText+entrantText,top,entrants};
-}
 export function RealtimeRankingBoard(){
  const [data,setData]=useState<Snapshot|null>(null),[error,setError]=useState(''),[busy,setBusy]=useState(false),[logic,setLogic]=useState('ALL'),[side,setSide]=useState('ALL'),[search,setSearch]=useState(''),[remaining,setRemaining]=useState(120),[changes,setChanges]=useState<Record<string,number>>({}),[flash,setFlash]=useState<Record<string,number>>({}),[selectedId,setSelectedId]=useState<string|null>(null);
- const [pcNotify,setPcNotify]=useState(false),[pcNotifyStatus,setPcNotifyStatus]=useState('PC通知 OFF');
+ const [pcNotify,setPcNotify]=useState(false),[notifyStatus,setNotifyStatus]=useState('');
  const prepareShow=useRef<(()=>void)|null>(null),rowNodes=useRef(new Map<string,HTMLElement>());
  const lastSnapshot=useRef(0);
- const previous=useRef<string[]>([]),requesting=useRef(false),alive=useRef(true),next=useRef(Date.now()+120000),flashTimer=useRef<ReturnType<typeof setTimeout>>(),dialog=useRef<HTMLDialogElement>(null);
- const previousAlertRows=useRef<RankRow[]|null>(null),pcNotifyRef=useRef(false),alertAudio=useRef<AudioContext|null>(null),lastNotificationVersion=useRef(0);
- pcNotifyRef.current=pcNotify;
- const playAlertTone=useCallback(async()=>{
-  try{
-   const AudioCtor=window.AudioContext||(window as unknown as {webkitAudioContext?:typeof AudioContext}).webkitAudioContext;
-   if(!AudioCtor)return;
-   alertAudio.current??=new AudioCtor();
-   if(alertAudio.current.state!=='running')await alertAudio.current.resume();
-   const ctx=alertAudio.current,t=ctx.currentTime;
-   [880,1174,1480].forEach((frequency,i)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.type='sine';o.frequency.value=frequency;g.gain.setValueAtTime(.0001,t+i*.11);g.gain.exponentialRampToValueAtTime(.11,t+i*.11+.02);g.gain.exponentialRampToValueAtTime(.0001,t+i*.11+.24);o.connect(g);g.connect(ctx.destination);o.start(t+i*.11);o.stop(t+i*.11+.26);});
-  }catch{}
- },[]);
- const showPcNotification=useCallback((body:string,version:number)=>{
-  if(!pcNotifyRef.current||!("Notification" in window)||Notification.permission!=='granted'||version===lastNotificationVersion.current)return;
-  lastNotificationVersion.current=version;
-  const notification=new Notification('DisDex Ranking通知',{body,tag:'disdex-ranking-alert',renotify:true,silent:false,requireInteraction:false});
-  notification.onclick=()=>{window.focus();notification.close();};
-  void playAlertTone();
- },[playAlertTone]);
- const load=useCallback(async()=>{if(requesting.current)return;requesting.current=true;setBusy(true);try{const res=await fetch('/api/system/realtime-ranking',{cache:'no-store'}),d=await res.json();if(!res.ok||!d.ok)throw Error(d.error||'取得失敗');if(!alive.current)return;if(typeof d.checkedAt!=='number'||!Number.isFinite(d.checkedAt)||d.checkedAt<lastSnapshot.current)throw Error('観測時刻が古いため更新を見送りました');lastSnapshot.current=d.checkedAt;const rows=(d.rows as RankRow[]).map(r=>currentRankRow(r,Date.now()));const ids=rankRows(rows).filter(r=>r.score!==null).map(r=>r.id),movement=rankChanges(previous.current,ids);previous.current=ids;setChanges(movement);setFlash(movement);if(flashTimer.current)clearTimeout(flashTimer.current);flashTimer.current=setTimeout(()=>setFlash({}),1200);const prior=previousAlertRows.current;if(prior){const alert=rankingAlert(prior,rows);if(alert)showPcNotification(alert.body,d.checkedAt);}previousAlertRows.current=rows;prepareShow.current?.();setData(d);setError('');}catch(e){if(alive.current){setError(e instanceof Error?e.message:'取得失敗');setFlash({});}}finally{requesting.current=false;if(alive.current){setBusy(false);next.current=Date.now()+120000;setRemaining(120);}}},[showPcNotification]);
- useEffect(()=>{try{const saved=localStorage.getItem('disdex-ranking-pc-notify')==='1';if(saved&&'Notification' in window&&Notification.permission==='granted'){setPcNotify(true);setPcNotifyStatus('PC通知 ON · Windows通知＋チャイム');}}catch{}alive.current=true;void load();const timer=setInterval(()=>{setRemaining(Math.max(0,Math.ceil((next.current-Date.now())/1000)));if(Date.now()>=next.current)void load();},1000);return()=>{alive.current=false;clearInterval(timer);if(flashTimer.current)clearTimeout(flashTimer.current);alertAudio.current?.close().catch(()=>{});};},[load]);
- const togglePcNotify=useCallback(async()=>{
-  if(pcNotifyRef.current){setPcNotify(false);setPcNotifyStatus('PC通知 OFF');try{localStorage.setItem('disdex-ranking-pc-notify','0');}catch{}return;}
-  if(!('Notification' in window)){setPcNotifyStatus('PC通知：このブラウザは未対応');return;}
-  const permission=Notification.permission==='granted'?'granted':await Notification.requestPermission();
-  if(permission!=='granted'){setPcNotify(false);setPcNotifyStatus(permission==='denied'?'PC通知：Chromeで通知がブロックされています':'PC通知：許可されていません');return;}
-  setPcNotify(true);setPcNotifyStatus('PC通知 ON · Windows通知＋チャイム');try{localStorage.setItem('disdex-ranking-pc-notify','1');}catch{}
-  await playAlertTone();
-  const n=new Notification('DisDex PC通知を有効にしました',{body:'順位変動＋1位Score 90以上、または4位以下→Top3入りで通知します。',tag:'disdex-ranking-enabled',silent:false});setTimeout(()=>n.close(),7000);
- },[playAlertTone]);
+ const previous=useRef<string[]>([]),alertRows=useRef<RankRow[]>([]),requesting=useRef(false),alive=useRef(true),next=useRef(Date.now()+120000),flashTimer=useRef<ReturnType<typeof setTimeout>>(),dialog=useRef<HTMLDialogElement>(null);
+ const pcNotifyRef=useRef(false),notifyAudio=useRef<AudioContext|null>(null);
+ const ensureNotifyAudio=useCallback(async()=>{const Audio=window.AudioContext||(window as unknown as {webkitAudioContext?:typeof AudioContext}).webkitAudioContext;if(!Audio)return null;notifyAudio.current??=new Audio();if(notifyAudio.current.state!=='running')await notifyAudio.current.resume();return notifyAudio.current;},[]);
+ const playNotifySound=useCallback(async()=>{const ctx=await ensureNotifyAudio();if(!ctx)return;const t=ctx.currentTime;[740,988,1318].forEach((frequency,i)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.type='sine';o.frequency.value=frequency;g.gain.setValueAtTime(.0001,t+i*.12);g.gain.exponentialRampToValueAtTime(.07,t+i*.12+.015);g.gain.exponentialRampToValueAtTime(.0001,t+i*.12+.22);o.connect(g);g.connect(ctx.destination);o.start(t+i*.12);o.stop(t+i*.12+.24);});},[ensureNotifyAudio]);
+ const sendPcNotification=useCallback((title:string,body:string)=>{if(!pcNotifyRef.current||!('Notification' in window)||Notification.permission!=='granted')return;void playNotifySound().catch(()=>{});const n=new Notification(title,{body,tag:'disdex-ranking-alert',renotify:true,silent:false});n.onclick=()=>{window.focus();n.close();};},[playNotifySound]);
+ const togglePcNotify=useCallback(async()=>{if(pcNotifyRef.current){pcNotifyRef.current=false;setPcNotify(false);setNotifyStatus('PC通知はOFFです。');try{localStorage.setItem('disdex-ranking-pc-notify','0');}catch{}return;}if(!('Notification' in window)){setNotifyStatus('このブラウザはPC通知に未対応です。');return;}const permission=Notification.permission==='default'?await Notification.requestPermission():Notification.permission;if(permission!=='granted'){setNotifyStatus('Chromeの通知許可が必要です。');return;}pcNotifyRef.current=true;setPcNotify(true);try{localStorage.setItem('disdex-ranking-pc-notify','1');}catch{}await ensureNotifyAudio().catch(()=>null);setNotifyStatus('PC通知ON：条件成立時にポップアップ＋通知音。');sendPcNotification('DisDex PC通知','Ranking通知を有効にしました。');},[ensureNotifyAudio,sendPcNotification]);
+ const testPcNotify=useCallback(()=>sendPcNotification('DisDex 通知テスト','Ranking通知のポップアップと通知音のテストです。'),[sendPcNotification]);
+ const load=useCallback(async()=>{if(requesting.current)return;requesting.current=true;setBusy(true);try{const res=await fetch('/api/system/realtime-ranking',{cache:'no-store'}),d=await res.json();if(!res.ok||!d.ok)throw Error(d.error||'取得失敗');if(!alive.current)return;if(typeof d.checkedAt!=='number'||!Number.isFinite(d.checkedAt)||d.checkedAt<lastSnapshot.current)throw Error('観測時刻が古いため更新を見送りました');lastSnapshot.current=d.checkedAt;const evaluated=(d.rows as RankRow[]).map(r=>currentRankRow(r,Date.now())),alert=rankingPcAlert(alertRows.current,evaluated);alertRows.current=evaluated;if(alert)sendPcNotification('DisDex Ranking：'+alert.title,alert.body);const ids=d.rows.filter((r:RankRow)=>r.score!==null).map((r:RankRow)=>r.id),movement=rankChanges(previous.current,ids);previous.current=ids;setChanges(movement);setFlash(movement);if(flashTimer.current)clearTimeout(flashTimer.current);flashTimer.current=setTimeout(()=>setFlash({}),1200);prepareShow.current?.();setData(d);setError('');}catch(e){if(alive.current){setError(e instanceof Error?e.message:'取得失敗');setFlash({});}}finally{requesting.current=false;if(alive.current){setBusy(false);next.current=Date.now()+120000;setRemaining(120);}}},[sendPcNotification]);
+ useEffect(()=>{try{const enabled=localStorage.getItem('disdex-ranking-pc-notify')==='1'&&'Notification' in window&&Notification.permission==='granted';pcNotifyRef.current=enabled;setPcNotify(enabled);if(enabled)setNotifyStatus('PC通知ON：条件成立時にポップアップ＋通知音。');}catch{}return()=>{notifyAudio.current?.close().catch(()=>{});};},[]);
+ useEffect(()=>{alive.current=true;void load();const timer=setInterval(()=>{setRemaining(Math.max(0,Math.ceil((next.current-Date.now())/1000)));if(Date.now()>=next.current)void load();},1000);return()=>{alive.current=false;clearInterval(timer);if(flashTimer.current)clearTimeout(flashTimer.current);};},[load]);
  const all=rankRows((data?.rows||[]).map(r=>currentRankRow(r,Date.now()))),filtered=all.filter(r=>(logic==='ALL'||r.logic===logic)&&(side==='ALL'||r.side===side)&&((r.symbol+' '+r.logic).toLowerCase().includes(search.toLowerCase()))),top=error?[]:filtered.filter(r=>r.score!==null&&!executionBlocked(r)).slice(0,3),selected=all.find(r=>r.id===selectedId);
  const show=useRankingShow(all,data?.checkedAt??0,logic+'|'+side+'|'+search,error);
  prepareShow.current=show.prepare;
@@ -80,8 +47,8 @@ export function RealtimeRankingBoard(){
    </div>
    <div className="ranking-commentary-tools">
     <div className="ranking-commentary-toggles">{(['motion','sound','voice'] as const).map(key=><button type="button" key={key} aria-pressed={show[key]} onClick={()=>show.preference(key,!show[key])} className={show[key]?'ranking-toggle-on':''}>{key==='motion'?'動き':key==='sound'?'効果音':'読み上げ'} {show[key]?'ON':'OFF'}</button>)}<button type="button" aria-pressed={pcNotify} onClick={()=>void togglePcNotify()} className={pcNotify?'ranking-toggle-on':''}>PC通知 {pcNotify?'ON':'OFF'}</button></div>
-    <button type="button" disabled={!commentRow} onClick={()=>commentRow&&setSelectedId(commentRow.id)} className="ranking-detail-button">不足条件をすべて見る →</button>
-    <span className="ranking-audio-notice">{pcNotifyStatus} · {show.audioNotice||'音声実況は現行設定を維持'}</span>
+    <div className="ranking-commentary-actions"><button type="button" disabled={!pcNotify} onClick={testPcNotify} className="ranking-detail-button">通知テスト</button><button type="button" disabled={!commentRow} onClick={()=>commentRow&&setSelectedId(commentRow.id)} className="ranking-detail-button">不足条件をすべて見る →</button></div>
+    <span className="ranking-audio-notice" title={notifyStatus||show.audioNotice}>{notifyStatus||show.audioNotice||'PC通知：Ranking変化＋1位Score 90以上 / 前回4位以下→Top3で通知'}</span>
    </div>
   </section>
   <div className="radar-filters"><input aria-label="通貨を検索" placeholder="通貨・ロジック検索" value={search} onChange={e=>setSearch(e.target.value)} className="min-w-0 flex-1"/><select aria-label="ロジック" value={logic} onChange={e=>setLogic(e.target.value)}><option value="ALL">全ロジック</option>{[...new Set(data?.rows.map(r=>r.logic)||[])].map(v=><option key={v}>{v}</option>)}</select><select aria-label="方向" value={side} onChange={e=>setSide(e.target.value)}><option value="ALL">全方向</option><option>LONG</option><option>SHORT</option><option>WAIT</option></select></div>
@@ -93,7 +60,7 @@ export function RealtimeRankingBoard(){
    .ranking-commentary{height:98px;flex-shrink:0;display:flex;gap:12px;align-items:center;padding:9px 12px;border:1px solid #c4ab5555;border-radius:12px;background:linear-gradient(110deg,#252315,#0b1520);position:relative}
    .ranking-commentary-copy{min-width:0;flex:1}.ranking-commentary-copy p{margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.65}
    .ranking-commentary-title{color:#f2dfa2;font-size:12px;font-weight:700}.ranking-commentary-signal{color:#edf3f8;font-size:11px}.ranking-commentary-execution{color:#e2adac;font-size:10px}
-   .ranking-commentary-tools{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:5px}.ranking-commentary-toggles{display:flex;gap:4px}.ranking-commentary-toggles button,.ranking-detail-button{font-size:10px;border:1px solid #ffffff25;border-radius:6px;padding:3px 6px;color:#bfc7d2}.ranking-commentary-toggles .ranking-toggle-on{color:#f3e3ac;border-color:#c7ab5c88;background:#c7ab5c12}.ranking-detail-button{color:#ead7a4}.ranking-detail-button:disabled{opacity:.4}.ranking-audio-notice{font-size:9px;color:#9aa6b5;max-width:270px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+   .ranking-commentary-tools{flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:5px}.ranking-commentary-toggles,.ranking-commentary-actions{display:flex;gap:4px}.ranking-commentary-toggles button,.ranking-detail-button{font-size:10px;border:1px solid #ffffff25;border-radius:6px;padding:3px 6px;color:#bfc7d2}.ranking-commentary-toggles .ranking-toggle-on{color:#f3e3ac;border-color:#c7ab5c88;background:#c7ab5c12}.ranking-detail-button{color:#ead7a4}.ranking-detail-button:disabled{opacity:.4}.ranking-audio-notice{font-size:9px;color:#9aa6b5;max-width:270px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
    .rank-rise-number{font-size:8px;color:#9df2c1;font-weight:700;white-space:nowrap;display:block}.ranking-flyer .rank-rise-number{color:#c0ffd9}
    @media(max-width:767px){.ranking-commentary{height:128px;align-items:stretch;flex-direction:column;gap:4px;padding:8px 10px}.ranking-commentary-tools{display:grid;grid-template-columns:1fr auto;align-items:center;gap:3px}.ranking-audio-notice{grid-column:1/-1;max-width:none}.ranking-commentary-title{font-size:11px}.ranking-commentary-signal{font-size:10px}.ranking-commentary-execution{font-size:9px}}
 
