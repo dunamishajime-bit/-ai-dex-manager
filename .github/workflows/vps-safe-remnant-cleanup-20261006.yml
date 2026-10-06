@@ -1,0 +1,78 @@
+name: VPS Safe Remnant Cleanup 20261006
+on:
+  push:
+    branches: [fix/cutover-rollback-safety-20261006]
+    paths: [".github/workflows/vps-safe-remnant-cleanup-20261006.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  cleanup:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: SSH setup
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def n(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id").write_text(n("ROOT_KEY")); (p/"known_hosts").write_text(n("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 600 "$HOME/.ssh/id" "$HOME/.ssh/known_hosts"
+      - name: Dry-run then apply protected retention cleanup
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -p "$PORT" root@"$SSH_HOST" 'bash -s' <<'REMOTE'
+          set -Eeuo pipefail
+          current=/home/deploy/disdex-trading/current
+          sha_before="$(tr -d '[:space:]' < "$current/.disdex-release-sha")"
+          path_before="$(readlink -f "$current")"
+          script="$current/scripts/ops/root/disdex-vps-retention-cleanup"
+          [[ -x "$script" ]]
+          dry="$("$script" --dry-run)"
+          echo "DRY_RUN=$dry"
+          python3 - "$dry" "$path_before" <<'PY'
+          import json,sys
+          d=json.loads(sys.argv[1]); current=sys.argv[2]
+          assert d["status"]=="DISDEX_VPS_RETENTION_CLEANUP_PASS"
+          assert d["protectedPathsTouched"] is False
+          assert d["currentReleaseDeleted"] is False
+          assert d["runtimeStateDeleted"] is False
+          assert d["approvalDeleted"] is False
+          assert d["killSwitchDeleted"] is False
+          assert d["ordersSent"] is False and d["cancelSent"] is False and d["positionChangesSent"] is False
+          assert current in d["protectedPaths"]
+          assert d["promotionLockBusy"] is False
+          print("DRY_RUN_SAFETY=PASS")
+          PY
+          applied="$("$script" --apply)"
+          echo "APPLY=$applied"
+          python3 - "$applied" <<'PY'
+          import json,sys
+          d=json.loads(sys.argv[1])
+          assert d["status"]=="DISDEX_VPS_RETENTION_CLEANUP_PASS"
+          assert d["protectedPathsTouched"] is False
+          assert d["currentReleaseDeleted"] is False
+          assert d["runtimeStateDeleted"] is False
+          assert d["approvalDeleted"] is False
+          assert d["killSwitchDeleted"] is False
+          assert d["ordersSent"] is False and d["cancelSent"] is False and d["positionChangesSent"] is False
+          print("APPLY_SAFETY=PASS")
+          print("BYTES_RECLAIMED="+str(d.get("bytesReclaimed",0)))
+          print("DELETED_COUNT="+str(len(d.get("deletedPaths",[]))))
+          for p in d.get("deletedPaths",[]): print("DELETED="+p)
+          PY
+          [[ "$(tr -d '[:space:]' < "$current/.disdex-release-sha")" == "$sha_before" ]]
+          [[ "$(readlink -f "$current")" == "$path_before" ]]
+          echo "CURRENT_SHA_UNCHANGED=$sha_before"
+          df -h / | tail -1
+          REMOTE
