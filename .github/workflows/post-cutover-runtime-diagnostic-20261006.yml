@@ -1,0 +1,101 @@
+name: Post Cutover Runtime Diagnostic 20261006
+on:
+  push:
+    branches: [ops/post-cutover-diagnostic-20261006]
+    paths: [.github/workflows/post-cutover-runtime-diagnostic-20261006.yml]
+permissions: { contents: read }
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Setup SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+      - name: Inspect current SHA and mixed-runner state
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -p "${SSH_PORT:-22}" root@"$SSH_HOST" 'bash -s' <<'REMOTE'
+          set -Eeuo pipefail
+          root=/home/deploy/disdex-trading
+          current="$(readlink -f "$root/current" 2>/dev/null || true)"
+          previous="$(readlink -f "$root/previous" 2>/dev/null || true)"
+          marker="$(tr -d '[:space:]' < "$root/current/.disdex-release-sha" 2>/dev/null || true)"
+          echo "CURRENT=$current"
+          echo "CURRENT_MARKER=$marker"
+          echo "PREVIOUS=$previous"
+          echo "=== ACTIVE DISDEX ==="
+          systemctl list-units --type=service --state=active --no-legend --plain 'disdex-*.service' || true
+          echo "=== TARGET/OLD UNIT STATES ==="
+          for sha in 91dc6c8f1d5c32dd201209c5e0c42644d5cdaf22 4c57efbb86ae0bbfe94bbe7dea4d09f0e1ec6c19; do
+            for n in v12-x1-all pengu-dual-ls-v2 quality102-causal-v1 v52-aster-only fet-brk48 hype-long idle-priority-short shared-crypto-risk v12-v52-margin-guard; do
+              u="disdex-$n@$sha.service"
+              load="$(systemctl show "$u" -p LoadState --value 2>/dev/null || true)"
+              [[ "$load" == loaded ]] || continue
+              echo "$u active=$(systemctl is-active "$u" 2>/dev/null || true) enabled=$(systemctl is-enabled "$u" 2>/dev/null || true) pid=$(systemctl show "$u" -p MainPID --value 2>/dev/null || true) restarts=$(systemctl show "$u" -p NRestarts --value 2>/dev/null || true)"
+            done
+          done
+          echo "=== ACTIVE PROCESS CWD ==="
+          while read -r u _; do
+            [[ "$u" == disdex-*.service ]] || continue
+            pid="$(systemctl show "$u" -p MainPID --value 2>/dev/null || true)"
+            if [[ "$pid" =~ ^[0-9]+$ && "$pid" -gt 0 ]]; then
+              echo "$u pid=$pid cwd=$(readlink -f /proc/$pid/cwd 2>/dev/null || true)"
+            fi
+          done < <(systemctl list-units --type=service --state=active --no-legend --plain 'disdex-*.service')
+          echo "=== SAFETY ==="
+          python3 - <<'PY'
+          import json,time
+          now=int(time.time()*1000)
+          for name,p in {
+            "kill":"/var/lib/disdex/shared/kill-switch.json",
+            "risk":"/var/lib/disdex/shared/crypto-daily-risk.json",
+            "margin":"/var/lib/disdex/shared/margin-risk/guard-live.json",
+            "activation":"/var/lib/disdex/shared/operator-activation/current.json",
+          }.items():
+            try:
+              d=json.load(open(p))
+              if name=="kill": out={k:d.get(k) for k in ("active","reason","updatedAt")}
+              elif name=="risk": out={k:d.get(k) for k in ("tripped","sourceComplete","updatedAt","utcDay","lossPct")}
+              elif name=="margin": out={k:d.get(k) for k in ("stage","ordersAllowed","checkedAt","consecutiveFailures")}
+              else: out={k:d.get(k) for k in ("approvedSha","ordersEnabled","approvedRunners","approvedAt")}
+              print(name,out)
+            except Exception as e: print(name,type(e).__name__,str(e))
+          PY
+          echo "=== HEARTBEATS ==="
+          python3 - <<'PY'
+          import json,glob,os,time
+          for p in sorted(glob.glob("/var/lib/disdex/runner-health/heartbeats/*.json")):
+            try:
+              d=json.load(open(p))
+              print(os.path.basename(p),{k:d.get(k) for k in ("runtimeSha","expectedSha","serviceUnit","safetyState","healthReason","updatedAt")})
+            except Exception as e: print(os.path.basename(p),type(e).__name__)
+          PY
+          echo "=== ASTER READONLY ==="
+          set -a
+          for f in /etc/disdex/disdex-v13d-v11eq-v96.env /etc/disdex/disdex-v12-pengu-v2-v52.env /etc/disdex/disdex-v12-x1-all.env; do [[ -f "$f" ]] && . "$f"; done
+          set +a
+          if [[ -x "$root/current/node_modules/.bin/tsx" ]]; then
+            cd "$root/current"
+            ./node_modules/.bin/tsx scripts/disdex-aster-readonly-account-diagnostic.ts
+          fi
+          echo "POST_CUTOVER_DIAGNOSTIC=PASS"
+          REMOTE
