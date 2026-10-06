@@ -46,6 +46,16 @@ jobs:
             tests/q102-risk-block-freshness.test.ts \
             tests/shared-risk-rollover-retry.test.ts \
             tests/resident-stop-runner-integration.test.ts
+          npx tsx --test \
+            tests/production-cutover-rollback-safety.test.mjs \
+            tests/production-rollback-behavior.test.mjs \
+            tests/fet-preemption-readiness-audit.test.mjs \
+            tests/fet_core_preemption_wiring.test.ts \
+            tests/fet-core-preemption.test.ts \
+            tests/operator_activation_hardening.test.ts
+          node --test tests/shared-risk-systemd-decoupling.test.mjs
+          python3 -m unittest discover -s tests -p test_runtime_wiring_script.py
+          python3 -m unittest discover -s tests -p test_runtime_multilineage_monitoring.py
           npm run strategy:v12-x1-all:selftest
           npm run strategy:pengu-dual-ls-v2:recovery-v8:selftest
           npm run strategy:quality102-causal-v1:runner:selftest
@@ -97,14 +107,26 @@ jobs:
               lib/hype-zec-long-runner.ts|\
               scripts/disdex-fet-brk48-live-runner.ts|\
               scripts/ops/root/disdex-idle-production-redeploy-20261001|\
+              scripts/ops/root/disdex-current-runtime-wiring|\
               scripts/ops/root/disdex-fet-preemption-readiness-guard.py|\
               tests/fet-brk48-live-runner.test.ts|\
               tests/live-order-lock-scope-v2.test.mjs|\
               tests/production-cutover-rollback-safety.test.mjs|\
+              tests/production-rollback-behavior.test.mjs|\
+              tests/shared-risk-systemd-decoupling.test.mjs|\
+              tests/fet_core_preemption_wiring.test.ts|\
+              tests/test_runtime_wiring_script.py|\
+              tests/test_runtime_multilineage_monitoring.py|\
+              docs/superpowers/plans/2026-10-06-live-approval-audit.md|\
+              docs/production/live-approval-audit-20261006.md|\
               tests/fet-preemption-readiness-audit.test.mjs) ;;
               *) echo "UNEXPECTED_PRODUCTION_DELTA=$p"; exit 1 ;;
             esac
           done
+          git diff --quiet "$FROM_SHA" "$TARGET_SHA" -- lib config scripts \
+            ':(exclude)scripts/ops/root/disdex-idle-production-redeploy-20261001' \
+            ':(exclude)scripts/ops/root/disdex-current-runtime-wiring' \
+            ':(exclude)scripts/ops/root/disdex-fet-preemption-readiness-guard.py'
           # Strategy signals, sizing, risk policy, V12/PENGU/Q102/V52/Idle and
           # exchange execution primitives are byte-identical to current LIVE.
           critical_unchanged=(
@@ -163,6 +185,7 @@ jobs:
           echo "SOURCE_SHA256=$(sha256sum /tmp/disdex-trading-source.tgz | awk '{print $1}')" >> "$GITHUB_ENV"
           echo "CERT_SHA256=$(sha256sum /tmp/idle-target.json | awk '{print $1}')" >> "$GITHUB_ENV"
           echo "RESIDUAL_CERT_SHA256=$(sha256sum /tmp/residual-target.json | awk '{print $1}')" >> "$GITHUB_ENV"
+          echo "WIRING_SHA256=$(sha256sum scripts/ops/root/disdex-current-runtime-wiring | awk '{print $1}')" >> "$GITHUB_ENV"
 
       - name: Transfer immutable source and audited cutover inputs
         shell: bash
@@ -174,6 +197,7 @@ jobs:
           scp "${common[@]}" -P "$PORT" /tmp/idle-target.json root@"$SSH_HOST":/tmp/idle-parity-v3-$GITHUB_RUN_ID.json
           scp "${common[@]}" -P "$PORT" /tmp/residual-target.json root@"$SSH_HOST":/tmp/idle-residual-long-parity-$GITHUB_RUN_ID.json
           scp "${common[@]}" -P "$PORT" scripts/ops/root/disdex-idle-production-redeploy-20261001 root@"$SSH_HOST":/tmp/disdex-idle-cutover-$GITHUB_RUN_ID.sh
+          scp "${common[@]}" -P "$PORT" scripts/ops/root/disdex-current-runtime-wiring root@"$SSH_HOST":/tmp/disdex-wiring-$GITHUB_RUN_ID.sh
 
       - name: Exact SHA Production cutover with automatic rollback
         shell: bash
@@ -183,7 +207,7 @@ jobs:
           ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
             -o ConnectTimeout=15 -p "$PORT" root@"$SSH_HOST" \
-            "FROM_SHA='$FROM_SHA' TARGET_SHA='$TARGET_SHA' REQUEST_ID='$GITHUB_RUN_ID' SOURCE_SHA256='$SOURCE_SHA256' CERT_SHA256='$CERT_SHA256' RESIDUAL_CERT_SHA256='$RESIDUAL_CERT_SHA256' V12_ACTIVE_MIGRATION_CODE_PARITY='1' bash /tmp/disdex-idle-cutover-$GITHUB_RUN_ID.sh"
+            "FROM_SHA='$FROM_SHA' TARGET_SHA='$TARGET_SHA' REQUEST_ID='$GITHUB_RUN_ID' SOURCE_SHA256='$SOURCE_SHA256' CERT_SHA256='$CERT_SHA256' RESIDUAL_CERT_SHA256='$RESIDUAL_CERT_SHA256' WIRING_SHA256='$WIRING_SHA256' V12_ACTIVE_MIGRATION_CODE_PARITY='1' bash /tmp/disdex-idle-cutover-$GITHUB_RUN_ID.sh"
 
       - name: Postdeploy read-only account and runtime verification
         shell: bash
@@ -277,3 +301,25 @@ jobs:
             echo "PUBLIC_ROUTE=$route HTTP=$code"
             [[ "$code" =~ ^(200|30[1278]|401|403)$ ]]
           done
+
+      - name: Roll back any cutover or mandatory postdeploy failure
+        if: ${{ failure() && env.FROM_SHA != '' }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -p "$PORT" root@"$SSH_HOST" \
+            "FROM_SHA='$FROM_SHA' TARGET_SHA='$TARGET_SHA' REQUEST_ID='$GITHUB_RUN_ID' bash -s" <<'REMOTE'
+          set -Eeuo pipefail
+          current="$(tr -d '[:space:]' </home/deploy/disdex-trading/current/.disdex-release-sha)"
+          if [[ "$current" == "$FROM_SHA" ]]; then
+            echo POSTDEPLOY_FAILURE_SOURCE_RELEASE_RETAINED
+            exit 0
+          fi
+          [[ "$current" == "$TARGET_SHA" ]]
+          backup="/var/lib/disdex/deploy-backups/idle-$REQUEST_ID/cutover.sh"
+          [[ -f "$backup" && ! -L "$backup" ]]
+          DISDEX_ROLLBACK_ONLY=true V12_ACTIVE_MIGRATION_CODE_PARITY=1 bash "$backup"
+          REMOTE

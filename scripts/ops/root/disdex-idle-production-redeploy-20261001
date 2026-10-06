@@ -5,9 +5,13 @@ umask 022
 : "${FROM_SHA:?FROM_SHA required}"
 : "${TARGET_SHA:?TARGET_SHA required}"
 : "${REQUEST_ID:?REQUEST_ID required}"
-: "${SOURCE_SHA256:?SOURCE_SHA256 required}"
-: "${CERT_SHA256:?CERT_SHA256 required}"
-: "${RESIDUAL_CERT_SHA256:?RESIDUAL_CERT_SHA256 required}"
+ROLLBACK_ONLY="${DISDEX_ROLLBACK_ONLY:-false}"
+if [[ "$ROLLBACK_ONLY" != true ]]; then
+  : "${SOURCE_SHA256:?SOURCE_SHA256 required}"
+  : "${CERT_SHA256:?CERT_SHA256 required}"
+  : "${RESIDUAL_CERT_SHA256:?RESIDUAL_CERT_SHA256 required}"
+  : "${WIRING_SHA256:?WIRING_SHA256 required}"
+fi
 V12_ACTIVE_MIGRATION_CODE_PARITY="${V12_ACTIVE_MIGRATION_CODE_PARITY:-0}"
 
 ROOT=/home/deploy/disdex-trading
@@ -32,13 +36,16 @@ LOCK=/run/lock/disdex-idle-production-redeploy.lock
 exec 9>"$LOCK"
 flock -n 9 || { echo "DEPLOY_CONCURRENT_LOCK"; exit 40; }
 
-[[ "$(tr -d '[:space:]' < "$CURRENT/.disdex-release-sha")" == "$FROM_SHA" ]]
-[[ "$(readlink -f "$CURRENT")" == "$OLD_RELEASE" ]]
-[[ -f "$SOURCE_FILE" && -f "$CERT_FILE" && -f "$RESIDUAL_CERT_FILE" ]]
-echo "$SOURCE_SHA256  $SOURCE_FILE" | sha256sum -c -
-echo "$CERT_SHA256  $CERT_FILE" | sha256sum -c -
-echo "$RESIDUAL_CERT_SHA256  $RESIDUAL_CERT_FILE" | sha256sum -c -
-[[ ! -e "$RELEASE" && ! -e "$STAGE" ]]
+if [[ "$ROLLBACK_ONLY" != true ]]; then
+  [[ "$(tr -d '[:space:]' < "$CURRENT/.disdex-release-sha")" == "$FROM_SHA" ]]
+  [[ "$(readlink -f "$CURRENT")" == "$OLD_RELEASE" ]]
+  [[ -f "$SOURCE_FILE" && -f "$CERT_FILE" && -f "$RESIDUAL_CERT_FILE" ]]
+  echo "$SOURCE_SHA256  $SOURCE_FILE" | sha256sum -c -
+  echo "$CERT_SHA256  $CERT_FILE" | sha256sum -c -
+  echo "$RESIDUAL_CERT_SHA256  $RESIDUAL_CERT_FILE" | sha256sum -c -
+  [[ ! -e "$RELEASE" && ! -e "$STAGE" ]]
+  echo "$WIRING_SHA256  /tmp/disdex-wiring-$REQUEST_ID.sh" | sha256sum -c -
+fi
 
 NAMES=(
   disdex-v12-x1-all
@@ -152,11 +159,11 @@ PY
 require_flat_account() {
   local runner_root="$1"
   local tmp budget_tmp
-  tmp="$(mktemp)"
+  tmp="$(mktemp)" || return 1
   budget_tmp="/tmp/disdex-aster-readonly-budget-cutover-$RANDOM-$.json"
   DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH="$budget_tmp" \
     "$runner_root/node_modules/.bin/tsx" \
-    "$runner_root/scripts/disdex-aster-readonly-account-diagnostic.ts" | tee "$tmp"
+    "$runner_root/scripts/disdex-aster-readonly-account-diagnostic.ts" | tee "$tmp" || { rm -f "$tmp"; return 1; }
   python3 - "$tmp" <<'PY'
 import json,sys
 rows=[x for x in open(sys.argv[1],encoding="utf-8") if x.lstrip().startswith("{")]
@@ -169,8 +176,10 @@ if x.get("openOrders"):
 assert x.get("ordersSent")==0 and x.get("cancelsSent")==0 and x.get("positionChangesSent")==0
 print("CUTOVER_ASTER_FLAT=PASS")
 PY
+  local validation_rc=$?
   rm -f "$tmp"
   rm -rf -- "$budget_tmp" "$budget_tmp.lock" "$budget_tmp.lock.recovery"
+  return "$validation_rc"
 }
 
 CUTOVER_ACCOUNT_MODE="UNKNOWN"
@@ -376,6 +385,7 @@ restart_stock_reference_current() {
   return 1
 }
 
+if [[ "$ROLLBACK_ONLY" != true ]]; then
 load_runtime_env
 classify_cutover_account_mode "$OLD_RELEASE"
 if [[ "$CUTOVER_ACCOUNT_MODE" == V12_ACTIVE ]]; then
@@ -461,6 +471,8 @@ PY
 done
 
 install -d -o root -g root -m 0700 "$BACKUP"
+install -o root -g root -m 0700 "$0" "$BACKUP/cutover.sh"
+install -o root -g root -m 0700 "/tmp/disdex-wiring-$REQUEST_ID.sh" "$BACKUP/runtime-wiring.sh"
 for p in "${STATE_PATHS[@]}"; do
   if [[ -f "$p" && ! -L "$p" ]]; then
     dest="$BACKUP$p"
@@ -479,99 +491,202 @@ for p in "${SYSTEMD_TEMPLATE_PATHS[@]}"; do
   echo "CUTOVER_SYSTEMD_TEMPLATE_BACKED_UP=$p"
 done
 
+fi # normal preflight; rollback-only reuses its durable backup
+
+quiesce_rollback_writers() {
+  local unit name sha state
+  for unit in disdex-current-runtime-coherence-guard.timer disdex-runner-watchdog.timer disdex-runner-position-recovery.timer disdex-v12-kill-switch-auto-repair.path disdex-v12-three-hour-health-check.timer; do
+    systemctl stop "$unit" || return 1
+  done
+  for unit in disdex-current-runtime-coherence-guard.service disdex-runner-watchdog.service disdex-runner-position-recovery.service disdex-v12-kill-switch-auto-repair.service disdex-v12-three-hour-health-check.service; do
+    systemctl stop "$unit" || return 1
+  done
+  for sha in "$TARGET_SHA" "$FROM_SHA"; do
+    for name in "${NAMES[@]}"; do
+      unit="$name@$sha.service"
+      state="$(systemctl show "$unit" -p LoadState --value)"
+      [[ "$state" == not-found ]] && continue
+      systemctl stop "$unit" || return 1
+      [[ "$(systemctl show "$unit" -p MainPID --value)" == 0 ]] || return 1
+    done
+  done
+  echo ROLLBACK_WRITERS_QUIESCED
+}
+
+migrate_rollback_state_lineage() {
+  # Writers are stopped, venue state was independently checked, and the workflow
+  # proved identical strategy/sizing bytes. Preserve accounting and ownership;
+  # only change top-level release identity. Never restore old financial snapshots.
+  python3 - "$FROM_SHA" "$TARGET_SHA" "$rollback_mode" "$BACKUP" <<'PY'
+import json,os,pathlib,sys,tempfile,shutil
+old,target,mode,backup=sys.argv[1:]
+paths=[
+ '/var/lib/disdex/v12-x1-all/runner.json',
+ '/var/lib/disdex/pengu-dual-ls-v2/runner-live.json',
+ '/var/lib/disdex/quality102-causal-v1/state.json',
+ '/var/lib/disdex/v52-aster-only/runner-live.json',
+ '/var/lib/disdex/fet-brk48-residual/state.json',
+ '/var/lib/disdex/hype-zec-long/runner.json',
+ '/var/lib/disdex/idle-priority/state.json',
+ '/var/lib/disdex/idle-priority/residual-long-state.json',
+]
+pending=json.load(open('/var/lib/disdex/shared/pending-exposure.json'))
+assert pending.get('schema')=='disdex-pending-exposure/v1' and isinstance(pending.get('entries'),list)
+assert all(isinstance(r,dict) and r.get('status')=='RELEASED' for r in pending['entries']), 'ROLLBACK_PENDING_EXPOSURE_UNVERIFIED'
+planned=[]
+for value in paths:
+ p=pathlib.Path(value)
+ if not p.is_file() or p.is_symlink():
+  raise RuntimeError('ROLLBACK_STATE_NOT_REGULAR:'+value)
+ before=json.loads(p.read_bytes())
+ for key in ['runtimeCommitSha','runtimeSha']:
+  if key in before and before[key] not in [old,target]:
+   raise RuntimeError('ROLLBACK_STATE_SHA_UNVERIFIED:'+value)
+ for key in ['pending','pendingOrder','pendingEntry']:
+  if before.get(key): raise RuntimeError('ROLLBACK_PENDING_STATE_UNVERIFIED:'+value)
+ allow_active=mode=='V12_ACTIVE' and value==paths[0]
+ for key in ['active','activePositions','position','positions','core','recovery','base']:
+  if before.get(key) and not allow_active:
+   raise RuntimeError('ROLLBACK_NONFLAT_STATE_UNVERIFIED:'+value+':'+key)
+ after=dict(before)
+ for key in ['runtimeCommitSha','runtimeSha']:
+  if key in after: after[key]=old
+ assert {k:v for k,v in after.items() if k not in ['runtimeCommitSha','runtimeSha']}=={k:v for k,v in before.items() if k not in ['runtimeCommitSha','runtimeSha']}
+ planned.append((p,before,after))
+audit=pathlib.Path(backup)/'rollback-latest'
+audit.mkdir(mode=0o700,exist_ok=True)
+for p,before,after in planned:
+ dest=audit/p.relative_to('/')
+ dest.parent.mkdir(mode=0o700,parents=True,exist_ok=True)
+ if not dest.exists(): shutil.copy2(p,dest)
+ if before==after: continue
+ st=p.stat()
+ fd,tmp=tempfile.mkstemp(prefix='.rollback-lineage-',dir=p.parent)
+ with os.fdopen(fd,'w') as f:
+  json.dump(after,f,indent=2);f.write('\n');f.flush();os.fsync(f.fileno())
+ os.chown(tmp,st.st_uid,st.st_gid);os.chmod(tmp,st.st_mode&0o777)
+ os.replace(tmp,p)
+ assert json.loads(p.read_bytes())==after
+print('ROLLBACK_CURRENT_FINANCIAL_STATE_PRESERVED')
+PY
+}
+
+verify_rollback_runtime() {
+  local unit name pid attempt
+  for name in "${NAMES[@]}"; do
+    unit="$name@$FROM_SHA.service"
+    [[ "$(systemctl is-active "$unit")" == active ]] || return 1
+    pid="$(systemctl show "$unit" -p MainPID --value)"
+    [[ "$pid" =~ ^[0-9]+$ && "$pid" -gt 0 ]] || return 1
+    [[ "$(readlink -f "/proc/$pid/cwd")" == "$OLD_RELEASE" ]] || return 1
+  done
+  for attempt in $(seq 1 24); do
+    systemctl start disdex-runner-health-snapshot.service || return 1
+    if python3 - "$FROM_SHA" <<'PY'
+import json,pathlib,sys
+sha=sys.argv[1]
+rows=list(pathlib.Path('/var/lib/disdex/runner-health/heartbeats').glob('*.json'))
+assert len(rows)==7
+for p in rows:
+ d=json.loads(p.read_text())
+ assert d.get('runtimeSha')==sha and d.get('expectedSha')==sha and d.get('safetyState')=='HEALTHY',p.name
+ assert int(d.get('mainPid') or 0)>0
+print('ROLLBACK_RESTORED_RUNTIME_VERIFIED')
+PY
+    then return 0; fi
+    sleep 5
+  done
+  return 1
+}
+
+rollback_hold() {
+  local reason="$1" failure_rc="$2"
+  echo "$reason"
+  quiesce_rollback_writers || echo ROLLBACK_HOLD_WRITER_STOP_FAILED
+  echo ROLLBACK_INCOMPLETE_RUNNERS_HELD
+  exit "$failure_rc"
+}
+
 rollback() {
   rc="${1:-$?}"
   trap - ERR EXIT
   set +e
   echo "DEPLOY_ROLLBACK_TRIGGERED rc=$rc"
-  rollback_mode=""
+  if ! quiesce_rollback_writers; then
+    echo ROLLBACK_BLOCKED_WRITER_STOP_FAILED
+    exit "$rc"
+  fi
   load_runtime_env
-  runner_root="$(readlink -f "$CURRENT" 2>/dev/null || true)"
-  if [[ -z "$runner_root" || ! -x "$runner_root/node_modules/.bin/tsx" ]]; then
-    runner_root="$OLD_RELEASE"
-  fi
-  if require_flat_account "$runner_root" >/tmp/disdex-rollback-account.log 2>&1; then
-    rollback_mode="FLAT"
-  elif [[ "$CUTOVER_ACCOUNT_MODE" == V12_ACTIVE && "$V12_ACTIVE_MIGRATION_CODE_PARITY" == 1 ]]; then
-    cat /tmp/disdex-rollback-account.log || true
-    if [[ "$TRADING_TARGET_STARTED" == 0 ]]; then
-      rollback_mode="V12_ACTIVE"
-      echo "DEPLOY_ROLLBACK_V12_ACTIVE_PRESTART_REUSE_PREFLIGHT=PASS"
-    elif [[ -x "$RELEASE/node_modules/.bin/tsx" && -f "$RELEASE/scripts/disdex-v12-active-state-sha-migrate.ts" ]]; then
-      state_sha="$(/usr/bin/jq -r '.runtimeCommitSha // ""' /var/lib/disdex/v12-x1-all/runner.json 2>/dev/null || true)"
-      if [[ "$state_sha" == "$TARGET_SHA" ]]; then
-        rollback_other_sha="$FROM_SHA"
-      elif [[ "$state_sha" == "$FROM_SHA" ]]; then
-        rollback_other_sha="$TARGET_SHA"
-      else
-        rollback_other_sha=""
-      fi
-      if [[ -n "$rollback_other_sha" ]] && "$RELEASE/node_modules/.bin/tsx"           "$RELEASE/scripts/disdex-v12-active-state-sha-migrate.ts"           --from-sha "$state_sha"           --to-sha "$rollback_other_sha"           --state-path /var/lib/disdex/v12-x1-all/runner.json           --verify-only           --ack I_ACK_V12_ACTIVE_STATE_SHA_MIGRATION_AFTER_READONLY_RECONCILIATION; then
-        rollback_mode="V12_ACTIVE"
-        echo "DEPLOY_ROLLBACK_V12_ACTIVE_READONLY_REVERIFY=PASS stateSha=$state_sha"
-      fi
+  runner_root="$RELEASE"
+  [[ -x "$runner_root/node_modules/.bin/tsx" ]] || runner_root="$OLD_RELEASE"
+  rollback_mode=""
+  if require_flat_account "$runner_root" >"$BACKUP/rollback-account.log" 2>&1; then
+    rollback_mode=FLAT
+  elif [[ "$V12_ACTIVE_MIGRATION_CODE_PARITY" == 1 ]]; then
+    state_sha="$(/usr/bin/jq -r '.runtimeCommitSha // ""' /var/lib/disdex/v12-x1-all/runner.json)"
+    if [[ "$state_sha" == "$TARGET_SHA" ]]; then other_sha="$FROM_SHA"; else other_sha="$TARGET_SHA"; fi
+    if "$runner_root/node_modules/.bin/tsx" "$runner_root/scripts/disdex-v12-active-state-sha-migrate.ts" \
+      --from-sha "$state_sha" --to-sha "$other_sha" --state-path /var/lib/disdex/v12-x1-all/runner.json \
+      --verify-only --ack I_ACK_V12_ACTIVE_STATE_SHA_MIGRATION_AFTER_READONLY_RECONCILIATION; then
+      rollback_mode=V12_ACTIVE
     fi
-  else
-    cat /tmp/disdex-rollback-account.log || true
   fi
-  if [[ -n "$rollback_mode" ]]; then
-    for name in "${NAMES[@]}"; do
-      systemctl disable --now "$name@$TARGET_SHA.service" >/dev/null 2>&1 || true
-    done
-    for p in "${STATE_PATHS[@]}"; do
-      src="$BACKUP$p"
-      if [[ -f "$src" ]]; then
-        mkdir -p -- "$(dirname "$p")"
-        cp -a -- "$src" "$p"
-      fi
-    done
-    for state_dir in /var/lib/disdex/pengu-dual-ls-v2 /var/lib/disdex/idle-priority; do
-      if [[ -d "$state_dir" && ! -L "$state_dir" ]]; then
-        chown deploy:deploy "$state_dir"
-        chmod 0700 "$state_dir"
-        echo "ROLLBACK_STATE_DIR_NORMALIZED=$state_dir:deploy:deploy:700"
-      fi
-    done
-    rm -f /var/lib/disdex/runner-health/heartbeats/idle-priority-short.json
-    for p in "${SYSTEMD_TEMPLATE_PATHS[@]}"; do
-      src="$BACKUP$p"
-      if [[ -f "$src" ]]; then
-        cp -a -- "$src" "$p"
-        chown root:root "$p"
-        chmod 0644 "$p"
-        echo "ROLLBACK_SYSTEMD_TEMPLATE_RESTORED=$p"
-      fi
-    done
-    systemctl daemon-reload
-    tmp_link="$ROOT/.current-rollback-$REQUEST_ID"
-    rm -f "$tmp_link"
-    ln -s "$OLD_RELEASE" "$tmp_link"
-    mv -Tf "$tmp_link" "$CURRENT"
-    if [[ "$rollback_mode" == V12_ACTIVE && -x "$RELEASE/node_modules/.bin/tsx" && -f "$RELEASE/scripts/disdex-v12-active-state-sha-migrate.ts" ]]; then
-      "$RELEASE/node_modules/.bin/tsx"         "$RELEASE/scripts/disdex-v12-active-state-sha-migrate.ts"         --from-sha "$FROM_SHA"         --to-sha "$TARGET_SHA"         --state-path /var/lib/disdex/v12-x1-all/runner.json         --verify-only         --ack I_ACK_V12_ACTIVE_STATE_SHA_MIGRATION_AFTER_READONLY_RECONCILIATION || {
-          echo "DEPLOY_ROLLBACK_V12_ACTIVE_RESTORED_STATE_REVERIFY_FAILED"
-          exit "$rc"
-        }
-      echo "DEPLOY_ROLLBACK_V12_ACTIVE_RESTORED_STATE_REVERIFY=PASS"
-    fi
-    (cd "$OLD_RELEASE" && bash scripts/ops/root/disdex-current-runtime-wiring --apply) || true
-    for name in "${NAMES[@]}"; do
-      systemctl enable --now "$name@$FROM_SHA.service" >/dev/null 2>&1 || true
-    done
-    if restart_stock_reference_current ROLLBACK; then
-      rm -rf -- "$RELEASE" "$STAGE"
-    else
-      echo "ROLLBACK_TARGET_RELEASE_PRESERVED_FOR_STOCK_REFERENCE=$RELEASE"
-    fi
-    echo "DEPLOY_ROLLBACK_MODE=$rollback_mode PASS"
-  else
-    echo "DEPLOY_ROLLBACK_SKIPPED_UNVERIFIED_EXPOSURE"
+  # Only restore control-plane authorization/certificates/templates, never the
+  # accounting snapshots captured before startup. Unknown exposure stays stopped.
+  for p in "$SHARED/operator-activation/current.json" "$SHARED/operator-activation/runtime.json" "$SHARED/idle-priority-parity-cert.json" "$SHARED/idle-residual-long-parity-cert.json" "${SYSTEMD_TEMPLATE_PATHS[@]}"; do
+    src="$BACKUP$p"
+    if [[ -f "$src" ]]; then cp -a -- "$src" "$p" || { echo ROLLBACK_CONTROL_RESTORE_FAILED; exit "$rc"; }; fi
+  done
+  tmp_link="$ROOT/.current-rollback-$REQUEST_ID"
+  rm -f -- "$tmp_link"
+  ln -s "$OLD_RELEASE" "$tmp_link" && mv -Tf "$tmp_link" "$CURRENT" || { echo ROLLBACK_POINTER_RESTORE_FAILED; exit "$rc"; }
+  if [[ -z "$rollback_mode" ]]; then
+    echo ROLLBACK_RELEASE_RESTORED_EXPOSURE_UNVERIFIED_RUNNERS_STOPPED
+    exit "$rc"
   fi
+  if ! migrate_rollback_state_lineage; then
+    echo ROLLBACK_RELEASE_RESTORED_STATE_UNVERIFIED_RUNNERS_STOPPED
+    exit "$rc"
+  fi
+  export DISDEX_ALLOW_V12_ACTIVE_SHA_MIGRATION=true
+  if ! (cd "$OLD_RELEASE" && DISDEX_CURRENT_RUNTIME_DEFER_OPERATOR_AUTOMATION=true bash "$BACKUP/runtime-wiring.sh" --apply); then
+    echo ROLLBACK_RELEASE_RESTORED_WIRING_FAILED_RUNNERS_STOPPED
+    exit "$rc"
+  fi
+  systemctl stop disdex-current-runtime-coherence-guard.timer || rollback_hold ROLLBACK_COHERENCE_STOP_FAILED "$rc"
+  if ! restart_stock_reference_current ROLLBACK; then rollback_hold ROLLBACK_STOCK_REFERENCE_FAILED "$rc"; fi
+  for name in disdex-shared-crypto-risk disdex-v12-v52-margin-guard; do
+    systemctl enable --now "$name@$FROM_SHA.service" || rollback_hold ROLLBACK_SAFETY_START_FAILED "$rc"
+  done
+  safety_ready=0
+  for attempt in $(seq 1 45); do
+    if require_shared_safe; then safety_ready=1; break; fi
+    sleep 2
+  done
+  [[ "$safety_ready" == 1 ]] || rollback_hold ROLLBACK_SAFETY_NOT_READY "$rc"
+  for name in "${CORE[@]}" disdex-hype-long disdex-idle-priority-short; do
+    systemctl enable --now "$name@$FROM_SHA.service" || rollback_hold ROLLBACK_TRADER_START_FAILED "$rc"
+    sleep 6
+  done
+  if ! verify_rollback_runtime; then rollback_hold ROLLBACK_RESTORED_RUNTIME_NOT_HEALTHY "$rc"; fi
+  (cd "$OLD_RELEASE" && bash "$BACKUP/runtime-wiring.sh" --apply) || rollback_hold ROLLBACK_AUTOMATION_RESTORE_FAILED "$rc"
+  echo "DEPLOY_ROLLBACK_MODE=$rollback_mode VERIFIED"
+  # Preserve failed release and all evidence; retention owns deletion after
+  # checking current, previous, dependency, systemd, process and state references.
   exit "$rc"
 }
+
+if [[ "$ROLLBACK_ONLY" == true ]]; then
+  current_sha="$(tr -d '[:space:]' < "$CURRENT/.disdex-release-sha")"
+  if [[ "$current_sha" == "$FROM_SHA" ]]; then echo ROLLBACK_ALREADY_AT_SOURCE; exit 0; fi
+  [[ "$current_sha" == "$TARGET_SHA" && -f "$BACKUP/cutover.sh" ]] || { echo ROLLBACK_SOURCE_UNVERIFIED; exit 1; }
+  rollback 1
+fi
 trap 'rc=$?; if [[ "$rc" -ne 0 ]]; then rollback "$rc"; fi' EXIT
 
 systemctl disable --now disdex-runner-watchdog.timer >/dev/null 2>&1 || true
+systemctl stop disdex-current-runtime-coherence-guard.timer
+systemctl stop disdex-current-runtime-coherence-guard.service
 systemctl stop disdex-runner-watchdog.service >/dev/null 2>&1 || true
 systemctl disable --now disdex-runner-position-recovery.timer >/dev/null 2>&1 || true
 systemctl stop disdex-runner-position-recovery.service >/dev/null 2>&1 || true

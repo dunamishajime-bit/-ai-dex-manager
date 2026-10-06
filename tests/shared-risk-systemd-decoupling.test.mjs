@@ -73,7 +73,8 @@ test("cutover verifies the effective dependency graph and can restore prior temp
   const cutover = await read(CUTOVER);
   assert.match(cutover, /SYSTEMD_TEMPLATE_PATHS=/);
   assert.match(cutover, /CUTOVER_SYSTEMD_TEMPLATE_BACKED_UP/);
-  assert.match(cutover, /ROLLBACK_SYSTEMD_TEMPLATE_RESTORED/);
+  assert.match(cutover, /"\$\{SYSTEMD_TEMPLATE_PATHS\[@\]\}"/);
+  assert.match(cutover, /cp -a -- "\$src" "\$p" \|\|.*ROLLBACK_CONTROL_RESTORE_FAILED/);
   assert.match(cutover, /POSTDEPLOY_SHARED_RISK_HARD_DEPENDENCY_PRESENT/);
   assert.match(cutover, /POSTDEPLOY_SHARED_RISK_SOFT_DEPENDENCY_MISSING/);
   assert.match(cutover, /POSTDEPLOY_MARGIN_GUARD_HARD_DEPENDENCY_PRESENT/);
@@ -237,7 +238,9 @@ test("cutover rebinds stock reference to current release and preserves target on
   assert.match(cutover, /\$\{phase\}_STOCK_REFERENCE_CURRENT=PASS/);
   assert.match(cutover, /restart_stock_reference_current POSTDEPLOY/);
   assert.match(cutover, /restart_stock_reference_current ROLLBACK/);
-  assert.match(cutover, /ROLLBACK_TARGET_RELEASE_PRESERVED_FOR_STOCK_REFERENCE/);
+  const rollback = cutover.slice(cutover.indexOf("rollback() {"), cutover.indexOf('if [[ "$ROLLBACK_ONLY" == true ]]'));
+  assert.match(rollback, /rollback_hold ROLLBACK_STOCK_REFERENCE_FAILED/);
+  assert.doesNotMatch(rollback, /rm -rf .*RELEASE/);
 });
 
 test("runtime wiring removes the obsolete fixed V56 stock-reference release pin", async () => {
@@ -311,7 +314,11 @@ test("active V12 cutover and rollback require code parity and read-only exchange
   assert.match(cutover, /scripts\/disdex-v12-active-state-sha-migrate\.ts/);
   assert.match(cutover, /--verify-only/);
   assert.match(cutover, /TRADING_TARGET_STARTED=1/);
-  assert.match(cutover, /DEPLOY_ROLLBACK_V12_ACTIVE_READONLY_REVERIFY=PASS/);
-  assert.match(cutover, /DEPLOY_ROLLBACK_V12_ACTIVE_RESTORED_STATE_REVERIFY=PASS/);
-  assert.match(cutover, /DEPLOY_ROLLBACK_SKIPPED_UNVERIFIED_EXPOSURE/);
+  const rollback = cutover.slice(cutover.indexOf("rollback() {"), cutover.indexOf('if [[ "$ROLLBACK_ONLY" == true ]]'));
+  assert.match(rollback, /--verify-only[\s\S]*?rollback_mode=V12_ACTIVE/);
+  assert.match(rollback, /if ! migrate_rollback_state_lineage/);
+  assert.match(cutover, /ROLLBACK_CURRENT_FINANCIAL_STATE_PRESERVED/);
+  assert.match(rollback, /ROLLBACK_RELEASE_RESTORED_EXPOSURE_UNVERIFIED_RUNNERS_STOPPED/);
+  assert.match(rollback, /ROLLBACK_RELEASE_RESTORED_STATE_UNVERIFIED_RUNNERS_STOPPED/);
+  assert.match(rollback, /if ! verify_rollback_runtime/);
 });

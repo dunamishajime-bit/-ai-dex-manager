@@ -22,7 +22,7 @@ class RuntimeWiringScriptTest(unittest.TestCase):
         self.assertIn("Environment=QUALITY102_CAUSAL_V1_SELECTOR_MODE=CAUSAL_V4", source)
         self.assertIn("Environment=FET_BRK48_LIVE_ENABLED=true", source)
         self.assertIn("Environment=FET_BRK48_STATE_PATH=/var/lib/disdex/fet-brk48-residual/state.json", source)
-        self.assertIn("Environment=FET_BRK48_MAX_GROSS=2.25", source)
+        self.assertNotIn("Environment=FET_BRK48_MAX_GROSS=", source)
         self.assertIn('RUNTIME_CONTRACT_ENV_DIR="/etc/disdex/current-runtime"', source)
         self.assertIn('CONTRACT_ENV_FILE="${RUNTIME_CONTRACT_ENV_DIR}/${DEPLOYED_SHA}.env"', source)
         self.assertIn("EnvironmentFile=${CONTRACT_ENV_FILE}", source)
@@ -62,7 +62,8 @@ class RuntimeWiringScriptTest(unittest.TestCase):
         self.assertIn("ensure_monitor_timer_active()", source)
         self.assertIn('ensure_monitor_timer_active "disdex-runner-health-snapshot.timer"', source)
         self.assertIn('ensure_monitor_timer_active "disdex-runner-health-alert.timer"', source)
-        self.assertIn("DISDEX_MONITOR_TIMER_ACTIVE", source)
+        self.assertIn("DISDEX_MONITOR_TIMER_ARMED", source)
+        self.assertIn("DISDEX_MONITOR_TIMER_RUNNING", source)
         # Recovery/watchdog automation is intentionally conditional on the
         # operator activation artifact after the premature-activation incident.
         self.assertIn("if operator_activation_all_trading_ready; then", source)

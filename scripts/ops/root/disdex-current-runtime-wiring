@@ -865,7 +865,6 @@ DISDEX_HYPE_ZEC_CORE_PREEMPT_SCRIPT=${CURRENT_RELEASE}/scripts/disdex-hype-zec-c
 DISDEX_HYPE_ZEC_MAX_GROSS=1.5
 HYPE_LONG_MAX_GROSS=1.5
 HYPE_LONG_RISK_PCT=5.0
-ZEC_LONG_RISK_PCT=4.5
 HYPE_ZEC_MAX_REDUCTION_FRACTION=0.5
 DISDEX_HYPE_ZEC_MODE=LIVE
 DISDEX_HYPE_ZEC_ENABLED=true
@@ -907,7 +906,6 @@ QUALITY102_CAUSAL_V1_LIVE_ACK=${DEPLOYED_SHA}
 QUALITY102_CAUSAL_V1_STATE_PATH=/var/lib/disdex/quality102-causal-v1/state.json
 FET_BRK48_LIVE_ENABLED=true
 FET_BRK48_STATE_PATH=/var/lib/disdex/fet-brk48-residual/state.json
-FET_BRK48_MAX_GROSS=2.25
 FET_BRK48_CORE_PREEMPTION_READY=${fet_core_preemption_ready}
 DISDEX_Q102_RUNTIME_SHA=${DEPLOYED_SHA}
 QUALITY102_CAUSAL_V1_PREFLIGHT_HISTORY_CHECK=false
@@ -1176,7 +1174,6 @@ Environment=DISDEX_RUNTIME_COMMIT_SHA=${DEPLOYED_SHA}
 Environment=DISDEX_RELEASE_SHA=${DEPLOYED_SHA}
 Environment=FET_BRK48_LIVE_ENABLED=true
 Environment=FET_BRK48_STATE_PATH=/var/lib/disdex/fet-brk48-residual/state.json
-Environment=FET_BRK48_MAX_GROSS=2.25
 Environment=CRYPTO_GROSS_CAP=3.0
 Environment=TOTAL_GROSS_CAP=4.25
 ReadWritePaths=/var/lib/disdex/fet-brk48-residual /var/lib/disdex/shared"
@@ -1312,8 +1309,12 @@ ReadWritePaths=${IDLE_PRIORITY_STATE_ROOT} ${SHARED_ROOT}"
   ensure_monitor_timer_active "disdex-runner-health-snapshot.timer"
   ensure_monitor_timer_active "disdex-runner-health-alert.timer"
   ensure_monitor_timer_active "disdex-trade-fill-notifier.timer"
-  systemctl enable --now disdex-current-runtime-coherence-guard.timer
-  ensure_monitor_timer_active "disdex-current-runtime-coherence-guard.timer"
+  if [[ "${DISDEX_CURRENT_RUNTIME_DEFER_OPERATOR_AUTOMATION:-false}" == "true" ]]; then
+    systemctl stop disdex-current-runtime-coherence-guard.timer
+  else
+    systemctl enable --now disdex-current-runtime-coherence-guard.timer
+    ensure_monitor_timer_active "disdex-current-runtime-coherence-guard.timer"
+  fi
   printf 'DISDEX_CURRENT_RUNTIME_WIRING_APPLIED\n'
 }
 
