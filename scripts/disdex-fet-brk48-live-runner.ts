@@ -5,6 +5,7 @@ import { V12AsterLiveAdapter } from "../lib/v12-aster-live-adapter";
 import { FetBrk48LiveRunner } from "../lib/fet-brk48-live-runner";
 import { createInterruptibleDelay } from "../lib/interruptible-delay";
 import { classifyAsterRateBudgetFailure, nextAsterRateBudgetRetryMs } from "../lib/disdex-aster-rate-budget-policy";
+import { nextAccountLockAwareWaitMs } from "../lib/disdex-account-lock-retry-scheduling";
 
 function numberEnv(name: string, fallback: number) {
   const n = Number(process.env[name]);
@@ -112,7 +113,9 @@ async function main() {
     }
     console.log(JSON.stringify({ timestamp: new Date().toISOString(), strategyId: "FET_BRK48_RESIDUAL", runtimeSha, ...result }));
     if (!daemon || stop) break;
-    await delay.wait(numberEnv("FET_BRK48_POLL_MS", 30_000));
+    const normalWaitMs = numberEnv("FET_BRK48_POLL_MS", 30_000);
+    const lockRetryMs = numberEnv("FET_BRK48_LOCK_RETRY_MS", 5_000);
+    await delay.wait(nextAccountLockAwareWaitMs(result.status, normalWaitMs, lockRetryMs));
   } while (!stop);
 }
 
