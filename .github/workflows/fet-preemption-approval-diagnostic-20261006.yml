@@ -1,0 +1,52 @@
+name: FET Preemption Approval Diagnostic 20261006
+on:
+  push:
+    branches: [ops/post-cutover-diagnostic-20261006]
+    paths: [.github/workflows/fet-preemption-approval-diagnostic-20261006.yml]
+permissions: { contents: read }
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Setup
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 ~/.ssh
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def n(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id").write_text(n("ROOT_KEY")); (p/"known_hosts").write_text(n("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 600 ~/.ssh/id ~/.ssh/known_hosts
+      - name: Inspect approval lineage
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ssh -T -i ~/.ssh/id -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=~/.ssh/known_hosts -p "${SSH_PORT:-22}" root@"$SSH_HOST" 'python3 - <<'"'"'PY'"'"'
+          import json,glob,os
+          paths=[
+            "/var/lib/disdex/shared/operator-activation/current.json",
+            "/var/lib/disdex/deploy-backups/idle-37418403012/var/lib/disdex/shared/operator-activation/current.json",
+            "/var/lib/disdex/deploy-backups/idle-37418403012/var/lib/disdex/shared/operator-activation/runtime.json",
+          ]
+          for p in paths:
+            print("---",p)
+            try:
+              d=json.load(open(p))
+              print({k:d.get(k) for k in ("schema","target","approvedSha","ordersEnabled","operatorAcknowledgement","approvedRunners","fetCorePreemptionReady","approvedAt")})
+            except Exception as e: print(type(e).__name__,str(e))
+          print("--- current-runtime env")
+          for p in glob.glob("/etc/disdex/current-runtime/4c57efbb86ae0bbfe94bbe7dea4d09f0e1ec6c19*"):
+            print(p)
+            for line in open(p,errors="ignore"):
+              if line.startswith(("DISDEX_RUNTIME_COMMIT_SHA=","FET_BRK48_CORE_PREEMPTION_READY=")):
+                print(line.strip())
+          PY'
