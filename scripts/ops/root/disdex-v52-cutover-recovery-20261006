@@ -9,13 +9,19 @@ OLD_RELEASE="$ROOT/releases/$OLD_SHA"
 ACTIVATION=/var/lib/disdex/shared/operator-activation/current.json
 BACKUP=/var/lib/disdex/deploy-backups/idle-37418403012/var/lib/disdex/shared/operator-activation/current.json
 
+echo "RECOVERY_CHECK=current_marker"
 [[ "$(tr -d '[:space:]' < "$ROOT/current/.disdex-release-sha")" == "$TARGET_SHA" ]]
+echo "RECOVERY_CHECK=current_link"
 [[ "$(readlink -f "$ROOT/current")" == "$RELEASE" ]]
+echo "RECOVERY_CHECK=artifacts"
 [[ -f "$BACKUP" && -f "$ACTIVATION" ]]
-
+echo "RECOVERY_CHECK=guard_parity"
 cmp -s "$OLD_RELEASE/scripts/ops/root/disdex-fet-preemption-readiness-guard.py" "$RELEASE/scripts/ops/root/disdex-fet-preemption-readiness-guard.py"
+echo "RECOVERY_CHECK=v52_engine_parity"
 cmp -s "$OLD_RELEASE/scripts/disdex_v52_aster_only_live_engine.py" "$RELEASE/scripts/disdex_v52_aster_only_live_engine.py"
+echo "RECOVERY_CHECK=v52_legacy_parity"
 cmp -s "$OLD_RELEASE/scripts/disdex_v52_aster_only_legacy_engine.py" "$RELEASE/scripts/disdex_v52_aster_only_legacy_engine.py"
+echo "RECOVERY_CHECK=preconditions_pass"
 
 python3 - "$ACTIVATION" "$BACKUP" "$OLD_SHA" "$TARGET_SHA" <<'PY'
 import datetime,json,os,sys,tempfile
