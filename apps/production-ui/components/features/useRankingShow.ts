@@ -23,35 +23,22 @@ export function useRankingShow(rows:RankRow[],version:number,viewKey:string,erro
   if(audio.current.state!=='running')await audio.current.resume();
   return audio.current;
  },[]);
- const fallbackSpeech=useCallback((text:string)=>{
-  if(!('speechSynthesis' in window))return;
-  window.speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(text);u.lang='ja-JP';u.rate=.92;u.pitch=.98;u.volume=1;
+ const googleSpeech=useCallback((text:string)=>{
+  if(!('speechSynthesis' in window)){setAudioNotice('このブラウザは読み上げに未対応です。');return false;}
   const ja=window.speechSynthesis.getVoices().filter(v=>v.lang.toLowerCase().startsWith('ja'));
-  const preferred=
-   ja.find(v=>/google.*日本語|google.*japanese/i.test(v.name))||
-   ja.find(v=>/nanami|keita|ayumi|natural|neural/i.test(v.name))||
-   ja.find(v=>!v.localService)||
-   ja[0];
-  if(preferred)u.voice=preferred;
+  const google=ja.find(v=>/^google 日本語$/i.test(v.name))||ja.find(v=>/google.*(?:日本語|japanese)/i.test(v.name));
+  if(!google){setAudioNotice('Google 日本語が見つかりません。Chromeの音声一覧を再読み込みしてください。');return false;}
+  window.speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);u.lang='ja-JP';u.rate=.92;u.pitch=.98;u.volume=1;u.voice=google;
+  u.onstart=()=>setAudioNotice('再生中：Google 日本語（無料・Chrome Online音声）');
+  u.onend=()=>setAudioNotice('Google 日本語を使用中。Ranking変動時もこの音声で実況します。');
+  u.onerror=()=>setAudioNotice('Google 日本語の再生に失敗しました。Chromeのサイト音声・Windows出力先を確認してください。');
   window.speechSynthesis.speak(u);
+  return true;
  },[]);
- const speakNatural=useCallback(async(text:string)=>{
-  try{
-   const ctx=await ensureAudio();
-   const res=await fetch('/api/tts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,voice:'marin'}),cache:'no-store'});
-   if(!res.ok)throw new Error('TTS_HTTP_'+res.status);
-   const buffer=await res.arrayBuffer(),decoded=await ctx.decodeAudioData(buffer.slice(0));
-   try{voiceSource.current?.stop();}catch{}
-   const source=ctx.createBufferSource();source.buffer=decoded;source.connect(ctx.destination);voiceSource.current=source;
-   source.onended=()=>{if(voiceSource.current===source)voiceSource.current=null;};
-   source.start();
-   setAudioNotice('AI生成の自然音声（marin）で実況しています。');
-  }catch{
-   setAudioNotice('AI自然音声を取得できないため、端末音声へ切り替えました。');
-   fallbackSpeech(text);
-  }
- },[ensureAudio,fallbackSpeech]);
+ const testGoogleVoice=useCallback(()=>{
+  googleSpeech('Google日本語の音声テストです。リアルタイムランキングの変化を、この音声でお知らせします。');
+ },[googleSpeech]);
  useEffect(()=>{
   try{const saved=JSON.parse(localStorage.getItem('disdex-ranking-show')||'{}');setMotion(saved.motion!==false);}catch{}
   return()=>{stopVisuals();try{voiceSource.current?.stop();}catch{}audio.current?.close().catch(()=>{});if('speechSynthesis' in window)window.speechSynthesis.cancel();};
@@ -64,10 +51,10 @@ export function useRankingShow(rows:RankRow[],version:number,viewKey:string,erro
    void ensureAudio().catch(()=>{setSound(false);setAudioNotice('このブラウザは効果音に未対応です。');});
   }
   if(key==='voice'){
-   if(!value){try{voiceSource.current?.stop();}catch{}if('speechSynthesis' in window)window.speechSynthesis.cancel();setAudioNotice('AI音声実況はOFFです。');}
-   else void speakNatural('自然音声実況を有効にしました。ランキングが動いたときに、変化をお知らせします。');
+   if(!value){try{voiceSource.current?.stop();}catch{}if('speechSynthesis' in window)window.speechSynthesis.cancel();setAudioNotice('Google日本語の実況はOFFです。');}
+   else googleSpeech('Google日本語の実況を有効にしました。ランキングが動いたときに、変化をお知らせします。');
   }
- },[ensureAudio,speakNatural]);
+ },[ensureAudio,googleSpeech]);
  const notify=useCallback((rise:RiseEvent,delay:number)=>{
   if(document.hidden||Date.now()-lastAudio.current<20000)return;
   const p=prefs.current;if(!p.sound&&!p.voice)return;lastAudio.current=Date.now();
@@ -79,9 +66,9 @@ export function useRankingShow(rows:RankRow[],version:number,viewKey:string,erro
   }
   if(p.voice)speechTimer.current=setTimeout(()=>{
    if(document.hidden||!prefs.current.voice)return;
-   void speakNatural(rankCommentary(rise.row,rise.from,rise.to).speech);
+   googleSpeech(rankCommentary(rise.row,rise.from,rise.to).speech);
   },delay);
- },[ensureAudio,speakNatural]);
+ },[ensureAudio,googleSpeech]);
  useLayoutEffect(()=>{
   const token=String(version);
   if(filters.current!==viewKey||error||document.hidden||wasBlocked.current||Number(version)<Number(seen.current)){stopVisuals();setHighlights({});setEvent(null);previous.current=measure();capture.current=null;seen.current=token;filters.current=viewKey;wasBlocked.current=!!error;return;}
@@ -119,5 +106,5 @@ export function useRankingShow(rows:RankRow[],version:number,viewKey:string,erro
   timer.current=setTimeout(()=>{stopVisuals();setHighlights({});setEvent(null);},12000);
  },[version,viewKey,error,measure,stopVisuals,notify]);
  const register=useCallback((id:string,node:HTMLElement|null)=>{if(node)nodes.current.set(id,node);else nodes.current.delete(id);},[]);
- return {event,highlights,prepare,register,sound,voice,motion,preference,audioNotice};
+ return {event,highlights,prepare,register,sound,voice,motion,preference,audioNotice,testGoogleVoice};
 }
