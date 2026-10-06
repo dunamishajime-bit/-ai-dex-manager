@@ -1,0 +1,28 @@
+name: OpenAI key presence check 20261006
+
+on:
+  push:
+    branches:
+      - codex/realtime-ranking-show-20261006
+    paths:
+      - ".github/workflows/openai-key-presence-check-20261006.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    env:
+      OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+    steps:
+      - name: Check secret presence only
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          if [[ -n "${OPENAI_API_KEY:-}" ]]; then
+            echo "OPENAI_API_KEY_SECRET_PRESENT=TRUE"
+          else
+            echo "OPENAI_API_KEY_SECRET_PRESENT=FALSE"
+          fi
