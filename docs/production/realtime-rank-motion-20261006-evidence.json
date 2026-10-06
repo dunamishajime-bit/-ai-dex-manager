@@ -1,7 +1,7 @@
 {
-  "checkedAt": "2026-10-06T09:54:31.498548+00:00",
-  "uiSha": "eef82fba25f84a6577ae2e74995fdc0689159d83",
-  "workingDirectory": "/home/deploy/disdex-trading/ui-releases/ui-realtime-ranking-eef82fba25f8",
+  "checkedAt": "2026-10-06T10:05:24.874474+00:00",
+  "uiSha": "d4f526ed271cfa54c8516ce961ea3f855f463516",
+  "workingDirectory": "/home/deploy/disdex-trading/ui-releases/ui-realtime-ranking-d4f526ed271c",
   "tradingSha": "8ed7c2266af33758b0a0f301aefc2457a7a7eab6",
   "runnerPidsUnchanged": true,
   "units": [
@@ -76,12 +76,23 @@
   "lineageSynchronized": true,
   "ordersSent": 0,
   "cancelsSent": 0,
-  "deploymentRun": 37445706915,
+  "deploymentRun": 37447026224,
   "browserRegression": {
     "source": "deployed production UI with isolated read-only response fixtures",
     "result": "PASS",
     "swapMovingElements": 4,
     "crossColumnMovingElements": 22,
+    "foregroundScale": 1.8,
+    "upwardDurationMs": 2400,
+    "stages": [
+      "origin",
+      "foreground lift",
+      "hold",
+      "foreground travel",
+      "descent",
+      "landing"
+    ],
+    "foregroundChoreographyVerified": true,
     "unchangedRankingNoAnimation": true,
     "motionOffNoAnimation": true,
     "reducedMotionNoAnimation": true,
