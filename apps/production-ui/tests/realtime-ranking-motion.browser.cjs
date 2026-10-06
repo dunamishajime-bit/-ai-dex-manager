@@ -20,7 +20,7 @@ await page.getByRole('button',{name:/^更新 ·/}).click();
 await page.waitForFunction(()=>document.querySelector('[data-ranking-row=B]')?.textContent?.includes('95'));
 console.log('AFTER',await page.locator('[data-ranking-row]').allTextContents());
 console.log('ANIMATIONS',await page.evaluate(()=>window.__anim));
-const moved=await page.evaluate(()=>window.__anim.filter(x=>x.flyer).length);console.log('MOVING_ELEMENTS',moved);if(moved!==4)throw Error('Expected both moving rows and both top cards to animate; got '+moved);if(errors.length)throw Error(errors.join(';'));
+const lifted=await page.evaluate(()=>window.__anim.filter(x=>x.flyer).some(x=>x.keyframes.some(f=>/scale\((1\.[6-9]|[2-9])/.test(f.transform||''))));if(!lifted)throw Error('Rising currency must enlarge prominently into the foreground before traveling');const phased=await page.evaluate(()=>window.__anim.some(x=>x.flyer&&x.keyframes.length===6&&x.keyframes[1].transform===x.keyframes[2].transform&&x.keyframes[2].transform!==x.keyframes[3].transform&&x.keyframes[5].transform==='translate(0,0) scale(1)'));if(!phased)throw Error('Foreground lift, hold, flight and landing phases missing');const moved=await page.evaluate(()=>window.__anim.filter(x=>x.flyer).length);console.log('MOVING_ELEMENTS',moved);if(moved!==4)throw Error('Expected both moving rows and both top cards to animate; got '+moved);if(errors.length)throw Error(errors.join(';'));
 
 await page.waitForFunction(()=>!document.querySelector('.ranking-flyer'));
 async function change(nextScore){

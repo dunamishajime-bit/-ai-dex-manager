@@ -92,9 +92,11 @@ export function useRankingShow(rows:RankRow[],version:number,viewKey:string,erro
   const rises=risingRankEvents(before.rows,current.current).filter(r=>nodes.current.has(r.row.id));
   setEvent(rises[0]??null);setHighlights(Object.fromEntries(rises.map(r=>[r.row.id,r.delta])));
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let visualDuration=0;
   if(prefs.current.motion&&!reduced){
    // Animate every visible displaced row and leader card, in either direction.
    // Leader registration uses a separate key so cards cannot overwrite row measurements.
+   const risingIds=new Set(rises.map(r=>r.row.id));
    const oldRows=new Map(before.rows.map(row=>[row.id,row]));
    const newRows=new Map(current.current.map(row=>[row.id,row]));
    [...nodes.current].forEach(([key,node])=>{
@@ -107,20 +109,35 @@ export function useRankingShow(rows:RankRow[],version:number,viewKey:string,erro
     const clone=node.cloneNode(true) as HTMLElement;
     clone.removeAttribute('id');clone.removeAttribute('data-ranking-row');clone.removeAttribute('data-ranking-leader');clone.setAttribute('aria-hidden','true');clone.setAttribute('inert','');
     clone.classList.add('ranking-flyer');
-    Object.assign(clone.style,{position:'fixed',left:end.left+'px',top:end.top+'px',width:end.width+'px',height:end.height+'px',zIndex:'100',pointerEvents:'none',background:'#20291c',border:'1px solid #efd58c',borderRadius:'6px',margin:'0'});
+    Object.assign(clone.style,{position:'fixed',left:end.left+'px',top:end.top+'px',width:end.width+'px',height:end.height+'px',zIndex:risingIds.has(id)?'150':'100',pointerEvents:'none',background:'#20291c',border:'1px solid #efd58c',borderRadius:'6px',margin:'0'});
     document.body.appendChild(clone);clones.current.push(clone);node.style.opacity='0';hiddenNodes.current.push(node);
-    const dx=startX-end.left,dy=startY-end.top;
-    const a=clone.animate([
+    const dx=startX-end.left,dy=startY-end.top,isRising=risingIds.has(id);
+    const scale=Math.max(1,Math.min(1.8,(innerWidth-32)/end.width));
+    const marginX=(scale-1)*end.width/2,marginY=(scale-1)*end.height/2,lift=Math.min(90,Math.max(64,end.height*.7));
+    const foregroundX=(x:number)=>Math.max(16+marginX,Math.min(innerWidth-end.width-marginX-16,end.left+x))-end.left;
+    const foregroundY=(y:number)=>Math.max(16+marginY,Math.min(innerHeight-end.height-marginY-16,end.top+y-lift))-end.top;
+    const shadow='0 36px 64px #000d, 0 0 36px #f4d77f99';
+    // Rise at the old position, hold in the foreground, travel above other
+    // currencies, then descend into the authoritative destination.
+    const frames=isRising?[
      {transform:`translate(${dx}px,${dy}px) scale(1)`,boxShadow:'0 0 0 transparent',offset:0},
-     {transform:`translate(${dx}px,${dy-6}px) scale(1.04)`,boxShadow:'0 14px 32px #000b, 0 0 16px #e8ce7e66',offset:.2},
-     {transform:'translate(0,-4px) scale(1.04)',boxShadow:'0 14px 32px #000b, 0 0 16px #e8ce7e66',offset:.82},
+     {transform:`translate(${foregroundX(dx)}px,${foregroundY(dy)}px) scale(${scale})`,boxShadow:shadow,offset:.2},
+     {transform:`translate(${foregroundX(dx)}px,${foregroundY(dy)}px) scale(${scale})`,boxShadow:shadow,offset:.34},
+     {transform:`translate(${foregroundX(0)}px,${foregroundY(0)}px) scale(${scale})`,boxShadow:shadow,offset:.74},
+     {transform:'translate(0,-8px) scale(1.12)',boxShadow:'0 12px 24px #0009, 0 0 24px #f4d77f66',offset:.9},
      {transform:'translate(0,0) scale(1)',boxShadow:'0 0 24px #e8ce7e55',offset:1}
-    ],{duration:1150,easing:'cubic-bezier(.22,.7,.25,1)',fill:'both'});
+    ]:[
+     {transform:`translate(${dx}px,${dy}px) scale(1)`,offset:0},
+     {transform:'translate(0,0) scale(1)',offset:1}
+    ];
+    const duration=isRising?2400:1800;
+    visualDuration=Math.max(visualDuration,duration);
+    const a=clone.animate(frames,{duration,easing:'cubic-bezier(.22,.7,.25,1)',fill:'both'});
     animations.current.push(a);
     a.onfinish=()=>{clone.remove();node.style.opacity='';if(rises[0]?.row.id===id&&prefs.current.motion&&!reduced)node.animate([{backgroundColor:'#e5d38d66'},{backgroundColor:'#ffffff01'}],{duration:1400});};
    });
   }
-  if(rises[0])notify(rises[0],prefs.current.motion&&!reduced?1400:0);
+  if(rises[0])notify(rises[0],visualDuration?visualDuration+100:0);
   timer.current=setTimeout(()=>{stopVisuals();setHighlights({});setEvent(null);},12000);
  },[version,viewKey,error,measure,stopVisuals,notify]);
  const register=useCallback((id:string,node:HTMLElement|null)=>{if(node)nodes.current.set(id,node);else nodes.current.delete(id);},[]);
