@@ -1,0 +1,18 @@
+﻿{
+    "scenario":  "FLOOR3_10BPS",
+    "schema":  "disdex-fet-profit-floor3-ledger/v1",
+    "files":  {
+                  "fet-exit-changes.json":  {
+                                                "bytes":  1307,
+                                                "sha256":  "536a8997d57e345cdc19236c021d2defbb710fa8317dc59fdad765dba1930569"
+                                            },
+                  "portfolio-trades.jsonl":  {
+                                                 "bytes":  1517747,
+                                                 "sha256":  "fb346ee3069867f1d8765c010c7867a4de7a2ab76d6a5891a761fc5b68e15692"
+                                             },
+                  "summary.json":  {
+                                       "bytes":  2274,
+                                       "sha256":  "6c19ae8042044b7f354233fdaeafb459c6b0222a101b9df2c01919e1481d8d8a"
+                                   }
+              }
+}

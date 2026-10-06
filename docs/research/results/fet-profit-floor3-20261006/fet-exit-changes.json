@@ -1,0 +1,72 @@
+[
+  {
+    "entry_ts_ms": 1773666000000,
+    "entry_price": 0.2226,
+    "old": [
+      1773752400000,
+      0.2305,
+      "FET_24H_TIME_EXIT"
+    ],
+    "new": [
+      1773720000000,
+      0.229278,
+      "FET_PROFIT_FLOOR_STOP"
+    ]
+  },
+  {
+    "entry_ts_ms": 1774386000000,
+    "entry_price": 0.2497,
+    "old": [
+      1774447200000,
+      0.25094849999999996,
+      "FET_PROFIT_FLOOR_STOP"
+    ],
+    "new": [
+      1774443600000,
+      0.257191,
+      "FET_PROFIT_FLOOR_STOP"
+    ]
+  },
+  {
+    "entry_ts_ms": 1779426000000,
+    "entry_price": 0.2068,
+    "old": [
+      1779462000000,
+      0.207834,
+      "FET_PROFIT_FLOOR_STOP"
+    ],
+    "new": [
+      1779458400000,
+      0.21300400000000003,
+      "FET_PROFIT_FLOOR_STOP"
+    ]
+  },
+  {
+    "entry_ts_ms": 1779771600000,
+    "entry_price": 0.238,
+    "old": [
+      1779858000000,
+      0.2431,
+      "FET_24H_TIME_EXIT"
+    ],
+    "new": [
+      1779822000000,
+      0.24514,
+      "FET_PROFIT_FLOOR_STOP"
+    ]
+  },
+  {
+    "entry_ts_ms": 1781355600000,
+    "entry_price": 0.2047,
+    "old": [
+      1781442000000,
+      0.20572349999999998,
+      "FET_PROFIT_FLOOR_STOP"
+    ],
+    "new": [
+      1781416800000,
+      0.210841,
+      "FET_PROFIT_FLOOR_STOP"
+    ]
+  }
+]

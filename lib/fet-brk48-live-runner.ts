@@ -206,7 +206,7 @@ async function maybeArmProfitFloor(
 ) {
   const position = state.position;
   if (!position) return false;
-  if (position.protectionMode === "PROFIT_FLOOR_0P5") return false;
+  if (position.protectionMode === "PROFIT_FLOOR_0P5" || position.protectionMode === "PROFIT_FLOOR_3P0") return false;
 
   const markPrice = finite(actual.markPrice);
   if (!(markPrice > 0)) return false;
@@ -220,7 +220,7 @@ async function maybeArmProfitFloor(
     position.entryPrice * (1 + FET_BRK48_RESIDUAL.profitFloorStopPct),
   );
   if (!(normalizedFloor.price > position.hardStop + EPS)) {
-    position.protectionMode = "PROFIT_FLOOR_0P5";
+    position.protectionMode = "PROFIT_FLOOR_3P0";
     position.profitFloorArmedAt = armedAt;
     position.profitFloorTriggerPrice = triggerPrice;
     state.position = position;
@@ -241,7 +241,7 @@ async function maybeArmProfitFloor(
     hardStopPct: FET_BRK48_RESIDUAL.hardStopPct,
     requestedStopPrice: normalizedFloor.price,
     stopClientOrderId: nextStopClientOrderId,
-    protectionMode: "PROFIT_FLOOR_0P5",
+    protectionMode: "PROFIT_FLOOR_3P0",
     profitFloorArmedAt: armedAt,
     profitFloorTriggerPrice: triggerPrice,
   });
@@ -522,7 +522,7 @@ export class FetBrk48LiveRunner {
           state.lastReconciledAt = now;
           await writeFetBrk48State(this.deps.statePath, state);
           if (profitFloorArmed) {
-            return { status: "held", message: "FET_PROFIT_FLOOR_ARMED_0P5_AFTER_5P0", ordersSent: 1, gross: state.position?.gross };
+            return { status: "held", message: "FET_PROFIT_FLOOR_ARMED_3P0_AFTER_5P0", ordersSent: 1, gross: state.position?.gross };
           }
         } catch (error) {
           await emergencyFlattenProtectedFailure(this.deps, state, ours[0], error instanceof Error ? error.message : String(error));

@@ -254,23 +254,23 @@ test("FET live runner enters once, protects, survives restart, and exits after 2
     assert.equal(tradeCalls.length, 1);
     assert.equal(openOrders.length, 1);
 
-    // Crossing +5% arms the +0.5% profit floor exactly once. The old -5% STOP
+    // Crossing +5% arms the +3.0% profit floor exactly once. The old -5% STOP
     // is canceled, the replacement is read back, and the upgraded protection
     // persists in state for restart recovery.
     liveMarkPrice = 111 * 1.051;
     now += 30_000;
     const armed = await new FetBrk48LiveRunner(deps).tick();
     assert.equal(armed.status, "held");
-    assert.equal(armed.message, "FET_PROFIT_FLOOR_ARMED_0P5_AFTER_5P0");
+    assert.equal(armed.message, "FET_PROFIT_FLOOR_ARMED_3P0_AFTER_5P0");
     assert.equal(armed.ordersSent, 1);
     assert.equal(tradeCalls.length, 1);
     assert.equal(openOrders.length, 1);
-    assert.equal(openOrders[0].stopPrice, 111 * 1.005);
+    assert.equal(openOrders[0].stopPrice, 111 * 1.03);
     const upgradedStopClientOrderId = openOrders[0].clientOrderId;
 
     const armedState = await readFetBrk48State(statePath, RUNTIME_SHA);
-    assert.equal(armedState.position?.protectionMode, "PROFIT_FLOOR_0P5");
-    assert.equal(armedState.position?.hardStop, 111 * 1.005);
+    assert.equal(armedState.position?.protectionMode, "PROFIT_FLOOR_3P0");
+    assert.equal(armedState.position?.hardStop, 111 * 1.03);
     assert.equal(armedState.position?.stopClientOrderId, upgradedStopClientOrderId);
     assert.ok((armedState.position?.profitFloorArmedAt || 0) > 0);
     assert.equal(armedState.position?.profitFloorTriggerPrice, 111 * 1.05);
@@ -282,7 +282,7 @@ test("FET live runner enters once, protects, survives restart, and exits after 2
     assert.equal(armedRestart.ordersSent, 0);
     assert.equal(openOrders.length, 1);
     assert.equal(openOrders[0].clientOrderId, upgradedStopClientOrderId);
-    assert.equal(openOrders[0].stopPrice, 111 * 1.005);
+    assert.equal(openOrders[0].stopPrice, 111 * 1.03);
 
     now = entryTs + 24 * HOUR + 1_000;
     await writeSharedCryptoDailyRisk(riskPath, buildSharedCryptoDailyRiskState({

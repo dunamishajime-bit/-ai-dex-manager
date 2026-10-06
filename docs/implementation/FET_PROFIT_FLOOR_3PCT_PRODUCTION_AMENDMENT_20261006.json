@@ -1,0 +1,39 @@
+{
+  "schema": "disdex-production-strategy-amendment/v1",
+  "date": "2026-10-06",
+  "baseProductionSha": "ba38937cb2a22316b8fa2c6b11d3a07eebf7daca",
+  "strategy": "FET_BRK48_RESIDUAL",
+  "change": {
+    "profitFloorTriggerPct": 0.05,
+    "profitFloorStopPctBefore": 0.005,
+    "profitFloorStopPctAfter": 0.03
+  },
+  "unchanged": {
+    "minimumReturn72h": 0.02,
+    "postExitCooldownHours": 24,
+    "holdHours": 24,
+    "hardStopPct": 0.05,
+    "minimumVolumeRatio": 1.2,
+    "maximumGross": 1.0
+  },
+  "integratedBacktest10bps": {
+    "finalEquityJpy": 4268873845.1163716,
+    "profitFactor": 2.9637157881041185,
+    "maximumMtmDrawdownPct": -12.96457052048714,
+    "closedTrades": 1358,
+    "fetTrades": 8,
+    "fetPnlJpy": 119064702.59208399,
+    "v12Trades": 995,
+    "v12Wins": 643,
+    "v12Losses": 352,
+    "ownershipConflicts": 0,
+    "accounting": "PASS"
+  },
+  "comparison": {
+    "previousFinalEquityJpy": 4067358397.424793,
+    "previousProfitFactor": 2.960180377096512,
+    "previousMaximumMtmDrawdownPct": -12.96457052048714
+  },
+  "causality": "The +3% floor becomes active only from the hour after a +5% trigger is observed, matching the existing causal H1 convention.",
+  "productionRule": "Do not add peak trailing. Only raise the post-trigger fixed floor from +0.5% to +3.0%."
+}
