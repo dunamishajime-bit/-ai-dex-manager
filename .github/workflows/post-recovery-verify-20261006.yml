@@ -1,0 +1,77 @@
+name: Post Recovery Verify 20261006
+on:
+  push:
+    branches: [ops/post-cutover-diagnostic-20261006]
+    paths: [.github/workflows/post-recovery-verify-20261006.yml]
+permissions: { contents: read }
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Setup
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 ~/.ssh
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def n(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id").write_text(n("ROOT_KEY")); (p/"known_hosts").write_text(n("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 600 ~/.ssh/id ~/.ssh/known_hosts
+      - name: Verify recovered runtime
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ssh -T -i ~/.ssh/id -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=~/.ssh/known_hosts -p "${SSH_PORT:-22}" root@"$SSH_HOST" 'bash -s' <<'REMOTE'
+          set -Eeuo pipefail
+          sha=4c57efbb86ae0bbfe94bbe7dea4d09f0e1ec6c19
+          root=/home/deploy/disdex-trading
+          release="$root/releases/$sha"
+          echo "CURRENT=$(readlink -f "$root/current")"
+          echo "SHA=$(tr -d '[:space:]' < "$root/current/.disdex-release-sha")"
+          python3 - <<'PY'
+          import json
+          d=json.load(open("/var/lib/disdex/shared/operator-activation/current.json"))
+          print("PREEMPTION_READY",d.get("fetCorePreemptionReady"))
+          print("APPROVED_SHA",d.get("approvedSha"))
+          PY
+          grep '^FET_BRK48_CORE_PREEMPTION_READY=' "/etc/disdex/current-runtime/$sha.env"
+          for n in v12-x1-all pengu-dual-ls-v2 quality102-causal-v1 v52-aster-only fet-brk48 hype-long idle-priority-short shared-crypto-risk v12-v52-margin-guard; do
+            u="disdex-$n@$sha.service"
+            echo "$u active=$(systemctl is-active "$u" 2>/dev/null || true) pid=$(systemctl show "$u" -p MainPID --value 2>/dev/null || true) restarts=$(systemctl show "$u" -p NRestarts --value 2>/dev/null || true)"
+          done
+          stock_pid="$(systemctl show disdex-stock-reference-free.service -p MainPID --value)"
+          echo "STOCK_REF_CWD=$(readlink -f "/proc/$stock_pid/cwd" 2>/dev/null || true)"
+          python3 - "$sha" <<'PY'
+          import json,sys
+          sha=sys.argv[1]
+          names=["v12-x1-all.json","pengu-v8.json","quality102-causal-v1.json","v52.json","fet-brk48-residual.json","hype-trend-long.json","idle-priority-short.json"]
+          for name in names:
+              d=json.load(open("/var/lib/disdex/runner-health/heartbeats/"+name))
+              print("HB",name,d.get("runtimeSha"),d.get("safetyState"),d.get("healthReason"))
+              assert d.get("runtimeSha")==sha
+              assert d.get("expectedSha")==sha
+              assert d.get("safetyState")=="HEALTHY"
+          kill=json.load(open("/var/lib/disdex/shared/kill-switch.json"))
+          risk=json.load(open("/var/lib/disdex/shared/crypto-daily-risk.json"))
+          guard=json.load(open("/var/lib/disdex/shared/margin-risk/guard-live.json"))
+          print("SAFETY",kill.get("active"),risk.get("tripped"),risk.get("sourceComplete"),guard.get("stage"),guard.get("ordersAllowed"))
+          assert kill.get("active") is False
+          assert risk.get("tripped") is False and risk.get("sourceComplete") is True
+          assert guard.get("stage")=="HEALTHY" and guard.get("ordersAllowed") is True
+          PY
+          set -a
+          for f in /etc/disdex/disdex-v13d-v11eq-v96.env /etc/disdex/disdex-v12-pengu-v2-v52.env /etc/disdex/disdex-v12-x1-all.env; do [[ -f "$f" ]] && . "$f"; done
+          set +a
+          cd "$release"
+          ./node_modules/.bin/tsx scripts/disdex-aster-readonly-account-diagnostic.ts
+          echo "POST_RECOVERY_VERIFY=PASS"
+          REMOTE
