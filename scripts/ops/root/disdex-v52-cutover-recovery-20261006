@@ -1,0 +1,91 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+OLD_SHA=91dc6c8f1d5c32dd201209c5e0c42644d5cdaf22
+TARGET_SHA=4c57efbb86ae0bbfe94bbe7dea4d09f0e1ec6c19
+ROOT=/home/deploy/disdex-trading
+RELEASE="$ROOT/releases/$TARGET_SHA"
+OLD_RELEASE="$ROOT/releases/$OLD_SHA"
+ACTIVATION=/var/lib/disdex/shared/operator-activation/current.json
+BACKUP=/var/lib/disdex/deploy-backups/idle-37418403012/var/lib/disdex/shared/operator-activation/current.json
+
+[[ "$(tr -d '[:space:]' < "$ROOT/current/.disdex-release-sha")" == "$TARGET_SHA" ]]
+[[ "$(readlink -f "$ROOT/current")" == "$RELEASE" ]]
+[[ -f "$BACKUP" && -f "$ACTIVATION" ]]
+
+cmp -s "$OLD_RELEASE/scripts/ops/root/disdex-fet-preemption-readiness-guard.py" "$RELEASE/scripts/ops/root/disdex-fet-preemption-readiness-guard.py"
+cmp -s "$OLD_RELEASE/scripts/disdex_v52_aster_only_live_engine.py" "$RELEASE/scripts/disdex_v52_aster_only_live_engine.py"
+cmp -s "$OLD_RELEASE/scripts/disdex_v52_aster_only_legacy_engine.py" "$RELEASE/scripts/disdex_v52_aster_only_legacy_engine.py"
+
+python3 - "$ACTIVATION" "$BACKUP" "$OLD_SHA" "$TARGET_SHA" <<'PY'
+import datetime,json,os,sys,tempfile
+current_path,backup_path,old_sha,new_sha=sys.argv[1:]
+cur=json.load(open(current_path,encoding="utf-8"))
+old=json.load(open(backup_path,encoding="utf-8"))
+assert cur.get("schema")=="disdex-live-operator-activation/v1"
+assert cur.get("approvedSha")==new_sha
+assert cur.get("ordersEnabled") is True
+assert cur.get("operatorAcknowledgement")=="I_ACK_REAL_MONEY_LIVE_ACTIVATION"
+assert cur.get("fetCorePreemptionReady") is not True
+assert old.get("schema")=="disdex-live-operator-activation/v1"
+assert old.get("approvedSha")==old_sha
+assert old.get("ordersEnabled") is True
+assert old.get("operatorAcknowledgement")=="I_ACK_REAL_MONEY_LIVE_ACTIVATION"
+assert old.get("fetCorePreemptionReady") is True
+assert {"V52","FET_BRK48_RESIDUAL"}.issubset(set(old.get("approvedRunners") or []))
+assert set(cur.get("approvedRunners") or [])==set(old.get("approvedRunners") or [])
+cur["fetCorePreemptionReady"]=True
+cur["approvedAt"]=datetime.datetime.now(datetime.timezone.utc).isoformat().replace("+00:00","Z")
+directory=os.path.dirname(current_path)
+fd,tmp=tempfile.mkstemp(prefix=".operator-activation-recovery.",dir=directory,text=True)
+with os.fdopen(fd,"w",encoding="utf-8") as f:
+    json.dump(cur,f,indent=2,sort_keys=True)
+    f.write("\n")
+    f.flush()
+    os.fsync(f.fileno())
+os.chmod(tmp,0o644)
+os.chown(tmp,0,0)
+os.replace(tmp,current_path)
+print("FET_PREEMPTION_APPROVAL_REBOUND=PASS")
+PY
+
+(cd "$RELEASE" && bash scripts/ops/root/disdex-current-runtime-wiring --apply)
+grep -Fxq "FET_BRK48_CORE_PREEMPTION_READY=true" "/etc/disdex/current-runtime/$TARGET_SHA.env"
+/usr/bin/python3 "$RELEASE/scripts/ops/root/disdex-fet-preemption-readiness-guard.py" --prestart --sha "$TARGET_SHA" --activation-path "$ACTIVATION"
+
+systemctl restart disdex-stock-reference-free.service
+sleep 2
+stock_pid="$(systemctl show disdex-stock-reference-free.service -p MainPID --value)"
+[[ "$stock_pid" =~ ^[0-9]+$ && "$stock_pid" -gt 0 ]]
+[[ "$(readlink -f "/proc/$stock_pid/cwd")" == "$RELEASE" ]]
+
+v52="disdex-v52-aster-only@$TARGET_SHA.service"
+systemctl reset-failed "$v52" >/dev/null 2>&1 || true
+systemctl enable --now "$v52"
+for _ in $(seq 1 20); do
+  [[ "$(systemctl is-active "$v52" 2>/dev/null || true)" == active ]] && break
+  sleep 1
+done
+[[ "$(systemctl is-active "$v52")" == active ]]
+
+systemctl start disdex-runner-health-snapshot.service
+sleep 3
+python3 - "$TARGET_SHA" <<'PY'
+import json,sys
+sha=sys.argv[1]
+root="/var/lib/disdex/runner-health/heartbeats"
+for name in ["v12-x1-all.json","pengu-v8.json","quality102-causal-v1.json","v52.json","fet-brk48-residual.json","hype-trend-long.json","idle-priority-short.json"]:
+    d=json.load(open(f"{root}/{name}",encoding="utf-8"))
+    assert d.get("runtimeSha")==sha,(name,d)
+    assert d.get("expectedSha")==sha,(name,d)
+    assert d.get("safetyState")=="HEALTHY",(name,d.get("healthReason"))
+print("ALL_TARGET_HEARTBEATS=HEALTHY")
+PY
+
+for n in v12-x1-all pengu-dual-ls-v2 quality102-causal-v1 v52-aster-only fet-brk48 hype-long idle-priority-short shared-crypto-risk v12-v52-margin-guard; do
+  [[ "$(systemctl is-active "disdex-$n@$TARGET_SHA.service" 2>/dev/null || true)" == active ]]
+  [[ "$(systemctl is-active "disdex-$n@$OLD_SHA.service" 2>/dev/null || true)" != active ]]
+done
+
+echo "STATUS=V52_CUTOVER_RECOVERY_COMPLETE"
+echo "PRODUCTION_SHA=$TARGET_SHA"
