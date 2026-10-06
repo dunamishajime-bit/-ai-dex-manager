@@ -1,0 +1,52 @@
+name: Targeted V52 FET Blocker Audit 20261006
+on:
+  push:
+    branches: [audit/live-order-path-20261006]
+    paths: [".github/workflows/targeted-v52-fet-blocker-audit-20261006.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: SSH setup
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def n(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id").write_text(n("ROOT_KEY")); (p/"known_hosts").write_text(n("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 600 "$HOME/.ssh/id" "$HOME/.ssh/known_hosts"
+      - name: Inspect blockers read-only
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -p "$PORT" root@"$SSH_HOST" 'bash -s' <<'REMOTE'
+          set -Eeuo pipefail
+          sha="$(tr -d '[:space:]' </home/deploy/disdex-trading/current/.disdex-release-sha)"
+          v52="disdex-v52-aster-only@$sha.service"
+          echo "SHA=$sha"
+          echo "=== V52 STATE ==="
+          systemctl show "$v52" -p ActiveState -p SubState -p Result -p ConditionResult -p AssertResult -p MainPID -p NRestarts --no-pager
+          echo "=== V52 JOURNAL ==="
+          journalctl -u "$v52" --since '8 hours ago' --no-pager -o short-iso | tail -n 500 || true
+          echo "=== V52 UNIT REFERENCES ==="
+          systemctl show "$v52" -p FragmentPath -p DropInPaths --value --no-pager || true
+          echo "=== FET READINESS JOURNAL ==="
+          journalctl --since '8 hours ago' --no-pager -o short-iso | grep -Ei 'fet-preemption-readiness|FET_PREEMPTION_AUDIT_SOURCE_UNAVAILABLE' | tail -n 400 || true
+          echo "=== FET READINESS FILE CANDIDATES ==="
+          find /var/lib/disdex /home/deploy/disdex-trading/current -maxdepth 6 -type f \
+            \( -iname '*preempt*' -o -iname '*readiness*' -o -iname '*audit*' \) \
+            -printf '%TY-%Tm-%TdT%TH:%TM:%TS|%u:%g|%m|%s|%p\n' 2>/dev/null | sort | tail -n 300 || true
+          echo "TARGETED_AUDIT=PASS"
+          REMOTE
