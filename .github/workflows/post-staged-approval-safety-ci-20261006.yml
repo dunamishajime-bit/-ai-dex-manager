@@ -1,0 +1,43 @@
+name: Post Staged Approval Safety CI 20261006
+on:
+  push:
+    branches: [fix/cutover-rollback-safety-20261006]
+    paths: [".github/workflows/post-staged-approval-safety-ci-20261006.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: codex/full-order-path-audit-20261006
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Verify staged approval and rollback contract
+        run: |
+          set -Eeuo pipefail
+          bash -n scripts/ops/root/disdex-idle-production-redeploy-20261001
+          python3 -m py_compile scripts/ops/root/disdex-fet-preemption-readiness-guard.py
+          npx tsx --test             tests/production-cutover-rollback-safety.test.mjs             tests/fet-preemption-readiness-audit.test.mjs             tests/operator_activation_hardening.test.ts             tests/live-order-lock-scope-v2.test.mjs
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path("docs/production/current-implementation-readiness.json").read_text())
+          assert "staged operator approval artifact" in d["activationRule"]
+          assert "must never fabricate operator approval" in d["activationRule"]
+          w=Path(".github/workflows/full-order-path-production-deploy-20261006.yml").read_text()
+          assert "workflow_dispatch:" in w and "\n  push:" not in w
+          s=Path("scripts/ops/root/disdex-idle-production-redeploy-20261001").read_text()
+          assert 'approved-$TARGET_SHA.json' in s
+          assert "OPERATOR_STAGED_ACTIVATION_REQUIRED" in s
+          assert "OPERATOR_STAGED_ACTIVATION_PROMOTED=PASS" in s
+          assert 'install -o root -g root -m 0600 "$staged_operator_activation"' in s
+          assert "trap 'rc=$?; if [[ \"$rc\" -ne 0 ]]; then rollback \"$rc\"; fi' EXIT" in s
+          print("POST_STAGED_APPROVAL_SAFETY=PASS")
+          PY
