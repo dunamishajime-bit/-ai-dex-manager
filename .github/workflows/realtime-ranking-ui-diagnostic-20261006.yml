@@ -1,0 +1,57 @@
+name: Realtime Ranking UI startup diagnostic 20261006
+
+on:
+  push:
+    branches:
+      - codex/realtime-ranking-show-20261006
+    paths:
+      - ".github/workflows/realtime-ranking-ui-diagnostic-20261006.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Initialize root SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+      - name: Read UI service evidence only
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -p "$PORT" "root@$SSH_HOST" 'bash -s' <<'REMOTE'
+          set -Eeuo pipefail
+          echo "=== SERVICE ==="
+          systemctl is-active ai-dex-manager-ui.service || true
+          systemctl show ai-dex-manager-ui.service -p WorkingDirectory -p ExecStart -p MainPID -p NRestarts --no-pager
+          echo "=== DROPINS ==="
+          systemctl cat ai-dex-manager-ui.service --no-pager | sed -n '1,220p'
+          echo "=== JOURNAL ==="
+          journalctl -u ai-dex-manager-ui.service -n 120 --no-pager -o short-iso
+          echo "=== PORT ==="
+          ss -ltnp | grep ':3001 ' || true
+          echo "=== CURRENT PAGE ==="
+          curl -sS -H 'Cookie: disdex_auth=1' -o /dev/null -w 'HTTP=%{http_code}\n' --max-time 10 http://127.0.0.1:3001/realtime || true
+          REMOTE
