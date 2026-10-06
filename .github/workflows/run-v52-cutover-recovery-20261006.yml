@@ -1,0 +1,38 @@
+name: Run V52 Cutover Recovery 20261006
+on:
+  push:
+    branches: [ops/post-cutover-diagnostic-20261006]
+    paths:
+      - scripts/ops/root/disdex-v52-cutover-recovery-20261006
+      - .github/workflows/run-v52-cutover-recovery-20261006.yml
+permissions: { contents: read }
+jobs:
+  recover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 ~/.ssh
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def n(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id").write_text(n("ROOT_KEY")); (p/"known_hosts").write_text(n("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 600 ~/.ssh/id ~/.ssh/known_hosts
+      - name: Execute audited recovery
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          scp -i ~/.ssh/id -P "$PORT" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=~/.ssh/known_hosts scripts/ops/root/disdex-v52-cutover-recovery-20261006 root@"$SSH_HOST":/tmp/disdex-v52-cutover-recovery-20261006
+          ssh -T -i ~/.ssh/id -p "$PORT" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=~/.ssh/known_hosts root@"$SSH_HOST" 'chmod 700 /tmp/disdex-v52-cutover-recovery-20261006 && /tmp/disdex-v52-cutover-recovery-20261006'
