@@ -1,4 +1,4 @@
-name: Full Order Path Production Deploy 20261006
+name: PENGU M05 Shadow Production 20261007
 
 on:
   workflow_dispatch:
@@ -34,6 +34,9 @@ jobs:
         run: |
           set -Eeuo pipefail
           npm ci --no-audit --no-fund
+          npm run strategy:pengu-dual-ls-v2:selftest
+          npm run strategy:pengu-dual-ls-v2:parity
+          npm run strategy:pengu-dual-ls-v2:short-v20:selftest
           npx tsx --test \
             tests/live-order-lock-scope-v2.test.mjs \
             tests/fet-brk48-live-runner.test.ts \
@@ -88,70 +91,14 @@ jobs:
         run: |
           set -Eeuo pipefail
           PORT="${SSH_PORT:-22}"
-          FROM_SHA="$(ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
-            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
-            -p "$PORT" root@"$SSH_HOST" "tr -d '[:space:]' </home/deploy/disdex-trading/current/.disdex-release-sha")"
-          [[ "$FROM_SHA" =~ ^[0-9a-f]{40}$ && "$FROM_SHA" != "$TARGET_SHA" ]]
+          FROM_SHA="$(ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -p "$PORT" root@"$SSH_HOST" "tr -d '[:space:]' </home/deploy/disdex-trading/current/.disdex-release-sha")"
+          [[ "$FROM_SHA" == 8ed7c2266af33758b0a0f301aefc2457a7a7eab6 ]]
           git merge-base --is-ancestor "$FROM_SHA" "$TARGET_SHA"
-          git diff --quiet "$FROM_SHA" "$TARGET_SHA" -- package-lock.json
-          mapfile -t changed < <(git diff --name-only "$FROM_SHA" "$TARGET_SHA")
-          for p in "${changed[@]}"; do
-            case "$p" in
-              .github/workflows/full-order-path-*-20261006.yml|\
-              .github/workflows/production-remnant-readonly-diagnostic-20261006.yml|\
-              .github/workflows/idle-priority-production-redeploy-20261001.yml|\
-              .github/workflows/pengu-state-dir-normalize-20261001.yml|\
-              .github/workflows/aster-rate-budget-permission-recovery-20261001.yml|\
-              docs/production/current-implementation-readiness.json|\
-              lib/fet-brk48-live-runner.ts|\
-              lib/hype-zec-long-runner.ts|\
-              scripts/disdex-fet-brk48-live-runner.ts|\
-              scripts/ops/root/disdex-idle-production-redeploy-20261001|\
-              scripts/ops/root/disdex-current-runtime-wiring|\
-              scripts/ops/root/disdex-fet-preemption-readiness-guard.py|\
-              tests/fet-brk48-live-runner.test.ts|\
-              tests/live-order-lock-scope-v2.test.mjs|\
-              tests/production-cutover-rollback-safety.test.mjs|\
-              tests/production-rollback-behavior.test.mjs|\
-              tests/shared-risk-systemd-decoupling.test.mjs|\
-              tests/fet_core_preemption_wiring.test.ts|\
-              tests/test_runtime_wiring_script.py|\
-              tests/test_runtime_multilineage_monitoring.py|\
-              docs/superpowers/plans/2026-10-06-live-approval-audit.md|\
-              docs/production/live-approval-audit-20261006.md|\
-              tests/fet-preemption-readiness-audit.test.mjs) ;;
-              *) echo "UNEXPECTED_PRODUCTION_DELTA=$p"; exit 1 ;;
-            esac
-          done
-          git diff --quiet "$FROM_SHA" "$TARGET_SHA" -- lib config scripts \
-            ':(exclude)scripts/ops/root/disdex-idle-production-redeploy-20261001' \
-            ':(exclude)scripts/ops/root/disdex-current-runtime-wiring' \
-            ':(exclude)scripts/ops/root/disdex-fet-preemption-readiness-guard.py'
-          # Strategy signals, sizing, risk policy, V12/PENGU/Q102/V52/Idle and
-          # exchange execution primitives are byte-identical to current LIVE.
-          critical_unchanged=(
-            config
-            lib/v12-live-execution-engine.ts
-            lib/pengu-dual-ls-v2-portfolio-runner.ts
-            lib/disdex-quality102-causal-v1-runner.ts
-            lib/idle-priority-short-runner.ts
-            lib/idle-residual-long-runner.ts
-            lib/direct-trade-executor.ts
-            lib/aster-v3-client.ts
-            scripts/disdex_v52_aster_only_live_engine.py
-            scripts/disdex_v52_aster_only_legacy_engine.py
-          )
-          # Exclude the two intentionally changed runtime runner files under lib/.
-          for p in "${critical_unchanged[@]}"; do
-            if [[ "$p" == config ]]; then
-              git diff --quiet "$FROM_SHA" "$TARGET_SHA" -- "$p"
-            elif [[ -e "$p" ]]; then
-              git diff --quiet "$FROM_SHA" "$TARGET_SHA" -- "$p"
-            fi
-          done
+          git diff --quiet "$FROM_SHA" "$TARGET_SHA" -- config package.json package-lock.json
+          git diff --quiet "$FROM_SHA" "$TARGET_SHA" -- lib scripts ':(exclude)lib/pengu-dual-ls-v2.ts' ':(exclude)lib/pengu-dual-ls-v2-runner-state.ts' ':(exclude)scripts/pengu-dual-ls-v2-selftest.ts'
+          git diff --quiet c97daf589d2c20ff6afee0f8ebe6319f59eecea4 "$TARGET_SHA" -- lib scripts config
           echo "FROM_SHA=$FROM_SHA" >> "$GITHUB_ENV"
-          echo "RUNTIME_ONLY_DELTA=PASS"
-          echo "FROM_SHA=$FROM_SHA TARGET_SHA=$TARGET_SHA"
+          echo "SHADOW_ONLY_RUNTIME_DELTA=PASS"
 
       - name: Rebind unchanged Idle parity certificates to exact target SHA
         shell: bash

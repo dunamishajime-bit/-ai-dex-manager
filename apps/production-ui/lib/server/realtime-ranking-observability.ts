@@ -42,11 +42,12 @@ async function observe(){
     for(const g of gates)if(g.key==='RAW_DETECTOR'&&g.state==='NO'&&num(best?.proximityScore)!==undefined)g.progress=Number(best.proximityScore)/100;
     gates.push(flag('eligible','実Runner最終Signal',r.eligible,r.rankingReason||r.reason));
     gates.push(flag('selection','同時候補の選定',r.selected,d.selectedReason,'execution'));
+    gates.push(flag('capacity','保有枠・残余Gross・証拠金・数量',undefined,'候補選定後に実Runnerが注文直前の余力・競合を確認','execution'));
     const rawSide=num(best?.proximitySide)??num(best?.candidateSide);
     const row=make(r.symbol,'Q102',r.side==='WAIT'?(rawSide===1?'LONG':rawSide===-1?'SHORT':'WAIT'):r.side,gates,rankingFresh,rankAt,r.rankingReason||r.reason);
     // Q102 native proximity incorporates its stage and audited detector distances.
     // Display separately; common ranking always uses the same gate completion formula.
-    if(r.rankingScore!==undefined)row.gates.push({key:'native-score',label:'Q102内部接近度（参考）',state:'OK',actual:r.rankingScore,detail:r.rankingStage||'',kind:'execution'});
+    if(r.rankingScore!==undefined)row.gates.push({key:'native-score',label:'Q102内部接近度（参考）',state:'OK',actual:r.rankingScore,detail:r.rankingStage||'',kind:'reference'});
     rows.push(row);
    }
   },
@@ -106,7 +107,7 @@ async function observe(){
   const riskFresh=risk?.sourceComplete===true&&risk?.utcDay===new Date(now).toISOString().slice(0,10)&&now-Number(risk.updatedAt)>=-60000&&now-Number(risk.updatedAt)<10*60000;
   row.gates.push(flag('shared-risk','共有日次損失ガード',riskFresh&&typeof risk?.tripped==='boolean'?!risk.tripped:undefined,risk?.tripped?'損失制限で停止':'当日の完全な共有状態を照合','execution'));
  }
- return {ok:true,readOnly:true,tradingMutation:0,checkedAt:now,refreshSeconds:120,runtimeSha:current.releaseSha,rows:rankRows(rows),errors,metric:'確認済み発注制約のない候補を優先し、Signal Gate充足度で順位付け（ロジックごとに条件数は異なります）。発火確率・期待利益ではありません。資金など未確認の実行条件は別途Runner確認待ち。'};
+ return {ok:true,readOnly:true,tradingMutation:0,checkedAt:now,refreshSeconds:120,runtimeSha:current.releaseSha,rows:rankRows(rows.map(row=>({...row,score:gateScore(row.gates,row.fresh)}))),errors,metric:'確認済み発注制約のない候補を優先し、市場条件と発注条件の充足度で順位付け（ロジックごとに条件数は異なります）。100はすべての条件を確認・通過した場合のみ。未達・未確認の条件があれば100未満です。'};
 }
 let cached:{expires:number;value:Awaited<ReturnType<typeof observe>>}|undefined,inflight:Promise<Awaited<ReturnType<typeof observe>>>|undefined;
 export async function loadRealtimeRanking(){

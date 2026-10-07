@@ -1,0 +1,252 @@
+name: PENGU M05 Shadow UI 20261007
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: realtime-full-gates-q102-ui-deploy-20261006
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      TARGET_SHA: ${{ github.sha }}
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify realtime ranking source contract
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          cd apps/production-ui
+          test -f app/realtime/page.tsx
+          test -f app/api/system/realtime-ranking/route.ts
+          test -f app/api/tts/route.ts
+          test -f components/features/RealtimeRankingBoard.tsx
+          test -f components/features/useRankingShow.ts
+          test -f lib/realtime-ranking.ts
+          grep -q "ランキング実況" components/features/RealtimeRankingBoard.tsx
+          grep -q "読み上げ" components/features/RealtimeRankingBoard.tsx
+          grep -q "ranking-flyer" components/features/useRankingShow.ts
+          grep -q "SpeechSynthesisUtterance" components/features/useRankingShow.ts
+          grep -q "fetch('/api/tts'" components/features/useRankingShow.ts
+          grep -q "voice:'marin'" components/features/useRankingShow.ts
+          grep -q "gpt-realtime-2.1-mini" app/api/tts/route.ts
+          grep -q "NATURAL_JA_INSTRUCTIONS" app/api/tts/route.ts
+          grep -q "rankingPcAlert" lib/realtime-ranking.ts
+          grep -q "PC通知" components/features/RealtimeRankingBoard.tsx
+          grep -q "new Notification" components/features/RealtimeRankingBoard.tsx
+          grep -q "renotify:true" components/features/RealtimeRankingBoard.tsx
+
+      - name: Test ranking commentary contract
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          cd apps/production-ui
+          npm ci --no-audit --no-fund
+          npx tsx --test tests/*.test.ts
+          npx tsc --noEmit
+          node --test ../../tests/q102-ranking-refresh.test.mjs
+
+      - name: Build isolated production UI
+        shell: bash
+        env:
+          DISDEX_UI_VERIFIED_TSC: "1"
+        run: |
+          set -Eeuo pipefail
+          cd apps/production-ui
+          npm run build
+          test -f .next/standalone/server.js
+          rm -rf .deploy-ui
+          mkdir -p .deploy-ui/.next
+          cp -a .next/standalone/. .deploy-ui/
+          cp -a .next/static .deploy-ui/.next/static
+          if [ -d public ]; then cp -a public .deploy-ui/public; fi
+          printf '%s\n' "$TARGET_SHA" > .deploy-ui/.disdex-release-sha
+          mkdir -p .deploy-ui/ops-refresh
+          cp ../../ops/disdex-quality102-ranking-refresh.mjs ../../ops/systemd/disdex-quality102-ranking-refresh.service ../../ops/systemd/disdex-quality102-ranking-refresh.path .deploy-ui/ops-refresh/
+          tar -C .deploy-ui -czf "/tmp/disdex-realtime-ui-$TARGET_SHA.tar.gz" .
+          test -s "/tmp/disdex-realtime-ui-$TARGET_SHA.tar.gz"
+
+      - name: Initialize root SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ -n "$SSH_HOST" && -n "$ROOT_KEY" && -n "$SSH_KNOWN_HOSTS" ]]
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+
+      - name: Upload UI bundle
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          scp -i "$HOME/.ssh/id_root" -P "$PORT" \
+            -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            "/tmp/disdex-realtime-ui-$TARGET_SHA.tar.gz" \
+            "root@$SSH_HOST:/tmp/disdex-realtime-ui-$TARGET_SHA.tar.gz"
+
+      - name: Deploy UI only with rollback and trading immutability proof
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" \
+            -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o ConnectTimeout=15 -p "$PORT" "root@$SSH_HOST" \
+            "TARGET_SHA='$TARGET_SHA' bash -s" <<'REMOTE'
+          set -Eeuo pipefail
+          ui_service=ai-dex-manager-ui.service
+          ui_root=/home/deploy/disdex-trading/ui-releases
+          release="$ui_root/ui-realtime-ranking-${TARGET_SHA:0:12}"
+          archive="/tmp/disdex-realtime-ui-$TARGET_SHA.tar.gz"
+          dropin_dir=/etc/systemd/system/ai-dex-manager-ui.service.d
+          canonical="$dropin_dir/90-current-ui-release.conf"
+          current=/home/deploy/disdex-trading/current
+
+          trading_sha_before="$(tr -d '[:space:]' < "$current/.disdex-release-sha")"
+          trading_path_before="$(readlink -f "$current")"
+          mapfile -t runner_units < <(systemctl list-units --type=service --state=active --no-legend --plain 'disdex-*.service' | awk '$3=="active" && $4=="running" {print $1}' | sort -u)
+          declare -A runner_pid_before runner_restart_before
+          for unit in "${runner_units[@]}"; do
+            runner_pid_before["$unit"]="$(systemctl show "$unit" -p MainPID --value 2>/dev/null || true)"
+            runner_restart_before["$unit"]="$(systemctl show "$unit" -p NRestarts --value 2>/dev/null || true)"
+          done
+
+          old_ui="$(systemctl show "$ui_service" -p WorkingDirectory --value)"
+          [[ -n "$old_ui" && -d "$old_ui" && -s "$archive" ]]
+          canonical_backup="/tmp/90-current-ui-release.conf.before-$TARGET_SHA"
+          canonical_existed=0
+          if [[ -f "$canonical" ]]; then
+            cp -a "$canonical" "$canonical_backup"
+            canonical_existed=1
+          fi
+          echo "UI_PREFLIGHT old_ui=$old_ui trading_sha=$trading_sha_before runners=${#runner_units[@]} canonical_existed=$canonical_existed"
+
+          rm -rf "$release"
+          install -d -o deploy -g deploy -m 0750 "$release"
+          tar -xzf "$archive" -C "$release"
+          chown -R deploy:deploy "$release"
+          [[ -f "$release/server.js" ]]
+          [[ -d "$release/.next/static" ]]
+          [[ "$(tr -d '[:space:]' < "$release/.disdex-release-sha")" == "$TARGET_SHA" ]]
+
+          cat > "$canonical" <<EOF
+          [Service]
+          WorkingDirectory=$release
+          Environment=DISDEX_UI_RELEASE_SHA=$TARGET_SHA
+          Environment=HOSTNAME=127.0.0.1
+          ExecStart=
+          ExecStart=/usr/bin/node server.js
+          EOF
+          sed -i 's/^[[:space:]]*//' "$canonical"
+          chmod 0644 "$canonical"
+          chown root:root "$canonical"
+
+          rollback() {
+            rc=$?
+            set +e
+            if [[ "$canonical_existed" == 1 && -f "$canonical_backup" ]]; then
+              cp -a "$canonical_backup" "$canonical"
+            else
+              rm -f "$canonical"
+            fi
+            systemctl daemon-reload
+            systemctl restart "$ui_service"
+            rm -rf "$release"
+            rm -f "$archive" "$canonical_backup"
+            echo "ROLLBACK=PREVIOUS_UI_RESTORED"
+            exit "$rc"
+          }
+          trap rollback ERR
+
+          systemctl daemon-reload
+          systemctl restart "$ui_service"
+
+          ok=0
+          for _ in $(seq 1 30); do
+            active="$(systemctl is-active "$ui_service" 2>/dev/null || true)"
+            wd="$(systemctl show "$ui_service" -p WorkingDirectory --value 2>/dev/null || true)"
+            code="$(curl -sS -H 'Cookie: disdex_auth=1' -o /tmp/realtime.html -w '%{http_code}' --max-time 8 http://127.0.0.1:3001/realtime || true)"
+            if [[ "$active" == active && "$wd" == "$release" && "$code" == 200 ]]; then ok=1; break; fi
+            sleep 1
+          done
+          [[ "$ok" == 1 ]]
+
+          api_code="$(curl -sS -H 'Cookie: disdex_auth=1' -o /tmp/realtime-ranking.json -w '%{http_code}' --max-time 20 http://127.0.0.1:3001/api/system/realtime-ranking)"
+          [[ "$api_code" == 200 ]]
+          python3 - <<'PY'
+          import json
+          d=json.load(open('/tmp/realtime-ranking.json',encoding='utf-8'))
+          assert d.get('ok') is True
+          assert isinstance(d.get('rows'),list)
+          assert isinstance(d.get('checkedAt'),(int,float))
+          PY
+
+          [[ "$(tr -d '[:space:]' < "$current/.disdex-release-sha")" == "$trading_sha_before" ]]
+          [[ "$(readlink -f "$current")" == "$trading_path_before" ]]
+          for unit in "${runner_units[@]}"; do
+            [[ "$(systemctl is-active "$unit" 2>/dev/null || true)" == active ]]
+            [[ "$(systemctl show "$unit" -p MainPID --value 2>/dev/null || true)" == "${runner_pid_before[$unit]}" ]]
+            [[ "$(systemctl show "$unit" -p NRestarts --value 2>/dev/null || true)" == "${runner_restart_before[$unit]}" ]]
+          done
+
+          install -m 0644 "$release/ops-refresh/disdex-quality102-ranking-refresh.mjs" /usr/local/libexec/disdex-quality102-ranking-refresh.mjs
+          install -m 0644 "$release/ops-refresh/disdex-quality102-ranking-refresh.service" /etc/systemd/system/disdex-quality102-ranking-refresh.service
+          install -m 0644 "$release/ops-refresh/disdex-quality102-ranking-refresh.path" /etc/systemd/system/disdex-quality102-ranking-refresh.path
+          systemctl daemon-reload
+          systemctl enable --now disdex-quality102-ranking-refresh.path
+          systemctl start disdex-quality102-ranking-refresh.service
+          curl -fsS --max-time 30 http://127.0.0.1:3001/api/system/q102-symbol-status > /tmp/q102-symbols-post-score-fix.json
+          python3 - <<'PY'
+          import json
+          d=json.load(open("/tmp/q102-symbols-post-score-fix.json"))
+          assert d["rankingAvailable"] is True
+          assert len(d["items"]) > 0
+          assert all(r.get("diagnostics") for r in d["items"])
+          print("Q102_DETAIL_ITEMS",len(d["items"]))
+          r=json.load(open("/tmp/realtime-ranking.json"))
+          for row in r["rows"]:
+              if row.get("score")==100:
+                  assert row["fresh"] and all(g["state"]=="OK" for g in row["gates"] if g.get("kind") not in {"reference","shadow"})
+          print("COMPLETE_SCORE_100_INVARIANT=PASS")
+          PY
+          rm -f "$archive" "$canonical_backup"
+          trap - ERR
+          echo "STATUS=REALTIME_RANKING_SHOW_UI_DEPLOYED"
+          echo "UI_SHA=$TARGET_SHA"
+          echo "UI_RELEASE=$release"
+          echo "REALTIME_ROUTE=PASS"
+          echo "REALTIME_RANKING_API=PASS"
+          echo "TRADING_SHA_UNCHANGED=$trading_sha_before"
+          echo "TRADING_RUNNER_PIDS_UNCHANGED=PASS"
+          echo "ORDER_MUTATION_ATTEMPTED=FALSE"
+          REMOTE
+
+      - name: Public realtime smoke
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          code="$(curl -sS -H 'Cookie: disdex_auth=1' -o /tmp/public-realtime.html -w '%{http_code}' --max-time 20 https://professional-dismanager.net/realtime)"
+          echo "PUBLIC_REALTIME_HTTP=$code"
+          [[ "$code" == 200 ]]
