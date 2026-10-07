@@ -1,0 +1,122 @@
+{
+  "checkedAt": "2026-10-07T09:45:30.431726+00:00",
+  "runtimeSha": "eabfeb1750666fac11f894a34cdcf68501ab923f",
+  "sourceShadowSha": "c97daf589d2c20ff6afee0f8ebe6319f59eecea4",
+  "runtimeDeploymentRun": 37601368859,
+  "units": [
+    {
+      "unit": "disdex-v12-x1-all@eabfeb1750666fac11f894a34cdcf68501ab923f.service",
+      "MainPID": "1216975",
+      "NRestarts": "0",
+      "ActiveState": "active"
+    },
+    {
+      "unit": "disdex-pengu-dual-ls-v2@eabfeb1750666fac11f894a34cdcf68501ab923f.service",
+      "MainPID": "1217169",
+      "NRestarts": "0",
+      "ActiveState": "active"
+    },
+    {
+      "unit": "disdex-quality102-causal-v1@eabfeb1750666fac11f894a34cdcf68501ab923f.service",
+      "MainPID": "1217479",
+      "NRestarts": "0",
+      "ActiveState": "active"
+    },
+    {
+      "unit": "disdex-v52-aster-only@eabfeb1750666fac11f894a34cdcf68501ab923f.service",
+      "MainPID": "1217675",
+      "NRestarts": "0",
+      "ActiveState": "active"
+    },
+    {
+      "unit": "disdex-fet-brk48@eabfeb1750666fac11f894a34cdcf68501ab923f.service",
+      "MainPID": "1217866",
+      "NRestarts": "0",
+      "ActiveState": "active"
+    },
+    {
+      "unit": "disdex-hype-long@eabfeb1750666fac11f894a34cdcf68501ab923f.service",
+      "MainPID": "1218062",
+      "NRestarts": "0",
+      "ActiveState": "active"
+    },
+    {
+      "unit": "disdex-idle-priority-short@eabfeb1750666fac11f894a34cdcf68501ab923f.service",
+      "MainPID": "1218227",
+      "NRestarts": "0",
+      "ActiveState": "active"
+    },
+    {
+      "unit": "disdex-shared-crypto-risk@eabfeb1750666fac11f894a34cdcf68501ab923f.service",
+      "MainPID": "1216320",
+      "NRestarts": "0",
+      "ActiveState": "active"
+    },
+    {
+      "unit": "disdex-v12-v52-margin-guard@eabfeb1750666fac11f894a34cdcf68501ab923f.service",
+      "MainPID": "1216351",
+      "NRestarts": "0",
+      "ActiveState": "active"
+    }
+  ],
+  "killSwitchActive": false,
+  "sharedRiskTripped": false,
+  "marginStage": "HEALTHY",
+  "operatorApprovedSha": "eabfeb1750666fac11f894a34cdcf68501ab923f",
+  "m05Threshold": -0.005,
+  "m05CurrentCandidateObserved": false,
+  "m05HistoryCount": 0,
+  "penguStateUpdatedAt": 1791365768332,
+  "productionGateChanged": false,
+  "ordersSentByOperator": 0,
+  "cancelsSentByOperator": 0,
+  "uiSha": "eabfeb1750666fac11f894a34cdcf68501ab923f",
+  "uiWorkingDirectory": "/home/deploy/disdex-trading/ui-releases/ui-realtime-ranking-eabfeb175066",
+  "uiDeploymentRun": 37602351639,
+  "rankingRows": 49,
+  "q102Diagnostics": 19,
+  "score100Invariant": true,
+  "lineageSynchronized": true,
+  "m05HpGate": {
+    "key": "m05-shadow",
+    "label": "M05 Shadow（72h ≤ -0.50%）",
+    "state": "UNKNOWN",
+    "required": "≤ -0.50%",
+    "detail": "現確定足はProduction SHORT candidateではないためM05判定対象外です。 / 蓄積 0件 / M05差分 0件",
+    "kind": "shadow"
+  },
+  "m05Summary": {
+    "total": 0,
+    "disagreements": 0,
+    "agreements": 0
+  },
+  "journalAnomalies": [],
+  "runnerPidsUnchangedDuringUiDeploy": true,
+  "tests": {
+    "ui": 89,
+    "currentLiveHistoricalRows": 9263,
+    "shortCandidates": 47,
+    "m05WouldBlock": 1,
+    "productionDecisionParity": true
+  },
+  "browserRegression": {
+    "status": "PASS",
+    "checks": "SWAP_4_STABLE_OFF_REDUCED_REVERSE_CROSS22_FILTER_MOBILE_PASS",
+    "productionAssets": true,
+    "readOnlyFixtures": true
+  },
+  "accountAudit": {
+    "status": "ASTER_READONLY_ACCOUNT_DIAGNOSTIC_PASS",
+    "observedAt": 1791366344175,
+    "positions": 0,
+    "openOrders": 0,
+    "ordersSent": 0,
+    "cancelsSent": 0,
+    "positionChangesSent": 0
+  },
+  "legacyParity": {
+    "status": "PREEXISTING_BASELINE_FAILURE",
+    "reproducedOnBaseline": "8ed7c2266af33758b0a0f301aefc2457a7a7eab6",
+    "replacement": "Direct baseline/current comparison: 9263 rows, identical production decisions"
+  }
+}
