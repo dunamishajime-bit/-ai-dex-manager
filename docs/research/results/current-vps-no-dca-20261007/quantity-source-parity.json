@@ -1,0 +1,8 @@
+{
+  "runtimeSha": "eabfeb1750666fac11f894a34cdcf68501ab923f",
+  "status": "PASS",
+  "vectors": 1503,
+  "method": "Actual Production normalizeMarketQuantity, mocked read-only exchangeInfo; no credential/order/API methods",
+  "ordersSent": 0,
+  "cancelsSent": 0
+}

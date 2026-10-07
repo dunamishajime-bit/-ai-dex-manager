@@ -1,0 +1,168 @@
+{
+  "checkedAtUtc": "2026-10-07T12:13:55.947381+00:00",
+  "runtimePath": "/home/deploy/disdex-trading/releases/eabfeb1750666fac11f894a34cdcf68501ab923f",
+  "runtimeSha": "eabfeb1750666fac11f894a34cdcf68501ab923f",
+  "allConfigGitBlobMatches": true,
+  "files": [
+    {
+      "path": "config/allTokensDisplay.ts",
+      "sha256": "4d942cba83897f920dd10355f866c9c2eeee20398015034106caee2f5f71acbd",
+      "vpsMatchesPinnedGitBlob": true
+    },
+    {
+      "path": "config/botConfig.ts",
+      "sha256": "4d5af21fa541aeea4222b0d32054e12cf35121f36c307382ee10c0cbbbe62dc7",
+      "vpsMatchesPinnedGitBlob": true
+    },
+    {
+      "path": "config/disdexQuality102CausalV1Runtime.ts",
+      "sha256": "fa2d883162d0adf752d8d2899a1b97b7d96ea49b98ae396500160188f4847414",
+      "vpsMatchesPinnedGitBlob": true
+    },
+    {
+      "path": "config/disdexQuality102CausalV4Model.ts",
+      "sha256": "4f2b3d6ad2b7fc4a6f4278cfffdfc0007a85e65afe8a03a0978187593bc23c50",
+      "vpsMatchesPinnedGitBlob": true
+    },
+    {
+      "path": "config/disdexStockRouterV13DV11EqRuntime.ts",
+      "sha256": "406dea75680dd8590957fc24558325e3367778da1e5cfef6bc5362b65b4813c5",
+      "vpsMatchesPinnedGitBlob": true
+    },
+    {
+      "path": "config/disdexStrictBt33404708902Runtime.ts",
+      "sha256": "d51a9cdfacbd3983ff4fb2d93df61a439b8126d63b7f708dea00e574484635cd",
+      "vpsMatchesPinnedGitBlob": true
+    },
+    {
+      "path": "config/disdexV35Runtime.ts",
+      "sha256": "7b468a46528bd552fc9316744accacf87abf2d0e20445708074c8cf3419124bc",
+      "vpsMatchesPinnedGitBlob": true
+    },
+    {
+      "path": "config/disdexV46Runtime.ts",
+      "sha256": "a9ff5fc8f24f0fd3205859a77dbe7c866c05d689452042c9ed13e318fe135869",
+      "vpsMatchesPinnedGitBlob": true
+    },
+    {
+      "path": "config/disdexV96Runtime.ts",
+      "sha256": "6d0a86fa02706aef1e40277473f3d8ea87d37e1de8cacf27bbbb2c7f3b97136e",
+      "vpsMatchesPinnedGitBlob": true
+    },
+    {
+      "path": "config/fetBrk48Runtime.ts",
+      "sha256": "6e5fedf969e0de82b1f4d7b4168daa0b90741d58d4c284146e0e937dc4e815e7",
+      "vpsMatchesPinnedGitBlob": true
+    },
+    {
+      "path": "config/hypeTrendLongPolicy.ts",
+      "sha256": "9c848a911dabcb8b5827eeb1072a3943034aa76671beaefca2e3854c3923cdad",
+      "vpsMatchesPinnedGitBlob": true
+    },
+    {
+      "path": "config/hypeZecLongPolicy.ts",
+      "sha256": "b2d95c9c5c5b8c0a1855fe260ea689c1ddf12f48e0a68acb228323f430d157e0",
+      "vpsMatchesPinnedGitBlob": true
+    },
+    {
+      "path": "config/hypeZecLongRuntime.ts",
+      "sha256": "1732199acd8d5844e7128fe7ceec4543f24535e584007b64b9206c1bb8f550f8",
+      "vpsMatchesPinnedGitBlob": true
+    },
+    {
+      "path": "config/idlePriorityShortPolicy.ts",
+      "sha256": "fa20fa804c59a52a29243581b1209983737d90524dc6a6c169b5aca349b95e81",
+      "vpsMatchesPinnedGitBlob": true
+    },
+    {
+      "path": "config/idlePriorityShortRuntime.ts",
+      "sha256": "c63500970bbfa5b0eab664dc96073cc331bf7c30bdd94e5807c92c02d0453d62",
+      "vpsMatchesPinnedGitBlob": true
+    },
+    {
+      "path": "config/idleResidualLongPolicy.ts",
+      "sha256": "cdf115da664365bb0c77ca5ed93c9ff37dc64cb0ff2d73f98961371865277715",
+      "vpsMatchesPinnedGitBlob": true
+    },
+    {
+      "path": "config/idleResidualLongRuntime.ts",
+      "sha256": "c65b43e423a76f2fbfd1a2f339f2383a3efd877a176d33a14032e1403dbbdcbf",
+      "vpsMatchesPinnedGitBlob": true
+    },
+    {
+      "path": "config/integratedProductionRiskPolicy.ts",
+      "sha256": "c06e19c5d73ec18f26dc9dd16b8ee5dcc4541cc612f89f7bcfb44d156a1113ca",
+      "vpsMatchesPinnedGitBlob": true
+    },
+    {
+      "path": "config/mainStrategy.ts",
+      "sha256": "c49c63ef9d9d72acf7392f85e89e39b4a8439ab5c85ce8a0590dc07763123b7f",
+      "vpsMatchesPinnedGitBlob": true
+    },
+    {
+      "path": "config/penguDualLsV1Runtime.ts",
+      "sha256": "5efe2e6003edca713e5a1092db10425e93f3688dbb1628304258bf027624ab96",
+      "vpsMatchesPinnedGitBlob": true
+    },
+    {
+      "path": "config/penguDualLsV2Runtime.ts",
+      "sha256": "18ed5fee4f5f40cb012285a76f5bf9215d03961153df493a362d09aa4dcf26d0",
+      "vpsMatchesPinnedGitBlob": true
+    },
+    {
+      "path": "config/penguRecoveryV8.ts",
+      "sha256": "a24b94ab37edb50d1de216eab7e545c0d0693a5fb18c9dddaeb282693ebecc64",
+      "vpsMatchesPinnedGitBlob": true
+    },
+    {
+      "path": "config/q102FamilySideGross.json",
+      "sha256": "954159f85bd6dbd9dbb9bdf4a26715b67c2c0617c5ed0d128412afaf09a1256f",
+      "vpsMatchesPinnedGitBlob": true
+    },
+    {
+      "path": "config/reclaimHybridStrategy.ts",
+      "sha256": "5f45688a403b91d7ced1b281eaa95b438d8c43c89ae9005e97fa228ed306957a",
+      "vpsMatchesPinnedGitBlob": true
+    },
+    {
+      "path": "config/sharedCryptoRiskPolicy.ts",
+      "sha256": "0cc9b376814b5721d29ca47736c9ab41dfbd5f608e7cee7f56aaa4cb73edd490",
+      "vpsMatchesPinnedGitBlob": true
+    },
+    {
+      "path": "config/strategyConfig.ts",
+      "sha256": "41c6184b1e093c5dd321a7135663213d8b9c9f6c43bc1f1505936cacf78989d4",
+      "vpsMatchesPinnedGitBlob": true
+    },
+    {
+      "path": "config/strategyExecutionRoutes.ts",
+      "sha256": "ead7ea1380d32b015686abdd661c116a60daef8c94eb899265eb4a7f9fce0bdf",
+      "vpsMatchesPinnedGitBlob": true
+    },
+    {
+      "path": "config/strategyMode.ts",
+      "sha256": "64194c53f3b396eb043ffb786655762fab1893cb1f33c727c25c5d30b75917a4",
+      "vpsMatchesPinnedGitBlob": true
+    },
+    {
+      "path": "config/strategyUniverse.ts",
+      "sha256": "c897d19012202f44cf96d11535afa57079601b461ce6da87d77313fe50b0462c",
+      "vpsMatchesPinnedGitBlob": true
+    },
+    {
+      "path": "config/tradeConfig.ts",
+      "sha256": "f106634618094a7828e007bff0b847b1eb4b96a74dd32f3e4bfd0a4f9bfe22ef",
+      "vpsMatchesPinnedGitBlob": true
+    },
+    {
+      "path": "config/v12X1AllRuntime.ts",
+      "sha256": "9060246d828c9a0052b677ffd424acb8607f217c1a79e46de0615fb49019fc3f",
+      "vpsMatchesPinnedGitBlob": true
+    },
+    {
+      "path": "config/v52V50Runtime.json",
+      "sha256": "e6f15b394f33b1e37329f5998844e8839059425e16cc3d25d4a227dc4cec559b",
+      "vpsMatchesPinnedGitBlob": true
+    }
+  ]
+}

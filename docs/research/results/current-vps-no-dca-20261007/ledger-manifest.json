@@ -1,0 +1,130 @@
+{
+  "files": [
+    {
+      "file": "ledgers/VPS_VERIFIED_VENUE_365D/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "rows": 1362,
+      "uncompressedBytes": 1496071,
+      "sha256Uncompressed": "6350010b046fd79ac3a1f00324caebadeefc9ee8543f50c1e8e80774e18428cd",
+      "sha256Compressed": "44a6164624b363ca8245c4012a8cb42fa6df4f6d69607e71bd7ab5099d8c03f6"
+    },
+    {
+      "file": "ledgers/VPS_VERIFIED_VENUE_365D/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "rows": 5421,
+      "uncompressedBytes": 2250330,
+      "sha256Uncompressed": "50ec43606278ae0a99145cc20f47752d9f7b24aff47254779563958f708cccf1",
+      "sha256Compressed": "85662c81a2ae58640cd718214eef09259fbc25a3780e9dd397e45398c98f84ce"
+    },
+    {
+      "file": "ledgers/VPS_VERIFIED_VENUE_365D/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "rows": 14218,
+      "uncompressedBytes": 9828709,
+      "sha256Uncompressed": "d2e2f467a4b3f1c2eb65d98f962f00ff1d2a8e379dbd16e9f416d2e98a4ea107",
+      "sha256Compressed": "0a06cf8562180b9e47d56bbff1a5b770178366f1b1ae19fcff0f5aa6e1f0c70a"
+    },
+    {
+      "file": "ledgers/VPS_VERIFIED_VENUE_365D/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "rows": 1353,
+      "uncompressedBytes": 1486535,
+      "sha256Uncompressed": "e7b5521ffa4495622caa1d3bf48095c4fef45ba3ea20efa3a0dba3770aab8627",
+      "sha256Compressed": "fd46c6872088fb39697147b5c2de4e62ca753d74eaa70ad050151644c7d46544"
+    },
+    {
+      "file": "ledgers/VPS_VERIFIED_VENUE_365D/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "rows": 5363,
+      "uncompressedBytes": 2229923,
+      "sha256Uncompressed": "523e43fb5c2960167ce9393f7108b8bdddb42e3a76d8014e0f41e228e32a0a3f",
+      "sha256Compressed": "14dcefda2112ffbd08fe1f564f6d3e433b30ee3c0c0ef222d1c09c64a739cdea"
+    },
+    {
+      "file": "ledgers/VPS_VERIFIED_VENUE_365D/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "rows": 14218,
+      "uncompressedBytes": 9825404,
+      "sha256Uncompressed": "2cc763a2daa392a3b25a155e835ec1edcac51494bc1024303249714ce8d898cf",
+      "sha256Compressed": "0236f214c6c8b77860462647908936de0937bfc34dddd6264d510386ff7d87cc"
+    },
+    {
+      "file": "ledgers/VPS_VERIFIED_VENUE_365D/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "rows": 1331,
+      "uncompressedBytes": 1463662,
+      "sha256Uncompressed": "f87f121edb2ad09c1e3099c6b90afba084adc3b6fb24087bac98a9682dfc6d38",
+      "sha256Compressed": "084bc831c90b5747169c79c88e97d4afc92f35513b2e1300edd786717536077d"
+    },
+    {
+      "file": "ledgers/VPS_VERIFIED_VENUE_365D/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "rows": 5291,
+      "uncompressedBytes": 2201212,
+      "sha256Uncompressed": "762da31ecf582db62aaa6c107fb0534ae1bf6af2d4f5dcff9dae0949b7cbec67",
+      "sha256Compressed": "c2449963c480d0f8aeae6e4d9daf49cf0bf93d7dd5202c56d4df291037362f1d"
+    },
+    {
+      "file": "ledgers/VPS_VERIFIED_VENUE_365D/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "rows": 14218,
+      "uncompressedBytes": 9818333,
+      "sha256Uncompressed": "5c3ad40480b9009a59af07a1fa32447cddaaee0e7203b16bb897bc1ca622cdee",
+      "sha256Compressed": "b75042e41521301fef26bd3fba000a1266b51d05ffa9c6e64a14edbe29828dcc"
+    },
+    {
+      "file": "ledgers/VPS_VERIFIED_CONTINUOUS_365D/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "rows": 1363,
+      "uncompressedBytes": 1541555,
+      "sha256Uncompressed": "f088d797ffadf931897847d5f725c24d7147a01f8297203dfd153ed8b2a2c224",
+      "sha256Compressed": "72f7abe1dcc2d1293bf3f033ae0be28020e0da70702f32af480bef65a1d4c5ce"
+    },
+    {
+      "file": "ledgers/VPS_VERIFIED_CONTINUOUS_365D/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "rows": 5379,
+      "uncompressedBytes": 2291981,
+      "sha256Uncompressed": "f2cff64072885620a776930f8ceff2edec9383d67362b399e114fd333cd0afe1",
+      "sha256Compressed": "9fab5e25f5fcbd399b44c5296f0e22b3dd4c73c9f345e014a40d52a9ea274e18"
+    },
+    {
+      "file": "ledgers/VPS_VERIFIED_CONTINUOUS_365D/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "rows": 14218,
+      "uncompressedBytes": 9852127,
+      "sha256Uncompressed": "34109f07ae242eacf7c0795f5626ead54007e896b30329d5a345a85167fba30c",
+      "sha256Compressed": "733e1ac283c5306e6ee1720e06a1ecb3a36da932d170bb72c5dcd23ab18d274d"
+    },
+    {
+      "file": "ledgers/VPS_VERIFIED_CONTINUOUS_365D/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "rows": 1353,
+      "uncompressedBytes": 1530127,
+      "sha256Uncompressed": "4cb25f80180003ad0bd16a18bcb23510bd40ed69fc6122c2c797a63a8e83f850",
+      "sha256Compressed": "721ca8e988522d2f55c8ccaf6bbf9265f5816c1a0bde035801fc8db8d1cc91ff"
+    },
+    {
+      "file": "ledgers/VPS_VERIFIED_CONTINUOUS_365D/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "rows": 5349,
+      "uncompressedBytes": 2278210,
+      "sha256Uncompressed": "e220055b9718bb2a047f5b9cb32dc8409f91aa2486b24c63acd8e0feb95f4f0b",
+      "sha256Compressed": "434b84bd2b93fc6f5ee2b45d379317cc863bc499e3bea39c81633c67de9c5c4f"
+    },
+    {
+      "file": "ledgers/VPS_VERIFIED_CONTINUOUS_365D/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "rows": 14218,
+      "uncompressedBytes": 9848538,
+      "sha256Uncompressed": "5655ab1575fcd1e7281478077da5eb8e9360e1bbf660b4f4bf7a713f721fb43e",
+      "sha256Compressed": "82c9f347ce97b013639d7d696a8f9d9d17eeb57f62fa2d55534b4f45f63478b4"
+    },
+    {
+      "file": "ledgers/VPS_VERIFIED_CONTINUOUS_365D/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "rows": 1339,
+      "uncompressedBytes": 1514296,
+      "sha256Uncompressed": "94d869445c850d46eca40b62f3d374a430a3ac0704a370532a8d554d346cd345",
+      "sha256Compressed": "e26809ed9cf4a53bf5d341cfd5639a3114cf1eb3bea6baf8bbb6ecf0d9cd1d66"
+    },
+    {
+      "file": "ledgers/VPS_VERIFIED_CONTINUOUS_365D/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "rows": 5309,
+      "uncompressedBytes": 2260222,
+      "sha256Uncompressed": "198e31952b4f9a5421dff22a06baa04800c6eb1af550031921caa9f921d089e1",
+      "sha256Compressed": "f125c1a811b9d17d46efd5233baa2f8e4ed9fcffd0e4f9f02682101c2efa4608"
+    },
+    {
+      "file": "ledgers/VPS_VERIFIED_CONTINUOUS_365D/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "rows": 14218,
+      "uncompressedBytes": 9843393,
+      "sha256Uncompressed": "fe7816575f6139ceca9bd640aa867399defdb47c72dd3671f22b9e5c55260fb9",
+      "sha256Compressed": "f0dee5a18fda895570e219b566c1761910f34eca3dcdbf0b6851ad6c7e1a863b"
+    }
+  ]
+}

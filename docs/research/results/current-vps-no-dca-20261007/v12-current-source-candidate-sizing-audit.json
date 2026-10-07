@@ -1,0 +1,11 @@
+{
+  "runtimeSha": "eabfeb1750666fac11f894a34cdcf68501ab923f",
+  "candidateCount": 1978,
+  "matched": 1978,
+  "grossMismatches": 0,
+  "preallocationHCAboveFinalCap": 189,
+  "currentSignalNotMatched": 0,
+  "missingUniverse": [],
+  "mismatches": [],
+  "absent": []
+}

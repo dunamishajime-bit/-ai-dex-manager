@@ -1,0 +1,5 @@
+runs/
+__pycache__/
+engine/**/__pycache__/
+quantity-test-vectors.json
+candidates/

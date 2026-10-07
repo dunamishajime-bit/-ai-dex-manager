@@ -1,0 +1,59 @@
+{
+  "status": "PASS",
+  "checks": [
+    {
+      "variant": "VPS_VERIFIED_VENUE_365D",
+      "scenario": "PRICE_MODEL_10BPS",
+      "trades": 1362,
+      "depositEvents": 1,
+      "calendarDays": 365,
+      "independentAccounting": "PASS",
+      "productionGrossBounds": "PASS"
+    },
+    {
+      "variant": "VPS_VERIFIED_VENUE_365D",
+      "scenario": "PRICE_MODEL_20BPS",
+      "trades": 1353,
+      "depositEvents": 1,
+      "calendarDays": 365,
+      "independentAccounting": "PASS",
+      "productionGrossBounds": "PASS"
+    },
+    {
+      "variant": "VPS_VERIFIED_VENUE_365D",
+      "scenario": "PRICE_MODEL_30BPS",
+      "trades": 1331,
+      "depositEvents": 1,
+      "calendarDays": 365,
+      "independentAccounting": "PASS",
+      "productionGrossBounds": "PASS"
+    },
+    {
+      "variant": "VPS_VERIFIED_CONTINUOUS_365D",
+      "scenario": "PRICE_MODEL_10BPS",
+      "trades": 1363,
+      "depositEvents": 1,
+      "calendarDays": 365,
+      "independentAccounting": "PASS",
+      "productionGrossBounds": "PASS"
+    },
+    {
+      "variant": "VPS_VERIFIED_CONTINUOUS_365D",
+      "scenario": "PRICE_MODEL_20BPS",
+      "trades": 1353,
+      "depositEvents": 1,
+      "calendarDays": 365,
+      "independentAccounting": "PASS",
+      "productionGrossBounds": "PASS"
+    },
+    {
+      "variant": "VPS_VERIFIED_CONTINUOUS_365D",
+      "scenario": "PRICE_MODEL_30BPS",
+      "trades": 1339,
+      "depositEvents": 1,
+      "calendarDays": 365,
+      "independentAccounting": "PASS",
+      "productionGrossBounds": "PASS"
+    }
+  ]
+}
