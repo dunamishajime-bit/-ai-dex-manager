@@ -1,0 +1,1543 @@
+{
+  "base_commit": "2c3426fb89199572e7a193522f9a8a865b9170a8",
+  "source_files": [
+    {
+      "path": "lib/direct-trade-executor.ts",
+      "sha256_lf_normalized": "ae1527a5b5a92ca6f76e8f3a8e6cebcc34f3d6c3be1ae2e89526308420bdb6e1"
+    },
+    {
+      "path": "lib/idle-priority-short-live.ts",
+      "sha256_lf_normalized": "c02a68fd2cb5a10817d847c0af744fd1eab0336ab49f5bfaa93c6b5e59e2f82f"
+    },
+    {
+      "path": "lib/idle-priority-short-runner.ts",
+      "sha256_lf_normalized": "65b1c311c82a3ceeffe9d40cc3217b9a090bacfd3753cf14c14d0daa145e1bbf"
+    },
+    {
+      "path": "lib/idle-residual-long-runner.ts",
+      "sha256_lf_normalized": "5adbee69bae52e98fcc5049528b1eed21b30e7f01553b9a285746beacdd3a053"
+    },
+    {
+      "path": "scripts/research/all_gate_ablation.cjs",
+      "sha256_lf_normalized": "df1333d98df50c7475274fff1d1302891966b56952b1198a21ff819f1e0df619"
+    },
+    {
+      "path": "scripts/research/run_gate_fix_comparison.py",
+      "sha256_lf_normalized": "272b00425c872a16c218fcc5106a6688c2a1990663b34702eec2867309135ea6"
+    },
+    {
+      "path": "scripts/research/verify-idle-quantity-parity.ts",
+      "sha256_lf_normalized": "260526838f6eea8a82d9d1dd8dbba8d4ec1bc1710c0fd83fb73ecfaa4b3b2380"
+    },
+    {
+      "path": "scripts/research/verify_gate_fix_comparison.py",
+      "sha256_lf_normalized": "136c93a0ae795b50ecbfadeb834c2d04be37732c38eea56deafa85f5ae765489"
+    },
+    {
+      "path": "tests/direct-quantity-text.test.ts",
+      "sha256_lf_normalized": "7b7d37c1dc7deb3297a61c41966ddd79fa97ad926717a65b3f3bd458b581796e"
+    },
+    {
+      "path": "tests/idle-normalized-quantity.test.ts",
+      "sha256_lf_normalized": "2fb8ff7b34ffd307e7b705d811ac6aa956783be4c09f37ede747ba3e9c2a0fcf"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": ".gitattributes",
+      "bytes": 29,
+      "sha256": "730a35ae3d558080083c3103d9ac8100c3f6561678092abe341701dfa331eb1d"
+    },
+    {
+      "path": "cases/CURRENT_H1_STRICT/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 172728,
+      "sha256": "064385d069c6919afa4df6375f4374e8f00290f8bad3c1e41941fbd77e0de6ef"
+    },
+    {
+      "path": "cases/CURRENT_H1_STRICT/result.json",
+      "bytes": 84311,
+      "sha256": "27beb9f1205a0b514fcad67adf8eaec974831da647b2ce153be2136589f554c6"
+    },
+    {
+      "path": "cases/CURRENT_H1_STRICT/runs/portfolio-price-model-summary.json",
+      "bytes": 81508,
+      "sha256": "7a2b1e6117ea070ccf3df7963ce846760305455d2f280ee80a70531d26a5951b"
+    },
+    {
+      "path": "cases/CURRENT_H1_STRICT/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 237903,
+      "sha256": "2e8f3cfe755899b93ac31a86a0b8bf01523fa4b78a21ceadf42f6367f07ec342"
+    },
+    {
+      "path": "cases/CURRENT_H1_STRICT/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 24290,
+      "sha256": "d1d823d9af5dd253deffea8d3bfcff0037d91a2cc5064471c070b09c57dc8128"
+    },
+    {
+      "path": "cases/CURRENT_H1_STRICT/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 250982,
+      "sha256": "49e4440b231b141628b831a63059e3647e19db70e377fc54c479ec34a43f22da"
+    },
+    {
+      "path": "cases/CURRENT_H1_STRICT/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 212556,
+      "sha256": "4765ef1e5614bdb8dea72867a984e2c95980b39f47800de29a924aa1cabbd112"
+    },
+    {
+      "path": "cases/CURRENT_H1_STRICT/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 233190,
+      "sha256": "bde255a6372bb8aacbe9073b123c7900134641e9e3d821716f102d3a91efcc33"
+    },
+    {
+      "path": "cases/CURRENT_H1_STRICT/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 23322,
+      "sha256": "db5c37b740480141ba8ced6133997f028674171952b2e06094030bfed7556a48"
+    },
+    {
+      "path": "cases/CURRENT_H1_STRICT/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 240278,
+      "sha256": "cd6c2ae0ef4e882e05b43eb61ff621309c255df724ec63ef20d148a6746d4b63"
+    },
+    {
+      "path": "cases/CURRENT_H1_STRICT/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 204550,
+      "sha256": "f91bd3d56429167c8377e7bc0eb5a10d3a51a32990c9ea3c6ed470131c365c3f"
+    },
+    {
+      "path": "cases/CURRENT_H1_STRICT/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 233629,
+      "sha256": "1dc77390d96298a8335a46a87c94ad98880b26c21d5580e71a66285bacfd0efe"
+    },
+    {
+      "path": "cases/CURRENT_H1_STRICT/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 24285,
+      "sha256": "87a2c006606df33f22b5cc4e0c7f1220e2e1b79e0d08df1acc82ed5f516ec2cc"
+    },
+    {
+      "path": "cases/CURRENT_H1_STRICT/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 236986,
+      "sha256": "667c01a53bd52e4968672d72fa09b9f3054dac6e00c3970029baab60645aa730"
+    },
+    {
+      "path": "cases/CURRENT_H1_STRICT/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 200847,
+      "sha256": "e882347eb54ef50818f13fe6396c95705398a7812fe7134e32fbcddbc552f140"
+    },
+    {
+      "path": "cases/CURRENT_H1_STRICT/runs/summary.json",
+      "bytes": 81846,
+      "sha256": "db08f9c99995e3150a44bd4eaf5af1caba52b1aad5c1e3bac79ec672647698ac"
+    },
+    {
+      "path": "cases/HYPE_SLOPE50/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 173010,
+      "sha256": "ff9e853307dd625b060b277fb41adb1f491bc7aeea7ee43b6abe77b649b58c28"
+    },
+    {
+      "path": "cases/HYPE_SLOPE50/result.json",
+      "bytes": 89279,
+      "sha256": "cc869fe69784ccaf47a0c3c42edf6184f1f5393eb82b8e677631198e6429bc70"
+    },
+    {
+      "path": "cases/HYPE_SLOPE50/runs/portfolio-price-model-summary.json",
+      "bytes": 86371,
+      "sha256": "696b70df3e77635f97a1ac9faa74cab0117e37079e97c1308c5050485f7987c4"
+    },
+    {
+      "path": "cases/HYPE_SLOPE50/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 243853,
+      "sha256": "35ec04eafcc162bb77972c045cc1c15d1cb34a7bff3fb1b63937ff1551298cee"
+    },
+    {
+      "path": "cases/HYPE_SLOPE50/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 25382,
+      "sha256": "1c2a83ee6d34ed728f842bd95fd0153765a76f1856942d327bfa29b07e9cf1f5"
+    },
+    {
+      "path": "cases/HYPE_SLOPE50/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 282867,
+      "sha256": "73c813f0aa5a52db2a29254e9d1ad7e7c4fe7ea281af509e4f3d35d7792e03e9"
+    },
+    {
+      "path": "cases/HYPE_SLOPE50/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 228209,
+      "sha256": "8e069ddef8442924bb6531d340136fe724682688de8ea1e7212568b9e9b8ae7c"
+    },
+    {
+      "path": "cases/HYPE_SLOPE50/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 238478,
+      "sha256": "f783260697dc9b62b98f527c58a8f5c490a9f89aeb7c9f6a4afdee9ecf454ba8"
+    },
+    {
+      "path": "cases/HYPE_SLOPE50/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 25450,
+      "sha256": "3e32821a8a2d877af61bf0107da6329d5ab5c046b0fbc62adb94e5e31bc38db4"
+    },
+    {
+      "path": "cases/HYPE_SLOPE50/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 273218,
+      "sha256": "a5bcb5cc023b95c5be3b68cb59c255f254218fb1a04b3add5750804d4e25a4b5"
+    },
+    {
+      "path": "cases/HYPE_SLOPE50/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 219705,
+      "sha256": "67739f081a1360ee6c9da59286cf36d1bd247e83aacada425bc4ad1a47f3c62f"
+    },
+    {
+      "path": "cases/HYPE_SLOPE50/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 239981,
+      "sha256": "ace80408b39c23fedfeb6e94730cb0a0a93d8fad6d9f0070f68ef8cf433e642c"
+    },
+    {
+      "path": "cases/HYPE_SLOPE50/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 25464,
+      "sha256": "8fe5b7d97bc18a215c2fd326eb2e5e89d3932086a1581c757397173d8782e63a"
+    },
+    {
+      "path": "cases/HYPE_SLOPE50/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 271068,
+      "sha256": "8553fdcf6d8f092047427832eeb04436a7a1febc315f687eb6d10ef216f81b5e"
+    },
+    {
+      "path": "cases/HYPE_SLOPE50/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 217710,
+      "sha256": "b7dfb6b2459afecea6e71e30bc2265f4ac8b825c67446b80955669c4c29ecf6b"
+    },
+    {
+      "path": "cases/HYPE_SLOPE50/runs/summary.json",
+      "bytes": 86709,
+      "sha256": "2cc915489821e3636b2cc13015684983ec6aaf20fff31a9090bff2cafc4afb69"
+    },
+    {
+      "path": "cases/IDLE_RELATIVE20/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 177557,
+      "sha256": "6e17fcd7388be20446ee3bb2f4105b099d2b556d4ec9d362c4aeead1dee47a27"
+    },
+    {
+      "path": "cases/IDLE_RELATIVE20/result.json",
+      "bytes": 89210,
+      "sha256": "794bd9cac24d7fd291112ca7d9c221a6731f3a6fada93c8dd07e32577aaf04b7"
+    },
+    {
+      "path": "cases/IDLE_RELATIVE20/runs/portfolio-price-model-summary.json",
+      "bytes": 86294,
+      "sha256": "2ca4978708b20baedc8b8113d352ddc09209f9c28d8e8860b7bc6fe1dbeef755"
+    },
+    {
+      "path": "cases/IDLE_RELATIVE20/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 247105,
+      "sha256": "a697a4cb0d458b808feabb7ab0edc19af2a60f4556b19cda6962840e1f384f84"
+    },
+    {
+      "path": "cases/IDLE_RELATIVE20/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 25394,
+      "sha256": "988fb7c7793e75f0008ba7a15fecc00a80251c378196724f37dadfdc303ff70c"
+    },
+    {
+      "path": "cases/IDLE_RELATIVE20/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 284955,
+      "sha256": "6f68b34049d3637daa793d65edb7be0cd00a43ae82f5ad4f9fa00416c94b0036"
+    },
+    {
+      "path": "cases/IDLE_RELATIVE20/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 227863,
+      "sha256": "cbf762e145e297fe047c63d9847fae904daa52cbeb5f75df132ecc07848f1741"
+    },
+    {
+      "path": "cases/IDLE_RELATIVE20/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 242458,
+      "sha256": "c11f274428a60f7c81038e5ea77aa2be3b0a39af3e3c29dfc96534d38195de35"
+    },
+    {
+      "path": "cases/IDLE_RELATIVE20/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 25374,
+      "sha256": "cb0dfa2b61e57b2e8aa4538123b0dcce0061196beb9d1e4c25d549f6711200de"
+    },
+    {
+      "path": "cases/IDLE_RELATIVE20/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 276326,
+      "sha256": "789f28e21fb3ece67c5734f11d8916c6d438e417a6016491ca43004943e1b603"
+    },
+    {
+      "path": "cases/IDLE_RELATIVE20/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 220703,
+      "sha256": "5442cc95d24e32675de88c3f4bb31367f0bb8c5b686810c17384905215872a18"
+    },
+    {
+      "path": "cases/IDLE_RELATIVE20/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 243701,
+      "sha256": "f946a073780f02b2d8b4ae5d402a422611aaad2e9078c8ed7a4fde23e872a5d1"
+    },
+    {
+      "path": "cases/IDLE_RELATIVE20/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 25459,
+      "sha256": "180d20e39c13a8276f9980d63edfa6a999ecc78b80c893326105aee70529e035"
+    },
+    {
+      "path": "cases/IDLE_RELATIVE20/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 273782,
+      "sha256": "39efe7758d35f6951238c1996d04e448640e32dd56b3c0c0c8ce0bcbc9a77521"
+    },
+    {
+      "path": "cases/IDLE_RELATIVE20/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 217793,
+      "sha256": "b6ed45fb07ecaecafa6f578a51d8b0cbd94d04ef935f6f29df9f9c54e9ddbb52"
+    },
+    {
+      "path": "cases/IDLE_RELATIVE20/runs/summary.json",
+      "bytes": 86632,
+      "sha256": "17779ca83d64e7cafe2d1b53919dfb147c22da51e9fbc657f13b13123d1c61c5"
+    },
+    {
+      "path": "cases/IDLE_VOLUME80/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 174978,
+      "sha256": "12cc07047a08f3cff51a5b5b4a43dace3dfb0444087ebf545613e47dfabca2c9"
+    },
+    {
+      "path": "cases/IDLE_VOLUME80/result.json",
+      "bytes": 88954,
+      "sha256": "18bf33142b76fe7376a0bc3085963fa76fb3e65ae7cbfcb56d8744351afef8f5"
+    },
+    {
+      "path": "cases/IDLE_VOLUME80/runs/portfolio-price-model-summary.json",
+      "bytes": 86043,
+      "sha256": "88e996c2d09511b8ba29df68a53106bd0931b5cccaa6b2768612231349e60383"
+    },
+    {
+      "path": "cases/IDLE_VOLUME80/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 245489,
+      "sha256": "73d147e6a43c8c6a681d14dc6ac6a5ec57f51da1216cd74fe596c9ec308d186d"
+    },
+    {
+      "path": "cases/IDLE_VOLUME80/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 25292,
+      "sha256": "0f36370744824f814800446d1db015d59c1d5e04874c21b403c94569eb7c158c"
+    },
+    {
+      "path": "cases/IDLE_VOLUME80/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 283841,
+      "sha256": "62e68c1d9aea5ce3c18b23ab4b579a3fabe4f1b780aea85cc99331972331a070"
+    },
+    {
+      "path": "cases/IDLE_VOLUME80/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 228057,
+      "sha256": "e686354b6741fca7017f70fbb42bc521140564e3686f9f943939fc2b201e1d1e"
+    },
+    {
+      "path": "cases/IDLE_VOLUME80/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 240448,
+      "sha256": "d66adbef57365d93a48c6653b5d2736527427e2a9330c27e277b2681b6414b13"
+    },
+    {
+      "path": "cases/IDLE_VOLUME80/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 25351,
+      "sha256": "942263c44668bd53e1537fbc8defc315fce0de035ea1c27f8e4f954244a209e5"
+    },
+    {
+      "path": "cases/IDLE_VOLUME80/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 273909,
+      "sha256": "7546646b11c9ab43f094f012655a3a8fc4d26f47188702da3ad9cd1e9ef37d53"
+    },
+    {
+      "path": "cases/IDLE_VOLUME80/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 219988,
+      "sha256": "1f883da968fea000b4c7c45d3a2ffbbb3ff9e83a40ea506f41d94db51256d28c"
+    },
+    {
+      "path": "cases/IDLE_VOLUME80/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 241715,
+      "sha256": "08de394f512d73df877353bce000556895f960a62c13001b21fe7e3acc168b00"
+    },
+    {
+      "path": "cases/IDLE_VOLUME80/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 25349,
+      "sha256": "f78072f4b7884902829a17b299ce2fba8f4b21309573ce94cb0e5458903f5055"
+    },
+    {
+      "path": "cases/IDLE_VOLUME80/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 271754,
+      "sha256": "182d9558e7140804c74415339382207d8ab4365c20b2363bca03f195958f4499"
+    },
+    {
+      "path": "cases/IDLE_VOLUME80/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 218166,
+      "sha256": "ab778ffaa830b4728c0288589ffd5d299968266fea5334f150f6303afede242e"
+    },
+    {
+      "path": "cases/IDLE_VOLUME80/runs/summary.json",
+      "bytes": 86381,
+      "sha256": "821c29b7db49a053e1dcff0bd2573db3d125585def79a925f178db34215bfde8"
+    },
+    {
+      "path": "cases/LEGACY_EXIT_REFERENCE/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 178276,
+      "sha256": "977af4abc4d4f2a4ff5ac9a0c608573d5192f988f8feff055c1ba575f722f0c6"
+    },
+    {
+      "path": "cases/LEGACY_EXIT_REFERENCE/result.json",
+      "bytes": 87695,
+      "sha256": "124d4cc8003a6cb45677068ad2aba6288fc4519ee037848e1d936f8f0977687e"
+    },
+    {
+      "path": "cases/LEGACY_EXIT_REFERENCE/runs/portfolio-price-model-summary.json",
+      "bytes": 84785,
+      "sha256": "184ab0b974e79954f3bd97299752c4c8e48586ae540bd77216b715f58afab60f"
+    },
+    {
+      "path": "cases/LEGACY_EXIT_REFERENCE/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 239637,
+      "sha256": "415d886fab0bb3ccd122df3d039718ebb1691f04efa89c17236eae01466d1d4a"
+    },
+    {
+      "path": "cases/LEGACY_EXIT_REFERENCE/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 24524,
+      "sha256": "f7327bb40011dd14c74e3aa6369b309f211ece465c14a4ee851e37f045ecd84d"
+    },
+    {
+      "path": "cases/LEGACY_EXIT_REFERENCE/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 254758,
+      "sha256": "3f9dbbf2bdb43f5ee1a13dc116d51e8b81c8d0fd109f8fb2c7b5c7ef7fa70754"
+    },
+    {
+      "path": "cases/LEGACY_EXIT_REFERENCE/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 208446,
+      "sha256": "f147bef39ca9b26e7ed7432157cfeee916187aba981fa3588088b68f58ed6dc9"
+    },
+    {
+      "path": "cases/LEGACY_EXIT_REFERENCE/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 238075,
+      "sha256": "7293539feef9d28b3468c56d5e958d3f7699da3e1401f5a6f4fbcdeca3e3eff7"
+    },
+    {
+      "path": "cases/LEGACY_EXIT_REFERENCE/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 25131,
+      "sha256": "59f906ad4e4a704fea72004317f251c093d0f08b487eb989e21be5f80464169b"
+    },
+    {
+      "path": "cases/LEGACY_EXIT_REFERENCE/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 253467,
+      "sha256": "0fb50a8bf50c3ee505e69fda1c2aa222f861b7225304f9e2019de63d982ce683"
+    },
+    {
+      "path": "cases/LEGACY_EXIT_REFERENCE/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 207381,
+      "sha256": "7c488bceb9a497fb6fe45048b935e40315411b927b16b7a8c78cebb3d292e668"
+    },
+    {
+      "path": "cases/LEGACY_EXIT_REFERENCE/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 239313,
+      "sha256": "1dd1d2ce6904c1dd950519d68b784bb801345f8172966b839744151ad1b02456"
+    },
+    {
+      "path": "cases/LEGACY_EXIT_REFERENCE/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 25207,
+      "sha256": "f5ca12496006fb074cd40785d68bceb1ef25f2b03957c0c2934f337a8e75354e"
+    },
+    {
+      "path": "cases/LEGACY_EXIT_REFERENCE/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 251996,
+      "sha256": "250a6ef3b0bdd0aa795d10326eeeba541b476a086dc7f38e791065ddb4a2ecba"
+    },
+    {
+      "path": "cases/LEGACY_EXIT_REFERENCE/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 205739,
+      "sha256": "ff23b6a9e55a8c6820189e607c8e37d03a5531a0ddde459b0e4e1494c62836b0"
+    },
+    {
+      "path": "cases/LEGACY_EXIT_REFERENCE/runs/summary.json",
+      "bytes": 85123,
+      "sha256": "c46123b5a9725e9beaf2fdb890ff572e649f1a5802a9faabee8a7df4c8fc52ef"
+    },
+    {
+      "path": "cases/LOT_FLOOR_FIX/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 172728,
+      "sha256": "064385d069c6919afa4df6375f4374e8f00290f8bad3c1e41941fbd77e0de6ef"
+    },
+    {
+      "path": "cases/LOT_FLOOR_FIX/result.json",
+      "bytes": 89298,
+      "sha256": "0f7c360e38cd0796100753a89c639dd41a87a26c6fbad8e64e22177f76376fd2"
+    },
+    {
+      "path": "cases/LOT_FLOOR_FIX/runs/portfolio-price-model-summary.json",
+      "bytes": 86386,
+      "sha256": "68a97b75e38aa43f9a1707cf2d3d93456948e69aeb58ce1737bd2d374f72be46"
+    },
+    {
+      "path": "cases/LOT_FLOOR_FIX/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 243084,
+      "sha256": "3dc42a0476dbb1cdd5a1e02641458556d59cd0ecc408cf72bc1d921a45a9c926"
+    },
+    {
+      "path": "cases/LOT_FLOOR_FIX/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 25471,
+      "sha256": "32586c4acc9a825f6701c193ea012269856b4d0a39625b1106dbd22e5babb74c"
+    },
+    {
+      "path": "cases/LOT_FLOOR_FIX/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 282020,
+      "sha256": "99f7e4eadc741603eed88fe3f7c9b82bbb0d1a34716e966e4fb9aa89e37cff5d"
+    },
+    {
+      "path": "cases/LOT_FLOOR_FIX/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 227327,
+      "sha256": "b54b2142894f2a646c187a0398b679f1618d5a701aa2643e2f3e5d47c7c32dd4"
+    },
+    {
+      "path": "cases/LOT_FLOOR_FIX/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 238214,
+      "sha256": "d76329e5e9378c2cc937b7fb14f76835c13884c5c36772fc1346dc68009bad27"
+    },
+    {
+      "path": "cases/LOT_FLOOR_FIX/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 25394,
+      "sha256": "a803039f4a6a0d98a69d3c399fe16fd74e79031143d96cfdd92bb59b027ccb83"
+    },
+    {
+      "path": "cases/LOT_FLOOR_FIX/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 272569,
+      "sha256": "67349bf6686472d828e7324d140b75b20b5cae8f89dd4832eb77b69d6ff40a51"
+    },
+    {
+      "path": "cases/LOT_FLOOR_FIX/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 219374,
+      "sha256": "3ec334c7c68b613a6da502f99ceb177baf4504c88346a0626296d4464a0ac753"
+    },
+    {
+      "path": "cases/LOT_FLOOR_FIX/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 239449,
+      "sha256": "305e50782a69972b05f7eb4a85a96f720e1ca27f97e052be8e614ce0f3b2db1f"
+    },
+    {
+      "path": "cases/LOT_FLOOR_FIX/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 25446,
+      "sha256": "34d231f2911bffea7becd06d2ca9c78fa4525c8be5f55f58e7162580a205f72c"
+    },
+    {
+      "path": "cases/LOT_FLOOR_FIX/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 270383,
+      "sha256": "0a0fd4995e66004f365c7a0e33055a1c736a5f9e714049cd471c582ba12de369"
+    },
+    {
+      "path": "cases/LOT_FLOOR_FIX/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 216937,
+      "sha256": "77ec4123daa7deec2b0b4005f8a6e49fff84af421e7f66d8d9e9fed871c136c9"
+    },
+    {
+      "path": "cases/LOT_FLOOR_FIX/runs/summary.json",
+      "bytes": 86724,
+      "sha256": "0fefc2522f130da7a82ceb0bd998fd99a6d3e5c16da237d252542366cc1ab21c"
+    },
+    {
+      "path": "cases/LOT_FLOOR_RESIDUAL_ONLY/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 172728,
+      "sha256": "064385d069c6919afa4df6375f4374e8f00290f8bad3c1e41941fbd77e0de6ef"
+    },
+    {
+      "path": "cases/LOT_FLOOR_RESIDUAL_ONLY/result.json",
+      "bytes": 88484,
+      "sha256": "4463046b82b8ff19a6ae3b94971c6655ab29921db610e293ef2cdc12fafce82d"
+    },
+    {
+      "path": "cases/LOT_FLOOR_RESIDUAL_ONLY/runs/portfolio-price-model-summary.json",
+      "bytes": 85547,
+      "sha256": "441e17c04a143a51a535b3057ae74193a4bf41794ac4d68985d7bb13f95a7f8e"
+    },
+    {
+      "path": "cases/LOT_FLOOR_RESIDUAL_ONLY/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 239610,
+      "sha256": "8beee38833c58024e1cff11baa25445b86a554bc9c8ea951879b30e2b0b1eb19"
+    },
+    {
+      "path": "cases/LOT_FLOOR_RESIDUAL_ONLY/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 25213,
+      "sha256": "286e9d865d903381084c0c8938cfefe3947320c4b3407fbd16adb654f240a968"
+    },
+    {
+      "path": "cases/LOT_FLOOR_RESIDUAL_ONLY/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 255415,
+      "sha256": "f6a768726892f410325529377436e19049c6afd0623375aa0f4f1c46d8dbbdb1"
+    },
+    {
+      "path": "cases/LOT_FLOOR_RESIDUAL_ONLY/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 218088,
+      "sha256": "eaadce4db5c71da3f67b9e8606a187158e15901e7904cf8cf29ba871842464f9"
+    },
+    {
+      "path": "cases/LOT_FLOOR_RESIDUAL_ONLY/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 234906,
+      "sha256": "064ec9e60193a2f75f6798da588994e1c6ab327a6919f27bf7aa0942d193e350"
+    },
+    {
+      "path": "cases/LOT_FLOOR_RESIDUAL_ONLY/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 25112,
+      "sha256": "936c87f1c03b957eab7c35a735ea3a4b0730350104b0f4bf76abb94d301f3b46"
+    },
+    {
+      "path": "cases/LOT_FLOOR_RESIDUAL_ONLY/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 246555,
+      "sha256": "60e485b273e7652fc6eca3b27bbd48d05285e6d3b74eb9b37e9e5aecf3f23971"
+    },
+    {
+      "path": "cases/LOT_FLOOR_RESIDUAL_ONLY/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 210123,
+      "sha256": "3a388cf81770068da8976570d2f4ec19928bf22537e63c512ebdebe9d232fe6a"
+    },
+    {
+      "path": "cases/LOT_FLOOR_RESIDUAL_ONLY/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 235718,
+      "sha256": "9304b16800c93fdd8a37aab91b1385d40ec36b3f7507e432c59442754ce04155"
+    },
+    {
+      "path": "cases/LOT_FLOOR_RESIDUAL_ONLY/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 25203,
+      "sha256": "6ea8e5e46bceafeac4a5ea242a551b411d541c25a7926dc30df66347eb4d4eeb"
+    },
+    {
+      "path": "cases/LOT_FLOOR_RESIDUAL_ONLY/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 243800,
+      "sha256": "d3e390b8ec9c0fa50fa6a567d0ccb26b1380e9020bdb8d1c6af7f03dbd751614"
+    },
+    {
+      "path": "cases/LOT_FLOOR_RESIDUAL_ONLY/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 207496,
+      "sha256": "898f917b9260fc825e1b198a96c405cf85925b826dbe1a32c1f349b90379e9fb"
+    },
+    {
+      "path": "cases/LOT_FLOOR_RESIDUAL_ONLY/runs/summary.json",
+      "bytes": 85885,
+      "sha256": "6cb91d24827c4a4be2a0a6cdd67dc576d43ba25e02e5818880ae691b718dadab"
+    },
+    {
+      "path": "cases/LOT_FLOOR_SHORT_ONLY/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 172728,
+      "sha256": "064385d069c6919afa4df6375f4374e8f00290f8bad3c1e41941fbd77e0de6ef"
+    },
+    {
+      "path": "cases/LOT_FLOOR_SHORT_ONLY/result.json",
+      "bytes": 87140,
+      "sha256": "47d0b05ed56bd1fe66eb2284a06d44352d989960fc80d353b9701af20ba15d40"
+    },
+    {
+      "path": "cases/LOT_FLOOR_SHORT_ONLY/runs/portfolio-price-model-summary.json",
+      "bytes": 84255,
+      "sha256": "0dfc39cf27fda67e72b550bc6c5be761e1029eb03449f23e3d1d0d96717f76c1"
+    },
+    {
+      "path": "cases/LOT_FLOOR_SHORT_ONLY/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 241841,
+      "sha256": "796bf0fa7dd24c35897a2c1f89e721e28f25ebda9d0efd5ce0968e9d779f8793"
+    },
+    {
+      "path": "cases/LOT_FLOOR_SHORT_ONLY/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 25379,
+      "sha256": "739da3b21c6d8d01325391b2a21c0ec1ed578f9ff10601ec6d38d6774d9c07ae"
+    },
+    {
+      "path": "cases/LOT_FLOOR_SHORT_ONLY/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 277022,
+      "sha256": "f99d034def89b395ec6e7bc88fbb7546630075567668cd6b20e81586882759d2"
+    },
+    {
+      "path": "cases/LOT_FLOOR_SHORT_ONLY/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 223050,
+      "sha256": "f11e7ba4250c4516ccb8e97d89372d4ae96aae639aa812ceb31ed5ad15a815e3"
+    },
+    {
+      "path": "cases/LOT_FLOOR_SHORT_ONLY/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 237006,
+      "sha256": "7c74610b4e44ce9a717b84a44def0b3a192e331b1e5af85b0d46254c35421c7e"
+    },
+    {
+      "path": "cases/LOT_FLOOR_SHORT_ONLY/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 24529,
+      "sha256": "7faa1e48af45b95dcfe895428cac71940c78da46d05752392a14c7abed59c032"
+    },
+    {
+      "path": "cases/LOT_FLOOR_SHORT_ONLY/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 268118,
+      "sha256": "fa58b799e6721ec4633750d65893212711753b9701e1e50eb9c69f02a57f270c"
+    },
+    {
+      "path": "cases/LOT_FLOOR_SHORT_ONLY/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 215315,
+      "sha256": "2497b192ef6119ea56ad9874e0518d772a9335535c87cc2f6f5f84c5e2629d51"
+    },
+    {
+      "path": "cases/LOT_FLOOR_SHORT_ONLY/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 238139,
+      "sha256": "da03cfd2db7b1a197b35bfd1203d4bbaa7f4b3a5de748703cc4e74aff420e5ba"
+    },
+    {
+      "path": "cases/LOT_FLOOR_SHORT_ONLY/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 24472,
+      "sha256": "8952b152d119106d291e67ddaa377e0a813c61d1f1dc72673fed9e07a4c579ef"
+    },
+    {
+      "path": "cases/LOT_FLOOR_SHORT_ONLY/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 265389,
+      "sha256": "1caf4f0caf4c5ef81246d7973793167ebf11c810aa3c48dad3a8ce6ac60d511b"
+    },
+    {
+      "path": "cases/LOT_FLOOR_SHORT_ONLY/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 212650,
+      "sha256": "29c0b8215e493edacb3525c6fc6fe885c24c54529fac99208de947389a8ff920"
+    },
+    {
+      "path": "cases/LOT_FLOOR_SHORT_ONLY/runs/summary.json",
+      "bytes": 84593,
+      "sha256": "1b2b4ae37f2910f62aefc1c1e8780ff9a2949223573e37620fc19c8ad6b4087c"
+    },
+    {
+      "path": "cases/Q_RET14_DELTA/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 173643,
+      "sha256": "a3e032069eb74dc636d2b8dc245d3e448b81054474030562fac886f2d676d3fd"
+    },
+    {
+      "path": "cases/Q_RET14_DELTA/result.json",
+      "bytes": 89387,
+      "sha256": "5c1a93dac3c8a570b94e81b226367182683a7008adada88eb57cbd2c92e87b7b"
+    },
+    {
+      "path": "cases/Q_RET14_DELTA/runs/portfolio-price-model-summary.json",
+      "bytes": 86419,
+      "sha256": "ab2f37313fb437e236bfa99c41570f3847e48e56941b241879df5ced6154fd97"
+    },
+    {
+      "path": "cases/Q_RET14_DELTA/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 244448,
+      "sha256": "15d083b003c4b3c5fc627d104c12a36ee26303d3c5cb54f02197410683a48fb2"
+    },
+    {
+      "path": "cases/Q_RET14_DELTA/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 25428,
+      "sha256": "c2eaff5c3b35787f54f5b16a1151fe3a7676cf6628563fde13f65be1144b0264"
+    },
+    {
+      "path": "cases/Q_RET14_DELTA/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 284160,
+      "sha256": "5eced848c512d82b536eddb65def8d1fee8ee080d32b08fd0612e4bf0d81daf1"
+    },
+    {
+      "path": "cases/Q_RET14_DELTA/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 228819,
+      "sha256": "a31ffc7f2ecef032bb7ca7b427dbe662b33db40440253a0fb3ecb7236d4292b5"
+    },
+    {
+      "path": "cases/Q_RET14_DELTA/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 239543,
+      "sha256": "b3fafc3bec8bce94761fcc1125b083baf96a508fc3c487da63694e1b0cc52955"
+    },
+    {
+      "path": "cases/Q_RET14_DELTA/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 25410,
+      "sha256": "256fc7dcbb424fbb6592f04a4c77e5bd021b4e57bb9d42e68c78764c9fd60a19"
+    },
+    {
+      "path": "cases/Q_RET14_DELTA/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 274514,
+      "sha256": "14cff3d5ff261e7d848ca464a7da5e148daceed081ce01bbced57f026b8ca6d3"
+    },
+    {
+      "path": "cases/Q_RET14_DELTA/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 220654,
+      "sha256": "a22229c065e264638900ff39f0c5b208df8f4e5150ea92896b8718ec07235f18"
+    },
+    {
+      "path": "cases/Q_RET14_DELTA/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 240815,
+      "sha256": "8d985dc3c0c6505e6c97271427aea85b4d575fb9235a85b09603f063565df3c7"
+    },
+    {
+      "path": "cases/Q_RET14_DELTA/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 25514,
+      "sha256": "c446dfa748ee00440f45f5a4e172201f15ea683c5691108d79f458adcece8d4f"
+    },
+    {
+      "path": "cases/Q_RET14_DELTA/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 272201,
+      "sha256": "78d04673fbedb056a6c3d7d514f0c34c7521a0dc0a41dedc8973d10e5cb007a0"
+    },
+    {
+      "path": "cases/Q_RET14_DELTA/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 218753,
+      "sha256": "c090738487d696dd0340501453e883f9fa378f3726030573488695a5f3c15772"
+    },
+    {
+      "path": "cases/Q_RET14_DELTA/runs/summary.json",
+      "bytes": 86757,
+      "sha256": "9a9599a195cef7c67be82de8b7ea192e32abc53130d8721b5b6346fa62ea17e6"
+    },
+    {
+      "path": "cases/Q_REV20_DELTA/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 173000,
+      "sha256": "11907e035767ced0ce5e55bacd952f1fca0fa6370fa6d3ffa06790475a6c5462"
+    },
+    {
+      "path": "cases/Q_REV20_DELTA/result.json",
+      "bytes": 89286,
+      "sha256": "ae1e2e4871ffe230220915edac3bd502a79ba2273d3e350ea10f74b404c6bcff"
+    },
+    {
+      "path": "cases/Q_REV20_DELTA/runs/portfolio-price-model-summary.json",
+      "bytes": 86334,
+      "sha256": "3a5eaafc05c6c3e7f6a50f2504e3892187188af80f0e75d1bbc28a9c5a08269b"
+    },
+    {
+      "path": "cases/Q_REV20_DELTA/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 243532,
+      "sha256": "5669b4bda30f83e4eaee0970f8891fb0e7c2ad1dde5de89250012e2d939a1671"
+    },
+    {
+      "path": "cases/Q_REV20_DELTA/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 25379,
+      "sha256": "650101101f3d738b2a6c22b626df3b6114663ae65dfd86e88048533b46d62df1"
+    },
+    {
+      "path": "cases/Q_REV20_DELTA/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 282994,
+      "sha256": "01536a29e7e6937044a03833c2176cde9fc3d0c6078610e55e83ef276c4a383b"
+    },
+    {
+      "path": "cases/Q_REV20_DELTA/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 228241,
+      "sha256": "88a770a3fbd5969b64c616aad5874df29fb6301baf5046f16322e5ac14cec73f"
+    },
+    {
+      "path": "cases/Q_REV20_DELTA/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 238580,
+      "sha256": "cb5e7743720fdacddb4d7f1bae1f2f31a1f76785eda2b16b0bbe453d9b4bf7f4"
+    },
+    {
+      "path": "cases/Q_REV20_DELTA/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 25433,
+      "sha256": "1a1dd59a52cd715452161a36ecc20e20da9affd537af794412e34adc63254010"
+    },
+    {
+      "path": "cases/Q_REV20_DELTA/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 273555,
+      "sha256": "d7e6cb1c79e61f68714f686f541326c3c007343c60abe47dc8afdb46d058973e"
+    },
+    {
+      "path": "cases/Q_REV20_DELTA/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 219959,
+      "sha256": "78bf857023b98b024fafc5e60ed22822a7a092bb307f8bee3d80134c5bbbad61"
+    },
+    {
+      "path": "cases/Q_REV20_DELTA/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 239723,
+      "sha256": "278da3928c665bf77370db81ed13a5e4398284a16995354f3398a15048465074"
+    },
+    {
+      "path": "cases/Q_REV20_DELTA/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 25447,
+      "sha256": "042a2b0c1abcbc3861bd5c93d612fcca6fca2bb3219bfd73542c0de7e85a7262"
+    },
+    {
+      "path": "cases/Q_REV20_DELTA/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 270782,
+      "sha256": "a267c8663d4cad44b939d6737af616b595a5cee4e699dfea0ab5b7865e3c51c3"
+    },
+    {
+      "path": "cases/Q_REV20_DELTA/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 217566,
+      "sha256": "4f4d006a48b133af97cb3f30f82721a492f6012e73bbf39d57f6b335ae03d8b3"
+    },
+    {
+      "path": "cases/Q_REV20_DELTA/runs/summary.json",
+      "bytes": 86672,
+      "sha256": "d5fc71ee66664dc6eff90e3e69e4bc324c6dced71344bf5b27a063c96579e541"
+    },
+    {
+      "path": "cases/RESIDUAL_RELATIVE20/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 187119,
+      "sha256": "e3beb55a0df24ec6bc510b9c3e9bbf724d3985dd089c24af78923ac2b8d04b0a"
+    },
+    {
+      "path": "cases/RESIDUAL_RELATIVE20/result.json",
+      "bytes": 89268,
+      "sha256": "859a91b450ea01cba8b1cd150542d90e3ae22e315eb2f3b8e42b2b342815eee4"
+    },
+    {
+      "path": "cases/RESIDUAL_RELATIVE20/runs/portfolio-price-model-summary.json",
+      "bytes": 86361,
+      "sha256": "353d822d09823185c1ededbb987303d609a968b38ec4d1828116a3f256e661f0"
+    },
+    {
+      "path": "cases/RESIDUAL_RELATIVE20/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 256233,
+      "sha256": "5b153e7d99450fb323485767d35e879fbebe2ee1e411dd867ce76ef33d1a1a59"
+    },
+    {
+      "path": "cases/RESIDUAL_RELATIVE20/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 25415,
+      "sha256": "a182e8882db8286306abce3ffbc0257ccb7e8da010ec01a59373553fdefab22c"
+    },
+    {
+      "path": "cases/RESIDUAL_RELATIVE20/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 283488,
+      "sha256": "5d084775b8f4549a0414146ff941e04805b864c4092f7345b2f9d98cd7818695"
+    },
+    {
+      "path": "cases/RESIDUAL_RELATIVE20/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 229098,
+      "sha256": "a1db850c4848e3e22fa682597590bf5f8293e689be1625a2fc714605e4d86133"
+    },
+    {
+      "path": "cases/RESIDUAL_RELATIVE20/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 251267,
+      "sha256": "d65bb7effca0ab25f10e5406b912e4e136da76e409537cb6f77d3c2754aed703"
+    },
+    {
+      "path": "cases/RESIDUAL_RELATIVE20/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 25397,
+      "sha256": "7f6c6ea60926b95d308a7904cdd04e02ee7527e6a74a571580a177ab03a26a86"
+    },
+    {
+      "path": "cases/RESIDUAL_RELATIVE20/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 274623,
+      "sha256": "c697b41e175959ace5ddb3c64afb96fa312384312ee6dc86c9f4b640ae97815b"
+    },
+    {
+      "path": "cases/RESIDUAL_RELATIVE20/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 221874,
+      "sha256": "da5277c4b996510ae81304e4d8586f493d802a43f29ae1703682a4ee667f84e5"
+    },
+    {
+      "path": "cases/RESIDUAL_RELATIVE20/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 252537,
+      "sha256": "88e13276da9d0557d6101be8c8f1072d3b56248045a2aab516eb4f947ad91715"
+    },
+    {
+      "path": "cases/RESIDUAL_RELATIVE20/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 25482,
+      "sha256": "d8c6341163bb5d361542d09c18812520f5d60fa973388825ad310f965119be27"
+    },
+    {
+      "path": "cases/RESIDUAL_RELATIVE20/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 272584,
+      "sha256": "f69d65278ee090275c02b754f5b194e77b8b438d6148b14930b44d7d6a5d9650"
+    },
+    {
+      "path": "cases/RESIDUAL_RELATIVE20/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 219376,
+      "sha256": "67737eb2dbba6ea99430f59cdc60711e2576320685d5977f659094595bc86e0d"
+    },
+    {
+      "path": "cases/RESIDUAL_RELATIVE20/runs/summary.json",
+      "bytes": 86699,
+      "sha256": "2faa2e7f2d2bca3427b8f24323c8ec4c7644cb5bb74b67a462a6074ee78a9016"
+    },
+    {
+      "path": "cases/V12_BTC10/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 196901,
+      "sha256": "df5924b33f4320dd7044799cd466044ebe578c8f6a2a684edd7c203ae5f65932"
+    },
+    {
+      "path": "cases/V12_BTC10/result.json",
+      "bytes": 89313,
+      "sha256": "f79dcaa302f94fe226d99ca4acb024b3c6e580e44464022e9c1efd85e33b93c4"
+    },
+    {
+      "path": "cases/V12_BTC10/runs/portfolio-price-model-summary.json",
+      "bytes": 86406,
+      "sha256": "179bcd909d70f8e0670be8f7a43bee100c673267ab2633ea12262d6ffc5371b6"
+    },
+    {
+      "path": "cases/V12_BTC10/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 279023,
+      "sha256": "ddeeaf1947e6fa3767cf2fcf4c1a2ef355319ee9b7bd510a0293f6cc026bf6f1"
+    },
+    {
+      "path": "cases/V12_BTC10/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 25455,
+      "sha256": "13ae0eba9decd1a3175de2897ae1c357bac9d235538da837774c29d18be01491"
+    },
+    {
+      "path": "cases/V12_BTC10/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 317549,
+      "sha256": "1fd100b342e8939a569674ce69543b0077682f1593194c92dafa6fc46850969f"
+    },
+    {
+      "path": "cases/V12_BTC10/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 268656,
+      "sha256": "76cb568ef5c306bbd76acbcc8c4106ec23b5fe934bed07616f2313119a545436"
+    },
+    {
+      "path": "cases/V12_BTC10/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 272546,
+      "sha256": "097814074289e2eddde4345f7f48e12cc2f43a8186855d9637e0cedc69625960"
+    },
+    {
+      "path": "cases/V12_BTC10/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 25436,
+      "sha256": "2f41bb43756ff9291b35309cdf5bdfefbcacfaf2f6957dc5d1a9c3039b64b92d"
+    },
+    {
+      "path": "cases/V12_BTC10/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 304718,
+      "sha256": "9e588fc272c988df22c1dd52c9e5979dc494e72760d6c514a3924674ddc1d8e4"
+    },
+    {
+      "path": "cases/V12_BTC10/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 256858,
+      "sha256": "491a83b699005312b0bedac5135dbc72c93a8f51624f6c5a8ee1e5c70f28b49c"
+    },
+    {
+      "path": "cases/V12_BTC10/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 273547,
+      "sha256": "c400a6b758d6635b13587c84c3ec6c96a0a55b66fc8dac0a0a218b61465fb4b2"
+    },
+    {
+      "path": "cases/V12_BTC10/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 25432,
+      "sha256": "2bd7bb7d915242c1523646c3adde7d85b93830bd0c1475bb92be8e79db0e0ad6"
+    },
+    {
+      "path": "cases/V12_BTC10/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 301814,
+      "sha256": "5aca363cf15fa9fb46e5617559098fd6d11011aee43cc3a6b56ea42e9a07d8f2"
+    },
+    {
+      "path": "cases/V12_BTC10/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 253597,
+      "sha256": "54f1a65cb2a778b68d405445ce5a2654f6081ccb194b7e4f9c928a6d10af139b"
+    },
+    {
+      "path": "cases/V12_BTC10/runs/summary.json",
+      "bytes": 86744,
+      "sha256": "91a6b8fab002c576ec09d5ad63b6accf9808f3a8a88390033747d6e6f65761aa"
+    },
+    {
+      "path": "cases/V12_BTC15/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 186335,
+      "sha256": "e9fb51ab6c16887a7ef72abfda3b82dc0ad879d3d53e490bf6a77e6b6dd3ca18"
+    },
+    {
+      "path": "cases/V12_BTC15/result.json",
+      "bytes": 89237,
+      "sha256": "539dd8f5737951b14dddf10d3fbae916e7dd129146e5ed2ba43be3958dda4584"
+    },
+    {
+      "path": "cases/V12_BTC15/runs/portfolio-price-model-summary.json",
+      "bytes": 86329,
+      "sha256": "7b19ef056e6e9c4f0fa2c428c1d6cf1a53f0fa30579d5dfb19f86727cdb246ad"
+    },
+    {
+      "path": "cases/V12_BTC15/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 262784,
+      "sha256": "492db60bb351474969728b88ba9a0127d87e0675fb3e64f3d037a9310bee0b55"
+    },
+    {
+      "path": "cases/V12_BTC15/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 25365,
+      "sha256": "0d1e0b74cb6c989aee9a6d98ef4dfa834feaf6efb07ed81cecff7e32ff0c54c3"
+    },
+    {
+      "path": "cases/V12_BTC15/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 302206,
+      "sha256": "375a3b6415c995ec15fc8221c5422c29dad4c2e6be8ae11b719c53f378885580"
+    },
+    {
+      "path": "cases/V12_BTC15/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 249825,
+      "sha256": "3709097ddccff112d0741699edc61a20177763c7510fa8ba3908d18d722eac86"
+    },
+    {
+      "path": "cases/V12_BTC15/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 256832,
+      "sha256": "27dad551b7f281a95a34f04ca4634329f7e6b132114c412559b2c66965ac7571"
+    },
+    {
+      "path": "cases/V12_BTC15/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 25438,
+      "sha256": "c2bf8fe37f8eefc6a0f0f6ca5def920955d767b13d7a231d62f3f3d3af9fcf39"
+    },
+    {
+      "path": "cases/V12_BTC15/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 290791,
+      "sha256": "d3a0ef50ee7b0682f9e1c9d456365f6d1fc728f722eefa0d8429d8cf794f5fdc"
+    },
+    {
+      "path": "cases/V12_BTC15/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 239800,
+      "sha256": "a4528c3d6f34825d32b369e27e975faf8aab8f68cb29d074bf65c377645bfc45"
+    },
+    {
+      "path": "cases/V12_BTC15/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 257337,
+      "sha256": "c85bd1e8f4dd503b40d680f8d1937e40e83d56e312c0562c109230f4580631bf"
+    },
+    {
+      "path": "cases/V12_BTC15/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 25451,
+      "sha256": "2d340c4027758e038caf2dedab84789bf6e7fef8ea540c9fd4dcab260a3080bb"
+    },
+    {
+      "path": "cases/V12_BTC15/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 286490,
+      "sha256": "cf493e25e7138aebd5aa90c556a529c523847b16fa099cbcf573ad537ccc62c3"
+    },
+    {
+      "path": "cases/V12_BTC15/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 235468,
+      "sha256": "2ca2b62be62e398437736676e987069442e9a91d1fbc87fa77e2bcf6d25c1848"
+    },
+    {
+      "path": "cases/V12_BTC15/runs/summary.json",
+      "bytes": 86667,
+      "sha256": "62579b7320353b217411b0643457ffca248a6e5865454049cd59a5b1792e13a5"
+    },
+    {
+      "path": "cases/V12_RELAXED_ATR10/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 184460,
+      "sha256": "5ffd092dc75fc2033fdac80e3d20bdb4650b4ed5dc05dc840fe901eb96ae9d20"
+    },
+    {
+      "path": "cases/V12_RELAXED_ATR10/result.json",
+      "bytes": 87442,
+      "sha256": "972dc28758329d99c189bb8e0571f00c47eb0053b863fce1925ea8d1e25fe0ed"
+    },
+    {
+      "path": "cases/V12_RELAXED_ATR10/runs/portfolio-price-model-summary.json",
+      "bytes": 84519,
+      "sha256": "04ca101af4601ac873da12ca8216f2b980f8264fa6ef9b70d4754f1224546ea5"
+    },
+    {
+      "path": "cases/V12_RELAXED_ATR10/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 261145,
+      "sha256": "c902abd6243d1fa0080303f9b4139b34af67405607739cb6c979f6dbb6940796"
+    },
+    {
+      "path": "cases/V12_RELAXED_ATR10/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 24902,
+      "sha256": "c44ba33fcb2de6bf829f74bc3ffbfbd2eba6718a006e3201d1a0962e87f05a8d"
+    },
+    {
+      "path": "cases/V12_RELAXED_ATR10/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 304722,
+      "sha256": "0d1b3b5755d6dde67afbf2ca6fcc00a024403f41bb9f1c2a424ef10e65d7c923"
+    },
+    {
+      "path": "cases/V12_RELAXED_ATR10/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 251232,
+      "sha256": "4c723c0f97da2118a0397fdfa906210ec3e5647743e7b0732c62bfe6b5fd7b0a"
+    },
+    {
+      "path": "cases/V12_RELAXED_ATR10/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 254718,
+      "sha256": "f67c21f382a319cee4f138214463c0c27eff617f2c5aa39fb535ebe89a2c6772"
+    },
+    {
+      "path": "cases/V12_RELAXED_ATR10/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 24861,
+      "sha256": "696244dd55772d71d3f40abef6e1bdddd1d4aafbd3c62b0a8c578324b5023993"
+    },
+    {
+      "path": "cases/V12_RELAXED_ATR10/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 292267,
+      "sha256": "7fd889fb939eba3697bc9e4aeefff0b674bf67abe8fc086a0da8cbd0b2fb3841"
+    },
+    {
+      "path": "cases/V12_RELAXED_ATR10/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 239854,
+      "sha256": "c1ec975e8a6d4d39cad444d9e267bcb5f757dab88e1cc5a07bcd010dfb923187"
+    },
+    {
+      "path": "cases/V12_RELAXED_ATR10/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 254315,
+      "sha256": "8ba4dc501741fac4e874d9e0b18d1e5566c3aec92026845f2d0f85cf38b84caa"
+    },
+    {
+      "path": "cases/V12_RELAXED_ATR10/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 24865,
+      "sha256": "f89f916a5e4eeab2c65e20fe3c2d8148dac62f8763af771da93f088ce3f0155a"
+    },
+    {
+      "path": "cases/V12_RELAXED_ATR10/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 285155,
+      "sha256": "b7b960962f1fe3fbff6880b377b4a6b42a5860713fd885a09d535f2c487c3699"
+    },
+    {
+      "path": "cases/V12_RELAXED_ATR10/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 232577,
+      "sha256": "2286f3e646587e28b6e38386c260205af7308eaf60913ce3950d12c0bbd7397d"
+    },
+    {
+      "path": "cases/V12_RELAXED_ATR10/runs/summary.json",
+      "bytes": 84857,
+      "sha256": "52c3aea0d1e1b87d36ab3499e3e70a945b07e9e38f6a48809b2a044cb9e21113"
+    },
+    {
+      "path": "cases/V12_SCORE85/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 183758,
+      "sha256": "b6789bb5892734f86298beadc446a95833248248e953ae24a7d554ef854e6216"
+    },
+    {
+      "path": "cases/V12_SCORE85/result.json",
+      "bytes": 87165,
+      "sha256": "dda42dae9024b94842820329e20479648a0ac41c1c38ced074a1112a9e4b4fb2"
+    },
+    {
+      "path": "cases/V12_SCORE85/runs/portfolio-price-model-summary.json",
+      "bytes": 84257,
+      "sha256": "ebd083c892f0df81ba6f1853ba15f8d3f061228cadaa8f93c7544d9419b0aecd"
+    },
+    {
+      "path": "cases/V12_SCORE85/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 258802,
+      "sha256": "b8f12cab0fceca5c6d5ede7a18dfa113a320bef7ae0f9ceca2515722bf86ed0e"
+    },
+    {
+      "path": "cases/V12_SCORE85/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 24728,
+      "sha256": "fe5b5c34600086ed4a6706fda0026c240eb7133fc19b5392f5624abae36722e7"
+    },
+    {
+      "path": "cases/V12_SCORE85/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 298082,
+      "sha256": "931870d17532bdcde8c1b7eb3792772a99262c6d55f12c69e164cc4815cb5025"
+    },
+    {
+      "path": "cases/V12_SCORE85/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 244535,
+      "sha256": "f33d21996b25786308c22359367a1bd3d37d8165161c42179dedc569e4587a99"
+    },
+    {
+      "path": "cases/V12_SCORE85/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 252788,
+      "sha256": "a388d68a36418439be11c32ac355a3887161464d12cf2518bbc6a2cd4bd4c8f0"
+    },
+    {
+      "path": "cases/V12_SCORE85/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 24879,
+      "sha256": "4ca98df4087d553bf934b25df379b018f81fffc24b828621894e37e5401ad8f1"
+    },
+    {
+      "path": "cases/V12_SCORE85/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 285365,
+      "sha256": "7828bbe757ddf78774b930800b9575a7d1779424487773c6c7464ec4b34ddf97"
+    },
+    {
+      "path": "cases/V12_SCORE85/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 233468,
+      "sha256": "549c552b54d2e0afc0cffbbc5133f4eba2b5f9b660534866b4a419ab943773f2"
+    },
+    {
+      "path": "cases/V12_SCORE85/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 253199,
+      "sha256": "524792719dbb591b182a8c735ab56c5ae53d47f7d8aa155c17c0f728be1b0def"
+    },
+    {
+      "path": "cases/V12_SCORE85/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 24783,
+      "sha256": "f8521fcb543c6443e45f40a7aa2a72549461d34bc8f5c5b76ab1a2789ced7e2e"
+    },
+    {
+      "path": "cases/V12_SCORE85/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 280480,
+      "sha256": "5b3078d99065bee70420e90939c59cfd967e7dee8544f9b820a0eaaccb934ec8"
+    },
+    {
+      "path": "cases/V12_SCORE85/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 229329,
+      "sha256": "4e5a08d13c9656a9f2adda7ba214f95483a09814081000326d54858719102347"
+    },
+    {
+      "path": "cases/V12_SCORE85/runs/summary.json",
+      "bytes": 84595,
+      "sha256": "2e8c78940f3e24675c07a62495b56f2ab5324c787fbdacc6688a3e197f320118"
+    },
+    {
+      "path": "cases/V12_VOLUME55/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 191852,
+      "sha256": "d109dcf279c5fbda54ff48aa87cf6f708241e3c3da8043712f52644beb7a5cff"
+    },
+    {
+      "path": "cases/V12_VOLUME55/result.json",
+      "bytes": 87134,
+      "sha256": "fe7fadd1aa4c11517bf90aee48861002376de46129f748444741ac3b910d7eca"
+    },
+    {
+      "path": "cases/V12_VOLUME55/runs/portfolio-price-model-summary.json",
+      "bytes": 84222,
+      "sha256": "0a5924d6e1c64fd2ab216b5c09add7eef4e709d2e219634ca73d6efce4a1d8e4"
+    },
+    {
+      "path": "cases/V12_VOLUME55/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 267284,
+      "sha256": "0fb45bfeb1a46d4c821365fd692c49e2026145456c87c45acd995621e890a56f"
+    },
+    {
+      "path": "cases/V12_VOLUME55/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 24814,
+      "sha256": "8116df2aa6ce7077e534f729a9f2e1e755db8c1015c1aa2e1a60ed420b7c064e"
+    },
+    {
+      "path": "cases/V12_VOLUME55/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 304976,
+      "sha256": "d2065c3fc319bbbb1c08624b0ccc2a9cc5c75f78fbec2da3dc60b9c49aa34a46"
+    },
+    {
+      "path": "cases/V12_VOLUME55/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 252409,
+      "sha256": "564635c61ec43621ca0bf65aa14228801199b884422cf6296f0d6f9763f73c47"
+    },
+    {
+      "path": "cases/V12_VOLUME55/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 259547,
+      "sha256": "57727a9ad048befb9099883f581b0e9550cbe6746a5eb9d76a5cc8530d0e849e"
+    },
+    {
+      "path": "cases/V12_VOLUME55/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 24732,
+      "sha256": "d22c8d702514c90c4c920892ddba5041fbe61cb6da0c0b27ab5110bd42675c65"
+    },
+    {
+      "path": "cases/V12_VOLUME55/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 288913,
+      "sha256": "e7030e0b4d538c50763144e0f6f8b271b17a0cc2cfe7069e1f6e3dbc8a4ac414"
+    },
+    {
+      "path": "cases/V12_VOLUME55/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 237737,
+      "sha256": "f35afcc8726a060893e7ff8e5bb4cc002d1aad455f41123768f15428416da3e3"
+    },
+    {
+      "path": "cases/V12_VOLUME55/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 260210,
+      "sha256": "3cf8bc9322c7ed414027ec944e0ba431d1ee460522b9cd9de3f19fe9a0d98959"
+    },
+    {
+      "path": "cases/V12_VOLUME55/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 24817,
+      "sha256": "6b60045745d46efd50000733ada2ce4a47f08049df1a6642b6b5aa2896d52a47"
+    },
+    {
+      "path": "cases/V12_VOLUME55/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 283993,
+      "sha256": "3a7afea33679865678ead508df4d54b6e9707faec12ee03f9fe2eede4e43522d"
+    },
+    {
+      "path": "cases/V12_VOLUME55/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 233431,
+      "sha256": "9b5ada15abffb523b182cf84a122968b8410025f1bf56fed7f793af2718d45aa"
+    },
+    {
+      "path": "cases/V12_VOLUME55/runs/summary.json",
+      "bytes": 84560,
+      "sha256": "797ae67f092d437e2b829053b4deaa23b71cbcc677cadce0809a1b2a73cc58d4"
+    },
+    {
+      "path": "code-verification.txt",
+      "bytes": 493,
+      "sha256": "08171f9923591ad40359ff58687bd0366be56f026b2564820c2a7809705d9ee7"
+    },
+    {
+      "path": "comparison-summary.json",
+      "bytes": 1485738,
+      "sha256": "1de5f4a5931daa99fd16d7fe457b4babec1739bbd104c8cd34017ba366515dde"
+    },
+    {
+      "path": "entry-source-manifest.json",
+      "bytes": 2991,
+      "sha256": "24b68b6a0ac05921ab637171f9df16ea12d09be8a6f6ba37ef4ad1706f69adc9"
+    },
+    {
+      "path": "exit-tables/HYPE_BASELINE.jsonl.gz",
+      "bytes": 3001,
+      "sha256": "8143c044d053c2dc162685c157a67cf8e43d7987380a6a706d3d39e46b4a74d7"
+    },
+    {
+      "path": "exit-tables/HYPE_BREAKOUT_0.jsonl.gz",
+      "bytes": 4137,
+      "sha256": "95dbda25b06be2dccc0e7ed80374e3d94291d8b2b482ec7658c8ccba2649f57c"
+    },
+    {
+      "path": "exit-tables/HYPE_DISTANCE_1200.jsonl.gz",
+      "bytes": 3485,
+      "sha256": "51fc9ed21c8d4cc3195732dd399d91fa24bf106994799d28494300785b5d69e7"
+    },
+    {
+      "path": "exit-tables/HYPE_SLOPE_50.jsonl.gz",
+      "bytes": 3294,
+      "sha256": "e440708f9ca8ea860303a6bc1fd168ef51f5ad07899284eea5eb343ad8a9e9a7"
+    },
+    {
+      "path": "exit-tables/IDLE_BASELINE.jsonl.gz",
+      "bytes": 76210,
+      "sha256": "4cc9fd5519012478970bf48299782ede9e4e23ddd4b7952501ad996270a7830d"
+    },
+    {
+      "path": "exit-tables/IDLE_DOT_BTC_01.jsonl.gz",
+      "bytes": 77885,
+      "sha256": "f3378948fa37886ef23162024b1b0dda8972180aab53773cc5aa7c3f1ec3bc25"
+    },
+    {
+      "path": "exit-tables/IDLE_RELATIVE_02.jsonl.gz",
+      "bytes": 91358,
+      "sha256": "7bbac3d2be9be3d979ea88bb4b0324f0efe74345d709b7b000758cf5d76eac35"
+    },
+    {
+      "path": "exit-tables/IDLE_VOLUME_80PCT.jsonl.gz",
+      "bytes": 83762,
+      "sha256": "8bbeaf6a0154337e715010ba4427df70d63f84c47eeccff45bbe46dc47eb41b4"
+    },
+    {
+      "path": "exit-tables/Q102_BASELINE.jsonl.gz",
+      "bytes": 8151,
+      "sha256": "8d404cc05c28dc3ad45babf9499519ee3f0a005796c3a4956455c95a3b6cd9e5"
+    },
+    {
+      "path": "exit-tables/Q102_MARGIN_UPPER20.jsonl.gz",
+      "bytes": 8555,
+      "sha256": "7d26711daf83993104095c33f8cdb09e6a6ea39937e28efa386a0ee00abdcf21"
+    },
+    {
+      "path": "exit-tables/Q102_RET14_WIDEN.jsonl.gz",
+      "bytes": 8920,
+      "sha256": "12682e3e46847ea9002e8443cc7140359195cf5ebf48a719096935126957fc3d"
+    },
+    {
+      "path": "exit-tables/Q102_REV_LONG_020.jsonl.gz",
+      "bytes": 8339,
+      "sha256": "14bd70db46adad3e42085d65056c56a46b5cffbbb5a5ac58d45b1eab78c4ecdf"
+    },
+    {
+      "path": "exit-tables/Q102_REV_LONG_OFF.jsonl.gz",
+      "bytes": 9103,
+      "sha256": "f475623d95fce23d2961b3d54203fa6289dbf557ecc8604c9d8eeb805d8e7695"
+    },
+    {
+      "path": "exit-tables/RESIDUAL_BASELINE.jsonl.gz",
+      "bytes": 91458,
+      "sha256": "055996ca0c3c22b7a100d222e9c99390956fb15a73bb6a6985266144a5866bd3"
+    },
+    {
+      "path": "exit-tables/RESIDUAL_RELATIVE_02.jsonl.gz",
+      "bytes": 138718,
+      "sha256": "b100fc36003167704d3d533c32490a8a5202ac8400967abf74d9a5d13076b45c"
+    },
+    {
+      "path": "exit-tables/RESIDUAL_VOLUME_80PCT.jsonl.gz",
+      "bytes": 101197,
+      "sha256": "b8b885281054d00f5358168d8a024e48c65bd20255691027a7b38f5a196ec003"
+    },
+    {
+      "path": "exit-tables/V12_BASELINE.jsonl.gz",
+      "bytes": 87813,
+      "sha256": "7c64acd48cd88d256135b2e3e2261ef2ae16fbd069bb8f235cad58fb6fa041b5"
+    },
+    {
+      "path": "exit-tables/V12_BTC1_ATR07_SCORE85.jsonl.gz",
+      "bytes": 144559,
+      "sha256": "f01df02261e6c4f0cd1f2d60ad920b216cb9f9616510a649c6a36aa2104ecd7a"
+    },
+    {
+      "path": "exit-tables/V12_BTC_0.jsonl.gz",
+      "bytes": 122558,
+      "sha256": "69111f8d61a1c8c897c2b2c89fadee2499af0a9e44f0e7e3e818a2ce42c99d20"
+    },
+    {
+      "path": "exit-tables/V12_BTC_1P0.jsonl.gz",
+      "bytes": 111163,
+      "sha256": "579b1789e0c7575b93529a3dbe9b956cc9406e97e118070f0cfd931067fa2d15"
+    },
+    {
+      "path": "exit-tables/V12_BTC_1P5.jsonl.gz",
+      "bytes": 100844,
+      "sha256": "cb384d55624cfbe5dff0aefe4ca2f57ad8dc215e87de13a42dca6c54f5048bb3"
+    },
+    {
+      "path": "exit-tables/V12_MOMENTUM_018.jsonl.gz",
+      "bytes": 88650,
+      "sha256": "94ee5136c2d7543d024c3db448ab2a114601a8af49a8125055232c640cd8cfb5"
+    },
+    {
+      "path": "exit-tables/V12_RELAXED_ATR10.jsonl.gz",
+      "bytes": 98287,
+      "sha256": "a9b587bb4cdd8a658cb1f9095dd5eac5bc62313484a4a153f35621da9a7603cd"
+    },
+    {
+      "path": "exit-tables/V12_SCORE_085.jsonl.gz",
+      "bytes": 98010,
+      "sha256": "670b73559befc829dac7640961dc027047e03bdb31d38120b1bb474f6ac0f07f"
+    },
+    {
+      "path": "exit-tables/V12_VOLUME_055.jsonl.gz",
+      "bytes": 105382,
+      "sha256": "16d7bd0ebf100d59c7cb1f8bce256311121a7b727265ada4fee3ba25693840a9"
+    },
+    {
+      "path": "independent-verification.json",
+      "bytes": 12516,
+      "sha256": "ec22332193943aef35931bc23efde981a03b1a9167b3821e802aaa444ac0e1a7"
+    },
+    {
+      "path": "inputs/core-reference-candidates.jsonl.gz",
+      "bytes": 116852,
+      "sha256": "99b8d5d304916e298496b82d67f1135fb47880144028a7bdf5deab7161591e69"
+    },
+    {
+      "path": "market-input-manifest.json",
+      "bytes": 89890,
+      "sha256": "5e7b86b8acf1371a62e71e4cfde7da6ec547b768c0ae4c69a920c9a3a4ed6742"
+    },
+    {
+      "path": "quantity-production-vectors.json",
+      "bytes": 147182,
+      "sha256": "271ceaaf9f5124a1dc12fd2ed444e93c50437115f1094a652841f21c7b6ad4ea"
+    },
+    {
+      "path": "README.md",
+      "bytes": 11160,
+      "sha256": "49f7bdd25bd875537b4d3a940c0114fc40266deb0ed7bba41d3e14a54e74242e"
+    },
+    {
+      "path": "support/engine/docs/research/results/formal-core-ownership-audit-20261003/engine-source.zip",
+      "bytes": 31422,
+      "sha256": "ba39690a3b125f274571132c2992211bee6a30259e7b832cbf27208544ab4a78"
+    },
+    {
+      "path": "support/engine/scripts/research/formal_core_live_ownership.py",
+      "bytes": 7397,
+      "sha256": "bcd14be18428e7e7728c7d87bc647e78b12dc9a599dbc6a6a6543cb6110a9db9"
+    },
+    {
+      "path": "support/engine/scripts/research/formal_core_ownership_audit.py",
+      "bytes": 10112,
+      "sha256": "8065f316a38af98e3ea02ccbaa63269828f89e1c9943f64bc1d5d304199e7546"
+    },
+    {
+      "path": "support/engine/scripts/research/pengu1_hype_engine.py",
+      "bytes": 7169,
+      "sha256": "ec407f6f48730b30b291aced2c0ae88be45d398fb9fd77cdd313f12808c6403a"
+    },
+    {
+      "path": "support/engine/scripts/research/run_formal_core_overlay_diagnostic.py",
+      "bytes": 7885,
+      "sha256": "3fe4773500ab440509a0d19e276b64b67b544a9d2f7d33899d155ef0895052f5"
+    },
+    {
+      "path": "support/engine/scripts/research/run_pengu1_hype_comparison.py",
+      "bytes": 4786,
+      "sha256": "60fb107a2a3499a61043346a173609186c6c00d2eea07728f4888d85507c67a3"
+    },
+    {
+      "path": "support/run-current-vps-no-dca.py",
+      "bytes": 13566,
+      "sha256": "7c3459fa56bb999b6b669c303045deb9517aeca22e85c1f29c0450184b455058"
+    },
+    {
+      "path": "support/venue-filters-observed-20261007.json",
+      "bytes": 1428806,
+      "sha256": "4d79faec04af2cc1bf209db7939c9cf7ab09382c842f6bab5624bfa7e7d6f980"
+    },
+    {
+      "path": "support/venue_constraints.py",
+      "bytes": 1202,
+      "sha256": "ebda1fcc1d14893defe7810c9108bbcfa3e098f914ad3dd185b9ae50bb7ece6a"
+    }
+  ],
+  "source_hash_format": "SHA256 of UTF-8 file bytes after CRLF-to-LF normalization"
+}

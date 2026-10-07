@@ -12,7 +12,7 @@ import { classifyAsterRateBudgetFailure } from "./disdex-aster-rate-budget-polic
 import { V12AsterLiveAdapter } from "./v12-aster-live-adapter";
 import { IDLE_PRIORITY_SHORT_POLICY, IDLE_PRIORITY_SHORT_STRATEGY, type IdlePrioritySymbol } from "../config/idlePriorityShortPolicy";
 import type { IdlePriorityShortRuntime } from "../config/idlePriorityShortRuntime";
-import { buildIdleProtectionPlan, deterministicIdleClientOrderId, evaluateIdleLiveAdmission, type IdleBaselineAdmission } from "./idle-priority-short-live";
+import { buildIdleProtectionPlan, deterministicIdleClientOrderId, evaluateIdleLiveAdmission, evaluateIdleNormalizedQuantity, type IdleBaselineAdmission } from "./idle-priority-short-live";
 import { buildBaselineAdmissionEvidence } from "./idle-priority-short-baseline-admission";
 import { assertIdleParityCertificate } from "./idle-priority-short-parity-cert";
 import { computeIdlePriorityFeatures, evaluateIdleGenericCandidate, evaluateIdlePriorityShort, type IdleFeatures, type IdleSignal } from "./idle-priority-short-signal";
@@ -484,9 +484,10 @@ export class IdlePriorityShortRunner {
         await assertOperatorActivation(this.dependencies.runtime);
         await this.dependencies.executor.getAccountSnapshot();
         const normalized = await this.dependencies.executor.normalizeMarketQuantity(symbol, equity / quote.bidPrice, quote.bidPrice);
-        if (normalized.notional / equity < 1 - 1e-6) return { status: "held", message: `IDLE_FULL_1X_NOT_REALIZABLE_AFTER_ROUNDING:${symbol}`, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+        const quantityAdmission = evaluateIdleNormalizedQuantity({ equity, referencePrice: quote.bidPrice, normalized });
+        if (!quantityAdmission.accepted) return { status: "held", message: `IDLE_FULL_1X_NOT_REALIZABLE_AFTER_ROUNDING:${symbol}`, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
         const clientOrderId = deterministicIdleClientOrderId({ action: "ENTRY", symbol, signalTs: signal.features.signalTs });
-        const reservation = await lock.reserve({ strategyId: IDLE_PRIORITY_SHORT_STRATEGY, symbol, side: "SHORT", gross: 1, notionalUsd: equity });
+        const reservation = await lock.reserve({ strategyId: IDLE_PRIORITY_SHORT_STRATEGY, symbol, side: "SHORT", gross: quantityAdmission.gross, notionalUsd: quantityAdmission.notionalUsd });
         const pending: IdlePending = { action: "ENTRY", phase: "planned", symbol, route: signal.route, clientOrderId, idempotencyKey: clientOrderId, reservationId: reservation.reservationId, quantity: normalized.quantity, expectedPrice: quote.bidPrice, signalTs: signal.features.signalTs, decisionTs: signal.features.decisionTs, holdHours: signal.holdHours as 12 | 24, createdAt: this.now(), updatedAt: this.now(), reason: signal.reason };
         state.pending = pending;
         await this.dependencies.stateStore.save(state);

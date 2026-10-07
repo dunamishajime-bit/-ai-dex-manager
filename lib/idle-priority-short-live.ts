@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import type { NormalizedOrderQuantity } from "./direct-trade-executor";
 import { IDLE_PRIORITY_SHORT_POLICY, type IdlePrioritySymbol } from "../config/idlePriorityShortPolicy";
 
 export type IdleLiveAdmissionInput = {
@@ -133,4 +134,30 @@ export function normalizeIdleProtectionPrice(value: number, tickSize: number) {
     const decimals = Math.min(12, Math.max(0, String(tickSize).split(".")[1]?.replace(/0+$/, "").length || 0));
     const rounded = Math.round(value / tickSize) * tickSize;
     return { value: rounded, text: rounded.toFixed(decimals) };
+}
+
+/** A full target may lose less than one venue lot, but must never shrink arbitrarily. */
+export function evaluateIdleNormalizedQuantity(input: {
+    equity: number;
+    referencePrice: number;
+    normalized: NormalizedOrderQuantity;
+}): { accepted: boolean; reason: string; gross: number; notionalUsd: number } {
+    const reject = { accepted: false, reason: "FULL_1X_QUANTITY_INVALID", gross: 0, notionalUsd: 0 };
+    const { equity, referencePrice, normalized: n } = input;
+    const numbers = [equity, referencePrice, n.quantity, n.stepSize, n.minQuantity, n.maxQuantity, n.minNotional, n.notional];
+    if (numbers.some(value => !Number.isFinite(value)) || equity <= 0 || referencePrice <= 0
+        || n.quantity <= 0 || n.stepSize <= 0 || n.minQuantity < 0 || n.maxQuantity <= 0 || n.minNotional < 0) return reject;
+    const target = equity / referencePrice;
+    const expected = Math.floor(target / n.stepSize + 1e-12) * n.stepSize;
+    const quantityTolerance = Math.min(n.stepSize / 1000, Math.max(1, target, n.quantity) * Number.EPSILON * 16);
+    const notionalTolerance = Math.max(1, equity, n.notional) * Number.EPSILON * 16;
+    const notional = n.quantity * referencePrice;
+    if (!n.quantityText.trim() || !Number.isFinite(Number(n.quantityText))
+        || Math.abs(Number(n.quantityText) - n.quantity) > quantityTolerance
+        || Math.abs(n.quantity - expected) > quantityTolerance
+        || n.quantity > target + quantityTolerance
+        || n.quantity < n.minQuantity - quantityTolerance || n.quantity > n.maxQuantity + quantityTolerance
+        || Math.abs(n.notional - notional) > notionalTolerance
+        || notional > equity + notionalTolerance || notional < n.minNotional - notionalTolerance) return reject;
+    return { accepted: true, reason: "FULL_1X_LOT_FLOOR_ACCEPTED", gross: notional / equity, notionalUsd: notional };
 }

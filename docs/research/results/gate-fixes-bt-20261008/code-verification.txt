@@ -1,0 +1,20 @@
+  ...
+# Subtest: residual state migration refuses exposure, pending, and manual review
+ok 99 - residual state migration refuses exposure, pending, and manual review
+  ---
+  duration_ms: 4.870584
+  ...
+1..99
+# tests 99
+# suites 0
+# pass 99
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 2584.003894
+TEST_EXIT=0
+TYPECHECK_EXIT=0
+
+Review: no remaining Critical or Important findings in quantity fixes.
+Production vectors:280 passed, wire numeric equality asserted.

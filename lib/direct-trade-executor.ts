@@ -412,7 +412,7 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
         return {
             symbol: row.symbol,
             quantity,
-            quantityText: quantity.toFixed(precision).replace(/\.?0+$/, ""),
+            quantityText: precision > 0 ? quantity.toFixed(precision).replace(/0+$/, "").replace(/\.$/, "") : quantity.toFixed(0),
             minQuantity,
             maxQuantity,
             stepSize,

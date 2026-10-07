@@ -120,7 +120,7 @@ function exitTrade(ctx,c,strategy){
     if(next&&((sg===1&&next.open<=nextStop)||(sg===-1&&next.open>=nextStop))){px=next.open;reason='TRAILING_CROSSED_BEFORE_REPLACEMENT';}
     stop=nextStop;
    }
-   if(px===null&&strategy==='HYPE'){peak=Math.max(peak,b.high);stop=Math.max(stop,peak-c.trailingDistance)}
+   if(px===null&&strategy==='HYPE'&&b.high>=entry+c.trailingDistance){px=Math.max(entry+c.trailingDistance,b.open);reason='TAKE_PROFIT'}
    if(px===null&&(strategy==='IDLE'||strategy==='RESIDUAL')){const tp=entry*(1+sg*.25);if((sg===1&&b.high>=tp)||(sg===-1&&b.low<=tp)){px=tp;reason='TAKE_PROFIT'}}
   }
   events.push({ts:t+H,mark_return:sg*(b.close/entry-1),mfe:sg===1?b.high/entry-1:1-b.low/entry,mae:sg===1?b.low/entry-1:1-b.high/entry});
@@ -164,12 +164,15 @@ const variants=[
  ['IDLE','BASELINE',()=>{}],['IDLE','DOT_BTC_01',()=>configs.IDLE.IDLE_PRIORITY_SHORT_POLICY.routes.DOTUSDT.btc24Max=.01],['IDLE','VOLUME_80PCT',()=>{for(const x of Object.values(configs.IDLE.IDLE_PRIORITY_SHORT_POLICY.generic))if(x&&typeof x==='object'&&'volumeRatioMin'in x)x.volumeRatioMin*=.8}],
  ['IDLE','RELATIVE_02',()=>configs.IDLE.IDLE_PRIORITY_SHORT_POLICY.generic.relative.rel24AbsMin=.02],['RESIDUAL','BASELINE',()=>{}],['RESIDUAL','RELATIVE_02',()=>{for(const x of Object.values(configs.RESIDUAL.IDLE_RESIDUAL_LONG_POLICY.routes))x.rel24Min=.02}],['RESIDUAL','VOLUME_80PCT',()=>{for(const x of Object.values(configs.RESIDUAL.IDLE_RESIDUAL_LONG_POLICY.routes))x.volumeRatioMin*=.8}],
 ];
-const selected=process.argv.slice(2),results=[];fs.mkdirSync(path.join(OUT,'gate-cases'),{recursive:true});
+const exportAll=process.argv.includes('--export-all-exits');
+const residualSizing=require(path.join(ROOT,'lib/v12-top2-residual.ts'));
+const selected=process.argv.slice(2).filter(x=>x!=='--export-all-exits'),results=[];fs.mkdirSync(path.join(OUT,'gate-cases'),{recursive:true});
 for(const[strategy,name,patch]of variants){
  if(selected.length&&!selected.includes(strategy))continue;
  reset();patch();console.log('START',strategy,name);
  const a=generate(contexts.ANNUAL,strategy,START,END),d=generate(contexts.RECENT,strategy,DSTART,DEND),sim=simulate(contexts.ANNUAL,a,strategy);
  const result={strategy,name,scope:'SOURCE_ENTRY_H1_UNIT_RETURN_ISOLATED_SLEEVE_NOT_GLOBAL_BT',raw_candidate_count:a.signals.length,annual_candidates:a.signals,skipped:sim.skipped,metrics:[10,20,30].map(cost=>({cost_bps:cost,...metrics(sim.trades,cost)})),yesterday_candidates:d.signals,yesterday_diagnostics:d.diagnostics,trades:sim.trades};
+ if(exportAll){const exports=a.signals.map(c=>{const t=exitTrade(contexts.ANNUAL,c,strategy);if(t&&strategy==='V12'){const raw=Math.min(v.sizeV12Position(1,c.entry_price,c.atr,c.side).requestedGross*v.v12EntryGrossMultiplierForSignal(c),v.v12EntryGrossCapForSignal(c));t.requested_gross=residualSizing.decideV12ResidualEntry(raw,{v12Gross:0,cryptoGross:0,stockGross:0,totalGross:0},0).acceptedGross;}return t;}).filter(Boolean); const ep=path.join(ROOT,'docs/research/results/gate-fixes-bt-20261008/exit-tables');fs.mkdirSync(ep,{recursive:true});fs.writeFileSync(path.join(ep,strategy+'_'+name+'.jsonl'),exports.map(x=>JSON.stringify({...x,events:undefined})+'\n').join(''));console.log('EXPORTED',strategy,name,exports.length);continue;}
  const file=path.join(OUT,'gate-cases',strategy+'_'+name+'.json');fs.writeFileSync(file,JSON.stringify(result));
  results.push({...result,trades:undefined,yesterday_diagnostics:undefined,yesterday_candidates:result.yesterday_candidates.map(x=>({symbol:x.symbol,side:x.side,entry_ts_ms:x.entry_ts_ms,route:x.route}))});
  fs.writeFileSync(path.join(OUT,'gate-summary-'+strategy+'.json'),JSON.stringify(results.filter(x=>x.strategy===strategy),null,2));
@@ -177,4 +180,4 @@ for(const[strategy,name,patch]of variants){
 }
 reset();
 const sourceManifest=Object.keys(require.cache).filter(f=>f.startsWith(ROOT)&&f.endsWith('.ts')).map(f=>({path:path.relative(ROOT,f).replaceAll('\\','/'),sha256:crypto.createHash('sha256').update(fs.readFileSync(f)).digest('hex')}));
-fs.writeFileSync(path.join(OUT,'entry-source-manifest.json'),JSON.stringify(sourceManifest,null,2));
+fs.writeFileSync(path.join(exportAll?path.join(ROOT,'docs/research/results/gate-fixes-bt-20261008'):OUT,'entry-source-manifest.json'),JSON.stringify(sourceManifest,null,2));

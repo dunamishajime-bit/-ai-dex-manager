@@ -12,6 +12,7 @@ import { aggregatePendingExposure, readPendingExposureRegistry } from "./disdex-
 import { readSharedCryptoDailyRisk } from "./disdex-shared-crypto-daily-risk";
 import { readSharedKillSwitch } from "./disdex-shared-kill-switch";
 import { classifyAsterRateBudgetFailure } from "./disdex-aster-rate-budget-policy";
+import { evaluateIdleNormalizedQuantity } from "./idle-priority-short-live";
 import { buildBaselineAdmissionEvidence } from "./idle-priority-short-baseline-admission";
 import { coreAndSidecarExposure } from "./idle-priority-short-runner";
 import { evaluateIdleGenericCandidate, evaluateIdlePriorityShort, computeIdlePriorityFeatures } from "./idle-priority-short-signal";
@@ -274,9 +275,10 @@ export class IdleResidualLongRunner{
     await this.d.executor.prepareVenueMargin5xCross(signal.symbol);
     if(!(await this.verifyVenueFiveXCross(signal.symbol)))return {status:"held",message:`IDLE_RESIDUAL_5X_CROSS_READBACK_FAILED:${signal.symbol}`,symbol:signal.symbol,ordersSent:0,cancelsSent:0,positionChangesSent:0};
     const normalized=await this.d.executor.normalizeMarketQuantity(signal.symbol,equity/quote.askPrice,quote.askPrice);
-    if(normalized.notional/equity<1-1e-6)return {status:"held",message:`IDLE_RESIDUAL_FULL_1X_NOT_REALIZABLE:${signal.symbol}`,symbol:signal.symbol,ordersSent:0,cancelsSent:0,positionChangesSent:0};
+    const quantityAdmission=evaluateIdleNormalizedQuantity({equity,referencePrice:quote.askPrice,normalized});
+    if(!quantityAdmission.accepted)return {status:"held",message:`IDLE_RESIDUAL_FULL_1X_NOT_REALIZABLE:${signal.symbol}`,symbol:signal.symbol,ordersSent:0,cancelsSent:0,positionChangesSent:0};
     const clientOrderId=id([IDLE_RESIDUAL_LONG_STRATEGY,"ENTRY",signal.symbol,signal.features.signalTs],"res-entry");
-    const reservation=await lock.reserve({strategyId:IDLE_RESIDUAL_LONG_STRATEGY,symbol:signal.symbol,side:"LONG",gross:1,notionalUsd:equity});
+    const reservation=await lock.reserve({strategyId:IDLE_RESIDUAL_LONG_STRATEGY,symbol:signal.symbol,side:"LONG",gross:quantityAdmission.gross,notionalUsd:quantityAdmission.notionalUsd});
     const pending:IdleResidualLongPending={action:"ENTRY",phase:"planned",symbol:signal.symbol,route:signal.route,clientOrderId,idempotencyKey:clientOrderId,reservationId:reservation.reservationId,quantity:normalized.quantity,expectedPrice:quote.askPrice,signalTs:signal.features.signalTs,decisionTs:signal.features.decisionTs,createdAt:this.now(),updatedAt:this.now(),reason:signal.reason};
     state.pending=pending;state.lastDecision={decisionTs:signal.features.decisionTs,symbol:signal.symbol,route:signal.route,accepted:true,reason:"IDLE_RESIDUAL_ENTRY_PLANNED"};await this.d.stateStore.save(state);
     state.pending.phase="submitted";await this.d.stateStore.save(state);
