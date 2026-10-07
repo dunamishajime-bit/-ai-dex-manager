@@ -1,0 +1,2381 @@
+{
+  "strategy_id": [
+    {
+      "group": [
+        "FET"
+      ],
+      "trades": 7,
+      "wins": 6,
+      "losses": 1,
+      "win_rate": 0.8571428571428571,
+      "wilson95_low": 0.48686549668097007,
+      "wilson95_high": 0.9743210440510253,
+      "pf_usd": 24.3696793192588,
+      "net_pnl_usd": 1566.5744575101119,
+      "mean_net_pnl_usd": 223.79635107287314,
+      "mean_net_return": 0.04422932166573594,
+      "unit_pf": 21.966747347757202,
+      "average_win_return": 0.054061956836975615,
+      "average_loss_return": -0.014766489361702061
+    },
+    {
+      "group": [
+        "HYPE_LONG"
+      ],
+      "trades": 26,
+      "wins": 16,
+      "losses": 10,
+      "win_rate": 0.6153846153846154,
+      "wilson95_low": 0.42534520039420076,
+      "wilson95_high": 0.7757164048816557,
+      "pf_usd": 4.001127558486679,
+      "net_pnl_usd": 3599.859713743315,
+      "mean_net_pnl_usd": 138.45614283628134,
+      "mean_net_return": 0.0081060013961802,
+      "unit_pf": 1.4213956634416032,
+      "average_win_return": 0.04443088497804525,
+      "average_loss_return": -0.050013812334803884
+    },
+    {
+      "group": [
+        "IDLE"
+      ],
+      "trades": 65,
+      "wins": 42,
+      "losses": 23,
+      "win_rate": 0.6461538461538462,
+      "wilson95_low": 0.5247488020503202,
+      "wilson95_high": 0.7512471073997797,
+      "pf_usd": 3.0221078885713313,
+      "net_pnl_usd": 4712.088729769323,
+      "mean_net_pnl_usd": 72.4936727656819,
+      "mean_net_return": 0.008745220888115971,
+      "unit_pf": 2.144378346280036,
+      "average_win_return": 0.02536101501759263,
+      "average_loss_return": -0.021596664043971838
+    },
+    {
+      "group": [
+        "PENGU"
+      ],
+      "trades": 65,
+      "wins": 49,
+      "losses": 16,
+      "win_rate": 0.7538461538461538,
+      "wilson95_low": 0.6369398600835174,
+      "wilson95_high": 0.842421456329814,
+      "pf_usd": 1.7493494440648607,
+      "net_pnl_usd": 3963.8258069900094,
+      "mean_net_pnl_usd": 60.98193549215399,
+      "mean_net_return": 0.03939645541209953,
+      "unit_pf": 4.295639640994573,
+      "average_win_return": 0.06811810366628811,
+      "average_loss_return": -0.048563592366352985
+    },
+    {
+      "group": [
+        "Q102"
+      ],
+      "trades": 133,
+      "wins": 85,
+      "losses": 48,
+      "win_rate": 0.6390977443609023,
+      "wilson95_low": 0.5546297002626035,
+      "wilson95_high": 0.7157559134688933,
+      "pf_usd": 2.6030420898843576,
+      "net_pnl_usd": 9808.706399236644,
+      "mean_net_pnl_usd": 73.7496721747116,
+      "mean_net_return": 0.01582768489507091,
+      "unit_pf": 2.3465375573289298,
+      "average_win_return": 0.04315778521351466,
+      "average_loss_return": -0.03256936775217324
+    },
+    {
+      "group": [
+        "RESIDUAL"
+      ],
+      "trades": 30,
+      "wins": 18,
+      "losses": 12,
+      "win_rate": 0.6,
+      "wilson95_low": 0.42320052498273836,
+      "wilson95_high": 0.7540960567391659,
+      "pf_usd": 1.5409419194903626,
+      "net_pnl_usd": 309.8480662446361,
+      "mean_net_pnl_usd": 10.328268874821202,
+      "mean_net_return": 0.004940146850031079,
+      "unit_pf": 2.216121650841799,
+      "average_win_return": 0.01500393537262988,
+      "average_loss_return": -0.010155535933867123
+    },
+    {
+      "group": [
+        "V12"
+      ],
+      "trades": 1123,
+      "wins": 452,
+      "losses": 671,
+      "win_rate": 0.402493321460374,
+      "wilson95_low": 0.37419024862032746,
+      "wilson95_high": 0.4314612289254075,
+      "pf_usd": 0.719680664363948,
+      "net_pnl_usd": -4717.112045672233,
+      "mean_net_pnl_usd": -4.200455962308311,
+      "mean_net_return": -0.0011881388428712759,
+      "unit_pf": 0.7760733363953767,
+      "average_win_return": 0.010230702803785017,
+      "average_loss_return": -0.008880115630186694
+    },
+    {
+      "group": [
+        "V52"
+      ],
+      "trades": 85,
+      "wins": 69,
+      "losses": 16,
+      "win_rate": 0.8117647058823529,
+      "wilson95_low": 0.7158877949459186,
+      "wilson95_high": 0.8806795788969659,
+      "pf_usd": 25.45382545324242,
+      "net_pnl_usd": 7969.224763323532,
+      "mean_net_pnl_usd": 93.75558545086508,
+      "mean_net_return": 0.008545991163093878,
+      "unit_pf": 24.2595530615046,
+      "average_win_return": 0.010980287322618111,
+      "average_loss_return": -0.0019519110248543776
+    }
+  ],
+  "strategy_id/side": [
+    {
+      "group": [
+        "FET",
+        "LONG"
+      ],
+      "trades": 7,
+      "wins": 6,
+      "losses": 1,
+      "win_rate": 0.8571428571428571,
+      "wilson95_low": 0.48686549668097007,
+      "wilson95_high": 0.9743210440510253,
+      "pf_usd": 24.3696793192588,
+      "net_pnl_usd": 1566.5744575101119,
+      "mean_net_pnl_usd": 223.79635107287314,
+      "mean_net_return": 0.04422932166573594,
+      "unit_pf": 21.966747347757202,
+      "average_win_return": 0.054061956836975615,
+      "average_loss_return": -0.014766489361702061
+    },
+    {
+      "group": [
+        "HYPE_LONG",
+        "LONG"
+      ],
+      "trades": 26,
+      "wins": 16,
+      "losses": 10,
+      "win_rate": 0.6153846153846154,
+      "wilson95_low": 0.42534520039420076,
+      "wilson95_high": 0.7757164048816557,
+      "pf_usd": 4.001127558486679,
+      "net_pnl_usd": 3599.859713743315,
+      "mean_net_pnl_usd": 138.45614283628134,
+      "mean_net_return": 0.0081060013961802,
+      "unit_pf": 1.4213956634416032,
+      "average_win_return": 0.04443088497804525,
+      "average_loss_return": -0.050013812334803884
+    },
+    {
+      "group": [
+        "IDLE",
+        "SHORT"
+      ],
+      "trades": 65,
+      "wins": 42,
+      "losses": 23,
+      "win_rate": 0.6461538461538462,
+      "wilson95_low": 0.5247488020503202,
+      "wilson95_high": 0.7512471073997797,
+      "pf_usd": 3.0221078885713313,
+      "net_pnl_usd": 4712.088729769323,
+      "mean_net_pnl_usd": 72.4936727656819,
+      "mean_net_return": 0.008745220888115971,
+      "unit_pf": 2.144378346280036,
+      "average_win_return": 0.02536101501759263,
+      "average_loss_return": -0.021596664043971838
+    },
+    {
+      "group": [
+        "PENGU",
+        "LONG"
+      ],
+      "trades": 44,
+      "wins": 33,
+      "losses": 11,
+      "win_rate": 0.75,
+      "wilson95_low": 0.6055915019158504,
+      "wilson95_high": 0.8542593391931426,
+      "pf_usd": 2.3481579744669703,
+      "net_pnl_usd": 4403.985516935607,
+      "mean_net_pnl_usd": 100.0905799303547,
+      "mean_net_return": 0.031026546261484357,
+      "unit_pf": 3.402579363716329,
+      "average_win_return": 0.05858719320911824,
+      "average_loss_return": -0.05165539458141728
+    },
+    {
+      "group": [
+        "PENGU",
+        "SHORT"
+      ],
+      "trades": 21,
+      "wins": 16,
+      "losses": 5,
+      "win_rate": 0.7619047619047619,
+      "wilson95_low": 0.5490841802765406,
+      "wilson95_high": 0.8937214361088773,
+      "pf_usd": 0.7824245096976772,
+      "net_pnl_usd": -440.15970994559757,
+      "mean_net_pnl_usd": -20.959986187885598,
+      "mean_net_return": 0.056933407918150374,
+      "unit_pf": 6.725837990751227,
+      "average_win_return": 0.08777560648420098,
+      "average_loss_return": -0.041761627493211544
+    },
+    {
+      "group": [
+        "Q102",
+        "LONG"
+      ],
+      "trades": 29,
+      "wins": 18,
+      "losses": 11,
+      "win_rate": 0.6206896551724138,
+      "wilson95_low": 0.4400222620928496,
+      "wilson95_high": 0.7731220426913266,
+      "pf_usd": 3.731357501989762,
+      "net_pnl_usd": 4512.7072618756165,
+      "mean_net_pnl_usd": 155.61059523709022,
+      "mean_net_return": 0.027182710541030455,
+      "unit_pf": 2.465665949796536,
+      "average_win_return": 0.07367455010966377,
+      "average_loss_return": -0.04889484511673314
+    },
+    {
+      "group": [
+        "Q102",
+        "SHORT"
+      ],
+      "trades": 104,
+      "wins": 67,
+      "losses": 37,
+      "win_rate": 0.6442307692307693,
+      "wilson95_low": 0.5485886820119005,
+      "wilson95_high": 0.7295971015818149,
+      "pf_usd": 2.185683038955484,
+      "net_pnl_usd": 5295.999137361027,
+      "mean_net_pnl_usd": 50.92306862847142,
+      "mean_net_return": 0.012661379666870653,
+      "unit_pf": 2.284057538046226,
+      "average_win_return": 0.0349592513608179,
+      "average_loss_return": -0.027715847454601383
+    },
+    {
+      "group": [
+        "RESIDUAL",
+        "LONG"
+      ],
+      "trades": 30,
+      "wins": 18,
+      "losses": 12,
+      "win_rate": 0.6,
+      "wilson95_low": 0.42320052498273836,
+      "wilson95_high": 0.7540960567391659,
+      "pf_usd": 1.5409419194903626,
+      "net_pnl_usd": 309.8480662446361,
+      "mean_net_pnl_usd": 10.328268874821202,
+      "mean_net_return": 0.004940146850031079,
+      "unit_pf": 2.216121650841799,
+      "average_win_return": 0.01500393537262988,
+      "average_loss_return": -0.010155535933867123
+    },
+    {
+      "group": [
+        "V12",
+        "LONG"
+      ],
+      "trades": 406,
+      "wins": 148,
+      "losses": 258,
+      "win_rate": 0.3645320197044335,
+      "wilson95_low": 0.3191870023119107,
+      "wilson95_high": 0.41241662211274516,
+      "pf_usd": 0.42169895390243745,
+      "net_pnl_usd": -4031.8088047335073,
+      "mean_net_pnl_usd": -9.930563558456914,
+      "mean_net_return": -0.0022385855753872517,
+      "unit_pf": 0.5875284837794761,
+      "average_win_return": 0.008747279071658256,
+      "average_loss_return": -0.008540554442684676
+    },
+    {
+      "group": [
+        "V12",
+        "SHORT"
+      ],
+      "trades": 717,
+      "wins": 304,
+      "losses": 413,
+      "win_rate": 0.42398884239888424,
+      "wilson95_low": 0.3883147897101949,
+      "wilson95_high": 0.4604730715897078,
+      "pf_usd": 0.9304671550013739,
+      "net_pnl_usd": -685.3032409387255,
+      "mean_net_pnl_usd": -0.955792525716493,
+      "mean_net_return": -0.0005933252119068598,
+      "unit_pf": 0.8867101288078021,
+      "average_win_return": 0.01095289593653094,
+      "average_loss_return": -0.009092238599618946
+    },
+    {
+      "group": [
+        "V52",
+        "LONG"
+      ],
+      "trades": 34,
+      "wins": 30,
+      "losses": 4,
+      "win_rate": 0.8823529411764706,
+      "wilson95_low": 0.7337882520370121,
+      "wilson95_high": 0.9532862902656388,
+      "pf_usd": 1203.803553603875,
+      "net_pnl_usd": 3298.7644579122016,
+      "mean_net_pnl_usd": 97.02248405624123,
+      "mean_net_return": 0.009562271604497857,
+      "unit_pf": 53.87157258906199,
+      "average_win_return": 0.011042214081848904,
+      "average_loss_return": -0.0015372969756350077
+    },
+    {
+      "group": [
+        "V52",
+        "SHORT"
+      ],
+      "trades": 51,
+      "wins": 39,
+      "losses": 12,
+      "win_rate": 0.7647058823529411,
+      "wilson95_low": 0.632375118636542,
+      "wilson95_high": 0.8599518740113747,
+      "pf_usd": 15.453091460729699,
+      "net_pnl_usd": 4670.46030541133,
+      "mean_net_pnl_usd": 91.57765304728099,
+      "mean_net_return": 0.00786847086882456,
+      "unit_pf": 16.9995932596782,
+      "average_win_return": 0.01093265135397904,
+      "average_loss_return": -0.002090115707927501
+    }
+  ],
+  "strategy_id/family": [
+    {
+      "group": [
+        "FET",
+        "None"
+      ],
+      "trades": 7,
+      "wins": 6,
+      "losses": 1,
+      "win_rate": 0.8571428571428571,
+      "wilson95_low": 0.48686549668097007,
+      "wilson95_high": 0.9743210440510253,
+      "pf_usd": 24.3696793192588,
+      "net_pnl_usd": 1566.5744575101119,
+      "mean_net_pnl_usd": 223.79635107287314,
+      "mean_net_return": 0.04422932166573594,
+      "unit_pf": 21.966747347757202,
+      "average_win_return": 0.054061956836975615,
+      "average_loss_return": -0.014766489361702061
+    },
+    {
+      "group": [
+        "HYPE_LONG",
+        "None"
+      ],
+      "trades": 26,
+      "wins": 16,
+      "losses": 10,
+      "win_rate": 0.6153846153846154,
+      "wilson95_low": 0.42534520039420076,
+      "wilson95_high": 0.7757164048816557,
+      "pf_usd": 4.001127558486679,
+      "net_pnl_usd": 3599.859713743315,
+      "mean_net_pnl_usd": 138.45614283628134,
+      "mean_net_return": 0.0081060013961802,
+      "unit_pf": 1.4213956634416032,
+      "average_win_return": 0.04443088497804525,
+      "average_loss_return": -0.050013812334803884
+    },
+    {
+      "group": [
+        "IDLE",
+        "None"
+      ],
+      "trades": 65,
+      "wins": 42,
+      "losses": 23,
+      "win_rate": 0.6461538461538462,
+      "wilson95_low": 0.5247488020503202,
+      "wilson95_high": 0.7512471073997797,
+      "pf_usd": 3.0221078885713313,
+      "net_pnl_usd": 4712.088729769323,
+      "mean_net_pnl_usd": 72.4936727656819,
+      "mean_net_return": 0.008745220888115971,
+      "unit_pf": 2.144378346280036,
+      "average_win_return": 0.02536101501759263,
+      "average_loss_return": -0.021596664043971838
+    },
+    {
+      "group": [
+        "PENGU",
+        "None"
+      ],
+      "trades": 65,
+      "wins": 49,
+      "losses": 16,
+      "win_rate": 0.7538461538461538,
+      "wilson95_low": 0.6369398600835174,
+      "wilson95_high": 0.842421456329814,
+      "pf_usd": 1.7493494440648607,
+      "net_pnl_usd": 3963.8258069900094,
+      "mean_net_pnl_usd": 60.98193549215399,
+      "mean_net_return": 0.03939645541209953,
+      "unit_pf": 4.295639640994573,
+      "average_win_return": 0.06811810366628811,
+      "average_loss_return": -0.048563592366352985
+    },
+    {
+      "group": [
+        "Q102",
+        "BRK"
+      ],
+      "trades": 11,
+      "wins": 8,
+      "losses": 3,
+      "win_rate": 0.7272727272727273,
+      "wilson95_low": 0.4343497069897537,
+      "wilson95_high": 0.9025411942607853,
+      "pf_usd": 2.967024216258588,
+      "net_pnl_usd": 675.6489182015861,
+      "mean_net_pnl_usd": 61.422628927416916,
+      "mean_net_return": 0.04570045070404723,
+      "unit_pf": 3.0684725617024573,
+      "average_win_return": 0.09321711573740106,
+      "average_loss_return": -0.08101065605156299
+    },
+    {
+      "group": [
+        "Q102",
+        "HIGH_VOL"
+      ],
+      "trades": 23,
+      "wins": 15,
+      "losses": 8,
+      "win_rate": 0.6521739130434783,
+      "wilson95_low": 0.4488997690689164,
+      "wilson95_high": 0.8118894536301776,
+      "pf_usd": 5.063367083073892,
+      "net_pnl_usd": 4748.764050389933,
+      "mean_net_pnl_usd": 206.46800219086666,
+      "mean_net_return": 0.029804399396058577,
+      "unit_pf": 3.0260657696000495,
+      "average_win_return": 0.06825614796355516,
+      "average_loss_return": -0.042292629167997524
+    },
+    {
+      "group": [
+        "Q102",
+        "MR"
+      ],
+      "trades": 35,
+      "wins": 17,
+      "losses": 18,
+      "win_rate": 0.4857142857142857,
+      "wilson95_low": 0.32993980391252736,
+      "wilson95_high": 0.6443146037328837,
+      "pf_usd": 0.11184329826196161,
+      "net_pnl_usd": -2503.248379075008,
+      "mean_net_pnl_usd": -71.52138225928594,
+      "mean_net_return": 0.0018727239828820995,
+      "unit_pf": 1.1254958473631125,
+      "average_win_return": 0.034578602474877686,
+      "average_loss_return": -0.029016161259558176
+    },
+    {
+      "group": [
+        "Q102",
+        "PB"
+      ],
+      "trades": 16,
+      "wins": 12,
+      "losses": 4,
+      "win_rate": 0.75,
+      "wilson95_low": 0.5050123107060135,
+      "wilson95_high": 0.8981809801576265,
+      "pf_usd": 7.501531981903144,
+      "net_pnl_usd": 4633.57585129129,
+      "mean_net_pnl_usd": 289.5984907057056,
+      "mean_net_return": 0.013442910201388436,
+      "unit_pf": 2.95478144223825,
+      "average_win_return": 0.027093130539277005,
+      "average_loss_return": -0.027507750812277264
+    },
+    {
+      "group": [
+        "Q102",
+        "REV"
+      ],
+      "trades": 48,
+      "wins": 33,
+      "losses": 15,
+      "win_rate": 0.6875,
+      "wilson95_low": 0.5466666274950367,
+      "wilson95_high": 0.800544878322685,
+      "pf_usd": 3.0957826931401575,
+      "net_pnl_usd": 2253.965958428843,
+      "mean_net_pnl_usd": 46.957624133934225,
+      "mean_net_return": 0.013255084261822411,
+      "unit_pf": 2.8197391827909475,
+      "average_win_return": 0.02987511482581715,
+      "average_loss_return": -0.02330898297896601
+    },
+    {
+      "group": [
+        "RESIDUAL",
+        "None"
+      ],
+      "trades": 30,
+      "wins": 18,
+      "losses": 12,
+      "win_rate": 0.6,
+      "wilson95_low": 0.42320052498273836,
+      "wilson95_high": 0.7540960567391659,
+      "pf_usd": 1.5409419194903626,
+      "net_pnl_usd": 309.8480662446361,
+      "mean_net_pnl_usd": 10.328268874821202,
+      "mean_net_return": 0.004940146850031079,
+      "unit_pf": 2.216121650841799,
+      "average_win_return": 0.01500393537262988,
+      "average_loss_return": -0.010155535933867123
+    },
+    {
+      "group": [
+        "V12",
+        "None"
+      ],
+      "trades": 1123,
+      "wins": 452,
+      "losses": 671,
+      "win_rate": 0.402493321460374,
+      "wilson95_low": 0.37419024862032746,
+      "wilson95_high": 0.4314612289254075,
+      "pf_usd": 0.719680664363948,
+      "net_pnl_usd": -4717.112045672233,
+      "mean_net_pnl_usd": -4.200455962308311,
+      "mean_net_return": -0.0011881388428712759,
+      "unit_pf": 0.7760733363953767,
+      "average_win_return": 0.010230702803785017,
+      "average_loss_return": -0.008880115630186694
+    },
+    {
+      "group": [
+        "V52",
+        "None"
+      ],
+      "trades": 85,
+      "wins": 69,
+      "losses": 16,
+      "win_rate": 0.8117647058823529,
+      "wilson95_low": 0.7158877949459186,
+      "wilson95_high": 0.8806795788969659,
+      "pf_usd": 25.45382545324242,
+      "net_pnl_usd": 7969.224763323532,
+      "mean_net_pnl_usd": 93.75558545086508,
+      "mean_net_return": 0.008545991163093878,
+      "unit_pf": 24.2595530615046,
+      "average_win_return": 0.010980287322618111,
+      "average_loss_return": -0.0019519110248543776
+    }
+  ],
+  "strategy_id/route": [
+    {
+      "group": [
+        "FET",
+        "None"
+      ],
+      "trades": 7,
+      "wins": 6,
+      "losses": 1,
+      "win_rate": 0.8571428571428571,
+      "wilson95_low": 0.48686549668097007,
+      "wilson95_high": 0.9743210440510253,
+      "pf_usd": 24.3696793192588,
+      "net_pnl_usd": 1566.5744575101119,
+      "mean_net_pnl_usd": 223.79635107287314,
+      "mean_net_return": 0.04422932166573594,
+      "unit_pf": 21.966747347757202,
+      "average_win_return": 0.054061956836975615,
+      "average_loss_return": -0.014766489361702061
+    },
+    {
+      "group": [
+        "HYPE_LONG",
+        "None"
+      ],
+      "trades": 26,
+      "wins": 16,
+      "losses": 10,
+      "win_rate": 0.6153846153846154,
+      "wilson95_low": 0.42534520039420076,
+      "wilson95_high": 0.7757164048816557,
+      "pf_usd": 4.001127558486679,
+      "net_pnl_usd": 3599.859713743315,
+      "mean_net_pnl_usd": 138.45614283628134,
+      "mean_net_return": 0.0081060013961802,
+      "unit_pf": 1.4213956634416032,
+      "average_win_return": 0.04443088497804525,
+      "average_loss_return": -0.050013812334803884
+    },
+    {
+      "group": [
+        "IDLE",
+        "IDLE_DOT_MOMENTUM_SHORT_BTCREL"
+      ],
+      "trades": 20,
+      "wins": 10,
+      "losses": 10,
+      "win_rate": 0.5,
+      "wilson95_low": 0.2992949144298199,
+      "wilson95_high": 0.7007050855701801,
+      "pf_usd": 1.4632889059876124,
+      "net_pnl_usd": 133.40709133679596,
+      "mean_net_pnl_usd": 6.670354566839798,
+      "mean_net_return": 0.0016834884869369447,
+      "unit_pf": 1.1676908194446722,
+      "average_win_return": 0.023445458223020556,
+      "average_loss_return": -0.020078481249146667
+    },
+    {
+      "group": [
+        "IDLE",
+        "IDLE_JUP_RELATIVE_SHORT"
+      ],
+      "trades": 19,
+      "wins": 14,
+      "losses": 5,
+      "win_rate": 0.7368421052631579,
+      "wilson95_low": 0.5120803155892935,
+      "wilson95_high": 0.8819376166045982,
+      "pf_usd": 1.5533039092938299,
+      "net_pnl_usd": 886.9490905343894,
+      "mean_net_pnl_usd": 46.68153108075734,
+      "mean_net_return": 0.008700874054862801,
+      "unit_pf": 2.5629865530648144,
+      "average_win_return": 0.019363307107570282,
+      "average_loss_return": -0.02115393849271815
+    },
+    {
+      "group": [
+        "IDLE",
+        "IDLE_RENDER_RELATIVE_SHORT"
+      ],
+      "trades": 17,
+      "wins": 9,
+      "losses": 8,
+      "win_rate": 0.5294117647058824,
+      "wilson95_low": 0.30962897311549487,
+      "wilson95_high": 0.738351988039119,
+      "pf_usd": 2.7950884066727943,
+      "net_pnl_usd": 788.624788868661,
+      "mean_net_pnl_usd": 46.38969346286241,
+      "mean_net_return": 0.000651897695697171,
+      "unit_pf": 1.0582759248015492,
+      "average_win_return": 0.022361225431460754,
+      "average_loss_return": -0.02377109600703686
+    },
+    {
+      "group": [
+        "IDLE",
+        "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2"
+      ],
+      "trades": 4,
+      "wins": 4,
+      "losses": 0,
+      "win_rate": 1.0,
+      "wilson95_low": 0.5100999795960008,
+      "wilson95_high": 1.0,
+      "pf_usd": null,
+      "net_pnl_usd": 120.00416826715865,
+      "mean_net_pnl_usd": 30.001042066789662,
+      "mean_net_return": 0.02457446433897337,
+      "unit_pf": null,
+      "average_win_return": 0.02457446433897337,
+      "average_loss_return": null
+    },
+    {
+      "group": [
+        "IDLE",
+        "IDLE_TIA_BREAKDOWN_SHORT_VOLCAP100"
+      ],
+      "trades": 5,
+      "wins": 5,
+      "losses": 0,
+      "win_rate": 1.0,
+      "wilson95_low": 0.5655085052479191,
+      "wilson95_high": 1.0000000000000002,
+      "pf_usd": null,
+      "net_pnl_usd": 2783.1035907623186,
+      "mean_net_pnl_usd": 556.6207181524637,
+      "mean_net_return": 0.05201457255273214,
+      "unit_pf": null,
+      "average_win_return": 0.05201457255273214,
+      "average_loss_return": null
+    },
+    {
+      "group": [
+        "PENGU",
+        "BASE_V64_LONG"
+      ],
+      "trades": 9,
+      "wins": 6,
+      "losses": 3,
+      "win_rate": 0.6666666666666666,
+      "wilson95_low": 0.35419734749908977,
+      "wilson95_high": 0.879418401317257,
+      "pf_usd": 1.362293540489218,
+      "net_pnl_usd": 167.4222854607346,
+      "mean_net_pnl_usd": 18.602476162303844,
+      "mean_net_return": 0.03827893998274612,
+      "unit_pf": 2.4124911278916836,
+      "average_win_return": 0.09806886705686434,
+      "average_loss_return": -0.0813009141654903
+    },
+    {
+      "group": [
+        "PENGU",
+        "RECOVERY_V8"
+      ],
+      "trades": 35,
+      "wins": 27,
+      "losses": 8,
+      "win_rate": 0.7714285714285715,
+      "wilson95_low": 0.6098236221989801,
+      "wilson95_high": 0.879342632538209,
+      "pf_usd": 2.5106030452648356,
+      "net_pnl_usd": 4236.563231474872,
+      "mean_net_pnl_usd": 121.04466375642491,
+      "mean_net_return": 0.02916164501887419,
+      "unit_pf": 4.147199539795021,
+      "average_win_return": 0.0498134879096191,
+      "average_loss_return": -0.04053832473738989
+    },
+    {
+      "group": [
+        "PENGU",
+        "SHORT_V20"
+      ],
+      "trades": 21,
+      "wins": 16,
+      "losses": 5,
+      "win_rate": 0.7619047619047619,
+      "wilson95_low": 0.5490841802765406,
+      "wilson95_high": 0.8937214361088773,
+      "pf_usd": 0.7824245096976772,
+      "net_pnl_usd": -440.15970994559757,
+      "mean_net_pnl_usd": -20.959986187885598,
+      "mean_net_return": 0.056933407918150374,
+      "unit_pf": 6.725837990751227,
+      "average_win_return": 0.08777560648420098,
+      "average_loss_return": -0.041761627493211544
+    },
+    {
+      "group": [
+        "Q102",
+        "None"
+      ],
+      "trades": 133,
+      "wins": 85,
+      "losses": 48,
+      "win_rate": 0.6390977443609023,
+      "wilson95_low": 0.5546297002626035,
+      "wilson95_high": 0.7157559134688933,
+      "pf_usd": 2.6030420898843576,
+      "net_pnl_usd": 9808.706399236644,
+      "mean_net_pnl_usd": 73.7496721747116,
+      "mean_net_return": 0.01582768489507091,
+      "unit_pf": 2.3465375573289298,
+      "average_win_return": 0.04315778521351466,
+      "average_loss_return": -0.03256936775217324
+    },
+    {
+      "group": [
+        "RESIDUAL",
+        "AVAX_REL_LONG"
+      ],
+      "trades": 19,
+      "wins": 11,
+      "losses": 8,
+      "win_rate": 0.5789473684210527,
+      "wilson95_low": 0.36275551465160105,
+      "wilson95_high": 0.7685837960796962,
+      "pf_usd": 1.9470981417405755,
+      "net_pnl_usd": 323.36923866640046,
+      "mean_net_pnl_usd": 17.01943361402108,
+      "mean_net_return": 0.0022703168564486595,
+      "unit_pf": 1.490987283939955,
+      "average_win_return": 0.011908336123754722,
+      "average_loss_return": -0.010981959636097176
+    },
+    {
+      "group": [
+        "RESIDUAL",
+        "DOGE_REL_VOL"
+      ],
+      "trades": 11,
+      "wins": 7,
+      "losses": 4,
+      "win_rate": 0.6363636363636364,
+      "wilson95_low": 0.35379677689163724,
+      "wilson95_high": 0.8483377638586862,
+      "pf_usd": 0.9415583671332067,
+      "net_pnl_usd": -13.521172421764422,
+      "mean_net_pnl_usd": -1.2291974928876748,
+      "mean_net_return": 0.009551671384400712,
+      "unit_pf": 4.089269495907766,
+      "average_win_return": 0.019868448478005125,
+      "average_loss_return": -0.008502688529407016
+    },
+    {
+      "group": [
+        "V12",
+        "None"
+      ],
+      "trades": 1123,
+      "wins": 452,
+      "losses": 671,
+      "win_rate": 0.402493321460374,
+      "wilson95_low": 0.37419024862032746,
+      "wilson95_high": 0.4314612289254075,
+      "pf_usd": 0.719680664363948,
+      "net_pnl_usd": -4717.112045672233,
+      "mean_net_pnl_usd": -4.200455962308311,
+      "mean_net_return": -0.0011881388428712759,
+      "unit_pf": 0.7760733363953767,
+      "average_win_return": 0.010230702803785017,
+      "average_loss_return": -0.008880115630186694
+    },
+    {
+      "group": [
+        "V52",
+        "V50_POST_OPEN_BASIS"
+      ],
+      "trades": 85,
+      "wins": 69,
+      "losses": 16,
+      "win_rate": 0.8117647058823529,
+      "wilson95_low": 0.7158877949459186,
+      "wilson95_high": 0.8806795788969659,
+      "pf_usd": 25.45382545324242,
+      "net_pnl_usd": 7969.224763323532,
+      "mean_net_pnl_usd": 93.75558545086508,
+      "mean_net_return": 0.008545991163093878,
+      "unit_pf": 24.2595530615046,
+      "average_win_return": 0.010980287322618111,
+      "average_loss_return": -0.0019519110248543776
+    }
+  ],
+  "strategy_id/symbol": [
+    {
+      "group": [
+        "FET",
+        "FETUSDT"
+      ],
+      "trades": 7,
+      "wins": 6,
+      "losses": 1,
+      "win_rate": 0.8571428571428571,
+      "wilson95_low": 0.48686549668097007,
+      "wilson95_high": 0.9743210440510253,
+      "pf_usd": 24.3696793192588,
+      "net_pnl_usd": 1566.5744575101119,
+      "mean_net_pnl_usd": 223.79635107287314,
+      "mean_net_return": 0.04422932166573594,
+      "unit_pf": 21.966747347757202,
+      "average_win_return": 0.054061956836975615,
+      "average_loss_return": -0.014766489361702061
+    },
+    {
+      "group": [
+        "HYPE_LONG",
+        "HYPEUSDT"
+      ],
+      "trades": 26,
+      "wins": 16,
+      "losses": 10,
+      "win_rate": 0.6153846153846154,
+      "wilson95_low": 0.42534520039420076,
+      "wilson95_high": 0.7757164048816557,
+      "pf_usd": 4.001127558486679,
+      "net_pnl_usd": 3599.859713743315,
+      "mean_net_pnl_usd": 138.45614283628134,
+      "mean_net_return": 0.0081060013961802,
+      "unit_pf": 1.4213956634416032,
+      "average_win_return": 0.04443088497804525,
+      "average_loss_return": -0.050013812334803884
+    },
+    {
+      "group": [
+        "IDLE",
+        "DOTUSDT"
+      ],
+      "trades": 20,
+      "wins": 10,
+      "losses": 10,
+      "win_rate": 0.5,
+      "wilson95_low": 0.2992949144298199,
+      "wilson95_high": 0.7007050855701801,
+      "pf_usd": 1.4632889059876124,
+      "net_pnl_usd": 133.40709133679596,
+      "mean_net_pnl_usd": 6.670354566839798,
+      "mean_net_return": 0.0016834884869369447,
+      "unit_pf": 1.1676908194446722,
+      "average_win_return": 0.023445458223020556,
+      "average_loss_return": -0.020078481249146667
+    },
+    {
+      "group": [
+        "IDLE",
+        "JUPUSDT"
+      ],
+      "trades": 19,
+      "wins": 14,
+      "losses": 5,
+      "win_rate": 0.7368421052631579,
+      "wilson95_low": 0.5120803155892935,
+      "wilson95_high": 0.8819376166045982,
+      "pf_usd": 1.5533039092938299,
+      "net_pnl_usd": 886.9490905343894,
+      "mean_net_pnl_usd": 46.68153108075734,
+      "mean_net_return": 0.008700874054862801,
+      "unit_pf": 2.5629865530648144,
+      "average_win_return": 0.019363307107570282,
+      "average_loss_return": -0.02115393849271815
+    },
+    {
+      "group": [
+        "IDLE",
+        "RENDERUSDT"
+      ],
+      "trades": 17,
+      "wins": 9,
+      "losses": 8,
+      "win_rate": 0.5294117647058824,
+      "wilson95_low": 0.30962897311549487,
+      "wilson95_high": 0.738351988039119,
+      "pf_usd": 2.7950884066727943,
+      "net_pnl_usd": 788.624788868661,
+      "mean_net_pnl_usd": 46.38969346286241,
+      "mean_net_return": 0.000651897695697171,
+      "unit_pf": 1.0582759248015492,
+      "average_win_return": 0.022361225431460754,
+      "average_loss_return": -0.02377109600703686
+    },
+    {
+      "group": [
+        "IDLE",
+        "TAOUSDT"
+      ],
+      "trades": 4,
+      "wins": 4,
+      "losses": 0,
+      "win_rate": 1.0,
+      "wilson95_low": 0.5100999795960008,
+      "wilson95_high": 1.0,
+      "pf_usd": null,
+      "net_pnl_usd": 120.00416826715865,
+      "mean_net_pnl_usd": 30.001042066789662,
+      "mean_net_return": 0.02457446433897337,
+      "unit_pf": null,
+      "average_win_return": 0.02457446433897337,
+      "average_loss_return": null
+    },
+    {
+      "group": [
+        "IDLE",
+        "TIAUSDT"
+      ],
+      "trades": 5,
+      "wins": 5,
+      "losses": 0,
+      "win_rate": 1.0,
+      "wilson95_low": 0.5655085052479191,
+      "wilson95_high": 1.0000000000000002,
+      "pf_usd": null,
+      "net_pnl_usd": 2783.1035907623186,
+      "mean_net_pnl_usd": 556.6207181524637,
+      "mean_net_return": 0.05201457255273214,
+      "unit_pf": null,
+      "average_win_return": 0.05201457255273214,
+      "average_loss_return": null
+    },
+    {
+      "group": [
+        "PENGU",
+        "PENGUUSDT"
+      ],
+      "trades": 65,
+      "wins": 49,
+      "losses": 16,
+      "win_rate": 0.7538461538461538,
+      "wilson95_low": 0.6369398600835174,
+      "wilson95_high": 0.842421456329814,
+      "pf_usd": 1.7493494440648607,
+      "net_pnl_usd": 3963.8258069900094,
+      "mean_net_pnl_usd": 60.98193549215399,
+      "mean_net_return": 0.03939645541209953,
+      "unit_pf": 4.295639640994573,
+      "average_win_return": 0.06811810366628811,
+      "average_loss_return": -0.048563592366352985
+    },
+    {
+      "group": [
+        "Q102",
+        "APTUSDT"
+      ],
+      "trades": 21,
+      "wins": 12,
+      "losses": 9,
+      "win_rate": 0.5714285714285714,
+      "wilson95_low": 0.3654621629703244,
+      "wilson95_high": 0.7553030051347894,
+      "pf_usd": 1.099097703428864,
+      "net_pnl_usd": 67.64856365663447,
+      "mean_net_pnl_usd": 3.2213601741254507,
+      "mean_net_return": 0.009283495797192303,
+      "unit_pf": 2.120804590730649,
+      "average_win_return": 0.03074116680838068,
+      "average_loss_return": -0.01932673221772553
+    },
+    {
+      "group": [
+        "Q102",
+        "ARBUSDT"
+      ],
+      "trades": 6,
+      "wins": 5,
+      "losses": 1,
+      "win_rate": 0.8333333333333334,
+      "wilson95_low": 0.43649056343635395,
+      "wilson95_high": 0.9699474141282697,
+      "pf_usd": 3.146449950496726,
+      "net_pnl_usd": 154.11403322069,
+      "mean_net_pnl_usd": 25.685672203448334,
+      "mean_net_return": 0.042061313113998994,
+      "unit_pf": 7.350716693100083,
+      "average_win_return": 0.05842127332369277,
+      "average_loss_return": -0.03973848793446986
+    },
+    {
+      "group": [
+        "Q102",
+        "AVAXUSDT"
+      ],
+      "trades": 24,
+      "wins": 16,
+      "losses": 8,
+      "win_rate": 0.6666666666666666,
+      "wilson95_low": 0.4670595949408046,
+      "wilson95_high": 0.8202802131162036,
+      "pf_usd": 6.258758663051421,
+      "net_pnl_usd": 247.2113914695997,
+      "mean_net_pnl_usd": 10.300474644566654,
+      "mean_net_return": 0.006275449905063506,
+      "unit_pf": 1.5123793639773953,
+      "average_win_return": 0.027784669729138407,
+      "average_loss_return": -0.0367429897430863
+    },
+    {
+      "group": [
+        "Q102",
+        "DOGEUSDT"
+      ],
+      "trades": 14,
+      "wins": 9,
+      "losses": 5,
+      "win_rate": 0.6428571428571429,
+      "wilson95_low": 0.3876400468214042,
+      "wilson95_high": 0.8365550926279727,
+      "pf_usd": 2.044359849574447,
+      "net_pnl_usd": 82.94455227468956,
+      "mean_net_pnl_usd": 5.9246108767635395,
+      "mean_net_return": 0.013309267350839853,
+      "unit_pf": 4.727882115747245,
+      "average_win_return": 0.026256941960661848,
+      "average_loss_return": -0.009996546946839739
+    },
+    {
+      "group": [
+        "Q102",
+        "ENAUSDT"
+      ],
+      "trades": 6,
+      "wins": 4,
+      "losses": 2,
+      "win_rate": 0.6666666666666666,
+      "wilson95_low": 0.29998832134152864,
+      "wilson95_high": 0.9032306674407831,
+      "pf_usd": 3.0140791153775672,
+      "net_pnl_usd": 1032.8333809584085,
+      "mean_net_pnl_usd": 172.1388968264014,
+      "mean_net_return": 0.04981788459358205,
+      "unit_pf": 4.324393933715509,
+      "average_win_return": 0.09720515779228717,
+      "average_loss_return": -0.04495666180382818
+    },
+    {
+      "group": [
+        "Q102",
+        "FETUSDT"
+      ],
+      "trades": 30,
+      "wins": 22,
+      "losses": 8,
+      "win_rate": 0.7333333333333333,
+      "wilson95_low": 0.5555169795568831,
+      "wilson95_high": 0.8581750444608938,
+      "pf_usd": 5.533963766591096,
+      "net_pnl_usd": 6581.7649681979265,
+      "mean_net_pnl_usd": 219.39216560659756,
+      "mean_net_return": 0.0143769648322794,
+      "unit_pf": 2.5114801037997583,
+      "average_win_return": 0.03257565010000357,
+      "average_loss_return": -0.03566941965396208
+    },
+    {
+      "group": [
+        "Q102",
+        "NEARUSDT"
+      ],
+      "trades": 7,
+      "wins": 5,
+      "losses": 2,
+      "win_rate": 0.7142857142857143,
+      "wilson95_low": 0.35892909014821267,
+      "wilson95_high": 0.9177828342909844,
+      "pf_usd": 23.57846848331838,
+      "net_pnl_usd": 670.2349203363584,
+      "mean_net_pnl_usd": 95.74784576233692,
+      "mean_net_return": 0.05353569828975378,
+      "unit_pf": 3.3205995030235145,
+      "average_win_return": 0.10724765650630264,
+      "average_loss_return": -0.08074419725161837
+    },
+    {
+      "group": [
+        "Q102",
+        "ONDOUSDT"
+      ],
+      "trades": 2,
+      "wins": 1,
+      "losses": 1,
+      "win_rate": 0.5,
+      "wilson95_low": 0.09452865480086614,
+      "wilson95_high": 0.9054713451991339,
+      "pf_usd": 9.649451091881295,
+      "net_pnl_usd": 3566.2983098827053,
+      "mean_net_pnl_usd": 1783.1491549413527,
+      "mean_net_return": 0.06542627571765483,
+      "unit_pf": 5.138559307200871,
+      "average_win_return": 0.16247045073848823,
+      "average_loss_return": -0.031617899303178584
+    },
+    {
+      "group": [
+        "Q102",
+        "OPUSDT"
+      ],
+      "trades": 1,
+      "wins": 1,
+      "losses": 0,
+      "win_rate": 1.0,
+      "wilson95_low": 0.20654329147389294,
+      "wilson95_high": 1.0,
+      "pf_usd": null,
+      "net_pnl_usd": 8.66638826216275,
+      "mean_net_pnl_usd": 8.66638826216275,
+      "mean_net_return": 0.020962184187284565,
+      "unit_pf": null,
+      "average_win_return": 0.020962184187284565,
+      "average_loss_return": null
+    },
+    {
+      "group": [
+        "Q102",
+        "SEIUSDT"
+      ],
+      "trades": 2,
+      "wins": 1,
+      "losses": 1,
+      "win_rate": 0.5,
+      "wilson95_low": 0.09452865480086614,
+      "wilson95_high": 0.9054713451991339,
+      "pf_usd": 1.8882589868563384,
+      "net_pnl_usd": 28.52449992184205,
+      "mean_net_pnl_usd": 14.262249960921025,
+      "mean_net_return": 0.0010086154097034283,
+      "unit_pf": 1.068332812184096,
+      "average_win_return": 0.031537906976744204,
+      "average_loss_return": -0.029520676157337347
+    },
+    {
+      "group": [
+        "Q102",
+        "SUIUSDT"
+      ],
+      "trades": 5,
+      "wins": 3,
+      "losses": 2,
+      "win_rate": 0.6,
+      "wilson95_low": 0.23071993220883708,
+      "wilson95_high": 0.8823817688407467,
+      "pf_usd": 1.4474184728290678,
+      "net_pnl_usd": 30.284123250124225,
+      "mean_net_pnl_usd": 6.056824650024845,
+      "mean_net_return": 0.0020258573298536212,
+      "unit_pf": 1.0859759186091487,
+      "average_win_return": 0.04264822658773266,
+      "average_loss_return": -0.05890769655696494
+    },
+    {
+      "group": [
+        "Q102",
+        "UNIUSDT"
+      ],
+      "trades": 15,
+      "wins": 6,
+      "losses": 9,
+      "win_rate": 0.4,
+      "wilson95_low": 0.19824228082594664,
+      "wilson95_high": 0.642535572434923,
+      "pf_usd": 0.025570409009950976,
+      "net_pnl_usd": -2661.818732194497,
+      "mean_net_pnl_usd": -177.4545821462998,
+      "mean_net_return": 0.0034595244224464384,
+      "unit_pf": 1.1789329727823146,
+      "average_win_return": 0.05698429065851466,
+      "average_loss_return": -0.03222365306826571
+    },
+    {
+      "group": [
+        "RESIDUAL",
+        "AVAXUSDT"
+      ],
+      "trades": 19,
+      "wins": 11,
+      "losses": 8,
+      "win_rate": 0.5789473684210527,
+      "wilson95_low": 0.36275551465160105,
+      "wilson95_high": 0.7685837960796962,
+      "pf_usd": 1.9470981417405755,
+      "net_pnl_usd": 323.36923866640046,
+      "mean_net_pnl_usd": 17.01943361402108,
+      "mean_net_return": 0.0022703168564486595,
+      "unit_pf": 1.490987283939955,
+      "average_win_return": 0.011908336123754722,
+      "average_loss_return": -0.010981959636097176
+    },
+    {
+      "group": [
+        "RESIDUAL",
+        "DOGEUSDT"
+      ],
+      "trades": 11,
+      "wins": 7,
+      "losses": 4,
+      "win_rate": 0.6363636363636364,
+      "wilson95_low": 0.35379677689163724,
+      "wilson95_high": 0.8483377638586862,
+      "pf_usd": 0.9415583671332067,
+      "net_pnl_usd": -13.521172421764422,
+      "mean_net_pnl_usd": -1.2291974928876748,
+      "mean_net_return": 0.009551671384400712,
+      "unit_pf": 4.089269495907766,
+      "average_win_return": 0.019868448478005125,
+      "average_loss_return": -0.008502688529407016
+    },
+    {
+      "group": [
+        "V12",
+        "AAVEUSDT"
+      ],
+      "trades": 83,
+      "wins": 29,
+      "losses": 54,
+      "win_rate": 0.3493975903614458,
+      "wilson95_low": 0.25555971692976304,
+      "wilson95_high": 0.45655982025057457,
+      "pf_usd": 0.596953724253635,
+      "net_pnl_usd": -586.6393997907817,
+      "mean_net_pnl_usd": -7.06794457579255,
+      "mean_net_return": -0.0018169615926458174,
+      "unit_pf": 0.6598748947109949,
+      "average_win_return": 0.010089014777488211,
+      "average_loss_return": -0.008210911865495572
+    },
+    {
+      "group": [
+        "V12",
+        "ADAUSDT"
+      ],
+      "trades": 116,
+      "wins": 50,
+      "losses": 66,
+      "win_rate": 0.43103448275862066,
+      "wilson95_low": 0.34455285764797317,
+      "wilson95_high": 0.5219375763916257,
+      "pf_usd": 0.8428354042980613,
+      "net_pnl_usd": -356.7903415643876,
+      "mean_net_pnl_usd": -3.075778806589548,
+      "mean_net_return": -5.9288202282656756e-05,
+      "unit_pf": 0.9889267837487511,
+      "average_win_return": 0.012284192820958082,
+      "average_loss_return": -0.009410410189586245
+    },
+    {
+      "group": [
+        "V12",
+        "ATOMUSDT"
+      ],
+      "trades": 31,
+      "wins": 13,
+      "losses": 18,
+      "win_rate": 0.41935483870967744,
+      "wilson95_low": 0.26415303073549257,
+      "wilson95_high": 0.5923403564797902,
+      "pf_usd": 0.6610687749183348,
+      "net_pnl_usd": -189.0809791373341,
+      "mean_net_pnl_usd": -6.0993864237849715,
+      "mean_net_return": -0.0012115255182578583,
+      "unit_pf": 0.7230337594031798,
+      "average_win_return": 0.007541932601307852,
+      "average_loss_return": -0.0075334674934997604
+    },
+    {
+      "group": [
+        "V12",
+        "AVAXUSDT"
+      ],
+      "trades": 61,
+      "wins": 30,
+      "losses": 31,
+      "win_rate": 0.4918032786885246,
+      "wilson95_low": 0.37060186643725185,
+      "wilson95_high": 0.6139759354676981,
+      "pf_usd": 3.1205400544556636,
+      "net_pnl_usd": 704.6854682421499,
+      "mean_net_pnl_usd": 11.552220790854916,
+      "mean_net_return": 0.0017822819037794048,
+      "unit_pf": 1.5289862025872585,
+      "average_win_return": 0.01047476285940615,
+      "average_loss_return": -0.00662979644037551
+    },
+    {
+      "group": [
+        "V12",
+        "BNBUSDT"
+      ],
+      "trades": 68,
+      "wins": 29,
+      "losses": 39,
+      "win_rate": 0.4264705882352941,
+      "wilson95_low": 0.31597057562082875,
+      "wilson95_high": 0.5448343062303549,
+      "pf_usd": 1.01170772121587,
+      "net_pnl_usd": 7.12282271755171,
+      "mean_net_pnl_usd": 0.10474739290517221,
+      "mean_net_return": -0.0006152896289888577,
+      "unit_pf": 0.8498386673366799,
+      "average_win_return": 0.008165238660890034,
+      "average_loss_return": -0.007144400408642391
+    },
+    {
+      "group": [
+        "V12",
+        "BTCUSDT"
+      ],
+      "trades": 78,
+      "wins": 32,
+      "losses": 46,
+      "win_rate": 0.41025641025641024,
+      "wilson95_low": 0.3078173313444522,
+      "wilson95_high": 0.5211205193329539,
+      "pf_usd": 1.2302195855532656,
+      "net_pnl_usd": 126.71308608106084,
+      "mean_net_pnl_usd": 1.624526744628985,
+      "mean_net_return": -0.000986470015820046,
+      "unit_pf": 0.7511359192442338,
+      "average_win_return": 0.007257462923058135,
+      "average_loss_return": -0.006721379886343998
+    },
+    {
+      "group": [
+        "V12",
+        "DOGEUSDT"
+      ],
+      "trades": 120,
+      "wins": 42,
+      "losses": 78,
+      "win_rate": 0.35,
+      "wilson95_low": 0.27051765896559277,
+      "wilson95_high": 0.4387884223511861,
+      "pf_usd": 0.1960559276452958,
+      "net_pnl_usd": -1591.700924684868,
+      "mean_net_pnl_usd": -13.2641743723739,
+      "mean_net_return": -0.0018304463701285742,
+      "unit_pf": 0.6363528619407681,
+      "average_win_return": 0.009151805727127562,
+      "average_loss_return": -0.007743966730189571
+    },
+    {
+      "group": [
+        "V12",
+        "ETHUSDT"
+      ],
+      "trades": 123,
+      "wins": 51,
+      "losses": 72,
+      "win_rate": 0.4146341463414634,
+      "wilson95_low": 0.33144299050634907,
+      "wilson95_high": 0.5029961840231428,
+      "pf_usd": 0.6279077010365628,
+      "net_pnl_usd": -627.8040927052463,
+      "mean_net_pnl_usd": -5.104098314676799,
+      "mean_net_return": -7.779184957961819e-05,
+      "unit_pf": 0.9798802398327146,
+      "average_win_return": 0.009137328381072254,
+      "average_loss_return": -0.006605168679624695
+    },
+    {
+      "group": [
+        "V12",
+        "INJUSDT"
+      ],
+      "trades": 51,
+      "wins": 20,
+      "losses": 31,
+      "win_rate": 0.39215686274509803,
+      "wilson95_low": 0.27027144858027696,
+      "wilson95_high": 0.5291508877483494,
+      "pf_usd": 1.5598888463716738,
+      "net_pnl_usd": 705.16929163553,
+      "mean_net_pnl_usd": 13.826848855598628,
+      "mean_net_return": 0.00048022141638328513,
+      "unit_pf": 1.0675232327247626,
+      "average_win_return": 0.019360020548387136,
+      "average_loss_return": -0.011700294152651456
+    },
+    {
+      "group": [
+        "V12",
+        "LINKUSDT"
+      ],
+      "trades": 63,
+      "wins": 24,
+      "losses": 39,
+      "win_rate": 0.38095238095238093,
+      "wilson95_low": 0.27117289491083674,
+      "wilson95_high": 0.5044159599340502,
+      "pf_usd": 0.3234051127850833,
+      "net_pnl_usd": -610.1311382060956,
+      "mean_net_pnl_usd": -9.684621241366596,
+      "mean_net_return": -0.0015333646586429522,
+      "unit_pf": 0.7387199397710239,
+      "average_win_return": 0.011380158513162186,
+      "average_loss_return": -0.009480148148984574
+    },
+    {
+      "group": [
+        "V12",
+        "LTCUSDT"
+      ],
+      "trades": 43,
+      "wins": 12,
+      "losses": 31,
+      "win_rate": 0.27906976744186046,
+      "wilson95_low": 0.16746451821827157,
+      "wilson95_high": 0.42691312900129397,
+      "pf_usd": 0.17728648327435562,
+      "net_pnl_usd": -383.45883364843843,
+      "mean_net_pnl_usd": -8.917647294149731,
+      "mean_net_return": -0.004079547818695401,
+      "unit_pf": 0.444273581140023,
+      "average_win_return": 0.011686613542409118,
+      "average_loss_return": -0.010182578022993926
+    },
+    {
+      "group": [
+        "V12",
+        "NEARUSDT"
+      ],
+      "trades": 89,
+      "wins": 44,
+      "losses": 45,
+      "win_rate": 0.4943820224719101,
+      "wilson95_low": 0.39291271906748554,
+      "wilson95_high": 0.5963162472579548,
+      "pf_usd": 1.1863374998955036,
+      "net_pnl_usd": 217.96586850624243,
+      "mean_net_pnl_usd": 2.449054702317331,
+      "mean_net_return": -0.001064680368879722,
+      "unit_pf": 0.8144027084806678,
+      "average_win_return": 0.009449833395093404,
+      "average_loss_return": -0.011345538271431223
+    },
+    {
+      "group": [
+        "V12",
+        "SOLUSDT"
+      ],
+      "trades": 118,
+      "wins": 46,
+      "losses": 72,
+      "win_rate": 0.3898305084745763,
+      "wilson95_low": 0.30663375206175597,
+      "wilson95_high": 0.4799744343048052,
+      "pf_usd": 0.29578487687524163,
+      "net_pnl_usd": -1264.6552262950204,
+      "mean_net_pnl_usd": -10.717417171991698,
+      "mean_net_return": -0.0031890706031025696,
+      "unit_pf": 0.5251869820976222,
+      "average_win_return": 0.009048563636160354,
+      "average_loss_return": -0.011007559144853882
+    },
+    {
+      "group": [
+        "V12",
+        "XRPUSDT"
+      ],
+      "trades": 79,
+      "wins": 30,
+      "losses": 49,
+      "win_rate": 0.379746835443038,
+      "wilson95_low": 0.28066330946973556,
+      "wilson95_high": 0.4899833221742695,
+      "pf_usd": 0.5156047914510493,
+      "net_pnl_usd": -868.5076468225957,
+      "mean_net_pnl_usd": -10.99376768129868,
+      "mean_net_return": -0.0022930650959039844,
+      "unit_pf": 0.6609861263382341,
+      "average_win_return": 0.011773269699961156,
+      "average_loss_return": -0.010905106807658152
+    },
+    {
+      "group": [
+        "V52",
+        "AMZNUSDT"
+      ],
+      "trades": 17,
+      "wins": 10,
+      "losses": 7,
+      "win_rate": 0.5882352941176471,
+      "wilson95_low": 0.36005074385515545,
+      "wilson95_high": 0.7838921396086862,
+      "pf_usd": 11.03971508318335,
+      "net_pnl_usd": 625.4914567500036,
+      "mean_net_pnl_usd": 36.79361510294139,
+      "mean_net_return": 0.0037611725489858057,
+      "unit_pf": 7.123857829579636,
+      "average_win_return": 0.007438105314842689,
+      "average_loss_return": -0.001491588545095455
+    },
+    {
+      "group": [
+        "V52",
+        "METAUSDT"
+      ],
+      "trades": 23,
+      "wins": 19,
+      "losses": 4,
+      "win_rate": 0.8260869565217391,
+      "wilson95_low": 0.6286194521470433,
+      "wilson95_high": 0.9302145964938723,
+      "pf_usd": 18.334991642688838,
+      "net_pnl_usd": 2586.3039460749887,
+      "mean_net_pnl_usd": 112.44799765543429,
+      "mean_net_return": 0.008263324494242958,
+      "unit_pf": 43.70831731570924,
+      "average_win_return": 0.01023718776807816,
+      "average_loss_return": -0.001112526056474252
+    },
+    {
+      "group": [
+        "V52",
+        "MSFTUSDT"
+      ],
+      "trades": 15,
+      "wins": 13,
+      "losses": 2,
+      "win_rate": 0.8666666666666667,
+      "wilson95_low": 0.6211750079348376,
+      "wilson95_high": 0.9626395301086407,
+      "pf_usd": 80.20707926071539,
+      "net_pnl_usd": 2430.842926115004,
+      "mean_net_pnl_usd": 162.0561950743336,
+      "mean_net_return": 0.009022026060127527,
+      "unit_pf": 68.66519545095645,
+      "average_win_return": 0.01056387622322407,
+      "average_loss_return": -0.001
+    },
+    {
+      "group": [
+        "V52",
+        "NVDAUSDT"
+      ],
+      "trades": 13,
+      "wins": 13,
+      "losses": 0,
+      "win_rate": 1.0,
+      "wilson95_low": 0.7718981569447083,
+      "wilson95_high": 1.0,
+      "pf_usd": null,
+      "net_pnl_usd": 344.6086588273596,
+      "mean_net_pnl_usd": 26.508358371335355,
+      "mean_net_return": 0.012671640044896064,
+      "unit_pf": null,
+      "average_win_return": 0.012671640044896064,
+      "average_loss_return": null
+    },
+    {
+      "group": [
+        "V52",
+        "TSLAUSDT"
+      ],
+      "trades": 17,
+      "wins": 14,
+      "losses": 3,
+      "win_rate": 0.8235294117647058,
+      "wilson95_low": 0.5897007098262422,
+      "wilson95_high": 0.9380898628745101,
+      "pf_usd": 24.679069919591264,
+      "net_pnl_usd": 1981.9777755561759,
+      "mean_net_pnl_usd": 116.5869279738927,
+      "mean_net_return": 0.01013830239276889,
+      "unit_pf": 13.019450836891822,
+      "average_win_return": 0.013335035216655428,
+      "average_loss_return": -0.004779784118701616
+    }
+  ],
+  "strategy_id/exit_reason_actual": [
+    {
+      "group": [
+        "FET",
+        "CORE_PREEMPT:Q102"
+      ],
+      "trades": 1,
+      "wins": 1,
+      "losses": 0,
+      "win_rate": 1.0,
+      "wilson95_low": 0.20654329147389294,
+      "wilson95_high": 1.0,
+      "pf_usd": null,
+      "net_pnl_usd": 146.95092868999987,
+      "mean_net_pnl_usd": 146.95092868999987,
+      "mean_net_return": 0.03141424311926603,
+      "unit_pf": null,
+      "average_win_return": 0.03141424311926603,
+      "average_loss_return": null
+    },
+    {
+      "group": [
+        "FET",
+        "CORE_PREEMPT:V12"
+      ],
+      "trades": 3,
+      "wins": 2,
+      "losses": 1,
+      "win_rate": 0.6666666666666666,
+      "wilson95_low": 0.2076549551264879,
+      "wilson95_high": 0.9385096847238394,
+      "pf_usd": 5.32823230173935,
+      "net_pnl_usd": 290.1408306654555,
+      "mean_net_pnl_usd": 96.7136102218185,
+      "mean_net_return": 0.0364619192928489,
+      "unit_pf": 8.407702345436718,
+      "average_win_return": 0.06207612362012438,
+      "average_loss_return": -0.014766489361702061
+    },
+    {
+      "group": [
+        "FET",
+        "FET_24H_TIME_EXIT"
+      ],
+      "trades": 2,
+      "wins": 2,
+      "losses": 0,
+      "win_rate": 1.0,
+      "wilson95_low": 0.34237195288961925,
+      "wilson95_high": 1.0,
+      "pf_usd": null,
+      "net_pnl_usd": 1047.5768217862494,
+      "mean_net_pnl_usd": 523.7884108931247,
+      "mean_net_return": 0.06847482470842214,
+      "unit_pf": null,
+      "average_win_return": 0.06847482470842214,
+      "average_loss_return": null
+    },
+    {
+      "group": [
+        "FET",
+        "FET_PROFIT_FLOOR_STOP"
+      ],
+      "trades": 1,
+      "wins": 1,
+      "losses": 0,
+      "win_rate": 1.0,
+      "wilson95_low": 0.20654329147389294,
+      "wilson95_high": 1.0,
+      "pf_usd": null,
+      "net_pnl_usd": 81.90587636840698,
+      "mean_net_pnl_usd": 81.90587636840698,
+      "mean_net_return": 0.03185560124549459,
+      "unit_pf": null,
+      "average_win_return": 0.03185560124549459,
+      "average_loss_return": null
+    },
+    {
+      "group": [
+        "HYPE_LONG",
+        "STOP"
+      ],
+      "trades": 10,
+      "wins": 0,
+      "losses": 10,
+      "win_rate": 0.0,
+      "wilson95_low": -2.7755575615628914e-17,
+      "wilson95_high": 0.2775401687666166,
+      "pf_usd": 0.0,
+      "net_pnl_usd": -1199.5024015435542,
+      "mean_net_pnl_usd": -119.95024015435543,
+      "mean_net_return": -0.050013812334803884,
+      "unit_pf": 0.0,
+      "average_win_return": null,
+      "average_loss_return": -0.050013812334803884
+    },
+    {
+      "group": [
+        "HYPE_LONG",
+        "TAKE_PROFIT"
+      ],
+      "trades": 16,
+      "wins": 16,
+      "losses": 0,
+      "win_rate": 1.0,
+      "wilson95_low": 0.8063865817272802,
+      "wilson95_high": 1.0,
+      "pf_usd": null,
+      "net_pnl_usd": 4799.362115286869,
+      "mean_net_pnl_usd": 299.9601322054293,
+      "mean_net_return": 0.04443088497804525,
+      "unit_pf": null,
+      "average_win_return": 0.04443088497804525,
+      "average_loss_return": null
+    },
+    {
+      "group": [
+        "IDLE",
+        "TIME_EXIT"
+      ],
+      "trades": 65,
+      "wins": 42,
+      "losses": 23,
+      "win_rate": 0.6461538461538462,
+      "wilson95_low": 0.5247488020503202,
+      "wilson95_high": 0.7512471073997797,
+      "pf_usd": 3.0221078885713313,
+      "net_pnl_usd": 4712.088729769323,
+      "mean_net_pnl_usd": 72.4936727656819,
+      "mean_net_return": 0.008745220888115971,
+      "unit_pf": 2.144378346280036,
+      "average_win_return": 0.02536101501759263,
+      "average_loss_return": -0.021596664043971838
+    },
+    {
+      "group": [
+        "PENGU",
+        "LONG_HARD_STOP"
+      ],
+      "trades": 3,
+      "wins": 0,
+      "losses": 3,
+      "win_rate": 0.0,
+      "wilson95_low": 0.0,
+      "wilson95_high": 0.5615060804490177,
+      "pf_usd": 0.0,
+      "net_pnl_usd": -462.11777674716,
+      "mean_net_pnl_usd": -154.03925891572,
+      "mean_net_return": -0.0813009141654903,
+      "unit_pf": 0.0,
+      "average_win_return": null,
+      "average_loss_return": -0.0813009141654903
+    },
+    {
+      "group": [
+        "PENGU",
+        "LONG_TRAILING_STOP"
+      ],
+      "trades": 6,
+      "wins": 6,
+      "losses": 0,
+      "win_rate": 1.0,
+      "wilson95_low": 0.6096569663469354,
+      "wilson95_high": 0.9999999999999999,
+      "pf_usd": null,
+      "net_pnl_usd": 629.5400622078946,
+      "mean_net_pnl_usd": 104.92334370131577,
+      "mean_net_return": 0.09806886705686434,
+      "unit_pf": null,
+      "average_win_return": 0.09806886705686434,
+      "average_loss_return": null
+    },
+    {
+      "group": [
+        "PENGU",
+        "RECOVERY_V8_HARD_STOP"
+      ],
+      "trades": 4,
+      "wins": 0,
+      "losses": 4,
+      "win_rate": 0.0,
+      "wilson95_low": 0.0,
+      "wilson95_high": 0.48990002040399916,
+      "pf_usd": 0.0,
+      "net_pnl_usd": -2503.557033833906,
+      "mean_net_pnl_usd": -625.8892584584765,
+      "mean_net_return": -0.053525985268702975,
+      "unit_pf": 0.0,
+      "average_win_return": null,
+      "average_loss_return": -0.053525985268702975
+    },
+    {
+      "group": [
+        "PENGU",
+        "RECOVERY_V8_MAX_HOLD"
+      ],
+      "trades": 9,
+      "wins": 5,
+      "losses": 4,
+      "win_rate": 0.5555555555555556,
+      "wilson95_low": 0.2666473457440297,
+      "wilson95_high": 0.811224570528086,
+      "pf_usd": 13.661114876441609,
+      "net_pnl_usd": 3810.918765969157,
+      "mean_net_pnl_usd": 423.4354184410174,
+      "mean_net_return": 0.010937884238428125,
+      "unit_pf": 1.8932720950892727,
+      "average_win_return": 0.041728722994032075,
+      "average_loss_return": -0.027550664206076818
+    },
+    {
+      "group": [
+        "PENGU",
+        "RECOVERY_V8_TRAILING_STOP"
+      ],
+      "trades": 22,
+      "wins": 22,
+      "losses": 0,
+      "win_rate": 1.0,
+      "wilson95_low": 0.8513404742740388,
+      "wilson95_high": 1.0,
+      "pf_usd": null,
+      "net_pnl_usd": 2929.2014993396215,
+      "mean_net_pnl_usd": 133.14552269725553,
+      "mean_net_return": 0.05165093448134343,
+      "unit_pf": null,
+      "average_win_return": 0.05165093448134343,
+      "average_loss_return": null
+    },
+    {
+      "group": [
+        "PENGU",
+        "SHORT_HARD_STOP"
+      ],
+      "trades": 2,
+      "wins": 0,
+      "losses": 2,
+      "win_rate": 0.0,
+      "wilson95_low": 0.0,
+      "wilson95_high": 0.6576280471103807,
+      "pf_usd": 0.0,
+      "net_pnl_usd": -1926.9154761870193,
+      "mean_net_pnl_usd": -963.4577380935096,
+      "mean_net_return": -0.08064733275140037,
+      "unit_pf": 0.0,
+      "average_win_return": null,
+      "average_loss_return": -0.08064733275140037
+    },
+    {
+      "group": [
+        "PENGU",
+        "SHORT_MAX_HOLD"
+      ],
+      "trades": 11,
+      "wins": 8,
+      "losses": 3,
+      "win_rate": 0.7272727272727273,
+      "wilson95_low": 0.4343497069897537,
+      "wilson95_high": 0.9025411942607853,
+      "pf_usd": 7.671728788964956,
+      "net_pnl_usd": 641.1876588866579,
+      "mean_net_pnl_usd": 58.289787171514355,
+      "mean_net_return": 0.037075535723183804,
+      "unit_pf": 9.5834790871609,
+      "average_win_return": 0.056918045614784855,
+      "average_loss_return": -0.015837823987752322
+    },
+    {
+      "group": [
+        "PENGU",
+        "SHORT_TRAILING_STOP"
+      ],
+      "trades": 7,
+      "wins": 7,
+      "losses": 0,
+      "win_rate": 1.0,
+      "wilson95_low": 0.6456611570247934,
+      "wilson95_high": 1.0,
+      "pf_usd": null,
+      "net_pnl_usd": 844.8483521515286,
+      "mean_net_pnl_usd": 120.69262173593266,
+      "mean_net_return": 0.1343795695420378,
+      "unit_pf": null,
+      "average_win_return": 0.1343795695420378,
+      "average_loss_return": null
+    },
+    {
+      "group": [
+        "PENGU",
+        "SHORT_V20_DEADLINE_EXIT"
+      ],
+      "trades": 1,
+      "wins": 1,
+      "losses": 0,
+      "win_rate": 1.0,
+      "wilson95_low": 0.20654329147389294,
+      "wilson95_high": 1.0,
+      "pf_usd": null,
+      "net_pnl_usd": 0.719755203235197,
+      "mean_net_pnl_usd": 0.719755203235197,
+      "mean_net_return": 0.008408352034672103,
+      "unit_pf": null,
+      "average_win_return": 0.008408352034672103,
+      "average_loss_return": null
+    },
+    {
+      "group": [
+        "Q102",
+        "Q102_HARD_STOP"
+      ],
+      "trades": 7,
+      "wins": 0,
+      "losses": 7,
+      "win_rate": 0.0,
+      "wilson95_low": 0.0,
+      "wilson95_high": 0.35433884297520657,
+      "pf_usd": 0.0,
+      "net_pnl_usd": -823.5726985003001,
+      "mean_net_pnl_usd": -117.65324264290003,
+      "mean_net_return": -0.06740407998581316,
+      "unit_pf": 0.0,
+      "average_win_return": null,
+      "average_loss_return": -0.06740407998581316
+    },
+    {
+      "group": [
+        "Q102",
+        "Q102_TIME_EXIT"
+      ],
+      "trades": 114,
+      "wins": 76,
+      "losses": 38,
+      "win_rate": 0.6666666666666666,
+      "wilson95_low": 0.5759462411867157,
+      "wilson95_high": 0.746520527764147,
+      "pf_usd": 2.769642750150771,
+      "net_pnl_usd": 8884.967688339804,
+      "mean_net_pnl_usd": 77.93831305561231,
+      "mean_net_return": 0.01710860808244795,
+      "unit_pf": 2.9014211821662954,
+      "average_win_return": 0.03915961257298219,
+      "average_loss_return": -0.026993400898620557
+    },
+    {
+      "group": [
+        "Q102",
+        "Q102_TRAIL_5_AFTER_12"
+      ],
+      "trades": 4,
+      "wins": 4,
+      "losses": 0,
+      "win_rate": 1.0,
+      "wilson95_low": 0.5100999795960008,
+      "wilson95_high": 1.0,
+      "pf_usd": null,
+      "net_pnl_usd": 1139.2065925701377,
+      "mean_net_pnl_usd": 284.8016481425344,
+      "mean_net_return": 0.12726160452414417,
+      "unit_pf": null,
+      "average_win_return": 0.12726160452414417,
+      "average_loss_return": null
+    },
+    {
+      "group": [
+        "Q102",
+        "STOP"
+      ],
+      "trades": 1,
+      "wins": 0,
+      "losses": 1,
+      "win_rate": 0.0,
+      "wilson95_low": 0.0,
+      "wilson95_high": 0.7934567085261071,
+      "pf_usd": 0.0,
+      "net_pnl_usd": -263.7871883151473,
+      "mean_net_pnl_usd": -263.7871883151473,
+      "mean_net_return": -0.048355384003868344,
+      "unit_pf": 0.0,
+      "average_win_return": null,
+      "average_loss_return": -0.048355384003868344
+    },
+    {
+      "group": [
+        "Q102",
+        "TIME_EXIT"
+      ],
+      "trades": 7,
+      "wins": 5,
+      "losses": 2,
+      "win_rate": 0.7142857142857143,
+      "wilson95_low": 0.35892909014821267,
+      "wilson95_high": 0.9177828342909844,
+      "pf_usd": 82.64732894358315,
+      "net_pnl_usd": 871.8920051421497,
+      "mean_net_pnl_usd": 124.55600073459281,
+      "mean_net_return": 0.02369118506476411,
+      "unit_pf": 10.532868267212077,
+      "average_win_return": 0.036646953901104576,
+      "average_loss_return": -0.00869823702608705
+    },
+    {
+      "group": [
+        "RESIDUAL",
+        "FORMAL_PRIORITY"
+      ],
+      "trades": 22,
+      "wins": 13,
+      "losses": 9,
+      "win_rate": 0.5909090909090909,
+      "wilson95_low": 0.38734477382893806,
+      "wilson95_high": 0.7674444033117963,
+      "pf_usd": 2.118144190871853,
+      "net_pnl_usd": 343.65458032827365,
+      "mean_net_pnl_usd": 15.620662742194257,
+      "mean_net_return": 0.004269447209515238,
+      "unit_pf": 2.417460067559923,
+      "average_win_return": 0.012322517756445849,
+      "average_loss_return": -0.007362765802717867
+    },
+    {
+      "group": [
+        "RESIDUAL",
+        "IDLE_SHORT_PRIORITY"
+      ],
+      "trades": 2,
+      "wins": 0,
+      "losses": 2,
+      "win_rate": 0.0,
+      "wilson95_low": 0.0,
+      "wilson95_high": 0.6576280471103807,
+      "pf_usd": 0.0,
+      "net_pnl_usd": -45.39642500000018,
+      "mean_net_pnl_usd": -22.69821250000009,
+      "mean_net_return": -0.015765984686895555,
+      "unit_pf": 0.0,
+      "average_win_return": null,
+      "average_loss_return": -0.015765984686895555
+    },
+    {
+      "group": [
+        "RESIDUAL",
+        "TIME_EXIT"
+      ],
+      "trades": 6,
+      "wins": 5,
+      "losses": 1,
+      "win_rate": 0.8333333333333334,
+      "wilson95_low": 0.43649056343635395,
+      "wilson95_high": 0.9699474141282697,
+      "pf_usd": 1.0526686142343098,
+      "net_pnl_usd": 11.589910916362593,
+      "mean_net_pnl_usd": 1.9316518193937655,
+      "mean_net_return": 0.014301422710898038,
+      "unit_pf": 4.565021629481925,
+      "average_win_return": 0.02197562117470836,
+      "average_loss_return": -0.02406956960815356
+    },
+    {
+      "group": [
+        "V12",
+        "PERIOD_END_MODEL_FLAT"
+      ],
+      "trades": 1,
+      "wins": 0,
+      "losses": 1,
+      "win_rate": 0.0,
+      "wilson95_low": 0.0,
+      "wilson95_high": 0.7934567085261071,
+      "pf_usd": 0.0,
+      "net_pnl_usd": -193.64993730000091,
+      "mean_net_pnl_usd": -193.64993730000091,
+      "mean_net_return": -0.007048411497730744,
+      "unit_pf": 0.0,
+      "average_win_return": null,
+      "average_loss_return": -0.007048411497730744
+    },
+    {
+      "group": [
+        "V12",
+        "Q102_PREEMPT:HIGH_VOL:V12_R1"
+      ],
+      "trades": 2,
+      "wins": 1,
+      "losses": 1,
+      "win_rate": 0.5,
+      "wilson95_low": 0.09452865480086614,
+      "wilson95_high": 0.9054713451991339,
+      "pf_usd": 0.08442664417765154,
+      "net_pnl_usd": -22.43612600000001,
+      "mean_net_pnl_usd": -11.218063000000004,
+      "mean_net_return": 0.01672340159840156,
+      "unit_pf": 34.44680319680312,
+      "average_win_return": 0.03444680319680312,
+      "average_loss_return": -0.001
+    },
+    {
+      "group": [
+        "V12",
+        "Q102_PREEMPT:HIGH_VOL:V12_R2"
+      ],
+      "trades": 1,
+      "wins": 1,
+      "losses": 0,
+      "win_rate": 1.0,
+      "wilson95_low": 0.20654329147389294,
+      "wilson95_high": 1.0,
+      "pf_usd": null,
+      "net_pnl_usd": 4.377534260000109,
+      "mean_net_pnl_usd": 4.377534260000109,
+      "mean_net_return": 0.0047491222030982255,
+      "unit_pf": null,
+      "average_win_return": 0.0047491222030982255,
+      "average_loss_return": null
+    },
+    {
+      "group": [
+        "V12",
+        "Q102_PREEMPT:PB:V12_R1"
+      ],
+      "trades": 4,
+      "wins": 0,
+      "losses": 4,
+      "win_rate": 0.0,
+      "wilson95_low": 0.0,
+      "wilson95_high": 0.48990002040399916,
+      "pf_usd": 0.0,
+      "net_pnl_usd": -140.4485731949998,
+      "mean_net_pnl_usd": -35.11214329874995,
+      "mean_net_return": -0.004297835771159797,
+      "unit_pf": 0.0,
+      "average_win_return": null,
+      "average_loss_return": -0.004297835771159797
+    },
+    {
+      "group": [
+        "V12",
+        "Q102_PREEMPT:PB:V12_R2"
+      ],
+      "trades": 2,
+      "wins": 2,
+      "losses": 0,
+      "win_rate": 1.0,
+      "wilson95_low": 0.34237195288961925,
+      "wilson95_high": 1.0,
+      "pf_usd": null,
+      "net_pnl_usd": 3.918597320000224,
+      "mean_net_pnl_usd": 1.959298660000112,
+      "mean_net_return": 0.0016452633769967417,
+      "unit_pf": null,
+      "average_win_return": 0.0016452633769967417,
+      "average_loss_return": null
+    },
+    {
+      "group": [
+        "V12",
+        "Q102_PREEMPT:REV:V12_R1"
+      ],
+      "trades": 2,
+      "wins": 0,
+      "losses": 2,
+      "win_rate": 0.0,
+      "wilson95_low": 0.0,
+      "wilson95_high": 0.6576280471103807,
+      "pf_usd": 0.0,
+      "net_pnl_usd": -36.51180720000036,
+      "mean_net_pnl_usd": -18.25590360000018,
+      "mean_net_return": -0.0060851429147949325,
+      "unit_pf": 0.0,
+      "average_win_return": null,
+      "average_loss_return": -0.0060851429147949325
+    },
+    {
+      "group": [
+        "V12",
+        "Q102_PREEMPT:REV:V12_R2"
+      ],
+      "trades": 3,
+      "wins": 1,
+      "losses": 2,
+      "win_rate": 0.3333333333333333,
+      "wilson95_low": 0.0614903152761605,
+      "wilson95_high": 0.7923450448735121,
+      "pf_usd": 77.64985168310245,
+      "net_pnl_usd": 194.44486852061561,
+      "mean_net_pnl_usd": 64.81495617353853,
+      "mean_net_return": -0.0032410184649281533,
+      "unit_pf": 0.4828907054674114,
+      "average_win_return": 0.009079653234873917,
+      "average_loss_return": -0.009401354314829188
+    },
+    {
+      "group": [
+        "V12",
+        "STOP"
+      ],
+      "trades": 226,
+      "wins": 151,
+      "losses": 75,
+      "win_rate": 0.668141592920354,
+      "wilson95_low": 0.6043895354454722,
+      "wilson95_high": 0.7262729729951234,
+      "pf_usd": 2.925464359005222,
+      "net_pnl_usd": 2665.300157877385,
+      "mean_net_pnl_usd": 11.793363530430907,
+      "mean_net_return": 0.004643648884283307,
+      "unit_pf": 3.201974900462402,
+      "average_win_return": 0.01010639865290397,
+      "average_loss_return": -0.0063546873165396265
+    },
+    {
+      "group": [
+        "V12",
+        "TAKE_PROFIT"
+      ],
+      "trades": 13,
+      "wins": 13,
+      "losses": 0,
+      "win_rate": 1.0,
+      "wilson95_low": 0.7718981569447083,
+      "wilson95_high": 1.0,
+      "pf_usd": null,
+      "net_pnl_usd": 294.395407524694,
+      "mean_net_pnl_usd": 22.645800578822616,
+      "mean_net_return": 0.04231636861393899,
+      "unit_pf": null,
+      "average_win_return": 0.04231636861393899,
+      "average_loss_return": null
+    },
+    {
+      "group": [
+        "V12",
+        "TRAILING_CROSSED_BEFORE_REPLACEMENT"
+      ],
+      "trades": 869,
+      "wins": 283,
+      "losses": 586,
+      "win_rate": 0.3256616800920598,
+      "wilson95_low": 0.29533024480245057,
+      "wilson95_high": 0.35752773080274497,
+      "pf_usd": 0.5024173951036731,
+      "net_pnl_usd": -7486.502167479927,
+      "mean_net_pnl_usd": -8.615077292842264,
+      "mean_net_return": -0.0033707833333956588,
+      "unit_pf": 0.4601272931434028,
+      "average_win_return": 0.008821669870503014,
+      "average_loss_return": -0.009258947593981536
+    },
+    {
+      "group": [
+        "V52",
+        "BASIS_CONVERGED"
+      ],
+      "trades": 59,
+      "wins": 54,
+      "losses": 5,
+      "win_rate": 0.9152542372881356,
+      "wilson95_low": 0.8164797538583944,
+      "wilson95_high": 0.9632585086938003,
+      "pf_usd": 33.05695309423587,
+      "net_pnl_usd": 5709.739409623531,
+      "mean_net_pnl_usd": 96.7752442309073,
+      "mean_net_return": 0.009986629259779837,
+      "unit_pf": 36.695990856875596,
+      "average_win_return": 0.011216990617589552,
+      "average_loss_return": -0.0033012734045650915
+    },
+    {
+      "group": [
+        "V52",
+        "BASIS_STOP"
+      ],
+      "trades": 4,
+      "wins": 0,
+      "losses": 4,
+      "win_rate": 0.0,
+      "wilson95_low": 0.0,
+      "wilson95_high": 0.48990002040399916,
+      "pf_usd": 0.0,
+      "net_pnl_usd": -13.352533799999756,
+      "mean_net_pnl_usd": -3.338133449999939,
+      "mean_net_return": -0.0012076652469369465,
+      "unit_pf": 0.0,
+      "average_win_return": null,
+      "average_loss_return": -0.0012076652469369465
+    },
+    {
+      "group": [
+        "V52",
+        "TIME_OR_SESSION_FLAT"
+      ],
+      "trades": 22,
+      "wins": 15,
+      "losses": 7,
+      "win_rate": 0.6818181818181818,
+      "wilson95_low": 0.47318222782839336,
+      "wilson95_high": 0.8363961264530752,
+      "pf_usd": 17.90800386006388,
+      "net_pnl_usd": 2272.8378875000003,
+      "mean_net_pnl_usd": 103.31081306818183,
+      "mean_net_return": 0.006455853796532593,
+      "unit_pf": 15.355697063042768,
+      "average_win_return": 0.010128155460720923,
+      "average_loss_return": -0.0014133640552995428
+    }
+  ]
+}

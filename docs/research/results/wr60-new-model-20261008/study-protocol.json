@@ -1,0 +1,145 @@
+{
+  "baseline_commit": "07744efb851a83200bffc2d0cb4b0be28d94190b",
+  "case_count": 24,
+  "costs": [
+    10,
+    20,
+    30
+  ],
+  "parameters": {
+    "BASELINE_Q_RET14": {},
+    "TRAIL_050": {
+      "trail": 0.5
+    },
+    "TRAIL_100": {
+      "trail": 1.0
+    },
+    "ARM1_TRAIL050": {
+      "arm": 1.0,
+      "trail": 0.5
+    },
+    "ARM1_TRAIL100": {
+      "arm": 1.0,
+      "trail": 1.0
+    },
+    "ARM2_TRAIL100": {
+      "arm": 2.0,
+      "trail": 1.0
+    },
+    "TP1_ARM1_TRAIL100": {
+      "arm": 1.0,
+      "trail": 1.0,
+      "tp": 1.0
+    },
+    "TP15_ARM1_TRAIL100": {
+      "arm": 1.0,
+      "trail": 1.0,
+      "tp": 1.5
+    },
+    "TP2_ARM1_TRAIL100": {
+      "arm": 1.0,
+      "trail": 1.0,
+      "tp": 2.0
+    },
+    "REL6_POS": {
+      "rel6": true
+    },
+    "Q_MR_OFF": {
+      "mr_off": true
+    },
+    "TP15_Q_MR_OFF": {
+      "arm": 1.0,
+      "trail": 1.0,
+      "tp": 1.5,
+      "mr_off": true
+    },
+    "V12_OFF_DIAGNOSTIC": {
+      "v12_off": true
+    },
+    "TP1_STOP075": {
+      "arm": 1.0,
+      "trail": 1.0,
+      "tp": 1.0,
+      "stop": 0.75
+    },
+    "TP1_STOP100": {
+      "arm": 1.0,
+      "trail": 1.0,
+      "tp": 1.0,
+      "stop": 1.0
+    },
+    "TP1_STOP150": {
+      "arm": 1.0,
+      "trail": 1.0,
+      "tp": 1.0,
+      "stop": 1.5
+    },
+    "TP05_STOP075": {
+      "arm": 1.0,
+      "trail": 1.0,
+      "tp": 0.5,
+      "stop": 0.75
+    },
+    "TP075_STOP100": {
+      "arm": 1.0,
+      "trail": 1.0,
+      "tp": 0.75,
+      "stop": 1.0
+    },
+    "ARM05_TRAIL025_STOP100": {
+      "arm": 0.5,
+      "trail": 0.25,
+      "stop": 1.0
+    },
+    "TP1_STOP075_REL6": {
+      "arm": 1.0,
+      "trail": 1.0,
+      "tp": 1.0,
+      "stop": 0.75,
+      "rel6": true
+    },
+    "TP05_STOP075_REL6": {
+      "arm": 1.0,
+      "trail": 1.0,
+      "tp": 0.5,
+      "stop": 0.75,
+      "rel6": true
+    },
+    "TP075_STOP100_REL6": {
+      "arm": 1.0,
+      "trail": 1.0,
+      "tp": 0.75,
+      "stop": 1.0,
+      "rel6": true
+    },
+    "TP05_STOP075_REL6_G075": {
+      "arm": 1.0,
+      "trail": 1.0,
+      "tp": 0.5,
+      "stop": 0.75,
+      "rel6": true,
+      "v12_gross_scale": 0.75
+    },
+    "TP05_STOP075_REL6_G050": {
+      "arm": 1.0,
+      "trail": 1.0,
+      "tp": 0.5,
+      "stop": 0.75,
+      "rel6": true,
+      "v12_gross_scale": 0.5
+    }
+  },
+  "exploratory_same_period_reused": true,
+  "forward_validation_completed": false,
+  "production_changed": false,
+  "focus_case": "TP05_STOP075_REL6_G050",
+  "focus_not_all_sleeves_60_or_profitable": true,
+  "limits": [
+    "No clean untouched holdout",
+    "Weekly cluster intervals are not model-selection adjusted",
+    "Trade days are distinct JST dates, not guaranteed daily firing",
+    "V12 focus PF below1",
+    "H1 next-open quote proxy and current venue filters",
+    "Frozen reference core streams including Q delta"
+  ]
+}

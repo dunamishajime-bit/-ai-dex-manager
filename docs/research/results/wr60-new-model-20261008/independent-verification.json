@@ -1,0 +1,664 @@
+{
+  "status": "PASS",
+  "scenario_count": 72,
+  "quantity_vectors": 280,
+  "checks": [
+    {
+      "case": "ARM05_TRAIL025_STOP100",
+      "cost_bps": 10.0,
+      "trades": 1321,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "ARM05_TRAIL025_STOP100",
+      "cost_bps": 20.0,
+      "trades": 1323,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "ARM05_TRAIL025_STOP100",
+      "cost_bps": 30.0,
+      "trades": 1309,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "ARM1_TRAIL050",
+      "cost_bps": 10.0,
+      "trades": 897,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "ARM1_TRAIL050",
+      "cost_bps": 20.0,
+      "trades": 898,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "ARM1_TRAIL050",
+      "cost_bps": 30.0,
+      "trades": 898,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "ARM1_TRAIL100",
+      "cost_bps": 10.0,
+      "trades": 866,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "ARM1_TRAIL100",
+      "cost_bps": 20.0,
+      "trades": 864,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "ARM1_TRAIL100",
+      "cost_bps": 30.0,
+      "trades": 868,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "ARM2_TRAIL100",
+      "cost_bps": 10.0,
+      "trades": 747,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "ARM2_TRAIL100",
+      "cost_bps": 20.0,
+      "trades": 747,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "ARM2_TRAIL100",
+      "cost_bps": 30.0,
+      "trades": 745,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "BASELINE_Q_RET14",
+      "cost_bps": 10.0,
+      "trades": 1534,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 1
+    },
+    {
+      "case": "BASELINE_Q_RET14",
+      "cost_bps": 20.0,
+      "trades": 1499,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 1
+    },
+    {
+      "case": "BASELINE_Q_RET14",
+      "cost_bps": 30.0,
+      "trades": 1481,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 1
+    },
+    {
+      "case": "Q_MR_OFF",
+      "cost_bps": 10.0,
+      "trades": 1507,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 1
+    },
+    {
+      "case": "Q_MR_OFF",
+      "cost_bps": 20.0,
+      "trades": 1470,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 1
+    },
+    {
+      "case": "Q_MR_OFF",
+      "cost_bps": 30.0,
+      "trades": 1450,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 1
+    },
+    {
+      "case": "REL6_POS",
+      "cost_bps": 10.0,
+      "trades": 1248,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 1
+    },
+    {
+      "case": "REL6_POS",
+      "cost_bps": 20.0,
+      "trades": 1229,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 1
+    },
+    {
+      "case": "REL6_POS",
+      "cost_bps": 30.0,
+      "trades": 1208,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 1
+    },
+    {
+      "case": "TP05_STOP075",
+      "cost_bps": 10.0,
+      "trades": 1467,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "TP05_STOP075",
+      "cost_bps": 20.0,
+      "trades": 1466,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "TP05_STOP075",
+      "cost_bps": 30.0,
+      "trades": 1461,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "TP05_STOP075_REL6",
+      "cost_bps": 10.0,
+      "trades": 1212,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 1
+    },
+    {
+      "case": "TP05_STOP075_REL6",
+      "cost_bps": 20.0,
+      "trades": 1212,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 1
+    },
+    {
+      "case": "TP05_STOP075_REL6",
+      "cost_bps": 30.0,
+      "trades": 1213,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 1
+    },
+    {
+      "case": "TP05_STOP075_REL6_G050",
+      "cost_bps": 10.0,
+      "trades": 1217,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 1
+    },
+    {
+      "case": "TP05_STOP075_REL6_G050",
+      "cost_bps": 20.0,
+      "trades": 1212,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 1
+    },
+    {
+      "case": "TP05_STOP075_REL6_G050",
+      "cost_bps": 30.0,
+      "trades": 1207,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 1
+    },
+    {
+      "case": "TP05_STOP075_REL6_G075",
+      "cost_bps": 10.0,
+      "trades": 1221,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 1
+    },
+    {
+      "case": "TP05_STOP075_REL6_G075",
+      "cost_bps": 20.0,
+      "trades": 1217,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 1
+    },
+    {
+      "case": "TP05_STOP075_REL6_G075",
+      "cost_bps": 30.0,
+      "trades": 1214,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 1
+    },
+    {
+      "case": "TP075_STOP100",
+      "cost_bps": 10.0,
+      "trades": 1275,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "TP075_STOP100",
+      "cost_bps": 20.0,
+      "trades": 1264,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "TP075_STOP100",
+      "cost_bps": 30.0,
+      "trades": 1267,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "TP075_STOP100_REL6",
+      "cost_bps": 10.0,
+      "trades": 1119,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 2
+    },
+    {
+      "case": "TP075_STOP100_REL6",
+      "cost_bps": 20.0,
+      "trades": 1111,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 2
+    },
+    {
+      "case": "TP075_STOP100_REL6",
+      "cost_bps": 30.0,
+      "trades": 1109,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 2
+    },
+    {
+      "case": "TP15_ARM1_TRAIL100",
+      "cost_bps": 10.0,
+      "trades": 910,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "TP15_ARM1_TRAIL100",
+      "cost_bps": 20.0,
+      "trades": 907,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "TP15_ARM1_TRAIL100",
+      "cost_bps": 30.0,
+      "trades": 908,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "TP15_Q_MR_OFF",
+      "cost_bps": 10.0,
+      "trades": 885,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "TP15_Q_MR_OFF",
+      "cost_bps": 20.0,
+      "trades": 884,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "TP15_Q_MR_OFF",
+      "cost_bps": 30.0,
+      "trades": 887,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "TP1_ARM1_TRAIL100",
+      "cost_bps": 10.0,
+      "trades": 942,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "TP1_ARM1_TRAIL100",
+      "cost_bps": 20.0,
+      "trades": 944,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "TP1_ARM1_TRAIL100",
+      "cost_bps": 30.0,
+      "trades": 945,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "TP1_STOP075",
+      "cost_bps": 10.0,
+      "trades": 1242,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "TP1_STOP075",
+      "cost_bps": 20.0,
+      "trades": 1240,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "TP1_STOP075",
+      "cost_bps": 30.0,
+      "trades": 1236,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "TP1_STOP075_REL6",
+      "cost_bps": 10.0,
+      "trades": 1082,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 2
+    },
+    {
+      "case": "TP1_STOP075_REL6",
+      "cost_bps": 20.0,
+      "trades": 1081,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 2
+    },
+    {
+      "case": "TP1_STOP075_REL6",
+      "cost_bps": 30.0,
+      "trades": 1080,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 2
+    },
+    {
+      "case": "TP1_STOP100",
+      "cost_bps": 10.0,
+      "trades": 1169,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "TP1_STOP100",
+      "cost_bps": 20.0,
+      "trades": 1166,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "TP1_STOP100",
+      "cost_bps": 30.0,
+      "trades": 1168,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "TP1_STOP150",
+      "cost_bps": 10.0,
+      "trades": 1075,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "TP1_STOP150",
+      "cost_bps": 20.0,
+      "trades": 1074,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "TP1_STOP150",
+      "cost_bps": 30.0,
+      "trades": 1067,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "TP2_ARM1_TRAIL100",
+      "cost_bps": 10.0,
+      "trades": 895,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "TP2_ARM1_TRAIL100",
+      "cost_bps": 20.0,
+      "trades": 894,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "TP2_ARM1_TRAIL100",
+      "cost_bps": 30.0,
+      "trades": 894,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "TRAIL_050",
+      "cost_bps": 10.0,
+      "trades": 1373,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 2
+    },
+    {
+      "case": "TRAIL_050",
+      "cost_bps": 20.0,
+      "trades": 1347,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 2
+    },
+    {
+      "case": "TRAIL_050",
+      "cost_bps": 30.0,
+      "trades": 1333,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 2
+    },
+    {
+      "case": "TRAIL_100",
+      "cost_bps": 10.0,
+      "trades": 1121,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "TRAIL_100",
+      "cost_bps": 20.0,
+      "trades": 1112,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "TRAIL_100",
+      "cost_bps": 30.0,
+      "trades": 1098,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 3
+    },
+    {
+      "case": "V12_OFF_DIAGNOSTIC",
+      "cost_bps": 10.0,
+      "trades": 440,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 1
+    },
+    {
+      "case": "V12_OFF_DIAGNOSTIC",
+      "cost_bps": 20.0,
+      "trades": 438,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 1
+    },
+    {
+      "case": "V12_OFF_DIAGNOSTIC",
+      "cost_bps": 30.0,
+      "trades": 439,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 1
+    }
+  ],
+  "limits": [
+    "MTM drawdown is engine-reported, not independently reconstructed here",
+    "H1 quote proxy and observed current filters do not certify historical LIVE execution",
+    "Temporal halves exclude reported boundary-crossing trades and are not unseen holdout",
+    "Changes are research-only; original candidate source reuse and H1 proxy execution remain."
+  ],
+  "baseline_ledgers_byte_identical_all_3_costs": true,
+  "gross_scaling_and_other_candidate_streams_verified": true,
+  "win_rate_intervals": "Descriptive iid Wilson only; not cluster-adjusted, not multiple-comparison-adjusted, not independent holdout evidence."
+}

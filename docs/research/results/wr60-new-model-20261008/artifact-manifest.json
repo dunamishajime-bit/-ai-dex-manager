@@ -1,0 +1,2141 @@
+{
+  "base_commit": "07744efb851a83200bffc2d0cb4b0be28d94190b",
+  "source_hash_format": "SHA256 after CRLF-to-LF normalization",
+  "source_files": [
+    {
+      "path": "scripts/research/build_wr60_diagnostics.py",
+      "sha256_lf_normalized": "57b6b1285161c3f85d8cdd8b9fb86a3981d58a7a48d5555c6a32aee38c81cff2"
+    },
+    {
+      "path": "scripts/research/postprocess_wr60_new_model.py",
+      "sha256_lf_normalized": "012aafce5d5f80cbc4565efb337bc0d14f5764ce33a1871607646beead67164a"
+    },
+    {
+      "path": "scripts/research/run_wr60_new_model.py",
+      "sha256_lf_normalized": "a11e6ae588e4f5dac8885337f0006f77657e98e7903c6d522bdbe5d9439ceb8e"
+    },
+    {
+      "path": "scripts/research/test_wr60_adapter.py",
+      "sha256_lf_normalized": "aab77fe24ce3e70247ea72b34d3f0cba56d213e2018c3aa8b4681e7e3af4e7b1"
+    },
+    {
+      "path": "scripts/research/verify_wr60_new_model.py",
+      "sha256_lf_normalized": "c8f8d49dccaae421382b4b622c9190a42115fe2ef187305ae5d73e7e2fa54017"
+    }
+  ],
+  "dependencies": [
+    {
+      "path": "scripts/research/run_gate_fix_comparison.py",
+      "sha256_lf_normalized": "272b00425c872a16c218fcc5106a6688c2a1990663b34702eec2867309135ea6"
+    },
+    {
+      "path": "scripts/research/verify_gate_fix_comparison.py",
+      "sha256_lf_normalized": "136c93a0ae795b50ecbfadeb834c2d04be37732c38eea56deafa85f5ae765489"
+    },
+    {
+      "path": "docs/research/results/gate-fixes-bt-20261008/artifact-manifest.json",
+      "sha256_lf_normalized": "267b6ee8cf601317d3687c8ee17816b441c4966ae29933a6c8e9f148ffcddae2"
+    },
+    {
+      "path": "docs/research/results/gate-fixes-bt-20261008/market-input-manifest.json",
+      "sha256_lf_normalized": "5f1581357dd820adb73e2a98569971f3f9e6b41e0520b26d47ead1352e48599c"
+    }
+  ],
+  "artifacts": [
+    {
+      "path": ".gitattributes",
+      "bytes": 29,
+      "sha256": "730a35ae3d558080083c3103d9ac8100c3f6561678092abe341701dfa331eb1d"
+    },
+    {
+      "path": "adapter-tests.txt",
+      "bytes": 112,
+      "sha256": "7eccf522e5c2296070de7a9bba11c2be28999d469116e2462b66d4230a243102"
+    },
+    {
+      "path": "baseline-decomposition.json",
+      "bytes": 70457,
+      "sha256": "56b22282423cd994f96c9d97f312842fa8e647e5b260bc4c263bf18514eab2de"
+    },
+    {
+      "path": "baseline-mfe-giveback.json",
+      "bytes": 890781,
+      "sha256": "6aa37011146ccac2d1ec7d71905f178c2dc29cc87ecdd8d29e5c1812b72890d7"
+    },
+    {
+      "path": "candidate-filter-counts/ARM05_TRAIL025_STOP100.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "candidate-filter-counts/ARM1_TRAIL050.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "candidate-filter-counts/ARM1_TRAIL100.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "candidate-filter-counts/ARM2_TRAIL100.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "candidate-filter-counts/BASELINE_Q_RET14.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "candidate-filter-counts/Q_MR_OFF.json",
+      "bytes": 22,
+      "sha256": "0a6fdc93ee7bb5e2bda2f633e74ffc88bc1e92c6eed2386d652f801752f3dcb8"
+    },
+    {
+      "path": "candidate-filter-counts/REL6_POS.json",
+      "bytes": 44,
+      "sha256": "454018b9ae09a5629a483f40b92bbb0b9aa6d8829a07a0801f57d5bf1e212a54"
+    },
+    {
+      "path": "candidate-filter-counts/TP05_STOP075.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "candidate-filter-counts/TP05_STOP075_REL6.json",
+      "bytes": 44,
+      "sha256": "454018b9ae09a5629a483f40b92bbb0b9aa6d8829a07a0801f57d5bf1e212a54"
+    },
+    {
+      "path": "candidate-filter-counts/TP05_STOP075_REL6_G050.json",
+      "bytes": 44,
+      "sha256": "454018b9ae09a5629a483f40b92bbb0b9aa6d8829a07a0801f57d5bf1e212a54"
+    },
+    {
+      "path": "candidate-filter-counts/TP05_STOP075_REL6_G075.json",
+      "bytes": 44,
+      "sha256": "454018b9ae09a5629a483f40b92bbb0b9aa6d8829a07a0801f57d5bf1e212a54"
+    },
+    {
+      "path": "candidate-filter-counts/TP075_STOP100.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "candidate-filter-counts/TP075_STOP100_REL6.json",
+      "bytes": 44,
+      "sha256": "454018b9ae09a5629a483f40b92bbb0b9aa6d8829a07a0801f57d5bf1e212a54"
+    },
+    {
+      "path": "candidate-filter-counts/TP15_ARM1_TRAIL100.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "candidate-filter-counts/TP15_Q_MR_OFF.json",
+      "bytes": 22,
+      "sha256": "0a6fdc93ee7bb5e2bda2f633e74ffc88bc1e92c6eed2386d652f801752f3dcb8"
+    },
+    {
+      "path": "candidate-filter-counts/TP1_ARM1_TRAIL100.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "candidate-filter-counts/TP1_STOP075.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "candidate-filter-counts/TP1_STOP075_REL6.json",
+      "bytes": 44,
+      "sha256": "454018b9ae09a5629a483f40b92bbb0b9aa6d8829a07a0801f57d5bf1e212a54"
+    },
+    {
+      "path": "candidate-filter-counts/TP1_STOP100.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "candidate-filter-counts/TP1_STOP150.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "candidate-filter-counts/TP2_ARM1_TRAIL100.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "candidate-filter-counts/TRAIL_050.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "candidate-filter-counts/TRAIL_100.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "candidate-filter-counts/V12_OFF_DIAGNOSTIC.json",
+      "bytes": 34,
+      "sha256": "9cee48575bc0e1dc7a1455ebd78655947346b100966a037494dec7922bb4d41d"
+    },
+    {
+      "path": "cases/ARM05_TRAIL025_STOP100/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 174844,
+      "sha256": "035764f4f51c9808eef93c48eed6b6328f3d5e09c70e7adbb0a452a6d7585e70"
+    },
+    {
+      "path": "cases/ARM05_TRAIL025_STOP100/result.json",
+      "bytes": 138940,
+      "sha256": "7604d84c36aef8070c8addbf7cc08e40c5b890cb4f990b12f818d50eba49c33b"
+    },
+    {
+      "path": "cases/ARM05_TRAIL025_STOP100/runs/portfolio-price-model-summary.json",
+      "bytes": 86427,
+      "sha256": "6f9caa3956475dc7610a0c8d3a0ac64c6b3779a239252c35d8ee1363568b0cbe"
+    },
+    {
+      "path": "cases/ARM05_TRAIL025_STOP100/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 236359,
+      "sha256": "c4301af26397b6dda21d02c4008f6d266b0cba5443799bacb290d2e05d1d0648"
+    },
+    {
+      "path": "cases/ARM05_TRAIL025_STOP100/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 25485,
+      "sha256": "85b812b33d33736fde0fbb72a076fc88348c33e9e845c7c283aab51437a331d7"
+    },
+    {
+      "path": "cases/ARM05_TRAIL025_STOP100/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 264736,
+      "sha256": "252ea9cac2e9f5a8372a821dbd15d2a7d9f793935e85a9c0b9e0f3902be985d7"
+    },
+    {
+      "path": "cases/ARM05_TRAIL025_STOP100/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 203248,
+      "sha256": "154788112d2a6c60f23d6dc985736e70af2776f1ca98c6a0f998d50f2f0ec300"
+    },
+    {
+      "path": "cases/ARM05_TRAIL025_STOP100/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 233793,
+      "sha256": "27524e088d6257c46701166f6c67585474a9e71e39e5abe521d0250a91066d42"
+    },
+    {
+      "path": "cases/ARM05_TRAIL025_STOP100/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 25389,
+      "sha256": "685524fbfcdbf9a8776656d53d393d4eed4144fc0aa3dc5afe62fac954f275a2"
+    },
+    {
+      "path": "cases/ARM05_TRAIL025_STOP100/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 261552,
+      "sha256": "0b4a25c2ecb696670f86e951eece13867540a52b86cba17631488ea898bf7e52"
+    },
+    {
+      "path": "cases/ARM05_TRAIL025_STOP100/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 201471,
+      "sha256": "d5781a03b230e0e2fc7f8cb5a9f1e4487a5f12fa2132ffe8165f842538bbf530"
+    },
+    {
+      "path": "cases/ARM05_TRAIL025_STOP100/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 235136,
+      "sha256": "8b8a0dc19eda553253e104048111b4954e6041fe9dcc8f00df34ea9253549980"
+    },
+    {
+      "path": "cases/ARM05_TRAIL025_STOP100/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 25478,
+      "sha256": "9393f7b0ea4c7c315a007af37c3ce8105839803ba7e0e25578875c1424bbf42d"
+    },
+    {
+      "path": "cases/ARM05_TRAIL025_STOP100/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 259021,
+      "sha256": "1e0573571cad33a8c2199342f7cf397297f86d62460db97592ee0e6718fa0847"
+    },
+    {
+      "path": "cases/ARM05_TRAIL025_STOP100/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 199445,
+      "sha256": "91b2c33d85e795cbca25ba6b6abac829d1988da88989eb5f5a6835fadce8ada8"
+    },
+    {
+      "path": "cases/ARM05_TRAIL025_STOP100/runs/summary.json",
+      "bytes": 86765,
+      "sha256": "d95e992f97d3a28c9cb2dc45590d632992cd3cb56497b703dc0b0963a66edcaa"
+    },
+    {
+      "path": "cases/ARM1_TRAIL050/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 174822,
+      "sha256": "466e1f2d2dd196cfd6c7ebeebfd3500cdc775b00e31a3b166f9035111b5f599f"
+    },
+    {
+      "path": "cases/ARM1_TRAIL050/result.json",
+      "bytes": 138970,
+      "sha256": "051d5ac05be85d954d0f7bf9419a1c200505994538d1d2b063686abdac99b224"
+    },
+    {
+      "path": "cases/ARM1_TRAIL050/runs/portfolio-price-model-summary.json",
+      "bytes": 86501,
+      "sha256": "34043214f3d2fd50436a979f72029e95d0edf39c7693dfbf634911c409ae8431"
+    },
+    {
+      "path": "cases/ARM1_TRAIL050/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 213703,
+      "sha256": "813c5be491254b1c4c461b9dd286a688d07312d69011ec071740b7f9e3a31221"
+    },
+    {
+      "path": "cases/ARM1_TRAIL050/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 25449,
+      "sha256": "10463e883bc42b653ecea3fb4d6d7911292c4c3a61542e873938d7955d491258"
+    },
+    {
+      "path": "cases/ARM1_TRAIL050/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 215682,
+      "sha256": "58aec5d2a055ff359c1d2be17ca99a946cbf19c8ff2da2b46357a8e8b2cf3ea4"
+    },
+    {
+      "path": "cases/ARM1_TRAIL050/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 143843,
+      "sha256": "c2439b507d5ff7386e1df11d761e1c9fc1cc62c6949add13c99cb4181c108fb7"
+    },
+    {
+      "path": "cases/ARM1_TRAIL050/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 211872,
+      "sha256": "b995919eb37dc0854f1dd8d288445eb61f3b9b2cecfeaa017da80b4be5d774ae"
+    },
+    {
+      "path": "cases/ARM1_TRAIL050/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 25456,
+      "sha256": "99ac1c1371a1ef4b920864450dcc07bfcfb8fdf84121123592a58c21fb64a75d"
+    },
+    {
+      "path": "cases/ARM1_TRAIL050/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 213789,
+      "sha256": "293c36589e9c20f4099fd44b84d46791216a7532fe265ccd77a3568bc7ef4414"
+    },
+    {
+      "path": "cases/ARM1_TRAIL050/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 142696,
+      "sha256": "dcf5646ba6aefa9e34d5bbbf6b9a47c3ad84429e3b0330392610b149e4889246"
+    },
+    {
+      "path": "cases/ARM1_TRAIL050/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 213669,
+      "sha256": "5ee8fab3a311b797c60bc45d267c1cad372001c10091d55702a862385859574e"
+    },
+    {
+      "path": "cases/ARM1_TRAIL050/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 25517,
+      "sha256": "ccaf424bda2e52f71afe043e7ec19ed48534d94eb08dc1c865cd89525549f5be"
+    },
+    {
+      "path": "cases/ARM1_TRAIL050/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 213955,
+      "sha256": "b38a9aaa33240346714fe314cc696912f6836a7a47afd71e94fd79bfef00f62c"
+    },
+    {
+      "path": "cases/ARM1_TRAIL050/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 143195,
+      "sha256": "e87476641cee850cd206f0ab9d81512888831158ae9fa95c117ab57540d9e303"
+    },
+    {
+      "path": "cases/ARM1_TRAIL050/runs/summary.json",
+      "bytes": 86839,
+      "sha256": "4b17df5a294ea424caaa2ea602eafbe7d2b3d99c5079e607d2bd76bda89a7a1f"
+    },
+    {
+      "path": "cases/ARM1_TRAIL100/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 176395,
+      "sha256": "06a4cab9c2c3dbd3567da553fd3e982d165f9036100959f861c2e35c070efd6e"
+    },
+    {
+      "path": "cases/ARM1_TRAIL100/result.json",
+      "bytes": 139176,
+      "sha256": "f993bb0caccd1067b060de3a2ce432914795cfe9eae82a7b2192e59bfc3fdc59"
+    },
+    {
+      "path": "cases/ARM1_TRAIL100/runs/portfolio-price-model-summary.json",
+      "bytes": 86753,
+      "sha256": "8c95c57831824d9166df27766aa08ec7f9150880611302478b718b0e823480ff"
+    },
+    {
+      "path": "cases/ARM1_TRAIL100/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 213388,
+      "sha256": "de35ed1db61e77d9c30189debfec061ee11a0df930609a04d8bef309baca4204"
+    },
+    {
+      "path": "cases/ARM1_TRAIL100/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 25543,
+      "sha256": "8d76d9673917111be985da5c3c34c5697dc999fcc3bd3590efe677b24d0a0e30"
+    },
+    {
+      "path": "cases/ARM1_TRAIL100/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 214099,
+      "sha256": "ec7836f07fdbe95277ecec1511e6280363b798e7b945e97819617064410ed6d5"
+    },
+    {
+      "path": "cases/ARM1_TRAIL100/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 140351,
+      "sha256": "bc77d7f481f96eea2da1e35276375dad1e926ae0b8565cb8c8df0908533143b3"
+    },
+    {
+      "path": "cases/ARM1_TRAIL100/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 211661,
+      "sha256": "cd01f67ff9a62f634b0c903bf6b2cce85225489392b2132d6b06fc68e90f7c73"
+    },
+    {
+      "path": "cases/ARM1_TRAIL100/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 25511,
+      "sha256": "f670ba0cdc013b192d8209a9e879a10ccf4ed75a352257f453c5a4b4b2f261b4"
+    },
+    {
+      "path": "cases/ARM1_TRAIL100/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 211347,
+      "sha256": "499e6e7cb9da63c3fdd161c96e9c94fe8542f090ff72037174ba6f643015a6d1"
+    },
+    {
+      "path": "cases/ARM1_TRAIL100/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 138509,
+      "sha256": "4ba7e0f421ab3ee9be8ec4be4fd7c077ff88465816e50c28a96d034c0a325eb2"
+    },
+    {
+      "path": "cases/ARM1_TRAIL100/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 213143,
+      "sha256": "bcc1e35112d4094c2094ccc0aae4459bd0a61a8274acf29798cef1e9eaec6844"
+    },
+    {
+      "path": "cases/ARM1_TRAIL100/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 25596,
+      "sha256": "9b89b28ae0f2e5a00269a4efada65a275f4a03d0e2e0e26cb52440bac16edde4"
+    },
+    {
+      "path": "cases/ARM1_TRAIL100/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 212172,
+      "sha256": "68960c2273d4f4e0856865ce3f908d5df15c5bd2d76db6edddd99a087025aa2f"
+    },
+    {
+      "path": "cases/ARM1_TRAIL100/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 139659,
+      "sha256": "0e20d1452a734ae14466011d2ad88c8ebf55e24e201bdcef571740fcc55294a9"
+    },
+    {
+      "path": "cases/ARM1_TRAIL100/runs/summary.json",
+      "bytes": 87091,
+      "sha256": "15cf28568f568470cf4bded941def97473db56aa878c189877a16f2081b0abab"
+    },
+    {
+      "path": "cases/ARM2_TRAIL100/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 177085,
+      "sha256": "7214e88484c8371ab2d3bfc497ea8778b1067ca85067530547d0d16c806a26ae"
+    },
+    {
+      "path": "cases/ARM2_TRAIL100/result.json",
+      "bytes": 139173,
+      "sha256": "0a48346f7009e0fe6028047641ba0c4c35095af86af7c1459d6dda6a0085458d"
+    },
+    {
+      "path": "cases/ARM2_TRAIL100/runs/portfolio-price-model-summary.json",
+      "bytes": 86688,
+      "sha256": "6e1a8d93eb0a61699cd3188109f1c60142be051bc41b6e537cf56839012145ad"
+    },
+    {
+      "path": "cases/ARM2_TRAIL100/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 207407,
+      "sha256": "67368c7f0cf43e77cdc2620e38d1e13df6a432384d6903f8e9e329f960a2ded3"
+    },
+    {
+      "path": "cases/ARM2_TRAIL100/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 25497,
+      "sha256": "4b6018e7cdc02b5f863d522d91f06a33a8f12c32d0bcca3833a3eaa477ff98a4"
+    },
+    {
+      "path": "cases/ARM2_TRAIL100/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 200297,
+      "sha256": "967ddac0e8e0ba3405cd30ee1e7a54cc8d34ab030df19da56315b823f8bff3e7"
+    },
+    {
+      "path": "cases/ARM2_TRAIL100/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 122503,
+      "sha256": "b38f979d7bf4a089268b512b0803507b5d61518e5c15280227e23eb1750719d0"
+    },
+    {
+      "path": "cases/ARM2_TRAIL100/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 206166,
+      "sha256": "e93cb6579c517f8e5f33e0a89bb6afa793fe0eb787837a99fbe3d04aa1ebfb24"
+    },
+    {
+      "path": "cases/ARM2_TRAIL100/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 25510,
+      "sha256": "553650a7c6134beca1f3e563d142b87e5baef66747115b4e55ea320680400e1e"
+    },
+    {
+      "path": "cases/ARM2_TRAIL100/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 198428,
+      "sha256": "886313c96c3ee4e06cdcfe5cd3ca554c0bd83528761458c56d58cd9faea58cba"
+    },
+    {
+      "path": "cases/ARM2_TRAIL100/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 121355,
+      "sha256": "3274a46643b37dc5eed84936251dd4b555df97f4a273d486f68a11e13e2a5dea"
+    },
+    {
+      "path": "cases/ARM2_TRAIL100/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 207359,
+      "sha256": "8ee1fc220bc987602445a7f8d9b1dd4fc277895f480c6c21168566d6c0b3fae9"
+    },
+    {
+      "path": "cases/ARM2_TRAIL100/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 25578,
+      "sha256": "d5edcd75a3bba403aea2a59dad4b79d9309a087a1561137fb93a8c5e2d0778ac"
+    },
+    {
+      "path": "cases/ARM2_TRAIL100/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 199107,
+      "sha256": "e13eebeb2d7a4cfad435c2eb449ade1d44e08a3ebf1c3dd0ce5af4b9cd6b0088"
+    },
+    {
+      "path": "cases/ARM2_TRAIL100/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 121680,
+      "sha256": "998869ae59a350492c3847811477aab1a64d77ae22ec6cacb819353b1d43c26c"
+    },
+    {
+      "path": "cases/ARM2_TRAIL100/runs/summary.json",
+      "bytes": 87026,
+      "sha256": "46204b6242c3e41686018e13745cf14fe62e50fa7629a8856768405f997cb924"
+    },
+    {
+      "path": "cases/BASELINE_Q_RET14/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 173643,
+      "sha256": "a3e032069eb74dc636d2b8dc245d3e448b81054474030562fac886f2d676d3fd"
+    },
+    {
+      "path": "cases/BASELINE_Q_RET14/result.json",
+      "bytes": 138871,
+      "sha256": "0a42b4dd75e4009365520c86a2547831233870040b217bef650d264b84d14687"
+    },
+    {
+      "path": "cases/BASELINE_Q_RET14/runs/portfolio-price-model-summary.json",
+      "bytes": 86419,
+      "sha256": "ab2f37313fb437e236bfa99c41570f3847e48e56941b241879df5ced6154fd97"
+    },
+    {
+      "path": "cases/BASELINE_Q_RET14/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 244448,
+      "sha256": "15d083b003c4b3c5fc627d104c12a36ee26303d3c5cb54f02197410683a48fb2"
+    },
+    {
+      "path": "cases/BASELINE_Q_RET14/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 25428,
+      "sha256": "c2eaff5c3b35787f54f5b16a1151fe3a7676cf6628563fde13f65be1144b0264"
+    },
+    {
+      "path": "cases/BASELINE_Q_RET14/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 284160,
+      "sha256": "5eced848c512d82b536eddb65def8d1fee8ee080d32b08fd0612e4bf0d81daf1"
+    },
+    {
+      "path": "cases/BASELINE_Q_RET14/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 228819,
+      "sha256": "a31ffc7f2ecef032bb7ca7b427dbe662b33db40440253a0fb3ecb7236d4292b5"
+    },
+    {
+      "path": "cases/BASELINE_Q_RET14/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 239543,
+      "sha256": "b3fafc3bec8bce94761fcc1125b083baf96a508fc3c487da63694e1b0cc52955"
+    },
+    {
+      "path": "cases/BASELINE_Q_RET14/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 25410,
+      "sha256": "256fc7dcbb424fbb6592f04a4c77e5bd021b4e57bb9d42e68c78764c9fd60a19"
+    },
+    {
+      "path": "cases/BASELINE_Q_RET14/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 274514,
+      "sha256": "14cff3d5ff261e7d848ca464a7da5e148daceed081ce01bbced57f026b8ca6d3"
+    },
+    {
+      "path": "cases/BASELINE_Q_RET14/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 220654,
+      "sha256": "a22229c065e264638900ff39f0c5b208df8f4e5150ea92896b8718ec07235f18"
+    },
+    {
+      "path": "cases/BASELINE_Q_RET14/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 240815,
+      "sha256": "8d985dc3c0c6505e6c97271427aea85b4d575fb9235a85b09603f063565df3c7"
+    },
+    {
+      "path": "cases/BASELINE_Q_RET14/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 25514,
+      "sha256": "c446dfa748ee00440f45f5a4e172201f15ea683c5691108d79f458adcece8d4f"
+    },
+    {
+      "path": "cases/BASELINE_Q_RET14/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 272201,
+      "sha256": "78d04673fbedb056a6c3d7d514f0c34c7521a0dc0a41dedc8973d10e5cb007a0"
+    },
+    {
+      "path": "cases/BASELINE_Q_RET14/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 218753,
+      "sha256": "c090738487d696dd0340501453e883f9fa378f3726030573488695a5f3c15772"
+    },
+    {
+      "path": "cases/BASELINE_Q_RET14/runs/summary.json",
+      "bytes": 86757,
+      "sha256": "9a9599a195cef7c67be82de8b7ea192e32abc53130d8721b5b6346fa62ea17e6"
+    },
+    {
+      "path": "cases/Q_MR_OFF/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 169542,
+      "sha256": "af5dab813063dac7d4461ba2cdca9d8b54fe0a4a2265938b03155d56f4f1ec50"
+    },
+    {
+      "path": "cases/Q_MR_OFF/result.json",
+      "bytes": 138989,
+      "sha256": "b09e7bbb54cd93c62b6a0d73f056cbf2d2703172500fe1219f27eb91397ccc76"
+    },
+    {
+      "path": "cases/Q_MR_OFF/runs/portfolio-price-model-summary.json",
+      "bytes": 86449,
+      "sha256": "863898a9b6028bfaa1327f35984f3c2dc44dbe3a90969a09267e5cd3b4dc168c"
+    },
+    {
+      "path": "cases/Q_MR_OFF/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 239411,
+      "sha256": "8cf997aba65ffda00c501a37fe5df47ee8e3fc0ab9c05927ec2e86fa0b872116"
+    },
+    {
+      "path": "cases/Q_MR_OFF/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 25427,
+      "sha256": "a114f4a8ec943dfb31634a42fa08000a8a628cb623f0c9c8c183bf6725f3a6a9"
+    },
+    {
+      "path": "cases/Q_MR_OFF/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 278639,
+      "sha256": "1a9999cfcebdee2e40074aeecf08436b3001d00e85b9d1bdf5739a34c5fd0505"
+    },
+    {
+      "path": "cases/Q_MR_OFF/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 223935,
+      "sha256": "38ac04911f7e815e907575178c38e5fac32eab11efc2098c43c9494d0f7b4736"
+    },
+    {
+      "path": "cases/Q_MR_OFF/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 234459,
+      "sha256": "df7ed70722cea906e1722291a7fece07911c86230cbbcddaa270c45882816bbb"
+    },
+    {
+      "path": "cases/Q_MR_OFF/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 25505,
+      "sha256": "2ac55a1c3d10a9dae4d0cc87b59c2027b18e6f078f839ee0e7ed925363689fc5"
+    },
+    {
+      "path": "cases/Q_MR_OFF/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 268902,
+      "sha256": "290277033252fcbced479d463bbe1e00519a5b3fb8c857e23ac5ace61a5862c6"
+    },
+    {
+      "path": "cases/Q_MR_OFF/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 215413,
+      "sha256": "e0b4d57eaeddd06e86bc5f81f59c8d7b6c1cb89e5e15e3d4b35dba5de6b0fff5"
+    },
+    {
+      "path": "cases/Q_MR_OFF/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 235480,
+      "sha256": "d9ecaa626a795cdc9b096586da870257d92aed08cfb96e45c04da64a111bb09a"
+    },
+    {
+      "path": "cases/Q_MR_OFF/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 25442,
+      "sha256": "44d5fa901e985e932f6ea9a4c19e890989aa8c432a5918df81f6206c46e08fe6"
+    },
+    {
+      "path": "cases/Q_MR_OFF/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 266129,
+      "sha256": "0d04500ee3611dd0aad531442171f3e8fa7ef31590a0dace17286eb84384f670"
+    },
+    {
+      "path": "cases/Q_MR_OFF/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 213183,
+      "sha256": "8bc2791944d8352eac1b94dcf817dfa1d43ef1f297dcf6ffcbc71d089508d142"
+    },
+    {
+      "path": "cases/Q_MR_OFF/runs/summary.json",
+      "bytes": 86787,
+      "sha256": "fbd0aba7ccb6178098abb71ed50c0c4eb1a9e899c5713e591a381ffb09f006cd"
+    },
+    {
+      "path": "cases/REL6_POS/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 144496,
+      "sha256": "09bf7d81ebc32991d2398063c9f77d518ba39631e1758593fe44bda41d4cde55"
+    },
+    {
+      "path": "cases/REL6_POS/result.json",
+      "bytes": 138718,
+      "sha256": "524ba6c65e4dd9fb8a1601d1698e5ba34cff838d66dbcd2791d34090c5f8415d"
+    },
+    {
+      "path": "cases/REL6_POS/runs/portfolio-price-model-summary.json",
+      "bytes": 86217,
+      "sha256": "b6a93f14f4d238781ee6d8a94f41683010407792e246055cd40aab4b5e89d0b2"
+    },
+    {
+      "path": "cases/REL6_POS/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 204719,
+      "sha256": "6b2da74b99883488c2bd904279b7d402200e5a600e8f1a5dc20088ed313ae451"
+    },
+    {
+      "path": "cases/REL6_POS/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 25365,
+      "sha256": "d944f28b418b8be9f68247ede3c7cb4691d0d576e97efb7d52292f72ad86c2d9"
+    },
+    {
+      "path": "cases/REL6_POS/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 249970,
+      "sha256": "89e70ca202b98a0507273b1fc4c4b69c70309065cb3038d7e3e82df13c93f9d4"
+    },
+    {
+      "path": "cases/REL6_POS/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 189551,
+      "sha256": "d41b00674d5047ae93c6fece4589359319ab35715cf181eccefbd303e35f6349"
+    },
+    {
+      "path": "cases/REL6_POS/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 201272,
+      "sha256": "f50a4a7cea975c284240d9bc9709dc2312f55836aa456b97b333b4c330dbe565"
+    },
+    {
+      "path": "cases/REL6_POS/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 25408,
+      "sha256": "62e1ccbf518ee7d6c4d14e279d209bd88b716f0cc75e12938265b88a2069a0d2"
+    },
+    {
+      "path": "cases/REL6_POS/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 244453,
+      "sha256": "2ba3871963c1884f74ad6da23f004be9f33f73dd7171b72686a1c6207e129828"
+    },
+    {
+      "path": "cases/REL6_POS/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 184601,
+      "sha256": "5d4d70204cbcd455972021390abf6d4007fbe4c781e9b64bd374e5034197510b"
+    },
+    {
+      "path": "cases/REL6_POS/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 202125,
+      "sha256": "4cacb900439b6c34fac1d23c5a2278b73c0414fc4295c8c0a7d54bfc6f4312bb"
+    },
+    {
+      "path": "cases/REL6_POS/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 25393,
+      "sha256": "5a625b6acb597b29c9da8b385f92a7476e7b73412c9fbd7d893670666f6da44a"
+    },
+    {
+      "path": "cases/REL6_POS/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 241390,
+      "sha256": "b14881798143f797fcf631df04da89d0b8357dd48701ce3b420c24b69c47aee8"
+    },
+    {
+      "path": "cases/REL6_POS/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 182068,
+      "sha256": "68c9f6c8b9783b2ef893f10ef276afcf485073aa54e36f8c90c171ed1322e6a2"
+    },
+    {
+      "path": "cases/REL6_POS/runs/summary.json",
+      "bytes": 86555,
+      "sha256": "2ed37e36137dc9758432d55ca9bcc9f613d837f0d9c5b9abaf5d7dfa44bd5155"
+    },
+    {
+      "path": "cases/TP05_STOP075/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 177443,
+      "sha256": "92ada367919e9d6071d6365cf12b4fc13541fb5aac61245a32758230e4fa59d0"
+    },
+    {
+      "path": "cases/TP05_STOP075/result.json",
+      "bytes": 136929,
+      "sha256": "ceae2e1d1282affd5a2804270d1124c6951987d3ee4abef3a56bcbe99e0fd267"
+    },
+    {
+      "path": "cases/TP05_STOP075/runs/portfolio-price-model-summary.json",
+      "bytes": 84376,
+      "sha256": "82dc46598dcf533b87ff3c5bfd6dde805e312ac4efe823aa16d9e618aa74bca0"
+    },
+    {
+      "path": "cases/TP05_STOP075/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 247082,
+      "sha256": "5b732bf9993311ab0c4cc46ad3e9406608ed56d1e2a37b12177ceda101d4b5c8"
+    },
+    {
+      "path": "cases/TP05_STOP075/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 24867,
+      "sha256": "9592505958be3e2ef2546f018188e8028db595036c1c3dfdc8b9ac9d757af332"
+    },
+    {
+      "path": "cases/TP05_STOP075/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 285535,
+      "sha256": "ace4aa9d923b04bbd2e6abf9d4fac35f87c0c0dd62d9b69bbd2441824ed6f985"
+    },
+    {
+      "path": "cases/TP05_STOP075/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 226595,
+      "sha256": "f63579b1994af38c573de57becbb1492e351f0967a55c897174ead933f5a837f"
+    },
+    {
+      "path": "cases/TP05_STOP075/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 243996,
+      "sha256": "5d65cee072d16cd366817db9ef6a17cd73eba7dd859dc48817bb25fe660b9e2c"
+    },
+    {
+      "path": "cases/TP05_STOP075/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 24858,
+      "sha256": "0e5ced276abd98ff9b03040f5a6b1c8184d44e043736b07d93621fe3228c916e"
+    },
+    {
+      "path": "cases/TP05_STOP075/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 280349,
+      "sha256": "9c09e3c901002d2257bf51778d90d1e3ba4c3e102b6380470550d38d21169a08"
+    },
+    {
+      "path": "cases/TP05_STOP075/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 223322,
+      "sha256": "7d6a5b27bf7f9176f016d39bfb01fe5b6af1cd77af8e76782cc5b987ae161cc2"
+    },
+    {
+      "path": "cases/TP05_STOP075/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 246047,
+      "sha256": "78026511435b25a0e6470d31c20e6932b98852a16c223b895957a65b198122e6"
+    },
+    {
+      "path": "cases/TP05_STOP075/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 24792,
+      "sha256": "1d34e491eaeb453894666d004318d243af8963ec847f6e861d2ec96504a53657"
+    },
+    {
+      "path": "cases/TP05_STOP075/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 280762,
+      "sha256": "653b291779f78a2ee9078727780f972fec4f60de5799ccff2ae2a0a975b7d23f"
+    },
+    {
+      "path": "cases/TP05_STOP075/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 223729,
+      "sha256": "49e0d6d2a62dead46d6c5636ac0d4cdb3675083c6c565a3f95deea05855b410b"
+    },
+    {
+      "path": "cases/TP05_STOP075/runs/summary.json",
+      "bytes": 84714,
+      "sha256": "8f1c06b1bde8aa7005729808ff10e67b054bbcfebf349353a12bce6e2a4aa85d"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 147128,
+      "sha256": "96911df514b3bad93f9a3bb3c1ea3df1192120db241b6ddc6c9c893574ff92dd"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6/result.json",
+      "bytes": 136631,
+      "sha256": "4f49c7c4ace349e40b85af49ed51bc585c6515f85261cf4852bb03e4489aab07"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6/runs/portfolio-price-model-summary.json",
+      "bytes": 84000,
+      "sha256": "a94e933884e5f8182627f9bcc9d8d6b620ba465cff61da1daf9c741b524bcadb"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 206962,
+      "sha256": "3c462908822281feaeb5053288332e724483456ae5064559393d21ab4c3f5435"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 24759,
+      "sha256": "99d9844dab3cbb5a257addf2ff807cb7b21f6ef0e8a193cbbfc32a834e63c922"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 251446,
+      "sha256": "44c5c6480e7d3d27f2451e5f328a4ecb69ede0cb0a449bdc3436ae5f3350bfb6"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 189302,
+      "sha256": "a97a7927ef8369af7bda5390f7957af8e37fe6ebe174f9865fe45fcb086e047f"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 204625,
+      "sha256": "0997f66da40e7c2ac7f3e2272eff28d322b4f87c0a05a5d4beecdd5893d3879c"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 24758,
+      "sha256": "18d2c7cadc3760e84ec396f67b874b59737be3c0073f2996fbc40dc47c2deef7"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 248659,
+      "sha256": "8a26fa0308d971c2e29f661c8e22ccf133678e193aecd125226ec93bffdf519e"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 187170,
+      "sha256": "c1df37cf4cb9538f6f592afcccf7498028e67bb868faa1719688826fd8cd15c7"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 206496,
+      "sha256": "be8b7d3c78c1d941566dee27c86e4dff0c3b6c7a08f8b7451d8987f81c4f9fff"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 24648,
+      "sha256": "61bbad0a8fdb1fbb204ef46f25377d36ea9e55413dc669cd4152a6433e025259"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 249036,
+      "sha256": "daad6bcd87cba87e66780c8801054234b6ac48e7e6eeab1d1a1f704f89151087"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 188133,
+      "sha256": "5f8036ed96cfd84277143cb0825993d8ac7bf4655c4289ad1754d5e2508af043"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6/runs/summary.json",
+      "bytes": 84338,
+      "sha256": "7b2a151bcf8399a222477568e5649facf6f7452788f5232d73fd11c79e9ae735"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6_G050/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 147218,
+      "sha256": "4f338e8a5913d732d84be7b853e6bacf144db289ae770a0b28198c7f41a4efcf"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6_G050/result.json",
+      "bytes": 136368,
+      "sha256": "aec7e4a2102799f5f682d1215fb73c96ed1c10f437c41a82e27087d96f610d73"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6_G050/runs/portfolio-price-model-summary.json",
+      "bytes": 83765,
+      "sha256": "fdd44c90cbe2ff2b664656836784d45366a9885225c85f94c023488f056909f8"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6_G050/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 207247,
+      "sha256": "9fbeea6a96b5640433af3f8469d9eabfd4a01199a9aa050e57d4fd4aeec693e5"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6_G050/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 24661,
+      "sha256": "4492ed415b27145812e3c621b40c8856f17bd743d5ce568d96936ce0897b510c"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6_G050/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 253429,
+      "sha256": "313e05edd4f0cc987213c6d9237a44bc984cd0adee9b7ed835e25abce03edeb9"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6_G050/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 189850,
+      "sha256": "4e976a83cb475438bf5ff175d80b71433b84773a6e4d7147f4b0e0646cc48e8a"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6_G050/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 204875,
+      "sha256": "e7585dd78ca19c5a15273eac3c776d4536532a308de49a11e5ed13819e374c46"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6_G050/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 24659,
+      "sha256": "da907f1ca23273d216cab4b479b9d0297be07c5cf62eda2f6de95d786bb1ae50"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6_G050/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 249924,
+      "sha256": "4bac163cfa73add15dde9763a02185b555301a1ff7c1829d83ce441592789c37"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6_G050/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 187213,
+      "sha256": "54f74a88db6043c08a438ccc32393fe258becd1801c11f3ebfa9ddd25f515a8d"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6_G050/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 206635,
+      "sha256": "4817ea059733643e9c7a5dd3862c7822345a2cc982d673c0db9cae56759a1361"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6_G050/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 24626,
+      "sha256": "2819afe4c59af33cc10dfad47134dc73ffeb6fecb50bf0f50542f9927b229630"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6_G050/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 249845,
+      "sha256": "b6863eee9ac9f71942695c4e153262eb4b106990552f07c932fb33850f481f61"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6_G050/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 187438,
+      "sha256": "2fba0d2d84a9f6ebf1f4ac3287becbea5e3ff1c8f631ee71e40faac1d2c5deb7"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6_G050/runs/summary.json",
+      "bytes": 84103,
+      "sha256": "60a8026afc77b5d6f70e30e011b0d9012e3d73209fb0706bf8d6714556e96caf"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6_G075/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 147157,
+      "sha256": "f39b87d3acd318f6dce14a15d3aa5379636f69c4496dc59fb4900e30b437263d"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6_G075/result.json",
+      "bytes": 136190,
+      "sha256": "6899905b303e609f65c7e62c820e5d50176c13e07d3839ade0963f064984efc4"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6_G075/runs/portfolio-price-model-summary.json",
+      "bytes": 83569,
+      "sha256": "1d159f2676b9acf9456cb4d3f2922abccd686ff82f0bfff9e94ab492fceaf5af"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6_G075/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 207515,
+      "sha256": "719aa2adcea1488e74683bdd8014c9195c666578c65c8cf16a766a43b76c679b"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6_G075/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 24652,
+      "sha256": "fbbaaf83353a40d19b9b9d2292d1384068d36269bafbb36453fdc5fcf6ad4b77"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6_G075/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 254705,
+      "sha256": "525ca3b6aed135ba575748d3f9438ffebc8fc2f84bddccbd60dc2c1b7ed0386c"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6_G075/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 190909,
+      "sha256": "ab2b175686237b79384f54569f0d201bf481ac98cd634319d1494e06501b5d34"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6_G075/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 205244,
+      "sha256": "199f12a7479ef4f35e6c128e6393c68fcdbb2e8cd06c8ed99c3801a2a9b438e2"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6_G075/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 24574,
+      "sha256": "8a01d0c5db7f3dc169c42131bf2d63d2b184458c184c54191ecba5053c91d619"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6_G075/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 251338,
+      "sha256": "8917d0a2c47190833d9cdeca10d13229d2bf14638d3a8891d19d1cc976f13203"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6_G075/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 188138,
+      "sha256": "7bf9a1b2693292c7924e35ebe1b8f98990b8fb2de776f995c9735d495a9e55f5"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6_G075/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 206832,
+      "sha256": "418c1be45f20692aed34e1e5a7bcbb4365d6feca7fa4cbfadb7d2ab458b340d1"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6_G075/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 24540,
+      "sha256": "947970dc6392b38ff6761ec97194183c7f9d3da84381f663025c09b2237a564f"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6_G075/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 250916,
+      "sha256": "5d7bc07935eb995efb0fcebe01fd9858baf38d201f7838475034c4135e273f0f"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6_G075/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 188243,
+      "sha256": "dcd8988273fdfecd1bfa5795a51516d682c2e984eae892c6e754952d66910478"
+    },
+    {
+      "path": "cases/TP05_STOP075_REL6_G075/runs/summary.json",
+      "bytes": 83907,
+      "sha256": "603b82e53513973ce6cec8692163d7aad6519aaf29bf444104df8b2f06b1810a"
+    },
+    {
+      "path": "cases/TP075_STOP100/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 177372,
+      "sha256": "ef3faa6b9215f12c6a5e52345f4f6fe3eaeb1ec07ce282e289ce5bc7348385ff"
+    },
+    {
+      "path": "cases/TP075_STOP100/result.json",
+      "bytes": 139051,
+      "sha256": "562e667e292689c7dd792c1e5b3b325e2a0272f0a8c49c077bed5e4d60138d6b"
+    },
+    {
+      "path": "cases/TP075_STOP100/runs/portfolio-price-model-summary.json",
+      "bytes": 86544,
+      "sha256": "3ee0abc43fc88fea404b999ff3777251447547842837937da9d9751554c686c3"
+    },
+    {
+      "path": "cases/TP075_STOP100/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 236815,
+      "sha256": "52faafd70c49349a6008720c02bbc04f2b3c992520b49051fa465b7f54731df5"
+    },
+    {
+      "path": "cases/TP075_STOP100/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 25433,
+      "sha256": "31b2d7b2959f08d00e0022a5b655c4ab2d2ac0589a5ddaf48311f043aed5a36d"
+    },
+    {
+      "path": "cases/TP075_STOP100/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 264843,
+      "sha256": "73e84fedff7627d2cdf13435cb26393ca88a7a24c3f311acef2311c8732f4f8e"
+    },
+    {
+      "path": "cases/TP075_STOP100/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 199436,
+      "sha256": "ca062fe2b5f153101a44f1a0bd2d137ce1dcf5c095e1f19089b57c8fd282699f"
+    },
+    {
+      "path": "cases/TP075_STOP100/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 233813,
+      "sha256": "06abb7f344f1974e7e54ee71d6d2717452f7e8b6bd790b699d686d9aa6e9f4f9"
+    },
+    {
+      "path": "cases/TP075_STOP100/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 25514,
+      "sha256": "c09d61bb584a911fe4b69da7a39487a8f96b399a260a428de5fac66c4357c0f9"
+    },
+    {
+      "path": "cases/TP075_STOP100/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 259348,
+      "sha256": "b903c821f7bcacc4cc060fcb6dce0f327709b87f8a80336a087ba23746f3baca"
+    },
+    {
+      "path": "cases/TP075_STOP100/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 195475,
+      "sha256": "c125c3dd531606bb3f09854a3d3e47c7a9ae7e98d2343af58a51de40512ff908"
+    },
+    {
+      "path": "cases/TP075_STOP100/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 235571,
+      "sha256": "ef67199434f22cecc7432e0793ed51102dfbe5c3911110179b1adb9f7eb5bd46"
+    },
+    {
+      "path": "cases/TP075_STOP100/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 25522,
+      "sha256": "780d9a1e38b13041bdedee15dfeec7c86eb446dd95c587c949493b5e6616c6e7"
+    },
+    {
+      "path": "cases/TP075_STOP100/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 259348,
+      "sha256": "e562aad6e674077e8d167a5b31913d3fde0d2bb09f419624373b442e62dc4508"
+    },
+    {
+      "path": "cases/TP075_STOP100/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 195965,
+      "sha256": "69f6a53bca4cc7b21daa7fc1e7b906fa91b1078268a1a6744407690c11ce7ae9"
+    },
+    {
+      "path": "cases/TP075_STOP100/runs/summary.json",
+      "bytes": 86882,
+      "sha256": "99cd24d90e9758341b7de81e8e59d85239959fc92cfbd1de900b0fa99a11258b"
+    },
+    {
+      "path": "cases/TP075_STOP100_REL6/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 147119,
+      "sha256": "066e5b3d6bc978f1231137350a958cd016047964def82b62c9474b3669dcc6e7"
+    },
+    {
+      "path": "cases/TP075_STOP100_REL6/result.json",
+      "bytes": 138900,
+      "sha256": "bf1cf45d282b705f7c8541df25d3763507fa9f124764a5a30ff0b9c86c5fc29d"
+    },
+    {
+      "path": "cases/TP075_STOP100_REL6/runs/portfolio-price-model-summary.json",
+      "bytes": 86299,
+      "sha256": "58ae07f87b0d156b91e9ccc632fd39c79e0fa6f64e7619eb739837dbd9075208"
+    },
+    {
+      "path": "cases/TP075_STOP100_REL6/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 202201,
+      "sha256": "f3fdedd6379e4831008e2bff36908b0636eb421d18fa2c1b26d921df2006435e"
+    },
+    {
+      "path": "cases/TP075_STOP100_REL6/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 25468,
+      "sha256": "3dc6890229492760efd0b72367d479252b6400586b56fd8bbda936b149de6445"
+    },
+    {
+      "path": "cases/TP075_STOP100_REL6/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 242567,
+      "sha256": "becda7e71b47811b0b8bb1233484348e011e497e148e370c77154e4a8ab1e8fe"
+    },
+    {
+      "path": "cases/TP075_STOP100_REL6/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 176477,
+      "sha256": "f9f7b4adcd811615fffde60988cf7f70eca2de0966a0b913e3bc516c91a78a81"
+    },
+    {
+      "path": "cases/TP075_STOP100_REL6/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 199567,
+      "sha256": "7ee4a7071f1f54bc56d0680078742ee2258cd55794bca013dcc0609c648d31c2"
+    },
+    {
+      "path": "cases/TP075_STOP100_REL6/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 25385,
+      "sha256": "57a8d357afd26194392500fff328f477d97ab18171627c674042852c99510cb0"
+    },
+    {
+      "path": "cases/TP075_STOP100_REL6/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 238695,
+      "sha256": "5a82840d4f42732c147b15aa2f37c6c2ac8b3fb3f1e6d63d66c27f4beedd6590"
+    },
+    {
+      "path": "cases/TP075_STOP100_REL6/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 173545,
+      "sha256": "86dc470f52f436add762e4cf2732189da3a32d54277a2afac0bb15aeca9e204b"
+    },
+    {
+      "path": "cases/TP075_STOP100_REL6/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 201219,
+      "sha256": "b871fc1aafa843bb3c5618e13b3e079a843877b1b9607eaaaf50d1c79f3a5ad5"
+    },
+    {
+      "path": "cases/TP075_STOP100_REL6/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 25379,
+      "sha256": "865c97b6d39fb7bb76cbe046b01dea6869dfab031e67b833ab1b450914389388"
+    },
+    {
+      "path": "cases/TP075_STOP100_REL6/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 238806,
+      "sha256": "9b64ad50bbb28166cb1c2029eec379b376b2c054ddd3ff68f2fd40bdb9f1d859"
+    },
+    {
+      "path": "cases/TP075_STOP100_REL6/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 173534,
+      "sha256": "12267673abbd7b7c0a73d74ce9fed6d66a072d28a7cb1a88284f632a12c05620"
+    },
+    {
+      "path": "cases/TP075_STOP100_REL6/runs/summary.json",
+      "bytes": 86637,
+      "sha256": "2722f866601eac8155c36435e403ce7cfd023aac46cd13de3f76282df8510667"
+    },
+    {
+      "path": "cases/TP15_ARM1_TRAIL100/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 177695,
+      "sha256": "6fb647ebaa5b1b9aea0156b734ffc06d93bf8df6b167f4ca5e13fb8f53adcacf"
+    },
+    {
+      "path": "cases/TP15_ARM1_TRAIL100/result.json",
+      "bytes": 139390,
+      "sha256": "9cfbea14c56899594565455cbf63493e4fc256bb1dfc9ce948fa1870a33677b2"
+    },
+    {
+      "path": "cases/TP15_ARM1_TRAIL100/runs/portfolio-price-model-summary.json",
+      "bytes": 86845,
+      "sha256": "30e72658fbcca17cc6f3f8fe852fc2580ecb4f132d4d593438916749e4039b5f"
+    },
+    {
+      "path": "cases/TP15_ARM1_TRAIL100/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 217695,
+      "sha256": "9765318300fa2560ab446843f6659d48258f62ed60d3e4c1ba3a5f338cf19e6b"
+    },
+    {
+      "path": "cases/TP15_ARM1_TRAIL100/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 25613,
+      "sha256": "e18d0f5d06685a0e130debcc499e032514941b81cc16dda69b49bcaa3e3e9dd1"
+    },
+    {
+      "path": "cases/TP15_ARM1_TRAIL100/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 221347,
+      "sha256": "40ba4281173b9dec9671f6bfb4083765f1f875caf1af24f38722797dba228f6c"
+    },
+    {
+      "path": "cases/TP15_ARM1_TRAIL100/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 147819,
+      "sha256": "69541d9eb8d2728d8161b06c6e7a3e4f0b95d1b1f95c60eb1bc36ef6a94e1b5b"
+    },
+    {
+      "path": "cases/TP15_ARM1_TRAIL100/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 215800,
+      "sha256": "f52ae64b7842a1538310f2c1fb70ae60c8505e5f5bd45004a933d74da9c20ee2"
+    },
+    {
+      "path": "cases/TP15_ARM1_TRAIL100/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 25530,
+      "sha256": "a9c7074abd49a28b67953ae992f991d75fc8b564adfa351b64266b2e193c1afe"
+    },
+    {
+      "path": "cases/TP15_ARM1_TRAIL100/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 218594,
+      "sha256": "6d2f15afccbc7883ae96d7c56dc878370d4befa347be2e2e705c75f68c372ec2"
+    },
+    {
+      "path": "cases/TP15_ARM1_TRAIL100/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 145566,
+      "sha256": "68aeab9b1b2b0c96c2d7cb61bb15a1d3cee9121829384f358c888f67cf026742"
+    },
+    {
+      "path": "cases/TP15_ARM1_TRAIL100/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 217412,
+      "sha256": "ff1e1b5c5d20804fd7d3ae7baa54985fcbe4b7ebfe614d95bb3f87163b9c5631"
+    },
+    {
+      "path": "cases/TP15_ARM1_TRAIL100/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 25591,
+      "sha256": "5ae9d1fcb85e2d84d631744120fece75478916e9d79f745da44ce225bba29b76"
+    },
+    {
+      "path": "cases/TP15_ARM1_TRAIL100/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 219697,
+      "sha256": "e46f8363d941b2a94dd10480249784b13ea6d04d7c485a26c485886069be5174"
+    },
+    {
+      "path": "cases/TP15_ARM1_TRAIL100/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 146587,
+      "sha256": "4bb86915bba05d2fb32e079b2bfc1bc593fd145d9bf2cc0d73cfd0eb5c7d0ce1"
+    },
+    {
+      "path": "cases/TP15_ARM1_TRAIL100/runs/summary.json",
+      "bytes": 87183,
+      "sha256": "e846f6fc451292b2e6b192a5d0c78ace7c589d19eaa2630b9e65c2911e2bac6c"
+    },
+    {
+      "path": "cases/TP15_Q_MR_OFF/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 173624,
+      "sha256": "c5d26a2464cd8179cd9e65a1ce54fb34779b6f19e040be8a9b19a4db98dc8970"
+    },
+    {
+      "path": "cases/TP15_Q_MR_OFF/result.json",
+      "bytes": 139213,
+      "sha256": "6772a1b7fcaa88968256c139e872dc7bf9e99ce80a14e948b72e6161a10b611f"
+    },
+    {
+      "path": "cases/TP15_Q_MR_OFF/runs/portfolio-price-model-summary.json",
+      "bytes": 86641,
+      "sha256": "f3765d19ca3194c5dd777c2b394512d2b2c33fd398576a1ac2f8e5548e42cb2f"
+    },
+    {
+      "path": "cases/TP15_Q_MR_OFF/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 213128,
+      "sha256": "c9b591078ba4d42eda3f8dfa6323035d29c25e373411e1a1b273695e08e10fb7"
+    },
+    {
+      "path": "cases/TP15_Q_MR_OFF/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 25521,
+      "sha256": "d73aa7ff4be5ce0b2f04d2100ed784b39b9ececf09527ff2b4f0802470054a58"
+    },
+    {
+      "path": "cases/TP15_Q_MR_OFF/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 217164,
+      "sha256": "274490f175d0505282b4c12b6e73954ddb50191e4aac31882ae95dd5dc2e438f"
+    },
+    {
+      "path": "cases/TP15_Q_MR_OFF/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 143581,
+      "sha256": "bcfa947c8091ccd3ddc13bd62d6259b542784fcadf173b8c62041da5e0748861"
+    },
+    {
+      "path": "cases/TP15_Q_MR_OFF/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 211216,
+      "sha256": "c5dca795faf3b2c8afeba095d86a2d5e5a2fb08cf8d6d35cc490c8015b31413b"
+    },
+    {
+      "path": "cases/TP15_Q_MR_OFF/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 25497,
+      "sha256": "9f749644ea2b128e1912d0818b78eebcb512b0b4e5df9cc7aa326c09862411d7"
+    },
+    {
+      "path": "cases/TP15_Q_MR_OFF/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 214622,
+      "sha256": "80f128a751ab216cecd40240ac25d877be95d0c8781fbdc97d30a453492dad7a"
+    },
+    {
+      "path": "cases/TP15_Q_MR_OFF/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 141836,
+      "sha256": "5742c4b20e3fff383c434b3f82030080fcc5ef66bc795d281a79efa4ab30f54c"
+    },
+    {
+      "path": "cases/TP15_Q_MR_OFF/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 213006,
+      "sha256": "44ce4721d469cc93127b4bad4c6461adc7fbd7b8eb81d7006c7768ac6d933333"
+    },
+    {
+      "path": "cases/TP15_Q_MR_OFF/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 25528,
+      "sha256": "1d9aaa3d8fc9ce86a5316bd76bc8fba371c4504e6dd2c3291242386a5826a4a2"
+    },
+    {
+      "path": "cases/TP15_Q_MR_OFF/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 215839,
+      "sha256": "a518f1fa08f3de890942f5cdd4a7674d82b3cb96790ca488780908fb63cdc2c4"
+    },
+    {
+      "path": "cases/TP15_Q_MR_OFF/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 142930,
+      "sha256": "61e5fcad7c6b12c5bd9cfa67b81393cf9bf379e9ac8d7247bab74aecb870ca86"
+    },
+    {
+      "path": "cases/TP15_Q_MR_OFF/runs/summary.json",
+      "bytes": 86979,
+      "sha256": "b6b79c1a60bb307b08a0f129dd338a03f5c6406408fe6783c887231f3f819142"
+    },
+    {
+      "path": "cases/TP1_ARM1_TRAIL100/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 176769,
+      "sha256": "3e29832c1a9527521b1faa6955401118cf3df5a4827e019a1da98f7886ecd577"
+    },
+    {
+      "path": "cases/TP1_ARM1_TRAIL100/result.json",
+      "bytes": 138842,
+      "sha256": "ff3f142a580f4be65291d4482fec586e7d5bc2fbd6917ef100fd827407f93262"
+    },
+    {
+      "path": "cases/TP1_ARM1_TRAIL100/runs/portfolio-price-model-summary.json",
+      "bytes": 86373,
+      "sha256": "1c351818185e523ceb515c3a9176050dfb6ed285ef0badbf0ac22ef1a61c93a5"
+    },
+    {
+      "path": "cases/TP1_ARM1_TRAIL100/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 218494,
+      "sha256": "1d4b150d99fa70b19cd25c586bd81bcce4fc1abd81547c433c6ec8805504c0e9"
+    },
+    {
+      "path": "cases/TP1_ARM1_TRAIL100/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 25434,
+      "sha256": "4d0eddb5e55b583270be4142b955e717b2f9d5dbbb82492c10eff866ecb1334b"
+    },
+    {
+      "path": "cases/TP1_ARM1_TRAIL100/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 224176,
+      "sha256": "ad5abede31a4cd951b7717e327b7f42f13ef0f8bf506bf05f2d9e3939acbed38"
+    },
+    {
+      "path": "cases/TP1_ARM1_TRAIL100/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 151278,
+      "sha256": "932ceb7f1a81699a53c50acf591463af5e0f634383f1ba91e141885d6261bd32"
+    },
+    {
+      "path": "cases/TP1_ARM1_TRAIL100/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 216805,
+      "sha256": "af40b794fd320ffb35e78c33cbb2073059284adf5098c0b55c821c50097cc568"
+    },
+    {
+      "path": "cases/TP1_ARM1_TRAIL100/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 25429,
+      "sha256": "e0d00652ea6a7712dba5dd4ce964b379b07693d4a9c63af29c55bbf0aac0d1b4"
+    },
+    {
+      "path": "cases/TP1_ARM1_TRAIL100/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 222265,
+      "sha256": "b7378546d9467e92b4075e7b2ee2e5f1ff36c31c8c74b6c7d07bf15f39079d77"
+    },
+    {
+      "path": "cases/TP1_ARM1_TRAIL100/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 150315,
+      "sha256": "d6ccd6301e17b2e39f4f8509d2da7ac842cea5f302a1d89427704029bea485a1"
+    },
+    {
+      "path": "cases/TP1_ARM1_TRAIL100/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 218801,
+      "sha256": "5b6f26d1f0b2879dfaad9e3bbd4f15fb10e83a75b2a21f1536e609d66833400b"
+    },
+    {
+      "path": "cases/TP1_ARM1_TRAIL100/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 25451,
+      "sha256": "7bc419f3baa11b947a3eacabe75bcc204fb87e42e93d36f2bb6903950db924c8"
+    },
+    {
+      "path": "cases/TP1_ARM1_TRAIL100/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 222507,
+      "sha256": "47e9e9ef42e68bb61d735b9df02523812f9a5053525ec6fd78431b9d571bce35"
+    },
+    {
+      "path": "cases/TP1_ARM1_TRAIL100/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 150812,
+      "sha256": "d77baec481be25a468d9ff11aa498b19a2376ab66da9699deae706658e88d70d"
+    },
+    {
+      "path": "cases/TP1_ARM1_TRAIL100/runs/summary.json",
+      "bytes": 86711,
+      "sha256": "ba2d4060ff821a0dfac72cd65b617d50919d8a79a7b8fc925fb30a8ff4a1b32e"
+    },
+    {
+      "path": "cases/TP1_STOP075/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 176903,
+      "sha256": "650c3c0c65cc05a8d21c7fa62c729563a01575bdbaf7abdc2385468b2689e613"
+    },
+    {
+      "path": "cases/TP1_STOP075/result.json",
+      "bytes": 139108,
+      "sha256": "b852de2fa814debd1f4d78065dd70e57339aad721a821aa5483accfe8593a6cd"
+    },
+    {
+      "path": "cases/TP1_STOP075/runs/portfolio-price-model-summary.json",
+      "bytes": 86533,
+      "sha256": "ec338ebd4799548effeaf466a391064e54de98a05472e993ce8465e4961a3be5"
+    },
+    {
+      "path": "cases/TP1_STOP075/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 234856,
+      "sha256": "c00364a94fb9e9a0fede1dc901abd7bbedb74cd8ae06f1a8e3e3d2d6d41f6740"
+    },
+    {
+      "path": "cases/TP1_STOP075/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 25475,
+      "sha256": "2821527bd882e2c28973ff65099da94ffe1ae47a86e29216a555e78539479ea1"
+    },
+    {
+      "path": "cases/TP1_STOP075/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 258752,
+      "sha256": "2c2e7f8a6a65bbdf2a9557dd5d9d4c4481ed13bbf0a65f2d0796678261e283ec"
+    },
+    {
+      "path": "cases/TP1_STOP075/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 193970,
+      "sha256": "8f6db3858e017fb9e1ae1e3c63aa3189a5716931735aa0c866edc27e4c7976b1"
+    },
+    {
+      "path": "cases/TP1_STOP075/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 232415,
+      "sha256": "e1b8bee3b9c8bd31e97ff946d13ae4f2f42afd189ecc7104b5a3a5b0627e3adc"
+    },
+    {
+      "path": "cases/TP1_STOP075/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 25467,
+      "sha256": "c1ed465a58caac87cba85a6ac827b4d40caf65cd4c10fc9bd5142f255edfffe4"
+    },
+    {
+      "path": "cases/TP1_STOP075/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 254646,
+      "sha256": "203e55e234961865da0334e0486c0fd9da24577df4c8ee8d2c3b304c5b1e5479"
+    },
+    {
+      "path": "cases/TP1_STOP075/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 191313,
+      "sha256": "3105b4e555b2856f019f8c8bccc1bdcaa87638d1a6412e038b4cee6475e45d39"
+    },
+    {
+      "path": "cases/TP1_STOP075/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 234036,
+      "sha256": "658b46d3771e8cb25db75f680863b32b2921d9214ca2526bba9bab47748057dc"
+    },
+    {
+      "path": "cases/TP1_STOP075/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 25508,
+      "sha256": "ec14b4a7df5548d7cb58de490a02efd910adce648b26ffbcc40d0360a516f47c"
+    },
+    {
+      "path": "cases/TP1_STOP075/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 254628,
+      "sha256": "0acbfbd96e9a19f4489d8c56a6cc5cf2c48b0e1b47dbe7390bfb81c29b2fdb90"
+    },
+    {
+      "path": "cases/TP1_STOP075/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 191393,
+      "sha256": "ae971dabc194148336a4fe216bcdcc00f413ec476427089136ac3d4dc789c31a"
+    },
+    {
+      "path": "cases/TP1_STOP075/runs/summary.json",
+      "bytes": 86871,
+      "sha256": "0b262d3c95e02f2aaae550bf32eeeff88e45d34f54378753fa0bc8882e296312"
+    },
+    {
+      "path": "cases/TP1_STOP075_REL6/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 146805,
+      "sha256": "e604a9af3863ccc668ecd0eb1324995f618f4b8e8a53b7308b0a4ccf237b4443"
+    },
+    {
+      "path": "cases/TP1_STOP075_REL6/result.json",
+      "bytes": 138978,
+      "sha256": "50f872cfc0194da39a7d960ef06f8d34fb8360b1beb725a6957b23c42259aae5"
+    },
+    {
+      "path": "cases/TP1_STOP075_REL6/runs/portfolio-price-model-summary.json",
+      "bytes": 86401,
+      "sha256": "b78eec0b6bdb41a6b38c48589178e5ba9b77b113cbb1474ff352b05d68ba371f"
+    },
+    {
+      "path": "cases/TP1_STOP075_REL6/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 200142,
+      "sha256": "016ffa10b26d19c20b43b663a5c132e2b67be35db4eda6afb484c86b3e6f748f"
+    },
+    {
+      "path": "cases/TP1_STOP075_REL6/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 25406,
+      "sha256": "d0f8a0e63407cbca42beb134d522e12bc756628766824309f1733261a12a27cf"
+    },
+    {
+      "path": "cases/TP1_STOP075_REL6/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 235984,
+      "sha256": "5ac2810c9dff6db9a6b7aa7985ac3398a423bec22e30f865d7fdc6ecb24a982b"
+    },
+    {
+      "path": "cases/TP1_STOP075_REL6/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 170195,
+      "sha256": "76a653715b974190b61cd1e63e3ce8e6b2fb912a47d44f43d5b389bf1c9d0009"
+    },
+    {
+      "path": "cases/TP1_STOP075_REL6/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 197877,
+      "sha256": "74616c6fb09f7572ddce1e91249abc668665680c2fdae1c13ca9474798f486a5"
+    },
+    {
+      "path": "cases/TP1_STOP075_REL6/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 25447,
+      "sha256": "abca894632cfe92a0a32f5f3d8d4e9692ce85a0ad86212e2fd63ab0253a0cd19"
+    },
+    {
+      "path": "cases/TP1_STOP075_REL6/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 233236,
+      "sha256": "c737df0ef782cbfae34eb86e70424d8dfd340843faea54bdf46ddd5c6b89d3c3"
+    },
+    {
+      "path": "cases/TP1_STOP075_REL6/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 168293,
+      "sha256": "94ddfc11c817f26732a41181aebb225cf3a6c5a86154e459e967fb7ec90728fc"
+    },
+    {
+      "path": "cases/TP1_STOP075_REL6/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 199530,
+      "sha256": "2f22103ee5b5bd5a467d09dfa91ac86d427ed78c59c98c9b7407bc651438334d"
+    },
+    {
+      "path": "cases/TP1_STOP075_REL6/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 25473,
+      "sha256": "88485a3547173493a778cafff1cbd69c411f96bd6bd50a8432b1900d4d2323cc"
+    },
+    {
+      "path": "cases/TP1_STOP075_REL6/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 233198,
+      "sha256": "272b063d87591da6a23c18f5a8639162eeb627a9c26c12a9ff2341a0bb2f10b5"
+    },
+    {
+      "path": "cases/TP1_STOP075_REL6/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 168957,
+      "sha256": "c7ab75e2ccfe8dd9c9ef98848bcdc3cfa20688446b9bf049582ad640ca32c90d"
+    },
+    {
+      "path": "cases/TP1_STOP075_REL6/runs/summary.json",
+      "bytes": 86739,
+      "sha256": "5d32973d9387b81478c6c249aaf32345c4044a0f3e024d0dfeff999a8df0a981"
+    },
+    {
+      "path": "cases/TP1_STOP100/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 176466,
+      "sha256": "356dc18d9cffd7e00e9981f78b319814a098f8217cc8de228726de413698e7d0"
+    },
+    {
+      "path": "cases/TP1_STOP100/result.json",
+      "bytes": 139055,
+      "sha256": "e1cebb7eac6fff5483b0fd4dbaa69d06f3d5338ba330fbdf57dcaf64d7a3ad05"
+    },
+    {
+      "path": "cases/TP1_STOP100/runs/portfolio-price-model-summary.json",
+      "bytes": 86564,
+      "sha256": "622b19895aaf48a7f3a3c347e8d6d94c7c2a7f2756ba90f79b8779b16ef3c3fc"
+    },
+    {
+      "path": "cases/TP1_STOP100/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 230023,
+      "sha256": "68d77d1cd41f7a548e8eee3bf22b1b29d19c321b88cb2b92a894c6b9f47e2754"
+    },
+    {
+      "path": "cases/TP1_STOP100/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 25498,
+      "sha256": "976fd5b893999d8dc63402f6c46de2db636d6ef8639b2e219efb61a1a4706a5e"
+    },
+    {
+      "path": "cases/TP1_STOP100/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 249977,
+      "sha256": "219aefbe0ae7ae1ae1089d8d0c98aabd42d6335ffd87a4ba37e5b431fb5170e2"
+    },
+    {
+      "path": "cases/TP1_STOP100/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 182555,
+      "sha256": "57d8c7d76683240e9c737dcd95bf07a28948287f3dd18cab7c00ae38957abe79"
+    },
+    {
+      "path": "cases/TP1_STOP100/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 227664,
+      "sha256": "f4ea185804df74b9d54129b4823d1ff5dfcd1b7cb172e9599a4c89fe349ab87d"
+    },
+    {
+      "path": "cases/TP1_STOP100/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 25497,
+      "sha256": "08563e481f73e1235d4d6b8a32ea374776d97118443a85d6267900ebda3fa2e6"
+    },
+    {
+      "path": "cases/TP1_STOP100/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 245992,
+      "sha256": "f7a25008a45d7230b58a7988589a06f954c7ce5ec428674029e4b9c20a3df5b5"
+    },
+    {
+      "path": "cases/TP1_STOP100/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 180280,
+      "sha256": "62b71bebd71880f40a49fbee6a4f3b65381beef24912b94cd822b82c76b89fdb"
+    },
+    {
+      "path": "cases/TP1_STOP100/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 229751,
+      "sha256": "fd5b80b658b224d0aaf83b05c9f72df720d07d1c679377d25ba22020f609d95d"
+    },
+    {
+      "path": "cases/TP1_STOP100/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 25486,
+      "sha256": "eb5d247af9b8d5c0c7e06b09d324052d565adb34cd55764b58b407f1dc8df98e"
+    },
+    {
+      "path": "cases/TP1_STOP100/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 246297,
+      "sha256": "526a819fe31116942699690e46b75b592c30dc677b82b0283c2e507ecc2d9f7e"
+    },
+    {
+      "path": "cases/TP1_STOP100/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 181148,
+      "sha256": "f6d7178fb0fed3e8b851887b9428430aaa2fb06f977aaf3e70a6c673039402e7"
+    },
+    {
+      "path": "cases/TP1_STOP100/runs/summary.json",
+      "bytes": 86902,
+      "sha256": "cc087df3e597b265f3e229523cfbd797a3e3493652d2502dc900dee32f553f85"
+    },
+    {
+      "path": "cases/TP1_STOP150/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 176473,
+      "sha256": "54a7ac7a190652cf35839446b5a50fd20fdf85c2d56f4942d5aa8c3eb498c1a1"
+    },
+    {
+      "path": "cases/TP1_STOP150/result.json",
+      "bytes": 138947,
+      "sha256": "ee9032dfadd79e4f9711a9fead8fdf70663ef52af29cfd36e5270c398690f475"
+    },
+    {
+      "path": "cases/TP1_STOP150/runs/portfolio-price-model-summary.json",
+      "bytes": 86450,
+      "sha256": "4532bac69d9e386af6bf5824358ec535d9ea07d5462fb6e1c3764a5b042827cd"
+    },
+    {
+      "path": "cases/TP1_STOP150/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 225255,
+      "sha256": "030288709e26e9632e5007d9429fc67c5d171a76022a123e85b333ba64c06872"
+    },
+    {
+      "path": "cases/TP1_STOP150/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 25499,
+      "sha256": "a116198ee94ae5dcd49f8f60f882efd0c724db72b5c78c5c56cd249194bdb7b9"
+    },
+    {
+      "path": "cases/TP1_STOP150/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 241344,
+      "sha256": "12f8e8bf30dbf7d5794663b0e1914dcf3990199e0748065f9d7f28f0329b3bd7"
+    },
+    {
+      "path": "cases/TP1_STOP150/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 170036,
+      "sha256": "e24f349f3f5311358691c4285f01e0c1f0eba287795713be673e888a4f3059e8"
+    },
+    {
+      "path": "cases/TP1_STOP150/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 223213,
+      "sha256": "1ef57d44e3da8f7cd40d34273980ee29e004fd1d67e87e14bdf4e911dc0433eb"
+    },
+    {
+      "path": "cases/TP1_STOP150/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 25408,
+      "sha256": "1705142ed90e86411570d71de74967973c4d7f01fb8321bcee3488485fcd580e"
+    },
+    {
+      "path": "cases/TP1_STOP150/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 238514,
+      "sha256": "32f372138c18cb20daa2d4a0ba43edb1047fa51a709846953fead6a8b596e3d7"
+    },
+    {
+      "path": "cases/TP1_STOP150/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 168220,
+      "sha256": "4c11c8e18a1f029b1478b1d5db4025370311a776784354b5e03f0a59e2505b03"
+    },
+    {
+      "path": "cases/TP1_STOP150/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 224782,
+      "sha256": "d7366bcd5f47f7c263e0f434d8f90ad3a5523e8027655ff8bb10fae17370b62e"
+    },
+    {
+      "path": "cases/TP1_STOP150/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 25468,
+      "sha256": "41db03f88f1db9f8870890f63c7dc307275d548c548dd2c39601234a02fa3ab6"
+    },
+    {
+      "path": "cases/TP1_STOP150/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 238147,
+      "sha256": "5829a588fadac8b33eaeb4f17a31d33f87e53fc92340e57a8a925dcaebe62ad0"
+    },
+    {
+      "path": "cases/TP1_STOP150/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 167660,
+      "sha256": "f14d24e6cd8e2b5d1a9a6e6a0e2899dc0695bd1353c93b165ff1e4d9e62b5f8b"
+    },
+    {
+      "path": "cases/TP1_STOP150/runs/summary.json",
+      "bytes": 86788,
+      "sha256": "3b076147fd2da54f72d43b4c5dbdcf106254988c292e1486d26ba166169cf34f"
+    },
+    {
+      "path": "cases/TP2_ARM1_TRAIL100/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 177070,
+      "sha256": "2e4792babc6edc31b44a1bf6012c23422d264f286a7c063abfaed8987a7b1677"
+    },
+    {
+      "path": "cases/TP2_ARM1_TRAIL100/result.json",
+      "bytes": 139207,
+      "sha256": "d5db7548ac2e660821f7d5167aa9fb6da2ad5100a5c89f9a14e725338a3ab6a8"
+    },
+    {
+      "path": "cases/TP2_ARM1_TRAIL100/runs/portfolio-price-model-summary.json",
+      "bytes": 86760,
+      "sha256": "7d18632ec0d6774b695d63eee65f9b967051243bf865eeea2a27d4c512cb4cdc"
+    },
+    {
+      "path": "cases/TP2_ARM1_TRAIL100/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 215923,
+      "sha256": "980f782799e8c0abd78cd3ea5640a0acab998aff2e9e769c6f932dc7cc1db2a5"
+    },
+    {
+      "path": "cases/TP2_ARM1_TRAIL100/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 25510,
+      "sha256": "ce4e77ed933ae1836b5c364a8289e0c5a33505d94cbb43fa48fd0a931be4445b"
+    },
+    {
+      "path": "cases/TP2_ARM1_TRAIL100/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 219633,
+      "sha256": "d9fe7f2f204004f8302529a31c218f8e6426333ffe0cd51879d6da33202afaa0"
+    },
+    {
+      "path": "cases/TP2_ARM1_TRAIL100/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 144985,
+      "sha256": "6858ddcdacb075bc844a815f21e09d013c33d2ead5b7566e09e4fa209002744d"
+    },
+    {
+      "path": "cases/TP2_ARM1_TRAIL100/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 214086,
+      "sha256": "9aaf249e2d1d7c0ffe6a09e71d66190d80a8bc59eee2cd8c32f877f678e6cf18"
+    },
+    {
+      "path": "cases/TP2_ARM1_TRAIL100/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 25592,
+      "sha256": "b7b224f35d3bd00c7c7127853e4a501fb1f9f933dfd35ef92231dbe0bf577161"
+    },
+    {
+      "path": "cases/TP2_ARM1_TRAIL100/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 217131,
+      "sha256": "0075c302d063044ff4cf07a61127767cea9f4b72862c6c7aaffd1a3d2737be3c"
+    },
+    {
+      "path": "cases/TP2_ARM1_TRAIL100/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 143160,
+      "sha256": "41b81b70bf1c69589933db8c5faf06e8e270b9624e04ad559e1ec99ea099874e"
+    },
+    {
+      "path": "cases/TP2_ARM1_TRAIL100/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 215391,
+      "sha256": "cee6c2fe10a5db2477c5223451bc58d483a58aa8e3b0f95137c2d0893131edba"
+    },
+    {
+      "path": "cases/TP2_ARM1_TRAIL100/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 25547,
+      "sha256": "53820faae6b744dfcd106d1c2272e11914567a2f9817864118fefd50198ad939"
+    },
+    {
+      "path": "cases/TP2_ARM1_TRAIL100/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 217745,
+      "sha256": "860c4e1ba198d15206f5415c3040d49b885c245f0cee3394e111635838974557"
+    },
+    {
+      "path": "cases/TP2_ARM1_TRAIL100/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 143819,
+      "sha256": "6fca3cbb012e0837d2f9dab3aafed1e2b5c547130849e1d218e7c527d58b8ab8"
+    },
+    {
+      "path": "cases/TP2_ARM1_TRAIL100/runs/summary.json",
+      "bytes": 87098,
+      "sha256": "27ab641d929ec576d1f7a95d1d6838b539cbfad87ed25aec13e61e94c12d9e02"
+    },
+    {
+      "path": "cases/TRAIL_050/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 175260,
+      "sha256": "96da38ff8b54dcdf10ee6ced751302ed7d795b09f9c960948cebc7fe459b3538"
+    },
+    {
+      "path": "cases/TRAIL_050/result.json",
+      "bytes": 138904,
+      "sha256": "4afd3695ac2ae550902441fd5df59bb7ae603a01c176e9fad5e2f35dc37bd4d4"
+    },
+    {
+      "path": "cases/TRAIL_050/runs/portfolio-price-model-summary.json",
+      "bytes": 86442,
+      "sha256": "6c6138369350c9625851a901666fe52c6519f8380eafd893f329507b46ee9fa3"
+    },
+    {
+      "path": "cases/TRAIL_050/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 239118,
+      "sha256": "3ca4451a1e77d045a4d298fc5a63965e09e03b6897f458140746b15852284313"
+    },
+    {
+      "path": "cases/TRAIL_050/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 25484,
+      "sha256": "4c4672d126e380ce5b081832dbef568beb7dd253d4e8dca0abae51af3633fe4a"
+    },
+    {
+      "path": "cases/TRAIL_050/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 271160,
+      "sha256": "270610d12bc67a066ff63730b1b01b76e3e5d5b982f94c9a2a031384a0fb5f67"
+    },
+    {
+      "path": "cases/TRAIL_050/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 210966,
+      "sha256": "697e82367ba837b3927e32c56f1f57e60a5cd5bb618adb94702c064e76e10d69"
+    },
+    {
+      "path": "cases/TRAIL_050/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 234774,
+      "sha256": "9352810b8ebae415ed51797fd385983b130746e51080bb40187dc7f4396f3654"
+    },
+    {
+      "path": "cases/TRAIL_050/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 25395,
+      "sha256": "51b65cbb4c448de02ceab2d52227508a49c09abfe6e5464a901aa813274d67a3"
+    },
+    {
+      "path": "cases/TRAIL_050/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 262996,
+      "sha256": "b226e6a4876eff181df2acf61d7266d6621a95502b942deae8e4a007794ef186"
+    },
+    {
+      "path": "cases/TRAIL_050/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 204399,
+      "sha256": "891a209792027117bbdbe6dbe20d466f8d133528501c1367f527c92dd9b8d3c6"
+    },
+    {
+      "path": "cases/TRAIL_050/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 236256,
+      "sha256": "1a945ece0bedc59ca1e0aa6dddb6fb31d0ad900e8caca2ad4822f6f67cc65a4f"
+    },
+    {
+      "path": "cases/TRAIL_050/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 25488,
+      "sha256": "873d7daea37e05a61fae46e20d206b1b705a92470b9a9f7e2c4fc455f2de9ec1"
+    },
+    {
+      "path": "cases/TRAIL_050/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 261569,
+      "sha256": "677b5d28c8541f5683773fbf5b63101b7e54cf05ad6e80f400c1abf655f91cfe"
+    },
+    {
+      "path": "cases/TRAIL_050/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 203039,
+      "sha256": "8994f0cd35beab2a7c9c1647c8bbaeb9cd890f05e181c33ef9a7d088cab50c08"
+    },
+    {
+      "path": "cases/TRAIL_050/runs/summary.json",
+      "bytes": 86780,
+      "sha256": "a5991a3226e24f94195e5a0e863cec09d13ed9ce82fe13c757b866d65c60e657"
+    },
+    {
+      "path": "cases/TRAIL_100/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 175926,
+      "sha256": "81e0b9db650222cbd2f7fd2c16721c95e377abf423d10f3b114e012deca31eef"
+    },
+    {
+      "path": "cases/TRAIL_100/result.json",
+      "bytes": 138888,
+      "sha256": "a35d1b825d37b6848c0b9c4d4847b3914a18512e891a9c7e602a6097e6ca2f10"
+    },
+    {
+      "path": "cases/TRAIL_100/runs/portfolio-price-model-summary.json",
+      "bytes": 86411,
+      "sha256": "f6cb870a2cbbbc461c55328f263734f7de43643aceb17003efbf065eff26c9f6"
+    },
+    {
+      "path": "cases/TRAIL_100/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 227036,
+      "sha256": "c9daaedbc466f2cbd1f88de319741fc6eaedfe383ca63c6922bf90172fcad374"
+    },
+    {
+      "path": "cases/TRAIL_100/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 25438,
+      "sha256": "8350b514202380fbc8f4d24ec846fdf14026d72495128b1487c046d8d6afcf55"
+    },
+    {
+      "path": "cases/TRAIL_100/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 243204,
+      "sha256": "de9dea763725334fbf11021175352ad37a2a881d1d211e1cdd6affeda941d9ff"
+    },
+    {
+      "path": "cases/TRAIL_100/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 176781,
+      "sha256": "8c29bff38a8c8c86e6ec27f8d92c41d77be69f304ed57eaf7dca8b1d40ed424e"
+    },
+    {
+      "path": "cases/TRAIL_100/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 224371,
+      "sha256": "04d8d2ea2306dd42a965b94a57dc1a5a6b8193383b86bdeac9520c5904e3aca1"
+    },
+    {
+      "path": "cases/TRAIL_100/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 25419,
+      "sha256": "93c13172aadd56cea3ceab5a7f1a176a433bac4f5e9034865bd4b71967d574ac"
+    },
+    {
+      "path": "cases/TRAIL_100/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 239339,
+      "sha256": "a288941ba46397189f694033f57b3697836637a19ad94266b24e691003196e6b"
+    },
+    {
+      "path": "cases/TRAIL_100/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 173811,
+      "sha256": "fc99d8b78df7f6c21a68bd00fbd800fc7c4caed5fc807cc5a2ab84968d4620a4"
+    },
+    {
+      "path": "cases/TRAIL_100/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 225635,
+      "sha256": "1fd8cd58815b01cd7abd663a1fcf3dd1da47bbc375d515175f96ae823202acbc"
+    },
+    {
+      "path": "cases/TRAIL_100/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 25487,
+      "sha256": "386acb3e58b3598447b2628db4f8c28a75775b62b40526e8f753db43fd2181ce"
+    },
+    {
+      "path": "cases/TRAIL_100/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 237298,
+      "sha256": "b17e2592407a67f93e249379d9f5330c2941c9ed6c16e5978829c14b065d0ced"
+    },
+    {
+      "path": "cases/TRAIL_100/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 171575,
+      "sha256": "4ef00598eeec197f02cdb8eaf0e96356144e01342dbe7784049903995161e592"
+    },
+    {
+      "path": "cases/TRAIL_100/runs/summary.json",
+      "bytes": 86749,
+      "sha256": "4b46f87708abff33f2e8b20b22949ce9d6fd21b08c2a825e8f7c9121b6053463"
+    },
+    {
+      "path": "cases/V12_OFF_DIAGNOSTIC/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 79872,
+      "sha256": "46632a304c808e708b112de40a7cd23b92508ddd31c60e7e1e6597672f045a0c"
+    },
+    {
+      "path": "cases/V12_OFF_DIAGNOSTIC/result.json",
+      "bytes": 122295,
+      "sha256": "ce8a26944cbe71c262f1d7d160c1da4a68a1a29bd85f01950c35228c64871719"
+    },
+    {
+      "path": "cases/V12_OFF_DIAGNOSTIC/runs/portfolio-price-model-summary.json",
+      "bytes": 75556,
+      "sha256": "1131a4607305a68349a1463d3ab7bd00943ff7e95419c6031047599dda6df7a8"
+    },
+    {
+      "path": "cases/V12_OFF_DIAGNOSTIC/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 104126,
+      "sha256": "8437699c4b8f0491271f4adce1a571a673232b39b18ce899fb592c4d1a10a447"
+    },
+    {
+      "path": "cases/V12_OFF_DIAGNOSTIC/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 22076,
+      "sha256": "134b6730f5e7628b860c628e98881f0c10b4b5567f8bbe506b347bccc8a005f9"
+    },
+    {
+      "path": "cases/V12_OFF_DIAGNOSTIC/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 143455,
+      "sha256": "a6410d0e7396de970deeec06591d54113b737f63eadf73014eae7215cd824bee"
+    },
+    {
+      "path": "cases/V12_OFF_DIAGNOSTIC/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 68820,
+      "sha256": "5a804fb12cf007da6f0e4854249d5f07582fe75644a048f1b8b4a5084f4485b3"
+    },
+    {
+      "path": "cases/V12_OFF_DIAGNOSTIC/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 103497,
+      "sha256": "610e9c4f3591452db0bed67d32bdae49cc142a29da8cf7dc02fe5b7b51cda74e"
+    },
+    {
+      "path": "cases/V12_OFF_DIAGNOSTIC/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 22254,
+      "sha256": "1bd75a62074e295f5ef517162c776fa39166a6e9eff48e94b6911633ed3cc099"
+    },
+    {
+      "path": "cases/V12_OFF_DIAGNOSTIC/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 142687,
+      "sha256": "d7b2d5823a94cca5359c1c47a36a7e69e677b7e2960d114fc9a8bc06197740a3"
+    },
+    {
+      "path": "cases/V12_OFF_DIAGNOSTIC/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 68287,
+      "sha256": "ee7b64f570ca5ee493e7d2cac1cf0e369f88dcbf414f9642cafd6e6aed611747"
+    },
+    {
+      "path": "cases/V12_OFF_DIAGNOSTIC/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 104358,
+      "sha256": "efe18bdf79d4e47aee62f5109a5f7be114050d8852a6a900f5ee071a1f5d1bed"
+    },
+    {
+      "path": "cases/V12_OFF_DIAGNOSTIC/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 22275,
+      "sha256": "7a845599aaec678980ce2807119166813791b08cfe3e51675a3682565bb2d46a"
+    },
+    {
+      "path": "cases/V12_OFF_DIAGNOSTIC/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 143058,
+      "sha256": "0a11c78fb8add567072bd46f5fff71aabd8e75e158f8133d014758b06c90108c"
+    },
+    {
+      "path": "cases/V12_OFF_DIAGNOSTIC/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 68797,
+      "sha256": "ca397803875ec9a1bc4236ff754d4bab2e8a4adbfc66bcd48f222e50f076b0cb"
+    },
+    {
+      "path": "cases/V12_OFF_DIAGNOSTIC/runs/summary.json",
+      "bytes": 75894,
+      "sha256": "9c25707826fe5ead1720fd60d9d8a50fd589ea5abc643e58b1f695cc3cfacbb8"
+    },
+    {
+      "path": "comparison-summary.json",
+      "bytes": 3478114,
+      "sha256": "f05b6e54037da462b64744d15c04f9ecbcff5b94cab1dc1edbf7b8279d644ec1"
+    },
+    {
+      "path": "exit-adapter-parity.json",
+      "bytes": 160,
+      "sha256": "7baf41aee57d052dc34232801c9718ece7258ec2192a5909d61f271bf8546b81"
+    },
+    {
+      "path": "independent-verification.json",
+      "bytes": 18898,
+      "sha256": "440b4b4ba4b9ee7c90428bc009d3c990fd8ebe6ea458a5ab6e10bac4d9aea56b"
+    },
+    {
+      "path": "inputs/core-reference-candidates.jsonl.gz",
+      "bytes": 116852,
+      "sha256": "99b8d5d304916e298496b82d67f1135fb47880144028a7bdf5deab7161591e69"
+    },
+    {
+      "path": "quantity-production-vectors.json",
+      "bytes": 147182,
+      "sha256": "271ceaaf9f5124a1dc12fd2ed444e93c50437115f1094a652841f21c7b6ad4ea"
+    },
+    {
+      "path": "README.md",
+      "bytes": 14181,
+      "sha256": "b945b30f0b3ac514140a7cc8976eb224becfd0d0e7fc1daca444741e2d76f545"
+    },
+    {
+      "path": "study-protocol.json",
+      "bytes": 2982,
+      "sha256": "103e008c35fc6c7c726f9b44100796e3b5682eb2a24abf5ed10d1792b589527f"
+    }
+  ]
+}
