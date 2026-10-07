@@ -16,10 +16,16 @@ test("V12 preloads market data before taking the shared account lock", async () 
 
 test("PENGU preloads H1 history before taking the shared account lock", async () => {
   const text = await source("../lib/pengu-dual-ls-v2-portfolio-runner.ts");
-  const tick = text.slice(text.indexOf("async tick(): Promise<PenguDualLsV2TickResult>"));
-  const load = tick.indexOf("this.dependencies.marketData.load()");
-  const acquire = tick.indexOf("this.dependencies.lock.acquire");
+  const coreStart = text.indexOf("private async tickCore(): Promise<PenguDualLsV2TickResult>");
+  const publicStart = text.indexOf("async tick(): Promise<PenguDualLsV2TickResult>");
+  assert.ok(coreStart >= 0, "PENGU tickCore must remain explicit so lock scope can be audited");
+  assert.ok(publicStart > coreStart, "public tick must wrap the audited tickCore");
+  const core = text.slice(coreStart, publicStart);
+  const load = core.indexOf("this.dependencies.marketData.load()");
+  const acquire = core.indexOf("this.dependencies.lock.acquire");
   assert.ok(load >= 0 && acquire >= 0 && load < acquire);
+  const wrapper = text.slice(publicStart);
+  assert.match(wrapper, /const result = await this\.tickCore\(\)/);
 });
 
 test("V52 prepares session/reference data before taking the shared account lock", async () => {

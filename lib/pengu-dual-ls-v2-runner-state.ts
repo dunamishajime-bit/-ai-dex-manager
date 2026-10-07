@@ -60,6 +60,24 @@ export interface PenguM05ShadowObservation {
     productionReason?: string;
     sourceRuntimeSha?: string;
     observedAt: number;
+    /** Shadow-only lifecycle evidence. Never consulted by Production decisions. */
+    productionTickStatus?: string;
+    productionTickMessage?: string;
+    productionOutcome?: "CANDIDATE" | "BLOCKED" | "ENTRY_FILLED" | "EXITED" | "MANUAL_REVIEW" | "FAILED";
+    downstreamBlockReason?: string;
+    entryIdempotencyKey?: string;
+    entryFillObservedAt?: number;
+    entryFillPrice?: number;
+    entryFillQuantity?: number;
+    entryTargetGross?: number;
+    exitIdempotencyKey?: string;
+    exitFillObservedAt?: number;
+    exitFillPrice?: number;
+    exitReason?: string;
+    realizedDirectionalReturn?: number;
+    /** Same net account-return metric used by the Production Q60/DD overlay. */
+    realizedNetAccountReturn?: number;
+    outcomeUpdatedAt?: number;
 }
 
 export interface PenguDualLsV2RunnerState {
@@ -169,6 +187,22 @@ function normalizeM05ShadowHistory(value: unknown): PenguM05ShadowObservation[] 
             productionReason: typeof row.productionReason === "string" ? row.productionReason : undefined,
             sourceRuntimeSha: typeof row.sourceRuntimeSha === "string" ? row.sourceRuntimeSha : undefined,
             observedAt,
+            productionTickStatus: typeof row.productionTickStatus === "string" ? row.productionTickStatus : undefined,
+            productionTickMessage: typeof row.productionTickMessage === "string" ? row.productionTickMessage : undefined,
+            productionOutcome: row.productionOutcome === "CANDIDATE" || row.productionOutcome === "BLOCKED" || row.productionOutcome === "ENTRY_FILLED" || row.productionOutcome === "EXITED" || row.productionOutcome === "MANUAL_REVIEW" || row.productionOutcome === "FAILED" ? row.productionOutcome : undefined,
+            downstreamBlockReason: typeof row.downstreamBlockReason === "string" ? row.downstreamBlockReason : undefined,
+            entryIdempotencyKey: typeof row.entryIdempotencyKey === "string" ? row.entryIdempotencyKey : undefined,
+            entryFillObservedAt: Number.isFinite(Number(row.entryFillObservedAt)) ? Number(row.entryFillObservedAt) : undefined,
+            entryFillPrice: Number.isFinite(Number(row.entryFillPrice)) ? Number(row.entryFillPrice) : undefined,
+            entryFillQuantity: Number.isFinite(Number(row.entryFillQuantity)) ? Number(row.entryFillQuantity) : undefined,
+            entryTargetGross: Number.isFinite(Number(row.entryTargetGross)) ? Number(row.entryTargetGross) : undefined,
+            exitIdempotencyKey: typeof row.exitIdempotencyKey === "string" ? row.exitIdempotencyKey : undefined,
+            exitFillObservedAt: Number.isFinite(Number(row.exitFillObservedAt)) ? Number(row.exitFillObservedAt) : undefined,
+            exitFillPrice: Number.isFinite(Number(row.exitFillPrice)) ? Number(row.exitFillPrice) : undefined,
+            exitReason: typeof row.exitReason === "string" ? row.exitReason : undefined,
+            realizedDirectionalReturn: Number.isFinite(Number(row.realizedDirectionalReturn)) ? Number(row.realizedDirectionalReturn) : undefined,
+            realizedNetAccountReturn: Number.isFinite(Number(row.realizedNetAccountReturn)) ? Number(row.realizedNetAccountReturn) : undefined,
+            outcomeUpdatedAt: Number.isFinite(Number(row.outcomeUpdatedAt)) ? Number(row.outcomeUpdatedAt) : undefined,
         }];
     }).slice(-100);
 }
@@ -199,6 +233,98 @@ function appendM05ShadowObservation(state: PenguDualLsV2RunnerState): PenguM05Sh
         observedAt: Date.now(),
     };
     return [...history, observation].slice(-100);
+}
+
+export function recordPenguM05ShadowTickOutcome(
+    state: PenguDualLsV2RunnerState,
+    result: { status: string; message: string; signal?: PenguDualLsV2Signal; idempotencyKey?: string },
+    observedAt = Date.now(),
+) {
+    const signal = result.signal ?? state.latestSignal;
+    if (!signal || signal.diagnostics?.m05ShadowCandidateObserved !== true) return false;
+    const history = appendM05ShadowObservation({ ...state, latestSignal: signal });
+    const index = history.findIndex((item) => item.route === "SHORT_V20" && item.referenceTs === signal.referenceTs);
+    if (index < 0) return false;
+    const current = history[index]!;
+    let productionOutcome = current.productionOutcome ?? "CANDIDATE";
+    const terminal = productionOutcome === "ENTRY_FILLED" || productionOutcome === "EXITED";
+    const matchingFilledPosition = result.status === "completed"
+        && state.position?.entryVersion === "SHORT_V20"
+        && Number.isFinite(Number(signal.entryTs))
+        && state.position.entryTs === Number(signal.entryTs);
+    const patch: Partial<PenguM05ShadowObservation> = {};
+
+    if (matchingFilledPosition && !terminal) {
+        productionOutcome = "ENTRY_FILLED";
+        patch.productionTickStatus = result.status;
+        patch.productionTickMessage = result.message;
+        patch.entryIdempotencyKey = result.idempotencyKey;
+        patch.entryFillObservedAt = observedAt;
+        patch.entryFillPrice = state.position?.entryPrice;
+        patch.entryFillQuantity = state.position?.quantity;
+        patch.entryTargetGross = state.position?.gross;
+        patch.downstreamBlockReason = undefined;
+    } else if (!terminal && productionOutcome !== "BLOCKED" && (result.status === "held" || result.status === "no-change" || result.status === "locked")) {
+        productionOutcome = "BLOCKED";
+        patch.productionTickStatus = result.status;
+        patch.productionTickMessage = result.message;
+        patch.downstreamBlockReason = result.message;
+    } else if (!terminal && productionOutcome !== "MANUAL_REVIEW" && result.status === "manual-review") {
+        productionOutcome = "MANUAL_REVIEW";
+        patch.productionTickStatus = result.status;
+        patch.productionTickMessage = result.message;
+        patch.downstreamBlockReason = result.message;
+    } else if (!terminal && productionOutcome !== "FAILED" && result.status === "failed") {
+        productionOutcome = "FAILED";
+        patch.productionTickStatus = result.status;
+        patch.productionTickMessage = result.message;
+        patch.downstreamBlockReason = result.message;
+    } else if (!terminal && !current.productionTickStatus) {
+        patch.productionTickStatus = result.status;
+        patch.productionTickMessage = result.message;
+    }
+
+    if (Object.keys(patch).length === 0) {
+        // If appendM05ShadowObservation created the row on this call, persist it once.
+        const existed = normalizeM05ShadowHistory(state.m05ShadowHistory).some((item) => item.route === "SHORT_V20" && item.referenceTs === signal.referenceTs);
+        if (existed) return false;
+    }
+    patch.productionOutcome = productionOutcome;
+    patch.outcomeUpdatedAt = observedAt;
+    history[index] = { ...current, ...patch };
+    state.m05ShadowHistory = history.slice(-100);
+    return true;
+}
+
+export function recordPenguM05ShadowExitOutcome(
+    state: PenguDualLsV2RunnerState,
+    input: {
+        entryTs: number;
+        exitIdempotencyKey?: string;
+        exitFillObservedAt: number;
+        exitFillPrice: number;
+        exitReason?: string;
+        realizedDirectionalReturn: number;
+        realizedNetAccountReturn: number;
+    },
+) {
+    const history = normalizeM05ShadowHistory(state.m05ShadowHistory);
+    const index = history.findLastIndex((item) => item.route === "SHORT_V20" && item.entryTs === input.entryTs);
+    if (index < 0) return false;
+    const current = history[index]!;
+    history[index] = {
+        ...current,
+        productionOutcome: "EXITED",
+        exitIdempotencyKey: input.exitIdempotencyKey,
+        exitFillObservedAt: input.exitFillObservedAt,
+        exitFillPrice: input.exitFillPrice,
+        exitReason: input.exitReason,
+        realizedDirectionalReturn: input.realizedDirectionalReturn,
+        realizedNetAccountReturn: input.realizedNetAccountReturn,
+        outcomeUpdatedAt: input.exitFillObservedAt,
+    };
+    state.m05ShadowHistory = history.slice(-100);
+    return true;
 }
 
 function normalize(value: unknown, mode: PenguDualLsV2Mode): PenguDualLsV2RunnerState {

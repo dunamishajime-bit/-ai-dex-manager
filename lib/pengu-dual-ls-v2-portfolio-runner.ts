@@ -20,10 +20,12 @@ import {
     type PenguDualLsV2Position,
     type PenguDualLsV2Signal,
 } from "@/lib/pengu-dual-ls-v2";
-import type {
-    PenguDualLsV2PendingOrder,
-    PenguDualLsV2RunnerState,
-    PenguDualLsV2RunnerStateStore,
+import {
+    recordPenguM05ShadowExitOutcome,
+    recordPenguM05ShadowTickOutcome,
+    type PenguDualLsV2PendingOrder,
+    type PenguDualLsV2RunnerState,
+    type PenguDualLsV2RunnerStateStore,
 } from "@/lib/pengu-dual-ls-v2-runner-state";
 import { PENGU_DUAL_LS_V2, type PenguDualLsV2Mode } from "@/config/penguDualLsV2Runtime";
 import { readDisDexV96KillSwitch } from "@/lib/disdex-v96-live-risk-controls";
@@ -549,6 +551,17 @@ export class PenguDualLsV2PortfolioRunner {
                 ? exitAverage / closedPosition.entryPrice - 1
                 : closedPosition.entryPrice / exitAverage - 1;
             const netAccountReturn = accountingGross * (directionalReturn - 2 * 0.0006);
+            if (closedPosition.entryVersion === "SHORT_V20") {
+                recordPenguM05ShadowExitOutcome(state, {
+                    entryTs: closedPosition.entryTs,
+                    exitIdempotencyKey: pending.idempotencyKey,
+                    exitFillObservedAt: result.updatedAt && Number.isFinite(result.updatedAt) ? result.updatedAt : this.now(),
+                    exitFillPrice: exitAverage,
+                    exitReason: pending.exitReason || pending.reason,
+                    realizedDirectionalReturn: directionalReturn,
+                    realizedNetAccountReturn: netAccountReturn,
+                });
+            }
             const route = routeForPenguEntryVersion(closedPosition.entryVersion === "LEGACY_V2" ? "LONG_V2_FINAL" : closedPosition.entryVersion);
             state.riskOverlay = recordPenguClosedTrade(state.riskOverlay || createPenguRiskOverlayState(), route, netAccountReturn, this.now());
             if (hadStopFill || pending.exitReason === "LONG_HARD_STOP" || pending.exitReason === "SHORT_HARD_STOP" || pending.exitReason === "RECOVERY_V8_HARD_STOP") {
@@ -804,7 +817,7 @@ export class PenguDualLsV2PortfolioRunner {
         }
     }
 
-    async tick(): Promise<PenguDualLsV2TickResult> {
+    private async tickCore(): Promise<PenguDualLsV2TickResult> {
         if (!this.dependencies.config.enabled) return { status: "disabled", message: "PENGU_DUAL_LS_V2_FINAL is disabled." };
         this.ensureLiveGate();
         let preloadedHistory: PenguDualLsV2History | undefined;
@@ -1340,5 +1353,21 @@ export class PenguDualLsV2PortfolioRunner {
         } finally {
             await lock.release();
         }
+    }
+
+    async tick(): Promise<PenguDualLsV2TickResult> {
+        const result = await this.tickCore();
+        try {
+            const state = await this.dependencies.stateStore.load();
+            if (recordPenguM05ShadowTickOutcome(state, result, this.now())) {
+                await this.dependencies.stateStore.save(state);
+            }
+        } catch (error) {
+            // Shadow telemetry is explicitly non-ordering. It must never fail or alter Production execution.
+            this.log.warn("PENGU M05 shadow outcome telemetry update failed", {
+                message: error instanceof Error ? error.message : String(error),
+            });
+        }
+        return result;
     }
 }

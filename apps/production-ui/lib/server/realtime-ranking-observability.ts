@@ -61,7 +61,7 @@ async function observe(){
      gates.push(flag('setup','戻り売りSetup Active',s?.diagnostics.shortSetupActive,'下落衝動後の戻りと反転を判定'));
      gates.push(flag('armed','Setup Armed',s?.diagnostics.shortSetupArmed,'Short専用の状態遷移'));
      const m05Observed=s?.diagnostics.m05ShadowCandidateObserved===true,m05Pass=s?.diagnostics.m05ShadowPass===true;
-     const m05HistoryNote='蓄積 '+(d.m05ShadowSummary?.total??0)+'件 / M05差分 '+(d.m05ShadowSummary?.disagreements??0)+'件';
+     const m05HistoryNote='蓄積 '+(d.m05ShadowSummary?.total??0)+'件 / M05差分 '+(d.m05ShadowSummary?.disagreements??0)+'件 / 後段BLOCK '+(d.m05ShadowSummary?.blocked??0)+'件 / 約定 '+(d.m05ShadowSummary?.entered??0)+'件 / 決済 '+(d.m05ShadowSummary?.exited??0)+'件';
      gates.push({key:'m05-shadow',label:'M05 Shadow（72h ≤ -0.50%）',state:m05Observed?(m05Pass?'OK':'NO'):'UNKNOWN',actual:m05Observed&&s?.diagnostics.m05ShadowPenguReturn72h!==undefined?(s.diagnostics.m05ShadowPenguReturn72h*100).toFixed(4)+'%':undefined,required:'≤ -0.50%',detail:(m05Observed?(m05Pass?'M05なら許可。Shadow観測のみで実注文には影響しません。':'M05ならBLOCK。Shadow観測のみで現行Production注文は変更しません。'):'現確定足はProduction SHORT candidateではないためM05判定対象外です。')+' / '+m05HistoryNote,kind:'shadow'});
     }
     gates.push(flag('holding','既存保有・保留注文なし',!d.position&&!d.pending,d.position?'PENGU保有中':d.pending?'注文処理中':'空き状態','execution'));

@@ -36,6 +36,7 @@ jobs:
           npm ci --no-audit --no-fund
           npm run strategy:pengu-dual-ls-v2:selftest
           npx tsx scripts/pengu-m05-current-live-parity.ts
+          npx tsx --test tests/pengu-m05-shadow-outcome.test.ts
           npm run strategy:pengu-dual-ls-v2:short-v20:selftest
           npx tsx --test \
             tests/live-order-lock-scope-v2.test.mjs \
@@ -92,11 +93,10 @@ jobs:
           set -Eeuo pipefail
           PORT="${SSH_PORT:-22}"
           FROM_SHA="$(ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -p "$PORT" root@"$SSH_HOST" "tr -d '[:space:]' </home/deploy/disdex-trading/current/.disdex-release-sha")"
-          [[ "$FROM_SHA" == 8ed7c2266af33758b0a0f301aefc2457a7a7eab6 ]]
+          [[ "$FROM_SHA" == eabfeb1750666fac11f894a34cdcf68501ab923f ]]
           git merge-base --is-ancestor "$FROM_SHA" "$TARGET_SHA"
           git diff --quiet "$FROM_SHA" "$TARGET_SHA" -- config package.json package-lock.json
-          git diff --quiet "$FROM_SHA" "$TARGET_SHA" -- lib scripts ':(exclude)lib/pengu-dual-ls-v2.ts' ':(exclude)lib/pengu-dual-ls-v2-runner-state.ts' ':(exclude)scripts/pengu-dual-ls-v2-selftest.ts' ':(exclude)scripts/pengu-m05-current-live-parity.ts'
-          git diff --quiet c97daf589d2c20ff6afee0f8ebe6319f59eecea4 "$TARGET_SHA" -- lib scripts config ':(exclude)scripts/pengu-m05-current-live-parity.ts'
+          git diff --quiet "$FROM_SHA" "$TARGET_SHA" -- lib scripts config package.json package-lock.json             ':(exclude)lib/pengu-dual-ls-v2-runner-state.ts'             ':(exclude)lib/pengu-dual-ls-v2-portfolio-runner.ts'
           echo "FROM_SHA=$FROM_SHA" >> "$GITHUB_ENV"
           echo "SHADOW_ONLY_RUNTIME_DELTA=PASS"
 

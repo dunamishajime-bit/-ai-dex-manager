@@ -20,6 +20,22 @@ export type PenguM05ShadowObservation = {
   productionReason?: string;
   sourceRuntimeSha?: string;
   observedAt: number;
+  productionTickStatus?: string;
+  productionTickMessage?: string;
+  productionOutcome?: string;
+  downstreamBlockReason?: string;
+  entryIdempotencyKey?: string;
+  entryFillObservedAt?: number;
+  entryFillPrice?: number;
+  entryFillQuantity?: number;
+  entryTargetGross?: number;
+  exitIdempotencyKey?: string;
+  exitFillObservedAt?: number;
+  exitFillPrice?: number;
+  exitReason?: string;
+  realizedDirectionalReturn?: number;
+  realizedNetAccountReturn?: number;
+  outcomeUpdatedAt?: number;
 };
 
 export type PenguRuntimeStatus = {
@@ -37,7 +53,7 @@ export type PenguRuntimeStatus = {
   reason: string;
   latestSignal?: PenguSignalObservability;
   m05ShadowHistory?: PenguM05ShadowObservation[];
-  m05ShadowSummary?: { total: number; disagreements: number; agreements: number; lastReferenceTs?: number };
+  m05ShadowSummary?: { total: number; disagreements: number; agreements: number; blocked: number; entered: number; exited: number; unresolved: number; lastReferenceTs?: number };
   executionTrace: PenguExecutionTrace;
   failures: PenguFailure[];
   resolvedFailures: PenguFailure[];
@@ -242,6 +258,22 @@ function m05ShadowHistory(value: unknown): PenguM05ShadowObservation[] {
       productionReason: text(row.productionReason),
       sourceRuntimeSha: text(row.sourceRuntimeSha),
       observedAt,
+      productionTickStatus: text(row.productionTickStatus),
+      productionTickMessage: text(row.productionTickMessage),
+      productionOutcome: text(row.productionOutcome),
+      downstreamBlockReason: text(row.downstreamBlockReason),
+      entryIdempotencyKey: text(row.entryIdempotencyKey),
+      entryFillObservedAt: number(row.entryFillObservedAt),
+      entryFillPrice: number(row.entryFillPrice),
+      entryFillQuantity: number(row.entryFillQuantity),
+      entryTargetGross: number(row.entryTargetGross),
+      exitIdempotencyKey: text(row.exitIdempotencyKey),
+      exitFillObservedAt: number(row.exitFillObservedAt),
+      exitFillPrice: number(row.exitFillPrice),
+      exitReason: text(row.exitReason),
+      realizedDirectionalReturn: number(row.realizedDirectionalReturn),
+      realizedNetAccountReturn: number(row.realizedNetAccountReturn),
+      outcomeUpdatedAt: number(row.outcomeUpdatedAt),
     }];
   }).slice(-100);
 }
@@ -339,7 +371,16 @@ export async function loadPenguRuntimeObservability(): Promise<PenguRuntimeStatu
     const releaseShaVerified = releaseSha ? releaseSha === expectedReleaseSha : undefined;
     const latestSignal = signalObservability(state.latestSignal);
     const m05History = m05ShadowHistory(state.m05ShadowHistory);
-    const m05ShadowSummary = { total: m05History.length, disagreements: m05History.filter((item) => item.wouldBlock).length, agreements: m05History.filter((item) => item.pass).length, lastReferenceTs: m05History.at(-1)?.referenceTs };
+    const m05ShadowSummary = {
+      total: m05History.length,
+      disagreements: m05History.filter((item) => item.wouldBlock).length,
+      agreements: m05History.filter((item) => item.pass).length,
+      blocked: m05History.filter((item) => item.productionOutcome === "BLOCKED").length,
+      entered: m05History.filter((item) => item.productionOutcome === "ENTRY_FILLED" || item.productionOutcome === "EXITED").length,
+      exited: m05History.filter((item) => item.productionOutcome === "EXITED").length,
+      unresolved: m05History.filter((item) => !item.productionOutcome || item.productionOutcome === "CANDIDATE" || item.productionOutcome === "MANUAL_REVIEW" || item.productionOutcome === "FAILED").length,
+      lastReferenceTs: m05History.at(-1)?.referenceTs,
+    };
     const positionObject = object(state.position);
     const pendingObject = object(state.pending);
     const position = positionObject ? { side: number(positionObject.side), quantity: number(positionObject.quantity), gross: number(positionObject.gross), entryPrice: number(positionObject.entryPrice) } : undefined;
