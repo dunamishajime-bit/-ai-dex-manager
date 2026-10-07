@@ -1,0 +1,28 @@
+{
+  "variants": {
+    "BASELINE": {},
+    "MOM12": {
+      "momentumBars": 6
+    },
+    "MOM24": {
+      "momentumBars": 12
+    },
+    "BTC24": {
+      "btcRegimeSmaBars": 12,
+      "btcRegimeMomentumBars": 12
+    },
+    "BTC12": {
+      "btcRegimeSmaBars": 6,
+      "btcRegimeMomentumBars": 6
+    },
+    "BREAKOUT36": {}
+  },
+  "sourceFiles": [
+    "lib/v12-x1-all.ts",
+    "config/v12X1AllRuntime.ts",
+    "lib/v12-top2-residual.ts"
+  ],
+  "closedInputs": true,
+  "ordersSent": false,
+  "note": "BREAKOUT36 is an explicit added use of previously unused configured breakoutBars/buffer; others modify ONE signal component."
+}

@@ -1,0 +1,56 @@
+{
+  "cases": [
+    {
+      "case": "BASELINE_BASE",
+      "robust_positive_all_costs_and_halves": false
+    },
+    {
+      "case": "BASELINE_CLOSE_TRAIL",
+      "robust_positive_all_costs_and_halves": false
+    },
+    {
+      "case": "BASELINE_NO_TRAIL",
+      "robust_positive_all_costs_and_halves": false
+    },
+    {
+      "case": "BTC12_BASE",
+      "robust_positive_all_costs_and_halves": false
+    },
+    {
+      "case": "BTC12_NO_TRAIL",
+      "robust_positive_all_costs_and_halves": false
+    },
+    {
+      "case": "COMP_ALL",
+      "robust_positive_all_costs_and_halves": false
+    },
+    {
+      "case": "COMP_NO_BREAKOUT",
+      "robust_positive_all_costs_and_halves": false
+    },
+    {
+      "case": "COMP_NO_MOM_EXIT",
+      "robust_positive_all_costs_and_halves": false
+    },
+    {
+      "case": "COMP_NO_PULLBACK",
+      "robust_positive_all_costs_and_halves": false
+    },
+    {
+      "case": "COMP_NO_TRAIL",
+      "robust_positive_all_costs_and_halves": false
+    },
+    {
+      "case": "COMP_REV_ONLY",
+      "robust_positive_all_costs_and_halves": false
+    },
+    {
+      "case": "COMP_TREND_ONLY",
+      "robust_positive_all_costs_and_halves": false
+    }
+  ],
+  "adoptable": [],
+  "not_a_future_guarantee": true,
+  "all_variants_reported": true,
+  "live_changes": false
+}

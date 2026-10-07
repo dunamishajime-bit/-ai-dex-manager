@@ -1,0 +1,77 @@
+{
+  "selected_cases": [
+    "BASELINE_BASE",
+    "BASELINE_NO_TRAIL",
+    "BASELINE_CLOSE_TRAIL",
+    "BTC12_BASE",
+    "BTC12_NO_TRAIL"
+  ],
+  "chosen_train_only": [
+    {
+      "case": "BTC12_BASE",
+      "source": "BTC12",
+      "exit_mode": "BASE",
+      "train": {
+        "10": {
+          "n": 404,
+          "win_rate": 0.43564356435643564,
+          "pf": 1.03239890675571,
+          "mean": 0.00014369963093307738,
+          "sum": 0.05805465089696326,
+          "without_best": 0.0003512694006323411
+        },
+        "20": {
+          "n": 404,
+          "win_rate": 0.3935643564356436,
+          "pf": 0.8296732066654405,
+          "mean": -0.0008563003690669227,
+          "sum": -0.34594534910303676,
+          "without_best": -0.4026487305993677
+        },
+        "30": {
+          "n": 404,
+          "win_rate": 0.35148514851485146,
+          "pf": 0.6718600460809376,
+          "mean": -0.0018563003690669222,
+          "sum": -0.7499453491030366,
+          "without_best": -0.8056487305993675
+        }
+      }
+    },
+    {
+      "case": "BTC12_NO_TRAIL",
+      "source": "BTC12",
+      "exit_mode": "NO_TRAIL",
+      "train": {
+        "10": {
+          "n": 401,
+          "win_rate": 0.5012468827930174,
+          "pf": 1.1929406708595893,
+          "mean": 0.002716236024526964,
+          "sum": 1.0892106458353126,
+          "without_best": 0.9927751034671989
+        },
+        "20": {
+          "n": 401,
+          "win_rate": 0.49625935162094764,
+          "pf": 1.1177226898371513,
+          "mean": 0.001716236024526963,
+          "sum": 0.6882106458353122,
+          "without_best": 0.5927751034671985
+        },
+        "30": {
+          "n": 401,
+          "win_rate": 0.4937655860349127,
+          "pf": 1.0474840991165508,
+          "mean": 0.0007162360245269639,
+          "sum": 0.28721064583531253,
+          "without_best": 0.19277510346719884
+        }
+      }
+    }
+  ],
+  "criteria": "Mandatory BASELINE exit-factor controls; top nonbaseline source BASE and top nonbaseline combo ranked first-half price-only mean at30bps, n>=80. Diagnostic selection does not certify positive edge.",
+  "candidates_tested": 18,
+  "split_ms": 1770508800000,
+  "prior_period_explored": true
+}

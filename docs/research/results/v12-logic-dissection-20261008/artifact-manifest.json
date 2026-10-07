@@ -1,0 +1,1090 @@
+{
+  "base_commit": "1a38f676c67fd4269d3771c4b69b9c7884db47ac",
+  "artifacts": [
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/.gitattributes",
+      "bytes": 30,
+      "sha256": "f06202a408fef9b9ea69bb6b1cb8160dbb0378c5bb67a444d510d231813824c8"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/accepted-loss-decomposition.json",
+      "bytes": 2899,
+      "sha256": "9de3f267720d7e224aae8c3053178601832ac2a8e6a317daa5bef8c7b850d3a1"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/baseline-path-dissection.jsonl.gz",
+      "bytes": 588210,
+      "sha256": "7fba92f741c9338937fe523a4ce164867e4f694e26e174095b62083b81cb9840"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_BASE/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 175775,
+      "sha256": "7716198f7bea5cd06197a3623185e5498188d3e937a447d307a860283ae467ee"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_BASE/result.json",
+      "bytes": 111349,
+      "sha256": "5e684b539d7fd041004763b06af464116dff599d6e4dd67812a284bd43f41320"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_BASE/runs/portfolio-price-model-summary.json",
+      "bytes": 86419,
+      "sha256": "ab2f37313fb437e236bfa99c41570f3847e48e56941b241879df5ced6154fd97"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_BASE/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 244471,
+      "sha256": "abdc37f30422c988b13bacf58ee9af6dcd4fded093f577baeea8e811013c6930"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_BASE/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 25428,
+      "sha256": "c2eaff5c3b35787f54f5b16a1151fe3a7676cf6628563fde13f65be1144b0264"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_BASE/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 284137,
+      "sha256": "32604958c5f8cbef50b2dbfd5420848bbddcce6bdebf60b1ba4f75e6c6bc0d9b"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_BASE/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 228796,
+      "sha256": "47250d778ccae7045ba508e2720477d2ad7900d965e03e0a9b5601511d07c3ca"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_BASE/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 239564,
+      "sha256": "4b0b4d36e8a143df7100222b1906ec7234d377f43bb3cd7a235849361da2198d"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_BASE/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 25410,
+      "sha256": "256fc7dcbb424fbb6592f04a4c77e5bd021b4e57bb9d42e68c78764c9fd60a19"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_BASE/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 274491,
+      "sha256": "8622fb8becb261e29480070b663da35a818c488db2b5ccd174a020875c730607"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_BASE/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 220631,
+      "sha256": "13c12a1e6f3a9473c53f302166e5c24eabc44f98c3f9dc3163672e5eb733612b"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_BASE/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 240833,
+      "sha256": "7a36d3da74d8764f5558fba87ef9b7c6fbc3300a3df85f16db6fe504f696ac0d"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_BASE/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 25514,
+      "sha256": "c446dfa748ee00440f45f5a4e172201f15ea683c5691108d79f458adcece8d4f"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_BASE/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 272178,
+      "sha256": "28a8aa9f051a2936f0d63edf500a2026f69c7b386659c50ab82b9d164ddc0c83"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_BASE/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 218730,
+      "sha256": "57e87f9f8b4d2eb7d03f419f48f7f53c00de5118fdc1e14be4df614694e7b75e"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_BASE/runs/summary.json",
+      "bytes": 86757,
+      "sha256": "9a9599a195cef7c67be82de8b7ea192e32abc53130d8721b5b6346fa62ea17e6"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_CLOSE_TRAIL/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 178427,
+      "sha256": "17342c71f6af80541ef2570288308b41fae47b36dcd3875370e2eedcc44dc581"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_CLOSE_TRAIL/result.json",
+      "bytes": 111281,
+      "sha256": "b1a97d17623987b7260d836eb6baefd4c7681b3c5ea8bc4c19802e2fdba92a5a"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_CLOSE_TRAIL/runs/portfolio-price-model-summary.json",
+      "bytes": 86382,
+      "sha256": "5ae513b8ff5f4cf340c964a68e86246f9a39591f2dcf9729fb51ab9f70f9ef07"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_CLOSE_TRAIL/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 239775,
+      "sha256": "bfa60f47c858bcc0cda6ab338f2cb5079ae9fdaeb141fc1c5258aa39bbb0598d"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_CLOSE_TRAIL/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 25374,
+      "sha256": "c636d51edff0e1571daa9137761e7e32281cd77bae4f698121e769b75fd9ffc6"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_CLOSE_TRAIL/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 271098,
+      "sha256": "ec5925a3bc67e11c88d852b3d7aee779b3f2b2f4ab3a80b42af5523c5a1a9d09"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_CLOSE_TRAIL/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 211220,
+      "sha256": "fff0c2490996aa649c262389db2292a3c55c0c6ca4f7cfff1dd025423ba4c22c"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_CLOSE_TRAIL/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 235693,
+      "sha256": "4b2a8b1960edc631645d6b2fed7a6dfd67ae4144c61fa32a69ee3aa141267ddb"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_CLOSE_TRAIL/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 25442,
+      "sha256": "4ff2946d7ee086936d1aa6655d03cea1d7bd1dbf4c10b471fa62ed6e16bdcc95"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_CLOSE_TRAIL/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 263994,
+      "sha256": "b95756be23bdd358e26425ed85f35691485246ee30d532c294d8126781ccf1f7"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_CLOSE_TRAIL/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 204905,
+      "sha256": "a5d41ffdbb94fa12b72f7618740b1a2de516e159da3957036a7d9b5063ab3d63"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_CLOSE_TRAIL/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 237622,
+      "sha256": "f01593855e12b9d2af68c367f855cb1af1301a5ae0809e5a61d1ac92642e3c46"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_CLOSE_TRAIL/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 25507,
+      "sha256": "3e53bc012cb6fa70afab08ed25cdff15cde2ac61cb74236458b02ecba254b402"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_CLOSE_TRAIL/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 262587,
+      "sha256": "e1e05872338d60658988c7a8febfaf3d2a6ea7c9d9f4b1573c4df19c35ee2b8d"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_CLOSE_TRAIL/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 204298,
+      "sha256": "98b9a184201cbb14321d42d5c6f9ea126781743f7a1210e13fd00e8afd91465b"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_CLOSE_TRAIL/runs/summary.json",
+      "bytes": 86720,
+      "sha256": "d30529cea38f52a6871f2c7797eb06b486c46b27292fe350f33a3007ca76edd1"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_NO_TRAIL/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 179786,
+      "sha256": "53e0415ab55556e8dd366aba444f5373d7a9c36a76c75360b47dc7a5bc89bf2c"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_NO_TRAIL/result.json",
+      "bytes": 111436,
+      "sha256": "90eaf1f8d21b09472342db10b1d61c5046870edadf09c1a218ae0cf0c3fc7edb"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_NO_TRAIL/runs/portfolio-price-model-summary.json",
+      "bytes": 86627,
+      "sha256": "90043f5caa6290528270e4690300463d8093e7bfafb72a4650063545327ccc13"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_NO_TRAIL/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 204390,
+      "sha256": "720e6b5a7a892c3ff7b2e21a8feffcd363a04d3c7002e416a10c12ed6f8681ed"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_NO_TRAIL/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 25516,
+      "sha256": "4affd23dfe3e0e70cec5d62b91365b1383b912033bbfa72a3b0d6e20f7674c57"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_NO_TRAIL/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 192399,
+      "sha256": "f4ddc068cd1703771f3a39b0eb8738aa2fb3525092a836b80e5071d2602472aa"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_NO_TRAIL/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 112176,
+      "sha256": "b2df09dd5d3a7aec0df9b8c530dafe05b152a2bd402703559408ad5634f17e44"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_NO_TRAIL/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 202946,
+      "sha256": "ef8b4cc3432ea5af81122dd197154ac7726c4d5b337262fa536c15a7506d2cc7"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_NO_TRAIL/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 25513,
+      "sha256": "af8604ef77e9df6413e35d7358a635cc892aa6b481d14cb7a9fb0e26469f2149"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_NO_TRAIL/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 189541,
+      "sha256": "3d96654646624a680134cc35341bf63eb547b0a3b4f232b50a0f2013841ea1ed"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_NO_TRAIL/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 110384,
+      "sha256": "22b8190139ae70e1e366bd1b6cc6ec74460ba8ff0059e8790094447c8391293e"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_NO_TRAIL/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 204032,
+      "sha256": "34bb441d73674ef3f0e8027e0765e0730525ae808ba4fd4e3696c6d5abb5813e"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_NO_TRAIL/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 25503,
+      "sha256": "dc505552979c295e2ee520fd58263f80e99fade988b79df7e7e13a23bf0940f3"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_NO_TRAIL/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 190362,
+      "sha256": "c815f398c2791be448d191e13de566b51076a93a845862ba3c6351d395c5e31e"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_NO_TRAIL/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 111309,
+      "sha256": "2e02695a5d862ae68d0c8c61dfed3a78598996a3da073e0affd29117d26e811c"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BASELINE_NO_TRAIL/runs/summary.json",
+      "bytes": 86965,
+      "sha256": "c920f1e09469b193f8a37c6f3c9c1c273055ddacdd4153cce0d9569cb3f9c805"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BTC12_BASE/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 114694,
+      "sha256": "56edda36133e3ef23119490c8488a1d7b8d8f102118b776a16041e5a95ba5d82"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BTC12_BASE/result.json",
+      "bytes": 108756,
+      "sha256": "43f6289dab2d3ce55d5cbcd49d9ddd2675607d1faad89fabc78b9f5ef3691262"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BTC12_BASE/runs/portfolio-price-model-summary.json",
+      "bytes": 83866,
+      "sha256": "6f7904e833685c01201aff805070d8c6d06854e658212b107011602e763124e1"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BTC12_BASE/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 155764,
+      "sha256": "8ed9a30cb8b266409408d0c6347cf50feefa505f628730e89114da0044ba069c"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BTC12_BASE/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 24607,
+      "sha256": "ee8e9c30c4b5332dca4e162e67f5584b88f54fc027b75b67c282bfccf8de9ef7"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BTC12_BASE/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 196869,
+      "sha256": "29f3ecc6228c4ff4a9a52233918afcf624b8cadc474158fc3b329c5bb2c74c80"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BTC12_BASE/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 128379,
+      "sha256": "d01e7a28e8e28c489e41e31837a5a34bba0797b459afb4a91568cc4110d48440"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BTC12_BASE/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 153216,
+      "sha256": "e6dc3f75a1d3459c7b2dbe21e30972be4ccf60a5bfffba282cd7ea11f0bf38b5"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BTC12_BASE/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 24665,
+      "sha256": "9bced462f2506f8fddf60d68d8e37dbb29127766f201ab1fdba82f2a8eca4f3d"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BTC12_BASE/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 192437,
+      "sha256": "b679d780e5dc3be9f8a1b2cd2cde30ec7b2efa1a78315d387634c002204e09be"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BTC12_BASE/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 124725,
+      "sha256": "9123db28cd84be28fd9da405886df2ae4957f648e3ada9945ce127637fd8410f"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BTC12_BASE/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 154199,
+      "sha256": "c62fe49713b49f04e94d383f07227096f97648f44df19a0adf0b59b22d97eb43"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BTC12_BASE/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 24775,
+      "sha256": "840ef6a26417d2eba54de5a0c4eceedf2700f172ab6c67ba17fe78fa8a3a0827"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BTC12_BASE/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 191096,
+      "sha256": "f314abcc4a2d989d9cc2b64d02643fe07f63cdd0fd49597432eb027bed1cd095"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BTC12_BASE/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 123565,
+      "sha256": "3705993769407b3bcfb2d6bd38a78835e64ef2a8d90f047844ab31073eae3b87"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BTC12_BASE/runs/summary.json",
+      "bytes": 84204,
+      "sha256": "33d509656eaee7c8f5bb0c2aac8b16409fd685354f88b732edaa000d9a6afef6"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BTC12_NO_TRAIL/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 116426,
+      "sha256": "315f3ea8def2a53f77f7d4474fe3b0f24e686f986c676579e1d071fa53858821"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BTC12_NO_TRAIL/result.json",
+      "bytes": 108758,
+      "sha256": "5445bc3d023249e4205ec2d96d8521e07961dbdfadcb3dc2e0a0a0212f04ec99"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BTC12_NO_TRAIL/runs/portfolio-price-model-summary.json",
+      "bytes": 83943,
+      "sha256": "9cd2bb22320182c69478fd4d23a1f8707e1f355dde62e06dba3a3ef81a515bc0"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BTC12_NO_TRAIL/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 145678,
+      "sha256": "6698709589cddf52d9c73f6d8734e04898091a673c9fb3445a24495254fa2b81"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BTC12_NO_TRAIL/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 24528,
+      "sha256": "d9ea46e91099f3da286db982ebd11439a88b1fb2125ecb9f0c451c4d72d52953"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BTC12_NO_TRAIL/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 176940,
+      "sha256": "723cbd68d8167d7691510b27d96d21116d772e25d7a3416d119f17b89c61e1b8"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BTC12_NO_TRAIL/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 98239,
+      "sha256": "e86d16423be0c843b656d1b73a7b0fe8bf588f1126a84220fc6144bb1e0b11a8"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BTC12_NO_TRAIL/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 144346,
+      "sha256": "b8e54e2b766f1e961c3f885d9d7a826e348a27d6bba683317af05acc468199ca"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BTC12_NO_TRAIL/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 24792,
+      "sha256": "303256a6d3dc18e0d4de6b0d617ef9e00767bdbc3c2daff2ecf3b22f75cd4349"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BTC12_NO_TRAIL/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 175174,
+      "sha256": "9bad0f9ba2ba24657ca40731d8e7a49909208faf1aa80267097523b64311010c"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BTC12_NO_TRAIL/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 97165,
+      "sha256": "648147fc6b7e34f92f89bef6694a33a1b638e5a2ed7fd87c7e1545deca496cfd"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BTC12_NO_TRAIL/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 145580,
+      "sha256": "ca6845956ada8dad4caad7c65f1765997d195611da6d9e57ebf6bc96341589bb"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BTC12_NO_TRAIL/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 24792,
+      "sha256": "f242305cb1dbabae4bf907897490fa6829cc652936b72a851d30dcbf0a85c4e6"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BTC12_NO_TRAIL/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 174906,
+      "sha256": "fa06ce8e24d2680c82fd18ab89029ad824858ba9c028bb474174270dcf4ca0fb"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BTC12_NO_TRAIL/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 97802,
+      "sha256": "044216ff305fccaa8dcd249cd26753db38c03035cea25bf6653b10b493b1e0e6"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/BTC12_NO_TRAIL/runs/summary.json",
+      "bytes": 84281,
+      "sha256": "747925edc8fe22e740e5208211961fad0059ca03d6efd35b4f0c05fbad81e322"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_ALL/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 282514,
+      "sha256": "48a344e4fc9a84db93c4766b3e1f00131c24d406757f34e62264bd677a4912eb"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_ALL/result.json",
+      "bytes": 107576,
+      "sha256": "6f6ae4a1dea6c765fbbdf77cf68685c37c7a4a488f220d8e8a4fa2fed3553db4"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_ALL/runs/portfolio-price-model-summary.json",
+      "bytes": 81704,
+      "sha256": "db0212062fe62521ba0fd968bedc5d4afd104401b605b4ba99fd1e5e428048b4"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_ALL/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 167152,
+      "sha256": "c0d82376cb87110c784cbd293142273ff32b00eb396e6a99185e083b79f7a8a9"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_ALL/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 23983,
+      "sha256": "45956828a6a9030fb5b72a91928517511b5e1ea2b02bb8757c58839aa09380b8"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_ALL/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 214844,
+      "sha256": "ec9a4c9c1c5885475d4ff69f0462342250d8c690c777cfda782a860e06bed3ef"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_ALL/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 143683,
+      "sha256": "35e75e028f1688003abcca843d030dfc679f6837ed0f94a6a999308ff90604ab"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_ALL/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 165068,
+      "sha256": "194cbedaa00c9a78f309615f7142351b753539006a6b78d6cf35e953dfdf70c9"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_ALL/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 24018,
+      "sha256": "9ea8e843ec64761f6f3aa311b4e405a6757656bd888488d2c2c8b1031a7fd174"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_ALL/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 211680,
+      "sha256": "9ab1fcc5b11d597921e18bd68eb41442b06e2b79f8155fc5d3a5bb91c73a9a24"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_ALL/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 141672,
+      "sha256": "f8ae112a82452f67bc0641766d2e1faa47e6911522e30347e8fd3c58198d69d7"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_ALL/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 166496,
+      "sha256": "6efa274dce698e380ce08da08b9d27b854004cf7abb4fa419925d1bfe4130a7c"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_ALL/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 24100,
+      "sha256": "d1fcd98b74f1991fe264c0f0637791cd3ec58f5cb07fb0d0377e35022f6d3bab"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_ALL/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 210754,
+      "sha256": "6a3c834c5f7c2ce88810e33251dbcef383cb278fe868f2011118abdcbdc394cc"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_ALL/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 141564,
+      "sha256": "63b80363d418106ab590d81b448a40ff84f47fbde19d993ccd22e8299df5d0ac"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_ALL/runs/summary.json",
+      "bytes": 82042,
+      "sha256": "7f2391b1d63f46a3a16302da8addf41459c1e9d0531eea83bc679fa0cbfbded6"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_BREAKOUT/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 172819,
+      "sha256": "d75bffc20516ba9793dd2b1530607e150d86645fe66c792012d7a398b0c685bd"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_BREAKOUT/result.json",
+      "bytes": 109033,
+      "sha256": "27f000af45054a3f29c5fc82830fa46d488164c07af93a63e50fa71967cc5a41"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_BREAKOUT/runs/portfolio-price-model-summary.json",
+      "bytes": 83806,
+      "sha256": "7489ceeade5b193f7b05b257419aad02df10306c6b358063dd7d582870557a5c"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_BREAKOUT/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 135789,
+      "sha256": "010c2b83c0ea4f92aea615d944e66dc2adee4fd1473a7e11b6e299d4f1426144"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_BREAKOUT/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 24645,
+      "sha256": "e5ca313c7c4c5fc8c372bf6152751f31c12eff8aa8d246907c29e3c2b940afff"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_BREAKOUT/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 182106,
+      "sha256": "a60745e2862bd20da3702de4dddee8cb624162815c7d1047b826dc6a94cb44d5"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_BREAKOUT/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 108502,
+      "sha256": "aaf93b52af4d1c8dfe1c98d634233646aba394a57fbf24e1fbd4e034a82c6c11"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_BREAKOUT/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 134214,
+      "sha256": "6dc87fa0d005a8f6f42c199a7dd3dedd5d75880a60ed040381e4b147814dd788"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_BREAKOUT/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 24683,
+      "sha256": "5ee391977965c6424dae9e6d6a5b428aea5758553e67501b84ece9f05764e1a9"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_BREAKOUT/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 179539,
+      "sha256": "b8c553cc7f1a91ccc556b2f493b07bdb2a9569822d397186c07473a972987521"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_BREAKOUT/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 106724,
+      "sha256": "87f8b5392d404120d20f4f9a1b5543d116b857f1d64190483a249530238e7f29"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_BREAKOUT/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 135338,
+      "sha256": "b0810ec5df154835b35ec424f8935d11bed0cad0c322a5c572591ae10dfc9790"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_BREAKOUT/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 24667,
+      "sha256": "3a9292695667c90eaba4a705bdd1ca49ef5686ecc60b62f16d823017a6d65cee"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_BREAKOUT/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 179095,
+      "sha256": "2f52f8e68b39c0e008729a5027ed0cf0329aa367777c26972ff3d2fd6f91b47e"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_BREAKOUT/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 107031,
+      "sha256": "4323658402c12eec4c2feb89e3a5ecc12145df8d01ef6165dbd7f22bf3dcde41"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_BREAKOUT/runs/summary.json",
+      "bytes": 84144,
+      "sha256": "5265b26c724cf3f984c4b48ac83644108e2c1d22524674d9d215acd941877536"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_MOM_EXIT/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 282857,
+      "sha256": "e42bbb4270d3e774d67acfc6ec61ad6239e86b4f2bf6eb6b6796a18551c91e30"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_MOM_EXIT/result.json",
+      "bytes": 107841,
+      "sha256": "22c34c039561a8da66b8ae61bbc011b4bcb8def79e316b8e5c515a3f11f7942a"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_MOM_EXIT/runs/portfolio-price-model-summary.json",
+      "bytes": 82028,
+      "sha256": "6cf0efd229ea53688bab8ad1dda0d3796c90aa0184bb783028f02acfc5b96c00"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_MOM_EXIT/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 165960,
+      "sha256": "f91406a841a86db5a4ac7c602919d6f13ce018124e7c2f95bbda9f50a3c1abb3"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_MOM_EXIT/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 24121,
+      "sha256": "1279b414dde7a88ae751e9f8ecff7f58c43bd77d641cfdc2a03555042e301b18"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_MOM_EXIT/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 212493,
+      "sha256": "2c556ce201dd3130eabbe0bb000446b869a06d05302a25f9f8b2dbcf748418e2"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_MOM_EXIT/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 140038,
+      "sha256": "0bb3069402cce7d96aef26104e8c5883b05df70e8bbee78d3fe8cac25e15e695"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_MOM_EXIT/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 164210,
+      "sha256": "614bdf7d7a207a72320374e9bc469850c48496ed6485eebe653609ebe66babee"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_MOM_EXIT/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 24079,
+      "sha256": "cdb94a355ee11bf67cb5ae8ab2fd5e6118c14101877b0ee3c6a25b6261aad220"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_MOM_EXIT/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 209990,
+      "sha256": "5e33dc931fd08f8f5ce1766da6f377a905998cde1b6f3e2553345373fda579e8"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_MOM_EXIT/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 138724,
+      "sha256": "01a1155bfe094cff2a0f3a71280d023fe1dbd721dd9aad44da7963aac8e77d82"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_MOM_EXIT/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 165530,
+      "sha256": "c23683f98469697251108546bb1c4afed9f1223c5debc192fbecc5084159ddb6"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_MOM_EXIT/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 24193,
+      "sha256": "a3beb0a492bc4e904424b358bc0b08717bb4bf77e29a37711c432b422e7569fd"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_MOM_EXIT/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 209451,
+      "sha256": "6ad55b92970538badda4cf1d81ceb046140da15045c35e356924e5fe8c85a7b9"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_MOM_EXIT/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 138729,
+      "sha256": "5da9f96256ba851d4f2f8452751fcacdc4dd955624fca926ad47a53ce6fefcbe"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_MOM_EXIT/runs/summary.json",
+      "bytes": 82366,
+      "sha256": "3ca07bbec4066100ba92df9393447e552b003f971cc267d315f9ab8d9594e0c3"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_PULLBACK/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 257872,
+      "sha256": "fc959e881bb5f3a5003104c414c330273aee9eb1a9dcbf2158928499c1805b1d"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_PULLBACK/result.json",
+      "bytes": 109243,
+      "sha256": "6bc032fc945562dc507de97ff8bd50a8b37a8b9946a331b70559076d7b313b87"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_PULLBACK/runs/portfolio-price-model-summary.json",
+      "bytes": 83964,
+      "sha256": "16a390a5695a7004f4268995c88c495675f743dd6813c9086b6a48301f6fab4a"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_PULLBACK/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 159558,
+      "sha256": "f1ba0a32a72120ce05a8ab3e0715d559303b37af6d4b725dfb028caebf6224cc"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_PULLBACK/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 24694,
+      "sha256": "67a120e8fe76489ae7bfe5b2c02234c9ded642a659b77e3475793242a0114694"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_PULLBACK/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 207056,
+      "sha256": "ce7a20a6a80631c94bb8707d877c3341dbb41f65b5b195e162ddd853522a9256"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_PULLBACK/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 135295,
+      "sha256": "8dbdabbc85e8c51e2243f2471c9e043c5d331acaff7fc1514d9cdb0a37da20d7"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_PULLBACK/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 157758,
+      "sha256": "132d8208b1c6959e222f0187f4530ddd44d4ffef6da1b3ece72a6895873a9dc2"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_PULLBACK/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 24688,
+      "sha256": "aa13718c84a90d3d00ad6b44eee934c4b85c57e1317b86d81a1151ed63e3a58c"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_PULLBACK/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 203592,
+      "sha256": "a012bc97853f3a1ed28a57c134460238fce01c73ec02edbce92d5a6f38c70ec3"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_PULLBACK/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 133298,
+      "sha256": "8c1c1b884d0f583a0632bb26effc22fd5a1f012e719fcb2746b732f1ceba5acf"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_PULLBACK/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 159225,
+      "sha256": "b37d2954097c07f30ddba193a48e88cedd476fc67ab846338201512253b7f39c"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_PULLBACK/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 24755,
+      "sha256": "17eb70caedc18f66335c1da38b3ba07074dabd4a2e3d82b84da46d7b7d48c3b3"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_PULLBACK/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 203238,
+      "sha256": "0a0f37279e826538708520c24f262ad561aea5ca322a1e6cdc5f12c9185e44ba"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_PULLBACK/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 133713,
+      "sha256": "ee5cfaf1f65114abfc20ad5fe31bdd716f36bf6018d6c0c821585daa0afd73cc"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_PULLBACK/runs/summary.json",
+      "bytes": 84302,
+      "sha256": "b3decffade5e2e09b9ceba06cf280162a960a6b9675b76dcf51a87288224aa12"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_TRAIL/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 282051,
+      "sha256": "ac7485aca06ba0706ac7202591d457c5141b8f742a49832635ca90f0286880e3"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_TRAIL/result.json",
+      "bytes": 107634,
+      "sha256": "783184194d963850b75478f954ff0b23d7994ea1836ce58d7daf8aca30f64417"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_TRAIL/runs/portfolio-price-model-summary.json",
+      "bytes": 81749,
+      "sha256": "83f206820352c7dac7f2b2eab60656287b6fc4bbeb339a37b8dd3547efcc27a9"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_TRAIL/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 165298,
+      "sha256": "a93ad9a56bfb3d8d73b6b62570087714c86f02c5e3d0140c60f19895cae58b06"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_TRAIL/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 23981,
+      "sha256": "0d9ed6a75a75d18a6ede12d669e9605a200061e7d5c65109df1d716b04ebdd4a"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_TRAIL/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 212604,
+      "sha256": "1be84126313698ca0041b41e3958a03a4a448be8db718d8566e6d7cd07fbdcea"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_TRAIL/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 139125,
+      "sha256": "686c537ddbc7af94b1939f97de93f800aa2515cd0bb5fcd7d1bad959d25b7c31"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_TRAIL/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 163459,
+      "sha256": "0694ad69d62a87fcca07cf27957093c154840b31a2d36dc695159751edb657ab"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_TRAIL/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 24045,
+      "sha256": "7c761e5bfe6536015395d97553a15b992c840da0521b755a07eaca49c18c1634"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_TRAIL/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 209689,
+      "sha256": "47b63e16c34571d5c4cb4d2bc5ce957df6def466bc978e7abac5ca9e07235318"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_TRAIL/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 137223,
+      "sha256": "f6ba9135bbdf0c6ff8b6827e556f56c8b56b76714055cb4f99fcf9fac2c4d663"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_TRAIL/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 164745,
+      "sha256": "90b9f1edf74379c17f09c8a59600ba21b9961172fe0ea3f7299b1bb3a95d0c31"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_TRAIL/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 24120,
+      "sha256": "298a5008fb90e036c76bdf97a36332936d23d10dfb99aebeea4f6ff7b460d84b"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_TRAIL/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 209093,
+      "sha256": "1d5da93a6625ca524fefe8a157145c1636547c4d44be700196192426db1ae2f8"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_TRAIL/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 137096,
+      "sha256": "cf8f06fa8e65fd8e97c576780fa63157433b543d1f6f2845da1917c0132512dc"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_NO_TRAIL/runs/summary.json",
+      "bytes": 82087,
+      "sha256": "dad522d3cfb620d167a37916fc8a49b15556d29fd391dca878b4113a19a9192f"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_REV_ONLY/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 132913,
+      "sha256": "c622e015256400c61f90026394ce16e38ee748a47ab9e6cd9b3f04f56e722681"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_REV_ONLY/result.json",
+      "bytes": 108236,
+      "sha256": "e929ed90209782adde099473c4a7fdf7afe6abbe883323e32fdc17eb48ce8677"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_REV_ONLY/runs/portfolio-price-model-summary.json",
+      "bytes": 83581,
+      "sha256": "0bd325bfcfa342e018b366ecbe0f92cc079f1d2c61e2d16e3516589e7fc27fd9"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_REV_ONLY/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 122395,
+      "sha256": "451fce149d3df17295ef8f3baccf7fb4410d212859d47ba6cd7449f232e9f9a9"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_REV_ONLY/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 24534,
+      "sha256": "a8885c3e7785e891825739b5de19d228369b0994e09894a92df7fdc53fb8b475"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_REV_ONLY/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 165430,
+      "sha256": "d8fe1e4f7535c13ad99016a95bb1700805b156a06b581366eff89206bafb9740"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_REV_ONLY/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 91420,
+      "sha256": "8b2543b84234a5b825a7eb5f3423f3502735af8c1fbf960d4f0660b02f9fcde6"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_REV_ONLY/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 120893,
+      "sha256": "972a5fb14c653920e468d5da47699050ec999d634cff5a0b8a024015f3a7bf2c"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_REV_ONLY/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 24637,
+      "sha256": "762e06cff6d259b9b06cae389c6c85339fd76719a32e2d7fb54a5bbd755c138e"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_REV_ONLY/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 163485,
+      "sha256": "dce2130e47ab2f50e60570ae2c7141e33bce5906db13a2ff3acfd2d5d21d8337"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_REV_ONLY/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 90186,
+      "sha256": "bf58ee08a2e5d1b528e2c7b16005df8c6df8d4f2e58f57662f16bc86a073685f"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_REV_ONLY/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 121905,
+      "sha256": "c19fb006c7cb6a01d01632ac3af8c36978e693c430e9d575600bb7e5d21f3e1f"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_REV_ONLY/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 24631,
+      "sha256": "1e033779949ee2ae5b1be2cfb319b66814482a7bbd7a1ba06e594541dc27b9f2"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_REV_ONLY/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 163148,
+      "sha256": "a422a2b008841491cd56ff8508225d636cc5142cd6d50ba2247c3304013ae094"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_REV_ONLY/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 90359,
+      "sha256": "2f8ae36a5367e9723437767c462f38c258f431f5af27b84215c8a9b3bf342a34"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_REV_ONLY/runs/summary.json",
+      "bytes": 83919,
+      "sha256": "a35ee0345c4834e58883f9db420bbae87959e86538c0770ca33cba4ace293a2c"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_TREND_ONLY/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 235697,
+      "sha256": "34fb4b7d7634c0ea118dc496d032a9c7e1eb433ea16a0c53b00b01cfcb8ff24b"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_TREND_ONLY/result.json",
+      "bytes": 107271,
+      "sha256": "3b3acdaa995153d1e63f87032be491f67187fce2bfc7c7e8f8836c43b7cee4a3"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_TREND_ONLY/runs/portfolio-price-model-summary.json",
+      "bytes": 82022,
+      "sha256": "b1db2bf50bf2c9ec6e1a5c24e804ba66153940cefa0c82d50c4f84a73d3a9cf4"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_TREND_ONLY/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 152599,
+      "sha256": "c4cdc1264b4a93350bc86771a20374a023d3039e2fcdbb6ed56cc6d8844a04a2"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_TREND_ONLY/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 24095,
+      "sha256": "0078de935b0ca9e6b8d9589d056f36c7b77895148a4b5969443ee139f6540c16"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_TREND_ONLY/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 196928,
+      "sha256": "77e850fcd13a371b47019d22d72b97fdfe9dc3f3625c02169a2760a7312a449b"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_TREND_ONLY/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 125487,
+      "sha256": "f5922c1b0e8c6daaadc5fdc406b0e57349d51ef9e40a9364d12cb2f0d9cc14ae"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_TREND_ONLY/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 151017,
+      "sha256": "6191292f3755b6ff2fe31598029823c40fb338e8226af0346ef37a6156d49fcf"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_TREND_ONLY/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 24140,
+      "sha256": "2566756c7fd29bfcb52c21a9ec670da9a6075aac9a3c91a22df4467214e849e7"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_TREND_ONLY/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 194522,
+      "sha256": "826e9975b3b93f1d9c91547a7a745835e3d11554a86732b361fb80fa5297de21"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_TREND_ONLY/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 124050,
+      "sha256": "3158f8889f43bcd489e9fc29c4b925da71dc2f686a6d58a7fb09b3ffd7154553"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_TREND_ONLY/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 152209,
+      "sha256": "db8949541b45d3faad5f56e2dd3ec51f0c6c6fba11432198d252a38c479c9bd1"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_TREND_ONLY/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 24168,
+      "sha256": "cd9aab53342adaea7048486ae02842dd7ed67c65d5fcdd9d9a039cb73d81577d"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_TREND_ONLY/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 193970,
+      "sha256": "4733eb696e91e863a4691155f6edcf335fa8788d828bd734db0268a1ff02a0e2"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_TREND_ONLY/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 124059,
+      "sha256": "d3360839ab4986df1ab2b043d96ab4029a3a3358b10dcfd108d7ee8776293c37"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/cases/COMP_TREND_ONLY/runs/summary.json",
+      "bytes": 82360,
+      "sha256": "ff12b90fa551cc37647b4ea310f204c84c6e426931eb25b9632b9febff4bfc9c"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/comparison-summary.json",
+      "bytes": 1377493,
+      "sha256": "8851dae1f1deb7fb550a96122d837edd7bdaa9e61eaea5ab2f53e04ff48f5ea4"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/composite-protocol.json",
+      "bytes": 2199,
+      "sha256": "e2b0b4db47135af59037966ccb636059088c6526a5b86b8d93d01fec25204b82"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/composite-route-pool.jsonl.gz",
+      "bytes": 206627,
+      "sha256": "b80df6ba7e1f344cd679782806c54e274843e3ca09843b686ed0ad15fccf8b0e"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/direction-architecture-probe.json",
+      "bytes": 3548,
+      "sha256": "5d83ae139709a26234c90d2bf3450c5ba20ef0f097fe8bb86173669f333491db"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/factor-matrix.json",
+      "bytes": 28760,
+      "sha256": "470a0c49e84a3ddf6f26aab973cc0de2a22fc073daad6b9cc2a46bdd46c128d7"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/independent-verification.json",
+      "bytes": 9648,
+      "sha256": "0a485e7037654c355500307a340ef36cdb452fe20c713f02df0d33db91a714ca"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/inputs/core-reference-candidates.jsonl.gz",
+      "bytes": 116852,
+      "sha256": "99b8d5d304916e298496b82d67f1135fb47880144028a7bdf5deab7161591e69"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/path-diagnostics.json",
+      "bytes": 68410,
+      "sha256": "410815feb181280d840d1b3e4b1348116d8a6f5cc2e9183e545a6ec4183bfc0d"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/profit-verdict.json",
+      "bytes": 1352,
+      "sha256": "9d48a6fc5a78900401fc59b97221fca2ae9236fcbaae20eba3803658b375887c"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/quantity-production-vectors.json",
+      "bytes": 147182,
+      "sha256": "271ceaaf9f5124a1dc12fd2ed444e93c50437115f1094a652841f21c7b6ad4ea"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/README.md",
+      "bytes": 11826,
+      "sha256": "c1dcbac71494e5fdab76d794b4c032a016353f8e289498aa676f9b8f531187f0"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/review.json",
+      "bytes": 306,
+      "sha256": "bf65389e8f3280f095fbb82c55164662bc3a504f056e1b225d3e6a010c0286d2"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/source-candidates/BASELINE.jsonl.gz",
+      "bytes": 272126,
+      "sha256": "8dbae00c4dd427b4a51907328ddf316e3d51e785f5db08be09ae22861fc9282f"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/source-candidates/BREAKOUT36.jsonl.gz",
+      "bytes": 9046,
+      "sha256": "3ec329ffc3a166ddbc50c358e192e1fbe91729d54f320f1698c9646da12cae41"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/source-candidates/BTC12.jsonl.gz",
+      "bytes": 98017,
+      "sha256": "2adf3e2b7ccc7027c87c3d18f6221fa04b6e8f7e11fa1eadf6f4c63ae5529c02"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/source-candidates/BTC24.jsonl.gz",
+      "bytes": 136262,
+      "sha256": "0356464a0b2cdba1e52251e3f6c44b5ae2d82e1b3ebab394dbbfea0c821c1585"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/source-candidates/MOM12.jsonl.gz",
+      "bytes": 125840,
+      "sha256": "ed590116b656114aeeb834fbed185a7850cafd2d533e51f739f09891ff50d3e0"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/source-candidates/MOM24.jsonl.gz",
+      "bytes": 159903,
+      "sha256": "d6cd60a95e07c12a07dcbc968141b92828956ab513e0d3c09e103b74d9cd9e44"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/source-exit-parity.json",
+      "bytes": 104,
+      "sha256": "2005bcbdb85fee90981f00686b96a66d009fcdc540674d28d073528e73546859"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/source-hashes.json",
+      "bytes": 294,
+      "sha256": "0a10d64c0ac200043924087c9e3cf2cf3d9c960b50a18e3abc09ac1510cbd65a"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/source-protocol.json",
+      "bytes": 625,
+      "sha256": "9937e040c6be2d4b2e372c94cefa51117ef6465ed9eab1baaee33a9ad23dd906"
+    },
+    {
+      "path": "docs/research/results/v12-logic-dissection-20261008/study-lock.json",
+      "bytes": 2294,
+      "sha256": "b7e7baf13954ba9c2c4afba8f932de0eff0e35e03df9743342e14365f896b385"
+    }
+  ]
+}

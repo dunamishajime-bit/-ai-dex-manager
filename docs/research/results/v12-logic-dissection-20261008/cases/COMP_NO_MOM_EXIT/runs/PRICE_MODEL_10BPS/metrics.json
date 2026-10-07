@@ -1,0 +1,690 @@
+{
+  "accounting_reconciliation": {
+    "closed_trade_pnl_settlement_units": 12941.66690947999,
+    "deposit_settlement_units": 67.65013358113603,
+    "equity_minus_wallet_jpy": -1.862645149230957e-09,
+    "equity_minus_wallet_nominal_jpy": null,
+    "event_cashflow_settlement_units": 13009.317043061126,
+    "final_fx_jpy_per_usd": 158.33550065019506,
+    "intrahour_events": 892,
+    "status": "PASS",
+    "wallet_settlement_units": 13009.317043061148
+  },
+  "candidate_decision_counts": {
+    "FET": {
+      "ACCEPTED_MODELED_ENTRY": {
+        "GROSS_ALLOCATED": 7
+      },
+      "EXCLUDED_PREALLOCATION": {
+        "FET_PREENTRY_OVERHEAT_24H_15PCT_ATR_2PCT": 4,
+        "FET_PREENTRY_RELATIVE_WEAK_BTC_AND_FET24H_LT_1PCT": 1
+      },
+      "REJECTED_PORTFOLIO": {
+        "FET:REENTRY_COOLDOWN": 2,
+        "FET:SLOT_OCCUPIED": 2,
+        "FET:SYMBOL_OWNED_BY_Q102": 5
+      }
+    },
+    "HYPE_LONG": {
+      "ACCEPTED_MODELED_ENTRY": {
+        "GROSS_ALLOCATED": 25
+      },
+      "REJECTED_PORTFOLIO": {
+        "HYPE_LONG:NO_LOT_SHRINK": 17,
+        "HYPE_LONG:SLOT_OCCUPIED": 18
+      }
+    },
+    "IDLE": {
+      "ACCEPTED_MODELED_ENTRY": {
+        "GROSS_ALLOCATED": 53
+      },
+      "REJECTED_PORTFOLIO": {
+        "IDLE:CORE_SIGNAL_OR_POSITION": 512,
+        "IDLE:FILLED_SYMBOL_COOLDOWN": 56,
+        "IDLE:FULL_1X_UNAVAILABLE": 45,
+        "IDLE:HYPE_SIDECAR_ACTIVE": 18,
+        "IDLE:MULTI_SIGNAL_CAPACITY_AMBIGUOUS": 4,
+        "IDLE:SHARED_DAILY_LOSS": 4,
+        "IDLE:SYMBOL_OWNED_BY_IDLE": 2
+      }
+    },
+    "PENGU": {
+      "ACCEPTED_MODELED_ENTRY": {
+        "GROSS_ALLOCATED": 62
+      },
+      "REJECTED_PORTFOLIO": {
+        "PENGU:COOLDOWN": 8,
+        "PENGU:NO_LOT_SHRINK": 7,
+        "PENGU:ROUTE_QUARANTINE": 3,
+        "PENGU:SLOT_OCCUPIED": 33
+      }
+    },
+    "Q102": {
+      "ACCEPTED_MODELED_ENTRY": {
+        "GROSS_ALLOCATED": 134
+      },
+      "REJECTED_PORTFOLIO": {
+        "Q102:BRK_FET_SHORT_EXHAUSTION": 1,
+        "Q102:NO_GROSS_ROOM": 2,
+        "Q102:SHARED_DAILY_LOSS": 11,
+        "Q102:SLOT_OCCUPIED": 240,
+        "Q102:SYMBOL_OWNED_BY_FET": 3,
+        "Q102:SYMBOL_OWNED_BY_V12": 7
+      }
+    },
+    "RESIDUAL": {
+      "ACCEPTED_MODELED_ENTRY": {
+        "GROSS_ALLOCATED": 33
+      },
+      "REJECTED_PORTFOLIO": {
+        "RESIDUAL:CORE_SIGNAL_OR_POSITION": 722,
+        "RESIDUAL:HYPE_SIDECAR_ACTIVE": 4,
+        "RESIDUAL:IDLE_PRIORITY": 18,
+        "RESIDUAL:RESIDUAL_SLOT_OCCUPIED": 60,
+        "RESIDUAL:SHARED_DAILY_LOSS": 4,
+        "RESIDUAL:SLOT_OCCUPIED": 1
+      }
+    },
+    "V12": {
+      "ACCEPTED_MODELED_ENTRY": {
+        "GROSS_ALLOCATED": 497
+      },
+      "REJECTED_PORTFOLIO": {
+        "V12:ATOM_EXHAUSTION_CAUSAL": 26,
+        "V12:AVAX_LONG_WEAK24_CAUSAL": 4,
+        "V12:AVAX_R1_SHORT_REBOUND": 2,
+        "V12:BASE_SLOTS_FULL": 113,
+        "V12:NO_GROSS_ROOM": 5,
+        "V12:SAME_SYMBOL_ACTIVE": 50,
+        "V12:SHARED_DAILY_LOSS": 6,
+        "V12:SIDE_LOSS_COOLDOWN": 4,
+        "V12:SYMBOL_COOLDOWN": 10,
+        "V12:SYMBOL_OWNED_BY_Q102": 10,
+        "V12:VENUE_MIN_NOTIONAL": 2,
+        "V12:VENUE_MIN_QTY": 19
+      },
+      "REJECTED_RESEARCH_POLICY": {
+        "V12:RANK3_NOT_IDLE_SIGNAL_SLOT": 86
+      }
+    },
+    "V52": {
+      "ACCEPTED_MODELED_ENTRY": {
+        "GROSS_ALLOCATED": 85
+      },
+      "EXCLUDED_PREALLOCATION": {
+        "SINGLE_V50_SLOT_ALREADY_OPEN": 11
+      },
+      "REJECTED_PORTFOLIO": {
+        "V52:SHARED_DAILY_LOSS": 3
+      }
+    }
+  },
+  "candidate_decision_rows": 3061,
+  "closed_trades": 896,
+  "contributed_jpy": 10000.0,
+  "final_equity_jpy": 2059836.7271302002,
+  "fx_cash_translation_pnl_jpy": -14348.927697587758,
+  "fx_reference": "ECB_USDJPY_EUR_CROSS_NEXT_DAY",
+  "in_sample_hypothesis_only": false,
+  "initial_jpy": 10000.0,
+  "maximum_mtm_drawdown": -0.23714177855733043,
+  "missing_active_position_mtm_hours": 0,
+  "missing_mtm_examples": [],
+  "monthly_equity_jpy": {
+    "2025-08": 8295.385281798252,
+    "2025-09": 13205.185763735697,
+    "2025-10": 31346.090046752513,
+    "2025-11": 50977.94012815649,
+    "2025-12": 61774.53695356502,
+    "2026-01": 137572.12873629574,
+    "2026-02": 215825.51233858083,
+    "2026-03": 396228.10918401135,
+    "2026-04": 507173.8028339295,
+    "2026-05": 905827.8352918137,
+    "2026-06": 1616406.2959579693,
+    "2026-07": 2011972.2725059853,
+    "2026-08": 2059836.7271302002
+  },
+  "monthly_jpy": 0.0,
+  "net_profit_jpy": 2049836.7271302002,
+  "pengu_risk_overlay": {
+    "global_hold_until_ms": 0,
+    "realized_drawdown": -0.0741902123963617,
+    "realized_equity_index": 11.324402328308633,
+    "route_quarantine_until_ms": {
+      "BASE_V64_LONG": 1778338800000,
+      "RECOVERY_V8": 1785420000000,
+      "SHORT_V20": 1784764800000
+    }
+  },
+  "priority_policy": "PB_REV_HIGHVOL_R2R1",
+  "profit_factor": 1.5837147404275478,
+  "rejected_entries": {
+    "FET:REENTRY_COOLDOWN": 2,
+    "FET:SLOT_OCCUPIED": 2,
+    "FET:SYMBOL_OWNED_BY_Q102": 5,
+    "HYPE_LONG:NO_LOT_SHRINK": 17,
+    "HYPE_LONG:SLOT_OCCUPIED": 18,
+    "IDLE:CORE_SIGNAL_OR_POSITION": 512,
+    "IDLE:FILLED_SYMBOL_COOLDOWN": 56,
+    "IDLE:FULL_1X_UNAVAILABLE": 45,
+    "IDLE:HYPE_SIDECAR_ACTIVE": 18,
+    "IDLE:MULTI_SIGNAL_CAPACITY_AMBIGUOUS": 4,
+    "IDLE:SHARED_DAILY_LOSS": 4,
+    "IDLE:SYMBOL_OWNED_BY_IDLE": 2,
+    "PENGU:COOLDOWN": 8,
+    "PENGU:NO_LOT_SHRINK": 7,
+    "PENGU:ROUTE_QUARANTINE": 3,
+    "PENGU:SLOT_OCCUPIED": 33,
+    "Q102:BRK_FET_SHORT_EXHAUSTION": 1,
+    "Q102:NO_GROSS_ROOM": 2,
+    "Q102:SHARED_DAILY_LOSS": 11,
+    "Q102:SLOT_OCCUPIED": 240,
+    "Q102:SYMBOL_OWNED_BY_FET": 3,
+    "Q102:SYMBOL_OWNED_BY_V12": 7,
+    "RESIDUAL:CORE_SIGNAL_OR_POSITION": 722,
+    "RESIDUAL:HYPE_SIDECAR_ACTIVE": 4,
+    "RESIDUAL:IDLE_PRIORITY": 18,
+    "RESIDUAL:RESIDUAL_SLOT_OCCUPIED": 60,
+    "RESIDUAL:SHARED_DAILY_LOSS": 4,
+    "RESIDUAL:SLOT_OCCUPIED": 1,
+    "V12:ATOM_EXHAUSTION_CAUSAL": 26,
+    "V12:AVAX_LONG_WEAK24_CAUSAL": 4,
+    "V12:AVAX_R1_SHORT_REBOUND": 2,
+    "V12:BASE_SLOTS_FULL": 113,
+    "V12:NO_GROSS_ROOM": 5,
+    "V12:RANK3_NOT_IDLE_SIGNAL_SLOT": 86,
+    "V12:SAME_SYMBOL_ACTIVE": 50,
+    "V12:SHARED_DAILY_LOSS": 6,
+    "V12:SIDE_LOSS_COOLDOWN": 4,
+    "V12:SYMBOL_COOLDOWN": 10,
+    "V12:SYMBOL_OWNED_BY_Q102": 10,
+    "V12:VENUE_MIN_NOTIONAL": 2,
+    "V12:VENUE_MIN_QTY": 19,
+    "V52:SHARED_DAILY_LOSS": 3
+  },
+  "research_risk_caps": {
+    "FET": 1.0,
+    "Q102_BRK": 0.75,
+    "Q102_MR": 0.75
+  },
+  "round_trip_cost_bps": 10.0,
+  "scenario_id": "PRICE_MODEL_10BPS",
+  "settlement_currency": "USD",
+  "status": "COMPLETE_H1_PRICE_MODEL_NOT_L2_VERIFIED",
+  "strategy_pnl_jpy": {
+    "FET": 143967.66802447158,
+    "HYPE_LONG": 418611.380737503,
+    "IDLE": 141342.3085248077,
+    "PENGU": 440264.1537702743,
+    "Q102": 887766.9510073063,
+    "RESIDUAL": -80762.66031144279,
+    "V12": -580849.6472607204,
+    "V52": 693845.5003355882
+  },
+  "strategy_trade_outcome_aggregates": {
+    "by_strategy": {
+      "FET": {
+        "average_loss_abs_jpy": 8845.818711054551,
+        "average_win_jpy": 25468.91445592102,
+        "fees_jpy": 4636.116318960747,
+        "flat_trades": 0,
+        "funding_pnl_jpy": 96.65476815084298,
+        "gross_loss_abs_jpy": 8845.818711054551,
+        "gross_win_jpy": 152813.48673552612,
+        "largest_loss_abs_jpy": 8845.818711054551,
+        "largest_win_jpy": 84440.63845121466,
+        "losing_trades": 1,
+        "net_pnl_jpy": 143967.66802447158,
+        "price_pnl_jpy": 148507.1295752815,
+        "profit_factor": 17.275222534750377,
+        "trades": 7,
+        "win_rate": 0.8571428571428571,
+        "winning_trades": 6
+      },
+      "HYPE_LONG": {
+        "average_loss_abs_jpy": 13480.136015842723,
+        "average_win_jpy": 30967.792286132044,
+        "fees_jpy": 15750.576884526003,
+        "flat_trades": 0,
+        "funding_pnl_jpy": 2485.0715995470596,
+        "gross_loss_abs_jpy": 107841.08812674179,
+        "gross_win_jpy": 526452.4688642448,
+        "largest_loss_abs_jpy": 40893.383603353344,
+        "largest_win_jpy": 63170.06271377479,
+        "losing_trades": 8,
+        "net_pnl_jpy": 418611.380737503,
+        "price_pnl_jpy": 431876.8860224819,
+        "profit_factor": 4.881742923861487,
+        "trades": 25,
+        "win_rate": 0.68,
+        "winning_trades": 17
+      },
+      "IDLE": {
+        "average_loss_abs_jpy": 12589.864760969145,
+        "average_win_jpy": 12679.045890786243,
+        "fees_jpy": 24418.18421150036,
+        "flat_trades": 0,
+        "funding_pnl_jpy": -2624.924027709364,
+        "gross_loss_abs_jpy": 264387.15998035204,
+        "gross_win_jpy": 405729.4685051598,
+        "largest_loss_abs_jpy": 77516.69282340138,
+        "largest_win_jpy": 116973.12235104413,
+        "losing_trades": 21,
+        "net_pnl_jpy": 141342.3085248077,
+        "price_pnl_jpy": 168385.41676401743,
+        "profit_factor": 1.5346035281566306,
+        "trades": 53,
+        "win_rate": 0.6037735849056604,
+        "winning_trades": 32
+      },
+      "PENGU": {
+        "average_loss_abs_jpy": 30805.819315005592,
+        "average_win_jpy": 19198.96688287996,
+        "fees_jpy": 27603.010387273305,
+        "flat_trades": 0,
+        "funding_pnl_jpy": -8453.09219525416,
+        "gross_loss_abs_jpy": 462087.28972508386,
+        "gross_win_jpy": 902351.443495358,
+        "largest_loss_abs_jpy": 155215.40554840403,
+        "largest_win_jpy": 143552.47270641147,
+        "losing_trades": 15,
+        "net_pnl_jpy": 440264.1537702743,
+        "price_pnl_jpy": 476320.2563528015,
+        "profit_factor": 1.9527726980592925,
+        "trades": 62,
+        "win_rate": 0.7580645161290323,
+        "winning_trades": 47
+      },
+      "Q102": {
+        "average_loss_abs_jpy": 12944.067229388931,
+        "average_win_jpy": 17547.467186255522,
+        "fees_jpy": 62118.83690173929,
+        "flat_trades": 0,
+        "funding_pnl_jpy": 7000.746977777146,
+        "gross_loss_abs_jpy": 621315.2270106687,
+        "gross_win_jpy": 1509082.178017975,
+        "largest_loss_abs_jpy": 70503.97584867048,
+        "largest_win_jpy": 330042.1778107765,
+        "losing_trades": 48,
+        "net_pnl_jpy": 887766.9510073063,
+        "price_pnl_jpy": 942885.0409312682,
+        "profit_factor": 2.4288511087658606,
+        "trades": 134,
+        "win_rate": 0.6417910447761194,
+        "winning_trades": 86
+      },
+      "RESIDUAL": {
+        "average_loss_abs_jpy": 6764.464089545055,
+        "average_win_jpy": 3411.582670708089,
+        "fees_jpy": 11396.66564787733,
+        "flat_trades": 0,
+        "funding_pnl_jpy": -803.4901833037296,
+        "gross_loss_abs_jpy": 128524.81770135605,
+        "gross_win_jpy": 47762.15738991325,
+        "largest_loss_abs_jpy": 50362.18138377205,
+        "largest_win_jpy": 35421.46697776253,
+        "losing_trades": 19,
+        "net_pnl_jpy": -80762.66031144279,
+        "price_pnl_jpy": -68562.50448026172,
+        "profit_factor": 0.37161816872516223,
+        "trades": 33,
+        "win_rate": 0.42424242424242425,
+        "winning_trades": 14
+      },
+      "V12": {
+        "average_loss_abs_jpy": 6609.881927791685,
+        "average_win_jpy": 6581.638417826586,
+        "fees_jpy": 222756.29738350722,
+        "flat_trades": 0,
+        "funding_pnl_jpy": -3857.591705169417,
+        "gross_loss_abs_jpy": 1930085.522915172,
+        "gross_win_jpy": 1349235.8756544502,
+        "largest_loss_abs_jpy": 53253.049455411456,
+        "largest_win_jpy": 60459.37293819942,
+        "losing_trades": 292,
+        "net_pnl_jpy": -580849.6472607204,
+        "price_pnl_jpy": -354235.7581720443,
+        "profit_factor": 0.6990549691376291,
+        "trades": 497,
+        "win_rate": 0.4124748490945674,
+        "winning_trades": 205
+      },
+      "V52": {
+        "average_loss_abs_jpy": 1911.7314758680081,
+        "average_win_jpy": 10499.031941296758,
+        "fees_jpy": 92036.92393885466,
+        "flat_trades": 0,
+        "funding_pnl_jpy": -10.713536289819722,
+        "gross_loss_abs_jpy": 30587.70361388813,
+        "gross_win_jpy": 724433.2039494764,
+        "largest_loss_abs_jpy": 9355.722871656779,
+        "largest_win_jpy": 58685.60076824157,
+        "losing_trades": 16,
+        "net_pnl_jpy": 693845.5003355882,
+        "price_pnl_jpy": 785893.1378107326,
+        "profit_factor": 23.683804874470948,
+        "trades": 85,
+        "win_rate": 0.8117647058823529,
+        "winning_trades": 69
+      }
+    },
+    "fet_by_exit_reason": {
+      "CORE_PREEMPT:V12": {
+        "average_loss_abs_jpy": 8845.818711054551,
+        "average_win_jpy": 11730.413335005473,
+        "fees_jpy": 1975.5482146781803,
+        "flat_trades": 0,
+        "funding_pnl_jpy": 874.1401228050897,
+        "gross_loss_abs_jpy": 8845.818711054551,
+        "gross_win_jpy": 46921.65334002189,
+        "largest_loss_abs_jpy": 8845.818711054551,
+        "largest_win_jpy": 18177.43114098473,
+        "losing_trades": 1,
+        "net_pnl_jpy": 38075.834628967335,
+        "price_pnl_jpy": 39177.242720840426,
+        "profit_factor": 5.304387855177754,
+        "trades": 5,
+        "win_rate": 0.8,
+        "winning_trades": 4
+      },
+      "FET_24H_TIME_EXIT": {
+        "average_loss_abs_jpy": null,
+        "average_win_jpy": 52945.916697752116,
+        "fees_jpy": 2660.5681042825668,
+        "flat_trades": 0,
+        "funding_pnl_jpy": -777.4853546542467,
+        "gross_loss_abs_jpy": 0.0,
+        "gross_win_jpy": 105891.83339550423,
+        "largest_loss_abs_jpy": 0.0,
+        "largest_win_jpy": 84440.63845121466,
+        "losing_trades": 0,
+        "net_pnl_jpy": 105891.83339550423,
+        "price_pnl_jpy": 109329.88685444105,
+        "profit_factor": null,
+        "trades": 2,
+        "win_rate": 1.0,
+        "winning_trades": 2
+      }
+    },
+    "pengu_by_exit_reason": {
+      "LONG_HARD_STOP": {
+        "average_loss_abs_jpy": 17522.68671990468,
+        "average_win_jpy": null,
+        "fees_jpy": 620.1418656675594,
+        "flat_trades": 0,
+        "funding_pnl_jpy": -269.42948841652003,
+        "gross_loss_abs_jpy": 52568.060159714034,
+        "gross_win_jpy": 0.0,
+        "largest_loss_abs_jpy": 42597.36266858946,
+        "largest_win_jpy": 0.0,
+        "losing_trades": 3,
+        "net_pnl_jpy": -52568.060159714034,
+        "price_pnl_jpy": -51678.48880562995,
+        "profit_factor": 0.0,
+        "trades": 3,
+        "win_rate": 0.0,
+        "winning_trades": 0
+      },
+      "LONG_TRAILING_STOP": {
+        "average_loss_abs_jpy": null,
+        "average_win_jpy": 11470.097983243259,
+        "fees_jpy": 874.5332062774243,
+        "flat_trades": 0,
+        "funding_pnl_jpy": -337.24229756671355,
+        "gross_loss_abs_jpy": 0.0,
+        "gross_win_jpy": 68820.58789945956,
+        "largest_loss_abs_jpy": 0.0,
+        "largest_win_jpy": 33013.9075616373,
+        "losing_trades": 0,
+        "net_pnl_jpy": 68820.58789945956,
+        "price_pnl_jpy": 70032.3634033037,
+        "profit_factor": null,
+        "trades": 6,
+        "win_rate": 1.0,
+        "winning_trades": 6
+      },
+      "RECOVERY_V8_HARD_STOP": {
+        "average_loss_abs_jpy": 43546.622313092426,
+        "average_win_jpy": null,
+        "fees_jpy": 4110.648471633556,
+        "flat_trades": 0,
+        "funding_pnl_jpy": -2215.0841339249278,
+        "gross_loss_abs_jpy": 217733.11156546214,
+        "gross_win_jpy": 0.0,
+        "largest_loss_abs_jpy": 115239.17293357008,
+        "largest_win_jpy": 0.0,
+        "losing_trades": 5,
+        "net_pnl_jpy": -217733.11156546214,
+        "price_pnl_jpy": -211407.37895990364,
+        "profit_factor": 0.0,
+        "trades": 5,
+        "win_rate": 0.0,
+        "winning_trades": 0
+      },
+      "RECOVERY_V8_MAX_HOLD": {
+        "average_loss_abs_jpy": 8748.051627963056,
+        "average_win_jpy": 78398.69703038399,
+        "fees_jpy": 8327.06390317893,
+        "flat_trades": 0,
+        "funding_pnl_jpy": -7000.349776426192,
+        "gross_loss_abs_jpy": 26244.15488388917,
+        "gross_win_jpy": 313594.78812153597,
+        "largest_loss_abs_jpy": 10614.935382174888,
+        "largest_win_jpy": 143552.47270641147,
+        "losing_trades": 3,
+        "net_pnl_jpy": 287350.6332376468,
+        "price_pnl_jpy": 302678.04691725195,
+        "profit_factor": 11.949128844459242,
+        "trades": 7,
+        "win_rate": 0.5714285714285714,
+        "winning_trades": 4
+      },
+      "RECOVERY_V8_TRAILING_STOP": {
+        "average_loss_abs_jpy": null,
+        "average_win_jpy": 15503.144843574024,
+        "fees_jpy": 7966.548929133579,
+        "flat_trades": 0,
+        "funding_pnl_jpy": -2936.5539752133323,
+        "gross_loss_abs_jpy": 0.0,
+        "gross_win_jpy": 356572.33140220254,
+        "largest_loss_abs_jpy": 0.0,
+        "largest_win_jpy": 53920.88063986308,
+        "losing_trades": 0,
+        "net_pnl_jpy": 356572.33140220254,
+        "price_pnl_jpy": 367475.4343065494,
+        "profit_factor": null,
+        "trades": 23,
+        "win_rate": 1.0,
+        "winning_trades": 23
+      },
+      "SHORT_HARD_STOP": {
+        "average_loss_abs_jpy": 155215.40554840403,
+        "average_win_jpy": null,
+        "fees_jpy": 2007.5346663475295,
+        "flat_trades": 0,
+        "funding_pnl_jpy": 1217.8726831382212,
+        "gross_loss_abs_jpy": 155215.40554840403,
+        "gross_win_jpy": 0.0,
+        "largest_loss_abs_jpy": 155215.40554840403,
+        "largest_win_jpy": 0.0,
+        "losing_trades": 1,
+        "net_pnl_jpy": -155215.40554840403,
+        "price_pnl_jpy": -154425.74356519472,
+        "profit_factor": 0.0,
+        "trades": 1,
+        "win_rate": 0.0,
+        "winning_trades": 0
+      },
+      "SHORT_MAX_HOLD": {
+        "average_loss_abs_jpy": 3442.185855871488,
+        "average_win_jpy": 11420.542359746063,
+        "fees_jpy": 2942.5324490644052,
+        "flat_trades": 0,
+        "funding_pnl_jpy": 2538.1942106184383,
+        "gross_loss_abs_jpy": 10326.557567614464,
+        "gross_win_jpy": 68523.25415847638,
+        "largest_loss_abs_jpy": 9492.97218727626,
+        "largest_win_jpy": 34685.6484501542,
+        "losing_trades": 3,
+        "net_pnl_jpy": 58196.696590861924,
+        "price_pnl_jpy": 58601.0348293079,
+        "profit_factor": 6.635633773385909,
+        "trades": 9,
+        "win_rate": 0.6666666666666666,
+        "winning_trades": 6
+      },
+      "SHORT_TRAILING_STOP": {
+        "average_loss_abs_jpy": null,
+        "average_win_jpy": 13534.301794981151,
+        "fees_jpy": 742.113671371999,
+        "flat_trades": 0,
+        "funding_pnl_jpy": 524.5154123283199,
+        "gross_loss_abs_jpy": 0.0,
+        "gross_win_jpy": 94740.11256486806,
+        "largest_loss_abs_jpy": 0.0,
+        "largest_win_jpy": 55423.24132549976,
+        "losing_trades": 0,
+        "net_pnl_jpy": 94740.11256486806,
+        "price_pnl_jpy": 94957.71082391175,
+        "profit_factor": null,
+        "trades": 7,
+        "win_rate": 1.0,
+        "winning_trades": 7
+      },
+      "SHORT_V20_DEADLINE_EXIT": {
+        "average_loss_abs_jpy": null,
+        "average_win_jpy": 100.36934881551608,
+        "fees_jpy": 11.893224598321037,
+        "flat_trades": 0,
+        "funding_pnl_jpy": 24.985170208546226,
+        "gross_loss_abs_jpy": 0.0,
+        "gross_win_jpy": 100.36934881551608,
+        "largest_loss_abs_jpy": 0.0,
+        "largest_win_jpy": 100.36934881551608,
+        "losing_trades": 0,
+        "net_pnl_jpy": 100.36934881551608,
+        "price_pnl_jpy": 87.27740320529088,
+        "profit_factor": null,
+        "trades": 1,
+        "win_rate": 1.0,
+        "winning_trades": 1
+      }
+    },
+    "pengu_by_route": {
+      "BASE_V64_LONG": {
+        "average_loss_abs_jpy": 17522.68671990468,
+        "average_win_jpy": 11470.097983243259,
+        "fees_jpy": 1494.6750719449838,
+        "flat_trades": 0,
+        "funding_pnl_jpy": -606.6717859832336,
+        "gross_loss_abs_jpy": 52568.060159714034,
+        "gross_win_jpy": 68820.58789945956,
+        "largest_loss_abs_jpy": 42597.36266858946,
+        "largest_win_jpy": 33013.9075616373,
+        "losing_trades": 3,
+        "net_pnl_jpy": 16252.527739745514,
+        "price_pnl_jpy": 18353.87459767374,
+        "profit_factor": 1.3091711524139666,
+        "trades": 9,
+        "win_rate": 0.6666666666666666,
+        "winning_trades": 6
+      },
+      "RECOVERY_V8": {
+        "average_loss_abs_jpy": 30497.158306168913,
+        "average_win_jpy": 24821.00442680513,
+        "fees_jpy": 20404.261303946067,
+        "flat_trades": 0,
+        "funding_pnl_jpy": -12151.987885564451,
+        "gross_loss_abs_jpy": 243977.2664493513,
+        "gross_win_jpy": 670167.1195237385,
+        "largest_loss_abs_jpy": 115239.17293357008,
+        "largest_win_jpy": 143552.47270641147,
+        "losing_trades": 8,
+        "net_pnl_jpy": 426189.8530743872,
+        "price_pnl_jpy": 458746.1022638976,
+        "profit_factor": 2.7468424795343074,
+        "trades": 35,
+        "win_rate": 0.7714285714285715,
+        "winning_trades": 27
+      },
+      "SHORT_V20": {
+        "average_loss_abs_jpy": 41385.49077900462,
+        "average_win_jpy": 11668.838290868569,
+        "fees_jpy": 5704.074011382255,
+        "flat_trades": 0,
+        "funding_pnl_jpy": 4305.567476293525,
+        "gross_loss_abs_jpy": 165541.96311601848,
+        "gross_win_jpy": 163363.73607215995,
+        "largest_loss_abs_jpy": 155215.40554840403,
+        "largest_win_jpy": 55423.24132549976,
+        "losing_trades": 4,
+        "net_pnl_jpy": -2178.2270438585547,
+        "price_pnl_jpy": -779.7205087697657,
+        "profit_factor": 0.986841843585412,
+        "trades": 18,
+        "win_rate": 0.7777777777777778,
+        "winning_trades": 14
+      }
+    },
+    "pengu_by_side": {
+      "LONG": {
+        "average_loss_abs_jpy": 26958.666055369573,
+        "average_win_jpy": 22393.566891612063,
+        "fees_jpy": 21898.93637589105,
+        "flat_trades": 0,
+        "funding_pnl_jpy": -12758.659671547684,
+        "gross_loss_abs_jpy": 296545.3266090653,
+        "gross_win_jpy": 738987.707423198,
+        "largest_loss_abs_jpy": 115239.17293357008,
+        "largest_win_jpy": 143552.47270641147,
+        "losing_trades": 11,
+        "net_pnl_jpy": 442442.3808141327,
+        "price_pnl_jpy": 477099.97686157137,
+        "profit_factor": 2.4919890523090356,
+        "trades": 44,
+        "win_rate": 0.75,
+        "winning_trades": 33
+      },
+      "SHORT": {
+        "average_loss_abs_jpy": 41385.49077900462,
+        "average_win_jpy": 11668.838290868569,
+        "fees_jpy": 5704.074011382255,
+        "flat_trades": 0,
+        "funding_pnl_jpy": 4305.567476293525,
+        "gross_loss_abs_jpy": 165541.96311601848,
+        "gross_win_jpy": 163363.73607215995,
+        "largest_loss_abs_jpy": 155215.40554840403,
+        "largest_win_jpy": 55423.24132549976,
+        "losing_trades": 4,
+        "net_pnl_jpy": -2178.2270438585547,
+        "price_pnl_jpy": -779.7205087697657,
+        "profit_factor": 0.986841843585412,
+        "trades": 18,
+        "win_rate": 0.7777777777777778,
+        "winning_trades": 14
+      }
+    }
+  },
+  "strategy_trades": {
+    "FET": 7,
+    "HYPE_LONG": 25,
+    "IDLE": 53,
+    "PENGU": 62,
+    "Q102": 134,
+    "RESIDUAL": 33,
+    "V12": 497,
+    "V52": 85
+  },
+  "v12_cooldown_hours_from_actual_exit": 2,
+  "v12_cooldown_policy": "BASE_2H",
+  "v12_sizing_policy": {
+    "doge_ltc_rank1_rank2_gross": "CANDIDATE_RUNTIME_RISK_SIZE",
+    "rank1_rank2_default_gross": 1.0,
+    "rank3_gross": 0.1,
+    "rank3_idle_only": true,
+    "rank3_preemptible": true,
+    "venue_leverage_assumption": "5x_cross_margin_only_not_pnl_multiplier"
+  },
+  "win_rate": 0.53125
+}

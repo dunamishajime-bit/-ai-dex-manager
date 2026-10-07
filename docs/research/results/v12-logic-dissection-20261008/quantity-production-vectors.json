@@ -1,0 +1,6162 @@
+[
+  {
+    "symbol": "AVAXUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 6.6225000000000005,
+    "normalized": {
+      "symbol": "AVAXUSDT",
+      "quantity": 9,
+      "quantityText": "9",
+      "minQuantity": 1,
+      "maxQuantity": 30000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 59.602500000000006
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.901321350982727,
+      "notionalUsd": 59.602500000000006
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 7.072830000000001,
+    "normalized": {
+      "symbol": "AVAXUSDT",
+      "quantity": 9,
+      "quantityText": "9",
+      "minQuantity": 1,
+      "maxQuantity": 30000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 63.65547000000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9626112028495525,
+      "notionalUsd": 63.65547000000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 7.52316,
+    "normalized": {
+      "symbol": "AVAXUSDT",
+      "quantity": 8,
+      "quantityText": "8",
+      "minQuantity": 1,
+      "maxQuantity": 30000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 60.18528
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9101342708590024,
+      "notionalUsd": 60.18528
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 7.97349,
+    "normalized": {
+      "symbol": "AVAXUSDT",
+      "quantity": 8,
+      "quantityText": "8",
+      "minQuantity": 1,
+      "maxQuantity": 30000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 63.78792
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9646141391850694,
+      "notionalUsd": 63.78792
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 8.42382,
+    "normalized": {
+      "symbol": "AVAXUSDT",
+      "quantity": 7,
+      "quantityText": "7",
+      "minQuantity": 1,
+      "maxQuantity": 30000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 58.966739999999994
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.8917072565722444,
+      "notionalUsd": 58.966739999999994
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 8.874149999999998,
+    "normalized": {
+      "symbol": "AVAXUSDT",
+      "quantity": 7,
+      "quantityText": "7",
+      "minQuantity": 1,
+      "maxQuantity": 30000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 62.11904999999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9393771413575529,
+      "notionalUsd": 62.11904999999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 9.324480000000001,
+    "normalized": {
+      "symbol": "AVAXUSDT",
+      "quantity": 7,
+      "quantityText": "7",
+      "minQuantity": 1,
+      "maxQuantity": 30000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 65.27136000000002
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.987047026142862,
+      "notionalUsd": 65.27136000000002
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 9.77481,
+    "normalized": {
+      "symbol": "AVAXUSDT",
+      "quantity": 6,
+      "quantityText": "6",
+      "minQuantity": 1,
+      "maxQuantity": 30000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 58.64886
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.8869002093670032,
+      "notionalUsd": 58.64886
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 10.22514,
+    "normalized": {
+      "symbol": "AVAXUSDT",
+      "quantity": 6,
+      "quantityText": "6",
+      "minQuantity": 1,
+      "maxQuantity": 30000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 61.35084
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9277601106115535,
+      "notionalUsd": 61.35084
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 10.67547,
+    "normalized": {
+      "symbol": "AVAXUSDT",
+      "quantity": 6,
+      "quantityText": "6",
+      "minQuantity": 1,
+      "maxQuantity": 30000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 64.05282
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9686200118561038,
+      "notionalUsd": 64.05282
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "equity": 100,
+    "referencePrice": 6.6225000000000005,
+    "normalized": {
+      "symbol": "AVAXUSDT",
+      "quantity": 15,
+      "quantityText": "15",
+      "minQuantity": 1,
+      "maxQuantity": 30000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 99.3375
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.993375,
+      "notionalUsd": 99.3375
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "equity": 100,
+    "referencePrice": 7.072830000000001,
+    "normalized": {
+      "symbol": "AVAXUSDT",
+      "quantity": 14,
+      "quantityText": "14",
+      "minQuantity": 1,
+      "maxQuantity": 30000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 99.01962
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9901962000000001,
+      "notionalUsd": 99.01962
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "equity": 100,
+    "referencePrice": 7.52316,
+    "normalized": {
+      "symbol": "AVAXUSDT",
+      "quantity": 13,
+      "quantityText": "13",
+      "minQuantity": 1,
+      "maxQuantity": 30000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 97.80108
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9780108,
+      "notionalUsd": 97.80108
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "equity": 100,
+    "referencePrice": 7.97349,
+    "normalized": {
+      "symbol": "AVAXUSDT",
+      "quantity": 12,
+      "quantityText": "12",
+      "minQuantity": 1,
+      "maxQuantity": 30000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 95.68188
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9568188000000001,
+      "notionalUsd": 95.68188
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "equity": 100,
+    "referencePrice": 8.42382,
+    "normalized": {
+      "symbol": "AVAXUSDT",
+      "quantity": 11,
+      "quantityText": "11",
+      "minQuantity": 1,
+      "maxQuantity": 30000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 92.66201999999998
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9266201999999999,
+      "notionalUsd": 92.66201999999998
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "equity": 100,
+    "referencePrice": 8.874149999999998,
+    "normalized": {
+      "symbol": "AVAXUSDT",
+      "quantity": 11,
+      "quantityText": "11",
+      "minQuantity": 1,
+      "maxQuantity": 30000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 97.61564999999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9761564999999999,
+      "notionalUsd": 97.61564999999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "equity": 100,
+    "referencePrice": 9.324480000000001,
+    "normalized": {
+      "symbol": "AVAXUSDT",
+      "quantity": 10,
+      "quantityText": "10",
+      "minQuantity": 1,
+      "maxQuantity": 30000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 93.24480000000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9324480000000002,
+      "notionalUsd": 93.24480000000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "equity": 100,
+    "referencePrice": 9.77481,
+    "normalized": {
+      "symbol": "AVAXUSDT",
+      "quantity": 10,
+      "quantityText": "10",
+      "minQuantity": 1,
+      "maxQuantity": 30000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 97.74810000000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.977481,
+      "notionalUsd": 97.74810000000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "equity": 100,
+    "referencePrice": 10.22514,
+    "normalized": {
+      "symbol": "AVAXUSDT",
+      "quantity": 9,
+      "quantityText": "9",
+      "minQuantity": 1,
+      "maxQuantity": 30000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 92.02626
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9202625999999999,
+      "notionalUsd": 92.02626
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "equity": 100,
+    "referencePrice": 10.67547,
+    "normalized": {
+      "symbol": "AVAXUSDT",
+      "quantity": 9,
+      "quantityText": "9",
+      "minQuantity": 1,
+      "maxQuantity": 30000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 96.07923000000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9607923,
+      "notionalUsd": 96.07923000000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "equity": 1000,
+    "referencePrice": 6.6225000000000005,
+    "normalized": {
+      "symbol": "AVAXUSDT",
+      "quantity": 151,
+      "quantityText": "151",
+      "minQuantity": 1,
+      "maxQuantity": 30000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 999.9975000000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999975000000001,
+      "notionalUsd": 999.9975000000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "equity": 1000,
+    "referencePrice": 7.072830000000001,
+    "normalized": {
+      "symbol": "AVAXUSDT",
+      "quantity": 141,
+      "quantityText": "141",
+      "minQuantity": 1,
+      "maxQuantity": 30000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 997.26903
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.99726903,
+      "notionalUsd": 997.26903
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "equity": 1000,
+    "referencePrice": 7.52316,
+    "normalized": {
+      "symbol": "AVAXUSDT",
+      "quantity": 132,
+      "quantityText": "132",
+      "minQuantity": 1,
+      "maxQuantity": 30000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 993.0571199999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9930571199999999,
+      "notionalUsd": 993.0571199999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "equity": 1000,
+    "referencePrice": 7.97349,
+    "normalized": {
+      "symbol": "AVAXUSDT",
+      "quantity": 125,
+      "quantityText": "125",
+      "minQuantity": 1,
+      "maxQuantity": 30000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 996.68625
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.99668625,
+      "notionalUsd": 996.68625
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "equity": 1000,
+    "referencePrice": 8.42382,
+    "normalized": {
+      "symbol": "AVAXUSDT",
+      "quantity": 118,
+      "quantityText": "118",
+      "minQuantity": 1,
+      "maxQuantity": 30000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 994.0107599999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9940107599999999,
+      "notionalUsd": 994.0107599999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "equity": 1000,
+    "referencePrice": 8.874149999999998,
+    "normalized": {
+      "symbol": "AVAXUSDT",
+      "quantity": 112,
+      "quantityText": "112",
+      "minQuantity": 1,
+      "maxQuantity": 30000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 993.9047999999998
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9939047999999998,
+      "notionalUsd": 993.9047999999998
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "equity": 1000,
+    "referencePrice": 9.324480000000001,
+    "normalized": {
+      "symbol": "AVAXUSDT",
+      "quantity": 107,
+      "quantityText": "107",
+      "minQuantity": 1,
+      "maxQuantity": 30000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 997.7193600000002
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9977193600000002,
+      "notionalUsd": 997.7193600000002
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "equity": 1000,
+    "referencePrice": 9.77481,
+    "normalized": {
+      "symbol": "AVAXUSDT",
+      "quantity": 102,
+      "quantityText": "102",
+      "minQuantity": 1,
+      "maxQuantity": 30000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 997.03062
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.99703062,
+      "notionalUsd": 997.03062
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "equity": 1000,
+    "referencePrice": 10.22514,
+    "normalized": {
+      "symbol": "AVAXUSDT",
+      "quantity": 97,
+      "quantityText": "97",
+      "minQuantity": 1,
+      "maxQuantity": 30000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 991.83858
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.99183858,
+      "notionalUsd": 991.83858
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "equity": 1000,
+    "referencePrice": 10.67547,
+    "normalized": {
+      "symbol": "AVAXUSDT",
+      "quantity": 93,
+      "quantityText": "93",
+      "minQuantity": 1,
+      "maxQuantity": 30000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 992.81871
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.99281871,
+      "notionalUsd": 992.81871
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "equity": 10000,
+    "referencePrice": 6.6225000000000005,
+    "normalized": {
+      "symbol": "AVAXUSDT",
+      "quantity": 1510,
+      "quantityText": "1510",
+      "minQuantity": 1,
+      "maxQuantity": 30000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 9999.975
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999975,
+      "notionalUsd": 9999.975
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "equity": 10000,
+    "referencePrice": 7.072830000000001,
+    "normalized": {
+      "symbol": "AVAXUSDT",
+      "quantity": 1413,
+      "quantityText": "1413",
+      "minQuantity": 1,
+      "maxQuantity": 30000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 9993.908790000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9993908790000001,
+      "notionalUsd": 9993.908790000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "equity": 10000,
+    "referencePrice": 7.52316,
+    "normalized": {
+      "symbol": "AVAXUSDT",
+      "quantity": 1329,
+      "quantityText": "1329",
+      "minQuantity": 1,
+      "maxQuantity": 30000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 9998.27964
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9998279640000001,
+      "notionalUsd": 9998.27964
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "equity": 10000,
+    "referencePrice": 7.97349,
+    "normalized": {
+      "symbol": "AVAXUSDT",
+      "quantity": 1254,
+      "quantityText": "1254",
+      "minQuantity": 1,
+      "maxQuantity": 30000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 9998.75646
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.999875646,
+      "notionalUsd": 9998.75646
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "equity": 10000,
+    "referencePrice": 8.42382,
+    "normalized": {
+      "symbol": "AVAXUSDT",
+      "quantity": 1187,
+      "quantityText": "1187",
+      "minQuantity": 1,
+      "maxQuantity": 30000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 9999.07434
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999074339999999,
+      "notionalUsd": 9999.07434
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "equity": 10000,
+    "referencePrice": 8.874149999999998,
+    "normalized": {
+      "symbol": "AVAXUSDT",
+      "quantity": 1126,
+      "quantityText": "1126",
+      "minQuantity": 1,
+      "maxQuantity": 30000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 9992.292899999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9992292899999998,
+      "notionalUsd": 9992.292899999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "equity": 10000,
+    "referencePrice": 9.324480000000001,
+    "normalized": {
+      "symbol": "AVAXUSDT",
+      "quantity": 1072,
+      "quantityText": "1072",
+      "minQuantity": 1,
+      "maxQuantity": 30000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 9995.842560000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9995842560000001,
+      "notionalUsd": 9995.842560000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "equity": 10000,
+    "referencePrice": 9.77481,
+    "normalized": {
+      "symbol": "AVAXUSDT",
+      "quantity": 1023,
+      "quantityText": "1023",
+      "minQuantity": 1,
+      "maxQuantity": 30000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 9999.63063
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999630629999999,
+      "notionalUsd": 9999.63063
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "equity": 10000,
+    "referencePrice": 10.22514,
+    "normalized": {
+      "symbol": "AVAXUSDT",
+      "quantity": 977,
+      "quantityText": "977",
+      "minQuantity": 1,
+      "maxQuantity": 30000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 9989.96178
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.998996178,
+      "notionalUsd": 9989.96178
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "AVAXUSDT",
+    "equity": 10000,
+    "referencePrice": 10.67547,
+    "normalized": {
+      "symbol": "AVAXUSDT",
+      "quantity": 936,
+      "quantityText": "936",
+      "minQuantity": 1,
+      "maxQuantity": 30000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 9992.23992
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.999223992,
+      "notionalUsd": 9992.23992
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "JUPUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 0.21525,
+    "normalized": {
+      "symbol": "JUPUSDT",
+      "quantity": 307,
+      "quantityText": "307",
+      "minQuantity": 1,
+      "maxQuantity": 1000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 66.08175
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9993019115859706,
+      "notionalUsd": 66.08175
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "JUPUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 0.229887,
+    "normalized": {
+      "symbol": "JUPUSDT",
+      "quantity": 287,
+      "quantityText": "287",
+      "minQuantity": 1,
+      "maxQuantity": 1000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 65.977569
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9977264649240566,
+      "notionalUsd": 65.977569
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "JUPUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 0.24452399999999996,
+    "normalized": {
+      "symbol": "JUPUSDT",
+      "quantity": 270,
+      "quantityText": "270",
+      "minQuantity": 1,
+      "maxQuantity": 1000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 66.02148
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9983904961617227,
+      "notionalUsd": 66.02148
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "JUPUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 0.259161,
+    "normalized": {
+      "symbol": "JUPUSDT",
+      "quantity": 255,
+      "quantityText": "255",
+      "minQuantity": 1,
+      "maxQuantity": 1000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 66.08605499999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9993670126877023,
+      "notionalUsd": 66.08605499999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "JUPUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 0.273798,
+    "normalized": {
+      "symbol": "JUPUSDT",
+      "quantity": 241,
+      "quantityText": "241",
+      "minQuantity": 1,
+      "maxQuantity": 1000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 65.98531799999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.997843646907174,
+      "notionalUsd": 65.98531799999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "JUPUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 0.28843499999999994,
+    "normalized": {
+      "symbol": "JUPUSDT",
+      "quantity": 229,
+      "quantityText": "229",
+      "minQuantity": 1,
+      "maxQuantity": 1000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 66.05161499999998
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9988462038738465,
+      "notionalUsd": 66.05161499999998
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "JUPUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 0.303072,
+    "normalized": {
+      "symbol": "JUPUSDT",
+      "quantity": 218,
+      "quantityText": "218",
+      "minQuantity": 1,
+      "maxQuantity": 1000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 66.06969600000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9991196285011211,
+      "notionalUsd": 66.06969600000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "JUPUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 0.31770899999999996,
+    "normalized": {
+      "symbol": "JUPUSDT",
+      "quantity": 208,
+      "quantityText": "208",
+      "minQuantity": 1,
+      "maxQuantity": 1000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 66.08347199999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9993279520266631,
+      "notionalUsd": 66.08347199999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "JUPUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 0.332346,
+    "normalized": {
+      "symbol": "JUPUSDT",
+      "quantity": 198,
+      "quantityText": "198",
+      "minQuantity": 1,
+      "maxQuantity": 1000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 65.804508
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9951094006344308,
+      "notionalUsd": 65.804508
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "JUPUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 0.346983,
+    "normalized": {
+      "symbol": "JUPUSDT",
+      "quantity": 190,
+      "quantityText": "190",
+      "minQuantity": 1,
+      "maxQuantity": 1000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 65.92676999999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.996958271923619,
+      "notionalUsd": 65.92676999999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "JUPUSDT",
+    "equity": 100,
+    "referencePrice": 0.21525,
+    "normalized": {
+      "symbol": "JUPUSDT",
+      "quantity": 464,
+      "quantityText": "464",
+      "minQuantity": 1,
+      "maxQuantity": 1000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 99.876
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9987600000000001,
+      "notionalUsd": 99.876
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "JUPUSDT",
+    "equity": 100,
+    "referencePrice": 0.229887,
+    "normalized": {
+      "symbol": "JUPUSDT",
+      "quantity": 434,
+      "quantityText": "434",
+      "minQuantity": 1,
+      "maxQuantity": 1000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 99.77095800000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9977095800000001,
+      "notionalUsd": 99.77095800000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "JUPUSDT",
+    "equity": 100,
+    "referencePrice": 0.24452399999999996,
+    "normalized": {
+      "symbol": "JUPUSDT",
+      "quantity": 408,
+      "quantityText": "408",
+      "minQuantity": 1,
+      "maxQuantity": 1000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 99.76579199999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9976579199999999,
+      "notionalUsd": 99.76579199999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "JUPUSDT",
+    "equity": 100,
+    "referencePrice": 0.259161,
+    "normalized": {
+      "symbol": "JUPUSDT",
+      "quantity": 385,
+      "quantityText": "385",
+      "minQuantity": 1,
+      "maxQuantity": 1000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 99.776985
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.99776985,
+      "notionalUsd": 99.776985
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "JUPUSDT",
+    "equity": 100,
+    "referencePrice": 0.273798,
+    "normalized": {
+      "symbol": "JUPUSDT",
+      "quantity": 365,
+      "quantityText": "365",
+      "minQuantity": 1,
+      "maxQuantity": 1000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 99.93627
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9993626999999999,
+      "notionalUsd": 99.93627
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "JUPUSDT",
+    "equity": 100,
+    "referencePrice": 0.28843499999999994,
+    "normalized": {
+      "symbol": "JUPUSDT",
+      "quantity": 346,
+      "quantityText": "346",
+      "minQuantity": 1,
+      "maxQuantity": 1000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 99.79850999999998
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9979850999999997,
+      "notionalUsd": 99.79850999999998
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "JUPUSDT",
+    "equity": 100,
+    "referencePrice": 0.303072,
+    "normalized": {
+      "symbol": "JUPUSDT",
+      "quantity": 329,
+      "quantityText": "329",
+      "minQuantity": 1,
+      "maxQuantity": 1000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 99.710688
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.99710688,
+      "notionalUsd": 99.710688
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "JUPUSDT",
+    "equity": 100,
+    "referencePrice": 0.31770899999999996,
+    "normalized": {
+      "symbol": "JUPUSDT",
+      "quantity": 314,
+      "quantityText": "314",
+      "minQuantity": 1,
+      "maxQuantity": 1000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 99.76062599999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9976062599999999,
+      "notionalUsd": 99.76062599999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "JUPUSDT",
+    "equity": 100,
+    "referencePrice": 0.332346,
+    "normalized": {
+      "symbol": "JUPUSDT",
+      "quantity": 300,
+      "quantityText": "300",
+      "minQuantity": 1,
+      "maxQuantity": 1000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 99.70379999999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9970379999999999,
+      "notionalUsd": 99.70379999999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "JUPUSDT",
+    "equity": 100,
+    "referencePrice": 0.346983,
+    "normalized": {
+      "symbol": "JUPUSDT",
+      "quantity": 288,
+      "quantityText": "288",
+      "minQuantity": 1,
+      "maxQuantity": 1000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 99.93110399999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9993110399999999,
+      "notionalUsd": 99.93110399999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "JUPUSDT",
+    "equity": 1000,
+    "referencePrice": 0.21525,
+    "normalized": {
+      "symbol": "JUPUSDT",
+      "quantity": 4645,
+      "quantityText": "4645",
+      "minQuantity": 1,
+      "maxQuantity": 1000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 999.83625
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.99983625,
+      "notionalUsd": 999.83625
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "JUPUSDT",
+    "equity": 1000,
+    "referencePrice": 0.229887,
+    "normalized": {
+      "symbol": "JUPUSDT",
+      "quantity": 4349,
+      "quantityText": "4349",
+      "minQuantity": 1,
+      "maxQuantity": 1000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 999.7785630000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9997785630000001,
+      "notionalUsd": 999.7785630000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "JUPUSDT",
+    "equity": 1000,
+    "referencePrice": 0.24452399999999996,
+    "normalized": {
+      "symbol": "JUPUSDT",
+      "quantity": 4089,
+      "quantityText": "4089",
+      "minQuantity": 1,
+      "maxQuantity": 1000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 999.8586359999998
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9998586359999998,
+      "notionalUsd": 999.8586359999998
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "JUPUSDT",
+    "equity": 1000,
+    "referencePrice": 0.259161,
+    "normalized": {
+      "symbol": "JUPUSDT",
+      "quantity": 3858,
+      "quantityText": "3858",
+      "minQuantity": 1,
+      "maxQuantity": 1000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 999.843138
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9998431379999999,
+      "notionalUsd": 999.843138
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "JUPUSDT",
+    "equity": 1000,
+    "referencePrice": 0.273798,
+    "normalized": {
+      "symbol": "JUPUSDT",
+      "quantity": 3652,
+      "quantityText": "3652",
+      "minQuantity": 1,
+      "maxQuantity": 1000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 999.9102959999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999102959999999,
+      "notionalUsd": 999.9102959999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "JUPUSDT",
+    "equity": 1000,
+    "referencePrice": 0.28843499999999994,
+    "normalized": {
+      "symbol": "JUPUSDT",
+      "quantity": 3466,
+      "quantityText": "3466",
+      "minQuantity": 1,
+      "maxQuantity": 1000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 999.7157099999998
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9997157099999998,
+      "notionalUsd": 999.7157099999998
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "JUPUSDT",
+    "equity": 1000,
+    "referencePrice": 0.303072,
+    "normalized": {
+      "symbol": "JUPUSDT",
+      "quantity": 3299,
+      "quantityText": "3299",
+      "minQuantity": 1,
+      "maxQuantity": 1000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 999.834528
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.999834528,
+      "notionalUsd": 999.834528
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "JUPUSDT",
+    "equity": 1000,
+    "referencePrice": 0.31770899999999996,
+    "normalized": {
+      "symbol": "JUPUSDT",
+      "quantity": 3147,
+      "quantityText": "3147",
+      "minQuantity": 1,
+      "maxQuantity": 1000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 999.8302229999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9998302229999999,
+      "notionalUsd": 999.8302229999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "JUPUSDT",
+    "equity": 1000,
+    "referencePrice": 0.332346,
+    "normalized": {
+      "symbol": "JUPUSDT",
+      "quantity": 3008,
+      "quantityText": "3008",
+      "minQuantity": 1,
+      "maxQuantity": 1000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 999.6967679999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.999696768,
+      "notionalUsd": 999.6967679999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "JUPUSDT",
+    "equity": 1000,
+    "referencePrice": 0.346983,
+    "normalized": {
+      "symbol": "JUPUSDT",
+      "quantity": 2881,
+      "quantityText": "2881",
+      "minQuantity": 1,
+      "maxQuantity": 1000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 999.658023
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.999658023,
+      "notionalUsd": 999.658023
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "JUPUSDT",
+    "equity": 10000,
+    "referencePrice": 0.21525,
+    "normalized": {
+      "symbol": "JUPUSDT",
+      "quantity": 46457,
+      "quantityText": "46457",
+      "minQuantity": 1,
+      "maxQuantity": 1000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 9999.86925
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.999986925,
+      "notionalUsd": 9999.86925
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "JUPUSDT",
+    "equity": 10000,
+    "referencePrice": 0.229887,
+    "normalized": {
+      "symbol": "JUPUSDT",
+      "quantity": 43499,
+      "quantityText": "43499",
+      "minQuantity": 1,
+      "maxQuantity": 1000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 9999.854613
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999854613,
+      "notionalUsd": 9999.854613
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "JUPUSDT",
+    "equity": 10000,
+    "referencePrice": 0.24452399999999996,
+    "normalized": {
+      "symbol": "JUPUSDT",
+      "quantity": 40895,
+      "quantityText": "40895",
+      "minQuantity": 1,
+      "maxQuantity": 1000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 9999.808979999998
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999808979999998,
+      "notionalUsd": 9999.808979999998
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "JUPUSDT",
+    "equity": 10000,
+    "referencePrice": 0.259161,
+    "normalized": {
+      "symbol": "JUPUSDT",
+      "quantity": 38586,
+      "quantityText": "38586",
+      "minQuantity": 1,
+      "maxQuantity": 1000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 9999.986346
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999986345999999,
+      "notionalUsd": 9999.986346
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "JUPUSDT",
+    "equity": 10000,
+    "referencePrice": 0.273798,
+    "normalized": {
+      "symbol": "JUPUSDT",
+      "quantity": 36523,
+      "quantityText": "36523",
+      "minQuantity": 1,
+      "maxQuantity": 1000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 9999.924353999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999924353999999,
+      "notionalUsd": 9999.924353999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "JUPUSDT",
+    "equity": 10000,
+    "referencePrice": 0.28843499999999994,
+    "normalized": {
+      "symbol": "JUPUSDT",
+      "quantity": 34669,
+      "quantityText": "34669",
+      "minQuantity": 1,
+      "maxQuantity": 1000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 9999.753014999998
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999753014999998,
+      "notionalUsd": 9999.753014999998
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "JUPUSDT",
+    "equity": 10000,
+    "referencePrice": 0.303072,
+    "normalized": {
+      "symbol": "JUPUSDT",
+      "quantity": 32995,
+      "quantityText": "32995",
+      "minQuantity": 1,
+      "maxQuantity": 1000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 9999.86064
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999860640000001,
+      "notionalUsd": 9999.86064
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "JUPUSDT",
+    "equity": 10000,
+    "referencePrice": 0.31770899999999996,
+    "normalized": {
+      "symbol": "JUPUSDT",
+      "quantity": 31475,
+      "quantityText": "31475",
+      "minQuantity": 1,
+      "maxQuantity": 1000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 9999.890774999998
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999890774999998,
+      "notionalUsd": 9999.890774999998
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "JUPUSDT",
+    "equity": 10000,
+    "referencePrice": 0.332346,
+    "normalized": {
+      "symbol": "JUPUSDT",
+      "quantity": 30089,
+      "quantityText": "30089",
+      "minQuantity": 1,
+      "maxQuantity": 1000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 9999.958794
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999958794,
+      "notionalUsd": 9999.958794
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "JUPUSDT",
+    "equity": 10000,
+    "referencePrice": 0.346983,
+    "normalized": {
+      "symbol": "JUPUSDT",
+      "quantity": 28819,
+      "quantityText": "28819",
+      "minQuantity": 1,
+      "maxQuantity": 1000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 9999.703077
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999703077000001,
+      "notionalUsd": 9999.703077
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 0.07275000000000001,
+    "normalized": {
+      "symbol": "DOGEUSDT",
+      "quantity": 908,
+      "quantityText": "908",
+      "minQuantity": 1,
+      "maxQuantity": 30000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 66.057
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9989276369592884,
+      "notionalUsd": 66.057
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 0.077697,
+    "normalized": {
+      "symbol": "DOGEUSDT",
+      "quantity": 851,
+      "quantityText": "851",
+      "minQuantity": 1,
+      "maxQuantity": 30000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 66.120147
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9998825589734742,
+      "notionalUsd": 66.120147
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 0.082644,
+    "normalized": {
+      "symbol": "DOGEUSDT",
+      "quantity": 800,
+      "quantityText": "800",
+      "minQuantity": 1,
+      "maxQuantity": 30000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 66.1152
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9998077494147593,
+      "notionalUsd": 66.1152
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 0.087591,
+    "normalized": {
+      "symbol": "DOGEUSDT",
+      "quantity": 754,
+      "quantityText": "754",
+      "minQuantity": 1,
+      "maxQuantity": 30000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 66.043614
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9987252110945303,
+      "notionalUsd": 66.043614
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 0.092538,
+    "normalized": {
+      "symbol": "DOGEUSDT",
+      "quantity": 714,
+      "quantityText": "714",
+      "minQuantity": 1,
+      "maxQuantity": 30000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 66.072132
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9991564661977108,
+      "notionalUsd": 66.072132
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 0.09748499999999999,
+    "normalized": {
+      "symbol": "DOGEUSDT",
+      "quantity": 678,
+      "quantityText": "678",
+      "minQuantity": 1,
+      "maxQuantity": 30000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 66.09482999999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9994997100553442,
+      "notionalUsd": 66.09482999999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 0.10243200000000001,
+    "normalized": {
+      "symbol": "DOGEUSDT",
+      "quantity": 645,
+      "quantityText": "645",
+      "minQuantity": 1,
+      "maxQuantity": 30000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 66.06864
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9991036594503826,
+      "notionalUsd": 66.06864
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 0.107379,
+    "normalized": {
+      "symbol": "DOGEUSDT",
+      "quantity": 615,
+      "quantityText": "615",
+      "minQuantity": 1,
+      "maxQuantity": 30000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 66.038085
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9986416004112604,
+      "notionalUsd": 66.038085
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 0.112326,
+    "normalized": {
+      "symbol": "DOGEUSDT",
+      "quantity": 588,
+      "quantityText": "588",
+      "minQuantity": 1,
+      "maxQuantity": 30000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 66.047688
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9987868189664131,
+      "notionalUsd": 66.047688
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 0.11727300000000002,
+    "normalized": {
+      "symbol": "DOGEUSDT",
+      "quantity": 563,
+      "quantityText": "563",
+      "minQuantity": 1,
+      "maxQuantity": 30000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 66.02469900000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9984391745465023,
+      "notionalUsd": 66.02469900000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "equity": 100,
+    "referencePrice": 0.07275000000000001,
+    "normalized": {
+      "symbol": "DOGEUSDT",
+      "quantity": 1374,
+      "quantityText": "1374",
+      "minQuantity": 1,
+      "maxQuantity": 30000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 99.95850000000002
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9995850000000002,
+      "notionalUsd": 99.95850000000002
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "equity": 100,
+    "referencePrice": 0.077697,
+    "normalized": {
+      "symbol": "DOGEUSDT",
+      "quantity": 1287,
+      "quantityText": "1287",
+      "minQuantity": 1,
+      "maxQuantity": 30000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 99.996039
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999603899999999,
+      "notionalUsd": 99.996039
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "equity": 100,
+    "referencePrice": 0.082644,
+    "normalized": {
+      "symbol": "DOGEUSDT",
+      "quantity": 1210,
+      "quantityText": "1210",
+      "minQuantity": 1,
+      "maxQuantity": 30000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 99.99924
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999924,
+      "notionalUsd": 99.99924
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "equity": 100,
+    "referencePrice": 0.087591,
+    "normalized": {
+      "symbol": "DOGEUSDT",
+      "quantity": 1141,
+      "quantityText": "1141",
+      "minQuantity": 1,
+      "maxQuantity": 30000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 99.941331
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.99941331,
+      "notionalUsd": 99.941331
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "equity": 100,
+    "referencePrice": 0.092538,
+    "normalized": {
+      "symbol": "DOGEUSDT",
+      "quantity": 1080,
+      "quantityText": "1080",
+      "minQuantity": 1,
+      "maxQuantity": 30000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 99.94104
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9994104,
+      "notionalUsd": 99.94104
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "equity": 100,
+    "referencePrice": 0.09748499999999999,
+    "normalized": {
+      "symbol": "DOGEUSDT",
+      "quantity": 1025,
+      "quantityText": "1025",
+      "minQuantity": 1,
+      "maxQuantity": 30000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 99.922125
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.99922125,
+      "notionalUsd": 99.922125
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "equity": 100,
+    "referencePrice": 0.10243200000000001,
+    "normalized": {
+      "symbol": "DOGEUSDT",
+      "quantity": 976,
+      "quantityText": "976",
+      "minQuantity": 1,
+      "maxQuantity": 30000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 99.97363200000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9997363200000001,
+      "notionalUsd": 99.97363200000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "equity": 100,
+    "referencePrice": 0.107379,
+    "normalized": {
+      "symbol": "DOGEUSDT",
+      "quantity": 931,
+      "quantityText": "931",
+      "minQuantity": 1,
+      "maxQuantity": 30000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 99.969849
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.99969849,
+      "notionalUsd": 99.969849
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "equity": 100,
+    "referencePrice": 0.112326,
+    "normalized": {
+      "symbol": "DOGEUSDT",
+      "quantity": 890,
+      "quantityText": "890",
+      "minQuantity": 1,
+      "maxQuantity": 30000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 99.97014
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9997014,
+      "notionalUsd": 99.97014
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "equity": 100,
+    "referencePrice": 0.11727300000000002,
+    "normalized": {
+      "symbol": "DOGEUSDT",
+      "quantity": 852,
+      "quantityText": "852",
+      "minQuantity": 1,
+      "maxQuantity": 30000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 99.91659600000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9991659600000001,
+      "notionalUsd": 99.91659600000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "equity": 1000,
+    "referencePrice": 0.07275000000000001,
+    "normalized": {
+      "symbol": "DOGEUSDT",
+      "quantity": 13745,
+      "quantityText": "13745",
+      "minQuantity": 1,
+      "maxQuantity": 30000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 999.9487500000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999487500000002,
+      "notionalUsd": 999.9487500000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "equity": 1000,
+    "referencePrice": 0.077697,
+    "normalized": {
+      "symbol": "DOGEUSDT",
+      "quantity": 12870,
+      "quantityText": "12870",
+      "minQuantity": 1,
+      "maxQuantity": 30000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 999.9603900000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.99996039,
+      "notionalUsd": 999.9603900000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "equity": 1000,
+    "referencePrice": 0.082644,
+    "normalized": {
+      "symbol": "DOGEUSDT",
+      "quantity": 12100,
+      "quantityText": "12100",
+      "minQuantity": 1,
+      "maxQuantity": 30000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 999.9924
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999924,
+      "notionalUsd": 999.9924
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "equity": 1000,
+    "referencePrice": 0.087591,
+    "normalized": {
+      "symbol": "DOGEUSDT",
+      "quantity": 11416,
+      "quantityText": "11416",
+      "minQuantity": 1,
+      "maxQuantity": 30000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 999.938856
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.999938856,
+      "notionalUsd": 999.938856
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "equity": 1000,
+    "referencePrice": 0.092538,
+    "normalized": {
+      "symbol": "DOGEUSDT",
+      "quantity": 10806,
+      "quantityText": "10806",
+      "minQuantity": 1,
+      "maxQuantity": 30000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 999.9656279999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999656279999999,
+      "notionalUsd": 999.9656279999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "equity": 1000,
+    "referencePrice": 0.09748499999999999,
+    "normalized": {
+      "symbol": "DOGEUSDT",
+      "quantity": 10257,
+      "quantityText": "10257",
+      "minQuantity": 1,
+      "maxQuantity": 30000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 999.9036449999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999036449999998,
+      "notionalUsd": 999.9036449999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "equity": 1000,
+    "referencePrice": 0.10243200000000001,
+    "normalized": {
+      "symbol": "DOGEUSDT",
+      "quantity": 9762,
+      "quantityText": "9762",
+      "minQuantity": 1,
+      "maxQuantity": 30000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 999.9411840000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999411840000001,
+      "notionalUsd": 999.9411840000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "equity": 1000,
+    "referencePrice": 0.107379,
+    "normalized": {
+      "symbol": "DOGEUSDT",
+      "quantity": 9312,
+      "quantityText": "9312",
+      "minQuantity": 1,
+      "maxQuantity": 30000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 999.9132480000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.999913248,
+      "notionalUsd": 999.9132480000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "equity": 1000,
+    "referencePrice": 0.112326,
+    "normalized": {
+      "symbol": "DOGEUSDT",
+      "quantity": 8902,
+      "quantityText": "8902",
+      "minQuantity": 1,
+      "maxQuantity": 30000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 999.9260519999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.999926052,
+      "notionalUsd": 999.9260519999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "equity": 1000,
+    "referencePrice": 0.11727300000000002,
+    "normalized": {
+      "symbol": "DOGEUSDT",
+      "quantity": 8527,
+      "quantityText": "8527",
+      "minQuantity": 1,
+      "maxQuantity": 30000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 999.9868710000002
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999868710000002,
+      "notionalUsd": 999.9868710000002
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "equity": 10000,
+    "referencePrice": 0.07275000000000001,
+    "normalized": {
+      "symbol": "DOGEUSDT",
+      "quantity": 137457,
+      "quantityText": "137457",
+      "minQuantity": 1,
+      "maxQuantity": 30000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 9999.996750000002
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999996750000002,
+      "notionalUsd": 9999.996750000002
+    },
+    "oldStrictAccepted": true
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "equity": 10000,
+    "referencePrice": 0.077697,
+    "normalized": {
+      "symbol": "DOGEUSDT",
+      "quantity": 128705,
+      "quantityText": "128705",
+      "minQuantity": 1,
+      "maxQuantity": 30000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 9999.992385
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999992384999999,
+      "notionalUsd": 9999.992385
+    },
+    "oldStrictAccepted": true
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "equity": 10000,
+    "referencePrice": 0.082644,
+    "normalized": {
+      "symbol": "DOGEUSDT",
+      "quantity": 121000,
+      "quantityText": "121000",
+      "minQuantity": 1,
+      "maxQuantity": 30000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 9999.923999999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999923999999999,
+      "notionalUsd": 9999.923999999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "equity": 10000,
+    "referencePrice": 0.087591,
+    "normalized": {
+      "symbol": "DOGEUSDT",
+      "quantity": 114166,
+      "quantityText": "114166",
+      "minQuantity": 1,
+      "maxQuantity": 30000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 9999.914106
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999914106,
+      "notionalUsd": 9999.914106
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "equity": 10000,
+    "referencePrice": 0.092538,
+    "normalized": {
+      "symbol": "DOGEUSDT",
+      "quantity": 108063,
+      "quantityText": "108063",
+      "minQuantity": 1,
+      "maxQuantity": 30000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 9999.933894
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999933893999999,
+      "notionalUsd": 9999.933894
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "equity": 10000,
+    "referencePrice": 0.09748499999999999,
+    "normalized": {
+      "symbol": "DOGEUSDT",
+      "quantity": 102579,
+      "quantityText": "102579",
+      "minQuantity": 1,
+      "maxQuantity": 30000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 9999.913814999998
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999913814999998,
+      "notionalUsd": 9999.913814999998
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "equity": 10000,
+    "referencePrice": 0.10243200000000001,
+    "normalized": {
+      "symbol": "DOGEUSDT",
+      "quantity": 97625,
+      "quantityText": "97625",
+      "minQuantity": 1,
+      "maxQuantity": 30000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 9999.924
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999924000000001,
+      "notionalUsd": 9999.924
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "equity": 10000,
+    "referencePrice": 0.107379,
+    "normalized": {
+      "symbol": "DOGEUSDT",
+      "quantity": 93128,
+      "quantityText": "93128",
+      "minQuantity": 1,
+      "maxQuantity": 30000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 9999.991512
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999991512,
+      "notionalUsd": 9999.991512
+    },
+    "oldStrictAccepted": true
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "equity": 10000,
+    "referencePrice": 0.112326,
+    "normalized": {
+      "symbol": "DOGEUSDT",
+      "quantity": 89026,
+      "quantityText": "89026",
+      "minQuantity": 1,
+      "maxQuantity": 30000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 9999.934476
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999934476000001,
+      "notionalUsd": 9999.934476
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOGEUSDT",
+    "equity": 10000,
+    "referencePrice": 0.11727300000000002,
+    "normalized": {
+      "symbol": "DOGEUSDT",
+      "quantity": 85271,
+      "quantityText": "85271",
+      "minQuantity": 1,
+      "maxQuantity": 30000000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 9999.985983
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999985983,
+      "notionalUsd": 9999.985983
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOTUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 0.8325,
+    "normalized": {
+      "symbol": "DOTUSDT",
+      "quantity": 79.4,
+      "quantityText": "79.4",
+      "minQuantity": 0.1,
+      "maxQuantity": 300000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 66.10050000000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9995854529698208,
+      "notionalUsd": 66.10050000000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOTUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 0.8891100000000002,
+    "normalized": {
+      "symbol": "DOTUSDT",
+      "quantity": 74.3,
+      "quantityText": "74.3",
+      "minQuantity": 0.1,
+      "maxQuantity": 300000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 66.06087300000002
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9989862052675368,
+      "notionalUsd": 66.06087300000002
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOTUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 0.94572,
+    "normalized": {
+      "symbol": "DOTUSDT",
+      "quantity": 69.9,
+      "quantityText": "69.9",
+      "minQuantity": 0.1,
+      "maxQuantity": 300000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 66.105828
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9996660240894556,
+      "notionalUsd": 66.105828
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOTUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 1.0023300000000002,
+    "normalized": {
+      "symbol": "DOTUSDT",
+      "quantity": 65.9,
+      "quantityText": "65.9",
+      "minQuantity": 0.1,
+      "maxQuantity": 300000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 66.05354700000002
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.998875419978039,
+      "notionalUsd": 66.05354700000002
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOTUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 1.05894,
+    "normalized": {
+      "symbol": "DOTUSDT",
+      "quantity": 62.4,
+      "quantityText": "62.4",
+      "minQuantity": 0.1,
+      "maxQuantity": 300000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 66.077856
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9992430257113726,
+      "notionalUsd": 66.077856
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOTUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 1.11555,
+    "normalized": {
+      "symbol": "DOTUSDT",
+      "quantity": 59.2,
+      "quantityText": "59.2",
+      "minQuantity": 0.1,
+      "maxQuantity": 300000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 66.04056
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9986790278739287,
+      "notionalUsd": 66.04056
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOTUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 1.17216,
+    "normalized": {
+      "symbol": "DOTUSDT",
+      "quantity": 56.4,
+      "quantityText": "56.4",
+      "minQuantity": 0.1,
+      "maxQuantity": 300000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 66.109824
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9997264524291818,
+      "notionalUsd": 66.109824
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOTUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 1.2287700000000001,
+    "normalized": {
+      "symbol": "DOTUSDT",
+      "quantity": 53.8,
+      "quantityText": "53.8",
+      "minQuantity": 0.1,
+      "maxQuantity": 300000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 66.107826
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9996962382593186,
+      "notionalUsd": 66.107826
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOTUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 1.28538,
+    "normalized": {
+      "symbol": "DOTUSDT",
+      "quantity": 51.4,
+      "quantityText": "51.4",
+      "minQuantity": 0.1,
+      "maxQuantity": 300000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 66.06853199999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9991020262520115,
+      "notionalUsd": 66.06853199999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOTUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 1.3419900000000002,
+    "normalized": {
+      "symbol": "DOTUSDT",
+      "quantity": 49.2,
+      "quantityText": "49.2",
+      "minQuantity": 0.1,
+      "maxQuantity": 300000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 66.02590800000002
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9984574572949331,
+      "notionalUsd": 66.02590800000002
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOTUSDT",
+    "equity": 100,
+    "referencePrice": 0.8325,
+    "normalized": {
+      "symbol": "DOTUSDT",
+      "quantity": 120.1,
+      "quantityText": "120.1",
+      "minQuantity": 0.1,
+      "maxQuantity": 300000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 99.98325
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9998325,
+      "notionalUsd": 99.98325
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOTUSDT",
+    "equity": 100,
+    "referencePrice": 0.8891100000000002,
+    "normalized": {
+      "symbol": "DOTUSDT",
+      "quantity": 112.4,
+      "quantityText": "112.4",
+      "minQuantity": 0.1,
+      "maxQuantity": 300000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 99.93596400000003
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9993596400000002,
+      "notionalUsd": 99.93596400000003
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOTUSDT",
+    "equity": 100,
+    "referencePrice": 0.94572,
+    "normalized": {
+      "symbol": "DOTUSDT",
+      "quantity": 105.7,
+      "quantityText": "105.7",
+      "minQuantity": 0.1,
+      "maxQuantity": 300000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 99.962604
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.99962604,
+      "notionalUsd": 99.962604
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOTUSDT",
+    "equity": 100,
+    "referencePrice": 1.0023300000000002,
+    "normalized": {
+      "symbol": "DOTUSDT",
+      "quantity": 99.7,
+      "quantityText": "99.7",
+      "minQuantity": 0.1,
+      "maxQuantity": 300000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 99.93230100000002
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9993230100000002,
+      "notionalUsd": 99.93230100000002
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOTUSDT",
+    "equity": 100,
+    "referencePrice": 1.05894,
+    "normalized": {
+      "symbol": "DOTUSDT",
+      "quantity": 94.4,
+      "quantityText": "94.4",
+      "minQuantity": 0.1,
+      "maxQuantity": 300000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 99.963936
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9996393600000001,
+      "notionalUsd": 99.963936
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOTUSDT",
+    "equity": 100,
+    "referencePrice": 1.11555,
+    "normalized": {
+      "symbol": "DOTUSDT",
+      "quantity": 89.6,
+      "quantityText": "89.6",
+      "minQuantity": 0.1,
+      "maxQuantity": 300000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 99.95327999999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9995327999999999,
+      "notionalUsd": 99.95327999999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOTUSDT",
+    "equity": 100,
+    "referencePrice": 1.17216,
+    "normalized": {
+      "symbol": "DOTUSDT",
+      "quantity": 85.3,
+      "quantityText": "85.3",
+      "minQuantity": 0.1,
+      "maxQuantity": 300000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 99.985248
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9998524799999999,
+      "notionalUsd": 99.985248
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOTUSDT",
+    "equity": 100,
+    "referencePrice": 1.2287700000000001,
+    "normalized": {
+      "symbol": "DOTUSDT",
+      "quantity": 81.3,
+      "quantityText": "81.3",
+      "minQuantity": 0.1,
+      "maxQuantity": 300000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 99.89900100000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9989900100000001,
+      "notionalUsd": 99.89900100000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOTUSDT",
+    "equity": 100,
+    "referencePrice": 1.28538,
+    "normalized": {
+      "symbol": "DOTUSDT",
+      "quantity": 77.7,
+      "quantityText": "77.7",
+      "minQuantity": 0.1,
+      "maxQuantity": 300000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 99.874026
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.99874026,
+      "notionalUsd": 99.874026
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOTUSDT",
+    "equity": 100,
+    "referencePrice": 1.3419900000000002,
+    "normalized": {
+      "symbol": "DOTUSDT",
+      "quantity": 74.5,
+      "quantityText": "74.5",
+      "minQuantity": 0.1,
+      "maxQuantity": 300000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 99.97825500000002
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9997825500000002,
+      "notionalUsd": 99.97825500000002
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOTUSDT",
+    "equity": 1000,
+    "referencePrice": 0.8325,
+    "normalized": {
+      "symbol": "DOTUSDT",
+      "quantity": 1201.2,
+      "quantityText": "1201.2",
+      "minQuantity": 0.1,
+      "maxQuantity": 300000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 999.999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.999999,
+      "notionalUsd": 999.999
+    },
+    "oldStrictAccepted": true
+  },
+  {
+    "symbol": "DOTUSDT",
+    "equity": 1000,
+    "referencePrice": 0.8891100000000002,
+    "normalized": {
+      "symbol": "DOTUSDT",
+      "quantity": 1124.7,
+      "quantityText": "1124.7",
+      "minQuantity": 0.1,
+      "maxQuantity": 300000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 999.9820170000003
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999820170000002,
+      "notionalUsd": 999.9820170000003
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOTUSDT",
+    "equity": 1000,
+    "referencePrice": 0.94572,
+    "normalized": {
+      "symbol": "DOTUSDT",
+      "quantity": 1057.3,
+      "quantityText": "1057.3",
+      "minQuantity": 0.1,
+      "maxQuantity": 300000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 999.909756
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.999909756,
+      "notionalUsd": 999.909756
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOTUSDT",
+    "equity": 1000,
+    "referencePrice": 1.0023300000000002,
+    "normalized": {
+      "symbol": "DOTUSDT",
+      "quantity": 997.6,
+      "quantityText": "997.6",
+      "minQuantity": 0.1,
+      "maxQuantity": 300000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 999.9244080000002
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999244080000002,
+      "notionalUsd": 999.9244080000002
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOTUSDT",
+    "equity": 1000,
+    "referencePrice": 1.05894,
+    "normalized": {
+      "symbol": "DOTUSDT",
+      "quantity": 944.3,
+      "quantityText": "944.3",
+      "minQuantity": 0.1,
+      "maxQuantity": 300000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 999.957042
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.999957042,
+      "notionalUsd": 999.957042
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOTUSDT",
+    "equity": 1000,
+    "referencePrice": 1.11555,
+    "normalized": {
+      "symbol": "DOTUSDT",
+      "quantity": 896.4,
+      "quantityText": "896.4",
+      "minQuantity": 0.1,
+      "maxQuantity": 300000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 999.97902
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999790199999999,
+      "notionalUsd": 999.97902
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOTUSDT",
+    "equity": 1000,
+    "referencePrice": 1.17216,
+    "normalized": {
+      "symbol": "DOTUSDT",
+      "quantity": 853.1,
+      "quantityText": "853.1",
+      "minQuantity": 0.1,
+      "maxQuantity": 300000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 999.9696960000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999696960000001,
+      "notionalUsd": 999.9696960000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOTUSDT",
+    "equity": 1000,
+    "referencePrice": 1.2287700000000001,
+    "normalized": {
+      "symbol": "DOTUSDT",
+      "quantity": 813.8,
+      "quantityText": "813.8",
+      "minQuantity": 0.1,
+      "maxQuantity": 300000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 999.973026
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.999973026,
+      "notionalUsd": 999.973026
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOTUSDT",
+    "equity": 1000,
+    "referencePrice": 1.28538,
+    "normalized": {
+      "symbol": "DOTUSDT",
+      "quantity": 777.9,
+      "quantityText": "777.9",
+      "minQuantity": 0.1,
+      "maxQuantity": 300000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 999.8971019999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9998971019999999,
+      "notionalUsd": 999.8971019999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOTUSDT",
+    "equity": 1000,
+    "referencePrice": 1.3419900000000002,
+    "normalized": {
+      "symbol": "DOTUSDT",
+      "quantity": 745.1,
+      "quantityText": "745.1",
+      "minQuantity": 0.1,
+      "maxQuantity": 300000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 999.9167490000002
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999167490000002,
+      "notionalUsd": 999.9167490000002
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOTUSDT",
+    "equity": 10000,
+    "referencePrice": 0.8325,
+    "normalized": {
+      "symbol": "DOTUSDT",
+      "quantity": 12012,
+      "quantityText": "12012",
+      "minQuantity": 0.1,
+      "maxQuantity": 300000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 9999.99
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.999999,
+      "notionalUsd": 9999.99
+    },
+    "oldStrictAccepted": true
+  },
+  {
+    "symbol": "DOTUSDT",
+    "equity": 10000,
+    "referencePrice": 0.8891100000000002,
+    "normalized": {
+      "symbol": "DOTUSDT",
+      "quantity": 11247.2,
+      "quantityText": "11247.2",
+      "minQuantity": 0.1,
+      "maxQuantity": 300000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 9999.997992000002
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999997992000003,
+      "notionalUsd": 9999.997992000002
+    },
+    "oldStrictAccepted": true
+  },
+  {
+    "symbol": "DOTUSDT",
+    "equity": 10000,
+    "referencePrice": 0.94572,
+    "normalized": {
+      "symbol": "DOTUSDT",
+      "quantity": 10573.9,
+      "quantityText": "10573.9",
+      "minQuantity": 0.1,
+      "maxQuantity": 300000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 9999.948708
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999948707999999,
+      "notionalUsd": 9999.948708
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOTUSDT",
+    "equity": 10000,
+    "referencePrice": 1.0023300000000002,
+    "normalized": {
+      "symbol": "DOTUSDT",
+      "quantity": 9976.7,
+      "quantityText": "9976.7",
+      "minQuantity": 0.1,
+      "maxQuantity": 300000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 9999.945711000002
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999945711000002,
+      "notionalUsd": 9999.945711000002
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOTUSDT",
+    "equity": 10000,
+    "referencePrice": 1.05894,
+    "normalized": {
+      "symbol": "DOTUSDT",
+      "quantity": 9443.4,
+      "quantityText": "9443.4",
+      "minQuantity": 0.1,
+      "maxQuantity": 300000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 9999.993996
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999993996,
+      "notionalUsd": 9999.993996
+    },
+    "oldStrictAccepted": true
+  },
+  {
+    "symbol": "DOTUSDT",
+    "equity": 10000,
+    "referencePrice": 1.11555,
+    "normalized": {
+      "symbol": "DOTUSDT",
+      "quantity": 8964.1,
+      "quantityText": "8964.1",
+      "minQuantity": 0.1,
+      "maxQuantity": 300000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 9999.901755
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999901755,
+      "notionalUsd": 9999.901755
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOTUSDT",
+    "equity": 10000,
+    "referencePrice": 1.17216,
+    "normalized": {
+      "symbol": "DOTUSDT",
+      "quantity": 8531.2,
+      "quantityText": "8531.2",
+      "minQuantity": 0.1,
+      "maxQuantity": 300000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 9999.931392000002
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999931392000002,
+      "notionalUsd": 9999.931392000002
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOTUSDT",
+    "equity": 10000,
+    "referencePrice": 1.2287700000000001,
+    "normalized": {
+      "symbol": "DOTUSDT",
+      "quantity": 8138.2,
+      "quantityText": "8138.2",
+      "minQuantity": 0.1,
+      "maxQuantity": 300000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 9999.976014000002
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999976014000002,
+      "notionalUsd": 9999.976014000002
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "DOTUSDT",
+    "equity": 10000,
+    "referencePrice": 1.28538,
+    "normalized": {
+      "symbol": "DOTUSDT",
+      "quantity": 7779.8,
+      "quantityText": "7779.8",
+      "minQuantity": 0.1,
+      "maxQuantity": 300000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 9999.999324
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999999324000001,
+      "notionalUsd": 9999.999324
+    },
+    "oldStrictAccepted": true
+  },
+  {
+    "symbol": "DOTUSDT",
+    "equity": 10000,
+    "referencePrice": 1.3419900000000002,
+    "normalized": {
+      "symbol": "DOTUSDT",
+      "quantity": 7451.6,
+      "quantityText": "7451.6",
+      "minQuantity": 0.1,
+      "maxQuantity": 300000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 9999.972684000002
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999972684000002,
+      "notionalUsd": 9999.972684000002
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "RENDERUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 0.9255,
+    "normalized": {
+      "symbol": "RENDERUSDT",
+      "quantity": 71.4,
+      "quantityText": "71.4",
+      "minQuantity": 0.1,
+      "maxQuantity": 200000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 66.08070000000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9992860332684751,
+      "notionalUsd": 66.08070000000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "RENDERUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 0.988434,
+    "normalized": {
+      "symbol": "RENDERUSDT",
+      "quantity": 66.9,
+      "quantityText": "66.9",
+      "minQuantity": 0.1,
+      "maxQuantity": 200000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 66.1262346
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999746169216517,
+      "notionalUsd": 66.1262346
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "RENDERUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 1.0513679999999999,
+    "normalized": {
+      "symbol": "RENDERUSDT",
+      "quantity": 62.8,
+      "quantityText": "62.8",
+      "minQuantity": 0.1,
+      "maxQuantity": 200000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 66.02591039999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9984574935882298,
+      "notionalUsd": 66.02591039999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "RENDERUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 1.1143020000000001,
+    "normalized": {
+      "symbol": "RENDERUSDT",
+      "quantity": 59.3,
+      "quantityText": "59.3",
+      "minQuantity": 0.1,
+      "maxQuantity": 200000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 66.07810860000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9992468455808959,
+      "notionalUsd": 66.07810860000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "RENDERUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 1.177236,
+    "normalized": {
+      "symbol": "RENDERUSDT",
+      "quantity": 56.1,
+      "quantityText": "56.1",
+      "minQuantity": 0.1,
+      "maxQuantity": 200000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 66.0429396
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9987150126780359,
+      "notionalUsd": 66.0429396
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "RENDERUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 1.2401699999999998,
+    "normalized": {
+      "symbol": "RENDERUSDT",
+      "quantity": 53.3,
+      "quantityText": "53.3",
+      "minQuantity": 0.1,
+      "maxQuantity": 200000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 66.10106099999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9995939365280253,
+      "notionalUsd": 66.10106099999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "RENDERUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 1.303104,
+    "normalized": {
+      "symbol": "RENDERUSDT",
+      "quantity": 50.7,
+      "quantityText": "50.7",
+      "minQuantity": 0.1,
+      "maxQuantity": 200000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 66.0673728
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9990844965894965,
+      "notionalUsd": 66.0673728
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "RENDERUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 1.3660379999999999,
+    "normalized": {
+      "symbol": "RENDERUSDT",
+      "quantity": 48.4,
+      "quantityText": "48.4",
+      "minQuantity": 0.1,
+      "maxQuantity": 200000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 66.1162392
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9998234644124177,
+      "notionalUsd": 66.1162392
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "RENDERUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 1.428972,
+    "normalized": {
+      "symbol": "RENDERUSDT",
+      "quantity": 46.2,
+      "quantityText": "46.2",
+      "minQuantity": 0.1,
+      "maxQuantity": 200000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 66.0185064
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9983455287665753,
+      "notionalUsd": 66.0185064
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "RENDERUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 1.4919060000000002,
+    "normalized": {
+      "symbol": "RENDERUSDT",
+      "quantity": 44.3,
+      "quantityText": "44.3",
+      "minQuantity": 0.1,
+      "maxQuantity": 200000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 66.0914358
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9994483822598743,
+      "notionalUsd": 66.0914358
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "RENDERUSDT",
+    "equity": 100,
+    "referencePrice": 0.9255,
+    "normalized": {
+      "symbol": "RENDERUSDT",
+      "quantity": 108,
+      "quantityText": "108",
+      "minQuantity": 0.1,
+      "maxQuantity": 200000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 99.954
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.99954,
+      "notionalUsd": 99.954
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "RENDERUSDT",
+    "equity": 100,
+    "referencePrice": 0.988434,
+    "normalized": {
+      "symbol": "RENDERUSDT",
+      "quantity": 101.1,
+      "quantityText": "101.1",
+      "minQuantity": 0.1,
+      "maxQuantity": 200000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 99.9306774
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9993067739999999,
+      "notionalUsd": 99.9306774
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "RENDERUSDT",
+    "equity": 100,
+    "referencePrice": 1.0513679999999999,
+    "normalized": {
+      "symbol": "RENDERUSDT",
+      "quantity": 95.1,
+      "quantityText": "95.1",
+      "minQuantity": 0.1,
+      "maxQuantity": 200000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 99.98509679999998
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9998509679999998,
+      "notionalUsd": 99.98509679999998
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "RENDERUSDT",
+    "equity": 100,
+    "referencePrice": 1.1143020000000001,
+    "normalized": {
+      "symbol": "RENDERUSDT",
+      "quantity": 89.7,
+      "quantityText": "89.7",
+      "minQuantity": 0.1,
+      "maxQuantity": 200000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 99.95288940000002
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9995288940000002,
+      "notionalUsd": 99.95288940000002
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "RENDERUSDT",
+    "equity": 100,
+    "referencePrice": 1.177236,
+    "normalized": {
+      "symbol": "RENDERUSDT",
+      "quantity": 84.9,
+      "quantityText": "84.9",
+      "minQuantity": 0.1,
+      "maxQuantity": 200000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 99.9473364
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.999473364,
+      "notionalUsd": 99.9473364
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "RENDERUSDT",
+    "equity": 100,
+    "referencePrice": 1.2401699999999998,
+    "normalized": {
+      "symbol": "RENDERUSDT",
+      "quantity": 80.6,
+      "quantityText": "80.6",
+      "minQuantity": 0.1,
+      "maxQuantity": 200000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 99.95770199999997
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9995770199999997,
+      "notionalUsd": 99.95770199999997
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "RENDERUSDT",
+    "equity": 100,
+    "referencePrice": 1.303104,
+    "normalized": {
+      "symbol": "RENDERUSDT",
+      "quantity": 76.7,
+      "quantityText": "76.7",
+      "minQuantity": 0.1,
+      "maxQuantity": 200000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 99.94807680000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9994807680000001,
+      "notionalUsd": 99.94807680000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "RENDERUSDT",
+    "equity": 100,
+    "referencePrice": 1.3660379999999999,
+    "normalized": {
+      "symbol": "RENDERUSDT",
+      "quantity": 73.2,
+      "quantityText": "73.2",
+      "minQuantity": 0.1,
+      "maxQuantity": 200000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 99.9939816
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999398159999999,
+      "notionalUsd": 99.9939816
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "RENDERUSDT",
+    "equity": 100,
+    "referencePrice": 1.428972,
+    "normalized": {
+      "symbol": "RENDERUSDT",
+      "quantity": 69.9,
+      "quantityText": "69.9",
+      "minQuantity": 0.1,
+      "maxQuantity": 200000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 99.8851428
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9988514279999999,
+      "notionalUsd": 99.8851428
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "RENDERUSDT",
+    "equity": 100,
+    "referencePrice": 1.4919060000000002,
+    "normalized": {
+      "symbol": "RENDERUSDT",
+      "quantity": 67,
+      "quantityText": "67",
+      "minQuantity": 0.1,
+      "maxQuantity": 200000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 99.95770200000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9995770200000001,
+      "notionalUsd": 99.95770200000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "RENDERUSDT",
+    "equity": 1000,
+    "referencePrice": 0.9255,
+    "normalized": {
+      "symbol": "RENDERUSDT",
+      "quantity": 1080.4,
+      "quantityText": "1080.4",
+      "minQuantity": 0.1,
+      "maxQuantity": 200000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 999.9102
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999102000000001,
+      "notionalUsd": 999.9102
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "RENDERUSDT",
+    "equity": 1000,
+    "referencePrice": 0.988434,
+    "normalized": {
+      "symbol": "RENDERUSDT",
+      "quantity": 1011.7,
+      "quantityText": "1011.7",
+      "minQuantity": 0.1,
+      "maxQuantity": 200000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 999.9986778000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999986778000001,
+      "notionalUsd": 999.9986778000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "RENDERUSDT",
+    "equity": 1000,
+    "referencePrice": 1.0513679999999999,
+    "normalized": {
+      "symbol": "RENDERUSDT",
+      "quantity": 951.1,
+      "quantityText": "951.1",
+      "minQuantity": 0.1,
+      "maxQuantity": 200000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 999.9561047999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999561048,
+      "notionalUsd": 999.9561047999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "RENDERUSDT",
+    "equity": 1000,
+    "referencePrice": 1.1143020000000001,
+    "normalized": {
+      "symbol": "RENDERUSDT",
+      "quantity": 897.4,
+      "quantityText": "897.4",
+      "minQuantity": 0.1,
+      "maxQuantity": 200000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 999.9746148
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999746148,
+      "notionalUsd": 999.9746148
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "RENDERUSDT",
+    "equity": 1000,
+    "referencePrice": 1.177236,
+    "normalized": {
+      "symbol": "RENDERUSDT",
+      "quantity": 849.4,
+      "quantityText": "849.4",
+      "minQuantity": 0.1,
+      "maxQuantity": 200000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 999.9442584
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999442584,
+      "notionalUsd": 999.9442584
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "RENDERUSDT",
+    "equity": 1000,
+    "referencePrice": 1.2401699999999998,
+    "normalized": {
+      "symbol": "RENDERUSDT",
+      "quantity": 806.3,
+      "quantityText": "806.3",
+      "minQuantity": 0.1,
+      "maxQuantity": 200000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 999.9490709999998
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999490709999997,
+      "notionalUsd": 999.9490709999998
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "RENDERUSDT",
+    "equity": 1000,
+    "referencePrice": 1.303104,
+    "normalized": {
+      "symbol": "RENDERUSDT",
+      "quantity": 767.3,
+      "quantityText": "767.3",
+      "minQuantity": 0.1,
+      "maxQuantity": 200000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 999.8716992
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9998716992,
+      "notionalUsd": 999.8716992
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "RENDERUSDT",
+    "equity": 1000,
+    "referencePrice": 1.3660379999999999,
+    "normalized": {
+      "symbol": "RENDERUSDT",
+      "quantity": 732,
+      "quantityText": "732",
+      "minQuantity": 0.1,
+      "maxQuantity": 200000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 999.939816
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999398159999999,
+      "notionalUsd": 999.939816
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "RENDERUSDT",
+    "equity": 1000,
+    "referencePrice": 1.428972,
+    "normalized": {
+      "symbol": "RENDERUSDT",
+      "quantity": 699.8,
+      "quantityText": "699.8",
+      "minQuantity": 0.1,
+      "maxQuantity": 200000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 999.9946055999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999946055999999,
+      "notionalUsd": 999.9946055999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "RENDERUSDT",
+    "equity": 1000,
+    "referencePrice": 1.4919060000000002,
+    "normalized": {
+      "symbol": "RENDERUSDT",
+      "quantity": 670.2,
+      "quantityText": "670.2",
+      "minQuantity": 0.1,
+      "maxQuantity": 200000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 999.8754012000002
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9998754012000002,
+      "notionalUsd": 999.8754012000002
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "RENDERUSDT",
+    "equity": 10000,
+    "referencePrice": 0.9255,
+    "normalized": {
+      "symbol": "RENDERUSDT",
+      "quantity": 10804.9,
+      "quantityText": "10804.9",
+      "minQuantity": 0.1,
+      "maxQuantity": 200000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 9999.934949999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999934949999999,
+      "notionalUsd": 9999.934949999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "RENDERUSDT",
+    "equity": 10000,
+    "referencePrice": 0.988434,
+    "normalized": {
+      "symbol": "RENDERUSDT",
+      "quantity": 10117,
+      "quantityText": "10117",
+      "minQuantity": 0.1,
+      "maxQuantity": 200000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 9999.986778
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999986778000001,
+      "notionalUsd": 9999.986778
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "RENDERUSDT",
+    "equity": 10000,
+    "referencePrice": 1.0513679999999999,
+    "normalized": {
+      "symbol": "RENDERUSDT",
+      "quantity": 9511.4,
+      "quantityText": "9511.4",
+      "minQuantity": 0.1,
+      "maxQuantity": 200000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 9999.981595199999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999981595199999,
+      "notionalUsd": 9999.981595199999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "RENDERUSDT",
+    "equity": 10000,
+    "referencePrice": 1.1143020000000001,
+    "normalized": {
+      "symbol": "RENDERUSDT",
+      "quantity": 8974.2,
+      "quantityText": "8974.2",
+      "minQuantity": 0.1,
+      "maxQuantity": 200000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 9999.969008400001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999969008400001,
+      "notionalUsd": 9999.969008400001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "RENDERUSDT",
+    "equity": 10000,
+    "referencePrice": 1.177236,
+    "normalized": {
+      "symbol": "RENDERUSDT",
+      "quantity": 8494.4,
+      "quantityText": "8494.4",
+      "minQuantity": 0.1,
+      "maxQuantity": 200000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 9999.9134784
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.99999134784,
+      "notionalUsd": 9999.9134784
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "RENDERUSDT",
+    "equity": 10000,
+    "referencePrice": 1.2401699999999998,
+    "normalized": {
+      "symbol": "RENDERUSDT",
+      "quantity": 8063.4,
+      "quantityText": "8063.4",
+      "minQuantity": 0.1,
+      "maxQuantity": 200000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 9999.986777999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999986777999998,
+      "notionalUsd": 9999.986777999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "RENDERUSDT",
+    "equity": 10000,
+    "referencePrice": 1.303104,
+    "normalized": {
+      "symbol": "RENDERUSDT",
+      "quantity": 7673.9,
+      "quantityText": "7673.9",
+      "minQuantity": 0.1,
+      "maxQuantity": 200000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 9999.8897856
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.99998897856,
+      "notionalUsd": 9999.8897856
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "RENDERUSDT",
+    "equity": 10000,
+    "referencePrice": 1.3660379999999999,
+    "normalized": {
+      "symbol": "RENDERUSDT",
+      "quantity": 7320.4,
+      "quantityText": "7320.4",
+      "minQuantity": 0.1,
+      "maxQuantity": 200000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 9999.9445752
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999944575199999,
+      "notionalUsd": 9999.9445752
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "RENDERUSDT",
+    "equity": 10000,
+    "referencePrice": 1.428972,
+    "normalized": {
+      "symbol": "RENDERUSDT",
+      "quantity": 6998,
+      "quantityText": "6998",
+      "minQuantity": 0.1,
+      "maxQuantity": 200000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 9999.946055999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999946055999999,
+      "notionalUsd": 9999.946055999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "RENDERUSDT",
+    "equity": 10000,
+    "referencePrice": 1.4919060000000002,
+    "normalized": {
+      "symbol": "RENDERUSDT",
+      "quantity": 6702.8,
+      "quantityText": "6702.8",
+      "minQuantity": 0.1,
+      "maxQuantity": 200000,
+      "stepSize": 0.1,
+      "minNotional": 5,
+      "notional": 9999.947536800002
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999947536800002,
+      "notionalUsd": 9999.947536800002
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TIAUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 0.5062500000000001,
+    "normalized": {
+      "symbol": "TIAUSDT",
+      "quantity": 130,
+      "quantityText": "130",
+      "minQuantity": 1,
+      "maxQuantity": 300000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 65.81250000000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9952302573138833,
+      "notionalUsd": 65.81250000000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TIAUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 0.540675,
+    "normalized": {
+      "symbol": "TIAUSDT",
+      "quantity": 122,
+      "quantityText": "122",
+      "minQuantity": 1,
+      "maxQuantity": 300000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 65.96235
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9974963200536131,
+      "notionalUsd": 65.96235
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TIAUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 0.5751000000000001,
+    "normalized": {
+      "symbol": "TIAUSDT",
+      "quantity": 114,
+      "quantityText": "114",
+      "minQuantity": 1,
+      "maxQuantity": 300000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 65.5614
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9914330711013625,
+      "notionalUsd": 65.5614
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TIAUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 0.6095250000000001,
+    "normalized": {
+      "symbol": "TIAUSDT",
+      "quantity": 108,
+      "quantityText": "108",
+      "minQuantity": 1,
+      "maxQuantity": 300000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 65.82870000000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9954752370695297,
+      "notionalUsd": 65.82870000000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TIAUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 0.64395,
+    "normalized": {
+      "symbol": "TIAUSDT",
+      "quantity": 102,
+      "quantityText": "102",
+      "minQuantity": 1,
+      "maxQuantity": 300000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 65.6829
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9932704192687112,
+      "notionalUsd": 65.6829
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TIAUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 0.678375,
+    "normalized": {
+      "symbol": "TIAUSDT",
+      "quantity": 97,
+      "quantityText": "97",
+      "minQuantity": 1,
+      "maxQuantity": 300000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 65.802375
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9950771449666039,
+      "notionalUsd": 65.802375
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TIAUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 0.7128000000000001,
+    "normalized": {
+      "symbol": "TIAUSDT",
+      "quantity": 92,
+      "quantityText": "92",
+      "minQuantity": 1,
+      "maxQuantity": 300000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 65.5776
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9916780508570089,
+      "notionalUsd": 65.5776
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TIAUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 0.747225,
+    "normalized": {
+      "symbol": "TIAUSDT",
+      "quantity": 88,
+      "quantityText": "88",
+      "minQuantity": 1,
+      "maxQuantity": 300000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 65.75580000000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9943728281691204,
+      "notionalUsd": 65.75580000000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TIAUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 0.78165,
+    "normalized": {
+      "symbol": "TIAUSDT",
+      "quantity": 84,
+      "quantityText": "84",
+      "minQuantity": 1,
+      "maxQuantity": 300000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 65.65859999999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9929029496352412,
+      "notionalUsd": 65.65859999999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TIAUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 0.8160750000000001,
+    "normalized": {
+      "symbol": "TIAUSDT",
+      "quantity": 81,
+      "quantityText": "81",
+      "minQuantity": 1,
+      "maxQuantity": 300000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 66.10207500000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9996092704460643,
+      "notionalUsd": 66.10207500000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TIAUSDT",
+    "equity": 100,
+    "referencePrice": 0.5062500000000001,
+    "normalized": {
+      "symbol": "TIAUSDT",
+      "quantity": 197,
+      "quantityText": "197",
+      "minQuantity": 1,
+      "maxQuantity": 300000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 99.73125000000002
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9973125000000002,
+      "notionalUsd": 99.73125000000002
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TIAUSDT",
+    "equity": 100,
+    "referencePrice": 0.540675,
+    "normalized": {
+      "symbol": "TIAUSDT",
+      "quantity": 184,
+      "quantityText": "184",
+      "minQuantity": 1,
+      "maxQuantity": 300000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 99.4842
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.994842,
+      "notionalUsd": 99.4842
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TIAUSDT",
+    "equity": 100,
+    "referencePrice": 0.5751000000000001,
+    "normalized": {
+      "symbol": "TIAUSDT",
+      "quantity": 173,
+      "quantityText": "173",
+      "minQuantity": 1,
+      "maxQuantity": 300000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 99.49230000000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9949230000000001,
+      "notionalUsd": 99.49230000000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TIAUSDT",
+    "equity": 100,
+    "referencePrice": 0.6095250000000001,
+    "normalized": {
+      "symbol": "TIAUSDT",
+      "quantity": 164,
+      "quantityText": "164",
+      "minQuantity": 1,
+      "maxQuantity": 300000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 99.96210000000002
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9996210000000002,
+      "notionalUsd": 99.96210000000002
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TIAUSDT",
+    "equity": 100,
+    "referencePrice": 0.64395,
+    "normalized": {
+      "symbol": "TIAUSDT",
+      "quantity": 155,
+      "quantityText": "155",
+      "minQuantity": 1,
+      "maxQuantity": 300000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 99.81225
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9981225,
+      "notionalUsd": 99.81225
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TIAUSDT",
+    "equity": 100,
+    "referencePrice": 0.678375,
+    "normalized": {
+      "symbol": "TIAUSDT",
+      "quantity": 147,
+      "quantityText": "147",
+      "minQuantity": 1,
+      "maxQuantity": 300000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 99.72112499999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9972112499999999,
+      "notionalUsd": 99.72112499999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TIAUSDT",
+    "equity": 100,
+    "referencePrice": 0.7128000000000001,
+    "normalized": {
+      "symbol": "TIAUSDT",
+      "quantity": 140,
+      "quantityText": "140",
+      "minQuantity": 1,
+      "maxQuantity": 300000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 99.79200000000002
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9979200000000001,
+      "notionalUsd": 99.79200000000002
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TIAUSDT",
+    "equity": 100,
+    "referencePrice": 0.747225,
+    "normalized": {
+      "symbol": "TIAUSDT",
+      "quantity": 133,
+      "quantityText": "133",
+      "minQuantity": 1,
+      "maxQuantity": 300000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 99.380925
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9938092500000001,
+      "notionalUsd": 99.380925
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TIAUSDT",
+    "equity": 100,
+    "referencePrice": 0.78165,
+    "normalized": {
+      "symbol": "TIAUSDT",
+      "quantity": 127,
+      "quantityText": "127",
+      "minQuantity": 1,
+      "maxQuantity": 300000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 99.26955
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9926955,
+      "notionalUsd": 99.26955
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TIAUSDT",
+    "equity": 100,
+    "referencePrice": 0.8160750000000001,
+    "normalized": {
+      "symbol": "TIAUSDT",
+      "quantity": 122,
+      "quantityText": "122",
+      "minQuantity": 1,
+      "maxQuantity": 300000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 99.56115000000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9956115000000001,
+      "notionalUsd": 99.56115000000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TIAUSDT",
+    "equity": 1000,
+    "referencePrice": 0.5062500000000001,
+    "normalized": {
+      "symbol": "TIAUSDT",
+      "quantity": 1975,
+      "quantityText": "1975",
+      "minQuantity": 1,
+      "maxQuantity": 300000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 999.8437500000002
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9998437500000003,
+      "notionalUsd": 999.8437500000002
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TIAUSDT",
+    "equity": 1000,
+    "referencePrice": 0.540675,
+    "normalized": {
+      "symbol": "TIAUSDT",
+      "quantity": 1849,
+      "quantityText": "1849",
+      "minQuantity": 1,
+      "maxQuantity": 300000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 999.708075
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.999708075,
+      "notionalUsd": 999.708075
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TIAUSDT",
+    "equity": 1000,
+    "referencePrice": 0.5751000000000001,
+    "normalized": {
+      "symbol": "TIAUSDT",
+      "quantity": 1738,
+      "quantityText": "1738",
+      "minQuantity": 1,
+      "maxQuantity": 300000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 999.5238
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9995238000000001,
+      "notionalUsd": 999.5238
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TIAUSDT",
+    "equity": 1000,
+    "referencePrice": 0.6095250000000001,
+    "normalized": {
+      "symbol": "TIAUSDT",
+      "quantity": 1640,
+      "quantityText": "1640",
+      "minQuantity": 1,
+      "maxQuantity": 300000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 999.6210000000002
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9996210000000002,
+      "notionalUsd": 999.6210000000002
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TIAUSDT",
+    "equity": 1000,
+    "referencePrice": 0.64395,
+    "normalized": {
+      "symbol": "TIAUSDT",
+      "quantity": 1552,
+      "quantityText": "1552",
+      "minQuantity": 1,
+      "maxQuantity": 300000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 999.4104
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9994104,
+      "notionalUsd": 999.4104
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TIAUSDT",
+    "equity": 1000,
+    "referencePrice": 0.678375,
+    "normalized": {
+      "symbol": "TIAUSDT",
+      "quantity": 1474,
+      "quantityText": "1474",
+      "minQuantity": 1,
+      "maxQuantity": 300000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 999.9247499999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999247499999999,
+      "notionalUsd": 999.9247499999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TIAUSDT",
+    "equity": 1000,
+    "referencePrice": 0.7128000000000001,
+    "normalized": {
+      "symbol": "TIAUSDT",
+      "quantity": 1402,
+      "quantityText": "1402",
+      "minQuantity": 1,
+      "maxQuantity": 300000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 999.3456000000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9993456000000001,
+      "notionalUsd": 999.3456000000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TIAUSDT",
+    "equity": 1000,
+    "referencePrice": 0.747225,
+    "normalized": {
+      "symbol": "TIAUSDT",
+      "quantity": 1338,
+      "quantityText": "1338",
+      "minQuantity": 1,
+      "maxQuantity": 300000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 999.78705
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.99978705,
+      "notionalUsd": 999.78705
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TIAUSDT",
+    "equity": 1000,
+    "referencePrice": 0.78165,
+    "normalized": {
+      "symbol": "TIAUSDT",
+      "quantity": 1279,
+      "quantityText": "1279",
+      "minQuantity": 1,
+      "maxQuantity": 300000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 999.7303499999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9997303499999999,
+      "notionalUsd": 999.7303499999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TIAUSDT",
+    "equity": 1000,
+    "referencePrice": 0.8160750000000001,
+    "normalized": {
+      "symbol": "TIAUSDT",
+      "quantity": 1225,
+      "quantityText": "1225",
+      "minQuantity": 1,
+      "maxQuantity": 300000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 999.6918750000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9996918750000001,
+      "notionalUsd": 999.6918750000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TIAUSDT",
+    "equity": 10000,
+    "referencePrice": 0.5062500000000001,
+    "normalized": {
+      "symbol": "TIAUSDT",
+      "quantity": 19753,
+      "quantityText": "19753",
+      "minQuantity": 1,
+      "maxQuantity": 300000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 9999.956250000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.999995625,
+      "notionalUsd": 9999.956250000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TIAUSDT",
+    "equity": 10000,
+    "referencePrice": 0.540675,
+    "normalized": {
+      "symbol": "TIAUSDT",
+      "quantity": 18495,
+      "quantityText": "18495",
+      "minQuantity": 1,
+      "maxQuantity": 300000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 9999.784125
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999784125,
+      "notionalUsd": 9999.784125
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TIAUSDT",
+    "equity": 10000,
+    "referencePrice": 0.5751000000000001,
+    "normalized": {
+      "symbol": "TIAUSDT",
+      "quantity": 17388,
+      "quantityText": "17388",
+      "minQuantity": 1,
+      "maxQuantity": 300000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 9999.838800000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999838800000002,
+      "notionalUsd": 9999.838800000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TIAUSDT",
+    "equity": 10000,
+    "referencePrice": 0.6095250000000001,
+    "normalized": {
+      "symbol": "TIAUSDT",
+      "quantity": 16406,
+      "quantityText": "16406",
+      "minQuantity": 1,
+      "maxQuantity": 300000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 9999.867150000002
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999867150000001,
+      "notionalUsd": 9999.867150000002
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TIAUSDT",
+    "equity": 10000,
+    "referencePrice": 0.64395,
+    "normalized": {
+      "symbol": "TIAUSDT",
+      "quantity": 15529,
+      "quantityText": "15529",
+      "minQuantity": 1,
+      "maxQuantity": 300000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 9999.89955
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.999989955,
+      "notionalUsd": 9999.89955
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TIAUSDT",
+    "equity": 10000,
+    "referencePrice": 0.678375,
+    "normalized": {
+      "symbol": "TIAUSDT",
+      "quantity": 14741,
+      "quantityText": "14741",
+      "minQuantity": 1,
+      "maxQuantity": 300000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 9999.925874999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999925874999999,
+      "notionalUsd": 9999.925874999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TIAUSDT",
+    "equity": 10000,
+    "referencePrice": 0.7128000000000001,
+    "normalized": {
+      "symbol": "TIAUSDT",
+      "quantity": 14029,
+      "quantityText": "14029",
+      "minQuantity": 1,
+      "maxQuantity": 300000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 9999.871200000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999871200000001,
+      "notionalUsd": 9999.871200000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TIAUSDT",
+    "equity": 10000,
+    "referencePrice": 0.747225,
+    "normalized": {
+      "symbol": "TIAUSDT",
+      "quantity": 13382,
+      "quantityText": "13382",
+      "minQuantity": 1,
+      "maxQuantity": 300000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 9999.364950000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999364950000001,
+      "notionalUsd": 9999.364950000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TIAUSDT",
+    "equity": 10000,
+    "referencePrice": 0.78165,
+    "normalized": {
+      "symbol": "TIAUSDT",
+      "quantity": 12793,
+      "quantityText": "12793",
+      "minQuantity": 1,
+      "maxQuantity": 300000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 9999.648449999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999648449999998,
+      "notionalUsd": 9999.648449999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TIAUSDT",
+    "equity": 10000,
+    "referencePrice": 0.8160750000000001,
+    "normalized": {
+      "symbol": "TIAUSDT",
+      "quantity": 12253,
+      "quantityText": "12253",
+      "minQuantity": 1,
+      "maxQuantity": 300000,
+      "stepSize": 1,
+      "minNotional": 5,
+      "notional": 9999.366975
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999366975,
+      "notionalUsd": 9999.366975
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TAOUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 224.625,
+    "normalized": {
+      "symbol": "TAOUSDT",
+      "quantity": 0.294,
+      "quantityText": "0.294",
+      "minQuantity": 0.001,
+      "maxQuantity": 2000,
+      "stepSize": 0.001,
+      "minNotional": 5,
+      "notional": 66.03975
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9986667788861463,
+      "notionalUsd": 66.03975
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TAOUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 239.89950000000002,
+    "normalized": {
+      "symbol": "TAOUSDT",
+      "quantity": 0.275,
+      "quantityText": "0.275",
+      "minQuantity": 0.001,
+      "maxQuantity": 2000,
+      "stepSize": 0.001,
+      "minNotional": 5,
+      "notional": 65.97236250000002
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9976477311525893,
+      "notionalUsd": 65.97236250000002
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TAOUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 255.174,
+    "normalized": {
+      "symbol": "TAOUSDT",
+      "quantity": 0.259,
+      "quantityText": "0.259",
+      "minQuantity": 0.001,
+      "maxQuantity": 2000,
+      "stepSize": 0.001,
+      "minNotional": 5,
+      "notional": 66.09006600000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9994276678605359,
+      "notionalUsd": 66.09006600000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TAOUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 270.4485,
+    "normalized": {
+      "symbol": "TAOUSDT",
+      "quantity": 0.244,
+      "quantityText": "0.244",
+      "minQuantity": 0.001,
+      "maxQuantity": 2000,
+      "stepSize": 0.001,
+      "minNotional": 5,
+      "notional": 65.989434
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.997905889911757,
+      "notionalUsd": 65.989434
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TAOUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 285.723,
+    "normalized": {
+      "symbol": "TAOUSDT",
+      "quantity": 0.231,
+      "quantityText": "0.231",
+      "minQuantity": 0.001,
+      "maxQuantity": 2000,
+      "stepSize": 0.001,
+      "minNotional": 5,
+      "notional": 66.002013
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9980961121553543,
+      "notionalUsd": 66.002013
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TAOUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 300.99749999999995,
+    "normalized": {
+      "symbol": "TAOUSDT",
+      "quantity": 0.219,
+      "quantityText": "0.219",
+      "minQuantity": 0.001,
+      "maxQuantity": 2000,
+      "stepSize": 0.001,
+      "minNotional": 5,
+      "notional": 65.91845249999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9968324929657431,
+      "notionalUsd": 65.91845249999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TAOUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 316.272,
+    "normalized": {
+      "symbol": "TAOUSDT",
+      "quantity": 0.209,
+      "quantityText": "0.209",
+      "minQuantity": 0.001,
+      "maxQuantity": 2000,
+      "stepSize": 0.001,
+      "minNotional": 5,
+      "notional": 66.100848
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9995907154979049,
+      "notionalUsd": 66.100848
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TAOUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 331.5465,
+    "normalized": {
+      "symbol": "TAOUSDT",
+      "quantity": 0.199,
+      "quantityText": "0.199",
+      "minQuantity": 0.001,
+      "maxQuantity": 2000,
+      "stepSize": 0.001,
+      "minNotional": 5,
+      "notional": 65.9777535
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9977292549712737,
+      "notionalUsd": 65.9777535
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TAOUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 346.82099999999997,
+    "normalized": {
+      "symbol": "TAOUSDT",
+      "quantity": 0.19,
+      "quantityText": "0.19",
+      "minQuantity": 0.001,
+      "maxQuantity": 2000,
+      "stepSize": 0.001,
+      "minNotional": 5,
+      "notional": 65.89599
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9964928103878907,
+      "notionalUsd": 65.89599
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TAOUSDT",
+    "equity": 66.12791313,
+    "referencePrice": 362.0955,
+    "normalized": {
+      "symbol": "TAOUSDT",
+      "quantity": 0.182,
+      "quantityText": "0.182",
+      "minQuantity": 0.001,
+      "maxQuantity": 2000,
+      "stepSize": 0.001,
+      "minNotional": 5,
+      "notional": 65.901381
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9965743342065754,
+      "notionalUsd": 65.901381
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TAOUSDT",
+    "equity": 100,
+    "referencePrice": 224.625,
+    "normalized": {
+      "symbol": "TAOUSDT",
+      "quantity": 0.445,
+      "quantityText": "0.445",
+      "minQuantity": 0.001,
+      "maxQuantity": 2000,
+      "stepSize": 0.001,
+      "minNotional": 5,
+      "notional": 99.958125
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.99958125,
+      "notionalUsd": 99.958125
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TAOUSDT",
+    "equity": 100,
+    "referencePrice": 239.89950000000002,
+    "normalized": {
+      "symbol": "TAOUSDT",
+      "quantity": 0.416,
+      "quantityText": "0.416",
+      "minQuantity": 0.001,
+      "maxQuantity": 2000,
+      "stepSize": 0.001,
+      "minNotional": 5,
+      "notional": 99.798192
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.99798192,
+      "notionalUsd": 99.798192
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TAOUSDT",
+    "equity": 100,
+    "referencePrice": 255.174,
+    "normalized": {
+      "symbol": "TAOUSDT",
+      "quantity": 0.391,
+      "quantityText": "0.391",
+      "minQuantity": 0.001,
+      "maxQuantity": 2000,
+      "stepSize": 0.001,
+      "minNotional": 5,
+      "notional": 99.77303400000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.99773034,
+      "notionalUsd": 99.77303400000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TAOUSDT",
+    "equity": 100,
+    "referencePrice": 270.4485,
+    "normalized": {
+      "symbol": "TAOUSDT",
+      "quantity": 0.369,
+      "quantityText": "0.369",
+      "minQuantity": 0.001,
+      "maxQuantity": 2000,
+      "stepSize": 0.001,
+      "minNotional": 5,
+      "notional": 99.79549650000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9979549650000001,
+      "notionalUsd": 99.79549650000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TAOUSDT",
+    "equity": 100,
+    "referencePrice": 285.723,
+    "normalized": {
+      "symbol": "TAOUSDT",
+      "quantity": 0.349,
+      "quantityText": "0.349",
+      "minQuantity": 0.001,
+      "maxQuantity": 2000,
+      "stepSize": 0.001,
+      "minNotional": 5,
+      "notional": 99.717327
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.99717327,
+      "notionalUsd": 99.717327
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TAOUSDT",
+    "equity": 100,
+    "referencePrice": 300.99749999999995,
+    "normalized": {
+      "symbol": "TAOUSDT",
+      "quantity": 0.332,
+      "quantityText": "0.332",
+      "minQuantity": 0.001,
+      "maxQuantity": 2000,
+      "stepSize": 0.001,
+      "minNotional": 5,
+      "notional": 99.93116999999998
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9993116999999998,
+      "notionalUsd": 99.93116999999998
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TAOUSDT",
+    "equity": 100,
+    "referencePrice": 316.272,
+    "normalized": {
+      "symbol": "TAOUSDT",
+      "quantity": 0.316,
+      "quantityText": "0.316",
+      "minQuantity": 0.001,
+      "maxQuantity": 2000,
+      "stepSize": 0.001,
+      "minNotional": 5,
+      "notional": 99.941952
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.99941952,
+      "notionalUsd": 99.941952
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TAOUSDT",
+    "equity": 100,
+    "referencePrice": 331.5465,
+    "normalized": {
+      "symbol": "TAOUSDT",
+      "quantity": 0.301,
+      "quantityText": "0.301",
+      "minQuantity": 0.001,
+      "maxQuantity": 2000,
+      "stepSize": 0.001,
+      "minNotional": 5,
+      "notional": 99.79549649999998
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9979549649999998,
+      "notionalUsd": 99.79549649999998
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TAOUSDT",
+    "equity": 100,
+    "referencePrice": 346.82099999999997,
+    "normalized": {
+      "symbol": "TAOUSDT",
+      "quantity": 0.288,
+      "quantityText": "0.288",
+      "minQuantity": 0.001,
+      "maxQuantity": 2000,
+      "stepSize": 0.001,
+      "minNotional": 5,
+      "notional": 99.88444799999998
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9988444799999998,
+      "notionalUsd": 99.88444799999998
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TAOUSDT",
+    "equity": 100,
+    "referencePrice": 362.0955,
+    "normalized": {
+      "symbol": "TAOUSDT",
+      "quantity": 0.276,
+      "quantityText": "0.276",
+      "minQuantity": 0.001,
+      "maxQuantity": 2000,
+      "stepSize": 0.001,
+      "minNotional": 5,
+      "notional": 99.93835800000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.99938358,
+      "notionalUsd": 99.93835800000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TAOUSDT",
+    "equity": 1000,
+    "referencePrice": 224.625,
+    "normalized": {
+      "symbol": "TAOUSDT",
+      "quantity": 4.451,
+      "quantityText": "4.451",
+      "minQuantity": 0.001,
+      "maxQuantity": 2000,
+      "stepSize": 0.001,
+      "minNotional": 5,
+      "notional": 999.8058749999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.999805875,
+      "notionalUsd": 999.8058749999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TAOUSDT",
+    "equity": 1000,
+    "referencePrice": 239.89950000000002,
+    "normalized": {
+      "symbol": "TAOUSDT",
+      "quantity": 4.168,
+      "quantityText": "4.168",
+      "minQuantity": 0.001,
+      "maxQuantity": 2000,
+      "stepSize": 0.001,
+      "minNotional": 5,
+      "notional": 999.9011160000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999011160000001,
+      "notionalUsd": 999.9011160000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TAOUSDT",
+    "equity": 1000,
+    "referencePrice": 255.174,
+    "normalized": {
+      "symbol": "TAOUSDT",
+      "quantity": 3.918,
+      "quantityText": "3.918",
+      "minQuantity": 0.001,
+      "maxQuantity": 2000,
+      "stepSize": 0.001,
+      "minNotional": 5,
+      "notional": 999.771732
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.999771732,
+      "notionalUsd": 999.771732
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TAOUSDT",
+    "equity": 1000,
+    "referencePrice": 270.4485,
+    "normalized": {
+      "symbol": "TAOUSDT",
+      "quantity": 3.697,
+      "quantityText": "3.697",
+      "minQuantity": 0.001,
+      "maxQuantity": 2000,
+      "stepSize": 0.001,
+      "minNotional": 5,
+      "notional": 999.8481045000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9998481045000001,
+      "notionalUsd": 999.8481045000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TAOUSDT",
+    "equity": 1000,
+    "referencePrice": 285.723,
+    "normalized": {
+      "symbol": "TAOUSDT",
+      "quantity": 3.499,
+      "quantityText": "3.499",
+      "minQuantity": 0.001,
+      "maxQuantity": 2000,
+      "stepSize": 0.001,
+      "minNotional": 5,
+      "notional": 999.7447770000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9997447770000001,
+      "notionalUsd": 999.7447770000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TAOUSDT",
+    "equity": 1000,
+    "referencePrice": 300.99749999999995,
+    "normalized": {
+      "symbol": "TAOUSDT",
+      "quantity": 3.322,
+      "quantityText": "3.322",
+      "minQuantity": 0.001,
+      "maxQuantity": 2000,
+      "stepSize": 0.001,
+      "minNotional": 5,
+      "notional": 999.9136949999998
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999136949999998,
+      "notionalUsd": 999.9136949999998
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TAOUSDT",
+    "equity": 1000,
+    "referencePrice": 316.272,
+    "normalized": {
+      "symbol": "TAOUSDT",
+      "quantity": 3.161,
+      "quantityText": "3.161",
+      "minQuantity": 0.001,
+      "maxQuantity": 2000,
+      "stepSize": 0.001,
+      "minNotional": 5,
+      "notional": 999.735792
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.999735792,
+      "notionalUsd": 999.735792
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TAOUSDT",
+    "equity": 1000,
+    "referencePrice": 331.5465,
+    "normalized": {
+      "symbol": "TAOUSDT",
+      "quantity": 3.016,
+      "quantityText": "3.016",
+      "minQuantity": 0.001,
+      "maxQuantity": 2000,
+      "stepSize": 0.001,
+      "minNotional": 5,
+      "notional": 999.9442439999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999442439999999,
+      "notionalUsd": 999.9442439999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TAOUSDT",
+    "equity": 1000,
+    "referencePrice": 346.82099999999997,
+    "normalized": {
+      "symbol": "TAOUSDT",
+      "quantity": 2.883,
+      "quantityText": "2.883",
+      "minQuantity": 0.001,
+      "maxQuantity": 2000,
+      "stepSize": 0.001,
+      "minNotional": 5,
+      "notional": 999.8849429999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9998849429999999,
+      "notionalUsd": 999.8849429999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TAOUSDT",
+    "equity": 1000,
+    "referencePrice": 362.0955,
+    "normalized": {
+      "symbol": "TAOUSDT",
+      "quantity": 2.761,
+      "quantityText": "2.761",
+      "minQuantity": 0.001,
+      "maxQuantity": 2000,
+      "stepSize": 0.001,
+      "minNotional": 5,
+      "notional": 999.7456755000001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9997456755,
+      "notionalUsd": 999.7456755000001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TAOUSDT",
+    "equity": 10000,
+    "referencePrice": 224.625,
+    "normalized": {
+      "symbol": "TAOUSDT",
+      "quantity": 44.518,
+      "quantityText": "44.518",
+      "minQuantity": 0.001,
+      "maxQuantity": 2000,
+      "stepSize": 0.001,
+      "minNotional": 5,
+      "notional": 9999.85575
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999855750000001,
+      "notionalUsd": 9999.85575
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TAOUSDT",
+    "equity": 10000,
+    "referencePrice": 239.89950000000002,
+    "normalized": {
+      "symbol": "TAOUSDT",
+      "quantity": 41.684,
+      "quantityText": "41.684",
+      "minQuantity": 0.001,
+      "maxQuantity": 2000,
+      "stepSize": 0.001,
+      "minNotional": 5,
+      "notional": 9999.970758
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999970758,
+      "notionalUsd": 9999.970758
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TAOUSDT",
+    "equity": 10000,
+    "referencePrice": 255.174,
+    "normalized": {
+      "symbol": "TAOUSDT",
+      "quantity": 39.188,
+      "quantityText": "39.188",
+      "minQuantity": 0.001,
+      "maxQuantity": 2000,
+      "stepSize": 0.001,
+      "minNotional": 5,
+      "notional": 9999.758712
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999758712000001,
+      "notionalUsd": 9999.758712
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TAOUSDT",
+    "equity": 10000,
+    "referencePrice": 270.4485,
+    "normalized": {
+      "symbol": "TAOUSDT",
+      "quantity": 36.975,
+      "quantityText": "36.975",
+      "minQuantity": 0.001,
+      "maxQuantity": 2000,
+      "stepSize": 0.001,
+      "minNotional": 5,
+      "notional": 9999.833287500001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999833287500002,
+      "notionalUsd": 9999.833287500001
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TAOUSDT",
+    "equity": 10000,
+    "referencePrice": 285.723,
+    "normalized": {
+      "symbol": "TAOUSDT",
+      "quantity": 34.998,
+      "quantityText": "34.998",
+      "minQuantity": 0.001,
+      "maxQuantity": 2000,
+      "stepSize": 0.001,
+      "minNotional": 5,
+      "notional": 9999.733554
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999733554,
+      "notionalUsd": 9999.733554
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TAOUSDT",
+    "equity": 10000,
+    "referencePrice": 300.99749999999995,
+    "normalized": {
+      "symbol": "TAOUSDT",
+      "quantity": 33.222,
+      "quantityText": "33.222",
+      "minQuantity": 0.001,
+      "maxQuantity": 2000,
+      "stepSize": 0.001,
+      "minNotional": 5,
+      "notional": 9999.738945
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999738945,
+      "notionalUsd": 9999.738945
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TAOUSDT",
+    "equity": 10000,
+    "referencePrice": 316.272,
+    "normalized": {
+      "symbol": "TAOUSDT",
+      "quantity": 31.618,
+      "quantityText": "31.618",
+      "minQuantity": 0.001,
+      "maxQuantity": 2000,
+      "stepSize": 0.001,
+      "minNotional": 5,
+      "notional": 9999.888095999999
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999888095999999,
+      "notionalUsd": 9999.888095999999
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TAOUSDT",
+    "equity": 10000,
+    "referencePrice": 331.5465,
+    "normalized": {
+      "symbol": "TAOUSDT",
+      "quantity": 30.161,
+      "quantityText": "30.161",
+      "minQuantity": 0.001,
+      "maxQuantity": 2000,
+      "stepSize": 0.001,
+      "minNotional": 5,
+      "notional": 9999.7739865
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.99997739865,
+      "notionalUsd": 9999.7739865
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TAOUSDT",
+    "equity": 10000,
+    "referencePrice": 346.82099999999997,
+    "normalized": {
+      "symbol": "TAOUSDT",
+      "quantity": 28.833,
+      "quantityText": "28.833",
+      "minQuantity": 0.001,
+      "maxQuantity": 2000,
+      "stepSize": 0.001,
+      "minNotional": 5,
+      "notional": 9999.889892999998
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999889892999998,
+      "notionalUsd": 9999.889892999998
+    },
+    "oldStrictAccepted": false
+  },
+  {
+    "symbol": "TAOUSDT",
+    "equity": 10000,
+    "referencePrice": 362.0955,
+    "normalized": {
+      "symbol": "TAOUSDT",
+      "quantity": 27.617,
+      "quantityText": "27.617",
+      "minQuantity": 0.001,
+      "maxQuantity": 2000,
+      "stepSize": 0.001,
+      "minNotional": 5,
+      "notional": 9999.991423500001
+    },
+    "result": {
+      "accepted": true,
+      "reason": "FULL_1X_LOT_FLOOR_ACCEPTED",
+      "gross": 0.9999991423500001,
+      "notionalUsd": 9999.991423500001
+    },
+    "oldStrictAccepted": true
+  }
+]

@@ -1,0 +1,63 @@
+{
+  "purpose": "V12 itself positive net expectancy and realized PnL; no trade-count target; combine state/direction, relative strength, volume, structural entry and route-specific exit",
+  "cases": {
+    "COMP_ALL": {
+      "routes": [
+        "BREAKOUT",
+        "PULLBACK",
+        "REVERSAL"
+      ]
+    },
+    "COMP_TREND_ONLY": {
+      "routes": [
+        "BREAKOUT",
+        "PULLBACK"
+      ]
+    },
+    "COMP_REV_ONLY": {
+      "routes": [
+        "REVERSAL"
+      ]
+    },
+    "COMP_NO_BREAKOUT": {
+      "routes": [
+        "PULLBACK",
+        "REVERSAL"
+      ]
+    },
+    "COMP_NO_PULLBACK": {
+      "routes": [
+        "BREAKOUT",
+        "REVERSAL"
+      ]
+    },
+    "COMP_NO_MOM_EXIT": {
+      "routes": [
+        "BREAKOUT",
+        "PULLBACK",
+        "REVERSAL"
+      ],
+      "no_momentum": true
+    },
+    "COMP_NO_TRAIL": {
+      "routes": [
+        "BREAKOUT",
+        "PULLBACK",
+        "REVERSAL"
+      ],
+      "no_trail": true
+    }
+  },
+  "parameters_frozen_before_bt": true,
+  "tuning": "one fixed architecture; no grid search or best-case selection. All ablations reported. Period was previously explored; not independent holdout.",
+  "feature_windows": "H2 completed, EMA12/48, BTC ret6h+ER24h, symbol ret12h+rel24h, volume20bars, ATR31bars, RSI14 simple gain/loss",
+  "route_rules": "See classify() source; trend continuation and confirmed pullback, climax/structure-confirmed reversal",
+  "exit_rules": "Trend stop1.2ATR TP2.5ATR hold36h arm1.5ATR trail1ATR; reversal stop1ATR TP1.5ATR hold18h arm1ATR trail0.75ATR. minstop0.5%; H2 adverse4h acceleration after6h+lowprofit exits next quote. Stop-first ambiguous H1. Armed trail floor0.1ATR requires actual next quote.",
+  "sizing": "Frozen existing risk budget3.19%; recompute from new stop. cap1x, rank3cap0.1x; no HC1.75 boost. Shared ownership/gross/cooldowns/fees/funding reused. Different signal architecture, not a production-parity claim.",
+  "limits": [
+    "H1 quote proxy not historical tick fills",
+    "Changing V12 streams interacts with fixed other-strategy candidates",
+    "No historic pending/margin replay",
+    "No LIVE changes"
+  ]
+}

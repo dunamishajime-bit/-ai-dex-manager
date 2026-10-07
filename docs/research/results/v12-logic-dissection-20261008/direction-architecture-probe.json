@@ -1,0 +1,114 @@
+[
+  {
+    "mode": "FOLLOW",
+    "scope": "Architecture counterfactual only: original clock/symbol/gross; opposite-direction probe does not enforce original BTC/HC direction gates and cannot be deployed directly. Protective stop/TP, no immediate trailing, max hold24h.",
+    "first": {
+      "10": {
+        "n": 1226,
+        "win_rate": 0.45921696574225124,
+        "pf": 0.8961811620107221,
+        "mean": -0.0016656337650959511,
+        "sum": -2.042066996007636,
+        "without_best": -2.1385025383757497
+      },
+      "20": {
+        "n": 1226,
+        "win_rate": 0.44942903752039154,
+        "pf": 0.8393189418238508,
+        "mean": -0.002665633765095952,
+        "sum": -3.268066996007637,
+        "without_best": -3.3635025383757506
+      },
+      "30": {
+        "n": 1226,
+        "win_rate": 0.4437194127243067,
+        "pf": 0.7861620522034187,
+        "mean": -0.0036656337650959516,
+        "sum": -4.4940669960076365,
+        "without_best": -4.58850253837575
+      }
+    },
+    "second": {
+      "10": {
+        "n": 744,
+        "win_rate": 0.3911290322580645,
+        "pf": 0.7215690889127293,
+        "mean": -0.0045770382391780925,
+        "sum": -3.4053164499485007,
+        "without_best": -3.5019456041120414
+      },
+      "20": {
+        "n": 744,
+        "win_rate": 0.3817204301075269,
+        "pf": 0.6729632795584777,
+        "mean": -0.0055770382391780934,
+        "sum": -4.149316449948501,
+        "without_best": -4.244945604112043
+      },
+      "30": {
+        "n": 744,
+        "win_rate": 0.364247311827957,
+        "pf": 0.6279590965416655,
+        "mean": -0.006577038239178093,
+        "sum": -4.893316449948501,
+        "without_best": -4.987945604112042
+      }
+    }
+  },
+  {
+    "mode": "REVERSE",
+    "scope": "Architecture counterfactual only: original clock/symbol/gross; opposite-direction probe does not enforce original BTC/HC direction gates and cannot be deployed directly. Protective stop/TP, no immediate trailing, max hold24h.",
+    "first": {
+      "10": {
+        "n": 1226,
+        "win_rate": 0.4836867862969005,
+        "pf": 0.9228253292640886,
+        "mean": -0.0012262103116849497,
+        "sum": -1.5033338421257483,
+        "without_best": -1.6481778478405031
+      },
+      "20": {
+        "n": 1226,
+        "win_rate": 0.47716150081566067,
+        "pf": 0.8643263981173915,
+        "mean": -0.00222621031168495,
+        "sum": -2.7293338421257487,
+        "without_best": -2.8731778478405037
+      },
+      "30": {
+        "n": 1226,
+        "win_rate": 0.4706362153344209,
+        "pf": 0.8094834987392866,
+        "mean": -0.0032262103116849497,
+        "sum": -3.9553338421257482,
+        "without_best": -4.098177847840503
+      }
+    },
+    "second": {
+      "10": {
+        "n": 744,
+        "win_rate": 0.5416666666666666,
+        "pf": 1.1971621337155347,
+        "mean": 0.002584003985538213,
+        "sum": 1.9224989652404305,
+        "without_best": 1.8209570714995618
+      },
+      "20": {
+        "n": 744,
+        "win_rate": 0.5282258064516129,
+        "pf": 1.116722953603496,
+        "mean": 0.0015840039855382127,
+        "sum": 1.1784989652404303,
+        "without_best": 1.0779570714995617
+      },
+      "30": {
+        "n": 744,
+        "win_rate": 0.5161290322580645,
+        "pf": 1.041565345129015,
+        "mean": 0.000584003985538213,
+        "sum": 0.4344989652404305,
+        "without_best": 0.3349570714995619
+      }
+    }
+  }
+]

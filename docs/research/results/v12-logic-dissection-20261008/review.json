@@ -1,0 +1,12 @@
+{
+  "reviewer": "gate_fix_review",
+  "critical": 0,
+  "important": 0,
+  "minor_notes": [
+    "Conservative MFE bounds, not precise Giveback",
+    "BREAKOUT36 alone filters after originalTop3; composite refills full pool"
+  ],
+  "test_suite": 39,
+  "audit_scenarios": 36,
+  "orders_sent": false
+}
