@@ -1,0 +1,12 @@
+{
+  "action": "NONE",
+  "activatedAt": null,
+  "active": false,
+  "graceDeadlineAt": null,
+  "graceStartedAt": null,
+  "operator": "operator-approved-fet-preemption-recovery-20261006",
+  "reason": "Operator approved FET preemption activation; venue/state reconciliation PASS",
+  "recoverable": false,
+  "strategyId": "DISDEX_V35_STRONG_RESERVED_PENGU_V96",
+  "clearedAt": "2026-10-05T21:43:28Z"
+}

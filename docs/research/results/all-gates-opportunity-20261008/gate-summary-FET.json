@@ -1,0 +1,1458 @@
+[
+  {
+    "strategy": "FET",
+    "name": "BASELINE",
+    "scope": "SOURCE_ENTRY_H1_UNIT_RETURN_ISOLATED_SLEEVE_NOT_GLOBAL_BT",
+    "raw_candidate_count": 21,
+    "annual_candidates": [
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773349200000,
+        "entry_price": 0.1673,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773363600000,
+        "entry_price": 0.1857,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773579600000,
+        "entry_price": 0.1969,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773666000000,
+        "entry_price": 0.2226,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773680400000,
+        "entry_price": 0.2471,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1774342800000,
+        "entry_price": 0.2396,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1774386000000,
+        "entry_price": 0.2497,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1775437200000,
+        "entry_price": 0.2425,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1777870800000,
+        "entry_price": 0.2115,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1778014800000,
+        "entry_price": 0.218,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1778043600000,
+        "entry_price": 0.2235,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779354000000,
+        "entry_price": 0.1956,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779426000000,
+        "entry_price": 0.2068,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779728400000,
+        "entry_price": 0.2271,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779771600000,
+        "entry_price": 0.238,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779786000000,
+        "entry_price": 0.2446,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780146000000,
+        "entry_price": 0.2682,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1781355600000,
+        "entry_price": 0.2047,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1785128400000,
+        "entry_price": 0.1599,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1785790800000,
+        "entry_price": 0.1454,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1785877200000,
+        "entry_price": 0.1472,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      }
+    ],
+    "skipped": 9,
+    "metrics": [
+      {
+        "cost_bps": 10,
+        "trades": 12,
+        "win_rate": 0.6666666666666666,
+        "pf": 2.792897595243137,
+        "mean_net_return": 0.02435105319370613,
+        "win_days_jst": 12,
+        "serial_unit_equity": 1.3072133000470372,
+        "serial_realized_dd": -0.10839010643735214,
+        "first": {
+          "trades": 0,
+          "win_rate": null,
+          "pf": null,
+          "mean_net_return": null
+        },
+        "second": {
+          "trades": 12,
+          "win_rate": 0.6666666666666666,
+          "pf": 2.792897595243137,
+          "mean_net_return": 0.02435105319370613
+        }
+      },
+      {
+        "cost_bps": 20,
+        "trades": 12,
+        "win_rate": 0.6666666666666666,
+        "pf": 2.6780862758905393,
+        "mean_net_return": 0.023351053193706128,
+        "win_days_jst": 12,
+        "serial_unit_equity": 1.291929252156028,
+        "serial_realized_dd": -0.11116687182978702,
+        "first": {
+          "trades": 0,
+          "win_rate": null,
+          "pf": null,
+          "mean_net_return": null
+        },
+        "second": {
+          "trades": 12,
+          "win_rate": 0.6666666666666666,
+          "pf": 2.6780862758905393,
+          "mean_net_return": 0.023351053193706128
+        }
+      },
+      {
+        "cost_bps": 30,
+        "trades": 12,
+        "win_rate": 0.5833333333333334,
+        "pf": 2.561679144109129,
+        "mean_net_return": 0.022351053193706127,
+        "win_days_jst": 12,
+        "serial_unit_equity": 1.276809124705797,
+        "serial_realized_dd": -0.11461381167970364,
+        "first": {
+          "trades": 0,
+          "win_rate": null,
+          "pf": null,
+          "mean_net_return": null
+        },
+        "second": {
+          "trades": 12,
+          "win_rate": 0.5833333333333334,
+          "pf": 2.561679144109129,
+          "mean_net_return": 0.022351053193706127
+        }
+      }
+    ],
+    "yesterday_candidates": []
+  },
+  {
+    "strategy": "FET",
+    "name": "VOLUME_10",
+    "scope": "SOURCE_ENTRY_H1_UNIT_RETURN_ISOLATED_SLEEVE_NOT_GLOBAL_BT",
+    "raw_candidate_count": 22,
+    "annual_candidates": [
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773349200000,
+        "entry_price": 0.1673,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773363600000,
+        "entry_price": 0.1857,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773579600000,
+        "entry_price": 0.1969,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773666000000,
+        "entry_price": 0.2226,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773680400000,
+        "entry_price": 0.2471,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1774342800000,
+        "entry_price": 0.2396,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1774386000000,
+        "entry_price": 0.2497,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1775437200000,
+        "entry_price": 0.2425,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1777870800000,
+        "entry_price": 0.2115,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1778014800000,
+        "entry_price": 0.218,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1778043600000,
+        "entry_price": 0.2235,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779339600000,
+        "entry_price": 0.1938,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779354000000,
+        "entry_price": 0.1956,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779426000000,
+        "entry_price": 0.2068,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779728400000,
+        "entry_price": 0.2271,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779771600000,
+        "entry_price": 0.238,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779786000000,
+        "entry_price": 0.2446,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780146000000,
+        "entry_price": 0.2682,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1781355600000,
+        "entry_price": 0.2047,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1785128400000,
+        "entry_price": 0.1599,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1785790800000,
+        "entry_price": 0.1454,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1785877200000,
+        "entry_price": 0.1472,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      }
+    ],
+    "skipped": 10,
+    "metrics": [
+      {
+        "cost_bps": 10,
+        "trades": 12,
+        "win_rate": 0.6666666666666666,
+        "pf": 2.730812147006008,
+        "mean_net_return": 0.023507811473382222,
+        "win_days_jst": 12,
+        "serial_unit_equity": 1.294922293160278,
+        "serial_realized_dd": -0.10839010643735214,
+        "first": {
+          "trades": 0,
+          "win_rate": null,
+          "pf": null,
+          "mean_net_return": null
+        },
+        "second": {
+          "trades": 12,
+          "win_rate": 0.6666666666666666,
+          "pf": 2.730812147006008,
+          "mean_net_return": 0.023507811473382222
+        }
+      },
+      {
+        "cost_bps": 20,
+        "trades": 12,
+        "win_rate": 0.6666666666666666,
+        "pf": 2.6174880516307755,
+        "mean_net_return": 0.02250781147338222,
+        "win_days_jst": 12,
+        "serial_unit_equity": 1.2797706550272487,
+        "serial_realized_dd": -0.11116687182978702,
+        "first": {
+          "trades": 0,
+          "win_rate": null,
+          "pf": null,
+          "mean_net_return": null
+        },
+        "second": {
+          "trades": 12,
+          "win_rate": 0.6666666666666666,
+          "pf": 2.6174880516307755,
+          "mean_net_return": 0.02250781147338222
+        }
+      },
+      {
+        "cost_bps": 30,
+        "trades": 12,
+        "win_rate": 0.5833333333333334,
+        "pf": 2.50276142794337,
+        "mean_net_return": 0.02150781147338222,
+        "win_days_jst": 12,
+        "serial_unit_equity": 1.2647816397393354,
+        "serial_realized_dd": -0.11461381167970364,
+        "first": {
+          "trades": 0,
+          "win_rate": null,
+          "pf": null,
+          "mean_net_return": null
+        },
+        "second": {
+          "trades": 12,
+          "win_rate": 0.5833333333333334,
+          "pf": 2.50276142794337,
+          "mean_net_return": 0.02150781147338222
+        }
+      }
+    ],
+    "yesterday_candidates": []
+  },
+  {
+    "strategy": "FET",
+    "name": "RETURN72_0",
+    "scope": "SOURCE_ENTRY_H1_UNIT_RETURN_ISOLATED_SLEEVE_NOT_GLOBAL_BT",
+    "raw_candidate_count": 23,
+    "annual_candidates": [
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773349200000,
+        "entry_price": 0.1673,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773363600000,
+        "entry_price": 0.1857,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773579600000,
+        "entry_price": 0.1969,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773666000000,
+        "entry_price": 0.2226,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773680400000,
+        "entry_price": 0.2471,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1774342800000,
+        "entry_price": 0.2396,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1774386000000,
+        "entry_price": 0.2497,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1775437200000,
+        "entry_price": 0.2425,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1777251600000,
+        "entry_price": 0.2143,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1777870800000,
+        "entry_price": 0.2115,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1778014800000,
+        "entry_price": 0.218,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1778043600000,
+        "entry_price": 0.2235,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779354000000,
+        "entry_price": 0.1956,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779426000000,
+        "entry_price": 0.2068,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779728400000,
+        "entry_price": 0.2271,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779771600000,
+        "entry_price": 0.238,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779786000000,
+        "entry_price": 0.2446,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780146000000,
+        "entry_price": 0.2682,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1781355600000,
+        "entry_price": 0.2047,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1782522000000,
+        "entry_price": 0.1774,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1785128400000,
+        "entry_price": 0.1599,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1785790800000,
+        "entry_price": 0.1454,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1785877200000,
+        "entry_price": 0.1472,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      }
+    ],
+    "skipped": 9,
+    "metrics": [
+      {
+        "cost_bps": 10,
+        "trades": 14,
+        "win_rate": 0.5714285714285714,
+        "pf": 1.8894582068483763,
+        "mean_net_return": 0.015305895489918508,
+        "win_days_jst": 14,
+        "serial_unit_equity": 1.207137407664352,
+        "serial_realized_dd": -0.15386221100904718,
+        "first": {
+          "trades": 0,
+          "win_rate": null,
+          "pf": null,
+          "mean_net_return": null
+        },
+        "second": {
+          "trades": 14,
+          "win_rate": 0.5714285714285714,
+          "pf": 1.8894582068483763,
+          "mean_net_return": 0.015305895489918508
+        }
+      },
+      {
+        "cost_bps": 20,
+        "trades": 14,
+        "win_rate": 0.5714285714285714,
+        "pf": 1.811144363780744,
+        "mean_net_return": 0.014305895489918508,
+        "win_days_jst": 14,
+        "serial_unit_equity": 1.1905415691299552,
+        "serial_realized_dd": -0.1573861944946383,
+        "first": {
+          "trades": 0,
+          "win_rate": null,
+          "pf": null,
+          "mean_net_return": null
+        },
+        "second": {
+          "trades": 14,
+          "win_rate": 0.5714285714285714,
+          "pf": 1.811144363780744,
+          "mean_net_return": 0.014305895489918508
+        }
+      },
+      {
+        "cost_bps": 30,
+        "trades": 14,
+        "win_rate": 0.5,
+        "pf": 1.7343313162567402,
+        "mean_net_return": 0.013305895489918507,
+        "win_days_jst": 14,
+        "serial_unit_equity": 1.1741577490955164,
+        "serial_realized_dd": -0.16153927966067938,
+        "first": {
+          "trades": 0,
+          "win_rate": null,
+          "pf": null,
+          "mean_net_return": null
+        },
+        "second": {
+          "trades": 14,
+          "win_rate": 0.5,
+          "pf": 1.7343313162567402,
+          "mean_net_return": 0.013305895489918507
+        }
+      }
+    ],
+    "yesterday_candidates": []
+  },
+  {
+    "strategy": "FET",
+    "name": "GRID_1H",
+    "scope": "SOURCE_ENTRY_H1_UNIT_RETURN_ISOLATED_SLEEVE_NOT_GLOBAL_BT",
+    "raw_candidate_count": 77,
+    "annual_candidates": [
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773208800000,
+        "entry_price": 0.1576,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773216000000,
+        "entry_price": 0.1585,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773226800000,
+        "entry_price": 0.162,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773230400000,
+        "entry_price": 0.1608,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773349200000,
+        "entry_price": 0.1673,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773352800000,
+        "entry_price": 0.1713,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773360000000,
+        "entry_price": 0.1769,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773363600000,
+        "entry_price": 0.1857,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773381600000,
+        "entry_price": 0.1912,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773579600000,
+        "entry_price": 0.1969,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773644400000,
+        "entry_price": 0.2064,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773648000000,
+        "entry_price": 0.208,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773658800000,
+        "entry_price": 0.214,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773662400000,
+        "entry_price": 0.2186,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773666000000,
+        "entry_price": 0.2226,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773676800000,
+        "entry_price": 0.2316,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773680400000,
+        "entry_price": 0.2471,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773684000000,
+        "entry_price": 0.247,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773986400000,
+        "entry_price": 0.2395,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1774342800000,
+        "entry_price": 0.2396,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1774386000000,
+        "entry_price": 0.2497,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1774436400000,
+        "entry_price": 0.2581,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1774440000000,
+        "entry_price": 0.2619,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1775437200000,
+        "entry_price": 0.2425,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1775602800000,
+        "entry_price": 0.254,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1776366000000,
+        "entry_price": 0.2369,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1776369600000,
+        "entry_price": 0.2428,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1777255200000,
+        "entry_price": 0.215,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1777870800000,
+        "entry_price": 0.2115,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1778014800000,
+        "entry_price": 0.218,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1778040000000,
+        "entry_price": 0.223,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1778043600000,
+        "entry_price": 0.2235,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1778104800000,
+        "entry_price": 0.226,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1778140800000,
+        "entry_price": 0.2319,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1778263200000,
+        "entry_price": 0.2339,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1778295600000,
+        "entry_price": 0.2396,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1778299200000,
+        "entry_price": 0.2423,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1778443200000,
+        "entry_price": 0.2466,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779354000000,
+        "entry_price": 0.1956,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779418800000,
+        "entry_price": 0.1996,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779422400000,
+        "entry_price": 0.2052,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779426000000,
+        "entry_price": 0.2068,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779436800000,
+        "entry_price": 0.2129,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779447600000,
+        "entry_price": 0.2166,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779451200000,
+        "entry_price": 0.2208,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779717600000,
+        "entry_price": 0.2179,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779721200000,
+        "entry_price": 0.223,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779724800000,
+        "entry_price": 0.2232,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779728400000,
+        "entry_price": 0.2271,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779732000000,
+        "entry_price": 0.2306,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779746400000,
+        "entry_price": 0.234,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779771600000,
+        "entry_price": 0.238,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779778800000,
+        "entry_price": 0.2438,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779786000000,
+        "entry_price": 0.2446,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779793200000,
+        "entry_price": 0.2532,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779796800000,
+        "entry_price": 0.2551,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780077600000,
+        "entry_price": 0.2606,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780146000000,
+        "entry_price": 0.2682,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1781355600000,
+        "entry_price": 0.2047,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1781359200000,
+        "entry_price": 0.2073,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1781373600000,
+        "entry_price": 0.2087,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1781409600000,
+        "entry_price": 0.215,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1781503200000,
+        "entry_price": 0.2174,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1782529200000,
+        "entry_price": 0.1801,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1782921600000,
+        "entry_price": 0.1801,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1783000800000,
+        "entry_price": 0.186,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1783062000000,
+        "entry_price": 0.189,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1784124000000,
+        "entry_price": 0.1633,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1785020400000,
+        "entry_price": 0.1595,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1785124800000,
+        "entry_price": 0.1598,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1785128400000,
+        "entry_price": 0.1599,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1785787200000,
+        "entry_price": 0.1448,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1785790800000,
+        "entry_price": 0.1454,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1785870000000,
+        "entry_price": 0.1473,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1785877200000,
+        "entry_price": 0.1472,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1785909600000,
+        "entry_price": 0.1516,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      },
+      {
+        "symbol": "FETUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1785913200000,
+        "entry_price": 0.1526,
+        "maxHoldHours": 24,
+        "hardStop": 0.05
+      }
+    ],
+    "skipped": 54,
+    "metrics": [
+      {
+        "cost_bps": 10,
+        "trades": 23,
+        "win_rate": 0.34782608695652173,
+        "pf": 0.7807636115627555,
+        "mean_net_return": -0.0052212195006009,
+        "win_days_jst": 23,
+        "serial_unit_equity": 0.8560132357642057,
+        "serial_realized_dd": -0.27824828713145744,
+        "first": {
+          "trades": 0,
+          "win_rate": null,
+          "pf": null,
+          "mean_net_return": null
+        },
+        "second": {
+          "trades": 23,
+          "win_rate": 0.34782608695652173,
+          "pf": 0.7807636115627555,
+          "mean_net_return": -0.0052212195006009
+        }
+      },
+      {
+        "cost_bps": 20,
+        "trades": 23,
+        "win_rate": 0.34782608695652173,
+        "pf": 0.7457369677577791,
+        "mean_net_return": -0.006221219500600901,
+        "win_days_jst": 23,
+        "serial_unit_equity": 0.8363812177558371,
+        "serial_realized_dd": -0.2856726883120104,
+        "first": {
+          "trades": 0,
+          "win_rate": null,
+          "pf": null,
+          "mean_net_return": null
+        },
+        "second": {
+          "trades": 23,
+          "win_rate": 0.34782608695652173,
+          "pf": 0.7457369677577791,
+          "mean_net_return": -0.006221219500600901
+        }
+      },
+      {
+        "cost_bps": 30,
+        "trades": 23,
+        "win_rate": 0.2608695652173913,
+        "pf": 0.7129117637006865,
+        "mean_net_return": -0.007221219500600902,
+        "win_days_jst": 23,
+        "serial_unit_equity": 0.8171802471112081,
+        "serial_realized_dd": -0.2930282882560651,
+        "first": {
+          "trades": 0,
+          "win_rate": null,
+          "pf": null,
+          "mean_net_return": null
+        },
+        "second": {
+          "trades": 23,
+          "win_rate": 0.2608695652173913,
+          "pf": 0.7129117637006865,
+          "mean_net_return": -0.007221219500600902
+        }
+      }
+    ],
+    "yesterday_candidates": []
+  }
+]

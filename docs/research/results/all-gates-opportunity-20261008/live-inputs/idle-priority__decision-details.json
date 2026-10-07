@@ -1,0 +1,214 @@
+{
+  "schema": "disdex-idle-priority-decision-details/v1",
+  "runtimeSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+  "decisionTs": 1791399600000,
+  "updatedAt": 1791400047077,
+  "symbols": [
+    {
+      "symbol": "TAOUSDT",
+      "route": "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2",
+      "features": {
+        "decisionTs": 1791399600000,
+        "signalTs": 1791396000000,
+        "ret12": -0.0420042502324347,
+        "ret24": -0.0500164636154099,
+        "btc24": -0.024480102019924233,
+        "rel24": -0.025536361595485668,
+        "atrRatio": 0.014946250934604893,
+        "volumeRatio": 0.45755969542669095,
+        "breakoutLong24": false,
+        "breakoutShort24": false,
+        "breakdown24": false
+      },
+      "generic": {
+        "accepted": false,
+        "archetype": null,
+        "side": "FLAT",
+        "reason": "GENERIC_CANDIDATE_GATE_NOT_MET"
+      },
+      "routeDecision": {
+        "accepted": false,
+        "side": "FLAT",
+        "reason": "GENERIC_ROUTE_MISMATCH",
+        "holdHours": 12
+      },
+      "cooldownAllowed": true,
+      "lastLifecycleTs": null
+    },
+    {
+      "symbol": "TIAUSDT",
+      "route": "IDLE_TIA_BREAKDOWN_SHORT_VOLCAP100",
+      "features": {
+        "decisionTs": 1791399600000,
+        "signalTs": 1791396000000,
+        "ret12": -0.02622377622377625,
+        "ret24": -0.07857733664185274,
+        "btc24": -0.024480102019924233,
+        "rel24": -0.0540972346219285,
+        "atrRatio": 0.016174018979225442,
+        "volumeRatio": 2.2124803734304086,
+        "breakoutLong24": false,
+        "breakoutShort24": false,
+        "breakdown24": false
+      },
+      "generic": {
+        "accepted": true,
+        "archetype": "RELATIVE",
+        "side": "SHORT",
+        "reason": "GENERIC_RELATIVE_SHORT"
+      },
+      "routeDecision": {
+        "accepted": false,
+        "side": "FLAT",
+        "reason": "GENERIC_ROUTE_MISMATCH",
+        "holdHours": 24
+      },
+      "cooldownAllowed": true,
+      "lastLifecycleTs": null
+    },
+    {
+      "symbol": "DOTUSDT",
+      "route": "IDLE_DOT_MOMENTUM_SHORT_BTCREL",
+      "features": {
+        "decisionTs": 1791399600000,
+        "signalTs": 1791396000000,
+        "ret12": -0.02640845070422515,
+        "ret24": -0.09344262295081962,
+        "btc24": -0.024480102019924233,
+        "rel24": -0.06896252093089539,
+        "atrRatio": 0.008912425729785563,
+        "volumeRatio": 0.038425352095112365,
+        "breakoutLong24": false,
+        "breakoutShort24": false,
+        "breakdown24": false
+      },
+      "generic": {
+        "accepted": false,
+        "archetype": null,
+        "side": "FLAT",
+        "reason": "GENERIC_CANDIDATE_GATE_NOT_MET"
+      },
+      "routeDecision": {
+        "accepted": false,
+        "side": "FLAT",
+        "reason": "GENERIC_ROUTE_MISMATCH",
+        "holdHours": 24
+      },
+      "cooldownAllowed": true,
+      "lastLifecycleTs": null
+    },
+    {
+      "symbol": "JUPUSDT",
+      "route": "IDLE_JUP_RELATIVE_SHORT",
+      "features": {
+        "decisionTs": 1791399600000,
+        "signalTs": 1791396000000,
+        "ret12": -0.03717026378896893,
+        "ret24": -0.08853575482406362,
+        "btc24": -0.024480102019924233,
+        "rel24": -0.06405565280413938,
+        "atrRatio": 0.012987012987012977,
+        "volumeRatio": 1.4053213297514975,
+        "breakoutLong24": false,
+        "breakoutShort24": false,
+        "breakdown24": false
+      },
+      "generic": {
+        "accepted": true,
+        "archetype": "RELATIVE",
+        "side": "SHORT",
+        "reason": "GENERIC_RELATIVE_SHORT"
+      },
+      "routeDecision": {
+        "accepted": true,
+        "side": "SHORT",
+        "reason": "IDLE_JUP_RELATIVE_SHORT",
+        "holdHours": 12
+      },
+      "cooldownAllowed": true,
+      "lastLifecycleTs": null
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "route": "IDLE_RENDER_RELATIVE_SHORT",
+      "features": {
+        "decisionTs": 1791399600000,
+        "signalTs": 1791396000000,
+        "ret12": -0.03402646502835538,
+        "ret24": -0.05719557195571956,
+        "btc24": -0.024480102019924233,
+        "rel24": -0.03271546993579533,
+        "atrRatio": 0.019604417109309467,
+        "volumeRatio": 0.14773601876966413,
+        "breakoutLong24": false,
+        "breakoutShort24": false,
+        "breakdown24": false
+      },
+      "generic": {
+        "accepted": false,
+        "archetype": null,
+        "side": "FLAT",
+        "reason": "GENERIC_CANDIDATE_GATE_NOT_MET"
+      },
+      "routeDecision": {
+        "accepted": false,
+        "side": "FLAT",
+        "reason": "GENERIC_ROUTE_MISMATCH",
+        "holdHours": 12
+      },
+      "cooldownAllowed": true,
+      "lastLifecycleTs": null
+    }
+  ],
+  "residual": [
+    {
+      "symbol": "DOGEUSDT",
+      "route": "DOGE_REL_VOL",
+      "features": {
+        "decisionTs": 1791399600000,
+        "signalTs": 1791396000000,
+        "ret12": -0.024680475980608074,
+        "ret24": -0.06109461179465425,
+        "btc24": -0.024480102019924233,
+        "rel24": -0.03661450977473002,
+        "atrRatio": 0.008335485120392491,
+        "volumeRatio": 0.6044669396927567,
+        "breakoutLong24": false,
+        "breakoutShort24": false,
+        "breakdown24": false
+      },
+      "decision": {
+        "accepted": false,
+        "side": "FLAT",
+        "reason": "REL24_NOT_MET",
+        "holdHours": 12,
+        "priority": 1
+      }
+    },
+    {
+      "symbol": "AVAXUSDT",
+      "route": "AVAX_REL_LONG",
+      "features": {
+        "decisionTs": 1791399600000,
+        "signalTs": 1791396000000,
+        "ret12": -0.002135231316726105,
+        "ret24": -0.02282627635476564,
+        "btc24": -0.024480102019924233,
+        "rel24": 0.0016538256651585925,
+        "atrRatio": 0.015035918076217653,
+        "volumeRatio": 0.4299217350965087,
+        "breakoutLong24": false,
+        "breakoutShort24": false,
+        "breakdown24": false
+      },
+      "decision": {
+        "accepted": false,
+        "side": "FLAT",
+        "reason": "REL24_NOT_MET",
+        "holdHours": 12,
+        "priority": 2
+      }
+    }
+  ],
+  "finalReason": "BASELINE_ADMISSION_BLOCKED:BASELINE_ADMISSION_SOURCE_STALE_OR_TS_MISMATCH"
+}

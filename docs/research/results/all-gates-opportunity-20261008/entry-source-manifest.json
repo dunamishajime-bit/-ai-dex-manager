@@ -1,0 +1,86 @@
+[
+  {
+    "path": "lib/v12-x1-all.ts",
+    "sha256": "6789e5af587e4d36b872450bcdde67c65f3360058d4aa2a6c892cab76b749dad"
+  },
+  {
+    "path": "config/v12X1AllRuntime.ts",
+    "sha256": "c67dafe3fe49ac71a0f4bae64cd3b494cead89badd7c94cb60c8bfa0062e56f6"
+  },
+  {
+    "path": "config/integratedProductionRiskPolicy.ts",
+    "sha256": "634ee196b267e3ec55e195f1fec9527669157926b191e473ab0aa1adb042c633"
+  },
+  {
+    "path": "lib/pengu-dual-ls-v2.ts",
+    "sha256": "0deb424ae7dfd553089651f09465deaa64d6b163ab99559a507a5f8b6ae876bb"
+  },
+  {
+    "path": "config/penguDualLsV2Runtime.ts",
+    "sha256": "4dfd88c27caa430bbbe02c04d70656241cc080fd79118e5c021987cc1786aac2"
+  },
+  {
+    "path": "config/sharedCryptoRiskPolicy.ts",
+    "sha256": "a83611274a909616031c9c94faa25e44fa1d07436e09c044d2053aa88f6a7494"
+  },
+  {
+    "path": "config/penguRecoveryV8.ts",
+    "sha256": "053f4578390ce3cd8547669c01142b70517969e837391608948206a672d088d8"
+  },
+  {
+    "path": "lib/pengu-short-v20.ts",
+    "sha256": "fce39b4ff1c6b5c7e62438e9a974a9479c0ecf5b5a1b41a91a5f2edf78caee65"
+  },
+  {
+    "path": "lib/pengu-recovery-v8.ts",
+    "sha256": "9ede7042755f594025537d3e7ede365e6c6156f99ebb76aafb6f15d43833790d"
+  },
+  {
+    "path": "lib/fet-brk48-signal.ts",
+    "sha256": "c9bb45e52fb2878df72abe68eab931771e99697211f407dbf672e2ed022d3d5a"
+  },
+  {
+    "path": "config/fetBrk48Runtime.ts",
+    "sha256": "4107a2095b7a739802eed1ef8d53b554d955458102399b10da91b0c700bdd6e3"
+  },
+  {
+    "path": "lib/hype-trend-long-signal.ts",
+    "sha256": "82a16decc1f1c0506461b2e06666f872ee5655ed36ca683d4dc738751ac7f137"
+  },
+  {
+    "path": "config/hypeTrendLongPolicy.ts",
+    "sha256": "030179519336d588c629b4122268ad378a71a6626a4084fbdfe184f865d81515"
+  },
+  {
+    "path": "lib/idle-priority-short-signal.ts",
+    "sha256": "76f68ba1ec78f5adb34c68718a28b199f58bd29dd6651a404631326906c2f827"
+  },
+  {
+    "path": "config/idlePriorityShortPolicy.ts",
+    "sha256": "4af0463cc51147eaa1a10592c100333601db30a36c64273fc18b7fb434564a41"
+  },
+  {
+    "path": "lib/idle-residual-long-signal.ts",
+    "sha256": "b88435a1fb2a9c98d851c658a3a1e5a665f8e9421d6183875daa330c48841670"
+  },
+  {
+    "path": "config/idleResidualLongPolicy.ts",
+    "sha256": "476242d787494f8c260c8a1b63ffdc8abd266f611df5dc55ca6a0d3af2cc01f9"
+  },
+  {
+    "path": "lib/disdex-quality102-causal-v4-s34.ts",
+    "sha256": "333191f07ffb05e0889a2235d63c4b9f70213244efb1fde68d8e17bcecd3279f"
+  },
+  {
+    "path": "config/disdexQuality102CausalV4Model.ts",
+    "sha256": "d4d69ad4afabdc5d89faa704c25630f36b9f724aa7007f131a18c3fbb52539e8"
+  },
+  {
+    "path": "lib/disdex-quality102-causal-selector.ts",
+    "sha256": "55648be0e88123ee325e240059fc7484d2e23314e2c6b95962e1bdeae3ac3242"
+  },
+  {
+    "path": "config/disdexStrictBt33404708902Runtime.ts",
+    "sha256": "904097c24e126790894347c0c148427bac410508b6e65dd304f38f5102c374e5"
+  }
+]

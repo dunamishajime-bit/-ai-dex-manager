@@ -1,0 +1,332 @@
+[
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/baseline-entry-key-comparison.json",
+    "bytes": 422,
+    "sha256": "b84bdd55cc41aa42a9496897c430c46e767dde108bea1b443a3e26b7fc1445db"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/entry-source-manifest.json",
+    "bytes": 2861,
+    "sha256": "fd09afc4df248764267e3763d135bb5a93540ec049f6115038cbd882d550115a"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-cases/FET_BASELINE.json",
+    "bytes": 34813,
+    "sha256": "90d1c691d876e68f2894cdb2922091a263b11a4ee492695e8120a5bc9f348cbd"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-cases/FET_GRID_1H.json",
+    "bytes": 65411,
+    "sha256": "a98198a86dc5adb8edc30a78f01d1024955aa6d42f0a675b17fc2069e59bb253"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-cases/FET_RETURN72_0.json",
+    "bytes": 39772,
+    "sha256": "4e31ef20919ca0f4d61ee4796a9714dc10e8faeed31bc809ee9b06d81cc4ae73"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-cases/FET_VOLUME_10.json",
+    "bytes": 34783,
+    "sha256": "3e6562a67c42e40c45e73ca25cad8b6e4b33f191fd1fb3f395b985edf5f0cada"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-cases/HYPE_BASELINE.json",
+    "bytes": 96692,
+    "sha256": "7367f8755d25fbce72344cabc1469a37f77a921da871016abebb97e2cb0f5f72"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-cases/HYPE_BREAKOUT_0.json",
+    "bytes": 108711,
+    "sha256": "8cb76454fe4f389160c2e0995d0cd5b62afd4764f0b5b99d8842db671188909e"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-cases/HYPE_DISTANCE_1200.json",
+    "bytes": 103992,
+    "sha256": "5b2f38695c2e7ac46797e6805c0f2d6d05360ea070f60093f41251d1055ff5aa"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-cases/HYPE_SLOPE_50.json",
+    "bytes": 101304,
+    "sha256": "1b6cdc0180fcc57eac0b17345a65488d78c37caf463915fa5a6c0f7588d665ce"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-cases/IDLE_BASELINE.json",
+    "bytes": 1102624,
+    "sha256": "b11e0c3ccad9a07deb91a332fddaf005d1a773058c279c94040437ca394d1c05"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-cases/IDLE_DOT_BTC_01.json",
+    "bytes": 1129868,
+    "sha256": "a083562748667d14c3a46bd53b9d62107352fa1fb508af81b135b89b79706609"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-cases/IDLE_RELATIVE_02.json",
+    "bytes": 1239259,
+    "sha256": "780205c5614575908420284d3934883243d4b5593eca6b578a4b3b25a1507bba"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-cases/IDLE_VOLUME_80PCT.json",
+    "bytes": 1174995,
+    "sha256": "113b908bd929e923987f67934760dad9722e6c01dcb44baa6652d6ecadd7d220"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-cases/PENGU_BASELINE.json",
+    "bytes": 537185,
+    "sha256": "e193a6ca88d0cc2bd9637f12abef57f0130a0b2efd09c1a53aa863522011912f"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-cases/PENGU_BTC_DIST_M06.json",
+    "bytes": 548038,
+    "sha256": "89e0241f4a4821e238b26daf984f1de25b3ee8b86632683fd2e455bee73fac9b"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-cases/PENGU_BTC_MAX_06.json",
+    "bytes": 537187,
+    "sha256": "0379a5e85e7087432fa1e4c5fa9a39a187ddf64611a0c51d5e480dd3b42f52ef"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-cases/PENGU_IMPULSE_M05.json",
+    "bytes": 575807,
+    "sha256": "1da4d0e0d7c05ecbea777c697b223f2804040d6003804ad9d08bbafdf0823ab4"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-cases/PENGU_LONG_BTC_M01.json",
+    "bytes": 537189,
+    "sha256": "0cd3e17cb0e417782de8e2fd60ed78f51a142ac42a06758765e94631fffb3eba"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-cases/PENGU_RECOVERY_BTC_0.json",
+    "bytes": 549848,
+    "sha256": "a4001bd7b9c81efa469f938b4a4c7a89426d008d670a0a4219ab4a87cdf0a9d7"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-cases/PENGU_RSI25_VOL7.json",
+    "bytes": 542940,
+    "sha256": "ff48a683c0c655e321ca20c7e573c3c747a75796924257a90311b1e207b14f00"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-cases/PENGU_SHORT_RSI25.json",
+    "bytes": 543268,
+    "sha256": "c9c54a1951a7067dcdfdc53f1ad8d3772f50f7756bda54112a654fd233a887e3"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-cases/PENGU_SHORT_VOL5.json",
+    "bytes": 537187,
+    "sha256": "2b2c75202241298b26067b5627229ed90590b68478eb1b9f2f23b794361cfb13"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-cases/Q102_BASELINE.json",
+    "bytes": 379078,
+    "sha256": "d5d751c0effd2b0ec5eadea68a320da099ef1e1c147dd4e2aa79e4914445d37a"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-cases/Q102_MARGIN_UPPER20.json",
+    "bytes": 393852,
+    "sha256": "da9924bc9e823a9a3ed44a05205f6c123f0eb732414c0491f810839ccc414b0d"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-cases/Q102_RET14_WIDEN.json",
+    "bytes": 405827,
+    "sha256": "57c0977816e587a80f51ce3df866042fe7d76c3046ff71ee0fed23da147fa7bb"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-cases/Q102_REV_LONG_020.json",
+    "bytes": 384924,
+    "sha256": "a1f74a8b13de9f71bf2b9c7aca7592108304999859d5d63844d09e4428f035be"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-cases/Q102_REV_LONG_OFF.json",
+    "bytes": 416694,
+    "sha256": "5c2e781c5ee1825c24a22499b95cad6827e8908a98e10d1c3e573aa2b68b0b1b"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-cases/RESIDUAL_BASELINE.json",
+    "bytes": 1101852,
+    "sha256": "17ee8513fe27dd9b186e4262532af66e19785ba70cc7e2e73ff4d1d78bf24018"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-cases/RESIDUAL_RELATIVE_02.json",
+    "bytes": 1634183,
+    "sha256": "2e68636cdb073df374f20fc55eb2624292c6097b1021a408bbfc1a6449c2c406"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-cases/RESIDUAL_VOLUME_80PCT.json",
+    "bytes": 1192774,
+    "sha256": "012e1ae4af89f9b1c27c61ce8e150ccdcbf8d1263e2da42fe1d0a7f9de9fde0a"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-cases/V12_BASELINE.json",
+    "bytes": 1144677,
+    "sha256": "c89e088751a5e7d4da97817683a376cdba8c183a2193ff295c7473ee79e652a1"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-cases/V12_BTC1_ATR07_SCORE85.json",
+    "bytes": 1928708,
+    "sha256": "13b0d13e2d133ffc4e409bfd52d7347c9ef34534cfbdd358d581cb9e0cee608c"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-cases/V12_BTC_0.json",
+    "bytes": 1540399,
+    "sha256": "22cd371711ba29e14e823ca0f0e70871613bdc4c355ec4053a45e328824fbaee"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-cases/V12_BTC_1P0.json",
+    "bytes": 1417359,
+    "sha256": "e0e28ed6a100829b5a3ff6ec21a0498e4612e2b83e4af84ecba00ff4298a05bf"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-cases/V12_BTC_1P5.json",
+    "bytes": 1296619,
+    "sha256": "1aae97ea04635ce8bb293e412b8028ffc4ad921ba7560f157b26c50035d886e5"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-cases/V12_MOMENTUM_018.json",
+    "bytes": 1156224,
+    "sha256": "9146f134681c0223e541c6130fad1d5ec3ea6e1359b0b61a4e88954a84df6012"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-cases/V12_RELAXED_ATR10.json",
+    "bytes": 1300307,
+    "sha256": "2c369c95ad018adb0b9f04594c91edd33f91153b618e26e5cb12bc5597281ccf"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-cases/V12_SCORE_085.json",
+    "bytes": 1294746,
+    "sha256": "68bebe3ed2143dc23cd88a4a4f34ffff34b2c93bbba3eb9822cf56740d986af6"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-cases/V12_VOLUME_055.json",
+    "bytes": 1319779,
+    "sha256": "6b8bbb0c326e424531ef13cfbcaefe9b858ac9d415b13d41318beba0c3f1ae73"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-summary-FET.json",
+    "bytes": 36076,
+    "sha256": "6f7929c708cf5c54a4213e995648e772b10d10c39258b348e9aab6861af13cc4"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-summary-HYPE.json",
+    "bytes": 90445,
+    "sha256": "83d602f0648f70df24e5268e6ad69afefd4333263ded954535e7bdc1a0ea4c53"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-summary-IDLE.json",
+    "bytes": 4168980,
+    "sha256": "987a2a4fab131973590d24b027a3a44a57d2f247fe7d8fb79364cd1821b6acf4"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-summary-PENGU.json",
+    "bytes": 1685429,
+    "sha256": "1f9f7ffbb762f854eeba706d809ccf9c6c4d9503bba97103a0cd936849beff98"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-summary-Q102.json",
+    "bytes": 373901,
+    "sha256": "15084ea2255134bf42a146938643611870fafb61d8ab0e8a16298508169068c7"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-summary-RESIDUAL.json",
+    "bytes": 4173456,
+    "sha256": "9ce2da90ec0aee0b32f3a5dba52279d04d5e965f81feb775ba53065607fe48f6"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/gate-summary-V12.json",
+    "bytes": 6192512,
+    "sha256": "85c61104be05235d2b7660778b43618583da8806dba5fd20ef96915fa540dc6b"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/live-day-journal.json",
+    "bytes": 6401337,
+    "sha256": "79448c0f022bfb1d59ebbbf361b1ffe5d3cdc139ff9a3d1d18a06fa8d19808f7"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/live-inputs/fet-brk48-residual__state.json",
+    "bytes": 678,
+    "sha256": "697d420d9a0704a81a65fa31d46f7e71e085314c03043b14cdc4899a79d7057b"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/live-inputs/hype-zec-long__runner.json",
+    "bytes": 4925,
+    "sha256": "d82000cfe05dec9895b111d604318cd5212317e50dc27b5e758b31a8c1b90a35"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/live-inputs/idle-priority__decision-details.json",
+    "bytes": 6154,
+    "sha256": "f06900a8683dc160b9814917c23be5cd3174487f6db44ff6f070de80843ffa56"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/live-inputs/idle-priority__decision.json",
+    "bytes": 299,
+    "sha256": "536b1e5cc031590fa94c94f526efc78d27b2e8f600f0659c06d1f6dad2514bde"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/live-inputs/idle-priority__state.json",
+    "bytes": 1979,
+    "sha256": "775d4faa69a8021e0366b4517616447c2093bebc370937bc99bdef0991920c33"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/live-inputs/pengu-dual-ls-v2__runner-live.json",
+    "bytes": 11187,
+    "sha256": "e44e08b67cc935aaf97a0de18b7c401939e7d480026c3340b633acf9bdd57993"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/live-inputs/quality102-causal-v1__decision-ranking-history-2026-10-06.jsonl",
+    "bytes": 778017,
+    "sha256": "92189e42bfe747014f18798cdcc4a6b770136e66044a11140859eb1edc24efe0"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/live-inputs/quality102-causal-v1__decision-ranking-history-2026-10-07.jsonl",
+    "bytes": 665094,
+    "sha256": "c7211e8c107584760a098de501400dc6a1c5e5ea7b4e9e380e8e00a02ccdca98"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/live-inputs/quality102-causal-v1__decision-ranking-snapshot.json",
+    "bytes": 57478,
+    "sha256": "7ee2843a73211b071ab898f9441bf223f23534ebf10f5b9e43fa15e22992311a"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/live-inputs/quality102-causal-v1__market-history.json",
+    "bytes": 13718632,
+    "sha256": "a9041f11db20502c9baa777dfefbb81a53ab36704d3f850e4a0cf13aabdde555"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/live-inputs/recent-public-klines.json",
+    "bytes": 2868063,
+    "sha256": "8f1089958f1a82ad7e35b0f957be18efe8700e8b0e53fecc24fec09dfa31f233"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/live-inputs/shared__crypto-daily-risk.json",
+    "bytes": 611,
+    "sha256": "e7227b9214e2f56f1cb1de211818dcdaec8113fd3f39478a4ec50a97800747b3"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/live-inputs/shared__kill-switch.json",
+    "bytes": 397,
+    "sha256": "20b9ddd3e3158e0874daf69429e142c062de2849b9edf36dcb0b495812b243c5"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/live-inputs/v12-x1-all__decision-snapshot.json",
+    "bytes": 5834,
+    "sha256": "f8a343cd17ded907070a152993d3717562c3da532451188f9e48bc3e272e67bb"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/live-inputs/v12-x1-all__runner.json",
+    "bytes": 722,
+    "sha256": "e8b6c44872baca0ddc3ae7deeec0b33c8d932c075de253ee9018566dff364253"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/README.md",
+    "bytes": 9392,
+    "sha256": "bd91d745cc224939a7bed21ac885eb709ce1dab1a254b5cd830c520e69898f30"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/v12-exit-parity-example.json",
+    "bytes": 1601,
+    "sha256": "f5e7574ad6449fde7f05b304536c5f5c37b3a481416ec5c687f0f19bced04c29"
+  },
+  {
+    "path": "docs/research/results/all-gates-opportunity-20261008/validated-audit.json",
+    "bytes": 40925,
+    "sha256": "dfa90c1b65d79d92596bb8988a910d522a57ed79c9ad2335780cbdb5192b9f3e"
+  }
+]

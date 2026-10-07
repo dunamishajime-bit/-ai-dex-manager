@@ -1,0 +1,187 @@
+{
+  "schema": "disdex-hype-zec-long/v1",
+  "runtimeCommitSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+  "mode": "LIVE",
+  "updatedAt": 1791399431306,
+  "lastDecisionTs": 1791399431305,
+  "lastDecision": {
+    "strategy": "HYPE_LONG",
+    "signalTs": 1791392400000,
+    "accepted": false,
+    "reason": "TREND_ALIGNMENT_NOT_MET"
+  },
+  "failures": [
+    {
+      "message": "HYPE_ZEC_RUNNER_FAIL_CLOSED:HYPE_ZEC_MARKET_DATA_ROW_INVALID",
+      "occurredAt": 1790577475010
+    },
+    {
+      "message": "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY",
+      "occurredAt": 1790583707385
+    },
+    {
+      "message": "HYPE_ZEC_RUNNER_FAIL_CLOSED:HYPE_ZEC_MARKET_DATA_ROW_INVALID",
+      "occurredAt": 1790761134320
+    },
+    {
+      "message": "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY",
+      "occurredAt": 1790762403709
+    },
+    {
+      "message": "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY",
+      "occurredAt": 1790762506219
+    },
+    {
+      "message": "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY",
+      "occurredAt": 1790763409517
+    },
+    {
+      "message": "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY",
+      "occurredAt": 1790763962401
+    },
+    {
+      "message": "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY",
+      "occurredAt": 1790764867395
+    },
+    {
+      "message": "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY",
+      "occurredAt": 1790765771087
+    },
+    {
+      "message": "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY",
+      "occurredAt": 1790767260498
+    },
+    {
+      "message": "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY",
+      "occurredAt": 1790768214505
+    },
+    {
+      "message": "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY",
+      "occurredAt": 1790769118428
+    },
+    {
+      "message": "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY",
+      "occurredAt": 1790769529577
+    },
+    {
+      "message": "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY",
+      "occurredAt": 1790770373453
+    },
+    {
+      "message": "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY",
+      "occurredAt": 1790771277577
+    },
+    {
+      "message": "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY",
+      "occurredAt": 1790772181236
+    },
+    {
+      "message": "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY",
+      "occurredAt": 1790773084501
+    },
+    {
+      "message": "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY",
+      "occurredAt": 1790773987989
+    },
+    {
+      "message": "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY",
+      "occurredAt": 1790781193300
+    },
+    {
+      "message": "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY",
+      "occurredAt": 1790786604849
+    },
+    {
+      "message": "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY",
+      "occurredAt": 1790808767595
+    },
+    {
+      "message": "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY",
+      "occurredAt": 1790810572066
+    },
+    {
+      "message": "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY",
+      "occurredAt": 1790811475595
+    },
+    {
+      "message": "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY",
+      "occurredAt": 1790812378907
+    },
+    {
+      "message": "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY",
+      "occurredAt": 1790813282403
+    },
+    {
+      "message": "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY",
+      "occurredAt": 1790814188856
+    },
+    {
+      "message": "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY",
+      "occurredAt": 1790814303073
+    },
+    {
+      "message": "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY",
+      "occurredAt": 1790815939556
+    },
+    {
+      "message": "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY",
+      "occurredAt": 1790816843302
+    },
+    {
+      "message": "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY",
+      "occurredAt": 1790817746779
+    },
+    {
+      "message": "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY",
+      "occurredAt": 1790818650065
+    },
+    {
+      "message": "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY",
+      "occurredAt": 1790819553800
+    },
+    {
+      "message": "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY",
+      "occurredAt": 1790820457335
+    },
+    {
+      "message": "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY",
+      "occurredAt": 1790821361264
+    },
+    {
+      "message": "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY",
+      "occurredAt": 1790822264545
+    },
+    {
+      "message": "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY",
+      "occurredAt": 1790825880129
+    },
+    {
+      "message": "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY",
+      "occurredAt": 1790828595771
+    },
+    {
+      "message": "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY",
+      "occurredAt": 1790829499075
+    },
+    {
+      "message": "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY",
+      "occurredAt": 1790830405379
+    },
+    {
+      "message": "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY",
+      "occurredAt": 1790830761710
+    },
+    {
+      "message": "HYPE_ZEC_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_LOCK_TIMEOUT",
+      "occurredAt": 1790958008962
+    },
+    {
+      "occurredAt": 1791086890712,
+      "message": "OPERATOR_READONLY_CONFIRMED_FLAT_RATE_BUDGET_RECOVERY"
+    },
+    {
+      "message": "HYPE_ZEC_BENIGN_MARKET_DATA_RECOVERY",
+      "occurredAt": 1791234068107
+    }
+  ]
+}

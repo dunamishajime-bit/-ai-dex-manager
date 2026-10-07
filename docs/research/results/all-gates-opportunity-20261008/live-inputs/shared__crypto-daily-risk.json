@@ -1,0 +1,25 @@
+{
+  "schema": "disdex-shared-crypto-daily-risk/v1",
+  "accountScope": "ASTER_FUTURES",
+  "utcDay": "2026-10-07",
+  "strategyIds": [
+    "V12_X1.00_ALL",
+    "PENGU_DUAL_LS_V2_FINAL",
+    "QUALITY102_CAUSAL_V1",
+    "FET_BRK48_RESIDUAL",
+    "HYPE_LONG",
+    "IDLE_PRIORITY_SHORT"
+  ],
+  "lossPct": 0,
+  "maximumLossPct": 7.5,
+  "tripped": false,
+  "updatedAt": 1791400165207,
+  "realizedPnl": 0,
+  "unrealizedPnl": 0,
+  "fees": 0,
+  "funding": 0,
+  "netDailyPnl": 0,
+  "referenceEquity": 66.12791313,
+  "sourceComplete": true,
+  "stateHash": "eec7f5be79ad8f9997c6b110d75b5afb8b063ef1b13dd48c816794f24df1ec3e"
+}

@@ -1,0 +1,1859 @@
+{
+  "schemaVersion": 2,
+  "strategyId": "QUALITY102_CAUSAL_V1",
+  "selectorMode": "CAUSAL_V4",
+  "runtimeCommitSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+  "capturedAt": "2026-10-07T19:01:25.528Z",
+  "decisionTs": 1791399685528,
+  "referenceTs": 1791399600000,
+  "selectedReason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+  "items": [
+    {
+      "symbol": "AAVEUSDT",
+      "eligible": false,
+      "side": "WAIT",
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "referenceTs": 1791399600000,
+      "selected": false,
+      "rankingScore": 33.33,
+      "rankingFamily": "MR",
+      "rankingLayer": "S3",
+      "rankingVariant": "MR48_Z2.5_H24",
+      "rankingStage": "NO_RAW",
+      "rankingReason": "RAW_THRESHOLD_NOT_REACHED",
+      "diagnostics": {
+        "s34": [
+          {
+            "key": "AAVE|MR48_Z2.5_H24",
+            "symbol": "AAVEUSDT",
+            "family": "MR",
+            "layer": "S3",
+            "variant": "MR48_Z2.5_H24",
+            "gridOpen": false,
+            "rawDetected": false,
+            "candidateSide": 1,
+            "proximitySide": 1,
+            "proximityScore": 55.54,
+            "rankingScore": 33.33,
+            "rankingStage": "NO_RAW",
+            "reason": "RAW_THRESHOLD_NOT_REACHED",
+            "metrics": {
+              "zScore": -1.3886,
+              "zThreshold": 2.5,
+              "mean": 178.668958,
+              "stdev": 4.550742,
+              "ret14": 0.240196,
+              "developmentN": 10,
+              "developmentSpf": 1.522368,
+              "developmentAvg": 0.010865
+            },
+            "gates": [
+              {
+                "name": "S34_4H_GRID",
+                "pass": false,
+                "reason": "UTC_HOUR_MOD4_NOT1",
+                "value": 19,
+                "threshold": "hour % 4 == 1"
+              },
+              {
+                "name": "RAW_DETECTOR",
+                "pass": false,
+                "reason": "RAW_THRESHOLD_NOT_REACHED"
+              }
+            ]
+          }
+        ]
+      },
+      "rankingRank": 10
+    },
+    {
+      "symbol": "APTUSDT",
+      "eligible": false,
+      "side": "WAIT",
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "referenceTs": 1791399600000,
+      "selected": false,
+      "rankingScore": 80,
+      "rankingFamily": "REV",
+      "rankingLayer": "S3",
+      "rankingVariant": "REV24_T0.05_H24",
+      "rankingStage": "QUALITY_PASS",
+      "rankingReason": "V4_RET14_WINDOW_REJECT",
+      "diagnostics": {
+        "highVol": {
+          "symbol": "APTUSDT",
+          "selectionAvailable": false,
+          "scannerHealthPass": false,
+          "marketValid": false,
+          "rawMatched": false,
+          "proximityScore": 0,
+          "rankingScore": 0,
+          "reason": "HIGH_VOL_MONTHLY_RULE_UNAVAILABLE"
+        },
+        "s34": [
+          {
+            "key": "APT|REV24_T0.05_H24",
+            "symbol": "APTUSDT",
+            "family": "REV",
+            "layer": "S3",
+            "variant": "REV24_T0.05_H24",
+            "gridOpen": false,
+            "rawDetected": true,
+            "candidateSide": 1,
+            "proximitySide": 1,
+            "proximityScore": 100,
+            "rankingScore": 80,
+            "rankingStage": "QUALITY_PASS",
+            "reason": "V4_RET14_WINDOW_REJECT",
+            "metrics": {
+              "move": -0.109794,
+              "threshold": 0.05,
+              "ret14": -0.02479,
+              "strength": 0.109794,
+              "margin": 2.195881,
+              "hardStop": 0.06,
+              "holdHours": 24,
+              "developmentN": 44,
+              "developmentSpf": 1.277295,
+              "developmentAvg": 0.006567
+            },
+            "gates": [
+              {
+                "name": "S34_4H_GRID",
+                "pass": false,
+                "reason": "UTC_HOUR_MOD4_NOT1",
+                "value": 19,
+                "threshold": "hour % 4 == 1"
+              },
+              {
+                "name": "RAW_DETECTOR",
+                "pass": true,
+                "reason": "RAW_SIGNAL_DETECTED"
+              },
+              {
+                "name": "HISTORICAL_QUALITY",
+                "pass": true,
+                "reason": "UNCHANGED"
+              },
+              {
+                "name": "V4_FEATURE",
+                "pass": false,
+                "reason": "V4_RET14_WINDOW_REJECT"
+              }
+            ]
+          },
+          {
+            "key": "APT|REV6_T0.03_H24",
+            "symbol": "APTUSDT",
+            "family": "REV",
+            "layer": "S3",
+            "variant": "REV6_T0.03_H24",
+            "gridOpen": false,
+            "rawDetected": false,
+            "candidateSide": 1,
+            "proximitySide": 1,
+            "proximityScore": 67.21,
+            "rankingScore": 40.33,
+            "rankingStage": "NO_RAW",
+            "reason": "RAW_THRESHOLD_NOT_REACHED",
+            "metrics": {
+              "move": -0.020163,
+              "threshold": 0.03,
+              "ret14": -0.02479,
+              "developmentN": 18,
+              "developmentSpf": 2.393822,
+              "developmentAvg": 0.021541
+            },
+            "gates": [
+              {
+                "name": "S34_4H_GRID",
+                "pass": false,
+                "reason": "UTC_HOUR_MOD4_NOT1",
+                "value": 19,
+                "threshold": "hour % 4 == 1"
+              },
+              {
+                "name": "RAW_DETECTOR",
+                "pass": false,
+                "reason": "RAW_THRESHOLD_NOT_REACHED"
+              }
+            ]
+          }
+        ]
+      },
+      "rankingRank": 2
+    },
+    {
+      "symbol": "ARBUSDT",
+      "eligible": false,
+      "side": "WAIT",
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "referenceTs": 1791399600000,
+      "selected": false,
+      "rankingScore": 0,
+      "rankingFamily": "HIGH_VOL",
+      "rankingLayer": "S1",
+      "rankingStage": "HIGH_VOL_APPROACH",
+      "rankingReason": "HIGH_VOL_MONTHLY_RULE_UNAVAILABLE",
+      "diagnostics": {
+        "highVol": {
+          "symbol": "ARBUSDT",
+          "selectionAvailable": false,
+          "scannerHealthPass": false,
+          "marketValid": false,
+          "rawMatched": false,
+          "proximityScore": 0,
+          "rankingScore": 0,
+          "reason": "HIGH_VOL_MONTHLY_RULE_UNAVAILABLE"
+        }
+      },
+      "rankingRank": 14
+    },
+    {
+      "symbol": "AVAXUSDT",
+      "eligible": false,
+      "side": "WAIT",
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "referenceTs": 1791399600000,
+      "selected": false,
+      "rankingScore": 14.24,
+      "rankingFamily": "PB",
+      "rankingLayer": "S3",
+      "rankingVariant": "PB168_0.1_P24_0.04_H24",
+      "rankingStage": "NO_RAW",
+      "rankingReason": "RAW_THRESHOLD_NOT_REACHED",
+      "diagnostics": {
+        "s34": [
+          {
+            "key": "AVAX|PB168_0.1_P24_0.04_H24",
+            "symbol": "AVAXUSDT",
+            "family": "PB",
+            "layer": "S3",
+            "variant": "PB168_0.1_P24_0.04_H24",
+            "gridOpen": false,
+            "rawDetected": false,
+            "candidateSide": 1,
+            "proximitySide": 1,
+            "proximityScore": 23.73,
+            "rankingScore": 14.24,
+            "rankingStage": "NO_RAW",
+            "reason": "RAW_THRESHOLD_NOT_REACHED",
+            "metrics": {
+              "longRet": 0.023731,
+              "pullRet": -0.022826,
+              "trendThreshold": 0.1,
+              "pullThreshold": 0.04,
+              "longProgress": 0.2373,
+              "shortProgress": 0,
+              "ret14": 0.090909,
+              "developmentN": 7,
+              "developmentSpf": 1.710169,
+              "developmentAvg": 0.01108
+            },
+            "gates": [
+              {
+                "name": "S34_4H_GRID",
+                "pass": false,
+                "reason": "UTC_HOUR_MOD4_NOT1",
+                "value": 19,
+                "threshold": "hour % 4 == 1"
+              },
+              {
+                "name": "RAW_DETECTOR",
+                "pass": false,
+                "reason": "RAW_THRESHOLD_NOT_REACHED"
+              }
+            ]
+          },
+          {
+            "key": "AVAX|MR24_Z1.5_H24",
+            "symbol": "AVAXUSDT",
+            "family": "MR",
+            "layer": "S3",
+            "variant": "MR24_Z1.5_H24",
+            "gridOpen": false,
+            "rawDetected": false,
+            "candidateSide": 1,
+            "proximitySide": 1,
+            "proximityScore": 14.48,
+            "rankingScore": 8.69,
+            "rankingStage": "NO_RAW",
+            "reason": "RAW_THRESHOLD_NOT_REACHED",
+            "metrics": {
+              "zScore": -0.2172,
+              "zThreshold": 1.5,
+              "mean": 11.259625,
+              "stdev": 0.200823,
+              "ret14": 0.090909,
+              "developmentN": 53,
+              "developmentSpf": 1.246268,
+              "developmentAvg": 0.005775
+            },
+            "gates": [
+              {
+                "name": "S34_4H_GRID",
+                "pass": false,
+                "reason": "UTC_HOUR_MOD4_NOT1",
+                "value": 19,
+                "threshold": "hour % 4 == 1"
+              },
+              {
+                "name": "RAW_DETECTOR",
+                "pass": false,
+                "reason": "RAW_THRESHOLD_NOT_REACHED"
+              }
+            ]
+          },
+          {
+            "key": "AVAX|REV12_T0.03_H12",
+            "symbol": "AVAXUSDT",
+            "family": "REV",
+            "layer": "S3",
+            "variant": "REV12_T0.03_H12",
+            "gridOpen": false,
+            "rawDetected": false,
+            "candidateSide": 1,
+            "proximitySide": 1,
+            "proximityScore": 7.12,
+            "rankingScore": 4.27,
+            "rankingStage": "NO_RAW",
+            "reason": "RAW_THRESHOLD_NOT_REACHED",
+            "metrics": {
+              "move": -0.002135,
+              "threshold": 0.03,
+              "ret14": 0.090909,
+              "developmentN": 75,
+              "developmentSpf": 1.520268,
+              "developmentAvg": 0.006927
+            },
+            "gates": [
+              {
+                "name": "S34_4H_GRID",
+                "pass": false,
+                "reason": "UTC_HOUR_MOD4_NOT1",
+                "value": 19,
+                "threshold": "hour % 4 == 1"
+              },
+              {
+                "name": "RAW_DETECTOR",
+                "pass": false,
+                "reason": "RAW_THRESHOLD_NOT_REACHED"
+              }
+            ]
+          },
+          {
+            "key": "AVAX|REV12_T0.03_H8",
+            "symbol": "AVAXUSDT",
+            "family": "REV",
+            "layer": "S3",
+            "variant": "REV12_T0.03_H8",
+            "gridOpen": false,
+            "rawDetected": false,
+            "candidateSide": 1,
+            "proximitySide": 1,
+            "proximityScore": 7.12,
+            "rankingScore": 4.27,
+            "rankingStage": "NO_RAW",
+            "reason": "RAW_THRESHOLD_NOT_REACHED",
+            "metrics": {
+              "move": -0.002135,
+              "threshold": 0.03,
+              "ret14": 0.090909,
+              "developmentN": 78,
+              "developmentSpf": 1.403251,
+              "developmentAvg": 0.004758
+            },
+            "gates": [
+              {
+                "name": "S34_4H_GRID",
+                "pass": false,
+                "reason": "UTC_HOUR_MOD4_NOT1",
+                "value": 19,
+                "threshold": "hour % 4 == 1"
+              },
+              {
+                "name": "RAW_DETECTOR",
+                "pass": false,
+                "reason": "RAW_THRESHOLD_NOT_REACHED"
+              }
+            ]
+          },
+          {
+            "key": "AVAX|REV12_T0.08_H24",
+            "symbol": "AVAXUSDT",
+            "family": "REV",
+            "layer": "S3",
+            "variant": "REV12_T0.08_H24",
+            "gridOpen": false,
+            "rawDetected": false,
+            "candidateSide": 1,
+            "proximitySide": 1,
+            "proximityScore": 2.67,
+            "rankingScore": 1.6,
+            "rankingStage": "NO_RAW",
+            "reason": "RAW_THRESHOLD_NOT_REACHED",
+            "metrics": {
+              "move": -0.002135,
+              "threshold": 0.08,
+              "ret14": 0.090909,
+              "developmentN": 9,
+              "developmentSpf": 2.380683,
+              "developmentAvg": 0.021979
+            },
+            "gates": [
+              {
+                "name": "S34_4H_GRID",
+                "pass": false,
+                "reason": "UTC_HOUR_MOD4_NOT1",
+                "value": 19,
+                "threshold": "hour % 4 == 1"
+              },
+              {
+                "name": "RAW_DETECTOR",
+                "pass": false,
+                "reason": "RAW_THRESHOLD_NOT_REACHED"
+              }
+            ]
+          }
+        ]
+      },
+      "rankingRank": 11
+    },
+    {
+      "symbol": "DOGEUSDT",
+      "eligible": false,
+      "side": "WAIT",
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "referenceTs": 1791399600000,
+      "selected": false,
+      "rankingScore": 70,
+      "rankingFamily": "MR",
+      "rankingLayer": "S4",
+      "rankingVariant": "MR72_Z1.5_H12",
+      "rankingStage": "RAW_REJECTED",
+      "rankingReason": "MR_REGIME_GATE",
+      "diagnostics": {
+        "s34": [
+          {
+            "key": "DOGE|MR72_Z1.5_H12",
+            "symbol": "DOGEUSDT",
+            "family": "MR",
+            "layer": "S4",
+            "variant": "MR72_Z1.5_H12",
+            "gridOpen": false,
+            "rawDetected": true,
+            "candidateSide": 1,
+            "proximitySide": 1,
+            "proximityScore": 100,
+            "rankingScore": 70,
+            "rankingStage": "RAW_REJECTED",
+            "reason": "MR_REGIME_GATE",
+            "metrics": {
+              "zScore": -1.9948,
+              "zThreshold": 1.5,
+              "mean": 0.093796,
+              "stdev": 0.002645,
+              "ret14": -0.037818,
+              "strength": 1.994781,
+              "margin": 1.329854,
+              "hardStop": 0.05,
+              "holdHours": 12,
+              "developmentN": 72,
+              "developmentSpf": 1.385029,
+              "developmentAvg": 0.00619
+            },
+            "gates": [
+              {
+                "name": "S34_4H_GRID",
+                "pass": false,
+                "reason": "UTC_HOUR_MOD4_NOT1",
+                "value": 19,
+                "threshold": "hour % 4 == 1"
+              },
+              {
+                "name": "RAW_DETECTOR",
+                "pass": true,
+                "reason": "RAW_SIGNAL_DETECTED"
+              },
+              {
+                "name": "HISTORICAL_QUALITY",
+                "pass": false,
+                "reason": "MR_REGIME_GATE"
+              }
+            ]
+          },
+          {
+            "key": "DOGE|MR72_Z2.5_H12",
+            "symbol": "DOGEUSDT",
+            "family": "MR",
+            "layer": "S4",
+            "variant": "MR72_Z2.5_H12",
+            "gridOpen": false,
+            "rawDetected": false,
+            "candidateSide": 1,
+            "proximitySide": 1,
+            "proximityScore": 79.79,
+            "rankingScore": 47.87,
+            "rankingStage": "NO_RAW",
+            "reason": "RAW_THRESHOLD_NOT_REACHED",
+            "metrics": {
+              "zScore": -1.9948,
+              "zThreshold": 2.5,
+              "mean": 0.093796,
+              "stdev": 0.002645,
+              "ret14": -0.037818,
+              "developmentN": 11,
+              "developmentSpf": 1.431334,
+              "developmentAvg": 0.010298
+            },
+            "gates": [
+              {
+                "name": "S34_4H_GRID",
+                "pass": false,
+                "reason": "UTC_HOUR_MOD4_NOT1",
+                "value": 19,
+                "threshold": "hour % 4 == 1"
+              },
+              {
+                "name": "RAW_DETECTOR",
+                "pass": false,
+                "reason": "RAW_THRESHOLD_NOT_REACHED"
+              }
+            ]
+          },
+          {
+            "key": "DOGE|MR48_Z2.0_H12",
+            "symbol": "DOGEUSDT",
+            "family": "MR",
+            "layer": "S4",
+            "variant": "MR48_Z2.0_H12",
+            "gridOpen": false,
+            "rawDetected": false,
+            "candidateSide": 1,
+            "proximitySide": 1,
+            "proximityScore": 78.73,
+            "rankingScore": 47.24,
+            "rankingStage": "NO_RAW",
+            "reason": "RAW_THRESHOLD_NOT_REACHED",
+            "metrics": {
+              "zScore": -1.5746,
+              "zThreshold": 2,
+              "mean": 0.092838,
+              "stdev": 0.002742,
+              "ret14": -0.037818,
+              "developmentN": 35,
+              "developmentSpf": 1.476375,
+              "developmentAvg": 0.008098
+            },
+            "gates": [
+              {
+                "name": "S34_4H_GRID",
+                "pass": false,
+                "reason": "UTC_HOUR_MOD4_NOT1",
+                "value": 19,
+                "threshold": "hour % 4 == 1"
+              },
+              {
+                "name": "RAW_DETECTOR",
+                "pass": false,
+                "reason": "RAW_THRESHOLD_NOT_REACHED"
+              }
+            ]
+          },
+          {
+            "key": "DOGE|BRK72_H48_V0.8",
+            "symbol": "DOGEUSDT",
+            "family": "BRK",
+            "layer": "S3",
+            "variant": "BRK72_H48_V0.8",
+            "gridOpen": false,
+            "rawDetected": false,
+            "candidateSide": 1,
+            "proximitySide": 1,
+            "proximityScore": 78.55,
+            "rankingScore": 47.13,
+            "rankingStage": "NO_RAW",
+            "reason": "RAW_THRESHOLD_NOT_REACHED",
+            "metrics": {
+              "close": 0.08852,
+              "priorHigh": 0.09753,
+              "priorLow": 0.0878,
+              "breakoutDistance": -0.092382,
+              "volumeRatio": 0.6284,
+              "volumeThreshold": 0.8,
+              "volumeProgress": 0.7855,
+              "longPriceProgress": 0.9076,
+              "shortPriceProgress": 0.9919,
+              "ret14": -0.037818,
+              "developmentN": 29,
+              "developmentSpf": 1.358913,
+              "developmentAvg": 0.011204
+            },
+            "gates": [
+              {
+                "name": "S34_4H_GRID",
+                "pass": false,
+                "reason": "UTC_HOUR_MOD4_NOT1",
+                "value": 19,
+                "threshold": "hour % 4 == 1"
+              },
+              {
+                "name": "RAW_DETECTOR",
+                "pass": false,
+                "reason": "RAW_THRESHOLD_NOT_REACHED"
+              }
+            ]
+          },
+          {
+            "key": "DOGE|BRK24_H48_V1.0",
+            "symbol": "DOGEUSDT",
+            "family": "BRK",
+            "layer": "S3",
+            "variant": "BRK24_H48_V1.0",
+            "gridOpen": false,
+            "rawDetected": false,
+            "candidateSide": 1,
+            "proximitySide": 1,
+            "proximityScore": 62.84,
+            "rankingScore": 37.7,
+            "rankingStage": "NO_RAW",
+            "reason": "RAW_THRESHOLD_NOT_REACHED",
+            "metrics": {
+              "close": 0.08852,
+              "priorHigh": 0.09502,
+              "priorLow": 0.0878,
+              "breakoutDistance": -0.068407,
+              "volumeRatio": 0.6284,
+              "volumeThreshold": 1,
+              "volumeProgress": 0.6284,
+              "longPriceProgress": 0.9316,
+              "shortPriceProgress": 0.9919,
+              "ret14": -0.037818,
+              "developmentN": 38,
+              "developmentSpf": 1.287341,
+              "developmentAvg": 0.009663
+            },
+            "gates": [
+              {
+                "name": "S34_4H_GRID",
+                "pass": false,
+                "reason": "UTC_HOUR_MOD4_NOT1",
+                "value": 19,
+                "threshold": "hour % 4 == 1"
+              },
+              {
+                "name": "RAW_DETECTOR",
+                "pass": false,
+                "reason": "RAW_THRESHOLD_NOT_REACHED"
+              }
+            ]
+          }
+        ]
+      },
+      "rankingRank": 4
+    },
+    {
+      "symbol": "DOTUSDT",
+      "eligible": false,
+      "side": "WAIT",
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "referenceTs": 1791399600000,
+      "selected": false,
+      "rankingScore": 3.16,
+      "rankingFamily": "BRK",
+      "rankingLayer": "S3",
+      "rankingVariant": "BRK72_H48_V0.8",
+      "rankingStage": "NO_RAW",
+      "rankingReason": "RAW_THRESHOLD_NOT_REACHED",
+      "diagnostics": {
+        "s34": [
+          {
+            "key": "DOT|BRK72_H48_V0.8",
+            "symbol": "DOTUSDT",
+            "family": "BRK",
+            "layer": "S3",
+            "variant": "BRK72_H48_V0.8",
+            "gridOpen": false,
+            "rawDetected": false,
+            "candidateSide": 1,
+            "proximitySide": 1,
+            "proximityScore": 5.26,
+            "rankingScore": 3.16,
+            "rankingStage": "NO_RAW",
+            "reason": "RAW_THRESHOLD_NOT_REACHED",
+            "metrics": {
+              "close": 1.106,
+              "priorHigh": 1.246,
+              "priorLow": 1.092,
+              "breakoutDistance": -0.11236,
+              "volumeRatio": 0.0421,
+              "volumeThreshold": 0.8,
+              "volumeProgress": 0.0526,
+              "longPriceProgress": 0.8876,
+              "shortPriceProgress": 0.9873,
+              "ret14": 0.003643,
+              "developmentN": 33,
+              "developmentSpf": 1.247404,
+              "developmentAvg": 0.006527
+            },
+            "gates": [
+              {
+                "name": "S34_4H_GRID",
+                "pass": false,
+                "reason": "UTC_HOUR_MOD4_NOT1",
+                "value": 19,
+                "threshold": "hour % 4 == 1"
+              },
+              {
+                "name": "RAW_DETECTOR",
+                "pass": false,
+                "reason": "RAW_THRESHOLD_NOT_REACHED"
+              }
+            ]
+          }
+        ]
+      },
+      "rankingRank": 13
+    },
+    {
+      "symbol": "ENAUSDT",
+      "eligible": false,
+      "side": "WAIT",
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "referenceTs": 1791399600000,
+      "selected": false,
+      "rankingScore": 0,
+      "rankingFamily": "HIGH_VOL",
+      "rankingLayer": "S1",
+      "rankingStage": "HIGH_VOL_APPROACH",
+      "rankingReason": "HIGH_VOL_MONTHLY_RULE_UNAVAILABLE",
+      "diagnostics": {
+        "highVol": {
+          "symbol": "ENAUSDT",
+          "selectionAvailable": false,
+          "scannerHealthPass": false,
+          "marketValid": false,
+          "rawMatched": false,
+          "proximityScore": 0,
+          "rankingScore": 0,
+          "reason": "HIGH_VOL_MONTHLY_RULE_UNAVAILABLE"
+        }
+      },
+      "rankingRank": 15
+    },
+    {
+      "symbol": "FETUSDT",
+      "eligible": false,
+      "side": "WAIT",
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "referenceTs": 1791399600000,
+      "selected": false,
+      "rankingScore": 89,
+      "rankingFamily": "REV",
+      "rankingLayer": "S3",
+      "rankingVariant": "REV24_T0.05_H8",
+      "rankingStage": "GRID_WAIT",
+      "rankingReason": "S34_GRID_WAIT",
+      "diagnostics": {
+        "s34": [
+          {
+            "key": "FET|REV24_T0.05_H8",
+            "symbol": "FETUSDT",
+            "family": "REV",
+            "layer": "S3",
+            "variant": "REV24_T0.05_H8",
+            "gridOpen": false,
+            "rawDetected": true,
+            "candidateSide": 1,
+            "proximitySide": 1,
+            "proximityScore": 100,
+            "rankingScore": 89,
+            "rankingStage": "GRID_WAIT",
+            "reason": "S34_GRID_WAIT",
+            "metrics": {
+              "move": -0.056635,
+              "threshold": 0.05,
+              "ret14": 0.168884,
+              "strength": 0.056635,
+              "margin": 1.132699,
+              "hardStop": 0.045,
+              "holdHours": 8,
+              "developmentN": 69,
+              "developmentSpf": 1.298829,
+              "developmentAvg": 0.004387
+            },
+            "gates": [
+              {
+                "name": "S34_4H_GRID",
+                "pass": false,
+                "reason": "UTC_HOUR_MOD4_NOT1",
+                "value": 19,
+                "threshold": "hour % 4 == 1"
+              },
+              {
+                "name": "RAW_DETECTOR",
+                "pass": true,
+                "reason": "RAW_SIGNAL_DETECTED"
+              },
+              {
+                "name": "HISTORICAL_QUALITY",
+                "pass": true,
+                "reason": "UNCHANGED"
+              },
+              {
+                "name": "V4_FEATURE",
+                "pass": true,
+                "reason": "V4_FEATURE_GATE_PASS"
+              },
+              {
+                "name": "V4_IMPROVEMENT",
+                "pass": false,
+                "reason": "REV_LONG_RET14_BELOW_24PCT",
+                "value": 0.168884,
+                "threshold": 0.24
+              }
+            ]
+          },
+          {
+            "key": "FET|REV24_T0.08_H8",
+            "symbol": "FETUSDT",
+            "family": "REV",
+            "layer": "S3",
+            "variant": "REV24_T0.08_H8",
+            "gridOpen": false,
+            "rawDetected": false,
+            "candidateSide": 1,
+            "proximitySide": 1,
+            "proximityScore": 70.79,
+            "rankingScore": 42.48,
+            "rankingStage": "NO_RAW",
+            "reason": "RAW_THRESHOLD_NOT_REACHED",
+            "metrics": {
+              "move": -0.056635,
+              "threshold": 0.08,
+              "ret14": 0.168884,
+              "developmentN": 31,
+              "developmentSpf": 1.907948,
+              "developmentAvg": 0.00965
+            },
+            "gates": [
+              {
+                "name": "S34_4H_GRID",
+                "pass": false,
+                "reason": "UTC_HOUR_MOD4_NOT1",
+                "value": 19,
+                "threshold": "hour % 4 == 1"
+              },
+              {
+                "name": "RAW_DETECTOR",
+                "pass": false,
+                "reason": "RAW_THRESHOLD_NOT_REACHED"
+              }
+            ]
+          },
+          {
+            "key": "FET|BRK24_H48_V1.2",
+            "symbol": "FETUSDT",
+            "family": "BRK",
+            "layer": "S3",
+            "variant": "BRK24_H48_V1.2",
+            "gridOpen": false,
+            "rawDetected": false,
+            "candidateSide": 1,
+            "proximitySide": 1,
+            "proximityScore": 55.89,
+            "rankingScore": 33.53,
+            "rankingStage": "NO_RAW",
+            "reason": "RAW_THRESHOLD_NOT_REACHED",
+            "metrics": {
+              "close": 0.2282,
+              "priorHigh": 0.2446,
+              "priorLow": 0.2226,
+              "breakoutDistance": -0.067048,
+              "volumeRatio": 0.6707,
+              "volumeThreshold": 1.2,
+              "volumeProgress": 0.5589,
+              "longPriceProgress": 0.933,
+              "shortPriceProgress": 0.9755,
+              "ret14": 0.168884,
+              "developmentN": 39,
+              "developmentSpf": 1.328034,
+              "developmentAvg": 0.009791
+            },
+            "gates": [
+              {
+                "name": "S34_4H_GRID",
+                "pass": false,
+                "reason": "UTC_HOUR_MOD4_NOT1",
+                "value": 19,
+                "threshold": "hour % 4 == 1"
+              },
+              {
+                "name": "RAW_DETECTOR",
+                "pass": false,
+                "reason": "RAW_THRESHOLD_NOT_REACHED"
+              }
+            ]
+          },
+          {
+            "key": "FET|REV12_T0.05_H12",
+            "symbol": "FETUSDT",
+            "family": "REV",
+            "layer": "S3",
+            "variant": "REV12_T0.05_H12",
+            "gridOpen": false,
+            "rawDetected": false,
+            "candidateSide": 1,
+            "proximitySide": 1,
+            "proximityScore": 39.52,
+            "rankingScore": 23.71,
+            "rankingStage": "NO_RAW",
+            "reason": "RAW_THRESHOLD_NOT_REACHED",
+            "metrics": {
+              "move": -0.019759,
+              "threshold": 0.05,
+              "ret14": 0.168884,
+              "developmentN": 50,
+              "developmentSpf": 1.585201,
+              "developmentAvg": 0.008765
+            },
+            "gates": [
+              {
+                "name": "S34_4H_GRID",
+                "pass": false,
+                "reason": "UTC_HOUR_MOD4_NOT1",
+                "value": 19,
+                "threshold": "hour % 4 == 1"
+              },
+              {
+                "name": "RAW_DETECTOR",
+                "pass": false,
+                "reason": "RAW_THRESHOLD_NOT_REACHED"
+              }
+            ]
+          },
+          {
+            "key": "FET|PB168_0.1_P24_0.02_H12",
+            "symbol": "FETUSDT",
+            "family": "PB",
+            "layer": "S3",
+            "variant": "PB168_0.1_P24_0.02_H12",
+            "gridOpen": false,
+            "rawDetected": false,
+            "candidateSide": 1,
+            "proximitySide": 1,
+            "proximityScore": 27.93,
+            "rankingScore": 16.76,
+            "rankingStage": "NO_RAW",
+            "reason": "RAW_THRESHOLD_NOT_REACHED",
+            "metrics": {
+              "longRet": 0.027928,
+              "pullRet": -0.056635,
+              "trendThreshold": 0.1,
+              "pullThreshold": 0.02,
+              "longProgress": 0.2793,
+              "shortProgress": 0,
+              "ret14": 0.168884,
+              "developmentN": 26,
+              "developmentSpf": 2.000676,
+              "developmentAvg": 0.010053
+            },
+            "gates": [
+              {
+                "name": "S34_4H_GRID",
+                "pass": false,
+                "reason": "UTC_HOUR_MOD4_NOT1",
+                "value": 19,
+                "threshold": "hour % 4 == 1"
+              },
+              {
+                "name": "RAW_DETECTOR",
+                "pass": false,
+                "reason": "RAW_THRESHOLD_NOT_REACHED"
+              }
+            ]
+          },
+          {
+            "key": "FET|REV12_T0.08_H24",
+            "symbol": "FETUSDT",
+            "family": "REV",
+            "layer": "S3",
+            "variant": "REV12_T0.08_H24",
+            "gridOpen": false,
+            "rawDetected": false,
+            "candidateSide": 1,
+            "proximitySide": 1,
+            "proximityScore": 24.7,
+            "rankingScore": 14.82,
+            "rankingStage": "NO_RAW",
+            "reason": "RAW_THRESHOLD_NOT_REACHED",
+            "metrics": {
+              "move": -0.019759,
+              "threshold": 0.08,
+              "ret14": 0.168884,
+              "developmentN": 11,
+              "developmentSpf": 8.080704,
+              "developmentAvg": 0.041302
+            },
+            "gates": [
+              {
+                "name": "S34_4H_GRID",
+                "pass": false,
+                "reason": "UTC_HOUR_MOD4_NOT1",
+                "value": 19,
+                "threshold": "hour % 4 == 1"
+              },
+              {
+                "name": "RAW_DETECTOR",
+                "pass": false,
+                "reason": "RAW_THRESHOLD_NOT_REACHED"
+              }
+            ]
+          },
+          {
+            "key": "FET|PB72_0.1_P12_0.04_H12",
+            "symbol": "FETUSDT",
+            "family": "PB",
+            "layer": "S3",
+            "variant": "PB72_0.1_P12_0.04_H12",
+            "gridOpen": false,
+            "rawDetected": false,
+            "candidateSide": 1,
+            "proximitySide": 1,
+            "proximityScore": 0,
+            "rankingScore": 0,
+            "rankingStage": "NO_RAW",
+            "reason": "RAW_THRESHOLD_NOT_REACHED",
+            "metrics": {
+              "longRet": -0.089749,
+              "pullRet": -0.019759,
+              "trendThreshold": 0.1,
+              "pullThreshold": 0.04,
+              "longProgress": 0,
+              "shortProgress": 0,
+              "ret14": 0.168884,
+              "developmentN": 13,
+              "developmentSpf": 1.814847,
+              "developmentAvg": 0.009501
+            },
+            "gates": [
+              {
+                "name": "S34_4H_GRID",
+                "pass": false,
+                "reason": "UTC_HOUR_MOD4_NOT1",
+                "value": 19,
+                "threshold": "hour % 4 == 1"
+              },
+              {
+                "name": "RAW_DETECTOR",
+                "pass": false,
+                "reason": "RAW_THRESHOLD_NOT_REACHED"
+              }
+            ]
+          }
+        ]
+      },
+      "rankingRank": 1
+    },
+    {
+      "symbol": "FILUSDT",
+      "eligible": false,
+      "side": "WAIT",
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "referenceTs": 1791399600000,
+      "selected": false,
+      "rankingScore": 68.48,
+      "rankingFamily": "HIGH_VOL",
+      "rankingLayer": "S1",
+      "rankingVariant": "HV_LD0.1_LRSI35_SR0.05_SRSI60_STOP0.1",
+      "rankingStage": "HIGH_VOL_APPROACH",
+      "rankingReason": "HIGH_VOL_MARKET_VALIDITY_BLOCKED",
+      "diagnostics": {
+        "highVol": {
+          "symbol": "FILUSDT",
+          "selectionAvailable": true,
+          "scannerHealthPass": true,
+          "marketValid": false,
+          "rawMatched": false,
+          "proximitySide": 1,
+          "proximityScore": 71.19,
+          "rankingScore": 68.48,
+          "rule": {
+            "longDrop": 0.1,
+            "longRsi": 35,
+            "shortRally": 0.05,
+            "shortRsi": 60,
+            "hardStop": 0.1
+          },
+          "metrics": {
+            "trades": 5,
+            "wins": 3,
+            "totalReturn": 0.2475842009176532,
+            "winRate": 0.6,
+            "profitFactor": 2.3973563752606957,
+            "expectancy": 0.05666280101682124,
+            "maxDrawdown": -0.19247311
+          },
+          "features": {
+            "signalTs": 1791396000000,
+            "ret24": -0.11744386873920543,
+            "ret14d": 0.10010764262647998,
+            "rsi14": 23.18997593076493,
+            "atr14": 0.01419539501181234,
+            "atrPct": 0.013889818993945539,
+            "volumeRatio": 0.13569093314143588,
+            "barUp": false,
+            "barDown": true
+          },
+          "gateProgress": {
+            "regime": 1,
+            "barDirection": 0,
+            "ret24": 1,
+            "rsi14": 1,
+            "atrPct": 1,
+            "volumeRatio": 0.27138186628287175
+          },
+          "reason": "HIGH_VOL_MARKET_VALIDITY_BLOCKED"
+        }
+      },
+      "rankingRank": 6
+    },
+    {
+      "symbol": "LDOUSDT",
+      "eligible": false,
+      "side": "WAIT",
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "referenceTs": 1791399600000,
+      "selected": false,
+      "rankingScore": 58.72,
+      "rankingFamily": "BRK",
+      "rankingLayer": "S3",
+      "rankingVariant": "BRK24_H24_V1.0",
+      "rankingStage": "NO_RAW",
+      "rankingReason": "RAW_THRESHOLD_NOT_REACHED",
+      "diagnostics": {
+        "s34": [
+          {
+            "key": "LDO|BRK24_H24_V1.0",
+            "symbol": "LDOUSDT",
+            "family": "BRK",
+            "layer": "S3",
+            "variant": "BRK24_H24_V1.0",
+            "gridOpen": false,
+            "rawDetected": false,
+            "candidateSide": -1,
+            "proximitySide": -1,
+            "proximityScore": 97.87,
+            "rankingScore": 58.72,
+            "rankingStage": "NO_RAW",
+            "reason": "RAW_THRESHOLD_NOT_REACHED",
+            "metrics": {
+              "close": 0.4328,
+              "priorHigh": 0.4776,
+              "priorLow": 0.4236,
+              "breakoutDistance": -0.021257,
+              "volumeRatio": 11.5904,
+              "volumeThreshold": 1,
+              "volumeProgress": 1,
+              "longPriceProgress": 0.9062,
+              "shortPriceProgress": 0.9787,
+              "ret14": 0.118925,
+              "developmentN": 57,
+              "developmentSpf": 1.312811,
+              "developmentAvg": 0.007678
+            },
+            "gates": [
+              {
+                "name": "S34_4H_GRID",
+                "pass": false,
+                "reason": "UTC_HOUR_MOD4_NOT1",
+                "value": 19,
+                "threshold": "hour % 4 == 1"
+              },
+              {
+                "name": "RAW_DETECTOR",
+                "pass": false,
+                "reason": "RAW_THRESHOLD_NOT_REACHED"
+              }
+            ]
+          },
+          {
+            "key": "LDO|BRK48_H24_V1.0",
+            "symbol": "LDOUSDT",
+            "family": "BRK",
+            "layer": "S3",
+            "variant": "BRK48_H24_V1.0",
+            "gridOpen": false,
+            "rawDetected": false,
+            "candidateSide": -1,
+            "proximitySide": -1,
+            "proximityScore": 97.87,
+            "rankingScore": 58.72,
+            "rankingStage": "NO_RAW",
+            "reason": "RAW_THRESHOLD_NOT_REACHED",
+            "metrics": {
+              "close": 0.4328,
+              "priorHigh": 0.4776,
+              "priorLow": 0.4236,
+              "breakoutDistance": -0.021257,
+              "volumeRatio": 11.5904,
+              "volumeThreshold": 1,
+              "volumeProgress": 1,
+              "longPriceProgress": 0.9062,
+              "shortPriceProgress": 0.9787,
+              "ret14": 0.118925,
+              "developmentN": 48,
+              "developmentSpf": 1.316229,
+              "developmentAvg": 0.008454
+            },
+            "gates": [
+              {
+                "name": "S34_4H_GRID",
+                "pass": false,
+                "reason": "UTC_HOUR_MOD4_NOT1",
+                "value": 19,
+                "threshold": "hour % 4 == 1"
+              },
+              {
+                "name": "RAW_DETECTOR",
+                "pass": false,
+                "reason": "RAW_THRESHOLD_NOT_REACHED"
+              }
+            ]
+          }
+        ]
+      },
+      "rankingRank": 8
+    },
+    {
+      "symbol": "NEARUSDT",
+      "eligible": false,
+      "side": "WAIT",
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "referenceTs": 1791399600000,
+      "selected": false,
+      "rankingScore": 58.9,
+      "rankingFamily": "BRK",
+      "rankingLayer": "S3",
+      "rankingVariant": "BRK48_H48_V1.2",
+      "rankingStage": "NO_RAW",
+      "rankingReason": "RAW_THRESHOLD_NOT_REACHED",
+      "diagnostics": {
+        "s34": [
+          {
+            "key": "NEAR|BRK48_H48_V1.2",
+            "symbol": "NEARUSDT",
+            "family": "BRK",
+            "layer": "S3",
+            "variant": "BRK48_H48_V1.2",
+            "gridOpen": false,
+            "rawDetected": false,
+            "candidateSide": 1,
+            "proximitySide": 1,
+            "proximityScore": 98.17,
+            "rankingScore": 58.9,
+            "rankingStage": "NO_RAW",
+            "reason": "RAW_THRESHOLD_NOT_REACHED",
+            "metrics": {
+              "close": 5.27,
+              "priorHigh": 5.368,
+              "priorLow": 4.871,
+              "breakoutDistance": -0.018256,
+              "volumeRatio": 3.6416,
+              "volumeThreshold": 1.2,
+              "volumeProgress": 1,
+              "longPriceProgress": 0.9817,
+              "shortPriceProgress": 0.9243,
+              "ret14": 0.192395,
+              "developmentN": 38,
+              "developmentSpf": 1.319198,
+              "developmentAvg": 0.008983
+            },
+            "gates": [
+              {
+                "name": "S34_4H_GRID",
+                "pass": false,
+                "reason": "UTC_HOUR_MOD4_NOT1",
+                "value": 19,
+                "threshold": "hour % 4 == 1"
+              },
+              {
+                "name": "RAW_DETECTOR",
+                "pass": false,
+                "reason": "RAW_THRESHOLD_NOT_REACHED"
+              }
+            ]
+          },
+          {
+            "key": "NEAR|BRK168_H24_V1.2",
+            "symbol": "NEARUSDT",
+            "family": "BRK",
+            "layer": "S3",
+            "variant": "BRK168_H24_V1.2",
+            "gridOpen": false,
+            "rawDetected": false,
+            "candidateSide": 1,
+            "proximitySide": 1,
+            "proximityScore": 95.37,
+            "rankingScore": 57.22,
+            "rankingStage": "NO_RAW",
+            "reason": "RAW_THRESHOLD_NOT_REACHED",
+            "metrics": {
+              "close": 5.27,
+              "priorHigh": 5.526,
+              "priorLow": 4.594,
+              "breakoutDistance": -0.046326,
+              "volumeRatio": 3.6416,
+              "volumeThreshold": 1.2,
+              "volumeProgress": 1,
+              "longPriceProgress": 0.9537,
+              "shortPriceProgress": 0.8717,
+              "ret14": 0.192395,
+              "developmentN": 27,
+              "developmentSpf": 1.488402,
+              "developmentAvg": 0.009133
+            },
+            "gates": [
+              {
+                "name": "S34_4H_GRID",
+                "pass": false,
+                "reason": "UTC_HOUR_MOD4_NOT1",
+                "value": 19,
+                "threshold": "hour % 4 == 1"
+              },
+              {
+                "name": "RAW_DETECTOR",
+                "pass": false,
+                "reason": "RAW_THRESHOLD_NOT_REACHED"
+              }
+            ]
+          }
+        ]
+      },
+      "rankingRank": 7
+    },
+    {
+      "symbol": "ONDOUSDT",
+      "eligible": false,
+      "side": "WAIT",
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "referenceTs": 1791399600000,
+      "selected": false,
+      "rankingScore": 77.78,
+      "rankingFamily": "HIGH_VOL",
+      "rankingLayer": "S1",
+      "rankingVariant": "HV_LD0.08_LRSI35_SR0.08_SRSI60_STOP0.1",
+      "rankingStage": "HIGH_VOL_APPROACH",
+      "rankingReason": "HIGH_VOL_THRESHOLD_NOT_REACHED",
+      "diagnostics": {
+        "highVol": {
+          "symbol": "ONDOUSDT",
+          "selectionAvailable": true,
+          "scannerHealthPass": true,
+          "marketValid": true,
+          "rawMatched": false,
+          "proximitySide": 1,
+          "proximityScore": 94.44,
+          "rankingScore": 77.78,
+          "rule": {
+            "longDrop": 0.08,
+            "longRsi": 35,
+            "shortRally": 0.08,
+            "shortRsi": 60,
+            "hardStop": 0.1
+          },
+          "metrics": {
+            "trades": 7,
+            "wins": 5,
+            "totalReturn": 0.14257130203097246,
+            "winRate": 0.7142857142857143,
+            "profitFactor": 1.9048908487359149,
+            "expectancy": 0.022360939691507424,
+            "maxDrawdown": -0.10150000000000015
+          },
+          "features": {
+            "signalTs": 1791396000000,
+            "ret24": -0.0630016051364366,
+            "ret14d": 0.13570038910505833,
+            "rsi14": 39.83126973475209,
+            "atr14": 0.006009836539724078,
+            "atrPct": 0.012869028992985178,
+            "volumeRatio": 0.6119166567863905,
+            "barUp": true,
+            "barDown": false
+          },
+          "gateProgress": {
+            "regime": 1,
+            "barDirection": 1,
+            "ret24": 0.7875200642054575,
+            "rsi14": 0.8787066099844442,
+            "atrPct": 1,
+            "volumeRatio": 1
+          },
+          "reason": "HIGH_VOL_THRESHOLD_NOT_REACHED"
+        }
+      },
+      "rankingRank": 3
+    },
+    {
+      "symbol": "OPUSDT",
+      "eligible": false,
+      "side": "WAIT",
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "referenceTs": 1791399600000,
+      "selected": false,
+      "rankingScore": 0,
+      "rankingFamily": "HIGH_VOL",
+      "rankingLayer": "S1",
+      "rankingStage": "HIGH_VOL_APPROACH",
+      "rankingReason": "HIGH_VOL_MONTHLY_RULE_UNAVAILABLE",
+      "diagnostics": {
+        "highVol": {
+          "symbol": "OPUSDT",
+          "selectionAvailable": false,
+          "scannerHealthPass": false,
+          "marketValid": false,
+          "rawMatched": false,
+          "proximityScore": 0,
+          "rankingScore": 0,
+          "reason": "HIGH_VOL_MONTHLY_RULE_UNAVAILABLE"
+        }
+      },
+      "rankingRank": 16
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "eligible": false,
+      "side": "WAIT",
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "referenceTs": 1791399600000,
+      "selected": false,
+      "rankingScore": 7.44,
+      "rankingFamily": "BRK",
+      "rankingLayer": "S4",
+      "rankingVariant": "BRK168_H12_V1.2",
+      "rankingStage": "NO_RAW",
+      "rankingReason": "RAW_THRESHOLD_NOT_REACHED",
+      "diagnostics": {
+        "highVol": {
+          "symbol": "RENDERUSDT",
+          "selectionAvailable": false,
+          "scannerHealthPass": false,
+          "marketValid": false,
+          "rawMatched": false,
+          "proximityScore": 0,
+          "rankingScore": 0,
+          "reason": "HIGH_VOL_MONTHLY_RULE_UNAVAILABLE"
+        },
+        "s34": [
+          {
+            "key": "RENDER|BRK168_H12_V1.2",
+            "symbol": "RENDERUSDT",
+            "family": "BRK",
+            "layer": "S4",
+            "variant": "BRK168_H12_V1.2",
+            "gridOpen": false,
+            "rawDetected": false,
+            "candidateSide": 1,
+            "proximitySide": 1,
+            "proximityScore": 12.4,
+            "rankingScore": 7.44,
+            "rankingStage": "NO_RAW",
+            "reason": "RAW_THRESHOLD_NOT_REACHED",
+            "metrics": {
+              "close": 2.044,
+              "priorHigh": 2.2,
+              "priorLow": 1.86,
+              "breakoutDistance": -0.070909,
+              "volumeRatio": 0.1488,
+              "volumeThreshold": 1.2,
+              "volumeProgress": 0.124,
+              "longPriceProgress": 0.9291,
+              "shortPriceProgress": 0.91,
+              "ret14": 0.179191,
+              "developmentN": 37,
+              "developmentSpf": 1.246102,
+              "developmentAvg": 0.004336
+            },
+            "gates": [
+              {
+                "name": "S34_4H_GRID",
+                "pass": false,
+                "reason": "UTC_HOUR_MOD4_NOT1",
+                "value": 19,
+                "threshold": "hour % 4 == 1"
+              },
+              {
+                "name": "RAW_DETECTOR",
+                "pass": false,
+                "reason": "RAW_THRESHOLD_NOT_REACHED"
+              }
+            ]
+          }
+        ]
+      },
+      "rankingRank": 12
+    },
+    {
+      "symbol": "SEIUSDT",
+      "eligible": false,
+      "side": "WAIT",
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "referenceTs": 1791399600000,
+      "selected": false,
+      "rankingScore": 0,
+      "rankingFamily": "HIGH_VOL",
+      "rankingLayer": "S1",
+      "rankingStage": "HIGH_VOL_APPROACH",
+      "rankingReason": "HIGH_VOL_MONTHLY_RULE_UNAVAILABLE",
+      "diagnostics": {
+        "highVol": {
+          "symbol": "SEIUSDT",
+          "selectionAvailable": false,
+          "scannerHealthPass": false,
+          "marketValid": false,
+          "rawMatched": false,
+          "proximityScore": 0,
+          "rankingScore": 0,
+          "reason": "HIGH_VOL_MONTHLY_RULE_UNAVAILABLE"
+        }
+      },
+      "rankingRank": 17
+    },
+    {
+      "symbol": "SOLUSDT",
+      "eligible": false,
+      "side": "WAIT",
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "referenceTs": 1791399600000,
+      "selected": false,
+      "rankingScore": 46.99,
+      "rankingFamily": "BRK",
+      "rankingLayer": "S3",
+      "rankingVariant": "BRK24_H48_V1.2",
+      "rankingStage": "NO_RAW",
+      "rankingReason": "RAW_THRESHOLD_NOT_REACHED",
+      "diagnostics": {
+        "s34": [
+          {
+            "key": "SOL|BRK24_H48_V1.2",
+            "symbol": "SOLUSDT",
+            "family": "BRK",
+            "layer": "S3",
+            "variant": "BRK24_H48_V1.2",
+            "gridOpen": false,
+            "rawDetected": false,
+            "candidateSide": 1,
+            "proximitySide": 1,
+            "proximityScore": 78.31,
+            "rankingScore": 46.99,
+            "rankingStage": "NO_RAW",
+            "reason": "RAW_THRESHOLD_NOT_REACHED",
+            "metrics": {
+              "close": 116.05,
+              "priorHigh": 121.43,
+              "priorLow": 115.48,
+              "breakoutDistance": -0.044305,
+              "volumeRatio": 0.9398,
+              "volumeThreshold": 1.2,
+              "volumeProgress": 0.7831,
+              "longPriceProgress": 0.9557,
+              "shortPriceProgress": 0.9951,
+              "ret14": 0.016197,
+              "developmentN": 37,
+              "developmentSpf": 1.788571,
+              "developmentAvg": 0.017936
+            },
+            "gates": [
+              {
+                "name": "S34_4H_GRID",
+                "pass": false,
+                "reason": "UTC_HOUR_MOD4_NOT1",
+                "value": 19,
+                "threshold": "hour % 4 == 1"
+              },
+              {
+                "name": "RAW_DETECTOR",
+                "pass": false,
+                "reason": "RAW_THRESHOLD_NOT_REACHED"
+              }
+            ]
+          },
+          {
+            "key": "SOL|BRK72_H48_V1.2",
+            "symbol": "SOLUSDT",
+            "family": "BRK",
+            "layer": "S3",
+            "variant": "BRK72_H48_V1.2",
+            "gridOpen": false,
+            "rawDetected": false,
+            "candidateSide": 1,
+            "proximitySide": 1,
+            "proximityScore": 78.31,
+            "rankingScore": 46.99,
+            "rankingStage": "NO_RAW",
+            "reason": "RAW_THRESHOLD_NOT_REACHED",
+            "metrics": {
+              "close": 116.05,
+              "priorHigh": 122.25,
+              "priorLow": 115.48,
+              "breakoutDistance": -0.050716,
+              "volumeRatio": 0.9398,
+              "volumeThreshold": 1.2,
+              "volumeProgress": 0.7831,
+              "longPriceProgress": 0.9493,
+              "shortPriceProgress": 0.9951,
+              "ret14": 0.016197,
+              "developmentN": 25,
+              "developmentSpf": 1.75062,
+              "developmentAvg": 0.017123
+            },
+            "gates": [
+              {
+                "name": "S34_4H_GRID",
+                "pass": false,
+                "reason": "UTC_HOUR_MOD4_NOT1",
+                "value": 19,
+                "threshold": "hour % 4 == 1"
+              },
+              {
+                "name": "RAW_DETECTOR",
+                "pass": false,
+                "reason": "RAW_THRESHOLD_NOT_REACHED"
+              }
+            ]
+          }
+        ]
+      },
+      "rankingRank": 9
+    },
+    {
+      "symbol": "SUIUSDT",
+      "eligible": false,
+      "side": "WAIT",
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "referenceTs": 1791399600000,
+      "selected": false,
+      "rankingScore": 0,
+      "rankingFamily": "HIGH_VOL",
+      "rankingLayer": "S1",
+      "rankingStage": "HIGH_VOL_APPROACH",
+      "rankingReason": "HIGH_VOL_MONTHLY_RULE_UNAVAILABLE",
+      "diagnostics": {
+        "highVol": {
+          "symbol": "SUIUSDT",
+          "selectionAvailable": false,
+          "scannerHealthPass": false,
+          "marketValid": false,
+          "rawMatched": false,
+          "proximityScore": 0,
+          "rankingScore": 0,
+          "reason": "HIGH_VOL_MONTHLY_RULE_UNAVAILABLE"
+        }
+      },
+      "rankingRank": 18
+    },
+    {
+      "symbol": "TRXUSDT",
+      "eligible": false,
+      "side": "WAIT",
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "referenceTs": 1791399600000,
+      "selected": false,
+      "rankingScore": 0,
+      "rankingFamily": "HIGH_VOL",
+      "rankingLayer": "S1",
+      "rankingStage": "HIGH_VOL_APPROACH",
+      "rankingReason": "HIGH_VOL_MONTHLY_RULE_UNAVAILABLE",
+      "diagnostics": {
+        "highVol": {
+          "symbol": "TRXUSDT",
+          "selectionAvailable": false,
+          "scannerHealthPass": false,
+          "marketValid": false,
+          "rawMatched": false,
+          "proximityScore": 0,
+          "rankingScore": 0,
+          "reason": "HIGH_VOL_MONTHLY_RULE_UNAVAILABLE"
+        }
+      },
+      "rankingRank": 19
+    },
+    {
+      "symbol": "UNIUSDT",
+      "eligible": false,
+      "side": "WAIT",
+      "requestedGross": 0,
+      "reason": "QUALITY102_CAUSAL_V4_NO_SIGNAL",
+      "referenceTs": 1791399600000,
+      "selected": false,
+      "rankingScore": 70,
+      "rankingFamily": "MR",
+      "rankingLayer": "S4",
+      "rankingVariant": "MR48_Z1.5_H24",
+      "rankingStage": "RAW_REJECTED",
+      "rankingReason": "MR_REGIME_GATE",
+      "diagnostics": {
+        "s34": [
+          {
+            "key": "UNI|MR48_Z1.5_H24",
+            "symbol": "UNIUSDT",
+            "family": "MR",
+            "layer": "S4",
+            "variant": "MR48_Z1.5_H24",
+            "gridOpen": false,
+            "rawDetected": true,
+            "candidateSide": 1,
+            "proximitySide": 1,
+            "proximityScore": 100,
+            "rankingScore": 70,
+            "rankingStage": "RAW_REJECTED",
+            "reason": "MR_REGIME_GATE",
+            "metrics": {
+              "zScore": -1.8018,
+              "zThreshold": 1.5,
+              "mean": 8.529063,
+              "stdev": 0.441252,
+              "ret14": -0.153636,
+              "strength": 1.801832,
+              "margin": 1.201222,
+              "hardStop": 0.07,
+              "holdHours": 24,
+              "developmentN": 63,
+              "developmentSpf": 1.467059,
+              "developmentAvg": 0.009748
+            },
+            "gates": [
+              {
+                "name": "S34_4H_GRID",
+                "pass": false,
+                "reason": "UTC_HOUR_MOD4_NOT1",
+                "value": 19,
+                "threshold": "hour % 4 == 1"
+              },
+              {
+                "name": "RAW_DETECTOR",
+                "pass": true,
+                "reason": "RAW_SIGNAL_DETECTED"
+              },
+              {
+                "name": "HISTORICAL_QUALITY",
+                "pass": false,
+                "reason": "MR_REGIME_GATE"
+              }
+            ]
+          },
+          {
+            "key": "UNI|MR72_Z1.5_H24",
+            "symbol": "UNIUSDT",
+            "family": "MR",
+            "layer": "S4",
+            "variant": "MR72_Z1.5_H24",
+            "gridOpen": false,
+            "rawDetected": true,
+            "candidateSide": 1,
+            "proximitySide": 1,
+            "proximityScore": 100,
+            "rankingScore": 70,
+            "rankingStage": "RAW_REJECTED",
+            "reason": "MR_REGIME_GATE",
+            "metrics": {
+              "zScore": -2.2214,
+              "zThreshold": 1.5,
+              "mean": 8.697458,
+              "stdev": 0.433722,
+              "ret14": -0.153636,
+              "strength": 2.221372,
+              "margin": 1.480915,
+              "hardStop": 0.07,
+              "holdHours": 24,
+              "developmentN": 56,
+              "developmentSpf": 1.266138,
+              "developmentAvg": 0.006292
+            },
+            "gates": [
+              {
+                "name": "S34_4H_GRID",
+                "pass": false,
+                "reason": "UTC_HOUR_MOD4_NOT1",
+                "value": 19,
+                "threshold": "hour % 4 == 1"
+              },
+              {
+                "name": "RAW_DETECTOR",
+                "pass": true,
+                "reason": "RAW_SIGNAL_DETECTED"
+              },
+              {
+                "name": "HISTORICAL_QUALITY",
+                "pass": false,
+                "reason": "MR_REGIME_GATE"
+              }
+            ]
+          },
+          {
+            "key": "UNI|MR24_Z2.0_H24",
+            "symbol": "UNIUSDT",
+            "family": "MR",
+            "layer": "S4",
+            "variant": "MR24_Z2.0_H24",
+            "gridOpen": false,
+            "rawDetected": false,
+            "candidateSide": 1,
+            "proximitySide": 1,
+            "proximityScore": 74.1,
+            "rankingScore": 44.46,
+            "rankingStage": "NO_RAW",
+            "reason": "RAW_THRESHOLD_NOT_REACHED",
+            "metrics": {
+              "zScore": -1.4819,
+              "zThreshold": 2,
+              "mean": 8.153667,
+              "stdev": 0.283187,
+              "ret14": -0.153636,
+              "developmentN": 19,
+              "developmentSpf": 1.821816,
+              "developmentAvg": 0.017782
+            },
+            "gates": [
+              {
+                "name": "S34_4H_GRID",
+                "pass": false,
+                "reason": "UTC_HOUR_MOD4_NOT1",
+                "value": 19,
+                "threshold": "hour % 4 == 1"
+              },
+              {
+                "name": "RAW_DETECTOR",
+                "pass": false,
+                "reason": "RAW_THRESHOLD_NOT_REACHED"
+              }
+            ]
+          }
+        ]
+      },
+      "rankingRank": 5
+    }
+  ],
+  "rankingModelVersion": "Q102_PROXIMITY_V1",
+  "rankingCapturedAt": "2026-10-07T19:05:02.580Z",
+  "observerCommitSha": "ce1edeead8d0f9e5d88e829d415057117502a335"
+}

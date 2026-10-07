@@ -1,0 +1,10 @@
+{
+  "schema": "disdex-idle-baseline-admission/v1",
+  "runtimeSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+  "decisionTs": 1791396000000,
+  "updatedAt": 1791399416457,
+  "sourceComplete": true,
+  "baselineOpenPositions": 0,
+  "baselinePendingExposure": 0,
+  "baselineAcceptedThisTimestamp": 1
+}

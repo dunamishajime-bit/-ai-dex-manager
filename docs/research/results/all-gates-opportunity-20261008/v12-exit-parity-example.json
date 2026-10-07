@@ -1,0 +1,55 @@
+{
+  "scope": "H1_PROXY_VS_PRIOR_REFERENCE_CANDIDATE_LEDGER_NOT_ACTUAL_FILL",
+  "old": [
+    {
+      "ambiguous_bar": false,
+      "entry_price": 0.8216,
+      "entry_quality_class": "STANDARD",
+      "entry_ts_ms": 1754798400000,
+      "exit_price": 0.8314967741935484,
+      "exit_reason": "V12_STOP",
+      "exit_ts_ms": 1754809200000,
+      "funding_return_per_gross": 0,
+      "rank": 2,
+      "requested_gross": 0.8805631839771526,
+      "side": "LONG",
+      "signal_ts_ms": 1754798400000,
+      "source_runtime_sha": "dbf84542311c15f69508f91a0e7311ff7e686d96",
+      "status": "MODELED_CLOSED_TRADE",
+      "strategy_id": "V12",
+      "symbol": "ADAUSDT",
+      "unit_price_return": 0.01204573295222544
+    }
+  ],
+  "new": [
+    {
+      "symbol": "ADAUSDT",
+      "side": "LONG",
+      "entry_ts_ms": 1754798400000,
+      "entry_price": 0.8216,
+      "maxHoldHours": 46,
+      "hardStop": 0.08,
+      "atr": 0.012016129032258077,
+      "rank": 2,
+      "entryGrossMultiplier": 1,
+      "exit_ts_ms": 1754805600000,
+      "exit_price": 0.8137,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "unit_gross_return": -0.009615384615384692,
+      "events": [
+        {
+          "ts": 1754802000000,
+          "mark_return": 0.014970788704965932,
+          "mfe": 0.014970788704965932,
+          "mae": -0.0015822784810126667
+        },
+        {
+          "ts": 1754805600000,
+          "mark_return": -0.012049659201557983,
+          "mfe": 0.010223953261927932,
+          "mae": -0.012049659201557983
+        }
+      ]
+    }
+  ]
+}

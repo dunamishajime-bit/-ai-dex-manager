@@ -1,0 +1,60 @@
+{
+  "schema": "disdex-idle-priority-state/v2",
+  "runtimeSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+  "updatedAt": 1791400047080,
+  "positions": [],
+  "manualReview": null,
+  "pending": null,
+  "lastDecision": {
+    "decisionTs": 1791399600000,
+    "accepted": false,
+    "reason": "BASELINE_ADMISSION_BLOCKED:BASELINE_ADMISSION_SOURCE_STALE_OR_TS_MISMATCH"
+  },
+  "lastAcceptedBySymbol": {},
+  "failures": [
+    {
+      "message": "IDLE_RUNNER_FAIL_CLOSED:EACCES: permission denied, open '/var/lib/disdex/shared/operator-activation/current.json'",
+      "occurredAt": 1790764899226
+    },
+    {
+      "message": "IDLE_BENIGN_OPERATOR_ACTIVATION_RECOVERY",
+      "occurredAt": 1790767250440
+    },
+    {
+      "message": "IDLE_RUNNER_FAIL_CLOSED:EACCES: permission denied, open '/var/lib/disdex/shared/operator-activation/current.json'",
+      "occurredAt": 1790767557060
+    },
+    {
+      "message": "IDLE_BENIGN_OPERATOR_ACTIVATION_RECOVERY",
+      "occurredAt": 1790768204047
+    },
+    {
+      "message": "IDLE_RUNNER_FAIL_CLOSED:EACCES: permission denied, open '/var/lib/disdex/shared/operator-activation/current.json'",
+      "occurredAt": 1790768511957
+    },
+    {
+      "message": "IDLE_BENIGN_OPERATOR_ACTIVATION_RECOVERY",
+      "occurredAt": 1790768765685
+    },
+    {
+      "message": "IDLE_RUNNER_FAIL_CLOSED:EACCES: permission denied, open '/var/lib/disdex/shared/operator-activation/current.json'",
+      "occurredAt": 1790768766396
+    },
+    {
+      "message": "IDLE_BENIGN_OPERATOR_ACTIVATION_RECOVERY",
+      "occurredAt": 1790769519661
+    },
+    {
+      "message": "IDLE_RUNNER_FAIL_CLOSED:EACCES: permission denied, open '/var/lib/disdex/shared/aster-rate-budget.json'",
+      "occurredAt": 1790797602192
+    },
+    {
+      "message": "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:5007",
+      "occurredAt": 1790874914947
+    },
+    {
+      "message": "IDLE_BENIGN_RATE_BUDGET_RECOVERY",
+      "occurredAt": 1790896762347
+    }
+  ]
+}

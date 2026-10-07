@@ -1,0 +1,30 @@
+{
+  "schema": "v12-x1-all-runner-state/v2",
+  "strategyId": "V12_X1.00_ALL",
+  "mode": "LIVE",
+  "updatedAt": 1791396054951,
+  "runtimeCommitSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+  "lastReferenceTs": 1791396000000,
+  "lastCompletedIdempotencyKey": "v12-entry-e97627f732a5cf53fe139d",
+  "cooldownUntilTs": 1790964000000,
+  "reconciliationStatus": "PASS",
+  "sideLossLedger": {
+    "LONG": {
+      "losses": 0,
+      "until": 0
+    },
+    "SHORT": {
+      "losses": 0,
+      "until": 0
+    },
+    "completed": [],
+    "initializedAt": 1791164926881
+  },
+  "latestDd1296Decision": {
+    "symbol": "LTC",
+    "side": "SHORT",
+    "rank": 1,
+    "entryTs": 1791396000000,
+    "reason": "DD1296_ENTRY_ALLOWED"
+  }
+}

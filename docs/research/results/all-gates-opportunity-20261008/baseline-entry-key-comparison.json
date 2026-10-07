@@ -1,0 +1,23 @@
+{
+  "V12": {
+    "prior_count": 1978,
+    "current_count": 1978,
+    "intersection": 1978,
+    "old_only": 0,
+    "current_only": 0
+  },
+  "PENGU": {
+    "prior_count": 113,
+    "current_count": 113,
+    "intersection": 113,
+    "old_only": 0,
+    "current_only": 0
+  },
+  "FET": {
+    "prior_count": 21,
+    "current_count": 21,
+    "intersection": 21,
+    "old_only": 0,
+    "current_only": 0
+  }
+}

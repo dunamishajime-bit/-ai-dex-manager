@@ -1,0 +1,3164 @@
+[
+  {
+    "strategy": "HYPE",
+    "name": "BASELINE",
+    "scope": "SOURCE_ENTRY_H1_UNIT_RETURN_ISOLATED_SLEEVE_NOT_GLOBAL_BT",
+    "raw_candidate_count": 60,
+    "annual_candidates": [
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1759435200000,
+        "entry_price": 50.8455,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.6610714285714283,
+        "trailingDistance": 1.993285714285714
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1761418800000,
+        "entry_price": 42.6815,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.3840178571428563,
+        "trailingDistance": 1.6608214285714276
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1761429600000,
+        "entry_price": 43.70167,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.6041071428571425,
+        "trailingDistance": 1.9249285714285709
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1761469200000,
+        "entry_price": 45.30931,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.665558928571428,
+        "trailingDistance": 1.9986707142857139
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1761660000000,
+        "entry_price": 49.241,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.9516071428571418,
+        "trailingDistance": 2.3419285714285705
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1767744000000,
+        "entry_price": 28.24035,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.2886607142857143,
+        "trailingDistance": 1.5463928571428571
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1770073200000,
+        "entry_price": 33.935,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.4469642857142855,
+        "trailingDistance": 2.9363571428571427
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1770080400000,
+        "entry_price": 34.066,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.483214285714285,
+        "trailingDistance": 2.979857142857142
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1770238800000,
+        "entry_price": 35.828,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.4491071428571423,
+        "trailingDistance": 2.938928571428571
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1770343200000,
+        "entry_price": 36.3245,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 3.877321428571431,
+        "trailingDistance": 4.6527857142857165
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1772413200000,
+        "entry_price": 32.425,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.5996428571428556,
+        "trailingDistance": 1.9195714285714267
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1772470800000,
+        "entry_price": 33.16,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.70482142857143,
+        "trailingDistance": 2.045785714285716
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1772640000000,
+        "entry_price": 33.107,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.308392857142858,
+        "trailingDistance": 1.5700714285714295
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773234000000,
+        "entry_price": 35.517,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.1199999999999946,
+        "trailingDistance": 1.3439999999999936
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773237600000,
+        "entry_price": 36.072,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.2451785714285661,
+        "trailingDistance": 1.4942142857142793
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773241200000,
+        "entry_price": 36.754,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.3626785714285663,
+        "trailingDistance": 1.6352142857142797
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773367200000,
+        "entry_price": 38.239,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.2864285714285688,
+        "trailingDistance": 1.5437142857142827
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773496800000,
+        "entry_price": 38,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 0.9874999999999977,
+        "trailingDistance": 1.1849999999999972
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773640800000,
+        "entry_price": 38.328,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.176964285714286,
+        "trailingDistance": 1.412357142857143
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773648000000,
+        "entry_price": 38.753,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.3287500000000005,
+        "trailingDistance": 1.5945000000000005
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773694800000,
+        "entry_price": 40.427,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.6428571428571446,
+        "trailingDistance": 1.9714285714285733
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773698400000,
+        "entry_price": 41.1,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.6562500000000022,
+        "trailingDistance": 1.9875000000000025
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773781200000,
+        "entry_price": 41.871,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.6503571428571422,
+        "trailingDistance": 1.9804285714285708
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773856800000,
+        "entry_price": 43.22,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.2126785714285697,
+        "trailingDistance": 2.6552142857142838
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1774440000000,
+        "entry_price": 41.361,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.1907142857142843,
+        "trailingDistance": 1.428857142857141
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1775757600000,
+        "entry_price": 40.095,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.0642857142857183,
+        "trailingDistance": 1.277142857142862
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1775786400000,
+        "entry_price": 40.542,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.399464285714289,
+        "trailingDistance": 1.6793571428571465
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1775833200000,
+        "entry_price": 42.012,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.3128571428571447,
+        "trailingDistance": 1.5754285714285738
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1775894400000,
+        "entry_price": 42.495,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 0.9414285714285724,
+        "trailingDistance": 1.1297142857142868
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1775937600000,
+        "entry_price": 42.988,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.0649999999999997,
+        "trailingDistance": 1.2779999999999996
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1776088800000,
+        "entry_price": 42.69,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.075535714285716,
+        "trailingDistance": 1.2906428571428594
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1776099600000,
+        "entry_price": 43.128,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.2062500000000018,
+        "trailingDistance": 1.447500000000002
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1776106800000,
+        "entry_price": 43.777,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.3217857142857157,
+        "trailingDistance": 1.5861428571428586
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1776121200000,
+        "entry_price": 44.425,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.4866071428571435,
+        "trailingDistance": 1.783928571428572
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1776441600000,
+        "entry_price": 45.247,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.370357142857144,
+        "trailingDistance": 1.644428571428573
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779152400000,
+        "entry_price": 48.133,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.400000000000001,
+        "trailingDistance": 2.880000000000001
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779274800000,
+        "entry_price": 49.623,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.5507142857142853,
+        "trailingDistance": 1.8608571428571423
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779285600000,
+        "entry_price": 51.244,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.9135714285714276,
+        "trailingDistance": 2.296285714285713
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779307200000,
+        "entry_price": 52.948,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.264107142857141,
+        "trailingDistance": 2.7169285714285687
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779570000000,
+        "entry_price": 59.483,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.637321428571428,
+        "trailingDistance": 3.1647857142857134
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779588000000,
+        "entry_price": 60.298,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 3.141607142857141,
+        "trailingDistance": 3.7699285714285686
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779606000000,
+        "entry_price": 61.828,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 3.0923214285714264,
+        "trailingDistance": 3.7107857142857115
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779613200000,
+        "entry_price": 62.757,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 3.1719642857142842,
+        "trailingDistance": 3.8063571428571414
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780041600000,
+        "entry_price": 62.845,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 3.090892857142857,
+        "trailingDistance": 3.709071428571428
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780070400000,
+        "entry_price": 65.607,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 3.2535714285714286,
+        "trailingDistance": 3.904285714285714
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780142400000,
+        "entry_price": 67.858,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.3317857142857106,
+        "trailingDistance": 2.7981428571428526
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780146000000,
+        "entry_price": 68.412,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.383571428571426,
+        "trailingDistance": 2.8602857142857108
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780189200000,
+        "entry_price": 69.438,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.8405357142857133,
+        "trailingDistance": 3.408642857142856
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780203600000,
+        "entry_price": 69.84,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.714821428571427,
+        "trailingDistance": 3.257785714285712
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780264800000,
+        "entry_price": 71.3,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.444642857142854,
+        "trailingDistance": 2.933571428571425
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780268400000,
+        "entry_price": 72.532,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.6883928571428535,
+        "trailingDistance": 3.226071428571424
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780275600000,
+        "entry_price": 73.49,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 3.096071428571425,
+        "trailingDistance": 3.7152857142857094
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780524000000,
+        "entry_price": 74.986,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 4.088928571428573,
+        "trailingDistance": 4.906714285714288
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1781517600000,
+        "entry_price": 66.508,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.829642857142855,
+        "trailingDistance": 3.395571428571426
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1781582400000,
+        "entry_price": 69.748,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.8916071428571426,
+        "trailingDistance": 3.4699285714285715
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1781586000000,
+        "entry_price": 70.371,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.8866071428571436,
+        "trailingDistance": 3.4639285714285726
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1783090800000,
+        "entry_price": 70.367,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.1071428571428568,
+        "trailingDistance": 2.528571428571428
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1783285200000,
+        "entry_price": 70.926,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.3898214285714237,
+        "trailingDistance": 1.6677857142857082
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1783292400000,
+        "entry_price": 71.552,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.5399999999999967,
+        "trailingDistance": 1.8479999999999959
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1783299600000,
+        "entry_price": 72.509,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.6526785714285706,
+        "trailingDistance": 1.9832142857142845
+      }
+    ],
+    "skipped": 34,
+    "metrics": [
+      {
+        "cost_bps": 10,
+        "trades": 26,
+        "win_rate": 0.4230769230769231,
+        "pf": 1.2183492826642608,
+        "mean_net_return": 0.005626885468516649,
+        "win_days_jst": 26,
+        "serial_unit_equity": 1.0827400776568632,
+        "serial_realized_dd": -0.3408249492988281,
+        "first": {
+          "trades": 7,
+          "win_rate": 0.2857142857142857,
+          "pf": 0.4797219315194939,
+          "mean_net_return": -0.022151451598738086
+        },
+        "second": {
+          "trades": 19,
+          "win_rate": 0.47368421052631576,
+          "pf": 1.8101278352793955,
+          "mean_net_return": 0.015861009651189445
+        }
+      },
+      {
+        "cost_bps": 20,
+        "trades": 26,
+        "win_rate": 0.4230769230769231,
+        "pf": 1.1756131365711715,
+        "mean_net_return": 0.004626885468516648,
+        "win_days_jst": 26,
+        "serial_unit_equity": 1.0549551566478805,
+        "serial_realized_dd": -0.35027837230069936,
+        "first": {
+          "trades": 7,
+          "win_rate": 0.2857142857142857,
+          "pf": 0.4652066605837817,
+          "mean_net_return": -0.023151451598738087
+        },
+        "second": {
+          "trades": 19,
+          "win_rate": 0.47368421052631576,
+          "pf": 1.7391801612442677,
+          "mean_net_return": 0.014861009651189446
+        }
+      },
+      {
+        "cost_bps": 30,
+        "trades": 26,
+        "win_rate": 0.38461538461538464,
+        "pf": 1.134517299915939,
+        "mean_net_return": 0.003626885468516647,
+        "win_days_jst": 26,
+        "serial_unit_equity": 1.0278563745326474,
+        "serial_realized_dd": -0.3596057947860838,
+        "first": {
+          "trades": 7,
+          "win_rate": 0.2857142857142857,
+          "pf": 0.4511626138148982,
+          "mean_net_return": -0.024151451598738088
+        },
+        "second": {
+          "trades": 19,
+          "win_rate": 0.42105263157894735,
+          "pf": 1.6701514793626717,
+          "mean_net_return": 0.013861009651189445
+        }
+      }
+    ],
+    "yesterday_candidates": []
+  },
+  {
+    "strategy": "HYPE",
+    "name": "SLOPE_50",
+    "scope": "SOURCE_ENTRY_H1_UNIT_RETURN_ISOLATED_SLEEVE_NOT_GLOBAL_BT",
+    "raw_candidate_count": 67,
+    "annual_candidates": [
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1759435200000,
+        "entry_price": 50.8455,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.6610714285714283,
+        "trailingDistance": 1.993285714285714
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1759633200000,
+        "entry_price": 50.17,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.4352678571428572,
+        "trailingDistance": 1.7223214285714288
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1759640400000,
+        "entry_price": 50.516,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.4211607142857132,
+        "trailingDistance": 1.705392857142856
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1759651200000,
+        "entry_price": 51.274,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.568214285714285,
+        "trailingDistance": 1.881857142857142
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1761393600000,
+        "entry_price": 41.1,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.1412500000000023,
+        "trailingDistance": 1.3695000000000026
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1761397200000,
+        "entry_price": 41.368,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.1889285714285742,
+        "trailingDistance": 1.4267142857142892
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1761418800000,
+        "entry_price": 42.6815,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.3840178571428563,
+        "trailingDistance": 1.6608214285714276
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1761429600000,
+        "entry_price": 43.70167,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.6041071428571425,
+        "trailingDistance": 1.9249285714285709
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1761469200000,
+        "entry_price": 45.30931,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.665558928571428,
+        "trailingDistance": 1.9986707142857139
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1761660000000,
+        "entry_price": 49.241,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.9516071428571418,
+        "trailingDistance": 2.3419285714285705
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1767744000000,
+        "entry_price": 28.24035,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.2886607142857143,
+        "trailingDistance": 1.5463928571428571
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1770073200000,
+        "entry_price": 33.935,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.4469642857142855,
+        "trailingDistance": 2.9363571428571427
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1770080400000,
+        "entry_price": 34.066,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.483214285714285,
+        "trailingDistance": 2.979857142857142
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1770238800000,
+        "entry_price": 35.828,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.4491071428571423,
+        "trailingDistance": 2.938928571428571
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1770343200000,
+        "entry_price": 36.3245,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 3.877321428571431,
+        "trailingDistance": 4.6527857142857165
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1772413200000,
+        "entry_price": 32.425,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.5996428571428556,
+        "trailingDistance": 1.9195714285714267
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1772470800000,
+        "entry_price": 33.16,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.70482142857143,
+        "trailingDistance": 2.045785714285716
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1772640000000,
+        "entry_price": 33.107,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.308392857142858,
+        "trailingDistance": 1.5700714285714295
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773234000000,
+        "entry_price": 35.517,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.1199999999999946,
+        "trailingDistance": 1.3439999999999936
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773237600000,
+        "entry_price": 36.072,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.2451785714285661,
+        "trailingDistance": 1.4942142857142793
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773241200000,
+        "entry_price": 36.754,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.3626785714285663,
+        "trailingDistance": 1.6352142857142797
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773367200000,
+        "entry_price": 38.239,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.2864285714285688,
+        "trailingDistance": 1.5437142857142827
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773496800000,
+        "entry_price": 38,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 0.9874999999999977,
+        "trailingDistance": 1.1849999999999972
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773640800000,
+        "entry_price": 38.328,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.176964285714286,
+        "trailingDistance": 1.412357142857143
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773648000000,
+        "entry_price": 38.753,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.3287500000000005,
+        "trailingDistance": 1.5945000000000005
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773694800000,
+        "entry_price": 40.427,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.6428571428571446,
+        "trailingDistance": 1.9714285714285733
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773698400000,
+        "entry_price": 41.1,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.6562500000000022,
+        "trailingDistance": 1.9875000000000025
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773781200000,
+        "entry_price": 41.871,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.6503571428571422,
+        "trailingDistance": 1.9804285714285708
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773856800000,
+        "entry_price": 43.22,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.2126785714285697,
+        "trailingDistance": 2.6552142857142838
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1774440000000,
+        "entry_price": 41.361,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.1907142857142843,
+        "trailingDistance": 1.428857142857141
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1775757600000,
+        "entry_price": 40.095,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.0642857142857183,
+        "trailingDistance": 1.277142857142862
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1775786400000,
+        "entry_price": 40.542,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.399464285714289,
+        "trailingDistance": 1.6793571428571465
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1775833200000,
+        "entry_price": 42.012,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.3128571428571447,
+        "trailingDistance": 1.5754285714285738
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1775894400000,
+        "entry_price": 42.495,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 0.9414285714285724,
+        "trailingDistance": 1.1297142857142868
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1775937600000,
+        "entry_price": 42.988,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.0649999999999997,
+        "trailingDistance": 1.2779999999999996
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1776088800000,
+        "entry_price": 42.69,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.075535714285716,
+        "trailingDistance": 1.2906428571428594
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1776099600000,
+        "entry_price": 43.128,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.2062500000000018,
+        "trailingDistance": 1.447500000000002
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1776106800000,
+        "entry_price": 43.777,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.3217857142857157,
+        "trailingDistance": 1.5861428571428586
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1776121200000,
+        "entry_price": 44.425,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.4866071428571435,
+        "trailingDistance": 1.783928571428572
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1776441600000,
+        "entry_price": 45.247,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.370357142857144,
+        "trailingDistance": 1.644428571428573
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779152400000,
+        "entry_price": 48.133,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.400000000000001,
+        "trailingDistance": 2.880000000000001
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779274800000,
+        "entry_price": 49.623,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.5507142857142853,
+        "trailingDistance": 1.8608571428571423
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779285600000,
+        "entry_price": 51.244,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.9135714285714276,
+        "trailingDistance": 2.296285714285713
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779307200000,
+        "entry_price": 52.948,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.264107142857141,
+        "trailingDistance": 2.7169285714285687
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779570000000,
+        "entry_price": 59.483,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.637321428571428,
+        "trailingDistance": 3.1647857142857134
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779588000000,
+        "entry_price": 60.298,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 3.141607142857141,
+        "trailingDistance": 3.7699285714285686
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779606000000,
+        "entry_price": 61.828,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 3.0923214285714264,
+        "trailingDistance": 3.7107857142857115
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779613200000,
+        "entry_price": 62.757,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 3.1719642857142842,
+        "trailingDistance": 3.8063571428571414
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780005600000,
+        "entry_price": 61.826,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 3.2601785714285745,
+        "trailingDistance": 3.9122142857142896
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780041600000,
+        "entry_price": 62.845,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 3.090892857142857,
+        "trailingDistance": 3.709071428571428
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780070400000,
+        "entry_price": 65.607,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 3.2535714285714286,
+        "trailingDistance": 3.904285714285714
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780142400000,
+        "entry_price": 67.858,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.3317857142857106,
+        "trailingDistance": 2.7981428571428526
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780146000000,
+        "entry_price": 68.412,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.383571428571426,
+        "trailingDistance": 2.8602857142857108
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780189200000,
+        "entry_price": 69.438,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.8405357142857133,
+        "trailingDistance": 3.408642857142856
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780203600000,
+        "entry_price": 69.84,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.714821428571427,
+        "trailingDistance": 3.257785714285712
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780264800000,
+        "entry_price": 71.3,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.444642857142854,
+        "trailingDistance": 2.933571428571425
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780268400000,
+        "entry_price": 72.532,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.6883928571428535,
+        "trailingDistance": 3.226071428571424
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780275600000,
+        "entry_price": 73.49,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 3.096071428571425,
+        "trailingDistance": 3.7152857142857094
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780524000000,
+        "entry_price": 74.986,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 4.088928571428573,
+        "trailingDistance": 4.906714285714288
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1781517600000,
+        "entry_price": 66.508,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.829642857142855,
+        "trailingDistance": 3.395571428571426
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1781582400000,
+        "entry_price": 69.748,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.8916071428571426,
+        "trailingDistance": 3.4699285714285715
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1781586000000,
+        "entry_price": 70.371,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.8866071428571436,
+        "trailingDistance": 3.4639285714285726
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1783076400000,
+        "entry_price": 69,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.1230357142857135,
+        "trailingDistance": 2.547642857142856
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1783090800000,
+        "entry_price": 70.367,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.1071428571428568,
+        "trailingDistance": 2.528571428571428
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1783285200000,
+        "entry_price": 70.926,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.3898214285714237,
+        "trailingDistance": 1.6677857142857082
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1783292400000,
+        "entry_price": 71.552,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.5399999999999967,
+        "trailingDistance": 1.8479999999999959
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1783299600000,
+        "entry_price": 72.509,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.6526785714285706,
+        "trailingDistance": 1.9832142857142845
+      }
+    ],
+    "skipped": 40,
+    "metrics": [
+      {
+        "cost_bps": 10,
+        "trades": 27,
+        "win_rate": 0.4444444444444444,
+        "pf": 1.3316787624690207,
+        "mean_net_return": 0.008186651421329797,
+        "win_days_jst": 27,
+        "serial_unit_equity": 1.1583692090435667,
+        "serial_realized_dd": -0.340824949298828,
+        "first": {
+          "trades": 8,
+          "win_rate": 0.25,
+          "pf": 0.6259800742732723,
+          "mean_net_return": -0.014367579344708017
+        },
+        "second": {
+          "trades": 19,
+          "win_rate": 0.5263157894736842,
+          "pf": 1.9355778709426428,
+          "mean_net_return": 0.017683169638608876
+        }
+      },
+      {
+        "cost_bps": 20,
+        "trades": 27,
+        "win_rate": 0.4444444444444444,
+        "pf": 1.2847548883455027,
+        "mean_net_return": 0.007186651421329797,
+        "win_days_jst": 27,
+        "serial_unit_equity": 1.1275838466427872,
+        "serial_realized_dd": -0.35027837230069936,
+        "first": {
+          "trades": 8,
+          "win_rate": 0.25,
+          "pf": 0.6076089645721091,
+          "mean_net_return": -0.015367579344708018
+        },
+        "second": {
+          "trades": 19,
+          "win_rate": 0.5263157894736842,
+          "pf": 1.8610897712317953,
+          "mean_net_return": 0.016683169638608875
+        }
+      },
+      {
+        "cost_bps": 30,
+        "trades": 27,
+        "win_rate": 0.4074074074074074,
+        "pf": 1.239510199413111,
+        "mean_net_return": 0.006186651421329796,
+        "win_days_jst": 27,
+        "serial_unit_equity": 1.0975869812247065,
+        "serial_realized_dd": -0.3596057947860839,
+        "first": {
+          "trades": 8,
+          "win_rate": 0.25,
+          "pf": 0.5899282568680677,
+          "mean_net_return": -0.01636757934470802
+        },
+        "second": {
+          "trades": 19,
+          "win_rate": 0.47368421052631576,
+          "pf": 1.7880779665636835,
+          "mean_net_return": 0.015683169638608874
+        }
+      }
+    ],
+    "yesterday_candidates": []
+  },
+  {
+    "strategy": "HYPE",
+    "name": "BREAKOUT_0",
+    "scope": "SOURCE_ENTRY_H1_UNIT_RETURN_ISOLATED_SLEEVE_NOT_GLOBAL_BT",
+    "raw_candidate_count": 87,
+    "annual_candidates": [
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1759431600000,
+        "entry_price": 50.0275,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.5821428571428584,
+        "trailingDistance": 1.89857142857143
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1759435200000,
+        "entry_price": 50.8455,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.6610714285714283,
+        "trailingDistance": 1.993285714285714
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1761415200000,
+        "entry_price": 41.8505,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.2522321428571435,
+        "trailingDistance": 1.502678571428572
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1761418800000,
+        "entry_price": 42.6815,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.3840178571428563,
+        "trailingDistance": 1.6608214285714276
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1761422400000,
+        "entry_price": 42.9755,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.4080357142857127,
+        "trailingDistance": 1.6896428571428554
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1761429600000,
+        "entry_price": 43.70167,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.6041071428571425,
+        "trailingDistance": 1.9249285714285709
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1761469200000,
+        "entry_price": 45.30931,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.665558928571428,
+        "trailingDistance": 1.9986707142857139
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1761530400000,
+        "entry_price": 48.66846,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.0066071428571406,
+        "trailingDistance": 2.4079285714285685
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1761660000000,
+        "entry_price": 49.241,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.9516071428571418,
+        "trailingDistance": 2.3419285714285705
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1767744000000,
+        "entry_price": 28.24035,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.2886607142857143,
+        "trailingDistance": 1.5463928571428571
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1770073200000,
+        "entry_price": 33.935,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.4469642857142855,
+        "trailingDistance": 2.9363571428571427
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1770080400000,
+        "entry_price": 34.066,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.483214285714285,
+        "trailingDistance": 2.979857142857142
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1770238800000,
+        "entry_price": 35.828,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.4491071428571423,
+        "trailingDistance": 2.938928571428571
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1770343200000,
+        "entry_price": 36.3245,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 3.877321428571431,
+        "trailingDistance": 4.6527857142857165
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1772413200000,
+        "entry_price": 32.425,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.5996428571428556,
+        "trailingDistance": 1.9195714285714267
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1772470800000,
+        "entry_price": 33.16,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.70482142857143,
+        "trailingDistance": 2.045785714285716
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1772640000000,
+        "entry_price": 33.107,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.308392857142858,
+        "trailingDistance": 1.5700714285714295
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773234000000,
+        "entry_price": 35.517,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.1199999999999946,
+        "trailingDistance": 1.3439999999999936
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773237600000,
+        "entry_price": 36.072,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.2451785714285661,
+        "trailingDistance": 1.4942142857142793
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773241200000,
+        "entry_price": 36.754,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.3626785714285663,
+        "trailingDistance": 1.6352142857142797
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773295200000,
+        "entry_price": 37.157,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.438392857142857,
+        "trailingDistance": 1.7260714285714283
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773309600000,
+        "entry_price": 37.453,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.4637500000000006,
+        "trailingDistance": 1.7565000000000008
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773367200000,
+        "entry_price": 38.239,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.2864285714285688,
+        "trailingDistance": 1.5437142857142827
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773493200000,
+        "entry_price": 37.738,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 0.9017857142857124,
+        "trailingDistance": 1.082142857142855
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773496800000,
+        "entry_price": 38,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 0.9874999999999977,
+        "trailingDistance": 1.1849999999999972
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773507600000,
+        "entry_price": 38.32,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.1903571428571411,
+        "trailingDistance": 1.4284285714285692
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773640800000,
+        "entry_price": 38.328,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.176964285714286,
+        "trailingDistance": 1.412357142857143
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773648000000,
+        "entry_price": 38.753,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.3287500000000005,
+        "trailingDistance": 1.5945000000000005
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773662400000,
+        "entry_price": 39.527,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.3992857142857127,
+        "trailingDistance": 1.679142857142855
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773694800000,
+        "entry_price": 40.427,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.6428571428571446,
+        "trailingDistance": 1.9714285714285733
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773698400000,
+        "entry_price": 41.1,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.6562500000000022,
+        "trailingDistance": 1.9875000000000025
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773781200000,
+        "entry_price": 41.871,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.6503571428571422,
+        "trailingDistance": 1.9804285714285708
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773856800000,
+        "entry_price": 43.22,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.2126785714285697,
+        "trailingDistance": 2.6552142857142838
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1774440000000,
+        "entry_price": 41.361,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.1907142857142843,
+        "trailingDistance": 1.428857142857141
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1775757600000,
+        "entry_price": 40.095,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.0642857142857183,
+        "trailingDistance": 1.277142857142862
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1775786400000,
+        "entry_price": 40.542,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.399464285714289,
+        "trailingDistance": 1.6793571428571465
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1775815200000,
+        "entry_price": 40.928,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.4457142857142877,
+        "trailingDistance": 1.734857142857145
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1775822400000,
+        "entry_price": 41.093,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.3587500000000028,
+        "trailingDistance": 1.6305000000000032
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1775826000000,
+        "entry_price": 41.159,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.2866071428571453,
+        "trailingDistance": 1.5439285714285742
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1775829600000,
+        "entry_price": 41.475,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.3119642857142886,
+        "trailingDistance": 1.5743571428571461
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1775833200000,
+        "entry_price": 42.012,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.3128571428571447,
+        "trailingDistance": 1.5754285714285738
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1775894400000,
+        "entry_price": 42.495,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 0.9414285714285724,
+        "trailingDistance": 1.1297142857142868
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1775937600000,
+        "entry_price": 42.988,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.0649999999999997,
+        "trailingDistance": 1.2779999999999996
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1776088800000,
+        "entry_price": 42.69,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.075535714285716,
+        "trailingDistance": 1.2906428571428594
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1776099600000,
+        "entry_price": 43.128,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.2062500000000018,
+        "trailingDistance": 1.447500000000002
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1776103200000,
+        "entry_price": 43.231,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.2748214285714305,
+        "trailingDistance": 1.5297857142857165
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1776106800000,
+        "entry_price": 43.777,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.3217857142857157,
+        "trailingDistance": 1.5861428571428586
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1776121200000,
+        "entry_price": 44.425,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.4866071428571435,
+        "trailingDistance": 1.783928571428572
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1776128400000,
+        "entry_price": 44.648,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.5680357142857155,
+        "trailingDistance": 1.8816428571428585
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1776319200000,
+        "entry_price": 45.524,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.2800000000000036,
+        "trailingDistance": 1.5360000000000045
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1776441600000,
+        "entry_price": 45.247,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.370357142857144,
+        "trailingDistance": 1.644428571428573
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1778004000000,
+        "entry_price": 44.281,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.1487499999999986,
+        "trailingDistance": 1.3784999999999985
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779152400000,
+        "entry_price": 48.133,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.400000000000001,
+        "trailingDistance": 2.880000000000001
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779271200000,
+        "entry_price": 48.949,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.4414285714285708,
+        "trailingDistance": 1.7297142857142849
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779274800000,
+        "entry_price": 49.623,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.5507142857142853,
+        "trailingDistance": 1.8608571428571423
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779285600000,
+        "entry_price": 51.244,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.9135714285714276,
+        "trailingDistance": 2.296285714285713
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779307200000,
+        "entry_price": 52.948,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.264107142857141,
+        "trailingDistance": 2.7169285714285687
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779562800000,
+        "entry_price": 58.615,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.5091071428571423,
+        "trailingDistance": 3.0109285714285705
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779570000000,
+        "entry_price": 59.483,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.637321428571428,
+        "trailingDistance": 3.1647857142857134
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779584400000,
+        "entry_price": 59.859,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.9364285714285705,
+        "trailingDistance": 3.5237142857142842
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779588000000,
+        "entry_price": 60.298,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 3.141607142857141,
+        "trailingDistance": 3.7699285714285686
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779606000000,
+        "entry_price": 61.828,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 3.0923214285714264,
+        "trailingDistance": 3.7107857142857115
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779609600000,
+        "entry_price": 62.009,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 3.1305357142857115,
+        "trailingDistance": 3.756642857142854
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779613200000,
+        "entry_price": 62.757,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 3.1719642857142842,
+        "trailingDistance": 3.8063571428571414
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779804000000,
+        "entry_price": 63.625,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 3.033928571428572,
+        "trailingDistance": 3.640714285714286
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780041600000,
+        "entry_price": 62.845,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 3.090892857142857,
+        "trailingDistance": 3.709071428571428
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780045200000,
+        "entry_price": 62.95,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.9537499999999994,
+        "trailingDistance": 3.5444999999999993
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780066800000,
+        "entry_price": 63.532,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.855892857142856,
+        "trailingDistance": 3.427071428571427
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780070400000,
+        "entry_price": 65.607,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 3.2535714285714286,
+        "trailingDistance": 3.904285714285714
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780142400000,
+        "entry_price": 67.858,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.3317857142857106,
+        "trailingDistance": 2.7981428571428526
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780146000000,
+        "entry_price": 68.412,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.383571428571426,
+        "trailingDistance": 2.8602857142857108
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780189200000,
+        "entry_price": 69.438,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.8405357142857133,
+        "trailingDistance": 3.408642857142856
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780203600000,
+        "entry_price": 69.84,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.714821428571427,
+        "trailingDistance": 3.257785714285712
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780264800000,
+        "entry_price": 71.3,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.444642857142854,
+        "trailingDistance": 2.933571428571425
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780268400000,
+        "entry_price": 72.532,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.6883928571428535,
+        "trailingDistance": 3.226071428571424
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780275600000,
+        "entry_price": 73.49,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 3.096071428571425,
+        "trailingDistance": 3.7152857142857094
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780524000000,
+        "entry_price": 74.986,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 4.088928571428573,
+        "trailingDistance": 4.906714285714288
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1781517600000,
+        "entry_price": 66.508,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.829642857142855,
+        "trailingDistance": 3.395571428571426
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1781582400000,
+        "entry_price": 69.748,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.8916071428571426,
+        "trailingDistance": 3.4699285714285715
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1781586000000,
+        "entry_price": 70.371,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.8866071428571436,
+        "trailingDistance": 3.4639285714285726
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1783087200000,
+        "entry_price": 69.685,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.048035714285716,
+        "trailingDistance": 2.457642857142859
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1783090800000,
+        "entry_price": 70.367,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.1071428571428568,
+        "trailingDistance": 2.528571428571428
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1783285200000,
+        "entry_price": 70.926,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.3898214285714237,
+        "trailingDistance": 1.6677857142857082
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1783288800000,
+        "entry_price": 71.02,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.4755357142857126,
+        "trailingDistance": 1.770642857142855
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1783292400000,
+        "entry_price": 71.552,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.5399999999999967,
+        "trailingDistance": 1.8479999999999959
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1783299600000,
+        "entry_price": 72.509,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.6526785714285706,
+        "trailingDistance": 1.9832142857142845
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1783429200000,
+        "entry_price": 72.059,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.9521428571428576,
+        "trailingDistance": 2.342571428571429
+      }
+    ],
+    "skipped": 56,
+    "metrics": [
+      {
+        "cost_bps": 10,
+        "trades": 31,
+        "win_rate": 0.3548387096774194,
+        "pf": 1.0990037566479676,
+        "mean_net_return": 0.0024987414753192263,
+        "win_days_jst": 31,
+        "serial_unit_equity": 1.0055432207397386,
+        "serial_realized_dd": -0.3670318388429976,
+        "first": {
+          "trades": 8,
+          "win_rate": 0.25,
+          "pf": 0.5296290841929512,
+          "mean_net_return": -0.018715313290282906
+        },
+        "second": {
+          "trades": 23,
+          "win_rate": 0.391304347826087,
+          "pf": 1.4895170614159983,
+          "mean_net_return": 0.009877543132919967
+        }
+      },
+      {
+        "cost_bps": 20,
+        "trades": 31,
+        "win_rate": 0.3548387096774194,
+        "pf": 1.0579021991281536,
+        "mean_net_return": 0.0014987414753192254,
+        "win_days_jst": 31,
+        "serial_unit_equity": 0.9747734441649419,
+        "serial_realized_dd": -0.379870507949833,
+        "first": {
+          "trades": 8,
+          "win_rate": 0.25,
+          "pf": 0.5136634424639831,
+          "mean_net_return": -0.019715313290282907
+        },
+        "second": {
+          "trades": 23,
+          "win_rate": 0.391304347826087,
+          "pf": 1.4270752827124893,
+          "mean_net_return": 0.008877543132919967
+        }
+      },
+      {
+        "cost_bps": 30,
+        "trades": 31,
+        "win_rate": 0.3225806451612903,
+        "pf": 1.0187770184082758,
+        "mean_net_return": 0.0004987414753192247,
+        "win_days_jst": 31,
+        "serial_unit_equity": 0.9449156344087956,
+        "serial_realized_dd": -0.3924615589138698,
+        "first": {
+          "trades": 8,
+          "win_rate": 0.25,
+          "pf": 0.49827782935768467,
+          "mean_net_return": -0.020715313290282908
+        },
+        "second": {
+          "trades": 23,
+          "win_rate": 0.34782608695652173,
+          "pf": 1.3674435244482162,
+          "mean_net_return": 0.007877543132919966
+        }
+      }
+    ],
+    "yesterday_candidates": []
+  },
+  {
+    "strategy": "HYPE",
+    "name": "DISTANCE_1200",
+    "scope": "SOURCE_ENTRY_H1_UNIT_RETURN_ISOLATED_SLEEVE_NOT_GLOBAL_BT",
+    "raw_candidate_count": 71,
+    "annual_candidates": [
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1759435200000,
+        "entry_price": 50.8455,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.6610714285714283,
+        "trailingDistance": 1.993285714285714
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1761418800000,
+        "entry_price": 42.6815,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.3840178571428563,
+        "trailingDistance": 1.6608214285714276
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1761429600000,
+        "entry_price": 43.70167,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.6041071428571425,
+        "trailingDistance": 1.9249285714285709
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1761433200000,
+        "entry_price": 44.398,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.7112499999999997,
+        "trailingDistance": 2.0534999999999997
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1761469200000,
+        "entry_price": 45.30931,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.665558928571428,
+        "trailingDistance": 1.9986707142857139
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1761472800000,
+        "entry_price": 46.392,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.8278803571428575,
+        "trailingDistance": 2.1934564285714293
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1761660000000,
+        "entry_price": 49.241,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.9516071428571418,
+        "trailingDistance": 2.3419285714285705
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1767744000000,
+        "entry_price": 28.24035,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.2886607142857143,
+        "trailingDistance": 1.5463928571428571
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1770073200000,
+        "entry_price": 33.935,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.4469642857142855,
+        "trailingDistance": 2.9363571428571427
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1770080400000,
+        "entry_price": 34.066,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.483214285714285,
+        "trailingDistance": 2.979857142857142
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1770084000000,
+        "entry_price": 35.391,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.665089285714286,
+        "trailingDistance": 3.1981071428571433
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1770238800000,
+        "entry_price": 35.828,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.4491071428571423,
+        "trailingDistance": 2.938928571428571
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1770343200000,
+        "entry_price": 36.3245,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 3.877321428571431,
+        "trailingDistance": 4.6527857142857165
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1772413200000,
+        "entry_price": 32.425,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.5996428571428556,
+        "trailingDistance": 1.9195714285714267
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1772470800000,
+        "entry_price": 33.16,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.70482142857143,
+        "trailingDistance": 2.045785714285716
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1772640000000,
+        "entry_price": 33.107,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.308392857142858,
+        "trailingDistance": 1.5700714285714295
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773093600000,
+        "entry_price": 35.255,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.9998214285714289,
+        "trailingDistance": 2.3997857142857146
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773234000000,
+        "entry_price": 35.517,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.1199999999999946,
+        "trailingDistance": 1.3439999999999936
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773237600000,
+        "entry_price": 36.072,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.2451785714285661,
+        "trailingDistance": 1.4942142857142793
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773241200000,
+        "entry_price": 36.754,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.3626785714285663,
+        "trailingDistance": 1.6352142857142797
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773367200000,
+        "entry_price": 38.239,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.2864285714285688,
+        "trailingDistance": 1.5437142857142827
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773496800000,
+        "entry_price": 38,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 0.9874999999999977,
+        "trailingDistance": 1.1849999999999972
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773640800000,
+        "entry_price": 38.328,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.176964285714286,
+        "trailingDistance": 1.412357142857143
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773648000000,
+        "entry_price": 38.753,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.3287500000000005,
+        "trailingDistance": 1.5945000000000005
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773694800000,
+        "entry_price": 40.427,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.6428571428571446,
+        "trailingDistance": 1.9714285714285733
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773698400000,
+        "entry_price": 41.1,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.6562500000000022,
+        "trailingDistance": 1.9875000000000025
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773781200000,
+        "entry_price": 41.871,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.6503571428571422,
+        "trailingDistance": 1.9804285714285708
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1773856800000,
+        "entry_price": 43.22,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.2126785714285697,
+        "trailingDistance": 2.6552142857142838
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1774440000000,
+        "entry_price": 41.361,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.1907142857142843,
+        "trailingDistance": 1.428857142857141
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1775757600000,
+        "entry_price": 40.095,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.0642857142857183,
+        "trailingDistance": 1.277142857142862
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1775786400000,
+        "entry_price": 40.542,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.399464285714289,
+        "trailingDistance": 1.6793571428571465
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1775833200000,
+        "entry_price": 42.012,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.3128571428571447,
+        "trailingDistance": 1.5754285714285738
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1775894400000,
+        "entry_price": 42.495,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 0.9414285714285724,
+        "trailingDistance": 1.1297142857142868
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1775937600000,
+        "entry_price": 42.988,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.0649999999999997,
+        "trailingDistance": 1.2779999999999996
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1776088800000,
+        "entry_price": 42.69,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.075535714285716,
+        "trailingDistance": 1.2906428571428594
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1776099600000,
+        "entry_price": 43.128,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.2062500000000018,
+        "trailingDistance": 1.447500000000002
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1776106800000,
+        "entry_price": 43.777,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.3217857142857157,
+        "trailingDistance": 1.5861428571428586
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1776121200000,
+        "entry_price": 44.425,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.4866071428571435,
+        "trailingDistance": 1.783928571428572
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1776441600000,
+        "entry_price": 45.247,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.370357142857144,
+        "trailingDistance": 1.644428571428573
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779152400000,
+        "entry_price": 48.133,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.400000000000001,
+        "trailingDistance": 2.880000000000001
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779274800000,
+        "entry_price": 49.623,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.5507142857142853,
+        "trailingDistance": 1.8608571428571423
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779285600000,
+        "entry_price": 51.244,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.9135714285714276,
+        "trailingDistance": 2.296285714285713
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779307200000,
+        "entry_price": 52.948,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.264107142857141,
+        "trailingDistance": 2.7169285714285687
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779318000000,
+        "entry_price": 54.15,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.969999999999997,
+        "trailingDistance": 3.5639999999999965
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779321600000,
+        "entry_price": 54.801,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 3.078928571428569,
+        "trailingDistance": 3.6947142857142823
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779570000000,
+        "entry_price": 59.483,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.637321428571428,
+        "trailingDistance": 3.1647857142857134
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779588000000,
+        "entry_price": 60.298,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 3.141607142857141,
+        "trailingDistance": 3.7699285714285686
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779606000000,
+        "entry_price": 61.828,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 3.0923214285714264,
+        "trailingDistance": 3.7107857142857115
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779613200000,
+        "entry_price": 62.757,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 3.1719642857142842,
+        "trailingDistance": 3.8063571428571414
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1779616800000,
+        "entry_price": 63.72,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 3.372321428571428,
+        "trailingDistance": 4.046785714285714
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780041600000,
+        "entry_price": 62.845,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 3.090892857142857,
+        "trailingDistance": 3.709071428571428
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780070400000,
+        "entry_price": 65.607,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 3.2535714285714286,
+        "trailingDistance": 3.904285714285714
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780142400000,
+        "entry_price": 67.858,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.3317857142857106,
+        "trailingDistance": 2.7981428571428526
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780146000000,
+        "entry_price": 68.412,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.383571428571426,
+        "trailingDistance": 2.8602857142857108
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780189200000,
+        "entry_price": 69.438,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.8405357142857133,
+        "trailingDistance": 3.408642857142856
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780203600000,
+        "entry_price": 69.84,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.714821428571427,
+        "trailingDistance": 3.257785714285712
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780264800000,
+        "entry_price": 71.3,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.444642857142854,
+        "trailingDistance": 2.933571428571425
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780268400000,
+        "entry_price": 72.532,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.6883928571428535,
+        "trailingDistance": 3.226071428571424
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780275600000,
+        "entry_price": 73.49,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 3.096071428571425,
+        "trailingDistance": 3.7152857142857094
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1780524000000,
+        "entry_price": 74.986,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 4.088928571428573,
+        "trailingDistance": 4.906714285714288
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1781517600000,
+        "entry_price": 66.508,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.829642857142855,
+        "trailingDistance": 3.395571428571426
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1781521200000,
+        "entry_price": 67.811,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 3.0371428571428547,
+        "trailingDistance": 3.644571428571426
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1781582400000,
+        "entry_price": 69.748,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.8916071428571426,
+        "trailingDistance": 3.4699285714285715
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1781586000000,
+        "entry_price": 70.371,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.8866071428571436,
+        "trailingDistance": 3.4639285714285726
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1781589600000,
+        "entry_price": 71.817,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 3.0646428571428608,
+        "trailingDistance": 3.677571428571433
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1781593200000,
+        "entry_price": 72.704,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 3.1182142857142914,
+        "trailingDistance": 3.7418571428571497
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1781600400000,
+        "entry_price": 73.745,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 3.33571428571429,
+        "trailingDistance": 4.002857142857147
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1783090800000,
+        "entry_price": 70.367,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 2.1071428571428568,
+        "trailingDistance": 2.528571428571428
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1783285200000,
+        "entry_price": 70.926,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.3898214285714237,
+        "trailingDistance": 1.6677857142857082
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1783292400000,
+        "entry_price": 71.552,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.5399999999999967,
+        "trailingDistance": 1.8479999999999959
+      },
+      {
+        "symbol": "HYPEUSDT",
+        "side": "LONG",
+        "entry_ts_ms": 1783299600000,
+        "entry_price": 72.509,
+        "maxHoldHours": 168,
+        "hardStop": null,
+        "stopDistance": 1.6526785714285706,
+        "trailingDistance": 1.9832142857142845
+      }
+    ],
+    "skipped": 45,
+    "metrics": [
+      {
+        "cost_bps": 10,
+        "trades": 26,
+        "win_rate": 0.4230769230769231,
+        "pf": 1.1852482285653363,
+        "mean_net_return": 0.004773867597199828,
+        "win_days_jst": 26,
+        "serial_unit_equity": 1.059746525972669,
+        "serial_realized_dd": -0.35482348496772953,
+        "first": {
+          "trades": 7,
+          "win_rate": 0.2857142857142857,
+          "pf": 0.4797219315194939,
+          "mean_net_return": -0.022151451598738086
+        },
+        "second": {
+          "trades": 19,
+          "win_rate": 0.47368421052631576,
+          "pf": 1.7505066504889422,
+          "mean_net_return": 0.014693722037808533
+        }
+      },
+      {
+        "cost_bps": 20,
+        "trades": 26,
+        "win_rate": 0.4230769230769231,
+        "pf": 1.1432368988292774,
+        "mean_net_return": 0.003773867597199827,
+        "win_days_jst": 26,
+        "serial_unit_equity": 1.0325301854682087,
+        "serial_realized_dd": -0.36408937524632456,
+        "first": {
+          "trades": 7,
+          "win_rate": 0.2857142857142857,
+          "pf": 0.4652066605837817,
+          "mean_net_return": -0.023151451598738087
+        },
+        "second": {
+          "trades": 19,
+          "win_rate": 0.47368421052631576,
+          "pf": 1.6811197826744793,
+          "mean_net_return": 0.013693722037808533
+        }
+      },
+      {
+        "cost_bps": 30,
+        "trades": 26,
+        "win_rate": 0.38461538461538464,
+        "pf": 1.1028797801139942,
+        "mean_net_return": 0.0027738675971998262,
+        "win_days_jst": 26,
+        "serial_unit_equity": 1.0059864756975179,
+        "serial_realized_dd": -0.3732315861219594,
+        "first": {
+          "trades": 7,
+          "win_rate": 0.2857142857142857,
+          "pf": 0.4511626138148982,
+          "mean_net_return": -0.024151451598738088
+        },
+        "second": {
+          "trades": 19,
+          "win_rate": 0.42105263157894735,
+          "pf": 1.6137155096436973,
+          "mean_net_return": 0.012693722037808532
+        }
+      }
+    ],
+    "yesterday_candidates": []
+  }
+]

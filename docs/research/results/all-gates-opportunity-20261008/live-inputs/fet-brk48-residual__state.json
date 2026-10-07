@@ -1,0 +1,17 @@
+{
+  "schema": "fet-brk48-residual-state/v1",
+  "strategyId": "FET_BRK48_RESIDUAL",
+  "runtimeCommitSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+  "updatedAt": 1791400137464,
+  "failures": [],
+  "lastReconciledAt": 1791254492498,
+  "lastReferenceTs": 1791118799999,
+  "lastCompletedIdempotencyKey": "0c78eee6e069ab50f000c5a1d126724a9000b7f2fe35ce0d12674da44ed9e4c8",
+  "lastEvaluationDecisionTs": 1791399600000,
+  "lastEvaluationCandidate": false,
+  "lastEvaluationReturn72h": -0.08974870362983645,
+  "lastEvaluationReturn72hObservedTs": 1791399600000,
+  "lastExitTs": 1791205216559,
+  "cooldownUntilTs": 1791291616559,
+  "lastEvaluationReason": "FET_NO_BRK48_R72_SIGNAL"
+}

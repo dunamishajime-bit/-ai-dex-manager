@@ -1,0 +1,369 @@
+{
+  "version": 2,
+  "strategyId": "PENGU_DUAL_LS_V2_FINAL",
+  "mode": "LIVE",
+  "updatedAt": 1791399625676,
+  "lastRunAt": 1791399621050,
+  "lastSignalReferenceTs": 1791392400000,
+  "latestSignal": {
+    "strategyId": "PENGU_DUAL_LS_V2_FINAL",
+    "referenceTs": 1791392400000,
+    "side": 0,
+    "targetGross": 0,
+    "reason": "PENGU V8 base Long/Short conditions are not active.",
+    "features": {
+      "referenceTs": 1791392400000,
+      "open": 0.00852,
+      "high": 0.008544,
+      "low": 0.008398,
+      "close": 0.008448,
+      "previousLow": 0.008503,
+      "priorHigh18h": 0.009192,
+      "penguReturn24h": -0.10251779453946652,
+      "penguReturn72h": -0.0943396226415093,
+      "btcReturn24h": -0.029812683024756592,
+      "relativeReturn24h": -0.07270511151470993,
+      "ema72": 0.009183666532374223,
+      "ema168": 0.009353800382949397,
+      "btcEma168Distance": -0.020292108478075166,
+      "volumeRatio6OverPrior36": 2.3927833300533234,
+      "atr24Ratio": 0.014840790719696965,
+      "rsi14": 19.13658462920999
+    },
+    "decision": {
+      "side": 0,
+      "longEligible": false,
+      "shortEligible": false,
+      "active": false,
+      "reason": "PENGU V8 base Long/Short conditions are not active."
+    },
+    "diagnostics": {
+      "evaluatedDecisionBars": 831,
+      "latestCompletedPenguTs": 1791392400000,
+      "latestCompletedBtcTs": 1791392400000,
+      "edgeTriggered": false,
+      "longEligible": false,
+      "shortEligible": false,
+      "shortSetupActive": true,
+      "shortSetupArmed": true,
+      "cooldownBlocked": false,
+      "m05ShadowCandidateObserved": false,
+      "m05ShadowThreshold": -0.005
+    }
+  },
+  "m05ShadowHistory": [],
+  "lastCompletedIdempotencyKey": "5bbbf2e4230d3d4e22574ebf2dc232d93213f1cafa6c8af106863494e20cdd62",
+  "cooldownUntilTs": 1791244800000,
+  "riskOverlay": {
+    "version": 1,
+    "routeQuarantineUntilTs": {
+      "RECOVERY_V8": 1790824522200,
+      "SHORT_V20": 1791378013380
+    },
+    "realizedEquity": 0.8868393090512792,
+    "realizedPeak": 1,
+    "realizedDrawdown": -0.11316069094872083,
+    "globalEntryHoldUntilTs": 0,
+    "lastClosedTradeTs": 1791162013380,
+    "lastHardStopTs": {
+      "RECOVERY_V8": 1790608522200,
+      "SHORT_V20": 1791162013380
+    }
+  },
+  "failures": [
+    {
+      "occurredAt": 1788974625446,
+      "message": "Aster HTTP 429"
+    },
+    {
+      "occurredAt": 1788974655990,
+      "message": "Aster HTTP 429"
+    },
+    {
+      "occurredAt": 1788976687703,
+      "message": "EACCES: permission denied, open '/var/lib/disdex/quality102-causal-v1/state.json'"
+    },
+    {
+      "occurredAt": 1788996446293,
+      "message": "QUALITY102_OWNERSHIP_RUNTIME_SHA_MISMATCH"
+    },
+    {
+      "occurredAt": 1789027216414,
+      "message": "PENGU_DUAL_LS_PRE_SUBMIT_ACCOUNT_STALE_OR_INVALID",
+      "idempotencyKey": "1a605b2494730ff6c2763594668ffdcf9e19486f2a813963d75af89eb3a84fe1"
+    },
+    {
+      "occurredAt": 1789029974294,
+      "message": "PENGU_DUAL_LS_EXECUTION_RESULT_IDENTITY_MISMATCH",
+      "idempotencyKey": "1a605b2494730ff6c2763594668ffdcf9e19486f2a813963d75af89eb3a84fe1"
+    },
+    {
+      "occurredAt": 1789121958896,
+      "message": "PENGU_PRE_SUBMIT_PENDING_RECONCILED_READONLY_ABSENT",
+      "idempotencyKey": "1a605b2494730ff6c2763594668ffdcf9e19486f2a813963d75af89eb3a84fe1"
+    },
+    {
+      "occurredAt": 1789225223285,
+      "message": "ENOENT: no such file or directory, rename '/var/lib/disdex/shared/aster-rate-budget.json.259127.1789225223281.tmp' -> '/var/lib/disdex/shared/aster-rate-budget.json'"
+    },
+    {
+      "occurredAt": 1789253660032,
+      "message": "QUALITY102_OWNERSHIP_RUNTIME_SHA_MISMATCH"
+    },
+    {
+      "occurredAt": 1789267406479,
+      "message": "QUALITY102_OWNERSHIP_RUNTIME_SHA_MISMATCH"
+    },
+    {
+      "occurredAt": 1789389010353,
+      "message": "QUALITY102_OWNERSHIP_RUNTIME_SHA_MISMATCH"
+    },
+    {
+      "occurredAt": 1789466406095,
+      "message": "ASTER_GLOBAL_RATE_BUDGET_SATURATED:5015"
+    },
+    {
+      "occurredAt": 1789506048991,
+      "message": "Aster request timeout after 10000ms"
+    },
+    {
+      "occurredAt": 1789555633785,
+      "message": "EACCES: permission denied, open '/var/lib/disdex/quality102-causal-v1/state.json'"
+    },
+    {
+      "occurredAt": 1789592421845,
+      "message": "Precision is over the maximum defined for this asset."
+    },
+    {
+      "occurredAt": 1789681944903,
+      "message": "QUALITY102_OWNERSHIP_RUNTIME_SHA_MISMATCH"
+    },
+    {
+      "occurredAt": 1789682340039,
+      "message": "PENGU_LOCAL_POSITION_CLEARED_AFTER_3X_AUTHENTICATED_ASTER_FLAT_RECOVERY"
+    },
+    {
+      "occurredAt": 1789682458729,
+      "message": "ASTER_GLOBAL_RATE_BUDGET_SATURATED:5292"
+    },
+    {
+      "occurredAt": 1789705838873,
+      "message": "QUALITY102_OWNERSHIP_RUNTIME_SHA_MISMATCH"
+    },
+    {
+      "occurredAt": 1789712326713,
+      "message": "QUALITY102_OWNERSHIP_RUNTIME_SHA_MISMATCH"
+    },
+    {
+      "occurredAt": 1789712567293,
+      "message": "ASTER_GLOBAL_RATE_BUDGET_SATURATED:5309"
+    },
+    {
+      "occurredAt": 1789712971957,
+      "message": "EACCES: permission denied, open '/var/lib/disdex/quality102-causal-v1/state.json'"
+    },
+    {
+      "occurredAt": 1789736411706,
+      "message": "PENGU_DUAL_LS_PRE_SUBMIT_OPEN_ORDER_CONFLICT",
+      "idempotencyKey": "dcc60737dcc6b2d7fdf82fbe60a22b0d97875c878065f2b2a97e635228449562"
+    },
+    {
+      "occurredAt": 1789740061310,
+      "message": "PENGU_DUAL_LS_EXECUTION_RESULT_IDENTITY_MISMATCH",
+      "idempotencyKey": "dcc60737dcc6b2d7fdf82fbe60a22b0d97875c878065f2b2a97e635228449562"
+    },
+    {
+      "occurredAt": 1789775628739,
+      "message": "PENGU_PENDING_EXIT_RECONCILED_READONLY_ABSENT_FOR_C023_CUTOVER",
+      "idempotencyKey": "dcc60737dcc6b2d7fdf82fbe60a22b0d97875c878065f2b2a97e635228449562"
+    },
+    {
+      "occurredAt": 1789804458166,
+      "message": "ASTER_GLOBAL_RATE_BUDGET_SATURATED:5278"
+    },
+    {
+      "occurredAt": 1789830019047,
+      "message": "ASTER_GLOBAL_RATE_BUDGET_LOCK_TIMEOUT"
+    },
+    {
+      "occurredAt": 1789838718411,
+      "message": "ASTER_GLOBAL_RATE_BUDGET_SATURATED:5300"
+    },
+    {
+      "occurredAt": 1789839502545,
+      "message": "ASTER_GLOBAL_RATE_BUDGET_SATURATED:5171"
+    },
+    {
+      "occurredAt": 1789870354555,
+      "message": "QUALITY102_OWNERSHIP_RUNTIME_SHA_MISMATCH"
+    },
+    {
+      "occurredAt": 1789873369245,
+      "message": "QUALITY102_OWNERSHIP_RUNTIME_SHA_MISMATCH"
+    },
+    {
+      "occurredAt": 1789873498457,
+      "message": "ASTER_GLOBAL_RATE_BUDGET_SATURATED:5363"
+    },
+    {
+      "occurredAt": 1789919626446,
+      "message": "QUALITY102_OWNERSHIP_RUNTIME_SHA_MISMATCH"
+    },
+    {
+      "occurredAt": 1790079929041,
+      "message": "ASTER_GLOBAL_RATE_BUDGET_SATURATED:6805"
+    },
+    {
+      "occurredAt": 1790079934582,
+      "message": "ASTER_GLOBAL_RATE_BUDGET_SATURATED:6264"
+    },
+    {
+      "occurredAt": 1790079940419,
+      "message": "ASTER_GLOBAL_RATE_BUDGET_SATURATED:5427"
+    },
+    {
+      "occurredAt": 1790079946276,
+      "message": "ASTER_GLOBAL_RATE_BUDGET_SATURATED:9570"
+    },
+    {
+      "occurredAt": 1790079951911,
+      "message": "ASTER_GLOBAL_RATE_BUDGET_SATURATED:8934"
+    },
+    {
+      "occurredAt": 1790079957652,
+      "message": "ASTER_GLOBAL_RATE_BUDGET_SATURATED:8194"
+    },
+    {
+      "occurredAt": 1790079963485,
+      "message": "ASTER_GLOBAL_RATE_BUDGET_SATURATED:7361"
+    },
+    {
+      "occurredAt": 1790079969343,
+      "message": "ASTER_GLOBAL_RATE_BUDGET_SATURATED:6503"
+    },
+    {
+      "occurredAt": 1790079974984,
+      "message": "ASTER_GLOBAL_RATE_BUDGET_SATURATED:5862"
+    },
+    {
+      "occurredAt": 1790079980752,
+      "message": "ASTER_GLOBAL_RATE_BUDGET_SATURATED:5094"
+    },
+    {
+      "occurredAt": 1790079986576,
+      "message": "ASTER_GLOBAL_RATE_BUDGET_SATURATED:9270"
+    },
+    {
+      "occurredAt": 1790079992706,
+      "message": "ASTER_GLOBAL_RATE_BUDGET_SATURATED:8140"
+    },
+    {
+      "occurredAt": 1790079998161,
+      "message": "ASTER_GLOBAL_RATE_BUDGET_SATURATED:7685"
+    },
+    {
+      "occurredAt": 1790085608956,
+      "message": "EACCES: permission denied, open '/var/lib/disdex/quality102-causal-v1/state.json'"
+    },
+    {
+      "occurredAt": 1790088101618,
+      "message": "MARGIN_GUARD_EMERGENCY_FLAT_RECONCILED"
+    },
+    {
+      "occurredAt": 1790120383913,
+      "message": "ASTER_GLOBAL_RATE_BUDGET_SATURATED:5306"
+    },
+    {
+      "occurredAt": 1790212695836,
+      "message": "EACCES: permission denied, open '/var/lib/disdex/shared/kill-switch.json'"
+    },
+    {
+      "occurredAt": 1790212716656,
+      "message": "EACCES: permission denied, open '/var/lib/disdex/shared/kill-switch.json'"
+    },
+    {
+      "occurredAt": 1790212736157,
+      "message": "EACCES: permission denied, open '/var/lib/disdex/shared/kill-switch.json'"
+    },
+    {
+      "occurredAt": 1790213009399,
+      "message": "EACCES: permission denied, open '/var/lib/disdex/shared/kill-switch.json'"
+    },
+    {
+      "occurredAt": 1790213024362,
+      "message": "EACCES: permission denied, open '/var/lib/disdex/shared/kill-switch.json'"
+    },
+    {
+      "occurredAt": 1790213039839,
+      "message": "EACCES: permission denied, open '/var/lib/disdex/shared/kill-switch.json'"
+    },
+    {
+      "occurredAt": 1790374237277,
+      "message": "ASTER_GLOBAL_RATE_BUDGET_SATURATED:5319"
+    },
+    {
+      "occurredAt": 1790572816317,
+      "message": "ASTER_GLOBAL_RATE_BUDGET_SATURATED:5073"
+    },
+    {
+      "occurredAt": 1790625369824,
+      "message": "QUALITY102_OWNERSHIP_RUNTIME_SHA_MISMATCH"
+    },
+    {
+      "occurredAt": 1790767267186,
+      "message": "QUALITY102_OWNERSHIP_RUNTIME_SHA_MISMATCH"
+    },
+    {
+      "occurredAt": 1790770420359,
+      "message": "ASTER_GLOBAL_RATE_BUDGET_SATURATED:5014"
+    },
+    {
+      "occurredAt": 1790797412998,
+      "message": "EACCES: permission denied, open '/var/lib/disdex/shared/aster-rate-budget.json'"
+    },
+    {
+      "occurredAt": 1790797418785,
+      "message": "EACCES: permission denied, open '/var/lib/disdex/shared/aster-rate-budget.json'"
+    },
+    {
+      "occurredAt": 1790798240946,
+      "message": "ASTER_GLOBAL_RATE_BUDGET_SATURATED:5208"
+    },
+    {
+      "occurredAt": 1790805919858,
+      "message": "ASTER_GLOBAL_RATE_BUDGET_SATURATED:5235"
+    },
+    {
+      "occurredAt": 1790806738161,
+      "message": "ASTER_GLOBAL_RATE_BUDGET_SATURATED:5066"
+    },
+    {
+      "occurredAt": 1790911376439,
+      "message": "ASTER_GLOBAL_RATE_BUDGET_SATURATED:5022"
+    },
+    {
+      "occurredAt": 1790920971519,
+      "message": "ASTER_GLOBAL_RATE_BUDGET_SATURATED:5063"
+    },
+    {
+      "occurredAt": 1790923663997,
+      "message": "ASTER_GLOBAL_RATE_BUDGET_SATURATED:5270"
+    },
+    {
+      "occurredAt": 1791039618974,
+      "message": "ASTER_GLOBAL_RATE_BUDGET_LOCK_TIMEOUT"
+    },
+    {
+      "occurredAt": 1791086920674,
+      "message": "ASTER_GLOBAL_RATE_BUDGET_SATURATED:5066"
+    },
+    {
+      "occurredAt": 1791087430371,
+      "message": "ASTER_GLOBAL_RATE_BUDGET_SATURATED:5076"
+    },
+    {
+      "occurredAt": 1791254771139,
+      "message": "ASTER_GLOBAL_RATE_BUDGET_SATURATED:5035"
+    }
+  ]
+}

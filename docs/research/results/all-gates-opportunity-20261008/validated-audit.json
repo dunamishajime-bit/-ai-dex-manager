@@ -1,0 +1,1270 @@
+{
+  "schema": "all-gates-audit/v1",
+  "window": {
+    "start_jst": "2026-10-07T00:00:00+09:00",
+    "end_jst_exclusive": "2026-10-08T00:00:00+09:00"
+  },
+  "verified_cases": 38,
+  "verified_cost_summaries": 114,
+  "live_json_rows": 16779,
+  "quantity_rounding_hold_rows": 41,
+  "quantity_rounding_symbol_strategy_hour_groups": {
+    "('IDLE_RESIDUAL_LONG', 'AVAXUSDT', 497586)": [
+      "2026-10-06T18:21:41.537Z",
+      "2026-10-06T18:26:58.563Z",
+      "2026-10-06T18:32:08.987Z",
+      "2026-10-06T18:37:26.984Z",
+      "2026-10-06T18:42:39.027Z",
+      "2026-10-06T18:47:52.365Z",
+      "2026-10-06T18:53:13.691Z"
+    ],
+    "('IDLE_RESIDUAL_LONG', 'AVAXUSDT', 497588)": [
+      "2026-10-06T20:42:08.626Z",
+      "2026-10-06T20:47:17.583Z",
+      "2026-10-06T20:52:26.698Z",
+      "2026-10-06T20:57:37.079Z"
+    ],
+    "('IDLE_RESIDUAL_LONG', 'AVAXUSDT', 497592)": [
+      "2026-10-07T00:12:54.794Z",
+      "2026-10-07T00:18:02.915Z",
+      "2026-10-07T00:23:12.019Z",
+      "2026-10-07T00:28:29.072Z",
+      "2026-10-07T00:33:42.567Z",
+      "2026-10-07T00:38:56.079Z",
+      "2026-10-07T00:44:04.734Z",
+      "2026-10-07T00:49:12.947Z",
+      "2026-10-07T00:54:22.470Z"
+    ],
+    "('IDLE_PRIORITY_SHORT', 'JUPUSDT', 497596)": [
+      "2026-10-07T04:03:36.938Z",
+      "2026-10-07T04:08:42.503Z",
+      "2026-10-07T04:13:48.081Z",
+      "2026-10-07T04:18:57.187Z",
+      "2026-10-07T04:24:02.866Z",
+      "2026-10-07T04:29:08.497Z",
+      "2026-10-07T04:34:18.934Z",
+      "2026-10-07T04:39:24.505Z",
+      "2026-10-07T04:44:30.117Z",
+      "2026-10-07T04:49:36.591Z",
+      "2026-10-07T04:54:42.211Z",
+      "2026-10-07T04:59:52.698Z"
+    ],
+    "('IDLE_PRIORITY_SHORT', 'JUPUSDT', 497600)": [
+      "2026-10-07T08:24:06.350Z",
+      "2026-10-07T08:29:11.975Z",
+      "2026-10-07T08:34:23.142Z",
+      "2026-10-07T08:39:29.127Z",
+      "2026-10-07T08:44:35.082Z",
+      "2026-10-07T08:49:40.437Z",
+      "2026-10-07T08:54:46.148Z",
+      "2026-10-07T08:59:59.823Z"
+    ],
+    "('IDLE_PRIORITY_SHORT', 'JUPUSDT', 497601)": [
+      "2026-10-07T09:37:05.774Z"
+    ]
+  },
+  "pengu_unique_hourly_features": 24,
+  "pengu_btc_short_gate_pass_hours": 24,
+  "live_stats": {
+    "disdex-pengu-dual-ls-v2": {
+      "rows": 47,
+      "messages": {
+        "Another PENGU Dual LS tick owns the account lock.": 13,
+        "PENGU V8 base Long/Short conditions are not active.": 26,
+        "OPERATOR_LIVE_ACTIVATION_CONFIRMED": 2,
+        "strict-portfolio-live-gate": 2,
+        "quality102-causal-v1-integration": 2,
+        "pengu-runtime-contract": 2
+      },
+      "ordersSent": 0,
+      "first": "1791298805463039",
+      "last": "1791381638880538"
+    },
+    "disdex-fet-brk48": {
+      "rows": 2718,
+      "messages": {
+        "FET_NO_BRK48_SIGNAL": 2701,
+        "ASTER_GLOBAL_RATE_BUDGET_SATURATED:5715": 1,
+        "ASTER_GLOBAL_RATE_BUDGET_SATURATED:6113": 1,
+        "ASTER_GLOBAL_RATE_BUDGET_SATURATED:5272": 1,
+        "ASTER_GLOBAL_RATE_BUDGET_SATURATED:5139": 1,
+        "ASTER_GLOBAL_RATE_BUDGET_SATURATED:5129": 1,
+        "ASTER_GLOBAL_RATE_BUDGET_SATURATED:5831": 1,
+        "ASTER_GLOBAL_RATE_BUDGET_SATURATED:5428": 1,
+        "unknown": 4,
+        "OPERATOR_LIVE_ACTIVATION_CONFIRMED": 4,
+        "ASTER_GLOBAL_RATE_BUDGET_SATURATED:5773": 1,
+        "ASTER_GLOBAL_RATE_BUDGET_SATURATED:5092": 1
+      },
+      "ordersSent": 0,
+      "first": "1791298817968318",
+      "last": "1791385170550076"
+    },
+    "disdex-v52-aster-only": {
+      "rows": 13130,
+      "messages": {
+        "v52-account-lock-busy": 398,
+        "v52-entry-held-reference-validation": 104,
+        "v50-signal-recorded": 3,
+        "v52-cost-telemetry": 70,
+        "v52-v50-decision": 14,
+        "ASTER_GLOBAL_RATE_BUDGET_SATURATED:5043": 1,
+        "ASTER_GLOBAL_RATE_BUDGET_SATURATED:5376": 1,
+        "history-book-error": 5,
+        "v52-market-closed": 12521,
+        "unknown": 2,
+        "OPERATOR_LIVE_ACTIVATION_CONFIRMED": 2,
+        "v52-runner-start": 1,
+        "v11-signal-recorded": 1,
+        "ASTER_GLOBAL_RATE_BUDGET_SATURATED:5016": 1,
+        "v52-v11-decision": 6
+      },
+      "ordersSent": 0,
+      "first": "1791298820616572",
+      "last": "1791384949442782"
+    },
+    "disdex-quality102-causal-v1": {
+      "rows": 66,
+      "messages": {
+        "Q102 shared account lock is busy or requires review.": 26,
+        "QUALITY102_CAUSAL_V4_NO_SIGNAL": 21,
+        "QUALITY102_CAUSAL_V4_REV_LONG_RET14_BELOW_24PCT_NO_BACKFILL": 3,
+        "unknown": 6,
+        "OPERATOR_LIVE_ACTIVATION_CONFIRMED": 4,
+        "quality102-causal-v1-runner-start": 2,
+        "Q102 initial daemon history/account reconciliation passed; new orders remain held until the next tick.": 1,
+        "QUALITY102_CAUSAL_V1_INITIAL_DAEMON_RECONCILIATION_PASS_NEW_ORDERS_HELD": 1,
+        "ASTER_GLOBAL_RATE_BUDGET_SATURATED:5418": 1,
+        "Q102 signal reference was already processed.": 1
+      },
+      "ordersSent": 0,
+      "first": "1791298948717945",
+      "last": "1791381659887544"
+    },
+    "disdex-idle-priority-short": {
+      "rows": 526,
+      "messages": {
+        "IDLE_GENERIC_CANDIDATE_NOT_SELECTED_ROUTE": 162,
+        "IDLE_RESIDUAL_BASELINE_ADMISSION_BLOCKED:BASELINE_ADMISSION_SOURCE_STALE_OR_TS_MISMATCH": 57,
+        "IDLE_RESIDUAL_RATE_BUDGET_DEFERRED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:5067": 1,
+        "IDLE_PRIORITY_SHORT_ACCOUNT_LOCK_BUSY": 36,
+        "IDLE_RATE_BUDGET_DEFERRED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:5073": 1,
+        "IDLE_RATE_BUDGET_DEFERRED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:5228": 1,
+        "IDLE_RESIDUAL_SHARED_SAFETY_BLOCK": 37,
+        "IDLE_RATE_BUDGET_DEFERRED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:5004": 1,
+        "IDLE_RESIDUAL_FULL_1X_NOT_REALIZABLE:AVAXUSDT": 20,
+        "IDLE_RATE_BUDGET_DEFERRED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:5077": 1,
+        "IDLE_RATE_BUDGET_DEFERRED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:5068": 1,
+        "IDLE_NO_GENERIC_CANDIDATE": 34,
+        "NO_IDLE_RESIDUAL_LONG_SIGNAL": 81,
+        "IDLE_RATE_BUDGET_DEFERRED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:5269": 1,
+        "IDLE_RATE_BUDGET_DEFERRED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:5494": 1,
+        "IDLE_RATE_BUDGET_DEFERRED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:5411": 1,
+        "IDLE_GENERIC_BASELINE_ADMISSION_BLOCKED:BASELINE_ADMISSION_SOURCE_STALE_OR_TS_MISMATCH": 46,
+        "IDLE_RATE_BUDGET_DEFERRED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:5024": 1,
+        "IDLE_FULL_1X_NOT_REALIZABLE_AFTER_ROUNDING:JUPUSDT": 21,
+        "IDLE_ENTRY_BLOCKED:MARGIN_GUARD_NOT_HEALTHY": 15,
+        "IDLE_RATE_BUDGET_DEFERRED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:5596": 1,
+        "IDLE_RATE_BUDGET_DEFERRED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:5810": 1,
+        "IDLE_RATE_BUDGET_DEFERRED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:5801": 1,
+        "IDLE_RATE_BUDGET_DEFERRED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:5607": 1,
+        "OPERATOR_LIVE_ACTIVATION_CONFIRMED": 2,
+        "IDLE_RATE_BUDGET_DEFERRED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:5478": 1
+      },
+      "ordersSent": 0,
+      "first": "1791298990850765",
+      "last": "1791384949547054"
+    },
+    "disdex-hype-long": {
+      "rows": 255,
+      "messages": {
+        "HYPE_ZEC_LONG_ACCOUNT_LOCK_BUSY": 156,
+        "HYPE_ZEC_NO_ACCEPTED_ENTRY": 95,
+        "unknown": 2,
+        "OPERATOR_LIVE_ACTIVATION_CONFIRMED": 2
+      },
+      "ordersSent": 0,
+      "first": "1791299028291018",
+      "last": "1791384432305362"
+    },
+    "disdex-v12-x1-all": {
+      "rows": 37,
+      "messages": {
+        "ACCOUNT_LOCK_BUSY_OR_STALE_REVIEW_REQUIRED": 19,
+        "NO_COMPLETED_BAR_SIGNAL": 12,
+        "OPERATOR_LIVE_ACTIVATION_CONFIRMED": 2,
+        "unknown": 2,
+        "NO_NEW_CONFIRMED_2H_BAR": 2
+      },
+      "ordersSent": 0,
+      "first": "1791302415857978",
+      "last": "1791381734518785"
+    }
+  },
+  "variants": [
+    {
+      "strategy": "FET",
+      "name": "BASELINE",
+      "annual_offered_candidates": 21,
+      "yesterday_offered_candidates": 0,
+      "isolated_metrics": {
+        "cost_bps": 10,
+        "trades": 12,
+        "win_rate": 0.6666666666666666,
+        "pf": 2.792897595243137,
+        "mean_net_return": 0.02435105319370613,
+        "win_days_jst": 12,
+        "serial_unit_equity": 1.3072133000470372,
+        "serial_realized_dd": -0.10839010643735214,
+        "first": {
+          "trades": 0,
+          "win_rate": null,
+          "pf": null,
+          "mean_net_return": null
+        },
+        "second": {
+          "trades": 12,
+          "win_rate": 0.6666666666666666,
+          "pf": 2.792897595243137,
+          "mean_net_return": 0.02435105319370613
+        }
+      }
+    },
+    {
+      "strategy": "FET",
+      "name": "GRID_1H",
+      "annual_offered_candidates": 77,
+      "yesterday_offered_candidates": 0,
+      "isolated_metrics": {
+        "cost_bps": 10,
+        "trades": 23,
+        "win_rate": 0.34782608695652173,
+        "pf": 0.7807636115627555,
+        "mean_net_return": -0.0052212195006009,
+        "win_days_jst": 23,
+        "serial_unit_equity": 0.8560132357642057,
+        "serial_realized_dd": -0.27824828713145744,
+        "first": {
+          "trades": 0,
+          "win_rate": null,
+          "pf": null,
+          "mean_net_return": null
+        },
+        "second": {
+          "trades": 23,
+          "win_rate": 0.34782608695652173,
+          "pf": 0.7807636115627555,
+          "mean_net_return": -0.0052212195006009
+        }
+      }
+    },
+    {
+      "strategy": "FET",
+      "name": "RETURN72_0",
+      "annual_offered_candidates": 23,
+      "yesterday_offered_candidates": 0,
+      "isolated_metrics": {
+        "cost_bps": 10,
+        "trades": 14,
+        "win_rate": 0.5714285714285714,
+        "pf": 1.8894582068483763,
+        "mean_net_return": 0.015305895489918508,
+        "win_days_jst": 14,
+        "serial_unit_equity": 1.207137407664352,
+        "serial_realized_dd": -0.15386221100904718,
+        "first": {
+          "trades": 0,
+          "win_rate": null,
+          "pf": null,
+          "mean_net_return": null
+        },
+        "second": {
+          "trades": 14,
+          "win_rate": 0.5714285714285714,
+          "pf": 1.8894582068483763,
+          "mean_net_return": 0.015305895489918508
+        }
+      }
+    },
+    {
+      "strategy": "FET",
+      "name": "VOLUME_10",
+      "annual_offered_candidates": 22,
+      "yesterday_offered_candidates": 0,
+      "isolated_metrics": {
+        "cost_bps": 10,
+        "trades": 12,
+        "win_rate": 0.6666666666666666,
+        "pf": 2.730812147006008,
+        "mean_net_return": 0.023507811473382222,
+        "win_days_jst": 12,
+        "serial_unit_equity": 1.294922293160278,
+        "serial_realized_dd": -0.10839010643735214,
+        "first": {
+          "trades": 0,
+          "win_rate": null,
+          "pf": null,
+          "mean_net_return": null
+        },
+        "second": {
+          "trades": 12,
+          "win_rate": 0.6666666666666666,
+          "pf": 2.730812147006008,
+          "mean_net_return": 0.023507811473382222
+        }
+      }
+    },
+    {
+      "strategy": "HYPE",
+      "name": "BASELINE",
+      "annual_offered_candidates": 60,
+      "yesterday_offered_candidates": 0,
+      "isolated_metrics": {
+        "cost_bps": 10,
+        "trades": 26,
+        "win_rate": 0.4230769230769231,
+        "pf": 1.2183492826642608,
+        "mean_net_return": 0.005626885468516649,
+        "win_days_jst": 26,
+        "serial_unit_equity": 1.0827400776568632,
+        "serial_realized_dd": -0.3408249492988281,
+        "first": {
+          "trades": 7,
+          "win_rate": 0.2857142857142857,
+          "pf": 0.4797219315194939,
+          "mean_net_return": -0.022151451598738086
+        },
+        "second": {
+          "trades": 19,
+          "win_rate": 0.47368421052631576,
+          "pf": 1.8101278352793955,
+          "mean_net_return": 0.015861009651189445
+        }
+      }
+    },
+    {
+      "strategy": "HYPE",
+      "name": "BREAKOUT_0",
+      "annual_offered_candidates": 87,
+      "yesterday_offered_candidates": 0,
+      "isolated_metrics": {
+        "cost_bps": 10,
+        "trades": 31,
+        "win_rate": 0.3548387096774194,
+        "pf": 1.0990037566479676,
+        "mean_net_return": 0.0024987414753192263,
+        "win_days_jst": 31,
+        "serial_unit_equity": 1.0055432207397386,
+        "serial_realized_dd": -0.3670318388429976,
+        "first": {
+          "trades": 8,
+          "win_rate": 0.25,
+          "pf": 0.5296290841929512,
+          "mean_net_return": -0.018715313290282906
+        },
+        "second": {
+          "trades": 23,
+          "win_rate": 0.391304347826087,
+          "pf": 1.4895170614159983,
+          "mean_net_return": 0.009877543132919967
+        }
+      }
+    },
+    {
+      "strategy": "HYPE",
+      "name": "DISTANCE_1200",
+      "annual_offered_candidates": 71,
+      "yesterday_offered_candidates": 0,
+      "isolated_metrics": {
+        "cost_bps": 10,
+        "trades": 26,
+        "win_rate": 0.4230769230769231,
+        "pf": 1.1852482285653363,
+        "mean_net_return": 0.004773867597199828,
+        "win_days_jst": 26,
+        "serial_unit_equity": 1.059746525972669,
+        "serial_realized_dd": -0.35482348496772953,
+        "first": {
+          "trades": 7,
+          "win_rate": 0.2857142857142857,
+          "pf": 0.4797219315194939,
+          "mean_net_return": -0.022151451598738086
+        },
+        "second": {
+          "trades": 19,
+          "win_rate": 0.47368421052631576,
+          "pf": 1.7505066504889422,
+          "mean_net_return": 0.014693722037808533
+        }
+      }
+    },
+    {
+      "strategy": "HYPE",
+      "name": "SLOPE_50",
+      "annual_offered_candidates": 67,
+      "yesterday_offered_candidates": 0,
+      "isolated_metrics": {
+        "cost_bps": 10,
+        "trades": 27,
+        "win_rate": 0.4444444444444444,
+        "pf": 1.3316787624690207,
+        "mean_net_return": 0.008186651421329797,
+        "win_days_jst": 27,
+        "serial_unit_equity": 1.1583692090435667,
+        "serial_realized_dd": -0.340824949298828,
+        "first": {
+          "trades": 8,
+          "win_rate": 0.25,
+          "pf": 0.6259800742732723,
+          "mean_net_return": -0.014367579344708017
+        },
+        "second": {
+          "trades": 19,
+          "win_rate": 0.5263157894736842,
+          "pf": 1.9355778709426428,
+          "mean_net_return": 0.017683169638608876
+        }
+      }
+    },
+    {
+      "strategy": "IDLE",
+      "name": "BASELINE",
+      "annual_offered_candidates": 694,
+      "yesterday_offered_candidates": 7,
+      "isolated_metrics": {
+        "cost_bps": 10,
+        "trades": 146,
+        "win_rate": 0.541095890410959,
+        "pf": 1.1856663449113212,
+        "mean_net_return": 0.0025274156813577236,
+        "win_days_jst": 134,
+        "serial_unit_equity": 1.2909658434601412,
+        "serial_realized_dd": -0.22407707347694306,
+        "first": {
+          "trades": 46,
+          "win_rate": 0.5652173913043478,
+          "pf": 1.4568974845264644,
+          "mean_net_return": 0.006965553643397052
+        },
+        "second": {
+          "trades": 100,
+          "win_rate": 0.53,
+          "pf": 1.0377768082302818,
+          "mean_net_return": 0.0004858722188196329
+        }
+      }
+    },
+    {
+      "strategy": "IDLE",
+      "name": "DOT_BTC_01",
+      "annual_offered_candidates": 709,
+      "yesterday_offered_candidates": 7,
+      "isolated_metrics": {
+        "cost_bps": 10,
+        "trades": 148,
+        "win_rate": 0.5067567567567568,
+        "pf": 1.0732575170163898,
+        "mean_net_return": 0.0010541386252103297,
+        "win_days_jst": 136,
+        "serial_unit_equity": 1.040732580695049,
+        "serial_realized_dd": -0.23464255744216334,
+        "first": {
+          "trades": 49,
+          "win_rate": 0.5306122448979592,
+          "pf": 1.2928447938990155,
+          "mean_net_return": 0.00472300859602606
+        },
+        "second": {
+          "trades": 99,
+          "win_rate": 0.494949494949495,
+          "pf": 0.9436938262993717,
+          "mean_net_return": -0.0007617667138802842
+        }
+      }
+    },
+    {
+      "strategy": "IDLE",
+      "name": "RELATIVE_02",
+      "annual_offered_candidates": 833,
+      "yesterday_offered_candidates": 9,
+      "isolated_metrics": {
+        "cost_bps": 10,
+        "trades": 160,
+        "win_rate": 0.53125,
+        "pf": 1.094858289310483,
+        "mean_net_return": 0.0013217666000186214,
+        "win_days_jst": 141,
+        "serial_unit_equity": 1.0971126525735904,
+        "serial_realized_dd": -0.4365937278611649,
+        "first": {
+          "trades": 41,
+          "win_rate": 0.5853658536585366,
+          "pf": 2.318152667520384,
+          "mean_net_return": 0.01208055969370036
+        },
+        "second": {
+          "trades": 118,
+          "win_rate": 0.5084745762711864,
+          "pf": 0.8375191148366138,
+          "mean_net_return": -0.0025524693862780095
+        }
+      }
+    },
+    {
+      "strategy": "IDLE",
+      "name": "VOLUME_80PCT",
+      "annual_offered_candidates": 765,
+      "yesterday_offered_candidates": 8,
+      "isolated_metrics": {
+        "cost_bps": 10,
+        "trades": 149,
+        "win_rate": 0.5302013422818792,
+        "pf": 1.1929485742922608,
+        "mean_net_return": 0.0025251605894168376,
+        "win_days_jst": 135,
+        "serial_unit_equity": 1.3101175671922163,
+        "serial_realized_dd": -0.22029627308229216,
+        "first": {
+          "trades": 47,
+          "win_rate": 0.5531914893617021,
+          "pf": 1.4201888132030607,
+          "mean_net_return": 0.006005722717500324
+        },
+        "second": {
+          "trades": 102,
+          "win_rate": 0.5196078431372549,
+          "pf": 1.0735235751463355,
+          "mean_net_return": 0.000921372157848957
+        }
+      }
+    },
+    {
+      "strategy": "PENGU",
+      "name": "BASELINE",
+      "annual_offered_candidates": 113,
+      "yesterday_offered_candidates": 0,
+      "isolated_metrics": {
+        "cost_bps": 10,
+        "trades": 67,
+        "win_rate": 0.746268656716418,
+        "pf": 4.07320550454161,
+        "mean_net_return": 0.03880771539197755,
+        "win_days_jst": 67,
+        "serial_unit_equity": 11.23185454258222,
+        "serial_realized_dd": -0.155439,
+        "first": {
+          "trades": 35,
+          "win_rate": 0.7428571428571429,
+          "pf": 4.334426304184767,
+          "mean_net_return": 0.046640853716242284
+        },
+        "second": {
+          "trades": 32,
+          "win_rate": 0.75,
+          "pf": 3.7144722458369377,
+          "mean_net_return": 0.030240220349812996
+        }
+      }
+    },
+    {
+      "strategy": "PENGU",
+      "name": "BTC_DIST_M06",
+      "annual_offered_candidates": 115,
+      "yesterday_offered_candidates": 0,
+      "isolated_metrics": {
+        "cost_bps": 10,
+        "trades": 68,
+        "win_rate": 0.7352941176470589,
+        "pf": 3.7451605907336174,
+        "mean_net_return": 0.037425429213629534,
+        "win_days_jst": 68,
+        "serial_unit_equity": 10.548496711956943,
+        "serial_realized_dd": -0.155439,
+        "first": {
+          "trades": 36,
+          "win_rate": 0.7222222222222222,
+          "pf": 3.7643347021102382,
+          "mean_net_return": 0.043812281537022005
+        },
+        "second": {
+          "trades": 32,
+          "win_rate": 0.75,
+          "pf": 3.7144722458369377,
+          "mean_net_return": 0.030240220349812996
+        }
+      }
+    },
+    {
+      "strategy": "PENGU",
+      "name": "BTC_MAX_06",
+      "annual_offered_candidates": 113,
+      "yesterday_offered_candidates": 0,
+      "isolated_metrics": {
+        "cost_bps": 10,
+        "trades": 67,
+        "win_rate": 0.746268656716418,
+        "pf": 4.07320550454161,
+        "mean_net_return": 0.03880771539197755,
+        "win_days_jst": 67,
+        "serial_unit_equity": 11.23185454258222,
+        "serial_realized_dd": -0.155439,
+        "first": {
+          "trades": 35,
+          "win_rate": 0.7428571428571429,
+          "pf": 4.334426304184767,
+          "mean_net_return": 0.046640853716242284
+        },
+        "second": {
+          "trades": 32,
+          "win_rate": 0.75,
+          "pf": 3.7144722458369377,
+          "mean_net_return": 0.030240220349812996
+        }
+      }
+    },
+    {
+      "strategy": "PENGU",
+      "name": "IMPULSE_M05",
+      "annual_offered_candidates": 140,
+      "yesterday_offered_candidates": 0,
+      "isolated_metrics": {
+        "cost_bps": 10,
+        "trades": 68,
+        "win_rate": 0.7352941176470589,
+        "pf": 3.478399454501858,
+        "mean_net_return": 0.036346714605007845,
+        "win_days_jst": 68,
+        "serial_unit_equity": 9.832833544382737,
+        "serial_realized_dd": -0.23938751883900034,
+        "first": {
+          "trades": 36,
+          "win_rate": 0.7222222222222222,
+          "pf": 3.620393701971826,
+          "mean_net_return": 0.0422865713696393
+        },
+        "second": {
+          "trades": 32,
+          "win_rate": 0.75,
+          "pf": 3.2802443038078604,
+          "mean_net_return": 0.029664375744797435
+        }
+      }
+    },
+    {
+      "strategy": "PENGU",
+      "name": "LONG_BTC_M01",
+      "annual_offered_candidates": 113,
+      "yesterday_offered_candidates": 0,
+      "isolated_metrics": {
+        "cost_bps": 10,
+        "trades": 67,
+        "win_rate": 0.746268656716418,
+        "pf": 4.07320550454161,
+        "mean_net_return": 0.03880771539197755,
+        "win_days_jst": 67,
+        "serial_unit_equity": 11.23185454258222,
+        "serial_realized_dd": -0.155439,
+        "first": {
+          "trades": 35,
+          "win_rate": 0.7428571428571429,
+          "pf": 4.334426304184767,
+          "mean_net_return": 0.046640853716242284
+        },
+        "second": {
+          "trades": 32,
+          "win_rate": 0.75,
+          "pf": 3.7144722458369377,
+          "mean_net_return": 0.030240220349812996
+        }
+      }
+    },
+    {
+      "strategy": "PENGU",
+      "name": "RECOVERY_BTC_0",
+      "annual_offered_candidates": 123,
+      "yesterday_offered_candidates": 0,
+      "isolated_metrics": {
+        "cost_bps": 10,
+        "trades": 68,
+        "win_rate": 0.7205882352941176,
+        "pf": 3.5276666622666344,
+        "mean_net_return": 0.03561260122735672,
+        "win_days_jst": 68,
+        "serial_unit_equity": 9.384530760434107,
+        "serial_realized_dd": -0.1554390000000001,
+        "first": {
+          "trades": 36,
+          "win_rate": 0.7222222222222222,
+          "pf": 3.854195353920901,
+          "mean_net_return": 0.04365083000190222
+        },
+        "second": {
+          "trades": 32,
+          "win_rate": 0.71875,
+          "pf": 3.086488706218039,
+          "mean_net_return": 0.026569593855993046
+        }
+      }
+    },
+    {
+      "strategy": "PENGU",
+      "name": "RSI25_VOL7",
+      "annual_offered_candidates": 118,
+      "yesterday_offered_candidates": 0,
+      "isolated_metrics": {
+        "cost_bps": 10,
+        "trades": 67,
+        "win_rate": 0.7313432835820896,
+        "pf": 3.627562282140086,
+        "mean_net_return": 0.035873661358444206,
+        "win_days_jst": 67,
+        "serial_unit_equity": 9.26684634930562,
+        "serial_realized_dd": -0.155439,
+        "first": {
+          "trades": 35,
+          "win_rate": 0.7142857142857143,
+          "pf": 3.871846075682867,
+          "mean_net_return": 0.04225918463126096
+        },
+        "second": {
+          "trades": 32,
+          "win_rate": 0.75,
+          "pf": 3.3128075820701133,
+          "mean_net_return": 0.028889495278800886
+        }
+      }
+    },
+    {
+      "strategy": "PENGU",
+      "name": "SHORT_RSI25",
+      "annual_offered_candidates": 115,
+      "yesterday_offered_candidates": 0,
+      "isolated_metrics": {
+        "cost_bps": 10,
+        "trades": 67,
+        "win_rate": 0.7313432835820896,
+        "pf": 3.8074726727436814,
+        "mean_net_return": 0.03651878378042014,
+        "win_days_jst": 67,
+        "serial_unit_equity": 9.702692675946723,
+        "serial_realized_dd": -0.155439,
+        "first": {
+          "trades": 35,
+          "win_rate": 0.7142857142857143,
+          "pf": 3.871846075682867,
+          "mean_net_return": 0.04225918463126096
+        },
+        "second": {
+          "trades": 32,
+          "win_rate": 0.75,
+          "pf": 3.7144722458369377,
+          "mean_net_return": 0.030240220349812996
+        }
+      }
+    },
+    {
+      "strategy": "PENGU",
+      "name": "SHORT_VOL5",
+      "annual_offered_candidates": 113,
+      "yesterday_offered_candidates": 0,
+      "isolated_metrics": {
+        "cost_bps": 10,
+        "trades": 67,
+        "win_rate": 0.746268656716418,
+        "pf": 4.07320550454161,
+        "mean_net_return": 0.03880771539197755,
+        "win_days_jst": 67,
+        "serial_unit_equity": 11.23185454258222,
+        "serial_realized_dd": -0.155439,
+        "first": {
+          "trades": 35,
+          "win_rate": 0.7428571428571429,
+          "pf": 4.334426304184767,
+          "mean_net_return": 0.046640853716242284
+        },
+        "second": {
+          "trades": 32,
+          "win_rate": 0.75,
+          "pf": 3.7144722458369377,
+          "mean_net_return": 0.030240220349812996
+        }
+      }
+    },
+    {
+      "strategy": "Q102",
+      "name": "BASELINE",
+      "annual_offered_candidates": 267,
+      "yesterday_offered_candidates": 0,
+      "isolated_metrics": {
+        "cost_bps": 10,
+        "trades": 134,
+        "win_rate": 0.6417910447761194,
+        "pf": 2.4229710478500386,
+        "mean_net_return": 0.014951095083716483,
+        "win_days_jst": 119,
+        "serial_unit_equity": 6.033452218635053,
+        "serial_realized_dd": -0.16365870319114406,
+        "first": {
+          "trades": 63,
+          "win_rate": 0.6507936507936508,
+          "pf": 2.7411680569354964,
+          "mean_net_return": 0.019502958672337232
+        },
+        "second": {
+          "trades": 70,
+          "win_rate": 0.6285714285714286,
+          "pf": 2.0248428248364734,
+          "mean_net_return": 0.010281578897095783
+        }
+      }
+    },
+    {
+      "strategy": "Q102",
+      "name": "MARGIN_UPPER20",
+      "annual_offered_candidates": 282,
+      "yesterday_offered_candidates": 0,
+      "isolated_metrics": {
+        "cost_bps": 10,
+        "trades": 140,
+        "win_rate": 0.6428571428571429,
+        "pf": 2.2859554161828712,
+        "mean_net_return": 0.01408421188011207,
+        "win_days_jst": 124,
+        "serial_unit_equity": 5.829636725713492,
+        "serial_realized_dd": -0.22303893526457286,
+        "first": {
+          "trades": 63,
+          "win_rate": 0.6507936507936508,
+          "pf": 2.684399134489249,
+          "mean_net_return": 0.018803979677463344
+        },
+        "second": {
+          "trades": 76,
+          "win_rate": 0.631578947368421,
+          "pf": 1.8820148856118746,
+          "mean_net_return": 0.00963275159830843
+        }
+      }
+    },
+    {
+      "strategy": "Q102",
+      "name": "RET14_WIDEN",
+      "annual_offered_candidates": 294,
+      "yesterday_offered_candidates": 0,
+      "isolated_metrics": {
+        "cost_bps": 10,
+        "trades": 147,
+        "win_rate": 0.6462585034013606,
+        "pf": 2.3909516983645025,
+        "mean_net_return": 0.014199880877704569,
+        "win_days_jst": 131,
+        "serial_unit_equity": 6.5381505836642155,
+        "serial_realized_dd": -0.16365870319114406,
+        "first": {
+          "trades": 68,
+          "win_rate": 0.6470588235294118,
+          "pf": 2.6282487745520284,
+          "mean_net_return": 0.01782643001774129
+        },
+        "second": {
+          "trades": 78,
+          "win_rate": 0.6410256410256411,
+          "pf": 2.0845376858104583,
+          "mean_net_return": 0.010514556740411608
+        }
+      }
+    },
+    {
+      "strategy": "Q102",
+      "name": "REV_LONG_020",
+      "annual_offered_candidates": 273,
+      "yesterday_offered_candidates": 0,
+      "isolated_metrics": {
+        "cost_bps": 10,
+        "trades": 136,
+        "win_rate": 0.6397058823529411,
+        "pf": 2.5383434032178167,
+        "mean_net_return": 0.015486761890297025,
+        "win_days_jst": 120,
+        "serial_unit_equity": 6.66785843009225,
+        "serial_realized_dd": -0.16365870319114417,
+        "first": {
+          "trades": 65,
+          "win_rate": 0.6461538461538462,
+          "pf": 2.996548193726303,
+          "mean_net_return": 0.02048368111107126
+        },
+        "second": {
+          "trades": 70,
+          "win_rate": 0.6285714285714286,
+          "pf": 2.0248428248364734,
+          "mean_net_return": 0.010281578897095783
+        }
+      }
+    },
+    {
+      "strategy": "Q102",
+      "name": "REV_LONG_OFF",
+      "annual_offered_candidates": 301,
+      "yesterday_offered_candidates": 3,
+      "isolated_metrics": {
+        "cost_bps": 10,
+        "trades": 149,
+        "win_rate": 0.6040268456375839,
+        "pf": 1.9320464859564626,
+        "mean_net_return": 0.01104456281942752,
+        "win_days_jst": 128,
+        "serial_unit_equity": 4.272825404267283,
+        "serial_realized_dd": -0.24695886216636542,
+        "first": {
+          "trades": 71,
+          "win_rate": 0.6197183098591549,
+          "pf": 2.233153427467398,
+          "mean_net_return": 0.01489354992035779
+        },
+        "second": {
+          "trades": 77,
+          "win_rate": 0.5844155844155844,
+          "pf": 1.5870966492013372,
+          "mean_net_return": 0.006923999917990115
+        }
+      }
+    },
+    {
+      "strategy": "RESIDUAL",
+      "name": "BASELINE",
+      "annual_offered_candidates": 842,
+      "yesterday_offered_candidates": 10,
+      "isolated_metrics": {
+        "cost_bps": 10,
+        "trades": 141,
+        "win_rate": 0.3829787234042553,
+        "pf": 0.6131257724492534,
+        "mean_net_return": -0.0055702347365481405,
+        "win_days_jst": 111,
+        "serial_unit_equity": 0.4247883579261857,
+        "serial_realized_dd": -0.6781176913642202,
+        "first": {
+          "trades": 81,
+          "win_rate": 0.43209876543209874,
+          "pf": 0.8334229323204188,
+          "mean_net_return": -0.0021118019081273515
+        },
+        "second": {
+          "trades": 60,
+          "win_rate": 0.31666666666666665,
+          "pf": 0.387635308059944,
+          "mean_net_return": -0.010239119054916205
+        }
+      }
+    },
+    {
+      "strategy": "RESIDUAL",
+      "name": "RELATIVE_02",
+      "annual_offered_candidates": 1278,
+      "yesterday_offered_candidates": 12,
+      "isolated_metrics": {
+        "cost_bps": 10,
+        "trades": 204,
+        "win_rate": 0.4215686274509804,
+        "pf": 0.7199102984837853,
+        "mean_net_return": -0.0035836800075556485,
+        "win_days_jst": 153,
+        "serial_unit_equity": 0.4406361516911855,
+        "serial_realized_dd": -0.6441745667095824,
+        "first": {
+          "trades": 113,
+          "win_rate": 0.48672566371681414,
+          "pf": 1.0114487858218004,
+          "mean_net_return": 0.00012397973515161287
+        },
+        "second": {
+          "trades": 91,
+          "win_rate": 0.34065934065934067,
+          "pf": 0.4625966476261248,
+          "mean_net_return": -0.008187697050697633
+        }
+      }
+    },
+    {
+      "strategy": "RESIDUAL",
+      "name": "VOLUME_80PCT",
+      "annual_offered_candidates": 935,
+      "yesterday_offered_candidates": 10,
+      "isolated_metrics": {
+        "cost_bps": 10,
+        "trades": 145,
+        "win_rate": 0.3931034482758621,
+        "pf": 0.597939736593275,
+        "mean_net_return": -0.0056522054762733935,
+        "win_days_jst": 114,
+        "serial_unit_equity": 0.4116048302613509,
+        "serial_realized_dd": -0.6847772102397489,
+        "first": {
+          "trades": 84,
+          "win_rate": 0.44047619047619047,
+          "pf": 0.7836067834527987,
+          "mean_net_return": -0.0026667575664876793
+        },
+        "second": {
+          "trades": 61,
+          "win_rate": 0.32786885245901637,
+          "pf": 0.40635967516757393,
+          "mean_net_return": -0.00976331407335536
+        }
+      }
+    },
+    {
+      "strategy": "V12",
+      "name": "BASELINE",
+      "annual_offered_candidates": 1978,
+      "yesterday_offered_candidates": 0,
+      "isolated_metrics": {
+        "cost_bps": 10,
+        "trades": 1275,
+        "win_rate": 0.41568627450980394,
+        "pf": 0.8400752015319428,
+        "mean_net_return": -0.0008340299908799318,
+        "win_days_jst": 246,
+        "serial_unit_equity": 0.30465280950863294,
+        "serial_realized_dd": -0.7743742071042197,
+        "first": {
+          "trades": 793,
+          "win_rate": 0.41866330390920553,
+          "pf": 0.7997513297468917,
+          "mean_net_return": -0.0011190771036404465
+        },
+        "second": {
+          "trades": 482,
+          "win_rate": 0.4107883817427386,
+          "pf": 0.9206554585397325,
+          "mean_net_return": -0.00036506243814324427
+        }
+      }
+    },
+    {
+      "strategy": "V12",
+      "name": "BTC1_ATR07_SCORE85",
+      "annual_offered_candidates": 3440,
+      "yesterday_offered_candidates": 0,
+      "isolated_metrics": {
+        "cost_bps": 10,
+        "trades": 2173,
+        "win_rate": 0.41003221352968244,
+        "pf": 0.8357998818886421,
+        "mean_net_return": -0.000760642394091458,
+        "win_days_jst": 322,
+        "serial_unit_equity": 0.16193546940964437,
+        "serial_realized_dd": -0.8471519942061487,
+        "first": {
+          "trades": 1219,
+          "win_rate": 0.41345365053322397,
+          "pf": 0.854089374598305,
+          "mean_net_return": -0.000687692239971873
+        },
+        "second": {
+          "trades": 953,
+          "win_rate": 0.4050367261280168,
+          "pf": 0.808836799583283,
+          "mean_net_return": -0.0008667440611988344
+        }
+      }
+    },
+    {
+      "strategy": "V12",
+      "name": "BTC_0",
+      "annual_offered_candidates": 2731,
+      "yesterday_offered_candidates": 0,
+      "isolated_metrics": {
+        "cost_bps": 10,
+        "trades": 1722,
+        "win_rate": 0.4065040650406504,
+        "pf": 0.8169621882088232,
+        "mean_net_return": -0.0010121550410551038,
+        "win_days_jst": 296,
+        "serial_unit_equity": 0.14559929598621166,
+        "serial_realized_dd": -0.8735085392750541,
+        "first": {
+          "trades": 1049,
+          "win_rate": 0.41658722592945663,
+          "pf": 0.8430724939169522,
+          "mean_net_return": -0.0008626986689139758
+        },
+        "second": {
+          "trades": 672,
+          "win_rate": 0.3898809523809524,
+          "pf": 0.77382442464809,
+          "mean_net_return": -0.0012639703653178262
+        }
+      }
+    },
+    {
+      "strategy": "V12",
+      "name": "BTC_1P0",
+      "annual_offered_candidates": 2488,
+      "yesterday_offered_candidates": 0,
+      "isolated_metrics": {
+        "cost_bps": 10,
+        "trades": 1583,
+        "win_rate": 0.4074542008843967,
+        "pf": 0.8043600053963622,
+        "mean_net_return": -0.001035136536152936,
+        "win_days_jst": 285,
+        "serial_unit_equity": 0.16686015066450754,
+        "serial_realized_dd": -0.8462639235272088,
+        "first": {
+          "trades": 967,
+          "win_rate": 0.42088934850051707,
+          "pf": 0.8204821917325362,
+          "mean_net_return": -0.0009576005610682465
+        },
+        "second": {
+          "trades": 615,
+          "win_rate": 0.3853658536585366,
+          "pf": 0.7749606672645986,
+          "mean_net_return": -0.0011773161018935813
+        }
+      }
+    },
+    {
+      "strategy": "V12",
+      "name": "BTC_1P5",
+      "annual_offered_candidates": 2260,
+      "yesterday_offered_candidates": 0,
+      "isolated_metrics": {
+        "cost_bps": 10,
+        "trades": 1445,
+        "win_rate": 0.41038062283737026,
+        "pf": 0.8534686639530931,
+        "mean_net_return": -0.000744441411304968,
+        "win_days_jst": 263,
+        "serial_unit_equity": 0.29792451001374654,
+        "serial_realized_dd": -0.7664708528631354,
+        "first": {
+          "trades": 895,
+          "win_rate": 0.4223463687150838,
+          "pf": 0.8763867604388756,
+          "mean_net_return": -0.0006433771899176914
+        },
+        "second": {
+          "trades": 549,
+          "win_rate": 0.38979963570127507,
+          "pf": 0.8094177915347812,
+          "mean_net_return": -0.0009313720634731669
+        }
+      }
+    },
+    {
+      "strategy": "V12",
+      "name": "MOMENTUM_018",
+      "annual_offered_candidates": 1999,
+      "yesterday_offered_candidates": 0,
+      "isolated_metrics": {
+        "cost_bps": 10,
+        "trades": 1289,
+        "win_rate": 0.4134988363072149,
+        "pf": 0.8306197382691571,
+        "mean_net_return": -0.0008803544179690811,
+        "win_days_jst": 247,
+        "serial_unit_equity": 0.28368373008597664,
+        "serial_realized_dd": -0.7858019542553123,
+        "first": {
+          "trades": 801,
+          "win_rate": 0.41697877652933835,
+          "pf": 0.7908219681382406,
+          "mean_net_return": -0.0011634664287446628
+        },
+        "second": {
+          "trades": 488,
+          "win_rate": 0.4077868852459016,
+          "pf": 0.9096218190066984,
+          "mean_net_return": -0.00041565621995425563
+        }
+      }
+    },
+    {
+      "strategy": "V12",
+      "name": "RELAXED_ATR10",
+      "annual_offered_candidates": 2277,
+      "yesterday_offered_candidates": 0,
+      "isolated_metrics": {
+        "cost_bps": 10,
+        "trades": 1449,
+        "win_rate": 0.41338854382332646,
+        "pf": 0.8375572085152421,
+        "mean_net_return": -0.0008057106858265832,
+        "win_days_jst": 261,
+        "serial_unit_equity": 0.27426874855595873,
+        "serial_realized_dd": -0.7672014088285564,
+        "first": {
+          "trades": 835,
+          "win_rate": 0.40718562874251496,
+          "pf": 0.7910334147997676,
+          "mean_net_return": -0.0011301463426803588
+        },
+        "second": {
+          "trades": 614,
+          "win_rate": 0.4218241042345277,
+          "pf": 0.916213024908205,
+          "mean_net_return": -0.0003644993283788907
+        }
+      }
+    },
+    {
+      "strategy": "V12",
+      "name": "SCORE_085",
+      "annual_offered_candidates": 2245,
+      "yesterday_offered_candidates": 0,
+      "isolated_metrics": {
+        "cost_bps": 10,
+        "trades": 1451,
+        "win_rate": 0.41902136457615435,
+        "pf": 0.8745324412823365,
+        "mean_net_return": -0.0006155689111981213,
+        "win_days_jst": 268,
+        "serial_unit_equity": 0.35792557311725653,
+        "serial_realized_dd": -0.7912560426995058,
+        "first": {
+          "trades": 882,
+          "win_rate": 0.41383219954648526,
+          "pf": 0.8163570042160077,
+          "mean_net_return": -0.0009770559525186621
+        },
+        "second": {
+          "trades": 569,
+          "win_rate": 0.4270650263620387,
+          "pf": 0.9870472698601512,
+          "mean_net_return": -5.523223203342543e-05
+        }
+      }
+    },
+    {
+      "strategy": "V12",
+      "name": "VOLUME_055",
+      "annual_offered_candidates": 2411,
+      "yesterday_offered_candidates": 0,
+      "isolated_metrics": {
+        "cost_bps": 10,
+        "trades": 1444,
+        "win_rate": 0.40789473684210525,
+        "pf": 0.8060829545065519,
+        "mean_net_return": -0.000997274155927774,
+        "win_days_jst": 255,
+        "serial_unit_equity": 0.20646138721267407,
+        "serial_realized_dd": -0.8465296280839962,
+        "first": {
+          "trades": 874,
+          "win_rate": 0.425629290617849,
+          "pf": 0.7759490417971909,
+          "mean_net_return": -0.0012319446157796007
+        },
+        "second": {
+          "trades": 570,
+          "win_rate": 0.38070175438596493,
+          "pf": 0.8613451437426665,
+          "mean_net_return": -0.0006374461174883629
+        }
+      }
+    }
+  ]
+}
