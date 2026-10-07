@@ -9,6 +9,7 @@ import {
     evaluatePenguDualLsV2Decision,
     evaluatePenguDualLsV2Exit,
     evaluatePenguDualLsV2ShortSignals,
+    PENGU_M05_SHADOW_THRESHOLD,
     targetGrossForAtr,
     type PenguDualLsV2Features,
     type PenguDualLsV2Position,
@@ -141,8 +142,20 @@ const armedRebreak = features({
 const shortSeries = evaluatePenguDualLsV2ShortSignals([impulse, armedRebreak]);
 assert.equal(shortSeries.signals[0], false);
 assert.equal(shortSeries.signals[1], true);
+assert.equal(PENGU_M05_SHADOW_THRESHOLD, -0.005);
+assert.equal(shortSeries.m05Pass[0], undefined);
+assert.equal(shortSeries.m05Pass[1], false, "M05 must flag the current-valid 72h=0 SHORT candidate as would-block");
+assert.equal(shortSeries.m05WouldBlock[1], true);
+const m05Allowed = evaluatePenguDualLsV2ShortSignals([impulse, { ...armedRebreak, penguReturn72h: -0.005 }]);
+assert.equal(m05Allowed.signals[1], true, "Shadow M05 must never change the current Production short signal");
+assert.equal(m05Allowed.m05Pass[1], true);
+assert.equal(m05Allowed.m05WouldBlock[1], false);
+const historicalM05Delta = evaluatePenguDualLsV2ShortSignals([impulse, { ...armedRebreak, penguReturn72h: -0.004075 }]);
+assert.equal(historicalM05Delta.signals[1], true, "2026-07-17-like disagreement remains a Production candidate in Shadow mode");
+assert.equal(historicalM05Delta.m05WouldBlock[1], true);
 const invalidated = evaluatePenguDualLsV2ShortSignals([impulse, { ...armedRebreak, close: 106.01 }]);
 assert.equal(invalidated.signals[1], false);
+assert.equal(invalidated.m05Pass[1], undefined, "M05 is observed only after the current Production SHORT candidate is valid");
 const expiredRows = [impulse, ...Array.from({ length: 25 }, (_, index) => features({ referenceTs: (201 + index) * HOUR, close: 100, low: 100, penguReturn24h: 0 }))];
 assert.equal(evaluatePenguDualLsV2ShortSignals(expiredRows).setupActive.at(-1), false);
 
@@ -213,6 +226,7 @@ const state = createPenguDualLsV2RunnerState("PAPER");
 assert.equal(state.strategyId, "PENGU_DUAL_LS_V2_FINAL");
 assert.equal(state.pending, undefined);
 assert.equal(state.position, undefined);
+assert.equal((state.m05ShadowHistory ?? []).length, 0);
 assert.equal(normalizedPositionGross([{ symbol: "BTCUSDT", quantity: 1, entryPrice: 100, markPrice: 100, unrealizedPnl: 0, pnlPct: 0, positionSide: "LONG", leverage: 5, notionalUsd: 100, updatedAt: 0 }], 1_000), 0.1);
 assert.equal(normalizedPositionGross([], 0), Number.POSITIVE_INFINITY);
 
@@ -271,6 +285,44 @@ async function main() {
     await longWait;
     assert.equal(shutdownDelay.interrupted, true);
     assert.ok(Date.now() - shutdownStartedAt < 1_000, "SIGTERM-style interruption must not wait for the next hourly boundary");
+
+    const m05HistoryStore = new MemoryPenguDualLsV2RunnerStateStore(createPenguDualLsV2RunnerState("PAPER"));
+    const m05HistoryState = await m05HistoryStore.load();
+    m05HistoryState.latestSignal = {
+        strategyId: PENGU_DUAL_LS_V2.id,
+        referenceTs: 300 * HOUR,
+        side: -1,
+        targetGross: 1,
+        entryTs: 301 * HOUR,
+        reason: "Production SHORT remains allowed; M05 Shadow would block.",
+        features: { ...armedRebreak, referenceTs: 300 * HOUR, penguReturn72h: -0.004075 },
+        decision: { side: -1, longEligible: false, shortEligible: true, active: true, reason: "current Production SHORT candidate" },
+        entryVersion: "SHORT_V20",
+        diagnostics: {
+            evaluatedDecisionBars: 1,
+            latestCompletedPenguTs: 300 * HOUR,
+            latestCompletedBtcTs: 300 * HOUR,
+            edgeTriggered: true,
+            longEligible: false,
+            shortEligible: true,
+            shortSetupActive: false,
+            shortSetupArmed: false,
+            cooldownBlocked: false,
+            m05ShadowCandidateObserved: true,
+            m05ShadowThreshold: PENGU_M05_SHADOW_THRESHOLD,
+            m05ShadowPass: false,
+            m05ShadowWouldBlock: true,
+            m05ShadowRoute: "SHORT_V20",
+            m05ShadowPenguReturn72h: -0.004075,
+        },
+    };
+    await m05HistoryStore.save(m05HistoryState);
+    const savedM05History = await m05HistoryStore.load();
+    assert.equal((savedM05History.m05ShadowHistory ?? []).length, 1);
+    assert.equal(savedM05History.m05ShadowHistory?.[0]?.wouldBlock, true);
+    assert.equal(savedM05History.m05ShadowHistory?.[0]?.referenceTs, 300 * HOUR);
+    await m05HistoryStore.save(savedM05History);
+    assert.equal(((await m05HistoryStore.load()).m05ShadowHistory ?? []).length, 1, "same referenceTs must not duplicate Shadow history");
 
     const shadowResult = await shadowRunner.tick();
     assert.equal(shadowResult.status, "shadow");

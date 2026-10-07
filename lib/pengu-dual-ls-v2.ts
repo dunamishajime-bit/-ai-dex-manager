@@ -11,6 +11,7 @@ import {
 } from "@/lib/pengu-recovery-v8";
 
 const HOUR = 3_600_000;
+export const PENGU_M05_SHADOW_THRESHOLD = -0.005;
 
 export interface PenguDualLsV2SignalOptions {
     recoveryV8Enabled?: boolean;
@@ -128,6 +129,13 @@ export interface PenguDualLsV2Signal {
         shortV20Phase?: "TRACKING" | "PROBATION" | "RESUMED";
         shortV20SizingState?: PenguDualLsV2SizingState;
         shortV20FailureConfirmedTs?: number;
+        /** Research-only M05 observation. Never changes Production signal/order behavior. */
+        m05ShadowCandidateObserved: boolean;
+        m05ShadowThreshold: number;
+        m05ShadowPass?: boolean;
+        m05ShadowWouldBlock?: boolean;
+        m05ShadowRoute?: "SHORT_V20";
+        m05ShadowPenguReturn72h?: number;
     };
 }
 
@@ -141,6 +149,9 @@ export interface PenguDualLsV2EvaluationRow {
     shortSignal: boolean;
     shortSetupActive: boolean;
     shortSetupArmed: boolean;
+    /** Present only when this row is an otherwise-valid current Production SHORT candidate. */
+    m05ShadowPass?: boolean;
+    m05ShadowWouldBlock?: boolean;
     recoveryV8?: RecoveryV8FeatureRow;
 }
 
@@ -148,6 +159,8 @@ interface ShortSignalState {
     signals: boolean[];
     setupActive: boolean[];
     setupArmed: boolean[];
+    m05Pass: Array<boolean | undefined>;
+    m05WouldBlock: Array<boolean | undefined>;
 }
 
 function cleanRows(rows: DisDexV35Candle[], now: number, label: string) {
@@ -328,6 +341,8 @@ export function evaluatePenguDualLsV2ShortSignals(featuresRows: Array<PenguDualL
     const signals = new Array<boolean>(featuresRows.length).fill(false);
     const setupActive = new Array<boolean>(featuresRows.length).fill(false);
     const setupArmed = new Array<boolean>(featuresRows.length).fill(false);
+    const m05Pass = new Array<boolean | undefined>(featuresRows.length).fill(undefined);
+    const m05WouldBlock = new Array<boolean | undefined>(featuresRows.length).fill(undefined);
     let active = false;
     let armed = false;
     let localLow = 0;
@@ -380,6 +395,11 @@ export function evaluatePenguDualLsV2ShortSignals(featuresRows: Array<PenguDualL
                     && features.btcEma168Distance >= rule.btcEma168DistanceMinimum
                     && features.rsi14 >= rule.rsiMinimum;
                 if (eligible) {
+                    // Shadow-only observation at the exact SHORT candidate-generation point.
+                    // It must never participate in Production eligibility or order decisions.
+                    const shadowPass = features.penguReturn72h <= PENGU_M05_SHADOW_THRESHOLD + 1e-12;
+                    m05Pass[index] = shadowPass;
+                    m05WouldBlock[index] = !shadowPass;
                     signals[index] = true;
                     active = false;
                     armed = false;
@@ -391,7 +411,7 @@ export function evaluatePenguDualLsV2ShortSignals(featuresRows: Array<PenguDualL
         setupActive[index] = active;
         setupArmed[index] = armed;
     }
-    return { signals, setupActive, setupArmed };
+    return { signals, setupActive, setupArmed, m05Pass, m05WouldBlock };
 }
 
 export function buildPenguDualLsV2EvaluationSeries(history: PenguDualLsV2History, now = Date.now()) {
@@ -409,6 +429,8 @@ export function buildPenguDualLsV2EvaluationSeries(history: PenguDualLsV2History
             shortSignal: short.signals[index],
             shortSetupActive: short.setupActive[index],
             shortSetupArmed: short.setupArmed[index],
+            m05ShadowPass: short.m05Pass[index],
+            m05ShadowWouldBlock: short.m05WouldBlock[index],
         };
     });
     const recovery = buildRecoveryV8FeatureRows(baseRows);
@@ -554,6 +576,8 @@ export function buildPenguDualLsV2Signal(history: PenguDualLsV2History, position
             shortV20Phase: position?.shortV20?.phase,
             shortV20SizingState: position?.shortV20?.sizingState,
             shortV20FailureConfirmedTs: position?.shortV20?.failureConfirmedTs,
+            m05ShadowCandidateObserved: false,
+            m05ShadowThreshold: PENGU_M05_SHADOW_THRESHOLD,
         },
     });
     if (!latest?.features) return empty("PENGU/BTCの確定1時間足履歴が不足しているためFail Closedです。");
@@ -576,7 +600,7 @@ export function buildPenguDualLsV2Signal(history: PenguDualLsV2History, position
         ? { side: 1 as const, longEligible: false, shortEligible: false, active: true, reason: recoveryDecision.reason }
         : baseDecision;
     const cooldownBlocked = latest.features.referenceTs < cooldownUntilTs;
-    const diagnostics = {
+    const diagnostics: PenguDualLsV2Signal["diagnostics"] = {
         evaluatedDecisionBars: rows.filter((row) => Boolean(row.features)).length,
         latestCompletedPenguTs: latest.candle.openTime,
         latestCompletedBtcTs: latest.btcCandle.openTime,
@@ -590,6 +614,12 @@ export function buildPenguDualLsV2Signal(history: PenguDualLsV2History, position
         shortV20Phase: position?.shortV20?.phase,
         shortV20SizingState: position?.shortV20?.sizingState,
         shortV20FailureConfirmedTs: position?.shortV20?.failureConfirmedTs,
+        m05ShadowCandidateObserved: latest.m05ShadowPass !== undefined,
+        m05ShadowThreshold: PENGU_M05_SHADOW_THRESHOLD,
+        m05ShadowPass: latest.m05ShadowPass,
+        m05ShadowWouldBlock: latest.m05ShadowWouldBlock,
+        m05ShadowRoute: latest.m05ShadowPass !== undefined ? "SHORT_V20" : undefined,
+        m05ShadowPenguReturn72h: latest.m05ShadowPass !== undefined ? latest.features.penguReturn72h : undefined,
     };
     let positionEvaluation: { exit?: PenguDualLsV2ExitDecision; updatedPosition: PenguDualLsV2Position } | undefined;
     if (position?.entryVersion === "RECOVERY_V8" && position.recoveryV8 && recoveryRow) {

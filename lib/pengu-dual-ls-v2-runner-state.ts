@@ -47,6 +47,21 @@ export interface PenguDualLsV2RunnerFailure {
     idempotencyKey?: string;
 }
 
+export interface PenguM05ShadowObservation {
+    strategyId: "PENGU_DUAL_LS_V2_FINAL";
+    route: "SHORT_V20";
+    referenceTs: number;
+    entryTs?: number;
+    penguReturn72h: number;
+    threshold: number;
+    pass: boolean;
+    wouldBlock: boolean;
+    productionSignalSide: -1 | 0 | 1;
+    productionReason?: string;
+    sourceRuntimeSha?: string;
+    observedAt: number;
+}
+
 export interface PenguDualLsV2RunnerState {
     version: 2;
     strategyId: "PENGU_DUAL_LS_V2_FINAL";
@@ -56,6 +71,8 @@ export interface PenguDualLsV2RunnerState {
     lastSignalReferenceTs?: number;
     /** Sanitized read-only decision telemetry for the monitoring UI. */
     latestSignal?: PenguDualLsV2Signal;
+    /** Shadow-only M05 candidate observations. Never consulted by Production order logic. */
+    m05ShadowHistory?: PenguM05ShadowObservation[];
     lastCompletedIdempotencyKey?: string;
     cooldownUntilTs?: number;
     /** Durable Q60 route quarantine + realized DD17/H72 overlay state. */
@@ -72,6 +89,7 @@ function defaultState(mode: PenguDualLsV2Mode): PenguDualLsV2RunnerState {
         mode,
         updatedAt: Date.now(),
         riskOverlay: createPenguRiskOverlayState(),
+        m05ShadowHistory: [],
         failures: [],
     };
 }
@@ -123,6 +141,66 @@ function validRecoveryV8State(value: unknown, position: PenguDualLsV2Position): 
         && (!partialDefenseTriggered || Boolean(actualFill && Number.isFinite(actualFill.filledAtTs) && Number.isFinite(actualFill.executedQuantity) && actualFill.executedQuantity > 0 && Number.isFinite(actualFill.averagePrice) && Number.isFinite(actualFill.triggerPrice) && Number.isFinite(actualFill.slippageBps)));
 }
 
+function normalizeM05ShadowHistory(value: unknown): PenguM05ShadowObservation[] {
+    if (!Array.isArray(value)) return [];
+    return value.flatMap((item): PenguM05ShadowObservation[] => {
+        if (!item || typeof item !== "object") return [];
+        const row = item as Partial<PenguM05ShadowObservation>;
+        const referenceTs = Number(row.referenceTs);
+        const penguReturn72h = Number(row.penguReturn72h);
+        const threshold = Number(row.threshold);
+        const observedAt = Number(row.observedAt);
+        const side = Number(row.productionSignalSide);
+        if (!Number.isFinite(referenceTs) || referenceTs <= 0
+            || !Number.isFinite(penguReturn72h) || !Number.isFinite(threshold)
+            || !Number.isFinite(observedAt)
+            || (side !== -1 && side !== 0 && side !== 1)
+            || typeof row.pass !== "boolean" || typeof row.wouldBlock !== "boolean") return [];
+        return [{
+            strategyId: "PENGU_DUAL_LS_V2_FINAL",
+            route: "SHORT_V20",
+            referenceTs,
+            entryTs: Number.isFinite(Number(row.entryTs)) ? Number(row.entryTs) : undefined,
+            penguReturn72h,
+            threshold,
+            pass: row.pass,
+            wouldBlock: row.wouldBlock,
+            productionSignalSide: side as -1 | 0 | 1,
+            productionReason: typeof row.productionReason === "string" ? row.productionReason : undefined,
+            sourceRuntimeSha: typeof row.sourceRuntimeSha === "string" ? row.sourceRuntimeSha : undefined,
+            observedAt,
+        }];
+    }).slice(-100);
+}
+
+function appendM05ShadowObservation(state: PenguDualLsV2RunnerState): PenguM05ShadowObservation[] {
+    const history = normalizeM05ShadowHistory(state.m05ShadowHistory);
+    const signal = state.latestSignal;
+    const diagnostics = signal?.diagnostics;
+    if (!signal || diagnostics?.m05ShadowCandidateObserved !== true) return history;
+    const referenceTs = Number(signal.referenceTs);
+    const penguReturn72h = Number(diagnostics.m05ShadowPenguReturn72h);
+    const threshold = Number(diagnostics.m05ShadowThreshold);
+    if (!Number.isFinite(referenceTs) || referenceTs <= 0 || !Number.isFinite(penguReturn72h) || !Number.isFinite(threshold)) return history;
+    if (history.some((item) => item.referenceTs === referenceTs && item.route === "SHORT_V20")) return history;
+    const sourceRuntimeSha = String(process.env.DISDEX_RELEASE_SHA || process.env.DISDEX_RUNTIME_COMMIT_SHA || process.env.DISDEX_RUNTIME_SHA || "").trim() || undefined;
+    const observation: PenguM05ShadowObservation = {
+        strategyId: "PENGU_DUAL_LS_V2_FINAL",
+        route: "SHORT_V20",
+        referenceTs,
+        entryTs: Number.isFinite(Number(signal.entryTs)) ? Number(signal.entryTs) : undefined,
+        penguReturn72h,
+        threshold,
+        pass: diagnostics.m05ShadowPass === true,
+        wouldBlock: diagnostics.m05ShadowWouldBlock === true,
+        productionSignalSide: signal.side,
+        productionReason: signal.reason,
+        sourceRuntimeSha,
+        observedAt: Date.now(),
+    };
+    return [...history, observation].slice(-100);
+}
+
 function normalize(value: unknown, mode: PenguDualLsV2Mode): PenguDualLsV2RunnerState {
     if (!value || typeof value !== "object") return defaultState(mode);
     const raw = value as Partial<PenguDualLsV2RunnerState>;
@@ -151,6 +229,7 @@ function normalize(value: unknown, mode: PenguDualLsV2Mode): PenguDualLsV2Runner
         lastRunAt: Number.isFinite(Number(raw.lastRunAt)) ? Number(raw.lastRunAt) : undefined,
         lastSignalReferenceTs: Number.isFinite(Number(raw.lastSignalReferenceTs)) ? Number(raw.lastSignalReferenceTs) : undefined,
         latestSignal: raw.latestSignal && typeof raw.latestSignal === "object" ? raw.latestSignal as PenguDualLsV2Signal : undefined,
+        m05ShadowHistory: normalizeM05ShadowHistory(raw.m05ShadowHistory),
         lastCompletedIdempotencyKey: typeof raw.lastCompletedIdempotencyKey === "string" ? raw.lastCompletedIdempotencyKey : undefined,
         cooldownUntilTs: Number.isFinite(Number(raw.cooldownUntilTs)) ? Number(raw.cooldownUntilTs) : undefined,
         riskOverlay: normalizePenguRiskOverlayState(raw.riskOverlay),
@@ -192,6 +271,7 @@ export class FilePenguDualLsV2RunnerStateStore implements PenguDualLsV2RunnerSta
             strategyId: "PENGU_DUAL_LS_V2_FINAL",
             mode: this.mode,
             updatedAt: Date.now(),
+            m05ShadowHistory: appendM05ShadowObservation(state),
             failures: state.failures.slice(-100),
         };
         const temporary = `${this.path}.${process.pid}.${Date.now()}.tmp`;
@@ -203,7 +283,7 @@ export class FilePenguDualLsV2RunnerStateStore implements PenguDualLsV2RunnerSta
 export class MemoryPenguDualLsV2RunnerStateStore implements PenguDualLsV2RunnerStateStore {
     constructor(private state: PenguDualLsV2RunnerState) {}
     async load() { return structuredClone(this.state); }
-    async save(state: PenguDualLsV2RunnerState) { this.state = structuredClone(state); }
+    async save(state: PenguDualLsV2RunnerState) { this.state = structuredClone({ ...state, m05ShadowHistory: appendM05ShadowObservation(state) }); }
 }
 
 export function createPenguDualLsV2RunnerState(mode: PenguDualLsV2Mode): PenguDualLsV2RunnerState {

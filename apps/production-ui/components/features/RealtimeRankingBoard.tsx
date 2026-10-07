@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { executionBlocked,currentRankRow,rankRows,rankChanges,type RankRow } from '@/lib/realtime-ranking';
 import { SignalGateList } from './SignalGateList';
 type Snapshot={checkedAt:number;runtimeSha:string;rows:RankRow[];metric:string;errors:Record<string,string>};
-function missing(row:RankRow){return row.gates.filter(g=>g.kind!=='execution'&&g.state!=='OK').map(g=>g.label+'：'+g.detail).join(' / ')||'市場条件通過。資金・競合はRunner確認待ち';}
+function missing(row:RankRow){return row.gates.filter(g=>g.kind!=='execution'&&g.kind!=='shadow'&&g.state!=='OK').map(g=>g.label+'：'+g.detail).join(' / ')||'市場条件通過。資金・競合はRunner確認待ち';}
 function constraints(row:RankRow){return row.gates.filter(g=>g.kind==='execution'&&g.state==='NO').map(g=>g.label).join(' / ');}
 function blockReason(row:RankRow){return row.gates.filter(g=>g.kind==='execution'&&g.state==='NO').map(g=>g.key==='clock'||g.label==='S34_4H_GRID'?'受付時間外':g.label==='FET保有・保留注文'?'保有・注文あり':g.label==='同時候補の選定'?'Runner選定未通過':g.label).join(' / ');}
 function rankExplanation(row:RankRow,rows:RankRow[]){if(row.score===null)return '必要なデータ・判定が未確認のため順位対象外です。';const ahead=rows.filter(r=>r.score!==null&&!executionBlocked(r)).length;return executionBlocked(row)?'確認済みの発注制約があるため、制約NOのない'+ahead+'件より後に表示しています。この制約ありグループ内ではScore順です。発注停止理由：'+blockReason(row)+'。':'確認済みの発注制約NOがないグループ内でScore順に表示しています。資金・競合など未確認の条件はRunnerの最終判定が必要です。';}

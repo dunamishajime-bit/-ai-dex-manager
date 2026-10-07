@@ -9,6 +9,19 @@ const STALE_AFTER_MS = 3 * 60 * 60 * 1000;
 
 export type PenguFailure = { occurredAt?: number; message: string };
 
+export type PenguM05ShadowObservation = {
+  referenceTs: number;
+  entryTs?: number;
+  penguReturn72h: number;
+  threshold: number;
+  pass: boolean;
+  wouldBlock: boolean;
+  productionSignalSide: number;
+  productionReason?: string;
+  sourceRuntimeSha?: string;
+  observedAt: number;
+};
+
 export type PenguRuntimeStatus = {
   status: "LIVE" | "STALE" | "UNAVAILABLE";
   configured: boolean;
@@ -23,6 +36,8 @@ export type PenguRuntimeStatus = {
   sharedRisk?: { tripped: boolean; lossPct?: number; maximumLossPct?: number; updatedAt?: number };
   reason: string;
   latestSignal?: PenguSignalObservability;
+  m05ShadowHistory?: PenguM05ShadowObservation[];
+  m05ShadowSummary?: { total: number; disagreements: number; agreements: number; lastReferenceTs?: number };
   executionTrace: PenguExecutionTrace;
   failures: PenguFailure[];
   resolvedFailures: PenguFailure[];
@@ -56,6 +71,12 @@ export type PenguSignalObservability = {
     shortSetupActive?: boolean;
     shortSetupArmed?: boolean;
     cooldownBlocked?: boolean;
+    m05ShadowCandidateObserved?: boolean;
+    m05ShadowThreshold?: number;
+    m05ShadowPass?: boolean;
+    m05ShadowWouldBlock?: boolean;
+    m05ShadowRoute?: string;
+    m05ShadowPenguReturn72h?: number;
   };
 };
 
@@ -198,6 +219,33 @@ function finiteRecord(value: unknown) {
   }));
 }
 
+function m05ShadowHistory(value: unknown): PenguM05ShadowObservation[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((entry): PenguM05ShadowObservation[] => {
+    const row = object(entry);
+    if (!row) return [];
+    const referenceTs = number(row.referenceTs);
+    const penguReturn72h = number(row.penguReturn72h);
+    const threshold = number(row.threshold);
+    const productionSignalSide = number(row.productionSignalSide);
+    const observedAt = number(row.observedAt);
+    if (referenceTs === undefined || penguReturn72h === undefined || threshold === undefined || productionSignalSide === undefined || observedAt === undefined
+      || typeof row.pass !== "boolean" || typeof row.wouldBlock !== "boolean") return [];
+    return [{
+      referenceTs,
+      entryTs: number(row.entryTs),
+      penguReturn72h,
+      threshold,
+      pass: row.pass,
+      wouldBlock: row.wouldBlock,
+      productionSignalSide,
+      productionReason: text(row.productionReason),
+      sourceRuntimeSha: text(row.sourceRuntimeSha),
+      observedAt,
+    }];
+  }).slice(-100);
+}
+
 function signalObservability(value: unknown): PenguSignalObservability | undefined {
   const row = object(value);
   if (!row) return undefined;
@@ -229,6 +277,12 @@ function signalObservability(value: unknown): PenguSignalObservability | undefin
       shortSetupActive: typeof diagnostics.shortSetupActive === "boolean" ? diagnostics.shortSetupActive : undefined,
       shortSetupArmed: typeof diagnostics.shortSetupArmed === "boolean" ? diagnostics.shortSetupArmed : undefined,
       cooldownBlocked: typeof diagnostics.cooldownBlocked === "boolean" ? diagnostics.cooldownBlocked : undefined,
+      m05ShadowCandidateObserved: typeof diagnostics.m05ShadowCandidateObserved === "boolean" ? diagnostics.m05ShadowCandidateObserved : undefined,
+      m05ShadowThreshold: number(diagnostics.m05ShadowThreshold),
+      m05ShadowPass: typeof diagnostics.m05ShadowPass === "boolean" ? diagnostics.m05ShadowPass : undefined,
+      m05ShadowWouldBlock: typeof diagnostics.m05ShadowWouldBlock === "boolean" ? diagnostics.m05ShadowWouldBlock : undefined,
+      m05ShadowRoute: text(diagnostics.m05ShadowRoute),
+      m05ShadowPenguReturn72h: number(diagnostics.m05ShadowPenguReturn72h),
     },
   };
 }
@@ -284,6 +338,8 @@ export async function loadPenguRuntimeObservability(): Promise<PenguRuntimeStatu
     const releaseShaSource = releaseSha ? "runner-state" as const : "vps-deployment-config" as const;
     const releaseShaVerified = releaseSha ? releaseSha === expectedReleaseSha : undefined;
     const latestSignal = signalObservability(state.latestSignal);
+    const m05History = m05ShadowHistory(state.m05ShadowHistory);
+    const m05ShadowSummary = { total: m05History.length, disagreements: m05History.filter((item) => item.wouldBlock).length, agreements: m05History.filter((item) => item.pass).length, lastReferenceTs: m05History.at(-1)?.referenceTs };
     const positionObject = object(state.position);
     const pendingObject = object(state.pending);
     const position = positionObject ? { side: number(positionObject.side), quantity: number(positionObject.quantity), gross: number(positionObject.gross), entryPrice: number(positionObject.entryPrice) } : undefined;
@@ -300,12 +356,12 @@ export async function loadPenguRuntimeObservability(): Promise<PenguRuntimeStatu
     const failures = failureClassification.active;
     const resolvedFailures = failureClassification.resolved;
     const executionTrace = buildExecutionTrace(latestSignal, killSwitchActive, sharedKillSwitch.reason || text(killSwitch?.reason), sharedRisk, position, pending, failures);
-    if (updatedAt === undefined || ageMs === undefined) return { status: "STALE", configured: true, capturedAt, mode, killSwitchActive, releaseSha, expectedReleaseSha, releaseShaSource, releaseShaVerified, sharedRisk, reason: "PENGU runner stateに更新時刻がありません。", latestSignal, executionTrace, failures, resolvedFailures, position, pending };
-    if (killSwitchActive) return { status: "STALE", configured: true, capturedAt, updatedAt, mode, killSwitchActive, releaseSha, expectedReleaseSha, releaseShaSource, releaseShaVerified, sharedRisk, reason: `PENGU Kill Switchが有効です。${sharedKillSwitch.reason || ""}`.trim(), latestSignal, executionTrace, failures, resolvedFailures, position, pending };
-    if (sharedRisk?.tripped) return { status: "STALE", configured: true, capturedAt, updatedAt, mode, killSwitchActive, releaseSha, expectedReleaseSha, releaseShaSource, releaseShaVerified, sharedRisk, reason: `共有Crypto riskが停止中です。lossPct=${sharedRisk.lossPct ?? "—"}% / 上限=${sharedRisk.maximumLossPct ?? "—"}%`, latestSignal, executionTrace, failures, resolvedFailures, position, pending };
-    if (ageMs > STALE_AFTER_MS) return { status: "STALE", configured: true, capturedAt, updatedAt, mode, killSwitchActive, releaseSha, expectedReleaseSha, releaseShaSource, releaseShaVerified, sharedRisk, reason: `PENGU runner stateが${Math.round(ageMs / 60000)}分更新されていません。`, latestSignal, executionTrace, failures, resolvedFailures, position, pending };
-    if (mode && mode.toLowerCase() !== "live") return { status: "STALE", configured: true, capturedAt, updatedAt, mode, killSwitchActive, releaseSha, expectedReleaseSha, releaseShaSource, releaseShaVerified, sharedRisk, reason: `PENGU runner mode=${mode}のためLIVE確認にしません。`, latestSignal, executionTrace, failures, resolvedFailures, position, pending };
-    return { status: "LIVE", configured: true, capturedAt, updatedAt, mode, killSwitchActive, releaseSha, expectedReleaseSha, releaseShaSource, releaseShaVerified, sharedRisk, reason: `PENGU runner stateを確認しました。最新判定：${latestSignal?.reason || "未取得"}`, latestSignal, executionTrace, failures, resolvedFailures, position, pending };
+    if (updatedAt === undefined || ageMs === undefined) return { status: "STALE", configured: true, capturedAt, mode, killSwitchActive, releaseSha, expectedReleaseSha, releaseShaSource, releaseShaVerified, sharedRisk, reason: "PENGU runner stateに更新時刻がありません。", latestSignal, m05ShadowHistory: m05History, m05ShadowSummary, executionTrace, failures, resolvedFailures, position, pending };
+    if (killSwitchActive) return { status: "STALE", configured: true, capturedAt, updatedAt, mode, killSwitchActive, releaseSha, expectedReleaseSha, releaseShaSource, releaseShaVerified, sharedRisk, reason: `PENGU Kill Switchが有効です。${sharedKillSwitch.reason || ""}`.trim(), latestSignal, m05ShadowHistory: m05History, m05ShadowSummary, executionTrace, failures, resolvedFailures, position, pending };
+    if (sharedRisk?.tripped) return { status: "STALE", configured: true, capturedAt, updatedAt, mode, killSwitchActive, releaseSha, expectedReleaseSha, releaseShaSource, releaseShaVerified, sharedRisk, reason: `共有Crypto riskが停止中です。lossPct=${sharedRisk.lossPct ?? "—"}% / 上限=${sharedRisk.maximumLossPct ?? "—"}%`, latestSignal, m05ShadowHistory: m05History, m05ShadowSummary, executionTrace, failures, resolvedFailures, position, pending };
+    if (ageMs > STALE_AFTER_MS) return { status: "STALE", configured: true, capturedAt, updatedAt, mode, killSwitchActive, releaseSha, expectedReleaseSha, releaseShaSource, releaseShaVerified, sharedRisk, reason: `PENGU runner stateが${Math.round(ageMs / 60000)}分更新されていません。`, latestSignal, m05ShadowHistory: m05History, m05ShadowSummary, executionTrace, failures, resolvedFailures, position, pending };
+    if (mode && mode.toLowerCase() !== "live") return { status: "STALE", configured: true, capturedAt, updatedAt, mode, killSwitchActive, releaseSha, expectedReleaseSha, releaseShaSource, releaseShaVerified, sharedRisk, reason: `PENGU runner mode=${mode}のためLIVE確認にしません。`, latestSignal, m05ShadowHistory: m05History, m05ShadowSummary, executionTrace, failures, resolvedFailures, position, pending };
+    return { status: "LIVE", configured: true, capturedAt, updatedAt, mode, killSwitchActive, releaseSha, expectedReleaseSha, releaseShaSource, releaseShaVerified, sharedRisk, reason: `PENGU runner stateを確認しました。最新判定：${latestSignal?.reason || "未取得"}`, latestSignal, m05ShadowHistory: m05History, m05ShadowSummary, executionTrace, failures, resolvedFailures, position, pending };
   } catch (error) {
     return unavailable(capturedAt, true, error instanceof Error ? error.message : "PENGU runner stateを読み取れません。", expectedReleaseSha);
   }

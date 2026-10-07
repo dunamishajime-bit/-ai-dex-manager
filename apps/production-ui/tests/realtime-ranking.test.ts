@@ -39,6 +39,15 @@ test('unknown signal data and stale snapshots have no rankable score',()=>{
  assert.equal(gateScore([{key:'x',label:'x',state:'OK',detail:''},{key:'account',label:'account',state:'UNKNOWN',detail:'',kind:'execution'}],true),100);
  assert.equal(gateScore([{key:'x',label:'x',state:'NO',progress:.99,detail:''},{key:'y',label:'y',state:'OK',detail:''}],true),99);
 });
+test('M05 shadow gates never change score or execution ranking',()=>{
+ const base=[{key:'direction',label:'direction',state:'OK' as const,detail:''}];
+ const wouldBlock={key:'m05-shadow',label:'M05 Shadow',state:'NO' as const,detail:'M05ならBLOCK',kind:'shadow' as const};
+ assert.equal(gateScore(base,true),100);
+ assert.equal(gateScore([...base,wouldBlock],true),100);
+ const shadowRow={...row('shadow',100),gates:[...base,wouldBlock]};
+ assert.deepEqual(rankRows([shadowRow,row('peer',90)]).map(r=>r.id),['shadow','peer']);
+});
+
 test('FET five-minute clock boundary and last completed bar freshness',()=>{
  const hour=now-now%H;
  assert.equal(evaluateFet(bars(),hour+300000).gates[0].state,'OK');
