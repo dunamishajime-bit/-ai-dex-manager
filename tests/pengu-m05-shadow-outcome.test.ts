@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
   createPenguDualLsV2RunnerState,
+  recordPenguM05ShadowEntryFillOutcome,
   recordPenguM05ShadowExitOutcome,
   recordPenguM05ShadowTickOutcome,
 } from "../lib/pengu-dual-ls-v2-runner-state";
@@ -94,6 +95,38 @@ test("M05 candidate follows actual SHORT_V20 fill and exit lifecycle", () => {
     signal: state.latestSignal,
   }, ENTRY + 73 * 3_600_000), false);
   assert.equal(state.m05ShadowHistory![0]!.productionOutcome, "EXITED");
+});
+
+
+test("tick outcome never attaches a signal-less later tick to the previous M05 candidate", () => {
+  const state = candidateState();
+  assert.equal(recordPenguM05ShadowTickOutcome(state, {
+    status: "held",
+    message: "current tick is blocked before signal evaluation",
+  }, REF + 10_000), false);
+  assert.equal(state.m05ShadowHistory?.length, 0);
+});
+
+test("M05 entry fill can be linked by durable pending referenceTs after later reconciliation", () => {
+  const state = candidateState();
+  assert.equal(recordPenguM05ShadowTickOutcome(state, {
+    status: "held",
+    message: "entry pending after candidate evaluation",
+    signal: state.latestSignal,
+  }, REF + 1_000), true);
+  assert.equal(recordPenguM05ShadowEntryFillOutcome(state, {
+    referenceTs: REF,
+    entryTs: ENTRY,
+    entryIdempotencyKey: "reconciled-entry-key",
+    entryFillObservedAt: ENTRY + 2_000,
+    entryFillPrice: 0.0123,
+    entryFillQuantity: 12345,
+    entryTargetGross: 1,
+  }), true);
+  const row = state.m05ShadowHistory![0]!;
+  assert.equal(row.productionOutcome, "ENTRY_FILLED");
+  assert.equal(row.entryIdempotencyKey, "reconciled-entry-key");
+  assert.equal(row.downstreamBlockReason, undefined);
 });
 
 test("non-M05 signals never create shadow outcome records", () => {

@@ -240,7 +240,10 @@ export function recordPenguM05ShadowTickOutcome(
     result: { status: string; message: string; signal?: PenguDualLsV2Signal; idempotencyKey?: string },
     observedAt = Date.now(),
 ) {
-    const signal = result.signal ?? state.latestSignal;
+    // Never fall back to state.latestSignal here. A result without an explicit
+    // signal can belong to lock/pending/reconciliation work for a later tick,
+    // and attaching it to the previous M05 candidate would corrupt the ledger.
+    const signal = result.signal;
     if (!signal || signal.diagnostics?.m05ShadowCandidateObserved !== true) return false;
     const history = appendM05ShadowObservation({ ...state, latestSignal: signal });
     const index = history.findIndex((item) => item.route === "SHORT_V20" && item.referenceTs === signal.referenceTs);
@@ -292,6 +295,40 @@ export function recordPenguM05ShadowTickOutcome(
     patch.productionOutcome = productionOutcome;
     patch.outcomeUpdatedAt = observedAt;
     history[index] = { ...current, ...patch };
+    state.m05ShadowHistory = history.slice(-100);
+    return true;
+}
+
+export function recordPenguM05ShadowEntryFillOutcome(
+    state: PenguDualLsV2RunnerState,
+    input: {
+        referenceTs: number;
+        entryTs: number;
+        entryIdempotencyKey?: string;
+        entryFillObservedAt: number;
+        entryFillPrice: number;
+        entryFillQuantity: number;
+        entryTargetGross: number;
+    },
+) {
+    const history = normalizeM05ShadowHistory(state.m05ShadowHistory);
+    const index = history.findIndex((item) => item.route === "SHORT_V20" && item.referenceTs === input.referenceTs);
+    if (index < 0) return false;
+    const current = history[index]!;
+    history[index] = {
+        ...current,
+        entryTs: input.entryTs,
+        productionOutcome: "ENTRY_FILLED",
+        productionTickStatus: "completed",
+        productionTickMessage: "PENGU Dual LS SHORT_V20 entry filled.",
+        downstreamBlockReason: undefined,
+        entryIdempotencyKey: input.entryIdempotencyKey,
+        entryFillObservedAt: input.entryFillObservedAt,
+        entryFillPrice: input.entryFillPrice,
+        entryFillQuantity: input.entryFillQuantity,
+        entryTargetGross: input.entryTargetGross,
+        outcomeUpdatedAt: input.entryFillObservedAt,
+    };
     state.m05ShadowHistory = history.slice(-100);
     return true;
 }

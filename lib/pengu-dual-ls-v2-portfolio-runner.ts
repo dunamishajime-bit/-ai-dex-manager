@@ -21,6 +21,7 @@ import {
     type PenguDualLsV2Signal,
 } from "@/lib/pengu-dual-ls-v2";
 import {
+    recordPenguM05ShadowEntryFillOutcome,
     recordPenguM05ShadowExitOutcome,
     recordPenguM05ShadowTickOutcome,
     type PenguDualLsV2PendingOrder,
@@ -608,6 +609,17 @@ export class PenguDualLsV2PortfolioRunner {
                     }
                     : undefined,
             };
+            if (pending.entryVersion === "SHORT_V20") {
+                recordPenguM05ShadowEntryFillOutcome(state, {
+                    referenceTs: pending.referenceTs,
+                    entryTs: pending.referenceTs + 3_600_000,
+                    entryIdempotencyKey: pending.idempotencyKey,
+                    entryFillObservedAt: result.updatedAt && Number.isFinite(result.updatedAt) ? result.updatedAt : this.now(),
+                    entryFillPrice: entryPrice,
+                    entryFillQuantity: Math.abs(actual!.quantity),
+                    entryTargetGross: pending.targetGross,
+                });
+            }
         }
         state.lastCompletedIdempotencyKey = pending.idempotencyKey;
         state.pending = undefined;
