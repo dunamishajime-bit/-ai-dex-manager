@@ -1,0 +1,123 @@
+[
+  {
+    "strategy": "FET",
+    "symbol": "FETUSDT",
+    "side": "LONG",
+    "family": null,
+    "entry_ts_ms": 1773349200000,
+    "old_exit_ts_ms": 1773435600000,
+    "new_exit_ts_ms": 1773370800000,
+    "old_price": 0.1772,
+    "new_price": 0.184828
+  },
+  {
+    "strategy": "FET",
+    "symbol": "FETUSDT",
+    "side": "LONG",
+    "family": null,
+    "entry_ts_ms": 1773579600000,
+    "old_exit_ts_ms": 1773666000000,
+    "new_exit_ts_ms": 1773651600000,
+    "old_price": 0.2226,
+    "new_price": 0.207858
+  },
+  {
+    "strategy": "FET",
+    "symbol": "FETUSDT",
+    "side": "LONG",
+    "family": null,
+    "entry_ts_ms": 1773666000000,
+    "old_exit_ts_ms": 1773720000000,
+    "new_exit_ts_ms": 1773687600000,
+    "old_price": 0.229278,
+    "new_price": 0.247
+  },
+  {
+    "strategy": "FET",
+    "symbol": "FETUSDT",
+    "side": "LONG",
+    "family": null,
+    "entry_ts_ms": 1774386000000,
+    "old_exit_ts_ms": 1774443600000,
+    "new_exit_ts_ms": 1774443600000,
+    "old_price": 0.257191,
+    "new_price": 0.25725
+  },
+  {
+    "strategy": "FET",
+    "symbol": "FETUSDT",
+    "side": "LONG",
+    "family": null,
+    "entry_ts_ms": 1779354000000,
+    "old_exit_ts_ms": 1779440400000,
+    "new_exit_ts_ms": 1779429600000,
+    "old_price": 0.2107,
+    "new_price": 0.2068
+  },
+  {
+    "strategy": "FET",
+    "symbol": "FETUSDT",
+    "side": "LONG",
+    "family": null,
+    "entry_ts_ms": 1779426000000,
+    "old_exit_ts_ms": 1779458400000,
+    "new_exit_ts_ms": 1779454800000,
+    "old_price": 0.21300400000000003,
+    "new_price": 0.21667799999999998
+  },
+  {
+    "strategy": "FET",
+    "symbol": "FETUSDT",
+    "side": "LONG",
+    "family": null,
+    "entry_ts_ms": 1779728400000,
+    "old_exit_ts_ms": 1779814800000,
+    "new_exit_ts_ms": 1779778800000,
+    "old_price": 0.256,
+    "new_price": 0.23608200000000001
+  },
+  {
+    "strategy": "FET",
+    "symbol": "FETUSDT",
+    "side": "LONG",
+    "family": null,
+    "entry_ts_ms": 1779771600000,
+    "old_exit_ts_ms": 1779822000000,
+    "new_exit_ts_ms": 1779800400000,
+    "old_price": 0.24514,
+    "new_price": 0.25333
+  },
+  {
+    "strategy": "FET",
+    "symbol": "FETUSDT",
+    "side": "LONG",
+    "family": null,
+    "entry_ts_ms": 1779786000000,
+    "old_exit_ts_ms": 1779822000000,
+    "new_exit_ts_ms": 1779800400000,
+    "old_price": 0.24582299999999999,
+    "new_price": 0.25333
+  },
+  {
+    "strategy": "FET",
+    "symbol": "FETUSDT",
+    "side": "LONG",
+    "family": null,
+    "entry_ts_ms": 1780146000000,
+    "old_exit_ts_ms": 1780160400000,
+    "new_exit_ts_ms": 1780156800000,
+    "old_price": 0.269541,
+    "new_price": 0.27626199999999995
+  },
+  {
+    "strategy": "FET",
+    "symbol": "FETUSDT",
+    "side": "LONG",
+    "family": null,
+    "entry_ts_ms": 1781355600000,
+    "old_exit_ts_ms": 1781416800000,
+    "new_exit_ts_ms": 1781416800000,
+    "old_price": 0.210841,
+    "new_price": 0.2097
+  }
+]

@@ -1,0 +1,136 @@
+{
+  "checkedAt": 1791399579501,
+  "runtimeSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+  "units": [
+    {
+      "MainPID": "1635987",
+      "NRestarts": "0",
+      "ActiveState": "active",
+      "SubState": "running",
+      "unit": "disdex-v12-x1-all@ce1edeead8d0f9e5d88e829d415057117502a335.service",
+      "cwd": "/home/deploy/disdex-trading/releases/ce1edeead8d0f9e5d88e829d415057117502a335"
+    },
+    {
+      "MainPID": "1636169",
+      "NRestarts": "0",
+      "ActiveState": "active",
+      "SubState": "running",
+      "unit": "disdex-pengu-dual-ls-v2@ce1edeead8d0f9e5d88e829d415057117502a335.service",
+      "cwd": "/home/deploy/disdex-trading/releases/ce1edeead8d0f9e5d88e829d415057117502a335"
+    },
+    {
+      "MainPID": "1636513",
+      "NRestarts": "0",
+      "ActiveState": "active",
+      "SubState": "running",
+      "unit": "disdex-quality102-causal-v1@ce1edeead8d0f9e5d88e829d415057117502a335.service",
+      "cwd": "/home/deploy/disdex-trading/releases/ce1edeead8d0f9e5d88e829d415057117502a335"
+    },
+    {
+      "MainPID": "1636664",
+      "NRestarts": "0",
+      "ActiveState": "active",
+      "SubState": "running",
+      "unit": "disdex-v52-aster-only@ce1edeead8d0f9e5d88e829d415057117502a335.service",
+      "cwd": "/home/deploy/disdex-trading/releases/ce1edeead8d0f9e5d88e829d415057117502a335"
+    },
+    {
+      "MainPID": "1636934",
+      "NRestarts": "0",
+      "ActiveState": "active",
+      "SubState": "running",
+      "unit": "disdex-fet-brk48@ce1edeead8d0f9e5d88e829d415057117502a335.service",
+      "cwd": "/home/deploy/disdex-trading/releases/ce1edeead8d0f9e5d88e829d415057117502a335"
+    },
+    {
+      "MainPID": "1637178",
+      "NRestarts": "0",
+      "ActiveState": "active",
+      "SubState": "running",
+      "unit": "disdex-hype-long@ce1edeead8d0f9e5d88e829d415057117502a335.service",
+      "cwd": "/home/deploy/disdex-trading/releases/ce1edeead8d0f9e5d88e829d415057117502a335"
+    },
+    {
+      "MainPID": "1637418",
+      "NRestarts": "0",
+      "ActiveState": "active",
+      "SubState": "running",
+      "unit": "disdex-idle-priority-short@ce1edeead8d0f9e5d88e829d415057117502a335.service",
+      "cwd": "/home/deploy/disdex-trading/releases/ce1edeead8d0f9e5d88e829d415057117502a335"
+    },
+    {
+      "MainPID": "1635461",
+      "NRestarts": "0",
+      "ActiveState": "active",
+      "SubState": "running",
+      "unit": "disdex-shared-crypto-risk@ce1edeead8d0f9e5d88e829d415057117502a335.service",
+      "cwd": "/home/deploy/disdex-trading/releases/ce1edeead8d0f9e5d88e829d415057117502a335"
+    },
+    {
+      "MainPID": "1635484",
+      "NRestarts": "0",
+      "ActiveState": "active",
+      "SubState": "running",
+      "unit": "disdex-v12-v52-margin-guard@ce1edeead8d0f9e5d88e829d415057117502a335.service",
+      "cwd": "/home/deploy/disdex-trading/releases/ce1edeead8d0f9e5d88e829d415057117502a335"
+    }
+  ],
+  "killSwitchActive": false,
+  "riskTripped": false,
+  "riskSourceComplete": true,
+  "riskUpdatedAt": 1791399560116,
+  "marginStage": "HEALTHY",
+  "marginOrdersAllowed": true,
+  "marginCheckedAt": 1791399341226,
+  "activationSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+  "m05CandidateRows": 0,
+  "observer": {
+    "all": {
+      "candidates": 0,
+      "n": 0,
+      "wins": 0,
+      "win_rate": null,
+      "pf_net_account_returns": null,
+      "mean_net_account_return": null,
+      "excursion_complete_count": 0,
+      "mean_mfe_h1_contained": null,
+      "mean_mae_h1_contained": null
+    },
+    "difference": {
+      "candidates": 0,
+      "n": 0,
+      "wins": 0,
+      "win_rate": null,
+      "pf_net_account_returns": null,
+      "mean_net_account_return": null,
+      "excursion_complete_count": 0,
+      "mean_mfe_h1_contained": null,
+      "mean_mae_h1_contained": null
+    },
+    "pass": {
+      "candidates": 0,
+      "n": 0,
+      "wins": 0,
+      "win_rate": null,
+      "pf_net_account_returns": null,
+      "mean_net_account_return": null,
+      "excursion_complete_count": 0,
+      "mean_mfe_h1_contained": null,
+      "mean_mae_h1_contained": null
+    },
+    "review_20_candidates_reached": false,
+    "automatic_promotion": false,
+    "scope": "Net account returns are Production overlay metrics; PF is return-weighted, not currency PnL. Contained H1 MFE/MAE exclude partial fill/exit bars.",
+    "checkedAt": 1791399755616,
+    "stateUpdatedAt": 1791399625676,
+    "stateSha256": "e44e08b67cc935aaf97a0de18b7c401939e7d480026c3340b633acf9bdd57993",
+    "errors": [],
+    "stateWritten": false,
+    "ordersSent": 0,
+    "cancelsSent": 0,
+    "positionChangesSent": 0
+  },
+  "observerTimerActive": "active",
+  "deploymentWorkflow": "https://github.com/dunamishajime-bit/-ai-dex-manager/actions/runs/37670223866",
+  "deploymentConclusion": "success"
+}

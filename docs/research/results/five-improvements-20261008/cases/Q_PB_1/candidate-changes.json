@@ -1,0 +1,90 @@
+[
+  {
+    "strategy": "Q102",
+    "symbol": "AVAXUSDT",
+    "side": "LONG",
+    "family": "PB",
+    "entry_ts_ms": 1754859600000,
+    "old_exit_ts_ms": 1754946000000,
+    "new_exit_ts_ms": 1754917200000,
+    "old_price": 23,
+    "new_price": 23.13
+  },
+  {
+    "strategy": "Q102",
+    "symbol": "AVAXUSDT",
+    "side": "LONG",
+    "family": "PB",
+    "entry_ts_ms": 1767877200000,
+    "old_exit_ts_ms": 1767963600000,
+    "new_exit_ts_ms": 1767949200000,
+    "old_price": 13.78,
+    "new_price": 13.73
+  },
+  {
+    "strategy": "Q102",
+    "symbol": "FETUSDT",
+    "side": "LONG",
+    "family": "PB",
+    "entry_ts_ms": 1771174800000,
+    "old_exit_ts_ms": 1771218000000,
+    "new_exit_ts_ms": 1771185600000,
+    "old_price": 0.1741,
+    "new_price": 0.1686
+  },
+  {
+    "strategy": "Q102",
+    "symbol": "FETUSDT",
+    "side": "LONG",
+    "family": "PB",
+    "entry_ts_ms": 1773421200000,
+    "old_exit_ts_ms": 1773464400000,
+    "new_exit_ts_ms": 1773424800000,
+    "old_price": 0.1815,
+    "new_price": 0.1744
+  },
+  {
+    "strategy": "Q102",
+    "symbol": "FETUSDT",
+    "side": "LONG",
+    "family": "PB",
+    "entry_ts_ms": 1779858000000,
+    "old_exit_ts_ms": 1779901200000,
+    "new_exit_ts_ms": 1779890400000,
+    "old_price": 0.2394,
+    "new_price": 0.243
+  },
+  {
+    "strategy": "Q102",
+    "symbol": "FETUSDT",
+    "side": "LONG",
+    "family": "PB",
+    "entry_ts_ms": 1779886800000,
+    "old_exit_ts_ms": 1779930000000,
+    "new_exit_ts_ms": 1779890400000,
+    "old_price": 0.2409,
+    "new_price": 0.243
+  },
+  {
+    "strategy": "Q102",
+    "symbol": "FETUSDT",
+    "side": "LONG",
+    "family": "PB",
+    "entry_ts_ms": 1779944400000,
+    "old_exit_ts_ms": 1779987600000,
+    "new_exit_ts_ms": 1779948000000,
+    "old_price": 0.2255,
+    "new_price": 0.2211
+  },
+  {
+    "strategy": "Q102",
+    "symbol": "FETUSDT",
+    "side": "LONG",
+    "family": "PB",
+    "entry_ts_ms": 1781586000000,
+    "old_exit_ts_ms": 1781629200000,
+    "new_exit_ts_ms": 1781622000000,
+    "old_price": 0.207,
+    "new_price": 0.2078
+  }
+]

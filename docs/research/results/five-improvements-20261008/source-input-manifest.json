@@ -1,0 +1,51 @@
+{
+  "baseline_research_sha": "9d40763a",
+  "runtime_baseline_sha": "eabfeb1750666fac11f894a34cdcf68501ab923f",
+  "files": [
+    {
+      "path": "C:\\tmp\\current-vps-no-dca-bt-20261007\\docs\\research\\results\\current-vps-no-dca-20261007\\run-current-vps-no-dca.py",
+      "bytes": 13566,
+      "sha256": "7c3459fa56bb999b6b669c303045deb9517aeca22e85c1f29c0450184b455058"
+    },
+    {
+      "path": "C:\\tmp\\current-vps-no-dca-bt-20261007\\docs\\research\\results\\current-vps-no-dca-20261007\\venue_constraints.py",
+      "bytes": 1202,
+      "sha256": "ebda1fcc1d14893defe7810c9108bbcfa3e098f914ad3dd185b9ae50bb7ece6a"
+    },
+    {
+      "path": "C:\\tmp\\current-vps-no-dca-bt-20261007\\docs\\research\\results\\current-vps-no-dca-20261007\\inputs\\current-source-checked-candidates.jsonl.gz",
+      "bytes": 116852,
+      "sha256": "99b8d5d304916e298496b82d67f1135fb47880144028a7bdf5deab7161591e69"
+    },
+    {
+      "path": "C:\\tmp\\current-vps-no-dca-bt-20261007\\docs\\research\\results\\current-vps-no-dca-20261007\\engine\\scripts\\research\\formal_core_live_ownership.py",
+      "bytes": 7397,
+      "sha256": "bcd14be18428e7e7728c7d87bc647e78b12dc9a599dbc6a6a6543cb6110a9db9"
+    },
+    {
+      "path": "C:\\tmp\\current-vps-no-dca-bt-20261007\\docs\\research\\results\\current-vps-no-dca-20261007\\engine\\scripts\\research\\formal_core_ownership_audit.py",
+      "bytes": 10112,
+      "sha256": "8065f316a38af98e3ea02ccbaa63269828f89e1c9943f64bc1d5d304199e7546"
+    },
+    {
+      "path": "C:\\tmp\\current-vps-no-dca-bt-20261007\\docs\\research\\results\\current-vps-no-dca-20261007\\engine\\scripts\\research\\pengu1_hype_engine.py",
+      "bytes": 7169,
+      "sha256": "ec407f6f48730b30b291aced2c0ae88be45d398fb9fd77cdd313f12808c6403a"
+    },
+    {
+      "path": "C:\\tmp\\current-vps-no-dca-bt-20261007\\docs\\research\\results\\current-vps-no-dca-20261007\\engine\\scripts\\research\\run_formal_core_overlay_diagnostic.py",
+      "bytes": 7885,
+      "sha256": "3fe4773500ab440509a0d19e276b64b67b544a9d2f7d33899d155ef0895052f5"
+    },
+    {
+      "path": "C:\\tmp\\current-vps-no-dca-bt-20261007\\docs\\research\\results\\current-vps-no-dca-20261007\\engine\\scripts\\research\\run_pengu1_hype_comparison.py",
+      "bytes": 4786,
+      "sha256": "60fb107a2a3499a61043346a173609186c6c00d2eea07728f4888d85507c67a3"
+    },
+    {
+      "path": "C:\\tmp\\current-vps-no-dca-bt-20261007\\docs\\research\\results\\current-vps-no-dca-20261007\\engine\\docs\\research\\results\\formal-core-ownership-audit-20261003\\engine-source.zip",
+      "bytes": 31422,
+      "sha256": "ba39690a3b125f274571132c2992211bee6a30259e7b832cbf27208544ab4a78"
+    }
+  ]
+}

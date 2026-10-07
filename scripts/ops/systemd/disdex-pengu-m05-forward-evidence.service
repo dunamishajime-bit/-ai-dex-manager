@@ -1,0 +1,17 @@
+[Unit]
+Description=DisDex M05 forward evidence observer (read-only trading state)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+ExecStart=/usr/bin/python3 /opt/disdex-observers/pengu-m05-forward-20261008/pengu_m05_forward_observer.py
+TimeoutStartSec=45
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/var/lib/disdex/shadow/pengu-m05
+InaccessiblePaths=/etc/disdex /root/.ssh
+UMask=0077

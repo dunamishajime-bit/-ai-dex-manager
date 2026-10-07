@@ -1,0 +1,101 @@
+[
+  {
+    "strategy": "FET",
+    "symbol": "FETUSDT",
+    "side": "LONG",
+    "family": null,
+    "entry_ts_ms": 1773349200000,
+    "old_exit_ts_ms": 1773435600000,
+    "new_exit_ts_ms": 1773392400000,
+    "old_price": 0.1772,
+    "new_price": 0.1803
+  },
+  {
+    "strategy": "FET",
+    "symbol": "FETUSDT",
+    "side": "LONG",
+    "family": null,
+    "entry_ts_ms": 1773363600000,
+    "old_exit_ts_ms": 1773421200000,
+    "new_exit_ts_ms": 1773406800000,
+    "old_price": 0.176415,
+    "new_price": 0.1837
+  },
+  {
+    "strategy": "FET",
+    "symbol": "FETUSDT",
+    "side": "LONG",
+    "family": null,
+    "entry_ts_ms": 1773579600000,
+    "old_exit_ts_ms": 1773666000000,
+    "new_exit_ts_ms": 1773622800000,
+    "old_price": 0.2226,
+    "new_price": 0.1962
+  },
+  {
+    "strategy": "FET",
+    "symbol": "FETUSDT",
+    "side": "LONG",
+    "family": null,
+    "entry_ts_ms": 1773666000000,
+    "old_exit_ts_ms": 1773720000000,
+    "new_exit_ts_ms": 1773709200000,
+    "old_price": 0.229278,
+    "new_price": 0.2341
+  },
+  {
+    "strategy": "FET",
+    "symbol": "FETUSDT",
+    "side": "LONG",
+    "family": null,
+    "entry_ts_ms": 1775437200000,
+    "old_exit_ts_ms": 1775512800000,
+    "new_exit_ts_ms": 1775480400000,
+    "old_price": 0.230375,
+    "new_price": 0.2366
+  },
+  {
+    "strategy": "FET",
+    "symbol": "FETUSDT",
+    "side": "LONG",
+    "family": null,
+    "entry_ts_ms": 1778014800000,
+    "old_exit_ts_ms": 1778101200000,
+    "new_exit_ts_ms": 1778065200000,
+    "old_price": 0.2251,
+    "new_price": 0.224
+  },
+  {
+    "strategy": "FET",
+    "symbol": "FETUSDT",
+    "side": "LONG",
+    "family": null,
+    "entry_ts_ms": 1779728400000,
+    "old_exit_ts_ms": 1779814800000,
+    "new_exit_ts_ms": 1779789600000,
+    "old_price": 0.256,
+    "new_price": 0.244
+  },
+  {
+    "strategy": "FET",
+    "symbol": "FETUSDT",
+    "side": "LONG",
+    "family": null,
+    "entry_ts_ms": 1781355600000,
+    "old_exit_ts_ms": 1781416800000,
+    "new_exit_ts_ms": 1781398800000,
+    "old_price": 0.210841,
+    "new_price": 0.2087
+  },
+  {
+    "strategy": "FET",
+    "symbol": "FETUSDT",
+    "side": "LONG",
+    "family": null,
+    "entry_ts_ms": 1785877200000,
+    "old_exit_ts_ms": 1785963600000,
+    "new_exit_ts_ms": 1785924000000,
+    "old_price": 0.1432,
+    "new_price": 0.1526
+  }
+]

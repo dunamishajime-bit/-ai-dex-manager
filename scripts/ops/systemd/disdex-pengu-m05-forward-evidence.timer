@@ -1,0 +1,12 @@
+[Unit]
+Description=Collect DisDex M05 forward evidence every 15 minutes
+
+[Timer]
+OnBootSec=90s
+OnUnitActiveSec=15min
+AccuracySec=15s
+Persistent=true
+Unit=disdex-pengu-m05-forward-evidence.service
+
+[Install]
+WantedBy=timers.target

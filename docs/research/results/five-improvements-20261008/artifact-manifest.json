@@ -1,0 +1,1798 @@
+{
+  "hash_scope": "Canonical LF text and unchanged binary bytes; localBytes/localSha256 retain observed Windows file identity",
+  "files": [
+    {
+      "path": "cases/BASELINE/candidate-changes.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "localBytes": 2,
+      "localSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "cases/BASELINE/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 118670,
+      "sha256": "38b2fd09b8876c4a72d76c29cb8245ce627c3832d9ea3f6ec93b6af5f65e9ab7",
+      "localBytes": 118670,
+      "localSha256": "38b2fd09b8876c4a72d76c29cb8245ce627c3832d9ea3f6ec93b6af5f65e9ab7"
+    },
+    {
+      "path": "cases/BASELINE/governor-observations.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "localBytes": 2,
+      "localSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "cases/BASELINE/result.json",
+      "bytes": 83076,
+      "sha256": "5faf75669345040292920756669d79c1cf438812b34f70941fb6cb171f6a4f5f",
+      "localBytes": 85260,
+      "localSha256": "a2a274e6c469b86dd50b4e9735fa8bf5389146fbdb66dc544e65037ce5400cfb"
+    },
+    {
+      "path": "cases/BASELINE/runs/portfolio-price-model-summary.json",
+      "bytes": 82843,
+      "sha256": "d06ea53c2b1642302cade126b35a8bdb611f1056accab556078fdd2d60c373aa",
+      "localBytes": 85020,
+      "localSha256": "0835a71caf5e098e3ad263a86ece003267cb21e82f659e118e8b9a1e7c026b4e"
+    },
+    {
+      "path": "cases/BASELINE/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 530073,
+      "sha256": "cb0e73eb825b83d3d82df3c97cbec9bc2267333cc8f9cccb1ca3ab903f98ef8b",
+      "localBytes": 530073,
+      "localSha256": "cb0e73eb825b83d3d82df3c97cbec9bc2267333cc8f9cccb1ca3ab903f98ef8b"
+    },
+    {
+      "path": "cases/BASELINE/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 23746,
+      "sha256": "0140acdc57989a88c0d45ec0b75d606f0b7213eef9789141f9f7f4486c7ec516",
+      "localBytes": 24446,
+      "localSha256": "522863cd89709aef54e038f97bd4133b2148900df4de5d88c30c65a6ce174c56"
+    },
+    {
+      "path": "cases/BASELINE/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 268135,
+      "sha256": "711c6e308ed601f2fcbb8dd01ccd0b20190c02a7b16cac17b060768cac332516",
+      "localBytes": 268135,
+      "localSha256": "711c6e308ed601f2fcbb8dd01ccd0b20190c02a7b16cac17b060768cac332516"
+    },
+    {
+      "path": "cases/BASELINE/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 214033,
+      "sha256": "21b181796582b3c6c577a9a84125b990fc29c32fd23e8d634b2f42448281809a",
+      "localBytes": 214033,
+      "localSha256": "21b181796582b3c6c577a9a84125b990fc29c32fd23e8d634b2f42448281809a"
+    },
+    {
+      "path": "cases/BASELINE/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 527732,
+      "sha256": "e6a0446af9d53022a3db9eb01cc3d0db9e6bcdbda35d7fa48b95c6cea7954a92",
+      "localBytes": 527732,
+      "localSha256": "e6a0446af9d53022a3db9eb01cc3d0db9e6bcdbda35d7fa48b95c6cea7954a92"
+    },
+    {
+      "path": "cases/BASELINE/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 24576,
+      "sha256": "8011a8fb43b4898e54b4f950cae39141b857af39cbf7c33aa37c10f1c847d0da",
+      "localBytes": 25300,
+      "localSha256": "9104b9862070c3e7b0bccb14db0381ea55296ed61380fb0ae5b8883fed1ae144"
+    },
+    {
+      "path": "cases/BASELINE/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 267662,
+      "sha256": "106dd76f282b38b3d172b2dff89258fa1c588bafcb533188a79ecaacb4432b3e",
+      "localBytes": 267662,
+      "localSha256": "106dd76f282b38b3d172b2dff89258fa1c588bafcb533188a79ecaacb4432b3e"
+    },
+    {
+      "path": "cases/BASELINE/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 212845,
+      "sha256": "54d60237eef3edf7f385e8955556e2548e348945d49a31ed6528e724df9b8d4d",
+      "localBytes": 212845,
+      "localSha256": "54d60237eef3edf7f385e8955556e2548e348945d49a31ed6528e724df9b8d4d"
+    },
+    {
+      "path": "cases/BASELINE/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 530021,
+      "sha256": "aa70dc643e0541f6d30bee691fd8e1d26368bb5897e5d9f3204b464338470200",
+      "localBytes": 530021,
+      "localSha256": "aa70dc643e0541f6d30bee691fd8e1d26368bb5897e5d9f3204b464338470200"
+    },
+    {
+      "path": "cases/BASELINE/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 24611,
+      "sha256": "655a6d3bd9c47c8e37fd8e509e635db889ae2d7430ab4a7c4747ae6d03ef7bc9",
+      "localBytes": 25335,
+      "localSha256": "374beed018fd5dd38180c3f5173517d37912f797b37b48950562762ee99740e7"
+    },
+    {
+      "path": "cases/BASELINE/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 267472,
+      "sha256": "1bf661a6cb1b9982cdcc91d0028750969b48628785bc6b59bf67283cc62313ea",
+      "localBytes": 267472,
+      "localSha256": "1bf661a6cb1b9982cdcc91d0028750969b48628785bc6b59bf67283cc62313ea"
+    },
+    {
+      "path": "cases/BASELINE/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 212181,
+      "sha256": "54dd3e6d913d18d1bf3cdeba41adb7d7e168cca3995888e82adaf4697320d495",
+      "localBytes": 212181,
+      "localSha256": "54dd3e6d913d18d1bf3cdeba41adb7d7e168cca3995888e82adaf4697320d495"
+    },
+    {
+      "path": "cases/BASELINE/runs/summary.json",
+      "bytes": 83172,
+      "sha256": "7fee88daaf29791382b551265182b0d65c0d5d5b5131317eae09caa366836000",
+      "localBytes": 85358,
+      "localSha256": "31453a45406a4a3181ab349d0f261bf4cdd66828a51aef451ce8f8f7d6b57c74"
+    },
+    {
+      "path": "cases/FET_MOM_12/candidate-changes.json",
+      "bytes": 2293,
+      "sha256": "bb6ab1465ca530956c4d2df568e39c7f52502fee6e00bab646040a2c7348bb82",
+      "localBytes": 2393,
+      "localSha256": "eb3de04d1a5e8dbbed7bfdc957604aa1df8407bdfbb54f90f54a69646a18fe2b"
+    },
+    {
+      "path": "cases/FET_MOM_12/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 118708,
+      "sha256": "140f1873d9b811ef3e3da6c5cc32c637c059fa2141be244ad152dce90159e50c",
+      "localBytes": 118708,
+      "localSha256": "140f1873d9b811ef3e3da6c5cc32c637c059fa2141be244ad152dce90159e50c"
+    },
+    {
+      "path": "cases/FET_MOM_12/governor-observations.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "localBytes": 2,
+      "localSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "cases/FET_MOM_12/result.json",
+      "bytes": 27832,
+      "sha256": "f3e9ad566cd3e8ab9b92922b72981fb4c7a33d78ea3021f61cfddccc498ae60d",
+      "localBytes": 28566,
+      "localSha256": "76443344eafc629c27bd486158b1aeeeff9818290818470b6b52f3c5f060f17b"
+    },
+    {
+      "path": "cases/FET_MOM_12/runs/portfolio-price-model-summary.json",
+      "bytes": 28561,
+      "sha256": "cb6d2836b2451d432d9710202bb15c6d76593855e2d0ad2ab56092526f8a2c2e",
+      "localBytes": 29308,
+      "localSha256": "cee4654f45e9b3a4e02ed0477fb56c319c5529bfb43358f3078270917ac402cd"
+    },
+    {
+      "path": "cases/FET_MOM_12/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 529947,
+      "sha256": "eb6fcea59b2560213e05cba32949626f7383a8187247bdab71fcefc0239a2c5a",
+      "localBytes": 529947,
+      "localSha256": "eb6fcea59b2560213e05cba32949626f7383a8187247bdab71fcefc0239a2c5a"
+    },
+    {
+      "path": "cases/FET_MOM_12/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 24373,
+      "sha256": "80fc3649be39bf37537f90d493a06bd49d8d4780d4cf89377646a4509431e440",
+      "localBytes": 25091,
+      "localSha256": "4bd27575697a482af50da7ae086aa55cfe6e858ddedfe4495b4bea185b13d3a2"
+    },
+    {
+      "path": "cases/FET_MOM_12/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 267823,
+      "sha256": "45c611bdf1da29a6c353ce734504de18041689299c804befb81ebc83e953c933",
+      "localBytes": 267823,
+      "localSha256": "45c611bdf1da29a6c353ce734504de18041689299c804befb81ebc83e953c933"
+    },
+    {
+      "path": "cases/FET_MOM_12/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 213935,
+      "sha256": "4af212e49ac198c33ac20c7d096843ea7575005b7b97b0117f13a0e7b6700211",
+      "localBytes": 213935,
+      "localSha256": "4af212e49ac198c33ac20c7d096843ea7575005b7b97b0117f13a0e7b6700211"
+    },
+    {
+      "path": "cases/FET_MOM_12/runs/summary.json",
+      "bytes": 27926,
+      "sha256": "e81ae63e6493671e616f8c8fb21065060236c170d7148246cd7b8712af40f95d",
+      "localBytes": 28662,
+      "localSha256": "b68cafa9a953299c4d34718ae41cc56287cad73f69323377942bcfb20efd2cbe"
+    },
+    {
+      "path": "cases/FET_MOM_18/candidate-changes.json",
+      "bytes": 1273,
+      "sha256": "aee529315ab47657f7bb37a2b12e1f6e9fa54b1cdb1d9d3ab3860e1d2452e3c0",
+      "localBytes": 1329,
+      "localSha256": "bb6c6910244623de152fb0cdcc52668509d1cfc8bcc27952fe95584fc975a630"
+    },
+    {
+      "path": "cases/FET_MOM_18/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 118707,
+      "sha256": "cd12d3b3b845233287a80ea3f55cd111d30e48f1a620fae76aa44d3ee702edbc",
+      "localBytes": 118707,
+      "localSha256": "cd12d3b3b845233287a80ea3f55cd111d30e48f1a620fae76aa44d3ee702edbc"
+    },
+    {
+      "path": "cases/FET_MOM_18/governor-observations.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "localBytes": 2,
+      "localSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "cases/FET_MOM_18/result.json",
+      "bytes": 27829,
+      "sha256": "b50baabc0f982dc9a415989159f8e9f3e1597489ca92e2784723e1c6029531c8",
+      "localBytes": 28563,
+      "localSha256": "d5677f22dcae0480db5feafa83af3f8e6c5e9c43928939b97740ecaf48449995"
+    },
+    {
+      "path": "cases/FET_MOM_18/runs/portfolio-price-model-summary.json",
+      "bytes": 28558,
+      "sha256": "e14b27ae90adcd132da70881a39fac99a5340433db40b8a7a84272b073e102d2",
+      "localBytes": 29305,
+      "localSha256": "3b948444abcfc5a1588b0d794d525234d0181a5d8d6d13e2e35715a03913e9b9"
+    },
+    {
+      "path": "cases/FET_MOM_18/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 530152,
+      "sha256": "5b2975b3cff09a4aa604072fcde686ea8b29adbd66353a8f9485b80299658497",
+      "localBytes": 530152,
+      "localSha256": "5b2975b3cff09a4aa604072fcde686ea8b29adbd66353a8f9485b80299658497"
+    },
+    {
+      "path": "cases/FET_MOM_18/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 24370,
+      "sha256": "a7c70278ae947dce76223c01f56b4cf0197de237f5dd438236f8975aa0905b0d",
+      "localBytes": 25088,
+      "localSha256": "c4a14cc83803e74d963869ea1c17f0ec56ae0311832f169fc185e81575ce06b2"
+    },
+    {
+      "path": "cases/FET_MOM_18/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 268077,
+      "sha256": "85adc4cadcef0bd19ac5a47ed21e415310ae465e30f6eb36f854491859503768",
+      "localBytes": 268077,
+      "localSha256": "85adc4cadcef0bd19ac5a47ed21e415310ae465e30f6eb36f854491859503768"
+    },
+    {
+      "path": "cases/FET_MOM_18/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 214048,
+      "sha256": "d76e11f242dac9570b396661778b5cf52037ace6cf8ca2407f1485cb4cdc33eb",
+      "localBytes": 214048,
+      "localSha256": "d76e11f242dac9570b396661778b5cf52037ace6cf8ca2407f1485cb4cdc33eb"
+    },
+    {
+      "path": "cases/FET_MOM_18/runs/summary.json",
+      "bytes": 27923,
+      "sha256": "e691765f622dcabdea2ba58166cb8230020bf390c2d944f943022e87376c7c8c",
+      "localBytes": 28659,
+      "localSha256": "27caedb56c9917dc488898894ee02d4b7ba2e56e17fdca4ff6d988ecb0837bdc"
+    },
+    {
+      "path": "cases/FET_TRAIL_5_2/candidate-changes.json",
+      "bytes": 2875,
+      "sha256": "a6ef481756aec8d79a41c62362f4461aa2c603522928c214451ebdeebe79a044",
+      "localBytes": 2997,
+      "localSha256": "718f94d0564af07700b6f5f9925ef5e26957d1ae747c74e80aa4396910491bc1"
+    },
+    {
+      "path": "cases/FET_TRAIL_5_2/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 118722,
+      "sha256": "d80e61ed469cd1dd6373a0b5725f740260d591b177b2ccc6965b7db25433f459",
+      "localBytes": 118722,
+      "localSha256": "d80e61ed469cd1dd6373a0b5725f740260d591b177b2ccc6965b7db25433f459"
+    },
+    {
+      "path": "cases/FET_TRAIL_5_2/governor-observations.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "localBytes": 2,
+      "localSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "cases/FET_TRAIL_5_2/result.json",
+      "bytes": 27848,
+      "sha256": "6827d34f36d2b941a26068d89d1193e8f2d9e2d84c28fa3fea84d43552a97f7e",
+      "localBytes": 28582,
+      "localSha256": "7c04a1d4f12c47ee72c32ab8f71d3fffeb47110526c31c1c25ee001d8e98d277"
+    },
+    {
+      "path": "cases/FET_TRAIL_5_2/runs/portfolio-price-model-summary.json",
+      "bytes": 28573,
+      "sha256": "e196e53af1aa00eca713f6f21fc0ba8e798bf3ef94e4d9423b978065fbe4d12e",
+      "localBytes": 29320,
+      "localSha256": "16ed09868babc853506361e63542130a9bcb771a87fdd4936f1c125a20d9eb31"
+    },
+    {
+      "path": "cases/FET_TRAIL_5_2/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 530018,
+      "sha256": "30cd4874422d1c0b5987ba904a06ea153e7b5323883a6183a038d896f300e630",
+      "localBytes": 530018,
+      "localSha256": "30cd4874422d1c0b5987ba904a06ea153e7b5323883a6183a038d896f300e630"
+    },
+    {
+      "path": "cases/FET_TRAIL_5_2/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 24385,
+      "sha256": "a7fc2293e05f98d9fa814490e77477f097091c3a24752a324a8d99beb3443f8a",
+      "localBytes": 25103,
+      "localSha256": "e9a1c42a354969968994057d6d6dfd902652e6ea53257530633e3458015f489c"
+    },
+    {
+      "path": "cases/FET_TRAIL_5_2/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 267927,
+      "sha256": "dae0490ad47cebb43cee6565b4c55aad0b493aabfe4d1d91d5993d686c9b772e",
+      "localBytes": 267927,
+      "localSha256": "dae0490ad47cebb43cee6565b4c55aad0b493aabfe4d1d91d5993d686c9b772e"
+    },
+    {
+      "path": "cases/FET_TRAIL_5_2/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 214061,
+      "sha256": "b5706f2afbe55fc58b021efd62dff15e650e3d63ec19158e6f551e85bc6a2e8d",
+      "localBytes": 214061,
+      "localSha256": "b5706f2afbe55fc58b021efd62dff15e650e3d63ec19158e6f551e85bc6a2e8d"
+    },
+    {
+      "path": "cases/FET_TRAIL_5_2/runs/summary.json",
+      "bytes": 27938,
+      "sha256": "5375f3032eaeec1aec5cf581d9e00b39a89f2c731e5d8632f0ba3d6968f2fb59",
+      "localBytes": 28674,
+      "localSha256": "856709eefe8a4c3c01a5d7e94543621f2a7dbcf600d0f4c84ff1ea37de80a07d"
+    },
+    {
+      "path": "cases/FET_TRAIL_5_3/candidate-changes.json",
+      "bytes": 2853,
+      "sha256": "af576ccd7b53eae57a088f3c7e65f3284c57d44f398ff15a31efdbd19d95a3ca",
+      "localBytes": 2975,
+      "localSha256": "b83f9caac8b5e1f1efee9b820da46774fa7af3c9b8e3cb8cd408097825e567b3"
+    },
+    {
+      "path": "cases/FET_TRAIL_5_3/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 118696,
+      "sha256": "ff587add957abbd228b2b35a495343e46f4ee9fcb9f5d3e41bba6b5b5a3337c9",
+      "localBytes": 118696,
+      "localSha256": "ff587add957abbd228b2b35a495343e46f4ee9fcb9f5d3e41bba6b5b5a3337c9"
+    },
+    {
+      "path": "cases/FET_TRAIL_5_3/governor-observations.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "localBytes": 2,
+      "localSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "cases/FET_TRAIL_5_3/result.json",
+      "bytes": 27849,
+      "sha256": "630538b1200b0005bb82a87b9a2cef7e21b3e6c889c536ae84c59bb8c2f0f480",
+      "localBytes": 28583,
+      "localSha256": "9e04c47280a7fbd2b1b285be3731e15f555101a5d8ea8fb08d1f2554924739a1"
+    },
+    {
+      "path": "cases/FET_TRAIL_5_3/runs/portfolio-price-model-summary.json",
+      "bytes": 28574,
+      "sha256": "35f4e35ab7449bf1af56d575a72cf403827d1249f5f061a0fa38da3c3c0071ee",
+      "localBytes": 29321,
+      "localSha256": "be46cff6231145b5cf9a2bfee93ccc4767000921cf1c919ad262425c79e8f5bd"
+    },
+    {
+      "path": "cases/FET_TRAIL_5_3/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 530009,
+      "sha256": "0be78f92208e3ae5bda6280569eca46c19bf840a69843d1864c0cebf861ed5ea",
+      "localBytes": 530009,
+      "localSha256": "0be78f92208e3ae5bda6280569eca46c19bf840a69843d1864c0cebf861ed5ea"
+    },
+    {
+      "path": "cases/FET_TRAIL_5_3/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 24386,
+      "sha256": "ca37d3b3a1a70ee5b05b5922bd8f69361eb4c9825b393bc8350a4ece64b2fc61",
+      "localBytes": 25104,
+      "localSha256": "c9fbe36deaf6623b8f15443b0ce2f7be22b165d0a61dcd85c550141e329ceebd"
+    },
+    {
+      "path": "cases/FET_TRAIL_5_3/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 267904,
+      "sha256": "fbb1680be6347c81b1cedf6c9fef6c6400c939567f279a9973901f95c0e1b17b",
+      "localBytes": 267904,
+      "localSha256": "fbb1680be6347c81b1cedf6c9fef6c6400c939567f279a9973901f95c0e1b17b"
+    },
+    {
+      "path": "cases/FET_TRAIL_5_3/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 213913,
+      "sha256": "6c26d88b9524387ca29502f42eae31a2be2d23db15826188d1bd9c0df65583b7",
+      "localBytes": 213913,
+      "localSha256": "6c26d88b9524387ca29502f42eae31a2be2d23db15826188d1bd9c0df65583b7"
+    },
+    {
+      "path": "cases/FET_TRAIL_5_3/runs/summary.json",
+      "bytes": 27939,
+      "sha256": "1a6ac0ea06bfdf65c1cfdf54f3b1ce779d19de92662942410120b094f7669cbf",
+      "localBytes": 28675,
+      "localSha256": "330a8a4634c008ab5b1071d117ede0c0425123a466bd6690a7286fbfa3c536c8"
+    },
+    {
+      "path": "cases/FET_TRAIL_5_3_TIGHT7_2/candidate-changes.json",
+      "bytes": 2853,
+      "sha256": "2058811bd58daad5dce67be8a4cb5246c758f188d41e39fc1d9f1bf6d1170468",
+      "localBytes": 2975,
+      "localSha256": "77bf4760b1c6be823ee58e9da0ec9d1beb23ed941711992716d3de84903ba7e4"
+    },
+    {
+      "path": "cases/FET_TRAIL_5_3_TIGHT7_2/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 118737,
+      "sha256": "30a536fc25c6c53e3dc0a679a1eca23bd46d1217190a9f0d8f0d3b393804394e",
+      "localBytes": 118737,
+      "localSha256": "30a536fc25c6c53e3dc0a679a1eca23bd46d1217190a9f0d8f0d3b393804394e"
+    },
+    {
+      "path": "cases/FET_TRAIL_5_3_TIGHT7_2/governor-observations.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "localBytes": 2,
+      "localSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "cases/FET_TRAIL_5_3_TIGHT7_2/result.json",
+      "bytes": 27877,
+      "sha256": "83dcb91ffe59e42b14ba10fe8dfb86c5e1eda1c7a75a08cfee3758d8e61dff19",
+      "localBytes": 28611,
+      "localSha256": "70cdc408986c7d330c973a2b43745cd34e48b96cd42bb8b515c59b0f4da73fec"
+    },
+    {
+      "path": "cases/FET_TRAIL_5_3_TIGHT7_2/runs/portfolio-price-model-summary.json",
+      "bytes": 28593,
+      "sha256": "c2089f5c09d54227ac8f5ec97612f8e151f6f9b5286f7f381c144f5730c719e2",
+      "localBytes": 29340,
+      "localSha256": "c5f631929be113978a625fabbb3dc0645c28466845948e415b8cccf72e84e17a"
+    },
+    {
+      "path": "cases/FET_TRAIL_5_3_TIGHT7_2/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 530133,
+      "sha256": "6c381fbe37a8118d9505f2f90a9669fcb0366c20b266ee57fce59d26f7090c8a",
+      "localBytes": 530133,
+      "localSha256": "6c381fbe37a8118d9505f2f90a9669fcb0366c20b266ee57fce59d26f7090c8a"
+    },
+    {
+      "path": "cases/FET_TRAIL_5_3_TIGHT7_2/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 24405,
+      "sha256": "826979dee1e8db715554cfcb336bd22116600ca3ca077f63350f864f86f854e0",
+      "localBytes": 25123,
+      "localSha256": "788065477df4979bcc30c749cd58b64aab2ad2d8bfc61d7fb2a972a4ef575ec6"
+    },
+    {
+      "path": "cases/FET_TRAIL_5_3_TIGHT7_2/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 268000,
+      "sha256": "8491ae88e5673e67945d022d3088e6495ca98a85be3d8853d461ccf89aaeacaa",
+      "localBytes": 268000,
+      "localSha256": "8491ae88e5673e67945d022d3088e6495ca98a85be3d8853d461ccf89aaeacaa"
+    },
+    {
+      "path": "cases/FET_TRAIL_5_3_TIGHT7_2/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 214061,
+      "sha256": "fa419c0e1a6d75c6e290a4f7f4871408cc918a827eaad69a6beb9cb7092ff7a9",
+      "localBytes": 214061,
+      "localSha256": "fa419c0e1a6d75c6e290a4f7f4871408cc918a827eaad69a6beb9cb7092ff7a9"
+    },
+    {
+      "path": "cases/FET_TRAIL_5_3_TIGHT7_2/runs/summary.json",
+      "bytes": 27958,
+      "sha256": "a9f1ad97e4a0c0caa7706b31625fca77958dfa5759a8eeddac205329e440581c",
+      "localBytes": 28694,
+      "localSha256": "e026962a94eb14a85e2e0add7bce05971b70ea87656526290b32be343474d25d"
+    },
+    {
+      "path": "cases/FET_TRAIL_5_3_TIGHT8_2/candidate-changes.json",
+      "bytes": 2864,
+      "sha256": "7c784d6ad2da29c1e38e5e5ac11f928422543920ae67ae3475a2bbe19f43ef7d",
+      "localBytes": 2986,
+      "localSha256": "dd6021dd075c47b28271e9807e0b2af39af6ed95f2b3797613c16d59f0983da4"
+    },
+    {
+      "path": "cases/FET_TRAIL_5_3_TIGHT8_2/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 118731,
+      "sha256": "54ac3074376e3f605818f330717be53fadaff4a4789837411b8a66a9910adc2e",
+      "localBytes": 118731,
+      "localSha256": "54ac3074376e3f605818f330717be53fadaff4a4789837411b8a66a9910adc2e"
+    },
+    {
+      "path": "cases/FET_TRAIL_5_3_TIGHT8_2/governor-observations.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "localBytes": 2,
+      "localSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "cases/FET_TRAIL_5_3_TIGHT8_2/result.json",
+      "bytes": 27876,
+      "sha256": "942813eff77a4dd5540b0e2da469583c5496616dd5647638c52c10b7be2665e3",
+      "localBytes": 28610,
+      "localSha256": "4c91ca2f59a8252c879e48dfe3e9e15a1ab6ab1e859df4444fd0e24ce92c8407"
+    },
+    {
+      "path": "cases/FET_TRAIL_5_3_TIGHT8_2/runs/portfolio-price-model-summary.json",
+      "bytes": 28592,
+      "sha256": "fed11313bc99a85879359c0f60a7cd356248e1327c8fbfb5eb7a81fbe3021ffb",
+      "localBytes": 29339,
+      "localSha256": "185262ebc2b32db3ea9da849cd4536561bb45fa7180601cb89967549073996e5"
+    },
+    {
+      "path": "cases/FET_TRAIL_5_3_TIGHT8_2/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 530073,
+      "sha256": "d04e14a77c97426bc75b860e7a3bfe851c223b3ba247b7700b0ee4920127c0f4",
+      "localBytes": 530073,
+      "localSha256": "d04e14a77c97426bc75b860e7a3bfe851c223b3ba247b7700b0ee4920127c0f4"
+    },
+    {
+      "path": "cases/FET_TRAIL_5_3_TIGHT8_2/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 24404,
+      "sha256": "88775e9d9a2ad9dd41122f923e7df594e91ec63a8fb467ef962884f02229e946",
+      "localBytes": 25122,
+      "localSha256": "fd36a886b875ee00f44d8c830623b27110543cac3df92b4a8f24b37dd7449603"
+    },
+    {
+      "path": "cases/FET_TRAIL_5_3_TIGHT8_2/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 267933,
+      "sha256": "83c38c1c4556fe5e78d455e07d8898fab2d310709c9fea299a9bcfee8cac2619",
+      "localBytes": 267933,
+      "localSha256": "83c38c1c4556fe5e78d455e07d8898fab2d310709c9fea299a9bcfee8cac2619"
+    },
+    {
+      "path": "cases/FET_TRAIL_5_3_TIGHT8_2/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 213946,
+      "sha256": "c678b5fa580039b537c0be1cc1aab99de7c57ed25a6a1fc808dcdac3c61cb99b",
+      "localBytes": 213946,
+      "localSha256": "c678b5fa580039b537c0be1cc1aab99de7c57ed25a6a1fc808dcdac3c61cb99b"
+    },
+    {
+      "path": "cases/FET_TRAIL_5_3_TIGHT8_2/runs/summary.json",
+      "bytes": 27957,
+      "sha256": "0ce6b92150962ebb8792412b466162c936f2d2d252654f640ecca52992de8616",
+      "localBytes": 28693,
+      "localSha256": "ae90d4a7ddea1d8c3cdcc0dc65833de7d837b0252242cecd1dc63fcbdb257ece"
+    },
+    {
+      "path": "cases/FET_TRAIL_7_2/candidate-changes.json",
+      "bytes": 1825,
+      "sha256": "3c91a09d21f243d39b5ed61e809fe844b8fe745068ed166cf4deb96ca178b5eb",
+      "localBytes": 1903,
+      "localSha256": "a98ea4c4a2dd28653a38abda6f8a1ccba24d95e0ed8b7fb21732b0663243b552"
+    },
+    {
+      "path": "cases/FET_TRAIL_7_2/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 118733,
+      "sha256": "dc054dcb3bb9321e60f7b03cca6f46fe005bf85fff332482a06f26119aff52a9",
+      "localBytes": 118733,
+      "localSha256": "dc054dcb3bb9321e60f7b03cca6f46fe005bf85fff332482a06f26119aff52a9"
+    },
+    {
+      "path": "cases/FET_TRAIL_7_2/governor-observations.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "localBytes": 2,
+      "localSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "cases/FET_TRAIL_7_2/result.json",
+      "bytes": 27853,
+      "sha256": "bde5a4784abb08998f7c3dd589548bd831513a1bd82d2ee51f17c4fa8961f4ea",
+      "localBytes": 28587,
+      "localSha256": "097e1c7b1708b2e59fc07a0cbbbe4604e80d7e897f37616abd56b5db60afdf42"
+    },
+    {
+      "path": "cases/FET_TRAIL_7_2/runs/portfolio-price-model-summary.json",
+      "bytes": 28579,
+      "sha256": "ba79848cbae1fc5f4f7b8f58d87ff98a75f12f8b63a0c90fa0894fbfffc10180",
+      "localBytes": 29326,
+      "localSha256": "e7c63ef69bee2901193c456620653c0492de6913edef966db7613420511a6ade"
+    },
+    {
+      "path": "cases/FET_TRAIL_7_2/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 529969,
+      "sha256": "a5f4a00002a181e6c244bf7a0e3c3a57a39d751582d55a2816ffcb266c58820b",
+      "localBytes": 529969,
+      "localSha256": "a5f4a00002a181e6c244bf7a0e3c3a57a39d751582d55a2816ffcb266c58820b"
+    },
+    {
+      "path": "cases/FET_TRAIL_7_2/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 24391,
+      "sha256": "f2c04de9678f40304b9c0d9cd770dc3b3fda4c3af4b59a5069423f5645194c9c",
+      "localBytes": 25109,
+      "localSha256": "1df05099a7894e8364b007cbc5bc64b64f44d0b776b3c39de0e2d23935469e1d"
+    },
+    {
+      "path": "cases/FET_TRAIL_7_2/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 267864,
+      "sha256": "6f0ce23917c028c841d023335c13007600ece91898d1abea4c680fc3a5ba58a5",
+      "localBytes": 267864,
+      "localSha256": "6f0ce23917c028c841d023335c13007600ece91898d1abea4c680fc3a5ba58a5"
+    },
+    {
+      "path": "cases/FET_TRAIL_7_2/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 213944,
+      "sha256": "e5ea035bb89e8a757edf17791f1a3bb3c803cb000f7fa5073e265e9aded49afb",
+      "localBytes": 213944,
+      "localSha256": "e5ea035bb89e8a757edf17791f1a3bb3c803cb000f7fa5073e265e9aded49afb"
+    },
+    {
+      "path": "cases/FET_TRAIL_7_2/runs/summary.json",
+      "bytes": 27944,
+      "sha256": "8f2b0a40aeb3ed6d108fbffcfc0d5e89837ce642432390e706addff76402f290",
+      "localBytes": 28680,
+      "localSha256": "afc81062d8e0cb1c8cf658eb63a570f9a45dca8d0b2c5ebccd69f7e5975ece8f"
+    },
+    {
+      "path": "cases/FET_TRAIL_8_2/candidate-changes.json",
+      "bytes": 1556,
+      "sha256": "147536ea7331e44ae8bf4a422aabc59b8b2acbf85505f73efc0ef46341438cee",
+      "localBytes": 1623,
+      "localSha256": "d62b2a9b5639524f0d15a3c16a584bc3f95e03ef150ab8328b775748674a1946"
+    },
+    {
+      "path": "cases/FET_TRAIL_8_2/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 118724,
+      "sha256": "6bd88e8dd77f2322699a3690b3cb4a8f6956b241a035aa2ef03a87478c751abb",
+      "localBytes": 118724,
+      "localSha256": "6bd88e8dd77f2322699a3690b3cb4a8f6956b241a035aa2ef03a87478c751abb"
+    },
+    {
+      "path": "cases/FET_TRAIL_8_2/governor-observations.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "localBytes": 2,
+      "localSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "cases/FET_TRAIL_8_2/result.json",
+      "bytes": 27859,
+      "sha256": "6fb0eab1335c2d13a6718dc84d09cbf8163533c316c553d3e8a922e3fff2a779",
+      "localBytes": 28593,
+      "localSha256": "946a2dee6d5e64f57435cc636f568d2afa60917901a735b43e393c1e8632d8c0"
+    },
+    {
+      "path": "cases/FET_TRAIL_8_2/runs/portfolio-price-model-summary.json",
+      "bytes": 28585,
+      "sha256": "25c251909cf0a2170de731508c0cf42bcdb7a19eed3e11567563e2113aa0408a",
+      "localBytes": 29332,
+      "localSha256": "cb73c3ff91ffcd7a33b3cf63b62332b3f3f148704301b6ef1e6708d99f21485a"
+    },
+    {
+      "path": "cases/FET_TRAIL_8_2/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 530017,
+      "sha256": "454bcf8e247790a557f603693ba2ab3dcccdfb07491875ed1ed60b0906d68d65",
+      "localBytes": 530017,
+      "localSha256": "454bcf8e247790a557f603693ba2ab3dcccdfb07491875ed1ed60b0906d68d65"
+    },
+    {
+      "path": "cases/FET_TRAIL_8_2/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 24397,
+      "sha256": "75da76b897afd0a0ae88e31bbdeaedb51eb2f702bb0c24dc76567c4c0f055130",
+      "localBytes": 25115,
+      "localSha256": "7cef3a689af53d8db5fb24a23a55773739ac18e4b04d513f0ef7ebcbee84c34a"
+    },
+    {
+      "path": "cases/FET_TRAIL_8_2/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 268028,
+      "sha256": "7e1e2a663e2cc3608c458e5ed75b03d33fe52115e80fc44c193491b8d7517414",
+      "localBytes": 268028,
+      "localSha256": "7e1e2a663e2cc3608c458e5ed75b03d33fe52115e80fc44c193491b8d7517414"
+    },
+    {
+      "path": "cases/FET_TRAIL_8_2/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 213985,
+      "sha256": "9d1eb1e1923847fa66c665ff5461c74138a081dd06f07a434f86ecec264bd48d",
+      "localBytes": 213985,
+      "localSha256": "9d1eb1e1923847fa66c665ff5461c74138a081dd06f07a434f86ecec264bd48d"
+    },
+    {
+      "path": "cases/FET_TRAIL_8_2/runs/summary.json",
+      "bytes": 27950,
+      "sha256": "f5aa334f3a1fb9d166cd0434012a2715ebe07679babc29c703945e4251391d68",
+      "localBytes": 28686,
+      "localSha256": "e165783fe53b9b61460fbb0c31fc23b998552ef15175ecc443a044146631a34a"
+    },
+    {
+      "path": "cases/GOV24_12_60/candidate-changes.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "localBytes": 2,
+      "localSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "cases/GOV24_12_60/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 118670,
+      "sha256": "38b2fd09b8876c4a72d76c29cb8245ce627c3832d9ea3f6ec93b6af5f65e9ab7",
+      "localBytes": 118670,
+      "localSha256": "38b2fd09b8876c4a72d76c29cb8245ce627c3832d9ea3f6ec93b6af5f65e9ab7"
+    },
+    {
+      "path": "cases/GOV24_12_60/governor-observations.json",
+      "bytes": 260,
+      "sha256": "adbae330702d5c22f5f0c992eaa5688da3dea30e30631d7348501da5744fe37f",
+      "localBytes": 271,
+      "localSha256": "e24cb5a3576652dbd5da69e4c0c6394f7fd62914ad62bcbc970b561c14ba24f0"
+    },
+    {
+      "path": "cases/GOV24_12_60/result.json",
+      "bytes": 27348,
+      "sha256": "e8d803aad53580aad822c0a8f665920e4dd5745972ee2c284b3ec3bd023acf53",
+      "localBytes": 28071,
+      "localSha256": "e4cbaab3cdffb2bfcc7e652683f545fcfb8309629b2576cad1838f59688e75ee"
+    },
+    {
+      "path": "cases/GOV24_12_60/runs/portfolio-price-model-summary.json",
+      "bytes": 27879,
+      "sha256": "0a9a9353537a58fe8bfd9bad74861816fda180774febe64259fc5dafb27f8e55",
+      "localBytes": 28608,
+      "localSha256": "fcac86e95ecd2bbaf2f6700914afbfa6b81278e39e06c02aa5fec4257312c8b1"
+    },
+    {
+      "path": "cases/GOV24_12_60/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 530115,
+      "sha256": "df80d1fc5d1df9c0e5750f0c27f44b6806560a2f55ad13d328d8a5fbe16e90f1",
+      "localBytes": 530115,
+      "localSha256": "df80d1fc5d1df9c0e5750f0c27f44b6806560a2f55ad13d328d8a5fbe16e90f1"
+    },
+    {
+      "path": "cases/GOV24_12_60/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 23763,
+      "sha256": "00748fa10c7a06f3abef3cae773026e650026b9f815beb2484675be29af290ad",
+      "localBytes": 24463,
+      "localSha256": "885899b9d0669c4566359aafe9573dc399516172a87a36c346e748f0c9223bc0"
+    },
+    {
+      "path": "cases/GOV24_12_60/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 268011,
+      "sha256": "186d08ba09318b239928e2fb828b658933d56768c31bead3f8ae72996ede851f",
+      "localBytes": 268011,
+      "localSha256": "186d08ba09318b239928e2fb828b658933d56768c31bead3f8ae72996ede851f"
+    },
+    {
+      "path": "cases/GOV24_12_60/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 213998,
+      "sha256": "9acacc7dc0180b3588e3c8050e88aadfcac85d281bee43cced7ecb14822c4955",
+      "localBytes": 213998,
+      "localSha256": "9acacc7dc0180b3588e3c8050e88aadfcac85d281bee43cced7ecb14822c4955"
+    },
+    {
+      "path": "cases/GOV24_12_60/runs/summary.json",
+      "bytes": 27244,
+      "sha256": "abb29bcbde021a542ba40a021c3eae00454817d4f7205cae29ae5801319bf5c3",
+      "localBytes": 27962,
+      "localSha256": "7acfc9ff95528d7dbcabd2191560ad7098cd175f07139096ce3be1699ab3df7f"
+    },
+    {
+      "path": "cases/GOV24_12_75/candidate-changes.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "localBytes": 2,
+      "localSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "cases/GOV24_12_75/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 118670,
+      "sha256": "38b2fd09b8876c4a72d76c29cb8245ce627c3832d9ea3f6ec93b6af5f65e9ab7",
+      "localBytes": 118670,
+      "localSha256": "38b2fd09b8876c4a72d76c29cb8245ce627c3832d9ea3f6ec93b6af5f65e9ab7"
+    },
+    {
+      "path": "cases/GOV24_12_75/governor-observations.json",
+      "bytes": 261,
+      "sha256": "6c50f223ec9ca26c753cb2b1a3e4fb4a37fa7a4492c9d8e9485e86bdac563299",
+      "localBytes": 272,
+      "localSha256": "4a2ef2f746cae5bc175ec2320b92f75cdac3fb573e3cba8920e00c27964d3a0f"
+    },
+    {
+      "path": "cases/GOV24_12_75/result.json",
+      "bytes": 27337,
+      "sha256": "131335de1623a9ac4a64f36f6e51f46e0f3b142af35b28158e3473b2bcceff63",
+      "localBytes": 28060,
+      "localSha256": "6c56935afe060de857fdb5a3424f9d7b341d9f6ab50c4f5930018bfc4319ec23"
+    },
+    {
+      "path": "cases/GOV24_12_75/runs/portfolio-price-model-summary.json",
+      "bytes": 27868,
+      "sha256": "63789e674712932033db05ef682950faaa49aeb7e589b73b0c0c2c73bf5d5fac",
+      "localBytes": 28597,
+      "localSha256": "819500e9f0c2df72e0ef4d2943327a3f0f36f901040cba3da521c6a2ab32bc5d"
+    },
+    {
+      "path": "cases/GOV24_12_75/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 530113,
+      "sha256": "e27df5332fa009e584e3052c03e18fdde7219da5cb5df712a12a5df37b8c44c3",
+      "localBytes": 530113,
+      "localSha256": "e27df5332fa009e584e3052c03e18fdde7219da5cb5df712a12a5df37b8c44c3"
+    },
+    {
+      "path": "cases/GOV24_12_75/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 23752,
+      "sha256": "e9e33fb55e49fe97d15f7f8536844cf0e5f27ec3bea23baa6c6b82f521cb3d75",
+      "localBytes": 24452,
+      "localSha256": "b4b92a3d61c68edb2330e601edb38ecc2fbaf44e8491945cf42b579d72d7133e"
+    },
+    {
+      "path": "cases/GOV24_12_75/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 267886,
+      "sha256": "e80ccd518f5313dbcff908d1f9c1d8c4df0b4afda1830a15d9d689d4c74de8ba",
+      "localBytes": 267886,
+      "localSha256": "e80ccd518f5313dbcff908d1f9c1d8c4df0b4afda1830a15d9d689d4c74de8ba"
+    },
+    {
+      "path": "cases/GOV24_12_75/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 213905,
+      "sha256": "7ca83a181f22290b5959f598d0069f0a463770cec55d2fcd3b38ed9763c5ced2",
+      "localBytes": 213905,
+      "localSha256": "7ca83a181f22290b5959f598d0069f0a463770cec55d2fcd3b38ed9763c5ced2"
+    },
+    {
+      "path": "cases/GOV24_12_75/runs/summary.json",
+      "bytes": 27233,
+      "sha256": "a8fc34138a25cdace7a9e99b776b5db33e47588abd892a90f48aba77e2a6786d",
+      "localBytes": 27951,
+      "localSha256": "ca28c87cbd8293c01922917b7cbe824b48b40dc8a10d292b2eb541028f06297d"
+    },
+    {
+      "path": "cases/GOV24_6_60/candidate-changes.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "localBytes": 2,
+      "localSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "cases/GOV24_6_60/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 118670,
+      "sha256": "38b2fd09b8876c4a72d76c29cb8245ce627c3832d9ea3f6ec93b6af5f65e9ab7",
+      "localBytes": 118670,
+      "localSha256": "38b2fd09b8876c4a72d76c29cb8245ce627c3832d9ea3f6ec93b6af5f65e9ab7"
+    },
+    {
+      "path": "cases/GOV24_6_60/governor-observations.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "localBytes": 2,
+      "localSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "cases/GOV24_6_60/result.json",
+      "bytes": 27329,
+      "sha256": "96c23914605bc32e210c1942d56021aedcacfb152b4188ca2ff2b2d79044d38f",
+      "localBytes": 28052,
+      "localSha256": "32dd7b21f59660f67fcd65a16f6c59b482ee6c70bd54bb2db6aba344857219f8"
+    },
+    {
+      "path": "cases/GOV24_6_60/runs/portfolio-price-model-summary.json",
+      "bytes": 27862,
+      "sha256": "6b323440322a071acd3387aa64f871eebc48afd0c435ab99437c61bfad99c0bf",
+      "localBytes": 28591,
+      "localSha256": "01fb6b419063e7083f96d1c89875b463800254f2ac9ac0c9aff5dbb0673360a4"
+    },
+    {
+      "path": "cases/GOV24_6_60/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 530073,
+      "sha256": "cb0e73eb825b83d3d82df3c97cbec9bc2267333cc8f9cccb1ca3ab903f98ef8b",
+      "localBytes": 530073,
+      "localSha256": "cb0e73eb825b83d3d82df3c97cbec9bc2267333cc8f9cccb1ca3ab903f98ef8b"
+    },
+    {
+      "path": "cases/GOV24_6_60/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 23746,
+      "sha256": "0140acdc57989a88c0d45ec0b75d606f0b7213eef9789141f9f7f4486c7ec516",
+      "localBytes": 24446,
+      "localSha256": "522863cd89709aef54e038f97bd4133b2148900df4de5d88c30c65a6ce174c56"
+    },
+    {
+      "path": "cases/GOV24_6_60/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 268135,
+      "sha256": "711c6e308ed601f2fcbb8dd01ccd0b20190c02a7b16cac17b060768cac332516",
+      "localBytes": 268135,
+      "localSha256": "711c6e308ed601f2fcbb8dd01ccd0b20190c02a7b16cac17b060768cac332516"
+    },
+    {
+      "path": "cases/GOV24_6_60/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 214033,
+      "sha256": "21b181796582b3c6c577a9a84125b990fc29c32fd23e8d634b2f42448281809a",
+      "localBytes": 214033,
+      "localSha256": "21b181796582b3c6c577a9a84125b990fc29c32fd23e8d634b2f42448281809a"
+    },
+    {
+      "path": "cases/GOV24_6_60/runs/summary.json",
+      "bytes": 27227,
+      "sha256": "3d1c00e3de59885e5432d26f2a5b6213a54f648d00200e806128ea38e9506d2f",
+      "localBytes": 27945,
+      "localSha256": "3fdd3b13b8721716a4c685be68fd281ff14d58800f821a3f72466feffb80d7e3"
+    },
+    {
+      "path": "cases/GOV24_6_75/candidate-changes.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "localBytes": 2,
+      "localSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "cases/GOV24_6_75/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 118670,
+      "sha256": "38b2fd09b8876c4a72d76c29cb8245ce627c3832d9ea3f6ec93b6af5f65e9ab7",
+      "localBytes": 118670,
+      "localSha256": "38b2fd09b8876c4a72d76c29cb8245ce627c3832d9ea3f6ec93b6af5f65e9ab7"
+    },
+    {
+      "path": "cases/GOV24_6_75/governor-observations.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "localBytes": 2,
+      "localSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "cases/GOV24_6_75/result.json",
+      "bytes": 27329,
+      "sha256": "170a67d9dcc3ed7f65f21d4f5de804b0e8ef8cba3fb008dd6a87221fd8bed255",
+      "localBytes": 28052,
+      "localSha256": "bc2530fa2d8c0e8eff8f683341eec299cc88f04816dc657d8892024e505844d9"
+    },
+    {
+      "path": "cases/GOV24_6_75/runs/portfolio-price-model-summary.json",
+      "bytes": 27862,
+      "sha256": "6b323440322a071acd3387aa64f871eebc48afd0c435ab99437c61bfad99c0bf",
+      "localBytes": 28591,
+      "localSha256": "01fb6b419063e7083f96d1c89875b463800254f2ac9ac0c9aff5dbb0673360a4"
+    },
+    {
+      "path": "cases/GOV24_6_75/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 530073,
+      "sha256": "cb0e73eb825b83d3d82df3c97cbec9bc2267333cc8f9cccb1ca3ab903f98ef8b",
+      "localBytes": 530073,
+      "localSha256": "cb0e73eb825b83d3d82df3c97cbec9bc2267333cc8f9cccb1ca3ab903f98ef8b"
+    },
+    {
+      "path": "cases/GOV24_6_75/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 23746,
+      "sha256": "0140acdc57989a88c0d45ec0b75d606f0b7213eef9789141f9f7f4486c7ec516",
+      "localBytes": 24446,
+      "localSha256": "522863cd89709aef54e038f97bd4133b2148900df4de5d88c30c65a6ce174c56"
+    },
+    {
+      "path": "cases/GOV24_6_75/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 268135,
+      "sha256": "711c6e308ed601f2fcbb8dd01ccd0b20190c02a7b16cac17b060768cac332516",
+      "localBytes": 268135,
+      "localSha256": "711c6e308ed601f2fcbb8dd01ccd0b20190c02a7b16cac17b060768cac332516"
+    },
+    {
+      "path": "cases/GOV24_6_75/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 214033,
+      "sha256": "21b181796582b3c6c577a9a84125b990fc29c32fd23e8d634b2f42448281809a",
+      "localBytes": 214033,
+      "localSha256": "21b181796582b3c6c577a9a84125b990fc29c32fd23e8d634b2f42448281809a"
+    },
+    {
+      "path": "cases/GOV24_6_75/runs/summary.json",
+      "bytes": 27227,
+      "sha256": "3d1c00e3de59885e5432d26f2a5b6213a54f648d00200e806128ea38e9506d2f",
+      "localBytes": 27945,
+      "localSha256": "3fdd3b13b8721716a4c685be68fd281ff14d58800f821a3f72466feffb80d7e3"
+    },
+    {
+      "path": "cases/GOV_12_60/candidate-changes.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "localBytes": 2,
+      "localSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "cases/GOV_12_60/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 118670,
+      "sha256": "38b2fd09b8876c4a72d76c29cb8245ce627c3832d9ea3f6ec93b6af5f65e9ab7",
+      "localBytes": 118670,
+      "localSha256": "38b2fd09b8876c4a72d76c29cb8245ce627c3832d9ea3f6ec93b6af5f65e9ab7"
+    },
+    {
+      "path": "cases/GOV_12_60/governor-observations.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "localBytes": 2,
+      "localSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "cases/GOV_12_60/result.json",
+      "bytes": 27329,
+      "sha256": "4605cece6fae0a7d962fa0900d755d57839abc8ee953ae994d1d259cc1eebdee",
+      "localBytes": 28052,
+      "localSha256": "fb9ef2d4105fad22717afc7f4eae73ebe9255c6b8518a2dd6f470ad2ea355781"
+    },
+    {
+      "path": "cases/GOV_12_60/runs/portfolio-price-model-summary.json",
+      "bytes": 27862,
+      "sha256": "6b323440322a071acd3387aa64f871eebc48afd0c435ab99437c61bfad99c0bf",
+      "localBytes": 28591,
+      "localSha256": "01fb6b419063e7083f96d1c89875b463800254f2ac9ac0c9aff5dbb0673360a4"
+    },
+    {
+      "path": "cases/GOV_12_60/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 530073,
+      "sha256": "cb0e73eb825b83d3d82df3c97cbec9bc2267333cc8f9cccb1ca3ab903f98ef8b",
+      "localBytes": 530073,
+      "localSha256": "cb0e73eb825b83d3d82df3c97cbec9bc2267333cc8f9cccb1ca3ab903f98ef8b"
+    },
+    {
+      "path": "cases/GOV_12_60/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 23746,
+      "sha256": "0140acdc57989a88c0d45ec0b75d606f0b7213eef9789141f9f7f4486c7ec516",
+      "localBytes": 24446,
+      "localSha256": "522863cd89709aef54e038f97bd4133b2148900df4de5d88c30c65a6ce174c56"
+    },
+    {
+      "path": "cases/GOV_12_60/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 268135,
+      "sha256": "711c6e308ed601f2fcbb8dd01ccd0b20190c02a7b16cac17b060768cac332516",
+      "localBytes": 268135,
+      "localSha256": "711c6e308ed601f2fcbb8dd01ccd0b20190c02a7b16cac17b060768cac332516"
+    },
+    {
+      "path": "cases/GOV_12_60/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 214033,
+      "sha256": "21b181796582b3c6c577a9a84125b990fc29c32fd23e8d634b2f42448281809a",
+      "localBytes": 214033,
+      "localSha256": "21b181796582b3c6c577a9a84125b990fc29c32fd23e8d634b2f42448281809a"
+    },
+    {
+      "path": "cases/GOV_12_60/runs/summary.json",
+      "bytes": 27227,
+      "sha256": "3d1c00e3de59885e5432d26f2a5b6213a54f648d00200e806128ea38e9506d2f",
+      "localBytes": 27945,
+      "localSha256": "3fdd3b13b8721716a4c685be68fd281ff14d58800f821a3f72466feffb80d7e3"
+    },
+    {
+      "path": "cases/GOV_12_75/candidate-changes.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "localBytes": 2,
+      "localSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "cases/GOV_12_75/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 118670,
+      "sha256": "38b2fd09b8876c4a72d76c29cb8245ce627c3832d9ea3f6ec93b6af5f65e9ab7",
+      "localBytes": 118670,
+      "localSha256": "38b2fd09b8876c4a72d76c29cb8245ce627c3832d9ea3f6ec93b6af5f65e9ab7"
+    },
+    {
+      "path": "cases/GOV_12_75/governor-observations.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "localBytes": 2,
+      "localSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "cases/GOV_12_75/result.json",
+      "bytes": 27132,
+      "sha256": "13777e619c05c8102fc79202321e78d04277f1e0e8924b08858c1dc07de56303",
+      "localBytes": 27848,
+      "localSha256": "496a494069c98fd36980b3ced2e0cc8a6074a7225e41a47095b34e8ee30bc63e"
+    },
+    {
+      "path": "cases/GOV_12_75/runs/portfolio-price-model-summary.json",
+      "bytes": 27862,
+      "sha256": "6b323440322a071acd3387aa64f871eebc48afd0c435ab99437c61bfad99c0bf",
+      "localBytes": 28591,
+      "localSha256": "01fb6b419063e7083f96d1c89875b463800254f2ac9ac0c9aff5dbb0673360a4"
+    },
+    {
+      "path": "cases/GOV_12_75/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 530073,
+      "sha256": "cb0e73eb825b83d3d82df3c97cbec9bc2267333cc8f9cccb1ca3ab903f98ef8b",
+      "localBytes": 530073,
+      "localSha256": "cb0e73eb825b83d3d82df3c97cbec9bc2267333cc8f9cccb1ca3ab903f98ef8b"
+    },
+    {
+      "path": "cases/GOV_12_75/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 23746,
+      "sha256": "0140acdc57989a88c0d45ec0b75d606f0b7213eef9789141f9f7f4486c7ec516",
+      "localBytes": 24446,
+      "localSha256": "522863cd89709aef54e038f97bd4133b2148900df4de5d88c30c65a6ce174c56"
+    },
+    {
+      "path": "cases/GOV_12_75/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 268135,
+      "sha256": "711c6e308ed601f2fcbb8dd01ccd0b20190c02a7b16cac17b060768cac332516",
+      "localBytes": 268135,
+      "localSha256": "711c6e308ed601f2fcbb8dd01ccd0b20190c02a7b16cac17b060768cac332516"
+    },
+    {
+      "path": "cases/GOV_12_75/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 214033,
+      "sha256": "21b181796582b3c6c577a9a84125b990fc29c32fd23e8d634b2f42448281809a",
+      "localBytes": 214033,
+      "localSha256": "21b181796582b3c6c577a9a84125b990fc29c32fd23e8d634b2f42448281809a"
+    },
+    {
+      "path": "cases/GOV_12_75/runs/summary.json",
+      "bytes": 27227,
+      "sha256": "3d1c00e3de59885e5432d26f2a5b6213a54f648d00200e806128ea38e9506d2f",
+      "localBytes": 27945,
+      "localSha256": "3fdd3b13b8721716a4c685be68fd281ff14d58800f821a3f72466feffb80d7e3"
+    },
+    {
+      "path": "cases/GOV_6_60/candidate-changes.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "localBytes": 2,
+      "localSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "cases/GOV_6_60/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 118670,
+      "sha256": "38b2fd09b8876c4a72d76c29cb8245ce627c3832d9ea3f6ec93b6af5f65e9ab7",
+      "localBytes": 118670,
+      "localSha256": "38b2fd09b8876c4a72d76c29cb8245ce627c3832d9ea3f6ec93b6af5f65e9ab7"
+    },
+    {
+      "path": "cases/GOV_6_60/governor-observations.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "localBytes": 2,
+      "localSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "cases/GOV_6_60/result.json",
+      "bytes": 27131,
+      "sha256": "39d3ca724d63c700313c309a3fbf578f6b19c63959d589830fb73980ab009c88",
+      "localBytes": 27847,
+      "localSha256": "2c52e5c9f70373042bc014365b576a244e9f7891ccace0322c8ca7ec18604330"
+    },
+    {
+      "path": "cases/GOV_6_60/runs/portfolio-price-model-summary.json",
+      "bytes": 27862,
+      "sha256": "6b323440322a071acd3387aa64f871eebc48afd0c435ab99437c61bfad99c0bf",
+      "localBytes": 28591,
+      "localSha256": "01fb6b419063e7083f96d1c89875b463800254f2ac9ac0c9aff5dbb0673360a4"
+    },
+    {
+      "path": "cases/GOV_6_60/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 530073,
+      "sha256": "cb0e73eb825b83d3d82df3c97cbec9bc2267333cc8f9cccb1ca3ab903f98ef8b",
+      "localBytes": 530073,
+      "localSha256": "cb0e73eb825b83d3d82df3c97cbec9bc2267333cc8f9cccb1ca3ab903f98ef8b"
+    },
+    {
+      "path": "cases/GOV_6_60/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 23746,
+      "sha256": "0140acdc57989a88c0d45ec0b75d606f0b7213eef9789141f9f7f4486c7ec516",
+      "localBytes": 24446,
+      "localSha256": "522863cd89709aef54e038f97bd4133b2148900df4de5d88c30c65a6ce174c56"
+    },
+    {
+      "path": "cases/GOV_6_60/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 268135,
+      "sha256": "711c6e308ed601f2fcbb8dd01ccd0b20190c02a7b16cac17b060768cac332516",
+      "localBytes": 268135,
+      "localSha256": "711c6e308ed601f2fcbb8dd01ccd0b20190c02a7b16cac17b060768cac332516"
+    },
+    {
+      "path": "cases/GOV_6_60/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 214033,
+      "sha256": "21b181796582b3c6c577a9a84125b990fc29c32fd23e8d634b2f42448281809a",
+      "localBytes": 214033,
+      "localSha256": "21b181796582b3c6c577a9a84125b990fc29c32fd23e8d634b2f42448281809a"
+    },
+    {
+      "path": "cases/GOV_6_60/runs/summary.json",
+      "bytes": 27227,
+      "sha256": "3d1c00e3de59885e5432d26f2a5b6213a54f648d00200e806128ea38e9506d2f",
+      "localBytes": 27945,
+      "localSha256": "3fdd3b13b8721716a4c685be68fd281ff14d58800f821a3f72466feffb80d7e3"
+    },
+    {
+      "path": "cases/GOV_6_75/candidate-changes.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "localBytes": 2,
+      "localSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "cases/GOV_6_75/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 118670,
+      "sha256": "38b2fd09b8876c4a72d76c29cb8245ce627c3832d9ea3f6ec93b6af5f65e9ab7",
+      "localBytes": 118670,
+      "localSha256": "38b2fd09b8876c4a72d76c29cb8245ce627c3832d9ea3f6ec93b6af5f65e9ab7"
+    },
+    {
+      "path": "cases/GOV_6_75/governor-observations.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "localBytes": 2,
+      "localSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "cases/GOV_6_75/result.json",
+      "bytes": 27131,
+      "sha256": "521c70a7e0a1e80a32b2ba1bff41def9f7f73824e5ba4cb088c98c6ecbf096f6",
+      "localBytes": 27847,
+      "localSha256": "fc6f24e332d3f45613339dbf5f76adf3693bfb6e2d96574768bb97ab56aaad84"
+    },
+    {
+      "path": "cases/GOV_6_75/runs/portfolio-price-model-summary.json",
+      "bytes": 27862,
+      "sha256": "6b323440322a071acd3387aa64f871eebc48afd0c435ab99437c61bfad99c0bf",
+      "localBytes": 28591,
+      "localSha256": "01fb6b419063e7083f96d1c89875b463800254f2ac9ac0c9aff5dbb0673360a4"
+    },
+    {
+      "path": "cases/GOV_6_75/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 530073,
+      "sha256": "cb0e73eb825b83d3d82df3c97cbec9bc2267333cc8f9cccb1ca3ab903f98ef8b",
+      "localBytes": 530073,
+      "localSha256": "cb0e73eb825b83d3d82df3c97cbec9bc2267333cc8f9cccb1ca3ab903f98ef8b"
+    },
+    {
+      "path": "cases/GOV_6_75/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 23746,
+      "sha256": "0140acdc57989a88c0d45ec0b75d606f0b7213eef9789141f9f7f4486c7ec516",
+      "localBytes": 24446,
+      "localSha256": "522863cd89709aef54e038f97bd4133b2148900df4de5d88c30c65a6ce174c56"
+    },
+    {
+      "path": "cases/GOV_6_75/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 268135,
+      "sha256": "711c6e308ed601f2fcbb8dd01ccd0b20190c02a7b16cac17b060768cac332516",
+      "localBytes": 268135,
+      "localSha256": "711c6e308ed601f2fcbb8dd01ccd0b20190c02a7b16cac17b060768cac332516"
+    },
+    {
+      "path": "cases/GOV_6_75/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 214033,
+      "sha256": "21b181796582b3c6c577a9a84125b990fc29c32fd23e8d634b2f42448281809a",
+      "localBytes": 214033,
+      "localSha256": "21b181796582b3c6c577a9a84125b990fc29c32fd23e8d634b2f42448281809a"
+    },
+    {
+      "path": "cases/GOV_6_75/runs/summary.json",
+      "bytes": 27227,
+      "sha256": "3d1c00e3de59885e5432d26f2a5b6213a54f648d00200e806128ea38e9506d2f",
+      "localBytes": 27945,
+      "localSha256": "3fdd3b13b8721716a4c685be68fd281ff14d58800f821a3f72466feffb80d7e3"
+    },
+    {
+      "path": "cases/Q_HV_1/candidate-changes.json",
+      "bytes": 27540,
+      "sha256": "ed51a0f44820402bf5b74ae9d49ff9c7a0b7cc1a56e34efc0c205b54187856eb",
+      "localBytes": 28696,
+      "localSha256": "987e98bfbe5081bda24424f3bde385c1b58dc5313e3ecdd79afaf536ae41b88c"
+    },
+    {
+      "path": "cases/Q_HV_1/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 118470,
+      "sha256": "12c62427b4de38016ede9561ef3ff84a66a9bc5f214f3cdf881d7bb32abf4fb9",
+      "localBytes": 118470,
+      "localSha256": "12c62427b4de38016ede9561ef3ff84a66a9bc5f214f3cdf881d7bb32abf4fb9"
+    },
+    {
+      "path": "cases/Q_HV_1/governor-observations.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "localBytes": 2,
+      "localSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "cases/Q_HV_1/result.json",
+      "bytes": 27173,
+      "sha256": "6ab31f02e7f5e14fbc1cd571039edf8e8de70baba24d3cd851b7afc1ad2b852c",
+      "localBytes": 27891,
+      "localSha256": "e046ed9ccc3ba32888d885e1c435158c9474248512ec1f5bffa339503f8e7d97"
+    },
+    {
+      "path": "cases/Q_HV_1/runs/portfolio-price-model-summary.json",
+      "bytes": 27904,
+      "sha256": "0141edde1ce565114eba44a17562c0a5de91dc7d8f6c6476a57e0516747ad78b",
+      "localBytes": 28635,
+      "localSha256": "a7205901b978410f2e9740c58d60f1cd1127e858b222c6ceb66d752bb98388eb"
+    },
+    {
+      "path": "cases/Q_HV_1/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 531878,
+      "sha256": "5f0aa3f9937f0d670d1b655aed46b94da448b0c40206fc6c2fe2c2edba9b7e8d",
+      "localBytes": 531878,
+      "localSha256": "5f0aa3f9937f0d670d1b655aed46b94da448b0c40206fc6c2fe2c2edba9b7e8d"
+    },
+    {
+      "path": "cases/Q_HV_1/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 23780,
+      "sha256": "aa2e6e54455f66870f412143eb81dc7e6a299b915f55f8c02c88a07e420f96bb",
+      "localBytes": 24482,
+      "localSha256": "2411e6167ea3df36637eabef79159b73cc58ac989ffa679390f866349058c21a"
+    },
+    {
+      "path": "cases/Q_HV_1/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 270414,
+      "sha256": "61aabbda64a0ae667f7b2edf5a540d89a33b6851bdc91fea59ebb115ca01ab83",
+      "localBytes": 270414,
+      "localSha256": "61aabbda64a0ae667f7b2edf5a540d89a33b6851bdc91fea59ebb115ca01ab83"
+    },
+    {
+      "path": "cases/Q_HV_1/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 216985,
+      "sha256": "b3fb49329c42b57b4c1a1959ca02fb28f7bb7a75891f31abea48f2b9ae8ffadc",
+      "localBytes": 216985,
+      "localSha256": "b3fb49329c42b57b4c1a1959ca02fb28f7bb7a75891f31abea48f2b9ae8ffadc"
+    },
+    {
+      "path": "cases/Q_HV_1/runs/summary.json",
+      "bytes": 27269,
+      "sha256": "611193cf451c07f7c1f7cf288ec46b313ac2fbc72360eeb63758f98739d8bd26",
+      "localBytes": 27989,
+      "localSha256": "2073b909b9633f7ea1b20041a5a985767085ce006ac6cd8a6b2b5a4b8d46d1c0"
+    },
+    {
+      "path": "cases/Q_HV_2/candidate-changes.json",
+      "bytes": 25700,
+      "sha256": "93e9ed568c6bc5b28df358a6255944b4c4a6d21c535e3c1d0d6c6d4a7c6d60cd",
+      "localBytes": 26779,
+      "localSha256": "2147ac66459eefc5fae827f36ee56c5fd21fa1bd98e0aefed17164e774abed93"
+    },
+    {
+      "path": "cases/Q_HV_2/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 118407,
+      "sha256": "bc6e1b4f909d6795af114928a89e78b9b4795c155e31bfa1e450b2e64d31f3a6",
+      "localBytes": 118407,
+      "localSha256": "bc6e1b4f909d6795af114928a89e78b9b4795c155e31bfa1e450b2e64d31f3a6"
+    },
+    {
+      "path": "cases/Q_HV_2/governor-observations.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "localBytes": 2,
+      "localSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "cases/Q_HV_2/result.json",
+      "bytes": 27168,
+      "sha256": "60f979f86e84b9f2622085e5793f24983865aedf8cc477dbe789c41b1c2a0af7",
+      "localBytes": 27886,
+      "localSha256": "48388900abccc5f405680b95e2e2defed3493585441e05fedcaf0a7ab4767ee7"
+    },
+    {
+      "path": "cases/Q_HV_2/runs/portfolio-price-model-summary.json",
+      "bytes": 27900,
+      "sha256": "f695e5acc44224ea02e5b9705fa13062666fb447aea1e3f31c0ad7f4f0c60580",
+      "localBytes": 28631,
+      "localSha256": "a01fa919363aa749204e40af8a19b6e28b24861df138fd552463ffb06a44ce8b"
+    },
+    {
+      "path": "cases/Q_HV_2/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 531431,
+      "sha256": "dc86e84d41176d9094b1749af33480ede25dfa8016b3235547ee36213b50bc5e",
+      "localBytes": 531431,
+      "localSha256": "dc86e84d41176d9094b1749af33480ede25dfa8016b3235547ee36213b50bc5e"
+    },
+    {
+      "path": "cases/Q_HV_2/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 23776,
+      "sha256": "63b8d034d36412dcb1eea0ce58dbc1bd3f922b0042433fedb5b69ba0d377fcf1",
+      "localBytes": 24478,
+      "localSha256": "cb79b35895059e5a6f4ba94c0cbf2c36a650a543bc5e773a2af17bc784fd40a4"
+    },
+    {
+      "path": "cases/Q_HV_2/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 268879,
+      "sha256": "b371c1f790222fc53a825cf3815e2f279839326230eef7579febee63a6b3953c",
+      "localBytes": 268879,
+      "localSha256": "b371c1f790222fc53a825cf3815e2f279839326230eef7579febee63a6b3953c"
+    },
+    {
+      "path": "cases/Q_HV_2/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 216266,
+      "sha256": "93ab7507cacb7c1010f4697bb7f5a4ab3cd8415ae358413435e58212a2209d52",
+      "localBytes": 216266,
+      "localSha256": "93ab7507cacb7c1010f4697bb7f5a4ab3cd8415ae358413435e58212a2209d52"
+    },
+    {
+      "path": "cases/Q_HV_2/runs/summary.json",
+      "bytes": 27265,
+      "sha256": "3ae66b3a002a666e4d13ff78e1b1859493aebddd044a24723d6b941f93084e26",
+      "localBytes": 27985,
+      "localSha256": "8b02dcde8e74f3c4871b199f5318fbc77f661b880a8754e603c2a7aa06e51d72"
+    },
+    {
+      "path": "cases/Q_PB_1/candidate-changes.json",
+      "bytes": 2034,
+      "sha256": "38e7c8bad1f5a8b2cc9516dfde0a34acdb9eb426345364676e3665a30ffa203b",
+      "localBytes": 2123,
+      "localSha256": "49eff7878cbc539f7651b7cb4a940e7cc7838cd6399fb8f6167e15bed905a887"
+    },
+    {
+      "path": "cases/Q_PB_1/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 118697,
+      "sha256": "e1577714bee74008325505420f3b24d35818f293f9deb982ca5d4f3b8f756679",
+      "localBytes": 118697,
+      "localSha256": "e1577714bee74008325505420f3b24d35818f293f9deb982ca5d4f3b8f756679"
+    },
+    {
+      "path": "cases/Q_PB_1/governor-observations.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "localBytes": 2,
+      "localSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "cases/Q_PB_1/result.json",
+      "bytes": 27143,
+      "sha256": "3b90548ce03a95b9640b2c21e7e71c8dcca0d03459f3436c1af6b9eae964bb9e",
+      "localBytes": 27859,
+      "localSha256": "310ba4650ad34a260c7ca7fafa617af3dbac71183fc7c91f594e07ec761b0e03"
+    },
+    {
+      "path": "cases/Q_PB_1/runs/portfolio-price-model-summary.json",
+      "bytes": 27876,
+      "sha256": "0fe35a35f52d3cbab43beec5c704f310de3a9b9b41b34a077b6a2d95f47a79d9",
+      "localBytes": 28605,
+      "localSha256": "da3880a3bc31f0159c469f0c156fc67fa0a882dd9fef6b8c40e4b16b13beb0f6"
+    },
+    {
+      "path": "cases/Q_PB_1/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 530456,
+      "sha256": "735b719fece48872cf957f160d160747a8339125018a9f9047bfa4074fe05842",
+      "localBytes": 530456,
+      "localSha256": "735b719fece48872cf957f160d160747a8339125018a9f9047bfa4074fe05842"
+    },
+    {
+      "path": "cases/Q_PB_1/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 23760,
+      "sha256": "fbeb971dc973853738f17a094b5ae5675d7b4c8f2a12469883294e7e9289e8a1",
+      "localBytes": 24460,
+      "localSha256": "226373e889316c801d2441f5e3f423f4bd1abd7c6a656a79be4df8126b4ac5fd"
+    },
+    {
+      "path": "cases/Q_PB_1/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 268202,
+      "sha256": "2f0066b9f570ac5d747ecbc642133f385f42ab4d638bb1883a39b2c41f777369",
+      "localBytes": 268202,
+      "localSha256": "2f0066b9f570ac5d747ecbc642133f385f42ab4d638bb1883a39b2c41f777369"
+    },
+    {
+      "path": "cases/Q_PB_1/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 214514,
+      "sha256": "88a4aac5ae2928f5d512c009457bf4cdfeb63262a1d3e454c7d91aa308d006f7",
+      "localBytes": 214514,
+      "localSha256": "88a4aac5ae2928f5d512c009457bf4cdfeb63262a1d3e454c7d91aa308d006f7"
+    },
+    {
+      "path": "cases/Q_PB_1/runs/summary.json",
+      "bytes": 27241,
+      "sha256": "c0ac6f96a76d2ae8e5e71a3f514fd8bbf18cdd71cbe16ffdd59e5eecfc30d428",
+      "localBytes": 27959,
+      "localSha256": "552661b8963c3a8d7ea8e838d1eb962160814ad34f7500c51d41b2b61090fee8"
+    },
+    {
+      "path": "cases/Q_PB_2/candidate-changes.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "localBytes": 2,
+      "localSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "cases/Q_PB_2/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 118670,
+      "sha256": "38b2fd09b8876c4a72d76c29cb8245ce627c3832d9ea3f6ec93b6af5f65e9ab7",
+      "localBytes": 118670,
+      "localSha256": "38b2fd09b8876c4a72d76c29cb8245ce627c3832d9ea3f6ec93b6af5f65e9ab7"
+    },
+    {
+      "path": "cases/Q_PB_2/governor-observations.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "localBytes": 2,
+      "localSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "cases/Q_PB_2/result.json",
+      "bytes": 27129,
+      "sha256": "bdef8eb407189c9d9302b71d383e842087ecf81db05416c7a52c28bded4c1de4",
+      "localBytes": 27845,
+      "localSha256": "51a795cd5ee675bc27e27f92e3e9d64f9261a68c3ac1e86beb4122fe70d52879"
+    },
+    {
+      "path": "cases/Q_PB_2/runs/portfolio-price-model-summary.json",
+      "bytes": 27862,
+      "sha256": "6b323440322a071acd3387aa64f871eebc48afd0c435ab99437c61bfad99c0bf",
+      "localBytes": 28591,
+      "localSha256": "01fb6b419063e7083f96d1c89875b463800254f2ac9ac0c9aff5dbb0673360a4"
+    },
+    {
+      "path": "cases/Q_PB_2/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 530073,
+      "sha256": "cb0e73eb825b83d3d82df3c97cbec9bc2267333cc8f9cccb1ca3ab903f98ef8b",
+      "localBytes": 530073,
+      "localSha256": "cb0e73eb825b83d3d82df3c97cbec9bc2267333cc8f9cccb1ca3ab903f98ef8b"
+    },
+    {
+      "path": "cases/Q_PB_2/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 23746,
+      "sha256": "0140acdc57989a88c0d45ec0b75d606f0b7213eef9789141f9f7f4486c7ec516",
+      "localBytes": 24446,
+      "localSha256": "522863cd89709aef54e038f97bd4133b2148900df4de5d88c30c65a6ce174c56"
+    },
+    {
+      "path": "cases/Q_PB_2/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 268135,
+      "sha256": "711c6e308ed601f2fcbb8dd01ccd0b20190c02a7b16cac17b060768cac332516",
+      "localBytes": 268135,
+      "localSha256": "711c6e308ed601f2fcbb8dd01ccd0b20190c02a7b16cac17b060768cac332516"
+    },
+    {
+      "path": "cases/Q_PB_2/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 214033,
+      "sha256": "21b181796582b3c6c577a9a84125b990fc29c32fd23e8d634b2f42448281809a",
+      "localBytes": 214033,
+      "localSha256": "21b181796582b3c6c577a9a84125b990fc29c32fd23e8d634b2f42448281809a"
+    },
+    {
+      "path": "cases/Q_PB_2/runs/summary.json",
+      "bytes": 27227,
+      "sha256": "3d1c00e3de59885e5432d26f2a5b6213a54f648d00200e806128ea38e9506d2f",
+      "localBytes": 27945,
+      "localSha256": "3fdd3b13b8721716a4c685be68fd281ff14d58800f821a3f72466feffb80d7e3"
+    },
+    {
+      "path": "cases/Q_REV_2/candidate-changes.json",
+      "bytes": 5132,
+      "sha256": "3e82b6bb6a7c4f9b40e5362c41d327c867a5ef32a1270e499f51d9f728df991c",
+      "localBytes": 5353,
+      "localSha256": "c84068a9dcf06462b228ba85679fd3b1b2fcb163cf59eb40b2107f87bea4210f"
+    },
+    {
+      "path": "cases/Q_REV_2/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 118797,
+      "sha256": "e789b69a90b3bd96443377f913a0ed1d3e65faab10550539da1beabd9bc1c13d",
+      "localBytes": 118797,
+      "localSha256": "e789b69a90b3bd96443377f913a0ed1d3e65faab10550539da1beabd9bc1c13d"
+    },
+    {
+      "path": "cases/Q_REV_2/governor-observations.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "localBytes": 2,
+      "localSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "cases/Q_REV_2/result.json",
+      "bytes": 27130,
+      "sha256": "050c05739b2f8e750c1d7c53648c85dedea7596e2d3c9589410b873434df193e",
+      "localBytes": 27846,
+      "localSha256": "e166396e8f0c65dfe0d2b829d38f0aaa70beb6638ed144046bdf7ab364da6579"
+    },
+    {
+      "path": "cases/Q_REV_2/runs/portfolio-price-model-summary.json",
+      "bytes": 27861,
+      "sha256": "a3522598d487e4599e5cd3d9a599dfdf344a095c690b47cfd9789424a74315d3",
+      "localBytes": 28590,
+      "localSha256": "567f5137b56f7b16d2e9df15764d38469d7e61db58ae1e59922be29d4b9ef64f"
+    },
+    {
+      "path": "cases/Q_REV_2/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 530377,
+      "sha256": "42950dac12be4b161c97dd800dfe2c14590f772243a350ca5c4cdc10b305d0f1",
+      "localBytes": 530377,
+      "localSha256": "42950dac12be4b161c97dd800dfe2c14590f772243a350ca5c4cdc10b305d0f1"
+    },
+    {
+      "path": "cases/Q_REV_2/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 23745,
+      "sha256": "81165c94d7fdff91d890aec872ea4089c91490ccd798aeb590b5bf51d4836e44",
+      "localBytes": 24445,
+      "localSha256": "cc7949158836e1b7665eeb79491fbe1346735df5467b725e3292577772fc02da"
+    },
+    {
+      "path": "cases/Q_REV_2/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 267360,
+      "sha256": "0f2ac373dda3102b868e5638c8a619ec51065e7875625c935fb2a2a3be8e5f86",
+      "localBytes": 267360,
+      "localSha256": "0f2ac373dda3102b868e5638c8a619ec51065e7875625c935fb2a2a3be8e5f86"
+    },
+    {
+      "path": "cases/Q_REV_2/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 214044,
+      "sha256": "d7e45005fd5df47fcb03e4ee09e29bd8c918998262874bab66606730bd4c3606",
+      "localBytes": 214044,
+      "localSha256": "d7e45005fd5df47fcb03e4ee09e29bd8c918998262874bab66606730bd4c3606"
+    },
+    {
+      "path": "cases/Q_REV_2/runs/summary.json",
+      "bytes": 27226,
+      "sha256": "ef3041966602b783516a9331a4bd75906e67fd6d3727e050e9c740d9e8b157d1",
+      "localBytes": 27944,
+      "localSha256": "cfa423682b819effc6cc9a17805f24730bb925b49c0f5810aecc817eda2fe0e6"
+    },
+    {
+      "path": "cases/Q_REV_4/candidate-changes.json",
+      "bytes": 1292,
+      "sha256": "ac939cb51c20bd338616f6adf26cb7fcab6cde2fab032c148d32689e2966aed3",
+      "localBytes": 1348,
+      "localSha256": "fff3c8758a026c7390d2802cfc74de693d39ec4240e9d5ed5d51d82bdf4ba026"
+    },
+    {
+      "path": "cases/Q_REV_4/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 118719,
+      "sha256": "e2c7dfe42613866a5c75788f9a42950047fdd3b66b39773c4fba4dd86f4e6b94",
+      "localBytes": 118719,
+      "localSha256": "e2c7dfe42613866a5c75788f9a42950047fdd3b66b39773c4fba4dd86f4e6b94"
+    },
+    {
+      "path": "cases/Q_REV_4/governor-observations.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "localBytes": 2,
+      "localSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "cases/Q_REV_4/result.json",
+      "bytes": 83095,
+      "sha256": "add58d9d2fe7dc4db0e1cbe34f259ed1614833dba72a2c2daeb2796942f57d60",
+      "localBytes": 85279,
+      "localSha256": "389d451f45e9672b6683587cc2923828795056527e002bea260b7247ddd66799"
+    },
+    {
+      "path": "cases/Q_REV_4/runs/portfolio-price-model-summary.json",
+      "bytes": 82863,
+      "sha256": "49d1a7f3cf03af124dbadd1a2d643c5e39396d0c462eb0f192f1b31000c15cdc",
+      "localBytes": 85040,
+      "localSha256": "a40769cb32f6728e1c39ff6831a37ae9c18e01af755cc978f33bcf66227894f8"
+    },
+    {
+      "path": "cases/Q_REV_4/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 530147,
+      "sha256": "8ce694c2e1cca8f71937f3fde6e217eada39bd3527383d868c968ed5335beb5a",
+      "localBytes": 530147,
+      "localSha256": "8ce694c2e1cca8f71937f3fde6e217eada39bd3527383d868c968ed5335beb5a"
+    },
+    {
+      "path": "cases/Q_REV_4/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 23766,
+      "sha256": "b1f017b29db2973e18bb9cb3fe8533f6b74ae1ea6a55f0611882f34217d600d7",
+      "localBytes": 24466,
+      "localSha256": "f0e1349fc2fb470193dbfb4a4e4e020f0f730c23c4a38c31acce2d0bbed1b11e"
+    },
+    {
+      "path": "cases/Q_REV_4/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 268092,
+      "sha256": "69e59c4784de4e6b62b7ae4e911998a01a5c42841916c14170a00eaf5aad6291",
+      "localBytes": 268092,
+      "localSha256": "69e59c4784de4e6b62b7ae4e911998a01a5c42841916c14170a00eaf5aad6291"
+    },
+    {
+      "path": "cases/Q_REV_4/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 214106,
+      "sha256": "b81d2b0dbde9877a165ddc795aef86311511768910bc59d73a3ce36d8ddf8298",
+      "localBytes": 214106,
+      "localSha256": "b81d2b0dbde9877a165ddc795aef86311511768910bc59d73a3ce36d8ddf8298"
+    },
+    {
+      "path": "cases/Q_REV_4/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 527913,
+      "sha256": "270f28686f0dec4d861fd62f23c700d229c2173414c6d9a16cc9983af38b6b71",
+      "localBytes": 527913,
+      "localSha256": "270f28686f0dec4d861fd62f23c700d229c2173414c6d9a16cc9983af38b6b71"
+    },
+    {
+      "path": "cases/Q_REV_4/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 24589,
+      "sha256": "4b89afa6c308de007327bf158ec0e851ac19367524e57eeda11de4b2a680ee6c",
+      "localBytes": 25313,
+      "localSha256": "6b8828f47f4306a4f016a960aea1e186855e8528829a705812a0a5ab9003c1d2"
+    },
+    {
+      "path": "cases/Q_REV_4/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 267770,
+      "sha256": "07536ee7b64141f743ea78e2eb917b461505ae49e69836748c7f232f907b48c4",
+      "localBytes": 267770,
+      "localSha256": "07536ee7b64141f743ea78e2eb917b461505ae49e69836748c7f232f907b48c4"
+    },
+    {
+      "path": "cases/Q_REV_4/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 213137,
+      "sha256": "74fc7949b61bd7376cca58024c06fa589c537e2d655add3f246fd87609a1c753",
+      "localBytes": 213137,
+      "localSha256": "74fc7949b61bd7376cca58024c06fa589c537e2d655add3f246fd87609a1c753"
+    },
+    {
+      "path": "cases/Q_REV_4/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 530026,
+      "sha256": "7b2af8bb7af3cc52620f8a44b53a83b8cc90decc8320337ddf777a2b37ff0d6a",
+      "localBytes": 530026,
+      "localSha256": "7b2af8bb7af3cc52620f8a44b53a83b8cc90decc8320337ddf777a2b37ff0d6a"
+    },
+    {
+      "path": "cases/Q_REV_4/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 24598,
+      "sha256": "8128e2fd57dc1d4d6d6744722a36e3590b25a019444dfeda211841edd3b732d3",
+      "localBytes": 25322,
+      "localSha256": "e71c3677e1ae1e7f5b8a6f3a399d0251d1d19a376b9ba9f76439e1c8da091aee"
+    },
+    {
+      "path": "cases/Q_REV_4/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 267645,
+      "sha256": "4af0abdbfe5283822c10c2f8a9c519ba31a9be14ddf314d7b03130f7c9d48aef",
+      "localBytes": 267645,
+      "localSha256": "4af0abdbfe5283822c10c2f8a9c519ba31a9be14ddf314d7b03130f7c9d48aef"
+    },
+    {
+      "path": "cases/Q_REV_4/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 212303,
+      "sha256": "59c2ff19b1b2d7ca3d0d0cea6861e4195d90e6c15a3098b044ce1cbdb5c165de",
+      "localBytes": 212303,
+      "localSha256": "59c2ff19b1b2d7ca3d0d0cea6861e4195d90e6c15a3098b044ce1cbdb5c165de"
+    },
+    {
+      "path": "cases/Q_REV_4/runs/summary.json",
+      "bytes": 83192,
+      "sha256": "975d5ee2baa9436a0994f644b1b9f12b15edd740d3adfe760f07f753be8420a5",
+      "localBytes": 85378,
+      "localSha256": "7354bb097426683ec3b69779b9a6dfb8e1173dce09fbf4c925f11935cb212dce"
+    },
+    {
+      "path": "confidence-analysis.json",
+      "bytes": 6048,
+      "sha256": "fac905d96bc9249d589f0f0e3e7820f18c1afa065389cc47ea6b43263184d1ac",
+      "localBytes": 6297,
+      "localSha256": "19689d91c943c760194b8c1a30843160dd11607d1c9af55f39255f97aa4eefd3"
+    },
+    {
+      "path": "deployment-workflow.json",
+      "bytes": 4820,
+      "sha256": "018d127b1e6f254caa97bab75d734f3757fb1047985e162aa83fea8e5e0a5d64",
+      "localBytes": 4966,
+      "localSha256": "cda7aa9db856526522437873880a9104fdb1d9cb3893fdd122b2871911e285aa"
+    },
+    {
+      "path": "fet-giveback-analysis.json",
+      "bytes": 2882,
+      "sha256": "b7ab81c54a528a1a9db3c91bebfe39b4297adb1c2ed6b92e2f93e1befc631193",
+      "localBytes": 2975,
+      "localSha256": "485b87bc0ffd7bba53d5206ae5d933e01189450ff7ee0e48c647e9df9f9f688b"
+    },
+    {
+      "path": "independent-verification.json",
+      "bytes": 6943,
+      "sha256": "399a33902f4d82fd0b29f0d12d3b2037ebf31773b9d2f029b9f141c28a2a63a3",
+      "localBytes": 7219,
+      "localSha256": "01df24d381e414a1946864d5820c395dff833763fafe95520d71333b09e20687"
+    },
+    {
+      "path": "live-evidence.json",
+      "bytes": 4745,
+      "sha256": "9ab67664d494350dbbffa8d511d485f47e448b82f74ffcbfa3c3b12bc5bb6c90",
+      "localBytes": 4880,
+      "localSha256": "3cee58283170698f725908566bdef917ca8193254aced77e5d99266105953beb"
+    },
+    {
+      "path": "market-input-manifest.json",
+      "bytes": 166311,
+      "sha256": "47d31186bfd1b7b38a6bcca82890806dc2cce2d808415e6323ad6b2d0e81ca4f",
+      "localBytes": 168822,
+      "localSha256": "d97385dbe237184b1ce5ba4617989e7170408cf1e560f05cccc0f31b504eec05"
+    },
+    {
+      "path": "README.md",
+      "bytes": 6949,
+      "sha256": "829f44ff6009997aaa6f4f567880e9a5073594422890abcbb475288fc903c767",
+      "localBytes": 7036,
+      "localSha256": "df3b6fb802f116a5839ac0abcd9dbf4a47d186f8ae96a98f11b13e15813ba6cc"
+    },
+    {
+      "path": "research-summary.json",
+      "bytes": 782071,
+      "sha256": "dea26f54cec786cf268422ba8734bf4ddeb18a0efad82e8f9d591327215428fa",
+      "localBytes": 801682,
+      "localSha256": "1be519aa8d30c98200ef8aca1d6d0d615b746c237eebfdbe7b0a3d83a802a0ea"
+    },
+    {
+      "path": "source-input-manifest.json",
+      "bytes": 2667,
+      "sha256": "3a93fa9977d32a72f64b19c6836b693e7c8b58e693e25c6d4cb992e46d586f60",
+      "localBytes": 2717,
+      "localSha256": "7fa368c576e43000977339951ac637be1685f40d5777e3684b6f72030756bf66"
+    },
+    {
+      "path": "ui-evidence.json",
+      "bytes": 426,
+      "sha256": "a4722486a2b44c66ab658ff8eb00a23b70703e9532e7a9ba57fa8c5bc10c8124",
+      "localBytes": 435,
+      "localSha256": "dbabee05a170b85924ef6afe6dff0c827d5b2aaa5306fe5a05b52cf4963de33c"
+    }
+  ],
+  "market_files_hash_verified": 501
+}

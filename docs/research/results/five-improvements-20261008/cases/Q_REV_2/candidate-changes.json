@@ -1,0 +1,222 @@
+[
+  {
+    "strategy": "Q102",
+    "symbol": "AVAXUSDT",
+    "side": "SHORT",
+    "family": "REV",
+    "entry_ts_ms": 1760288400000,
+    "old_exit_ts_ms": 1760331600000,
+    "new_exit_ts_ms": 1760320800000,
+    "old_price": 22.51,
+    "new_price": 22.36
+  },
+  {
+    "strategy": "Q102",
+    "symbol": "APTUSDT",
+    "side": "SHORT",
+    "family": "REV",
+    "entry_ts_ms": 1760331600000,
+    "old_exit_ts_ms": 1760418000000,
+    "new_exit_ts_ms": 1760364000000,
+    "old_price": 3.739,
+    "new_price": 3.794
+  },
+  {
+    "strategy": "Q102",
+    "symbol": "APTUSDT",
+    "side": "SHORT",
+    "family": "REV",
+    "entry_ts_ms": 1760346000000,
+    "old_exit_ts_ms": 1760432400000,
+    "new_exit_ts_ms": 1760364000000,
+    "old_price": 3.638,
+    "new_price": 3.794
+  },
+  {
+    "strategy": "Q102",
+    "symbol": "AVAXUSDT",
+    "side": "SHORT",
+    "family": "REV",
+    "entry_ts_ms": 1762506000000,
+    "old_exit_ts_ms": 1762538400000,
+    "new_exit_ts_ms": 1762527600000,
+    "old_price": 17.556,
+    "new_price": 16.59
+  },
+  {
+    "strategy": "Q102",
+    "symbol": "AVAXUSDT",
+    "side": "SHORT",
+    "family": "REV",
+    "entry_ts_ms": 1763355600000,
+    "old_exit_ts_ms": 1763398800000,
+    "new_exit_ts_ms": 1763391600000,
+    "old_price": 15.29,
+    "new_price": 15.55
+  },
+  {
+    "strategy": "Q102",
+    "symbol": "AVAXUSDT",
+    "side": "SHORT",
+    "family": "REV",
+    "entry_ts_ms": 1763370000000,
+    "old_exit_ts_ms": 1763413200000,
+    "new_exit_ts_ms": 1763391600000,
+    "old_price": 14.38,
+    "new_price": 15.55
+  },
+  {
+    "strategy": "Q102",
+    "symbol": "APTUSDT",
+    "side": "SHORT",
+    "family": "REV",
+    "entry_ts_ms": 1765314000000,
+    "old_exit_ts_ms": 1765400400000,
+    "new_exit_ts_ms": 1765396800000,
+    "old_price": 1.825,
+    "new_price": 1.849
+  },
+  {
+    "strategy": "Q102",
+    "symbol": "APTUSDT",
+    "side": "SHORT",
+    "family": "REV",
+    "entry_ts_ms": 1765342800000,
+    "old_exit_ts_ms": 1765429200000,
+    "new_exit_ts_ms": 1765386000000,
+    "old_price": 1.73,
+    "new_price": 1.809
+  },
+  {
+    "strategy": "Q102",
+    "symbol": "APTUSDT",
+    "side": "SHORT",
+    "family": "REV",
+    "entry_ts_ms": 1766077200000,
+    "old_exit_ts_ms": 1766163600000,
+    "new_exit_ts_ms": 1766116800000,
+    "old_price": 1.6218000000000001,
+    "new_price": 1.483
+  },
+  {
+    "strategy": "Q102",
+    "symbol": "APTUSDT",
+    "side": "SHORT",
+    "family": "REV",
+    "entry_ts_ms": 1766523600000,
+    "old_exit_ts_ms": 1766610000000,
+    "new_exit_ts_ms": 1766592000000,
+    "old_price": 1.627,
+    "new_price": 1.595
+  },
+  {
+    "strategy": "Q102",
+    "symbol": "APTUSDT",
+    "side": "SHORT",
+    "family": "REV",
+    "entry_ts_ms": 1769144400000,
+    "old_exit_ts_ms": 1769230800000,
+    "new_exit_ts_ms": 1769187600000,
+    "old_price": 1.5515,
+    "new_price": 1.5815
+  },
+  {
+    "strategy": "Q102",
+    "symbol": "APTUSDT",
+    "side": "SHORT",
+    "family": "REV",
+    "entry_ts_ms": 1769734800000,
+    "old_exit_ts_ms": 1769821200000,
+    "new_exit_ts_ms": 1769774400000,
+    "old_price": 1.452,
+    "new_price": 1.468
+  },
+  {
+    "strategy": "Q102",
+    "symbol": "APTUSDT",
+    "side": "SHORT",
+    "family": "REV",
+    "entry_ts_ms": 1770166800000,
+    "old_exit_ts_ms": 1770253200000,
+    "new_exit_ts_ms": 1770235200000,
+    "old_price": 1.228,
+    "new_price": 1.239
+  },
+  {
+    "strategy": "Q102",
+    "symbol": "APTUSDT",
+    "side": "SHORT",
+    "family": "REV",
+    "entry_ts_ms": 1770397200000,
+    "old_exit_ts_ms": 1770483600000,
+    "new_exit_ts_ms": 1770418800000,
+    "old_price": 1.124,
+    "new_price": 1.148
+  },
+  {
+    "strategy": "Q102",
+    "symbol": "FETUSDT",
+    "side": "SHORT",
+    "family": "REV",
+    "entry_ts_ms": 1772341200000,
+    "old_exit_ts_ms": 1772384400000,
+    "new_exit_ts_ms": 1772377200000,
+    "old_price": 0.1525,
+    "new_price": 0.1569
+  },
+  {
+    "strategy": "Q102",
+    "symbol": "APTUSDT",
+    "side": "SHORT",
+    "family": "REV",
+    "entry_ts_ms": 1779613200000,
+    "old_exit_ts_ms": 1779699600000,
+    "new_exit_ts_ms": 1779670800000,
+    "old_price": 0.9639,
+    "new_price": 0.9457
+  },
+  {
+    "strategy": "Q102",
+    "symbol": "APTUSDT",
+    "side": "SHORT",
+    "family": "REV",
+    "entry_ts_ms": 1780707600000,
+    "old_exit_ts_ms": 1780794000000,
+    "new_exit_ts_ms": 1780729200000,
+    "old_price": 0.6692,
+    "new_price": 0.6561
+  },
+  {
+    "strategy": "Q102",
+    "symbol": "APTUSDT",
+    "side": "SHORT",
+    "family": "REV",
+    "entry_ts_ms": 1781269200000,
+    "old_exit_ts_ms": 1781355600000,
+    "new_exit_ts_ms": 1781276400000,
+    "old_price": 0.6717,
+    "new_price": 0.6586
+  },
+  {
+    "strategy": "Q102",
+    "symbol": "APTUSDT",
+    "side": "SHORT",
+    "family": "REV",
+    "entry_ts_ms": 1781600400000,
+    "old_exit_ts_ms": 1781686800000,
+    "new_exit_ts_ms": 1781661600000,
+    "old_price": 0.6535,
+    "new_price": 0.6842
+  },
+  {
+    "strategy": "Q102",
+    "symbol": "APTUSDT",
+    "side": "SHORT",
+    "family": "REV",
+    "entry_ts_ms": 1782464400000,
+    "old_exit_ts_ms": 1782550800000,
+    "new_exit_ts_ms": 1782482400000,
+    "old_price": 0.6011,
+    "new_price": 0.592
+  }
+]

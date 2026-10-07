@@ -1,0 +1,12 @@
+[
+  {
+    "ts": 1770397200000,
+    "strategy": "Q102",
+    "side": "SHORT",
+    "requested_before": 1.25,
+    "same_side_gross": 1.1976123617382675,
+    "btc_current3": 0.03884421587716802,
+    "btc_previous3": -0.01451011870583696,
+    "multiplier": 0.6
+  }
+]

@@ -1,0 +1,10 @@
+{
+  "MainPID": "1472989",
+  "WorkingDirectory": "/home/deploy/disdex-trading/ui-releases/ui-realtime-ranking-ce1edeead8d0",
+  "ActiveState": "active",
+  "SubState": "running",
+  "cwd": "/home/deploy/disdex-trading/ui-releases/ui-realtime-ranking-ce1edeead8d0",
+  "markers": {
+    "/home/deploy/disdex-trading/ui-releases/ui-realtime-ranking-ce1edeead8d0/.disdex-release-sha": "ce1edeead8d0f9e5d88e829d415057117502a335\n"
+  }
+}

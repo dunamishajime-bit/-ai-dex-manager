@@ -1,0 +1,94 @@
+{
+  "trades": [
+    {
+      "entry_ts": 1773349200000,
+      "exit_ts": 1773367200000,
+      "exit_reason": "CORE_PREEMPT:V12",
+      "net_pnl_usd": 7686.751446898128,
+      "coverage": "OK",
+      "mfe": 0.12731619844590547,
+      "mae": -0.005977286312014329,
+      "final_price_return": 0.11297071129707104,
+      "giveback": 0.014345487148834435
+    },
+    {
+      "entry_ts": 1774386000000,
+      "exit_ts": 1774443600000,
+      "exit_reason": "FET_PROFIT_FLOOR_STOP",
+      "net_pnl_usd": 3299.9151357257665,
+      "coverage": "OK",
+      "mfe": 0.05126151381657995,
+      "mae": -0.04084901882258718,
+      "final_price_return": 0.030000000000000027,
+      "giveback": 0.021261513816579924
+    },
+    {
+      "entry_ts": 1777870800000,
+      "exit_ts": 1777957200000,
+      "exit_reason": "FET_24H_TIME_EXIT",
+      "net_pnl_usd": -1084.8606249999925,
+      "coverage": "OK",
+      "mfe": 0.0,
+      "mae": -0.04917257683215126,
+      "final_price_return": -0.008983451536642928,
+      "giveback": 0.008983451536642928
+    },
+    {
+      "entry_ts": 1778043600000,
+      "exit_ts": 1778130000000,
+      "exit_reason": "FET_24H_TIME_EXIT",
+      "net_pnl_usd": 104.65437500000021,
+      "coverage": "OK",
+      "mfe": 0.017897091722595126,
+      "mae": -0.03221476510067123,
+      "final_price_return": 0.0022371364653244186,
+      "giveback": 0.015659955257270708
+    },
+    {
+      "entry_ts": 1779426000000,
+      "exit_ts": 1779458400000,
+      "exit_reason": "FET_PROFIT_FLOOR_STOP",
+      "net_pnl_usd": 2988.399456000008,
+      "coverage": "OK",
+      "mfe": 0.07930367504835578,
+      "mae": -0.007253384912959349,
+      "final_price_return": 0.030000000000000027,
+      "giveback": 0.049303675048355755
+    },
+    {
+      "entry_ts": 1779728400000,
+      "exit_ts": 1779814800000,
+      "exit_reason": "FET_24H_TIME_EXIT",
+      "net_pnl_usd": 14291.839375000003,
+      "coverage": "OK",
+      "mfe": 0.14707177454865694,
+      "mae": -0.010568031704095038,
+      "final_price_return": 0.1272567151034787,
+      "giveback": 0.01981505944517825
+    },
+    {
+      "entry_ts": 1781355600000,
+      "exit_ts": 1781416800000,
+      "exit_reason": "FET_PROFIT_FLOOR_STOP",
+      "net_pnl_usd": 2945.787875000003,
+      "coverage": "OK",
+      "mfe": 0.05031753786028337,
+      "mae": -0.010258915486077158,
+      "final_price_return": 0.030000000000000027,
+      "giveback": 0.02031753786028334
+    },
+    {
+      "entry_ts": 1785790800000,
+      "exit_ts": 1785877200000,
+      "exit_reason": "FET_24H_TIME_EXIT",
+      "net_pnl_usd": 805.9381249999981,
+      "coverage": "OK",
+      "mfe": 0.019944979367262583,
+      "mae": -0.007565337001375405,
+      "final_price_return": 0.012379642365887289,
+      "giveback": 0.007565337001375294
+    }
+  ],
+  "scope": "H1 intrabar extrema bound; exit-bar path before STOP cannot be determined; not tick-exact MFE",
+  "count": 8
+}

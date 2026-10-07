@@ -1,0 +1,277 @@
+{
+  "status": "PASS",
+  "checked_cases": 27,
+  "checks": [
+    {
+      "policy": "BASELINE",
+      "cost": 10.0,
+      "trades": 1362,
+      "accounting": "PASS",
+      "ownership_conflicts": 0,
+      "pf_wr_recomputed": "PASS",
+      "decisions_trade_linkage": "PASS",
+      "missing_mtm_hours": 0
+    },
+    {
+      "policy": "BASELINE",
+      "cost": 20.0,
+      "trades": 1353,
+      "accounting": "PASS",
+      "ownership_conflicts": 0,
+      "pf_wr_recomputed": "PASS",
+      "decisions_trade_linkage": "PASS",
+      "missing_mtm_hours": 0
+    },
+    {
+      "policy": "BASELINE",
+      "cost": 30.0,
+      "trades": 1331,
+      "accounting": "PASS",
+      "ownership_conflicts": 0,
+      "pf_wr_recomputed": "PASS",
+      "decisions_trade_linkage": "PASS",
+      "missing_mtm_hours": 0
+    },
+    {
+      "policy": "FET_MOM_12",
+      "cost": 10.0,
+      "trades": 1362,
+      "accounting": "PASS",
+      "ownership_conflicts": 0,
+      "pf_wr_recomputed": "PASS",
+      "decisions_trade_linkage": "PASS",
+      "missing_mtm_hours": 0
+    },
+    {
+      "policy": "FET_MOM_18",
+      "cost": 10.0,
+      "trades": 1362,
+      "accounting": "PASS",
+      "ownership_conflicts": 0,
+      "pf_wr_recomputed": "PASS",
+      "decisions_trade_linkage": "PASS",
+      "missing_mtm_hours": 0
+    },
+    {
+      "policy": "FET_TRAIL_5_2",
+      "cost": 10.0,
+      "trades": 1362,
+      "accounting": "PASS",
+      "ownership_conflicts": 0,
+      "pf_wr_recomputed": "PASS",
+      "decisions_trade_linkage": "PASS",
+      "missing_mtm_hours": 0
+    },
+    {
+      "policy": "FET_TRAIL_5_3",
+      "cost": 10.0,
+      "trades": 1362,
+      "accounting": "PASS",
+      "ownership_conflicts": 0,
+      "pf_wr_recomputed": "PASS",
+      "decisions_trade_linkage": "PASS",
+      "missing_mtm_hours": 0
+    },
+    {
+      "policy": "FET_TRAIL_5_3_TIGHT7_2",
+      "cost": 10.0,
+      "trades": 1362,
+      "accounting": "PASS",
+      "ownership_conflicts": 0,
+      "pf_wr_recomputed": "PASS",
+      "decisions_trade_linkage": "PASS",
+      "missing_mtm_hours": 0
+    },
+    {
+      "policy": "FET_TRAIL_5_3_TIGHT8_2",
+      "cost": 10.0,
+      "trades": 1362,
+      "accounting": "PASS",
+      "ownership_conflicts": 0,
+      "pf_wr_recomputed": "PASS",
+      "decisions_trade_linkage": "PASS",
+      "missing_mtm_hours": 0
+    },
+    {
+      "policy": "FET_TRAIL_7_2",
+      "cost": 10.0,
+      "trades": 1362,
+      "accounting": "PASS",
+      "ownership_conflicts": 0,
+      "pf_wr_recomputed": "PASS",
+      "decisions_trade_linkage": "PASS",
+      "missing_mtm_hours": 0
+    },
+    {
+      "policy": "FET_TRAIL_8_2",
+      "cost": 10.0,
+      "trades": 1362,
+      "accounting": "PASS",
+      "ownership_conflicts": 0,
+      "pf_wr_recomputed": "PASS",
+      "decisions_trade_linkage": "PASS",
+      "missing_mtm_hours": 0
+    },
+    {
+      "policy": "GOV24_12_60",
+      "cost": 10.0,
+      "trades": 1362,
+      "accounting": "PASS",
+      "ownership_conflicts": 0,
+      "pf_wr_recomputed": "PASS",
+      "decisions_trade_linkage": "PASS",
+      "missing_mtm_hours": 0
+    },
+    {
+      "policy": "GOV24_12_75",
+      "cost": 10.0,
+      "trades": 1362,
+      "accounting": "PASS",
+      "ownership_conflicts": 0,
+      "pf_wr_recomputed": "PASS",
+      "decisions_trade_linkage": "PASS",
+      "missing_mtm_hours": 0
+    },
+    {
+      "policy": "GOV24_6_60",
+      "cost": 10.0,
+      "trades": 1362,
+      "accounting": "PASS",
+      "ownership_conflicts": 0,
+      "pf_wr_recomputed": "PASS",
+      "decisions_trade_linkage": "PASS",
+      "missing_mtm_hours": 0
+    },
+    {
+      "policy": "GOV24_6_75",
+      "cost": 10.0,
+      "trades": 1362,
+      "accounting": "PASS",
+      "ownership_conflicts": 0,
+      "pf_wr_recomputed": "PASS",
+      "decisions_trade_linkage": "PASS",
+      "missing_mtm_hours": 0
+    },
+    {
+      "policy": "GOV_12_60",
+      "cost": 10.0,
+      "trades": 1362,
+      "accounting": "PASS",
+      "ownership_conflicts": 0,
+      "pf_wr_recomputed": "PASS",
+      "decisions_trade_linkage": "PASS",
+      "missing_mtm_hours": 0
+    },
+    {
+      "policy": "GOV_12_75",
+      "cost": 10.0,
+      "trades": 1362,
+      "accounting": "PASS",
+      "ownership_conflicts": 0,
+      "pf_wr_recomputed": "PASS",
+      "decisions_trade_linkage": "PASS",
+      "missing_mtm_hours": 0
+    },
+    {
+      "policy": "GOV_6_60",
+      "cost": 10.0,
+      "trades": 1362,
+      "accounting": "PASS",
+      "ownership_conflicts": 0,
+      "pf_wr_recomputed": "PASS",
+      "decisions_trade_linkage": "PASS",
+      "missing_mtm_hours": 0
+    },
+    {
+      "policy": "GOV_6_75",
+      "cost": 10.0,
+      "trades": 1362,
+      "accounting": "PASS",
+      "ownership_conflicts": 0,
+      "pf_wr_recomputed": "PASS",
+      "decisions_trade_linkage": "PASS",
+      "missing_mtm_hours": 0
+    },
+    {
+      "policy": "Q_HV_1",
+      "cost": 10.0,
+      "trades": 1385,
+      "accounting": "PASS",
+      "ownership_conflicts": 0,
+      "pf_wr_recomputed": "PASS",
+      "decisions_trade_linkage": "PASS",
+      "missing_mtm_hours": 0
+    },
+    {
+      "policy": "Q_HV_2",
+      "cost": 10.0,
+      "trades": 1380,
+      "accounting": "PASS",
+      "ownership_conflicts": 0,
+      "pf_wr_recomputed": "PASS",
+      "decisions_trade_linkage": "PASS",
+      "missing_mtm_hours": 0
+    },
+    {
+      "policy": "Q_PB_1",
+      "cost": 10.0,
+      "trades": 1365,
+      "accounting": "PASS",
+      "ownership_conflicts": 0,
+      "pf_wr_recomputed": "PASS",
+      "decisions_trade_linkage": "PASS",
+      "missing_mtm_hours": 0
+    },
+    {
+      "policy": "Q_PB_2",
+      "cost": 10.0,
+      "trades": 1362,
+      "accounting": "PASS",
+      "ownership_conflicts": 0,
+      "pf_wr_recomputed": "PASS",
+      "decisions_trade_linkage": "PASS",
+      "missing_mtm_hours": 0
+    },
+    {
+      "policy": "Q_REV_2",
+      "cost": 10.0,
+      "trades": 1362,
+      "accounting": "PASS",
+      "ownership_conflicts": 0,
+      "pf_wr_recomputed": "PASS",
+      "decisions_trade_linkage": "PASS",
+      "missing_mtm_hours": 0
+    },
+    {
+      "policy": "Q_REV_4",
+      "cost": 10.0,
+      "trades": 1363,
+      "accounting": "PASS",
+      "ownership_conflicts": 0,
+      "pf_wr_recomputed": "PASS",
+      "decisions_trade_linkage": "PASS",
+      "missing_mtm_hours": 0
+    },
+    {
+      "policy": "Q_REV_4",
+      "cost": 20.0,
+      "trades": 1354,
+      "accounting": "PASS",
+      "ownership_conflicts": 0,
+      "pf_wr_recomputed": "PASS",
+      "decisions_trade_linkage": "PASS",
+      "missing_mtm_hours": 0
+    },
+    {
+      "policy": "Q_REV_4",
+      "cost": 30.0,
+      "trades": 1332,
+      "accounting": "PASS",
+      "ownership_conflicts": 0,
+      "pf_wr_recomputed": "PASS",
+      "decisions_trade_linkage": "PASS",
+      "missing_mtm_hours": 0
+    }
+  ],
+  "scope": "Frozen candidate stream / H1 model; verification does not prove historical venue constraints, asynchronous pending, fill path or OOS robustness."
+}
