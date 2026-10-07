@@ -1,0 +1,430 @@
+{
+  "artifacts": [
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/.gitattributes",
+      "bytes": 30,
+      "sha256": "f06202a408fef9b9ea69bb6b1cb8160dbb0378c5bb67a444d510d231813824c8"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/candidate-filter-counts/BASELINE_Q_RET14.json",
+      "bytes": 2,
+      "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/candidate-filter-counts/DIAGNOSTIC_REL_ER_ARM2_T1_L2.json",
+      "bytes": 37,
+      "sha256": "9708029965d7ddb1eb3e42adb20c73160da1567b8a32b49f0b0b4a56ee26d7ce"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/candidate-filter-counts/DIAGNOSTIC_SHORT_REL_TP15_S1_L4.json",
+      "bytes": 37,
+      "sha256": "48d712a7bfcfe74a5b8fed26d8ba103803835868f2dc48b8e090620fee096905"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/candidate-filter-counts/PRIOR_WR60.json",
+      "bytes": 36,
+      "sha256": "6a10530a223c7e1f7fb3203bc34141c111b65c93b571a47dd4f43c829946eaed"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/case-parameters.json",
+      "bytes": 680,
+      "sha256": "4403c0d651b365939d5a189198579a49514cfee32911c82a47642396286112ec"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/BASELINE_Q_RET14/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 173652,
+      "sha256": "3f3eeac2f3673086705bb38d7baf9043fe37dfc093ffaf43adceb537b94ac834"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/BASELINE_Q_RET14/result.json",
+      "bytes": 103486,
+      "sha256": "cba001497423644f97f44af3e8d140988183cc7b6cb00040779f67bfe8e5f669"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/BASELINE_Q_RET14/runs/portfolio-price-model-summary.json",
+      "bytes": 86419,
+      "sha256": "ab2f37313fb437e236bfa99c41570f3847e48e56941b241879df5ced6154fd97"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/BASELINE_Q_RET14/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 244471,
+      "sha256": "abdc37f30422c988b13bacf58ee9af6dcd4fded093f577baeea8e811013c6930"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/BASELINE_Q_RET14/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 25428,
+      "sha256": "c2eaff5c3b35787f54f5b16a1151fe3a7676cf6628563fde13f65be1144b0264"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/BASELINE_Q_RET14/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 284137,
+      "sha256": "32604958c5f8cbef50b2dbfd5420848bbddcce6bdebf60b1ba4f75e6c6bc0d9b"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/BASELINE_Q_RET14/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 228796,
+      "sha256": "47250d778ccae7045ba508e2720477d2ad7900d965e03e0a9b5601511d07c3ca"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/BASELINE_Q_RET14/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 239564,
+      "sha256": "4b0b4d36e8a143df7100222b1906ec7234d377f43bb3cd7a235849361da2198d"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/BASELINE_Q_RET14/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 25410,
+      "sha256": "256fc7dcbb424fbb6592f04a4c77e5bd021b4e57bb9d42e68c78764c9fd60a19"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/BASELINE_Q_RET14/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 274491,
+      "sha256": "8622fb8becb261e29480070b663da35a818c488db2b5ccd174a020875c730607"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/BASELINE_Q_RET14/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 220631,
+      "sha256": "13c12a1e6f3a9473c53f302166e5c24eabc44f98c3f9dc3163672e5eb733612b"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/BASELINE_Q_RET14/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 240833,
+      "sha256": "7a36d3da74d8764f5558fba87ef9b7c6fbc3300a3df85f16db6fe504f696ac0d"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/BASELINE_Q_RET14/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 25514,
+      "sha256": "c446dfa748ee00440f45f5a4e172201f15ea683c5691108d79f458adcece8d4f"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/BASELINE_Q_RET14/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 272178,
+      "sha256": "28a8aa9f051a2936f0d63edf500a2026f69c7b386659c50ab82b9d164ddc0c83"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/BASELINE_Q_RET14/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 218730,
+      "sha256": "57e87f9f8b4d2eb7d03f419f48f7f53c00de5118fdc1e14be4df614694e7b75e"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/BASELINE_Q_RET14/runs/summary.json",
+      "bytes": 86757,
+      "sha256": "9a9599a195cef7c67be82de8b7ea192e32abc53130d8721b5b6346fa62ea17e6"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/DIAGNOSTIC_REL_ER_ARM2_T1_L2/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 97686,
+      "sha256": "a0e35f3326094f5b5bfd5795e065f0ed417a7f10a424f62b2da9bcbbdaa1af83"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/DIAGNOSTIC_REL_ER_ARM2_T1_L2/result.json",
+      "bytes": 100020,
+      "sha256": "146b794e8c2cceb32d5d9b104719bc0d93ca0d6763bc8e13027c61afb047c1b5"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/DIAGNOSTIC_REL_ER_ARM2_T1_L2/runs/portfolio-price-model-summary.json",
+      "bytes": 82899,
+      "sha256": "8ad528abe66bebad3a597f385c6775481e9a8e2bb470261b56de6ea898530bee"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/DIAGNOSTIC_REL_ER_ARM2_T1_L2/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 128862,
+      "sha256": "7fb5590d233e7a57eea4e22e23fa7f04b1f0ba380a018e452290342f0d15f19a"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/DIAGNOSTIC_REL_ER_ARM2_T1_L2/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 24336,
+      "sha256": "f488cfc4748d4605a976ee2612c710d867a00b0358e36c331d476b4393202ea2"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/DIAGNOSTIC_REL_ER_ARM2_T1_L2/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 168442,
+      "sha256": "c1245c1b387598e1e6fe6dee615cdc3594d8e9cf22b0ee09af6f4e2f12704c82"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/DIAGNOSTIC_REL_ER_ARM2_T1_L2/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 94864,
+      "sha256": "5005975641123a9d43f323c9e3b521f6aecd106b05057864313f1a3d32f24701"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/DIAGNOSTIC_REL_ER_ARM2_T1_L2/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 127979,
+      "sha256": "b6effbc3a7f6e8395ac096f72f841322395a837392df801e8df48d1b6f436f6f"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/DIAGNOSTIC_REL_ER_ARM2_T1_L2/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 24401,
+      "sha256": "14145b0eb1c0efd6bff44aa2887479d96c235a501989c01e0657a840409016ca"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/DIAGNOSTIC_REL_ER_ARM2_T1_L2/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 166910,
+      "sha256": "cc4c0c72ddba430c5b5ff7ef446702e1419391ed763f99c3b505039fd83dcf64"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/DIAGNOSTIC_REL_ER_ARM2_T1_L2/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 93953,
+      "sha256": "775134ca71145084bc337be1aba4cbb995708b10b6e1849acc1733db29c1eb1a"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/DIAGNOSTIC_REL_ER_ARM2_T1_L2/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 128932,
+      "sha256": "d3346165470d9857aab7cf0db911ff588ccfa4ea13ce8668babba5fd1916b197"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/DIAGNOSTIC_REL_ER_ARM2_T1_L2/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 24423,
+      "sha256": "06f23195d912833180edefbeb7054c49748a2f59b7a0dcab3fb4f8bf6bc9a65b"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/DIAGNOSTIC_REL_ER_ARM2_T1_L2/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 167285,
+      "sha256": "9b887c7a4393683a5fd7a69ccf9f0b18f293c252d2c9d9ce2e229a072e822e01"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/DIAGNOSTIC_REL_ER_ARM2_T1_L2/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 94504,
+      "sha256": "2633ebb00ca3d2978b7ce70a21882ca5559ae303212f25aafdfc259aaf781e38"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/DIAGNOSTIC_REL_ER_ARM2_T1_L2/runs/summary.json",
+      "bytes": 83237,
+      "sha256": "87811144ecc141615355c9bdd158468ef74e7f75eaa639de0880d775f9983f3f"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/DIAGNOSTIC_SHORT_REL_TP15_S1_L4/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 97098,
+      "sha256": "732b25efc6301bcc6cc37739aba869509b74161bcbde5e22b1caac0c001b5041"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/DIAGNOSTIC_SHORT_REL_TP15_S1_L4/result.json",
+      "bytes": 98419,
+      "sha256": "5f2e6a588e1e2359b1e85bf117595edef5b6683a2e73e1cf94182dfdf4194be9"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/DIAGNOSTIC_SHORT_REL_TP15_S1_L4/runs/portfolio-price-model-summary.json",
+      "bytes": 81276,
+      "sha256": "086793dbccf62a90026fc96285caa71f7dfdcf2a39ef3d12b163c1a1e319ce9d"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/DIAGNOSTIC_SHORT_REL_TP15_S1_L4/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 131258,
+      "sha256": "5cb6e30ba0e02e8558443352a6d2d1c6b18a03bbeebfb791f6b919e08b47cacc"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/DIAGNOSTIC_SHORT_REL_TP15_S1_L4/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 23926,
+      "sha256": "81b2d7a534e48b02f3abb7c51e5d012c40dc7fa0759ce333ea7290850cd2f4f1"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/DIAGNOSTIC_SHORT_REL_TP15_S1_L4/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 177191,
+      "sha256": "f4dd5bbd90c86445a4c011ad78a5f25152909e13044b32e8c66242b215d5f496"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/DIAGNOSTIC_SHORT_REL_TP15_S1_L4/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 103256,
+      "sha256": "6fa49a89318eafb9d73f9dbaf3bbf8f8fa8451cede2f59cd86ab3ca0186d973c"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/DIAGNOSTIC_SHORT_REL_TP15_S1_L4/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 130121,
+      "sha256": "2e91b7ada048f861d5e0a5f00870234405c03cb0096ffa2ca3c0e264f78d8220"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/DIAGNOSTIC_SHORT_REL_TP15_S1_L4/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 23905,
+      "sha256": "3f37a132fb921fe5d4cbe4dc80295294ee6ed35296b1e9bc5310015b04da78c2"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/DIAGNOSTIC_SHORT_REL_TP15_S1_L4/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 175695,
+      "sha256": "336baf8f4b2948077ea542a1a64997efb5f8ca2afc6372933c8ca31c1822a37a"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/DIAGNOSTIC_SHORT_REL_TP15_S1_L4/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 102344,
+      "sha256": "28c2f3b4e4b2364deb2c2ea677017d6fdcb5e92d40c1a262292c525235953891"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/DIAGNOSTIC_SHORT_REL_TP15_S1_L4/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 131201,
+      "sha256": "5c34c425c06d9f1317320d9c5b7c25a6ed0a8188b5f4ee30683bec2bb66fdbfb"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/DIAGNOSTIC_SHORT_REL_TP15_S1_L4/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 23890,
+      "sha256": "164af75dbda1c6e962a5003394b9bc379fb725c42883e2d5f0a12cd25197b0e0"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/DIAGNOSTIC_SHORT_REL_TP15_S1_L4/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 175816,
+      "sha256": "ae99ba4fc0f0b4bb80cede9f261c47bb0e6a8892e4d6fb481a786629a2cabcc2"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/DIAGNOSTIC_SHORT_REL_TP15_S1_L4/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 102823,
+      "sha256": "9eb419a63a6203c050165d7e3b6531315e4c8690b1acf4466a34f220caa15631"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/DIAGNOSTIC_SHORT_REL_TP15_S1_L4/runs/summary.json",
+      "bytes": 81614,
+      "sha256": "5a29d477a7f4fbac80e89154ffe401499952afd93cc3143512c1624d132f6292"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/PRIOR_WR60/candidates/crypto-price-model-candidates.jsonl.gz",
+      "bytes": 147182,
+      "sha256": "0fedd2e1dc92cf6e6bc49419604f21780ca059449ff85227cf8d2d743bfd30c1"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/PRIOR_WR60/result.json",
+      "bytes": 100957,
+      "sha256": "20da3b3d855f32127dabedd5df0533b14083a2b1b0d4503b90df38cff754cdb1"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/PRIOR_WR60/runs/portfolio-price-model-summary.json",
+      "bytes": 83765,
+      "sha256": "fdd44c90cbe2ff2b664656836784d45366a9885225c85f94c023488f056909f8"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/PRIOR_WR60/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl.gz",
+      "bytes": 207221,
+      "sha256": "7e981b84cdbf640fc3ee68aea9dd6bb723c636e8ada72b966a435ab75b0e7d4e"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/PRIOR_WR60/runs/PRICE_MODEL_10BPS/metrics.json",
+      "bytes": 24661,
+      "sha256": "4492ed415b27145812e3c621b40c8856f17bd743d5ce568d96936ce0897b510c"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/PRIOR_WR60/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl.gz",
+      "bytes": 253406,
+      "sha256": "22aeb08844bb0be6b45ba503eba36f440d6c3519cdc884ee769c2764925aea5f"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/PRIOR_WR60/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl.gz",
+      "bytes": 189827,
+      "sha256": "46f4fd1d2e1e49792f0727baf38ca2e45916dc02a8a4b6278398a2ccf4f48936"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/PRIOR_WR60/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl.gz",
+      "bytes": 204849,
+      "sha256": "13a57bc4fa693f7b8c694e267be13c9e27d2de15c8bd924cbf019fe6ad2dace7"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/PRIOR_WR60/runs/PRICE_MODEL_20BPS/metrics.json",
+      "bytes": 24659,
+      "sha256": "da907f1ca23273d216cab4b479b9d0297be07c5cf62eda2f6de95d786bb1ae50"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/PRIOR_WR60/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl.gz",
+      "bytes": 249901,
+      "sha256": "db8bb7db5bb8d7f52de9930605fdee60d9de2c99a08b5eb0f2855fae9413068b"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/PRIOR_WR60/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl.gz",
+      "bytes": 187190,
+      "sha256": "8134592ce9829cfbba20c6fe90af44f9d364b7e0c8a3fdde0de288373f2098ba"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/PRIOR_WR60/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl.gz",
+      "bytes": 206609,
+      "sha256": "d37eee244ceb7e1c12d33a1455c090bef0da69b69761e05133963f04f5c920b3"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/PRIOR_WR60/runs/PRICE_MODEL_30BPS/metrics.json",
+      "bytes": 24626,
+      "sha256": "2819afe4c59af33cc10dfad47134dc73ffeb6fecb50bf0f50542f9927b229630"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/PRIOR_WR60/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl.gz",
+      "bytes": 249822,
+      "sha256": "3738dcbb10d8261b9aab071c1b5d431a58c6e7ede126d2532022945f1482e0c7"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/PRIOR_WR60/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl.gz",
+      "bytes": 187415,
+      "sha256": "dfe53bbc79b541d2e203e493dbec18d1b7231d86b9d0735f11853bb35bd3c1bb"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/cases/PRIOR_WR60/runs/summary.json",
+      "bytes": 84103,
+      "sha256": "60a8026afc77b5d6f70e30e011b0d9012e3d73209fb0706bf8d6714556e96caf"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/comparison-summary.json",
+      "bytes": 424111,
+      "sha256": "ddb595fcf4eb410eeddf54292059f858058ad5b3af15a2f2b186a9ce846b6df1"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/diagnostic-lock.json",
+      "bytes": 1169,
+      "sha256": "70b1b739bb76f293283c54b4a5a57fc84c9d72a3f02d63d5925e534302034b4a"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/exit-adapter-parity.json",
+      "bytes": 33,
+      "sha256": "325f47b3735ad3cd0c48307e99fd60af615774c95f2177e7aef133a191855fe5"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/independent-verification.json",
+      "bytes": 3486,
+      "sha256": "2506fead93940162086e001b898c68be9146723d20cdd2454e52d25df58b23f8"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/inputs/core-reference-candidates.jsonl.gz",
+      "bytes": 116852,
+      "sha256": "99b8d5d304916e298496b82d67f1135fb47880144028a7bdf5deab7161591e69"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/locked-validation-phase1.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/locked-validation.json",
+      "bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/profit-verdict.json",
+      "bytes": 832,
+      "sha256": "94ca2048fff24a37d28e167122095abaf19ee9f12ffac78e427c5581dcdb44d8"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/quantity-production-vectors.json",
+      "bytes": 147182,
+      "sha256": "271ceaaf9f5124a1dc12fd2ed444e93c50437115f1094a652841f21c7b6ad4ea"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/README.md",
+      "bytes": 5261,
+      "sha256": "8a70255f1cb4f35f41f55d73de8995a8e61abc9d25cb2fb74d7d259b26b81500"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/review.json",
+      "bytes": 217,
+      "sha256": "00b9da8f2c2531c68945a86437afa2fc518d4147315e0496d545cb29a8d4dd9f"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/selection-lock-phase1.json",
+      "bytes": 485,
+      "sha256": "5cb513ad12ecd19807945f01a80985033e5c0c35c8dfbe0b071ed0ffd041d417"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/selection-lock.json",
+      "bytes": 485,
+      "sha256": "b85b5a074eb3eb6a5f6283007615911219915fe209a783ed778fb5a88725b03f"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/training-screen-phase1.json",
+      "bytes": 86164,
+      "sha256": "b962da971891261f5388219f55dcd9225857976cae8255cc9b018078baf29a37"
+    },
+    {
+      "path": "docs/research/results/v12-positive-new-model-20261008/training-screen.json",
+      "bytes": 225103,
+      "sha256": "bc31e190b3dbd8aa69f10a4f16d2c050791c8ee7d8a70ac6db6be1389f267cbb"
+    }
+  ],
+  "base_commit": "6ea055206d36c417c2fa129b19bb9e0145a78a71"
+}

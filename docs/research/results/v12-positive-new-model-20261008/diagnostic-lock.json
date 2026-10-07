@@ -1,0 +1,52 @@
+{
+  "status": "FAILED_SELECTION_THRESHOLD; diagnostic only, not accepted",
+  "chosen_training_only": [
+    {
+      "name": "REL_ER_ARM2_T1_L2",
+      "parameters": {
+        "gate": {
+          "rel": 0,
+          "er": 0.4
+        },
+        "exit": {
+          "stop": 1.5,
+          "arm": 2,
+          "trail": 1
+        },
+        "lag": 2
+      },
+      "train30": {
+        "n": 187,
+        "wr": 0.5026737967914439,
+        "pf": 1.061289481023413,
+        "mean": 0.0009002471893479022,
+        "sum": 0.16834622440805772,
+        "sum_without_best": 0.08531933150652662
+      }
+    },
+    {
+      "name": "SHORT_REL_TP15_S1_L4",
+      "parameters": {
+        "gate": {
+          "short": 1,
+          "rel": 0
+        },
+        "exit": {
+          "tp": 1.5,
+          "stop": 1,
+          "arm": 1,
+          "trail": 1
+        },
+        "lag": 4
+      },
+      "train30": {
+        "n": 190,
+        "wr": 0.4842105263157895,
+        "pf": 1.032978079635562,
+        "mean": 0.00031129356366246656,
+        "sum": 0.05914577709586865,
+        "sum_without_best": 0.006820604640826559
+      }
+    }
+  ]
+}

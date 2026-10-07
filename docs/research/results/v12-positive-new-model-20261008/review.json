@@ -1,0 +1,9 @@
+{
+  "reviewer": "gate_fix_review",
+  "critical": 0,
+  "important": 0,
+  "scope": "causality, selection, delayed entry and candidate mapping",
+  "tests": 7,
+  "ledger_scenarios": 12,
+  "live_mutations": false
+}

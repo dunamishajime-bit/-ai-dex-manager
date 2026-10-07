@@ -1,0 +1,120 @@
+{
+  "status": "PASS",
+  "scenario_count": 12,
+  "quantity_vectors": 280,
+  "checks": [
+    {
+      "case": "BASELINE_Q_RET14",
+      "cost_bps": 10.0,
+      "trades": 1534,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 1
+    },
+    {
+      "case": "BASELINE_Q_RET14",
+      "cost_bps": 20.0,
+      "trades": 1499,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 1
+    },
+    {
+      "case": "BASELINE_Q_RET14",
+      "cost_bps": 30.0,
+      "trades": 1481,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 1
+    },
+    {
+      "case": "DIAGNOSTIC_REL_ER_ARM2_T1_L2",
+      "cost_bps": 10.0,
+      "trades": 590,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 1
+    },
+    {
+      "case": "DIAGNOSTIC_REL_ER_ARM2_T1_L2",
+      "cost_bps": 20.0,
+      "trades": 589,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 1
+    },
+    {
+      "case": "DIAGNOSTIC_REL_ER_ARM2_T1_L2",
+      "cost_bps": 30.0,
+      "trades": 588,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 1
+    },
+    {
+      "case": "DIAGNOSTIC_SHORT_REL_TP15_S1_L4",
+      "cost_bps": 10.0,
+      "trades": 643,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 2
+    },
+    {
+      "case": "DIAGNOSTIC_SHORT_REL_TP15_S1_L4",
+      "cost_bps": 20.0,
+      "trades": 643,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 2
+    },
+    {
+      "case": "DIAGNOSTIC_SHORT_REL_TP15_S1_L4",
+      "cost_bps": 30.0,
+      "trades": 642,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 2
+    },
+    {
+      "case": "PRIOR_WR60",
+      "cost_bps": 10.0,
+      "trades": 1217,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 1
+    },
+    {
+      "case": "PRIOR_WR60",
+      "cost_bps": 20.0,
+      "trades": 1212,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 1
+    },
+    {
+      "case": "PRIOR_WR60",
+      "cost_bps": 30.0,
+      "trades": 1207,
+      "ledger_accounting": "PASS",
+      "win_rate_and_settlement_usd_pf": "PASS",
+      "ownership": "PASS",
+      "split_excluded_crossing_trades": 1
+    }
+  ],
+  "limits": [
+    "MTM drawdown is engine-reported, not independently reconstructed here",
+    "H1 quote proxy and observed current filters do not certify historical LIVE execution",
+    "Temporal halves exclude reported boundary-crossing trades and are not unseen holdout"
+  ]
+}

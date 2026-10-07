@@ -1,0 +1,45 @@
+{
+  "BASELINE_Q_RET14": {
+    "gate": {},
+    "exit": {},
+    "lag": 0
+  },
+  "PRIOR_WR60": {
+    "gate": {
+      "rel": 0
+    },
+    "exit": {
+      "tp": 0.5,
+      "stop": 0.75,
+      "arm": 1,
+      "trail": 1
+    },
+    "lag": 0,
+    "gross": 0.5
+  },
+  "DIAGNOSTIC_REL_ER_ARM2_T1_L2": {
+    "gate": {
+      "rel": 0,
+      "er": 0.4
+    },
+    "exit": {
+      "stop": 1.5,
+      "arm": 2,
+      "trail": 1
+    },
+    "lag": 2
+  },
+  "DIAGNOSTIC_SHORT_REL_TP15_S1_L4": {
+    "gate": {
+      "short": 1,
+      "rel": 0
+    },
+    "exit": {
+      "tp": 1.5,
+      "stop": 1,
+      "arm": 1,
+      "trail": 1
+    },
+    "lag": 4
+  }
+}

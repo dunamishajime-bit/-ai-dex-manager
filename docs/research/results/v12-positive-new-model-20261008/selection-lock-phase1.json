@@ -1,0 +1,12 @@
+{
+  "selection": "first 182 days only; n>=80, price-only PF30>=1.10, net positive after removing best trade; ranked mean return; distinct gate/lag",
+  "candidates_tested": 189,
+  "selected": [],
+  "split_ms": 1770508800000,
+  "limits": [
+    "Historical period already explored, not untouched holdout",
+    "Screen excludes funding and occupancy; full replay includes them",
+    "No historical tick/L2; H1 quote proxy",
+    "Selection does not guarantee profitability"
+  ]
+}

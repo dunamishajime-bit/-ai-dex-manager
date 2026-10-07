@@ -1,0 +1,30 @@
+{
+  "cases": [
+    {
+      "case": "BASELINE_Q_RET14",
+      "robust_positive_all_costs_halves": false,
+      "predeclared_screen_pass": false
+    },
+    {
+      "case": "DIAGNOSTIC_REL_ER_ARM2_T1_L2",
+      "robust_positive_all_costs_halves": false,
+      "predeclared_screen_pass": false
+    },
+    {
+      "case": "DIAGNOSTIC_SHORT_REL_TP15_S1_L4",
+      "robust_positive_all_costs_halves": false,
+      "predeclared_screen_pass": false
+    },
+    {
+      "case": "PRIOR_WR60",
+      "robust_positive_all_costs_halves": false,
+      "predeclared_screen_pass": false
+    }
+  ],
+  "adoptable": [],
+  "limits": [
+    "H1 quote proxy, not live profit or future guarantee",
+    "Prior explored historical year; no untouched holdout",
+    "Original candidate signals and fixed non-V12 streams reused"
+  ]
+}
