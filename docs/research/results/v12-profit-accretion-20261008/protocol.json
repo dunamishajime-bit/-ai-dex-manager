@@ -1,0 +1,23 @@
+{
+  "research_only": true,
+  "live_changes": false,
+  "production_changes": false,
+  "core": "FAILED_BREAK_REV_SHORT_6H",
+  "complements": {
+    "SHORT_MID": 91,
+    "LONG_CREEP": 65,
+    "union": 156
+  },
+  "caps": [
+    0.1,
+    0.25,
+    0.5
+  ],
+  "costs_bps": [
+    10,
+    20,
+    30
+  ],
+  "decision_rule": "A complement is useful only if it increases absolute V12 net profit versus CORE55 and remains robust enough across costs/temporal halves.",
+  "period": "2025-08-10 through 2026-08-10 UTC; studied development period"
+}

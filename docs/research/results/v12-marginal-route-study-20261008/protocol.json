@@ -1,0 +1,25 @@
+{
+  "research_only": true,
+  "live_changes": false,
+  "production_changes": false,
+  "base": "RESCUE_300_CAP10",
+  "cap": 0.1,
+  "cases": {
+    "BASE300": 368,
+    "BASE300_PLUS_CREEP": 434,
+    "BASE300_PLUS_ACCEL": 452,
+    "BASE300_PLUS_SHORT_MID": 439,
+    "BASE300_PLUS_MID_CREEP": 505
+  },
+  "incremental_raw_counts": {
+    "SHORT_CREEP": 66,
+    "ALL_ACCEL_EARLY": 84,
+    "SHORT_MID": 71,
+    "SHORT_MID_PLUS_CREEP": 137
+  },
+  "costs_bps": [
+    10,
+    20,
+    30
+  ]
+}
