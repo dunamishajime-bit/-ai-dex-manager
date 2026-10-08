@@ -1,0 +1,6 @@
+{
+  "rootOwnedArchiveReproducedEacces": true,
+  "startupInstallRestoresDeployWrites": true,
+  "archiveSymlinkRejected": true,
+  "liveStateModifiedByFaultTest": false
+}

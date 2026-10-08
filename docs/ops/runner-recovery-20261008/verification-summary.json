@@ -1,0 +1,12 @@
+{
+  "windows_policy_tests": 30,
+  "windows_retry_tests": 6,
+  "linux_policy_tests": 30,
+  "linux_retry_tests": 6,
+  "permissions_fault_reproduction": "PASS",
+  "systemd_archive_before_recovery": "PASS",
+  "systemd_unit_verify": "PASS",
+  "source_deployed_ops_hashes": "EXACT",
+  "review_critical": 0,
+  "review_important": 0
+}
