@@ -1,4 +1,5 @@
 import { readFile } from "node:fs/promises";
+import { penguRouteLabel } from "@/lib/trade-history-attribution";
 
 import { HISTORICAL_FILL_LINEAGE_BY_ORDER_ID } from "@/lib/server/historical-fill-lineage";
 
@@ -76,6 +77,12 @@ export function parseFillLineageEvidenceLine(line: string): FillLineageEvidence 
 
 export function routeFromFillEvidence(evidence?: FillLineageEvidence) {
   if (!evidence) return undefined;
+  for (const explicit of [evidence.entryVersion, evidence.routeLabel, evidence.family]) {
+    const route = penguRouteLabel(explicit || "");
+    if (route) return route;
+  }
+  const pengu = penguRouteLabel([evidence.reason, evidence.clientOrderId, evidence.requestId].filter(Boolean).join(" "));
+  if (pengu) return pengu;
   const joined = [
     evidence.entryVersion,
     evidence.routeLabel,
@@ -84,11 +91,6 @@ export function routeFromFillEvidence(evidence?: FillLineageEvidence) {
     evidence.clientOrderId,
     evidence.requestId,
   ].filter(Boolean).join(" ").toUpperCase();
-
-  if (/RECOVERY[_ ]?V8|RECV8-/.test(joined)) return "Recovery V8";
-  if (/SHORT[_ ]?V20/.test(joined)) return "Short V20";
-  if (/V64.*DYNAMIC|DYNAMIC.*V64/.test(joined)) return "V64 Dynamic Long";
-  if (/LONG[_ ]?V2[_ ]?FINAL/.test(joined)) return "Long V2 Final";
 
   if (/HIGH[_ ]?VOL/.test(joined)) return "HIGH_VOL";
   if (/\bBRK\b/.test(joined)) return "BRK";
