@@ -1,0 +1,13 @@
+{
+  "research_only": true,
+  "live_changes": false,
+  "branch": "FAILED_BREAK_REV entries whose output side is SHORT only",
+  "economic_interpretation": "Fresh upward 90h momentum onset breaks prior structure, then fails back below the breakout level within 2-8h with opposite close-location confirmation; enter SHORT next H1 open.",
+  "exit": "Legacy V12 46h exit retained to isolate entry.",
+  "costs_bps": [
+    10,
+    20,
+    30
+  ],
+  "period": "2025-08-10 through 2026-08-10 UTC; previously explored, not untouched holdout"
+}

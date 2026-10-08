@@ -1,0 +1,15 @@
+{
+  "research_only": true,
+  "live_changes": false,
+  "period": "2025-08-10 through 2026-08-10 UTC; previously explored, not untouched holdout",
+  "hypothesis": "Existing V12 persistent 90h momentum entries retain only candidates whose causal consecutive threshold age is <=6h.",
+  "age_definition": "At each existing V12 entry, count consecutive completed H2 observations where side-adjusted 45-H2 return >=2.27%; current qualifying H2 contributes 2h; capped at 96h.",
+  "locked_gate": "momentum_condition_age_h <= 6",
+  "entry_exit_sizing": "No entry price shift. Existing V12 entry, exit, sizing, win-rate gates and all non-V12 streams unchanged. Only stale V12 candidates are removed.",
+  "costs_bps": [
+    10,
+    20,
+    30
+  ],
+  "why_6h": "Prespecified from phase diagnosis: 0-6h bucket was positive while 8-12h sharply negative. This is exploratory and requires forward/holdout validation before adoption."
+}

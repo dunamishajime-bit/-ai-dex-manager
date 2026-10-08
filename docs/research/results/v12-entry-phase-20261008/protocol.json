@@ -1,0 +1,73 @@
+{
+  "cases": {
+    "BASELINE_Q_RET14": {},
+    "STATE_ALL_LEGACY_EXIT": {
+      "routes": [
+        "FIRST_TURN",
+        "COMPRESSION",
+        "RETEST",
+        "FAILED_BREAK"
+      ],
+      "structured": false
+    },
+    "STATE_ALL_STRUCT_EXIT": {
+      "routes": [
+        "FIRST_TURN",
+        "COMPRESSION",
+        "RETEST",
+        "FAILED_BREAK"
+      ]
+    },
+    "FIRST_TURN_STRUCT": {
+      "routes": [
+        "FIRST_TURN"
+      ]
+    },
+    "COMPRESSION_STRUCT": {
+      "routes": [
+        "COMPRESSION"
+      ]
+    },
+    "RETEST_STRUCT": {
+      "routes": [
+        "RETEST"
+      ]
+    },
+    "FAILED_BREAK_STRUCT": {
+      "routes": [
+        "FAILED_BREAK"
+      ]
+    },
+    "STATE_NO_FIRST_TURN": {
+      "routes": [
+        "COMPRESSION",
+        "RETEST",
+        "FAILED_BREAK"
+      ]
+    },
+    "STATE_NO_FAILED_BREAK": {
+      "routes": [
+        "FIRST_TURN",
+        "COMPRESSION",
+        "RETEST"
+      ]
+    },
+    "STATE_NO_BTC_STRUCT": {
+      "routes": [
+        "FIRST_TURN",
+        "COMPRESSION",
+        "RETEST",
+        "FAILED_BREAK"
+      ],
+      "no_btc": true
+    }
+  },
+  "frozen_before_bt": true,
+  "period": "2025-08-10 through 2026-08-10 UTC; prior explored period, not untouched holdout",
+  "features": "closed H2; EMA6/24 cross, ATR31, prior12 range, prior20 volume, prior6 TR mean / prior31ATR compression, prior12 ER, signed BTC6>=-0.5%; warm state240h",
+  "entry": "event confirmation then next H1 open; no retrospective entry. State expires8h. Wrongside structural stop or >2.5ATR rejected. All cases reported, no parameter grid.",
+  "exit": "legacy46h stop2.477ATR TP3.1995ATR trail0.2ATR; structure24h stop event extreme+0.2ATR, min0.5%price, TP2R arm1.2R trail0.75R floor0.1R; stop-first ambiguous bar; crossed replacement uses actual next open",
+  "size": "existing3.19%risk, grosscap1, rank3cap0.1. Fixed nonV12 streams incl Q RET14. Global exposure, ownership, cooldown, fees/funding and FX unchanged",
+  "adoption": "each of all/first/second >=50 trades, netUSD>0, unitmean>0, PF>=1.1 at10/20/30bps, withoutbest net>0",
+  "live_changes": false
+}

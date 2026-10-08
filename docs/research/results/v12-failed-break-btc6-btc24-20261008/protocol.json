@@ -1,0 +1,14 @@
+{
+  "research_only": true,
+  "live_changes": false,
+  "variant": "FAILED_BREAK_REV_SHORT_6H + BTC6<=0 + BTC24<=+1.0%",
+  "selection_basis": "Chosen from pre-holdout Jan-2025..Aug-2026 diagnostics; post-2026-08-11 data not used for threshold sweep.",
+  "economic_rationale": "A failed upward breakout is not shorted while BTC is still rising over 6h or while the 24h BTC move remains strongly positive; avoids treating a one-bar pullback inside a strong market upswing as reversal.",
+  "threshold_neighborhood": "BTC24 caps 0%, +0.5%, +1.0%, +1.5%, +2.0% were compared. 0.5% and 1.0% remained strong; 1.5% admitted the bad 2025-Q2 regime.",
+  "exit": "Legacy V12 46h exit retained to isolate entry.",
+  "costs_bps": [
+    10,
+    20,
+    30
+  ]
+}

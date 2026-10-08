@@ -1,0 +1,21 @@
+{
+  "research_only": true,
+  "live_changes": false,
+  "period": "2025-08-10 through 2026-08-10 UTC; previously explored, not untouched holdout",
+  "event": "First completed H2 where side-adjusted 45-H2 return crosses from below to >=2.27%. Entry at the immediately following H1 open.",
+  "ranking": "Legacy V12 penalized score is used only for simultaneous ranking; it is not an eligibility threshold for rank1/rank2. Rank3 retains score>=0.70 and 0.10 gross cap.",
+  "variants": {
+    "ONSET_RAW": "onset + existing volume ratio >=0.80",
+    "ONSET_CONFIRM": "RAW + signed6h>0 + signed relative-to-BTC6h>=0 + side CLV>=0.60 + body>=0.20ATR",
+    "ONSET_BREAK": "CONFIRM + close clears prior12-H2 high/low by 0.05ATR",
+    "ONSET_FAST_BTC": "CONFIRM + signed BTC6h >=0"
+  },
+  "exit": "Existing legacy V12 46h stop2.477ATR / TP3.1995ATR / 0.2ATR H2 trailing, to isolate entry timing.",
+  "size": "Existing 3.19% risk sizing, rank3 cap0.10, aggregate/ownership/global portfolio constraints unchanged.",
+  "costs_bps": [
+    10,
+    20,
+    30
+  ],
+  "note": "All variants were fixed before integrated replay; this is exploratory on a previously studied period and is not production approval."
+}

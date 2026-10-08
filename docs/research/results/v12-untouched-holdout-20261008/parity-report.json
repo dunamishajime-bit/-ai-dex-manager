@@ -1,0 +1,294 @@
+{
+  "research_only": true,
+  "frozen_source": "C:\\tmp\\bt-v12-score100-volume080-normalonly-20260928\\extracted\\bt-v12-score100-volume080-normalonly-20260928\\market-Aster-H1-funding-and-manifests\\normalized\\aster\\klines",
+  "public_endpoint": "https://fapi.asterdex.com/fapi/v1/klines",
+  "fetch_start_utc": "2026-06-01T00:00:00Z",
+  "untouched_holdout_start_utc": "2026-08-11T00:00:00Z",
+  "fetch_end_exclusive_utc": "2026-10-08T00:00:00Z",
+  "symbols": {
+    "BTCUSDT": {
+      "expected_overlap_rows": 1704,
+      "common_rows": 1704,
+      "missing_rows": 0,
+      "extra_rows": 0,
+      "price_mismatch_rows": 0,
+      "volume_mismatch_rows": 0,
+      "max_abs_diff": {
+        "open": 0.0,
+        "high": 0.0,
+        "low": 0.0,
+        "close": 0.0,
+        "base_volume": 0.0,
+        "quote_volume": 0.0
+      },
+      "sample_mismatches": [],
+      "pass_price_parity": true,
+      "fetched_rows": 3096,
+      "holdout_rows": 1392
+    },
+    "ETHUSDT": {
+      "expected_overlap_rows": 1704,
+      "common_rows": 1704,
+      "missing_rows": 0,
+      "extra_rows": 0,
+      "price_mismatch_rows": 0,
+      "volume_mismatch_rows": 0,
+      "max_abs_diff": {
+        "open": 0.0,
+        "high": 0.0,
+        "low": 0.0,
+        "close": 0.0,
+        "base_volume": 0.0,
+        "quote_volume": 0.0
+      },
+      "sample_mismatches": [],
+      "pass_price_parity": true,
+      "fetched_rows": 3096,
+      "holdout_rows": 1392
+    },
+    "BNBUSDT": {
+      "expected_overlap_rows": 1704,
+      "common_rows": 1704,
+      "missing_rows": 0,
+      "extra_rows": 0,
+      "price_mismatch_rows": 0,
+      "volume_mismatch_rows": 0,
+      "max_abs_diff": {
+        "open": 0.0,
+        "high": 0.0,
+        "low": 0.0,
+        "close": 0.0,
+        "base_volume": 0.0,
+        "quote_volume": 0.0
+      },
+      "sample_mismatches": [],
+      "pass_price_parity": true,
+      "fetched_rows": 3096,
+      "holdout_rows": 1392
+    },
+    "SOLUSDT": {
+      "expected_overlap_rows": 1704,
+      "common_rows": 1704,
+      "missing_rows": 0,
+      "extra_rows": 0,
+      "price_mismatch_rows": 0,
+      "volume_mismatch_rows": 0,
+      "max_abs_diff": {
+        "open": 0.0,
+        "high": 0.0,
+        "low": 0.0,
+        "close": 0.0,
+        "base_volume": 0.0,
+        "quote_volume": 0.0
+      },
+      "sample_mismatches": [],
+      "pass_price_parity": true,
+      "fetched_rows": 3096,
+      "holdout_rows": 1392
+    },
+    "LINKUSDT": {
+      "expected_overlap_rows": 1704,
+      "common_rows": 1704,
+      "missing_rows": 0,
+      "extra_rows": 0,
+      "price_mismatch_rows": 0,
+      "volume_mismatch_rows": 0,
+      "max_abs_diff": {
+        "open": 0.0,
+        "high": 0.0,
+        "low": 0.0,
+        "close": 0.0,
+        "base_volume": 0.0,
+        "quote_volume": 0.0
+      },
+      "sample_mismatches": [],
+      "pass_price_parity": true,
+      "fetched_rows": 3096,
+      "holdout_rows": 1392
+    },
+    "AVAXUSDT": {
+      "expected_overlap_rows": 1704,
+      "common_rows": 1704,
+      "missing_rows": 0,
+      "extra_rows": 0,
+      "price_mismatch_rows": 0,
+      "volume_mismatch_rows": 0,
+      "max_abs_diff": {
+        "open": 0.0,
+        "high": 0.0,
+        "low": 0.0,
+        "close": 0.0,
+        "base_volume": 0.0,
+        "quote_volume": 0.0
+      },
+      "sample_mismatches": [],
+      "pass_price_parity": true,
+      "fetched_rows": 3096,
+      "holdout_rows": 1392
+    },
+    "DOGEUSDT": {
+      "expected_overlap_rows": 1704,
+      "common_rows": 1704,
+      "missing_rows": 0,
+      "extra_rows": 0,
+      "price_mismatch_rows": 0,
+      "volume_mismatch_rows": 0,
+      "max_abs_diff": {
+        "open": 0.0,
+        "high": 0.0,
+        "low": 0.0,
+        "close": 0.0,
+        "base_volume": 0.0,
+        "quote_volume": 0.0
+      },
+      "sample_mismatches": [],
+      "pass_price_parity": true,
+      "fetched_rows": 3096,
+      "holdout_rows": 1392
+    },
+    "INJUSDT": {
+      "expected_overlap_rows": 1704,
+      "common_rows": 1704,
+      "missing_rows": 0,
+      "extra_rows": 0,
+      "price_mismatch_rows": 0,
+      "volume_mismatch_rows": 0,
+      "max_abs_diff": {
+        "open": 0.0,
+        "high": 0.0,
+        "low": 0.0,
+        "close": 0.0,
+        "base_volume": 0.0,
+        "quote_volume": 0.0
+      },
+      "sample_mismatches": [],
+      "pass_price_parity": true,
+      "fetched_rows": 3096,
+      "holdout_rows": 1392
+    },
+    "XRPUSDT": {
+      "expected_overlap_rows": 1704,
+      "common_rows": 1704,
+      "missing_rows": 0,
+      "extra_rows": 0,
+      "price_mismatch_rows": 0,
+      "volume_mismatch_rows": 0,
+      "max_abs_diff": {
+        "open": 0.0,
+        "high": 0.0,
+        "low": 0.0,
+        "close": 0.0,
+        "base_volume": 0.0,
+        "quote_volume": 0.0
+      },
+      "sample_mismatches": [],
+      "pass_price_parity": true,
+      "fetched_rows": 3096,
+      "holdout_rows": 1392
+    },
+    "ADAUSDT": {
+      "expected_overlap_rows": 1704,
+      "common_rows": 1704,
+      "missing_rows": 0,
+      "extra_rows": 0,
+      "price_mismatch_rows": 0,
+      "volume_mismatch_rows": 0,
+      "max_abs_diff": {
+        "open": 0.0,
+        "high": 0.0,
+        "low": 0.0,
+        "close": 0.0,
+        "base_volume": 0.0,
+        "quote_volume": 0.0
+      },
+      "sample_mismatches": [],
+      "pass_price_parity": true,
+      "fetched_rows": 3096,
+      "holdout_rows": 1392
+    },
+    "LTCUSDT": {
+      "expected_overlap_rows": 1704,
+      "common_rows": 1704,
+      "missing_rows": 0,
+      "extra_rows": 0,
+      "price_mismatch_rows": 0,
+      "volume_mismatch_rows": 0,
+      "max_abs_diff": {
+        "open": 0.0,
+        "high": 0.0,
+        "low": 0.0,
+        "close": 0.0,
+        "base_volume": 0.0,
+        "quote_volume": 0.0
+      },
+      "sample_mismatches": [],
+      "pass_price_parity": true,
+      "fetched_rows": 3096,
+      "holdout_rows": 1392
+    },
+    "ATOMUSDT": {
+      "expected_overlap_rows": 1704,
+      "common_rows": 1704,
+      "missing_rows": 0,
+      "extra_rows": 0,
+      "price_mismatch_rows": 0,
+      "volume_mismatch_rows": 0,
+      "max_abs_diff": {
+        "open": 0.0,
+        "high": 0.0,
+        "low": 0.0,
+        "close": 0.0,
+        "base_volume": 0.0,
+        "quote_volume": 0.0
+      },
+      "sample_mismatches": [],
+      "pass_price_parity": true,
+      "fetched_rows": 3096,
+      "holdout_rows": 1392
+    },
+    "AAVEUSDT": {
+      "expected_overlap_rows": 1704,
+      "common_rows": 1704,
+      "missing_rows": 0,
+      "extra_rows": 0,
+      "price_mismatch_rows": 0,
+      "volume_mismatch_rows": 0,
+      "max_abs_diff": {
+        "open": 0.0,
+        "high": 0.0,
+        "low": 0.0,
+        "close": 0.0,
+        "base_volume": 0.0,
+        "quote_volume": 0.0
+      },
+      "sample_mismatches": [],
+      "pass_price_parity": true,
+      "fetched_rows": 3096,
+      "holdout_rows": 1392
+    },
+    "NEARUSDT": {
+      "expected_overlap_rows": 1704,
+      "common_rows": 1704,
+      "missing_rows": 0,
+      "extra_rows": 0,
+      "price_mismatch_rows": 0,
+      "volume_mismatch_rows": 0,
+      "max_abs_diff": {
+        "open": 0.0,
+        "high": 0.0,
+        "low": 0.0,
+        "close": 0.0,
+        "base_volume": 0.0,
+        "quote_volume": 0.0
+      },
+      "sample_mismatches": [],
+      "pass_price_parity": true,
+      "fetched_rows": 3096,
+      "holdout_rows": 1392
+    }
+  },
+  "hard_gate": "OHLC exact/float-roundoff parity plus no missing overlap rows",
+  "all_price_parity_pass": true,
+  "all_have_holdout": true,
+  "status": "PASS_FETCH_AND_PRICE_PARITY"
+}
