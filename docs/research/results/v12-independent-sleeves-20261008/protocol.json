@@ -1,0 +1,31 @@
+{
+  "research_only": true,
+  "live_changes": false,
+  "production_changes": false,
+  "architecture": "FAILED_BREAK core + independent preemptible V12 recovery sleeves",
+  "route_slots": "one concurrent position per recovery route; core retains original 2 base + rank3 structure",
+  "cooldowns": "route-local symbol and side-loss cooldowns for V12",
+  "same_symbol": "exclusive across portfolio; true core may preempt same-symbol recovery",
+  "priority": "recovery does not make IDLE/RESIDUAL core-busy; true core can preempt recovery for symbol or gross",
+  "shared_caps_unchanged": {
+    "crypto": 3.0,
+    "V12": 2.0,
+    "total": 4.25
+  },
+  "recovery_family_caps": {
+    "INDEP_RCAP050": 0.5,
+    "INDEP_RCAP075": 0.75,
+    "INDEP_RCAP100": 1.0
+  },
+  "recovery_candidate_gross": {
+    "INDEP_RCAP050": 0.1,
+    "INDEP_RCAP075": 0.125,
+    "INDEP_RCAP100": 0.15
+  },
+  "costs_bps": [
+    10,
+    20,
+    30
+  ],
+  "warning": "Studied development period; no LIVE promotion."
+}

@@ -1,0 +1,21 @@
+{
+  "research_only": true,
+  "live_changes": false,
+  "production_changes": false,
+  "base": "V2 multi-logic architecture",
+  "change": "maximum 2 concurrent positions per recovery route instead of 1",
+  "unchanged_guards": [
+    "recovery family gross cap 0.50x",
+    "per-trade recovery gross 0.10x",
+    "same-symbol exclusivity",
+    "core preemption",
+    "crypto gross 3.0x",
+    "V12 cap 2.0x",
+    "total gross 4.25x"
+  ],
+  "costs_bps": [
+    10,
+    20,
+    30
+  ]
+}

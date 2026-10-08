@@ -1,0 +1,13 @@
+{
+  "research_only": true,
+  "live_changes": false,
+  "production_changes": false,
+  "max_route_slots": 4,
+  "recovery_family_gross_cap": 0.5,
+  "per_trade_gross": 0.1,
+  "costs_bps": [
+    10,
+    20,
+    30
+  ]
+}
