@@ -1,0 +1,34 @@
+{
+  "research_only": true,
+  "live_changes": false,
+  "production_changes": false,
+  "base": "V4 Min-Lift + REC_Y reversal preemption",
+  "cases": {
+    "V4_CAP_S16_F075_L020": {
+      "slots": 16,
+      "family_cap": 0.75,
+      "lift_cap": 0.2,
+      "gross": 0.1
+    },
+    "V4_CAP_S16_F100_L020": {
+      "slots": 16,
+      "family_cap": 1.0,
+      "lift_cap": 0.2,
+      "gross": 0.1
+    },
+    "V4_CAP_S16_F100_L030": {
+      "slots": 16,
+      "family_cap": 1.0,
+      "lift_cap": 0.3,
+      "gross": 0.1
+    }
+  },
+  "costs_bps": [
+    10
+  ],
+  "unchanged_caps": {
+    "V12": 2.0,
+    "crypto": 3.0,
+    "total": 4.25
+  }
+}

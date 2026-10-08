@@ -1,0 +1,23 @@
+{
+  "research_only": true,
+  "live_changes": false,
+  "production_changes": false,
+  "base": "V4 best capacity",
+  "extended_routes": "stage3 routes 13-18",
+  "extended_raw_keys_added": 66,
+  "excluded_extended_routes": "20 and 22 failed second-half check; later routes not needed initially",
+  "config": {
+    "slots": 16,
+    "family_cap": 1.0,
+    "lift_cap": 0.3,
+    "gross": 0.1
+  },
+  "unchanged_caps": {
+    "V12": 2.0,
+    "crypto": 3.0,
+    "total": 4.25
+  },
+  "costs_bps": [
+    10
+  ]
+}

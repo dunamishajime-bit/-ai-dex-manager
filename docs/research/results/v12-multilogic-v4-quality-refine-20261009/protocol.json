@@ -1,0 +1,29 @@
+{
+  "research_only": true,
+  "live_changes": false,
+  "production_changes": false,
+  "base": "V4 Final1000",
+  "cases": {
+    "REF_G5_TIME48": {
+      "bad_gross": 0.1
+    },
+    "REF_G5_TIME48_X10X14_HALF": {
+      "bad_gross": 0.05
+    }
+  },
+  "G5_change": "legacy/trailing exit -> fixed 48h",
+  "X10_X14_half_case": "requested gross max 0.05x",
+  "caps": {
+    "route_slots": 16,
+    "recovery_family": 1.0,
+    "minlift": 0.3,
+    "V12": 2.0,
+    "crypto": 3.0,
+    "total": 4.25
+  },
+  "costs_bps": [
+    10,
+    20,
+    30
+  ]
+}

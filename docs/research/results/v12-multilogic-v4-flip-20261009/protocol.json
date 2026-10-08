@@ -1,0 +1,19 @@
+{
+  "research_only": true,
+  "live_changes": false,
+  "production_changes": false,
+  "base": "V4 Min-Lift 0.10x",
+  "reversal_preemption": "new REC_Y may preempt opposite REC_X/REC_G only",
+  "protected_routes": [
+    "FAILED_BREAK_REV_SHORT_6H",
+    "CONT_SHORT_MID_AGE24_48",
+    "REC_Y existing"
+  ],
+  "recovery_family_cap": 0.75,
+  "V12_cap": 2.0,
+  "crypto_cap": 3.0,
+  "total_cap": 4.25,
+  "costs_bps": [
+    10
+  ]
+}

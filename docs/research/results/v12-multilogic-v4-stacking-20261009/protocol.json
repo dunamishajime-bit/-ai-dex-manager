@@ -10,6 +10,7 @@
   "crypto_gross_cap": 3.0,
   "total_gross_cap": 4.25,
   "same_symbol_opposite_direction": "REJECT",
+  "final_audit_exception": "V12/V12 same-symbol same-side overlap only",
   "costs_bps": [
     10
   ]

@@ -214,7 +214,7 @@ print('CANDIDATES',len(cand),flush=True)
 
 # Greedy incremental. Target enough raw opportunities so integrated acceptance can approach 1,000.
 extra=set();selected=[]
-for step in range(50):
+for step in range(30):
  best=None
  for j,r in enumerate(cand):
   if j in [q['idx'] for q in selected]:continue
@@ -233,7 +233,8 @@ for step in range(50):
  selected.append({'idx':j,'rule':r['rule'],'exit':r['exit'],'inc_n':len(inc),'inc_pf10':a10[1],'inc_pf20':a20[1],'inc_mean20':a20[2],'f_n':F[0],'f_pf10':F[1],'s_n':S[0],'s_pf10':S[1],'inc_keys':[K(A[i]) for i in sorted(inc)]})
  extra|=inc
  print('ADD',step+1,r['rule'],r['exit'],'inc',len(inc),'PF10',round(a10[1],3),'PF20',round(a20[1],3),'F',round(F[1],3),'S',round(S[1],3),'EXTRA',len(extra),'TOTAL_RAW',707+len(extra),flush=True)
+ # extended search: do not stop at 1,050 raw candidates
 
 OUT.mkdir(parents=True,exist_ok=True)
-(OUT/'selected-stage3-extended-routes.json').write_text(json.dumps(selected,indent=2),encoding='utf-8')
+(OUT/'selected-stage3-routes-extended.json').write_text(json.dumps(selected,indent=2),encoding='utf-8')
 print('FINAL_EXTRA',len(extra),'TOTAL_RAW',707+len(extra),'ROUTES',len(selected),flush=True)

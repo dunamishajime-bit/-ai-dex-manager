@@ -1,0 +1,31 @@
+{
+  "research_only": true,
+  "live_changes": false,
+  "production_changes": false,
+  "base": "V4 extended 997-trade result",
+  "new_routes": [
+    "19 REV_D1_TP2_SL1_H36",
+    "21 ORIG_D2_TP1_SL1_H24"
+  ],
+  "new_raw_keys": 26,
+  "excluded": [
+    "20 second-half failed",
+    "22 second-half failed"
+  ],
+  "config": {
+    "slots": 16,
+    "family_cap": 1.0,
+    "lift_cap": 0.3,
+    "gross": 0.1
+  },
+  "caps": {
+    "V12": 2.0,
+    "crypto": 3.0,
+    "total": 4.25
+  },
+  "costs_bps": [
+    10,
+    20,
+    30
+  ]
+}

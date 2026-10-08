@@ -1,0 +1,27 @@
+{
+  "research_only": true,
+  "live_changes": false,
+  "production_changes": false,
+  "base": "V4 same-direction stacking",
+  "cases": {
+    "V4_STACK_G0100_RCAP075": {
+      "family_cap": 0.75,
+      "gross": 0.1,
+      "slots": 8
+    },
+    "V4_STACK_G0125_RCAP075": {
+      "family_cap": 0.75,
+      "gross": 0.125,
+      "slots": 8
+    }
+  },
+  "costs_bps": [
+    10
+  ],
+  "shared_caps": {
+    "recovery_family": 0.75,
+    "V12": 2.0,
+    "crypto": 3.0,
+    "total": 4.25
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "research_only": true,
+  "live_changes": false,
+  "production_changes": false,
+  "base": "V4 stacking 0.10x",
+  "minlift_max_gross": 0.2,
+  "recovery_family_cap": 0.75,
+  "V12_cap": 2.0,
+  "crypto_cap": 3.0,
+  "total_cap": 4.25,
+  "opposite_direction": "unchanged reject",
+  "costs_bps": [
+    10
+  ]
+}
