@@ -78,6 +78,22 @@ jobs:
           tar -C .deploy-ui -czf "/tmp/disdex-realtime-ui-$TARGET_SHA.tar.gz" .
           test -s "/tmp/disdex-realtime-ui-$TARGET_SHA.tar.gz"
 
+      - name: Verify serial ranking animation in browser
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          npm install --prefix /tmp/ranking-browser playwright@1.58.2 --no-audit --no-fund
+          node /tmp/ranking-browser/node_modules/playwright/cli.js install --with-deps chromium
+          cd apps/production-ui
+          PORT=3018 HOSTNAME=127.0.0.1 node .deploy-ui/server.js > /tmp/ranking-preview.log 2>&1 &
+          preview_pid=$!
+          trap 'kill "$preview_pid" || true' EXIT
+          for attempt in $(seq 1 30); do
+            if curl -fsS -H 'Cookie: disdex_auth=1' http://127.0.0.1:3018/realtime >/dev/null; then break; fi
+            sleep 1
+          done
+          PLAYWRIGHT_MODULE=/tmp/ranking-browser/node_modules/playwright REALTIME_TEST_BASE=http://127.0.0.1:3018 node tests/realtime-ranking-motion.browser.cjs
+
       - name: Initialize root SSH
         shell: bash
         run: |

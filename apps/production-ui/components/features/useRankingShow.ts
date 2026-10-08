@@ -2,6 +2,8 @@
 import { useCallback,useEffect,useLayoutEffect,useRef,useState } from 'react';
 import { rankCommentary,risingRankEvents,type RankRow,type RiseEvent } from '@/lib/realtime-ranking';
 
+import { playRankingSequence } from '@/lib/ranking-sequence';
+
 type Capture={rows:RankRow[];rects:Map<string,DOMRect>;scrollX:number;scrollY:number};
 export function useRankingShow(rows:RankRow[],version:number,viewKey:string,error:string){
  const [event,setEvent]=useState<RiseEvent|null>(null),[highlights,setHighlights]=useState<Record<string,number>>({});
@@ -13,9 +15,10 @@ export function useRankingShow(rows:RankRow[],version:number,viewKey:string,erro
  const speechTimer=useRef<ReturnType<typeof setTimeout>>(),wasBlocked=useRef(false),hiddenNodes=useRef<HTMLElement[]>([]);
  const timer=useRef<ReturnType<typeof setTimeout>>(),audio=useRef<AudioContext|null>(null),voiceSource=useRef<AudioBufferSourceNode|null>(null),prefs=useRef({sound,voice,motion}),lastAudio=useRef(0);
  prefs.current={sound,voice,motion};
+ const batch=useRef(0),running=useRef(false);
  const measure=useCallback(():Capture=>({rows:current.current,rects:new Map([...nodes.current].map(([id,n])=>[id,n.getBoundingClientRect()])),scrollX:window.scrollX,scrollY:window.scrollY}),[]);
  const prepare=useCallback(()=>{capture.current=measure();},[measure]);
- const stopVisuals=useCallback(()=>{animations.current.forEach(a=>a.cancel());animations.current=[];clones.current.forEach(n=>n.remove());clones.current=[];hiddenNodes.current.forEach(n=>{n.style.opacity='';});hiddenNodes.current=[];if(speechTimer.current)clearTimeout(speechTimer.current);if(timer.current)clearTimeout(timer.current);},[]);
+ const stopVisuals=useCallback((cancelSpeech=true)=>{batch.current++;running.current=false;animations.current.forEach(a=>a.cancel());animations.current=[];clones.current.forEach(n=>n.remove());clones.current=[];hiddenNodes.current.forEach(n=>{n.style.opacity='';});hiddenNodes.current=[];if(cancelSpeech&&speechTimer.current)clearTimeout(speechTimer.current);if(timer.current)clearTimeout(timer.current);},[]);
  const ensureAudio=useCallback(async()=>{
   const Audio=window.AudioContext||(window as unknown as {webkitAudioContext?:typeof AudioContext}).webkitAudioContext;
   if(!Audio)throw new Error('AUDIO_CONTEXT_UNAVAILABLE');
@@ -58,7 +61,7 @@ export function useRankingShow(rows:RankRow[],version:number,viewKey:string,erro
  },[stopVisuals]);
  const preference=useCallback((key:'sound'|'voice'|'motion',value:boolean)=>{
   const p={...prefs.current,[key]:value};prefs.current=p;
-  if(key==='sound')setSound(value);if(key==='voice')setVoice(value);if(key==='motion')setMotion(value);
+  if(key==='sound')setSound(value);if(key==='voice')setVoice(value);if(key==='motion'){setMotion(value);if(!value){stopVisuals();setHighlights({});setEvent(null);}}
   try{localStorage.setItem('disdex-ranking-show',JSON.stringify({motion:p.motion}));}catch{}
   if(key==='sound'&&value){
    void ensureAudio().catch(()=>{setSound(false);setAudioNotice('このブラウザは効果音に未対応です。');});
@@ -67,7 +70,7 @@ export function useRankingShow(rows:RankRow[],version:number,viewKey:string,erro
    if(!value){try{voiceSource.current?.stop();}catch{}if('speechSynthesis' in window)window.speechSynthesis.cancel();setAudioNotice('AI音声実況はOFFです。');}
    else void speakNatural('自然音声実況を有効にしました。ランキングが動いたときに、変化をお知らせします。');
   }
- },[ensureAudio,speakNatural]);
+ },[ensureAudio,speakNatural,stopVisuals]);
  const notify=useCallback((rise:RiseEvent,delay:number)=>{
   if(document.hidden||Date.now()-lastAudio.current<20000)return;
   const p=prefs.current;if(!p.sound&&!p.voice)return;lastAudio.current=Date.now();
@@ -90,7 +93,7 @@ export function useRankingShow(rows:RankRow[],version:number,viewKey:string,erro
   const before=capture.current||previous.current,after=measure();capture.current=null;previous.current=after;
   if(!before)return;
   const rises=risingRankEvents(before.rows,current.current).filter(r=>nodes.current.has(r.row.id));
-  setEvent(rises[0]??null);setHighlights(Object.fromEntries(rises.map(r=>[r.row.id,r.delta])));
+  setEvent(rises[0]??null);setHighlights({});
   const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let visualDuration=0;
   if(prefs.current.motion&&!reduced){
@@ -99,6 +102,7 @@ export function useRankingShow(rows:RankRow[],version:number,viewKey:string,erro
    const risingIds=new Set(rises.map(r=>r.row.id));
    const oldRows=new Map(before.rows.map(row=>[row.id,row]));
    const newRows=new Map(current.current.map(row=>[row.id,row]));
+   const queue=new Map<string,{clone:HTMLElement;frames:Keyframe[];node:HTMLElement;delta:number}[]>();
    [...nodes.current].forEach(([key,node])=>{
     const id=key.startsWith('leader:')?key.slice(7):key;
     const oldRow=oldRows.get(id),newRow=newRows.get(id),old=before.rects.get(key),end=node.getBoundingClientRect();
@@ -110,6 +114,7 @@ export function useRankingShow(rows:RankRow[],version:number,viewKey:string,erro
     clone.removeAttribute('id');clone.removeAttribute('data-ranking-row');clone.removeAttribute('data-ranking-leader');clone.setAttribute('aria-hidden','true');clone.setAttribute('inert','');
     clone.classList.add('ranking-flyer');
     Object.assign(clone.style,{position:'fixed',left:end.left+'px',top:end.top+'px',width:end.width+'px',height:end.height+'px',zIndex:risingIds.has(id)?'150':'100',pointerEvents:'none',background:'#20291c',border:'1px solid #efd58c',borderRadius:'6px',margin:'0'});
+    clone.dataset.rankingCurrency=id;
     document.body.appendChild(clone);clones.current.push(clone);node.style.opacity='0';hiddenNodes.current.push(node);
     const dx=startX-end.left,dy=startY-end.top,isRising=risingIds.has(id);
     const scale=Math.max(1,Math.min(1.8,(innerWidth-32)/end.width));
@@ -130,16 +135,47 @@ export function useRankingShow(rows:RankRow[],version:number,viewKey:string,erro
      {transform:`translate(${dx}px,${dy}px) scale(1)`,offset:0},
      {transform:'translate(0,0) scale(1)',offset:1}
     ];
-    const duration=isRising?2400:1800;
-    visualDuration=Math.max(visualDuration,duration);
-    const a=clone.animate(frames,{duration,easing:'cubic-bezier(.22,.7,.25,1)',fill:'both'});
-    animations.current.push(a);
-    a.onfinish=()=>{clone.remove();node.style.opacity='';if(rises[0]?.row.id===id&&prefs.current.motion&&!reduced)node.animate([{backgroundColor:'#e5d38d66'},{backgroundColor:'#ffffff01'}],{duration:1400});};
+    clone.style.transform=`translate(${dx}px,${dy}px) scale(1)`;
+    clone.style.zIndex='90';
+    const group=queue.get(id)||[];
+    group.push({clone,frames,node,delta:(oldRow.rank??0)-(newRow.rank??0)});
+    queue.set(id,group);
    });
+   const groups=[...queue].sort(([a],[b])=>Number(risingIds.has(b))-Number(risingIds.has(a)));
+   const palette=['#67e8f9','#c4b5fd','#fbbf24','#6ee7b7','#fda4af'];
+   const generation=batch.current;
+   visualDuration=groups.length*3600;
+   running.current=groups.length>0;
+   void playRankingSequence(groups,async([id,items])=>{
+    const color=palette[[...queue.keys()].indexOf(id)%palette.length];
+    const rise=rises.find(r=>r.row.id===id);
+    if(rise)setEvent(rise);
+    await Promise.all(items.map(({clone,frames})=>{
+     clone.style.zIndex='150';clone.style.borderColor=color;
+     clone.style.outline='2px solid '+color;clone.style.outlineOffset='-2px';
+     clone.dataset.rankingMoving='true';
+     const animation=clone.animate(frames,{duration:3600,easing:'cubic-bezier(.22,.7,.25,1)',fill:'forwards'});
+     animations.current.push(animation);
+     return animation.finished.then(()=>{
+      if(batch.current!==generation)return;
+      clone.dataset.rankingMoving='false';clone.dataset.rankingCompleted='true';
+      clone.style.zIndex='120';
+     }).catch(()=>{});
+    }));
+    if(batch.current===generation)setHighlights(h=>({...h,[id]:items[0].delta}));
+   },()=>batch.current===generation,()=>{stopVisuals(false);setHighlights({});setEvent(null);});
   }
   if(rises[0])notify(rises[0],visualDuration?visualDuration+100:0);
-  timer.current=setTimeout(()=>{stopVisuals();setHighlights({});setEvent(null);},12000);
+  if(!visualDuration)timer.current=setTimeout(()=>{setHighlights({});setEvent(null);},12000);
  },[version,viewKey,error,measure,stopVisuals,notify]);
+ useEffect(()=>{
+  const reset=()=>{if(!running.current)return;stopVisuals();setHighlights({});setEvent(null);previous.current=measure();capture.current=null;};
+  const media=window.matchMedia('(prefers-reduced-motion: reduce)');
+  const reduce=()=>{if(media.matches)reset();};
+  window.addEventListener('scroll',reset,true);window.addEventListener('resize',reset);
+  document.addEventListener('visibilitychange',reset);media.addEventListener('change',reduce);
+  return()=>{window.removeEventListener('scroll',reset,true);window.removeEventListener('resize',reset);document.removeEventListener('visibilitychange',reset);media.removeEventListener('change',reduce);};
+ },[measure,stopVisuals]);
  const register=useCallback((id:string,node:HTMLElement|null)=>{if(node)nodes.current.set(id,node);else nodes.current.delete(id);},[]);
- return {event,highlights,prepare,register,sound,voice,motion,preference,audioNotice};
+ return {isShowing:()=>running.current,event,highlights,prepare,register,sound,voice,motion,preference,audioNotice};
 }
