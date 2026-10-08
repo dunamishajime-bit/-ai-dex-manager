@@ -1,0 +1,16 @@
+{
+  "research_only": true,
+  "live_changes": false,
+  "production_changes": false,
+  "base": "V3 1051-candidate architecture",
+  "change": "allow same-symbol same-direction V12 virtual legs; opposite side still rejected",
+  "max_recovery_route_virtual_legs": 8,
+  "recovery_family_gross_cap": 0.75,
+  "V12_total_gross_cap": 2.0,
+  "crypto_gross_cap": 3.0,
+  "total_gross_cap": 4.25,
+  "same_symbol_opposite_direction": "REJECT",
+  "costs_bps": [
+    10
+  ]
+}

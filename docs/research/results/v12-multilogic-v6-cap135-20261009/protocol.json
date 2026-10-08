@@ -1,0 +1,20 @@
+{
+  "research_only": true,
+  "live_changes": false,
+  "production_changes": false,
+  "base": "V5 / V3 1051-candidate architecture",
+  "opposite_virtual_net": "allowed only among V12 recovery/complement sleeves",
+  "failed_break_core_overlap": "forbidden",
+  "max_route_virtual_legs": 16,
+  "recovery_family_cap": 1.35,
+  "stage3_requested_gross": 0.1,
+  "V12_total_cap": 2.0,
+  "crypto_cap": 3.0,
+  "total_cap": 4.25,
+  "venue_min_policy": "minimum feasible upsize only inside remaining gross room",
+  "cost_bps": [
+    10,
+    20,
+    30
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "research_only": true,
+  "live_changes": false,
+  "production_changes": false,
+  "base": "V3 1051-candidate multi-logic architecture",
+  "same_side_virtual_legs": true,
+  "opposite_policy": "incoming REC_Y reversal may preempt opposite recovery; FAILED_BREAK core protected",
+  "venue_min_policy": "round up only to minimum feasible venue quantity if within current Gross room",
+  "max_route_virtual_legs": 16,
+  "recovery_family_cap": 1.0,
+  "stage3_requested_gross": 0.1,
+  "V12_total_cap": 2.0,
+  "crypto_cap": 3.0,
+  "total_cap": 4.25,
+  "cost_bps": [
+    10
+  ]
+}
