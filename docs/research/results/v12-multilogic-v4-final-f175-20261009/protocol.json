@@ -1,0 +1,37 @@
+{
+  "research_only": true,
+  "live_changes": false,
+  "production_changes": false,
+  "base": "V3 stackflip F1.25 / stage3 0.075",
+  "targeted_route_gross": {
+    "REC_Y06_REV_D0_T72": 0.15,
+    "REC_X10_TIME_48H": 0.15,
+    "REC_Y03_REV_D0_T36": 0.15,
+    "REC_Y08_REV_D0_T6": 0.15,
+    "REC_X11_TIME_48H": 0.15,
+    "REC_X02_TIME_36H": 0.15,
+    "REC_X06_TIME_12H": 0.15,
+    "REC_X04_TIME_24H": 0.15,
+    "REC_X05_TIME_36H": 0.15,
+    "REC_G1_MID_REL_LOWVOL": 0.15,
+    "REC_X03_TIME_12H": 0.15,
+    "REC_X12_TIME_12H": 0.15,
+    "REC_Y04_REV_D2_T36": 0.15,
+    "REC_Y07_REV_D0_T72": 0.15
+  },
+  "selection_rule": "only routes profitable after integrated admission; weak/negative routes not upsized",
+  "shared_caps_unchanged": {
+    "V12": 2.0,
+    "crypto": 3.0,
+    "total": 4.25,
+    "recovery_family": 1.75
+  },
+  "costs_bps": [
+    10,
+    20,
+    30
+  ],
+  "final_v4_candidate": true,
+  "g2_exit": "6h time exit",
+  "g2_reason": "legacy/long exit was sub-1 at 30bps; 6h exit screened positive overall and in both temporal halves at 30bps"
+}

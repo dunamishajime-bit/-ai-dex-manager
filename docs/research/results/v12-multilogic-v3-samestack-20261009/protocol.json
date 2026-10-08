@@ -1,0 +1,33 @@
+{
+  "research_only": true,
+  "live_changes": false,
+  "production_changes": false,
+  "change": "allow same-symbol V12 virtual subpositions only when side matches; opposite side still rejected",
+  "execution_model": "same-side quantities would be aggregated at venue and tracked as virtual route lots internally",
+  "shared_caps_unchanged": {
+    "V12": 2.0,
+    "crypto": 3.0,
+    "total": 4.25
+  },
+  "cases": {
+    "V3_STACK_F075_G0075": {
+      "family_cap": 0.75,
+      "gross": 0.075,
+      "slots": 4
+    },
+    "V3_STACK_F100_G0050": {
+      "family_cap": 1.0,
+      "gross": 0.05,
+      "slots": 8
+    },
+    "V3_STACK_F125_G0050": {
+      "family_cap": 1.25,
+      "gross": 0.05,
+      "slots": 8
+    }
+  },
+  "cost_bps": [
+    10
+  ],
+  "warning": "Development-period research only."
+}

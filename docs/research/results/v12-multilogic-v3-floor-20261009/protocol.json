@@ -1,0 +1,17 @@
+{
+  "research_only": true,
+  "live_changes": false,
+  "production_changes": false,
+  "base": "V3 stackflip",
+  "venue_floor": "ceil to observed MARKET_LOT_SIZE/LOT_SIZE step so quantity>=minQty and notional>=max($5, MIN_NOTIONAL)",
+  "post_floor_guard": "accepted_gross must remain <= current room",
+  "shared_caps_unchanged": {
+    "V12": 2.0,
+    "crypto": 3.0,
+    "total": 4.25,
+    "recovery_family": 1.25
+  },
+  "costs_bps": [
+    10
+  ]
+}

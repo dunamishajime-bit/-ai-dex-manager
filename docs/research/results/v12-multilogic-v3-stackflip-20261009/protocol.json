@@ -1,0 +1,29 @@
+{
+  "research_only": true,
+  "live_changes": false,
+  "production_changes": false,
+  "execution_model": "same-side virtual stacking + recovery-to-recovery signal flip",
+  "core_flip": false,
+  "other_strategy_flip": false,
+  "shared_caps_unchanged": {
+    "V12": 2.0,
+    "crypto": 3.0,
+    "total": 4.25
+  },
+  "cases": {
+    "V3_STACKFLIP_F125_G0075": {
+      "family_cap": 1.25,
+      "gross": 0.075,
+      "slots": 16
+    },
+    "V3_STACKFLIP_F150_G0075": {
+      "family_cap": 1.5,
+      "gross": 0.075,
+      "slots": 16
+    }
+  },
+  "cost_bps": [
+    10
+  ],
+  "warning": "Development-period research only."
+}
