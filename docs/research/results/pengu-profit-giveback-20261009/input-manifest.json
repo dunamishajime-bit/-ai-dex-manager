@@ -1,0 +1,51 @@
+{
+  "runtime_sha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+  "inputs": {
+    "normalized/aster/klines/PENGUUSDT.jsonl": {
+      "sha256": "a28e0824e75965c73e6cd870e7157113a720e0ad7467741c6d377e9fe233f0a4",
+      "bytes": 2333684,
+      "rows": 9324
+    },
+    "normalized/aster/klines/BTCUSDT.jsonl": {
+      "sha256": "f573b511842dcd1207801324948fa85842e0e2fd8d44ad76e3273d9fa607421c",
+      "bytes": 3495402,
+      "rows": 14088
+    },
+    "normalized/aster/funding/PENGUUSDT.jsonl": {
+      "sha256": "8aa24839cd7dbf2e2daec74a51488a2228b776f5ce0c290568535d596a2b0b4c",
+      "bytes": 267227,
+      "rows": 2329
+    },
+    "lib/pengu-dual-ls-v2.ts": {
+      "sha256": "0deb424ae7dfd553089651f09465deaa64d6b163ab99559a507a5f8b6ae876bb"
+    },
+    "lib/pengu-short-v20.ts": {
+      "sha256": "fce39b4ff1c6b5c7e62438e9a974a9479c0ecf5b5a1b41a91a5f2edf78caee65"
+    },
+    "lib/pengu-recovery-v8.ts": {
+      "sha256": "9ede7042755f594025537d3e7ede365e6c6156f99ebb76aafb6f15d43833790d"
+    },
+    "config/penguDualLsV2Runtime.ts": {
+      "sha256": "4dfd88c27caa430bbbe02c04d70656241cc080fd79118e5c021987cc1786aac2"
+    },
+    "config/penguRecoveryV8.ts": {
+      "sha256": "053f4578390ce3cd8547669c01142b70517969e837391608948206a672d088d8"
+    },
+    "engine/run-current-vps-no-dca.py": {
+      "sha256": "7c3459fa56bb999b6b669c303045deb9517aeca22e85c1f29c0450184b455058",
+      "bytes": 13566
+    },
+    "engine/venue_constraints.py": {
+      "sha256": "ebda1fcc1d14893defe7810c9108bbcfa3e098f914ad3dd185b9ae50bb7ece6a",
+      "bytes": 1202
+    },
+    "engine/venue-filters-observed-20261007.json": {
+      "sha256": "4d79faec04af2cc1bf209db7939c9cf7ab09382c842f6bab5624bfa7e7d6f980",
+      "bytes": 1428806
+    },
+    "engine/engine/docs/research/results/formal-core-ownership-audit-20261003/engine-source.zip": {
+      "sha256": "ba39690a3b125f274571132c2992211bee6a30259e7b832cbf27208544ab4a78",
+      "bytes": 31422
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "status": "PASS",
+  "trades": 2,
+  "resident_partial_events": 2,
+  "same_timestamp_partial_before_final": true,
+  "closing_quantity_fraction": 0.5,
+  "timestamps_not_backdated": true
+}

@@ -1,0 +1,152 @@
+{
+  "H1_NEXT_OPEN__ALL_PEAK_PROFIT_MINUS4PP.jsonl.gz": {
+    "same_20_baseline_admitted_shorts": {
+      "n": 20,
+      "average_price_return": 0.021187711460515346,
+      "sum_price_returns": 0.4237542292103069,
+      "median_price_return": 0.018393084739382615,
+      "gross_win_rate": 0.75,
+      "improved": 6,
+      "worsened": 10,
+      "unchanged": 4,
+      "mean_mfe_h1_bound": 0.06216285815819686,
+      "mean_mae_h1_bound": -0.023155704687856726,
+      "average_hold_hours": 23.55,
+      "costs_and_funding": "EXCLUDED_FROM_THIS_GROSS_PAIRED_DIAGNOSTIC_INCLUDED_IN_PORTFOLIO_BT"
+    },
+    "all_44_independent_short_candidates": {
+      "n": 44,
+      "average_price_return": -0.0015951466750798726,
+      "sum_price_returns": -0.0701864537035144,
+      "median_price_return": -0.010885410873474277,
+      "gross_win_rate": 0.4318181818181818,
+      "improved": 17,
+      "worsened": 20,
+      "unchanged": 7,
+      "mean_mfe_h1_bound": 0.043563805499079684,
+      "mean_mae_h1_bound": -0.028886464471710803,
+      "average_hold_hours": 17.90909090909091,
+      "costs_and_funding": "EXCLUDED_FROM_THIS_GROSS_PAIRED_DIAGNOSTIC_INCLUDED_IN_PORTFOLIO_BT"
+    }
+  },
+  "H1_NEXT_OPEN__BASELINE.jsonl.gz": {
+    "same_20_baseline_admitted_shorts": {
+      "n": 20,
+      "average_price_return": 0.06460527039936964,
+      "sum_price_returns": 1.292105407987393,
+      "median_price_return": 0.05315123053928461,
+      "gross_win_rate": 0.75,
+      "improved": 0,
+      "worsened": 0,
+      "unchanged": 20,
+      "mean_mfe_h1_bound": 0.1330454982149439,
+      "mean_mae_h1_bound": -0.0312987227659169,
+      "average_hold_hours": 55.2,
+      "costs_and_funding": "EXCLUDED_FROM_THIS_GROSS_PAIRED_DIAGNOSTIC_INCLUDED_IN_PORTFOLIO_BT"
+    },
+    "all_44_independent_short_candidates": {
+      "n": 44,
+      "average_price_return": 0.018075098684934773,
+      "sum_price_returns": 0.79530434213713,
+      "median_price_return": 0.007862795504909481,
+      "gross_win_rate": 0.5454545454545454,
+      "improved": 0,
+      "worsened": 0,
+      "unchanged": 44,
+      "mean_mfe_h1_bound": 0.08899819234504122,
+      "mean_mae_h1_bound": -0.048167028668766924,
+      "average_hold_hours": 50.18181818181818,
+      "costs_and_funding": "EXCLUDED_FROM_THIS_GROSS_PAIRED_DIAGNOSTIC_INCLUDED_IN_PORTFOLIO_BT"
+    }
+  },
+  "H1_NEXT_OPEN__SHORT_PEAK_PROFIT_GIVEBACK4PCT.jsonl.gz": {
+    "same_20_baseline_admitted_shorts": {
+      "n": 20,
+      "average_price_return": 0.007093750773298763,
+      "sum_price_returns": 0.14187501546597525,
+      "median_price_return": 0.0015720580255519923,
+      "gross_win_rate": 0.6,
+      "improved": 5,
+      "worsened": 14,
+      "unchanged": 1,
+      "mean_mfe_h1_bound": 0.01969090840496999,
+      "mean_mae_h1_bound": -0.015220983328132012,
+      "average_hold_hours": 5.15,
+      "costs_and_funding": "EXCLUDED_FROM_THIS_GROSS_PAIRED_DIAGNOSTIC_INCLUDED_IN_PORTFOLIO_BT"
+    },
+    "all_44_independent_short_candidates": {
+      "n": 44,
+      "average_price_return": 0.0026065198430143544,
+      "sum_price_returns": 0.11468687309263159,
+      "median_price_return": 0.001448246473408743,
+      "gross_win_rate": 0.5909090909090909,
+      "improved": 20,
+      "worsened": 20,
+      "unchanged": 4,
+      "mean_mfe_h1_bound": 0.017724291927508417,
+      "mean_mae_h1_bound": -0.0165887044781257,
+      "average_hold_hours": 4.818181818181818,
+      "costs_and_funding": "EXCLUDED_FROM_THIS_GROSS_PAIRED_DIAGNOSTIC_INCLUDED_IN_PORTFOLIO_BT"
+    }
+  },
+  "H1_NEXT_OPEN__SHORT_PEAK_PROFIT_MINUS4PP.jsonl.gz": {
+    "same_20_baseline_admitted_shorts": {
+      "n": 20,
+      "average_price_return": 0.021187711460515346,
+      "sum_price_returns": 0.4237542292103069,
+      "median_price_return": 0.018393084739382615,
+      "gross_win_rate": 0.75,
+      "improved": 6,
+      "worsened": 10,
+      "unchanged": 4,
+      "mean_mfe_h1_bound": 0.06216285815819686,
+      "mean_mae_h1_bound": -0.023155704687856726,
+      "average_hold_hours": 23.55,
+      "costs_and_funding": "EXCLUDED_FROM_THIS_GROSS_PAIRED_DIAGNOSTIC_INCLUDED_IN_PORTFOLIO_BT"
+    },
+    "all_44_independent_short_candidates": {
+      "n": 44,
+      "average_price_return": -0.0015951466750798726,
+      "sum_price_returns": -0.0701864537035144,
+      "median_price_return": -0.010885410873474277,
+      "gross_win_rate": 0.4318181818181818,
+      "improved": 17,
+      "worsened": 20,
+      "unchanged": 7,
+      "mean_mfe_h1_bound": 0.043563805499079684,
+      "mean_mae_h1_bound": -0.028886464471710803,
+      "average_hold_hours": 17.90909090909091,
+      "costs_and_funding": "EXCLUDED_FROM_THIS_GROSS_PAIRED_DIAGNOSTIC_INCLUDED_IN_PORTFOLIO_BT"
+    }
+  },
+  "H1_NEXT_OPEN__SHORT_PRICE_TRAIL4_FROM_PROFIT.jsonl.gz": {
+    "same_20_baseline_admitted_shorts": {
+      "n": 20,
+      "average_price_return": 0.02112902132075793,
+      "sum_price_returns": 0.4225804264151586,
+      "median_price_return": 0.021828992125857205,
+      "gross_win_rate": 0.8,
+      "improved": 7,
+      "worsened": 10,
+      "unchanged": 3,
+      "mean_mfe_h1_bound": 0.06048642651739741,
+      "mean_mae_h1_bound": -0.021915929636731984,
+      "average_hold_hours": 20.25,
+      "costs_and_funding": "EXCLUDED_FROM_THIS_GROSS_PAIRED_DIAGNOSTIC_INCLUDED_IN_PORTFOLIO_BT"
+    },
+    "all_44_independent_short_candidates": {
+      "n": 44,
+      "average_price_return": -0.00195603328105758,
+      "sum_price_returns": -0.0860654643665335,
+      "median_price_return": -0.009726130835041036,
+      "gross_win_rate": 0.45454545454545453,
+      "improved": 18,
+      "worsened": 20,
+      "unchanged": 6,
+      "mean_mfe_h1_bound": 0.04065559751726701,
+      "mean_mae_h1_bound": -0.02823466165227321,
+      "average_hold_hours": 15.75,
+      "costs_and_funding": "EXCLUDED_FROM_THIS_GROSS_PAIRED_DIAGNOSTIC_INCLUDED_IN_PORTFOLIO_BT"
+    }
+  }
+}

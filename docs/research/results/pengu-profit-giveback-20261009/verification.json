@@ -1,0 +1,462 @@
+{
+  "scenario_count": 45,
+  "checks": [
+    {
+      "scope": "standalone",
+      "case": "H1_TRIGGER_PRICE__BASELINE",
+      "cost": "PRICE_MODEL_10BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 67
+    },
+    {
+      "scope": "standalone",
+      "case": "H1_TRIGGER_PRICE__BASELINE",
+      "cost": "PRICE_MODEL_20BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 67
+    },
+    {
+      "scope": "standalone",
+      "case": "H1_TRIGGER_PRICE__BASELINE",
+      "cost": "PRICE_MODEL_30BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 67
+    },
+    {
+      "scope": "standalone",
+      "case": "H1_TRIGGER_PRICE__SHORT_PRICE_TRAIL4_FROM_PROFIT",
+      "cost": "PRICE_MODEL_10BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 72
+    },
+    {
+      "scope": "standalone",
+      "case": "H1_TRIGGER_PRICE__SHORT_PRICE_TRAIL4_FROM_PROFIT",
+      "cost": "PRICE_MODEL_20BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 70
+    },
+    {
+      "scope": "standalone",
+      "case": "H1_TRIGGER_PRICE__SHORT_PRICE_TRAIL4_FROM_PROFIT",
+      "cost": "PRICE_MODEL_30BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 69
+    },
+    {
+      "scope": "standalone",
+      "case": "H1_TRIGGER_PRICE__SHORT_PEAK_PROFIT_MINUS4PP",
+      "cost": "PRICE_MODEL_10BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 71
+    },
+    {
+      "scope": "standalone",
+      "case": "H1_TRIGGER_PRICE__SHORT_PEAK_PROFIT_MINUS4PP",
+      "cost": "PRICE_MODEL_20BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 71
+    },
+    {
+      "scope": "standalone",
+      "case": "H1_TRIGGER_PRICE__SHORT_PEAK_PROFIT_MINUS4PP",
+      "cost": "PRICE_MODEL_30BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 71
+    },
+    {
+      "scope": "standalone",
+      "case": "H1_TRIGGER_PRICE__SHORT_PEAK_PROFIT_GIVEBACK4PCT",
+      "cost": "PRICE_MODEL_10BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 71
+    },
+    {
+      "scope": "standalone",
+      "case": "H1_TRIGGER_PRICE__SHORT_PEAK_PROFIT_GIVEBACK4PCT",
+      "cost": "PRICE_MODEL_20BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 71
+    },
+    {
+      "scope": "standalone",
+      "case": "H1_TRIGGER_PRICE__SHORT_PEAK_PROFIT_GIVEBACK4PCT",
+      "cost": "PRICE_MODEL_30BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 71
+    },
+    {
+      "scope": "standalone",
+      "case": "H1_TRIGGER_PRICE__ALL_PEAK_PROFIT_MINUS4PP",
+      "cost": "PRICE_MODEL_10BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 78
+    },
+    {
+      "scope": "standalone",
+      "case": "H1_TRIGGER_PRICE__ALL_PEAK_PROFIT_MINUS4PP",
+      "cost": "PRICE_MODEL_20BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 78
+    },
+    {
+      "scope": "standalone",
+      "case": "H1_TRIGGER_PRICE__ALL_PEAK_PROFIT_MINUS4PP",
+      "cost": "PRICE_MODEL_30BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 75
+    },
+    {
+      "scope": "standalone",
+      "case": "H1_NEXT_OPEN__BASELINE",
+      "cost": "PRICE_MODEL_10BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 67
+    },
+    {
+      "scope": "standalone",
+      "case": "H1_NEXT_OPEN__BASELINE",
+      "cost": "PRICE_MODEL_20BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 67
+    },
+    {
+      "scope": "standalone",
+      "case": "H1_NEXT_OPEN__BASELINE",
+      "cost": "PRICE_MODEL_30BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 67
+    },
+    {
+      "scope": "standalone",
+      "case": "H1_NEXT_OPEN__SHORT_PRICE_TRAIL4_FROM_PROFIT",
+      "cost": "PRICE_MODEL_10BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 72
+    },
+    {
+      "scope": "standalone",
+      "case": "H1_NEXT_OPEN__SHORT_PRICE_TRAIL4_FROM_PROFIT",
+      "cost": "PRICE_MODEL_20BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 72
+    },
+    {
+      "scope": "standalone",
+      "case": "H1_NEXT_OPEN__SHORT_PRICE_TRAIL4_FROM_PROFIT",
+      "cost": "PRICE_MODEL_30BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 70
+    },
+    {
+      "scope": "standalone",
+      "case": "H1_NEXT_OPEN__SHORT_PEAK_PROFIT_MINUS4PP",
+      "cost": "PRICE_MODEL_10BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 70
+    },
+    {
+      "scope": "standalone",
+      "case": "H1_NEXT_OPEN__SHORT_PEAK_PROFIT_MINUS4PP",
+      "cost": "PRICE_MODEL_20BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 70
+    },
+    {
+      "scope": "standalone",
+      "case": "H1_NEXT_OPEN__SHORT_PEAK_PROFIT_MINUS4PP",
+      "cost": "PRICE_MODEL_30BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 69
+    },
+    {
+      "scope": "standalone",
+      "case": "H1_NEXT_OPEN__SHORT_PEAK_PROFIT_GIVEBACK4PCT",
+      "cost": "PRICE_MODEL_10BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 71
+    },
+    {
+      "scope": "standalone",
+      "case": "H1_NEXT_OPEN__SHORT_PEAK_PROFIT_GIVEBACK4PCT",
+      "cost": "PRICE_MODEL_20BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 71
+    },
+    {
+      "scope": "standalone",
+      "case": "H1_NEXT_OPEN__SHORT_PEAK_PROFIT_GIVEBACK4PCT",
+      "cost": "PRICE_MODEL_30BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 71
+    },
+    {
+      "scope": "standalone",
+      "case": "H1_NEXT_OPEN__ALL_PEAK_PROFIT_MINUS4PP",
+      "cost": "PRICE_MODEL_10BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 78
+    },
+    {
+      "scope": "standalone",
+      "case": "H1_NEXT_OPEN__ALL_PEAK_PROFIT_MINUS4PP",
+      "cost": "PRICE_MODEL_20BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 76
+    },
+    {
+      "scope": "standalone",
+      "case": "H1_NEXT_OPEN__ALL_PEAK_PROFIT_MINUS4PP",
+      "cost": "PRICE_MODEL_30BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 76
+    },
+    {
+      "scope": "integrated",
+      "case": "H1_NEXT_OPEN__BASELINE",
+      "cost": "PRICE_MODEL_10BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 1526
+    },
+    {
+      "scope": "integrated",
+      "case": "H1_NEXT_OPEN__BASELINE",
+      "cost": "PRICE_MODEL_20BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 1499
+    },
+    {
+      "scope": "integrated",
+      "case": "H1_NEXT_OPEN__BASELINE",
+      "cost": "PRICE_MODEL_30BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 1476
+    },
+    {
+      "scope": "integrated",
+      "case": "H1_NEXT_OPEN__SHORT_PRICE_TRAIL4_FROM_PROFIT",
+      "cost": "PRICE_MODEL_10BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 1531
+    },
+    {
+      "scope": "integrated",
+      "case": "H1_NEXT_OPEN__SHORT_PRICE_TRAIL4_FROM_PROFIT",
+      "cost": "PRICE_MODEL_20BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 1507
+    },
+    {
+      "scope": "integrated",
+      "case": "H1_NEXT_OPEN__SHORT_PRICE_TRAIL4_FROM_PROFIT",
+      "cost": "PRICE_MODEL_30BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 1480
+    },
+    {
+      "scope": "integrated",
+      "case": "H1_NEXT_OPEN__SHORT_PEAK_PROFIT_MINUS4PP",
+      "cost": "PRICE_MODEL_10BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 1533
+    },
+    {
+      "scope": "integrated",
+      "case": "H1_NEXT_OPEN__SHORT_PEAK_PROFIT_MINUS4PP",
+      "cost": "PRICE_MODEL_20BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 1508
+    },
+    {
+      "scope": "integrated",
+      "case": "H1_NEXT_OPEN__SHORT_PEAK_PROFIT_MINUS4PP",
+      "cost": "PRICE_MODEL_30BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 1479
+    },
+    {
+      "scope": "integrated",
+      "case": "H1_NEXT_OPEN__SHORT_PEAK_PROFIT_GIVEBACK4PCT",
+      "cost": "PRICE_MODEL_10BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 1547
+    },
+    {
+      "scope": "integrated",
+      "case": "H1_NEXT_OPEN__SHORT_PEAK_PROFIT_GIVEBACK4PCT",
+      "cost": "PRICE_MODEL_20BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 1513
+    },
+    {
+      "scope": "integrated",
+      "case": "H1_NEXT_OPEN__SHORT_PEAK_PROFIT_GIVEBACK4PCT",
+      "cost": "PRICE_MODEL_30BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 1481
+    },
+    {
+      "scope": "integrated",
+      "case": "H1_NEXT_OPEN__ALL_PEAK_PROFIT_MINUS4PP",
+      "cost": "PRICE_MODEL_10BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 1551
+    },
+    {
+      "scope": "integrated",
+      "case": "H1_NEXT_OPEN__ALL_PEAK_PROFIT_MINUS4PP",
+      "cost": "PRICE_MODEL_20BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 1509
+    },
+    {
+      "scope": "integrated",
+      "case": "H1_NEXT_OPEN__ALL_PEAK_PROFIT_MINUS4PP",
+      "cost": "PRICE_MODEL_30BPS",
+      "accounting": "PASS",
+      "no_pengu_overlap": true,
+      "initial_jpy": 10000,
+      "monthly_jpy": 0,
+      "closed_trades": 1472
+    }
+  ],
+  "eligible_entries": 113,
+  "independent_short_candidates": 44,
+  "short_only_long_lifecycles_unchanged": true,
+  "source_signal_samples_matched": 6,
+  "partial_order_test": "PASS",
+  "independent_review": "NO_REMAINING_IMPORTANT_FINDINGS",
+  "no_live_changes": true
+}

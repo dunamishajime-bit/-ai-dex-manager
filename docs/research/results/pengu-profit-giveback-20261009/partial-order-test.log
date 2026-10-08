@@ -1,0 +1,4 @@
+START VPS_VENUE_PENGU_GIVEBACK monthly 0.0 period_end 1786320000000 costs [10.0]
+RESULT {"scenario_id": "PRICE_MODEL_10BPS", "final_equity_jpy": 9776.470083057922, "profit_factor": 0.0, "win_rate": 0.0, "maximum_mtm_drawdown": -0.09266188863193026, "closed_trades": 2, "contributed_jpy": 10000.0, "deposit_event_count": 1, "status": "COMPLETE_H1_PRICE_MODEL_NOT_L2_VERIFIED"}
+ALL_SCENARIOS_ACCOUNTING_AND_DEPOSIT_AUDIT_PASS
+COMPARISON {"name": "PARTIAL_EVENT_ORDER_FIX", "scope": "standalone", "rows": [{"cost": "PRICE_MODEL_10BPS", "final": 9776.470083057922, "dd": -0.09266188863193026, "pf": 0.0, "wr": 0.0, "n": 2, "short": {"trades": 0, "wins": 0, "win_rate": null, "pf": null, "net_pnl_usd": 0, "mean_pnl_usd": null}}]}
