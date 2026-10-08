@@ -136,11 +136,18 @@ function explicitLogicId(strategyId: string, reason: string) {
   return undefined;
 }
 
+export function penguRouteLabel(value: string) {
+  // Comparison text must not replace the actual SHORT_FIRST route.
+  if (/PENGU\s+V8\s+Short:\s*SHORT_FIRST|short[_\s-]*v20/i.test(value)) return "Short V20";
+  if (/recovery[_\s-]*v8|recv8-/i.test(value)) return "Recovery V8";
+  if (/v64[_\s-]*dynamic[_\s-]*long/i.test(value)) return "V64 Dynamic Long";
+  if (/long[_\s-]*v2[_\s-]*final/i.test(value)) return "Long V2 Final";
+  return undefined;
+}
+
 function routeLabel(reason: string) {
-  if (/recovery[_\s-]*v8|recv8-/i.test(reason)) return "Recovery V8";
-  if (/v64[_\s-]*dynamic[_\s-]*long/i.test(reason)) return "V64 Dynamic Long";
-  if (/short[_\s-]*v20/i.test(reason)) return "Short V20";
-  if (/long[_\s-]*v2[_\s-]*final/i.test(reason)) return "Long V2 Final";
+  const pengu = penguRouteLabel(reason);
+  if (pengu) return pengu;
   if (/high[_\s-]*vol/i.test(reason)) return "HIGH_VOL";
   if (/(?:^|[^A-Z])BRK(?:[^A-Z]|$)/i.test(reason)) return "BRK";
   if (/(?:^|[^A-Z])MR(?:[^A-Z]|$)/i.test(reason)) return "MR";
