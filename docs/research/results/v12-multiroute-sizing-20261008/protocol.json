@@ -1,0 +1,43 @@
+{
+  "research_only": true,
+  "live_changes": false,
+  "production_changes": false,
+  "hypothesis": "Preserve rescue entries but scale weaker continuation routes rather than eliminating them.",
+  "core_sizing": "FAILED_BREAK_REV_SHORT_6H unchanged.",
+  "rescue_caps": [
+    0.5,
+    0.25
+  ],
+  "cap_policy": "Uniform cap across every continuation rescue route; not tuned by route outcomes.",
+  "plans": {
+    "CORE55": [],
+    "RESCUE_300": [
+      "SHORT_BURST",
+      "SHORT_FAST",
+      "LONG_CREEP"
+    ],
+    "RESCUE_500": [
+      "SHORT_BURST",
+      "SHORT_FAST",
+      "LONG_CREEP",
+      "SHORT_CREEP",
+      "ALL_ACCEL_EARLY"
+    ],
+    "RESCUE_700": [
+      "SHORT_BURST",
+      "SHORT_FAST",
+      "LONG_CREEP",
+      "SHORT_CREEP",
+      "ALL_ACCEL_EARLY",
+      "NEG_PULLBACK",
+      "ALL_BURST_EARLY"
+    ]
+  },
+  "costs_bps": [
+    10,
+    20,
+    30
+  ],
+  "period": "2025-08-10 through 2026-08-10 UTC; previously explored.",
+  "promotion": "Research only; requires external/forward evidence before LIVE."
+}

@@ -1,0 +1,49 @@
+{
+  "research_only": true,
+  "live_changes": false,
+  "production_changes": false,
+  "period": "2025-08-10 through 2026-08-10 UTC; previously explored, not untouched holdout",
+  "goal": "Recover hundreds of V12 opportunities while retaining the high-precision failed-break SHORT route.",
+  "core_route": "FAILED_BREAK_REV_SHORT_6H; unchanged from prior research.",
+  "continuation_routes": {
+    "SHORT_BURST": "SHORT, age<=96h, signed6h return>=3.0%",
+    "SHORT_FAST": "SHORT, age<=12h, signed6h return 0..1.5%",
+    "LONG_CREEP": "LONG, signed6h return 0..0.25%",
+    "SHORT_CREEP": "SHORT, signed6h return 0.25..0.50%",
+    "ALL_ACCEL_EARLY": "age<=24h, signed6h 1.5..3.0%, EMA12 distance>=1 ATR",
+    "NEG_PULLBACK": "age<=72h, signed6h<0, EMA12 distance 0.5..1 ATR",
+    "ALL_BURST_EARLY": "age<=24h, signed6h>=3.0%"
+  },
+  "plan_membership": {
+    "CORE55": [],
+    "RESCUE_300": [
+      "SHORT_BURST",
+      "SHORT_FAST",
+      "LONG_CREEP"
+    ],
+    "RESCUE_500": [
+      "SHORT_BURST",
+      "SHORT_FAST",
+      "LONG_CREEP",
+      "SHORT_CREEP",
+      "ALL_ACCEL_EARLY"
+    ],
+    "RESCUE_700": [
+      "SHORT_BURST",
+      "SHORT_FAST",
+      "LONG_CREEP",
+      "SHORT_CREEP",
+      "ALL_ACCEL_EARLY",
+      "NEG_PULLBACK",
+      "ALL_BURST_EARLY"
+    ]
+  },
+  "selection_rule": "Each included rescue band was required to have candidate-level PF>1 in both temporal halves before integrated replay.",
+  "costs_bps": [
+    10,
+    20,
+    30
+  ],
+  "portfolio_engine": "same integrated ownership/gross/quantity/funding/exit replay as baseline",
+  "important": "This is exploratory on a studied period; do not promote to LIVE from these results alone."
+}
