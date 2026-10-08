@@ -1,0 +1,28 @@
+{
+  "research_only": true,
+  "live_changes": false,
+  "production_changes": false,
+  "source_engine": "buildV12Signals exact current library",
+  "period": {
+    "start": "2026-08-11T00:00:00.000Z",
+    "entry_end": "2026-10-04T22:00:00.000Z",
+    "data_end": "2026-10-08T00:00:00.000Z"
+  },
+  "candidate_count": 299,
+  "universe": [
+    "BTC",
+    "ETH",
+    "BNB",
+    "SOL",
+    "LINK",
+    "AVAX",
+    "DOGE",
+    "INJ",
+    "XRP",
+    "ADA",
+    "LTC",
+    "ATOM",
+    "AAVE",
+    "NEAR"
+  ]
+}
