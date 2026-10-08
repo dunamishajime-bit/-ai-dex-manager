@@ -175,3 +175,22 @@ But only **2 trades** remain. Without-best is negative because one trade dominat
 6. **Do not deploy it yet**: independent post-selection sample after the BTC gate is only 2 trades.
 7. Do not tune the BTC thresholds from the observed holdout. Any new threshold change creates a new validation requirement.
 8. Continue research on a separate complementary LONG architecture rather than forcing symmetry onto this SHORT edge.
+
+## Complementary LONG mirror test
+
+A strict economic mirror was tested without a parameter sweep:
+- FAILED_BREAK_REV output side LONG
+- BTC6 >= 0
+- BTC24 >= -1.0%
+
+Result on the development window:
+- raw LONG failed-break events: 76
+- gated: 24
+- selected/completed: 23
+- 10bps WR 43.48% / PF 0.5337 / mean -0.1845%
+- first-half PF 0.2828
+- second-half PF 0.7048
+- 20bps PF 0.3708
+- 30bps PF 0.2464
+
+**Rejected.** The failed-break edge is directionally asymmetric. Do not add a mirrored LONG route merely to increase trade count. A future complementary LONG architecture must be independently motivated and separately validated.
