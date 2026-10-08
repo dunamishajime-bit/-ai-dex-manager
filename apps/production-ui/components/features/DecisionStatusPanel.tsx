@@ -1,6 +1,7 @@
 "use client";
 import { formatQ102SideGross } from "@/lib/production-display";
 import { Dd1296RuntimePanel } from "./Dd1296RuntimePanel";
+import { V12V4ShadowPanel, type V12V4ShadowObservability } from "./V12V4ShadowPanel";
 import type { Dd1296Observation } from "@/lib/server/dd1296-observability";
 
 
@@ -206,6 +207,7 @@ type Snapshot = {
   v12: { items: DecisionStatusItem[] };
   v52: { marketOpen: boolean; marketLabel: string; items: DecisionStatusItem[] };
   v12Observability?: V12Observability;
+  v12V4Shadow?: V12V4ShadowObservability;
   penguRuntime?: PenguRuntimeStatus;
   v52Top2Observability?: V52Top2Observability;
   quality102Runtime?: Quality102RuntimeStatus;
@@ -851,7 +853,7 @@ export function DecisionStatusPanel({ logic = "overview" }: { logic?: DecisionLo
     {toolbar}
     {warning}
     <div><Link href="/decision-status" className="inline-flex rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 text-xs text-white/75 hover:bg-white/[0.08]">← 判定状況一覧</Link></div>
-    {logic === "v12" ? <><V12Detail details={snapshot.v12Observability} production={productionRuntime} /><Sleeve title="V12 補助ランキング" items={snapshot.v12.items} /></> : null}
+    {logic === "v12" ? <><V12V4ShadowPanel details={snapshot.v12V4Shadow} /><V12Detail details={snapshot.v12Observability} production={productionRuntime} /><Sleeve title="V12 補助ランキング" items={snapshot.v12.items} /></> : null}
     {logic === "pengu" ? <PenguDetail details={snapshot.penguRuntime} production={productionRuntime} /> : null}
     <Dd1296RuntimePanel data={snapshot.dd1296} logic={logic} />
     {logic === "q102" ? <><Quality102Detail details={snapshot.quality102Runtime} production={productionRuntime} /><Quality102SymbolTable snapshot={q102Symbols} error={q102SymbolError} /></> : null}

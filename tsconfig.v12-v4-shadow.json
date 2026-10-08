@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.json",
+  "files": [
+    "lib/v12-multilogic-v4-shadow.ts",
+    "scripts/v12-multilogic-v4-shadow-runner.ts",
+    "tests/v12-multilogic-v4-shadow.test.ts",
+    "tests/v12-v4-shadow-observability.test.ts"
+  ],
+  "include": [],
+  "exclude": [],
+  "compilerOptions": {
+    "incremental": false,
+    "noEmit": true
+  }
+}

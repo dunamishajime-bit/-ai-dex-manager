@@ -2,6 +2,7 @@ import { loadDd1296Observability } from "@/lib/server/dd1296-observability";
 import { NextRequest, NextResponse } from "next/server";
 import { loadDecisionStatus } from "@/lib/server/disdex-decision-status";
 import { loadV12DecisionObservability } from "@/lib/server/v12-decision-observability";
+import { loadV12V4ShadowObservability } from "@/lib/server/v12-v4-shadow-observability";
 import { loadV52Top2Observability } from "@/lib/server/v52-top2-observability";
 import { loadPenguRuntimeObservability } from "@/lib/server/pengu-runtime-observability";
 import { loadQuality102RuntimeObservability } from "@/lib/server/quality102-runtime-observability";
@@ -37,6 +38,7 @@ export async function GET(req: NextRequest) {
         errors: [observabilityError instanceof Error ? observabilityError.message : "V12 observability failed."],
       };
     }
+    const v12V4Shadow = await loadV12V4ShadowObservability();
     const expectedRuntimeSha = snapshot.runtime.units[0]?.releaseSha;
     const [v52Top2Observability, penguRuntime, quality102Runtime, fetRuntime] = await Promise.all([
       loadV52Top2Observability(),
@@ -60,7 +62,7 @@ export async function GET(req: NextRequest) {
       }),
     };
     const dd1296 = await loadDd1296Observability().catch(() => undefined);
-    return NextResponse.json({ ...snapshot, dd1296, runtime, v12Observability, v52Top2Observability, penguRuntime, quality102Runtime, fetRuntime }, { headers: { "Cache-Control": "private, no-store" } });
+    return NextResponse.json({ ...snapshot, dd1296, runtime, v12Observability, v12V4Shadow, v52Top2Observability, penguRuntime, quality102Runtime, fetRuntime }, { headers: { "Cache-Control": "private, no-store" } });
   }
   catch (error) { return NextResponse.json({ ok: false, readOnly: true, error: error instanceof Error ? error.message : "判定データを取得できません。" }, { status: 503 }); }
 }

@@ -125,7 +125,9 @@
     "strategy:idle-priority-short:predeploy": "npm run strategy:idle-priority-short:selftest && npm run strategy:idle-priority-short:parity:evidence && npm run strategy:idle-priority-short:parity:495-63",
     "strategy:idle-priority-short:parity:integrated": "tsx scripts/idle-priority-short-integrated-parity.ts",
     "strategy:idle-priority-short:parity:63-61-overlay": "tsx scripts/idle-priority-short-63-61-overlay-parity.ts",
-    "strategy:idle-priority-short:parity:certify": "tsx scripts/idle-priority-short-generate-parity-cert.ts"
+    "strategy:idle-priority-short:parity:certify": "tsx scripts/idle-priority-short-generate-parity-cert.ts",
+    "strategy:v12-v4-shadow:selftest": "tsx scripts/v12-multilogic-v4-shadow-runner.ts --self-test && tsx --test tests/v12-multilogic-v4-shadow.test.ts tests/v12-v4-shadow-observability.test.ts",
+    "strategy:v12-v4-shadow:once": "tsx scripts/v12-multilogic-v4-shadow-runner.ts --once"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
