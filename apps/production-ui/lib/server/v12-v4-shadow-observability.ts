@@ -4,6 +4,8 @@ import { isAbsolute, join } from "node:path";
 const DEFAULT_STATE = "/var/lib/disdex/v12-v4-shadow/state.json";
 const DEFAULT_RELEASE = "/home/deploy/disdex-trading/current";
 const CATALOG_RELATIVE = "docs/research/V12_MULTILOGIC_V4_ROUTE_CATALOG_20261009.json";
+const MIDPOINT_PRIORITY_RELATIVE = "docs/implementation/v12-v4-v2-full-year-priority.json";
+const MIDPOINT_ID = "V2_M150_D05_CORE_NATIVE";
 const MAX_BYTES = 2 * 1024 * 1024;
 
 type Json = Record<string, unknown>;
@@ -38,6 +40,10 @@ export type V12V4RouteCatalogRow = {
   exitPolicy: string;
   grossPolicy: string;
   preemptionPolicy: string;
+  midpointTier?: string;
+  midpointRank?: number;
+  midpointGross?: number;
+  midpointTrainCount?: number;
   metrics: Record<string, { trades: number; winRate: number; pf?: number; netPnlUsd: number }>;
 };
 
@@ -49,6 +55,11 @@ export type V12V4ShadowObservability = {
   shadow: true;
   orderEnabled: false;
   capturedAt?: string;
+  observedPolicyId?: string;
+  midpointPriorityAvailable: boolean;
+  midpointPromotionStatus: "BLOCKED_HINDSIGHT_LEAKAGE_AND_EXTERNAL_Y06";
+  midpointBt: Record<"10bps" | "20bps" | "30bps", { finalEquityJpy: number; dd: number }>;
+  midpointCaps: { recoveryFamilyGross: number; v12Gross: number; cryptoGross: number; totalGross: number };
   stateAvailable: boolean;
   statePath: string;
   catalogAvailable: boolean;
@@ -126,6 +137,7 @@ export async function loadV12V4ShadowObservability(options: { statePath?: string
   const statePath = isAbsolute(configured) ? configured : DEFAULT_STATE;
   const releaseRoot = options.releaseRoot || DEFAULT_RELEASE;
   const catalogPath = join(releaseRoot, CATALOG_RELATIVE);
+  const midpointPriorityPath = join(releaseRoot, MIDPOINT_PRIORITY_RELATIVE);
   const errors: string[] = [];
 
   let state: Json | null = null;
@@ -147,6 +159,17 @@ export async function loadV12V4ShadowObservability(options: { statePath?: string
     errors.push(error instanceof Error ? error.message : "V12 V4 route catalog unavailable.");
   }
 
+  let midpointRankSource: Json[] = [];
+  try {
+    const raw = await readJson(midpointPriorityPath);
+    if (!Array.isArray(raw) || raw.length !== 41) throw new Error("MIDPOINT_PRIORITY_41_ROUTES_REQUIRED");
+    midpointRankSource = raw.map(obj).filter((x): x is Json => Boolean(x));
+    const routeIds = new Set(midpointRankSource.map((x) => String(x.route || "")));
+    if (routeIds.size !== 41) throw new Error("MIDPOINT_DUPLICATE_ROUTE");
+  } catch (error) {
+    errors.push(error instanceof Error ? error.message : "V12 midpoint rank file unavailable.");
+  }
+  const midpointRanks = new Map(midpointRankSource.map((x) => [String(x.route), x]));
   const architecture = obj(catalog?.architecture);
   const stateCaps = obj(state?.caps);
   const routeList = Array.isArray(catalog?.routes) ? catalog!.routes as unknown[] : [];
@@ -178,6 +201,19 @@ export async function loadV12V4ShadowObservability(options: { statePath?: string
       exitPolicy: String(r.exit_policy || ""),
       grossPolicy: String(r.requested_gross_policy || ""),
       preemptionPolicy: String(r.opposite_preemption || ""),
+      midpointTier: midpointRanks.get(String(r.route)) ? String(midpointRanks.get(String(r.route))?.tier || "") : undefined,
+      midpointRank: midpointRanks.get(String(r.route))
+        ? String(r.route) === "FAILED_BREAK_REV_SHORT_6H"
+          ? 1 : num(midpointRanks.get(String(r.route))?.priority_order, 99) + 3
+        : undefined,
+      midpointGross: midpointRanks.get(String(r.route))
+        ? String(r.route) === "FAILED_BREAK_REV_SHORT_6H"
+          ? undefined // Core has native dynamically requested gross, not a fixed tier size.
+          : String(midpointRanks.get(String(r.route))?.tier) === "D"
+            ? 0.05 : Math.min(1, num(midpointRanks.get(String(r.route))?.gross) * 1.5)
+        : undefined,
+      midpointTrainCount: midpointRanks.get(String(r.route))
+        ? num(midpointRanks.get(String(r.route))?.n30) : undefined,
       metrics,
     };
   });
@@ -215,6 +251,17 @@ export async function loadV12V4ShadowObservability(options: { statePath?: string
     shadow: true,
     orderEnabled: false,
     capturedAt: state?.capturedAt === undefined ? undefined : String(state.capturedAt),
+    observedPolicyId: state?.policyId === MIDPOINT_ID ? MIDPOINT_ID : undefined,
+    midpointPriorityAvailable: midpointRankSource.length === 41,
+    midpointPromotionStatus: "BLOCKED_HINDSIGHT_LEAKAGE_AND_EXTERNAL_Y06",
+    midpointBt: {
+      "10bps": { finalEquityJpy: 291326103, dd: -0.20420014 },
+      "20bps": { finalEquityJpy: 231193740, dd: -0.20965901 },
+      "30bps": { finalEquityJpy: 174749524, dd: -0.18388765 },
+    },
+    midpointCaps: {
+      recoveryFamilyGross: 2.50, v12Gross: 3.00, cryptoGross: 3.50, totalGross: 4.75,
+    },
     stateAvailable: Boolean(state && state.orderEnabled === false && num(state.tradingMutation, -1) === 0),
     statePath,
     catalogAvailable: Boolean(catalog),

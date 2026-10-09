@@ -238,6 +238,7 @@ function makeLegId(candidate: V12V4ShadowCandidate, serial: number): string {
 export function admitV12V4ShadowCandidates(
   candidates: V12V4ShadowCandidate[],
   context: V12V4PortfolioContext = {},
+  caps: Readonly<Record<keyof typeof V12_V4_CAPS, number>> = V12_V4_CAPS,
 ): { accepted: V12V4VirtualLeg[]; rejected: V12V4RejectedLeg[]; activeLegs: V12V4VirtualLeg[] } {
   let active = [...(context.activeLegs || [])];
   const accepted: V12V4VirtualLeg[] = [];
@@ -252,7 +253,7 @@ export function admitV12V4ShadowCandidates(
     let gross = candidate.requestedGross;
     const venueMinGross = context.venueMinimumGrossBySymbol?.[candidate.symbol];
     if (finite(venueMinGross) && venueMinGross > gross) {
-      if (venueMinGross > V12_V4_CAPS.minLiftMaxGross + 1e-12) {
+      if (venueMinGross > caps.minLiftMaxGross + 1e-12) {
         reject(candidate, gross, "VENUE_MIN_LIFT_EXCEEDS_0.30X");
         continue;
       }
@@ -260,7 +261,7 @@ export function admitV12V4ShadowCandidates(
     }
 
     const routeActive = active.filter((leg) => leg.route === candidate.route);
-    if (isRecoveryFamily(candidate.family) && routeActive.length >= V12_V4_CAPS.recoveryRouteSlots) {
+    if (isRecoveryFamily(candidate.family) && routeActive.length >= caps.recoveryRouteSlots) {
       reject(candidate, gross, "RECOVERY_ROUTE_SLOT_OCCUPIED");
       continue;
     }
@@ -278,23 +279,23 @@ export function admitV12V4ShadowCandidates(
     }
 
     const recoveryGross = (context.recoveryFamilyGrossBefore || 0) + active.filter((x) => isRecoveryFamily(x.family)).reduce((s, x) => s + x.postMinLiftGross, 0);
-    if (isRecoveryFamily(candidate.family) && recoveryGross + gross > V12_V4_CAPS.recoveryFamilyGross + 1e-12) {
+    if (isRecoveryFamily(candidate.family) && recoveryGross + gross > caps.recoveryFamilyGross + 1e-12) {
       reject(candidate, gross, "RECOVERY_FAMILY_GROSS_CAP", preempted);
       continue;
     }
 
     const v12Gross = (context.v12GrossBefore || 0) + active.reduce((s, x) => s + x.postMinLiftGross, 0);
-    if (v12Gross + gross > V12_V4_CAPS.v12Gross + 1e-12) {
+    if (v12Gross + gross > caps.v12Gross + 1e-12) {
       reject(candidate, gross, "V12_GROSS_CAP", preempted);
       continue;
     }
     const cryptoGross = (context.cryptoGrossBefore || 0) + active.reduce((s, x) => s + x.postMinLiftGross, 0);
-    if (cryptoGross + gross > V12_V4_CAPS.cryptoGross + 1e-12) {
+    if (cryptoGross + gross > caps.cryptoGross + 1e-12) {
       reject(candidate, gross, "CRYPTO_GROSS_CAP", preempted);
       continue;
     }
     const totalGross = (context.totalGrossBefore || 0) + active.reduce((s, x) => s + x.postMinLiftGross, 0);
-    if (totalGross + gross > V12_V4_CAPS.totalGross + 1e-12) {
+    if (totalGross + gross > caps.totalGross + 1e-12) {
       reject(candidate, gross, "TOTAL_GROSS_CAP", preempted);
       continue;
     }

@@ -3,8 +3,15 @@ import { dirname, isAbsolute, resolve } from "node:path";
 
 import { buildV12V4ShadowSnapshot, type V12V4Features, type V12V4PortfolioContext } from "../lib/v12-multilogic-v4-shadow";
 
+import {
+  buildV12V4V2ShadowSnapshot,
+  V12_V4_V2_POLICY,
+  type V12V4V2Features,
+} from "../lib/v12-v4-v2-shadow";
+
 type Input = {
-  observations: V12V4Features[];
+  policyId?: typeof V12_V4_V2_POLICY;
+  observations: V12V4V2Features[];
   context?: V12V4PortfolioContext;
 };
 
@@ -19,7 +26,11 @@ function absoluteOrResolve(value: string) {
 async function loadInput(path: string): Promise<Input> {
   const raw = JSON.parse(await readFile(path, "utf8")) as Partial<Input>;
   if (!Array.isArray(raw.observations)) throw new Error("V12_V4_SHADOW_INPUT_OBSERVATIONS_REQUIRED");
-  return { observations: raw.observations, context: raw.context };
+  const policyId = raw.policyId;
+  if (policyId !== undefined && policyId !== V12_V4_V2_POLICY) {
+    throw new Error("V12_V4_UNRECOGNIZED_SHADOW_POLICY");
+  }
+  return { policyId, observations: raw.observations, context: raw.context };
 }
 
 async function atomicJson(path: string, value: unknown) {
@@ -37,11 +48,17 @@ export async function runV12V4ShadowOnce(options: {
   const inputPath = absoluteOrResolve(options.inputPath || process.env.V12_V4_SHADOW_INPUT_PATH || ".runtime-state/v12-v4-shadow-input.json");
   const statePath = absoluteOrResolve(options.statePath || process.env.V12_V4_SHADOW_STATE_PATH || ".runtime-state/v12-v4-shadow-state.json");
   const input = await loadInput(inputPath);
-  const snapshot = buildV12V4ShadowSnapshot({
-    observations: input.observations,
-    context: input.context,
-    capturedAt: options.capturedAt,
-  });
+  const snapshot = input.policyId === V12_V4_V2_POLICY
+    ? buildV12V4V2ShadowSnapshot({
+        observations: input.observations,
+        context: input.context,
+        capturedAt: options.capturedAt,
+      })
+    : buildV12V4ShadowSnapshot({
+        observations: input.observations,
+        context: input.context,
+        capturedAt: options.capturedAt,
+      });
   if (snapshot.orderEnabled !== false || snapshot.tradingMutation !== 0 || snapshot.counts.realOrderEnabledV4 !== 0) {
     throw new Error("V12_V4_SHADOW_SAFETY_INVARIANT_FAILED");
   }
@@ -90,6 +107,7 @@ async function main() {
     candidates: result.snapshot.counts.independentlyQualifyingCandidates,
     accepted: result.snapshot.counts.admittedShadowVirtualLegs,
     orderEnabled: result.snapshot.orderEnabled,
+    policyId: "policyId" in result.snapshot ? result.snapshot.policyId : "FROZEN_V4",
   }));
 }
 
