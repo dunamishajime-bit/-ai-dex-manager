@@ -74,6 +74,8 @@ export class V4ExecutionStore{
    for(const [cid,prior]of Object.entries(current.intents)){
     const next=proposed.intents[cid];
     if(!next||next.legId!==prior.legId||next.action!==prior.action||next.sequence!==prior.sequence||next.createdAt!==prior.createdAt||JSON.stringify(next.command)!==JSON.stringify(prior.command)||next.updatedAt<prior.updatedAt||
+      (prior.venueOrderId!==undefined&&next.venueOrderId!==prior.venueOrderId)||
+      (prior.sharedReservationId!==undefined&&next.sharedReservationId!==prior.sharedReservationId)||
       (next.stage!==prior.stage&&!transitions[prior.stage].includes(next.stage)))throw Error("INTENT_HISTORY_MUTATION");
    }
    for(const [cid,intent]of Object.entries(proposed.intents)){if(!current.intents[cid]&&intent.stage!=="PREPARED")throw Error("NEW_INTENT_MUST_BE_PREPARED");}

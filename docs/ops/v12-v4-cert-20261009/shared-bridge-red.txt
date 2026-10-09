@@ -1,0 +1,23 @@
+✔ shared reservation survives account-lock release and is not duplicated after reacquisition (41.0312ms)
+✔ unknown submission retains shared exposure and cannot be released from an order ACK (34.5034ms)
+✔ partial fill reduces only unfilled reservation while recorded position retains gross (28.9769ms)
+✔ reservation fails closed when account lease was released (8.7825ms)
+✔ peer reservation missing from the current account ledger prevents another admission (14.7554ms)
+✖ order bridge restart releases shared reservation only after verified fills are durably recorded (199.2895ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 5
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 716.172
+
+✖ failing tests:
+
+test at tests\v12-v4-shared-reservations.test.ts:2:8196
+✖ order bridge restart releases shared reservation only after verified fills are durably recorded (199.2895ms)
+  TypeError: bindV4SharedDispatchGuards is not a function
+      at TestContext.<anonymous> (C:\Users\dis\DisDex-v4-production-cert-20261009\tests\v12-v4-shared-reservations.test.ts:92:15)
+      at async Test.run (node:internal/test_runner/test:1110:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:785:7)

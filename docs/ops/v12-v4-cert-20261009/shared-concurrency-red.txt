@@ -1,0 +1,35 @@
+✔ shared reservation survives account-lock release and is not duplicated after reacquisition (39.2271ms)
+✔ unknown submission retains shared exposure and cannot be released from an order ACK (31.81ms)
+✔ partial fill reduces only unfilled reservation while recorded position retains gross (29.4209ms)
+✔ reservation fails closed when account lease was released (10.7755ms)
+✔ peer reservation missing from the current account ledger prevents another admission (12.4017ms)
+✔ order bridge restart releases shared reservation only after verified fills are durably recorded (214.8677ms)
+✖ concurrent managers sharing one account lease preserve both reservations (17.5237ms)
+ℹ tests 7
+ℹ suites 0
+ℹ pass 6
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 748.8494
+
+✖ failing tests:
+
+test at tests\v12-v4-shared-reservations.test.ts:2:11371
+✖ concurrent managers sharing one account lease preserve both reservations (17.5237ms)
+  Error: ENOENT: no such file or directory, rename 'C:\Users\dis\AppData\Local\Temp\v4-shared-bzoAJq\pending.json.107596.1791550169362.tmp' -> 'C:\Users\dis\AppData\Local\Temp\v4-shared-bzoAJq\pending.json'
+      at async rename (node:internal/fs/promises:782:10)
+      at async atomicWrite (C:\Users\dis\DisDex-v4-production-cert-20261009\lib\disdex-pending-exposure-registry.ts:165:9)
+      at async upsertPendingExposure (C:\Users\dis\DisDex-v4-production-cert-20261009\lib\disdex-pending-exposure-registry.ts:183:5)
+      at async V4SharedReservations.reserve (C:\Users\dis\DisDex-v4-production-cert-20261009\lib\v12-v4-shared-reservations.ts:75:13)
+      at async Promise.all (index 1)
+      at async TestContext.<anonymous> (C:\Users\dis\DisDex-v4-production-cert-20261009\tests\v12-v4-shared-reservations.test.ts:126:2)
+      at async Test.run (node:internal/test_runner/test:1110:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:785:7) {
+    errno: -4058,
+    code: 'ENOENT',
+    syscall: 'rename',
+    path: 'C:\\Users\\dis\\AppData\\Local\\Temp\\v4-shared-bzoAJq\\pending.json.107596.1791550169362.tmp',
+    dest: 'C:\\Users\\dis\\AppData\\Local\\Temp\\v4-shared-bzoAJq\\pending.json'
+  }

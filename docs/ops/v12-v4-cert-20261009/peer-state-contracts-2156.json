@@ -1,0 +1,1601 @@
+{
+  "v12-x1-all": {
+    "DISDEX_V96_V52_MARGIN_GUARD_STATE_FILE": {
+      "path": "/var/lib/disdex/shared/margin-risk/guard-live.json",
+      "rootType": "dict",
+      "keys": [
+        "accountConfiguration",
+        "action",
+        "activeManagedPositionCount",
+        "activeManagedPositions",
+        "availableBalanceUsd",
+        "cancelSent",
+        "checkedAt",
+        "consecutiveFailures",
+        "maintenanceMarginRatioPct",
+        "minimumLiquidationBufferPct",
+        "mode",
+        "nearestLiquidationSymbol",
+        "nextCheckAt",
+        "ordersAllowed",
+        "ordersSent",
+        "pollIntervalMs",
+        "positionChangesSent",
+        "schemaVersion",
+        "stage",
+        "strategyId",
+        "thresholds",
+        "totalMaintMarginUsd",
+        "totalMarginBalanceUsd",
+        "totalOpenOrderInitialMarginUsd",
+        "totalPositionInitialMarginUsd"
+      ],
+      "identity": {
+        "strategyId": "DISDEX_V96_V52_SHARED_MARGIN_GUARD"
+      },
+      "positions": {}
+    },
+    "V12_X1_ALL_STATE_PATH": {
+      "path": "/var/lib/disdex/v12-x1-all/runner.json",
+      "rootType": "dict",
+      "keys": [
+        "schema",
+        "strategyId",
+        "mode",
+        "updatedAt",
+        "runtimeCommitSha",
+        "lastReferenceTs",
+        "lastCompletedIdempotencyKey",
+        "cooldownUntilTs",
+        "reconciliationStatus",
+        "sideLossLedger",
+        "latestDd1296Decision"
+      ],
+      "identity": {
+        "schema": "v12-x1-all-runner-state/v2",
+        "strategyId": "V12_X1.00_ALL",
+        "runtimeCommitSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+        "updatedAt": 1791547215421
+      },
+      "positions": {}
+    },
+    "DISDEX_HYPE_ZEC_STATE_PATH": {
+      "path": "/var/lib/disdex/hype-zec-long/runner.json",
+      "rootType": "dict",
+      "keys": [
+        "schema",
+        "runtimeCommitSha",
+        "mode",
+        "updatedAt",
+        "lastDecisionTs",
+        "lastDecision",
+        "failures"
+      ],
+      "identity": {
+        "schema": "disdex-hype-zec-long/v1",
+        "runtimeCommitSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+        "updatedAt": 1791550285189,
+        "lastDecisionTs": 1791550285189
+      },
+      "positions": {}
+    },
+    "DISDEX_HYPE_ZEC_PREEMPTION_STATE_PATH": {
+      "path": "/var/lib/disdex/hype-zec-long/preemption.json",
+      "exists": false
+    },
+    "DISDEX_IDLE_PRIORITY_STATE_PATH": {
+      "path": "/var/lib/disdex/idle-priority/state.json",
+      "rootType": "dict",
+      "keys": [
+        "schema",
+        "runtimeSha",
+        "updatedAt",
+        "positions",
+        "manualReview",
+        "pending",
+        "lastDecision",
+        "lastAcceptedBySymbol",
+        "failures"
+      ],
+      "identity": {
+        "schema": "disdex-idle-priority-state/v2",
+        "runtimeSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+        "updatedAt": 1791550167865
+      },
+      "positions": {
+        "positions": [],
+        "pending": null
+      }
+    },
+    "DISDEX_IDLE_RESIDUAL_LONG_STATE_PATH": {
+      "path": "/var/lib/disdex/idle-priority/residual-long-state.json",
+      "rootType": "dict",
+      "keys": [
+        "schema",
+        "runtimeSha",
+        "updatedAt",
+        "position",
+        "pending",
+        "manualReview",
+        "lastDecision",
+        "failures"
+      ],
+      "identity": {
+        "schema": "disdex-idle-residual-long-state/v1",
+        "runtimeSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+        "updatedAt": 1791550171222
+      },
+      "positions": {
+        "position": null,
+        "pending": null
+      }
+    },
+    "PENGU_DUAL_LS_V2_STATE_PATH": {
+      "path": "/var/lib/disdex/pengu-dual-ls-v2/runner-live.json",
+      "rootType": "dict",
+      "keys": [
+        "version",
+        "strategyId",
+        "mode",
+        "updatedAt",
+        "lastRunAt",
+        "lastSignalReferenceTs",
+        "latestSignal",
+        "m05ShadowHistory",
+        "lastCompletedIdempotencyKey",
+        "cooldownUntilTs",
+        "riskOverlay",
+        "failures"
+      ],
+      "identity": {
+        "strategyId": "PENGU_DUAL_LS_V2_FINAL",
+        "updatedAt": 1791547210468
+      },
+      "positions": {}
+    },
+    "FET_BRK48_STATE_PATH": {
+      "path": "/var/lib/disdex/fet-brk48-residual/state.json",
+      "rootType": "dict",
+      "keys": [
+        "schema",
+        "strategyId",
+        "runtimeCommitSha",
+        "updatedAt",
+        "failures",
+        "lastReconciledAt",
+        "lastReferenceTs",
+        "lastCompletedIdempotencyKey",
+        "lastEvaluationDecisionTs",
+        "lastEvaluationCandidate",
+        "lastEvaluationReturn72h",
+        "lastEvaluationReturn72hObservedTs",
+        "lastExitTs",
+        "cooldownUntilTs",
+        "lastEvaluationReason"
+      ],
+      "identity": {
+        "schema": "fet-brk48-residual-state/v1",
+        "strategyId": "FET_BRK48_RESIDUAL",
+        "runtimeCommitSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+        "updatedAt": 1791550320126
+      },
+      "positions": {}
+    },
+    "DISDEX_V52_ASTER_ONLY_STATE_PATH": {
+      "path": "/var/lib/disdex/v52-aster-only/runner-live.json",
+      "rootType": "dict",
+      "keys": [
+        "dailyLossPct",
+        "dailyLossTripped",
+        "dayStartEquity",
+        "idleAdmissionDecisionTs",
+        "lastEquity",
+        "nyDay",
+        "pendingOrder",
+        "positions",
+        "referenceOrdersAllowed",
+        "referenceStatus",
+        "schemaVersion",
+        "strategyId",
+        "updatedAt",
+        "utcDay",
+        "v11Attempted",
+        "v11SignalAt",
+        "v11SignalBasis",
+        "v11SignalSelectedSymbol",
+        "v50Attempted",
+        "v50CompletedTrades",
+        "v50DailyEntries",
+        "v50DailyEntriesDay",
+        "v50SignalBasis",
+        "v50SignalSnapshotDay",
+        "v50SignalSnapshots",
+        "v50Top2Telemetry",
+        "v52EntryRetry",
+        "v52GateDiagnostics",
+        "v52Ledger",
+        "v52StrategyDailyLossLatch",
+        "v52Top2Telemetry"
+      ],
+      "identity": {
+        "strategyId": "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96",
+        "updatedAt": 1791550341883
+      },
+      "positions": {
+        "positions": {}
+      }
+    },
+    "QUALITY102_CAUSAL_V1_STATE_PATH": {
+      "path": "/var/lib/disdex/quality102-causal-v1/state.json",
+      "rootType": "dict",
+      "keys": [
+        "version",
+        "strategyId",
+        "mode",
+        "runtimeCommitSha",
+        "updatedAt",
+        "lastProcessedReferenceTs",
+        "lastCompletedIdempotencyKey",
+        "initialDaemonReconciliation",
+        "lastReconciledAt",
+        "failures"
+      ],
+      "identity": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "runtimeCommitSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+        "updatedAt": 1791547290798
+      },
+      "positions": {}
+    }
+  },
+  "pengu-dual-ls-v2": {
+    "DISDEX_V96_V52_MARGIN_GUARD_STATE_FILE": {
+      "path": "/var/lib/disdex/shared/margin-risk/guard-live.json",
+      "rootType": "dict",
+      "keys": [
+        "accountConfiguration",
+        "action",
+        "activeManagedPositionCount",
+        "activeManagedPositions",
+        "availableBalanceUsd",
+        "cancelSent",
+        "checkedAt",
+        "consecutiveFailures",
+        "maintenanceMarginRatioPct",
+        "minimumLiquidationBufferPct",
+        "mode",
+        "nearestLiquidationSymbol",
+        "nextCheckAt",
+        "ordersAllowed",
+        "ordersSent",
+        "pollIntervalMs",
+        "positionChangesSent",
+        "schemaVersion",
+        "stage",
+        "strategyId",
+        "thresholds",
+        "totalMaintMarginUsd",
+        "totalMarginBalanceUsd",
+        "totalOpenOrderInitialMarginUsd",
+        "totalPositionInitialMarginUsd"
+      ],
+      "identity": {
+        "strategyId": "DISDEX_V96_V52_SHARED_MARGIN_GUARD"
+      },
+      "positions": {}
+    },
+    "DISDEX_HYPE_ZEC_STATE_PATH": {
+      "path": "/var/lib/disdex/hype-zec-long/runner.json",
+      "rootType": "dict",
+      "keys": [
+        "schema",
+        "runtimeCommitSha",
+        "mode",
+        "updatedAt",
+        "lastDecisionTs",
+        "lastDecision",
+        "failures"
+      ],
+      "identity": {
+        "schema": "disdex-hype-zec-long/v1",
+        "runtimeCommitSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+        "updatedAt": 1791550285189,
+        "lastDecisionTs": 1791550285189
+      },
+      "positions": {}
+    },
+    "DISDEX_HYPE_ZEC_PREEMPTION_STATE_PATH": {
+      "path": "/var/lib/disdex/hype-zec-long/preemption.json",
+      "exists": false
+    },
+    "DISDEX_IDLE_PRIORITY_STATE_PATH": {
+      "path": "/var/lib/disdex/idle-priority/state.json",
+      "rootType": "dict",
+      "keys": [
+        "schema",
+        "runtimeSha",
+        "updatedAt",
+        "positions",
+        "manualReview",
+        "pending",
+        "lastDecision",
+        "lastAcceptedBySymbol",
+        "failures"
+      ],
+      "identity": {
+        "schema": "disdex-idle-priority-state/v2",
+        "runtimeSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+        "updatedAt": 1791550167865
+      },
+      "positions": {
+        "positions": [],
+        "pending": null
+      }
+    },
+    "DISDEX_IDLE_RESIDUAL_LONG_STATE_PATH": {
+      "path": "/var/lib/disdex/idle-priority/residual-long-state.json",
+      "rootType": "dict",
+      "keys": [
+        "schema",
+        "runtimeSha",
+        "updatedAt",
+        "position",
+        "pending",
+        "manualReview",
+        "lastDecision",
+        "failures"
+      ],
+      "identity": {
+        "schema": "disdex-idle-residual-long-state/v1",
+        "runtimeSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+        "updatedAt": 1791550171222
+      },
+      "positions": {
+        "position": null,
+        "pending": null
+      }
+    },
+    "PENGU_DUAL_LS_V2_STATE_PATH": {
+      "path": "/var/lib/disdex/pengu-dual-ls-v2/runner-live.json",
+      "rootType": "dict",
+      "keys": [
+        "version",
+        "strategyId",
+        "mode",
+        "updatedAt",
+        "lastRunAt",
+        "lastSignalReferenceTs",
+        "latestSignal",
+        "m05ShadowHistory",
+        "lastCompletedIdempotencyKey",
+        "cooldownUntilTs",
+        "riskOverlay",
+        "failures"
+      ],
+      "identity": {
+        "strategyId": "PENGU_DUAL_LS_V2_FINAL",
+        "updatedAt": 1791547210468
+      },
+      "positions": {}
+    },
+    "FET_BRK48_STATE_PATH": {
+      "path": "/var/lib/disdex/fet-brk48-residual/state.json",
+      "rootType": "dict",
+      "keys": [
+        "schema",
+        "strategyId",
+        "runtimeCommitSha",
+        "updatedAt",
+        "failures",
+        "lastReconciledAt",
+        "lastReferenceTs",
+        "lastCompletedIdempotencyKey",
+        "lastEvaluationDecisionTs",
+        "lastEvaluationCandidate",
+        "lastEvaluationReturn72h",
+        "lastEvaluationReturn72hObservedTs",
+        "lastExitTs",
+        "cooldownUntilTs",
+        "lastEvaluationReason"
+      ],
+      "identity": {
+        "schema": "fet-brk48-residual-state/v1",
+        "strategyId": "FET_BRK48_RESIDUAL",
+        "runtimeCommitSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+        "updatedAt": 1791550320126
+      },
+      "positions": {}
+    },
+    "DISDEX_V52_ASTER_ONLY_STATE_PATH": {
+      "path": "/var/lib/disdex/v52-aster-only/runner-live.json",
+      "rootType": "dict",
+      "keys": [
+        "dailyLossPct",
+        "dailyLossTripped",
+        "dayStartEquity",
+        "idleAdmissionDecisionTs",
+        "lastEquity",
+        "nyDay",
+        "pendingOrder",
+        "positions",
+        "referenceOrdersAllowed",
+        "referenceStatus",
+        "schemaVersion",
+        "strategyId",
+        "updatedAt",
+        "utcDay",
+        "v11Attempted",
+        "v11SignalAt",
+        "v11SignalBasis",
+        "v11SignalSelectedSymbol",
+        "v50Attempted",
+        "v50CompletedTrades",
+        "v50DailyEntries",
+        "v50DailyEntriesDay",
+        "v50SignalBasis",
+        "v50SignalSnapshotDay",
+        "v50SignalSnapshots",
+        "v50Top2Telemetry",
+        "v52EntryRetry",
+        "v52GateDiagnostics",
+        "v52Ledger",
+        "v52StrategyDailyLossLatch",
+        "v52Top2Telemetry"
+      ],
+      "identity": {
+        "strategyId": "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96",
+        "updatedAt": 1791550341883
+      },
+      "positions": {
+        "positions": {}
+      }
+    },
+    "QUALITY102_CAUSAL_V1_STATE_PATH": {
+      "path": "/var/lib/disdex/quality102-causal-v1/state.json",
+      "rootType": "dict",
+      "keys": [
+        "version",
+        "strategyId",
+        "mode",
+        "runtimeCommitSha",
+        "updatedAt",
+        "lastProcessedReferenceTs",
+        "lastCompletedIdempotencyKey",
+        "initialDaemonReconciliation",
+        "lastReconciledAt",
+        "failures"
+      ],
+      "identity": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "runtimeCommitSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+        "updatedAt": 1791547290798
+      },
+      "positions": {}
+    }
+  },
+  "quality102-causal-v1": {
+    "DISDEX_V96_V52_MARGIN_GUARD_STATE_FILE": {
+      "path": "/var/lib/disdex/shared/margin-risk/guard-live.json",
+      "rootType": "dict",
+      "keys": [
+        "accountConfiguration",
+        "action",
+        "activeManagedPositionCount",
+        "activeManagedPositions",
+        "availableBalanceUsd",
+        "cancelSent",
+        "checkedAt",
+        "consecutiveFailures",
+        "maintenanceMarginRatioPct",
+        "minimumLiquidationBufferPct",
+        "mode",
+        "nearestLiquidationSymbol",
+        "nextCheckAt",
+        "ordersAllowed",
+        "ordersSent",
+        "pollIntervalMs",
+        "positionChangesSent",
+        "schemaVersion",
+        "stage",
+        "strategyId",
+        "thresholds",
+        "totalMaintMarginUsd",
+        "totalMarginBalanceUsd",
+        "totalOpenOrderInitialMarginUsd",
+        "totalPositionInitialMarginUsd"
+      ],
+      "identity": {
+        "strategyId": "DISDEX_V96_V52_SHARED_MARGIN_GUARD"
+      },
+      "positions": {}
+    },
+    "QUALITY102_CAUSAL_V1_STATE_PATH": {
+      "path": "/var/lib/disdex/quality102-causal-v1/state.json",
+      "rootType": "dict",
+      "keys": [
+        "version",
+        "strategyId",
+        "mode",
+        "runtimeCommitSha",
+        "updatedAt",
+        "lastProcessedReferenceTs",
+        "lastCompletedIdempotencyKey",
+        "initialDaemonReconciliation",
+        "lastReconciledAt",
+        "failures"
+      ],
+      "identity": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "runtimeCommitSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+        "updatedAt": 1791547290798
+      },
+      "positions": {}
+    },
+    "DISDEX_HYPE_ZEC_STATE_PATH": {
+      "path": "/var/lib/disdex/hype-zec-long/runner.json",
+      "rootType": "dict",
+      "keys": [
+        "schema",
+        "runtimeCommitSha",
+        "mode",
+        "updatedAt",
+        "lastDecisionTs",
+        "lastDecision",
+        "failures"
+      ],
+      "identity": {
+        "schema": "disdex-hype-zec-long/v1",
+        "runtimeCommitSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+        "updatedAt": 1791550285189,
+        "lastDecisionTs": 1791550285189
+      },
+      "positions": {}
+    },
+    "DISDEX_HYPE_ZEC_PREEMPTION_STATE_PATH": {
+      "path": "/var/lib/disdex/hype-zec-long/preemption.json",
+      "exists": false
+    },
+    "DISDEX_IDLE_PRIORITY_STATE_PATH": {
+      "path": "/var/lib/disdex/idle-priority/state.json",
+      "rootType": "dict",
+      "keys": [
+        "schema",
+        "runtimeSha",
+        "updatedAt",
+        "positions",
+        "manualReview",
+        "pending",
+        "lastDecision",
+        "lastAcceptedBySymbol",
+        "failures"
+      ],
+      "identity": {
+        "schema": "disdex-idle-priority-state/v2",
+        "runtimeSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+        "updatedAt": 1791550167865
+      },
+      "positions": {
+        "positions": [],
+        "pending": null
+      }
+    },
+    "DISDEX_IDLE_RESIDUAL_LONG_STATE_PATH": {
+      "path": "/var/lib/disdex/idle-priority/residual-long-state.json",
+      "rootType": "dict",
+      "keys": [
+        "schema",
+        "runtimeSha",
+        "updatedAt",
+        "position",
+        "pending",
+        "manualReview",
+        "lastDecision",
+        "failures"
+      ],
+      "identity": {
+        "schema": "disdex-idle-residual-long-state/v1",
+        "runtimeSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+        "updatedAt": 1791550171222
+      },
+      "positions": {
+        "position": null,
+        "pending": null
+      }
+    },
+    "PENGU_DUAL_LS_V2_STATE_PATH": {
+      "path": "/var/lib/disdex/pengu-dual-ls-v2/runner-live.json",
+      "rootType": "dict",
+      "keys": [
+        "version",
+        "strategyId",
+        "mode",
+        "updatedAt",
+        "lastRunAt",
+        "lastSignalReferenceTs",
+        "latestSignal",
+        "m05ShadowHistory",
+        "lastCompletedIdempotencyKey",
+        "cooldownUntilTs",
+        "riskOverlay",
+        "failures"
+      ],
+      "identity": {
+        "strategyId": "PENGU_DUAL_LS_V2_FINAL",
+        "updatedAt": 1791547210468
+      },
+      "positions": {}
+    },
+    "FET_BRK48_STATE_PATH": {
+      "path": "/var/lib/disdex/fet-brk48-residual/state.json",
+      "rootType": "dict",
+      "keys": [
+        "schema",
+        "strategyId",
+        "runtimeCommitSha",
+        "updatedAt",
+        "failures",
+        "lastReconciledAt",
+        "lastReferenceTs",
+        "lastCompletedIdempotencyKey",
+        "lastEvaluationDecisionTs",
+        "lastEvaluationCandidate",
+        "lastEvaluationReturn72h",
+        "lastEvaluationReturn72hObservedTs",
+        "lastExitTs",
+        "cooldownUntilTs",
+        "lastEvaluationReason"
+      ],
+      "identity": {
+        "schema": "fet-brk48-residual-state/v1",
+        "strategyId": "FET_BRK48_RESIDUAL",
+        "runtimeCommitSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+        "updatedAt": 1791550320126
+      },
+      "positions": {}
+    },
+    "DISDEX_V52_ASTER_ONLY_STATE_PATH": {
+      "path": "/var/lib/disdex/v52-aster-only/runner-live.json",
+      "rootType": "dict",
+      "keys": [
+        "dailyLossPct",
+        "dailyLossTripped",
+        "dayStartEquity",
+        "idleAdmissionDecisionTs",
+        "lastEquity",
+        "nyDay",
+        "pendingOrder",
+        "positions",
+        "referenceOrdersAllowed",
+        "referenceStatus",
+        "schemaVersion",
+        "strategyId",
+        "updatedAt",
+        "utcDay",
+        "v11Attempted",
+        "v11SignalAt",
+        "v11SignalBasis",
+        "v11SignalSelectedSymbol",
+        "v50Attempted",
+        "v50CompletedTrades",
+        "v50DailyEntries",
+        "v50DailyEntriesDay",
+        "v50SignalBasis",
+        "v50SignalSnapshotDay",
+        "v50SignalSnapshots",
+        "v50Top2Telemetry",
+        "v52EntryRetry",
+        "v52GateDiagnostics",
+        "v52Ledger",
+        "v52StrategyDailyLossLatch",
+        "v52Top2Telemetry"
+      ],
+      "identity": {
+        "strategyId": "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96",
+        "updatedAt": 1791550341883
+      },
+      "positions": {
+        "positions": {}
+      }
+    }
+  },
+  "v52-aster-only": {
+    "DISDEX_V96_V52_MARGIN_GUARD_STATE_FILE": {
+      "path": "/var/lib/disdex/shared/margin-risk/guard-live.json",
+      "rootType": "dict",
+      "keys": [
+        "accountConfiguration",
+        "action",
+        "activeManagedPositionCount",
+        "activeManagedPositions",
+        "availableBalanceUsd",
+        "cancelSent",
+        "checkedAt",
+        "consecutiveFailures",
+        "maintenanceMarginRatioPct",
+        "minimumLiquidationBufferPct",
+        "mode",
+        "nearestLiquidationSymbol",
+        "nextCheckAt",
+        "ordersAllowed",
+        "ordersSent",
+        "pollIntervalMs",
+        "positionChangesSent",
+        "schemaVersion",
+        "stage",
+        "strategyId",
+        "thresholds",
+        "totalMaintMarginUsd",
+        "totalMarginBalanceUsd",
+        "totalOpenOrderInitialMarginUsd",
+        "totalPositionInitialMarginUsd"
+      ],
+      "identity": {
+        "strategyId": "DISDEX_V96_V52_SHARED_MARGIN_GUARD"
+      },
+      "positions": {}
+    },
+    "DISDEX_HYPE_ZEC_STATE_PATH": {
+      "path": "/var/lib/disdex/hype-zec-long/runner.json",
+      "rootType": "dict",
+      "keys": [
+        "schema",
+        "runtimeCommitSha",
+        "mode",
+        "updatedAt",
+        "lastDecisionTs",
+        "lastDecision",
+        "failures"
+      ],
+      "identity": {
+        "schema": "disdex-hype-zec-long/v1",
+        "runtimeCommitSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+        "updatedAt": 1791550285189,
+        "lastDecisionTs": 1791550285189
+      },
+      "positions": {}
+    },
+    "DISDEX_HYPE_ZEC_PREEMPTION_STATE_PATH": {
+      "path": "/var/lib/disdex/hype-zec-long/preemption.json",
+      "exists": false
+    },
+    "DISDEX_IDLE_PRIORITY_STATE_PATH": {
+      "path": "/var/lib/disdex/idle-priority/state.json",
+      "rootType": "dict",
+      "keys": [
+        "schema",
+        "runtimeSha",
+        "updatedAt",
+        "positions",
+        "manualReview",
+        "pending",
+        "lastDecision",
+        "lastAcceptedBySymbol",
+        "failures"
+      ],
+      "identity": {
+        "schema": "disdex-idle-priority-state/v2",
+        "runtimeSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+        "updatedAt": 1791550167865
+      },
+      "positions": {
+        "positions": [],
+        "pending": null
+      }
+    },
+    "DISDEX_IDLE_RESIDUAL_LONG_STATE_PATH": {
+      "path": "/var/lib/disdex/idle-priority/residual-long-state.json",
+      "rootType": "dict",
+      "keys": [
+        "schema",
+        "runtimeSha",
+        "updatedAt",
+        "position",
+        "pending",
+        "manualReview",
+        "lastDecision",
+        "failures"
+      ],
+      "identity": {
+        "schema": "disdex-idle-residual-long-state/v1",
+        "runtimeSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+        "updatedAt": 1791550171222
+      },
+      "positions": {
+        "position": null,
+        "pending": null
+      }
+    },
+    "PENGU_DUAL_LS_V2_STATE_PATH": {
+      "path": "/var/lib/disdex/pengu-dual-ls-v2/runner-live.json",
+      "rootType": "dict",
+      "keys": [
+        "version",
+        "strategyId",
+        "mode",
+        "updatedAt",
+        "lastRunAt",
+        "lastSignalReferenceTs",
+        "latestSignal",
+        "m05ShadowHistory",
+        "lastCompletedIdempotencyKey",
+        "cooldownUntilTs",
+        "riskOverlay",
+        "failures"
+      ],
+      "identity": {
+        "strategyId": "PENGU_DUAL_LS_V2_FINAL",
+        "updatedAt": 1791547210468
+      },
+      "positions": {}
+    },
+    "FET_BRK48_STATE_PATH": {
+      "path": "/var/lib/disdex/fet-brk48-residual/state.json",
+      "rootType": "dict",
+      "keys": [
+        "schema",
+        "strategyId",
+        "runtimeCommitSha",
+        "updatedAt",
+        "failures",
+        "lastReconciledAt",
+        "lastReferenceTs",
+        "lastCompletedIdempotencyKey",
+        "lastEvaluationDecisionTs",
+        "lastEvaluationCandidate",
+        "lastEvaluationReturn72h",
+        "lastEvaluationReturn72hObservedTs",
+        "lastExitTs",
+        "cooldownUntilTs",
+        "lastEvaluationReason"
+      ],
+      "identity": {
+        "schema": "fet-brk48-residual-state/v1",
+        "strategyId": "FET_BRK48_RESIDUAL",
+        "runtimeCommitSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+        "updatedAt": 1791550320126
+      },
+      "positions": {}
+    },
+    "DISDEX_V52_ASTER_ONLY_STATE_PATH": {
+      "path": "/var/lib/disdex/v52-aster-only/runner-live.json",
+      "rootType": "dict",
+      "keys": [
+        "dailyLossPct",
+        "dailyLossTripped",
+        "dayStartEquity",
+        "idleAdmissionDecisionTs",
+        "lastEquity",
+        "nyDay",
+        "pendingOrder",
+        "positions",
+        "referenceOrdersAllowed",
+        "referenceStatus",
+        "schemaVersion",
+        "strategyId",
+        "updatedAt",
+        "utcDay",
+        "v11Attempted",
+        "v11SignalAt",
+        "v11SignalBasis",
+        "v11SignalSelectedSymbol",
+        "v50Attempted",
+        "v50CompletedTrades",
+        "v50DailyEntries",
+        "v50DailyEntriesDay",
+        "v50SignalBasis",
+        "v50SignalSnapshotDay",
+        "v50SignalSnapshots",
+        "v50Top2Telemetry",
+        "v52EntryRetry",
+        "v52GateDiagnostics",
+        "v52Ledger",
+        "v52StrategyDailyLossLatch",
+        "v52Top2Telemetry"
+      ],
+      "identity": {
+        "strategyId": "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96",
+        "updatedAt": 1791550341883
+      },
+      "positions": {
+        "positions": {}
+      }
+    },
+    "QUALITY102_CAUSAL_V1_STATE_PATH": {
+      "path": "/var/lib/disdex/quality102-causal-v1/state.json",
+      "rootType": "dict",
+      "keys": [
+        "version",
+        "strategyId",
+        "mode",
+        "runtimeCommitSha",
+        "updatedAt",
+        "lastProcessedReferenceTs",
+        "lastCompletedIdempotencyKey",
+        "initialDaemonReconciliation",
+        "lastReconciledAt",
+        "failures"
+      ],
+      "identity": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "runtimeCommitSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+        "updatedAt": 1791547290798
+      },
+      "positions": {}
+    }
+  },
+  "hype-long": {
+    "DISDEX_V96_V52_MARGIN_GUARD_STATE_FILE": {
+      "path": "/var/lib/disdex/shared/margin-risk/guard-live.json",
+      "rootType": "dict",
+      "keys": [
+        "accountConfiguration",
+        "action",
+        "activeManagedPositionCount",
+        "activeManagedPositions",
+        "availableBalanceUsd",
+        "cancelSent",
+        "checkedAt",
+        "consecutiveFailures",
+        "maintenanceMarginRatioPct",
+        "minimumLiquidationBufferPct",
+        "mode",
+        "nearestLiquidationSymbol",
+        "nextCheckAt",
+        "ordersAllowed",
+        "ordersSent",
+        "pollIntervalMs",
+        "positionChangesSent",
+        "schemaVersion",
+        "stage",
+        "strategyId",
+        "thresholds",
+        "totalMaintMarginUsd",
+        "totalMarginBalanceUsd",
+        "totalOpenOrderInitialMarginUsd",
+        "totalPositionInitialMarginUsd"
+      ],
+      "identity": {
+        "strategyId": "DISDEX_V96_V52_SHARED_MARGIN_GUARD"
+      },
+      "positions": {}
+    },
+    "QUALITY102_CAUSAL_V1_STATE_PATH": {
+      "path": "/var/lib/disdex/quality102-causal-v1/state.json",
+      "rootType": "dict",
+      "keys": [
+        "version",
+        "strategyId",
+        "mode",
+        "runtimeCommitSha",
+        "updatedAt",
+        "lastProcessedReferenceTs",
+        "lastCompletedIdempotencyKey",
+        "initialDaemonReconciliation",
+        "lastReconciledAt",
+        "failures"
+      ],
+      "identity": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "runtimeCommitSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+        "updatedAt": 1791547290798
+      },
+      "positions": {}
+    },
+    "DISDEX_HYPE_ZEC_STATE_PATH": {
+      "path": "/var/lib/disdex/hype-zec-long/runner.json",
+      "rootType": "dict",
+      "keys": [
+        "schema",
+        "runtimeCommitSha",
+        "mode",
+        "updatedAt",
+        "lastDecisionTs",
+        "lastDecision",
+        "failures"
+      ],
+      "identity": {
+        "schema": "disdex-hype-zec-long/v1",
+        "runtimeCommitSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+        "updatedAt": 1791550285189,
+        "lastDecisionTs": 1791550285189
+      },
+      "positions": {}
+    },
+    "DISDEX_HYPE_ZEC_PREEMPTION_STATE_PATH": {
+      "path": "/var/lib/disdex/hype-zec-long/preemption.json",
+      "exists": false
+    },
+    "DISDEX_IDLE_PRIORITY_STATE_PATH": {
+      "path": "/var/lib/disdex/idle-priority/state.json",
+      "rootType": "dict",
+      "keys": [
+        "schema",
+        "runtimeSha",
+        "updatedAt",
+        "positions",
+        "manualReview",
+        "pending",
+        "lastDecision",
+        "lastAcceptedBySymbol",
+        "failures"
+      ],
+      "identity": {
+        "schema": "disdex-idle-priority-state/v2",
+        "runtimeSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+        "updatedAt": 1791550167865
+      },
+      "positions": {
+        "positions": [],
+        "pending": null
+      }
+    },
+    "DISDEX_IDLE_RESIDUAL_LONG_STATE_PATH": {
+      "path": "/var/lib/disdex/idle-priority/residual-long-state.json",
+      "rootType": "dict",
+      "keys": [
+        "schema",
+        "runtimeSha",
+        "updatedAt",
+        "position",
+        "pending",
+        "manualReview",
+        "lastDecision",
+        "failures"
+      ],
+      "identity": {
+        "schema": "disdex-idle-residual-long-state/v1",
+        "runtimeSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+        "updatedAt": 1791550171222
+      },
+      "positions": {
+        "position": null,
+        "pending": null
+      }
+    },
+    "PENGU_DUAL_LS_V2_STATE_PATH": {
+      "path": "/var/lib/disdex/pengu-dual-ls-v2/runner-live.json",
+      "rootType": "dict",
+      "keys": [
+        "version",
+        "strategyId",
+        "mode",
+        "updatedAt",
+        "lastRunAt",
+        "lastSignalReferenceTs",
+        "latestSignal",
+        "m05ShadowHistory",
+        "lastCompletedIdempotencyKey",
+        "cooldownUntilTs",
+        "riskOverlay",
+        "failures"
+      ],
+      "identity": {
+        "strategyId": "PENGU_DUAL_LS_V2_FINAL",
+        "updatedAt": 1791547210468
+      },
+      "positions": {}
+    },
+    "FET_BRK48_STATE_PATH": {
+      "path": "/var/lib/disdex/fet-brk48-residual/state.json",
+      "rootType": "dict",
+      "keys": [
+        "schema",
+        "strategyId",
+        "runtimeCommitSha",
+        "updatedAt",
+        "failures",
+        "lastReconciledAt",
+        "lastReferenceTs",
+        "lastCompletedIdempotencyKey",
+        "lastEvaluationDecisionTs",
+        "lastEvaluationCandidate",
+        "lastEvaluationReturn72h",
+        "lastEvaluationReturn72hObservedTs",
+        "lastExitTs",
+        "cooldownUntilTs",
+        "lastEvaluationReason"
+      ],
+      "identity": {
+        "schema": "fet-brk48-residual-state/v1",
+        "strategyId": "FET_BRK48_RESIDUAL",
+        "runtimeCommitSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+        "updatedAt": 1791550320126
+      },
+      "positions": {}
+    },
+    "DISDEX_V52_ASTER_ONLY_STATE_PATH": {
+      "path": "/var/lib/disdex/v52-aster-only/runner-live.json",
+      "rootType": "dict",
+      "keys": [
+        "dailyLossPct",
+        "dailyLossTripped",
+        "dayStartEquity",
+        "idleAdmissionDecisionTs",
+        "lastEquity",
+        "nyDay",
+        "pendingOrder",
+        "positions",
+        "referenceOrdersAllowed",
+        "referenceStatus",
+        "schemaVersion",
+        "strategyId",
+        "updatedAt",
+        "utcDay",
+        "v11Attempted",
+        "v11SignalAt",
+        "v11SignalBasis",
+        "v11SignalSelectedSymbol",
+        "v50Attempted",
+        "v50CompletedTrades",
+        "v50DailyEntries",
+        "v50DailyEntriesDay",
+        "v50SignalBasis",
+        "v50SignalSnapshotDay",
+        "v50SignalSnapshots",
+        "v50Top2Telemetry",
+        "v52EntryRetry",
+        "v52GateDiagnostics",
+        "v52Ledger",
+        "v52StrategyDailyLossLatch",
+        "v52Top2Telemetry"
+      ],
+      "identity": {
+        "strategyId": "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96",
+        "updatedAt": 1791550341883
+      },
+      "positions": {
+        "positions": {}
+      }
+    }
+  },
+  "fet-brk48": {
+    "DISDEX_V96_V52_MARGIN_GUARD_STATE_FILE": {
+      "path": "/var/lib/disdex/shared/margin-risk/guard-live.json",
+      "rootType": "dict",
+      "keys": [
+        "accountConfiguration",
+        "action",
+        "activeManagedPositionCount",
+        "activeManagedPositions",
+        "availableBalanceUsd",
+        "cancelSent",
+        "checkedAt",
+        "consecutiveFailures",
+        "maintenanceMarginRatioPct",
+        "minimumLiquidationBufferPct",
+        "mode",
+        "nearestLiquidationSymbol",
+        "nextCheckAt",
+        "ordersAllowed",
+        "ordersSent",
+        "pollIntervalMs",
+        "positionChangesSent",
+        "schemaVersion",
+        "stage",
+        "strategyId",
+        "thresholds",
+        "totalMaintMarginUsd",
+        "totalMarginBalanceUsd",
+        "totalOpenOrderInitialMarginUsd",
+        "totalPositionInitialMarginUsd"
+      ],
+      "identity": {
+        "strategyId": "DISDEX_V96_V52_SHARED_MARGIN_GUARD"
+      },
+      "positions": {}
+    },
+    "QUALITY102_CAUSAL_V1_STATE_PATH": {
+      "path": "/var/lib/disdex/quality102-causal-v1/state.json",
+      "rootType": "dict",
+      "keys": [
+        "version",
+        "strategyId",
+        "mode",
+        "runtimeCommitSha",
+        "updatedAt",
+        "lastProcessedReferenceTs",
+        "lastCompletedIdempotencyKey",
+        "initialDaemonReconciliation",
+        "lastReconciledAt",
+        "failures"
+      ],
+      "identity": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "runtimeCommitSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+        "updatedAt": 1791547290798
+      },
+      "positions": {}
+    },
+    "DISDEX_HYPE_ZEC_STATE_PATH": {
+      "path": "/var/lib/disdex/hype-zec-long/runner.json",
+      "rootType": "dict",
+      "keys": [
+        "schema",
+        "runtimeCommitSha",
+        "mode",
+        "updatedAt",
+        "lastDecisionTs",
+        "lastDecision",
+        "failures"
+      ],
+      "identity": {
+        "schema": "disdex-hype-zec-long/v1",
+        "runtimeCommitSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+        "updatedAt": 1791550285189,
+        "lastDecisionTs": 1791550285189
+      },
+      "positions": {}
+    },
+    "DISDEX_HYPE_ZEC_PREEMPTION_STATE_PATH": {
+      "path": "/var/lib/disdex/hype-zec-long/preemption.json",
+      "exists": false
+    },
+    "DISDEX_IDLE_PRIORITY_STATE_PATH": {
+      "path": "/var/lib/disdex/idle-priority/state.json",
+      "rootType": "dict",
+      "keys": [
+        "schema",
+        "runtimeSha",
+        "updatedAt",
+        "positions",
+        "manualReview",
+        "pending",
+        "lastDecision",
+        "lastAcceptedBySymbol",
+        "failures"
+      ],
+      "identity": {
+        "schema": "disdex-idle-priority-state/v2",
+        "runtimeSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+        "updatedAt": 1791550167865
+      },
+      "positions": {
+        "positions": [],
+        "pending": null
+      }
+    },
+    "DISDEX_IDLE_RESIDUAL_LONG_STATE_PATH": {
+      "path": "/var/lib/disdex/idle-priority/residual-long-state.json",
+      "rootType": "dict",
+      "keys": [
+        "schema",
+        "runtimeSha",
+        "updatedAt",
+        "position",
+        "pending",
+        "manualReview",
+        "lastDecision",
+        "failures"
+      ],
+      "identity": {
+        "schema": "disdex-idle-residual-long-state/v1",
+        "runtimeSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+        "updatedAt": 1791550171222
+      },
+      "positions": {
+        "position": null,
+        "pending": null
+      }
+    },
+    "PENGU_DUAL_LS_V2_STATE_PATH": {
+      "path": "/var/lib/disdex/pengu-dual-ls-v2/runner-live.json",
+      "rootType": "dict",
+      "keys": [
+        "version",
+        "strategyId",
+        "mode",
+        "updatedAt",
+        "lastRunAt",
+        "lastSignalReferenceTs",
+        "latestSignal",
+        "m05ShadowHistory",
+        "lastCompletedIdempotencyKey",
+        "cooldownUntilTs",
+        "riskOverlay",
+        "failures"
+      ],
+      "identity": {
+        "strategyId": "PENGU_DUAL_LS_V2_FINAL",
+        "updatedAt": 1791547210468
+      },
+      "positions": {}
+    },
+    "FET_BRK48_STATE_PATH": {
+      "path": "/var/lib/disdex/fet-brk48-residual/state.json",
+      "rootType": "dict",
+      "keys": [
+        "schema",
+        "strategyId",
+        "runtimeCommitSha",
+        "updatedAt",
+        "failures",
+        "lastReconciledAt",
+        "lastReferenceTs",
+        "lastCompletedIdempotencyKey",
+        "lastEvaluationDecisionTs",
+        "lastEvaluationCandidate",
+        "lastEvaluationReturn72h",
+        "lastEvaluationReturn72hObservedTs",
+        "lastExitTs",
+        "cooldownUntilTs",
+        "lastEvaluationReason"
+      ],
+      "identity": {
+        "schema": "fet-brk48-residual-state/v1",
+        "strategyId": "FET_BRK48_RESIDUAL",
+        "runtimeCommitSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+        "updatedAt": 1791550320126
+      },
+      "positions": {}
+    },
+    "DISDEX_V52_ASTER_ONLY_STATE_PATH": {
+      "path": "/var/lib/disdex/v52-aster-only/runner-live.json",
+      "rootType": "dict",
+      "keys": [
+        "dailyLossPct",
+        "dailyLossTripped",
+        "dayStartEquity",
+        "idleAdmissionDecisionTs",
+        "lastEquity",
+        "nyDay",
+        "pendingOrder",
+        "positions",
+        "referenceOrdersAllowed",
+        "referenceStatus",
+        "schemaVersion",
+        "strategyId",
+        "updatedAt",
+        "utcDay",
+        "v11Attempted",
+        "v11SignalAt",
+        "v11SignalBasis",
+        "v11SignalSelectedSymbol",
+        "v50Attempted",
+        "v50CompletedTrades",
+        "v50DailyEntries",
+        "v50DailyEntriesDay",
+        "v50SignalBasis",
+        "v50SignalSnapshotDay",
+        "v50SignalSnapshots",
+        "v50Top2Telemetry",
+        "v52EntryRetry",
+        "v52GateDiagnostics",
+        "v52Ledger",
+        "v52StrategyDailyLossLatch",
+        "v52Top2Telemetry"
+      ],
+      "identity": {
+        "strategyId": "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96",
+        "updatedAt": 1791550341883
+      },
+      "positions": {
+        "positions": {}
+      }
+    }
+  },
+  "idle-priority-short": {
+    "DISDEX_V96_V52_MARGIN_GUARD_STATE_FILE": {
+      "path": "/var/lib/disdex/shared/margin-risk/guard-live.json",
+      "rootType": "dict",
+      "keys": [
+        "accountConfiguration",
+        "action",
+        "activeManagedPositionCount",
+        "activeManagedPositions",
+        "availableBalanceUsd",
+        "cancelSent",
+        "checkedAt",
+        "consecutiveFailures",
+        "maintenanceMarginRatioPct",
+        "minimumLiquidationBufferPct",
+        "mode",
+        "nearestLiquidationSymbol",
+        "nextCheckAt",
+        "ordersAllowed",
+        "ordersSent",
+        "pollIntervalMs",
+        "positionChangesSent",
+        "schemaVersion",
+        "stage",
+        "strategyId",
+        "thresholds",
+        "totalMaintMarginUsd",
+        "totalMarginBalanceUsd",
+        "totalOpenOrderInitialMarginUsd",
+        "totalPositionInitialMarginUsd"
+      ],
+      "identity": {
+        "strategyId": "DISDEX_V96_V52_SHARED_MARGIN_GUARD"
+      },
+      "positions": {}
+    },
+    "QUALITY102_CAUSAL_V1_STATE_PATH": {
+      "path": "/var/lib/disdex/quality102-causal-v1/state.json",
+      "rootType": "dict",
+      "keys": [
+        "version",
+        "strategyId",
+        "mode",
+        "runtimeCommitSha",
+        "updatedAt",
+        "lastProcessedReferenceTs",
+        "lastCompletedIdempotencyKey",
+        "initialDaemonReconciliation",
+        "lastReconciledAt",
+        "failures"
+      ],
+      "identity": {
+        "strategyId": "QUALITY102_CAUSAL_V1",
+        "runtimeCommitSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+        "updatedAt": 1791547290798
+      },
+      "positions": {}
+    },
+    "DISDEX_HYPE_ZEC_STATE_PATH": {
+      "path": "/var/lib/disdex/hype-zec-long/runner.json",
+      "rootType": "dict",
+      "keys": [
+        "schema",
+        "runtimeCommitSha",
+        "mode",
+        "updatedAt",
+        "lastDecisionTs",
+        "lastDecision",
+        "failures"
+      ],
+      "identity": {
+        "schema": "disdex-hype-zec-long/v1",
+        "runtimeCommitSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+        "updatedAt": 1791550285189,
+        "lastDecisionTs": 1791550285189
+      },
+      "positions": {}
+    },
+    "DISDEX_HYPE_ZEC_PREEMPTION_STATE_PATH": {
+      "path": "/var/lib/disdex/hype-zec-long/preemption.json",
+      "exists": false
+    },
+    "DISDEX_IDLE_PRIORITY_STATE_PATH": {
+      "path": "/var/lib/disdex/idle-priority/state.json",
+      "rootType": "dict",
+      "keys": [
+        "schema",
+        "runtimeSha",
+        "updatedAt",
+        "positions",
+        "manualReview",
+        "pending",
+        "lastDecision",
+        "lastAcceptedBySymbol",
+        "failures"
+      ],
+      "identity": {
+        "schema": "disdex-idle-priority-state/v2",
+        "runtimeSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+        "updatedAt": 1791550167865
+      },
+      "positions": {
+        "positions": [],
+        "pending": null
+      }
+    },
+    "DISDEX_IDLE_RESIDUAL_LONG_STATE_PATH": {
+      "path": "/var/lib/disdex/idle-priority/residual-long-state.json",
+      "rootType": "dict",
+      "keys": [
+        "schema",
+        "runtimeSha",
+        "updatedAt",
+        "position",
+        "pending",
+        "manualReview",
+        "lastDecision",
+        "failures"
+      ],
+      "identity": {
+        "schema": "disdex-idle-residual-long-state/v1",
+        "runtimeSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+        "updatedAt": 1791550171222
+      },
+      "positions": {
+        "position": null,
+        "pending": null
+      }
+    },
+    "PENGU_DUAL_LS_V2_STATE_PATH": {
+      "path": "/var/lib/disdex/pengu-dual-ls-v2/runner-live.json",
+      "rootType": "dict",
+      "keys": [
+        "version",
+        "strategyId",
+        "mode",
+        "updatedAt",
+        "lastRunAt",
+        "lastSignalReferenceTs",
+        "latestSignal",
+        "m05ShadowHistory",
+        "lastCompletedIdempotencyKey",
+        "cooldownUntilTs",
+        "riskOverlay",
+        "failures"
+      ],
+      "identity": {
+        "strategyId": "PENGU_DUAL_LS_V2_FINAL",
+        "updatedAt": 1791547210468
+      },
+      "positions": {}
+    },
+    "FET_BRK48_STATE_PATH": {
+      "path": "/var/lib/disdex/fet-brk48-residual/state.json",
+      "rootType": "dict",
+      "keys": [
+        "schema",
+        "strategyId",
+        "runtimeCommitSha",
+        "updatedAt",
+        "failures",
+        "lastReconciledAt",
+        "lastReferenceTs",
+        "lastCompletedIdempotencyKey",
+        "lastEvaluationDecisionTs",
+        "lastEvaluationCandidate",
+        "lastEvaluationReturn72h",
+        "lastEvaluationReturn72hObservedTs",
+        "lastExitTs",
+        "cooldownUntilTs",
+        "lastEvaluationReason"
+      ],
+      "identity": {
+        "schema": "fet-brk48-residual-state/v1",
+        "strategyId": "FET_BRK48_RESIDUAL",
+        "runtimeCommitSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+        "updatedAt": 1791550320126
+      },
+      "positions": {}
+    },
+    "DISDEX_V52_ASTER_ONLY_STATE_PATH": {
+      "path": "/var/lib/disdex/v52-aster-only/runner-live.json",
+      "rootType": "dict",
+      "keys": [
+        "dailyLossPct",
+        "dailyLossTripped",
+        "dayStartEquity",
+        "idleAdmissionDecisionTs",
+        "lastEquity",
+        "nyDay",
+        "pendingOrder",
+        "positions",
+        "referenceOrdersAllowed",
+        "referenceStatus",
+        "schemaVersion",
+        "strategyId",
+        "updatedAt",
+        "utcDay",
+        "v11Attempted",
+        "v11SignalAt",
+        "v11SignalBasis",
+        "v11SignalSelectedSymbol",
+        "v50Attempted",
+        "v50CompletedTrades",
+        "v50DailyEntries",
+        "v50DailyEntriesDay",
+        "v50SignalBasis",
+        "v50SignalSnapshotDay",
+        "v50SignalSnapshots",
+        "v50Top2Telemetry",
+        "v52EntryRetry",
+        "v52GateDiagnostics",
+        "v52Ledger",
+        "v52StrategyDailyLossLatch",
+        "v52Top2Telemetry"
+      ],
+      "identity": {
+        "strategyId": "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96",
+        "updatedAt": 1791550341883
+      },
+      "positions": {
+        "positions": {}
+      }
+    }
+  }
+}

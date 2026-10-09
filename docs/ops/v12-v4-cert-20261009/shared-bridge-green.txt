@@ -1,0 +1,23 @@
+✔ ambiguous send is journaled and absent order lookup never resubmits (19.7159ms)
+✔ authority rejection performs no reservation or order mutation (9.9125ms)
+✔ reduce-only exit routes through existing executor without reserving new gross (17.7437ms)
+✔ readback of a non-reduce-only exit fails before terminal acknowledgement (13.8262ms)
+✔ durable intent survives restart and SUBMITTING cannot return to PREPARED (16.136ms)
+✔ stale writer, wrong release and journal snapshot corruption fail closed (9.0297ms)
+✔ shared reservation survives account-lock release and is not duplicated after reacquisition (49.2713ms)
+✔ unknown submission retains shared exposure and cannot be released from an order ACK (38.774ms)
+✔ partial fill reduces only unfilled reservation while recorded position retains gross (30.9834ms)
+✔ reservation fails closed when account lease was released (9.4089ms)
+✔ peer reservation missing from the current account ledger prevents another admission (13.9116ms)
+✔ order bridge restart releases shared reservation only after verified fills are durably recorded (295.3256ms)
+✔ signed entry trades are idempotent across restart, with actual commissions and terminal proof (17.0534ms)
+✔ terminal ACK without complete trade history cannot release reservation (1.7115ms)
+✔ a trade belonging to another order never enters the V4 leg (2.2547ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 15
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 903.1228

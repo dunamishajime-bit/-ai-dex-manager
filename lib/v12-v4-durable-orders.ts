@@ -84,7 +84,15 @@ export class V4DurableOrderDispatcher{
   if(command.action!=="ENTRY"&&view.reduceOnly!==true)throw Error("ORDER_READBACK_NOT_REDUCE_ONLY");
   const terminal=["FILLED","CANCELED","EXPIRED","REJECTED"].includes(view.status);
   const target=terminal?"TERMINAL":"ACKNOWLEDGED";
-  if(intent.stage!=="TERMINAL"&&intent.stage!==target)this.store.commit(doc.revision,advanceV4Intent(doc,cid,target,ts));
+  if(view.orderId!==undefined&&(!Number.isSafeInteger(view.orderId)||view.orderId<=0))throw Error("VENUE_ORDER_ID_INVALID");
+  if(intent.venueOrderId!==undefined&&view.orderId!==undefined&&intent.venueOrderId!==String(view.orderId))throw Error("VENUE_ORDER_ID_CHANGED");
+  let next=doc;
+  if(intent.stage!=="TERMINAL"&&intent.stage!==target)next=advanceV4Intent(doc,cid,target,ts);
+  if(view.orderId!==undefined&&intent.venueOrderId===undefined){
+   next=structuredClone(next);next.intents[cid].venueOrderId=String(view.orderId);
+   next.intents[cid].updatedAt=Math.max(next.intents[cid].updatedAt,ts);
+  }
+  if(next!==doc)this.store.commit(doc.revision,next);
   return view;
  }
 }

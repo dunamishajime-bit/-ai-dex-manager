@@ -1,0 +1,13 @@
+✔ shared reservation survives account-lock release and is not duplicated after reacquisition (40.0626ms)
+✔ unknown submission retains shared exposure and cannot be released from an order ACK (36.4291ms)
+✔ partial fill reduces only unfilled reservation while recorded position retains gross (28.9903ms)
+✔ reservation fails closed when account lease was released (9.7471ms)
+✔ peer reservation missing from the current account ledger prevents another admission (13.409ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 498.0494

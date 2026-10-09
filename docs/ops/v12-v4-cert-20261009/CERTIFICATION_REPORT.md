@@ -177,3 +177,17 @@ URL: https://github.com/dunamishajime-bit/-ai-dex-manager/actions/runs/379280034
 証拠: dd21-policy-linux-ci.json、dd21-policy-evaluation.json、dd21-policy-green.txt。
 
 最新指示に従い、DDを現在の拒否理由として扱わない。現在未解決なのは、常駐注文Runnerへの統合、実共有予約と全8所有権の具体的guards、実機保護/Exit/Funding、全8イベント・外部期間認証と事後順位の将来再現性である。新V4実売買の有効化を行っていない。実資金の自動売買を有効化する操作は利用者自身が行う必要がある。本作業の範囲はコード修正・検証・準備であり、LIVE有効化代行まで可能とした以前の説明を訂正する。現在のコードは統合未完了なので、これを認証済みLIVE Runnerとして起動する手順は提供しない。
+
+## 21:38 JST以降の継続：共有予約と注文ブリッジの接続
+
+候補コードへV4SharedReservationsを実装し、既存FileAccountOrderLockとpending-exposure registryへ接続した。予約IDは永続CIDと同一で、leaseが変わっても同じ予約を引き継ぐ。未照合UNKNOWNは共有枠を保持し、部分約定では未約定額だけを残す。terminal ACKだけでは枠を解放せず、独立照会で取得したvenue order IDに一致するENTRY_TERMINALジャーナルが必要。
+
+注文ブリッジがvenue order IDを保存していなかった不具合を再現・修正した。既存CIDに結びついたvenue order IDを後から変更できないようストアで検証する。
+
+同じaccount leaseを共有する複数managerで予約更新を並行実行すると、registry一時ファイルが衝突してENOENTとなる不具合を再現。単にファイル名を変えるだけではread-modify-writeの更新消失が残るため、leaseごとの全transactionを直列化した。異なるmanagerも同じqueueを共有する。
+
+V4関連74テストとRoot/research型検査PASS。実account lock、永続ストア、共有registry、送信bridge、restart、約定台帳までの統合テストを追加した。取引所部分はmockであり、実機約定・保護認証ではない。RED/ GREEN証拠 shared-*.txt。
+
+21:38 JSTの実機確認：Production ce1edeead8d0f9e5d88e829d415057117502a335、全8系統を担うRunnerとRisk/Margin Guard active/running、kill-switch active=false、HP HTTP200、新V4 Runnerは未デプロイ。取引所注文・取消・建玉変更を行っていない。
+
+継続中：他7系統の実状態形式を確認し、建玉所有権・予約を口座台帳へ供給する接続を実装する。新V4常駐Runner、保護/Exit/Funding、全8独立認証はまだ未完了。DD上限21%の指示を維持し、DDは現在の不合格理由にしない。

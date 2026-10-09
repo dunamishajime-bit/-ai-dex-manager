@@ -1,0 +1,33 @@
+✔ shared reservation survives account-lock release and is not duplicated after reacquisition (38.6947ms)
+✔ unknown submission retains shared exposure and cannot be released from an order ACK (32.7938ms)
+✔ partial fill reduces only unfilled reservation while recorded position retains gross (28.1978ms)
+✔ reservation fails closed when account lease was released (7.8817ms)
+✔ peer reservation missing from the current account ledger prevents another admission (13.5101ms)
+✖ order bridge restart releases shared reservation only after verified fills are durably recorded (253.8935ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 5
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 695.0906
+
+✖ failing tests:
+
+test at tests\v12-v4-shared-reservations.test.ts:2:8196
+✖ order bridge restart releases shared reservation only after verified fills are durably recorded (253.8935ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  undefined !== '42'
+  
+      at TestContext.<anonymous> (C:\Users\dis\DisDex-v4-production-cert-20261009\tests\v12-v4-shared-reservations.test.ts:97:9)
+      at async Test.run (node:internal/test_runner/test:1110:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:785:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: undefined,
+    expected: '42',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
