@@ -8,6 +8,7 @@ import type {AsterV3Client,AsterKline} from "./aster-v3-client";
 import {V12_X1_ALL} from "../config/v12X1AllRuntime";
 import {resampleV12H1ToH2,type V12Bar} from "./v12-x1-all";
 import {computeNativeV4Sources} from "./v12-v4-native-source";
+import {stepNativeFailedBreakCore,type CoreMachineState,type NativeCoreEvent} from "./v12-v4-native-core";
 import {adaptProductionCandidates,type FeatureBar} from "./v12-v4-production-features";
 import {V12_V4_V2_POLICY} from "./v12-v4-v2-shadow";
 
@@ -17,7 +18,7 @@ const TWO_HOURS=2*H;
 export type V4LiveDecisionSnapshot={
  schema:"v12-v4-live-decision/v1";policyId:typeof V12_V4_V2_POLICY;decisionTs:number;capturedAtMs:number;
  sourceFingerprint:string;candidateCount:number;filteredCount:number;
- sourceCount:number;errors:string[];orderEnabled:false;realOrderEnabledV4:0;tradingMutation:0;
+ sourceCount:number;nativeCoreEvents:NativeCoreEvent[];errors:string[];orderEnabled:false;realOrderEnabledV4:0;tradingMutation:0;
  candidates:ReturnType<typeof adaptProductionCandidates>["candidates"];
  filtered:ReturnType<typeof adaptProductionCandidates>["filtered"];
 };
@@ -46,6 +47,22 @@ export async function loadV4ClosedCandles(client:Pick<AsterV3Client,"getKlines">
  }
  return out;
 }
+export function replayLiveNativeCore(universe:Record<string,V12Bar[]>):NativeCoreEvent[]{
+ const btc=universe.BTC;
+ if(!btc||btc.length<121)throw Error("V4_NATIVE_CORE_REPLAY_WARMUP");
+ const events:NativeCoreEvent[]=[];
+ for(const symbol of V12_X1_ALL.universe.filter(s=>s!=="BTC")){
+  const rows=universe[symbol];
+  if(!rows||rows.length!==btc.length)throw Error("V4_NATIVE_CORE_H2_ALIGNMENT");
+  let state:CoreMachineState={lastDecisionTs:null,setup:null};
+  for(let i=60;i<rows.length;i++){
+   const result=stepNativeFailedBreakCore(state,symbol,rows.slice(i-60,i+1),btc.slice(i-60,i+1),rows[i].endTs);
+   state=result.state;
+   if(i===rows.length-1&&result.event)events.push(result.event);
+  }
+ }
+ return events;
+}
 export function buildV4LiveDecisionBatch(h1:Record<string,V4VenueH1Bar[]>,capturedAtMs:number):V4LiveDecisionSnapshot{
  const commonSymbols=V12_X1_ALL.universe;
  if(!commonSymbols.every(symbol=>Array.isArray(h1[symbol])))throw Error("V4_UNIVERSE_NOT_COMPLETE");
@@ -65,8 +82,9 @@ export function buildV4LiveDecisionBatch(h1:Record<string,V4VenueH1Bar[]>,captur
  const index=aligned.BTC.length-1;
  const decisionTs=aligned.BTC[index].endTs;
  if(!Number.isFinite(decisionTs)||decisionTs>capturedAtMs||
-    capturedAtMs-decisionTs>2*TWO_HOURS)throw Error("V4_H2_STALE_OR_FUTURE");
+    capturedAtMs-decisionTs>TWO_HOURS+15*60_000)throw Error("V4_H2_STALE_OR_FUTURE");
  const source=computeNativeV4Sources(aligned,index,decisionTs);
+ const nativeCoreEvents=replayLiveNativeCore(aligned);
  const candidates:V4LiveDecisionSnapshot["candidates"]=[],filtered:V4LiveDecisionSnapshot["filtered"]=[];
  const errors:string[]=[];
  for(const n of source){
@@ -83,6 +101,6 @@ export function buildV4LiveDecisionBatch(h1:Record<string,V4VenueH1Bar[]>,captur
  const sourceFingerprint=createHash("sha256").update(JSON.stringify({decisionTs,h2:aligned,h1:h1.BTC.slice(-50)})).digest("hex");
  return {schema:"v12-v4-live-decision/v1",policyId:V12_V4_V2_POLICY,
   decisionTs,capturedAtMs,sourceFingerprint,candidateCount:candidates.length,filteredCount:filtered.length,
-  sourceCount:source.length,errors,candidates:errors.length?[]:candidates,filtered,
+  sourceCount:source.length,nativeCoreEvents,errors,candidates:errors.length?[]:candidates,filtered,
   orderEnabled:false,realOrderEnabledV4:0,tradingMutation:0};
 }

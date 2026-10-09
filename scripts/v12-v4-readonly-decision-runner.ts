@@ -24,7 +24,7 @@ async function main(){
  const once=process.argv.includes("--once");
  for(;;){
   const result=await tick(client,destination);
-  console.log(JSON.stringify({decisionTs:result.decisionTs,candidates:result.candidateCount,orderEnabled:false}));
+  console.log(JSON.stringify({decisionTs:result.decisionTs,candidates:result.candidateCount,nativeCoreEvents:result.nativeCoreEvents.length,orderEnabled:false}));
   if(once)break;
   const h2=7200000,now=Date.now(),next=now+h2-now%h2+5000;
   await new Promise<void>(done=>setTimeout(done,Math.max(1,next-Date.now())));
