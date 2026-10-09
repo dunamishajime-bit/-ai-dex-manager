@@ -1,0 +1,30 @@
+{
+  "observedAt": "2026-10-09T11:30:01.116916+00:00",
+  "productionSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+  "account": {
+    "status": "ASTER_READONLY_ACCOUNT_DIAGNOSTIC_PASS",
+    "observedAt": 1791545401046,
+    "venueTime": 1791545400986,
+    "usdtBalance": [
+      {
+        "balance": 72.47855158,
+        "availableBalance": 72.46602778
+      }
+    ],
+    "positions": [],
+    "openOrders": [],
+    "ordersSent": 0,
+    "cancelsSent": 0,
+    "positionChangesSent": 0
+  },
+  "legacyV12DirectV4Bindings": {
+    "v12-v4-native-source": false,
+    "v12-v4-native-core": false,
+    "v12-v4-production-lifecycle": false
+  },
+  "hp": "WorkingDirectory=/home/deploy/disdex-trading/ui-releases/ui-studio-15-b297c883dfda\nActiveState=active",
+  "hpHttp": 200,
+  "newV4Deployed": false,
+  "ordersEnabledByThisTask": false,
+  "auditMutations": 0
+}

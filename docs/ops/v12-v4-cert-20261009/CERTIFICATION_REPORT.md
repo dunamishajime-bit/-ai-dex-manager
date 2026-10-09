@@ -130,3 +130,13 @@ Linux再検証run 37918728861は全工程PASS（19:42 JST完了）。検証コ�
 19:45 JSTの署名付き最終照会でも、Production ce1edeead8d0f9e5d88e829d415057117502a335、全8系統とShared Risk/Margin Guard active/running、共有Kill Switch false、実建玉0・未約定0、注文/取消/建玉変更0を確認。HPはui-sfx-diverse-ce392a0d8dd1、active、正規ポート3001 /realtime HTTP200。証拠native-release-decision-audit.json。今回の新V4作業でProduction・既存LIVE・HP公開を変更していない。
 
 Native外部Entry/Exitの一致範囲は258件・25ルート、元候補299件・Core8件。残り16ルートの実発火、全8系統の約定/手数料/Funding/共有予約統合、事後順位の将来再現性、通常株式市場のfeed継続鮮度は未認証。研究10/20bps DD>20%、外部PF<1も残る。最終採用判定BLOCKED、新V4実注文無効・デプロイなし。現在稼働する旧来の現行LIVEと新V4のLIVEを混同しない。
+
+## 20:25 JSTの切替依頼を受けた再監査
+
+20:30 JST署名付き照会PASS、実建玉0・未約定0。Production SHA ce1edeead8d0f9e5d88e829d415057117502a335、共有Kill Switch false、全8系統を担う7 RunnerとShared Risk/Margin Guardはactive/running。最新HPは別作業のui-studio-15-b297c883dfdaでactive、正規ポート/realtime HTTP200。
+
+実機release内のlib/config/scriptsと候補8d9f69a36f50d278e6f31c011958034845b5c4f1を改行正規化SHA256で比較した。既存プログラムの差分はV52のlock scope修正とAlpaca feed鮮度修正の2ファイル。V4モジュールは実機releaseに存在せず、現行V12 Runnerにも新V4への接続はない。候補にはオフラインlifecycle/候補生成/認証のみがあり、実注文への注文ブリッジと全8統合実行認証は未完了。単純配置・orderEnabled書換えを新ロジックLIVE完了とは扱わない。ソース証拠activation-source-audit-2025.json、照会証拠activation-readback-2025.json。
+
+研究の最終判定9c03bb90841e4fb9fe62186940c62d3fcedabac4（2026-10-09 12:13 JST）も全文確認。Y06の外部PF0.2995を受け、BLOCKED_PRODUCTION_ROBUSTNESS、現行LIVE維持・新V4/Gross即時昇格不可と明記。本文の固定コピーactivation-research-verdict-source-2025.mdを保存した。リスク縮小やY06停止は事後検証の仮説であり、指定291,326,103円案と無断で入れ替えない。
+
+最新ユーザー指示は切替希望の再確認として扱い、最初の「全認証に合格した場合に限りLIVE」「DD20%超等の未解決が残るなら実注文を有効化しない」という条件を撤回したとは扱わない。実装未完了・全8実行未認証・外部成績不合格のため、切替未実施、新V4の実注文権限は無効。既存LIVEへ注文/取消/決済/再起動/設定変更は行っていない。
