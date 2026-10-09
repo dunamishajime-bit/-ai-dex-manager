@@ -181,16 +181,17 @@ async function main() {
     const values={
       pengu:proposal.pengu,v52:proposal.v52,v12:proposal.v12,killSwitch:proposal.killSwitch,
     };
-    const written:FileKey[]=[];
     try{
-      for(const key of keys){await atomicWrite(files[key],values[key]);written.push(key);}
+      for(const key of keys){await atomicWrite(files[key],values[key]);}
       const after=await safeState();
       assert(after.killSwitch.active===false,"KILL_CLEAR_NOT_PERSISTED");
       assert(!after.pengu.position && !after.v12.manualReview,"LOCAL_RECOVERY_NOT_PERSISTED");
       console.log(JSON.stringify({status:"OPERATOR_MANUAL_FLAT_APPLY_PASS",
         productionSha:SHA,archive,ordersSent:false,killSwitchCleared:true}));
     }catch(err){
-      for(const key of [...written].reverse())await replaceBytes(files[key],originals[key]).catch(e=>console.error("ROLLBACK_FAILED",key,String(e)));
+      // Roll back all four files, including any write which renamed successfully
+      // before its own post-rename verification raised an error.
+      for(const key of [...keys].reverse())await replaceBytes(files[key],originals[key]).catch(e=>console.error("ROLLBACK_FAILED",key,String(e)));
       throw err;
     }
   }finally{await handle.release();}
