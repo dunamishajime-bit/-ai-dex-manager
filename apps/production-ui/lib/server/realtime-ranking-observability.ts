@@ -7,6 +7,7 @@ import { loadPenguRuntimeObservability } from './pengu-runtime-observability';
 import { loadHypeRuntimeObservability } from './hype-runtime-observability';
 import { loadFetGates } from './fet-gate-observability';
 import { DIST_TERMINAL_LIVE_CONFIG } from '@/lib/disterminal-live-config';
+import {loadPublicAsterQuoteBatch,publicAsterPreviewForRow} from './realtime-ranking-market-preview';
 type Obj=Record<string,unknown>;
 const obj=(v:unknown):Obj=>v&&typeof v==='object'&&!Array.isArray(v)?v as Obj:{};
 const list=(v:unknown)=>Array.isArray(v)?v.map(obj):[];
@@ -107,11 +108,22 @@ async function observe(){
   const riskFresh=risk?.sourceComplete===true&&risk?.utcDay===new Date(now).toISOString().slice(0,10)&&now-Number(risk.updatedAt)>=-60000&&now-Number(risk.updatedAt)<10*60000;
   row.gates.push(flag('shared-risk','共有日次損失ガード',riskFresh&&typeof risk?.tripped==='boolean'?!risk.tripped:undefined,risk?.tripped?'損失制限で停止':'当日の完全な共有状態を照合','execution'));
  }
- return {ok:true,readOnly:true,tradingMutation:0,checkedAt:now,refreshSeconds:120,runtimeSha:current.releaseSha,rows:rankRows(rows.map(row=>({...row,score:gateScore(row.gates,row.fresh)}))),errors,metric:'確認済み発注制約のない候補を優先し、市場条件と発注条件の充足度で順位付け（ロジックごとに条件数は異なります）。100はすべての条件を確認・通過した場合のみ。未達・未確認の条件があれば100未満です。'};
+ const official=rankRows(rows.map(row=>({...row,score:gateScore(row.gates,row.fresh)})));
+ let marketPriceCheckedAt:number|undefined,marketPriceError:string|undefined;
+ try {
+  const quote=await loadPublicAsterQuoteBatch();
+  marketPriceCheckedAt=quote.at;
+  for(const row of official)row.preview=publicAsterPreviewForRow(row,quote,Date.now());
+ }catch {
+  // Public quote transport failure never changes the official trading gates or Score.
+  marketPriceError='Aster公開価格の取得に失敗しました。暫定順位は更新待ちです。';
+ }
+ const previewUpdatedAt=Math.max(0,...official.map(r=>r.preview?.referenceAt?Math.floor(r.preview.priceAt/60000)*60000:0));
+ return {ok:true,readOnly:true,tradingMutation:0,checkedAt:now,refreshSeconds:30,previewRefreshSeconds:60,marketPriceCheckedAt,previewUpdatedAt:previewUpdatedAt||undefined,marketPriceError,runtimeSha:current.releaseSha,rows:official,errors,metric:'確認済み発注制約のない候補を優先し、市場条件と発注条件の充足度で順位付け（ロジックごとに条件数は異なります）。100はすべての条件を確認・通過した場合のみ。未達・未確認の条件があれば100未満です。'};
 }
 let cached:{expires:number;value:Awaited<ReturnType<typeof observe>>}|undefined,inflight:Promise<Awaited<ReturnType<typeof observe>>>|undefined;
 export async function loadRealtimeRanking(){
  if(cached&&cached.expires>Date.now())return cached.value;
- if(!inflight)inflight=observe().then(value=>{const expires=Math.min(fetObservationExpiry(value.checkedAt,110000),...value.rows.filter(r=>r.logic==='FET').map(r=>fetObservationExpiry(r.checkedAt,110000)));cached=expires>Date.now()?{value,expires}:undefined;return value;}).finally(()=>{inflight=undefined;});
+ if(!inflight)inflight=observe().then(value=>{const expires=Math.min(fetObservationExpiry(value.checkedAt,25000),...value.rows.filter(r=>r.logic==='FET').map(r=>fetObservationExpiry(r.checkedAt,25000)));cached=expires>Date.now()?{value,expires}:undefined;return value;}).finally(()=>{inflight=undefined;});
  return inflight;
 }
