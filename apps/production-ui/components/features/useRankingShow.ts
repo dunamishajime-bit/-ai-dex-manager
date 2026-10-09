@@ -2,7 +2,7 @@
 import { useCallback,useEffect,useLayoutEffect,useRef,useState } from 'react';
 import { rankCommentary,risingRankEvents,type RankRow,type RiseEvent } from '@/lib/realtime-ranking';
 
-import {playRankingSequenceConcurrent,RANKING_MOTION_MS,rankingMovementTiming} from '@/lib/ranking-sequence';
+import {playRankingSequence,RANKING_MOTION_MS} from '@/lib/ranking-sequence';
 
 type Capture={rows:RankRow[];rects:Map<string,DOMRect>;scrollX:number;scrollY:number};
 export function useRankingShow(rows:RankRow[],version:number,viewKey:string,error:string){
@@ -160,9 +160,9 @@ export function useRankingShow(rows:RankRow[],version:number,viewKey:string,erro
    const groups=[...queue].sort(([a],[b])=>Number(risingIds.has(b))-Number(risingIds.has(a)));
    const palette=['#67e8f9','#c4b5fd','#fbbf24','#6ee7b7','#fda4af'];
    const generation=batch.current;
-   visualDuration=groups.length?RANKING_MOTION_MS:0;
+   visualDuration=groups.length*RANKING_MOTION_MS;
    running.current=groups.length>0;
-   void playRankingSequenceConcurrent(groups,async([id,items],groupIndex)=>{
+   void playRankingSequence(groups,async([id,items])=>{
     const color=palette[[...queue.keys()].indexOf(id)%palette.length];
     const rise=rises.find(r=>r.row.id===id);
     if(rise)setEvent(rise);
@@ -170,8 +170,7 @@ export function useRankingShow(rows:RankRow[],version:number,viewKey:string,erro
      clone.style.zIndex='150';clone.style.borderColor=color;
      clone.style.outline='2px solid '+color;clone.style.outlineOffset='-2px';
      clone.dataset.rankingMoving='true';
-     const timing=rankingMovementTiming(groupIndex);
-     const animation=clone.animate(frames,{duration:timing.duration,delay:timing.delay,easing:'cubic-bezier(.22,.7,.25,1)',fill:'forwards'});
+     const animation=clone.animate(frames,{duration:RANKING_MOTION_MS,easing:'cubic-bezier(.22,.7,.25,1)',fill:'forwards'});
      animations.current.push(animation);
      return animation.finished.then(()=>{
       if(batch.current!==generation)return;
@@ -182,7 +181,7 @@ export function useRankingShow(rows:RankRow[],version:number,viewKey:string,erro
     if(batch.current===generation)setHighlights(h=>({...h,[id]:items[0].delta}));
    },()=>batch.current===generation,()=>{stopVisuals(false);setHighlights({});setEvent(null);});
   }
-  if(rises[0])notify(rises[0],visualDuration?visualDuration+100:0);
+  if(rises[0])notify(rises[0],visualDuration?RANKING_MOTION_MS+100:0);
   else if(visualDuration)void playEffect();
   if(!visualDuration)timer.current=setTimeout(()=>{setHighlights({});setEvent(null);},12000);
  },[version,viewKey,error,measure,stopVisuals,notify,playEffect]);
