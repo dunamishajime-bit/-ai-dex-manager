@@ -11,6 +11,7 @@ import {computeNativeV4Sources} from "./v12-v4-native-source";
 import {adaptProductionCandidates,type FeatureBar} from "./v12-v4-production-features";
 import {V12_V4_V2_POLICY} from "./v12-v4-v2-shadow";
 
+export type V4VenueH1Bar=FeatureBar & {volume:number};
 const H=3600000;
 const TWO_HOURS=2*H;
 export type V4LiveDecisionSnapshot={
@@ -20,22 +21,22 @@ export type V4LiveDecisionSnapshot={
  candidates:ReturnType<typeof adaptProductionCandidates>["candidates"];
  filtered:ReturnType<typeof adaptProductionCandidates>["filtered"];
 };
-function parseH1(rows:readonly AsterKline[],capturedAtMs:number):FeatureBar[]{
- const seen=new Set<number>(),data:FeatureBar[]=[];
+function parseH1(rows:readonly AsterKline[],capturedAtMs:number):V4VenueH1Bar[]{
+ const seen=new Set<number>(),data:V4VenueH1Bar[]=[];
  for(const r of rows){
   const openTs=Number(r[0]),closeTs=Number(r[6]);
   if(openTs%H!==0||openTs+H>capturedAtMs||closeTs>=capturedAtMs)continue;
-  const bar={openTs,open:Number(r[1]),high:Number(r[2]),low:Number(r[3]),close:Number(r[4]),quoteVolume:Number(r[7])};
-  if(![bar.open,bar.high,bar.low,bar.close,bar.quoteVolume].every(Number.isFinite)||Math.min(bar.open,bar.low,bar.close)<=0||
+  const bar={openTs,open:Number(r[1]),high:Number(r[2]),low:Number(r[3]),close:Number(r[4]),volume:Number(r[5]),quoteVolume:Number(r[7])};
+  if(![bar.open,bar.high,bar.low,bar.close,bar.volume,bar.quoteVolume].every(Number.isFinite)||Math.min(bar.open,bar.low,bar.close)<=0||
     bar.high<Math.max(bar.open,bar.close)||bar.low>Math.min(bar.open,bar.close)||bar.quoteVolume<0)throw Error("INVALID_SIGNED_H1_CANDLE");
   if(seen.has(openTs))throw Error("DUPLICATE_H1_CANDLE");seen.add(openTs);data.push(bar);
  }
  return data.sort((a,b)=>a.openTs-b.openTs);
 }
 export async function loadV4ClosedCandles(client:Pick<AsterV3Client,"getKlines">,
- capturedAtMs:number,spacingMs=100):Promise<Record<string,FeatureBar[]>>{
+ capturedAtMs:number,spacingMs=100):Promise<Record<string,V4VenueH1Bar[]>>{
  if(!Number.isFinite(capturedAtMs)||capturedAtMs<=0)throw Error("INVALID_V4_CLOCK");
- const out:Record<string,FeatureBar[]>={};
+ const out:Record<string,V4VenueH1Bar[]>={};
  for(const symbol of V12_X1_ALL.universe){
   if(spacingMs>0)await new Promise<void>(r=>setTimeout(r,spacingMs));
   const rows=await client.getKlines(symbol+"USDT","1h",500);
@@ -45,13 +46,13 @@ export async function loadV4ClosedCandles(client:Pick<AsterV3Client,"getKlines">
  }
  return out;
 }
-export function buildV4LiveDecisionBatch(h1:Record<string,FeatureBar[]>,capturedAtMs:number):V4LiveDecisionSnapshot{
+export function buildV4LiveDecisionBatch(h1:Record<string,V4VenueH1Bar[]>,capturedAtMs:number):V4LiveDecisionSnapshot{
  const commonSymbols=V12_X1_ALL.universe;
  if(!commonSymbols.every(symbol=>Array.isArray(h1[symbol])))throw Error("V4_UNIVERSE_NOT_COMPLETE");
  const h2:Record<string,V12Bar[]>={};
  for(const symbol of commonSymbols){
   const rows=h1[symbol];
-  const source=rows.map(x=>({...x,ts:x.openTs,volume:x.quoteVolume,closed:true as const}));
+  const source=rows.map(x=>({...x,ts:x.openTs,volume:x.volume,closed:true as const}));
   h2[symbol]=resampleV12H1ToH2(source);
  }
  const common=commonSymbols.reduce<Set<number>|undefined>((set,symbol)=>{

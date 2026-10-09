@@ -180,7 +180,7 @@ export function applyProductionEvent(state: State, event: Event): State {
   if (event.type==="ACCOUNT_MARK") {
     positive(event.equityUsd,"ACCOUNT_EQUITY");
     if(event.foreign!==undefined){validateForeignExposures(event.foreign);next.foreign=structuredClone(event.foreign);next.foreignBasisEquityUsd=event.equityUsd;}
-    const symbols=new Set([...next.foreign.map(x=>x.symbol),...Object.values(next.legs).filter(x=>x.qty>0).map(x=>x.candidate.symbol)]);
+    const symbols=new Set([...next.foreign.filter(x=>x.qty>0).map(x=>x.symbol),...Object.values(next.legs).filter(x=>x.qty>0).map(x=>x.candidate.symbol)]);
     for(const symbol of symbols)positive(event.prices[symbol],"ACCOUNT_MARK_"+symbol);
     for(const price of Object.values(event.prices))positive(price,"ACCOUNT_MARK");
     next.equityUsd=event.equityUsd;next.equityPeakUsd=Math.max(next.equityPeakUsd,event.equityUsd);
