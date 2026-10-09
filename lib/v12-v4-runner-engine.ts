@@ -56,6 +56,9 @@ export class V4RunnerEngine{
   const dispatcher=new V4DurableOrderDispatcher(d.store,createV4AsterOrderGateway(d.adapter),
    bindV4SharedDispatchGuards(reserv,d.assertAuthority));
   const cycle=new V4OrderCycle(d.store,dispatcher,reserv,d.client);
+  // Funding for an in-flight or stop-closed position must be signed and
+  // journalled *before* the venue close changes its owner status.
+  await cycle.reconcileFundingUpTo(this.now());
   // Resolve existing network outcomes before making an admission.
   for(const [cid,intent] of Object.entries(d.store.read().intents)){
    if(intent.stage==="PREPARED")throw Error("V4_PREPARED_INTENT_REQUIRES_OPERATOR_REVIEW:"+cid);

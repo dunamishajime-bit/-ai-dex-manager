@@ -90,7 +90,8 @@ export type Event = EntryEvent |
   { type: "ENTRY_TERMINAL"; eventId: string; ts: number; id: string } |
   { type: "EXIT_REQUEST"; eventId: string; ts: number; id: string; qty: number } |
   { type: "EXIT_FILL"; eventId: string; ts: number; id: string; qty: number; price: number; feeUsd: number; cooldownUntil: number } |
-  { type: "FUNDING"; eventId: string; ts: number; id: string; amountUsd: number };
+  { type: "FUNDING"; eventId: string; ts: number; id: string; amountUsd: number } |
+  { type: "FUNDING_SCAN"; eventId: string; ts: number; fromMs: number; throughMs: number };
 export type State = { initial: InitialState; foreign:ForeignExposure[]; foreignBasisEquityUsd:number; executionReview?:string; equityUsd:number; equityPeakUsd:number; maxDrawdown:number; prices:Record<string,number>; legs: Record<string, Leg>; journal: Event[]; cooldown: Record<string, number> };
 function validateForeignExposures(rows:ForeignExposure[]) {
   if(!Array.isArray(rows))throw Error("INVALID_FOREIGN_INVENTORY");
@@ -189,6 +190,15 @@ export function applyProductionEvent(state: State, event: Event): State {
     next.equityUsd=event.equityUsd;next.equityPeakUsd=Math.max(next.equityPeakUsd,event.equityUsd);
     next.maxDrawdown=Math.max(next.maxDrawdown,1-event.equityUsd/next.equityPeakUsd);
     next.prices=structuredClone(event.prices);
+  } else if (event.type==="FUNDING_SCAN") {
+    if(!Number.isFinite(event.fromMs)||!Number.isFinite(event.throughMs)||
+      event.fromMs<0||event.throughMs<event.fromMs||event.throughMs>event.ts||
+      event.throughMs-event.fromMs>86_400_000)
+      throw Error("V4_FUNDING_SCAN_RANGE_INVALID");
+    const last=([...state.journal].reverse().find(x=>x.type==="FUNDING_SCAN"));
+    if(last?.type==="FUNDING_SCAN"&&event.fromMs>last.throughMs&&
+       Object.values(state.legs).some(l=>l.qty>0&&l.entryTs<event.fromMs))
+      throw Error("V4_FUNDING_SCAN_GAP_WITH_OPEN_LEG");
   } else if (event.type==="RESERVE") {
     const l=event.leg,c=l.candidate, catalog=V12_V4_ROUTE_CATALOG.find(x=>x.route===c.route);
     positive(l.requestedQty,"RESERVED_QTY");positive(l.reservationUsd,"RESERVED_USD");

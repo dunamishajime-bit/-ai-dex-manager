@@ -65,3 +65,35 @@ TRAILING_CROSSED_BEFORE_REPLACEMENT at108. Missing/future opens still fail close
 
 No production code/config/current/artifact/restart or trading mutation was made.
 This audit and native-feed regression fix are not a LIVE certificate.
+
+
+## 2026-10-10 addendum: independent execution work after ec7fcee
+
+**Still BLOCKED. This is not a LIVE certificate and requires no current
+Production artifact, VPS release, order, position or STOP mutation.**
+
+- Investigated candidate approved STOP sources:
+  `docs/implementation/DD1296_RESIDENT_STOP_IMPLEMENTATION_20261005.md`,
+  `docs/implementation/V12_V4_EXECUTION_BUILD_PLAN_20261009.md`,
+  `docs/implementation/V12_V4_V2_M150_PRODUCTION_GATE_20261009.md`,
+  and `lib/v12-resident-stop-lifecycle.ts`.
+  The 2026-10-05 resident implementation is for *existing PENGU and Q102*
+  using each strategy's actual existing stop fractions; **none of these
+  grants a formula/threshold for the V4 TIME 37 route family**.
+  Do not misapply PENGU/Q102 stops to V4 TIME or invent an ATR multiplier.
+- Connected `V4OrderCycle.reconcileFundingUpTo()` into the live daemon
+  before any restored STOP/EXIT reconciliation. Each bounded 24h segment
+  is persisted as `FUNDING_SCAN` in the replay-validated event journal.
+  Signed income trade IDs remain idempotent across process restarts. Missing
+  >1,000-row pagination and multi-leg allocation remain FAIL CLOSED.
+- Separated V4 from the legacy seven-runner `--all` operator validation.
+  A proposed separate runner scope `V12_V4` now requires the exact active
+  SHA and an explicit approvedRunners entry. It **cannot be approved by a
+  legacy `V12_X1_ALL` artifact**.
+- Added a *candidate* V4 systemd unit at
+  `deploy/systemd/disdex-v12-v4@.service`; requires an independent env
+  file, release marker, mutual exclusion, root-signed operator gate and
+  coherent release. Unit is **not installed, enabled or started**.
+- Missing V4 TIME resident STOP blueprint, actual 41/41 parity,
+  same-symbol virtual-leg STOP replacement, signed Aster execution and
+  any independent forward-period policy gate remain blockers.

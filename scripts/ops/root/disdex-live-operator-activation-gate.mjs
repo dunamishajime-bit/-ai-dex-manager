@@ -16,6 +16,9 @@ export const TRADING_RUNNERS = Object.freeze([
   "HYPE_TREND_LONG",
   "IDLE_PRIORITY_SHORT",
 ]);
+// V12_V4 has its own independent activation scope. Do not add it to the
+// existing seven-runner --all gate or break legacy LIVE on rollout.
+export const VALID_TRADING_RUNNERS = Object.freeze([...TRADING_RUNNERS, "V12_V4"]);
 
 function exactSha(value) {
   const normalized = String(value || "").trim().toLowerCase();
@@ -102,7 +105,7 @@ export async function evaluateOperatorActivationGate(input) {
   const runner = String(input.runner || "");
   const activationPath = resolve(String(input.activationPath || DEFAULT_PATH));
   if (!sha) return { allowed: false, reason: "OPERATOR_GATE_SHA_INVALID" };
-  if (!TRADING_RUNNERS.includes(runner)) return { allowed: false, reason: `OPERATOR_GATE_RUNNER_INVALID:${runner}` };
+  if (!VALID_TRADING_RUNNERS.includes(runner)) return { allowed: false, reason: `OPERATOR_GATE_RUNNER_INVALID:${runner}` };
 
   let readiness;
   try {

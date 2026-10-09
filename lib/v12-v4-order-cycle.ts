@@ -60,17 +60,42 @@ export class V4OrderCycle{
   if(result.requiresReview)throw Error("V4_EXIT_RESIDUAL_REQUIRES_RECONCILIATION");
   return this.store.read();
  }
- async reconcileFunding(from:number,to:number){
-  if(!Number.isFinite(from)||!Number.isFinite(to)||from>=to)
+ async reconcileFunding(from:number,to:number,recordedAt:number=to){
+  if(!Number.isFinite(from)||!Number.isFinite(to)||!Number.isFinite(recordedAt)||
+     from<0||from>=to||to>recordedAt||to-from>86_400_000)
    throw Error("V4_FUNDING_RANGE_INVALID");
-  const {state}=this.store.read();
-  const symbols=new Set(Object.values(state.legs).filter(l=>l.qty>0).map(l=>l.candidate.symbol));
-  if(!symbols.size)return this.store.read();
-  const incomes=await this.client.getIncomeHistory({incomeType:"FUNDING_FEE",startTime:from,endTime:to,limit:1000});
+  const snapshot=this.store.read();
+  const legs=Object.values(snapshot.state.legs).filter(l=>l.qty>0);
+  if(!legs.length)return snapshot;
+  const symbols=new Set(legs.map(l=>l.candidate.symbol));
+  const incomes=await this.client.getIncomeHistory({
+   incomeType:"FUNDING_FEE",startTime:from,endTime:to,limit:1000
+  });
   if(incomes.length===1000)throw Error("V4_FUNDING_HISTORY_MAY_BE_TRUNCATED");
+  const relevant=incomes.filter(r=>symbols.has(String(r.symbol))&&
+    legs.some(l=>l.candidate.symbol===r.symbol&&Number(r.time)>=l.entryTs));
   const doc=this.store.read();
-  const updated=reconcileV4Funding(doc.state,incomes.filter(r=>symbols.has(String(r.symbol))),to);
-  if(updated!==doc.state)this.store.commit(doc.revision,{...doc,state:updated});
-  return this.store.read();
+  let next=reconcileV4Funding(doc.state,relevant,recordedAt);
+  next=applyProductionEvent(next,{type:"FUNDING_SCAN",
+    eventId:"funding-scan:"+from+":"+to,ts:recordedAt,fromMs:from,throughMs:to});
+  if(next===doc.state)return doc;
+  return this.store.commit(doc.revision,{...doc,state:next});
+ }
+ /** Catch up from the durable journal before processing any live STOP/Exit. */
+ async reconcileFundingUpTo(at:number){
+  if(!Number.isFinite(at)||at<0)throw Error("V4_FUNDING_CLOCK_INVALID");
+  for(let count=0;count<45;count++){
+   const state=this.store.read().state;
+   const legs=Object.values(state.legs).filter(l=>l.qty>0);
+   if(!legs.length)return this.store.read();
+   const previous=[...state.journal].reverse().find(e=>e.type==="FUNDING_SCAN");
+   const lastEnd=previous?.type==="FUNDING_SCAN"?previous.throughMs:0;
+   const earliest=Math.min(...legs.map(l=>l.entryTs));
+   const from=Math.max(lastEnd,earliest);
+   if(from>=at)return this.store.read();
+   const to=Math.min(at,from+86_400_000);
+   await this.reconcileFunding(from,to,at);
+  }
+  throw Error("V4_FUNDING_CATCHUP_TOO_OLD_REQUIRES_REVIEW");
  }
 }
