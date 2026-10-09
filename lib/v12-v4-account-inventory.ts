@@ -36,3 +36,5 @@ export async function readV4SignedInventory(client:Pick<AsterV3Client,"getPositi
  const end=now();if(end<start||end-start>30000)throw Error("STALE_V4_SIGNED_READBACK");
  return verifyV4Inventory(positions,orders,claims,end);
 }
+
+export {buildV4AccountMark} from "./v12-v4-peer-account-mark";
