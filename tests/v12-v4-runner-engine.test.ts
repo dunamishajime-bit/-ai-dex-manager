@@ -49,17 +49,18 @@ test("mock Aster dispatch reaches signed entry fill, STOP, and shared reservatio
  const fixture=(await import("./fixtures/v12-v4-native-route-20261009.json")).default;
  const {adaptProductionCandidates}=await import("../lib/v12-v4-production-features");
  const {readPendingExposureRegistry}=await import("../lib/disdex-pending-exposure-registry");
+ const {productionExitSpec}=await import("../lib/v12-v4-production-lifecycle");
  const candidate=adaptProductionCandidates({...fixture,source:{...fixture.source,side:"SHORT",sourceEngine:"buildV12Signals"}}).candidates[0];
- const time=candidate.eligibleEntryTs+5000,dir=mkdtempSync(join(tmpdir(),"v4-fullcycle-"));
+ let time=candidate.eligibleEntryTs+5000;const dir=mkdtempSync(join(tmpdir(),"v4-fullcycle-"));
  try{
   const store=new V4ExecutionStore(join(dir,"state.json"),sha);
   store.initialize({equityUsd:1000,foreign:[],holdProtected:false});
   const lock=new FileAccountOrderLock(join(dir,"account.lock"),120000,join(dir,"pending.json"));
-  let submitted=0,stops=0;const orders=new Map<string,any>(),fills:any[]=[];
+  let submitted=0,stops=0,exits=0,positionQty=0,exitFeed:any={closed:[]};const orders=new Map<string,any>(),fills:any[]=[];
   const adapter:any={client:{getOrder:async(_s:string,cid:string)=>orders.get(cid)},
-   executor:{},cancel:async()=>{},
+   executor:{},cancel:async(cid:string)=>{orders.delete(cid);},
    executeEntry:async(x:any)=>{
-    submitted++;const qty=x.quantity,id=51;
+    submitted++;const qty=x.quantity,id=51;positionQty=qty*(x.side==="LONG"?1:-1);
     orders.set(x.clientOrderId,{symbol:x.symbol,clientOrderId:x.clientOrderId,orderId:id,
      status:"FILLED",side:x.side==="LONG"?"BUY":"SELL",origQty:String(qty),
      executedQty:String(qty),avgPrice:"100",cumQuote:String(qty*100)});
@@ -72,14 +73,25 @@ test("mock Aster dispatch reaches signed entry fill, STOP, and shared reservatio
      origQty:String(x.quantity),executedQty:"0",avgPrice:"0",cumQuote:"0"});
     return {acknowledged:true,orderId:"52"};
    },
+   executeExit:async(x:any)=>{
+    exits++;const qty=x.quantity,id=53;positionQty=0;
+    const side=x.positionSide==="LONG"?"SELL":"BUY";
+    orders.set(x.clientOrderId,{symbol:x.symbol,clientOrderId:x.clientOrderId,
+     orderId:id,status:"FILLED",side,reduceOnly:true,origQty:String(qty),
+     executedQty:String(qty),avgPrice:"100",cumQuote:String(qty*100)});
+    fills.push({symbol:x.symbol,id:92,orderId:id,side,price:"100",qty:String(qty),
+     commission:"0",commissionAsset:"USDT",time});
+    return {status:"FILLED",executionUnknown:false};
+   },
   };
   const client:any={getBalances:async()=>[{asset:"USDT",balance:"1000",availableBalance:"1000"}],
-   getPositions:async()=>[],getOpenOrders:async()=>[],
+   getPositions:async()=>positionQty?[{symbol:candidate.symbol,positionAmt:String(positionQty),markPrice:"100",unRealizedProfit:"0"}]:[],
+   getOpenOrders:async()=>[...orders.values()].filter(o=>o.status==="NEW"),
    getUserTrades:async()=>fills,getIncomeHistory:async()=>[]};
   const atrKey=[candidate.symbol,candidate.route,candidate.effectiveSide,candidate.eligibleEntryTs].join("|");
   const runner=new V4RunnerEngine({store,accountLock:lock,adapter,client,
    pendingRegistryPath:join(dir,"pending.json"),fetchPeers:async()=>peers(time),
-   fetchExitFeed:async()=>({closed:[]}),fetchDecision:async()=>({
+   fetchExitFeed:async()=>exitFeed,fetchDecision:async()=>({
     schema:"v12-v4-live-decision/v1",policyId:"V2_M150_D05_CORE_NATIVE",
     decisionTs:candidate.eligibleEntryTs,capturedAtMs:time,sourceFingerprint:"mock-signed-fixture",
     candidateCount:1,filteredCount:0,sourceCount:1,nativeCoreEvents:[],
@@ -98,5 +110,15 @@ test("mock Aster dispatch reaches signed entry fill, STOP, and shared reservatio
   assert.equal(leg.status,"OPEN");assert.ok(leg.qty>0);
   const registry=await readPendingExposureRegistry(join(dir,"pending.json"));
   assert.equal(registry.entries.filter(x=>x.status!=="RELEASED").length,0);
+  const spec=productionExitSpec(candidate.route);
+  const end=candidate.eligibleEntryTs+spec.hours*3600000;
+  exitFeed={closed:Array.from({length:spec.hours},(_,i)=>({openTs:candidate.eligibleEntryTs+i*3600000,
+   open:100,high:100.1,low:99.9,close:100})),nextOpens:[{ts:end,price:100}]};
+  time=end+5000;
+  const closing=await runner.tick();
+  assert.equal(closing.status,"exited");
+  assert.equal(exits,1);
+  assert.equal(store.read().state.legs[leg.id].status,"CLOSED");
+  assert.equal([...orders.values()].filter(o=>o.status==="NEW").length,0);
  }finally{rmSync(dir,{recursive:true,force:true});}
 });

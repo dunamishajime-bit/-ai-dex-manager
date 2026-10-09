@@ -11,10 +11,10 @@ export function attachV4NativeCoreCandidates(snapshot:V4LiveDecisionSnapshot,
  const next={...snapshot,candidates:[...snapshot.candidates],filtered:[...snapshot.filtered],
   entryAtrByCandidate:{...snapshot.entryAtrByCandidate}};
  for(const e of selected){
-  const symbol=e.symbol+"USDT",bars=h1[e.symbol];
+  const symbol=e.symbol.endsWith("USDT")?e.symbol:e.symbol+"USDT",bars=h1[symbol.slice(0,-4)];
   if(!bars||!Number.isFinite(e.entry_price)||!(e.entry_price>0))
    throw Error("V4_NATIVE_CORE_OPEN_PRICE_MISSING:"+symbol);
-  const source:SourceEvidence={symbol,side:"SHORT",eligibleSourceEntryTs:e.entry_ts_ms,
+  const source:SourceEvidence={symbol,side:"LONG",eligibleSourceEntryTs:e.entry_ts_ms,
    decisionTs:e.decision_ts_ms,momentumConditionAgeHours:e.state_age_h,
    coreRequestedGross:e.requested_gross,sourceEngine:"FAILED_BREAK_NATIVE",
    sourceParityVerified:false,failedBreak:{

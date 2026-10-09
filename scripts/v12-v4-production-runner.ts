@@ -8,6 +8,7 @@ import {initializeV4SignedFlatState} from "../lib/v12-v4-signed-bootstrap";
 import {V4RunnerEngine} from "../lib/v12-v4-runner-engine";
 import {loadV4ClosedCandles,buildV4LiveDecisionBatch} from "../lib/v12-v4-live-candidate-builder";
 import {productionExitSpec} from "../lib/v12-v4-production-lifecycle";
+import {attachV4NativeCoreCandidates} from "../lib/v12-v4-core-candidate";
 import type {V4PeerKind,V4PeerSource} from "../lib/v12-v4-peer-state-owners";
 const H2=7200000;
 function env(name:string){
@@ -60,7 +61,18 @@ export async function buildV4ProductionRuntime(){
   const now=Date.now(),boundary=now-now%H2;
   if(cache&&cache.boundary===boundary)return cache.value;
   const bars=await loadV4ClosedCandles(client,now);
-  const value=buildV4LiveDecisionBatch(bars,now);
+  let value=buildV4LiveDecisionBatch(bars,now);
+  if(value.nativeCoreEvents.length){
+   const refs=new Map<string,number>();
+   for(const event of value.nativeCoreEvents){
+    const raw=await client.getKlines(event.symbol+"USDT","1h",3);
+    const opened=raw.find(row=>Number(row[0])===event.entry_ts_ms);
+    if(!opened||Number(opened[0])>now||!(Number(opened[1])>0))
+     throw Error("V4_NATIVE_CORE_ENTRY_H1_OPEN_MISSING");
+    refs.set(event.symbol+"|"+event.entry_ts_ms,Number(opened[1]));
+   }
+   value=attachV4NativeCoreCandidates(value,bars,refs);
+  }
   cache={boundary,value};
   return value;
  };

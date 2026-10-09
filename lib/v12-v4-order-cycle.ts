@@ -4,6 +4,7 @@ import {V4ExecutionStore} from "./v12-v4-execution-store";
 import {V4SharedReservations} from "./v12-v4-shared-reservations";
 import {reconcileV4EntryTrades,type V4VenueTrade} from "./v12-v4-venue-fills";
 import {reconcileV4ExitTrades} from "./v12-v4-venue-exit";
+import {applyProductionEvent} from "./v12-v4-production-lifecycle";
 import {reconcileV4Funding} from "./v12-v4-funding-ledger";
 /** Venue GET-only reconciliation; this class never sends orders.
  * The separate durable dispatcher owns submitted mutations.
@@ -44,7 +45,15 @@ export class V4OrderCycle{
    throw Error("V4_NOT_EXIT_INTENT");
   const order=await this.dispatcher.reconcile(cid,at);
   if(!order)throw Error("V4_AMBIGUOUS_EXIT_NOT_ABSENT_PROOF");
-  const {doc,intent}=this.lookup(cid),leg=doc.state.legs[intent.legId];
+  let {doc,intent}=this.lookup(cid);
+  const leg=doc.state.legs[intent.legId];
+  if(["STOP","TAKE_PROFIT"].includes(intent.action)&&leg.status==="OPEN"&&order.executedQuantity>0){
+   if(!(order.quantity>0)||Math.abs(order.quantity-leg.qty)>Math.max(1e-8,leg.qty*1e-7))
+    throw Error("V4_RESIDENT_STOP_OWNER_QTY_MISMATCH");
+   const event={type:"EXIT_REQUEST" as const,eventId:"venue-protection-close:"+cid,
+    ts:at,id:leg.id,qty:leg.qty};
+   doc=this.store.commit(doc.revision,{...doc,state:applyProductionEvent(doc.state,event)});
+  }
   const trades=await this.signedTrades(order.symbol,Number(order.orderId),leg.entryTs,at);
   const result=reconcileV4ExitTrades(doc.state,intent.legId,cid,order,trades,at,cooldownUntil);
   if(result.state!==doc.state)this.store.commit(doc.revision,{...doc,state:result.state});

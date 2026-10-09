@@ -37,7 +37,10 @@ export function reconcileV4ExitTrades(state:State,id:string,cid:string,order:V12
  for(const event of events){
   const old=next.journal.find(x=>x.eventId===event.eventId);
   if(old){
-   if(JSON.stringify({...old,ts:0})!==JSON.stringify({...event,ts:0}))
+   // The recorded cooldown is durable evidence. Re-reading an identical
+   // venue trade at a later time must not rewrite the already-booked exit.
+   const normalized=old.type==="EXIT_FILL"?{...event,cooldownUntil:old.cooldownUntil}:event;
+   if(JSON.stringify({...old,ts:0})!==JSON.stringify({...normalized,ts:0}))
     throw Error("V4_EXIT_EVENT_CONFLICT");
   }else next=applyProductionEvent(next,event);
  }

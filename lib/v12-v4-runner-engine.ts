@@ -67,7 +67,7 @@ export class V4RunnerEngine{
     const proof=await dispatcher.reconcile(cid,this.now());
     if(!proof)throw Error("V4_PROTECTIVE_ORDER_ID_UNRESOLVED:"+cid);
     if(["FILLED","PARTIALLY_FILLED"].includes(proof.status))
-     await cycle.reconcileExit(cid,this.now(),this.now()+24*3600000);
+     await cycle.reconcileExit(cid,this.now(),this.now());
    }
   }
   const [positions,openOrders,balances,peers,registry]=await Promise.all([
