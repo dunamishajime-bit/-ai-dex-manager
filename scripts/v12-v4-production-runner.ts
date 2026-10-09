@@ -4,6 +4,7 @@ import {AsterV3Client} from "../lib/aster-v3-client";
 import {V12AsterLiveAdapter} from "../lib/v12-aster-live-adapter";
 import {FileAccountOrderLock} from "../lib/disdex-account-order-lock";
 import {V4ExecutionStore} from "../lib/v12-v4-execution-store";
+import {initializeV4SignedFlatState} from "../lib/v12-v4-signed-bootstrap";
 import {V4RunnerEngine} from "../lib/v12-v4-runner-engine";
 import {loadV4ClosedCandles,buildV4LiveDecisionBatch} from "../lib/v12-v4-live-candidate-builder";
 import {productionExitSpec} from "../lib/v12-v4-production-lifecycle";
@@ -46,7 +47,9 @@ export async function buildV4ProductionRuntime(){
  if(!client.hasTradingCredentials())throw Error("V4_SIGNED_VENUE_CREDENTIALS_REQUIRED");
  const adapter=new V12AsterLiveAdapter(client,{maxSlippageBps:20});
  const store=new V4ExecutionStore(env("V12_V4_EXECUTION_STORE_PATH"),releaseSha);
- // Never initialize with a fabricated flat account or reset a prior-release state.
+ if(process.argv.includes("--init-signed-flat")){
+  await initializeV4SignedFlatState({store,client,peers:await loadPeers(),pendingPath:env("DISDEX_PENDING_EXPOSURE_REGISTRY_PATH")});
+ }
  store.read();
  const lock=new FileAccountOrderLock(env("DISDEX_ACCOUNT_LOCK_PATH"),120000);
  const pendingRegistryPath=env("DISDEX_PENDING_EXPOSURE_REGISTRY_PATH");
@@ -97,15 +100,16 @@ export async function buildV4ProductionRuntime(){
  return {engine,releaseSha};
 }
 async function main(){
- const once=process.argv.includes("--once"),daemon=process.argv.includes("--daemon");
+ const once=process.argv.includes("--once"),daemon=process.argv.includes("--daemon"),initialize=process.argv.includes("--init-signed-flat");
  if(process.argv.includes("--self-test")){
   const {PRODUCTION_EXIT_CATALOG}=await import("../lib/v12-v4-production-lifecycle");
   if(PRODUCTION_EXIT_CATALOG.length!==41)throw Error("V4_ROUTE_CATALOG_INCOMPLETE");
   console.log(JSON.stringify({status:"SELF_TEST_PASS",routes:41,realOrderEnabledV4:0}));
   return;
  }
- if(!once&&!daemon)throw Error("V4_RUNNER_REQUIRES_--once_OR_--daemon");
+ if(!once&&!daemon&&!initialize)throw Error("V4_RUNNER_REQUIRES_MODE");
  const {engine,releaseSha}=await buildV4ProductionRuntime();
+ if(initialize){console.log(JSON.stringify({status:"SIGNED_FLAT_STATE_INITIALIZED",releaseSha,orderEnabled:false}));return;}
  let stopping=false;
  process.once("SIGINT",()=>{stopping=true;});
  process.once("SIGTERM",()=>{stopping=true;});
