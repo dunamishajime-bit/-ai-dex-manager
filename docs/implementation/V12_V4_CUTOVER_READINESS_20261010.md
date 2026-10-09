@@ -1,6 +1,6 @@
 # V12 V4 – cutover readiness, 2026-10-10
 
-STATUS: BLOCKED_V4_RUNNER_AND_PORTFOLIO_CERTIFICATION_INCOMPLETE.
+STATUS: BLOCKED_V4_REAL_ORDER_AUTHORIZATION_AND_VENUE_PARITY_INCOMPLETE.
 
 Repository: dunamishajime-bit/-ai-dex-manager
 Branch: codex/v12-v4-production-cert-20261009
@@ -20,17 +20,31 @@ External-period research remains weak (Y06 PF ~0.30, other test ~0.57).
 - Signed entry and reduce-only exit fill reconciliation, including partial
   fills, fees and restart deduplication.
 - Single-owner funding allocation with ambiguous attribution denied.
+- A real always-on V4 runner entrypoint now exists:
+  scripts/v12-v4-production-runner.ts and lib/v12-v4-runner-engine.ts.
+- Mock-venue full-cycle test: signed account -> durable reservation -> ENTRY ->
+  independent fill -> resident STOP -> H1 TIME exit -> signed closing fill ->
+  STOP removal -> flat. Resident STOP-triggered close and exact trade-id
+  restart deduplication are also covered by dedicated tests.
+- Native failed-upward-break event is mapped to the single frozen SHORT Core
+  route with real H1 opening price and source ATR; cannot grant source parity.
+- Signed-flat-only first-state bootstrap refuses any existing foreign exposure.
 - Read-only Aster public market-data smoke probe completed.
 - Local V4 tests and full TypeScript typecheck passed.
 
 ## Remaining engineering blockers – Codex cannot perform only a switch yet
 
-1. The real order-authorized, always-on V4 Production runner does not exist.
-   Current candidate daemon intentionally has zero real order authority.
-2. Native failed-break Core source is not integrated into final live entry
-   admission and entry-price evidence for the complete 41-route strategy.
-3. Route-specific resident STOP/TP, trailing amendments and time-based exits
-   are not end-to-end bound to real broker protection/virtual-leg ownership.
+1. The permanent Production runner code now exists, but deployment-time
+   assertAuthority and assertSourceParity deliberately fail closed until
+   independent signed V4 evidence and operator attestation are certified.
+   Neither test success nor modifying a boolean authorizes live trading.
+2. Core route mapping is implemented and mock-verified, but independent source
+   parity for the 41 research routes and their full production entry order is
+   still unverified on live historical data.
+3. A stop-first mock fill and H1 TIME exit pass. Nevertheless, every TIME-only
+   route lacks a contract-approved exchange resident emergency STOP blueprint;
+   native trailing amendments, overlapping virtual legs, partial STOP resize
+   and live protection are not fully certified against Aster.
 4. Funding/paginated trade history completeness and all eight independent
    current-runtime programs have not passed integrated external replay.
 5. Signed current account readback, operator artifact and shared Gross caps

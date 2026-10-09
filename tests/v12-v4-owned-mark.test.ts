@@ -27,3 +27,20 @@ test("signed account marks reconcile an existing V4 leg without folding it into 
  assert.ok(Math.abs(updated.prices[candidate.symbol]-100)<1e-12);
  assert.throws(()=>buildV4AccountMark({...args,venue:{...args.venue,positions:[{...args.venue.positions[0],quantity:qty+1}]}}),/VENUE_OWNED_QUANTITY_MISMATCH/);
 });
+
+test("canonical Q102 and FET flat snapshots may omit optional position but pending cannot masquerade as flat",async()=>{
+ const {v4PeerOwners}=await import("../lib/v12-v4-peer-state-owners");
+ const now=Date.now(),sha="a".repeat(40);
+ const kinds=["V12","PENGU","Q102","V52","FET","HYPE_LONG","IDLE","RESIDUAL"] as const;
+ const sources=kinds.map(kind=>({kind,programSha:sha,raw:{updatedAt:now,
+  ...(kind==="V12"?{activePositions:[]}:kind==="V52"?{positions:{}}:
+  kind==="HYPE_LONG"||kind==="IDLE"?{positions:[]}:
+  kind==="Q102"?{version:1,strategyId:"QUALITY102_CAUSAL_V1"}:
+  kind==="FET"?{schema:"fet-brk48-residual-state/v1",strategyId:"FET_BRK48_RESIDUAL"}:
+  kind==="RESIDUAL"?{schema:"disdex-idle-residual-long-state/v1"}:
+  {strategyId:"PENGU_DUAL_LS_V2_FINAL",mode:"LIVE"})}}));
+ assert.deepEqual(v4PeerOwners(sources,sha,now),[]);
+ const q=sources.find(s=>s.kind==="Q102")!;
+ (q.raw as any).pending={symbol:"BTCUSDT"};
+ assert.throws(()=>v4PeerOwners(sources,sha,now),/UNKNOWN_PEER_OWNER_SCHEMA/);
+});

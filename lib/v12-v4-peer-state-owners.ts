@@ -27,7 +27,13 @@ export function v4PeerOwners(sources:V4PeerSource[],expectedSha:string,now:numbe
    if(!Array.isArray(r.activePositions)&&!("active" in r))throw Error("UNKNOWN_V12_OWNER_SCHEMA");
    for(const p of (r.activePositions??(r.active?[r.active]:[])))add(s.kind,p.symbol,p.side,Number(p.quantity));
   }else if(["PENGU","Q102","FET","RESIDUAL"].includes(s.kind)){
-   if(!("position" in r))throw Error("UNKNOWN_PEER_OWNER_SCHEMA");
+   const knownFlatWithoutPosition=!r.position&&!r.pending&&(
+    s.kind==="Q102"&&r.version===1&&r.strategyId==="QUALITY102_CAUSAL_V1"||
+    s.kind==="FET"&&r.schema==="fet-brk48-residual-state/v1"&&r.strategyId==="FET_BRK48_RESIDUAL"||
+    s.kind==="RESIDUAL"&&r.schema==="disdex-idle-residual-long-state/v1"||
+    s.kind==="PENGU"&&r.strategyId==="PENGU_DUAL_LS_V2_FINAL"&&r.mode==="LIVE"
+   );
+   if(!("position" in r)&&!knownFlatWithoutPosition)throw Error("UNKNOWN_PEER_OWNER_SCHEMA");
    if(r.position)add(s.kind,s.kind==="PENGU"?"PENGU":r.position.symbol,r.position.side,Number(r.position.quantity));
   }else if(s.kind==="V52"){
    if(!r.positions||typeof r.positions!=="object")throw Error("UNKNOWN_V52_OWNER_SCHEMA");
