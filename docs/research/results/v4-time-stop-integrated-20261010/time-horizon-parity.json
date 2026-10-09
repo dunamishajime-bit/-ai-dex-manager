@@ -1,0 +1,10 @@
+{
+  "status": "TIME_ROUTE_PLANNED_HORIZON_PARITY_ONLY_NOT_ENTRY_OR_PROTECTION_CERTIFICATE",
+  "period": "2025-08-10..2026-08-10",
+  "time_routes_covered": 37,
+  "catalog_time_routes": 37,
+  "time_trade_rows": 746,
+  "planned_time_horizon_mismatches": 0,
+  "other_route_count": 4,
+  "trade_source_sha256": "edaae6ba9a8fe84c7db1cbb2e9d133ac9e85f8a89033be5ed7825b6a6e065a65"
+}

@@ -1,0 +1,17 @@
+{
+  "status": "FIXED_ACCEPTED_COHORT_H1_COUNTERFACTUAL_NOT_PORTFOLIO_REPLAY",
+  "period": "2025-08-10 to 2026-08-10",
+  "canonical_market_root": "C:\\tmp\\bt-v12-score100-volume080-normalonly-20260928\\extracted\\bt-v12-score100-volume080-normalonly-20260928\\market-Aster-H1-funding-and-manifests\\normalized\\aster\\klines",
+  "entry_and_exit_original": "unchanged accepted V12 TIME trades in selected V4 10/20/30bps trade ledger",
+  "stop_timing": "H1 high/low from entry until original exit (exclusive); intrabar stop assumed triggered if touched",
+  "stop_fill": "adverse gap: LONG min(open,stop), SHORT max(open,stop)",
+  "atr_source": "ATR14 simple True Range from 14 H1 completed bars strictly before entry",
+  "fee": "original exit fee fraction applied to stop-price difference",
+  "funding": "baseline unchanged; not certified for altered funding settlement",
+  "warnings": [
+    "fixed original accepted trades (no compounding/re-admission/reallocation)",
+    "not real historical intrabar fills; no tick/orderbook/slippage proof",
+    "no reflow of other strategies or DD; do not infer integrated final equity or DD",
+    "treat as policy sensitivity only; live resident STOP requires explicit contract approval"
+  ]
+}

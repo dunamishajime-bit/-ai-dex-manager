@@ -200,8 +200,18 @@ export class V4RunnerEngine{
    await cycle.reconcileEntry(cid,this.now());
    const latest=d.store.read().state.legs[legId];
    if(latest.qty>0){
+    const signedAverageFill=latest.entryNotional/latest.qty;
+    if(!(signedAverageFill>0)||!Number.isFinite(signedAverageFill))
+     throw Error("V4_SIGNED_AVERAGE_ENTRY_FILL_MISSING");
+    // The quote used for reservation is not the executed price. Recompute
+    // venue STOP from independently reconciled fills, never from stale quote.
+    const signedStop=await d.requiredResidentStop({route:candidate.route,symbol:candidate.symbol,
+     side:candidate.effectiveSide,entryPrice:signedAverageFill,atr14});
+    if(!Number.isFinite(signedStop)||!(signedStop>0)||
+     (candidate.effectiveSide==="LONG"?signedStop>=signedAverageFill:signedStop<=signedAverageFill))
+      throw Error("V4_SIGNED_FILL_RESIDENT_STOP_INVALID");
     const protective:V4DurableOrderCommand={...command,action:"STOP",sequence:0,
-     quantity:latest.qty,price:stop};
+     quantity:latest.qty,price:signedStop};
     await d.assertAuthority(protective);
     const stopCid=dispatcher.prepare(protective,this.now());
     await dispatcher.submit(stopCid,this.now());

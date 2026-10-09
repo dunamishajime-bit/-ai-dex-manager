@@ -1,0 +1,64 @@
+{
+  "policy_evidence_only": true,
+  "research_source_git_sha": "9c03bb90841e4fb9fe62186940c62d3fcedabac4",
+  "h1_dataset": {
+    "AAVEUSDT": {
+      "sha256": "79548b1968b5562645c5b516396c7aa9b16645add167410e4a613161883e4aba",
+      "size_bytes": 3303243
+    },
+    "ADAUSDT": {
+      "sha256": "e9c591532aedac859602ddb7cae76d16a2a22129c739478f1ea1075579d1b972",
+      "size_bytes": 3357320
+    },
+    "ATOMUSDT": {
+      "sha256": "1fba07ebb4db4a2d0190abe35ea2e21cc3538dbe162e3ac5ee26e9b0128afc9b",
+      "size_bytes": 3234914
+    },
+    "AVAXUSDT": {
+      "sha256": "46214ec892d6378d0f3efb3e5ca1d890ee33cf5dfc98b0ad652fd8bda764104c",
+      "size_bytes": 3257135
+    },
+    "BNBUSDT": {
+      "sha256": "92e071adce1df1ac2ea400181d190689a2c6ec1527fa17c969dc39c622f79657",
+      "size_bytes": 3354658
+    },
+    "BTCUSDT": {
+      "sha256": "f573b511842dcd1207801324948fa85842e0e2fd8d44ad76e3273d9fa607421c",
+      "size_bytes": 3495402
+    },
+    "DOGEUSDT": {
+      "sha256": "c392039d1bb9de87d2c54ba75d5425f43571aef0a41ab15559d9d572ad760d1f",
+      "size_bytes": 3498610
+    },
+    "ETHUSDT": {
+      "sha256": "72727955b1bacee9a6fb8666e08826c1926ff95ae6bd8d1ccb35d7dc6d6bac86",
+      "size_bytes": 3448388
+    },
+    "INJUSDT": {
+      "sha256": "6dbc916cd9e788a964c58935cc3661184a27736c57e3683157774c2e863bb948",
+      "size_bytes": 3272119
+    },
+    "LINKUSDT": {
+      "sha256": "f4f8e5baabd65da0f52093be29ac2348742223f680d1fe3fd7e1d7b4ab37b066",
+      "size_bytes": 3338858
+    },
+    "LTCUSDT": {
+      "sha256": "51ad635801eb58ca43459d9425f1eec779294c82455f53a2f3428a70a45ac09a",
+      "size_bytes": 3307908
+    },
+    "NEARUSDT": {
+      "sha256": "6c5b4b2f250ebc9aec723da4566132b7e431b26a3e320e2ef09f482de6d0e47e",
+      "size_bytes": 3267891
+    },
+    "SOLUSDT": {
+      "sha256": "10958e969ea53fbb5d9eaedf20680d9e9463fcba18ceee79f8f2853a8907db26",
+      "size_bytes": 3401901
+    },
+    "XRPUSDT": {
+      "sha256": "3d434bf8ed2265663b9375c8de1f64d9ce4b1a90e20b06bf2a91c657dc5fa99e",
+      "size_bytes": 3407642
+    }
+  },
+  "runner_contract": "not activated",
+  "full_corpus_github_included": false
+}

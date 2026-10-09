@@ -1,0 +1,296 @@
+[
+  {
+    "route": "CONT_SHORT_MID_AGE24_48",
+    "spec": {
+      "kind": "TIME",
+      "hours": 3
+    }
+  },
+  {
+    "route": "FAILED_BREAK_REV_SHORT_6H",
+    "spec": {
+      "kind": "TIME",
+      "hours": 9
+    }
+  },
+  {
+    "route": "REC_G1_MID_REL_LOWVOL",
+    "spec": {
+      "kind": "TIME",
+      "hours": 12
+    }
+  },
+  {
+    "route": "REC_G2_EARLY_BTC_OPPOSE_VOL",
+    "spec": {
+      "kind": "TIME",
+      "hours": 6
+    }
+  },
+  {
+    "route": "REC_G3_LATE_BTC_REL",
+    "spec": {
+      "kind": "NATIVE",
+      "hours": 46,
+      "source": "WR60_BASELINE_1978_PARITY"
+    }
+  },
+  {
+    "route": "REC_G4_MATURE_REL_RANGE",
+    "spec": {
+      "kind": "TIME",
+      "hours": 24
+    }
+  },
+  {
+    "route": "REC_G5_SLOW_TREND",
+    "spec": {
+      "kind": "TIME",
+      "hours": 48
+    }
+  },
+  {
+    "route": "REC_X01_TIME_24H",
+    "spec": {
+      "kind": "TIME",
+      "hours": 24
+    }
+  },
+  {
+    "route": "REC_X02_TIME_36H",
+    "spec": {
+      "kind": "TIME",
+      "hours": 36
+    }
+  },
+  {
+    "route": "REC_X03_TIME_12H",
+    "spec": {
+      "kind": "TIME",
+      "hours": 12
+    }
+  },
+  {
+    "route": "REC_X04_TIME_24H",
+    "spec": {
+      "kind": "TIME",
+      "hours": 24
+    }
+  },
+  {
+    "route": "REC_X05_TIME_36H",
+    "spec": {
+      "kind": "TIME",
+      "hours": 36
+    }
+  },
+  {
+    "route": "REC_X06_TIME_12H",
+    "spec": {
+      "kind": "TIME",
+      "hours": 18
+    }
+  },
+  {
+    "route": "REC_X07_TIME_6H",
+    "spec": {
+      "kind": "TIME",
+      "hours": 6
+    }
+  },
+  {
+    "route": "REC_X08_TIME_48H",
+    "spec": {
+      "kind": "TIME",
+      "hours": 48
+    }
+  },
+  {
+    "route": "REC_X09_TIME_48H",
+    "spec": {
+      "kind": "TIME",
+      "hours": 48
+    }
+  },
+  {
+    "route": "REC_X10_TIME_48H",
+    "spec": {
+      "kind": "TIME",
+      "hours": 48
+    }
+  },
+  {
+    "route": "REC_X11_TIME_48H",
+    "spec": {
+      "kind": "TIME",
+      "hours": 48
+    }
+  },
+  {
+    "route": "REC_X12_TIME_12H",
+    "spec": {
+      "kind": "TIME",
+      "hours": 12
+    }
+  },
+  {
+    "route": "REC_X13_TP1.5_SL1_H24",
+    "spec": {
+      "kind": "ATR",
+      "hours": 24,
+      "tp": 1.5,
+      "sl": 1
+    }
+  },
+  {
+    "route": "REC_X14_TIME_48H",
+    "spec": {
+      "kind": "TIME",
+      "hours": 48
+    }
+  },
+  {
+    "route": "REC_Y01_REV_D0_T72",
+    "spec": {
+      "kind": "TIME",
+      "hours": 72
+    }
+  },
+  {
+    "route": "REC_Y02_REV_D0_T12",
+    "spec": {
+      "kind": "TIME",
+      "hours": 12
+    }
+  },
+  {
+    "route": "REC_Y03_REV_D0_T36",
+    "spec": {
+      "kind": "TIME",
+      "hours": 36
+    }
+  },
+  {
+    "route": "REC_Y04_REV_D2_T36",
+    "spec": {
+      "kind": "TIME",
+      "hours": 36
+    }
+  },
+  {
+    "route": "REC_Y05_REV_D2_T9",
+    "spec": {
+      "kind": "TIME",
+      "hours": 9
+    }
+  },
+  {
+    "route": "REC_Y06_REV_D0_T72",
+    "spec": {
+      "kind": "TIME",
+      "hours": 72
+    }
+  },
+  {
+    "route": "REC_Y07_REV_D0_T72",
+    "spec": {
+      "kind": "TIME",
+      "hours": 72
+    }
+  },
+  {
+    "route": "REC_Y08_REV_D0_T6",
+    "spec": {
+      "kind": "TIME",
+      "hours": 6
+    }
+  },
+  {
+    "route": "REC_Y09_REV_D2_T24",
+    "spec": {
+      "kind": "TIME",
+      "hours": 24
+    }
+  },
+  {
+    "route": "REC_Y10_REV_D2_T24",
+    "spec": {
+      "kind": "TIME",
+      "hours": 24
+    }
+  },
+  {
+    "route": "REC_Y11_REV_D0_T36",
+    "spec": {
+      "kind": "TIME",
+      "hours": 36
+    }
+  },
+  {
+    "route": "REC_Y12_REV_D0_T24",
+    "spec": {
+      "kind": "TIME",
+      "hours": 24
+    }
+  },
+  {
+    "route": "REC_Y13_REV_D2_T36",
+    "spec": {
+      "kind": "TIME",
+      "hours": 36
+    }
+  },
+  {
+    "route": "REC_Y15_REV_D0_T3",
+    "spec": {
+      "kind": "TIME",
+      "hours": 3
+    }
+  },
+  {
+    "route": "REC_Y16_REV_D0_T6",
+    "spec": {
+      "kind": "TIME",
+      "hours": 6
+    }
+  },
+  {
+    "route": "REC_Y17_REV_D1_T3",
+    "spec": {
+      "kind": "TIME",
+      "hours": 3
+    }
+  },
+  {
+    "route": "REC_Y18_REV_D2_T18",
+    "spec": {
+      "kind": "TIME",
+      "hours": 18
+    }
+  },
+  {
+    "route": "REC_Y19_REV_D1_TP2_SL1_H36",
+    "spec": {
+      "kind": "ATR",
+      "hours": 36,
+      "tp": 2,
+      "sl": 1
+    }
+  },
+  {
+    "route": "REC_Z14_ORIG_D2_T6",
+    "spec": {
+      "kind": "TIME",
+      "hours": 6
+    }
+  },
+  {
+    "route": "REC_Z21_ORIG_D2_TP1_SL1_H24",
+    "spec": {
+      "kind": "ATR",
+      "hours": 24,
+      "tp": 1,
+      "sl": 1
+    }
+  }
+]

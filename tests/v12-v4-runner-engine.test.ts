@@ -63,9 +63,9 @@ test("mock Aster dispatch reaches signed entry fill, STOP, and shared reservatio
     submitted++;const qty=x.quantity,id=51;positionQty=qty*(x.side==="LONG"?1:-1);
     orders.set(x.clientOrderId,{symbol:x.symbol,clientOrderId:x.clientOrderId,orderId:id,
      status:"FILLED",side:x.side==="LONG"?"BUY":"SELL",origQty:String(qty),
-     executedQty:String(qty),avgPrice:"100",cumQuote:String(qty*100)});
+     executedQty:String(qty),avgPrice:"99",cumQuote:String(qty*99)});
     fills.push({symbol:x.symbol,id:91,orderId:id,side:x.side==="LONG"?"BUY":"SELL",
-     price:"100",qty:String(qty),commission:"0",commissionAsset:"USDT",time});
+     price:"99",qty:String(qty),commission:"0",commissionAsset:"USDT",time});
     return {status:"FILLED",executionUnknown:false};
    },
    placeStopMarket:async(x:any)=>{
@@ -99,13 +99,17 @@ test("mock Aster dispatch reaches signed entry fill, STOP, and shared reservatio
     orderEnabled:false,realOrderEnabledV4:0,tradingMutation:0,
    }),
    assertAuthority:async()=>{},assertSourceParity:async()=>{},
-   requiredResidentStop:async()=>candidate.effectiveSide==="LONG"?90:110,
+   requiredResidentStop:async({entryPrice}:any)=>candidate.effectiveSide==="LONG"?entryPrice*.92:entryPrice*1.08,
    quantityNormalizer:{normalizeMarketQuantity:async(_s:string,q:number,p:number)=>({quantity:q,notional:q*p})} as any,
    referencePrice:async()=>100,minimumVenueOrderNotional:async()=>5,now:()=>time,
   });
   const result=await runner.tick();
   assert.equal(result.status,"submitted");
   assert.equal(submitted,1);assert.equal(stops,1);
+  const activeStop=[...orders.values()].find(o=>o.type==="STOP_MARKET");
+  assert.ok(activeStop);
+  const expectedStop=candidate.effectiveSide==="LONG"?99*.92:99*1.08;
+  assert.ok(Math.abs(Number(activeStop.stopPrice)-expectedStop)<1e-7);
   const leg=Object.values(store.read().state.legs)[0];
   assert.equal(leg.status,"OPEN");assert.ok(leg.qty>0);
   const registry=await readPendingExposureRegistry(join(dir,"pending.json"));

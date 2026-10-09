@@ -97,3 +97,43 @@ Production artifact, VPS release, order, position or STOP mutation.**
 - Missing V4 TIME resident STOP blueprint, actual 41/41 parity,
   same-symbol virtual-leg STOP replacement, signed Aster execution and
   any independent forward-period policy gate remain blockers.
+
+
+## Research-only TIME family STOP sensitivity, 2026-10-10
+
+The unchanged formal integrated 41-route 10bps baseline was reproduced to
+JPY291,326,102.6203428, maximum DD -20.420013795%, 1,222 trades. Historical
+Aster normalized H1 includes the full 2025-08-10..2026-08-10 sample. All
+37 TIME routes have 746 accepted V12 trades, with **0 mismatches** between
+their selected planned exit timestamp and entry + route-specific TIME hours.
+
+Full multi-strategy Gross, compounded equity and DD recomputation with an
+additional emergency STOP shows:
+- fixed 8% 10bps: JPY282,646,704, PF4.1126, DD -19.5264%, 1,228 trades;
+- fixed 8% 20bps: JPY228,069,633, PF3.783, DD -19.974%, 1,228 trades;
+- fixed 8% 30bps: JPY162,548,087, PF3.342, DD -18.189%, 1,223 trades.
+- Unchanged 20bps: JPY231,193,740, DD -20.9659%.
+- Unchanged 30bps: JPY174,749,524, DD -18.3888%.
+
+The 8% emergency limit is a candidate, NOT an approved V4 TIME Exit contract,
+and is strictly research-only in lib/v12-v4-time-emergency-stop-research.ts.
+No changes to existing TIME route Exit policy or live authority have occurred.
+Historical STOPs use H1 high/low with adverse-open gap convention; intrabar
+sequencing, actual Aster resident STOP fills, exchange filters and Aug-Oct
+out-of-sample performance are NOT certified.
+
+Formal outputs: docs/research/results/v4-time-stop-integrated-20261010/
+Runner TIME protection remains Fail Closed until explicit STOP approval,
+exact real-fill stop normalization, shared-symbol ownership and source/venue
+execution certification.
+
+
+### Runner entry-fill STOP reconciliation hardening
+
+Prior runner calculated the resident STOP once using a pre-trade quote.
+The revised runner still verifies that a valid protection blueprint exists
+before admission, then **recomputes the actual resident STOP from the
+independently reconciled average signed ENTRY fill** before submitting
+STOP_MARKET. The mock Aster regression uses a price-100 reservation
+and price-99 fill; STOP matches price-99, not the stale price-100 quote.
+No live order authority is granted by this change.
