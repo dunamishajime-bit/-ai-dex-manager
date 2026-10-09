@@ -1,0 +1,35 @@
+✔ Core confirms a failed upward break using only completed H2 and matches its frozen event (2.4371ms)
+✔ repeated decision cannot emit the same Core event and future H2 is rejected (1.1003ms)
+✔ Core selection uses observed entry price and risk distance, with rank3 capped at 0.10x (0.2688ms)
+✖ native failed-break source cannot also open recovery routes from the same setup (36.4775ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 3
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 466.6104
+
+✖ failing tests:
+
+test at tests\v12-v4-native-core.test.ts:2:4089
+✖ native failed-break source cannot also open recovery routes from the same setup (36.4775ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+
+    [
+      'FAILED_BREAK_REV_SHORT_6H',
+  +   'REC_Y06_REV_D0_T72'
+    ]
+
+      at TestContext.<anonymous> (C:\Users\dis\DisDex-v4-production-cert-20261009\tests\v12-v4-native-core.test.ts:48:9)
+      at async Test.run (node:internal/test_runner/test:1110:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:785:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'FAILED_BREAK_REV_SHORT_6H', 'REC_Y06_REV_D0_T72' ],
+    expected: [ 'FAILED_BREAK_REV_SHORT_6H' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

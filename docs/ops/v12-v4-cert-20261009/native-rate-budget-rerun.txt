@@ -1,0 +1,23 @@
+✔ shared Aster rate budget module exists (0.9443ms)
+✔ shared Aster rate budget exposes a slot reservation API (1.0308ms)
+✔ shared Aster rate budget serializes permits in the Python-compatible JSON format (25.8365ms)
+✔ shared Aster rate budget charges request weight, not HTTP count (15.1616ms)
+✔ AsterV3Client routes every request attempt through the shared global rate budget (0.929ms)
+✔ shared budget rejects a non-empty document without the canonical schema (9.8304ms)
+✔ shared budget rejects non-finite configuration (1.7475ms)
+✔ shared budget publishes state with atomic rename (1.1307ms)
+✔ shared budget never evicts an old lock owned by a live process (34.324ms)
+✔ shared budget survives concurrent stale ownerless lock recovery without duplicate permits (466.1955ms)
+﹣ shared budget detects PID reuse using Linux process start ticks (0.1741ms) # SKIP
+✔ shared budget reclaims a stale ownerless recovery mutex after a crashed recovery (15.1743ms)
+✔ shared budget never evicts a recovery mutex owned by a live process (38.4213ms)
+✔ shared Aster budget propagates venue cooldown across daemons (11.5404ms)
+✔ root-owned rate-budget writers preserve parent ownership before atomic rename (1.3727ms)
+ℹ tests 15
+ℹ suites 0
+ℹ pass 14
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 1
+ℹ todo 0
+ℹ duration_ms 886.2514

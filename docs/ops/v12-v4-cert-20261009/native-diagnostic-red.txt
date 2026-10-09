@@ -1,0 +1,32 @@
+✔ closed H2 native candidates retain research direction, rank, ATR and phase diagnostics (3.6377ms)
+✔ future candles cannot change a native source at the decision boundary (7.7569ms)
+✔ native source refuses shifted symbols and gaps in its 121-bar window (4.4037ms)
+✔ 90h momentum condition age caps at 96h and resets on the latest failed condition (0.2485ms)
+✖ CONT uses native H2 phase diagnostics while recovery rules retain H1 features (15.7358ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 4
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 447.5869
+
+✖ failing tests:
+
+test at tests\v12-v4-native-source.test.ts:2:4287
+✖ CONT uses native H2 phase diagnostics while recovery rules retain H1 features (15.7358ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+
+    assert.ok(evaluateV12V4Routes(f).some(x=>x.route==="CONT_SHORT_MID_AGE24_48"))
+
+      at TestContext.<anonymous> (C:\Users\dis\DisDex-v4-production-cert-20261009\tests\v12-v4-native-source.test.ts:48:9)
+      at async Test.run (node:internal/test_runner/test:1110:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:785:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }

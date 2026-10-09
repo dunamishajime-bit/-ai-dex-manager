@@ -12,7 +12,7 @@
 
 公開HPはf2608b5720d7系のui-20sounds-top3リリース、/realtime HTTP200。新V4候補へ最新HPの1.5秒順次アニメーションと20効果音・通知変更を取り込み、旧UIへ巻き戻さない。新V4表示の修正は候補ソースまで。新V4本番公開は採用ゲート未合格につき実施しない。
 
-旧HOLD_PROTECTEDという運用障害は現在解除済みだが、DD20.42%、外部PF0.57/Y06PF0.30、native Entry生成と全8系統実行一致の未認証という採用上の問題は残る。新V4の注文権限は無効のまま。
+旧HOLD_PROTECTEDという運用障害は現在解除済みだが、DD20.42%、外部PF0.57/Y06PF0.30、全8系統実行一致の未認証という採用上の問題は残る。Native Entryは下記の継続検証で外部候補・Core・修正後258件まで一致した。新V4の注文権限は無効のまま。
 
 ## 研究BTとLIVE認証の区別
 
@@ -88,3 +88,35 @@ XRP pending用の復旧コードは、通常のnative口座ロック取得、V12
 研究DD超過・外部PF失敗はコードビルドPASSやGross拡大で解消できない。必要な未達はNative Entryの候補全数一致、Core onset/Gross因果生成、全8実装の共有予約・約定・Funding統合リプレイ、未使用期間の将来順位再現性。これらを合格扱いに書き換えていない。
 
 19:01 JST Linux CI全工程PASS: https://github.com/dunamishajime-bit/-ai-dex-manager/actions/runs/37914537310 。初回クリーン依存環境のRecharts label型不一致はunknown入力をstring/numberへ検証してDateへ渡す修正で解決。古い失敗ログをresume-ci-first-failure.txtとして残す。公開HP ai-dex-manager-ui.serviceは18:57 JSTにactive、PID3032654、f2608b5720d7リリースを維持（過去preflight unitのfailedとは区別）。共有Kill Switchは同時点active=false。
+
+## 19:07 JSTの継続指示後：Native Entryとルート割当の修正・一致証拠
+
+この節は上記の「Native Entry生成未実装」という以前の到達点を更新する。新V4のLIVE権限と採用判定はBLOCKEDのまま。
+
+- 閉じたH2のみから現行buildV12Signalsを呼ぶNative候補生成器を追加。Momentum age（90h条件、96h上限）、H2 6hリターン、H2 EMA12/ATR31を移植。CONTはこのH2診断を使い、Recoveryは閉じたH1の特徴量を維持する。未来のindex+1 candleを渡してEntry時刻を決めない。
+- Coreの90h onset、構造break、6h以内のfail、retest/reaccelとの遷移優先順位、Top3、ATRリスク数量とrank3 0.10x上限をNative状態機械として実装。6hはsetup確認期間でありExit保持時間ではない。
+- 元候補から全一致ルートを候補化する実装を修正。研究の凍結discovery順で最初のルートを割り当て、その後に2段階修正を適用する。修正で拒否された場合に次ルートへ流さない。Core sourceからRecoveryを重複生成しない。これはポートフォリオ発火順位とは別の順序。
+
+|照合対象|結果|証拠|
+|---|---:|---|
+|Native元候補、方向/rank/ATR/age/診断/Score/Volume/gate|299 / 299、差分0|native-source-parity.json|
+|Core生イベントと選択・Gross|8 / 8、差分0|native-core-parity.json|
+|修正前ルート候補|570件、研究258件に対し余分312件|native-route-parity-before.json|
+|修正後Entry identity/rank/requestedGross|258 / 258、余分・不足・差分0|native-route-parity-after.json|
+|単独legのEntry/Exit時刻・価格・正規化理由|258 / 258、差分0|native-route-exit-parity.json|
+
+外部台帳で実際に発火した25ルートを覆う。残り16ルートの実発火一致、1年全体のNative選別一致、全8系統共有予約・非同期約定・手数料・Funding・実機数量はこの258件のPASSに含めない。Exit照合は単独leg・仮想fractional数量・既知H1約定価格のジャーナルであり、取引所約定の一致ではない。最初のExit比較は修正前274件の台帳を使っており対象誤りだった。正規の修正後258件の台帳へ訂正し、Exit実装を結果に合わせて変更せず一致した。
+
+Native source/core/adapter/Exit CLIには取引所実注文権限を与えない。sourceParityVerified入力だけをLIVE認証とは扱わない。原研究に存在する学習期間の事後選別inc_keysを将来Entryの判定材料にしない。
+
+### 継続後の検証・実機
+
+Root/research TypeScript PASS。Root全122ファイルの初回は121 PASS/1 FAIL（Windows atomic renameのEPERM）。同じrate-budget競合テストを再実行し14 PASS/1 Linux限定skip。初回失敗証拠もnative-full-root-tests.jsonに保持する。Linux CIへ全122ファイルの回帰を追加し、失敗を無視しない。UIはアプリ正規cwdで114/114 PASS（native-ui-tests-app-cwd.txt）。誤ったroot cwdで実行したUI失敗もnative-ui-tests-wrong-cwd.txtに保存し、コード失敗と区別する。
+
+19:28 JSTの署名付き再照会：Production ce1edeead8d0f9e5d88e829d415057117502a335、全8系統（IDLE内RESIDUAL）と共有Risk/Margin Guard active/running。共有Kill Switch active=false、実建玉0、未約定0。この監査の注文・取消・建玉変更は0。native-final-vps-audit.json参照。
+
+同時刻の公開HPは別作業のui-sfx-diverse-ce392a0d8dd1、PID3073347、active。正規ポート3001 /realtimeはHTTP200（native-final-hp-audit.txt）。3000へのconnection refusedは誤ったポート照会でありHP停止とは扱わない。今回の新V4作業はHPを再デプロイしていない。
+
+### 条件付きLIVE判定
+
+候補実装の一致改善は実施したが、10bps DD20.420014%、20bps DD20.965901%、独立期間V2 PF0.570027 / Y06 PF0.299519は変わらない。コード一致はこの研究案の将来利益を証明しない。全8系統統合イベント一致も未合格。ユーザーの「DD20%超・事後順位再現性等の未解決が残る場合は実注文を有効化しない」という条件に従い、新V4デプロイ・実注文有効化は実施しない。既存LIVEは稼働中。旧ロジックへの巻き戻し、Kill Switch解除、強制lock削除、強制決済は行っていない。

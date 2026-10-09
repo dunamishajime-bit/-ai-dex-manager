@@ -1,0 +1,2085 @@
+{
+  "status": "PASS_NATIVE_ROUTE_EXIT_REPLAY",
+  "expected": 258,
+  "matching": 258,
+  "mismatches": [],
+  "errors": [],
+  "matches": [
+    {
+      "key": "REC_G2_EARLY_BTC_OPPOSE_VOL|LTCUSDT|1786737600000|SHORT",
+      "exitTs": 1786759200000,
+      "price": 43.83,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_6H"
+    },
+    {
+      "key": "REC_Y12_REV_D0_T24|LTCUSDT|1786860000000|LONG",
+      "exitTs": 1786946400000,
+      "price": 44.22,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_24H"
+    },
+    {
+      "key": "CONT_SHORT_MID_AGE24_48|INJUSDT|1786867200000|SHORT",
+      "exitTs": 1786878000000,
+      "price": 4.077,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_3H"
+    },
+    {
+      "key": "REC_X05_TIME_36H|INJUSDT|1786881600000|SHORT",
+      "exitTs": 1787011200000,
+      "price": 4.077,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_36H"
+    },
+    {
+      "key": "REC_X06_TIME_12H|INJUSDT|1786917600000|SHORT",
+      "exitTs": 1786982400000,
+      "price": 4.129,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_18H"
+    },
+    {
+      "key": "REC_X03_TIME_12H|ATOMUSDT|1787025600000|SHORT",
+      "exitTs": 1787068800000,
+      "price": 1.41,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_12H"
+    },
+    {
+      "key": "REC_Z21_ORIG_D2_TP1_SL1_H24|ATOMUSDT|1787054400000|SHORT",
+      "exitTs": 1787058000000,
+      "price": 1.385,
+      "reason": "TP",
+      "priceModelOnly": true,
+      "sourceReason": "TP_SL_TP"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|NEARUSDT|1787184000000|SHORT",
+      "exitTs": 1787443200000,
+      "price": 1.883,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|INJUSDT|1787234400000|SHORT",
+      "exitTs": 1787493600000,
+      "price": 5.137,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|XRPUSDT|1787234400000|SHORT",
+      "exitTs": 1787493600000,
+      "price": 1.5195,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|INJUSDT|1787241600000|SHORT",
+      "exitTs": 1787500800000,
+      "price": 5.223,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|XRPUSDT|1787241600000|SHORT",
+      "exitTs": 1787500800000,
+      "price": 1.4969,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|XRPUSDT|1787248800000|SHORT",
+      "exitTs": 1787508000000,
+      "price": 1.5046,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|LINKUSDT|1787248800000|SHORT",
+      "exitTs": 1787508000000,
+      "price": 11.506,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y03_REV_D0_T36|DOGEUSDT|1787256000000|SHORT",
+      "exitTs": 1787385600000,
+      "price": 0.09307,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_36H"
+    },
+    {
+      "key": "REC_Y03_REV_D0_T36|INJUSDT|1787263200000|SHORT",
+      "exitTs": 1787392800000,
+      "price": 4.838,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_36H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|DOGEUSDT|1787263200000|SHORT",
+      "exitTs": 1787522400000,
+      "price": 0.09336,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|DOGEUSDT|1787277600000|SHORT",
+      "exitTs": 1787536800000,
+      "price": 0.0907,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y08_REV_D0_T6|INJUSDT|1787292000000|SHORT",
+      "exitTs": 1787313600000,
+      "price": 4.86,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_6H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|AVAXUSDT|1787299200000|SHORT",
+      "exitTs": 1787558400000,
+      "price": 7.444,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_X14_TIME_48H|SOLUSDT|1787306400000|LONG",
+      "exitTs": 1787479200000,
+      "price": 93.35,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_Y19_REV_D1_TP2_SL1_H36|ETHUSDT|1787310000000|SHORT",
+      "exitTs": 1787335200000,
+      "price": 2425.127857142857,
+      "reason": "STOP",
+      "priceModelOnly": true,
+      "sourceReason": "TP_SL_STOP"
+    },
+    {
+      "key": "REC_Y03_REV_D0_T36|AVAXUSDT|1787313600000|SHORT",
+      "exitTs": 1787443200000,
+      "price": 7.489,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_36H"
+    },
+    {
+      "key": "REC_Y03_REV_D0_T36|ETHUSDT|1787320800000|SHORT",
+      "exitTs": 1787450400000,
+      "price": 2423.75,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_36H"
+    },
+    {
+      "key": "REC_Y03_REV_D0_T36|SOLUSDT|1787328000000|SHORT",
+      "exitTs": 1787457600000,
+      "price": 93.72,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_36H"
+    },
+    {
+      "key": "REC_Y07_REV_D0_T72|ETHUSDT|1787335200000|SHORT",
+      "exitTs": 1787594400000,
+      "price": 2468.72,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_X14_TIME_48H|AAVEUSDT|1787335200000|LONG",
+      "exitTs": 1787508000000,
+      "price": 140.26,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_Y03_REV_D0_T36|ETHUSDT|1787342400000|SHORT",
+      "exitTs": 1787472000000,
+      "price": 2388.5,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_36H"
+    },
+    {
+      "key": "REC_Y18_REV_D2_T18|AVAXUSDT|1787349600000|SHORT",
+      "exitTs": 1787414400000,
+      "price": 7.484,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_18H"
+    },
+    {
+      "key": "REC_X14_TIME_48H|BNBUSDT|1787349600000|LONG",
+      "exitTs": 1787522400000,
+      "price": 703.87,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_X14_TIME_48H|AVAXUSDT|1787349600000|LONG",
+      "exitTs": 1787522400000,
+      "price": 7.618,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_X14_TIME_48H|BNBUSDT|1787356800000|LONG",
+      "exitTs": 1787529600000,
+      "price": 702.77,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_X14_TIME_48H|ADAUSDT|1787356800000|LONG",
+      "exitTs": 1787529600000,
+      "price": 0.2263,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_X14_TIME_48H|LINKUSDT|1787371200000|LONG",
+      "exitTs": 1787544000000,
+      "price": 11.397,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_Y03_REV_D0_T36|ATOMUSDT|1787378400000|SHORT",
+      "exitTs": 1787508000000,
+      "price": 1.609,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_36H"
+    },
+    {
+      "key": "REC_X09_TIME_48H|SOLUSDT|1787385600000|LONG",
+      "exitTs": 1787558400000,
+      "price": 94.12,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|BNBUSDT|1787385600000|SHORT",
+      "exitTs": 1787644800000,
+      "price": 706.75,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|ATOMUSDT|1787392800000|SHORT",
+      "exitTs": 1787652000000,
+      "price": 1.558,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|BNBUSDT|1787392800000|SHORT",
+      "exitTs": 1787652000000,
+      "price": 699.16,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_X09_TIME_48H|INJUSDT|1787414400000|LONG",
+      "exitTs": 1787587200000,
+      "price": 5.682,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_X09_TIME_48H|LTCUSDT|1787436000000|LONG",
+      "exitTs": 1787608800000,
+      "price": 51.8,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_X09_TIME_48H|INJUSDT|1787436000000|LONG",
+      "exitTs": 1787608800000,
+      "price": 5.696,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_X09_TIME_48H|SOLUSDT|1787450400000|LONG",
+      "exitTs": 1787623200000,
+      "price": 100.47,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_Y09_REV_D2_T24|ATOMUSDT|1787457600000|SHORT",
+      "exitTs": 1787544000000,
+      "price": 1.568,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_24H"
+    },
+    {
+      "key": "REC_Y01_REV_D0_T72|ATOMUSDT|1787457600000|SHORT",
+      "exitTs": 1787716800000,
+      "price": 1.529,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_X09_TIME_48H|XRPUSDT|1787464800000|LONG",
+      "exitTs": 1787637600000,
+      "price": 1.5198,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_Y09_REV_D2_T24|ATOMUSDT|1787472000000|SHORT",
+      "exitTs": 1787558400000,
+      "price": 1.561,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_24H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|LTCUSDT|1787493600000|SHORT",
+      "exitTs": 1787752800000,
+      "price": 50.31,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|AAVEUSDT|1787493600000|SHORT",
+      "exitTs": 1787752800000,
+      "price": 124.03,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y03_REV_D0_T36|DOGEUSDT|1787500800000|SHORT",
+      "exitTs": 1787630400000,
+      "price": 0.09191,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_36H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|AVAXUSDT|1787500800000|SHORT",
+      "exitTs": 1787760000000,
+      "price": 7.225,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_X09_TIME_48H|LTCUSDT|1787508000000|LONG",
+      "exitTs": 1787680800000,
+      "price": 51.05,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|ATOMUSDT|1787508000000|SHORT",
+      "exitTs": 1787767200000,
+      "price": 1.495,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|ATOMUSDT|1787515200000|SHORT",
+      "exitTs": 1787774400000,
+      "price": 1.489,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y07_REV_D0_T72|LTCUSDT|1787522400000|SHORT",
+      "exitTs": 1787781600000,
+      "price": 50.27,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|ATOMUSDT|1787522400000|SHORT",
+      "exitTs": 1787781600000,
+      "price": 1.501,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|AVAXUSDT|1787529600000|SHORT",
+      "exitTs": 1787788800000,
+      "price": 7.437,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|ETHUSDT|1787529600000|SHORT",
+      "exitTs": 1787788800000,
+      "price": 2505.6,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_X09_TIME_48H|BNBUSDT|1787536800000|LONG",
+      "exitTs": 1787709600000,
+      "price": 695.21,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_X09_TIME_48H|DOGEUSDT|1787536800000|LONG",
+      "exitTs": 1787709600000,
+      "price": 0.08646,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_X09_TIME_48H|BNBUSDT|1787544000000|LONG",
+      "exitTs": 1787716800000,
+      "price": 696.4,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_X09_TIME_48H|XRPUSDT|1787544000000|LONG",
+      "exitTs": 1787716800000,
+      "price": 1.4385,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_X09_TIME_48H|ETHUSDT|1787551200000|LONG",
+      "exitTs": 1787724000000,
+      "price": 2463.78,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_Y19_REV_D1_TP2_SL1_H36|DOGEUSDT|1787562000000|SHORT",
+      "exitTs": 1787572800000,
+      "price": 0.09216785714285713,
+      "reason": "STOP",
+      "priceModelOnly": true,
+      "sourceReason": "TP_SL_STOP"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|BNBUSDT|1787565600000|SHORT",
+      "exitTs": 1787824800000,
+      "price": 712.9,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|SOLUSDT|1787565600000|SHORT",
+      "exitTs": 1787824800000,
+      "price": 104.4,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y07_REV_D0_T72|BNBUSDT|1787572800000|SHORT",
+      "exitTs": 1787832000000,
+      "price": 707.13,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y07_REV_D0_T72|SOLUSDT|1787572800000|SHORT",
+      "exitTs": 1787832000000,
+      "price": 103.9,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y18_REV_D2_T18|BNBUSDT|1787587200000|SHORT",
+      "exitTs": 1787652000000,
+      "price": 699.16,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_18H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|INJUSDT|1787580000000|SHORT",
+      "exitTs": 1787839200000,
+      "price": 5.468,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y07_REV_D0_T72|BTCUSDT|1787587200000|SHORT",
+      "exitTs": 1787846400000,
+      "price": 80266.3,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|INJUSDT|1787587200000|SHORT",
+      "exitTs": 1787846400000,
+      "price": 5.535,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y03_REV_D0_T36|BTCUSDT|1787594400000|SHORT",
+      "exitTs": 1787724000000,
+      "price": 79059.9,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_36H"
+    },
+    {
+      "key": "REC_Y03_REV_D0_T36|BNBUSDT|1787594400000|SHORT",
+      "exitTs": 1787724000000,
+      "price": 696.66,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_36H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|INJUSDT|1787594400000|SHORT",
+      "exitTs": 1787853600000,
+      "price": 5.522,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y07_REV_D0_T72|SOLUSDT|1787601600000|SHORT",
+      "exitTs": 1787860800000,
+      "price": 109.29,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|INJUSDT|1787601600000|SHORT",
+      "exitTs": 1787860800000,
+      "price": 5.474,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_X09_TIME_48H|LINKUSDT|1787608800000|LONG",
+      "exitTs": 1787781600000,
+      "price": 11.461,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|SOLUSDT|1787616000000|SHORT",
+      "exitTs": 1787875200000,
+      "price": 109.11,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|SOLUSDT|1787623200000|SHORT",
+      "exitTs": 1787882400000,
+      "price": 107.78,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|INJUSDT|1787623200000|SHORT",
+      "exitTs": 1787882400000,
+      "price": 5.436,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|SOLUSDT|1787630400000|SHORT",
+      "exitTs": 1787889600000,
+      "price": 106.79,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y03_REV_D0_T36|ETHUSDT|1787630400000|SHORT",
+      "exitTs": 1787760000000,
+      "price": 2448.76,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_36H"
+    },
+    {
+      "key": "REC_Y07_REV_D0_T72|ETHUSDT|1787637600000|SHORT",
+      "exitTs": 1787896800000,
+      "price": 2492.04,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|SOLUSDT|1787637600000|SHORT",
+      "exitTs": 1787896800000,
+      "price": 107.14,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_X09_TIME_48H|SOLUSDT|1787644800000|LONG",
+      "exitTs": 1787817600000,
+      "price": 101.79,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|INJUSDT|1787644800000|SHORT",
+      "exitTs": 1787904000000,
+      "price": 5.338,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_X09_TIME_48H|INJUSDT|1787652000000|LONG",
+      "exitTs": 1787824800000,
+      "price": 5.502,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_X09_TIME_48H|AAVEUSDT|1787652000000|LONG",
+      "exitTs": 1787824800000,
+      "price": 129.28,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|INJUSDT|1787673600000|SHORT",
+      "exitTs": 1787932800000,
+      "price": 5.281,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|SOLUSDT|1787824800000|SHORT",
+      "exitTs": 1788084000000,
+      "price": 104.55,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|SOLUSDT|1787846400000|SHORT",
+      "exitTs": 1788105600000,
+      "price": 106.21,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|SOLUSDT|1787853600000|SHORT",
+      "exitTs": 1788112800000,
+      "price": 106.36,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_X03_TIME_12H|XRPUSDT|1787947200000|SHORT",
+      "exitTs": 1787990400000,
+      "price": 1.3816,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_12H"
+    },
+    {
+      "key": "REC_X01_TIME_24H|DOGEUSDT|1787947200000|SHORT",
+      "exitTs": 1788033600000,
+      "price": 0.0852,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_24H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|AAVEUSDT|1788451200000|SHORT",
+      "exitTs": 1788710400000,
+      "price": 133.59,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|ADAUSDT|1788451200000|SHORT",
+      "exitTs": 1788710400000,
+      "price": 0.217,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|AAVEUSDT|1788458400000|SHORT",
+      "exitTs": 1788717600000,
+      "price": 133.31,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|ADAUSDT|1788458400000|SHORT",
+      "exitTs": 1788717600000,
+      "price": 0.2185,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|AAVEUSDT|1788465600000|SHORT",
+      "exitTs": 1788724800000,
+      "price": 132.55,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|XRPUSDT|1788472800000|SHORT",
+      "exitTs": 1788732000000,
+      "price": 1.4247,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_X10_TIME_48H|AAVEUSDT|1788480000000|LONG",
+      "exitTs": 1788652800000,
+      "price": 134.6,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|ADAUSDT|1788480000000|SHORT",
+      "exitTs": 1788739200000,
+      "price": 0.2233,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|AAVEUSDT|1788487200000|SHORT",
+      "exitTs": 1788746400000,
+      "price": 133.2,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_X10_TIME_48H|NEARUSDT|1788487200000|LONG",
+      "exitTs": 1788660000000,
+      "price": 2.21,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|ADAUSDT|1788501600000|SHORT",
+      "exitTs": 1788760800000,
+      "price": 0.2201,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_X10_TIME_48H|NEARUSDT|1788508800000|LONG",
+      "exitTs": 1788681600000,
+      "price": 2.306,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|DOGEUSDT|1788508800000|SHORT",
+      "exitTs": 1788768000000,
+      "price": 0.08936,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_X10_TIME_48H|AAVEUSDT|1788516000000|LONG",
+      "exitTs": 1788688800000,
+      "price": 134.27,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|ADAUSDT|1788516000000|SHORT",
+      "exitTs": 1788775200000,
+      "price": 0.2172,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|NEARUSDT|1788523200000|SHORT",
+      "exitTs": 1788782400000,
+      "price": 2.342,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|AVAXUSDT|1788667200000|SHORT",
+      "exitTs": 1788926400000,
+      "price": 7.95,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|ETHUSDT|1788674400000|SHORT",
+      "exitTs": 1788933600000,
+      "price": 2495.27,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_X10_TIME_48H|BTCUSDT|1788681600000|LONG",
+      "exitTs": 1788854400000,
+      "price": 78442,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_Y18_REV_D2_T18|BTCUSDT|1788710400000|SHORT",
+      "exitTs": 1788775200000,
+      "price": 79284.6,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_18H"
+    },
+    {
+      "key": "REC_Y09_REV_D2_T24|BTCUSDT|1788717600000|SHORT",
+      "exitTs": 1788804000000,
+      "price": 79149.4,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_24H"
+    },
+    {
+      "key": "REC_Y09_REV_D2_T24|BTCUSDT|1788724800000|SHORT",
+      "exitTs": 1788811200000,
+      "price": 79336.2,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_24H"
+    },
+    {
+      "key": "REC_Y08_REV_D0_T6|BTCUSDT|1788739200000|SHORT",
+      "exitTs": 1788760800000,
+      "price": 79713.7,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_6H"
+    },
+    {
+      "key": "REC_Y09_REV_D2_T24|BNBUSDT|1788753600000|SHORT",
+      "exitTs": 1788840000000,
+      "price": 743.3,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_24H"
+    },
+    {
+      "key": "REC_Y01_REV_D0_T72|BTCUSDT|1788746400000|SHORT",
+      "exitTs": 1789005600000,
+      "price": 78074.7,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_X09_TIME_48H|BNBUSDT|1788753600000|LONG",
+      "exitTs": 1788926400000,
+      "price": 749.92,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_X03_TIME_12H|DOGEUSDT|1789048800000|SHORT",
+      "exitTs": 1789092000000,
+      "price": 0.08351,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_12H"
+    },
+    {
+      "key": "REC_Z14_ORIG_D2_T6|LINKUSDT|1789056000000|SHORT",
+      "exitTs": 1789077600000,
+      "price": 11.58,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_6H"
+    },
+    {
+      "key": "REC_X06_TIME_12H|LINKUSDT|1789056000000|SHORT",
+      "exitTs": 1789120800000,
+      "price": 11.423,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_18H"
+    },
+    {
+      "key": "REC_G5_SLOW_TREND|LINKUSDT|1789077600000|SHORT",
+      "exitTs": 1789250400000,
+      "price": 11.493,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_G3_LATE_BTC_REL|DOGEUSDT|1789286400000|SHORT",
+      "price": 0.08351,
+      "reason": "TRAILING_CROSSED_BEFORE_REPLACEMENT",
+      "exitTs": 1789293600000,
+      "priceModelOnly": true,
+      "sourceReason": "TRAILING_CROSSED_BEFORE_REPLACEMENT"
+    },
+    {
+      "key": "REC_G5_SLOW_TREND|AVAXUSDT|1789286400000|SHORT",
+      "exitTs": 1789459200000,
+      "price": 7.453,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "CONT_SHORT_MID_AGE24_48|ATOMUSDT|1789293600000|SHORT",
+      "exitTs": 1789304400000,
+      "price": 1.588,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_3H"
+    },
+    {
+      "key": "REC_X03_TIME_12H|BTCUSDT|1789293600000|SHORT",
+      "exitTs": 1789336800000,
+      "price": 77281.4,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_12H"
+    },
+    {
+      "key": "REC_X02_TIME_36H|ATOMUSDT|1789300800000|SHORT",
+      "exitTs": 1789430400000,
+      "price": 1.584,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_36H"
+    },
+    {
+      "key": "REC_X03_TIME_12H|BTCUSDT|1789300800000|SHORT",
+      "exitTs": 1789344000000,
+      "price": 76797.2,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_12H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|NEARUSDT|1789408800000|SHORT",
+      "exitTs": 1789668000000,
+      "price": 3.051,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_X03_TIME_12H|XRPUSDT|1789509600000|SHORT",
+      "exitTs": 1789552800000,
+      "price": 1.2906,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_12H"
+    },
+    {
+      "key": "REC_X03_TIME_12H|ADAUSDT|1789516800000|SHORT",
+      "exitTs": 1789560000000,
+      "price": 0.1947,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_12H"
+    },
+    {
+      "key": "REC_X03_TIME_12H|INJUSDT|1789524000000|SHORT",
+      "exitTs": 1789567200000,
+      "price": 5.426,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_12H"
+    },
+    {
+      "key": "REC_Y15_REV_D0_T3|ADAUSDT|1789524000000|LONG",
+      "exitTs": 1789534800000,
+      "price": 0.1956,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_3H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|BNBUSDT|1789711200000|SHORT",
+      "exitTs": 1789970400000,
+      "price": 773.39,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|BNBUSDT|1789718400000|SHORT",
+      "exitTs": 1789977600000,
+      "price": 769.17,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|ATOMUSDT|1789740000000|SHORT",
+      "exitTs": 1789999200000,
+      "price": 1.79,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_X14_TIME_48H|NEARUSDT|1789747200000|LONG",
+      "exitTs": 1789920000000,
+      "price": 3.918,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_X14_TIME_48H|NEARUSDT|1789754400000|LONG",
+      "exitTs": 1789927200000,
+      "price": 4.095,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|AAVEUSDT|1789761600000|SHORT",
+      "exitTs": 1790020800000,
+      "price": 145.49,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|ATOMUSDT|1789768800000|SHORT",
+      "exitTs": 1790028000000,
+      "price": 1.807,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|LTCUSDT|1789776000000|SHORT",
+      "exitTs": 1790035200000,
+      "price": 62.04,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|AAVEUSDT|1789776000000|SHORT",
+      "exitTs": 1790035200000,
+      "price": 145.59,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|LTCUSDT|1789783200000|SHORT",
+      "exitTs": 1790042400000,
+      "price": 61.12,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|AAVEUSDT|1789783200000|SHORT",
+      "exitTs": 1790042400000,
+      "price": 144.06,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|LTCUSDT|1789790400000|SHORT",
+      "exitTs": 1790049600000,
+      "price": 61.16,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|AAVEUSDT|1789790400000|SHORT",
+      "exitTs": 1790049600000,
+      "price": 143.51,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_X10_TIME_48H|ADAUSDT|1789797600000|LONG",
+      "exitTs": 1789970400000,
+      "price": 0.2324,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_Y19_REV_D1_TP2_SL1_H36|ATOMUSDT|1789801200000|SHORT",
+      "exitTs": 1789815600000,
+      "price": 1.724,
+      "reason": "STOP",
+      "priceModelOnly": true,
+      "sourceReason": "TP_SL_STOP"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|AVAXUSDT|1789804800000|SHORT",
+      "exitTs": 1790064000000,
+      "price": 10.725,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|AVAXUSDT|1789812000000|SHORT",
+      "exitTs": 1790071200000,
+      "price": 10.92,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|INJUSDT|1789812000000|SHORT",
+      "exitTs": 1790071200000,
+      "price": 7.72,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|AVAXUSDT|1789819200000|SHORT",
+      "exitTs": 1790078400000,
+      "price": 10.848,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y19_REV_D1_TP2_SL1_H36|NEARUSDT|1789830000000|SHORT",
+      "exitTs": 1789840800000,
+      "price": 3.6784285714285714,
+      "reason": "STOP",
+      "priceModelOnly": true,
+      "sourceReason": "TP_SL_STOP"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|ADAUSDT|1789826400000|SHORT",
+      "exitTs": 1790085600000,
+      "price": 0.2532,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y19_REV_D1_TP2_SL1_H36|NEARUSDT|1789837200000|SHORT",
+      "exitTs": 1789848000000,
+      "price": 3.464428571428572,
+      "reason": "TP",
+      "priceModelOnly": true,
+      "sourceReason": "TP_SL_TP"
+    },
+    {
+      "key": "REC_X14_TIME_48H|AVAXUSDT|1789833600000|LONG",
+      "exitTs": 1790006400000,
+      "price": 11.061,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|ADAUSDT|1789840800000|SHORT",
+      "exitTs": 1790100000000,
+      "price": 0.2499,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y03_REV_D0_T36|DOGEUSDT|1789848000000|SHORT",
+      "exitTs": 1789977600000,
+      "price": 0.08969,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_36H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|ADAUSDT|1789848000000|SHORT",
+      "exitTs": 1790107200000,
+      "price": 0.2529,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y09_REV_D2_T24|DOGEUSDT|1789862400000|SHORT",
+      "exitTs": 1789948800000,
+      "price": 0.08725,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_24H"
+    },
+    {
+      "key": "REC_Y03_REV_D0_T36|AVAXUSDT|1789869600000|SHORT",
+      "exitTs": 1789999200000,
+      "price": 11.26,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_36H"
+    },
+    {
+      "key": "REC_Y09_REV_D2_T24|BTCUSDT|1789884000000|SHORT",
+      "exitTs": 1789970400000,
+      "price": 81519,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_24H"
+    },
+    {
+      "key": "REC_Y09_REV_D2_T24|SOLUSDT|1789884000000|SHORT",
+      "exitTs": 1789970400000,
+      "price": 111.75,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_24H"
+    },
+    {
+      "key": "REC_Y09_REV_D2_T24|ETHUSDT|1789884000000|SHORT",
+      "exitTs": 1789970400000,
+      "price": 2665.16,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_24H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|INJUSDT|1789884000000|SHORT",
+      "exitTs": 1790143200000,
+      "price": 7.9,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_X09_TIME_48H|NEARUSDT|1789891200000|LONG",
+      "exitTs": 1790064000000,
+      "price": 4.367,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_Y09_REV_D2_T24|LINKUSDT|1789898400000|SHORT",
+      "exitTs": 1789984800000,
+      "price": 12.941,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_24H"
+    },
+    {
+      "key": "REC_X09_TIME_48H|NEARUSDT|1789898400000|LONG",
+      "exitTs": 1790071200000,
+      "price": 4.515,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_Y09_REV_D2_T24|ADAUSDT|1789905600000|SHORT",
+      "exitTs": 1789992000000,
+      "price": 0.242,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_24H"
+    },
+    {
+      "key": "REC_Y09_REV_D2_T24|AAVEUSDT|1789912800000|SHORT",
+      "exitTs": 1789999200000,
+      "price": 145.94,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_24H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|AVAXUSDT|1789905600000|SHORT",
+      "exitTs": 1790164800000,
+      "price": 11.12,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y09_REV_D2_T24|SOLUSDT|1789920000000|SHORT",
+      "exitTs": 1790006400000,
+      "price": 117.88,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_24H"
+    },
+    {
+      "key": "REC_Y01_REV_D0_T72|BTCUSDT|1789912800000|SHORT",
+      "exitTs": 1790172000000,
+      "price": 85754.9,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y01_REV_D0_T72|NEARUSDT|1789912800000|SHORT",
+      "exitTs": 1790172000000,
+      "price": 4.754,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y01_REV_D0_T72|BTCUSDT|1789920000000|SHORT",
+      "exitTs": 1790179200000,
+      "price": 83975.9,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y01_REV_D0_T72|SOLUSDT|1789920000000|SHORT",
+      "exitTs": 1790179200000,
+      "price": 113.82,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y01_REV_D0_T72|ETHUSDT|1789920000000|SHORT",
+      "exitTs": 1790179200000,
+      "price": 2654.64,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y01_REV_D0_T72|BTCUSDT|1789927200000|SHORT",
+      "exitTs": 1790186400000,
+      "price": 84276.2,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y01_REV_D0_T72|SOLUSDT|1789927200000|SHORT",
+      "exitTs": 1790186400000,
+      "price": 114.47,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y01_REV_D0_T72|ETHUSDT|1789927200000|SHORT",
+      "exitTs": 1790186400000,
+      "price": 2667.28,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y01_REV_D0_T72|SOLUSDT|1789934400000|SHORT",
+      "exitTs": 1790193600000,
+      "price": 114.48,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|NEARUSDT|1789934400000|SHORT",
+      "exitTs": 1790193600000,
+      "price": 4.407,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y01_REV_D0_T72|SOLUSDT|1789941600000|SHORT",
+      "exitTs": 1790200800000,
+      "price": 114.66,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y01_REV_D0_T72|ADAUSDT|1789941600000|SHORT",
+      "exitTs": 1790200800000,
+      "price": 0.238,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y01_REV_D0_T72|BTCUSDT|1789948800000|SHORT",
+      "exitTs": 1790208000000,
+      "price": 84350.7,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y01_REV_D0_T72|SOLUSDT|1789948800000|SHORT",
+      "exitTs": 1790208000000,
+      "price": 114.91,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y01_REV_D0_T72|ADAUSDT|1789948800000|SHORT",
+      "exitTs": 1790208000000,
+      "price": 0.2385,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y09_REV_D2_T24|BTCUSDT|1789963200000|SHORT",
+      "exitTs": 1790049600000,
+      "price": 85637,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_24H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|NEARUSDT|1789956000000|SHORT",
+      "exitTs": 1790215200000,
+      "price": 4.31,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y07_REV_D0_T72|BTCUSDT|1789963200000|SHORT",
+      "exitTs": 1790222400000,
+      "price": 83894.4,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|SOLUSDT|1789963200000|SHORT",
+      "exitTs": 1790222400000,
+      "price": 114.65,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|SOLUSDT|1789970400000|SHORT",
+      "exitTs": 1790229600000,
+      "price": 114.8,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|LTCUSDT|1789970400000|SHORT",
+      "exitTs": 1790229600000,
+      "price": 67.28,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|SOLUSDT|1789977600000|SHORT",
+      "exitTs": 1790236800000,
+      "price": 115.44,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|XRPUSDT|1789977600000|SHORT",
+      "exitTs": 1790236800000,
+      "price": 1.5058,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_X14_TIME_48H|XRPUSDT|1789992000000|LONG",
+      "exitTs": 1790164800000,
+      "price": 1.5726,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_X14_TIME_48H|ETHUSDT|1789992000000|LONG",
+      "exitTs": 1790164800000,
+      "price": 2726.9,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_X14_TIME_48H|XRPUSDT|1789999200000|LONG",
+      "exitTs": 1790172000000,
+      "price": 1.5742,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_X14_TIME_48H|ETHUSDT|1789999200000|LONG",
+      "exitTs": 1790172000000,
+      "price": 2714.85,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_X14_TIME_48H|XRPUSDT|1790006400000|LONG",
+      "exitTs": 1790179200000,
+      "price": 1.5048,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|DOGEUSDT|1790020800000|SHORT",
+      "exitTs": 1790280000000,
+      "price": 0.09617,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|DOGEUSDT|1790028000000|SHORT",
+      "exitTs": 1790287200000,
+      "price": 0.09585,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|DOGEUSDT|1790035200000|SHORT",
+      "exitTs": 1790294400000,
+      "price": 0.09572,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y07_REV_D0_T72|LINKUSDT|1790035200000|SHORT",
+      "exitTs": 1790294400000,
+      "price": 13.224,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|DOGEUSDT|1790042400000|SHORT",
+      "exitTs": 1790301600000,
+      "price": 0.09593,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|ADAUSDT|1790042400000|SHORT",
+      "exitTs": 1790301600000,
+      "price": 0.25,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|DOGEUSDT|1790049600000|SHORT",
+      "exitTs": 1790308800000,
+      "price": 0.09516,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_X09_TIME_48H|LTCUSDT|1790049600000|LONG",
+      "exitTs": 1790222400000,
+      "price": 66.68,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_X09_TIME_48H|ADAUSDT|1790056800000|LONG",
+      "exitTs": 1790229600000,
+      "price": 0.24,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_X09_TIME_48H|ADAUSDT|1790064000000|LONG",
+      "exitTs": 1790236800000,
+      "price": 0.2422,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_X09_TIME_48H|LINKUSDT|1790064000000|LONG",
+      "exitTs": 1790236800000,
+      "price": 12.473,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_Y19_REV_D1_TP2_SL1_H36|ATOMUSDT|1790074800000|SHORT",
+      "exitTs": 1790100000000,
+      "price": 1.7667142857142857,
+      "reason": "STOP",
+      "priceModelOnly": true,
+      "sourceReason": "TP_SL_STOP"
+    },
+    {
+      "key": "REC_Y03_REV_D0_T36|ADAUSDT|1790071200000|SHORT",
+      "exitTs": 1790200800000,
+      "price": 0.238,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_36H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|XRPUSDT|1790078400000|SHORT",
+      "exitTs": 1790337600000,
+      "price": 1.5945,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|ADAUSDT|1790085600000|SHORT",
+      "exitTs": 1790344800000,
+      "price": 0.2554,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y07_REV_D0_T72|INJUSDT|1790085600000|SHORT",
+      "exitTs": 1790344800000,
+      "price": 8.256,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y07_REV_D0_T72|AVAXUSDT|1790092800000|SHORT",
+      "exitTs": 1790352000000,
+      "price": 10.356,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|XRPUSDT|1790092800000|SHORT",
+      "exitTs": 1790352000000,
+      "price": 1.5756,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|LINKUSDT|1790100000000|SHORT",
+      "exitTs": 1790359200000,
+      "price": 13.776,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|XRPUSDT|1790107200000|SHORT",
+      "exitTs": 1790366400000,
+      "price": 1.571,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|ADAUSDT|1790107200000|SHORT",
+      "exitTs": 1790366400000,
+      "price": 0.2552,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_X09_TIME_48H|XRPUSDT|1790114400000|LONG",
+      "exitTs": 1790287200000,
+      "price": 1.5376,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|INJUSDT|1790121600000|SHORT",
+      "exitTs": 1790380800000,
+      "price": 8.196,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_X09_TIME_48H|NEARUSDT|1790121600000|LONG",
+      "exitTs": 1790294400000,
+      "price": 4.592,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_Y03_REV_D0_T36|ADAUSDT|1790128800000|SHORT",
+      "exitTs": 1790258400000,
+      "price": 0.2415,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_36H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|DOGEUSDT|1790136000000|SHORT",
+      "exitTs": 1790395200000,
+      "price": 0.0979,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|LTCUSDT|1790136000000|SHORT",
+      "exitTs": 1790395200000,
+      "price": 71.72,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y07_REV_D0_T72|NEARUSDT|1790143200000|SHORT",
+      "exitTs": 1790402400000,
+      "price": 4.904,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_X09_TIME_48H|NEARUSDT|1790150400000|LONG",
+      "exitTs": 1790323200000,
+      "price": 4.526,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|NEARUSDT|1790157600000|SHORT",
+      "exitTs": 1790416800000,
+      "price": 4.866,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_X09_TIME_48H|AVAXUSDT|1790157600000|LONG",
+      "exitTs": 1790330400000,
+      "price": 10.426,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_X09_TIME_48H|AVAXUSDT|1790164800000|LONG",
+      "exitTs": 1790337600000,
+      "price": 10.588,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|NEARUSDT|1790164800000|SHORT",
+      "exitTs": 1790424000000,
+      "price": 4.897,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_X09_TIME_48H|BTCUSDT|1790172000000|LONG",
+      "exitTs": 1790344800000,
+      "price": 83885.9,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|NEARUSDT|1790172000000|SHORT",
+      "exitTs": 1790431200000,
+      "price": 4.824,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y18_REV_D2_T18|AAVEUSDT|1790560800000|SHORT",
+      "exitTs": 1790625600000,
+      "price": 146.58,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_18H"
+    },
+    {
+      "key": "REC_X09_TIME_48H|LINKUSDT|1790560800000|LONG",
+      "exitTs": 1790733600000,
+      "price": 14.44,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_X09_TIME_48H|LINKUSDT|1790568000000|LONG",
+      "exitTs": 1790740800000,
+      "price": 14.384,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_X09_TIME_48H|LINKUSDT|1790575200000|LONG",
+      "exitTs": 1790748000000,
+      "price": 14.424,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|AAVEUSDT|1790920800000|SHORT",
+      "exitTs": 1791180000000,
+      "price": 180.6,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|AAVEUSDT|1790928000000|SHORT",
+      "exitTs": 1791187200000,
+      "price": 179.56,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_X10_TIME_48H|AVAXUSDT|1790935200000|LONG",
+      "exitTs": 1791108000000,
+      "price": 11,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|AAVEUSDT|1790942400000|SHORT",
+      "exitTs": 1791201600000,
+      "price": 181.12,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_X10_TIME_48H|AVAXUSDT|1790942400000|LONG",
+      "exitTs": 1791115200000,
+      "price": 10.992,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_Y03_REV_D0_T36|AAVEUSDT|1790949600000|SHORT",
+      "exitTs": 1791079200000,
+      "price": 182.24,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_36H"
+    },
+    {
+      "key": "REC_X10_TIME_48H|AVAXUSDT|1790949600000|LONG",
+      "exitTs": 1791122400000,
+      "price": 10.972,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_48H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|SOLUSDT|1791122400000|SHORT",
+      "exitTs": 1791381600000,
+      "price": 116.16,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y06_REV_D0_T72|SOLUSDT|1791129600000|SHORT",
+      "exitTs": 1791388800000,
+      "price": 116.69,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_72H"
+    },
+    {
+      "key": "REC_Y19_REV_D1_TP2_SL1_H36|AAVEUSDT|1791147600000|SHORT",
+      "exitTs": 1791162000000,
+      "price": 179.8085714285714,
+      "reason": "STOP",
+      "priceModelOnly": true,
+      "sourceReason": "TP_SL_STOP"
+    },
+    {
+      "key": "FAILED_BREAK_REV_SHORT_6H|INJUSDT|1786507200000|SHORT",
+      "exitTs": 1786539600000,
+      "price": 4.546,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_9H"
+    },
+    {
+      "key": "FAILED_BREAK_REV_SHORT_6H|ADAUSDT|1788897600000|SHORT",
+      "exitTs": 1788930000000,
+      "price": 0.2203,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_9H"
+    },
+    {
+      "key": "FAILED_BREAK_REV_SHORT_6H|BTCUSDT|1789430400000|SHORT",
+      "exitTs": 1789462800000,
+      "price": 76960.9,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_9H"
+    },
+    {
+      "key": "FAILED_BREAK_REV_SHORT_6H|AVAXUSDT|1790503200000|SHORT",
+      "exitTs": 1790535600000,
+      "price": 11.032,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_9H"
+    },
+    {
+      "key": "FAILED_BREAK_REV_SHORT_6H|LTCUSDT|1790964000000|SHORT",
+      "exitTs": 1790996400000,
+      "price": 69.92,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_9H"
+    },
+    {
+      "key": "FAILED_BREAK_REV_SHORT_6H|SOLUSDT|1791144000000|SHORT",
+      "exitTs": 1791176400000,
+      "price": 120.44,
+      "reason": "TIME",
+      "priceModelOnly": true,
+      "sourceReason": "TIME_9H"
+    }
+  ],
+  "inputSha256": {
+    "C:\\Users\\dis\\DisDex-five-improvements-20261008\\docs\\research\\results\\v12-multilogic-causal-holdout-20261009\\baseline-candidates.jsonl": "37c6e0431aef513cf4104ae533f5fc8222c597ef9f4e412d89b4186f671160ba",
+    "docs/research/results/v4-production-cert-20261009/bt-selected-external/repaired-candidates.jsonl": "5207c1f44d025652a8ebce04731605b2df7a729938757f9930dc006aeb7b628a",
+    "docs/ops/v12-v4-cert-20261009/native-route-parity-after.json": "8fc3e1db5be8bb637aad1355a51ac6544ad959971980dd524cc4388c51b1200b"
+  },
+  "limitations": [
+    "Standalone explicit historical H1 price/fill fixture journals; no all8 portfolio admission or venue fills.",
+    "Entry/Exit timestamp, price and canonical reason match; source reason vocabulary is retained.",
+    "Fractional fixture quantities are not a venue lot-size certification."
+  ],
+  "orderEnabled": false,
+  "tradingMutation": 0
+}

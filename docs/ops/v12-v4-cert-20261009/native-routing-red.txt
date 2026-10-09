@@ -1,0 +1,39 @@
+✔ closed H2 native candidates retain research direction, rank, ATR and phase diagnostics (3.8737ms)
+✔ future candles cannot change a native source at the decision boundary (6.3595ms)
+✔ native source refuses shifted symbols and gaps in its 121-bar window (4.3711ms)
+✔ 90h momentum condition age caps at 96h and resets on the latest failed condition (0.3466ms)
+✔ CONT uses native H2 phase diagnostics while recovery rules retain H1 features (9.2448ms)
+✖ native allocation assigns the first frozen route before repairs, without duplicate sleeves (49.6517ms)
+ℹ tests 6
+ℹ suites 0
+ℹ pass 5
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 465.9119
+
+✖ failing tests:
+
+test at tests\v12-v4-native-source.test.ts:2:5021
+✖ native allocation assigns the first frozen route before repairs, without duplicate sleeves (49.6517ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+
+    [
+  +   'REC_Y16_REV_D0_T6',
+      'REC_G2_EARLY_BTC_OPPOSE_VOL',
+  +   'REC_Y13_REV_D2_T36',
+  +   'REC_Z21_ORIG_D2_TP1_SL1_H24'
+    ]
+
+      at TestContext.<anonymous> (C:\Users\dis\DisDex-v4-production-cert-20261009\tests\v12-v4-native-source.test.ts:57:9)
+      at async Test.run (node:internal/test_runner/test:1110:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:785:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ 'REC_Y16_REV_D0_T6', 'REC_G2_EARLY_BTC_OPPOSE_VOL', 'REC_Y13_REV_D2_T36', 'REC_Z21_ORIG_D2_TP1_SL1_H24' ],
+    expected: [ 'REC_G2_EARLY_BTC_OPPOSE_VOL' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

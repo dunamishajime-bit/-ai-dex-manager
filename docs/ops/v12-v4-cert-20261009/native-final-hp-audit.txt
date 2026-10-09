@@ -1,0 +1,8 @@
+ExecStart={ path=/usr/bin/node ; argv[]=/usr/bin/node server.js ; ignore_errors=no ; start_time=[Fri 2026-10-09 19:27:53 JST] ; stop_time=[n/a] ; pid=3073347 ; code=(null) ; status=0/0 }
+EnvironmentFiles=/etc/disdex/ai-dex-manager-ui.env (ignore_errors=no)
+EnvironmentFiles=/etc/disdex/ai-dex-manager-ui-hp-v52.env (ignore_errors=no)
+EnvironmentFiles=/etc/disdex/ai-dex-manager-mail.env (ignore_errors=no)
+WorkingDirectory=/home/deploy/disdex-trading/ui-releases/ui-sfx-diverse-ce392a0d8dd1
+ActiveState=active
+
+{"port": 3001, "status": 200}

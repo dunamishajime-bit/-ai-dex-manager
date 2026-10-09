@@ -1,0 +1,34 @@
+✔ closed H2 native candidates retain research direction, rank, ATR and phase diagnostics (6.6283ms)
+✔ future candles cannot change a native source at the decision boundary (13.7551ms)
+✔ native source refuses shifted symbols and gaps in its 121-bar window (9.1552ms)
+✔ 90h momentum condition age caps at 96h and resets on the latest failed condition (0.5504ms)
+✔ CONT uses native H2 phase diagnostics while recovery rules retain H1 features (192.2679ms)
+✔ forward frozen ranking is temporally valid while observed PF/DD and execution blockers still prevent promotion (1.5638ms)
+✔ replaying past entries at a present decision time retains full-year lookahead (0.2628ms)
+✔ 1978 H1 native matches certify the price model only (0.2151ms)
+✔ stale account and payload flags cannot authorize orders; malformed evidence fails closed (0.57ms)
+✔ missing, nonfinite, fractional and nonnumeric sample counts retain proof blockers (0.7034ms)
+✔ offline proof payload cannot replace actual journal entry times or evaluation clock (125.3261ms)
+✔ 41 executable exit catalog rows preserve two-pass overrides and one native state exit (2.7568ms)
+✔ pending reservation, deferred partial fills and restart exactly preserve accounting (4.3324ms)
+✔ same-symbol partial closes reduce only the selected virtual leg (1.6987ms)
+✔ existing TSLA and PENGU owners block all V4 netting, pending foreign gross counts (0.9162ms)
+✔ precision floors; protected hold and worst-case cap reservations fail closed (0.9802ms)
+✔ ATR stop-first same-bar ambiguity, gap-stop and H1 cutoff are executable (0.5288ms)
+✔ time deadline requires available exact next open; future open forbidden (0.295ms)
+✔ closed H1 formulas ignore future bars, reject gaps, and normalize effective side (1.8504ms)
+✔ mark-to-market gross uses current equity and exact quantities, and journal rejects gaps (1.3786ms)
+✔ offline CLI evaluates causal robust candidate, persists explicit fills, and restarts (32.6092ms)
+✔ reversal preemption waits for actual closes and cannot delete an opposing virtual leg (1.1517ms)
+✔ equity DD admission fails closed and existing virtual-leg exits remain available (0.719ms)
+✔ closing records cooldown; caller cannot release foreign ownership or forge reservations (0.8589ms)
+✔ native G3 reuses frozen production trailing levels, persisted state, and mandatory native ATR evidence (10.8548ms)
+✔ claimed source parity never certifies native generation or unlocks order authority (2.9946ms)
+ℹ tests 26
+ℹ suites 0
+ℹ pass 26
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 680.9878

@@ -10,6 +10,7 @@ export type FeatureBar = H1Bar & { quoteVolume: number };
 export type SourceEvidence = {
   symbol: string; side: V12V4Side; eligibleSourceEntryTs: number; decisionTs: number;
   momentumConditionAgeHours: number; coreRequestedGross?: number;
+  nativeDiagnosticRet6?: number; nativeDiagnosticEma12Atr?: number;
   sourceEngine: "buildV12Signals" | "FAILED_BREAK_NATIVE";
   sourceParityVerified: boolean;
   failedBreak?: Pick<V12V4Features,"freshUpward90hOnset"|"structuralUpBreak"|"failedBelowWithin6h"|"oppositeClvBodyConfirm">;
@@ -75,8 +76,19 @@ export function adaptProductionCandidates(args:{
     !Number.isFinite(s.decisionTs)||s.decisionTs>s.eligibleSourceEntryTs) throw Error("INVALID_SOURCE_EVIDENCE");
   const source=computeProductionH1Features(s.symbol,s.side,s.eligibleSourceEntryTs,args.decisionTs,args.symbolBars,args.btcBars);
   const obs:V12V4V2Features={...source.features,sourceSide:s.side,sourceSignalTs:s.eligibleSourceEntryTs,
-    age:s.momentumConditionAgeHours,coreRequestedGross:s.coreRequestedGross,...s.failedBreak};
-  const raw=evaluateV12V4Routes(obs), candidates=[] as ReturnType<typeof evaluateV12V4V2Routes>["candidates"],
+    age:s.momentumConditionAgeHours,coreRequestedGross:s.coreRequestedGross,
+    nativeDiagnosticRet6:s.nativeDiagnosticRet6,nativeDiagnosticEma12Atr:s.nativeDiagnosticEma12Atr,...s.failedBreak};
+  // Allocation order is frozen discovery order, separate from portfolio firing rank.
+  // First matching source route is chosen before either repair pass; rejected repairs do not fall through.
+  const allocationOrder=(route:string)=>{
+    if(route==="CONT_SHORT_MID_AGE24_48")return 0;
+    const m=/^REC_([GXYZ])(\d+)/.exec(route);
+    if(!m)return -1;
+    return (m[1]==="G"?10:m[1]==="X"?30:60)+Number(m[2]);
+  };
+  const raw=evaluateV12V4Routes(obs).filter(r=>s.sourceEngine==="FAILED_BREAK_NATIVE"
+    ? r.route==="FAILED_BREAK_REV_SHORT_6H" : r.route!=="FAILED_BREAK_REV_SHORT_6H")
+    .sort((a,b)=>allocationOrder(a.route)-allocationOrder(b.route)).slice(0,1), candidates=[] as ReturnType<typeof evaluateV12V4V2Routes>["candidates"],
     filtered=[] as ReturnType<typeof evaluateV12V4V2Routes>["filtered"], deferred:string[]=[];
   for(const r of raw){
     if(r.eligibleEntryTs>args.decisionTs){deferred.push(r.route);continue;}

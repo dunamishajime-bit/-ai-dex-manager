@@ -10,6 +10,8 @@ export type V12V4Features = {
   age?: number;
   sret6?: number;
   ema12Dist?: number;
+  nativeDiagnosticRet6?: number;
+  nativeDiagnosticEma12Atr?: number;
   btc6?: number;
   btc24?: number;
   rel12?: number;
@@ -196,7 +198,11 @@ export function evaluateV12V4Routes(features: V12V4Features): V12V4ShadowCandida
   const out: V12V4ShadowCandidate[] = [];
   for (const route of V12_V4_ROUTE_CATALOG) {
     const tokens = String(route.entry_rule_tokens || "").split("|").map((x) => x.trim()).filter(Boolean);
-    if (!tokens.every((token) => tokenPass(token, features))) continue;
+    const ruleFeatures = route.route === "CONT_SHORT_MID_AGE24_48" &&
+      (features.nativeDiagnosticRet6 !== undefined || features.nativeDiagnosticEma12Atr !== undefined)
+      ? {...features, sret6:features.nativeDiagnosticRet6, ema12Dist:features.nativeDiagnosticEma12Atr}
+      : features;
+    if (!tokens.every((token) => tokenPass(token, ruleFeatures))) continue;
     const entryDelayHours = Number(route.entry_delay_h || 0);
     out.push({
       strategyId: "V12",
