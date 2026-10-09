@@ -1,0 +1,29 @@
+{
+  "research_only": true,
+  "live_changes": false,
+  "ranking_source": "docs\\research\\results\\v12-v4-priority-forward-split-20261009\\training-only-priority.json",
+  "confidence_rules": {
+    "TRAIN_GUARD_N20_40": {
+      "small_limit": 20,
+      "medium_limit": 40,
+      "score_penalty": 15
+    },
+    "TRAIN_GUARD_N30_60": {
+      "small_limit": 30,
+      "medium_limit": 60,
+      "score_penalty": 15
+    }
+  },
+  "caps": {
+    "family": 1.5,
+    "v12": 2.5,
+    "crypto": 3.25,
+    "total": 4.5
+  },
+  "costs_bps": [
+    10,
+    20,
+    30
+  ],
+  "caution": "Route repair rules were mined during development; this is not untouched out of sample."
+}

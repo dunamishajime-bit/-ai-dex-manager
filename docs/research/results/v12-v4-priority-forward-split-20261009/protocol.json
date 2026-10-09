@@ -1,0 +1,32 @@
+{
+  "research_only": true,
+  "live_changes": false,
+  "production_changes": false,
+  "train_end_exclusive_ms": 1778457600000,
+  "rank_source": "ONLY V12 exits before train_end from secondpass 30bps portfolio trades",
+  "validation": "V12 accepted rows with entry >= train_end; first/second parts never mixed in scoring",
+  "caution": "SECOND repair feature selection used full 2025-2026 study. This is only priority-score forward split, not untouched holdout.",
+  "caps": {
+    "family": 2.5,
+    "v12": 3.0,
+    "crypto": 3.5,
+    "total": 4.75
+  },
+  "cases": {
+    "FW_M150_D05_CORE_NATIVE": {
+      "mult": 1.5,
+      "d": 0.05,
+      "core": "native"
+    },
+    "FW_M150_D05_CORE_TIER": {
+      "mult": 1.5,
+      "d": 0.05,
+      "core": "tier"
+    }
+  },
+  "costs_bps": [
+    10,
+    20,
+    30
+  ]
+}

@@ -1,0 +1,39 @@
+{
+  "second_repairs": {
+    "FAILED_BREAK_REV_SHORT_6H": {
+      "filters": [
+        "REL24_NEG",
+        "BODY_FAVOR"
+      ],
+      "time_h": 9
+    },
+    "CONT_SHORT_MID_AGE24_48": {
+      "filters": [
+        "EMA_GE1"
+      ],
+      "time_h": 3
+    },
+    "REC_G1_MID_REL_LOWVOL": {
+      "filters": [
+        "RANGE_NOT_TOP"
+      ],
+      "time_h": 12
+    },
+    "REC_X03_TIME_12H": {
+      "filters": [
+        "EMA_GE1"
+      ]
+    },
+    "REC_X07_TIME_6H": {
+      "filters": [
+        "BTC24_ALIGNED",
+        "NOT_COMPRESS"
+      ]
+    },
+    "REC_X13_TP1.5_SL1_H24": {
+      "filters": [
+        "NOT_COMPRESS"
+      ]
+    }
+  }
+}

@@ -1,0 +1,54 @@
+{
+  "research_only": true,
+  "repairs": {
+    "REC_G2_EARLY_BTC_OPPOSE_VOL": {
+      "filters": [
+        "BTC24_ALIGNED"
+      ],
+      "time_h": 6
+    },
+    "REC_G3_LATE_BTC_REL": {
+      "filters": [
+        "CLV_FAVOR"
+      ]
+    },
+    "REC_G4_MATURE_REL_RANGE": {
+      "filters": [
+        "BTC6_OPPOSE"
+      ],
+      "time_h": 24
+    },
+    "REC_X06_TIME_12H": {
+      "filters": [
+        "VOL_GE1"
+      ],
+      "time_h": 18
+    },
+    "REC_X07_TIME_6H": {
+      "filters": [
+        "BODY_FAVOR"
+      ]
+    },
+    "REC_X08_TIME_48H": {
+      "filters": [
+        "CLV_OPPOSE"
+      ]
+    },
+    "REC_X10_TIME_48H": {
+      "filters": [
+        "AGE_12_24"
+      ]
+    },
+    "REC_X14_TIME_48H": {
+      "filters": [
+        "EMA_10_20",
+        "RANGE_TOP25"
+      ]
+    }
+  },
+  "costs_bps": [
+    10,
+    20,
+    30
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "research_only": true,
+  "order_enabled": false,
+  "training_priority_source": "docs\\research\\results\\v12-v4-priority-forward-split-20261009\\training-only-priority.json",
+  "prior_candidate_tuning_on_same_development_window": true,
+  "cases": {
+    "FW_CAP125_V200_C300_T425": {
+      "family": 1.25,
+      "v12": 2.0,
+      "crypto": 3.0,
+      "total": 4.25,
+      "mult": 1.5,
+      "d": 0.05,
+      "core": "native"
+    },
+    "FW_CAP150_V250_C325_T450": {
+      "family": 1.5,
+      "v12": 2.5,
+      "crypto": 3.25,
+      "total": 4.5,
+      "mult": 1.5,
+      "d": 0.05,
+      "core": "native"
+    },
+    "FW_CAP200_V275_C350_T475": {
+      "family": 2.0,
+      "v12": 2.75,
+      "crypto": 3.5,
+      "total": 4.75,
+      "mult": 1.5,
+      "d": 0.05,
+      "core": "native"
+    }
+  },
+  "costs_bps": [
+    10,
+    20,
+    30
+  ]
+}
