@@ -36,10 +36,10 @@ test("unchanged ranks do not animate and top3 exchange requires rank movement",(
 });
 test("previous one-sound storage safely migrates into three independent choices",()=>{
  const migrated=loadRankingSoundSelections(undefined,"gold");
- assert.equal(migrated.rise,"gold");
+ assert.equal(migrated.rise,DEFAULT_RANKING_SOUND_SELECTIONS.rise);
  assert.equal(migrated.fall,DEFAULT_RANKING_SOUND_SELECTIONS.fall);
  assert.equal(migrated.top3,DEFAULT_RANKING_SOUND_SELECTIONS.top3);
- const selected=loadRankingSoundSelections({rise:"piano",fall:"mist",top3:"diamond"},"crystal");
- assert.deepEqual(selected,{rise:"piano",fall:"mist",top3:"diamond"});
- assert.equal(RANKING_SOUNDS.length,20);
+ const selected=loadRankingSoundSelections({rise:"rise-crystal",fall:"fall-noir",top3:"top3-diamond"},"crystal");
+ assert.deepEqual(selected,{rise:"rise-crystal",fall:"fall-noir",top3:"top3-diamond"});
+ assert.equal(RANKING_SOUNDS.length,15);
 });

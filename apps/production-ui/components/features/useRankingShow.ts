@@ -3,7 +3,7 @@ import { useCallback,useEffect,useLayoutEffect,useRef,useState } from 'react';
 import { rankCommentary,risingRankEvents,type RankRow,type RiseEvent } from '@/lib/realtime-ranking';
 
 import {playRankingSequence,RANKING_MOTION_MS} from '@/lib/ranking-sequence';
-import {chooseRankingSound,synthesizeRankingSound,loadRankingSoundSelections,DEFAULT_RANKING_SOUND_SELECTIONS,type RankingSoundSelections,type RankingSoundRole} from '@/lib/ranking-sounds';
+import {chooseRankingSound,playRankingSound,preloadRankingSound,loadRankingSoundSelections,DEFAULT_RANKING_SOUND_SELECTIONS,type RankingSoundSelections,type RankingSoundRole} from '@/lib/ranking-sounds';
 import {createRankingMovementPhases} from '@/lib/ranking-motion-groups';
 
 type Capture={rows:RankRow[];rects:Map<string,DOMRect>;scrollX:number;scrollY:number};
@@ -75,7 +75,7 @@ export function useRankingShow(rows:RankRow[],version:number,viewKey:string,erro
   }
  },[ensureAudio,speakNatural,stopVisuals]);
  const selectSound=useCallback((role:RankingSoundRole,id:string)=>{
-  const sound=chooseRankingSound(id);
+  const sound=chooseRankingSound(id,role);
   const soundIds={...prefs.current.soundIds,[role]:sound.id};
   prefs.current={...prefs.current,soundIds};
   setSoundIds(soundIds);
@@ -85,17 +85,28 @@ export function useRankingShow(rows:RankRow[],version:number,viewKey:string,erro
   setAudioNotice('専用音：'+sound.label+' に変更しました。');
  },[]);
  const playEffect=useCallback(async(role:RankingSoundRole,force=false)=>{
+  const startedAt=Date.now();
   if(!force&&(!prefs.current.sound||document.hidden))return;
   try{
    const ctx=await ensureAudio();
    if(ctx.state!=='running')throw Error('BROWSER_AUDIO_LOCKED');
-   const selected=chooseRankingSound(prefs.current.soundIds[role]);
-   synthesizeRankingSound(ctx,selected,role);
+   const selected=chooseRankingSound(prefs.current.soundIds[role],role);
+   await playRankingSound(ctx,selected,{preview:force,startTimestamp:startedAt});
    if(force)setAudioNotice('「'+selected.label+'」を試聴中。');
   }catch{
    setAudioNotice('音声が制限されています。試聴をクリックし、端末の音量を確認してください。');
   }
  },[ensureAudio]);
+ // Decode the 3 selected same-origin studio recordings before the next rank movement.
+ useEffect(()=>{
+  if(!sound)return;
+  const Audio=window.AudioContext||(window as unknown as {webkitAudioContext?:typeof AudioContext}).webkitAudioContext;
+  if(!Audio)return;
+  const ctx=audio.current??=new Audio();
+  (['rise','fall','top3'] as const).forEach(role=>{
+   void preloadRankingSound(ctx,chooseRankingSound(soundIds[role],role)).catch(()=>{});
+  });
+ },[sound,soundIds]);
  const notify=useCallback((rise:RiseEvent,delay:number)=>{
   if(document.hidden)return;
   const p=prefs.current;if(!p.sound&&!p.voice)return;

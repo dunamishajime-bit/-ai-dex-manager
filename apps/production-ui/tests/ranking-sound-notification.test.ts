@@ -1,6 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {RANKING_SOUNDS,DEFAULT_RANKING_SOUND_ID,chooseRankingSound,synthesizeRankingSound} from "../lib/ranking-sounds";
+import {RANKING_SOUNDS,DEFAULT_RANKING_SOUND_ID,chooseRankingSound,rankingSoundsForRole,preloadRankingSound,playRankingSound} from "../lib/ranking-sounds";
+import {statSync,readFileSync} from "node:fs";
+import {createHash} from "node:crypto";
 import {top3MovementAlert} from "../lib/ranking-top3-movement";
 import {rankRows,type RankRow} from "../lib/realtime-ranking";
 import {rankProvisionalRows} from "../lib/realtime-ranking-preview";
@@ -11,56 +13,54 @@ const row=(symbol:string,score:number,preview?:number):RankRow=>({
  ...(preview===undefined?{}:{preview:{price:100,priceAt:1,referenceAt:0,score:preview,status:"ONE_MINUTE_REFERENCE"}}),
 });
 
-test("20 distinct, selectable, synthetically rendered sound presets",()=>{
- assert.equal(RANKING_SOUNDS.length,20);
- assert.equal(new Set(RANKING_SOUNDS.map(x=>x.id)).size,20);
+test("15 curated stereo recordings: 5 rise, 5 fall, 5 Top3",()=>{
+ assert.equal(RANKING_SOUNDS.length,15);
+ assert.equal(new Set(RANKING_SOUNDS.map(s=>s.id)).size,15);
+ assert.equal(new Set(RANKING_SOUNDS.map(s=>s.src)).size,15);
  assert.equal(chooseRankingSound(DEFAULT_RANKING_SOUND_ID).id,DEFAULT_RANKING_SOUND_ID);
- for(const item of RANKING_SOUNDS){
-  assert.ok(item.label&&item.description);
-  assert.ok(item.duration>=0.75&&item.duration<=1.85);
-  assert.ok(item.recipe);
-  assert.equal(chooseRankingSound(item.id),item);
+ const fingerprints=new Set<string>();
+ for(const role of ["rise","fall","top3"] as const){
+  const group=rankingSoundsForRole(role);
+  assert.equal(group.length,5);
+  for(const item of group){
+   assert.equal(item.role,role);
+   assert.equal(chooseRankingSound(item.id,role),item);
+   assert.ok(item.duration>=1.60&&item.duration<=2.20);
+   assert.match(item.src,/^\/audio\/ranking-studio-v1\/(rise|fall|top3)-[a-z]+\.mp3$/);
+   const file=new URL("../public"+item.src,import.meta.url);
+   const stat=statSync(file);
+   assert.ok(stat.size>10_000&&stat.size<100_000,item.id);
+   const bytes=readFileSync(file);
+   assert.equal(bytes.subarray(0,3).toString(),"ID3","MP3 metadata header must be present");
+   fingerprints.add(createHash("sha256").update(bytes).digest("hex"));
+  }
  }
- assert.equal(chooseRankingSound("unrecognized").id,DEFAULT_RANKING_SOUND_ID);
+ assert.equal(fingerprints.size,15,"all 15 files are independently designed recordings");
+ assert.equal(chooseRankingSound("old-unsupported","top3").role,"top3");
 });
-
-test("all 20 SFX have distinct synthesis gestures instead of the same melody",()=>{
- const signatures=new Set<string>();
- const recipeNames=new Set<string>();
- for(const preset of RANKING_SOUNDS){
-  recipeNames.add(preset.recipe);
-  const starts:string[]=[];
-  const stops:number[]=[];
-  let bends=0,noiseBuffers=0,filters=0;
-  const gain=()=>({value:0,setValueAtTime:()=>{},linearRampToValueAtTime:()=>{},exponentialRampToValueAtTime:()=>{}});
-  const oscillator=()=>({
-   type:"sine",frequency:{setValueAtTime:(_f:number,_t:number)=>{},exponentialRampToValueAtTime:()=>{bends++;}},
-   connect:()=>{},start:(time:number)=>{starts.push("osc:"+time.toFixed(3));},stop:(time:number)=>{stops.push(time);}
-  });
-  const fakeCtx={
-   currentTime:0,sampleRate:8000,destination:{},
-   createGain:()=>({gain:gain(),connect:()=>{}}),
-   createOscillator:()=>oscillator(),
-   createBiquadFilter:()=>{filters++;return {type:"lowpass",frequency:gain(),connect:()=>{}};},
-   createBuffer:(_channels:number,frames:number)=>{noiseBuffers++;return {getChannelData:()=>new Float32Array(frames)};},
-   createBufferSource:()=>({buffer:null,connect:()=>{},start:(time:number)=>{starts.push("noise:"+time.toFixed(3));},stop:(time:number)=>{stops.push(time);}}),
-  };
-  synthesizeRankingSound(fakeCtx as unknown as AudioContext,preset,"rise");
-  assert.ok(starts.length>=1,preset.id);
-  assert.equal(stops.length,starts.length,preset.id);
-  assert.ok(stops.every(t=>t>0&&t<=preset.duration+.10),preset.id);
-  signatures.add(JSON.stringify({starts,bends,noiseBuffers,filters}));
- }
- assert.equal(recipeNames.size,20,"all 20 presets need a distinct recipe");
- assert.equal(signatures.size,20,"all 20 sounds must differ in timing, source type, or modulation");
-});
-test("SFX flash, laser, wind, bass and Top3 fanfare use different source families",()=>{
- const find=(id:string)=>RANKING_SOUNDS.find(p=>p.id===id)!.recipe;
- assert.equal(find("crystal"),"flash");
- assert.equal(find("neon"),"laser");
- assert.equal(find("mist"),"wind");
- assert.equal(find("velvet"),"subboom");
- assert.equal(find("luxury"),"fanfare");
+test("decoded sound is cached per AudioContext and playback uses the real buffer",async()=>{
+ const sound=RANKING_SOUNDS[0],oldFetch=globalThis.fetch;
+ let requests=0,decoded=0,starts=0;
+ const audioBuffer={length:48000,duration:1.7};
+ const ctx={
+  state:"running",destination:{},
+  decodeAudioData:async(bytes:ArrayBuffer)=>{decoded++;assert.ok(bytes.byteLength>1000);return audioBuffer;},
+  createBufferSource:()=>({buffer:null,connect:()=>{},start:()=>{starts++;}}),
+  createGain:()=>({gain:{value:0},connect:()=>{}})
+ } as unknown as AudioContext;
+ globalThis.fetch=async(url:RequestInfo|URL)=>{
+  requests++;assert.equal(String(url),sound.src);
+  return {ok:true,arrayBuffer:async()=>new ArrayBuffer(1400)} as Response;
+ };
+ try{
+  const a=await preloadRankingSound(ctx,sound);
+  const b=await preloadRankingSound(ctx,sound);
+  assert.equal(a,b);
+  assert.equal(requests,1);
+  assert.equal(decoded,1);
+  await playRankingSound(ctx,sound,{preview:true});
+  assert.equal(starts,1);
+ }finally{globalThis.fetch=oldFetch;}
 });
 test("formal Top3 swap always notifies even when scores below 90",()=>{
  const before=[row("BTC",70),row("ETH",68),row("SOL",65),row("LINK",63)];

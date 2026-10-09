@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { executionBlocked,currentRankRow,rankRows,rankChanges,rankCommentary,rankingPcAlert,type RankRow } from '@/lib/realtime-ranking';
 import { SignalGateList } from './SignalGateList';
 import { useRankingShow } from './useRankingShow';
-import {RANKING_SOUNDS} from '@/lib/ranking-sounds';
+import {rankingSoundsForRole} from '@/lib/ranking-sounds';
 import {top3MovementAlert} from '@/lib/ranking-top3-movement';
 import {displayRank,displayScore,formatPrice,rankProvisionalRows,RANKING_PAGE_REFRESH_MS} from '@/lib/realtime-ranking-preview';
 type Snapshot={checkedAt:number;runtimeSha:string;rows:RankRow[];metric:string;errors:Record<string,string>;refreshSeconds?:number;previewRefreshSeconds?:number;marketPriceCheckedAt?:number;previewUpdatedAt?:number;marketPriceError?:string};
@@ -83,8 +83,8 @@ export function RealtimeRankingBoard(){
     <div className="ranking-commentary-actions">
      {(['rise','fall','top3'] as const).map(role=><div key={role} className="ranking-sound-setting">
       <label className="ranking-sound-select">{role==='rise'?'↑ 上昇':role==='fall'?'↓ 下降':'★ Top3'}
-       <select aria-label={role==='rise'?'上昇通貨の効果音（20種類）':role==='fall'?'下降通貨の効果音（20種類）':'Top3入替専用効果音（20種類）'} value={show.soundIds[role]} onChange={e=>show.selectSound(role,e.target.value)}>
-        {RANKING_SOUNDS.map(effect=><option key={effect.id} value={effect.id}>{effect.label} — {effect.description}</option>)}
+       <select aria-label={role==='rise'?'上昇通貨専用のスタジオ音（5種類）':role==='fall'?'下降通貨専用のスタジオ音（5種類）':'Top3入替専用のスタジオ音（5種類）'} value={show.soundIds[role]} onChange={e=>show.selectSound(role,e.target.value)}>
+        {rankingSoundsForRole(role).map(effect=><option key={effect.id} value={effect.id}>{effect.label} — {effect.description}</option>)}
        </select>
       </label>
       <button type="button" onClick={()=>show.testSound(role)} className="ranking-detail-button" aria-label={(role==='rise'?'上昇':role==='fall'?'下降':'Top3')+'専用音を試聴'}>♪ 試聴</button>
