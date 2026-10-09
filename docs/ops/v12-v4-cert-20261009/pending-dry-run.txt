@@ -1,0 +1,4 @@
+
+{"status":"V12_ABSENT_PENDING_RECONCILE_FAIL_CLOSED","reason":"ACCOUNT_LOCK_BUSY_NO_FORCE_DELETE","ordersSent":0,"cancelsSent":0,"positionChangesSent":0,"newStrategyEnabled":false}
+
+CONTROLLER_EXIT 2

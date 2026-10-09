@@ -7,6 +7,7 @@ import { loadV52Top2Observability } from "@/lib/server/v52-top2-observability";
 import { loadPenguRuntimeObservability } from "@/lib/server/pengu-runtime-observability";
 import { loadQuality102RuntimeObservability } from "@/lib/server/quality102-runtime-observability";
 import { loadFetRuntimeObservability } from "@/lib/server/fet-runtime-observability";
+import { loadV12RuntimeBadge } from "@/lib/server/v12-runtime-status";
 export const dynamic = "force-dynamic";
 export async function GET(req: NextRequest) {
   if (req.cookies.get("disdex_auth")?.value !== "1") return NextResponse.json({ ok: false, readOnly: true, error: "ログインが必要です。" }, { status: 401 });
@@ -46,13 +47,11 @@ export async function GET(req: NextRequest) {
       loadQuality102RuntimeObservability(),
       loadFetRuntimeObservability({ expectedReleaseSha: expectedRuntimeSha }),
     ]);
-    const v12UpdatedAt = v12Observability.runnerState?.updatedAt;
-    const v12Fresh = v12Observability.wiring.runnerStateConfigured && v12UpdatedAt !== undefined && Date.now() - v12UpdatedAt <= 3 * 60 * 60 * 1000 && v12Observability.runnerState?.mode?.toLowerCase() === "live" && v12Observability.runnerState.killSwitch?.active !== true;
-    const v12Status = !v12Observability.wiring.runnerStateConfigured ? "UNAVAILABLE" : v12Fresh ? "LIVE" : "STALE";
+    const v12Badge = await loadV12RuntimeBadge({ configured: v12Observability.wiring.runnerStateConfigured, state: v12Observability.runnerState, expectedReleaseSha: expectedRuntimeSha });
     const runtime = {
       ...snapshot.runtime,
       units: snapshot.runtime.units.map((unit) => {
-        if (unit.id === "V12_X1.00_ALL") return { ...unit, status: v12Status as typeof unit.status, updatedAt: v12UpdatedAt, reason: v12Fresh ? "V12 runner state更新済み、mode=LIVE、Kill Switch inactiveを確認しました。" : v12Observability.errors[0] || "V12 runner stateが未接続・停止・古いためLIVE確認できません。" };
+        if (unit.id === "V12_X1.00_ALL") return { ...unit, status: v12Badge.status, updatedAt: v12Badge.updatedAt, reason: v12Badge.reason };
         if (unit.id === "PENGU_DUAL_LS_V2_FINAL") return { ...unit, status: penguRuntime.status, updatedAt: penguRuntime.updatedAt, reason: penguRuntime.reason };
         if (unit.id === "QUALITY102_CAUSAL_V1") return { ...unit, status: quality102Runtime.status, updatedAt: quality102Runtime.updatedAt, reason: quality102Runtime.reason };
         if (unit.id === "FET_BRK48_RESIDUAL") return { ...unit, releaseSha: fetRuntime.runtimeSha || unit.releaseSha, status: fetRuntime.status, updatedAt: fetRuntime.updatedAt, reason: fetRuntime.reason };

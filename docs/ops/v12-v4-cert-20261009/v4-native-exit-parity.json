@@ -1,0 +1,36 @@
+{
+  "status": "PASS",
+  "source": "WR60_FROZEN_BASELINE_NATIVE",
+  "capturedAt": "2026-10-09T04:46:56.603Z",
+  "sourceRows": 1978,
+  "matching": 1978,
+  "mismatches": [],
+  "orderEnabled": false,
+  "realOrderEnabledV4": 0,
+  "tradingMutation": 0,
+  "priceModelOnly": true,
+  "sourceHashes": {
+    "frozenBaselineArchiveSha256": "7c64acd48cd88d256135b2e3e2261ef2ae16fbd069bb8f235cad58fb6fa041b5",
+    "frozenBaselineContentSha256": "f1fecab44f5b13c783df07f7202e1b55634ed177b7f455d833cb83096c21dc13",
+    "h1KlinesSha256": {
+      "XRPUSDT": "3d434bf8ed2265663b9375c8de1f64d9ce4b1a90e20b06bf2a91c657dc5fa99e",
+      "ADAUSDT": "e9c591532aedac859602ddb7cae76d16a2a22129c739478f1ea1075579d1b972",
+      "ETHUSDT": "72727955b1bacee9a6fb8666e08826c1926ff95ae6bd8d1ccb35d7dc6d6bac86",
+      "LINKUSDT": "f4f8e5baabd65da0f52093be29ac2348742223f680d1fe3fd7e1d7b4ab37b066",
+      "DOGEUSDT": "c392039d1bb9de87d2c54ba75d5425f43571aef0a41ab15559d9d572ad760d1f",
+      "SOLUSDT": "10958e969ea53fbb5d9eaedf20680d9e9463fcba18ceee79f8f2853a8907db26",
+      "AAVEUSDT": "79548b1968b5562645c5b516396c7aa9b16645add167410e4a613161883e4aba",
+      "BTCUSDT": "f573b511842dcd1207801324948fa85842e0e2fd8d44ad76e3273d9fa607421c",
+      "LTCUSDT": "51ad635801eb58ca43459d9425f1eec779294c82455f53a2f3428a70a45ac09a",
+      "NEARUSDT": "6c5b4b2f250ebc9aec723da4566132b7e431b26a3e320e2ef09f482de6d0e47e",
+      "BNBUSDT": "92e071adce1df1ac2ea400181d190689a2c6ec1527fa17c969dc39c622f79657",
+      "ATOMUSDT": "1fba07ebb4db4a2d0190abe35ea2e21cc3538dbe162e3ac5ee26e9b0128afc9b",
+      "AVAXUSDT": "46214ec892d6378d0f3efb3e5ca1d890ee33cf5dfc98b0ad652fd8bda764104c",
+      "INJUSDT": "6dbc916cd9e788a964c58935cc3661184a27736c57e3683157774c2e863bb948"
+    },
+    "lifecycleSha256": "78c91a05fc31576d094bc75ee6a1d3f13f844e044b2a4a38991b1b6650f46622",
+    "pureHelpersSha256": "6789e5af587e4d36b872450bcdde67c65f3360058d4aa2a6c892cab76b749dad",
+    "runtimeConfigSha256": "c67dafe3fe49ac71a0f4bae64cd3b494cead89badd7c94cb60c8bfa0062e56f6"
+  },
+  "scope": "Native exit timestamp, price and reason only. H1 price model; not order/venue/native signal generation certification."
+}

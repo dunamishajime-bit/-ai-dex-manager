@@ -1,5 +1,7 @@
 import { readFile } from "node:fs/promises";
 import { isAbsolute, join } from "node:path";
+import { createHash } from "node:crypto";
+import { loadCurrentProductionRuntime } from "./current-production-runtime";
 
 const DEFAULT_STATE = "/var/lib/disdex/v12-v4-shadow/state.json";
 const DEFAULT_RELEASE = "/home/deploy/disdex-trading/current";
@@ -9,6 +11,10 @@ const MIDPOINT_ID = "V2_M150_D05_CORE_NATIVE";
 const MAX_BYTES = 2 * 1024 * 1024;
 
 type Json = Record<string, unknown>;
+const MAX_AGE_MS = 3 * 60 * 60 * 1000;
+// Git stores LF; the audited Windows source uses CRLF (raw SHA256 30f896...bb4d5).
+// Normalize only line endings so Linux and Windows verify the same frozen bytes.
+const PRIORITY_SHA256 = "bae4573f6ff516bec2b27e7e10d35e5027c7265c67bbdb101c1038066b5f7c27";
 
 export type V12V4ShadowRow = {
   route: string;
@@ -44,6 +50,7 @@ export type V12V4RouteCatalogRow = {
   midpointRank?: number;
   midpointGross?: number;
   midpointTrainCount?: number;
+  midpointScore?: number;
   metrics: Record<string, { trades: number; winRate: number; pf?: number; netPnlUsd: number }>;
 };
 
@@ -88,6 +95,9 @@ export type V12V4ShadowObservability = {
   rejected: V12V4ShadowRow[];
   aggregateBt: Record<string, { trades?: number; winRate?: number; pf?: number; netPnlUsd?: number; finalEquityJpy?: number; dd?: number }>;
   routeCatalog: V12V4RouteCatalogRow[];
+  certification: { status: "BLOCKED_PRODUCTION_PARITY"; orderAuthority: false; eightSystemParity: "NOT_PROVEN"; certificateVerified: false; blockers: string[] };
+  runtimeObservation: { checkedAt: string; releaseSha?: string; runnerStatus: "OBSERVED" | "STALE" | "UNAVAILABLE"; runnerUpdatedAt?: number; mode?: string; safetyState?: string; killSwitchActive?: boolean; killSwitchAction?: string; killSwitchReason?: string; caps?: { v12Gross: number; cryptoGross: number; totalGross: number }; error?: string; orderAuthority: false };
+  shadowFresh: boolean;
   errors: string[];
 };
 
@@ -110,6 +120,9 @@ function row(v: unknown): V12V4ShadowRow | null {
   const x = obj(v);
   if (!x) return null;
   if (x.orderEnabled !== false || x.shadow !== true) return null;
+  if (typeof x.route !== "string" || !x.route || typeof x.symbol !== "string" || !x.symbol) return null;
+  if (typeof x.requestedGross !== "number" || !Number.isFinite(x.requestedGross) || x.requestedGross < 0) return null;
+  if (x.postMinLiftGross !== undefined && (typeof x.postMinLiftGross !== "number" || !Number.isFinite(x.postMinLiftGross) || x.postMinLiftGross < 0)) return null;
   return {
     route: String(x.route || ""),
     family: String(x.family || ""),
@@ -132,13 +145,27 @@ function row(v: unknown): V12V4ShadowRow | null {
   };
 }
 
-export async function loadV12V4ShadowObservability(options: { statePath?: string; releaseRoot?: string } = {}): Promise<V12V4ShadowObservability> {
+export async function loadV12V4ShadowObservability(options: { statePath?: string; releaseRoot?: string; now?: number; killSwitchPath?: string } = {}): Promise<V12V4ShadowObservability> {
   const configured = String(options.statePath || process.env.V12_V4_SHADOW_STATE_PATH || DEFAULT_STATE).trim();
   const statePath = isAbsolute(configured) ? configured : DEFAULT_STATE;
   const releaseRoot = options.releaseRoot || DEFAULT_RELEASE;
   const catalogPath = join(releaseRoot, CATALOG_RELATIVE);
   const midpointPriorityPath = join(releaseRoot, MIDPOINT_PRIORITY_RELATIVE);
   const errors: string[] = [];
+  const now = options.now ?? Date.now();
+  let runtimeObservation: V12V4ShadowObservability["runtimeObservation"] = { checkedAt: new Date(now).toISOString(), runnerStatus: "UNAVAILABLE", orderAuthority: false };
+  try {
+    const runtime = await loadCurrentProductionRuntime();
+    const unit = runtime.runtimeLineage.units.v12;
+    const fresh = unit.updatedAt !== undefined && now - unit.updatedAt >= -60000 && now - unit.updatedAt <= MAX_AGE_MS;
+    runtimeObservation = { ...runtimeObservation, releaseSha: runtime.releaseSha, runnerStatus: fresh && unit.matchesCurrent ? "OBSERVED" : "STALE", runnerUpdatedAt: unit.updatedAt, mode: unit.mode, safetyState: unit.safetyState, caps: { v12Gross: runtime.caps.v12DynamicGross, cryptoGross: runtime.caps.cryptoGross, totalGross: runtime.caps.totalGross } };
+  } catch (error) { runtimeObservation.error = error instanceof Error ? error.message : "CURRENT_RUNTIME_UNAVAILABLE"; }
+  try {
+    const kill = obj(await readJson(options.killSwitchPath || process.env.DISDEX_SHARED_KILL_SWITCH_PATH || "/var/lib/disdex/shared/kill-switch.json"));
+    runtimeObservation.killSwitchActive = typeof kill?.active === "boolean" ? kill.active : undefined;
+    runtimeObservation.killSwitchAction = typeof kill?.action === "string" ? kill.action : undefined;
+    runtimeObservation.killSwitchReason = typeof kill?.reason === "string" ? kill.reason : undefined;
+  } catch { /* Missing shared protection remains unknown; never implies permission. */ }
 
   let state: Json | null = null;
   try {
@@ -151,6 +178,13 @@ export async function loadV12V4ShadowObservability(options: { statePath?: string
     errors.push(error instanceof Error ? error.message : "V12 V4 shadow state unavailable.");
   }
 
+  const capturedTs = typeof state?.capturedAt === "string" ? Date.parse(state.capturedAt) : NaN;
+  const shadowFresh = Number.isFinite(capturedTs) && now - capturedTs >= -60000 && now - capturedTs <= MAX_AGE_MS;
+  if (state && !shadowFresh) errors.push("V12 V4 shadow state is stale or has an invalid/future timestamp.");
+  const stateAvailable = Boolean(state && state.orderEnabled === false && state.tradingMutation === 0 && state.shadow === true && state.architecture === "MULTILOGIC_V4" && shadowFresh);
+  if (state && !stateAvailable) errors.push("V12 V4 shadow state rejected; no rows, counts or caps are current observations.");
+  if (!stateAvailable) state = null;
+
   let catalog: Json | null = null;
   try {
     catalog = obj(await readJson(catalogPath));
@@ -161,12 +195,15 @@ export async function loadV12V4ShadowObservability(options: { statePath?: string
 
   let midpointRankSource: Json[] = [];
   try {
-    const raw = await readJson(midpointPriorityPath);
+    const priorityText = await readFile(midpointPriorityPath, "utf8");
+    if (Buffer.byteLength(priorityText, "utf8") > MAX_BYTES || createHash("sha256").update(priorityText.replace(/\r\n/g, "\n")).digest("hex") !== PRIORITY_SHA256) throw new Error("MIDPOINT_PRIORITY_SHA256_MISMATCH");
+    const raw = JSON.parse(priorityText) as unknown;
     if (!Array.isArray(raw) || raw.length !== 41) throw new Error("MIDPOINT_PRIORITY_41_ROUTES_REQUIRED");
     midpointRankSource = raw.map(obj).filter((x): x is Json => Boolean(x));
     const routeIds = new Set(midpointRankSource.map((x) => String(x.route || "")));
     if (routeIds.size !== 41) throw new Error("MIDPOINT_DUPLICATE_ROUTE");
   } catch (error) {
+    midpointRankSource = [];
     errors.push(error instanceof Error ? error.message : "V12 midpoint rank file unavailable.");
   }
   const midpointRanks = new Map(midpointRankSource.map((x) => [String(x.route), x]));
@@ -212,6 +249,7 @@ export async function loadV12V4ShadowObservability(options: { statePath?: string
           : String(midpointRanks.get(String(r.route))?.tier) === "D"
             ? 0.05 : Math.min(1, num(midpointRanks.get(String(r.route))?.gross) * 1.5)
         : undefined,
+      midpointScore: midpointRanks.get(String(r.route)) ? num(midpointRanks.get(String(r.route))?.score) : undefined,
       midpointTrainCount: midpointRanks.get(String(r.route))
         ? num(midpointRanks.get(String(r.route))?.n30) : undefined,
       metrics,
@@ -262,7 +300,10 @@ export async function loadV12V4ShadowObservability(options: { statePath?: string
     midpointCaps: {
       recoveryFamilyGross: 2.50, v12Gross: 3.00, cryptoGross: 3.50, totalGross: 4.75,
     },
-    stateAvailable: Boolean(state && state.orderEnabled === false && num(state.tradingMutation, -1) === 0),
+    stateAvailable,
+    shadowFresh: stateAvailable && shadowFresh,
+    certification: { status: "BLOCKED_PRODUCTION_PARITY", orderAuthority: false, certificateVerified: false, eightSystemParity: "NOT_PROVEN", blockers: ["Frozen full-year hindsight priority (training end 2026-08-10); not out-of-sample causal proof.", "External Y06: 102 entries, PF approximately 0.30; whole-portfolio external parity not certified.", "10bps maximum MTM DD 20.42% exceeds 20% goal.", "41-route venue execution, Exit lifecycle, quantities, reservations and eight-system live parity not certified."] },
+    runtimeObservation,
     statePath,
     catalogAvailable: Boolean(catalog),
     catalogPath,
@@ -270,10 +311,10 @@ export async function loadV12V4ShadowObservability(options: { statePath?: string
     caps,
     counts: {
       rawRouteSymbolEvaluations: num(countsObj?.rawRouteSymbolEvaluations),
-      independentlyQualifyingCandidates: num(countsObj?.independentlyQualifyingCandidates),
-      admittedShadowVirtualLegs: num(countsObj?.admittedShadowVirtualLegs),
-      rejectedShadowLegs: num(countsObj?.rejectedShadowLegs),
-      uniqueAdmittedSymbols: num(countsObj?.uniqueAdmittedSymbols),
+      independentlyQualifyingCandidates: candidates.length,
+      admittedShadowVirtualLegs: accepted.length,
+      rejectedShadowLegs: rejected.length,
+      uniqueAdmittedSymbols: new Set(accepted.map(leg => leg.symbol)).size,
       realOrderEnabledV4: 0,
     },
     candidates,

@@ -1,0 +1,122 @@
+[
+  {
+    "relative": "scripts\\research\\run_gate_fix_comparison.py",
+    "normalized_identical": true
+  },
+  {
+    "relative": "scripts\\research\\run_wr60_new_model.py",
+    "normalized_identical": true
+  },
+  {
+    "relative": "scripts\\research\\run_v12_logic_dissection.py",
+    "normalized_identical": true
+  },
+  {
+    "relative": "scripts\\research\\v12_composite_logic.py",
+    "normalized_identical": true
+  },
+  {
+    "relative": "scripts\\research\\v12_entry_state_logic.py",
+    "normalized_identical": true
+  },
+  {
+    "relative": "scripts\\research\\run_v12_entry_phase.py",
+    "normalized_identical": true
+  },
+  {
+    "relative": "scripts\\research\\run_v12_momentum_onset.py",
+    "normalized_identical": true
+  },
+  {
+    "relative": "scripts\\research\\run_v12_onset_state_machine.py",
+    "normalized_identical": true
+  },
+  {
+    "relative": "scripts\\research\\analyze_v12_failed_break_sensitivity.py",
+    "normalized_identical": true
+  },
+  {
+    "relative": "scripts\\research\\run_v12_multiroute_rescue.py",
+    "normalized_identical": true
+  },
+  {
+    "relative": "scripts\\research\\run_v12_robust_complement.py",
+    "normalized_identical": true
+  },
+  {
+    "relative": "scripts\\research\\run_v12_multilogic_recovery.py",
+    "normalized_identical": true
+  },
+  {
+    "relative": "scripts\\research\\run_v12_independent_sleeves.py",
+    "normalized_identical": true
+  },
+  {
+    "relative": "scripts\\research\\run_v12_multilogic_v2.py",
+    "normalized_identical": true
+  },
+  {
+    "relative": "scripts\\research\\run_v12_multilogic_v3.py",
+    "normalized_identical": true
+  },
+  {
+    "relative": "scripts\\research\\run_v12_multilogic_v4_stacking.py",
+    "normalized_identical": true
+  },
+  {
+    "relative": "scripts\\research\\run_v12_multilogic_v4_minlift.py",
+    "normalized_identical": true
+  },
+  {
+    "relative": "scripts\\research\\run_v12_multilogic_v4_flip.py",
+    "normalized_identical": true
+  },
+  {
+    "relative": "scripts\\research\\run_v12_multilogic_v4_extended.py",
+    "normalized_identical": true
+  },
+  {
+    "relative": "scripts\\research\\run_v12_multilogic_v4_final1000.py",
+    "normalized_identical": true
+  },
+  {
+    "relative": "scripts\\research\\run_v12_multilogic_v4_quality_refine.py",
+    "normalized_identical": true
+  },
+  {
+    "relative": "scripts\\research\\run_v12_v4_route_repair_integrated.py",
+    "normalized_identical": true
+  },
+  {
+    "relative": "scripts\\research\\run_v12_v4_route_repair_secondpass.py",
+    "normalized_identical": true
+  },
+  {
+    "relative": "scripts\\research\\run_v12_v4_priority_gross_v2_sweep.py",
+    "normalized_identical": true
+  },
+  {
+    "relative": "docs\\research\\results\\gate-fixes-bt-20261008\\support\\engine\\scripts\\research\\formal_core_live_ownership.py",
+    "normalized_identical": true
+  },
+  {
+    "relative": "docs\\research\\results\\gate-fixes-bt-20261008\\support\\engine\\scripts\\research\\pengu1_hype_engine.py",
+    "normalized_identical": true
+  },
+  {
+    "relative": "docs\\research\\results\\gate-fixes-bt-20261008\\support\\engine\\scripts\\research\\formal_core_ownership_audit.py",
+    "normalized_identical": true
+  },
+  {
+    "relative": "docs\\research\\results\\gate-fixes-bt-20261008\\support\\engine\\scripts\\research\\run_formal_core_overlay_diagnostic.py",
+    "normalized_identical": true
+  },
+  {
+    "relative": "docs\\research\\results\\gate-fixes-bt-20261008\\support\\engine\\scripts\\research\\run_pengu1_hype_comparison.py",
+    "normalized_identical": true
+  },
+  {
+    "relative": "docs\\research\\results\\gate-fixes-bt-20261008\\support\\venue_constraints.py",
+    "normalized_identical": true
+  }
+]

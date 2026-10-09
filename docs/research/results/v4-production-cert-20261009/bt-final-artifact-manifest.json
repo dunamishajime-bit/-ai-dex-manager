@@ -1,0 +1,197 @@
+[
+  {
+    "path": "bt-audit-checks.json",
+    "size": 1120,
+    "sha256": "85bf0bee40335af713986d03779280f61b868158f3dda41b4243d09ca8981e54"
+  },
+  {
+    "path": "bt-audit-run.log",
+    "size": 84,
+    "sha256": "c8a1383c3b075d815b3c9ba0f69a3fcda7ad35cb533068a39e54a1ff4a09c252"
+  },
+  {
+    "path": "bt-baseline\\cases\\V2_M150_D05_CORE_NATIVE\\candidates\\crypto-price-model-candidates.jsonl",
+    "size": 1716653,
+    "sha256": "fabdd5ae7dee170e05176896103f645ac67c4ea0d1f3bc3ec76605f013cd0edd"
+  },
+  {
+    "path": "bt-baseline\\cases\\V2_M150_D05_CORE_NATIVE\\result.json",
+    "size": 83867,
+    "sha256": "3cde4a95e0653d73236409986650d0ce771d6b0cd7d4fe265f0b3c87da215c5e"
+  },
+  {
+    "path": "bt-baseline\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\portfolio-price-model-summary.json",
+    "size": 80899,
+    "sha256": "e70f8c903cfbd1b1bcb01d458789e54ceb6cca02ebf99b411945e80bd439641c"
+  },
+  {
+    "path": "bt-baseline\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_10BPS\\candidate-decisions.jsonl",
+    "size": 2535837,
+    "sha256": "fb118b6d06657b52d105a6574cd8ee4184d68ab6dd68ba96bce5b075347c6b64"
+  },
+  {
+    "path": "bt-baseline\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_10BPS\\metrics.json",
+    "size": 23809,
+    "sha256": "d6bb56bef1626170b664db539edf49035812d970069de5e29f1210fae02d4f72"
+  },
+  {
+    "path": "bt-baseline\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_10BPS\\portfolio-events.jsonl",
+    "size": 2970172,
+    "sha256": "f3872587d4afd209834f6d1b56abc9bd555cd934d97ae0efe4f955de73e877cf"
+  },
+  {
+    "path": "bt-baseline\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_10BPS\\portfolio-trades.jsonl",
+    "size": 1354388,
+    "sha256": "edaae6ba9a8fe84c7db1cbb2e9d133ac9e85f8a89033be5ed7825b6a6e065a65"
+  },
+  {
+    "path": "bt-baseline\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_20BPS\\candidate-decisions.jsonl",
+    "size": 2536780,
+    "sha256": "7d72b82d71795dcfb6aba1625670806e7075c3289c9da0fbad60617880d74142"
+  },
+  {
+    "path": "bt-baseline\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_20BPS\\metrics.json",
+    "size": 23809,
+    "sha256": "c0f405132676525bc47cacd866e07511ac89b3b18ceea9302e29ae73bfb932e4"
+  },
+  {
+    "path": "bt-baseline\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_20BPS\\portfolio-events.jsonl",
+    "size": 2993144,
+    "sha256": "2f46ab7dd37fbed7c0925c43767f39a02fcdd8802d44687b7bc91bb178e36210"
+  },
+  {
+    "path": "bt-baseline\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_20BPS\\portfolio-trades.jsonl",
+    "size": 1358045,
+    "sha256": "963cae2a51a77b42a3676bf7e15c36f6d813a852aa47d5262baf1a42bbce0612"
+  },
+  {
+    "path": "bt-baseline\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_30BPS\\candidate-decisions.jsonl",
+    "size": 2534747,
+    "sha256": "b396e0708ef46d96fc7516369be9da96d14d48d6f1756819091bf4bdba6bd314"
+  },
+  {
+    "path": "bt-baseline\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_30BPS\\metrics.json",
+    "size": 23774,
+    "sha256": "763b50071d03d8d8fedda1fa935d320f1fdd2bd184468c814d5b6839499bfe57"
+  },
+  {
+    "path": "bt-baseline\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_30BPS\\portfolio-events.jsonl",
+    "size": 2980398,
+    "sha256": "453ae455dfedc55e7f6dae00a536f2b9db572187cdf6dfeca2ad03b0c3acd463"
+  },
+  {
+    "path": "bt-baseline\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_30BPS\\portfolio-trades.jsonl",
+    "size": 1351705,
+    "sha256": "b47a0845f01d2f43c4b9575f9e940ab12d410e25a7f8cb9f5852bb734f016337"
+  },
+  {
+    "path": "bt-baseline\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\summary.json",
+    "size": 81237,
+    "sha256": "e52e978c75799666b8df5de5e66140809a39a4aaa523a9c4f37f6b9ca0a5983f"
+  },
+  {
+    "path": "bt-baseline\\fresh-run-summary.json",
+    "size": 22011,
+    "sha256": "398de9213ede8288ba5f937cd0c36d7fc379df3215a752c9badd0346aa9e0341"
+  },
+  {
+    "path": "bt-baseline\\inputs\\core-reference-candidates.jsonl.gz",
+    "size": 116852,
+    "sha256": "99b8d5d304916e298496b82d67f1135fb47880144028a7bdf5deab7161591e69"
+  },
+  {
+    "path": "bt-baseline\\observed-filter-counterfactual.json",
+    "size": 2909,
+    "sha256": "ba1de9573d10b943313f814d68f4a3570617631bd120cc818926379b0f43935d"
+  },
+  {
+    "path": "bt-baseline\\perlogic-metrics.json",
+    "size": 94736,
+    "sha256": "0e46127586ff739a5a756fe5bc7b697b38bb6a1bd713aa7d20b94fbc98251d0c"
+  },
+  {
+    "path": "bt-baseline\\quantity-production-vectors.json",
+    "size": 147182,
+    "sha256": "271ceaaf9f5124a1dc12fd2ed444e93c50437115f1094a652841f21c7b6ad4ea"
+  },
+  {
+    "path": "bt-baseline\\rerun-manifest.json",
+    "size": 10944,
+    "sha256": "bba579ffa211822cbe71a8940658b39ecc4adc7d11515f434dc262566d2b3fa6"
+  },
+  {
+    "path": "bt-baseline\\source-comparison.json",
+    "size": 3801,
+    "sha256": "9b1d337820c244829af963446017471c43983f75b225f932688599bf4aca0110"
+  },
+  {
+    "path": "bt-baseline-run.log",
+    "size": 2710,
+    "sha256": "dc0e1fc9deb66bb9cd11bfe50cb7b1d8ff80bef1d96d730d52471afe54338c20"
+  },
+  {
+    "path": "bt-external\\causal-feature-checks.jsonl",
+    "size": 36310,
+    "sha256": "43ea16812d23629dd342f96fc517d8391c1234fe6c979931c228e78ff22da03e"
+  },
+  {
+    "path": "bt-external\\input-manifest.json",
+    "size": 4892,
+    "sha256": "6181a53c4f64a0c48d422746bf2c36f4c4ab2327f155e568a884c574c4b0c891"
+  },
+  {
+    "path": "bt-external\\route-trades.jsonl",
+    "size": 396824,
+    "sha256": "6dd1e6dda9816b5b81b808ec9ff18f7e4da9e1946b6d77d219cefd3d5936c2ab"
+  },
+  {
+    "path": "bt-external\\summary.json",
+    "size": 16182,
+    "sha256": "7f86109ac6b0ebe1988e607285c1a5c6424de38250b45257d4957038b8a32b48"
+  },
+  {
+    "path": "bt-external\\y06-independent.jsonl",
+    "size": 26205,
+    "sha256": "00a74af3bdc0adb5a8c4140d79e352a1b58ca2b527023fef5343c914c23b96e8"
+  },
+  {
+    "path": "bt-external-run.log",
+    "size": 1246,
+    "sha256": "4aa0b8f0b64a112743ce44ae968310770f5f88380f038d1eca403306c669cc56"
+  },
+  {
+    "path": "bt-selected-external\\causal-checks.jsonl",
+    "size": 36052,
+    "sha256": "21e4c8aa3ca3ea5164a75a70ee0da577a8a67d76a950770f5d1c1c4e156fc075"
+  },
+  {
+    "path": "bt-selected-external\\rejected.jsonl",
+    "size": 3468,
+    "sha256": "dec71e16fa665ef03344c31ae49230bf4baad1b9d016a427e93c5e0bd9d7a565"
+  },
+  {
+    "path": "bt-selected-external\\repaired-candidates.jsonl",
+    "size": 379267,
+    "sha256": "5207c1f44d025652a8ebce04731605b2df7a729938757f9930dc006aeb7b628a"
+  },
+  {
+    "path": "bt-selected-external\\summary.json",
+    "size": 17140,
+    "sha256": "5af2f3c9703dac4e04a9ab616c04f0c5cd9629e66584ba77fc6b0e1d678ff724"
+  },
+  {
+    "path": "bt-selected-external-run.log",
+    "size": 1158,
+    "sha256": "939049369692381f401e71fcdf4de26dfaab426fc1e0600a44fb79cb8bb7cc0f"
+  },
+  {
+    "path": "BT_CERT_AUDIT.json",
+    "size": 61743,
+    "sha256": "bb8eb8f64463660f3907da18407472ae65e2664167befdad5af64f45bf8e65f9"
+  },
+  {
+    "path": "BT_CERT_AUDIT.md",
+    "size": 4232,
+    "sha256": "a686501cc2bcb9bb114b2d84b8630a03b024f2fdc0a448ac06404452e7b8062a"
+  }
+]

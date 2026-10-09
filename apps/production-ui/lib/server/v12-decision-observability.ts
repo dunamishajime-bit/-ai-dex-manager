@@ -188,6 +188,7 @@ function safeRunnerState(value: unknown) {
   return {
     strategyId: typeof row.strategyId === "string" ? row.strategyId : undefined,
     mode: typeof row.mode === "string" ? row.mode : undefined,
+    runtimeCommitSha: typeof row.runtimeCommitSha === "string" ? row.runtimeCommitSha : undefined,
     updatedAt: Number.isFinite(Number(row.updatedAt)) ? Number(row.updatedAt) : undefined,
     lastReferenceTs: Number.isFinite(Number(row.lastReferenceTs)) ? Number(row.lastReferenceTs) : undefined,
     manualReview: typeof row.manualReview === "string" ? row.manualReview : undefined,

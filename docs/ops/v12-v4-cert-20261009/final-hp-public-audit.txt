@@ -1,0 +1,21 @@
+UI_EXEC_PORTS []
+LISTEN State  Recv-Q Send-Q Local Address:Port  Peer Address:PortProcess
+LISTEN 0      0            0.0.0.0:22         0.0.0.0:*    users:(("sshd",pid=1040,fd=3),("systemd",pid=1,fd=166))
+LISTEN 0      0          127.0.0.1:3001       0.0.0.0:*    users:(("next-server (v1",pid=2685016,fd=18))
+LISTEN 0      0         127.0.0.54:53         0.0.0.0:*    users:(("systemd-resolve",pid=488,fd=17))
+LISTEN 0      0            0.0.0.0:80         0.0.0.0:*    users:(("nginx",pid=2261950,fd=5),("nginx",pid=2261949,fd=5),("nginx",pid=2261948,fd=5),("nginx",pid=584,fd=5))
+LISTEN 0      0          127.0.0.1:20241      0.0.0.0:*    users:(("cloudflared",pid=553,fd=9))
+LISTEN 0      0         127.0.0.53:53         0.0.0.0:*    users:(("systemd-resolve",pid=488,fd=15))
+LISTEN 0      0          127.0.0.1:8765       0.0.0.0:*    users:(("python3",pid=3177788,fd=3))
+LISTEN 0      0            0.0.0.0:443        0.0.0.0:*    users:(("nginx",pid=2261950,fd=7),("nginx",pid=2261949,fd=7),("nginx",pid=2261948,fd=7),("nginx",pid=584,fd=7))
+LISTEN 0      0          127.0.0.1:8798       0.0.0.0:*    users:(("python3",pid=120324,fd=6))
+LISTEN 0      0          127.0.0.1:8797       0.0.0.0:*    users:(("python",pid=1635786,fd=3))
+LISTEN 0      0          127.0.0.1:8789       0.0.0.0:*    users:(("node",pid=554,fd=17))
+LISTEN 0      0                  *:3011             *:*    users:(("next-server",pid=2472634,fd=18))
+LISTEN 0      0                  *:22               *:*    users:(("sshd",pid=1040,fd=4),("systemd",pid=1,fd=170))
+LISTEN 0      0                  *:80               *:*    users:(("nginx",pid=2261950,fd=6),("nginx",pid=2261949,fd=6),("nginx",pid=2261948,fd=6),("nginx",pid=584,fd=6))
+LISTEN 0      0                  *:443              *:*    users:(("nginx",pid=2261950,fd=8),("nginx",pid=2261949,fd=8),("nginx",pid=2261948,fd=8),("nginx",pid=584,fd=8))
+
+NGINX_UI_ROUTE /etc/nginx/sites-enabled/ai-dex-manager.hajime-backup-1791256996 ['professional-dismanager.net', 'www.professional-dismanager.net', 'www.professional-dismanager.net', 'professional-dismanager.net', 'http://127.0.0.1:8787/goldcat/', 'http://127.0.0.1:8788/goldcat/', 'http://127.0.0.1:8789/goldcat/', 'http://127.0.0.1:8787/goldcat/', 'http://127.0.0.1:8765/', 'http://127.0.0.1:3001']
+NGINX_UI_ROUTE /etc/nginx/sites-enabled/ai-dex-manager ['professional-dismanager.net', 'www.professional-dismanager.net', 'www.professional-dismanager.net', 'professional-dismanager.net', 'http://127.0.0.1:8798', 'http://127.0.0.1:8798', 'http://127.0.0.1:8798', 'http://127.0.0.1:8787/goldcat/', 'http://127.0.0.1:8788/goldcat/', 'http://127.0.0.1:8789/goldcat/', 'http://127.0.0.1:8787/goldcat/', 'http://127.0.0.1:8765/', 'http://127.0.0.1:3001']
+HP_PUBLIC_AUDIT_JSON {"observedAt": "2026-10-09T04:52:06.162197+00:00", "public": [{"url": "https://professional-dismanager.net/realtime", "status": 200, "bytes": 11098}, {"url": "https://professional-dismanager.net/api/system/decision-status", "error": "HTTP Error 401: Unauthorized"}, {"url": "https://www.professional-dismanager.net/realtime", "status": 200, "bytes": 11098}, {"url": "https://www.professional-dismanager.net/api/system/decision-status", "error": "HTTP Error 401: Unauthorized"}]}

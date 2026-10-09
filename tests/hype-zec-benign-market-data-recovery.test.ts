@@ -144,7 +144,9 @@ test("known flat pre-order rate-budget failures hold without poisoning the daemo
       assert.equal(harness.getSaved().lastDecision?.accepted, false);
       assert.equal(harness.getSaved().lastDecisionTs, 1_700_000_000_000);
     }
-    assert.equal(harness.getMarketLoads(), 3);
+    // Flat-state preload runs outside the order lock; failures are retried
+    // under authoritative account/ownership reconciliation on each tick.
+    assert.equal(harness.getMarketLoads(), 6);
   }
 });
 
@@ -161,7 +163,9 @@ test("flat pre-request account budget denial is no-entry HOLD, not a permanent r
   assert.equal((await harness.runner.tick()).status, "held");
   assert.equal(harness.getSaved().manualReview, undefined);
   assert.equal(harness.getSaved().lastDecision?.accepted, false);
-  assert.equal(harness.getMarketLoads(), 0);
+  // One failed preload precedes account reads; the account denial prevents
+  // an authoritative market retry and any order path.
+  assert.equal(harness.getMarketLoads(), 1);
 });
 
 test("account budget denial with owned durable exposure remains manual review", async () => {

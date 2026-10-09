@@ -1,0 +1,22 @@
+✔ side caps constrain opposite HV and REV allocations independently (1.0005ms)
+✔ FET BRK SHORT exhaustion boundary rejects only the selected route (0.1669ms)
+✔ boundary return uses entry open and ignores future/current H1 close (0.2396ms)
+✔ V12 causal thresholds apply to intended symbol side and rank (0.1351ms)
+✔ six same-side net losses block only that side; duplicate fills and zero do not reset streak (0.2639ms)
+✔ FET cooldown survives the real durable store and expires at exactly 24 hours (17.2337ms)
+✔ PENGU limited re-break rejects elevated bounce only during BTC counterwind (17.1354ms)
+✔ V12 full-exit counter uses fees and all partial fills and rejects incomplete quantity proof (6.8299ms)
+✔ FET active migration requires exact venue quantity, profit-floor STOP and cross5 leverage (176.575ms)
+✔ new integrated acceptance is bound to specified research SHA and reproduced 1358-trade ledger (5.9998ms)
+✔ LONG loss cooldown survives real V12 restart and never disables opposite SHORT (11.4215ms)
+✔ delayed V12 forced exit stops accounting at first flat before another owner opens same symbol (0.8847ms)
+✔ simultaneous finalized exits count in actual fill-time order instead of reversed active array (0.8173ms)
+✔ formal handoff PB SHORT inherits 2.50 independently of PB LONG 2.00 (0.139ms)
+ℹ tests 14
+ℹ suites 0
+ℹ pass 14
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 629.1427

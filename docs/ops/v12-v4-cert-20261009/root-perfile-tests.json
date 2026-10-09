@@ -1,0 +1,722 @@
+[
+  {
+    "file": "tests\\account-lock-bounded-retry.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 transient contention retries before return (1.6373ms)\n\u2714 persistent contention remains bounded (0.3118ms)\n\u2139 tests 2\n\u2139 suites 0\n\u2139 pass 2\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 421.1341\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\aster-418-fail-closed.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 AsterV3Client never retries HTTP 418 (8.2996ms)\n\u2714 order reconciliation stops immediately on HTTP 418 (1.3341ms)\n\u2714 V12 protection reconciliation stops immediately on HTTP 418 (0.688ms)\n\u2714 Q102 market-data pagination stops immediately on HTTP 418 (1.0307ms)\n\u2139 tests 4\n\u2139 suites 0\n\u2139 pass 4\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 1454.5123\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\aster-global-rate-budget.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 shared Aster rate budget module exists (1.8037ms)\n\u2714 shared Aster rate budget exposes a slot reservation API (0.5527ms)\n\u2714 shared Aster rate budget serializes permits in the Python-compatible JSON format (35.9807ms)\n\u2714 shared Aster rate budget charges request weight, not HTTP count (21.7356ms)\n\u2714 AsterV3Client routes every request attempt through the shared global rate budget (0.5598ms)\n\u2714 shared budget rejects a non-empty document without the canonical schema (12.4742ms)\n\u2714 shared budget rejects non-finite configuration (1.5662ms)\n\u2714 shared budget publishes state with atomic rename (0.4947ms)\n\u2714 shared budget never evicts an old lock owned by a live process (27.9903ms)\n\u2714 shared budget survives concurrent stale ownerless lock recovery without duplicate permits (1014.0457ms)\n\ufe63 shared budget detects PID reuse using Linux process start ticks (0.3378ms) # SKIP\n\u2714 shared budget reclaims a stale ownerless recovery mutex after a crashed recovery (21.0087ms)\n\u2714 shared budget never evicts a recovery mutex owned by a live process (34.5916ms)\n\u2714 shared Aster budget propagates venue cooldown across daemons (15.9713ms)\n\u2714 root-owned rate-budget writers preserve parent ownership before atomic rename (0.4562ms)\n\u2139 tests 15\n\u2139 suites 0\n\u2139 pass 14\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 1\n\u2139 todo 0\n\u2139 duration_ms 1607.5027\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\aster-rate-budget-policy.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 classifies only known pre-request Aster budget failures (1.814ms)\n\u2139 tests 1\n\u2139 suites 0\n\u2139 pass 1\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 420.9408\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\aster-rate-limit-cooldown.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 HTTP 429 publishes a shared cooldown and is not retried locally (76.0303ms)\n\u2139 tests 1\n\u2139 suites 0\n\u2139 pass 1\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 1019.1502\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\aster-readonly-recovery-gate.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 requires three serial authenticated read-only successes before recovery passes (3.5115ms)\n\u2714 a 429 in any round fails the streak immediately instead of counting earlier successes (1.7723ms)\n\u2714 flatness is part of the recovery proof (0.7728ms)\n\u2139 tests 3\n\u2139 suites 0\n\u2139 pass 3\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 555.2114\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\aster-readonly-recovery-script-contract.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 recovery CLI is read-only, requires the canonical shared Kill Switch, and disables hidden 429 retries (9.2038ms)\n\u2139 tests 1\n\u2139 suites 0\n\u2139 pass 1\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 450.3194\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\aster-request-weight.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 Aster request weights cover heavy user-data endpoints (1.0916ms)\n\u2714 Aster market-data request weights follow documented parameter tiers (0.3541ms)\n\u2139 tests 2\n\u2139 suites 0\n\u2139 pass 2\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 775.9717\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\aster-upstream-live-recovery-script-contract.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 Aster upstream recovery is two-phase, read-only before apply, and archives safety state (12.4053ms)\n\u2714 Aster upstream recovery blocks conflicting old release lineages before Kill clear (2.0191ms)\n\u2714 Aster upstream recovery rechecks lineage while account lock is held before publishing recovery (1.4864ms)\n\u2714 Aster upstream recovery refuses Kill clear while legacy V96/V52 live supervisor is active (1.1774ms)\n\u2714 reference stale recovery requires fresh proof for every V52 stock before Kill clear (1.0985ms)\n\u2139 tests 5\n\u2139 suites 0\n\u2139 pass 5\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 418.4355\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\aster-upstream-recovery-policy.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 only Aster transport/rate-limit Kill Switch reasons are allow-listed (1.1127ms)\n\u2714 off-hours local reference stale kill is a separate narrow recovery reason (0.2105ms)\n\u2714 V12 operator review is clearable only for the same Aster communication incident (0.174ms)\n\u2714 only the exact stale pre-cutover Q102 lineage mismatch is recoverable (0.1542ms)\n\u2714 only the exact local V52 rate-budget saturation reason is recoverable (0.1482ms)\n\u2714 upstream recovery normalizes the shared Kill Switch for deploy-owned runners (12.7316ms)\n\u2139 tests 6\n\u2139 suites 0\n\u2139 pass 6\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 435.8781\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\aster-user-trades-client.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 getUserTrades is a signed read-only GET with bounded request weight (92.9938ms)\n\u2139 tests 1\n\u2139 suites 0\n\u2139 pass 1\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 875.8245\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\aster-v3-client-default-base-url.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 Aster V3 client defaults to the reachable futures API host (1.1078ms)\n\u2139 tests 1\n\u2139 suites 0\n\u2139 pass 1\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 763.7324\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\aster_trade_history_sync_contract.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 Aster client exposes signed read-only userTrades (1.8542ms)\n\u2714 history sync preserves the last good snapshot on partial failure (65.6352ms)\n\u2714 managed history symbols cover all live sleeves (4.7417ms)\n\u2714 history sync atomically publishes a complete read-only snapshot (11.1498ms)\n\u2139 tests 4\n\u2139 suites 0\n\u2139 pass 4\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 502.3667\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\current_live_target_contract.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 current live target preserves base rules while applying DD1296 sizing (9.9528ms)\n\u2714 historical controlling ledger and cost stress remain unchanged (4.9341ms)\n\u2139 tests 2\n\u2139 suites 0\n\u2139 pass 2\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 448.5373\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\current_live_target_readiness.test.ts",
+    "exit": 1,
+    "stdout": "\u2714 implementation is ready while real-money activation remains operator-blocked (377.3278ms)\n\u2714 readiness checker is read-only by construction (1.6436ms)\n\u2714 activation entry points require the read-only readiness gate (6.4126ms)\n\u2716 standalone FET Core preemption helper is independently fail-closed (5.989ms)\n\u2139 tests 4\n\u2139 suites 0\n\u2139 pass 3\n\u2139 fail 1\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 775.4666\n\n\u2716 failing tests:\n\ntest at tests\\current_live_target_readiness.test.ts:2:4273\n\u2716 standalone FET Core preemption helper is independently fail-closed (5.989ms)\n  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /FET_BRK48_CORE_PREEMPTION_READY=false/. Input:\n  \n  '#!/usr/bin/env bash\\n' +\n    'set -Eeuo pipefail\\n' +\n    '\\n' +\n    'umask 077\\n' +\n    'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\\n' +\n    '\\n' +\n    'TRADING_ROOT=\"${DISDEX_TRADING_ROOT:-/home/deploy/disdex-trading}\"\\n' +\n    'TRADING_RELEASES=\"${TRADING_ROOT}/releases\"\\n' +\n    'TRADING_CURRENT=\"${TRADING_ROOT}/current\"\\n' +\n    'SHARED_ROOT=\"${DISDEX_SHARED_ROOT:-/var/lib/disdex/shared}\"\\n' +\n    'OPERATOR_ACTIVATION_PATH=\"${SHARED_ROOT}/operator-activation/current.json\"\\n' +\n    \"# The canonical approval remains root:root and non-writable by deploy. Idle's\\n\" +\n    '# application-side defense-in-depth check needs a read-only root-generated\\n' +\n    '# projection because the daemon itself runs as deploy. The root ExecStartPre\\n' +\n    '# gate validates the canonical artifact first and refreshes this projection on\\n' +\n    '# every Idle start; the projection can never authorize a start by itself.\\n' +\n    'OPERATOR_ACTIVATION_RUNTIME_PATH=\"${SHARED_ROOT}/operator-activation/runtime.json\"\\n' +\n    'V52_LEGACY_CRYPTO_ROOT=\"${SHARED_ROOT}/crypto-v96\"\\n' +\n    'PENGU_STATE_ROOT=\"/var/lib/disdex/pengu-dual-ls-v2\"\\n' +\n    'HYPE_ZEC_STATE_ROOT=\"/var/lib/disdex/hype-zec-long\"\\n' +\n    'IDLE_PRIORITY_STATE_ROOT=\"/var/lib/disdex/idle-priority\"\\n' +\n    'LIVE_STATE_FILES=(\\n' +\n    '  \"/var/lib/disdex/v12-x1-all/runner.json\"\\n' +\n    '  \"/var/lib/disdex/pengu-dual-ls-v2/runner-live.json\"\\n' +\n    '  \"/var/lib/disdex/quality102-causal-v1/state.json\"\\n' +\n    '  \"/var/lib/disdex/quality102-causal-v1/market-history.json\"\\n' +\n    '  \"/var/lib/disdex/fet-brk48-residual/state.json\"\\n' +\n    '  \"/var/lib/disdex/v52-aster-only/runner-live.json\"\\n' +\n    '  \"${HYPE_ZEC_STATE_ROOT}/runner.json\"\\n' +\n    '  \"${IDLE_PRIORITY_STATE_ROOT}/state.json\"\\n' +\n    ')\\n' +\n    'RUNTIME_CONTRACT_ENV_DIR=\"/etc/disdex/current-runtime\"\\n' +\n    'PENDING_EXPOSURE_REGISTRY_PATH=\"${SHARED_ROOT}/pending-exposure.json\"\\n' +\n    'WATCHDOG_DROPIN_DIR=\"/etc/systemd/system/disdex-runner-watchdog.service.d\"\\n' +\n    'SNAPSHOT_DROPIN_DIR=\"/etc/systemd/system/disdex-runner-health-snapshot.service.d\"\\n' +\n    'POSITION_RECOVERY_DROPIN_DIR=\"/etc/systemd/system/disdex-runner-position-recovery.service.d\"\\n' +\n    'FILL_NOTIFIER_DROPIN_DIR=\"/etc/systemd/system/disdex-trade-fill-notifier.service.d\"\\n' +\n    'CURRENT_SUPPORT_OVERRIDE=\"zzzzzzzzzzzzzzzzzzzz-current-release.conf\"\\n' +\n    'AUTO_REPAIR_DROPIN_DIR=\"/etc/systemd/system/disdex-v12-kill-switch-auto-repair.service.d\"\\n' +\n    'AUTO_REPAIR_PATH_DROPIN_DIR=\"/etc/systemd/system/disdex-v12-kill-switch-auto-repair.path.d\"\\n' +\n    'THREE_HOUR_HEALTH_DROPIN_DIR=\"/etc/systemd/system/disdex-v12-three-hour-health-check.service.d\"\\n' +\n    'HISTORY_SYNC_DROPIN_DIR=\"/etc/systemd/system/aster-trade-history-git-sync.service.d\"\\n' +\n    'HEALTH_ALERT_DROPIN_DIR=\"/etc/systemd/system/disdex-runner-health-alert.service.d\"\\n' +\n    'V12_DROPIN_DIR=\"/etc/systemd/system/disdex-v12-x1-all@CURRENT.service.d\"\\n' +\n    'PENGU_DROPIN_DIR=\"/etc/systemd/system/disdex-pengu-dual-ls-v2@CURRENT.service.d\"\\n' +\n    'Q102_DROPIN_DIR=\"/etc/systemd/system/disdex-quality102-causal-v1@CURRENT.service.d\"\\n' +\n    'FET_DROPIN_DIR=\"/etc/systemd/system/disdex-fet-brk48@CURRENT.service.d\"\\n' +\n    'MARGIN_DROPIN_DIR=\"/etc/systemd/system/disdex-v12-v52-margin-guard@CURRENT.service.d\"\\n' +\n    'V52_DROPIN_DIR=\"/etc/systemd/system/disdex-v52-aster-only@CURRENT.service.d\"\\n' +\n    'SHARED_RISK_DROPIN_DIR=\"/etc/systemd/system/disdex-shared-crypto-risk@CURRENT.service.d\"\\n' +\n    'IDLE_DROPIN_DIR=\"/etc/systemd/system/disdex-idle-priority-short@CURRENT.service.d\"\\n' +\n    '# These exact legacy supervisors must never coexist with the SHA-pinned current\\n' +\n    '# runtime. Historical source/config files remain installed for rollback and\\n' +\n    '# research, but an active legacy service is a hard wiring conflict.\\n' +\n    'LEGACY_LIVE_UNITS=(\\n' +\n    '  \"disdex-v96-live.service\"\\n' +\n    '  \"disdex-v96-v52-live.service\"\\n' +\n    '  \"disdex-v13d-v11eq-v96.service\"\\n' +\n    '  \"disdex-v46-live.service\"\\n' +\n    '  \"disdex-pengu-dual-ls-v2-v20.service\"\\n' +\n    '  \"disdex-v12-x1-all.service\"\\n' +\n    '  \"disdex-pengu-dual-ls-v2.service\"\\n' +\n    '  \"disdex-quality102-causal-v1.service\"\\n' +\n    '  \"disdex-fet-brk48.service\"\\n' +\n    '  \"disdex-v52-aster-only.service\"\\n' +\n    '  \"disdex-shared-crypto-risk.service\"\\n' +\n    '  \"disdex-v12-v52-margin-guard.service\"\\n' +\n    '  \"disdex-idle-priority-short.service\"\\n' +\n    ')\\n' +\n    \"SELF_TEST_FIXTURE=''\\n\" +\n    \"# Q102's configurable HIGH_VOL universe must remain disjoint from sleeves that\\n\" +\n    '# own symbols in the current production portfolio.  The historical env file\\n' +\n    '# may still contain the former Idle-owned symbols; pin the safe ownership\\n' +\n    '# boundary in the SHA-bound runtime contract so a stale env cannot reintroduce\\n' +\n    '# a cross-sleeve symbol collision.\\n' +\n    'QUALITY102_DISJOINT_HIGH_VOL_SYMBOLS=\"SUIUSDT,SEIUSDT,APTUSDT,ARBUSDT,OPUSDT,ENAUSDT,ONDOUSDT,FILUSDT,TRXUSDT\"\\n' +\n    '\\n' +\n    'usage() {\\n' +\n    \"  printf '%s\\\\n' \\\\\\n\" +\n    \"    'Usage: disdex-current-runtime-wiring [--check|--apply|--self-test]' \\\\\\n\" +\n    \"    '  --check     validate current release and print the intended wiring (read-only)' \\\\\\n\" +\n    \"    '  --apply     write current-release systemd overrides and reload systemd' \\\\\\n\" +\n    \"    '  --self-test validate local argument/SHA rendering without touching systemd'\\n\" +\n    '}\\n' +\n    '\\n' +\n    'require_root_for_apply() {\\n' +\n    '  [[ \"$(id -u)\" == \"0\" ]] || {\\n' +\n    \"    printf 'runtime wiring apply must run as root\\\\n' >&2\\n\" +\n    '    exit 1\\n' +\n    '  }\\n' +\n    '}\\n' +\n    '\\n' +\n    'resolve_current() {\\n' +\n    '  [[ -L \"$TRADING_CURRENT\" ]] || {\\n' +\n    `    printf 'current release link is missing: %s\\\\n' \"$TRADING_CURRENT\" >&2\\n` +\n    '    return 1\\n' +\n    '  }\\n' +\n    '  CURRENT_RELEASE=\"$(readlink -f -- \"$TRADING_CURRENT\")\"\\n' +\n    '  [[ \"$CURRENT_RELEASE\" == \"$TRADING_RELEASES\"/* ]] || {\\n' +\n    `    printf 'current release is outside release root: %s\\\\n' \"$CURRENT_RELEASE\" >&2\\n` +\n    '    return 1\\n' +\n    '  }\\n' +\n    '  DEPLOYED_SHA=\"$(basename -- \"$CURRENT_RELEASE\")\"\\n' +\n    '  [[ \"$DEPLOYED_SHA\" =~ ^[0-9a-f]{40}$ ]] || {\\n' +\n    `    printf 'current release directory is not an exact SHA: %s\\\\n' \"$DEPLOYED_SHA\" >&2\\n` +\n    '    return 1\\n' +\n    '  }\\n' +\n    '  [[ -f \"$CURRENT_RELEASE/.disdex-release-sha\" ]] || {\\n' +\n    `    printf 'release marker is missing: %s/.disdex-release-sha\\\\n' \"$CURRENT_RELEASE\" >&2\\n` +\n    '    return 1\\n' +\n    '  }\\n' +\n    `  MARKER_SHA=\"$(tr -d '[:space:]' < \"$CURRENT_RELEASE/.disdex-release-sha\")\"\\n` +\n    '  [[ \"$MARKER_SHA\" == \"$DEPLOYED_SHA\" ]] || {\\n' +\n    `    printf 'release marker mismatch: directory=%s marker=%s\\\\n' \"$DEPLOYED_SHA\" \"$MARKER_SHA\" >&2\\n` +\n    '    return 1\\n' +\n    '  }\\n' +\n    '  [[ -d \"$CURRENT_RELEASE/scripts\" ]] || {\\n' +\n    `    printf 'release scripts directory is missing: %s/scripts\\\\n' \"$CURRENT_RELEASE\" >&2\\n` +\n    '    return 1\\n' +\n    '  }\\n' +\n    '  validate_release_artifacts\\n' +\n    '  NODE_MODULES_SOURCE_SHA=\"$(dependency_source_sha \"$CURRENT_RELEASE/node_modules\")\"\\n' +\n    '  PYTHON_RUNTIME_SOURCE_SHA=\"$(dependency_source_sha \"$CURRENT_RELEASE/.venv2\")\"\\n' +\n    '}\\n' +\n    '\\n' +\n    'dependency_source_sha() {\\n' +\n    '  local dependency_path=\"$1\" resolved target_root target_marker\\n' +\n    '  if [[ -L \"$dependency_path\" ]]; then\\n' +\n    '    resolved=\"$(readlink -f -- \"$dependency_path\")\"\\n' +\n    '    target_root=\"$(dirname -- \"$resolved\")\"\\n' +\n    '    target=\"$(basename -- \"$target_root\")\"\\n' +\n    `    target_marker=\"$(tr -d '[:space:]' < \"$target_root/.disdex-release-sha\")\"\\n` +\n    '    [[ \"$target\" == \"$target_marker\" ]] || {\\n' +\n    `      printf 'dependency source marker mismatch: %s -> %s marker=%s\\\\n' \"$dependency_path\" \"$target_root\" \"$target_marker\" >&2\\n` +\n    '      return 1\\n' +\n    '    }\\n' +\n    `    printf '%s' \"$target\"\\n` +\n    '    return 0\\n' +\n    '  fi\\n' +\n    `  printf '%s' \"$DEPLOYED_SHA\"\\n` +\n    '}\\n' +\n    '\\n' +\n    'validate_release_artifacts() {\\n' +\n    '  local required_file\\n' +\n    '  local -a required_files=(\\n' +\n    '    \"$CURRENT_RELEASE/scripts/disdex-v12-x1-all-live-runner.ts\"\\n' +\n    '    \"$CURRENT_RELEASE/scripts/disdex-pengu-dual-ls-v2-live-runner.ts\"\\n' +\n    '    \"$CURRENT_RELEASE/scripts/disdex-pengu-presubmit-snapshot-recovery.ts\"\\n' +\n    '    \"$CURRENT_RELEASE/scripts/disdex-v12-benign-entry-gate-recovery.ts\"\\n' +\n    '    \"$CURRENT_RELEASE/scripts/disdex-v12-runtime-lineage-recovery.ts\"\\n' +\n    '    \"$CURRENT_RELEASE/scripts/disdex-flat-state-sha-migrate.ts\"\\n' +\n    '    \"$CURRENT_RELEASE/scripts/disdex-fet-active-state-sha-migrate.ts\"\\n' +\n    '    \"$CURRENT_RELEASE/scripts/disdex-quality102-causal-v1-state-migrate.ts\"\\n' +\n    '    \"$CURRENT_RELEASE/scripts/disdex-quality102-causal-v1-live-runner.ts\"\\n' +\n    '    \"$CURRENT_RELEASE/scripts/generated/disdex-quality102-ranking-observer.cjs\"\\n' +\n    '    \"$CURRENT_RELEASE/scripts/disdex-current-live-target-readiness.ts\"\\n' +\n    '    \"$CURRENT_RELEASE/scripts/disdex-v12-active-state-sha-migrate.ts\"\\n' +\n    '    \"$CURRENT_RELEASE/scripts/ops/root/disdex-live-operator-activation-gate.mjs\"\\n' +\n    '    \"$CURRENT_RELEASE/scripts/disdex-fet-brk48-live-runner.ts\"\\n' +\n    '    \"$CURRENT_RELEASE/scripts/disdex-hype-trend-live-runner.ts\"\\n' +\n    '    \"$CURRENT_RELEASE/scripts/disdex-hype-zec-long-live-runner.ts\"\\n' +\n    '    \"$CURRENT_RELEASE/scripts/disdex-hype-zec-long-state-migrate.ts\"\\n' +\n    '    \"$CURRENT_RELEASE/scripts/disdex-hype-zec-benign-market-data-recovery.ts\"\\n' +\n    '    \"$CURRENT_RELEASE/lib/hype-zec-long-recovery-contract.ts\"\\n' +\n    '    \"$CURRENT_RELEASE/scripts/disdex-hype-zec-core-preempt.ts\"\\n' +\n    '    \"$CURRENT_RELEASE/scripts/disdex-idle-priority-short-live-runner.ts\"\\n' +\n    '    \"$CURRENT_RELEASE/scripts/disdex-idle-priority-short-benign-state-recovery.ts\"\\n' +\n    '    \"$CURRENT_RELEASE/scripts/disdex-idle-priority-short-state-migrate.ts\"\\n' +\n    '    \"$CURRENT_RELEASE/scripts/disdex-idle-residual-long-state-migrate.ts\"\\n' +\n    '    \"$CURRENT_RELEASE/lib/idle-priority-short-runner.ts\"\\n' +\n    '    \"$CURRENT_RELEASE/lib/idle-priority-short-baseline-admission.ts\"\\n' +\n    '    \"$CURRENT_RELEASE/lib/idle-priority-short-live.ts\"\\n' +\n    '    \"$CURRENT_RELEASE/config/idlePriorityShortPolicy.ts\"\\n' +\n    '    \"$CURRENT_RELEASE/config/idlePriorityShortRuntime.ts\"\\n' +\n    '    \"$CURRENT_RELEASE/deploy/systemd/disdex-v12-x1-all@.service\"\\n' +\n    '    \"$CURRENT_RELEASE/deploy/systemd/disdex-pengu-dual-ls-v2@.service\"\\n' +\n    '    \"$CURRENT_RELEASE/ops/systemd/disdex-idle-priority-short@.service\"\\n' +\n    '    \"$CURRENT_RELEASE/ops/systemd/disdex-runner-health-alert.timer\"\\n' +\n    '    \"$CURRENT_RELEASE/ops/systemd/disdex-runner-position-recovery.timer\"\\n' +\n    '    \"$CURRENT_RELEASE/ops/systemd/disdex-trade-fill-notifier.timer\"\\n' +\n    '    \"$CURRENT_RELEASE/scripts/ops/root/disdex-current-runtime-coherence-guard\"\\n' +\n    '    \"$CURRENT_RELEASE/ops/systemd/disdex-current-runtime-coherence-guard.service\"\\n' +\n    '    \"$CURRENT_RELEASE/ops/systemd/disdex-current-runtime-coherence-guard.timer\"\\n' +\n    '    \"$CURRENT_RELEASE/scripts/disdex_v96_v52_margin_guard_runtime.py\"\\n' +\n    '    \"$CURRENT_RELEASE/scripts/disdex_v52_aster_only_live_engine.py\"\\n' +\n    '    \"$CURRENT_RELEASE/lib/aster-readonly-recovery-gate.ts\"\\n' +\n    '    \"$CURRENT_RELEASE/lib/aster-upstream-recovery-policy.ts\"\\n' +\n    '    \"$CURRENT_RELEASE/lib/disdex-aster-global-rate-budget.ts\"\\n' +\n    '    \"$CURRENT_RELEASE/scripts/disdex-aster-readonly-recovery-gate.ts\"\\n' +\n    '    \"$CURRENT_RELEASE/scripts/disdex-aster-upstream-live-recovery.ts\"\\n' +\n    '    \"$CURRENT_RELEASE/scripts/disdex-aster-trade-history-git-sync.ts\"\\n' +\n    '    \"$CURRENT_RELEASE/lib/disdex-'... 65167 more characters\n  \n      at TestContext.<anonymous> (C:\\Users\\dis\\DisDex-v4-production-cert-20261009\\tests\\current_live_target_readiness.test.ts:72:10)\n      at async Test.run (node:internal/test_runner/test:1110:7)\n      at async Test.processPendingSubtests (node:internal/test_runner/test:785:7) {\n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: '#!/usr/bin/env bash\\nset -Eeuo pipefail\\n\\numask 077\\nPATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin\\n\\nTRADING_ROOT=\"${DISDEX_TRADING_ROOT:-/home/deploy/disdex-trading}\"\\nTRADING_RELEASES=\"${TRADING_ROOT}/releases\"\\nTRADING_CURRENT=\"${TRADING_ROOT}/current\"\\nSHARED_ROOT=\"${DISDEX_SHARED_ROOT:-/var/lib/disdex/shared}\"\\nOPERATOR_ACTIVATION_PATH=\"${SHARED_ROOT}/operator-activation/current.json\"\\n# The canonical approval remains root:root and non-writable by deploy. Idle\\'s\\n# application-side defense-in-depth check needs a read-only root-generated\\n# projection because the daemon itself runs as deploy. The root ExecStartPre\\n# gate validates the canonical artifact first and refreshes this projection on\\n# every Idle start; the projection can never authorize a start by itself.\\nOPERATOR_ACTIVATION_RUNTIME_PATH=\"${SHARED_ROOT}/operator-activation/runtime.json\"\\nV52_LEGACY_CRYPTO_ROOT=\"${SHARED_ROOT}/crypto-v96\"\\nPENGU_STATE_ROOT=\"/var/lib/disdex/pengu-dual-ls-v2\"\\nHYPE_ZEC_STATE_ROOT=\"/var/lib/disdex/hype-zec-long\"\\nIDLE_PRIORITY_STATE_ROOT=\"/var/lib/disdex/idle-priority\"\\nLIVE_STATE_FILES=(\\n  \"/var/lib/disdex/v12-x1-all/runner.json\"\\n  \"/var/lib/disdex/pengu-dual-ls-v2/runner-live.json\"\\n  \"/var/lib/disdex/quality102-causal-v1/state.json\"\\n  \"/var/lib/disdex/quality102-causal-v1/market-history.json\"\\n  \"/var/lib/disdex/fet-brk48-residual/state.json\"\\n  \"/var/lib/disdex/v52-aster-only/runner-live.json\"\\n  \"${HYPE_ZEC_STATE_ROOT}/runner.json\"\\n  \"${IDLE_PRIORITY_STATE_ROOT}/state.json\"\\n)\\nRUNTIME_CONTRACT_ENV_DIR=\"/etc/disdex/current-runtime\"\\nPENDING_EXPOSURE_REGISTRY_PATH=\"${SHARED_ROOT}/pending-exposure.json\"\\nWATCHDOG_DROPIN_DIR=\"/etc/systemd/system/disdex-runner-watchdog.service.d\"\\nSNAPSHOT_DROPIN_DIR=\"/etc/systemd/system/disdex-runner-health-snapshot.service.d\"\\nPOSITION_RECOVERY_DROPIN_DIR=\"/etc/systemd/system/disdex-runner-position-recovery.service.d\"\\nFILL_NOTIFIER_DROPIN_DIR=\"/etc/systemd/system/disdex-trade-fill-notifier.service.d\"\\nCURRENT_SUPPORT_OVERRIDE=\"zzzzzzzzzzzzzzzzzzzz-current-release.conf\"\\nAUTO_REPAIR_DROPIN_DIR=\"/etc/systemd/system/disdex-v12-kill-switch-auto-repair.service.d\"\\nAUTO_REPAIR_PATH_DROPIN_DIR=\"/etc/systemd/system/disdex-v12-kill-switch-auto-repair.path.d\"\\nTHREE_HOUR_HEALTH_DROPIN_DIR=\"/etc/systemd/system/disdex-v12-three-hour-health-check.service.d\"\\nHISTORY_SYNC_DROPIN_DIR=\"/etc/systemd/system/aster-trade-history-git-sync.service.d\"\\nHEALTH_ALERT_DROPIN_DIR=\"/etc/systemd/system/disdex-runner-health-alert.service.d\"\\nV12_DROPIN_DIR=\"/etc/systemd/system/disdex-v12-x1-all@CURRENT.service.d\"\\nPENGU_DROPIN_DIR=\"/etc/systemd/system/disdex-pengu-dual-ls-v2@CURRENT.service.d\"\\nQ102_DROPIN_DIR=\"/etc/systemd/system/disdex-quality102-causal-v1@CURRENT.service.d\"\\nFET_DROPIN_DIR=\"/etc/systemd/system/disdex-fet-brk48@CURRENT.service.d\"\\nMARGIN_DROPIN_DIR=\"/etc/systemd/system/disdex-v12-v52-margin-guard@CURRENT.service.d\"\\nV52_DROPIN_DIR=\"/etc/systemd/system/disdex-v52-aster-only@CURRENT.service.d\"\\nSHARED_RISK_DROPIN_DIR=\"/etc/systemd/system/disdex-shared-crypto-risk@CURRENT.service.d\"\\nIDLE_DROPIN_DIR=\"/etc/systemd/system/disdex-idle-priority-short@CURRENT.service.d\"\\n# These exact legacy supervisors must never coexist with the SHA-pinned current\\n# runtime. Historical source/config files remain installed for rollback and\\n# research, but an active legacy service is a hard wiring conflict.\\nLEGACY_LIVE_UNITS=(\\n  \"disdex-v96-live.service\"\\n  \"disdex-v96-v52-live.service\"\\n  \"disdex-v13d-v11eq-v96.service\"\\n  \"disdex-v46-live.service\"\\n  \"disdex-pengu-dual-ls-v2-v20.service\"\\n  \"disdex-v12-x1-all.service\"\\n  \"disdex-pengu-dual-ls-v2.service\"\\n  \"disdex-quality102-causal-v1.service\"\\n  \"disdex-fet-brk48.service\"\\n  \"disdex-v52-aster-only.service\"\\n  \"disdex-shared-crypto-risk.service\"\\n  \"disdex-v12-v52-margin-guard.service\"\\n  \"disdex-idle-priority-short.service\"\\n)\\nSELF_TEST_FIXTURE=\\'\\'\\n# Q102\\'s configurable HIGH_VOL universe must remain disjoint from sleeves that\\n# own symbols in the current production portfolio.  The historical env file\\n# may still contain the former Idle-owned symbols; pin the safe ownership\\n# boundary in the SHA-bound runtime contract so a stale env cannot reintroduce\\n# a cross-sleeve symbol collision.\\nQUALITY102_DISJOINT_HIGH_VOL_SYMBOLS=\"SUIUSDT,SEIUSDT,APTUSDT,ARBUSDT,OPUSDT,ENAUSDT,ONDOUSDT,FILUSDT,TRXUSDT\"\\n\\nusage() {\\n  printf \\'%s\\\\n\\' \\\\\\n    \\'Usage: disdex-current-runtime-wiring [--check|--apply|--self-test]\\' \\\\\\n    \\'  --check     validate current release and print the intended wiring (read-only)\\' \\\\\\n    \\'  --apply     write current-release systemd overrides and reload systemd\\' \\\\\\n    \\'  --self-test validate local argument/SHA rendering without touching systemd\\'\\n}\\n\\nrequire_root_for_apply() {\\n  [[ \"$(id -u)\" == \"0\" ]] || {\\n    printf \\'runtime wiring apply must run as root\\\\n\\' >&2\\n    exit 1\\n  }\\n}\\n\\nresolve_current() {\\n  [[ -L \"$TRADING_CURRENT\" ]] || {\\n    printf \\'current release link is missing: %s\\\\n\\' \"$TRADING_CURRENT\" >&2\\n    return 1\\n  }\\n  CURRENT_RELEASE=\"$(readlink -f -- \"$TRADING_CURRENT\")\"\\n  [[ \"$CURRENT_RELEASE\" == \"$TRADING_RELEASES\"/* ]] || {\\n    printf \\'current release is outside release root: %s\\\\n\\' \"$CURRENT_RELEASE\" >&2\\n    return 1\\n  }\\n  DEPLOYED_SHA=\"$(basename -- \"$CURRENT_RELEASE\")\"\\n  [[ \"$DEPLOYED_SHA\" =~ ^[0-9a-f]{40}$ ]] || {\\n    printf \\'current release directory is not an exact SHA: %s\\\\n\\' \"$DEPLOYED_SHA\" >&2\\n    return 1\\n  }\\n  [[ -f \"$CURRENT_RELEASE/.disdex-release-sha\" ]] || {\\n    printf \\'release marker is missing: %s/.disdex-release-sha\\\\n\\' \"$CURRENT_RELEASE\" >&2\\n    return 1\\n  }\\n  MARKER_SHA=\"$(tr -d \\'[:space:]\\' < \"$CURRENT_RELEASE/.disdex-release-sha\")\"\\n  [[ \"$MARKER_SHA\" == \"$DEPLOYED_SHA\" ]] || {\\n    printf \\'release marker mismatch: directory=%s marker=%s\\\\n\\' \"$DEPLOYED_SHA\" \"$MARKER_SHA\" >&2\\n    return 1\\n  }\\n  [[ -d \"$CURRENT_RELEASE/scripts\" ]] || {\\n    printf \\'release scripts directory is missing: %s/scripts\\\\n\\' \"$CURRENT_RELEASE\" >&2\\n    return 1\\n  }\\n  validate_release_artifacts\\n  NODE_MODULES_SOURCE_SHA=\"$(dependency_source_sha \"$CURRENT_RELEASE/node_modules\")\"\\n  PYTHON_RUNTIME_SOURCE_SHA=\"$(dependency_source_sha \"$CURRENT_RELEASE/.venv2\")\"\\n}\\n\\ndependency_source_sha() {\\n  local dependency_path=\"$1\" resolved target_root target_marker\\n  if [[ -L \"$dependency_path\" ]]; then\\n    resolved=\"$(readlink -f -- \"$dependency_path\")\"\\n    target_root=\"$(dirname -- \"$resolved\")\"\\n    target=\"$(basename -- \"$target_root\")\"\\n    target_marker=\"$(tr -d \\'[:space:]\\' < \"$target_root/.disdex-release-sha\")\"\\n    [[ \"$target\" == \"$target_marker\" ]] || {\\n      printf \\'dependency source marker mismatch: %s -> %s marker=%s\\\\n\\' \"$dependency_path\" \"$target_root\" \"$target_marker\" >&2\\n      return 1\\n    }\\n    printf \\'%s\\' \"$target\"\\n    return 0\\n  fi\\n  printf \\'%s\\' \"$DEPLOYED_SHA\"\\n}\\n\\nvalidate_release_artifacts() {\\n  local required_file\\n  local -a required_files=(\\n    \"$CURRENT_RELEASE/scripts/disdex-v12-x1-all-live-runner.ts\"\\n    \"$CURRENT_RELEASE/scripts/disdex-pengu-dual-ls-v2-live-runner.ts\"\\n    \"$CURRENT_RELEASE/scripts/disdex-pengu-presubmit-snapshot-recovery.ts\"\\n    \"$CURRENT_RELEASE/scripts/disdex-v12-benign-entry-gate-recovery.ts\"\\n    \"$CURRENT_RELEASE/scripts/disdex-v12-runtime-lineage-recovery.ts\"\\n    \"$CURRENT_RELEASE/scripts/disdex-flat-state-sha-migrate.ts\"\\n    \"$CURRENT_RELEASE/scripts/disdex-fet-active-state-sha-migrate.ts\"\\n    \"$CURRENT_RELEASE/scripts/disdex-quality102-causal-v1-state-migrate.ts\"\\n    \"$CURRENT_RELEASE/scripts/disdex-quality102-causal-v1-live-runner.ts\"\\n    \"$CURRENT_RELEASE/scripts/generated/disdex-quality102-ranking-observer.cjs\"\\n    \"$CURRENT_RELEASE/scripts/disdex-current-live-target-readiness.ts\"\\n    \"$CURRENT_RELEASE/scripts/disdex-v12-active-state-sha-migrate.ts\"\\n    \"$CURRENT_RELEASE/scripts/ops/root/disdex-live-operator-activation-gate.mjs\"\\n    \"$CURRENT_RELEASE/scripts/disdex-fet-brk48-live-runner.ts\"\\n    \"$CURRENT_RELEASE/scripts/disdex-hype-trend-live-runner.ts\"\\n    \"$CURRENT_RELEASE/scripts/disdex-hype-zec-long-live-runner.ts\"\\n    \"$CURRENT_RELEASE/scripts/disdex-hype-zec-long-state-migrate.ts\"\\n    \"$CURRENT_RELEASE/scripts/disdex-hype-zec-benign-market-data-recovery.ts\"\\n    \"$CURRENT_RELEASE/lib/hype-zec-long-recovery-contract.ts\"\\n    \"$CURRENT_RELEASE/scripts/disdex-hype-zec-core-preempt.ts\"\\n    \"$CURRENT_RELEASE/scripts/disdex-idle-priority-short-live-runner.ts\"\\n    \"$CURRENT_RELEASE/scripts/disdex-idle-priority-short-benign-state-recovery.ts\"\\n    \"$CURRENT_RELEASE/scripts/disdex-idle-priority-short-state-migrate.ts\"\\n    \"$CURRENT_RELEASE/scripts/disdex-idle-residual-long-state-migrate.ts\"\\n    \"$CURRENT_RELEASE/lib/idle-priority-short-runner.ts\"\\n    \"$CURRENT_RELEASE/lib/idle-priority-short-baseline-admission.ts\"\\n    \"$CURRENT_RELEASE/lib/idle-priority-short-live.ts\"\\n    \"$CURRENT_RELEASE/config/idlePriorityShortPolicy.ts\"\\n    \"$CURRENT_RELEASE/config/idlePriorityShortRuntime.ts\"\\n    \"$CURRENT_RELEASE/deploy/systemd/disdex-v12-x1-all@.service\"\\n    \"$CURRENT_RELEASE/deploy/systemd/disdex-pengu-dual-ls-v2@.service\"\\n    \"$CURRENT_RELEASE/ops/systemd/disdex-idle-priority-short@.service\"\\n    \"$CURRENT_RELEASE/ops/systemd/disdex-runner-health-alert.timer\"\\n    \"$CURRENT_RELEASE/ops/systemd/disdex-runner-position-recovery.timer\"\\n    \"$CURRENT_RELEASE/ops/systemd/disdex-trade-fill-notifier.timer\"\\n    \"$CURRENT_RELEASE/scripts/ops/root/disdex-current-runtime-coherence-guard\"\\n    \"$CURRENT_RELEASE/ops/systemd/disdex-current-runtime-coherence-guard.service\"\\n    \"$CURRENT_RELEASE/ops/systemd/disdex-current-runtime-coherence-guard.timer\"\\n    \"$CURRENT_RELEASE/scripts/disdex_v96_v52_margin_guard_runtime.py\"\\n    \"$CURRENT_RELEASE/scripts/disdex_v52_aster_only_live_engine.py\"\\n    \"$CURRENT_RELEASE/lib/aster-readonly-recovery-gate.ts\"\\n    \"$CURRENT_RELEASE/lib/aster-upstream-recovery-policy.ts\"\\n    \"$CURRENT_RELEASE/lib/disdex-aster-global-rate-budget.ts\"\\n    \"$CURRENT_RELEASE/scripts/disdex-aster-readonly-recovery-gate.ts\"\\n    \"$CURRENT_RELEASE/scripts/disdex-aster-upstream-live-recovery.ts\"\\n    \"$CURRENT_RELEASE/scripts/disdex-aster-trade-history-git-sync.ts\"\\n    \"$CURRENT_RELEASE/lib/disdex-'... 65167 more characters,\n    expected: /FET_BRK48_CORE_PREEMPTION_READY=false/,\n    operator: 'match',\n    diff: 'simple'\n  }\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\dd1296-entry-contract.test.ts",
+    "exit": 1,
+    "stdout": "\u2714 side caps constrain opposite HV and REV allocations independently (2.1674ms)\n\u2714 FET BRK SHORT exhaustion boundary rejects only the selected route (0.3885ms)\n\u2714 boundary return uses entry open and ignores future/current H1 close (0.5115ms)\n\u2714 V12 causal thresholds apply to intended symbol side and rank (0.2026ms)\n\u2714 six same-side net losses block only that side; duplicate fills and zero do not reset streak (0.3846ms)\n\u2714 FET cooldown survives the real durable store and expires at exactly 24 hours (26.0436ms)\n\u2714 PENGU limited re-break rejects elevated bounce only during BTC counterwind (43.5877ms)\n\u2714 V12 full-exit counter uses fees and all partial fills and rejects incomplete quantity proof (9.9106ms)\n\u2714 FET active migration requires exact venue quantity, profit-floor STOP and cross5 leverage (288.8499ms)\n\u2716 new integrated acceptance is bound to specified research SHA and reproduced 1358-trade ledger (8.4397ms)\n\u2714 LONG loss cooldown survives real V12 restart and never disables opposite SHORT (25.4725ms)\n\u2714 delayed V12 forced exit stops accounting at first flat before another owner opens same symbol (1.2074ms)\n\u2714 simultaneous finalized exits count in actual fill-time order instead of reversed active array (1.0394ms)\n\u2714 formal handoff PB SHORT inherits 2.50 independently of PB LONG 2.00 (0.1234ms)\n\u2139 tests 14\n\u2139 suites 0\n\u2139 pass 13\n\u2139 fail 1\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 802.3869\n\n\u2716 failing tests:\n\ntest at tests\\dd1296-entry-contract.test.ts:2:8662\n\u2716 new integrated acceptance is bound to specified research SHA and reproduced 1358-trade ledger (8.4397ms)\n  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n  + actual - expected\n  \n  + '840CFC33B61C2EEAA2DE6315AE2F221AA6240CF022911F8418CF9A909BCB1F95'\n  - 'D2C9A5F375C6BA248D6537B1B419F16138F8FDC845D7B03F6D7FDE5CE1FDA333'\n  \n      at TestContext.<anonymous> (C:\\Users\\dis\\DisDex-v4-production-cert-20261009\\tests\\dd1296-entry-contract.test.ts:75:69)\n      at async Test.run (node:internal/test_runner/test:1110:7)\n      at async Test.processPendingSubtests (node:internal/test_runner/test:785:7) {\n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: '840CFC33B61C2EEAA2DE6315AE2F221AA6240CF022911F8418CF9A909BCB1F95',\n    expected: 'D2C9A5F375C6BA248D6537B1B419F16138F8FDC845D7B03F6D7FDE5CE1FDA333',\n    operator: 'strictEqual',\n    diff: 'simple'\n  }\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\direct-trade-executor-position-freshness.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 position snapshot freshness uses observation time, not the last position mutation time (1.2878ms)\n\u2139 tests 1\n\u2139 suites 0\n\u2139 pass 1\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 966.5256\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\direct_trade_fill_notification.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 direct Aster market fill is queued without sending an order for the test (18.6644ms)\n\u2139 tests 1\n\u2139 suites 0\n\u2139 pass 1\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 963.3859\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\dynamic-margin-gate.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 V12 dynamic DOGE entry sends zero orders unless venue is confirmed 5x Cross (60.6682ms)\n\u2714 Q102 dynamic AVAX entry sends zero orders unless venue is confirmed 5x Cross (9.8999ms)\n\u2714 dynamic entries prepare mismatched leverage or isolated margin before exposure (35.9898ms)\n\u2714 1x Cross is mutated to 5x before a V12 entry (10.3479ms)\n\u2714 5x Isolated is changed to Cross before a Q102 entry (14.1205ms)\n\u2714 1x Isolated requires both venue mutations and a successful 5x Cross read-back (13.386ms)\n\u2714 venue mutation failures and read-back failure send zero exposure orders (26.155ms)\n\u2714 non-flat positions or unresolved open orders prohibit venue mutation and new exposure (4.6874ms)\n\u2714 already 5x Cross skips mutation and proceeds to entry (5.5313ms)\n\u2714 V12/Q102 entry proceeds only after exact 5x Cross read-back (11.2552ms)\n\u2714 V12 adapter marks a dynamic entry as venue-margin protected (14.9214ms)\n\u2714 Q102 runner marks a dynamic entry as venue-margin protected (1.4907ms)\n\u2714 venue preparation precedes fresh Margin Guard for protected exposure (1.3235ms)\n\u2714 strategy Gross contracts remain separate from venue leverage 5x (25.1613ms)\n\u2139 tests 14\n\u2139 suites 0\n\u2139 pass 14\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 1296.4501\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\fet-brk48-live-runner.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 FET live runner enters once, protects, survives restart, and exits after 24h (127.3669ms)\n\u2139 tests 1\n\u2139 suites 0\n\u2139 pass 1\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 983.1019\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\fet-brk48-signal.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 BRK48 uses previous completed H1 at entry hour%4==1 (1.5275ms)\n\u2714 no lookahead and threshold gates (0.314ms)\n\u2714 late entry window is rejected instead of chasing the H1 open (0.2421ms)\n\u2714 DD1296 FET causal +2% minimum rejects a otherwise valid +1.99% breakout (0.3216ms)\n\u2139 tests 4\n\u2139 suites 0\n\u2139 pass 4\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 428.079\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\fet-core-preemption.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 FET Core preemption is reduce-only, cancels protection, clears state, and is idempotent (28.7705ms)\n\u2139 tests 1\n\u2139 suites 0\n\u2139 pass 1\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 810.5112\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\fet-return72-telemetry.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 72h observation excludes current/future close and uses exact completed close endpoints (1.0606ms)\n\u2139 tests 1\n\u2139 suites 0\n\u2139 pass 1\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 414.8568\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\fet_core_preemption_wiring.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 FET Core preemption is wired through all four Core families (9.0565ms)\n\u2714 preemption implementations re-read live state before continuing Core entry (2.2483ms)\n\u2139 tests 2\n\u2139 suites 0\n\u2139 pass 2\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 398.5673\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\final-integrated-logic-contract.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 V12 Top3 preserves strong-quality signal while Rank3 residual sizing is explicit (1.3368ms)\n\u2714 PENGU allocation is the formal 1.0x COMBINED_FILTERED Q60/DD17/H72 contract (0.2009ms)\n\u2714 LIVE integrated risk contract uses final Q102/FET/stock/shared caps (0.8054ms)\n\u2714 shared crypto daily loss remains the canonical 7.5% contract (0.5333ms)\n\u2714 V50 uses the selected B60/C20/Stop1.75/Edge7.5 policy (0.1709ms)\n\u2714 V50 policy preserves V11 identity and operational gates (0.258ms)\n\u2139 tests 6\n\u2139 suites 0\n\u2139 pass 6\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 409.4845\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\flat-state-sha-migration.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 migrates flat FET state and preserves exact backup (28.5882ms)\n\u2714 migrates flat V12 state (16.6556ms)\n\u2714 refuses any active/pending/review state (17.4748ms)\n\u2139 tests 3\n\u2139 suites 0\n\u2139 pass 3\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 429.0873\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\hype-preserve-stop-levels.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 priority reduction keeps actual HYPE75 STOP and TP instead of rebuilding legacy levels (2.2413ms)\n\u2139 tests 1\n\u2139 suites 0\n\u2139 pass 1\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 429.9089\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\hype-resident-fill.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 HYPE venue STOP fill read-back clears once and removes verified sibling TP (7.4341ms)\n\u2139 tests 1\n\u2139 suites 0\n\u2139 pass 1\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 809.0359\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\hype-trend-live-contract.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 HYPE live policy matches the approved high-win Aster fixed-ledger contract (0.8239ms)\n\u2714 HYPE trend signal never uses an incomplete current candle (2.515ms)\n\u2139 tests 2\n\u2139 suites 0\n\u2139 pass 2\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 398.4272\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\hype-trend-runner-gate.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 HYPE entry is blocked when core plus pending and candidate worst-case gross exceed capacity (1.6482ms)\n\u2714 HYPE entry remains lowest-priority and does not alter a core reservation (0.3405ms)\n\u2714 TREND runtime is scoped to HYPE and enforces the 1.5x sleeve contract (2.1936ms)\n\u2714 TREND runtime rejects a ZEC or mixed symbol scope (0.7067ms)\n\u2139 tests 4\n\u2139 suites 0\n\u2139 pass 4\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 427.1019\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\hype-zec-benign-market-data-recovery.test.ts",
+    "exit": 1,
+    "stdout": "\u2714 recovers only the flat known market-row manual review and keeps an exact backup (26.022ms)\n\u2714 known benign manual review returns to the next shadow cycle without order mutation (3.626ms)\n\u2714 a transient known market-row failure on a flat state does not poison the daemon (1.1572ms)\n\u2716 known flat pre-order rate-budget failures hold without poisoning the daemon (3.9886ms)\n\u2714 budget deferral never clears an existing manual review (0.324ms)\n\u2716 flat pre-request account budget denial is no-entry HOLD, not a permanent review (0.662ms)\n\u2714 account budget denial with owned durable exposure remains manual review (0.5799ms)\n\u2714 budget-shaped errors after the read-only phase cannot be benignly deferred (0.3846ms)\n\u2714 unknown or malformed pre-order failure still requires manual review (1.2077ms)\n\u2714 refuses unknown manual review and any active/pending state (14.1376ms)\n\u2139 tests 10\n\u2139 suites 0\n\u2139 pass 8\n\u2139 fail 2\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 839.5354\n\n\u2716 failing tests:\n\ntest at tests\\hype-zec-benign-market-data-recovery.test.ts:3:1742\n\u2716 known flat pre-order rate-budget failures hold without poisoning the daemon (3.9886ms)\n  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n  \n  6 !== 3\n  \n      at TestContext.<anonymous> (C:\\Users\\dis\\DisDex-v4-production-cert-20261009\\tests\\hype-zec-benign-market-data-recovery.test.ts:147:12)\n      at async Test.run (node:internal/test_runner/test:1110:7)\n      at async Test.processPendingSubtests (node:internal/test_runner/test:785:7) {\n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: 6,\n    expected: 3,\n    operator: 'strictEqual',\n    diff: 'simple'\n  }\n\ntest at tests\\hype-zec-benign-market-data-recovery.test.ts:3:3051\n\u2716 flat pre-request account budget denial is no-entry HOLD, not a permanent review (0.662ms)\n  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:\n  \n  1 !== 0\n  \n      at TestContext.<anonymous> (C:\\Users\\dis\\DisDex-v4-production-cert-20261009\\tests\\hype-zec-benign-market-data-recovery.test.ts:164:10)\n      at async Test.run (node:internal/test_runner/test:1110:7)\n      at async Test.processPendingSubtests (node:internal/test_runner/test:785:7) {\n    generatedMessage: true,\n    code: 'ERR_ASSERTION',\n    actual: 1,\n    expected: 0,\n    operator: 'strictEqual',\n    diff: 'simple'\n  }\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\hype-zec-long-sleeves.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 HYPE LONG accepts a completed BTC-gated breakout and returns protective levels (3.1052ms)\n\u2714 ZEC LONG uses its own completed-bar breakout rules (0.5849ms)\n\u2714 stale or incomplete candles fail closed (0.3459ms)\n\u2714 risk-derived quantity is capped by both stop risk and GROSS 1.0x (0.3895ms)\n\u2714 protective levels honor long-side tick rounding (0.1863ms)\n\u2139 tests 5\n\u2139 suites 0\n\u2139 pass 5\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 389.8117\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\hype-zec-long-state-migration.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 migrates a flat HYPE state with an exact backup and preserves unknown fields (28.2165ms)\n\u2714 refuses HYPE state migration when exposure, pending, or manual review exists (13.9524ms)\n\u2139 tests 2\n\u2139 suites 0\n\u2139 pass 2\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 404.6795\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\hype-zec-long-state.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 HYPE/ZEC state store writes an exact SHA-owned 0600 regular file (14.3584ms)\n\u2714 HYPE/ZEC state store rejects a stale runtime SHA (2.1238ms)\n\u2139 tests 2\n\u2139 suites 0\n\u2139 pass 2\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 399.1754\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\hype-zec-market-data-scope.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 HYPE-only TREND market data never depends on ZEC or legacy timeframes (2.1584ms)\n\u2139 tests 1\n\u2139 suites 0\n\u2139 pass 1\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 414.3273\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\hype-zec-policy.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 HYPE/ZEC production contract pins independent risk and gross ceilings (2.3783ms)\n\u2714 HYPE and ZEC are explicit long-only sidecar owners (0.7178ms)\n\u2139 tests 2\n\u2139 suites 0\n\u2139 pass 2\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 423.4252\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\hype-zec-preemption-executor.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 requires a verified shared account lock before any sidecar reduction (2.3947ms)\n\u2714 reduces only the planned half, then re-installs and reads back both protections (1.9732ms)\n\u2714 blocks without mutation when venue risk is not exactly 5x Cross (0.4887ms)\n\u2714 blocks on partial/unknown reduction and never opens the priority order (0.5694ms)\n\u2139 tests 4\n\u2139 suites 0\n\u2139 pass 4\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 416.9891\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\hype-zec-preemption.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 sidecar preemption is not planned without an accepted higher-priority candidate (1.6782ms)\n\u2714 priority entry releases only the required capacity and never more than half of either sidecar (16.886ms)\n\u2714 pending and reserved Gross are included in the capacity deficit (0.4372ms)\n\u2714 a stock priority entry consumes total capacity but not crypto capacity (0.323ms)\n\u2714 strict planner accepts sidecars only with explicit preemption support and preserves hard caps (2.281ms)\n\u2139 tests 5\n\u2139 suites 0\n\u2139 pass 5\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 439.153\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\hype-zec-priority-capacity.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 sidecars are the sole cause only when removing them makes the same candidate fit (1.7112ms)\n\u2714 a non-sidecar cap breach never authorizes sidecar reduction (0.2083ms)\n\u2714 pending/reserved gross is part of the sole-cause proof (0.1566ms)\n\u2714 a stock candidate uses total capacity without consuming crypto capacity (0.1497ms)\n\u2714 an unknown active position never authorizes sidecar reduction (0.177ms)\n\u2139 tests 5\n\u2139 suites 0\n\u2139 pass 5\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 434.9931\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\hype-zec-runner-gate.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 only the known malformed market row is a retryable HYPE data failure (1.3518ms)\n\u2714 HYPE/ZEC runtime defaults to fail-closed shadow mode (0.7819ms)\n\u2714 HYPE/ZEC live gate rejects missing operator activation (0.8277ms)\n\u2714 HYPE/ZEC live gate requires an exact runtime SHA (0.3292ms)\n\u2714 transient account lock collisions use a bounded short retry without changing normal cadence (0.32ms)\n\u2714 successful no-entry evaluation replaces stale HYPE fail-closed observability (0.2873ms)\n\u2714 no-entry observability preserves a more specific decision written during the same tick (0.3104ms)\n\u2714 HYPE does not misclassify exact V12 protective orders as unmanaged account orders (2.5491ms)\n\u2139 tests 8\n\u2139 suites 0\n\u2139 pass 8\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 825.5112\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\hype75-pengu1-entry.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 HYPE weaker EMA240 growth below75bps cannot enter (3.5852ms)\n\u2714 HYPE stronger completed trend remains eligible (1.2828ms)\n\u2714 PENGU route request 0.1875 submits full fixed1 notional with5x margin (1.3973ms)\n\u2714 PENGU route request 0.5 submits full fixed1 notional with5x margin (0.2793ms)\n\u2714 PENGU route request 0.6 submits full fixed1 notional with5x margin (0.2235ms)\n\u2714 PENGU route request 1 submits full fixed1 notional with5x margin (0.2217ms)\n\u2714 PENGU route request 1.25 submits full fixed1 notional with5x margin (0.1645ms)\n\u2714 PENGU reduced allocation and lower runtime cap cannot authorize a new order (0.2248ms)\n\u2714 Recovery V8 half-defense scales1.0 entry to0.5 and records0.5 reduction (0.6044ms)\n\u2714 Recovery1.0 state survives a real disk save and restart (21.2191ms)\n\u2139 tests 10\n\u2139 suites 0\n\u2139 pass 10\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 1268.2076\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\idle-filled-cooldown.test.ts",
+    "exit": 0,
+    "stdout": "{\"level\":\"error\",\"message\":\"idle-priority-short-manual-review\",\"reason\":\"IDLE_ENTRY_POSITION_MISMATCH:RENDERUSDT\",\"ordersSent\":0,\"cancelsSent\":0,\"positionChangesSent\":0}\n{\"level\":\"error\",\"message\":\"idle-priority-short-manual-review\",\"reason\":\"IDLE_ENTRY_POSITION_MISMATCH:RENDERUSDT\",\"ordersSent\":0,\"cancelsSent\":0,\"positionChangesSent\":0}\n\u2714 LONG generic candidate cannot consume SHORT cooldown (2.342ms)\n\u2714 route rejection cannot consume cooldown (0.3023ms)\n\u2714 REJECTED without exposure cannot consume cooldown (0.5399ms)\n\u2714 CANCELED without exposure cannot consume cooldown (0.1623ms)\n\u2714 EXPIRED without exposure cannot consume cooldown (0.1613ms)\n\u2714 UNKNOWN without exposure cannot consume cooldown (0.175ms)\n\u2714 FILLED starts cooldown and preserves other symbols (1.2247ms)\n\u2714 PARTIALLY_FILLED starts cooldown and preserves other symbols (0.3165ms)\n\u2139 tests 8\n\u2139 suites 0\n\u2139 pass 8\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 469.745\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\idle-priority-rate-budget-deferral.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 flat Idle defers exact Aster rate-budget saturation without manual review (1.2101ms)\n\u2714 rate-budget deferral never masks exposure, pending, or an existing manual review (0.2035ms)\n\u2139 tests 2\n\u2139 suites 0\n\u2139 pass 2\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 456.5423\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\idle-priority-short-baseline-admission.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 baseline admission evidence is produced from current decision snapshots and is atomic (28.6334ms)\n\u2714 same-timestamp baseline acceptance blocks Idle admission (13.5087ms)\n\u2714 retained older PENGU signal and an unselected Q102 item are not current acceptance (13.5058ms)\n\u2714 missing or mismatched baseline source fails closed (12.8936ms)\n\u2714 Idle fails closed until every asynchronous baseline source completed the current cycle (19.204ms)\n\u2714 current FET candidate blocks Idle before FET order resolution (15.9261ms)\n\u2714 fresh V12 alternating-H1 no-bar observation is current no-acceptance, never a carried signal (21.3486ms)\n\u2139 tests 7\n\u2139 suites 0\n\u2139 pass 7\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 546.075\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\idle-priority-short-benign-state-recovery.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 clears only the known flat operator-artifact EACCES review and keeps an exact backup (34.0499ms)\n\u2714 clears the exact flat Aster rate-budget saturation review and keeps an exact backup (18.069ms)\n\u2714 refuses unknown review and any active or pending exposure (19.1303ms)\n\u2139 tests 3\n\u2139 suites 0\n\u2139 pass 3\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 494.1093\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\idle-priority-short-idle-gate.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 baseline five win a same-timestamp acceptance (1.1698ms)\n\u2714 open baseline position means account is not idle (0.1685ms)\n\u2714 baseline pending exposure fails closed (0.1374ms)\n\u2714 HYPE or other non-baseline crypto sidecar blocks new Idle (0.1162ms)\n\u2714 0.5 residual capacity skips instead of partial sizing (0.9474ms)\n\u2714 5x Cross readback is mandatory (0.2712ms)\n\u2714 clean idle state admits exactly 1.00x (0.1736ms)\n\u2139 tests 7\n\u2139 suites 0\n\u2139 pass 7\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 444.6096\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\idle-priority-short-live-path.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 missing or stale baseline admission fails closed (1.1948ms)\n\u2714 baseline wins at the same timestamp (0.7235ms)\n\u2714 risk, margin, kill switch, cross, and side gates all fail closed (0.1796ms)\n\u2714 partial capacity never becomes a partial Idle order (0.138ms)\n\u2714 same-symbol Idle occupancy and sidecar exposure block new entry (1.3013ms)\n\u2714 accepted admission is exactly one gross (0.1703ms)\n\u2714 protection plan is deterministic SHORT-only and uses stop/TP contract (0.6128ms)\n\u2714 baseline admission evidence is SHA-bound and fresh (0.726ms)\n\u2139 tests 8\n\u2139 suites 0\n\u2139 pass 8\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 409.2815\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\idle-priority-short-market-data.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 parses quoteVolume from Aster kline index 7 (1.3799ms)\n\u2714 drops current incomplete H1 and returns exact decision boundary (0.8192ms)\n\u2714 fails closed on a gap (2.0715ms)\n\u2714 fails closed on duplicate bars (0.351ms)\n\u2714 fails closed when latest closed H1 is stale (0.3887ms)\n\u2139 tests 5\n\u2139 suites 0\n\u2139 pass 5\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 419.9119\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\idle-priority-short-parity-cert.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 accepts coherent 10bps certificate (1.0828ms)\n\u2714 rejects historical mixed JPY268m certificate (0.4704ms)\n\u2714 rejects 8bps sensitivity as production parity certificate (0.1704ms)\n\u2714 rejects historical 1342 count (0.1493ms)\n\u2714 rejects pre-v3 certificate (0.1522ms)\n\u2714 rejects generic lifecycle proof drift (0.1858ms)\n\u2139 tests 6\n\u2139 suites 0\n\u2139 pass 6\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 414.2523\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\idle-priority-short-postdeploy-regression.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 Idle ownership is durable-state backed; same symbol owned by another strategy is baseline exposure (1.6105ms)\n\u2714 per-symbol cooldown is not global and is exactly 12h (0.6865ms)\n\u2714 venue STOP fill is reconciled as a normal exit and surviving TP is cancelled (1.6961ms)\n\u2714 EXIT pending can reconcile after restart without an exposure reservation (0.8548ms)\n\u2714 unprotected filled entry is safety-closed with BUY ask reference (1.5205ms)\n\u2714 open formal position short-circuits baseline snapshot clocks and refreshes durable Idle decision (10.8558ms)\n\u2139 tests 6\n\u2139 suites 0\n\u2139 pass 6\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 466.0216\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\idle-priority-short-signal.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 production contract pins gross/leverage/cross/protection (2.4786ms)\n\u2714 generic priority is BREAKOUT then RELATIVE then MOMENTUM (0.5809ms)\n\u2714 all five selected routes remain SHORT with exact holds (0.4648ms)\n\u2714 generic archetype gates cannot be bypassed (0.2407ms)\n\u2714 symbol filters remain additional to generic gates (0.3686ms)\n\u2139 tests 5\n\u2139 suites 0\n\u2139 pass 5\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 402.1434\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\idle-priority-short-state-migration.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 flat Idle state migrates with exact backup and read-back (30.8005ms)\n\u2714 Idle state migration fails closed for exposure or review state (7.5941ms)\n\u2139 tests 2\n\u2139 suites 0\n\u2139 pass 2\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 457.8862\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\idle-priority-short-state.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 empty v2 state is SHA-bound and safe (2.4638ms)\n\u2714 different runtime SHA fails closed (0.6781ms)\n\u2714 legacy v1 state fails closed (0.3274ms)\n\u2714 unknown symbol ownership is rejected (0.3633ms)\n\u2714 unverified protection is rejected (0.3724ms)\n\u2714 wrong route or hold contract is rejected (0.3517ms)\n\u2714 valid protected position survives normalization (0.3645ms)\n\u2714 pending entry is explicit and validated (0.2804ms)\n\u2139 tests 8\n\u2139 suites 0\n\u2139 pass 8\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 418.6832\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\idle-residual-long-baseline-deferral.test.ts",
+    "exit": "TIMEOUT",
+    "stdout": "\u2716 stale residual baseline defers without orders, manual review or daemon rejection; next tick retries (24.7724ms)\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\idle-residual-long-contract.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 DOGE and AVAX residual gates are frozen and DOGE has priority (2.2698ms)\n\u2714 V12 Trail0.20 production contract is frozen and live code uses completed 2H extreme (6.4527ms)\n\u2714 all formal runners preserve priority over residual LONG (2.1183ms)\n\u2714 combined exact-SHA residual certificate rejects drift (1.7592ms)\n\u2714 flat residual LONG defers only Aster rate-budget saturation (0.5925ms)\n\u2139 tests 5\n\u2139 suites 0\n\u2139 pass 5\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 432.8605\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\idle-residual-long-preemption.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 formal preemption closes residual LONG reduce-only before clearing durable state (22.0174ms)\n\u2714 disabled residual preemption never sends an order (0.4816ms)\n\u2139 tests 2\n\u2139 suites 0\n\u2139 pass 2\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 367.6678\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\idle-residual-long-state-migrate.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 flat residual state migrates SHA with exact backup and no exposure mutation (31.5714ms)\n\u2714 residual state migration refuses exposure, pending, and manual review (14.5904ms)\n\u2139 tests 2\n\u2139 suites 0\n\u2139 pass 2\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 393.8174\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\integrated_gross_governor.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 missing profit/DD evidence fail-closes to normal entry caps (1.1101ms)\n\u2714 profit tier expands only with fresh profit/DD evidence (1.2518ms)\n\u2714 5x Cross margin capacity prevents an 8x hard ceiling from becoming 8x exposure (0.187ms)\n\u2714 existing exposure above a reduced effective cap is preserved, not force-trimmed (0.1264ms)\n\u2714 final integrated production constants stay pinned (0.1189ms)\n\u2139 tests 5\n\u2139 suites 0\n\u2139 pass 5\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 374.8854\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\live_strategy_contract_parity.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 current LIVE target preserves the validated V12 signal contract with Top3 residual sizing (0.9886ms)\n\u2714 PENGU V20/V8 implementation target has Recovery V8 live-enabled as supplemental Long (0.2575ms)\n\u2714 Q102 one-slot LIVE target uses DD-governed sizing up to 3.00x under shared 3.0x/3.5x caps (0.1553ms)\n\u2714 V52 preserves the canonical V50 signal thresholds and holding window (10.8833ms)\n\u2139 tests 4\n\u2139 suites 0\n\u2139 pass 4\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 374.2358\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\managed-protective-orders.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 split Recovery V8 protection is managed only when it covers the full position (2.8005ms)\n\u2714 unknown, wrong-side, and non-reduce-only orders remain blocking (0.2563ms)\n\u2714 partially filled protection uses remaining quantity (0.1667ms)\n\u2714 V12 full-quantity STOP and TP are managed, mismatches remain blocking (0.6816ms)\n\u2139 tests 4\n\u2139 suites 0\n\u2139 pass 4\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 362.2074\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\margin-guard-emergency-recovery.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 margin guard emergency recovery allowlists the exact grace-expired reason (8.3738ms)\n\u2139 tests 1\n\u2139 suites 0\n\u2139 pass 1\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 340.0857\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\operator_activation_hardening.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 implementation readiness permits deployment while operator activation remains blocked (1.0323ms)\n\u2714 operator activation artifact is exact-SHA and runner scoped (1.1624ms)\n\u2714 operator activation file must be root-owned non-writable regular file (0.3236ms)\n\u2714 watchdog restart is held fail-closed until operator activation (0.5045ms)\n\u2714 runtime wiring places activation gate in every trading runner prestart (10.1476ms)\n\u2714 activation gate prestart runs as root so root-owned 0600 artifact remains fail-closed (3.6623ms)\n\u2714 Idle application receives a root-generated read-only activation projection without weakening the approval artifact (1.1162ms)\n\u2714 runtime wiring leaves watchdog and auto-repair disabled until all trading runners are operator-approved (1.1513ms)\n\u2714 auto-repair checks operator activation before quiescing or resuming trading runners (1.6581ms)\n\u2714 recovery state metadata requires deploy ownership contract and mode 0600 (1.2793ms)\n\u2714 all root-run V12 recovery helpers enforce ownership normalization (5.5767ms)\n\u2714 three-hour and position-recovery automation remain blocked before operator approval (1.69ms)\n\u2139 tests 12\n\u2139 suites 0\n\u2139 pass 12\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 370.2079\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\pending-exposure-registry.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 active pending exposure is included across runners and released rows are ignored (1.634ms)\n\u2714 malformed active pending exposure fails closed instead of being treated as zero (0.4966ms)\n\u2714 HYPE/ZEC pending reservations are classified as crypto sidecars (0.1864ms)\n\u2714 strict planner caps a candidate against cross-runner pending gross (1.5248ms)\n\u2714 strict planner subtracts pending gross from strategy-specific residual caps (0.8089ms)\n\u2714 strict planner blocks PENGU strategy over-cap when pending reservation exists (0.2416ms)\n\u2139 tests 6\n\u2139 suites 0\n\u2139 pass 6\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 381.4482\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\pengu-live-scheduling.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 PENGU retries a transient account-lock collision instead of waiting for the next hour (1.0122ms)\n\u2714 PENGU keeps the hour-boundary schedule after a completed tick (0.1801ms)\n\u2714 PENGU retries a transient global rate-budget saturation within the bounded retry interval (0.2394ms)\n\u2714 PENGU does not short-retry an unknown failed tick (0.1599ms)\n\u2139 tests 4\n\u2139 suites 0\n\u2139 pass 4\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 359.6335\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\pengu-m05-shadow-outcome.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 M05 candidate records downstream Production block without changing shadow verdict (1.4263ms)\n\u2714 M05 candidate follows actual SHORT_V20 fill and exit lifecycle (0.6387ms)\n\u2714 tick outcome never attaches a signal-less later tick to the previous M05 candidate (0.1509ms)\n\u2714 M05 entry fill can be linked by durable pending referenceTs after later reconciliation (0.3082ms)\n\u2714 non-M05 signals never create shadow outcome records (0.2191ms)\n\u2714 shadow outcome persistence failure cannot change the Production tick result (0.9948ms)\n\u2139 tests 6\n\u2139 suites 0\n\u2139 pass 6\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 1089.6687\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\pengu-market-data-alignment.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 PENGU tolerates only a leading extra completed H1 candle by aligning common timestamps (4.3504ms)\n\u2714 PENGU still fails closed on an internal H1 gap (1.7626ms)\n\u2714 PENGU still fails closed when the latest completed H1 timestamps differ (0.5726ms)\n\u2139 tests 3\n\u2139 suites 0\n\u2139 pass 3\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 375.4432\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\pengu-q60-dd17-production-contract.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 new PENGU production profile is COMBINED_FILTERED with fixed gross 1.0 and Q60/DD17/H72 (1.0912ms)\n\u2139 tests 1\n\u2139 suites 0\n\u2139 pass 1\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 385.7349\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\pengu-recovery-v8-aster-precision.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 PENGU Recovery V8 formats protective stop values to the venue filters (1.9976ms)\n\u2139 tests 1\n\u2139 suites 0\n\u2139 pass 1\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 661.3183\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\pengu-recovery-v8-logical-entry.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 Recovery V8 uses logical entry after a manual re-entry (1.2356ms)\n\u2139 tests 1\n\u2139 suites 0\n\u2139 pass 1\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 348.2532\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\pengu-recovery-v8-reconciliation.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 PENGU recovery reconciliation refuses mismatched positions without mutation (12.0425ms)\n\u2714 PENGU recovery reconciliation dry-run proves normalized protection without mutation (5.0185ms)\n\u2714 PENGU recovery reconciliation updates state only after protective read-back (7.5049ms)\n\u2714 PENGU recovery reconciliation leaves state manual-review when read-back fails (5.7611ms)\n\u2139 tests 4\n\u2139 suites 0\n\u2139 pass 4\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 1088.0394\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\pengu-route-quarantine-dd-governor.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 hard stop quarantines only the same route for 60 hours (1.6548ms)\n\u2714 realized DD governor uses only closed filled trades and holds new entries for 72 hours (0.7101ms)\n\u2714 unfilled or rejected intents do not change realized equity (0.6695ms)\n\u2714 malformed persisted overlay fails closed instead of allowing a new entry (0.2281ms)\n\u2714 live runner consults the durable overlay before planning a new entry (14.1287ms)\n\u2139 tests 5\n\u2139 suites 0\n\u2139 pass 5\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 356.2855\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\pengu_q102_integration_status.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 PENGU reports causal Q102 ownership wiring instead of the retired selector manifest (1.2125ms)\n\u2139 tests 1\n\u2139 suites 0\n\u2139 pass 1\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 387.5551\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\portfolio-dd-governor.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 governor starts at high-water and boosts Q102 to 3.0x at DD <=0.30% (2.4291ms)\n\u2714 closed-event TWR accumulates commission and funding then gates above 0.30% (1.1778ms)\n\u2714 new peak resets current DD and duplicate income is idempotent (0.3549ms)\n\u2714 stale governor never boosts (0.2295ms)\n\u2139 tests 4\n\u2139 suites 0\n\u2139 pass 4\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 423.6837\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\q102-multilineage-ownership.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 base sleeves use the Q102-specific runtime SHA for ownership and reductions (10.7207ms)\n\u2714 runtime wiring exposes Q102 state and runtime SHA to other crypto sleeves (1.9589ms)\n\u2139 tests 2\n\u2139 suites 0\n\u2139 pass 2\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 423.4216\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\q102-ranking-observer-runtime-wiring.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 current runtime wiring retargets Q102 ranking observer to the deployed SHA (10.2373ms)\n\u2139 tests 1\n\u2139 suites 0\n\u2139 pass 1\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 384.7778\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\q102-risk-block-freshness.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 risk-blocked Q102 refreshes state freshness without creating exposure (0.7618ms)\n\u2139 tests 1\n\u2139 suites 0\n\u2139 pass 1\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 987.3024\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\q102-state-permission-contract.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 Q102 live unit repairs market history ownership before daemon start (7.6923ms)\n\u2714 current runtime wiring keeps the Q102 state path canonical (1.3551ms)\n\u2714 Q102 migration and daemon startup preserve deploy-owned state (3.6139ms)\n\u2139 tests 3\n\u2139 suites 0\n\u2139 pass 3\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 359.7618\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\q102-symbol-ownership-contract.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 Q102 runtime contract pins a high-vol universe disjoint from Idle ownership (6.9716ms)\n\u2714 Q102 ranking observer uses the same disjoint symbol contract (1.8229ms)\n\u2714 Q102 parser accepts the production disjoint list and rejects Idle-owned overlap (1.4077ms)\n\u2139 tests 3\n\u2139 suites 0\n\u2139 pass 3\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 937.5272\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\quality102-current-entry-open.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 Q102 current entry open queries through observed now instead of a 1ms range (2.1117ms)\n\u2714 Q102 retries a transient empty current candle without advancing the observed timestamp (1016.2432ms)\n\u2714 Q102 keeps retrying a delayed Aster current candle without widening the observed range (1.0161ms)\n\u2139 tests 3\n\u2139 suites 0\n\u2139 pass 3\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 1582.9162\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\quality102-live-scheduling.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 Q102 retries a transient account-lock collision instead of skipping the hour (0.9687ms)\n\u2714 Q102 retries transient shared Aster rate-budget saturation instead of skipping the hour (0.2803ms)\n\u2714 Q102 does not short-retry unrelated local blocks (0.1333ms)\n\u2714 Q102 keeps the hour-boundary schedule after a completed tick (0.13ms)\n\u2139 tests 4\n\u2139 suites 0\n\u2139 pass 4\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 299.5698\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\quality102-pending-order-recovery.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 requires three stable read-only rounds and never mutates in verify-only mode (2.776ms)\n\u2714 applies only the exact proven no-exposure pending transition after backup (0.9176ms)\n\u2714 rejects an ambiguous order lookup without writing (0.8422ms)\n\u2714 rejects matching trades, positions, open orders, races, and incomplete history (1.7311ms)\n\u2139 tests 4\n\u2139 suites 0\n\u2139 pass 4\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 574.5485\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\quality102-pending-recovery-wiring.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 Q102 service auto-recovers only a proven no-exposure planned pending before live preflight (0.8998ms)\n\u2714 Q102 no-pending startup path proves state before taking the shared order lock (1.5301ms)\n\u2139 tests 2\n\u2139 suites 0\n\u2139 pass 2\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 305.7476\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\quality102-preflight-protective-order.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 Q102 preflight recognizes the reconciled PENGU Recovery V8 protection order (1.8775ms)\n\u2714 Q102 preflight still rejects an unknown open order (0.6672ms)\n\u2714 Q102 startup preserves the existing FET profit-floor STOP and rejects malformed orders (9.9364ms)\n\u2139 tests 3\n\u2139 suites 0\n\u2139 pass 3\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 1145.5131\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\quality102-preflight-rate-budget.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 Q102 preflight defers only the canonical global rate-budget saturation (1.7445ms)\n\u2714 Q102 preflight does not defer malformed, HTTP, or unknown failures (0.3898ms)\n\u2139 tests 2\n\u2139 suites 0\n\u2139 pass 2\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 1184.2788\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\quality102_causal_v1_portfolio.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 causal-v1 requires readiness, is capped at 3.00x, and historical Quality102 stays blocked (3.3481ms)\n\u2714 causal-v1 participates in exact crypto and total Gross boundaries (1.9994ms)\n\u2714 base strategies retain priority when causal-v1 is simultaneous (1.3256ms)\n\u2714 causal-v1 owns one planner slot (0.3468ms)\n\u2714 causal-v1 live-quote MTM realizes Long and Short PnL exactly once (0.6863ms)\n\u2714 base planning reduces causal-v1 before reserving stock capacity and recalculates Gross (1.8605ms)\n\u2714 causal-v1 MTM rejects an unverified mark source (0.7394ms)\n\u2714 causal-v1 MTM requires cross-checked live evidence and one validation/reduction timestamp (0.6589ms)\n\u2714 causal-v1 MTM rejects a live quote whose evidence price differs from the reduction mark (0.38ms)\n\u2714 causal-v1 loss rechecks V12 dynamic 2.0x and PENGU 0.85x strategy caps after equity changes (1.1056ms)\n\u2714 historical QUALITY102 is never selected for causal conflict reduction (0.5508ms)\n\u2714 V12 Top3 slot rejection happens before causal-v1 MTM reduction (0.4492ms)\n\u2714 V12 rank2 may use Dynamic residual up to aggregate 2.0x without unnecessary causal Q102 MTM (0.4205ms)\n\u2714 V12 active position over per-position 1.0x fails closed (0.2325ms)\n\u2714 Core intents fully preempt FET residual before capacity allocation (0.8075ms)\n\u2714 FET residual intent does not preempt itself (0.177ms)\n\u2714 stale or unverified FET residual mark fails closed (0.2633ms)\n\u2139 tests 17\n\u2139 suites 0\n\u2139 pass 17\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 466.1595\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\quality102_ranking_observability.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 S34 ranking diagnostic reaches 100 only when the exact FET BRK route is signal-ready (12.3354ms)\n\u2714 S34 ranking records near-threshold BRK metrics without inventing a signal (0.8407ms)\n\u2714 ranking history appends once per hourly reference timestamp (14.4211ms)\n\u2139 tests 3\n\u2139 suites 0\n\u2139 pass 3\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 425.2442\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\recovery-stop-readback.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 Recovery entry response alone cannot establish protection (1.8932ms)\n\u2714 Recovery replacement never cancels old full stop before independently verifying new stops (0.7989ms)\n\u2139 tests 2\n\u2139 suites 0\n\u2139 pass 2\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 688.5248\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\resident-stop-ledger.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 partial STOP + normal remainder has weighted economics, restart=false (1.2289ms)\n\u2714 partial STOP + normal remainder has weighted economics, restart=true (0.2197ms)\n\u2714 replacement fill after old cancellation is recovered from durable intent (0.2622ms)\n\u2714 never-submitted planned normal exit does not query nonexistent market order (0.7551ms)\n\u2714 identity mismatch and unexplained quantity fail closed (0.5509ms)\n\u2139 tests 5\n\u2139 suites 0\n\u2139 pass 5\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 395.0762\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\resident-stop-observation.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 independent read-only observation verifies owned exact live FET stop (2.6447ms)\n\u2714 wrong venue shape is unprotected {\"side\":\"BUY\"} (0.4899ms)\n\u2714 wrong venue shape is unprotected {\"origQty\":\"514\"} (0.4647ms)\n\u2714 wrong venue shape is unprotected {\"reduceOnly\":false} (1.3825ms)\n\u2714 wrong venue shape is unprotected {\"stopPrice\":\".24\"} (0.1801ms)\n\u2714 wrong venue shape is unprotected {\"status\":\"UNKNOWN\"} (0.1535ms)\n\u2714 duplicate, orphan and old state SHA are not silently protected (0.2302ms)\n\u2714 V52 fixed emergency stop remains disabled/dynamic only (0.1798ms)\n\u2714 owner symbol mismatch cannot be protected (0.2223ms)\n\u2714 owner side mismatch cannot be protected (0.1976ms)\n\u2714 owner quantity mismatch cannot be protected (0.107ms)\n\u2714 owner price mismatch cannot be protected (0.0938ms)\n\u2714 owner freshness mismatch cannot be protected (0.0935ms)\n\u2139 tests 13\n\u2139 suites 0\n\u2139 pass 13\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 387.5344\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\resident-stop-runner-integration.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 PENGU: filled entry uses venue position average and actual qty, persists verified protection (2.846ms)\n\u2714 PENGU: read-back failure retains filled position and blocks completion (0.9539ms)\n\u2714 PENGU: resident fill clears once, no repeated loss/governor update (8.0999ms)\n\u2714 Q102: filled entry uses venue position average and actual qty, persists verified protection (0.9994ms)\n\u2714 Q102: read-back failure retains filled position and blocks completion (0.4957ms)\n\u2714 Q102: resident fill clears once, no repeated loss/governor update (1.9314ms)\n\u2714 PENGU: accepted-timeout partial STOP survives restart and final STOP closes once (2.5879ms)\n\u2714 PENGU: partial STOP plus normal exit books both legs after restart (2.3709ms)\n\u2714 PENGU: full STOP before planned market submission never queries that unposted market (3.5144ms)\n\u2714 Q102: accepted-timeout partial STOP survives restart and final STOP closes once (4.3822ms)\n\u2714 Q102: partial STOP plus normal exit books both legs after restart (2.6205ms)\n\u2714 Q102: full STOP before planned market submission never queries that unposted market (1.4751ms)\n\u2714 Recovery full hard-stop is reconciled before missing-position check and once (1.0898ms)\n\u2714 PENGU: replacement full fill before readback is owned after restart (10.7823ms)\n\u2714 PENGU: replacement full fill during cancel is owned after restart (2.3125ms)\n\u2714 Q102: replacement full fill before readback is owned after restart (1.8899ms)\n\u2714 Q102: replacement full fill during cancel is owned after restart (1.7782ms)\n\u2714 Recovery split stop fills reconcile original quantity and weighted proceeds once (0.5406ms)\n\u2139 tests 18\n\u2139 suites 0\n\u2139 pass 18\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 1241.6664\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\runtime-alert-policy.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 runner alert policy notifies when a live runner becomes unhealthy (0.9546ms)\n\u2714 runner alert policy notifies on recovery without changing trading gates (0.1677ms)\n\u2714 initial active observation is quiet (0.1072ms)\n\u2714 V52 stop is intentional only outside the US equity regular session (29.7489ms)\n\u2714 runner unit resolution is pinned to the current release SHA (0.6322ms)\n\u2714 missing or invalid current release SHA fails closed without choosing a historical unit (0.3815ms)\n\u2714 health alert source covers every current crypto runner including HYPE and Idle (14.3203ms)\n\u2139 tests 7\n\u2139 suites 0\n\u2139 pass 7\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 469.579\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\runtime-dependency-lineage.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 runtime wiring records and validates dependency release lineage (8.9946ms)\n\u2139 tests 1\n\u2139 suites 0\n\u2139 pass 1\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 410.5645\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\shared-risk-rollover-retry.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 retries a prior-day shared-risk snapshot only during UTC rollover grace (22.4714ms)\n\u2714 does not wait on DAY_MISMATCH outside the UTC rollover grace (7.0298ms)\n\u2139 tests 2\n\u2139 suites 0\n\u2139 pass 2\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 389.1037\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\shared-risk-rollover-wiring.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 V12 waits for UTC rollover outside the account lock even while a position is held (10.3264ms)\n\u2714 PENGU waits through UTC rollover before the account lock even while a position is held (2.0708ms)\n\u2714 Q102 flat entry waits through UTC rollover before the account lock without consuming the signal (1.5516ms)\n\u2714 PENGU signal-reference bookkeeping is observational and does not gate same-signal retry (1.4882ms)\n\u2139 tests 4\n\u2139 suites 0\n\u2139 pass 4\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 382.554\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\shared-risk-transient-refresh-retry.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 daemon retries a transient refresh failure without terminating (2.3333ms)\n\u2714 daemon keeps retrying consecutive failures using the bounded retry cadence (0.8931ms)\n\u2714 one-shot mode still surfaces refresh failure to the caller (0.59ms)\n\u2139 tests 3\n\u2139 suites 0\n\u2139 pass 3\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 372.3625\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\shared_crypto_daily_loss_contract.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 PENGU resolves the formal 7.5% shared daily-loss contract (1.3673ms)\n\u2714 shared-risk writer and Q102 consume the canonical formal contract (8.5147ms)\n\u2714 current-runtime wiring injects one 7.5% contract into every crypto sleeve (1.4574ms)\n\u2714 tracked environment examples expose 7.5% rather than stale 5% (1.9885ms)\n\u2714 stale per-runner 5% overrides fail closed instead of silently changing the formal contract (0.5572ms)\n\u2714 TS runtime surfaces consume the canonical shared-risk resolver (5.4443ms)\n\u2714 legacy production launch surfaces cannot re-inject a stale 5% PENGU cap (8.771ms)\n\u2714 shared daily-risk scope includes every current LIVE crypto sleeve and Idle/HYPE symbols (2.0034ms)\n\u2714 HYPE entry path fails closed on the shared daily-risk snapshot (2.9813ms)\n\u2139 tests 9\n\u2139 suites 0\n\u2139 pass 9\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 419.9922\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\strict_bt33404708902_contract.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 source identity and strict caps are immutable (0.9226ms)\n\u2714 all five simultaneous intents admit base strategies before blocking historical Q102 and preserving causal priority (3.2756ms)\n\u2714 MTM reduction is restart/reconciliation stable and preserves remaining cost basis (0.617ms)\n\u2714 same-symbol base entry fully flattens causal Quality102 before the base order (0.6284ms)\n\u2714 a quality position is reduced at its current mark when a base order needs capacity (0.7447ms)\n\u2714 missing look-ahead proof keeps Quality102 fail-closed (0.4002ms)\n\u2139 tests 6\n\u2139 suites 0\n\u2139 pass 6\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 429.1162\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\trade_fill_notification.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 confirmed fills accept FILLED/PARTIALLY_FILLED and reject non-fills (1.1153ms)\n\u2714 strategy mapping and Japanese email rendering are deterministic (58.0209ms)\n\u2714 notification key is stable and changes when fill facts change (0.4098ms)\n\u2714 spool processing sends each fill once across restarts (41.6794ms)\n\u2714 failed delivery keeps the event pending and permits a later retry (23.5272ms)\n\u2139 tests 5\n\u2139 suites 0\n\u2139 pass 5\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 845.2162\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\v12-active-state-sha-migration.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 active V12 state migration preserves positions and changes only runtime SHA (2.0248ms)\n\u2714 active V12 migration rejects pending or missing protection state (0.5794ms)\n\u2714 active V12 exchange reconciliation requires exact protective order type, quantity, and price (0.5743ms)\n\u2139 tests 3\n\u2139 suites 0\n\u2139 pass 3\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 1034.1813\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\v12-entry-quantity-gate.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 V12 classifies an Aster minQty rejection as a non-order capacity gate (1.0363ms)\n\u2714 V12 classifies an Aster minNotional rejection as a non-order capacity gate (0.2461ms)\n\u2714 V12 accepts scientific notation in venue-minimum errors (0.1209ms)\n\u2714 V12 does not downgrade unknown venue errors into a no-op (0.1557ms)\n\u2714 V12 does not downgrade unrelated quantity errors (0.1287ms)\n\u2139 tests 5\n\u2139 suites 0\n\u2139 pass 5\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 1036.3186\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\v12-multilogic-v4-shadow.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 G5 is shadow-only, 0.10x, fixed 48h exit (11.8377ms)\n\u2714 robust complement has 0.25x cap and no real order flag (0.2713ms)\n\u2714 REC_Y flips source side and applies entry delay from catalog (0.2782ms)\n\u2714 same-symbol same-side virtual legs are admitted (0.5777ms)\n\u2714 opposite side is rejected unless REC_Y can preempt X/G (0.8563ms)\n\u2714 core is protected from REC_Y preemption (0.3051ms)\n\u2714 Min-Lift cannot exceed 0.30x and caps remain frozen (0.4622ms)\n\u2714 snapshot proves zero real-order enabled V4 rows (1.8864ms)\n\u2139 tests 8\n\u2139 suites 0\n\u2139 pass 8\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 377.0142\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\v12-preorder-gross-reservation.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 pre-order reservation blocks an entry that would breach the V12 2.0x base cap (1.3857ms)\n\u2714 worst-case fill is checked before an exposure order (0.3558ms)\n\u2714 pending and reserved gross are included on retry/restart (0.176ms)\n\u2714 invalid/stale gross snapshots fail closed (0.5158ms)\n\u2139 tests 4\n\u2139 suites 0\n\u2139 pass 4\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 395.6697\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\v12-protection-failure-recovery.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 accepts only the exact flattened protection-failure state (2.0077ms)\n\u2714 recovery clears only local pending/manual-review/kill-switch and preserves history (0.9115ms)\n\u2139 tests 2\n\u2139 suites 0\n\u2139 pass 2\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 1072.106\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\v12-rate-budget-resilience.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 V12 treats bounded global rate-budget saturation as retryable locked state (1.4243ms)\n\u2714 V12 treats global rate-budget lock timeout as retryable locked state (0.1425ms)\n\u2714 V12 keeps malformed and unknown failures fail-closed (0.1208ms)\n\u2139 tests 3\n\u2139 suites 0\n\u2139 pass 3\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 1083.9677\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\v12-rate-budget-state-recovery.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 rate-budget recovery accepts only a stale entry with no local V12 position (1.0783ms)\n\u2714 rate-budget recovery rejects unrelated manual review or local position (1.4104ms)\n\u2714 rate-budget recovery clears only stale local gates and preserves history (0.4351ms)\n\u2139 tests 3\n\u2139 suites 0\n\u2139 pass 3\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 707.7592\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\v12-runtime-lineage-recovery.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 V12 lineage recovery clears only the transient ownership review flags (1.9843ms)\n\u2714 V12 lineage recovery rejects non-flat or unrelated manual-review state (0.5386ms)\n\u2139 tests 2\n\u2139 suites 0\n\u2139 pass 2\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 1029.8228\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\v12-runtime-status.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 LIVE requires coherent fresh state, service heartbeat and explicit inactive shared protection (1.4882ms)\n\u2714 future state cannot display LIVE (0.3269ms)\n\u2714 stale state cannot display LIVE (0.2055ms)\n\u2714 missing state lineage cannot display LIVE (0.2818ms)\n\u2714 mismatched state lineage cannot display LIVE (0.23ms)\n\u2714 PAPER state cannot display LIVE (0.382ms)\n\u2714 manual review cannot display LIVE (0.1939ms)\n\u2714 embedded hold cannot display LIVE (0.1531ms)\n\u2714 future heartbeat cannot display LIVE (0.1919ms)\n\u2714 future tick cannot display LIVE (0.3914ms)\n\u2714 stale heartbeat cannot display LIVE (0.1609ms)\n\u2714 stale tick cannot display LIVE (0.0853ms)\n\u2714 blocked service cannot display LIVE (0.1544ms)\n\u2714 disabled service cannot display LIVE (0.1243ms)\n\u2714 dead service cannot display LIVE (0.162ms)\n\u2714 wrong heartbeat SHA cannot display LIVE (0.1402ms)\n\u2714 wrong expected SHA cannot display LIVE (0.1142ms)\n\u2714 wrong service unit cannot display LIVE (0.1394ms)\n\u2714 unrelated heartbeat cannot display LIVE (0.1067ms)\n\u2714 protected hold cannot display LIVE (0.1042ms)\n\u2714 unknown shared protection cannot display LIVE (0.0653ms)\n\u2714 coerced shared protection cannot display LIVE (0.0629ms)\n\u2714 missing current marker, heartbeat or shared protection cannot pass (0.1808ms)\n\u2714 file reader uses current marker and fails closed on missing/malformed kill JSON (30.7888ms)\n\u2139 tests 24\n\u2139 suites 0\n\u2139 pass 24\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 393.3173\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\v12-v4-hp-failclosed.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 fresh non-ordering snapshot displays research decisions without certifying LIVE (19.3066ms)\n\u2714 missing state and missing certificate fail closed (5.9071ms)\n\u2714 claimed certificate or legacy enable flag never gives V4 authority (7.5179ms)\n\u2714 order-enabled rejects all state-derived decisions and caps (8.3017ms)\n\u2714 nonzero mutation rejects all state-derived decisions and caps (6.3263ms)\n\u2714 coerced mutation rejects all state-derived decisions and caps (5.8633ms)\n\u2714 wrong architecture rejects all state-derived decisions and caps (6.3962ms)\n\u2714 missing shadow proof rejects all state-derived decisions and caps (7.1951ms)\n\u2714 stale timestamp rejects all state-derived decisions and caps (8.8713ms)\n\u2714 future timestamp rejects all state-derived decisions and caps (9.0835ms)\n\u2714 missing timestamp rejects all state-derived decisions and caps (8.3549ms)\n\u2714 unsafe nested leg cannot appear as a safe Shadow admission (7.3734ms)\n\u2714 tampered frozen rank table cannot supply rank, score or planned gross (18.2818ms)\n\u2714 Linux LF frozen priority verifies identically to the audited CRLF source (15.6458ms)\n\u2714 shared protected hold remains explicit even without current runtime files (10.915ms)\n\u2139 tests 15\n\u2139 suites 0\n\u2139 pass 15\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 544.6652\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\v12-v4-production-certification.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 forward frozen ranking is temporally valid while observed PF/DD and execution blockers still prevent promotion (1.2839ms)\n\u2714 replaying past entries at a present decision time retains full-year lookahead (0.2224ms)\n\u2714 1978 H1 native matches certify the price model only (0.1647ms)\n\u2714 stale account and payload flags cannot authorize orders; malformed evidence fails closed (0.4691ms)\n\u2139 tests 4\n\u2139 suites 0\n\u2139 pass 4\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 521.151\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\v12-v4-production-lifecycle.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 41 executable exit catalog rows preserve two-pass overrides and one native state exit (1.6161ms)\n\u2714 pending reservation, deferred partial fills and restart exactly preserve accounting (2.9976ms)\n\u2714 same-symbol partial closes reduce only the selected virtual leg (1.8319ms)\n\u2714 existing TSLA and PENGU owners block all V4 netting, pending foreign gross counts (1.4358ms)\n\u2714 precision floors; protected hold and worst-case cap reservations fail closed (1.2771ms)\n\u2714 ATR stop-first same-bar ambiguity, gap-stop and H1 cutoff are executable (0.4633ms)\n\u2714 time deadline requires available exact next open; future open forbidden (0.3167ms)\n\u2714 closed H1 formulas ignore future bars, reject gaps, and normalize effective side (2.7264ms)\n\u2714 mark-to-market gross uses current equity and exact quantities, and journal rejects gaps (1.8865ms)\n\u2714 offline CLI evaluates causal robust candidate, persists explicit fills, and restarts (32.6664ms)\n\u2714 reversal preemption waits for actual closes and cannot delete an opposing virtual leg (0.8679ms)\n\u2714 equity DD admission fails closed and existing virtual-leg exits remain available (0.586ms)\n\u2714 closing records cooldown; caller cannot release foreign ownership or forge reservations (1.0538ms)\n\u2714 native G3 reuses frozen production trailing levels, persisted state, and mandatory native ATR evidence (10.1789ms)\n\u2714 claimed source parity never certifies native generation or unlocks order authority (3.5245ms)\n\u2139 tests 15\n\u2139 suites 0\n\u2139 pass 15\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 453.6507\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\v12-v4-shadow-observability.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 HP reader loads frozen catalog plus shadow state and preserves zero mutation (28.1112ms)\n\u2714 HP reader remains read-only when shadow state is missing (3.7199ms)\n\u2139 tests 2\n\u2139 suites 0\n\u2139 pass 2\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 389.0353\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\v12-v4-v2-shadow.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 V2_M150 case reproduces exact four caps and frozen 41 full-year ranked routes (1.4454ms)\n\u2714 G5 uses same frozen fixed48 exit but full-year hindsight rank/tier sizing (13.3509ms)\n\u2714 V2 entry repairs reject missing entry-bar features for second-pass route, never fabricating a pass (0.4523ms)\n\u2714 V2 simulation snapshots are always isolated shadow and never place a live order (0.6809ms)\n\u2714 research BT 10bps fails DD 20pct limit; original V4 cap unchanged (1.2493ms)\n\u2139 tests 5\n\u2139 suites 0\n\u2139 pass 5\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 376.6912\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\v12-winrate-entry-gate.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 HC175 remains exempt and receives 1.75 gross multiplier (1.9643ms)\n\u2714 Sep23 XRP04 false burst is blocked (0.4063ms)\n\u2714 Sep23 INJ Rank1 fast mismatch is blocked (0.1566ms)\n\u2714 same fast mismatch does not blanket-block Rank2 XRP (0.1276ms)\n\u2714 Sep23 SOL Rank1 is blocked while LTC and NEAR pass (0.1659ms)\n\u2714 E085 is strict and invalid features fail closed (0.2571ms)\n\u2139 tests 6\n\u2139 suites 0\n\u2139 pass 6\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 366.123\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\v12_decision_observation.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 V12 emits current ranked observability even when no execution signal completes (38.0717ms)\n\u2139 tests 1\n\u2139 suites 0\n\u2139 pass 1\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 412.2204\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\v12_dynamic_residual_reduction.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 dynamic trim preserves Base and resizes protection to venue quantity (21.793ms)\n\u2139 tests 1\n\u2139 suites 0\n\u2139 pass 1\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 957.1801\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\v12_strong_quality_gate_contract.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 V12 strong regime uses the validated bounded quality gate (1.0899ms)\n\u2714 current integrated production risk uses the selected Top3/FET/Q102 governor family sizing (0.1543ms)\n\u2714 committed one-year research artifact matches the production candidate (7.7546ms)\n\u2139 tests 3\n\u2139 suites 0\n\u2139 pass 3\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 359.9898\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\v12_top2_state.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 legacy active state migrates in memory to one activePositions row (11.9973ms)\n\u2714 three distinct positions persist but duplicate, fourth, or aggregate over-cap fail closed (19.8842ms)\n\u2139 tests 2\n\u2139 suites 0\n\u2139 pass 2\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 389.7527\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\v12_top3_rank3_contract.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 Top3 preserves top2 and only admits rank3 at score >= 0.70 (1.7142ms)\n\u2714 requesting Top2 cannot expose rank3 (0.1505ms)\n\u2139 tests 2\n\u2139 suites 0\n\u2139 pass 2\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 386.7972\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\venue-resident-stop.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 uses actual quantity/average and original stop fraction for both sides (1.2056ms)\n\u2714 requires read-back, then restart adopts same stop without placing twice (1.1134ms)\n\u2714 acknowledgement without read-back is never protected (0.436ms)\n\u2714 timeout after accepted order reconciles on next invocation without duplicate (0.3334ms)\n\u2714 invalid side read-back fails closed (0.2616ms)\n\u2714 invalid quantity read-back fails closed (0.1481ms)\n\u2714 invalid stopPrice read-back fails closed (0.1705ms)\n\u2714 invalid reduceOnly read-back fails closed (0.1643ms)\n\u2714 invalid status read-back fails closed (0.1692ms)\n\u2714 duplicate protection rejects without cancelling a valid stop (0.4157ms)\n\u2714 quantity reduction verifies replacement before cancelling prior protection (0.4403ms)\n\u2714 partially filled resident stop is retained for exact remaining quantity (0.2018ms)\n\u2139 tests 12\n\u2139 suites 0\n\u2139 pass 12\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 634.4769\n",
+    "stderr": ""
+  },
+  {
+    "file": "tests\\watchdog-release-lineage.test.ts",
+    "exit": 0,
+    "stdout": "\u2714 watchdog enforces singleton release lineage for every live runner family (1.0125ms)\n\u2714 watchdog also enforces singleton lineage for margin guard (0.135ms)\n\u2714 watchdog fails closed if the legacy V96/V52 live supervisor is active (0.123ms)\n\u2714 watchdog rejects every known unpinned legacy trading supervisor (0.1599ms)\n\u2139 tests 4\n\u2139 suites 0\n\u2139 pass 4\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 359.6585\n",
+    "stderr": ""
+  }
+]

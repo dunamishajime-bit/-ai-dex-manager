@@ -1,0 +1,12 @@
+✔ implementation is ready while real-money activation remains operator-blocked (230.343ms)
+✔ readiness checker is read-only by construction (1.939ms)
+✔ activation entry points require the read-only readiness gate (1.3746ms)
+✔ standalone FET Core preemption helper is independently fail-closed (0.8953ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 4
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 590.3598

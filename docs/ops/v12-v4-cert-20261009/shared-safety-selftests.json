@@ -1,0 +1,32 @@
+[
+  {
+    "script": "v12-live-execution-selftest.ts",
+    "exit": 0,
+    "stdout": "V12_LIVE_EXECUTION_SELFTEST_PASS {\"ordersSent\":0,\"realExchangeCalls\":0}\n",
+    "stderr": ""
+  },
+  {
+    "script": "disdex-account-order-lock-selftest.ts",
+    "exit": 0,
+    "stdout": "ACCOUNT_ORDER_LOCK_TS_SELFTEST_PASS\n",
+    "stderr": ""
+  },
+  {
+    "script": "disdex-unified-portfolio-routing-selftest.ts",
+    "exit": 0,
+    "stdout": "UNIFIED_PORTFOLIO_ROUTING_SELFTEST_PASS\n",
+    "stderr": ""
+  },
+  {
+    "script": "v12-resident-stop-selftest.ts",
+    "exit": 0,
+    "stdout": "V12_RESIDENT_STOP_SELFTEST_PASS\n",
+    "stderr": ""
+  },
+  {
+    "script": "disdex-shared-crypto-risk-selftest.ts",
+    "exit": 0,
+    "stdout": "SHARED_CRYPTO_RISK_SELFTEST_PASS {\"strategyIds\":[\"V12_X1.00_ALL\",\"PENGU_DUAL_LS_V2_FINAL\",\"QUALITY102_CAUSAL_V1\",\"FET_BRK48_RESIDUAL\",\"HYPE_LONG\",\"IDLE_PRIORITY_SHORT\"],\"q102Symbols\":14,\"v4S34Symbols\":11}\n",
+    "stderr": ""
+  }
+]

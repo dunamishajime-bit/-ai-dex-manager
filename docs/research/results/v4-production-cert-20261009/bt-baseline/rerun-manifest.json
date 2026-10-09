@@ -1,0 +1,204 @@
+{
+  "status": "RESEARCH_BASELINE_RERUN_NOT_RUNTIME_CERTIFICATION",
+  "seconds": 25.322992086410522,
+  "source_root": "C:\\Users\\dis\\DisDex-five-improvements-20261008",
+  "sources": [
+    {
+      "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\scripts\\research\\run_gate_fix_comparison.py",
+      "sha256": "68ff9c0683895cda337c431f045941451abb2958c5f2d8a097afed21e724c240"
+    },
+    {
+      "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\scripts\\research\\run_wr60_new_model.py",
+      "sha256": "f278b90f52a822cc09fb19bb45f271731f32b8073963f0508ce45d22406301b1"
+    },
+    {
+      "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\scripts\\research\\run_v12_logic_dissection.py",
+      "sha256": "edefde79b28f14d9b62e785084437712b1396bd2a44fc3c3c18b18b5f3ca5e80"
+    },
+    {
+      "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\scripts\\research\\v12_composite_logic.py",
+      "sha256": "25c32c0ef61ac5ab562cacc943e3aa51f6d1ad77535cb74485b3a36df9bc5b4f"
+    },
+    {
+      "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\scripts\\research\\v12_entry_state_logic.py",
+      "sha256": "62520754e8a25255df52cfd019579e51fce786bab1b02275e59cab3bf68a3278"
+    },
+    {
+      "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\scripts\\research\\run_v12_entry_phase.py",
+      "sha256": "044fda8467b5c0e6534bdee3615067d6d0e6c5703a25ac549531bfb15a197370"
+    },
+    {
+      "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\scripts\\research\\run_v12_momentum_onset.py",
+      "sha256": "5efe84494d4c297e836d15587329319e078957ebfb56ba15e22269d0d25583e8"
+    },
+    {
+      "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\scripts\\research\\run_v12_onset_state_machine.py",
+      "sha256": "bdf27454abc744d628fa9c649e1e185a239b21225795a2d314e9b9893226047e"
+    },
+    {
+      "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\scripts\\research\\analyze_v12_failed_break_sensitivity.py",
+      "sha256": "797185587bb3682d8b3196e5b7e069100bbaa63e4bbc93e5ad62093f25351509"
+    },
+    {
+      "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\scripts\\research\\run_v12_multiroute_rescue.py",
+      "sha256": "c6e35bd76f0979b0a3a46c61f238200b60239117cee1d22b1870eb030b673f5b"
+    },
+    {
+      "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\scripts\\research\\run_v12_robust_complement.py",
+      "sha256": "4875f2860d86fb21a1851ea2963a5913013131eda756e987bfee0a5e247655b9"
+    },
+    {
+      "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\scripts\\research\\run_v12_multilogic_recovery.py",
+      "sha256": "b12306e973c47d3c72eb6fe00535fec4481b4bab57027e38b3ed0ca8ba6f0f47"
+    },
+    {
+      "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\scripts\\research\\run_v12_independent_sleeves.py",
+      "sha256": "1a939e8d38a3b68955f1cb74ebe7bdd75c4d063627890aa7a2ab591095f1e5a4"
+    },
+    {
+      "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\scripts\\research\\run_v12_multilogic_v2.py",
+      "sha256": "b3a9ee60bfba72747f717b4a064dd250b5087f59b587e2ff5d229f865db652e0"
+    },
+    {
+      "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\scripts\\research\\run_v12_multilogic_v3.py",
+      "sha256": "9bb3361b2fca103bdc052545ed947fb411aa6c068c5d03f119208feb16edf335"
+    },
+    {
+      "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\scripts\\research\\run_v12_multilogic_v4_stacking.py",
+      "sha256": "9132ecdda7607fc1597e0ccbfbae1fa722601f48973ccfa195cec394eb888319"
+    },
+    {
+      "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\scripts\\research\\run_v12_multilogic_v4_minlift.py",
+      "sha256": "74db07f4f25a06717d7030ea9f3fe81c0948c66dd7f73e0a0f62044afceb2291"
+    },
+    {
+      "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\scripts\\research\\run_v12_multilogic_v4_flip.py",
+      "sha256": "935b14112f9d93e6020a0d81981872652109f904ed90f4ec203dbbdee6855df3"
+    },
+    {
+      "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\scripts\\research\\run_v12_multilogic_v4_extended.py",
+      "sha256": "29830d312f072b92d19d31674afeeb0d39fd9e106aeaa9fda2c5746dbdd64391"
+    },
+    {
+      "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\scripts\\research\\run_v12_multilogic_v4_final1000.py",
+      "sha256": "ddc32f47d49e76fcd5a02f08948f6949e1501ed7e03a2a9a818484f0687b9ab3"
+    },
+    {
+      "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\scripts\\research\\run_v12_multilogic_v4_quality_refine.py",
+      "sha256": "442eb50b1f9b65a2ebd48e32bc348052207dfcf5f2132dfd4b3415ac579f7a47"
+    },
+    {
+      "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\scripts\\research\\run_v12_v4_route_repair_integrated.py",
+      "sha256": "3070019307dee4b6b167b1771dcd631339ed2c3ff7071b8b359ba64f830a0afb"
+    },
+    {
+      "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\scripts\\research\\run_v12_v4_route_repair_secondpass.py",
+      "sha256": "ec6d68154acb8c405f2f98f62c6626d873dc65bf4669a794d59d01ba60c7cbea"
+    },
+    {
+      "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\scripts\\research\\run_v12_v4_priority_gross_v2_sweep.py",
+      "sha256": "0e9c4d88b652623d403f87d5b94b5eb873bc097952ff8bae33a83b5a229c354c"
+    },
+    {
+      "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\docs\\research\\results\\gate-fixes-bt-20261008\\support\\engine\\scripts\\research\\formal_core_live_ownership.py",
+      "sha256": "bcd14be18428e7e7728c7d87bc647e78b12dc9a599dbc6a6a6543cb6110a9db9"
+    },
+    {
+      "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\docs\\research\\results\\gate-fixes-bt-20261008\\support\\engine\\scripts\\research\\pengu1_hype_engine.py",
+      "sha256": "ec407f6f48730b30b291aced2c0ae88be45d398fb9fd77cdd313f12808c6403a"
+    },
+    {
+      "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\docs\\research\\results\\gate-fixes-bt-20261008\\support\\engine\\scripts\\research\\formal_core_ownership_audit.py",
+      "sha256": "8065f316a38af98e3ea02ccbaa63269828f89e1c9943f64bc1d5d304199e7546"
+    },
+    {
+      "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\docs\\research\\results\\gate-fixes-bt-20261008\\support\\engine\\scripts\\research\\run_formal_core_overlay_diagnostic.py",
+      "sha256": "3fe4773500ab440509a0d19e276b64b67b544a9d2f7d33899d155ef0895052f5"
+    },
+    {
+      "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\docs\\research\\results\\gate-fixes-bt-20261008\\support\\engine\\scripts\\research\\run_pengu1_hype_comparison.py",
+      "sha256": "60fb107a2a3499a61043346a173609186c6c00d2eea07728f4888d85507c67a3"
+    },
+    {
+      "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\docs\\research\\results\\gate-fixes-bt-20261008\\support\\venue_constraints.py",
+      "sha256": "ebda1fcc1d14893defe7810c9108bbcfa3e098f914ad3dd185b9ae50bb7ece6a"
+    }
+  ],
+  "outputs": [
+    {
+      "path": "cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_10BPS\\candidate-decisions.jsonl",
+      "sha256": "fb118b6d06657b52d105a6574cd8ee4184d68ab6dd68ba96bce5b075347c6b64",
+      "reference_sha256": "fb118b6d06657b52d105a6574cd8ee4184d68ab6dd68ba96bce5b075347c6b64",
+      "equal": true
+    },
+    {
+      "path": "cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_10BPS\\metrics.json",
+      "sha256": "d6bb56bef1626170b664db539edf49035812d970069de5e29f1210fae02d4f72",
+      "reference_sha256": "d6bb56bef1626170b664db539edf49035812d970069de5e29f1210fae02d4f72",
+      "equal": true
+    },
+    {
+      "path": "cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_10BPS\\portfolio-events.jsonl",
+      "sha256": "f3872587d4afd209834f6d1b56abc9bd555cd934d97ae0efe4f955de73e877cf",
+      "reference_sha256": "f3872587d4afd209834f6d1b56abc9bd555cd934d97ae0efe4f955de73e877cf",
+      "equal": true
+    },
+    {
+      "path": "cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_10BPS\\portfolio-trades.jsonl",
+      "sha256": "edaae6ba9a8fe84c7db1cbb2e9d133ac9e85f8a89033be5ed7825b6a6e065a65",
+      "reference_sha256": "edaae6ba9a8fe84c7db1cbb2e9d133ac9e85f8a89033be5ed7825b6a6e065a65",
+      "equal": true
+    },
+    {
+      "path": "cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_20BPS\\candidate-decisions.jsonl",
+      "sha256": "7d72b82d71795dcfb6aba1625670806e7075c3289c9da0fbad60617880d74142",
+      "reference_sha256": "7d72b82d71795dcfb6aba1625670806e7075c3289c9da0fbad60617880d74142",
+      "equal": true
+    },
+    {
+      "path": "cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_20BPS\\metrics.json",
+      "sha256": "c0f405132676525bc47cacd866e07511ac89b3b18ceea9302e29ae73bfb932e4",
+      "reference_sha256": "c0f405132676525bc47cacd866e07511ac89b3b18ceea9302e29ae73bfb932e4",
+      "equal": true
+    },
+    {
+      "path": "cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_20BPS\\portfolio-events.jsonl",
+      "sha256": "2f46ab7dd37fbed7c0925c43767f39a02fcdd8802d44687b7bc91bb178e36210",
+      "reference_sha256": "2f46ab7dd37fbed7c0925c43767f39a02fcdd8802d44687b7bc91bb178e36210",
+      "equal": true
+    },
+    {
+      "path": "cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_20BPS\\portfolio-trades.jsonl",
+      "sha256": "963cae2a51a77b42a3676bf7e15c36f6d813a852aa47d5262baf1a42bbce0612",
+      "reference_sha256": "963cae2a51a77b42a3676bf7e15c36f6d813a852aa47d5262baf1a42bbce0612",
+      "equal": true
+    },
+    {
+      "path": "cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_30BPS\\candidate-decisions.jsonl",
+      "sha256": "b396e0708ef46d96fc7516369be9da96d14d48d6f1756819091bf4bdba6bd314",
+      "reference_sha256": "b396e0708ef46d96fc7516369be9da96d14d48d6f1756819091bf4bdba6bd314",
+      "equal": true
+    },
+    {
+      "path": "cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_30BPS\\metrics.json",
+      "sha256": "763b50071d03d8d8fedda1fa935d320f1fdd2bd184468c814d5b6839499bfe57",
+      "reference_sha256": "763b50071d03d8d8fedda1fa935d320f1fdd2bd184468c814d5b6839499bfe57",
+      "equal": true
+    },
+    {
+      "path": "cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_30BPS\\portfolio-events.jsonl",
+      "sha256": "453ae455dfedc55e7f6dae00a536f2b9db572187cdf6dfeca2ad03b0c3acd463",
+      "reference_sha256": "453ae455dfedc55e7f6dae00a536f2b9db572187cdf6dfeca2ad03b0c3acd463",
+      "equal": true
+    },
+    {
+      "path": "cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_30BPS\\portfolio-trades.jsonl",
+      "sha256": "b47a0845f01d2f43c4b9575f9e940ab12d410e25a7f8cb9f5852bb734f016337",
+      "reference_sha256": "b47a0845f01d2f43c4b9575f9e940ab12d410e25a7f8cb9f5852bb734f016337",
+      "equal": true
+    }
+  ],
+  "hindsight_rank_causal_in_train": false,
+  "trading_mutation": 0,
+  "network_calls": 0
+}

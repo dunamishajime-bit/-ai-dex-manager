@@ -215,11 +215,11 @@ export default function LiveResearchDashboard() {
                 <LineChart data={chartData} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
                   <CartesianGrid stroke="rgba(255,255,255,0.08)" strokeDasharray="3 3" />
                   <XAxis dataKey="cycle" stroke="rgba(255,255,255,0.4)" tick={{ fontSize: 11 }} />
-                  <YAxis stroke="rgba(255,255,255,0.4)" tick={{ fontSize: 11 }} tickFormatter={(value) => `${value}%`} />
+                  <YAxis stroke="rgba(255,255,255,0.4)" tick={{ fontSize: 11 }} tickFormatter={(value: number) => `${value}%`} />
                   <Tooltip
                     contentStyle={{ background: "#080b11", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 12 }}
                     labelStyle={{ color: "white" }}
-                    formatter={(value) => `${Number(value).toFixed(2)}%`}
+                    formatter={(value: unknown) => `${Number(value).toFixed(2)}%`}
                   />
                   <Legend wrapperStyle={{ fontSize: 11 }} />
                   <ReferenceLine y={payload.targets.oosMonthlyPct} stroke="rgba(250,204,21,0.7)" strokeDasharray="5 5" label="OOS目標30%" />

@@ -399,14 +399,14 @@ export const AutoTradeSimulator: React.FC<AutoTradeSimulatorProps> = ({ marketDa
                                     <YAxis
                                         domain={['auto', 'auto']}
                                         orientation="right"
-                                        tickFormatter={(val) => val >= 1 ? `$${val.toLocaleString(undefined, { maximumFractionDigits: 0 })}` : `$${val.toFixed(4)}`}
+                                        tickFormatter={(val: number) => val >= 1 ? `$${val.toLocaleString(undefined, { maximumFractionDigits: 0 })}` : `$${val.toFixed(4)}`}
                                         stroke="#9ca3af"
                                         fontSize={12}
                                     />
                                     <Tooltip
                                         contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151', color: '#fff' }}
                                         formatter={formatTooltipPrice}
-                                        labelFormatter={(label) => new Date(label).toLocaleString()}
+                                        labelFormatter={(label: string | number) => new Date(label).toLocaleString()}
                                     />
                                     <Area
                                         type="monotone"

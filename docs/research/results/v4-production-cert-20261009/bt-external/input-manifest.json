@@ -1,0 +1,82 @@
+[
+  {
+    "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\scripts\\research\\run_v12_multilogic_causal_holdout.py",
+    "sha256": "21ed736f3aaf0ba6b409abe78e93e33c0d41a07a26fc1a0c5ffd9ca729751b2d"
+  },
+  {
+    "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\docs\\research\\results\\v12-v4-priority-gross-v2-20261009\\route-priority-score.json",
+    "sha256": "30f89625860c027c7ecb96da182263ca9d7c19a91e20504302dea6048e8bb4d5"
+  },
+  {
+    "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\docs\\research\\results\\v12-recovery-stage2-search-20261008\\selected-stage2-routes.json",
+    "sha256": "12ca52a858a5b57e278bef02b63e236adce8fdd131217079d4b5f898852af42e"
+  },
+  {
+    "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\docs\\research\\results\\v12-recovery-stage3-search-20261008\\selected-stage3-routes.json",
+    "sha256": "aef7a08a549311059dc04ec9b8f40145bb27b13d8d2de56647f940fa2c220062"
+  },
+  {
+    "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\docs\\research\\results\\v12-multilogic-causal-holdout-20261009\\baseline-candidates.jsonl",
+    "sha256": "37c6e0431aef513cf4104ae533f5fc8222c597ef9f4e412d89b4186f671160ba"
+  },
+  {
+    "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\docs\\research\\results\\v12-untouched-holdout-20261008\\holdout-trades.jsonl",
+    "sha256": "c3299ee8b8d3ca3e95a20017b74d01e5d8572b0055df9c083c81b43f3384b4fe"
+  },
+  {
+    "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\docs\\research\\results\\v12-untouched-holdout-20261008\\data\\klines\\AAVEUSDT.jsonl",
+    "sha256": "55c2a64bf10f93c4dd7df1ea24d0cbc3af89c879b6e1db4ad10c2dd90fd7b0ed"
+  },
+  {
+    "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\docs\\research\\results\\v12-untouched-holdout-20261008\\data\\klines\\ADAUSDT.jsonl",
+    "sha256": "4dad5c48218184fa58b502aa6b327eba2c0d937133f129b13b975efdda2b8ba6"
+  },
+  {
+    "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\docs\\research\\results\\v12-untouched-holdout-20261008\\data\\klines\\ATOMUSDT.jsonl",
+    "sha256": "d89588ca8e0ab41d0db98c407acfcca0c940ea2f651a3a2ecd3b377e7b10a02e"
+  },
+  {
+    "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\docs\\research\\results\\v12-untouched-holdout-20261008\\data\\klines\\AVAXUSDT.jsonl",
+    "sha256": "0b3891b82671e8129e3b9c996e105ddd6c6c19c8678cc0cad8e0cef922da866c"
+  },
+  {
+    "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\docs\\research\\results\\v12-untouched-holdout-20261008\\data\\klines\\BNBUSDT.jsonl",
+    "sha256": "04482b91df7f58f2828a8c52bf488c5174634bde566c48f684910331b6546437"
+  },
+  {
+    "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\docs\\research\\results\\v12-untouched-holdout-20261008\\data\\klines\\BTCUSDT.jsonl",
+    "sha256": "6f70a2f041898d5925318fa9fe76cca3d4bc0e7b506efd281f721db3b2f6b04d"
+  },
+  {
+    "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\docs\\research\\results\\v12-untouched-holdout-20261008\\data\\klines\\DOGEUSDT.jsonl",
+    "sha256": "2ad1bb800dec801d370a5eb94a122f857d8c7542133e6470e9c24f0df347d9d9"
+  },
+  {
+    "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\docs\\research\\results\\v12-untouched-holdout-20261008\\data\\klines\\ETHUSDT.jsonl",
+    "sha256": "951f7feeb56eeb12696c02097976b8ba38e05cc599e174e38bc3fa69a8b47316"
+  },
+  {
+    "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\docs\\research\\results\\v12-untouched-holdout-20261008\\data\\klines\\INJUSDT.jsonl",
+    "sha256": "3970cef2bca0dbfbb9eb067a14ae642fa7790e4c49e7dac1423c5067b891bbf1"
+  },
+  {
+    "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\docs\\research\\results\\v12-untouched-holdout-20261008\\data\\klines\\LINKUSDT.jsonl",
+    "sha256": "31708c912b91d6259d80e917dc09349a0ccc3649a58ed8393154e84aeeb35faf"
+  },
+  {
+    "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\docs\\research\\results\\v12-untouched-holdout-20261008\\data\\klines\\LTCUSDT.jsonl",
+    "sha256": "27a6a2cc2465a036734599fefa75d9c11fb4cb34b9892eee1822355868990297"
+  },
+  {
+    "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\docs\\research\\results\\v12-untouched-holdout-20261008\\data\\klines\\NEARUSDT.jsonl",
+    "sha256": "78ee020cbdb53dfb14fe7b441c5f86ba4b8e41f42370f64f330974a77642da55"
+  },
+  {
+    "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\docs\\research\\results\\v12-untouched-holdout-20261008\\data\\klines\\SOLUSDT.jsonl",
+    "sha256": "55ac4f4fcecf7cc2e3a77f25f93d52989b94683b9f720ea385e2eb1ac8dcc2ba"
+  },
+  {
+    "path": "C:\\Users\\dis\\DisDex-five-improvements-20261008\\docs\\research\\results\\v12-untouched-holdout-20261008\\data\\klines\\XRPUSDT.jsonl",
+    "sha256": "927c51ecf7c6e12fa1ba41faccb54be481bc2f7568b2112e4d79a8a33de7b608"
+  }
+]

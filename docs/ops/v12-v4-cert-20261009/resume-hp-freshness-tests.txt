@@ -1,0 +1,33 @@
+✔ LIVE requires coherent fresh state, service heartbeat and explicit inactive shared protection (1.0583ms)
+✔ future state cannot display LIVE (0.169ms)
+✔ stale state cannot display LIVE (0.0893ms)
+✔ missing state lineage cannot display LIVE (0.1097ms)
+✔ mismatched state lineage cannot display LIVE (0.093ms)
+✔ PAPER state cannot display LIVE (0.092ms)
+✔ manual review cannot display LIVE (0.0905ms)
+✔ embedded hold cannot display LIVE (0.0785ms)
+✔ future heartbeat cannot display LIVE (0.0963ms)
+✔ future tick cannot display LIVE (0.1488ms)
+✔ stale heartbeat cannot display LIVE (0.0796ms)
+✔ two-hour-old healthy positive PID cannot display LIVE (0.079ms)
+✔ stale tick cannot display LIVE (0.0839ms)
+✔ blocked service cannot display LIVE (0.0852ms)
+✔ disabled service cannot display LIVE (0.1042ms)
+✔ dead service cannot display LIVE (0.0582ms)
+✔ wrong heartbeat SHA cannot display LIVE (0.044ms)
+✔ wrong expected SHA cannot display LIVE (0.0683ms)
+✔ wrong service unit cannot display LIVE (0.0838ms)
+✔ unrelated heartbeat cannot display LIVE (0.0762ms)
+✔ protected hold cannot display LIVE (0.0657ms)
+✔ unknown shared protection cannot display LIVE (0.048ms)
+✔ coerced shared protection cannot display LIVE (0.0426ms)
+✔ missing current marker, heartbeat or shared protection cannot pass (0.1372ms)
+✔ file reader uses current marker and fails closed on missing/malformed kill JSON (149.5691ms)
+ℹ tests 25
+ℹ suites 0
+ℹ pass 25
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 737.0345

@@ -7,6 +7,9 @@ import {IdleResidualLongRunner} from "../lib/idle-residual-long-runner";
 import {emptyIdleResidualLongState} from "../lib/idle-residual-long-state";
 import {emptyIdleState} from "../lib/idle-priority-short-state";
 const SHA="a".repeat(40), H=3600000, NOW=1800000000000;
+// These admission tests require the production root-owned, mode-0600 POSIX
+// certificate contract. Windows cannot create that ownership/mode fixture.
+const requiresRootPosix = process.platform === "win32" || typeof process.getuid !== "function" || process.getuid() !== 0;
 async function fixture(){
  const root=await mkdtemp(join(tmpdir(),"idle-residual-stale-"));
  const cert={schema:"disdex-idle-residual-long-parity-cert/v1",runtimeSha:SHA,generatedAt:new Date(NOW).toISOString(),priority:["FORMAL_EXISTING","IDLE_PRIORITY_SHORT","DOGE_REL_VOL","AVAX_REL_LONG"],trailAtr:0.20,stopAtr:2.477,takeProfitAtr:3.1995,roundtripBps:10,finalJpy:1319918378.8124561,integratedTradeCount:1390,idleTrades:61,dogeTrades:11,avaxTrades:16,profitFactor:2.332297694545306,maxMtmDrawdown:-0.21359613575534397,contractSha256:"b".repeat(64)};
@@ -24,7 +27,7 @@ async function fixture(){
  const runner=new IdleResidualLongRunner(d);
  return {runner,state:()=>state,released:()=>released,orders:()=>orders,cleanup:()=>rm(root,{recursive:true,force:true})};
 }
-test("stale residual baseline defers without orders, manual review or daemon rejection; next tick retries",{skip:typeof process.getuid==="function"&&process.getuid()!==0},async()=>{
+test("stale residual baseline defers without orders, manual review or daemon rejection; next tick retries",{skip:requiresRootPosix,timeout:5000},async()=>{
  const f=await fixture();
  try{
   (f.runner as any).baselineContext=async()=>{throw Error("BASELINE_ADMISSION_SOURCE_STALE_OR_TS_MISMATCH");};
@@ -37,14 +40,15 @@ test("stale residual baseline defers without orders, manual review or daemon rej
   assert.equal(f.orders(),0);
  }finally{await f.cleanup();}
 });
-test("account lock remains held while async residual entry admission settles",{skip:typeof process.getuid==="function"&&process.getuid()!==0},async()=>{
+test("account lock remains held while async residual entry admission settles",{skip:requiresRootPosix,timeout:5000},async()=>{
  const f=await fixture();
  try{
   let reached!:()=>void,finish!:()=>void;
   const started=new Promise<void>(r=>{reached=r;});
   const pending=new Promise<void>(r=>{finish=r;});
   (f.runner as any).baselineContext=async()=>{reached();await pending;throw Error("BASELINE_ADMISSION_SOURCE_STALE_OR_TS_MISMATCH");};
-  const tick=f.runner.tick();await started;
+  const tick=f.runner.tick();
+  await Promise.race([started,tick.then((result)=>{throw new Error(`entry admission was not reached: ${result.message}`);})]);
   assert.equal(f.released(),false);
   finish();assert.equal((await tick).status,"held");
   assert.equal(f.released(),true);assert.equal(f.orders(),0);

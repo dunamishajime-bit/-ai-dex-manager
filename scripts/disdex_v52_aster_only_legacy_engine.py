@@ -1081,7 +1081,11 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         if not kill:
             self._clear_kill_flatten_latch()
         if not market_open:
-            return {"local": local, "rows": None, "skipWithoutLock": not positions_open}
+            # No quote-based exit or venue mutation is possible in this branch.
+            # idle_tick still refreshes the strategy loss latch; emergency flatten
+            # above remains serialized, and the independent Margin Guard retains
+            # account-level protection for every managed position.
+            return {"local": local, "rows": None, "skipWithoutLock": True, "marketClosed": True}
         in_decision_window = base.clock("09:59:50") <= sec <= base.clock("15:30:30")
         if not positions_open and not in_decision_window:
             return {"local": local, "rows": None, "skipWithoutLock": True}
@@ -1215,7 +1219,7 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
 
     def _loop_interval_ms(self, prepared: dict) -> int:
         idle_ms = max(1_000, base.int_env("DISDEX_STOCK_IDLE_INTERVAL_MS", 5000))
-        if prepared.get("killHold") or prepared.get("upstreamHold"):
+        if prepared.get("killHold") or prepared.get("upstreamHold") or prepared.get("marketClosed"):
             return idle_ms
         active = regular_us_equity_session() or bool(self.positions())
         return 250 if active else idle_ms

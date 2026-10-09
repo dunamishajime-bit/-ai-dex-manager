@@ -1,0 +1,114 @@
+{
+  "status": "COUNTERFACTUAL_CURRENT_FILTER_DIAGNOSTIC_NOT_REPLAY",
+  "not_historical_filter_archive": true,
+  "cases": {
+    "PRICE_MODEL_10BPS": {
+      "by_strategy": {
+        "V12": {
+          "trades": 828,
+          "observed_20261007_quantity_equal": 828
+        },
+        "RESIDUAL": {
+          "trades": 22,
+          "observed_20261007_quantity_equal": 22
+        },
+        "Q102": {
+          "trades": 136,
+          "observed_20261007_quantity_equal": 136
+        },
+        "PENGU": {
+          "trades": 67,
+          "observed_20261007_quantity_equal": 67
+        },
+        "IDLE": {
+          "trades": 47,
+          "observed_20261007_quantity_equal": 47
+        },
+        "V52": {
+          "trades": 87,
+          "observed_20261007_quantity_equal": 87
+        },
+        "HYPE_LONG": {
+          "trades": 28,
+          "observed_20261007_quantity_equal": 28
+        },
+        "FET": {
+          "trades": 7,
+          "observed_20261007_quantity_equal": 7
+        }
+      }
+    },
+    "PRICE_MODEL_20BPS": {
+      "by_strategy": {
+        "V12": {
+          "trades": 828,
+          "observed_20261007_quantity_equal": 828
+        },
+        "RESIDUAL": {
+          "trades": 22,
+          "observed_20261007_quantity_equal": 22
+        },
+        "Q102": {
+          "trades": 136,
+          "observed_20261007_quantity_equal": 136
+        },
+        "PENGU": {
+          "trades": 67,
+          "observed_20261007_quantity_equal": 67
+        },
+        "IDLE": {
+          "trades": 51,
+          "observed_20261007_quantity_equal": 51
+        },
+        "V52": {
+          "trades": 86,
+          "observed_20261007_quantity_equal": 86
+        },
+        "HYPE_LONG": {
+          "trades": 27,
+          "observed_20261007_quantity_equal": 27
+        },
+        "FET": {
+          "trades": 7,
+          "observed_20261007_quantity_equal": 7
+        }
+      }
+    },
+    "PRICE_MODEL_30BPS": {
+      "by_strategy": {
+        "V12": {
+          "trades": 824,
+          "observed_20261007_quantity_equal": 824
+        },
+        "RESIDUAL": {
+          "trades": 22,
+          "observed_20261007_quantity_equal": 22
+        },
+        "Q102": {
+          "trades": 136,
+          "observed_20261007_quantity_equal": 136
+        },
+        "PENGU": {
+          "trades": 67,
+          "observed_20261007_quantity_equal": 67
+        },
+        "IDLE": {
+          "trades": 53,
+          "observed_20261007_quantity_equal": 53
+        },
+        "V52": {
+          "trades": 86,
+          "observed_20261007_quantity_equal": 86
+        },
+        "HYPE_LONG": {
+          "trades": 23,
+          "observed_20261007_quantity_equal": 23
+        },
+        "FET": {
+          "trades": 7,
+          "observed_20261007_quantity_equal": 7
+        }
+      }
+    }
+  }
+}

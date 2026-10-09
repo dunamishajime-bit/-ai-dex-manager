@@ -72,7 +72,10 @@ test('FET active migration requires exact venue quantity, profit-floor STOP and 
 test('new integrated acceptance is bound to specified research SHA and reproduced 1358-trade ledger',async()=>{
  const {readFile}=await import('node:fs/promises');const {createHash}=await import('node:crypto');
  const t=JSON.parse(await readFile('docs/production/current-live-target.json','utf8'));
- const bytes=await readFile(t.formalBacktest.sourceArtifact);assert.equal(createHash('sha256').update(bytes).digest('hex').toUpperCase(),t.formalBacktest.sourceArtifactSha256);
+ // Hash Git-canonical LF content: Windows checkout CRLF must not change the frozen artifact contract.
+ const bytes=await readFile(t.formalBacktest.sourceArtifact);
+ const canonicalBytes=Buffer.from(bytes.toString('utf8').replace(/\r\n/g,'\n'),'utf8');
+ assert.equal(createHash('sha256').update(canonicalBytes).digest('hex').toUpperCase(),t.formalBacktest.sourceArtifactSha256);
  assert.equal(t.researchSourceSha,'db0ee5def97e8194f55aa77fa5b7326fa938d456');assert.equal(t.formalBacktest.NORMAL.trades,1358);
  assert.equal(t.strategy.v52.basisStopMultiple,1.75);assert.equal(t.strategy.v52.fixedEntryReferenceStopPhase1,false);
 });

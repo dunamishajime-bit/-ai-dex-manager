@@ -1,0 +1,59 @@
+[
+  {
+    "cmd": [
+      "node",
+      "--import",
+      "tsx",
+      "--test",
+      "tests/v12-v4-production-lifecycle.test.ts",
+      "tests/v12-v4-shadow-observability.test.ts",
+      "tests/v12-v4-hp-failclosed.test.ts",
+      "tests/v12-runtime-status.test.ts"
+    ],
+    "exit": 0,
+    "stdout": "\u2714 LIVE requires coherent fresh state, service heartbeat and explicit inactive shared protection (2.2495ms)\n\u2714 future state cannot display LIVE (0.2751ms)\n\u2714 stale state cannot display LIVE (0.128ms)\n\u2714 missing state lineage cannot display LIVE (0.1534ms)\n\u2714 mismatched state lineage cannot display LIVE (0.1085ms)\n\u2714 PAPER state cannot display LIVE (0.1394ms)\n\u2714 manual review cannot display LIVE (0.1482ms)\n\u2714 embedded hold cannot display LIVE (0.1143ms)\n\u2714 future heartbeat cannot display LIVE (0.1227ms)\n\u2714 future tick cannot display LIVE (0.2419ms)\n\u2714 stale heartbeat cannot display LIVE (0.1121ms)\n\u2714 stale tick cannot display LIVE (1.2433ms)\n\u2714 blocked service cannot display LIVE (0.158ms)\n\u2714 disabled service cannot display LIVE (0.1149ms)\n\u2714 dead service cannot display LIVE (0.1415ms)\n\u2714 wrong heartbeat SHA cannot display LIVE (0.1052ms)\n\u2714 wrong expected SHA cannot display LIVE (0.0824ms)\n\u2714 wrong service unit cannot display LIVE (0.1373ms)\n\u2714 unrelated heartbeat cannot display LIVE (0.1521ms)\n\u2714 protected hold cannot display LIVE (0.0837ms)\n\u2714 unknown shared protection cannot display LIVE (0.0581ms)\n\u2714 coerced shared protection cannot display LIVE (0.0872ms)\n\u2714 missing current marker, heartbeat or shared protection cannot pass (0.1514ms)\n\u2714 file reader uses current marker and fails closed on missing/malformed kill JSON (27.4399ms)\n\u2714 fresh non-ordering snapshot displays research decisions without certifying LIVE (18.6363ms)\n\u2714 missing state and missing certificate fail closed (4.473ms)\n\u2714 claimed certificate or legacy enable flag never gives V4 authority (6.8816ms)\n\u2714 order-enabled rejects all state-derived decisions and caps (7.4007ms)\n\u2714 nonzero mutation rejects all state-derived decisions and caps (5.3319ms)\n\u2714 coerced mutation rejects all state-derived decisions and caps (5.4762ms)\n\u2714 wrong architecture rejects all state-derived decisions and caps (5.3309ms)\n\u2714 missing shadow proof rejects all state-derived decisions and caps (7.9206ms)\n\u2714 stale timestamp rejects all state-derived decisions and caps (5.8781ms)\n\u2714 future timestamp rejects all state-derived decisions and caps (6.3706ms)\n\u2714 missing timestamp rejects all state-derived decisions and caps (4.5597ms)\n\u2714 unsafe nested leg cannot appear as a safe Shadow admission (4.7963ms)\n\u2714 tampered frozen rank table cannot supply rank, score or planned gross (12.2112ms)\n\u2714 Linux LF frozen priority verifies identically to the audited CRLF source (9.0083ms)\n\u2714 shared protected hold remains explicit even without current runtime files (7.384ms)\n\u2714 41 exit catalog rows preserve two-pass overrides and one explicit native blocker (1.7003ms)\n\u2714 pending reservation, deferred partial fills and restart exactly preserve accounting (4.1458ms)\n\u2714 same-symbol partial closes reduce only the selected virtual leg (2.0511ms)\n\u2714 existing TSLA and PENGU owners block all V4 netting, pending foreign gross counts (0.8182ms)\n\u2714 precision floors; protected hold and worst-case cap reservations fail closed (0.9021ms)\n\u2714 ATR stop-first same-bar ambiguity, gap-stop and H1 cutoff are executable (0.4782ms)\n\u2714 time deadline requires available exact next open; future open forbidden (0.2817ms)\n\u2714 closed H1 formulas ignore future bars, reject gaps, and normalize effective side (4.0492ms)\n\u2714 mark-to-market gross uses current equity and exact quantities, and journal rejects gaps (1.54ms)\n\u2714 offline CLI evaluates causal robust candidate, persists explicit fills, and restarts (20.7983ms)\n\u2714 reversal preemption waits for actual closes and cannot delete an opposing virtual leg (0.8182ms)\n\u2714 equity DD admission fails closed and existing virtual-leg exits remain available (0.7148ms)\n\u2714 closing records cooldown; caller cannot release foreign ownership or forge reservations (0.8478ms)\n\u2714 native G3 reuses frozen production trailing levels, persisted state, and mandatory native ATR evidence (3.8328ms)\n\u2714 claimed source parity never certifies native generation or unlocks order authority (2.1715ms)\n\u2714 HP reader loads frozen catalog plus shadow state and preserves zero mutation (26.5168ms)\n\u2714 HP reader remains read-only when shadow state is missing (3.5325ms)\n\u2139 tests 56\n\u2139 suites 0\n\u2139 pass 56\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 481.8334\n",
+    "stderr": ""
+  },
+  {
+    "cmd": [
+      "python",
+      "-m",
+      "unittest",
+      "tests.test_stock_reference_alpaca_stream_recovery",
+      "tests.test_stock_reference_alpaca_market_status",
+      "tests.test_stock_reference_gate"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "..............\n----------------------------------------------------------------------\nRan 14 tests in 0.549s\n\nOK\n"
+  },
+  {
+    "cmd": [
+      "python",
+      "tests/test_v52_account_lock_scope.py"
+    ],
+    "exit": 0,
+    "stdout": "V52_ACCOUNT_LOCK_SCOPE_SELFTEST_PASS\nV52_MARKET_CLOSED_LOCK_SCOPE_SELFTEST_PASS\n",
+    "stderr": ""
+  },
+  {
+    "cmd": [
+      "node",
+      "--test",
+      "scripts/ops/root/disdex-v12-absent-pending-policy.test.mjs"
+    ],
+    "exit": 0,
+    "stdout": "\u2714 absent entry resolves idempotency without clearing local or shared protection (9.7826ms)\n\u2714 refuses ambiguous lookup (0.3353ms)\n\u2714 refuses historical fill (0.1868ms)\n\u2714 refuses current XRP exposure (0.1714ms)\n\u2714 refuses XRP open order (0.2125ms)\n\u2714 refuses foreign position quantity changed (0.1633ms)\n\u2714 refuses protective order changed (0.1562ms)\n\u2714 refuses incomplete trade interval (0.1114ms)\n\u2714 refuses stale evidence (0.1508ms)\n\u2714 refuses unvalidated numeric position (0.2051ms)\n\u2714 refuses runtime mismatch, V12 exposure and exit pending (0.203ms)\n\u2714 release only one exactly bound durable pending reservation (0.2865ms)\n\u2139 tests 12\n\u2139 suites 0\n\u2139 pass 12\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 85.4035\n",
+    "stderr": ""
+  },
+  {
+    "cmd": [
+      "git",
+      "diff",
+      "--check"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "warning: in the working copy of 'apps/production-ui/components/features/V12V4ShadowPanel.tsx', LF will be replaced by CRLF the next time Git touches it\nwarning: in the working copy of 'apps/production-ui/lib/server/v12-v4-shadow-observability.ts', LF will be replaced by CRLF the next time Git touches it\n"
+  }
+]

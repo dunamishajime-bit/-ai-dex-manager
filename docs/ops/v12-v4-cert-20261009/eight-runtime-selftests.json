@@ -1,0 +1,125 @@
+[
+  {
+    "cmd": [
+      "node",
+      "--import",
+      "tsx",
+      "scripts/v12-x1-all-selftest.ts"
+    ],
+    "exit": 0,
+    "stdout": "V12_X1_ALL_SELFTEST_PASS {\"strategyId\":\"V12_X1.00_ALL\",\"bars\":2}\n",
+    "stderr": ""
+  },
+  {
+    "cmd": [
+      "node",
+      "--import",
+      "tsx",
+      "scripts/v12-x1-all-frozen-artifact-parity-selftest.ts"
+    ],
+    "exit": 0,
+    "stdout": "V12_BTC2_Q54_ATR14_PENGU_HARD24_Q102X1_PARITY_SELFTEST_PASS\n",
+    "stderr": ""
+  },
+  {
+    "cmd": [
+      "node",
+      "--import",
+      "tsx",
+      "scripts/pengu-v8-v64-dynamic-selftest.ts"
+    ],
+    "exit": 0,
+    "stdout": "PENGU_V8_V64_DYNAMIC_SELFTEST_PASS\n",
+    "stderr": ""
+  },
+  {
+    "cmd": [
+      "node",
+      "--import",
+      "tsx",
+      "scripts/pengu-short-v20-parity.ts"
+    ],
+    "exit": 0,
+    "stdout": "PENGU_SHORT_V20_PRODUCTION_PARITY_PASS\n{\"candidate\":\"COUNTERWIND_VOL_TARGET_FAILURE_EXIT\",\"preRegistrationSha\":\"ad7cedb3cafaf9f9680e390112f72375d84b50ac\",\"fixtures\":{\"volTarget\":2,\"cap\":2,\"floor\":2},\"ordersSent\":0,\"cancelSent\":0,\"positionChangesSent\":0}\n",
+    "stderr": ""
+  },
+  {
+    "cmd": [
+      "node",
+      "--import",
+      "tsx",
+      "scripts/disdex-quality102-causal-v4-model-selftest.ts"
+    ],
+    "exit": 0,
+    "stdout": "QUALITY102_CAUSAL_V4_MODEL_SELFTEST_PASS {\"keys\":31}\n",
+    "stderr": ""
+  },
+  {
+    "cmd": [
+      "node",
+      "--import",
+      "tsx",
+      "scripts/disdex-quality102-causal-v4-signal-selftest.ts"
+    ],
+    "exit": 0,
+    "stdout": "QUALITY102_CAUSAL_V4_SIGNAL_SELFTEST_PASS\n",
+    "stderr": ""
+  },
+  {
+    "cmd": [
+      "node",
+      "--import",
+      "tsx",
+      "scripts/disdex-quality102-causal-v4-exit-selftest.ts"
+    ],
+    "exit": 0,
+    "stdout": "QUALITY102_CAUSAL_V4_EXIT_SELFTEST_PASS\n",
+    "stderr": ""
+  },
+  {
+    "cmd": [
+      "python",
+      "scripts/disdex_v52_aster_only_live_engine.py",
+      "--self-test"
+    ],
+    "exit": 0,
+    "stdout": "DISDEX_STRICT_PORTFOLIO_PLANNER_PY_SELFTEST_PASS\nV52_IDLE_ADMISSION_HEARTBEAT_SELFTEST_PASS\nV52_STRICT_ASTER_ONLY_SELFTEST_PASS\n",
+    "stderr": ""
+  },
+  {
+    "cmd": [
+      "node",
+      "--import",
+      "tsx",
+      "scripts/disdex-hype-trend-live-runner.ts",
+      "--self-test"
+    ],
+    "exit": 0,
+    "stdout": "{\"event\":\"hype-zec-runner-selftest\",\"status\":\"PASS\",\"mode\":\"SHADOW\",\"enabled\":false,\"liveOrders\":0,\"cancelOrders\":0,\"positionChanges\":0}\n",
+    "stderr": ""
+  },
+  {
+    "cmd": [
+      "node",
+      "--import",
+      "tsx",
+      "scripts/disdex-idle-priority-short-live-runner.ts",
+      "--self-test"
+    ],
+    "exit": 0,
+    "stdout": "{\"event\":\"idle-priority-short-selftest\",\"status\":\"PASS\",\"mode\":\"SHADOW\",\"enabled\":true,\"liveOrders\":0,\"cancelOrders\":0,\"positionChanges\":0}\n",
+    "stderr": ""
+  },
+  {
+    "cmd": [
+      "node",
+      "node_modules/typescript/bin/tsc",
+      "--noEmit",
+      "-p",
+      "tsconfig.research.json"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  }
+]

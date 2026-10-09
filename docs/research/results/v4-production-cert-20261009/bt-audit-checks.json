@@ -1,0 +1,54 @@
+[
+  {
+    "name": "ALL_12_REFERENCE_LEDGER_METRIC_SHA256_MATCH",
+    "pass": true
+  },
+  {
+    "name": "ALL_30_SOURCE_MODULES_NORMALIZED_IDENTICAL",
+    "pass": true
+  },
+  {
+    "name": "PRICE_MODEL_10BPS_PARITY_AND_ACCOUNTING",
+    "pass": true
+  },
+  {
+    "name": "PRICE_MODEL_10BPS_ALL8",
+    "pass": true
+  },
+  {
+    "name": "PRICE_MODEL_10BPS_RECORDED_CURRENT_FILTERS_ALL_EQUAL",
+    "pass": true
+  },
+  {
+    "name": "PRICE_MODEL_20BPS_PARITY_AND_ACCOUNTING",
+    "pass": true
+  },
+  {
+    "name": "PRICE_MODEL_20BPS_ALL8",
+    "pass": true
+  },
+  {
+    "name": "PRICE_MODEL_20BPS_RECORDED_CURRENT_FILTERS_ALL_EQUAL",
+    "pass": true
+  },
+  {
+    "name": "PRICE_MODEL_30BPS_PARITY_AND_ACCOUNTING",
+    "pass": true
+  },
+  {
+    "name": "PRICE_MODEL_30BPS_ALL8",
+    "pass": true
+  },
+  {
+    "name": "PRICE_MODEL_30BPS_RECORDED_CURRENT_FILTERS_ALL_EQUAL",
+    "pass": true
+  },
+  {
+    "name": "ORIGINAL_EXTERNAL_274_REFERENCE_EVENTS",
+    "pass": true
+  },
+  {
+    "name": "Y06_INDEPENDENT_REVERSE_72H_EQUALS_SELECTED_TRANSLATION",
+    "pass": true
+  }
+]

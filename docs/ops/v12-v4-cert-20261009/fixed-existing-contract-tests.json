@@ -1,0 +1,12 @@
+[
+  {
+    "file": "tests/current_live_target_readiness.test.ts",
+    "exitCode": 0,
+    "log": "C:\\Users\\dis\\DisDex-v4-production-cert-20261009\\docs\\ops\\v12-v4-cert-20261009\\fixed-current_live_target_readiness.test.log"
+  },
+  {
+    "file": "tests/dd1296-entry-contract.test.ts",
+    "exitCode": 0,
+    "log": "C:\\Users\\dis\\DisDex-v4-production-cert-20261009\\docs\\ops\\v12-v4-cert-20261009\\fixed-dd1296-entry-contract.test.log"
+  }
+]

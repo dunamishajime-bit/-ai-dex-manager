@@ -1,0 +1,21 @@
+✔ absent entry resolves idempotency without clearing local or shared protection (10.197ms)
+✔ refuses ambiguous lookup (0.3783ms)
+✔ refuses historical fill (0.1593ms)
+✔ refuses current XRP exposure (0.1795ms)
+✔ refuses XRP open order (0.1978ms)
+✔ refuses foreign position quantity changed (0.2086ms)
+✔ refuses protective order changed (0.1381ms)
+✔ refuses incomplete trade interval (0.1163ms)
+✔ refuses stale evidence (0.151ms)
+✔ refuses unvalidated numeric position (0.2545ms)
+✔ refuses runtime mismatch, V12 exposure and exit pending (0.1858ms)
+✔ release only one exactly bound durable pending reservation (0.3675ms)
+✔ controller temporary state serialization roundtrips before CAS rename (9.064ms)
+ℹ tests 13
+ℹ suites 0
+ℹ pass 13
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 95.9026

@@ -109,7 +109,11 @@ class QuoteStore:
         with self._lock:
             return self._quotes.get(symbol)
 
-    def health(self) -> Dict[str, Any]:
+    def last_quote_received_ms(self) -> int:
+        with self._lock:
+            return self._last_message_ms
+
+    def health(self, max_age_ms: int = 30000) -> Dict[str, Any]:
         with self._lock:
             rows = {
                 symbol: {
@@ -121,12 +125,21 @@ class QuoteStore:
                 }
                 for symbol, quote in self._quotes.items()
             }
+            market_open = regular_us_equity_session()
+            freshness_ready = self._connected and all(
+                symbol in rows and rows[symbol]["ageMs"] <= max_age_ms
+                for symbol in SYMBOLS
+            )
+            status = "ok" if freshness_ready else "deferred" if self._connected and not market_open else "degraded"
             return {
-                "status": "ok" if self._connected else "degraded",
+                "status": status,
+                "freshnessReady": freshness_ready,
+                "maximumQuoteAgeMs": max_age_ms,
+                "healthReason": "READY" if freshness_ready else "MARKET_CLOSED_REFERENCE_DEFERRED" if status == "deferred" else "REFERENCE_SOURCE_OR_QUOTE_QUALITY_NOT_READY",
                 "connected": self._connected,
                 "lastError": self._last_error,
                 "lastMessageAt": self._last_message_ms,
-                "marketOpen": regular_us_equity_session(),
+                "marketOpen": market_open,
                 "symbols": rows,
             }
 
@@ -140,6 +153,8 @@ class AlpacaStream(threading.Thread):
         self.secret = (os.getenv("ALPACA_DATA_API_SECRET") or "").strip()
         self.feed = (os.getenv("ALPACA_DATA_FEED") or "sip").strip().lower()
         self.url = f"wss://stream.data.alpaca.markets/v2/{self.feed}"
+        # Reconnect a silently stalled socket; never make cached quotes executable.
+        self.stall_timeout_ms = max(30000, int(os.getenv("DISDEX_STOCK_REFERENCE_STREAM_STALL_MS", "30000")))
         if not self.key or not self.secret:
             raise RuntimeError("ALPACA_DATA_API_KEY and ALPACA_DATA_API_SECRET are required")
         if self.feed not in {"sip", "iex"}:
@@ -164,6 +179,24 @@ class AlpacaStream(threading.Thread):
                 raise RuntimeError(f"Alpaca stream error while waiting for {message}: {error}")
         raise RuntimeError(f"Alpaca stream did not confirm {message}: {seen}")
 
+    @classmethod
+    def _wait_for_subscription(cls, connection: websocket.WebSocket, attempts: int = 4) -> None:
+        for _ in range(attempts):
+            rows = cls._rows(connection.recv())
+            for row in rows:
+                if row.get("T") == "error":
+                    raise RuntimeError(f"Alpaca subscription rejected: {row}")
+                if row.get("T") == "subscription":
+                    if set(SYMBOLS).issubset(set(row.get("quotes") or [])):
+                        return
+                    raise RuntimeError("Alpaca subscription missing required quote symbols")
+        raise RuntimeError("Alpaca subscription acknowledgement missing")
+
+    def _require_quote_progress(self, connected_at_ms: int) -> None:
+        last_progress = max(connected_at_ms, self.store.last_quote_received_ms())
+        if regular_us_equity_session() and now_ms() - last_progress > self.stall_timeout_ms:
+            raise RuntimeError("ALPACA_QUOTE_STREAM_STALLED")
+
     def run(self) -> None:
         backoff = 1.0
         while not self.stop_event.is_set():
@@ -174,16 +207,24 @@ class AlpacaStream(threading.Thread):
                 connection.send(json.dumps({"action": "auth", "key": self.key, "secret": self.secret}))
                 self._wait_for_success(connection, "authenticated")
                 connection.send(json.dumps({"action": "subscribe", "quotes": list(SYMBOLS)}))
+                self._wait_for_subscription(connection)
                 self.store.set_connected(True)
+                connected_at_ms = now_ms()
                 backoff = 1.0
                 while not self.stop_event.is_set():
                     connection.settimeout(5)
                     try:
                         raw = connection.recv()
                     except websocket.WebSocketTimeoutException:
+                        self._require_quote_progress(connected_at_ms)
                         continue
+                    if not raw:
+                        raise RuntimeError("ALPACA_QUOTE_STREAM_CLOSED")
                     for row in self._rows(raw):
+                        if row.get("T") == "error":
+                            raise RuntimeError(f"Alpaca stream error: {row}")
                         self.store.update(row, self.feed)
+                    self._require_quote_progress(connected_at_ms)
             except Exception as error:
                 self.store.set_error(error)
                 if self.stop_event.wait(backoff):
@@ -223,7 +264,7 @@ class Handler(BaseHTTPRequestHandler):
     def do_GET(self) -> None:
         parsed = urlparse(self.path)
         if parsed.path == "/health":
-            self._json(HTTPStatus.OK, self.quote_store.health())
+            self._json(HTTPStatus.OK, self.quote_store.health(self.max_age_ms))
             return
         if parsed.path != "/quote":
             self._json(HTTPStatus.NOT_FOUND, {"error": "not_found"})

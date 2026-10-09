@@ -1,0 +1,5 @@
+components/features/AutoTradeSimulator.tsx(402,57): error TS7006: Parameter 'val' implicitly has an 'any' type.
+components/features/AutoTradeSimulator.tsx(409,58): error TS7006: Parameter 'label' implicitly has an 'any' type.
+components/research-lab/LiveResearchDashboard.tsx(218,97): error TS7006: Parameter 'value' implicitly has an 'any' type.
+components/research-lab/LiveResearchDashboard.tsx(222,33): error TS7006: Parameter 'value' implicitly has an 'any' type.
+context/SimulationContext.tsx(7366,53): error TS7006: Parameter 'result' implicitly has an 'any' type.

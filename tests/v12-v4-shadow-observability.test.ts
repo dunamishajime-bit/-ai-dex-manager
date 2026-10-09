@@ -36,7 +36,7 @@ test("HP reader loads frozen catalog plus shadow state and preserves zero mutati
     });
     await writeFile(statePath, JSON.stringify(snapshot), "utf8");
 
-    const view = await loadV12V4ShadowObservability({ statePath, releaseRoot: process.cwd() });
+    const view = await loadV12V4ShadowObservability({ statePath, releaseRoot: process.cwd(), now: Date.UTC(2026, 9, 9) });
     assert.equal(view.orderEnabled, false);
     assert.equal(view.tradingMutation, 0);
     assert.equal(view.counts.realOrderEnabledV4, 0);
