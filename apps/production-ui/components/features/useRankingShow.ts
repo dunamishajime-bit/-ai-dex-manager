@@ -3,18 +3,20 @@ import { useCallback,useEffect,useLayoutEffect,useRef,useState } from 'react';
 import { rankCommentary,risingRankEvents,type RankRow,type RiseEvent } from '@/lib/realtime-ranking';
 
 import {playRankingSequence,RANKING_MOTION_MS} from '@/lib/ranking-sequence';
+import {chooseRankingSound,synthesizeRankingSound,DEFAULT_RANKING_SOUND_ID} from '@/lib/ranking-sounds';
 
 type Capture={rows:RankRow[];rects:Map<string,DOMRect>;scrollX:number;scrollY:number};
 export function useRankingShow(rows:RankRow[],version:number,viewKey:string,error:string){
  const [event,setEvent]=useState<RiseEvent|null>(null),[highlights,setHighlights]=useState<Record<string,number>>({});
  const [sound,setSound]=useState(true),[voice,setVoice]=useState(false),[motion,setMotion]=useState(true);
  const [audioNotice,setAudioNotice]=useState('');
+ const [soundId,setSoundId]=useState(DEFAULT_RANKING_SOUND_ID);
  const current=useRef(rows);current.current=rows;
  const previous=useRef<Capture|null>(null),capture=useRef<Capture|null>(null),seen=useRef(''),filters=useRef(viewKey);
  const nodes=useRef(new Map<string,HTMLElement>()),clones=useRef<HTMLElement[]>([]),animations=useRef<Animation[]>([]);
  const speechTimer=useRef<ReturnType<typeof setTimeout>>(),wasBlocked=useRef(false),hiddenNodes=useRef<HTMLElement[]>([]);
- const timer=useRef<ReturnType<typeof setTimeout>>(),audio=useRef<AudioContext|null>(null),voiceSource=useRef<AudioBufferSourceNode|null>(null),prefs=useRef({sound,voice,motion}),lastAudio=useRef(0);
- prefs.current={sound,voice,motion};
+ const timer=useRef<ReturnType<typeof setTimeout>>(),audio=useRef<AudioContext|null>(null),voiceSource=useRef<AudioBufferSourceNode|null>(null),prefs=useRef({sound,voice,motion,soundId});
+ prefs.current={sound,voice,motion,soundId};
  const batch=useRef(0),running=useRef(false);
  const measure=useCallback(():Capture=>({rows:current.current,rects:new Map([...nodes.current].map(([id,n])=>[id,n.getBoundingClientRect()])),scrollX:window.scrollX,scrollY:window.scrollY}),[]);
  const prepare=useCallback(()=>{capture.current=measure();},[measure]);
@@ -56,13 +58,13 @@ export function useRankingShow(rows:RankRow[],version:number,viewKey:string,erro
   }
  },[ensureAudio,fallbackSpeech]);
  useEffect(()=>{
-  try{const saved=JSON.parse(localStorage.getItem('disdex-ranking-show')||'{}');setMotion(saved.motion!==false);setSound(saved.sound!==false);}catch{}
+  try{const saved=JSON.parse(localStorage.getItem('disdex-ranking-show')||'{}');setMotion(saved.motion!==false);setSound(saved.sound!==false);setSoundId(chooseRankingSound(saved.soundId).id);}catch{}
   return()=>{stopVisuals();try{voiceSource.current?.stop();}catch{}audio.current?.close().catch(()=>{});if('speechSynthesis' in window)window.speechSynthesis.cancel();};
  },[stopVisuals]);
  const preference=useCallback((key:'sound'|'voice'|'motion',value:boolean)=>{
   const p={...prefs.current,[key]:value};prefs.current=p;
   if(key==='sound')setSound(value);if(key==='voice')setVoice(value);if(key==='motion'){setMotion(value);if(!value){stopVisuals();setHighlights({});setEvent(null);}}
-  try{localStorage.setItem('disdex-ranking-show',JSON.stringify({motion:p.motion,sound:p.sound}));}catch{}
+  try{localStorage.setItem('disdex-ranking-show',JSON.stringify({motion:p.motion,sound:p.sound,soundId:p.soundId}));}catch{}
   if(key==='sound'&&value){
    void ensureAudio().catch(()=>{setSound(false);setAudioNotice('このブラウザは効果音に未対応です。');});
   }
@@ -71,36 +73,34 @@ export function useRankingShow(rows:RankRow[],version:number,viewKey:string,erro
    else void speakNatural('自然音声実況を有効にしました。ランキングが動いたときに、変化をお知らせします。');
   }
  },[ensureAudio,speakNatural,stopVisuals]);
+ const selectSound=useCallback((id:string)=>{
+  const selected=chooseRankingSound(id);
+  prefs.current={...prefs.current,soundId:selected.id};
+  setSoundId(selected.id);
+  try{localStorage.setItem('disdex-ranking-show',JSON.stringify({
+   motion:prefs.current.motion,sound:prefs.current.sound,soundId:selected.id,
+  }));}catch{}
+  setAudioNotice('効果音「'+selected.label+'」を選択しました。試聴できます。');
+ },[]);
  const playEffect=useCallback(async(force=false)=>{
-  if(document.hidden||(!force&&!prefs.current.sound)||(!force&&Date.now()-lastAudio.current<3500))return;
+  if(!force&&(!prefs.current.sound||document.hidden))return;
   try{
    const ctx=await ensureAudio();
    if(ctx.state!=='running')throw Error('BROWSER_AUDIO_LOCKED');
-   lastAudio.current=Date.now();
-   const t=ctx.currentTime;
-   [660,880].forEach((frequency,i)=>{
-    const o=ctx.createOscillator(),g=ctx.createGain();
-    o.frequency.value=frequency;o.type='sine';
-    g.gain.setValueAtTime(.0001,t+i*.095);
-    g.gain.linearRampToValueAtTime(.055,t+i*.095+.017);
-    g.gain.exponentialRampToValueAtTime(.0001,t+i*.095+.22);
-    o.connect(g);g.connect(ctx.destination);
-    o.start(t+i*.095);o.stop(t+i*.095+.24);
-   });
-   if(force)setAudioNotice('効果音の試聴を再生しました。');
+   synthesizeRankingSound(ctx,chooseRankingSound(prefs.current.soundId));
+   if(force)setAudioNotice('「'+chooseRankingSound(prefs.current.soundId).label+'」を再生しました。');
   }catch{
-   setAudioNotice('音が出ない場合は「効果音テスト」をタップし、端末の音量・ミュートを確認してください。');
+   setAudioNotice('ブラウザで音声が制限されています。「試聴」をクリックし、端末の音量を確認してください。');
   }
  },[ensureAudio]);
  const notify=useCallback((rise:RiseEvent,delay:number)=>{
   if(document.hidden)return;
   const p=prefs.current;if(!p.sound&&!p.voice)return;
-  if(p.sound)void playEffect();
   if(p.voice)speechTimer.current=setTimeout(()=>{
    if(document.hidden||!prefs.current.voice)return;
    void speakNatural(rankCommentary(rise.row,rise.from,rise.to).speech);
   },delay);
- },[playEffect,speakNatural]);
+ },[speakNatural]);
  useLayoutEffect(()=>{
   const token=String(version);
   if(filters.current!==viewKey||error||document.hidden||wasBlocked.current||Number(version)<Number(seen.current)){stopVisuals();setHighlights({});setEvent(null);previous.current=measure();capture.current=null;seen.current=token;filters.current=viewKey;wasBlocked.current=!!error;return;}
@@ -163,6 +163,7 @@ export function useRankingShow(rows:RankRow[],version:number,viewKey:string,erro
    visualDuration=groups.length*RANKING_MOTION_MS;
    running.current=groups.length>0;
    void playRankingSequence(groups,async([id,items])=>{
+    void playEffect(); // one chime exactly when this currency begins its 1.5s movement
     const color=palette[[...queue.keys()].indexOf(id)%palette.length];
     const rise=rises.find(r=>r.row.id===id);
     if(rise)setEvent(rise);
@@ -182,7 +183,7 @@ export function useRankingShow(rows:RankRow[],version:number,viewKey:string,erro
    },()=>batch.current===generation,()=>{stopVisuals(false);setHighlights({});setEvent(null);});
   }
   if(rises[0])notify(rises[0],visualDuration?RANKING_MOTION_MS+100:0);
-  else if(visualDuration)void playEffect();
+  else if(!visualDuration&&rises.length)void playEffect();
   if(!visualDuration)timer.current=setTimeout(()=>{setHighlights({});setEvent(null);},12000);
  },[version,viewKey,error,measure,stopVisuals,notify,playEffect]);
  useEffect(()=>{
@@ -194,5 +195,5 @@ export function useRankingShow(rows:RankRow[],version:number,viewKey:string,erro
   return()=>{window.removeEventListener('scroll',reset,true);window.removeEventListener('resize',reset);document.removeEventListener('visibilitychange',reset);media.removeEventListener('change',reduce);};
  },[measure,stopVisuals]);
  const register=useCallback((id:string,node:HTMLElement|null)=>{if(node)nodes.current.set(id,node);else nodes.current.delete(id);},[]);
- return {isShowing:()=>running.current,event,highlights,prepare,register,sound,voice,motion,preference,audioNotice,testSound:()=>void playEffect(true)};
+ return {isShowing:()=>running.current,event,highlights,prepare,register,sound,voice,motion,preference,audioNotice,soundId,selectSound,testSound:()=>void playEffect(true)};
 }

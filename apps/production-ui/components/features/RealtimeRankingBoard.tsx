@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { executionBlocked,currentRankRow,rankRows,rankChanges,rankCommentary,rankingPcAlert,type RankRow } from '@/lib/realtime-ranking';
 import { SignalGateList } from './SignalGateList';
 import { useRankingShow } from './useRankingShow';
+import {RANKING_SOUNDS} from '@/lib/ranking-sounds';
+import {top3MovementAlert} from '@/lib/ranking-top3-movement';
 import {displayRank,displayScore,formatPrice,rankProvisionalRows,RANKING_PAGE_REFRESH_MS} from '@/lib/realtime-ranking-preview';
 type Snapshot={checkedAt:number;runtimeSha:string;rows:RankRow[];metric:string;errors:Record<string,string>;refreshSeconds?:number;previewRefreshSeconds?:number;marketPriceCheckedAt?:number;previewUpdatedAt?:number;marketPriceError?:string};
 function missing(row:RankRow){return row.gates.filter(g=>g.kind!=='execution'&&g.kind!=='shadow'&&g.state!=='OK').map(g=>g.label+'：'+g.detail).join(' / ')||'市場条件通過。資金・競合はRunner確認待ち';}
@@ -19,15 +21,42 @@ export function RealtimeRankingBoard(){
  const prepareShow=useRef<(()=>void)|null>(null),rowNodes=useRef(new Map<string,HTMLElement>());
  const isShowing=useRef<(()=>boolean)|null>(null),publishTimer=useRef<ReturnType<typeof setTimeout>>();
  const lastSnapshot=useRef(0);
- const previous=useRef<string[]>([]),alertRows=useRef<RankRow[]>([]),requesting=useRef(false),alive=useRef(true),next=useRef(Date.now()+RANKING_PAGE_REFRESH_MS),flashTimer=useRef<ReturnType<typeof setTimeout>>(),dialog=useRef<HTMLDialogElement>(null);
+ const previous=useRef<string[]>([]),alertRows=useRef<RankRow[]>([]),previewAlertRows=useRef<RankRow[]>([]),requesting=useRef(false),alive=useRef(true),next=useRef(Date.now()+RANKING_PAGE_REFRESH_MS),flashTimer=useRef<ReturnType<typeof setTimeout>>(),dialog=useRef<HTMLDialogElement>(null);
  const pcNotifyRef=useRef(false),notifyAudio=useRef<AudioContext|null>(null);
  const ensureNotifyAudio=useCallback(async()=>{const Audio=window.AudioContext||(window as unknown as {webkitAudioContext?:typeof AudioContext}).webkitAudioContext;if(!Audio)return null;notifyAudio.current??=new Audio();if(notifyAudio.current.state!=='running')await notifyAudio.current.resume();return notifyAudio.current;},[]);
  const playNotifySound=useCallback(async()=>{const ctx=await ensureNotifyAudio();if(!ctx)return;const t=ctx.currentTime;[740,988,1318].forEach((frequency,i)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.type='sine';o.frequency.value=frequency;g.gain.setValueAtTime(.0001,t+i*.12);g.gain.exponentialRampToValueAtTime(.07,t+i*.12+.015);g.gain.exponentialRampToValueAtTime(.0001,t+i*.12+.22);o.connect(g);g.connect(ctx.destination);o.start(t+i*.12);o.stop(t+i*.12+.24);});},[ensureNotifyAudio]);
- const sendPcNotification=useCallback((title:string,body:string)=>{if(!pcNotifyRef.current||!('Notification' in window)||Notification.permission!=='granted')return;void playNotifySound().catch(()=>{});const n=new Notification(title,{body,tag:'disdex-ranking-alert',renotify:true,silent:false} as NotificationOptions & {renotify:boolean});n.onclick=()=>{window.focus();n.close();};},[playNotifySound]);
+ const sendPcNotification=useCallback((title:string,body:string)=>{
+ if(!pcNotifyRef.current)return;
+ if(!('Notification' in window)||Notification.permission!=='granted'){
+  setNotifyStatus('PC通知の権限がありません。ブラウザのサイト通知を「許可」にしてからONにしてください。');return;
+ }
+ try{
+  // Stable tag updates the notification without showing stale Top3 movements.
+  const n=new Notification(title,{body,tag:'disdex-ranking-alert',renotify:true,silent:false} as NotificationOptions & {renotify:boolean});
+  n.onclick=()=>{window.focus();n.close();};
+  void playNotifySound().catch(()=>{});
+  setNotifyStatus('PC通知ON：Top3の順位変動を通知しています。');
+ }catch{
+  setNotifyStatus('通知を表示できません。Windows通知設定、集中モード、ブラウザの通知権限を確認してください。');
+ }
+},[playNotifySound]);
  const togglePcNotify=useCallback(async()=>{if(pcNotifyRef.current){pcNotifyRef.current=false;setPcNotify(false);setNotifyStatus('PC通知はOFFです。');try{localStorage.setItem('disdex-ranking-pc-notify','0');}catch{}return;}if(!('Notification' in window)){setNotifyStatus('このブラウザはPC通知に未対応です。');return;}const permission=Notification.permission==='default'?await Notification.requestPermission():Notification.permission;if(permission!=='granted'){setNotifyStatus('Chromeの通知許可が必要です。');return;}pcNotifyRef.current=true;setPcNotify(true);try{localStorage.setItem('disdex-ranking-pc-notify','1');}catch{}await ensureNotifyAudio().catch(()=>null);setNotifyStatus('PC通知ON：条件成立時にポップアップ＋通知音。');sendPcNotification('DisDex PC通知','Ranking通知を有効にしました。');},[ensureNotifyAudio,sendPcNotification]);
  const testPcNotify=useCallback(()=>sendPcNotification('DisDex 通知テスト','Ranking通知のポップアップと通知音のテストです。'),[sendPcNotification]);
- const load=useCallback(async()=>{if(requesting.current)return;requesting.current=true;setBusy(true);try{const res=await fetch('/api/system/realtime-ranking',{cache:'no-store'}),d=await res.json();if(!res.ok||!d.ok)throw Error(d.error||'取得失敗');if(!alive.current)return;if(typeof d.checkedAt!=='number'||!Number.isFinite(d.checkedAt)||d.checkedAt<lastSnapshot.current)throw Error('観測時刻が古いため更新を見送りました');lastSnapshot.current=d.checkedAt;const evaluated=(d.rows as RankRow[]).map(r=>currentRankRow(r,Date.now())),alert=rankingPcAlert(alertRows.current,evaluated);alertRows.current=evaluated;if(alert)sendPcNotification('DisDex Ranking：'+alert.title,alert.body);if(publishTimer.current)clearTimeout(publishTimer.current);const publish=()=>{if(!alive.current)return;if(isShowing.current?.()){publishTimer.current=setTimeout(publish,250);return;}const ids=rankProvisionalRows(evaluated,true).filter((r:RankRow)=>r.score!==null).map((r:RankRow)=>r.id),movement=rankChanges(previous.current,ids);previous.current=ids;setChanges(movement);setFlash(movement);if(flashTimer.current)clearTimeout(flashTimer.current);flashTimer.current=setTimeout(()=>setFlash({}),1200);prepareShow.current?.();setData(d);setError('');};publish();}catch(e){if(alive.current){if(publishTimer.current)clearTimeout(publishTimer.current);setError(e instanceof Error?e.message:'取得失敗');setFlash({});}}finally{requesting.current=false;if(alive.current){setBusy(false);next.current=Date.now()+RANKING_PAGE_REFRESH_MS;setRemaining(RANKING_PAGE_REFRESH_MS/1000);}}},[sendPcNotification]);
- useEffect(()=>{try{const enabled=localStorage.getItem('disdex-ranking-pc-notify')==='1'&&'Notification' in window&&Notification.permission==='granted';pcNotifyRef.current=enabled;setPcNotify(enabled);if(enabled)setNotifyStatus('PC通知ON：条件成立時にポップアップ＋通知音。');}catch{}return()=>{notifyAudio.current?.close().catch(()=>{});};},[]);
+ const load=useCallback(async()=>{if(requesting.current)return;requesting.current=true;setBusy(true);try{const res=await fetch('/api/system/realtime-ranking',{cache:'no-store'}),d=await res.json();if(!res.ok||!d.ok)throw Error(d.error||'取得失敗');if(!alive.current)return;if(typeof d.checkedAt!=='number'||!Number.isFinite(d.checkedAt)||d.checkedAt<lastSnapshot.current)throw Error('観測時刻が古いため更新を見送りました');lastSnapshot.current=d.checkedAt;const evaluated=(d.rows as RankRow[]).map(r=>currentRankRow(r,Date.now()));
+ const currentPreview=rankProvisionalRows(evaluated,true);
+ const previousFormal=rankRows(alertRows.current),nextFormal=rankRows(evaluated);
+ const alert=top3MovementAlert(previewAlertRows.current,currentPreview,'暫定')
+   ??top3MovementAlert(previousFormal,nextFormal,'正式')
+   ??rankingPcAlert(alertRows.current,evaluated);
+ alertRows.current=evaluated;previewAlertRows.current=currentPreview;
+ if(alert)sendPcNotification('DisDex Ranking：'+alert.title,alert.body);if(publishTimer.current)clearTimeout(publishTimer.current);const publish=()=>{if(!alive.current)return;if(isShowing.current?.()){publishTimer.current=setTimeout(publish,250);return;}const ids=rankProvisionalRows(evaluated,true).filter((r:RankRow)=>r.score!==null).map((r:RankRow)=>r.id),movement=rankChanges(previous.current,ids);previous.current=ids;setChanges(movement);setFlash(movement);if(flashTimer.current)clearTimeout(flashTimer.current);flashTimer.current=setTimeout(()=>setFlash({}),1200);prepareShow.current?.();setData(d);setError('');};publish();}catch(e){if(alive.current){if(publishTimer.current)clearTimeout(publishTimer.current);setError(e instanceof Error?e.message:'取得失敗');setFlash({});}}finally{requesting.current=false;if(alive.current){setBusy(false);next.current=Date.now()+RANKING_PAGE_REFRESH_MS;setRemaining(RANKING_PAGE_REFRESH_MS/1000);}}},[sendPcNotification]);
+ useEffect(()=>{try{const saved=localStorage.getItem('disdex-ranking-pc-notify');
+ const enabled=saved!=='0'&&'Notification' in window&&Notification.permission==='granted';
+ pcNotifyRef.current=enabled;setPcNotify(enabled);
+ if(enabled)setNotifyStatus('PC通知ON：Top3の順位変動を通知します。');
+ else if('Notification' in window&&Notification.permission==='denied')setNotifyStatus('ブラウザのサイト通知がブロックされています。設定から許可してください。');
+ else if(saved==='0')setNotifyStatus('PC通知OFFです。ONにするとTop3変動を通知します。');
+ else setNotifyStatus('PC通知を受けるには「PC通知」を押して許可してください。');}catch{}return()=>{notifyAudio.current?.close().catch(()=>{});};},[]);
  useEffect(()=>{alive.current=true;void load();const timer=setInterval(()=>{setRemaining(Math.max(0,Math.ceil((next.current-Date.now())/1000)));if(Date.now()>=next.current)void load();},1000);return()=>{alive.current=false;clearInterval(timer);if(publishTimer.current)clearTimeout(publishTimer.current);if(flashTimer.current)clearTimeout(flashTimer.current);};},[load]);
  const formal=rankRows((data?.rows||[]).map(r=>currentRankRow(r,Date.now()))),all=rankProvisionalRows(formal,view==='PREVIEW'),filtered=all.filter(r=>(logic==='ALL'||r.logic===logic)&&(side==='ALL'||r.side===side)&&((r.symbol+' '+r.logic).toLowerCase().includes(search.toLowerCase()))),top=error?[]:filtered.filter(r=>displayScore(r,view==='PREVIEW')!==null&&!executionBlocked(r)).slice(0,3),selected=all.find(r=>r.id===selectedId);
  const show=useRankingShow(formal,data?.checkedAt??0,logic+'|'+side+'|'+search,error);
@@ -51,8 +80,14 @@ export function RealtimeRankingBoard(){
    </div>
    <div className="ranking-commentary-tools">
     <div className="ranking-commentary-toggles">{(['motion','sound','voice'] as const).map(key=><button type="button" key={key} aria-pressed={show[key]} onClick={()=>show.preference(key,!show[key])} className={show[key]?'ranking-toggle-on':''}>{key==='motion'?'動き':key==='sound'?'効果音':'読み上げ'} {show[key]?'ON':'OFF'}</button>)}<button type="button" aria-pressed={pcNotify} onClick={()=>void togglePcNotify()} className={pcNotify?'ranking-toggle-on':''}>PC通知 {pcNotify?'ON':'OFF'}</button></div>
-    <div className="ranking-commentary-actions"><button type="button" onClick={show.testSound} className="ranking-detail-button">効果音テスト ♪</button><button type="button" disabled={!pcNotify} onClick={testPcNotify} className="ranking-detail-button">通知テスト</button><button type="button" disabled={!commentRow} onClick={()=>commentRow&&setSelectedId(commentRow.id)} className="ranking-detail-button">不足条件をすべて見る →</button></div>
-    <span className="ranking-audio-notice" title={notifyStatus||show.audioNotice}>{notifyStatus||show.audioNotice||'PC通知：Ranking変化＋1位Score 90以上 / 前回4位以下→Top3で通知'}</span>
+    <div className="ranking-commentary-actions">
+     <label className="inline-flex items-center gap-1 rounded-md border border-white/20 px-1 text-[10px] text-[#ead7a4]">移動音
+      <select aria-label="移動する通貨の効果音を選択（20種類）" value={show.soundId} onChange={e=>show.selectSound(e.target.value)} className="max-w-[170px] rounded bg-[#20291c] px-1 py-1 text-[11px] text-white">
+       {RANKING_SOUNDS.map(effect=><option key={effect.id} value={effect.id}>{effect.label} — {effect.description}</option>)}
+      </select>
+     </label>
+     <button type="button" onClick={show.testSound} className="ranking-detail-button">選択音を試聴 ♪</button><button type="button" disabled={!pcNotify} onClick={testPcNotify} className="ranking-detail-button">通知テスト</button><button type="button" disabled={!commentRow} onClick={()=>commentRow&&setSelectedId(commentRow.id)} className="ranking-detail-button">不足条件をすべて見る →</button></div>
+    <span className="ranking-audio-notice" title={notifyStatus||show.audioNotice}>{notifyStatus||show.audioNotice||'PC通知：Top3の1位・2位・3位の入替や新規Top3入りを通知'}</span>
    </div>
   </section>
   <div className="radar-filters"><input aria-label="通貨を検索" placeholder="通貨・ロジック検索" value={search} onChange={e=>setSearch(e.target.value)} className="min-w-0 flex-1"/><select aria-label="ロジック" value={logic} onChange={e=>setLogic(e.target.value)}><option value="ALL">全ロジック</option>{[...new Set(data?.rows.map(r=>r.logic)||[])].map(v=><option key={v}>{v}</option>)}</select><select aria-label="方向" value={side} onChange={e=>setSide(e.target.value)}><option value="ALL">全方向</option><option>LONG</option><option>SHORT</option><option>WAIT</option></select></div>
