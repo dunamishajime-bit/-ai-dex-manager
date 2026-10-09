@@ -140,3 +140,16 @@ Native外部Entry/Exitの一致範囲は258件・25ルート、元候補299件�
 研究の最終判定9c03bb90841e4fb9fe62186940c62d3fcedabac4（2026-10-09 12:13 JST）も全文確認。Y06の外部PF0.2995を受け、BLOCKED_PRODUCTION_ROBUSTNESS、現行LIVE維持・新V4/Gross即時昇格不可と明記。本文の固定コピーactivation-research-verdict-source-2025.mdを保存した。リスク縮小やY06停止は事後検証の仮説であり、指定291,326,103円案と無断で入れ替えない。
 
 最新ユーザー指示は切替希望の再確認として扱い、最初の「全認証に合格した場合に限りLIVE」「DD20%超等の未解決が残るなら実注文を有効化しない」という条件を撤回したとは扱わない。実装未完了・全8実行未認証・外部成績不合格のため、切替未実施、新V4の実注文権限は無効。既存LIVEへ注文/取消/決済/再起動/設定変更は行っていない。
+
+## 実注文基盤の修正と実装（今回の継続作業）
+
+監査結果の列挙で止めず、以下のコードを実装した。これは実注文Runner完成・採用認証・LIVE切替の宣言ではない。
+
+- ACCOUNT_MARKで他ロジックの現在建玉・未約定予約を更新し、更新時の資産額を基準にGrossを換算する。数量ゼロの未約定予約も共有上限に計上する。
+- 予約額を超える確認済み約定を拒否して台帳から落とす不具合を修正。実数量・実価格・手数料を記録し、超過はexecutionReviewとして以後の新規を停止する。決済は妨げない。
+- v12-v4-execution-store.ts：原始状態からのジャーナル再生照合、revision CAS、exclusive writer、ファイルfsync/atomic rename/Linux directory fsync、release一致を検証する永続ストア。SUBMITTING/UNKNOWNからPREPAREDへ戻せない。
+- v12-v4-durable-orders.ts：既存Aster adapterの実注文/Reduce-Only Exit/STOP/TPを呼ぶ送信ブリッジ。共有予約後・送信前にSUBMITTINGを永続化し、通信断はUNKNOWNへ記録する。同じCIDの照会が-2013/nullでも再送しない。注文ACKと約定・保護確認を区別する。
+- v12-v4-venue-fills.ts：独立取得したorder/user tradesのorderId・symbol・side・数量・価格・手数料を照合し、trade IDで重複計上を防ぐ。完全な約定履歴がないterminal ACKでは予約を解放しない。USDT以外の手数料は換算証拠が必要。
+- V4関連66テストPASS、Root/research型検査PASS。RED→GREEN証拠を同ディレクトリへ保存。Linux全体回帰は新commitを対象に別途実行する。
+
+残作業：この送信基盤をNative/H1/H2常駐Runnerへ接続すること、実共有予約・全8所有権を具体的に供給するProduction guards、実約定・部分決済・保護注文・Fundingの統合照合、全8系統外部期間認証。送信基盤のテストでこれらをPASSと扱わない。独立期間PF<1、開発期間DD>20%、事後順位問題も未解決。新V4実注文を有効化していない。既存Production、Kill Switch、建玉・注文、HPには本修正から変更を加えていない。

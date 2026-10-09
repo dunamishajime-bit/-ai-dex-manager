@@ -83,30 +83,35 @@ export type ForeignExposure = { owner: string; symbol: string; side: "LONG" | "S
 export type InitialState = { equityUsd: number; foreign: ForeignExposure[]; holdProtected: boolean };
 export type EntryEvent = { type: "RESERVE"; eventId: string; ts: number; leg: Leg };
 export type Event = EntryEvent |
-  { type: "ACCOUNT_MARK"; eventId:string; ts:number; equityUsd:number; prices:Record<string,number> } |
+  { type: "ACCOUNT_MARK"; eventId:string; ts:number; equityUsd:number; prices:Record<string,number>; foreign?:ForeignExposure[] } |
   { type: "EXIT_BAR"; eventId: string; ts: number; id: string; bar: H1Bar; nextOpen?: {ts:number;price:number} } |
   { type: "ENTRY_FILL"; eventId: string; ts: number; id: string; qty: number; price: number; feeUsd: number } |
   { type: "ENTRY_TERMINAL"; eventId: string; ts: number; id: string } |
   { type: "EXIT_REQUEST"; eventId: string; ts: number; id: string; qty: number } |
   { type: "EXIT_FILL"; eventId: string; ts: number; id: string; qty: number; price: number; feeUsd: number; cooldownUntil: number } |
   { type: "FUNDING"; eventId: string; ts: number; id: string; amountUsd: number };
-export type State = { initial: InitialState; equityUsd:number; equityPeakUsd:number; maxDrawdown:number; prices:Record<string,number>; legs: Record<string, Leg>; journal: Event[]; cooldown: Record<string, number> };
+export type State = { initial: InitialState; foreign:ForeignExposure[]; foreignBasisEquityUsd:number; executionReview?:string; equityUsd:number; equityPeakUsd:number; maxDrawdown:number; prices:Record<string,number>; legs: Record<string, Leg>; journal: Event[]; cooldown: Record<string, number> };
+function validateForeignExposures(rows:ForeignExposure[]) {
+  if(!Array.isArray(rows))throw Error("INVALID_FOREIGN_INVENTORY");
+  for(const x of rows){
+    if(!x.owner||x.owner==="V12_V4"||!x.symbol||!["LONG","SHORT"].includes(x.side)||typeof x.crypto!=="boolean")throw Error("INVALID_FOREIGN_OWNER");
+    if(!Number.isFinite(x.qty)||x.qty<0||(x.qty===0&&!(x.pendingGross>0)))throw Error("INVALID_FOREIGN_QTY");
+    if(![x.gross,x.pendingGross].every(n=>Number.isFinite(n)&&n>=0))throw Error("INVALID_FOREIGN_GROSS");
+    if(x.qty===0&&x.gross!==0)throw Error("UNFILLED_FOREIGN_POSITION_GROSS");
+  }
+}
 export function createProductionState(initial: InitialState): State {
   positive(initial.equityUsd, "EQUITY");
   if(typeof initial.holdProtected!=="boolean"||!Array.isArray(initial.foreign))throw Error("INVALID_INITIAL_STATE");
-  for (const x of initial.foreign) {
-    if (!x.owner || x.owner === "V12_V4" || !x.symbol || !["LONG","SHORT"].includes(x.side)) throw Error("INVALID_FOREIGN_OWNER");
-    positive(x.qty, "FOREIGN_QTY");
-    if (![x.gross,x.pendingGross].every(n => Number.isFinite(n) && n >= 0)) throw Error("INVALID_FOREIGN_GROSS");
-  }
-  return { initial: structuredClone(initial), equityUsd:initial.equityUsd, equityPeakUsd:initial.equityUsd,maxDrawdown:0, prices:{}, legs: {}, journal: [], cooldown: {} };
+  validateForeignExposures(initial.foreign);
+  return { initial: structuredClone(initial), foreign:structuredClone(initial.foreign), foreignBasisEquityUsd:initial.equityUsd, equityUsd:initial.equityUsd, equityPeakUsd:initial.equityUsd,maxDrawdown:0, prices:{}, legs: {}, journal: [], cooldown: {} };
 }
 function key(c: V12V4ShadowCandidate) { return [c.symbol,c.route,c.effectiveSide,c.eligibleEntryTs].join(":"); }
 function recovery(l: Leg) { return l.candidate.family.startsWith("RECOVERY_"); }
 export function productionGross(state: State) {
-  const foreignGross=(x:ForeignExposure)=>((state.prices[x.symbol]!==undefined?x.qty*state.prices[x.symbol]:x.gross*state.initial.equityUsd)+x.pendingGross*state.initial.equityUsd)/state.equityUsd;
-  const foreignCrypto = state.initial.foreign.filter(x=>x.crypto).reduce((n,x)=>n+foreignGross(x),0);
-  const foreignTotal = state.initial.foreign.reduce((n,x)=>n+foreignGross(x),0);
+  const foreignGross=(x:ForeignExposure)=>((state.prices[x.symbol]!==undefined?x.qty*state.prices[x.symbol]:x.gross*state.foreignBasisEquityUsd)+x.pendingGross*state.foreignBasisEquityUsd)/state.equityUsd;
+  const foreignCrypto = state.foreign.filter(x=>x.crypto).reduce((n,x)=>n+foreignGross(x),0);
+  const foreignTotal = state.foreign.reduce((n,x)=>n+foreignGross(x),0);
   const active = Object.values(state.legs).filter(x=>x.status!=="CLOSED"&&x.status!=="CANCELLED");
   const gross = (x: Leg) => ((state.prices[x.candidate.symbol]!==undefined?x.qty*state.prices[x.candidate.symbol]:x.entryNotional) + x.reservationUsd) / state.equityUsd;
   const v12 = active.reduce((n,x)=>n+gross(x),0);
@@ -122,9 +127,10 @@ export type EntryPlanInput = {
 export async function planProductionEntry(state: State, input: EntryPlanInput): Promise<EntryEvent> {
   const { candidate:c } = input;
   if (state.initial.holdProtected) throw Error("HOLD_PROTECTED");
+  if(state.executionReview)throw Error("UNRESOLVED_EXECUTION_REVIEW:"+state.executionReview);
   if(state.maxDrawdown>0.20)throw Error("EQUITY_DD_OVER_20_PERCENT");
   if (!Number.isFinite(input.ts) || input.ts !== c.eligibleEntryTs || input.ts % HOUR !== 0) throw Error("ENTRY_TIME_MISMATCH");
-  if (state.initial.foreign.some(x=>x.symbol === c.symbol)) throw Error("FOREIGN_SYMBOL_OWNERSHIP");
+  if (state.foreign.some(x=>x.symbol === c.symbol)) throw Error("FOREIGN_SYMBOL_OWNERSHIP");
   if (state.legs[key(c)] || state.journal.some(x=>x.eventId===input.eventId)) throw Error("DUPLICATE_ENTRY");
   if ((state.cooldown[c.symbol+":"+c.route]??0)>input.ts) throw Error("COOLDOWN");
   const spec = productionExitSpec(c.route);
@@ -172,7 +178,8 @@ export function applyProductionEvent(state: State, event: Event): State {
   const next=structuredClone(state);
   if (event.type==="ACCOUNT_MARK") {
     positive(event.equityUsd,"ACCOUNT_EQUITY");
-    const symbols=new Set([...next.initial.foreign.map(x=>x.symbol),...Object.values(next.legs).filter(x=>x.qty>0).map(x=>x.candidate.symbol)]);
+    if(event.foreign!==undefined){validateForeignExposures(event.foreign);next.foreign=structuredClone(event.foreign);next.foreignBasisEquityUsd=event.equityUsd;}
+    const symbols=new Set([...next.foreign.map(x=>x.symbol),...Object.values(next.legs).filter(x=>x.qty>0).map(x=>x.candidate.symbol)]);
     for(const symbol of symbols)positive(event.prices[symbol],"ACCOUNT_MARK_"+symbol);
     for(const price of Object.values(event.prices))positive(price,"ACCOUNT_MARK");
     next.equityUsd=event.equityUsd;next.equityPeakUsd=Math.max(next.equityPeakUsd,event.equityUsd);
@@ -192,7 +199,7 @@ export function applyProductionEvent(state: State, event: Event): State {
     if (next.legs[event.leg.id]) throw Error("DUPLICATE_LEG");
     // Re-check immutable event against current reservations; planned events may race.
     const g=productionGross(next), add=event.leg.reservationUsd/next.equityUsd;
-    if (next.initial.holdProtected || next.maxDrawdown>0.20 || next.initial.foreign.some(x=>x.symbol===event.leg.candidate.symbol) ||
+    if (next.initial.holdProtected || next.executionReview || next.maxDrawdown>0.20 || next.foreign.some(x=>x.symbol===event.leg.candidate.symbol) ||
       (recovery(event.leg)&&g.recovery+add>2.5+1e-12)||g.v12+add>3+1e-12||g.crypto+add>3.5+1e-12||g.total+add>4.75+1e-12)
       throw Error("RESERVATION_RECHECK_FAILED");
     next.legs[event.leg.id]=structuredClone(event.leg);
@@ -210,8 +217,10 @@ export function applyProductionEvent(state: State, event: Event): State {
     } else if (event.type==="ENTRY_FILL") {
       positive(event.qty,"FILL_QTY");positive(event.price,"FILL_PRICE");
       if (l.status!=="PENDING_ENTRY" || l.qty+event.qty>l.requestedQty+1e-12 ||
-        event.qty*event.price>l.reservationUsd+1e-8 || !Number.isFinite(event.feeUsd)||event.feeUsd<0) throw Error("INVALID_ENTRY_FILL");
-      l.qty+=event.qty;l.entryNotional+=event.qty*event.price;l.reservationUsd-=event.qty*event.price;l.feesUsd+=event.feeUsd;
+        !Number.isFinite(event.feeUsd)||event.feeUsd<0) throw Error("INVALID_ENTRY_FILL");
+      const actualNotional=event.qty*event.price;
+      if(actualNotional>l.reservationUsd+1e-8)next.executionReview="ENTRY_FILL_OVER_RESERVED_NOTIONAL:"+l.id;
+      l.qty+=event.qty;l.entryNotional+=actualNotional;l.reservationUsd=Math.max(0,l.reservationUsd-actualNotional);l.feesUsd+=event.feeUsd;
     } else if (event.type==="ENTRY_TERMINAL") {
       if(l.status!=="PENDING_ENTRY") throw Error("INVALID_ENTRY_TERMINAL");
       l.reservationUsd=0;l.status=l.qty>0?"OPEN":"CANCELLED";

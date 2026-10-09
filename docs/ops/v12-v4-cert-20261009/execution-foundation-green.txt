@@ -1,0 +1,42 @@
+✔ fresh account inventory replaces prior foreign gross before reservation (19.0566ms)
+✔ foreign reservation without a filled position occupies shared crypto gross (1.9074ms)
+✔ a confirmed adverse-price fill is recorded before overrun blocks subsequent entries (3.0994ms)
+✔ Core confirms a failed upward break using only completed H2 and matches its frozen event (4.0241ms)
+✔ repeated decision cannot emit the same Core event and future H2 is rejected (1.9973ms)
+✔ Core selection uses observed entry price and risk distance, with rank3 capped at 0.10x (0.4837ms)
+✔ native failed-break source cannot also open recovery routes from the same setup (118.3837ms)
+✔ closed H2 native candidates retain research direction, rank, ATR and phase diagnostics (4.8511ms)
+✔ future candles cannot change a native source at the decision boundary (9.3818ms)
+✔ native source refuses shifted symbols and gaps in its 121-bar window (8.679ms)
+✔ 90h momentum condition age caps at 96h and resets on the latest failed condition (0.3535ms)
+✔ CONT uses native H2 phase diagnostics while recovery rules retain H1 features (12.66ms)
+✔ native allocation assigns the first frozen route before repairs, without duplicate sleeves (124.6616ms)
+✔ forward frozen ranking is temporally valid while observed PF/DD and execution blockers still prevent promotion (1.977ms)
+✔ replaying past entries at a present decision time retains full-year lookahead (0.2867ms)
+✔ 1978 H1 native matches certify the price model only (0.2407ms)
+✔ stale account and payload flags cannot authorize orders; malformed evidence fails closed (0.6365ms)
+✔ missing, nonfinite, fractional and nonnumeric sample counts retain proof blockers (1.0368ms)
+✔ offline proof payload cannot replace actual journal entry times or evaluation clock (88.5947ms)
+✔ 41 executable exit catalog rows preserve two-pass overrides and one native state exit (2.2319ms)
+✔ pending reservation, deferred partial fills and restart exactly preserve accounting (5.3038ms)
+✔ same-symbol partial closes reduce only the selected virtual leg (2.3685ms)
+✔ existing TSLA and PENGU owners block all V4 netting, pending foreign gross counts (1.1514ms)
+✔ precision floors; protected hold and worst-case cap reservations fail closed (1.3097ms)
+✔ ATR stop-first same-bar ambiguity, gap-stop and H1 cutoff are executable (0.6479ms)
+✔ time deadline requires available exact next open; future open forbidden (0.361ms)
+✔ closed H1 formulas ignore future bars, reject gaps, and normalize effective side (2.6361ms)
+✔ mark-to-market gross uses current equity and exact quantities, and journal rejects gaps (2.0333ms)
+✔ offline CLI evaluates causal robust candidate, persists explicit fills, and restarts (27.9217ms)
+✔ reversal preemption waits for actual closes and cannot delete an opposing virtual leg (1.2258ms)
+✔ equity DD admission fails closed and existing virtual-leg exits remain available (0.7387ms)
+✔ closing records cooldown; caller cannot release foreign ownership or forge reservations (0.954ms)
+✔ native G3 reuses frozen production trailing levels, persisted state, and mandatory native ATR evidence (67.1447ms)
+✔ claimed source parity never certifies native generation or unlocks order authority (1.5348ms)
+ℹ tests 34
+ℹ suites 0
+ℹ pass 34
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 671.4297

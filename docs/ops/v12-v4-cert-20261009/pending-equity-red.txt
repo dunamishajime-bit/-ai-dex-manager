@@ -1,0 +1,35 @@
+✔ fresh account inventory replaces prior foreign gross before reservation (12.7149ms)
+✔ foreign reservation without a filled position occupies shared crypto gross (0.7961ms)
+✔ a confirmed adverse-price fill is recorded before overrun blocks subsequent entries (1.9878ms)
+✖ fresh pending gross uses refreshed equity rather than startup equity (1.7657ms)
+ℹ tests 4
+ℹ suites 0
+ℹ pass 3
+ℹ fail 1
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 377.0607
+
+✖ failing tests:
+
+test at tests\v12-v4-execution-foundation.test.ts:2:4298
+✖ fresh pending gross uses refreshed equity rather than startup equity (1.7657ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  
+  1.625 !== 3.25
+  
+      at TestContext.<anonymous> (C:\Users\dis\DisDex-v4-production-cert-20261009\tests\v12-v4-execution-foundation.test.ts:39:9)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1103:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:785:18)
+      at Test.postRun (node:internal/test_runner/test:1232:19)
+      at Test.run (node:internal/test_runner/test:1160:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:785:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: 1.625,
+    expected: 3.25,
+    operator: 'strictEqual',
+    diff: 'simple'
+  }

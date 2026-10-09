@@ -1,0 +1,13 @@
+✔ fresh account inventory replaces prior foreign gross before reservation (13.716ms)
+✔ foreign reservation without a filled position occupies shared crypto gross (0.8046ms)
+✔ a confirmed adverse-price fill is recorded before overrun blocks subsequent entries (2.3964ms)
+✔ durable intent survives restart and SUBMITTING cannot return to PREPARED (23.0163ms)
+✔ stale writer, wrong release and journal snapshot corruption fail closed (150.1423ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 573.0998

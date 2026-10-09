@@ -1,0 +1,16 @@
+✔ ambiguous send is journaled and absent order lookup never resubmits (21.167ms)
+✔ authority rejection performs no reservation or order mutation (9.1449ms)
+✔ fresh account inventory replaces prior foreign gross before reservation (17.11ms)
+✔ foreign reservation without a filled position occupies shared crypto gross (1.4826ms)
+✔ a confirmed adverse-price fill is recorded before overrun blocks subsequent entries (2.755ms)
+✔ fresh pending gross uses refreshed equity rather than startup equity (1.179ms)
+✔ durable intent survives restart and SUBMITTING cannot return to PREPARED (14.4196ms)
+✔ stale writer, wrong release and journal snapshot corruption fail closed (10.5821ms)
+ℹ tests 8
+ℹ suites 0
+ℹ pass 8
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 427.5764
