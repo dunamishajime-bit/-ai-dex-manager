@@ -137,3 +137,19 @@ independently reconciled average signed ENTRY fill** before submitting
 STOP_MARKET. The mock Aster regression uses a price-100 reservation
 and price-99 fill; STOP matches price-99, not the stale price-100 quote.
 No live order authority is granted by this change.
+
+
+### TIME37 candidate STOP implementation after research
+
+A deterministic fixed 8%-of-actual-signed-fill STOP formula is now wired to
+the production runner **only through a separate non-symlink, root-owned,
+root-only (0600), exact-release SHA operator approval artifact**:
+
+/var/lib/disdex/shared/v12-v4-time-stop-approval.json
+
+The exact schema/policy/37-route acknowledgement is validated by
+lib/v12-v4-time-stop-approval.ts. No such approval artifact was created;
+therefore TIME routes continue to FAIL CLOSED. The normal TIME Exit remains
+unchanged when no STOP fires. Neither assertSourceParity nor assertAuthority
+has been bypassed; both continue refusing production mutations pending
+independent venue/route certification. No VPS service changes were made.

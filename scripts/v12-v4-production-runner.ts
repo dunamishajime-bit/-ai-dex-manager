@@ -8,6 +8,7 @@ import {initializeV4SignedFlatState} from "../lib/v12-v4-signed-bootstrap";
 import {V4RunnerEngine} from "../lib/v12-v4-runner-engine";
 import {loadV4ClosedCandles,buildV4LiveDecisionBatch} from "../lib/v12-v4-live-candidate-builder";
 import {productionExitSpec} from "../lib/v12-v4-production-lifecycle";
+import {readV4TimeStopApproval,approvedV4TimeStopQuote} from "../lib/v12-v4-time-stop-approval";
 import {attachV4NativeCoreCandidates} from "../lib/v12-v4-core-candidate";
 import type {V4PeerKind,V4PeerSource} from "../lib/v12-v4-peer-state-owners";
 const H2=7200000;
@@ -102,7 +103,12 @@ export async function buildV4ProductionRuntime(){
   },
   requiredResidentStop:async({route,side,entryPrice,atr14})=>{
    const spec=productionExitSpec(route),sg=side==="LONG"?1:-1;
-   if(spec.kind==="TIME")throw Error("V4_TIME_ROUTE_RESIDENT_PROTECTION_NOT_DEFINED");
+   if(spec.kind==="TIME"){
+    // Never infer authorization from research scores or environment flags.
+    // A root-owned exact-SHA policy artifact must be explicitly installed.
+    const approval=await readV4TimeStopApproval(releaseSha);
+    return approvedV4TimeStopQuote({route,side,signedAverageEntryFill:entryPrice,approval});
+   }
    return spec.kind==="ATR"?entryPrice-sg*spec.sl*atr14:
     (await import("../lib/v12-x1-all")).protectiveLevels(entryPrice,atr14,side).initialStop;
   },
