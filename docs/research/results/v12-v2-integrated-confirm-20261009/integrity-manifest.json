@@ -1,0 +1,129 @@
+{
+  "status": "PASS_12_OF_12_SHA256_EXACT",
+  "source_case": "V2_M150_D05_CORE_NATIVE",
+  "source_root": "docs/research/results",
+  "checks": [
+    {
+      "bps": 10,
+      "file": "portfolio-trades.jsonl",
+      "old_source_relative": "v12-v4-priority-gross-v2-sweep-20261009/cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl",
+      "new_source_relative": "v12-v2-integrated-confirm-20261009/cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl",
+      "old_sha256": "edaae6ba9a8fe84c7db1cbb2e9d133ac9e85f8a89033be5ed7825b6a6e065a65",
+      "new_sha256": "edaae6ba9a8fe84c7db1cbb2e9d133ac9e85f8a89033be5ed7825b6a6e065a65",
+      "bytes": 1354388,
+      "exact_sha_match": true
+    },
+    {
+      "bps": 10,
+      "file": "candidate-decisions.jsonl",
+      "old_source_relative": "v12-v4-priority-gross-v2-sweep-20261009/cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl",
+      "new_source_relative": "v12-v2-integrated-confirm-20261009/cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl",
+      "old_sha256": "fb118b6d06657b52d105a6574cd8ee4184d68ab6dd68ba96bce5b075347c6b64",
+      "new_sha256": "fb118b6d06657b52d105a6574cd8ee4184d68ab6dd68ba96bce5b075347c6b64",
+      "bytes": 2535837,
+      "exact_sha_match": true
+    },
+    {
+      "bps": 10,
+      "file": "portfolio-events.jsonl",
+      "old_source_relative": "v12-v4-priority-gross-v2-sweep-20261009/cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl",
+      "new_source_relative": "v12-v2-integrated-confirm-20261009/cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl",
+      "old_sha256": "f3872587d4afd209834f6d1b56abc9bd555cd934d97ae0efe4f955de73e877cf",
+      "new_sha256": "f3872587d4afd209834f6d1b56abc9bd555cd934d97ae0efe4f955de73e877cf",
+      "bytes": 2970172,
+      "exact_sha_match": true
+    },
+    {
+      "bps": 10,
+      "file": "metrics.json",
+      "old_source_relative": "v12-v4-priority-gross-v2-sweep-20261009/cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_10BPS/metrics.json",
+      "new_source_relative": "v12-v2-integrated-confirm-20261009/cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_10BPS/metrics.json",
+      "old_sha256": "d6bb56bef1626170b664db539edf49035812d970069de5e29f1210fae02d4f72",
+      "new_sha256": "d6bb56bef1626170b664db539edf49035812d970069de5e29f1210fae02d4f72",
+      "bytes": 23809,
+      "exact_sha_match": true
+    },
+    {
+      "bps": 20,
+      "file": "portfolio-trades.jsonl",
+      "old_source_relative": "v12-v4-priority-gross-v2-stress-20261009/cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl",
+      "new_source_relative": "v12-v2-integrated-confirm-20261009/cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl",
+      "old_sha256": "963cae2a51a77b42a3676bf7e15c36f6d813a852aa47d5262baf1a42bbce0612",
+      "new_sha256": "963cae2a51a77b42a3676bf7e15c36f6d813a852aa47d5262baf1a42bbce0612",
+      "bytes": 1358045,
+      "exact_sha_match": true
+    },
+    {
+      "bps": 20,
+      "file": "candidate-decisions.jsonl",
+      "old_source_relative": "v12-v4-priority-gross-v2-stress-20261009/cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl",
+      "new_source_relative": "v12-v2-integrated-confirm-20261009/cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl",
+      "old_sha256": "7d72b82d71795dcfb6aba1625670806e7075c3289c9da0fbad60617880d74142",
+      "new_sha256": "7d72b82d71795dcfb6aba1625670806e7075c3289c9da0fbad60617880d74142",
+      "bytes": 2536780,
+      "exact_sha_match": true
+    },
+    {
+      "bps": 20,
+      "file": "portfolio-events.jsonl",
+      "old_source_relative": "v12-v4-priority-gross-v2-stress-20261009/cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl",
+      "new_source_relative": "v12-v2-integrated-confirm-20261009/cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl",
+      "old_sha256": "2f46ab7dd37fbed7c0925c43767f39a02fcdd8802d44687b7bc91bb178e36210",
+      "new_sha256": "2f46ab7dd37fbed7c0925c43767f39a02fcdd8802d44687b7bc91bb178e36210",
+      "bytes": 2993144,
+      "exact_sha_match": true
+    },
+    {
+      "bps": 20,
+      "file": "metrics.json",
+      "old_source_relative": "v12-v4-priority-gross-v2-stress-20261009/cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_20BPS/metrics.json",
+      "new_source_relative": "v12-v2-integrated-confirm-20261009/cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_20BPS/metrics.json",
+      "old_sha256": "c0f405132676525bc47cacd866e07511ac89b3b18ceea9302e29ae73bfb932e4",
+      "new_sha256": "c0f405132676525bc47cacd866e07511ac89b3b18ceea9302e29ae73bfb932e4",
+      "bytes": 23809,
+      "exact_sha_match": true
+    },
+    {
+      "bps": 30,
+      "file": "portfolio-trades.jsonl",
+      "old_source_relative": "v12-v4-priority-gross-v2-stress-20261009/cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl",
+      "new_source_relative": "v12-v2-integrated-confirm-20261009/cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl",
+      "old_sha256": "b47a0845f01d2f43c4b9575f9e940ab12d410e25a7f8cb9f5852bb734f016337",
+      "new_sha256": "b47a0845f01d2f43c4b9575f9e940ab12d410e25a7f8cb9f5852bb734f016337",
+      "bytes": 1351705,
+      "exact_sha_match": true
+    },
+    {
+      "bps": 30,
+      "file": "candidate-decisions.jsonl",
+      "old_source_relative": "v12-v4-priority-gross-v2-stress-20261009/cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl",
+      "new_source_relative": "v12-v2-integrated-confirm-20261009/cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl",
+      "old_sha256": "b396e0708ef46d96fc7516369be9da96d14d48d6f1756819091bf4bdba6bd314",
+      "new_sha256": "b396e0708ef46d96fc7516369be9da96d14d48d6f1756819091bf4bdba6bd314",
+      "bytes": 2534747,
+      "exact_sha_match": true
+    },
+    {
+      "bps": 30,
+      "file": "portfolio-events.jsonl",
+      "old_source_relative": "v12-v4-priority-gross-v2-stress-20261009/cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl",
+      "new_source_relative": "v12-v2-integrated-confirm-20261009/cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl",
+      "old_sha256": "453ae455dfedc55e7f6dae00a536f2b9db572187cdf6dfeca2ad03b0c3acd463",
+      "new_sha256": "453ae455dfedc55e7f6dae00a536f2b9db572187cdf6dfeca2ad03b0c3acd463",
+      "bytes": 2980398,
+      "exact_sha_match": true
+    },
+    {
+      "bps": 30,
+      "file": "metrics.json",
+      "old_source_relative": "v12-v4-priority-gross-v2-stress-20261009/cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_30BPS/metrics.json",
+      "new_source_relative": "v12-v2-integrated-confirm-20261009/cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_30BPS/metrics.json",
+      "old_sha256": "763b50071d03d8d8fedda1fa935d320f1fdd2bd184468c814d5b6839499bfe57",
+      "new_sha256": "763b50071d03d8d8fedda1fa935d320f1fdd2bd184468c814d5b6839499bfe57",
+      "bytes": 23774,
+      "exact_sha_match": true
+    }
+  ],
+  "production_vps_sha_verified": false,
+  "live_deploy_eligible": false
+}
