@@ -1,0 +1,670 @@
+checks	Full root regression on Linux	﻿2026-10-09T10:34:50.5812868Z ##[group]Run python3 - <<'PY'
+checks	Full root regression on Linux	2026-10-09T10:34:50.5813258Z ^[[36;1mpython3 - <<'PY'^[[0m
+checks	Full root regression on Linux	2026-10-09T10:34:50.5813496Z ^[[36;1mimport pathlib, subprocess^[[0m
+checks	Full root regression on Linux	2026-10-09T10:34:50.5813852Z ^[[36;1mfiles = sorted(pathlib.Path("tests").glob("*.test.ts"))^[[0m
+checks	Full root regression on Linux	2026-10-09T10:34:50.5814169Z ^[[36;1mfor path in files:^[[0m
+checks	Full root regression on Linux	2026-10-09T10:34:50.5814521Z ^[[36;1m    subprocess.run(["node", "--import", "tsx", "--test", str(path)], check=True, timeout=90)^[[0m
+checks	Full root regression on Linux	2026-10-09T10:34:50.5814975Z ^[[36;1mprint(f"PASS {len(files)} root test files")^[[0m
+checks	Full root regression on Linux	2026-10-09T10:34:50.5815248Z ^[[36;1mPY^[[0m
+checks	Full root regression on Linux	2026-10-09T10:34:50.5851857Z shell: /usr/bin/bash -e {0}
+checks	Full root regression on Linux	2026-10-09T10:34:50.5852723Z env:
+checks	Full root regression on Linux	2026-10-09T10:34:50.5852959Z   NEXT_TELEMETRY_DISABLED: 1
+checks	Full root regression on Linux	2026-10-09T10:34:50.5853231Z   NODE_OPTIONS: --max-old-space-size=4096
+checks	Full root regression on Linux	2026-10-09T10:34:50.5853522Z ##[endgroup]
+checks	Full root regression on Linux	2026-10-09T10:34:50.8570313Z ✔ transient contention retries before return (1.109723ms)
+checks	Full root regression on Linux	2026-10-09T10:34:50.8571622Z ✔ persistent contention remains bounded (0.189418ms)
+checks	Full root regression on Linux	2026-10-09T10:34:50.8701463Z ℹ tests 2
+checks	Full root regression on Linux	2026-10-09T10:34:50.8701960Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:34:50.8702544Z ℹ pass 2
+checks	Full root regression on Linux	2026-10-09T10:34:50.8702811Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:34:50.8703063Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:34:50.8703408Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:34:50.8703690Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:34:50.8704005Z ℹ duration_ms 223.669626
+checks	Full root regression on Linux	2026-10-09T10:34:51.3302379Z ✔ AsterV3Client never retries HTTP 418 (2.110536ms)
+checks	Full root regression on Linux	2026-10-09T10:34:51.3303592Z ✔ order reconciliation stops immediately on HTTP 418 (0.420113ms)
+checks	Full root regression on Linux	2026-10-09T10:34:51.3304659Z ✔ V12 protection reconciliation stops immediately on HTTP 418 (0.224954ms)
+checks	Full root regression on Linux	2026-10-09T10:34:51.3305338Z ✔ Q102 market-data pagination stops immediately on HTTP 418 (0.373649ms)
+checks	Full root regression on Linux	2026-10-09T10:34:51.3473125Z ℹ tests 4
+checks	Full root regression on Linux	2026-10-09T10:34:51.3473704Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:34:51.3474007Z ℹ pass 4
+checks	Full root regression on Linux	2026-10-09T10:34:51.3474313Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:34:51.3474600Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:34:51.3474950Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:34:51.3475247Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:34:51.3475589Z ℹ duration_ms 437.46622
+checks	Full root regression on Linux	2026-10-09T10:34:51.6573104Z ✔ shared Aster rate budget module exists (0.682177ms)
+checks	Full root regression on Linux	2026-10-09T10:34:51.6573846Z ✔ shared Aster rate budget exposes a slot reservation API (0.17322ms)
+checks	Full root regression on Linux	2026-10-09T10:34:51.6658528Z ✔ shared Aster rate budget serializes permits in the Python-compatible JSON format (10.980835ms)
+checks	Full root regression on Linux	2026-10-09T10:34:51.6753804Z ✔ shared Aster rate budget charges request weight, not HTTP count (9.137081ms)
+checks	Full root regression on Linux	2026-10-09T10:34:51.6754766Z ✔ AsterV3Client routes every request attempt through the shared global rate budget (0.255933ms)
+checks	Full root regression on Linux	2026-10-09T10:34:51.6787211Z ✔ shared budget rejects a non-empty document without the canonical schema (3.180646ms)
+checks	Full root regression on Linux	2026-10-09T10:34:51.6794826Z ✔ shared budget rejects non-finite configuration (0.686871ms)
+checks	Full root regression on Linux	2026-10-09T10:34:51.6795778Z ✔ shared budget publishes state with atomic rename (0.266524ms)
+checks	Full root regression on Linux	2026-10-09T10:34:51.7031679Z ✔ shared budget never evicts an old lock owned by a live process (23.345514ms)
+checks	Full root regression on Linux	2026-10-09T10:34:52.0148056Z ✔ shared budget survives concurrent stale ownerless lock recovery without duplicate permits (311.341342ms)
+checks	Full root regression on Linux	2026-10-09T10:34:52.0195832Z ✔ shared budget detects PID reuse using Linux process start ticks (4.964082ms)
+checks	Full root regression on Linux	2026-10-09T10:34:52.0244357Z ✔ shared budget reclaims a stale ownerless recovery mutex after a crashed recovery (4.940275ms)
+checks	Full root regression on Linux	2026-10-09T10:34:52.0491664Z ✔ shared budget never evicts a recovery mutex owned by a live process (24.734346ms)
+checks	Full root regression on Linux	2026-10-09T10:34:52.0539167Z ✔ shared Aster budget propagates venue cooldown across daemons (4.658498ms)
+checks	Full root regression on Linux	2026-10-09T10:34:52.0540575Z ✔ root-owned rate-budget writers preserve parent ownership before atomic rename (0.194898ms)
+checks	Full root regression on Linux	2026-10-09T10:34:52.0687287Z ℹ tests 15
+checks	Full root regression on Linux	2026-10-09T10:34:52.0687672Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:34:52.0688034Z ℹ pass 15
+checks	Full root regression on Linux	2026-10-09T10:34:52.0688304Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:34:52.0688632Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:34:52.0688864Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:34:52.0689083Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:34:52.0689347Z ℹ duration_ms 644.156621
+checks	Full root regression on Linux	2026-10-09T10:34:52.3477287Z ✔ classifies only known pre-request Aster budget failures (1.097577ms)
+checks	Full root regression on Linux	2026-10-09T10:34:52.3616035Z ℹ tests 1
+checks	Full root regression on Linux	2026-10-09T10:34:52.3616494Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:34:52.3616895Z ℹ pass 1
+checks	Full root regression on Linux	2026-10-09T10:34:52.3617146Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:34:52.3617399Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:34:52.3617637Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:34:52.3617908Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:34:52.3618148Z ℹ duration_ms 219.239528
+checks	Full root regression on Linux	2026-10-09T10:34:52.7069970Z ✔ HTTP 429 publishes a shared cooldown and is not retried locally (31.491175ms)
+checks	Full root regression on Linux	2026-10-09T10:34:52.7198442Z ℹ tests 1
+checks	Full root regression on Linux	2026-10-09T10:34:52.7198825Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:34:52.7199126Z ℹ pass 1
+checks	Full root regression on Linux	2026-10-09T10:34:52.7199367Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:34:52.7199570Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:34:52.7199835Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:34:52.7200077Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:34:52.7200319Z ℹ duration_ms 314.306986
+checks	Full root regression on Linux	2026-10-09T10:34:52.9923530Z ✔ requires three serial authenticated read-only successes before recovery passes (1.288737ms)
+checks	Full root regression on Linux	2026-10-09T10:34:52.9924856Z ✔ a 429 in any round fails the streak immediately instead of counting earlier successes (0.545817ms)
+checks	Full root regression on Linux	2026-10-09T10:34:52.9925890Z ✔ flatness is part of the recovery proof (0.220968ms)
+checks	Full root regression on Linux	2026-10-09T10:34:53.0067298Z ℹ tests 3
+checks	Full root regression on Linux	2026-10-09T10:34:53.0067895Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:34:53.0068342Z ℹ pass 3
+checks	Full root regression on Linux	2026-10-09T10:34:53.0068661Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:34:53.0068936Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:34:53.0069228Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:34:53.0069522Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:34:53.0069846Z ℹ duration_ms 234.312573
+checks	Full root regression on Linux	2026-10-09T10:34:53.2364017Z ✔ recovery CLI is read-only, requires the canonical shared Kill Switch, and disables hidden 429 retries (4.591115ms)
+checks	Full root regression on Linux	2026-10-09T10:34:53.2477220Z ℹ tests 1
+checks	Full root regression on Linux	2026-10-09T10:34:53.2477719Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:34:53.2477932Z ℹ pass 1
+checks	Full root regression on Linux	2026-10-09T10:34:53.2478181Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:34:53.2478397Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:34:53.2478620Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:34:53.2478865Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:34:53.2497883Z ℹ duration_ms 212.415688
+checks	Full root regression on Linux	2026-10-09T10:34:53.5801662Z ✔ Aster request weights cover heavy user-data endpoints (0.526044ms)
+checks	Full root regression on Linux	2026-10-09T10:34:53.5804031Z ✔ Aster market-data request weights follow documented parameter tiers (0.113438ms)
+checks	Full root regression on Linux	2026-10-09T10:34:53.5946224Z ℹ tests 2
+checks	Full root regression on Linux	2026-10-09T10:34:53.5946730Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:34:53.5947029Z ℹ pass 2
+checks	Full root regression on Linux	2026-10-09T10:34:53.5947304Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:34:53.5947533Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:34:53.5947810Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:34:53.5948058Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:34:53.5948301Z ℹ duration_ms 293.736469
+checks	Full root regression on Linux	2026-10-09T10:34:53.8717189Z ✔ Aster upstream recovery is two-phase, read-only before apply, and archives safety state (5.617207ms)
+checks	Full root regression on Linux	2026-10-09T10:34:53.8719238Z ✔ Aster upstream recovery blocks conflicting old release lineages before Kill clear (0.845867ms)
+checks	Full root regression on Linux	2026-10-09T10:34:53.8730215Z ✔ Aster upstream recovery rechecks lineage while account lock is held before publishing recovery (0.876138ms)
+checks	Full root regression on Linux	2026-10-09T10:34:53.8735482Z ✔ Aster upstream recovery refuses Kill clear while legacy V96/V52 live supervisor is active (0.702158ms)
+checks	Full root regression on Linux	2026-10-09T10:34:53.8740590Z ✔ reference stale recovery requires fresh proof for every V52 stock before Kill clear (0.563612ms)
+checks	Full root regression on Linux	2026-10-09T10:34:53.8853647Z ℹ tests 5
+checks	Full root regression on Linux	2026-10-09T10:34:53.8853923Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:34:53.8854219Z ℹ pass 5
+checks	Full root regression on Linux	2026-10-09T10:34:53.8854428Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:34:53.8858332Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:34:53.8858569Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:34:53.8858783Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:34:53.8859038Z ℹ duration_ms 218.803215
+checks	Full root regression on Linux	2026-10-09T10:34:54.1382906Z ✔ only Aster transport/rate-limit Kill Switch reasons are allow-listed (0.701887ms)
+checks	Full root regression on Linux	2026-10-09T10:34:54.1384605Z ✔ off-hours local reference stale kill is a separate narrow recovery reason (0.135025ms)
+checks	Full root regression on Linux	2026-10-09T10:34:54.1390142Z ✔ V12 operator review is clearable only for the same Aster communication incident (0.104299ms)
+checks	Full root regression on Linux	2026-10-09T10:34:54.1395648Z ✔ only the exact stale pre-cutover Q102 lineage mismatch is recoverable (0.152397ms)
+checks	Full root regression on Linux	2026-10-09T10:34:54.1397181Z ✔ only the exact local V52 rate-budget saturation reason is recoverable (0.104109ms)
+checks	Full root regression on Linux	2026-10-09T10:34:54.1426662Z ✔ upstream recovery normalizes the shared Kill Switch for deploy-owned runners (7.133561ms)
+checks	Full root regression on Linux	2026-10-09T10:34:54.1536784Z ℹ tests 6
+checks	Full root regression on Linux	2026-10-09T10:34:54.1537192Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:34:54.1537488Z ℹ pass 6
+checks	Full root regression on Linux	2026-10-09T10:34:54.1537711Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:34:54.1537927Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:34:54.1538179Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:34:54.1538382Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:34:54.1538621Z ℹ duration_ms 223.321027
+checks	Full root regression on Linux	2026-10-09T10:34:54.5074990Z ✔ getUserTrades is a signed read-only GET with bounded request weight (40.800198ms)
+checks	Full root regression on Linux	2026-10-09T10:34:54.5304320Z ℹ tests 1
+checks	Full root regression on Linux	2026-10-09T10:34:54.5304764Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:34:54.5304976Z ℹ pass 1
+checks	Full root regression on Linux	2026-10-09T10:34:54.5305220Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:34:54.5305468Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:34:54.5305725Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:34:54.5305940Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:34:54.5306217Z ℹ duration_ms 336.691786
+checks	Full root regression on Linux	2026-10-09T10:34:54.8333144Z ✔ Aster V3 client defaults to the reachable futures API host (0.619976ms)
+checks	Full root regression on Linux	2026-10-09T10:34:54.8473172Z ℹ tests 1
+checks	Full root regression on Linux	2026-10-09T10:34:54.8473718Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:34:54.8473919Z ℹ pass 1
+checks	Full root regression on Linux	2026-10-09T10:34:54.8474132Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:34:54.8474385Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:34:54.8474622Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:34:54.8474845Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:34:54.8475080Z ℹ duration_ms 288.921305
+checks	Full root regression on Linux	2026-10-09T10:34:55.1929073Z ✔ Aster client exposes signed read-only userTrades (0.783296ms)
+checks	Full root regression on Linux	2026-10-09T10:34:55.1999828Z ✔ history sync preserves the last good snapshot on partial failure (38.380084ms)
+checks	Full root regression on Linux	2026-10-09T10:34:55.2000701Z ✔ managed history symbols cover all live sleeves (1.810523ms)
+checks	Full root regression on Linux	2026-10-09T10:34:55.2019048Z ✔ history sync atomically publishes a complete read-only snapshot (3.561969ms)
+checks	Full root regression on Linux	2026-10-09T10:34:55.2149036Z ℹ tests 4
+checks	Full root regression on Linux	2026-10-09T10:34:55.2149977Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:34:55.2150689Z ℹ pass 4
+checks	Full root regression on Linux	2026-10-09T10:34:55.2151406Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:34:55.2151926Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:34:55.2152625Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:34:55.2153213Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:34:55.2153763Z ℹ duration_ms 288.345194
+checks	Full root regression on Linux	2026-10-09T10:34:55.5210040Z ✔ current live target preserves base rules while applying DD1296 sizing (5.957175ms)
+checks	Full root regression on Linux	2026-10-09T10:34:55.5216735Z ✔ historical controlling ledger and cost stress remain unchanged (1.294229ms)
+checks	Full root regression on Linux	2026-10-09T10:34:55.5339528Z ℹ tests 2
+checks	Full root regression on Linux	2026-10-09T10:34:55.5339937Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:34:55.5340235Z ℹ pass 2
+checks	Full root regression on Linux	2026-10-09T10:34:55.5340490Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:34:55.5340780Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:34:55.5341075Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:34:55.5341326Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:34:55.5341582Z ℹ duration_ms 245.019784
+checks	Full root regression on Linux	2026-10-09T10:34:56.0357735Z ✔ implementation is ready while real-money activation remains operator-blocked (212.834995ms)
+checks	Full root regression on Linux	2026-10-09T10:34:56.0361544Z ✔ readiness checker is read-only by construction (0.758193ms)
+checks	Full root regression on Linux	2026-10-09T10:34:56.0377113Z ✔ activation entry points require the read-only readiness gate (1.838168ms)
+checks	Full root regression on Linux	2026-10-09T10:34:56.0384814Z ✔ standalone FET Core preemption helper is independently fail-closed (0.993232ms)
+checks	Full root regression on Linux	2026-10-09T10:34:56.0521974Z ℹ tests 4
+checks	Full root regression on Linux	2026-10-09T10:34:56.0522639Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:34:56.0522987Z ℹ pass 4
+checks	Full root regression on Linux	2026-10-09T10:34:56.0523333Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:34:56.0523603Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:34:56.0523907Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:34:56.0524170Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:34:56.0524406Z ℹ duration_ms 448.145635
+checks	Full root regression on Linux	2026-10-09T10:34:56.3741193Z ✔ side caps constrain opposite HV and REV allocations independently (0.801576ms)
+checks	Full root regression on Linux	2026-10-09T10:34:56.3742616Z ✔ FET BRK SHORT exhaustion boundary rejects only the selected route (0.130951ms)
+checks	Full root regression on Linux	2026-10-09T10:34:56.3743477Z ✔ boundary return uses entry open and ignores future/current H1 close (0.163517ms)
+checks	Full root regression on Linux	2026-10-09T10:34:56.3743970Z ✔ V12 causal thresholds apply to intended symbol side and rank (0.097058ms)
+checks	Full root regression on Linux	2026-10-09T10:34:56.3744602Z ✔ six same-side net losses block only that side; duplicate fills and zero do not reset streak (0.186841ms)
+checks	Full root regression on Linux	2026-10-09T10:34:56.4826283Z ✔ FET cooldown survives the real durable store and expires at exactly 24 hours (15.962579ms)
+checks	Full root regression on Linux	2026-10-09T10:34:56.4832991Z ✔ PENGU limited re-break rejects elevated bounce only during BTC counterwind (26.865582ms)
+checks	Full root regression on Linux	2026-10-09T10:34:56.4840055Z ✔ V12 full-exit counter uses fees and all partial fills and rejects incomplete quantity proof (8.928097ms)
+checks	Full root regression on Linux	2026-10-09T10:34:56.4841341Z ✔ FET active migration requires exact venue quantity, profit-floor STOP and cross5 leverage (66.943369ms)
+checks	Full root regression on Linux	2026-10-09T10:34:56.5032582Z ✔ new integrated acceptance is bound to specified research SHA and reproduced 1358-trade ledger (12.227488ms)
+checks	Full root regression on Linux	2026-10-09T10:34:56.5064605Z ✔ LONG loss cooldown survives real V12 restart and never disables opposite SHORT (11.708908ms)
+checks	Full root regression on Linux	2026-10-09T10:34:56.5065674Z ✔ delayed V12 forced exit stops accounting at first flat before another owner opens same symbol (0.688769ms)
+checks	Full root regression on Linux	2026-10-09T10:34:56.5066662Z ✔ simultaneous finalized exits count in actual fill-time order instead of reversed active array (0.53166ms)
+checks	Full root regression on Linux	2026-10-09T10:34:56.5067480Z ✔ formal handoff PB SHORT inherits 2.50 independently of PB LONG 2.00 (0.05776ms)
+checks	Full root regression on Linux	2026-10-09T10:34:56.5210164Z ℹ tests 14
+checks	Full root regression on Linux	2026-10-09T10:34:56.5210664Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:34:56.5211062Z ℹ pass 14
+checks	Full root regression on Linux	2026-10-09T10:34:56.5211329Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:34:56.5211611Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:34:56.5211915Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:34:56.5212390Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:34:56.5212737Z ℹ duration_ms 404.139865
+checks	Full root regression on Linux	2026-10-09T10:34:56.9341601Z ✔ position snapshot freshness uses observation time, not the last position mutation time (0.629038ms)
+checks	Full root regression on Linux	2026-10-09T10:34:56.9494887Z ℹ tests 1
+checks	Full root regression on Linux	2026-10-09T10:34:56.9495290Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:34:56.9495702Z ℹ pass 1
+checks	Full root regression on Linux	2026-10-09T10:34:56.9495954Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:34:56.9496250Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:34:56.9496543Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:34:56.9496787Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:34:56.9497077Z ℹ duration_ms 366.68924
+checks	Full root regression on Linux	2026-10-09T10:34:57.3518579Z ✔ direct Aster market fill is queued without sending an order for the test (6.30079ms)
+checks	Full root regression on Linux	2026-10-09T10:34:57.3653054Z ℹ tests 1
+checks	Full root regression on Linux	2026-10-09T10:34:57.3653418Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:34:57.3653747Z ℹ pass 1
+checks	Full root regression on Linux	2026-10-09T10:34:57.3653971Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:34:57.3654255Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:34:57.3654517Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:34:57.3654752Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:34:57.3654997Z ℹ duration_ms 368.596947
+checks	Full root regression on Linux	2026-10-09T10:34:57.8717394Z ✔ V12 dynamic DOGE entry sends zero orders unless venue is confirmed 5x Cross (26.244953ms)
+checks	Full root regression on Linux	2026-10-09T10:34:57.8718917Z ✔ Q102 dynamic AVAX entry sends zero orders unless venue is confirmed 5x Cross (3.957687ms)
+checks	Full root regression on Linux	2026-10-09T10:34:57.8720188Z ✔ dynamic entries prepare mismatched leverage or isolated margin before exposure (16.387231ms)
+checks	Full root regression on Linux	2026-10-09T10:34:57.8721041Z ✔ 1x Cross is mutated to 5x before a V12 entry (5.264926ms)
+checks	Full root regression on Linux	2026-10-09T10:34:57.8721807Z ✔ 5x Isolated is changed to Cross before a Q102 entry (4.480707ms)
+checks	Full root regression on Linux	2026-10-09T10:34:57.8722802Z ✔ 1x Isolated requires both venue mutations and a successful 5x Cross read-back (4.391294ms)
+checks	Full root regression on Linux	2026-10-09T10:34:57.8723849Z ✔ venue mutation failures and read-back failure send zero exposure orders (13.09278ms)
+checks	Full root regression on Linux	2026-10-09T10:34:57.8724845Z ✔ non-flat positions or unresolved open orders prohibit venue mutation and new exposure (2.892666ms)
+checks	Full root regression on Linux	2026-10-09T10:34:57.8725770Z ✔ already 5x Cross skips mutation and proceeds to entry (3.48058ms)
+checks	Full root regression on Linux	2026-10-09T10:34:57.8726616Z ✔ V12/Q102 entry proceeds only after exact 5x Cross read-back (6.78976ms)
+checks	Full root regression on Linux	2026-10-09T10:34:57.8755756Z ✔ V12 adapter marks a dynamic entry as venue-margin protected (6.65554ms)
+checks	Full root regression on Linux	2026-10-09T10:34:57.8767089Z ✔ Q102 runner marks a dynamic entry as venue-margin protected (1.069515ms)
+checks	Full root regression on Linux	2026-10-09T10:34:57.8896526Z ✔ venue preparation precedes fresh Margin Guard for protected exposure (0.872375ms)
+checks	Full root regression on Linux	2026-10-09T10:34:57.8898052Z ✔ strategy Gross contracts remain separate from venue leverage 5x (12.254893ms)
+checks	Full root regression on Linux	2026-10-09T10:34:57.9048056Z ℹ tests 14
+checks	Full root regression on Linux	2026-10-09T10:34:57.9048545Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:34:57.9048855Z ℹ pass 14
+checks	Full root regression on Linux	2026-10-09T10:34:57.9049140Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:34:57.9049440Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:34:57.9049763Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:34:57.9050061Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:34:57.9050365Z ℹ duration_ms 494.111723
+checks	Full root regression on Linux	2026-10-09T10:34:58.3953383Z ✔ FET live runner enters once, protects, survives restart, and exits after 24h (31.624001ms)
+checks	Full root regression on Linux	2026-10-09T10:34:58.4098152Z ℹ tests 1
+checks	Full root regression on Linux	2026-10-09T10:34:58.4099194Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:34:58.4099696Z ℹ pass 1
+checks	Full root regression on Linux	2026-10-09T10:34:58.4100152Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:34:58.4100621Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:34:58.4101496Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:34:58.4101840Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:34:58.4102319Z ℹ duration_ms 433.371879
+checks	Full root regression on Linux	2026-10-09T10:34:58.6527469Z ✔ BRK48 uses previous completed H1 at entry hour%4==1 (0.935825ms)
+checks	Full root regression on Linux	2026-10-09T10:34:58.6528561Z ✔ no lookahead and threshold gates (0.22463ms)
+checks	Full root regression on Linux	2026-10-09T10:34:58.6529772Z ✔ late entry window is rejected instead of chasing the H1 open (0.156884ms)
+checks	Full root regression on Linux	2026-10-09T10:34:58.6534532Z ✔ DD1296 FET causal +2% minimum rejects a otherwise valid +1.99% breakout (0.248856ms)
+checks	Full root regression on Linux	2026-10-09T10:34:58.6668649Z ℹ tests 4
+checks	Full root regression on Linux	2026-10-09T10:34:58.6669095Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:34:58.6669501Z ℹ pass 4
+checks	Full root regression on Linux	2026-10-09T10:34:58.6669769Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:34:58.6670125Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:34:58.6670467Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:34:58.6672829Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:34:58.6673268Z ℹ duration_ms 224.600442
+checks	Full root regression on Linux	2026-10-09T10:34:59.0247216Z ✔ FET Core preemption is reduce-only, cancels protection, clears state, and is idempotent (14.428982ms)
+checks	Full root regression on Linux	2026-10-09T10:34:59.0383415Z ℹ tests 1
+checks	Full root regression on Linux	2026-10-09T10:34:59.0383799Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:34:59.0384105Z ℹ pass 1
+checks	Full root regression on Linux	2026-10-09T10:34:59.0384391Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:34:59.0385038Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:34:59.0385304Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:34:59.0385515Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:34:59.0385768Z ℹ duration_ms 331.561371
+checks	Full root regression on Linux	2026-10-09T10:34:59.2850991Z ✔ 72h observation excludes current/future close and uses exact completed close endpoints (0.633671ms)
+checks	Full root regression on Linux	2026-10-09T10:34:59.3004213Z ℹ tests 1
+checks	Full root regression on Linux	2026-10-09T10:34:59.3004573Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:34:59.3004851Z ℹ pass 1
+checks	Full root regression on Linux	2026-10-09T10:34:59.3005167Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:34:59.3005439Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:34:59.3005738Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:34:59.3005982Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:34:59.3007327Z ℹ duration_ms 224.118101
+checks	Full root regression on Linux	2026-10-09T10:34:59.5412777Z ✔ FET Core preemption is wired through all four Core families (5.821562ms)
+checks	Full root regression on Linux	2026-10-09T10:34:59.5418093Z ✔ preemption implementations re-read live state before continuing Core entry (1.503029ms)
+checks	Full root regression on Linux	2026-10-09T10:34:59.5536584Z ℹ tests 2
+checks	Full root regression on Linux	2026-10-09T10:34:59.5536936Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:34:59.5537576Z ℹ pass 2
+checks	Full root regression on Linux	2026-10-09T10:34:59.5537896Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:34:59.5538134Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:34:59.5538463Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:34:59.5538700Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:34:59.5538946Z ℹ duration_ms 215.673942
+checks	Full root regression on Linux	2026-10-09T10:34:59.8113098Z ✔ V12 Top3 preserves strong-quality signal while Rank3 residual sizing is explicit (0.556274ms)
+checks	Full root regression on Linux	2026-10-09T10:34:59.8115053Z ✔ PENGU allocation is the formal 1.0x COMBINED_FILTERED Q60/DD17/H72 contract (0.100904ms)
+checks	Full root regression on Linux	2026-10-09T10:34:59.8116324Z ✔ LIVE integrated risk contract uses final Q102/FET/stock/shared caps (0.50254ms)
+checks	Full root regression on Linux	2026-10-09T10:34:59.8117221Z ✔ shared crypto daily loss remains the canonical 7.5% contract (0.337972ms)
+checks	Full root regression on Linux	2026-10-09T10:34:59.8117865Z ✔ V50 uses the selected B60/C20/Stop1.75/Edge7.5 policy (0.108295ms)
+checks	Full root regression on Linux	2026-10-09T10:34:59.8118317Z ✔ V50 policy preserves V11 identity and operational gates (0.182881ms)
+checks	Full root regression on Linux	2026-10-09T10:34:59.8252761Z ℹ tests 6
+checks	Full root regression on Linux	2026-10-09T10:34:59.8253131Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:34:59.8253544Z ℹ pass 6
+checks	Full root regression on Linux	2026-10-09T10:34:59.8253813Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:34:59.8254603Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:34:59.8254994Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:34:59.8255291Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:34:59.8255617Z ℹ duration_ms 227.172852
+checks	Full root regression on Linux	2026-10-09T10:35:00.0883019Z ✔ migrates flat FET state and preserves exact backup (11.859331ms)
+checks	Full root regression on Linux	2026-10-09T10:35:00.1053978Z ✔ migrates flat V12 state (17.657568ms)
+checks	Full root regression on Linux	2026-10-09T10:35:00.1088571Z ✔ refuses any active/pending/review state (3.706719ms)
+checks	Full root regression on Linux	2026-10-09T10:35:00.1221910Z ℹ tests 3
+checks	Full root regression on Linux	2026-10-09T10:35:00.1222535Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:35:00.1222968Z ℹ pass 3
+checks	Full root regression on Linux	2026-10-09T10:35:00.1223326Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:35:00.1223609Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:35:00.1224467Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:35:00.1224764Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:35:00.1225062Z ℹ duration_ms 257.692766
+checks	Full root regression on Linux	2026-10-09T10:35:00.4075041Z ✔ priority reduction keeps actual HYPE75 STOP and TP instead of rebuilding legacy levels (1.024088ms)
+checks	Full root regression on Linux	2026-10-09T10:35:00.4211036Z ℹ tests 1
+checks	Full root regression on Linux	2026-10-09T10:35:00.4211430Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:35:00.4211661Z ℹ pass 1
+checks	Full root regression on Linux	2026-10-09T10:35:00.4211928Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:35:00.4212392Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:35:00.4212626Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:35:00.4212830Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:35:00.4213085Z ℹ duration_ms 240.664502
+checks	Full root regression on Linux	2026-10-09T10:35:00.8605533Z ✔ HYPE venue STOP fill read-back clears once and removes verified sibling TP (1.262877ms)
+checks	Full root regression on Linux	2026-10-09T10:35:00.8865705Z ℹ tests 1
+checks	Full root regression on Linux	2026-10-09T10:35:00.8866169Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:35:00.8866517Z ℹ pass 1
+checks	Full root regression on Linux	2026-10-09T10:35:00.8866818Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:35:00.8867250Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:35:00.8867582Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:35:00.8867889Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:35:00.8868322Z ℹ duration_ms 391.532722
+checks	Full root regression on Linux	2026-10-09T10:35:01.1860224Z ✔ HYPE live policy matches the approved high-win Aster fixed-ledger contract (0.659596ms)
+checks	Full root regression on Linux	2026-10-09T10:35:01.1861446Z ✔ HYPE trend signal never uses an incomplete current candle (2.177406ms)
+checks	Full root regression on Linux	2026-10-09T10:35:01.2018089Z ℹ tests 2
+checks	Full root regression on Linux	2026-10-09T10:35:01.2019258Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:35:01.2019791Z ℹ pass 2
+checks	Full root regression on Linux	2026-10-09T10:35:01.2020347Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:35:01.2020896Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:35:01.2021287Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:35:01.2021627Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:35:01.2022344Z ℹ duration_ms 240.860269
+checks	Full root regression on Linux	2026-10-09T10:35:01.5044914Z ✔ HYPE entry is blocked when core plus pending and candidate worst-case gross exceed capacity (0.587534ms)
+checks	Full root regression on Linux	2026-10-09T10:35:01.5046274Z ✔ HYPE entry remains lowest-priority and does not alter a core reservation (0.157886ms)
+checks	Full root regression on Linux	2026-10-09T10:35:01.5048059Z ✔ TREND runtime is scoped to HYPE and enforces the 1.5x sleeve contract (0.919369ms)
+checks	Full root regression on Linux	2026-10-09T10:35:01.5048814Z ✔ TREND runtime rejects a ZEC or mixed symbol scope (0.378649ms)
+checks	Full root regression on Linux	2026-10-09T10:35:01.5203453Z ℹ tests 4
+checks	Full root regression on Linux	2026-10-09T10:35:01.5203899Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:35:01.5204181Z ℹ pass 4
+checks	Full root regression on Linux	2026-10-09T10:35:01.5204521Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:35:01.5204814Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:35:01.5205096Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:35:01.5205417Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:35:01.5205775Z ℹ duration_ms 244.252723
+checks	Full root regression on Linux	2026-10-09T10:35:02.0309332Z ✔ recovers only the flat known market-row manual review and keeps an exact backup (124.320334ms)
+checks	Full root regression on Linux	2026-10-09T10:35:02.0311651Z ✔ known benign manual review returns to the next shadow cycle without order mutation (1.476932ms)
+checks	Full root regression on Linux	2026-10-09T10:35:02.0313246Z ✔ a transient known market-row failure on a flat state does not poison the daemon (0.229868ms)
+checks	Full root regression on Linux	2026-10-09T10:35:02.0314257Z ✔ known flat pre-order rate-budget failures hold without poisoning the daemon (0.64991ms)
+checks	Full root regression on Linux	2026-10-09T10:35:02.0315545Z ✔ budget deferral never clears an existing manual review (0.163726ms)
+checks	Full root regression on Linux	2026-10-09T10:35:02.0316665Z ✔ flat pre-request account budget denial is no-entry HOLD, not a permanent review (0.219314ms)
+checks	Full root regression on Linux	2026-10-09T10:35:02.0317768Z ✔ account budget denial with owned durable exposure remains manual review (0.287523ms)
+checks	Full root regression on Linux	2026-10-09T10:35:02.0318833Z ✔ budget-shaped errors after the read-only phase cannot be benignly deferred (0.217014ms)
+checks	Full root regression on Linux	2026-10-09T10:35:02.0319769Z ✔ unknown or malformed pre-order failure still requires manual review (0.464043ms)
+checks	Full root regression on Linux	2026-10-09T10:35:02.0339838Z ✔ refuses unknown manual review and any active/pending state (4.080104ms)
+checks	Full root regression on Linux	2026-10-09T10:35:02.0482766Z ℹ tests 10
+checks	Full root regression on Linux	2026-10-09T10:35:02.0483133Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:35:02.0483607Z ℹ pass 10
+checks	Full root regression on Linux	2026-10-09T10:35:02.0484547Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:35:02.0485038Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:35:02.0485359Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:35:02.0485687Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:35:02.0486060Z ℹ duration_ms 459.392113
+checks	Full root regression on Linux	2026-10-09T10:35:02.3399329Z ✔ HYPE LONG accepts a completed BTC-gated breakout and returns protective levels (1.188422ms)
+checks	Full root regression on Linux	2026-10-09T10:35:02.3400760Z ✔ ZEC LONG uses its own completed-bar breakout rules (0.233989ms)
+checks	Full root regression on Linux	2026-10-09T10:35:02.3404305Z ✔ stale or incomplete candles fail closed (0.221464ms)
+checks	Full root regression on Linux	2026-10-09T10:35:02.3405197Z ✔ risk-derived quantity is capped by both stop risk and GROSS 1.0x (0.259183ms)
+checks	Full root regression on Linux	2026-10-09T10:35:02.3406007Z ✔ protective levels honor long-side tick rounding (0.112772ms)
+checks	Full root regression on Linux	2026-10-09T10:35:02.3550101Z ℹ tests 5
+checks	Full root regression on Linux	2026-10-09T10:35:02.3550566Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:35:02.3551098Z ℹ pass 5
+checks	Full root regression on Linux	2026-10-09T10:35:02.3551462Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:35:02.3551778Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:35:02.3552399Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:35:02.3552726Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:35:02.3553058Z ℹ duration_ms 248.73775
+checks	Full root regression on Linux	2026-10-09T10:35:02.6527654Z ✔ migrates a flat HYPE state with an exact backup and preserves unknown fields (9.946361ms)
+checks	Full root regression on Linux	2026-10-09T10:35:02.6548635Z ✔ refuses HYPE state migration when exposure, pending, or manual review exists (2.75547ms)
+checks	Full root regression on Linux	2026-10-09T10:35:02.6677965Z ℹ tests 2
+checks	Full root regression on Linux	2026-10-09T10:35:02.6678325Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:35:02.6678598Z ℹ pass 2
+checks	Full root regression on Linux	2026-10-09T10:35:02.6678965Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:35:02.6679197Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:35:02.6679449Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:35:02.6679668Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:35:02.6679907Z ℹ duration_ms 245.593772
+checks	Full root regression on Linux	2026-10-09T10:35:02.9593912Z ✔ HYPE/ZEC state store writes an exact SHA-owned 0600 regular file (6.652994ms)
+checks	Full root regression on Linux	2026-10-09T10:35:02.9601482Z ✔ HYPE/ZEC state store rejects a stale runtime SHA (1.440113ms)
+checks	Full root regression on Linux	2026-10-09T10:35:02.9722902Z ℹ tests 2
+checks	Full root regression on Linux	2026-10-09T10:35:02.9723273Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:35:02.9723614Z ℹ pass 2
+checks	Full root regression on Linux	2026-10-09T10:35:02.9723888Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:35:02.9724231Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:35:02.9724524Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:35:02.9724735Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:35:02.9725014Z ℹ duration_ms 235.457039
+checks	Full root regression on Linux	2026-10-09T10:35:03.2584138Z ✔ HYPE-only TREND market data never depends on ZEC or legacy timeframes (1.367512ms)
+checks	Full root regression on Linux	2026-10-09T10:35:03.2725101Z ℹ tests 1
+checks	Full root regression on Linux	2026-10-09T10:35:03.2725442Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:35:03.2725770Z ℹ pass 1
+checks	Full root regression on Linux	2026-10-09T10:35:03.2725981Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:35:03.2726230Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:35:03.2726520Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:35:03.2726726Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:35:03.2726982Z ℹ duration_ms 222.512191
+checks	Full root regression on Linux	2026-10-09T10:35:03.5199167Z ✔ HYPE/ZEC production contract pins independent risk and gross ceilings (1.035718ms)
+checks	Full root regression on Linux	2026-10-09T10:35:03.5200291Z ✔ HYPE and ZEC are explicit long-only sidecar owners (0.92573ms)
+checks	Full root regression on Linux	2026-10-09T10:35:03.5331809Z ℹ tests 2
+checks	Full root regression on Linux	2026-10-09T10:35:03.5335176Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:35:03.5335995Z ℹ pass 2
+checks	Full root regression on Linux	2026-10-09T10:35:03.5336200Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:35:03.5336415Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:35:03.5336657Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:35:03.5336917Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:35:03.5337185Z ℹ duration_ms 220.953584
+checks	Full root regression on Linux	2026-10-09T10:35:03.7981572Z ✔ requires a verified shared account lock before any sidecar reduction (1.301303ms)
+checks	Full root regression on Linux	2026-10-09T10:35:03.7982917Z ✔ reduces only the planned half, then re-installs and reads back both protections (1.194864ms)
+checks	Full root regression on Linux	2026-10-09T10:35:03.7983698Z ✔ blocks without mutation when venue risk is not exactly 5x Cross (0.316969ms)
+checks	Full root regression on Linux	2026-10-09T10:35:03.7984544Z ✔ blocks on partial/unknown reduction and never opens the priority order (0.362464ms)
+checks	Full root regression on Linux	2026-10-09T10:35:03.8125165Z ℹ tests 4
+checks	Full root regression on Linux	2026-10-09T10:35:03.8125678Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:35:03.8125962Z ℹ pass 4
+checks	Full root regression on Linux	2026-10-09T10:35:03.8126237Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:35:03.8126534Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:35:03.8126829Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:35:03.8127027Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:35:03.8127306Z ℹ duration_ms 233.52758
+checks	Full root regression on Linux	2026-10-09T10:35:04.0643833Z ✔ sidecar preemption is not planned without an accepted higher-priority candidate (0.681697ms)
+checks	Full root regression on Linux	2026-10-09T10:35:04.0645334Z ✔ priority entry releases only the required capacity and never more than half of either sidecar (5.690496ms)
+checks	Full root regression on Linux	2026-10-09T10:35:04.0647812Z ✔ pending and reserved Gross are included in the capacity deficit (0.203438ms)
+checks	Full root regression on Linux	2026-10-09T10:35:04.0648611Z ✔ a stock priority entry consumes total capacity but not crypto capacity (0.127293ms)
+checks	Full root regression on Linux	2026-10-09T10:35:04.0653117Z ✔ strict planner accepts sidecars only with explicit preemption support and preserves hard caps (1.116666ms)
+checks	Full root regression on Linux	2026-10-09T10:35:04.0792495Z ℹ tests 5
+checks	Full root regression on Linux	2026-10-09T10:35:04.0793024Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:35:04.0793387Z ℹ pass 5
+checks	Full root regression on Linux	2026-10-09T10:35:04.0793783Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:35:04.0794163Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:35:04.0794552Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:35:04.0794927Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:35:04.0795194Z ℹ duration_ms 237.613554
+checks	Full root regression on Linux	2026-10-09T10:35:04.3711703Z ✔ sidecars are the sole cause only when removing them makes the same candidate fit (0.847841ms)
+checks	Full root regression on Linux	2026-10-09T10:35:04.3713609Z ✔ a non-sidecar cap breach never authorizes sidecar reduction (0.148967ms)
+checks	Full root regression on Linux	2026-10-09T10:35:04.3714652Z ✔ pending/reserved gross is part of the sole-cause proof (0.095154ms)
+checks	Full root regression on Linux	2026-10-09T10:35:04.3715285Z ✔ a stock candidate uses total capacity without consuming crypto capacity (0.070937ms)
+checks	Full root regression on Linux	2026-10-09T10:35:04.3715951Z ✔ an unknown active position never authorizes sidecar reduction (0.092641ms)
+checks	Full root regression on Linux	2026-10-09T10:35:04.3853536Z ℹ tests 5
+checks	Full root regression on Linux	2026-10-09T10:35:04.3854074Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:35:04.3854459Z ℹ pass 5
+checks	Full root regression on Linux	2026-10-09T10:35:04.3854703Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:35:04.3854953Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:35:04.3855262Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:35:04.3855515Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:35:04.3855851Z ℹ duration_ms 228.041172
+checks	Full root regression on Linux	2026-10-09T10:35:04.7363720Z ✔ only the known malformed market row is a retryable HYPE data failure (0.600436ms)
+checks	Full root regression on Linux	2026-10-09T10:35:04.7365235Z ✔ HYPE/ZEC runtime defaults to fail-closed shadow mode (0.275124ms)
+checks	Full root regression on Linux	2026-10-09T10:35:04.7366219Z ✔ HYPE/ZEC live gate rejects missing operator activation (0.410536ms)
+checks	Full root regression on Linux	2026-10-09T10:35:04.7367105Z ✔ HYPE/ZEC live gate requires an exact runtime SHA (0.166148ms)
+checks	Full root regression on Linux	2026-10-09T10:35:04.7368139Z ✔ transient account lock collisions use a bounded short retry without changing normal cadence (0.123644ms)
+checks	Full root regression on Linux	2026-10-09T10:35:04.7369124Z ✔ successful no-entry evaluation replaces stale HYPE fail-closed observability (0.158855ms)
+checks	Full root regression on Linux	2026-10-09T10:35:04.7370242Z ✔ no-entry observability preserves a more specific decision written during the same tick (0.079372ms)
+checks	Full root regression on Linux	2026-10-09T10:35:04.7371330Z ✔ HYPE does not misclassify exact V12 protective orders as unmanaged account orders (1.131875ms)
+checks	Full root regression on Linux	2026-10-09T10:35:04.7616993Z ℹ tests 8
+checks	Full root regression on Linux	2026-10-09T10:35:04.7617372Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:35:04.7617584Z ℹ pass 8
+checks	Full root regression on Linux	2026-10-09T10:35:04.7617823Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:35:04.7618067Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:35:04.7618402Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:35:04.7633459Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:35:04.7634036Z ℹ duration_ms 340.658162
+checks	Full root regression on Linux	2026-10-09T10:35:05.3132677Z ✔ HYPE weaker EMA240 growth below75bps cannot enter (1.685902ms)
+checks	Full root regression on Linux	2026-10-09T10:35:05.3134086Z ✔ HYPE stronger completed trend remains eligible (0.543754ms)
+checks	Full root regression on Linux	2026-10-09T10:35:05.3136245Z ✔ PENGU route request 0.1875 submits full fixed1 notional with5x margin (0.67346ms)
+checks	Full root regression on Linux	2026-10-09T10:35:05.3137269Z ✔ PENGU route request 0.5 submits full fixed1 notional with5x margin (0.087412ms)
+checks	Full root regression on Linux	2026-10-09T10:35:05.3138285Z ✔ PENGU route request 0.6 submits full fixed1 notional with5x margin (0.066497ms)
+checks	Full root regression on Linux	2026-10-09T10:35:05.3139686Z ✔ PENGU route request 1 submits full fixed1 notional with5x margin (0.081917ms)
+checks	Full root regression on Linux	2026-10-09T10:35:05.3140510Z ✔ PENGU route request 1.25 submits full fixed1 notional with5x margin (0.066694ms)
+checks	Full root regression on Linux	2026-10-09T10:35:05.3141139Z ✔ PENGU reduced allocation and lower runtime cap cannot authorize a new order (0.108038ms)
+checks	Full root regression on Linux	2026-10-09T10:35:05.3141781Z ✔ Recovery V8 half-defense scales1.0 entry to0.5 and records0.5 reduction (0.338403ms)
+checks	Full root regression on Linux	2026-10-09T10:35:05.3186294Z ✔ Recovery1.0 state survives a real disk save and restart (8.06282ms)
+checks	Full root regression on Linux	2026-10-09T10:35:05.3342743Z ℹ tests 10
+checks	Full root regression on Linux	2026-10-09T10:35:05.3343201Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:35:05.3343487Z ℹ pass 10
+checks	Full root regression on Linux	2026-10-09T10:35:05.3343753Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:35:05.3344101Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:35:05.3344396Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:35:05.3344694Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:35:05.3345009Z ℹ duration_ms 493.012114
+checks	Full root regression on Linux	2026-10-09T10:35:05.6442914Z {"level":"error","message":"idle-priority-short-manual-review","reason":"IDLE_ENTRY_POSITION_MISMATCH:RENDERUSDT","ordersSent":0,"cancelsSent":0,"positionChangesSent":0}
+checks	Full root regression on Linux	2026-10-09T10:35:05.6444887Z {"level":"error","message":"idle-priority-short-manual-review","reason":"IDLE_ENTRY_POSITION_MISMATCH:RENDERUSDT","ordersSent":0,"cancelsSent":0,"positionChangesSent":0}
+checks	Full root regression on Linux	2026-10-09T10:35:05.6458711Z ✔ LONG generic candidate cannot consume SHORT cooldown (1.128625ms)
+checks	Full root regression on Linux	2026-10-09T10:35:05.6459762Z ✔ route rejection cannot consume cooldown (0.147459ms)
+checks	Full root regression on Linux	2026-10-09T10:35:05.6461887Z ✔ REJECTED without exposure cannot consume cooldown (0.252607ms)
+checks	Full root regression on Linux	2026-10-09T10:35:05.6462978Z ✔ CANCELED without exposure cannot consume cooldown (0.081101ms)
+checks	Full root regression on Linux	2026-10-09T10:35:05.6463637Z ✔ EXPIRED without exposure cannot consume cooldown (0.073909ms)
+checks	Full root regression on Linux	2026-10-09T10:35:05.6468375Z ✔ UNKNOWN without exposure cannot consume cooldown (0.073879ms)
+checks	Full root regression on Linux	2026-10-09T10:35:05.6469512Z ✔ FILLED starts cooldown and preserves other symbols (0.712968ms)
+checks	Full root regression on Linux	2026-10-09T10:35:05.6470328Z ✔ PARTIALLY_FILLED starts cooldown and preserves other symbols (0.25114ms)
+checks	Full root regression on Linux	2026-10-09T10:35:05.6630563Z ℹ tests 8
+checks	Full root regression on Linux	2026-10-09T10:35:05.6631180Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:35:05.6631471Z ℹ pass 8
+checks	Full root regression on Linux	2026-10-09T10:35:05.6631770Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:35:05.6632204Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:35:05.6632533Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:35:05.6632839Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:35:05.6633174Z ℹ duration_ms 263.124414
+checks	Full root regression on Linux	2026-10-09T10:35:05.9446890Z ✔ flat Idle defers exact Aster rate-budget saturation without manual review (0.652825ms)
+checks	Full root regression on Linux	2026-10-09T10:35:05.9448897Z ✔ rate-budget deferral never masks exposure, pending, or an existing manual review (0.109676ms)
+checks	Full root regression on Linux	2026-10-09T10:35:05.9587541Z ℹ tests 2
+checks	Full root regression on Linux	2026-10-09T10:35:05.9588173Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:35:05.9588741Z ℹ pass 2
+checks	Full root regression on Linux	2026-10-09T10:35:05.9589119Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:35:05.9589620Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:35:05.9590085Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:35:05.9590431Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:35:05.9590884Z ℹ duration_ms 239.68352
+checks	Full root regression on Linux	2026-10-09T10:35:06.2566044Z ✔ baseline admission evidence is produced from current decision snapshots and is atomic (8.646335ms)
+checks	Full root regression on Linux	2026-10-09T10:35:06.2607377Z ✔ same-timestamp baseline acceptance blocks Idle admission (4.800397ms)
+checks	Full root regression on Linux	2026-10-09T10:35:06.2640214Z ✔ retained older PENGU signal and an unselected Q102 item are not current acceptance (3.298091ms)
+checks	Full root regression on Linux	2026-10-09T10:35:06.2674653Z ✔ missing or mismatched baseline source fails closed (3.340768ms)
+checks	Full root regression on Linux	2026-10-09T10:35:06.2720168Z ✔ Idle fails closed until every asynchronous baseline source completed the current cycle (4.590466ms)
+checks	Full root regression on Linux	2026-10-09T10:35:06.2754756Z ✔ current FET candidate blocks Idle before FET order resolution (3.249858ms)
+checks	Full root regression on Linux	2026-10-09T10:35:06.2798840Z ✔ fresh V12 alternating-H1 no-bar observation is current no-acceptance, never a carried signal (4.575687ms)
+checks	Full root regression on Linux	2026-10-09T10:35:06.2926444Z ℹ tests 7
+checks	Full root regression on Linux	2026-10-09T10:35:06.2927494Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:35:06.2928015Z ℹ pass 7
+checks	Full root regression on Linux	2026-10-09T10:35:06.2928876Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:35:06.2929161Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:35:06.2929486Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:35:06.2929708Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:35:06.2929977Z ℹ duration_ms 257.903779
+checks	Full root regression on Linux	2026-10-09T10:35:06.5619604Z ✔ clears only the known flat operator-artifact EACCES review and keeps an exact backup (8.749672ms)
+checks	Full root regression on Linux	2026-10-09T10:35:06.5651880Z ✔ clears the exact flat Aster rate-budget saturation review and keeps an exact backup (3.86759ms)
+checks	Full root regression on Linux	2026-10-09T10:35:06.5699517Z ✔ refuses unknown review and any active or pending exposure (4.873787ms)
+checks	Full root regression on Linux	2026-10-09T10:35:06.5816078Z ℹ tests 3
+checks	Full root regression on Linux	2026-10-09T10:35:06.5816588Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:35:06.5816967Z ℹ pass 3
+checks	Full root regression on Linux	2026-10-09T10:35:06.5817311Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:35:06.5817601Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:35:06.5817932Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:35:06.5818213Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:35:06.5818531Z ℹ duration_ms 235.916956
+checks	Full root regression on Linux	2026-10-09T10:35:06.8264591Z ✔ baseline five win a same-timestamp acceptance (0.707239ms)
+checks	Full root regression on Linux	2026-10-09T10:35:06.8265515Z ✔ open baseline position means account is not idle (0.119637ms)
+checks	Full root regression on Linux	2026-10-09T10:35:06.8273052Z ✔ baseline pending exposure fails closed (0.12587ms)
+checks	Full root regression on Linux	2026-10-09T10:35:06.8274213Z ✔ HYPE or other non-baseline crypto sidecar blocks new Idle (0.092114ms)
+checks	Full root regression on Linux	2026-10-09T10:35:06.8279102Z ✔ 0.5 residual capacity skips instead of partial sizing (0.529162ms)
+checks	Full root regression on Linux	2026-10-09T10:35:06.8284311Z ✔ 5x Cross readback is mandatory (0.120534ms)
+checks	Full root regression on Linux	2026-10-09T10:35:06.8287112Z ✔ clean idle state admits exactly 1.00x (0.094568ms)
+checks	Full root regression on Linux	2026-10-09T10:35:06.8442805Z ℹ tests 7
+checks	Full root regression on Linux	2026-10-09T10:35:06.8443335Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:35:06.8443687Z ℹ pass 7
+checks	Full root regression on Linux	2026-10-09T10:35:06.8444032Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:35:06.8444407Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:35:06.8444811Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:35:06.8445162Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:35:06.8445507Z ℹ duration_ms 232.931494
+checks	Full root regression on Linux	2026-10-09T10:35:07.0929686Z ✔ missing or stale baseline admission fails closed (0.713819ms)
+checks	Full root regression on Linux	2026-10-09T10:35:07.0930454Z ✔ baseline wins at the same timestamp (0.507762ms)
+checks	Full root regression on Linux	2026-10-09T10:35:07.0932156Z ✔ risk, margin, kill switch, cross, and side gates all fail closed (0.116882ms)
+checks	Full root regression on Linux	2026-10-09T10:35:07.0933019Z ✔ partial capacity never becomes a partial Idle order (0.126216ms)
+checks	Full root regression on Linux	2026-10-09T10:35:07.0933750Z ✔ same-symbol Idle occupancy and sidecar exposure block new entry (0.132688ms)
+checks	Full root regression on Linux	2026-10-09T10:35:07.0934447Z ✔ accepted admission is exactly one gross (0.087528ms)
+checks	Full root regression on Linux	2026-10-09T10:35:07.0935187Z ✔ protection plan is deterministic SHORT-only and uses stop/TP contract (0.272257ms)
+checks	Full root regression on Linux	2026-10-09T10:35:07.0935883Z ✔ baseline admission evidence is SHA-bound and fresh (1.138321ms)
+checks	Full root regression on Linux	2026-10-09T10:35:07.1127622Z ℹ tests 8
+checks	Full root regression on Linux	2026-10-09T10:35:07.1128153Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:35:07.1128627Z ℹ pass 8
+checks	Full root regression on Linux	2026-10-09T10:35:07.1128900Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:35:07.1129158Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:35:07.1129513Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:35:07.1129788Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:35:07.1130150Z ℹ duration_ms 239.006057
+checks	Full root regression on Linux	2026-10-09T10:35:07.3761614Z ✔ parses quoteVolume from Aster kline index 7 (0.776669ms)
+checks	Full root regression on Linux	2026-10-09T10:35:07.3764748Z ✔ drops current incomplete H1 and returns exact decision boundary (0.593863ms)
+checks	Full root regression on Linux	2026-10-09T10:35:07.3765368Z ✔ fails closed on a gap (0.663701ms)
+checks	Full root regression on Linux	2026-10-09T10:35:07.3765947Z ✔ fails closed on duplicate bars (1.034358ms)
+checks	Full root regression on Linux	2026-10-09T10:35:07.3766750Z ✔ fails closed when latest closed H1 is stale (0.229405ms)
+checks	Full root regression on Linux	2026-10-09T10:35:07.3929229Z ℹ tests 5
+checks	Full root regression on Linux	2026-10-09T10:35:07.3929789Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:35:07.3930190Z ℹ pass 5
+checks	Full root regression on Linux	2026-10-09T10:35:07.3930544Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:35:07.3930895Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:35:07.3931257Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:35:07.3931629Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:35:07.3932150Z ℹ duration_ms 253.759105
+checks	Full root regression on Linux	2026-10-09T10:35:07.6820402Z ✔ accepts coherent 10bps certificate (0.712766ms)
+checks	Full root regression on Linux	2026-10-09T10:35:07.6821333Z ✔ rejects historical mixed JPY268m certificate (0.370437ms)
+checks	Full root regression on Linux	2026-10-09T10:35:07.6821788Z ✔ rejects 8bps sensitivity as production parity certificate (0.151697ms)
+checks	Full root regression on Linux	2026-10-09T10:35:07.6846706Z ✔ rejects historical 1342 count (0.127635ms)
+checks	Full root regression on Linux	2026-10-09T10:35:07.6847278Z ✔ rejects pre-v3 certificate (0.132344ms)
+checks	Full root regression on Linux	2026-10-09T10:35:07.6847718Z ✔ rejects generic lifecycle proof drift (0.156792ms)
+checks	Full root regression on Linux	2026-10-09T10:35:07.7021704Z ℹ tests 6
+checks	Full root regression on Linux	2026-10-09T10:35:07.7022167Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:35:07.7022514Z ℹ pass 6
+checks	Full root regression on Linux	2026-10-09T10:35:07.7023087Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:35:07.7023329Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:35:07.7023558Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:35:07.7023757Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:35:07.7024025Z ℹ duration_ms 244.613387
+checks	Full root regression on Linux	2026-10-09T10:35:08.0226359Z ✔ Idle ownership is durable-state backed; same symbol owned by another strategy is baseline exposure (0.801736ms)
+checks	Full root regression on Linux	2026-10-09T10:35:08.0233404Z ✔ per-symbol cooldown is not global and is exactly 12h (0.357831ms)
+checks	Full root regression on Linux	2026-10-09T10:35:08.0234234Z ✔ venue STOP fill is reconciled as a normal exit and surviving TP is cancelled (0.835506ms)
+checks	Full root regression on Linux	2026-10-09T10:35:08.0234804Z ✔ EXIT pending can reconcile after restart without an exposure reservation (0.327179ms)
+checks	Full root regression on Linux	2026-10-09T10:35:08.0235312Z ✔ unprotected filled entry is safety-closed with BUY ask reference (0.667754ms)
+checks	Full root regression on Linux	2026-10-09T10:35:08.0257618Z ✔ open formal position short-circuits baseline snapshot clocks and refreshes durable Idle decision (6.132333ms)
+checks	Full root regression on Linux	2026-10-09T10:35:08.0430493Z ℹ tests 6
+checks	Full root regression on Linux	2026-10-09T10:35:08.0431440Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:35:08.0432269Z ℹ pass 6
+checks	Full root regression on Linux	2026-10-09T10:35:08.0433196Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:35:08.0433538Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:35:08.0433772Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:35:08.0434005Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:35:08.0434245Z ℹ duration_ms 269.481184
+checks	Full root regression on Linux	2026-10-09T10:35:08.3048411Z ✔ production contract pins gross/leverage/cross/protection (0.999705ms)
+checks	Full root regression on Linux	2026-10-09T10:35:08.3049110Z ✔ generic priority is BREAKOUT then RELATIVE then MOMENTUM (0.191743ms)
+checks	Full root regression on Linux	2026-10-09T10:35:08.3049755Z ✔ all five selected routes remain SHORT with exact holds (0.220473ms)
+checks	Full root regression on Linux	2026-10-09T10:35:08.3050183Z ✔ generic archetype gates cannot be bypassed (0.132036ms)
+checks	Full root regression on Linux	2026-10-09T10:35:08.3050588Z ✔ symbol filters remain additional to generic gates (0.122009ms)
+checks	Full root regression on Linux	2026-10-09T10:35:08.3175215Z ℹ tests 5
+checks	Full root regression on Linux	2026-10-09T10:35:08.3175655Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:35:08.3176091Z ℹ pass 5
+checks	Full root regression on Linux	2026-10-09T10:35:08.3176416Z ℹ fail 0
+checks	Full root regression on Linux	2026-10-09T10:35:08.3176691Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:35:08.3177061Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:35:08.3177323Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:35:08.3178960Z ℹ duration_ms 233.728076
+checks	Full root regression on Linux	2026-10-09T10:35:08.5873817Z ✖ flat Idle state migrates with exact backup and read-back (11.636807ms)
+checks	Full root regression on Linux	2026-10-09T10:35:08.5899775Z ✔ Idle state migration fails closed for exposure or review state (5.382835ms)
+checks	Full root regression on Linux	2026-10-09T10:35:08.6023845Z ℹ tests 2
+checks	Full root regression on Linux	2026-10-09T10:35:08.6024168Z ℹ suites 0
+checks	Full root regression on Linux	2026-10-09T10:35:08.6024450Z ℹ pass 1
+checks	Full root regression on Linux	2026-10-09T10:35:08.6024668Z ℹ fail 1
+checks	Full root regression on Linux	2026-10-09T10:35:08.6025080Z ℹ cancelled 0
+checks	Full root regression on Linux	2026-10-09T10:35:08.6025690Z ℹ skipped 0
+checks	Full root regression on Linux	2026-10-09T10:35:08.6026116Z ℹ todo 0
+checks	Full root regression on Linux	2026-10-09T10:35:08.6026467Z ℹ duration_ms 252.142217
+checks	Full root regression on Linux	2026-10-09T10:35:08.6030032Z
+checks	Full root regression on Linux	2026-10-09T10:35:08.6030876Z ✖ failing tests:
+checks	Full root regression on Linux	2026-10-09T10:35:08.6031109Z
+checks	Full root regression on Linux	2026-10-09T10:35:08.6031538Z test at tests/idle-priority-short-state-migration.test.ts:2:1328
+checks	Full root regression on Linux	2026-10-09T10:35:08.6032442Z ✖ flat Idle state migrates with exact backup and read-back (11.636807ms)
+checks	Full root regression on Linux	2026-10-09T10:35:08.6032957Z   Error: LIVE_STATE_ID_LOOKUP_FAILED:-u:deploy
+checks	Full root regression on Linux	2026-10-09T10:35:08.6033676Z       at numericId (/home/runner/work/-ai-dex-manager/-ai-dex-manager/lib/disdex-live-state-ownership.ts:32:11)
+checks	Full root regression on Linux	2026-10-09T10:35:08.6034641Z       at normalizeLiveStateOwnership (/home/runner/work/-ai-dex-manager/-ai-dex-manager/lib/disdex-live-state-ownership.ts:48:15)
+checks	Full root regression on Linux	2026-10-09T10:35:08.6035814Z       at migrateIdlePriorityShortState (/home/runner/work/-ai-dex-manager/-ai-dex-manager/scripts/disdex-idle-priority-short-state-migrate.ts:63:11)
+checks	Full root regression on Linux	2026-10-09T10:35:08.6037034Z       at async TestContext.<anonymous> (/home/runner/work/-ai-dex-manager/-ai-dex-manager/tests/idle-priority-short-state-migration.test.ts:19:20)
+checks	Full root regression on Linux	2026-10-09T10:35:08.6038160Z       at async Test.run (node:internal/test_runner/test:1409:7)
+checks	Full root regression on Linux	2026-10-09T10:35:08.6038849Z       at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3)
+checks	Full root regression on Linux	2026-10-09T10:35:08.7230572Z Traceback (most recent call last):
+checks	Full root regression on Linux	2026-10-09T10:35:08.7231130Z   File "<stdin>", line 4, in <module>
+checks	Full root regression on Linux	2026-10-09T10:35:08.7231483Z   File "/usr/lib/python3.12/subprocess.py", line 571, in run
+checks	Full root regression on Linux	2026-10-09T10:35:08.7286341Z     raise CalledProcessError(retcode, process.args,
+checks	Full root regression on Linux	2026-10-09T10:35:08.7288123Z subprocess.CalledProcessError: Command '['node', '--import', 'tsx', '--test', 'tests/idle-priority-short-state-migration.test.ts']' returned non-zero exit status 1.
+checks	Full root regression on Linux	2026-10-09T10:35:08.7445209Z ##[error]Process completed with exit code 1.

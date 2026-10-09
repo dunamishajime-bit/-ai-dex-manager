@@ -35,12 +35,14 @@ jobs:
         run: node --import tsx --test tests/v12-v4-native-source.test.ts tests/v12-v4-native-core.test.ts tests/v12-v4-production-lifecycle.test.ts tests/v12-v4-production-certification.test.ts tests/v12-runtime-status.test.ts tests/v12-v4-hp-failclosed.test.ts tests/v12-v4-shadow-observability.test.ts
       - name: Full root regression on Linux
         run: |
-          python3 - <<'PY'
-          import pathlib, subprocess
-          files = sorted(pathlib.Path("tests").glob("*.test.ts"))
+          sudo useradd --no-create-home deploy
+          sudo env NODE_BINARY="$(command -v node)" python3 - <<'PY'
+          import os, pathlib, subprocess
+          files = sorted([*pathlib.Path("tests").glob("*.test.ts"), *pathlib.Path("tests").glob("*.test.mjs")])
           for path in files:
-              subprocess.run(["node", "--import", "tsx", "--test", str(path)], check=True, timeout=90)
-          print(f"PASS {len(files)} root test files")
+              subprocess.run([os.environ["NODE_BINARY"], "--import", "tsx", "--test", str(path)], check=True, timeout=90)
+          subprocess.run(["python3", "tests/v52-worst-case-capacity.test.py"], check=True, timeout=90)
+          print(f"PASS {len(files)} root Node test files and V52 Python capacity test")
           PY
       - name: Install UI dependencies
         working-directory: apps/production-ui
