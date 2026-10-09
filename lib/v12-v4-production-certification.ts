@@ -2,6 +2,7 @@ import {V12_V4_MAXIMUM_DRAWDOWN} from "../config/v12V4AdoptionRiskPolicy";
 /** Fail-closed, evidence-only classification. This module never grants order authority. */
 import {V12_V4_V2_POLICY,V12_V4_V2_CAPS,V12_V4_V2_BT,V12_V4_V2_PRIORITY} from "./v12-v4-v2-shadow";
 import {PRODUCTION_EXIT_CATALOG} from "./v12-v4-production-lifecycle";
+import type {V4InventoryVerdict} from "./v12-v4-account-inventory";
 export const V4_RANKING_CUTOFF_EXCLUSIVE_MS=Date.parse("2026-08-11T00:00:00Z");
 export type CertificationEvidence={
  policyId:typeof V12_V4_V2_POLICY; evaluatedAtMs:number;
@@ -10,7 +11,10 @@ export type CertificationEvidence={
  nativeSignalProof?:{sourceSha:string; reportSha256:string; mismatches:number; samples:number};
  nativeExitProof?:{sourceRows:number; matching:number; mismatches:number; priceModelOnly:boolean};
  account?:{capturedAtMs:number; holdProtected:boolean; pendingReconciled:boolean; ownerInventoryVerified:boolean;
-  protectedPenguQty:number; protectedTslaQty:number; releaseCoherent:boolean; quoteFresh:boolean};
+  /** Actual signed GET readback matched against all current owner snapshots. */
+  inventory?:V4InventoryVerdict;
+  /** Legacy fields are never accepted as proof of current ownership. */
+  protectedPenguQty?:number; protectedTslaQty?:number; releaseCoherent:boolean; quoteFresh:boolean};
  venueQuantityAndFillProof?:{reportSha256:string; samples:number; mismatches:number; l2Verified:boolean};
  wholePortfolioExternalProof?:{reportSha256:string; nonV12ProgramsSha:string; costsBps:readonly number[]; eventMismatches:number};
 };
@@ -36,7 +40,7 @@ export function certifyV4Production(e:CertificationEvidence){
  add(!a||!Number.isFinite(a.capturedAtMs)||a.capturedAtMs>e.evaluatedAtMs||e.evaluatedAtMs-a.capturedAtMs>30000,"FRESH_ACCOUNT_READBACK_REQUIRED");
  add(!a||a.holdProtected!==false,"HOLD_PROTECTED_OR_HOLD_STATUS_UNKNOWN");
  add(!a||a.pendingReconciled!==true,"PENDING_ORDER_RECONCILIATION_REQUIRED");
- add(!a||a.ownerInventoryVerified!==true||a.protectedPenguQty!==7718||a.protectedTslaQty!==.38,"EXISTING_PENGU_TSLA_OWNERSHIP_PROTECTION_NOT_VERIFIED");
+ add(!a||a.ownerInventoryVerified!==true||!a.inventory||a.inventory.verified!==true||a.inventory.blockers.length!==0||a.inventory.capturedAtMs!==a.capturedAtMs,"CURRENT_SIGNED_ACCOUNT_OWNERSHIP_NOT_VERIFIED");
  add(!a||a.releaseCoherent!==true||a.quoteFresh!==true,"RELEASE_OR_QUOTE_HEALTH_NOT_VERIFIED");
  const v=e.venueQuantityAndFillProof;
  add(!v||!sha(v.reportSha256,64)||!positiveSampleCount(v.samples)||v.mismatches!==0||v.l2Verified!==true,"VENUE_QUANTITY_FILL_AND_L2_PARITY_REQUIRED");
