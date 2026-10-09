@@ -153,3 +153,11 @@ Native外部Entry/Exitの一致範囲は258件・25ルート、元候補299件�
 - V4関連66テストPASS、Root/research型検査PASS。RED→GREEN証拠を同ディレクトリへ保存。Linux全体回帰は新commitを対象に別途実行する。
 
 残作業：この送信基盤をNative/H1/H2常駐Runnerへ接続すること、実共有予約・全8所有権を具体的に供給するProduction guards、実約定・部分決済・保護注文・Fundingの統合照合、全8系統外部期間認証。送信基盤のテストでこれらをPASSと扱わない。独立期間PF<1、開発期間DD>20%、事後順位問題も未解決。新V4実注文を有効化していない。既存Production、Kill Switch、建玉・注文、HPには本修正から変更を加えていない。
+
+### 修正基盤のLinux検証と実機確認
+
+実装SHA a4b40c29f99e796caf9dd6f7375d12f3b7e339ab のLinux CI 37926847668は全工程SUCCESS。Root 140 Nodeテストファイル、V52 Python capacity、Root/research型検査、UIテスト、本番UI buildを通過した。証拠 execution-bridge-linux-ci.json、URL https://github.com/dunamishajime-bit/-ai-dex-manager/actions/runs/37926847668 。注文Runner統合・全8戦略採用認証をこのコードCIで代替しない。
+
+20:59 JSTの署名付き実機照会（execution-bridge-vps-readback.json）：Production ce1edeead8d0f9e5d88e829d415057117502a335、全8系統を担う7 Runner＋Risk/Margin Guard active/running、現在のkill-switch.json active=false、実建玉0・未約定0、HP ui-studio-15-b297c883dfda /realtime HTTP200。before-clear/backupのkill記録は現在状態と区別する。取引所送信・取消・建玉変更0、新V4デプロイ・有効化なし。
+
+今回、実装上の不具合を修正して送信・再起動・Entry約定照合の基盤を追加したが、依頼全体は未完了。新Runner統合・保護/Exit/Funding・全8統合認証と戦略の独立検証が残る。研究案の外部PFとDDに関する不合格も残り、指定条件のまま新V4 LIVE完了とは報告できない。

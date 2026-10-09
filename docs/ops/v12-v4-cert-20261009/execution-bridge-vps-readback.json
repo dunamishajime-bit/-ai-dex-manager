@@ -1,0 +1,88 @@
+{
+  "observedAt": "2026-10-09T11:59:23.740836+00:00",
+  "productionSha": "ce1edeead8d0f9e5d88e829d415057117502a335",
+  "services": {
+    "v12-x1-all": {
+      "MainPID": "2919664",
+      "ActiveState": "active",
+      "SubState": "running"
+    },
+    "pengu-dual-ls-v2": {
+      "MainPID": "2920260",
+      "ActiveState": "active",
+      "SubState": "running"
+    },
+    "quality102-causal-v1": {
+      "MainPID": "2920216",
+      "ActiveState": "active",
+      "SubState": "running"
+    },
+    "v52-aster-only": {
+      "MainPID": "2920314",
+      "ActiveState": "active",
+      "SubState": "running"
+    },
+    "hype-long": {
+      "MainPID": "2919841",
+      "ActiveState": "active",
+      "SubState": "running"
+    },
+    "fet-brk48": {
+      "MainPID": "2920004",
+      "ActiveState": "active",
+      "SubState": "running"
+    },
+    "idle-priority-short": {
+      "MainPID": "2919716",
+      "ActiveState": "active",
+      "SubState": "running"
+    },
+    "shared-crypto-risk": {
+      "MainPID": "2917933",
+      "ActiveState": "active",
+      "SubState": "running"
+    },
+    "v12-v52-margin-guard": {
+      "MainPID": "2917950",
+      "ActiveState": "active",
+      "SubState": "running"
+    }
+  },
+  "account": {
+    "status": "ASTER_READONLY_ACCOUNT_DIAGNOSTIC_PASS",
+    "observedAt": 1791547163682,
+    "venueTime": 1791547161416,
+    "usdtBalance": [
+      {
+        "balance": 72.47855158,
+        "availableBalance": 72.46602705
+      }
+    ],
+    "positions": [],
+    "openOrders": [],
+    "ordersSent": 0,
+    "cancelsSent": 0,
+    "positionChangesSent": 0
+  },
+  "hp": "MainPID=3102062\nWorkingDirectory=/home/deploy/disdex-trading/ui-releases/ui-studio-15-b297c883dfda\nActiveState=active\n",
+  "hpHttp": 200,
+  "killSwitchReadback": [
+    {
+      "file": "pengu-kill-switch.before-clear-20260905.json",
+      "active": true,
+      "reason": "V52 fatal tick error: QUALITY102_STATE_MISMATCH:runtimeCommitSha"
+    },
+    {
+      "file": "kill-switch.before-8231-strict-state-mismatch-recovery.json",
+      "active": true,
+      "reason": "V52 upstream state unavailable: QUALITY102_STATE_MISMATCH:runtimeCommitSha"
+    },
+    {
+      "file": "kill-switch.json",
+      "active": false,
+      "reason": "OPERATOR_EXTERNAL_MANUAL_CLOSE_VERIFIED_3X_FLAT"
+    }
+  ],
+  "v4OrderEnabledByThisTask": false,
+  "tradingMutationsByThisTask": 0
+}
