@@ -66,20 +66,20 @@ export function calculateQuotePreview(input: {
 export function rankProvisionalRows(rows: RankRow[], enabled: boolean): RankRow[] {
   if (!enabled) return rows;
   const tier = (row: RankRow) =>
-    row.preview?.score === undefined ? 0 : row.gates.some(g => g.kind === "execution" && g.state === "NO") ? 1 : 2;
+    row.score === null || row.preview?.score === undefined ? 0 : row.gates.some(g => g.kind === "execution" && g.state === "NO") ? 1 : 2;
   return [...rows].sort((a,b) =>
     tier(b)-tier(a) ||
-    (b.preview?.score ?? -1)-(a.preview?.score ?? -1) ||
+    ((b.score !== null ? b.preview?.score : undefined) ?? -1)-((a.score !== null ? a.preview?.score : undefined) ?? -1) ||
     a.id.localeCompare(b.id)
-  ).map((row,i) => ({...row,previewRank: row.preview?.score === undefined ? undefined : i+1}));
+  ).map((row,i) => ({...row,previewRank: row.score === null || row.preview?.score === undefined ? undefined : i+1}));
 }
 
 export function displayRank(row: RankRow, preview: boolean) {
-  return preview ? row.previewRank : row.rank;
+  return preview ? row.score === null ? undefined : row.previewRank : row.rank;
 }
 
 export function displayScore(row: RankRow, preview: boolean): number | null {
-  return preview ? row.preview?.score ?? null : row.score;
+  return preview ? row.score === null ? null : row.preview?.score ?? null : row.score;
 }
 
 export function formatPrice(value: number) {

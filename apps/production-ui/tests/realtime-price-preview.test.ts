@@ -62,3 +62,16 @@ test("prices format without scientific notation",()=>{
   assert.equal(formatPrice(0.00812),"0.00812");
   assert.equal(formatPrice(82503.2),"82,503.2");
 });
+
+test("expired confirmed-candle eligibility suppresses stale provisional scores",()=>{
+  const expired=row("FET",null,"LONG");
+  expired.logic="FET";
+  expired.preview={price:100,priceAt:now,referenceAt:now-60_000,minuteChangePct:5,score:99,status:"ONE_MINUTE_REFERENCE"};
+  const ranked=rankProvisionalRows([expired,row("LIVE",70,"LONG",0.5)],true);
+  const stale=ranked.find(r=>r.id==="FET")!;
+  assert.equal(stale.score,null);
+  assert.equal(stale.previewRank,undefined);
+  assert.equal(displayRank(stale,true),undefined);
+  assert.equal(displayScore(stale,true),null);
+  assert.equal(ranked[0].id,"LIVE");
+});
