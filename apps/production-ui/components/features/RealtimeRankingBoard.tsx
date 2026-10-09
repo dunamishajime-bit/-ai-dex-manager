@@ -51,7 +51,7 @@ export function RealtimeRankingBoard(){
    </div>
    <div className="ranking-commentary-tools">
     <div className="ranking-commentary-toggles">{(['motion','sound','voice'] as const).map(key=><button type="button" key={key} aria-pressed={show[key]} onClick={()=>show.preference(key,!show[key])} className={show[key]?'ranking-toggle-on':''}>{key==='motion'?'動き':key==='sound'?'効果音':'読み上げ'} {show[key]?'ON':'OFF'}</button>)}<button type="button" aria-pressed={pcNotify} onClick={()=>void togglePcNotify()} className={pcNotify?'ranking-toggle-on':''}>PC通知 {pcNotify?'ON':'OFF'}</button></div>
-    <div className="ranking-commentary-actions"><button type="button" disabled={!pcNotify} onClick={testPcNotify} className="ranking-detail-button">通知テスト</button><button type="button" disabled={!commentRow} onClick={()=>commentRow&&setSelectedId(commentRow.id)} className="ranking-detail-button">不足条件をすべて見る →</button></div>
+    <div className="ranking-commentary-actions"><button type="button" onClick={show.testSound} className="ranking-detail-button">効果音テスト ♪</button><button type="button" disabled={!pcNotify} onClick={testPcNotify} className="ranking-detail-button">通知テスト</button><button type="button" disabled={!commentRow} onClick={()=>commentRow&&setSelectedId(commentRow.id)} className="ranking-detail-button">不足条件をすべて見る →</button></div>
     <span className="ranking-audio-notice" title={notifyStatus||show.audioNotice}>{notifyStatus||show.audioNotice||'PC通知：Ranking変化＋1位Score 90以上 / 前回4位以下→Top3で通知'}</span>
    </div>
   </section>
