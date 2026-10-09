@@ -120,7 +120,7 @@ export function productionGross(state: State) {
     crypto: foreignCrypto+v12, total: foreignTotal+v12 };
 }
 export type EntryPlanInput = {
-  candidate: V12V4ShadowCandidate; ts: number; eventId: string; referencePrice: number;
+  candidate: V12V4ShadowCandidate; ts: number; observedAtMs?: number; eventId: string; referencePrice: number;
   minimumOrderNotionalUsd: number; entryAtr?: number; nativeExitEvidence?:"WR60_BASELINE_1978_PARITY";
   quantityNormalizer: Parameters<typeof normalizeDisDexV96OrderQuantity>[0]["executor"];
 };
@@ -131,6 +131,9 @@ export async function planProductionEntry(state: State, input: EntryPlanInput): 
   if(state.executionReview)throw Error("UNRESOLVED_EXECUTION_REVIEW:"+state.executionReview);
   if(state.maxDrawdown>V12_V4_MAXIMUM_DRAWDOWN+1e-12)throw Error("EQUITY_DD_OVER_OPERATOR_LIMIT");
   if (!Number.isFinite(input.ts) || input.ts !== c.eligibleEntryTs || input.ts % HOUR !== 0) throw Error("ENTRY_TIME_MISMATCH");
+  const observedAtMs=input.observedAtMs??input.ts;
+  if(!Number.isFinite(observedAtMs)||observedAtMs<input.ts||observedAtMs-input.ts>15*60_000||
+    observedAtMs<(state.journal.at(-1)?.ts??0))throw Error("ENTRY_LIVE_OBSERVATION_STALE_OR_REVERSED");
   if (state.foreign.some(x=>x.symbol === c.symbol)) throw Error("FOREIGN_SYMBOL_OWNERSHIP");
   if (state.legs[key(c)] || state.journal.some(x=>x.eventId===input.eventId)) throw Error("DUPLICATE_ENTRY");
   if ((state.cooldown[c.symbol+":"+c.route]??0)>input.ts) throw Error("COOLDOWN");
@@ -163,7 +166,7 @@ export async function planProductionEntry(state: State, input: EntryPlanInput): 
   if (g.v12+worst>3+1e-12) throw Error("V12_GROSS_CAP");
   if (g.crypto+worst>3.5+1e-12) throw Error("CRYPTO_GROSS_CAP");
   if (g.total+worst>4.75+1e-12) throw Error("TOTAL_GROSS_CAP");
-  return { type:"RESERVE", eventId:input.eventId, ts:input.ts, leg:{
+  return { type:"RESERVE", eventId:input.eventId, ts:observedAtMs, leg:{
     id:key(c), candidate:structuredClone(c), qty:0, entryNotional:0, requestedQty:p.normalized.quantity,
     reservationUsd:notional, entryTs:c.eligibleEntryTs, entryAtr:input.entryAtr,nativeExitEvidence:input.nativeExitEvidence, status:"PENDING_ENTRY",
     exitRemainingQty:0, realizedUsd:0, feesUsd:0, fundingUsd:0,
@@ -190,7 +193,7 @@ export function applyProductionEvent(state: State, event: Event): State {
     const l=event.leg,c=l.candidate, catalog=V12_V4_ROUTE_CATALOG.find(x=>x.route===c.route);
     positive(l.requestedQty,"RESERVED_QTY");positive(l.reservationUsd,"RESERVED_USD");
     if (!catalog || c.family!==catalog.family || l.id!==key(c) || l.status!=="PENDING_ENTRY" || l.qty!==0 || l.entryNotional!==0 ||
-      l.entryTs!==c.eligibleEntryTs || event.ts!==l.entryTs || c.orderEnabled!==false || c.shadow!==true ||
+      l.entryTs!==c.eligibleEntryTs || event.ts<l.entryTs || event.ts-l.entryTs>15*60_000 || c.orderEnabled!==false || c.shadow!==true ||
       !Number.isFinite(c.requestedGross) || c.requestedGross<=0 || c.requestedGross>1 || l.exitRemainingQty!==0 ||
       l.realizedUsd!==0 || l.feesUsd!==0 || l.fundingUsd!==0 ||
       (productionExitSpec(c.route).kind==="NATIVE"&&(l.nativeExitEvidence!=="WR60_BASELINE_1978_PARITY"||!l.entryAtr||l.entryTs%(2*HOUR)!==0))) throw Error("INVALID_RESERVATION");
@@ -209,7 +212,7 @@ export function applyProductionEvent(state: State, event: Event): State {
     if (!l) throw Error("UNKNOWN_LEG");
     if (event.type==="EXIT_BAR") {
       if(l.status!=="OPEN"||l.plannedExit)throw Error("INVALID_EXIT_BAR_STATE");
-      if(event.ts!==event.bar.openTs+HOUR || event.bar.openTs!==(l.lastExitBarTs===undefined?l.entryTs:l.lastExitBarTs+HOUR)) throw Error("EXIT_BAR_STREAM_GAP");
+      if(event.ts<event.bar.openTs+HOUR || event.ts-event.bar.openTs>72*HOUR || event.bar.openTs!==(l.lastExitBarTs===undefined?l.entryTs:l.lastExitBarTs+HOUR)) throw Error("EXIT_BAR_STREAM_GAP");
       const decision=evaluateProductionExit(l,event.bar,event.ts,event.nextOpen);
       if(productionExitSpec(l.candidate.route).kind==="NATIVE"){
         const n=evaluateNativeProductionExit(l,event.bar,event.ts,event.nextOpen);l.nativeStop=n.stop;l.nativePeak=n.peak;l.previousExitBar=event.bar;

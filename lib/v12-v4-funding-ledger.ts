@@ -14,7 +14,7 @@ export function reconcileV4Funding(state:State,rows:readonly AsterIncomeRow[],at
   if(!Number.isFinite(amountUsd))throw Error("V4_FUNDING_AMOUNT_INVALID");
   const legs=Object.values(state.legs).filter(l=>l.candidate.symbol===r.symbol&&
     ["OPEN","PENDING_EXIT"].includes(l.status)&&l.qty>0);
-  if(legs.length!==1||state.foreign.some(f=>f.symbol===r.symbol&&f.qty>0))
+  if(legs.length!==1||r.time<legs[0]?.entryTs||state.foreign.some(f=>f.symbol===r.symbol&&f.qty>0))
     throw Error("V4_FUNDING_OWNER_AMBIGUOUS:"+r.symbol);
   events.push({id:legs[0].id,eventId:key,ts:at,amountUsd});
  }

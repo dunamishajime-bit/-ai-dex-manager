@@ -9,7 +9,7 @@ import {V12_X1_ALL} from "../config/v12X1AllRuntime";
 import {resampleV12H1ToH2,type V12Bar} from "./v12-x1-all";
 import {computeNativeV4Sources} from "./v12-v4-native-source";
 import {stepNativeFailedBreakCore,type CoreMachineState,type NativeCoreEvent} from "./v12-v4-native-core";
-import {adaptProductionCandidates,type FeatureBar} from "./v12-v4-production-features";
+import {adaptProductionCandidates,computeProductionH1Features,type FeatureBar} from "./v12-v4-production-features";
 import {V12_V4_V2_POLICY} from "./v12-v4-v2-shadow";
 
 export type V4VenueH1Bar=FeatureBar & {volume:number};
@@ -18,7 +18,7 @@ const TWO_HOURS=2*H;
 export type V4LiveDecisionSnapshot={
  schema:"v12-v4-live-decision/v1";policyId:typeof V12_V4_V2_POLICY;decisionTs:number;capturedAtMs:number;
  sourceFingerprint:string;candidateCount:number;filteredCount:number;
- sourceCount:number;nativeCoreEvents:NativeCoreEvent[];errors:string[];orderEnabled:false;realOrderEnabledV4:0;tradingMutation:0;
+ sourceCount:number;nativeCoreEvents:NativeCoreEvent[];entryAtrByCandidate:Record<string,number>;errors:string[];orderEnabled:false;realOrderEnabledV4:0;tradingMutation:0;
  candidates:ReturnType<typeof adaptProductionCandidates>["candidates"];
  filtered:ReturnType<typeof adaptProductionCandidates>["filtered"];
 };
@@ -86,6 +86,7 @@ export function buildV4LiveDecisionBatch(h1:Record<string,V4VenueH1Bar[]>,captur
  const source=computeNativeV4Sources(aligned,index,decisionTs);
  const nativeCoreEvents=replayLiveNativeCore(aligned);
  const candidates:V4LiveDecisionSnapshot["candidates"]=[],filtered:V4LiveDecisionSnapshot["filtered"]=[];
+ const entryAtrByCandidate:Record<string,number>={};
  const errors:string[]=[];
  for(const n of source){
   try{
@@ -93,6 +94,11 @@ export function buildV4LiveDecisionBatch(h1:Record<string,V4VenueH1Bar[]>,captur
    if(!bars)throw Error("V4_H1_SYMBOL_MISSING");
    const result=adaptProductionCandidates({source:n.source,decisionTs,symbolBars:bars,btcBars:h1.BTC});
    candidates.push(...result.candidates);filtered.push(...result.filtered);
+   for(const c of result.candidates){
+    const key=[c.symbol,c.route,c.effectiveSide,c.eligibleEntryTs].join("|");
+    const f=computeProductionH1Features(c.symbol,c.effectiveSide,c.eligibleEntryTs,decisionTs,bars,h1.BTC);
+    entryAtrByCandidate[key]=f.atr14;
+   }
   }catch(e){
    errors.push(n.source.symbol+":"+(e instanceof Error?e.message:String(e)));
   }
@@ -101,6 +107,6 @@ export function buildV4LiveDecisionBatch(h1:Record<string,V4VenueH1Bar[]>,captur
  const sourceFingerprint=createHash("sha256").update(JSON.stringify({decisionTs,h2:aligned,h1:h1.BTC.slice(-50)})).digest("hex");
  return {schema:"v12-v4-live-decision/v1",policyId:V12_V4_V2_POLICY,
   decisionTs,capturedAtMs,sourceFingerprint,candidateCount:candidates.length,filteredCount:filtered.length,
-  sourceCount:source.length,nativeCoreEvents,errors,candidates:errors.length?[]:candidates,filtered,
+  sourceCount:source.length,nativeCoreEvents,entryAtrByCandidate,errors,candidates:errors.length?[]:candidates,filtered,
   orderEnabled:false,realOrderEnabledV4:0,tradingMutation:0};
 }
