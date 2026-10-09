@@ -122,3 +122,11 @@ Root/research TypeScript PASS。Root全122ファイルの初回は121 PASS/1 FAI
 候補実装の一致改善は実施したが、10bps DD20.420014%、20bps DD20.965901%、独立期間V2 PF0.570027 / Y06 PF0.299519は変わらない。コード一致はこの研究案の将来利益を証明しない。全8系統統合イベント一致も未合格。ユーザーの「DD20%超・事後順位再現性等の未解決が残る場合は実注文を有効化しない」という条件に従い、新V4デプロイ・実注文有効化は実施しない。既存LIVEは稼働中。旧ロジックへの巻き戻し、Kill Switch解除、強制lock削除、強制決済は行っていない。
 
 Linux初回run 37918318265は全体回帰で停止。V4固有テスト/型検査はPASSだが、Idle状態移行の所有権検査に必要なdeployユーザーがCIに存在しなかった。Productionの所有権チェックを緩めず、使い捨てLinux CI内にdeployユーザーを作成しroot権限で所有権移行テストを実行する設定へ修正。全122TSに加え14MJSとV52 Python capacityテストをCI対象に含めた。Windows MJSは12/14ファイルPASS、2ファイルはbash不在/WindowsパスのPOSIX非互換。Linux再検証の結果を別途記録する。
+
+## 継続作業の最終確定（19:45 JST）
+
+Linux再検証run 37918728861は全工程PASS（19:42 JST完了）。検証コードSHA d4c4f041019c4583bf664b330249af051659b66d。全136 Node rootテストファイル（122TS＋14MJS）、V52 Python容量テスト、Root/research型検査、V4固有テスト、UI114テスト、Linux本番buildを失敗無視なしで通過。native-ci-linux-final.json参照。URL: https://github.com/dunamishajime-bit/-ai-dex-manager/actions/runs/37918728861 。これはコード検証PASSであり、研究案の採用認証PASSではない。
+
+19:45 JSTの署名付き最終照会でも、Production ce1edeead8d0f9e5d88e829d415057117502a335、全8系統とShared Risk/Margin Guard active/running、共有Kill Switch false、実建玉0・未約定0、注文/取消/建玉変更0を確認。HPはui-sfx-diverse-ce392a0d8dd1、active、正規ポート3001 /realtime HTTP200。証拠native-release-decision-audit.json。今回の新V4作業でProduction・既存LIVE・HP公開を変更していない。
+
+Native外部Entry/Exitの一致範囲は258件・25ルート、元候補299件・Core8件。残り16ルートの実発火、全8系統の約定/手数料/Funding/共有予約統合、事後順位の将来再現性、通常株式市場のfeed継続鮮度は未認証。研究10/20bps DD>20%、外部PF<1も残る。最終採用判定BLOCKED、新V4実注文無効・デプロイなし。現在稼働する旧来の現行LIVEと新V4のLIVEを混同しない。
