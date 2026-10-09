@@ -1,0 +1,47 @@
+UTC 2026-10-09T09:57:56.602281+00:00
+CURRENT_KILL {
+  "active": false,
+  "action": "FLATTEN_MANAGED",
+  "strategyId": "DISDEX_V35_STRONG_RESERVED_PENGU_V96",
+  "reason": "OPERATOR_EXTERNAL_MANUAL_CLOSE_VERIFIED_3X_FLAT",
+  "operator": "SIGNED_TRIPLE_FLAT_RECOVERY",
+  "recoveredAt": "2026-10-09T06:17:05.874Z",
+  "previousReason": "V52 managed Stock symbol reconciliation mismatch",
+  "productionSha": "ce1edeead8d0f9e5d88e829d415057117502a335"
+}
+
+ai-dex-manager-ui-preflight-20sounds-f260.service MainPID=0
+WorkingDirectory=/home/deploy/disdex-trading/ui-releases/ui-20sounds-top3-f2608b5720d7
+ActiveState=failed
+
+ai-dex-manager-ui-preflight-dc28.service MainPID=0
+WorkingDirectory=/home/deploy/disdex-trading/ui-releases/ui-realtime-ranking-dc28b7b1ea30
+ActiveState=failed
+
+ai-dex-manager-ui-preflight-motion4243.service MainPID=0
+WorkingDirectory=/home/deploy/disdex-trading/ui-releases/ui-motion-sound-4243b19e71ca
+ActiveState=failed
+
+ai-dex-manager-ui-preflight-serial244.service MainPID=0
+WorkingDirectory=/home/deploy/disdex-trading/ui-releases/ui-motion-serial-244ccc29678e
+ActiveState=failed
+
+ai-dex-manager-ui.service MainPID=3032654
+WorkingDirectory=/home/deploy/disdex-trading/ui-releases/ui-20sounds-top3-f2608b5720d7
+ActiveState=active
+
+disdex-ui-retention.service MainPID=0
+WorkingDirectory=
+ActiveState=inactive
+
+plymouth-quit-wait.service MainPID=0
+WorkingDirectory=
+ActiveState=active
+
+plymouth-quit.service MainPID=0
+WorkingDirectory=
+ActiveState=active
+
+uuidd.service MainPID=0
+WorkingDirectory=
+ActiveState=inactive

@@ -1,0 +1,234 @@
+Refreshing run status every 15 seconds. Press Ctrl+C to quit.
+
+* codex/v12-v4-v2-m150-implementation-20261009 V12 V4 certification checks only · 37914537310
+Triggered via push about 1 minute ago
+
+JOBS
+* checks (ID 113767407218)
+  ✓ Set up job
+  ✓ Run actions/checkout@v4
+  ✓ Run actions/setup-node@v4
+  * Install root dependencies
+  * Root type checks
+  * V4 lifecycle and fail-closed status checks
+  * Install UI dependencies
+  * UI contract checks
+  * Linux UI production build
+  * Adoption remains blocked
+  * Post Run actions/setup-node@v4
+  * Post Run actions/checkout@v4
+Refreshing run status every 15 seconds. Press Ctrl+C to quit.
+
+* codex/v12-v4-v2-m150-implementation-20261009 V12 V4 certification checks only · 37914537310
+Triggered via push about 1 minute ago
+
+JOBS
+* checks (ID 113767407218)
+  ✓ Set up job
+  ✓ Run actions/checkout@v4
+  ✓ Run actions/setup-node@v4
+  * Install root dependencies
+  * Root type checks
+  * V4 lifecycle and fail-closed status checks
+  * Install UI dependencies
+  * UI contract checks
+  * Linux UI production build
+  * Adoption remains blocked
+  * Post Run actions/setup-node@v4
+  * Post Run actions/checkout@v4
+Refreshing run status every 15 seconds. Press Ctrl+C to quit.
+
+* codex/v12-v4-v2-m150-implementation-20261009 V12 V4 certification checks only · 37914537310
+Triggered via push about 1 minute ago
+
+JOBS
+* checks (ID 113767407218)
+  ✓ Set up job
+  ✓ Run actions/checkout@v4
+  ✓ Run actions/setup-node@v4
+  ✓ Install root dependencies
+  ✓ Root type checks
+  * V4 lifecycle and fail-closed status checks
+  * Install UI dependencies
+  * UI contract checks
+  * Linux UI production build
+  * Adoption remains blocked
+  * Post Run actions/setup-node@v4
+  * Post Run actions/checkout@v4
+Refreshing run status every 15 seconds. Press Ctrl+C to quit.
+
+* codex/v12-v4-v2-m150-implementation-20261009 V12 V4 certification checks only · 37914537310
+Triggered via push about 2 minutes ago
+
+JOBS
+* checks (ID 113767407218)
+  ✓ Set up job
+  ✓ Run actions/checkout@v4
+  ✓ Run actions/setup-node@v4
+  ✓ Install root dependencies
+  ✓ Root type checks
+  ✓ V4 lifecycle and fail-closed status checks
+  * Install UI dependencies
+  * UI contract checks
+  * Linux UI production build
+  * Adoption remains blocked
+  * Post Run actions/setup-node@v4
+  * Post Run actions/checkout@v4
+Refreshing run status every 15 seconds. Press Ctrl+C to quit.
+
+* codex/v12-v4-v2-m150-implementation-20261009 V12 V4 certification checks only · 37914537310
+Triggered via push about 2 minutes ago
+
+JOBS
+* checks (ID 113767407218)
+  ✓ Set up job
+  ✓ Run actions/checkout@v4
+  ✓ Run actions/setup-node@v4
+  ✓ Install root dependencies
+  ✓ Root type checks
+  ✓ V4 lifecycle and fail-closed status checks
+  * Install UI dependencies
+  * UI contract checks
+  * Linux UI production build
+  * Adoption remains blocked
+  * Post Run actions/setup-node@v4
+  * Post Run actions/checkout@v4
+Refreshing run status every 15 seconds. Press Ctrl+C to quit.
+
+* codex/v12-v4-v2-m150-implementation-20261009 V12 V4 certification checks only · 37914537310
+Triggered via push about 2 minutes ago
+
+JOBS
+* checks (ID 113767407218)
+  ✓ Set up job
+  ✓ Run actions/checkout@v4
+  ✓ Run actions/setup-node@v4
+  ✓ Install root dependencies
+  ✓ Root type checks
+  ✓ V4 lifecycle and fail-closed status checks
+  ✓ Install UI dependencies
+  ✓ UI contract checks
+  * Linux UI production build
+  * Adoption remains blocked
+  * Post Run actions/setup-node@v4
+  * Post Run actions/checkout@v4
+Refreshing run status every 15 seconds. Press Ctrl+C to quit.
+
+* codex/v12-v4-v2-m150-implementation-20261009 V12 V4 certification checks only · 37914537310
+Triggered via push about 2 minutes ago
+
+JOBS
+* checks (ID 113767407218)
+  ✓ Set up job
+  ✓ Run actions/checkout@v4
+  ✓ Run actions/setup-node@v4
+  ✓ Install root dependencies
+  ✓ Root type checks
+  ✓ V4 lifecycle and fail-closed status checks
+  ✓ Install UI dependencies
+  ✓ UI contract checks
+  * Linux UI production build
+  * Adoption remains blocked
+  * Post Run actions/setup-node@v4
+  * Post Run actions/checkout@v4
+Refreshing run status every 15 seconds. Press Ctrl+C to quit.
+
+* codex/v12-v4-v2-m150-implementation-20261009 V12 V4 certification checks only · 37914537310
+Triggered via push about 3 minutes ago
+
+JOBS
+* checks (ID 113767407218)
+  ✓ Set up job
+  ✓ Run actions/checkout@v4
+  ✓ Run actions/setup-node@v4
+  ✓ Install root dependencies
+  ✓ Root type checks
+  ✓ V4 lifecycle and fail-closed status checks
+  ✓ Install UI dependencies
+  ✓ UI contract checks
+  * Linux UI production build
+  * Adoption remains blocked
+  * Post Run actions/setup-node@v4
+  * Post Run actions/checkout@v4
+Refreshing run status every 15 seconds. Press Ctrl+C to quit.
+
+* codex/v12-v4-v2-m150-implementation-20261009 V12 V4 certification checks only · 37914537310
+Triggered via push about 3 minutes ago
+
+JOBS
+* checks (ID 113767407218)
+  ✓ Set up job
+  ✓ Run actions/checkout@v4
+  ✓ Run actions/setup-node@v4
+  ✓ Install root dependencies
+  ✓ Root type checks
+  ✓ V4 lifecycle and fail-closed status checks
+  ✓ Install UI dependencies
+  ✓ UI contract checks
+  * Linux UI production build
+  * Adoption remains blocked
+  * Post Run actions/setup-node@v4
+  * Post Run actions/checkout@v4
+Refreshing run status every 15 seconds. Press Ctrl+C to quit.
+
+* codex/v12-v4-v2-m150-implementation-20261009 V12 V4 certification checks only · 37914537310
+Triggered via push about 3 minutes ago
+
+JOBS
+* checks (ID 113767407218)
+  ✓ Set up job
+  ✓ Run actions/checkout@v4
+  ✓ Run actions/setup-node@v4
+  ✓ Install root dependencies
+  ✓ Root type checks
+  ✓ V4 lifecycle and fail-closed status checks
+  ✓ Install UI dependencies
+  ✓ UI contract checks
+  * Linux UI production build
+  * Adoption remains blocked
+  * Post Run actions/setup-node@v4
+  * Post Run actions/checkout@v4
+Refreshing run status every 15 seconds. Press Ctrl+C to quit.
+
+* codex/v12-v4-v2-m150-implementation-20261009 V12 V4 certification checks only · 37914537310
+Triggered via push about 4 minutes ago
+
+JOBS
+* checks (ID 113767407218)
+  ✓ Set up job
+  ✓ Run actions/checkout@v4
+  ✓ Run actions/setup-node@v4
+  ✓ Install root dependencies
+  ✓ Root type checks
+  ✓ V4 lifecycle and fail-closed status checks
+  ✓ Install UI dependencies
+  ✓ UI contract checks
+  * Linux UI production build
+  * Adoption remains blocked
+  * Post Run actions/setup-node@v4
+  * Post Run actions/checkout@v4
+✓ codex/v12-v4-v2-m150-implementation-20261009 V12 V4 certification checks only · 37914537310
+Triggered via push about 4 minutes ago
+
+JOBS
+✓ checks in 4m4s (ID 113767407218)
+  ✓ Set up job
+  ✓ Run actions/checkout@v4
+  ✓ Run actions/setup-node@v4
+  ✓ Install root dependencies
+  ✓ Root type checks
+  ✓ V4 lifecycle and fail-closed status checks
+  ✓ Install UI dependencies
+  ✓ UI contract checks
+  ✓ Linux UI production build
+  ✓ Adoption remains blocked
+  ✓ Post Run actions/setup-node@v4
+  ✓ Post Run actions/checkout@v4
+  ✓ Complete job
+
+ANNOTATIONS
+! Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-node@v4. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+checks: .github#2
+
+- "The ubuntu-latest label will migrate to Ubuntu 26 beginning October 19, 2026. For more information, see https://github.com/actions/runner-images/issues/14748"
+checks: .github#1

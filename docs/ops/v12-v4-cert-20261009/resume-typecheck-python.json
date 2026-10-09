@@ -1,0 +1,58 @@
+[
+  {
+    "cmd": [
+      "node",
+      "node_modules/typescript/bin/tsc",
+      "--noEmit",
+      "-p",
+      "tsconfig.json"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "cmd": [
+      "node",
+      "node_modules/typescript/bin/tsc",
+      "--noEmit",
+      "-p",
+      "tsconfig.research.json"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": ""
+  },
+  {
+    "cmd": [
+      "python",
+      "-m",
+      "unittest",
+      "tests.test_stock_reference_alpaca_stream_recovery",
+      "tests.test_stock_reference_alpaca_market_status",
+      "tests.test_stock_reference_gate"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "..............\n----------------------------------------------------------------------\nRan 14 tests in 0.555s\n\nOK\n"
+  },
+  {
+    "cmd": [
+      "python",
+      "tests/test_v52_account_lock_scope.py"
+    ],
+    "exit": 0,
+    "stdout": "V52_ACCOUNT_LOCK_SCOPE_SELFTEST_PASS\nV52_MARKET_CLOSED_LOCK_SCOPE_SELFTEST_PASS\n",
+    "stderr": ""
+  },
+  {
+    "cmd": [
+      "node",
+      "--test",
+      "scripts/ops/root/disdex-v12-absent-pending-policy.test.mjs"
+    ],
+    "exit": 0,
+    "stdout": "\u2714 absent entry resolves idempotency without clearing local or shared protection (12.366ms)\n\u2714 refuses ambiguous lookup (0.5763ms)\n\u2714 refuses historical fill (0.2643ms)\n\u2714 refuses current XRP exposure (0.2204ms)\n\u2714 refuses XRP open order (0.2554ms)\n\u2714 refuses foreign position quantity changed (0.2129ms)\n\u2714 refuses protective order changed (0.211ms)\n\u2714 refuses incomplete trade interval (0.1289ms)\n\u2714 refuses stale evidence (0.179ms)\n\u2714 refuses unvalidated numeric position (0.251ms)\n\u2714 refuses runtime mismatch, V12 exposure and exit pending (0.2394ms)\n\u2714 release only one exactly bound durable pending reservation (0.3215ms)\n\u2714 controller temporary state serialization roundtrips before CAS rename (9.0968ms)\n\u2139 tests 13\n\u2139 suites 0\n\u2139 pass 13\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 108.066\n",
+    "stderr": ""
+  }
+]

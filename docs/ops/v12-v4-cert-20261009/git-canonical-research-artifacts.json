@@ -1,0 +1,206 @@
+{
+  "sourceCommit": "5d7e93ae4d74ff6b63b811c4ab7f2b757bb9ed34",
+  "scope": "Git canonical stored research artifacts; original run-time byte hashes remain in rerun-manifest",
+  "files": [
+    {
+      "path": "docs/research/results/v4-production-cert-20261009/BT_CERT_AUDIT.json",
+      "gitContentSha256": "cea8b5974e4b394402be2c95079207bc14b988828eb2e6656e0115e8ee9187a8",
+      "bytes": 59646
+    },
+    {
+      "path": "docs/research/results/v4-production-cert-20261009/BT_CERT_AUDIT.md",
+      "gitContentSha256": "d027794c9f573a3c65c699476023e7f229227b68d0cb45446e768be9dd1e531b",
+      "bytes": 4192
+    },
+    {
+      "path": "docs/research/results/v4-production-cert-20261009/bt-audit-checks.json",
+      "gitContentSha256": "4a91c573de00825cd15b5d616dcffdaf4ba567b2e914555763c5fcddf8a1ab6c",
+      "bytes": 1066
+    },
+    {
+      "path": "docs/research/results/v4-production-cert-20261009/bt-audit-run.log",
+      "gitContentSha256": "0b391efc643472670732526a2ca3c11ec2ec09e7532a0d0cc87d1f2ad7a4d118",
+      "bytes": 83
+    },
+    {
+      "path": "docs/research/results/v4-production-cert-20261009/bt-baseline-run.log",
+      "gitContentSha256": "2c023b91e7948e10e81a799b82c4b590fde9fdeea130d158100434da1d8ea3be",
+      "bytes": 2698
+    },
+    {
+      "path": "docs/research/results/v4-production-cert-20261009/bt-baseline/cases/V2_M150_D05_CORE_NATIVE/candidates/crypto-price-model-candidates.jsonl",
+      "gitContentSha256": "3e05197bb700eab0a3c2e53720a3b369056716f8324ee269c330e2af13601dad",
+      "bytes": 1713567
+    },
+    {
+      "path": "docs/research/results/v4-production-cert-20261009/bt-baseline/cases/V2_M150_D05_CORE_NATIVE/result.json",
+      "gitContentSha256": "a9276de095fe855abcbc2462199617e920d79a461ccaf26a0b168d46704b2fdf",
+      "bytes": 81702
+    },
+    {
+      "path": "docs/research/results/v4-production-cert-20261009/bt-baseline/cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl",
+      "gitContentSha256": "43fda12aef55bc47a150ae09eba43ce7083011142d5cd96dcd0b3c319d13706e",
+      "bytes": 2532652
+    },
+    {
+      "path": "docs/research/results/v4-production-cert-20261009/bt-baseline/cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_10BPS/metrics.json",
+      "gitContentSha256": "562092f66215fedd93e74a3c3a57ad56682232d007fa0b73571028a79776b68b",
+      "bytes": 23129
+    },
+    {
+      "path": "docs/research/results/v4-production-cert-20261009/bt-baseline/cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl",
+      "gitContentSha256": "e5d757a8dbce534f5c5d2bb4361f0f98d3d7811582ebd7164a40baaa83137af5",
+      "bytes": 2962402
+    },
+    {
+      "path": "docs/research/results/v4-production-cert-20261009/bt-baseline/cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl",
+      "gitContentSha256": "a93fee0f7da2b42fbd394d1c5985cbe482ae6c8cbb63bb86bb423cc9ee9974b2",
+      "bytes": 1353166
+    },
+    {
+      "path": "docs/research/results/v4-production-cert-20261009/bt-baseline/cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl",
+      "gitContentSha256": "26452fe7572a049aa7ec0c88ae8c4f4db4fc8b4ca671ad2676df2fe11a511f74",
+      "bytes": 2533595
+    },
+    {
+      "path": "docs/research/results/v4-production-cert-20261009/bt-baseline/cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_20BPS/metrics.json",
+      "gitContentSha256": "92aad4b9c39979bc548dee98ce389fcf7cdf89c539b95dc6428e7086a6d53ee9",
+      "bytes": 23129
+    },
+    {
+      "path": "docs/research/results/v4-production-cert-20261009/bt-baseline/cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl",
+      "gitContentSha256": "e278a22b4a89610ca06ed017e0ae7da088a71248cc909f31893136392d08af84",
+      "bytes": 2985317
+    },
+    {
+      "path": "docs/research/results/v4-production-cert-20261009/bt-baseline/cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl",
+      "gitContentSha256": "f3bc68f47451d5db49d2c012fa0fcaa67569895d7831edea12ca0893eb852d52",
+      "bytes": 1356821
+    },
+    {
+      "path": "docs/research/results/v4-production-cert-20261009/bt-baseline/cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl",
+      "gitContentSha256": "295a534fece65378caeae15cd6565850a2d6a47b2318d7349df274cad1378c3a",
+      "bytes": 2531562
+    },
+    {
+      "path": "docs/research/results/v4-production-cert-20261009/bt-baseline/cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_30BPS/metrics.json",
+      "gitContentSha256": "e9e01614edf076f80e41164b38e5b3937bdbe2af07acdbf83d711203953ff217",
+      "bytes": 23094
+    },
+    {
+      "path": "docs/research/results/v4-production-cert-20261009/bt-baseline/cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl",
+      "gitContentSha256": "2431ccf194799d8f16d27473d4a6bddc465b3a431741b6b9678b64a7f065dbdb",
+      "bytes": 2972604
+    },
+    {
+      "path": "docs/research/results/v4-production-cert-20261009/bt-baseline/cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl",
+      "gitContentSha256": "b17d2893513f4f01cf83dbe6e3421a8d51e9e1db7652daa74ec93316acea3712",
+      "bytes": 1350487
+    },
+    {
+      "path": "docs/research/results/v4-production-cert-20261009/bt-baseline/cases/V2_M150_D05_CORE_NATIVE/runs/portfolio-price-model-summary.json",
+      "gitContentSha256": "8212efdb8c7824e6cee3837fe4e6d2a3b32fc5a7db44f9bc24134488c58aa9ea",
+      "bytes": 78830
+    },
+    {
+      "path": "docs/research/results/v4-production-cert-20261009/bt-baseline/cases/V2_M150_D05_CORE_NATIVE/runs/summary.json",
+      "gitContentSha256": "9bd4b5e7d34b741df0ff99ec155f163235e3716f9e5ada9a46b369fb5fd54ac5",
+      "bytes": 79159
+    },
+    {
+      "path": "docs/research/results/v4-production-cert-20261009/bt-baseline/fresh-run-summary.json",
+      "gitContentSha256": "449c331b6d8f91ec63ddfcd3a8110bd868732ad17d068e43db7728b649a6c0cc",
+      "bytes": 21431
+    },
+    {
+      "path": "docs/research/results/v4-production-cert-20261009/bt-baseline/inputs/core-reference-candidates.jsonl.gz",
+      "gitContentSha256": "99b8d5d304916e298496b82d67f1135fb47880144028a7bdf5deab7161591e69",
+      "bytes": 116852
+    },
+    {
+      "path": "docs/research/results/v4-production-cert-20261009/bt-baseline/observed-filter-counterfactual.json",
+      "gitContentSha256": "f040bc594cfde9095cfb898130a6ce4951f3563f3a4dd3a5946e27d7b4699f22",
+      "bytes": 2795
+    },
+    {
+      "path": "docs/research/results/v4-production-cert-20261009/bt-baseline/perlogic-metrics.json",
+      "gitContentSha256": "4565879113d49dcb73e9a9943caa26b46574adb471b56e991e43b728bf413c93",
+      "bytes": 91974
+    },
+    {
+      "path": "docs/research/results/v4-production-cert-20261009/bt-baseline/quantity-production-vectors.json",
+      "gitContentSha256": "271ceaaf9f5124a1dc12fd2ed444e93c50437115f1094a652841f21c7b6ad4ea",
+      "bytes": 147182
+    },
+    {
+      "path": "docs/research/results/v4-production-cert-20261009/bt-baseline/rerun-manifest.json",
+      "gitContentSha256": "3375da226c3dbfcab5a60e3fe666c974c7797a7c8e50b410157fed8f9d5b1846",
+      "bytes": 10740
+    },
+    {
+      "path": "docs/research/results/v4-production-cert-20261009/bt-baseline/source-comparison.json",
+      "gitContentSha256": "e55560a447398091a632e20c8672870fcbffb89d333585070d5b27995dc30e51",
+      "bytes": 3679
+    },
+    {
+      "path": "docs/research/results/v4-production-cert-20261009/bt-external-run.log",
+      "gitContentSha256": "c8730801247d1f4197b1ba3df84c480f9806e7ea3e79781f59d5f12d633e3b95",
+      "bytes": 1190
+    },
+    {
+      "path": "docs/research/results/v4-production-cert-20261009/bt-external/causal-feature-checks.jsonl",
+      "gitContentSha256": "43f623a0c51909faa13f1810b8339ed3e02b450b3fcd210bf1bada4fada7c65d",
+      "bytes": 36011
+    },
+    {
+      "path": "docs/research/results/v4-production-cert-20261009/bt-external/input-manifest.json",
+      "gitContentSha256": "d82bc3de6a6c6d9f98b2f75a0f6eaa41af109f018c05668f3894b964f6c3a154",
+      "bytes": 4810
+    },
+    {
+      "path": "docs/research/results/v4-production-cert-20261009/bt-external/route-trades.jsonl",
+      "gitContentSha256": "815ecc8712970209ec9be832d7f2542a89c6b4d15480242b10e5bcb77d1633ef",
+      "bytes": 396550
+    },
+    {
+      "path": "docs/research/results/v4-production-cert-20261009/bt-external/summary.json",
+      "gitContentSha256": "e24a47cd7839e173bdb8fb3bd5f1ef2e2fad92abaa1851d3de8798b94dd80d3f",
+      "bytes": 15509
+    },
+    {
+      "path": "docs/research/results/v4-production-cert-20261009/bt-external/y06-independent.jsonl",
+      "gitContentSha256": "e282e7e7d6865c81cc2c6a2d377a11e90797c30a94f296935dacc280fdfc3a19",
+      "bytes": 26103
+    },
+    {
+      "path": "docs/research/results/v4-production-cert-20261009/bt-final-artifact-manifest.json",
+      "gitContentSha256": "fa9e8a97f38767a83a690ca56e9d0696998abdacfcde8859b89e88c6e4aedec8",
+      "bytes": 7008
+    },
+    {
+      "path": "docs/research/results/v4-production-cert-20261009/bt-selected-external-run.log",
+      "gitContentSha256": "c94b3d0fb46cbd9c842cd9c18d940133a3e3bc94583d0d07a96f200338473cce",
+      "bytes": 1107
+    },
+    {
+      "path": "docs/research/results/v4-production-cert-20261009/bt-selected-external/causal-checks.jsonl",
+      "gitContentSha256": "84e0d6cd13d0311f7b0f0a0f8d987581e2dd80bdf995151e4d024735a817367e",
+      "bytes": 35734
+    },
+    {
+      "path": "docs/research/results/v4-production-cert-20261009/bt-selected-external/rejected.jsonl",
+      "gitContentSha256": "51b9898859bfe3691cfd3c6ecb370f042e677a53127840cb1bcabc7531dad939",
+      "bytes": 3438
+    },
+    {
+      "path": "docs/research/results/v4-production-cert-20261009/bt-selected-external/repaired-candidates.jsonl",
+      "gitContentSha256": "439d31dd274dc4fa40f236dbe9b0d79bb79bb97ca8b099102fd6d77a2bf5f8ca",
+      "bytes": 379009
+    },
+    {
+      "path": "docs/research/results/v4-production-cert-20261009/bt-selected-external/summary.json",
+      "gitContentSha256": "6983f5a32beadb4cb1b9c781c1c5ac636d9bb5367897a15923d65ead619f9a8c",
+      "bytes": 16414
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+checks	Root type checks	﻿2026-10-09T09:52:25.2683459Z ##[group]Run npm run typecheck
+checks	Root type checks	2026-10-09T09:52:25.2683692Z ^[[36;1mnpm run typecheck^[[0m
+checks	Root type checks	2026-10-09T09:52:25.2755234Z shell: /usr/bin/bash -e {0}
+checks	Root type checks	2026-10-09T09:52:25.2755428Z env:
+checks	Root type checks	2026-10-09T09:52:25.2755566Z   NEXT_TELEMETRY_DISABLED: 1
+checks	Root type checks	2026-10-09T09:52:25.2755730Z   NODE_OPTIONS: --max-old-space-size=4096
+checks	Root type checks	2026-10-09T09:52:25.2755904Z ##[endgroup]
+checks	Root type checks	2026-10-09T09:52:25.3536534Z
+checks	Root type checks	2026-10-09T09:52:25.3537182Z > dis-dex-manager@0.1.0 typecheck
+checks	Root type checks	2026-10-09T09:52:25.3537577Z > tsc --noEmit && tsc --noEmit -p tsconfig.research.json
+checks	Root type checks	2026-10-09T09:52:25.3537771Z
+checks	Root type checks	2026-10-09T09:52:33.9115578Z ##[error]components/features/AutoTradeSimulator.tsx(409,41): error TS2322: Type '(label: string | number) => string' is not assignable to type '((label: ReactNode, payload: readonly Payload<ValueType, NameType>[]) => ReactNode) & ((label: any, payload: Payload<ValueType, NameType>[]) => ReactNode)'.
+checks	Root type checks	2026-10-09T09:52:33.9124143Z   Type '(label: string | number) => string' is not assignable to type '(label: ReactNode, payload: readonly Payload<ValueType, NameType>[]) => ReactNode'.
+checks	Root type checks	2026-10-09T09:52:33.9125171Z     Types of parameters 'label' and 'label' are incompatible.
+checks	Root type checks	2026-10-09T09:52:33.9125554Z       Type 'ReactNode' is not assignable to type 'string | number'.
+checks	Root type checks	2026-10-09T09:52:33.9125925Z         Type 'undefined' is not assignable to type 'string | number'.
+checks	Root type checks	2026-10-09T09:52:34.0023847Z ##[error]Process completed with exit code 2.

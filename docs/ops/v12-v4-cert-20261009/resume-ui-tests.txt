@@ -1,0 +1,1189 @@
+node:internal/modules/cjs/loader:1448
+  const err = new Error(message);
+              ^
+
+Error: Cannot find module '@/lib/trade-history-attribution'
+Require stack:
+- C:\Users\dis\DisDex-v4-production-cert-20261009\apps\production-ui\lib\server\trade-history-source.ts
+- C:\Users\dis\DisDex-v4-production-cert-20261009\apps\production-ui\tests\aster-account-history-consistency.test.ts
+    at node:internal/modules/cjs/loader:1448:15
+    at m._resolveFilename (file:///C:/Users/dis/-ai-dex-manager/node_modules/tsx/dist/register-B7jrtLTO.mjs:1:789)
+    at nextResolveSimple (C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:4:1004)
+    at C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:3:2630
+    at C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:3:1542
+    at resolveTsPaths (C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:4:760)
+    at Module._resolveFilename (C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:4:1102)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1059:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1064:22)
+    at Module._load (node:internal/modules/cjs/loader:1234:25) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    'C:\\Users\\dis\\DisDex-v4-production-cert-20261009\\apps\\production-ui\\lib\\server\\trade-history-source.ts',
+    'C:\\Users\\dis\\DisDex-v4-production-cert-20261009\\apps\\production-ui\\tests\\aster-account-history-consistency.test.ts'
+  ]
+}
+
+Node.js v24.13.1
+✖ apps\production-ui\tests\aster-account-history-consistency.test.ts (471.1149ms)
+✔ HP runtime config points at the current VPS release and current logic names (1.4463ms)
+✔ current runtime config keeps the production gross safety contract (0.18ms)
+✔ Side sizing display keeps asymmetric sizes including PB SHORT (1.0274ms)
+✖ Formal BT reads current authoritative DD12.96 files and reconciles trades (7.2391ms)
+✖ Every policy summary consumes Side sizing; formal page no old fixed BT (6.874ms)
+✖ Home and performance current-logic labels no longer use old Top2 / sidecar descriptions (2.288ms)
+✔ UI reads production side sizing, durable counters/cooldown, independently verified stops; stale protection is unknown (23.3163ms)
+node:internal/modules/cjs/loader:1448
+  const err = new Error(message);
+              ^
+
+Error: Cannot find module '@/lib/trade-history-attribution'
+Require stack:
+- C:\Users\dis\DisDex-v4-production-cert-20261009\apps\production-ui\lib\server\fill-lineage-evidence.ts
+- C:\Users\dis\DisDex-v4-production-cert-20261009\apps\production-ui\tests\decision-hierarchy-history-lineage.test.ts
+    at node:internal/modules/cjs/loader:1448:15
+    at m._resolveFilename (file:///C:/Users/dis/-ai-dex-manager/node_modules/tsx/dist/register-B7jrtLTO.mjs:1:789)
+    at nextResolveSimple (C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:4:1004)
+    at C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:3:2630
+    at C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:3:1542
+    at resolveTsPaths (C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:4:760)
+    at Module._resolveFilename (C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:4:1102)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1059:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1064:22)
+    at Module._load (node:internal/modules/cjs/loader:1234:25) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    'C:\\Users\\dis\\DisDex-v4-production-cert-20261009\\apps\\production-ui\\lib\\server\\fill-lineage-evidence.ts',
+    'C:\\Users\\dis\\DisDex-v4-production-cert-20261009\\apps\\production-ui\\tests\\decision-hierarchy-history-lineage.test.ts'
+  ]
+}
+
+Node.js v24.13.1
+✖ apps\production-ui\tests\decision-hierarchy-history-lineage.test.ts (469.514ms)
+✖ decision status keeps responsive overflow containment (6.2177ms)
+✔ DISTerminal mirrors the current integrated LIVE contract (1.5227ms)
+node:internal/modules/cjs/loader:1448
+  const err = new Error(message);
+              ^
+
+Error: Cannot find module '@/lib/production-display'
+Require stack:
+- C:\Users\dis\DisDex-v4-production-cert-20261009\apps\production-ui\lib\server\disdex-decision-status.ts
+- C:\Users\dis\DisDex-v4-production-cert-20261009\apps\production-ui\tests\fet-decision-status.test.ts
+    at node:internal/modules/cjs/loader:1448:15
+    at m._resolveFilename (file:///C:/Users/dis/-ai-dex-manager/node_modules/tsx/dist/register-B7jrtLTO.mjs:1:789)
+    at nextResolveSimple (C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:4:1004)
+    at C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:3:2630
+    at C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:3:1542
+    at resolveTsPaths (C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:4:760)
+    at Module._resolveFilename (C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:4:1102)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1059:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1064:22)
+    at Module._load (node:internal/modules/cjs/loader:1234:25) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    'C:\\Users\\dis\\DisDex-v4-production-cert-20261009\\apps\\production-ui\\lib\\server\\disdex-decision-status.ts',
+    'C:\\Users\\dis\\DisDex-v4-production-cert-20261009\\apps\\production-ui\\tests\\fet-decision-status.test.ts'
+  ]
+}
+
+Node.js v24.13.1
+✖ apps\production-ui\tests\fet-decision-status.test.ts (461.9103ms)
+✔ fresh FET heartbeat state is exposed as LIVE when the release SHA matches (11.2404ms)
+✔ stale FET heartbeat state is never shown as LIVE (5.9568ms)
+node:fs:439
+    return binding.readFileUtf8(path, stringToFlags(options.flag));
+                   ^
+
+Error: ENOENT: no such file or directory, open 'C:\Users\dis\DisDex-v4-production-cert-20261009\docs\research-results\final-live-governor-monthly-breakdown-20260922.json'
+    at readFileSync (node:fs:439:20)
+    at assert (C:\Users\dis\DisDex-v4-production-cert-20261009\apps\production-ui\tests\final-live-governor-monthly-breakdown-contract.test.ts:6:3)
+    at Object.<anonymous> (C:\Users\dis\DisDex-v4-production-cert-20261009\apps\production-ui\tests\final-live-governor-monthly-breakdown-contract.test.ts:29:2)
+    at Module._compile (node:internal/modules/cjs/loader:1804:14)
+    at Object.transformer (C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:3:1104)
+    at Module.load (node:internal/modules/cjs/loader:1525:32)
+    at Module._load (node:internal/modules/cjs/loader:1327:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at loadCJSModuleWithModuleLoad (node:internal/modules/esm/translators:339:3) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\dis\\DisDex-v4-production-cert-20261009\\docs\\research-results\\final-live-governor-monthly-breakdown-20260922.json'
+}
+
+Node.js v24.13.1
+✖ apps\production-ui\tests\final-live-governor-monthly-breakdown-contract.test.ts (424.09ms)
+node:internal/modules/cjs/loader:1448
+  const err = new Error(message);
+              ^
+
+Error: Cannot find module '@/lib/server/fill-lineage-evidence'
+Require stack:
+- C:\Users\dis\DisDex-v4-production-cert-20261009\apps\production-ui\tests\historical-fill-lineage.test.ts
+    at node:internal/modules/cjs/loader:1448:15
+    at m._resolveFilename (file:///C:/Users/dis/-ai-dex-manager/node_modules/tsx/dist/register-B7jrtLTO.mjs:1:789)
+    at nextResolveSimple (C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:4:1004)
+    at C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:3:2630
+    at C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:3:1542
+    at resolveTsPaths (C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:4:760)
+    at Module._resolveFilename (C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:4:1102)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1059:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1064:22)
+    at Module._load (node:internal/modules/cjs/loader:1234:25) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    'C:\\Users\\dis\\DisDex-v4-production-cert-20261009\\apps\\production-ui\\tests\\historical-fill-lineage.test.ts'
+  ]
+}
+
+Node.js v24.13.1
+✖ apps\production-ui\tests\historical-fill-lineage.test.ts (446.9602ms)
+✖ exactly five strategy runtimes are represented in production SHA lineage (0.9831ms)
+✖ FET page and read-only authenticated API are present (0.3449ms)
+✖ do not conflate UI build SHA and new trading runtime SHA (4.9198ms)
+node:internal/modules/cjs/loader:1448
+  const err = new Error(message);
+              ^
+
+Error: Cannot find module '@/lib/trade-history-attribution'
+Require stack:
+- C:\Users\dis\DisDex-v4-production-cert-20261009\apps\production-ui\tests\hp-hype-only-20260928.test.ts
+    at node:internal/modules/cjs/loader:1448:15
+    at m._resolveFilename (file:///C:/Users/dis/-ai-dex-manager/node_modules/tsx/dist/register-B7jrtLTO.mjs:1:789)
+    at nextResolveSimple (C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:4:1004)
+    at C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:3:2630
+    at C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:3:1542
+    at resolveTsPaths (C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:4:760)
+    at Module._resolveFilename (C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:4:1102)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1059:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1064:22)
+    at Module._load (node:internal/modules/cjs/loader:1234:25) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    'C:\\Users\\dis\\DisDex-v4-production-cert-20261009\\apps\\production-ui\\tests\\hp-hype-only-20260928.test.ts'
+  ]
+}
+
+Node.js v24.13.1
+✖ apps\production-ui\tests\hp-hype-only-20260928.test.ts (444.58ms)
+✔ fresh H1 HYPE remains fresh without legacy 15m DATA_FRESHNESS gate (0.7253ms)
+✔ H1 decision expiry, missing observation, future time and SHA mismatch remain stale (0.1803ms)
+✔ HYPE75 uses current H1 decision and live heartbeat, preserving resolved history without false stop (23.9104ms)
+node:internal/modules/cjs/loader:1448
+  const err = new Error(message);
+              ^
+
+Error: Cannot find module '@/lib/server/live-performance-analytics'
+Require stack:
+- C:\Users\dis\DisDex-v4-production-cert-20261009\apps\production-ui\tests\live-performance-analytics.test.ts
+    at node:internal/modules/cjs/loader:1448:15
+    at m._resolveFilename (file:///C:/Users/dis/-ai-dex-manager/node_modules/tsx/dist/register-B7jrtLTO.mjs:1:789)
+    at nextResolveSimple (C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:4:1004)
+    at C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:3:2630
+    at C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:3:1542
+    at resolveTsPaths (C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:4:760)
+    at Module._resolveFilename (C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:4:1102)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1059:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1064:22)
+    at Module._load (node:internal/modules/cjs/loader:1234:25) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    'C:\\Users\\dis\\DisDex-v4-production-cert-20261009\\apps\\production-ui\\tests\\live-performance-analytics.test.ts'
+  ]
+}
+
+Node.js v24.13.1
+✖ apps\production-ui\tests\live-performance-analytics.test.ts (443.9627ms)
+node:fs:439
+    return binding.readFileUtf8(path, stringToFlags(options.flag));
+                   ^
+
+Error: ENOENT: no such file or directory, open 'C:\Users\dis\DisDex-v4-production-cert-20261009\app\api\system\live-performance\route.ts'
+    at readFileSync (node:fs:439:20)
+    at assert (C:\Users\dis\DisDex-v4-production-cert-20261009\apps\production-ui\tests\live-performance-ui-contract.test.ts:6:8)
+    at Object.<anonymous> (C:\Users\dis\DisDex-v4-production-cert-20261009\apps\production-ui\tests\live-performance-ui-contract.test.ts:47:2)
+    at Module._compile (node:internal/modules/cjs/loader:1804:14)
+    at Object.transformer (C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:3:1104)
+    at Module.load (node:internal/modules/cjs/loader:1525:32)
+    at Module._load (node:internal/modules/cjs/loader:1327:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at loadCJSModuleWithModuleLoad (node:internal/modules/esm/translators:339:3) {
+  errno: -4058,
+  code: 'ENOENT',
+  syscall: 'open',
+  path: 'C:\\Users\\dis\\DisDex-v4-production-cert-20261009\\app\\api\\system\\live-performance\\route.ts'
+}
+
+Node.js v24.13.1
+✖ apps\production-ui\tests\live-performance-ui-contract.test.ts (424.3048ms)
+✖ mobile app shell constrains flex content without horizontal overflow (11.1928ms)
+✖ home and dashboard roots wrap long runtime labels on narrow screens (5.2243ms)
+✔ inactive Kill Switch labels retained PENGU failures as audit history (0.8345ms)
+✔ active Kill Switch labels PENGU failures as current fail-closed history (0.164ms)
+node:internal/modules/cjs/loader:1448
+  const err = new Error(message);
+              ^
+
+Error: Cannot find module '@/lib/trade-history-attribution'
+Require stack:
+- C:\Users\dis\DisDex-v4-production-cert-20261009\apps\production-ui\lib\server\fill-lineage-evidence.ts
+- C:\Users\dis\DisDex-v4-production-cert-20261009\apps\production-ui\tests\pengu-route-display.test.ts
+    at node:internal/modules/cjs/loader:1448:15
+    at m._resolveFilename (file:///C:/Users/dis/-ai-dex-manager/node_modules/tsx/dist/register-B7jrtLTO.mjs:1:789)
+    at nextResolveSimple (C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:4:1004)
+    at C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:3:2630
+    at C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:3:1542
+    at resolveTsPaths (C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:4:760)
+    at Module._resolveFilename (C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:4:1102)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1059:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1064:22)
+    at Module._load (node:internal/modules/cjs/loader:1234:25) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    'C:\\Users\\dis\\DisDex-v4-production-cert-20261009\\apps\\production-ui\\lib\\server\\fill-lineage-evidence.ts',
+    'C:\\Users\\dis\\DisDex-v4-production-cert-20261009\\apps\\production-ui\\tests\\pengu-route-display.test.ts'
+  ]
+}
+
+Node.js v24.13.1
+✖ apps\production-ui\tests\pengu-route-display.test.ts (467.0469ms)
+node:internal/modules/cjs/loader:1448
+  const err = new Error(message);
+              ^
+
+Error: Cannot find module '@/lib/disterminal-live-config'
+Require stack:
+- C:\Users\dis\DisDex-v4-production-cert-20261009\apps\production-ui\lib\server\quality102-runtime-observability.ts
+- C:\Users\dis\DisDex-v4-production-cert-20261009\apps\production-ui\tests\quality102-runtime-observability.test.ts
+    at node:internal/modules/cjs/loader:1448:15
+    at m._resolveFilename (file:///C:/Users/dis/-ai-dex-manager/node_modules/tsx/dist/register-B7jrtLTO.mjs:1:789)
+    at nextResolveSimple (C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:4:1004)
+    at C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:3:2630
+    at C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:3:1542
+    at resolveTsPaths (C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:4:760)
+    at Module._resolveFilename (C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:4:1102)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1059:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1064:22)
+    at Module._load (node:internal/modules/cjs/loader:1234:25) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    'C:\\Users\\dis\\DisDex-v4-production-cert-20261009\\apps\\production-ui\\lib\\server\\quality102-runtime-observability.ts',
+    'C:\\Users\\dis\\DisDex-v4-production-cert-20261009\\apps\\production-ui\\tests\\quality102-runtime-observability.test.ts'
+  ]
+}
+
+Node.js v24.13.1
+✖ apps\production-ui\tests\quality102-runtime-observability.test.ts (448.3272ms)
+✔ each currency runs a full 1500ms foreground journey (0.7172ms)
+✔ three currencies are animated in sequence, never simultaneously (1.1127ms)
+✔ canceled ranking batch stops before the next currency (0.1528ms)
+✔ empty batch completes without a delay (0.25ms)
+✔ 20 distinct, selectable, synthetically rendered sound presets (1.2923ms)
+✔ each currency sound schedules a playable nonzero envelope with independent oscillators (0.3919ms)
+✔ formal Top3 swap always notifies even when scores below 90 (0.6448ms)
+✔ new entrant from fourth into Top3 notifies (0.1835ms)
+✔ top3 stable should not produce duplicate notifications (0.1669ms)
+✔ provisional Top3 changes notification is separate from formal ranking (0.4493ms)
+✔ no false provisional Top3 movement if prices have not been observed (9.2521ms)
+✔ AVAX accepted route with unconfirmed residual capacity is below 100 (1.0599ms)
+✔ 100 requires every signal and execution condition to pass (0.2022ms)
+✔ a shared stop appended after initial scoring invalidates 100 (0.2101ms)
+✔ FET cached 100 expires when its current entry clock closes (1.206ms)
+✔ shadow observations cannot hide an execution blocker or make unknown shadow data stale (0.2598ms)
+✔ UI poll 30 seconds and isolated 60s provisional scoring (0.9135ms)
+✔ zero/no formal score, WAIT and missing anchor never invent eligibility (0.2412ms)
+✔ quote-only hint refuses stale, negative and incoherent snapshots (0.1341ms)
+✔ one minute price estimate is display only; source score and gates unchanged (0.945ms)
+✔ never notify from a price-only provisional rank change (0.4403ms)
+✔ bad market snapshot does not lower formal signal score (0.1658ms)
+✔ prices format without scientific notation (16.6181ms)
+✔ expired confirmed-candle eligibility suppresses stale provisional scores (0.4008ms)
+✔ one currency completes before the next starts; cleanup waits for the final currency (7.7301ms)
+✔ cancelled batch does not start another currency or clear a newer batch (0.3454ms)
+✔ only existing fresh candidates rising in authoritative order are show events (11.6659ms)
+✔ commentary states numeric minimum gap and keeps execution blocks separate (0.8233ms)
+✔ unknown, stale, strict breakout and upper limits never invent minimum deficits (0.2183ms)
+✔ PC alerts only fire for changed high-score leader or an entry from below top 3 (0.4318ms)
+✔ PC alert requires a ranking change with top score 90+, or a prior rank below top3 entering top3 (0.2898ms)
+✔ FET strict breakout and inclusive volume boundary (2.6064ms)
+✔ FET completed bars only and gaps fail closed (0.3624ms)
+✔ FET entry clock is independent of technical signal (0.5028ms)
+✔ unknown scores last and ties stable (9.765ms)
+✔ known execution blocks rank behind available candidates despite higher signal score (0.4338ms)
+✔ initial and unchanged rankings do not flash; only movement flashes (0.3844ms)
+✔ unknown signal data and stale snapshots have no rankable score (0.3437ms)
+✔ M05 shadow gates never change score or execution ranking (0.2152ms)
+✔ FET five-minute clock boundary and last completed bar freshness (0.6154ms)
+✔ source freshness rejects future and old market data independently of heartbeat (0.361ms)
+✔ client clock expires a previously passing cached gate at cutoff (0.3045ms)
+✔ hour crossing expires FET market evidence and cache begun before boundary (0.3587ms)
+✖ HP Production contract is sourced from current VPS runtime (6.8077ms)
+✖ Production UI does not fall back to stale strategy contract values (3.8229ms)
+✖ static metadata is explicitly non-authoritative (1.5247ms)
+✖ decision status auto-refreshes from Production runtime without static contract fallback (1.1726ms)
+✔ runtime source number parser accepts signed and scientific values (0.613ms)
+✔ explicit low-ranking alternate route is shown as an alternate route (1.9092ms)
+✔ official symbol inference preserves the strategy lineage without inventing a subroute (0.5364ms)
+✔ a negative-PnL fill is never labeled test-order merely because it lost money (0.5566ms)
+✔ a losing order with explicit logic evidence remains a logic order (0.248ms)
+✔ recovered or manually probed fills are labeled as test orders (0.2049ms)
+✔ history label makes a low-ranking alternate route visible (0.1814ms)
+✔ history logic names receive distinct stable color tones (0.4295ms)
+node:internal/modules/cjs/loader:1448
+  const err = new Error(message);
+              ^
+
+Error: Cannot find module '@/lib/server/asterdex/client'
+Require stack:
+- C:\Users\dis\DisDex-v4-production-cert-20261009\apps\production-ui\lib\server\v12-decision-observability.ts
+- C:\Users\dis\DisDex-v4-production-cert-20261009\apps\production-ui\tests\ui-capacity-gate-clarity.test.ts
+    at node:internal/modules/cjs/loader:1448:15
+    at m._resolveFilename (file:///C:/Users/dis/-ai-dex-manager/node_modules/tsx/dist/register-B7jrtLTO.mjs:1:789)
+    at nextResolveSimple (C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:4:1004)
+    at C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:3:2630
+    at C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:3:1542
+    at resolveTsPaths (C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:4:760)
+    at Module._resolveFilename (C:\Users\dis\-ai-dex-manager\node_modules\tsx\dist\register-D46fvsV_.cjs:4:1102)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1059:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1064:22)
+    at Module._load (node:internal/modules/cjs/loader:1234:25) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    'C:\\Users\\dis\\DisDex-v4-production-cert-20261009\\apps\\production-ui\\lib\\server\\v12-decision-observability.ts',
+    'C:\\Users\\dis\\DisDex-v4-production-cert-20261009\\apps\\production-ui\\tests\\ui-capacity-gate-clarity.test.ts'
+  ]
+}
+
+Node.js v24.13.1
+✖ apps\production-ui\tests\ui-capacity-gate-clarity.test.ts (406.6761ms)
+ℹ tests 87
+ℹ suites 0
+ℹ pass 63
+ℹ fail 24
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 7300.8568
+
+✖ failing tests:
+
+test at apps\production-ui\tests\aster-account-history-consistency.test.ts:1:1
+✖ apps\production-ui\tests\aster-account-history-consistency.test.ts (471.1149ms)
+  'test failed'
+
+test at apps\production-ui\tests\dd1296-display-alignment.test.ts:2:1591
+✖ Formal BT reads current authoritative DD12.96 files and reconciles trades (7.2391ms)
+  Error: ENOENT: no such file or directory, open 'C:\Users\docs\implementation\FINAL_PRODUCTION_TARGET_DD1296_20261005.json'
+      at async open (node:internal/fs/promises:637:25)
+      at async readFile (node:internal/fs/promises:1269:14)
+      at async Promise.all (index 0)
+      at async loadFormalBtAnchor (C:\Users\dis\DisDex-v4-production-cert-20261009\apps\production-ui\lib\server\formal-bt-anchor.ts:5:34)
+      at async TestContext.<anonymous> (C:\Users\dis\DisDex-v4-production-cert-20261009\apps\production-ui\tests\dd1296-display-alignment.test.ts:14:11)
+      at async Test.run (node:internal/test_runner/test:1110:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:785:7) {
+    errno: -4058,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: 'C:\\Users\\docs\\implementation\\FINAL_PRODUCTION_TARGET_DD1296_20261005.json'
+  }
+
+test at apps\production-ui\tests\dd1296-display-alignment.test.ts:2:2158
+✖ Every policy summary consumes Side sizing; formal page no old fixed BT (6.874ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /formatQ102SideGross/. Input:
+
+  '"use client";\r\n' +
+    '\r\n' +
+    'import Link from "next/link";\r\n' +
+    'import { ArrowRight, BarChart3, Coins, Settings, Wallet } from "lucide-react";\r\n' +
+    '\r\n' +
+    'import { LiveDecisionPanel } from "@/components/features/autotrade/LiveDecisionPanel";\r\n' +
+    'import { useSimulation } from "@/context/SimulationContext";\r\n' +
+    'import { useOperationalWallet } from "@/hooks/useOperationalWallet";\r\n' +
+    '\r\n' +
+    'function SummaryCard({\r\n' +
+    '  title,\r\n' +
+    '  value,\r\n' +
+    '  text,\r\n' +
+    '  tone = "default",\r\n' +
+    '}: {\r\n' +
+    '  title: string;\r\n' +
+    '  value: string;\r\n' +
+    '  text: string;\r\n' +
+    '  tone?: "default" | "profit" | "loss";\r\n' +
+    '}) {\r\n' +
+    '  return (\r\n' +
+    '    <div className="panel-gold rounded-[24px] p-4">\r\n' +
+    '      <div className="text-[10px] font-semibold uppercase tracking-[0.26em] text-gold-100/72">{title}</div>\r\n' +
+    '      <div\r\n' +
+    '        className={`mt-2 text-[1.45rem] font-black ${\r\n' +
+    '          tone === "profit" ? "text-profit" : tone === "loss" ? "text-loss" : "text-white"\r\n' +
+    '        }`}\r\n' +
+    '      >\r\n' +
+    '        {value}\r\n' +
+    '      </div>\r\n' +
+    '      <div className="mt-1 text-[11px] leading-5 text-white/78">{text}</div>\r\n' +
+    '    </div>\r\n' +
+    '  );\r\n' +
+    '}\r\n' +
+    '\r\n' +
+    'function QuickLink({\r\n' +
+    '  href,\r\n' +
+    '  title,\r\n' +
+    '  text,\r\n' +
+    '  icon: Icon,\r\n' +
+    '}: {\r\n' +
+    '  href: string;\r\n' +
+    '  title: string;\r\n' +
+    '  text: string;\r\n' +
+    '  icon: React.ComponentType<{ className?: string }>;\r\n' +
+    '}) {\r\n' +
+    '  return (\r\n' +
+    '    <Link\r\n' +
+    '      href={href}\r\n' +
+    '      className="group rounded-[22px] border border-gold-400/16 bg-[linear-gradient(180deg,rgba(8,10,15,0.34),rgba(4,6,10,0.64))] px-4 py-4 transition hover:border-gold-300/36"\r\n' +
+    '    >\r\n' +
+    '      <div className="flex items-center justify-between gap-3">\r\n' +
+    '        <div className="flex items-center gap-2 text-sm font-bold text-white">\r\n' +
+    '          <Icon className="h-4 w-4 text-gold-100" />\r\n' +
+    '          {title}\r\n' +
+    '        </div>\r\n' +
+    '        <ArrowRight className="h-4 w-4 text-gold-100/70 transition group-hover:translate-x-0.5" />\r\n' +
+    '      </div>\r\n' +
+    '      <p className="mt-2 text-[11px] leading-5 text-white/76">{text}</p>\r\n' +
+    '    </Link>\r\n' +
+    '  );\r\n' +
+    '}\r\n' +
+    '\r\n' +
+    'export default function HomePage() {\r\n' +
+    '  const { activeStrategies, tradeNotifications } = useSimulation();\r\n' +
+    '  const { wallet } = useOperationalWallet();\r\n' +
+    '  const holdings = (wallet?.trackedHoldings || []).filter((holding) => Number(holding.amount) > 0);\r\n' +
+    '  const usdtHolding = holdings.find((holding) => holding.symbol === "USDT");\r\n' +
+    '  const portfolioUsd = Number(wallet?.lastPortfolioUsd || 0);\r\n' +
+    '  const cashUsd = Number(usdtHolding?.usdValue || 0);\r\n' +
+    '  const isWalletRunning = wallet?.status === "running";\r\n' +
+    '\r\n' +
+    '  return (\r\n' +
+    '    <main className="relative min-h-full overflow-hidden rounded-[28px] border border-gold-400/16 bg-[#03050a] text-white shadow-[0_0_30px_rgba(253,224,71,0.06)]">\r\n' +
+    `      <div className="absolute inset-0 bg-[url('/backgrounds/login_bg.png')] bg-cover bg-center opacity-[0.22] mix-blend-screen" />\r\n` +
+    '      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(253,224,71,0.12),transparent_22%),radial-gradient(circle_at_bottom_right,rgba(56,189,248,0.05),transparent_28%)]" />\r\n' +
+    '      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(3,5,10,0.12),rgba(3,5,10,0.68))]" />\r\n' +
+    '\r\n' +
+    '      <div className="relative z-10 space-y-3 p-3 md:p-4">\r\n' +
+    '        <section className="grid gap-3 xl:grid-cols-[1.06fr_0.94fr]">\r\n' +
+    '          <div className="panel-gold rounded-[30px] p-4 md:p-5">\r\n' +
+    '            <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.32em] text-gold-100/76">\r\n' +
+    '              <Wallet className="h-3.5 w-3.5" />\r\n' +
+    '              Professional DisManager\r\n' +
+    '            </div>\r\n' +
+    '            <h1 className="gold-heading mt-3 text-[2.2rem] font-black tracking-tight md:text-[3rem]">\r\n' +
+    '              運用ウォレットの状況を一画面で確認します。\r\n' +
+    '            </h1>\r\n' +
+    '            <p className="mt-3 max-w-2xl text-sm leading-7 text-white/86 md:text-[15px]">\r\n' +
+    '              実際の運用ウォレット残高、自動売買の状態、判定内容、取引履歴へすぐ移動できます。\r\n' +
+    '              日々の確認と判断をここから進められる自分専用のホームです。\r\n' +
+    '            </p>\r\n' +
+    '            <div className="mt-4 flex flex-wrap gap-2">\r\n' +
+    '              <span className="rounded-full border border-gold-400/20 bg-[linear-gradient(90deg,rgba(253,224,71,0.12),rgba(245,158,11,0.08))] px-3 py-1.5 text-[11px] font-semibold text-gold-50">\r\n' +
+    '                運用ウォレット確認\r\n' +
+    '              </span>\r\n' +
+    '              <span className="rounded-full border border-gold-400/20 bg-[linear-gradient(90deg,rgba(253,224,71,0.12),rgba(245,158,11,0.08))] px-3 py-1.5 text-[11px] font-semibold text-gold-50">\r\n' +
+    '                自動売買の状態確認\r\n' +
+    '              </span>\r\n' +
+    '              <span className="rounded-full border border-gold-400/20 bg-[linear-gradient(90deg,rgba(253,224,71,0.12),rgba(245,158,11,0.08))] px-3 py-1.5 text-[11px] font-semibold text-gold-50">\r\n' +
+    '                履歴と設定の整理\r\n' +
+    '              </span>\r\n' +
+    '            </div>\r\n' +
+    '          </div>\r\n' +
+    '\r\n' +
+    '          <div className="grid gap-3">\r\n' +
+    '            <SummaryCard\r\n' +
+    '              title="Portfolio"\r\n' +
+    '              value={`$${portfolioUsd.toFixed(2)}`}\r\n' +
+    '              text={`USDT ${cashUsd.toFixed(2)} / 保有資産 ${holdings.length}`}\r\n' +
+    '            />\r\n' +
+    '            <SummaryCard\r\n' +
+    '              title="Auto Trade"\r\n' +
+    '              value={isWalletRunning ? "稼働中" : "停止中"}\r\n' +
+    '              text="運用ウォレットの状態をもとに、自動売買の稼働状況を表示しています。"\r\n' +
+    '              tone={isWalletRunning ? "profit" : "loss"}\r\n' +
+    '            />\r\n' +
+    '          </div>\r\n' +
+    '        </section>\r\n' +
+    '\r\n' +
+    '        <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">\r\n' +
+    '          <QuickLink href="/wallets" title="運用ウォレット" text="入金確認、保有資産、ウォレット状態を確認します。" icon={Wallet} />\r\n' +
+    '          <QuickLink href="/positions" title="ダッシュボード" text="自動売買の判定内容と現在の状態を確認します。" icon={BarChart3} />\r\n' +
+    '          <QuickLink href="/history" title="トレード履歴" text="約定履歴、取得単価、損益の流れを確認します。" icon={Coins} />\r\n' +
+    '          <QuickLink href="/settings" title="設定" text="認証設定や運用に必要な基本設定を整理します。" icon={Settings} />\r\n' +
+    '        </section>\r\n' +
+    '\r\n' +
+    '        <section className="grid gap-3 md:grid-cols-3">\r\n' +
+    '          <SummaryCard title="Strategies" value={`${activeStrategies.length}`} text="現在読み込み中の戦略数です。" />\r\n' +
+    '          <SummaryCard title="Notifications" value={`${tradeNotifications.length}`} text="最新の通知件数です。" />\r\n' +
+    '          <SummaryCard title="Positions" value={`${holdings.length}`} text="現在保有中の運用ウォレット資産数です。" />\r\n' +
+    '        </section>\r\n' +
+    '\r\n' +
+    '        <LiveDecisionPanel compact />\r\n' +
+    '      </div>\r\n' +
+    '    </main>\r\n' +
+    '  );\r\n' +
+    '}\r\n'
+
+      at TestContext.<anonymous> (C:\Users\dis\DisDex-v4-production-cert-20261009\apps\production-ui\tests\dd1296-display-alignment.test.ts:25:43)
+      at async Test.run (node:internal/test_runner/test:1110:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:785:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '"use client";\r\n\r\nimport Link from "next/link";\r\nimport { ArrowRight, BarChart3, Coins, Settings, Wallet } from "lucide-react";\r\n\r\nimport { LiveDecisionPanel } from "@/components/features/autotrade/LiveDecisionPanel";\r\nimport { useSimulation } from "@/context/SimulationContext";\r\nimport { useOperationalWallet } from "@/hooks/useOperationalWallet";\r\n\r\nfunction SummaryCard({\r\n  title,\r\n  value,\r\n  text,\r\n  tone = "default",\r\n}: {\r\n  title: string;\r\n  value: string;\r\n  text: string;\r\n  tone?: "default" | "profit" | "loss";\r\n}) {\r\n  return (\r\n    <div className="panel-gold rounded-[24px] p-4">\r\n      <div className="text-[10px] font-semibold uppercase tracking-[0.26em] text-gold-100/72">{title}</div>\r\n      <div\r\n        className={`mt-2 text-[1.45rem] font-black ${\r\n          tone === "profit" ? "text-profit" : tone === "loss" ? "text-loss" : "text-white"\r\n        }`}\r\n      >\r\n        {value}\r\n      </div>\r\n      <div className="mt-1 text-[11px] leading-5 text-white/78">{text}</div>\r\n    </div>\r\n  );\r\n}\r\n\r\nfunction QuickLink({\r\n  href,\r\n  title,\r\n  text,\r\n  icon: Icon,\r\n}: {\r\n  href: string;\r\n  title: string;\r\n  text: string;\r\n  icon: React.ComponentType<{ className?: string }>;\r\n}) {\r\n  return (\r\n    <Link\r\n      href={href}\r\n      className="group rounded-[22px] border border-gold-400/16 bg-[linear-gradient(180deg,rgba(8,10,15,0.34),rgba(4,6,10,0.64))] px-4 py-4 transition hover:border-gold-300/36"\r\n    >\r\n      <div className="flex items-center justify-between gap-3">\r\n        <div className="flex items-center gap-2 text-sm font-bold text-white">\r\n          <Icon className="h-4 w-4 text-gold-100" />\r\n          {title}\r\n        </div>\r\n        <ArrowRight className="h-4 w-4 text-gold-100/70 transition group-hover:translate-x-0.5" />\r\n      </div>\r\n      <p className="mt-2 text-[11px] leading-5 text-white/76">{text}</p>\r\n    </Link>\r\n  );\r\n}\r\n\r\nexport default function HomePage() {\r\n  const { activeStrategies, tradeNotifications } = useSimulation();\r\n  const { wallet } = useOperationalWallet();\r\n  const holdings = (wallet?.trackedHoldings || []).filter((holding) => Number(holding.amount) > 0);\r\n  const usdtHolding = holdings.find((holding) => holding.symbol === "USDT");\r\n  const portfolioUsd = Number(wallet?.lastPortfolioUsd || 0);\r\n  const cashUsd = Number(usdtHolding?.usdValue || 0);\r\n  const isWalletRunning = wallet?.status === "running";\r\n\r\n  return (\r\n    <main className="relative min-h-full overflow-hidden rounded-[28px] border border-gold-400/16 bg-[#03050a] text-white shadow-[0_0_30px_rgba(253,224,71,0.06)]">\r\n      <div className="absolute inset-0 bg-[url(\'/backgrounds/login_bg.png\')] bg-cover bg-center opacity-[0.22] mix-blend-screen" />\r\n      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(253,224,71,0.12),transparent_22%),radial-gradient(circle_at_bottom_right,rgba(56,189,248,0.05),transparent_28%)]" />\r\n      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(3,5,10,0.12),rgba(3,5,10,0.68))]" />\r\n\r\n      <div className="relative z-10 space-y-3 p-3 md:p-4">\r\n        <section className="grid gap-3 xl:grid-cols-[1.06fr_0.94fr]">\r\n          <div className="panel-gold rounded-[30px] p-4 md:p-5">\r\n            <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.32em] text-gold-100/76">\r\n              <Wallet className="h-3.5 w-3.5" />\r\n              Professional DisManager\r\n            </div>\r\n            <h1 className="gold-heading mt-3 text-[2.2rem] font-black tracking-tight md:text-[3rem]">\r\n              運用ウォレットの状況を一画面で確認します。\r\n            </h1>\r\n            <p className="mt-3 max-w-2xl text-sm leading-7 text-white/86 md:text-[15px]">\r\n              実際の運用ウォレット残高、自動売買の状態、判定内容、取引履歴へすぐ移動できます。\r\n              日々の確認と判断をここから進められる自分専用のホームです。\r\n            </p>\r\n            <div className="mt-4 flex flex-wrap gap-2">\r\n              <span className="rounded-full border border-gold-400/20 bg-[linear-gradient(90deg,rgba(253,224,71,0.12),rgba(245,158,11,0.08))] px-3 py-1.5 text-[11px] font-semibold text-gold-50">\r\n                運用ウォレット確認\r\n              </span>\r\n              <span className="rounded-full border border-gold-400/20 bg-[linear-gradient(90deg,rgba(253,224,71,0.12),rgba(245,158,11,0.08))] px-3 py-1.5 text-[11px] font-semibold text-gold-50">\r\n                自動売買の状態確認\r\n              </span>\r\n              <span className="rounded-full border border-gold-400/20 bg-[linear-gradient(90deg,rgba(253,224,71,0.12),rgba(245,158,11,0.08))] px-3 py-1.5 text-[11px] font-semibold text-gold-50">\r\n                履歴と設定の整理\r\n              </span>\r\n            </div>\r\n          </div>\r\n\r\n          <div className="grid gap-3">\r\n            <SummaryCard\r\n              title="Portfolio"\r\n              value={`$${portfolioUsd.toFixed(2)}`}\r\n              text={`USDT ${cashUsd.toFixed(2)} / 保有資産 ${holdings.length}`}\r\n            />\r\n            <SummaryCard\r\n              title="Auto Trade"\r\n              value={isWalletRunning ? "稼働中" : "停止中"}\r\n              text="運用ウォレットの状態をもとに、自動売買の稼働状況を表示しています。"\r\n              tone={isWalletRunning ? "profit" : "loss"}\r\n            />\r\n          </div>\r\n        </section>\r\n\r\n        <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">\r\n          <QuickLink href="/wallets" title="運用ウォレット" text="入金確認、保有資産、ウォレット状態を確認します。" icon={Wallet} />\r\n          <QuickLink href="/positions" title="ダッシュボード" text="自動売買の判定内容と現在の状態を確認します。" icon={BarChart3} />\r\n          <QuickLink href="/history" title="トレード履歴" text="約定履歴、取得単価、損益の流れを確認します。" icon={Coins} />\r\n          <QuickLink href="/settings" title="設定" text="認証設定や運用に必要な基本設定を整理します。" icon={Settings} />\r\n        </section>\r\n\r\n        <section className="grid gap-3 md:grid-cols-3">\r\n          <SummaryCard title="Strategies" value={`${activeStrategies.length}`} text="現在読み込み中の戦略数です。" />\r\n          <SummaryCard title="Notifications" value={`${tradeNotifications.length}`} text="最新の通知件数です。" />\r\n          <SummaryCard title="Positions" value={`${holdings.length}`} text="現在保有中の運用ウォレット資産数です。" />\r\n        </section>\r\n\r\n        <LiveDecisionPanel compact />\r\n      </div>\r\n    </main>\r\n  );\r\n}\r\n',
+    expected: /formatQ102SideGross/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at apps\production-ui\tests\dd1296-display-alignment.test.ts:2:2853
+✖ Home and performance current-logic labels no longer use old Top2 / sidecar descriptions (2.288ms)
+  Error: ENOENT: no such file or directory, open 'C:\Users\dis\DisDex-v4-production-cert-20261009\app\performance\page.tsx'
+      at async open (node:internal/fs/promises:637:25)
+      at async readFile (node:internal/fs/promises:1269:14)
+      at async TestContext.<anonymous> (C:\Users\dis\DisDex-v4-production-cert-20261009\apps\production-ui\tests\dd1296-display-alignment.test.ts:31:63)
+      at async Test.run (node:internal/test_runner/test:1110:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:785:7) {
+    errno: -4058,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: 'C:\\Users\\dis\\DisDex-v4-production-cert-20261009\\app\\performance\\page.tsx'
+  }
+
+test at apps\production-ui\tests\decision-hierarchy-history-lineage.test.ts:1:1
+✖ apps\production-ui\tests\decision-hierarchy-history-lineage.test.ts (469.514ms)
+  'test failed'
+
+test at apps\production-ui\tests\decision-status-layout-regression.test.ts:2:921
+✖ decision status keeps responsive overflow containment (6.2177ms)
+  Error: ENOENT: no such file or directory, open 'C:\Users\dis\DisDex-v4-production-cert-20261009\components\features\DecisionStatusPanel.tsx'
+      at async open (node:internal/fs/promises:637:25)
+      at async readFile (node:internal/fs/promises:1269:14)
+      at async TestContext.<anonymous> (C:\Users\dis\DisDex-v4-production-cert-20261009\apps\production-ui\tests\decision-status-layout-regression.test.ts:6:18)
+      at async Test.run (node:internal/test_runner/test:1110:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:358:3) {
+    errno: -4058,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: 'C:\\Users\\dis\\DisDex-v4-production-cert-20261009\\components\\features\\DecisionStatusPanel.tsx'
+  }
+
+test at apps\production-ui\tests\fet-decision-status.test.ts:1:1
+✖ apps\production-ui\tests\fet-decision-status.test.ts (461.9103ms)
+  'test failed'
+
+test at apps\production-ui\tests\final-live-governor-monthly-breakdown-contract.test.ts:1:1
+✖ apps\production-ui\tests\final-live-governor-monthly-breakdown-contract.test.ts (424.09ms)
+  'test failed'
+
+test at apps\production-ui\tests\historical-fill-lineage.test.ts:1:1
+✖ apps\production-ui\tests\historical-fill-lineage.test.ts (446.9602ms)
+  'test failed'
+
+test at apps\production-ui\tests\hp-a09-runtime-sync-20260927.test.ts:2:1078
+✖ exactly five strategy runtimes are represented in production SHA lineage (0.9831ms)
+  Error: ENOENT: no such file or directory, open 'C:\Users\dis\DisDex-v4-production-cert-20261009\lib\server\current-production-runtime.ts'
+      at readFileSync (node:fs:439:20)
+      at read (C:\Users\dis\DisDex-v4-production-cert-20261009\apps\production-ui\tests\hp-a09-runtime-sync-20260927.test.ts:4:27)
+      at TestContext.<anonymous> (C:\Users\dis\DisDex-v4-production-cert-20261009\apps\production-ui\tests\hp-a09-runtime-sync-20260927.test.ts:6:16)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1103:25)
+      at Test.start (node:internal/test_runner/test:1000:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:358:17) {
+    errno: -4058,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: 'C:\\Users\\dis\\DisDex-v4-production-cert-20261009\\lib\\server\\current-production-runtime.ts'
+  }
+
+test at apps\production-ui\tests\hp-a09-runtime-sync-20260927.test.ts:2:1487
+✖ FET page and read-only authenticated API are present (0.3449ms)
+  Error: ENOENT: no such file or directory, open 'C:\Users\dis\DisDex-v4-production-cert-20261009\app\decision-status\fet\page.tsx'
+      at readFileSync (node:fs:439:20)
+      at read (C:\Users\dis\DisDex-v4-production-cert-20261009\apps\production-ui\tests\hp-a09-runtime-sync-20260927.test.ts:4:27)
+      at TestContext.<anonymous> (C:\Users\dis\DisDex-v4-production-cert-20261009\apps\production-ui\tests\hp-a09-runtime-sync-20260927.test.ts:12:14)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1103:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:785:18)
+      at Test.postRun (node:internal/test_runner/test:1232:19)
+      at Test.run (node:internal/test_runner/test:1160:12)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:358:3) {
+    errno: -4058,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: 'C:\\Users\\dis\\DisDex-v4-production-cert-20261009\\app\\decision-status\\fet\\page.tsx'
+  }
+
+test at apps\production-ui\tests\hp-a09-runtime-sync-20260927.test.ts:2:2343
+✖ do not conflate UI build SHA and new trading runtime SHA (4.9198ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /HPのビルドSHAと売買Runtime SHA/. Input:
+
+  '"use client";\r\n' +
+    '\r\n' +
+    'import Link from "next/link";\r\n' +
+    'import { ArrowRight, BarChart3, Coins, Settings, Wallet } from "lucide-react";\r\n' +
+    '\r\n' +
+    'import { LiveDecisionPanel } from "@/components/features/autotrade/LiveDecisionPanel";\r\n' +
+    'import { useSimulation } from "@/context/SimulationContext";\r\n' +
+    'import { useOperationalWallet } from "@/hooks/useOperationalWallet";\r\n' +
+    '\r\n' +
+    'function SummaryCard({\r\n' +
+    '  title,\r\n' +
+    '  value,\r\n' +
+    '  text,\r\n' +
+    '  tone = "default",\r\n' +
+    '}: {\r\n' +
+    '  title: string;\r\n' +
+    '  value: string;\r\n' +
+    '  text: string;\r\n' +
+    '  tone?: "default" | "profit" | "loss";\r\n' +
+    '}) {\r\n' +
+    '  return (\r\n' +
+    '    <div className="panel-gold rounded-[24px] p-4">\r\n' +
+    '      <div className="text-[10px] font-semibold uppercase tracking-[0.26em] text-gold-100/72">{title}</div>\r\n' +
+    '      <div\r\n' +
+    '        className={`mt-2 text-[1.45rem] font-black ${\r\n' +
+    '          tone === "profit" ? "text-profit" : tone === "loss" ? "text-loss" : "text-white"\r\n' +
+    '        }`}\r\n' +
+    '      >\r\n' +
+    '        {value}\r\n' +
+    '      </div>\r\n' +
+    '      <div className="mt-1 text-[11px] leading-5 text-white/78">{text}</div>\r\n' +
+    '    </div>\r\n' +
+    '  );\r\n' +
+    '}\r\n' +
+    '\r\n' +
+    'function QuickLink({\r\n' +
+    '  href,\r\n' +
+    '  title,\r\n' +
+    '  text,\r\n' +
+    '  icon: Icon,\r\n' +
+    '}: {\r\n' +
+    '  href: string;\r\n' +
+    '  title: string;\r\n' +
+    '  text: string;\r\n' +
+    '  icon: React.ComponentType<{ className?: string }>;\r\n' +
+    '}) {\r\n' +
+    '  return (\r\n' +
+    '    <Link\r\n' +
+    '      href={href}\r\n' +
+    '      className="group rounded-[22px] border border-gold-400/16 bg-[linear-gradient(180deg,rgba(8,10,15,0.34),rgba(4,6,10,0.64))] px-4 py-4 transition hover:border-gold-300/36"\r\n' +
+    '    >\r\n' +
+    '      <div className="flex items-center justify-between gap-3">\r\n' +
+    '        <div className="flex items-center gap-2 text-sm font-bold text-white">\r\n' +
+    '          <Icon className="h-4 w-4 text-gold-100" />\r\n' +
+    '          {title}\r\n' +
+    '        </div>\r\n' +
+    '        <ArrowRight className="h-4 w-4 text-gold-100/70 transition group-hover:translate-x-0.5" />\r\n' +
+    '      </div>\r\n' +
+    '      <p className="mt-2 text-[11px] leading-5 text-white/76">{text}</p>\r\n' +
+    '    </Link>\r\n' +
+    '  );\r\n' +
+    '}\r\n' +
+    '\r\n' +
+    'export default function HomePage() {\r\n' +
+    '  const { activeStrategies, tradeNotifications } = useSimulation();\r\n' +
+    '  const { wallet } = useOperationalWallet();\r\n' +
+    '  const holdings = (wallet?.trackedHoldings || []).filter((holding) => Number(holding.amount) > 0);\r\n' +
+    '  const usdtHolding = holdings.find((holding) => holding.symbol === "USDT");\r\n' +
+    '  const portfolioUsd = Number(wallet?.lastPortfolioUsd || 0);\r\n' +
+    '  const cashUsd = Number(usdtHolding?.usdValue || 0);\r\n' +
+    '  const isWalletRunning = wallet?.status === "running";\r\n' +
+    '\r\n' +
+    '  return (\r\n' +
+    '    <main className="relative min-h-full overflow-hidden rounded-[28px] border border-gold-400/16 bg-[#03050a] text-white shadow-[0_0_30px_rgba(253,224,71,0.06)]">\r\n' +
+    `      <div className="absolute inset-0 bg-[url('/backgrounds/login_bg.png')] bg-cover bg-center opacity-[0.22] mix-blend-screen" />\r\n` +
+    '      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(253,224,71,0.12),transparent_22%),radial-gradient(circle_at_bottom_right,rgba(56,189,248,0.05),transparent_28%)]" />\r\n' +
+    '      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(3,5,10,0.12),rgba(3,5,10,0.68))]" />\r\n' +
+    '\r\n' +
+    '      <div className="relative z-10 space-y-3 p-3 md:p-4">\r\n' +
+    '        <section className="grid gap-3 xl:grid-cols-[1.06fr_0.94fr]">\r\n' +
+    '          <div className="panel-gold rounded-[30px] p-4 md:p-5">\r\n' +
+    '            <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.32em] text-gold-100/76">\r\n' +
+    '              <Wallet className="h-3.5 w-3.5" />\r\n' +
+    '              Professional DisManager\r\n' +
+    '            </div>\r\n' +
+    '            <h1 className="gold-heading mt-3 text-[2.2rem] font-black tracking-tight md:text-[3rem]">\r\n' +
+    '              運用ウォレットの状況を一画面で確認します。\r\n' +
+    '            </h1>\r\n' +
+    '            <p className="mt-3 max-w-2xl text-sm leading-7 text-white/86 md:text-[15px]">\r\n' +
+    '              実際の運用ウォレット残高、自動売買の状態、判定内容、取引履歴へすぐ移動できます。\r\n' +
+    '              日々の確認と判断をここから進められる自分専用のホームです。\r\n' +
+    '            </p>\r\n' +
+    '            <div className="mt-4 flex flex-wrap gap-2">\r\n' +
+    '              <span className="rounded-full border border-gold-400/20 bg-[linear-gradient(90deg,rgba(253,224,71,0.12),rgba(245,158,11,0.08))] px-3 py-1.5 text-[11px] font-semibold text-gold-50">\r\n' +
+    '                運用ウォレット確認\r\n' +
+    '              </span>\r\n' +
+    '              <span className="rounded-full border border-gold-400/20 bg-[linear-gradient(90deg,rgba(253,224,71,0.12),rgba(245,158,11,0.08))] px-3 py-1.5 text-[11px] font-semibold text-gold-50">\r\n' +
+    '                自動売買の状態確認\r\n' +
+    '              </span>\r\n' +
+    '              <span className="rounded-full border border-gold-400/20 bg-[linear-gradient(90deg,rgba(253,224,71,0.12),rgba(245,158,11,0.08))] px-3 py-1.5 text-[11px] font-semibold text-gold-50">\r\n' +
+    '                履歴と設定の整理\r\n' +
+    '              </span>\r\n' +
+    '            </div>\r\n' +
+    '          </div>\r\n' +
+    '\r\n' +
+    '          <div className="grid gap-3">\r\n' +
+    '            <SummaryCard\r\n' +
+    '              title="Portfolio"\r\n' +
+    '              value={`$${portfolioUsd.toFixed(2)}`}\r\n' +
+    '              text={`USDT ${cashUsd.toFixed(2)} / 保有資産 ${holdings.length}`}\r\n' +
+    '            />\r\n' +
+    '            <SummaryCard\r\n' +
+    '              title="Auto Trade"\r\n' +
+    '              value={isWalletRunning ? "稼働中" : "停止中"}\r\n' +
+    '              text="運用ウォレットの状態をもとに、自動売買の稼働状況を表示しています。"\r\n' +
+    '              tone={isWalletRunning ? "profit" : "loss"}\r\n' +
+    '            />\r\n' +
+    '          </div>\r\n' +
+    '        </section>\r\n' +
+    '\r\n' +
+    '        <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">\r\n' +
+    '          <QuickLink href="/wallets" title="運用ウォレット" text="入金確認、保有資産、ウォレット状態を確認します。" icon={Wallet} />\r\n' +
+    '          <QuickLink href="/positions" title="ダッシュボード" text="自動売買の判定内容と現在の状態を確認します。" icon={BarChart3} />\r\n' +
+    '          <QuickLink href="/history" title="トレード履歴" text="約定履歴、取得単価、損益の流れを確認します。" icon={Coins} />\r\n' +
+    '          <QuickLink href="/settings" title="設定" text="認証設定や運用に必要な基本設定を整理します。" icon={Settings} />\r\n' +
+    '        </section>\r\n' +
+    '\r\n' +
+    '        <section className="grid gap-3 md:grid-cols-3">\r\n' +
+    '          <SummaryCard title="Strategies" value={`${activeStrategies.length}`} text="現在読み込み中の戦略数です。" />\r\n' +
+    '          <SummaryCard title="Notifications" value={`${tradeNotifications.length}`} text="最新の通知件数です。" />\r\n' +
+    '          <SummaryCard title="Positions" value={`${holdings.length}`} text="現在保有中の運用ウォレット資産数です。" />\r\n' +
+    '        </section>\r\n' +
+    '\r\n' +
+    '        <LiveDecisionPanel compact />\r\n' +
+    '      </div>\r\n' +
+    '    </main>\r\n' +
+    '  );\r\n' +
+    '}\r\n'
+
+      at TestContext.<anonymous> (C:\Users\dis\DisDex-v4-production-cert-20261009\apps\production-ui\tests\hp-a09-runtime-sync-20260927.test.ts:26:10)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1103:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:785:18)
+      at Test.postRun (node:internal/test_runner/test:1232:19)
+      at Test.run (node:internal/test_runner/test:1160:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:785:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '"use client";\r\n\r\nimport Link from "next/link";\r\nimport { ArrowRight, BarChart3, Coins, Settings, Wallet } from "lucide-react";\r\n\r\nimport { LiveDecisionPanel } from "@/components/features/autotrade/LiveDecisionPanel";\r\nimport { useSimulation } from "@/context/SimulationContext";\r\nimport { useOperationalWallet } from "@/hooks/useOperationalWallet";\r\n\r\nfunction SummaryCard({\r\n  title,\r\n  value,\r\n  text,\r\n  tone = "default",\r\n}: {\r\n  title: string;\r\n  value: string;\r\n  text: string;\r\n  tone?: "default" | "profit" | "loss";\r\n}) {\r\n  return (\r\n    <div className="panel-gold rounded-[24px] p-4">\r\n      <div className="text-[10px] font-semibold uppercase tracking-[0.26em] text-gold-100/72">{title}</div>\r\n      <div\r\n        className={`mt-2 text-[1.45rem] font-black ${\r\n          tone === "profit" ? "text-profit" : tone === "loss" ? "text-loss" : "text-white"\r\n        }`}\r\n      >\r\n        {value}\r\n      </div>\r\n      <div className="mt-1 text-[11px] leading-5 text-white/78">{text}</div>\r\n    </div>\r\n  );\r\n}\r\n\r\nfunction QuickLink({\r\n  href,\r\n  title,\r\n  text,\r\n  icon: Icon,\r\n}: {\r\n  href: string;\r\n  title: string;\r\n  text: string;\r\n  icon: React.ComponentType<{ className?: string }>;\r\n}) {\r\n  return (\r\n    <Link\r\n      href={href}\r\n      className="group rounded-[22px] border border-gold-400/16 bg-[linear-gradient(180deg,rgba(8,10,15,0.34),rgba(4,6,10,0.64))] px-4 py-4 transition hover:border-gold-300/36"\r\n    >\r\n      <div className="flex items-center justify-between gap-3">\r\n        <div className="flex items-center gap-2 text-sm font-bold text-white">\r\n          <Icon className="h-4 w-4 text-gold-100" />\r\n          {title}\r\n        </div>\r\n        <ArrowRight className="h-4 w-4 text-gold-100/70 transition group-hover:translate-x-0.5" />\r\n      </div>\r\n      <p className="mt-2 text-[11px] leading-5 text-white/76">{text}</p>\r\n    </Link>\r\n  );\r\n}\r\n\r\nexport default function HomePage() {\r\n  const { activeStrategies, tradeNotifications } = useSimulation();\r\n  const { wallet } = useOperationalWallet();\r\n  const holdings = (wallet?.trackedHoldings || []).filter((holding) => Number(holding.amount) > 0);\r\n  const usdtHolding = holdings.find((holding) => holding.symbol === "USDT");\r\n  const portfolioUsd = Number(wallet?.lastPortfolioUsd || 0);\r\n  const cashUsd = Number(usdtHolding?.usdValue || 0);\r\n  const isWalletRunning = wallet?.status === "running";\r\n\r\n  return (\r\n    <main className="relative min-h-full overflow-hidden rounded-[28px] border border-gold-400/16 bg-[#03050a] text-white shadow-[0_0_30px_rgba(253,224,71,0.06)]">\r\n      <div className="absolute inset-0 bg-[url(\'/backgrounds/login_bg.png\')] bg-cover bg-center opacity-[0.22] mix-blend-screen" />\r\n      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(253,224,71,0.12),transparent_22%),radial-gradient(circle_at_bottom_right,rgba(56,189,248,0.05),transparent_28%)]" />\r\n      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(3,5,10,0.12),rgba(3,5,10,0.68))]" />\r\n\r\n      <div className="relative z-10 space-y-3 p-3 md:p-4">\r\n        <section className="grid gap-3 xl:grid-cols-[1.06fr_0.94fr]">\r\n          <div className="panel-gold rounded-[30px] p-4 md:p-5">\r\n            <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.32em] text-gold-100/76">\r\n              <Wallet className="h-3.5 w-3.5" />\r\n              Professional DisManager\r\n            </div>\r\n            <h1 className="gold-heading mt-3 text-[2.2rem] font-black tracking-tight md:text-[3rem]">\r\n              運用ウォレットの状況を一画面で確認します。\r\n            </h1>\r\n            <p className="mt-3 max-w-2xl text-sm leading-7 text-white/86 md:text-[15px]">\r\n              実際の運用ウォレット残高、自動売買の状態、判定内容、取引履歴へすぐ移動できます。\r\n              日々の確認と判断をここから進められる自分専用のホームです。\r\n            </p>\r\n            <div className="mt-4 flex flex-wrap gap-2">\r\n              <span className="rounded-full border border-gold-400/20 bg-[linear-gradient(90deg,rgba(253,224,71,0.12),rgba(245,158,11,0.08))] px-3 py-1.5 text-[11px] font-semibold text-gold-50">\r\n                運用ウォレット確認\r\n              </span>\r\n              <span className="rounded-full border border-gold-400/20 bg-[linear-gradient(90deg,rgba(253,224,71,0.12),rgba(245,158,11,0.08))] px-3 py-1.5 text-[11px] font-semibold text-gold-50">\r\n                自動売買の状態確認\r\n              </span>\r\n              <span className="rounded-full border border-gold-400/20 bg-[linear-gradient(90deg,rgba(253,224,71,0.12),rgba(245,158,11,0.08))] px-3 py-1.5 text-[11px] font-semibold text-gold-50">\r\n                履歴と設定の整理\r\n              </span>\r\n            </div>\r\n          </div>\r\n\r\n          <div className="grid gap-3">\r\n            <SummaryCard\r\n              title="Portfolio"\r\n              value={`$${portfolioUsd.toFixed(2)}`}\r\n              text={`USDT ${cashUsd.toFixed(2)} / 保有資産 ${holdings.length}`}\r\n            />\r\n            <SummaryCard\r\n              title="Auto Trade"\r\n              value={isWalletRunning ? "稼働中" : "停止中"}\r\n              text="運用ウォレットの状態をもとに、自動売買の稼働状況を表示しています。"\r\n              tone={isWalletRunning ? "profit" : "loss"}\r\n            />\r\n          </div>\r\n        </section>\r\n\r\n        <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">\r\n          <QuickLink href="/wallets" title="運用ウォレット" text="入金確認、保有資産、ウォレット状態を確認します。" icon={Wallet} />\r\n          <QuickLink href="/positions" title="ダッシュボード" text="自動売買の判定内容と現在の状態を確認します。" icon={BarChart3} />\r\n          <QuickLink href="/history" title="トレード履歴" text="約定履歴、取得単価、損益の流れを確認します。" icon={Coins} />\r\n          <QuickLink href="/settings" title="設定" text="認証設定や運用に必要な基本設定を整理します。" icon={Settings} />\r\n        </section>\r\n\r\n        <section className="grid gap-3 md:grid-cols-3">\r\n          <SummaryCard title="Strategies" value={`${activeStrategies.length}`} text="現在読み込み中の戦略数です。" />\r\n          <SummaryCard title="Notifications" value={`${tradeNotifications.length}`} text="最新の通知件数です。" />\r\n          <SummaryCard title="Positions" value={`${holdings.length}`} text="現在保有中の運用ウォレット資産数です。" />\r\n        </section>\r\n\r\n        <LiveDecisionPanel compact />\r\n      </div>\r\n    </main>\r\n  );\r\n}\r\n',
+    expected: /HPのビルドSHAと売買Runtime SHA/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at apps\production-ui\tests\hp-hype-only-20260928.test.ts:1:1
+✖ apps\production-ui\tests\hp-hype-only-20260928.test.ts (444.58ms)
+  'test failed'
+
+test at apps\production-ui\tests\live-performance-analytics.test.ts:1:1
+✖ apps\production-ui\tests\live-performance-analytics.test.ts (443.9627ms)
+  'test failed'
+
+test at apps\production-ui\tests\live-performance-ui-contract.test.ts:1:1
+✖ apps\production-ui\tests\live-performance-ui-contract.test.ts (424.3048ms)
+  'test failed'
+
+test at apps\production-ui\tests\mobile-layout-regression.test.ts:2:921
+✖ mobile app shell constrains flex content without horizontal overflow (11.1928ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /flex (?:min-h-0 )?min-w-0 flex-1 flex-col overflow-hidden/. Input:
+
+  '"use client";\r\n' +
+    '\r\n' +
+    'import "./globals.css";\r\n' +
+    'import { usePathname } from "next/navigation";\r\n' +
+    '\r\n' +
+    'import { SimulationProvider } from "@/context/SimulationContext";\r\n' +
+    'import { FlashEffect } from "@/components/ui/FlashEffect";\r\n' +
+    'import { Web3Provider } from "@/context/Web3Context";\r\n' +
+    'import { AuthProvider, useAuth } from "@/context/AuthContext";\r\n' +
+    'import { Sidebar } from "@/components/layout/Sidebar";\r\n' +
+    'import { TopBar } from "@/components/layout/TopBar";\r\n' +
+    'import { TradeNotificationToast } from "@/components/features/TradeNotificationToast";\r\n' +
+    'import ParticleBackground from "@/components/layout/ParticleBackground";\r\n' +
+    'import { BottomNav } from "@/components/layout/BottomNav";\r\n' +
+    'import { LoginPage } from "@/components/features/LoginPage";\r\n' +
+    'import LearningIndicator from "@/components/features/LearningIndicator";\r\n' +
+    'import { CurrencyProvider } from "@/context/CurrencyContext";\r\n' +
+    'import {\r\n' +
+    '  PUBLIC_ADMIN_ENABLED,\r\n' +
+    '  PUBLIC_REGISTER_ENABLED,\r\n' +
+    '  PUBLIC_RESET_PASSWORD_ENABLED,\r\n' +
+    '  SITE_BRAND_NAME,\r\n' +
+    '} from "@/lib/site-access";\r\n' +
+    '\r\n' +
+    'const PUBLIC_PATHS = [\r\n' +
+    '  "/login",\r\n' +
+    '  ...(PUBLIC_RESET_PASSWORD_ENABLED ? ["/reset-password"] : []),\r\n' +
+    '  ...(PUBLIC_REGISTER_ENABLED ? ["/register"] : []),\r\n' +
+    '];\r\n' +
+    '\r\n' +
+    'function AuthGuard({ children }: { children: React.ReactNode }) {\r\n' +
+    '  const { isAuthenticated, isLoading } = useAuth();\r\n' +
+    '  const pathname = usePathname();\r\n' +
+    '\r\n' +
+    '  if (pathname === "/admin" && PUBLIC_ADMIN_ENABLED) {\r\n' +
+    '    return <>{children}</>;\r\n' +
+    '  }\r\n' +
+    '\r\n' +
+    '  if (PUBLIC_PATHS.some((path) => pathname?.startsWith(path))) {\r\n' +
+    '    return <>{children}</>;\r\n' +
+    '  }\r\n' +
+    '\r\n' +
+    '  if (isLoading) {\r\n' +
+    '    return (\r\n' +
+    '      <div className="flex min-h-screen items-center justify-center bg-cyber-black">\r\n' +
+    '        <div className="flex flex-col items-center gap-4">\r\n' +
+    '          <div className="h-12 w-12 animate-spin rounded-full border-2 border-gold-500/30 border-t-gold-500" />\r\n' +
+    '          <p className="font-mono text-sm text-gold-400">{SITE_BRAND_NAME} Loading...</p>\r\n' +
+    '        </div>\r\n' +
+    '      </div>\r\n' +
+    '    );\r\n' +
+    '  }\r\n' +
+    '\r\n' +
+    '  if (!isAuthenticated) {\r\n' +
+    '    return <LoginPage />;\r\n' +
+    '  }\r\n' +
+    '\r\n' +
+    '  return <>{children}</>;\r\n' +
+    '}\r\n' +
+    '\r\n' +
+    'function AppLayout({ children }: { children: React.ReactNode }) {\r\n' +
+    '  const { isAuthenticated } = useAuth();\r\n' +
+    '  const pathname = usePathname();\r\n' +
+    '\r\n' +
+    '  const isAdmin = pathname === "/admin" && PUBLIC_ADMIN_ENABLED;\r\n' +
+    '  const isPublicPath = PUBLIC_PATHS.some((path) => pathname?.startsWith(path));\r\n' +
+    '\r\n' +
+    '  if (!isAuthenticated && !isAdmin && !isPublicPath) {\r\n' +
+    '    return <AuthGuard>{children}</AuthGuard>;\r\n' +
+    '  }\r\n' +
+    '\r\n' +
+    '  if (isPublicPath) {\r\n' +
+    '    return <AuthGuard>{children}</AuthGuard>;\r\n' +
+    '  }\r\n' +
+    '\r\n' +
+    '  return (\r\n' +
+    '    <AuthGuard>\r\n' +
+    '      <div className="flex h-screen overflow-hidden bg-cyber-black text-white">\r\n' +
+    '        <Sidebar />\r\n' +
+    '        <div className="flex flex-1 flex-col overflow-hidden">\r\n' +
+    '          <TopBar />\r\n' +
+    '          <main className="custom-scrollbar flex-1 overflow-y-auto p-4 pb-16 md:p-6 md:pb-4">{children}</main>\r\n' +
+    '        </div>\r\n' +
+    '        <FlashEffect />\r\n' +
+    '        <TradeNotificationToast />\r\n' +
+    '        <LearningIndicator />\r\n' +
+    '        <BottomNav />\r\n' +
+    '      </div>\r\n' +
+    '    </AuthGuard>\r\n' +
+    '  );\r\n' +
+    '}\r\n' +
+    '\r\n' +
+    'export default function RootLayout({\r\n' +
+    '  children,\r\n' +
+    '}: {\r\n' +
+    '  children: React.ReactNode;\r\n' +
+    '}) {\r\n' +
+    '  return (\r\n' +
+    '    <html lang="ja">\r\n' +
+    '      <head>\r\n' +
+    '        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />\r\n' +
+    '        <title>{SITE_BRAND_NAME}</title>\r\n' +
+    '        <meta name="description" content="個人用の運用状況とトレード履歴を確認するための非公開サイトです。" />\r\n' +
+    '        <meta name="robots" content="noindex, nofollow" />\r\n' +
+    '        <meta name="googlebot" content="noindex, nofollow, noarchive" />\r\n' +
+    '        <meta name="bingbot" content="noindex, nofollow, noarchive" />\r\n' +
+    '        <link rel="manifest" href="/manifest.webmanifest" />\r\n' +
+    '        <link rel="icon" href="/favicon.ico" />\r\n' +
+    '        <link rel="apple-touch-icon" href="/icon-192.png" />\r\n' +
+    '        <meta name="theme-color" content="#000000" />\r\n' +
+    '        <meta name="mobile-web-app-capable" content="yes" />\r\n' +
+    '        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />\r\n' +
+    '        <meta name="apple-mobile-web-app-title" content={SITE_BRAND_NAME} />\r\n' +
+    '        <script\r\n' +
+    '          dangerouslySetInnerHTML={{\r\n' +
+    '            __html: `\r\n' +
+    '              (function() {\r\n' +
+    "                if (!('serviceWorker' in navigator)) return;\r\n" +
+    "                window.addEventListener('load', function() {\r\n" +
+    '                  navigator.serviceWorker.getRegistrations()\r\n' +
+    '                    .then(function(registrations) {\r\n' +
+    '                      return Promise.all(registrations.map(function(registration) {\r\n' +
+    '                        return registration.unregister();\r\n' +
+    '                      }));\r\n' +
+    '                    })\r\n' +
+    '                    .then(function() {\r\n' +
+    '                      if (!window.caches) return;\r\n' +
+    '                      return caches.keys().then(function(keys) {\r\n' +
+    '                        return Promise.all(keys.map(function(key) {\r\n' +
+    '                          return caches.delete(key);\r\n' +
+    '                        }));\r\n' +
+    '                      });\r\n' +
+    '                    })\r\n' +
+    '                    .catch(function(err) {\r\n' +
+    "                      console.log('SW cleanup failed:', err);\r\n" +
+    '                    });\r\n' +
+    '                });\r\n' +
+    '              })();\r\n' +
+    '            `,\r\n' +
+    '          }}\r\n' +
+    '        />\r\n' +
+    '      </head>\r\n' +
+    '      <body className="antialiased bg-cyber-black">\r\n' +
+    '        <AuthProvider>\r\n' +
+    '          <Web3Provider>\r\n' +
+    '            <CurrencyProvider>\r\n' +
+    '              <SimulationProvider>\r\n' +
+    '                <ParticleBackground />\r\n' +
+    '                <AppLayout>{children}</AppLayout>\r\n' +
+    '              </SimulationProvider>\r\n' +
+    '            </CurrencyProvider>\r\n' +
+    '          </Web3Provider>\r\n' +
+    '        </AuthProvider>\r\n' +
+    '        <div className="cyber-overlay" />\r\n' +
+    '      </body>\r\n' +
+    '    </html>\r\n' +
+    '  );\r\n' +
+    '}\r\n'
+
+      at TestContext.<anonymous> (C:\Users\dis\DisDex-v4-production-cert-20261009\apps\production-ui\tests\mobile-layout-regression.test.ts:7:10)
+      at async Test.run (node:internal/test_runner/test:1110:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:358:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '"use client";\r\n\r\nimport "./globals.css";\r\nimport { usePathname } from "next/navigation";\r\n\r\nimport { SimulationProvider } from "@/context/SimulationContext";\r\nimport { FlashEffect } from "@/components/ui/FlashEffect";\r\nimport { Web3Provider } from "@/context/Web3Context";\r\nimport { AuthProvider, useAuth } from "@/context/AuthContext";\r\nimport { Sidebar } from "@/components/layout/Sidebar";\r\nimport { TopBar } from "@/components/layout/TopBar";\r\nimport { TradeNotificationToast } from "@/components/features/TradeNotificationToast";\r\nimport ParticleBackground from "@/components/layout/ParticleBackground";\r\nimport { BottomNav } from "@/components/layout/BottomNav";\r\nimport { LoginPage } from "@/components/features/LoginPage";\r\nimport LearningIndicator from "@/components/features/LearningIndicator";\r\nimport { CurrencyProvider } from "@/context/CurrencyContext";\r\nimport {\r\n  PUBLIC_ADMIN_ENABLED,\r\n  PUBLIC_REGISTER_ENABLED,\r\n  PUBLIC_RESET_PASSWORD_ENABLED,\r\n  SITE_BRAND_NAME,\r\n} from "@/lib/site-access";\r\n\r\nconst PUBLIC_PATHS = [\r\n  "/login",\r\n  ...(PUBLIC_RESET_PASSWORD_ENABLED ? ["/reset-password"] : []),\r\n  ...(PUBLIC_REGISTER_ENABLED ? ["/register"] : []),\r\n];\r\n\r\nfunction AuthGuard({ children }: { children: React.ReactNode }) {\r\n  const { isAuthenticated, isLoading } = useAuth();\r\n  const pathname = usePathname();\r\n\r\n  if (pathname === "/admin" && PUBLIC_ADMIN_ENABLED) {\r\n    return <>{children}</>;\r\n  }\r\n\r\n  if (PUBLIC_PATHS.some((path) => pathname?.startsWith(path))) {\r\n    return <>{children}</>;\r\n  }\r\n\r\n  if (isLoading) {\r\n    return (\r\n      <div className="flex min-h-screen items-center justify-center bg-cyber-black">\r\n        <div className="flex flex-col items-center gap-4">\r\n          <div className="h-12 w-12 animate-spin rounded-full border-2 border-gold-500/30 border-t-gold-500" />\r\n          <p className="font-mono text-sm text-gold-400">{SITE_BRAND_NAME} Loading...</p>\r\n        </div>\r\n      </div>\r\n    );\r\n  }\r\n\r\n  if (!isAuthenticated) {\r\n    return <LoginPage />;\r\n  }\r\n\r\n  return <>{children}</>;\r\n}\r\n\r\nfunction AppLayout({ children }: { children: React.ReactNode }) {\r\n  const { isAuthenticated } = useAuth();\r\n  const pathname = usePathname();\r\n\r\n  const isAdmin = pathname === "/admin" && PUBLIC_ADMIN_ENABLED;\r\n  const isPublicPath = PUBLIC_PATHS.some((path) => pathname?.startsWith(path));\r\n\r\n  if (!isAuthenticated && !isAdmin && !isPublicPath) {\r\n    return <AuthGuard>{children}</AuthGuard>;\r\n  }\r\n\r\n  if (isPublicPath) {\r\n    return <AuthGuard>{children}</AuthGuard>;\r\n  }\r\n\r\n  return (\r\n    <AuthGuard>\r\n      <div className="flex h-screen overflow-hidden bg-cyber-black text-white">\r\n        <Sidebar />\r\n        <div className="flex flex-1 flex-col overflow-hidden">\r\n          <TopBar />\r\n          <main className="custom-scrollbar flex-1 overflow-y-auto p-4 pb-16 md:p-6 md:pb-4">{children}</main>\r\n        </div>\r\n        <FlashEffect />\r\n        <TradeNotificationToast />\r\n        <LearningIndicator />\r\n        <BottomNav />\r\n      </div>\r\n    </AuthGuard>\r\n  );\r\n}\r\n\r\nexport default function RootLayout({\r\n  children,\r\n}: {\r\n  children: React.ReactNode;\r\n}) {\r\n  return (\r\n    <html lang="ja">\r\n      <head>\r\n        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />\r\n        <title>{SITE_BRAND_NAME}</title>\r\n        <meta name="description" content="個人用の運用状況とトレード履歴を確認するための非公開サイトです。" />\r\n        <meta name="robots" content="noindex, nofollow" />\r\n        <meta name="googlebot" content="noindex, nofollow, noarchive" />\r\n        <meta name="bingbot" content="noindex, nofollow, noarchive" />\r\n        <link rel="manifest" href="/manifest.webmanifest" />\r\n        <link rel="icon" href="/favicon.ico" />\r\n        <link rel="apple-touch-icon" href="/icon-192.png" />\r\n        <meta name="theme-color" content="#000000" />\r\n        <meta name="mobile-web-app-capable" content="yes" />\r\n        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />\r\n        <meta name="apple-mobile-web-app-title" content={SITE_BRAND_NAME} />\r\n        <script\r\n          dangerouslySetInnerHTML={{\r\n            __html: `\r\n              (function() {\r\n                if (!(\'serviceWorker\' in navigator)) return;\r\n                window.addEventListener(\'load\', function() {\r\n                  navigator.serviceWorker.getRegistrations()\r\n                    .then(function(registrations) {\r\n                      return Promise.all(registrations.map(function(registration) {\r\n                        return registration.unregister();\r\n                      }));\r\n                    })\r\n                    .then(function() {\r\n                      if (!window.caches) return;\r\n                      return caches.keys().then(function(keys) {\r\n                        return Promise.all(keys.map(function(key) {\r\n                          return caches.delete(key);\r\n                        }));\r\n                      });\r\n                    })\r\n                    .catch(function(err) {\r\n                      console.log(\'SW cleanup failed:\', err);\r\n                    });\r\n                });\r\n              })();\r\n            `,\r\n          }}\r\n        />\r\n      </head>\r\n      <body className="antialiased bg-cyber-black">\r\n        <AuthProvider>\r\n          <Web3Provider>\r\n            <CurrencyProvider>\r\n              <SimulationProvider>\r\n                <ParticleBackground />\r\n                <AppLayout>{children}</AppLayout>\r\n              </SimulationProvider>\r\n            </CurrencyProvider>\r\n          </Web3Provider>\r\n        </AuthProvider>\r\n        <div className="cyber-overlay" />\r\n      </body>\r\n    </html>\r\n  );\r\n}\r\n',
+    expected: /flex (?:min-h-0 )?min-w-0 flex-1 flex-col overflow-hidden/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at apps\production-ui\tests\mobile-layout-regression.test.ts:2:1315
+✖ home and dashboard roots wrap long runtime labels on narrow screens (5.2243ms)
+  AssertionError [ERR_ASSERTION]: The input did not match the regular expression /main className="relative min-w-0 min-h-full/. Input:
+
+  '"use client";\r\n' +
+    '\r\n' +
+    'import Link from "next/link";\r\n' +
+    'import { ArrowRight, BarChart3, Coins, Settings, Wallet } from "lucide-react";\r\n' +
+    '\r\n' +
+    'import { LiveDecisionPanel } from "@/components/features/autotrade/LiveDecisionPanel";\r\n' +
+    'import { useSimulation } from "@/context/SimulationContext";\r\n' +
+    'import { useOperationalWallet } from "@/hooks/useOperationalWallet";\r\n' +
+    '\r\n' +
+    'function SummaryCard({\r\n' +
+    '  title,\r\n' +
+    '  value,\r\n' +
+    '  text,\r\n' +
+    '  tone = "default",\r\n' +
+    '}: {\r\n' +
+    '  title: string;\r\n' +
+    '  value: string;\r\n' +
+    '  text: string;\r\n' +
+    '  tone?: "default" | "profit" | "loss";\r\n' +
+    '}) {\r\n' +
+    '  return (\r\n' +
+    '    <div className="panel-gold rounded-[24px] p-4">\r\n' +
+    '      <div className="text-[10px] font-semibold uppercase tracking-[0.26em] text-gold-100/72">{title}</div>\r\n' +
+    '      <div\r\n' +
+    '        className={`mt-2 text-[1.45rem] font-black ${\r\n' +
+    '          tone === "profit" ? "text-profit" : tone === "loss" ? "text-loss" : "text-white"\r\n' +
+    '        }`}\r\n' +
+    '      >\r\n' +
+    '        {value}\r\n' +
+    '      </div>\r\n' +
+    '      <div className="mt-1 text-[11px] leading-5 text-white/78">{text}</div>\r\n' +
+    '    </div>\r\n' +
+    '  );\r\n' +
+    '}\r\n' +
+    '\r\n' +
+    'function QuickLink({\r\n' +
+    '  href,\r\n' +
+    '  title,\r\n' +
+    '  text,\r\n' +
+    '  icon: Icon,\r\n' +
+    '}: {\r\n' +
+    '  href: string;\r\n' +
+    '  title: string;\r\n' +
+    '  text: string;\r\n' +
+    '  icon: React.ComponentType<{ className?: string }>;\r\n' +
+    '}) {\r\n' +
+    '  return (\r\n' +
+    '    <Link\r\n' +
+    '      href={href}\r\n' +
+    '      className="group rounded-[22px] border border-gold-400/16 bg-[linear-gradient(180deg,rgba(8,10,15,0.34),rgba(4,6,10,0.64))] px-4 py-4 transition hover:border-gold-300/36"\r\n' +
+    '    >\r\n' +
+    '      <div className="flex items-center justify-between gap-3">\r\n' +
+    '        <div className="flex items-center gap-2 text-sm font-bold text-white">\r\n' +
+    '          <Icon className="h-4 w-4 text-gold-100" />\r\n' +
+    '          {title}\r\n' +
+    '        </div>\r\n' +
+    '        <ArrowRight className="h-4 w-4 text-gold-100/70 transition group-hover:translate-x-0.5" />\r\n' +
+    '      </div>\r\n' +
+    '      <p className="mt-2 text-[11px] leading-5 text-white/76">{text}</p>\r\n' +
+    '    </Link>\r\n' +
+    '  );\r\n' +
+    '}\r\n' +
+    '\r\n' +
+    'export default function HomePage() {\r\n' +
+    '  const { activeStrategies, tradeNotifications } = useSimulation();\r\n' +
+    '  const { wallet } = useOperationalWallet();\r\n' +
+    '  const holdings = (wallet?.trackedHoldings || []).filter((holding) => Number(holding.amount) > 0);\r\n' +
+    '  const usdtHolding = holdings.find((holding) => holding.symbol === "USDT");\r\n' +
+    '  const portfolioUsd = Number(wallet?.lastPortfolioUsd || 0);\r\n' +
+    '  const cashUsd = Number(usdtHolding?.usdValue || 0);\r\n' +
+    '  const isWalletRunning = wallet?.status === "running";\r\n' +
+    '\r\n' +
+    '  return (\r\n' +
+    '    <main className="relative min-h-full overflow-hidden rounded-[28px] border border-gold-400/16 bg-[#03050a] text-white shadow-[0_0_30px_rgba(253,224,71,0.06)]">\r\n' +
+    `      <div className="absolute inset-0 bg-[url('/backgrounds/login_bg.png')] bg-cover bg-center opacity-[0.22] mix-blend-screen" />\r\n` +
+    '      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(253,224,71,0.12),transparent_22%),radial-gradient(circle_at_bottom_right,rgba(56,189,248,0.05),transparent_28%)]" />\r\n' +
+    '      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(3,5,10,0.12),rgba(3,5,10,0.68))]" />\r\n' +
+    '\r\n' +
+    '      <div className="relative z-10 space-y-3 p-3 md:p-4">\r\n' +
+    '        <section className="grid gap-3 xl:grid-cols-[1.06fr_0.94fr]">\r\n' +
+    '          <div className="panel-gold rounded-[30px] p-4 md:p-5">\r\n' +
+    '            <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.32em] text-gold-100/76">\r\n' +
+    '              <Wallet className="h-3.5 w-3.5" />\r\n' +
+    '              Professional DisManager\r\n' +
+    '            </div>\r\n' +
+    '            <h1 className="gold-heading mt-3 text-[2.2rem] font-black tracking-tight md:text-[3rem]">\r\n' +
+    '              運用ウォレットの状況を一画面で確認します。\r\n' +
+    '            </h1>\r\n' +
+    '            <p className="mt-3 max-w-2xl text-sm leading-7 text-white/86 md:text-[15px]">\r\n' +
+    '              実際の運用ウォレット残高、自動売買の状態、判定内容、取引履歴へすぐ移動できます。\r\n' +
+    '              日々の確認と判断をここから進められる自分専用のホームです。\r\n' +
+    '            </p>\r\n' +
+    '            <div className="mt-4 flex flex-wrap gap-2">\r\n' +
+    '              <span className="rounded-full border border-gold-400/20 bg-[linear-gradient(90deg,rgba(253,224,71,0.12),rgba(245,158,11,0.08))] px-3 py-1.5 text-[11px] font-semibold text-gold-50">\r\n' +
+    '                運用ウォレット確認\r\n' +
+    '              </span>\r\n' +
+    '              <span className="rounded-full border border-gold-400/20 bg-[linear-gradient(90deg,rgba(253,224,71,0.12),rgba(245,158,11,0.08))] px-3 py-1.5 text-[11px] font-semibold text-gold-50">\r\n' +
+    '                自動売買の状態確認\r\n' +
+    '              </span>\r\n' +
+    '              <span className="rounded-full border border-gold-400/20 bg-[linear-gradient(90deg,rgba(253,224,71,0.12),rgba(245,158,11,0.08))] px-3 py-1.5 text-[11px] font-semibold text-gold-50">\r\n' +
+    '                履歴と設定の整理\r\n' +
+    '              </span>\r\n' +
+    '            </div>\r\n' +
+    '          </div>\r\n' +
+    '\r\n' +
+    '          <div className="grid gap-3">\r\n' +
+    '            <SummaryCard\r\n' +
+    '              title="Portfolio"\r\n' +
+    '              value={`$${portfolioUsd.toFixed(2)}`}\r\n' +
+    '              text={`USDT ${cashUsd.toFixed(2)} / 保有資産 ${holdings.length}`}\r\n' +
+    '            />\r\n' +
+    '            <SummaryCard\r\n' +
+    '              title="Auto Trade"\r\n' +
+    '              value={isWalletRunning ? "稼働中" : "停止中"}\r\n' +
+    '              text="運用ウォレットの状態をもとに、自動売買の稼働状況を表示しています。"\r\n' +
+    '              tone={isWalletRunning ? "profit" : "loss"}\r\n' +
+    '            />\r\n' +
+    '          </div>\r\n' +
+    '        </section>\r\n' +
+    '\r\n' +
+    '        <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">\r\n' +
+    '          <QuickLink href="/wallets" title="運用ウォレット" text="入金確認、保有資産、ウォレット状態を確認します。" icon={Wallet} />\r\n' +
+    '          <QuickLink href="/positions" title="ダッシュボード" text="自動売買の判定内容と現在の状態を確認します。" icon={BarChart3} />\r\n' +
+    '          <QuickLink href="/history" title="トレード履歴" text="約定履歴、取得単価、損益の流れを確認します。" icon={Coins} />\r\n' +
+    '          <QuickLink href="/settings" title="設定" text="認証設定や運用に必要な基本設定を整理します。" icon={Settings} />\r\n' +
+    '        </section>\r\n' +
+    '\r\n' +
+    '        <section className="grid gap-3 md:grid-cols-3">\r\n' +
+    '          <SummaryCard title="Strategies" value={`${activeStrategies.length}`} text="現在読み込み中の戦略数です。" />\r\n' +
+    '          <SummaryCard title="Notifications" value={`${tradeNotifications.length}`} text="最新の通知件数です。" />\r\n' +
+    '          <SummaryCard title="Positions" value={`${holdings.length}`} text="現在保有中の運用ウォレット資産数です。" />\r\n' +
+    '        </section>\r\n' +
+    '\r\n' +
+    '        <LiveDecisionPanel compact />\r\n' +
+    '      </div>\r\n' +
+    '    </main>\r\n' +
+    '  );\r\n' +
+    '}\r\n'
+
+      at TestContext.<anonymous> (C:\Users\dis\DisDex-v4-production-cert-20261009\apps\production-ui\tests\mobile-layout-regression.test.ts:14:10)
+      at async Test.run (node:internal/test_runner/test:1110:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:785:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '"use client";\r\n\r\nimport Link from "next/link";\r\nimport { ArrowRight, BarChart3, Coins, Settings, Wallet } from "lucide-react";\r\n\r\nimport { LiveDecisionPanel } from "@/components/features/autotrade/LiveDecisionPanel";\r\nimport { useSimulation } from "@/context/SimulationContext";\r\nimport { useOperationalWallet } from "@/hooks/useOperationalWallet";\r\n\r\nfunction SummaryCard({\r\n  title,\r\n  value,\r\n  text,\r\n  tone = "default",\r\n}: {\r\n  title: string;\r\n  value: string;\r\n  text: string;\r\n  tone?: "default" | "profit" | "loss";\r\n}) {\r\n  return (\r\n    <div className="panel-gold rounded-[24px] p-4">\r\n      <div className="text-[10px] font-semibold uppercase tracking-[0.26em] text-gold-100/72">{title}</div>\r\n      <div\r\n        className={`mt-2 text-[1.45rem] font-black ${\r\n          tone === "profit" ? "text-profit" : tone === "loss" ? "text-loss" : "text-white"\r\n        }`}\r\n      >\r\n        {value}\r\n      </div>\r\n      <div className="mt-1 text-[11px] leading-5 text-white/78">{text}</div>\r\n    </div>\r\n  );\r\n}\r\n\r\nfunction QuickLink({\r\n  href,\r\n  title,\r\n  text,\r\n  icon: Icon,\r\n}: {\r\n  href: string;\r\n  title: string;\r\n  text: string;\r\n  icon: React.ComponentType<{ className?: string }>;\r\n}) {\r\n  return (\r\n    <Link\r\n      href={href}\r\n      className="group rounded-[22px] border border-gold-400/16 bg-[linear-gradient(180deg,rgba(8,10,15,0.34),rgba(4,6,10,0.64))] px-4 py-4 transition hover:border-gold-300/36"\r\n    >\r\n      <div className="flex items-center justify-between gap-3">\r\n        <div className="flex items-center gap-2 text-sm font-bold text-white">\r\n          <Icon className="h-4 w-4 text-gold-100" />\r\n          {title}\r\n        </div>\r\n        <ArrowRight className="h-4 w-4 text-gold-100/70 transition group-hover:translate-x-0.5" />\r\n      </div>\r\n      <p className="mt-2 text-[11px] leading-5 text-white/76">{text}</p>\r\n    </Link>\r\n  );\r\n}\r\n\r\nexport default function HomePage() {\r\n  const { activeStrategies, tradeNotifications } = useSimulation();\r\n  const { wallet } = useOperationalWallet();\r\n  const holdings = (wallet?.trackedHoldings || []).filter((holding) => Number(holding.amount) > 0);\r\n  const usdtHolding = holdings.find((holding) => holding.symbol === "USDT");\r\n  const portfolioUsd = Number(wallet?.lastPortfolioUsd || 0);\r\n  const cashUsd = Number(usdtHolding?.usdValue || 0);\r\n  const isWalletRunning = wallet?.status === "running";\r\n\r\n  return (\r\n    <main className="relative min-h-full overflow-hidden rounded-[28px] border border-gold-400/16 bg-[#03050a] text-white shadow-[0_0_30px_rgba(253,224,71,0.06)]">\r\n      <div className="absolute inset-0 bg-[url(\'/backgrounds/login_bg.png\')] bg-cover bg-center opacity-[0.22] mix-blend-screen" />\r\n      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(253,224,71,0.12),transparent_22%),radial-gradient(circle_at_bottom_right,rgba(56,189,248,0.05),transparent_28%)]" />\r\n      <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(3,5,10,0.12),rgba(3,5,10,0.68))]" />\r\n\r\n      <div className="relative z-10 space-y-3 p-3 md:p-4">\r\n        <section className="grid gap-3 xl:grid-cols-[1.06fr_0.94fr]">\r\n          <div className="panel-gold rounded-[30px] p-4 md:p-5">\r\n            <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.32em] text-gold-100/76">\r\n              <Wallet className="h-3.5 w-3.5" />\r\n              Professional DisManager\r\n            </div>\r\n            <h1 className="gold-heading mt-3 text-[2.2rem] font-black tracking-tight md:text-[3rem]">\r\n              運用ウォレットの状況を一画面で確認します。\r\n            </h1>\r\n            <p className="mt-3 max-w-2xl text-sm leading-7 text-white/86 md:text-[15px]">\r\n              実際の運用ウォレット残高、自動売買の状態、判定内容、取引履歴へすぐ移動できます。\r\n              日々の確認と判断をここから進められる自分専用のホームです。\r\n            </p>\r\n            <div className="mt-4 flex flex-wrap gap-2">\r\n              <span className="rounded-full border border-gold-400/20 bg-[linear-gradient(90deg,rgba(253,224,71,0.12),rgba(245,158,11,0.08))] px-3 py-1.5 text-[11px] font-semibold text-gold-50">\r\n                運用ウォレット確認\r\n              </span>\r\n              <span className="rounded-full border border-gold-400/20 bg-[linear-gradient(90deg,rgba(253,224,71,0.12),rgba(245,158,11,0.08))] px-3 py-1.5 text-[11px] font-semibold text-gold-50">\r\n                自動売買の状態確認\r\n              </span>\r\n              <span className="rounded-full border border-gold-400/20 bg-[linear-gradient(90deg,rgba(253,224,71,0.12),rgba(245,158,11,0.08))] px-3 py-1.5 text-[11px] font-semibold text-gold-50">\r\n                履歴と設定の整理\r\n              </span>\r\n            </div>\r\n          </div>\r\n\r\n          <div className="grid gap-3">\r\n            <SummaryCard\r\n              title="Portfolio"\r\n              value={`$${portfolioUsd.toFixed(2)}`}\r\n              text={`USDT ${cashUsd.toFixed(2)} / 保有資産 ${holdings.length}`}\r\n            />\r\n            <SummaryCard\r\n              title="Auto Trade"\r\n              value={isWalletRunning ? "稼働中" : "停止中"}\r\n              text="運用ウォレットの状態をもとに、自動売買の稼働状況を表示しています。"\r\n              tone={isWalletRunning ? "profit" : "loss"}\r\n            />\r\n          </div>\r\n        </section>\r\n\r\n        <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">\r\n          <QuickLink href="/wallets" title="運用ウォレット" text="入金確認、保有資産、ウォレット状態を確認します。" icon={Wallet} />\r\n          <QuickLink href="/positions" title="ダッシュボード" text="自動売買の判定内容と現在の状態を確認します。" icon={BarChart3} />\r\n          <QuickLink href="/history" title="トレード履歴" text="約定履歴、取得単価、損益の流れを確認します。" icon={Coins} />\r\n          <QuickLink href="/settings" title="設定" text="認証設定や運用に必要な基本設定を整理します。" icon={Settings} />\r\n        </section>\r\n\r\n        <section className="grid gap-3 md:grid-cols-3">\r\n          <SummaryCard title="Strategies" value={`${activeStrategies.length}`} text="現在読み込み中の戦略数です。" />\r\n          <SummaryCard title="Notifications" value={`${tradeNotifications.length}`} text="最新の通知件数です。" />\r\n          <SummaryCard title="Positions" value={`${holdings.length}`} text="現在保有中の運用ウォレット資産数です。" />\r\n        </section>\r\n\r\n        <LiveDecisionPanel compact />\r\n      </div>\r\n    </main>\r\n  );\r\n}\r\n',
+    expected: /main className="relative min-w-0 min-h-full/,
+    operator: 'match',
+    diff: 'simple'
+  }
+
+test at apps\production-ui\tests\pengu-route-display.test.ts:1:1
+✖ apps\production-ui\tests\pengu-route-display.test.ts (467.0469ms)
+  'test failed'
+
+test at apps\production-ui\tests\quality102-runtime-observability.test.ts:1:1
+✖ apps\production-ui\tests\quality102-runtime-observability.test.ts (448.3272ms)
+  'test failed'
+
+test at apps\production-ui\tests\runtime-auto-sync-contract.test.ts:2:1350
+✖ HP Production contract is sourced from current VPS runtime (6.8077ms)
+  Error: ENOENT: no such file or directory, open 'C:\Users\dis\DisDex-v4-production-cert-20261009\lib\server\current-production-runtime.ts'
+      at async open (node:internal/fs/promises:637:25)
+      at async readFile (node:internal/fs/promises:1269:14)
+      at async TestContext.<anonymous> (C:\Users\dis\DisDex-v4-production-cert-20261009\apps\production-ui\tests\runtime-auto-sync-contract.test.ts:18:18)
+      at async Test.run (node:internal/test_runner/test:1110:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:358:3) {
+    errno: -4058,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: 'C:\\Users\\dis\\DisDex-v4-production-cert-20261009\\lib\\server\\current-production-runtime.ts'
+  }
+
+test at apps\production-ui\tests\runtime-auto-sync-contract.test.ts:2:1980
+✖ Production UI does not fall back to stale strategy contract values (3.8229ms)
+  Error: ENOENT: no such file or directory, open 'C:\Users\dis\DisDex-v4-production-cert-20261009\components\layout\LiveProductionBanner.tsx'
+      at async open (node:internal/fs/promises:637:25)
+      at async readFile (node:internal/fs/promises:1269:14)
+      at async Promise.all (index 2)
+      at async TestContext.<anonymous> (C:\Users\dis\DisDex-v4-production-cert-20261009\apps\production-ui\tests\runtime-auto-sync-contract.test.ts:28:37)
+      at async Test.run (node:internal/test_runner/test:1110:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:785:7) {
+    errno: -4058,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: 'C:\\Users\\dis\\DisDex-v4-production-cert-20261009\\components\\layout\\LiveProductionBanner.tsx'
+  }
+
+test at apps\production-ui\tests\runtime-auto-sync-contract.test.ts:2:2739
+✖ static metadata is explicitly non-authoritative (1.5247ms)
+  Error: ENOENT: no such file or directory, open 'C:\Users\dis\DisDex-v4-production-cert-20261009\lib\disterminal-live-config.ts'
+      at async open (node:internal/fs/promises:637:25)
+      at async readFile (node:internal/fs/promises:1269:14)
+      at async TestContext.<anonymous> (C:\Users\dis\DisDex-v4-production-cert-20261009\apps\production-ui\tests\runtime-auto-sync-contract.test.ts:43:20)
+      at async Test.run (node:internal/test_runner/test:1110:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:785:7) {
+    errno: -4058,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: 'C:\\Users\\dis\\DisDex-v4-production-cert-20261009\\lib\\disterminal-live-config.ts'
+  }
+
+test at apps\production-ui\tests\runtime-auto-sync-contract.test.ts:2:3090
+✖ decision status auto-refreshes from Production runtime without static contract fallback (1.1726ms)
+  Error: ENOENT: no such file or directory, open 'C:\Users\dis\DisDex-v4-production-cert-20261009\lib\server\disdex-decision-status.ts'
+      at async open (node:internal/fs/promises:637:25)
+      at async readFile (node:internal/fs/promises:1269:14)
+      at async Promise.all (index 1)
+      at async TestContext.<anonymous> (C:\Users\dis\DisDex-v4-production-cert-20261009\apps\production-ui\tests\runtime-auto-sync-contract.test.ts:50:27)
+      at async Test.run (node:internal/test_runner/test:1110:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:785:7) {
+    errno: -4058,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: 'C:\\Users\\dis\\DisDex-v4-production-cert-20261009\\lib\\server\\disdex-decision-status.ts'
+  }
+
+test at apps\production-ui\tests\ui-capacity-gate-clarity.test.ts:1:1
+✖ apps\production-ui\tests\ui-capacity-gate-clarity.test.ts (406.6761ms)
+  'test failed'

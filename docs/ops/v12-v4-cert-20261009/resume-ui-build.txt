@@ -1,0 +1,122 @@
+⚠ Attempted to load @next/swc-win32-x64-msvc, but an error occurred: \\?\C:\Users\dis\-ai-dex-manager\node_modules\@next\swc-win32-x64-msvc\next-swc.win32-x64-msvc.node is not a valid Win32 application.
+\\?\C:\Users\dis\-ai-dex-manager\node_modules\@next\swc-win32-x64-msvc\next-swc.win32-x64-msvc.node
+  Skipping creating a lockfile at C:\Users\dis\DisDex-v4-production-cert-20261009\apps\production-ui\.next\lock because we're using WASM bindings
+▲ Next.js 16.2.6 (webpack)
+- Experiments (use with caution):
+  · cpus: 1
+  ✓ webpackMemoryOptimizations
+  ✓ workerThreads
+
+  Creating an optimized production build ...
+Browserslist: browsers data (caniuse-lite) is 9 months old. Please run:
+  npx update-browserslist-db@latest
+  Why you should do it regularly: https://github.com/browserslist/update-db#readme
+✓ Compiled successfully in 3.1min
+  Running TypeScript ...
+⚠ Attempted to load @next/swc-win32-x64-msvc, but an error occurred: \\?\C:\Users\dis\-ai-dex-manager\node_modules\@next\swc-win32-x64-msvc\next-swc.win32-x64-msvc.node is not a valid Win32 application.
+\\?\C:\Users\dis\-ai-dex-manager\node_modules\@next\swc-win32-x64-msvc\next-swc.win32-x64-msvc.node
+  Finished TypeScript in 16.2s ...
+  Collecting page data using 1 worker ...
+  Generating static pages using 1 worker (0/47) ...
+⚠ Attempted to load @next/swc-win32-x64-msvc, but an error occurred: \\?\C:\Users\dis\-ai-dex-manager\node_modules\@next\swc-win32-x64-msvc\next-swc.win32-x64-msvc.node is not a valid Win32 application.
+\\?\C:\Users\dis\-ai-dex-manager\node_modules\@next\swc-win32-x64-msvc\next-swc.win32-x64-msvc.node
+  Finalizing page optimization ...
+  Collecting build traces ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /admin
+├ ƒ /api/admin
+├ ƒ /api/agents/refresh-universe
+├ ƒ /api/ai/improvements/audit
+├ ƒ /api/ai/improvements/postmortem
+├ ƒ /api/ai/improvements/runtime-config
+├ ƒ /api/ai/trade-review
+├ ƒ /api/analytics/start-daily
+├ ƒ /api/auth/2fa
+├ ƒ /api/auth/approve
+├ ƒ /api/auth/delete
+├ ƒ /api/auth/login
+├ ƒ /api/auth/profile
+├ ƒ /api/auth/register
+├ ƒ /api/auth/reset-password
+├ ƒ /api/auth/reset-password/confirm
+├ ƒ /api/auth/users
+├ ƒ /api/auth/webauthn/generate-authentication-options
+├ ƒ /api/auth/webauthn/generate-registration-options
+├ ƒ /api/auth/webauthn/verify-authentication
+├ ƒ /api/auth/webauthn/verify-registration
+├ ƒ /api/cron/update-prices
+├ ƒ /api/market/chart
+├ ƒ /api/market/contract-prices
+├ ƒ /api/market/dashboard
+├ ƒ /api/market/prices
+├ ƒ /api/market/realtime-trade
+├ ƒ /api/market/refresh
+├ ƒ /api/market/universe-metrics
+├ ƒ /api/news
+├ ƒ /api/operational-wallets
+├ ƒ /api/price
+├ ƒ /api/quote
+├ ƒ /api/rpcProxy
+├ ƒ /api/send-email
+├ ƒ /api/settings/totp/generate
+├ ƒ /api/settings/totp/verify
+├ ƒ /api/strategy/live-check
+├ ƒ /api/strategy/order-gate-check
+├ ƒ /api/strategy/structural-check
+├ ƒ /api/system/auto-trade/history
+├ ƒ /api/system/auto-trade/live-decision
+├ ƒ /api/system/auto-trade/manual-run
+├ ƒ /api/system/auto-trade/pengu-strong-run
+├ ƒ /api/system/auto-trade/run
+├ ƒ /api/system/decision-status
+├ ƒ /api/system/fet-gates
+├ ƒ /api/system/fet-status
+├ ƒ /api/system/formal-priority-status
+├ ƒ /api/system/hype-status
+├ ƒ /api/system/idle-priority-status
+├ ƒ /api/system/live-performance
+├ ƒ /api/system/live-portfolio
+├ ƒ /api/system/live-runtime
+├ ƒ /api/system/live-status
+├ ƒ /api/system/performance-summary
+├ ƒ /api/system/q102-symbol-status
+├ ƒ /api/system/realtime-ranking
+├ ƒ /api/system/settings
+├ ƒ /api/system/trade-history
+├ ƒ /api/telegram/webhook
+├ ƒ /api/test-direct
+├ ƒ /api/tokens/search
+├ ƒ /api/trade
+├ ƒ /api/trade/execute
+├ ƒ /api/tts
+├ ○ /decision-status
+├ ○ /decision-status/fet
+├ ○ /decision-status/formal-priority
+├ ○ /decision-status/hype
+├ ○ /decision-status/idle-priority
+├ ○ /decision-status/pengu
+├ ○ /decision-status/q102
+├ ○ /decision-status/v12
+├ ○ /decision-status/v52
+├ ○ /decision-status/zec
+├ ○ /history
+├ ƒ /history/[logic]
+├ ○ /history/performance
+├ ○ /history/zec
+├ ○ /login
+├ ○ /performance
+├ ƒ /placeholder.png
+├ ○ /positions
+├ ○ /realtime
+├ ○ /register
+├ ○ /reset-password
+├ ○ /robots.txt
+├ ○ /settings
+└ ○ /wallets
+
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand

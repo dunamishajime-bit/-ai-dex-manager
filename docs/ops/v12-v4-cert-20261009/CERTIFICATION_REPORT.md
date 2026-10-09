@@ -4,6 +4,16 @@
 
 指定Handoff a537329f98a3c4b521d59043b90d0517d2faf3ae と指定監査資料2本を全文確認。現行 ce1edeead8d0f9e5d88e829d415057117502a335 を基点に監査した。隔離された認証用作業ツリーで修正・再検証し、他担当の研究ツリーとWindows主作業ツリーは変更していない。先行HPの順次ランキングアニメーション修正68631785460629d377d1927874bd08aebf105b4cを保持した。
 
+## 再開後の実機観測（18:35 / 18:56 JST）
+
+別作業で現行Runtimeが復旧したため、午前の保護停止・保有記録は過去時点の証拠として扱う。2026-10-09 18:35 JSTの署名付き取引所照会はPASS、実建玉0件・未約定注文0件。共有Kill Switchはactive=false。解除記録はSIGNED_TRIPLE_FLAT_RECOVERY／OPERATOR_EXTERNAL_MANUAL_CLOSE_VERIFIED_3X_FLAT。今回の新V4認証作業から解除・建玉決済・再起動はしていない。
+
+現行Production SHAはce1edeead8d0f9e5d88e829d415057117502a335で変更なし。V12/PENGU/Q102/V52/HYPE_LONG/FET/IDLE(RESIDUAL含む)、Shared Risk、Margin Guardは全active/running。**これは現行ロジックの稼働であり、新V4の有効化ではない。**
+
+公開HPはf2608b5720d7系のui-20sounds-top3リリース、/realtime HTTP200。新V4候補へ最新HPの1.5秒順次アニメーションと20効果音・通知変更を取り込み、旧UIへ巻き戻さない。新V4表示の修正は候補ソースまで。新V4本番公開は採用ゲート未合格につき実施しない。
+
+旧HOLD_PROTECTEDという運用障害は現在解除済みだが、DD20.42%、外部PF0.57/Y06PF0.30、native Entry生成と全8系統実行一致の未認証という採用上の問題は残る。新V4の注文権限は無効のまま。
+
 ## 研究BTとLIVE認証の区別
 
 |コスト|研究最終資産|件数 / V12|PF|最大MTM DD|
@@ -45,7 +55,7 @@
 
 ## 運用保護と復旧条件
 
-共有HOLD_PROTECTEDはTSLAフィード鮮度HTTP503を起点とする。V12停止は同Kill Switchを尊重したもの。ACCOUNT_LOCK_BUSYは孤児ロックではなくV52休場中の短周期ロック取得による。強制削除は行わない。全建玉フラット前提の既存自動復旧は現在のTSLA/PENGU保有に適用できない。
+午前の共有HOLD_PROTECTEDはTSLAフィード鮮度HTTP503を起点とした。午前のV12停止は同Kill Switchを尊重したもの。ACCOUNT_LOCK_BUSYは孤児ロックではなくV52休場中の短周期ロック取得による。強制削除は行わない。全建玉フラット前提の既存自動復旧は午前当時のTSLA/PENGU保有に適用できなかった。現在は別作業の署名付きflat recoveryで現行運用が復旧している。
 
 XRP pending用の復旧コードは、通常のnative口座ロック取得、V12停止、同じ現行SHA、3回の署名付き注文照会400/-2013、全対象時間の約定0件、全建玉と保護注文の安定、状態CAS・事前アーカイブ、対応予約枠の一意一致を要求する。共有/ローカルKill SwitchとmanualReviewを残す。注文・取消・強制決済・Runner再起動は行わない。適用結果は pending-apply-retry.txt と最終観測で確認する。
 
@@ -54,11 +64,27 @@ XRP pending用の復旧コードは、通常のnative口座ロック取得、V12
 1. 10/20bps DDが20%超、外部V2/Y06 PFが1未満。
 2. 順位の将来再現性と未使用期間での全8系統外部検証が未証明。
 3. ネイティブEntry候補生成・全系統実設定・非同期venue execution・Funding/予約統合の完全一致が未証明。
-4. TSLA通常市場で実機の新しい引用時刻が継続進行する証拠がない。HOLD解除不可。
-5. Productionと新候補SHAの一致、および全認証PASSは成立していない。現行安全管理を維持し、新規実注文を停止する。
+4. TSLA通常市場で継続した新鮮な引用時刻の証拠は未取得。今回の認証作業では解除していない。別作業のflat recoveryによる現行解除を最新実機観測として区別する。
+5. Productionと新候補SHAの一致、および全認証PASSは成立していない。現行安全管理を維持し、新V4の実注文は有効化しない。
 
 ロールバック方針：現行Productionリリースを変更せず保持。運用整合は対象ファイルのアーカイブとCASを保存するが、予約を単独で戻して二重枠にしない。将来の安全修正も保護建玉を保った読取照合と条件付きActivationを経る。旧ロジックへの巻き戻しは行わない。
 
 ## 最終証拠
 
-最終VPS観測、テスト結果、GitHubリモートSHA照合は本報告の確定時に追記する。未認証をLIVE完了とは報告しない。
+- 最新実機証拠：resume-vps-1832.txt、resume-signed-account.json（18:35 JST）。
+- 最終rootテスト：120ファイル全PASS。WindowsでPOSIX専用2ケースskip、同じケースをLinuxで全3件PASS確認（feed-agent-targeted-test-evidence.json）。
+- HPテスト：31ファイル114件全PASS（resume-ui-tests-correct-cwd.txt）。root/research TypeScript、Python14件、口座ロックscope、pending13件PASS（resume-typecheck-python.json）。
+- Native Exit一致率：1,978/1,978、100%。研究12ファイル一致率：12/12、100%。現行全8系統との実行一致率は未認証、数値を捏造しない。
+- ロジック別MTM最大DDは未認証。共有資産曲線を個別系統の独立資本曲線として流用できない。個別件数/勝率/PF/実現損益と発火順・Gross競合の全台帳は研究成果ディレクトリ参照。
+- GitHubは指定実装ブランチへ通常のfast-forward Pushのみ。Production ce1edeeaはGitHubコミットAPIでも存在・SHA一致を確認済み。新候補とProductionのSHA一致は成立していないため、新V4 LIVE完了とは報告しない。
+- ビルド検証の結果はresume-ui-build.txtとresume-linux-ui-build.txt。WindowsネイティブSWC不整合はWASM fallbackでビルドPASS。本番OSの隔離ビルドは初回heap不足、2560MB heapでの再試行は500秒タイムアウト。LinuxビルドPASSとは扱わない。18:56 JSTに当該ビルドプロセス0件を確認して今回の/var/tmp隔離ディレクトリのみ除去。GitHub Linuxクリーン環境でRoot/research型検査、V4安全テスト、UIテスト、production buildがすべてPASS（run 37914537310、コードSHA 034e88b4851302fddc457d010cc81f63c5ad7b19、19:01 JST完了）。これは採用認証PASSを意味しない。Productionサービス・UIリリースは変更しない。
+
+18:56 JSTの最終読取照会でもProduction ce1edeead8d0f9e5d88e829d415057117502a335、全8系統RunnerとShared Risk/Margin Guard active/running、署名付き実建玉0・未約定0・送信注文0、HP HTTP200を確認（resume-final-vps-audit.txt）。one-shot監査サービスのinactive/deadは継続Runner停止とは区別する。
+
+## LIVE優先の最終判定
+
+18:59 JSTのユーザー指示に従い、HP追加変更・公開を後回しにしてLIVE側のEntry生成を再照合。現行buildV12SignalsはH2 Top3/既存WinRateGate、研究selected externalは別の候補集合・Core抽出台帳とinc_keysを使う。名前が同じnativeでも同じ候補母集団とは認証できない。現在の候補アダプターはSourceEvidenceを外部から受け取るもので、独立native生成器の完成とは扱わない。事後選別IDを実注文判定に流用せず、新V4実注文はBLOCKEDを維持する。
+
+研究DD超過・外部PF失敗はコードビルドPASSやGross拡大で解消できない。必要な未達はNative Entryの候補全数一致、Core onset/Gross因果生成、全8実装の共有予約・約定・Funding統合リプレイ、未使用期間の将来順位再現性。これらを合格扱いに書き換えていない。
+
+19:01 JST Linux CI全工程PASS: https://github.com/dunamishajime-bit/-ai-dex-manager/actions/runs/37914537310 。初回クリーン依存環境のRecharts label型不一致はunknown入力をstring/numberへ検証してDateへ渡す修正で解決。古い失敗ログをresume-ci-first-failure.txtとして残す。公開HP ai-dex-manager-ui.serviceは18:57 JSTにactive、PID3032654、f2608b5720d7リリースを維持（過去preflight unitのfailedとは区別）。共有Kill Switchは同時点active=false。
