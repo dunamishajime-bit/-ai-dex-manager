@@ -1,7 +1,7 @@
 name: V12 V4 certification checks only
 on:
   push:
-    branches: ["codex/v12-v4-v2-m150-implementation-20261009"]
+    branches: ["codex/v12-v4-v2-m150-implementation-20261009", "codex/v12-v4-production-cert-20261009"]
     paths:
       - ".github/workflows/v12-v4-certification-checks-20261009.yml"
       - "components/**"
