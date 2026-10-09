@@ -17,29 +17,50 @@ test("20 distinct, selectable, synthetically rendered sound presets",()=>{
  assert.equal(chooseRankingSound(DEFAULT_RANKING_SOUND_ID).id,DEFAULT_RANKING_SOUND_ID);
  for(const item of RANKING_SOUNDS){
   assert.ok(item.label&&item.description);
-  assert.ok(item.notes.length>=1 && item.notes.length<=3);
-  assert.ok(item.notes.every(n=>n>250&&n<2000));
-  assert.ok(item.length>=1.2&&item.length<=1.85);
+  assert.ok(item.duration>=0.75&&item.duration<=1.85);
+  assert.ok(item.recipe);
   assert.equal(chooseRankingSound(item.id),item);
  }
  assert.equal(chooseRankingSound("unrecognized").id,DEFAULT_RANKING_SOUND_ID);
 });
 
-test("all 20 sounds are richer and schedule layered, long notes with one bounded echo",()=>{
- let started=0,stopped=0;
- const g={gain:{value:0,setValueAtTime:()=>{},linearRampToValueAtTime:()=>{},exponentialRampToValueAtTime:()=>{}},connect:()=>{}};
- const o={type:"sine",frequency:{value:0,setValueAtTime:()=>{}},connect:()=>{},start:()=>{started++},stop:()=>{stopped++}};
- const delay={delayTime:{value:0},connect:()=>{}};
- const fakeCtx={currentTime:0,destination:{},createOscillator:()=>({...o,frequency:{...o.frequency}}),createGain:()=>g,createDelay:()=>delay};
+test("all 20 SFX have distinct synthesis gestures instead of the same melody",()=>{
+ const signatures=new Set<string>();
+ const recipeNames=new Set<string>();
  for(const preset of RANKING_SOUNDS){
-  const before=started;
+  recipeNames.add(preset.recipe);
+  const starts:string[]=[];
+  const stops:number[]=[];
+  let bends=0,noiseBuffers=0,filters=0;
+  const gain=()=>({value:0,setValueAtTime:()=>{},linearRampToValueAtTime:()=>{},exponentialRampToValueAtTime:()=>{}});
+  const oscillator=()=>({
+   type:"sine",frequency:{setValueAtTime:(_f:number,_t:number)=>{},exponentialRampToValueAtTime:()=>{bends++;}},
+   connect:()=>{},start:(time:number)=>{starts.push("osc:"+time.toFixed(3));},stop:(time:number)=>{stops.push(time);}
+  });
+  const fakeCtx={
+   currentTime:0,sampleRate:8000,destination:{},
+   createGain:()=>({gain:gain(),connect:()=>{}}),
+   createOscillator:()=>oscillator(),
+   createBiquadFilter:()=>{filters++;return {type:"lowpass",frequency:gain(),connect:()=>{}};},
+   createBuffer:(_channels:number,frames:number)=>{noiseBuffers++;return {getChannelData:()=>new Float32Array(frames)};},
+   createBufferSource:()=>({buffer:null,connect:()=>{},start:(time:number)=>{starts.push("noise:"+time.toFixed(3));},stop:(time:number)=>{stops.push(time);}}),
+  };
   synthesizeRankingSound(fakeCtx as unknown as AudioContext,preset,"rise");
-  assert.ok(started-before>=preset.notes.length*4);
+  assert.ok(starts.length>=1,preset.id);
+  assert.equal(stops.length,starts.length,preset.id);
+  assert.ok(stops.every(t=>t>0&&t<=preset.duration+.10),preset.id);
+  signatures.add(JSON.stringify({starts,bends,noiseBuffers,filters}));
  }
- const before=started;
- synthesizeRankingSound(fakeCtx as unknown as AudioContext,RANKING_SOUNDS[0],"top3");
- assert.equal(started-before,RANKING_SOUNDS[0].notes.length*4+6);
- assert.equal(stopped,started);
+ assert.equal(recipeNames.size,20,"all 20 presets need a distinct recipe");
+ assert.equal(signatures.size,20,"all 20 sounds must differ in timing, source type, or modulation");
+});
+test("SFX flash, laser, wind, bass and Top3 fanfare use different source families",()=>{
+ const find=(id:string)=>RANKING_SOUNDS.find(p=>p.id===id)!.recipe;
+ assert.equal(find("crystal"),"flash");
+ assert.equal(find("neon"),"laser");
+ assert.equal(find("mist"),"wind");
+ assert.equal(find("velvet"),"subboom");
+ assert.equal(find("luxury"),"fanfare");
 });
 test("formal Top3 swap always notifies even when scores below 90",()=>{
  const before=[row("BTC",70),row("ETH",68),row("SOL",65),row("LINK",63)];
