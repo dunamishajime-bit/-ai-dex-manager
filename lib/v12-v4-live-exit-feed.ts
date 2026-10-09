@@ -14,12 +14,18 @@ export function appendV4ClosedExitBars(state:State,id:string,feed:V4ExitFeed,at:
    throw Error("V4_EXIT_FEED_UNCLOSED_H1");
   indexed.set(bar.openTs,bar);
  }
- const end=original.entryTs+productionExitSpec(original.candidate.route).hours*HOUR;
+ const spec=productionExitSpec(original.candidate.route);
+ const end=original.entryTs+spec.hours*HOUR;
  let barTs=original.lastExitBarTs===undefined?original.entryTs:original.lastExitBarTs+HOUR;
  while(barTs+HOUR<=at&&barTs<end){
   const bar=indexed.get(barTs);
   if(!bar)throw Error("V4_EXIT_FEED_GAP:"+barTs);
-  const nextOpen=barTs+HOUR===end?(feed.nextOpens?.find(x=>x.ts===end)??feed.nextOpen):undefined;
+  const boundary=barTs+HOUR;
+  // Native trailing updates at every completed H2 boundary, not just expiry.
+  // The exit evaluator rejects missing/future opens; do not substitute a close.
+  const needsOpen=boundary===end||(spec.kind==="NATIVE"&&boundary%(2*HOUR)===0);
+  const nextOpen=needsOpen?(feed.nextOpens?.find(x=>x.ts===boundary)??
+   (feed.nextOpen?.ts===boundary?feed.nextOpen:undefined)):undefined;
   next=applyProductionEvent(next,{type:"EXIT_BAR",id,eventId:"live-exit-bar:"+id+":"+barTs,
    ts:at,bar,nextOpen});
   if(next.legs[id].plannedExit)break;
