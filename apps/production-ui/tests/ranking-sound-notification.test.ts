@@ -19,22 +19,28 @@ test("20 distinct, selectable, synthetically rendered sound presets",()=>{
   assert.ok(item.label&&item.description);
   assert.ok(item.notes.length>=1 && item.notes.length<=3);
   assert.ok(item.notes.every(n=>n>250&&n<2000));
-  assert.ok(item.length>0&&item.length<0.5);
+  assert.ok(item.length>=1.2&&item.length<=1.85);
   assert.equal(chooseRankingSound(item.id),item);
  }
- assert.equal(chooseRankingSound("unrecognized"),RANKING_SOUNDS[0]);
+ assert.equal(chooseRankingSound("unrecognized").id,DEFAULT_RANKING_SOUND_ID);
 });
 
-test("each currency sound schedules a playable nonzero envelope with independent oscillators",()=>{
+test("all 20 sounds are richer and schedule layered, long notes with one bounded echo",()=>{
  let started=0,stopped=0;
- const g={gain:{setValueAtTime:()=>{},linearRampToValueAtTime:()=>{},exponentialRampToValueAtTime:()=>{}},connect:()=>{}};
+ const g={gain:{value:0,setValueAtTime:()=>{},linearRampToValueAtTime:()=>{},exponentialRampToValueAtTime:()=>{}},connect:()=>{}};
  const o={type:"sine",frequency:{value:0,setValueAtTime:()=>{}},connect:()=>{},start:()=>{started++},stop:()=>{stopped++}};
- const fakeCtx={currentTime:0,destination:{},createOscillator:()=>({...o,frequency:{...o.frequency}}),createGain:()=>g};
- synthesizeRankingSound(fakeCtx as unknown as AudioContext,RANKING_SOUNDS[0]);
- assert.equal(started,6);
- assert.equal(stopped,6);
+ const delay={delayTime:{value:0},connect:()=>{}};
+ const fakeCtx={currentTime:0,destination:{},createOscillator:()=>({...o,frequency:{...o.frequency}}),createGain:()=>g,createDelay:()=>delay};
+ for(const preset of RANKING_SOUNDS){
+  const before=started;
+  synthesizeRankingSound(fakeCtx as unknown as AudioContext,preset,"rise");
+  assert.ok(started-before>=preset.notes.length*4);
+ }
+ const before=started;
+ synthesizeRankingSound(fakeCtx as unknown as AudioContext,RANKING_SOUNDS[0],"top3");
+ assert.equal(started-before,RANKING_SOUNDS[0].notes.length*4+6);
+ assert.equal(stopped,started);
 });
-
 test("formal Top3 swap always notifies even when scores below 90",()=>{
  const before=[row("BTC",70),row("ETH",68),row("SOL",65),row("LINK",63)];
  const after=[row("ETH",75),row("BTC",70),row("SOL",65),row("LINK",63)];
