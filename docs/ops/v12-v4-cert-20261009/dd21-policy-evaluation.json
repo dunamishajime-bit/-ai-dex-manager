@@ -1,0 +1,19 @@
+{
+  "diagnostic": "OPERATOR_DD_POLICY_ONLY_NOT_LIVE_CERTIFICATE",
+  "maximumDrawdown": 0.21,
+  "cases": {
+    "10bps": {
+      "reportedDrawdown": -0.2042001379546361,
+      "withinLimit": true
+    },
+    "20bps": {
+      "reportedDrawdown": -0.2097,
+      "withinLimit": true
+    },
+    "30bps": {
+      "reportedDrawdown": -0.1839,
+      "withinLimit": true
+    }
+  },
+  "ordersEnabled": false
+}

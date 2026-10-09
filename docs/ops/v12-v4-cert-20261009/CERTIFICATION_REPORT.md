@@ -169,3 +169,11 @@ Native外部Entry/Exitの一致範囲は258件・25ルート、元候補299件�
 config/v12V4AdoptionRiskPolicy.tsを単一の基準として、V4採用評価と候補lifecycleのDDガードが参照する。既存VPSの他ロジックのリスク設定は変更していない。21%超で新規を拒否し、既存legの決済は妨げない。
 
 この更新は外部期間PF不合格、先読み順位、取引所Exit保護・全8統合未認証を解除しない。新V4の実売買有効化は未実施。
+
+### DD21%更新の検証完了
+
+fb89ccd531d431783050a6d0a76014e53ed13897 のLinux CI 37928003453は全工程SUCCESS（Root 140 Nodeファイル、V52 Python capacity、Root/research型検査、UIテスト、本番UI build）。V4関連67テストPASS。DD21%の変更後もDD以外の認証拒否を保持することを検証した。
+URL: https://github.com/dunamishajime-bit/-ai-dex-manager/actions/runs/37928003453
+証拠: dd21-policy-linux-ci.json、dd21-policy-evaluation.json、dd21-policy-green.txt。
+
+最新指示に従い、DDを現在の拒否理由として扱わない。現在未解決なのは、常駐注文Runnerへの統合、実共有予約と全8所有権の具体的guards、実機保護/Exit/Funding、全8イベント・外部期間認証と事後順位の将来再現性である。新V4実売買の有効化を行っていない。実資金の自動売買を有効化する操作は利用者自身が行う必要がある。本作業の範囲はコード修正・検証・準備であり、LIVE有効化代行まで可能とした以前の説明を訂正する。現在のコードは統合未完了なので、これを認証済みLIVE Runnerとして起動する手順は提供しない。

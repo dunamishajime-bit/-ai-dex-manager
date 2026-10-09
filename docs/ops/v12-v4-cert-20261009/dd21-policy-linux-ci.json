@@ -1,0 +1,131 @@
+{
+  "conclusion": "success",
+  "headSha": "fb89ccd531d431783050a6d0a76014e53ed13897",
+  "jobs": [
+    {
+      "completedAt": "2026-10-09T12:12:50Z",
+      "conclusion": "success",
+      "databaseId": 113811516678,
+      "name": "checks",
+      "startedAt": "2026-10-09T12:07:37Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-10-09T12:07:39Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-10-09T12:07:38Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-09T12:07:42Z",
+          "conclusion": "success",
+          "name": "Run actions/checkout@v4",
+          "number": 2,
+          "startedAt": "2026-10-09T12:07:39Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-09T12:07:42Z",
+          "conclusion": "success",
+          "name": "Run actions/setup-node@v4",
+          "number": 3,
+          "startedAt": "2026-10-09T12:07:42Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-09T12:09:12Z",
+          "conclusion": "success",
+          "name": "Install root dependencies",
+          "number": 4,
+          "startedAt": "2026-10-09T12:07:42Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-09T12:09:28Z",
+          "conclusion": "success",
+          "name": "Root type checks",
+          "number": 5,
+          "startedAt": "2026-10-09T12:09:12Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-09T12:09:30Z",
+          "conclusion": "success",
+          "name": "V4 lifecycle and fail-closed status checks",
+          "number": 6,
+          "startedAt": "2026-10-09T12:09:28Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-09T12:10:33Z",
+          "conclusion": "success",
+          "name": "Full root regression on Linux",
+          "number": 7,
+          "startedAt": "2026-10-09T12:09:30Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-09T12:11:17Z",
+          "conclusion": "success",
+          "name": "Install UI dependencies",
+          "number": 8,
+          "startedAt": "2026-10-09T12:10:33Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-09T12:11:23Z",
+          "conclusion": "success",
+          "name": "UI contract checks",
+          "number": 9,
+          "startedAt": "2026-10-09T12:11:17Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-09T12:12:48Z",
+          "conclusion": "success",
+          "name": "Linux UI production build",
+          "number": 10,
+          "startedAt": "2026-10-09T12:11:23Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-09T12:12:48Z",
+          "conclusion": "success",
+          "name": "Adoption remains blocked",
+          "number": 11,
+          "startedAt": "2026-10-09T12:12:48Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-09T12:12:48Z",
+          "conclusion": "success",
+          "name": "Post Run actions/setup-node@v4",
+          "number": 21,
+          "startedAt": "2026-10-09T12:12:48Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-09T12:12:49Z",
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@v4",
+          "number": 22,
+          "startedAt": "2026-10-09T12:12:48Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-09T12:12:49Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 23,
+          "startedAt": "2026-10-09T12:12:49Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/dunamishajime-bit/-ai-dex-manager/actions/runs/37928003453/job/113811516678"
+    }
+  ],
+  "status": "completed",
+  "url": "https://github.com/dunamishajime-bit/-ai-dex-manager/actions/runs/37928003453"
+}
