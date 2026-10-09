@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["lib/external-manual-flat-reconcile.ts", "tests/external-manual-flat-reconcile.test.ts", "scripts/disdex-external-manual-flat-recovery.ts"],
+  "exclude": ["node_modules"]
+}
