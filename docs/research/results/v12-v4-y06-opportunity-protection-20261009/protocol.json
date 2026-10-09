@@ -1,0 +1,47 @@
+{
+  "research_only": true,
+  "order_enabled": false,
+  "training_only_rank_source": "docs\\research\\results\\v12-v4-priority-forward-split-20261009\\training-only-priority.json",
+  "fixed_caps": {
+    "family": 1.5,
+    "v12": 2.5,
+    "crypto": 3.25,
+    "total": 4.5
+  },
+  "cases": {
+    "Y06_FRONT_NATIVE_060": {
+      "y_gross": 0.6,
+      "move_front": true,
+      "small_sample_cap": false
+    },
+    "Y06_FRONT_LOWER_030": {
+      "y_gross": 0.3,
+      "move_front": true,
+      "small_sample_cap": false
+    },
+    "Y06_FRONT_LOWER_040": {
+      "y_gross": 0.4,
+      "move_front": true,
+      "small_sample_cap": false
+    },
+    "Y06_FRONT_LOWER_050": {
+      "y_gross": 0.5,
+      "move_front": true,
+      "small_sample_cap": false
+    },
+    "Y06_NATIVE_RANK_LOWER_040": {
+      "y_gross": 0.4,
+      "move_front": false,
+      "small_sample_cap": false
+    },
+    "Y06_FRONT_040_SMALLCAP": {
+      "y_gross": 0.4,
+      "move_front": true,
+      "small_sample_cap": true
+    }
+  },
+  "costs_bps": [
+    10
+  ],
+  "caution": "Route-repair conditions already selected using entire development year. Relative rankings are train-derived; prioritizing Y06 is motivated by development-ledger missed-trade diagnosis."
+}

@@ -1,0 +1,40 @@
+{
+  "research_only": true,
+  "live_activation_approved": false,
+  "candidate_modification_motivated_by_post_selection_external_55day_result": true,
+  "training_only_score_source": "docs\\research\\results\\v12-v4-priority-forward-split-20261009\\training-only-priority.json",
+  "cases": {
+    "Y06_PAUSED": {
+      "pause": [
+        "REC_Y06_REV_D0_T72"
+      ],
+      "low_y06": null
+    },
+    "Y06_SIZE_010": {
+      "pause": [],
+      "low_y06": 0.1
+    },
+    "REVERSE_WEAK5_PAUSED": {
+      "pause": [
+        "REC_Y01_REV_D0_T72",
+        "REC_Y03_REV_D0_T36",
+        "REC_Y06_REV_D0_T72",
+        "REC_Y07_REV_D0_T72",
+        "REC_Y09_REV_D2_T24"
+      ],
+      "low_y06": null
+    }
+  },
+  "caps": {
+    "family": 1.5,
+    "v12": 2.5,
+    "crypto": 3.25,
+    "total": 4.5
+  },
+  "costs_bps": [
+    10,
+    20,
+    30
+  ],
+  "warning": "This is NOT external holdout validation; route exclusions were motivated by examined future outcome. Need new forward evidence."
+}

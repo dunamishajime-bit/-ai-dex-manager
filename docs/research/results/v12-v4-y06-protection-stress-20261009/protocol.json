@@ -1,0 +1,32 @@
+{
+  "research_only": true,
+  "source": "run_v12_v4_y06_protection_sweep.py",
+  "cases": {
+    "Y06_FRONT_LOWER_030": {
+      "y_gross": 0.3,
+      "move_front": true,
+      "small_sample_cap": false
+    },
+    "Y06_FRONT_LOWER_050": {
+      "y_gross": 0.5,
+      "move_front": true,
+      "small_sample_cap": false
+    },
+    "Y06_FRONT_NATIVE_060": {
+      "y_gross": 0.6,
+      "move_front": true,
+      "small_sample_cap": false
+    }
+  },
+  "costs_bps": [
+    20,
+    30
+  ],
+  "fixed_caps": {
+    "family": 1.5,
+    "v12": 2.5,
+    "crypto": 3.25,
+    "total": 4.5
+  },
+  "validation_note": "Historical development sample; not independent OOS of mined Entry/Exit route policies."
+}
