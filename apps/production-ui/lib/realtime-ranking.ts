@@ -1,9 +1,10 @@
 export type Gate = { key:string; label:string; state:'OK'|'NO'|'UNKNOWN'; actual?:number|string; required?:number|string; detail:string; kind?:'signal'|'execution'|'reference'|'shadow'; progress?:number };
-export type RankRow = { id:string; symbol:string; logic:string; side:string; score:number|null; gates:Gate[]; reason:string; fresh:boolean; checkedAt:number; rank?:number; href?:string };
+import type { RankingPricePreview } from './realtime-ranking-preview';
+export type RankRow = { id:string; symbol:string; logic:string; side:string; score:number|null; gates:Gate[]; reason:string; fresh:boolean; checkedAt:number; rank?:number; previewRank?:number; preview?:RankingPricePreview; href?:string };
 export function executionBlocked(row:RankRow){return row.gates.some(g=>g.kind==='execution'&&g.state==='NO');}
 export function rankRows(rows:RankRow[]){const tier=(r:RankRow)=>r.score===null?0:executionBlocked(r)?1:2;return [...rows].sort((a,b)=>tier(b)-tier(a)||(b.score??-1)-(a.score??-1)||a.id.localeCompare(b.id)).map((r,i)=>({...r,rank:r.score===null?undefined:i+1}));}
 export function rankChanges(previous:string[],next:string[]){const result:Record<string,number>={};if(!previous.length)return result;next.forEach((id,i)=>{const old=previous.indexOf(id);if(old<0)result[id]=0;else if(old!==i)result[id]=old-i;});return result;}
-export type RankingPcAlert={title:string;body:string;reason:'TOP_SCORE'|'TOP3_ENTRY'|'BOTH'};
+export type RankingPcAlert={title:string;body:string;reason:'TOP_SCORE'|'TOP3_ENTRY'|'BOTH'|'TOP3_MOVEMENT'};
 export function rankingPcAlert(previous:RankRow[],next:RankRow[]):RankingPcAlert|null{
  if(!previous.length)return null;
  const before=rankRows(previous).filter(r=>r.score!==null),after=rankRows(next).filter(r=>r.score!==null);
