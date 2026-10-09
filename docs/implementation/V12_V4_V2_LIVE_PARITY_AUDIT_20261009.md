@@ -60,3 +60,11 @@ Other current runners observed active: PENGU/Q102/V52/FET/HYPE/IDLE plus Shared 
 7. Finish operator activation for the **new** SHA, review current account positions and protective orders, then perform reversible release/HP deployment with explicit rollback and no unapproved test trade. Do not claim LIVE until the new runner SHA and actual venue state were rechecked.
 
 Result: **position inventory and PENGU protection certified. The selected 291,326,103 JPY V2 portfolio is not certified equivalent to the currently running VPS and is not safe to promote as-is.**
+
+## DD許容値の更新（2026-10-09 21:04:45 JST）
+
+ユーザーの最新指示「20%でも21%にはいっていないので許可します」により、候補V4のDD許容上限を21%へ更新した。新しい判定は10bps -20.420014%・20bps -20.97%をDD理由で拒否しない。元のBT値、41ルート、順位、Gross条件を変更していない。
+
+config/v12V4AdoptionRiskPolicy.tsを単一の基準として、V4採用評価と候補lifecycleのDDガードが参照する。既存VPSの他ロジックのリスク設定は変更していない。21%超で新規を拒否し、既存legの決済は妨げない。
+
+この更新は外部期間PF不合格、先読み順位、取引所Exit保護・全8統合未認証を解除しない。新V4の実売買有効化は未実施。

@@ -1,0 +1,53 @@
+✔ fresh account inventory replaces prior foreign gross before reservation (13.1008ms)
+✔ foreign reservation without a filled position occupies shared crypto gross (0.8661ms)
+✔ a confirmed adverse-price fill is recorded before overrun blocks subsequent entries (2.1104ms)
+✔ fresh pending gross uses refreshed equity rather than startup equity (0.6625ms)
+✖ operator-approved 21 percent DD admits 20.5 percent and rejects above 21 (0.6234ms)
+✖ forward frozen ranking is temporally valid while observed PF and execution blockers still prevent promotion (5.9306ms)
+✔ replaying past entries at a present decision time retains full-year lookahead (0.1983ms)
+✔ 1978 H1 native matches certify the price model only (0.1363ms)
+✔ stale account and payload flags cannot authorize orders; malformed evidence fails closed (0.4275ms)
+✔ missing, nonfinite, fractional and nonnumeric sample counts retain proof blockers (0.4958ms)
+✔ offline proof payload cannot replace actual journal entry times or evaluation clock (20.9973ms)
+ℹ tests 11
+ℹ suites 0
+ℹ pass 9
+ℹ fail 2
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 444.0751
+
+✖ failing tests:
+
+test at tests\v12-v4-execution-foundation.test.ts:2:4962
+✖ operator-approved 21 percent DD admits 20.5 percent and rejects above 21 (0.6234ms)
+  Error: EQUITY_DD_OVER_20_PERCENT
+      at planProductionEntry (C:\Users\dis\DisDex-v4-production-cert-20261009\lib\v12-v4-production-lifecycle.ts:131:35)
+      at plan (C:\Users\dis\DisDex-v4-production-cert-20261009\tests\v12-v4-execution-foundation.test.ts:9:39)
+      at TestContext.<anonymous> (C:\Users\dis\DisDex-v4-production-cert-20261009\tests\v12-v4-execution-foundation.test.ts:46:8)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1103:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:785:18)
+      at Test.postRun (node:internal/test_runner/test:1232:19)
+      at Test.run (node:internal/test_runner/test:1160:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:785:7)
+
+test at tests\v12-v4-production-certification.test.ts:2:1069
+✖ forward frozen ranking is temporally valid while observed PF and execution blockers still prevent promotion (5.9306ms)
+  AssertionError [ERR_ASSERTION]: The expression evaluated to a falsy value:
+  
+    assert.ok(!c.blockers.some(x=>x.startsWith("OBSERVED_DEVELOPMENT_DD_OVER")))
+  
+      at TestContext.<anonymous> (C:\Users\dis\DisDex-v4-production-cert-20261009\tests\v12-v4-production-certification.test.ts:8:9)
+      at Test.runInAsyncScope (node:async_hooks:214:14)
+      at Test.run (node:internal/test_runner/test:1103:25)
+      at Test.start (node:internal/test_runner/test:1000:17)
+      at startSubtestAfterBootstrap (node:internal/test_runner/harness:358:17) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: false,
+    expected: true,
+    operator: '==',
+    diff: 'simple'
+  }

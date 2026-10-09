@@ -153,9 +153,9 @@ test("reversal preemption waits for actual closes and cannot delete an opposing 
 });
 test("equity DD admission fails closed and existing virtual-leg exits remain available",async()=>{
  let state=createProductionState(initial);
- state=applyProductionEvent(state,{type:"ACCOUNT_MARK",eventId:"dd",ts,equityUsd:790,prices:{}});
- assert.ok(state.maxDrawdown>0.20);
- await assert.rejects(reserve(state),/DD_OVER_20/);
+ state=applyProductionEvent(state,{type:"ACCOUNT_MARK",eventId:"dd",ts,equityUsd:780,prices:{}});
+ assert.ok(state.maxDrawdown>0.21);
+ await assert.rejects(reserve(state),/DD_OVER_OPERATOR_LIMIT/);
  const r=await reserve(createProductionState(initial));
  assert.throws(()=>applyProductionEvent(state,r),/RESERVATION_RECHECK_FAILED/);
 });

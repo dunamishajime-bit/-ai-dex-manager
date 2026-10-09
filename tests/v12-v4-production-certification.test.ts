@@ -1,11 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {certifyV4Production,V4_RANKING_CUTOFF_EXCLUSIVE_MS as cut} from "../lib/v12-v4-production-certification";
-test("forward frozen ranking is temporally valid while observed PF/DD and execution blockers still prevent promotion",()=>{
+test("forward frozen ranking is temporally valid while observed PF and execution blockers still prevent promotion",()=>{
  const c=certifyV4Production({policyId:"V2_M150_D05_CORE_NATIVE",evaluatedAtMs:cut+1000,signalEntryTimesMs:[cut]});
  assert.equal(c.policyTemporalCausal,true);
  assert.ok(c.blockers.includes("OBSERVED_EXTERNAL_Y06_PF_FAILED"));
- assert.ok(c.blockers.includes("OBSERVED_DEVELOPMENT_DD_OVER_20_PERCENT"));
+ assert.ok(!c.blockers.some(x=>x.startsWith("OBSERVED_DEVELOPMENT_DD_OVER")));
  assert.ok(c.blockers.includes("HOLD_PROTECTED_OR_HOLD_STATUS_UNKNOWN"));
  assert.equal(c.orderEnabled,false);assert.equal(c.realOrderEnabledV4,0);
 });

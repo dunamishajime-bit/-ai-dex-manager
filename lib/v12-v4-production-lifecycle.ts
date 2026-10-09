@@ -1,3 +1,4 @@
+import {V12_V4_MAXIMUM_DRAWDOWN} from "../config/v12V4AdoptionRiskPolicy";
 /**
  * Executable OFFLINE V4 lifecycle. No venue mutation dependency or order authority.
  * Journal records are data; persistence is caller-owned and must complete before consumption.
@@ -128,7 +129,7 @@ export async function planProductionEntry(state: State, input: EntryPlanInput): 
   const { candidate:c } = input;
   if (state.initial.holdProtected) throw Error("HOLD_PROTECTED");
   if(state.executionReview)throw Error("UNRESOLVED_EXECUTION_REVIEW:"+state.executionReview);
-  if(state.maxDrawdown>0.20)throw Error("EQUITY_DD_OVER_20_PERCENT");
+  if(state.maxDrawdown>V12_V4_MAXIMUM_DRAWDOWN+1e-12)throw Error("EQUITY_DD_OVER_OPERATOR_LIMIT");
   if (!Number.isFinite(input.ts) || input.ts !== c.eligibleEntryTs || input.ts % HOUR !== 0) throw Error("ENTRY_TIME_MISMATCH");
   if (state.foreign.some(x=>x.symbol === c.symbol)) throw Error("FOREIGN_SYMBOL_OWNERSHIP");
   if (state.legs[key(c)] || state.journal.some(x=>x.eventId===input.eventId)) throw Error("DUPLICATE_ENTRY");
@@ -199,7 +200,7 @@ export function applyProductionEvent(state: State, event: Event): State {
     if (next.legs[event.leg.id]) throw Error("DUPLICATE_LEG");
     // Re-check immutable event against current reservations; planned events may race.
     const g=productionGross(next), add=event.leg.reservationUsd/next.equityUsd;
-    if (next.initial.holdProtected || next.executionReview || next.maxDrawdown>0.20 || next.foreign.some(x=>x.symbol===event.leg.candidate.symbol) ||
+    if (next.initial.holdProtected || next.executionReview || next.maxDrawdown>V12_V4_MAXIMUM_DRAWDOWN+1e-12 || next.foreign.some(x=>x.symbol===event.leg.candidate.symbol) ||
       (recovery(event.leg)&&g.recovery+add>2.5+1e-12)||g.v12+add>3+1e-12||g.crypto+add>3.5+1e-12||g.total+add>4.75+1e-12)
       throw Error("RESERVATION_RECHECK_FAILED");
     next.legs[event.leg.id]=structuredClone(event.leg);

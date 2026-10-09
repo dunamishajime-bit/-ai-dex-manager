@@ -47,3 +47,11 @@ The user explicitly chose the **high-profit development variant** rather than th
 - Keep `orderEnabled=false`, `tradingMutation=0`, and `realOrderEnabledV4=0` in all V2 snapshots until separately authorized and demonstrated.
 
 **Classification: user-selected V2 policy code prepared and tested for Shadow/HP; NO production deployment or LIVE enabling claimed.**
+
+## DD許容値の更新（2026-10-09 21:04:45 JST）
+
+ユーザーの最新指示「20%でも21%にはいっていないので許可します」により、候補V4のDD許容上限を21%へ更新した。新しい判定は10bps -20.420014%・20bps -20.97%をDD理由で拒否しない。元のBT値、41ルート、順位、Gross条件を変更していない。
+
+config/v12V4AdoptionRiskPolicy.tsを単一の基準として、V4採用評価と候補lifecycleのDDガードが参照する。既存VPSの他ロジックのリスク設定は変更していない。21%超で新規を拒否し、既存legの決済は妨げない。
+
+この更新は外部期間PF不合格、先読み順位、取引所Exit保護・全8統合未認証を解除しない。新V4の実売買有効化は未実施。

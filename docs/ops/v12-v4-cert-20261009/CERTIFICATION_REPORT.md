@@ -161,3 +161,11 @@ Native外部Entry/Exitの一致範囲は258件・25ルート、元候補299件�
 20:59 JSTの署名付き実機照会（execution-bridge-vps-readback.json）：Production ce1edeead8d0f9e5d88e829d415057117502a335、全8系統を担う7 Runner＋Risk/Margin Guard active/running、現在のkill-switch.json active=false、実建玉0・未約定0、HP ui-studio-15-b297c883dfda /realtime HTTP200。before-clear/backupのkill記録は現在状態と区別する。取引所送信・取消・建玉変更0、新V4デプロイ・有効化なし。
 
 今回、実装上の不具合を修正して送信・再起動・Entry約定照合の基盤を追加したが、依頼全体は未完了。新Runner統合・保護/Exit/Funding・全8統合認証と戦略の独立検証が残る。研究案の外部PFとDDに関する不合格も残り、指定条件のまま新V4 LIVE完了とは報告できない。
+
+## DD許容値の更新（2026-10-09 21:04:45 JST）
+
+ユーザーの最新指示「20%でも21%にはいっていないので許可します」により、候補V4のDD許容上限を21%へ更新した。新しい判定は10bps -20.420014%・20bps -20.97%をDD理由で拒否しない。元のBT値、41ルート、順位、Gross条件を変更していない。
+
+config/v12V4AdoptionRiskPolicy.tsを単一の基準として、V4採用評価と候補lifecycleのDDガードが参照する。既存VPSの他ロジックのリスク設定は変更していない。21%超で新規を拒否し、既存legの決済は妨げない。
+
+この更新は外部期間PF不合格、先読み順位、取引所Exit保護・全8統合未認証を解除しない。新V4の実売買有効化は未実施。

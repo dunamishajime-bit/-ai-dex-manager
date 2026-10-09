@@ -1,3 +1,4 @@
+import {V12_V4_MAXIMUM_DRAWDOWN} from "../config/v12V4AdoptionRiskPolicy";
 /** Fail-closed, evidence-only classification. This module never grants order authority. */
 import {V12_V4_V2_POLICY,V12_V4_V2_CAPS,V12_V4_V2_BT,V12_V4_V2_PRIORITY} from "./v12-v4-v2-shadow";
 import {PRODUCTION_EXIT_CATALOG} from "./v12-v4-production-lifecycle";
@@ -23,7 +24,7 @@ export function certifyV4Production(e:CertificationEvidence){
  const policyTemporalCausal=e.signalEntryTimesMs.length>0&&e.signalEntryTimesMs.every(t=>t>=V4_RANKING_CUTOFF_EXCLUSIVE_MS);
  add(!policyTemporalCausal,"HISTORICAL_FULL_YEAR_RANKING_LOOKAHEAD_OR_NO_FORWARD_SIGNALS");
  add(V12_V4_V2_BT.externalY06.profitFactor10bps<1,"OBSERVED_EXTERNAL_Y06_PF_FAILED");
- add(Math.abs(V12_V4_V2_BT.costs["10bps"].dd)>.20||Math.abs(V12_V4_V2_BT.costs["20bps"].dd)>.20,"OBSERVED_DEVELOPMENT_DD_OVER_20_PERCENT");
+ add(Math.abs(V12_V4_V2_BT.costs["10bps"].dd)>V12_V4_MAXIMUM_DRAWDOWN+1e-12||Math.abs(V12_V4_V2_BT.costs["20bps"].dd)>V12_V4_MAXIMUM_DRAWDOWN+1e-12,"OBSERVED_DEVELOPMENT_DD_OVER_OPERATOR_LIMIT");
  add(PRODUCTION_EXIT_CATALOG.length!==41||V12_V4_V2_PRIORITY.length!==41,"FROZEN_41_ROUTE_CONTRACT_INVALID");
  const n=e.nativeSignalProof;
  add(!n||!sha(n.sourceSha,40)||!sha(n.reportSha256,64)||!positiveSampleCount(n.samples)||n.mismatches!==0,"NATIVE_SIGNAL_SOURCE_PARITY_NOT_CERTIFIED");
