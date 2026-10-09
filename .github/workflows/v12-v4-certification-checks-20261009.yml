@@ -4,6 +4,7 @@ on:
     branches: ["codex/v12-v4-v2-m150-implementation-20261009"]
     paths:
       - ".github/workflows/v12-v4-certification-checks-20261009.yml"
+      - "components/**"
       - "lib/**"
       - "config/**"
       - "tests/**"

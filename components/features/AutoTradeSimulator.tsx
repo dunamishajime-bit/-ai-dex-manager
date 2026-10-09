@@ -406,7 +406,7 @@ export const AutoTradeSimulator: React.FC<AutoTradeSimulatorProps> = ({ marketDa
                                     <Tooltip
                                         contentStyle={{ backgroundColor: '#1f2937', borderColor: '#374151', color: '#fff' }}
                                         formatter={formatTooltipPrice}
-                                        labelFormatter={(label: string | number) => new Date(label).toLocaleString()}
+                                        labelFormatter={(label: unknown) => new Date(typeof label === "string" || typeof label === "number" ? label : NaN).toLocaleString()}
                                     />
                                     <Area
                                         type="monotone"
