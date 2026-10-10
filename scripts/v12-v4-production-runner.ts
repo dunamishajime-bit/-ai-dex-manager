@@ -12,7 +12,7 @@ import {assertV4CertifiedSource,assertV4CertifiedOrder} from "../lib/v12-v4-cert
 import {readV4CanaryPermit,assertV4CanarySourceSnapshot,assertV4CanaryOrderAuthority} from "../lib/v12-v4-canary-permit";
 import {readV4TimeStopApproval,approvedV4TimeStopQuote} from "../lib/v12-v4-time-stop-approval";
 import {attachV4NativeCoreCandidates} from "../lib/v12-v4-core-candidate";
-import type {V4PeerKind,V4PeerSource} from "../lib/v12-v4-peer-state-owners";
+import type {V4PeerKind,V4PeerSource,V4PeerLineageMode} from "../lib/v12-v4-peer-state-owners";
 import {observeV4PeerService} from "../lib/v12-v4-peer-service-attestation";
 const H2=7200000;
 function env(name:string){
@@ -25,7 +25,7 @@ async function safeJson(path:string){
  if(!st.isFile()||st.isSymbolicLink())throw Error("V4_UNSAFE_SOURCE_FILE");
  return JSON.parse(await readFile(path,"utf8")) as Record<string,any>;
 }
-async function loadPeers(releaseSha:string):Promise<V4PeerSource[]>{
+async function loadPeers(releaseSha:string,lineageMode:V4PeerLineageMode="UNIFIED_RELEASE"):Promise<V4PeerSource[]>{
  const paths=JSON.parse(env("V12_V4_PEER_STATE_PATHS_JSON")) as Record<V4PeerKind,string>;
  const kinds:V4PeerKind[]=["V12","PENGU","Q102","V52","FET","HYPE_LONG","IDLE","RESIDUAL"];
  return Promise.all(kinds.map(async kind=>{
@@ -34,7 +34,8 @@ async function loadPeers(releaseSha:string):Promise<V4PeerSource[]>{
   const raw=await safeJson(path);
   const programSha=String(raw.runtimeCommitSha??raw.runtimeSha??"").toLowerCase();
   if(!/^[a-f0-9]{40}$/.test(programSha))throw Error("V4_PEER_RELEASE_NOT_ATTESTED:"+kind);
-  const service=await observeV4PeerService(kind,releaseSha);
+  const serviceSha=kind==="V12"||lineageMode==="UNIFIED_RELEASE"?releaseSha:programSha;
+  const service=await observeV4PeerService(kind,serviceSha);
   if(!service.retiredV12&&!service.active)
    throw Error("V4_PEER_SERVICE_NOT_ATTESTED:"+kind);
   return {kind,programSha,raw,service};
@@ -51,6 +52,7 @@ export async function buildV4ProductionRuntime(){
  const operationMode=String(process.env.V12_V4_OPERATION_MODE??"CERTIFIED").trim().toUpperCase();
  if(!["CERTIFIED","CANARY"].includes(operationMode))throw Error("V4_OPERATION_MODE_INVALID");
  const canaryPermit=operationMode==="CANARY"?await readV4CanaryPermit(releaseSha):undefined;
+ const peerLineageMode:V4PeerLineageMode=canaryPermit?"ATTEST_EACH_PEER":"UNIFIED_RELEASE";
  const client=new AsterV3Client({baseUrl:process.env.ASTER_FUTURES_BASE_URL,
   userAddress:process.env.ASTER_USER_ADDRESS,
   privateKey:process.env.ASTER_API_PRIVATE_KEY as `0x${string}`|undefined,
@@ -59,7 +61,8 @@ export async function buildV4ProductionRuntime(){
  const adapter=new V12AsterLiveAdapter(client,{maxSlippageBps:20});
  const store=new V4ExecutionStore(env("V12_V4_EXECUTION_STORE_PATH"),releaseSha);
  if(process.argv.includes("--init-signed-flat")){
-  await initializeV4SignedFlatState({store,client,peers:await loadPeers(releaseSha),pendingPath:env("DISDEX_PENDING_EXPOSURE_REGISTRY_PATH")});
+  await initializeV4SignedFlatState({store,client,peers:await loadPeers(releaseSha,peerLineageMode),
+   pendingPath:env("DISDEX_PENDING_EXPOSURE_REGISTRY_PATH"),peerLineageMode});
  }
  store.read();
  const lock=new FileAccountOrderLock(env("DISDEX_ACCOUNT_LOCK_PATH"),120000);
@@ -88,7 +91,7 @@ export async function buildV4ProductionRuntime(){
  };
  const engine=new V4RunnerEngine({
   store,accountLock:lock,adapter,client,pendingRegistryPath,
-  fetchDecision,fetchPeers:()=>loadPeers(releaseSha),
+  fetchDecision,fetchPeers:()=>loadPeers(releaseSha,peerLineageMode),peerLineageMode,
   fetchExitFeed:async symbol=>{
    const now=Date.now(),rows=await client.getKlines(symbol,"1h",500);
    return {closed:rows.filter(x=>Number(x[0])+3600000<=now&&Number(x[6])<now)

@@ -16,7 +16,7 @@ import {planV4RetiredStops} from "./v12-v4-stop-retirement";
 import {appendV4ClosedExitBars,type V4ExitFeed} from "./v12-v4-live-exit-feed";
 import {applyProductionEvent,planProductionEntry,productionExitSpec,nativeEvidenceForProductionRoute,type EntryPlanInput} from "./v12-v4-production-lifecycle";
 import {buildV4AccountMark,type V4SignedMark} from "./v12-v4-peer-account-mark";
-import type {V4PeerSource} from "./v12-v4-peer-state-owners";
+import type {V4PeerSource,V4PeerLineageMode} from "./v12-v4-peer-state-owners";
 import type {V4LiveDecisionSnapshot} from "./v12-v4-live-candidate-builder";
 export type V4TickResult={status:"locked"|"observing"|"blocked"|"submitted"|"exited";reason:string;
  eventTs:number;candidateCount:number;orderEnabled:boolean};
@@ -35,6 +35,7 @@ export interface V4RunnerDependencies{
  referencePrice:(symbol:string)=>Promise<number>;
  minimumVenueOrderNotional:(symbol:string,price:number)=>Promise<number>;
  canaryEntry?:{maxNotionalUsd:number};
+ peerLineageMode?:V4PeerLineageMode;
  now?:()=>number;
 }
 export class V4RunnerEngine{
@@ -111,7 +112,7 @@ export class V4RunnerEngine{
     quantity:Number(p.positionAmt),markPrice:Number(p.markPrice)}))};
   const base=d.store.read(),accountMark=buildV4AccountMark({sources:peers,venue:mark,
    registry,state:base.state,expectedPeerSha:base.releaseSha,now:mark.capturedAt,
-   eventId:"signed-account:"+mark.capturedAt});
+   eventId:"signed-account:"+mark.capturedAt,peerLineageMode:d.peerLineageMode});
   this.commitEvent(accountMark.event);
   const current=d.store.read();
   // Each virtual leg must own exactly one signed Aster resident STOP. Merely

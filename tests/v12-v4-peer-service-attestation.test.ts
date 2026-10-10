@@ -44,6 +44,27 @@ test("retired legacy V12 must be flat and cannot conceal pending work",()=>{
  const review=sources();review[5].raw.manualReview="unknown";
  assert.throws(()=>v4PeerOwners(review,sha,now),/PEER_PENDING_OR_MANUAL_REVIEW/);
 });
+test("Production canary may attest each non-V12 peer at its own exact active release",()=>{
+ const v=sources();
+ const peerShas=["c","d","e","f","1","2","3"].map(x=>x.repeat(40));
+ for(let i=1;i<v.length;i++){
+  const peerSha=peerShas[i-1];
+  v[i].programSha=peerSha;
+  (v[i].raw as any).runtimeCommitSha=peerSha;
+  v[i].service!.unit=v[i].service!.unit.replace(sha,peerSha);
+ }
+ assert.throws(()=>v4PeerOwners(v,sha,now),/PEER_PROGRAM_LINEAGE_MISMATCH/);
+ assert.deepEqual(v4PeerOwners(v,sha,now,"ATTEST_EACH_PEER"),[]);
+ const wrongService=sources();
+ wrongService[1].programSha="c".repeat(40);
+ (wrongService[1].raw as any).runtimeCommitSha="c".repeat(40);
+ assert.throws(()=>v4PeerOwners(wrongService,sha,now,"ATTEST_EACH_PEER"),/STALE_PEER_OWNER_SNAPSHOT/);
+ const wrongState=sources();
+ wrongState[1].programSha="c".repeat(40);
+ wrongState[1].service!.unit=wrongState[1].service!.unit.replace(sha,"c".repeat(40));
+ assert.throws(()=>v4PeerOwners(wrongState,sha,now,"ATTEST_EACH_PEER"),/PEER_PROGRAM_LINEAGE_MISMATCH/);
+});
+
 test("systemd must identify exact release-bound active runner and live PID",()=>{
  const unit="disdex-pengu-dual-ls-v2@"+sha+".service";
  const release="/home/deploy/disdex-trading/releases/"+sha;

@@ -21,6 +21,8 @@ jobs:
       SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
       SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
     steps:
+      - uses: actions/checkout@v4
+
       - name: Initialize SSH
         shell: bash
         run: |
