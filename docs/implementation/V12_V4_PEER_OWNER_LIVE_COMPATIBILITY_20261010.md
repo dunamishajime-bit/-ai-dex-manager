@@ -38,7 +38,9 @@ Observed legacy processes are release-scoped systemd instances
    root-managed service unit identities using **read-only** systemctl.
    A stale, dormant peer state is accepted only with the matching exact SHA
    service active/running, nonzero PID, and the previous valid state no older
-   than six hours. A missing actual SHA is never fabricated.
+   than six hours. The **systemd ExecStart and WorkingDirectory must also
+   reference exactly the same immutable release SHA**, not just the unit name.
+   A missing actual SHA is never fabricated.
 4. The old V12 is a **replacement**, not an eighth simultaneously active
    entry Owner. The read-only systemd check rejects ANY running legacy V12
    unit regardless of SHA; a retired legacy state can only be accepted if

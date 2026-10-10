@@ -46,10 +46,18 @@ test("retired legacy V12 must be flat and cannot conceal pending work",()=>{
 });
 test("systemd must identify exact release-bound active runner and live PID",()=>{
  const unit="disdex-pengu-dual-ls-v2@"+sha+".service";
+ const release="/home/deploy/disdex-trading/releases/"+sha;
+ const fields="WorkingDirectory="+release+"\nExecStart={ path="+release+"/runner; argv[]="+release+"/runner --daemon }\n";
  assert.equal(parseV4SystemdShow(
-  "Id="+unit+"\nActiveState=active\nSubState=running\nMainPID=1234\n",unit,now).mainPid,1234);
+  "Id="+unit+"\nActiveState=active\nSubState=running\nMainPID=1234\n"+fields,unit,now).mainPid,1234);
  assert.throws(()=>parseV4SystemdShow(
-  "Id="+unit+"\nActiveState=inactive\nSubState=dead\nMainPID=0\n",unit,now),/NOT_RUNNING/);
+  "Id="+unit+"\nActiveState=inactive\nSubState=dead\nMainPID=0\n"+fields,unit,now),/NOT_RUNNING/);
  assert.throws(()=>parseV4SystemdShow(
-  "Id="+unit+"\nActiveState=active\nSubState=running\nMainPID=12\n",unit.replace(sha,oldSha),now),/WRONG_SHA/);
+  "Id="+unit+"\nActiveState=active\nSubState=running\nMainPID=12\n"+fields,unit.replace(sha,oldSha),now),/WRONG_SHA/);
+ assert.throws(()=>parseV4SystemdShow(
+  "Id="+unit+"\nActiveState=active\nSubState=running\nMainPID=12\n"+
+  "WorkingDirectory=/home/deploy/disdex-trading/releases/"+oldSha+
+  "\nExecStart={ path=/home/deploy/disdex-trading/releases/"+oldSha+"/runner }\n",
+  unit,now),/EXECUTABLE_RELEASE_SHA_MISMATCH/);
+
 });

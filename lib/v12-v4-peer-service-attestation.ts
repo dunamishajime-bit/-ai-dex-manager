@@ -21,6 +21,14 @@ export function parseV4SystemdShow(text:string,expectedUnit:string,now:number):V
  if(data.Id!==expectedUnit||data.ActiveState!=="active"||data.SubState!=="running"||
   !/^[1-9][0-9]*$/.test(data.MainPID??""))
   throw Error("V4_PEER_UNIT_NOT_RUNNING_OR_WRONG_SHA:"+expectedUnit);
+ const match=/@([a-f0-9]{40})\.service$/.exec(expectedUnit);
+ if(!match)throw Error("V4_PEER_UNIT_NAME_NOT_RELEASE_BOUND");
+ const dir="/home/deploy/disdex-trading/releases/"+match[1];
+ const cmd=data.ExecStart??"";
+ const refs=[...cmd.matchAll(/\/home\/deploy\/disdex-trading\/releases\/([a-f0-9]{40})\//g)]
+  .map(m=>m[1]);
+ if(data.WorkingDirectory!==dir||!refs.length||refs.some(ref=>ref!==match[1]))
+  throw Error("V4_PEER_EXECUTABLE_RELEASE_SHA_MISMATCH:"+expectedUnit);
  return {unit:expectedUnit,active:true,retiredV12:false,observedAt:now,mainPid:Number(data.MainPID)};
 }
 export async function observeV4PeerService(kind:V4PeerKind,sha:string):Promise<V4ServiceObservation>{
@@ -38,6 +46,6 @@ export async function observeV4PeerService(kind:V4PeerKind,sha:string):Promise<V
  }
  const unit=PREFIX[kind]+"@"+sha+".service";
  const {stdout}=await exec("systemctl",["show",unit,"--no-pager",
-  "--property=Id,ActiveState,SubState,MainPID"],{timeout:5000});
+  "--property=Id,ActiveState,SubState,MainPID,WorkingDirectory,ExecStart"],{timeout:5000});
  return parseV4SystemdShow(stdout,unit,Date.now());
 }
