@@ -84,12 +84,21 @@ jobs:
             echo "ESBUILD_DIRECT_EXEC=FAIL"
             sed -n '1,4p' /tmp/v4-esbuild-direct.err | sed 's/^/ESBUILD_DIRECT_ERROR=/'
           fi
-          if runuser -u deploy -- bash -c 'cd "$1" && node -e "require(\x27esbuild\x27).transformSync(\x27const x:number=1\x27,{loader:\x27ts\x27})"' _ "$root/current" >/tmp/v4-esbuild-node.txt 2>/tmp/v4-esbuild-node.err; then
-            echo "ESBUILD_NODE_TRANSFORM=PASS"
-          else
-            echo "ESBUILD_NODE_TRANSFORM=FAIL"
-            sed -n '1,8p' /tmp/v4-esbuild-node.err | sed 's/^/ESBUILD_NODE_ERROR=/'
-          fi
-          rm -f /tmp/v4-esbuild-version.txt /tmp/v4-esbuild-direct.err /tmp/v4-esbuild-node.txt /tmp/v4-esbuild-node.err
+          cat >/tmp/v4-esbuild-node-probe.cjs <<'JS'
+          const cp=require("child_process");
+          const bin=process.argv[2], mod=process.argv[3];
+          const r=cp.spawnSync(bin,["--version"],{encoding:"utf8"});
+          console.log("NODE_SPAWN_STATUS="+String(r.status));
+          console.log("NODE_SPAWN_ERROR="+String(r.error?.code??"NONE"));
+          try{
+            require(mod).transformSync("const x:number=1",{loader:"ts"});
+            console.log("NODE_ESBUILD_TRANSFORM=PASS");
+          }catch(e){
+            console.log("NODE_ESBUILD_TRANSFORM=FAIL:"+String(e?.code??e?.message??e).slice(0,160));
+          }
+          JS
+          chmod 0644 /tmp/v4-esbuild-node-probe.cjs
+          runuser -u deploy -- node /tmp/v4-esbuild-node-probe.cjs "$dep/@esbuild/linux-x64/bin/esbuild" "$dep/esbuild" | sed 's/^/ESBUILD_NODE_PROBE=/'
+          rm -f /tmp/v4-esbuild-version.txt /tmp/v4-esbuild-direct.err /tmp/v4-esbuild-node-probe.cjs
           echo "TRADING_MUTATION=0"
           REMOTE
