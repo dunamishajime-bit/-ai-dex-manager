@@ -123,3 +123,20 @@ not the new research SHA. The new SHA must not be declared LIVE-ready.
   read back. Operator must supply the master address and securely make Testnet
   credentials available to the approved local runtime; never commit secrets,
   use Production keys or send them through chat.
+
+
+## 2026-10-10 Testnet-independent certification policy
+
+Aster Testnet is no longer a mandatory LIVE gate. Its -5050 funding or account
+block must not deadlock V4 adoption if equivalent authentic Aster evidence can
+be established elsewhere.
+
+The Production certificate schema is now v2 and accepts exactly one real-venue
+evidence mode: ASTER_TESTNET, AUTHENTIC_PRODUCTION_HISTORY, or
+CONTROLLED_PRODUCTION_CANARY. Mock-only evidence is explicitly rejected. Every
+mode must carry separate SHA-256 evidence for signed orders, signed positions,
+restart recovery, and same-symbol race protection. The 41-route, shared-risk,
+root ownership, expiry, exact-SHA, and explicit Operator gates are unchanged.
+
+Current preferred path is AUTHENTIC_PRODUCTION_HISTORY. This policy change does
+not itself certify the broker lifecycle and does not authorize LIVE.

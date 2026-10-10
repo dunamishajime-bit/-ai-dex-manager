@@ -34,6 +34,7 @@ export interface V4RunnerDependencies{
  quantityNormalizer:EntryPlanInput["quantityNormalizer"];
  referencePrice:(symbol:string)=>Promise<number>;
  minimumVenueOrderNotional:(symbol:string,price:number)=>Promise<number>;
+ canaryEntry?:{maxNotionalUsd:number};
  now?:()=>number;
 }
 export class V4RunnerEngine{
@@ -204,6 +205,11 @@ export class V4RunnerEngine{
   const d=this.deps,now=this.now();
   // This is a source-level *independent* proof, not the shadow boolean.
   await d.assertSourceParity(decision);
+  // A Production canary is deliberately one-entry-only. Historical durable
+  // ENTRY intents remain the consumption marker even after the canary closes.
+  if(d.canaryEntry&&Object.values(d.store.read().intents).some(i=>i.action==="ENTRY"))
+   return {status:"blocked",reason:"PRODUCTION_CANARY_ALREADY_CONSUMED",
+    eventTs:this.now(),candidateCount:decision.candidateCount,orderEnabled:false};
   const ranked=[...decision.candidates].sort((a,b)=>a.rank-b.rank||
    a.eligibleEntryTs-b.eligibleEntryTs||a.symbol.localeCompare(b.symbol));
   for(const candidate of ranked){
@@ -222,11 +228,26 @@ export class V4RunnerEngine{
     (candidate.effectiveSide==="LONG"?stop>=price:stop<=price))
     throw Error("V4_RESIDENT_STOP_BLUEPRINT_INVALID");
    const state=d.store.read().state;
-   const plan=await planProductionEntry(state,{candidate,ts:candidate.eligibleEntryTs,
+   const baseInput={ts:candidate.eligibleEntryTs,
     observedAtMs:this.now(),eventId:"reserve-live:"+legId,referencePrice:price,
     minimumOrderNotionalUsd:min,entryAtr:atr14,
     nativeExitEvidence:nativeEvidenceForProductionRoute(candidate.route),
-    quantityNormalizer:d.quantityNormalizer});
+    quantityNormalizer:d.quantityNormalizer};
+   // The natural candidate must be admissible under ordinary strategy/risk rules.
+   // Canary mode changes only size, never route eligibility or ownership rules.
+   const ordinaryPlan=await planProductionEntry(state,{candidate,...baseInput});
+   let plan=ordinaryPlan;
+   if(d.canaryEntry){
+    if(min>d.canaryEntry.maxNotionalUsd+1e-8)
+     throw Error("V4_CANARY_VENUE_MINIMUM_EXCEEDS_CAP");
+    const minimumGross=min/state.equityUsd;
+    if(!(minimumGross>0)||minimumGross>1)
+     throw Error("V4_CANARY_MINIMUM_GROSS_INVALID");
+    const canaryCandidate={...candidate,requestedGross:minimumGross};
+    plan=await planProductionEntry(state,{candidate:canaryCandidate,...baseInput});
+    if(plan.leg.reservationUsd>d.canaryEntry.maxNotionalUsd+1e-8)
+     throw Error("V4_CANARY_RESERVATION_EXCEEDS_CAP");
+   }
    const command:V4DurableOrderCommand={legId:plan.leg.id,action:"ENTRY",sequence:0,
     symbol:candidate.symbol,positionSide:candidate.effectiveSide,
     quantity:plan.leg.requestedQty,price,signalTs:candidate.eligibleEntryTs};
@@ -264,7 +285,8 @@ export class V4RunnerEngine{
        !(Number(proof.stopPrice)>0)||Math.abs(Number(proof.stopPrice)-venueStop)>1e-8)
      throw Error("V4_RESIDENT_STOP_NOT_VENUE_CONFIRMED");
    }
-   return {status:"submitted",reason:"DURABLE_ENTRY_WITH_RESIDENT_STOP",
+   return {status:"submitted",reason:d.canaryEntry?
+    "DURABLE_PRODUCTION_CANARY_WITH_RESIDENT_STOP":"DURABLE_ENTRY_WITH_RESIDENT_STOP",
     eventTs:this.now(),candidateCount:decision.candidateCount,orderEnabled:true};
   }
   return {status:"observing",reason:"NO_FRESH_NON_DUPLICATE_CANDIDATE",

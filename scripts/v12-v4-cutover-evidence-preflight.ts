@@ -42,7 +42,7 @@ const externalCheck=check("25 external routes historical signed-source replay",
  });
 const remaining=[
  "41/41 independent unseen-period coverage is not observed (16 historically verified only)",
- "Aster signed partial/reduceOnly/STOP cancel and competing same-symbol fills not certified in real venue",
+ "Independent Aster lifecycle evidence is not yet certified. Testnet is optional: use Aster Testnet, authentic Production history, or a controlled Production canary; mock-only proof is forbidden",
  "Root-managed release-bound TIME37 emergency STOP policy requires separate operator approval",
  "Root-managed 41-route production certificate and real-money operator acknowledgement not installed",
  "Fresh broker Gross/Kill/Margin/peer state/old V12 stop/restart/rollback must be verified by Codex",
@@ -52,6 +52,7 @@ const report={
  status:"CUTOVER_BLOCKED_UNTIL_VERIFIED",
  orderEnabled:false,realOrderEnabledV4:0,tradingMutation:0,
  generatedAt:new Date().toISOString(),checks:[coverage,historicEntry,historicExited,externalCheck],
+ testnetMandatory:false,allowedVenueEvidenceModes:["ASTER_TESTNET","AUTHENTIC_PRODUCTION_HISTORY","CONTROLLED_PRODUCTION_CANARY"],
  independentRealVenueCertificate:false,releaseOperatorAuthorization:false,
  remaining,
 };

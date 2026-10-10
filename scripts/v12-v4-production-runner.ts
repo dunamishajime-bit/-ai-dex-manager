@@ -9,6 +9,7 @@ import {V4RunnerEngine} from "../lib/v12-v4-runner-engine";
 import {loadV4ClosedCandles,buildV4LiveDecisionBatch} from "../lib/v12-v4-live-candidate-builder";
 import {productionExitSpec} from "../lib/v12-v4-production-lifecycle";
 import {assertV4CertifiedSource,assertV4CertifiedOrder} from "../lib/v12-v4-certified-gates";
+import {readV4CanaryPermit,assertV4CanarySourceSnapshot,assertV4CanaryOrderAuthority} from "../lib/v12-v4-canary-permit";
 import {readV4TimeStopApproval,approvedV4TimeStopQuote} from "../lib/v12-v4-time-stop-approval";
 import {attachV4NativeCoreCandidates} from "../lib/v12-v4-core-candidate";
 import type {V4PeerKind,V4PeerSource} from "../lib/v12-v4-peer-state-owners";
@@ -47,6 +48,9 @@ function requireReleaseSha(){
 }
 export async function buildV4ProductionRuntime(){
  const releaseSha=requireReleaseSha();
+ const operationMode=String(process.env.V12_V4_OPERATION_MODE??"CERTIFIED").trim().toUpperCase();
+ if(!["CERTIFIED","CANARY"].includes(operationMode))throw Error("V4_OPERATION_MODE_INVALID");
+ const canaryPermit=operationMode==="CANARY"?await readV4CanaryPermit(releaseSha):undefined;
  const client=new AsterV3Client({baseUrl:process.env.ASTER_FUTURES_BASE_URL,
   userAddress:process.env.ASTER_USER_ADDRESS,
   privateKey:process.env.ASTER_API_PRIVATE_KEY as `0x${string}`|undefined,
@@ -117,10 +121,18 @@ export async function buildV4ProductionRuntime(){
    return spec.kind==="ATR"?entryPrice-sg*spec.sl*atr14:
     (await import("../lib/v12-x1-all")).protectiveLevels(entryPrice,atr14,side).initialStop;
   },
-  assertSourceParity:async decision=>{await assertV4CertifiedSource(releaseSha,decision);},
-  assertAuthority:async cmd=>{await assertV4CertifiedOrder(releaseSha,cmd,store.read());},
+  canaryEntry:canaryPermit?{maxNotionalUsd:canaryPermit.absoluteNotionalCapUsd}:undefined,
+  assertSourceParity:async decision=>{
+   if(canaryPermit)assertV4CanarySourceSnapshot(decision,canaryPermit,releaseSha);
+   else await assertV4CertifiedSource(releaseSha,decision);
+  },
+  assertAuthority:async cmd=>{
+   if(canaryPermit)assertV4CanaryOrderAuthority({sha:releaseSha,command:cmd,
+    permit:canaryPermit,ownedDocument:store.read()});
+   else await assertV4CertifiedOrder(releaseSha,cmd,store.read());
+  },
  });
- return {engine,releaseSha};
+ return {engine,releaseSha,operationMode};
 }
 async function main(){
  const once=process.argv.includes("--once"),daemon=process.argv.includes("--daemon"),initialize=process.argv.includes("--init-signed-flat");
@@ -131,14 +143,14 @@ async function main(){
   return;
  }
  if(!once&&!daemon&&!initialize)throw Error("V4_RUNNER_REQUIRES_MODE");
- const {engine,releaseSha}=await buildV4ProductionRuntime();
- if(initialize){console.log(JSON.stringify({status:"SIGNED_FLAT_STATE_INITIALIZED",releaseSha,orderEnabled:false}));return;}
+ const {engine,releaseSha,operationMode}=await buildV4ProductionRuntime();
+ if(initialize){console.log(JSON.stringify({status:"SIGNED_FLAT_STATE_INITIALIZED",releaseSha,operationMode,orderEnabled:false}));return;}
  let stopping=false;
  process.once("SIGINT",()=>{stopping=true;});
  process.once("SIGTERM",()=>{stopping=true;});
  do{
   const result=await engine.tick();
-  console.log(JSON.stringify({releaseSha,timestamp:new Date().toISOString(),...result}));
+  console.log(JSON.stringify({releaseSha,operationMode,timestamp:new Date().toISOString(),...result}));
   if(!daemon||stopping)break;
   await new Promise<void>(done=>setTimeout(done,Math.max(15000,Number(process.env.V12_V4_TICK_INTERVAL_MS||60000))));
  }while(!stopping);
