@@ -69,5 +69,14 @@ jobs:
           echo "FREE_GB=$(df -BG --output=avail "$root" | tail -1 | tr -dc '0-9')"
           echo "V4_SERVICE_COUNT=$(systemctl list-units --type=service --state=running --no-legend 2>/dev/null | grep -c "$TARGET_SHA" || true)"
           echo "CANARY_PERMIT_EXISTS=$([[ -e /etc/disdex/v12-v4-production-canary-permit.json ]] && echo TRUE || echo FALSE)"
+          echo "MOUNT_INFO=$(findmnt -T "$root/current" -no TARGET,OPTIONS 2>/dev/null || true)"
+          dep="$(readlink -f "$root/current/node_modules" 2>/dev/null || true)"
+          echo "CURRENT_NODE_MODULES_TARGET_BASENAME=$(basename "$(dirname "$dep")")/$(basename "$dep")"
+          for p in "$dep/@esbuild/linux-x64/bin/esbuild" "$root/current/node_modules/@esbuild/linux-x64/bin/esbuild"; do
+            if [[ -e "$p" ]]; then
+              echo "ESBUILD_MODE=$(stat -c '%a:%U:%G:%s' "$p")"
+              echo "ESBUILD_ACCESS_DEPLOY=$(runuser -u deploy -- test -x "$p" && echo EXECUTABLE || echo NOT_EXECUTABLE)"
+            fi
+          done
           echo "TRADING_MUTATION=0"
           REMOTE
