@@ -61,6 +61,11 @@ jobs:
             done
           done
           echo 'STAGE_PROCESS_TREE_END'
+          tpids="$(pgrep -f "$TARGET_SHA" || true)"
+          echo "TARGET_PROCESS_COUNT=$(wc -w <<<"$tpids")"
+          for pid in $tpids; do
+            ps -p "$pid" -o pid=,ppid=,etimes=,stat=,pcpu=,pmem=,wchan:24=,comm= | sed 's/^/TARGET_PROCESS=/'
+          done
           echo "FREE_GB=$(df -BG --output=avail "$root" | tail -1 | tr -dc '0-9')"
           echo "V4_SERVICE_COUNT=$(systemctl list-units --type=service --state=running --no-legend 2>/dev/null | grep -c "$TARGET_SHA" || true)"
           echo "CANARY_PERMIT_EXISTS=$([[ -e /etc/disdex/v12-v4-production-canary-permit.json ]] && echo TRUE || echo FALSE)"
