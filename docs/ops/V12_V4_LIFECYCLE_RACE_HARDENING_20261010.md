@@ -57,3 +57,41 @@ changed release SHA without a legitimate re-approval process.
 No real-money TEST orders were used. Production signing keys must not be
 reused for Testnet. Do not call this venue lifecycle certification PASS.
 Keep existing LIVE Production unchanged until all gates are proven.
+
+## Follow-up: broker net-quantity check before normal EXIT STOP retirement
+
+The existing normal EXIT path cancelled the completed virtual leg's STOP
+before obtaining the signed post-EXIT net-position and remaining per-leg STOP
+inventory. A net-position mismatch therefore could cancel protective STOP
+first and only then fail. That ordering is unsafe.
+
+The implementation now performs a fresh venue positions/orders readback
+BEFORE cancellation, verifies broker net exposure against all surviving
+virtual legs, invokes the audited retired-STOP planner (including durable
+trigger, remaining STOP quantity, type, side, status and ownership checks),
+and only then cancels the retired STOP. It performs another independent
+positions/orders readback AFTER cancellation and rechecks net quantity and
+surviving STOPs. If the old STOP is already absent, the same post-EXIT
+readback checks must still pass. No additional order type is introduced.
+
+A negative full-runner test deliberately reports a wrong venue net position
+after an otherwise signed EXIT fill, confirms ZERO STOP cancellation, then
+simulates restored correct signed inventory at a later timestamp and verifies
+crash-recovery cancellation without placing a second EXIT. This is mock
+fault injection; it is not Aster venue certification.
+
+Latest local validation with this change: V4 suite 120/120 PASS, root
+TypeScript typecheck exit 0.
+
+Aster's official V3 order documentation states that reduceOnly is not
+permitted in Hedge Mode and that One-way Mode normally uses positionSide
+BOTH. The actual deployment mode must be signed/read back independently,
+and no mixed-mode assumption grants production authority.
+
+Root SSH from this session was attempted read-only with the user's valid
+key target and a local SSH alias. It returned exit 255 with no authenticated
+remote readback. No VPS systemd, Aster live account, approval artifact,
+runner, position, order or configuration was changed.
+
+The approved TIME37 artifact is still bound to its ORIGINAL source SHA,
+not the new research SHA. The new SHA must not be declared LIVE-ready.

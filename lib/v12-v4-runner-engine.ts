@@ -160,25 +160,39 @@ export class V4RunnerEngine{
    await cycle.reconcileExit(cid,this.now(),this.now());
    if(d.store.read().state.legs[leg.id].qty>1e-10)
     throw Error("V4_EXIT_RESIDUAL_POSITION_REQUIRES_REVIEW");
-   const stop=Object.values(d.store.read().intents).filter(i=>i.legId===leg.id&&i.action==="STOP");
-   if(stop.length!==1)throw Error("V4_COMPLETED_EXIT_STOP_IDENTITY_UNCERTAIN");
-   await d.adapter.cancel(stop[0].clientOrderId);
-   const remaining=await d.client.getOpenOrders(leg.candidate.symbol);
-   if(remaining.some(o=>o.clientOrderId===stop[0].clientOrderId))
-    throw Error("V4_RESIDENT_STOP_CANCEL_NOT_CONFIRMED");
-   // For overlapping virtual legs, an individual reduce-only exit cannot
-   // silently consume surviving legs or destroy their independent STOPs.
-   const [venuePositions,readbackOrders]=await Promise.all([
-    d.client.getPositions(),d.client.getOpenOrders()]);
    const after=d.store.read();
+   const stop=Object.values(after.intents).filter(i=>i.legId===leg.id&&i.action==="STOP");
+   if(stop.length!==1)throw Error("V4_COMPLETED_EXIT_STOP_IDENTITY_UNCERTAIN");
+   const stopCid=stop[0].clientOrderId;
+   // Never cancel protection based only on an EXIT ACK or a local fill ledger.
+   // Reconcile the actual net position and all surviving same-symbol STOPs
+   // *before* retiring this leg's STOP, under the account lease.
    const otherRemaining=Object.values(after.state.legs).filter(l=>l.qty>0&&
     l.candidate.symbol===leg.candidate.symbol);
    const expected=otherRemaining.reduce((sum,l)=>sum+l.qty*
     (l.candidate.effectiveSide==="LONG"?1:-1),0);
-   const actual=venuePositions.filter(p=>p.symbol===leg.candidate.symbol)
-    .reduce((sum,p)=>sum+Number(p.positionAmt),0);
-   if(!Number.isFinite(actual)||Math.abs(expected-actual)>Math.max(1e-8,Math.abs(expected)*1e-7))
-    throw Error("V4_SHARED_SYMBOL_EXIT_VENUE_QTY_DRIFT");
+   const assertNet=(positions:Awaited<ReturnType<typeof d.client.getPositions>>)=>{
+    const actual=positions.filter(p=>p.symbol===leg.candidate.symbol)
+     .reduce((sum,p)=>sum+Number(p.positionAmt),0);
+    if(!Number.isFinite(actual)||Math.abs(expected-actual)>Math.max(1e-8,Math.abs(expected)*1e-7))
+     throw Error("V4_SHARED_SYMBOL_EXIT_VENUE_QTY_DRIFT");
+   };
+   const [beforePositions,beforeOrders]=await Promise.all([
+    d.client.getPositions(),d.client.getOpenOrders()]);
+   assertNet(beforePositions);
+   const pendingRetire=planV4RetiredStops({state:after.state,intents:after.intents,
+    openOrders:beforeOrders,positions:beforePositions});
+   if(beforeOrders.some(o=>o.clientOrderId===stopCid)){
+    if(!pendingRetire.includes(stopCid))throw Error("V4_EXIT_STOP_RETIREMENT_NOT_ATTESTED");
+    await d.adapter.cancel(stopCid);
+   }
+   // A missing retired STOP is safe only after verifying that all surviving
+   // legs are still protected and the exchange net position is unchanged.
+   const [venuePositions,readbackOrders]=await Promise.all([
+    d.client.getPositions(),d.client.getOpenOrders()]);
+   if(readbackOrders.some(o=>o.clientOrderId===stopCid))
+    throw Error("V4_RESIDENT_STOP_CANCEL_NOT_CONFIRMED");
+   assertNet(venuePositions);
    verifyV4ResidentStops(after.state,after.intents,readbackOrders);
    return {status:"exited",reason:"ROUTE_EXIT_SIGNED_FILL_AND_STOP_REMOVED",
     eventTs:this.now(),candidateCount:0,orderEnabled:true};

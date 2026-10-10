@@ -56,10 +56,11 @@ test("mock Aster dispatch reaches signed entry fill, STOP, and shared reservatio
   const store=new V4ExecutionStore(join(dir,"state.json"),sha);
   store.initialize({equityUsd:1000,foreign:[],holdProtected:false});
   const lock=new FileAccountOrderLock(join(dir,"account.lock"),120000,join(dir,"pending.json"));
-  let submitted=0,stops=0,exits=0,positionQty=0,exitFeed:any={closed:[]};const orders=new Map<string,any>(),fills:any[]=[];
+  let submitted=0,stops=0,exits=0,positionQty=0,exitFeed:any={closed:[]};
+  let venueExitDrift=false,cancelCount=0;const orders=new Map<string,any>(),fills:any[]=[];
   const adapter:any={client:{getOrder:async(_s:string,cid:string)=>orders.get(cid)},
    executor:{},normalizeStopPrice:async(_s:string,p:number)=>({price:Math.round(p*100)/100,text:p.toFixed(2)}),
-   cancel:async(cid:string)=>{orders.delete(cid);},
+   cancel:async(cid:string)=>{cancelCount++;orders.delete(cid);},
    executeEntry:async(x:any)=>{
     submitted++;const qty=x.quantity,id=51;positionQty=qty*(x.side==="LONG"?1:-1);
     orders.set(x.clientOrderId,{symbol:x.symbol,clientOrderId:x.clientOrderId,orderId:id,
@@ -86,7 +87,10 @@ test("mock Aster dispatch reaches signed entry fill, STOP, and shared reservatio
    },
   };
   const client:any={getBalances:async()=>[{asset:"USDT",balance:"1000",availableBalance:"1000"}],
-   getPositions:async()=>positionQty?[{symbol:candidate.symbol,positionAmt:String(positionQty),markPrice:"100",unRealizedProfit:"0"}]:[],
+   getPositions:async()=>{
+    const signedQty=exits>0&&venueExitDrift?0.25:positionQty;
+    return signedQty?[{symbol:candidate.symbol,positionAmt:String(signedQty),markPrice:"100",unRealizedProfit:"0"}]:[];
+   },
    getOpenOrders:async()=>[...orders.values()].filter(o=>o.status==="NEW"),
    getUserTrades:async()=>fills,getIncomeHistory:async()=>[]};
   const atrKey=[candidate.symbol,candidate.route,candidate.effectiveSide,candidate.eligibleEntryTs].join("|");
@@ -120,10 +124,20 @@ test("mock Aster dispatch reaches signed entry fill, STOP, and shared reservatio
   exitFeed={closed:Array.from({length:spec.hours},(_,i)=>({openTs:candidate.eligibleEntryTs+i*3600000,
    open:100,high:100.1,low:99.9,close:100})),nextOpens:[{ts:end,price:100}]};
   time=end+5000;
-  const closing=await runner.tick();
-  assert.equal(closing.status,"exited");
+  venueExitDrift=true;
+  await assert.rejects(runner.tick(),/V4_SHARED_SYMBOL_EXIT_VENUE_QTY_DRIFT/);
   assert.equal(exits,1);
+  assert.equal(cancelCount,0,"unreconciled broker net quantity must not retire the STOP");
   assert.equal(store.read().state.legs[leg.id].status,"CLOSED");
+  assert.equal([...orders.values()].filter(o=>o.status==="NEW").length,1);
+  // Once the signed venue inventory is reconciled, restart retirement safely
+  // cancels the orphan STOP without a second EXIT mutation.
+  venueExitDrift=false;
+  time+=1000; // A restart receives a fresh signed account-mark event ID.
+  const recovered=await runner.tick();
+  assert.equal(recovered.status,"observing");
+  assert.equal(exits,1);
+  assert.equal(cancelCount,1);
   assert.equal([...orders.values()].filter(o=>o.status==="NEW").length,0);
  }finally{rmSync(dir,{recursive:true,force:true});}
 });
