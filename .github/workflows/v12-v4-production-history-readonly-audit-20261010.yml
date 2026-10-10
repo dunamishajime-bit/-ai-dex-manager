@@ -1,0 +1,94 @@
+name: V12 V4 Production History Readonly Audit 20261010
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize restricted root SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ -n "$SSH_HOST" && -n "$ROOT_KEY" && -n "$SSH_KNOWN_HOSTS" ]]
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+
+      - name: Run signed GET-only Production history audit
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          common=(-i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts")
+          remote_script="/tmp/v12-v4-prod-history-audit-$GITHUB_RUN_ID.ts"
+          remote_result="/tmp/v12-v4-prod-history-audit-$GITHUB_RUN_ID.json"
+          scp "${common[@]}" -P "$PORT" scripts/v12-v4-production-history-readonly-audit.ts "root@$SSH_HOST:$remote_script"
+          ssh -T "${common[@]}" -p "$PORT" "root@$SSH_HOST" "AUDIT_SCRIPT='$remote_script' AUDIT_RESULT='$remote_result' bash -s" <<'REMOTE'
+          set -Eeuo pipefail
+          current=/home/deploy/disdex-trading/current
+          release="$(readlink -f "$current")"
+          [[ -d "$release" && -x "$release/node_modules/.bin/tsx" ]]
+          set -a
+          for f in /etc/disdex/disdex-v13d-v11eq-v96.env /etc/disdex/disdex-v12-pengu-v2-v52.env /etc/disdex/disdex-v12-x1-all.env; do
+            [[ -f "$f" ]] && . "$f"
+          done
+          set +a
+          export DISDEX_V4_AUDIT_RELEASE_ROOT="$release"
+          cd "$release"
+          "$release/node_modules/.bin/tsx" "$AUDIT_SCRIPT" > "$AUDIT_RESULT"
+          python3 - "$AUDIT_RESULT" <<'PY'
+          import json,sys
+          d=json.load(open(sys.argv[1],encoding="utf-8"))
+          assert d["status"]=="PASS_SIGNED_GET_ONLY"
+          assert d["productionHost"] is True
+          assert d["mutationCalls"]==0 and d["secretDisclosed"] is False
+          assert len(d["evidenceSha256"])==64
+          print("V12_V4_PRODUCTION_HISTORY_READONLY_AUDIT=PASS")
+          print("POSITION_MODE_DUAL="+str(d["positionMode"]["dualSidePosition"]).lower())
+          print("NONZERO_POSITIONS="+str(d["accountSummary"]["nonzeroPositionCount"]))
+          print("OPEN_ORDERS="+str(d["accountSummary"]["openOrderCount"]))
+          print("TRADE_SYMBOLS="+str(d["tradeHistory"]["queriedSymbols"]))
+          print("TOTAL_TRADES="+str(d["tradeHistory"]["totalTrades"]))
+          print("MULTIFILL_ORDERS="+str(d["tradeHistory"]["multiFillOrderCount"]))
+          print("MAX_FILLS_PER_ORDER="+str(d["tradeHistory"]["maxFillsPerOrder"]))
+          print("EVIDENCE_SHA256="+d["evidenceSha256"])
+          PY
+          REMOTE
+          scp "${common[@]}" -P "$PORT" "root@$SSH_HOST:$remote_result" production-history-audit.json
+          ssh -T "${common[@]}" -p "$PORT" "root@$SSH_HOST" "rm -f '$remote_script' '$remote_result'"
+          python3 - <<'PY'
+          import json
+          d=json.load(open("production-history-audit.json",encoding="utf-8"))
+          raw=json.dumps(d)
+          forbidden=("privateKey","signature","secret","mnemonic","apiKey")
+          assert not any(x in raw for x in forbidden)
+          print("LOCAL_ARTIFACT_SECRET_SCAN=PASS")
+          PY
+
+      - name: Upload sanitized evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: v12-v4-production-history-readonly-${{ github.run_id }}
+          path: production-history-audit.json
+          retention-days: 7
+          if-no-files-found: error
