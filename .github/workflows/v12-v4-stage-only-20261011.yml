@@ -124,10 +124,14 @@ jobs:
             chown -R deploy:deploy "$stage"
             avail_kb="$(df -Pk "$root" | awk 'NR==2{print $4}')"
             [[ "$avail_kb" =~ ^[0-9]+$ && "$avail_kb" -ge 2097152 ]]
-            # Install an isolated dependency tree. Never mutate or reuse the
-            # current Production release's node_modules.
-            runuser -u deploy -- bash -c 'cd "$1" && npm ci --no-audit --no-fund' _ "$stage"
-            runuser -u deploy -- "$stage/node_modules/.bin/tsx" "$stage/scripts/v12-v4-production-runner.ts" --self-test | tee "/tmp/v12-v4-stage-selftest-$RUN_ID.log"
+            # Dependency and lockfile equality were proved before SSH. Reuse the
+            # current immutable dependency tree read-only, but execute from the
+            # staged release cwd so esbuild never inherits root's inaccessible cwd.
+            dependency_root="$(readlink -f "$current/node_modules")"
+            [[ -x "$dependency_root/.bin/tsx" ]]
+            ln -s "$dependency_root" "$stage/node_modules"
+            chown -h deploy:deploy "$stage/node_modules"
+            runuser -u deploy -- bash -c 'cd "$1" && ./node_modules/.bin/tsx scripts/v12-v4-production-runner.ts --self-test' _ "$stage" | tee "/tmp/v12-v4-stage-selftest-$RUN_ID.log"
             grep -Fq '"status":"SELF_TEST_PASS"' "/tmp/v12-v4-stage-selftest-$RUN_ID.log"
             grep -Fq '"routes":41' "/tmp/v12-v4-stage-selftest-$RUN_ID.log"
             grep -Fq '"realOrderEnabledV4":0' "/tmp/v12-v4-stage-selftest-$RUN_ID.log"
