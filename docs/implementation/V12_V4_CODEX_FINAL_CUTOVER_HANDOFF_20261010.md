@@ -133,3 +133,19 @@ execution certificate, and partial fill/trigger races still fail closed.
   pass, but race-triggered partial STOP fills, broker cancellation semantics,
   long-offline funding attribution, and fully independent source parity still
   require Aster/forward evidence before operator LIVE certification.
+
+## 2026-10-10 16-route independent historical replay closure
+
+The previously absent external-period 16 routes are now independently
+replayed against accepted original 2025-2026 H1 source observations:
+**212/212 source+Entry/rank/Gross** and **212/212 independently computed
+price-model Entry+Exit time/price/reason**. Both records include SHA256
+market/ledger provenance. Two ATOMUSDT cases uncovered the Production
+zero-median quote-volume feature mismatch, now aligned to original Python
+None/undefined semantics without relaxing VOL predicates. See
+`docs/implementation/V12_V4_SIXTEEN_HISTORICAL_INDEPENDENT_PARITY_20261010.md`.
+
+This closes the 16-route *retrospective accepted-trade* evidence gap only.
+No data proves the same 16 routes fired in independent Aug-Oct external
+forward windows; full live no-extra-candidate admission, broker-side Stop,
+shared Gross and operator deployment certification remain blocked.

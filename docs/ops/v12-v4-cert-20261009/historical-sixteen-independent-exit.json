@@ -1,0 +1,112 @@
+{
+  "status": "PASS_SIXTEEN_HISTORICAL_H1_EXIT_PRICE_MODEL",
+  "scope": "Independent pure-Python H1 simulated Exit; original BT retrospective, not an unseen forward or venue STOP fill certificate",
+  "expected": 212,
+  "matched": 212,
+  "byRoute": [
+    {
+      "route": "REC_G1_MID_REL_LOWVOL",
+      "expected": 13,
+      "matched": 13
+    },
+    {
+      "route": "REC_G4_MATURE_REL_RANGE",
+      "expected": 17,
+      "matched": 17
+    },
+    {
+      "route": "REC_X04_TIME_24H",
+      "expected": 19,
+      "matched": 19
+    },
+    {
+      "route": "REC_X07_TIME_6H",
+      "expected": 14,
+      "matched": 14
+    },
+    {
+      "route": "REC_X08_TIME_48H",
+      "expected": 11,
+      "matched": 11
+    },
+    {
+      "route": "REC_X11_TIME_48H",
+      "expected": 13,
+      "matched": 13
+    },
+    {
+      "route": "REC_X12_TIME_12H",
+      "expected": 15,
+      "matched": 15
+    },
+    {
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "expected": 22,
+      "matched": 22
+    },
+    {
+      "route": "REC_Y02_REV_D0_T12",
+      "expected": 15,
+      "matched": 15
+    },
+    {
+      "route": "REC_Y04_REV_D2_T36",
+      "expected": 10,
+      "matched": 10
+    },
+    {
+      "route": "REC_Y05_REV_D2_T9",
+      "expected": 9,
+      "matched": 9
+    },
+    {
+      "route": "REC_Y10_REV_D2_T24",
+      "expected": 12,
+      "matched": 12
+    },
+    {
+      "route": "REC_Y11_REV_D0_T36",
+      "expected": 11,
+      "matched": 11
+    },
+    {
+      "route": "REC_Y13_REV_D2_T36",
+      "expected": 12,
+      "matched": 12
+    },
+    {
+      "route": "REC_Y16_REV_D0_T6",
+      "expected": 8,
+      "matched": 8
+    },
+    {
+      "route": "REC_Y17_REV_D1_T3",
+      "expected": 11,
+      "matched": 11
+    }
+  ],
+  "errors": [],
+  "inputSha256": {
+    "candidates": "fabdd5ae7dee170e05176896103f645ac67c4ea0d1f3bc3ec76605f013cd0edd",
+    "ledger": "edaae6ba9a8fe84c7db1cbb2e9d133ac9e85f8a89033be5ed7825b6a6e065a65",
+    "external": "8fc3e1db5be8bb637aad1355a51ac6544ad959971980dd524cc4388c51b1200b"
+  },
+  "marketSha256": {
+    "ADAUSDT": "e9c591532aedac859602ddb7cae76d16a2a22129c739478f1ea1075579d1b972",
+    "AAVEUSDT": "79548b1968b5562645c5b516396c7aa9b16645add167410e4a613161883e4aba",
+    "XRPUSDT": "3d434bf8ed2265663b9375c8de1f64d9ce4b1a90e20b06bf2a91c657dc5fa99e",
+    "LTCUSDT": "51ad635801eb58ca43459d9425f1eec779294c82455f53a2f3428a70a45ac09a",
+    "LINKUSDT": "f4f8e5baabd65da0f52093be29ac2348742223f680d1fe3fd7e1d7b4ab37b066",
+    "BTCUSDT": "f573b511842dcd1207801324948fa85842e0e2fd8d44ad76e3273d9fa607421c",
+    "DOGEUSDT": "c392039d1bb9de87d2c54ba75d5425f43571aef0a41ab15559d9d572ad760d1f",
+    "SOLUSDT": "10958e969ea53fbb5d9eaedf20680d9e9463fcba18ceee79f8f2853a8907db26",
+    "AVAXUSDT": "46214ec892d6378d0f3efb3e5ca1d890ee33cf5dfc98b0ad652fd8bda764104c",
+    "ATOMUSDT": "1fba07ebb4db4a2d0190abe35ea2e21cc3538dbe162e3ac5ee26e9b0128afc9b",
+    "BNBUSDT": "92e071adce1df1ac2ea400181d190689a2c6ec1527fa17c969dc39c622f79657",
+    "INJUSDT": "6dbc916cd9e788a964c58935cc3661184a27736c57e3683157774c2e863bb948",
+    "NEARUSDT": "6c5b4b2f250ebc9aec723da4566132b7e431b26a3e320e2ef09f482de6d0e47e",
+    "ETHUSDT": "72727955b1bacee9a6fb8666e08826c1926ff95ae6bd8d1ccb35d7dc6d6bac86"
+  },
+  "orderEnabled": false,
+  "tradingMutation": 0
+}

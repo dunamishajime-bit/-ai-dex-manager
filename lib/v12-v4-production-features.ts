@@ -48,7 +48,10 @@ export function computeProductionH1Features(symbol: string, side: V12V4Side, ent
   const closes=Array.from({length:48},(_,i)=>get(sm,48-i).close);
   const prior=Array.from({length:24},(_,i)=>get(sm,25-i));
   const vols=prior.map(b=>b.quoteVolume).sort((a,b)=>a-b), med=(vols[11]+vols[12])/2;
-  if(!(med>0))throw Error("FEATURE_VOLUME_MEDIAN_ZERO");
+  // Original Python causal feature emits None when the prior 24h median
+  // quote volume is zero. An absent volRatio makes both VOL_GE1/VOL_LT1
+  // fail closed while unrelated route predicates remain evaluable.
+  if(!Number.isFinite(med)||med<0)throw Error("FEATURE_VOLUME_MEDIAN_INVALID");
   const hi=Math.max(...prior.map(b=>b.high)),lo=Math.min(...prior.map(b=>b.low));
   const loc=hi>lo?(px-lo)/(hi-lo):0.5;
   const recent=Array.from({length:13},(_,i)=>get(sm,13-i));
@@ -59,7 +62,7 @@ export function computeProductionH1Features(symbol: string, side: V12V4Side, ent
     symbol:symbol.toUpperCase(),sret6:sg*ret(sm,6),btc6:sg*ret(bm,6),btc24:sg*br24,
     rel12:sg*(ret(sm,12)-ret(bm,12)),rel24:sg*(sr24-br24),
     ema12Dist:sg*(px-ema(closes.slice(-24),12))/A,
-    break24Atr:sg===1?(px-hi)/A:(lo-px)/A,volRatio:prev.quoteVolume/med,
+    break24Atr:sg===1?(px-hi)/A:(lo-px)/A,volRatio:med>0?prev.quoteVolume/med:undefined,
     er24:den>0?Math.abs(er.at(-1)!-er[0])/den:0,rangeLoc24:sg===1?loc:1-loc,
     pullback12Atr:sg===1?(favored-px)/A:(px-favored)/A,compression:atr(6)/atr(24),
     bodyAtr:sg*(px-prev.open)/A,clv:sg===1?clv:1-clv,
