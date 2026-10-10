@@ -30,6 +30,7 @@ export interface V4RunnerDependencies{
  fetchPeers:()=>Promise<V4PeerSource[]>;
  assertAuthority:(cmd:V4DurableOrderCommand)=>Promise<void>;
  assertSourceParity:(decision:V4LiveDecisionSnapshot)=>Promise<void>;
+ assertEntrySafety:()=>Promise<void>;
  requiredResidentStop:(input:{route:string;symbol:string;side:"LONG"|"SHORT";entryPrice:number;atr14:number})=>Promise<number>;
  quantityNormalizer:EntryPlanInput["quantityNormalizer"];
  referencePrice:(symbol:string)=>Promise<number>;
@@ -204,6 +205,9 @@ export class V4RunnerEngine{
  private async tryCandidate(decision:V4LiveDecisionSnapshot,dispatcher:V4DurableOrderDispatcher,
   cycle:V4OrderCycle):Promise<V4TickResult>{
   const d=this.deps,now=this.now();
+  // Existing positions are reconciled and exited before this point. These
+  // global controls gate new ENTRY only and therefore never strand protection.
+  await d.assertEntrySafety();
   // This is a source-level *independent* proof, not the shadow boolean.
   await d.assertSourceParity(decision);
   // A Production canary is deliberately one-entry-only. Historical durable

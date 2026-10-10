@@ -14,6 +14,7 @@ import {readV4TimeStopApproval,approvedV4TimeStopQuote} from "../lib/v12-v4-time
 import {attachV4NativeCoreCandidates} from "../lib/v12-v4-core-candidate";
 import type {V4PeerKind,V4PeerSource,V4PeerLineageMode} from "../lib/v12-v4-peer-state-owners";
 import {observeV4PeerService} from "../lib/v12-v4-peer-service-attestation";
+import {assertV4EntrySafety} from "../lib/v12-v4-entry-safety";
 const H2=7200000;
 function env(name:string){
  const value=String(process.env[name]??"").trim();
@@ -125,6 +126,7 @@ export async function buildV4ProductionRuntime(){
     (await import("../lib/v12-x1-all")).protectiveLevels(entryPrice,atr14,side).initialStop;
   },
   canaryEntry:canaryPermit?{maxNotionalUsd:canaryPermit.absoluteNotionalCapUsd}:undefined,
+  assertEntrySafety:async()=>{await assertV4EntrySafety();},
   assertSourceParity:async decision=>{
    if(canaryPermit)assertV4CanarySourceSnapshot(decision,canaryPermit,releaseSha);
    else await assertV4CertifiedSource(releaseSha,decision);
