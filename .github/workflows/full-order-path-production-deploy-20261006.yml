@@ -1,4 +1,4 @@
-name: PENGU M05 Shadow Production 20261007
+name: V12 V4 Controlled Production Canary
 
 on:
   workflow_dispatch:
@@ -7,13 +7,14 @@ permissions:
   contents: read
 
 concurrency:
-  group: disdex-full-order-path-production-deploy-20261006
+  group: disdex-v12-v4-production-canary
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  deploy-canary:
+    if: github.ref == 'refs/heads/research/v4-independent-venue-lifecycle-20261010'
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
+    timeout-minutes: 45
     env:
       TARGET_SHA: ${{ github.sha }}
       SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
@@ -24,52 +25,22 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - uses: actions/setup-node@v4
         with:
           node-version: "24"
           cache: npm
 
-      - name: Verify exact runtime delta and decision-to-order safety
+      - name: Exact SHA predeployment checks
         shell: bash
         run: |
           set -Eeuo pipefail
           npm ci --no-audit --no-fund
-          npm run strategy:pengu-dual-ls-v2:selftest
-          npx tsx scripts/pengu-m05-current-live-parity.ts
-          npx tsx --test tests/pengu-m05-shadow-outcome.test.ts
-          npm run strategy:pengu-dual-ls-v2:short-v20:selftest
-          npx tsx --test \
-            tests/live-order-lock-scope-v2.test.mjs \
-            tests/fet-brk48-live-runner.test.ts \
-            tests/hype-trend-runner-gate.test.ts \
-            tests/hype-zec-runner-gate.test.ts \
-            tests/account-lock-bounded-retry.test.ts \
-            tests/v12-preorder-gross-reservation.test.ts \
-            tests/managed-protective-orders.test.ts \
-            tests/quality102-preflight-protective-order.test.ts \
-            tests/q102-risk-block-freshness.test.ts \
-            tests/shared-risk-rollover-retry.test.ts \
-            tests/resident-stop-runner-integration.test.ts
-          npx tsx --test \
-            tests/production-cutover-rollback-safety.test.mjs \
-            tests/production-rollback-behavior.test.mjs \
-            tests/fet-preemption-readiness-audit.test.mjs \
-            tests/fet_core_preemption_wiring.test.ts \
-            tests/fet-core-preemption.test.ts \
-            tests/operator_activation_hardening.test.ts
-          node --test tests/shared-risk-systemd-decoupling.test.mjs
-          python3 -m unittest discover -s tests -p test_runtime_wiring_script.py
-          python3 -m unittest discover -s tests -p test_runtime_multilineage_monitoring.py
-          npm run strategy:v12-x1-all:selftest
-          npm run strategy:pengu-dual-ls-v2:recovery-v8:selftest
-          npm run strategy:quality102-causal-v1:runner:selftest
-          npm run strategy:hype-trend-long:selftest
-          npm run strategy:shared-crypto-risk:selftest
-          npx tsc --noEmit -p tsconfig.pengu-dual-ls-v2.json
-          npx tsc --noEmit -p tsconfig.v96-runner.json
-          bash -n scripts/ops/root/disdex-idle-production-redeploy-20261001
-          bash -n scripts/ops/root/disdex-current-runtime-wiring
-          bash scripts/ops/root/disdex-current-runtime-wiring --self-test
+          npx tsc --noEmit
+          npx tsx --test 'tests/v12-v4-*.test.ts' tests/aster-v3-client-testnet-chain-id.test.ts
+          test -f deploy/systemd/disdex-v12-v4-canary@.service
+          grep -q 'V12_V4_OPERATION_MODE=CANARY' deploy/systemd/disdex-v12-v4-canary@.service
+          grep -q 'v12-v4-canary.json' deploy/systemd/disdex-v12-v4-canary@.service
 
       - name: Initialize restricted root SSH
         shell: bash
@@ -87,186 +58,249 @@ jobs:
           chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
           ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
 
-      - name: Prove direct descendant and runtime-only delta
+      - name: Capture current release and immutable compatibility
         shell: bash
         run: |
           set -Eeuo pipefail
           PORT="${SSH_PORT:-22}"
-          FROM_SHA="$(ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -p "$PORT" root@"$SSH_HOST" "tr -d '[:space:]' </home/deploy/disdex-trading/current/.disdex-release-sha")"
-          [[ "$FROM_SHA" == eabfeb1750666fac11f894a34cdcf68501ab923f ]]
-          git merge-base --is-ancestor "$FROM_SHA" "$TARGET_SHA"
-          git diff --quiet "$FROM_SHA" "$TARGET_SHA" -- config package.json package-lock.json
-          git diff --quiet "$FROM_SHA" "$TARGET_SHA" -- lib scripts config package.json package-lock.json             ':(exclude)lib/pengu-dual-ls-v2-runner-state.ts'             ':(exclude)lib/pengu-dual-ls-v2-portfolio-runner.ts'
-          echo "FROM_SHA=$FROM_SHA" >> "$GITHUB_ENV"
-          echo "SHADOW_ONLY_RUNTIME_DELTA=PASS"
+          SSH=(ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -p "$PORT" "root@$SSH_HOST")
+          OLD_SHA="$("${SSH[@]}" "tr -d '[:space:]' </home/deploy/disdex-trading/current/.disdex-release-sha")"
+          [[ "$OLD_SHA" =~ ^[0-9a-f]{40}$ ]]
+          git merge-base --is-ancestor "$OLD_SHA" "$TARGET_SHA"
+          git diff --quiet "$OLD_SHA" "$TARGET_SHA" -- package.json package-lock.json
+          echo "OLD_SHA=$OLD_SHA" >> "$GITHUB_ENV"
+          echo "CURRENT_PRODUCTION_SHA=$OLD_SHA"
+          echo "TARGET_CANARY_SHA=$TARGET_SHA"
 
-      - name: Rebind unchanged Idle parity certificates to exact target SHA
+      - name: Fresh read-only production preflight
         shell: bash
         run: |
           set -Eeuo pipefail
           PORT="${SSH_PORT:-22}"
-          scp -i "$HOME/.ssh/id_root" -P "$PORT" -o IdentitiesOnly=yes -o BatchMode=yes \
-            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
-            root@"$SSH_HOST":/var/lib/disdex/shared/idle-priority-parity-cert.json /tmp/idle-current.json
-          scp -i "$HOME/.ssh/id_root" -P "$PORT" -o IdentitiesOnly=yes -o BatchMode=yes \
-            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
-            root@"$SSH_HOST":/var/lib/disdex/shared/idle-residual-long-parity-cert.json /tmp/residual-current.json
-          FROM_SHA="$FROM_SHA" TARGET_SHA="$TARGET_SHA" npx tsx -e '
-            import fs from "node:fs";
-            import {assertIdleParityCertificate} from "./lib/idle-priority-short-parity-cert";
-            import {assertIdleResidualLongParityCert} from "./lib/idle-residual-long-parity-cert";
-            const from=process.env.FROM_SHA!,target=process.env.TARGET_SHA!;
-            const a=JSON.parse(fs.readFileSync("/tmp/idle-current.json","utf8"));
-            assertIdleParityCertificate(a,from);
-            a.runtimeSha=target; a.generatedAt=Date.now();
-            assertIdleParityCertificate(a,target);
-            fs.writeFileSync("/tmp/idle-target.json",JSON.stringify(a,null,2)+"\n");
-            const b=JSON.parse(fs.readFileSync("/tmp/residual-current.json","utf8"));
-            assertIdleResidualLongParityCert(b,from);
-            b.runtimeSha=target; b.generatedAt=new Date().toISOString();
-            assertIdleResidualLongParityCert(b,target);
-            fs.writeFileSync("/tmp/residual-target.json",JSON.stringify(b,null,2)+"\n");
-            console.log("UNCHANGED_IDLE_CERT_REBIND=PASS");
-          '
-          git archive --format=tar.gz --output=/tmp/disdex-trading-source.tgz HEAD
-          echo "SOURCE_SHA256=$(sha256sum /tmp/disdex-trading-source.tgz | awk '{print $1}')" >> "$GITHUB_ENV"
-          echo "CERT_SHA256=$(sha256sum /tmp/idle-target.json | awk '{print $1}')" >> "$GITHUB_ENV"
-          echo "RESIDUAL_CERT_SHA256=$(sha256sum /tmp/residual-target.json | awk '{print $1}')" >> "$GITHUB_ENV"
-          echo "WIRING_SHA256=$(sha256sum scripts/ops/root/disdex-current-runtime-wiring | awk '{print $1}')" >> "$GITHUB_ENV"
-
-      - name: Transfer immutable source and audited cutover inputs
-        shell: bash
-        run: |
-          set -Eeuo pipefail
-          PORT="${SSH_PORT:-22}"
-          common=(-i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts")
-          scp "${common[@]}" -P "$PORT" /tmp/disdex-trading-source.tgz root@"$SSH_HOST":/tmp/disdex-source-$GITHUB_RUN_ID.tgz
-          scp "${common[@]}" -P "$PORT" /tmp/idle-target.json root@"$SSH_HOST":/tmp/idle-parity-v3-$GITHUB_RUN_ID.json
-          scp "${common[@]}" -P "$PORT" /tmp/residual-target.json root@"$SSH_HOST":/tmp/idle-residual-long-parity-$GITHUB_RUN_ID.json
-          scp "${common[@]}" -P "$PORT" scripts/ops/root/disdex-idle-production-redeploy-20261001 root@"$SSH_HOST":/tmp/disdex-idle-cutover-$GITHUB_RUN_ID.sh
-          scp "${common[@]}" -P "$PORT" scripts/ops/root/disdex-current-runtime-wiring root@"$SSH_HOST":/tmp/disdex-wiring-$GITHUB_RUN_ID.sh
-
-      - name: Exact SHA Production cutover with automatic rollback
-        shell: bash
-        run: |
-          set -Eeuo pipefail
-          PORT="${SSH_PORT:-22}"
-          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
-            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
-            -o ConnectTimeout=15 -p "$PORT" root@"$SSH_HOST" \
-            "FROM_SHA='$FROM_SHA' TARGET_SHA='$TARGET_SHA' REQUEST_ID='$GITHUB_RUN_ID' SOURCE_SHA256='$SOURCE_SHA256' CERT_SHA256='$CERT_SHA256' RESIDUAL_CERT_SHA256='$RESIDUAL_CERT_SHA256' WIRING_SHA256='$WIRING_SHA256' V12_ACTIVE_MIGRATION_CODE_PARITY='1' bash /tmp/disdex-idle-cutover-$GITHUB_RUN_ID.sh"
-
-      - name: Postdeploy read-only account and runtime verification
-        shell: bash
-        run: |
-          set -Eeuo pipefail
-          PORT="${SSH_PORT:-22}"
-          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
-            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
-            -p "$PORT" root@"$SSH_HOST" "TARGET_SHA='$TARGET_SHA' bash -s" <<'REMOTE'
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts"             -p "$PORT" "root@$SSH_HOST" "OLD_SHA='$OLD_SHA' bash -s" <<'REMOTE'
           set -Eeuo pipefail
           current=/home/deploy/disdex-trading/current
-          [[ "$(tr -d '[:space:]' < "$current/.disdex-release-sha")" == "$TARGET_SHA" ]]
-          [[ "$(readlink -f "$current")" == "/home/deploy/disdex-trading/releases/$TARGET_SHA" ]]
-          names=(disdex-v12-x1-all disdex-pengu-dual-ls-v2 disdex-quality102-causal-v1 disdex-v52-aster-only disdex-fet-brk48 disdex-hype-long disdex-idle-priority-short disdex-shared-crypto-risk disdex-v12-v52-margin-guard)
-          for name in "${names[@]}"; do
-            unit="$name@$TARGET_SHA.service"
-            [[ "$(systemctl is-active "$unit" 2>/dev/null || true)" == active ]]
-            pid="$(systemctl show "$unit" -p MainPID --value)"
-            [[ "$pid" =~ ^[0-9]+$ && "$pid" -gt 0 ]]
-            cwd="$(readlink -f "/proc/$pid/cwd" 2>/dev/null || true)"
-            [[ "$cwd" == "/home/deploy/disdex-trading/releases/$TARGET_SHA" ]]
-          done
+          [[ "$(tr -d '[:space:]' < "$current/.disdex-release-sha")" == "$OLD_SHA" ]]
+          old_unit="disdex-v12-x1-all@$OLD_SHA.service"
+          [[ "$(systemctl is-active "$old_unit" 2>/dev/null || true)" == active ]]
+          [[ ! -e /var/lib/disdex/shared/account-order.lock ]]
           python3 - <<'PY'
           import json,time
           now=int(time.time()*1000)
           kill=json.load(open("/var/lib/disdex/shared/kill-switch.json"))
           risk=json.load(open("/var/lib/disdex/shared/crypto-daily-risk.json"))
-          guard=json.load(open("/var/lib/disdex/shared/margin-risk/guard-live.json"))
+          margin=json.load(open("/var/lib/disdex/shared/margin-risk/guard-live.json"))
           pending=json.load(open("/var/lib/disdex/shared/pending-exposure.json"))
-          assert kill.get("active") is False
-          assert risk.get("tripped") is False and risk.get("sourceComplete") is True and now-int(risk["updatedAt"])<120000
-          assert guard.get("stage")=="HEALTHY" and guard.get("ordersAllowed") is True and now-int(guard["checkedAt"])<360000
-          active=[r for r in pending.get("entries",[]) if str(r.get("status","")).upper() in {"PENDING","SUBMITTED","UNKNOWN"}]
+          v12=json.load(open("/var/lib/disdex/v12-x1-all/runner.json"))
+          assert kill.get("active") is False, kill
+          assert risk.get("tripped") is False and risk.get("sourceComplete") is True
+          assert now-int(risk["updatedAt"])<120000, ("risk-stale",now-int(risk["updatedAt"]))
+          mt=int(margin.get("checkedAt",margin.get("updatedAt",0)))
+          assert margin.get("stage")=="HEALTHY" and margin.get("ordersAllowed") is True
+          assert 0<=now-mt<360000, ("margin-stale",now-mt)
+          active=[x for x in pending.get("entries",[]) if str(x.get("status","")).upper() in {"PENDING","SUBMITTED","UNKNOWN"}]
           assert not active, active
-          print("POSTDEPLOY_SHARED_SAFETY=PASS")
+          assert not v12.get("activePositions",[]) and not v12.get("active") and not v12.get("pending")
+          assert not v12.get("manualReview") and not v12.get("dd1296UnaccountedExits",[])
+          print("V4_CANARY_STATE_PREFLIGHT=PASS")
           PY
           set -a
-          for f in /etc/disdex/disdex-v13d-v11eq-v96.env /etc/disdex/disdex-v12-pengu-v2-v52.env /etc/disdex/disdex-v12-x1-all.env; do [[ -f "$f" ]] && . "$f"; done
+          for f in /etc/disdex/disdex-v13d-v11eq-v96.env /etc/disdex/disdex-v12-pengu-v2-v52.env /etc/disdex/disdex-v12-x1-all.env; do
+            [[ -f "$f" ]] && . "$f"
+          done
           set +a
-          cd "/home/deploy/disdex-trading/releases/$TARGET_SHA"
-          ./node_modules/.bin/tsx scripts/disdex-aster-readonly-account-diagnostic.ts | tee /tmp/postdeploy-account-$TARGET_SHA.jsonl
-          grep -q 'ASTER_READONLY_ACCOUNT_DIAGNOSTIC_PASS' /tmp/postdeploy-account-$TARGET_SHA.jsonl
-          echo "POSTDEPLOY_RUNTIME=PASS"
-          echo "ORDER_MUTATION_AUDIT=READ_ONLY"
-          REMOTE
-
-      - name: Retention cleanup with dry-run guard
-        shell: bash
-        run: |
-          set -Eeuo pipefail
-          PORT="${SSH_PORT:-22}"
-          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
-            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
-            -p "$PORT" root@"$SSH_HOST" "TARGET_SHA='$TARGET_SHA' bash -s" <<'REMOTE'
-          set -Eeuo pipefail
-          release="/home/deploy/disdex-trading/releases/$TARGET_SHA"
-          dry="$("$release/scripts/ops/root/disdex-vps-retention-cleanup" --dry-run)"
-          echo "$dry"
-          python3 - "$dry" <<'PY'
+          cd "$current"
+          snapshot="$(./node_modules/.bin/tsx scripts/disdex-aster-readonly-account-diagnostic.ts)"
+          echo "$snapshot"
+          python3 - "$snapshot" <<'PY'
           import json,sys
           d=json.loads(sys.argv[1])
-          assert d["status"]=="DISDEX_VPS_RETENTION_CLEANUP_PASS"
-          assert d["protectedPathsTouched"] is False
-          assert d["currentReleaseDeleted"] is False
-          assert d["runtimeStateDeleted"] is False
-          assert d["approvalDeleted"] is False
-          assert d["killSwitchDeleted"] is False
-          assert d["ordersSent"] is False and d["cancelSent"] is False and d["positionChangesSent"] is False
-          PY
-          applied="$("$release/scripts/ops/root/disdex-vps-retention-cleanup" --apply)"
-          echo "$applied"
-          python3 - "$applied" "$TARGET_SHA" <<'PY'
-          import json,sys
-          d=json.loads(sys.argv[1]); sha=sys.argv[2]
-          assert d["status"]=="DISDEX_VPS_RETENTION_CLEANUP_PASS"
-          assert d["currentReleaseDeleted"] is False
-          assert d["runtimeStateDeleted"] is False
-          assert d["killSwitchDeleted"] is False
-          assert d["ordersSent"] is False and d["cancelSent"] is False and d["positionChangesSent"] is False
-          assert f"/home/deploy/disdex-trading/releases/{sha}" in d["protectedPaths"]
-          print("RETENTION_CLEANUP=PASS")
+          assert d["status"]=="ASTER_READONLY_ACCOUNT_DIAGNOSTIC_PASS"
+          assert d.get("positions")==[], d.get("positions")
+          assert d.get("openOrders")==[], d.get("openOrders")
+          assert d.get("ordersSent")==0 and d.get("cancelsSent")==0 and d.get("positionChangesSent")==0
+          print("V4_CANARY_SIGNED_FLAT_PREFLIGHT=PASS")
           PY
           REMOTE
 
-      - name: Public smoke
+      - name: Transfer exact immutable source
         shell: bash
         run: |
           set -Eeuo pipefail
-          for route in /decision-status /realtime /history; do
-            code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 20 "https://professional-dismanager.net$route")"
-            echo "PUBLIC_ROUTE=$route HTTP=$code"
-            [[ "$code" =~ ^(200|30[1278]|401|403)$ ]]
-          done
+          git archive --format=tar.gz --output="/tmp/v12-v4-$TARGET_SHA.tgz" "$TARGET_SHA"
+          PORT="${SSH_PORT:-22}"
+          scp -i "$HOME/.ssh/id_root" -P "$PORT" -o IdentitiesOnly=yes -o BatchMode=yes             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts"             "/tmp/v12-v4-$TARGET_SHA.tgz" "root@$SSH_HOST:/tmp/v12-v4-$TARGET_SHA.tgz"
 
-      - name: Roll back any cutover or mandatory postdeploy failure
-        if: ${{ failure() && env.FROM_SHA != '' }}
+      - name: Stage canary release and root approvals
         shell: bash
         run: |
           set -Eeuo pipefail
           PORT="${SSH_PORT:-22}"
-          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
-            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
-            -p "$PORT" root@"$SSH_HOST" \
-            "FROM_SHA='$FROM_SHA' TARGET_SHA='$TARGET_SHA' REQUEST_ID='$GITHUB_RUN_ID' bash -s" <<'REMOTE'
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts"             -p "$PORT" "root@$SSH_HOST" "OLD_SHA='$OLD_SHA' TARGET_SHA='$TARGET_SHA' bash -s" <<'REMOTE'
           set -Eeuo pipefail
-          current="$(tr -d '[:space:]' </home/deploy/disdex-trading/current/.disdex-release-sha)"
-          if [[ "$current" == "$FROM_SHA" ]]; then
-            echo POSTDEPLOY_FAILURE_SOURCE_RELEASE_RETAINED
-            exit 0
+          release="/home/deploy/disdex-trading/releases/$TARGET_SHA"
+          old="/home/deploy/disdex-trading/releases/$OLD_SHA"
+          install -d -m 0755 "$release"
+          tar -xzf "/tmp/v12-v4-$TARGET_SHA.tgz" -C "$release"
+          printf '%s\n' "$TARGET_SHA" > "$release/.disdex-release-sha"
+          [[ -d "$old/node_modules" ]]
+          rm -rf "$release/node_modules"
+          ln -s "$old/node_modules" "$release/node_modules"
+          install -o root -g root -m 0644 "$release/deploy/systemd/disdex-v12-v4-canary@.service" /etc/systemd/system/disdex-v12-v4-canary@.service
+          install -d -o root -g root -m 0755 /etc/disdex /var/lib/disdex/shared/operator-activation "/var/lib/disdex/v12-v4/$TARGET_SHA"
+          cat > /etc/disdex/disdex-v12-v4-canary.env <<EOF
+          V12_V4_EXECUTION_STORE_PATH=/var/lib/disdex/v12-v4/$TARGET_SHA/orders.json
+          DISDEX_ACCOUNT_LOCK_PATH=/var/lib/disdex/shared/account-order.lock
+          DISDEX_PENDING_EXPOSURE_REGISTRY_PATH=/var/lib/disdex/shared/pending-exposure.json
+          DISDEX_SHARED_KILL_SWITCH_FILE=/var/lib/disdex/shared/kill-switch.json
+          V12_V4_TICK_INTERVAL_MS=60000
+          V12_V4_PEER_STATE_PATHS_JSON='{"V12":"/var/lib/disdex/v12-x1-all/runner.json","PENGU":"/var/lib/disdex/pengu-dual-ls-v2/runner-live.json","Q102":"/var/lib/disdex/quality102-causal-v1/state.json","V52":"/var/lib/disdex/v52-aster-only/runner-live.json","FET":"/var/lib/disdex/fet-brk48-residual/state.json","HYPE_LONG":"/var/lib/disdex/hype-zec-long/runner.json","IDLE":"/var/lib/disdex/idle-priority/state.json","RESIDUAL":"/var/lib/disdex/idle-priority/residual-long-state.json"}'
+          EOF
+          chown root:deploy /etc/disdex/disdex-v12-v4-canary.env
+          chmod 0640 /etc/disdex/disdex-v12-v4-canary.env
+          TARGET_SHA="$TARGET_SHA" RELEASE="$release" python3 - <<'PY'
+          import json,os,datetime,pathlib
+          sha=os.environ["TARGET_SHA"]; release=pathlib.Path(os.environ["RELEASE"])
+          now=datetime.datetime.now(datetime.timezone.utc)
+          iso=lambda x:x.isoformat().replace("+00:00","Z")
+          time_approval={
+            "schema":"disdex-v12-v4-time-stop-approval/v1","approvedSha":sha,
+            "approvedAt":iso(now),"routeCount":37,
+            "policyId":"V12_V4_TIME37_FIXED_8PCT_H1_RESEARCH_20261010",
+            "operatorAcknowledgement":"I_APPROVE_V12_V4_TIME37_FIXED8_EMERGENCY_STOP"}
+          canary={
+            "schema":"disdex-v12-v4-production-canary-permit/v1","approvedSha":sha,
+            "policyId":"V2_M150_D05_CORE_NATIVE","approvedAt":iso(now),
+            "validUntil":iso(now+datetime.timedelta(hours=23,minutes=55)),
+            "maxEntries":1,"sizing":"VENUE_MINIMUM_ONLY","absoluteNotionalCapUsd":25,
+            "operatorAcknowledgement":"I_AUTHORIZE_ONE_V12_V4_PRODUCTION_CANARY_AT_VENUE_MINIMUM"}
+          readiness=json.load(open(release/"docs/production/current-implementation-readiness.json",encoding="utf-8"))
+          assert readiness["implementationStatus"]=="READY"
+          assert [b for b in readiness.get("blockers",[]) if b!="OPERATOR_LIVE_ACTIVATION_REQUIRED"]==[]
+          activation={
+            "schema":"disdex-live-operator-activation/v1","target":readiness["target"],
+            "approvedSha":sha,"approvedRunners":["V12_V4"],"ordersEnabled":True,
+            "operatorAcknowledgement":"I_ACK_REAL_MONEY_LIVE_ACTIVATION","approvedAt":iso(now)}
+          for path,obj in [
+            ("/etc/disdex/v12-v4-time-stop-approval.json",time_approval),
+            ("/etc/disdex/v12-v4-production-canary-permit.json",canary),
+            ("/var/lib/disdex/shared/operator-activation/v12-v4-canary.json",activation)]:
+            pathlib.Path(path).write_text(json.dumps(obj,indent=2)+"\n",encoding="utf-8")
+          PY
+          chown root:deploy /etc/disdex/v12-v4-time-stop-approval.json /etc/disdex/v12-v4-production-canary-permit.json
+          chmod 0640 /etc/disdex/v12-v4-time-stop-approval.json /etc/disdex/v12-v4-production-canary-permit.json
+          chown root:root /var/lib/disdex/shared/operator-activation/v12-v4-canary.json
+          chmod 0600 /var/lib/disdex/shared/operator-activation/v12-v4-canary.json
+          systemctl daemon-reload
+          echo "V4_CANARY_STAGING=PASS"
+          REMOTE
+
+      - name: Atomic V12 to V4 canary handoff
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts"             -p "$PORT" "root@$SSH_HOST" "OLD_SHA='$OLD_SHA' TARGET_SHA='$TARGET_SHA' bash -s" <<'REMOTE'
+          set -Eeuo pipefail
+          old_unit="disdex-v12-x1-all@$OLD_SHA.service"
+          canary_unit="disdex-v12-v4-canary@$TARGET_SHA.service"
+          [[ "$(systemctl is-active "$old_unit" 2>/dev/null || true)" == active ]]
+          [[ ! -e /var/lib/disdex/shared/account-order.lock ]]
+          systemctl stop "$old_unit"
+          systemctl mask "$old_unit"
+          sleep 2
+          if systemctl list-units --no-pager --plain --type=service --state=running 'disdex-v12-x1-all@*.service' | grep -q 'disdex-v12-x1-all@'; then
+            echo "OLD_V12_STILL_RUNNING" >&2; exit 1
           fi
-          [[ "$current" == "$TARGET_SHA" ]]
-          backup="/var/lib/disdex/deploy-backups/idle-$REQUEST_ID/cutover.sh"
-          [[ -f "$backup" && ! -L "$backup" ]]
-          DISDEX_ROLLBACK_ONLY=true V12_ACTIVE_MIGRATION_CODE_PARITY=1 bash "$backup"
+          [[ ! -e /var/lib/disdex/shared/account-order.lock ]]
+          set -a
+          for f in /etc/disdex/disdex-v13d-v11eq-v96.env /etc/disdex/disdex-v12-pengu-v2-v52.env /etc/disdex/disdex-v12-v4-canary.env; do . "$f"; done
+          export DISDEX_RELEASE_SHA="$TARGET_SHA" V12_V4_LIVE_ACK="$TARGET_SHA" V12_V4_OPERATION_MODE=CANARY
+          set +a
+          cd "/home/deploy/disdex-trading/releases/$TARGET_SHA"
+          snapshot="$(./node_modules/.bin/tsx scripts/disdex-aster-readonly-account-diagnostic.ts)"
+          python3 - "$snapshot" <<'PY'
+          import json,sys
+          d=json.loads(sys.argv[1]); assert d["status"]=="ASTER_READONLY_ACCOUNT_DIAGNOSTIC_PASS"
+          assert d["positions"]==[] and d["openOrders"]==[]
+          PY
+          runuser -u deploy -- env             DISDEX_RELEASE_SHA="$TARGET_SHA" V12_V4_LIVE_ACK="$TARGET_SHA" V12_V4_OPERATION_MODE=CANARY             bash -lc 'set -a; . /etc/disdex/disdex-v13d-v11eq-v96.env; . /etc/disdex/disdex-v12-pengu-v2-v52.env; . /etc/disdex/disdex-v12-v4-canary.env; set +a; cd "/home/deploy/disdex-trading/releases/'"$TARGET_SHA"'"; ./node_modules/.bin/tsx scripts/v12-v4-production-runner.ts --init-signed-flat'
+          systemctl enable --now "$canary_unit"
+          sleep 8
+          [[ "$(systemctl is-active "$canary_unit" 2>/dev/null || true)" == active ]]
+          echo "V4_CANARY_SERVICE_ACTIVE=PASS"
+          REMOTE
+
+      - name: Observe first canary ticks and signed account
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts"             -p "$PORT" "root@$SSH_HOST" "TARGET_SHA='$TARGET_SHA' bash -s" <<'REMOTE'
+          set -Eeuo pipefail
+          unit="disdex-v12-v4-canary@$TARGET_SHA.service"
+          submitted=0
+          for i in $(seq 1 18); do
+            [[ "$(systemctl is-active "$unit" 2>/dev/null || true)" == active ]]
+            logs="$(journalctl -u "$unit" --since '10 minutes ago' --no-pager -o cat)"
+            if grep -q 'DURABLE_PRODUCTION_CANARY_WITH_RESIDENT_STOP' <<<"$logs"; then submitted=1; break; fi
+            if grep -q 'V4_RUNNER_FAILED_CLOSED' <<<"$logs"; then echo "$logs" | tail -50; exit 1; fi
+            sleep 10
+          done
+          store="/var/lib/disdex/v12-v4/$TARGET_SHA/orders.json"
+          python3 - "$store" "$submitted" <<'PY'
+          import json,sys,os
+          p=sys.argv[1]; submitted=int(sys.argv[2])
+          d=json.load(open(p,encoding="utf-8"))
+          entries=[x for x in d.get("intents",{}).values() if x.get("action")=="ENTRY"]
+          stops=[x for x in d.get("intents",{}).values() if x.get("action")=="STOP"]
+          assert len(entries)<=1, entries
+          if submitted:
+            assert len(entries)==1 and len(stops)==1, (entries,stops)
+          print("V4_CANARY_ENTRY_INTENT_COUNT="+str(len(entries)))
+          print("V4_CANARY_STOP_INTENT_COUNT="+str(len(stops)))
+          PY
+          set -a
+          for f in /etc/disdex/disdex-v13d-v11eq-v96.env /etc/disdex/disdex-v12-pengu-v2-v52.env /etc/disdex/disdex-v12-v4-canary.env; do . "$f"; done
+          set +a
+          cd "/home/deploy/disdex-trading/releases/$TARGET_SHA"
+          ./node_modules/.bin/tsx scripts/disdex-aster-readonly-account-diagnostic.ts
+          if [[ "$submitted" == 1 ]]; then
+            echo "V4_PRODUCTION_CANARY=ENTRY_SUBMITTED_AND_RESIDENT_STOP_CONFIRMED"
+          else
+            echo "V4_PRODUCTION_CANARY=ARMED_WAITING_FOR_NATURAL_SIGNAL"
+          fi
+          echo "OLD_V12_RUNNING_COUNT=$(systemctl list-units --no-pager --plain --type=service --state=running 'disdex-v12-x1-all@*.service' | grep -c 'disdex-v12-x1-all@' || true)"
+          REMOTE
+
+      - name: Roll back safely on deployment failure
+        if: failure()
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ -n "${OLD_SHA:-}" ]] || exit 0
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts"             -p "$PORT" "root@$SSH_HOST" "OLD_SHA='$OLD_SHA' TARGET_SHA='$TARGET_SHA' bash -s" <<'REMOTE'
+          set -Eeuo pipefail
+          canary="disdex-v12-v4-canary@$TARGET_SHA.service"
+          old="disdex-v12-x1-all@$OLD_SHA.service"
+          store="/var/lib/disdex/v12-v4/$TARGET_SHA/orders.json"
+          entries=0
+          if [[ -f "$store" ]]; then
+            entries="$(python3 - "$store" <<'PY'
+          import json,sys
+          d=json.load(open(sys.argv[1],encoding="utf-8"))
+          print(sum(1 for x in d.get("intents",{}).values() if x.get("action")=="ENTRY"))
+          PY
+          )"
+          fi
+          if [[ "$entries" == 0 ]]; then
+            systemctl disable --now "$canary" 2>/dev/null || true
+            systemctl unmask "$old" 2>/dev/null || true
+            systemctl enable --now "$old"
+            echo "V4_CANARY_ROLLBACK=OLD_V12_RESTORED_NO_CANARY_ENTRY"
+          else
+            systemctl restart "$canary" 2>/dev/null || true
+            echo "V4_CANARY_ROLLBACK=CANARY_ENTRY_EXISTS_OLD_V12_REMAINS_MASKED"
+          fi
           REMOTE

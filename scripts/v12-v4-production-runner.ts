@@ -13,7 +13,7 @@ import {readV4CanaryPermit,assertV4CanarySourceSnapshot,assertV4CanaryOrderAutho
 import {readV4TimeStopApproval,approvedV4TimeStopQuote} from "../lib/v12-v4-time-stop-approval";
 import {attachV4NativeCoreCandidates} from "../lib/v12-v4-core-candidate";
 import type {V4PeerKind,V4PeerSource,V4PeerLineageMode} from "../lib/v12-v4-peer-state-owners";
-import {observeV4PeerService} from "../lib/v12-v4-peer-service-attestation";
+import {observeV4PeerService,observeCurrentV4PeerService} from "../lib/v12-v4-peer-service-attestation";
 import {assertV4EntrySafety} from "../lib/v12-v4-entry-safety";
 const H2=7200000;
 function env(name:string){
@@ -33,13 +33,19 @@ async function loadPeers(releaseSha:string,lineageMode:V4PeerLineageMode="UNIFIE
   const path=paths[kind];
   if(!path||!path.startsWith("/var/lib/disdex/"))throw Error("V4_PEER_STATE_PATH_INVALID:"+kind);
   const raw=await safeJson(path);
-  const programSha=String(raw.runtimeCommitSha??raw.runtimeSha??"").toLowerCase();
-  if(!/^[a-f0-9]{40}$/.test(programSha))throw Error("V4_PEER_RELEASE_NOT_ATTESTED:"+kind);
-  const serviceSha=kind==="V12"||lineageMode==="UNIFIED_RELEASE"?releaseSha:programSha;
-  const service=await observeV4PeerService(kind,serviceSha);
-  if(!service.retiredV12&&!service.active)
-   throw Error("V4_PEER_SERVICE_NOT_ATTESTED:"+kind);
-  return {kind,programSha,raw,service};
+  let programSha=String(raw.runtimeCommitSha??raw.runtimeSha??"").toLowerCase();
+  let programShaSource:"STATE"|"SYSTEMD"="STATE";
+  let service;
+  if(kind!=="V12"&&lineageMode==="ATTEST_EACH_PEER"&&!/^[a-f0-9]{40}$/.test(programSha)){
+   const current=await observeCurrentV4PeerService(kind);
+   programSha=current.sha;service=current.service;programShaSource="SYSTEMD";
+  }else{
+   if(!/^[a-f0-9]{40}$/.test(programSha))throw Error("V4_PEER_RELEASE_NOT_ATTESTED:"+kind);
+   const serviceSha=kind==="V12"||lineageMode==="UNIFIED_RELEASE"?releaseSha:programSha;
+   service=await observeV4PeerService(kind,serviceSha);
+  }
+  if(!service.retiredV12&&!service.active)throw Error("V4_PEER_SERVICE_NOT_ATTESTED:"+kind);
+  return {kind,programSha,programShaSource,raw,service};
  }));
 }
 function requireReleaseSha(){

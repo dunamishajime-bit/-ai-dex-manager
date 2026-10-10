@@ -44,7 +44,7 @@ test("retired legacy V12 must be flat and cannot conceal pending work",()=>{
  const review=sources();review[5].raw.manualReview="unknown";
  assert.throws(()=>v4PeerOwners(review,sha,now),/PEER_PENDING_OR_MANUAL_REVIEW/);
 });
-test("Production canary may attest each non-V12 peer at its own exact active release",()=>{
+test("Production canary may attest each non-V12 peer at its own exact active release; service-derived SHA is accepted only when state omits its own SHA",()=>{
  const v=sources();
  const peerShas=["c","d","e","f","1","2","3"].map(x=>x.repeat(40));
  for(let i=1;i<v.length;i++){
@@ -55,6 +55,17 @@ test("Production canary may attest each non-V12 peer at its own exact active rel
  }
  assert.throws(()=>v4PeerOwners(v,sha,now),/PEER_PROGRAM_LINEAGE_MISMATCH/);
  assert.deepEqual(v4PeerOwners(v,sha,now,"ATTEST_EACH_PEER"),[]);
+ const serviceDerived=sources();
+ delete (serviceDerived[1].raw as any).runtimeCommitSha;
+ delete (serviceDerived[1].raw as any).runtimeSha;
+ serviceDerived[1].programSha="c".repeat(40);
+ (serviceDerived[1] as any).programShaSource="SYSTEMD";
+ serviceDerived[1].service!.unit=serviceDerived[1].service!.unit.replace(sha,"c".repeat(40));
+ assert.deepEqual(v4PeerOwners(serviceDerived,sha,now,"ATTEST_EACH_PEER"),[]);
+ const contradictory=structuredClone(serviceDerived);
+ (contradictory[1].raw as any).runtimeCommitSha="d".repeat(40);
+ assert.throws(()=>v4PeerOwners(contradictory,sha,now,"ATTEST_EACH_PEER"),/PEER_PROGRAM_LINEAGE_MISMATCH/);
+
  const wrongService=sources();
  wrongService[1].programSha="c".repeat(40);
  (wrongService[1].raw as any).runtimeCommitSha="c".repeat(40);

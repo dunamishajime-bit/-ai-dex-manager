@@ -2,7 +2,7 @@ import type {ForeignExposure} from "./v12-v4-production-lifecycle";
 export type V4PeerKind="V12"|"PENGU"|"Q102"|"V52"|"FET"|"HYPE_LONG"|"IDLE"|"RESIDUAL";
 import type {V4ServiceObservation} from "./v12-v4-peer-service-attestation";
 export type V4PeerSource={kind:V4PeerKind;programSha:string;raw:Record<string,any>;
- service?:V4ServiceObservation};
+ programShaSource?:"STATE"|"SYSTEMD";service?:V4ServiceObservation};
 export type V4PeerLineageMode="UNIFIED_RELEASE"|"ATTEST_EACH_PEER";
 export function v4PeerOwners(sources:V4PeerSource[],expectedSha:string,now:number,
  lineageMode:V4PeerLineageMode="UNIFIED_RELEASE"):ForeignExposure[]{
@@ -38,7 +38,8 @@ export function v4PeerOwners(sources:V4PeerSource[],expectedSha:string,now:numbe
   }else if(
    (lineageMode==="UNIFIED_RELEASE"&&s.programSha!==expectedSha)||
    (r.runtimeCommitSha&&r.runtimeCommitSha!==attestedSha)||
-   (r.runtimeSha&&r.runtimeSha!==attestedSha))
+   (r.runtimeSha&&r.runtimeSha!==attestedSha)||
+   (lineageMode==="ATTEST_EACH_PEER"&&s.programShaSource==="SYSTEMD"&&(r.runtimeCommitSha||r.runtimeSha)))
    throw Error("PEER_PROGRAM_LINEAGE_MISMATCH");
   const obs=s.service;
   const liveObservation=obs&&obs.active&&obs.mainPid>0&&
