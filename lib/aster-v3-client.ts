@@ -1,5 +1,6 @@
 import { privateKeyToAccount } from "viem/accounts";
 import { deferAsterGlobalRateBudget, waitForAsterGlobalRateSlot } from "./disdex-aster-global-rate-budget";
+import type {AsterRatePriority} from "./disdex-aster-rate-budget-policy";
 
 export type AsterHttpMethod = "GET" | "POST" | "PUT" | "DELETE";
 export type AsterOrderSide = "BUY" | "SELL";
@@ -339,13 +340,14 @@ export class AsterV3Client {
         return { signedParams, signature };
     }
 
-    private async request<T>(input: { method: AsterHttpMethod; path: string; params?: Record<string, unknown>; signed?: boolean; orderMutation?: boolean }): Promise<T> {
+    private async request<T>(input: { method: AsterHttpMethod; path: string; params?: Record<string, unknown>; signed?: boolean; orderMutation?: boolean; ratePriority?:AsterRatePriority }): Promise<T> {
         const method = input.method;
         const params = input.params || {};
         let retries = 0;
         while (true) {
             try {
-                await waitForAsterGlobalRateSlot(asterFuturesRequestWeight(method, input.path, params));
+                await waitForAsterGlobalRateSlot(asterFuturesRequestWeight(method, input.path, params),
+                    input.ratePriority ?? (input.orderMutation===true?"NEW_EXPOSURE":"RISK_READ"));
                 const abort = new AbortController();
                 const timeout = setTimeout(() => abort.abort(), this.timeoutMs);
                 try {
@@ -392,32 +394,33 @@ export class AsterV3Client {
         }
     }
 
-    ping() { return this.request<Record<string, never>>({ method: "GET", path: "/fapi/v3/ping" }); }
-    getServerTime() { return this.request<{ serverTime: number }>({ method: "GET", path: "/fapi/v3/time" }); }
-    getExchangeInfo() { return this.request<AsterExchangeInfo>({ method: "GET", path: "/fapi/v3/exchangeInfo" }); }
-    getPriceTickers(symbol?: string) { return this.request<AsterPriceTicker | AsterPriceTicker[]>({ method: "GET", path: "/fapi/v3/ticker/price", params: symbol ? { symbol } : undefined }); }
-    getBookTickers(symbol?: string) { return this.request<AsterBookTicker | AsterBookTicker[]>({ method: "GET", path: "/fapi/v3/ticker/bookTicker", params: symbol ? { symbol } : undefined }); }
-    get24hTickers(symbol?: string) { return this.request<Aster24hTicker | Aster24hTicker[]>({ method: "GET", path: "/fapi/v3/ticker/24hr", params: symbol ? { symbol } : undefined }); }
+    ping() { return this.request<Record<string, never>>({ method: "GET", path: "/fapi/v3/ping", ratePriority:"MARKET_DATA" }); }
+    getServerTime() { return this.request<{ serverTime: number }>({ method: "GET", path: "/fapi/v3/time", ratePriority:"MARKET_DATA" }); }
+    getExchangeInfo() { return this.request<AsterExchangeInfo>({ method: "GET", path: "/fapi/v3/exchangeInfo", ratePriority:"MARKET_DATA" }); }
+    getPriceTickers(symbol?: string) { return this.request<AsterPriceTicker | AsterPriceTicker[]>({ method: "GET", path: "/fapi/v3/ticker/price", params: symbol ? { symbol } : undefined, ratePriority:"MARKET_DATA" }); }
+    getBookTickers(symbol?: string) { return this.request<AsterBookTicker | AsterBookTicker[]>({ method: "GET", path: "/fapi/v3/ticker/bookTicker", params: symbol ? { symbol } : undefined, ratePriority:"MARKET_DATA" }); }
+    get24hTickers(symbol?: string) { return this.request<Aster24hTicker | Aster24hTicker[]>({ method: "GET", path: "/fapi/v3/ticker/24hr", params: symbol ? { symbol } : undefined, ratePriority:"MARKET_DATA" }); }
     getKlines(symbol: string, interval: string, limit = 200, range: AsterKlineRange = {}) {
         return this.request<AsterKline[]>({
             method: "GET",
             path: "/fapi/v3/klines",
             params: { symbol, interval, limit, startTime: range.startTime, endTime: range.endTime },
+            ratePriority: "MARKET_DATA",
         });
     }
-    getBalances() { return this.request<AsterBalanceRow[]>({ method: "GET", path: "/fapi/v3/balance", signed: true }); }
-    getPositionMode() { return this.request<{ dualSidePosition: boolean }>({ method: "GET", path: "/fapi/v3/positionSide/dual", signed: true }); }
-    getPositions(symbol?: string) { return this.request<AsterPositionRiskRow[]>({ method: "GET", path: "/fapi/v3/positionRisk", params: symbol ? { symbol } : undefined, signed: true }); }
-    getOpenOrders(symbol?: string) { return this.request<AsterOrderResponse[]>({ method: "GET", path: "/fapi/v3/openOrders", params: symbol ? { symbol } : undefined, signed: true }); }
+    getBalances() { return this.request<AsterBalanceRow[]>({ method: "GET", path: "/fapi/v3/balance", signed: true, ratePriority:"RISK_READ" }); }
+    getPositionMode() { return this.request<{ dualSidePosition: boolean }>({ method: "GET", path: "/fapi/v3/positionSide/dual", signed: true, ratePriority:"RISK_READ" }); }
+    getPositions(symbol?: string) { return this.request<AsterPositionRiskRow[]>({ method: "GET", path: "/fapi/v3/positionRisk", params: symbol ? { symbol } : undefined, signed: true, ratePriority:"RECONCILIATION" }); }
+    getOpenOrders(symbol?: string) { return this.request<AsterOrderResponse[]>({ method: "GET", path: "/fapi/v3/openOrders", params: symbol ? { symbol } : undefined, signed: true, ratePriority:"RECONCILIATION" }); }
     setMarginType(symbol: string, marginType: "CROSSED" | "ISOLATED") {
         return this.request<Record<string, unknown>>({ method: "POST", path: "/fapi/v3/marginType", params: { symbol, marginType }, signed: true, orderMutation: true });
     }
     setLeverage(symbol: string, leverage: number) {
         return this.request<Record<string, unknown>>({ method: "POST", path: "/fapi/v3/leverage", params: { symbol, leverage }, signed: true, orderMutation: true });
     }
-    getOrder(symbol: string, clientOrderId: string) { return this.request<AsterOrderResponse>({ method: "GET", path: "/fapi/v3/order", params: { symbol, origClientOrderId: clientOrderId }, signed: true }); }
+    getOrder(symbol: string, clientOrderId: string) { return this.request<AsterOrderResponse>({ method: "GET", path: "/fapi/v3/order", params: { symbol, origClientOrderId: clientOrderId }, signed: true, ratePriority:"RECONCILIATION" }); }
     getIncomeHistory(input: { symbol?: string; incomeType?: "REALIZED_PNL" | "FUNDING_FEE" | "COMMISSION"; startTime?: number; endTime?: number; limit?: number } = {}) {
-        return this.request<AsterIncomeRow[]>({ method: "GET", path: "/fapi/v3/income", params: { ...input, limit: Math.min(1000, Math.max(1, input.limit ?? 1000)) }, signed: true });
+        return this.request<AsterIncomeRow[]>({ method: "GET", path: "/fapi/v3/income", params: { ...input, limit: Math.min(1000, Math.max(1, input.limit ?? 1000)) }, signed: true, ratePriority:"RECONCILIATION" });
     }
     getUserTrades(symbol: string, input: { startTime?: number; endTime?: number; fromId?: number; limit?: number } = {}) {
         const normalizedSymbol = String(symbol || "").trim().toUpperCase();
@@ -427,19 +430,20 @@ export class AsterV3Client {
             path: "/fapi/v3/userTrades",
             params: { symbol: normalizedSymbol, ...input, limit: Math.min(1000, Math.max(1, input.limit ?? 1000)) },
             signed: true,
+            ratePriority: "RECONCILIATION",
         });
     }
 
     placeMarketOrder(order: AsterNewMarketOrder) {
-        return this.request<AsterOrderResponse>({ method: "POST", path: "/fapi/v3/order", params: { symbol: order.symbol, side: order.side, type: "MARKET", quantity: order.quantity, positionSide: order.positionSide || "BOTH", reduceOnly: order.reduceOnly === true ? "true" : "false", newClientOrderId: order.newClientOrderId, newOrderRespType: order.newOrderRespType || "RESULT" }, signed: true, orderMutation: true });
+        return this.request<AsterOrderResponse>({ method: "POST", path: "/fapi/v3/order", params: { symbol: order.symbol, side: order.side, type: "MARKET", quantity: order.quantity, positionSide: order.positionSide || "BOTH", reduceOnly: order.reduceOnly === true ? "true" : "false", newClientOrderId: order.newClientOrderId, newOrderRespType: order.newOrderRespType || "RESULT" }, signed: true, orderMutation: true, ratePriority:order.reduceOnly===true?"PROTECTIVE":"NEW_EXPOSURE" });
     }
 
     placeConditionalOrder(order: AsterNewConditionalOrder) {
-        return this.request<AsterOrderResponse>({ method: "POST", path: "/fapi/v3/order", params: { symbol: order.symbol, side: order.side, type: order.type, quantity: order.quantity, stopPrice: order.stopPrice, positionSide: order.positionSide || "BOTH", reduceOnly: "true", newClientOrderId: order.newClientOrderId, workingType: order.workingType || "MARK_PRICE", priceProtect: order.priceProtect === true ? "TRUE" : "FALSE", newOrderRespType: order.newOrderRespType || "ACK" }, signed: true, orderMutation: true });
+        return this.request<AsterOrderResponse>({ method: "POST", path: "/fapi/v3/order", params: { symbol: order.symbol, side: order.side, type: order.type, quantity: order.quantity, stopPrice: order.stopPrice, positionSide: order.positionSide || "BOTH", reduceOnly: "true", newClientOrderId: order.newClientOrderId, workingType: order.workingType || "MARK_PRICE", priceProtect: order.priceProtect === true ? "TRUE" : "FALSE", newOrderRespType: order.newOrderRespType || "ACK" }, signed: true, orderMutation: true, ratePriority:"PROTECTIVE" });
     }
 
     cancelOrder(symbol: string, clientOrderId: string) {
-        return this.request<AsterOrderResponse>({ method: "DELETE", path: "/fapi/v3/order", params: { symbol, origClientOrderId: clientOrderId }, signed: true, orderMutation: true });
+        return this.request<AsterOrderResponse>({ method: "DELETE", path: "/fapi/v3/order", params: { symbol, origClientOrderId: clientOrderId }, signed: true, orderMutation: true, ratePriority:"PROTECTIVE" });
     }
 
     placeStopMarketOrder(order: AsterNewStopMarketOrder) {
@@ -461,6 +465,7 @@ export class AsterV3Client {
             },
             signed: true,
             orderMutation: true,
+            ratePriority: "PROTECTIVE",
         });
     }
 

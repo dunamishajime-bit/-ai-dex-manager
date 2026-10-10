@@ -1,6 +1,7 @@
 import { chmod, chown, mkdir, readFile, rename, rm, stat, writeFile } from "node:fs/promises";
 import { randomUUID } from "node:crypto";
 import { dirname, join, resolve } from "node:path";
+import type { AsterRatePriority } from "./disdex-aster-rate-budget-policy";
 
 export const ASTER_GLOBAL_RATE_BUDGET_SCHEMA = "disdex-aster-rate-budget/v1";
 
@@ -10,6 +11,7 @@ export type AsterGlobalRateSlotOptions = {
   maxQueueMs: number;
   weight?: number;
   nowMs?: number;
+  priority?: AsterRatePriority;
 };
 
 type BudgetState = {
@@ -19,6 +21,7 @@ type BudgetState = {
   pid: number;
   cooldownUntil?: number;
   lastRateLimitStatus?: number;
+  lastPriority?: AsterRatePriority;
 };
 
 const sleep = (ms: number) => new Promise<void>((resolveSleep) => setTimeout(resolveSleep, ms));
@@ -26,6 +29,16 @@ const errorCode = (error: unknown) => error && typeof error === "object" && "cod
 const transientLockRace = (error: unknown) => ["ENOENT", "ENOTEMPTY", "EPERM", "EBUSY"].includes(errorCode(error));
 const LOCK_OWNER_SCHEMA = "disdex-aster-rate-budget-lock/v1";
 const LOCK_RECOVERY_GRACE_MS = 5_000;
+const PRIORITY_QUEUE_FRACTION: Record<AsterRatePriority, number> = {
+  PROTECTIVE: 1,
+  RECONCILIATION: 0.8,
+  RISK_READ: 0.7,
+  MARKET_DATA: 0.6,
+  NEW_EXPOSURE: 0.8,
+};
+function priorityQueueMs(maxQueueMs:number,priority:AsterRatePriority){
+  return Math.max(1,Math.floor(maxQueueMs*PRIORITY_QUEUE_FRACTION[priority]));
+}
 
 type BudgetLockOwner = {
   schema: typeof LOCK_OWNER_SCHEMA;
@@ -285,8 +298,12 @@ export async function reserveAsterGlobalRateSlot(options: AsterGlobalRateSlotOpt
   const minIntervalMs = Math.max(1, Math.min(1_000, Math.floor(options.minIntervalMs)));
   const maxQueueMs = Math.max(minIntervalMs, Math.min(30_000, Math.floor(options.maxQueueMs)));
   const weight = Math.max(1, Math.min(100, Math.floor(options.weight ?? 1)));
+  const priority:AsterRatePriority = options.priority ?? "RISK_READ";
+  if (!(["PROTECTIVE","RECONCILIATION","RISK_READ","MARKET_DATA","NEW_EXPOSURE"] as string[]).includes(priority))
+    throw new Error("ASTER_GLOBAL_RATE_BUDGET_CONFIG_INVALID");
+  const queueMs=priorityQueueMs(maxQueueMs,priority);
   await mkdir(dirname(path), { recursive: true, mode: 0o700 });
-  const owner = await acquireBudgetLock(lockPath, maxQueueMs);
+  const owner = await acquireBudgetLock(lockPath, queueMs);
   try {
     const current = await readBudget(path);
     if (Object.keys(current).length > 0 && current.schema !== ASTER_GLOBAL_RATE_BUDGET_SCHEMA) {
@@ -297,12 +314,15 @@ export async function reserveAsterGlobalRateSlot(options: AsterGlobalRateSlotOpt
     if (!Number.isFinite(nextAllowedAt) || nextAllowedAt < 0) throw new Error("ASTER_GLOBAL_RATE_BUDGET_MALFORMED");
     const permitAt = Math.max(now, nextAllowedAt);
     const waitMs = permitAt - now;
-    if (waitMs > maxQueueMs) throw new Error(`ASTER_GLOBAL_RATE_BUDGET_SATURATED:${waitMs}`);
+    const serviceMs = minIntervalMs * weight;
+    const projectedMs = waitMs + serviceMs;
+    if (projectedMs > queueMs) throw new Error(`ASTER_GLOBAL_RATE_BUDGET_SATURATED:${projectedMs}`);
     const state: BudgetState = {
       schema: ASTER_GLOBAL_RATE_BUDGET_SCHEMA,
       nextAllowedAt: permitAt + (minIntervalMs * weight),
       updatedAt: now,
       pid: process.pid,
+      lastPriority: priority,
     };
     await atomicWriteBudget(path, state);
     return { permitAt, waitMs, nextAllowedAt: state.nextAllowedAt };
@@ -327,11 +347,11 @@ export async function deferAsterGlobalRateBudget(options: { path: string; cooldo
   } finally { await releaseBudgetLock(lockPath, owner); }
 }
 
-export async function waitForAsterGlobalRateSlot(weight = 1) {
+export async function waitForAsterGlobalRateSlot(weight = 1, priority:AsterRatePriority="RISK_READ") {
   const path = String(process.env.DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH || "").trim();
   if (!path) return;
   const minIntervalMs = Number(process.env.DISDEX_ASTER_GLOBAL_MIN_INTERVAL_MS || 50);
   const maxQueueMs = Number(process.env.DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS || 5_000);
-  const slot = await reserveAsterGlobalRateSlot({ path, minIntervalMs, maxQueueMs, weight });
+  const slot = await reserveAsterGlobalRateSlot({ path, minIntervalMs, maxQueueMs, weight, priority });
   if (slot.waitMs > 0) await sleep(slot.waitMs);
 }

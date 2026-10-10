@@ -6,7 +6,7 @@
 import type {AsterV3Client,AsterBalanceRow,AsterPositionRiskRow,AsterOrderResponse} from "./aster-v3-client";
 import type {AccountLockHandle,FileAccountOrderLock} from "./disdex-account-order-lock";
 import {readPendingExposureRegistry,type PendingExposureRegistry} from "./disdex-pending-exposure-registry";
-import {V4ExecutionStore,type V4ExecutionDocument} from "./v12-v4-execution-store";
+import {V4ExecutionStore,advanceV4Protection,advanceV4Intent,type V4ExecutionDocument,type V4ProtectionPhase} from "./v12-v4-execution-store";
 import {V4SharedReservations,bindV4SharedDispatchGuards} from "./v12-v4-shared-reservations";
 import {V4DurableOrderDispatcher,createV4AsterOrderGateway,type V4DurableOrderCommand} from "./v12-v4-durable-orders";
 import type {V12AsterLiveAdapter} from "./v12-aster-live-adapter";
@@ -47,6 +47,11 @@ export class V4RunnerEngine{
   if(next===d.state)return d;
   return this.deps.store.commit(d.revision,{...d,state:next});
  }
+ private commitProtection(legId:string,phase:V4ProtectionPhase,protectedQty=0,stopClientOrderId?:string){
+  const d=this.deps.store.read();
+  const next=advanceV4Protection(d,legId,phase,this.now(),protectedQty,stopClientOrderId);
+  return this.deps.store.commit(d.revision,next);
+ }
 
  async tick():Promise<V4TickResult>{
   const at=this.now();
@@ -55,29 +60,143 @@ export class V4RunnerEngine{
   try{return await this.underLease(lease);}
   finally{await lease.release();}
  }
+ private abandonPreparedEntry(cid:string){
+  const at=this.now(),doc=this.deps.store.read(),intent=doc.intents[cid];
+  if(!intent||intent.action!=="ENTRY"||intent.stage!=="PREPARED")return;
+  const leg=doc.state.legs[intent.legId];
+  if(!leg||leg.qty>0)throw Error("V4_PREPARED_ENTRY_STATE_CONFLICT:"+cid);
+  let next=doc;
+  if(leg.status==="PENDING_ENTRY")next={...next,state:applyProductionEvent(next.state,{type:"ENTRY_TERMINAL",eventId:"recovery-unsent-entry:"+cid,ts:at,id:leg.id})};
+  next=advanceV4Intent(next,cid,"TERMINAL",at);
+  this.deps.store.commit(doc.revision,next);
+  this.commitProtection(intent.legId,"CLOSED",0);
+ }
+ private async ensureResidentProtection(legId:string,dispatcher:V4DurableOrderDispatcher,cycle:V4OrderCycle):Promise<boolean>{
+  const d=this.deps;let doc=d.store.read(),leg=doc.state.legs[legId];
+  if(!leg||leg.qty<=0||leg.status==="CLOSED"||leg.status==="CANCELLED")return true;
+  if(!(leg.entryNotional>0)||!(leg.entryAtr&&leg.entryAtr>0))throw Error("V4_PROTECTION_RECOVERY_ENTRY_EVIDENCE_MISSING:"+legId);
+  const average=leg.entryNotional/leg.qty;
+  const raw=await d.requiredResidentStop({route:leg.candidate.route,symbol:leg.candidate.symbol,side:leg.candidate.effectiveSide,entryPrice:average,atr14:leg.entryAtr});
+  if(!(raw>0)||!Number.isFinite(raw)||(leg.candidate.effectiveSide==="LONG"?raw>=average:raw<=average))throw Error("V4_PROTECTION_RECOVERY_STOP_INVALID:"+legId);
+  const normalized=await d.adapter.normalizeStopPrice(leg.candidate.symbol,raw),desired=normalized.price;
+  if(!(desired>0)||!Number.isFinite(desired))throw Error("V4_PROTECTION_RECOVERY_STOP_NORMALIZATION_INVALID:"+legId);
+  const stopIntents=Object.values(doc.intents).filter(i=>i.legId===legId&&i.action==="STOP");
+  let open=await d.client.getOpenOrders(leg.candidate.symbol);
+  for(const intent of stopIntents.filter(i=>open.some(o=>o.clientOrderId===i.clientOrderId))){
+   await dispatcher.reconcile(intent.clientOrderId,this.now());
+  }
+  doc=d.store.read();leg=doc.state.legs[legId];
+  const same=Object.values(doc.state.legs).filter(l=>l.qty>0&&l.candidate.symbol===leg.candidate.symbol);
+  const sides=new Set(same.map(l=>l.candidate.effectiveSide));
+  if(sides.size!==1)throw Error("V4_PROTECTION_RECOVERY_OPPOSING_VIRTUAL_LEGS:"+leg.candidate.symbol);
+  const expected=same.reduce((n,l)=>n+l.qty*(l.candidate.effectiveSide==="LONG"?1:-1),0);
+  const positions=await d.client.getPositions(leg.candidate.symbol);
+  const actual=positions.filter(p=>String(p.symbol).toUpperCase()===leg.candidate.symbol).reduce((n,p)=>n+Number(p.positionAmt),0);
+  if(!Number.isFinite(actual)||Math.abs(actual-expected)>Math.max(1e-8,Math.abs(expected)*1e-7)){
+   for(const intent of Object.values(doc.intents).filter(i=>i.legId===legId&&["STOP","TAKE_PROFIT","EXIT"].includes(i.action)&&i.stage!=="PREPARED")){
+    const proof=await dispatcher.reconcile(intent.clientOrderId,this.now());
+    if(proof&&["FILLED","PARTIALLY_FILLED"].includes(String(proof.status).toUpperCase()))return false;
+   }
+   throw Error("V4_PROTECTION_RECOVERY_VENUE_QTY_DRIFT:"+leg.candidate.symbol);
+  }
+  open=await d.client.getOpenOrders(leg.candidate.symbol);
+  const active=Object.values(doc.intents).filter(i=>i.legId===legId&&i.action==="STOP"&&open.some(o=>o.clientOrderId===i.clientOrderId));
+  const matches=active.filter(i=>{
+   const o=open.find(x=>x.clientOrderId===i.clientOrderId)!;const c=i.command as V4DurableOrderCommand|undefined;
+   const remaining=Number(o.origQty)-Number(o.executedQty);
+   return c&&o.type==="STOP_MARKET"&&o.reduceOnly===true&&String(o.status).toUpperCase()==="NEW"&&
+    Math.abs(Number(o.stopPrice)-desired)<=Math.max(1e-12,desired*1e-10)&&
+    Math.abs(remaining-leg.qty)<=Math.max(1e-8,leg.qty*1e-7)&&
+    Math.abs(c.price-desired)<=Math.max(1e-12,desired*1e-10)&&
+    Math.abs(c.quantity-leg.qty)<=Math.max(1e-8,leg.qty*1e-7);
+  });
+  let targetCid:string;
+  if(matches.length){
+   if(matches.length!==1)throw Error("V4_PROTECTION_RECOVERY_DUPLICATE_MATCHING_STOPS:"+legId);
+   targetCid=matches[0].clientOrderId;
+  }else{
+   const sequence=Object.values(doc.intents).filter(i=>i.legId===legId&&i.action==="STOP").reduce((n,i)=>Math.max(n,i.sequence+1),0);
+   const command:V4DurableOrderCommand={legId,action:"STOP",sequence,symbol:leg.candidate.symbol,positionSide:leg.candidate.effectiveSide,quantity:leg.qty,price:desired,signalTs:leg.entryTs};
+   await d.assertAuthority(command);
+   targetCid=dispatcher.prepare(command,this.now());
+   this.commitProtection(legId,"STOP_SENT_UNKNOWN",0,targetCid);
+   const intent=d.store.read().intents[targetCid];
+   let proof;
+   if(intent.stage==="PREPARED"){await dispatcher.submit(targetCid,this.now());proof=await dispatcher.reconcile(targetCid,this.now());}
+   else proof=await dispatcher.recoverReductionSameId(targetCid,this.now());
+   if(!proof)proof=await dispatcher.recoverReductionSameId(targetCid,this.now());
+   if(!proof)throw Error("V4_PROTECTION_RECOVERY_READBACK_MISSING:"+targetCid);
+   if(["FILLED","PARTIALLY_FILLED"].includes(String(proof.status).toUpperCase()))return false;
+   const remaining=Number(proof.quantity)-Number(proof.executedQuantity);
+   if(proof.type!=="STOP_MARKET"||proof.reduceOnly!==true||String(proof.status).toUpperCase()!=="NEW"||
+    Math.abs(remaining-leg.qty)>Math.max(1e-8,leg.qty*1e-7)||
+    Math.abs(Number(proof.stopPrice)-desired)>Math.max(1e-12,desired*1e-10))throw Error("V4_PROTECTION_RECOVERY_CONFIRMATION_INVALID:"+targetCid);
+  }
+  this.commitProtection(legId,"STOP_CONFIRMED",leg.qty,targetCid);
+  const confirmed=await d.client.getOpenOrders(leg.candidate.symbol);
+  if(!confirmed.some(o=>o.clientOrderId===targetCid))throw Error("V4_PROTECTION_RECOVERY_CONFIRMED_STOP_NOT_OPEN:"+targetCid);
+  const old=Object.values(d.store.read().intents).filter(i=>i.legId===legId&&i.action==="STOP"&&i.clientOrderId!==targetCid&&confirmed.some(o=>o.clientOrderId===i.clientOrderId));
+  for(const intent of old)await d.adapter.cancel(intent.clientOrderId);
+  if(old.length){
+   const readback=await d.client.getOpenOrders(leg.candidate.symbol);
+   if(old.some(i=>readback.some(o=>o.clientOrderId===i.clientOrderId))||!readback.some(o=>o.clientOrderId===targetCid))throw Error("V4_PROTECTION_RECOVERY_SUPERSEDE_NOT_CONFIRMED:"+legId);
+  }
+  return true;
+ }
+ private async reconcileEntriesAndProtection(dispatcher:V4DurableOrderDispatcher,cycle:V4OrderCycle){
+  const d=this.deps;
+  for(const snapshot of Object.values(d.store.read().intents).filter(i=>i.action==="ENTRY")){
+   let intent=d.store.read().intents[snapshot.clientOrderId];
+   if(intent.stage==="PREPARED"){this.abandonPreparedEntry(intent.clientOrderId);continue;}
+   const currentProtection=d.store.read().protections[intent.legId];
+   if(!currentProtection||currentProtection.phase==="ENTRY_PREPARED")this.commitProtection(intent.legId,"ENTRY_SENT",0);
+   const proof=await dispatcher.reconcile(intent.clientOrderId,this.now());
+   if(!proof)throw Error("V4_ENTRY_ORDER_ID_UNRESOLVED:"+intent.clientOrderId);
+   await cycle.reconcileEntry(intent.clientOrderId,this.now());
+   const leg=d.store.read().state.legs[intent.legId];
+   if(!leg)throw Error("V4_ENTRY_RECOVERY_LEG_MISSING:"+intent.legId);
+   if(leg.status==="CANCELLED"){this.commitProtection(leg.id,"CLOSED",0);continue;}
+   if(leg.qty<=0)continue;
+   const terminal=["FILLED","CANCELED","EXPIRED","REJECTED"].includes(String(proof.status).toUpperCase());
+   this.commitProtection(leg.id,terminal?"ENTRY_FILLED_STOP_PENDING":"ENTRY_PARTIALLY_FILLED",0);
+   await this.ensureResidentProtection(leg.id,dispatcher,cycle);
+  }
+ }
+ private async reconcileReductions(dispatcher:V4DurableOrderDispatcher,cycle:V4OrderCycle){
+  const d=this.deps;
+  for(const snapshot of Object.values(d.store.read().intents).filter(i=>i.action!=="ENTRY")){
+   let intent=d.store.read().intents[snapshot.clientOrderId];
+   let proof;
+   if(intent.stage==="PREPARED"){await dispatcher.submit(intent.clientOrderId,this.now());proof=await dispatcher.reconcile(intent.clientOrderId,this.now());}
+   else proof=await dispatcher.reconcile(intent.clientOrderId,this.now());
+   if(!proof&&intent.stage!=="TERMINAL")proof=await dispatcher.recoverReductionSameId(intent.clientOrderId,this.now());
+   if(!proof)continue;
+   if(["FILLED","PARTIALLY_FILLED"].includes(String(proof.status).toUpperCase())){
+    const before=d.store.read().state.legs[intent.legId];
+    if(before&&before.qty>0&&before.status==="OPEN")this.commitProtection(intent.legId,"EXIT_PENDING",before.qty,d.store.read().protections[intent.legId]?.stopClientOrderId);
+    await cycle.reconcileExit(intent.clientOrderId,this.now(),this.now());
+    const after=d.store.read().state.legs[intent.legId];
+    if(after?.status==="CLOSED"||after?.qty===0)this.commitProtection(intent.legId,"CLOSED",0);
+   }
+  }
+ }
  private async underLease(lease:AccountLockHandle):Promise<V4TickResult>{
   const at=this.now(), d=this.deps;
   const reserv=new V4SharedReservations(d.store,lease,d.pendingRegistryPath,this.now);
   const dispatcher=new V4DurableOrderDispatcher(d.store,createV4AsterOrderGateway(d.adapter),
    bindV4SharedDispatchGuards(reserv,d.assertAuthority));
   const cycle=new V4OrderCycle(d.store,dispatcher,reserv,d.client);
+  // Protection recovery runs before ordinary account/market reads. A newly
+  // reconciled ENTRY fill is never allowed to reach signal processing without
+  // first attempting to establish its resident STOP.
+  await this.reconcileEntriesAndProtection(dispatcher,cycle);
   // Funding for an in-flight or stop-closed position must be signed and
-  // journalled *before* the venue close changes its owner status.
+  // journalled before applying a venue close to the virtual owner.
   await cycle.reconcileFundingUpTo(this.now());
-  // Resolve existing network outcomes before making an admission.
-  for(const [cid,intent] of Object.entries(d.store.read().intents)){
-   if(intent.stage==="PREPARED")throw Error("V4_PREPARED_INTENT_REQUIRES_OPERATOR_REVIEW:"+cid);
-   if(intent.action==="ENTRY"){
-    const proof=await dispatcher.reconcile(cid,this.now());
-    if(!proof)throw Error("V4_ENTRY_ORDER_ID_UNRESOLVED:"+cid);
-    await cycle.reconcileEntry(cid,this.now());
-   }else{
-    const proof=await dispatcher.reconcile(cid,this.now());
-    if(!proof)throw Error("V4_PROTECTIVE_ORDER_ID_UNRESOLVED:"+cid);
-    if(["FILLED","PARTIALLY_FILLED"].includes(proof.status))
-     await cycle.reconcileExit(cid,this.now(),this.now());
-   }
-  }
+  await this.reconcileReductions(dispatcher,cycle);
+  // A partial ENTRY may have accumulated additional fills while reduction
+  // reconciliation was running. Re-evaluate exact STOP quantity/trigger.
+  await this.reconcileEntriesAndProtection(dispatcher,cycle);
   let [positions,openOrders,balances,peers,registry]=await Promise.all([
    d.client.getPositions(),d.client.getOpenOrders(),d.client.getBalances(),
    d.fetchPeers(),readPendingExposureRegistry(d.pendingRegistryPath),
@@ -158,15 +277,13 @@ export class V4RunnerEngine{
     quantity:leg.qty,price,signalTs:leg.entryTs};
    await d.assertAuthority(cmd);
    this.commitEvent({type:"EXIT_REQUEST",eventId:"route-exit:"+leg.id,ts:at,id:leg.id,qty:leg.qty});
+   this.commitProtection(leg.id,"EXIT_PENDING",leg.qty,d.store.read().protections[leg.id]?.stopClientOrderId);
    const cid=dispatcher.prepare(cmd,this.now());
    await dispatcher.submit(cid,this.now());
    await cycle.reconcileExit(cid,this.now(),this.now());
    if(d.store.read().state.legs[leg.id].qty>1e-10)
     throw Error("V4_EXIT_RESIDUAL_POSITION_REQUIRES_REVIEW");
    const after=d.store.read();
-   const stop=Object.values(after.intents).filter(i=>i.legId===leg.id&&i.action==="STOP");
-   if(stop.length!==1)throw Error("V4_COMPLETED_EXIT_STOP_IDENTITY_UNCERTAIN");
-   const stopCid=stop[0].clientOrderId;
    // Never cancel protection based only on an EXIT ACK or a local fill ledger.
    // Reconcile the actual net position and all surviving same-symbol STOPs
    // *before* retiring this leg's STOP, under the account lease.
@@ -183,6 +300,10 @@ export class V4RunnerEngine{
    const [beforePositions,beforeOrders]=await Promise.all([
     d.client.getPositions(),d.client.getOpenOrders()]);
    assertNet(beforePositions);
+   const activeStops=Object.values(after.intents).filter(i=>i.legId===leg.id&&i.action==="STOP"&&
+    beforeOrders.some(o=>o.clientOrderId===i.clientOrderId));
+   if(activeStops.length!==1)throw Error("V4_COMPLETED_EXIT_STOP_IDENTITY_UNCERTAIN");
+   const stopCid=activeStops[0].clientOrderId;
    const pendingRetire=planV4RetiredStops({state:after.state,intents:after.intents,
     openOrders:beforeOrders,positions:beforePositions});
    if(beforeOrders.some(o=>o.clientOrderId===stopCid)){
@@ -197,6 +318,7 @@ export class V4RunnerEngine{
     throw Error("V4_RESIDENT_STOP_CANCEL_NOT_CONFIRMED");
    assertNet(venuePositions);
    verifyV4ResidentStops(after.state,after.intents,readbackOrders);
+   this.commitProtection(leg.id,"CLOSED",0);
    return {status:"exited",reason:"ROUTE_EXIT_SIGNED_FILL_AND_STOP_REMOVED",
     eventTs:this.now(),candidateCount:0,orderEnabled:true};
   }
@@ -258,38 +380,20 @@ export class V4RunnerEngine{
     quantity:plan.leg.requestedQty,price,signalTs:candidate.eligibleEntryTs};
    await d.assertAuthority(command);
    this.commitEvent(plan);
+   this.commitProtection(plan.leg.id,"ENTRY_PREPARED",0);
    const cid=dispatcher.prepare(command,this.now());
    await dispatcher.submit(cid,this.now());
+   this.commitProtection(plan.leg.id,"ENTRY_SENT",0);
    await cycle.reconcileEntry(cid,this.now());
+   const proof=await dispatcher.reconcile(cid,this.now());
+   if(!proof)throw Error("V4_ENTRY_ORDER_ID_UNRESOLVED:"+cid);
    const latest=d.store.read().state.legs[legId];
    if(latest.qty>0){
-    const signedAverageFill=latest.entryNotional/latest.qty;
-    if(!(signedAverageFill>0)||!Number.isFinite(signedAverageFill))
-     throw Error("V4_SIGNED_AVERAGE_ENTRY_FILL_MISSING");
-    // The quote used for reservation is not the executed price. Recompute
-    // venue STOP from independently reconciled fills, never from stale quote.
-    const signedStop=await d.requiredResidentStop({route:candidate.route,symbol:candidate.symbol,
-     side:candidate.effectiveSide,entryPrice:signedAverageFill,atr14});
-    if(!Number.isFinite(signedStop)||!(signedStop>0)||
-     (candidate.effectiveSide==="LONG"?signedStop>=signedAverageFill:signedStop<=signedAverageFill))
-      throw Error("V4_SIGNED_FILL_RESIDENT_STOP_INVALID");
-    const normalized=await d.adapter.normalizeStopPrice(candidate.symbol,signedStop);
-    const venueStop=normalized.price;
-    if(!Number.isFinite(venueStop)||!(venueStop>0)||
-      (candidate.effectiveSide==="LONG"?venueStop>=signedAverageFill:venueStop<=signedAverageFill))
-      throw Error("V4_VENUE_TICK_STOP_NORMALIZATION_INVALID");
-    const protective:V4DurableOrderCommand={...command,action:"STOP",sequence:0,
-     quantity:latest.qty,price:venueStop};
-    await d.assertAuthority(protective);
-    const stopCid=dispatcher.prepare(protective,this.now());
-    await dispatcher.submit(stopCid,this.now());
-    const proof=await dispatcher.reconcile(stopCid,this.now());
-    if(!proof||proof.reduceOnly!==true||proof.type!=="STOP_MARKET"||
-       proof.clientOrderId!==stopCid||
-       Math.abs(proof.quantity-proof.executedQuantity-latest.qty)>Math.max(1e-8,latest.qty*1e-7)||
-       !(Number(proof.stopPrice)>0)||Math.abs(Number(proof.stopPrice)-venueStop)>1e-8)
-     throw Error("V4_RESIDENT_STOP_NOT_VENUE_CONFIRMED");
-   }
+    const terminal=["FILLED","CANCELED","EXPIRED","REJECTED"].includes(String(proof.status).toUpperCase());
+    this.commitProtection(legId,terminal?"ENTRY_FILLED_STOP_PENDING":"ENTRY_PARTIALLY_FILLED",0);
+    const protectedNow=await this.ensureResidentProtection(legId,dispatcher,cycle);
+    if(!protectedNow)throw Error("V4_ENTRY_FILLED_BEFORE_STOP_RECOVERY_REQUIRED:"+legId);
+   }else if(latest.status==="CANCELLED")this.commitProtection(legId,"CLOSED",0);
    return {status:"submitted",reason:d.canaryEntry?
     "DURABLE_PRODUCTION_CANARY_WITH_RESIDENT_STOP":"DURABLE_ENTRY_WITH_RESIDENT_STOP",
     eventTs:this.now(),candidateCount:decision.candidateCount,orderEnabled:true};

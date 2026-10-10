@@ -142,3 +142,121 @@ test("mock Aster dispatch reaches signed entry fill, STOP, and shared reservatio
   assert.equal([...orders.values()].filter(o=>o.status==="NEW").length,0);
  }finally{rmSync(dir,{recursive:true,force:true});}
 });
+
+async function protectionRecoveryHarness(mode:"UNKNOWN_STOP_ACK"|"PARTIAL_GROWTH"){
+ const fixture=(await import("./fixtures/v12-v4-native-route-20261009.json")).default;
+ const {adaptProductionCandidates}=await import("../lib/v12-v4-production-features");
+ const candidate=adaptProductionCandidates({...fixture,source:{...fixture.source,side:"SHORT",sourceEngine:"buildV12Signals"}}).candidates[0];
+ let time=candidate.eligibleEntryTs+5000;
+ const dir=mkdtempSync(join(tmpdir(),"v4-protection-recovery-"));
+ const store=new V4ExecutionStore(join(dir,"state.json"),sha);
+ store.initialize({equityUsd:1000,foreign:[],holdProtected:false});
+ const lock=new FileAccountOrderLock(join(dir,"account.lock"),120000,join(dir,"pending.json"));
+ const orders=new Map<string,any>(),fills:any[]=[];
+ let entrySends=0,stopSends=0,cancels=0,positionQty=0,firstStop=true;
+ const adapter:any={
+  client:{getOrder:async(_s:string,cid:string)=>orders.get(cid)},
+  executor:{},
+  normalizeStopPrice:async(_s:string,p:number)=>({price:Math.round(p*100)/100,text:p.toFixed(2)}),
+  cancel:async(cid:string)=>{cancels++;const o=orders.get(cid);if(o)o.status="CANCELED";},
+  executeEntry:async(x:any)=>{
+   entrySends++;const full=x.quantity,qty=mode==="PARTIAL_GROWTH"?full/2:full,id=701;
+   positionQty=qty*(x.side==="LONG"?1:-1);
+   orders.set(x.clientOrderId,{symbol:x.symbol,clientOrderId:x.clientOrderId,orderId:id,
+    status:mode==="PARTIAL_GROWTH"?"PARTIALLY_FILLED":"FILLED",side:x.side==="LONG"?"BUY":"SELL",
+    reduceOnly:false,origQty:String(full),executedQty:String(qty),avgPrice:"99",cumQuote:String(qty*99)});
+   fills.push({symbol:x.symbol,id:801,orderId:id,side:x.side==="LONG"?"BUY":"SELL",
+    price:"99",qty:String(qty),commission:"0",commissionAsset:"USDT",time});
+   return {status:mode==="PARTIAL_GROWTH"?"PARTIALLY_FILLED":"FILLED",executionUnknown:false};
+  },
+  placeStopMarket:async(x:any)=>{
+   stopSends++;const id=710+stopSends;
+   orders.set(x.clientOrderId,{...x,orderId:id,status:"NEW",type:"STOP_MARKET",
+    side:x.side,reduceOnly:true,origQty:String(x.quantity),executedQty:"0",
+    avgPrice:"0",cumQuote:"0",stopPrice:String(x.stopPrice)});
+   if(mode==="UNKNOWN_STOP_ACK"&&firstStop){firstStop=false;throw Error("simulated response loss after venue accept");}
+   return {acknowledged:true,orderId:String(id)};
+  },
+  executeExit:async()=>{throw Error("UNEXPECTED_EXIT")},
+ };
+ const client:any={
+  getBalances:async()=>[{asset:"USDT",balance:"1000",availableBalance:"1000"}],
+  getPositions:async()=>positionQty?[{symbol:candidate.symbol,positionAmt:String(positionQty),markPrice:"100",unRealizedProfit:"0"}]:[],
+  getOpenOrders:async()=>[...orders.values()].filter(o=>o.status==="NEW"),
+  getUserTrades:async()=>fills,
+  getIncomeHistory:async()=>[],
+ };
+ const atrKey=[candidate.symbol,candidate.route,candidate.effectiveSide,candidate.eligibleEntryTs].join("|");
+ const engine=new V4RunnerEngine({store,accountLock:lock,adapter,client,
+  pendingRegistryPath:join(dir,"pending.json"),fetchPeers:async()=>peers(time),
+  fetchExitFeed:async()=>({closed:[]}),
+  fetchDecision:async()=>({schema:"v12-v4-live-decision/v1",policyId:"V2_M150_D05_CORE_NATIVE",
+   decisionTs:candidate.eligibleEntryTs,capturedAtMs:time,sourceFingerprint:"recovery-fixture",
+   candidateCount:1,filteredCount:0,sourceCount:1,nativeCoreEvents:[],
+   entryAtrByCandidate:{[atrKey]:1},errors:[],candidates:[candidate],filtered:[],
+   orderEnabled:false,realOrderEnabledV4:0,tradingMutation:0}),
+  assertAuthority:async()=>{},assertEntrySafety:async()=>{},assertSourceParity:async()=>{},
+  requiredResidentStop:async({entryPrice}:any)=>candidate.effectiveSide==="LONG"?entryPrice*.92:entryPrice*1.08,
+  quantityNormalizer:{normalizeMarketQuantity:async(_s:string,q:number,p:number)=>({quantity:q,notional:q*p})} as any,
+  referencePrice:async()=>100,minimumVenueOrderNotional:async()=>5,now:()=>time,
+ });
+ return {dir,store,engine,orders,fills,candidate,
+  get time(){return time},set time(v:number){time=v},
+  get entrySends(){return entrySends},get stopSends(){return stopSends},get cancels(){return cancels},
+  get positionQty(){return positionQty},set positionQty(v:number){positionQty=v}};
+}
+
+test("restart recovers venue-accepted STOP after response loss without duplicate ENTRY or STOP",async()=>{
+ const h=await protectionRecoveryHarness("UNKNOWN_STOP_ACK");
+ try{
+  await assert.rejects(h.engine.tick(),/simulated response loss after venue accept/);
+  assert.equal(h.entrySends,1);assert.equal(h.stopSends,1);
+  const before=Object.values(h.store.read().protections)[0];
+  assert.equal(before.phase,"STOP_SENT_UNKNOWN");
+  h.time+=1000;
+  const recovered=await h.engine.tick();
+  assert.equal(recovered.status,"observing");
+  assert.equal(h.entrySends,1,"restart must not resend ENTRY");
+  assert.equal(h.stopSends,1,"readback of accepted STOP must prevent duplicate STOP send");
+  const doc=h.store.read(),leg=Object.values(doc.state.legs)[0];
+  assert.equal(doc.protections[leg.id].phase,"STOP_CONFIRMED");
+  assert.equal(doc.protections[leg.id].protectedQty,leg.qty);
+  assert.equal([...h.orders.values()].filter((o:any)=>o.status==="NEW"&&o.type==="STOP_MARKET").length,1);
+ }finally{rmSync(h.dir,{recursive:true,force:true});}
+});
+
+test("additional cumulative ENTRY fill re-arms larger STOP before retiring smaller STOP",async()=>{
+ const h=await protectionRecoveryHarness("PARTIAL_GROWTH");
+ try{
+  const first=await h.engine.tick();
+  assert.equal(first.status,"submitted");
+  assert.equal(h.entrySends,1);assert.equal(h.stopSends,1);
+  let doc=h.store.read(),leg=Object.values(doc.state.legs)[0];
+  const half=leg.qty,requested=leg.requestedQty;
+  assert.ok(half>0&&half<requested);
+  const oldStop=Object.values(doc.intents).find(i=>i.legId===leg.id&&i.action==="STOP")!;
+  assert.equal(doc.protections[leg.id].phase,"STOP_CONFIRMED");
+  const entry=Object.values(doc.intents).find(i=>i.legId===leg.id&&i.action==="ENTRY")!;
+  const entryOrder=h.orders.get(entry.clientOrderId);
+  const extra=requested-half;
+  entryOrder.status="FILLED";entryOrder.executedQty=String(requested);
+  entryOrder.cumQuote=String(requested*99);entryOrder.avgPrice="99";
+  h.fills.push({symbol:h.candidate.symbol,id:802,orderId:entryOrder.orderId,side:entryOrder.side,
+   price:"99",qty:String(extra),commission:"0",commissionAsset:"USDT",time:h.time+500});
+  h.positionQty=requested*(h.candidate.effectiveSide==="LONG"?1:-1);
+  h.time+=1000;
+  const second=await h.engine.tick();
+  assert.equal(second.status,"observing");
+  assert.equal(h.entrySends,1);
+  assert.equal(h.stopSends,2,"larger cumulative fill requires a new deterministic STOP generation");
+  assert.equal(h.cancels,1,"old smaller STOP retires only after replacement confirmation");
+  doc=h.store.read();leg=doc.state.legs[leg.id];
+  assert.equal(leg.qty,requested);
+  assert.equal(doc.protections[leg.id].phase,"STOP_CONFIRMED");
+  assert.equal(doc.protections[leg.id].protectedQty,requested);
+  const active=[...h.orders.values()].filter((o:any)=>o.status==="NEW"&&o.type==="STOP_MARKET");
+  assert.equal(active.length,1);
+  assert.equal(Number(active[0].origQty),requested);
+  assert.notEqual(active[0].clientOrderId,oldStop.clientOrderId);
+ }finally{rmSync(h.dir,{recursive:true,force:true});}
+});

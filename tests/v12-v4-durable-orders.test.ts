@@ -67,3 +67,33 @@ test("readback of a non-reduce-only exit fails before terminal acknowledgement",
  assert.equal(store.read().intents[cid].stage,"ACKNOWLEDGED");
  }finally{rmSync(dir,{recursive:true,force:true});}
 });
+
+
+test("unknown protective result queries first and retries only the same deterministic client ID",async()=>{
+ const dir=mkdtempSync(join(tmpdir(),"v4-protective-retry-"));
+ try{
+  const store=new V4ExecutionStore(join(dir,"state.json"),"a".repeat(40));
+  store.initialize({equityUsd:1000,foreign:[],holdProtected:false});
+  const seen:string[]=[];let queryCount=0,accepted:any;
+  const gateway:any={
+   placeStopMarket:async(input:any)=>{
+    seen.push(input.clientOrderId);
+    accepted={symbol:input.symbol,clientOrderId:input.clientOrderId,orderId:901,status:"NEW",
+     side:input.side,type:"STOP_MARKET",reduceOnly:true,quantity:input.quantity,
+     executedQuantity:0,averagePrice:0,quoteQuantity:0,stopPrice:input.stopPrice};
+    throw Error("first response lost");
+   },
+   queryOrderSameId:async()=>{queryCount++;return queryCount===1?null:accepted},
+  };
+  const bridge=new V4DurableOrderDispatcher(store,gateway,{
+   assertAuthority:async()=>{},assertAccountLease:async()=>{},reserveShared:async()=>{}});
+  const cid=bridge.prepare({legId:"XRPUSDT:r:LONG:3600000",action:"STOP",sequence:0,
+   symbol:"XRPUSDT",positionSide:"LONG",quantity:2,price:92,signalTs:3600000},3600000);
+  await assert.rejects(()=>bridge.submit(cid,3600001),/first response lost/);
+  gateway.placeStopMarket=async(input:any)=>{seen.push(input.clientOrderId);return {acknowledged:true,orderId:"901"};};
+  const proof=await bridge.recoverReductionSameId(cid,3600002);
+  assert.equal(proof?.clientOrderId,cid);
+  assert.ok(queryCount>=2);
+  assert.deepEqual([...new Set(seen)],[cid],"every retry must reuse one deterministic client ID");
+ }finally{rmSync(dir,{recursive:true,force:true});}
+});

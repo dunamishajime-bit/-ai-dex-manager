@@ -52,7 +52,7 @@ test("AsterV3Client routes every request attempt through the shared global rate 
   const source = readFileSync(resolve("lib/aster-v3-client.ts"), "utf8");
   assert.match(source, /waitForAsterGlobalRateSlot/);
   const requestBody = source.split("private async request<T>", 2)[1] || "";
-  assert.match(requestBody, /await waitForAsterGlobalRateSlot\(asterFuturesRequestWeight\(method, input\.path, params\)\)/);
+  assert.match(requestBody, /await waitForAsterGlobalRateSlot\(asterFuturesRequestWeight\(method, input\.path, params\),[\s\S]*?input\.ratePriority/);
 });
 
 test("shared budget rejects a non-empty document without the canonical schema", async () => {
@@ -219,4 +219,49 @@ test("root-owned rate-budget writers preserve parent ownership before atomic ren
   assert.match(source, /stat\(dirname\(path\)\)/);
   assert.match(source, /chown\(temporary, parent\.uid, parent\.gid\)/);
   assert.match(source, /rename\(temporary, path\)/);
+});
+
+
+test("heavy reconciliation sheds before consuming protective headroom", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "disdex-aster-budget-priority-"));
+  const path = join(directory, "aster-rate-budget.json");
+  try {
+    const common = { path, minIntervalMs: 50, maxQueueMs: 5_000, nowMs: 1_000 };
+    await reserveAsterGlobalRateSlot({ ...common, weight: 40, priority: "RECONCILIATION" });
+    await reserveAsterGlobalRateSlot({ ...common, weight: 40, priority: "RECONCILIATION" });
+    await assert.rejects(
+      reserveAsterGlobalRateSlot({ ...common, weight: 40, priority: "RECONCILIATION" }),
+      /ASTER_GLOBAL_RATE_BUDGET_SATURATED:6000/,
+    );
+    const protective = await reserveAsterGlobalRateSlot({ ...common, weight: 1, priority: "PROTECTIVE" });
+    assert.equal(protective.waitMs, 4_000);
+    const state = JSON.parse(await readFile(path, "utf8"));
+    assert.equal(state.lastPriority, "PROTECTIVE");
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("market-data global reads shed even earlier than reconciliation", async () => {
+  const directory = await mkdtemp(join(tmpdir(), "disdex-aster-budget-market-headroom-"));
+  const path = join(directory, "aster-rate-budget.json");
+  try {
+    const common = { path, minIntervalMs: 50, maxQueueMs: 5_000, nowMs: 1_000 };
+    await reserveAsterGlobalRateSlot({ ...common, weight: 40, priority: "MARKET_DATA" });
+    await assert.rejects(
+      reserveAsterGlobalRateSlot({ ...common, weight: 40, priority: "MARKET_DATA" }),
+      /ASTER_GLOBAL_RATE_BUDGET_SATURATED:4000/,
+    );
+  } finally {
+    await rm(directory, { recursive: true, force: true });
+  }
+});
+
+test("Aster V3 assigns protective and reconciliation priorities before background reads", () => {
+  const source = readFileSync(resolve("lib/aster-v3-client.ts"), "utf8");
+  assert.match(source, /placeStopMarketOrder[\s\S]*?ratePriority:\s*"PROTECTIVE"/);
+  assert.match(source, /cancelOrder[\s\S]*?ratePriority:"PROTECTIVE"/);
+  assert.match(source, /getPositions[\s\S]*?ratePriority:"RECONCILIATION"/);
+  assert.match(source, /getOpenOrders[\s\S]*?ratePriority:"RECONCILIATION"/);
+  assert.match(source, /getKlines[\s\S]*?ratePriority:\s*"MARKET_DATA"/);
 });

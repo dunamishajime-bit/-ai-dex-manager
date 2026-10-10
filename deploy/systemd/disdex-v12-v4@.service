@@ -25,7 +25,6 @@ ExecStartPre=/usr/bin/bash /home/deploy/disdex-trading/releases/%i/scripts/ops/d
 ExecStartPre=+/usr/bin/node /home/deploy/disdex-trading/releases/%i/scripts/ops/root/disdex-live-operator-activation-gate.mjs --release-root /home/deploy/disdex-trading/releases/%i --sha %i --runner V12_V4 --activation-path /var/lib/disdex/shared/operator-activation/current.json
 ExecStart=/home/deploy/disdex-trading/releases/%i/node_modules/.bin/tsx scripts/v12-v4-production-runner.ts --daemon
 Restart=on-failure
-RestartPreventExitStatus=2
 RestartSec=30s
 TimeoutStopSec=30s
 KillSignal=SIGTERM

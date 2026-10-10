@@ -72,6 +72,41 @@ export class V4DurableOrderDispatcher{
    throw error;
   }
  }
+ async recoverReductionSameId(cid:string,ts:number){
+  let doc=this.store.read(),intent=doc.intents[cid];
+  if(!intent||!['EXIT','STOP','TAKE_PROFIT'].includes(intent.action))throw Error("V4_REDUCTION_RECOVERY_ACTION_INVALID");
+  if(intent.stage==='PREPARED'){await this.submit(cid,ts);return await this.reconcile(cid,ts);}
+  if(intent.stage==='TERMINAL')return await this.reconcile(cid,ts);
+  const command=commandOf(intent);
+  const existing=await this.gateway.queryOrderSameId(command.symbol,cid);
+  if(existing)return await this.reconcile(cid,ts);
+  // A missing readback is checked before any retry. Reusing the exact client
+  // order ID makes a delayed first submission collide rather than duplicate.
+  await this.guards.assertAuthority(command);
+  await this.guards.assertAccountLease();
+  if(intent.stage==='ACKNOWLEDGED'){
+   doc=this.store.commit(doc.revision,advanceV4Intent(doc,cid,'UNKNOWN',ts));
+   intent=doc.intents[cid];
+  }
+  try{
+   const common={symbol:command.symbol,quantity:command.quantity,clientOrderId:cid};
+   let result;
+   if(command.action==='EXIT')result=await this.gateway.executeExit({...common,positionSide:command.positionSide,signalTs:command.signalTs,expectedPrice:command.price});
+   else{
+    const conditional={...common,side:command.positionSide==='LONG'?'SELL' as const:'BUY' as const,stopPrice:command.price,reduceOnly:true as const};
+    result=command.action==='STOP'?await this.gateway.placeStopMarket(conditional):await this.gateway.placeTakeProfit(conditional);
+   }
+   const ambiguous='executionUnknown' in result&&result.executionUnknown;
+   const current=this.store.read(),stage=current.intents[cid].stage;
+   if(stage!=='TERMINAL'&&stage!==(ambiguous?'UNKNOWN':'ACKNOWLEDGED'))
+    this.store.commit(current.revision,advanceV4Intent(current,cid,ambiguous?'UNKNOWN':'ACKNOWLEDGED',ts));
+   return await this.reconcile(cid,ts);
+  }catch(error){
+   const current=this.store.read(),stage=current.intents[cid]?.stage;
+   if(stage==='SUBMITTING')this.store.commit(current.revision,advanceV4Intent(current,cid,'UNKNOWN',ts));
+   throw error;
+  }
+ }
  async reconcile(cid:string,ts:number){
   const doc=this.store.read(),intent=doc.intents[cid];
   if(!intent||intent.stage==="PREPARED")throw Error("ORDER_NOT_SUBMITTED");
