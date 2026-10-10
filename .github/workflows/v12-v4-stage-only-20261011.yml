@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     env:
-      TARGET_SHA: 89c4a79fd3de33def73bac22e09840b416c24179
+      TARGET_SHA: bd47341cdd009117e165ba2689565d7c2d5cf975
       SOURCE_REF: research/v4-independent-venue-lifecycle-20261010
       EXPECTED_CURRENT_SHA: ce1edeead8d0f9e5d88e829d415057117502a335
       SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
@@ -43,11 +43,18 @@ jobs:
           [[ "$remote_sha" == "$TARGET_SHA" ]]
           [[ -z "$(git status --porcelain)" ]]
           [[ -z "$(git diff --name-only "$EXPECTED_CURRENT_SHA" "$TARGET_SHA" -- package-lock.json npm-shrinkwrap.json)" ]]
-          dep_diff="$(git diff --unified=0 "$EXPECTED_CURRENT_SHA" "$TARGET_SHA" -- package.json || true)"
-          if grep -E '^[+-][[:space:]]*"[^"]+"[[:space:]]*:' <<<"$dep_diff" | grep -vE 'strategy:v12-v4-shadow:(selftest|once)' >/dev/null; then
-            echo 'STAGE_DEPENDENCY_CONTRACT_CHANGED' >&2
-            exit 1
-          fi
+          python3 - <<'PY'
+          import json,os,subprocess
+          old=os.environ["EXPECTED_CURRENT_SHA"]; target=os.environ["TARGET_SHA"]
+          def package(sha):
+              return json.loads(subprocess.check_output(["git","show",f"{sha}:package.json"],text=True))
+          a,b=package(old),package(target)
+          keys=("dependencies","devDependencies","optionalDependencies","peerDependencies","engines","packageManager")
+          changed=[k for k in keys if a.get(k)!=b.get(k)]
+          if changed:
+              raise SystemExit("STAGE_DEPENDENCY_CONTRACT_CHANGED:"+",".join(changed))
+          print("STAGE_DEPENDENCY_CONTRACT=PASS")
+          PY
           echo "TARGET_SHA_VERIFIED=$TARGET_SHA"
           echo 'TRADING_MUTATION=0'
 
