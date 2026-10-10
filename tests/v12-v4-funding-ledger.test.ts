@@ -65,3 +65,23 @@ test("real runner funding checkpoint survives process restart and never double-b
   assert.equal(calls,2);
  }finally{rmSync(dir,{recursive:true,force:true});}
 });
+
+test("signed Aster symbol funding allocates deterministically to two overlapping same-side virtual legs",()=>{
+ const state=createProductionState({equityUsd:1000,foreign:[],holdProtected:false}) as any;
+ state.legs={
+  one:{id:"one",qty:2,status:"OPEN",fundingUsd:0,
+   candidate:{symbol:"ETHUSDT",effectiveSide:"LONG"},entryTs:100},
+  two:{id:"two",qty:3,status:"OPEN",fundingUsd:0,
+   candidate:{symbol:"ETHUSDT",effectiveSide:"LONG"},entryTs:200},
+ };
+ const rows=[{symbol:"ETHUSDT",incomeType:"FUNDING_FEE",income:"-0.5",
+  asset:"USDT",tranId:444,time:300}];
+ const after=reconcileV4Funding(state,rows,400);
+ assert.equal(after.legs.one.fundingUsd,-.2);
+ assert.equal(after.legs.two.fundingUsd,-.3);
+ assert.equal(after.journal.filter(x=>x.type==="FUNDING").length,2);
+ assert.deepEqual(reconcileV4Funding(after,rows,450),after);
+ const invalid=structuredClone(state);
+ invalid.legs.two.candidate.effectiveSide="SHORT";
+ assert.throws(()=>reconcileV4Funding(invalid,rows,400),/OWNER_AMBIGUOUS/);
+});

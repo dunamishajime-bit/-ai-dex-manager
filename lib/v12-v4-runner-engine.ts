@@ -12,6 +12,7 @@ import {V4DurableOrderDispatcher,createV4AsterOrderGateway,type V4DurableOrderCo
 import type {V12AsterLiveAdapter} from "./v12-aster-live-adapter";
 import {V4OrderCycle} from "./v12-v4-order-cycle";
 import {verifyV4ResidentStops} from "./v12-v4-resident-stop-owners";
+import {planV4RetiredStops} from "./v12-v4-stop-retirement";
 import {appendV4ClosedExitBars,type V4ExitFeed} from "./v12-v4-live-exit-feed";
 import {applyProductionEvent,planProductionEntry,productionExitSpec,nativeEvidenceForProductionRoute,type EntryPlanInput} from "./v12-v4-production-lifecycle";
 import {buildV4AccountMark,type V4SignedMark} from "./v12-v4-peer-account-mark";
@@ -74,10 +75,25 @@ export class V4RunnerEngine{
      await cycle.reconcileExit(cid,this.now(),this.now());
    }
   }
-  const [positions,openOrders,balances,peers,registry]=await Promise.all([
+  let [positions,openOrders,balances,peers,registry]=await Promise.all([
    d.client.getPositions(),d.client.getOpenOrders(),d.client.getBalances(),
    d.fetchPeers(),readPendingExposureRegistry(d.pendingRegistryPath),
   ]);
+  // After a crash between signed EXIT fill and STOP cancellation, retire only
+  // the proven CLOSED leg's reduce-only STOP while preserving all surviving
+  // same-symbol virtual legs and their independently verified STOPs.
+  const toRetire=planV4RetiredStops({state:d.store.read().state,
+   intents:d.store.read().intents,openOrders,positions});
+  if(toRetire.length){
+   for(const cid of toRetire)await d.adapter.cancel(cid);
+   const refreshed=await Promise.all([
+    d.client.getPositions(),d.client.getOpenOrders(),d.client.getBalances(),
+    d.fetchPeers(),readPendingExposureRegistry(d.pendingRegistryPath),
+   ]);
+   [positions,openOrders,balances,peers,registry]=refreshed;
+   if(toRetire.some(cid=>openOrders.some(o=>o.clientOrderId===cid)))
+    throw Error("V4_RETIRED_STOP_CANCEL_NOT_CONFIRMED");
+  }
   const usdt=balances.find(b=>b.asset==="USDT");
   const walletUsd=Number(usdt?.balance);
   let unrealizedUsd=0;
@@ -128,7 +144,11 @@ export class V4RunnerEngine{
    if(at-leg.plannedExit.exitTs>15*60000)throw Error("V4_STALE_EXIT_DECISION_REQUIRES_REVIEW:"+old.id);
    const same=Object.values(d.store.read().state.legs)
     .filter(l=>l.candidate.symbol===leg.candidate.symbol&&l.qty>0);
-   if(same.length!==1)throw Error("V4_SHARED_SYMBOL_STOP_RESIZE_NOT_CERTIFIED");
+   if(same.some(x=>x.candidate.effectiveSide!==leg.candidate.effectiveSide))
+    throw Error("V4_SHARED_SYMBOL_OPPOSING_EXIT_NOT_CERTIFIED");
+   // Other legs keep independent exact stop order ownership throughout.
+   // Broker one-way-mode signed quantity is verified again after the
+   // current leg has fully filled and its own stop is removed.
    const price=await d.referencePrice(leg.candidate.symbol);
    const cmd:V4DurableOrderCommand={legId:leg.id,action:"EXIT",sequence:0,
     symbol:leg.candidate.symbol,positionSide:leg.candidate.effectiveSide,
@@ -146,6 +166,20 @@ export class V4RunnerEngine{
    const remaining=await d.client.getOpenOrders(leg.candidate.symbol);
    if(remaining.some(o=>o.clientOrderId===stop[0].clientOrderId))
     throw Error("V4_RESIDENT_STOP_CANCEL_NOT_CONFIRMED");
+   // For overlapping virtual legs, an individual reduce-only exit cannot
+   // silently consume surviving legs or destroy their independent STOPs.
+   const [venuePositions,readbackOrders]=await Promise.all([
+    d.client.getPositions(),d.client.getOpenOrders()]);
+   const after=d.store.read();
+   const otherRemaining=Object.values(after.state.legs).filter(l=>l.qty>0&&
+    l.candidate.symbol===leg.candidate.symbol);
+   const expected=otherRemaining.reduce((sum,l)=>sum+l.qty*
+    (l.candidate.effectiveSide==="LONG"?1:-1),0);
+   const actual=venuePositions.filter(p=>p.symbol===leg.candidate.symbol)
+    .reduce((sum,p)=>sum+Number(p.positionAmt),0);
+   if(!Number.isFinite(actual)||Math.abs(expected-actual)>Math.max(1e-8,Math.abs(expected)*1e-7))
+    throw Error("V4_SHARED_SYMBOL_EXIT_VENUE_QTY_DRIFT");
+   verifyV4ResidentStops(after.state,after.intents,readbackOrders);
    return {status:"exited",reason:"ROUTE_EXIT_SIGNED_FILL_AND_STOP_REMOVED",
     eventTs:this.now(),candidateCount:0,orderEnabled:true};
   }

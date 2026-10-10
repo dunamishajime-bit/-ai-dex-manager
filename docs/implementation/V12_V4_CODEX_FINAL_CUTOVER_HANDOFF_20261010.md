@@ -42,7 +42,9 @@ Original historical replay has **261 pairs of overlapping V12 same-symbol
 virtual legs**; prohibiting a second leg would change the authorized BT.
 Per-leg STOP identity/quantity is verified in mock tests, but an atomic
 individual STOP-cancel/partial-exit/rearm sequence with remaining same-symbol
-legs is **not certified**, and the current runner refuses that manual path.
+legs is **not certified**, and the runner now supports independent same-symbol STOP/EXIT readback and
+  crash-safe retirement for a fully closed leg with signed remaining exposure.
+  Partial-close/racing triggers still require independent Aster certification.
 
 ## Hard blockers that cannot be declared PASS by this code
 
@@ -89,3 +91,45 @@ install V4 service and test restart/failover; verify signed broker readback,
 gross exposure, HP status and release marker. Preserve old release and
 positions for immediate controlled rollback. Never place artificial TEST
 orders. If a blocker remains, leave current LIVE as-is and report it by name.
+
+## 2026-10-10 same-symbol exit recovery delta
+
+The follow-on helper `lib/v12-v4-stop-retirement.ts` now identifies
+un-cancelled resident STOPs belonging to **journal-closed** virtual legs.
+It refuses cancellation unless the broker's signed net position equals
+the exact surviving virtual V4 quantity; every surviving virtual leg has
+its own correct reduce-only STOP quantity, side and identity; and the
+retired STOP is still NEW and has never filled.
+
+Within the account lease, the runner cancels only that retired CID,
+refreshes signed venue positions/orders/balances and all peer/pending
+sources, and rejects if the orphan remains. The normal EXIT path no
+longer assumes only one virtual leg per symbol: after signed close it
+checks the surviving aggregate venue quantity AND each remaining STOP.
+This is mock-certified crash recovery; it is not an Aster failover
+execution certificate, and partial fill/trigger races still fail closed.
+
+
+## 2026-10-10 further runner crash-recovery improvements
+
+- A retired STOP is now detected after the signed venue readback if its own
+  virtual leg has already reached journal status CLOSED and quantity zero.
+  The only cancelable order is the matching exact CID, active NEW with no
+  executions. If other same-symbol V4 legs remain, each must still have
+  its independent exact reduce-only STOP and the broker's signed net position
+  must equal those surviving legs. After cancellation, the entire venue
+  position/orders/balances + peer registry is re-fetched and checked.
+  No manual deletion or fake broker evidence is allowed.
+- Normal virtual-leg EXIT no longer has an artificial one-leg-per-symbol
+  restriction. The actual signed reduce-only close is reconciled; the
+  exiting leg's STOP is canceled; the remaining V4 signed net position and
+  each other leg's STOP are verified before success.
+- Aster's one-symbol signed USDT funding record is now allocated
+  proportionately to same-side, overlapping V4 legs by their positive
+  quantity as of the funding instant. Sum is preserved exactly, stable
+  leg IDs give idempotent event keys, and mixed-side/foreign ownership remains
+  rejected. Restart checkpoint behavior is unchanged.
+- Source/41-route historical coverage and other mock suites continue to
+  pass, but race-triggered partial STOP fills, broker cancellation semantics,
+  long-offline funding attribution, and fully independent source parity still
+  require Aster/forward evidence before operator LIVE certification.
