@@ -3,8 +3,18 @@ import type {State} from "./v12-v4-production-lifecycle";
 import type {V4OrderIntent} from "./v12-v4-execution-store";
 import type {AsterOrderResponse,AsterPositionRiskRow} from "./aster-v3-client";
 
-type Stop=Pick<AsterOrderResponse,"symbol"|"clientOrderId"|"side"|"type"|"reduceOnly"|"origQty"|"executedQty"|"status">;
+type Stop=Pick<AsterOrderResponse,"symbol"|"clientOrderId"|"side"|"type"|"reduceOnly"|"origQty"|"executedQty"|"status"|"stopPrice">;
 type Position=Pick<AsterPositionRiskRow,"symbol"|"positionAmt">;
+// A stale or altered conditional trigger is not acceptable evidence that a
+// surviving virtual leg is protected before any other STOP is cancelled.
+function attestStopTrigger(intent:V4OrderIntent,order:Stop,legId:string){
+ const stored=(intent.command as {price?:unknown}|undefined)?.price;
+ const expected=typeof stored==="number"?stored:NaN;
+ const actual=order.stopPrice===undefined||order.stopPrice===null?NaN:Number(order.stopPrice);
+ if(!(expected>0)||!Number.isFinite(expected)||!(actual>0)||!Number.isFinite(actual)||
+    Math.abs(expected-actual)>Math.max(1e-12,expected*1e-10))
+   throw Error("V4_RETIRE_SURVIVING_STOP_TRIGGER_MISMATCH:"+legId);
+}
 
 export function planV4RetiredStops(args:{
  state:State;intents:Record<string,V4OrderIntent>;
@@ -26,6 +36,7 @@ export function planV4RetiredStops(args:{
      !["NEW"].includes(String(order.status).toUpperCase())||
      !(Number(order.origQty)>0)||Number(order.executedQty)!==0)
     throw Error("V4_CLOSED_LEG_STOP_NOT_SAFE_TO_CANCEL:"+leg.id);
+  attestStopTrigger(stillOpen[0],order,leg.id);
   // Aster one-way venue quantity must equal the remaining V4-owned legs;
   // other peer same-symbol occupancy is not enough evidence to auto-cancel.
   const same=active.filter(l=>l.candidate.symbol===leg.candidate.symbol);
@@ -44,10 +55,13 @@ export function planV4RetiredStops(args:{
      openOrders.some(o=>o.clientOrderId===i.clientOrderId));
    if(matches.length!==1)throw Error("V4_REMAINING_LEG_STOP_NOT_PROTECTED:"+other.id);
    const otherOrder=openOrders.find(o=>o.clientOrderId===matches[0].clientOrderId)!;
-   if(otherOrder.reduceOnly!==true||otherOrder.type!=="STOP_MARKET"||
+   if(otherOrder.symbol!==other.candidate.symbol||otherOrder.reduceOnly!==true||
+      otherOrder.type!=="STOP_MARKET"||
       otherOrder.side!==(other.candidate.effectiveSide==="LONG"?"SELL":"BUY")||
-      Number(otherOrder.origQty)-Number(otherOrder.executedQty)!==other.qty)
+      otherOrder.status!=="NEW"||Number(otherOrder.executedQty)!==0||
+      Number(otherOrder.origQty)!==other.qty)
     throw Error("V4_REMAINING_LEG_STOP_QTY_CONFLICT:"+other.id);
+   attestStopTrigger(matches[0],otherOrder,other.id);
   }
   retire.push(id);
  }

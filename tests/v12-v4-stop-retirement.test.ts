@@ -9,14 +9,14 @@ test("only retired leg STOP is cancelable; surviving same-symbol leg keeps signe
   survivor:{id:"survivor",qty:3,status:"OPEN",candidate:{symbol:"ETHUSDT",effectiveSide:"LONG"}},
  };
  const intents:any={
-  oldStop:{legId:"retired",action:"STOP",clientOrderId:"oldStop",stage:"ACKNOWLEDGED"},
-  kept:{legId:"survivor",action:"STOP",clientOrderId:"kept",stage:"ACKNOWLEDGED"}
+  oldStop:{legId:"retired",action:"STOP",clientOrderId:"oldStop",stage:"ACKNOWLEDGED",command:{price:90}},
+  kept:{legId:"survivor",action:"STOP",clientOrderId:"kept",stage:"ACKNOWLEDGED",command:{price:91}}
  };
  const orders:any=[
   {clientOrderId:"oldStop",symbol:"ETHUSDT",side:"SELL",type:"STOP_MARKET",
-   reduceOnly:true,origQty:"2",executedQty:"0",status:"NEW"},
+   reduceOnly:true,origQty:"2",executedQty:"0",status:"NEW",stopPrice:"90"},
   {clientOrderId:"kept",symbol:"ETHUSDT",side:"SELL",type:"STOP_MARKET",
-   reduceOnly:true,origQty:"3",executedQty:"0",status:"NEW"}
+   reduceOnly:true,origQty:"3",executedQty:"0",status:"NEW",stopPrice:"91"}
  ];
  const args={state,intents,openOrders:orders,positions:[{symbol:"ETHUSDT",positionAmt:"3"}]} as any;
  assert.deepEqual(planV4RetiredStops(args),["oldStop"]);
@@ -24,4 +24,8 @@ test("only retired leg STOP is cancelable; surviving same-symbol leg keeps signe
  assert.throws(()=>planV4RetiredStops({...args,positions:[{symbol:"ETHUSDT",positionAmt:"5"}]}),/EXPOSURE_CONFLICT/);
  assert.throws(()=>planV4RetiredStops({...args,openOrders:[orders[0]]}),/NOT_PROTECTED/);
  assert.throws(()=>planV4RetiredStops({...args,openOrders:[{...orders[0],executedQty:"1"},orders[1]]}),/NOT_SAFE_TO_CANCEL/);
+ assert.throws(()=>planV4RetiredStops({...args,openOrders:[orders[0],{...orders[1],stopPrice:"95"}]}),/SURVIVING_STOP_TRIGGER_MISMATCH/);
+ assert.throws(()=>planV4RetiredStops({...args,openOrders:[{...orders[0],stopPrice:"89"},orders[1]]}),/SURVIVING_STOP_TRIGGER_MISMATCH/);
+ assert.throws(()=>planV4RetiredStops({...args,openOrders:[orders[0],{...orders[1],status:"PARTIALLY_FILLED",executedQty:"1",origQty:"4"}]}),/STOP_QTY_CONFLICT/);
+ assert.throws(()=>planV4RetiredStops({...args,intents:{...intents,kept:{...intents.kept,command:undefined}}}),/SURVIVING_STOP_TRIGGER_MISMATCH/);
 });

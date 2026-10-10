@@ -255,6 +255,7 @@ function parseErrorMessage(payload: unknown, fallback: string) {
 export function asterFuturesRequestWeight(method: AsterHttpMethod, path: string, params: Record<string, unknown> = {}): number {
     const symbol = typeof params.symbol === "string" && params.symbol.length > 0;
     if (path === "/fapi/v3/balance" || path === "/fapi/v3/positionRisk" || path === "/fapi/v3/account" || path === "/fapi/v3/accountWithJoinMargin") return 5;
+    if (path === "/fapi/v3/positionSide/dual") return 30;
     if (path === "/fapi/v3/openOrders") return symbol ? 1 : 40;
     if (path === "/fapi/v3/income") return 30;
     if (path === "/fapi/v3/userTrades") return 5;
@@ -332,7 +333,7 @@ export class AsterV3Client {
         const signedParams: Record<string, unknown> = { ...params, recvWindow: params.recvWindow ?? this.recvWindowMs, nonce: this.nonce.next(), user: this.userAddress, signer: this.signerAddress };
         const message = encodeParams(signedParams);
         const signature = await this.account.signTypedData({
-            domain: { name: "AsterSignTransaction", version: "1", chainId: 1666, verifyingContract: "0x0000000000000000000000000000000000000000" },
+            domain: { name: "AsterSignTransaction", version: "1", chainId: this.baseUrl === "https://fapi.asterdex-testnet.com" ? 714 : 1666, verifyingContract: "0x0000000000000000000000000000000000000000" },
             types: { Message: [{ name: "msg", type: "string" }] }, primaryType: "Message", message: { msg: message },
         });
         return { signedParams, signature };
@@ -405,6 +406,7 @@ export class AsterV3Client {
         });
     }
     getBalances() { return this.request<AsterBalanceRow[]>({ method: "GET", path: "/fapi/v3/balance", signed: true }); }
+    getPositionMode() { return this.request<{ dualSidePosition: boolean }>({ method: "GET", path: "/fapi/v3/positionSide/dual", signed: true }); }
     getPositions(symbol?: string) { return this.request<AsterPositionRiskRow[]>({ method: "GET", path: "/fapi/v3/positionRisk", params: symbol ? { symbol } : undefined, signed: true }); }
     getOpenOrders(symbol?: string) { return this.request<AsterOrderResponse[]>({ method: "GET", path: "/fapi/v3/openOrders", params: symbol ? { symbol } : undefined, signed: true }); }
     setMarginType(symbol: string, marginType: "CROSSED" | "ISOLATED") {

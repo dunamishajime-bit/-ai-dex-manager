@@ -15,7 +15,7 @@ export const V4_PRODUCTION_CERT_PATH="/etc/disdex/v12-v4-production-certificatio
 const SHA=/^[a-f0-9]{40}$/;
 const DIGEST=/^[a-f0-9]{64}$/;
 export type V4ProductionCertificate={
- schema:"disdex-v12-v4-production-certification/v1";
+ schema:"disdex-v12-v4-production-certification/v2";
  approvedSha:string;policyId:typeof V12_V4_V2_POLICY;
  approvedAt:string;validUntil:string;
  verifiedRoutes:string[];
@@ -23,6 +23,12 @@ export type V4ProductionCertificate={
   sourceParitySha256:string;exitParitySha256:string;
   tradeExecutionSha256:string;portfolioRiskSha256:string;
   protectedSameSymbolSha256:string;independentForwardSha256:string;
+  venueLifecycle:{
+   mode:"ASTER_TESTNET"|"AUTHENTIC_PRODUCTION_HISTORY"|"CONTROLLED_PRODUCTION_CANARY";
+   signedOrdersSha256:string;signedPositionsSha256:string;
+   restartRecoverySha256:string;sameSymbolRaceSha256:string;
+   realVenueObserved:true;simulatedOnly:false;
+  };
  };
  approvedGross:{v12:number;crypto:number;total:number;recovery:number};
  forwardUnderperformanceAcknowledged:true;
@@ -32,7 +38,7 @@ export function validateV4ProductionCertificate(raw:unknown,sha:string,now=Date.
  if(!raw||typeof raw!=="object"||Array.isArray(raw)||!SHA.test(sha))
   throw Error("V4_ROOT_CERTIFICATE_REQUIRED");
  const c=raw as Record<string,any>;
- if(c.schema!=="disdex-v12-v4-production-certification/v1"||
+ if(c.schema!=="disdex-v12-v4-production-certification/v2"||
   c.approvedSha!==sha||c.policyId!==V12_V4_V2_POLICY||
   c.operatorAcknowledgement!=="I_AUTHORIZE_CERTIFIED_V12_V4_REAL_ORDERS"||
   c.forwardUnderperformanceAcknowledged!==true)throw Error("V4_ROOT_CERTIFICATE_INVALID");
@@ -44,6 +50,13 @@ export function validateV4ProductionCertificate(raw:unknown,sha:string,now=Date.
  if(!e||!["sourceParitySha256","exitParitySha256","tradeExecutionSha256",
    "portfolioRiskSha256","protectedSameSymbolSha256","independentForwardSha256"]
     .every(k=>DIGEST.test(String(e[k]??""))))throw Error("V4_INDEPENDENT_CERT_EVIDENCE_REQUIRED");
+ const venue=e.venueLifecycle;
+ const modes=new Set(["ASTER_TESTNET","AUTHENTIC_PRODUCTION_HISTORY","CONTROLLED_PRODUCTION_CANARY"]);
+ if(!venue||!modes.has(String(venue.mode))||venue.realVenueObserved!==true||
+   venue.simulatedOnly!==false||
+   !["signedOrdersSha256","signedPositionsSha256","restartRecoverySha256","sameSymbolRaceSha256"]
+    .every(k=>DIGEST.test(String(venue[k]??""))))
+  throw Error("V4_REAL_VENUE_LIFECYCLE_EVIDENCE_REQUIRED");
  const caps=c.approvedGross;
  if(!caps||caps.v12!==3||caps.crypto!==3.5||caps.total!==4.75||caps.recovery!==2.5)
   throw Error("V4_SHARED_RISK_CAP_MISMATCH");

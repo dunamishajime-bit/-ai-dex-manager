@@ -16,7 +16,7 @@ import {planV4RetiredStops} from "./v12-v4-stop-retirement";
 import {appendV4ClosedExitBars,type V4ExitFeed} from "./v12-v4-live-exit-feed";
 import {applyProductionEvent,planProductionEntry,productionExitSpec,nativeEvidenceForProductionRoute,type EntryPlanInput} from "./v12-v4-production-lifecycle";
 import {buildV4AccountMark,type V4SignedMark} from "./v12-v4-peer-account-mark";
-import type {V4PeerSource} from "./v12-v4-peer-state-owners";
+import type {V4PeerSource,V4PeerLineageMode} from "./v12-v4-peer-state-owners";
 import type {V4LiveDecisionSnapshot} from "./v12-v4-live-candidate-builder";
 export type V4TickResult={status:"locked"|"observing"|"blocked"|"submitted"|"exited";reason:string;
  eventTs:number;candidateCount:number;orderEnabled:boolean};
@@ -30,10 +30,13 @@ export interface V4RunnerDependencies{
  fetchPeers:()=>Promise<V4PeerSource[]>;
  assertAuthority:(cmd:V4DurableOrderCommand)=>Promise<void>;
  assertSourceParity:(decision:V4LiveDecisionSnapshot)=>Promise<void>;
+ assertEntrySafety:()=>Promise<void>;
  requiredResidentStop:(input:{route:string;symbol:string;side:"LONG"|"SHORT";entryPrice:number;atr14:number})=>Promise<number>;
  quantityNormalizer:EntryPlanInput["quantityNormalizer"];
  referencePrice:(symbol:string)=>Promise<number>;
  minimumVenueOrderNotional:(symbol:string,price:number)=>Promise<number>;
+ canaryEntry?:{maxNotionalUsd:number};
+ peerLineageMode?:V4PeerLineageMode;
  now?:()=>number;
 }
 export class V4RunnerEngine{
@@ -110,7 +113,7 @@ export class V4RunnerEngine{
     quantity:Number(p.positionAmt),markPrice:Number(p.markPrice)}))};
   const base=d.store.read(),accountMark=buildV4AccountMark({sources:peers,venue:mark,
    registry,state:base.state,expectedPeerSha:base.releaseSha,now:mark.capturedAt,
-   eventId:"signed-account:"+mark.capturedAt});
+   eventId:"signed-account:"+mark.capturedAt,peerLineageMode:d.peerLineageMode});
   this.commitEvent(accountMark.event);
   const current=d.store.read();
   // Each virtual leg must own exactly one signed Aster resident STOP. Merely
@@ -160,25 +163,39 @@ export class V4RunnerEngine{
    await cycle.reconcileExit(cid,this.now(),this.now());
    if(d.store.read().state.legs[leg.id].qty>1e-10)
     throw Error("V4_EXIT_RESIDUAL_POSITION_REQUIRES_REVIEW");
-   const stop=Object.values(d.store.read().intents).filter(i=>i.legId===leg.id&&i.action==="STOP");
-   if(stop.length!==1)throw Error("V4_COMPLETED_EXIT_STOP_IDENTITY_UNCERTAIN");
-   await d.adapter.cancel(stop[0].clientOrderId);
-   const remaining=await d.client.getOpenOrders(leg.candidate.symbol);
-   if(remaining.some(o=>o.clientOrderId===stop[0].clientOrderId))
-    throw Error("V4_RESIDENT_STOP_CANCEL_NOT_CONFIRMED");
-   // For overlapping virtual legs, an individual reduce-only exit cannot
-   // silently consume surviving legs or destroy their independent STOPs.
-   const [venuePositions,readbackOrders]=await Promise.all([
-    d.client.getPositions(),d.client.getOpenOrders()]);
    const after=d.store.read();
+   const stop=Object.values(after.intents).filter(i=>i.legId===leg.id&&i.action==="STOP");
+   if(stop.length!==1)throw Error("V4_COMPLETED_EXIT_STOP_IDENTITY_UNCERTAIN");
+   const stopCid=stop[0].clientOrderId;
+   // Never cancel protection based only on an EXIT ACK or a local fill ledger.
+   // Reconcile the actual net position and all surviving same-symbol STOPs
+   // *before* retiring this leg's STOP, under the account lease.
    const otherRemaining=Object.values(after.state.legs).filter(l=>l.qty>0&&
     l.candidate.symbol===leg.candidate.symbol);
    const expected=otherRemaining.reduce((sum,l)=>sum+l.qty*
     (l.candidate.effectiveSide==="LONG"?1:-1),0);
-   const actual=venuePositions.filter(p=>p.symbol===leg.candidate.symbol)
-    .reduce((sum,p)=>sum+Number(p.positionAmt),0);
-   if(!Number.isFinite(actual)||Math.abs(expected-actual)>Math.max(1e-8,Math.abs(expected)*1e-7))
-    throw Error("V4_SHARED_SYMBOL_EXIT_VENUE_QTY_DRIFT");
+   const assertNet=(positions:Awaited<ReturnType<typeof d.client.getPositions>>)=>{
+    const actual=positions.filter(p=>p.symbol===leg.candidate.symbol)
+     .reduce((sum,p)=>sum+Number(p.positionAmt),0);
+    if(!Number.isFinite(actual)||Math.abs(expected-actual)>Math.max(1e-8,Math.abs(expected)*1e-7))
+     throw Error("V4_SHARED_SYMBOL_EXIT_VENUE_QTY_DRIFT");
+   };
+   const [beforePositions,beforeOrders]=await Promise.all([
+    d.client.getPositions(),d.client.getOpenOrders()]);
+   assertNet(beforePositions);
+   const pendingRetire=planV4RetiredStops({state:after.state,intents:after.intents,
+    openOrders:beforeOrders,positions:beforePositions});
+   if(beforeOrders.some(o=>o.clientOrderId===stopCid)){
+    if(!pendingRetire.includes(stopCid))throw Error("V4_EXIT_STOP_RETIREMENT_NOT_ATTESTED");
+    await d.adapter.cancel(stopCid);
+   }
+   // A missing retired STOP is safe only after verifying that all surviving
+   // legs are still protected and the exchange net position is unchanged.
+   const [venuePositions,readbackOrders]=await Promise.all([
+    d.client.getPositions(),d.client.getOpenOrders()]);
+   if(readbackOrders.some(o=>o.clientOrderId===stopCid))
+    throw Error("V4_RESIDENT_STOP_CANCEL_NOT_CONFIRMED");
+   assertNet(venuePositions);
    verifyV4ResidentStops(after.state,after.intents,readbackOrders);
    return {status:"exited",reason:"ROUTE_EXIT_SIGNED_FILL_AND_STOP_REMOVED",
     eventTs:this.now(),candidateCount:0,orderEnabled:true};
@@ -188,8 +205,16 @@ export class V4RunnerEngine{
  private async tryCandidate(decision:V4LiveDecisionSnapshot,dispatcher:V4DurableOrderDispatcher,
   cycle:V4OrderCycle):Promise<V4TickResult>{
   const d=this.deps,now=this.now();
+  // Existing positions are reconciled and exited before this point. These
+  // global controls gate new ENTRY only and therefore never strand protection.
+  await d.assertEntrySafety();
   // This is a source-level *independent* proof, not the shadow boolean.
   await d.assertSourceParity(decision);
+  // A Production canary is deliberately one-entry-only. Historical durable
+  // ENTRY intents remain the consumption marker even after the canary closes.
+  if(d.canaryEntry&&Object.values(d.store.read().intents).some(i=>i.action==="ENTRY"))
+   return {status:"blocked",reason:"PRODUCTION_CANARY_ALREADY_CONSUMED",
+    eventTs:this.now(),candidateCount:decision.candidateCount,orderEnabled:false};
   const ranked=[...decision.candidates].sort((a,b)=>a.rank-b.rank||
    a.eligibleEntryTs-b.eligibleEntryTs||a.symbol.localeCompare(b.symbol));
   for(const candidate of ranked){
@@ -208,11 +233,26 @@ export class V4RunnerEngine{
     (candidate.effectiveSide==="LONG"?stop>=price:stop<=price))
     throw Error("V4_RESIDENT_STOP_BLUEPRINT_INVALID");
    const state=d.store.read().state;
-   const plan=await planProductionEntry(state,{candidate,ts:candidate.eligibleEntryTs,
+   const baseInput={ts:candidate.eligibleEntryTs,
     observedAtMs:this.now(),eventId:"reserve-live:"+legId,referencePrice:price,
     minimumOrderNotionalUsd:min,entryAtr:atr14,
     nativeExitEvidence:nativeEvidenceForProductionRoute(candidate.route),
-    quantityNormalizer:d.quantityNormalizer});
+    quantityNormalizer:d.quantityNormalizer};
+   // The natural candidate must be admissible under ordinary strategy/risk rules.
+   // Canary mode changes only size, never route eligibility or ownership rules.
+   const ordinaryPlan=await planProductionEntry(state,{candidate,...baseInput});
+   let plan=ordinaryPlan;
+   if(d.canaryEntry){
+    if(min>d.canaryEntry.maxNotionalUsd+1e-8)
+     throw Error("V4_CANARY_VENUE_MINIMUM_EXCEEDS_CAP");
+    const minimumGross=min/state.equityUsd;
+    if(!(minimumGross>0)||minimumGross>1)
+     throw Error("V4_CANARY_MINIMUM_GROSS_INVALID");
+    const canaryCandidate={...candidate,requestedGross:minimumGross};
+    plan=await planProductionEntry(state,{candidate:canaryCandidate,...baseInput});
+    if(plan.leg.reservationUsd>d.canaryEntry.maxNotionalUsd+1e-8)
+     throw Error("V4_CANARY_RESERVATION_EXCEEDS_CAP");
+   }
    const command:V4DurableOrderCommand={legId:plan.leg.id,action:"ENTRY",sequence:0,
     symbol:candidate.symbol,positionSide:candidate.effectiveSide,
     quantity:plan.leg.requestedQty,price,signalTs:candidate.eligibleEntryTs};
@@ -250,7 +290,8 @@ export class V4RunnerEngine{
        !(Number(proof.stopPrice)>0)||Math.abs(Number(proof.stopPrice)-venueStop)>1e-8)
      throw Error("V4_RESIDENT_STOP_NOT_VENUE_CONFIRMED");
    }
-   return {status:"submitted",reason:"DURABLE_ENTRY_WITH_RESIDENT_STOP",
+   return {status:"submitted",reason:d.canaryEntry?
+    "DURABLE_PRODUCTION_CANARY_WITH_RESIDENT_STOP":"DURABLE_ENTRY_WITH_RESIDENT_STOP",
     eventTs:this.now(),candidateCount:decision.candidateCount,orderEnabled:true};
   }
   return {status:"observing",reason:"NO_FRESH_NON_DUPLICATE_CANDIDATE",

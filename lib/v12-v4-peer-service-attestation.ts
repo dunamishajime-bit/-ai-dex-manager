@@ -49,3 +49,18 @@ export async function observeV4PeerService(kind:V4PeerKind,sha:string):Promise<V
   "--property=Id,ActiveState,SubState,MainPID,WorkingDirectory,ExecStart"],{timeout:5000});
  return parseV4SystemdShow(stdout,unit,Date.now());
 }
+
+export async function observeCurrentV4PeerService(kind:Exclude<V4PeerKind,"V12">):Promise<{
+ sha:string;service:V4ServiceObservation;
+}>{
+ const prefix=PREFIX[kind];
+ const {stdout}=await exec("systemctl",["list-units","--no-pager","--plain",
+  "--type=service","--state=running",prefix+"@*.service"],{timeout:5000});
+ const escaped=prefix.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");
+ const re=new RegExp("^"+escaped+"@([a-f0-9]{40})\\.service\\s+loaded\\s+active\\s+running\\b","gmi");
+ const matches=[...stdout.matchAll(re)].map(m=>m[1]);
+ const unique=[...new Set(matches)];
+ if(unique.length!==1)throw Error("V4_PEER_CURRENT_SERVICE_NOT_UNIQUE:"+kind+":"+unique.length);
+ const sha=unique[0];
+ return {sha,service:await observeV4PeerService(kind,sha)};
+}

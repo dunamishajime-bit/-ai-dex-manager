@@ -218,3 +218,10 @@ at real cutover; a one-time flat GET does not test partial STOP fills.
 
 Codex copy-ready final request:
 `docs/implementation/CODEX_V12_V4_FINAL_LIVE_CUTOVER_REQUEST_20261010.md`.
+
+
+## 2026-10-10 Testnet-independent Production canary policy
+
+Aster Testnet is not a mandatory Production cutover condition. When Testnet is not usable, certification must first use authentic existing Production history. If that history cannot establish the required STOP, partial-fill, restart and same-symbol lifecycle behavior, one controlled Production canary may be used.
+
+The canary requires a separate exact-SHA root-owned permit, one natural V4 signal only, venue-minimum notional sizing, an absolute USD cap of 25 or less, and a validity window of 24 hours or less. Any durable ENTRY intent permanently consumes the one-entry permit for that execution store. A successful canary never auto-promotes ordinary LIVE. Existing canary STOP/EXIT protection remains allowed after permit expiry. Mock-only evidence cannot replace authentic venue evidence.

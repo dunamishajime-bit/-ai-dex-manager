@@ -2,8 +2,10 @@ import type {ForeignExposure} from "./v12-v4-production-lifecycle";
 export type V4PeerKind="V12"|"PENGU"|"Q102"|"V52"|"FET"|"HYPE_LONG"|"IDLE"|"RESIDUAL";
 import type {V4ServiceObservation} from "./v12-v4-peer-service-attestation";
 export type V4PeerSource={kind:V4PeerKind;programSha:string;raw:Record<string,any>;
- service?:V4ServiceObservation};
-export function v4PeerOwners(sources:V4PeerSource[],expectedSha:string,now:number):ForeignExposure[]{
+ programShaSource?:"STATE"|"SYSTEMD";service?:V4ServiceObservation};
+export type V4PeerLineageMode="UNIFIED_RELEASE"|"ATTEST_EACH_PEER";
+export function v4PeerOwners(sources:V4PeerSource[],expectedSha:string,now:number,
+ lineageMode:V4PeerLineageMode="UNIFIED_RELEASE"):ForeignExposure[]{
  const kinds:V4PeerKind[]=["V12","PENGU","Q102","V52","FET","HYPE_LONG","IDLE","RESIDUAL"];
  if(sources.length!==8||kinds.some(k=>sources.filter(s=>s.kind===k).length!==1))
   throw Error("ALL_EIGHT_PEER_SOURCES_REQUIRED");
@@ -22,7 +24,9 @@ export function v4PeerOwners(sources:V4PeerSource[],expectedSha:string,now:numbe
  };
  for(const s of sources){
   const r=s.raw;
+  if(!/^[a-f0-9]{40}$/.test(s.programSha))throw Error("PEER_PROGRAM_SHA_INVALID");
   const retired=s.kind==="V12"&&s.service?.retiredV12===true&&!s.service.active;
+  const attestedSha=lineageMode==="ATTEST_EACH_PEER"?s.programSha:expectedSha;
   if(retired){
    // Legacy V12 is intentionally stopped before V4 cutover; its last state
    // must be flat, with no pending work, and its own release SHA attested.
@@ -31,14 +35,16 @@ export function v4PeerOwners(sources:V4PeerSource[],expectedSha:string,now:numbe
       (r.activePositions?.length??0)>0||r.active||r.pending||
       r.dd1296UnaccountedExits?.length||r.manualReview)
     throw Error("V4_RETIRED_V12_NOT_SIGNED_FLAT");
-  }else if(s.programSha!==expectedSha||
-   (r.runtimeCommitSha&&r.runtimeCommitSha!==expectedSha)||
-   (r.runtimeSha&&r.runtimeSha!==expectedSha))
+  }else if(
+   (lineageMode==="UNIFIED_RELEASE"&&s.programSha!==expectedSha)||
+   (r.runtimeCommitSha&&r.runtimeCommitSha!==attestedSha)||
+   (r.runtimeSha&&r.runtimeSha!==attestedSha)||
+   (lineageMode==="ATTEST_EACH_PEER"&&s.programShaSource==="SYSTEMD"&&(r.runtimeCommitSha||r.runtimeSha)))
    throw Error("PEER_PROGRAM_LINEAGE_MISMATCH");
   const obs=s.service;
   const liveObservation=obs&&obs.active&&obs.mainPid>0&&
    obs.observedAt<=now&&now-obs.observedAt<=15000&&
-   obs.unit.endsWith("@"+expectedSha+".service");
+   obs.unit.endsWith("@"+attestedSha+".service");
   const retiredObservation=retired&&obs?.observedAt!==undefined&&
    obs.observedAt<=now&&now-obs.observedAt<=15000;
   const age=now-r.updatedAt;
