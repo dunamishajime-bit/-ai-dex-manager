@@ -78,5 +78,18 @@ jobs:
               echo "ESBUILD_ACCESS_DEPLOY=$(runuser -u deploy -- test -x "$p" && echo EXECUTABLE || echo NOT_EXECUTABLE)"
             fi
           done
+          if runuser -u deploy -- "$dep/@esbuild/linux-x64/bin/esbuild" --version >/tmp/v4-esbuild-version.txt 2>/tmp/v4-esbuild-direct.err; then
+            echo "ESBUILD_DIRECT_EXEC=PASS"
+          else
+            echo "ESBUILD_DIRECT_EXEC=FAIL"
+            sed -n '1,4p' /tmp/v4-esbuild-direct.err | sed 's/^/ESBUILD_DIRECT_ERROR=/'
+          fi
+          if runuser -u deploy -- bash -c 'cd "$1" && node -e "require(\x27esbuild\x27).transformSync(\x27const x:number=1\x27,{loader:\x27ts\x27})"' _ "$root/current" >/tmp/v4-esbuild-node.txt 2>/tmp/v4-esbuild-node.err; then
+            echo "ESBUILD_NODE_TRANSFORM=PASS"
+          else
+            echo "ESBUILD_NODE_TRANSFORM=FAIL"
+            sed -n '1,8p' /tmp/v4-esbuild-node.err | sed 's/^/ESBUILD_NODE_ERROR=/'
+          fi
+          rm -f /tmp/v4-esbuild-version.txt /tmp/v4-esbuild-direct.err /tmp/v4-esbuild-node.txt /tmp/v4-esbuild-node.err
           echo "TRADING_MUTATION=0"
           REMOTE
