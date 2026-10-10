@@ -95,3 +95,31 @@ runner, position, order or configuration was changed.
 
 The approved TIME37 artifact is still bound to its ORIGINAL source SHA,
 not the new research SHA. The new SHA must not be declared LIVE-ready.
+
+## Read-only Aster Testnet signed preflight (2026-10-10)
+
+- Aster official Futures Authentication documentation specifies EIP-712 Message
+  `chainId=1666` for Production and `chainId=714` for Testnet.
+  URL: https://asterdex.github.io/aster-api-website/asterCode/authentication/
+- The DisDex client now chooses 714 only for the exact host
+  `https://fapi.asterdex-testnet.com`, retaining 1666 for the existing
+  Production host. This patch adds NO Production order authority.
+- The Testnet-only script `scripts/v12-v4-aster-testnet-readonly-certification.ts`
+  strictly rejects all non-Testnet hosts and performs **signed GET only**:
+  current position mode, balances, positions and ETHUSDT open orders.
+  Hedge Mode fails the V4 one-way/combined-symbol requirement.
+- A synthetic (public example key) EIP-712 signature test checks that the
+  generated signature verifies under the intended chain ID and not the other.
+  URL/path guarding also has an explicit negative test.
+- Existing user Desktop TEST.txt contained two API-Agent-labeled public
+  addresses and one agent secret, the latter previously checked for a local
+  address match but never copied into Git or output. **The master Testnet
+  account user address is not identified by that file**, and the preflight
+  environment does not have a configured `ASTER_TESTNET_USER_ADDRESS`.
+  Running the preflight in this state fails closed with exit 2 and zero
+  mutation calls. Do not confuse the API Agent address with the master user.
+- Real signed Testnet requests and the STOP/EXIT/restart lifecycle remain
+  **NOT EXECUTED, NOT CERTIFIED**. API Agent approval has not been independently
+  read back. Operator must supply the master address and securely make Testnet
+  credentials available to the approved local runtime; never commit secrets,
+  use Production keys or send them through chat.
