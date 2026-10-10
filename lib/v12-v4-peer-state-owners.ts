@@ -1,6 +1,8 @@
 import type {ForeignExposure} from "./v12-v4-production-lifecycle";
 export type V4PeerKind="V12"|"PENGU"|"Q102"|"V52"|"FET"|"HYPE_LONG"|"IDLE"|"RESIDUAL";
-export type V4PeerSource={kind:V4PeerKind;programSha:string;raw:Record<string,any>};
+import type {V4ServiceObservation} from "./v12-v4-peer-service-attestation";
+export type V4PeerSource={kind:V4PeerKind;programSha:string;raw:Record<string,any>;
+ service?:V4ServiceObservation};
 export function v4PeerOwners(sources:V4PeerSource[],expectedSha:string,now:number):ForeignExposure[]{
  const kinds:V4PeerKind[]=["V12","PENGU","Q102","V52","FET","HYPE_LONG","IDLE","RESIDUAL"];
  if(sources.length!==8||kinds.some(k=>sources.filter(s=>s.kind===k).length!==1))
@@ -20,18 +22,45 @@ export function v4PeerOwners(sources:V4PeerSource[],expectedSha:string,now:numbe
  };
  for(const s of sources){
   const r=s.raw;
-  if(s.programSha!==expectedSha||(r.runtimeCommitSha&&r.runtimeCommitSha!==expectedSha)||
-   (r.runtimeSha&&r.runtimeSha!==expectedSha))throw Error("PEER_PROGRAM_LINEAGE_MISMATCH");
-  if(!Number.isFinite(r.updatedAt)||r.updatedAt>now||now-r.updatedAt>120000)throw Error("STALE_PEER_OWNER_SNAPSHOT");
+  const retired=s.kind==="V12"&&s.service?.retiredV12===true&&!s.service.active;
+  if(retired){
+   // Legacy V12 is intentionally stopped before V4 cutover; its last state
+   // must be flat, with no pending work, and its own release SHA attested.
+   if(!/^[a-f0-9]{40}$/.test(s.programSha)||
+      s.programSha!==(r.runtimeCommitSha??r.runtimeSha)||
+      (r.activePositions?.length??0)>0||r.active||r.pending||
+      r.dd1296UnaccountedExits?.length||r.manualReview)
+    throw Error("V4_RETIRED_V12_NOT_SIGNED_FLAT");
+  }else if(s.programSha!==expectedSha||
+   (r.runtimeCommitSha&&r.runtimeCommitSha!==expectedSha)||
+   (r.runtimeSha&&r.runtimeSha!==expectedSha))
+   throw Error("PEER_PROGRAM_LINEAGE_MISMATCH");
+  const obs=s.service;
+  const liveObservation=obs&&obs.active&&obs.mainPid>0&&
+   obs.observedAt<=now&&now-obs.observedAt<=15000&&
+   obs.unit.endsWith("@"+expectedSha+".service");
+  const retiredObservation=retired&&obs?.observedAt!==undefined&&
+   obs.observedAt<=now&&now-obs.observedAt<=15000;
+  const age=now-r.updatedAt;
+  if(!Number.isFinite(r.updatedAt)||age<0||
+    (age>120000&&!(
+      (liveObservation&&age<=6*3600000)||
+      retiredObservation
+    )))throw Error("STALE_PEER_OWNER_SNAPSHOT");
+  if(r.pending||r.pendingOrder||r.manualReview||r.manualReviewReason||
+     r.executionReview||r.bootstrapRequired)throw Error("PEER_PENDING_OR_MANUAL_REVIEW:"+s.kind);
   if(s.kind==="V12"){
-   if(!Array.isArray(r.activePositions)&&!("active" in r))throw Error("UNKNOWN_V12_OWNER_SCHEMA");
+   if(r.schema!=="v12-x1-all-runner-state/v2"||
+      r.strategyId!=="V12_X1.00_ALL"||r.mode!=="LIVE"||
+      (r.activePositions!==undefined&&!Array.isArray(r.activePositions)))
+      throw Error("UNKNOWN_V12_OWNER_SCHEMA");
    for(const p of (r.activePositions??(r.active?[r.active]:[])))add(s.kind,p.symbol,p.side,Number(p.quantity));
   }else if(["PENGU","Q102","FET","RESIDUAL"].includes(s.kind)){
    const knownFlatWithoutPosition=!r.position&&!r.pending&&(
     s.kind==="Q102"&&r.version===1&&r.strategyId==="QUALITY102_CAUSAL_V1"||
     s.kind==="FET"&&r.schema==="fet-brk48-residual-state/v1"&&r.strategyId==="FET_BRK48_RESIDUAL"||
     s.kind==="RESIDUAL"&&r.schema==="disdex-idle-residual-long-state/v1"||
-    s.kind==="PENGU"&&r.strategyId==="PENGU_DUAL_LS_V2_FINAL"&&r.mode==="LIVE"
+    s.kind==="PENGU"&&r.version===2&&r.strategyId==="PENGU_DUAL_LS_V2_FINAL"&&r.mode==="LIVE"
    );
    if(!("position" in r)&&!knownFlatWithoutPosition)throw Error("UNKNOWN_PEER_OWNER_SCHEMA");
    if(r.position)add(s.kind,s.kind==="PENGU"?"PENGU":r.position.symbol,r.position.side,Number(r.position.quantity));
@@ -39,8 +68,10 @@ export function v4PeerOwners(sources:V4PeerSource[],expectedSha:string,now:numbe
    if(!r.positions||typeof r.positions!=="object")throw Error("UNKNOWN_V52_OWNER_SCHEMA");
    for(const p of Object.values(r.positions) as any[])if(p)add(s.kind,p.symbol,p.asterOpenSide??p.side,Number(p.asterQty??p.quantity));
   }else{
-   if(!Array.isArray(r.positions))throw Error("UNKNOWN_PEER_POSITIONS_SCHEMA");
-   for(const p of r.positions)if(s.kind!=="HYPE_LONG"||p.strategy==="HYPE_LONG")
+   const validFlatHype=s.kind==="HYPE_LONG"&&
+    r.schema==="disdex-hype-zec-long/v1"&&r.mode==="LIVE"&&r.positions===undefined;
+   if(!Array.isArray(r.positions)&&!validFlatHype)throw Error("UNKNOWN_PEER_POSITIONS_SCHEMA");
+   for(const p of (r.positions??[]))if(s.kind!=="HYPE_LONG"||p.strategy==="HYPE_LONG")
     add(s.kind,p.symbol,p.side,Number(p.quantity));
   }
  }

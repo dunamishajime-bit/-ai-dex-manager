@@ -9,8 +9,8 @@ import {V4RunnerEngine} from "../lib/v12-v4-runner-engine";
 const sha="a".repeat(40);
 const families=["V12","PENGU","Q102","V52","FET","HYPE_LONG","IDLE","RESIDUAL"] as const;
 function peers(now:number){return families.map(kind=>({kind,programSha:sha,raw:{
- updatedAt:now,...(kind==="V12"?{activePositions:[]}:
- kind==="V52"?{positions:{}}:kind==="IDLE"||kind==="HYPE_LONG"?{positions:[]}:{position:null})
+ updatedAt:now,...(kind==="V12"?{schema:"v12-x1-all-runner-state/v2",strategyId:"V12_X1.00_ALL",mode:"LIVE",activePositions:[]}:
+ kind==="V52"?{positions:{}}:kind==="IDLE"||kind==="HYPE_LONG"?{positions:[]}:kind==="PENGU"?{version:2,strategyId:"PENGU_DUAL_LS_V2_FINAL",mode:"LIVE",position:null}:{position:null})
 }}));}
 test("runner takes real shared lock and signed account mark, then stays non-ordering with no signals",async()=>{
  const dir=mkdtempSync(join(tmpdir(),"v4-engine-"));const now=Date.now();

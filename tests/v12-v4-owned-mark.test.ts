@@ -9,8 +9,8 @@ test("signed account marks reconcile an existing V4 leg without folding it into 
  const now=Date.now(),sha="a".repeat(40);
  const kinds=["V12","PENGU","Q102","V52","FET","HYPE_LONG","IDLE","RESIDUAL"] as const;
  const sources=kinds.map(kind=>({kind,programSha:sha,raw:{
-   updatedAt:now,...(kind==="V12"?{activePositions:[]}:
-   kind==="V52"?{positions:{}}:kind==="HYPE_LONG"||kind==="IDLE"?{positions:[]}:{position:null})}}));
+   updatedAt:now,...(kind==="V12"?{schema:"v12-x1-all-runner-state/v2",strategyId:"V12_X1.00_ALL",mode:"LIVE",activePositions:[]}:
+   kind==="V52"?{positions:{}}:kind==="HYPE_LONG"||kind==="IDLE"?{positions:[]}:kind==="PENGU"?{version:2,strategyId:"PENGU_DUAL_LS_V2_FINAL",mode:"LIVE",position:null}:{position:null})}}));
  const candidate={...adaptProductionCandidates({...fixture,source:{...fixture.source,side:fixture.source.side as "LONG"|"SHORT",sourceEngine:"buildV12Signals"}}).candidates[0],requestedGross:.5};
  let state=createProductionState({equityUsd:1000,foreign:[],holdProtected:false});
  const entry=await planProductionEntry(state,{candidate,ts:candidate.eligibleEntryTs,eventId:"reserve",referencePrice:100,minimumOrderNotionalUsd:5,
@@ -33,14 +33,14 @@ test("canonical Q102 and FET flat snapshots may omit optional position but pendi
  const now=Date.now(),sha="a".repeat(40);
  const kinds=["V12","PENGU","Q102","V52","FET","HYPE_LONG","IDLE","RESIDUAL"] as const;
  const sources=kinds.map(kind=>({kind,programSha:sha,raw:{updatedAt:now,
-  ...(kind==="V12"?{activePositions:[]}:kind==="V52"?{positions:{}}:
+  ...(kind==="V12"?{schema:"v12-x1-all-runner-state/v2",strategyId:"V12_X1.00_ALL",mode:"LIVE",activePositions:[]}:kind==="V52"?{positions:{}}:
   kind==="HYPE_LONG"||kind==="IDLE"?{positions:[]}:
   kind==="Q102"?{version:1,strategyId:"QUALITY102_CAUSAL_V1"}:
   kind==="FET"?{schema:"fet-brk48-residual-state/v1",strategyId:"FET_BRK48_RESIDUAL"}:
   kind==="RESIDUAL"?{schema:"disdex-idle-residual-long-state/v1"}:
-  {strategyId:"PENGU_DUAL_LS_V2_FINAL",mode:"LIVE"})}}));
+  {version:2,strategyId:"PENGU_DUAL_LS_V2_FINAL",mode:"LIVE"})}}));
  assert.deepEqual(v4PeerOwners(sources,sha,now),[]);
  const q=sources.find(s=>s.kind==="Q102")!;
  (q.raw as any).pending={symbol:"BTCUSDT"};
- assert.throws(()=>v4PeerOwners(sources,sha,now),/UNKNOWN_PEER_OWNER_SCHEMA/);
+ assert.throws(()=>v4PeerOwners(sources,sha,now),/PEER_PENDING_OR_MANUAL_REVIEW/);
 });

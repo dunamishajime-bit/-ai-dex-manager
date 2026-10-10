@@ -11,8 +11,8 @@ test("signed flat init is safe, repeatable and never infers flat from missing st
   const store=new V4ExecutionStore(join(dir,"orders.json"),sha);
   const kinds=["V12","PENGU","Q102","V52","FET","HYPE_LONG","IDLE","RESIDUAL"] as const;
   const peers=kinds.map(kind=>({kind,programSha:sha,raw:{
-   updatedAt:now,...(kind==="V12"?{activePositions:[]}:kind==="V52"?{positions:{}}:
-    kind==="HYPE_LONG"||kind==="IDLE"?{positions:[]}:{position:null}),
+   updatedAt:now,...(kind==="V12"?{schema:"v12-x1-all-runner-state/v2",strategyId:"V12_X1.00_ALL",mode:"LIVE",activePositions:[]}:kind==="V52"?{positions:{}}:
+    kind==="HYPE_LONG"||kind==="IDLE"?{positions:[]}:kind==="PENGU"?{version:2,strategyId:"PENGU_DUAL_LS_V2_FINAL",mode:"LIVE",position:null}:{position:null}),
   }}));
   const client:any={getPositions:async()=>[],getOpenOrders:async()=>[],
    getBalances:async()=>[{asset:"USDT",balance:"72.5",availableBalance:"72.4"}]};

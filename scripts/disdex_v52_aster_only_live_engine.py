@@ -48,6 +48,14 @@ class V52AsterOnlyEngine(legacy.V52AsterOnlyEngine):
         if self.live:
             assert_strict_live_configuration()
 
+    def save(self) -> None:
+        # Additional state release identity consumed only by cross-runner V4
+        # accounting. Never replace missing release evidence with a guessed SHA.
+        sha = (os.getenv("DISDEX_RELEASE_SHA") or os.getenv("DISDEX_RUNTIME_COMMIT_SHA") or "").strip().lower()
+        if len(sha) == 40 and all(c in "0123456789abcdef" for c in sha):
+            self.state["runtimeCommitSha"] = sha
+        super().save()
+
     def _refresh_idle_admission_heartbeat(self) -> None:
         self.state["idleAdmissionDecisionTs"] = (base.now_ms() // 3_600_000) * 3_600_000
         self.save()

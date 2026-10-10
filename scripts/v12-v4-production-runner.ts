@@ -12,6 +12,7 @@ import {assertV4CertifiedSource,assertV4CertifiedOrder} from "../lib/v12-v4-cert
 import {readV4TimeStopApproval,approvedV4TimeStopQuote} from "../lib/v12-v4-time-stop-approval";
 import {attachV4NativeCoreCandidates} from "../lib/v12-v4-core-candidate";
 import type {V4PeerKind,V4PeerSource} from "../lib/v12-v4-peer-state-owners";
+import {observeV4PeerService} from "../lib/v12-v4-peer-service-attestation";
 const H2=7200000;
 function env(name:string){
  const value=String(process.env[name]??"").trim();
@@ -23,7 +24,7 @@ async function safeJson(path:string){
  if(!st.isFile()||st.isSymbolicLink())throw Error("V4_UNSAFE_SOURCE_FILE");
  return JSON.parse(await readFile(path,"utf8")) as Record<string,any>;
 }
-async function loadPeers():Promise<V4PeerSource[]>{
+async function loadPeers(releaseSha:string):Promise<V4PeerSource[]>{
  const paths=JSON.parse(env("V12_V4_PEER_STATE_PATHS_JSON")) as Record<V4PeerKind,string>;
  const kinds:V4PeerKind[]=["V12","PENGU","Q102","V52","FET","HYPE_LONG","IDLE","RESIDUAL"];
  return Promise.all(kinds.map(async kind=>{
@@ -32,7 +33,10 @@ async function loadPeers():Promise<V4PeerSource[]>{
   const raw=await safeJson(path);
   const programSha=String(raw.runtimeCommitSha??raw.runtimeSha??"").toLowerCase();
   if(!/^[a-f0-9]{40}$/.test(programSha))throw Error("V4_PEER_RELEASE_NOT_ATTESTED:"+kind);
-  return {kind,programSha,raw};
+  const service=await observeV4PeerService(kind,releaseSha);
+  if(!service.retiredV12&&!service.active)
+   throw Error("V4_PEER_SERVICE_NOT_ATTESTED:"+kind);
+  return {kind,programSha,raw,service};
  }));
 }
 function requireReleaseSha(){
@@ -51,7 +55,7 @@ export async function buildV4ProductionRuntime(){
  const adapter=new V12AsterLiveAdapter(client,{maxSlippageBps:20});
  const store=new V4ExecutionStore(env("V12_V4_EXECUTION_STORE_PATH"),releaseSha);
  if(process.argv.includes("--init-signed-flat")){
-  await initializeV4SignedFlatState({store,client,peers:await loadPeers(),pendingPath:env("DISDEX_PENDING_EXPOSURE_REGISTRY_PATH")});
+  await initializeV4SignedFlatState({store,client,peers:await loadPeers(releaseSha),pendingPath:env("DISDEX_PENDING_EXPOSURE_REGISTRY_PATH")});
  }
  store.read();
  const lock=new FileAccountOrderLock(env("DISDEX_ACCOUNT_LOCK_PATH"),120000);
@@ -80,7 +84,7 @@ export async function buildV4ProductionRuntime(){
  };
  const engine=new V4RunnerEngine({
   store,accountLock:lock,adapter,client,pendingRegistryPath,
-  fetchDecision,fetchPeers:loadPeers,
+  fetchDecision,fetchPeers:()=>loadPeers(releaseSha),
   fetchExitFeed:async symbol=>{
    const now=Date.now(),rows=await client.getKlines(symbol,"1h",500);
    return {closed:rows.filter(x=>Number(x[0])+3600000<=now&&Number(x[6])<now)

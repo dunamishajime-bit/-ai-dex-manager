@@ -149,3 +149,46 @@ This closes the 16-route *retrospective accepted-trade* evidence gap only.
 No data proves the same 16 routes fired in independent Aug-Oct external
 forward windows; full live no-extra-candidate admission, broker-side Stop,
 shared Gross and operator deployment certification remain blocked.
+
+
+## 2026-10-10 production peer ownership and service attestation closure
+
+An actual read-only Xserver VPS inspection identified a last critical
+deployment blocker: old V4 bootstrap expected a stale
+`/var/lib/disdex/pengu-dual-ls-v2-final/runner-live.json` rather than the
+running PENGU source `/var/lib/disdex/pengu-dual-ls-v2/runner-live.json`.
+PENGU and V52 do not currently persist the required 40-byte production SHA;
+V12 and HYPE omit optional flat-position arrays. Some active peer states are
+unchanged for 50–120 minutes without a new trade.
+
+Fixes staged on this research branch (NOT installed on VPS):
+- Actual PENGU serialized state now writes `runtimeCommitSha` only when
+  its own unit supplies the real release SHA, with the release-bound systemd
+  Environment setting prepared.
+- The **actual** V52 Python engine (not the old V11EQ engine) similarly
+  writes the exact supplied release SHA; a root-managed systemd unit drop-in
+  is prepared, not installed.
+- `v12-v4-peer-service-attestation.ts` reads the exact live systemd
+  release unit/active state/PID; dormant source files require a fresh real
+  matching unit observation plus an age <=6h. Missing/mismatched release
+  lineage, pending entries, any manual-review state, or mismatched Aster
+  signed net positions still block order authorization.
+- The old V12 must be **confirmed stopped** (no running instance at ANY SHA)
+  before V4 ownership assessment; its immutable old flat state is allowed
+  without falsifying its source SHA. A non-flat/pending legacy V12 blocks.
+- RESIDUAL remains a sub-owner of IDLE; systemd proof references the same
+  IDLE unit rather than a fictional separate service.
+- Additional regression and mock tests cover retired non-flat V12,
+  stale active service, wrong SHA/PID, legacy flat optional arrays, and
+  PENGU persisted SHA. All existing entry/STOP/exit order safety gates
+  remain in place.
+
+Detailed handoff: `docs/implementation/V12_V4_PEER_OWNER_LIVE_COMPATIBILITY_20261010.md`.
+
+**Remaining evidence must be collected by Codex before final cutover:**
+actual staged newer-SHA runner startup/write/readback across every peer,
+fresh signed Aster net position and STOP readback including race/partial
+fills without artificial real-money TEST orders, watchdog no-resurrection
+proof, root-controlled signed policy approval, and acceptance of the
+independent-period underperformance. Do not manufacture attestations or
+invoke `V12_V4_LIVE_VERIFIED` while any condition remains unresolved.

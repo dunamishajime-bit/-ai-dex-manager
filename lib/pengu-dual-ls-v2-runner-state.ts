@@ -85,6 +85,8 @@ export interface PenguDualLsV2RunnerState {
     strategyId: "PENGU_DUAL_LS_V2_FINAL";
     mode: PenguDualLsV2Mode;
     updatedAt: number;
+    /** Production release identity; emitted on the next safe state save. */
+    runtimeCommitSha?: string;
     lastRunAt?: number;
     lastSignalReferenceTs?: number;
     /** Sanitized read-only decision telemetry for the monitoring UI. */
@@ -389,6 +391,8 @@ function normalize(value: unknown, mode: PenguDualLsV2Mode): PenguDualLsV2Runner
         strategyId: "PENGU_DUAL_LS_V2_FINAL",
         mode,
         updatedAt: Number.isFinite(Number(raw.updatedAt)) ? Number(raw.updatedAt) : Date.now(),
+        runtimeCommitSha: typeof raw.runtimeCommitSha === "string" &&
+            /^[a-f0-9]{40}$/i.test(raw.runtimeCommitSha) ? raw.runtimeCommitSha.toLowerCase() : undefined,
         lastRunAt: Number.isFinite(Number(raw.lastRunAt)) ? Number(raw.lastRunAt) : undefined,
         lastSignalReferenceTs: Number.isFinite(Number(raw.lastSignalReferenceTs)) ? Number(raw.lastSignalReferenceTs) : undefined,
         latestSignal: raw.latestSignal && typeof raw.latestSignal === "object" ? raw.latestSignal as PenguDualLsV2Signal : undefined,
@@ -434,6 +438,10 @@ export class FilePenguDualLsV2RunnerStateStore implements PenguDualLsV2RunnerSta
             strategyId: "PENGU_DUAL_LS_V2_FINAL",
             mode: this.mode,
             updatedAt: Date.now(),
+            runtimeCommitSha: (() => {
+                const sha = String(process.env.DISDEX_RELEASE_SHA || process.env.DISDEX_RUNTIME_COMMIT_SHA || "").trim().toLowerCase();
+                return /^[a-f0-9]{40}$/.test(sha) ? sha : state.runtimeCommitSha;
+            })(),
             m05ShadowHistory: appendM05ShadowObservation(state),
             failures: state.failures.slice(-100),
         };
