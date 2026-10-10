@@ -1,0 +1,56 @@
+name: V12 V4 stage quick readonly 20261011
+on:
+  push:
+    branches: [ops/v12-v4-stage-only-20261011]
+    paths: [.github/workflows/v12-v4-stage-quick-readonly-20261011.yml]
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    env:
+      TARGET_SHA: bd47341cdd009117e165ba2689565d7c2d5cf975
+      EXPECTED_CURRENT_SHA: ce1edeead8d0f9e5d88e829d415057117502a335
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Configure root SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Quick process readback
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          timeout 45s ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -p "$PORT" "root@$SSH_HOST" "TARGET_SHA='$TARGET_SHA' EXPECTED_CURRENT_SHA='$EXPECTED_CURRENT_SHA' bash -s" <<'REMOTE'
+          set -Eeuo pipefail
+          root=/home/deploy/disdex-trading
+          current_sha="$(tr -d '[:space:]' < "$root/current/.disdex-release-sha")"
+          echo "CURRENT_SHA=$current_sha"
+          echo "OLD_V12_ACTIVE=$(systemctl is-active "disdex-v12-x1-all@$EXPECTED_CURRENT_SHA.service" 2>/dev/null || true)"
+          echo "TARGET_RELEASE_EXISTS=$([[ -d "$root/releases/$TARGET_SHA" ]] && echo TRUE || echo FALSE)"
+          echo "STAGE_COUNT=$(find "$root/releases" -mindepth 1 -maxdepth 1 -type d -name ".stage-$TARGET_SHA-*" | wc -l)"
+          pids="$(pgrep -f 'npm ci --no-audit --no-fund' || true)"
+          echo "NPM_PID_COUNT=$(wc -w <<<"$pids")"
+          for pid in $pids; do
+            ps -p "$pid" -o pid=,etimes=,stat=,pcpu=,pmem=,comm= | sed 's/^/NPM_PROCESS=/'
+          done
+          echo "FREE_GB=$(df -BG --output=avail "$root" | tail -1 | tr -dc '0-9')"
+          echo "V4_SERVICE_COUNT=$(systemctl list-units --type=service --state=running --no-legend 2>/dev/null | grep -c "$TARGET_SHA" || true)"
+          echo "CANARY_PERMIT_EXISTS=$([[ -e /etc/disdex/v12-v4-production-canary-permit.json ]] && echo TRUE || echo FALSE)"
+          echo "TRADING_MUTATION=0"
+          REMOTE
