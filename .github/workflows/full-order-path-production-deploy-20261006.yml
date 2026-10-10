@@ -38,6 +38,7 @@ jobs:
           npm ci --no-audit --no-fund
           npx tsc --noEmit
           npx tsx --test 'tests/v12-v4-*.test.ts' tests/aster-v3-client-testnet-chain-id.test.ts
+          npx tsx --test tests/production-rollback-behavior.test.mjs
           test -f deploy/systemd/disdex-v12-v4-canary@.service
           grep -q 'V12_V4_OPERATION_MODE=CANARY' deploy/systemd/disdex-v12-v4-canary@.service
           grep -q 'v12-v4-canary.json' deploy/systemd/disdex-v12-v4-canary@.service
@@ -278,6 +279,7 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
+          export DISDEX_ROLLBACK_ONLY=true
           [[ -n "${OLD_SHA:-}" ]] || exit 0
           PORT="${SSH_PORT:-22}"
           ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts"             -p "$PORT" "root@$SSH_HOST" "OLD_SHA='$OLD_SHA' TARGET_SHA='$TARGET_SHA' bash -s" <<'REMOTE'
