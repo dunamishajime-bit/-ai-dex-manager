@@ -72,7 +72,11 @@ export class V4OrderCycle{
    incomeType:"FUNDING_FEE",startTime:from,endTime:to,limit:1000
   });
   if(incomes.length===1000)throw Error("V4_FUNDING_HISTORY_MAY_BE_TRUNCATED");
-  const relevant=incomes.filter(r=>symbols.has(String(r.symbol))&&
+  // Aster may return inclusive start/end timestamps. Persist disjoint
+  // funding windows (from, to] so a boundary settlement is never rebooked
+  // under a different set of virtual owners after the next cycle.
+  const relevant=incomes.filter(r=>Number(r.time)>from&&Number(r.time)<=to&&
+    symbols.has(String(r.symbol))&&
     legs.some(l=>l.candidate.symbol===r.symbol&&Number(r.time)>=l.entryTs));
   const doc=this.store.read();
   let next=reconcileV4Funding(doc.state,relevant,recordedAt);
