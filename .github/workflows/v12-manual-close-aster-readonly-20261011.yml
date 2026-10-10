@@ -43,15 +43,15 @@ jobs:
           cleanup(){ rm -f "$out" "$err"; }
           trap cleanup EXIT
           set +e
-          runuser -u deploy -- env RELEASE="$release" bash -lc '
+          (
             set -Eeuo pipefail
             set -a
             . /etc/disdex/disdex-v13d-v11eq-v96.env
             . /etc/disdex/disdex-v12-pengu-v2-v52.env
             set +a
-            cd "$RELEASE"
+            cd "$release"
             ./node_modules/.bin/tsx scripts/disdex-aster-readonly-account-diagnostic.ts
-          ' >"$out" 2>"$err"
+          ) >"$out" 2>"$err"
           rc=$?
           set -e
           echo "DIAGNOSTIC_EXIT=$rc"
