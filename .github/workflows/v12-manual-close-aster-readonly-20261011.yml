@@ -1,0 +1,92 @@
+name: V12 manual-close Aster readonly verify 20261011
+on:
+  push:
+    branches: [ops/v12-v4-stage-only-20261011]
+    paths: [.github/workflows/v12-manual-close-aster-readonly-20261011.yml]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Configure root SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Read Aster account without mutation
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -p "$PORT" "root@$SSH_HOST" 'bash -s' <<'REMOTE'
+          set -Eeuo pipefail
+          root=/home/deploy/disdex-trading
+          release="$(readlink -f "$root/current")"
+          out="/tmp/v12-manual-close-readonly-$$.jsonl"
+          err="/tmp/v12-manual-close-readonly-$$.err"
+          cleanup(){ rm -f "$out" "$err"; }
+          trap cleanup EXIT
+          runuser -u deploy -- env RELEASE="$release" bash -lc '
+            set -Eeuo pipefail
+            set -a
+            . /etc/disdex/disdex-v13d-v11eq-v96.env
+            . /etc/disdex/disdex-v12-pengu-v2-v52.env
+            set +a
+            cd "$RELEASE"
+            ./node_modules/.bin/tsx scripts/disdex-aster-readonly-account-diagnostic.ts
+          ' >"$out" 2>"$err"
+          python3 - "$out" <<'PY'
+          import json,sys
+          path=sys.argv[1]
+          obj=None
+          for line in open(path,encoding="utf-8",errors="replace"):
+              try:
+                  d=json.loads(line)
+              except Exception:
+                  continue
+              if isinstance(d,dict) and str(d.get("status","")).startswith("ASTER_READONLY_ACCOUNT_DIAGNOSTIC_"):
+                  obj=d
+          if not obj or obj.get("status")!="ASTER_READONLY_ACCOUNT_DIAGNOSTIC_PASS":
+              raise SystemExit("ASTER_READONLY_ACCOUNT_DIAGNOSTIC_NOT_PASS")
+          pos=obj.get("positions",[])
+          orders=obj.get("openOrders",[])
+          print("ASTER_READONLY_PASS=TRUE")
+          print("POSITIONS_COUNT="+str(len(pos)))
+          print("OPEN_ORDERS_COUNT="+str(len(orders)))
+          print("POSITIONS="+json.dumps([{
+              "symbol":p.get("symbol"),
+              "positionAmt":p.get("positionAmt"),
+              "positionSide":p.get("positionSide")
+          } for p in pos],separators=(",",":")))
+          print("OPEN_ORDERS="+json.dumps([{
+              "symbol":o.get("symbol"),
+              "clientOrderId":o.get("clientOrderId"),
+              "type":o.get("type"),
+              "side":o.get("side"),
+              "reduceOnly":o.get("reduceOnly"),
+              "status":o.get("status"),
+              "origQty":o.get("origQty"),
+              "executedQty":o.get("executedQty")
+          } for o in orders],separators=(",",":")))
+          print("ORDERS_SENT="+str(obj.get("ordersSent")))
+          print("CANCELS_SENT="+str(obj.get("cancelsSent")))
+          print("POSITION_CHANGES_SENT="+str(obj.get("positionChangesSent")))
+          PY
+          echo TRADING_MUTATION=0
+          REMOTE
