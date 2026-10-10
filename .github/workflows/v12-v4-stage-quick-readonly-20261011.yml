@@ -49,22 +49,18 @@ jobs:
           for pid in $pids; do
             ps -p "$pid" -o pid=,ppid=,etimes=,stat=,pcpu=,pmem=,wchan:24=,comm= | sed 's/^/NPM_PROCESS=/'
           done
-          python3 - <<'PY'
-          import os
-          target=os.environ.get("TARGET_SHA","")
-          rows=[]
-          for pid in os.listdir("/proc"):
-              if not pid.isdigit(): continue
-              try:
-                  cmd=open(f"/proc/{pid}/cmdline","rb").read().replace(b"\0",b" ").decode("utf-8","replace")
-                  stat=open(f"/proc/{pid}/stat",encoding="utf-8").read().split()
-              except Exception: continue
-              if target in cmd or ("npm" in cmd.lower() and "ci" in cmd.lower()):
-                  rows.append((int(pid),int(stat[3]),cmd[:260]))
-          print("STAGE_RELATED_PROCESS_COUNT="+str(len(rows)))
-          for pid,ppid,cmd in sorted(rows):
-              print(f"STAGE_PROCESS={pid}:ppid={ppid}:{cmd}")
-          PY
+          echo 'STAGE_PROCESS_TREE_BEGIN'
+          for pid in $(pgrep -f "runuser -u deploy -- bash -c.*$TARGET_SHA" || true); do
+            ps -p "$pid" -o pid=,ppid=,etimes=,stat=,pcpu=,pmem=,wchan:24=,comm=
+            pstree -ap "$pid" 2>/dev/null || true
+            for c1 in $(pgrep -P "$pid" 2>/dev/null || true); do
+              ps -p "$c1" -o pid=,ppid=,etimes=,stat=,pcpu=,pmem=,wchan:24=,comm=
+              for c2 in $(pgrep -P "$c1" 2>/dev/null || true); do
+                ps -p "$c2" -o pid=,ppid=,etimes=,stat=,pcpu=,pmem=,wchan:24=,comm=
+              done
+            done
+          done
+          echo 'STAGE_PROCESS_TREE_END'
           echo "FREE_GB=$(df -BG --output=avail "$root" | tail -1 | tr -dc '0-9')"
           echo "V4_SERVICE_COUNT=$(systemctl list-units --type=service --state=running --no-legend 2>/dev/null | grep -c "$TARGET_SHA" || true)"
           echo "CANARY_PERMIT_EXISTS=$([[ -e /etc/disdex/v12-v4-production-canary-permit.json ]] && echo TRUE || echo FALSE)"
