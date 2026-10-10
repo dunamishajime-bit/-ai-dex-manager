@@ -1,0 +1,68 @@
+name: V12 V4 flat readonly 20261011
+on:
+  push:
+    branches: [ops/v12-v4-stage-only-20261011]
+    paths: [.github/workflows/v12-v4-flat-readonly-20261011.yml]
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Configure root SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+      - name: Read actual Aster account only
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -p "$PORT" "root@$SSH_HOST" 'bash -s' <<'REMOTE'
+          set -Eeuo pipefail
+          root=/home/deploy/disdex-trading
+          current="$(readlink -f "$root/current")"
+          sha="$(tr -d '[:space:]' < "$current/.disdex-release-sha")"
+          set -a
+          . /etc/disdex/disdex-v13d-v11eq-v96.env
+          . /etc/disdex/disdex-v12-pengu-v2-v52.env
+          set +a
+          cd "$current"
+          out="$(runuser -u deploy -- env DISDEX_RELEASE_SHA="$sha" ./node_modules/.bin/tsx scripts/disdex-aster-readonly-account-diagnostic.ts)"
+          printf '%s\n' "$out"
+          python3 - "$out" <<'PY'
+          import json,sys
+          raw=sys.argv[1]
+          rows=[]
+          for line in raw.splitlines():
+              try: rows.append(json.loads(line))
+              except: pass
+          obj=next((x for x in reversed(rows) if isinstance(x,dict) and ("positions" in x or "openOrders" in x)),None)
+          if not obj: raise SystemExit("ASTER_READONLY_RESULT_MISSING")
+          positions=[x for x in obj.get("positions",[]) if abs(float(x.get("positionAmt") or 0))>1e-12]
+          orders=obj.get("openOrders",[])
+          print("ASTER_ACTIVE_POSITIONS="+str(len(positions)))
+          print("ASTER_OPEN_ORDERS="+str(len(orders)))
+          print("ASTER_FLAT="+("TRUE" if not positions and not orders else "FALSE"))
+          print("ORDERS_SENT="+str(obj.get("ordersSent",0)))
+          print("CANCELS_SENT="+str(obj.get("cancelsSent",0)))
+          print("POSITION_CHANGES_SENT="+str(obj.get("positionChangesSent",0)))
+          PY
+          echo 'TRADING_MUTATION=0'
+          REMOTE
