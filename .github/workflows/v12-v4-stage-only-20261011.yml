@@ -1,0 +1,137 @@
+name: V12 V4 stage-only 20261011
+
+on:
+  push:
+    branches:
+      - ops/v12-v4-stage-only-20261011
+    paths:
+      - .github/workflows/v12-v4-stage-only-20261011.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: v12-v4-stage-only-production
+  cancel-in-progress: false
+
+jobs:
+  stage-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      TARGET_SHA: 89c4a79fd3de33def73bac22e09840b416c24179
+      SOURCE_REF: research/v4-independent-venue-lifecycle-20261010
+      EXPECTED_CURRENT_SHA: ce1edeead8d0f9e5d88e829d415057117502a335
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+
+    steps:
+      - name: Checkout exact V4 candidate
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TARGET_SHA }}
+          fetch-depth: 0
+
+      - name: Verify immutable candidate and dependency contract
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ "$(git rev-parse HEAD)" == "$TARGET_SHA" ]]
+          remote_sha="$(git ls-remote origin "refs/heads/$SOURCE_REF" | awk 'NR==1{print $1}')"
+          [[ "$remote_sha" == "$TARGET_SHA" ]]
+          [[ -z "$(git status --porcelain)" ]]
+          [[ -z "$(git diff --name-only "$EXPECTED_CURRENT_SHA" "$TARGET_SHA" -- package-lock.json npm-shrinkwrap.json)" ]]
+          dep_diff="$(git diff --unified=0 "$EXPECTED_CURRENT_SHA" "$TARGET_SHA" -- package.json || true)"
+          if grep -E '^[+-][[:space:]]*"[^"]+"[[:space:]]*:' <<<"$dep_diff" | grep -vE 'strategy:v12-v4-shadow:(selftest|once)' >/dev/null; then
+            echo 'STAGE_DEPENDENCY_CONTRACT_CHANGED' >&2
+            exit 1
+          fi
+          echo "TARGET_SHA_VERIFIED=$TARGET_SHA"
+          echo 'TRADING_MUTATION=0'
+
+      - name: Build immutable source archive
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          git archive --format=tar.gz --output=/tmp/v12-v4-stage.tar.gz "$TARGET_SHA"
+          test -s /tmp/v12-v4-stage.tar.gz
+          sha256sum /tmp/v12-v4-stage.tar.gz | tee /tmp/v12-v4-stage.sha256
+
+      - name: Configure root SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          [[ -n "$SSH_HOST" && -n "$ROOT_KEY" && -n "$SSH_KNOWN_HOSTS" ]]
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          p=Path.home()/".ssh"
+          def norm(k):
+              return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"),encoding="utf-8")
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"),encoding="utf-8")
+          PY
+          chmod 0600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+
+      - name: Stage source without touching current or systemd
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          common=(-i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts")
+          remote_archive="/tmp/v12-v4-stage-${GITHUB_RUN_ID}.tar.gz"
+          scp "${common[@]}" -P "$PORT" /tmp/v12-v4-stage.tar.gz "root@$SSH_HOST:$remote_archive"
+          ssh -T "${common[@]}" -p "$PORT" "root@$SSH_HOST"             "TARGET_SHA='$TARGET_SHA' EXPECTED_CURRENT_SHA='$EXPECTED_CURRENT_SHA' RUN_ID='$GITHUB_RUN_ID' ARCHIVE='$remote_archive' bash -s" <<'REMOTE'
+          set -Eeuo pipefail
+          root=/home/deploy/disdex-trading
+          current="$(readlink -f "$root/current")"
+          current_sha="$(tr -d '[:space:]' < "$current/.disdex-release-sha")"
+          [[ "$current_sha" == "$EXPECTED_CURRENT_SHA" ]]
+          [[ "$current" == "$root/releases/$EXPECTED_CURRENT_SHA" ]]
+          target="$root/releases/$TARGET_SHA"
+          stage="$root/releases/.stage-$TARGET_SHA-$RUN_ID"
+          [[ "$target" != "$current" ]]
+          old_v12="disdex-v12-x1-all@$EXPECTED_CURRENT_SHA.service"
+          [[ "$(systemctl is-active "$old_v12" 2>/dev/null || true)" == "active" ]]
+          kill_before="$(sha256sum /var/lib/disdex/shared/kill-switch.json | awk '{print $1}')"
+          if [[ -e "$target" ]]; then
+            [[ -f "$target/.disdex-release-sha" ]]
+            [[ "$(tr -d '[:space:]' < "$target/.disdex-release-sha")" == "$TARGET_SHA" ]]
+            echo 'V12_V4_STAGE_ALREADY_PRESENT=TRUE'
+          else
+            [[ ! -e "$stage" ]]
+            install -d -o deploy -g deploy -m 0755 "$stage"
+            tar -xzf "$ARCHIVE" -C "$stage"
+            printf '%s\n' "$TARGET_SHA" > "$stage/.disdex-release-sha"
+            chown deploy:deploy "$stage/.disdex-release-sha"
+            dependency_root="$current/node_modules"
+            [[ -x "$dependency_root/.bin/tsx" ]]
+            ln -s "$dependency_root" "$stage/node_modules"
+            chown -h deploy:deploy "$stage/node_modules"
+            chown -R deploy:deploy "$stage"
+            runuser -u deploy -- "$stage/node_modules/.bin/tsx" "$stage/scripts/v12-v4-production-runner.ts" --self-test | tee "/tmp/v12-v4-stage-selftest-$RUN_ID.log"
+            grep -Fq '"status":"SELF_TEST_PASS"' "/tmp/v12-v4-stage-selftest-$RUN_ID.log"
+            grep -Fq '"routes":41' "/tmp/v12-v4-stage-selftest-$RUN_ID.log"
+            grep -Fq '"realOrderEnabledV4":0' "/tmp/v12-v4-stage-selftest-$RUN_ID.log"
+            mv "$stage" "$target"
+          fi
+          [[ "$(readlink -f "$root/current")" == "$current" ]]
+          [[ "$(tr -d '[:space:]' < "$root/current/.disdex-release-sha")" == "$EXPECTED_CURRENT_SHA" ]]
+          [[ "$(systemctl is-active "$old_v12" 2>/dev/null || true)" == "active" ]]
+          [[ "$(sha256sum /var/lib/disdex/shared/kill-switch.json | awk '{print $1}')" == "$kill_before" ]]
+          ! systemctl list-units --type=service --all --no-legend | grep -F "$TARGET_SHA" >/dev/null
+          [[ ! -e /etc/disdex/v12-v4-production-canary-permit.json ]]
+          rm -f "$ARCHIVE" "/tmp/v12-v4-stage-selftest-$RUN_ID.log"
+          echo "V12_V4_STAGE_PATH=$target"
+          echo "CURRENT_SHA_UNCHANGED=$EXPECTED_CURRENT_SHA"
+          echo 'OLD_V12_ACTIVE=TRUE'
+          echo 'V4_SERVICE_STARTED=FALSE'
+          echo 'APPROVAL_ARTIFACT_CREATED=FALSE'
+          echo 'ORDERS_SENT=0'
+          echo 'TRADING_MUTATION=0'
+          echo 'STATUS: V12_V4_STAGE_ONLY_VERIFIED'
+          REMOTE
