@@ -110,21 +110,29 @@ jobs:
             [[ "$(tr -d '[:space:]' < "$target/.disdex-release-sha")" == "$TARGET_SHA" ]]
             echo 'V12_V4_STAGE_ALREADY_PRESENT=TRUE'
           else
+            # Remove only abandoned transient stages for this exact immutable target.
+            find "$root/releases" -mindepth 1 -maxdepth 1 -type d -name ".stage-$TARGET_SHA-*" -print -exec rm -rf -- {} +
             [[ ! -e "$stage" ]]
             install -d -o deploy -g deploy -m 0755 "$stage"
+            cleanup_stage() {
+              rm -rf -- "$stage"
+              rm -f -- "/tmp/v12-v4-stage-selftest-$RUN_ID.log"
+            }
+            trap cleanup_stage EXIT
             tar -xzf "$ARCHIVE" -C "$stage"
             printf '%s\n' "$TARGET_SHA" > "$stage/.disdex-release-sha"
-            chown deploy:deploy "$stage/.disdex-release-sha"
-            dependency_root="$current/node_modules"
-            [[ -x "$dependency_root/.bin/tsx" ]]
-            ln -s "$dependency_root" "$stage/node_modules"
-            chown -h deploy:deploy "$stage/node_modules"
             chown -R deploy:deploy "$stage"
+            avail_kb="$(df -Pk "$root" | awk 'NR==2{print $4}')"
+            [[ "$avail_kb" =~ ^[0-9]+$ && "$avail_kb" -ge 2097152 ]]
+            # Install an isolated dependency tree. Never mutate or reuse the
+            # current Production release's node_modules.
+            runuser -u deploy -- bash -c 'cd "$1" && npm ci --no-audit --no-fund' _ "$stage"
             runuser -u deploy -- "$stage/node_modules/.bin/tsx" "$stage/scripts/v12-v4-production-runner.ts" --self-test | tee "/tmp/v12-v4-stage-selftest-$RUN_ID.log"
             grep -Fq '"status":"SELF_TEST_PASS"' "/tmp/v12-v4-stage-selftest-$RUN_ID.log"
             grep -Fq '"routes":41' "/tmp/v12-v4-stage-selftest-$RUN_ID.log"
             grep -Fq '"realOrderEnabledV4":0' "/tmp/v12-v4-stage-selftest-$RUN_ID.log"
             mv "$stage" "$target"
+            trap - EXIT
           fi
           [[ "$(readlink -f "$root/current")" == "$current" ]]
           [[ "$(tr -d '[:space:]' < "$root/current/.disdex-release-sha")" == "$EXPECTED_CURRENT_SHA" ]]
