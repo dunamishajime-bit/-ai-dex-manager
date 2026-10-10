@@ -42,6 +42,7 @@ jobs:
           err="/tmp/v12-manual-close-readonly-$$.err"
           cleanup(){ rm -f "$out" "$err"; }
           trap cleanup EXIT
+          set +e
           runuser -u deploy -- env RELEASE="$release" bash -lc '
             set -Eeuo pipefail
             set -a
@@ -51,6 +52,29 @@ jobs:
             cd "$RELEASE"
             ./node_modules/.bin/tsx scripts/disdex-aster-readonly-account-diagnostic.ts
           ' >"$out" 2>"$err"
+          rc=$?
+          set -e
+          echo "DIAGNOSTIC_EXIT=$rc"
+          if [[ "$rc" -ne 0 ]]; then
+            python3 - "$err" <<'PYERR'
+          import json,sys,re
+          raw=open(sys.argv[1],encoding="utf-8",errors="replace").read()
+          msg=""
+          for line in reversed(raw.splitlines()):
+              try:
+                  d=json.loads(line)
+              except Exception:
+                  continue
+              if isinstance(d,dict) and str(d.get("status","")).startswith("ASTER_READONLY_ACCOUNT_DIAGNOSTIC_"):
+                  msg=str(d.get("message",""));break
+          cats=[x for x in ["RATE_BUDGET","LOCK_TIMEOUT","SATURATED","429","418","TIMEOUT","CREDENTIALS","EACCES"] if x in raw.upper() or x in msg.upper()]
+          print("DIAGNOSTIC_ERROR_CATEGORIES="+",".join(cats))
+          safe=re.sub(r"0x[a-fA-F0-9]{20,}","<address>",msg)
+          safe=re.sub(r"sk-[A-Za-z0-9_-]+","<secret>",safe)
+          print("DIAGNOSTIC_ERROR_MESSAGE="+safe[:240])
+          PYERR
+            exit "$rc"
+          fi
           python3 - "$out" <<'PY'
           import json,sys
           path=sys.argv[1]
