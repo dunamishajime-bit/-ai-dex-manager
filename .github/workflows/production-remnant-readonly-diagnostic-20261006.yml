@@ -134,7 +134,7 @@ jobs:
           fi
           echo "--- candidate V52 state files ---"
           find /var/lib/disdex /home/deploy/ai-dex-manager-v96-paper/.runtime-state -xdev -type f \
-            \( -iname '*v52*' -o -path '*/v52/*' \) -printf '%T@ %p\n' 2>/dev/null | sort -nr | head -40
+            \( -iname '*v52*' -o -path '*/v52/*' \) -printf '%T@ %p\n' 2>/dev/null | sort -nr | sed -n '1,40p'
           echo
 
           echo "=== TMP CLEANUP CANDIDATES ==="
@@ -147,3 +147,61 @@ jobs:
           echo
           echo "READONLY_REMNANT_DIAGNOSTIC=PASS"
           REMOTE
+
+      - name: Run signed GET-only V12 V4 Production history audit
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="$SSH_PORT"
+          [[ -n "$PORT" ]] || PORT=22
+          remote_script="/tmp/v12-v4-prod-history-audit-$GITHUB_RUN_ID.ts"
+          remote_result="/tmp/v12-v4-prod-history-audit-$GITHUB_RUN_ID.json"
+          scp -i "$HOME/.ssh/id_root" -P "$PORT" -o IdentitiesOnly=yes -o BatchMode=yes             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts"             scripts/v12-v4-production-history-readonly-audit.ts "root@$SSH_HOST:$remote_script"
+          ssh -T -i "$HOME/.ssh/id_root" -p "$PORT" -o IdentitiesOnly=yes -o BatchMode=yes             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts"             "root@$SSH_HOST" "AUDIT_SCRIPT='$remote_script' AUDIT_RESULT='$remote_result' bash -s" <<'REMOTE'
+          set -Eeuo pipefail
+          current=/home/deploy/disdex-trading/current
+          release="$(readlink -f "$current")"
+          [[ -d "$release" && -x "$release/node_modules/.bin/tsx" ]]
+          set -a
+          for f in /etc/disdex/disdex-v13d-v11eq-v96.env /etc/disdex/disdex-v12-pengu-v2-v52.env /etc/disdex/disdex-v12-x1-all.env; do
+            [[ -f "$f" ]] && . "$f"
+          done
+          set +a
+          export DISDEX_V4_AUDIT_RELEASE_ROOT="$release"
+          cd "$release"
+          "$release/node_modules/.bin/tsx" "$AUDIT_SCRIPT" > "$AUDIT_RESULT"
+          python3 - "$AUDIT_RESULT" <<'PY'
+          import json,sys
+          d=json.load(open(sys.argv[1],encoding="utf-8"))
+          assert d["status"]=="PASS_SIGNED_GET_ONLY"
+          assert d["productionHost"] is True
+          assert d["mutationCalls"]==0 and d["secretDisclosed"] is False
+          assert len(d["evidenceSha256"])==64
+          print("V12_V4_PRODUCTION_HISTORY_READONLY_AUDIT=PASS")
+          print("POSITION_MODE_DUAL="+str(d["positionMode"]["dualSidePosition"]).lower())
+          print("NONZERO_POSITIONS="+str(d["accountSummary"]["nonzeroPositionCount"]))
+          print("OPEN_ORDERS="+str(d["accountSummary"]["openOrderCount"]))
+          print("TRADE_SYMBOLS="+str(d["tradeHistory"]["queriedSymbols"]))
+          print("TOTAL_TRADES="+str(d["tradeHistory"]["totalTrades"]))
+          print("MULTIFILL_ORDERS="+str(d["tradeHistory"]["multiFillOrderCount"]))
+          print("MAX_FILLS_PER_ORDER="+str(d["tradeHistory"]["maxFillsPerOrder"]))
+          print("EVIDENCE_SHA256="+d["evidenceSha256"])
+          PY
+          REMOTE
+          scp -i "$HOME/.ssh/id_root" -P "$PORT" -o IdentitiesOnly=yes -o BatchMode=yes             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts"             "root@$SSH_HOST:$remote_result" production-history-audit.json
+          ssh -T -i "$HOME/.ssh/id_root" -p "$PORT" -o IdentitiesOnly=yes -o BatchMode=yes             -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts"             "root@$SSH_HOST" "rm -f '$remote_script' '$remote_result'"
+          python3 - <<'PY'
+          import json
+          d=json.load(open("production-history-audit.json",encoding="utf-8"))
+          raw=json.dumps(d)
+          assert not any(x in raw for x in ("privateKey","signature","secret","mnemonic","apiKey"))
+          print("LOCAL_ARTIFACT_SECRET_SCAN=PASS")
+          PY
+
+      - name: Upload sanitized V12 V4 history evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: v12-v4-production-history-readonly
+          path: production-history-audit.json
+          retention-days: 7
+          if-no-files-found: error
