@@ -192,3 +192,29 @@ fills without artificial real-money TEST orders, watchdog no-resurrection
 proof, root-controlled signed policy approval, and acceptance of the
 independent-period underperformance. Do not manufacture attestations or
 invoke `V12_V4_LIVE_VERIFIED` while any condition remains unresolved.
+
+
+## 2026-10-10 additional preformal route evidence and Aster read-only readback
+
+A new independent **preformal** (2025-01-13 to 2025-08-10 UTC)
+Aster H1/H2 replay inspected 2,508 closed decision clocks and
+1,027 native source events. Of the 16 routes absent from the later
+external period, **11 produced 178 unique candidate opportunities**;
+independent Python H1 entry/exit price-model calculation matched
+Production **178/178** (TIME 140, ATR 38). **Five routes remain
+unobserved in both added and external periods.** All five had accepted
+formal-year retrospective examples matched in the earlier 212/212
+study. Do NOT label this 41/41 pristine out-of-fit certification or
+signed exchange execution evidence.
+
+Files: `docs/implementation/V12_V4_PRE_FORMAL_INDEPENDENT_ROUTE_EVIDENCE_20261010.md`
+and `docs/ops/v12-v4-cert-20261009/preformal-2025-*.json`.
+
+Actual Aster account GET-only diagnostic against the current legacy
+release succeeded once on 2026-10-10: **0 open positions and 0 open
+orders** at that precise observation, **0 orders/cancels/position
+mutations**. Fresh signed account and protection readback remain mandatory
+at real cutover; a one-time flat GET does not test partial STOP fills.
+
+Codex copy-ready final request:
+`docs/implementation/CODEX_V12_V4_FINAL_LIVE_CUTOVER_REQUEST_20261010.md`.

@@ -1,0 +1,3171 @@
+{
+  "status": "READ_ONLY_PRE_FORMAL_ROUTE_OBSERVATION",
+  "historicalPreFormalPeriod": {
+    "start": "2025-01-13",
+    "endExclusive": "2025-08-10"
+  },
+  "noFitPeriodOverlap": true,
+  "notPristineIndependentForward": true,
+  "clockCount": 2508,
+  "nativeCount": 1027,
+  "absentExternalRouteCount": 16,
+  "observedRoutes": 11,
+  "results": [
+    {
+      "route": "REC_G1_MID_REL_LOWVOL",
+      "candidates": 6,
+      "filtered": 5,
+      "examples": [
+        {
+          "symbol": "ETHUSDT",
+          "side": "SHORT",
+          "rank": 36,
+          "eligibleEntryTs": 1748779200000,
+          "gross": 0.18
+        },
+        {
+          "symbol": "LTCUSDT",
+          "side": "SHORT",
+          "rank": 36,
+          "eligibleEntryTs": 1749931200000,
+          "gross": 0.18
+        },
+        {
+          "symbol": "ETHUSDT",
+          "side": "SHORT",
+          "rank": 36,
+          "eligibleEntryTs": 1749988800000,
+          "gross": 0.18
+        },
+        {
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "rank": 36,
+          "eligibleEntryTs": 1753423200000,
+          "gross": 0.18
+        },
+        {
+          "symbol": "ATOMUSDT",
+          "side": "SHORT",
+          "rank": 36,
+          "eligibleEntryTs": 1754136000000,
+          "gross": 0.18
+        },
+        {
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "rank": 36,
+          "eligibleEntryTs": 1754179200000,
+          "gross": 0.18
+        }
+      ]
+    },
+    {
+      "route": "REC_G4_MATURE_REL_RANGE",
+      "candidates": 27,
+      "filtered": 16,
+      "examples": [
+        {
+          "symbol": "AAVEUSDT",
+          "side": "SHORT",
+          "rank": 12,
+          "eligibleEntryTs": 1738015200000,
+          "gross": 0.6000000000000001
+        },
+        {
+          "symbol": "AAVEUSDT",
+          "side": "SHORT",
+          "rank": 12,
+          "eligibleEntryTs": 1740520800000,
+          "gross": 0.6000000000000001
+        },
+        {
+          "symbol": "XRPUSDT",
+          "side": "SHORT",
+          "rank": 12,
+          "eligibleEntryTs": 1741658400000,
+          "gross": 0.6000000000000001
+        },
+        {
+          "symbol": "ATOMUSDT",
+          "side": "SHORT",
+          "rank": 12,
+          "eligibleEntryTs": 1741665600000,
+          "gross": 0.6000000000000001
+        },
+        {
+          "symbol": "ATOMUSDT",
+          "side": "SHORT",
+          "rank": 12,
+          "eligibleEntryTs": 1741672800000,
+          "gross": 0.6000000000000001
+        },
+        {
+          "symbol": "XRPUSDT",
+          "side": "SHORT",
+          "rank": 12,
+          "eligibleEntryTs": 1741672800000,
+          "gross": 0.6000000000000001
+        },
+        {
+          "symbol": "ATOMUSDT",
+          "side": "SHORT",
+          "rank": 12,
+          "eligibleEntryTs": 1741680000000,
+          "gross": 0.6000000000000001
+        },
+        {
+          "symbol": "LINKUSDT",
+          "side": "SHORT",
+          "rank": 12,
+          "eligibleEntryTs": 1741687200000,
+          "gross": 0.6000000000000001
+        },
+        {
+          "symbol": "ATOMUSDT",
+          "side": "SHORT",
+          "rank": 12,
+          "eligibleEntryTs": 1741694400000,
+          "gross": 0.6000000000000001
+        },
+        {
+          "symbol": "LINKUSDT",
+          "side": "SHORT",
+          "rank": 12,
+          "eligibleEntryTs": 1741701600000,
+          "gross": 0.6000000000000001
+        },
+        {
+          "symbol": "XRPUSDT",
+          "side": "SHORT",
+          "rank": 12,
+          "eligibleEntryTs": 1743292800000,
+          "gross": 0.6000000000000001
+        },
+        {
+          "symbol": "INJUSDT",
+          "side": "SHORT",
+          "rank": 12,
+          "eligibleEntryTs": 1743300000000,
+          "gross": 0.6000000000000001
+        },
+        {
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "rank": 12,
+          "eligibleEntryTs": 1743307200000,
+          "gross": 0.6000000000000001
+        },
+        {
+          "symbol": "INJUSDT",
+          "side": "SHORT",
+          "rank": 12,
+          "eligibleEntryTs": 1743307200000,
+          "gross": 0.6000000000000001
+        },
+        {
+          "symbol": "INJUSDT",
+          "side": "SHORT",
+          "rank": 12,
+          "eligibleEntryTs": 1743314400000,
+          "gross": 0.6000000000000001
+        }
+      ]
+    },
+    {
+      "route": "REC_X04_TIME_24H",
+      "candidates": 28,
+      "filtered": 0,
+      "examples": [
+        {
+          "symbol": "AAVEUSDT",
+          "side": "SHORT",
+          "rank": 33,
+          "eligibleEntryTs": 1738000800000,
+          "gross": 0.18
+        },
+        {
+          "symbol": "LTCUSDT",
+          "side": "SHORT",
+          "rank": 33,
+          "eligibleEntryTs": 1738706400000,
+          "gross": 0.18
+        },
+        {
+          "symbol": "BTCUSDT",
+          "side": "SHORT",
+          "rank": 33,
+          "eligibleEntryTs": 1740600000000,
+          "gross": 0.18
+        },
+        {
+          "symbol": "BTCUSDT",
+          "side": "SHORT",
+          "rank": 33,
+          "eligibleEntryTs": 1740607200000,
+          "gross": 0.18
+        },
+        {
+          "symbol": "BTCUSDT",
+          "side": "SHORT",
+          "rank": 33,
+          "eligibleEntryTs": 1743393600000,
+          "gross": 0.18
+        },
+        {
+          "symbol": "LINKUSDT",
+          "side": "SHORT",
+          "rank": 33,
+          "eligibleEntryTs": 1743969600000,
+          "gross": 0.18
+        },
+        {
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "rank": 33,
+          "eligibleEntryTs": 1743969600000,
+          "gross": 0.18
+        },
+        {
+          "symbol": "LINKUSDT",
+          "side": "SHORT",
+          "rank": 33,
+          "eligibleEntryTs": 1743976800000,
+          "gross": 0.18
+        },
+        {
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "rank": 33,
+          "eligibleEntryTs": 1743976800000,
+          "gross": 0.18
+        },
+        {
+          "symbol": "LINKUSDT",
+          "side": "SHORT",
+          "rank": 33,
+          "eligibleEntryTs": 1743991200000,
+          "gross": 0.18
+        },
+        {
+          "symbol": "ETHUSDT",
+          "side": "SHORT",
+          "rank": 33,
+          "eligibleEntryTs": 1744020000000,
+          "gross": 0.18
+        },
+        {
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "rank": 33,
+          "eligibleEntryTs": 1744027200000,
+          "gross": 0.18
+        },
+        {
+          "symbol": "ADAUSDT",
+          "side": "SHORT",
+          "rank": 33,
+          "eligibleEntryTs": 1744099200000,
+          "gross": 0.18
+        },
+        {
+          "symbol": "BTCUSDT",
+          "side": "SHORT",
+          "rank": 33,
+          "eligibleEntryTs": 1744164000000,
+          "gross": 0.18
+        },
+        {
+          "symbol": "BTCUSDT",
+          "side": "SHORT",
+          "rank": 33,
+          "eligibleEntryTs": 1744171200000,
+          "gross": 0.18
+        }
+      ]
+    },
+    {
+      "route": "REC_X07_TIME_6H",
+      "candidates": 10,
+      "filtered": 18,
+      "examples": [
+        {
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "rank": 43,
+          "eligibleEntryTs": 1740427200000,
+          "gross": 0.05
+        },
+        {
+          "symbol": "AAVEUSDT",
+          "side": "SHORT",
+          "rank": 43,
+          "eligibleEntryTs": 1740448800000,
+          "gross": 0.05
+        },
+        {
+          "symbol": "ATOMUSDT",
+          "side": "SHORT",
+          "rank": 43,
+          "eligibleEntryTs": 1740484800000,
+          "gross": 0.05
+        },
+        {
+          "symbol": "LINKUSDT",
+          "side": "SHORT",
+          "rank": 43,
+          "eligibleEntryTs": 1741629600000,
+          "gross": 0.05
+        },
+        {
+          "symbol": "ADAUSDT",
+          "side": "SHORT",
+          "rank": 43,
+          "eligibleEntryTs": 1743235200000,
+          "gross": 0.05
+        },
+        {
+          "symbol": "INJUSDT",
+          "side": "SHORT",
+          "rank": 43,
+          "eligibleEntryTs": 1743249600000,
+          "gross": 0.05
+        },
+        {
+          "symbol": "LTCUSDT",
+          "side": "SHORT",
+          "rank": 43,
+          "eligibleEntryTs": 1744020000000,
+          "gross": 0.05
+        },
+        {
+          "symbol": "ADAUSDT",
+          "side": "SHORT",
+          "rank": 43,
+          "eligibleEntryTs": 1748620800000,
+          "gross": 0.05
+        },
+        {
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "rank": 43,
+          "eligibleEntryTs": 1748656800000,
+          "gross": 0.05
+        },
+        {
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "rank": 43,
+          "eligibleEntryTs": 1748678400000,
+          "gross": 0.05
+        }
+      ]
+    },
+    {
+      "route": "REC_X08_TIME_48H",
+      "candidates": 7,
+      "filtered": 7,
+      "examples": [
+        {
+          "symbol": "ADAUSDT",
+          "side": "SHORT",
+          "rank": 25,
+          "eligibleEntryTs": 1740628800000,
+          "gross": 0.30000000000000004
+        },
+        {
+          "symbol": "ETHUSDT",
+          "side": "SHORT",
+          "rank": 25,
+          "eligibleEntryTs": 1740736800000,
+          "gross": 0.30000000000000004
+        },
+        {
+          "symbol": "ETHUSDT",
+          "side": "SHORT",
+          "rank": 25,
+          "eligibleEntryTs": 1740751200000,
+          "gross": 0.30000000000000004
+        },
+        {
+          "symbol": "AAVEUSDT",
+          "side": "SHORT",
+          "rank": 25,
+          "eligibleEntryTs": 1740751200000,
+          "gross": 0.30000000000000004
+        },
+        {
+          "symbol": "ETHUSDT",
+          "side": "SHORT",
+          "rank": 25,
+          "eligibleEntryTs": 1740758400000,
+          "gross": 0.30000000000000004
+        },
+        {
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "rank": 25,
+          "eligibleEntryTs": 1754100000000,
+          "gross": 0.30000000000000004
+        },
+        {
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "rank": 25,
+          "eligibleEntryTs": 1754172000000,
+          "gross": 0.30000000000000004
+        }
+      ]
+    },
+    {
+      "route": "REC_X11_TIME_48H",
+      "candidates": 13,
+      "filtered": 0,
+      "examples": [
+        {
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "rank": 13,
+          "eligibleEntryTs": 1740636000000,
+          "gross": 0.44999999999999996
+        },
+        {
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "rank": 13,
+          "eligibleEntryTs": 1740643200000,
+          "gross": 0.44999999999999996
+        },
+        {
+          "symbol": "ADAUSDT",
+          "side": "SHORT",
+          "rank": 13,
+          "eligibleEntryTs": 1740657600000,
+          "gross": 0.44999999999999996
+        },
+        {
+          "symbol": "BTCUSDT",
+          "side": "SHORT",
+          "rank": 13,
+          "eligibleEntryTs": 1740736800000,
+          "gross": 0.44999999999999996
+        },
+        {
+          "symbol": "BTCUSDT",
+          "side": "SHORT",
+          "rank": 13,
+          "eligibleEntryTs": 1740765600000,
+          "gross": 0.44999999999999996
+        },
+        {
+          "symbol": "BTCUSDT",
+          "side": "SHORT",
+          "rank": 13,
+          "eligibleEntryTs": 1740772800000,
+          "gross": 0.44999999999999996
+        },
+        {
+          "symbol": "LTCUSDT",
+          "side": "SHORT",
+          "rank": 13,
+          "eligibleEntryTs": 1744207200000,
+          "gross": 0.44999999999999996
+        },
+        {
+          "symbol": "AAVEUSDT",
+          "side": "SHORT",
+          "rank": 13,
+          "eligibleEntryTs": 1744207200000,
+          "gross": 0.44999999999999996
+        },
+        {
+          "symbol": "ETHUSDT",
+          "side": "SHORT",
+          "rank": 13,
+          "eligibleEntryTs": 1754265600000,
+          "gross": 0.44999999999999996
+        },
+        {
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "rank": 13,
+          "eligibleEntryTs": 1754272800000,
+          "gross": 0.44999999999999996
+        },
+        {
+          "symbol": "ETHUSDT",
+          "side": "SHORT",
+          "rank": 13,
+          "eligibleEntryTs": 1754272800000,
+          "gross": 0.44999999999999996
+        },
+        {
+          "symbol": "BNBUSDT",
+          "side": "SHORT",
+          "rank": 13,
+          "eligibleEntryTs": 1754308800000,
+          "gross": 0.44999999999999996
+        },
+        {
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "rank": 13,
+          "eligibleEntryTs": 1754308800000,
+          "gross": 0.44999999999999996
+        }
+      ]
+    },
+    {
+      "route": "REC_X12_TIME_12H",
+      "candidates": 23,
+      "filtered": 0,
+      "examples": [
+        {
+          "symbol": "ADAUSDT",
+          "side": "SHORT",
+          "rank": 21,
+          "eligibleEntryTs": 1740571200000,
+          "gross": 0.30000000000000004
+        },
+        {
+          "symbol": "BTCUSDT",
+          "side": "SHORT",
+          "rank": 21,
+          "eligibleEntryTs": 1740578400000,
+          "gross": 0.30000000000000004
+        },
+        {
+          "symbol": "BTCUSDT",
+          "side": "SHORT",
+          "rank": 21,
+          "eligibleEntryTs": 1740585600000,
+          "gross": 0.30000000000000004
+        },
+        {
+          "symbol": "BNBUSDT",
+          "side": "SHORT",
+          "rank": 21,
+          "eligibleEntryTs": 1740585600000,
+          "gross": 0.30000000000000004
+        },
+        {
+          "symbol": "BTCUSDT",
+          "side": "SHORT",
+          "rank": 21,
+          "eligibleEntryTs": 1740592800000,
+          "gross": 0.30000000000000004
+        },
+        {
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "rank": 21,
+          "eligibleEntryTs": 1740592800000,
+          "gross": 0.30000000000000004
+        },
+        {
+          "symbol": "BNBUSDT",
+          "side": "SHORT",
+          "rank": 21,
+          "eligibleEntryTs": 1740600000000,
+          "gross": 0.30000000000000004
+        },
+        {
+          "symbol": "BNBUSDT",
+          "side": "SHORT",
+          "rank": 21,
+          "eligibleEntryTs": 1740607200000,
+          "gross": 0.30000000000000004
+        },
+        {
+          "symbol": "AVAXUSDT",
+          "side": "SHORT",
+          "rank": 21,
+          "eligibleEntryTs": 1740614400000,
+          "gross": 0.30000000000000004
+        },
+        {
+          "symbol": "INJUSDT",
+          "side": "SHORT",
+          "rank": 21,
+          "eligibleEntryTs": 1740621600000,
+          "gross": 0.30000000000000004
+        },
+        {
+          "symbol": "XRPUSDT",
+          "side": "SHORT",
+          "rank": 21,
+          "eligibleEntryTs": 1743314400000,
+          "gross": 0.30000000000000004
+        },
+        {
+          "symbol": "XRPUSDT",
+          "side": "SHORT",
+          "rank": 21,
+          "eligibleEntryTs": 1743321600000,
+          "gross": 0.30000000000000004
+        },
+        {
+          "symbol": "INJUSDT",
+          "side": "SHORT",
+          "rank": 21,
+          "eligibleEntryTs": 1743328800000,
+          "gross": 0.30000000000000004
+        },
+        {
+          "symbol": "ADAUSDT",
+          "side": "SHORT",
+          "rank": 21,
+          "eligibleEntryTs": 1743336000000,
+          "gross": 0.30000000000000004
+        },
+        {
+          "symbol": "INJUSDT",
+          "side": "SHORT",
+          "rank": 21,
+          "eligibleEntryTs": 1743336000000,
+          "gross": 0.30000000000000004
+        }
+      ]
+    },
+    {
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "candidates": 38,
+      "filtered": 0,
+      "examples": [
+        {
+          "symbol": "LTCUSDT",
+          "side": "SHORT",
+          "rank": 41,
+          "eligibleEntryTs": 1736769600000,
+          "gross": 0.05
+        },
+        {
+          "symbol": "INJUSDT",
+          "side": "SHORT",
+          "rank": 41,
+          "eligibleEntryTs": 1736769600000,
+          "gross": 0.05
+        },
+        {
+          "symbol": "INJUSDT",
+          "side": "SHORT",
+          "rank": 41,
+          "eligibleEntryTs": 1737943200000,
+          "gross": 0.05
+        },
+        {
+          "symbol": "INJUSDT",
+          "side": "SHORT",
+          "rank": 41,
+          "eligibleEntryTs": 1737957600000,
+          "gross": 0.05
+        },
+        {
+          "symbol": "ADAUSDT",
+          "side": "SHORT",
+          "rank": 41,
+          "eligibleEntryTs": 1737964800000,
+          "gross": 0.05
+        },
+        {
+          "symbol": "LTCUSDT",
+          "side": "SHORT",
+          "rank": 41,
+          "eligibleEntryTs": 1738101600000,
+          "gross": 0.05
+        },
+        {
+          "symbol": "NEARUSDT",
+          "side": "SHORT",
+          "rank": 41,
+          "eligibleEntryTs": 1738101600000,
+          "gross": 0.05
+        },
+        {
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "rank": 41,
+          "eligibleEntryTs": 1738454400000,
+          "gross": 0.05
+        },
+        {
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "rank": 41,
+          "eligibleEntryTs": 1738468800000,
+          "gross": 0.05
+        },
+        {
+          "symbol": "DOGEUSDT",
+          "side": "SHORT",
+          "rank": 41,
+          "eligibleEntryTs": 1738497600000,
+          "gross": 0.05
+        },
+        {
+          "symbol": "AAVEUSDT",
+          "side": "SHORT",
+          "rank": 41,
+          "eligibleEntryTs": 1740434400000,
+          "gross": 0.05
+        },
+        {
+          "symbol": "LTCUSDT",
+          "side": "SHORT",
+          "rank": 41,
+          "eligibleEntryTs": 1741053600000,
+          "gross": 0.05
+        },
+        {
+          "symbol": "INJUSDT",
+          "side": "SHORT",
+          "rank": 41,
+          "eligibleEntryTs": 1741053600000,
+          "gross": 0.05
+        },
+        {
+          "symbol": "LINKUSDT",
+          "side": "SHORT",
+          "rank": 41,
+          "eligibleEntryTs": 1741528800000,
+          "gross": 0.05
+        },
+        {
+          "symbol": "SOLUSDT",
+          "side": "SHORT",
+          "rank": 41,
+          "eligibleEntryTs": 1741528800000,
+          "gross": 0.05
+        }
+      ]
+    },
+    {
+      "route": "REC_Y02_REV_D0_T12",
+      "candidates": 11,
+      "filtered": 0,
+      "examples": [
+        {
+          "symbol": "ADAUSDT",
+          "side": "LONG",
+          "rank": 14,
+          "eligibleEntryTs": 1740664800000,
+          "gross": 0.44999999999999996
+        },
+        {
+          "symbol": "XRPUSDT",
+          "side": "LONG",
+          "rank": 14,
+          "eligibleEntryTs": 1740700800000,
+          "gross": 0.44999999999999996
+        },
+        {
+          "symbol": "ADAUSDT",
+          "side": "LONG",
+          "rank": 14,
+          "eligibleEntryTs": 1740780000000,
+          "gross": 0.44999999999999996
+        },
+        {
+          "symbol": "ADAUSDT",
+          "side": "LONG",
+          "rank": 14,
+          "eligibleEntryTs": 1740787200000,
+          "gross": 0.44999999999999996
+        },
+        {
+          "symbol": "SOLUSDT",
+          "side": "LONG",
+          "rank": 14,
+          "eligibleEntryTs": 1741701600000,
+          "gross": 0.44999999999999996
+        },
+        {
+          "symbol": "XRPUSDT",
+          "side": "LONG",
+          "rank": 14,
+          "eligibleEntryTs": 1743364800000,
+          "gross": 0.44999999999999996
+        },
+        {
+          "symbol": "ETHUSDT",
+          "side": "LONG",
+          "rank": 14,
+          "eligibleEntryTs": 1743400800000,
+          "gross": 0.44999999999999996
+        },
+        {
+          "symbol": "SOLUSDT",
+          "side": "LONG",
+          "rank": 14,
+          "eligibleEntryTs": 1750636800000,
+          "gross": 0.44999999999999996
+        },
+        {
+          "symbol": "ATOMUSDT",
+          "side": "LONG",
+          "rank": 14,
+          "eligibleEntryTs": 1754186400000,
+          "gross": 0.44999999999999996
+        },
+        {
+          "symbol": "DOGEUSDT",
+          "side": "LONG",
+          "rank": 14,
+          "eligibleEntryTs": 1754193600000,
+          "gross": 0.44999999999999996
+        },
+        {
+          "symbol": "SOLUSDT",
+          "side": "LONG",
+          "rank": 14,
+          "eligibleEntryTs": 1754294400000,
+          "gross": 0.44999999999999996
+        }
+      ]
+    },
+    {
+      "route": "REC_Y04_REV_D2_T36",
+      "candidates": 0,
+      "filtered": 0,
+      "examples": []
+    },
+    {
+      "route": "REC_Y05_REV_D2_T9",
+      "candidates": 0,
+      "filtered": 0,
+      "examples": []
+    },
+    {
+      "route": "REC_Y10_REV_D2_T24",
+      "candidates": 0,
+      "filtered": 0,
+      "examples": []
+    },
+    {
+      "route": "REC_Y11_REV_D0_T36",
+      "candidates": 7,
+      "filtered": 0,
+      "examples": [
+        {
+          "symbol": "NEARUSDT",
+          "side": "LONG",
+          "rank": 19,
+          "eligibleEntryTs": 1738656000000,
+          "gross": 0.30000000000000004
+        },
+        {
+          "symbol": "ADAUSDT",
+          "side": "LONG",
+          "rank": 19,
+          "eligibleEntryTs": 1743343200000,
+          "gross": 0.30000000000000004
+        },
+        {
+          "symbol": "NEARUSDT",
+          "side": "LONG",
+          "rank": 19,
+          "eligibleEntryTs": 1743357600000,
+          "gross": 0.30000000000000004
+        },
+        {
+          "symbol": "ATOMUSDT",
+          "side": "LONG",
+          "rank": 19,
+          "eligibleEntryTs": 1744092000000,
+          "gross": 0.30000000000000004
+        },
+        {
+          "symbol": "ATOMUSDT",
+          "side": "LONG",
+          "rank": 19,
+          "eligibleEntryTs": 1748743200000,
+          "gross": 0.30000000000000004
+        },
+        {
+          "symbol": "ETHUSDT",
+          "side": "LONG",
+          "rank": 19,
+          "eligibleEntryTs": 1749974400000,
+          "gross": 0.30000000000000004
+        },
+        {
+          "symbol": "ETHUSDT",
+          "side": "LONG",
+          "rank": 19,
+          "eligibleEntryTs": 1749981600000,
+          "gross": 0.30000000000000004
+        }
+      ]
+    },
+    {
+      "route": "REC_Y13_REV_D2_T36",
+      "candidates": 0,
+      "filtered": 0,
+      "examples": []
+    },
+    {
+      "route": "REC_Y16_REV_D0_T6",
+      "candidates": 8,
+      "filtered": 0,
+      "examples": [
+        {
+          "symbol": "XRPUSDT",
+          "side": "LONG",
+          "rank": 15,
+          "eligibleEntryTs": 1740693600000,
+          "gross": 0.44999999999999996
+        },
+        {
+          "symbol": "BTCUSDT",
+          "side": "LONG",
+          "rank": 15,
+          "eligibleEntryTs": 1740708000000,
+          "gross": 0.44999999999999996
+        },
+        {
+          "symbol": "BTCUSDT",
+          "side": "LONG",
+          "rank": 15,
+          "eligibleEntryTs": 1740715200000,
+          "gross": 0.44999999999999996
+        },
+        {
+          "symbol": "BTCUSDT",
+          "side": "LONG",
+          "rank": 15,
+          "eligibleEntryTs": 1740722400000,
+          "gross": 0.44999999999999996
+        },
+        {
+          "symbol": "BTCUSDT",
+          "side": "LONG",
+          "rank": 15,
+          "eligibleEntryTs": 1741521600000,
+          "gross": 0.44999999999999996
+        },
+        {
+          "symbol": "XRPUSDT",
+          "side": "LONG",
+          "rank": 15,
+          "eligibleEntryTs": 1741636800000,
+          "gross": 0.44999999999999996
+        },
+        {
+          "symbol": "ADAUSDT",
+          "side": "LONG",
+          "rank": 15,
+          "eligibleEntryTs": 1743400800000,
+          "gross": 0.44999999999999996
+        },
+        {
+          "symbol": "XRPUSDT",
+          "side": "LONG",
+          "rank": 15,
+          "eligibleEntryTs": 1745157600000,
+          "gross": 0.44999999999999996
+        }
+      ]
+    },
+    {
+      "route": "REC_Y17_REV_D1_T3",
+      "candidates": 0,
+      "filtered": 0,
+      "examples": []
+    }
+  ],
+  "candidateRecords": [
+    {
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "symbol": "LTCUSDT",
+      "side": "SHORT",
+      "rank": 41,
+      "requestedGross": 0.05,
+      "entryTs": 1736769600000,
+      "entryPrice": 94.29,
+      "entryAtr": 1.5828571428571425,
+      "exitTs": 1736776800000,
+      "exitPrice": 95.87285714285714,
+      "exitReason": "STOP"
+    },
+    {
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "symbol": "INJUSDT",
+      "side": "SHORT",
+      "rank": 41,
+      "requestedGross": 0.05,
+      "entryTs": 1736769600000,
+      "entryPrice": 18.986,
+      "entryAtr": 0.4281428571428579,
+      "exitTs": 1736780400000,
+      "exitPrice": 19.41414285714286,
+      "exitReason": "STOP"
+    },
+    {
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "symbol": "INJUSDT",
+      "side": "SHORT",
+      "rank": 41,
+      "requestedGross": 0.05,
+      "entryTs": 1737943200000,
+      "entryPrice": 19.462,
+      "entryAtr": 0.278714285714286,
+      "exitTs": 1737957600000,
+      "exitPrice": 19.04392857142857,
+      "exitReason": "TP"
+    },
+    {
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "symbol": "INJUSDT",
+      "side": "SHORT",
+      "rank": 41,
+      "requestedGross": 0.05,
+      "entryTs": 1737957600000,
+      "entryPrice": 19.147,
+      "entryAtr": 0.33285714285714335,
+      "exitTs": 1737964800000,
+      "exitPrice": 18.647714285714283,
+      "exitReason": "TP"
+    },
+    {
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "symbol": "ADAUSDT",
+      "side": "SHORT",
+      "rank": 41,
+      "requestedGross": 0.05,
+      "entryTs": 1737964800000,
+      "entryPrice": 0.8876,
+      "entryAtr": 0.016828571428571446,
+      "exitTs": 1737982800000,
+      "exitPrice": 0.9044285714285714,
+      "exitReason": "STOP"
+    },
+    {
+      "route": "REC_X04_TIME_24H",
+      "symbol": "AAVEUSDT",
+      "side": "SHORT",
+      "rank": 33,
+      "requestedGross": 0.18,
+      "entryTs": 1738000800000,
+      "entryPrice": 297.57,
+      "exitTs": 1738087200000,
+      "exitPrice": 293.27,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_G4_MATURE_REL_RANGE",
+      "symbol": "AAVEUSDT",
+      "side": "SHORT",
+      "rank": 12,
+      "requestedGross": 0.6000000000000001,
+      "entryTs": 1738015200000,
+      "entryPrice": 304.26,
+      "exitTs": 1738101600000,
+      "exitPrice": 283.51,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "symbol": "LTCUSDT",
+      "side": "SHORT",
+      "rank": 41,
+      "requestedGross": 0.05,
+      "entryTs": 1738101600000,
+      "entryPrice": 109.53,
+      "entryAtr": 1.7492857142857159,
+      "exitTs": 1738112400000,
+      "exitPrice": 111.27928571428572,
+      "exitReason": "STOP"
+    },
+    {
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "symbol": "NEARUSDT",
+      "side": "SHORT",
+      "rank": 41,
+      "requestedGross": 0.05,
+      "entryTs": 1738101600000,
+      "entryPrice": 4.29,
+      "entryAtr": 0.05942857142857142,
+      "exitTs": 1738116000000,
+      "exitPrice": 4.349428571428572,
+      "exitReason": "STOP"
+    },
+    {
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "symbol": "SOLUSDT",
+      "side": "SHORT",
+      "rank": 41,
+      "requestedGross": 0.05,
+      "entryTs": 1738454400000,
+      "entryPrice": 213.36,
+      "entryAtr": 2.614285714285716,
+      "exitTs": 1738458000000,
+      "exitPrice": 215.97428571428574,
+      "exitReason": "STOP"
+    },
+    {
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "symbol": "SOLUSDT",
+      "side": "SHORT",
+      "rank": 41,
+      "requestedGross": 0.05,
+      "entryTs": 1738468800000,
+      "entryPrice": 207.2,
+      "entryAtr": 3.192142857142857,
+      "exitTs": 1738472400000,
+      "exitPrice": 210.39214285714286,
+      "exitReason": "STOP"
+    },
+    {
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "symbol": "DOGEUSDT",
+      "side": "SHORT",
+      "rank": 41,
+      "requestedGross": 0.05,
+      "entryTs": 1738497600000,
+      "entryPrice": 0.29174,
+      "entryAtr": 0.005224285714285713,
+      "exitTs": 1738504800000,
+      "exitPrice": 0.29696428571428574,
+      "exitReason": "STOP"
+    },
+    {
+      "route": "REC_Y11_REV_D0_T36",
+      "symbol": "NEARUSDT",
+      "side": "LONG",
+      "rank": 19,
+      "requestedGross": 0.30000000000000004,
+      "entryTs": 1738656000000,
+      "entryPrice": 3.292,
+      "exitTs": 1738785600000,
+      "exitPrice": 3.333,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X04_TIME_24H",
+      "symbol": "LTCUSDT",
+      "side": "SHORT",
+      "rank": 33,
+      "requestedGross": 0.18,
+      "entryTs": 1738706400000,
+      "entryPrice": 98.43,
+      "exitTs": 1738792800000,
+      "exitPrice": 103.73,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X07_TIME_6H",
+      "symbol": "SOLUSDT",
+      "side": "SHORT",
+      "rank": 43,
+      "requestedGross": 0.05,
+      "entryTs": 1740427200000,
+      "entryPrice": 151.14,
+      "exitTs": 1740448800000,
+      "exitPrice": 141.8,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "symbol": "AAVEUSDT",
+      "side": "SHORT",
+      "rank": 41,
+      "requestedGross": 0.05,
+      "entryTs": 1740434400000,
+      "entryPrice": 219.14,
+      "entryAtr": 3.34571428571429,
+      "exitTs": 1740438000000,
+      "exitPrice": 214.12142857142854,
+      "exitReason": "TP"
+    },
+    {
+      "route": "REC_X07_TIME_6H",
+      "symbol": "AAVEUSDT",
+      "side": "SHORT",
+      "rank": 43,
+      "requestedGross": 0.05,
+      "entryTs": 1740448800000,
+      "entryPrice": 207.61,
+      "exitTs": 1740470400000,
+      "exitPrice": 195.03,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X07_TIME_6H",
+      "symbol": "ATOMUSDT",
+      "side": "SHORT",
+      "rank": 43,
+      "requestedGross": 0.05,
+      "entryTs": 1740484800000,
+      "entryPrice": 4.27,
+      "exitTs": 1740506400000,
+      "exitPrice": 4.34,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_G4_MATURE_REL_RANGE",
+      "symbol": "AAVEUSDT",
+      "side": "SHORT",
+      "rank": 12,
+      "requestedGross": 0.6000000000000001,
+      "entryTs": 1740520800000,
+      "entryPrice": 205.45,
+      "exitTs": 1740607200000,
+      "exitPrice": 204.7,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X12_TIME_12H",
+      "symbol": "ADAUSDT",
+      "side": "SHORT",
+      "rank": 21,
+      "requestedGross": 0.30000000000000004,
+      "entryTs": 1740571200000,
+      "entryPrice": 0.6796,
+      "exitTs": 1740614400000,
+      "exitPrice": 0.653,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X12_TIME_12H",
+      "symbol": "BTCUSDT",
+      "side": "SHORT",
+      "rank": 21,
+      "requestedGross": 0.30000000000000004,
+      "entryTs": 1740578400000,
+      "entryPrice": 87185.8,
+      "exitTs": 1740621600000,
+      "exitPrice": 84800,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X12_TIME_12H",
+      "symbol": "BTCUSDT",
+      "side": "SHORT",
+      "rank": 21,
+      "requestedGross": 0.30000000000000004,
+      "entryTs": 1740585600000,
+      "entryPrice": 87532,
+      "exitTs": 1740628800000,
+      "exitPrice": 85000,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X12_TIME_12H",
+      "symbol": "BNBUSDT",
+      "side": "SHORT",
+      "rank": 21,
+      "requestedGross": 0.30000000000000004,
+      "entryTs": 1740585600000,
+      "entryPrice": 621.2,
+      "exitTs": 1740628800000,
+      "exitPrice": 611.5,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X12_TIME_12H",
+      "symbol": "BTCUSDT",
+      "side": "SHORT",
+      "rank": 21,
+      "requestedGross": 0.30000000000000004,
+      "entryTs": 1740592800000,
+      "entryPrice": 86250,
+      "exitTs": 1740636000000,
+      "exitPrice": 86000,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X12_TIME_12H",
+      "symbol": "AVAXUSDT",
+      "side": "SHORT",
+      "rank": 21,
+      "requestedGross": 0.30000000000000004,
+      "entryTs": 1740592800000,
+      "entryPrice": 21.83,
+      "exitTs": 1740636000000,
+      "exitPrice": 22.5,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X04_TIME_24H",
+      "symbol": "BTCUSDT",
+      "side": "SHORT",
+      "rank": 33,
+      "requestedGross": 0.18,
+      "entryTs": 1740600000000,
+      "entryPrice": 84075.7,
+      "exitTs": 1740686400000,
+      "exitPrice": 83600,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X12_TIME_12H",
+      "symbol": "BNBUSDT",
+      "side": "SHORT",
+      "rank": 21,
+      "requestedGross": 0.30000000000000004,
+      "entryTs": 1740600000000,
+      "entryPrice": 604,
+      "exitTs": 1740643200000,
+      "exitPrice": 619.8,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X04_TIME_24H",
+      "symbol": "BTCUSDT",
+      "side": "SHORT",
+      "rank": 33,
+      "requestedGross": 0.18,
+      "entryTs": 1740607200000,
+      "entryPrice": 84751.8,
+      "exitTs": 1740693600000,
+      "exitPrice": 84334.6,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X12_TIME_12H",
+      "symbol": "BNBUSDT",
+      "side": "SHORT",
+      "rank": 21,
+      "requestedGross": 0.30000000000000004,
+      "entryTs": 1740607200000,
+      "entryPrice": 612,
+      "exitTs": 1740650400000,
+      "exitPrice": 614.7,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X12_TIME_12H",
+      "symbol": "AVAXUSDT",
+      "side": "SHORT",
+      "rank": 21,
+      "requestedGross": 0.30000000000000004,
+      "entryTs": 1740614400000,
+      "entryPrice": 21.9,
+      "exitTs": 1740657600000,
+      "exitPrice": 23,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X12_TIME_12H",
+      "symbol": "INJUSDT",
+      "side": "SHORT",
+      "rank": 21,
+      "requestedGross": 0.30000000000000004,
+      "entryTs": 1740621600000,
+      "entryPrice": 13.197,
+      "exitTs": 1740664800000,
+      "exitPrice": 13.65,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X08_TIME_48H",
+      "symbol": "ADAUSDT",
+      "side": "SHORT",
+      "rank": 25,
+      "requestedGross": 0.30000000000000004,
+      "entryTs": 1740628800000,
+      "entryPrice": 0.6606,
+      "exitTs": 1740801600000,
+      "exitPrice": 0.6436,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X11_TIME_48H",
+      "symbol": "SOLUSDT",
+      "side": "SHORT",
+      "rank": 13,
+      "requestedGross": 0.44999999999999996,
+      "entryTs": 1740636000000,
+      "entryPrice": 139.69,
+      "exitTs": 1740808800000,
+      "exitPrice": 144.46,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X11_TIME_48H",
+      "symbol": "SOLUSDT",
+      "side": "SHORT",
+      "rank": 13,
+      "requestedGross": 0.44999999999999996,
+      "entryTs": 1740643200000,
+      "entryPrice": 140.51,
+      "exitTs": 1740816000000,
+      "exitPrice": 142.78,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X11_TIME_48H",
+      "symbol": "ADAUSDT",
+      "side": "SHORT",
+      "rank": 13,
+      "requestedGross": 0.44999999999999996,
+      "entryTs": 1740657600000,
+      "entryPrice": 0.6795,
+      "exitTs": 1740830400000,
+      "exitPrice": 0.6344,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_Y02_REV_D0_T12",
+      "symbol": "ADAUSDT",
+      "side": "LONG",
+      "rank": 14,
+      "requestedGross": 0.44999999999999996,
+      "entryTs": 1740664800000,
+      "entryPrice": 0.6727,
+      "exitTs": 1740708000000,
+      "exitPrice": 0.6105,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_Y16_REV_D0_T6",
+      "symbol": "XRPUSDT",
+      "side": "LONG",
+      "rank": 15,
+      "requestedGross": 0.44999999999999996,
+      "entryTs": 1740693600000,
+      "entryPrice": 2.1745,
+      "exitTs": 1740715200000,
+      "exitPrice": 2.0158,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_Y02_REV_D0_T12",
+      "symbol": "XRPUSDT",
+      "side": "LONG",
+      "rank": 14,
+      "requestedGross": 0.44999999999999996,
+      "entryTs": 1740700800000,
+      "entryPrice": 2.2008,
+      "exitTs": 1740744000000,
+      "exitPrice": 2.0357,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_Y16_REV_D0_T6",
+      "symbol": "BTCUSDT",
+      "side": "LONG",
+      "rank": 15,
+      "requestedGross": 0.44999999999999996,
+      "entryTs": 1740708000000,
+      "entryPrice": 81750,
+      "exitTs": 1740729600000,
+      "exitPrice": 79055,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_Y16_REV_D0_T6",
+      "symbol": "BTCUSDT",
+      "side": "LONG",
+      "rank": 15,
+      "requestedGross": 0.44999999999999996,
+      "entryTs": 1740715200000,
+      "entryPrice": 80515.7,
+      "exitTs": 1740736800000,
+      "exitPrice": 80000,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_Y16_REV_D0_T6",
+      "symbol": "BTCUSDT",
+      "side": "LONG",
+      "rank": 15,
+      "requestedGross": 0.44999999999999996,
+      "entryTs": 1740722400000,
+      "entryPrice": 79958.2,
+      "exitTs": 1740744000000,
+      "exitPrice": 80400,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X11_TIME_48H",
+      "symbol": "BTCUSDT",
+      "side": "SHORT",
+      "rank": 13,
+      "requestedGross": 0.44999999999999996,
+      "entryTs": 1740736800000,
+      "entryPrice": 80000,
+      "exitTs": 1740909600000,
+      "exitPrice": 85907.5,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X08_TIME_48H",
+      "symbol": "ETHUSDT",
+      "side": "SHORT",
+      "rank": 25,
+      "requestedGross": 0.30000000000000004,
+      "entryTs": 1740736800000,
+      "entryPrice": 2130.2,
+      "exitTs": 1740909600000,
+      "exitPrice": 2251.7,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X08_TIME_48H",
+      "symbol": "ETHUSDT",
+      "side": "SHORT",
+      "rank": 25,
+      "requestedGross": 0.30000000000000004,
+      "entryTs": 1740751200000,
+      "entryPrice": 2158.9,
+      "exitTs": 1740924000000,
+      "exitPrice": 2202.7,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X08_TIME_48H",
+      "symbol": "AAVEUSDT",
+      "side": "SHORT",
+      "rank": 25,
+      "requestedGross": 0.30000000000000004,
+      "entryTs": 1740751200000,
+      "entryPrice": 188.47,
+      "exitTs": 1740924000000,
+      "exitPrice": 191,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X08_TIME_48H",
+      "symbol": "ETHUSDT",
+      "side": "SHORT",
+      "rank": 25,
+      "requestedGross": 0.30000000000000004,
+      "entryTs": 1740758400000,
+      "entryPrice": 2225.7,
+      "exitTs": 1740931200000,
+      "exitPrice": 2237,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X11_TIME_48H",
+      "symbol": "BTCUSDT",
+      "side": "SHORT",
+      "rank": 13,
+      "requestedGross": 0.44999999999999996,
+      "entryTs": 1740765600000,
+      "entryPrice": 83985.9,
+      "exitTs": 1740938400000,
+      "exitPrice": 94200,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X11_TIME_48H",
+      "symbol": "BTCUSDT",
+      "side": "SHORT",
+      "rank": 13,
+      "requestedGross": 0.44999999999999996,
+      "entryTs": 1740772800000,
+      "entryPrice": 84200,
+      "exitTs": 1740945600000,
+      "exitPrice": 93542.9,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_Y02_REV_D0_T12",
+      "symbol": "ADAUSDT",
+      "side": "LONG",
+      "rank": 14,
+      "requestedGross": 0.44999999999999996,
+      "entryTs": 1740780000000,
+      "entryPrice": 0.633,
+      "exitTs": 1740823200000,
+      "exitPrice": 0.6448,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_Y02_REV_D0_T12",
+      "symbol": "ADAUSDT",
+      "side": "LONG",
+      "rank": 14,
+      "requestedGross": 0.44999999999999996,
+      "entryTs": 1740787200000,
+      "entryPrice": 0.6336,
+      "exitTs": 1740830400000,
+      "exitPrice": 0.6344,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "symbol": "LTCUSDT",
+      "side": "SHORT",
+      "rank": 41,
+      "requestedGross": 0.05,
+      "entryTs": 1741053600000,
+      "entryPrice": 102.58,
+      "entryAtr": 3.0600000000000014,
+      "exitTs": 1741107600000,
+      "exitPrice": 97.99,
+      "exitReason": "TP"
+    },
+    {
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "symbol": "INJUSDT",
+      "side": "SHORT",
+      "rank": 41,
+      "requestedGross": 0.05,
+      "entryTs": 1741053600000,
+      "entryPrice": 11.062,
+      "entryAtr": 0.2958571428571428,
+      "exitTs": 1741100400000,
+      "exitPrice": 10.618214285714284,
+      "exitReason": "TP"
+    },
+    {
+      "route": "REC_Y16_REV_D0_T6",
+      "symbol": "BTCUSDT",
+      "side": "LONG",
+      "rank": 15,
+      "requestedGross": 0.44999999999999996,
+      "entryTs": 1741521600000,
+      "entryPrice": 85046.1,
+      "exitTs": 1741543200000,
+      "exitPrice": 82425.7,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "symbol": "LINKUSDT",
+      "side": "SHORT",
+      "rank": 41,
+      "requestedGross": 0.05,
+      "entryTs": 1741528800000,
+      "entryPrice": 14.516,
+      "entryAtr": 0.09000000000000011,
+      "exitTs": 1741539600000,
+      "exitPrice": 14.381,
+      "exitReason": "TP"
+    },
+    {
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "symbol": "SOLUSDT",
+      "side": "SHORT",
+      "rank": 41,
+      "requestedGross": 0.05,
+      "entryTs": 1741528800000,
+      "entryPrice": 133.13,
+      "entryAtr": 1.230714285714287,
+      "exitTs": 1741536000000,
+      "exitPrice": 131.28392857142856,
+      "exitReason": "TP"
+    },
+    {
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "symbol": "INJUSDT",
+      "side": "SHORT",
+      "rank": 41,
+      "requestedGross": 0.05,
+      "entryTs": 1741536000000,
+      "entryPrice": 10.289,
+      "entryAtr": 0.1685,
+      "exitTs": 1741539600000,
+      "exitPrice": 10.036249999999999,
+      "exitReason": "TP"
+    },
+    {
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "symbol": "LINKUSDT",
+      "side": "SHORT",
+      "rank": 41,
+      "requestedGross": 0.05,
+      "entryTs": 1741543200000,
+      "entryPrice": 13.725,
+      "entryAtr": 0.13692857142857154,
+      "exitTs": 1741546800000,
+      "exitPrice": 13.861928571428571,
+      "exitReason": "STOP"
+    },
+    {
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "symbol": "SOLUSDT",
+      "side": "SHORT",
+      "rank": 41,
+      "requestedGross": 0.05,
+      "entryTs": 1741543200000,
+      "entryPrice": 126.78,
+      "entryAtr": 1.67285714285714,
+      "exitTs": 1741550400000,
+      "exitPrice": 128.45285714285714,
+      "exitReason": "STOP"
+    },
+    {
+      "route": "REC_X07_TIME_6H",
+      "symbol": "LINKUSDT",
+      "side": "SHORT",
+      "rank": 43,
+      "requestedGross": 0.05,
+      "entryTs": 1741629600000,
+      "entryPrice": 13.058,
+      "exitTs": 1741651200000,
+      "exitPrice": 12.598,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "symbol": "XRPUSDT",
+      "side": "SHORT",
+      "rank": 41,
+      "requestedGross": 0.05,
+      "entryTs": 1741629600000,
+      "entryPrice": 2.0566,
+      "entryAtr": 0.046614285714285754,
+      "exitTs": 1741654800000,
+      "exitPrice": 1.9866785714285713,
+      "exitReason": "TP"
+    },
+    {
+      "route": "REC_Y16_REV_D0_T6",
+      "symbol": "XRPUSDT",
+      "side": "LONG",
+      "rank": 15,
+      "requestedGross": 0.44999999999999996,
+      "entryTs": 1741636800000,
+      "entryPrice": 2.0693,
+      "exitTs": 1741658400000,
+      "exitPrice": 2.0125,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "symbol": "ATOMUSDT",
+      "side": "SHORT",
+      "rank": 41,
+      "requestedGross": 0.05,
+      "entryTs": 1741651200000,
+      "entryPrice": 3.59,
+      "entryAtr": 0.06214285714285709,
+      "exitTs": 1741654800000,
+      "exitPrice": 3.496785714285714,
+      "exitReason": "TP"
+    },
+    {
+      "route": "REC_G4_MATURE_REL_RANGE",
+      "symbol": "XRPUSDT",
+      "side": "SHORT",
+      "rank": 12,
+      "requestedGross": 0.6000000000000001,
+      "entryTs": 1741658400000,
+      "entryPrice": 2.0125,
+      "exitTs": 1741744800000,
+      "exitPrice": 2.2527,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_G4_MATURE_REL_RANGE",
+      "symbol": "ATOMUSDT",
+      "side": "SHORT",
+      "rank": 12,
+      "requestedGross": 0.6000000000000001,
+      "entryTs": 1741665600000,
+      "entryPrice": 3.54,
+      "exitTs": 1741752000000,
+      "exitPrice": 3.78,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_G4_MATURE_REL_RANGE",
+      "symbol": "ATOMUSDT",
+      "side": "SHORT",
+      "rank": 12,
+      "requestedGross": 0.6000000000000001,
+      "entryTs": 1741672800000,
+      "entryPrice": 3.6,
+      "exitTs": 1741759200000,
+      "exitPrice": 3.8,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_G4_MATURE_REL_RANGE",
+      "symbol": "XRPUSDT",
+      "side": "SHORT",
+      "rank": 12,
+      "requestedGross": 0.6000000000000001,
+      "entryTs": 1741672800000,
+      "entryPrice": 2.12,
+      "exitTs": 1741759200000,
+      "exitPrice": 2.1806,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_G4_MATURE_REL_RANGE",
+      "symbol": "ATOMUSDT",
+      "side": "SHORT",
+      "rank": 12,
+      "requestedGross": 0.6000000000000001,
+      "entryTs": 1741680000000,
+      "entryPrice": 3.59,
+      "exitTs": 1741766400000,
+      "exitPrice": 3.87,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_G4_MATURE_REL_RANGE",
+      "symbol": "LINKUSDT",
+      "side": "SHORT",
+      "rank": 12,
+      "requestedGross": 0.6000000000000001,
+      "entryTs": 1741687200000,
+      "entryPrice": 12.915,
+      "exitTs": 1741773600000,
+      "exitPrice": 13.105,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_G4_MATURE_REL_RANGE",
+      "symbol": "ATOMUSDT",
+      "side": "SHORT",
+      "rank": 12,
+      "requestedGross": 0.6000000000000001,
+      "entryTs": 1741694400000,
+      "entryPrice": 3.7,
+      "exitTs": 1741780800000,
+      "exitPrice": 3.89,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_Y02_REV_D0_T12",
+      "symbol": "SOLUSDT",
+      "side": "LONG",
+      "rank": 14,
+      "requestedGross": 0.44999999999999996,
+      "entryTs": 1741701600000,
+      "entryPrice": 122.66,
+      "exitTs": 1741744800000,
+      "exitPrice": 126.06,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_G4_MATURE_REL_RANGE",
+      "symbol": "LINKUSDT",
+      "side": "SHORT",
+      "rank": 12,
+      "requestedGross": 0.6000000000000001,
+      "entryTs": 1741701600000,
+      "entryPrice": 12.925,
+      "exitTs": 1741788000000,
+      "exitPrice": 13.326,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "symbol": "ADAUSDT",
+      "side": "SHORT",
+      "rank": 41,
+      "requestedGross": 0.05,
+      "entryTs": 1742306400000,
+      "entryPrice": 0.6827,
+      "entryAtr": 0.010564285714285733,
+      "exitTs": 1742310000000,
+      "exitPrice": 0.6932642857142857,
+      "exitReason": "STOP"
+    },
+    {
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "symbol": "SOLUSDT",
+      "side": "SHORT",
+      "rank": 41,
+      "requestedGross": 0.05,
+      "entryTs": 1743148800000,
+      "entryPrice": 131.74,
+      "entryAtr": 1.3235714285714286,
+      "exitTs": 1743170400000,
+      "exitPrice": 129.75464285714287,
+      "exitReason": "TP"
+    },
+    {
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "symbol": "ATOMUSDT",
+      "side": "SHORT",
+      "rank": 41,
+      "requestedGross": 0.05,
+      "entryTs": 1743148800000,
+      "entryPrice": 4.56,
+      "entryAtr": 0.05785714285714289,
+      "exitTs": 1743166800000,
+      "exitPrice": 4.617857142857143,
+      "exitReason": "STOP"
+    },
+    {
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "symbol": "SOLUSDT",
+      "side": "SHORT",
+      "rank": 41,
+      "requestedGross": 0.05,
+      "entryTs": 1743156000000,
+      "entryPrice": 130.75,
+      "entryAtr": 1.3042857142857156,
+      "exitTs": 1743166800000,
+      "exitPrice": 132.05428571428573,
+      "exitReason": "STOP"
+    },
+    {
+      "route": "REC_X07_TIME_6H",
+      "symbol": "ADAUSDT",
+      "side": "SHORT",
+      "rank": 43,
+      "requestedGross": 0.05,
+      "entryTs": 1743235200000,
+      "entryPrice": 0.6858,
+      "exitTs": 1743256800000,
+      "exitPrice": 0.6709,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X07_TIME_6H",
+      "symbol": "INJUSDT",
+      "side": "SHORT",
+      "rank": 43,
+      "requestedGross": 0.05,
+      "entryTs": 1743249600000,
+      "entryPrice": 8.735,
+      "exitTs": 1743271200000,
+      "exitPrice": 8.73,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "symbol": "NEARUSDT",
+      "side": "SHORT",
+      "rank": 41,
+      "requestedGross": 0.05,
+      "entryTs": 1743264000000,
+      "entryPrice": 2.572,
+      "entryAtr": 0.06442857142857143,
+      "exitTs": 1743321600000,
+      "exitPrice": 2.6364285714285716,
+      "exitReason": "STOP"
+    },
+    {
+      "route": "REC_G4_MATURE_REL_RANGE",
+      "symbol": "XRPUSDT",
+      "side": "SHORT",
+      "rank": 12,
+      "requestedGross": 0.6000000000000001,
+      "entryTs": 1743292800000,
+      "entryPrice": 2.1159,
+      "exitTs": 1743379200000,
+      "exitPrice": 2.1243,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_G4_MATURE_REL_RANGE",
+      "symbol": "INJUSDT",
+      "side": "SHORT",
+      "rank": 12,
+      "requestedGross": 0.6000000000000001,
+      "entryTs": 1743300000000,
+      "entryPrice": 8.839,
+      "exitTs": 1743386400000,
+      "exitPrice": 8.637,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_G4_MATURE_REL_RANGE",
+      "symbol": "SOLUSDT",
+      "side": "SHORT",
+      "rank": 12,
+      "requestedGross": 0.6000000000000001,
+      "entryTs": 1743307200000,
+      "entryPrice": 125.99,
+      "exitTs": 1743393600000,
+      "exitPrice": 125.19,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_G4_MATURE_REL_RANGE",
+      "symbol": "INJUSDT",
+      "side": "SHORT",
+      "rank": 12,
+      "requestedGross": 0.6000000000000001,
+      "entryTs": 1743307200000,
+      "entryPrice": 8.758,
+      "exitTs": 1743393600000,
+      "exitPrice": 8.703,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_G4_MATURE_REL_RANGE",
+      "symbol": "INJUSDT",
+      "side": "SHORT",
+      "rank": 12,
+      "requestedGross": 0.6000000000000001,
+      "entryTs": 1743314400000,
+      "entryPrice": 8.845,
+      "exitTs": 1743400800000,
+      "exitPrice": 8.822,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X12_TIME_12H",
+      "symbol": "XRPUSDT",
+      "side": "SHORT",
+      "rank": 21,
+      "requestedGross": 0.30000000000000004,
+      "entryTs": 1743314400000,
+      "entryPrice": 2.1659,
+      "exitTs": 1743357600000,
+      "exitPrice": 2.1658,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X12_TIME_12H",
+      "symbol": "XRPUSDT",
+      "side": "SHORT",
+      "rank": 21,
+      "requestedGross": 0.30000000000000004,
+      "entryTs": 1743321600000,
+      "entryPrice": 2.1639,
+      "exitTs": 1743364800000,
+      "exitPrice": 2.1626,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X12_TIME_12H",
+      "symbol": "INJUSDT",
+      "side": "SHORT",
+      "rank": 21,
+      "requestedGross": 0.30000000000000004,
+      "entryTs": 1743328800000,
+      "entryPrice": 9.055,
+      "exitTs": 1743372000000,
+      "exitPrice": 8.489,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X12_TIME_12H",
+      "symbol": "ADAUSDT",
+      "side": "SHORT",
+      "rank": 21,
+      "requestedGross": 0.30000000000000004,
+      "entryTs": 1743336000000,
+      "entryPrice": 0.6797,
+      "exitTs": 1743379200000,
+      "exitPrice": 0.6605,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X12_TIME_12H",
+      "symbol": "INJUSDT",
+      "side": "SHORT",
+      "rank": 21,
+      "requestedGross": 0.30000000000000004,
+      "entryTs": 1743336000000,
+      "entryPrice": 9.062,
+      "exitTs": 1743379200000,
+      "exitPrice": 8.626,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_Y11_REV_D0_T36",
+      "symbol": "ADAUSDT",
+      "side": "LONG",
+      "rank": 19,
+      "requestedGross": 0.30000000000000004,
+      "entryTs": 1743343200000,
+      "entryPrice": 0.6638,
+      "exitTs": 1743472800000,
+      "exitPrice": 0.6598,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_Y11_REV_D0_T36",
+      "symbol": "NEARUSDT",
+      "side": "LONG",
+      "rank": 19,
+      "requestedGross": 0.30000000000000004,
+      "entryTs": 1743357600000,
+      "entryPrice": 2.626,
+      "exitTs": 1743487200000,
+      "exitPrice": 2.548,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_Y02_REV_D0_T12",
+      "symbol": "XRPUSDT",
+      "side": "LONG",
+      "rank": 14,
+      "requestedGross": 0.44999999999999996,
+      "entryTs": 1743364800000,
+      "entryPrice": 2.1626,
+      "exitTs": 1743408000000,
+      "exitPrice": 2.0923,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X12_TIME_12H",
+      "symbol": "BTCUSDT",
+      "side": "SHORT",
+      "rank": 21,
+      "requestedGross": 0.30000000000000004,
+      "entryTs": 1743372000000,
+      "entryPrice": 82112,
+      "exitTs": 1743415200000,
+      "exitPrice": 81544.9,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "symbol": "AVAXUSDT",
+      "side": "SHORT",
+      "rank": 41,
+      "requestedGross": 0.05,
+      "entryTs": 1743372000000,
+      "entryPrice": 18.76,
+      "entryAtr": 0.16714285714285712,
+      "exitTs": 1743375600000,
+      "exitPrice": 18.927142857142858,
+      "exitReason": "STOP"
+    },
+    {
+      "route": "REC_X12_TIME_12H",
+      "symbol": "BTCUSDT",
+      "side": "SHORT",
+      "rank": 21,
+      "requestedGross": 0.30000000000000004,
+      "entryTs": 1743386400000,
+      "entryPrice": 81670.8,
+      "exitTs": 1743429600000,
+      "exitPrice": 82576.7,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X04_TIME_24H",
+      "symbol": "BTCUSDT",
+      "side": "SHORT",
+      "rank": 33,
+      "requestedGross": 0.18,
+      "entryTs": 1743393600000,
+      "entryPrice": 81685.9,
+      "exitTs": 1743480000000,
+      "exitPrice": 82898.8,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_Y02_REV_D0_T12",
+      "symbol": "ETHUSDT",
+      "side": "LONG",
+      "rank": 14,
+      "requestedGross": 0.44999999999999996,
+      "entryTs": 1743400800000,
+      "entryPrice": 1809,
+      "exitTs": 1743444000000,
+      "exitPrice": 1830,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_Y16_REV_D0_T6",
+      "symbol": "ADAUSDT",
+      "side": "LONG",
+      "rank": 15,
+      "requestedGross": 0.44999999999999996,
+      "entryTs": 1743400800000,
+      "entryPrice": 0.6573,
+      "exitTs": 1743422400000,
+      "exitPrice": 0.6362,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "symbol": "LINKUSDT",
+      "side": "SHORT",
+      "rank": 41,
+      "requestedGross": 0.05,
+      "entryTs": 1743962400000,
+      "entryPrice": 11.803,
+      "entryAtr": 0.1547142857142856,
+      "exitTs": 1743966000000,
+      "exitPrice": 11.570928571428572,
+      "exitReason": "TP"
+    },
+    {
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "symbol": "LTCUSDT",
+      "side": "SHORT",
+      "rank": 41,
+      "requestedGross": 0.05,
+      "entryTs": 1743962400000,
+      "entryPrice": 76.62,
+      "entryAtr": 1.3799999999999994,
+      "exitTs": 1743966000000,
+      "exitPrice": 74.55000000000001,
+      "exitReason": "TP"
+    },
+    {
+      "route": "REC_X04_TIME_24H",
+      "symbol": "LINKUSDT",
+      "side": "SHORT",
+      "rank": 33,
+      "requestedGross": 0.18,
+      "entryTs": 1743969600000,
+      "entryPrice": 11.501,
+      "exitTs": 1744056000000,
+      "exitPrice": 11.547,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X04_TIME_24H",
+      "symbol": "AVAXUSDT",
+      "side": "SHORT",
+      "rank": 33,
+      "requestedGross": 0.18,
+      "entryTs": 1743969600000,
+      "entryPrice": 16.21,
+      "exitTs": 1744056000000,
+      "exitPrice": 16.88,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X04_TIME_24H",
+      "symbol": "LINKUSDT",
+      "side": "SHORT",
+      "rank": 33,
+      "requestedGross": 0.18,
+      "entryTs": 1743976800000,
+      "entryPrice": 11.405,
+      "exitTs": 1744063200000,
+      "exitPrice": 11.547,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X04_TIME_24H",
+      "symbol": "AVAXUSDT",
+      "side": "SHORT",
+      "rank": 33,
+      "requestedGross": 0.18,
+      "entryTs": 1743976800000,
+      "entryPrice": 15.98,
+      "exitTs": 1744063200000,
+      "exitPrice": 16.88,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "symbol": "LINKUSDT",
+      "side": "SHORT",
+      "rank": 41,
+      "requestedGross": 0.05,
+      "entryTs": 1743984000000,
+      "entryPrice": 11.342,
+      "entryAtr": 0.2815714285714287,
+      "exitTs": 1743998400000,
+      "exitPrice": 10.919642857142858,
+      "exitReason": "TP"
+    },
+    {
+      "route": "REC_X04_TIME_24H",
+      "symbol": "LINKUSDT",
+      "side": "SHORT",
+      "rank": 33,
+      "requestedGross": 0.18,
+      "entryTs": 1743991200000,
+      "entryPrice": 11.317,
+      "exitTs": 1744077600000,
+      "exitPrice": 11.772,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "symbol": "ADAUSDT",
+      "side": "SHORT",
+      "rank": 41,
+      "requestedGross": 0.05,
+      "entryTs": 1744005600000,
+      "entryPrice": 0.5452,
+      "entryAtr": 0.01819285714285713,
+      "exitTs": 1744009200000,
+      "exitPrice": 0.5179107142857143,
+      "exitReason": "TP"
+    },
+    {
+      "route": "REC_X07_TIME_6H",
+      "symbol": "LTCUSDT",
+      "side": "SHORT",
+      "rank": 43,
+      "requestedGross": 0.05,
+      "entryTs": 1744020000000,
+      "entryPrice": 65.07,
+      "exitTs": 1744041600000,
+      "exitPrice": 72.38,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X04_TIME_24H",
+      "symbol": "ETHUSDT",
+      "side": "SHORT",
+      "rank": 33,
+      "requestedGross": 0.18,
+      "entryTs": 1744020000000,
+      "entryPrice": 1494,
+      "exitTs": 1744106400000,
+      "exitPrice": 1568.5,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X04_TIME_24H",
+      "symbol": "SOLUSDT",
+      "side": "SHORT",
+      "rank": 33,
+      "requestedGross": 0.18,
+      "entryTs": 1744027200000,
+      "entryPrice": 100.03,
+      "exitTs": 1744113600000,
+      "exitPrice": 110.32,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_G4_MATURE_REL_RANGE",
+      "symbol": "NEARUSDT",
+      "side": "SHORT",
+      "rank": 12,
+      "requestedGross": 0.6000000000000001,
+      "entryTs": 1744048800000,
+      "entryPrice": 2.054,
+      "exitTs": 1744135200000,
+      "exitPrice": 1.946,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_Y11_REV_D0_T36",
+      "symbol": "ATOMUSDT",
+      "side": "LONG",
+      "rank": 19,
+      "requestedGross": 0.30000000000000004,
+      "entryTs": 1744092000000,
+      "entryPrice": 4.25,
+      "exitTs": 1744221600000,
+      "exitPrice": 4.57,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X04_TIME_24H",
+      "symbol": "ADAUSDT",
+      "side": "SHORT",
+      "rank": 33,
+      "requestedGross": 0.18,
+      "entryTs": 1744099200000,
+      "entryPrice": 0.5845,
+      "exitTs": 1744185600000,
+      "exitPrice": 0.5754,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X12_TIME_12H",
+      "symbol": "BNBUSDT",
+      "side": "SHORT",
+      "rank": 21,
+      "requestedGross": 0.30000000000000004,
+      "entryTs": 1744135200000,
+      "entryPrice": 556,
+      "exitTs": 1744178400000,
+      "exitPrice": 550.3,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X12_TIME_12H",
+      "symbol": "BNBUSDT",
+      "side": "SHORT",
+      "rank": 21,
+      "requestedGross": 0.30000000000000004,
+      "entryTs": 1744164000000,
+      "entryPrice": 548.8,
+      "exitTs": 1744207200000,
+      "exitPrice": 559.8,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X04_TIME_24H",
+      "symbol": "BTCUSDT",
+      "side": "SHORT",
+      "rank": 33,
+      "requestedGross": 0.18,
+      "entryTs": 1744164000000,
+      "entryPrice": 76190.5,
+      "exitTs": 1744250400000,
+      "exitPrice": 82206.9,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X04_TIME_24H",
+      "symbol": "BTCUSDT",
+      "side": "SHORT",
+      "rank": 33,
+      "requestedGross": 0.18,
+      "entryTs": 1744171200000,
+      "entryPrice": 75331.2,
+      "exitTs": 1744257600000,
+      "exitPrice": 81743.5,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X12_TIME_12H",
+      "symbol": "LTCUSDT",
+      "side": "SHORT",
+      "rank": 21,
+      "requestedGross": 0.30000000000000004,
+      "entryTs": 1744171200000,
+      "entryPrice": 68.65,
+      "exitTs": 1744214400000,
+      "exitPrice": 71.36,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X04_TIME_24H",
+      "symbol": "BTCUSDT",
+      "side": "SHORT",
+      "rank": 33,
+      "requestedGross": 0.18,
+      "entryTs": 1744178400000,
+      "entryPrice": 76740,
+      "exitTs": 1744264800000,
+      "exitPrice": 82080.7,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X12_TIME_12H",
+      "symbol": "BTCUSDT",
+      "side": "SHORT",
+      "rank": 21,
+      "requestedGross": 0.30000000000000004,
+      "entryTs": 1744185600000,
+      "entryPrice": 77686.4,
+      "exitTs": 1744228800000,
+      "exitPrice": 82189.8,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X04_TIME_24H",
+      "symbol": "BTCUSDT",
+      "side": "SHORT",
+      "rank": 33,
+      "requestedGross": 0.18,
+      "entryTs": 1744200000000,
+      "entryPrice": 76189,
+      "exitTs": 1744286400000,
+      "exitPrice": 81750,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X11_TIME_48H",
+      "symbol": "LTCUSDT",
+      "side": "SHORT",
+      "rank": 13,
+      "requestedGross": 0.44999999999999996,
+      "entryTs": 1744207200000,
+      "entryPrice": 72.03,
+      "exitTs": 1744380000000,
+      "exitPrice": 76.21,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X11_TIME_48H",
+      "symbol": "AAVEUSDT",
+      "side": "SHORT",
+      "rank": 13,
+      "requestedGross": 0.44999999999999996,
+      "entryTs": 1744207200000,
+      "entryPrice": 128.3,
+      "exitTs": 1744380000000,
+      "exitPrice": 135.55,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_Y16_REV_D0_T6",
+      "symbol": "XRPUSDT",
+      "side": "LONG",
+      "rank": 15,
+      "requestedGross": 0.44999999999999996,
+      "entryTs": 1745157600000,
+      "entryPrice": 2.0501,
+      "exitTs": 1745179200000,
+      "exitPrice": 2.0769,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X07_TIME_6H",
+      "symbol": "ADAUSDT",
+      "side": "SHORT",
+      "rank": 43,
+      "requestedGross": 0.05,
+      "entryTs": 1748620800000,
+      "entryPrice": 0.701,
+      "exitTs": 1748642400000,
+      "exitPrice": 0.7059,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X07_TIME_6H",
+      "symbol": "SOLUSDT",
+      "side": "SHORT",
+      "rank": 43,
+      "requestedGross": 0.05,
+      "entryTs": 1748656800000,
+      "entryPrice": 153.21,
+      "exitTs": 1748678400000,
+      "exitPrice": 154.77,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "symbol": "AVAXUSDT",
+      "side": "SHORT",
+      "rank": 41,
+      "requestedGross": 0.05,
+      "entryTs": 1748656800000,
+      "entryPrice": 20.15,
+      "entryAtr": 0.2328571428571427,
+      "exitTs": 1748696400000,
+      "exitPrice": 20.38285714285714,
+      "exitReason": "STOP"
+    },
+    {
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "symbol": "LINKUSDT",
+      "side": "SHORT",
+      "rank": 41,
+      "requestedGross": 0.05,
+      "entryTs": 1748664000000,
+      "entryPrice": 13.617,
+      "entryAtr": 0.18357142857142808,
+      "exitTs": 1748689200000,
+      "exitPrice": 13.874,
+      "exitReason": "STOP"
+    },
+    {
+      "route": "REC_X07_TIME_6H",
+      "symbol": "SOLUSDT",
+      "side": "SHORT",
+      "rank": 43,
+      "requestedGross": 0.05,
+      "entryTs": 1748678400000,
+      "entryPrice": 154.77,
+      "exitTs": 1748700000000,
+      "exitPrice": 154.74,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_G4_MATURE_REL_RANGE",
+      "symbol": "AVAXUSDT",
+      "side": "SHORT",
+      "rank": 12,
+      "requestedGross": 0.6000000000000001,
+      "entryTs": 1748707200000,
+      "entryPrice": 20.86,
+      "exitTs": 1748793600000,
+      "exitPrice": 20.86,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_G4_MATURE_REL_RANGE",
+      "symbol": "LINKUSDT",
+      "side": "SHORT",
+      "rank": 12,
+      "requestedGross": 0.6000000000000001,
+      "entryTs": 1748714400000,
+      "entryPrice": 14.014,
+      "exitTs": 1748800800000,
+      "exitPrice": 13.898,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_Y11_REV_D0_T36",
+      "symbol": "ATOMUSDT",
+      "side": "LONG",
+      "rank": 19,
+      "requestedGross": 0.30000000000000004,
+      "entryTs": 1748743200000,
+      "entryPrice": 4.32,
+      "exitTs": 1748872800000,
+      "exitPrice": 4.34,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X12_TIME_12H",
+      "symbol": "SOLUSDT",
+      "side": "SHORT",
+      "rank": 21,
+      "requestedGross": 0.30000000000000004,
+      "entryTs": 1748743200000,
+      "entryPrice": 155.13,
+      "exitTs": 1748786400000,
+      "exitPrice": 151.94,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_G1_MID_REL_LOWVOL",
+      "symbol": "ETHUSDT",
+      "side": "SHORT",
+      "rank": 36,
+      "requestedGross": 0.18,
+      "entryTs": 1748779200000,
+      "entryPrice": 2496.1,
+      "exitTs": 1748822400000,
+      "exitPrice": 2538.2,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "symbol": "ADAUSDT",
+      "side": "SHORT",
+      "rank": 41,
+      "requestedGross": 0.05,
+      "entryTs": 1749153600000,
+      "entryPrice": 0.6409,
+      "entryAtr": 0.008085714285714283,
+      "exitTs": 1749157200000,
+      "exitPrice": 0.6287714285714286,
+      "exitReason": "TP"
+    },
+    {
+      "route": "REC_G1_MID_REL_LOWVOL",
+      "symbol": "LTCUSDT",
+      "side": "SHORT",
+      "rank": 36,
+      "requestedGross": 0.18,
+      "entryTs": 1749931200000,
+      "entryPrice": 85.06,
+      "exitTs": 1749974400000,
+      "exitPrice": 85.26,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_G4_MATURE_REL_RANGE",
+      "symbol": "ADAUSDT",
+      "side": "SHORT",
+      "rank": 12,
+      "requestedGross": 0.6000000000000001,
+      "entryTs": 1749945600000,
+      "entryPrice": 0.6247,
+      "exitTs": 1750032000000,
+      "exitPrice": 0.6324,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_G4_MATURE_REL_RANGE",
+      "symbol": "SOLUSDT",
+      "side": "SHORT",
+      "rank": 12,
+      "requestedGross": 0.6000000000000001,
+      "entryTs": 1749952800000,
+      "entryPrice": 144.94,
+      "exitTs": 1750039200000,
+      "exitPrice": 156.55,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_G4_MATURE_REL_RANGE",
+      "symbol": "LINKUSDT",
+      "side": "SHORT",
+      "rank": 12,
+      "requestedGross": 0.6000000000000001,
+      "entryTs": 1749960000000,
+      "entryPrice": 13.264,
+      "exitTs": 1750046400000,
+      "exitPrice": 13.437,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_G4_MATURE_REL_RANGE",
+      "symbol": "AVAXUSDT",
+      "side": "SHORT",
+      "rank": 12,
+      "requestedGross": 0.6000000000000001,
+      "entryTs": 1749960000000,
+      "entryPrice": 19.07,
+      "exitTs": 1750046400000,
+      "exitPrice": 19.25,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_G4_MATURE_REL_RANGE",
+      "symbol": "SOLUSDT",
+      "side": "SHORT",
+      "rank": 12,
+      "requestedGross": 0.6000000000000001,
+      "entryTs": 1749960000000,
+      "entryPrice": 145.61,
+      "exitTs": 1750046400000,
+      "exitPrice": 155.6,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_Y11_REV_D0_T36",
+      "symbol": "ETHUSDT",
+      "side": "LONG",
+      "rank": 19,
+      "requestedGross": 0.30000000000000004,
+      "entryTs": 1749974400000,
+      "entryPrice": 2527.9,
+      "exitTs": 1750104000000,
+      "exitPrice": 2659.4,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_G4_MATURE_REL_RANGE",
+      "symbol": "SOLUSDT",
+      "side": "SHORT",
+      "rank": 12,
+      "requestedGross": 0.6000000000000001,
+      "entryTs": 1749974400000,
+      "entryPrice": 145.84,
+      "exitTs": 1750060800000,
+      "exitPrice": 157.17,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_G4_MATURE_REL_RANGE",
+      "symbol": "ADAUSDT",
+      "side": "SHORT",
+      "rank": 12,
+      "requestedGross": 0.6000000000000001,
+      "entryTs": 1749974400000,
+      "entryPrice": 0.6279,
+      "exitTs": 1750060800000,
+      "exitPrice": 0.6479,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_Y11_REV_D0_T36",
+      "symbol": "ETHUSDT",
+      "side": "LONG",
+      "rank": 19,
+      "requestedGross": 0.30000000000000004,
+      "entryTs": 1749981600000,
+      "entryPrice": 2509.4,
+      "exitTs": 1750111200000,
+      "exitPrice": 2647.5,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_G1_MID_REL_LOWVOL",
+      "symbol": "ETHUSDT",
+      "side": "SHORT",
+      "rank": 36,
+      "requestedGross": 0.18,
+      "entryTs": 1749988800000,
+      "entryPrice": 2515.1,
+      "exitTs": 1750032000000,
+      "exitPrice": 2546.6,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "symbol": "AVAXUSDT",
+      "side": "SHORT",
+      "rank": 41,
+      "requestedGross": 0.05,
+      "entryTs": 1750442400000,
+      "entryPrice": 17.3,
+      "entryAtr": 0.2107142857142854,
+      "exitTs": 1750453200000,
+      "exitPrice": 17.510714285714286,
+      "exitReason": "STOP"
+    },
+    {
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "symbol": "ADAUSDT",
+      "side": "SHORT",
+      "rank": 41,
+      "requestedGross": 0.05,
+      "entryTs": 1750442400000,
+      "entryPrice": 0.5743,
+      "entryAtr": 0.007042857142857176,
+      "exitTs": 1750453200000,
+      "exitPrice": 0.5813428571428572,
+      "exitReason": "STOP"
+    },
+    {
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "symbol": "DOGEUSDT",
+      "side": "SHORT",
+      "rank": 41,
+      "requestedGross": 0.05,
+      "entryTs": 1750543200000,
+      "entryPrice": 0.15316,
+      "entryAtr": 0.0020835714285714286,
+      "exitTs": 1750554000000,
+      "exitPrice": 0.15524357142857143,
+      "exitReason": "STOP"
+    },
+    {
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "symbol": "ETHUSDT",
+      "side": "SHORT",
+      "rank": 41,
+      "requestedGross": 0.05,
+      "entryTs": 1750543200000,
+      "entryPrice": 2281.1,
+      "entryAtr": 29.80000000000002,
+      "exitTs": 1750550400000,
+      "exitPrice": 2310.9,
+      "exitReason": "STOP"
+    },
+    {
+      "route": "REC_Y02_REV_D0_T12",
+      "symbol": "SOLUSDT",
+      "side": "LONG",
+      "rank": 14,
+      "requestedGross": 0.44999999999999996,
+      "entryTs": 1750636800000,
+      "entryPrice": 131.53,
+      "exitTs": 1750680000000,
+      "exitPrice": 134.08,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_G1_MID_REL_LOWVOL",
+      "symbol": "AVAXUSDT",
+      "side": "SHORT",
+      "rank": 36,
+      "requestedGross": 0.18,
+      "entryTs": 1753423200000,
+      "entryPrice": 23,
+      "exitTs": 1753466400000,
+      "exitPrice": 23.36,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X04_TIME_24H",
+      "symbol": "ATOMUSDT",
+      "side": "SHORT",
+      "rank": 33,
+      "requestedGross": 0.18,
+      "entryTs": 1754013600000,
+      "entryPrice": 4.19,
+      "exitTs": 1754100000000,
+      "exitPrice": 4.16,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X04_TIME_24H",
+      "symbol": "DOGEUSDT",
+      "side": "SHORT",
+      "rank": 33,
+      "requestedGross": 0.18,
+      "entryTs": 1754013600000,
+      "entryPrice": 0.20759,
+      "exitTs": 1754100000000,
+      "exitPrice": 0.20263,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X04_TIME_24H",
+      "symbol": "DOGEUSDT",
+      "side": "SHORT",
+      "rank": 33,
+      "requestedGross": 0.18,
+      "entryTs": 1754020800000,
+      "entryPrice": 0.20813,
+      "exitTs": 1754107200000,
+      "exitPrice": 0.20306,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X04_TIME_24H",
+      "symbol": "ATOMUSDT",
+      "side": "SHORT",
+      "rank": 33,
+      "requestedGross": 0.18,
+      "entryTs": 1754035200000,
+      "entryPrice": 4.16,
+      "exitTs": 1754121600000,
+      "exitPrice": 4.16,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X04_TIME_24H",
+      "symbol": "DOGEUSDT",
+      "side": "SHORT",
+      "rank": 33,
+      "requestedGross": 0.18,
+      "entryTs": 1754035200000,
+      "entryPrice": 0.20543,
+      "exitTs": 1754121600000,
+      "exitPrice": 0.2002,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X04_TIME_24H",
+      "symbol": "DOGEUSDT",
+      "side": "SHORT",
+      "rank": 33,
+      "requestedGross": 0.18,
+      "entryTs": 1754042400000,
+      "entryPrice": 0.20505,
+      "exitTs": 1754128800000,
+      "exitPrice": 0.19767,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X04_TIME_24H",
+      "symbol": "ATOMUSDT",
+      "side": "SHORT",
+      "rank": 33,
+      "requestedGross": 0.18,
+      "entryTs": 1754042400000,
+      "entryPrice": 4.16,
+      "exitTs": 1754128800000,
+      "exitPrice": 4.11,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X04_TIME_24H",
+      "symbol": "INJUSDT",
+      "side": "SHORT",
+      "rank": 33,
+      "requestedGross": 0.18,
+      "entryTs": 1754049600000,
+      "entryPrice": 12.87,
+      "exitTs": 1754136000000,
+      "exitPrice": 12.364,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X04_TIME_24H",
+      "symbol": "ATOMUSDT",
+      "side": "SHORT",
+      "rank": 33,
+      "requestedGross": 0.18,
+      "entryTs": 1754056800000,
+      "entryPrice": 4.14,
+      "exitTs": 1754143200000,
+      "exitPrice": 4.11,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X08_TIME_48H",
+      "symbol": "DOGEUSDT",
+      "side": "SHORT",
+      "rank": 25,
+      "requestedGross": 0.30000000000000004,
+      "entryTs": 1754100000000,
+      "entryPrice": 0.20263,
+      "exitTs": 1754272800000,
+      "exitPrice": 0.20118,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_G4_MATURE_REL_RANGE",
+      "symbol": "AVAXUSDT",
+      "side": "SHORT",
+      "rank": 12,
+      "requestedGross": 0.6000000000000001,
+      "entryTs": 1754100000000,
+      "entryPrice": 21.7,
+      "exitTs": 1754186400000,
+      "exitPrice": 21.1,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_G1_MID_REL_LOWVOL",
+      "symbol": "ATOMUSDT",
+      "side": "SHORT",
+      "rank": 36,
+      "requestedGross": 0.18,
+      "entryTs": 1754136000000,
+      "entryPrice": 4.12,
+      "exitTs": 1754179200000,
+      "exitPrice": 4.08,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X13_TP1.5_SL1_H24",
+      "symbol": "XRPUSDT",
+      "side": "SHORT",
+      "rank": 41,
+      "requestedGross": 0.05,
+      "entryTs": 1754150400000,
+      "entryPrice": 2.8277,
+      "entryAtr": 0.02854285714285714,
+      "exitTs": 1754157600000,
+      "exitPrice": 2.856242857142857,
+      "exitReason": "STOP"
+    },
+    {
+      "route": "REC_X08_TIME_48H",
+      "symbol": "DOGEUSDT",
+      "side": "SHORT",
+      "rank": 25,
+      "requestedGross": 0.30000000000000004,
+      "entryTs": 1754172000000,
+      "entryPrice": 0.19393,
+      "exitTs": 1754344800000,
+      "exitPrice": 0.21,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_G1_MID_REL_LOWVOL",
+      "symbol": "SOLUSDT",
+      "side": "SHORT",
+      "rank": 36,
+      "requestedGross": 0.18,
+      "entryTs": 1754179200000,
+      "entryPrice": 158.65,
+      "exitTs": 1754222400000,
+      "exitPrice": 161.23,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_Y02_REV_D0_T12",
+      "symbol": "ATOMUSDT",
+      "side": "LONG",
+      "rank": 14,
+      "requestedGross": 0.44999999999999996,
+      "entryTs": 1754186400000,
+      "entryPrice": 4.14,
+      "exitTs": 1754229600000,
+      "exitPrice": 4.21,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_G4_MATURE_REL_RANGE",
+      "symbol": "XRPUSDT",
+      "side": "SHORT",
+      "rank": 12,
+      "requestedGross": 0.6000000000000001,
+      "entryTs": 1754193600000,
+      "entryPrice": 2.8318,
+      "exitTs": 1754280000000,
+      "exitPrice": 3.0054,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_Y02_REV_D0_T12",
+      "symbol": "DOGEUSDT",
+      "side": "LONG",
+      "rank": 14,
+      "requestedGross": 0.44999999999999996,
+      "entryTs": 1754193600000,
+      "entryPrice": 0.19547,
+      "exitTs": 1754236800000,
+      "exitPrice": 0.19979,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X04_TIME_24H",
+      "symbol": "BTCUSDT",
+      "side": "SHORT",
+      "rank": 33,
+      "requestedGross": 0.18,
+      "entryTs": 1754265600000,
+      "entryPrice": 114181.7,
+      "exitTs": 1754352000000,
+      "exitPrice": 115013.7,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X11_TIME_48H",
+      "symbol": "ETHUSDT",
+      "side": "SHORT",
+      "rank": 13,
+      "requestedGross": 0.44999999999999996,
+      "entryTs": 1754265600000,
+      "entryPrice": 3498.8,
+      "exitTs": 1754438400000,
+      "exitPrice": 3608.6,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X11_TIME_48H",
+      "symbol": "SOLUSDT",
+      "side": "SHORT",
+      "rank": 13,
+      "requestedGross": 0.44999999999999996,
+      "entryTs": 1754272800000,
+      "entryPrice": 163.32,
+      "exitTs": 1754445600000,
+      "exitPrice": 162.71,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X04_TIME_24H",
+      "symbol": "BTCUSDT",
+      "side": "SHORT",
+      "rank": 33,
+      "requestedGross": 0.18,
+      "entryTs": 1754272800000,
+      "entryPrice": 114679,
+      "exitTs": 1754359200000,
+      "exitPrice": 114653.3,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X11_TIME_48H",
+      "symbol": "ETHUSDT",
+      "side": "SHORT",
+      "rank": 13,
+      "requestedGross": 0.44999999999999996,
+      "entryTs": 1754272800000,
+      "entryPrice": 3533.1,
+      "exitTs": 1754445600000,
+      "exitPrice": 3586,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X12_TIME_12H",
+      "symbol": "BTCUSDT",
+      "side": "SHORT",
+      "rank": 21,
+      "requestedGross": 0.30000000000000004,
+      "entryTs": 1754287200000,
+      "entryPrice": 114343.1,
+      "exitTs": 1754330400000,
+      "exitPrice": 115162.4,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_Y02_REV_D0_T12",
+      "symbol": "SOLUSDT",
+      "side": "LONG",
+      "rank": 14,
+      "requestedGross": 0.44999999999999996,
+      "entryTs": 1754294400000,
+      "entryPrice": 163.07,
+      "exitTs": 1754337600000,
+      "exitPrice": 165.75,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X11_TIME_48H",
+      "symbol": "BNBUSDT",
+      "side": "SHORT",
+      "rank": 13,
+      "requestedGross": 0.44999999999999996,
+      "entryTs": 1754308800000,
+      "entryPrice": 756.1,
+      "exitTs": 1754481600000,
+      "exitPrice": 762.4,
+      "exitReason": "TIME"
+    },
+    {
+      "route": "REC_X11_TIME_48H",
+      "symbol": "SOLUSDT",
+      "side": "SHORT",
+      "rank": 13,
+      "requestedGross": 0.44999999999999996,
+      "entryTs": 1754308800000,
+      "entryPrice": 162.27,
+      "exitTs": 1754481600000,
+      "exitPrice": 164.26,
+      "exitReason": "TIME"
+    }
+  ],
+  "errors": [],
+  "marketHashes": {
+    "BTCUSDT": "f573b511842dcd1207801324948fa85842e0e2fd8d44ad76e3273d9fa607421c",
+    "ETHUSDT": "72727955b1bacee9a6fb8666e08826c1926ff95ae6bd8d1ccb35d7dc6d6bac86",
+    "BNBUSDT": "92e071adce1df1ac2ea400181d190689a2c6ec1527fa17c969dc39c622f79657",
+    "SOLUSDT": "10958e969ea53fbb5d9eaedf20680d9e9463fcba18ceee79f8f2853a8907db26",
+    "LINKUSDT": "f4f8e5baabd65da0f52093be29ac2348742223f680d1fe3fd7e1d7b4ab37b066",
+    "AVAXUSDT": "46214ec892d6378d0f3efb3e5ca1d890ee33cf5dfc98b0ad652fd8bda764104c",
+    "DOGEUSDT": "c392039d1bb9de87d2c54ba75d5425f43571aef0a41ab15559d9d572ad760d1f",
+    "INJUSDT": "6dbc916cd9e788a964c58935cc3661184a27736c57e3683157774c2e863bb948",
+    "XRPUSDT": "3d434bf8ed2265663b9375c8de1f64d9ce4b1a90e20b06bf2a91c657dc5fa99e",
+    "ADAUSDT": "e9c591532aedac859602ddb7cae76d16a2a22129c739478f1ea1075579d1b972",
+    "LTCUSDT": "51ad635801eb58ca43459d9425f1eec779294c82455f53a2f3428a70a45ac09a",
+    "ATOMUSDT": "1fba07ebb4db4a2d0190abe35ea2e21cc3538dbe162e3ac5ee26e9b0128afc9b",
+    "AAVEUSDT": "79548b1968b5562645c5b516396c7aa9b16645add167410e4a613161883e4aba",
+    "NEARUSDT": "6c5b4b2f250ebc9aec723da4566132b7e431b26a3e320e2ef09f482de6d0e47e"
+  },
+  "ordersSent": 0,
+  "tradingMutation": 0
+}
