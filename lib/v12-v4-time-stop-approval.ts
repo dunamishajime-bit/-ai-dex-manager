@@ -7,7 +7,7 @@ import {open,constants} from "node:fs/promises";
 import {resolve} from "node:path";
 import {productionExitSpec} from "./v12-v4-production-lifecycle";
 import {V12_V4_TIME_EMERGENCY_RESEARCH_ID} from "./v12-v4-time-emergency-stop-research";
-export const V4_TIME_STOP_APPROVAL_PATH="/var/lib/disdex/shared/v12-v4-time-stop-approval.json";
+export const V4_TIME_STOP_APPROVAL_PATH="/etc/disdex/v12-v4-time-stop-approval.json";
 const SHA=/^[0-9a-f]{40}$/;
 export type V4TimeApproval={
  schema:"disdex-v12-v4-time-stop-approval/v1";
@@ -34,8 +34,11 @@ export async function readV4TimeStopApproval(sha:string,path=V4_TIME_STOP_APPROV
  const handle=await open(path,constants.O_RDONLY|constants.O_NOFOLLOW);
  try{
   const stat=await handle.stat();
-  if(!stat.isFile()||stat.uid!==0||stat.gid!==0||
-   (stat.mode&0o077)!==0)
+  // Service runs as deploy, so the owner must be root and only group deploy
+  // may read. Parent /etc/disdex is root:root 0755 and cannot be replaced by deploy.
+  if(!stat.isFile()||stat.uid!==0||
+   (stat.gid!==0&&stat.gid!==process.getgid?.())||
+   (stat.mode&0o022)!==0||((stat.mode&0o044)===0))
    throw Error("V4_TIME_STOP_APPROVAL_NOT_ROOT_SECURE");
   return validateV4TimeApproval(JSON.parse(await handle.readFile("utf8")),sha);
  }finally{await handle.close();}

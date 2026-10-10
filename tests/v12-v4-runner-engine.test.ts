@@ -58,7 +58,8 @@ test("mock Aster dispatch reaches signed entry fill, STOP, and shared reservatio
   const lock=new FileAccountOrderLock(join(dir,"account.lock"),120000,join(dir,"pending.json"));
   let submitted=0,stops=0,exits=0,positionQty=0,exitFeed:any={closed:[]};const orders=new Map<string,any>(),fills:any[]=[];
   const adapter:any={client:{getOrder:async(_s:string,cid:string)=>orders.get(cid)},
-   executor:{},cancel:async(cid:string)=>{orders.delete(cid);},
+   executor:{},normalizeStopPrice:async(_s:string,p:number)=>({price:Math.round(p*100)/100,text:p.toFixed(2)}),
+   cancel:async(cid:string)=>{orders.delete(cid);},
    executeEntry:async(x:any)=>{
     submitted++;const qty=x.quantity,id=51;positionQty=qty*(x.side==="LONG"?1:-1);
     orders.set(x.clientOrderId,{symbol:x.symbol,clientOrderId:x.clientOrderId,orderId:id,

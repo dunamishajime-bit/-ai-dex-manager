@@ -11,8 +11,9 @@ import {V4SharedReservations,bindV4SharedDispatchGuards} from "./v12-v4-shared-r
 import {V4DurableOrderDispatcher,createV4AsterOrderGateway,type V4DurableOrderCommand} from "./v12-v4-durable-orders";
 import type {V12AsterLiveAdapter} from "./v12-aster-live-adapter";
 import {V4OrderCycle} from "./v12-v4-order-cycle";
+import {verifyV4ResidentStops} from "./v12-v4-resident-stop-owners";
 import {appendV4ClosedExitBars,type V4ExitFeed} from "./v12-v4-live-exit-feed";
-import {applyProductionEvent,planProductionEntry,productionExitSpec,type EntryPlanInput} from "./v12-v4-production-lifecycle";
+import {applyProductionEvent,planProductionEntry,productionExitSpec,nativeEvidenceForProductionRoute,type EntryPlanInput} from "./v12-v4-production-lifecycle";
 import {buildV4AccountMark,type V4SignedMark} from "./v12-v4-peer-account-mark";
 import type {V4PeerSource} from "./v12-v4-peer-state-owners";
 import type {V4LiveDecisionSnapshot} from "./v12-v4-live-candidate-builder";
@@ -96,21 +97,9 @@ export class V4RunnerEngine{
    eventId:"signed-account:"+mark.capturedAt});
   this.commitEvent(accountMark.event);
   const current=d.store.read();
-  const v4Owned=Object.values(current.state.legs).filter(l=>l.qty>0);
-  const v4BySymbol=new Map<string,{side:string;qty:number}>();
-  for(const l of v4Owned){
-   const symbol=l.candidate.symbol,side=l.candidate.effectiveSide;
-   const prev=v4BySymbol.get(symbol);
-   if(prev&&prev.side!==side)throw Error("V4_OPPOSING_VIRTUAL_OWNERSHIP");
-   v4BySymbol.set(symbol,{side,qty:(prev?.qty??0)+l.qty});
-  }
-  for(const [symbol,owned] of v4BySymbol){
-   const stops=openOrders.filter(o=>o.symbol===symbol&&o.reduceOnly===true&&
-    o.side===(owned.side==="LONG"?"SELL":"BUY")&&
-    o.type==="STOP_MARKET"&&["NEW","PARTIALLY_FILLED"].includes(String(o.status).toUpperCase()));
-   if(stops.length!==1||Number(stops[0].origQty)<owned.qty-1e-8)
-    throw Error("V4_RESIDENT_STOP_OWNERSHIP_MISSING:"+symbol);
-  }
+  // Each virtual leg must own exactly one signed Aster resident STOP. Merely
+  // finding one symbol-level aggregate STOP misses unprotected sub-legs.
+  verifyV4ResidentStops(current.state,current.intents,openOrders);
   const exit=await this.processExitBars(dispatcher,cycle);
   if(exit)return exit;
   const decision=await d.fetchDecision();
@@ -188,7 +177,7 @@ export class V4RunnerEngine{
    const plan=await planProductionEntry(state,{candidate,ts:candidate.eligibleEntryTs,
     observedAtMs:this.now(),eventId:"reserve-live:"+legId,referencePrice:price,
     minimumOrderNotionalUsd:min,entryAtr:atr14,
-    nativeExitEvidence:candidate.route==="FAILED_BREAK_REV_SHORT_6H"?"WR60_BASELINE_1978_PARITY":undefined,
+    nativeExitEvidence:nativeEvidenceForProductionRoute(candidate.route),
     quantityNormalizer:d.quantityNormalizer});
    const command:V4DurableOrderCommand={legId:plan.leg.id,action:"ENTRY",sequence:0,
     symbol:candidate.symbol,positionSide:candidate.effectiveSide,
@@ -210,13 +199,21 @@ export class V4RunnerEngine{
     if(!Number.isFinite(signedStop)||!(signedStop>0)||
      (candidate.effectiveSide==="LONG"?signedStop>=signedAverageFill:signedStop<=signedAverageFill))
       throw Error("V4_SIGNED_FILL_RESIDENT_STOP_INVALID");
+    const normalized=await d.adapter.normalizeStopPrice(candidate.symbol,signedStop);
+    const venueStop=normalized.price;
+    if(!Number.isFinite(venueStop)||!(venueStop>0)||
+      (candidate.effectiveSide==="LONG"?venueStop>=signedAverageFill:venueStop<=signedAverageFill))
+      throw Error("V4_VENUE_TICK_STOP_NORMALIZATION_INVALID");
     const protective:V4DurableOrderCommand={...command,action:"STOP",sequence:0,
-     quantity:latest.qty,price:signedStop};
+     quantity:latest.qty,price:venueStop};
     await d.assertAuthority(protective);
     const stopCid=dispatcher.prepare(protective,this.now());
     await dispatcher.submit(stopCid,this.now());
     const proof=await dispatcher.reconcile(stopCid,this.now());
-    if(!proof||proof.reduceOnly!==true||proof.type!=="STOP_MARKET")
+    if(!proof||proof.reduceOnly!==true||proof.type!=="STOP_MARKET"||
+       proof.clientOrderId!==stopCid||
+       Math.abs(proof.quantity-proof.executedQuantity-latest.qty)>Math.max(1e-8,latest.qty*1e-7)||
+       !(Number(proof.stopPrice)>0)||Math.abs(Number(proof.stopPrice)-venueStop)>1e-8)
      throw Error("V4_RESIDENT_STOP_NOT_VENUE_CONFIRMED");
    }
    return {status:"submitted",reason:"DURABLE_ENTRY_WITH_RESIDENT_STOP",

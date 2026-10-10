@@ -8,6 +8,7 @@ import {initializeV4SignedFlatState} from "../lib/v12-v4-signed-bootstrap";
 import {V4RunnerEngine} from "../lib/v12-v4-runner-engine";
 import {loadV4ClosedCandles,buildV4LiveDecisionBatch} from "../lib/v12-v4-live-candidate-builder";
 import {productionExitSpec} from "../lib/v12-v4-production-lifecycle";
+import {assertV4CertifiedSource,assertV4CertifiedOrder} from "../lib/v12-v4-certified-gates";
 import {readV4TimeStopApproval,approvedV4TimeStopQuote} from "../lib/v12-v4-time-stop-approval";
 import {attachV4NativeCoreCandidates} from "../lib/v12-v4-core-candidate";
 import type {V4PeerKind,V4PeerSource} from "../lib/v12-v4-peer-state-owners";
@@ -112,8 +113,8 @@ export async function buildV4ProductionRuntime(){
    return spec.kind==="ATR"?entryPrice-sg*spec.sl*atr14:
     (await import("../lib/v12-x1-all")).protectiveLevels(entryPrice,atr14,side).initialStop;
   },
-  assertSourceParity:async()=>{throw Error("V4_NATIVE_SOURCE_FORWARD_PARITY_NOT_CERTIFIED");},
-  assertAuthority:async()=>{throw Error("V4_REAL_ORDER_ACTIVATION_NOT_CERTIFIED");},
+  assertSourceParity:async decision=>{await assertV4CertifiedSource(releaseSha,decision);},
+  assertAuthority:async cmd=>{await assertV4CertifiedOrder(releaseSha,cmd,store.read());},
  });
  return {engine,releaseSha};
 }

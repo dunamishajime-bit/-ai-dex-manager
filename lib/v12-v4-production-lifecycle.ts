@@ -34,6 +34,9 @@ export function productionExitSpec(routeName: string): ExitSpec {
   throw Error("UNSUPPORTED_EXIT_POLICY:" + p);
 }
 export const PRODUCTION_EXIT_CATALOG = V12_V4_ROUTE_CATALOG.map(r => ({ route: r.route, spec: productionExitSpec(r.route) }));
+export function nativeEvidenceForProductionRoute(route:string):"WR60_BASELINE_1978_PARITY"|undefined{
+ return productionExitSpec(route).kind==="NATIVE"?"WR60_BASELINE_1978_PARITY":undefined;
+}
 export type H1Bar = { openTs: number; open: number; high: number; low: number; close: number };
 export type Leg = {
   id: string; candidate: V12V4ShadowCandidate; qty: number; entryNotional: number;

@@ -143,9 +143,9 @@ No live order authority is granted by this change.
 
 A deterministic fixed 8%-of-actual-signed-fill STOP formula is now wired to
 the production runner **only through a separate non-symlink, root-owned,
-root-only (0600), exact-release SHA operator approval artifact**:
+root-owned non-writable (root:deploy 0640 or root:root 0644), exact-release SHA operator approval artifact**:
 
-/var/lib/disdex/shared/v12-v4-time-stop-approval.json
+/etc/disdex/v12-v4-time-stop-approval.json
 
 The exact schema/policy/37-route acknowledgement is validated by
 lib/v12-v4-time-stop-approval.ts. No such approval artifact was created;
@@ -153,3 +153,35 @@ therefore TIME routes continue to FAIL CLOSED. The normal TIME Exit remains
 unchanged when no STOP fires. Neither assertSourceParity nor assertAuthority
 has been bypassed; both continue refusing production mutations pending
 independent venue/route certification. No VPS service changes were made.
+
+
+### 2026-10-10 additional code closure and remaining execution blockers
+
+- The frozen accepted original 10bps V12 ledger contains exactly 828 V12
+  trades spanning **all 41 routes**: TIME 746, ATR 44, Native 38.
+  All 746 planned TIME deadlines match the frozen route durations.
+  Historical coverage is NOT signed live route Entry/Exit parity.
+- Historical ledger exposes **261 overlapping same-symbol V12 leg pairs**.
+  Grouping by symbol and asserting a single STOP is unsafe.
+  New independent `v12-v4-resident-stop-owners.ts` proves exactly one
+  exchange reduce-only STOP with correct remaining quantity for EACH leg.
+  Same-symbol manual EXIT/STOP cancellation race is still blocked.
+- Corrected Native Exit evidence to follow the catalog NATIVE route
+  `REC_G3_LATE_BTC_REL` rather than incorrectly attaching it to the
+  TIME `FAILED_BREAK_REV_SHORT_6H` candidate.
+- Corrected post-fill protective STOP to obey actual signed average fill,
+  exchange tick normalization and signed STOP readback price/quantity.
+- Removed production-entry boolean hard denial, replacing it with an
+  explicit independent 41-route/root-managed exact-SHA production
+  certification at `/etc/disdex/v12-v4-production-certification.json`.
+  No such certification was manufactured or installed.
+  Existing signed V4 EXIT/protection can be reduce-only even after
+  the time-limited new-entry certificate expires, but cannot open a
+  position absent the certification.
+- TIME emergency policy artifact was relocated out of deploy-writable
+  `/var/lib/disdex/shared` into root-owned `/etc/disdex`.
+  No operator approval has been given or installed.
+- Source parity, H2 Native forward evidence, same-symbol partial exit
+  interlock, venue-verified STOP/funding/fill behavior, shared-risk
+  multi-runner readback, and independently reviewed forward-period
+  certificate remain mandatory before LIVE.
