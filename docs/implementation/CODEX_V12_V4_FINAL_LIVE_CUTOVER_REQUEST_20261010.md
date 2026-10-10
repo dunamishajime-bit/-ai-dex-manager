@@ -41,8 +41,11 @@
 
 1. 最新remote SHAを固定して、`tsc`、V4関連テスト、Linux全回帰、
    UI契約・Productionビルド、研究エビデンスのSHA照合を実施。
-   `scripts/v12-v4-cutover-evidence-preflight.ts` のBLOCKED状態を、
-   認証省略ではなく真正なエビデンスの積み上げで解消すること。
+   `scripts/v12-v4-cutover-evidence-preflight.ts` は**研究証拠の
+   監査用**であり、常にexit 2のFail Closedを意図しています。
+   このスクリプトをLIVE_READYに偽装・改変しないこと。正式な
+   最終Productionの可否は、別途root管理証明書・実署名broker
+   readback・全Runner実機証拠・Operator承認で独立判定してください。
 2. Xserver VPSの最新read-only実口座照合。Aster資産・建玉・
    未約定/保護注文・一時注文・shared pending・Kill Switch、
    Margin Guard・Gross予約を**同一基準時刻**で照合。
