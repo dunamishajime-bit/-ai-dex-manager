@@ -2,7 +2,7 @@
 import type {State} from "./v12-v4-production-lifecycle";
 import type {V4OrderIntent} from "./v12-v4-execution-store";
 import type {AsterOrderResponse} from "./aster-v3-client";
-type StopView=Pick<AsterOrderResponse,"symbol"|"clientOrderId"|"side"|"type"|"reduceOnly"|"origQty"|"executedQty"|"status">;
+type StopView=Pick<AsterOrderResponse,"symbol"|"clientOrderId"|"side"|"type"|"reduceOnly"|"origQty"|"executedQty"|"status"|"stopPrice">;
 export function verifyV4ResidentStops(
  state:State,intents:Record<string,V4OrderIntent>,openOrders:readonly StopView[]){
  const legs=Object.values(state.legs).filter(l=>l.qty>0);
@@ -17,6 +17,14 @@ export function verifyV4ResidentStops(
    order.reduceOnly!==true||order.side!==(leg.candidate.effectiveSide==="LONG"?"SELL":"BUY")||
    !["NEW","PARTIALLY_FILLED"].includes(String(order.status).toUpperCase()))
    throw Error("V4_LEG_STOP_VENUE_IDENTITY_INVALID:"+leg.id);
+  // Compare against the normalized trigger persisted before submission, not a
+  // newly calculated price. Missing evidence must not silently pass on restart.
+  const command=intent.command as {price?:unknown}|undefined;
+  const expectedTrigger=Number(command?.price),actualTrigger=Number(order.stopPrice);
+  if(!Number.isFinite(expectedTrigger)||expectedTrigger<=0||
+   !Number.isFinite(actualTrigger)||actualTrigger<=0||
+   Math.abs(expectedTrigger-actualTrigger)>Math.max(1e-12,expectedTrigger*1e-10))
+   throw Error("V4_LEG_STOP_TRIGGER_MISMATCH:"+leg.id);
   const remaining=Number(order.origQty)-Number(order.executedQty);
   if(!Number.isFinite(remaining)||remaining<=0||
    Math.abs(remaining-leg.qty)>Math.max(1e-8,leg.qty*1e-7))
