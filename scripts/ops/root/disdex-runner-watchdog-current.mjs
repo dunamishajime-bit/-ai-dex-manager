@@ -137,6 +137,20 @@ const RUNNERS = [
     },
 ];
 
+const V4_V12_RUNNER = {
+    key: "V12_V4",
+    expectedShaEnv: "DISDEX_WATCHDOG_V12_EXPECTED_SHA",
+    releaseRootEnv: "DISDEX_WATCHDOG_V12_RELEASE_ROOT",
+    heartbeatFile: "v12-v4.json",
+    unitEnv: "DISDEX_WATCHDOG_V12_SERVICE_UNIT",
+    expectedUnit: (sha) => `disdex-v12-v4@${sha}.service`,
+    unitPattern: "disdex-v12-v4@*.service",
+    unitPrefix: "disdex-v12-v4",
+    script: "scripts/v12-v4-production-runner.ts",
+    heartbeatTimeoutMs: 5 * 60_000,
+    tickTimeoutMs: 5 * 60_000,
+};
+
 const ZERO_EFFECTS = { ordersSent: 0, cancelSent: 0, positionChangesSent: 0 };
 
 function safeReason(value) {
@@ -182,6 +196,7 @@ function pathWithin(root, candidate) {
 function serviceAllowed(runner, unit, sha) {
     if (typeof unit !== "string") return false;
     if (runner.key === "V12_X1_ALL") return /^disdex-v12-x1-all@[0-9a-f]{40}\.service$/.test(unit) && unit === runner.expectedUnit(sha);
+    if (runner.key === "V12_V4") return /^disdex-v12-v4@[0-9a-f]{40}\.service$/.test(unit) && unit === runner.expectedUnit(sha);
     if (runner.key === "QUALITY102_CAUSAL_V1") return /^disdex-quality102-causal-v1@[0-9a-f]{40}\.service$/.test(unit) && unit === runner.expectedUnit(sha);
     if (runner.key === "PENGU_V8") return unit === runner.expectedUnit(sha);
     return unit === runner.expectedUnit(sha);
@@ -262,8 +277,11 @@ function buildConfig(env) {
         throw new Error("watchdog release pin or approval pin is incomplete or non-canonical");
     }
     if (approvedSha !== expectedSha) throw new Error("watchdog expected SHA is not explicitly approved");
+    const v12Variant = String(env.DISDEX_WATCHDOG_V12_VARIANT || "LEGACY").trim().toUpperCase();
+    if (!["LEGACY", "V4"].includes(v12Variant)) throw new Error("watchdog V12 variant is invalid");
+    const configuredRunners = v12Variant === "V4" ? [V4_V12_RUNNER, ...RUNNERS.slice(1)] : RUNNERS;
     const runnerConfig = {};
-    for (const runner of RUNNERS) {
+    for (const runner of configuredRunners) {
         const runnerExpectedSha = String(env[runner.expectedShaEnv] || expectedSha).trim().toLowerCase();
         const runnerReleaseRoot = String(env[runner.releaseRootEnv] || (runnerExpectedSha === expectedSha ? releaseRoot : `/home/deploy/disdex-trading/releases/${runnerExpectedSha}`)).trim();
         if (!exactSha(runnerExpectedSha) || !isAbsoluteCanonicalPath(runnerReleaseRoot)) {
@@ -287,11 +305,12 @@ function buildConfig(env) {
         if (!pathWithin(healthRoot, path) || !isAbsoluteCanonicalPath(path)) throw new Error("watchdog private path escapes health root");
     }
     if (!isAbsoluteCanonicalPath(operatorActivationPath)) throw new Error("watchdog operator activation path is non-canonical");
-    const sharedRiskExpectedSha = String(env.DISDEX_WATCHDOG_SHARED_RISK_EXPECTED_SHA || runnerConfig.V12_X1_ALL.expectedSha).trim().toLowerCase();
+    const v12Config = runnerConfig.V12_V4 || runnerConfig.V12_X1_ALL;
+    const sharedRiskExpectedSha = String(env.DISDEX_WATCHDOG_SHARED_RISK_EXPECTED_SHA || v12Config.expectedSha).trim().toLowerCase();
     if (!exactSha(sharedRiskExpectedSha)) throw new Error("shared crypto risk writer release pin is invalid");
     const sharedRiskUnit = `disdex-shared-crypto-risk@${sharedRiskExpectedSha}.service`;
     const marginGuardUnit = `disdex-v12-v52-margin-guard@${expectedSha}.service`;
-    return { healthRoot, releaseRoot, expectedSha, approvedSha, sharedRiskExpectedSha, sharedRiskUnit, marginGuardUnit, runnerConfig, statePath, auditPath, lockPath, operatorActivationPath };
+    return { healthRoot, releaseRoot, expectedSha, approvedSha, v12Variant, sharedRiskExpectedSha, sharedRiskUnit, marginGuardUnit, runnerConfig, statePath, auditPath, lockPath, operatorActivationPath };
 }
 
 async function assertRelease(config) {
@@ -551,6 +570,12 @@ async function run(config) {
                 if (props.LoadState === "loaded" && !new Set(["inactive", "failed"]).has(props.ActiveState)) {
                     throw new Error(`LEGACY_LIVE_CONFLICT:${legacyUnit}:${props.ActiveState || "UNKNOWN"}`);
                 }
+            }
+            if (config.v12Variant === "V4") {
+                const legacyV12Units = parseNonInactiveServiceUnits(await systemctl([
+                    "list-units", "--all", "--type=service", "--no-legend", "disdex-v12-x1-all@*.service",
+                ]), "disdex-v12-x1-all");
+                if (legacyV12Units.length) throw new Error("V4_LEGACY_V12_PINNED_CONFLICT:" + legacyV12Units.join(","));
             }
             for (const runner of Object.values(config.runnerConfig)) {
                 const nonInactiveUnits = parseNonInactiveServiceUnits(await systemctl([
