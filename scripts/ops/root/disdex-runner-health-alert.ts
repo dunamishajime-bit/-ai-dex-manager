@@ -97,7 +97,7 @@ async function readCurrentReleaseSha() {
 }
 
 function resolveServiceUnit(runner: typeof runners[number], currentReleaseSha: string | undefined) {
-  const resolved = resolveRunnerServiceUnit(runner.id, currentReleaseSha);
+  const resolved = resolveRunnerServiceUnit(runner.id, currentReleaseSha, process.env[runner.unitEnv]);
   if (!resolved.unit) return resolved;
   if (!unitExists(resolved.unit)) {
     return {
