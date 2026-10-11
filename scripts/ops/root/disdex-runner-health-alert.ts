@@ -97,6 +97,21 @@ async function readCurrentReleaseSha() {
 }
 
 function resolveServiceUnit(runner: typeof runners[number], currentReleaseSha: string | undefined) {
+  const normalizedSha = currentReleaseSha?.trim().toLowerCase();
+  const override = process.env[runner.unitEnv]?.trim();
+  if (override) {
+    const suffix = normalizedSha && /^[0-9a-f]{40}$/.test(normalizedSha) ? `@${normalizedSha}.service` : "";
+    const allowedPrefix = runner.id === "V12"
+      ? /^(?:disdex-v12-x1-all|disdex-v12-v4)@[0-9a-f]{40}\.service$/
+      : /^[a-z0-9-]+@[0-9a-f]{40}\.service$/;
+    if (!suffix || !allowedPrefix.test(override) || !override.endsWith(suffix)) {
+      return { unit: override, releaseSha: normalizedSha, failClosed: true, detail: "SHA-bound service overrideが不正なためFail Closed" } as const;
+    }
+    if (!unitExists(override)) {
+      return { unit: override, releaseSha: normalizedSha, failClosed: true, detail: "指定serviceがsystemdに存在しないためFail Closed" } as const;
+    }
+    return { unit: override, releaseSha: normalizedSha, failClosed: false, detail: `current release ${normalizedSha} の明示unitを使用` } as const;
+  }
   const resolved = resolveRunnerServiceUnit(runner.id, currentReleaseSha);
   if (!resolved.unit) return resolved;
   if (!unitExists(resolved.unit)) {
