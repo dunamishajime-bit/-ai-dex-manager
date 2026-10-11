@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 8
     env:
-      TARGET_SHA: 6723948608ce9c8ab3aba077cba7e5a0d7f6f708
+      TARGET_SHA: 447205ee22ab64d2d0013922eeccfd4a1e14a72f
       OLD_SHA: ce1edeead8d0f9e5d88e829d415057117502a335
       SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
       ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
@@ -96,14 +96,26 @@ jobs:
           PY
 
           unit="disdex-v12-x1-all@$OLD_SHA.service"
-          systemctl stop "$unit" || true
-          systemctl reset-failed "$unit" || true
-          systemctl unmask --runtime "$unit" >/dev/null 2>&1 || true
-          systemctl mask "$unit"
+          {
+            printf '%s
+' "$unit"
+            systemctl list-unit-files 'disdex-v12-x1-all@*.service' --no-legend --no-pager 2>/dev/null | awk '{print $1}'
+            systemctl list-units --all --type=service --no-legend --no-pager 'disdex-v12-x1-all@*.service' 2>/dev/null | awk '{print $1}'
+          } | grep -E '^disdex-v12-x1-all@[0-9a-f]{40}.service$' | sort -u > /tmp/v12-retire-units.txt
+          while read -r legacy_unit; do
+            [[ -n "$legacy_unit" ]] || continue
+            systemctl stop "$legacy_unit" || true
+            systemctl reset-failed "$legacy_unit" || true
+            systemctl disable "$legacy_unit" >/dev/null 2>&1 || true
+            systemctl unmask --runtime "$legacy_unit" >/dev/null 2>&1 || true
+            systemctl mask "$legacy_unit"
+            [[ "$(systemctl is-active "$legacy_unit" 2>/dev/null || true)" != "active" ]]
+            [[ "$(systemctl is-enabled "$legacy_unit" 2>/dev/null || true)" == "masked" ]]
+            [[ -L "/etc/systemd/system/$legacy_unit" && "$(readlink "/etc/systemd/system/$legacy_unit")" == "/dev/null" ]]
+            echo "LEGACY_V12_PERSISTENT_MASK=$legacy_unit"
+          done < /tmp/v12-retire-units.txt
+          rm -f /tmp/v12-retire-units.txt
           sleep 2
-          [[ "$(systemctl is-active "$unit" 2>/dev/null || true)" != "active" ]]
-          [[ "$(systemctl is-enabled "$unit" 2>/dev/null || true)" == "masked" ]]
-          [[ -L "/etc/systemd/system/$unit" && "$(readlink "/etc/systemd/system/$unit")" == "/dev/null" ]]
           [[ "$(systemctl is-active "disdex-v12-v4-canary@$TARGET_SHA.service" 2>/dev/null || true)" != "active" ]]
           [[ "$(systemctl is-active "disdex-v12-v4@$TARGET_SHA.service" 2>/dev/null || true)" != "active" ]]
           [[ ! -e /etc/disdex/v12-v4-production-canary-permit.json ]]
