@@ -97,11 +97,10 @@ jobs:
 
           unit="disdex-v12-x1-all@$OLD_SHA.service"
           {
-            printf '%s
-' "$unit"
+            printf '%s\n' "$unit"
             systemctl list-unit-files 'disdex-v12-x1-all@*.service' --no-legend --no-pager 2>/dev/null | awk '{print $1}'
             systemctl list-units --all --type=service --no-legend --no-pager 'disdex-v12-x1-all@*.service' 2>/dev/null | awk '{print $1}'
-          } | grep -E '^disdex-v12-x1-all@[0-9a-f]{40}.service$' | sort -u > /tmp/v12-retire-units.txt
+          } | grep -E '^disdex-v12-x1-all@[0-9a-f]{40}\.service$' | sort -u > /tmp/v12-retire-units.txt
           while read -r legacy_unit; do
             [[ -n "$legacy_unit" ]] || continue
             systemctl stop "$legacy_unit" || true
