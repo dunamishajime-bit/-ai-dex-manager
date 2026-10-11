@@ -96,14 +96,30 @@ async function main(){
  const active=(openOrders||[]).map((o:any)=>({symbol:String(o.symbol),orderHash:short(String(o.symbol)+":"+String(o.orderId??o.clientOrderId??"")),
    type:String(o.type||""),status:String(o.status||""),side:String(o.side||""),positionSide:String(o.positionSide||""),
    reduceOnly:o.reduceOnly===true,origQty:num(o.origQty),executedQty:num(o.executedQty),stopPrice:num(o.stopPrice)}));
+ const accountEvidence={positionMode:{dualSidePosition:mode?.dualSidePosition===true},
+   usdtBalance:num(usdt?.balance),usdtAvailable:num(usdt?.availableBalance),
+   nonzeroPositionCount:nonzero.length,openOrderCount:active.length,nonzeroPositions:nonzero,openOrders:active};
+ const orderEvidence={queriedSymbols:symbols,orders:orderRows};
+ const ambiguousTriggeredProtectionOrders=orderRows.filter(x=>x.reduceOnly===true&&x.status==="FILLED"&&Number(x.stopPrice)>0);
  const evidenceCore={
-  schema:"disdex-v12-v4-production-history-deep-readonly/v1",status:"PASS_SIGNED_GET_ONLY",
+  schema:"disdex-v12-v4-production-history-deep-readonly/v2",status:"PASS_SIGNED_GET_ONLY",
   observedAt:new Date().toISOString(),candidateSha:"6723948608ce9c8ab3aba077cba7e5a0d7f6f708",
   productionHost:true,positionMode:{dualSidePosition:mode?.dualSidePosition===true},
-  account:{usdtBalance:num(usdt?.balance),usdtAvailable:num(usdt?.availableBalance),
-    nonzeroPositionCount:nonzero.length,openOrderCount:active.length,nonzeroPositions:nonzero,openOrders:active},
+  account:accountEvidence,
   history:{queriedSymbols:symbols,totalTrades,totalDistinctOrders:totalOrders,multiFillOrders,maxFills,
-    stopOrders,filledReduceOnlyStops,reduceOnlyOrders,partialFillEvidence,symbols:symbolRows,orders:orderRows},
+    stopOrders,filledReduceOnlyStops,reduceOnlyOrders,partialFillEvidence,
+    ambiguousTriggeredProtectionOrderCount:ambiguousTriggeredProtectionOrders.length,
+    symbols:symbolRows,orders:orderRows},
+  lifecycleEvidence:{
+    signedOrdersSha256:sha(JSON.stringify(orderEvidence)),
+    signedPositionsSha256:sha(JSON.stringify(accountEvidence)),
+    partialFillObserved:partialFillEvidence>0,
+    actualStopTypeObserved:stopOrders>0,
+    ambiguousNonzeroStopPriceReduceOnlyFilled:ambiguousTriggeredProtectionOrders.length,
+    restartRecoverySha256:null,
+    sameSymbolRaceSha256:null,
+    completeForProductionCertificate:false,
+  },
   mutationCalls:0,secretDisclosed:false,
  };
  console.log(JSON.stringify({...evidenceCore,evidenceSha256:sha(JSON.stringify(evidenceCore))},null,2));
