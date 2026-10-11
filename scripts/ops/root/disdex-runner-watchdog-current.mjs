@@ -699,6 +699,19 @@ function selfTest() {
     const approvedEnv = { ...baseConfigEnv, DISDEX_WATCHDOG_APPROVED_SHA: sha };
     const approvedConfig = buildConfig(approvedEnv);
     if (approvedConfig.approvedSha !== sha) throw new Error("approval gate self-test did not retain approved SHA");
+    const v4 = V4_V12_RUNNER;
+    if (!serviceAllowed(v4, v4.expectedUnit(sha), sha)) throw new Error("V4 allowlist self-test failed");
+    if (serviceAllowed(v4, LEGACY_V12_RUNNER.expectedUnit(sha), sha)) throw new Error("V4 allowlist accepted legacy V12");
+    const v4Config = buildConfig({
+        ...approvedEnv,
+        DISDEX_WATCHDOG_V12_MODE: "V4",
+        DISDEX_WATCHDOG_V12_SERVICE_UNIT: v4.expectedUnit(sha),
+    });
+    if (!v4Config.runnerConfig.V12_V4 || v4Config.runnerConfig.V12_X1_ALL) throw new Error("V4 mode did not replace legacy V12 config");
+    const v4Pinned = { ...v4, expectedCwd: baseConfigEnv.DISDEX_WATCHDOG_RELEASE_ROOT };
+    const v4Command = `/usr/bin/node ${baseConfigEnv.DISDEX_WATCHDOG_RELEASE_ROOT}/node_modules/tsx/dist/cli.mjs scripts/v12-v4-production-runner.ts --daemon`;
+    if (!commandMatches({ releaseRoot: baseConfigEnv.DISDEX_WATCHDOG_RELEASE_ROOT }, v4Pinned, v4Command)) throw new Error("V4 command pin self-test failed");
+    console.log("DISDEX_CURRENT_WATCHDOG_V12_V4_MODE_SELFTEST_PASS");
     const mismatchedApprovalSha = "f".repeat(40);
     try {
         buildConfig({ ...baseConfigEnv, DISDEX_WATCHDOG_APPROVED_SHA: mismatchedApprovalSha });
