@@ -19,8 +19,8 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
     env:
-      TARGET_SHA: bd47341cdd009117e165ba2689565d7c2d5cf975
-      SOURCE_REF: research/v4-independent-venue-lifecycle-20261010
+      TARGET_SHA: 52dccce5c5b5348eef16aa00de6eda1cbe7ec25d
+      SOURCE_REF: research/v4-rate-budget-stop-recovery-20261011
       EXPECTED_CURRENT_SHA: ce1edeead8d0f9e5d88e829d415057117502a335
       SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
       ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
