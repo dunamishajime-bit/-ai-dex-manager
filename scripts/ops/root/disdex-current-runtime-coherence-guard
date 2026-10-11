@@ -214,17 +214,24 @@ support_runtime_current() {
 
 legacy_v12_persistently_retired() {
   [[ "$PRIMARY_V12_MODE" == "V4" ]] || return 0
-  local unit active enabled
-  while read -r unit _; do
-    [[ "$unit" =~ ^disdex-v12-x1-all@[0-9a-f]{40}\.service$ ]] || continue
+  local unit active enabled previous_target previous_sha
+  {
+    printf 'disdex-v12-x1-all@%s.service\n' "$DEPLOYED_SHA"
+    if [[ -L "$TRADING_ROOT/previous" ]]; then
+      previous_target="$(readlink -f -- "$TRADING_ROOT/previous" 2>/dev/null || true)"
+      previous_sha="$(basename -- "$previous_target")"
+      [[ "$previous_sha" =~ ^[0-9a-f]{40}$ ]] && printf 'disdex-v12-x1-all@%s.service\n' "$previous_sha"
+    fi
+    systemctl list-unit-files 'disdex-v12-x1-all@*.service' --no-legend --no-pager 2>/dev/null | awk '{print $1}'
+    systemctl list-units --all --type=service --no-legend --no-pager 'disdex-v12-x1-all@*.service' 2>/dev/null | awk '{print $1}'
+  } | grep -E '^disdex-v12-x1-all@[0-9a-f]{40}\.service$' | sort -u | while read -r unit; do
     active="$(systemctl show "$unit" -p ActiveState --value 2>/dev/null || true)"
     [[ "$active" != "active" && "$active" != "activating" && "$active" != "deactivating" ]] || return 1
     enabled="$(systemctl is-enabled "$unit" 2>/dev/null || true)"
-    [[ "$enabled" == "masked" || "$enabled" == "disabled" || "$enabled" == "not-found" ]] || return 1
-  done < <(systemctl list-units --all --type=service --no-legend --no-pager 'disdex-v12-x1-all@*.service' 2>/dev/null || true)
-  enabled="$(systemctl is-enabled "disdex-v12-x1-all@$DEPLOYED_SHA.service" 2>/dev/null || true)"
-  [[ "$enabled" == "masked" ]] || return 1
+    [[ "$enabled" == "masked" ]] || return 1
+  done
 }
+
 
 q102_observer_singleton() {
   local expected="disdex-quality102-ranking-observer@$DEPLOYED_SHA.timer" unit count=0
