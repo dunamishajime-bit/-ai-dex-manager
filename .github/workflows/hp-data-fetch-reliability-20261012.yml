@@ -1,0 +1,65 @@
+name: HP Data Fetch Reliability 20261012
+
+on:
+  push:
+    branches:
+      - codex/hp-data-fetch-reliability-20261012
+    paths:
+      - "app/**"
+      - "components/**"
+      - "hooks/**"
+      - "lib/**"
+      - "tests/**"
+      - "next.config.mjs"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/hp-data-fetch-reliability-20261012.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hp-data-fetch-reliability-20261012
+  cancel-in-progress: false
+
+jobs:
+  ui:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci --no-audit --no-fund
+      - name: Verify all HP TypeScript tests
+        run: node --import tsx --test "tests/*.test.ts"
+      - name: Verify TypeScript
+        run: npx tsc --noEmit
+      - name: Clean production build
+        run: NEXT_TELEMETRY_DISABLED=1 DISDEX_UI_VERIFIED_TSC=1 npm run build
+      - name: Verify real-time and market routes are in this build
+        run: |
+          node <<'NODE'
+          const manifest = require('./.next/server/app-paths-manifest.json');
+          const required = [
+            '/page',
+            '/positions/page',
+            '/wallets/page',
+            '/history/page',
+            '/performance/page',
+            '/realtime/page',
+            '/decision-status/page',
+            '/api/market/dashboard/route',
+            '/api/market/realtime-trade/route',
+            '/api/market/universe-metrics/route',
+            '/api/system/realtime-ranking/route',
+          ];
+          const missing = required.filter((route) => !manifest[route]);
+          if (missing.length) throw new Error(`HP_ROUTE_MISSING:${missing.join(',')}`);
+          console.log(`HP_ROUTE_MANIFEST_PASS=${required.length}`);
+          NODE
+          test -s .next/standalone/server.js
