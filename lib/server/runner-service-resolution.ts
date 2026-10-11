@@ -34,7 +34,7 @@ export function expectedRunnerServiceUnit(runnerId: AlertRunnerId, releaseSha: s
   return `${SERVICE_PREFIX[runnerId]}${normalizedSha}.service`;
 }
 
-export function resolveRunnerServiceUnit(runnerId: AlertRunnerId, releaseSha: string | undefined) {
+export function resolveRunnerServiceUnit(runnerId: AlertRunnerId, releaseSha: string | undefined, explicitUnit?: string) {
   const normalizedSha = normalizeCurrentReleaseSha(releaseSha);
   if (!normalizedSha) {
     return {
@@ -44,8 +44,29 @@ export function resolveRunnerServiceUnit(runnerId: AlertRunnerId, releaseSha: st
       detail: "current release SHAを確認できないためFail Closed",
     } as const;
   }
+  const expected = `${SERVICE_PREFIX[runnerId]}${normalizedSha}.service`;
+  if (explicitUnit?.trim()) {
+    const unit = explicitUnit.trim();
+    const allowed = runnerId === "V12"
+      ? new Set([expected, `disdex-v12-v4@${normalizedSha}.service`])
+      : new Set([expected]);
+    if (!allowed.has(unit)) {
+      return {
+        unit,
+        releaseSha: normalizedSha,
+        failClosed: true,
+        detail: `明示unitがcurrent release ${normalizedSha} と一致しないためFail Closed`,
+      } as const;
+    }
+    return {
+      unit,
+      releaseSha: normalizedSha,
+      failClosed: false,
+      detail: `current release ${normalizedSha} の明示unitを使用`,
+    } as const;
+  }
   return {
-    unit: `${SERVICE_PREFIX[runnerId]}${normalizedSha}.service`,
+    unit: expected,
     releaseSha: normalizedSha,
     failClosed: false,
     detail: `current release ${normalizedSha} のunitを使用`,
