@@ -1132,7 +1132,19 @@ ExecStart=${CURRENT_RELEASE}/node_modules/.bin/tsx scripts/disdex-aster-trade-hi
 ReadWritePaths=
 ReadWritePaths=/home/deploy/ai-dex-manager/data"
 
-  write_atomic "${V12_DROPIN_DIR}/zzzzzzzzzzzz-current-release-contract.conf" "[Unit]
+  if [[ "$PRIMARY_V12_MODE" == "V4" ]]; then
+    write_atomic "${V12_DROPIN_DIR}/zzzzzzzzzzzz-current-release-contract.conf" "[Unit]
+StartLimitIntervalSec=300s
+StartLimitBurst=3
+[Service]
+RestartSec=30s
+EnvironmentFile=${CONTRACT_ENV_FILE}
+Environment=DISDEX_RELEASE_SHA=${DEPLOYED_SHA}
+Environment=V12_V4_LIVE_ACK=${DEPLOYED_SHA}
+Environment=V12_V4_OPERATION_MODE=CERTIFIED
+Environment=V12_V4_HEALTH_STATE_PATH=/var/lib/disdex/v12-v4/heartbeat.json"
+  else
+    write_atomic "${V12_DROPIN_DIR}/zzzzzzzzzzzz-current-release-contract.conf" "[Unit]
 StartLimitIntervalSec=300s
 StartLimitBurst=3
 [Service]
@@ -1152,6 +1164,7 @@ Environment=CRYPTO_GROSS_CAP=3.0
 Environment=TOTAL_GROSS_CAP=4.25
 Environment=QUALITY102_LIVE_ENABLED=false
 Environment=QUALITY102_LIVE_SELECTOR_PARITY=false"
+  fi
 
   write_atomic "${PENGU_DROPIN_DIR}/zzzzzzzzzzzz-current-release-contract.conf" "[Unit]
 StartLimitIntervalSec=300s
