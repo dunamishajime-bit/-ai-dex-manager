@@ -1,0 +1,97 @@
+name: V12 retire old runner no-orders 20261011
+on:
+  push:
+    branches: [ops/v12-v4-stage-only-20261011]
+    paths: [.github/workflows/v12-retire-old-runner-no-orders-20261011.yml]
+permissions:
+  contents: read
+jobs:
+  retire:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    env:
+      TARGET_SHA: 4759dec0d8f3d8a55e09dbce97e3a9fd0dfae038
+      OLD_SHA: ce1edeead8d0f9e5d88e829d415057117502a335
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Configure root SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+      - name: Retire old V12 instance while flat
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -p "$PORT" "root@$SSH_HOST"             "TARGET_SHA='$TARGET_SHA' OLD_SHA='$OLD_SHA' bash -s" <<'REMOTE'
+          set -Eeuo pipefail
+          root=/home/deploy/disdex-trading
+          current="$(readlink -f "$root/current")"
+          [[ "$(tr -d '[:space:]' < "$current/.disdex-release-sha")" == "$OLD_SHA" ]]
+          [[ -d "$root/releases/$TARGET_SHA" ]]
+          state=/var/lib/disdex/v12-x1-all/runner.json
+          python3 - "$state" <<'PY'
+          import json,sys
+          d=json.load(open(sys.argv[1]))
+          assert not d.get("active")
+          assert not d.get("activePositions")
+          assert not d.get("pending")
+          assert not d.get("manualReview")
+          assert not (d.get("killSwitch") or {}).get("active")
+          assert d.get("reconciliationStatus")=="PASS"
+          print("V12_STATE_FLAT=TRUE")
+          PY
+          out="$(mktemp)"; err="$(mktemp)"
+          trap 'rm -f "$out" "$err"' EXIT
+          (
+            set -Eeuo pipefail
+            set -a
+            . /etc/disdex/disdex-v13d-v11eq-v96.env
+            . /etc/disdex/disdex-v12-pengu-v2-v52.env
+            set +a
+            cd "$current"
+            ./node_modules/.bin/tsx scripts/disdex-aster-readonly-account-diagnostic.ts
+          ) >"$out" 2>"$err"
+          python3 - "$out" <<'PY'
+          import json,sys
+          obj=None
+          for line in open(sys.argv[1],encoding="utf-8",errors="replace"):
+              try:d=json.loads(line)
+              except Exception:continue
+              if isinstance(d,dict) and d.get("status")=="ASTER_READONLY_ACCOUNT_DIAGNOSTIC_PASS":obj=d
+          assert obj is not None
+          assert not obj.get("positions")
+          assert not obj.get("openOrders")
+          assert all(obj.get(k)==0 for k in ("ordersSent","cancelsSent","positionChangesSent"))
+          print("ASTER_FLAT=TRUE")
+          PY
+
+          unit="disdex-v12-x1-all@$OLD_SHA.service"
+          systemctl stop "$unit" || true
+          systemctl reset-failed "$unit" || true
+          systemctl mask --runtime "$unit"
+          sleep 2
+          [[ "$(systemctl is-active "$unit" 2>/dev/null || true)" != "active" ]]
+          [[ "$(systemctl is-enabled "$unit" 2>/dev/null || true)" == "masked-runtime" || "$(systemctl is-enabled "$unit" 2>/dev/null || true)" == "masked" ]]
+          [[ "$(systemctl is-active "disdex-v12-v4-canary@$TARGET_SHA.service" 2>/dev/null || true)" != "active" ]]
+          [[ "$(systemctl is-active "disdex-v12-v4@$TARGET_SHA.service" 2>/dev/null || true)" != "active" ]]
+          [[ ! -e /etc/disdex/v12-v4-production-canary-permit.json ]]
+          [[ ! -e /etc/disdex/v12-v4-production-certification.json ]]
+          echo "OLD_V12_MASKED=TRUE"
+          echo "V4_CANARY_ACTIVE=FALSE"
+          echo "V4_PRODUCTION_ACTIVE=FALSE"
+          echo "TRADING_MUTATION=0"
+          echo "STATUS=OLD_V12_RETIRED_FOR_CUTOVER_PREP"
+          REMOTE
