@@ -28,6 +28,8 @@ function runnerPin(expectedShaEnv, releaseRootEnv) {
 }
 
 const V12_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_V12_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_V12_RELEASE_ROOT");
+const V12_MODE = String(process.env.DISDEX_HEALTH_SNAPSHOT_V12_MODE || "LEGACY").trim().toUpperCase();
+if (!["LEGACY","V4"].includes(V12_MODE)) throw new Error("V12 health snapshot mode is invalid");
 const PENGU_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_PENGU_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_PENGU_RELEASE_ROOT");
 const V52_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_V52_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_V52_RELEASE_ROOT");
 const Q102_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_Q102_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_Q102_RELEASE_ROOT");
@@ -35,18 +37,29 @@ const FET_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_FET_EXPECTED_SHA", "DISDEX_HEA
 const HYPE_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_HYPE_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_HYPE_RELEASE_ROOT");
 const IDLE_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_IDLE_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_IDLE_RELEASE_ROOT");
 
+const V12_RUNNER = V12_MODE === "V4" ? {
+    key: "V12_V4",
+    runnerId: "V12_V4",
+    unit: `disdex-v12-v4@${V12_PIN.expectedSha}.service`,
+    expectedSha: V12_PIN.expectedSha,
+    releaseRoot: V12_PIN.releaseRoot,
+    script: "scripts/v12-v4-production-runner.ts",
+    statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_V12_STATE_PATH", "/var/lib/disdex/v12-v4/heartbeat.json"),
+    heartbeatFile: "v12-v4.json",
+    maxStateAgeMs: 5 * 60_000,
+} : {
+    key: "V12_X1_ALL",
+    runnerId: "V12_X1_ALL",
+    unit: `disdex-v12-x1-all@${V12_PIN.expectedSha}.service`,
+    expectedSha: V12_PIN.expectedSha,
+    releaseRoot: V12_PIN.releaseRoot,
+    script: "scripts/disdex-v12-x1-all-live-runner.ts",
+    statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_V12_STATE_PATH", "/var/lib/disdex/v12-x1-all/runner.json"),
+    heartbeatFile: "v12-x1-all.json",
+    maxStateAgeMs: 3 * 60 * 60_000,
+};
 const RUNNERS = [
-    {
-        key: "V12_X1_ALL",
-        runnerId: "V12_X1_ALL",
-        unit: `disdex-v12-x1-all@${V12_PIN.expectedSha}.service`,
-        expectedSha: V12_PIN.expectedSha,
-        releaseRoot: V12_PIN.releaseRoot,
-        script: "scripts/disdex-v12-x1-all-live-runner.ts",
-        statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_V12_STATE_PATH", "/var/lib/disdex/v12-x1-all/runner.json"),
-        heartbeatFile: "v12-x1-all.json",
-        maxStateAgeMs: 3 * 60 * 60_000,
-    },
+    V12_RUNNER,
     {
         key: "PENGU_V8",
         runnerId: "PENGU_V8",
@@ -283,6 +296,9 @@ function stateIdentityMatches(runner, state) {
     const strategyId = String(state?.strategyId || "");
     return strategyId === runner.runnerId
         || (runner.key === "V12_X1_ALL" && strategyId === "V12_X1.00_ALL")
+        || (runner.key === "V12_V4" && state?.schema === "disdex-v12-v4-runner-heartbeat/v1"
+            && String(state?.releaseSha || state?.runtimeSha || "").toLowerCase() === runner.expectedSha
+            && String(state?.operationMode || "").toUpperCase() === "CERTIFIED")
         || (runner.key === "PENGU_V8" && strategyId === "PENGU_DUAL_LS_V2_FINAL")
         || (runner.key === "V52" && strategyId === "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96")
         || (runner.key === "HYPE_TREND_LONG" && state?.schema === "disdex-hype-zec-long/v1" && state?.mode === "LIVE" && String(state?.runtimeCommitSha || "").toLowerCase() === runner.expectedSha)
@@ -348,6 +364,7 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
         heartbeat.fet={minimumReturn72h:0.02,postExitCooldownHours:24,maximumNewEntryGross:1,lastEvaluationReason:state?.lastEvaluationReason||null,cooldownUntilTs:state?.cooldownUntilTs||null,lastExitTs:state?.lastExitTs||null,cooldownActive:now<Number(state?.cooldownUntilTs||0)};
     }
     if(runner.key === "V12_X1_ALL") heartbeat.dd1296={sideLossLedger:state?.sideLossLedger||null,latestDecision:state?.latestDd1296Decision||null};
+    if(runner.key === "V12_V4") heartbeat.v12v4={operationMode:String(state?.operationMode||""),status:String(state?.status||""),candidateCount:Number(state?.candidateCount||0)};
     if (runner.key === "QUALITY102_CAUSAL_V1") {
         heartbeat.quality102 = {
             selectorMode: "CAUSAL_V4",
