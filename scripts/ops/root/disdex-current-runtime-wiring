@@ -632,7 +632,7 @@ retire_stale_release_enabled_units() {
   for link in /etc/systemd/system/multi-user.target.wants/disdex-*@*.service; do
     [[ -L "$link" ]] || continue
     unit="$(basename "$link")"
-    [[ "$unit" =~ ^disdex-(v12-x1-all|pengu-dual-ls-v2|quality102-causal-v1|fet-brk48|hype-long|v52-aster-only|shared-crypto-risk|v12-v52-margin-guard|idle-priority-short)@([0-9a-f]{40})\.service$ ]] || continue
+    [[ "$unit" =~ ^disdex-(v12-x1-all|v12-v4|pengu-dual-ls-v2|quality102-causal-v1|fet-brk48|hype-long|v52-aster-only|shared-crypto-risk|v12-v52-margin-guard|idle-priority-short)@([0-9a-f]{40})\.service$ ]] || continue
     sha="${BASH_REMATCH[2]}"
     [[ "$sha" == "$DEPLOYED_SHA" ]] && continue
     systemctl disable --now "$unit" >/dev/null 2>&1 || true
@@ -680,7 +680,7 @@ reset_stale_release_failed_units() {
   local unit
   while read -r unit _; do
     [[ -n "$unit" ]] || continue
-    [[ "$unit" =~ ^disdex-(v12-x1-all|pengu-dual-ls-v2|quality102-causal-v1|fet-brk48|hype-long|v52-aster-only|shared-crypto-risk|v12-v52-margin-guard|idle-priority-short)@[0-9a-f]{40}\.service$ ]] || continue
+    [[ "$unit" =~ ^disdex-(v12-x1-all|v12-v4|pengu-dual-ls-v2|quality102-causal-v1|fet-brk48|hype-long|v52-aster-only|shared-crypto-risk|v12-v52-margin-guard|idle-priority-short)@[0-9a-f]{40}\.service$ ]] || continue
     [[ "$unit" == *"@${DEPLOYED_SHA}.service" ]] && continue
     systemctl reset-failed "$unit" >/dev/null 2>&1 || true
   done < <(systemctl list-units --all --type=service --state=failed --no-legend 2>/dev/null || true)
@@ -1439,6 +1439,8 @@ self_test() {
   mkdir -p "$SELF_TEST_FIXTURE/scripts/ops/root" "$SELF_TEST_FIXTURE/scripts/generated" "$SELF_TEST_FIXTURE/lib/server" "$SELF_TEST_FIXTURE/config" "$SELF_TEST_FIXTURE/ops/systemd" "$SELF_TEST_FIXTURE/deploy/systemd" "$SELF_TEST_FIXTURE/node_modules/.bin" "$SELF_TEST_FIXTURE/.venv2/bin"
   for required_file in \
     scripts/disdex-v12-x1-all-live-runner.ts \
+    scripts/v12-v4-production-runner.ts \
+    deploy/systemd/disdex-v12-v4@.service \
     scripts/disdex-pengu-dual-ls-v2-live-runner.ts \
     scripts/disdex-quality102-causal-v1-live-runner.ts \
     scripts/generated/disdex-quality102-ranking-observer.cjs \
