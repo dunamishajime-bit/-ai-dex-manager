@@ -1,5 +1,5 @@
 ﻿import { NextResponse } from "next/server";
-import { kvGet } from "@/lib/kv";
+import { kvGet, kvSet } from "@/lib/kv";
 import { Universe, PricePoint, TokenRef } from "@/lib/types/market";
 import { fetchPricesBatch, fetchUsdJpy, priceKey, toJpy } from "@/lib/providers/market-providers";
 
@@ -56,26 +56,29 @@ function attachPrice(list: TokenRef[], prices: Record<string, PricePoint>) {
 
 export async function GET(request: Request) {
     try {
-        let universe = await kvGet<Universe>("universe:v1");
+        const storedUniverse = await kvGet<Universe>("universe:v1");
 
-        // Self-seed if empty
-        if (!universe) {
-            try {
-                const configuredOrigin = process.env.NEXT_PUBLIC_APP_URL?.trim();
-                const requestOrigin = new URL(request.url).origin;
-                const refreshUrl = new URL("/api/agents/refresh-universe", configuredOrigin || requestOrigin);
-                const refreshRes = await fetch(refreshUrl, { method: "POST" });
-                if (refreshRes.ok) {
-                    universe = await kvGet<Universe>("universe:v1");
-                }
-            } catch (error) {
-                console.warn("[Dashboard] Universe seed failed, serving fallback if cache is empty:", error);
-            }
-        }
-
-        if (!universe) {
-            console.warn("[Dashboard] Universe not ready, serving fallback universe.");
-            universe = { ...FALLBACK_UNIVERSE, updatedAt: Date.now() };
+        // Seed KV directly: calling this app's public HTTPS origin from the server
+        // caused intermittent TLS handshake failures and left dependent pages empty.
+        const needsSeed = !storedUniverse
+            || !Array.isArray(storedUniverse.majorsTop10)
+            || storedUniverse.majorsTop10.length === 0
+            || !Array.isArray(storedUniverse.bnbTop15)
+            || storedUniverse.bnbTop15.length === 0
+            || !Array.isArray(storedUniverse.polygonTop15);
+        let universe: Universe;
+        if (!storedUniverse || needsSeed) {
+            universe = {
+                ...FALLBACK_UNIVERSE,
+                ...(storedUniverse?.majorsTop10?.length ? { majorsTop10: storedUniverse.majorsTop10 } : {}),
+                ...(storedUniverse?.bnbTop15?.length ? { bnbTop15: storedUniverse.bnbTop15 } : {}),
+                ...(storedUniverse && Array.isArray(storedUniverse.polygonTop15) ? { polygonTop15: storedUniverse.polygonTop15 } : {}),
+                favoritesByUser: storedUniverse?.favoritesByUser ?? FALLBACK_UNIVERSE.favoritesByUser,
+                updatedAt: Date.now(),
+            };
+            await kvSet("universe:v1", universe);
+        } else {
+            universe = storedUniverse;
         }
 
         let prices = (await kvGet<Record<string, PricePoint>>("prices:v1")) ?? {};
