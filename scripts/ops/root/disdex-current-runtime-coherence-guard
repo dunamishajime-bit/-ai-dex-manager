@@ -61,6 +61,26 @@ resolve_current() {
   }
   HEALTH_ENV="$RUNTIME_ENV_DIR/$DEPLOYED_SHA.health-snapshot.env"
   WATCHDOG_ENV="$RUNTIME_ENV_DIR/$DEPLOYED_SHA.watchdog.env"
+  PRIMARY_V12_MODE_FILE="$RUNTIME_ENV_DIR/$DEPLOYED_SHA.v12-primary.env"
+  PRIMARY_V12_MODE="LEGACY"
+  if [[ -f "$PRIMARY_V12_MODE_FILE" ]]; then
+    PRIMARY_V12_MODE="$(sed -n 's/^DISDEX_PRIMARY_V12_RUNNER=//p' "$PRIMARY_V12_MODE_FILE" | tail -n1)"
+  fi
+  [[ "$PRIMARY_V12_MODE" == "LEGACY" || "$PRIMARY_V12_MODE" == "V4" ]] || {
+    echo "invalid primary V12 mode" >&2
+    return 1
+  }
+  if [[ "$PRIMARY_V12_MODE" == "V4" ]]; then
+    FAMILIES[0]="disdex-v12-v4"
+    HEARTBEATS[0]="v12-v4.json"
+    V12_EXPECTED_UNIT="disdex-v12-v4@$DEPLOYED_SHA.service"
+    V12_OPERATOR_RUNNER="V12_V4"
+  else
+    FAMILIES[0]="disdex-v12-x1-all"
+    HEARTBEATS[0]="v12-x1-all.json"
+    V12_EXPECTED_UNIT="disdex-v12-x1-all@$DEPLOYED_SHA.service"
+    V12_OPERATOR_RUNNER="V12_X1_ALL"
+  fi
   CURRENT_UNITS=()
   local family
   for family in "${FAMILIES[@]}"; do CURRENT_UNITS+=("${family}@${DEPLOYED_SHA}.service"); done
@@ -89,7 +109,7 @@ verify_current_units_enabled() {
 list_stale_noninactive_units() {
   local unit active
   while read -r unit _; do
-    [[ "$unit" =~ ^disdex-(v12-x1-all|pengu-dual-ls-v2|quality102-causal-v1|v52-aster-only|fet-brk48|hype-long|idle-priority-short|shared-crypto-risk|v12-v52-margin-guard)@([0-9a-f]{40})\.service$ ]] || continue
+    [[ "$unit" =~ ^disdex-(v12-x1-all|v12-v4|pengu-dual-ls-v2|quality102-causal-v1|v52-aster-only|fet-brk48|hype-long|idle-priority-short|shared-crypto-risk|v12-v52-margin-guard)@([0-9a-f]{40})\.service$ ]] || continue
     [[ "${BASH_REMATCH[2]}" == "$DEPLOYED_SHA" ]] && continue
     active="$(systemctl show "$unit" -p ActiveState --value 2>/dev/null || true)"
     [[ "$active" == "inactive" || "$active" == "failed" || -z "$active" ]] && continue
@@ -102,7 +122,7 @@ list_stale_enabled_units() {
   for link in /etc/systemd/system/multi-user.target.wants/disdex-*@*.service; do
     [[ -L "$link" ]] || continue
     unit="$(basename "$link")"
-    [[ "$unit" =~ ^disdex-(v12-x1-all|pengu-dual-ls-v2|quality102-causal-v1|v52-aster-only|fet-brk48|hype-long|idle-priority-short|shared-crypto-risk|v12-v52-margin-guard)@([0-9a-f]{40})\.service$ ]] || continue
+    [[ "$unit" =~ ^disdex-(v12-x1-all|v12-v4|pengu-dual-ls-v2|quality102-causal-v1|v52-aster-only|fet-brk48|hype-long|idle-priority-short|shared-crypto-risk|v12-v52-margin-guard)@([0-9a-f]{40})\.service$ ]] || continue
     [[ "${BASH_REMATCH[2]}" == "$DEPLOYED_SHA" ]] && continue
     printf '%s\n' "$unit"
   done
@@ -132,6 +152,12 @@ monitor_pins_current() {
   grep -Fq "WorkingDirectory=$CURRENT_RELEASE" "$WATCHDOG_DROPIN" || return 1
   grep -Fxq "DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_SERVICE_UNIT=disdex-shared-crypto-risk@$DEPLOYED_SHA.service" "$HEALTH_ENV" || return 1
   grep -Fxq "DISDEX_HEALTH_SNAPSHOT_MARGIN_SERVICE_UNIT=disdex-v12-v52-margin-guard@$DEPLOYED_SHA.service" "$HEALTH_ENV" || return 1
+  grep -Fxq "DISDEX_HEALTH_SNAPSHOT_V12_MODE=$PRIMARY_V12_MODE" "$HEALTH_ENV" || return 1
+  grep -Fxq "DISDEX_WATCHDOG_V12_MODE=$PRIMARY_V12_MODE" "$WATCHDOG_ENV" || return 1
+  grep -Fxq "DISDEX_WATCHDOG_V12_SERVICE_UNIT=$V12_EXPECTED_UNIT" "$WATCHDOG_ENV" || return 1
+  if [[ "$PRIMARY_V12_MODE" == "V4" ]]; then
+    grep -Fxq "DISDEX_HEALTH_SNAPSHOT_V12_STATE_PATH=/var/lib/disdex/v12-v4/heartbeat.json" "$HEALTH_ENV" || return 1
+  fi
 }
 
 heartbeat_identity_current() {
@@ -160,19 +186,12 @@ timer_waiting() {
 }
 
 operator_ready() {
-  python3 - "$DEPLOYED_SHA" <<'PY'
-import json,sys
-try:
-    d=json.load(open("/var/lib/disdex/shared/operator-activation/current.json"))
-except Exception:
-    raise SystemExit(1)
-sha=sys.argv[1]
-if d.get("approvedSha") != sha or d.get("ordersEnabled") is not True:
-    raise SystemExit(1)
-expected={"V12_X1.00_ALL","PENGU_DUAL_LS_V2_FINAL","QUALITY102_CAUSAL_V1","V52_ASTER_ONLY","FET_BRK48_RESIDUAL","HYPE_TREND_LONG","IDLE_PRIORITY_SHORT"}
-if not expected.issubset(set(d.get("enabledRunners") or [])):
-    raise SystemExit(1)
-PY
+  local runner gate="$CURRENT_RELEASE/scripts/ops/root/disdex-live-operator-activation-gate.mjs"
+  [[ -f "$gate" ]] || return 1
+  for runner in "$V12_OPERATOR_RUNNER" PENGU_V8 QUALITY102_CAUSAL_V1 V52 FET_BRK48_RESIDUAL HYPE_TREND_LONG IDLE_PRIORITY_SHORT; do
+    /usr/bin/node "$gate" --release-root "$CURRENT_RELEASE" --sha "$DEPLOYED_SHA" --runner "$runner" --activation-path /var/lib/disdex/shared/operator-activation/current.json >/dev/null 2>&1 || return 1
+  done
+  return 0
 }
 
 support_runtime_current() {
@@ -181,10 +200,30 @@ support_runtime_current() {
   timer_waiting disdex-trade-fill-notifier.timer || return 1
   if operator_ready; then
     timer_waiting disdex-runner-watchdog.timer || return 1
-    timer_waiting disdex-runner-position-recovery.timer || return 1
-    timer_waiting disdex-v12-three-hour-health-check.timer || return 1
-    [[ "$(systemctl show disdex-v12-kill-switch-auto-repair.path -p ActiveState --value 2>/dev/null || true)" == "active" ]] || return 1
+    if [[ "$PRIMARY_V12_MODE" == "LEGACY" ]]; then
+      timer_waiting disdex-runner-position-recovery.timer || return 1
+      timer_waiting disdex-v12-three-hour-health-check.timer || return 1
+      [[ "$(systemctl show disdex-v12-kill-switch-auto-repair.path -p ActiveState --value 2>/dev/null || true)" == "active" ]] || return 1
+    else
+      [[ "$(systemctl show disdex-runner-position-recovery.timer -p ActiveState --value 2>/dev/null || true)" != "active" ]] || return 1
+      [[ "$(systemctl show disdex-v12-three-hour-health-check.timer -p ActiveState --value 2>/dev/null || true)" != "active" ]] || return 1
+      [[ "$(systemctl show disdex-v12-kill-switch-auto-repair.path -p ActiveState --value 2>/dev/null || true)" != "active" ]] || return 1
+    fi
   fi
+}
+
+legacy_v12_persistently_retired() {
+  [[ "$PRIMARY_V12_MODE" == "V4" ]] || return 0
+  local unit active enabled
+  while read -r unit _; do
+    [[ "$unit" =~ ^disdex-v12-x1-all@[0-9a-f]{40}\.service$ ]] || continue
+    active="$(systemctl show "$unit" -p ActiveState --value 2>/dev/null || true)"
+    [[ "$active" != "active" && "$active" != "activating" && "$active" != "deactivating" ]] || return 1
+    enabled="$(systemctl is-enabled "$unit" 2>/dev/null || true)"
+    [[ "$enabled" == "masked" || "$enabled" == "disabled" || "$enabled" == "not-found" ]] || return 1
+  done < <(systemctl list-units --all --type=service --no-legend --no-pager 'disdex-v12-x1-all@*.service' 2>/dev/null || true)
+  enabled="$(systemctl is-enabled "disdex-v12-x1-all@$DEPLOYED_SHA.service" 2>/dev/null || true)"
+  [[ "$enabled" == "masked" ]] || return 1
 }
 
 q102_observer_singleton() {
@@ -209,6 +248,7 @@ check_coherent() {
   monitor_pins_current || return 1
   heartbeat_identity_current || return 1
   legacy_units_inactive || return 1
+  legacy_v12_persistently_retired || return 1
   [[ -z "$(list_stale_noninactive_units)" ]] || return 1
   [[ -z "$(list_stale_enabled_units)" ]] || return 1
   q102_observer_singleton || return 1
@@ -234,7 +274,7 @@ retire_stale_units() {
 repair_coherence() {
   [[ "$(id -u)" == "0" ]] || { echo "repair requires root" >&2; return 1; }
   verify_current_units_active || return 20
-  /usr/local/sbin/disdex-current-runtime-wiring --apply
+  DISDEX_PRIMARY_V12_RUNNER="$PRIMARY_V12_MODE" /usr/local/sbin/disdex-current-runtime-wiring --apply
   retire_stale_units
   systemctl daemon-reload
   systemctl reset-failed >/dev/null 2>&1 || true
