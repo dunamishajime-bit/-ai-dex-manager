@@ -1,5 +1,6 @@
 import "dotenv/config";
-import {readFile,lstat} from "node:fs/promises";
+import {readFile,lstat,mkdir,rename,writeFile} from "node:fs/promises";
+import {dirname} from "node:path";
 import {AsterV3Client} from "../lib/aster-v3-client";
 import {V12AsterLiveAdapter} from "../lib/v12-aster-live-adapter";
 import {FileAccountOrderLock} from "../lib/disdex-account-order-lock";
@@ -16,6 +17,27 @@ import type {V4PeerKind,V4PeerSource,V4PeerLineageMode} from "../lib/v12-v4-peer
 import {observeV4PeerService,observeCurrentV4PeerService} from "../lib/v12-v4-peer-service-attestation";
 import {assertV4EntrySafety} from "../lib/v12-v4-entry-safety";
 const H2=7200000;
+const V4_HEALTH_SCHEMA="disdex-v12-v4-runner-heartbeat/v1";
+function v4HealthPath(){
+ return String(process.env.V12_V4_HEALTH_STATE_PATH??"/var/lib/disdex/v12-v4/heartbeat.json").trim();
+}
+async function writeV4Health(releaseSha:string,operationMode:string,result:{
+ status:string;reason:string;eventTs:number;candidateCount:number;orderEnabled:boolean;
+}){
+ const path=v4HealthPath();
+ if(!path.startsWith("/var/lib/disdex/v12-v4/"))throw Error("V4_HEALTH_PATH_INVALID");
+ await mkdir(dirname(path),{recursive:true,mode:0o700});
+ const now=Date.now(),tmp=path+"."+process.pid+"."+now+".tmp";
+ const payload={
+  schema:V4_HEALTH_SCHEMA,strategyId:"V12_V4",releaseSha,runtimeSha:releaseSha,
+  operationMode,mode:"LIVE",updatedAt:now,lastTickAt:result.eventTs,
+  status:result.status,reason:result.reason,candidateCount:result.candidateCount,
+  orderEnabled:result.orderEnabled,
+ };
+ await writeFile(tmp,JSON.stringify(payload)+"\n",{encoding:"utf8",mode:0o600});
+ await rename(tmp,path);
+}
+
 function env(name:string){
  const value=String(process.env[name]??"").trim();
  if(!value)throw Error("V4_MISSING_CONFIGURATION:"+name);
@@ -161,6 +183,7 @@ async function main(){
  process.once("SIGTERM",()=>{stopping=true;});
  do{
   const result=await engine.tick();
+  await writeV4Health(releaseSha,operationMode,result);
   console.log(JSON.stringify({releaseSha,operationMode,timestamp:new Date().toISOString(),...result}));
   if(!daemon||stopping)break;
   await new Promise<void>(done=>setTimeout(done,Math.max(15000,Number(process.env.V12_V4_TICK_INTERVAL_MS||60000))));
