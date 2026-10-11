@@ -1,0 +1,87 @@
+name: V12 manual-close reconcile diagnostic 20261011
+on:
+  push:
+    branches: [ops/v12-v4-stage-only-20261011]
+    paths: [.github/workflows/v12-manual-close-reconcile-diagnostic-20261011.yml]
+permissions:
+  contents: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    env:
+      TARGET_SHA: 52dccce5c5b5348eef16aa00de6eda1cbe7ec25d
+      EXPECTED_CURRENT_SHA: ce1edeead8d0f9e5d88e829d415057117502a335
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Configure root SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+
+      - name: Reconcile with sanitized evidence
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -p "$PORT" "root@$SSH_HOST"             "TARGET_SHA='$TARGET_SHA' EXPECTED_CURRENT_SHA='$EXPECTED_CURRENT_SHA' bash -s" <<'REMOTE'
+          set -Eeuo pipefail
+          root=/home/deploy/disdex-trading
+          target="$root/releases/$TARGET_SHA"
+          state=/var/lib/disdex/v12-x1-all/runner.json
+          [[ -d "$target" ]]
+          out="$(mktemp)"; err="$(mktemp)"
+          cleanup(){ rm -f "$out" "$err"; }
+          trap cleanup EXIT
+          set +e
+          (
+            set -Eeuo pipefail
+            set -a
+            . /etc/disdex/disdex-v13d-v11eq-v96.env
+            . /etc/disdex/disdex-v12-pengu-v2-v52.env
+            set +a
+            cd "$target"
+            ./node_modules/.bin/tsx scripts/v12-external-manual-close-reconcile.ts               --ack I_ACK_V12_EXTERNAL_MANUAL_CLOSE_RECONCILIATION               --expected-state-sha "$EXPECTED_CURRENT_SHA"
+          ) >"$out" 2>"$err"
+          rc=$?
+          set -e
+          echo "RECONCILE_EXIT=$rc"
+          python3 - "$out" "$err" "$state" <<'PY'
+          import json,re,sys,os
+          out,err,state=sys.argv[1:4]
+          raw=(open(out,encoding="utf-8",errors="replace").read()+"\n"+
+               open(err,encoding="utf-8",errors="replace").read())
+          objs=[]
+          for line in raw.splitlines():
+              try:
+                  d=json.loads(line)
+                  if isinstance(d,dict): objs.append(d)
+              except Exception: pass
+          for d in objs[-5:]:
+              safe={}
+              for k,v in d.items():
+                  if k in {"error","status","ordersSent","cancelsSent","positionChangesSent","stateRuntimeSha","reconciliationStatus"}:
+                      safe[k]=v
+              print("RECONCILE_RESULT="+json.dumps(safe,separators=(",",":")))
+          cats=[x for x in ["SHARED_PENDING","FILL","TRADE","ORDER","POSITION","STATE_SHA","REVIEW_REASON","RATE_BUDGET","LOCK_TIMEOUT","SATURATED","CREDENTIALS","EACCES"] if x in raw.upper()]
+          print("RECONCILE_ERROR_CATEGORIES="+",".join(cats))
+          s=json.load(open(state))
+          print("STATE_ACTIVE="+str(bool(s.get("active") or s.get("activePositions"))))
+          print("STATE_MANUAL_REVIEW="+str(bool(s.get("manualReview"))))
+          print("STATE_RECONCILIATION_STATUS="+str(s.get("reconciliationStatus")))
+          print("TRADING_MUTATION=0")
+          PY
+          exit "$rc"
+          REMOTE
