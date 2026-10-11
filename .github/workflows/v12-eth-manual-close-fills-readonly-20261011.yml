@@ -1,0 +1,106 @@
+name: V12 ETH manual-close fills readonly 20261011
+on:
+  push:
+    branches: [ops/v12-v4-stage-only-20261011]
+    paths: [.github/workflows/v12-eth-manual-close-fills-readonly-20261011.yml]
+permissions:
+  contents: read
+jobs:
+  read:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    env:
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Configure root SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+      - name: Read signed ETH fill sequence
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -p "$PORT" "root@$SSH_HOST" 'bash -s' <<'REMOTE'
+          set -Eeuo pipefail
+          root=/home/deploy/disdex-trading
+          current="$(readlink -f "$root/current")"
+          state=/var/lib/disdex/v12-x1-all/runner.json
+          python3 - "$state" >/tmp/v12-eth-proof-args.json <<'PY'
+          import json,sys
+          d=json.load(open(sys.argv[1]))
+          p=(d.get("activePositions") or ([d.get("active")] if d.get("active") else []))[0]
+          print(json.dumps({
+            "symbol":p["symbol"],
+            "positionId":p["positionId"],
+            "entrySignalTs":p["entrySignalTs"],
+            "quantity":p["quantity"],
+            "side":p["side"]
+          }))
+          PY
+          cat >/tmp/v12-eth-proof.ts <<'TS'
+          import {readFileSync} from "node:fs";
+          import {AsterV3Client} from process.env.ASTER_CLIENT_MODULE!;
+          const a=JSON.parse(readFileSync("/tmp/v12-eth-proof-args.json","utf8"));
+          const client=new AsterV3Client({
+            baseUrl:process.env.ASTER_FUTURES_BASE_URL,
+            userAddress:process.env.ASTER_USER_ADDRESS,
+            privateKey:process.env.ASTER_API_PRIVATE_KEY as `0x${string}`,
+            requestTimeoutMs:Number(process.env.ASTER_REQUEST_TIMEOUT_MS||10000),
+            recvWindowMs:Number(process.env.ASTER_RECV_WINDOW_MS||5000),
+            readOnlyRateLimitMaxRetries:0,
+            userAgent:"DisDex-V12-ManualClose-Proof/1.0"
+          });
+          const entry=await client.getOrder(a.symbol,a.positionId);
+          const trades=await client.getUserTrades(a.symbol,{startTime:a.entrySignalTs,endTime:Date.now(),limit:1000});
+          const income=await client.getIncomeHistory({symbol:a.symbol,incomeType:"FUNDING_FEE",startTime:a.entrySignalTs,endTime:Date.now(),limit:1000});
+          console.log(JSON.stringify({
+            status:"V12_ETH_MANUAL_CLOSE_FILL_PROOF",
+            expected:a,
+            entry:{
+              orderId:entry.orderId,
+              clientOrderId:entry.clientOrderId,
+              side:entry.side,
+              executedQty:Number(entry.executedQty||0),
+              status:entry.status
+            },
+            trades:trades.map(t=>({
+              id:String(t.id),
+              orderId:String(t.orderId),
+              side:t.side,
+              qty:Number(t.qty),
+              price:Number(t.price),
+              realizedPnl:Number(t.realizedPnl),
+              commission:Number(t.commission),
+              commissionAsset:t.commissionAsset,
+              time:Number(t.time)
+            })),
+            funding:income.map(x=>({tranId:String(x.tranId),income:Number(x.income),time:Number(x.time)})),
+            ordersSent:0,cancelsSent:0,positionChangesSent:0
+          }));
+          TS
+          (
+            set -Eeuo pipefail
+            set -a
+            . /etc/disdex/disdex-v13d-v11eq-v96.env
+            . /etc/disdex/disdex-v12-pengu-v2-v52.env
+            set +a
+            cd "$current"
+            export ASTER_CLIENT_MODULE="$current/lib/aster-v3-client.ts"
+            ./node_modules/.bin/tsx /tmp/v12-eth-proof.ts
+          )
+          rm -f /tmp/v12-eth-proof.ts /tmp/v12-eth-proof-args.json
+          echo TRADING_MUTATION=0
+          REMOTE
