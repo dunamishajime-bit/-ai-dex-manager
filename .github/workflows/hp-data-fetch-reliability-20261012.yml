@@ -63,3 +63,21 @@ jobs:
           console.log(`HP_ROUTE_MANIFEST_PASS=${required.length}`);
           NODE
           test -s .next/standalone/server.js
+      - name: Package exact-SHA Linux UI release
+        run: |
+          set -Eeuo pipefail
+          mkdir -p .deploy-ui/.next
+          cp -a .next/standalone/. .deploy-ui/
+          cp -a .next/static .deploy-ui/.next/static
+          if [ -d public ]; then cp -a public .deploy-ui/public; fi
+          printf '%s\n' "$GITHUB_SHA" > .deploy-ui/.disdex-release-sha
+          archive="$RUNNER_TEMP/disdex-ui-$GITHUB_SHA.tar.gz"
+          tar -C .deploy-ui -czf "$archive" .
+          test -s "$archive"
+          sha256sum "$archive"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: disdex-ui-${{ github.sha }}
+          path: ${{ runner.temp }}/disdex-ui-${{ github.sha }}.tar.gz
+          if-no-files-found: error
+          retention-days: 90
