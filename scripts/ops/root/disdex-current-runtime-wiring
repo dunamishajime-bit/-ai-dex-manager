@@ -1337,7 +1337,11 @@ ExecStart=${CURRENT_RELEASE}/node_modules/.bin/tsx scripts/disdex-idle-priority-
 ReadWritePaths=${IDLE_PRIORITY_STATE_ROOT} ${SHARED_ROOT}"
 
   migrate_quality102_state_lineage
-  migrate_v12_state_lineage
+  if [[ "$PRIMARY_V12_MODE" == "V4" ]]; then
+    assert_retired_legacy_v12_flat
+  else
+    migrate_v12_state_lineage
+  fi
   migrate_fet_state_lineage
   recover_hype_benign_state
   migrate_hype_state_lineage
@@ -1346,6 +1350,16 @@ ReadWritePaths=${IDLE_PRIORITY_STATE_ROOT} ${SHARED_ROOT}"
   migrate_idle_residual_state_lineage
   normalize_position_recovery_state_lineage
   systemctl daemon-reload
+  if [[ "$PRIMARY_V12_MODE" == "V4" ]]; then
+    persistently_mask_legacy_v12
+    systemctl disable --now disdex-v12-kill-switch-auto-repair.path || true
+    systemctl stop disdex-v12-kill-switch-auto-repair.service || true
+    systemctl disable --now disdex-runner-position-recovery.timer || true
+    systemctl stop disdex-runner-position-recovery.service || true
+    systemctl disable --now disdex-v12-three-hour-health-check.timer || true
+    systemctl stop disdex-v12-three-hour-health-check.service || true
+    printf 'DISDEX_V12_V4_LEGACY_RECOVERY_AUTOMATION_DISABLED\n'
+  fi
   retire_stale_release_enabled_units
   reset_stale_release_failed_units
   prune_stale_runtime_metadata
@@ -1366,12 +1380,19 @@ ReadWritePaths=${IDLE_PRIORITY_STATE_ROOT} ${SHARED_ROOT}"
     else
       systemctl enable --now "$HYPE_UNIT"
       systemctl enable --now "$IDLE_UNIT"
-      systemctl enable --now disdex-v12-kill-switch-auto-repair.path
       systemctl enable --now disdex-runner-watchdog.timer
-      systemctl enable --now disdex-runner-position-recovery.timer
-      ensure_monitor_timer_active "disdex-runner-position-recovery.timer"
-      systemctl enable --now disdex-v12-three-hour-health-check.timer
-      printf 'DISDEX_CURRENT_RUNTIME_OPERATOR_AUTOMATION_ENABLED\n'
+      if [[ "$PRIMARY_V12_MODE" == "LEGACY" ]]; then
+        systemctl enable --now disdex-v12-kill-switch-auto-repair.path
+        systemctl enable --now disdex-runner-position-recovery.timer
+        ensure_monitor_timer_active "disdex-runner-position-recovery.timer"
+        systemctl enable --now disdex-v12-three-hour-health-check.timer
+      else
+        persistently_mask_legacy_v12
+        systemctl disable --now disdex-v12-kill-switch-auto-repair.path || true
+        systemctl disable --now disdex-runner-position-recovery.timer || true
+        systemctl disable --now disdex-v12-three-hour-health-check.timer || true
+      fi
+      printf 'DISDEX_CURRENT_RUNTIME_OPERATOR_AUTOMATION_ENABLED mode=%s\n' "$PRIMARY_V12_MODE"
     fi
   else
     systemctl disable --now "$HYPE_UNIT" || true
