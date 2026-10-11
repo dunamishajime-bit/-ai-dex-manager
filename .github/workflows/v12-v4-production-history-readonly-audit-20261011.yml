@@ -70,12 +70,15 @@ jobs:
           assert len(d["evidenceSha256"])==64
           print("V12_V4_PRODUCTION_HISTORY_READONLY_AUDIT=PASS")
           print("POSITION_MODE_DUAL="+str(d["positionMode"]["dualSidePosition"]).lower())
-          print("NONZERO_POSITIONS="+str(d["accountSummary"]["nonzeroPositionCount"]))
-          print("OPEN_ORDERS="+str(d["accountSummary"]["openOrderCount"]))
-          print("TRADE_SYMBOLS="+str(d["tradeHistory"]["queriedSymbols"]))
-          print("TOTAL_TRADES="+str(d["tradeHistory"]["totalTrades"]))
-          print("MULTIFILL_ORDERS="+str(d["tradeHistory"]["multiFillOrderCount"]))
-          print("MAX_FILLS_PER_ORDER="+str(d["tradeHistory"]["maxFillsPerOrder"]))
+          print("NONZERO_POSITIONS="+str(d["account"]["nonzeroPositionCount"]))
+          print("OPEN_ORDERS="+str(d["account"]["openOrderCount"]))
+          print("TRADE_SYMBOLS="+str(len(d["history"]["queriedSymbols"])))
+          print("TOTAL_TRADES="+str(d["history"]["totalTrades"]))
+          print("MULTIFILL_ORDERS="+str(d["history"]["multiFillOrders"]))
+          print("MAX_FILLS_PER_ORDER="+str(d["history"]["maxFills"]))
+          print("STOP_ORDERS="+str(d["history"]["stopOrders"]))
+          print("FILLED_REDUCE_ONLY_STOPS="+str(d["history"]["filledReduceOnlyStops"]))
+          print("PARTIAL_FILL_EVIDENCE="+str(d["history"]["partialFillEvidence"]))
           print("EVIDENCE_SHA256="+d["evidenceSha256"])
           PY
           REMOTE
