@@ -61,7 +61,7 @@ test("external manual close reconciliation blocks when net closing fill evidence
   await store.save(baseState());
   await assert.rejects(reconcileV12ExternalManualClose({stateStore:store,client:client({complete:false}),
    pendingRegistryPath:join(dir,"pending.json"),expectedStateSha:sha,now:3000}),
-   /V12_NET_EXIT_QUANTITY_RECONCILIATION_FAILED/);
+   /V12_EXTERNAL_CLOSE_NET_FLAT_UNPROVEN/);
   const after=await store.load();
   assert.equal(after.active?.symbol,"ETHUSDT");
   assert.equal(after.manualReview,"V12_POSITION_SIDE_OR_QTY_MISMATCH");
@@ -77,5 +77,46 @@ test("external manual close reconciliation blocks while an owned protection orde
    pendingRegistryPath:join(dir,"pending.json"),expectedStateSha:sha,now:3000}),
    /V12_EXTERNAL_CLOSE_PROTECTION_ORDER_REMAINS/);
   assert.equal((await store.load()).active?.symbol,"ETHUSDT");
+ }finally{rmSync(dir,{recursive:true,force:true});}
+});
+
+
+test("external manual close accepts a bounded transient reversal that returns signed net exactly flat",async()=>{
+ const dir=mkdtempSync(join(tmpdir(),"v12-external-close-reversal-"));
+ try{
+  const path=join(dir,"state.json"),store=new FileV12X1AllRunnerStateStore(path,"LIVE");
+  await store.save(baseState());
+  const c=client() as any;
+  c.getUserTrades=async()=>[
+   {symbol:"ETHUSDT",id:1,orderId:10,side:"SELL",qty:"0.028",price:"2500",realizedPnl:"0",commission:"0.028",commissionAsset:"USDT",time:1100},
+   {symbol:"ETHUSDT",id:2,orderId:11,side:"BUY",qty:"0.036",price:"2490",realizedPnl:"0.28",commission:"0.036",commissionAsset:"USDT",time:2200},
+   {symbol:"ETHUSDT",id:3,orderId:12,side:"SELL",qty:"0.008",price:"2491",realizedPnl:"0.008",commission:"0.008",commissionAsset:"USDT",time:2300},
+  ];
+  const result=await reconcileV12ExternalManualClose({stateStore:store,client:c,
+   pendingRegistryPath:join(dir,"pending.json"),expectedStateSha:sha,now:3000});
+  assert.equal(result.status,"V12_EXTERNAL_MANUAL_CLOSE_RECONCILED");
+  const after=await store.load();
+  assert.equal(after.active,undefined);assert.equal(after.activePositions,undefined);
+  assert.equal(after.manualReview,undefined);assert.equal(after.reconciliationStatus,"PASS");
+  assert.ok(after.sideLossLedger?.completed?.includes("v12-entry-test"));
+ }finally{rmSync(dir,{recursive:true,force:true});}
+});
+
+test("external manual close rejects a transient reversal larger than the owned entry",async()=>{
+ const dir=mkdtempSync(join(tmpdir(),"v12-external-close-overreversal-"));
+ try{
+  const path=join(dir,"state.json"),store=new FileV12X1AllRunnerStateStore(path,"LIVE");
+  await store.save(baseState());
+  const c=client() as any;
+  c.getUserTrades=async()=>[
+   {symbol:"ETHUSDT",id:1,orderId:10,side:"SELL",qty:"0.028",price:"2500",realizedPnl:"0",commission:"0",commissionAsset:"USDT",time:1100},
+   {symbol:"ETHUSDT",id:2,orderId:11,side:"BUY",qty:"0.060",price:"2490",realizedPnl:"0.28",commission:"0",commissionAsset:"USDT",time:2200},
+  ];
+  await assert.rejects(reconcileV12ExternalManualClose({stateStore:store,client:c,
+   pendingRegistryPath:join(dir,"pending.json"),expectedStateSha:sha,now:3000}),
+   /V12_EXTERNAL_CLOSE_REVERSAL_EXCEEDS_ENTRY/);
+  const after=await store.load();
+  assert.equal(after.active?.symbol,"ETHUSDT");
+  assert.equal(after.manualReview,"V12_POSITION_SIDE_OR_QTY_MISMATCH");
  }finally{rmSync(dir,{recursive:true,force:true});}
 });
