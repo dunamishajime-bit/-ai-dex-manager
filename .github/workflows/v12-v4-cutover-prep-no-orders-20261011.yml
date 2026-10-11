@@ -106,6 +106,9 @@ jobs:
             . /etc/disdex/disdex-v13d-v11eq-v96.env
             . /etc/disdex/disdex-v12-pengu-v2-v52.env
             set +a
+            export V12_X1_ALL_MODE=LIVE
+            export V12_X1_ALL_STATE_PATH=/var/lib/disdex/v12-x1-all/runner.json
+            export DISDEX_PENDING_EXPOSURE_REGISTRY_PATH=/var/lib/disdex/shared/pending-exposure.json
             cd "$target"
             ./node_modules/.bin/tsx scripts/v12-external-manual-close-reconcile.ts               --ack I_ACK_V12_EXTERNAL_MANUAL_CLOSE_RECONCILIATION               --expected-state-sha "$EXPECTED_CURRENT_SHA"
           ) | tee /tmp/v12-external-manual-close-reconcile.out
