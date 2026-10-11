@@ -6,6 +6,7 @@ on:
       - ops/v12-v4-prod-history-audit-20261011
     paths:
       - .github/workflows/v12-v4-production-history-readonly-audit-20261011.yml
+      - scripts/v12-v4-production-history-deep-readonly-audit.ts
 
 permissions:
   contents: read
@@ -21,8 +22,6 @@ jobs:
       SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: 6723948608ce9c8ab3aba077cba7e5a0d7f6f708
 
       - name: Initialize restricted root SSH
         shell: bash
@@ -48,7 +47,7 @@ jobs:
           common=(-i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts")
           remote_script="/tmp/v12-v4-prod-history-audit-$GITHUB_RUN_ID.ts"
           remote_result="/tmp/v12-v4-prod-history-audit-$GITHUB_RUN_ID.json"
-          scp "${common[@]}" -P "$PORT" scripts/v12-v4-production-history-readonly-audit.ts "root@$SSH_HOST:$remote_script"
+          scp "${common[@]}" -P "$PORT" scripts/v12-v4-production-history-deep-readonly-audit.ts "root@$SSH_HOST:$remote_script"
           ssh -T "${common[@]}" -p "$PORT" "root@$SSH_HOST" "AUDIT_SCRIPT='$remote_script' AUDIT_RESULT='$remote_result' bash -s" <<'REMOTE'
           set -Eeuo pipefail
           release=/home/deploy/disdex-trading/releases/6723948608ce9c8ab3aba077cba7e5a0d7f6f708
