@@ -20,7 +20,7 @@ jobs:
     timeout-minutes: 20
     env:
       TARGET_SHA: 447205ee22ab64d2d0013922eeccfd4a1e14a72f
-      SOURCE_REF: fix/v12-v4-monitor-coherence-20261011
+      SOURCE_REF: release/v12-v4-monitor-coherence-final-20261011
       EXPECTED_CURRENT_SHA: ce1edeead8d0f9e5d88e829d415057117502a335
       SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
       ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
