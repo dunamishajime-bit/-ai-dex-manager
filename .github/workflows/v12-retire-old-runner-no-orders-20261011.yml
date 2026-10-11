@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 8
     env:
-      TARGET_SHA: 4759dec0d8f3d8a55e09dbce97e3a9fd0dfae038
+      TARGET_SHA: 6723948608ce9c8ab3aba077cba7e5a0d7f6f708
       OLD_SHA: ce1edeead8d0f9e5d88e829d415057117502a335
       SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
       ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
@@ -98,15 +98,17 @@ jobs:
           unit="disdex-v12-x1-all@$OLD_SHA.service"
           systemctl stop "$unit" || true
           systemctl reset-failed "$unit" || true
-          systemctl mask --runtime "$unit"
+          systemctl unmask --runtime "$unit" >/dev/null 2>&1 || true
+          systemctl mask "$unit"
           sleep 2
           [[ "$(systemctl is-active "$unit" 2>/dev/null || true)" != "active" ]]
-          [[ "$(systemctl is-enabled "$unit" 2>/dev/null || true)" == "masked-runtime" || "$(systemctl is-enabled "$unit" 2>/dev/null || true)" == "masked" ]]
+          [[ "$(systemctl is-enabled "$unit" 2>/dev/null || true)" == "masked" ]]
+          [[ -L "/etc/systemd/system/$unit" && "$(readlink "/etc/systemd/system/$unit")" == "/dev/null" ]]
           [[ "$(systemctl is-active "disdex-v12-v4-canary@$TARGET_SHA.service" 2>/dev/null || true)" != "active" ]]
           [[ "$(systemctl is-active "disdex-v12-v4@$TARGET_SHA.service" 2>/dev/null || true)" != "active" ]]
           [[ ! -e /etc/disdex/v12-v4-production-canary-permit.json ]]
           [[ ! -e /etc/disdex/v12-v4-production-certification.json ]]
-          echo "OLD_V12_MASKED=TRUE"
+          echo "OLD_V12_PERSISTENTLY_MASKED=TRUE"
           echo "V4_CANARY_ACTIVE=FALSE"
           echo "V4_PRODUCTION_ACTIVE=FALSE"
           echo "TRADING_MUTATION=0"
