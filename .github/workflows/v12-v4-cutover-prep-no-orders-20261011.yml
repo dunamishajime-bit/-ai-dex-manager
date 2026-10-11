@@ -59,6 +59,7 @@ jobs:
               set -a
               . /etc/disdex/disdex-v13d-v11eq-v96.env
               . /etc/disdex/disdex-v12-pengu-v2-v52.env
+            . /etc/disdex/disdex-v12-x1-all.env
               set +a
               cd "$current"
               ./node_modules/.bin/tsx scripts/disdex-aster-readonly-account-diagnostic.ts
@@ -105,6 +106,7 @@ jobs:
             set -a
             . /etc/disdex/disdex-v13d-v11eq-v96.env
             . /etc/disdex/disdex-v12-pengu-v2-v52.env
+            . /etc/disdex/disdex-v12-x1-all.env
             set +a
             export V12_X1_ALL_MODE=LIVE
             export V12_X1_ALL_STATE_PATH=/var/lib/disdex/v12-x1-all/runner.json
