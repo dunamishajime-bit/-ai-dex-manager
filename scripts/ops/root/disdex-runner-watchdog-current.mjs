@@ -38,20 +38,33 @@ const LEGACY_LIVE_UNITS = [
     "disdex-v12-v52-margin-guard.service",
     "disdex-idle-priority-short.service",
 ];
-const RUNNERS = [
-    {
-        key: "V12_X1_ALL",
-        expectedShaEnv: "DISDEX_WATCHDOG_V12_EXPECTED_SHA",
-        releaseRootEnv: "DISDEX_WATCHDOG_V12_RELEASE_ROOT",
-        heartbeatFile: "v12-x1-all.json",
-        unitEnv: "DISDEX_WATCHDOG_V12_SERVICE_UNIT",
-        expectedUnit: (sha) => `disdex-v12-x1-all@${sha}.service`,
-        unitPattern: "disdex-v12-x1-all@*.service",
-        unitPrefix: "disdex-v12-x1-all",
-        script: "scripts/disdex-v12-x1-all-live-runner.ts",
-        heartbeatTimeoutMs: 10_800_000,
-        tickTimeoutMs: 5_400_000,
-    },
+const LEGACY_V12_RUNNER = {
+    key: "V12_X1_ALL",
+    expectedShaEnv: "DISDEX_WATCHDOG_V12_EXPECTED_SHA",
+    releaseRootEnv: "DISDEX_WATCHDOG_V12_RELEASE_ROOT",
+    heartbeatFile: "v12-x1-all.json",
+    unitEnv: "DISDEX_WATCHDOG_V12_SERVICE_UNIT",
+    expectedUnit: (sha) => `disdex-v12-x1-all@${sha}.service`,
+    unitPattern: "disdex-v12-x1-all@*.service",
+    unitPrefix: "disdex-v12-x1-all",
+    script: "scripts/disdex-v12-x1-all-live-runner.ts",
+    heartbeatTimeoutMs: 10_800_000,
+    tickTimeoutMs: 5_400_000,
+};
+const V4_V12_RUNNER = {
+    key: "V12_V4",
+    expectedShaEnv: "DISDEX_WATCHDOG_V12_EXPECTED_SHA",
+    releaseRootEnv: "DISDEX_WATCHDOG_V12_RELEASE_ROOT",
+    heartbeatFile: "v12-v4.json",
+    unitEnv: "DISDEX_WATCHDOG_V12_SERVICE_UNIT",
+    expectedUnit: (sha) => `disdex-v12-v4@${sha}.service`,
+    unitPattern: "disdex-v12-v4@*.service",
+    unitPrefix: "disdex-v12-v4",
+    script: "scripts/v12-v4-production-runner.ts",
+    heartbeatTimeoutMs: 5 * 60_000,
+    tickTimeoutMs: 3 * 60_000,
+};
+const OTHER_RUNNERS = [
     {
         key: "PENGU_V8",
         expectedShaEnv: "DISDEX_WATCHDOG_PENGU_EXPECTED_SHA",
@@ -136,6 +149,13 @@ const RUNNERS = [
         tickTimeoutMs: 15 * 60_000,
     },
 ];
+const RUNNERS = [LEGACY_V12_RUNNER, ...OTHER_RUNNERS];
+function runnersForEnv(env) {
+    const mode = String(env.DISDEX_WATCHDOG_V12_MODE || "LEGACY").trim().toUpperCase();
+    if (mode === "LEGACY") return RUNNERS;
+    if (mode === "V4") return [V4_V12_RUNNER, ...OTHER_RUNNERS];
+    throw new Error("watchdog V12 mode is invalid");
+}
 
 const ZERO_EFFECTS = { ordersSent: 0, cancelSent: 0, positionChangesSent: 0 };
 
@@ -182,6 +202,7 @@ function pathWithin(root, candidate) {
 function serviceAllowed(runner, unit, sha) {
     if (typeof unit !== "string") return false;
     if (runner.key === "V12_X1_ALL") return /^disdex-v12-x1-all@[0-9a-f]{40}\.service$/.test(unit) && unit === runner.expectedUnit(sha);
+    if (runner.key === "V12_V4") return /^disdex-v12-v4@[0-9a-f]{40}\.service$/.test(unit) && unit === runner.expectedUnit(sha);
     if (runner.key === "QUALITY102_CAUSAL_V1") return /^disdex-quality102-causal-v1@[0-9a-f]{40}\.service$/.test(unit) && unit === runner.expectedUnit(sha);
     if (runner.key === "PENGU_V8") return unit === runner.expectedUnit(sha);
     return unit === runner.expectedUnit(sha);
@@ -263,7 +284,7 @@ function buildConfig(env) {
     }
     if (approvedSha !== expectedSha) throw new Error("watchdog expected SHA is not explicitly approved");
     const runnerConfig = {};
-    for (const runner of RUNNERS) {
+    for (const runner of runnersForEnv(env)) {
         const runnerExpectedSha = String(env[runner.expectedShaEnv] || expectedSha).trim().toLowerCase();
         const runnerReleaseRoot = String(env[runner.releaseRootEnv] || (runnerExpectedSha === expectedSha ? releaseRoot : `/home/deploy/disdex-trading/releases/${runnerExpectedSha}`)).trim();
         if (!exactSha(runnerExpectedSha) || !isAbsoluteCanonicalPath(runnerReleaseRoot)) {
@@ -287,7 +308,8 @@ function buildConfig(env) {
         if (!pathWithin(healthRoot, path) || !isAbsoluteCanonicalPath(path)) throw new Error("watchdog private path escapes health root");
     }
     if (!isAbsoluteCanonicalPath(operatorActivationPath)) throw new Error("watchdog operator activation path is non-canonical");
-    const sharedRiskExpectedSha = String(env.DISDEX_WATCHDOG_SHARED_RISK_EXPECTED_SHA || runnerConfig.V12_X1_ALL.expectedSha).trim().toLowerCase();
+    const primaryV12 = runnerConfig.V12_V4 ?? runnerConfig.V12_X1_ALL;
+    const sharedRiskExpectedSha = String(env.DISDEX_WATCHDOG_SHARED_RISK_EXPECTED_SHA || primaryV12.expectedSha).trim().toLowerCase();
     if (!exactSha(sharedRiskExpectedSha)) throw new Error("shared crypto risk writer release pin is invalid");
     const sharedRiskUnit = `disdex-shared-crypto-risk@${sharedRiskExpectedSha}.service`;
     const marginGuardUnit = `disdex-v12-v52-margin-guard@${expectedSha}.service`;
