@@ -1,0 +1,238 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+umask 077
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+ROOT=/home/deploy/disdex-trading
+CURRENT="$ROOT/current"
+RUNTIME_ENV_DIR=/etc/disdex/current-runtime
+HEALTH_DROPIN=/etc/systemd/system/disdex-runner-health-snapshot.service.d/zzzzzzzzzzzzzzzzzzzz-current-release.conf
+WATCHDOG_DROPIN=/etc/systemd/system/disdex-runner-watchdog.service.d/zzzzzzzzzzzzzzzzzzzz-current-release.conf
+ALERT_DROPIN=/etc/systemd/system/disdex-runner-health-alert.service.d/zzzzzzzzzzzzzzzzzzzz-current-release.conf
+COHERENCE_DROPIN=/etc/systemd/system/disdex-current-runtime-coherence-guard.service.d/zzzzzzzzzzzz-v12-v4.conf
+RETIRE_EVIDENCE=/var/lib/disdex/runner-health/private/v12-v4-legacy-retirement.json
+ACK=I_ACK_V12_V4_MONITORING_CUTOVER
+
+usage(){ echo "Usage: disdex-v12-v4-monitoring-wiring [--check|--apply] --legacy-sha <sha> [--ack $ACK]"; }
+arg(){ local n="$1" i; for ((i=1;i<=$#;i++)); do :; done; }
+get_arg(){
+  local name="$1"; shift
+  while (($#)); do [[ "$1" == "$name" ]] && { printf '%s' "${2:-}"; return 0; }; shift; done
+  return 1
+}
+exact_sha(){ [[ "$1" =~ ^[0-9a-f]{40}$ ]]; }
+write_atomic(){
+  local path="$1" content="$2" dir tmp
+  dir="$(dirname "$path")"; install -d -o root -g root -m 0755 "$dir"
+  tmp="$(mktemp "$dir/.v12-v4-monitoring.XXXXXX")"
+  printf '%s\n' "$content" > "$tmp"; chown root:root "$tmp"; chmod 0644 "$tmp"; mv -f "$tmp" "$path"
+}
+active(){ [[ "$(systemctl is-active "$1" 2>/dev/null || true)" == active ]]; }
+
+resolve(){
+  RELEASE="$(readlink -f "$CURRENT" 2>/dev/null || true)"
+  [[ "$RELEASE" == "$ROOT/releases/"* && -d "$RELEASE" ]] || { echo V4_MONITOR_CURRENT_INVALID >&2; exit 2; }
+  SHA="$(basename "$RELEASE")"; exact_sha "$SHA" || { echo V4_MONITOR_SHA_INVALID >&2; exit 2; }
+  [[ "$(tr -d '[:space:]' < "$RELEASE/.disdex-release-sha")" == "$SHA" ]] || { echo V4_MONITOR_MARKER_MISMATCH >&2; exit 2; }
+  for f in scripts/v12-v4-production-runner.ts scripts/ops/root/disdex-runner-watchdog-current.mjs scripts/ops/root/disdex-runner-health-snapshot-current.mjs scripts/ops/root/disdex-current-runtime-coherence-guard deploy/systemd/disdex-v12-v4@.service; do
+    [[ -f "$RELEASE/$f" ]] || { echo "V4_MONITOR_REQUIRED_FILE_MISSING:$f" >&2; exit 2; }
+  done
+  V4_UNIT="disdex-v12-v4@$SHA.service"
+  PENGU_UNIT="disdex-pengu-dual-ls-v2@$SHA.service"
+  Q102_UNIT="disdex-quality102-causal-v1@$SHA.service"
+  V52_UNIT="disdex-v52-aster-only@$SHA.service"
+  FET_UNIT="disdex-fet-brk48@$SHA.service"
+  HYPE_UNIT="disdex-hype-long@$SHA.service"
+  IDLE_UNIT="disdex-idle-priority-short@$SHA.service"
+  RISK_UNIT="disdex-shared-crypto-risk@$SHA.service"
+  MARGIN_UNIT="disdex-v12-v52-margin-guard@$SHA.service"
+  HEALTH_ENV="$RUNTIME_ENV_DIR/$SHA.health-snapshot.env"
+  WATCHDOG_ENV="$RUNTIME_ENV_DIR/$SHA.watchdog.env"
+}
+
+check_legacy_inactive(){
+  local u
+  for u in "disdex-v12-x1-all@$LEGACY_SHA.service" "disdex-v12-x1-all@$SHA.service"; do
+    active "$u" && { echo "V4_MONITOR_LEGACY_V12_ACTIVE:$u" >&2; return 1; }
+  done
+}
+persistent_mask(){
+  local u="$1" runtime="/run/systemd/system/$1" persistent="/etc/systemd/system/$1"
+  [[ -L "$runtime" && "$(readlink "$runtime")" == /dev/null ]] && rm -f "$runtime"
+  systemctl disable "$u" >/dev/null 2>&1 || true
+  systemctl mask "$u" >/dev/null
+  [[ -L "$persistent" && "$(readlink "$persistent")" == /dev/null ]] || {
+    echo "V4_MONITOR_PERSISTENT_MASK_FAILED:$u" >&2; return 1;
+  }
+}
+render(){
+  HEALTH_CONTENT="DISDEX_HEALTH_SNAPSHOT_EXPECTED_SHA=$SHA
+DISDEX_HEALTH_SNAPSHOT_RELEASE_ROOT=$RELEASE
+DISDEX_HEALTH_SNAPSHOT_V12_VARIANT=V4
+DISDEX_HEALTH_SNAPSHOT_V12_EXPECTED_SHA=$SHA
+DISDEX_HEALTH_SNAPSHOT_V12_RELEASE_ROOT=$RELEASE
+DISDEX_HEALTH_SNAPSHOT_V12_SERVICE_UNIT=$V4_UNIT
+DISDEX_HEALTH_SNAPSHOT_V12_STATE_PATH=/var/lib/disdex/v12-v4/orders.json
+DISDEX_HEALTH_SNAPSHOT_PENGU_EXPECTED_SHA=$SHA
+DISDEX_HEALTH_SNAPSHOT_PENGU_RELEASE_ROOT=$RELEASE
+DISDEX_HEALTH_SNAPSHOT_V52_EXPECTED_SHA=$SHA
+DISDEX_HEALTH_SNAPSHOT_V52_RELEASE_ROOT=$RELEASE
+DISDEX_HEALTH_SNAPSHOT_Q102_EXPECTED_SHA=$SHA
+DISDEX_HEALTH_SNAPSHOT_Q102_RELEASE_ROOT=$RELEASE
+DISDEX_HEALTH_SNAPSHOT_FET_EXPECTED_SHA=$SHA
+DISDEX_HEALTH_SNAPSHOT_FET_RELEASE_ROOT=$RELEASE
+DISDEX_HEALTH_SNAPSHOT_HYPE_EXPECTED_SHA=$SHA
+DISDEX_HEALTH_SNAPSHOT_HYPE_RELEASE_ROOT=$RELEASE
+DISDEX_HEALTH_SNAPSHOT_IDLE_EXPECTED_SHA=$SHA
+DISDEX_HEALTH_SNAPSHOT_IDLE_RELEASE_ROOT=$RELEASE
+DISDEX_HEALTH_SNAPSHOT_HEALTH_ROOT=/var/lib/disdex/runner-health
+DISDEX_HEALTH_SNAPSHOT_KILL_SWITCH_PATH=/var/lib/disdex/shared/kill-switch.json
+DISDEX_HEALTH_SNAPSHOT_PENGU_STATE_PATH=/var/lib/disdex/pengu-dual-ls-v2/runner-live.json
+DISDEX_HEALTH_SNAPSHOT_V52_STATE_PATH=/var/lib/disdex/v52-aster-only/runner-live.json
+DISDEX_HEALTH_SNAPSHOT_Q102_STATE_PATH=/var/lib/disdex/quality102-causal-v1/state.json
+DISDEX_HEALTH_SNAPSHOT_FET_STATE_PATH=/var/lib/disdex/fet-brk48-residual/state.json
+DISDEX_HEALTH_SNAPSHOT_HYPE_STATE_PATH=/var/lib/disdex/hype-zec-long/runner.json
+DISDEX_HEALTH_SNAPSHOT_IDLE_STATE_PATH=/var/lib/disdex/idle-priority/state.json
+DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_STATE_PATH=/var/lib/disdex/shared/crypto-daily-risk.json
+DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_SERVICE_UNIT=$RISK_UNIT
+DISDEX_HEALTH_SNAPSHOT_MARGIN_STATE_PATH=/var/lib/disdex/shared/margin-risk/guard-live.json
+DISDEX_HEALTH_SNAPSHOT_MARGIN_SERVICE_UNIT=$MARGIN_UNIT"
+
+  WATCHDOG_CONTENT="DISDEX_WATCHDOG_RELEASE_ROOT=$RELEASE
+DISDEX_WATCHDOG_EXPECTED_SHA=$SHA
+DISDEX_WATCHDOG_APPROVED_SHA=$SHA
+DISDEX_WATCHDOG_V12_VARIANT=V4
+DISDEX_WATCHDOG_V12_EXPECTED_SHA=$SHA
+DISDEX_WATCHDOG_V12_RELEASE_ROOT=$RELEASE
+DISDEX_WATCHDOG_V12_SERVICE_UNIT=$V4_UNIT
+DISDEX_WATCHDOG_PENGU_EXPECTED_SHA=$SHA
+DISDEX_WATCHDOG_PENGU_RELEASE_ROOT=$RELEASE
+DISDEX_WATCHDOG_PENGU_SERVICE_UNIT=$PENGU_UNIT
+DISDEX_WATCHDOG_V52_EXPECTED_SHA=$SHA
+DISDEX_WATCHDOG_V52_RELEASE_ROOT=$RELEASE
+DISDEX_WATCHDOG_V52_SERVICE_UNIT=$V52_UNIT
+DISDEX_WATCHDOG_Q102_EXPECTED_SHA=$SHA
+DISDEX_WATCHDOG_Q102_RELEASE_ROOT=$RELEASE
+DISDEX_WATCHDOG_Q102_SERVICE_UNIT=$Q102_UNIT
+DISDEX_WATCHDOG_FET_EXPECTED_SHA=$SHA
+DISDEX_WATCHDOG_FET_RELEASE_ROOT=$RELEASE
+DISDEX_WATCHDOG_FET_SERVICE_UNIT=$FET_UNIT
+DISDEX_WATCHDOG_HYPE_EXPECTED_SHA=$SHA
+DISDEX_WATCHDOG_HYPE_RELEASE_ROOT=$RELEASE
+DISDEX_WATCHDOG_HYPE_SERVICE_UNIT=$HYPE_UNIT
+DISDEX_WATCHDOG_IDLE_EXPECTED_SHA=$SHA
+DISDEX_WATCHDOG_IDLE_RELEASE_ROOT=$RELEASE
+DISDEX_WATCHDOG_IDLE_SERVICE_UNIT=$IDLE_UNIT
+DISDEX_WATCHDOG_SHARED_RISK_EXPECTED_SHA=$SHA
+DISDEX_WATCHDOG_HEALTH_ROOT=/var/lib/disdex/runner-health
+DISDEX_WATCHDOG_STATE_PATH=/var/lib/disdex/runner-health/private/watchdog-current-state.json
+DISDEX_WATCHDOG_AUDIT_PATH=/var/lib/disdex/runner-health/private/watchdog-current-audit.json
+DISDEX_WATCHDOG_LOCK_PATH=/var/lib/disdex/runner-health/private/watchdog-current.lock
+DISDEX_WATCHDOG_OPERATOR_ACTIVATION_PATH=/var/lib/disdex/shared/operator-activation/current.json"
+}
+
+self_test(){
+  grep -q 'DISDEX_HEALTH_SNAPSHOT_V12_VARIANT=V4' "$0"
+  grep -q 'DISDEX_WATCHDOG_V12_VARIANT=V4' "$0"
+  grep -q 'systemctl disable --now disdex-runner-position-recovery.timer' "$0"
+  grep -q 'systemctl disable --now disdex-v12-three-hour-health-check.timer' "$0"
+  grep -q 'systemctl disable --now disdex-v12-kill-switch-auto-repair.path' "$0"
+  grep -q 'persistent_mask "disdex-v12-x1-all@$LEGACY_SHA.service"' "$0"
+  echo DISDEX_V12_V4_MONITORING_WIRING_SELFTEST_PASS
+}
+
+main(){
+  [[ "${1:-}" == --self-test ]] && { self_test; exit 0; }
+  MODE="${1:---check}"; shift || true
+  LEGACY_SHA="$(get_arg --legacy-sha "$@" || true)"
+  exact_sha "$LEGACY_SHA" || { echo V4_MONITOR_LEGACY_SHA_REQUIRED >&2; exit 2; }
+  resolve; render
+  check_legacy_inactive
+  case "$MODE" in
+    --check)
+      echo "V4_MONITORING_CHECK_PASS sha=$SHA legacySha=$LEGACY_SHA v4Unit=$V4_UNIT tradingMutation=0"
+      ;;
+    --apply)
+      [[ "$(id -u)" == 0 ]] || { echo V4_MONITOR_ROOT_REQUIRED >&2; exit 1; }
+      [[ "$(get_arg --ack "$@" || true)" == "$ACK" ]] || { echo V4_MONITOR_ACK_REQUIRED >&2; exit 2; }
+
+      systemctl disable --now disdex-runner-watchdog.timer >/dev/null 2>&1 || true
+      systemctl stop disdex-runner-watchdog.service >/dev/null 2>&1 || true
+      systemctl disable --now disdex-runner-position-recovery.timer >/dev/null 2>&1 || true
+      systemctl stop disdex-runner-position-recovery.service >/dev/null 2>&1 || true
+      systemctl disable --now disdex-v12-three-hour-health-check.timer >/dev/null 2>&1 || true
+      systemctl stop disdex-v12-three-hour-health-check.service >/dev/null 2>&1 || true
+      systemctl disable --now disdex-v12-kill-switch-auto-repair.path >/dev/null 2>&1 || true
+      systemctl stop disdex-v12-kill-switch-auto-repair.service >/dev/null 2>&1 || true
+      systemctl disable --now disdex-current-runtime-coherence-guard.timer >/dev/null 2>&1 || true
+      systemctl stop disdex-current-runtime-coherence-guard.service >/dev/null 2>&1 || true
+
+      check_legacy_inactive
+      persistent_mask "disdex-v12-x1-all@$LEGACY_SHA.service"
+      persistent_mask "disdex-v12-x1-all@$SHA.service"
+
+      write_atomic "$HEALTH_ENV" "$HEALTH_CONTENT"
+      write_atomic "$WATCHDOG_ENV" "$WATCHDOG_CONTENT"
+      write_atomic "$HEALTH_DROPIN" "[Service]
+EnvironmentFile=
+EnvironmentFile=$HEALTH_ENV
+WorkingDirectory=$RELEASE
+ExecStartPre=
+ExecStartPre=/usr/bin/test -f $RELEASE/.disdex-release-sha
+ExecStartPre=/usr/bin/grep -Fxq $SHA $RELEASE/.disdex-release-sha
+ExecStart=
+ExecStart=/usr/bin/node $RELEASE/scripts/ops/root/disdex-runner-health-snapshot-current.mjs"
+      write_atomic "$WATCHDOG_DROPIN" "[Service]
+EnvironmentFile=
+EnvironmentFile=$WATCHDOG_ENV
+WorkingDirectory=$RELEASE
+ExecStartPre=
+ExecStartPre=/usr/bin/test -f $RELEASE/.disdex-release-sha
+ExecStartPre=/usr/bin/grep -Fxq $SHA $RELEASE/.disdex-release-sha
+ExecStart=
+ExecStart=/usr/bin/node $RELEASE/scripts/ops/root/disdex-runner-watchdog-current.mjs"
+      write_atomic "$ALERT_DROPIN" "[Service]
+WorkingDirectory=$RELEASE
+Environment=DISDEX_ALERT_V12_SERVICE_UNIT=$V4_UNIT
+ExecStart=
+ExecStart=$RELEASE/node_modules/.bin/tsx $RELEASE/scripts/ops/root/disdex-runner-health-alert.ts"
+      write_atomic "$COHERENCE_DROPIN" "[Service]
+Environment=DISDEX_V12_RUNTIME_VARIANT=V4
+Environment=DISDEX_V12_LEGACY_RETIRED_SHA=$LEGACY_SHA
+WorkingDirectory=$RELEASE
+ExecStart=
+ExecStart=/usr/bin/bash $RELEASE/scripts/ops/root/disdex-current-runtime-coherence-guard --auto"
+
+      install -d -o root -g root -m 0700 "$(dirname "$RETIRE_EVIDENCE")"
+      python3 - "$RETIRE_EVIDENCE" "$SHA" "$LEGACY_SHA" <<'PY'
+import json,os,sys,tempfile,time
+path,sha,legacy=sys.argv[1:]
+data={"schema":"disdex-v12-v4-legacy-retirement/v1","v4Sha":sha,"legacySha":legacy,
+      "retiredUnits":[f"disdex-v12-x1-all@{legacy}.service",f"disdex-v12-x1-all@{sha}.service"],
+      "positionRecoveryDisabled":True,"v12AutoRepairDisabled":True,"v12ThreeHourHealthDisabled":True,
+      "updatedAt":int(time.time()*1000)}
+fd,tmp=tempfile.mkstemp(prefix=".v12-v4-retire.",dir=os.path.dirname(path),text=True)
+with os.fdopen(fd,"w") as f: json.dump(data,f,indent=2);f.write("\n");f.flush();os.fsync(f.fileno())
+os.chown(tmp,0,0);os.chmod(tmp,0o600);os.replace(tmp,path)
+PY
+      systemctl daemon-reload
+      systemctl enable --now disdex-runner-health-snapshot.timer
+      systemctl enable --now disdex-runner-health-alert.timer
+      systemctl enable --now disdex-trade-fill-notifier.timer
+      systemctl enable --now disdex-runner-watchdog.timer
+      systemctl enable --now disdex-current-runtime-coherence-guard.timer
+      systemctl reset-failed disdex-runner-watchdog.service >/dev/null 2>&1 || true
+      systemctl start disdex-runner-health-snapshot.service
+      systemctl start disdex-runner-watchdog.service || true
+
+      [[ "$(systemctl is-enabled disdex-runner-position-recovery.timer 2>/dev/null || true)" != enabled ]]
+      [[ "$(systemctl is-enabled disdex-v12-three-hour-health-check.timer 2>/dev/null || true)" != enabled ]]
+      [[ "$(systemctl is-enabled disdex-v12-kill-switch-auto-repair.path 2>/dev/null || true)" != enabled ]]
+      [[ -L "/etc/systemd/system/disdex-v12-x1-all@$LEGACY_SHA.service" && "$(readlink "/etc/systemd/system/disdex-v12-x1-all@$LEGACY_SHA.service")" == /dev/null ]]
+      echo "V4_MONITORING_APPLY_PASS sha=$SHA legacySha=$LEGACY_SHA oldV12PersistentMask=true legacyRecoveryDisabled=true tradingMutation=0"
+      ;;
+    *) usage; exit 2;;
+  esac
+}
+main "$@"
