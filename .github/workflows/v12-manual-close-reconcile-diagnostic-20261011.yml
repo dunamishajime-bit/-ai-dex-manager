@@ -51,6 +51,7 @@ jobs:
             set -a
             . /etc/disdex/disdex-v13d-v11eq-v96.env
             . /etc/disdex/disdex-v12-pengu-v2-v52.env
+            . /etc/disdex/disdex-v12-x1-all.env
             set +a
             cd "$target"
             ./node_modules/.bin/tsx scripts/v12-external-manual-close-reconcile.ts               --ack I_ACK_V12_EXTERNAL_MANUAL_CLOSE_RECONCILIATION               --expected-state-sha "$EXPECTED_CURRENT_SHA"
