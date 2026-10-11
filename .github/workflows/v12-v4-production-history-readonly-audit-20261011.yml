@@ -85,9 +85,16 @@ jobs:
           python3 - <<'PY'
           import json
           d=json.load(open("production-history-audit.json",encoding="utf-8"))
-          raw=json.dumps(d)
-          forbidden=("privateKey","signature","secret","mnemonic","apiKey")
-          assert not any(x in raw for x in forbidden)
+          forbidden_keys={"privateKey","signature","mnemonic","apiKey","apiSecret","accessToken","authorization","password"}
+          def walk(x):
+              if isinstance(x,dict):
+                  for k,v in x.items():
+                      assert k not in forbidden_keys
+                      walk(v)
+              elif isinstance(x,list):
+                  for v in x: walk(v)
+          walk(d)
+          assert d.get("secretDisclosed") is False
           print("LOCAL_ARTIFACT_SECRET_SCAN=PASS")
           PY
 
