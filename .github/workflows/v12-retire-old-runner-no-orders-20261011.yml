@@ -53,6 +53,23 @@ jobs:
           assert d.get("reconciliationStatus")=="PASS"
           print("V12_STATE_FLAT=TRUE")
           PY
+
+          [[ -f "$state" && ! -L "$state" ]]
+          chown deploy:deploy "$state"
+          chmod 0600 "$state"
+          [[ "$(stat -c '%U:%G:%a' "$state")" == "deploy:deploy:600" ]]
+          runuser -u deploy -- python3 - "$state" <<'PY'
+          import json,sys
+          d=json.load(open(sys.argv[1]))
+          assert not d.get("active")
+          assert not d.get("activePositions")
+          assert not d.get("pending")
+          assert not d.get("manualReview")
+          assert not (d.get("killSwitch") or {}).get("active")
+          assert d.get("reconciliationStatus")=="PASS"
+          print("V12_STATE_OWNERSHIP_NORMALIZED=TRUE")
+          PY
+
           out="$(mktemp)"; err="$(mktemp)"
           trap 'rm -f "$out" "$err"' EXIT
           (
