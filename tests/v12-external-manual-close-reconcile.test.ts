@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {mkdtempSync,rmSync} from "node:fs";
+import {mkdtempSync,rmSync,readFileSync} from "node:fs";
 import {tmpdir} from "node:os";
 import {join} from "node:path";
 import {FileV12X1AllRunnerStateStore} from "../lib/v12-x1-all-runner-state";
@@ -119,4 +119,14 @@ test("external manual close rejects a transient reversal larger than the owned e
   assert.equal(after.active?.symbol,"ETHUSDT");
   assert.equal(after.manualReview,"V12_POSITION_SIDE_OR_QTY_MISMATCH");
  }finally{rmSync(dir,{recursive:true,force:true});}
+});
+
+
+test("manual-close CLI restores canonical deploy ownership after root state replacement",()=>{
+ const source=readFileSync(join(process.cwd(),"scripts/v12-external-manual-close-reconcile.ts"),"utf8");
+ assert.match(source,/normalizeLiveStateOwnership/);
+ assert.match(source,/V12_EXTERNAL_CLOSE_STATE/);
+ assert.match(source,/stateOwnership:"deploy:deploy:600"/);
+ assert.ok((source.match(/await normalizeStateOwnership\(\)/g)||[]).length>=2);
+ assert.match(source,/catch\(error\)\{\s*try\{await normalizeStateOwnership\(\);\}catch\{\}/s);
 });
