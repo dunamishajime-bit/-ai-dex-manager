@@ -12,7 +12,7 @@ Repository:
 `dunamishajime-bit/-ai-dex-manager`
 
 Final code candidate branch:
-`fix/v12-v4-monitor-coherence-20261011`
+`release/v12-v4-monitor-coherence-final-20261011`
 
 Final code candidate SHA:
 `447205ee22ab64d2d0013922eeccfd4a1e14a72f`
@@ -30,7 +30,7 @@ Do not silently alter 447205. If source changes are needed, generate a new SHA a
 ## 2. Exact-SHA certification already completed
 
 ### Full Linux certification
-Run `38137971256`: SUCCESS on exact SHA 447205.
+Run `38138117036`: SUCCESS on exact SHA 447205.
 
 Passed:
 - root dependency install
@@ -57,26 +57,28 @@ Evidence:
 - V4 not started
 
 ### Final decision-to-order and VPS read-only audit
-Run `38138588141`: SUCCESS for both jobs.
+Run `38138887252`: SUCCESS for both jobs.
 
 Static job PASS:
 - critical decision-to-order tests
 - runner self-tests
 - critical runtime compilation
 
-VPS read-only job PASS:
+VPS read-only job PASS after persistent retirement:
 - current Production remains ce1edee
+- current/release marker equality PASS
 - signed Aster account readback succeeds
 - positions = 0
 - open orders = 0
 - orders/cancels/position changes = 0
-- account-config-readiness latest execution status = 0
+- legacy ce1edee and f8c70d instances read back as masked/inactive/dead
+- Margin Guard is fresh HEALTHY with ordersAllowed=true and consecutiveFailures=0
 - final candidate release exists on VPS
 - disk approximately 7.7 GB free / 84% used
 
 ## 3. Legacy V12 retirement is now persistent
 
-Run `38135759555`: SUCCESS.
+Run `38138846574`: SUCCESS.
 
 Verified before retirement:
 - V12 state flat
@@ -87,9 +89,13 @@ Verified before retirement:
 - trading mutation = 0
 
 Then:
-- old exact V12 instance stopped
-- runtime mask was removed
-- persistent systemd mask installed under /etc/systemd/system
+- all discovered exact-SHA legacy V12 instances were stopped
+- runtime masks were removed where present
+- persistent systemd masks were installed under /etc/systemd/system
+- persistent masks verified for:
+  - `26c4796d1385239098966913c78a6ca3f2d74997`
+  - `ce1edeead8d0f9e5d88e829d415057117502a335`
+  - `f8c70d3d3144478afff0a8faf6dfc8405d304532`
 - `OLD_V12_PERSISTENTLY_MASKED=TRUE`
 - V4 Canary inactive
 - V4 Production inactive
@@ -125,7 +131,7 @@ Implemented contract:
 - Health alert resolver accepts the exact-SHA V4 unit and fails closed on mismatched explicit units.
 - Rollback to an old SHA uses that old SHA's own primary-mode contract instead of silently reusing the V4 marker.
 
-These changes are certified by Run 38137971256 and static-order-path Run 38138588141.
+These changes are certified by Run 38138117036 and static-order-path Run 38138887252.
 
 Current Production is still ce1edee, therefore the legacy watchdog may still show failed while the old V12 is intentionally masked. Do not "fix" that by unmasking V12. The 447205 V4-aware monitor/coherence contract must be applied atomically with final V4 cutover.
 
