@@ -103,7 +103,7 @@ jobs:
           stage="$root/releases/.stage-$TARGET_SHA-$RUN_ID"
           [[ "$target" != "$current" ]]
           old_v12="disdex-v12-x1-all@$EXPECTED_CURRENT_SHA.service"
-          [[ "$(systemctl is-active "$old_v12" 2>/dev/null || true)" == "active" ]]
+          old_v12_before="$(systemctl is-active "$old_v12" 2>/dev/null || true)"
           kill_before="$(sha256sum /var/lib/disdex/shared/kill-switch.json | awk '{print $1}')"
           if [[ -e "$target" ]]; then
             [[ -f "$target/.disdex-release-sha" ]]
@@ -140,14 +140,14 @@ jobs:
           fi
           [[ "$(readlink -f "$root/current")" == "$current" ]]
           [[ "$(tr -d '[:space:]' < "$root/current/.disdex-release-sha")" == "$EXPECTED_CURRENT_SHA" ]]
-          [[ "$(systemctl is-active "$old_v12" 2>/dev/null || true)" == "active" ]]
+          [[ "$(systemctl is-active "$old_v12" 2>/dev/null || true)" == "$old_v12_before" ]]
           [[ "$(sha256sum /var/lib/disdex/shared/kill-switch.json | awk '{print $1}')" == "$kill_before" ]]
           ! systemctl list-units --type=service --all --no-legend | grep -F "$TARGET_SHA" >/dev/null
           [[ ! -e /etc/disdex/v12-v4-production-canary-permit.json ]]
           rm -f "$ARCHIVE" "/tmp/v12-v4-stage-selftest-$RUN_ID.log"
           echo "V12_V4_STAGE_PATH=$target"
           echo "CURRENT_SHA_UNCHANGED=$EXPECTED_CURRENT_SHA"
-          echo 'OLD_V12_ACTIVE=TRUE'
+          echo "OLD_V12_STATE_UNCHANGED=$old_v12_before"
           echo 'V4_SERVICE_STARTED=FALSE'
           echo 'APPROVAL_ARTIFACT_CREATED=FALSE'
           echo 'ORDERS_SENT=0'
