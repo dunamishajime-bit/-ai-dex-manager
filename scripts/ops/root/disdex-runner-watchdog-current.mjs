@@ -472,7 +472,58 @@ function decision(action, reason, runner, extra = {}) {
     return { runner: runner.key, unit: runner.unit, action, reason: safeReason(reason), tradingEffects: { ...ZERO_EFFECTS }, ...extra };
 }
 
+/**
+ * Keep the legacy V12 permanently retired during the approved, single-entry
+ * V4 canary. Do not revive it when its stale heartbeat disappears.
+ * This does not authorize an entry, restart the canary, or relax peer checks.
+ * Every attestation is read-only and fails closed when the canary is unhealthy.
+ */
+function retiredCanaryProperties(text) {
+    return Object.fromEntries(String(text).split(/\r?\n/).filter(s => s.includes("="))
+        .map(line => [line.slice(0, line.indexOf("=")), line.slice(line.indexOf("=") + 1)]));
+}
+function assertRetiredV12CanaryEvidence(args) {
+    const { legacy, canary, heartbeat, legacyUnit, canaryUnit, sha, now } = args;
+    if (!exactSha(sha) || legacy.UnitFileState !== "masked" ||
+        legacy.ActiveState !== "inactive" || legacy.MainPID !== "0")
+        throw new Error("RETIRED_V12_MASK_OR_PROCESS_ATTESTATION_FAILED");
+    if (canary.Id !== canaryUnit || canary.ActiveState !== "active" ||
+        canary.SubState !== "running" || !/^[1-9][0-9]*$/.test(canary.MainPID || "") ||
+        canary.WorkingDirectory !== `/home/deploy/disdex-trading/releases/${sha}`)
+        throw new Error("V4_CANARY_SYSTEMD_ATTESTATION_FAILED");
+    if (heartbeat?.schema !== "disdex-v12-v4-runner-heartbeat/v1" ||
+        heartbeat.releaseSha !== sha || heartbeat.operationMode !== "CANARY" ||
+        !Number.isFinite(heartbeat.updatedAt) || heartbeat.updatedAt > now ||
+        now - heartbeat.updatedAt > 180000)
+        throw new Error("V4_CANARY_HEARTBEAT_ATTESTATION_FAILED");
+    return { expectedUnit: legacyUnit, canaryUnit };
+}
+async function attestRetiredV12Canary(runner, now) {
+    const sha = String(process.env.DISDEX_WATCHDOG_RETIRED_V12_CANARY_SHA || "").trim().toLowerCase();
+    if (!sha || runner.key !== "V12_X1_ALL") return null;
+    if (!exactSha(sha)) throw new Error("V4_CANARY_SHA_NOT_EXACT");
+    const canaryUnit = `disdex-v12-v4-canary@${sha}.service`;
+    const [legacyText, canaryText, legacyList, heartbeatText] = await Promise.all([
+        systemctl(["show", runner.unit, "--property=UnitFileState,ActiveState,MainPID", "--no-pager"], true),
+        systemctl(["show", canaryUnit, "--property=Id,ActiveState,SubState,MainPID,WorkingDirectory", "--no-pager"], true),
+        systemctl(["list-units", "--all", "--type=service", "--no-legend", "disdex-v12-x1-all@*.service"], true),
+        readFile("/var/lib/disdex/v12-v4/heartbeat.json", "utf8"),
+    ]);
+    const nonInactive = parseNonInactiveServiceUnits(legacyList, "disdex-v12-x1-all");
+    if (nonInactive.length) throw new Error("RETIRED_V12_ACTIVE_INSTANCE_DETECTED");
+    assertRetiredV12CanaryEvidence({
+        legacy: retiredCanaryProperties(legacyText),
+        canary: retiredCanaryProperties(canaryText),
+        heartbeat: JSON.parse(heartbeatText), legacyUnit: runner.unit,
+        canaryUnit, sha, now,
+    });
+    return { result: decision("NOOP", "persistently masked legacy V12; exact-SHA active V4 canary attested (no legacy restart)", runner),
+        attempts: [], clearAttempts: true };
+}
+
 async function evaluateRunner(config, runner, state, now) {
+    const retired = await attestRetiredV12Canary(runner, now);
+    if (retired) return retired;
     const paths = runnerPaths(config, runner);
     const attempts = recentAttempts(state, runner.key, now);
     if (runner.key === "V52" && await markerExists(paths.stopMarker)) {
@@ -819,6 +870,32 @@ function selfTest() {
     const activationAllowed = applyOperatorActivationGateToRestart(restartRequested, { allowed: true, reason: "OPERATOR_LIVE_ACTIVATION_CONFIRMED" }, v12, decision);
     if (activationAllowed.action !== "RESTART") throw new Error("operator activation ready self-test failed");
     console.log("DISDEX_CURRENT_WATCHDOG_OPERATOR_ACTIVATION_GATE_SELFTEST_PASS");
+    const retiredSha = "a".repeat(40);
+    const retiredUnit = `disdex-v12-x1-all@${retiredSha}.service`;
+    const canaryUnit = `disdex-v12-v4-canary@${retiredSha}.service`;
+    const retiredProps = { UnitFileState: "masked", ActiveState: "inactive", MainPID: "0" };
+    const canaryProps = { Id: canaryUnit, ActiveState: "active", SubState: "running",
+        MainPID: "12345", WorkingDirectory: `/home/deploy/disdex-trading/releases/${retiredSha}` };
+    const hb = { schema: "disdex-v12-v4-runner-heartbeat/v1", releaseSha: retiredSha,
+        operationMode: "CANARY", updatedAt: now };
+    assertRetiredV12CanaryEvidence({ legacy: retiredProps, canary: canaryProps, heartbeat: hb,
+        legacyUnit: retiredUnit, canaryUnit, sha: retiredSha, now });
+    for (const bad of [
+        { legacy: { ...retiredProps, UnitFileState: "enabled" } },
+        { legacy: { ...retiredProps, ActiveState: "active", MainPID: "99" } },
+        { canary: { ...canaryProps, ActiveState: "inactive" } },
+        { heartbeat: { ...hb, operationMode: "CERTIFIED" } },
+        { heartbeat: { ...hb, updatedAt: now - 181000 } },
+    ]) {
+        try {
+            assertRetiredV12CanaryEvidence({ legacy: retiredProps, canary: canaryProps,
+                heartbeat: hb, legacyUnit: retiredUnit, canaryUnit, sha: retiredSha, now, ...bad });
+            throw new Error("retired canary fail-closed test unexpectedly passed");
+        } catch (err) {
+            if (String(err.message).includes("unexpectedly passed")) throw err;
+        }
+    }
+    console.log("DISDEX_WATCHDOG_RETIRED_V12_CANARY_FAIL_CLOSED_SELFTEST_PASS");
     const source = readFileSync(new URL(import.meta.url), "utf8");
     if (/(?:submitOrder|cancelOrder|closePosition|placeMarket|modifyPosition)\s*\(/.test(source)) throw new Error("forbidden operation self-test failed");
     console.log("DISDEX_CURRENT_WATCHDOG_SELFTEST_PASS");
