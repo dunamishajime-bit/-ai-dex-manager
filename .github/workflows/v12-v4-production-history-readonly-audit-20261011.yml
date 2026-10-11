@@ -50,9 +50,9 @@ jobs:
           scp "${common[@]}" -P "$PORT" scripts/v12-v4-production-history-deep-readonly-audit.ts "root@$SSH_HOST:$remote_script"
           ssh -T "${common[@]}" -p "$PORT" "root@$SSH_HOST" "AUDIT_SCRIPT='$remote_script' AUDIT_RESULT='$remote_result' bash -s" <<'REMOTE'
           set -Eeuo pipefail
-          release=/home/deploy/disdex-trading/releases/6723948608ce9c8ab3aba077cba7e5a0d7f6f708
+          release=/home/deploy/disdex-trading/releases/447205ee22ab64d2d0013922eeccfd4a1e14a72f
           [[ -d "$release" && -x "$release/node_modules/.bin/tsx" ]]
-          [[ "$(tr -d '[:space:]' < "$release/.disdex-release-sha")" == "6723948608ce9c8ab3aba077cba7e5a0d7f6f708" ]]
+          [[ "$(tr -d '[:space:]' < "$release/.disdex-release-sha")" == "447205ee22ab64d2d0013922eeccfd4a1e14a72f" ]]
           set -a
           for f in /etc/disdex/disdex-v13d-v11eq-v96.env /etc/disdex/disdex-v12-pengu-v2-v52.env /etc/disdex/disdex-v12-x1-all.env; do
             [[ -f "$f" ]] && . "$f"
