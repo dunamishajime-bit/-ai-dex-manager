@@ -52,6 +52,7 @@ jobs:
           PY
           cat >/tmp/v12-eth-proof.ts <<'TS'
           import {readFileSync} from "node:fs";
+          async function main(){
           const {AsterV3Client}=await import(process.env.ASTER_CLIENT_MODULE!);
           const a=JSON.parse(readFileSync("/tmp/v12-eth-proof-args.json","utf8"));
           const client=new AsterV3Client({
@@ -90,6 +91,8 @@ jobs:
             funding:income.map(x=>({tranId:String(x.tranId),income:Number(x.income),time:Number(x.time)})),
             ordersSent:0,cancelsSent:0,positionChangesSent:0
           }));
+          }
+          main().catch(e=>{console.error(String(e?.stack||e));process.exitCode=1});
           TS
           (
             set -Eeuo pipefail
