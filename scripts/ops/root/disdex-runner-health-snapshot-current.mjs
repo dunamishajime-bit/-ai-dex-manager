@@ -294,11 +294,14 @@ function releaseValid(runner) {
 
 function stateIdentityMatches(runner, state) {
     const strategyId = String(state?.strategyId || "");
+    if (runner.key === "V12_V4") {
+        return state?.schema === "disdex-v12-v4-runner-heartbeat/v1"
+            && strategyId === "V12_V4"
+            && String(state?.releaseSha || state?.runtimeSha || "").toLowerCase() === runner.expectedSha
+            && String(state?.operationMode || "").toUpperCase() === "CERTIFIED";
+    }
     return strategyId === runner.runnerId
         || (runner.key === "V12_X1_ALL" && strategyId === "V12_X1.00_ALL")
-        || (runner.key === "V12_V4" && state?.schema === "disdex-v12-v4-runner-heartbeat/v1"
-            && String(state?.releaseSha || state?.runtimeSha || "").toLowerCase() === runner.expectedSha
-            && String(state?.operationMode || "").toUpperCase() === "CERTIFIED")
         || (runner.key === "PENGU_V8" && strategyId === "PENGU_DUAL_LS_V2_FINAL")
         || (runner.key === "V52" && strategyId === "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96")
         || (runner.key === "HYPE_TREND_LONG" && state?.schema === "disdex-hype-zec-long/v1" && state?.mode === "LIVE" && String(state?.runtimeCommitSha || "").toLowerCase() === runner.expectedSha)
