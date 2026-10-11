@@ -9,7 +9,7 @@ const num=(x:unknown)=>Number.isFinite(Number(x))?Number(x):0;
 
 async function main(){
  const releaseRoot=realpathSync(String(process.env.DISDEX_V4_AUDIT_RELEASE_ROOT||""));
- if(!releaseRoot.endsWith("/6723948608ce9c8ab3aba077cba7e5a0d7f6f708"))throw Error("DEEP_AUDIT_EXACT_RELEASE_REQUIRED");
+ if(!releaseRoot.endsWith("/447205ee22ab64d2d0013922eeccfd4a1e14a72f"))throw Error("DEEP_AUDIT_EXACT_RELEASE_REQUIRED");
  const {AsterV3Client}=await import(pathToFileURL(join(releaseRoot,"lib/aster-v3-client.ts")).href) as any;
  const baseUrl=String(process.env.ASTER_FUTURES_BASE_URL||"https://fapi.asterdex.com").trim().replace(/\/+$/,"");
  if(baseUrl!=="https://fapi.asterdex.com")throw Error("DEEP_AUDIT_PRODUCTION_HOST_REQUIRED");
@@ -103,7 +103,7 @@ async function main(){
  const ambiguousTriggeredProtectionOrders=orderRows.filter(x=>x.reduceOnly===true&&x.status==="FILLED"&&Number(x.stopPrice)>0);
  const evidenceCore={
   schema:"disdex-v12-v4-production-history-deep-readonly/v2",status:"PASS_SIGNED_GET_ONLY",
-  observedAt:new Date().toISOString(),candidateSha:"6723948608ce9c8ab3aba077cba7e5a0d7f6f708",
+  observedAt:new Date().toISOString(),candidateSha:"447205ee22ab64d2d0013922eeccfd4a1e14a72f",
   productionHost:true,positionMode:{dualSidePosition:mode?.dualSidePosition===true},
   account:accountEvidence,
   history:{queriedSymbols:symbols,totalTrades,totalDistinctOrders:totalOrders,multiFillOrders,maxFills,
