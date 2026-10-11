@@ -1,0 +1,150 @@
+name: V12 V4 cutover prep no-orders 20261011
+on:
+  push:
+    branches: [ops/v12-v4-stage-only-20261011]
+    paths: [.github/workflows/v12-v4-cutover-prep-no-orders-20261011.yml]
+permissions:
+  contents: read
+jobs:
+  prep:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      TARGET_SHA: 52dccce5c5b5348eef16aa00de6eda1cbe7ec25d
+      EXPECTED_CURRENT_SHA: ce1edeead8d0f9e5d88e829d415057117502a335
+      SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+      ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+      SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+      SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+    steps:
+      - name: Configure root SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 0700 "$HOME/.ssh"
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path.home()/".ssh"
+          def norm(k): return os.environ[k].lstrip("\ufeff").replace("\r\n","\n").replace("\r","\n").strip()+"\n"
+          (p/"id_root").write_text(norm("ROOT_KEY"))
+          (p/"known_hosts").write_text(norm("SSH_KNOWN_HOSTS"))
+          PY
+          chmod 600 "$HOME/.ssh/id_root" "$HOME/.ssh/known_hosts"
+          ssh-keygen -y -f "$HOME/.ssh/id_root" >/dev/null
+
+      - name: Prepare cutover without enabling orders
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$HOME/.ssh/id_root" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" -p "$PORT" "root@$SSH_HOST"             "TARGET_SHA='$TARGET_SHA' EXPECTED_CURRENT_SHA='$EXPECTED_CURRENT_SHA' bash -s" <<'REMOTE'
+          set -Eeuo pipefail
+          root=/home/deploy/disdex-trading
+          current="$(readlink -f "$root/current")"
+          current_sha="$(tr -d '[:space:]' < "$current/.disdex-release-sha")"
+          target="$root/releases/$TARGET_SHA"
+          old_unit="disdex-v12-x1-all@$EXPECTED_CURRENT_SHA.service"
+          [[ "$current_sha" == "$EXPECTED_CURRENT_SHA" ]]
+          [[ -d "$target" ]]
+          [[ "$(tr -d '[:space:]' < "$target/.disdex-release-sha")" == "$TARGET_SHA" ]]
+          [[ ! -e /etc/disdex/v12-v4-production-canary-permit.json ]]
+          [[ ! -e /etc/disdex/v12-v4-production-certification.json ]]
+
+          run_readonly() {
+            local out err
+            out="$(mktemp)"; err="$(mktemp)"
+            trap 'rm -f "$out" "$err"' RETURN
+            (
+              set -Eeuo pipefail
+              set -a
+              . /etc/disdex/disdex-v13d-v11eq-v96.env
+              . /etc/disdex/disdex-v12-pengu-v2-v52.env
+              set +a
+              cd "$current"
+              ./node_modules/.bin/tsx scripts/disdex-aster-readonly-account-diagnostic.ts
+            ) >"$out" 2>"$err"
+            python3 - "$out" <<'PY'
+          import json,sys
+          obj=None
+          for line in open(sys.argv[1],encoding="utf-8",errors="replace"):
+              try:d=json.loads(line)
+              except Exception:continue
+              if isinstance(d,dict) and d.get("status")=="ASTER_READONLY_ACCOUNT_DIAGNOSTIC_PASS":obj=d
+          if obj is None: raise SystemExit("ASTER_READONLY_RESULT_MISSING")
+          pos=obj.get("positions",[]); orders=obj.get("openOrders",[])
+          if pos or orders:
+              raise SystemExit("ASTER_NOT_FLAT")
+          if any(obj.get(k)!=0 for k in ("ordersSent","cancelsSent","positionChangesSent")):
+              raise SystemExit("READONLY_MUTATION_COUNTER_NONZERO")
+          print("ASTER_FLAT=TRUE")
+          print("ASTER_POSITIONS=0")
+          print("ASTER_OPEN_ORDERS=0")
+          PY
+          }
+
+          run_readonly
+
+          state=/var/lib/disdex/v12-x1-all/runner.json
+          python3 - "$state" "$EXPECTED_CURRENT_SHA" <<'PY'
+          import json,sys
+          d=json.load(open(sys.argv[1]))
+          assert d.get("runtimeCommitSha")==sys.argv[2]
+          assert d.get("manualReview") and str(d["manualReview"]).startswith("V12_POSITION_SIDE_OR_QTY_MISMATCH")
+          assert d.get("active") or d.get("activePositions")
+          print("STALE_V12_STATE_CONFIRMED=TRUE")
+          PY
+
+          was_active="$(systemctl is-active "$old_unit" 2>/dev/null || true)"
+          systemctl stop "$old_unit" || true
+          [[ "$(systemctl is-active "$old_unit" 2>/dev/null || true)" != "active" ]]
+          echo "OLD_V12_PREP_STOPPED=TRUE"
+          echo "OLD_V12_WAS_ACTIVE=$was_active"
+
+          (
+            set -Eeuo pipefail
+            set -a
+            . /etc/disdex/disdex-v13d-v11eq-v96.env
+            . /etc/disdex/disdex-v12-pengu-v2-v52.env
+            set +a
+            cd "$target"
+            ./node_modules/.bin/tsx scripts/v12-external-manual-close-reconcile.ts               --ack I_ACK_V12_EXTERNAL_MANUAL_CLOSE_RECONCILIATION               --expected-state-sha "$EXPECTED_CURRENT_SHA"
+          ) | tee /tmp/v12-external-manual-close-reconcile.out
+
+          grep -Fq '"status":"V12_EXTERNAL_MANUAL_CLOSE_RECONCILED"' /tmp/v12-external-manual-close-reconcile.out
+          grep -Fq '"ordersSent":0' /tmp/v12-external-manual-close-reconcile.out
+          grep -Fq '"cancelsSent":0' /tmp/v12-external-manual-close-reconcile.out
+          grep -Fq '"positionChangesSent":0' /tmp/v12-external-manual-close-reconcile.out
+
+          python3 - "$state" <<'PY'
+          import json,sys
+          d=json.load(open(sys.argv[1]))
+          assert not d.get("active")
+          assert not d.get("activePositions")
+          assert not d.get("pending")
+          assert not d.get("manualReview")
+          assert not (d.get("killSwitch") or {}).get("active")
+          assert d.get("reconciliationStatus")=="PASS"
+          print("V12_STATE_FLAT=TRUE")
+          PY
+
+          run_readonly
+
+          install -o root -g root -m 0644 "$target/deploy/systemd/disdex-v12-v4-canary@.service" /etc/systemd/system/disdex-v12-v4-canary@.service
+          install -o root -g root -m 0644 "$target/deploy/systemd/disdex-v12-v4@.service" /etc/systemd/system/disdex-v12-v4@.service
+          systemctl daemon-reload
+          [[ "$(systemctl is-active "disdex-v12-v4-canary@$TARGET_SHA.service" 2>/dev/null || true)" != "active" ]]
+          [[ "$(systemctl is-active "disdex-v12-v4@$TARGET_SHA.service" 2>/dev/null || true)" != "active" ]]
+          [[ "$(readlink -f "$root/current")" == "$current" ]]
+          [[ "$(tr -d '[:space:]' < "$root/current/.disdex-release-sha")" == "$EXPECTED_CURRENT_SHA" ]]
+
+          rm -f /tmp/v12-external-manual-close-reconcile.out
+          echo "CURRENT_SHA_UNCHANGED=$EXPECTED_CURRENT_SHA"
+          echo "TARGET_SHA_STAGED=$TARGET_SHA"
+          echo "V4_SYSTEMD_INSTALLED=TRUE"
+          echo "V4_CANARY_ACTIVE=FALSE"
+          echo "V4_PRODUCTION_ACTIVE=FALSE"
+          echo "CANARY_PERMIT_EXISTS=FALSE"
+          echo "PRODUCTION_CERT_EXISTS=FALSE"
+          echo "TRADING_MUTATION=0"
+          echo "STATUS=V12_V4_CUTOVER_PREP_READY_NO_ORDERS"
+          REMOTE
