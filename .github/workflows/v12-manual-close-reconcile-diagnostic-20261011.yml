@@ -75,8 +75,12 @@ jobs:
                   if k in {"error","status","ordersSent","cancelsSent","positionChangesSent","stateRuntimeSha","reconciliationStatus"}:
                       safe[k]=v
               print("RECONCILE_RESULT="+json.dumps(safe,separators=(",",":")))
-          cats=[x for x in ["SHARED_PENDING","FILL","TRADE","ORDER","POSITION","STATE_SHA","REVIEW_REASON","RATE_BUDGET","LOCK_TIMEOUT","SATURATED","CREDENTIALS","EACCES"] if x in raw.upper()]
+          cats=[x for x in ["SHARED_PENDING","FILL","TRADE","ORDER","POSITION","STATE_SHA","REVIEW_REASON","RATE_BUDGET","LOCK_TIMEOUT","SATURATED","CREDENTIALS","EACCES","ESBUILD","MODULE","PERMISSION"] if x in raw.upper()]
           print("RECONCILE_ERROR_CATEGORIES="+",".join(cats))
+          scrub=re.sub(r"0x[a-fA-F0-9]{16,}","<hex>",raw)
+          scrub=re.sub(r"(?i)(private.?key|secret|token|authorization)\s*[:=]\s*[^\s,}]+",r"\1=<redacted>",scrub)
+          for line in scrub.splitlines()[:16]:
+              print("RECONCILE_RAW_SAFE="+line[:360])
           s=json.load(open(state))
           print("STATE_ACTIVE="+str(bool(s.get("active") or s.get("activePositions"))))
           print("STATE_MANUAL_REVIEW="+str(bool(s.get("manualReview"))))
