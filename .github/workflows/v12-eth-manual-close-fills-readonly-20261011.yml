@@ -52,7 +52,7 @@ jobs:
           PY
           cat >/tmp/v12-eth-proof.ts <<'TS'
           import {readFileSync} from "node:fs";
-          import {AsterV3Client} from process.env.ASTER_CLIENT_MODULE!;
+          const {AsterV3Client}=await import(process.env.ASTER_CLIENT_MODULE!);
           const a=JSON.parse(readFileSync("/tmp/v12-eth-proof-args.json","utf8"));
           const client=new AsterV3Client({
             baseUrl:process.env.ASTER_FUTURES_BASE_URL,
