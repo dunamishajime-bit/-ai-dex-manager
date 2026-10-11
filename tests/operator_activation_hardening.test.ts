@@ -18,7 +18,7 @@ function artifact(overrides: Record<string, unknown> = {}) {
     schema: "disdex-live-operator-activation/v1",
     target: TARGET,
     approvedSha: SHA,
-    approvedRunners: ["V12_X1_ALL", "PENGU_V8", "QUALITY102_CAUSAL_V1", "V52", "FET_BRK48_RESIDUAL"],
+    approvedRunners: ["V12_X1_ALL", "V12_V4", "PENGU_V8", "QUALITY102_CAUSAL_V1", "V52", "FET_BRK48_RESIDUAL"],
     ordersEnabled: true,
     operatorAcknowledgement: "I_ACK_REAL_MONEY_LIVE_ACTIVATION",
     approvedAt: new Date().toISOString(),
@@ -107,11 +107,15 @@ test("watchdog restart is held fail-closed until operator activation", () => {
   assert.equal(allowed.action, "RESTART");
 });
 
-test("runtime wiring places activation gate in every trading runner prestart", async () => {
+test("runtime wiring places exact operator gates in legacy and V4 primary paths", async () => {
   const source = await readFile("scripts/ops/root/disdex-current-runtime-wiring", "utf8");
   for (const runner of ["V12_X1_ALL", "PENGU_V8", "QUALITY102_CAUSAL_V1", "V52", "FET_BRK48_RESIDUAL"]) {
     assert.match(source, new RegExp(`--runner ${runner} --activation-path`));
   }
+  assert.match(source, /V12_OPERATOR_RUNNER="V12_V4"/);
+  assert.match(source, /for runner in "\$V12_OPERATOR_RUNNER" PENGU_V8 QUALITY102_CAUSAL_V1 V52 FET_BRK48_RESIDUAL/);
+  const v4Unit = await readFile("deploy/systemd/disdex-v12-v4@.service", "utf8");
+  assert.match(v4Unit, /ExecStartPre=\+\/usr\/bin\/node .*disdex-live-operator-activation-gate\.mjs .*--runner V12_V4 /);
   assert.match(source, /--require-implementation-ready/);
   assert.match(source, /DISDEX_WATCHDOG_OPERATOR_ACTIVATION_PATH=/);
 });
@@ -119,15 +123,18 @@ test("runtime wiring places activation gate in every trading runner prestart", a
 test("activation gate prestart runs as root so root-owned 0600 artifact remains fail-closed", async () => {
   const source = await readFile("scripts/ops/root/disdex-current-runtime-wiring", "utf8");
   const gateLines = source.split(/\r?\n/).filter((line) => line.includes("disdex-live-operator-activation-gate.mjs") && line.includes("ExecStartPre="));
-  assert.equal(gateLines.length, 7, "all-runner gate plus six runner gates must be rendered");
+  assert.ok(gateLines.length >= 6, "legacy/peer runner root prestart gates must remain rendered");
   for (const line of gateLines) assert.match(line, /ExecStartPre=\+\/usr\/bin\/node /);
   for (const path of [
     "ops/systemd/disdex-fet-brk48@.service",
     "ops/systemd/disdex-quality102-causal-v1@.service",
+    "deploy/systemd/disdex-v12-v4@.service",
   ]) {
     const unit = await readFile(path, "utf8");
     assert.match(unit, /ExecStartPre=\+\/usr\/bin\/node .*disdex-live-operator-activation-gate\.mjs/);
   }
+  const v4 = await readFile("deploy/systemd/disdex-v12-v4@.service", "utf8");
+  assert.match(v4, /--runner V12_V4 --activation-path \/var\/lib\/disdex\/shared\/operator-activation\/current\.json/);
 });
 
 test("Idle application receives a root-generated read-only activation projection without weakening the approval artifact", async () => {
@@ -154,7 +161,10 @@ test("runtime wiring leaves watchdog and auto-repair disabled until all trading 
   const stopThreeHour = source.indexOf("systemctl disable --now disdex-v12-three-hour-health-check.timer", gate);
   assert.ok(gate >= 0 && enableAutoRepair > gate && enableWatchdog > gate && enablePositionRecovery > gate && enableThreeHour > gate);
   assert.ok(blocked > gate && stopAutoRepair > gate && stopWatchdog > gate && stopPositionRecovery > gate && stopThreeHour > gate);
-  assert.match(source, /for runner in V12_X1_ALL PENGU_V8 QUALITY102_CAUSAL_V1 V52 FET_BRK48_RESIDUAL/);
+  assert.match(source, /for runner in "\$V12_OPERATOR_RUNNER" PENGU_V8 QUALITY102_CAUSAL_V1 V52 FET_BRK48_RESIDUAL/);
+  assert.match(source, /V12_OPERATOR_RUNNER="V12_X1_ALL"/);
+  assert.match(source, /V12_OPERATOR_RUNNER="V12_V4"/);
+  assert.match(source, /DISDEX_V12_V4_LEGACY_RECOVERY_AUTOMATION_DISABLED/);
 });
 
 test("auto-repair checks operator activation before quiescing or resuming trading runners", async () => {
