@@ -53,6 +53,7 @@ class RuntimeWiringScriptTest(unittest.TestCase):
         self.assertIn("normalize_live_state_ownership", source)
         self.assertIn("chown deploy:deploy \"$state_path\"", source)
         self.assertIn("chmod 0600 \"$state_path\"", source)
+        self.assertIn('"$PENDING_EXPOSURE_REGISTRY_PATH"', source)
         self.assertIn("chown deploy:deploy /var/lib/disdex/pengu-dual-ls-v2/runner-live.json", source)
         self.assertIn("chown deploy:deploy /var/lib/disdex/quality102-causal-v1/state.json", source)
         self.assertIn("chown deploy:deploy /var/lib/disdex/fet-brk48-residual/state.json", source)

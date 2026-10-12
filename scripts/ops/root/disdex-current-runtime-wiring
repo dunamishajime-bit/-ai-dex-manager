@@ -728,7 +728,10 @@ normalize_position_recovery_state_lineage() {
 
 normalize_live_state_ownership() {
   local state_path
-  for state_path in "${LIVE_STATE_FILES[@]}"; do
+  # Trading daemons run as deploy and must be able to read/write the shared
+  # reservation registry.  Keep the same fail-closed 0600 contract as the
+  # per-runner state files; root retains access for migration/recovery.
+  for state_path in "${LIVE_STATE_FILES[@]}" "$PENDING_EXPOSURE_REGISTRY_PATH"; do
     [[ -e "$state_path" ]] || continue
     [[ -f "$state_path" && ! -L "$state_path" ]] || {
       printf 'LIVE state path is not a regular file: %s\n' "$state_path" >&2
