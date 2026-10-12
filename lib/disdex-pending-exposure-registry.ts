@@ -1,4 +1,4 @@
-import { lstat, mkdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
+import { chmod, chown, lstat, mkdir, readFile, rename, stat, unlink, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 
 export const PENDING_EXPOSURE_SCHEMA = "disdex-pending-exposure/v1" as const;
@@ -158,10 +158,26 @@ export async function readPendingExposureRegistry(path = pendingExposurePath()):
 
 async function atomicWrite(path: string, registry: PendingExposureRegistry) {
     await assertSafePath(path);
-    await mkdir(dirname(path), { recursive: true });
+    const parent = dirname(path);
+    await mkdir(parent, { recursive: true });
+    let metadata;
+    try {
+        metadata = await stat(path);
+    } catch (error) {
+        if ((error as NodeJS.ErrnoException)?.code !== "ENOENT") throw error;
+        // The shared registry may be initialized by a root recovery helper.
+        // In that case inherit the state directory uid/gid so deploy runners do
+        // not lose access after the atomic rename.
+        metadata = await stat(parent);
+    }
+    const mode = (metadata.mode & 0o777) || 0o600;
     const temporary = `${path}.${process.pid}.${Date.now()}.tmp`;
     try {
-        await writeFile(temporary, `${JSON.stringify(registry, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
+        await writeFile(temporary, `${JSON.stringify(registry, null, 2)}\n`, { encoding: "utf8", mode });
+        if (process.platform !== "win32") {
+            await chown(temporary, metadata.uid, metadata.gid);
+            await chmod(temporary, mode);
+        }
         await rename(temporary, path);
     } catch (error) {
         await unlink(temporary).catch(() => undefined);

@@ -1,9 +1,14 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 import {
   aggregatePendingExposure,
   normalizePendingExposureRegistry,
+  readPendingExposureRegistry,
+  upsertPendingExposure,
 } from "../lib/disdex-pending-exposure-registry";
 import { planStrictPortfolio } from "../lib/disdex-strict-portfolio-planner";
 
@@ -195,4 +200,30 @@ test("strict planner blocks PENGU strategy over-cap when pending reservation exi
   assert.equal(plan.status, "planned");
   assert.equal(plan.accepted.length, 1);
   assert.ok((plan.accepted[0]?.gross || 0) <= 0.2 + 1e-9);
+});
+
+
+test("atomic pending registry updates preserve shared file metadata", async () => {
+  const root = await mkdtemp(join(tmpdir(), "pending-exposure-metadata-"));
+  try {
+    const path = join(root, "pending-exposure.json");
+    const initial = { schema: "disdex-pending-exposure/v1", accountScope: "ASTER_FUTURES", updatedAt: 1, entries: [] };
+    await writeFile(path, `${JSON.stringify(initial)}\n`, { mode: 0o640 });
+    const before = await stat(path);
+    await upsertPendingExposure({
+      reservationId: "metadata-test", strategyId: "V12_X1.00_ALL", sleeve: "CRYPTO",
+      symbol: "BTCUSDT", side: "LONG", gross: 0.1, notionalUsd: 100, createdAt: 1,
+    }, path);
+    const after = await stat(path);
+    assert.equal(after.mode & 0o777, before.mode & 0o777);
+    if (process.platform !== "win32") {
+      assert.equal(after.uid, before.uid);
+      assert.equal(after.gid, before.gid);
+    }
+    const registry = await readPendingExposureRegistry(path);
+    assert.equal(registry.entries.length, 1);
+    assert.equal(registry.entries[0].reservationId, "metadata-test");
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
 });
