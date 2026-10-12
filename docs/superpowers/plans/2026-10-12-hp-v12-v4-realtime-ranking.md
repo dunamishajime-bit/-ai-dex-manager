@@ -92,12 +92,12 @@
 - Board consumes `RankRow` and `RealtimeTopSlot` from Task 2; it does not calculate trading signals.
 - For `logic=ALL`, render separate panels only for scopes with a verified ranking contract; never produce one cross-strategy Top 3 from incomparable metrics. For a selected logic, render that logic’s scope or a non-ranked candidate list when no native rank exists.
 
-- [ ] **Step 1: Add failing UI contract tests** — three accessible top-slot cells exist for the V12 V4 panel; two candidates yield one explicit placeholder; duplicate symbols collapse to their canonical best row; blocked candidates are marked non-orderable; missing/stale score labels differ from numeric zero.
-- [ ] **Step 2: Implement grouped Top 3 cards** — use scoped output, not `score > 0 && !executionBlocked` as an implicit cross-logic ranking rule. Keep the full evaluated-row list and its score even for rank-ineligible rows.
-- [ ] **Step 3: Add truthful metric/source labels** — show native score, Gate充足度, route rank/features, or unavailable separately; include evaluation/source timestamp and exact unavailable/stale reason.
-- [ ] **Step 4: Preserve existing refresh and feedback** — keep 30-second refresh, sound controls, rank movement animation, and existing sound preferences; adapt movement IDs to ranking scope so separate strategies do not cross-trigger each other.
-- [ ] **Step 5: Verify responsive layout** — extend `tests/mobile-layout-regression.test.ts` for narrow viewport, three placeholders, long symbol/route labels, and accessible scroll/overflow behavior.
-- [ ] **Step 6: Run UI and ranking tests** — `npx tsx --test tests/realtime-ranking-ui-contract.test.ts tests/mobile-layout-regression.test.ts tests/realtime-ranking.test.ts`; expected: all pass.
+- [x] **Step 1: Add failing UI contract tests** — three accessible top-slot cells exist for the V12 V4 panel; two candidates yield one explicit placeholder; duplicate symbols collapse to their canonical best row; blocked candidates are marked non-orderable; missing/stale score labels differ from numeric zero.
+- [x] **Step 2: Implement grouped Top 3 cards** — use scoped output, not `score > 0 && !executionBlocked` as an implicit cross-logic ranking rule. Keep the full evaluated-row list and its score even for rank-ineligible rows.
+- [x] **Step 3: Add truthful metric/source labels** — show native score, Gate充足度, route rank/features, or unavailable separately; include evaluation/source timestamp and exact unavailable/stale reason.
+- [x] **Step 4: Preserve existing refresh and feedback** — keep 30-second refresh, sound controls, rank movement animation, and existing sound preferences; adapt movement IDs to ranking scope so separate strategies do not cross-trigger each other.
+- [x] **Step 5: Verify responsive layout** — extend `tests/mobile-layout-regression.test.ts` for narrow viewport, three placeholders, long symbol/route labels, and accessible scroll/overflow behavior.
+- [x] **Step 6: Run UI and ranking tests** — `npx tsx --test tests/realtime-ranking-ui-contract.test.ts tests/mobile-layout-regression.test.ts tests/realtime-ranking.test.ts`; expected: all pass.
 - [ ] **Step 7: Commit this task only** after reviewing the staged path list.
 
 ### Task 4: V4 target/runtime distinction across every HP V12 surface

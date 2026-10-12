@@ -16,3 +16,14 @@ test("home and dashboard roots wrap long runtime labels on narrow screens", asyn
   assert.match(dashboard, /main className="relative min-w-0 min-h-full/);
   assert.match(dashboard, /break-words/);
 });
+
+test("realtime ranking keeps three accessible slots readable on narrow screens", async () => {
+  const source = await readFile("components/features/RealtimeRankingBoard.tsx", "utf8");
+  assert.match(source, /data-top-slot/);
+  assert.match(source, /aria-label=\{.*上位3/);
+  assert.match(source, /grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/);
+  assert.match(source, /@media\(max-width:767px\)[\s\S]*?radar-leaders\{grid-template-columns:minmax\(0,1fr\)\}/);
+  assert.match(source, /min-width:0/);
+  assert.match(source, /overflow-wrap:anywhere/);
+  assert.doesNotMatch(source, /\.radar-leaders\s*\{[^}]*min-width:\s*\d{3,}px/);
+});
