@@ -20,6 +20,7 @@ export type TradeHistoryAttribution = {
 
 export type TradeHistoryAttributionTone =
   | "v12"
+  | "v12-v4"
   | "v12-strong"
   | "v12-relaxed"
   | "v12-dynamic"
@@ -74,6 +75,7 @@ export function getTradeHistoryAttributionTone(attribution?: TradeHistoryAttribu
   if (!attribution) return "unknown";
   if (attribution.classification === "test-order") return "test-order";
   const labels = `${attribution.logicLabel || ""} ${attribution.routeLabel || ""}`.toUpperCase();
+  if (labels.includes("V12 V4") || labels.includes("V12_V4")) return "v12-v4";
   if (labels.includes("RECOVERY V8")) return "recovery-v8";
   if (labels.includes("V64 DYNAMIC LONG")) return "v64-dynamic";
   if (labels.includes("SHORT V20")) return "short-v20";
@@ -110,6 +112,7 @@ function extractRanking(reason: string) {
 
 function logicLabel(strategyId: string, reason: string) {
   const normalized = strategyId.toUpperCase();
+  if (normalized === "V12_V4" || normalized.startsWith("V12_V4_")) return "V12 V4";
   if (normalized === "HYPE_LONG" || normalized === "HYPE") return "HYPE";
   if (normalized.includes("QUALITY102") || normalized === "Q102") {
     return reason.toUpperCase().includes("CAUSAL_V4") ? "Q102 / CAUSAL_V4" : "Q102";
@@ -126,6 +129,7 @@ function explicitLogicId(strategyId: string, reason: string) {
   const label = logicLabel(strategyId, reason);
   if (label) return label;
   const upper = reason.toUpperCase();
+  if (/\bV12_V4\b/.test(upper)) return "V12 V4";
   if (/HYPE_ZEC_HYPE_LONG|\bHYPE_LONG\b/.test(upper)) return "HYPE";
   if (/QUALITY102|Q102/.test(upper)) return upper.includes("CAUSAL_V4") ? "Q102 / CAUSAL_V4" : "Q102";
   if (/PENGU/.test(upper)) return "PENGU";

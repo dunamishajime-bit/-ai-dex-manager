@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ArrowRight, Route, ShieldCheck } from "lucide-react";
 
 import { DecisionStatusPanel } from "@/components/features/DecisionStatusPanel";
+import { V12V4RuntimePanel } from "@/components/features/V12V4RuntimePanel";
 
 export default function DecisionStatusPage() {
   return (
@@ -10,11 +11,12 @@ export default function DecisionStatusPage() {
         <div className="text-xs font-semibold uppercase tracking-[0.24em] text-gold-100/70">Read-only LIVE decision monitor</div>
         <h1 className="gold-heading mt-2 text-3xl font-black">判定状況</h1>
         <p className="mt-3 max-w-4xl text-sm leading-7 text-white/75">
-          V12 / PENGU / FET / Q102 / V52 / HYPE の従来LIVEデータを維持しながら、
-          Idle Priority / Formal Priority の新ロジック状態も確認できます。
+          V12 V4の仕様と実runtimeを分けて表示し、PENGU / FET / Q102 / V52 / HYPE の実測状態も表示します。
+          旧V12 snapshotは互換runnerとして識別し、V4判定データの代用にはしません。Idle Priority / Formal Priorityも確認できます。
         </p>
       </header>
 
+      <V12V4RuntimePanel />
       <DecisionStatusPanel logic="overview" />
 
       <section className="grid gap-3 md:grid-cols-2">

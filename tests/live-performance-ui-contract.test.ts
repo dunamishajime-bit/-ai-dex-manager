@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
+import { HISTORICAL_FILL_LINEAGE_BY_ORDER_ID } from "../lib/server/historical-fill-lineage";
+import { deriveTradeHistoryAttribution, formatTradeHistoryAttributionLabel } from "../lib/trade-history-attribution";
 
 const files = {
   api: readFileSync("app/api/system/live-performance/route.ts", "utf8"),
@@ -44,4 +46,15 @@ test("trade history exposes total and per-logic performance children", () => {
     assert.ok(files.nav.includes(path), path);
     assert.ok(files.sidebar.includes(path), path);
   }
+});
+
+test("V12 V4 UI rollout does not relabel historical V12 Aster fills", () => {
+  const entry = HISTORICAL_FILL_LINEAGE_BY_ORDER_ID["1045562381"];
+  assert.equal(entry.strategyId, "V12_X1.00_ALL");
+  const attribution = deriveTradeHistoryAttribution({
+    source: "local-ledger",
+    strategyId: String(entry.strategyId),
+    reason: String(entry.reason),
+  });
+  assert.equal(formatTradeHistoryAttributionLabel({ strategyId: String(entry.strategyId), attribution }), "ロジック発火: V12");
 });

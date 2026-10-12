@@ -45,7 +45,7 @@ export function Sidebar() {
           <div className="min-w-0">
             <div className="truncate text-[11px] font-bold text-white">{SITE_BRAND_NAME}</div>
             <div className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#dad1a7]">Personal</div>
-            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#dad1a7]">V12 / PENGU / Q102 / FET / V52 + HYPE</div>
+            <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#dad1a7]">V12 V4 / PENGU / Q102 / FET / V52 + HYPE</div>
           </div>
         </div>
       </div>

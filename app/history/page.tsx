@@ -81,6 +81,8 @@ function hasExplorerTx(entry: Pick<TradeHistoryEntry, "provider" | "txHash">) {
 
 function attributionClass(entry: TradeHistoryEntry) {
   switch (getTradeHistoryAttributionTone(entry.attribution)) {
+    case "v12-v4":
+      return "border-emerald-300/45 bg-emerald-400/15 text-emerald-100";
     case "v12":
       return "border-emerald-400/30 bg-emerald-500/10 text-emerald-200";
     case "v12-strong":
@@ -132,6 +134,7 @@ function attributionClass(entry: TradeHistoryEntry) {
 }
 
 const LOGIC_COLOR_LEGEND = [
+  ["V12 V4", "border-emerald-300/45 bg-emerald-400/15 text-emerald-100"],
   ["V12", "border-emerald-400/30 bg-emerald-500/10 text-emerald-200"],
   ["V12 Strong", "border-lime-400/35 bg-lime-500/10 text-lime-200"],
   ["V12 Relaxed", "border-teal-400/35 bg-teal-500/10 text-teal-200"],
