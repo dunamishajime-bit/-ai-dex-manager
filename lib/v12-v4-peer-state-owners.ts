@@ -4,6 +4,15 @@ import type {V4ServiceObservation} from "./v12-v4-peer-service-attestation";
 export type V4PeerSource={kind:V4PeerKind;programSha:string;raw:Record<string,any>;
  programShaSource?:"STATE"|"SYSTEMD";service?:V4ServiceObservation};
 export type V4PeerLineageMode="UNIFIED_RELEASE"|"ATTEST_EACH_PEER";
+/** The V4 execution release can differ from existing peer runner releases.
+ * Both LIVE modes require signed per-peer systemd SHA and durable state
+ * attestation rather than inventing a unified release.
+ */
+export function liveV4PeerLineageMode(mode:"CERTIFIED"|"CANARY"):V4PeerLineageMode {
+ if(mode!=="CERTIFIED"&&mode!=="CANARY")throw Error("V4_LIVE_MODE_UNRECOGNIZED");
+ return "ATTEST_EACH_PEER";
+}
+
 export function v4PeerOwners(sources:V4PeerSource[],expectedSha:string,now:number,
  lineageMode:V4PeerLineageMode="UNIFIED_RELEASE"):ForeignExposure[]{
  const kinds:V4PeerKind[]=["V12","PENGU","Q102","V52","FET","HYPE_LONG","IDLE","RESIDUAL"];
