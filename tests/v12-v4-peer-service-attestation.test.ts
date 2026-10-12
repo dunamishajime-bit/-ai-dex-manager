@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {v4PeerOwners,type V4PeerKind,type V4PeerSource} from "../lib/v12-v4-peer-state-owners";
+import {v4PeerOwners,liveV4PeerLineageMode,type V4PeerKind,type V4PeerSource} from "../lib/v12-v4-peer-state-owners";
 import {parseV4SystemdShow} from "../lib/v12-v4-peer-service-attestation";
 const sha="a".repeat(40),oldSha="b".repeat(40),now=Date.now();
 const kinds:V4PeerKind[]=["V12","PENGU","Q102","V52","FET","HYPE_LONG","IDLE","RESIDUAL"];
@@ -92,4 +92,17 @@ test("systemd must identify exact release-bound active runner and live PID",()=>
   "\nExecStart={ path=/home/deploy/disdex-trading/releases/"+oldSha+"/runner }\n",
   unit,now),/EXECUTABLE_RELEASE_SHA_MISMATCH/);
 
+});
+
+test("both approved LIVE modes attest each independently active peer SHA and reject false unified identity",()=>{
+ assert.equal(liveV4PeerLineageMode("CERTIFIED"),"ATTEST_EACH_PEER");
+ assert.equal(liveV4PeerLineageMode("CANARY"),"ATTEST_EACH_PEER");
+ assert.throws(()=>liveV4PeerLineageMode("UNVERIFIED" as any),/MODE_UNRECOGNIZED/);
+ const v=sources();
+ v[1].programSha="c".repeat(40);
+ (v[1].raw as any).runtimeCommitSha="c".repeat(40);
+ v[1].service!.unit=v[1].service!.unit.replace(sha,"c".repeat(40));
+ assert.deepEqual(v4PeerOwners(v,sha,now,liveV4PeerLineageMode("CERTIFIED")),[]);
+ v[1].service!.active=false;
+ assert.throws(()=>v4PeerOwners(v,sha,now,liveV4PeerLineageMode("CERTIFIED")),/STALE_PEER_OWNER_SNAPSHOT/);
 });
