@@ -1022,6 +1022,11 @@ apply_wiring() {
     }
   fi
   assert_current_live_target_ready
+  cd "$CURRENT_RELEASE" || return 1
+  # All release-relative TypeScript invocations below must resolve aliases and
+  # configuration from the exact immutable current release. systemd starts
+  # this helper with an arbitrary cwd (often /root), so pin it before
+  # migration/recovery commands execute.
   local fet_readiness_guard="${CURRENT_RELEASE}/scripts/ops/root/disdex-fet-preemption-readiness-guard.py"
   [[ -f "$fet_readiness_guard" ]] || fet_readiness_guard="/usr/local/libexec/disdex-fet-preemption-readiness-guard.py"
   [[ -f "$fet_readiness_guard" ]] || { printf 'FET preemption readiness guard missing\n' >&2; return 1; }

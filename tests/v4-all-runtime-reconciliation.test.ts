@@ -23,6 +23,13 @@ test("V4 runtime wiring keeps V4 primary and all peer pins explicit", () => {
   assert.match(wiring, /DISDEX_WATCHDOG_FET_EXPECTED_SHA=\$\{DEPLOYED_SHA\}/);
 });
 
+test("runtime migration commands execute from the exact release root", () => {
+  assert.match(
+    wiring,
+    /assert_current_live_target_ready\n\s+cd "\$CURRENT_RELEASE"\s+\|\| return 1/,
+  );
+});
+
 test("V4 wiring does not authorize legacy V12 and V4 together", () => {
   assert.match(wiring, /DISDEX_V12_V4_LEGACY_PERSISTENT_MASK/);
   assert.match(wiring, /V12_OPERATOR_RUNNER="V12_V4"/);
