@@ -99,3 +99,14 @@ test("V12 health alert independently pins full-live SHA while peers remain on cu
  assert.match(wiring,/ExecStart=\/usr\/bin\/node \$\{MONITOR_RUNTIME_ROOT\}\/scripts\/ops\/root\/disdex-runner-watchdog-current\.mjs/);
  assert.match(wiring,/ExecStartPre=\/usr\/bin\/grep -Fxq \$\{V4_PRIMARY_SHA:-\$\{DEPLOYED_SHA\}\}/);
 });
+
+
+test("coherence guard remains armed while operator trading automation is deferred",()=>{
+ const start=wiring.indexOf('ensure_monitor_timer_active "disdex-runner-health-snapshot.timer"');
+ const end=wiring.indexOf("DISDEX_CURRENT_RUNTIME_WIRING_APPLIED",start);
+ assert.ok(start>=0&&end>start);
+ const monitorBlock=wiring.slice(start,end);
+ assert.match(monitorBlock,/systemctl enable --now disdex-current-runtime-coherence-guard\.timer/);
+ assert.match(monitorBlock,/ensure_monitor_timer_active "disdex-current-runtime-coherence-guard\.timer"/);
+ assert.doesNotMatch(monitorBlock,/systemctl stop disdex-current-runtime-coherence-guard\.timer/);
+});
