@@ -6,6 +6,7 @@
 import {open,lstat} from "node:fs/promises";
 import {constants} from "node:fs";
 import {dirname} from "node:path";
+import {createHash} from "node:crypto";
 import {PRODUCTION_EXIT_CATALOG} from "./v12-v4-production-lifecycle";
 import type {V4LiveDecisionSnapshot} from "./v12-v4-live-candidate-builder";
 import type {V4DurableOrderCommand} from "./v12-v4-durable-orders";
@@ -34,10 +35,89 @@ export type V4ProductionCertificate={
  forwardUnderperformanceAcknowledged:true;
  operatorAcknowledgement:"I_AUTHORIZE_CERTIFIED_V12_V4_REAL_ORDERS";
 };
-export function validateV4ProductionCertificate(raw:unknown,sha:string,now=Date.now()):V4ProductionCertificate{
+/** Regular V4 production certification may use already-authenticated Aster
+ * production history and the V4 execution regression suite. It does NOT
+ * require a V4 trade to exist before the first V4 trade can take place.
+ * This is a separate version from the earlier exhaustive venue-lifecycle
+ * certificate, not an override or a silent relaxation of that contract.
+ */
+export const V4_SHARED_EXECUTION_EVIDENCE_PATHS={
+ routeSourceParity:"/etc/disdex/v12-v4-evidence/route-source-parity.json",
+ establishedAsterOrders:"/etc/disdex/v12-v4-evidence/established-aster-orders.json",
+ signedAsterAccount:"/etc/disdex/v12-v4-evidence/signed-aster-account.json",
+ v4ExecutionTests:"/etc/disdex/v12-v4-evidence/v4-execution-tests.json",
+ sharedRiskAndPeers:"/etc/disdex/v12-v4-evidence/shared-risk-and-peers.json",
+} as const;
+type V4EvidenceKey=keyof typeof V4_SHARED_EXECUTION_EVIDENCE_PATHS;
+export type V4SharedExecutionCertificate={
+ schema:"disdex-v12-v4-production-certification/v3";
+ approvedSha:string;policyId:typeof V12_V4_V2_POLICY;
+ approvedAt:string;validUntil:string;
+ verifiedRoutes:string[];
+ venueEvidenceBasis:"ESTABLISHED_ASTER_PRODUCTION_EXECUTION";
+ evidenceSha256:Record<V4EvidenceKey,string>;
+ approvedGross:{v12:number;crypto:number;total:number;recovery:number};
+ risksAcknowledged:{
+  v4FirstLiveFillNotYetObserved:true;
+  weakIndependentForwardPerformance:true;
+ };
+ operatorAcknowledgement:"I_AUTHORIZE_CERTIFIED_V12_V4_REAL_ORDERS";
+};
+export type V4AnyProductionCertificate=V4ProductionCertificate|V4SharedExecutionCertificate;
+const FULL_ROUTE_SET=new Set(PRODUCTION_EXIT_CATALOG.map(r=>r.route));
+function requireAllRoutes(routes:unknown){
+ if(FULL_ROUTE_SET.size!==41||!Array.isArray(routes)||routes.length!==41||
+   new Set(routes).size!==41||routes.some((r:unknown)=>!FULL_ROUTE_SET.has(String(r))))
+  throw Error("V4_ALL_41_ROUTE_PROOF_REQUIRED");
+}
+function validateV4SharedExecutionCertificate(raw:Record<string,any>,sha:string,now:number):V4SharedExecutionCertificate{
+ const c=raw;
+ if(c.schema!=="disdex-v12-v4-production-certification/v3"||
+    c.approvedSha!==sha||c.policyId!==V12_V4_V2_POLICY||
+    c.venueEvidenceBasis!=="ESTABLISHED_ASTER_PRODUCTION_EXECUTION"||
+    c.operatorAcknowledgement!=="I_AUTHORIZE_CERTIFIED_V12_V4_REAL_ORDERS"||
+    c.risksAcknowledged?.v4FirstLiveFillNotYetObserved!==true||
+    c.risksAcknowledged?.weakIndependentForwardPerformance!==true)
+  throw Error("V4_SHARED_EXECUTION_CERTIFICATE_INVALID");
+ requireAllRoutes(c.verifiedRoutes);
+ const hashes=c.evidenceSha256;
+ if(!hashes||Object.keys(hashes).length!==5||
+  !Object.keys(V4_SHARED_EXECUTION_EVIDENCE_PATHS).every(k=>DIGEST.test(String(hashes[k]??""))))
+  throw Error("V4_SHARED_EXECUTION_EVIDENCE_INCOMPLETE");
+ const caps=c.approvedGross;
+ if(!caps||caps.v12!==3||caps.crypto!==3.5||caps.total!==4.75||caps.recovery!==2.5)
+  throw Error("V4_SHARED_RISK_CAP_MISMATCH");
+ const from=Date.parse(String(c.approvedAt)),until=Date.parse(String(c.validUntil));
+ if(!Number.isFinite(from)||!Number.isFinite(until)||from>now+300000||
+   until<=now||until-from>7*86400000||until<=from)
+  throw Error("V4_CERTIFICATE_EXPIRED_OR_FUTURE");
+ return c as V4SharedExecutionCertificate;
+}
+/** Read and hash actual root-managed evidence bytes; a plausible hex string,
+ * research document or writable paper log is NOT enough to issue authority. */
+export async function verifyV4SharedExecutionEvidence(c:V4SharedExecutionCertificate){
+ const parent=await lstat("/etc/disdex/v12-v4-evidence");
+ if(!parent.isDirectory()||parent.isSymbolicLink()||parent.uid!==0||
+    (parent.mode&0o022)!==0)throw Error("V4_EVIDENCE_PARENT_UNTRUSTED");
+ for(const [key,path] of Object.entries(V4_SHARED_EXECUTION_EVIDENCE_PATHS) as [V4EvidenceKey,string][]){
+  const file=await open(path,constants.O_RDONLY|constants.O_NOFOLLOW);
+  try{
+   const st=await file.stat();
+   if(!st.isFile()||st.uid!==0||(st.mode&0o022)!==0)
+    throw Error("V4_EVIDENCE_FILE_UNTRUSTED:"+key);
+   const data=await file.readFile();
+   if(createHash("sha256").update(data).digest("hex")!==c.evidenceSha256[key])
+    throw Error("V4_EVIDENCE_DIGEST_MISMATCH:"+key);
+  }finally{await file.close();}
+ }
+ return true;
+}
+
+export function validateV4ProductionCertificate(raw:unknown,sha:string,now=Date.now()):V4AnyProductionCertificate{
  if(!raw||typeof raw!=="object"||Array.isArray(raw)||!SHA.test(sha))
   throw Error("V4_ROOT_CERTIFICATE_REQUIRED");
  const c=raw as Record<string,any>;
+ if(c.schema==="disdex-v12-v4-production-certification/v3")return validateV4SharedExecutionCertificate(c,sha,now);
  if(c.schema!=="disdex-v12-v4-production-certification/v2"||
   c.approvedSha!==sha||c.policyId!==V12_V4_V2_POLICY||
   c.operatorAcknowledgement!=="I_AUTHORIZE_CERTIFIED_V12_V4_REAL_ORDERS"||
@@ -77,7 +157,9 @@ export async function readV4ProductionCertificate(sha:string,
   if(!st.isFile()||st.uid!==0||(st.mode&0o022)!==0||
    (st.gid!==0&&st.gid!==process.getgid?.()))
     throw Error("V4_CERT_NOT_ROOT_SECURE");
-  return validateV4ProductionCertificate(JSON.parse(await f.readFile("utf8")),sha,now);
+  const cert=validateV4ProductionCertificate(JSON.parse(await f.readFile("utf8")),sha,now);
+  if(cert.schema==="disdex-v12-v4-production-certification/v3")await verifyV4SharedExecutionEvidence(cert);
+  return cert;
  }finally{await f.close();}
 }
 export async function assertV4CertifiedSource(sha:string,decision:V4LiveDecisionSnapshot){
