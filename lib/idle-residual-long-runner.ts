@@ -1,3 +1,4 @@
+import {reuseFlatIdleMarketSnapshot} from "./idle-lock-safe-market";
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 
@@ -288,6 +289,17 @@ export class IdleResidualLongRunner{
 
   async tick():Promise<IdleResidualLongTickResult>{
     if(!this.d.runtime.enabled)return {status:"disabled",message:"IDLE_RESIDUAL_LONG_DISABLED",ordersSent:0,cancelsSent:0,positionChangesSent:0};
+    // Read-only completed H1 candles can be prefetched while the local book
+    // is flat. With owned positions or unresolved fills, protection recovery
+    // always takes the shared account lease before market-data I/O.
+    let preloadedMarket:Awaited<ReturnType<typeof this.d.marketData.load>>|undefined;
+    try{
+      const before=await this.d.stateStore.load();
+      if(!before.pending&&!before.position&&!before.manualReview)
+        preloadedMarket=await this.d.marketData.load();
+    }catch{
+      // Continue through the original locked fail-closed path.
+    }
     const lock=await this.d.lock.acquire(`${IDLE_RESIDUAL_LONG_STRATEGY}:${process.pid}:${Date.now()}`);
     if(!lock)return {status:"locked",message:"IDLE_RESIDUAL_ACCOUNT_LOCK_BUSY",ordersSent:0,cancelsSent:0,positionChangesSent:0};
     try{
@@ -295,7 +307,9 @@ export class IdleResidualLongRunner{
       if(state.manualReview)return {status:"manual-review",message:state.manualReview,ordersSent:0,cancelsSent:0,positionChangesSent:0};
       const recovered=await this.reconcilePending(state,lock);if(recovered)return recovered;
       const [account,positions,openOrders,market]=await Promise.all([
-        this.d.executor.getAccountSnapshot(),this.d.executor.getPositions(),this.d.executor.getOpenOrders(),this.d.marketData.load(),
+        this.d.executor.getAccountSnapshot(),this.d.executor.getPositions(),this.d.executor.getOpenOrders(),
+        Promise.resolve(reuseFlatIdleMarketSnapshot(preloadedMarket,this.now(),
+          !state.pending&&!state.position&&!state.manualReview)).then(m=>m??this.d.marketData.load()),
       ]);
       await this.reconcileProtectiveFill(state,positions,openOrders);
       const freshPositions=await this.d.executor.getPositions();
