@@ -71,10 +71,24 @@ class DependencyLivenessHealthTest(unittest.TestCase):
         self.assertIn("DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_RELEASE_ROOT=${CURRENT_RELEASE}", wiring)
         self.assertIn("DISDEX_HEALTH_SNAPSHOT_MARGIN_RELEASE_ROOT=${CURRENT_RELEASE}", wiring)
 
-    def test_v4_primary_loads_current_peer_contract_before_v4_contract(self):
+    def test_v4_primary_keeps_peer_margin_paths_explicit_without_peer_env_reload(self):
         wiring = WIRING.read_text(encoding="utf-8")
-        self.assertIn(
+        self.assertIn("EnvironmentFile=${V4_CONTRACT_ENV_FILE}", wiring)
+        self.assertNotIn(
             "EnvironmentFile=${CONTRACT_ENV_FILE}\nEnvironmentFile=${V4_CONTRACT_ENV_FILE}",
+            wiring,
+        )
+        self.assertIn(
+            "DISDEX_V96_V52_MARGIN_GUARD_STATE_DIR=${SHARED_ROOT}/margin-risk",
+            wiring,
+        )
+        self.assertIn(
+            "DISDEX_V96_V52_MARGIN_GUARD_STATE_FILE=${SHARED_ROOT}/margin-risk/guard-live.json",
+            wiring,
+        )
+        self.assertIn("DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED=true", wiring)
+        self.assertIn(
+            "DISDEX_V96_V52_MARGIN_GUARD_SCRIPT=scripts/disdex_v96_v52_margin_guard_runtime.py",
             wiring,
         )
 
