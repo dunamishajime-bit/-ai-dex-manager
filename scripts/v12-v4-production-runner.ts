@@ -4,6 +4,7 @@ import {dirname} from "node:path";
 import {AsterV3Client} from "../lib/aster-v3-client";
 import {V12AsterLiveAdapter} from "../lib/v12-aster-live-adapter";
 import {FileAccountOrderLock} from "../lib/disdex-account-order-lock";
+import {executeV4WithContentionAudit} from "../lib/v12-v4-lock-contention-observer";
 import {V4ExecutionStore} from "../lib/v12-v4-execution-store";
 import {initializeV4SignedFlatState} from "../lib/v12-v4-signed-bootstrap";
 import {V4RunnerEngine} from "../lib/v12-v4-runner-engine";
@@ -182,7 +183,11 @@ async function main(){
  process.once("SIGINT",()=>{stopping=true;});
  process.once("SIGTERM",()=>{stopping=true;});
  do{
-  const result=await engine.tick();
+  const result=await executeV4WithContentionAudit({
+   operation:()=>engine.tick(),releaseSha,operationMode,
+   accountLockPath:env("DISDEX_ACCOUNT_LOCK_PATH"),
+   attempts:10,retryMs:750,shouldStop:()=>stopping,
+  });
   await writeV4Health(releaseSha,operationMode,result);
   console.log(JSON.stringify({releaseSha,operationMode,timestamp:new Date().toISOString(),...result}));
   if(!daemon||stopping)break;
