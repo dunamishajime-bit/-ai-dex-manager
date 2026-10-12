@@ -17,6 +17,10 @@ This operational contract changes monitoring/restart authorization only. It does
 
 The V4-specific operator path is optional for legacy watchdog configurations and defaults to the shared path. For V4 Full-LIVE, it must be explicitly set to `/var/lib/disdex/shared/operator-activation/v12-v4-full.json` so a V4 restart cannot borrow another runner's approval. Peer restart approvals remain scoped to the shared peer artifact.
 
+## V4 safety environment precedence
+
+The V4 systemd template must load `/etc/disdex/current-runtime/%i.env` after the legacy credential/config environment files. That SHA-bound file supplies the canonical shared account lock, pending registry, daily-risk state, and Aster global rate-budget path. Because older base env files may define different kill-switch aliases, the generated runtime contract must set all five aliases recognized by the shared kill-switch reader (`DISDEX_SHARED_KILL_SWITCH_FILE`, `DISDEX_V13D_V11EQ_V96_KILL_SWITCH_FILE`, `DISDEX_V52_ASTER_ONLY_KILL_SWITCH_FILE`, `DISDEX_V96_KILL_SWITCH_FILE`, and `PENGU_DUAL_LS_V2_KILL_SWITCH_FILE`) to the same `/var/lib/disdex/shared/kill-switch.json`. A missing or divergent alias/rate-budget value is a pre-activation block, not a reason to bypass either safety mechanism.
+
 ## Fail-closed rules
 
 - An absent, noncanonical, wrong-SHA, wrong-runner, or insecure operator artifact blocks restart with `HOLD_FAIL_CLOSED`.
