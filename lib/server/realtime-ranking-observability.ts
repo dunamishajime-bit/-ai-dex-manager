@@ -1,12 +1,15 @@
 import { readFile } from 'node:fs/promises';
-import { REALTIME_RANKING_REFRESH_MS,expireRealtimeRankingRows,fetObservationExpiry,freshTimestamp,gateScore,rankRows,realtimeRankingCacheExpiry,type Gate,type RankRow } from '@/lib/realtime-ranking';
-import { loadCurrentProductionRuntime,extractObjectNumber } from './current-production-runtime';
+import { REALTIME_RANKING_REFRESH_MS,expireRealtimeRankingRows,fetObservationExpiry,freshTimestamp,gateCompletionMetric,nativeMetric,rankRows,realtimeRankingCacheExpiry,type Gate,type RankMetric,type RankRow,type RankingSourceStatus } from '@/lib/realtime-ranking';
+import { loadCurrentProductionRuntime } from './current-production-runtime';
 import { loadDecisionStatus } from './disdex-decision-status';
+import { loadV12V4HpObservability } from './v12-v4-hp-observability';
+import type { V12V4HpSnapshot } from '@/lib/v12-v4-hp-contract';
 import { loadQuality102SymbolObservability } from './quality102-symbol-observability';
 import { loadPenguRuntimeObservability } from './pengu-runtime-observability';
 import { loadHypeRuntimeObservability } from './hype-runtime-observability';
 import { loadFetGates } from './fet-gate-observability';
 import { DIST_TERMINAL_LIVE_CONFIG } from '@/lib/disterminal-live-config';
+import { V12_V4_HP_ROUTE_IDS, V12_V4_HP_TARGET } from '@/lib/v12-v4-hp-contract';
 type Obj=Record<string,unknown>;
 const obj=(v:unknown):Obj=>v&&typeof v==='object'&&!Array.isArray(v)?v as Obj:{};
 const list=(v:unknown)=>Array.isArray(v)?v.map(obj):[];
@@ -15,26 +18,63 @@ const text=(v:unknown)=>typeof v==='string'?v:'';
 const ROOT='/home/deploy/disdex-trading/current';
 async function json(path:string){const s=await readFile(path,'utf8');if(s.length>2*1024*1024)throw Error('SNAPSHOT_TOO_LARGE');return obj(JSON.parse(s));}
 function flag(key:string,label:string,value:unknown,detail:string,kind:Gate['kind']='signal'):Gate{return {key,label,state:typeof value==='boolean'?value?'OK':'NO':'UNKNOWN',detail,kind};}
-function minimum(key:string,label:string,value:unknown,threshold:number):Gate{const n=num(value);return {key,label,state:n===undefined?'UNKNOWN':n>=threshold?'OK':'NO',actual:n,required:'≥ '+threshold,detail:n===undefined?'実測未取得':n>=threshold?'必要値を通過':'必要値未達',progress:n===undefined?undefined:threshold>0?n/threshold:0};}
-function make(symbol:string,logic:string,side:string,gates:Gate[],fresh:boolean,checkedAt:number,reason:string):RankRow{return {id:logic+':'+symbol+':'+side,symbol,logic,side,gates,fresh,checkedAt,reason:!fresh?'観測が古い・未取得 / '+reason:reason,score:gateScore(gates,fresh),href:'/decision-status/'+(logic.startsWith('Idle')?'idle-priority':logic.toLowerCase())};}
-const SOURCES=['V12','Q102','PENGU','FET','HYPE','Idle','V52'];
+type RankRowOptions={metric?:RankMetric;rankingScope?:string;sourceRank?:number;rankingEligible?:boolean;rankingContractAvailable?:boolean;rankingExclusion?:string;sourceStatus?:RankingSourceStatus;sourceRoute?:string;sourceFeatures?:Record<string,number|boolean>};
+function make(symbol:string,logic:string,side:string,gates:Gate[],fresh:boolean,checkedAt:number,reason:string,options:RankRowOptions={}):RankRow{
+ const metric=options.metric??gateCompletionMetric(gates,fresh);
+ return {id:logic+':'+symbol+':'+side+(options.sourceRoute?':'+options.sourceRoute:''),symbol,logic,side,gates,fresh,checkedAt,reason:!fresh?'観測が古い・未取得 / '+reason:reason,...metric,rankingScope:options.rankingScope??logic,rankingEligible:options.rankingEligible??false,rankingContractAvailable:options.rankingContractAvailable??false,...(options.sourceRank!==undefined?{sourceRank:options.sourceRank}:{}),...(options.rankingExclusion?{rankingExclusion:options.rankingExclusion}:{}),...(options.sourceStatus?{sourceStatus:options.sourceStatus}:{}),...(options.sourceRoute?{sourceRoute:options.sourceRoute}:{}),...(options.sourceFeatures?{sourceFeatures:options.sourceFeatures}:{}),href:'/decision-status/'+(logic.startsWith('Idle')?'idle-priority':logic.toLowerCase())};
+}
+function decisionSourceStatus(snapshot:V12V4HpSnapshot):RankingSourceStatus{
+ if(snapshot.errors.some(error=>/V4_DECISION_SOURCE|V4_DECISION_SCHEMA|V4_DECISION_BATCH|V4_FILTERED|V4_CANDIDATE|V4_DECISION_ROW/.test(error)))return 'SOURCE_ERROR';
+ if(snapshot.freshness.decision)return 'FRESH';
+ if(snapshot.timestamps.decisionTs!==null||snapshot.timestamps.capturedAtMs!==null)return 'STALE';
+ return snapshot.errors.length?'SOURCE_ERROR':'NOT_EVALUATED';
+}
+export function v12V4SnapshotToRankRows(snapshot:V12V4HpSnapshot,now=Date.now()):RankRow[]{
+ const sourceStatus=decisionSourceStatus(snapshot),fresh=sourceStatus==='FRESH',checkedAt=snapshot.timestamps.decisionTs??snapshot.timestamps.capturedAtMs??now;
+ const runtimeState=snapshot.displayStatus==='LIVE_VERIFIED'?'OK':snapshot.displayStatus==='UNAVAILABLE'||snapshot.displayStatus==='SOURCE_ERROR'?'UNKNOWN':'NO';
+ const runtimeGate:Gate={key:'v4-runtime',label:'V12 V4 runtime状態',state:runtimeState,detail:'表示状態: '+snapshot.displayStatus,kind:'execution'};
+ const metric=nativeMetric(undefined,'V4 decision source has no verified native score',fresh);
+ const rows:RankRow[]=[
+  ...snapshot.candidates.map(candidate=>make(candidate.symbol,'V12_V4',candidate.side??'WAIT',[runtimeGate],fresh,checkedAt,'V4候補 / '+(candidate.family??candidate.route)+' / '+candidate.rankingExclusion,{
+    metric,rankingScope:'V12_V4',sourceRank:candidate.sourceRank??undefined,rankingEligible:false,rankingContractAvailable:false,
+    rankingExclusion:candidate.rankingExclusion,sourceStatus,sourceRoute:candidate.route,sourceFeatures:candidate.features,
+  })),
+  ...snapshot.filtered.map(filtered=>make(filtered.symbol,'V12_V4',filtered.side??'WAIT',[
+    {key:'causal-filter',label:'V4因果Gate',state:fresh?'NO':'UNKNOWN',detail:filtered.reason,kind:'signal'},runtimeGate,
+  ],fresh,checkedAt,filtered.reason,{
+    metric,rankingScope:'V12_V4',rankingEligible:false,rankingContractAvailable:false,rankingExclusion:'FILTERED_BY_V4_SOURCE',
+    sourceStatus,sourceRoute:filtered.route,
+  })),
+ ];
+ if(!rows.length){
+  const sentinelStatus=sourceStatus==='FRESH'?'NOT_EVALUATED':sourceStatus;
+  rows.push(make('—','V12_V4','WAIT',[{key:'source',label:'V4 decision rows',state:'UNKNOWN',detail:sentinelStatus==='SOURCE_ERROR'?'V4 decision source取得失敗':sentinelStatus==='STALE'?'V4 decision source stale':'このcycleにV4 candidate/filtered rowなし',kind:'signal'},runtimeGate],false,checkedAt,sentinelStatus==='SOURCE_ERROR'?'V4 decision source取得失敗':'V4 source row未出力',{
+    metric:nativeMetric(undefined,'V4 decision source has no verified native score',false),rankingScope:'V12_V4',rankingEligible:false,rankingContractAvailable:false,sourceStatus:sentinelStatus,
+  }));
+ }
+ return rows;
+}
+export function mergeV12V4RealtimeRows(existing:RankRow[],snapshot:V12V4HpSnapshot,now=Date.now()):RankRow[]{
+ return [...existing.filter(row=>row.logic!=='V12'&&row.logic!=='V12_V4'),...v12V4SnapshotToRankRows(snapshot,now)];
+}
+export function v12V4RealtimeSummary(snapshot:V12V4HpSnapshot){
+ return {displayStatus:snapshot.displayStatus,target:snapshot.target,actual:snapshot.actual,routeCoverage:snapshot.routeCoverage,timestamps:snapshot.timestamps,freshness:snapshot.freshness,errors:snapshot.errors,readOnly:true as const,tradingMutation:0 as const};
+}
+function unavailableV12V4RealtimeSummary(now:number){
+ return {displayStatus:'UNAVAILABLE' as const,target:V12_V4_HP_TARGET,actual:{currentReleaseSha:null,activeRunnerId:null,activeRunnerState:'unavailable',activeRunnerSha:null,v4RunnerMode:'UNKNOWN' as const,v12PrimaryMode:'UNKNOWN' as const,legacyV12RunnerActive:null,v4ReleaseSha:null,heartbeatSha:null,orderEnabled:null},routeCoverage:{expected:V12_V4_HP_TARGET.expectedRouteCount,observed:0,candidateCount:null,filteredCount:null,unobserved:[...V12_V4_HP_ROUTE_IDS],completeness:false as const,semantics:'EMITTED_ROUTE_PRESENCE_ONLY_NOT_EVALUATION_COVERAGE' as const},timestamps:{checkedAt:now,heartbeatUpdatedAt:null,decisionTs:null,capturedAtMs:null},freshness:{heartbeat:false,decision:false},errors:['V4 observability取得失敗'],readOnly:true as const,tradingMutation:0 as const};
+}
+const SOURCES=['V12_V4','Q102','PENGU','FET','HYPE','Idle','V52'];
 async function observe(){
  const now=Date.now(),current=await loadCurrentProductionRuntime(),rows:RankRow[]=[],errors:Record<string,string>={};
+ let v12V4Snapshot:V12V4HpSnapshot|undefined;
  const sourceExpiries:number[]=[],sourceExpiryByLogic:Record<string,number>={};
  const constrainFreshness=(logic:string,at:unknown,maxAge:number,invalidatesScore=true)=>{const timestamp=Number(at),expiry=timestamp+maxAge;if(Number.isFinite(timestamp)&&timestamp>0){sourceExpiries.push(expiry);if(invalidatesScore)sourceExpiryByLogic[logic]=Math.min(sourceExpiryByLogic[logic]??Infinity,expiry);}};
  const jobs=[
   async()=>{
-   const [d,s,source]=await Promise.all([json(process.env.V12_DECISION_SNAPSHOT_PATH||'/var/lib/disdex/v12-x1-all/decision-snapshot.json'),json(process.env.V12_X1_ALL_STATE_PATH||'/var/lib/disdex/v12-x1-all/runner.json'),readFile(ROOT+'/config/v12X1AllRuntime.ts','utf8')]);
-   const at=num(d.observedAt)??num(d.referenceTs)??0,fresh=s.runtimeCommitSha===current.releaseSha&&s.mode==='LIVE'&&now-Number(s.updatedAt)>=-60000&&now-Number(s.updatedAt)<=3*3600000&&now-at>=-60000&&now-at<=3*3600000;
-   constrainFreshness('V12',s.updatedAt,3*3600000);constrainFreshness('V12',at,3*3600000);
-   const vol=extractObjectNumber(source,'minimumVolumeRatio'),mom=extractObjectNumber(source,'minimumMomentumPct');
-   for(const r of list(d.candidates)){
-    const side=text(r.side),gates=[minimum('volume','出来高比率',r.volumeRatio,vol),minimum('momentum',side==='SHORT'?'下落モメンタム':'上昇モメンタム',side==='SHORT'&&num(r.momentum)!==undefined?-Number(r.momentum):r.momentum,mom)];
-    if(d.btcRegime==='NEUTRAL')gates.push(minimum('score','Neutral Score',r.score,current.v12.neutralScoreThreshold));
-    gates.push(flag('authoritative','実Runner全Signal Gate',r.signalEligible,text(r.signalReason)||text(d.reason)));
-    gates.push(flag('execution','資金競合・保有・Margin Guard',undefined,'発注時の実Runner確認待ち','execution'));
-    rows.push(make(text(r.symbol).replace(/USDT$/,'')+'USDT','V12',side||'WAIT',gates,fresh,at,text(r.signalReason)||text(d.reason)));
-   }
+   v12V4Snapshot=await loadV12V4HpObservability();
+   constrainFreshness('V12_V4',v12V4Snapshot.timestamps.heartbeatUpdatedAt,3*3600000);
+   constrainFreshness('V12_V4',v12V4Snapshot.timestamps.decisionTs,3*3600000);
+   rows.push(...v12V4SnapshotToRankRows(v12V4Snapshot,now));
   },
   async()=>{
    const d=await loadQuality102SymbolObservability(),rankAt=Date.parse(d.rankingCapturedAt||d.capturedAt),rankingFresh=freshTimestamp(rankAt,now,2*3600000)&&freshTimestamp(Date.parse(d.capturedAt),now,2*3600000);
@@ -47,10 +87,18 @@ async function observe(){
     gates.push(flag('eligible','実Runner最終Signal',r.eligible,r.rankingReason||r.reason));
     gates.push(flag('selection','同時候補の選定',r.selected,d.selectedReason,'execution'));
     const rawSide=num(best?.proximitySide)??num(best?.candidateSide);
-    const row=make(r.symbol,'Q102',r.side==='WAIT'?(rawSide===1?'LONG':rawSide===-1?'SHORT':'WAIT'):r.side,gates,rankingFresh,rankAt,r.rankingReason||r.reason);
-    // Q102 native proximity incorporates its stage and audited detector distances.
-    // Display separately; common ranking always uses the same gate completion formula.
-    if(r.rankingScore!==undefined)row.gates.push({key:'native-score',label:'Q102内部接近度（参考）',state:'OK',actual:r.rankingScore,detail:r.rankingStage||'',kind:'execution'});
+    const hasNativeScore=typeof r.rankingScore==='number'&&Number.isFinite(r.rankingScore);
+    const rankingContractAvailable=rankingFresh&&d.snapshotSource==='ranking'&&d.rankingAvailable;
+    const metric=hasNativeScore
+     ?nativeMetric(r.rankingScore,'Q102 Proximity V1（モデル単位）',rankingFresh)
+     :gateCompletionMetric(gates,rankingFresh);
+    const row=make(r.symbol,'Q102',r.side==='WAIT'?(rawSide===1?'LONG':rawSide===-1?'SHORT':'WAIT'):r.side,gates,rankingFresh,rankAt,r.rankingReason||r.reason,{
+     metric,rankingScope:'Q102',sourceRank:r.rankingRank,rankingEligible:rankingContractAvailable&&r.rankingRank!==undefined&&hasNativeScore&&(r.rankingScore??0)>0,
+     rankingContractAvailable,sourceStatus:rankingFresh?'FRESH':'STALE',
+    });
+    // Keep the native model output visible in the detail panel without feeding it
+    // into the Gate-completion metric used by strategies that have no native score.
+    if(hasNativeScore)row.gates.push({key:'native-score',label:'Q102 Proximity V1（モデル単位）',state:rankingFresh?'OK':'UNKNOWN',actual:r.rankingScore,detail:r.rankingStage||'snapshotのsource値',kind:'execution'});
     rows.push(row);
    }
   },
@@ -101,8 +149,12 @@ async function observe(){
    for(const symbol of DIST_TERMINAL_LIVE_CONFIG.stockSymbols)if(!d.v52.items.some(r=>r.symbol===symbol))rows.push(make(symbol,'V52','WAIT',[flag('signal','V52候補観測',undefined,'この銘柄は最新候補台帳に記録されていません')],false,now,'最新候補台帳に未記録。NOとは断定しません'));
   }
  ];
- const results=await Promise.allSettled(jobs.map(job=>job()));
- results.forEach((result,i)=>{if(result.status==='rejected'){errors[SOURCES[i]]='観測取得失敗';rows.push(make('—',SOURCES[i],'WAIT',[flag('source','観測接続',undefined,'取得不能')],false,now,'観測取得失敗'));}});
+  const results=await Promise.allSettled(jobs.map(job=>job()));
+  results.forEach((result,i)=>{if(result.status==='rejected'){
+   errors[SOURCES[i]]='観測取得失敗';
+   if(SOURCES[i]==='V12_V4')rows.push(make('—','V12_V4','WAIT',[flag('source','V4 decision観測',undefined,'取得不能')],false,now,'V4 observability取得失敗',{metric:nativeMetric(undefined,'V4 decision source has no verified native score',false),rankingScope:'V12_V4',rankingEligible:false,rankingContractAvailable:false,sourceStatus:'SOURCE_ERROR'}));
+   else rows.push(make('—',SOURCES[i],'WAIT',[flag('source','観測接続',undefined,'取得不能')],false,now,'観測取得失敗',{sourceStatus:'SOURCE_ERROR'}));
+  }});
  const [kill,risk]=await Promise.all([json(process.env.DISDEX_SHARED_KILL_SWITCH_PATH||'/var/lib/disdex/shared/kill-switch.json').catch(()=>null),json(process.env.DISDEX_SHARED_CRYPTO_DAILY_RISK_PATH||'/var/lib/disdex/shared/crypto-daily-risk.json').catch(()=>null)]);
  constrainFreshness('Shared Risk',risk?.updatedAt,10*60000,false);
  for(const row of rows)if(row.logic!=='V52'&&row.logic!=='FET'){
@@ -111,7 +163,7 @@ async function observe(){
   row.gates.push(flag('shared-risk','共有日次損失ガード',riskFresh&&typeof risk?.tripped==='boolean'?!risk.tripped:undefined,risk?.tripped?'損失制限で停止':'当日の完全な共有状態を照合','execution'));
  }
  const checkedAt=Date.now(),freshRows=expireRealtimeRankingRows(rows,checkedAt,sourceExpiryByLogic);
- const snapshot={ok:true,readOnly:true,tradingMutation:0,checkedAt:now,refreshSeconds:REALTIME_RANKING_REFRESH_MS/1000,runtimeSha:current.releaseSha,rows:rankRows(freshRows),errors,metric:'確認済み発注制約のない候補を優先し、Signal Gate充足度で順位付け（ロジックごとに条件数は異なります）。発火確率・期待利益ではありません。資金など未確認の実行条件は別途Runner確認待ち。'};
+ const snapshot={ok:true,readOnly:true,tradingMutation:0,checkedAt:now,refreshSeconds:REALTIME_RANKING_REFRESH_MS/1000,runtimeSha:current.releaseSha,rows:rankRows(v12V4Snapshot?mergeV12V4RealtimeRows(freshRows,v12V4Snapshot,now):freshRows),errors,v12V4:v12V4Snapshot?v12V4RealtimeSummary(v12V4Snapshot):unavailableV12V4RealtimeSummary(now),metric:'数値は各ロジックの実測native scoreまたはSignal Gate充足度です。尺度が異なるためロジック横断の比較・順位付けはしていません。発火確率・期待利益ではありません。'};
  return {snapshot,expires:realtimeRankingCacheExpiry(now,sourceExpiries,snapshot.rows)};
 }
 type Observation=Awaited<ReturnType<typeof observe>>;

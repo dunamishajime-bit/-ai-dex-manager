@@ -62,15 +62,22 @@ type PersistedSnapshot = {
   items?: Quality102SymbolDecision[];
 };
 
-function normalizedItems(value: unknown): Quality102SymbolDecision[] {
+function optionalFiniteNumber(value: unknown): number | undefined {
+  if (typeof value !== "number" && typeof value !== "string") return undefined;
+  if (typeof value === "string" && value.trim() === "") return undefined;
+  const parsed = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
+export function normalizeQuality102SymbolItems(value: unknown): Quality102SymbolDecision[] {
   if (!Array.isArray(value)) throw new Error("Q102_DECISION_SNAPSHOT_ITEMS_INVALID");
   return value.map((item) => {
     const row = item as Partial<Quality102SymbolDecision>;
     const symbol = String(row.symbol || "").toUpperCase();
     if (!symbol) throw new Error("Q102_DECISION_SNAPSHOT_SYMBOL_MISSING");
     if (!["LONG", "SHORT", "WAIT"].includes(String(row.side))) throw new Error(`Q102_DECISION_SNAPSHOT_SIDE_INVALID:${symbol}`);
-    const rankingScore = Number(row.rankingScore);
-    const rankingRank = Number(row.rankingRank);
+    const rankingScore = optionalFiniteNumber(row.rankingScore);
+    const rankingRank = optionalFiniteNumber(row.rankingRank);
     return {
       symbol,
       eligible: row.eligible === true,
@@ -82,8 +89,8 @@ function normalizedItems(value: unknown): Quality102SymbolDecision[] {
       reason: String(row.reason || ""),
       selected: row.selected === true,
       referenceTs: Number(row.referenceTs || 0),
-      ...(Number.isFinite(rankingScore) ? { rankingScore } : {}),
-      ...(Number.isFinite(rankingRank) && rankingRank > 0 ? { rankingRank } : {}),
+      ...(rankingScore !== undefined ? { rankingScore } : {}),
+      ...(rankingRank !== undefined && rankingRank > 0 ? { rankingRank } : {}),
       ...(row.rankingFamily ? { rankingFamily: String(row.rankingFamily) } : {}),
       ...(row.rankingLayer ? { rankingLayer: String(row.rankingLayer) } : {}),
       ...(row.rankingVariant ? { rankingVariant: String(row.rankingVariant) } : {}),
@@ -106,7 +113,7 @@ function validateSnapshot(parsed: PersistedSnapshot, productionSha: string) {
   const capturedAtMs = Date.parse(capturedAt);
   if (!Number.isFinite(capturedAtMs)) throw new Error("Q102_DECISION_SNAPSHOT_CAPTURED_AT_INVALID");
   if (Date.now() - capturedAtMs > MAX_AGE_MS) throw new Error("Q102_DECISION_SNAPSHOT_STALE");
-  const items = normalizedItems(parsed.items);
+  const items = normalizeQuality102SymbolItems(parsed.items);
   if (!items.length) throw new Error("Q102_DECISION_SNAPSHOT_EMPTY");
   return { capturedAt, items };
 }

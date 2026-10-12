@@ -21,17 +21,20 @@ test('FET entry clock is independent of technical signal',()=>{
  assert.equal(evaluateFet(bars(),now).gates.find(g=>g.key==='clock')?.state,'OK');
  assert.equal(evaluateFet(bars(),now+6*60000).gates.find(g=>g.key==='clock')?.state,'NO');
 });
-const row=(id:string,score:number|null):RankRow=>({id,symbol:id,logic:'X',side:'LONG',score,gates:[],reason:'',fresh:score!==null,checkedAt:now});
-test('unknown scores last and ties stable',()=>{
- assert.deepEqual(rankRows([row('z',null),row('b',80),row('a',80)]).map(r=>r.id),['a','b','z']);
+type TestRankRow=RankRow & {scoreKind:'NATIVE'|'GATE_COMPLETION'|'UNAVAILABLE';scoreLabel:string;rankingScope?:string;sourceRank?:number;rankingEligible?:boolean;rankingContractAvailable?:boolean};
+const row=(id:string,score:number|null,sourceRank?:number):TestRankRow=>({id,symbol:id,logic:'X',side:'LONG',score,scoreKind:score===null?'UNAVAILABLE':'NATIVE',scoreLabel:'Test native score',gates:[],reason:'',fresh:true,checkedAt:now,rankingScope:'X',sourceRank,rankingEligible:sourceRank!==undefined&&score!==0,rankingContractAvailable:sourceRank!==undefined});
+test('rows without a canonical rank do not gain synthetic ranks from incomparable scores',()=>{
+ const ranked=rankRows([row('z',null),row('b',80),row('a',80)]);
+ assert.deepEqual(ranked.map(r=>r.id),['z','b','a']);
+ assert.deepEqual(ranked.map(r=>r.rank),[undefined,undefined,undefined]);
 });
-test('zero-score rows stay visible but are not assigned a rank or promoted above positive scores',()=>{
+test('zero-score rows stay visible but do not receive a synthetic rank',()=>{
  const blocked={...row('blocked-high',90),gates:[{key:'held',label:'held',state:'NO' as const,detail:'',kind:'execution' as const}]};
  const ranked=rankRows([row('zero',0),blocked,row('candidate',25),row('unknown',null)]);
- assert.deepEqual(ranked.map(r=>r.id),['candidate','blocked-high','zero','unknown']);
- assert.deepEqual(ranked.map(r=>r.rank),[1,2,undefined,undefined]);
- assert.equal(ranked[2].score,0);
- assert.equal(ranked[2].rank,undefined);
+ assert.deepEqual(ranked.map(r=>r.id),['zero','blocked-high','candidate','unknown']);
+ assert.deepEqual(ranked.map(r=>r.rank),[undefined,undefined,undefined,undefined]);
+ assert.equal(ranked[0].score,0);
+ assert.equal(ranked[0].rank,undefined);
 });
 test('display keeps a numeric score visible when the row has no ranking eligibility',async()=>{
  const mod=await import('../lib/realtime-ranking') as typeof import('../lib/realtime-ranking') & {rankScoreDisplay?:(score:number|null|undefined,unavailable?:boolean)=>string};
@@ -42,10 +45,66 @@ test('display keeps a numeric score visible when the row has no ranking eligibil
  assert.equal(mod.rankScoreDisplay!(null),'—');
  assert.equal(mod.rankScoreDisplay!(0,true),'—');
 });
-test('top candidates omit zero-score and execution-blocked rows',async()=>{
+test('top candidates use canonical source rank and keep execution-blocked observations visible',async()=>{
  const mod=await import('../lib/realtime-ranking') as typeof import('../lib/realtime-ranking') & {topRankedCandidates?: (rows:RankRow[],limit?:number)=>RankRow[]};
  assert.equal(typeof mod.topRankedCandidates,'function');
- assert.deepEqual(mod.topRankedCandidates!([row('zero',0),row('candidate',1),{...row('blocked',100),gates:[{key:'held',label:'held',state:'NO',detail:'',kind:'execution'}]}]).map(r=>r.id),['candidate']);
+ const blocked={...row('blocked',100,2),gates:[{key:'held',label:'held',state:'NO' as const,detail:'',kind:'execution' as const}]};
+ assert.deepEqual(mod.topRankedCandidates!([row('zero',0,3),row('candidate',1,1),blocked]).map(r=>r.id),['candidate','blocked']);
+});
+
+test('metric metadata distinguishes native score, gate completion, missing data, numeric zero, and stale data',async()=>{
+ const mod=await import('../lib/realtime-ranking') as typeof import('../lib/realtime-ranking') & {gateCompletionMetric?:(gates:unknown[],fresh:boolean)=>{score:number|null;scoreKind:string;scoreLabel:string};nativeMetric?:(score:unknown,label:string,fresh:boolean)=>{score:number|null;scoreKind:string;scoreLabel:string}};
+ assert.equal(typeof mod.gateCompletionMetric,'function');
+ assert.equal(typeof mod.nativeMetric,'function');
+ const zero=mod.gateCompletionMetric!([{key:'signal',label:'signal',state:'NO',detail:''}],true);
+ assert.deepEqual([zero.score,zero.scoreKind], [0,'GATE_COMPLETION']);
+ assert.match(zero.scoreLabel,/Gate充足度/);
+ const missing=mod.gateCompletionMetric!([{key:'signal',label:'signal',state:'UNKNOWN',detail:''}],true);
+ assert.deepEqual([missing.score,missing.scoreKind],[null,'UNAVAILABLE']);
+ const native=mod.nativeMetric!(42,'Q102 proximity model units',true);
+ assert.deepEqual([native.score,native.scoreKind,native.scoreLabel],[42,'NATIVE','Q102 proximity model units']);
+ const nativeZero=mod.nativeMetric!(0,'Q102 proximity model units',true);
+ assert.deepEqual([nativeZero.score,nativeZero.scoreKind],[0,'NATIVE']);
+ const stale=mod.nativeMetric!(42,'Q102 proximity model units',false);
+ assert.deepEqual([stale.score,stale.scoreKind],[null,'UNAVAILABLE']);
+});
+
+test('scoped top-three uses canonical source rank, deduplicates symbols, keeps blocked rows, and returns three slots',async()=>{
+ const mod=await import('../lib/realtime-ranking') as typeof import('../lib/realtime-ranking') & {topRankedSymbols?:(rows:RankRow[],scope:string)=>Array<{slot:number;status:string;symbol?:string;sourceRow?:RankRow}>};
+ assert.equal(typeof mod.topRankedSymbols,'function');
+ const blocked={...row('eth-route-z',90,1),symbol:'ETHUSDT',sourceRank:1,rankingScope:'Q102',gates:[{key:'margin',label:'margin',state:'NO' as const,detail:'blocked',kind:'execution' as const}]};
+ const duplicate={...row('eth-route-a',80,2),symbol:'ETHUSDT',sourceRank:2,rankingScope:'Q102'};
+ const btc={...row('btc',70,3),symbol:'BTCUSDT',sourceRank:3,rankingScope:'Q102'};
+ const otherScope={...row('other',100,1),symbol:'OTHERUSDT',sourceRank:1,rankingScope:'PENGU'};
+ const slots=mod.topRankedSymbols!([otherScope,btc,duplicate,blocked],'Q102');
+ assert.equal(slots.length,3);
+ assert.deepEqual(slots.map(slot=>slot.status),['CANDIDATE','CANDIDATE','NO_CANDIDATE']);
+ assert.deepEqual(slots.map(slot=>slot.symbol),['ETHUSDT','BTCUSDT',undefined]);
+ assert.equal(slots[0].sourceRow?.id,'eth-route-z');
+ assert.equal(slots[0].sourceRow?.gates.some(g=>g.kind==='execution'&&g.state==='NO'),true);
+});
+
+test('scoped top-three uses deterministic route/id tie-breaks and fills one-candidate placeholders',async()=>{
+ const mod=await import('../lib/realtime-ranking') as typeof import('../lib/realtime-ranking') & {topRankedSymbols?:(rows:RankRow[],scope:string)=>Array<{status:string;symbol?:string;sourceRow?:RankRow}>};
+ assert.equal(typeof mod.topRankedSymbols,'function');
+ const routeZ={...row('same-z',80,1),symbol:'AAAUSDT',rankingScope:'Q102',sourceRoute:'Z_ROUTE'};
+ const routeA={...row('same-a',70,1),symbol:'AAAUSDT',rankingScope:'Q102',sourceRoute:'A_ROUTE'};
+ const second={...row('second',10,2),symbol:'BBBUSDT',rankingScope:'Q102'};
+ const slots=mod.topRankedSymbols!([routeZ,second,routeA],'Q102');
+ assert.deepEqual(slots.map(slot=>slot.status),['CANDIDATE','CANDIDATE','NO_CANDIDATE']);
+ assert.deepEqual(slots.map(slot=>slot.symbol),['AAAUSDT','BBBUSDT',undefined]);
+ assert.equal(slots[0].sourceRow?.id,'same-a');
+ assert.deepEqual(mod.topRankedSymbols!([routeA],'Q102').map(slot=>slot.status),['CANDIDATE','NO_CANDIDATE','NO_CANDIDATE']);
+});
+
+test('scoped top-three returns NOT_EVALUATED, STALE, and SOURCE_ERROR placeholders without cross-scope promotion',async()=>{
+ const mod=await import('../lib/realtime-ranking') as typeof import('../lib/realtime-ranking') & {topRankedSymbols?:(rows:RankRow[],scope:string)=>Array<{status:string}>};
+ assert.equal(typeof mod.topRankedSymbols,'function');
+ assert.deepEqual(mod.topRankedSymbols!([],'V12_V4').map(slot=>slot.status),['NOT_EVALUATED','NOT_EVALUATED','NOT_EVALUATED']);
+ const stale={...row('stale',90,1),rankingScope:'V12_V4',rankingEligible:false,fresh:false,sourceStatus:'STALE' as const};
+ assert.deepEqual(mod.topRankedSymbols!([stale],'V12_V4').map(slot=>slot.status),['STALE','STALE','STALE']);
+ const failed={...stale,sourceStatus:'SOURCE_ERROR' as const};
+ assert.deepEqual(mod.topRankedSymbols!([failed],'V12_V4').map(slot=>slot.status),['SOURCE_ERROR','SOURCE_ERROR','SOURCE_ERROR']);
 });
 test('ranking refresh is scheduled 30 seconds after an observation completes',async()=>{
  const mod=await import('../lib/realtime-ranking') as typeof import('../lib/realtime-ranking') & {nextRealtimeRankingAt?: (now:number)=>number;realtimeRankingCacheExpiry?:(now:number,sourceExpiries:number[])=>number};
@@ -78,7 +137,7 @@ test('a source freshness deadline crossed during observation removes its cached 
  const observed=row('V12:BTC:LONG',75);observed.logic='V12';observed.checkedAt=now;
  assert.equal(typeof mod.expireRealtimeRankingRows,'function');
  const result=mod.expireRealtimeRankingRows!([observed],now+101,{'V12':now+100});
- assert.equal(result[0].fresh,false);assert.equal(result[0].score,null);assert.equal(result[0].rank,undefined);
+ assert.equal(result[0].fresh,false);assert.equal(result[0].score,null);assert.equal(result[0].scoreKind,'UNAVAILABLE');assert.equal(result[0].rankingEligible,false);assert.equal(result[0].rank,undefined);
 });
 test('a positive non-FET score expires in the browser at its exact freshness deadline',()=>{
  const observed=row('V12:BTC:LONG',75);observed.logic='V12';observed.freshUntil=now+100;
@@ -90,7 +149,7 @@ test('zero score remains displayed until its source deadline then becomes unknow
  const observed=row('Q102:BTC:LONG',0);observed.logic='Q102';observed.freshUntil=now+100;
  assert.equal(currentRankRow(observed,now+99).score,0);
  const expired=currentRankRow(observed,now+100);
- assert.equal(expired.score,null);assert.equal(expired.fresh,false);assert.equal(expired.rank,undefined);
+ assert.equal(expired.score,null);assert.equal(expired.scoreKind,'UNAVAILABLE');assert.equal(expired.rankingEligible,false);assert.equal(expired.fresh,false);assert.equal(expired.rank,undefined);
 });
 test('zero-score rows do not create movement phases or sound events',async()=>{
  const mod=await import('../lib/ranking-motion-groups').catch(()=>null) as null|{createRankingMovementPhases:(before:unknown[],after:unknown[])=>unknown[]};
@@ -121,9 +180,12 @@ test('all selected ranking sound recordings are packaged as public assets',async
  const mod=await import('../lib/ranking-sounds');
  for(const sound of mod.RANKING_SOUNDS){const file=join(process.cwd(),'public',sound.src.replace(/^\//,''));assert.equal(existsSync(file),true,sound.src);assert.ok(statSync(file).size>1_000,sound.src);}
 });
-test('known execution blocks rank behind available candidates despite higher signal score',()=>{
- const blocked={...row('held',100),gates:[{key:'holding',label:'holding',state:'NO' as const,detail:'',kind:'execution' as const}]};
- assert.deepEqual(rankRows([blocked,row('candidate',30),row('unknown',null)]).map(r=>r.id),['candidate','held','unknown']);
+test('canonical source rank remains visible when execution blocks an observation',()=>{
+ const blocked={...row('held',100,1),gates:[{key:'holding',label:'holding',state:'NO' as const,detail:'',kind:'execution' as const}]};
+ const [result]=rankRows([blocked,row('candidate',30,2)]);
+ assert.equal(result.id,'held');
+ assert.equal(result.rank,1);
+ assert.equal(result.gates[0].state,'NO');
 });
 test('initial and unchanged rankings do not flash; only movement flashes',()=>{
  assert.deepEqual(rankChanges([],['a','b']),{});
