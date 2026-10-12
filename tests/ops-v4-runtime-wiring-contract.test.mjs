@@ -30,3 +30,14 @@ test("V4 runtime contract supplies the shared Aster rate budget after legacy env
   const v4Env = v4Unit.indexOf("EnvironmentFile=/etc/disdex/current-runtime/%i.env");
   assert.ok(baseV96 >= 0 && basePeers > baseV96 && v4Env > basePeers, "SHA-bound runtime contract must load last");
 });
+
+test("V4 full-LIVE wiring pins V4 independently while preserving current peer SHA", () => {
+  assert.match(wiring, /DISDEX_V12_V4_PRIMARY_SHA/);
+  assert.match(wiring, /V4_PRIMARY_RELEASE/);
+  assert.match(wiring, /disdex-v12-v4@\$\{V4_PRIMARY_SHA\}\.service/);
+  assert.match(wiring, /PENGU_UNIT="disdex-pengu-dual-ls-v2@\$\{DEPLOYED_SHA\}\.service"/);
+  assert.match(wiring, /V4_OPERATOR_ACTIVATION_PATH=.*v12-v4-full\.json/);
+  assert.match(wiring, /V4_CONTRACT_ENV_FILE=.*\$\{V4_PRIMARY_SHA\}\.env/);
+  assert.match(wiring, /DISDEX_V4_MIXED_SHA_RUNTIME_METADATA_PRUNE_SKIPPED/);
+  assert.match(wiring, /operator_activation_all_trading_ready/);
+});

@@ -1,0 +1,25 @@
+{
+  "schema": "disdex-current-implementation-readiness/v1",
+  "date": "2026-10-12",
+  "target": "V12_V4_V2_M150_D05_CORE_NATIVE",
+  "canonicalTarget": "docs/implementation/V12_V4_V2_M150_PRODUCTION_GATE_20261009.md",
+  "implementationStatus": "READY",
+  "status": "BLOCKED",
+  "ordersEnabled": false,
+  "blockers": [
+    "OPERATOR_LIVE_ACTIVATION_REQUIRED"
+  ],
+  "completed": [
+    "V12_V4_FROZEN_41_ROUTE_POLICY_PRESENT",
+    "V12_V4_GROSS_CAPS_V12_3_CRYPTO_3_5_TOTAL_4_75_RECOVERY_2_5",
+    "V12_V4_V3_ROOT_EVIDENCE_REHASH_REQUIRED_AT_RUNTIME",
+    "V12_V4_FIRST_LIVE_FILL_RISK_ACK_REQUIRED_AT_CERTIFICATION",
+    "V12_V4_EXACT_SHA_OPERATOR_SCOPE_SEPARATE_FROM_PEERS"
+  ],
+  "activationRule": "V12_V4 may place real orders only after the root-managed exact-SHA v3 production certificate validates all five sealed evidence files and the separate root-owned V12_V4 operator artifact approves this exact SHA and target. The V4 runner must continue enforcing signed account reconciliation, peer ownership, shared risk, margin, pending exposure, account lock, venue filters and protective-order checks. This readiness file does not certify those root artifacts and does not enable orders.",
+  "riskDisclosure": {
+    "v4FirstLiveFillNotYetObserved": true,
+    "weakIndependentForwardPerformance": true,
+    "liveOrdersEnabledByThisFile": false
+  }
+}

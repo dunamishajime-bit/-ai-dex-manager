@@ -130,6 +130,42 @@ resolve_current() {
     printf 'invalid primary V12 mode: %s\n' "$PRIMARY_V12_MODE" >&2
     return 1
   }
+  if [[ "$PRIMARY_V12_MODE" == "V4" ]]; then
+    V4_PRIMARY_SHA="${DISDEX_V12_V4_PRIMARY_SHA:-}"
+    if [[ -z "$V4_PRIMARY_SHA" && -f "$PRIMARY_V12_MODE_FILE" ]]; then
+      V4_PRIMARY_SHA="$(sed -n 's/^DISDEX_V12_V4_PRIMARY_SHA=//p' "$PRIMARY_V12_MODE_FILE" | tail -n1)"
+    fi
+    [[ "$V4_PRIMARY_SHA" =~ ^[0-9a-f]{40}$ ]] || {
+      printf 'V4 primary SHA is missing or invalid; refusing mixed-SHA wiring\n' >&2
+      return 1
+    }
+    V4_PRIMARY_RELEASE="${TRADING_RELEASES}/${V4_PRIMARY_SHA}"
+    [[ -d "$V4_PRIMARY_RELEASE" && ! -L "$V4_PRIMARY_RELEASE" && -f "$V4_PRIMARY_RELEASE/.disdex-release-sha" && ! -L "$V4_PRIMARY_RELEASE/.disdex-release-sha" ]] || {
+      printf 'V4 primary release is missing or unsafe: %s\n' "$V4_PRIMARY_RELEASE" >&2
+      return 1
+    }
+    [[ "$(tr -d '[:space:]' < "$V4_PRIMARY_RELEASE/.disdex-release-sha")" == "$V4_PRIMARY_SHA" ]] || {
+      printf 'V4 primary release marker mismatch: %s\n' "$V4_PRIMARY_RELEASE" >&2
+      return 1
+    }
+    [[ -f "$V4_PRIMARY_RELEASE/scripts/v12-v4-production-runner.ts" && -f "$V4_PRIMARY_RELEASE/deploy/systemd/disdex-v12-v4@.service" ]] || {
+      printf 'V4 primary release is missing production runner artifacts: %s\n' "$V4_PRIMARY_RELEASE" >&2
+      return 1
+    }
+    V4_CONTRACT_ENV_FILE="${RUNTIME_CONTRACT_ENV_DIR}/${V4_PRIMARY_SHA}.env"
+    V4_OPERATOR_ACTIVATION_PATH="${SHARED_ROOT}/operator-activation/v12-v4-full.json"
+    HEALTH_ALERT_EXEC_ROOT="$V4_PRIMARY_RELEASE"
+    MONITOR_RUNTIME_SHA="$V4_PRIMARY_SHA"
+    MONITOR_RUNTIME_ROOT="$V4_PRIMARY_RELEASE"
+  else
+    V4_PRIMARY_SHA=""
+    V4_PRIMARY_RELEASE=""
+    V4_CONTRACT_ENV_FILE=""
+    V4_OPERATOR_ACTIVATION_PATH="${OPERATOR_ACTIVATION_PATH}"
+    HEALTH_ALERT_EXEC_ROOT="$CURRENT_RELEASE"
+    MONITOR_RUNTIME_SHA="$DEPLOYED_SHA"
+    MONITOR_RUNTIME_ROOT="$CURRENT_RELEASE"
+  fi
   validate_release_artifacts
   NODE_MODULES_SOURCE_SHA="$(dependency_source_sha "$CURRENT_RELEASE/node_modules")"
   PYTHON_RUNTIME_SOURCE_SHA="$(dependency_source_sha "$CURRENT_RELEASE/.venv2")"
@@ -386,7 +422,7 @@ recover_hype_benign_state() {
 
 set_units() {
   if [[ "$PRIMARY_V12_MODE" == "V4" ]]; then
-    V12_UNIT="disdex-v12-v4@${DEPLOYED_SHA}.service"
+    V12_UNIT="disdex-v12-v4@${V4_PRIMARY_SHA}.service"
     V12_OPERATOR_RUNNER="V12_V4"
     V12_STATE_PATH="/var/lib/disdex/v12-v4/heartbeat.json"
     V12_HEARTBEAT_FILE="v12-v4.json"
@@ -427,6 +463,8 @@ show_plan() {
   printf 'deployedSha=%s\n' "$DEPLOYED_SHA"
   printf 'releaseMarker=%s\n' "$MARKER_SHA"
   printf 'primaryV12Mode=%s\n' "$PRIMARY_V12_MODE"
+  printf 'v4PrimarySha=%s\n' "${V4_PRIMARY_SHA:-none}"
+  printf 'v4PrimaryRelease=%s\n' "${V4_PRIMARY_RELEASE:-none}"
   printf 'primaryV12ModeFile=%s\n' "$PRIMARY_V12_MODE_FILE"
   printf 'v12Unit=%s\n' "$V12_UNIT"
   printf 'penguUnit=%s\n' "$PENGU_UNIT"
@@ -441,6 +479,7 @@ show_plan() {
   printf 'v52LegacyCryptoState=%s\n' "$V52_LEGACY_CRYPTO_ROOT"
   printf 'penguStateRoot=%s\n' "$PENGU_STATE_ROOT"
   printf 'contractEnvFile=%s\n' "$CONTRACT_ENV_FILE"
+  printf 'v4ContractEnvFile=%s\n' "${V4_CONTRACT_ENV_FILE:-none}"
   printf 'idleOperatorEnvFile=%s\n' "$IDLE_OPERATOR_ENV_FILE"
   printf 'hypeOperatorEnvFile=%s\n' "$HYPE_OPERATOR_ENV_FILE"
   printf 'healthSnapshotEnvFile=%s\n' "$HEALTH_SNAPSHOT_ENV_FILE"
@@ -476,9 +515,11 @@ check_units() {
 
 prepare_managed_unit_templates_for_apply() {
   require_root_for_apply
+  local ops_source_release="$CURRENT_RELEASE"
   if [[ "$PRIMARY_V12_MODE" == "V4" ]]; then
+    ops_source_release="$V4_PRIMARY_RELEASE"
     install -o root -g root -m 0644 \
-      "$CURRENT_RELEASE/deploy/systemd/disdex-v12-v4@.service" \
+      "$V4_PRIMARY_RELEASE/deploy/systemd/disdex-v12-v4@.service" \
       /etc/systemd/system/disdex-v12-v4@.service
   else
     install -o root -g root -m 0644 \
@@ -501,13 +542,16 @@ prepare_managed_unit_templates_for_apply() {
     "$CURRENT_RELEASE/ops/systemd/disdex-trade-fill-notifier.timer" \
     /etc/systemd/system/disdex-trade-fill-notifier.timer
   install -o root -g root -m 0755 \
-    "$CURRENT_RELEASE/scripts/ops/root/disdex-current-runtime-coherence-guard" \
+    "$ops_source_release/scripts/ops/root/disdex-current-runtime-coherence-guard" \
     /usr/local/sbin/disdex-current-runtime-coherence-guard
+  install -o root -g root -m 0755 \
+    "$ops_source_release/scripts/ops/root/disdex-current-runtime-wiring" \
+    /usr/local/sbin/disdex-current-runtime-wiring
   install -o root -g root -m 0644 \
-    "$CURRENT_RELEASE/ops/systemd/disdex-current-runtime-coherence-guard.service" \
+    "$ops_source_release/ops/systemd/disdex-current-runtime-coherence-guard.service" \
     /etc/systemd/system/disdex-current-runtime-coherence-guard.service
   install -o root -g root -m 0644 \
-    "$CURRENT_RELEASE/ops/systemd/disdex-current-runtime-coherence-guard.timer" \
+    "$ops_source_release/ops/systemd/disdex-current-runtime-coherence-guard.timer" \
     /etc/systemd/system/disdex-current-runtime-coherence-guard.timer
   systemctl daemon-reload
 }
@@ -537,6 +581,100 @@ write_atomic() {
   chown root:root "$temporary"
   mv -f -- "$temporary" "$target"
   trap - RETURN
+}
+
+write_atomic_preserve_existing() {
+  local target="$1" content="$2" directory temporary backup
+  directory="$(dirname -- "$target")"
+  install -d -o root -g root -m 0755 "$directory"
+  [[ ! -L "$target" ]] || { printf 'refusing symlink runtime artifact: %s\n' "$target" >&2; return 1; }
+  temporary="$(mktemp "${directory}/.current-runtime-wiring.XXXXXX")"
+  trap 'rm -f -- "$temporary"' RETURN
+  printf '%s\n' "$content" > "$temporary"
+  chmod 0644 "$temporary"
+  chown root:root "$temporary"
+  if [[ -e "$target" ]]; then
+    [[ -f "$target" ]] || { printf 'runtime artifact is not a regular file: %s\n' "$target" >&2; return 1; }
+    if cmp -s -- "$temporary" "$target"; then
+      rm -f -- "$temporary"
+      trap - RETURN
+      return 0
+    fi
+    backup="${target}.before-v4-$(date -u +%Y%m%dT%H%M%SZ)-$$"
+    cp -a -- "$target" "$backup"
+    printf 'DISDEX_V4_RUNTIME_ARTIFACT_BACKUP path=%s\n' "$backup"
+  fi
+  mv -f -- "$temporary" "$target"
+  trap - RETURN
+}
+
+write_v4_primary_runtime_artifacts() {
+  [[ "$PRIMARY_V12_MODE" == "V4" ]] || return 0
+  local mode_content env_content v4_base_env=/etc/disdex/disdex-v12-v4.env
+  [[ -f "$v4_base_env" && ! -L "$v4_base_env" ]] || {
+    printf 'V4 base environment is missing or unsafe: %s\n' "$v4_base_env" >&2
+    return 1
+  }
+  grep -q '^V12_V4_PEER_STATE_PATHS_JSON=' "$v4_base_env" || {
+    printf 'V4 peer state path contract is missing\n' >&2
+    return 1
+  }
+  mode_content="DISDEX_PRIMARY_V12_RUNNER=V4
+DISDEX_V12_V4_PRIMARY_SHA=${V4_PRIMARY_SHA}
+DISDEX_V12_V4_PEER_SHA=${DEPLOYED_SHA}"
+  env_content="DISDEX_RELEASE_SHA=${V4_PRIMARY_SHA}
+DISDEX_RUNTIME_SHA=${V4_PRIMARY_SHA}
+DISDEX_RELEASE_ROOT=${V4_PRIMARY_RELEASE}
+DISDEX_RUNTIME_COMMIT_SHA=${V4_PRIMARY_SHA}
+V12_V4_LIVE_ACK=${V4_PRIMARY_SHA}
+V12_V4_OPERATION_MODE=CERTIFIED
+V12_V4_HEALTH_STATE_PATH=/var/lib/disdex/v12-v4/heartbeat.json
+V12_V4_EXECUTION_STORE_PATH=/var/lib/disdex/v12-v4/orders.json
+DISDEX_PENDING_EXPOSURE_REGISTRY_PATH=${PENDING_EXPOSURE_REGISTRY_PATH}
+DISDEX_ACCOUNT_LOCK_PATH=${SHARED_ROOT}/account-order.lock
+DISDEX_OPERATOR_ACTIVATION_PATH=${V4_OPERATOR_ACTIVATION_PATH}
+DISDEX_SHARED_CRYPTO_DAILY_RISK_PATH=${SHARED_ROOT}/crypto-daily-risk.json
+DISDEX_SHARED_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json
+DISDEX_V13D_V11EQ_V96_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json
+DISDEX_V52_ASTER_ONLY_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json
+DISDEX_V96_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json
+PENGU_DUAL_LS_V2_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json
+DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH=${SHARED_ROOT}/aster-rate-budget.json
+DISDEX_ASTER_GLOBAL_MIN_INTERVAL_MS=50
+DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS=5000"
+  write_atomic_preserve_existing "$PRIMARY_V12_MODE_FILE" "$mode_content"
+  write_atomic_preserve_existing "$V4_CONTRACT_ENV_FILE" "$env_content"
+}
+
+assert_v4_primary_singleton() {
+  [[ "$PRIMARY_V12_MODE" == "V4" ]] || return 0
+  local unit active
+  while read -r unit _; do
+    [[ "$unit" =~ ^disdex-v12-v4-canary@[0-9a-f]{40}\.service$ ]] || continue
+    active="$(systemctl show "$unit" -p ActiveState --value 2>/dev/null || true)"
+    [[ "$active" != "active" && "$active" != "activating" && "$active" != "deactivating" ]] || {
+      printf 'V4 canary must be stopped before full primary wiring: %s state=%s\n' "$unit" "$active" >&2
+      return 1
+    }
+  done < <(systemctl list-units --all --type=service --no-legend --no-pager 'disdex-v12-v4-canary@*.service' 2>/dev/null || true)
+  while read -r unit _; do
+    [[ "$unit" =~ ^disdex-v12-v4@([0-9a-f]{40})\.service$ ]] || continue
+    active="$(systemctl show "$unit" -p ActiveState --value 2>/dev/null || true)"
+    [[ "$active" != "active" && "$active" != "activating" && "$active" != "deactivating" ]] || {
+      [[ "$unit" == "$V12_UNIT" ]] || {
+        printf 'competing V4 production authority is active: %s state=%s\n' "$unit" "$active" >&2
+        return 1
+      }
+    }
+  done < <(systemctl list-units --all --type=service --no-legend --no-pager 'disdex-v12-v4@*.service' 2>/dev/null || true)
+  while read -r unit _; do
+    [[ "$unit" =~ ^disdex-v12-x1-all@[0-9a-f]{40}\.service$ ]] || continue
+    active="$(systemctl show "$unit" -p ActiveState --value 2>/dev/null || true)"
+    [[ "$active" != "active" && "$active" != "activating" && "$active" != "deactivating" ]] || {
+      printf 'legacy V12 authority is active during V4 primary wiring: %s state=%s\n' "$unit" "$active" >&2
+      return 1
+    }
+  done < <(systemctl list-units --all --type=service --no-legend --no-pager 'disdex-v12-x1-all@*.service' 2>/dev/null || true)
 }
 
 normalize_position_recovery_state_lineage() {
@@ -632,9 +770,10 @@ retire_stale_release_enabled_units() {
   for link in /etc/systemd/system/multi-user.target.wants/disdex-*@*.service; do
     [[ -L "$link" ]] || continue
     unit="$(basename "$link")"
-    [[ "$unit" =~ ^disdex-(v12-x1-all|v12-v4|pengu-dual-ls-v2|quality102-causal-v1|fet-brk48|hype-long|v52-aster-only|shared-crypto-risk|v12-v52-margin-guard|idle-priority-short)@([0-9a-f]{40})\.service$ ]] || continue
+    [[ "$unit" =~ ^disdex-(v12-x1-all|v12-v4|v12-v4-canary|pengu-dual-ls-v2|quality102-causal-v1|fet-brk48|hype-long|v52-aster-only|shared-crypto-risk|v12-v52-margin-guard|idle-priority-short)@([0-9a-f]{40})\.service$ ]] || continue
     sha="${BASH_REMATCH[2]}"
     [[ "$sha" == "$DEPLOYED_SHA" ]] && continue
+    [[ "$PRIMARY_V12_MODE" == "V4" && "$unit" == "$V12_UNIT" ]] && continue
     systemctl disable --now "$unit" >/dev/null 2>&1 || true
     systemctl reset-failed "$unit" >/dev/null 2>&1 || true
     printf 'DISDEX_STALE_RELEASE_UNIT_RETIRED unit=%s\n' "$unit"
@@ -643,6 +782,10 @@ retire_stale_release_enabled_units() {
 
 prune_stale_runtime_metadata() {
   local previous_sha="" target base sha unit state path
+  if [[ "$PRIMARY_V12_MODE" == "V4" ]]; then
+    printf 'DISDEX_V4_MIXED_SHA_RUNTIME_METADATA_PRUNE_SKIPPED\n'
+    return 0
+  fi
   if [[ -L "$TRADING_ROOT/previous" ]]; then
     target="$(readlink -f -- "$TRADING_ROOT/previous" 2>/dev/null || true)"
     if [[ "$target" == "$TRADING_RELEASES"/* ]]; then
@@ -655,7 +798,7 @@ prune_stale_runtime_metadata() {
     base="$(basename -- "$path")"
     sha="${base:0:40}"
     [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || continue
-    [[ "$sha" == "$DEPLOYED_SHA" || "$sha" == "$NODE_MODULES_SOURCE_SHA" || "$sha" == "$PYTHON_RUNTIME_SOURCE_SHA" || ( -n "$previous_sha" && "$sha" == "$previous_sha" ) ]] && continue
+    [[ "$sha" == "$DEPLOYED_SHA" || ( "$PRIMARY_V12_MODE" == "V4" && "$sha" == "$V4_PRIMARY_SHA" ) || "$sha" == "$NODE_MODULES_SOURCE_SHA" || "$sha" == "$PYTHON_RUNTIME_SOURCE_SHA" || ( -n "$previous_sha" && "$sha" == "$previous_sha" ) ]] && continue
     rm -f -- "$path"
     printf 'DISDEX_STALE_RUNTIME_ENV_REMOVED path=%s\n' "$path"
   done
@@ -664,7 +807,7 @@ prune_stale_runtime_metadata() {
     base="$(basename -- "$path")"
     [[ "$base" =~ @([0-9a-f]{40})\.service\.d$ ]] || continue
     sha="${BASH_REMATCH[1]}"
-    [[ "$sha" == "$DEPLOYED_SHA" || "$sha" == "$NODE_MODULES_SOURCE_SHA" || "$sha" == "$PYTHON_RUNTIME_SOURCE_SHA" || ( -n "$previous_sha" && "$sha" == "$previous_sha" ) ]] && continue
+    [[ "$sha" == "$DEPLOYED_SHA" || ( "$PRIMARY_V12_MODE" == "V4" && "$sha" == "$V4_PRIMARY_SHA" ) || "$sha" == "$NODE_MODULES_SOURCE_SHA" || "$sha" == "$PYTHON_RUNTIME_SOURCE_SHA" || ( -n "$previous_sha" && "$sha" == "$previous_sha" ) ]] && continue
     unit="${base%.d}"
     state="$(systemctl show "$unit" -p ActiveState --value 2>/dev/null || true)"
     [[ "$state" != "active" && "$state" != "activating" && "$state" != "deactivating" ]] || {
@@ -682,6 +825,7 @@ reset_stale_release_failed_units() {
     [[ -n "$unit" ]] || continue
     [[ "$unit" =~ ^disdex-(v12-x1-all|v12-v4|pengu-dual-ls-v2|quality102-causal-v1|fet-brk48|hype-long|v52-aster-only|shared-crypto-risk|v12-v52-margin-guard|idle-priority-short)@[0-9a-f]{40}\.service$ ]] || continue
     [[ "$unit" == *"@${DEPLOYED_SHA}.service" ]] && continue
+    [[ "$PRIMARY_V12_MODE" == "V4" && "$unit" == "$V12_UNIT" ]] && continue
     systemctl reset-failed "$unit" >/dev/null 2>&1 || true
   done < <(systemctl list-units --all --type=service --state=failed --no-legend 2>/dev/null || true)
 }
@@ -777,10 +921,22 @@ assert_current_live_target_ready() {
 }
 
 operator_activation_all_trading_ready() {
-  local runner
-  local gate="$CURRENT_RELEASE/scripts/ops/root/disdex-live-operator-activation-gate.mjs"
+  local runner gate peer_gate release_root sha activation_path
+  peer_gate="$CURRENT_RELEASE/scripts/ops/root/disdex-live-operator-activation-gate.mjs"
+  gate="$peer_gate"
+  if [[ "$PRIMARY_V12_MODE" == "V4" ]]; then
+    gate="$V4_PRIMARY_RELEASE/scripts/ops/root/disdex-live-operator-activation-gate.mjs"
+    /usr/bin/node "$gate" --release-root "$V4_PRIMARY_RELEASE" --sha "$V4_PRIMARY_SHA" \
+      --runner V12_V4 --activation-path "$V4_OPERATOR_ACTIVATION_PATH" >/dev/null 2>&1 || return 1
+  fi
   for runner in "$V12_OPERATOR_RUNNER" PENGU_V8 QUALITY102_CAUSAL_V1 V52 FET_BRK48_RESIDUAL HYPE_TREND_LONG IDLE_PRIORITY_SHORT; do
-    /usr/bin/node "$gate"       --release-root "$CURRENT_RELEASE"       --sha "$DEPLOYED_SHA"       --runner "$runner"       --activation-path "$OPERATOR_ACTIVATION_PATH" >/dev/null 2>&1 || return 1
+    [[ "$PRIMARY_V12_MODE" == "V4" && "$runner" == "V12_V4" ]] && continue
+    gate="$peer_gate"
+    release_root="$CURRENT_RELEASE"
+    sha="$DEPLOYED_SHA"
+    activation_path="$OPERATOR_ACTIVATION_PATH"
+    /usr/bin/node "$gate" --release-root "$release_root" --sha "$sha" \
+      --runner "$runner" --activation-path "$activation_path" >/dev/null 2>&1 || return 1
   done
   return 0
 }
@@ -834,6 +990,13 @@ persistently_mask_legacy_v12() {
 apply_wiring() {
   require_root_for_apply
   assert_no_legacy_live_units
+  if [[ "$PRIMARY_V12_MODE" == "V4" ]]; then
+    assert_v4_primary_singleton
+    operator_activation_all_trading_ready || {
+      printf 'V4 full-LIVE or peer operator gate is not ready; wiring was not applied\n' >&2
+      return 1
+    }
+  fi
   assert_current_live_target_ready
   local fet_readiness_guard="${CURRENT_RELEASE}/scripts/ops/root/disdex-fet-preemption-readiness-guard.py"
   [[ -f "$fet_readiness_guard" ]] || fet_readiness_guard="/usr/local/libexec/disdex-fet-preemption-readiness-guard.py"
@@ -894,7 +1057,9 @@ apply_wiring() {
     }
   fi
   normalize_live_state_ownership
-  write_atomic "$PRIMARY_V12_MODE_FILE" "DISDEX_PRIMARY_V12_RUNNER=${PRIMARY_V12_MODE}"
+  if [[ "$PRIMARY_V12_MODE" != "V4" ]]; then
+    write_atomic "$PRIMARY_V12_MODE_FILE" "DISDEX_PRIMARY_V12_RUNNER=${PRIMARY_V12_MODE}"
+  fi
   if [[ -f /etc/systemd/system/disdex-stock-reference-free.service.d/zzzz-v56-release.conf ]]; then
     rm -f -- /etc/systemd/system/disdex-stock-reference-free.service.d/zzzz-v56-release.conf
     printf 'DISDEX_STOCK_REFERENCE_LEGACY_RELEASE_PIN_REMOVED\n'
@@ -1015,10 +1180,10 @@ PENGU_DUAL_LS_V2_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json"
   # root-generated read-only projection for the application-side check.
   write_atomic "$IDLE_OPERATOR_ENV_FILE" "DISDEX_OPERATOR_ACTIVATION_PATH=${OPERATOR_ACTIVATION_RUNTIME_PATH}"
 
-  write_atomic "$HEALTH_SNAPSHOT_ENV_FILE" "DISDEX_HEALTH_SNAPSHOT_EXPECTED_SHA=${DEPLOYED_SHA}
-DISDEX_HEALTH_SNAPSHOT_RELEASE_ROOT=${CURRENT_RELEASE}
-DISDEX_HEALTH_SNAPSHOT_V12_EXPECTED_SHA=${DEPLOYED_SHA}
-DISDEX_HEALTH_SNAPSHOT_V12_RELEASE_ROOT=${CURRENT_RELEASE}
+  write_atomic "$HEALTH_SNAPSHOT_ENV_FILE" "DISDEX_HEALTH_SNAPSHOT_EXPECTED_SHA=${MONITOR_RUNTIME_SHA}
+DISDEX_HEALTH_SNAPSHOT_RELEASE_ROOT=${MONITOR_RUNTIME_ROOT}
+DISDEX_HEALTH_SNAPSHOT_V12_EXPECTED_SHA=${V4_PRIMARY_SHA:-${DEPLOYED_SHA}}
+DISDEX_HEALTH_SNAPSHOT_V12_RELEASE_ROOT=${V4_PRIMARY_RELEASE:-${CURRENT_RELEASE}}
 DISDEX_HEALTH_SNAPSHOT_V12_MODE=${PRIMARY_V12_MODE}
 DISDEX_HEALTH_SNAPSHOT_PENGU_EXPECTED_SHA=${DEPLOYED_SHA}
 DISDEX_HEALTH_SNAPSHOT_PENGU_RELEASE_ROOT=${CURRENT_RELEASE}
@@ -1046,13 +1211,13 @@ DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_SERVICE_UNIT=${SHARED_RISK_UNIT}
 DISDEX_HEALTH_SNAPSHOT_MARGIN_STATE_PATH=/var/lib/disdex/shared/margin-risk/guard-live.json
 DISDEX_HEALTH_SNAPSHOT_MARGIN_SERVICE_UNIT=${MARGIN_UNIT}"
 
-  write_atomic "$WATCHDOG_ENV_FILE" "DISDEX_WATCHDOG_RELEASE_ROOT=${CURRENT_RELEASE}
-DISDEX_WATCHDOG_EXPECTED_SHA=${DEPLOYED_SHA}
-DISDEX_WATCHDOG_APPROVED_SHA=${DEPLOYED_SHA}
-DISDEX_WATCHDOG_RUNNER_SHA=${DEPLOYED_SHA}
-DISDEX_WATCHDOG_RUNNER_ROOT=${CURRENT_RELEASE}
-DISDEX_WATCHDOG_V12_EXPECTED_SHA=${DEPLOYED_SHA}
-DISDEX_WATCHDOG_V12_RELEASE_ROOT=${CURRENT_RELEASE}
+  write_atomic "$WATCHDOG_ENV_FILE" "DISDEX_WATCHDOG_RELEASE_ROOT=${MONITOR_RUNTIME_ROOT}
+DISDEX_WATCHDOG_EXPECTED_SHA=${MONITOR_RUNTIME_SHA}
+DISDEX_WATCHDOG_APPROVED_SHA=${MONITOR_RUNTIME_SHA}
+DISDEX_WATCHDOG_RUNNER_SHA=${MONITOR_RUNTIME_SHA}
+DISDEX_WATCHDOG_RUNNER_ROOT=${MONITOR_RUNTIME_ROOT}
+DISDEX_WATCHDOG_V12_EXPECTED_SHA=${V4_PRIMARY_SHA:-${DEPLOYED_SHA}}
+DISDEX_WATCHDOG_V12_RELEASE_ROOT=${V4_PRIMARY_RELEASE:-${CURRENT_RELEASE}}
 DISDEX_WATCHDOG_V12_MODE=${PRIMARY_V12_MODE}
 DISDEX_WATCHDOG_PENGU_EXPECTED_SHA=${DEPLOYED_SHA}
 DISDEX_WATCHDOG_PENGU_RELEASE_ROOT=${CURRENT_RELEASE}
@@ -1067,11 +1232,13 @@ DISDEX_WATCHDOG_HYPE_RELEASE_ROOT=${CURRENT_RELEASE}
 DISDEX_WATCHDOG_IDLE_EXPECTED_SHA=${DEPLOYED_SHA}
 DISDEX_WATCHDOG_IDLE_RELEASE_ROOT=${CURRENT_RELEASE}
 DISDEX_WATCHDOG_SHARED_RISK_EXPECTED_SHA=${DEPLOYED_SHA}
+DISDEX_WATCHDOG_MARGIN_GUARD_EXPECTED_SHA=${DEPLOYED_SHA}
 DISDEX_WATCHDOG_HEALTH_ROOT=/var/lib/disdex/runner-health
 DISDEX_WATCHDOG_STATE_PATH=/var/lib/disdex/runner-health/private/watchdog-current-state.json
 DISDEX_WATCHDOG_AUDIT_PATH=/var/lib/disdex/runner-health/private/watchdog-current-audit.json
 DISDEX_WATCHDOG_LOCK_PATH=/var/lib/disdex/runner-health/private/watchdog-current.lock
 DISDEX_WATCHDOG_OPERATOR_ACTIVATION_PATH=${OPERATOR_ACTIVATION_PATH}
+DISDEX_WATCHDOG_V12_OPERATOR_ACTIVATION_PATH=${V4_OPERATOR_ACTIVATION_PATH}
 DISDEX_WATCHDOG_V12_SERVICE_UNIT=${V12_UNIT}
 DISDEX_WATCHDOG_PENGU_SERVICE_UNIT=${PENGU_UNIT}
 DISDEX_WATCHDOG_V52_SERVICE_UNIT=${V52_UNIT}
@@ -1086,22 +1253,22 @@ DISDEX_WATCHDOG_IDLE_SERVICE_UNIT=${IDLE_UNIT}"
   write_atomic "${WATCHDOG_DROPIN_DIR}/${CURRENT_SUPPORT_OVERRIDE}" "[Service]
 EnvironmentFile=
 EnvironmentFile=${WATCHDOG_ENV_FILE}
-WorkingDirectory=${CURRENT_RELEASE}
+WorkingDirectory=${MONITOR_RUNTIME_ROOT}
 ExecStartPre=
-ExecStartPre=/usr/bin/test -f ${CURRENT_RELEASE}/.disdex-release-sha
-ExecStartPre=/usr/bin/grep -Fxq ${DEPLOYED_SHA} ${CURRENT_RELEASE}/.disdex-release-sha
+ExecStartPre=/usr/bin/test -f ${MONITOR_RUNTIME_ROOT}/.disdex-release-sha
+ExecStartPre=/usr/bin/grep -Fxq ${MONITOR_RUNTIME_SHA} ${MONITOR_RUNTIME_ROOT}/.disdex-release-sha
 ExecStart=
-ExecStart=/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-runner-watchdog-current.mjs"
+ExecStart=/usr/bin/node ${MONITOR_RUNTIME_ROOT}/scripts/ops/root/disdex-runner-watchdog-current.mjs"
 
   write_atomic "${SNAPSHOT_DROPIN_DIR}/${CURRENT_SUPPORT_OVERRIDE}" "[Service]
 EnvironmentFile=
 EnvironmentFile=${HEALTH_SNAPSHOT_ENV_FILE}
-WorkingDirectory=${CURRENT_RELEASE}
+WorkingDirectory=${MONITOR_RUNTIME_ROOT}
 ExecStartPre=
-ExecStartPre=/usr/bin/test -f ${CURRENT_RELEASE}/.disdex-release-sha
-ExecStartPre=/usr/bin/grep -Fxq ${DEPLOYED_SHA} ${CURRENT_RELEASE}/.disdex-release-sha
+ExecStartPre=/usr/bin/test -f ${MONITOR_RUNTIME_ROOT}/.disdex-release-sha
+ExecStartPre=/usr/bin/grep -Fxq ${MONITOR_RUNTIME_SHA} ${MONITOR_RUNTIME_ROOT}/.disdex-release-sha
 ExecStart=
-ExecStart=/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-runner-health-snapshot-current.mjs"
+ExecStart=/usr/bin/node ${MONITOR_RUNTIME_ROOT}/scripts/ops/root/disdex-runner-health-snapshot-current.mjs"
 
   write_atomic "${POSITION_RECOVERY_DROPIN_DIR}/${CURRENT_SUPPORT_OVERRIDE}" "[Service]
 WorkingDirectory=${CURRENT_RELEASE}
@@ -1120,12 +1287,13 @@ ExecStart=${CURRENT_RELEASE}/node_modules/.bin/tsx ${CURRENT_RELEASE}/scripts/op
   remove_stale_support_release_pin_dropins
 
   write_atomic "${HEALTH_ALERT_DROPIN_DIR}/${CURRENT_SUPPORT_OVERRIDE}" "[Service]
-WorkingDirectory=${CURRENT_RELEASE}
+WorkingDirectory=${HEALTH_ALERT_EXEC_ROOT}
 ExecStart=
-ExecStart=${CURRENT_RELEASE}/node_modules/.bin/tsx ${CURRENT_RELEASE}/scripts/ops/root/disdex-runner-health-alert.ts
+ExecStart=${HEALTH_ALERT_EXEC_ROOT}/node_modules/.bin/tsx ${HEALTH_ALERT_EXEC_ROOT}/scripts/ops/root/disdex-runner-health-alert.ts
+Environment=DISDEX_TRADING_ROOT=${CURRENT_RELEASE}
 Environment=DISDEX_ALERT_OPERATOR_ACTIVATION_PATH=${OPERATOR_ACTIVATION_PATH}
 Environment=DISDEX_ALERT_V12_SERVICE_UNIT=${V12_UNIT}
-Environment=DISDEX_ALERT_V12_EXPECTED_SHA=${DEPLOYED_SHA}
+Environment=DISDEX_ALERT_V12_EXPECTED_SHA=${V4_PRIMARY_SHA:-${DEPLOYED_SHA}}
 Environment=DISDEX_ALERT_PENGU_V8_SERVICE_UNIT=${PENGU_UNIT}
 Environment=DISDEX_ALERT_QUALITY102_SERVICE_UNIT=${Q102_UNIT}
 Environment=DISDEX_ALERT_V52_SERVICE_UNIT=${V52_UNIT}
@@ -1133,7 +1301,9 @@ Environment=DISDEX_ALERT_FET_BRK48_SERVICE_UNIT=${FET_UNIT}
 Environment=DISDEX_ALERT_HYPE_SERVICE_UNIT=${HYPE_UNIT}
 Environment=DISDEX_ALERT_IDLE_SERVICE_UNIT=${IDLE_UNIT}
 Environment=DISDEX_ALERT_SHARED_CRYPTO_RISK_SERVICE_UNIT=${SHARED_RISK_UNIT}
-Environment=DISDEX_ALERT_MARGIN_GUARD_SERVICE_UNIT=${MARGIN_UNIT}"
+Environment=DISDEX_ALERT_MARGIN_GUARD_SERVICE_UNIT=${MARGIN_UNIT}
+ExecStartPre=/usr/bin/test -f ${HEALTH_ALERT_EXEC_ROOT}/.disdex-release-sha
+ExecStartPre=/usr/bin/grep -Fxq ${V4_PRIMARY_SHA:-${DEPLOYED_SHA}} ${HEALTH_ALERT_EXEC_ROOT}/.disdex-release-sha"
 
   remove_stale_health_alert_unit_pin_dropins
 
@@ -1190,8 +1360,8 @@ StartLimitBurst=3
 [Service]
 RestartSec=30s
 EnvironmentFile=${CONTRACT_ENV_FILE}
-Environment=DISDEX_RELEASE_SHA=${DEPLOYED_SHA}
-Environment=V12_V4_LIVE_ACK=${DEPLOYED_SHA}
+Environment=DISDEX_RELEASE_SHA=${V4_PRIMARY_SHA}
+Environment=V12_V4_LIVE_ACK=${V4_PRIMARY_SHA}
 Environment=V12_V4_OPERATION_MODE=CERTIFIED
 Environment=V12_V4_HEALTH_STATE_PATH=/var/lib/disdex/v12-v4/heartbeat.json"
   else
@@ -1366,6 +1536,7 @@ ReadWritePaths=${IDLE_PRIORITY_STATE_ROOT} ${SHARED_ROOT}"
   migrate_idle_state_lineage
   migrate_idle_residual_state_lineage
   normalize_position_recovery_state_lineage
+  write_v4_primary_runtime_artifacts
   systemctl daemon-reload
   if [[ "$PRIMARY_V12_MODE" == "V4" ]]; then
     persistently_mask_legacy_v12

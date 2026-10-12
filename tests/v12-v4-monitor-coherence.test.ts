@@ -1,5 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import {execFileSync} from "node:child_process";
+import {resolve} from "node:path";
 import {readFileSync} from "node:fs";
 import {resolveRunnerServiceUnit} from "../lib/server/runner-service-resolution";
 
@@ -55,9 +57,16 @@ test("coherence guard follows the persistent V4 primary marker",()=>{
  assert.match(coherence,/PRIMARY_V12_MODE_FILE/);
  assert.match(coherence,/FAMILIES\[0\]="disdex-v12-v4"/);
  assert.match(coherence,/HEARTBEATS\[0\]="v12-v4\.json"/);
- assert.match(coherence,/V12_EXPECTED_UNIT="disdex-v12-v4@\$DEPLOYED_SHA\.service"/);
+	assert.match(coherence,/V12_EXPECTED_UNIT="disdex-v12-v4@\$V4_PRIMARY_SHA\.service"/);
  assert.match(coherence,/legacy_v12_persistently_retired/);
  assert.match(coherence,/DISDEX_PRIMARY_V12_RUNNER="\$PRIMARY_V12_MODE"/);
+});
+
+test("coherence guard accepts only the exact V4-primary/current-peer mixed-SHA set",()=>{
+ const bash=process.platform==="win32"?"C:/Program Files/Git/bin/bash.exe":"/usr/bin/bash";
+ const guard=resolve("scripts/ops/root/disdex-current-runtime-coherence-guard");
+ const output=execFileSync(bash,[guard,"--self-test-v4-mixed-sha"],{encoding:"utf8"});
+ assert.match(output,/V4_MIXED_SHA_COHERENCE_SELFTEST_PASS/);
 });
 
 test("health alert accepts only exact-SHA V4 override for V12",()=>{
@@ -84,5 +93,9 @@ test("V12 health alert independently pins full-live SHA while peers remain on cu
  assert.equal(bad.failClosed,true);
  assert.match(alert,/DISDEX_ALERT_V12_EXPECTED_SHA/);
  assert.match(alert,/function runnerLabel/);
- assert.match(wiring,/DISDEX_ALERT_V12_EXPECTED_SHA=\$\{DEPLOYED_SHA\}/);
+ assert.match(wiring,/DISDEX_ALERT_V12_EXPECTED_SHA=\$\{V4_PRIMARY_SHA:-\$\{DEPLOYED_SHA\}\}/);
+ assert.match(wiring,/DISDEX_WATCHDOG_EXPECTED_SHA=\$\{MONITOR_RUNTIME_SHA\}/);
+ assert.match(wiring,/DISDEX_HEALTH_SNAPSHOT_EXPECTED_SHA=\$\{MONITOR_RUNTIME_SHA\}/);
+ assert.match(wiring,/ExecStart=\/usr\/bin\/node \$\{MONITOR_RUNTIME_ROOT\}\/scripts\/ops\/root\/disdex-runner-watchdog-current\.mjs/);
+ assert.match(wiring,/ExecStartPre=\/usr\/bin\/grep -Fxq \$\{V4_PRIMARY_SHA:-\$\{DEPLOYED_SHA\}\}/);
 });

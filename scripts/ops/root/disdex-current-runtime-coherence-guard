@@ -10,6 +10,10 @@ TRADING_CURRENT="${TRADING_ROOT}/current"
 RUNTIME_ENV_DIR="/etc/disdex/current-runtime"
 HEALTH_DROPIN="/etc/systemd/system/disdex-runner-health-snapshot.service.d/zzzzzzzzzzzzzzzzzzzz-current-release.conf"
 WATCHDOG_DROPIN="/etc/systemd/system/disdex-runner-watchdog.service.d/zzzzzzzzzzzzzzzzzzzz-current-release.conf"
+ALERT_DROPIN="/etc/systemd/system/disdex-runner-health-alert.service.d/zzzzzzzzzzzzzzzzzzzz-current-release.conf"
+V4_OPERATOR_ACTIVATION_PATH="/var/lib/disdex/shared/operator-activation/v12-v4-full.json"
+MONITOR_RUNTIME_SHA=""
+MONITOR_RUNTIME_ROOT=""
 
 FAMILIES=(
   "disdex-v12-x1-all"
@@ -46,6 +50,8 @@ LEGACY_LIVE_UNITS=(
   "disdex-v12-v52-margin-guard.service"
   "disdex-idle-priority-short.service"
 )
+declare -A EXPECTED_SHA_BY_UNIT=()
+declare -A EXPECTED_ROOT_BY_UNIT=()
 
 usage() { printf '%s\n' 'Usage: disdex-current-runtime-coherence-guard [--check|--repair|--auto]'; }
 
@@ -71,31 +77,77 @@ resolve_current() {
     return 1
   }
   if [[ "$PRIMARY_V12_MODE" == "V4" ]]; then
+    V4_PRIMARY_SHA="$(sed -n 's/^DISDEX_V12_V4_PRIMARY_SHA=//p' "$PRIMARY_V12_MODE_FILE" | tail -n1)"
+    [[ "$V4_PRIMARY_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo "V4 primary SHA pin is missing or invalid" >&2; return 1; }
+    V4_PRIMARY_RELEASE="$TRADING_RELEASES/$V4_PRIMARY_SHA"
+    [[ -d "$V4_PRIMARY_RELEASE" && ! -L "$V4_PRIMARY_RELEASE" && -f "$V4_PRIMARY_RELEASE/.disdex-release-sha" && ! -L "$V4_PRIMARY_RELEASE/.disdex-release-sha" ]] || { echo "V4 primary release or marker is missing or unsafe" >&2; return 1; }
+    [[ "$(tr -d '[:space:]' < "$V4_PRIMARY_RELEASE/.disdex-release-sha")" == "$V4_PRIMARY_SHA" ]] || {
+      echo "V4 primary release marker mismatch" >&2
+      return 1
+    }
     FAMILIES[0]="disdex-v12-v4"
     HEARTBEATS[0]="v12-v4.json"
-    V12_EXPECTED_UNIT="disdex-v12-v4@$DEPLOYED_SHA.service"
+    MONITOR_RUNTIME_SHA="$V4_PRIMARY_SHA"
+    MONITOR_RUNTIME_ROOT="$V4_PRIMARY_RELEASE"
+    V12_EXPECTED_UNIT="disdex-v12-v4@$V4_PRIMARY_SHA.service"
     V12_OPERATOR_RUNNER="V12_V4"
   else
+    V4_PRIMARY_SHA=""
+    V4_PRIMARY_RELEASE=""
+    MONITOR_RUNTIME_SHA="$DEPLOYED_SHA"
+    MONITOR_RUNTIME_ROOT="$CURRENT_RELEASE"
     FAMILIES[0]="disdex-v12-x1-all"
     HEARTBEATS[0]="v12-x1-all.json"
     V12_EXPECTED_UNIT="disdex-v12-x1-all@$DEPLOYED_SHA.service"
     V12_OPERATOR_RUNNER="V12_X1_ALL"
   fi
+  build_current_units
+}
+
+build_current_units() {
   CURRENT_UNITS=()
-  local family
-  for family in "${FAMILIES[@]}"; do CURRENT_UNITS+=("${family}@${DEPLOYED_SHA}.service"); done
+  HEARTBEAT_EXPECTED_SHAS=()
+  EXPECTED_SHA_BY_UNIT=()
+  EXPECTED_ROOT_BY_UNIT=()
+  local index family sha root unit
+  for index in "${!FAMILIES[@]}"; do
+    family="${FAMILIES[$index]}"
+    sha="$DEPLOYED_SHA"
+    root="$CURRENT_RELEASE"
+    if [[ "$PRIMARY_V12_MODE" == "V4" && "$index" -eq 0 ]]; then
+      sha="$V4_PRIMARY_SHA"
+      root="$V4_PRIMARY_RELEASE"
+    fi
+    unit="${family}@${sha}.service"
+    CURRENT_UNITS+=("$unit")
+    EXPECTED_SHA_BY_UNIT["$unit"]="$sha"
+    EXPECTED_ROOT_BY_UNIT["$unit"]="$root"
+    if [[ "$index" -lt "${#HEARTBEATS[@]}" ]]; then HEARTBEAT_EXPECTED_SHAS+=("$sha"); fi
+  done
+}
+
+is_expected_unit() {
+  [[ -n "${EXPECTED_SHA_BY_UNIT[$1]:-}" ]]
 }
 
 verify_current_units_active() {
-  local unit pid cwd
+  local unit pid cwd expected_root expected_sha working_directory exec_start marker
   for unit in "${CURRENT_UNITS[@]}"; do
     [[ "$(systemctl show "$unit" -p LoadState --value 2>/dev/null || true)" == "loaded" ]] || return 1
     [[ "$(systemctl show "$unit" -p ActiveState --value 2>/dev/null || true)" == "active" ]] || return 1
     [[ "$(systemctl show "$unit" -p SubState --value 2>/dev/null || true)" == "running" ]] || return 1
     pid="$(systemctl show "$unit" -p MainPID --value 2>/dev/null || true)"
     [[ "$pid" =~ ^[1-9][0-9]*$ ]] || return 1
+    expected_root="${EXPECTED_ROOT_BY_UNIT[$unit]}"
+    expected_sha="${EXPECTED_SHA_BY_UNIT[$unit]}"
+    working_directory="$(systemctl show "$unit" -p WorkingDirectory --value 2>/dev/null || true)"
+    [[ "$working_directory" == "$expected_root" ]] || return 1
+    exec_start="$(systemctl show "$unit" -p ExecStart --value 2>/dev/null || true)"
+    [[ "$exec_start" == *"$expected_root/"* ]] || return 1
     cwd="$(readlink -f -- "/proc/$pid/cwd" 2>/dev/null || true)"
-    [[ "$cwd" == "$CURRENT_RELEASE" ]] || return 1
+    [[ "$cwd" == "$expected_root" ]] || return 1
+    marker="$(tr -d '[:space:]' < "$expected_root/.disdex-release-sha" 2>/dev/null || true)"
+    [[ "$marker" == "$expected_sha" ]] || return 1
   done
 }
 
@@ -109,8 +161,8 @@ verify_current_units_enabled() {
 list_stale_noninactive_units() {
   local unit active
   while read -r unit _; do
-    [[ "$unit" =~ ^disdex-(v12-x1-all|v12-v4|pengu-dual-ls-v2|quality102-causal-v1|v52-aster-only|fet-brk48|hype-long|idle-priority-short|shared-crypto-risk|v12-v52-margin-guard)@([0-9a-f]{40})\.service$ ]] || continue
-    [[ "${BASH_REMATCH[2]}" == "$DEPLOYED_SHA" ]] && continue
+    [[ "$unit" =~ ^disdex-(v12-x1-all|v12-v4|v12-v4-canary|pengu-dual-ls-v2|quality102-causal-v1|v52-aster-only|fet-brk48|hype-long|idle-priority-short|shared-crypto-risk|v12-v52-margin-guard)@([0-9a-f]{40})\.service$ ]] || continue
+    is_expected_unit "$unit" && continue
     active="$(systemctl show "$unit" -p ActiveState --value 2>/dev/null || true)"
     [[ "$active" == "inactive" || "$active" == "failed" || -z "$active" ]] && continue
     printf '%s\n' "$unit"
@@ -122,8 +174,8 @@ list_stale_enabled_units() {
   for link in /etc/systemd/system/multi-user.target.wants/disdex-*@*.service; do
     [[ -L "$link" ]] || continue
     unit="$(basename "$link")"
-    [[ "$unit" =~ ^disdex-(v12-x1-all|v12-v4|pengu-dual-ls-v2|quality102-causal-v1|v52-aster-only|fet-brk48|hype-long|idle-priority-short|shared-crypto-risk|v12-v52-margin-guard)@([0-9a-f]{40})\.service$ ]] || continue
-    [[ "${BASH_REMATCH[2]}" == "$DEPLOYED_SHA" ]] && continue
+    [[ "$unit" =~ ^disdex-(v12-x1-all|v12-v4|v12-v4-canary|pengu-dual-ls-v2|quality102-causal-v1|v52-aster-only|fet-brk48|hype-long|idle-priority-short|shared-crypto-risk|v12-v52-margin-guard)@([0-9a-f]{40})\.service$ ]] || continue
+    is_expected_unit "$unit" && continue
     printf '%s\n' "$unit"
   done
 }
@@ -137,41 +189,62 @@ legacy_units_inactive() {
 }
 
 monitor_pins_current() {
-  [[ -f "$HEALTH_ENV" && -f "$WATCHDOG_ENV" && -f "$HEALTH_DROPIN" && -f "$WATCHDOG_DROPIN" ]] || return 1
-  grep -Fxq "DISDEX_HEALTH_SNAPSHOT_EXPECTED_SHA=$DEPLOYED_SHA" "$HEALTH_ENV" || return 1
-  grep -Fxq "DISDEX_WATCHDOG_EXPECTED_SHA=$DEPLOYED_SHA" "$WATCHDOG_ENV" || return 1
-  grep -Fxq "DISDEX_WATCHDOG_APPROVED_SHA=$DEPLOYED_SHA" "$WATCHDOG_ENV" || return 1
+  [[ -f "$HEALTH_ENV" && -f "$WATCHDOG_ENV" && -f "$HEALTH_DROPIN" && -f "$WATCHDOG_DROPIN" && -f "$ALERT_DROPIN" ]] || return 1
+  grep -Fxq "DISDEX_HEALTH_SNAPSHOT_EXPECTED_SHA=$MONITOR_RUNTIME_SHA" "$HEALTH_ENV" || return 1
+  grep -Fxq "DISDEX_HEALTH_SNAPSHOT_RELEASE_ROOT=$MONITOR_RUNTIME_ROOT" "$HEALTH_ENV" || return 1
+  grep -Fxq "DISDEX_WATCHDOG_EXPECTED_SHA=$MONITOR_RUNTIME_SHA" "$WATCHDOG_ENV" || return 1
+  grep -Fxq "DISDEX_WATCHDOG_APPROVED_SHA=$MONITOR_RUNTIME_SHA" "$WATCHDOG_ENV" || return 1
+  grep -Fxq "DISDEX_WATCHDOG_RELEASE_ROOT=$MONITOR_RUNTIME_ROOT" "$WATCHDOG_ENV" || return 1
   local sleeve
   for sleeve in V12 PENGU V52 Q102 FET HYPE IDLE; do
-    grep -Fxq "DISDEX_HEALTH_SNAPSHOT_${sleeve}_EXPECTED_SHA=$DEPLOYED_SHA" "$HEALTH_ENV" || return 1
-    grep -Fxq "DISDEX_WATCHDOG_${sleeve}_EXPECTED_SHA=$DEPLOYED_SHA" "$WATCHDOG_ENV" || return 1
+    local expected_sha="$DEPLOYED_SHA"
+    if [[ "$PRIMARY_V12_MODE" == "V4" && "$sleeve" == "V12" ]]; then expected_sha="$V4_PRIMARY_SHA"; fi
+    grep -Fxq "DISDEX_HEALTH_SNAPSHOT_${sleeve}_EXPECTED_SHA=$expected_sha" "$HEALTH_ENV" || return 1
+    grep -Fxq "DISDEX_WATCHDOG_${sleeve}_EXPECTED_SHA=$expected_sha" "$WATCHDOG_ENV" || return 1
   done
   grep -Fq "EnvironmentFile=$HEALTH_ENV" "$HEALTH_DROPIN" || return 1
-  grep -Fq "WorkingDirectory=$CURRENT_RELEASE" "$HEALTH_DROPIN" || return 1
+  grep -Fq "WorkingDirectory=$MONITOR_RUNTIME_ROOT" "$HEALTH_DROPIN" || return 1
   grep -Fq "EnvironmentFile=$WATCHDOG_ENV" "$WATCHDOG_DROPIN" || return 1
-  grep -Fq "WorkingDirectory=$CURRENT_RELEASE" "$WATCHDOG_DROPIN" || return 1
+  grep -Fq "WorkingDirectory=$MONITOR_RUNTIME_ROOT" "$WATCHDOG_DROPIN" || return 1
+  grep -Fq "ExecStart=/usr/bin/node $MONITOR_RUNTIME_ROOT/scripts/ops/root/disdex-runner-watchdog-current.mjs" "$WATCHDOG_DROPIN" || return 1
+  grep -Fq "ExecStart=/usr/bin/node $MONITOR_RUNTIME_ROOT/scripts/ops/root/disdex-runner-health-snapshot-current.mjs" "$HEALTH_DROPIN" || return 1
   grep -Fxq "DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_SERVICE_UNIT=disdex-shared-crypto-risk@$DEPLOYED_SHA.service" "$HEALTH_ENV" || return 1
   grep -Fxq "DISDEX_HEALTH_SNAPSHOT_MARGIN_SERVICE_UNIT=disdex-v12-v52-margin-guard@$DEPLOYED_SHA.service" "$HEALTH_ENV" || return 1
   grep -Fxq "DISDEX_HEALTH_SNAPSHOT_V12_MODE=$PRIMARY_V12_MODE" "$HEALTH_ENV" || return 1
   grep -Fxq "DISDEX_WATCHDOG_V12_MODE=$PRIMARY_V12_MODE" "$WATCHDOG_ENV" || return 1
   grep -Fxq "DISDEX_WATCHDOG_V12_SERVICE_UNIT=$V12_EXPECTED_UNIT" "$WATCHDOG_ENV" || return 1
   if [[ "$PRIMARY_V12_MODE" == "V4" ]]; then
+    grep -Fxq "DISDEX_HEALTH_SNAPSHOT_V12_RELEASE_ROOT=$V4_PRIMARY_RELEASE" "$HEALTH_ENV" || return 1
+    grep -Fxq "DISDEX_WATCHDOG_V12_RELEASE_ROOT=$V4_PRIMARY_RELEASE" "$WATCHDOG_ENV" || return 1
+    grep -Fxq "DISDEX_WATCHDOG_V12_OPERATOR_ACTIVATION_PATH=$V4_OPERATOR_ACTIVATION_PATH" "$WATCHDOG_ENV" || return 1
+    grep -Fxq "Environment=DISDEX_ALERT_V12_EXPECTED_SHA=$V4_PRIMARY_SHA" "$ALERT_DROPIN" || return 1
+    grep -Fxq "Environment=DISDEX_ALERT_V12_SERVICE_UNIT=$V12_EXPECTED_UNIT" "$ALERT_DROPIN" || return 1
+    grep -Fq "WorkingDirectory=$V4_PRIMARY_RELEASE" "$ALERT_DROPIN" || return 1
+    grep -Fq "ExecStart=$V4_PRIMARY_RELEASE/node_modules/.bin/tsx $V4_PRIMARY_RELEASE/scripts/ops/root/disdex-runner-health-alert.ts" "$ALERT_DROPIN" || return 1
+    grep -Fxq "ExecStartPre=/usr/bin/test -f $V4_PRIMARY_RELEASE/.disdex-release-sha" "$ALERT_DROPIN" || return 1
+    grep -Fxq "ExecStartPre=/usr/bin/grep -Fxq $V4_PRIMARY_SHA $V4_PRIMARY_RELEASE/.disdex-release-sha" "$ALERT_DROPIN" || return 1
     grep -Fxq "DISDEX_HEALTH_SNAPSHOT_V12_STATE_PATH=/var/lib/disdex/v12-v4/heartbeat.json" "$HEALTH_ENV" || return 1
+  else
+    grep -Fxq "Environment=DISDEX_ALERT_V12_EXPECTED_SHA=$DEPLOYED_SHA" "$ALERT_DROPIN" || return 1
   fi
 }
 
 heartbeat_identity_current() {
-  python3 - "$DEPLOYED_SHA" "${HEARTBEATS[@]}" <<'PY'
+  local args=() index
+  for index in "${!HEARTBEATS[@]}"; do
+    args+=("${HEARTBEATS[$index]}" "${HEARTBEAT_EXPECTED_SHAS[$index]}" "${CURRENT_UNITS[$index]}")
+  done
+  python3 "${args[@]}" <<'PY'
 import json,pathlib,sys
-sha=sys.argv[1]
-for name in sys.argv[2:]:
+for index in range(1,len(sys.argv),3):
+    name,sha,unit=sys.argv[index:index+3]
     path=pathlib.Path("/var/lib/disdex/runner-health/heartbeats")/name
     if not path.is_file():
         raise SystemExit(1)
     data=json.loads(path.read_text())
     if data.get("runtimeSha") != sha or data.get("expectedSha") != sha:
         raise SystemExit(1)
-    if not str(data.get("serviceUnit","")).endswith(f"@{sha}.service"):
+    if data.get("serviceUnit") != unit:
         raise SystemExit(1)
 PY
 }
@@ -186,9 +259,18 @@ timer_waiting() {
 }
 
 operator_ready() {
-  local runner gate="$CURRENT_RELEASE/scripts/ops/root/disdex-live-operator-activation-gate.mjs"
-  [[ -f "$gate" ]] || return 1
-  for runner in "$V12_OPERATOR_RUNNER" PENGU_V8 QUALITY102_CAUSAL_V1 V52 FET_BRK48_RESIDUAL HYPE_TREND_LONG IDLE_PRIORITY_SHORT; do
+  local runner gate
+  if [[ "$PRIMARY_V12_MODE" == "V4" ]]; then
+    gate="$V4_PRIMARY_RELEASE/scripts/ops/root/disdex-live-operator-activation-gate.mjs"
+    [[ -f "$gate" ]] || return 1
+    /usr/bin/node "$gate" --release-root "$V4_PRIMARY_RELEASE" --sha "$V4_PRIMARY_SHA" --runner V12_V4 --activation-path "$V4_OPERATOR_ACTIVATION_PATH" >/dev/null 2>&1 || return 1
+  else
+    gate="$CURRENT_RELEASE/scripts/ops/root/disdex-live-operator-activation-gate.mjs"
+    [[ -f "$gate" ]] || return 1
+    /usr/bin/node "$gate" --release-root "$CURRENT_RELEASE" --sha "$DEPLOYED_SHA" --runner "$V12_OPERATOR_RUNNER" --activation-path /var/lib/disdex/shared/operator-activation/current.json >/dev/null 2>&1 || return 1
+  fi
+  for runner in PENGU_V8 QUALITY102_CAUSAL_V1 V52 FET_BRK48_RESIDUAL HYPE_TREND_LONG IDLE_PRIORITY_SHORT; do
+    gate="$CURRENT_RELEASE/scripts/ops/root/disdex-live-operator-activation-gate.mjs"
     /usr/bin/node "$gate" --release-root "$CURRENT_RELEASE" --sha "$DEPLOYED_SHA" --runner "$runner" --activation-path /var/lib/disdex/shared/operator-activation/current.json >/dev/null 2>&1 || return 1
   done
   return 0
@@ -281,7 +363,7 @@ retire_stale_units() {
 repair_coherence() {
   [[ "$(id -u)" == "0" ]] || { echo "repair requires root" >&2; return 1; }
   verify_current_units_active || return 20
-  DISDEX_PRIMARY_V12_RUNNER="$PRIMARY_V12_MODE" /usr/local/sbin/disdex-current-runtime-wiring --apply
+  DISDEX_PRIMARY_V12_RUNNER="$PRIMARY_V12_MODE" DISDEX_V12_V4_PRIMARY_SHA="$V4_PRIMARY_SHA" /usr/local/sbin/disdex-current-runtime-wiring --apply
   retire_stale_units
   systemctl daemon-reload
   systemctl reset-failed >/dev/null 2>&1 || true
@@ -294,6 +376,31 @@ repair_coherence() {
 
 main() {
   local mode="${1:---check}"
+  if [[ "$mode" == "--self-test-v4-mixed-sha" ]]; then
+    DEPLOYED_SHA="ce1edeead8d0f9e5d88e829d415057117502a335"
+    CURRENT_RELEASE="/home/deploy/disdex-trading/releases/$DEPLOYED_SHA"
+    PRIMARY_V12_MODE="V4"
+    V4_PRIMARY_SHA="428ddfae4df7bcecdab46604013855bea746262b"
+    V4_PRIMARY_RELEASE="/home/deploy/disdex-trading/releases/$V4_PRIMARY_SHA"
+    FAMILIES[0]="disdex-v12-v4"
+    build_current_units
+    [[ "${CURRENT_UNITS[0]}" == "disdex-v12-v4@$V4_PRIMARY_SHA.service" ]]
+    [[ "${EXPECTED_ROOT_BY_UNIT[${CURRENT_UNITS[0]}]}" == "$V4_PRIMARY_RELEASE" ]]
+    [[ "${EXPECTED_SHA_BY_UNIT[${CURRENT_UNITS[0]}]}" == "$V4_PRIMARY_SHA" ]]
+    for index in "${!CURRENT_UNITS[@]}"; do
+      if [[ "$index" -gt 0 ]]; then
+        [[ "${CURRENT_UNITS[$index]}" == *"@$DEPLOYED_SHA.service" ]]
+        [[ "${EXPECTED_ROOT_BY_UNIT[${CURRENT_UNITS[$index]}]}" == "$CURRENT_RELEASE" ]]
+      fi
+    done
+    is_expected_unit "disdex-v12-v4@$V4_PRIMARY_SHA.service"
+    ! is_expected_unit "disdex-v12-v4@80b3a6211f168691a85da511bedaa0c7df664f64.service"
+    ! is_expected_unit "disdex-v12-v4-canary@e8bdd2f522612179b148147d4f76951b2e30f9d7.service"
+    [[ "${HEARTBEAT_EXPECTED_SHAS[0]}" == "$V4_PRIMARY_SHA" ]]
+    [[ "${HEARTBEAT_EXPECTED_SHAS[1]}" == "$DEPLOYED_SHA" ]]
+    printf 'V4_MIXED_SHA_COHERENCE_SELFTEST_PASS\n'
+    exit 0
+  fi
   resolve_current
   case "$mode" in
     --check)

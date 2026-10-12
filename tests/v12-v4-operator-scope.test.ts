@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {TRADING_RUNNERS,VALID_TRADING_RUNNERS,validateOperatorActivationArtifact} from
+import {TRADING_RUNNERS,VALID_TRADING_RUNNERS,readinessFileForRunner,validateOperatorActivationArtifact} from
  "../scripts/ops/root/disdex-live-operator-activation-gate.mjs";
 test("V4 is a separate operator scope without changing legacy seven-runner --all gate",()=>{
  assert.equal(TRADING_RUNNERS.length,7);
@@ -16,4 +16,9 @@ test("V4 is a separate operator scope without changing legacy seven-runner --all
   {sha,target:"disdex-trading",runner:"V12_V4"}).allowed,true);
  assert.equal(validateOperatorActivationArtifact({...artifact,approvedRunners:["V12_V4"]},
   {sha:"b".repeat(40),target:"disdex-trading",runner:"V12_V4"}).allowed,false);
+});
+
+test("V4 activation reads its own target readiness without changing peer target readiness",()=>{
+ assert.equal(readinessFileForRunner("V12_V4"),"docs/production/v12-v4-implementation-readiness.json");
+ assert.equal(readinessFileForRunner("PENGU_V8"),"docs/production/current-implementation-readiness.json");
 });

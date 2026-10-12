@@ -20,6 +20,12 @@ export const TRADING_RUNNERS = Object.freeze([
 // existing seven-runner --all gate or break legacy LIVE on rollout.
 export const VALID_TRADING_RUNNERS = Object.freeze([...TRADING_RUNNERS, "V12_V4"]);
 
+export function readinessFileForRunner(runner) {
+  return runner === "V12_V4"
+    ? "docs/production/v12-v4-implementation-readiness.json"
+    : "docs/production/current-implementation-readiness.json";
+}
+
 function exactSha(value) {
   const normalized = String(value || "").trim().toLowerCase();
   return SHA.test(normalized) ? normalized : undefined;
@@ -109,7 +115,7 @@ export async function evaluateOperatorActivationGate(input) {
 
   let readiness;
   try {
-    readiness = JSON.parse(await readFile(join(releaseRoot, "docs/production/current-implementation-readiness.json"), "utf8"));
+    readiness = JSON.parse(await readFile(join(releaseRoot, readinessFileForRunner(runner)), "utf8"));
   } catch {
     return { allowed: false, reason: "OPERATOR_GATE_READINESS_UNAVAILABLE" };
   }
