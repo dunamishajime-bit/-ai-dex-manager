@@ -30,6 +30,10 @@ test("watchdog V4 mode targets only the V4 service and V12_V4 operator scope",()
  assert.match(watchdog,/key: "V12_V4"/);
  assert.match(watchdog,/disdex-v12-v4@\$\{sha\}\.service/);
  assert.match(watchdog,/DISDEX_WATCHDOG_V12_MODE/);
+ assert.match(watchdog,/operatorActivationPathEnv: "DISDEX_WATCHDOG_V12_OPERATOR_ACTIVATION_PATH"/);
+ assert.match(watchdog,/activationPath: runner\.operatorActivationPath/);
+ assert.match(watchdog,/DISDEX_WATCHDOG_MARGIN_GUARD_EXPECTED_SHA/);
+ assert.match(watchdog,/assertReleasePinnedRunnerSingleton\(nonInactiveMarginUnits, config\.marginGuardUnit/);
  assert.match(watchdog,/runnersForEnv\(env\)/);
  assert.match(watchdog,/evaluateOperatorActivationGate/);
 });

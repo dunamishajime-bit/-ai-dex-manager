@@ -39,6 +39,30 @@ test("current watchdog requires an explicit approval pin", async () => {
   assert.match(stdout, /DISDEX_CURRENT_WATCHDOG_APPROVAL_GATE_SELFTEST_PASS/);
 });
 
+test("current watchdog separates V4 full-live approval from peer runner approvals", async () => {
+  const { stdout } = await execFileAsync(process.execPath, [fileURLToPath(watchdog), "--self-test"], {
+    encoding: "utf8",
+    windowsHide: true,
+  });
+  assert.match(stdout, /DISDEX_CURRENT_WATCHDOG_PER_RUNNER_OPERATOR_PATH_SELFTEST_PASS/);
+});
+
+test("current watchdog fails closed when V4 has no dedicated operator artifact path", async () => {
+  const { stdout } = await execFileAsync(process.execPath, [fileURLToPath(watchdog), "--self-test"], {
+    encoding: "utf8",
+    windowsHide: true,
+  });
+  assert.match(stdout, /DISDEX_CURRENT_WATCHDOG_V4_OPERATOR_PATH_REQUIRED_SELFTEST_PASS/);
+});
+
+test("current watchdog pins Margin Guard independently from the watchdog release", async () => {
+  const { stdout } = await execFileAsync(process.execPath, [fileURLToPath(watchdog), "--self-test"], {
+    encoding: "utf8",
+    windowsHide: true,
+  });
+  assert.match(stdout, /DISDEX_CURRENT_WATCHDOG_MARGIN_GUARD_INDEPENDENT_SHA_SELFTEST_PASS/);
+});
+
 test("current watchdog rejects duplicate shared crypto risk writers", async () => {
   const { stdout } = await execFileAsync(process.execPath, [fileURLToPath(watchdog), "--self-test"], {
     encoding: "utf8",

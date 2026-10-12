@@ -55,6 +55,7 @@ const V4_V12_RUNNER = {
     key: "V12_V4",
     expectedShaEnv: "DISDEX_WATCHDOG_V12_EXPECTED_SHA",
     releaseRootEnv: "DISDEX_WATCHDOG_V12_RELEASE_ROOT",
+    operatorActivationPathEnv: "DISDEX_WATCHDOG_V12_OPERATOR_ACTIVATION_PATH",
     heartbeatFile: "v12-v4.json",
     unitEnv: "DISDEX_WATCHDOG_V12_SERVICE_UNIT",
     expectedUnit: (sha) => `disdex-v12-v4@${sha}.service`,
@@ -274,6 +275,18 @@ function heartbeatFreshness(value, runner, now) {
     return { heartbeatFresh, runnerTickFresh, fresh: heartbeatFresh && runnerTickFresh };
 }
 
+function operatorActivationPathForRunner(runner, env, defaultPath) {
+    const configuredPath = runner.operatorActivationPathEnv
+        ? env[runner.operatorActivationPathEnv]
+        : undefined;
+    if (runner.operatorActivationPathEnv && !configuredPath) {
+        throw new Error(`${runner.key} dedicated operator activation path is required`);
+    }
+    const path = String(configuredPath || defaultPath).trim();
+    if (!isAbsoluteCanonicalPath(path)) throw new Error(`${runner.key} operator activation path is non-canonical`);
+    return path;
+}
+
 function buildConfig(env) {
     const healthRoot = env.DISDEX_WATCHDOG_HEALTH_ROOT || DEFAULT_HEALTH_ROOT;
     const releaseRoot = env.DISDEX_WATCHDOG_RELEASE_ROOT;
@@ -283,6 +296,8 @@ function buildConfig(env) {
         throw new Error("watchdog release pin or approval pin is incomplete or non-canonical");
     }
     if (approvedSha !== expectedSha) throw new Error("watchdog expected SHA is not explicitly approved");
+    const operatorActivationPath = String(env.DISDEX_WATCHDOG_OPERATOR_ACTIVATION_PATH || "/var/lib/disdex/shared/operator-activation/current.json").trim();
+    if (!isAbsoluteCanonicalPath(operatorActivationPath)) throw new Error("watchdog operator activation path is non-canonical");
     const runnerConfig = {};
     for (const runner of runnersForEnv(env)) {
         const runnerExpectedSha = String(env[runner.expectedShaEnv] || expectedSha).trim().toLowerCase();
@@ -297,23 +312,24 @@ function buildConfig(env) {
             unit,
             expectedSha: runnerExpectedSha,
             expectedCwd: runnerReleaseRoot,
+            operatorActivationPath: operatorActivationPathForRunner(runner, env, operatorActivationPath),
             ...runnerPaths({ healthRoot }, runner),
         };
     }
     const statePath = env.DISDEX_WATCHDOG_STATE_PATH || join(healthRoot, "private", "watchdog-current-state.json");
     const auditPath = env.DISDEX_WATCHDOG_AUDIT_PATH || join(healthRoot, "private", "watchdog-current-audit.json");
     const lockPath = env.DISDEX_WATCHDOG_LOCK_PATH || join(healthRoot, "private", "watchdog-current.lock");
-    const operatorActivationPath = env.DISDEX_WATCHDOG_OPERATOR_ACTIVATION_PATH || "/var/lib/disdex/shared/operator-activation/current.json";
     for (const path of [statePath, auditPath, lockPath]) {
         if (!pathWithin(healthRoot, path) || !isAbsoluteCanonicalPath(path)) throw new Error("watchdog private path escapes health root");
     }
-    if (!isAbsoluteCanonicalPath(operatorActivationPath)) throw new Error("watchdog operator activation path is non-canonical");
     const primaryV12 = runnerConfig.V12_V4 ?? runnerConfig.V12_X1_ALL;
     const sharedRiskExpectedSha = String(env.DISDEX_WATCHDOG_SHARED_RISK_EXPECTED_SHA || primaryV12.expectedSha).trim().toLowerCase();
     if (!exactSha(sharedRiskExpectedSha)) throw new Error("shared crypto risk writer release pin is invalid");
+    const marginGuardExpectedSha = String(env.DISDEX_WATCHDOG_MARGIN_GUARD_EXPECTED_SHA || expectedSha).trim().toLowerCase();
+    if (!exactSha(marginGuardExpectedSha)) throw new Error("margin guard release pin is invalid");
     const sharedRiskUnit = `disdex-shared-crypto-risk@${sharedRiskExpectedSha}.service`;
-    const marginGuardUnit = `disdex-v12-v52-margin-guard@${expectedSha}.service`;
-    return { healthRoot, releaseRoot, expectedSha, approvedSha, sharedRiskExpectedSha, sharedRiskUnit, marginGuardUnit, runnerConfig, statePath, auditPath, lockPath, operatorActivationPath };
+    const marginGuardUnit = `disdex-v12-v52-margin-guard@${marginGuardExpectedSha}.service`;
+    return { healthRoot, releaseRoot, expectedSha, approvedSha, sharedRiskExpectedSha, sharedRiskUnit, marginGuardExpectedSha, marginGuardUnit, runnerConfig, statePath, auditPath, lockPath, operatorActivationPath };
 }
 
 async function assertRelease(config) {
@@ -587,7 +603,7 @@ async function run(config) {
             const nonInactiveMarginUnits = parseNonInactiveServiceUnits(await systemctl([
                 "list-units", "--all", "--type=service", "--no-legend", MARGIN_GUARD_UNIT_PATTERN,
             ]), "disdex-v12-v52-margin-guard");
-            assertReleasePinnedRunnerSingleton(nonInactiveMarginUnits, `disdex-v12-v52-margin-guard@${config.expectedSha}.service`, "MARGIN_GUARD_LINEAGE", true);
+            assertReleasePinnedRunnerSingleton(nonInactiveMarginUnits, config.marginGuardUnit, "MARGIN_GUARD_LINEAGE", true);
         } catch (error) {
             compositionInvariantError = safeReason(error?.message);
             errors.push(`COMPOSITION_LINEAGE: ${compositionInvariantError}`);
@@ -608,7 +624,7 @@ async function run(config) {
                         releaseRoot: runner.expectedCwd,
                         sha: runner.expectedSha,
                         runner: runner.key,
-                        activationPath: config.operatorActivationPath,
+                        activationPath: runner.operatorActivationPath,
                     });
                     result = applyOperatorActivationGateToRestart(result, operatorGate, runner, decision);
                 }
@@ -702,12 +718,42 @@ function selfTest() {
     const v4 = V4_V12_RUNNER;
     if (!serviceAllowed(v4, v4.expectedUnit(sha), sha)) throw new Error("V4 allowlist self-test failed");
     if (serviceAllowed(v4, LEGACY_V12_RUNNER.expectedUnit(sha), sha)) throw new Error("V4 allowlist accepted legacy V12");
+    try {
+        buildConfig({
+            ...approvedEnv,
+            DISDEX_WATCHDOG_V12_MODE: "V4",
+            DISDEX_WATCHDOG_V12_SERVICE_UNIT: v4.expectedUnit(sha),
+        });
+        throw new Error("V4 operator path self-test accepted the shared path without a dedicated V4 path");
+    } catch (error) {
+        if (!String(error?.message || "").includes("V12_V4 dedicated operator activation path is required")) throw error;
+    }
+    console.log("DISDEX_CURRENT_WATCHDOG_V4_OPERATOR_PATH_REQUIRED_SELFTEST_PASS");
+    const v4FullOperatorPath = join(process.cwd(), "self-test-operator-activation", "v12-v4-full.json");
     const v4Config = buildConfig({
         ...approvedEnv,
         DISDEX_WATCHDOG_V12_MODE: "V4",
         DISDEX_WATCHDOG_V12_SERVICE_UNIT: v4.expectedUnit(sha),
+        DISDEX_WATCHDOG_V12_OPERATOR_ACTIVATION_PATH: v4FullOperatorPath,
     });
     if (!v4Config.runnerConfig.V12_V4 || v4Config.runnerConfig.V12_X1_ALL) throw new Error("V4 mode did not replace legacy V12 config");
+    if (v4Config.runnerConfig.V12_V4.operatorActivationPath !== v4FullOperatorPath) {
+        throw new Error("V4 runner did not use its dedicated full-live operator artifact");
+    }
+    if (v4Config.runnerConfig.PENGU_V8.operatorActivationPath !== baseConfigEnv.DISDEX_WATCHDOG_OPERATOR_ACTIVATION_PATH) {
+        throw new Error("peer runner did not retain the shared operator artifact");
+    }
+    console.log("DISDEX_CURRENT_WATCHDOG_PER_RUNNER_OPERATOR_PATH_SELFTEST_PASS");
+    const marginGuardSha = "b".repeat(40);
+    const marginGuardConfig = buildConfig({
+        ...approvedEnv,
+        DISDEX_WATCHDOG_MARGIN_GUARD_EXPECTED_SHA: marginGuardSha,
+    });
+    if (marginGuardConfig.marginGuardUnit !== `disdex-v12-v52-margin-guard@${marginGuardSha}.service`) {
+        throw new Error("Margin Guard did not retain its independent release pin");
+    }
+    if (marginGuardConfig.expectedSha !== sha) throw new Error("Margin Guard release pin changed the watchdog release pin");
+    console.log("DISDEX_CURRENT_WATCHDOG_MARGIN_GUARD_INDEPENDENT_SHA_SELFTEST_PASS");
     const v4Pinned = { ...v4, expectedCwd: baseConfigEnv.DISDEX_WATCHDOG_RELEASE_ROOT };
     const v4Command = `/usr/bin/node ${baseConfigEnv.DISDEX_WATCHDOG_RELEASE_ROOT}/node_modules/tsx/dist/cli.mjs scripts/v12-v4-production-runner.ts --daemon`;
     if (!commandMatches({ releaseRoot: baseConfigEnv.DISDEX_WATCHDOG_RELEASE_ROOT }, v4Pinned, v4Command)) throw new Error("V4 command pin self-test failed");
