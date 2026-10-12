@@ -18,6 +18,10 @@ import {applyProductionEvent,planProductionEntry,productionExitSpec,nativeEviden
 import {buildV4AccountMark,type V4SignedMark} from "./v12-v4-peer-account-mark";
 import type {V4PeerSource,V4PeerLineageMode} from "./v12-v4-peer-state-owners";
 import type {V4LiveDecisionSnapshot} from "./v12-v4-live-candidate-builder";
+export type V4PreparedDecision =
+ | {kind:"READY";preparedAtMs:number;decision:V4LiveDecisionSnapshot}
+ | {kind:"FAILED";preparedAtMs:number;reason:string};
+
 export type V4TickResult={status:"locked"|"observing"|"blocked"|"submitted"|"exited";reason:string;
  eventTs:number;candidateCount:number;orderEnabled:boolean};
 export interface V4RunnerDependencies{
@@ -53,11 +57,32 @@ export class V4RunnerEngine{
   return this.deps.store.commit(d.revision,next);
  }
 
- async tick():Promise<V4TickResult>{
+ /**
+  * Cold market-data work is moved outside the shared account mutex only if this
+  * V4 store is completely flat and has no durable order intents. Any open,
+  * unknown, or recovery-required intent retains the original priority:
+  * acquire the lock first, reconcile fills, and check resident protection.
+  *
+  * This fetch reads completed venue candles only; no signed account state or
+  * order mutation may be hoisted out of the protected section.
+  */
+ async prepareFlatMarketDecision():Promise<V4PreparedDecision|undefined>{
+  const local=this.deps.store.read();
+  if(Object.keys(local.intents).length>0||
+    Object.values(local.state.legs).some(leg=>leg.qty>0||leg.status==="PENDING_ENTRY"))return;
+  const preparedAtMs=this.now();
+  try{
+   return {kind:"READY",preparedAtMs,decision:await this.deps.fetchDecision()};
+  }catch(error){
+   return {kind:"FAILED",preparedAtMs,
+    reason:error instanceof Error?error.name:"NON_ERROR_DECISION_FAILURE"};
+  }
+ }
+ async tick(prepared?:V4PreparedDecision):Promise<V4TickResult>{
   const at=this.now();
   const lease=await this.deps.accountLock.acquire("V12_V4_RUNNER");
   if(!lease)return {status:"locked",reason:"SHARED_ACCOUNT_LOCK_BUSY",eventTs:at,candidateCount:0,orderEnabled:false};
-  try{return await this.underLease(lease);}
+  try{return await this.underLease(lease,prepared);}
   finally{await lease.release();}
  }
  private abandonPreparedEntry(cid:string){
@@ -180,7 +205,7 @@ export class V4RunnerEngine{
    }
   }
  }
- private async underLease(lease:AccountLockHandle):Promise<V4TickResult>{
+ private async underLease(lease:AccountLockHandle,prepared?:V4PreparedDecision):Promise<V4TickResult>{
   const at=this.now(), d=this.deps;
   const reserv=new V4SharedReservations(d.store,lease,d.pendingRegistryPath,this.now);
   const dispatcher=new V4DurableOrderDispatcher(d.store,createV4AsterOrderGateway(d.adapter),
@@ -240,7 +265,16 @@ export class V4RunnerEngine{
   verifyV4ResidentStops(current.state,current.intents,openOrders);
   const exit=await this.processExitBars(dispatcher,cycle);
   if(exit)return exit;
-  const decision=await d.fetchDecision();
+  // Recheck the actual H2 boundary after waiting and after all signed account
+  // and protective STOP reconciliation. Never carry a pre-lock candidate across
+  // an H2 boundary or a newly nonflat/unknown V4 state.
+  const boundary=(ms:number)=>Math.floor(ms/7_200_000);
+  const stillFlat=Object.keys(d.store.read().intents).length===0&&
+   Object.values(d.store.read().state.legs).every(leg=>leg.qty<=0&&leg.status!=="PENDING_ENTRY");
+  const reusable=Boolean(prepared&&stillFlat&&prepared.preparedAtMs<=this.now()&&
+   boundary(prepared.preparedAtMs)===boundary(this.now()));
+  if(reusable&&prepared?.kind==="FAILED")throw Error("V4_MARKET_PREFETCH_FAILED_AFTER_PROTECTION_RECONCILIATION:"+prepared.reason);
+  const decision=reusable&&prepared?.kind==="READY"?prepared.decision:await d.fetchDecision();
   if(decision.orderEnabled!==false||decision.tradingMutation!==0||
    decision.realOrderEnabledV4!==0||decision.errors.length)
    throw Error("V4_CANDIDATE_SOURCE_UNTRUSTED");
