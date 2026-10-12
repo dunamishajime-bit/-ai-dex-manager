@@ -1632,12 +1632,11 @@ ReadWritePaths=${IDLE_PRIORITY_STATE_ROOT} ${SHARED_ROOT}"
   ensure_monitor_timer_active "disdex-runner-health-snapshot.timer"
   ensure_monitor_timer_active "disdex-runner-health-alert.timer"
   ensure_monitor_timer_active "disdex-trade-fill-notifier.timer"
-  if [[ "${DISDEX_CURRENT_RUNTIME_DEFER_OPERATOR_AUTOMATION:-false}" == "true" ]]; then
-    systemctl stop disdex-current-runtime-coherence-guard.timer
-  else
-    systemctl enable --now disdex-current-runtime-coherence-guard.timer
-    ensure_monitor_timer_active "disdex-current-runtime-coherence-guard.timer"
-  fi
+  # Coherence is read-only safety monitoring, not order automation.  Keep it
+  # armed even while operator-controlled trading automation is intentionally
+  # deferred during a cutover.
+  systemctl enable --now disdex-current-runtime-coherence-guard.timer
+  ensure_monitor_timer_active "disdex-current-runtime-coherence-guard.timer"
   printf 'DISDEX_CURRENT_RUNTIME_WIRING_APPLIED\n'
 }
 
