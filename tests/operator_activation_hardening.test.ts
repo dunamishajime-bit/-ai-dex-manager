@@ -134,7 +134,8 @@ test("activation gate prestart runs as root so root-owned 0600 artifact remains 
     assert.match(unit, /ExecStartPre=\+\/usr\/bin\/node .*disdex-live-operator-activation-gate\.mjs/);
   }
   const v4 = await readFile("deploy/systemd/disdex-v12-v4@.service", "utf8");
-  assert.match(v4, /--runner V12_V4 --activation-path \/var\/lib\/disdex\/shared\/operator-activation\/current\.json/);
+  assert.match(v4, /--runner V12_V4 --activation-path \/var\/lib\/disdex\/shared\/operator-activation\/v12-v4-full\.json/);
+  assert.doesNotMatch(v4, /(?:After|Wants)=.*disdex-(?:shared-crypto-risk|v12-v52-margin-guard)@%i\.service/);
 });
 
 test("Idle application receives a root-generated read-only activation projection without weakening the approval artifact", async () => {
