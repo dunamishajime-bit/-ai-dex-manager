@@ -1,5 +1,5 @@
 export type Gate = { key:string; label:string; state:'OK'|'NO'|'UNKNOWN'; actual?:number|string; required?:number|string; detail:string; kind?:'signal'|'execution'; progress?:number };
-export type RankScoreKind='NATIVE'|'GATE_COMPLETION'|'UNAVAILABLE';
+export type RankScoreKind='NATIVE'|'MARKET'|'GATE_COMPLETION'|'UNAVAILABLE';
 export type RankingSourceStatus='FRESH'|'STALE'|'SOURCE_ERROR'|'NOT_EVALUATED';
 export type RankMetric={score:number|null;scoreKind:RankScoreKind;scoreLabel:string};
 export type RankRow = {
@@ -12,7 +12,7 @@ export type RealtimeTopSlot={slot:1|2|3;status:'CANDIDATE'|'NO_CANDIDATE'|'NOT_E
 export function executionBlocked(row:RankRow){return row.gates.some(g=>g.kind==='execution'&&g.state==='NO');}
 export const REALTIME_RANKING_REFRESH_MS=30_000;
 export function nextRealtimeRankingAt(observedAt:number){return observedAt+REALTIME_RANKING_REFRESH_MS;}
-const REALTIME_RANKING_SOURCE_MAX_AGE_MS:Record<string,number>={V12:3*3600000,V12_V4:3*3600000,Q102:2*3600000,PENGU:2*3600000,FET:110000,HYPE:20*60000,'Idle Long':2*3600000,'Idle Short':2*3600000,V52:2*3600000};
+const REALTIME_RANKING_SOURCE_MAX_AGE_MS:Record<string,number>={V12:3*3600000,V12_V4:3*3600000,Q102:2*3600000,PENGU:2*3600000,FET:110000,HYPE:20*60000,'Idle Long':2*3600000,'Idle Short':2*3600000,V52:2*3600000,MARKET:90_000};
 export function realtimeRankingRowExpiry(row:RankRow){return row.checkedAt+(REALTIME_RANKING_SOURCE_MAX_AGE_MS[row.logic]??2*3600000);}
 export function realtimeRankingCacheExpiry(observedAt:number,sourceExpiries:number[],rows:RankRow[]=[]){
  const deadlines=[observedAt+REALTIME_RANKING_REFRESH_MS,...sourceExpiries.filter(x=>Number.isFinite(x)&&x>observedAt),...rows.filter(r=>r.fresh).map(realtimeRankingRowExpiry)];

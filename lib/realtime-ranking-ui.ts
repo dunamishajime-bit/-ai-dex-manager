@@ -13,6 +13,7 @@ export type RealtimeRankingPanel = {
 };
 
 const LOGIC_TITLES: Record<string, string> = {
+  MARKET: "全取り扱い通貨",
   V12_V4: "V12 V4",
   Q102: "Q102",
   PENGU: "PENGU",
@@ -38,12 +39,7 @@ function titleForScope(scope: string) {
  */
 export function buildRealtimeRankingPanels(rows: RankRow[], selectedLogic = "ALL"): RealtimeRankingPanel[] {
   const selectedScope = selectedLogic === "ALL" ? null : scopeForLogic(selectedLogic);
-  const scopes = selectedScope
-    ? [selectedScope]
-    : ["V12_V4", ...new Set(rows
-      .filter((row) => row.rankingContractAvailable === true && typeof row.rankingScope === "string")
-      .map((row) => row.rankingScope!)
-      .filter((scope) => scope !== "V12_V4"))];
+  const scopes = selectedScope ? [selectedScope] : ["MARKET"];
 
   return scopes.map((scope) => {
     const scopedRows = rows.filter((row) => row.rankingScope === scope);
@@ -75,6 +71,7 @@ export function rankingMovementId(scope: string, row: RankRow) {
 }
 
 export function scoreKindLabel(row: RankRow): string {
+  if (row.scoreKind === "MARKET") return row.scoreLabel || "Aster共通市場Score（参考・非発注）";
   if (row.scoreKind === "NATIVE") return row.scoreLabel || "実測スコア";
   if (row.scoreKind === "GATE_COMPLETION") return row.scoreLabel || "Gate充足度（発火確率ではありません）";
   if (row.sourceStatus === "STALE" || !row.fresh) return "未評価（STALE / 発注不可）";

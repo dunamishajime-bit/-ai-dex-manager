@@ -8,6 +8,7 @@ import { loadQuality102SymbolObservability } from './quality102-symbol-observabi
 import { loadPenguRuntimeObservability } from './pengu-runtime-observability';
 import { loadHypeRuntimeObservability } from './hype-runtime-observability';
 import { loadFetGates } from './fet-gate-observability';
+import { loadMarketUniverseRanking } from './realtime-universe-score';
 import { DIST_TERMINAL_LIVE_CONFIG } from '@/lib/disterminal-live-config';
 import { V12_V4_HP_ROUTE_IDS, V12_V4_HP_TARGET } from '@/lib/v12-v4-hp-contract';
 type Obj=Record<string,unknown>;
@@ -162,8 +163,10 @@ async function observe(){
   const riskFresh=risk?.sourceComplete===true&&risk?.utcDay===new Date(now).toISOString().slice(0,10)&&now-Number(risk.updatedAt)>=-60000&&now-Number(risk.updatedAt)<10*60000;
   row.gates.push(flag('shared-risk','共有日次損失ガード',riskFresh&&typeof risk?.tripped==='boolean'?!risk.tripped:undefined,risk?.tripped?'損失制限で停止':'当日の完全な共有状態を照合','execution'));
  }
+ // Public-market-only ranking with one shared formula; no trading state or order mutation.
+ const marketRows=await loadMarketUniverseRanking(rows,now);
  const checkedAt=Date.now(),freshRows=expireRealtimeRankingRows(rows,checkedAt,sourceExpiryByLogic);
- const snapshot={ok:true,readOnly:true,tradingMutation:0,checkedAt:now,refreshSeconds:REALTIME_RANKING_REFRESH_MS/1000,runtimeSha:current.releaseSha,rows:rankRows(v12V4Snapshot?mergeV12V4RealtimeRows(freshRows,v12V4Snapshot,now):freshRows),errors,v12V4:v12V4Snapshot?v12V4RealtimeSummary(v12V4Snapshot):unavailableV12V4RealtimeSummary(now),metric:'数値は各ロジックの実測native scoreまたはSignal Gate充足度です。尺度が異なるためロジック横断の比較・順位付けはしていません。発火確率・期待利益ではありません。'};
+ const snapshot={ok:true,readOnly:true,tradingMutation:0,checkedAt:now,refreshSeconds:REALTIME_RANKING_REFRESH_MS/1000,runtimeSha:current.releaseSha,rows:rankRows([...(v12V4Snapshot?mergeV12V4RealtimeRows(freshRows,v12V4Snapshot,now):freshRows),...marketRows]),errors,v12V4:v12V4Snapshot?v12V4RealtimeSummary(v12V4Snapshot):unavailableV12V4RealtimeSummary(now),metric:'全通貨順位はAster公開相場を同一算式で評価した共通市場Score（0-100、参考）で降順。ロジック固有Scoreとは独立で、実発注・発火確率・期待利益には使いません。'};
  return {snapshot,expires:realtimeRankingCacheExpiry(now,sourceExpiries,snapshot.rows)};
 }
 type Observation=Awaited<ReturnType<typeof observe>>;

@@ -38,6 +38,7 @@ type Snapshot = {
 };
 
 function missing(row: RankRow) {
+  if (row.logic === 'MARKET') return row.reason;
   return row.gates.filter((gate) => gate.kind !== 'execution' && gate.state !== 'OK')
     .map((gate) => gate.label + '：' + gate.detail).join(' / ') || 'Signal Gateの不足情報なし（発注可を意味しません）';
 }
@@ -57,6 +58,7 @@ function blockReason(row: RankRow) {
 }
 
 function rankExplanation(row: RankRow) {
+  if (row.logic === 'MARKET') return row.score === null ? 'Asterの価格・確定足が不足し共通市場Score未評価です。' : '全取扱通貨を同じ市場指標・重みで評価した表示専用Scoreによる順位です。注文・売買ロジックの発火条件とは異なります。';
   if (!row.fresh || row.sourceStatus === 'STALE') return '観測がSTALEのため現在の順位・判定は未評価です。発注不可です。';
   if (row.sourceStatus === 'SOURCE_ERROR') return '観測取得に失敗しました。Scoreや順位を推測していません。';
   if (row.score === null) return '必要なデータまたは実測スコアが未取得のため順位対象外です。';
@@ -179,9 +181,10 @@ export function RealtimeRankingBoard() {
 
   const all = rankRows((data?.rows ?? []).map((row) => currentRankRow(row, Date.now())));
   const filtered = all.filter((row) =>
-    (logic === 'ALL' || row.logic === logic) &&
-    (side === 'ALL' || row.side === side) &&
-    (row.symbol + ' ' + row.logic + ' ' + (row.sourceRoute ?? '')).toLowerCase().includes(search.toLowerCase()));
+    (logic === 'ALL' ? row.logic === 'MARKET' : row.logic === logic) &&
+    (logic === 'ALL' || side === 'ALL' || row.side === side) &&
+    (row.symbol + ' ' + row.logic + ' ' + (row.sourceRoute ?? '')).toLowerCase().includes(search.toLowerCase()))
+    .sort((a,b) => (b.score ?? -Infinity) - (a.score ?? -Infinity) || a.symbol.localeCompare(b.symbol));
   const panels = error && !data ? [] : buildRealtimeRankingPanels(all, logic);
   const feedbackRows = rankingFeedbackRows(panels);
   const selected = all.find((row) => row.id === selectedId);
@@ -197,7 +200,7 @@ export function RealtimeRankingBoard() {
     const movementId = rankingMovementId(row.rankingScope ?? row.logic, row);
     const sourceDetails = [
       row.sourceRoute ? `Route ${row.sourceRoute}` : '',
-      row.sourceRank ? `Source rank ${row.sourceRank}（LIVE順位ではありません）` : '',
+      row.sourceRank && row.logic !== 'MARKET' ? `Source rank ${row.sourceRank}（LIVE順位ではありません）` : '',
       row.sourceFeatures && Object.keys(row.sourceFeatures).length
         ? `Source features ${Object.entries(row.sourceFeatures).map(([key, value]) => `${key}=${value}`).join(' / ')}` : '',
     ].filter(Boolean).join(' · ');
@@ -219,13 +222,13 @@ export function RealtimeRankingBoard() {
         <span className="min-w-0 truncate">{row.symbol.replace(/USDT$/, '')}</span>
         {executionBlocked(row) && <span className="rank-order-block truncate text-[8px] font-normal text-rose-300">発注不可: {blockReason(row)}</span>}
       </span>
-      <span className="min-w-0 truncate text-[10px] text-[#d7be76]" title={row.sourceRoute ?? row.logic}>{row.logic}</span>
+      <span className="min-w-0 truncate text-[10px] text-[#d7be76]" title={row.sourceRoute ?? row.logic}>{row.logic === 'MARKET' ? '共通市場' : row.logic}</span>
       <span className={'text-[9px] ' + (row.side === 'LONG' ? 'text-emerald-300' : row.side === 'SHORT' ? 'text-rose-300' : 'text-white/45')}>
         {row.side === 'LONG' ? 'Long' : row.side === 'SHORT' ? 'Short' : '—'}
       </span>
       <span className="rank-score-cell min-w-0 text-right font-mono font-bold text-[#ead7a4]" title={scoreKindLabel(row)}>
         <span>{scoreValueLabel(row, !!error)}</span>
-        <small className="block truncate font-sans font-normal text-white/50">{row.score === null ? '未評価' : row.scoreKind === 'NATIVE' ? '実測値' : 'Gate充足度'}</small>
+        <small className="block truncate font-sans font-normal text-white/50">{row.score === null ? '未評価' : row.scoreKind === 'MARKET' ? '市場Score' : row.scoreKind === 'NATIVE' ? '実測値' : 'Gate充足度'}</small>
       </span>
     </button>;
   };
@@ -266,12 +269,12 @@ export function RealtimeRankingBoard() {
         className="radar-leader-button"
       >
         <div className="radar-leader-heading">
-          <div className="radar-leader-identity"><Trophy size={13} className="shrink-0 text-[#d8bd75]"/><span className="slot-number">{slot.slot}</span><strong>{row.symbol}</strong><span>{row.side === 'LONG' ? 'Long' : row.side === 'SHORT' ? 'Short' : '方向未評価'}</span></div>
+          <div className="radar-leader-identity"><Trophy size={13} className="shrink-0 text-[#d8bd75]"/><span className="slot-number">{slot.slot}</span><strong>{row.symbol}</strong><span>{row.logic === 'MARKET' ? '共通市場' : row.side === 'LONG' ? 'Long' : row.side === 'SHORT' ? 'Short' : '方向未評価'}</span></div>
           <Movement delta={changes[movementId]}/>
         </div>
         <div className="radar-score-line"><b>{scoreValueLabel(row, !!error)}</b><span>{scoreKindLabel(row)}</span></div>
-        <p className="radar-source-route">{row.sourceRoute ? `Route: ${row.sourceRoute}` : `${row.logic} strategy rank`}</p>
-        <p className={blocked ? 'radar-slot-warning' : 'radar-slot-note'}>{blocked ? `発注不可: ${blockReason(row)}` : '順位観測です。発注可否は別途Runnerが判定します。'}</p>
+        <p className="radar-source-route">{row.logic === 'MARKET' ? 'Aster公開相場の共通スコア順' : row.sourceRoute ? `Route: ${row.sourceRoute}` : `${row.logic} strategy rank`}</p>
+        <p className={blocked ? 'radar-slot-warning' : 'radar-slot-note'}>{row.logic === 'MARKET' ? '参考市場ランキング。発注条件とは無関係です。' : blocked ? `発注不可: ${blockReason(row)}` : '順位観測です。発注可否は別途Runnerが判定します。'}</p>
         <p className="radar-slot-reason">{row.reason || missing(row)}</p>
         <time dateTime={new Date(row.checkedAt).toISOString()}>観測 {new Date(row.checkedAt).toLocaleTimeString('ja-JP')}</time>
       </button>
@@ -290,18 +293,18 @@ export function RealtimeRankingBoard() {
       <span role="status" aria-live="polite" className="feedback-notice">{feedback.audioNotice || '0は実測表示のみ。順位・Top3・演出対象外です。'}</span>
     </div>
 
-    <div className="radar-filters"><input aria-label="通貨を検索" placeholder="通貨・ロジック検索" value={search} onChange={(event) => setSearch(event.target.value)} className="min-w-0 flex-1"/><select aria-label="ロジック" value={logic} onChange={(event) => setLogic(event.target.value)}><option value="ALL">全ロジック</option>{[...new Set(data?.rows.map((row) => row.logic) ?? [])].map((value) => <option key={value} value={value}>{value === 'V12_V4' ? 'V12 V4' : value}</option>)}</select><select aria-label="方向" value={side} onChange={(event) => setSide(event.target.value)}><option value="ALL">全方向</option><option>LONG</option><option>SHORT</option><option>WAIT</option></select></div>
+    <div className="radar-filters"><input aria-label="通貨を検索" placeholder="通貨・ロジック検索" value={search} onChange={(event) => setSearch(event.target.value)} className="min-w-0 flex-1"/><select aria-label="ロジック" value={logic} onChange={(event) => {setLogic(event.target.value); setSide('ALL');}}><option value="ALL">全通貨スコア順</option>{[...new Set(data?.rows.filter((row) => row.logic !== "MARKET").map((row) => row.logic) ?? [])].map((value) => <option key={value} value={value}>{value === 'V12_V4' ? 'V12 V4' : value}</option>)}</select><select aria-label="方向" disabled={logic === "ALL"} value={side} onChange={(event) => setSide(event.target.value)}><option value="ALL">全方向</option><option>LONG</option><option>SHORT</option><option>WAIT</option></select></div>
 
-    <div className="radar-panel-list" aria-label="戦略別順位">
+    <div className="radar-panel-list" aria-label="全通貨ランキングまたは戦略別順位">
       {panels.map((panel) => <section key={panel.scope} aria-label={`${panel.title} 上位3`} className="radar-panel" data-ranking-scope={panel.scope}>
-        <header className="radar-panel-heading"><div><h2>{panel.title} · strategy-scoped Top 3</h2><p>{panel.rankingContractAvailable ? 'このロジック固有の順位契約。別ロジックのScoreとは比較しません。' : 'LIVE順位契約未取得。別ロジックのScoreやResearch順位で補完しません。'}</p></div><span>{panel.rankingContractAvailable ? 'RANK SOURCE' : '順位未評価'}</span></header>
+        <header className="radar-panel-heading"><div><h2>{panel.scope === "MARKET" ? "全通貨 共通Score Top 3" : panel.title + " · strategy-scoped Top 3"}</h2><p>{panel.scope === "MARKET" ? "全取扱通貨を同じAster相場指標で比較。スコアは表示専用、取引判定に不使用。" : panel.rankingContractAvailable ? "ロジック固有の順位契約。別ロジックのScoreとは比較しません。" : "LIVE順位契約未取得。別ロジックのScoreやResearch順位で補完しません。"}</p></div><span>{panel.rankingContractAvailable ? 'RANK SOURCE' : '順位未評価'}</span></header>
         {v4PanelSummary(panel, data)}
         <div role="list" aria-label={`${panel.title} 上位3枠`} className="radar-leaders">{panel.slots.map((slot) => renderSlot(panel, slot))}</div>
       </section>)}
       {!panels.length && <p className="p-3 text-xs text-white/50">順位契約に基づくTop 3はありません。全観測値は下の一覧に表示します。</p>}
     </div>
 
-    <section aria-label="全監視通貨・ロジック" className="radar-ranking"><div className="radar-inventory-heading"><h2>監視対象の実測値 · 順位対象 {filtered.filter((row) => row.rankingEligible && row.rank !== undefined).length} / 表示 {filtered.length}件</h2><span title={data?.metric}>ロジック間の比較不可 · Gate充足度は発火確率ではありません · クリックで詳細</span></div><p className="radar-inventory-note">表示フィルターは下の観測一覧に適用。上のTop 3は選択ロジック単位で表示します。0も実測値なら表示し、未取得とは区別します。</p>
+    <section aria-label="全監視通貨・ロジック" className="radar-ranking"><div className="radar-inventory-heading"><h2>{logic === "ALL" ? "全取り扱い通貨 · Score高い順" : logic + " 観測値 · Score順"} · 有効 {filtered.filter((row) => row.score !== null).length} / 全 {filtered.length}件</h2><span title={data?.metric}>共通市場ScoreはAster公開相場から計算 · 発注非連動 · クリックで詳細</span></div><p className="radar-inventory-note">{logic === "ALL" ? "全取扱通貨を同じ算式（Trend25 / Momentum20 / BTC相対強度15 / Volume10 / Structure10 / RiskFit5 / Bonus15）で評価し降順表示。欠測は—で最後尾。ロジック固有Scoreと混在させません。" : "ロジック固有の観測値を表示。共通市場Scoreとは異なる尺度です。"} 0も実測値なら表示し、未取得とは区別します。</p>
       <div className="radar-columns">{[0, 1, 2].map((column) => <div key={column} className="radar-column"><div className="rank-column-heading"><span>順位</span><span>通貨</span><span>ロジック</span><span>方向</span><span>Score / 尺度</span></div><div className="rank-column-body">{filtered.slice(column * 15, column * 15 + 15).map(cell)}</div></div>)}</div>
       {filtered.length > 45 && <div className="radar-tail" aria-label="46位以降">{filtered.slice(45).map(cell)}</div>}
       {data && !filtered.length && <p className="p-3 text-xs text-white/45">該当する観測行はありません。</p>}

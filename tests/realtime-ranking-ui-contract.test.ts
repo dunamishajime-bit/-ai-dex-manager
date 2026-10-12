@@ -25,17 +25,17 @@ function row(overrides: Partial<RankRow> & Pick<RankRow, "id" | "logic" | "symbo
   };
 }
 
-test("ALL view renders V12 V4 placeholder and only scopes backed by ranking contracts", () => {
-  const rows = [
-    row({ id: "q1", logic: "Q102", symbol: "BTCUSDT", score: 12, scoreKind: "NATIVE", rankingScope: "Q102", sourceRank: 1, rankingEligible: true, rankingContractAvailable: true }),
-    row({ id: "p1", logic: "PENGU", symbol: "PENGUUSDT", score: 88, scoreKind: "GATE_COMPLETION", rankingScope: "PENGU", rankingEligible: false, rankingContractAvailable: false }),
+test("ALL view exposes one shared-market Top-3 and does not mix native strategy scores", () => {
+  const rows=[
+    row({ id:"market-btc",logic:"MARKET",symbol:"BTCUSDT",score:82.75,scoreKind:"MARKET",scoreLabel:"Aster共通市場Score",rankingScope:"MARKET",sourceRank:1,rankingEligible:true,rankingContractAvailable:true }),
+    row({ id:"market-eth",logic:"MARKET",symbol:"ETHUSDT",score:74.25,scoreKind:"MARKET",scoreLabel:"Aster共通市場Score",rankingScope:"MARKET",sourceRank:2,rankingEligible:true,rankingContractAvailable:true }),
+    row({ id:"q1",logic:"Q102",symbol:"BTCUSDT",score:99,scoreKind:"NATIVE",rankingScope:"Q102",sourceRank:1,rankingEligible:true,rankingContractAvailable:true }),
   ];
-
-  const panels = buildRealtimeRankingPanels(rows, "ALL");
-  assert.deepEqual(panels.map((panel) => panel.scope), ["V12_V4", "Q102"]);
-  assert.deepEqual(panels[0].slots.map((slot) => slot.status), ["NOT_EVALUATED", "NOT_EVALUATED", "NOT_EVALUATED"]);
-  assert.equal(panels[0].slots.length, 3);
-  assert.equal(panels.some((panel) => panel.scope === "PENGU"), false);
+  const panels=buildRealtimeRankingPanels(rows,"ALL");
+  assert.deepEqual(panels.map(panel=>panel.scope),["MARKET"]);
+  assert.deepEqual(panels[0].slots.map(slot=>slot.symbol),["BTCUSDT","ETHUSDT",undefined]);
+  assert.equal(panels[0].slots.length,3);
+  assert.match(scoreKindLabel(rows[0]),/Aster共通市場Score/);
 });
 
 test("selected logic gets three scoped slots, deduplicated by symbol, retaining blocked candidate and placeholder", () => {
@@ -58,14 +58,13 @@ test("score labels distinguish native, gate completion, unavailable and numeric 
   assert.match(scoreKindLabel(row({ id: "na", logic: "V12_V4", symbol: "BTCUSDT", score: null, scoreKind: "UNAVAILABLE", sourceRank: 1 })), /未評価/);
 });
 
-test("movement snapshots namespace ids and use only scoped Top-3 candidates", () => {
-  const rowA = row({ id: "same-id", logic: "Q102", symbol: "BTCUSDT", score: 10, scoreKind: "NATIVE", rankingScope: "Q102", sourceRank: 1, rankingEligible: true, rankingContractAvailable: true });
-  const rowB = { ...rowA, logic: "Other", rankingScope: "Other" };
-  const panels = buildRealtimeRankingPanels([rowA, rowB], "ALL");
-  const feedback = rankingFeedbackRows(panels);
-  assert.equal(feedback.length, 2);
-  assert.notEqual(feedback[0].id, feedback[1].id);
-  assert.ok(feedback.every((item) => item.rank === 1));
+test("movement snapshots use only the shared-market score Top-3 in ALL view", () => {
+  const market=row({ id:"market",logic:"MARKET",symbol:"BTCUSDT",score:88,scoreKind:"MARKET",rankingScope:"MARKET",sourceRank:1,rankingEligible:true,rankingContractAvailable:true });
+  const q102=row({ id:"q102",logic:"Q102",symbol:"BTCUSDT",score:95,scoreKind:"NATIVE",rankingScope:"Q102",sourceRank:1,rankingEligible:true,rankingContractAvailable:true });
+  const feedback=rankingFeedbackRows(buildRealtimeRankingPanels([market,q102],"ALL"));
+  assert.equal(feedback.length,1);
+  assert.equal(feedback[0].symbol,"BTCUSDT");
+  assert.ok(feedback[0].id.startsWith("MARKET::"));
 });
 
 test("ranking board exposes score meaning and placeholder slot semantics accessibly", async () => {
@@ -73,7 +72,7 @@ test("ranking board exposes score meaning and placeholder slot semantics accessi
   assert.match(source, /aria-label=\{.*上位3/);
   assert.match(source, /data-top-slot/);
   assert.match(source, /Gate充足度/);
-  assert.match(source, /発火確率ではありません/);
+  assert.match(source, /発火確率.*ありません/);
   assert.match(source, /順位未評価/);
   assert.match(source, /発注不可/);
 });
