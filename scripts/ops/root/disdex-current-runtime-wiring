@@ -1602,6 +1602,12 @@ ReadWritePaths=${IDLE_PRIORITY_STATE_ROOT} ${SHARED_ROOT}"
     else
       systemctl enable --now "$HYPE_UNIT"
       systemctl enable --now "$IDLE_UNIT"
+      # The operator gate authorizes the exact current-SHA trading set.  Start
+      # every core runner here; enabling only overlays leaves V4/PENGU/Q102/
+      # FET/V52 disabled while the wiring reports LIVE.
+      for unit in "$V12_UNIT" "$PENGU_UNIT" "$Q102_UNIT" "$FET_UNIT" "$V52_UNIT"; do
+        systemctl enable --now "$unit"
+      done
       systemctl enable --now disdex-runner-watchdog.timer
       if [[ "$PRIMARY_V12_MODE" == "LEGACY" ]]; then
         systemctl enable --now disdex-v12-kill-switch-auto-repair.path

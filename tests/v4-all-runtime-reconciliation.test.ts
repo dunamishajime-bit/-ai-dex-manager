@@ -35,3 +35,10 @@ test("V4 wiring does not authorize legacy V12 and V4 together", () => {
   assert.match(wiring, /V12_OPERATOR_RUNNER="V12_V4"/);
   assert.match(wiring, /systemctl disable --now disdex-v12-three-hour-health-check\.timer/);
 });
+
+test("operator-enabled wiring starts every exact-SHA trading runner", () => {
+  assert.match(
+    wiring,
+    /for unit in "\$V12_UNIT" "\$PENGU_UNIT" "\$Q102_UNIT" "\$FET_UNIT" "\$V52_UNIT"[\s\S]*?systemctl enable --now "\$unit"/,
+  );
+});
