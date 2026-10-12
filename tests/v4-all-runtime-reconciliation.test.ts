@@ -44,6 +44,24 @@ test("operator-enabled wiring starts every exact-SHA trading runner", () => {
 });
 
 test("V4 primary contract preserves peer safety overrides after V4 env generation", () => {
+  assert.match(wiring, /STRICT_PORTFOLIO_PLANNER_ACTIVE=true/);
+  assert.match(wiring, /V12_BASE_GROSS_CAP=2\.0/);
+  assert.match(wiring, /V12_DYNAMIC_GROSS_CAP=2\.0/);
+  assert.match(wiring, /V12_GROSS_CAP=2\.0/);
+  assert.match(wiring, /PENGU_GROSS_CAP=1\.0/);
+  assert.match(wiring, /PENGU_DUAL_LS_V2_MAX_GROSS=1\.0/);
+  assert.match(wiring, /PENGU_DUAL_LS_V2_PORTFOLIO_GROSS_CAP=3\.0/);
+  assert.match(wiring, /QUALITY102_CAUSAL_V1_MAX_GROSS=3\.0/);
+  assert.match(wiring, /STOCK_GROSS_CAP=4\.0/);
+  assert.match(wiring, /CRYPTO_GROSS_CAP=3\.0/);
+  assert.match(wiring, /TOTAL_GROSS_CAP=4\.25/);
+  assert.match(wiring, /DISDEX_V52_CRYPTO_GROSS_CAP=3\.0/);
+  assert.match(wiring, /DISDEX_V52_STOCK_GROSS_CAP=4\.0/);
+  assert.match(wiring, /DISDEX_V52_V11_GROSS_CAP=2\.0/);
+  assert.match(wiring, /DISDEX_V52_V50_GROSS_CAP=2\.0/);
+  assert.match(wiring, /DISDEX_V52_PORTFOLIO_GROSS_CAP=4\.25/);
+  assert.match(wiring, /DISDEX_HYPE_ZEC_MAX_GROSS=1\.5/);
+  assert.match(wiring, /DISDEX_IDLE_PRIORITY_RUNTIME_SHA=\$\{DEPLOYED_SHA\}/);
   assert.match(wiring, /DISDEX_SHARED_CRYPTO_MAX_DAILY_LOSS_PCT=7\.5/);
   assert.match(wiring, /PENGU_DUAL_LS_V2_MAX_DAILY_LOSS_PCT=7\.5/);
   assert.match(wiring, /QUALITY102_CAUSAL_V1_MAX_DAILY_LOSS_PCT=7\.5/);
