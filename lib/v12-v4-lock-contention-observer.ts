@@ -27,6 +27,7 @@ export type V4LockContentionEvent={
  outcome:string;
  elapsedMs:number;
  retryIntervalMs:number;
+ retryScheduleMs:number[];
  observations:V4LockHolderObservation[];
  orderMutationByObserver:0;
 };
@@ -61,7 +62,7 @@ export async function executeV4WithContentionAudit<T extends TickResult>(input:{
  accountLockPath:string;
  auditPath?:string;
  attempts?:number;
- retryMs?:number;
+ retryMs?:number|((attempt:number)=>number);
  shouldStop?:()=>boolean;
  wait?:(ms:number)=>Promise<void>;
  now?:()=>number;
@@ -70,11 +71,18 @@ export async function executeV4WithContentionAudit<T extends TickResult>(input:{
 }):Promise<T>{
  const now=input.now??Date.now,startedAt=now();
  const retryMs=input.retryMs??750;
+ const retryScheduleMs:number[]=[];
+ const boundedRetry=(attempt:number)=>{
+  const raw=typeof retryMs==="function"?retryMs(attempt):retryMs;
+  const bounded=Math.max(250,Math.min(2_000,Math.trunc(raw)));
+  retryScheduleMs.push(bounded);
+  return bounded;
+ };
  const observations:V4LockHolderObservation[]=[];
  let result:T|undefined;
  try{
   result=await runWithBoundedAccountLockRetry({
-   attempts:input.attempts??10,retryMs,shouldStop:input.shouldStop,wait:input.wait,
+   attempts:input.attempts??10,retryMs:boundedRetry,shouldStop:input.shouldStop,wait:input.wait,
    operation:async()=>{
     const next=await input.operation();
     if(next.status==="locked"){
@@ -92,7 +100,9 @@ export async function executeV4WithContentionAudit<T extends TickResult>(input:{
     observedAt:startedAt,busyAttempts:observations.length,
     resolved:Boolean(result&&result.status!=="locked"),
     outcome:result?.status??"THREW_DURING_RETRY",
-    elapsedMs:Math.max(0,now()-startedAt),retryIntervalMs:retryMs,
+    elapsedMs:Math.max(0,now()-startedAt),
+    retryIntervalMs:retryScheduleMs[0]??(typeof retryMs==="number"?Math.max(250,Math.min(2_000,Math.trunc(retryMs))):0),
+    retryScheduleMs,
     observations,orderMutationByObserver:0,
    };
    // Never let an observability write failure strand the protection reconciliation.
