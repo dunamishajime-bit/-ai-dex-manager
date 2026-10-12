@@ -46,3 +46,13 @@ A valid v3 root certificate still requires:
 - The existing one-entry Canary's exact-SHA approval remains unchanged, max 25 USDT until 2026-10-13 00:49 JST; no auto-extension.
 
 **User requested simplifying unnecessarily strict conditions. This was implemented and its evidence tested. The work is NOT a completed full LIVE cutover.** Do not claim full deployment until startup policy, root certificate, exact ownership and signed post-cutover state are independently verified.
+
+## 2026-10-12 subsequent operational configuration correction
+
+The previously inactive V4 full-production systemd template `/etc/systemd/system/disdex-v12-v4@.service` was backed up and corrected. New `/etc/disdex/disdex-v12-v4.env` was copied from the *working* Canary environment, only changing `V12_V4_OPERATION_MODE=CANARY` to `CERTIFIED`. The service no longer mistakenly `Wants=` a second `shared-risk@newSHA` or `MarginGuard@newSHA` nor requires nonexistent `current-runtime/%i.env`. It now references the separate root operator authorization path `/var/lib/disdex/shared/operator-activation/v12-v4-full.json`, leaving the current Canary gate untouched.
+
+A first `systemd-analyze verify` attempt on the raw template failed because it expanded `%i` to literal `i`, not a real release SHA; the script **restored its backup**. The exact-release `3639ba7d52430a87f683579d1107c1cd2db3eb19` artifact was subsequently placed immutably (and **not started**) at `/home/deploy/disdex-trading/releases/3639ba7d52430a87f683579d1107c1cd2db3eb19`. Its 41-route self-test passed. Then the guarded full-unit configuration edit was repeated and `systemd-analyze verify disdex-v12-v4@3639ba7d52430a87f683579d1107c1cd2db3eb19.service` passed.
+
+The new full service remains `inactive, MainPID=0, disabled`; current V4 Canary remained active PID838362/NRestarts0 at final unit check, and Production current symlink unchanged. Independent signed Aster GET-only account readback *after unit changes* reconfirmed FET LONG 298 and its reduceOnly SELL STOP_MARKET 298, no other orders/positions, and zero venue mutations.
+
+**Remaining operational activation, not missing V4-before-V4 historical data:** root-sign/install an exact-SHA v3 production certificate using five sealed root-owned files; install separate root V12_V4 full activation approval, adapt strict watchdog to attest the actual full V4 service after cutover, stop the existing Canary exactly once, reconcile the observation-only journal to new SHA, then start the full unit only after the full signed account, shared Gross/Margin and one-writer preflight and postdeployment readback. The user approved pursuing full LIVE, but these steps have **not** yet been executed; no automatic or unsupervised activation is implied.
