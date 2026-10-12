@@ -191,6 +191,12 @@ function exactSha(value) {
     return /^[0-9a-f]{40}$/.test(value) && !/^0{40}$/.test(value);
 }
 
+function releaseRootForSha(sha) {
+    const normalized = String(sha || "").trim().toLowerCase();
+    if (!exactSha(normalized)) throw new Error("release SHA is invalid");
+    return `/home/deploy/disdex-trading/releases/${normalized}`;
+}
+
 function isAbsoluteCanonicalPath(path) {
     return isAbsolute(path) && resolve(path) === path;
 }
@@ -334,7 +340,23 @@ function buildConfig(env) {
     if (!exactSha(marginGuardExpectedSha)) throw new Error("margin guard release pin is invalid");
     const sharedRiskUnit = `disdex-shared-crypto-risk@${sharedRiskExpectedSha}.service`;
     const marginGuardUnit = `disdex-v12-v52-margin-guard@${marginGuardExpectedSha}.service`;
-    return { healthRoot, releaseRoot, expectedSha, approvedSha, sharedRiskExpectedSha, sharedRiskUnit, marginGuardExpectedSha, marginGuardUnit, runnerConfig, statePath, auditPath, lockPath, operatorActivationPath };
+    const safetyDaemons = [
+        {
+            key: "SHARED_CRYPTO_RISK",
+            unit: sharedRiskUnit,
+            expectedSha: sharedRiskExpectedSha,
+            expectedCwd: releaseRootForSha(sharedRiskExpectedSha),
+            script: "scripts/disdex-shared-crypto-risk-writer.ts",
+        },
+        {
+            key: "MARGIN_GUARD",
+            unit: marginGuardUnit,
+            expectedSha: marginGuardExpectedSha,
+            expectedCwd: releaseRootForSha(marginGuardExpectedSha),
+            script: "scripts/disdex_v96_v52_margin_guard_runtime.py",
+        },
+    ];
+    return { healthRoot, releaseRoot, expectedSha, approvedSha, sharedRiskExpectedSha, sharedRiskUnit, marginGuardExpectedSha, marginGuardUnit, safetyDaemons, runnerConfig, statePath, auditPath, lockPath, operatorActivationPath };
 }
 
 async function assertRelease(config) {
@@ -359,6 +381,15 @@ async function assertRelease(config) {
         const runnerMarkerStats = await lstat(runnerMarker);
         if (!runnerMarkerStats.isFile() || runnerMarkerStats.isSymbolicLink()) throw new Error(`${runner.key} release marker is invalid`);
         if ((await readFile(runnerMarker, "utf8")).trim() !== runner.expectedSha) throw new Error(`${runner.key} release marker does not match expected SHA`);
+    }
+    for (const daemon of config.safetyDaemons) {
+        const stats = await lstat(daemon.expectedCwd);
+        if (!stats.isDirectory() || stats.isSymbolicLink()) throw new Error(`${daemon.key} safety daemon release root is not a real directory`);
+        if ((await realpath(daemon.expectedCwd)) !== daemon.expectedCwd) throw new Error(`${daemon.key} safety daemon release root is not canonical`);
+        const marker = join(daemon.expectedCwd, RELEASE_MARKER);
+        const markerStats = await lstat(marker);
+        if (!markerStats.isFile() || markerStats.isSymbolicLink()) throw new Error(`${daemon.key} safety daemon release marker is invalid`);
+        if ((await readFile(marker, "utf8")).trim() !== daemon.expectedSha) throw new Error(`${daemon.key} safety daemon release marker does not match expected SHA`);
     }
 }
 
@@ -525,9 +556,10 @@ async function evaluateSafetyDaemon(config, daemon, state, now) {
     const attempts = recentAttempts(state, daemon.key, now);
     const service = await inspectService(daemon.unit);
     const process = await processInfo(service.mainPid);
+    const expectedCwd = daemon.expectedCwd || config.releaseRoot;
     const healthy = service.active
         && service.mainPid > 0
-        && process.cwd === config.releaseRoot
+        && process.cwd === expectedCwd
         && String(process.command || "").includes(daemon.script)
         && String(process.command || "").includes("--daemon");
     if (healthy) {
@@ -535,7 +567,7 @@ async function evaluateSafetyDaemon(config, daemon, state, now) {
     }
     const reason = !service.active || service.mainPid <= 0
         ? "service is not active"
-        : process.cwd !== config.releaseRoot
+        : process.cwd !== expectedCwd
             ? "process cwd is not pinned to release"
             : "process command is not pinned to safety daemon";
     return { result: decision("RESTART", reason, daemon), attempts, clearAttempts: false };
@@ -552,10 +584,7 @@ async function run(config) {
         const dependencyDecisions = {};
         const restartCalls = [];
         const errors = [];
-        const safetyDaemons = [
-            { key: "SHARED_CRYPTO_RISK", unit: config.sharedRiskUnit, script: "scripts/disdex-shared-crypto-risk-writer.ts" },
-            { key: "MARGIN_GUARD", unit: config.marginGuardUnit, script: "scripts/disdex_v96_v52_margin_guard_runtime.py" },
-        ];
+        const safetyDaemons = config.safetyDaemons;
         for (const daemon of safetyDaemons) {
             try {
                 const evaluated = await evaluateSafetyDaemon(config, daemon, state, now);
@@ -780,7 +809,12 @@ function selfTest() {
         throw new Error("Margin Guard did not retain its independent release pin");
     }
     if (marginGuardConfig.expectedSha !== sha) throw new Error("Margin Guard release pin changed the watchdog release pin");
+    const marginGuardDaemon = marginGuardConfig.safetyDaemons.find((daemon) => daemon.key === "MARGIN_GUARD");
+    if (!marginGuardDaemon || marginGuardDaemon.expectedCwd !== releaseRootForSha(marginGuardSha) || marginGuardDaemon.expectedCwd === marginGuardConfig.releaseRoot) {
+        throw new Error("mixed-SHA Margin Guard process identity did not bind to the peer release root");
+    }
     console.log("DISDEX_CURRENT_WATCHDOG_MARGIN_GUARD_INDEPENDENT_SHA_SELFTEST_PASS");
+    console.log("DISDEX_CURRENT_WATCHDOG_MIXED_SHA_SAFETY_DAEMON_CWD_SELFTEST_PASS");
     const v4Pinned = { ...v4, expectedCwd: baseConfigEnv.DISDEX_WATCHDOG_RELEASE_ROOT };
     const v4Command = `/usr/bin/node ${baseConfigEnv.DISDEX_WATCHDOG_RELEASE_ROOT}/node_modules/tsx/dist/cli.mjs scripts/v12-v4-production-runner.ts --daemon`;
     if (!commandMatches({ releaseRoot: baseConfigEnv.DISDEX_WATCHDOG_RELEASE_ROOT }, v4Pinned, v4Command)) throw new Error("V4 command pin self-test failed");

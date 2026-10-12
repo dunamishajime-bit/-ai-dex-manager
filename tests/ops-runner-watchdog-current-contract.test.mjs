@@ -63,6 +63,14 @@ test("current watchdog pins Margin Guard independently from the watchdog release
   assert.match(stdout, /DISDEX_CURRENT_WATCHDOG_MARGIN_GUARD_INDEPENDENT_SHA_SELFTEST_PASS/);
 });
 
+test("current watchdog validates mixed-SHA safety daemons against their peer release roots", async () => {
+  const { stdout } = await execFileAsync(process.execPath, [fileURLToPath(watchdog), "--self-test"], {
+    encoding: "utf8",
+    windowsHide: true,
+  });
+  assert.match(stdout, /DISDEX_CURRENT_WATCHDOG_MIXED_SHA_SAFETY_DAEMON_CWD_SELFTEST_PASS/);
+});
+
 test("current watchdog rejects concurrent legacy V12 or Canary authority in V4 mode", async () => {
   const { stdout } = await execFileAsync(process.execPath, [fileURLToPath(watchdog), "--self-test"], {
     encoding: "utf8",
