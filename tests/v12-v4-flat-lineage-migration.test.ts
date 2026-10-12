@@ -3,11 +3,22 @@ import assert from "node:assert/strict";
 import { createProductionState } from "../lib/v12-v4-production-lifecycle";
 import { v4OrderIdentity, type V4ExecutionDocument } from "../lib/v12-v4-execution-store";
 import { migrateFlatV4State, type V4FlatLineageEvidence } from "../lib/v12-v4-flat-lineage-migration";
+import { parseMigrationArgs } from "../scripts/v12-v4-flat-lineage-migration";
 
 const OLD_SHA = "a".repeat(40);
 const NEW_SHA = "b".repeat(40);
 const LEG_ID = "LTCUSDT:FAILED_BREAK_REV_SHORT_6H:SHORT:1791799200000";
 const CID = v4OrderIdentity(OLD_SHA, LEG_ID, "ENTRY", 0);
+const ACK = "I_ACK_V12_V4_FLAT_LINEAGE_MIGRATION_AFTER_SIGNED_RECONCILIATION";
+
+test("migration CLI preserves the case-sensitive operator ACK and normalizes only SHAs", () => {
+    const parsed = parseMigrationArgs(["node", "migration.ts", "--apply", "--old-sha", OLD_SHA.toUpperCase(), "--new-sha", NEW_SHA.toUpperCase(), "--ack", ACK]);
+    assert.deepEqual(parsed, { expectedOldSha: OLD_SHA, newSha: NEW_SHA });
+    assert.throws(
+        () => parseMigrationArgs(["node", "migration.ts", "--apply", "--old-sha", OLD_SHA, "--new-sha", NEW_SHA, "--ack", ACK.toLowerCase()]),
+        /V4_FLAT_LINEAGE_MIGRATION_ACK_REQUIRED/,
+    );
+});
 
 function flatObserved(): V4ExecutionDocument {
     const foreign = [{ owner: "FET", symbol: "FETUSDT", side: "LONG" as const, qty: 298, gross: 0, pendingGross: 0, crypto: true }];

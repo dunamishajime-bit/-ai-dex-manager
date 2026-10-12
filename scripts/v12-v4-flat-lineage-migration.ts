@@ -9,15 +9,24 @@ import { migrateFlatV4State } from "../lib/v12-v4-flat-lineage-migration";
 const ACK = "I_ACK_V12_V4_FLAT_LINEAGE_MIGRATION_AFTER_SIGNED_RECONCILIATION";
 const SHA = /^[a-f0-9]{40}$/;
 
-function arg(name: string) {
-    const index = process.argv.indexOf(name);
-    return index >= 0 ? String(process.argv[index + 1] || "").trim().toLowerCase() : "";
-}
-
 function required(name: string) {
     const value = String(process.env[name] || "").trim();
     if (!value) throw new Error(`V4_FLAT_LINEAGE_MIGRATION_MISSING_ENV:${name}`);
     return value;
+}
+
+export function parseMigrationArgs(argv: readonly string[] = process.argv) {
+    const value = (name: string) => {
+        const index = argv.indexOf(name);
+        return index >= 0 ? String(argv[index + 1] || "").trim() : "";
+    };
+    if (!argv.includes("--apply")) throw new Error("V4_FLAT_LINEAGE_MIGRATION_REQUIRES_APPLY");
+    if (value("--ack") !== ACK) throw new Error("V4_FLAT_LINEAGE_MIGRATION_ACK_REQUIRED");
+    const expectedOldSha = value("--old-sha").toLowerCase();
+    const newSha = value("--new-sha").toLowerCase();
+    if (!SHA.test(expectedOldSha) || !SHA.test(newSha) || expectedOldSha === newSha)
+        throw new Error("V4_FLAT_LINEAGE_MIGRATION_SHA_INVALID");
+    return { expectedOldSha, newSha };
 }
 
 async function regular(path: string) {
@@ -32,12 +41,7 @@ function numberValue(value: unknown, label: string) {
 }
 
 async function main() {
-    if (!process.argv.includes("--apply")) throw new Error("V4_FLAT_LINEAGE_MIGRATION_REQUIRES_APPLY");
-    if (arg("--ack") !== ACK) throw new Error("V4_FLAT_LINEAGE_MIGRATION_ACK_REQUIRED");
-    const expectedOldSha = arg("--old-sha");
-    const newSha = arg("--new-sha");
-    if (!SHA.test(expectedOldSha) || !SHA.test(newSha) || expectedOldSha === newSha)
-        throw new Error("V4_FLAT_LINEAGE_MIGRATION_SHA_INVALID");
+    const { expectedOldSha, newSha } = parseMigrationArgs();
 
     const statePath = required("V12_V4_EXECUTION_STORE_PATH");
     const pendingPath = required("DISDEX_PENDING_EXPOSURE_REGISTRY_PATH");
@@ -166,7 +170,9 @@ async function main() {
     }
 }
 
-main().catch((error) => {
-    console.error(error instanceof Error ? error.message : String(error));
-    process.exitCode = 2;
-});
+if (process.argv[1]?.replaceAll("\\", "/").endsWith("scripts/v12-v4-flat-lineage-migration.ts")) {
+    main().catch((error) => {
+        console.error(error instanceof Error ? error.message : String(error));
+        process.exitCode = 2;
+    });
+}
