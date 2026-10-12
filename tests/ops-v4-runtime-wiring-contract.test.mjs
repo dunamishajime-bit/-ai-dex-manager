@@ -41,3 +41,13 @@ test("V4 full-LIVE wiring pins V4 independently while preserving current peer SH
   assert.match(wiring, /DISDEX_V4_MIXED_SHA_RUNTIME_METADATA_PRUNE_SKIPPED/);
   assert.match(wiring, /operator_activation_all_trading_ready/);
 });
+
+test("mixed-SHA wiring validates V4 runner artifacts from the pinned V4 release", () => {
+  const validation = wiring.match(/validate_release_artifacts\(\) \{([\s\S]*?)\n\}/)?.[1] ?? "";
+  assert.match(validation, /local required_file v4_release="\$CURRENT_RELEASE"/);
+  assert.match(validation, /if \[\[ "\$PRIMARY_V12_MODE" == "V4" \]\]; then\s+v4_release="\$V4_PRIMARY_RELEASE"/);
+  assert.match(validation, /"\$v4_release\/scripts\/v12-v4-production-runner\.ts"/);
+  assert.match(validation, /"\$v4_release\/deploy\/systemd\/disdex-v12-v4@\.service"/);
+  assert.doesNotMatch(validation, /"\$CURRENT_RELEASE\/scripts\/v12-v4-production-runner\.ts"/);
+  assert.doesNotMatch(validation, /"\$CURRENT_RELEASE\/deploy\/systemd\/disdex-v12-v4@\.service"/);
+});

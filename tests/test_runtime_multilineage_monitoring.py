@@ -36,7 +36,9 @@ class RuntimeMultilineageMonitoringTest(unittest.TestCase):
 
     def test_monolithic_wiring_emits_explicit_per_runner_defaults(self):
         source = WIRING.read_text(encoding="utf-8")
-        for sleeve in ("V12", "PENGU", "V52", "Q102", "FET"):
+        self.assertIn("DISDEX_HEALTH_SNAPSHOT_V12_EXPECTED_SHA=${V4_PRIMARY_SHA:-${DEPLOYED_SHA}}", source)
+        self.assertIn("DISDEX_WATCHDOG_V12_EXPECTED_SHA=${V4_PRIMARY_SHA:-${DEPLOYED_SHA}}", source)
+        for sleeve in ("PENGU", "V52", "Q102", "FET"):
             self.assertIn(f"DISDEX_HEALTH_SNAPSHOT_{sleeve}_EXPECTED_SHA=${{DEPLOYED_SHA}}", source)
             self.assertIn(f"DISDEX_WATCHDOG_{sleeve}_EXPECTED_SHA=${{DEPLOYED_SHA}}", source)
         self.assertIn("QUALITY102_CAUSAL_V1_STATE_PATH=/var/lib/disdex/quality102-causal-v1/state.json", source)
@@ -44,7 +46,7 @@ class RuntimeMultilineageMonitoringTest(unittest.TestCase):
         self.assertNotIn("FET_BRK48_MAX_GROSS=", source)
         self.assertNotIn("ZEC_LONG_RISK_PCT=", source)
         self.assertIn("DISDEX_Q102_RUNTIME_SHA=${DEPLOYED_SHA}", source)
-        self.assertIn("DISDEX_WATCHDOG_APPROVED_SHA=${DEPLOYED_SHA}", source)
+        self.assertIn("DISDEX_WATCHDOG_APPROVED_SHA=${MONITOR_RUNTIME_SHA}", source)
 
 
 if __name__ == "__main__":

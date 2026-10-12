@@ -22,11 +22,15 @@ class RuntimeWiringMonitorEnvironmentTest(unittest.TestCase):
 
     def test_monitor_environment_files_are_release_pinned(self):
         source = SCRIPT.read_text(encoding="utf-8")
-        self.assertIn("DISDEX_HEALTH_SNAPSHOT_EXPECTED_SHA=${DEPLOYED_SHA}", source)
-        self.assertIn("DISDEX_HEALTH_SNAPSHOT_RELEASE_ROOT=${CURRENT_RELEASE}", source)
-        self.assertIn("DISDEX_WATCHDOG_EXPECTED_SHA=${DEPLOYED_SHA}", source)
-        self.assertIn("DISDEX_WATCHDOG_RELEASE_ROOT=${CURRENT_RELEASE}", source)
-        self.assertIn("DISDEX_WATCHDOG_RUNNER_ROOT=${CURRENT_RELEASE}", source)
+        self.assertIn("DISDEX_HEALTH_SNAPSHOT_EXPECTED_SHA=${MONITOR_RUNTIME_SHA}", source)
+        self.assertIn("DISDEX_HEALTH_SNAPSHOT_RELEASE_ROOT=${MONITOR_RUNTIME_ROOT}", source)
+        self.assertIn("DISDEX_HEALTH_SNAPSHOT_V12_EXPECTED_SHA=${V4_PRIMARY_SHA:-${DEPLOYED_SHA}}", source)
+        self.assertIn("DISDEX_HEALTH_SNAPSHOT_V12_RELEASE_ROOT=${V4_PRIMARY_RELEASE:-${CURRENT_RELEASE}}", source)
+        self.assertIn("DISDEX_WATCHDOG_EXPECTED_SHA=${MONITOR_RUNTIME_SHA}", source)
+        self.assertIn("DISDEX_WATCHDOG_RELEASE_ROOT=${MONITOR_RUNTIME_ROOT}", source)
+        self.assertIn("DISDEX_WATCHDOG_RUNNER_ROOT=${MONITOR_RUNTIME_ROOT}", source)
+        self.assertIn("DISDEX_WATCHDOG_V12_EXPECTED_SHA=${V4_PRIMARY_SHA:-${DEPLOYED_SHA}}", source)
+        self.assertIn("DISDEX_WATCHDOG_V12_RELEASE_ROOT=${V4_PRIMARY_RELEASE:-${CURRENT_RELEASE}}", source)
 
 
 if __name__ == "__main__":

@@ -25,7 +25,7 @@ class RuntimeHealthSnapshotCurrentTest(unittest.TestCase):
 
         wiring = WIRING.read_text(encoding="utf-8")
         self.assertIn("scripts/ops/root/disdex-runner-health-snapshot-current.mjs", wiring)
-        self.assertIn("ExecStart=/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-runner-health-snapshot-current.mjs", wiring)
+        self.assertIn("ExecStart=/usr/bin/node ${MONITOR_RUNTIME_ROOT}/scripts/ops/root/disdex-runner-health-snapshot-current.mjs", wiring)
 
 
 class MarginGuardHealthVisibilityTest(unittest.TestCase):
