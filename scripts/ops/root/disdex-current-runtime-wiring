@@ -1004,6 +1004,61 @@ ensure_trading_unit_running() {
   return 1
 }
 
+wait_aster_rate_budget_quiet() {
+  local label="$1" attempt=0 consecutive=0
+  local budget_path="${DISDEX_ASTER_GLOBAL_RATE_BUDGET_PATH:-${SHARED_ROOT}/aster-rate-budget.json}"
+  local quiet_horizon_ms="${DISDEX_CURRENT_RUNTIME_RATE_BUDGET_QUIET_HORIZON_MS:-500}"
+  local max_attempts="${DISDEX_CURRENT_RUNTIME_RATE_BUDGET_QUIET_MAX_ATTEMPTS:-40}"
+  while (( attempt < max_attempts )); do
+    attempt=$((attempt + 1))
+    if /usr/bin/python3 - "$budget_path" "$quiet_horizon_ms" <<'PY'
+import json, math, os, sys, time
+
+path = sys.argv[1]
+quiet_horizon_ms = int(sys.argv[2])
+if os.path.exists(path + ".lock") or os.path.exists(path + ".lock.recovery"):
+    raise SystemExit(2)
+try:
+    with open(path, encoding="utf-8") as handle:
+        state = json.load(handle)
+except FileNotFoundError:
+    raise SystemExit(3)
+except Exception:
+    raise SystemExit(3)
+if not isinstance(state, dict) or state.get("schema") != "disdex-aster-rate-budget/v1":
+    raise SystemExit(3)
+try:
+    next_allowed_at = float(state["nextAllowedAt"])
+    cooldown_until = float(state.get("cooldownUntil", 0))
+except (KeyError, TypeError, ValueError):
+    raise SystemExit(3)
+if not math.isfinite(next_allowed_at) or next_allowed_at < 0 or not math.isfinite(cooldown_until) or cooldown_until < 0:
+    raise SystemExit(3)
+blocked_until = max(next_allowed_at, cooldown_until)
+now_ms = time.time() * 1000
+raise SystemExit(0 if max(0, blocked_until - now_ms) <= quiet_horizon_ms else 2)
+PY
+    then
+      consecutive=$((consecutive + 1))
+      printf 'DISDEX_RATE_BUDGET_QUIET label=%s attempt=%s consecutive=%s\n' "$label" "$attempt" "$consecutive"
+      if (( consecutive >= 3 )); then
+        return 0
+      fi
+    else
+      local rc=$?
+      if (( rc == 3 )); then
+        printf 'shared Aster rate-budget state is missing or malformed: %s\n' "$budget_path" >&2
+        return 1
+      fi
+      consecutive=0
+      printf 'DISDEX_RATE_BUDGET_BUSY label=%s attempt=%s\n' "$label" "$attempt"
+    fi
+    sleep 1
+  done
+  printf 'shared Aster rate-budget did not become quiet: %s\n' "$label" >&2
+  return 1
+}
+
 retarget_quality102_ranking_observer() {
   local unit
   while read -r unit; do
@@ -1700,10 +1755,15 @@ ReadWritePaths=${IDLE_PRIORITY_STATE_ROOT} ${SHARED_ROOT}"
       # Start every peer first and wait for a running exact-SHA service before
       # V4 starts.  V4 attests all eight peers during startup; starting V4 in
       # the same transaction as its peers creates a false zero-peer failure and
-      # can amplify Aster's global rate-budget burst.
+      # can amplify Aster's global rate-budget burst.  Wait for three quiet
+      # observations between starts so the next daemon does not inherit a
+      # transient shared-budget saturation from the previous daemon.
       for unit in "$PENGU_UNIT" "$Q102_UNIT" "$FET_UNIT" "$V52_UNIT" "$HYPE_UNIT" "$IDLE_UNIT"; do
+        wait_aster_rate_budget_quiet "before-${unit}"
         ensure_trading_unit_running "$unit"
+        wait_aster_rate_budget_quiet "after-${unit}"
       done
+      wait_aster_rate_budget_quiet "before-${V12_UNIT}"
       ensure_trading_unit_running "$V12_UNIT"
       systemctl enable --now disdex-runner-watchdog.timer
       if [[ "$PRIMARY_V12_MODE" == "LEGACY" ]]; then

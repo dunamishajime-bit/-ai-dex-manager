@@ -90,6 +90,15 @@ test("V4 runtime EnvironmentFile pins peer writers to the monitored state roots"
   assert.match(wiring, /DISDEX_V52_ASTER_ONLY_STATE_PATH=\/var\/lib\/disdex\/v52-aster-only\/runner-live\.json/);
 });
 
+test("trading startup waits for shared Aster rate-budget quiet between peers", () => {
+  assert.match(wiring, /wait_aster_rate_budget_quiet\(\) \{/);
+  assert.match(wiring, /disdex-aster-rate-budget\/v1/);
+  assert.match(wiring, /DISDEX_CURRENT_RUNTIME_RATE_BUDGET_QUIET_HORIZON_MS/);
+  assert.match(wiring, /wait_aster_rate_budget_quiet "before-\$\{unit\}"/);
+  assert.match(wiring, /wait_aster_rate_budget_quiet "before-\$\{V12_UNIT\}"/);
+  assert.match(wiring, /wait_aster_rate_budget_quiet "after-\$\{unit\}"/);
+});
+
 test("V4 wiring performs official flat execution-ledger lineage migration before startup", () => {
   assert.match(wiring, /v12-v4-flat-lineage-migration\.ts/);
   assert.match(wiring, /V4_FLAT_LINEAGE_MIGRATION_AFTER_SIGNED_RECONCILIATION/);
