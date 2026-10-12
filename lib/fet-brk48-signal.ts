@@ -26,11 +26,13 @@ export function buildFetBrk48Signal(rows: readonly FetBrk48Bar[], now:number): F
   const volumeMedian72h=median(prior72.map(r=>r.volume));
   const volumeRatio=volumeMedian72h>0?signal.volume/volumeMedian72h:0;
   if(!(signal.close>prior48hHigh)||volumeRatio+1e-12<FET_BRK48_RESIDUAL.minimumVolumeRatio)return undefined;
+  if(volumeRatio-FET_BRK48_RESIDUAL.maximumVolumeRatio>1e-12)return undefined;
   // Final candidate builder compares completed closes exactly 72h apart.
   const priorBoundary=completed.find(r=>r.openTs===signal.openTs-72*3_600_000);
   if(!priorBoundary || !(priorBoundary.close>0))return undefined;
   const return72h=signal.close/priorBoundary.close-1;
   if(return72h+1e-12<FET_BRK48_RESIDUAL.minimumReturn72h)return undefined;
+  if(return72h-FET_BRK48_RESIDUAL.maximumReturn72h>1e-12)return undefined;
   const entryPrice=signal.close; // live sizing uses fresh executable quote; this is causal signal anchor only.
   return {strategyId:FET_BRK48_RESIDUAL.strategyId,symbol:"FETUSDT",side:"LONG",referenceTs:signal.closeTs,entryTs,entryPrice,prior48hHigh,volumeMedian72h,volumeRatio,return72h,hardStopPrice:entryPrice*(1-FET_BRK48_RESIDUAL.hardStopPct),exitTs:entryTs+FET_BRK48_RESIDUAL.holdHours*3_600_000};
 }
