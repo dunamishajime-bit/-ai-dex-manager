@@ -5,6 +5,7 @@ import { join } from "node:path";
 import test from "node:test";
 
 import {
+  BENIGN_IDLE_PENDING_EXPOSURE_EACCES,
   BENIGN_IDLE_OPERATOR_ACTIVATION_EACCES,
   recoverIdlePriorityShortBenignState,
 } from "../scripts/disdex-idle-priority-short-benign-state-recovery";
@@ -59,6 +60,24 @@ test("clears the exact flat Aster rate-budget saturation review and keeps an exa
     assert.equal(after.lastDecision.reason, "IDLE_BENIGN_RATE_BUDGET_RECOVERY");
     assert.equal(after.runtimeSha, SHA);
     assert.equal(after.unknownField, "preserve");
+    assert.equal(JSON.stringify(JSON.parse(await readFile(result.backupPath, "utf8"))), JSON.stringify(original));
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("clears the exact flat pending-exposure registry EACCES review and keeps an exact backup", async () => {
+  const root = await mkdtemp(join(tmpdir(), "idle-benign-pending-exposure-recovery-"));
+  try {
+    const statePath = join(root, "state.json");
+    const original = flatState(BENIGN_IDLE_PENDING_EXPOSURE_EACCES);
+    await writeFile(statePath, `${JSON.stringify(original, null, 2)}\n`, { mode: 0o600 });
+    const result = await recoverIdlePriorityShortBenignState({ statePath, expectedSha: SHA });
+    assert.equal(result.status, "IDLE_BENIGN_STATE_RECOVERY_PASS");
+    assert.equal(result.recoveryReason, "IDLE_BENIGN_PENDING_EXPOSURE_RECOVERY");
+    const after = JSON.parse(await readFile(statePath, "utf8"));
+    assert.equal(after.manualReview, null);
+    assert.equal(after.lastDecision.reason, "IDLE_BENIGN_PENDING_EXPOSURE_RECOVERY");
     assert.equal(JSON.stringify(JSON.parse(await readFile(result.backupPath, "utf8"))), JSON.stringify(original));
   } finally {
     await rm(root, { recursive: true, force: true });

@@ -7,6 +7,8 @@ import { normalizeIdleState } from "../lib/idle-priority-short-state";
 const SHA = /^[0-9a-f]{40}$/i;
 export const BENIGN_IDLE_OPERATOR_ACTIVATION_EACCES =
   "IDLE_RUNNER_FAIL_CLOSED:EACCES: permission denied, open '/var/lib/disdex/shared/operator-activation/current.json'";
+export const BENIGN_IDLE_PENDING_EXPOSURE_EACCES =
+  "IDLE_RUNNER_FAIL_CLOSED:EACCES: permission denied, open '/var/lib/disdex/shared/pending-exposure.json'";
 export const BENIGN_IDLE_RATE_BUDGET_REVIEW = /^IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:\d+$/;
 
 function exactSha(value: unknown, field: string): string {
@@ -55,13 +57,19 @@ export async function recoverIdlePriorityShortBenignState(input: {
   const review = String(checked.x.manualReview);
   const recoveryReason = checked.x.manualReview === BENIGN_IDLE_OPERATOR_ACTIVATION_EACCES
     ? "IDLE_BENIGN_OPERATOR_ACTIVATION_RECOVERY"
+    : checked.x.manualReview === BENIGN_IDLE_PENDING_EXPOSURE_EACCES
+      ? "IDLE_BENIGN_PENDING_EXPOSURE_RECOVERY"
     : BENIGN_IDLE_RATE_BUDGET_REVIEW.test(review)
       ? "IDLE_BENIGN_RATE_BUDGET_RECOVERY"
       : undefined;
   if (!recoveryReason) throw new Error("IDLE_BENIGN_STATE_RECOVERY_UNKNOWN_REVIEW");
 
   const now = Date.now();
-  const backupSuffix = recoveryReason === "IDLE_BENIGN_RATE_BUDGET_RECOVERY" ? "rate-budget" : "operator-activation";
+  const backupSuffix = recoveryReason === "IDLE_BENIGN_RATE_BUDGET_RECOVERY"
+    ? "rate-budget"
+    : recoveryReason === "IDLE_BENIGN_PENDING_EXPOSURE_RECOVERY"
+      ? "pending-exposure"
+      : "operator-activation";
   const backupPath = resolve(input.backupPath || `${statePath}.before-benign-${backupSuffix}-recovery-${checked.stateSha}`);
   try {
     await stat(backupPath);
