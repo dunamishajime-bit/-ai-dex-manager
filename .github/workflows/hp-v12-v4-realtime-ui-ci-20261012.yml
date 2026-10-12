@@ -73,3 +73,32 @@ jobs:
           console.log(`HP_ROUTE_MANIFEST_PASS=${required.length}`);
           NODE
           test -s .next/standalone/server.js
+      - name: Package exact-SHA Linux standalone UI release
+        run: |
+          set -Eeuo pipefail
+          mkdir -p .deploy-ui/.next
+          cp -a .next/standalone/. .deploy-ui/
+          cp -a .next/static .deploy-ui/.next/static
+          if [ -d public ]; then cp -a public .deploy-ui/public; fi
+          printf '%s\n' "$GITHUB_SHA" > .deploy-ui/.disdex-release-sha
+          python3 - <<'PY'
+          import pathlib
+          root=pathlib.Path('.deploy-ui').resolve()
+          for path in root.rglob('*'):
+              if path.is_symlink():
+                  target=path.resolve()
+                  if target!=root and root not in target.parents:
+                      raise SystemExit(f'UI_RELEASE_EXTERNAL_SYMLINK:{path}')
+          print('UI_RELEASE_SYMLINKS_INTERNAL=PASS')
+          PY
+          archive="$RUNNER_TEMP/disdex-ui-$GITHUB_SHA.tar.gz"
+          tar -C .deploy-ui -czf "$archive" .
+          test -s "$archive"
+          echo "UI_ARCHIVE_SHA256=$(sha256sum "$archive" | awk '{print $1}')"
+          echo "UI_ARCHIVE_BYTES=$(stat -c '%s' "$archive")"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: disdex-ui-${{ github.sha }}
+          path: ${{ runner.temp }}/disdex-ui-${{ github.sha }}.tar.gz
+          if-no-files-found: error
+          retention-days: 90
