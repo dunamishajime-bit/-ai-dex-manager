@@ -1,5 +1,8 @@
 # AI DEX Manager (AI-DEX マネージャー)
 
+> **VPS作業を行うAIへの必須事項**：Xserver VPSにアクセスする前に、[AGENTS.md](AGENTS.md) と [Git for Windows SSH 接続手順](docs/ops/DISDEX_VPS_SSH_ACCESS_20261012.md) を必ず確認してください。Windows標準ssh.exe（exitCode=255）ではなく、所有者Windows PC上の検証済みGit SSHスクリプトを使用します。Production操作前には必ず最新の建玉・保護STOP・Runner・Risk Gateを再監査してください。
+
+
 未来的なUIと高度なAIエージェント機能を備えた、分散型取引所(DEX)向け管理ダッシュボードのプロトタイプです。
 
 ## 🚀 主な機能
