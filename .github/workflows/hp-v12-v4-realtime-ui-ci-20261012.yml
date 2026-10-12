@@ -41,6 +41,7 @@ jobs:
           tests/v12-v4-hp-observability.test.ts
           tests/v12-v4-hp-status-route.test.ts
           tests/realtime-ranking.test.ts
+          tests/realtime-universe-score.test.ts
           tests/realtime-ranking-observability.test.ts
           tests/realtime-ranking-ui-contract.test.ts
           tests/v12-v4-hp-ui-contract.test.ts

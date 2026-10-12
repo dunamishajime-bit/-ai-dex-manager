@@ -53,8 +53,17 @@ export function buildRealtimeRankingPanels(rows: RankRow[], selectedLogic = "ALL
   });
 }
 
-/** Stable namespacing prevents independent strategy panels from sharing movement identities. */
-export function rankingFeedbackRows(panels: RealtimeRankingPanel[]): RankRow[] {
+/** Stable namespacing prevents independent strategy panels from sharing movement identities.
+ * In the all-currency MARKET view every ranked currency participates so rise/fall
+ * waves are not accidentally limited to the Top 3 cards.
+ */
+export function rankingFeedbackRows(panels: RealtimeRankingPanel[], rankedRows: RankRow[] = []): RankRow[] {
+  if (panels.some((panel) => panel.scope === "MARKET")) {
+    return rankedRows
+      .filter((row) => row.rankingScope === "MARKET" && row.rankingEligible === true && Number.isInteger(row.rank) && Number(row.rank) > 0)
+      .sort((a, b) => Number(a.rank) - Number(b.rank))
+      .map((row) => ({ ...row, id: `MARKET::${row.id}`, rankingScope: "MARKET" }));
+  }
   return panels.flatMap((panel) => panel.slots.flatMap((slot) => {
     if (slot.status !== "CANDIDATE" || !slot.sourceRow) return [];
     return [{

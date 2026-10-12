@@ -58,13 +58,18 @@ test("score labels distinguish native, gate completion, unavailable and numeric 
   assert.match(scoreKindLabel(row({ id: "na", logic: "V12_V4", symbol: "BTCUSDT", score: null, scoreKind: "UNAVAILABLE", sourceRank: 1 })), /未評価/);
 });
 
-test("movement snapshots use only the shared-market score Top-3 in ALL view", () => {
-  const market=row({ id:"market",logic:"MARKET",symbol:"BTCUSDT",score:88,scoreKind:"MARKET",rankingScope:"MARKET",sourceRank:1,rankingEligible:true,rankingContractAvailable:true });
-  const q102=row({ id:"q102",logic:"Q102",symbol:"BTCUSDT",score:95,scoreKind:"NATIVE",rankingScope:"Q102",sourceRank:1,rankingEligible:true,rankingContractAvailable:true });
-  const feedback=rankingFeedbackRows(buildRealtimeRankingPanels([market,q102],"ALL"));
-  assert.equal(feedback.length,1);
-  assert.equal(feedback[0].symbol,"BTCUSDT");
-  assert.ok(feedback[0].id.startsWith("MARKET::"));
+test("movement snapshots include every ranked shared-market currency in ALL view", () => {
+  const market=[
+    row({ id:"market-btc",logic:"MARKET",symbol:"BTCUSDT",score:88,scoreKind:"MARKET",rankingScope:"MARKET",sourceRank:1,rank:1,rankingEligible:true,rankingContractAvailable:true }),
+    row({ id:"market-eth",logic:"MARKET",symbol:"ETHUSDT",score:82,scoreKind:"MARKET",rankingScope:"MARKET",sourceRank:2,rank:2,rankingEligible:true,rankingContractAvailable:true }),
+    row({ id:"market-sol",logic:"MARKET",symbol:"SOLUSDT",score:79,scoreKind:"MARKET",rankingScope:"MARKET",sourceRank:3,rank:3,rankingEligible:true,rankingContractAvailable:true }),
+    row({ id:"market-xrp",logic:"MARKET",symbol:"XRPUSDT",score:71,scoreKind:"MARKET",rankingScope:"MARKET",sourceRank:4,rank:4,rankingEligible:true,rankingContractAvailable:true }),
+  ];
+  const q102=row({ id:"q102",logic:"Q102",symbol:"BTCUSDT",score:95,scoreKind:"NATIVE",rankingScope:"Q102",sourceRank:1,rank:1,rankingEligible:true,rankingContractAvailable:true });
+  const rows=[...market,q102];
+  const feedback=rankingFeedbackRows(buildRealtimeRankingPanels(rows,"ALL"),rows);
+  assert.deepEqual(feedback.map(item=>item.symbol),["BTCUSDT","ETHUSDT","SOLUSDT","XRPUSDT"]);
+  assert.ok(feedback.every(item=>item.id.startsWith("MARKET::")));
 });
 
 test("ranking board exposes score meaning and placeholder slot semantics accessibly", async () => {

@@ -186,7 +186,7 @@ export function RealtimeRankingBoard() {
     (row.symbol + ' ' + row.logic + ' ' + (row.sourceRoute ?? '')).toLowerCase().includes(search.toLowerCase()))
     .sort((a,b) => (b.score ?? -Infinity) - (a.score ?? -Infinity) || a.symbol.localeCompare(b.symbol));
   const panels = error && !data ? [] : buildRealtimeRankingPanels(all, logic);
-  const feedbackRows = rankingFeedbackRows(panels);
+  const feedbackRows = rankingFeedbackRows(panels, filtered);
   const selected = all.find((row) => row.id === selectedId);
   const feedback = useRealtimeRankingFeedback(feedbackRows, revision, logic + '|' + side + '|' + search, error);
   prepareFeedback.current = feedback.prepare;

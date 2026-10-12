@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { NextRequest } from "next/server";
 
-import { createV12V4HpStatusGet } from "../app/api/system/v12-v4-hp-status/route";
+import { createV12V4HpStatusGet } from "../lib/server/v12-v4-hp-status-handler";
 import type { V12V4HpSnapshot } from "../lib/v12-v4-hp-contract";
 
 const snapshot = {
