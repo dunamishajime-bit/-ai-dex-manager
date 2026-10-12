@@ -1375,6 +1375,7 @@ StartLimitIntervalSec=300s
 StartLimitBurst=3
 [Service]
 RestartSec=30s
+EnvironmentFile=${CONTRACT_ENV_FILE}
 EnvironmentFile=${V4_CONTRACT_ENV_FILE}
 Environment=DISDEX_RELEASE_SHA=${V4_PRIMARY_SHA}
 Environment=V12_V4_LIVE_ACK=${V4_PRIMARY_SHA}

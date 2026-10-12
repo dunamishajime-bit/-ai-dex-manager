@@ -71,6 +71,13 @@ class DependencyLivenessHealthTest(unittest.TestCase):
         self.assertIn("DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_RELEASE_ROOT=${CURRENT_RELEASE}", wiring)
         self.assertIn("DISDEX_HEALTH_SNAPSHOT_MARGIN_RELEASE_ROOT=${CURRENT_RELEASE}", wiring)
 
+    def test_v4_primary_loads_current_peer_contract_before_v4_contract(self):
+        wiring = WIRING.read_text(encoding="utf-8")
+        self.assertIn(
+            "EnvironmentFile=${CONTRACT_ENV_FILE}\nEnvironmentFile=${V4_CONTRACT_ENV_FILE}",
+            wiring,
+        )
+
     def test_wiring_makes_safety_daemons_self_restarting_and_visible(self):
         wiring = WIRING.read_text(encoding="utf-8")
         self.assertIn("DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_STATE_PATH=/var/lib/disdex/shared/crypto-daily-risk.json", wiring)
