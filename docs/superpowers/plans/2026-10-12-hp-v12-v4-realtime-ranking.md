@@ -98,7 +98,7 @@
 - [x] **Step 4: Preserve existing refresh and feedback** — keep 30-second refresh, sound controls, rank movement animation, and existing sound preferences; adapt movement IDs to ranking scope so separate strategies do not cross-trigger each other.
 - [x] **Step 5: Verify responsive layout** — extend `tests/mobile-layout-regression.test.ts` for narrow viewport, three placeholders, long symbol/route labels, and accessible scroll/overflow behavior.
 - [x] **Step 6: Run UI and ranking tests** — `npx tsx --test tests/realtime-ranking-ui-contract.test.ts tests/mobile-layout-regression.test.ts tests/realtime-ranking.test.ts`; expected: all pass.
-- [ ] **Step 7: Commit this task only** after reviewing the staged path list.
+- [x] **Step 7: Commit this task only** after reviewing the staged path list.
 
 ### Task 4: V4 target/runtime distinction across every HP V12 surface
 
@@ -117,13 +117,13 @@
 - `V12V4RuntimePanel` receives the validated snapshot and renders target policy separately from actual runner/runtime identity.
 - Historical fill/event rows continue to use their stored strategy IDs; this task does not change `lib/server/historical-fill-lineage.ts`, `lib/server/fill-lineage-evidence.ts`, or `lib/trade-history-attribution.ts` mappings.
 
-- [ ] **Step 1: Add failing page-contract tests** — current V12 page and shared banners show `V2_M150_D05_CORE_NATIVE / 41 routes` as target, while an old, staged, shadow, stale, unavailable, or SHA-mismatched runtime is visibly labeled as such.
-- [ ] **Step 2: Add failing historical-integrity tests** — old V12 fill/event IDs and strategy labels remain unchanged; only rows whose actual source/strategy ID is V4 display as V4.
-- [ ] **Step 3: Implement the status hook and shared panel** using Task 1’s response type. The panel never infers LIVE from static contract text and does not silently fall back to old V12 decision data.
-- [ ] **Step 4: Migrate current V12 surfaces** — home, positions, decision-status overview/detail, runtime banner/badge/sidebar, and current strategy explanations. Keep `disterminal-live-config.ts` as actual runtime configuration; do not rewrite it to make the page appear migrated.
-- [ ] **Step 5: Audit remaining V12 references** with `rg -n "V12_X1\.00_ALL|V12 X1\.00 ALL|v12-x1-all|V12" app components lib`. Update current-contract copy only; document/test any retained history, compatibility or old-runtime reference.
-- [ ] **Step 6: Run contract/history/layout tests** — `npx tsx --test tests/v12-v4-hp-ui-contract.test.ts tests/decision-status-layout-regression.test.ts tests/live-performance-ui-contract.test.ts tests/mobile-layout-regression.test.ts`; expected: all pass.
-- [ ] **Step 7: Commit this task only** after reviewing the staged path list.
+- [x] **Step 1: Add failing page-contract tests** — current V12 page and shared banners show `V2_M150_D05_CORE_NATIVE / 41 routes` as target, while an old, staged, shadow, stale, unavailable, or SHA-mismatched runtime is visibly labeled as such.
+- [x] **Step 2: Add failing historical-integrity tests** — old V12 fill/event IDs and strategy labels remain unchanged; only rows whose actual source/strategy ID is V4 display as V4.
+- [x] **Step 3: Implement the status hook and shared panel** using Task 1’s response type. The panel never infers LIVE from static contract text and does not silently fall back to old V12 decision data.
+- [x] **Step 4: Migrate current V12 surfaces** — home, positions, decision-status overview/detail, runtime banner/badge/sidebar, and current strategy explanations. Keep `disterminal-live-config.ts` as actual runtime configuration; do not rewrite it to make the page appear migrated.
+- [x] **Step 5: Audit remaining V12 references** with `rg -n "V12_X1\.00_ALL|V12 X1\.00 ALL|v12-x1-all|V12" app components lib`. Update current-contract copy only; document/test any retained history, compatibility or old-runtime reference.
+- [x] **Step 6: Run contract/history/layout tests** — `npx tsx --test tests/v12-v4-hp-ui-contract.test.ts tests/decision-status-layout-regression.test.ts tests/live-performance-ui-contract.test.ts tests/mobile-layout-regression.test.ts`; expected: all pass.
+- [x] **Step 7: Commit this task only** after reviewing the staged path list.
 
 ### Task 5: Integrated validation, CI, and HP-only XServer release
 
@@ -135,10 +135,10 @@
 - Production UI artifact reports its UI build/deploy SHA separately from the Trading release/runtime SHA.
 - Deployment uses the repository’s existing XServer HP-only release path, never Vercel.
 
-- [ ] **Step 1: Run focused regression suite** — `npx tsx --test tests/v12-v4-hp-observability.test.ts tests/v12-v4-hp-status-route.test.ts tests/realtime-ranking.test.ts tests/realtime-ranking-observability.test.ts tests/realtime-ranking-ui-contract.test.ts tests/v12-v4-hp-ui-contract.test.ts tests/decision-status-layout-regression.test.ts tests/mobile-layout-regression.test.ts tests/live-performance-ui-contract.test.ts`; expected: exit 0 and all tests pass.
-- [ ] **Step 2: Run TypeScript typecheck** — `npx tsc --noEmit`; expected: exit 0.
-- [ ] **Step 3: Run production build** — `npm run build`; expected: exit 0.
-- [ ] **Step 4: Run `git diff --check` and inspect complete branch diff** — verify only intended HP/API/tests/spec/plan files changed, history mapping files are untouched, and there is no Trading/runtime mutation path.
+- [x] **Step 1: Run focused regression suite** — `npx tsx --test tests/v12-v4-hp-observability.test.ts tests/v12-v4-hp-status-route.test.ts tests/realtime-ranking.test.ts tests/realtime-ranking-observability.test.ts tests/realtime-ranking-ui-contract.test.ts tests/v12-v4-hp-ui-contract.test.ts tests/decision-status-layout-regression.test.ts tests/mobile-layout-regression.test.ts tests/live-performance-ui-contract.test.ts`; expected: exit 0 and all tests pass.
+- [x] **Step 2: Run TypeScript typecheck** — `npx tsc --noEmit`; expected: exit 0.
+- [x] **Step 3: Run production build** — `npm run build`; expected: exit 0. On Windows, the default duplicated Next/SWC WASM type-check step can raise a native-binding runtime error after compilation; after standalone `tsc --noEmit` passes, use the repository-documented `DISDEX_UI_VERIFIED_TSC=1` build path and record both results.
+- [x] **Step 4: Run `git diff --check` and inspect complete branch diff** — verify only intended HP/API/tests/spec/plan files changed, history mapping files are untouched, and there is no Trading/runtime mutation path.
 - [ ] **Step 5: Push the tested commit to the approved HP-only implementation branch** — verify GitHub remote SHA exactly matches local HEAD.
 - [ ] **Step 6: Run applicable GitHub Actions and inspect jobs** — require at least one required job, none skipped/cancelled, and success for every required job. A zero-job workflow is not green.
 - [ ] **Step 7: Read-only VPS preflight** — verify current UI release, Trading SHA/services, available disk, HP health/API, and V4 runtime evidence. Confirm `C:\Users\dis\Desktop\DisDex.pem` exists without displaying it, then connect as `root@professional-dismanager.net`. If the key, SSH access, or deployment lineage cannot be verified, stop; do not switch hosting or use Vercel.
