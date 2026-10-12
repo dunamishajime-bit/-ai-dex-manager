@@ -42,6 +42,7 @@
       "breakoutLookbackHours": 48,
       "volumeMedianHours": 72,
       "minimumVolumeRatio": 1.2,
+      "maximumVolumeRatio": 10,
       "decisionModuloHours": 4,
       "decisionHourRemainderUtc": 1,
       "holdHours": 24,
@@ -50,6 +51,7 @@
       "minimumResidualGross": 0.05,
       "priority": "LOWER_THAN_CORE",
       "minimumReturn72h": 0.02,
+      "maximumReturn72h": 0.15,
       "postExitCooldownHours": 24,
       "causalReturnBasis": "COMPLETED_CLOSE_TO_COMPLETED_CLOSE_72H",
       "existingPositionSizing": "PRESERVE_UNTIL_CONFIRMED_EXIT"

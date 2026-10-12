@@ -366,7 +366,7 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
         serviceResult: String(service?.result || ""),
     };
     if(runner.key === "FET_BRK48_RESIDUAL") {
-        heartbeat.fet={minimumReturn72h:0.02,postExitCooldownHours:24,maximumNewEntryGross:1,lastEvaluationReason:state?.lastEvaluationReason||null,cooldownUntilTs:state?.cooldownUntilTs||null,lastExitTs:state?.lastExitTs||null,cooldownActive:now<Number(state?.cooldownUntilTs||0)};
+        heartbeat.fet={minimumVolumeRatio:1.2,maximumVolumeRatio:10,minimumReturn72h:0.02,maximumReturn72h:0.15,postExitCooldownHours:24,maximumNewEntryGross:1,lastEvaluationReason:state?.lastEvaluationReason||null,cooldownUntilTs:state?.cooldownUntilTs||null,lastExitTs:state?.lastExitTs||null,cooldownActive:now<Number(state?.cooldownUntilTs||0)};
     }
     if(runner.key === "V12_X1_ALL") heartbeat.dd1296={sideLossLedger:state?.sideLossLedger||null,latestDecision:state?.latestDd1296Decision||null};
     if(runner.key === "V12_V4") heartbeat.v12v4={operationMode:String(state?.operationMode||""),status:String(state?.status||""),candidateCount:Number(state?.candidateCount||0)};
