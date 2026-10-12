@@ -1,0 +1,75 @@
+name: HP V12 V4 Realtime UI CI 20261012
+
+on:
+  push:
+    branches:
+      - codex/hp-v12-v4-realtime-ui-20261012
+    paths:
+      - "app/**"
+      - "components/**"
+      - "hooks/**"
+      - "lib/**"
+      - "tests/**"
+      - "next.config.mjs"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/hp-v12-v4-realtime-ui-ci-20261012.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hp-v12-v4-realtime-ui-ci-20261012
+  cancel-in-progress: false
+
+jobs:
+  hp-ui:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Focused HP and V12 V4 regression suite
+        run: >-
+          npx tsx --test
+          tests/v12-v4-hp-observability.test.ts
+          tests/v12-v4-hp-status-route.test.ts
+          tests/realtime-ranking.test.ts
+          tests/realtime-ranking-observability.test.ts
+          tests/realtime-ranking-ui-contract.test.ts
+          tests/v12-v4-hp-ui-contract.test.ts
+          tests/decision-status-layout-regression.test.ts
+          tests/mobile-layout-regression.test.ts
+          tests/live-performance-ui-contract.test.ts
+      - name: TypeScript typecheck
+        run: npx tsc --noEmit
+      - name: Production build with independently verified types
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+          DISDEX_UI_VERIFIED_TSC: "1"
+        run: npm run build
+      - name: Verify UI route artifacts
+        run: |
+          node <<'NODE'
+          const manifest = require('./.next/server/app-paths-manifest.json');
+          const required = [
+            '/page',
+            '/positions/page',
+            '/history/page',
+            '/realtime/page',
+            '/decision-status/page',
+            '/decision-status/v12/page',
+            '/api/system/v12-v4-hp-status/route',
+            '/api/system/realtime-ranking/route',
+          ];
+          const missing = required.filter((route) => !manifest[route]);
+          if (missing.length) throw new Error(`HP_ROUTE_MISSING:${missing.join(',')}`);
+          console.log(`HP_ROUTE_MANIFEST_PASS=${required.length}`);
+          NODE
+          test -s .next/standalone/server.js
