@@ -54,8 +54,9 @@ test("mixed-SHA wiring validates V4 runner artifacts from the pinned V4 release"
 
 test("V4 primary unit must not load the peer-SHA env after the V4 ACK env", () => {
   const v4PrimaryBlock = wiring.match(
-    /if \[\[ "\$PRIMARY_V12_MODE" == "V4" \]\]; then\s+write_atomic "\$\{V12_DROPIN_DIR\}[\s\S]*?\n  else/,
+    /write_atomic "\$\{V12_DROPIN_DIR\}\/zzzzzzzzzzzz-current-release-contract\.conf" "\[Unit\][\s\S]*?V12_V4_HEALTH_STATE_PATH=\/var\/lib\/disdex\/v12-v4\/heartbeat\.json"\s*\n  else/,
   )?.[0] ?? "";
+  assert.ok(v4PrimaryBlock, "V4 primary unit drop-in branch must be present");
   assert.match(v4PrimaryBlock, /EnvironmentFile=\$\{V4_CONTRACT_ENV_FILE\}/);
   assert.doesNotMatch(v4PrimaryBlock, /EnvironmentFile=\$\{CONTRACT_ENV_FILE\}/);
 });
