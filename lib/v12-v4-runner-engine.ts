@@ -24,6 +24,12 @@ export type V4PreparedDecision =
 
 export type V4TickResult={status:"locked"|"observing"|"blocked"|"submitted"|"exited";reason:string;
  eventTs:number;candidateCount:number;orderEnabled:boolean};
+function safeDecisionFailureReason(error:unknown){
+ const raw=error instanceof Error?error.message:"NON_ERROR_DECISION_FAILURE";
+ return raw.replace(/\b(0x[a-fA-F0-9]{40,64})\b/g,"[REDACTED]")
+  .replace(/(secret|private.?key|signature|token|api.?key)=?[^\s,;]+/ig,"$1=[REDACTED]")
+  .replace(/[\r\n\t]+/g," ").replace(/\s{2,}/g," ").slice(0,180)||"DECISION_SOURCE_UNAVAILABLE";
+}
 export interface V4RunnerDependencies{
  store:V4ExecutionStore;accountLock:FileAccountOrderLock;
  adapter:V12AsterLiveAdapter;
@@ -75,7 +81,7 @@ export class V4RunnerEngine{
    return {kind:"READY",preparedAtMs,decision:await this.deps.fetchDecision()};
   }catch(error){
    return {kind:"FAILED",preparedAtMs,
-    reason:error instanceof Error?error.name:"NON_ERROR_DECISION_FAILURE"};
+    reason:safeDecisionFailureReason(error)};
   }
  }
  async tick(prepared?:V4PreparedDecision):Promise<V4TickResult>{
@@ -273,13 +279,24 @@ export class V4RunnerEngine{
    Object.values(d.store.read().state.legs).every(leg=>leg.qty<=0&&leg.status!=="PENDING_ENTRY");
   const reusable=Boolean(prepared&&stillFlat&&prepared.preparedAtMs<=this.now()&&
    boundary(prepared.preparedAtMs)===boundary(this.now()));
-  if(reusable&&prepared?.kind==="FAILED")throw Error("V4_MARKET_PREFETCH_FAILED_AFTER_PROTECTION_RECONCILIATION:"+prepared.reason);
-  const decision=reusable&&prepared?.kind==="READY"?prepared.decision:await d.fetchDecision();
+  if(reusable&&prepared?.kind==="FAILED")return {status:"observing",
+   reason:"V4_MARKET_DATA_UNAVAILABLE:"+prepared.reason,eventTs:this.now(),candidateCount:0,orderEnabled:false};
+  let decision:V4LiveDecisionSnapshot;
+  try{
+   decision=reusable&&prepared?.kind==="READY"?prepared.decision:await d.fetchDecision();
+  }catch(error){
+   return {status:"observing",reason:"V4_MARKET_DATA_UNAVAILABLE:"+safeDecisionFailureReason(error),
+    eventTs:this.now(),candidateCount:0,orderEnabled:false};
+  }
   if(decision.orderEnabled!==false||decision.tradingMutation!==0||
-   decision.realOrderEnabledV4!==0||decision.errors.length)
+   decision.realOrderEnabledV4!==0)
    throw Error("V4_CANDIDATE_SOURCE_UNTRUSTED");
+  if(decision.errors.length)return {status:"observing",
+   reason:"V4_MARKET_DATA_UNAVAILABLE:"+safeDecisionFailureReason(new Error(decision.errors.slice(0,3).join(";"))),
+   eventTs:this.now(),candidateCount:0,orderEnabled:false};
   if(this.now()-decision.capturedAtMs>135*60000||decision.capturedAtMs>this.now())
-   throw Error("V4_DECISION_SNAPSHOT_STALE");
+   return {status:"observing",reason:"V4_MARKET_DATA_UNAVAILABLE:V4_DECISION_SNAPSHOT_STALE",
+    eventTs:this.now(),candidateCount:0,orderEnabled:false};
   if(!decision.candidates.length)
    return {status:"observing",reason:"NO_NATIVE_ENTRY_CANDIDATES",eventTs:this.now(),candidateCount:0,orderEnabled:false};
   return await this.tryCandidate(decision,dispatcher,cycle);

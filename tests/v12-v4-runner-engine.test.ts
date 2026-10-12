@@ -46,6 +46,71 @@ test("runner takes real shared lock and signed account mark, then stays non-orde
   assert.equal(store.read().state.journal.length,2);
  }finally{rmSync(dir,{recursive:true,force:true});}
 });
+test("market-data prefetch failure stays fail-closed without terminating the V4 tick loop",async()=>{
+ const dir=mkdtempSync(join(tmpdir(),"v4-prefetch-failure-"));let time=Date.now();let mutationCalls=0,fetchAttempts=0;
+ try{
+  const store=new V4ExecutionStore(join(dir,"orders.json"),sha);
+  store.initialize({equityUsd:1000,foreign:[],holdProtected:false});
+  const lock=new FileAccountOrderLock(join(dir,"account.lock"),120000,join(dir,"pending.json"));
+  const client:any={getBalances:async()=>[{asset:"USDT",balance:"1000",availableBalance:"1000"}],
+   getPositions:async()=>[],getOpenOrders:async()=>[],getUserTrades:async()=>[],getIncomeHistory:async()=>[]};
+  const engine=new V4RunnerEngine({store,accountLock:lock,adapter:{} as any,client,
+   pendingRegistryPath:join(dir,"pending.json"),fetchPeers:async()=>peers(time),
+   fetchExitFeed:async()=>({closed:[]}),
+   fetchDecision:async()=>{fetchAttempts++;throw Error("V4_H1_WARMUP_INSUFFICIENT:APTUSDT")},
+   assertAuthority:async()=>{mutationCalls++;throw Error("AUTHORITY_FORBIDDEN")},
+   assertEntrySafety:async()=>{},assertSourceParity:async()=>{},
+   requiredResidentStop:async()=>{throw Error("STOP_NOT_CERTIFIED")},
+   quantityNormalizer:{} as any,referencePrice:async()=>{throw Error("NO_PRICE")},
+   minimumVenueOrderNotional:async()=>{throw Error("NO_FILTER")},now:()=>time,
+  });
+  const prepared=await engine.prepareFlatMarketDecision();
+  assert.equal(prepared?.kind,"FAILED");
+  const result=await engine.tick(prepared);
+  assert.equal(result.status,"observing");
+  assert.equal(result.reason,"V4_MARKET_DATA_UNAVAILABLE:V4_H1_WARMUP_INSUFFICIENT:APTUSDT");
+  assert.equal(result.orderEnabled,false);
+  assert.equal(mutationCalls,0);
+  assert.equal(store.read().state.journal.length,1,"signed account reconciliation completes before fail-closed observation");
+  time+=60_000;
+  const retryPrepared=await engine.prepareFlatMarketDecision();
+  const retry=await engine.tick(retryPrepared);
+  assert.equal(retry.status,"observing","a later failed source read remains a tick result, not a process-fatal throw");
+  assert.equal(retry.orderEnabled,false);
+  assert.equal(fetchAttempts,2);
+  assert.equal(mutationCalls,0);
+  assert.equal(store.read().state.journal.length,2);
+ }finally{rmSync(dir,{recursive:true,force:true});}
+});
+test("candidate source errors and stale data remain fail-closed observations",async()=>{
+ const now=Date.now(),dir=mkdtempSync(join(tmpdir(),"v4-invalid-decision-"));
+ try{
+  for(const scenario of [
+   {name:"partial source errors",capturedAtMs:now,errors:["APTUSDT:INVALID_SIGNED_H1_CANDLE"],reason:"V4_MARKET_DATA_UNAVAILABLE:APTUSDT:INVALID_SIGNED_H1_CANDLE"},
+   {name:"stale snapshot",capturedAtMs:now-136*60_000,errors:[],reason:"V4_MARKET_DATA_UNAVAILABLE:V4_DECISION_SNAPSHOT_STALE"},
+  ]){
+   const caseDir=join(dir,scenario.name.replaceAll(" ","-"));const store=new V4ExecutionStore(join(caseDir,"orders.json"),sha);
+   store.initialize({equityUsd:1000,foreign:[],holdProtected:false});
+   const lock=new FileAccountOrderLock(join(caseDir,"account.lock"),120000,join(caseDir,"pending.json"));
+   const client:any={getBalances:async()=>[{asset:"USDT",balance:"1000",availableBalance:"1000"}],
+    getPositions:async()=>[],getOpenOrders:async()=>[],getUserTrades:async()=>[],getIncomeHistory:async()=>[]};
+   const decision={schema:"v12-v4-live-decision/v1" as const,policyId:"V2_M150_D05_CORE_NATIVE" as const,
+    decisionTs:now-5000,capturedAtMs:scenario.capturedAtMs,sourceFingerprint:"test",candidateCount:0,
+    filteredCount:0,sourceCount:0,nativeCoreEvents:[],entryAtrByCandidate:{},errors:scenario.errors,
+    candidates:[],filtered:[],orderEnabled:false as const,realOrderEnabledV4:0 as const,tradingMutation:0 as const};
+   const engine=new V4RunnerEngine({store,accountLock:lock,adapter:{} as any,client,
+    pendingRegistryPath:join(caseDir,"pending.json"),fetchPeers:async()=>peers(now),fetchExitFeed:async()=>({closed:[]}),
+    fetchDecision:async()=>decision,assertAuthority:async()=>{throw Error("AUTHORITY_FORBIDDEN")},
+    assertEntrySafety:async()=>{},assertSourceParity:async()=>{},requiredResidentStop:async()=>{throw Error("STOP_NOT_CERTIFIED")},
+    quantityNormalizer:{} as any,referencePrice:async()=>{throw Error("NO_PRICE")},minimumVenueOrderNotional:async()=>{throw Error("NO_FILTER")},now:()=>now});
+   const result=await engine.tick();
+   assert.equal(result.status,"observing",scenario.name);
+   assert.equal(result.reason,scenario.reason,scenario.name);
+   assert.equal(result.orderEnabled,false,scenario.name);
+   assert.equal(store.read().state.journal.length,1,scenario.name);
+  }
+ }finally{rmSync(dir,{recursive:true,force:true});}
+});
 test("mock Aster dispatch reaches signed entry fill, STOP, and shared reservation retirement",async()=>{
  const fixture=(await import("./fixtures/v12-v4-native-route-20261009.json")).default;
  const {adaptProductionCandidates}=await import("../lib/v12-v4-production-features");

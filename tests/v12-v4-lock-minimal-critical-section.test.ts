@@ -78,7 +78,7 @@ test("old pre-lock market data is rejected after H2 boundary, not traded or reus
   assert.equal(f.reads(),1);
  }finally{f.cleanup();}
 });
-test("failed market prefetch cannot skip signed account reconciliation or authorize an order",async()=>{
+test("failed market prefetch stays fail-closed after signed account reconciliation without terminating the runner",async()=>{
  const initial=Math.floor(Date.now()/H2)*H2+10000;
  let marketReads=0;
  const f=fixture(initial,async()=>{marketReads++;throw Error("MARKET_NETWORK_FAILURE");});
@@ -86,7 +86,10 @@ test("failed market prefetch cannot skip signed account reconciliation or author
   const prepared=await f.engine.prepareFlatMarketDecision();
   assert.equal(prepared?.kind,"FAILED");
   assert.equal(f.reads(),0);
-  await assert.rejects(f.engine.tick(prepared),/V4_MARKET_PREFETCH_FAILED_AFTER_PROTECTION_RECONCILIATION/);
+  const result=await f.engine.tick(prepared);
+  assert.equal(result.status,"observing");
+  assert.equal(result.reason,"V4_MARKET_DATA_UNAVAILABLE:MARKET_NETWORK_FAILURE");
+  assert.equal(result.orderEnabled,false);
   assert.equal(marketReads,1);
   assert.equal(f.reads(),1,"account mark and protection reconciliation precede market failure");
  }finally{f.cleanup();}
