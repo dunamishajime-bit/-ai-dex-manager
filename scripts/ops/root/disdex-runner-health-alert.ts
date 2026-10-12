@@ -97,7 +97,10 @@ async function readCurrentReleaseSha() {
 }
 
 function resolveServiceUnit(runner: typeof runners[number], currentReleaseSha: string | undefined) {
-  const resolved = resolveRunnerServiceUnit(runner.id, currentReleaseSha, process.env[runner.unitEnv]);
+  const expectedShaOverride = runner.id === "V12"
+    ? process.env.DISDEX_ALERT_V12_EXPECTED_SHA
+    : undefined;
+  const resolved = resolveRunnerServiceUnit(runner.id, currentReleaseSha, process.env[runner.unitEnv], expectedShaOverride);
   if (!resolved.unit) return resolved;
   if (!unitExists(resolved.unit)) {
     return {
@@ -107,6 +110,13 @@ function resolveServiceUnit(runner: typeof runners[number], currentReleaseSha: s
     } as const;
   }
   return resolved;
+}
+
+function runnerLabel(runner: typeof runners[number]) {
+  if (runner.id === "V12" && process.env.DISDEX_ALERT_V12_SERVICE_UNIT?.trim().startsWith("disdex-v12-v4@")) {
+    return "V12 V4";
+  }
+  return runner.label;
 }
 
 function serviceStatus(unit: string, conflict = false): { status: RunnerHealthStatus; detail: string } {
@@ -218,7 +228,7 @@ async function main() {
     state.runners[runner.id] = markRunnerAlertAttempt(observation.record, observedAt);
     await saveState(state);
     const mail = formatRunnerHealthEmail({
-      runnerLabel: runner.label,
+      runnerLabel: runnerLabel(runner),
       service: observed.service,
       status: observed.status,
       previousStatus: observation.previousNotifiedStatus,

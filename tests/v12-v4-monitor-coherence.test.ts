@@ -69,3 +69,20 @@ test("health alert accepts only exact-SHA V4 override for V12",()=>{
  assert.equal(bad.failClosed,true);
  assert.match(alert,/process\.env\[runner\.unitEnv\]/);
 });
+
+test("V12 health alert independently pins full-live SHA while peers remain on current SHA",()=>{
+ const current="ce1edeead8d0f9e5d88e829d415057117502a335";
+ const v4="80b3a6211f168691a85da511bedaa0c7df664f64";
+ const ok=resolveRunnerServiceUnit("V12",current,`disdex-v12-v4@${v4}.service`,v4);
+ const peer=resolveRunnerServiceUnit("PENGU_V8",current,`disdex-pengu-dual-ls-v2@${current}.service`);
+ const bad=resolveRunnerServiceUnit("V12",current,`disdex-v12-v4@${"b".repeat(40)}.service`,v4);
+ assert.equal(ok.failClosed,false);
+ assert.equal(ok.unit,`disdex-v12-v4@${v4}.service`);
+ assert.equal(ok.releaseSha,v4);
+ assert.equal(peer.failClosed,false);
+ assert.equal(peer.releaseSha,current);
+ assert.equal(bad.failClosed,true);
+ assert.match(alert,/DISDEX_ALERT_V12_EXPECTED_SHA/);
+ assert.match(alert,/function runnerLabel/);
+ assert.match(wiring,/DISDEX_ALERT_V12_EXPECTED_SHA=\$\{DEPLOYED_SHA\}/);
+});

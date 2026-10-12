@@ -11,6 +11,8 @@ on:
       - "deploy/systemd/disdex-v12-v4@.service"
       - "scripts/ops/root/disdex-current-runtime-wiring"
       - "scripts/ops/root/disdex-runner-watchdog-current.mjs"
+      - "scripts/ops/root/disdex-runner-health-alert.ts"
+      - "lib/server/runner-service-resolution.ts"
       - "apps/production-ui/**"
       - "scripts/v12-v4-production-*.ts"
   workflow_dispatch:

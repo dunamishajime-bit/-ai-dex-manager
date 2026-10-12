@@ -34,14 +34,39 @@ export function expectedRunnerServiceUnit(runnerId: AlertRunnerId, releaseSha: s
   return `${SERVICE_PREFIX[runnerId]}${normalizedSha}.service`;
 }
 
-export function resolveRunnerServiceUnit(runnerId: AlertRunnerId, releaseSha: string | undefined, explicitUnit?: string) {
-  const normalizedSha = normalizeCurrentReleaseSha(releaseSha);
-  if (!normalizedSha) {
+export function resolveRunnerServiceUnit(
+  runnerId: AlertRunnerId,
+  releaseSha: string | undefined,
+  explicitUnit?: string,
+  expectedShaOverride?: string,
+) {
+  const normalizedCurrentSha = normalizeCurrentReleaseSha(releaseSha);
+  if (!normalizedCurrentSha) {
     return {
       unit: "",
       releaseSha: undefined,
       failClosed: true,
       detail: "current release SHAを確認できないためFail Closed",
+    } as const;
+  }
+  const overrideSupplied = expectedShaOverride !== undefined;
+  const normalizedSha = overrideSupplied
+    ? normalizeCurrentReleaseSha(expectedShaOverride)
+    : normalizedCurrentSha;
+  if (!normalizedSha) {
+    return {
+      unit: explicitUnit?.trim() || "",
+      releaseSha: undefined,
+      failClosed: true,
+      detail: `runner expected SHAが不正なためFail Closed (current=${normalizedCurrentSha})`,
+    } as const;
+  }
+  if (overrideSupplied && !explicitUnit?.trim()) {
+    return {
+      unit: "",
+      releaseSha: normalizedSha,
+      failClosed: true,
+      detail: `runner expected SHA ${normalizedSha} に対する明示unitが未設定のためFail Closed`,
     } as const;
   }
   const expected = `${SERVICE_PREFIX[runnerId]}${normalizedSha}.service`;
@@ -55,14 +80,16 @@ export function resolveRunnerServiceUnit(runnerId: AlertRunnerId, releaseSha: st
         unit,
         releaseSha: normalizedSha,
         failClosed: true,
-        detail: `明示unitがcurrent release ${normalizedSha} と一致しないためFail Closed`,
+        detail: `明示unitがrunner expected SHA ${normalizedSha} と一致しないためFail Closed`,
       } as const;
     }
     return {
       unit,
       releaseSha: normalizedSha,
       failClosed: false,
-      detail: `current release ${normalizedSha} の明示unitを使用`,
+      detail: overrideSupplied
+        ? `runner expected release ${normalizedSha} の明示unitを使用 (current=${normalizedCurrentSha})`
+        : `current release ${normalizedSha} の明示unitを使用`,
     } as const;
   }
   return {

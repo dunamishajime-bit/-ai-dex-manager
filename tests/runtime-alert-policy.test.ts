@@ -56,6 +56,34 @@ test("missing or invalid current release SHA fails closed without choosing a his
   assert.match(resolved.detail, /Fail Closed/);
 });
 
+test("V12 health alert can pin a V4 unit independently from peer current SHA", () => {
+  const peerSha = "ce1edeead8d0f9e5d88e829d415057117502a335";
+  const v4Sha = "80b3a6211f168691a85da511bedaa0c7df664f64";
+  const resolved = resolveRunnerServiceUnit("V12", peerSha, `disdex-v12-v4@${v4Sha}.service`, v4Sha);
+  assert.equal(resolved.failClosed, false);
+  assert.equal(resolved.unit, `disdex-v12-v4@${v4Sha}.service`);
+  assert.equal(resolved.releaseSha, v4Sha);
+});
+
+test("V12 independent SHA pin fails closed when its unit or SHA is malformed", () => {
+  const peerSha = "ce1edeead8d0f9e5d88e829d415057117502a335";
+  const v4Sha = "80b3a6211f168691a85da511bedaa0c7df664f64";
+  const mismatch = resolveRunnerServiceUnit("V12", peerSha, `disdex-v12-v4@${"b".repeat(40)}.service`, v4Sha);
+  const invalid = resolveRunnerServiceUnit("V12", peerSha, `disdex-v12-v4@${v4Sha}.service`, "not-a-sha");
+  assert.equal(mismatch.failClosed, true);
+  assert.equal(invalid.failClosed, true);
+});
+
+test("per-runner SHA override requires an explicit exact runner unit", () => {
+  const currentSha = "ce1edeead8d0f9e5d88e829d415057117502a335";
+  const v4Sha = "80b3a6211f168691a85da511bedaa0c7df664f64";
+  const missingUnit = resolveRunnerServiceUnit("V12", currentSha, undefined, v4Sha);
+  const peerOverride = resolveRunnerServiceUnit("PENGU_V8", currentSha, `disdex-pengu-dual-ls-v2@${v4Sha}.service`, v4Sha);
+  assert.equal(missingUnit.failClosed, true);
+  assert.equal(peerOverride.failClosed, false);
+  assert.equal(peerOverride.unit, `disdex-pengu-dual-ls-v2@${v4Sha}.service`);
+});
+
 
 test("health alert source covers every current crypto runner including HYPE and Idle", async () => {
   const { readFile } = await import("node:fs/promises");
