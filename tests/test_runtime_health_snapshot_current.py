@@ -61,6 +61,16 @@ class DependencyLivenessHealthTest(unittest.TestCase):
         watchdog = (ROOT / "scripts" / "ops" / "root" / "disdex-runner-watchdog-current.mjs").read_text(encoding="utf-8")
         self.assertIn("value.healthReason || value.reason", watchdog)
 
+    def test_snapshot_pins_mixed_sha_safety_daemons_to_peer_release_roots(self):
+        source = SNAPSHOT.read_text(encoding="utf-8")
+        self.assertIn("DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_RELEASE_ROOT", source)
+        self.assertIn("DISDEX_HEALTH_SNAPSHOT_MARGIN_RELEASE_ROOT", source)
+        self.assertIn("SHARED_RISK_RELEASE_ROOT", source)
+        self.assertIn("MARGIN_RELEASE_ROOT", source)
+        wiring = WIRING.read_text(encoding="utf-8")
+        self.assertIn("DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_RELEASE_ROOT=${CURRENT_RELEASE}", wiring)
+        self.assertIn("DISDEX_HEALTH_SNAPSHOT_MARGIN_RELEASE_ROOT=${CURRENT_RELEASE}", wiring)
+
     def test_wiring_makes_safety_daemons_self_restarting_and_visible(self):
         wiring = WIRING.read_text(encoding="utf-8")
         self.assertIn("DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_STATE_PATH=/var/lib/disdex/shared/crypto-daily-risk.json", wiring)

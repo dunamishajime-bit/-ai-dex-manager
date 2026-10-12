@@ -12,7 +12,9 @@ const KILL_SWITCH_PATH = String(process.env.DISDEX_HEALTH_SNAPSHOT_KILL_SWITCH_P
 const MARGIN_STATE_PATH = String(process.env.DISDEX_HEALTH_SNAPSHOT_MARGIN_STATE_PATH || "/var/lib/disdex/shared/margin-risk/guard-live.json").trim();
 const SHARED_RISK_STATE_PATH = String(process.env.DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_STATE_PATH || "/var/lib/disdex/shared/crypto-daily-risk.json").trim();
 const SHARED_RISK_UNIT = String(process.env.DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_SERVICE_UNIT || `disdex-shared-crypto-risk@${DEFAULT_EXPECTED_SHA}.service`).trim();
+const SHARED_RISK_RELEASE_ROOT = String(process.env.DISDEX_HEALTH_SNAPSHOT_SHARED_RISK_RELEASE_ROOT || `/home/deploy/disdex-trading/releases/${DEFAULT_EXPECTED_SHA}`).trim();
 const MARGIN_UNIT = String(process.env.DISDEX_HEALTH_SNAPSHOT_MARGIN_SERVICE_UNIT || `disdex-v12-v52-margin-guard@${DEFAULT_EXPECTED_SHA}.service`).trim();
+const MARGIN_RELEASE_ROOT = String(process.env.DISDEX_HEALTH_SNAPSHOT_MARGIN_RELEASE_ROOT || `/home/deploy/disdex-trading/releases/${DEFAULT_EXPECTED_SHA}`).trim();
 const MARGIN_FRESHNESS_GRACE_MS = 120_000;
 const SHARED_RISK_FRESHNESS_GRACE_MS = 120_000;
 
@@ -398,9 +400,9 @@ async function main() {
     const now = Date.now();
     const killReason = await sharedKillSwitch();
     const sharedRisk = await sharedRiskStatus(now);
-    const sharedRiskService = await safetyServiceStatus("Shared Risk", SHARED_RISK_UNIT, DEFAULT_RELEASE_ROOT, "scripts/disdex-shared-crypto-risk-writer.ts");
+    const sharedRiskService = await safetyServiceStatus("Shared Risk", SHARED_RISK_UNIT, SHARED_RISK_RELEASE_ROOT, "scripts/disdex-shared-crypto-risk-writer.ts");
     const marginGuard = await marginGuardStatus(now);
-    const marginGuardService = await safetyServiceStatus("Margin Guard", MARGIN_UNIT, DEFAULT_RELEASE_ROOT, "scripts/disdex_v96_v52_margin_guard_runtime.py");
+    const marginGuardService = await safetyServiceStatus("Margin Guard", MARGIN_UNIT, MARGIN_RELEASE_ROOT, "scripts/disdex_v96_v52_margin_guard_runtime.py");
     const globalReasons = [killReason, sharedRisk.reason, sharedRiskService.reason, marginGuard.reason, marginGuardService.reason].filter(Boolean);
     const globalBlockReason = globalReasons.join("; ");
     const results = [];
