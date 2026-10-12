@@ -24,6 +24,7 @@ export const RANKING_SOUNDS:readonly RankingSound[]=[
 export const DEFAULT_RANKING_SOUND_SELECTIONS:RankingSoundSelections={rise:'rise-ascend',fall:'fall-velvet',top3:'top3-royal'};
 export function rankingSoundsForRole(role:RankingSoundRole){return RANKING_SOUNDS.filter(item=>item.role===role);}
 export function chooseRankingSound(id:unknown,role:RankingSoundRole='rise'){return RANKING_SOUNDS.find(item=>item.id===id&&item.role===role)??RANKING_SOUNDS.find(item=>item.id===DEFAULT_RANKING_SOUND_SELECTIONS[role])!;}
+export function canReuseRankingAudioContext(context:{state:string}|null|undefined){return !!context&&context.state!=='closed';}
 export function loadRankingSoundSelections(input:unknown,legacy:unknown):RankingSoundSelections{
  const saved=input&&typeof input==='object'?input as Record<string,unknown>:{};
  return {rise:chooseRankingSound(saved.rise??legacy,'rise').id,fall:chooseRankingSound(saved.fall,'fall').id,top3:chooseRankingSound(saved.top3,'top3').id};

@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises';
-import { REALTIME_RANKING_REFRESH_MS,fetObservationExpiry,freshTimestamp,gateScore,rankRows,realtimeRankingCacheExpiry,type Gate,type RankRow } from '@/lib/realtime-ranking';
+import { REALTIME_RANKING_REFRESH_MS,expireRealtimeRankingRows,fetObservationExpiry,freshTimestamp,gateScore,rankRows,realtimeRankingCacheExpiry,type Gate,type RankRow } from '@/lib/realtime-ranking';
 import { loadCurrentProductionRuntime,extractObjectNumber } from './current-production-runtime';
 import { loadDecisionStatus } from './disdex-decision-status';
 import { loadQuality102SymbolObservability } from './quality102-symbol-observability';
@@ -20,10 +20,13 @@ function make(symbol:string,logic:string,side:string,gates:Gate[],fresh:boolean,
 const SOURCES=['V12','Q102','PENGU','FET','HYPE','Idle','V52'];
 async function observe(){
  const now=Date.now(),current=await loadCurrentProductionRuntime(),rows:RankRow[]=[],errors:Record<string,string>={};
+ const sourceExpiries:number[]=[],sourceExpiryByLogic:Record<string,number>={};
+ const constrainFreshness=(logic:string,at:unknown,maxAge:number,invalidatesScore=true)=>{const timestamp=Number(at),expiry=timestamp+maxAge;if(Number.isFinite(timestamp)&&timestamp>0){sourceExpiries.push(expiry);if(invalidatesScore)sourceExpiryByLogic[logic]=Math.min(sourceExpiryByLogic[logic]??Infinity,expiry);}};
  const jobs=[
   async()=>{
    const [d,s,source]=await Promise.all([json(process.env.V12_DECISION_SNAPSHOT_PATH||'/var/lib/disdex/v12-x1-all/decision-snapshot.json'),json(process.env.V12_X1_ALL_STATE_PATH||'/var/lib/disdex/v12-x1-all/runner.json'),readFile(ROOT+'/config/v12X1AllRuntime.ts','utf8')]);
    const at=num(d.observedAt)??num(d.referenceTs)??0,fresh=s.runtimeCommitSha===current.releaseSha&&s.mode==='LIVE'&&now-Number(s.updatedAt)>=-60000&&now-Number(s.updatedAt)<=3*3600000&&now-at>=-60000&&now-at<=3*3600000;
+   constrainFreshness('V12',s.updatedAt,3*3600000);constrainFreshness('V12',at,3*3600000);
    const vol=extractObjectNumber(source,'minimumVolumeRatio'),mom=extractObjectNumber(source,'minimumMomentumPct');
    for(const r of list(d.candidates)){
     const side=text(r.side),gates=[minimum('volume','出来高比率',r.volumeRatio,vol),minimum('momentum',side==='SHORT'?'下落モメンタム':'上昇モメンタム',side==='SHORT'&&num(r.momentum)!==undefined?-Number(r.momentum):r.momentum,mom)];
@@ -35,6 +38,7 @@ async function observe(){
   },
   async()=>{
    const d=await loadQuality102SymbolObservability(),rankAt=Date.parse(d.rankingCapturedAt||d.capturedAt),rankingFresh=freshTimestamp(rankAt,now,2*3600000)&&freshTimestamp(Date.parse(d.capturedAt),now,2*3600000);
+   constrainFreshness('Q102',rankAt,2*3600000);constrainFreshness('Q102',Date.parse(d.capturedAt),2*3600000);
    for(const r of d.items){
     const models=list(r.diagnostics?.s34),best=models.sort((a,b)=>(num(b.rankingScore)??0)-(num(a.rankingScore)??0))[0],highVol=obj(r.diagnostics?.highVol);
     const gates:Gate[]=list(best?.gates).map(g=>({key:text(g.name),label:text(g.name),state:typeof g.pass==='boolean'?g.pass?'OK':'NO':'UNKNOWN',actual:typeof g.value==='string'||typeof g.value==='number'?g.value:undefined,required:typeof g.threshold==='string'||typeof g.threshold==='number'?g.threshold:undefined,detail:text(g.reason),kind:text(g.name).includes('GRID')?'execution':'signal'}));
@@ -52,6 +56,8 @@ async function observe(){
   },
   async()=>{
    const d=await loadPenguRuntimeObservability(),s=d.latestSignal,signalAt=s?.referenceTs??0,lineage=current.runtimeLineage.units.pengu,runtimeVerified=d.releaseShaVerified===true||(d.releaseSha===undefined&&lineage.matchesCurrent&&freshTimestamp(lineage.updatedAt,now,3*3600000)),fresh=d.status==='LIVE'&&runtimeVerified&&freshTimestamp(d.updatedAt,now,3*3600000)&&freshTimestamp(signalAt,now,2*3600000)&&freshTimestamp(s?.diagnostics.latestCompletedPenguTs,now,2*3600000)&&s?.diagnostics.latestCompletedPenguTs===s?.diagnostics.latestCompletedBtcTs;
+   constrainFreshness('PENGU',d.updatedAt,3*3600000);constrainFreshness('PENGU',signalAt,2*3600000);constrainFreshness('PENGU',s?.diagnostics.latestCompletedPenguTs,2*3600000);
+   if(d.releaseSha===undefined)constrainFreshness('PENGU',lineage.updatedAt,3*3600000);
    for(const side of ['LONG','SHORT']){
     const eligible=side==='LONG'?(s?.side===1?true:s?.decision.longEligible):(s?.side===-1?true:s?.decision.shortEligible);
     const gates=[flag('direction',side+'専用ロジック',eligible,s?.decision.reason||d.reason)];
@@ -62,9 +68,10 @@ async function observe(){
     rows.push(make('PENGUUSDT','PENGU',side,gates,fresh,signalAt,s?.reason||d.reason));
    }
   },
-  async()=>{const d=await loadFetGates();rows.push(make(d.symbol,'FET',d.side,d.gates,d.fresh,d.checkedAt,d.reason));},
+  async()=>{const d=await loadFetGates(),expiry=fetObservationExpiry(d.checkedAt,110000);constrainFreshness('FET',d.checkedAt,110000);sourceExpiries.push(expiry);sourceExpiryByLogic.FET=Math.min(sourceExpiryByLogic.FET??Infinity,expiry);rows.push(make(d.symbol,'FET',d.side,d.gates,d.fresh,d.checkedAt,d.reason));},
   async()=>{
    const d=await loadHypeRuntimeObservability(),s=d.sleeves.HYPE_LONG;
+   constrainFreshness('HYPE',s.stateUpdatedAt,180000);constrainFreshness('HYPE',s.publicReferenceTs,20*60000);
    const gates:Gate[]=s.gates.map(g=>({key:g.key,label:g.label,state:g.status==='PASS'?'OK':g.status==='BLOCKED'?'NO':'UNKNOWN',actual:g.actual,required:g.threshold,detail:g.reason,kind:g.source==='PUBLIC_CANDLES'?'signal':'execution'}));
    gates.push(flag('position','新規保有枠',!s.position&&!s.pending,s.position?'HYPE保有中':s.pending?'保留注文あり':'保有なし','execution'));
    rows.push(make('HYPEUSDT','HYPE','LONG',gates,s.status==='LIVE'&&s.stateSha===current.releaseSha&&s.gates.some(g=>g.key==='DATA_FRESHNESS'&&g.status==='PASS'),s.publicReferenceTs||0,s.note));
@@ -72,7 +79,9 @@ async function observe(){
   async()=>{
    const d=await json(process.env.DISDEX_IDLE_PRIORITY_DECISION_DETAILS_PATH||'/var/lib/disdex/idle-priority/decision-details.json');
    const at=num(d.updatedAt)??0,fresh=d.runtimeSha===current.releaseSha&&now-at>=-60000&&now-at<=2*3600000;
-   const [state,residual]=await Promise.all([json('/var/lib/disdex/idle-priority/state.json').catch(()=>({})),json('/var/lib/disdex/idle-priority/residual-long-state.json').catch(()=>({}))]);
+   const [state,residual]=await Promise.all([json('/var/lib/disdex/idle-priority/state.json').catch(()=>({} as Obj)),json('/var/lib/disdex/idle-priority/residual-long-state.json').catch(()=>({} as Obj))]);
+   constrainFreshness('Idle Short',at,2*3600000);constrainFreshness('Idle Long',at,2*3600000);
+   constrainFreshness('Idle Short',state.updatedAt,2*3600000,false);constrainFreshness('Idle Long',residual.updatedAt,2*3600000,false);
    for(const r of [...list(d.symbols),...list(d.residual)]){
     const isLong=!!r.decision,decision=obj(r.decision||r.routeDecision),generic=obj(r.generic),gates:Gate[]=[];
     if(!isLong)gates.push(flag('generic','汎用候補の成立',generic.accepted,text(generic.reason)));
@@ -95,16 +104,20 @@ async function observe(){
  const results=await Promise.allSettled(jobs.map(job=>job()));
  results.forEach((result,i)=>{if(result.status==='rejected'){errors[SOURCES[i]]='観測取得失敗';rows.push(make('—',SOURCES[i],'WAIT',[flag('source','観測接続',undefined,'取得不能')],false,now,'観測取得失敗'));}});
  const [kill,risk]=await Promise.all([json(process.env.DISDEX_SHARED_KILL_SWITCH_PATH||'/var/lib/disdex/shared/kill-switch.json').catch(()=>null),json(process.env.DISDEX_SHARED_CRYPTO_DAILY_RISK_PATH||'/var/lib/disdex/shared/crypto-daily-risk.json').catch(()=>null)]);
+ constrainFreshness('Shared Risk',risk?.updatedAt,10*60000,false);
  for(const row of rows)if(row.logic!=='V52'&&row.logic!=='FET'){
   row.gates.push(flag('shared-kill','共有Kill Switch',typeof kill?.active==='boolean'?!kill.active:undefined,kill?.active?'共有停止中':'共有停止状態','execution'));
   const riskFresh=risk?.sourceComplete===true&&risk?.utcDay===new Date(now).toISOString().slice(0,10)&&now-Number(risk.updatedAt)>=-60000&&now-Number(risk.updatedAt)<10*60000;
   row.gates.push(flag('shared-risk','共有日次損失ガード',riskFresh&&typeof risk?.tripped==='boolean'?!risk.tripped:undefined,risk?.tripped?'損失制限で停止':'当日の完全な共有状態を照合','execution'));
  }
- return {ok:true,readOnly:true,tradingMutation:0,checkedAt:now,refreshSeconds:REALTIME_RANKING_REFRESH_MS/1000,runtimeSha:current.releaseSha,rows:rankRows(rows),errors,metric:'確認済み発注制約のない候補を優先し、Signal Gate充足度で順位付け（ロジックごとに条件数は異なります）。発火確率・期待利益ではありません。資金など未確認の実行条件は別途Runner確認待ち。'};
+ const checkedAt=Date.now(),freshRows=expireRealtimeRankingRows(rows,checkedAt,sourceExpiryByLogic);
+ const snapshot={ok:true,readOnly:true,tradingMutation:0,checkedAt:now,refreshSeconds:REALTIME_RANKING_REFRESH_MS/1000,runtimeSha:current.releaseSha,rows:rankRows(freshRows),errors,metric:'確認済み発注制約のない候補を優先し、Signal Gate充足度で順位付け（ロジックごとに条件数は異なります）。発火確率・期待利益ではありません。資金など未確認の実行条件は別途Runner確認待ち。'};
+ return {snapshot,expires:realtimeRankingCacheExpiry(now,sourceExpiries,snapshot.rows)};
 }
-let cached:{expires:number;value:Awaited<ReturnType<typeof observe>>}|undefined,inflight:Promise<Awaited<ReturnType<typeof observe>>>|undefined;
+type Observation=Awaited<ReturnType<typeof observe>>;
+let cached:{expires:number;value:Observation['snapshot']}|undefined,inflight:Promise<Observation>|undefined;
 export async function loadRealtimeRanking(){
  if(cached&&cached.expires>Date.now())return cached.value;
- if(!inflight)inflight=observe().then(value=>{const sourceExpiries=value.rows.filter(r=>r.logic==='FET').map(r=>fetObservationExpiry(r.checkedAt,110000)),expires=realtimeRankingCacheExpiry(value.checkedAt,sourceExpiries);cached=expires>Date.now()?{value,expires}:undefined;return value;}).finally(()=>{inflight=undefined;});
- return inflight;
+ if(!inflight)inflight=observe().then(result=>{cached=result.expires>Date.now()?{value:result.snapshot,expires:result.expires}:undefined;return result;}).finally(()=>{inflight=undefined;});
+ return (await inflight).snapshot;
 }

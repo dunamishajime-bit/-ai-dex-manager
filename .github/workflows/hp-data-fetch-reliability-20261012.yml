@@ -27,6 +27,10 @@ jobs:
   ui:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
+    env:
+      EXPECTED_TRADING_SHA: ce1edeead8d0f9e5d88e829d415057117502a335
+      EXPECTED_OLD_UI_SHA: 44b82b42e47be44a2c8b9d564caf17b2b6d6ca10
+      EXPECTED_OLD_UI_PATH: /home/deploy/disdex-trading/ui-releases/ui-disdex-data-fetch-44b82b42e47b
 
     steps:
       - uses: actions/checkout@v4
@@ -37,6 +41,8 @@ jobs:
       - run: npm ci --no-audit --no-fund
       - name: Verify all HP TypeScript tests
         run: node --import tsx --test "tests/*.test.ts"
+      - name: Verify HP deployment workflow safety contract
+        run: node tests/hp-data-fetch-workflow-contract.test.mjs
       - name: Verify TypeScript
         run: npx tsc --noEmit
       - name: Clean production build
@@ -64,6 +70,7 @@ jobs:
           NODE
           test -s .next/standalone/server.js
       - name: Package exact-SHA Linux UI release
+        id: package-ui
         run: |
           set -Eeuo pipefail
           mkdir -p .deploy-ui/.next
@@ -71,13 +78,415 @@ jobs:
           cp -a .next/static .deploy-ui/.next/static
           if [ -d public ]; then cp -a public .deploy-ui/public; fi
           printf '%s\n' "$GITHUB_SHA" > .deploy-ui/.disdex-release-sha
+          python3 - <<'PY'
+          import pathlib
+          root=pathlib.Path('.deploy-ui').resolve()
+          for path in root.rglob('*'):
+              if path.is_symlink():
+                  target=path.resolve()
+                  if target!=root and root not in target.parents:
+                      raise SystemExit(f'UI_RELEASE_EXTERNAL_SYMLINK:{path}')
+          print('UI_RELEASE_SYMLINKS_INTERNAL=PASS')
+          PY
           archive="$RUNNER_TEMP/disdex-ui-$GITHUB_SHA.tar.gz"
           tar -C .deploy-ui -czf "$archive" .
           test -s "$archive"
-          sha256sum "$archive"
+          archive_sha256="$(sha256sum "$archive" | awk '{print $1}')"
+          echo "archive_sha256=$archive_sha256" >> "$GITHUB_OUTPUT"
+          echo "UI_ARCHIVE_SHA256=$archive_sha256"
+          echo "UI_ARCHIVE_BYTES=$(stat -c '%s' "$archive")"
       - uses: actions/upload-artifact@v4
         with:
           name: disdex-ui-${{ github.sha }}
           path: ${{ runner.temp }}/disdex-ui-${{ github.sha }}.tar.gz
           if-no-files-found: error
           retention-days: 90
+
+      - name: Initialize restricted root SSH for HP-only deployment
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          ROOT_KEY: ${{ secrets.DISDEX_VPS_ROOT_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.DISDEX_VPS_KNOWN_HOSTS }}
+        run: |
+          set -Eeuo pipefail
+          [[ -n "$SSH_HOST" && -n "$ROOT_KEY" && -n "$SSH_KNOWN_HOSTS" ]]
+          DISDEX_SSH_DIR="$RUNNER_TEMP/disdex-vps-ssh-$GITHUB_RUN_ID"
+          [[ ! -e "$DISDEX_SSH_DIR" && ! -L "$DISDEX_SSH_DIR" ]]
+          install -d -m 0700 "$DISDEX_SSH_DIR"
+          echo "DISDEX_SSH_DIR=$DISDEX_SSH_DIR" >> "$GITHUB_ENV"
+          export DISDEX_SSH_DIR
+          python3 - <<'PY'
+          import os,pathlib
+          p=pathlib.Path(os.environ['DISDEX_SSH_DIR'])
+          def norm(k): return os.environ[k].lstrip('\ufeff').replace('\r\n','\n').replace('\r','\n').strip()+'\n'
+          (p/'id_root').write_text(norm('ROOT_KEY'))
+          (p/'known_hosts').write_text(norm('SSH_KNOWN_HOSTS'))
+          PY
+          chmod 0600 "$DISDEX_SSH_DIR/id_root" "$DISDEX_SSH_DIR/known_hosts"
+          ssh-keygen -y -f "$DISDEX_SSH_DIR/id_root" >/dev/null
+
+      - name: Read-only VPS preflight for exact current Trading and UI lineage
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$DISDEX_SSH_DIR/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$DISDEX_SSH_DIR/known_hosts" \
+            -o ConnectTimeout=15 -p "$PORT" "root@$SSH_HOST" \
+            "EXPECTED_TRADING_SHA='$EXPECTED_TRADING_SHA' EXPECTED_OLD_UI_SHA='$EXPECTED_OLD_UI_SHA' EXPECTED_OLD_UI_PATH='$EXPECTED_OLD_UI_PATH' bash -s" <<'REMOTE'
+          set -Eeuo pipefail
+          [[ "$(id -un)" == root ]]
+          current=/home/deploy/disdex-trading/current
+          [[ "$(tr -d '[:space:]' < "$current/.disdex-release-sha")" == "$EXPECTED_TRADING_SHA" ]]
+          [[ "$(readlink -f "$current")" == "/home/deploy/disdex-trading/releases/$EXPECTED_TRADING_SHA" ]]
+          [[ "$(systemctl is-active ai-dex-manager-ui.service)" == active ]]
+          ui_wd="$(systemctl show ai-dex-manager-ui.service -p WorkingDirectory --value)"
+          [[ "$ui_wd" == "$EXPECTED_OLD_UI_PATH" && -d "$ui_wd" && ! -L "$ui_wd" ]]
+          [[ "$(tr -d '[:space:]' < "$ui_wd/.disdex-release-sha")" == "$EXPECTED_OLD_UI_SHA" ]]
+          ui_env="$(systemctl show ai-dex-manager-ui.service -p Environment --value)"
+          [[ " $ui_env " == *" DISDEX_UI_RELEASE_SHA=$EXPECTED_OLD_UI_SHA "* ]]
+          [[ "$(curl -sS --max-time 7 -o /dev/null -w '%{http_code}' http://127.0.0.1:3001/)" == 200 ]]
+          free_kb="$(df -Pk /home/deploy | awk 'NR==2 {print $4}')"
+          [[ "$free_kb" -ge 500000 ]] || { echo "HP_DEPLOY_DISK_TOO_LOW_KB=$free_kb"; exit 32; }
+          dropin_dir=/etc/systemd/system/ai-dex-manager-ui.service.d
+          prefix="$(printf '%224s' ' ' | tr ' ' z)"
+          dropin="$dropin_dir/${prefix}-rt-20261012.conf"
+          dropin_name="${dropin##*/}"
+          [[ "${#prefix}" == 224 && "${#dropin_name}" -lt 255 && ! -e "$dropin" && ! -e "$dropin.tmp" && ! -L "$dropin.tmp" ]]
+          mapfile -t old_dropins < <(systemctl show ai-dex-manager-ui.service -p DropInPaths --value | tr ' ' '\n')
+          for path in "${old_dropins[@]}"; do
+            [[ -z "$path" ]] && continue
+            [[ "$(basename "$path")" < "$(basename "$dropin")" ]] || { echo "LATER_UI_DROPIN_PRESENT=$path"; exit 33; }
+          done
+          echo "HP_PREFLIGHT=PASS"
+          echo "TRADING_SHA=$EXPECTED_TRADING_SHA"
+          echo "CURRENT_UI_SHA=$EXPECTED_OLD_UI_SHA"
+          echo "CURRENT_UI_PATH=$ui_wd"
+          echo "FREE_KB=$free_kb"
+          echo "TRADING_MUTATION=0"
+          REMOTE
+
+      - name: Transfer exact-SHA standalone UI artifact
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          archive="$RUNNER_TEMP/disdex-ui-$GITHUB_SHA.tar.gz"
+          scp -i "$DISDEX_SSH_DIR/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$DISDEX_SSH_DIR/known_hosts" \
+            -P "$PORT" "$archive" "root@$SSH_HOST:/tmp/disdex-ui-$GITHUB_RUN_ID.tar.gz"
+
+      - name: Install immutable UI release, switch only HP, and verify ranking data
+        shell: bash
+        env:
+          EXPECTED_ARCHIVE_SHA256: ${{ steps.package-ui.outputs.archive_sha256 }}
+          SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$DISDEX_SSH_DIR/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$DISDEX_SSH_DIR/known_hosts" \
+            -o ConnectTimeout=15 -p "$PORT" "root@$SSH_HOST" \
+            "EXPECTED_TRADING_SHA='$EXPECTED_TRADING_SHA' EXPECTED_OLD_UI_SHA='$EXPECTED_OLD_UI_SHA' EXPECTED_OLD_UI_PATH='$EXPECTED_OLD_UI_PATH' NEW_UI_SHA='$GITHUB_SHA' REQUEST_ID='$GITHUB_RUN_ID' EXPECTED_ARCHIVE_SHA256='$EXPECTED_ARCHIVE_SHA256' bash -s" <<'REMOTE'
+          set -Eeuo pipefail
+          umask 022
+          [[ "$NEW_UI_SHA" =~ ^[a-f0-9]{40}$ && "$REQUEST_ID" =~ ^[0-9]+$ ]]
+          [[ "$EXPECTED_ARCHIVE_SHA256" =~ ^[a-f0-9]{64}$ ]]
+          exec 9>/run/lock/disdex-hp-realtime-ranking-deploy.lock
+          flock -n 9 || { echo HP_DEPLOY_CONCURRENT_LOCK; exit 40; }
+          ui=ai-dex-manager-ui.service
+          trading=/home/deploy/disdex-trading/current
+          root=/home/deploy/disdex-trading/ui-releases
+          dropin_dir=/etc/systemd/system/ai-dex-manager-ui.service.d
+          prefix="$(printf '%224s' ' ' | tr ' ' z)"
+          dropin="$dropin_dir/${prefix}-rt-20261012.conf"
+          dropin_name="${dropin##*/}"
+          archive="/tmp/disdex-ui-$REQUEST_ID.tar.gz"
+          trap 'rm -f -- "$archive"' EXIT
+          short="${NEW_UI_SHA:0:12}"
+          release="$root/ui-realtime-ranking-$short"
+          stage="$root/.ui-realtime-ranking-$short.stage-$REQUEST_ID"
+          [[ "$(id -un)" == root && -f "$archive" && ! -e "$release" && ! -L "$release" && ! -e "$stage" ]]
+          printf '%s  %s\n' "$EXPECTED_ARCHIVE_SHA256" "$archive" | sha256sum -c -
+          [[ "$(tr -d '[:space:]' < "$trading/.disdex-release-sha")" == "$EXPECTED_TRADING_SHA" ]]
+          [[ "$(readlink -f "$trading")" == "/home/deploy/disdex-trading/releases/$EXPECTED_TRADING_SHA" ]]
+          [[ "$(systemctl is-active "$ui")" == active ]]
+          old_wd="$(systemctl show "$ui" -p WorkingDirectory --value)"
+          old_env="$(systemctl show "$ui" -p Environment --value)"
+          [[ "$old_wd" == "$EXPECTED_OLD_UI_PATH" && -d "$old_wd" && ! -L "$old_wd" ]]
+          [[ "$(tr -d '[:space:]' < "$old_wd/.disdex-release-sha")" == "$EXPECTED_OLD_UI_SHA" ]]
+          [[ " $old_env " == *" DISDEX_UI_RELEASE_SHA=$EXPECTED_OLD_UI_SHA "* ]]
+          [[ "${#prefix}" == 224 && "${#dropin_name}" -lt 255 && ! -e "$dropin" && ! -e "$dropin.tmp" && ! -L "$dropin.tmp" ]]
+          mapfile -t old_dropins < <(systemctl show "$ui" -p DropInPaths --value | tr ' ' '\n')
+          for path in "${old_dropins[@]}"; do
+            [[ -z "$path" ]] && continue
+            [[ "$(basename "$path")" < "$(basename "$dropin")" ]] || { echo "LATER_UI_DROPIN_PRESENT=$path"; exit 41; }
+          done
+          free_kb="$(df -Pk /home/deploy | awk 'NR==2 {print $4}')"
+          [[ "$free_kb" -ge 500000 ]]
+          [[ "$(systemctl show "$ui" -p MainPID --value)" =~ ^[1-9][0-9]*$ ]]
+          [[ "$(curl -sS --max-time 7 -o /dev/null -w '%{http_code}' http://127.0.0.1:3001/)" == 200 ]]
+          names=(disdex-v12-x1-all disdex-pengu-dual-ls-v2 disdex-quality102-causal-v1
+            disdex-v52-aster-only disdex-fet-brk48 disdex-hype-long disdex-idle-priority-short
+            disdex-shared-crypto-risk disdex-v12-v52-margin-guard)
+          snapshot_unit() {
+            local unit="$1" snapshot
+            local -a fields=()
+            snapshot="$(systemctl show "$unit" -p ActiveState -p SubState -p MainPID -p NRestarts --value)"
+            [[ -n "$snapshot" ]]
+            mapfile -t fields <<< "$snapshot"
+            [[ "${#fields[@]}" == 4 ]]
+            [[ "${fields[0]}" =~ ^(active|inactive|failed|activating|deactivating)$ ]]
+            [[ -n "${fields[1]}" && "${fields[2]}" =~ ^[0-9]+$ && "${fields[3]}" =~ ^[0-9]+$ ]]
+            printf '%s\n' "$snapshot"
+          }
+          before=()
+          for name in "${names[@]}"; do
+            unit="$name@$EXPECTED_TRADING_SHA.service"
+            if ! snapshot="$(snapshot_unit "$unit")"; then
+              echo "TRADING_OR_SUPPORT_UNIT_SNAPSHOT_UNAVAILABLE=$unit"
+              exit 43
+            fi
+            before+=("$snapshot")
+          done
+          cleanup_stage() {
+            rc=$?
+            trap - ERR
+            if [[ -d "$stage" && ! -L "$stage" && "$stage" == "$root/.ui-realtime-ranking-$short.stage-$REQUEST_ID" ]]; then
+              rm -rf -- "$stage"
+            fi
+            rm -f -- "$archive"
+            exit "$rc"
+          }
+          trap cleanup_stage ERR
+          install -d -o deploy -g deploy -m 0755 "$stage"
+          tar --no-same-owner -xzf "$archive" -C "$stage"
+          [[ -s "$stage/server.js" && -s "$stage/package.json" && -s "$stage/.disdex-release-sha" ]]
+          [[ "$(tr -d '[:space:]' < "$stage/.disdex-release-sha")" == "$NEW_UI_SHA" ]]
+          [[ -d "$stage/.next/static" && -d "$stage/public/audio/ranking-studio-v1" ]]
+          [[ "$(find "$stage/public/audio/ranking-studio-v1" -maxdepth 1 -type f -name '*.mp3' | wc -l)" -eq 15 ]]
+          chown -R deploy:deploy "$stage"
+          mv -- "$stage" "$release"
+          dropin_installed=false
+          rollback() {
+            local rc="${1:-$?}" restored_wd restored_env restored_sha
+            trap - ERR
+            set +e
+            rm -f -- "$dropin.tmp"
+            if [[ "$dropin_installed" == true && -f "$dropin" ]] && \
+               grep -Fxq "WorkingDirectory=$release" "$dropin" && \
+               grep -Fxq "Environment=DISDEX_UI_RELEASE_SHA=$NEW_UI_SHA" "$dropin"; then
+              rm -f -- "$dropin"
+              systemctl daemon-reload || rc=1
+              systemctl restart "$ui" || rc=1
+              restored_wd="$(systemctl show "$ui" -p WorkingDirectory --value 2>/dev/null)"
+              restored_env="$(systemctl show "$ui" -p Environment --value 2>/dev/null)"
+              restored_sha="$(tr -d '[:space:]' < "$EXPECTED_OLD_UI_PATH/.disdex-release-sha" 2>/dev/null)"
+              if [[ "$(systemctl is-active "$ui" 2>/dev/null)" == active && \
+                    "$restored_wd" == "$EXPECTED_OLD_UI_PATH" && \
+                    "$restored_sha" == "$EXPECTED_OLD_UI_SHA" && \
+                    " $restored_env " == *" DISDEX_UI_RELEASE_SHA=$EXPECTED_OLD_UI_SHA "* && \
+                    "$(tr -d '[:space:]' < "$trading/.disdex-release-sha" 2>/dev/null)" == "$EXPECTED_TRADING_SHA" && \
+                    "$(readlink -f "$trading" 2>/dev/null)" == "/home/deploy/disdex-trading/releases/$EXPECTED_TRADING_SHA" ]]; then
+                if python3 - <<'PY'
+          import urllib.request
+          base='http://127.0.0.1:3001'
+          headers={'Cookie':'disdex_auth=1','User-Agent':'DisDex-HP-Rollback-Check'}
+          for path in ('/','/realtime'):
+              request=urllib.request.Request(base+path,headers=headers)
+              with urllib.request.urlopen(request,timeout=20) as response:
+                  if response.status!=200: raise RuntimeError('RESTORED_PAGE_'+path)
+          PY
+                then
+                  echo "RESTORED_UI_HEALTH=PASS"
+                  echo "RESTORED_UI_WORKDIR=$restored_wd"
+                else
+                  echo "RESTORED_UI_HEALTH=FAIL"
+                  rc=1
+                fi
+              else
+                echo "RESTORED_UI_HEALTH=FAIL"
+                echo "RESTORED_UI_WORKDIR=$restored_wd"
+                rc=1
+              fi
+              echo "HP_UI_ROLLBACK_ATTEMPTED=TRUE"
+            else
+              echo "HP_UI_ROLLBACK_NOT_APPLIED=DROPIN_WAS_NOT_OWNED_BY_THIS_RUN"
+            fi
+            rm -f -- "$archive"
+            exit "$rc"
+          }
+          trap 'rollback "$?"' ERR
+          printf '[Service]\nWorkingDirectory=%s\nEnvironment=DISDEX_UI_RELEASE_SHA=%s\n' "$release" "$NEW_UI_SHA" > "$dropin.tmp"
+          chown root:root "$dropin.tmp"; chmod 0644 "$dropin.tmp"
+          mv -nT -- "$dropin.tmp" "$dropin"
+          [[ ! -e "$dropin.tmp" && -f "$dropin" ]]
+          dropin_installed=true
+          systemctl daemon-reload
+          systemctl restart "$ui"
+          ready=false
+          for _ in $(seq 1 35); do
+            if [[ "$(systemctl is-active "$ui" 2>/dev/null || true)" == active ]] && \
+               [[ "$(curl -sS --max-time 4 -o /dev/null -w '%{http_code}' http://127.0.0.1:3001/ 2>/dev/null || true)" == 200 ]]; then ready=true; break; fi
+            sleep 2
+          done
+          [[ "$ready" == true ]]
+          [[ "$(systemctl show "$ui" -p WorkingDirectory --value)" == "$release" ]]
+          new_env="$(systemctl show "$ui" -p Environment --value)"
+          [[ " $new_env " == *" DISDEX_UI_RELEASE_SHA=$NEW_UI_SHA "* ]]
+          [[ "$(tr -d '[:space:]' < "$release/.disdex-release-sha")" == "$NEW_UI_SHA" ]]
+          [[ "$(tr -d '[:space:]' < "$trading/.disdex-release-sha")" == "$EXPECTED_TRADING_SHA" ]]
+          python3 - "$EXPECTED_TRADING_SHA" "$NEW_UI_SHA" <<'PY'
+          import json,sys,urllib.request
+          trading,ui=sys.argv[1:]
+          base='http://127.0.0.1:3001'
+          headers={'Cookie':'disdex_auth=1','User-Agent':'DisDex-HP-Realtime-Ranking-Verified'}
+          for path in ('/','/realtime'):
+              request=urllib.request.Request(base+path,headers=headers)
+              with urllib.request.urlopen(request,timeout=20) as response:
+                  if response.status!=200: raise RuntimeError('HP_PAGE_'+path+'_'+str(response.status))
+          request=urllib.request.Request(base+'/api/system/realtime-ranking',headers=headers)
+          with urllib.request.urlopen(request,timeout=25) as response:
+              data=json.loads(response.read(2_000_000))
+          if data.get('ok') is not True or data.get('readOnly') is not True or data.get('tradingMutation')!=0:
+              raise RuntimeError('RANKING_API_READONLY_CONTRACT_FAILED')
+          if data.get('refreshSeconds')!=30 or data.get('runtimeSha')!=trading:
+              raise RuntimeError('RANKING_API_REFRESH_OR_TRADING_SHA_MISMATCH')
+          rows=data.get('rows')
+          if not isinstance(rows,list) or not rows: raise RuntimeError('RANKING_API_ROWS_MISSING')
+          zero=[row for row in rows if row.get('score')==0]
+          if any(row.get('rank') is not None for row in zero): raise RuntimeError('ZERO_SCORE_ROW_HAS_RANK')
+          positive=[row for row in rows if isinstance(row.get('score'),(int,float)) and row['score']>0]
+          if any(not isinstance(row.get('rank'),int) or row['rank']<1 for row in positive):
+              raise RuntimeError('POSITIVE_SCORE_ROW_MISSING_RANK')
+          manifest_request=urllib.request.Request(base+'/audio/ranking-studio-v1/manifest.json',headers=headers)
+          with urllib.request.urlopen(manifest_request,timeout=12) as response: sounds=json.loads(response.read(100_000))
+          if len(sounds)!=15: raise RuntimeError('RANKING_SOUND_MANIFEST_COUNT')
+          for sound in sounds:
+              request=urllib.request.Request(base+sound['src'],headers=headers)
+              with urllib.request.urlopen(request,timeout=12) as response:
+                  payload=response.read(100_000)
+                  if response.status!=200 or len(payload)<1000: raise RuntimeError('RANKING_SOUND_ASSET_FAILED:'+sound['id'])
+          print('HP_REALTIME_PAGES=PASS')
+          print('RANKING_API_REFRESH_SECONDS='+str(data['refreshSeconds']))
+          print('RANKING_API_RUNTIME_SHA='+data['runtimeSha'])
+          print('ZERO_SCORE_ROWS_VISIBLE_UNRANKED='+str(len(zero)))
+          print('RANKING_SOUND_ASSETS_PASS='+str(len(sounds)))
+          print('TRADING_MUTATION=0')
+          PY
+          for i in "${!names[@]}"; do
+            unit="${names[$i]}@$EXPECTED_TRADING_SHA.service"
+            if ! after="$(snapshot_unit "$unit")"; then
+              echo "TRADING_OR_SUPPORT_UNIT_SNAPSHOT_UNAVAILABLE=$unit"
+              rollback 42
+            fi
+            if [[ "$after" != "${before[$i]}" ]]; then
+              echo "TRADING_OR_SUPPORT_UNIT_CHANGED=$unit"
+              rollback 42
+            fi
+          done
+          [[ "$(readlink -f "$trading")" == "/home/deploy/disdex-trading/releases/$EXPECTED_TRADING_SHA" ]]
+          rm -f -- "$archive"
+          echo STATUS=HP_REALTIME_RANKING_DEPLOYED_VERIFIED
+          echo "TRADING_SHA=$EXPECTED_TRADING_SHA"
+          echo "UI_SHA=$NEW_UI_SHA"
+          echo "UI_RELEASE=$release"
+          echo "UI_WORKDIR=$(systemctl show "$ui" -p WorkingDirectory --value)"
+          echo "UI_PID=$(systemctl show "$ui" -p MainPID --value)"
+          echo "UI_NRESTARTS=$(systemctl show "$ui" -p NRestarts --value)"
+          echo "TRADING_RUNNERS_RESTARTED=0"
+          echo "TRADING_MUTATION=0"
+          trap - ERR
+          REMOTE
+          echo "HP_UI_DEPLOYED=true" >> "$GITHUB_ENV"
+
+      - name: Verify public XServer HP reachability
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          for route in / /realtime; do
+            code="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 15 "https://professional-dismanager.net$route")"
+            echo "PUBLIC_ROUTE=$route HTTP=$code"
+            [[ "$code" =~ ^(200|30[1278]|401|403)$ ]]
+          done
+
+      - name: Rollback HP release if public smoke fails
+        if: ${{ failure() && env.HP_UI_DEPLOYED == 'true' }}
+        shell: bash
+        env:
+          SSH_HOST: ${{ secrets.DISDEX_VPS_SSH_HOST }}
+          SSH_PORT: ${{ vars.DISDEX_VPS_SSH_PORT }}
+        run: |
+          set -Eeuo pipefail
+          PORT="${SSH_PORT:-22}"
+          ssh -T -i "$DISDEX_SSH_DIR/id_root" -o IdentitiesOnly=yes -o BatchMode=yes \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$DISDEX_SSH_DIR/known_hosts" \
+            -o ConnectTimeout=15 -p "$PORT" "root@$SSH_HOST" \
+            "EXPECTED_TRADING_SHA='$EXPECTED_TRADING_SHA' EXPECTED_OLD_UI_SHA='$EXPECTED_OLD_UI_SHA' EXPECTED_OLD_UI_PATH='$EXPECTED_OLD_UI_PATH' NEW_UI_SHA='$GITHUB_SHA' bash -s" <<'REMOTE'
+          set -Eeuo pipefail
+          exec 9>/run/lock/disdex-hp-realtime-ranking-deploy.lock
+          flock -n 9 || { echo HP_ROLLBACK_CONCURRENT_LOCK; exit 50; }
+          ui=ai-dex-manager-ui.service
+          trading=/home/deploy/disdex-trading/current
+          root=/home/deploy/disdex-trading/ui-releases
+          release="$root/ui-realtime-ranking-${NEW_UI_SHA:0:12}"
+          dropin_dir=/etc/systemd/system/ai-dex-manager-ui.service.d
+          prefix="$(printf '%224s' ' ' | tr ' ' z)"
+          dropin="$dropin_dir/${prefix}-rt-20261012.conf"
+          [[ "$(id -un)" == root ]]
+          [[ "$(tr -d '[:space:]' < "$trading/.disdex-release-sha")" == "$EXPECTED_TRADING_SHA" ]]
+          [[ "$(readlink -f "$trading")" == "/home/deploy/disdex-trading/releases/$EXPECTED_TRADING_SHA" ]]
+          [[ "$(systemctl show "$ui" -p WorkingDirectory --value)" == "$release" ]]
+          [[ "$(tr -d '[:space:]' < "$release/.disdex-release-sha")" == "$NEW_UI_SHA" ]]
+          grep -Fxq "WorkingDirectory=$release" "$dropin"
+          grep -Fxq "Environment=DISDEX_UI_RELEASE_SHA=$NEW_UI_SHA" "$dropin"
+          rm -f -- "$dropin"
+          systemctl daemon-reload
+          systemctl restart "$ui"
+          for _ in $(seq 1 35); do
+            if [[ "$(systemctl is-active "$ui" 2>/dev/null || true)" == active && \
+                  "$(systemctl show "$ui" -p WorkingDirectory --value 2>/dev/null || true)" == "$EXPECTED_OLD_UI_PATH" && \
+                  "$(curl -sS --max-time 4 -o /dev/null -w '%{http_code}' http://127.0.0.1:3001/ 2>/dev/null || true)" == 200 ]]; then break; fi
+            sleep 2
+          done
+          [[ "$(systemctl is-active "$ui")" == active ]]
+          [[ "$(systemctl show "$ui" -p WorkingDirectory --value)" == "$EXPECTED_OLD_UI_PATH" ]]
+          [[ "$(tr -d '[:space:]' < "$EXPECTED_OLD_UI_PATH/.disdex-release-sha")" == "$EXPECTED_OLD_UI_SHA" ]]
+          old_env="$(systemctl show "$ui" -p Environment --value)"
+          [[ " $old_env " == *" DISDEX_UI_RELEASE_SHA=$EXPECTED_OLD_UI_SHA "* ]]
+          [[ "$(tr -d '[:space:]' < "$trading/.disdex-release-sha")" == "$EXPECTED_TRADING_SHA" ]]
+          [[ "$(readlink -f "$trading")" == "/home/deploy/disdex-trading/releases/$EXPECTED_TRADING_SHA" ]]
+          python3 - <<'PY'
+          import urllib.request
+          base='http://127.0.0.1:3001'
+          headers={'Cookie':'disdex_auth=1','User-Agent':'DisDex-HP-Rollback-Check'}
+          for path in ('/','/realtime'):
+              request=urllib.request.Request(base+path,headers=headers)
+              with urllib.request.urlopen(request,timeout=20) as response:
+                  if response.status!=200: raise RuntimeError('RESTORED_PAGE_'+path)
+          PY
+          echo HP_UI_ROLLBACK=PASS
+          echo RESTORED_UI_HEALTH=PASS
+          echo "RESTORED_UI_SHA=$EXPECTED_OLD_UI_SHA"
+          echo "TRADING_SHA=$EXPECTED_TRADING_SHA"
+          echo TRADING_MUTATION=0
+          REMOTE
+
+      - name: Remove temporary root SSH credentials
+        if: always()
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          expected="$RUNNER_TEMP/disdex-vps-ssh-$GITHUB_RUN_ID"
+          if [[ "${DISDEX_SSH_DIR:-}" == "$expected" && -d "$expected" && ! -L "$expected" ]]; then
+            rm -f -- "$expected/id_root" "$expected/known_hosts"
+            rmdir -- "$expected" 2>/dev/null || true
+          fi

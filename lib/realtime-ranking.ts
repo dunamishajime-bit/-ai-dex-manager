@@ -1,10 +1,25 @@
 export type Gate = { key:string; label:string; state:'OK'|'NO'|'UNKNOWN'; actual?:number|string; required?:number|string; detail:string; kind?:'signal'|'execution'; progress?:number };
-export type RankRow = { id:string; symbol:string; logic:string; side:string; score:number|null; gates:Gate[]; reason:string; fresh:boolean; checkedAt:number; rank?:number; href?:string };
+export type RankRow = { id:string; symbol:string; logic:string; side:string; score:number|null; gates:Gate[]; reason:string; fresh:boolean; checkedAt:number; freshUntil?:number; rank?:number; href?:string };
 export function executionBlocked(row:RankRow){return row.gates.some(g=>g.kind==='execution'&&g.state==='NO');}
 export const REALTIME_RANKING_REFRESH_MS=30_000;
 export function nextRealtimeRankingAt(observedAt:number){return observedAt+REALTIME_RANKING_REFRESH_MS;}
-export function realtimeRankingCacheExpiry(observedAt:number,sourceExpiries:number[]){return Math.min(observedAt+REALTIME_RANKING_REFRESH_MS,...sourceExpiries);}
+const REALTIME_RANKING_SOURCE_MAX_AGE_MS:Record<string,number>={V12:3*3600000,Q102:2*3600000,PENGU:2*3600000,FET:110000,HYPE:20*60000,'Idle Long':2*3600000,'Idle Short':2*3600000,V52:2*3600000};
+export function realtimeRankingRowExpiry(row:RankRow){return row.checkedAt+(REALTIME_RANKING_SOURCE_MAX_AGE_MS[row.logic]??2*3600000);}
+export function realtimeRankingCacheExpiry(observedAt:number,sourceExpiries:number[],rows:RankRow[]=[]){
+ const deadlines=[observedAt+REALTIME_RANKING_REFRESH_MS,...sourceExpiries.filter(x=>Number.isFinite(x)&&x>observedAt),...rows.filter(r=>r.fresh).map(realtimeRankingRowExpiry)];
+ return Math.min(...deadlines);
+}
+export function expireRealtimeRankingRows(rows:RankRow[],now:number,sourceExpiryByLogic:Record<string,number>={}){
+ return rows.map(row=>{
+  const cutoff=Math.min(realtimeRankingRowExpiry(row),sourceExpiryByLogic[row.logic]??Infinity);
+  if(!row.fresh)return row;
+  return now>=cutoff
+   ?{...row,freshUntil:cutoff,fresh:false,score:null,rank:undefined,reason:'観測処理中に鮮度期限を超過 / '+row.reason}
+   :{...row,freshUntil:cutoff};
+ });
+}
 export function isRankableScore(score:number|null|undefined):score is number{return typeof score==='number'&&Number.isFinite(score)&&score>0;}
+export function rankScoreDisplay(score:number|null|undefined,unavailable=false){return unavailable||typeof score!=='number'||!Number.isFinite(score)?'—':String(score);}
 export function rankRows(rows:RankRow[]){
  const tier=(r:RankRow)=>!isRankableScore(r.score)?(r.score===null?0:1):executionBlocked(r)?2:3;
  const ordered=[...rows].sort((a,b)=>tier(b)-tier(a)||(isRankableScore(b.score)?b.score:0)-(isRankableScore(a.score)?a.score:0)||a.id.localeCompare(b.id));
@@ -22,7 +37,15 @@ export function freshTimestamp(at:unknown,now:number,maxAge:number){return typeo
 export function updateFetClock(gates:Gate[],now:number){const entry=now-now%3600000,open=new Date(entry).getUTCHours()%FET_POLICY.decisionEntryHourModulo===FET_POLICY.decisionEntryHourRemainder&&now-entry<=FET_POLICY.liveEntryWindowMs;return gates.map(g=>g.key==='clock'?{...g,state:open?'OK' as const:'NO' as const,actual:new Date(now).toISOString(),detail:'現在時刻で受付時間を再評価（市場条件は記載の観測時点）'}:g);}
 export function fetObservationExpiry(at:number,ttl:number){const hour=Math.floor(at/3600000)*3600000,cutoff=hour+FET_POLICY.liveEntryWindowMs+1;return Math.min(at+ttl,hour+3600000,at<cutoff?cutoff:Infinity);}
 export function currentFetGates(gates:Gate[],checkedAt:number,now:number){return updateFetClock(gates,now).map(g=>Math.floor(checkedAt/3600000)!==Math.floor(now/3600000)&&(g.kind!=='execution'||g.key==='data')?{...g,state:'UNKNOWN' as const,detail:'新しい確定足の観測更新待ち（前回値）'}:g);}
-export function currentRankRow(row:RankRow,now:number):RankRow{if(row.logic!=='FET')return row;const fresh=row.fresh&&Math.floor(row.checkedAt/3600000)===Math.floor(now/3600000);return {...row,fresh,gates:currentFetGates(row.gates,row.checkedAt,now),score:fresh?row.score:null,rank:fresh?row.rank:undefined,reason:fresh?row.reason:'新しい確定足の観測更新待ち'};}
+export function currentRankRow(row:RankRow,now:number):RankRow{
+ const beforeSourceExpiry=row.freshUntil===undefined||now<row.freshUntil;
+ const withinFetHour=row.logic!=='FET'||Math.floor(row.checkedAt/3600000)===Math.floor(now/3600000);
+ const fresh=row.fresh&&beforeSourceExpiry&&withinFetHour;
+ if(row.logic==='FET')return {...row,fresh,gates:currentFetGates(row.gates,row.checkedAt,now),score:fresh?row.score:null,rank:fresh?row.rank:undefined,reason:fresh?row.reason:'新しい確定足の観測更新待ち'};
+ if(fresh)return row;
+ if(row.score!==null||row.rank!==undefined||row.fresh)return {...row,fresh:false,score:null,rank:undefined,reason:'観測鮮度期限切れ / '+row.reason};
+ return row;
+}
 export function evaluateFet(raw:unknown,now:number,policy=FET_POLICY):{valid:boolean;gates:Gate[];referenceTs?:number}{
  const H=3600000,entry=now-now%H;
  const clock=new Date(entry).getUTCHours()%policy.decisionEntryHourModulo===policy.decisionEntryHourRemainder&&now-entry<=policy.liveEntryWindowMs;
