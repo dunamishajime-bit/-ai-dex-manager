@@ -47,3 +47,40 @@ test("missing or expired ENTRY certificate cannot trap already signed existing p
  await assert.rejects(()=>assertV4CertifiedOrder(sha,{...exit,symbol:"BTCUSDT"},doc),/QUANTITY_MISMATCH/);
  await assert.rejects(()=>assertV4CertifiedOrder(sha,exit,undefined),/SIGNED_V4_OWNERSHIP/);
 });
+
+const establishedSharedHistory={
+ schema:"disdex-v12-v4-production-certification/v3",
+ approvedSha:sha,policyId:V12_V4_V2_POLICY,
+ approvedAt:"2026-10-10T01:00:00Z",validUntil:"2026-10-11T01:00:00Z",
+ verifiedRoutes:PRODUCTION_EXIT_CATALOG.map(x=>x.route),
+ venueEvidenceBasis:"ESTABLISHED_ASTER_PRODUCTION_EXECUTION",
+ evidenceSha256:{
+  routeSourceParity:proof,
+  establishedAsterOrders:"c".repeat(64),
+  signedAsterAccount:"d".repeat(64),
+  v4ExecutionTests:"e".repeat(64),
+  sharedRiskAndPeers:"f".repeat(64),
+ },
+ approvedGross:{v12:3,crypto:3.5,total:4.75,recovery:2.5},
+ risksAcknowledged:{v4FirstLiveFillNotYetObserved:true,weakIndependentForwardPerformance:true},
+ operatorAcknowledgement:"I_AUTHORIZE_CERTIFIED_V12_V4_REAL_ORDERS",
+} as const;
+test("new full LIVE production evidence accepts authentic shared Aster history without demanding nonexistent V4 fill",()=>{
+ assert.equal(validateV4ProductionCertificate(establishedSharedHistory,sha,now).schema,
+   "disdex-v12-v4-production-certification/v3");
+ assert.throws(()=>validateV4ProductionCertificate({
+  ...establishedSharedHistory,approvedSha:"c".repeat(40)},sha,now),/CERTIFICATE_INVALID/);
+ assert.throws(()=>validateV4ProductionCertificate({
+  ...establishedSharedHistory,verifiedRoutes:establishedSharedHistory.verifiedRoutes.slice(1)},sha,now),/41_ROUTE/);
+ assert.throws(()=>validateV4ProductionCertificate({
+  ...establishedSharedHistory,evidenceSha256:{...establishedSharedHistory.evidenceSha256,
+   signedAsterAccount:"bad"}},sha,now),/EVIDENCE_INCOMPLETE/);
+ assert.throws(()=>validateV4ProductionCertificate({
+  ...establishedSharedHistory,venueEvidenceBasis:"MOCK_ONLY"},sha,now),/CERTIFICATE_INVALID/);
+ assert.throws(()=>validateV4ProductionCertificate({
+  ...establishedSharedHistory,risksAcknowledged:{...establishedSharedHistory.risksAcknowledged,
+    v4FirstLiveFillNotYetObserved:false}},sha,now),/CERTIFICATE_INVALID/);
+ assert.throws(()=>validateV4ProductionCertificate({
+  ...establishedSharedHistory,approvedGross:{...establishedSharedHistory.approvedGross,total:5}},sha,now),/RISK_CAP/);
+ assert.throws(()=>validateV4ProductionCertificate(establishedSharedHistory,sha,now+10*86400000),/EXPIRED/);
+});
