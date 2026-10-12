@@ -16,7 +16,8 @@ test("short live-peer contention retries, records the real owner, and succeeds w
   let calls=0,clock=start;
   const result=await executeV4WithContentionAudit({
    operation:async()=>({status:++calls===3?"observing":"locked"}),
-   accountLockPath:path,auditPath,releaseSha:"a".repeat(40),operationMode:"CANARY",
+   accountLockPath:path,releaseSha:"a".repeat(40),operationMode:"CANARY",
+   persist:async ev=>{writeFileSync(auditPath,JSON.stringify(ev)+"\n");},
    attempts:5,retryMs:250,now:()=>clock,wait:async(ms)=>{clock+=ms;},
    emit:()=>{},
   });
@@ -43,7 +44,8 @@ test("persistent lock remains fail-closed and records the actual peer and retry 
   let calls=0;
   const result=await executeV4WithContentionAudit({
    operation:async()=>{calls++;return {status:"locked"};},
-   accountLockPath:path,auditPath:out,releaseSha:"a".repeat(40),operationMode:"CANARY",
+   accountLockPath:path,releaseSha:"a".repeat(40),operationMode:"CANARY",
+   persist:async ev=>{writeFileSync(out,JSON.stringify(ev)+"\n");},
    attempts:3,retryMs:300,now:()=>clock,wait:async()=>{},emit:()=>{},
   });
   assert.equal(result.status,"locked");assert.equal(calls,3);
