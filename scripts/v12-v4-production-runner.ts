@@ -17,6 +17,7 @@ import {attachV4NativeCoreCandidates} from "../lib/v12-v4-core-candidate";
 import {liveV4PeerLineageMode,type V4PeerKind,type V4PeerSource} from "../lib/v12-v4-peer-state-owners";
 import {observeV4PeerService,observeCurrentV4PeerService} from "../lib/v12-v4-peer-service-attestation";
 import {assertV4EntrySafety} from "../lib/v12-v4-entry-safety";
+import {classifyV4TransientInfrastructureFailure,nextV4DaemonWaitMs} from "../lib/v12-v4-runtime-resilience";
 const H2=7200000;
 const V4_HEALTH_SCHEMA="disdex-v12-v4-runner-heartbeat/v1";
 function v4HealthPath(){
@@ -178,29 +179,59 @@ async function main(){
   return;
  }
  if(!once&&!daemon&&!initialize)throw Error("V4_RUNNER_REQUIRES_MODE");
- const {engine,releaseSha,operationMode}=await buildV4ProductionRuntime();
- if(initialize){console.log(JSON.stringify({status:"SIGNED_FLAT_STATE_INITIALIZED",releaseSha,operationMode,orderEnabled:false}));return;}
  let stopping=false;
  process.once("SIGINT",()=>{stopping=true;});
  process.once("SIGTERM",()=>{stopping=true;});
+
+ let runtime:Awaited<ReturnType<typeof buildV4ProductionRuntime>>;
+ for(;;){
+  try{
+   runtime=await buildV4ProductionRuntime();
+   break;
+  }catch(error){
+   const transient=classifyV4TransientInfrastructureFailure(error,Date.now());
+   if(!daemon||stopping||!transient)throw error;
+   console.warn(JSON.stringify({level:"warn",status:"V4_STARTUP_INFRASTRUCTURE_DEFERRED",
+    reason:transient.result.reason,retryMs:transient.retryMs,ordersSent:0,cancelsSent:0,positionChangesSent:0}));
+   await new Promise<void>(done=>setTimeout(done,transient.retryMs));
+  }
+ }
+ const {engine,releaseSha,operationMode}=runtime;
+ if(initialize){console.log(JSON.stringify({status:"SIGNED_FLAT_STATE_INITIALIZED",releaseSha,operationMode,orderEnabled:false}));return;}
  do{
-  // Complete H1/H2 market-data reads outside the account mutex when V4 has
-  // no unresolved order or owned leg. Signed account and STOP recovery always
-  // remain inside engine.tick() under the original exclusive lease.
-  const prepared=await engine.prepareFlatMarketDecision();
-  const result=await executeV4WithContentionAudit({
-   operation:()=>engine.tick(prepared),releaseSha,operationMode,
-   accountLockPath:env("DISDEX_ACCOUNT_LOCK_PATH"),
-   attempts:10,retryMs:750,shouldStop:()=>stopping,
-  });
+  let result;
+  try{
+   // Complete H1/H2 market-data reads outside the account mutex when V4 has
+   // no unresolved order or owned leg. Signed account and STOP recovery always
+   // remain inside engine.tick() under the original exclusive lease.
+   const prepared=await engine.prepareFlatMarketDecision();
+   result=await executeV4WithContentionAudit({
+    operation:()=>engine.tick(prepared),releaseSha,operationMode,
+    accountLockPath:env("DISDEX_ACCOUNT_LOCK_PATH"),
+    // Progressive deterministic backoff breaks recurring phase collisions with
+    // FET/Idle/HYPE instead of hammering the shared lease every fixed 750 ms.
+    attempts:10,retryMs:attempt=>Math.min(2_000,750+attempt*250),shouldStop:()=>stopping,
+   });
+  }catch(error){
+   // Shared Aster queue saturation happens before the HTTP request. Preserve
+   // durable ENTRY/STOP state and retry in-process; all other failures remain fatal.
+   const transient=classifyV4TransientInfrastructureFailure(error,Date.now());
+   if(!transient)throw error;
+   result=transient.result;
+   console.warn(JSON.stringify({level:"warn",status:"V4_TRANSIENT_INFRASTRUCTURE_DEFERRED",
+    reason:result.reason,retryMs:transient.retryMs,ordersSent:0,cancelsSent:0,positionChangesSent:0}));
+  }
   await writeV4Health(releaseSha,operationMode,result);
   console.log(JSON.stringify({releaseSha,operationMode,timestamp:new Date().toISOString(),...result}));
   if(!daemon||stopping)break;
-  // A held lock is not a trading signal rejection. Reschedule within the
-  // original 15-minute entry-validity window without extending that window.
-  // Each new tick fetches/rechecks the latest closed candle boundary.
-  const nextDelay=result.status==="locked"?15000:
-   Math.max(15000,Number(process.env.V12_V4_TICK_INTERVAL_MS||60000));
+  // Keep V4 on a stable wall-clock phase rather than repeatedly colliding with
+  // peer daemons that also run on round-minute / half-minute cadences.
+  const nextDelay=nextV4DaemonWaitMs(result,{
+   now:Date.now(),
+   normalIntervalMs:Number(process.env.V12_V4_TICK_INTERVAL_MS||60000),
+   lockRetryMs:Number(process.env.V12_V4_LOCK_RETRY_INTERVAL_MS||5000),
+   phaseOffsetMs:Number(process.env.V12_V4_TICK_PHASE_OFFSET_MS||17000),
+  });
   await new Promise<void>(done=>setTimeout(done,nextDelay));
  }while(!stopping);
 }
