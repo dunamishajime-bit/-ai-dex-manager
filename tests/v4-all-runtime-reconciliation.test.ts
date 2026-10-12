@@ -39,7 +39,15 @@ test("V4 wiring does not authorize legacy V12 and V4 together", () => {
 test("operator-enabled wiring starts every exact-SHA trading runner", () => {
   assert.match(
     wiring,
-    /for unit in "\$V12_UNIT" "\$PENGU_UNIT" "\$Q102_UNIT" "\$FET_UNIT" "\$V52_UNIT"[\s\S]*?systemctl enable --now "\$unit"/,
+    /for unit in "\$PENGU_UNIT" "\$Q102_UNIT" "\$FET_UNIT" "\$V52_UNIT" "\$HYPE_UNIT" "\$IDLE_UNIT"[\s\S]*?ensure_trading_unit_running "\$unit"[\s\S]*?ensure_trading_unit_running "\$V12_UNIT"/,
+  );
+  assert.match(wiring, /ensure_trading_unit_running\(\) \{/);
+});
+
+test("V4 primary unit is ordered after every attested peer", () => {
+  assert.match(
+    wiring,
+    /After=\$\{PENGU_UNIT\} \$\{Q102_UNIT\} \$\{FET_UNIT\} \$\{V52_UNIT\} \$\{HYPE_UNIT\} \$\{IDLE_UNIT\}/,
   );
 });
 
