@@ -1,5 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import {existsSync,statSync} from 'node:fs';
+import {join} from 'node:path';
 import { currentRankRow, fetObservationExpiry, evaluateFet, freshTimestamp, updateFetClock, gateScore, rankRows, rankChanges, type RankRow } from '../lib/realtime-ranking';
 const H = 3600000;
 const now = Date.UTC(2026,9,4,13,2);
@@ -22,6 +24,46 @@ test('FET entry clock is independent of technical signal',()=>{
 const row=(id:string,score:number|null):RankRow=>({id,symbol:id,logic:'X',side:'LONG',score,gates:[],reason:'',fresh:score!==null,checkedAt:now});
 test('unknown scores last and ties stable',()=>{
  assert.deepEqual(rankRows([row('z',null),row('b',80),row('a',80)]).map(r=>r.id),['a','b','z']);
+});
+test('zero-score rows stay visible but are not assigned a rank or promoted above positive scores',()=>{
+ const blocked={...row('blocked-high',90),gates:[{key:'held',label:'held',state:'NO' as const,detail:'',kind:'execution' as const}]};
+ const ranked=rankRows([row('zero',0),blocked,row('candidate',25),row('unknown',null)]);
+ assert.deepEqual(ranked.map(r=>r.id),['candidate','blocked-high','zero','unknown']);
+ assert.deepEqual(ranked.map(r=>r.rank),[1,2,undefined,undefined]);
+});
+test('top candidates omit zero-score and execution-blocked rows',async()=>{
+ const mod=await import('../lib/realtime-ranking') as typeof import('../lib/realtime-ranking') & {topRankedCandidates?: (rows:RankRow[],limit?:number)=>RankRow[]};
+ assert.equal(typeof mod.topRankedCandidates,'function');
+ assert.deepEqual(mod.topRankedCandidates!([row('zero',0),row('candidate',1),{...row('blocked',100),gates:[{key:'held',label:'held',state:'NO',detail:'',kind:'execution'}]}]).map(r=>r.id),['candidate']);
+});
+test('ranking refresh is scheduled 30 seconds after an observation completes',async()=>{
+ const mod=await import('../lib/realtime-ranking') as typeof import('../lib/realtime-ranking') & {nextRealtimeRankingAt?: (now:number)=>number;realtimeRankingCacheExpiry?:(now:number,sourceExpiries:number[])=>number};
+ assert.equal(typeof mod.nextRealtimeRankingAt,'function');
+ assert.equal(mod.nextRealtimeRankingAt!(1_000),31_000);
+ assert.equal(mod.realtimeRankingCacheExpiry!(1_000,[120_000]),31_000);
+ assert.equal(mod.realtimeRankingCacheExpiry!(1_000,[20_000]),20_000);
+});
+test('zero-score rows do not create movement phases or sound events',async()=>{
+ const mod=await import('../lib/ranking-motion-groups').catch(()=>null) as null|{createRankingMovementPhases:(before:unknown[],after:unknown[])=>unknown[]};
+ assert.ok(mod);
+ assert.deepEqual(mod.createRankingMovementPhases([{id:'zero',rank:1,score:0}],[{id:'zero',rank:undefined,score:0}]),[]);
+});
+test('positive score movement is grouped into a bounded rise animation',async()=>{
+ const mod=await import('../lib/ranking-motion-groups').catch(()=>null) as null|{createRankingMovementPhases:(before:unknown[],after:unknown[])=>Array<{role:string;durationMs:number;changes:Array<{id:string}>}>};
+ assert.ok(mod);
+ assert.deepEqual(mod.createRankingMovementPhases([{id:'a',rank:5,score:70}],[{id:'a',rank:2,score:80}]),[{role:'top3',durationMs:1900,changes:[{id:'a',from:5,to:2,role:'top3'}]}]);
+});
+test('ranking sounds are separately selectable for rise, fall, and top three',async()=>{
+ const mod=await import('../lib/ranking-sounds').catch(()=>null) as null|typeof import('../lib/ranking-sounds');
+ assert.ok(mod);
+ assert.equal(mod.rankingSoundsForRole('rise').length,5);
+ assert.equal(mod.rankingSoundsForRole('fall').length,5);
+ assert.equal(mod.rankingSoundsForRole('top3').length,5);
+ assert.deepEqual(mod.loadRankingSoundSelections({rise:'rise-silver',fall:'fall-arc',top3:'invalid'},undefined),{rise:'rise-silver',fall:'fall-arc',top3:'top3-royal'});
+});
+test('all selected ranking sound recordings are packaged as public assets',async()=>{
+ const mod=await import('../lib/ranking-sounds');
+ for(const sound of mod.RANKING_SOUNDS){const file=join(process.cwd(),'public',sound.src.replace(/^\//,''));assert.equal(existsSync(file),true,sound.src);assert.ok(statSync(file).size>1_000,sound.src);}
 });
 test('known execution blocks rank behind available candidates despite higher signal score',()=>{
  const blocked={...row('held',100),gates:[{key:'holding',label:'holding',state:'NO' as const,detail:'',kind:'execution' as const}]};

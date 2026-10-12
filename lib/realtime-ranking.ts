@@ -1,7 +1,20 @@
 export type Gate = { key:string; label:string; state:'OK'|'NO'|'UNKNOWN'; actual?:number|string; required?:number|string; detail:string; kind?:'signal'|'execution'; progress?:number };
 export type RankRow = { id:string; symbol:string; logic:string; side:string; score:number|null; gates:Gate[]; reason:string; fresh:boolean; checkedAt:number; rank?:number; href?:string };
 export function executionBlocked(row:RankRow){return row.gates.some(g=>g.kind==='execution'&&g.state==='NO');}
-export function rankRows(rows:RankRow[]){const tier=(r:RankRow)=>r.score===null?0:executionBlocked(r)?1:2;return [...rows].sort((a,b)=>tier(b)-tier(a)||(b.score??-1)-(a.score??-1)||a.id.localeCompare(b.id)).map((r,i)=>({...r,rank:r.score===null?undefined:i+1}));}
+export const REALTIME_RANKING_REFRESH_MS=30_000;
+export function nextRealtimeRankingAt(observedAt:number){return observedAt+REALTIME_RANKING_REFRESH_MS;}
+export function realtimeRankingCacheExpiry(observedAt:number,sourceExpiries:number[]){return Math.min(observedAt+REALTIME_RANKING_REFRESH_MS,...sourceExpiries);}
+export function isRankableScore(score:number|null|undefined):score is number{return typeof score==='number'&&Number.isFinite(score)&&score>0;}
+export function rankRows(rows:RankRow[]){
+ const tier=(r:RankRow)=>!isRankableScore(r.score)?(r.score===null?0:1):executionBlocked(r)?2:3;
+ const ordered=[...rows].sort((a,b)=>tier(b)-tier(a)||(isRankableScore(b.score)?b.score:0)-(isRankableScore(a.score)?a.score:0)||a.id.localeCompare(b.id));
+ let rank=0;
+ return ordered.map(r=>({...r,rank:isRankableScore(r.score)?++rank:undefined}));
+}
+export function topRankedCandidates(rows:RankRow[],limit=3){
+ if(!Number.isInteger(limit)||limit<=0)return [];
+ return rankRows(rows).filter(r=>isRankableScore(r.score)&&!executionBlocked(r)).slice(0,limit);
+}
 export function rankChanges(previous:string[],next:string[]){const result:Record<string,number>={};if(!previous.length)return result;next.forEach((id,i)=>{const old=previous.indexOf(id);if(old<0)result[id]=0;else if(old!==i)result[id]=old-i;});return result;}
 export function gateScore(gates:Gate[],fresh:boolean){const signal=gates.filter(g=>g.kind!=='execution');if(!fresh||!signal.length||signal.some(g=>g.state==='UNKNOWN'))return null;const score=Math.round(100*signal.reduce((s,g)=>s+(g.state==='OK'?1:Math.max(0,Math.min(.99,g.progress??0))),0)/signal.length);return signal.every(g=>g.state==='OK')?100:Math.min(99,score);}
 export const FET_POLICY={lookbackHours:48,volumeMedianHours:72,minimumVolumeRatio:1.2,decisionEntryHourModulo:4,decisionEntryHourRemainder:1,liveEntryWindowMs:300000};

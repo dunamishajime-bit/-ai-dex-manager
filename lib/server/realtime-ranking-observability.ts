@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises';
-import { fetObservationExpiry,freshTimestamp,gateScore,rankRows,type Gate,type RankRow } from '@/lib/realtime-ranking';
+import { REALTIME_RANKING_REFRESH_MS,fetObservationExpiry,freshTimestamp,gateScore,rankRows,realtimeRankingCacheExpiry,type Gate,type RankRow } from '@/lib/realtime-ranking';
 import { loadCurrentProductionRuntime,extractObjectNumber } from './current-production-runtime';
 import { loadDecisionStatus } from './disdex-decision-status';
 import { loadQuality102SymbolObservability } from './quality102-symbol-observability';
@@ -100,11 +100,11 @@ async function observe(){
   const riskFresh=risk?.sourceComplete===true&&risk?.utcDay===new Date(now).toISOString().slice(0,10)&&now-Number(risk.updatedAt)>=-60000&&now-Number(risk.updatedAt)<10*60000;
   row.gates.push(flag('shared-risk','共有日次損失ガード',riskFresh&&typeof risk?.tripped==='boolean'?!risk.tripped:undefined,risk?.tripped?'損失制限で停止':'当日の完全な共有状態を照合','execution'));
  }
- return {ok:true,readOnly:true,tradingMutation:0,checkedAt:now,refreshSeconds:120,runtimeSha:current.releaseSha,rows:rankRows(rows),errors,metric:'確認済み発注制約のない候補を優先し、Signal Gate充足度で順位付け（ロジックごとに条件数は異なります）。発火確率・期待利益ではありません。資金など未確認の実行条件は別途Runner確認待ち。'};
+ return {ok:true,readOnly:true,tradingMutation:0,checkedAt:now,refreshSeconds:REALTIME_RANKING_REFRESH_MS/1000,runtimeSha:current.releaseSha,rows:rankRows(rows),errors,metric:'確認済み発注制約のない候補を優先し、Signal Gate充足度で順位付け（ロジックごとに条件数は異なります）。発火確率・期待利益ではありません。資金など未確認の実行条件は別途Runner確認待ち。'};
 }
 let cached:{expires:number;value:Awaited<ReturnType<typeof observe>>}|undefined,inflight:Promise<Awaited<ReturnType<typeof observe>>>|undefined;
 export async function loadRealtimeRanking(){
  if(cached&&cached.expires>Date.now())return cached.value;
- if(!inflight)inflight=observe().then(value=>{const expires=Math.min(fetObservationExpiry(value.checkedAt,110000),...value.rows.filter(r=>r.logic==='FET').map(r=>fetObservationExpiry(r.checkedAt,110000)));cached=expires>Date.now()?{value,expires}:undefined;return value;}).finally(()=>{inflight=undefined;});
+ if(!inflight)inflight=observe().then(value=>{const sourceExpiries=value.rows.filter(r=>r.logic==='FET').map(r=>fetObservationExpiry(r.checkedAt,110000)),expires=realtimeRankingCacheExpiry(value.checkedAt,sourceExpiries);cached=expires>Date.now()?{value,expires}:undefined;return value;}).finally(()=>{inflight=undefined;});
  return inflight;
 }
