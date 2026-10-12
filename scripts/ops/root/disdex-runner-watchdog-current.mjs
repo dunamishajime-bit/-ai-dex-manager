@@ -228,6 +228,11 @@ function assertReleasePinnedRunnerSingleton(activeUnits, expectedUnit, label = "
     }
 }
 
+function assertNoCompetingV12Authority(legacyV12Units, canaryV4Units) {
+    const conflicts = [...new Set([...legacyV12Units, ...canaryV4Units])];
+    if (conflicts.length > 0) throw new Error(`V12_V4_COMPETING_AUTHORITY:${conflicts.join(",")}`);
+}
+
 function assertSharedCryptoRiskWriterSingleton(activeUnits, expectedSha) {
     assertReleasePinnedRunnerSingleton(activeUnits, `disdex-shared-crypto-risk@${expectedSha}.service`, "SHARED_CRYPTO_RISK", true);
 }
@@ -583,6 +588,15 @@ async function run(config) {
         }
         let compositionInvariantError;
         try {
+            if (config.runnerConfig.V12_V4) {
+                const activeLegacyV12Units = parseNonInactiveServiceUnits(await systemctl([
+                    "list-units", "--all", "--type=service", "--no-legend", LEGACY_V12_RUNNER.unitPattern,
+                ]), LEGACY_V12_RUNNER.unitPrefix);
+                const activeV4CanaryUnits = parseNonInactiveServiceUnits(await systemctl([
+                    "list-units", "--all", "--type=service", "--no-legend", "disdex-v12-v4-canary@*.service",
+                ]), "disdex-v12-v4-canary");
+                assertNoCompetingV12Authority(activeLegacyV12Units, activeV4CanaryUnits);
+            }
             for (const legacyUnit of LEGACY_LIVE_UNITS) {
                 const legacyOutput = await systemctl(["show", legacyUnit, "--property=LoadState", "--property=ActiveState", "--no-pager"], true);
                 const props = Object.fromEntries(String(legacyOutput || "").split(/\r?\n/).filter(Boolean).map((line) => line.split("=", 2)));
@@ -718,6 +732,19 @@ function selfTest() {
     const v4 = V4_V12_RUNNER;
     if (!serviceAllowed(v4, v4.expectedUnit(sha), sha)) throw new Error("V4 allowlist self-test failed");
     if (serviceAllowed(v4, LEGACY_V12_RUNNER.expectedUnit(sha), sha)) throw new Error("V4 allowlist accepted legacy V12");
+    for (const [legacyUnits, canaryUnits] of [
+        [[LEGACY_V12_RUNNER.expectedUnit(sha)], []],
+        [[], [`disdex-v12-v4-canary@${sha}.service`]],
+    ]) {
+        try {
+            assertNoCompetingV12Authority(legacyUnits, canaryUnits);
+            throw new Error("V4 single-authority self-test accepted a competing runner");
+        } catch (error) {
+            if (!String(error?.message || "").startsWith("V12_V4_COMPETING_AUTHORITY:")) throw error;
+        }
+    }
+    assertNoCompetingV12Authority([], []);
+    console.log("DISDEX_CURRENT_WATCHDOG_V4_SINGLE_AUTHORITY_SELFTEST_PASS");
     try {
         buildConfig({
             ...approvedEnv,

@@ -22,6 +22,7 @@ The V4-specific operator path is optional for legacy watchdog configurations and
 - An absent, noncanonical, wrong-SHA, wrong-runner, or insecure operator artifact blocks restart with `HOLD_FAIL_CLOSED`.
 - A missing or invalid runner/Safety SHA pin blocks watchdog execution; the watchdog must not infer or rewrite a peer SHA.
 - V4 can never resolve to `disdex-v12-x1-all@...`; legacy X1 remains persistently masked.
+- In V4 mode, any non-inactive legacy X1 instance or `disdex-v12-v4-canary@...` instance is a composition conflict; the watchdog must hold rather than permit two V12 authorities.
 - The watchdog is observational/recovery-only and must report zero order, cancel, and position-mutation effects.
 - This file is not itself an operator approval, V4 production certificate, TIME37 approval, deployment, or permission to enable orders.
 
