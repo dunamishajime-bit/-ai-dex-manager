@@ -31,6 +31,7 @@ test("short live-peer contention retries, records the real owner, and succeeds w
   assert.equal(rows[0].observations[0].state,"HELD");
   assert.equal(rows[0].elapsedMs,500);
   assert.equal(rows[0].orderMutationByObserver,0);
+  assert.deepEqual(rows[0].retryScheduleMs,[250,250]);
   assert.ok(!readFileSync(auditPath,"utf8").includes("test-lease"));
  }finally{rmSync(dir,{recursive:true,force:true});}
 });
@@ -65,5 +66,26 @@ test("missing or malformed lock files never generate invented holder identities"
   const result=await inspectV4LockHolder(path);
   assert.equal(result.state,"UNREADABLE");
   assert.equal(result.ownerId,undefined);
+ }finally{rmSync(dir,{recursive:true,force:true});}
+});
+
+test("production-style progressive backoff is persisted for collision diagnosis",async()=>{
+ const dir=mkdtempSync(join(tmpdir(),"v4-lock-audit-"));
+ try{
+  const path=join(dir,"account.lock"),out=join(dir,"events.jsonl"),start=1_700_000_000_000;
+  writeFileSync(path,JSON.stringify({schema:"disdex-account-lock/v1",ownerId:"FET_BRK48_RESIDUAL",
+   leaseId:"lease",acquiredAt:start,expiresAt:start+120000,reservations:[]}));
+  let calls=0,clock=start;
+  await executeV4WithContentionAudit({
+   operation:async()=>({status:++calls===4?"observing":"locked"}),
+   accountLockPath:path,releaseSha:"b".repeat(40),operationMode:"CERTIFIED",
+   persist:async ev=>writeFileSync(out,JSON.stringify(ev)+"\n"),
+   attempts:6,retryMs:attempt=>Math.min(2000,750+attempt*250),
+   now:()=>clock,wait:async ms=>{clock+=ms;},emit:()=>{},
+  });
+  const event=JSON.parse(readFileSync(out,"utf8").trim());
+  assert.deepEqual(event.retryScheduleMs,[1000,1250,1500]);
+  assert.equal(event.elapsedMs,3750);
+  assert.equal(event.resolved,true);
  }finally{rmSync(dir,{recursive:true,force:true});}
 });
