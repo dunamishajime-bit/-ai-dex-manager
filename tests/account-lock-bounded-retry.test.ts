@@ -27,3 +27,16 @@ test("persistent contention remains bounded", async () => {
     assert.equal(result.status, "locked");
     assert.equal(calls, 3);
 });
+
+test("scheduled contention backoff increases deterministically while remaining bounded", async () => {
+    let calls = 0;
+    const waits: number[] = [];
+    const result = await runWithBoundedAccountLockRetry({
+        operation: async () => ({ status: ++calls < 5 ? "locked" : "no-change" }),
+        attempts: 6,
+        retryMs: (attempt) => 500 + attempt * 250,
+        wait: async (ms) => { waits.push(ms); },
+    });
+    assert.equal(result.status, "no-change");
+    assert.deepEqual(waits, [750, 1_000, 1_250, 1_500]);
+});
