@@ -51,3 +51,11 @@ test("mixed-SHA wiring validates V4 runner artifacts from the pinned V4 release"
   assert.doesNotMatch(validation, /"\$CURRENT_RELEASE\/scripts\/v12-v4-production-runner\.ts"/);
   assert.doesNotMatch(validation, /"\$CURRENT_RELEASE\/deploy\/systemd\/disdex-v12-v4@\.service"/);
 });
+
+test("V4 primary unit must not load the peer-SHA env after the V4 ACK env", () => {
+  const v4PrimaryBlock = wiring.match(
+    /if \[\[ "\$PRIMARY_V12_MODE" == "V4" \]\]; then\s+write_atomic "\$\{V12_DROPIN_DIR\}[\s\S]*?\n  else/,
+  )?.[0] ?? "";
+  assert.match(v4PrimaryBlock, /EnvironmentFile=\$\{V4_CONTRACT_ENV_FILE\}/);
+  assert.doesNotMatch(v4PrimaryBlock, /EnvironmentFile=\$\{CONTRACT_ENV_FILE\}/);
+});

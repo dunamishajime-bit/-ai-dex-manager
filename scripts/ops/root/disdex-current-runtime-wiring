@@ -1365,12 +1365,15 @@ ReadWritePaths=
 ReadWritePaths=/home/deploy/ai-dex-manager/data"
 
   if [[ "$PRIMARY_V12_MODE" == "V4" ]]; then
+    # This instance is pinned to the separate V4 primary SHA.  Never load the
+    # peer/current contract here: EnvironmentFile values override Environment=
+    # and would replace DISDEX_RELEASE_SHA after the V4 ACK is set.
     write_atomic "${V12_DROPIN_DIR}/zzzzzzzzzzzz-current-release-contract.conf" "[Unit]
 StartLimitIntervalSec=300s
 StartLimitBurst=3
 [Service]
 RestartSec=30s
-EnvironmentFile=${CONTRACT_ENV_FILE}
+EnvironmentFile=${V4_CONTRACT_ENV_FILE}
 Environment=DISDEX_RELEASE_SHA=${V4_PRIMARY_SHA}
 Environment=V12_V4_LIVE_ACK=${V4_PRIMARY_SHA}
 Environment=V12_V4_OPERATION_MODE=CERTIFIED
