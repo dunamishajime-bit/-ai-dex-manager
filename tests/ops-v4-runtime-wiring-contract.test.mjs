@@ -60,3 +60,11 @@ test("V4 primary unit must not load the peer-SHA env after the V4 ACK env", () =
   assert.match(v4PrimaryBlock, /EnvironmentFile=\$\{V4_CONTRACT_ENV_FILE\}/);
   assert.doesNotMatch(v4PrimaryBlock, /EnvironmentFile=\$\{CONTRACT_ENV_FILE\}/);
 });
+
+test("V4 wiring runs Idle benign recovery from the pinned V4 primary release", () => {
+  const recovery = wiring.match(/recover_idle_benign_state\(\) \{([\s\S]*?)\n\}/)?.[1] ?? "";
+  assert.match(recovery, /local recovery_release="\$CURRENT_RELEASE"/);
+  assert.match(recovery, /if \[\[ "\$PRIMARY_V12_MODE" == "V4" \]\]; then\s+recovery_release="\$V4_PRIMARY_RELEASE"/);
+  assert.match(recovery, /"\$recovery_release\/scripts\/disdex-idle-priority-short-benign-state-recovery\.ts"/);
+  assert.doesNotMatch(recovery, /"\$CURRENT_RELEASE\/scripts\/disdex-idle-priority-short-benign-state-recovery\.ts"/);
+});

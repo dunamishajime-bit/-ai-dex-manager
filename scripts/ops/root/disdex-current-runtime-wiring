@@ -335,8 +335,12 @@ migrate_idle_residual_state_lineage() {
 }
 
 recover_idle_benign_state() {
-  "$CURRENT_RELEASE/node_modules/.bin/tsx" \
-    "$CURRENT_RELEASE/scripts/disdex-idle-priority-short-benign-state-recovery.ts" \
+  local recovery_release="$CURRENT_RELEASE"
+  if [[ "$PRIMARY_V12_MODE" == "V4" ]]; then
+    recovery_release="$V4_PRIMARY_RELEASE"
+  fi
+  "$recovery_release/node_modules/.bin/tsx" \
+    "$recovery_release/scripts/disdex-idle-priority-short-benign-state-recovery.ts" \
     --apply \
     --state-path "$IDLE_PRIORITY_STATE_ROOT/state.json"
 }
