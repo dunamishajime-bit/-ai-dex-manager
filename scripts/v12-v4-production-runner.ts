@@ -82,7 +82,8 @@ export async function buildV4ProductionRuntime(){
  const operationMode=String(process.env.V12_V4_OPERATION_MODE??"CERTIFIED").trim().toUpperCase();
  if(!["CERTIFIED","CANARY"].includes(operationMode))throw Error("V4_OPERATION_MODE_INVALID");
  const canaryPermit=operationMode==="CANARY"?await readV4CanaryPermit(releaseSha):undefined;
- const peerLineageMode:V4PeerLineageMode=canaryPermit?"ATTEST_EACH_PEER":"UNIFIED_RELEASE";
+ // Existing PENGU, FET, Q102, V52, HYPE and Idle remain on independently observed exact SHA releases.
+ const peerLineageMode:V4PeerLineageMode="ATTEST_EACH_PEER";
  const client=new AsterV3Client({baseUrl:process.env.ASTER_FUTURES_BASE_URL,
   userAddress:process.env.ASTER_USER_ADDRESS,
   privateKey:process.env.ASTER_API_PRIVATE_KEY as `0x${string}`|undefined,
