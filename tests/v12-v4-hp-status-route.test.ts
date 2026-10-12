@@ -1,0 +1,56 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { NextRequest } from "next/server";
+
+import { createV12V4HpStatusGet } from "../app/api/system/v12-v4-hp-status/route";
+import type { V12V4HpSnapshot } from "../lib/v12-v4-hp-contract";
+
+const snapshot = {
+  schema: "v12-v4-hp-status/v1",
+  target: { policyId: "V2_M150_D05_CORE_NATIVE", expectedRouteCount: 41 },
+  displayStatus: "UNAVAILABLE",
+  actual: { currentReleaseSha: null, activeRunnerId: null, activeRunnerState: "unavailable", activeRunnerSha: null, v4RunnerMode: "UNKNOWN", v12PrimaryMode: "UNKNOWN", legacyV12RunnerActive: null, v4ReleaseSha: null, heartbeatSha: null, orderEnabled: null },
+  timestamps: { checkedAt: 1, heartbeatUpdatedAt: null, decisionTs: null, capturedAtMs: null },
+  freshness: { heartbeat: false, decision: false },
+  candidates: [],
+  filtered: [],
+  routeCoverage: { expected: 41, observed: 0, candidateCount: null, filteredCount: null, unobserved: [], completeness: false, semantics: "EMITTED_ROUTE_PRESENCE_ONLY_NOT_EVALUATION_COVERAGE" },
+  errors: ["V4_DECISION_PATH_UNCONFIGURED"],
+  readOnly: true,
+  tradingMutation: 0,
+} as const satisfies V12V4HpSnapshot;
+
+test("V4 HP status route requires auth and never calls the loader for anonymous access", async () => {
+  let calls = 0;
+  const get = createV12V4HpStatusGet(async () => { calls += 1; return snapshot; });
+  const response = await get(new NextRequest("http://localhost/api/system/v12-v4-hp-status"));
+  assert.equal(response.status, 401);
+  assert.match(response.headers.get("Cache-Control") || "", /private/);
+  assert.match(response.headers.get("Cache-Control") || "", /no-store/);
+  assert.equal(calls, 0);
+});
+
+test("authenticated V4 status response is private, read-only, and exposes unavailable source truth", async () => {
+  const get = createV12V4HpStatusGet(async () => snapshot);
+  const request = new NextRequest("http://localhost/api/system/v12-v4-hp-status", { headers: { cookie: "disdex_auth=1" } });
+  const response = await get(request);
+  const body = await response.json();
+  assert.equal(response.status, 200);
+  assert.match(response.headers.get("Cache-Control") || "", /private/);
+  assert.match(response.headers.get("Cache-Control") || "", /no-store/);
+  assert.equal(body.readOnly, true);
+  assert.equal(body.tradingMutation, 0);
+  assert.equal(body.displayStatus, "UNAVAILABLE");
+});
+
+test("loader exception returns 503 with fail-closed read-only markers", async () => {
+  const get = createV12V4HpStatusGet(async () => { throw new Error("source unavailable"); });
+  const request = new NextRequest("http://localhost/api/system/v12-v4-hp-status", { headers: { cookie: "disdex_auth=1" } });
+  const response = await get(request);
+  const body = await response.json();
+  assert.equal(response.status, 503);
+  assert.equal(body.readOnly, true);
+  assert.equal(body.tradingMutation, 0);
+  assert.equal(body.error, "V4_HP_STATUS_UNAVAILABLE");
+  assert.match(response.headers.get("Cache-Control") || "", /no-store/);
+});
