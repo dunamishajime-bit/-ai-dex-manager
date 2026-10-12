@@ -14,7 +14,7 @@ import {assertV4CertifiedSource,assertV4CertifiedOrder} from "../lib/v12-v4-cert
 import {readV4CanaryPermit,assertV4CanarySourceSnapshot,assertV4CanaryOrderAuthority} from "../lib/v12-v4-canary-permit";
 import {readV4TimeStopApproval,approvedV4TimeStopQuote} from "../lib/v12-v4-time-stop-approval";
 import {attachV4NativeCoreCandidates} from "../lib/v12-v4-core-candidate";
-import type {V4PeerKind,V4PeerSource,V4PeerLineageMode} from "../lib/v12-v4-peer-state-owners";
+import {liveV4PeerLineageMode,type V4PeerKind,type V4PeerSource} from "../lib/v12-v4-peer-state-owners";
 import {observeV4PeerService,observeCurrentV4PeerService} from "../lib/v12-v4-peer-service-attestation";
 import {assertV4EntrySafety} from "../lib/v12-v4-entry-safety";
 const H2=7200000;
@@ -83,7 +83,7 @@ export async function buildV4ProductionRuntime(){
  if(!["CERTIFIED","CANARY"].includes(operationMode))throw Error("V4_OPERATION_MODE_INVALID");
  const canaryPermit=operationMode==="CANARY"?await readV4CanaryPermit(releaseSha):undefined;
  // Existing PENGU, FET, Q102, V52, HYPE and Idle remain on independently observed exact SHA releases.
- const peerLineageMode:V4PeerLineageMode="ATTEST_EACH_PEER";
+ const peerLineageMode=liveV4PeerLineageMode(operationMode);
  const client=new AsterV3Client({baseUrl:process.env.ASTER_FUTURES_BASE_URL,
   userAddress:process.env.ASTER_USER_ADDRESS,
   privateKey:process.env.ASTER_API_PRIVATE_KEY as `0x${string}`|undefined,
