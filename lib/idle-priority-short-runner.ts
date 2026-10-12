@@ -1,3 +1,4 @@
+import {reuseFlatIdleMarketSnapshot} from "./idle-lock-safe-market";
 import { createHash } from "node:crypto";
 import { lstat, readFile } from "node:fs/promises";
 
@@ -502,6 +503,17 @@ export class IdlePriorityShortRunner {
 
     async tick(): Promise<IdlePriorityShortTickResult> {
         if (!this.dependencies.runtime.enabled) return { status: "disabled", message: "IDLE_PRIORITY_SHORT_DISABLED", ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+        // Complete market-candle I/O outside account ownership only for a
+        // flat and settled local book. Protected positions and unknown fills
+        // still take the lock first, before any market prefetch.
+        let preloadedMarket: Awaited<ReturnType<typeof this.dependencies.marketData.load>>|undefined;
+        try{
+            const before=await this.dependencies.stateStore.load();
+            if(!before.pending&&!before.manualReview&&before.positions.length===0)
+                preloadedMarket=await this.dependencies.marketData.load();
+        }catch{
+            // Preserve original fail-closed locked path on prefetch failure.
+        }
         const lock = await this.dependencies.lock.acquire(`${IDLE_PRIORITY_SHORT_STRATEGY}:${process.pid}:${Date.now()}`);
         if (!lock) return { status: "locked", message: "IDLE_PRIORITY_SHORT_ACCOUNT_LOCK_BUSY", ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
         try {
@@ -514,7 +526,9 @@ export class IdlePriorityShortRunner {
                 this.dependencies.executor.getAccountSnapshot(),
                 this.dependencies.executor.getPositions(),
                 this.dependencies.executor.getOpenOrders(),
-                this.dependencies.marketData.load(),
+                Promise.resolve(reuseFlatIdleMarketSnapshot(preloadedMarket,this.now(),
+                    !state.pending&&!state.manualReview&&state.positions.length===0))
+                    .then(market=>market??this.dependencies.marketData.load()),
             ]);
             const diagnosticSymbols = (Object.keys(market.symbols) as IdlePrioritySymbol[]).map((symbol) => {
                 const features = computeIdlePriorityFeatures(market.decisionTs, market.symbols[symbol], market.btc);
