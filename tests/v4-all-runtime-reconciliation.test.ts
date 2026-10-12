@@ -78,6 +78,18 @@ test("V4 primary contract preserves peer safety overrides after V4 env generatio
   assert.match(wiring, /DISDEX_IDLE_PRIORITY_OPERATOR_ARMED=true/);
 });
 
+test("V4 runtime EnvironmentFile pins peer writers to the monitored state roots", () => {
+  // The legacy EnvironmentFiles are still loaded by the peer templates.  The
+  // release-bound contract must therefore repeat these paths; otherwise a
+  // process can write an old state tree while health/watchdog reads /var/lib.
+  assert.match(wiring, /DISDEX_V13D_V11EQ_V96_STATE_DIR=\/var\/lib\/disdex\/v52-aster-only/);
+  assert.match(wiring, /DISDEX_V52_ASTER_ONLY_STATE_DIR=\/var\/lib\/disdex\/v52-aster-only/);
+  assert.match(wiring, /DISDEX_V11EQ_ASTER_ONLY_STATE_DIR=\/var\/lib\/disdex\/v52-aster-only/);
+  assert.match(wiring, /PENGU_DUAL_LS_V2_STATE_DIR=\$\{PENGU_STATE_ROOT\}/);
+  assert.match(wiring, /PENGU_DUAL_LS_V2_STATE_PATH=\$\{PENGU_STATE_ROOT\}\/runner-live\.json/);
+  assert.match(wiring, /DISDEX_V52_ASTER_ONLY_STATE_PATH=\/var\/lib\/disdex\/v52-aster-only\/runner-live\.json/);
+});
+
 test("V4 wiring performs official flat execution-ledger lineage migration before startup", () => {
   assert.match(wiring, /v12-v4-flat-lineage-migration\.ts/);
   assert.match(wiring, /V4_FLAT_LINEAGE_MIGRATION_AFTER_SIGNED_RECONCILIATION/);
