@@ -183,15 +183,24 @@ async function main(){
  process.once("SIGINT",()=>{stopping=true;});
  process.once("SIGTERM",()=>{stopping=true;});
  do{
+  // Complete H1/H2 market-data reads outside the account mutex when V4 has
+  // no unresolved order or owned leg. Signed account and STOP recovery always
+  // remain inside engine.tick() under the original exclusive lease.
+  const prepared=await engine.prepareFlatMarketDecision();
   const result=await executeV4WithContentionAudit({
-   operation:()=>engine.tick(),releaseSha,operationMode,
+   operation:()=>engine.tick(prepared),releaseSha,operationMode,
    accountLockPath:env("DISDEX_ACCOUNT_LOCK_PATH"),
    attempts:10,retryMs:750,shouldStop:()=>stopping,
   });
   await writeV4Health(releaseSha,operationMode,result);
   console.log(JSON.stringify({releaseSha,operationMode,timestamp:new Date().toISOString(),...result}));
   if(!daemon||stopping)break;
-  await new Promise<void>(done=>setTimeout(done,Math.max(15000,Number(process.env.V12_V4_TICK_INTERVAL_MS||60000))));
+  // A held lock is not a trading signal rejection. Reschedule within the
+  // original 15-minute entry-validity window without extending that window.
+  // Each new tick fetches/rechecks the latest closed candle boundary.
+  const nextDelay=result.status==="locked"?15000:
+   Math.max(15000,Number(process.env.V12_V4_TICK_INTERVAL_MS||60000));
+  await new Promise<void>(done=>setTimeout(done,nextDelay));
  }while(!stopping);
 }
 if(process.argv[1]?.includes("v12-v4-production-runner"))
