@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import {classifyV4RateBudgetDefer} from "../scripts/v12-v4-production-runner";
+import {classifyV4RateBudgetDefer,retryV4FlatBootstrapRateBudget} from "../scripts/v12-v4-production-runner";
 import type {V4ExecutionDocument} from "../lib/v12-v4-execution-store";
 
 function doc(overrides:Record<string,unknown>={}):V4ExecutionDocument{
@@ -42,4 +42,33 @@ test("owned position or active resident protection keeps fail-closed restart sem
 
 test("unrelated infrastructure errors remain fatal",()=>{
  assert.equal(classifyV4RateBudgetDefer(new Error("ECONNRESET"),doc()),undefined);
+});
+
+test("flat bootstrap waits through bounded local budget saturation and then succeeds",async()=>{
+ let calls=0; const waits:number[]=[];
+ const result=await retryV4FlatBootstrapRateBudget({
+  store:{read:()=>doc()} as any,
+  attempts:4,
+  wait:async(ms)=>{waits.push(ms);},
+  operation:async()=>{calls++; if(calls<3)throw new Error("ASTER_GLOBAL_RATE_BUDGET_SATURATED:4000"); return "OK";},
+ });
+ assert.equal(result,"OK");
+ assert.equal(calls,3);
+ assert.equal(waits.length,2);
+ assert.ok(waits.every(ms=>ms>=4000&&ms<=15000));
+});
+
+test("bootstrap never waits when durable state requires immediate reconciliation",async()=>{
+ let waits=0,calls=0;
+ const active=doc({intents:{
+  cid:{clientOrderId:"cid",legId:"leg",action:"ENTRY",sequence:0,stage:"SUBMITTING",createdAt:1,updatedAt:1},
+ }});
+ await assert.rejects(()=>retryV4FlatBootstrapRateBudget({
+  store:{read:()=>active} as any,
+  attempts:4,
+  wait:async()=>{waits++;},
+  operation:async()=>{calls++;throw new Error("ASTER_GLOBAL_RATE_BUDGET_SATURATED:4000");},
+ }),/ASTER_GLOBAL_RATE_BUDGET_SATURATED:4000/);
+ assert.equal(calls,1);
+ assert.equal(waits,0);
 });
