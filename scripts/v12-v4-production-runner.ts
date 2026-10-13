@@ -17,8 +17,24 @@ import {attachV4NativeCoreCandidates} from "../lib/v12-v4-core-candidate";
 import {liveV4PeerLineageMode,type V4PeerKind,type V4PeerSource} from "../lib/v12-v4-peer-state-owners";
 import {observeV4PeerService,observeCurrentV4PeerService} from "../lib/v12-v4-peer-service-attestation";
 import {assertV4EntrySafety} from "../lib/v12-v4-entry-safety";
+import {classifyAsterRateBudgetFailure,nextAsterRateBudgetRetryMs} from "../lib/disdex-aster-rate-budget-policy";
+import type {V4ExecutionDocument} from "../lib/v12-v4-execution-store";
+import type {V4TickResult} from "../lib/v12-v4-runner-engine";
 const H2=7200000;
 const V4_HEALTH_SCHEMA="disdex-v12-v4-runner-heartbeat/v1";
+export type V4RateBudgetDefer={reason:string;waitMs:number};
+export function classifyV4RateBudgetDefer(error:unknown,doc:V4ExecutionDocument):V4RateBudgetDefer|undefined{
+ const rate=classifyAsterRateBudgetFailure(error);
+ if(!rate)return;
+ const activeIntent=Object.values(doc.intents).some(intent=>intent.stage!=="TERMINAL");
+ const activeLeg=Object.values(doc.state.legs).some(leg=>leg.qty>0||leg.status==="PENDING_ENTRY"||leg.status==="OPEN");
+ const activeProtection=Object.values(doc.protections).some(protection=>protection.phase!=="CLOSED");
+ // A rate slot is reserved before HTTP transmission. It is safe to defer only
+ // while the durable execution store proves there is nothing to reconcile.
+ if(activeIntent||activeLeg||activeProtection)return;
+ const waitMs=nextAsterRateBudgetRetryMs(0,1000,15000,rate.waitMs??0,()=>0.5);
+ return {reason:"V4_RATE_BUDGET_DEFERRED:"+rate.reason,waitMs};
+}
 function v4HealthPath(){
  return String(process.env.V12_V4_HEALTH_STATE_PATH??"/var/lib/disdex/v12-v4/heartbeat.json").trim();
 }
@@ -167,7 +183,7 @@ export async function buildV4ProductionRuntime(){
    else await assertV4CertifiedOrder(releaseSha,cmd,store.read());
   },
  });
- return {engine,releaseSha,operationMode};
+ return {engine,store,releaseSha,operationMode};
 }
 async function main(){
  const once=process.argv.includes("--once"),daemon=process.argv.includes("--daemon"),initialize=process.argv.includes("--init-signed-flat");
@@ -178,29 +194,42 @@ async function main(){
   return;
  }
  if(!once&&!daemon&&!initialize)throw Error("V4_RUNNER_REQUIRES_MODE");
- const {engine,releaseSha,operationMode}=await buildV4ProductionRuntime();
+ const {engine,store,releaseSha,operationMode}=await buildV4ProductionRuntime();
  if(initialize){console.log(JSON.stringify({status:"SIGNED_FLAT_STATE_INITIALIZED",releaseSha,operationMode,orderEnabled:false}));return;}
  let stopping=false;
  process.once("SIGINT",()=>{stopping=true;});
  process.once("SIGTERM",()=>{stopping=true;});
  do{
-  // Complete H1/H2 market-data reads outside the account mutex when V4 has
-  // no unresolved order or owned leg. Signed account and STOP recovery always
-  // remain inside engine.tick() under the original exclusive lease.
-  const prepared=await engine.prepareFlatMarketDecision();
-  const result=await executeV4WithContentionAudit({
-   operation:()=>engine.tick(prepared),releaseSha,operationMode,
-   accountLockPath:env("DISDEX_ACCOUNT_LOCK_PATH"),
-   attempts:10,retryMs:750,shouldStop:()=>stopping,
-  });
+  let result:V4TickResult;
+  let deferredWaitMs=0;
+  let hadLockContention=false;
+  try{
+   // Complete H1/H2 market-data reads outside the account mutex when V4 has
+   // no unresolved order or owned leg. Signed account and STOP recovery always
+   // remain inside engine.tick() under the original exclusive lease.
+   const prepared=await engine.prepareFlatMarketDecision();
+   result=await executeV4WithContentionAudit({
+    operation:()=>engine.tick(prepared),releaseSha,operationMode,
+    accountLockPath:env("DISDEX_ACCOUNT_LOCK_PATH"),
+    attempts:10,retryMs:750,shouldStop:()=>stopping,
+    onContention:()=>{hadLockContention=true;},
+   });
+  }catch(error){
+   const deferred=classifyV4RateBudgetDefer(error,store.read());
+   if(!deferred)throw error;
+   deferredWaitMs=deferred.waitMs;
+   result={status:"observing",reason:deferred.reason,eventTs:Date.now(),candidateCount:0,orderEnabled:false};
+  }
   await writeV4Health(releaseSha,operationMode,result);
-  console.log(JSON.stringify({releaseSha,operationMode,timestamp:new Date().toISOString(),...result}));
+  console.log(JSON.stringify({releaseSha,operationMode,timestamp:new Date().toISOString(),...result,
+   ...(deferredWaitMs?{retryAfterMs:deferredWaitMs}:{}),hadLockContention}));
   if(!daemon||stopping)break;
-  // A held lock is not a trading signal rejection. Reschedule within the
-  // original 15-minute entry-validity window without extending that window.
-  // Each new tick fetches/rechecks the latest closed candle boundary.
+  // Persistent lock contention retries quickly, while a resolved collision gets
+  // one phase-shifted normal tick so V4 does not re-align with the same peer.
+  const normalWait=Math.max(15000,Number(process.env.V12_V4_TICK_INTERVAL_MS||60000));
   const nextDelay=result.status==="locked"?15000:
-   Math.max(15000,Number(process.env.V12_V4_TICK_INTERVAL_MS||60000));
+   deferredWaitMs>0?Math.max(1000,deferredWaitMs):
+   normalWait+(hadLockContention?7000:0);
   await new Promise<void>(done=>setTimeout(done,nextDelay));
  }while(!stopping);
 }
