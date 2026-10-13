@@ -42,6 +42,16 @@ test("V4 full-LIVE wiring pins V4 independently while preserving current peer SH
   assert.match(wiring, /operator_activation_all_trading_ready/);
 });
 
+test("V4 primary SHA env preserves Idle Residual LONG runtime contract", () => {
+  const primaryEnv = wiring.match(/write_v4_primary_runtime_artifacts\(\) \{([\s\S]*?)\n\}/)?.[1] ?? "";
+  assert.ok(primaryEnv, "V4 primary runtime artifact function must be present");
+  assert.match(primaryEnv, /^DISDEX_IDLE_RESIDUAL_LONG_ENABLED=true$/m);
+  assert.match(primaryEnv, /^DISDEX_IDLE_RESIDUAL_LONG_OPERATOR_ARMED=true$/m);
+  assert.match(primaryEnv, /^DISDEX_IDLE_RESIDUAL_LONG_STATE_PATH=\$\{IDLE_PRIORITY_STATE_ROOT\}\/residual-long-state\.json$/m);
+  assert.match(primaryEnv, /^DISDEX_IDLE_RESIDUAL_LONG_PARITY_CERT_PATH=\$\{SHARED_ROOT\}\/idle-residual-long-parity-cert\.json$/m);
+  assert.match(primaryEnv, /^DISDEX_IDLE_RESIDUAL_LONG_MAX_SLIPPAGE_BPS=20$/m);
+});
+
 test("mixed-SHA wiring validates V4 runner artifacts from the pinned V4 release", () => {
   const validation = wiring.match(/validate_release_artifacts\(\) \{([\s\S]*?)\n\}/)?.[1] ?? "";
   assert.match(validation, /local required_file v4_release="\$CURRENT_RELEASE"/);
