@@ -29,7 +29,8 @@ test("short live-peer contention retries, records the real owner, and succeeds w
   assert.equal(rows[0].resolved,true);
   assert.equal(rows[0].observations[0].ownerId,"PENGU_DUAL_LS_V2");
   assert.equal(rows[0].observations[0].state,"HELD");
-  assert.equal(rows[0].elapsedMs,500);
+  assert.equal(rows[0].elapsedMs,1000);
+  assert.deepEqual(rows[0].retryDelaysMs,[250,750]);
   assert.equal(rows[0].orderMutationByObserver,0);
   assert.ok(!readFileSync(auditPath,"utf8").includes("test-lease"));
  }finally{rmSync(dir,{recursive:true,force:true});}
@@ -52,6 +53,7 @@ test("persistent lock remains fail-closed and records the actual peer and retry 
   const event=JSON.parse(readFileSync(out,"utf8").trim());
   assert.equal(event.busyAttempts,3);assert.equal(event.resolved,false);
   assert.equal(event.outcome,"locked");
+  assert.deepEqual(event.retryDelaysMs,[300,800]);
   assert.ok(event.observations.every((x:any)=>x.ownerId==="Q102_RUNNER"));
  }finally{rmSync(dir,{recursive:true,force:true});}
 });
