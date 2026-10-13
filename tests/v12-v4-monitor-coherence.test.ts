@@ -68,10 +68,17 @@ test("safety daemons are enabled as well as started so coherence does not defer 
 });
 
 test("coherence guard accepts only the exact V4-primary/current-peer mixed-SHA set",()=>{
+  const bash=process.platform==="win32"?"C:/Program Files/Git/bin/bash.exe":"/usr/bin/bash";
+  const guard=resolve("scripts/ops/root/disdex-current-runtime-coherence-guard");
+  const output=execFileSync(bash,[guard,"--self-test-v4-mixed-sha"],{encoding:"utf8"});
+  assert.match(output,/V4_MIXED_SHA_COHERENCE_SELFTEST_PASS/);
+});
+
+test("coherence guard accepts only the release-bound Python Margin Guard form",()=>{
  const bash=process.platform==="win32"?"C:/Program Files/Git/bin/bash.exe":"/usr/bin/bash";
  const guard=resolve("scripts/ops/root/disdex-current-runtime-coherence-guard");
- const output=execFileSync(bash,[guard,"--self-test-v4-mixed-sha"],{encoding:"utf8"});
- assert.match(output,/V4_MIXED_SHA_COHERENCE_SELFTEST_PASS/);
+ const output=execFileSync(bash,[guard,"--self-test-margin-guard-exec"],{encoding:"utf8"});
+ assert.match(output,/MARGIN_GUARD_EXECSTART_COHERENCE_SELFTEST_PASS/);
 });
 
 test("health alert accepts only exact-SHA V4 override for V12",()=>{

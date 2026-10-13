@@ -130,6 +130,23 @@ is_expected_unit() {
   [[ -n "${EXPECTED_SHA_BY_UNIT[$1]:-}" ]]
 }
 
+exec_start_matches_expected_root() {
+  local unit="$1" expected_root="$2" exec_start="$3"
+  [[ "$exec_start" == *"$expected_root/"* ]] && return 0
+
+  # Margin Guard is intentionally launched by the system Python interpreter
+  # with a relative script from its release-bound WorkingDirectory.  The
+  # WorkingDirectory, /proc/<pid>/cwd, and release-marker checks below remain
+  # mandatory; accept only this exact unit/script form here, never arbitrary
+  # system-Python commands for other runtime units.
+  if [[ "$unit" =~ ^disdex-v12-v52-margin-guard@[0-9a-f]{40}\.service$ ]] \
+    && [[ "$exec_start" == *"/usr/bin/python3"* ]] \
+    && [[ "$exec_start" == *"scripts/disdex_v96_v52_margin_guard_runtime.py"* ]]; then
+    return 0
+  fi
+  return 1
+}
+
 verify_current_units_active() {
   local unit pid cwd expected_root expected_sha working_directory exec_start marker
   for unit in "${CURRENT_UNITS[@]}"; do
@@ -143,7 +160,7 @@ verify_current_units_active() {
     working_directory="$(systemctl show "$unit" -p WorkingDirectory --value 2>/dev/null || true)"
     [[ "$working_directory" == "$expected_root" ]] || return 1
     exec_start="$(systemctl show "$unit" -p ExecStart --value 2>/dev/null || true)"
-    [[ "$exec_start" == *"$expected_root/"* ]] || return 1
+    exec_start_matches_expected_root "$unit" "$expected_root" "$exec_start" || return 1
     cwd="$(readlink -f -- "/proc/$pid/cwd" 2>/dev/null || true)"
     [[ "$cwd" == "$expected_root" ]] || return 1
     marker="$(tr -d '[:space:]' < "$expected_root/.disdex-release-sha" 2>/dev/null || true)"
@@ -399,6 +416,18 @@ main() {
     [[ "${HEARTBEAT_EXPECTED_SHAS[0]}" == "$V4_PRIMARY_SHA" ]]
     [[ "${HEARTBEAT_EXPECTED_SHAS[1]}" == "$DEPLOYED_SHA" ]]
     printf 'V4_MIXED_SHA_COHERENCE_SELFTEST_PASS\n'
+    exit 0
+  fi
+  if [[ "$mode" == "--self-test-margin-guard-exec" ]]; then
+    local test_sha="30a3fa9934e1ff5d8a9438062ea7177f2bf9bb0e"
+    local test_root="/home/deploy/disdex-trading/releases/$test_sha"
+    local test_unit="disdex-v12-v52-margin-guard@$test_sha.service"
+    local valid_exec="{ path=/usr/bin/python3 ; argv[]=/usr/bin/python3 scripts/disdex_v96_v52_margin_guard_runtime.py --mode live --daemon ; }"
+    local invalid_exec="{ path=/usr/bin/python3 ; argv[]=/usr/bin/python3 /tmp/disdex_v96_v52_margin_guard_runtime.py --mode live --daemon ; }"
+    exec_start_matches_expected_root "$test_unit" "$test_root" "$valid_exec"
+    ! exec_start_matches_expected_root "$test_unit" "$test_root" "$invalid_exec"
+    ! exec_start_matches_expected_root "disdex-v12-v4@$test_sha.service" "$test_root" "$valid_exec"
+    printf 'MARGIN_GUARD_EXECSTART_COHERENCE_SELFTEST_PASS\n'
     exit 0
   fi
   resolve_current
