@@ -27,6 +27,7 @@ export type V4LockContentionEvent={
  outcome:string;
  elapsedMs:number;
  retryIntervalMs:number;
+ retryDelaysMs:number[];
  observations:V4LockHolderObservation[];
  orderMutationByObserver:0;
 };
@@ -67,18 +68,29 @@ export async function executeV4WithContentionAudit<T extends TickResult>(input:{
  now?:()=>number;
  persist?:(event:V4LockContentionEvent)=>Promise<void>;
  emit?:(event:V4LockContentionEvent)=>void;
+ onContention?:(observation:V4LockHolderObservation,attempt:number)=>void;
 }):Promise<T>{
  const now=input.now??Date.now,startedAt=now();
  const retryMs=input.retryMs??750;
  const observations:V4LockHolderObservation[]=[];
+ const retryDelaysMs:number[]=[];
+ const baseWait=input.wait??((ms:number)=>new Promise<void>(done=>setTimeout(done,ms)));
  let result:T|undefined;
  try{
   result=await runWithBoundedAccountLockRetry({
-   attempts:input.attempts??10,retryMs,shouldStop:input.shouldStop,wait:input.wait,
+   attempts:input.attempts??10,retryMs,shouldStop:input.shouldStop,
+   wait:async()=>{
+    const n=Math.max(1,observations.length);
+    const delay=Math.min(2500,retryMs+Math.max(0,n-1)*500);
+    retryDelaysMs.push(delay);
+    await baseWait(delay);
+   },
    operation:async()=>{
     const next=await input.operation();
     if(next.status==="locked"){
-     observations.push(await inspectV4LockHolder(input.accountLockPath,now()));
+     const observation=await inspectV4LockHolder(input.accountLockPath,now());
+     observations.push(observation);
+     input.onContention?.(observation,observations.length);
     }
     return next;
    },
@@ -92,7 +104,7 @@ export async function executeV4WithContentionAudit<T extends TickResult>(input:{
     observedAt:startedAt,busyAttempts:observations.length,
     resolved:Boolean(result&&result.status!=="locked"),
     outcome:result?.status??"THREW_DURING_RETRY",
-    elapsedMs:Math.max(0,now()-startedAt),retryIntervalMs:retryMs,
+    elapsedMs:Math.max(0,now()-startedAt),retryIntervalMs:retryMs,retryDelaysMs,
     observations,orderMutationByObserver:0,
    };
    // Never let an observability write failure strand the protection reconciliation.
