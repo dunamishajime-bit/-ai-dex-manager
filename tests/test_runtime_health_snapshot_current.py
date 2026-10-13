@@ -27,6 +27,12 @@ class RuntimeHealthSnapshotCurrentTest(unittest.TestCase):
         self.assertIn("scripts/ops/root/disdex-runner-health-snapshot-current.mjs", wiring)
         self.assertIn("ExecStart=/usr/bin/node ${MONITOR_RUNTIME_ROOT}/scripts/ops/root/disdex-runner-health-snapshot-current.mjs", wiring)
 
+    def test_idle_parity_gate_is_visible_in_health_state(self):
+        source = SNAPSHOT.read_text(encoding="utf-8")
+        self.assertIn("parityCertificatePath", source)
+        self.assertIn("IDLE_PARITY_CERT_RUNTIME_SHA_MISMATCH", source)
+        self.assertIn("IDLE_PARITY_CERT_NOT_VERIFIED", source)
+
 
 class MarginGuardHealthVisibilityTest(unittest.TestCase):
     def test_snapshot_surfaces_margin_guard_state_and_freshness(self):

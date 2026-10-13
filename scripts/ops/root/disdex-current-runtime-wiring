@@ -937,6 +937,18 @@ ensure_safety_daemon_active() {
     printf 'required safety daemon failed to become active: %s state=%s\n' "$unit" "$active_state" >&2
     return 1
   }
+  # Safety daemons must survive a host/systemd restart as well as the current
+  # cutover.  Leaving a started template instance disabled makes the
+  # coherence guard defer forever after every deployment and can silently
+  # remove the risk/margin authority on the next boot.
+  systemctl enable "$unit" >/dev/null 2>&1 || {
+    printf 'required safety daemon is not enabled: %s\n' "$unit" >&2
+    return 1
+  }
+  [[ "$(systemctl is-enabled "$unit" 2>/dev/null || true)" == "enabled" ]] || {
+    printf 'required safety daemon enablement could not be verified: %s\n' "$unit" >&2
+    return 1
+  }
   printf 'DISDEX_SAFETY_DAEMON_ACTIVE unit=%s ordersSent=0 cancelSent=0 positionChangesSent=0\n' "$unit"
 }
 

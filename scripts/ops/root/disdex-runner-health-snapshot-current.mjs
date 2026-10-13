@@ -17,6 +17,8 @@ const MARGIN_UNIT = String(process.env.DISDEX_HEALTH_SNAPSHOT_MARGIN_SERVICE_UNI
 const MARGIN_RELEASE_ROOT = String(process.env.DISDEX_HEALTH_SNAPSHOT_MARGIN_RELEASE_ROOT || `/home/deploy/disdex-trading/releases/${DEFAULT_EXPECTED_SHA}`).trim();
 const MARGIN_FRESHNESS_GRACE_MS = 120_000;
 const SHARED_RISK_FRESHNESS_GRACE_MS = 120_000;
+const IDLE_PARITY_CERT_SCHEMA = "disdex-idle-priority-parity-cert/v3";
+const IDLE_PARITY_REPLAY_MODEL = "FIXED_BASELINE_ACCEPTED_INTENTS_DYNAMIC_GROSS_V1";
 
 function configuredPath(name, fallback) {
     return String(process.env[name] || fallback).trim();
@@ -125,6 +127,7 @@ const RUNNERS = [
         releaseRoot: IDLE_PIN.releaseRoot,
         script: "scripts/disdex-idle-priority-short-live-runner.ts",
         statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_IDLE_STATE_PATH", "/var/lib/disdex/idle-priority/state.json"),
+        parityCertificatePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_IDLE_PARITY_CERT_PATH", "/var/lib/disdex/shared/idle-priority-parity-cert.json"),
         heartbeatFile: "idle-priority-short.json",
         maxStateAgeMs: 20 * 60_000,
     },
@@ -132,6 +135,40 @@ const RUNNERS = [
 
 function json(path) {
     return readFile(path, "utf8").then((raw) => JSON.parse(raw));
+}
+
+function near(actual, expected, tolerance) {
+    const value = Number(actual);
+    return Number.isFinite(value) && Math.abs(value - expected) <= tolerance;
+}
+
+function idleParityCertificateReason(raw, expectedSha) {
+    if (!raw || typeof raw !== "object" || Array.isArray(raw)) return "IDLE_PARITY_CERT_MALFORMED";
+    if (raw.schema !== IDLE_PARITY_CERT_SCHEMA) return "IDLE_PARITY_CERT_SCHEMA_MISMATCH";
+    if (String(raw.runtimeSha || "").toLowerCase() !== expectedSha) return "IDLE_PARITY_CERT_RUNTIME_SHA_MISMATCH";
+    if (raw.newBacktestVerified === false) return "IDLE_PARITY_CERT_NOT_VERIFIED";
+    if (raw.candidateStreamSha256 !== "09e97db7a812728f5e54c1179c8e39ac30c6dba4fea241a9d415fa4810f8adbb") return "IDLE_PARITY_CERT_STREAM_SHA_MISMATCH";
+    if (raw.genericCandidateSha256 !== "d32ed3a07a6338e8fae792ec6d9071ea27a1dee548eed6a3825dfbda3270019a") return "IDLE_PARITY_CERT_GENERIC_SHA_MISMATCH";
+    if (raw.genericCandidateRows !== 393 || raw.genericSourceGapRows !== 2) return "IDLE_PARITY_CERT_GENERIC_COUNTS_MISMATCH";
+    if (raw.genericLifecycleModel !== "BASELINE_CONTINUOUS_IDLE__BREAKOUT_RELATIVE_MOMENTUM__12H_PER_SYMBOL") return "IDLE_PARITY_CERT_GENERIC_MODEL_MISMATCH";
+    if (raw.filteredSha256 !== "5029baad39bd07c9fc40ec4ba75941cb089697d5cebc437c29838cbc924f3e48") return "IDLE_PARITY_CERT_FILTERED_SHA_MISMATCH";
+    if (raw.candidateRows !== 495 || raw.filteredRows !== 63 || raw.admittedRows !== 61 || raw.wins !== 48 || raw.losses !== 13) return "IDLE_PARITY_CERT_COUNTS_MISMATCH";
+    if (raw.roundtripBps !== 10 || raw.replayModelVersion !== IDLE_PARITY_REPLAY_MODEL) return "IDLE_PARITY_CERT_REPLAY_CONTRACT_MISMATCH";
+    if (raw.baselineTradeCount !== 1284 || raw.baselineRejectedRows !== 6 || raw.integratedTradeCount !== 1339) return "IDLE_PARITY_CERT_TRADE_COUNTS_MISMATCH";
+    if (!near(raw.baselineJpy, 141845207.7243423, 1) || !near(raw.finalJpy, 214775230.26444945, 1)) return "IDLE_PARITY_CERT_EQUITY_MISMATCH";
+    if (!near(raw.profitFactor, 2.046425970772986, 1e-9) || !near(raw.maxDrawdownPct, -0.22840597480157931, 1e-9) || !near(raw.idleProfitFactor, 6.582814623608791, 1e-9)) return "IDLE_PARITY_CERT_METRIC_MISMATCH";
+    if (!Number.isFinite(Number(raw.generatedAt))) return "IDLE_PARITY_CERT_GENERATED_AT_INVALID";
+    return "";
+}
+
+async function idleParityReason(runner) {
+    if (runner.key !== "IDLE_PRIORITY_SHORT") return "";
+    try {
+        const certificate = await json(runner.parityCertificatePath);
+        return idleParityCertificateReason(certificate, runner.expectedSha);
+    } catch {
+        return "IDLE_PARITY_CERT_UNAVAILABLE";
+    }
 }
 
 async function serviceSnapshot(unit) {
@@ -337,9 +374,10 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
     const commandCurrent = Boolean(service?.command.includes(runner.script) && service?.command.includes("--daemon"));
     const execCurrent = Boolean(service?.execStart.includes(runner.releaseRoot));
     const identityOk = serviceActive && processPresent && cwdCurrent && commandCurrent && execCurrent;
+    const parityReason = await idleParityReason(runner);
     const manualReviewReason = state?.manualReview ? `${runner.key} manual review is active` : "";
-    const blockedReason = globalBlockReason || stateError || serviceError || !releaseValid(runner)
-        ? (globalBlockReason || stateError || serviceError || "release pin is invalid")
+    const blockedReason = globalBlockReason || stateError || serviceError || parityReason || !releaseValid(runner)
+        ? (globalBlockReason || stateError || serviceError || parityReason || "release pin is invalid")
         : manualReviewReason
             ? manualReviewReason
             : !identityOk
@@ -375,6 +413,12 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
             selectorMode: "CAUSAL_V4",
             historicalSelectorParity: false,
             brkLiveEnabled: true,
+        };
+    }
+    if (runner.key === "IDLE_PRIORITY_SHORT") {
+        heartbeat.idle = {
+            parityCertificatePath: runner.parityCertificatePath,
+            parityVerified: !parityReason,
         };
     }
     if (blockedReason) heartbeat.healthReason = blockedReason;

@@ -62,6 +62,11 @@ test("coherence guard follows the persistent V4 primary marker",()=>{
  assert.match(coherence,/DISDEX_PRIMARY_V12_RUNNER="\$PRIMARY_V12_MODE"/);
 });
 
+test("safety daemons are enabled as well as started so coherence does not defer forever",()=>{
+ assert.match(wiring,/systemctl enable "\$unit"/);
+ assert.match(wiring,/required safety daemon is not enabled/);
+});
+
 test("coherence guard accepts only the exact V4-primary/current-peer mixed-SHA set",()=>{
  const bash=process.platform==="win32"?"C:/Program Files/Git/bin/bash.exe":"/usr/bin/bash";
  const guard=resolve("scripts/ops/root/disdex-current-runtime-coherence-guard");
