@@ -1,4 +1,4 @@
-import "dotenv/config";
+﻿import "dotenv/config";
 import {readFile,lstat,mkdir,rename,writeFile} from "node:fs/promises";
 import {dirname} from "node:path";
 import {AsterV3Client} from "../lib/aster-v3-client";
@@ -19,7 +19,7 @@ import {observeV4PeerService,observeCurrentV4PeerService} from "../lib/v12-v4-pe
 import {assertV4EntrySafety} from "../lib/v12-v4-entry-safety";
 import {classifyAsterRateBudgetFailure,nextAsterRateBudgetRetryMs} from "../lib/disdex-aster-rate-budget-policy";
 import type {V4ExecutionDocument} from "../lib/v12-v4-execution-store";
-import type {V4TickResult} from "../lib/v12-v4-runner-engine";
+import type {V4PreparedDecision,V4TickResult} from "../lib/v12-v4-runner-engine";
 const H2=7200000;
 const V4_HEALTH_SCHEMA="disdex-v12-v4-runner-heartbeat/v1";
 export type V4RateBudgetDefer={reason:string;waitMs:number};
@@ -52,6 +52,29 @@ export async function retryV4FlatBootstrapRateBudget<T>(input:{
 }
 function v4HealthPath(){
  return String(process.env.V12_V4_HEALTH_STATE_PATH??"/var/lib/disdex/v12-v4/heartbeat.json").trim();
+}
+const V4_IDLE_BASELINE_SCHEMA="v12-v4-idle-baseline/v1";
+export type V4IdleBaselineSnapshot={
+ schema:typeof V4_IDLE_BASELINE_SCHEMA;strategyId:"V12_V4";releaseSha:string;runtimeSha:string;
+ updatedAt:number;sourceComplete:boolean;candidateCount:number;reason:string;decisionTs?:number;capturedAtMs?:number;
+};
+export function buildV4IdleBaselineSnapshot(releaseSha:string,prepared:V4PreparedDecision|undefined,updatedAt=Date.now()):V4IdleBaselineSnapshot{
+ const base={schema:V4_IDLE_BASELINE_SCHEMA,strategyId:"V12_V4" as const,releaseSha,runtimeSha:releaseSha,updatedAt} as const;
+ if(!prepared)return {...base,sourceComplete:false,candidateCount:0,reason:"V4_EXECUTION_STATE_NOT_FLAT_OR_PREPARE_SKIPPED"};
+ if(prepared.kind==="FAILED")return {...base,sourceComplete:false,candidateCount:0,reason:"V4_MARKET_DATA_UNAVAILABLE:"+prepared.reason};
+ const decision=prepared.decision;
+ const sourceComplete=decision.errors.length===0;
+ return {...base,sourceComplete,candidateCount:sourceComplete?decision.candidateCount:0,
+  reason:sourceComplete?(decision.candidateCount>0?"SIGNAL_AVAILABLE":"NO_COMPLETED_BAR_SIGNAL"):"V4_DECISION_SOURCE_INCOMPLETE",
+  decisionTs:decision.decisionTs,capturedAtMs:decision.capturedAtMs};
+}
+async function writeV4IdleBaselineSnapshot(releaseSha:string,prepared:V4PreparedDecision|undefined){
+ const path=String(process.env.V12_V4_IDLE_BASELINE_SNAPSHOT_PATH??"/var/lib/disdex/v12-v4/idle-baseline-snapshot.json").trim();
+ if(!path.startsWith("/var/lib/disdex/v12-v4/"))throw Error("V4_IDLE_BASELINE_PATH_INVALID");
+ await mkdir(dirname(path),{recursive:true,mode:0o700});
+ const now=Date.now(),tmp=path+"."+process.pid+"."+now+".tmp";
+ await writeFile(tmp,JSON.stringify(buildV4IdleBaselineSnapshot(releaseSha,prepared,now))+"\n",{encoding:"utf8",mode:0o600});
+ await rename(tmp,path);
 }
 async function writeV4Health(releaseSha:string,operationMode:string,result:{
  status:string;reason:string;eventTs:number;candidateCount:number;orderEnabled:boolean;
@@ -224,6 +247,7 @@ async function main(){
    // no unresolved order or owned leg. Signed account and STOP recovery always
    // remain inside engine.tick() under the original exclusive lease.
    const prepared=await engine.prepareFlatMarketDecision();
+   await writeV4IdleBaselineSnapshot(releaseSha,prepared);
    result=await executeV4WithContentionAudit({
     operation:()=>engine.tick(prepared),releaseSha,operationMode,
     accountLockPath:env("DISDEX_ACCOUNT_LOCK_PATH"),

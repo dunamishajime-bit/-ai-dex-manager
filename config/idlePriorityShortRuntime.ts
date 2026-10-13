@@ -10,6 +10,9 @@ export function resolveIdlePriorityShortRuntime(){
  const runtimeSha=String(process.env.DISDEX_RUNTIME_SHA||process.env.GIT_COMMIT||"").trim().toLowerCase();
  if(!/^[0-9a-f]{40}$/.test(runtimeSha)) throw new Error("IDLE_RUNTIME_SHA_INVALID");
  if(mode==="LIVE" && (!enabled || !bool(process.env.DISDEX_IDLE_PRIORITY_OPERATOR_ARMED,false))) throw new Error("IDLE_LIVE_NOT_OPERATOR_ARMED");
+ const v12DecisionPath=resolve(mode==="LIVE"
+  ? (process.env.V12_V4_IDLE_BASELINE_SNAPSHOT_PATH||"/var/lib/disdex/v12-v4/idle-baseline-snapshot.json")
+  : (process.env.V12_DECISION_SNAPSHOT_PATH||"/var/lib/disdex/v12-x1-all/decision-snapshot.json"));
  return {
   mode,enabled,runtimeSha,
   releaseRoot:resolve(process.env.DISDEX_RELEASE_ROOT||process.cwd()),
@@ -17,7 +20,7 @@ export function resolveIdlePriorityShortRuntime(){
   statePath:resolve(process.env.DISDEX_IDLE_PRIORITY_STATE_PATH||"/var/lib/disdex/idle-priority/state.json"),
   decisionPath:resolve(process.env.DISDEX_IDLE_PRIORITY_DECISION_PATH||"/var/lib/disdex/idle-priority/decision.json"),
   decisionDetailsPath:resolve(process.env.DISDEX_IDLE_PRIORITY_DECISION_DETAILS_PATH||"/var/lib/disdex/idle-priority/decision-details.json"),
-  v12DecisionPath:resolve(process.env.V12_DECISION_SNAPSHOT_PATH||"/var/lib/disdex/v12-x1-all/decision-snapshot.json"),
+  v12DecisionPath,
   q102DecisionPath:resolve(process.env.QUALITY102_CAUSAL_V1_DECISION_SNAPSHOT_PATH||"/var/lib/disdex/quality102-causal-v1/decision-snapshot.json"),
   penguStatePath:resolve(process.env.PENGU_DUAL_LS_V2_STATE_PATH||"/var/lib/disdex/pengu-dual-ls-v2/runner-live.json"),
   fetStatePath:resolve(process.env.FET_BRK48_STATE_PATH||"/var/lib/disdex/fet-brk48-residual/state.json"),

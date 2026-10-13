@@ -117,8 +117,42 @@ def test_closed_session_emergency_flatten_still_requires_lock() -> None:
         prepared = engine.prepare_tick_inputs()
     assert not prepared["skipWithoutLock"], "actual emergency mutation must remain serialized"
 
+
+def test_flat_regular_session_outside_action_window_skips_account_lock() -> None:
+    from unittest.mock import patch
+    engine = object.__new__(v52.V52AsterOnlyEngine)
+    engine.state = {"positions": {}}
+    engine.current_local_time = lambda: v52.dt.datetime(2026, 10, 13, 11, 0, 0, tzinfo=v52.base.NY)
+    engine.positions = lambda: {}
+    engine.kill_switch = lambda: None
+    engine._clear_kill_flatten_latch = lambda: None
+    engine.books_and_refs = lambda: (_ for _ in ()).throw(AssertionError("flat non-action window must not fetch lock-bound books"))
+    with patch.object(v52, "regular_us_equity_session", return_value=True):
+        prepared = engine.prepare_tick_inputs()
+    assert prepared["skipWithoutLock"] is True
+    assert prepared["rows"] is None
+    assert engine._loop_interval_ms(prepared) >= 15_000
+
+
+def test_flat_regular_session_action_window_still_requires_account_lock() -> None:
+    from unittest.mock import patch
+    engine = object.__new__(v52.V52AsterOnlyEngine)
+    engine.state = {"positions": {}}
+    engine.current_local_time = lambda: v52.dt.datetime(2026, 10, 13, 10, 30, 5, tzinfo=v52.base.NY)
+    engine.positions = lambda: {}
+    engine.kill_switch = lambda: None
+    engine._clear_kill_flatten_latch = lambda: None
+    engine.books_and_refs = lambda: ["prepared"]
+    with patch.object(v52, "regular_us_equity_session", return_value=True):
+        prepared = engine.prepare_tick_inputs()
+    assert prepared["skipWithoutLock"] is False
+    assert prepared["rows"] == ["prepared"]
+    assert engine._loop_interval_ms(prepared) == 250
+
 if __name__ == "__main__":
     test_v52_releases_shared_lock_before_daemon_sleep()
     test_market_closed_position_guard_does_not_take_order_lock()
     test_closed_session_emergency_flatten_still_requires_lock()
+    test_flat_regular_session_outside_action_window_skips_account_lock()
+    test_flat_regular_session_action_window_still_requires_account_lock()
     print("V52_MARKET_CLOSED_LOCK_SCOPE_SELFTEST_PASS")

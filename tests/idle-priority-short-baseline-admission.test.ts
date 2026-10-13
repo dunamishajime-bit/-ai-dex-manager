@@ -239,3 +239,63 @@ test("fresh V12 alternating-H1 no-bar observation is current no-acceptance, neve
         await rm(f.root, { recursive: true, force: true });
     }
 });
+
+test("fresh V4 same-timestamp candidate blocks Idle admission", async () => {
+    const f = await fixture();
+    try {
+        await writeFile(f.paths.v12Path, JSON.stringify({
+            schema: "v12-v4-idle-baseline/v1",
+            strategyId: "V12_V4",
+            releaseSha: SHA,
+            runtimeSha: SHA,
+            sourceComplete: true,
+            decisionTs: f.input.decisionTs,
+            capturedAtMs: f.input.decisionTs,
+            updatedAt: f.input.decisionTs + 10_000,
+            candidateCount: 1,
+            reason: "SIGNAL_AVAILABLE",
+        }));
+        const result = await buildBaselineAdmissionEvidence({ ...f.input, now: f.input.decisionTs + 30_000 });
+        assert.equal(result.baselineAcceptedThisTimestamp, 1);
+    } finally {
+        await rm(f.root, { recursive: true, force: true });
+    }
+});
+
+test("fresh V4 alternating-H1 snapshot proves liveness without carrying the prior H2 candidate", async () => {
+    const f = await fixture();
+    try {
+        await writeFile(f.paths.v12Path, JSON.stringify({
+            schema: "v12-v4-idle-baseline/v1",
+            strategyId: "V12_V4",
+            releaseSha: SHA,
+            runtimeSha: SHA,
+            sourceComplete: true,
+            decisionTs: f.input.decisionTs - 3_600_000,
+            capturedAtMs: f.input.decisionTs + 5_000,
+            updatedAt: f.input.decisionTs + 10_000,
+            candidateCount: 1,
+            reason: "SIGNAL_AVAILABLE",
+        }));
+        const result = await buildBaselineAdmissionEvidence({ ...f.input, now: f.input.decisionTs + 30_000 });
+        assert.equal(result.baselineAcceptedThisTimestamp, 0);
+
+        await writeFile(f.paths.v12Path, JSON.stringify({
+            schema: "v12-v4-idle-baseline/v1",
+            strategyId: "V12_V4",
+            releaseSha: SHA,
+            runtimeSha: SHA,
+            sourceComplete: false,
+            decisionTs: f.input.decisionTs,
+            updatedAt: f.input.decisionTs + 20_000,
+            candidateCount: 0,
+            reason: "V4_DECISION_SOURCE_INCOMPLETE",
+        }));
+        await assert.rejects(
+            () => buildBaselineAdmissionEvidence({ ...f.input, now: f.input.decisionTs + 30_000 }),
+            /BASELINE_ADMISSION_SOURCE_STALE_OR_TS_MISMATCH/,
+        );
+    } finally {
+        await rm(f.root, { recursive: true, force: true });
+    }
+});

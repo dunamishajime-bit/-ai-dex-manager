@@ -54,6 +54,22 @@ function parsedTimeMs(value: unknown) {
 }
 
 function acceptedByV12(snapshot: JsonRecord, decisionTs: number, now: number) {
+    if (snapshot.schema === "v12-v4-idle-baseline/v1") {
+        if (snapshot.strategyId !== "V12_V4" || snapshot.sourceComplete !== true) throw new Error("BASELINE_ADMISSION_SOURCE_STALE_OR_TS_MISMATCH");
+        const referenceTs = finite(snapshot.decisionTs);
+        const observedAt = finite(snapshot.updatedAt);
+        const candidateCount = finite(snapshot.candidateCount);
+        if (referenceTs === undefined || observedAt === undefined || candidateCount === undefined || candidateCount < 0
+            || observedAt < decisionTs || observedAt > now + 60_000 || now - observedAt > 90_000) {
+            throw new Error("BASELINE_ADMISSION_SOURCE_STALE_OR_TS_MISMATCH");
+        }
+        if (referenceTs === decisionTs) return candidateCount > 0;
+        // V4 is a completed-H2 strategy while Idle evaluates every completed H1.
+        // On the alternating H1 boundary V4 legitimately re-publishes the last H2
+        // decision. It is current liveness evidence, but never a carried acceptance.
+        if (referenceTs === decisionTs - 3_600_000) return false;
+        throw new Error("BASELINE_ADMISSION_SOURCE_STALE_OR_TS_MISMATCH");
+    }
     if (snapshot.schema !== "v12-decision-observation/v1" || snapshot.strategyId !== "V12_X1.00_ALL") throw new Error("BASELINE_ADMISSION_SOURCE_MALFORMED");
     const referenceTs = finite(snapshot.referenceTs);
     if (referenceTs === decisionTs) return snapshot.reason === "SIGNAL_AVAILABLE";

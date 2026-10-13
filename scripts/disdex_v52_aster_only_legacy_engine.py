@@ -1069,6 +1069,17 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
         self.save()
         return bool(next_latch.get("tripped") or next_latch.get("failClosed"))
 
+    def _flat_requires_account_lock(self, sec: int) -> bool:
+        if base.clock("09:59:55") <= sec <= base.clock("10:00:20"):
+            return True
+        if base.clock("10:30:00") <= sec <= base.clock("10:30:20"):
+            return True
+        for window in V50_WINDOWS:
+            entry = base.clock(window + ":00")
+            if entry - 10 <= sec <= entry + 20:
+                return True
+        return False
+
     def prepare_tick_inputs(self) -> dict:
         local = self.current_local_time()
         positions_open = bool(self.positions())
@@ -1086,8 +1097,7 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
             # above remains serialized, and the independent Margin Guard retains
             # account-level protection for every managed position.
             return {"local": local, "rows": None, "skipWithoutLock": True, "marketClosed": True}
-        in_decision_window = base.clock("09:59:50") <= sec <= base.clock("15:30:30")
-        if not positions_open and not in_decision_window:
+        if not positions_open and not self._flat_requires_account_lock(sec):
             return {"local": local, "rows": None, "skipWithoutLock": True}
         return {"local": local, "rows": self.books_and_refs(), "skipWithoutLock": False}
 
@@ -1218,8 +1228,8 @@ class V52AsterOnlyEngine(legacy.AsterOnlyStockEngine):
                     attempted[window] = False; self.save()
 
     def _loop_interval_ms(self, prepared: dict) -> int:
-        idle_ms = max(1_000, base.int_env("DISDEX_STOCK_IDLE_INTERVAL_MS", 5000))
-        if prepared.get("killHold") or prepared.get("upstreamHold") or prepared.get("marketClosed"):
+        idle_ms = max(15_000, base.int_env("DISDEX_STOCK_IDLE_INTERVAL_MS", 15_000))
+        if prepared.get("skipWithoutLock") or prepared.get("killHold") or prepared.get("upstreamHold") or prepared.get("marketClosed"):
             return idle_ms
         active = regular_us_equity_session() or bool(self.positions())
         return 250 if active else idle_ms
