@@ -14,7 +14,7 @@ import {assertV4CertifiedSource,assertV4CertifiedOrder} from "../lib/v12-v4-cert
 import {readV4CanaryPermit,assertV4CanarySourceSnapshot,assertV4CanaryOrderAuthority} from "../lib/v12-v4-canary-permit";
 import {readV4TimeStopApproval,approvedV4TimeStopQuote} from "../lib/v12-v4-time-stop-approval";
 import {attachV4NativeCoreCandidates} from "../lib/v12-v4-core-candidate";
-import {liveV4PeerLineageMode,type V4PeerKind,type V4PeerSource} from "../lib/v12-v4-peer-state-owners";
+import {liveV4PeerLineageMode,type V4PeerKind,type V4PeerSource,type V4PeerLineageMode} from "../lib/v12-v4-peer-state-owners";
 import {observeV4PeerService,observeCurrentV4PeerService} from "../lib/v12-v4-peer-service-attestation";
 import {assertV4EntrySafety} from "../lib/v12-v4-entry-safety";
 import {classifyAsterRateBudgetFailure,nextAsterRateBudgetRetryMs} from "../lib/disdex-aster-rate-budget-policy";
@@ -95,8 +95,9 @@ function requireReleaseSha(){
 }
 export async function buildV4ProductionRuntime(){
  const releaseSha=requireReleaseSha();
- const operationMode=String(process.env.V12_V4_OPERATION_MODE??"CERTIFIED").trim().toUpperCase();
- if(!["CERTIFIED","CANARY"].includes(operationMode))throw Error("V4_OPERATION_MODE_INVALID");
+ const operationModeRaw=String(process.env.V12_V4_OPERATION_MODE??"CERTIFIED").trim().toUpperCase();
+ if(operationModeRaw!=="CERTIFIED"&&operationModeRaw!=="CANARY")throw Error("V4_OPERATION_MODE_INVALID");
+ const operationMode: "CERTIFIED"|"CANARY"=operationModeRaw;
  const canaryPermit=operationMode==="CANARY"?await readV4CanaryPermit(releaseSha):undefined;
  // Existing PENGU, FET, Q102, V52, HYPE and Idle remain on independently observed exact SHA releases.
  const peerLineageMode=liveV4PeerLineageMode(operationMode);
