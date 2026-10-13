@@ -35,6 +35,21 @@ export function classifyV4RateBudgetDefer(error:unknown,doc:V4ExecutionDocument)
  const waitMs=nextAsterRateBudgetRetryMs(0,1000,15000,rate.waitMs??0,()=>0.5);
  return {reason:"V4_RATE_BUDGET_DEFERRED:"+rate.reason,waitMs};
 }
+export async function retryV4FlatBootstrapRateBudget<T>(input:{
+ operation:()=>Promise<T>;store:V4ExecutionStore;attempts?:number;wait?:(ms:number)=>Promise<void>;
+}):Promise<T>{
+ const attempts=Math.max(1,Math.min(12,Math.trunc(input.attempts??8)));
+ const wait=input.wait??((ms:number)=>new Promise<void>(done=>setTimeout(done,ms)));
+ for(let attempt=0;;attempt++){
+  try{return await input.operation();}
+  catch(error){
+   const deferred=classifyV4RateBudgetDefer(error,input.store.read());
+   if(!deferred||attempt+1>=attempts)throw error;
+   const delay=nextAsterRateBudgetRetryMs(attempt,1000,15000,deferred.waitMs,()=>0.5);
+   await wait(delay);
+  }
+ }
+}
 function v4HealthPath(){
  return String(process.env.V12_V4_HEALTH_STATE_PATH??"/var/lib/disdex/v12-v4/heartbeat.json").trim();
 }
@@ -115,7 +130,7 @@ export async function buildV4ProductionRuntime(){
  store.read();
  const lock=new FileAccountOrderLock(env("DISDEX_ACCOUNT_LOCK_PATH"),120000);
  const pendingRegistryPath=env("DISDEX_PENDING_EXPOSURE_REGISTRY_PATH");
- const info=await client.getExchangeInfo();
+ const info=await retryV4FlatBootstrapRateBudget({operation:()=>client.getExchangeInfo(),store});
  const symbols=new Map(info.symbols.map(row=>[row.symbol,row]));
  let cache:{boundary:number;value:ReturnType<typeof buildV4LiveDecisionBatch>}|undefined;
  const fetchDecision=async()=>{
