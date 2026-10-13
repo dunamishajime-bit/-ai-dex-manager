@@ -81,6 +81,29 @@ test("claimed LIVE is downgraded if any actual release/heartbeat/primary-mode ev
   assert.match(presentation.runtimeLabel, /SHA不一致/);
 });
 
+test("LIVE presentation does not require a current-tick order candidate or optional decision telemetry", () => {
+  const live = snapshot({
+    displayStatus: "LIVE_VERIFIED",
+    actual: {
+      currentReleaseSha: shaA,
+      activeRunnerId: "disdex-v12-v4@" + shaA + ".service",
+      activeRunnerState: "active/running",
+      activeRunnerSha: shaA,
+      v4RunnerMode: "CERTIFIED",
+      v12PrimaryMode: "V4",
+      legacyV12RunnerActive: false,
+      v4ReleaseSha: shaA,
+      heartbeatSha: shaA,
+      orderEnabled: false,
+    },
+    freshness: { heartbeat: true, decision: false },
+    timestamps: { checkedAt: now, heartbeatUpdatedAt: now, decisionTs: null, capturedAtMs: null },
+  });
+  const presentation = buildV12V4HpPresentation(live);
+  assert.equal(presentation.runtimeStatus, "LIVE_VERIFIED");
+  assert.equal(presentation.isLiveVerified, true);
+});
+
 test("runtime freshness, source errors and unavailable evidence remain distinct", () => {
   assert.equal(buildV12V4HpPresentation(snapshot({ displayStatus: "STALE" })).runtimeLabel, "STALE / 発注不可");
   assert.equal(buildV12V4HpPresentation(snapshot({ displayStatus: "SOURCE_ERROR" })).runtimeLabel, "取得エラー / 発注不可");

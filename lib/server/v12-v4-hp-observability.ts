@@ -144,10 +144,20 @@ async function readPrimaryMode(paths: SourcePaths, currentSha: string): Promise<
     throw new Error("V12_PRIMARY_MODE_SOURCE_INVALID");
   }
   const lines = contents.split(/\r?\n/).map(line => line.trim()).filter(line => line && !line.startsWith("#"));
-  if (lines.length !== 1) throw new Error("V12_PRIMARY_MODE_SOURCE_INVALID");
-  const match = /^DISDEX_PRIMARY_V12_RUNNER=(V4|LEGACY)$/.exec(lines[0]);
-  if (!match) throw new Error("V12_PRIMARY_MODE_SOURCE_INVALID");
-  return match[1] as "V4" | "LEGACY";
+  const allowed = new Set(["DISDEX_PRIMARY_V12_RUNNER", "DISDEX_V12_V4_PRIMARY_SHA", "DISDEX_V12_V4_PEER_SHA"]);
+  const entries = new Map<string, string>();
+  for (const line of lines) {
+    const match = /^([A-Z0-9_]+)=(.*)$/.exec(line);
+    if (!match || !allowed.has(match[1]) || entries.has(match[1])) throw new Error("V12_PRIMARY_MODE_SOURCE_INVALID");
+    entries.set(match[1], match[2].trim());
+  }
+  const mode = entries.get("DISDEX_PRIMARY_V12_RUNNER");
+  if (mode !== "V4" && mode !== "LEGACY") throw new Error("V12_PRIMARY_MODE_SOURCE_INVALID");
+  for (const key of ["DISDEX_V12_V4_PRIMARY_SHA", "DISDEX_V12_V4_PEER_SHA"]) {
+    const value = entries.get(key);
+    if (value !== undefined && normalizeSha(value) !== currentSha) throw new Error("V12_PRIMARY_MODE_SOURCE_INVALID");
+  }
+  return mode;
 }
 
 async function readLegacyV12Active(): Promise<boolean> {
@@ -281,8 +291,6 @@ export async function loadV12V4HpObservability(options: V12V4HpObservabilityOpti
   if (paths.decisionPath) {
     try { decision = await readJson(paths.decisionPath, paths.stateRoot, MAX_DECISION_BYTES); }
     catch (error) { errors.push(`V4_DECISION_SOURCE:${error instanceof Error ? error.message : "UNAVAILABLE"}`); }
-  } else {
-    errors.push("V4_DECISION_PATH_UNCONFIGURED");
   }
 
   if (!heartbeat && !decision && !currentSha) return defaultSnapshot(now, errors);
@@ -408,11 +416,12 @@ export async function loadV12V4HpObservability(options: V12V4HpObservabilityOpti
   }
 
   const shaMismatch = !!(currentSha && runnerSha && currentSha !== runnerSha);
-  const sourceIntegrityError = errors.some(error =>
+  const runtimeErrors = errors.filter(error => !/^(V4_DECISION_|V4_CANDIDATE_|V4_FILTERED_)/.test(error));
+  const sourceIntegrityError = runtimeErrors.some(error =>
     /SCHEMA|POLICY|SAFETY|CONFLICTED|MISMATCH|INCOMPLETE|UNSAFE|OUTSIDE|ROW_INVALID|IDENTITY_INVALID|JSON_SOURCE_INVALID|DUPLICATE/.test(error));
-  const staleEvidence = (!!heartbeat && !heartbeatFresh) || (!!decision && decisionSchemaOk && !decisionFresh);
-  const runtimeEvidenceUnavailable = !currentSha || !heartbeat || !decision || !heartbeatFresh || !decisionFresh ||
-    !decisionBatchComplete || activeRunnerState === "unavailable" || legacyV12RunnerActive === null;
+  const staleEvidence = !!heartbeat && !heartbeatFresh;
+  const runtimeEvidenceUnavailable = !currentSha || !heartbeat || !heartbeatFresh ||
+    activeRunnerState !== "active/running" || legacyV12RunnerActive === null;
 
   let displayStatus: V12V4HpDisplayStatus;
   if (shaMismatch) displayStatus = "SHA_MISMATCH";
@@ -421,11 +430,10 @@ export async function loadV12V4HpObservability(options: V12V4HpObservabilityOpti
   else if (v4RunnerMode === "SHADOW") displayStatus = "SHADOW";
   else if (activeRunnerState === "duplicate" || activeRunnerState === "release-path-mismatch" || legacyV12RunnerActive === true) displayStatus = "SOURCE_ERROR";
   else if (runtimeEvidenceUnavailable) displayStatus = "UNAVAILABLE";
-  else if (v4RunnerMode === "CANARY" || orderEnabled !== true || v12PrimaryMode === "LEGACY") displayStatus = "STAGED_NOT_LIVE";
+  else if (v4RunnerMode === "CANARY" || v12PrimaryMode === "LEGACY") displayStatus = "STAGED_NOT_LIVE";
   else if (v4RunnerMode === "UNKNOWN" || v12PrimaryMode === "UNKNOWN") displayStatus = "UNAVAILABLE";
-  else if (currentSha === runnerSha && activeRunnerSha === runnerSha && heartbeatFresh && decisionFresh &&
-    decisionSchemaOk && decisionBatchComplete && v4RunnerMode === "CERTIFIED" && orderEnabled === true &&
-    v12PrimaryMode === "V4" && legacyV12RunnerActive === false) displayStatus = "LIVE_VERIFIED";
+  else if (currentSha === runnerSha && activeRunnerSha === runnerSha && heartbeatFresh &&
+    v4RunnerMode === "CERTIFIED" && v12PrimaryMode === "V4" && legacyV12RunnerActive === false) displayStatus = "LIVE_VERIFIED";
   else displayStatus = "STAGED_NOT_LIVE";
 
   return {

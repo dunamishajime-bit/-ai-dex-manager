@@ -20,7 +20,8 @@ type ResidualRow = {
   decision: { accepted: boolean; side: string; reason: string; holdHours: number; priority: number };
 };
 type Payload = {
-  ok: boolean; status?: string; releaseSha?: string; heartbeat?: any; baseline?: any; state?: any; residualState?: any;
+  ok: boolean; status?: string; releaseSha?: string; heartbeat?: any; baseline?: any; baselineStatus?: string;
+  baselineStale?: boolean; baselineObservedRuntimeSha?: string | null; v4Baseline?: any; state?: any; residualState?: any;
   details?: { decisionTs: number; updatedAt: number; symbols: Row[]; residual: ResidualRow[]; finalReason?: string };
 };
 
@@ -50,6 +51,7 @@ export default function IdlePriorityDecisionPage(){
 
   const details=data?.details;
   const baseline=data?.baseline;
+  const admissionEvaluated=data?.baselineStatus==="EVALUATED"&&!!baseline;
   return <main className="space-y-4 p-4 text-white">
     <header className="panel-gold rounded-[28px] p-5">
       <div className="text-[10px] uppercase tracking-[0.28em] text-gold-100/70">Idle Priority + Residual LONG</div>
@@ -70,10 +72,10 @@ export default function IdlePriorityDecisionPage(){
     <section className="panel-gold rounded-[24px] p-4">
       <div className="mb-3 text-sm font-black">共通 Admission</div>
       <div className="grid gap-2 md:grid-cols-4">
-        <Gate label="Source Complete" ok={baseline?.sourceComplete===true} value={baseline?.sourceComplete===true?"PASS":"BLOCK"} />
-        <Gate label="Formal Open" ok={Number(baseline?.baselineOpenPositions||0)===0} value={String(baseline?.baselineOpenPositions??"—")} />
-        <Gate label="Formal Pending" ok={Number(baseline?.baselinePendingExposure||0)===0} value={num(baseline?.baselinePendingExposure,3)} />
-        <Gate label="Same Timestamp" ok={Number(baseline?.baselineAcceptedThisTimestamp||0)===0} value={String(baseline?.baselineAcceptedThisTimestamp??"—")} />
+        <Gate label="Source Complete" ok={admissionEvaluated?baseline?.sourceComplete===true:undefined} value={admissionEvaluated?(baseline?.sourceComplete===true?"PASS":"BLOCK"):"N/A"} />
+        <Gate label="Formal Open" ok={admissionEvaluated?Number(baseline?.baselineOpenPositions||0)===0:undefined} value={admissionEvaluated?String(baseline?.baselineOpenPositions??"—"):"N/A"} />
+        <Gate label="Formal Pending" ok={admissionEvaluated?Number(baseline?.baselinePendingExposure||0)===0:undefined} value={admissionEvaluated?num(baseline?.baselinePendingExposure,3):"N/A"} />
+        <Gate label="Same Timestamp" ok={admissionEvaluated?Number(baseline?.baselineAcceptedThisTimestamp||0)===0:undefined} value={admissionEvaluated?String(baseline?.baselineAcceptedThisTimestamp??"—"):"N/A"} />
       </div>
       <div className="mt-2 text-[11px] text-white/55">最終理由: {details?.finalReason||data?.state?.lastDecision?.reason||"—"}</div>
     </section>

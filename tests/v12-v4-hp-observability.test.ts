@@ -28,7 +28,12 @@ async function fixture(options: {
   await mkdir(stateRoot, { recursive: true });
   await writeFile(join(release, ".disdex-release-sha"), `${options.currentSha ?? SHA}\n`);
   const primaryModePath = join(root, `${options.currentSha ?? SHA}.v12-primary.env`);
-  if (options.primaryMode) await writeFile(primaryModePath, `DISDEX_PRIMARY_V12_RUNNER=${options.primaryMode}\n`);
+  if (options.primaryMode) await writeFile(primaryModePath, [
+    "DISDEX_PRIMARY_V12_RUNNER=" + options.primaryMode,
+    "DISDEX_V12_V4_PRIMARY_SHA=" + (options.currentSha ?? SHA),
+    "DISDEX_V12_V4_PEER_SHA=" + (options.currentSha ?? SHA),
+    "",
+  ].join("\n"));
   await writeFile(join(stateRoot, "heartbeat.json"), JSON.stringify({
     schema: "disdex-v12-v4-runner-heartbeat/v1",
     strategyId: "V12_V4",
@@ -143,13 +148,14 @@ test("release SHA mismatch is not LIVE and does not fall back to legacy V12 data
 });
 
 test("LIVE_VERIFIED requires exact primary V4 mode, certified active unit, and no legacy V12 authority", async () => {
-  const f = await fixture({ operationMode: "CERTIFIED", orderEnabled: true, activeService: "production", primaryMode: "V4", legacyRunnerActive: false });
-  const legacy = await fixture({ operationMode: "CERTIFIED", orderEnabled: true, activeService: "production", primaryMode: "V4", legacyRunnerActive: true });
-  const unknownMode = await fixture({ operationMode: "CERTIFIED", orderEnabled: true, activeService: "production", legacyRunnerActive: false });
+  const f = await fixture({ operationMode: "CERTIFIED", orderEnabled: false, activeService: "production", primaryMode: "V4", legacyRunnerActive: false });
+  const legacy = await fixture({ operationMode: "CERTIFIED", orderEnabled: false, activeService: "production", primaryMode: "V4", legacyRunnerActive: true });
+  const unknownMode = await fixture({ operationMode: "CERTIFIED", orderEnabled: false, activeService: "production", legacyRunnerActive: false });
   try {
     const verified = await loadV12V4HpObservability(f.options);
     assert.equal(verified.displayStatus, "LIVE_VERIFIED");
     assert.equal(verified.actual.v12PrimaryMode, "V4");
+    assert.equal(verified.actual.orderEnabled, false);
     const duplicateAuthority = await loadV12V4HpObservability(legacy.options);
     assert.notEqual(duplicateAuthority.displayStatus, "LIVE_VERIFIED");
     assert.equal(duplicateAuthority.actual.legacyV12RunnerActive, true);
@@ -177,7 +183,7 @@ test("primary mode evidence is bound to the current release SHA filename", async
   }
 });
 
-test("incomplete decision batches are source errors and cannot leak partial candidates", async () => {
+test("incomplete decision batches stay telemetry errors and cannot leak partial candidates", async () => {
   const f = await fixture();
   try {
     const decisionPath = f.options.paths.decisionPath!;
@@ -185,7 +191,7 @@ test("incomplete decision batches are source errors and cannot leak partial cand
     decision.candidateCount = 2;
     await writeFile(decisionPath, JSON.stringify(decision));
     const result = await loadV12V4HpObservability(f.options);
-    assert.equal(result.displayStatus, "SOURCE_ERROR");
+    assert.equal(result.displayStatus, "STAGED_NOT_LIVE");
     assert.match(result.errors.join(" "), /BATCH_INCOMPLETE/);
     assert.equal(result.candidates.length, 0);
     assert.equal(result.filtered.length, 0);
@@ -194,7 +200,7 @@ test("incomplete decision batches are source errors and cannot leak partial cand
   }
 });
 
-test("stale V4 heartbeat is visibly stale and missing decision data is unavailable with a fresh heartbeat", async () => {
+test("stale V4 heartbeat is visibly stale while missing optional decision telemetry does not override runtime authority", async () => {
   const f = await fixture({ updatedAt: NOW - 4 * 60 * 60_000 });
   const missingFixture = await fixture();
   try {
@@ -203,7 +209,7 @@ test("stale V4 heartbeat is visibly stale and missing decision data is unavailab
     assert.equal(stale.freshness.heartbeat, false);
     await rm(missingFixture.options.paths.decisionPath, { force: true });
     const missing = await loadV12V4HpObservability(missingFixture.options);
-    assert.equal(missing.displayStatus, "UNAVAILABLE");
+    assert.equal(missing.displayStatus, "STAGED_NOT_LIVE");
     assert.match(missing.errors.join(" "), /DECISION/);
     assert.equal(missing.candidates.length, 0);
   } finally {

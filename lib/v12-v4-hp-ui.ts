@@ -43,9 +43,8 @@ function exactLiveEvidence(snapshot: V12V4HpSnapshot): boolean {
     actual.v4RunnerMode === "CERTIFIED" &&
     actual.v12PrimaryMode === "V4" &&
     actual.legacyV12RunnerActive === false &&
-    actual.orderEnabled === true &&
-    snapshot.freshness.heartbeat && snapshot.freshness.decision &&
-    snapshot.errors.length === 0 && snapshot.readOnly === true && snapshot.tradingMutation === 0;
+    snapshot.freshness.heartbeat &&
+    snapshot.readOnly === true && snapshot.tradingMutation === 0;
 }
 
 export function buildV12V4HpPresentation(
