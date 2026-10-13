@@ -40,6 +40,7 @@ export type V12V4HpObservabilityOptions = {
   paths?: Partial<SourcePaths>;
   readSystemd?: (unit: string) => Promise<string>;
   readLegacyV12Active?: () => Promise<boolean>;
+  readPrimaryMode?: (currentSha: string) => Promise<"V4" | "LEGACY">;
 };
 
 const isObj = (value: unknown): value is Obj => value !== null && typeof value === "object" && !Array.isArray(value);
@@ -141,6 +142,7 @@ async function readPrimaryMode(paths: SourcePaths, currentSha: string): Promise<
   } catch (error) {
     const code = isObj(error) && typeof error.code === "string" ? error.code : "";
     if (code === "ENOENT" || code === "ENOTDIR") throw new Error("V12_PRIMARY_MODE_SOURCE_UNAVAILABLE");
+    if (code === "EACCES" || code === "EPERM") throw new Error("V12_PRIMARY_MODE_SOURCE_PERMISSION_DENIED");
     throw new Error("V12_PRIMARY_MODE_SOURCE_INVALID");
   }
   const lines = contents.split(/\r?\n/).map(line => line.trim()).filter(line => line && !line.startsWith("#"));
@@ -309,7 +311,7 @@ export async function loadV12V4HpObservability(options: V12V4HpObservabilityOpti
 
   let v12PrimaryMode: V12V4HpSnapshot["actual"]["v12PrimaryMode"] = "UNKNOWN";
   if (currentSha) {
-    try { v12PrimaryMode = await readPrimaryMode(paths, currentSha); }
+    try { v12PrimaryMode = await (options.readPrimaryMode ? options.readPrimaryMode(currentSha) : readPrimaryMode(paths, currentSha)); }
     catch (error) { errors.push(error instanceof Error ? error.message : "V12_PRIMARY_MODE_SOURCE_UNAVAILABLE"); }
   }
   let legacyV12RunnerActive: boolean | null = null;
@@ -413,6 +415,19 @@ export async function loadV12V4HpObservability(options: V12V4HpObservabilityOpti
     activeRunnerState = "release-path-mismatch";
   } else if (!runnerSha) {
     activeRunnerState = "unavailable";
+  }
+
+  // The exact-SHA primary-mode contract is intentionally root:root 0600 in Production.
+  // If the read-only UI user cannot read only that file, prove V4 authority from stronger
+  // runtime evidence: the exact current SHA's production (not canary) V4 service is the
+  // sole active V12 authority, is CERTIFIED, and legacy V12 is not running.
+  const primaryPermissionIndex = errors.indexOf("V12_PRIMARY_MODE_SOURCE_PERMISSION_DENIED");
+  const productionV4Unit = runnerSha ? `disdex-v12-v4@${runnerSha}.service` : null;
+  if (v12PrimaryMode === "UNKNOWN" && primaryPermissionIndex >= 0 && currentSha && runnerSha &&
+    currentSha === runnerSha && activeRunnerSha === runnerSha && activeRunnerId === productionV4Unit &&
+    activeRunnerState === "active/running" && v4RunnerMode === "CERTIFIED" && legacyV12RunnerActive === false) {
+    v12PrimaryMode = "V4";
+    errors.splice(primaryPermissionIndex, 1);
   }
 
   const shaMismatch = !!(currentSha && runnerSha && currentSha !== runnerSha);

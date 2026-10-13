@@ -19,6 +19,7 @@ async function fixture(options: {
   activeService?: "canary" | "production" | "none";
   primaryMode?: "V4" | "LEGACY";
   legacyRunnerActive?: boolean | null;
+  primaryModePermissionDenied?: boolean;
 } = {}) {
   const root = await mkdtemp(join(tmpdir(), "v12-v4-hp-"));
   const releases = join(root, "releases");
@@ -94,6 +95,9 @@ async function fixture(options: {
       },
       readSystemd: systemd,
       readLegacyV12Active: async () => options.legacyRunnerActive ?? false,
+      readPrimaryMode: options.primaryModePermissionDenied
+        ? async () => { throw new Error("V12_PRIMARY_MODE_SOURCE_PERMISSION_DENIED"); }
+        : undefined,
     },
   };
 }
@@ -166,6 +170,25 @@ test("LIVE_VERIFIED requires exact primary V4 mode, certified active unit, and n
     await rm(f.root, { recursive: true, force: true });
     await rm(legacy.root, { recursive: true, force: true });
     await rm(unknownMode.root, { recursive: true, force: true });
+  }
+});
+
+test("root-only primary contract can be inferred only from exact certified production V4 authority", async () => {
+  const f = await fixture({
+    operationMode: "CERTIFIED",
+    orderEnabled: false,
+    activeService: "production",
+    legacyRunnerActive: false,
+    primaryModePermissionDenied: true,
+  });
+  try {
+    const result = await loadV12V4HpObservability(f.options);
+    assert.equal(result.displayStatus, "LIVE_VERIFIED");
+    assert.equal(result.actual.v12PrimaryMode, "V4");
+    assert.equal(result.actual.activeRunnerId, `disdex-v12-v4@${SHA}.service`);
+    assert.doesNotMatch(result.errors.join(" "), /PRIMARY_MODE_SOURCE_PERMISSION_DENIED/);
+  } finally {
+    await rm(f.root, { recursive: true, force: true });
   }
 });
 
