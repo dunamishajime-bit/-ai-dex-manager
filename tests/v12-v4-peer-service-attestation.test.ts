@@ -35,6 +35,24 @@ test("stale flat peer state is accepted only alongside current release-bound liv
  const dead=sources();dead[3].service!.active=false;
  assert.throws(()=>v4PeerOwners(dead,sha,now),/STALE_PEER_OWNER_SNAPSHOT/);
 });
+test("dormant flat Residual may outlive six hours only with fresh exact service attestation",()=>{
+ const dormant=sources();
+ dormant[7].raw.updatedAt=now-8*3600000;
+ assert.deepEqual(v4PeerOwners(dormant,sha,now),[]);
+ const positioned=sources();
+ positioned[7].raw.updatedAt=now-8*3600000;
+ positioned[7].raw.position={symbol:"DOGEUSDT",side:"LONG",quantity:1};
+ assert.throws(()=>v4PeerOwners(positioned,sha,now),/STALE_PEER_OWNER_SNAPSHOT/);
+ const pending=sources();
+ pending[7].raw.updatedAt=now-8*3600000;
+ pending[7].raw.pending={phase:"planned"};
+ assert.throws(()=>v4PeerOwners(pending,sha,now),/STALE_PEER_OWNER_SNAPSHOT/);
+ const dead=sources();
+ dead[7].raw.updatedAt=now-8*3600000;
+ dead[7].service!.active=false;
+ assert.throws(()=>v4PeerOwners(dead,sha,now),/STALE_PEER_OWNER_SNAPSHOT/);
+});
+
 test("retired legacy V12 must be flat and cannot conceal pending work",()=>{
  const okay=sources();assert.deepEqual(v4PeerOwners(okay,sha,now),[]);
  const positioned=sources();positioned[0].raw.activePositions=[{symbol:"ADAUSDT",side:"LONG",quantity:3}];

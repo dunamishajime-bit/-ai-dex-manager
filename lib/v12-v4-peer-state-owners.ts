@@ -57,10 +57,14 @@ export function v4PeerOwners(sources:V4PeerSource[],expectedSha:string,now:numbe
   const retiredObservation=retired&&obs?.observedAt!==undefined&&
    obs.observedAt<=now&&now-obs.observedAt<=15000;
   const age=now-r.updatedAt;
+  const durableFlatResidual=s.kind==="RESIDUAL"&&liveObservation&&
+   r.schema==="disdex-idle-residual-long-state/v1"&&
+   r.position==null&&r.pending==null&&r.manualReview==null;
   if(!Number.isFinite(r.updatedAt)||age<0||
     (age>120000&&!(
       (liveObservation&&age<=6*3600000)||
-      retiredObservation
+      retiredObservation||
+      durableFlatResidual
     )))throw Error("STALE_PEER_OWNER_SNAPSHOT");
   if(r.pending||r.pendingOrder||r.manualReview||r.manualReviewReason||
      r.executionReview||r.bootstrapRequired)throw Error("PEER_PENDING_OR_MANUAL_REVIEW:"+s.kind);
