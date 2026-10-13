@@ -81,6 +81,11 @@ test("coherence guard accepts only the release-bound Python Margin Guard form",(
  assert.match(output,/MARGIN_GUARD_EXECSTART_COHERENCE_SELFTEST_PASS/);
 });
 
+test("coherence guard passes heartbeat arguments to Python stdin instead of treating a heartbeat name as a script",()=>{
+ assert.ok(coherence.includes('python3 - "${args[@]}" <<\'PY\''));
+ assert.ok(!coherence.includes('python3 "${args[@]}" <<\'PY\''));
+});
+
 test("health alert accepts only exact-SHA V4 override for V12",()=>{
  const sha="a".repeat(40);
  const ok=resolveRunnerServiceUnit("V12",sha,`disdex-v12-v4@${sha}.service`);

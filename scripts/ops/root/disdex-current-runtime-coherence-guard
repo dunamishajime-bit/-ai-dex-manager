@@ -251,7 +251,7 @@ heartbeat_identity_current() {
   for index in "${!HEARTBEATS[@]}"; do
     args+=("${HEARTBEATS[$index]}" "${HEARTBEAT_EXPECTED_SHAS[$index]}" "${CURRENT_UNITS[$index]}")
   done
-  python3 "${args[@]}" <<'PY'
+  python3 - "${args[@]}" <<'PY'
 import json,pathlib,sys
 for index in range(1,len(sys.argv),3):
     name,sha,unit=sys.argv[index:index+3]
