@@ -80,6 +80,7 @@ export function rankingMovementId(scope: string, row: RankRow) {
 }
 
 export function scoreKindLabel(row: RankRow): string {
+  if (row.scoreKind === "MARKET_PLUS_V4") return row.scoreLabel || "市場Score＋実Runner V4 Gate参考加点（非発注）";
   if (row.scoreKind === "MARKET") return row.scoreLabel || "Aster共通市場Score（参考・非発注）";
   if (row.scoreKind === "NATIVE") return row.scoreLabel || "実測スコア";
   if (row.scoreKind === "GATE_COMPLETION") return row.scoreLabel || "Gate充足度（発火確率ではありません）";
