@@ -102,6 +102,7 @@ export function V12V4SymbolStatusPanel() {
           {nativeAvailable ? "確定snapshot観測済み" : "未接続・未更新"}
         </div>
         <div className="mt-1 text-[10px] text-white/45">確定時刻 {friendlyTime(snapshot?.timestamps.decisionTs)}</div>
+        <div className="mt-1 break-words text-[10px] text-white/50">実Runner: {snapshot?.actual.latestSignalReason ?? "未取得"} / 候補 {snapshot?.actual.latestSignalCount ?? "—"}件</div>
       </div>
     </div>
     {!nativeAvailable ? <div className="mt-3 rounded-xl border border-amber-400/20 bg-amber-500/[0.05] p-3 text-xs leading-6 text-amber-100">
