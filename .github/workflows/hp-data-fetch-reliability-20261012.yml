@@ -1,9 +1,9 @@
-name: HP Data Fetch Reliability 20261012
+name: HP Ranking Logic Display Deployment 20261014
 
 on:
   push:
     branches:
-      - codex/hp-data-fetch-reliability-20261012
+      - codex/hp-route-logic-direction-fix-20261014
     paths:
       - "app/**"
       - "components/**"
@@ -20,7 +20,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: hp-data-fetch-reliability-20261012
+  group: hp-ranking-logic-display-20261014
   cancel-in-progress: false
 
 jobs:
@@ -28,9 +28,9 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
-      EXPECTED_TRADING_SHA: ce1edeead8d0f9e5d88e829d415057117502a335
-      EXPECTED_OLD_UI_SHA: 44b82b42e47be44a2c8b9d564caf17b2b6d6ca10
-      EXPECTED_OLD_UI_PATH: /home/deploy/disdex-trading/ui-releases/ui-disdex-data-fetch-44b82b42e47b
+      EXPECTED_TRADING_SHA: e8cc2e73f8d3981d708ee52f013241597c038b10
+      EXPECTED_OLD_UI_SHA: f53d98d955a31a98145da1a3c02d373ec4f97e7c
+      EXPECTED_OLD_UI_PATH: /home/deploy/disdex-trading/ui-releases/ui-route-logic-f53d98d955a3
 
     steps:
       - uses: actions/checkout@v4
@@ -153,10 +153,10 @@ jobs:
           free_kb="$(df -Pk /home/deploy | awk 'NR==2 {print $4}')"
           [[ "$free_kb" -ge 500000 ]] || { echo "HP_DEPLOY_DISK_TOO_LOW_KB=$free_kb"; exit 32; }
           dropin_dir=/etc/systemd/system/ai-dex-manager-ui.service.d
-          prefix="$(printf '%224s' ' ' | tr ' ' z)"
-          dropin="$dropin_dir/${prefix}-rt-20261012.conf"
+          prefix="$(printf '%248s' ' ' | tr ' ' z)"
+          dropin="$dropin_dir/${prefix}.conf"
           dropin_name="${dropin##*/}"
-          [[ "${#prefix}" == 224 && "${#dropin_name}" -lt 255 && ! -e "$dropin" && ! -e "$dropin.tmp" && ! -L "$dropin.tmp" ]]
+          [[ "${#prefix}" == 248 && "${#dropin_name}" -lt 255 && ! -e "$dropin" && ! -e "$dropin.tmp" && ! -L "$dropin.tmp" ]]
           mapfile -t old_dropins < <(systemctl show ai-dex-manager-ui.service -p DropInPaths --value | tr ' ' '\n')
           for path in "${old_dropins[@]}"; do
             [[ -z "$path" ]] && continue
@@ -206,14 +206,14 @@ jobs:
           trading=/home/deploy/disdex-trading/current
           root=/home/deploy/disdex-trading/ui-releases
           dropin_dir=/etc/systemd/system/ai-dex-manager-ui.service.d
-          prefix="$(printf '%224s' ' ' | tr ' ' z)"
-          dropin="$dropin_dir/${prefix}-rt-20261012.conf"
+          prefix="$(printf '%248s' ' ' | tr ' ' z)"
+          dropin="$dropin_dir/${prefix}.conf"
           dropin_name="${dropin##*/}"
           archive="/tmp/disdex-ui-$REQUEST_ID.tar.gz"
           trap 'rm -f -- "$archive"' EXIT
           short="${NEW_UI_SHA:0:12}"
-          release="$root/ui-realtime-ranking-$short"
-          stage="$root/.ui-realtime-ranking-$short.stage-$REQUEST_ID"
+          release="$root/ui-route-logic-$short"
+          stage="$root/.ui-route-logic-$short.stage-$REQUEST_ID"
           [[ "$(id -un)" == root && -f "$archive" && ! -e "$release" && ! -L "$release" && ! -e "$stage" ]]
           printf '%s  %s\n' "$EXPECTED_ARCHIVE_SHA256" "$archive" | sha256sum -c -
           [[ "$(tr -d '[:space:]' < "$trading/.disdex-release-sha")" == "$EXPECTED_TRADING_SHA" ]]
@@ -224,7 +224,7 @@ jobs:
           [[ "$old_wd" == "$EXPECTED_OLD_UI_PATH" && -d "$old_wd" && ! -L "$old_wd" ]]
           [[ "$(tr -d '[:space:]' < "$old_wd/.disdex-release-sha")" == "$EXPECTED_OLD_UI_SHA" ]]
           [[ " $old_env " == *" DISDEX_UI_RELEASE_SHA=$EXPECTED_OLD_UI_SHA "* ]]
-          [[ "${#prefix}" == 224 && "${#dropin_name}" -lt 255 && ! -e "$dropin" && ! -e "$dropin.tmp" && ! -L "$dropin.tmp" ]]
+          [[ "${#prefix}" == 248 && "${#dropin_name}" -lt 255 && ! -e "$dropin" && ! -e "$dropin.tmp" && ! -L "$dropin.tmp" ]]
           mapfile -t old_dropins < <(systemctl show "$ui" -p DropInPaths --value | tr ' ' '\n')
           for path in "${old_dropins[@]}"; do
             [[ -z "$path" ]] && continue
@@ -260,7 +260,7 @@ jobs:
           cleanup_stage() {
             rc=$?
             trap - ERR
-            if [[ -d "$stage" && ! -L "$stage" && "$stage" == "$root/.ui-realtime-ranking-$short.stage-$REQUEST_ID" ]]; then
+            if [[ -d "$stage" && ! -L "$stage" && "$stage" == "$root/.ui-route-logic-$short.stage-$REQUEST_ID" ]]; then
               rm -rf -- "$stage"
             fi
             rm -f -- "$archive"
@@ -364,7 +364,7 @@ jobs:
           if not isinstance(rows,list) or not rows: raise RuntimeError('RANKING_API_ROWS_MISSING')
           zero=[row for row in rows if row.get('score')==0]
           if any(row.get('rank') is not None for row in zero): raise RuntimeError('ZERO_SCORE_ROW_HAS_RANK')
-          positive=[row for row in rows if isinstance(row.get('score'),(int,float)) and row['score']>0]
+          positive=[row for row in rows if row.get('logic')=='MARKET' and isinstance(row.get('score'),(int,float)) and row['score']>0]
           if any(not isinstance(row.get('rank'),int) or row['rank']<1 for row in positive):
               raise RuntimeError('POSITIVE_SCORE_ROW_MISSING_RANK')
           manifest_request=urllib.request.Request(base+'/audio/ranking-studio-v1/manifest.json',headers=headers)
@@ -395,7 +395,7 @@ jobs:
           done
           [[ "$(readlink -f "$trading")" == "/home/deploy/disdex-trading/releases/$EXPECTED_TRADING_SHA" ]]
           rm -f -- "$archive"
-          echo STATUS=HP_REALTIME_RANKING_DEPLOYED_VERIFIED
+          echo STATUS=HP_RANKING_LOGIC_DISPLAY_DEPLOYED_VERIFIED
           echo "TRADING_SHA=$EXPECTED_TRADING_SHA"
           echo "UI_SHA=$NEW_UI_SHA"
           echo "UI_RELEASE=$release"
@@ -437,10 +437,10 @@ jobs:
           ui=ai-dex-manager-ui.service
           trading=/home/deploy/disdex-trading/current
           root=/home/deploy/disdex-trading/ui-releases
-          release="$root/ui-realtime-ranking-${NEW_UI_SHA:0:12}"
+          release="$root/ui-route-logic-${NEW_UI_SHA:0:12}"
           dropin_dir=/etc/systemd/system/ai-dex-manager-ui.service.d
-          prefix="$(printf '%224s' ' ' | tr ' ' z)"
-          dropin="$dropin_dir/${prefix}-rt-20261012.conf"
+          prefix="$(printf '%248s' ' ' | tr ' ' z)"
+          dropin="$dropin_dir/${prefix}.conf"
           [[ "$(id -un)" == root ]]
           [[ "$(tr -d '[:space:]' < "$trading/.disdex-release-sha")" == "$EXPECTED_TRADING_SHA" ]]
           [[ "$(readlink -f "$trading")" == "/home/deploy/disdex-trading/releases/$EXPECTED_TRADING_SHA" ]]
