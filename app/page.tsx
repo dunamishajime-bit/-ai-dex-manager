@@ -8,6 +8,7 @@ import { useOperationalWallet } from "@/hooks/useOperationalWallet";
 import { useLivePortfolio } from "@/hooks/useLivePortfolio";
 import { useProductionRuntime } from "@/hooks/useProductionRuntime";
 import { V12V4RuntimePanel } from "@/components/features/V12V4RuntimePanel";
+import { V12RouteInventoryPanel } from "@/components/features/V12RouteInventoryPanel";
 
 function SummaryCard({ title, value, detail, tone = "default" }: { title: string; value: string; detail: string; tone?: "default" | "profit" | "loss" }) {
   return (
@@ -94,6 +95,7 @@ export default function HomePage() {
           </div>
         </section>
         <V12V4RuntimePanel />
+        <V12RouteInventoryPanel />
         <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <QuickLink href="/positions" title="ダッシュボード" detail="V12、PENGU V2、FET、V52、Quality102の実建玉・保護注文・リスク状態を確認します。" icon={BarChart3} />
           <QuickLink href="/wallets" title="AsterDEXウォレット" detail="口座残高、利用可能残高、ウォレット情報を確認します。" icon={Wallet} />
