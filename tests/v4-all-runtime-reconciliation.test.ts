@@ -104,3 +104,8 @@ test("V4 wiring performs official flat execution-ledger lineage migration before
   assert.match(wiring, /V4_FLAT_LINEAGE_MIGRATION_AFTER_SIGNED_RECONCILIATION/);
   assert.match(wiring, /V12_V4_EXECUTION_STORE_PATH/);
 });
+
+test("V4 lineage migration loads the V4-primary contract environment", () => {
+  assert.match(wiring, /contract_env_file="\$V4_CONTRACT_ENV_FILE"/);
+  assert.match(wiring, /"\$contract_env_file"; do/);
+});

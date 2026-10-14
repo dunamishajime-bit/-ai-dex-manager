@@ -346,13 +346,20 @@ recover_idle_benign_state() {
 }
 
 load_runtime_migration_environment() {
+  local contract_env_file="${CONTRACT_ENV_FILE}"
+  if [[ "${PRIMARY_V12_MODE:-}" == "V4" && -n "${V4_CONTRACT_ENV_FILE:-}" ]]; then
+    # V4 lineage migration needs the V4-primary contract (including the
+    # execution-store path), not only the peer/current contract.  Keep this
+    # late in the load order so the SHA-bound contract remains authoritative.
+    contract_env_file="$V4_CONTRACT_ENV_FILE"
+  fi
   set -a
   for env_file in \
     /etc/disdex/disdex-v13d-v11eq-v96.env \
     /etc/disdex/disdex-v12-pengu-v2-v52.env \
     /etc/disdex/disdex-v12-x1-all.env \
     /etc/disdex/disdex-quality102-causal-v1.env \
-    "$CONTRACT_ENV_FILE"; do
+    "$contract_env_file"; do
     [[ -f "$env_file" ]] && . "$env_file"
   done
   set +a
