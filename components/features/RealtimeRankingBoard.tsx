@@ -36,6 +36,7 @@ type Snapshot = {
   metric: string;
   errors: Record<string, string>;
   v12V4?: V12V4Summary;
+  v4GateReference?: { verified:boolean; decisionTs:number|null; maximumBonus:number; source:string };
 };
 
 function missing(row: RankRow) {
@@ -59,7 +60,7 @@ function blockReason(row: RankRow) {
 }
 
 function rankExplanation(row: RankRow) {
-  if (row.logic === 'MARKET') return row.score === null ? 'Asterの価格・確定足が不足し共通市場Score未評価です。' : '全取扱通貨を同じ市場指標・重みで評価した表示専用Scoreによる順位です。注文・売買ロジックの発火条件とは異なります。';
+  if (row.logic === 'MARKET') return row.score === null ? 'Asterの価格・確定足が不足しScore未評価です。' : row.v4Reference ? `共通市場Score ${row.v4Reference.marketBaseScore.toFixed(2)} + V12 V4実Runner Gate参考加点 ${row.v4Reference.v4GateBonus}。発注判断、勝率、利益予測とは無関係です。` : 'Aster共通市場Scoreのみ。V12 V4正式Gateの有効な実測がないため参考加点は行っていません。';
   if (!row.fresh || row.sourceStatus === 'STALE') return '観測がSTALEのため現在の順位・判定は未評価です。発注不可です。';
   if (row.sourceStatus === 'SOURCE_ERROR') return '観測取得に失敗しました。Scoreや順位を推測していません。';
   if (row.score === null) return '必要なデータまたは実測スコアが未取得のため順位対象外です。';
@@ -273,7 +274,7 @@ export function RealtimeRankingBoard() {
       {renderStrategyBadges(row)}
       <span className="rank-score-cell min-w-0 text-right font-mono font-bold text-[#ead7a4]" title={scoreKindLabel(row)}>
         <span>{scoreValueLabel(row, !!error)}</span>
-        <small className="block truncate font-sans font-normal text-white/50">{row.score === null ? '未評価' : row.scoreKind === 'MARKET' ? '市場Score' : row.scoreKind === 'NATIVE' ? '実測値' : 'Gate充足度'}</small>
+        <small className="block truncate font-sans font-normal text-white/50">{row.score === null ? '未評価' : row.scoreKind === 'MARKET_PLUS_V4' ? '市場＋V4参考' : row.scoreKind === 'MARKET' ? '市場Score' : row.scoreKind === 'NATIVE' ? '実測値' : 'Gate充足度'}</small>
       </span>
     </button>;
   };
@@ -319,7 +320,7 @@ export function RealtimeRankingBoard() {
         </div>
         <div className="radar-score-line"><b>{scoreValueLabel(row, !!error)}</b><span>{scoreKindLabel(row)}</span></div>
         <div className="radar-leader-strategies">{renderStrategyBadges(row, true)}</div>
-        <p className="radar-source-route">{row.logic === 'MARKET' ? 'Aster公開相場の共通スコア順' : row.sourceRoute ? `Route: ${row.sourceRoute}` : `${row.logic} strategy rank`}</p>
+        <p className="radar-source-route">{row.logic === 'MARKET' ? (row.v4Reference ? '市場Score＋V4参考Gate加点順' : 'Aster市場Score順') : row.sourceRoute ? `Route: ${row.sourceRoute}` : `${row.logic} strategy rank`}</p>
         <p className={blocked ? 'radar-slot-warning' : 'radar-slot-note'}>{row.logic === 'MARKET' ? '参考市場ランキング。発注条件とは無関係です。' : blocked ? `発注不可: ${blockReason(row)}` : '順位観測です。発注可否は別途Runnerが判定します。'}</p>
         <p className="radar-slot-reason">{row.reason || missing(row)}</p>
         <time dateTime={new Date(row.checkedAt).toISOString()}>観測 {new Date(row.checkedAt).toLocaleTimeString('ja-JP')}</time>
@@ -350,7 +351,7 @@ export function RealtimeRankingBoard() {
       {!panels.length && <p className="p-3 text-xs text-white/50">順位契約に基づくTop 3はありません。全観測値は下の一覧に表示します。</p>}
     </div>
 
-    <section aria-label="全監視通貨・ロジック" className="radar-ranking"><div className="radar-inventory-heading"><h2>{logic === "ALL" ? "全取り扱い通貨 · Score高い順" : logic + " 観測値 · Score順"} · 有効 {filtered.filter((row) => row.score !== null).length} / 全 {filtered.length}件</h2><span title={data?.metric}>共通市場ScoreはAster公開相場から計算 · 発注非連動 · クリックで詳細</span></div><p className="radar-inventory-note">{logic === "ALL" ? "全取扱通貨を同じ算式（Trend25 / Momentum20 / BTC相対強度15 / Volume10 / Structure10 / RiskFit5 / Bonus15）で評価し降順表示。欠測は—で最後尾。ロジック固有Scoreと混在させません。" : "ロジック固有の観測値を表示。共通市場Scoreとは異なる尺度です。"} 0も実測値なら表示し、未取得とは区別します。</p>
+    <section aria-label="全監視通貨・ロジック" className="radar-ranking"><div className="radar-inventory-heading"><h2>{logic === "ALL" ? "全取り扱い通貨 · Score高い順" : logic + " 観測値 · Score順"} · 有効 {filtered.filter((row) => row.score !== null).length} / 全 {filtered.length}件</h2><span title={data?.metric}>市場Score＋V4正式Gate参考加点 {data?.v4GateReference?.verified ? '有効' : '未取得・加点なし'} · 発注非連動 · クリックで内訳</span></div><p className="radar-inventory-note">{logic === "ALL" ? "Aster市場Score（Trend25 / Momentum20 / BTC相対強度15 / Volume10 / Structure10 / RiskFit5 / Bonus15）に、同一SHA・確定足で検証できたV12 V4 Gateの参考加点（最大15点）を対象通貨にのみ加えて順位表示。未取得は加点0。正式発火Scoreではありません。" : "ロジック固有の観測値を表示。共通市場Scoreとは異なる尺度です。"} 0も実測値なら表示し、未取得とは区別します。</p>
       <div className="radar-columns">{[0, 1, 2].map((column) => <div key={column} className="radar-column"><div className="rank-column-heading"><span>順位</span><span>通貨</span><span>ロジック / 判定方向</span><span>Score / 尺度</span></div><div className="rank-column-body">{filtered.slice(column * 15, column * 15 + 15).map(cell)}</div></div>)}</div>
       {filtered.length > 45 && <div className="radar-tail" aria-label="46位以降">{filtered.slice(45).map(cell)}</div>}
       {data && !filtered.length && <p className="p-3 text-xs text-white/45">該当する観測行はありません。</p>}
