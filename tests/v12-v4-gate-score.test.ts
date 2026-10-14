@@ -65,5 +65,5 @@ test("only source-fingerprint, SHA and fresh Runner signals can affect reference
  assert.equal(verifyV4GateTelemetry(gate,{...decision,sourceFingerprint:"b".repeat(64)},runtime(),NOW),null);
  assert.equal(verifyV4GateTelemetry({...gate,runtimeSha:"b".repeat(40)},decision,runtime(),NOW),null);
  assert.equal(verifyV4GateTelemetry(gate,decision,runtime(),NOW+3*H),null);
- assert.equal(verifyV4GateTelemetry(gate,decision,{...runtime(),displayStatus:"SHADOW_ONLY"},NOW),null);
+ assert.equal(verifyV4GateTelemetry(gate,decision,{...runtime(),displayStatus:"UNAVAILABLE"},NOW),null);
 });
