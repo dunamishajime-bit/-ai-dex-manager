@@ -1,0 +1,29 @@
+name: HP Home V4 Runtime Status Mixed SHA
+on:
+  push:
+    branches:
+      - fix/hp-home-v12-v4-mixed-sha-status-20261015
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: hp-home-v4-runtime-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Test home V4 status, runtime authority, Gate Score and Ranking
+        run: npx tsx --test tests/v12-v4-hp-presentation-mixed-sha.test.ts tests/v12-v4-hp-observability.test.ts tests/v12-v4-mixed-sha-production-runtime.test.ts tests/v12-v4-gate-score.test.ts tests/realtime-ranking.test.ts
+      - name: TypeScript validation
+        run: npx tsc --noEmit --pretty false --incremental false
+      - name: Confirm read-only HP change
+        run: echo 'HOME_V4_SHA_DISPLAY_ONLY=PASS; TRADING_RUNNER_NO_CHANGE=TRUE'
