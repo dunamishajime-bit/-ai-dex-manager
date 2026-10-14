@@ -163,7 +163,7 @@ function v52Number(value: unknown, key: string): number {
 }
 
 /** Production peers remain on current while the certified V4 runner uses a separate SHA. */
-export function resolveV12PrimaryReleaseSha(currentSha: string, mode: string, primaryEnv: Record<string,string>): string {
+export function resolveV12PrimaryReleaseSha(currentSha: string, mode: string, primaryEnv: Record<string,string | undefined>): string {
   if (mode !== "V4") return currentSha;
   const pinnedSha = (primaryEnv.DISDEX_V12_V4_PRIMARY_SHA ?? "").trim();
   const peerSha = (primaryEnv.DISDEX_V12_V4_PEER_SHA ?? "").trim();
