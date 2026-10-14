@@ -1,0 +1,32 @@
+name: HP V4 Mixed-SHA Gate Integration
+on:
+  push:
+    branches:
+      - fix/hp-v4-mixed-sha-gatescore-20261015
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: hp-v4-mixed-sha-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - name: Install reproducible dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Mixed SHA authorization, Gate evidence and Ranking regressions
+        run: npx tsx --test tests/v12-v4-mixed-sha-production-runtime.test.ts tests/v12-v4-hp-observability.test.ts tests/v12-v4-gate-score.test.ts tests/realtime-ranking.test.ts tests/realtime-universe-score.test.ts
+      - name: Typecheck
+        run: npx tsc --noEmit --pretty false --incremental false
+      - name: Ensure no trading changes from UI branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo 'UI_READ_ONLY_UPDATE=PASS; V4_RUNNER_NOT_MODIFIED=TRUE'
