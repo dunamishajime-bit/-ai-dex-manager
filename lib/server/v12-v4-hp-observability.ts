@@ -62,7 +62,7 @@ function pathsFor(options: V12V4HpObservabilityOptions): SourcePaths {
     releasesRoot: options.paths?.releasesRoot ?? process.env.DISDEX_RELEASES_ROOT ?? "/home/deploy/disdex-trading/releases",
     stateRoot,
     heartbeatPath: options.paths?.heartbeatPath ?? process.env.V12_V4_HEALTH_STATE_PATH ?? join(stateRoot, "heartbeat.json"),
-    decisionPath: options.paths?.decisionPath ?? process.env.V12_V4_REALTIME_DECISION_PATH,
+    decisionPath: options.paths?.decisionPath ?? process.env.V12_V4_REALTIME_DECISION_PATH ?? join(stateRoot, "realtime-decision.json"),
     primaryModeRoot: options.paths?.primaryModeRoot ?? process.env.DISDEX_RUNTIME_CONTRACT_ENV_DIR ?? "/etc/disdex/current-runtime",
     primaryModePath: options.paths?.primaryModePath,
   };
@@ -294,7 +294,15 @@ export async function loadV12V4HpObservability(options: V12V4HpObservabilityOpti
 
   if (paths.decisionPath) {
     try { decision = await readJson(paths.decisionPath, paths.stateRoot, MAX_DECISION_BYTES); }
-    catch (error) { errors.push(`V4_DECISION_SOURCE:${error instanceof Error ? error.message : "UNAVAILABLE"}`); }
+    catch (error) {
+      // Before the runner publishes this optional observer file, keep the real
+      // V4 heartbeat status intact rather than misreporting missing telemetry
+      // as a LIVE execution fault. Explicitly configured source still fails closed.
+      const optionalDefault=!options.paths?.decisionPath&&!process.env.V12_V4_REALTIME_DECISION_PATH;
+      const missing=error instanceof Error&&error.message==="V4_JSON_SOURCE_UNAVAILABLE";
+      if(!(optionalDefault&&missing))
+        errors.push(`V4_DECISION_SOURCE:${error instanceof Error ? error.message : "UNAVAILABLE"}`);
+    }
   }
 
   if (!heartbeat && !decision && !currentSha) return defaultSnapshot(now, errors);
