@@ -9,10 +9,11 @@ const finite=(v:unknown):v is number=>typeof v==="number"&&Number.isFinite(v);
 export function verifyV4GateTelemetry(
  gates:unknown,decision:unknown,live:V12V4HpSnapshot,now=Date.now(),
 ):V4VerifiedGateTelemetry|null{
- const sha=live.actual.currentReleaseSha;
+ const sha=live.actual.activeRunnerSha;
  if(!object(gates)||!object(decision)||!sha||live.displayStatus!=="LIVE_VERIFIED"||
   !live.freshness.heartbeat||live.actual.v12PrimaryMode!=="V4"||
   live.actual.legacyV12RunnerActive!==false||live.actual.heartbeatSha!==sha||
+  live.actual.v4ReleaseSha!==sha||!live.actual.currentReleaseSha||
   live.actual.activeRunnerSha!==sha||
   gates.schema!=="disdex-v12-v4-gate-telemetry/v1"||
   gates.source!=="RUNNER_SAME_CLOSED_CANDLE_BATCH"||
