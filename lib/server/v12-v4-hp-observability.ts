@@ -434,13 +434,25 @@ export async function loadV12V4HpObservability(options: V12V4HpObservabilityOpti
   const primaryPermissionIndex = errors.indexOf("V12_PRIMARY_MODE_SOURCE_PERMISSION_DENIED");
   const productionV4Unit = runnerSha ? `disdex-v12-v4@${runnerSha}.service` : null;
   if (v12PrimaryMode === "UNKNOWN" && primaryPermissionIndex >= 0 && currentSha && runnerSha &&
-    currentSha === runnerSha && activeRunnerSha === runnerSha && activeRunnerId === productionV4Unit &&
+    activeRunnerSha === runnerSha && activeRunnerId === productionV4Unit &&
     activeRunnerState === "active/running" && v4RunnerMode === "CERTIFIED" && legacyV12RunnerActive === false) {
     v12PrimaryMode = "V4";
     errors.splice(primaryPermissionIndex, 1);
   }
 
   const shaMismatch = !!(currentSha && runnerSha && currentSha !== runnerSha);
+  // The certified V4 runner may have its own exact release SHA while PENGU,
+  // Q102, FET and other unchanged peers remain pinned to current trading SHA.
+  // Accept mixed lineage ONLY when systemd attests the sole production V4,
+  // the heartbeat has the same SHA, primary authority is V4 and Legacy is flat.
+  // Unknown/duplicate/canary/shadow/legacy conditions still fail closed.
+  const independentV4ReleaseAttested = !!(
+    currentSha && runnerSha && activeRunnerSha === runnerSha &&
+    activeRunnerId === productionV4Unit &&
+    activeRunnerState === "active/running" &&
+    heartbeatFresh && v4RunnerMode === "CERTIFIED" &&
+    v12PrimaryMode === "V4" && legacyV12RunnerActive === false
+  );
   const runtimeErrors = errors.filter(error => !/^(V4_DECISION_|V4_CANDIDATE_|V4_FILTERED_)/.test(error));
   const sourceIntegrityError = runtimeErrors.some(error =>
     /SCHEMA|POLICY|SAFETY|CONFLICTED|MISMATCH|INCOMPLETE|UNSAFE|OUTSIDE|ROW_INVALID|IDENTITY_INVALID|JSON_SOURCE_INVALID|DUPLICATE/.test(error));
@@ -449,7 +461,7 @@ export async function loadV12V4HpObservability(options: V12V4HpObservabilityOpti
     activeRunnerState !== "active/running" || legacyV12RunnerActive === null;
 
   let displayStatus: V12V4HpDisplayStatus;
-  if (shaMismatch) displayStatus = "SHA_MISMATCH";
+  if (shaMismatch && !independentV4ReleaseAttested) displayStatus = "SHA_MISMATCH";
   else if (sourceIntegrityError) displayStatus = "SOURCE_ERROR";
   else if (staleEvidence) displayStatus = "STALE";
   else if (v4RunnerMode === "SHADOW") displayStatus = "SHADOW";
@@ -457,7 +469,7 @@ export async function loadV12V4HpObservability(options: V12V4HpObservabilityOpti
   else if (runtimeEvidenceUnavailable) displayStatus = "UNAVAILABLE";
   else if (v4RunnerMode === "CANARY" || v12PrimaryMode === "LEGACY") displayStatus = "STAGED_NOT_LIVE";
   else if (v4RunnerMode === "UNKNOWN" || v12PrimaryMode === "UNKNOWN") displayStatus = "UNAVAILABLE";
-  else if (currentSha === runnerSha && activeRunnerSha === runnerSha && heartbeatFresh &&
+  else if (independentV4ReleaseAttested && heartbeatFresh &&
     v4RunnerMode === "CERTIFIED" && v12PrimaryMode === "V4" && legacyV12RunnerActive === false) displayStatus = "LIVE_VERIFIED";
   else displayStatus = "STAGED_NOT_LIVE";
 
