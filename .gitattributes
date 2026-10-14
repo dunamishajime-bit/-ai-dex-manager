@@ -1,3 +1,18 @@
+# V12 V4 and all future DisDex release worktrees: preserve Git blob bytes on Linux.
+# This affects checkout/packaging only; it does not change trading code or live files.
+* text=auto eol=lf
+*.sh text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.mjs text eol=lf
+*.cjs text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.py text eol=lf
+.gitattributes text eol=lf
+
 /scripts/ops/disdex-v96-v52-candidate-preflight.sh text eol=lf
 /scripts/ops/disdex-v96-v52-live-policy.sh text eol=lf
 /scripts/ops/*.sh text eol=lf
