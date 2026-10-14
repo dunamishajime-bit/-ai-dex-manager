@@ -240,3 +240,31 @@ test("stale V4 heartbeat is visibly stale while missing optional decision teleme
     await rm(missingFixture.root, { recursive: true, force: true });
   }
 });
+
+
+test("independent V4 production SHA is LIVE only if exact systemd, heartbeat and V4 primary agree", async () => {
+  const f=await fixture({heartbeatSha:OTHER_SHA,operationMode:"CERTIFIED",activeService:"production",primaryMode:"V4",legacyRunnerActive:false});
+  try{
+    const actual=await loadV12V4HpObservability(f.options);
+    assert.equal(actual.displayStatus,"LIVE_VERIFIED");
+    assert.equal(actual.actual.currentReleaseSha,SHA);
+    assert.equal(actual.actual.activeRunnerSha,OTHER_SHA);
+    assert.equal(actual.actual.v4ReleaseSha,OTHER_SHA);
+    assert.equal(actual.actual.activeRunnerState,"active/running");
+  }finally{await rm(f.root,{recursive:true,force:true});}
+});
+
+test("mixed V4 SHA must never bypass CANARY, legacy or missing primary attestation",async()=>{
+  for(const parameters of [
+    {heartbeatSha:OTHER_SHA,operationMode:"CANARY" as const,activeService:"production" as const,primaryMode:"V4" as const,legacyRunnerActive:false},
+    {heartbeatSha:OTHER_SHA,operationMode:"CERTIFIED" as const,activeService:"production" as const,primaryMode:"LEGACY" as const,legacyRunnerActive:false},
+    {heartbeatSha:OTHER_SHA,operationMode:"CERTIFIED" as const,activeService:"production" as const,primaryMode:"V4" as const,legacyRunnerActive:true},
+    {heartbeatSha:OTHER_SHA,operationMode:"CERTIFIED" as const,activeService:"none" as const,primaryMode:"V4" as const,legacyRunnerActive:false},
+  ]) {
+   const f=await fixture(parameters);
+   try{
+    const actual=await loadV12V4HpObservability(f.options);
+    assert.notEqual(actual.displayStatus,"LIVE_VERIFIED");
+   }finally{await rm(f.root,{recursive:true,force:true});}
+  }
+});
