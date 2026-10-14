@@ -1,0 +1,31 @@
+name: HP V12 V4 Gate Reference Score CI
+on:
+  push:
+    branches:
+      - codex/hp-v12-v4-gate-score-20261014
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: hp-v4-gate-score-ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  test-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Verify V4 Gate Score and strict telemetry source contract
+        run: npx tsx --test tests/v12-v4-gate-score.test.ts tests/v12-v4-symbol-status.test.ts tests/realtime-ranking-strategy-display.test.ts
+      - name: Verify TypeScript
+        run: npx tsc --noEmit --pretty false --incremental false
+      - name: Verify production build
+        run: npm run build
+      - name: Confirm no deployment
+        run: echo 'HP_GATE_SCORE_CANDIDATE_CI_ONLY=PASS; production deployment is intentionally excluded'
