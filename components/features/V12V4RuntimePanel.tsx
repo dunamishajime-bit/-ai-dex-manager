@@ -49,7 +49,7 @@ export function V12V4RuntimePanel({ compact = false }: { compact?: boolean }) {
       <div className="mt-4 grid min-w-0 gap-3 md:grid-cols-2">
         <div className="min-w-0 rounded-2xl border border-sky-400/20 bg-sky-500/5 p-3">
           <div className="flex items-center gap-2 text-sm font-bold text-sky-100"><ShieldCheck className="h-4 w-4" />V4 target契約</div>
-          <div className="mt-2 break-words text-xs leading-5 text-white/80">{view.target.policyId} / 41 routes</div>
+          <div className="mt-2 break-words text-xs leading-5 text-white/80">{view.target.policyId}</div>
           <p className="mt-2 text-[11px] leading-5 text-white/55">これは採用対象の仕様です。Productionで稼働中であることを示す表示ではありません。</p>
         </div>
         <div className="min-w-0 rounded-2xl border border-white/10 bg-black/20 p-3">
