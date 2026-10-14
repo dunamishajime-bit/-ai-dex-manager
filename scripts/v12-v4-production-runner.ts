@@ -9,6 +9,7 @@ import {V4ExecutionStore} from "../lib/v12-v4-execution-store";
 import {initializeV4SignedFlatState} from "../lib/v12-v4-signed-bootstrap";
 import {V4RunnerEngine} from "../lib/v12-v4-runner-engine";
 import {loadV4ClosedCandles,buildV4LiveDecisionBatch} from "../lib/v12-v4-live-candidate-builder";
+import {buildV4RunnerGateTelemetry} from "../lib/v12-v4-gate-telemetry";
 import {productionExitSpec} from "../lib/v12-v4-production-lifecycle";
 import {assertV4CertifiedSource,assertV4CertifiedOrder} from "../lib/v12-v4-certified-gates";
 import {readV4CanaryPermit,assertV4CanarySourceSnapshot,assertV4CanaryOrderAuthority} from "../lib/v12-v4-canary-permit";
@@ -93,6 +94,34 @@ async function writeV4Health(releaseSha:string,operationMode:string,result:{
  await rename(tmp,path);
 }
 
+/** Strictly optional read-only observer. Telemetry IO/validation failure MUST NOT
+ * block venue entry/STOP reconciliation or change the trading decision.
+ * Publication is atomic, 0600, pinned to the authorized V4 release.
+ */
+async function writeV4GateObserverArtifacts(
+ releaseSha:string, bars:Parameters<typeof buildV4RunnerGateTelemetry>[0],
+ decision:Parameters<typeof buildV4RunnerGateTelemetry>[1],
+){
+ const report=buildV4RunnerGateTelemetry(bars,decision,releaseSha);
+ const base="/var/lib/disdex/v12-v4/";
+ const paths:[string,unknown][]=[
+  [base+"gate-telemetry.json",report],
+  [base+"realtime-decision.json",{...decision,releaseSha,runtimeSha:releaseSha,source:"RUNNER_SAME_CLOSED_CANDLE_BATCH"}],
+ ];
+ for(const [path,payload] of paths){
+  if(!path.startsWith(base))throw Error("V4_OBSERVER_PATH_INVALID");
+  try{
+   const st=await lstat(path);
+   if(!st.isFile()||st.isSymbolicLink())throw Error("V4_OBSERVER_UNSAFE_EXISTING_FILE");
+  }catch(err){
+   if((err as NodeJS.ErrnoException).code!=="ENOENT")throw err;
+  }
+  const tmp=path+"."+process.pid+"."+Date.now()+".tmp";
+  await writeFile(tmp,JSON.stringify(payload),{encoding:"utf8",mode:0o600,flag:"wx"});
+  await rename(tmp,path);
+ }
+}
+
 function env(name:string){
  const value=String(process.env[name]??"").trim();
  if(!value)throw Error("V4_MISSING_CONFIGURATION:"+name);
@@ -173,6 +202,9 @@ export async function buildV4ProductionRuntime(){
    value=attachV4NativeCoreCandidates(value,bars,refs);
   }
   cache={boundary,value};
+  try{await writeV4GateObserverArtifacts(releaseSha,bars,value);}
+  catch(error){console.error(JSON.stringify({level:"observer_warning",category:"V4_GATE_TELEMETRY",
+    reason:error instanceof Error?error.message.slice(0,160):"UNKNOWN_OBSERVER_FAILURE",orderEnabledUnchanged:true}));}
   return value;
  };
  const engine=new V4RunnerEngine({
