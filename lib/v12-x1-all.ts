@@ -418,6 +418,68 @@ function candidateEligibility(candidate: V12Candidate, atrRatio: number, regimeS
     return { eligible: true as const, reason: "SIGNAL_ELIGIBLE" };
 }
 
+/** Read-only attestation of the exact native source gates used by V4's frozen V12 generator.
+ * This does not choose, allocate or authorize a V4 route/order.
+ * A not-evaluated gate must never be interpreted as PASS or BLOCK.
+ */
+export type V12NativeGateObservation = {
+    symbol: string;
+    side: V12Side | null;
+    sourceEligible: boolean | null;
+    sourceReason: string;
+    portfolioRank: number | null;
+    rawScore: number | null;
+    gates: Array<{
+        key: "VOLUME_RATIO" | "EDGE_TO_COST" | "DIRECTIONAL_MOMENTUM" | "REGIME_ENTRY_QUALITY" | "WIN_RATE_OVERLAY";
+        state: "PASS" | "BLOCK" | "NOT_EVALUATED";
+        actual: number | string | null;
+        required: number | string;
+        reason: string;
+    }>;
+};
+export function observeV12NativeEntryGates(
+    universe: Record<string, V12Bar[]>,
+    index: number,
+): { decisionTs: number; regime: V12Regime; items: V12NativeGateObservation[] } | null {
+    const btc=universe.BTC, regimeState=computeV12RegimeState(btc || [],index);
+    if(!btc?.[index]||!regimeState)return null;
+    const source=buildV12DecisionObservation(universe,index);
+    if(!source||source.referenceTs!==btc[index].endTs) return null;
+    const observed=new Map(source.candidates.map(row=>[row.symbol,row]));
+    const edgeThreshold=V12_X1_ALL.minimumEdgeToCostRatio*(V12_X1_ALL.normalRoundTripCostBps/10000);
+    const items=V12_X1_ALL.universe.map(symbol=>{
+        const m=candidateMetricsFor(symbol,universe[symbol]||[],index);
+        if(!m) {
+            const names=["VOLUME_RATIO","EDGE_TO_COST","DIRECTIONAL_MOMENTUM","REGIME_ENTRY_QUALITY","WIN_RATE_OVERLAY"] as const;
+            return {symbol,side:null,sourceEligible:null,sourceReason:"NATIVE_SOURCE_FEATURES_UNAVAILABLE",portfolioRank:null,rawScore:null,
+                gates:names.map(key=>({key,state:"NOT_EVALUATED" as const,actual:null,required:"source feature" as const,reason:"NATIVE_SOURCE_FEATURES_UNAVAILABLE"})),
+            } satisfies V12NativeGateObservation;
+        }
+        const c=m.candidate,side=c.side;
+        const selected=observed.get(symbol);
+        const eligible=candidateEligibility(c,m.atrRatio,regimeState);
+        const baseGates:V12NativeGateObservation["gates"]=[
+            {key:"VOLUME_RATIO",state:c.volumeRatio>=V12_X1_ALL.minimumVolumeRatio?"PASS":"BLOCK",
+                actual:c.volumeRatio,required:V12_X1_ALL.minimumVolumeRatio,reason:"CURRENT_OVER_PRIOR_20_VOLUME"},
+            {key:"EDGE_TO_COST",state:Math.abs(c.momentum)>=edgeThreshold?"PASS":"BLOCK",
+                actual:Math.abs(c.momentum),required:edgeThreshold,reason:"DIRECTIONAL_MOMENTUM_ABSOLUTE"},
+            {key:"DIRECTIONAL_MOMENTUM",state:Math.abs(c.momentum)>=V12_X1_ALL.minimumMomentumPct?"PASS":"BLOCK",
+                actual:Math.abs(c.momentum),required:V12_X1_ALL.minimumMomentumPct,reason:"DIRECTIONAL_MOMENTUM_ABSOLUTE"},
+            {key:"REGIME_ENTRY_QUALITY",state:evaluateV12EntryQuality({
+                regime:regimeState.regime,strongRegime:regimeState.strongRegime,side,momentum:c.momentum,atrRatio:m.atrRatio,score:c.score,
+             })?"PASS":"BLOCK",
+             actual:c.score,required:"V12_NATIVE_REGIME_AND_QUALITY_CONTRACT",reason:"BTC_REGIME_AND_ENTRY_QUALITY"},
+        ];
+        const rank=selected?.portfolioRank??null;
+        const overlay=rank!==null?evaluateV12WinRateGate(universe,index,{symbol,side,rank}):null;
+        baseGates.push({key:"WIN_RATE_OVERLAY",state:overlay?overlay.allow?"PASS":"BLOCK":"NOT_EVALUATED",
+            actual:overlay?.reason??null,required:"TOP3_ONLY",reason:overlay?.reason??"NOT_EVALUATED_OUTSIDE_TOP3"});
+        return {symbol,side,sourceEligible:eligible.eligible,sourceReason:eligible.reason,portfolioRank:rank,
+            rawScore:c.score,gates:baseGates} satisfies V12NativeGateObservation;
+    });
+    return {decisionTs:source.referenceTs,regime:regimeState.regime,items};
+}
+
 function candidateFor(symbol: string, bars: V12Bar[], index: number, regimeState: V12RegimeState): V12Candidate | null {
     const metrics = candidateMetricsFor(symbol, bars, index);
     if (!metrics) return null;
