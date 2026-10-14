@@ -6,6 +6,7 @@ import { Activity, AlertCircle, CheckCircle2, CircleDashed, Clock3, RefreshCw, S
 
 import { penguFailureDisplayState } from "@/lib/pengu-failure-display";
 import { useProductionRuntime } from "@/hooks/useProductionRuntime";
+import { useV12V4HpStatus } from "@/hooks/useV12V4HpStatus";
 import type { CurrentProductionRuntime } from "@/lib/server/current-production-runtime";
 import type { V52Top2Observability, V52Top2DecisionRow } from "@/lib/server/v52-top2-observability";
 import type { PenguRuntimeStatus } from "@/lib/server/pengu-runtime-observability";
@@ -273,11 +274,21 @@ function penguStatusClass(status: PenguRuntimeStatus["status"]) {
 }
 
 function RuntimeSummary({ runtime }: { runtime: Snapshot["runtime"] }) {
-  const liveCount = runtime.units.filter((unit) => unit.status === "LIVE").length;
-  const verified = liveCount === runtime.units.length;
-  const badge = verified ? "全runner LIVE確認済み" : liveCount > 0 ? `${liveCount}/${runtime.units.length} runner LIVE確認` : "LIVE未確認";
+  const { snapshot: v4 } = useV12V4HpStatus();
+  // Legacy X1 is retired when the real V4 primary and stopped legacy service are attested.
+  // Keep the legacy warning visible if the V4 attestation is unavailable or legacy restarts.
+  const legacyRetired = v4?.displayStatus === "LIVE_VERIFIED"
+    && v4.actual.v12PrimaryMode === "V4"
+    && v4.actual.activeRunnerState === "active/running"
+    && v4.actual.legacyV12RunnerActive === false;
+  const units = legacyRetired
+    ? runtime.units.filter((unit) => unit.id !== "V12_X1.00_ALL")
+    : runtime.units;
+  const liveCount = units.filter((unit) => unit.status === "LIVE").length;
+  const verified = units.length > 0 && liveCount === units.length;
+  const badge = verified ? "全runner LIVE確認済み" : liveCount > 0 ? `${liveCount}/${units.length} runner LIVE確認` : "LIVE未確認";
   const badgeClass = verified ? "border-emerald-400/35 bg-emerald-500/10 text-emerald-100" : liveCount > 0 ? "border-amber-400/35 bg-amber-500/10 text-amber-100" : "border-rose-400/35 bg-rose-500/10 text-rose-100";
-  return <section className="panel-gold rounded-[28px] p-4 md:p-5"><div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2 text-lg font-bold text-white"><ServerCog className="h-5 w-5 text-gold-100" />VPS実稼働ロジック（互換runnerを含む観測）</div><span className={`rounded-full border px-3 py-1 text-xs font-semibold ${badgeClass}`}>{badge}</span></div><p className="mt-2 text-xs leading-5 text-white/55">確認時刻：{time(runtime.checkedAt)} / runnerごとに実stateの更新時刻・mode・保護状態を判定します。V12 X1.00 ALLはLegacy/互換runnerとして表示され、V12 V4のLIVE確認とは別です。ここから発注操作は行いません。</p><div className="mt-4 grid gap-3 xl:grid-cols-3">{runtime.units.map((unit) => { const isLegacyV12 = unit.id === "V12_X1.00_ALL"; const label = isLegacyV12 ? `Legacy V12 X1.00 ALL（互換runner）` : unit.label; return <article key={unit.id} className="rounded-2xl border border-white/10 bg-black/20 p-3"><div className="flex items-start justify-between gap-2"><div><div className="font-bold text-white">{label}</div><div className="mt-1 text-[11px] text-white/45">{unit.venue} / {unit.timeframe}</div></div><span className={`rounded-full border px-2 py-1 text-[10px] font-semibold ${runtimeStatusClass(unit.status)}`}>{unit.status === "UNAVAILABLE" ? "未取得" : unit.status === "UNCONFIRMED" ? "未確認" : unit.status === "STALE" ? "要確認" : "LIVE"}</span></div><div className="mt-3 space-y-2 text-xs leading-5 text-white/72"><p><span className="text-white/45">判定：</span>{unit.entryPolicy}</p><p><span className="text-white/45">保護：</span>{unit.protection}</p><p className="text-white/50">{unit.note}</p><p className="text-amber-100/80">状態根拠：{unit.reason || "未取得"}</p></div><div className="mt-3 border-t border-white/10 pt-2 text-[10px] text-white/40">release {shortSha(unit.releaseSha)}… / state更新 {time(unit.updatedAt)}</div></article>; })}</div></section>;
+  return <section className="panel-gold rounded-[28px] p-4 md:p-5"><div className="flex flex-wrap items-center justify-between gap-3"><div className="flex items-center gap-2 text-lg font-bold text-white"><ServerCog className="h-5 w-5 text-gold-100" />VPS実稼働ロジック</div><span className={`rounded-full border px-3 py-1 text-xs font-semibold ${badgeClass}`}>{badge}</span></div><p className="mt-2 text-xs leading-5 text-white/55">確認時刻：{time(runtime.checkedAt)} / runnerごとに実stateの更新時刻・mode・保護状態を判定します。V12 V4は上の専用パネルで確認します。停止済みLegacy V12はV4 Primaryを実証できた場合のみ現行一覧から除外し、異常再起動時は再表示します。ここから発注操作は行いません。</p><div className="mt-4 grid gap-3 xl:grid-cols-3">{units.map((unit) => { const isLegacyV12 = unit.id === "V12_X1.00_ALL"; const label = isLegacyV12 ? `Legacy V12 X1.00 ALL（互換runner）` : unit.label; return <article key={unit.id} className="rounded-2xl border border-white/10 bg-black/20 p-3"><div className="flex items-start justify-between gap-2"><div><div className="font-bold text-white">{label}</div><div className="mt-1 text-[11px] text-white/45">{unit.venue} / {unit.timeframe}</div></div><span className={`rounded-full border px-2 py-1 text-[10px] font-semibold ${runtimeStatusClass(unit.status)}`}>{unit.status === "UNAVAILABLE" ? "未取得" : unit.status === "UNCONFIRMED" ? "未確認" : unit.status === "STALE" ? "要確認" : "LIVE"}</span></div><div className="mt-3 space-y-2 text-xs leading-5 text-white/72"><p><span className="text-white/45">判定：</span>{unit.entryPolicy}</p><p><span className="text-white/45">保護：</span>{unit.protection}</p><p className="text-white/50">{unit.note}</p><p className="text-amber-100/80">状態根拠：{unit.reason || "未取得"}</p></div><div className="mt-3 border-t border-white/10 pt-2 text-[10px] text-white/40">release {shortSha(unit.releaseSha)}… / state更新 {time(unit.updatedAt)}</div></article>; })}</div></section>;
 }
 
 function FetRuntimeDetail({ details }: { details?: FetRuntimeStatus }) {
