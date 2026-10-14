@@ -56,10 +56,12 @@ export function V12V4RuntimePanel({ compact = false }: { compact?: boolean }) {
           <div className="text-sm font-bold text-white">実runtime（read-only）</div>
           <div className="mt-2 break-words text-xs leading-5 text-white/80">{view.actualSummary}</div>
           <div className="mt-2 grid gap-1 text-[11px] leading-5 text-white/60">
-            <div>current release SHA: {actual?.currentReleaseSha ?? "未取得"}</div>
+            <div>他ロジック共通 SHA: {actual?.currentReleaseSha ?? "未取得"}</div>
+            <div>V12 V4専用 SHA: {actual?.activeRunnerSha ?? "未取得"}</div>
             <div>heartbeat: {timestamp(snapshot?.timestamps.heartbeatUpdatedAt)} / {snapshot?.freshness.heartbeat ? "fresh" : "未確認・stale"}</div>
             <div>decision: {timestamp(snapshot?.timestamps.decisionTs)} / {snapshot?.freshness.decision ? "fresh" : "未確認・stale"}</div>
-            <div>orderEnabled: {actual?.orderEnabled === null || actual?.orderEnabled === undefined ? "未取得" : actual.orderEnabled ? "true" : "false"} / tradingMutation=0</div>
+            <div>V4 heartbeatのorderEnabled: {actual?.orderEnabled === null || actual?.orderEnabled === undefined ? "未取得" : actual.orderEnabled ? "true" : "false"}（参考値） / HPはread-only・tradingMutation=0</div>
+            <div>発注可否は取引Runnerと実取引所側の安全Gateで判定します。HPのSHA表示だけで発注停止とは断定しません。</div>
           </div>
         </div>
       </div>
