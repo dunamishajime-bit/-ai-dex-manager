@@ -1,28 +1,35 @@
 # Latest Production SHA monthly BT
 
-This directory contains the completed one-year, no-DCA, compounded H1 replay
+This directory contains the corrected one-year, no-DCA, compounded H1 replay
 for Production runtime `e8cc2e73f8d3981d708ee52f013241597c038b10`.
 
 ## Status
 
-`COMPLETE_CURRENT_SHA_POLICY_CERTIFIED_H1_CAUSAL_PRICE_MODEL_NOT_L2_VERIFIED`
+`COMPLETE_CURRENT_SHA_POLICY_CERTIFIED_H1_CAUSAL_PRICE_MODEL_DD21_DESIGN_ONLY`
 
-The primary 10bps result is:
+The operator clarification is explicit: DD21 is a design/evaluation upper
+bound, not a V12 entry-stop rule. The corrected replay therefore does not
+reject new V12 entries after DD21. It reports whether the portfolio exceeded
+the design threshold.
+
+Primary 10bps result:
 
 - Initial capital: `JPY 10,000`
 - Recurring contribution: `JPY 0`
-- Final equity: `JPY 14,452,316.093050238`
-- Net profit: `JPY 14,442,316.093050238`
-- Total return: `144,423.16093050237%`
-- Geometric monthly equivalent: `83.36993074854218%`
-- Profit factor: `2.31346410128944`
-- Maximum H1 mark-to-market drawdown: `-27.660125106894597%`
-- Win rate: `64.86486486486487%`
-- Closed trades: `666`
+- Final equity: `JPY 222,196,830.18350622`
+- Net profit: `JPY 222,186,830.18350622`
+- Total return: `2,221,868.301835062%`
+- Geometric monthly equivalent: `130.2651188595402%`
+- Profit factor: `4.326953769851883`
+- Maximum H1 mark-to-market drawdown: `-28.480497015241745%`
+- Win rate: `69.97558991049634%`
+- Closed trades: `1,229`
 - Accounting reconciliation: `PASS`
 
-The human-readable analysis is in `LATEST_BT_REPORT.md`. The canonical replay
-output is `replay-1/`.
+The human-readable analysis is in `LATEST_BT_REPORT.md`. The corrected
+canonical replay output is `replay-corrected-1/`. The older `replay-1/`
+directory is retained as historical pre-correction evidence and is not the
+current result.
 
 ## Contract
 
@@ -34,6 +41,8 @@ output is `replay-1/`.
 - Primary cost: `10bps` round trip
 - Cost stresses: `20bps` and `30bps` round trip
 - Replay mutations: orders `0`, cancels `0`, position changes `0`
+- V12 DD21 trade-stop gate: **not applied**
+- V12 DD21 design threshold breach: **reported**
 
 ## Current-runtime adaptations included
 
@@ -41,7 +50,7 @@ output is `replay-1/`.
 - V12 Gross `3.0x`, Recovery Gross `2.5x`
 - V4 entry authority Crypto `3.5x`, Total `4.75x`
 - Peer entry authority Crypto `3.0x`, Total `4.25x`
-- V12 account maximum-drawdown entry Gate `21%`
+- DD21 retained as design/evaluation threshold only
 - TIME-family fixed `8%` emergency STOP
 - PENGU `COMBINED_FILTERED_Q60_DD17_H72`, accepted-entry Gross `1.0x`
 - Q102 current family/side sizing with BRK disabled
@@ -55,22 +64,30 @@ Historical candidate rows preserve their original runtime SHAs
 to the target runtime through checked-in route/source/exit parity evidence, the
 target Git-object hashes for all current policy files, raw Aster H1/funding
 hashes, and current-policy causal re-evaluation. See
-`replay-1/provenance-manifest.json`.
+`replay-corrected-1/provenance-manifest.json`.
 
-This is therefore the current-SHA policy-certified H1 causal economic replay.
-It is not a reconstruction of historical L2 order books, venue latency,
-partial/unknown execution or historical minQty/minNotional read-back behavior.
+This is the corrected current-SHA policy replay under the operator's DD21
+semantics. It is not a reconstruction of historical L2 order books, venue
+latency, partial/unknown execution or historical minQty/minNotional read-back
+behavior.
+
+The checked-in V4 lifecycle source still contains executable DD21
+entry/reservation guards. That source-level contract conflict is recorded in
+the summary and must be reconciled before this BT can be called exact live-code
+parity. This task changed the research interpretation only; it did not modify
+VPS or Production runtime.
 
 ## Determinism
 
-The complete replay was run twice into independent output directories. All 15
-canonical ledgers/summaries matched byte-for-byte. The canonical hash-manifest
-SHA-256 was:
+The corrected replay was run twice into independent output directories. All 15
+canonical ledgers/summaries matched byte-for-byte. The corrected canonical
+hash-manifest SHA-256 is:
 
-`d47f433bc79e545ec9fea1bd3839bf37e33ec1907f6d042af35f8b5f93495844`
+`0b49802f128c38c3ec467b76bf123afd4fe64dbc926c85975efc43b665659f27`
 
-The second bulky output copy was removed after writing
-`independent-replay-verification.json`; the canonical `replay-1/` remains.
+The old DD21-entry-stop output is not the canonical result. It remains in
+`replay-1/` as historical pre-correction evidence; its code and metrics are
+also recoverable from the previous Git commit.
 
 ## Reproduction
 
@@ -83,9 +100,10 @@ provenance manifest:
   --research-root '<DisDex-five-improvements-20261008>' `
   --aster-market-root '<market-Aster-H1-funding-and-manifests>' `
   --v52-ledger-root '<v52-SHA-verified-original-ledger>' `
-  --output-dir docs/research/results/exact-current-sha-monthly-bt-20261014/replay-1
+  --output-dir docs/research/results/exact-current-sha-monthly-bt-20261014/replay-corrected-1
 ```
 
-A valid result must retain the exact target SHA, one initial JPY 10,000
+A valid result must retain the exact target SHA binding, one initial JPY 10,000
 contribution, zero recurring contributions, `accounting_reconciliation=PASS`,
-Q102 BRK accepted count zero, and zero order/cancel/position mutations.
+Q102 BRK accepted count zero, zero trading mutations, and
+`v12_dd21_trade_gate_applied=false`.

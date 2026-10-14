@@ -1,0 +1,545 @@
+{
+  "candidate_policy_audit": {
+    "fet_gate_accepted": 7,
+    "fet_gate_rejected": 14,
+    "pengu_fixed_gross_rows": 113,
+    "q102_family_side_rows": {
+      "BRK|LONG": 18,
+      "BRK|SHORT": 7,
+      "HIGH_VOL|LONG": 11,
+      "HIGH_VOL|SHORT": 105,
+      "MR|SHORT": 89,
+      "PB|LONG": 20,
+      "PB|SHORT": 15,
+      "REV|LONG": 9,
+      "REV|SHORT": 124
+    },
+    "time37_fixed8_stops": 22,
+    "time37_routes": {
+      "REC_G5_SLOW_TREND": 2,
+      "REC_X02_TIME_36H": 1,
+      "REC_X11_TIME_48H": 2,
+      "REC_Y06_REV_D0_T72": 16,
+      "REC_Y13_REV_D2_T36": 1
+    },
+    "v12_dd21_trade_rejections": 0
+  },
+  "capital": {
+    "compounding": true,
+    "initial_jpy": 10000.0,
+    "monthly_contribution_jpy": 0.0
+  },
+  "contract": {
+    "fet_gross": 1.0,
+    "fet_policy": "BRK48_VOL10_RET15",
+    "margin_type": "cross",
+    "peer_crypto_entry_cap": 3.0,
+    "peer_total_entry_cap": 4.25,
+    "pengu_entry_gross": 1.0,
+    "pengu_policy": "COMBINED_FILTERED_Q60_DD17_H72",
+    "q102_brk_enabled": false,
+    "required_leverage": 5,
+    "time37_emergency_stop_fraction": 0.08,
+    "v12_crypto_entry_cap": 3.5,
+    "v12_dd21_trade_gate_applied": false,
+    "v12_design_maximum_drawdown_limit": 0.21,
+    "v12_gross": 3.0,
+    "v12_policy": "V2_M150_D05_CORE_NATIVE",
+    "v12_recovery_gross": 2.5,
+    "v12_total_entry_cap": 4.75
+  },
+  "limitations": [
+    "H1 causal price model; not historical L2 fill reconstruction.",
+    "Historical venue minQty/minNotional/read-back latency and partial/unknown execution are not modeled.",
+    "Candidate/data origin SHAs are preserved and bound to e8cc by parity evidence; they are not relabeled as e8cc.",
+    "Per operator clarification, DD21 is a design/evaluation limit only and is not applied as a V12 trade-stop gate in this replay.",
+    "The checked-in V4 lifecycle source still contains executable DD21 entry/reservation guards; this runtime-contract conflict is recorded and must be resolved before claiming exact live-code parity."
+  ],
+  "mutation": {
+    "cancels_sent": 0,
+    "orders_sent": 0,
+    "position_changes_sent": 0
+  },
+  "period": {
+    "end_ms": 1786320000000,
+    "start_ms": 1754784000000
+  },
+  "primary_scenario": "PRICE_MODEL_10BPS",
+  "scenarios": [
+    {
+      "accounting_reconciliation": {
+        "closed_trade_pnl_settlement_units": 1403261.5418105398,
+        "deposit_settlement_units": 67.65013358113603,
+        "equity_minus_wallet_jpy": -1.4901161193847656e-07,
+        "equity_minus_wallet_nominal_jpy": null,
+        "event_cashflow_settlement_units": 1403329.191944121,
+        "final_fx_jpy_per_usd": 158.33550065019506,
+        "intrahour_events": 868,
+        "status": "PASS",
+        "wallet_settlement_units": 1403329.1919441228
+      },
+      "candidate_decision_counts": {
+        "FET": {
+          "ACCEPTED_MODELED_ENTRY": {
+            "GROSS_ALLOCATED": 5
+          },
+          "EXCLUDED_PREALLOCATION": {
+            "FET_CURRENT_VOL10_RET15:RETURN72_ABOVE_15PCT": 2,
+            "FET_CURRENT_VOL10_RET15:VOLUME_ABOVE_10": 7,
+            "FET_CURRENT_VOL10_RET15:VOLUME_ABOVE_10,RETURN72_ABOVE_15PCT": 5
+          },
+          "REJECTED_PORTFOLIO": {
+            "FET:REENTRY_COOLDOWN": 1,
+            "FET:SYMBOL_OWNED_BY_Q102": 1
+          }
+        },
+        "HYPE_LONG": {
+          "ACCEPTED_MODELED_ENTRY": {
+            "GROSS_ALLOCATED": 19
+          },
+          "REJECTED_PORTFOLIO": {
+            "HYPE_LONG:NO_LOT_SHRINK": 25,
+            "HYPE_LONG:SLOT_OCCUPIED": 16
+          }
+        },
+        "IDLE": {
+          "ACCEPTED_MODELED_ENTRY": {
+            "GROSS_ALLOCATED": 51
+          },
+          "REJECTED_PORTFOLIO": {
+            "IDLE:CORE_SIGNAL_OR_POSITION": 376,
+            "IDLE:FILLED_SYMBOL_COOLDOWN": 63,
+            "IDLE:FULL_1X_QUANTITY_BLOCK": 63,
+            "IDLE:FULL_1X_UNAVAILABLE": 42,
+            "IDLE:HYPE_SIDECAR_ACTIVE": 20,
+            "IDLE:MULTI_SIGNAL_CAPACITY_AMBIGUOUS": 69,
+            "IDLE:SHARED_DAILY_LOSS": 9,
+            "IDLE:SYMBOL_OWNED_BY_IDLE": 1
+          }
+        },
+        "PENGU": {
+          "ACCEPTED_MODELED_ENTRY": {
+            "GROSS_ALLOCATED": 67
+          },
+          "REJECTED_PORTFOLIO": {
+            "PENGU:COOLDOWN": 7,
+            "PENGU:NO_LOT_SHRINK": 1,
+            "PENGU:ROUTE_QUARANTINE": 3,
+            "PENGU:SLOT_OCCUPIED": 35
+          }
+        },
+        "Q102": {
+          "ACCEPTED_MODELED_ENTRY": {
+            "GROSS_ALLOCATED": 138
+          },
+          "REJECTED_PORTFOLIO": {
+            "Q102:SHARED_DAILY_LOSS": 9,
+            "Q102:SLOT_OCCUPIED": 226
+          },
+          "REJECTED_RESEARCH_POLICY": {
+            "Q102:BRK_DISABLED_CURRENT_RUNTIME": 25
+          }
+        },
+        "RESIDUAL": {
+          "ACCEPTED_MODELED_ENTRY": {
+            "GROSS_ALLOCATED": 23
+          },
+          "REJECTED_PORTFOLIO": {
+            "RESIDUAL:CORE_SIGNAL_OR_POSITION": 635,
+            "RESIDUAL:FULL_1X_QUANTITY_BLOCK": 31,
+            "RESIDUAL:FULL_1X_UNAVAILABLE": 3,
+            "RESIDUAL:HYPE_SIDECAR_ACTIVE": 6,
+            "RESIDUAL:IDLE_PRIORITY": 20,
+            "RESIDUAL:RESIDUAL_SLOT_OCCUPIED": 96,
+            "RESIDUAL:SHARED_DAILY_LOSS": 6,
+            "RESIDUAL:SYMBOL_OWNED_BY_V12": 22
+          }
+        },
+        "V12": {
+          "ACCEPTED_MODELED_ENTRY": {
+            "GROSS_ALLOCATED": 839
+          },
+          "REJECTED_PORTFOLIO": {
+            "V12:ATOM_EXHAUSTION_CAUSAL": 2,
+            "V12:NO_GROSS_ROOM": 37,
+            "V12:OPPOSITE_SYMBOL_ACTIVE": 48,
+            "V12:SHARED_DAILY_LOSS": 8,
+            "V12:SIDE_LOSS_COOLDOWN": 2,
+            "V12:SYMBOL_COOLDOWN": 6,
+            "V12:SYMBOL_OWNED_BY_Q102": 2,
+            "V12:SYMBOL_OWNED_BY_RESIDUAL": 1,
+            "V12:VENUE_MIN_NOTIONAL": 4,
+            "V12:VENUE_MIN_QTY": 9
+          }
+        },
+        "V52": {
+          "ACCEPTED_MODELED_ENTRY": {
+            "GROSS_ALLOCATED": 87
+          },
+          "EXCLUDED_PREALLOCATION": {
+            "SINGLE_V50_SLOT_ALREADY_OPEN": 11
+          },
+          "REJECTED_PORTFOLIO": {
+            "V52:SHARED_DAILY_LOSS": 1
+          }
+        }
+      },
+      "closed_trades": 1229,
+      "contributed_jpy": 10000.0,
+      "deposit_event_count": 1,
+      "final_equity_jpy": 222196830.18350622,
+      "historical_fill_verified": false,
+      "maximum_mtm_drawdown_pct": -28.480497015241745,
+      "net_profit_jpy": 222186830.18350622,
+      "profit_factor": 4.326953769851883,
+      "q102_brk_accepted": 0,
+      "q102_brk_rejected": 25,
+      "round_trip_cost_bps": 10,
+      "scenario_id": "PRICE_MODEL_10BPS",
+      "strategy_pnl_jpy": {
+        "FET": 1131885.3306064573,
+        "HYPE_LONG": 38329423.54312977,
+        "IDLE": 6901205.9200414,
+        "PENGU": 17317338.887223512,
+        "Q102": 8602479.367280433,
+        "RESIDUAL": -2379946.7303993413,
+        "V12": 123447683.5190644,
+        "V52": 31556941.764045548
+      },
+      "strategy_trades": {
+        "FET": 5,
+        "HYPE_LONG": 19,
+        "IDLE": 51,
+        "PENGU": 67,
+        "Q102": 138,
+        "RESIDUAL": 23,
+        "V12": 839,
+        "V52": 87
+      },
+      "total_return_pct": 2221868.301835062,
+      "v12_dd21_trade_gate_applied": false,
+      "v12_design_dd_breached": true,
+      "v12_design_dd_limit_pct": 21.0,
+      "win_rate_pct": 69.97558991049634
+    },
+    {
+      "accounting_reconciliation": {
+        "closed_trade_pnl_settlement_units": 933986.93056522,
+        "deposit_settlement_units": 67.65013358113603,
+        "equity_minus_wallet_jpy": -2.9802322387695312e-08,
+        "equity_minus_wallet_nominal_jpy": null,
+        "event_cashflow_settlement_units": 934054.5806988011,
+        "final_fx_jpy_per_usd": 158.33550065019506,
+        "intrahour_events": 871,
+        "status": "PASS",
+        "wallet_settlement_units": 934054.5806988
+      },
+      "candidate_decision_counts": {
+        "FET": {
+          "ACCEPTED_MODELED_ENTRY": {
+            "GROSS_ALLOCATED": 5
+          },
+          "EXCLUDED_PREALLOCATION": {
+            "FET_CURRENT_VOL10_RET15:RETURN72_ABOVE_15PCT": 2,
+            "FET_CURRENT_VOL10_RET15:VOLUME_ABOVE_10": 7,
+            "FET_CURRENT_VOL10_RET15:VOLUME_ABOVE_10,RETURN72_ABOVE_15PCT": 5
+          },
+          "REJECTED_PORTFOLIO": {
+            "FET:REENTRY_COOLDOWN": 1,
+            "FET:SYMBOL_OWNED_BY_Q102": 1
+          }
+        },
+        "HYPE_LONG": {
+          "ACCEPTED_MODELED_ENTRY": {
+            "GROSS_ALLOCATED": 20
+          },
+          "REJECTED_PORTFOLIO": {
+            "HYPE_LONG:NO_LOT_SHRINK": 23,
+            "HYPE_LONG:SLOT_OCCUPIED": 17
+          }
+        },
+        "IDLE": {
+          "ACCEPTED_MODELED_ENTRY": {
+            "GROSS_ALLOCATED": 53
+          },
+          "REJECTED_PORTFOLIO": {
+            "IDLE:CORE_SIGNAL_OR_POSITION": 376,
+            "IDLE:FILLED_SYMBOL_COOLDOWN": 63,
+            "IDLE:FULL_1X_QUANTITY_BLOCK": 57,
+            "IDLE:FULL_1X_UNAVAILABLE": 43,
+            "IDLE:HYPE_SIDECAR_ACTIVE": 22,
+            "IDLE:MULTI_SIGNAL_CAPACITY_AMBIGUOUS": 70,
+            "IDLE:SHARED_DAILY_LOSS": 9,
+            "IDLE:SYMBOL_OWNED_BY_IDLE": 1
+          }
+        },
+        "PENGU": {
+          "ACCEPTED_MODELED_ENTRY": {
+            "GROSS_ALLOCATED": 67
+          },
+          "REJECTED_PORTFOLIO": {
+            "PENGU:COOLDOWN": 7,
+            "PENGU:NO_LOT_SHRINK": 1,
+            "PENGU:ROUTE_QUARANTINE": 3,
+            "PENGU:SLOT_OCCUPIED": 35
+          }
+        },
+        "Q102": {
+          "ACCEPTED_MODELED_ENTRY": {
+            "GROSS_ALLOCATED": 138
+          },
+          "REJECTED_PORTFOLIO": {
+            "Q102:SHARED_DAILY_LOSS": 9,
+            "Q102:SLOT_OCCUPIED": 226
+          },
+          "REJECTED_RESEARCH_POLICY": {
+            "Q102:BRK_DISABLED_CURRENT_RUNTIME": 25
+          }
+        },
+        "RESIDUAL": {
+          "ACCEPTED_MODELED_ENTRY": {
+            "GROSS_ALLOCATED": 23
+          },
+          "REJECTED_PORTFOLIO": {
+            "RESIDUAL:CORE_SIGNAL_OR_POSITION": 635,
+            "RESIDUAL:FULL_1X_QUANTITY_BLOCK": 31,
+            "RESIDUAL:FULL_1X_UNAVAILABLE": 3,
+            "RESIDUAL:HYPE_SIDECAR_ACTIVE": 6,
+            "RESIDUAL:IDLE_PRIORITY": 20,
+            "RESIDUAL:RESIDUAL_SLOT_OCCUPIED": 96,
+            "RESIDUAL:SHARED_DAILY_LOSS": 6,
+            "RESIDUAL:SYMBOL_OWNED_BY_V12": 22
+          }
+        },
+        "V12": {
+          "ACCEPTED_MODELED_ENTRY": {
+            "GROSS_ALLOCATED": 837
+          },
+          "REJECTED_PORTFOLIO": {
+            "V12:ATOM_EXHAUSTION_CAUSAL": 2,
+            "V12:NO_GROSS_ROOM": 39,
+            "V12:OPPOSITE_SYMBOL_ACTIVE": 48,
+            "V12:SHARED_DAILY_LOSS": 8,
+            "V12:SIDE_LOSS_COOLDOWN": 2,
+            "V12:SYMBOL_COOLDOWN": 6,
+            "V12:SYMBOL_OWNED_BY_Q102": 2,
+            "V12:SYMBOL_OWNED_BY_RESIDUAL": 1,
+            "V12:VENUE_MIN_NOTIONAL": 3,
+            "V12:VENUE_MIN_QTY": 10
+          }
+        },
+        "V52": {
+          "ACCEPTED_MODELED_ENTRY": {
+            "GROSS_ALLOCATED": 87
+          },
+          "EXCLUDED_PREALLOCATION": {
+            "SINGLE_V50_SLOT_ALREADY_OPEN": 11
+          },
+          "REJECTED_PORTFOLIO": {
+            "V52:SHARED_DAILY_LOSS": 1
+          }
+        }
+      },
+      "closed_trades": 1230,
+      "contributed_jpy": 10000.0,
+      "deposit_event_count": 1,
+      "final_equity_jpy": 147893999.6695525,
+      "historical_fill_verified": false,
+      "maximum_mtm_drawdown_pct": -28.662044886068706,
+      "net_profit_jpy": 147883999.6695525,
+      "profit_factor": 3.732016671977539,
+      "q102_brk_accepted": 0,
+      "q102_brk_rejected": 25,
+      "round_trip_cost_bps": 20,
+      "scenario_id": "PRICE_MODEL_20BPS",
+      "strategy_pnl_jpy": {
+        "FET": 1301541.383150121,
+        "HYPE_LONG": 23460145.29287002,
+        "IDLE": 1969443.0907586287,
+        "PENGU": 11772274.443057226,
+        "Q102": 5350148.455530184,
+        "RESIDUAL": -1526660.853757703,
+        "V12": 84066479.96846798,
+        "V52": 23492342.125300847
+      },
+      "strategy_trades": {
+        "FET": 5,
+        "HYPE_LONG": 20,
+        "IDLE": 53,
+        "PENGU": 67,
+        "Q102": 138,
+        "RESIDUAL": 23,
+        "V12": 837,
+        "V52": 87
+      },
+      "total_return_pct": 1478839.996695525,
+      "v12_dd21_trade_gate_applied": false,
+      "v12_design_dd_breached": true,
+      "v12_design_dd_limit_pct": 21.0,
+      "win_rate_pct": 68.130081300813
+    },
+    {
+      "accounting_reconciliation": {
+        "closed_trade_pnl_settlement_units": 555212.3034323829,
+        "deposit_settlement_units": 67.65013358113603,
+        "equity_minus_wallet_jpy": -4.470348358154297e-08,
+        "equity_minus_wallet_nominal_jpy": null,
+        "event_cashflow_settlement_units": 555279.9535659639,
+        "final_fx_jpy_per_usd": 158.33550065019506,
+        "intrahour_events": 876,
+        "status": "PASS",
+        "wallet_settlement_units": 555279.953565963
+      },
+      "candidate_decision_counts": {
+        "FET": {
+          "ACCEPTED_MODELED_ENTRY": {
+            "GROSS_ALLOCATED": 5
+          },
+          "EXCLUDED_PREALLOCATION": {
+            "FET_CURRENT_VOL10_RET15:RETURN72_ABOVE_15PCT": 2,
+            "FET_CURRENT_VOL10_RET15:VOLUME_ABOVE_10": 7,
+            "FET_CURRENT_VOL10_RET15:VOLUME_ABOVE_10,RETURN72_ABOVE_15PCT": 5
+          },
+          "REJECTED_PORTFOLIO": {
+            "FET:REENTRY_COOLDOWN": 1,
+            "FET:SYMBOL_OWNED_BY_Q102": 1
+          }
+        },
+        "HYPE_LONG": {
+          "ACCEPTED_MODELED_ENTRY": {
+            "GROSS_ALLOCATED": 19
+          },
+          "REJECTED_PORTFOLIO": {
+            "HYPE_LONG:NO_LOT_SHRINK": 25,
+            "HYPE_LONG:SLOT_OCCUPIED": 16
+          }
+        },
+        "IDLE": {
+          "ACCEPTED_MODELED_ENTRY": {
+            "GROSS_ALLOCATED": 55
+          },
+          "REJECTED_PORTFOLIO": {
+            "IDLE:CORE_SIGNAL_OR_POSITION": 376,
+            "IDLE:FILLED_SYMBOL_COOLDOWN": 68,
+            "IDLE:FULL_1X_QUANTITY_BLOCK": 45,
+            "IDLE:FULL_1X_UNAVAILABLE": 46,
+            "IDLE:HYPE_SIDECAR_ACTIVE": 22,
+            "IDLE:MULTI_SIGNAL_CAPACITY_AMBIGUOUS": 72,
+            "IDLE:SHARED_DAILY_LOSS": 9,
+            "IDLE:SYMBOL_OWNED_BY_IDLE": 1
+          }
+        },
+        "PENGU": {
+          "ACCEPTED_MODELED_ENTRY": {
+            "GROSS_ALLOCATED": 67
+          },
+          "REJECTED_PORTFOLIO": {
+            "PENGU:COOLDOWN": 7,
+            "PENGU:NO_LOT_SHRINK": 1,
+            "PENGU:ROUTE_QUARANTINE": 3,
+            "PENGU:SLOT_OCCUPIED": 35
+          }
+        },
+        "Q102": {
+          "ACCEPTED_MODELED_ENTRY": {
+            "GROSS_ALLOCATED": 138
+          },
+          "REJECTED_PORTFOLIO": {
+            "Q102:SHARED_DAILY_LOSS": 9,
+            "Q102:SLOT_OCCUPIED": 226
+          },
+          "REJECTED_RESEARCH_POLICY": {
+            "Q102:BRK_DISABLED_CURRENT_RUNTIME": 25
+          }
+        },
+        "RESIDUAL": {
+          "ACCEPTED_MODELED_ENTRY": {
+            "GROSS_ALLOCATED": 23
+          },
+          "REJECTED_PORTFOLIO": {
+            "RESIDUAL:CORE_SIGNAL_OR_POSITION": 635,
+            "RESIDUAL:FULL_1X_QUANTITY_BLOCK": 31,
+            "RESIDUAL:FULL_1X_UNAVAILABLE": 3,
+            "RESIDUAL:HYPE_SIDECAR_ACTIVE": 6,
+            "RESIDUAL:IDLE_PRIORITY": 20,
+            "RESIDUAL:RESIDUAL_SLOT_OCCUPIED": 96,
+            "RESIDUAL:SHARED_DAILY_LOSS": 6,
+            "RESIDUAL:SYMBOL_OWNED_BY_V12": 22
+          }
+        },
+        "V12": {
+          "ACCEPTED_MODELED_ENTRY": {
+            "GROSS_ALLOCATED": 836
+          },
+          "REJECTED_PORTFOLIO": {
+            "V12:ATOM_EXHAUSTION_CAUSAL": 2,
+            "V12:NO_GROSS_ROOM": 39,
+            "V12:OPPOSITE_SYMBOL_ACTIVE": 48,
+            "V12:SHARED_DAILY_LOSS": 8,
+            "V12:SIDE_LOSS_COOLDOWN": 2,
+            "V12:SYMBOL_COOLDOWN": 6,
+            "V12:SYMBOL_OWNED_BY_Q102": 2,
+            "V12:SYMBOL_OWNED_BY_RESIDUAL": 1,
+            "V12:VENUE_MIN_NOTIONAL": 2,
+            "V12:VENUE_MIN_QTY": 12
+          }
+        },
+        "V52": {
+          "ACCEPTED_MODELED_ENTRY": {
+            "GROSS_ALLOCATED": 87
+          },
+          "EXCLUDED_PREALLOCATION": {
+            "SINGLE_V50_SLOT_ALREADY_OPEN": 11
+          },
+          "REJECTED_PORTFOLIO": {
+            "V52:SHARED_DAILY_LOSS": 1
+          }
+        }
+      },
+      "closed_trades": 1230,
+      "contributed_jpy": 10000.0,
+      "deposit_event_count": 1,
+      "final_equity_jpy": 87920529.44888377,
+      "historical_fill_verified": false,
+      "maximum_mtm_drawdown_pct": -29.449034217800584,
+      "net_profit_jpy": 87910529.44888377,
+      "profit_factor": 3.064725271444264,
+      "q102_brk_accepted": 0,
+      "q102_brk_rejected": 25,
+      "round_trip_cost_bps": 30,
+      "scenario_id": "PRICE_MODEL_30BPS",
+      "strategy_pnl_jpy": {
+        "FET": 1442332.0830633026,
+        "HYPE_LONG": 10853120.617522856,
+        "IDLE": 2175638.515324248,
+        "PENGU": 7190889.259928894,
+        "Q102": 2153757.130992635,
+        "RESIDUAL": -977886.3968845775,
+        "V12": 49932435.47250422,
+        "V52": 16335637.684398033
+      },
+      "strategy_trades": {
+        "FET": 5,
+        "HYPE_LONG": 19,
+        "IDLE": 55,
+        "PENGU": 67,
+        "Q102": 138,
+        "RESIDUAL": 23,
+        "V12": 836,
+        "V52": 87
+      },
+      "total_return_pct": 879105.2944888377,
+      "v12_dd21_trade_gate_applied": false,
+      "v12_design_dd_breached": true,
+      "v12_design_dd_limit_pct": 21.0,
+      "win_rate_pct": 66.5040650406504
+    }
+  ],
+  "schema": "disdex/e8cc-current-contract-h1-no-dca-bt/v2",
+  "status": "COMPLETE_CURRENT_SHA_POLICY_CERTIFIED_H1_CAUSAL_PRICE_MODEL_NOT_L2_VERIFIED",
+  "stress_scenarios": [
+    "PRICE_MODEL_20BPS",
+    "PRICE_MODEL_30BPS"
+  ],
+  "target_production_sha": "e8cc2e73f8d3981d708ee52f013241597c038b10"
+}

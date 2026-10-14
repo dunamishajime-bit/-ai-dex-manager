@@ -1,0 +1,242 @@
+{
+  "PRICE_MODEL_10BPS": [
+    {
+      "contribution_jpy": 0.0,
+      "ending_equity_jpy": 11395.41516099524,
+      "month": "2025-08",
+      "monthly_return_pct": 13.954151609952415
+    },
+    {
+      "contribution_jpy": 0.0,
+      "ending_equity_jpy": 22229.23676428311,
+      "month": "2025-09",
+      "monthly_return_pct": 95.07175868739193
+    },
+    {
+      "contribution_jpy": 0.0,
+      "ending_equity_jpy": 113058.76030992805,
+      "month": "2025-10",
+      "monthly_return_pct": 408.6038783463117
+    },
+    {
+      "contribution_jpy": 0.0,
+      "ending_equity_jpy": 296825.1928599128,
+      "month": "2025-11",
+      "monthly_return_pct": 162.54063997007017
+    },
+    {
+      "contribution_jpy": 0.0,
+      "ending_equity_jpy": 660813.2189593074,
+      "month": "2025-12",
+      "monthly_return_pct": 122.62706631885503
+    },
+    {
+      "contribution_jpy": 0.0,
+      "ending_equity_jpy": 1838690.1642419645,
+      "month": "2026-01",
+      "monthly_return_pct": 178.24657732144885
+    },
+    {
+      "contribution_jpy": 0.0,
+      "ending_equity_jpy": 6755944.405988943,
+      "month": "2026-02",
+      "monthly_return_pct": 267.4324547645694
+    },
+    {
+      "contribution_jpy": 0.0,
+      "ending_equity_jpy": 15844200.155050272,
+      "month": "2026-03",
+      "monthly_return_pct": 134.522358428599
+    },
+    {
+      "contribution_jpy": 0.0,
+      "ending_equity_jpy": 30605520.976150945,
+      "month": "2026-04",
+      "monthly_return_pct": 93.16545282593873
+    },
+    {
+      "contribution_jpy": 0.0,
+      "ending_equity_jpy": 74665837.08309655,
+      "month": "2026-05",
+      "monthly_return_pct": 143.9619869280421
+    },
+    {
+      "contribution_jpy": 0.0,
+      "ending_equity_jpy": 194697709.43124261,
+      "month": "2026-06",
+      "monthly_return_pct": 160.75875800409375
+    },
+    {
+      "contribution_jpy": 0.0,
+      "ending_equity_jpy": 227295141.69462544,
+      "month": "2026-07",
+      "monthly_return_pct": 16.742586422104043
+    },
+    {
+      "contribution_jpy": 0.0,
+      "ending_equity_jpy": 222196830.18350622,
+      "month": "2026-08",
+      "monthly_return_pct": -2.243035848944308
+    }
+  ],
+  "PRICE_MODEL_20BPS": [
+    {
+      "contribution_jpy": 0.0,
+      "ending_equity_jpy": 11099.257432689164,
+      "month": "2025-08",
+      "monthly_return_pct": 10.992574326891646
+    },
+    {
+      "contribution_jpy": 0.0,
+      "ending_equity_jpy": 20944.93186222693,
+      "month": "2025-09",
+      "monthly_return_pct": 88.70570386574343
+    },
+    {
+      "contribution_jpy": 0.0,
+      "ending_equity_jpy": 97091.7446198496,
+      "month": "2025-10",
+      "monthly_return_pct": 363.55722357325686
+    },
+    {
+      "contribution_jpy": 0.0,
+      "ending_equity_jpy": 241159.72865545333,
+      "month": "2025-11",
+      "monthly_return_pct": 148.38335081904606
+    },
+    {
+      "contribution_jpy": 0.0,
+      "ending_equity_jpy": 516438.078888094,
+      "month": "2025-12",
+      "monthly_return_pct": 114.14772763570853
+    },
+    {
+      "contribution_jpy": 0.0,
+      "ending_equity_jpy": 1356158.8470525919,
+      "month": "2026-01",
+      "monthly_return_pct": 162.5985384293197
+    },
+    {
+      "contribution_jpy": 0.0,
+      "ending_equity_jpy": 4657825.19759236,
+      "month": "2026-02",
+      "monthly_return_pct": 243.45719955412636
+    },
+    {
+      "contribution_jpy": 0.0,
+      "ending_equity_jpy": 10005432.810946014,
+      "month": "2026-03",
+      "monthly_return_pct": 114.80910911207754
+    },
+    {
+      "contribution_jpy": 0.0,
+      "ending_equity_jpy": 17153482.88258446,
+      "month": "2026-04",
+      "monthly_return_pct": 71.44168779803736
+    },
+    {
+      "contribution_jpy": 0.0,
+      "ending_equity_jpy": 43895165.50917324,
+      "month": "2026-05",
+      "monthly_return_pct": 155.896518564979
+    },
+    {
+      "contribution_jpy": 0.0,
+      "ending_equity_jpy": 125078334.59984715,
+      "month": "2026-06",
+      "monthly_return_pct": 184.94785963093867
+    },
+    {
+      "contribution_jpy": 0.0,
+      "ending_equity_jpy": 150920512.8042209,
+      "month": "2026-07",
+      "monthly_return_pct": 20.660794922676672
+    },
+    {
+      "contribution_jpy": 0.0,
+      "ending_equity_jpy": 147893999.6695525,
+      "month": "2026-08",
+      "monthly_return_pct": -2.0053689710122446
+    }
+  ],
+  "PRICE_MODEL_30BPS": [
+    {
+      "contribution_jpy": 0.0,
+      "ending_equity_jpy": 10691.440080854503,
+      "month": "2025-08",
+      "monthly_return_pct": 6.91440080854504
+    },
+    {
+      "contribution_jpy": 0.0,
+      "ending_equity_jpy": 19274.22106019393,
+      "month": "2025-09",
+      "monthly_return_pct": 80.27712744430828
+    },
+    {
+      "contribution_jpy": 0.0,
+      "ending_equity_jpy": 82174.54411052124,
+      "month": "2025-10",
+      "monthly_return_pct": 326.34430649045606
+    },
+    {
+      "contribution_jpy": 0.0,
+      "ending_equity_jpy": 190654.6864680642,
+      "month": "2025-11",
+      "monthly_return_pct": 132.01185784692865
+    },
+    {
+      "contribution_jpy": 0.0,
+      "ending_equity_jpy": 393618.7414939168,
+      "month": "2025-12",
+      "monthly_return_pct": 106.4563682046443
+    },
+    {
+      "contribution_jpy": 0.0,
+      "ending_equity_jpy": 974873.9944939509,
+      "month": "2026-01",
+      "monthly_return_pct": 147.6696081070665
+    },
+    {
+      "contribution_jpy": 0.0,
+      "ending_equity_jpy": 3149831.82148895,
+      "month": "2026-02",
+      "monthly_return_pct": 223.1014304698939
+    },
+    {
+      "contribution_jpy": 0.0,
+      "ending_equity_jpy": 6284321.124093182,
+      "month": "2026-03",
+      "monthly_return_pct": 99.51290990267967
+    },
+    {
+      "contribution_jpy": 0.0,
+      "ending_equity_jpy": 10184359.103143776,
+      "month": "2026-04",
+      "monthly_return_pct": 62.05981365430881
+    },
+    {
+      "contribution_jpy": 0.0,
+      "ending_equity_jpy": 26003702.776851837,
+      "month": "2026-05",
+      "monthly_return_pct": 155.3297906475513
+    },
+    {
+      "contribution_jpy": 0.0,
+      "ending_equity_jpy": 75323543.19746655,
+      "month": "2026-06",
+      "monthly_return_pct": 189.66468292553554
+    },
+    {
+      "contribution_jpy": 0.0,
+      "ending_equity_jpy": 89265499.09429254,
+      "month": "2026-07",
+      "monthly_return_pct": 18.509426541813177
+    },
+    {
+      "contribution_jpy": 0.0,
+      "ending_equity_jpy": 87920529.44888377,
+      "month": "2026-08",
+      "monthly_return_pct": -1.5067071366374751
+    }
+  ]
+}

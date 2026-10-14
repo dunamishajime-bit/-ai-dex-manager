@@ -1,16 +1,27 @@
 {
-  "schema": "disdex/independent-replay-verification/v1",
+  "schema": "disdex/independent-replay-verification/v2",
   "targetProductionSha": "e8cc2e73f8d3981d708ee52f013241597c038b10",
+  "dd21Semantics": "DESIGN_ONLY_REPORTING_NOT_TRADE_STOP",
+  "canonicalReplayDirectory": "replay-corrected-1",
+  "historicalPreCorrectionDirectory": "replay-1",
   "runCount": 2,
   "canonicalFileCountPerRun": 15,
   "differentCanonicalFiles": 0,
-  "canonicalHashManifestSha256": "d47f433bc79e545ec9fea1bd3839bf37e33ec1907f6d042af35f8b5f93495844",
-  "currentContractSummarySha256": "e33ab5f34cd0a35faec3106ba97cdb2a1ee5772759a514b3ad3549f3fd08d48f",
-  "monthlyResultsSha256": "c51ef2bd170a6a2467ac862b2dbc8a777361c9d941192ebb2887b3c661a4c6f0",
+  "canonicalHashManifestSha256": "0b49802f128c38c3ec467b76bf123afd4fe64dbc926c85975efc43b665659f27",
+  "currentContractSummarySha256": "fa4956ac6b2ca06b32d1ca148d8e44ce82d34547a207a940234d6187041c7d10",
+  "monthlyResultsSha256": "64f3593a7018887983d2081269e1cdbd5371d7f13b4070ba1223fd371af907b8",
   "result": "PASS",
+  "runtimeSourceConflict": true,
+  "runtimeSourceConflictPaths": [
+    "lib/v12-v4-production-lifecycle.ts",
+    "lib/v12-v4-shared-reservations.ts"
+  ],
   "notes": [
-    "Both runs used independent output directories and the same pinned source roots.",
+    "Both corrected runs used independent output directories and the same pinned source roots.",
     "Every canonical trade, decision, event, metric and summary file matched byte-for-byte.",
-    "The second output copy was deleted after this verification record was written; replay-1 is canonical."
+    "No V12 DD21 trade-stop decisions were emitted in the corrected replay.",
+    "The pre-correction replay-1 directory is retained as historical evidence and is not the current canonical result.",
+    "The checked-in runtime source still contains executable DD21 entry/reservation guards; the research result does not certify exact live-code parity until that separate contract conflict is resolved.",
+    "No VPS, Aster, Production release, operator artifact or live runtime was changed by this correction."
   ]
 }

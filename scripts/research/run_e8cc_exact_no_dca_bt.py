@@ -193,43 +193,6 @@ def patch_current_admission_source(source: str) -> str:
         "                    record_decision(candidate, \"REJECTED_RESEARCH_POLICY\", \"Q102:BRK_DISABLED_CURRENT_RUNTIME\", ts)\n"
         "                    rejected[\"Q102:BRK_DISABLED_CURRENT_RUNTIME\"] += 1\n"
         "                    continue\n"
-        "                if strategy == \"V12\" and v4_max_drawdown > 0.21 + 1e-12:\n"
-        "                    record_decision(candidate, \"REJECTED_PORTFOLIO\", \"V12:DD21_OPERATOR_LIMIT\", ts)\n"
-        "                    rejected[\"V12:DD21_OPERATOR_LIMIT\"] += 1\n"
-        "                    continue\n"
-    ), 1)
-
-    state_hook = "    candidate_i = deposit_i = 0\n"
-    if source.count(state_hook) != 1:
-        raise RuntimeError("CURRENT_DD21_STATE_PATCH_ANCHOR_MISMATCH")
-    source = source.replace(state_hook, state_hook + (
-        "    v4_risk_times = list(range(PERIOD_START_MS, PERIOD_END_MS, HOUR))\n"
-        "    v4_risk_i = 0\n"
-        "    v4_equity_peak = 0.0\n"
-        "    v4_max_drawdown = 0.0\n"
-    ), 1)
-    loop_hook = (
-        "        next_scheduled = scheduled[0][0] if scheduled else math.inf\n"
-        "        ts = min(next_candidate, next_deposit, next_scheduled)\n"
-    )
-    if source.count(loop_hook) != 1:
-        raise RuntimeError("CURRENT_DD21_LOOP_PATCH_ANCHOR_MISMATCH")
-    source = source.replace(loop_hook, (
-        "        next_scheduled = scheduled[0][0] if scheduled else math.inf\n"
-        "        next_v4_risk = v4_risk_times[v4_risk_i] if v4_risk_i < len(v4_risk_times) else math.inf\n"
-        "        ts = min(next_candidate, next_deposit, next_scheduled, next_v4_risk)\n"
-    ), 1)
-    candidate_hook = "        if candidate_i < len(candidate_times) and candidate_times[candidate_i] == ts:\n"
-    if source.count(candidate_hook) != 1:
-        raise RuntimeError("CURRENT_DD21_CANDIDATE_PATCH_ANCHOR_MISMATCH")
-    source = source.replace(candidate_hook, (
-        "        while v4_risk_i < len(v4_risk_times) and v4_risk_times[v4_risk_i] == ts:\n"
-        "            v4_risk_equity = _equity(wallet, active, market, ts)\n"
-        "            if v4_risk_equity > 0:\n"
-        "                v4_equity_peak = max(v4_equity_peak, v4_risk_equity)\n"
-        "                v4_max_drawdown = max(v4_max_drawdown, 1.0 - v4_risk_equity / v4_equity_peak)\n"
-        "            v4_risk_i += 1\n\n"
-        + candidate_hook
     ), 1)
 
     room_hook = "                requested = min(float(candidate[\"requested_gross\"]), research_cap)\n"
@@ -409,6 +372,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         "pengu_fixed_gross_rows": 0, "q102_family_side_rows": {},
         "fet_gate_accepted": 0, "fet_gate_rejected": 0,
         "time37_fixed8_stops": 0, "time37_routes": {},
+        "v12_dd21_trade_rejections": 0,
     }
     base_filter = sweep.make_filter(CASE, sweep.CASES[CASE])
     s.w.base._study_filter = _current_filter(base_filter, fet_bars, route_kind, strategy_bars, audit)
@@ -447,6 +411,9 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "profit_factor": metrics["profit_factor"],
             "win_rate_pct": float(metrics["win_rate"]) * 100.0,
             "maximum_mtm_drawdown_pct": float(metrics["maximum_mtm_drawdown"]) * 100.0,
+            "v12_design_dd_limit_pct": 21.0,
+            "v12_design_dd_breached": abs(float(metrics["maximum_mtm_drawdown"]) * 100.0) > 21.0 + 1e-12,
+            "v12_dd21_trade_gate_applied": False,
             "closed_trades": metrics["closed_trades"],
             "strategy_trades": metrics["strategy_trades"],
             "strategy_pnl_jpy": metrics["strategy_pnl_jpy"],
@@ -462,7 +429,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         monthly[scenario_id] = _monthly_rows(metrics)
 
     summary = {
-        "schema": "disdex/e8cc-current-contract-h1-no-dca-bt/v1",
+        "schema": "disdex/e8cc-current-contract-h1-no-dca-bt/v2",
         "status": "COMPLETE_CURRENT_SHA_POLICY_CERTIFIED_H1_CAUSAL_PRICE_MODEL_NOT_L2_VERIFIED",
         "target_production_sha": args.target_sha,
         "period": {"start_ms": PERIOD_START_MS, "end_ms": PERIOD_END_MS},
@@ -477,7 +444,8 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "pengu_policy": "COMBINED_FILTERED_Q60_DD17_H72", "pengu_entry_gross": 1.0,
             "q102_brk_enabled": False, "fet_policy": "BRK48_VOL10_RET15", "fet_gross": 1.0,
             "time37_emergency_stop_fraction": TIME_STOP_FRACTION,
-            "v12_maximum_drawdown_entry_limit": 0.21,
+            "v12_design_maximum_drawdown_limit": 0.21,
+            "v12_dd21_trade_gate_applied": False,
         },
         "candidate_policy_audit": audit,
         "scenarios": scenario_reports,
@@ -485,6 +453,8 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             "H1 causal price model; not historical L2 fill reconstruction.",
             "Historical venue minQty/minNotional/read-back latency and partial/unknown execution are not modeled.",
             "Candidate/data origin SHAs are preserved and bound to e8cc by parity evidence; they are not relabeled as e8cc.",
+            "Per operator clarification, DD21 is a design/evaluation limit only and is not applied as a V12 trade-stop gate in this replay.",
+            "The checked-in V4 lifecycle source still contains executable DD21 entry/reservation guards; this runtime-contract conflict is recorded and must be resolved before claiming exact live-code parity.",
         ],
         "mutation": {"orders_sent": 0, "cancels_sent": 0, "position_changes_sent": 0},
     }

@@ -1,0 +1,62 @@
+{
+  "cases/V2_M150_D05_CORE_NATIVE/candidates/crypto-price-model-candidates.jsonl": {
+    "bytes": 1721478,
+    "sha256": "97be1defbfd5ec1193af7d8f15928fb7133491b9efe5e4d057a2616bf2bdc8a4"
+  },
+  "cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_10BPS/candidate-decisions.jsonl": {
+    "bytes": 2538947,
+    "sha256": "d490860f7492e669728ecd8a2b2f0cb0c614177ec6057a2918ac25e03ac29d76"
+  },
+  "cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_10BPS/metrics.json": {
+    "bytes": 24634,
+    "sha256": "bf3d8e9ce032036e75b2f0f39e014821f7877517b0130d295aa1a2bf0fe43002"
+  },
+  "cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_10BPS/portfolio-events.jsonl": {
+    "bytes": 2874951,
+    "sha256": "acba1b40f0ce8d73285e6ef264d3ac4f5a227db689e681daa7121a1b1cb524cd"
+  },
+  "cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_10BPS/portfolio-trades.jsonl": {
+    "bytes": 1363744,
+    "sha256": "c78cbad6cbe488d94ed0b389a3f5c8c8cc6d92b95142d97089d650481fa4774e"
+  },
+  "cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_20BPS/candidate-decisions.jsonl": {
+    "bytes": 2539032,
+    "sha256": "a118d2790af6443969a14534a40de423e76112556d5a596be691573fa9b64da3"
+  },
+  "cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_20BPS/metrics.json": {
+    "bytes": 24616,
+    "sha256": "e881e50272804bb3086c390b2f6f37eb9a7d83b73b9041e74af817d854888bbf"
+  },
+  "cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_20BPS/portfolio-events.jsonl": {
+    "bytes": 2879861,
+    "sha256": "3d8b7ce0caa476c84622d504bec28817d63df8cf90dece5409a8633099d23d98"
+  },
+  "cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_20BPS/portfolio-trades.jsonl": {
+    "bytes": 1364686,
+    "sha256": "c917016366c1a1577761b4f056e9463a56e8bec8848c4e13b8195f7f6e5431e1"
+  },
+  "cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_30BPS/candidate-decisions.jsonl": {
+    "bytes": 2539188,
+    "sha256": "2edd842821d03c4aa1b142434821f2d0d295fc087ebe8c89a0aa3cdda1b72134"
+  },
+  "cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_30BPS/metrics.json": {
+    "bytes": 24626,
+    "sha256": "b9ef2604e2695e274c05d8bea8928f13566114ee7afd9e1baf0d9ba217ccfd05"
+  },
+  "cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_30BPS/portfolio-events.jsonl": {
+    "bytes": 2883946,
+    "sha256": "99da3068425d04a6dd69c96ce22b864e8c78a70231276d9425659332fcc125f7"
+  },
+  "cases/V2_M150_D05_CORE_NATIVE/runs/PRICE_MODEL_30BPS/portfolio-trades.jsonl": {
+    "bytes": 1365148,
+    "sha256": "1da953f08657f701c9bc31b4693b0e7c6b1504acf07c9e9de25b9cd84ea76972"
+  },
+  "current-contract-summary.json": {
+    "bytes": 18362,
+    "sha256": "fa4956ac6b2ca06b32d1ca148d8e44ce82d34547a207a940234d6187041c7d10"
+  },
+  "monthly-results.json": {
+    "bytes": 6681,
+    "sha256": "64f3593a7018887983d2081269e1cdbd5371d7f13b4070ba1223fd371af907b8"
+  }
+}

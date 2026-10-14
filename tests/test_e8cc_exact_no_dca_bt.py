@@ -59,8 +59,8 @@ class E8ccCurrentBtPolicyTest(unittest.TestCase):
         self.assertIn('3.5 if strategy == "V12"', patched)
         self.assertIn('4.75 if strategy == "V12"', patched)
         self.assertIn("Q102:BRK_DISABLED_CURRENT_RUNTIME", patched)
-        self.assertIn("V12:DD21_OPERATOR_LIMIT", patched)
-        self.assertIn("next_v4_risk", patched)
+        self.assertNotIn("V12:DD21_OPERATOR_LIMIT", patched)
+        self.assertNotIn("next_v4_risk", patched)
         self.assertNotIn("CRYPTO_CAP - crypto_gross", patched)
 
 
