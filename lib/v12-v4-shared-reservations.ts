@@ -10,7 +10,6 @@ import {readPendingExposureRegistry,upsertPendingExposure,releasePendingExposure
 import {V4ExecutionStore,type V4ExecutionDocument} from "./v12-v4-execution-store";
 import type {V4DurableOrderCommand,V4DispatchGuards} from "./v12-v4-durable-orders";
 import {productionGross} from "./v12-v4-production-lifecycle";
-import {V12_V4_MAXIMUM_DRAWDOWN} from "../config/v12V4AdoptionRiskPolicy";
 export const V4_SHARED_OWNER="V12_V4";
 const active=(x:PendingExposureEntry)=>x.status!=="RELEASED";
 function bucket(symbol:string,side:string,crypto:boolean){return [symbol,side,crypto?"CRYPTO":"STOCK"].join("|");}
@@ -58,7 +57,7 @@ export class V4SharedReservations{
     Math.abs(command.quantity-leg.requestedQty)>1e-12||command.signalTs!==leg.entryTs)throw Error("V4_SHARED_RESERVATION_COMMAND_CONFLICT");
   const mark=[...doc.state.journal].reverse().find(x=>x.type==="ACCOUNT_MARK");
   if(!mark||mark.ts>now||now-mark.ts>30000)throw Error("FRESH_SHARED_ACCOUNT_LEDGER_REQUIRED");
-  if(doc.state.initial.holdProtected||doc.state.executionReview||doc.state.maxDrawdown>V12_V4_MAXIMUM_DRAWDOWN+1e-12)throw Error("V4_SHARED_RESERVATION_HOLD");
+  if(doc.state.initial.holdProtected||doc.state.executionReview)throw Error("V4_SHARED_RESERVATION_HOLD");
   const registry=await readPendingExposureRegistry(this.path);
   if(registry.accountScope!=="ASTER_FUTURES")throw Error("V4_SHARED_ACCOUNT_SCOPE_CONFLICT");
   const peers=new Map<string,number>(),covered=new Map<string,number>();
