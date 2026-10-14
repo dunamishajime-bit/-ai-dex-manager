@@ -21,13 +21,15 @@ test("realtime ranking rows expose every matching strategy and LONG SHORT WAIT d
   const board = readFileSync("components/features/RealtimeRankingBoard.tsx", "utf8");
   const page = readFileSync("app/realtime/page.tsx", "utf8");
   assert.match(board, /strategyRowsForSymbol/);
-  assert.match(board, /LIVEロジック \/ 方向/);
+  assert.match(board, /ロジック \/ 判定方向/);
   assert.match(board, /data-strategy-logic/);
   assert.match(board, /data-strategy-side/);
   assert.match(board, /rank-strategy-long/);
   assert.match(board, /rank-strategy-short/);
   assert.match(board, /rank-strategy-wait/);
-  assert.match(board, /対象ロジックなし/);
+  assert.match(board, /ロジック未確認/);
+  assert.match(board, /設定候補/);
+  assert.match(board, /data-strategy-source/);
   assert.match(board, /renderStrategyBadges\(row, true\)/);
   assert.match(page, /RealtimeRankingBoard/);
   assert.doesNotMatch(page, /LiveLogicDirectionBoard/);
