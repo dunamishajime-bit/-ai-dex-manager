@@ -16,10 +16,10 @@ function statusLabel(status: V12V4HpDisplayStatus): string {
   switch (status) {
     case "LIVE_VERIFIED": return "LIVE確認済み";
     case "STAGED_NOT_LIVE": return "V4仕様 / 本番未切替";
-    case "SHADOW": return "SHADOW / 発注不可";
-    case "STALE": return "STALE / 発注不可";
-    case "SHA_MISMATCH": return "SHA不一致 / 発注不可";
-    case "SOURCE_ERROR": return "取得エラー / 発注不可";
+    case "SHADOW": return "SHADOW / LIVE未確認";
+    case "STALE": return "STALE / LIVE未確認";
+    case "SHA_MISMATCH": return "SHA不一致 / LIVE未確認";
+    case "SOURCE_ERROR": return "取得エラー / LIVE未確認";
     case "UNAVAILABLE": return "runtime未取得 / LIVE未確認";
   }
 }
@@ -34,12 +34,20 @@ function actualSummary(snapshot: V12V4HpSnapshot | null): string {
 
 function exactLiveEvidence(snapshot: V12V4HpSnapshot): boolean {
   const actual = snapshot.actual;
-  const shaValues = [actual.currentReleaseSha, actual.activeRunnerSha, actual.v4ReleaseSha, actual.heartbeatSha];
+  // V4 has its own exact production SHA. The peer release stays on its
+  // separate shared SHA; forcing V4 == peer produces a false "SHA mismatch".
+  // Exact runner/service/heartbeat equality is still required; the API must
+  // independently have established LIVE_VERIFIED (no display-side override).
   const currentSha = actual.currentReleaseSha?.toLowerCase();
+  const runnerSha = actual.activeRunnerSha?.toLowerCase();
+  const runnerReleaseSha = actual.v4ReleaseSha?.toLowerCase();
+  const heartbeatSha = actual.heartbeatSha?.toLowerCase();
   return snapshot.displayStatus === "LIVE_VERIFIED" &&
-    shaValues.every((sha) => typeof sha === "string" && SHA_RE.test(sha) && sha.toLowerCase() === currentSha) &&
+    !!currentSha && SHA_RE.test(currentSha) &&
+    !!runnerSha && SHA_RE.test(runnerSha) &&
+    runnerReleaseSha === runnerSha && heartbeatSha === runnerSha &&
     actual.activeRunnerState === "active/running" &&
-    actual.activeRunnerId?.includes(currentSha ?? "") === true &&
+    actual.activeRunnerId === `disdex-v12-v4@${runnerSha}.service` &&
     actual.v4RunnerMode === "CERTIFIED" &&
     actual.v12PrimaryMode === "V4" &&
     actual.legacyV12RunnerActive === false &&
