@@ -18,6 +18,8 @@ async function fixture(options: {
   orderEnabled?: boolean;
   activeService?: "canary" | "production" | "none";
   primaryMode?: "V4" | "LEGACY";
+  primarySha?: string;
+  peerSha?: string;
   legacyRunnerActive?: boolean | null;
   primaryModePermissionDenied?: boolean;
 } = {}) {
@@ -31,8 +33,8 @@ async function fixture(options: {
   const primaryModePath = join(root, `${options.currentSha ?? SHA}.v12-primary.env`);
   if (options.primaryMode) await writeFile(primaryModePath, [
     "DISDEX_PRIMARY_V12_RUNNER=" + options.primaryMode,
-    "DISDEX_V12_V4_PRIMARY_SHA=" + (options.currentSha ?? SHA),
-    "DISDEX_V12_V4_PEER_SHA=" + (options.currentSha ?? SHA),
+    "DISDEX_V12_V4_PRIMARY_SHA=" + (options.primarySha ?? options.heartbeatSha ?? options.currentSha ?? SHA),
+    "DISDEX_V12_V4_PEER_SHA=" + (options.peerSha ?? options.currentSha ?? SHA),
     "",
   ].join("\n"));
   await writeFile(join(stateRoot, "heartbeat.json"), JSON.stringify({
@@ -267,4 +269,22 @@ test("mixed V4 SHA must never bypass CANARY, legacy or missing primary attestati
     assert.notEqual(actual.displayStatus,"LIVE_VERIFIED");
    }finally{await rm(f.root,{recursive:true,force:true});}
   }
+});
+
+
+test("mixed-SHA V4 only verifies when root-owned primary and peer pins match running releases", async () => {
+  const okay=await fixture({heartbeatSha:OTHER_SHA,operationMode:"CERTIFIED",activeService:"production",primaryMode:"V4",legacyRunnerActive:false});
+  const wrongPrimary=await fixture({heartbeatSha:OTHER_SHA,operationMode:"CERTIFIED",activeService:"production",primaryMode:"V4",primarySha:SHA,legacyRunnerActive:false});
+  const wrongPeer=await fixture({heartbeatSha:OTHER_SHA,operationMode:"CERTIFIED",activeService:"production",primaryMode:"V4",peerSha:OTHER_SHA,legacyRunnerActive:false});
+  const noPeer=await fixture({heartbeatSha:OTHER_SHA,operationMode:"CERTIFIED",activeService:"production",primaryMode:"V4",peerSha:"",legacyRunnerActive:false});
+  try{
+    const success=await loadV12V4HpObservability(okay.options);
+    assert.equal(success.displayStatus,"LIVE_VERIFIED");
+    assert.equal(success.actual.activeRunnerSha,OTHER_SHA);
+    for(const f of [wrongPrimary,wrongPeer,noPeer]){
+      const invalid=await loadV12V4HpObservability(f.options);
+      assert.equal(invalid.displayStatus,"SHA_MISMATCH");
+      assert.match(invalid.errors.join(" "),/V12_PRIMARY_MODE_SOURCE_INVALID/);
+    }
+  }finally{for(const f of [okay,wrongPrimary,wrongPeer,noPeer])await rm(f.root,{recursive:true,force:true});}
 });
