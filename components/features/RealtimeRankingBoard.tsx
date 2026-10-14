@@ -23,6 +23,7 @@ import {
   type RealtimeRankingPanel,
 } from '@/lib/realtime-ranking-ui';
 import type { V12V4HpSnapshot } from '@/lib/v12-v4-hp-contract';
+import { rankingStrategyBadges } from '@/lib/realtime-ranking-strategy-display';
 import { SignalGateList } from './SignalGateList';
 import { useRealtimeRankingFeedback } from '@/hooks/useRealtimeRankingFeedback';
 
@@ -187,15 +188,16 @@ export function RealtimeRankingBoard() {
       a.logic.localeCompare(b.logic) ||
       a.side.localeCompare(b.side));
   const strategyRowsFor = (row: RankRow) => row.logic === 'MARKET' ? strategyRowsForSymbol(row.symbol) : [row];
+  const strategyBadgesFor = (row: RankRow) => rankingStrategyBadges(row.symbol, strategyRowsFor(row));
   const logicLabel = (value: string) => value === 'V12_V4' ? 'V12 V4' : value;
   const filtered = all.filter((row) => {
-    const linked = strategyRowsFor(row);
+    const linked = strategyBadgesFor(row);
     const searchText = [
       row.symbol,
       row.logic,
       row.side,
       row.sourceRoute ?? '',
-      ...linked.flatMap((candidate) => [candidate.logic, candidate.side, candidate.sourceRoute ?? '']),
+      ...linked.flatMap((candidate) => [candidate.logic, candidate.side, ...candidate.sourceRoutes]),
     ].join(' ').toLowerCase();
     return (logic === 'ALL' ? row.logic === 'MARKET' : row.logic === logic) &&
       (logic === 'ALL' || side === 'ALL' || row.side === side) &&
@@ -213,24 +215,29 @@ export function RealtimeRankingBoard() {
   }, [selected]);
 
   const renderStrategyBadges = (row: RankRow, compact = false) => {
-    const linked = strategyRowsFor(row);
+    const linked = strategyBadgesFor(row);
     if (!linked.length) {
-      return <span className="rank-strategy-empty">対象ロジックなし</span>;
+      return <span className="rank-strategy-empty" title="取引ロジックの紐付けが現在の判定・設定資料から確認できません">ロジック未確認</span>;
     }
     return <span className={'rank-strategy-badges ' + (compact ? 'rank-strategy-badges-compact' : '')}>
       {linked.map((candidate) => {
-        const direction = candidate.side === 'LONG' ? 'LONG' : candidate.side === 'SHORT' ? 'SHORT' : 'WAIT';
-        const tone = direction === 'LONG' ? 'rank-strategy-long' : direction === 'SHORT' ? 'rank-strategy-short' : 'rank-strategy-wait';
+        const configOnly = candidate.source === 'CONFIG_ONLY';
+        const direction = configOnly ? '未判定' : candidate.side === 'UNKNOWN' ? '方向未取得' : candidate.side;
+        const tone = configOnly || !candidate.fresh ? 'rank-strategy-wait' : direction === 'LONG' ? 'rank-strategy-long' : direction === 'SHORT' ? 'rank-strategy-short' : 'rank-strategy-wait';
+        const description = configOnly
+          ? '監視設定上の候補。現行Productionでの登録・方向は未照合'
+          : candidate.fresh ? '最新のロジック観測（発注条件成立を意味しません）' : '古いロジック観測。現在の方向は未確認';
         return <span
-          key={row.id + ':' + candidate.id}
+          key={row.id + ':' + candidate.logic + ':' + candidate.side}
           className={'rank-strategy-badge ' + tone + (!candidate.fresh ? ' rank-strategy-stale' : '')}
           data-strategy-logic={candidate.logic}
-          data-strategy-side={direction}
-          title={logicLabel(candidate.logic) + ' ' + direction + (candidate.sourceRoute ? ' / ' + candidate.sourceRoute : '') + (candidate.fresh ? '' : ' / STALE')}
+          data-strategy-side={candidate.side}
+          data-strategy-source={candidate.source}
+          title={logicLabel(candidate.logic) + ' ' + direction + ' / ' + description + (candidate.sourceRoutes.length ? ' / Route: ' + candidate.sourceRoutes.join(', ') : '')}
         >
           <b>{logicLabel(candidate.logic)}</b>
           <em>{direction}</em>
-          {!candidate.fresh && <small>STALE</small>}
+          {configOnly ? <small>設定候補</small> : !candidate.fresh ? <small>STALE</small> : null}
         </span>;
       })}
     </span>;
@@ -238,7 +245,7 @@ export function RealtimeRankingBoard() {
 
   const cell = (row: RankRow) => {
     const movementId = rankingMovementId(row.rankingScope ?? row.logic, row);
-    const strategySummary = strategyRowsFor(row).map((candidate) => logicLabel(candidate.logic) + ' ' + candidate.side).join(' / ') || '対象ロジックなし';
+    const strategySummary = strategyBadgesFor(row).map((candidate) => logicLabel(candidate.logic) + ' ' + (candidate.source === 'CONFIG_ONLY' ? '未判定（設定候補）' : candidate.side)).join(' / ') || 'ロジック紐付け未確認';
     const sourceDetails = [
       row.sourceRoute ? `Route ${row.sourceRoute}` : '',
       row.sourceRank && row.logic !== 'MARKET' ? `Source rank ${row.sourceRank}（LIVE順位ではありません）` : '',
@@ -344,7 +351,7 @@ export function RealtimeRankingBoard() {
     </div>
 
     <section aria-label="全監視通貨・ロジック" className="radar-ranking"><div className="radar-inventory-heading"><h2>{logic === "ALL" ? "全取り扱い通貨 · Score高い順" : logic + " 観測値 · Score順"} · 有効 {filtered.filter((row) => row.score !== null).length} / 全 {filtered.length}件</h2><span title={data?.metric}>共通市場ScoreはAster公開相場から計算 · 発注非連動 · クリックで詳細</span></div><p className="radar-inventory-note">{logic === "ALL" ? "全取扱通貨を同じ算式（Trend25 / Momentum20 / BTC相対強度15 / Volume10 / Structure10 / RiskFit5 / Bonus15）で評価し降順表示。欠測は—で最後尾。ロジック固有Scoreと混在させません。" : "ロジック固有の観測値を表示。共通市場Scoreとは異なる尺度です。"} 0も実測値なら表示し、未取得とは区別します。</p>
-      <div className="radar-columns">{[0, 1, 2].map((column) => <div key={column} className="radar-column"><div className="rank-column-heading"><span>順位</span><span>通貨</span><span>LIVEロジック / 方向</span><span>Score / 尺度</span></div><div className="rank-column-body">{filtered.slice(column * 15, column * 15 + 15).map(cell)}</div></div>)}</div>
+      <div className="radar-columns">{[0, 1, 2].map((column) => <div key={column} className="radar-column"><div className="rank-column-heading"><span>順位</span><span>通貨</span><span>ロジック / 判定方向</span><span>Score / 尺度</span></div><div className="rank-column-body">{filtered.slice(column * 15, column * 15 + 15).map(cell)}</div></div>)}</div>
       {filtered.length > 45 && <div className="radar-tail" aria-label="46位以降">{filtered.slice(45).map(cell)}</div>}
       {data && !filtered.length && <p className="p-3 text-xs text-white/45">該当する観測行はありません。</p>}
     </section>
@@ -357,7 +364,7 @@ export function RealtimeRankingBoard() {
       .radar-feedback{display:flex;align-items:center;flex-wrap:wrap;gap:5px;min-width:0;flex-shrink:0;padding:5px 7px;border:1px solid #ffffff13;border-radius:9px;background:#080d15;color:#d8d2be;font-size:10px}.radar-feedback>button,.feedback-select button{border:1px solid #ffffff25;border-radius:6px;padding:3px 6px;background:#ffffff06;color:#c7cbd1;white-space:nowrap}.radar-feedback .feedback-on{border-color:#c7ab5c88;background:#c7ab5c12;color:#f3e3ac}.feedback-select{display:flex;align-items:center;gap:3px;border:1px solid #b99c5040;border-radius:6px;padding:2px 4px;color:#e7cf8b;white-space:nowrap}.feedback-select select{max-width:min(145px,28vw);min-width:0;border-radius:4px;padding:3px 2px;background:#20291c;color:white;font-size:10px}.feedback-notice{min-width:0;flex:1;color:#9aa6b5;font-size:9px;overflow-wrap:anywhere}
       .radar-filters{display:flex;gap:5px;min-width:0;flex-shrink:0}.radar-filters input,.radar-filters select{min-width:0;height:28px;padding:2px 7px;border:1px solid #ffffff18;border-radius:7px;background:#090e16;color:#eee;font-size:10px}
       .radar-panel-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:7px;min-width:0;flex-shrink:0}.radar-panel{min-width:0;overflow:hidden;border:1px solid #a78b4635;border-radius:11px;background:#080d15}.radar-panel-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;min-width:0;padding:8px 10px;border-bottom:1px solid #ffffff10}.radar-panel-heading h2{font-size:12px;font-weight:700;color:#ead7a4}.radar-panel-heading p,.radar-panel-heading>span{font-size:9px;color:#aab3c0;overflow-wrap:anywhere}.radar-panel-heading>span{flex-shrink:0;color:#d5bd79}.panel-source-note{display:flex;flex-wrap:wrap;gap:3px 10px;padding:6px 9px;color:#acb6c3;font-size:9px;overflow-wrap:anywhere}.radar-leaders{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;min-width:0;padding:0 7px 7px}.radar-leader{min-width:0;overflow:hidden;text-align:left;padding:0;border:1px solid #a78b4645;border-radius:10px;background:linear-gradient(140deg,#262116,#090e16 80%)}.radar-leader-button{display:block;width:100%;min-width:0;height:100%;text-align:left;padding:8px;color:white}.radar-leader-heading,.radar-leader-identity{display:flex;align-items:center;min-width:0;gap:6px}.radar-leader-heading{justify-content:space-between}.radar-leader-identity strong{min-width:0;overflow-wrap:anywhere;color:#fff;font-size:14px}.radar-leader-identity span:not(.slot-number){font-size:9px;color:#c6c9cf}.slot-number{flex-shrink:0;color:#d8bd75;font-size:10px}.radar-score-line{display:flex;align-items:flex-start;gap:6px;min-width:0;margin-top:8px}.radar-score-line b{flex-shrink:0;color:#ead7a4;font-family:monospace;font-size:16px}.radar-score-line span{min-width:0;color:#aeb6c0;font-size:9px;overflow-wrap:anywhere}.radar-source-route,.radar-slot-warning,.radar-slot-note,.radar-slot-reason,.radar-leader time{display:block;margin-top:5px;min-width:0;color:#aab3c0;font-size:9px;line-height:1.35;overflow-wrap:anywhere;word-break:break-word}.radar-slot-warning{color:#fda4af}.radar-slot-note{color:#d3c58f}.radar-slot-reason{max-height:3.9em;overflow:hidden}.radar-leader time{color:#7f8998}.radar-leader-placeholder{min-height:134px;border-style:dashed;background:#ffffff03}.radar-leader-placeholder strong{display:block;color:#c8cbd1;font-size:11px;overflow-wrap:anywhere}.radar-leader-placeholder p{margin-top:5px;color:#828d9b;font-size:9px;overflow-wrap:anywhere}
-      .radar-ranking{display:flex;flex-direction:column;flex:1;min-width:0;min-height:0;border:1px solid #ffffff16;border-radius:10px;background:#080d15;overflow:hidden}.radar-inventory-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;min-width:0;padding:6px 8px}.radar-inventory-heading h2{font-size:11px;font-weight:600;color:#fff;overflow-wrap:anywhere}.radar-inventory-heading span,.radar-inventory-note{font-size:9px;color:#aab3c0;overflow-wrap:anywhere}.radar-inventory-note{padding:0 8px 5px;color:#dbc787}.radar-columns{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;flex:1;min-width:0;min-height:0;padding:0 5px 5px}.radar-column{display:flex;flex-direction:column;min-width:0;min-height:0;border:1px solid #ffffff0d;border-radius:6px;overflow:hidden}.rank-column-heading,.rank-cell{display:grid;grid-template-columns:22px minmax(54px,.72fr) minmax(132px,1.65fr) minmax(56px,.72fr);align-items:center;gap:4px;padding:3px 5px}.rank-column-heading{white-space:nowrap;min-height:23px;flex-shrink:0;color:#ffffff75;background:#ffffff05;font-size:8px}.rank-column-body{display:grid;grid-template-rows:repeat(15,minmax(32px,auto));min-width:0;min-height:0;overflow-y:auto}.rank-cell{min-width:0;min-height:32px;width:100%;text-align:left;border-bottom:1px solid #ffffff0b;border-left:2px solid #a78b4640;font-size:clamp(9px,1.2vh,11px);line-height:1.15;overflow:hidden;background:#ffffff01}.rank-cell:hover{background:#d6b66212}.rank-cell:focus-visible{outline:1px solid #d6b662;outline-offset:-2px}.rank-blocked{border-left-color:#fb718560}.rank-unknown{border-left-color:#ffffff30;opacity:.72}.rank-score-zero{border-left-color:#ffffff18}.rank-symbol{overflow-wrap:anywhere}.rank-order-block{max-width:72px}.rank-score-cell small{font-size:8px}.rank-strategy-badges{display:flex;min-width:0;flex-wrap:wrap;gap:2px}.rank-strategy-badge{display:inline-flex;min-width:0;align-items:center;gap:3px;border:1px solid #ffffff20;border-radius:5px;padding:2px 4px;font-size:8px;line-height:1.05;white-space:nowrap}.rank-strategy-badge b{max-width:86px;overflow:hidden;text-overflow:ellipsis;font-weight:700}.rank-strategy-badge em{font-style:normal;font-weight:800}.rank-strategy-badge small{font-size:6px;opacity:.7}.rank-strategy-long{border-color:#34d39955;background:#10b98112;color:#86efac}.rank-strategy-short{border-color:#fb718555;background:#f43f5e12;color:#fda4af}.rank-strategy-wait{border-color:#ffffff22;background:#ffffff08;color:#cbd5e1}.rank-strategy-stale{opacity:.5}.rank-strategy-empty{font-size:8px;color:#ffffff50}.rank-strategy-badges-compact{margin-top:1px}.radar-leader-strategies{margin-top:6px;min-width:0}.radar-tail{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;flex-shrink:0;padding:0 5px 5px}.radar-tail .rank-cell{min-height:34px;border:1px solid #ffffff12;border-radius:5px;font-size:9px}
+      .radar-ranking{display:flex;flex-direction:column;flex:1;min-width:0;min-height:0;border:1px solid #ffffff16;border-radius:10px;background:#080d15;overflow:hidden}.radar-inventory-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;min-width:0;padding:6px 8px}.radar-inventory-heading h2{font-size:11px;font-weight:600;color:#fff;overflow-wrap:anywhere}.radar-inventory-heading span,.radar-inventory-note{font-size:9px;color:#aab3c0;overflow-wrap:anywhere}.radar-inventory-note{padding:0 8px 5px;color:#dbc787}.radar-columns{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;flex:1;min-width:0;min-height:0;padding:0 5px 5px}.radar-column{display:flex;flex-direction:column;min-width:0;min-height:0;border:1px solid #ffffff0d;border-radius:6px;overflow:hidden}.rank-column-heading,.rank-cell{display:grid;grid-template-columns:22px minmax(54px,.72fr) minmax(132px,1.65fr) minmax(56px,.72fr);align-items:center;gap:4px;padding:3px 5px}.rank-column-heading{white-space:nowrap;min-height:23px;flex-shrink:0;color:#ffffff75;background:#ffffff05;font-size:8px}.rank-column-body{display:grid;grid-template-rows:repeat(15,minmax(32px,auto));min-width:0;min-height:0;overflow-y:auto}.rank-cell{min-width:0;min-height:32px;width:100%;text-align:left;border-bottom:1px solid #ffffff0b;border-left:2px solid #a78b4640;font-size:clamp(9px,1.2vh,11px);line-height:1.15;overflow:hidden;background:#ffffff01}.rank-cell:hover{background:#d6b66212}.rank-cell:focus-visible{outline:1px solid #d6b662;outline-offset:-2px}.rank-blocked{border-left-color:#fb718560}.rank-unknown{border-left-color:#ffffff30;opacity:.72}.rank-score-zero{border-left-color:#ffffff18}.rank-symbol{overflow-wrap:anywhere}.rank-order-block{max-width:72px}.rank-score-cell small{font-size:8px}.rank-strategy-badges{display:flex;min-width:0;flex-wrap:wrap;gap:2px}.rank-strategy-badge{display:inline-flex;min-width:0;align-items:center;gap:3px;border:1px solid #ffffff20;border-radius:5px;padding:2px 4px;font-size:8px;line-height:1.05;white-space:nowrap}.rank-strategy-badge b{max-width:86px;overflow:hidden;text-overflow:ellipsis;font-weight:700}.rank-strategy-badge em{font-style:normal;font-weight:800}.rank-strategy-badge small{font-size:6px;opacity:.7}.rank-strategy-long{border-color:#34d39955;background:#10b98112;color:#86efac}.rank-strategy-short{border-color:#fb718555;background:#f43f5e12;color:#fda4af}.rank-strategy-wait{border-color:#ffffff22;background:#ffffff08;color:#cbd5e1}.rank-strategy-stale{opacity:.72}.rank-strategy-empty{font-size:8px;color:#ffffff50}.rank-strategy-badges-compact{margin-top:1px}.radar-leader-strategies{margin-top:6px;min-width:0}.radar-tail{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;flex-shrink:0;padding:0 5px 5px}.radar-tail .rank-cell{min-height:34px;border:1px solid #ffffff12;border-radius:5px;font-size:9px}
       .rank-dialog{width:min(720px,calc(100vw - 24px));max-height:85dvh;padding:0;border:1px solid #a78b4660;border-radius:18px;background:#080d15;color:white}.rank-dialog[open]{display:flex;flex-direction:column}.rank-dialog::backdrop{background:#000a;backdrop-filter:blur(3px)}
       @keyframes radar-gold-flash{0%{background-color:rgba(244,211,125,.04)}25%{background-color:rgba(255,223,133,.30);box-shadow:inset 0 0 35px rgba(255,216,116,.15)}100%{background-color:transparent}}.rank-flash{animation:radar-gold-flash 1.1s ease-out}@media(prefers-reduced-motion:reduce){.rank-flash{animation:none;outline:1px solid #f2d27e88}}
       @media(min-width:768px) and (max-width:1000px){.radar-columns{grid-template-columns:repeat(2,minmax(0,1fr))}.radar-tail{grid-template-columns:repeat(2,minmax(0,1fr))}}
