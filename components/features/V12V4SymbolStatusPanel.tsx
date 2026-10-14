@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Activity, ChevronDown, RefreshCw } from "lucide-react";
 
 import { useV12V4HpStatus } from "@/hooks/useV12V4HpStatus";
+import type {V4GateTelemetryItem} from "@/lib/v12-v4-gate-score";
 import {
   v12V4SymbolDisplayRows,
   type MarketRankingResponse,
@@ -42,6 +43,8 @@ export function V12V4SymbolStatusPanel() {
   const { snapshot, loading, error, refresh } = useV12V4HpStatus();
   const [ranking, setRanking] = useState<MarketRankingResponse | null>(null);
   const [marketError, setMarketError] = useState<string | null>(null);
+  const [verifiedGates, setVerifiedGates] = useState<V4GateTelemetryItem[] | null>(null);
+  const [verifiedGateTs, setVerifiedGateTs] = useState<number | null>(null);
 
   const loadMarket = useCallback(async (signal?: AbortSignal) => {
     try {
@@ -68,8 +71,21 @@ export function V12V4SymbolStatusPanel() {
     return () => { window.clearInterval(timer); controller.abort(); };
   }, [loadMarket]);
 
+  const loadV4Gates = useCallback(async (signal?: AbortSignal) => {
+    try {
+      const response=await fetch("/api/system/v12-v4-gate-telemetry",{cache:"no-store",signal});
+      const raw:unknown=await response.json();
+      const data=raw as {ok?:boolean;readOnly?:boolean;tradingMutation?:number;verified?:boolean;decisionTs?:number|null;symbols?:V4GateTelemetryItem[]};
+      if(!response.ok||data.ok!==true||data.readOnly!==true||data.tradingMutation!==0)throw Error("V4 Gate API契約不一致");
+      setVerifiedGates(data.verified===true&&Array.isArray(data.symbols)&&data.symbols.length===14?data.symbols:null);
+      setVerifiedGateTs(data.verified?data.decisionTs??null:null);
+    }catch(e){if(e instanceof Error&&e.name==="AbortError")return;setVerifiedGates(null);setVerifiedGateTs(null);}
+  },[]);
+  useEffect(()=>{const ctrl=new AbortController();void loadV4Gates(ctrl.signal);
+    const timer=window.setInterval(()=>void loadV4Gates(ctrl.signal),30_000);
+    return()=>{window.clearInterval(timer);ctrl.abort();};},[loadV4Gates]);
   const rows = useMemo(() => v12V4SymbolDisplayRows(snapshot, ranking), [snapshot, ranking]);
-  const nativeAvailable = snapshot?.displayStatus === "LIVE_VERIFIED" && snapshot.freshness.decision;
+  const nativeAvailable = verifiedGates!==null || (snapshot?.displayStatus === "LIVE_VERIFIED" && snapshot.freshness.decision);
   const candidates = rows.filter((row) => row.state === "CANDIDATE").length;
   const filtered = rows.filter((row) => row.state === "FILTERED").length;
 
@@ -82,7 +98,7 @@ export function V12V4SymbolStatusPanel() {
           データ未取得をBLOCKやWAITと断定しません。市場Scoreと参考指標はAster公開相場による別計算で、V4の正式Score・発注Gate・勝率ではありません。
         </p>
       </div>
-      <button type="button" onClick={() => { void refresh(); void loadMarket(); }} disabled={loading}
+      <button type="button" onClick={() => { void refresh(); void loadMarket(); void loadV4Gates(); }} disabled={loading}
         className="inline-flex items-center gap-1 rounded-full border border-white/15 px-3 py-1.5 text-xs font-semibold text-white/75 disabled:opacity-50">
         <RefreshCw className={"h-3.5 w-3.5 " + (loading ? "animate-spin" : "")} />更新
       </button>
@@ -99,9 +115,9 @@ export function V12V4SymbolStatusPanel() {
       <div className="rounded-xl border border-white/10 bg-black/20 p-3">
         <div className="text-[10px] text-white/50">通貨別V4 source</div>
         <div className={"mt-1 text-sm font-bold " + (nativeAvailable ? "text-emerald-200" : "text-amber-100")}>
-          {nativeAvailable ? "確定snapshot観測済み" : "未接続・未更新"}
+          {verifiedGates ? "実Runnerの14通貨Gateを検証済み" : nativeAvailable ? "確定snapshot観測済み" : "未接続・未更新"}
         </div>
-        <div className="mt-1 text-[10px] text-white/45">確定時刻 {friendlyTime(snapshot?.timestamps.decisionTs)}</div>
+        <div className="mt-1 text-[10px] text-white/45">確定時刻 {friendlyTime(verifiedGateTs ?? snapshot?.timestamps.decisionTs)}</div>
         <div className="mt-1 break-words text-[10px] text-white/50">実Runner: {snapshot?.actual.latestSignalReason ?? "未取得"} / 候補 {snapshot?.actual.latestSignalCount ?? "—"}件</div>
       </div>
     </div>
@@ -117,20 +133,36 @@ export function V12V4SymbolStatusPanel() {
       {rows.map((row) => <details key={row.symbol} className="group min-w-0 rounded-xl border border-white/10 bg-black/20">
         <summary className="grid min-w-0 cursor-pointer list-none grid-cols-[minmax(100px,1fr)_minmax(118px,1.2fr)_65px_22px] items-center gap-2 px-3 py-3 text-xs md:grid-cols-[140px_minmax(190px,1.1fr)_92px_92px_92px_22px]">
           <span className="font-bold text-white">{row.symbol}</span>
-          <span className={"min-w-0 break-words font-semibold " + nativeClass(row.state)}>{nativeLabel(row.state)}</span>
-          <span className="text-right text-white/75">{row.marketFresh && row.marketScore !== null ? row.marketScore.toFixed(2) : "—"}<span className="block text-[9px] text-white/45">市場Score</span></span>
-          <span className="hidden text-right font-semibold text-white/65 md:block">{row.side ?? "未取得"}<span className="block text-[9px] font-normal">V4方向</span></span>
+          <span className={"min-w-0 break-words font-semibold " + nativeClass(row.state)}>{verifiedGates?.some(g=>g.symbol===row.symbol) ? "V4実Runner Gate観測済み" : nativeLabel(row.state)}</span>
+          <span className="text-right text-white/75">{row.marketFresh && row.realtimeScore !== null ? row.realtimeScore.toFixed(2) : "—"}<span className="block text-[9px] text-white/45">Realtime Score</span></span>
+          <span className="hidden text-right font-semibold text-white/65 md:block">{verifiedGates?.find(g=>g.symbol===row.symbol)?.nativeSide ?? row.side ?? "未取得"}<span className="block text-[9px] font-normal">V4 source方向</span></span>
           <span className="hidden text-right text-white/65 md:block">{row.marketFeatures.volumeRatio?.toFixed(2) ?? "—"}<span className="block text-[9px]">出来高比・参考</span></span>
           <ChevronDown className="h-4 w-4 text-white/40 transition group-open:rotate-180" />
         </summary>
         <div className="min-w-0 border-t border-white/10 px-3 py-3 text-xs leading-6 text-white/75">
           <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3">
             <div className="font-semibold text-white">V12 V4正式判定の観測内容</div>
+            {row.marketFresh && <p className="mt-1">Score内訳：市場 {row.marketScore?.toFixed(2) ?? "—"} + V4参考Gate +{row.v4GateBonus.toFixed(2)}。取引への影響はありません。</p>}
             <p className="mt-1">{row.message}</p>
             <p className="mt-1">方向：{row.side ?? "未取得"} / Route：{row.routes.length ? row.routes.join(" / ") : "未観測"}</p>
             {row.filteredReasons.length ? <div className="mt-1">除外理由：{row.filteredReasons.join(" / ")}</div> : null}
             <div className="mt-1 text-[10px] text-white/50">V4のnative Score・個別Gate・発注可能判定はRunner由来の実測がない限り補完しません。</div>
           </div>
+          {verifiedGates?.filter(item=>item.symbol===row.symbol).map(item=><div key={item.symbol}
+            className="mt-2 rounded-lg border border-emerald-400/25 bg-emerald-500/[0.04] p-3">
+            <div className="font-semibold text-emerald-200">現行V4 Runner正式source Gate（確定足の実測）</div>
+            <p className="mt-1">候補源の方向：{item.nativeSide??"未取得"} / source判定：{item.sourceEligible===true?"PASS":item.sourceEligible===false?"BLOCK":"未判定"} / {item.sourceReason}</p>
+            <div className="mt-2 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+              {item.gates.map(gate=><div key={gate.key} className="rounded-lg border border-white/10 bg-black/25 px-3 py-2">
+                <div className="flex justify-between gap-2"><strong className="break-words text-white">{gate.key}</strong>
+                  <span className={gate.state==="PASS"?"text-emerald-200":gate.state==="BLOCK"?"text-rose-200":"text-amber-100"}>{gate.state}</span></div>
+                <div className="mt-1 break-words text-white/60">実測 {gate.actual??"未取得"} / 条件 {gate.required}</div>
+                <p className="break-words text-white/50">{gate.reason}</p>
+              </div>)}
+            </div>
+            <div className="mt-2">V4 routeの候補出力：{item.routeGate.state} / {item.routeGate.routes.join(", ")||"route出力なし"} / {item.routeGate.reason}</div>
+            <p className="text-[10px] text-white/45">V4 routeの未出力は41個の全Gate不通過を意味しません。容量・注文・共有リスクGateは別判定です。</p>
+          </div>)}
           <div className="mt-2 rounded-lg border border-sky-400/15 bg-sky-500/[0.04] p-3">
             <div className="font-semibold text-sky-100">市場参考指標（V4判定には使用しない）</div>
             {row.marketFresh ? <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
