@@ -39,34 +39,28 @@ export function V12RouteInventoryPanel() {
             V12 V4 ルート構成
           </div>
           <p className="mt-1 text-[11px] leading-5 text-white/55">
-            実装ルート総数と、現在cycleのcandidate / filtered出力に実際に現れたrouteを分離して表示します。
+            41件のルート定義一覧です。直近cycleの出力状況は別項目として表示します。出力0件でも未実装・停止という意味ではありません。
           </p>
         </div>
         <span className="rounded-full border border-sky-400/25 bg-sky-500/10 px-3 py-1 text-xs font-black text-sky-100">
-          Catalog {V12_V4_HP_ROUTE_IDS.length}/41 ・ {catalogMatchesRuntime === false ? "MISMATCH" : "一致"}
+          Catalog照合：{catalogMatchesRuntime === false ? "要確認" : catalogMatchesRuntime ? "一致" : "未確認"}
         </span>
       </div>
 
       {snapshot ? (
         <>
-          <div className="mt-3 grid gap-2 sm:grid-cols-4">
+          <div className="mt-3 grid gap-2 sm:grid-cols-3">
             <div className="rounded-xl border border-sky-400/20 bg-sky-500/[0.04] px-3 py-2">
-              <div className="text-[10px] text-white/45">実装ルート / Catalog</div>
+              <div className="text-[10px] text-white/45">定義ルート / Catalog</div>
               <div className="mt-1 text-xl font-black text-sky-100">{snapshot.routeCoverage.expected} / {V12_V4_HP_ROUTE_IDS.length}</div>
-              <div className={"mt-0.5 text-[9px] " + (catalogMatchesRuntime ? "text-emerald-200" : "text-rose-200")}>{catalogMatchesRuntime ? "41/41 一致" : "route定義不一致"}</div>
+              <div className={"mt-0.5 text-[9px] " + (catalogMatchesRuntime ? "text-emerald-200" : "text-rose-200")}>{catalogMatchesRuntime ? "定義件数一致" : "route定義不一致"}</div>
             </div>
             <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2">
-              <div className="text-[10px] text-white/45">今回cycle出力route</div>
+              <div className="text-[10px] text-white/45">直近cycleで出力されたroute</div>
               <div className="mt-1 text-sm font-bold text-white">{snapshot.routeCoverage.observed}</div>
             </div>
-            <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2">
-              <div className="text-[10px] text-white/45">Decision候補 / filtered</div>
-              <div className="mt-1 text-sm font-bold text-white">
-                {snapshot.routeCoverage.candidateCount ?? "—"} / {snapshot.routeCoverage.filteredCount ?? "—"}
-              </div>
-            </div>
             <div className="rounded-xl border border-amber-400/20 bg-amber-500/[0.04] px-3 py-2">
-              <div className="text-[10px] text-white/45">今回未出力route</div>
+              <div className="text-[10px] text-white/45">直近cycleで未出力のroute</div>
               <div className="mt-1 text-sm font-bold text-amber-100">{snapshot.routeCoverage.unobserved.length}</div>
               <div className="mt-0.5 text-[9px] text-white/40">未実装という意味ではありません</div>
             </div>
@@ -76,8 +70,8 @@ export function V12RouteInventoryPanel() {
             {routeFamilies.map((family) => (
               <div key={family.label} className="rounded-xl border border-white/10 bg-black/20 px-3 py-2">
                 <div className="text-[10px] font-semibold text-white/70">{family.label}</div>
-                <div className="mt-1 text-sm font-black text-white">{family.observed} / {family.total}</div>
-                <div className="text-[9px] text-white/40">今回観測 / 実装総数</div>
+                <div className="mt-1 text-sm font-black text-white">{family.total} ルート</div>
+                <div className="text-[9px] text-white/40">定義済みルート数（直近出力 {family.observed}）</div>
               </div>
             ))}
           </div>
