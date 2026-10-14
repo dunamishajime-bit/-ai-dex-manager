@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
-import { validateExactBtManifest, type ExactBtStrategyId, type ValidatedBtManifest } from "./exact-current-sha-bt-contract.ts";
+import { validateExactBtManifest, type ExactBtStrategyId, type ValidatedBtManifest } from "./exact-current-sha-bt-contract";
 
 const HOUR = 60 * 60 * 1000;
 const MONTHS = ["2025-08", "2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06", "2026-07", "2026-08"];

@@ -4,7 +4,7 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import assert from "node:assert/strict";
-import { writeExactBtReport } from "../scripts/research/run-exact-current-sha-monthly-bt.ts";
+import { writeExactBtReport } from "../scripts/research/run-exact-current-sha-monthly-bt";
 
 const TARGET = "e8cc2e73f8d3981d708ee52f013241597c038b10";
 const STRATEGIES = ["V12", "PENGU", "Q102", "V52", "FET", "HYPE", "IDLE", "RESIDUAL"];

@@ -1,0 +1,16 @@
+{
+  "schema": "disdex/independent-replay-verification/v1",
+  "targetProductionSha": "e8cc2e73f8d3981d708ee52f013241597c038b10",
+  "runCount": 2,
+  "canonicalFileCountPerRun": 15,
+  "differentCanonicalFiles": 0,
+  "canonicalHashManifestSha256": "d47f433bc79e545ec9fea1bd3839bf37e33ec1907f6d042af35f8b5f93495844",
+  "currentContractSummarySha256": "e33ab5f34cd0a35faec3106ba97cdb2a1ee5772759a514b3ad3549f3fd08d48f",
+  "monthlyResultsSha256": "c51ef2bd170a6a2467ac862b2dbc8a777361c9d941192ebb2887b3c661a4c6f0",
+  "result": "PASS",
+  "notes": [
+    "Both runs used independent output directories and the same pinned source roots.",
+    "Every canonical trade, decision, event, metric and summary file matched byte-for-byte.",
+    "The second output copy was deleted after this verification record was written; replay-1 is canonical."
+  ]
+}

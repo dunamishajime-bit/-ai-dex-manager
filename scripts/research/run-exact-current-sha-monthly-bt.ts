@@ -1,8 +1,8 @@
 import { createHash } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import { runExactIntegratedBt, type IntegratedBtResult } from "./exact-current-sha-integrated-bt.ts";
-import { validateExactBtManifest } from "./exact-current-sha-bt-contract.ts";
+import { runExactIntegratedBt, type IntegratedBtResult } from "./exact-current-sha-integrated-bt";
+import { validateExactBtManifest } from "./exact-current-sha-bt-contract";
 
 function sha256(body: Buffer | string): string {
   return createHash("sha256").update(body).digest("hex");

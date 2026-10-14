@@ -4,8 +4,8 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 import assert from "node:assert/strict";
-import { validateExactBtManifest, type ExactBtManifest } from "../scripts/research/exact-current-sha-bt-contract.ts";
-import { runExactIntegratedBt } from "../scripts/research/exact-current-sha-integrated-bt.ts";
+import { validateExactBtManifest, type ExactBtManifest } from "../scripts/research/exact-current-sha-bt-contract";
+import { runExactIntegratedBt } from "../scripts/research/exact-current-sha-integrated-bt";
 
 const TARGET = "e8cc2e73f8d3981d708ee52f013241597c038b10";
 const H = 60 * 60 * 1000;
