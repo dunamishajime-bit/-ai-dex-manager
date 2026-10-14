@@ -156,8 +156,10 @@ jobs:
           dropin_dir=/etc/systemd/system/ai-dex-manager-ui.service.d
           prefix="$(printf '%248s' ' ' | tr ' ' z)"
           dropin="$dropin_dir/${prefix}.conf"
+          # The final name is 253 bytes; adding .tmp would exceed Linux NAME_MAX (255).
+          dropin_tmp="$dropin_dir/.disdex-hp-ranking-logic-ui.tmp"
           dropin_name="${dropin##*/}"
-          [[ "${#prefix}" == 248 && "${#dropin_name}" -lt 255 && ! -e "$dropin" && ! -e "$dropin.tmp" && ! -L "$dropin.tmp" ]]
+          [[ "${#prefix}" == 248 && "${#dropin_name}" -lt 255 && ! -e "$dropin" && ! -e "$dropin_tmp" && ! -L "$dropin_tmp" ]]
           mapfile -t old_dropins < <(systemctl show ai-dex-manager-ui.service -p DropInPaths --value | tr ' ' '\n')
           for path in "${old_dropins[@]}"; do
             [[ -z "$path" ]] && continue
@@ -209,6 +211,8 @@ jobs:
           dropin_dir=/etc/systemd/system/ai-dex-manager-ui.service.d
           prefix="$(printf '%248s' ' ' | tr ' ' z)"
           dropin="$dropin_dir/${prefix}.conf"
+          # The final name is 253 bytes; adding .tmp would exceed Linux NAME_MAX (255).
+          dropin_tmp="$dropin_dir/.disdex-hp-ranking-logic-ui.tmp"
           dropin_name="${dropin##*/}"
           archive="/tmp/disdex-ui-$REQUEST_ID.tar.gz"
           trap 'rm -f -- "$archive"' EXIT
@@ -225,7 +229,7 @@ jobs:
           [[ "$old_wd" == "$EXPECTED_OLD_UI_PATH" && -d "$old_wd" && ! -L "$old_wd" ]]
           [[ "$(tr -d '[:space:]' < "$old_wd/.disdex-release-sha")" == "$EXPECTED_OLD_UI_SHA" ]]
           [[ " $old_env " == *" DISDEX_UI_RELEASE_SHA=$EXPECTED_OLD_UI_SHA "* ]]
-          [[ "${#prefix}" == 248 && "${#dropin_name}" -lt 255 && ! -e "$dropin" && ! -e "$dropin.tmp" && ! -L "$dropin.tmp" ]]
+          [[ "${#prefix}" == 248 && "${#dropin_name}" -lt 255 && ! -e "$dropin" && ! -e "$dropin_tmp" && ! -L "$dropin_tmp" ]]
           mapfile -t old_dropins < <(systemctl show "$ui" -p DropInPaths --value | tr ' ' '\n')
           for path in "${old_dropins[@]}"; do
             [[ -z "$path" ]] && continue
@@ -281,7 +285,7 @@ jobs:
             local rc="${1:-$?}" restored_wd restored_env restored_sha
             trap - ERR
             set +e
-            rm -f -- "$dropin.tmp"
+            rm -f -- "$dropin_tmp"
             if [[ "$dropin_installed" == true && -f "$dropin" ]] && \
                grep -Fxq "WorkingDirectory=$release" "$dropin" && \
                grep -Fxq "Environment=DISDEX_UI_RELEASE_SHA=$NEW_UI_SHA" "$dropin"; then
@@ -326,10 +330,10 @@ jobs:
             exit "$rc"
           }
           trap 'rollback "$?"' ERR
-          printf '[Service]\nWorkingDirectory=%s\nEnvironment=DISDEX_UI_RELEASE_SHA=%s\n' "$release" "$NEW_UI_SHA" > "$dropin.tmp"
-          chown root:root "$dropin.tmp"; chmod 0644 "$dropin.tmp"
-          mv -nT -- "$dropin.tmp" "$dropin"
-          [[ ! -e "$dropin.tmp" && -f "$dropin" ]]
+          printf '[Service]\nWorkingDirectory=%s\nEnvironment=DISDEX_UI_RELEASE_SHA=%s\n' "$release" "$NEW_UI_SHA" > "$dropin_tmp"
+          chown root:root "$dropin_tmp"; chmod 0644 "$dropin_tmp"
+          mv -nT -- "$dropin_tmp" "$dropin"
+          [[ ! -e "$dropin_tmp" && -f "$dropin" ]]
           dropin_installed=true
           systemctl daemon-reload
           systemctl restart "$ui"
@@ -442,6 +446,8 @@ jobs:
           dropin_dir=/etc/systemd/system/ai-dex-manager-ui.service.d
           prefix="$(printf '%248s' ' ' | tr ' ' z)"
           dropin="$dropin_dir/${prefix}.conf"
+          # The final name is 253 bytes; adding .tmp would exceed Linux NAME_MAX (255).
+          dropin_tmp="$dropin_dir/.disdex-hp-ranking-logic-ui.tmp"
           [[ "$(id -un)" == root ]]
           [[ "$(tr -d '[:space:]' < "$trading/.disdex-release-sha")" == "$EXPECTED_TRADING_SHA" ]]
           [[ "$(readlink -f "$trading")" == "/home/deploy/disdex-trading/releases/$EXPECTED_TRADING_SHA" ]]
