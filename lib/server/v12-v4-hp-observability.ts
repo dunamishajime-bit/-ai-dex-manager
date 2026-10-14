@@ -129,7 +129,7 @@ async function readSystemd(unit: string): Promise<string> {
   return stdout;
 }
 
-async function readPrimaryMode(paths: SourcePaths, currentSha: string): Promise<"V4" | "LEGACY"> {
+async function readPrimaryMode(paths: SourcePaths, currentSha: string, heartbeatSha: string | null): Promise<"V4" | "LEGACY"> {
   const expectedPath = join(paths.primaryModeRoot, `${currentSha}.v12-primary.env`);
   const path = paths.primaryModePath ?? expectedPath;
   if (resolve(path) !== resolve(expectedPath)) throw new Error("V12_PRIMARY_MODE_SOURCE_INVALID");
@@ -155,9 +155,19 @@ async function readPrimaryMode(paths: SourcePaths, currentSha: string): Promise<
   }
   const mode = entries.get("DISDEX_PRIMARY_V12_RUNNER");
   if (mode !== "V4" && mode !== "LEGACY") throw new Error("V12_PRIMARY_MODE_SOURCE_INVALID");
-  for (const key of ["DISDEX_V12_V4_PRIMARY_SHA", "DISDEX_V12_V4_PEER_SHA"]) {
-    const value = entries.get(key);
-    if (value !== undefined && normalizeSha(value) !== currentSha) throw new Error("V12_PRIMARY_MODE_SOURCE_INVALID");
+  const primary = normalizeSha(entries.get("DISDEX_V12_V4_PRIMARY_SHA"));
+  const peer = normalizeSha(entries.get("DISDEX_V12_V4_PEER_SHA"));
+  if (mode === "V4") {
+    // Mixed-SHA Production: root-owned primary contract must pin the SAME V4
+    // release as the heartbeat. Other trading runners stay on currentSha.
+    if (!primary || !heartbeatSha || primary !== heartbeatSha ||
+        (primary !== currentSha && peer !== currentSha) ||
+        (entries.has("DISDEX_V12_V4_PEER_SHA") && peer !== currentSha)) {
+      throw new Error("V12_PRIMARY_MODE_SOURCE_INVALID");
+    }
+  } else if ((entries.has("DISDEX_V12_V4_PRIMARY_SHA") && primary !== currentSha) ||
+             (entries.has("DISDEX_V12_V4_PEER_SHA") && peer !== currentSha)) {
+    throw new Error("V12_PRIMARY_MODE_SOURCE_INVALID");
   }
   return mode;
 }
@@ -321,7 +331,7 @@ export async function loadV12V4HpObservability(options: V12V4HpObservabilityOpti
 
   let v12PrimaryMode: V12V4HpSnapshot["actual"]["v12PrimaryMode"] = "UNKNOWN";
   if (currentSha) {
-    try { v12PrimaryMode = await (options.readPrimaryMode ? options.readPrimaryMode(currentSha) : readPrimaryMode(paths, currentSha)); }
+    try { v12PrimaryMode = await (options.readPrimaryMode ? options.readPrimaryMode(currentSha) : readPrimaryMode(paths, currentSha, heartbeatSha)); }
     catch (error) { errors.push(error instanceof Error ? error.message : "V12_PRIMARY_MODE_SOURCE_UNAVAILABLE"); }
   }
   let legacyV12RunnerActive: boolean | null = null;
