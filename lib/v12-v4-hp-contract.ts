@@ -98,6 +98,9 @@ export type V12V4HpSnapshot = {
     v4ReleaseSha: string | null;
     heartbeatSha: string | null;
     orderEnabled: boolean | null;
+    /** Current certified runner heartbeat only; never a per-symbol Gate verdict. */
+    latestSignalReason?: string | null;
+    latestSignalCount?: number | null;
   };
   timestamps: {
     checkedAt: number;
