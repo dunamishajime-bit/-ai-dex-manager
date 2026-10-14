@@ -34,9 +34,13 @@ test("Production UI does not fall back to stale strategy contract values", async
     assert.doesNotMatch(source, /\?\?\s*config\.(?:quality102Runtime|v52|v12|pengu|maximumGross|sharedCryptoGross)/);
     assert.match(source, /runtime未取得|RUNTIME MISMATCH/);
   }
-  assert.match(home, /strongRegimeQualityScoreMinimum/);
-  assert.match(positions, /strongRegimeQualityScoreMinimum/);
-  assert.match(banner, /strongRegimeQualityScoreMinimum/);
+  for (const source of [home, positions, banner]) {
+    assert.match(source, /useProductionRuntime/);
+    assert.match(source, /runtimeLineage/);
+  }
+  assert.match(home, /productionRuntime\.releaseSha/);
+  assert.match(positions, /productionRuntime\.releaseSha/);
+  assert.match(banner, /runtime\.releaseSha/);
 });
 
 test("static metadata is explicitly non-authoritative", async () => {
