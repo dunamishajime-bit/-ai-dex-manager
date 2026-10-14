@@ -162,9 +162,21 @@ function v52Number(value: unknown, key: string): number {
   return parsed;
 }
 
+/** Production peers remain on current while the certified V4 runner uses a separate SHA. */
+export function resolveV12PrimaryReleaseSha(currentSha: string, mode: string, primaryEnv: Record<string,string>): string {
+  if (mode !== "V4") return currentSha;
+  const pinnedSha = (primaryEnv.DISDEX_V12_V4_PRIMARY_SHA ?? "").trim();
+  const peerSha = (primaryEnv.DISDEX_V12_V4_PEER_SHA ?? "").trim();
+  if (!SHA_RE.test(pinnedSha) || (peerSha && peerSha !== currentSha) ||
+      (pinnedSha !== currentSha && peerSha !== currentSha)) {
+    throw new Error("CURRENT_V12_PRIMARY_SHA_MISMATCH");
+  }
+  return pinnedSha;
+}
+
 type RuntimeUnitKey = keyof typeof HEARTBEAT_PATHS;
 
-async function loadRuntimeLineage(releaseSha: string, env: EnvMap): Promise<CurrentProductionRuntime["runtimeLineage"]> {
+async function loadRuntimeLineage(releaseSha: string, env: EnvMap, v12PrimarySha: string): Promise<CurrentProductionRuntime["runtimeLineage"]> {
   const units = {} as CurrentProductionRuntime["runtimeLineage"]["units"];
   const v12PrimaryMode = (env.DISDEX_PRIMARY_V12_RUNNER ?? "").trim().toUpperCase();
   const heartbeatPaths = {
@@ -177,7 +189,7 @@ async function loadRuntimeLineage(releaseSha: string, env: EnvMap): Promise<Curr
       const runtimeSha = typeof raw.runtimeSha === "string" ? raw.runtimeSha.trim()
         : unit === "fet" && typeof raw.runtimeCommitSha === "string" ? raw.runtimeCommitSha.trim() : undefined;
       const expectedSha = typeof raw.expectedSha === "string" ? raw.expectedSha.trim()
-        : unit === "fet" || (unit === "v12" && v12PrimaryMode === "V4") ? releaseSha : undefined;
+        : unit === "fet" ? releaseSha : unit === "v12" && v12PrimaryMode === "V4" ? v12PrimarySha : undefined;
       units[unit] = {
         runtimeSha,
         expectedSha,
@@ -195,7 +207,8 @@ async function loadRuntimeLineage(releaseSha: string, env: EnvMap): Promise<Curr
             ? Number(raw.updatedAt)
             : undefined,
         healthReason: typeof raw.healthReason === "string" ? raw.healthReason : undefined,
-        matchesCurrent: runtimeSha === releaseSha && expectedSha === releaseSha,
+        matchesCurrent: runtimeSha === (unit === "v12" && v12PrimaryMode === "V4" ? v12PrimarySha : releaseSha) &&
+          expectedSha === (unit === "v12" && v12PrimaryMode === "V4" ? v12PrimarySha : releaseSha),
       };
     } catch (error) {
       units[unit] = {
@@ -232,15 +245,13 @@ export async function loadCurrentProductionRuntime(): Promise<CurrentProductionR
     throw new Error(`CURRENT_RUNTIME_SHA_MISMATCH:MARKER_${releaseSha}:ENV_${envRelease}:RUNTIME_${runtimeCommit}`);
   }
   const v12PrimaryMode = (env.DISDEX_PRIMARY_V12_RUNNER ?? "").trim().toUpperCase();
-  if (v12PrimaryMode === "V4" && env.DISDEX_V12_V4_PRIMARY_SHA !== releaseSha) {
-    throw new Error(`CURRENT_V12_PRIMARY_SHA_MISMATCH:RELEASE_${releaseSha}:PRIMARY_${env.DISDEX_V12_V4_PRIMARY_SHA ?? "MISSING"}`);
-  }
+  const v12PrimarySha = resolveV12PrimaryReleaseSha(releaseSha, v12PrimaryMode, primaryEnv);
 
   const q102Source = await readFile(join(CURRENT_RELEASE_ROOT, "config", "integratedProductionRiskPolicy.ts"), "utf8");
   const v12Source = await readFile(join(CURRENT_RELEASE_ROOT, "config", "v12X1AllRuntime.ts"), "utf8");
   const penguSource = await readFile(join(CURRENT_RELEASE_ROOT, "config", "penguDualLsV2Runtime.ts"), "utf8");
   const penguRecoverySource = await readFile(join(CURRENT_RELEASE_ROOT, "config", "penguRecoveryV8.ts"), "utf8");
-  const runtimeLineage = await loadRuntimeLineage(releaseSha, env);
+  const runtimeLineage = await loadRuntimeLineage(releaseSha, env, v12PrimarySha);
   const v52Raw = JSON.parse(await readFile(join(CURRENT_RELEASE_ROOT, "config", "v52V50Runtime.json"), "utf8")) as Record<string, unknown>;
   const windowsNy = Array.isArray(v52Raw.windowsNy)
     ? v52Raw.windowsNy.map((value) => String(value)).filter(Boolean)
@@ -258,7 +269,7 @@ export async function loadCurrentProductionRuntime(): Promise<CurrentProductionR
     source: "VPS_CURRENT_RUNTIME",
     releaseSha,
     productionReleaseShas: {
-      v12: releaseSha,
+      v12: v12PrimarySha,
       pengu: releaseSha,
       quality102: releaseSha,
       v52: releaseSha,
