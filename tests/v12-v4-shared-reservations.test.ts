@@ -40,6 +40,18 @@ async function setup(withSecond=false){
  const lock=new FileAccountOrderLock(lockPath,120000,pending);const handle=(await lock.acquire("V12_V4_TEST"))!;
  return {dir,pending,lock,handle,store,id,cid,command,at,second,manager:new V4SharedReservations(store,handle,pending)};
 }
+test("research drawdown threshold is not a shared reservation hold",async()=>{
+ const x=await setup();
+ try{
+  const doc=x.store.read();
+  const state=applyProductionEvent(doc.state,{type:"ACCOUNT_MARK",eventId:"dd-research-only",ts:x.at,equityUsd:780,prices:{[x.command.symbol]:100},foreign:[]});
+  assert.ok(state.maxDrawdown>0.21);
+  x.store.commit(doc.revision,{...doc,state});
+  const row=await x.manager.reserve(x.cid,x.command);
+  assert.equal(row.strategyId,"V12_V4");
+  assert.equal(row.status,"PENDING");
+ }finally{await x.handle.release();rmSync(x.dir,{recursive:true,force:true});}
+});
 test("shared reservation survives account-lock release and is not duplicated after reacquisition",async()=>{
  const x=await setup();
  try{
