@@ -20,7 +20,7 @@ export type V4RunnerSymbolGate={
 };
 export type V4RunnerGateTelemetry={
  schema:typeof V4_GATE_TELEMETRY_SCHEMA;strategyId:"V12_V4";
- releaseSha:string;runtimeSha:string;decisionTs:number;capturedAtMs:number;computedAtMs:number;
+ releaseSha:string;runtimeSha:string;activeRunnerSha:string;decisionTs:number;capturedAtMs:number;computedAtMs:number;
  sourceFingerprint:string;sourceCount:number;candidateCount:number;filteredCount:number;
  btcRegime:"LONG"|"SHORT"|"NEUTRAL";
  symbolCount:number;symbols:V4RunnerSymbolGate[];
@@ -73,7 +73,7 @@ export function buildV4RunnerGateTelemetry(
  if(decision.candidateCount!==decision.candidates.length||decision.filteredCount!==decision.filtered.length||
     new Set(symbols.map(s=>s.symbol)).size!==universe.length)throw Error("V4_GATE_TELEMETRY_COUNT_MISMATCH");
  return {schema:V4_GATE_TELEMETRY_SCHEMA,strategyId:"V12_V4",
-  releaseSha,runtimeSha:releaseSha,decisionTs:decision.decisionTs,capturedAtMs:decision.capturedAtMs,computedAtMs:at,
+  releaseSha,runtimeSha:releaseSha,activeRunnerSha:releaseSha,decisionTs:decision.decisionTs,capturedAtMs:decision.capturedAtMs,computedAtMs:at,
   sourceFingerprint:decision.sourceFingerprint,sourceCount:decision.sourceCount,
   candidateCount:decision.candidateCount,filteredCount:decision.filteredCount,
   btcRegime:native.regime,symbolCount:symbols.length,symbols,

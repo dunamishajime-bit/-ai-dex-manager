@@ -27,6 +27,7 @@ test("exact production native gate functions create 14 read-only symbol observat
  const result=buildV4RunnerGateTelemetry(fixture(),decision(),SHA,capturedAtMs+500);
  assert.equal(result.symbolCount,V12_X1_ALL.universe.length);
  assert.equal(result.symbols.length,14);
+ assert.equal(result.activeRunnerSha,SHA);
  assert.equal(result.sourceFingerprint,"a".repeat(64));
  assert.equal(result.readOnly,true);assert.equal(result.tradingMutation,0);assert.equal(result.orderEnabled,false);
  assert.equal(result.symbols[0].symbol,"BTCUSDT");
