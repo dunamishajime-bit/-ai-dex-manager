@@ -498,7 +498,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           JOB_RESULT: ${{ job.status }}
         run: |
-          node <<'NODE'
+          node --input-type=module <<'NODE'
           const successful = process.env.JOB_RESULT === 'success' && process.env.HP_UI_DEPLOYED === 'true';
           const state = successful ? 'success' : 'failure';
           const payload = JSON.stringify({
