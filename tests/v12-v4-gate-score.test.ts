@@ -38,7 +38,7 @@ test("never supplement absent V4 telemetry or unavailable market scores",()=>{
 });
 function runtime():V12V4HpSnapshot{
  return {displayStatus:"LIVE_VERIFIED",freshness:{heartbeat:true,decision:false},
-  actual:{currentReleaseSha:SHA,activeRunnerSha:SHA,heartbeatSha:SHA,v12PrimaryMode:"V4",
+  actual:{currentReleaseSha:SHA,activeRunnerSha:SHA,heartbeatSha:SHA,v4ReleaseSha:SHA,v12PrimaryMode:"V4",
    legacyV12RunnerActive:false}} as V12V4HpSnapshot;
 }
 function strictFixture(){
@@ -67,4 +67,15 @@ test("only source-fingerprint, SHA and fresh Runner signals can affect reference
  assert.equal(verifyV4GateTelemetry({...gate,runtimeSha:"b".repeat(40)},decision,runtime(),NOW),null);
  assert.equal(verifyV4GateTelemetry(gate,decision,runtime(),NOW+3*H),null);
  assert.equal(verifyV4GateTelemetry(gate,decision,{...runtime(),displayStatus:"UNAVAILABLE"},NOW),null);
+});
+
+
+test("different V4 production SHA than trading peer SHA may be verified only against its own live unit",()=>{
+ const NEW="b".repeat(40);
+ const {gate,decision}=strictFixture();
+ const candidate={...gate,releaseSha:NEW,runtimeSha:NEW};
+ const origin={...decision,releaseSha:NEW,runtimeSha:NEW};
+ const live={...runtime(),actual:{...runtime().actual,activeRunnerSha:NEW,heartbeatSha:NEW,v4ReleaseSha:NEW}};
+ assert.equal(verifyV4GateTelemetry(candidate,origin,live,NOW)?.releaseSha,NEW);
+ assert.equal(verifyV4GateTelemetry(candidate,origin,{...live,actual:{...live.actual,heartbeatSha:SHA}},NOW),null);
 });
