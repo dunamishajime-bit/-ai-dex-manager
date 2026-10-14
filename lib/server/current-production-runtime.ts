@@ -216,11 +216,24 @@ export async function loadCurrentProductionRuntime(): Promise<CurrentProductionR
   if (!SHA_RE.test(releaseSha)) throw new Error(`CURRENT_RUNTIME_SHA_INVALID:${releaseSha || "EMPTY"}`);
 
   const envPath = join(RUNTIME_ENV_ROOT, `${releaseSha}.env`);
-  const env = parseEnv(await readFile(envPath, "utf8"));
-  const envRelease = requiredText(env, "DISDEX_RELEASE_SHA");
-  const runtimeCommit = requiredText(env, "DISDEX_RUNTIME_COMMIT_SHA");
+  const runtimeEnv = parseEnv(await readFile(envPath, "utf8"));
+  const primaryEnvPath = join(RUNTIME_ENV_ROOT, `${releaseSha}.v12-primary.env`);
+  let primaryEnv: EnvMap = {};
+  try {
+    primaryEnv = parseEnv(await readFile(primaryEnvPath, "utf8"));
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException)?.code;
+    if (code !== "ENOENT" && code !== "ENOTDIR") throw error;
+  }
+  const env = { ...runtimeEnv, ...primaryEnv };
+  const envRelease = requiredText(runtimeEnv, "DISDEX_RELEASE_SHA");
+  const runtimeCommit = requiredText(runtimeEnv, "DISDEX_RUNTIME_COMMIT_SHA");
   if (envRelease !== releaseSha || runtimeCommit !== releaseSha) {
     throw new Error(`CURRENT_RUNTIME_SHA_MISMATCH:MARKER_${releaseSha}:ENV_${envRelease}:RUNTIME_${runtimeCommit}`);
+  }
+  const v12PrimaryMode = (env.DISDEX_PRIMARY_V12_RUNNER ?? "").trim().toUpperCase();
+  if (v12PrimaryMode === "V4" && env.DISDEX_V12_V4_PRIMARY_SHA !== releaseSha) {
+    throw new Error(`CURRENT_V12_PRIMARY_SHA_MISMATCH:RELEASE_${releaseSha}:PRIMARY_${env.DISDEX_V12_V4_PRIMARY_SHA ?? "MISSING"}`);
   }
 
   const q102Source = await readFile(join(CURRENT_RELEASE_ROOT, "config", "integratedProductionRiskPolicy.ts"), "utf8");

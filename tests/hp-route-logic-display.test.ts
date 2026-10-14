@@ -43,6 +43,8 @@ test("production runtime uses V4 heartbeat when V4 is the primary V12 runner", (
   const source = readFileSync("lib/server/current-production-runtime.ts", "utf8");
   assert.match(source, /V12_V4_HEARTBEAT_PATH = "\/var\/lib\/disdex\/v12-v4\/heartbeat\.json"/);
   assert.match(source, /DISDEX_PRIMARY_V12_RUNNER/);
+  assert.match(source, /\$\{releaseSha\}\.v12-primary\.env/);
+  assert.match(source, /CURRENT_V12_PRIMARY_SHA_MISMATCH/);
   assert.match(source, /v12PrimaryMode === "V4" \? V12_V4_HEARTBEAT_PATH/);
   assert.match(source, /loadRuntimeLineage\(releaseSha, env\)/);
 });
