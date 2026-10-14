@@ -11,7 +11,7 @@ export async function GET(req:NextRequest){
   const verified=await loadVerifiedV4GateTelemetry(live);
   return NextResponse.json({ok:true,readOnly:true,tradingMutation:0,
    verified:!!verified,decisionTs:verified?.decisionTs??null,
-   runtimeSha:live.actual.currentReleaseSha,
+   runtimeSha:verified?.releaseSha??live.actual.activeRunnerSha??live.actual.currentReleaseSha,
    symbols:verified?.symbols??[],
    reason:verified?"RUNNER_EXACT_SOURCE_VERIFIED":"RUNNER_NATIVE_GATE_TELEMETRY_NOT_AVAILABLE_OR_STALE",
   },{headers});
