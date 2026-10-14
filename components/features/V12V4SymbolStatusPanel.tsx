@@ -143,8 +143,8 @@ export function V12V4SymbolStatusPanel() {
           <div className="rounded-lg border border-white/10 bg-white/[0.03] p-3">
             <div className="font-semibold text-white">V12 V4正式判定の観測内容</div>
             {row.marketFresh && <p className="mt-1">Score内訳：市場 {row.marketScore?.toFixed(2) ?? "—"} + V4参考Gate +{row.v4GateBonus.toFixed(2)}。取引への影響はありません。</p>}
-            <p className="mt-1">{row.message}</p>
-            <p className="mt-1">方向：{row.side ?? "未取得"} / Route：{row.routes.length ? row.routes.join(" / ") : "未観測"}</p>
+            <p className="mt-1">{verifiedGates?.some(g=>g.symbol===row.symbol) ? "V4実Runnerの同一確定足source Gateを実測。Route出力と最終発注可否は別です。" : row.message}</p>
+            <p className="mt-1">方向：{verifiedGates?.find(g=>g.symbol===row.symbol)?.nativeSide ?? row.side ?? "未取得"} / Route：{verifiedGates?.find(g=>g.symbol===row.symbol)?.routeGate.routes.join(" / ") || (row.routes.length ? row.routes.join(" / ") : "未観測")}</p>
             {row.filteredReasons.length ? <div className="mt-1">除外理由：{row.filteredReasons.join(" / ")}</div> : null}
             <div className="mt-1 text-[10px] text-white/50">V4のnative Score・個別Gate・発注可能判定はRunner由来の実測がない限り補完しません。</div>
           </div>
