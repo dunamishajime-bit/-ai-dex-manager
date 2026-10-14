@@ -9,6 +9,9 @@ import { loadPenguRuntimeObservability } from './pengu-runtime-observability';
 import { loadHypeRuntimeObservability } from './hype-runtime-observability';
 import { loadFetGates } from './fet-gate-observability';
 import { loadMarketUniverseRanking } from './realtime-universe-score';
+import { orderMarketRows } from './realtime-universe-score';
+import { loadVerifiedV4GateTelemetry } from './v12-v4-gate-reference-observability';
+import { applyV4GateBonusToMarketRows } from '@/lib/v12-v4-gate-score';
 import { DIST_TERMINAL_LIVE_CONFIG } from '@/lib/disterminal-live-config';
 import { V12_V4_HP_ROUTE_IDS, V12_V4_HP_TARGET } from '@/lib/v12-v4-hp-contract';
 type Obj=Record<string,unknown>;
@@ -165,8 +168,14 @@ async function observe(){
  }
  // Public-market-only ranking with one shared formula; no trading state or order mutation.
  const marketRows=await loadMarketUniverseRanking(rows,now);
+ // Only V4 Runner-signed lineage and matching same-candle fingerprints may add reference points.
+ // An absent/stale observer leaves the original public-market ranking completely unchanged.
+ const v4GateEvidence=v12V4Snapshot?await loadVerifiedV4GateTelemetry(v12V4Snapshot,Date.now()):null;
+ const scoredMarketRows=v4GateEvidence
+  ?orderMarketRows(applyV4GateBonusToMarketRows(marketRows,v4GateEvidence))
+  :marketRows;
  const checkedAt=Date.now(),freshRows=expireRealtimeRankingRows(rows,checkedAt,sourceExpiryByLogic);
- const snapshot={ok:true,readOnly:true,tradingMutation:0,checkedAt:now,refreshSeconds:REALTIME_RANKING_REFRESH_MS/1000,runtimeSha:current.releaseSha,rows:rankRows([...(v12V4Snapshot?mergeV12V4RealtimeRows(freshRows,v12V4Snapshot,now):freshRows),...marketRows]),errors,v12V4:v12V4Snapshot?v12V4RealtimeSummary(v12V4Snapshot):unavailableV12V4RealtimeSummary(now),metric:'全通貨順位はAster公開相場を同一算式で評価した共通市場Score（0-100、参考）で降順。ロジック固有Scoreとは独立で、実発注・発火確率・期待利益には使いません。'};
+ const snapshot={ok:true,readOnly:true,tradingMutation:0,checkedAt:now,refreshSeconds:REALTIME_RANKING_REFRESH_MS/1000,runtimeSha:current.releaseSha,rows:rankRows([...(v12V4Snapshot?mergeV12V4RealtimeRows(freshRows,v12V4Snapshot,now):freshRows),...scoredMarketRows]),errors,v4GateReference:{verified:!!v4GateEvidence,decisionTs:v4GateEvidence?.decisionTs??null,maximumBonus:15,source:v4GateEvidence?'LIVE_V4_RUNNER':'UNAVAILABLE'},v12V4:v12V4Snapshot?v12V4RealtimeSummary(v12V4Snapshot):unavailableV12V4RealtimeSummary(now),metric:'全通貨順位はAster市場Score（0-100）に、同一SHA・同一確定足のV12 V4実Runner Gateが確認できた対象通貨だけ参考加点（最大15点）。欠測・古い証拠は加点0。参考値であり発注・発火確率・期待利益には使いません。'};
  return {snapshot,expires:realtimeRankingCacheExpiry(now,sourceExpiries,snapshot.rows)};
 }
 type Observation=Awaited<ReturnType<typeof observe>>;
