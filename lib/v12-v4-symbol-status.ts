@@ -9,6 +9,7 @@ type MarketRow = {
   score?: number | null;
   scoreKind?: string;
   sourceFeatures?: Record<string, number | boolean>;
+  v4Reference?: {marketBaseScore:number;v4GateBonus:number};
 };
 
 export type MarketRankingResponse = {
@@ -26,6 +27,8 @@ export type V12V4SymbolDisplayRow = {
   filteredReasons: string[];
   message: string;
   marketScore: number | null;
+  realtimeScore: number | null;
+  v4GateBonus: number;
   marketFeatures: Record<string, number>;
   marketFresh: boolean;
 };
@@ -61,7 +64,7 @@ export function v12V4SymbolDisplayRows(
     && ranking.runtimeSha === snapshot.actual.currentReleaseSha;
   const marketRows = new Map<string, MarketRow>();
   if (marketSourceValid) for (const row of ranking?.rows ?? []) {
-    if (row.logic !== "MARKET" || !row.symbol || row.scoreKind !== "MARKET" || row.fresh !== true
+    if (row.logic !== "MARKET" || !row.symbol || (row.scoreKind !== "MARKET" && row.scoreKind !== "MARKET_PLUS_V4") || row.fresh !== true
       || typeof row.checkedAt !== "number" || now - row.checkedAt < -60_000
       || now - row.checkedAt > 120_000) continue;
     marketRows.set(row.symbol.toUpperCase(), row);
@@ -80,6 +83,8 @@ export function v12V4SymbolDisplayRows(
     const m = marketRows.get(symbol);
     const validScore = m && typeof m.score === "number" && Number.isFinite(m.score)
       && m.score >= 0 && m.score <= 100 ? m.score : null;
+    const marketScore = m?.v4Reference?.marketBaseScore ?? validScore;
+    const v4GateBonus = m?.v4Reference?.v4GateBonus ?? 0;
     const firstSide = candidates[0]?.side ?? filtered[0]?.side;
     const side = firstSide === "LONG" || firstSide === "SHORT" ? firstSide : null;
     const state: V12V4SymbolDisplayRow["state"] =
@@ -97,7 +102,8 @@ export function v12V4SymbolDisplayRows(
           : "V4の通貨別判定snapshotが未取得です。PASS・BLOCK・LONG・SHORTを推測しません。";
     return {
       symbol, state, side, routes, filteredReasons, message,
-      marketScore: validScore,
+      marketScore,
+      realtimeScore:validScore,v4GateBonus,
       marketFeatures: validScore === null ? {} : numericFeatures(m?.sourceFeatures),
       marketFresh: validScore !== null,
     };
