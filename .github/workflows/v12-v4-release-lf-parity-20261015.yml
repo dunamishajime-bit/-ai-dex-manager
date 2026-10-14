@@ -1,0 +1,48 @@
+name: V12 V4 Release LF and Git Source Parity
+on:
+  push:
+    branches:
+      - fix/v12-v4-release-lf-parity-20261015
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-release-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Exact tree and LF parity
+        run: |
+          set -euo pipefail
+          python3 scripts/ops/verify-v12-v4-release-tree.py --repository . --release . --sha "$(git rev-parse HEAD)"
+      - name: Verify CRLF release files fail closed
+        run: |
+          python3 - <<'PY'
+          import pathlib,subprocess,tempfile,sys
+          with tempfile.TemporaryDirectory() as d:
+              root=pathlib.Path(d)
+              repo=root/'repo'
+              staged=root/'stage'
+              repo.mkdir()
+              staged.mkdir()
+              def git(*a):
+                  return subprocess.run(['git','-C',str(repo),*a],check=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True).stdout.strip()
+              git('init')
+              git('config','user.name','CI')
+              git('config','user.email','ci@example.invalid')
+              (repo/'source.ts').write_bytes(b'export const x = 1;\n')
+              git('add','source.ts')
+              git('commit','-m','source')
+              sha=git('rev-parse','HEAD')
+              (staged/'source.ts').write_bytes(b'export const x = 1;\r\n')
+              (staged/'.disdex-release-sha').write_text(sha+'\n')
+              script=pathlib.Path('scripts/ops/verify-v12-v4-release-tree.py').resolve()
+              p=subprocess.run([sys.executable,str(script),'--repository',str(repo),'--release',str(staged),'--sha',sha],capture_output=True,text=True)
+              assert p.returncode==2,(p.stdout,p.stderr)
+              assert 'CRLF_ONLY=1' in p.stdout,p.stdout
+              (staged/'source.ts').write_bytes(b'export const x = 1;\n')
+              p=subprocess.run([sys.executable,str(script),'--repository',str(repo),'--release',str(staged),'--sha',sha],capture_output=True,text=True)
+              assert p.returncode==0,(p.stdout,p.stderr)
+              print('LF_DEPLOYMENT_PREFLIGHT_POSITIVE_AND_NEGATIVE=PASS')
+          PY
