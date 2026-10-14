@@ -1,6 +1,7 @@
 import type {V12V4HpSnapshot} from "./v12-v4-hp-contract";
 import type {V4VerifiedGateTelemetry,V4GateTelemetryItem,V4SourceGateState} from "./v12-v4-gate-score";
 import {DIST_TERMINAL_LIVE_CONFIG} from "./disterminal-live-config";
+import {V12_V4_HP_TARGET} from "./v12-v4-hp-contract";
 type Obj=Record<string,unknown>;
 const object=(v:unknown):v is Obj=>!!v&&typeof v==="object"&&!Array.isArray(v);
 const state=(v:unknown):v is V4SourceGateState=>v==="PASS"||v==="BLOCK"||v==="NOT_EVALUATED";
@@ -17,7 +18,7 @@ export function verifyV4GateTelemetry(
   gates.source!=="RUNNER_SAME_CLOSED_CANDLE_BATCH"||
   gates.releaseSha!==sha||gates.runtimeSha!==sha||
   gates.readOnly!==true||gates.orderEnabled!==false||gates.tradingMutation!==0||
-  decision.schema!=="v12-v4-live-decision/v1"||decision.releaseSha!==sha||
+  decision.schema!=="v12-v4-live-decision/v1"||decision.policyId!==V12_V4_HP_TARGET.policyId||decision.releaseSha!==sha||
   decision.runtimeSha!==sha||decision.orderEnabled!==false||
   decision.tradingMutation!==0||decision.realOrderEnabledV4!==0||
   !finite(gates.decisionTs)||!finite(gates.capturedAtMs)||
@@ -52,6 +53,19 @@ export function verifyV4GateTelemetry(
   if(!gateKeys.every(key=>found.has(key))||!state(x.routeGate.state)||
    !Array.isArray(x.routeGate.routes)||x.routeGate.routes.some(y=>typeof y!=="string")||
    typeof x.routeGate.reason!=="string")return null;
+  // A route PASS cannot come from a standalone telemetry claim.
+  // Verify its exact emitted route inventory against the paired original V4 decision.
+  const emitted=(decision.candidates as unknown[]).filter(y=>object(y)&&y.symbol===x.symbol)
+    .map(y=>(y as Obj).route).filter(y=>typeof y==="string") as string[];
+  const rejected=(decision.filtered as unknown[]).filter(y=>object(y)&&y.symbol===x.symbol)
+    .map(y=>(y as Obj).route).filter(y=>typeof y==="string") as string[];
+  const actualRoutes=[...new Set(x.routeGate.routes as string[])].sort();
+  const expectedRoutes=[...new Set(emitted.length?emitted:rejected)].sort();
+  if(actualRoutes.length!==expectedRoutes.length||
+    actualRoutes.some((name,i)=>name!==expectedRoutes[i])||
+    (emitted.length>0&&x.routeGate.state!=="PASS")||
+    (emitted.length===0&&rejected.length>0&&x.routeGate.state!=="BLOCK")||
+    (emitted.length===0&&rejected.length===0&&x.routeGate.state!=="NOT_EVALUATED"))return null;
   seen.add(x.symbol);
   items.push({symbol:x.symbol,nativeSide:x.nativeSide,sourceEligible:x.sourceEligible,
    sourceReason:x.sourceReason,portfolioRank:x.portfolioRank,nativeScore:x.nativeScore,
