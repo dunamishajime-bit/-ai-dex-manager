@@ -30,8 +30,8 @@ jobs:
     timeout-minutes: 30
     env:
       EXPECTED_TRADING_SHA: e8cc2e73f8d3981d708ee52f013241597c038b10
-      EXPECTED_OLD_UI_SHA: 1b94cf0c91eb0404deb52d6e1cea499d7f7b84b6
-      EXPECTED_OLD_UI_PATH: /home/deploy/disdex-trading/ui-releases/ui-route-logic-1b94cf0c91eb
+      EXPECTED_OLD_UI_SHA: 6f453a5345a1558fda524082cf6c4d4781eb2395
+      EXPECTED_OLD_UI_PATH: /home/deploy/disdex-trading/ui-releases/ui-route-logic-6f453a5345a1
 
     steps:
       - uses: actions/checkout@v4
@@ -154,12 +154,12 @@ jobs:
           free_kb="$(df -Pk /home/deploy | awk 'NR==2 {print $4}')"
           [[ "$free_kb" -ge 500000 ]] || { echo "HP_DEPLOY_DISK_TOO_LOW_KB=$free_kb"; exit 32; }
           dropin_dir=/etc/systemd/system/ai-dex-manager-ui.service.d
-          prefix="$(printf '%250s' ' ' | tr ' ' z)"
+          prefix="~disdex-v4-telemetry-ui-20261014"
           dropin="$dropin_dir/${prefix}.conf"
           # The final name is 253 bytes; adding .tmp would exceed Linux NAME_MAX (255).
           dropin_tmp="$dropin_dir/.disdex-hp-ranking-logic-ui.tmp"
           dropin_name="${dropin##*/}"
-          [[ "${#prefix}" == 250 && "${#dropin_name}" -le 255 && ! -e "$dropin" && ! -e "$dropin_tmp" && ! -L "$dropin_tmp" ]]
+          [[ "$dropin_name" == "~disdex-v4-telemetry-ui-20261014.conf" && ! -e "$dropin" && ! -e "$dropin_tmp" && ! -L "$dropin_tmp" ]]
           mapfile -t old_dropins < <(systemctl show ai-dex-manager-ui.service -p DropInPaths --value | tr ' ' '\n')
           for path in "${old_dropins[@]}"; do
             [[ -z "$path" ]] && continue
@@ -209,7 +209,7 @@ jobs:
           trading=/home/deploy/disdex-trading/current
           root=/home/deploy/disdex-trading/ui-releases
           dropin_dir=/etc/systemd/system/ai-dex-manager-ui.service.d
-          prefix="$(printf '%250s' ' ' | tr ' ' z)"
+          prefix="~disdex-v4-telemetry-ui-20261014"
           dropin="$dropin_dir/${prefix}.conf"
           # The final name is 253 bytes; adding .tmp would exceed Linux NAME_MAX (255).
           dropin_tmp="$dropin_dir/.disdex-hp-ranking-logic-ui.tmp"
@@ -229,7 +229,7 @@ jobs:
           [[ "$old_wd" == "$EXPECTED_OLD_UI_PATH" && -d "$old_wd" && ! -L "$old_wd" ]]
           [[ "$(tr -d '[:space:]' < "$old_wd/.disdex-release-sha")" == "$EXPECTED_OLD_UI_SHA" ]]
           [[ " $old_env " == *" DISDEX_UI_RELEASE_SHA=$EXPECTED_OLD_UI_SHA "* ]]
-          [[ "${#prefix}" == 250 && "${#dropin_name}" -le 255 && ! -e "$dropin" && ! -e "$dropin_tmp" && ! -L "$dropin_tmp" ]]
+          [[ "$dropin_name" == "~disdex-v4-telemetry-ui-20261014.conf" && ! -e "$dropin" && ! -e "$dropin_tmp" && ! -L "$dropin_tmp" ]]
           mapfile -t old_dropins < <(systemctl show "$ui" -p DropInPaths --value | tr ' ' '\n')
           for path in "${old_dropins[@]}"; do
             [[ -z "$path" ]] && continue
@@ -444,7 +444,7 @@ jobs:
           root=/home/deploy/disdex-trading/ui-releases
           release="$root/ui-route-logic-${NEW_UI_SHA:0:12}"
           dropin_dir=/etc/systemd/system/ai-dex-manager-ui.service.d
-          prefix="$(printf '%250s' ' ' | tr ' ' z)"
+          prefix="~disdex-v4-telemetry-ui-20261014"
           dropin="$dropin_dir/${prefix}.conf"
           # The final name is 253 bytes; adding .tmp would exceed Linux NAME_MAX (255).
           dropin_tmp="$dropin_dir/.disdex-hp-ranking-logic-ui.tmp"
