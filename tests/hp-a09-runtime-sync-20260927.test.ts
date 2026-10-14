@@ -23,7 +23,10 @@ test("FET page and read-only authenticated API are present",()=>{
   assert.doesNotMatch(api+page,/placeMarket|executeEntry|submitOrder|cancelOrder/);
 });
 test("do not conflate UI build SHA and new trading runtime SHA",()=>{
-  assert.match(read("app/page.tsx"),/HPのビルドSHAと売買Runtime SHA/);
+  const home=read("app/page.tsx");
+  assert.match(home,/useProductionRuntime/);
+  assert.match(home,/productionRuntime\.releaseSha\.slice\(0, 12\)/);
+  assert.match(home,/RUNTIME MISMATCH/);
   assert.match(read("components/layout/Sidebar.tsx"),/FET 判定/);
   assert.doesNotMatch(read("components/layout/Sidebar.tsx"),/V52時間外停止/);
 });
