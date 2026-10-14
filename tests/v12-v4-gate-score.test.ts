@@ -53,7 +53,7 @@ function strictFixture(){
    sourceReason:"SOURCE_ENTRY_BLOCKED",portfolioRank:null,nativeScore:0,
    gates:labels.map(key=>({key,state:"BLOCK",actual:0.4,required:0.8,reason:"TEST"})),
    routeGate:{state:"NOT_EVALUATED",routes:[],reason:"NONE"}}))};
- const decision={schema:"v12-v4-live-decision/v1",releaseSha:SHA,runtimeSha:SHA,
+ const decision={schema:"v12-v4-live-decision/v1",policyId:"V2_M150_D05_CORE_NATIVE",releaseSha:SHA,runtimeSha:SHA,
   orderEnabled:false,tradingMutation:0,realOrderEnabledV4:0,
   source:"RUNNER_SAME_CLOSED_CANDLE_BATCH",sourceFingerprint:FP,
   decisionTs:T,capturedAtMs:T+1000,candidates:[],filtered:[],errors:[]};
@@ -62,6 +62,7 @@ function strictFixture(){
 test("only source-fingerprint, SHA and fresh Runner signals can affect reference Score",()=>{
  const {gate,decision}=strictFixture();
  assert.equal(verifyV4GateTelemetry(gate,decision,runtime(),NOW)?.symbols.length,14);
+ assert.equal(verifyV4GateTelemetry(gate,{...decision,policyId:"INCOMPATIBLE"},runtime(),NOW),null);
  assert.equal(verifyV4GateTelemetry(gate,{...decision,sourceFingerprint:"b".repeat(64)},runtime(),NOW),null);
  assert.equal(verifyV4GateTelemetry({...gate,runtimeSha:"b".repeat(40)},decision,runtime(),NOW),null);
  assert.equal(verifyV4GateTelemetry(gate,decision,runtime(),NOW+3*H),null);
