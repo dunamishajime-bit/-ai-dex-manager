@@ -66,13 +66,7 @@ export function V12V4RuntimePanel({ compact = false }: { compact?: boolean }) {
         </div>
       </div>
 
-      {snapshot ? (
-        <div className="mt-3 grid min-w-0 gap-3 sm:grid-cols-3">
-          <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="text-[10px] text-white/45">Decision候補 / filtered</div><div className="mt-1 text-sm font-bold text-white">{snapshot.routeCoverage.candidateCount ?? "—"} / {snapshot.routeCoverage.filteredCount ?? "—"}</div></div>
-          <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="text-[10px] text-white/45">出力されたroute数</div><div className="mt-1 text-sm font-bold text-white">{snapshot.routeCoverage.observed} / {snapshot.routeCoverage.expected}</div></div>
-          <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2"><div className="text-[10px] text-white/45">V4 route coverage</div><div className="mt-1 text-xs font-semibold text-amber-100">評価完了率ではありません</div></div>
-        </div>
-      ) : <div className="mt-3 rounded-xl border border-amber-400/20 bg-amber-500/5 px-3 py-2 text-xs text-amber-100">{error || (loading ? "V4 runtimeを取得中です。" : "V4 runtime未取得。LIVE状態は未確認です。")}</div>}
+      {!snapshot ? <div className="mt-3 rounded-xl border border-amber-400/20 bg-amber-500/5 px-3 py-2 text-xs text-amber-100">{error || (loading ? "V4 runtimeを取得中です。" : "V4 runtime未取得。LIVE状態は未確認です。")}</div> : null}
 
       {snapshot ? <div className="mt-4 min-w-0 rounded-2xl border border-white/10 bg-black/20 p-3">
         <div className="flex flex-wrap items-start justify-between gap-2">
