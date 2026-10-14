@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - codex/v12-v4-dd21-gates-integrated-20261014
+      - codex/v12-v4-gate-active-sha-20261014
   workflow_dispatch:
 permissions:
   contents: read
@@ -35,10 +36,10 @@ jobs:
           verify_blob lib/v12-v4-shared-reservations.ts c240523a0d3b368bd526c0cc9d057450f35d9413
           verify_blob tests/v12-v4-production-lifecycle.test.ts 27d23c4d19e3cf4174ee058a33ef0155bf08c759
           verify_blob tests/v12-v4-shared-reservations.test.ts fb6e5f9dc938541f4e3a71dce8599f9cf788616b
-          verify_blob lib/v12-v4-gate-telemetry.ts a8ac554787c8864a386a8155ee6c69bd48999e21
+          verify_blob lib/v12-v4-gate-telemetry.ts a6e90f185ec1036df453faebeb4ef53f9203d495
           verify_blob lib/v12-x1-all.ts 4e0902d3a5fbfd4f3c8dbc0c789efc37aa6c75db
           verify_blob scripts/v12-v4-production-runner.ts 34a6e7a55ea152968435950c6ef39fae10c3df43
-          verify_blob tests/v12-v4-gate-telemetry.test.ts f9d0ecfd1237ea70d7c9d5531733d6f0295ed965
+          verify_blob tests/v12-v4-gate-telemetry.test.ts c391b48eb4cb058d6c829dcabadff18de1d3edb3
       - name: Install locked dependencies
         run: npm ci --no-audit --no-fund
       - name: Verify DD21 no-halt and live Gate telemetry
