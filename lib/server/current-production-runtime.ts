@@ -5,8 +5,10 @@ const CURRENT_MARKER = "/home/deploy/disdex-trading/current/.disdex-release-sha"
 const CURRENT_RELEASE_ROOT = "/home/deploy/disdex-trading/current";
 const RUNTIME_ENV_ROOT = "/etc/disdex/current-runtime";
 const SHA_RE = /^[0-9a-f]{40}$/i;
+const LEGACY_V12_HEARTBEAT_PATH = "/var/lib/disdex/runner-health/heartbeats/v12-x1-all.json";
+const V12_V4_HEARTBEAT_PATH = "/var/lib/disdex/v12-v4/heartbeat.json";
 const HEARTBEAT_PATHS = Object.freeze({
-  v12: "/var/lib/disdex/runner-health/heartbeats/v12-x1-all.json",
+  v12: LEGACY_V12_HEARTBEAT_PATH,
   pengu: "/var/lib/disdex/runner-health/heartbeats/pengu-v8.json",
   quality102: "/var/lib/disdex/runner-health/heartbeats/quality102-causal-v1.json",
   v52: "/var/lib/disdex/runner-health/heartbeats/v52.json",
@@ -162,21 +164,30 @@ function v52Number(value: unknown, key: string): number {
 
 type RuntimeUnitKey = keyof typeof HEARTBEAT_PATHS;
 
-async function loadRuntimeLineage(releaseSha: string): Promise<CurrentProductionRuntime["runtimeLineage"]> {
+async function loadRuntimeLineage(releaseSha: string, env: EnvMap): Promise<CurrentProductionRuntime["runtimeLineage"]> {
   const units = {} as CurrentProductionRuntime["runtimeLineage"]["units"];
-  for (const [unit, path] of Object.entries(HEARTBEAT_PATHS) as Array<[RuntimeUnitKey, string]>) {
+  const v12PrimaryMode = (env.DISDEX_PRIMARY_V12_RUNNER ?? "").trim().toUpperCase();
+  const heartbeatPaths = {
+    ...HEARTBEAT_PATHS,
+    v12: v12PrimaryMode === "V4" ? V12_V4_HEARTBEAT_PATH : LEGACY_V12_HEARTBEAT_PATH,
+  };
+  for (const [unit, path] of Object.entries(heartbeatPaths) as Array<[RuntimeUnitKey, string]>) {
     try {
       const raw = JSON.parse(await readFile(path, "utf8")) as Record<string, unknown>;
       const runtimeSha = typeof raw.runtimeSha === "string" ? raw.runtimeSha.trim()
         : unit === "fet" && typeof raw.runtimeCommitSha === "string" ? raw.runtimeCommitSha.trim() : undefined;
       const expectedSha = typeof raw.expectedSha === "string" ? raw.expectedSha.trim()
-        : unit === "fet" ? releaseSha : undefined;
+        : unit === "fet" || (unit === "v12" && v12PrimaryMode === "V4") ? releaseSha : undefined;
       units[unit] = {
         runtimeSha,
         expectedSha,
         mode: typeof raw.mode === "string" ? raw.mode : undefined,
         safetyState: typeof raw.safetyState === "string" ? raw.safetyState : undefined,
-        liveEnabled: typeof raw.liveEnabled === "boolean" ? raw.liveEnabled : undefined,
+        liveEnabled: typeof raw.liveEnabled === "boolean"
+          ? raw.liveEnabled
+          : unit === "v12" && v12PrimaryMode === "V4"
+            ? raw.mode === "LIVE" && raw.operationMode === "CERTIFIED"
+            : undefined,
         mainPid: Number.isFinite(Number(raw.mainPid)) ? Number(raw.mainPid) : undefined,
         updatedAt: Number.isFinite(Number(raw.heartbeatAt))
           ? Number(raw.heartbeatAt)
@@ -216,7 +227,7 @@ export async function loadCurrentProductionRuntime(): Promise<CurrentProductionR
   const v12Source = await readFile(join(CURRENT_RELEASE_ROOT, "config", "v12X1AllRuntime.ts"), "utf8");
   const penguSource = await readFile(join(CURRENT_RELEASE_ROOT, "config", "penguDualLsV2Runtime.ts"), "utf8");
   const penguRecoverySource = await readFile(join(CURRENT_RELEASE_ROOT, "config", "penguRecoveryV8.ts"), "utf8");
-  const runtimeLineage = await loadRuntimeLineage(releaseSha);
+  const runtimeLineage = await loadRuntimeLineage(releaseSha, env);
   const v52Raw = JSON.parse(await readFile(join(CURRENT_RELEASE_ROOT, "config", "v52V50Runtime.json"), "utf8")) as Record<string, unknown>;
   const windowsNy = Array.isArray(v52Raw.windowsNy)
     ? v52Raw.windowsNy.map((value) => String(value)).filter(Boolean)

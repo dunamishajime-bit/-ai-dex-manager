@@ -5,6 +5,14 @@ import { ListTree } from "lucide-react";
 import { useV12V4HpStatus } from "@/hooks/useV12V4HpStatus";
 import { V12_V4_HP_ROUTE_IDS } from "@/lib/v12-v4-hp-contract";
 
+const ROUTE_FAMILIES = [
+  { label: "CORE / ROBUST", match: (route: string) => !route.startsWith("REC_") },
+  { label: "REC_G", match: (route: string) => route.startsWith("REC_G") },
+  { label: "REC_X", match: (route: string) => route.startsWith("REC_X") },
+  { label: "REC_Y", match: (route: string) => route.startsWith("REC_Y") },
+  { label: "REC_Z", match: (route: string) => route.startsWith("REC_Z") },
+] as const;
+
 export function V12RouteInventoryPanel() {
   const { snapshot, loading, error } = useV12V4HpStatus();
   const observed = new Set(
@@ -12,6 +20,15 @@ export function V12RouteInventoryPanel() {
       ? V12_V4_HP_ROUTE_IDS.filter((route) => !snapshot.routeCoverage.unobserved.includes(route))
       : [],
   );
+  const routeFamilies = ROUTE_FAMILIES.map((family) => {
+    const routes = V12_V4_HP_ROUTE_IDS.filter(family.match);
+    return {
+      label: family.label,
+      total: routes.length,
+      observed: routes.filter((route) => observed.has(route)).length,
+    };
+  });
+  const catalogMatchesRuntime = snapshot?.routeCoverage.expected === V12_V4_HP_ROUTE_IDS.length;
 
   return (
     <section className="panel-gold min-w-0 rounded-[28px] p-4 md:p-5" data-testid="v12-route-inventory">
@@ -26,7 +43,7 @@ export function V12RouteInventoryPanel() {
           </p>
         </div>
         <span className="rounded-full border border-sky-400/25 bg-sky-500/10 px-3 py-1 text-xs font-black text-sky-100">
-          実装 {V12_V4_HP_ROUTE_IDS.length} routes
+          Catalog {V12_V4_HP_ROUTE_IDS.length}/41 ・ {catalogMatchesRuntime === false ? "MISMATCH" : "一致"}
         </span>
       </div>
 
@@ -34,8 +51,9 @@ export function V12RouteInventoryPanel() {
         <>
           <div className="mt-3 grid gap-2 sm:grid-cols-4">
             <div className="rounded-xl border border-sky-400/20 bg-sky-500/[0.04] px-3 py-2">
-              <div className="text-[10px] text-white/45">実装ルート総数</div>
-              <div className="mt-1 text-xl font-black text-sky-100">{snapshot.routeCoverage.expected}</div>
+              <div className="text-[10px] text-white/45">実装ルート / Catalog</div>
+              <div className="mt-1 text-xl font-black text-sky-100">{snapshot.routeCoverage.expected} / {V12_V4_HP_ROUTE_IDS.length}</div>
+              <div className={"mt-0.5 text-[9px] " + (catalogMatchesRuntime ? "text-emerald-200" : "text-rose-200")}>{catalogMatchesRuntime ? "41/41 一致" : "route定義不一致"}</div>
             </div>
             <div className="rounded-xl border border-white/10 bg-black/20 px-3 py-2">
               <div className="text-[10px] text-white/45">今回cycle出力route</div>
@@ -52,6 +70,16 @@ export function V12RouteInventoryPanel() {
               <div className="mt-1 text-sm font-bold text-amber-100">{snapshot.routeCoverage.unobserved.length}</div>
               <div className="mt-0.5 text-[9px] text-white/40">未実装という意味ではありません</div>
             </div>
+          </div>
+
+          <div className="mt-3 grid gap-2 sm:grid-cols-3 xl:grid-cols-5" data-testid="v12-route-family-breakdown">
+            {routeFamilies.map((family) => (
+              <div key={family.label} className="rounded-xl border border-white/10 bg-black/20 px-3 py-2">
+                <div className="text-[10px] font-semibold text-white/70">{family.label}</div>
+                <div className="mt-1 text-sm font-black text-white">{family.observed} / {family.total}</div>
+                <div className="text-[9px] text-white/40">今回観測 / 実装総数</div>
+              </div>
+            ))}
           </div>
 
           <details className="mt-3 rounded-xl border border-white/10 bg-black/20 px-3 py-2">
