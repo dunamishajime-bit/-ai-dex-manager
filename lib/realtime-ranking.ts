@@ -1,5 +1,5 @@
 export type Gate = { key:string; label:string; state:'OK'|'NO'|'UNKNOWN'; actual?:number|string; required?:number|string; detail:string; kind?:'signal'|'execution'; progress?:number };
-export type RankScoreKind='NATIVE'|'MARKET'|'GATE_COMPLETION'|'UNAVAILABLE';
+export type RankScoreKind='NATIVE'|'MARKET'|'MARKET_PLUS_V4'|'GATE_COMPLETION'|'UNAVAILABLE';
 export type RankingSourceStatus='FRESH'|'STALE'|'SOURCE_ERROR'|'NOT_EVALUATED';
 export type RankMetric={score:number|null;scoreKind:RankScoreKind;scoreLabel:string};
 export type RankRow = {
@@ -7,6 +7,7 @@ export type RankRow = {
  gates:Gate[]; reason:string; fresh:boolean; checkedAt:number; freshUntil?:number; rank?:number; href?:string;
  rankingScope?:string; sourceRank?:number; rankingEligible?:boolean; rankingContractAvailable?:boolean; rankingExclusion?:string;
  sourceStatus?:RankingSourceStatus; sourceRoute?:string; sourceFeatures?:Record<string,number|boolean>;
+ v4Reference?:{marketBaseScore:number;v4GateBonus:number;v4SourceGatePassCount:number;v4RouteEmitted:boolean;v4GateDecisionTs:number};
 };
 export type RealtimeTopSlot={slot:1|2|3;status:'CANDIDATE'|'NO_CANDIDATE'|'NOT_EVALUATED'|'STALE'|'SOURCE_ERROR';symbol?:string;sourceRow?:RankRow};
 export function executionBlocked(row:RankRow){return row.gates.some(g=>g.kind==='execution'&&g.state==='NO');}
