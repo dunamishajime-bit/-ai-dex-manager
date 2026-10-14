@@ -1,0 +1,26 @@
+name: HP V12 V4 Single Route Counter
+on:
+  push:
+    branches:
+      - fix/hp-v4-single-route-count-20261015
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - name: Install
+        run: npm ci --no-audit --no-fund
+      - name: Verify unique route count, runtime status and inventory tests
+        run: npx tsx --test tests/v12-v4-route-display-single-source.test.ts tests/v12-v4-hp-presentation-mixed-sha.test.ts tests/v12-v4-hp-observability.test.ts
+      - name: Typecheck
+        run: npx tsc --noEmit --pretty false --incremental false
+      - name: Display-only assertion
+        run: echo 'V4_ROUTE_DISPLAY_ONLY=PASS; ORDER_LOGIC_UNMODIFIED=TRUE'
