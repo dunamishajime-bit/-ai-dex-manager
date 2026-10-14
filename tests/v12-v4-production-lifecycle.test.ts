@@ -151,13 +151,17 @@ test("reversal preemption waits for actual closes and cannot delete an opposing 
  assert.equal(state.legs[r.leg.id].status,"PENDING_ENTRY");
  assert.equal(state.legs[r.leg.id].reservationUsd,100);
 });
-test("equity DD admission fails closed and existing virtual-leg exits remain available",async()=>{
+test("research DD is observed but does not halt production entry or reservation",async()=>{
  let state=createProductionState(initial);
  state=applyProductionEvent(state,{type:"ACCOUNT_MARK",eventId:"dd",ts,equityUsd:780,prices:{}});
  assert.ok(state.maxDrawdown>0.21);
- await assert.rejects(reserve(state),/DD_OVER_OPERATOR_LIMIT/);
- const r=await reserve(createProductionState(initial));
- assert.throws(()=>applyProductionEvent(state,r),/RESERVATION_RECHECK_FAILED/);
+ const r=await reserve(state);
+ const accepted=applyProductionEvent(state,r);
+ assert.equal(accepted.legs[r.leg.id].status,"PENDING_ENTRY");
+ assert.equal(accepted.maxDrawdown,state.maxDrawdown);
+ const held={...state,initial:{...state.initial,holdProtected:true}};
+ await assert.rejects(reserve(held),/HOLD_PROTECTED/);
+ assert.throws(()=>applyProductionEvent(held,r),/RESERVATION_RECHECK_FAILED/);
 });
 test("closing records cooldown; caller cannot release foreign ownership or forge reservations",async()=>{
  let state=createProductionState(initial),r=await reserve(state);state=applyProductionEvent(state,r);
