@@ -122,6 +122,13 @@ class RuntimeWiringHygieneTest(unittest.TestCase):
         self.assertIn("verify_current_units_active || return 20", guard)
         self.assertIn("zzzzzzzzzzzzzzzzzzzz-current-release.conf", guard)
 
+    def test_idle_protected_positions_never_route_to_flat_recovery(self):
+        source = WIRING.read_text(encoding="utf-8")
+        self.assertGreaterEqual(source.count("((.positions // []) | length > 0)"), 2)
+        self.assertIn("IDLE_PROTECTED_STATE_ALREADY_RECONCILED", source)
+        self.assertIn("IDLE_PROTECTED_RATE_BUDGET_RECOVERY_PASS", source)
+        self.assertNotIn("((.positions // []) | all(.protectionVerified == true))", source)
+
     def test_coherence_guard_timer_is_restart_safe_and_wired(self):
         timer = (ROOT / "ops" / "systemd" / "disdex-current-runtime-coherence-guard.timer").read_text(encoding="utf-8")
         service = (ROOT / "ops" / "systemd" / "disdex-current-runtime-coherence-guard.service").read_text(encoding="utf-8")

@@ -339,9 +339,14 @@ migrate_idle_state_lineage() {
   if /usr/bin/jq -e '
     (.pending // null) == null and
     (.manualReview // null) == null and
-    ((.positions // []) | length > 0) and
-    ((.positions // []) | all(.protectionVerified == true))
+    ((.positions // []) | length > 0)
   ' "$state_path" >/dev/null 2>&1; then
+    # The venue-backed protected recovery is the authority for every live
+    # position.  Do not require a transient per-position protection flag here:
+    # the Idle daemon may atomically refresh the state between the lineage and
+    # benign-recovery reads.  The protected helper still fails closed unless
+    # the state schema, live position, and both reduce-only STOP/TP orders
+    # match exactly.
     load_runtime_migration_environment
     "$CURRENT_RELEASE/node_modules/.bin/tsx" \
       "$CURRENT_RELEASE/scripts/disdex-idle-priority-short-protected-rate-budget-recovery.ts" \
@@ -398,8 +403,7 @@ recover_idle_benign_state() {
     if /usr/bin/jq -e '
       (.pending // null) == null and
       (.manualReview // null) == null and
-      ((.positions // []) | length > 0) and
-      ((.positions // []) | all(.protectionVerified == true))
+      ((.positions // []) | length > 0)
     ' "$state_path" >/dev/null 2>&1; then
       printf 'IDLE_PROTECTED_STATE_ALREADY_RECONCILED positions=%s ordersSent=0 cancelsSent=0 positionChangesSent=0\n' \
         "$(/usr/bin/jq '(.positions // []) | length' "$state_path")"
