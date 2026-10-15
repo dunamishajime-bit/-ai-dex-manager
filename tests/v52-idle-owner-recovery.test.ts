@@ -4,6 +4,7 @@ import test from "node:test";
 import {
     DEFAULT_V52_IDLE_OWNER_MARGIN_MAX_AGE_MS,
     DEFAULT_V52_IDLE_OWNER_RECOVERY_MAX_QUEUE_MS,
+    ensureProtectedIdleRecoveryQueueWindow,
     isMarginGuardFresh,
     protectedIdleSnapshotFingerprint,
     protectedIdleValidationFingerprint,
@@ -121,6 +122,18 @@ test("margin freshness default covers the configured five-minute guard poll", ()
 
 test("protected recovery has a bounded read-only queue window for open-order reconciliation", () => {
     assert.equal(DEFAULT_V52_IDLE_OWNER_RECOVERY_MAX_QUEUE_MS, 10_000);
+});
+
+test("protected recovery raises a shorter runtime queue window without bypassing the shared gate", () => {
+    const previous = process.env.DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS;
+    try {
+        process.env.DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS = "5000";
+        ensureProtectedIdleRecoveryQueueWindow();
+        assert.equal(process.env.DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS, "10000");
+    } finally {
+        if (previous === undefined) delete process.env.DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS;
+        else process.env.DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS = previous;
+    }
 });
 
 test("final signed-read comparison ignores observation timestamp drift", () => {

@@ -34,6 +34,13 @@ const DEFAULT_PENDING_PATH = "/var/lib/disdex/shared/pending-exposure.json";
 const DEFAULT_MAX_STATE_AGE_MS = 20 * 60_000;
 export const DEFAULT_V52_IDLE_OWNER_RECOVERY_MAX_QUEUE_MS = 10_000;
 
+export function ensureProtectedIdleRecoveryQueueWindow() {
+    const configured = Number(process.env.DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS);
+    if (!Number.isFinite(configured) || configured < DEFAULT_V52_IDLE_OWNER_RECOVERY_MAX_QUEUE_MS) {
+        process.env.DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS = String(DEFAULT_V52_IDLE_OWNER_RECOVERY_MAX_QUEUE_MS);
+    }
+}
+
 type IdleProtectionState = IdleState["positions"][number];
 
 export type ProtectedIdleVenueSnapshot = {
@@ -384,9 +391,7 @@ async function main() {
     // peer safety readers may be using the same budget.  Keep the shared lock
     // and rate gate intact, but give this read-only reconciliation a bounded
     // queue window large enough to wait instead of falsely failing closed.
-    if (!String(process.env.DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS || "").trim()) {
-        process.env.DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS = String(DEFAULT_V52_IDLE_OWNER_RECOVERY_MAX_QUEUE_MS);
-    }
+    ensureProtectedIdleRecoveryQueueWindow();
     const client = new AsterV3Client({
         baseUrl: process.env.ASTER_FUTURES_BASE_URL,
         userAddress: process.env.ASTER_USER_ADDRESS,
