@@ -462,7 +462,7 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
     private async enqueueConfirmedFill(result: DirectTradeResult, context: { reason?: string; reduceOnly?: boolean } = {}) {
         if (!isConfirmedTradeFill(result)) return;
         try {
-            await enqueueTradeFillNotification(
+            const enqueueResult = await enqueueTradeFillNotification(
                 buildTradeFillNotificationEvent(result, {
                     env: process.env,
                     reason: context.reason || result.reason || "Aster実約定",
@@ -470,6 +470,16 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
                 }),
                 process.env,
             );
+            if (!enqueueResult.queued) {
+                // Do not throw after a real venue fill. Persistent telemetry
+                // exposes missing LIVE notification flags without leaking IDs.
+                console.warn("[TradeFillNotification] confirmed fill not enqueued", {
+                    reason: enqueueResult.reason,
+                    symbol: result.symbol,
+                    strategyId: process.env.DISDEX_TRADE_FILL_STRATEGY_ID || "UNCONFIGURED",
+                    isReduceOnly: context.reduceOnly ?? result.reduceOnly ?? false,
+                });
+            }
         } catch (error) {
             // Notification delivery is deliberately outside the order/state
             // transaction.  A mail or local-spool failure must never turn a
