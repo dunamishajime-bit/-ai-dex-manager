@@ -94,6 +94,14 @@ export function protectedIdleSnapshotFingerprint(input: ProtectedIdleVenueSnapsh
     return JSON.stringify({ state, positions, orders });
 }
 
+export function protectedIdleValidationFingerprint(input: ProtectedIdleValidation): string {
+    return JSON.stringify({
+        symbols: [...input.symbols].sort(),
+        positionCount: input.positionCount,
+        protectiveOrderCount: input.protectiveOrderCount,
+    });
+}
+
 function finitePositive(value: unknown): value is number {
     return Number.isFinite(Number(value)) && Number(value) > 0;
 }
@@ -415,7 +423,7 @@ async function main() {
         const verifyState = await readIdleState(statePath, candidateSha);
         const verifySnapshot = await readSnapshot(client, verifyState);
         const verifyResult = validateProtectedIdleSnapshot(verifySnapshot, candidateSha, Date.now());
-        if (JSON.stringify(verifyResult) !== JSON.stringify(observations[observations.length - 1])) throw new Error("V52_IDLE_OWNER_RECOVERY_FINAL_GET_MISMATCH");
+        if (protectedIdleValidationFingerprint(verifyResult) !== protectedIdleValidationFingerprint(observations[observations.length - 1])) throw new Error("V52_IDLE_OWNER_RECOVERY_FINAL_GET_MISMATCH");
         const stateArchive = await archiveBytes(statePath, beforeState, requestId, "idle-state");
         const killArchive = await archiveBytes(killPath, beforeKill, requestId, "kill-switch");
         if (verifyOnly) {

@@ -5,7 +5,9 @@ import {
     DEFAULT_V52_IDLE_OWNER_MARGIN_MAX_AGE_MS,
     isMarginGuardFresh,
     protectedIdleSnapshotFingerprint,
+    protectedIdleValidationFingerprint,
     validateProtectedIdleSnapshot,
+    type ProtectedIdleValidation,
     type ProtectedIdleVenueSnapshot,
 } from "../scripts/disdex-v52-idle-owner-recovery";
 import { emptyIdleState, type IdleOwnedPosition } from "../lib/idle-priority-short-state";
@@ -113,6 +115,20 @@ test("margin freshness default covers the configured five-minute guard poll", ()
             checkedAt + 360_001,
         ),
         false,
+    );
+});
+
+test("final signed-read comparison ignores observation timestamp drift", () => {
+    const first: ProtectedIdleValidation = {
+        symbols: ["DOTUSDT", "JUPUSDT"],
+        positionCount: 2,
+        protectiveOrderCount: 4,
+        capturedAt: 1_000,
+    };
+    const second = { ...first, capturedAt: 2_000 };
+    assert.equal(
+        protectedIdleValidationFingerprint(first),
+        protectedIdleValidationFingerprint(second),
     );
 });
 
