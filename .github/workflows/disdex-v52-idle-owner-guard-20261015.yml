@@ -1,0 +1,28 @@
+name: V52 Idle Ownership Fail Closed Checks
+on:
+  push:
+    branches: [fix/v52-idle-ownership-guard-20261015]
+    paths:
+      - scripts/disdex_strict_portfolio_planner.py
+      - tests/test_disdex_v52_idle_owned_position.py
+      - .github/workflows/disdex-v52-idle-owner-guard-20261015.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  owner-guard-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Python compile and ownership tests
+        run: |
+          python -m py_compile scripts/disdex_strict_portfolio_planner.py
+          python -m unittest discover -s tests -p test_disdex_v52_idle_owned_position.py -v
+          python scripts/disdex_strict_portfolio_planner.py
+      - name: No venue calls or production activation
+        run: echo "Ownership validation only; no signed Aster requests, orders, stops, Kill Switch resets, or deployments."
