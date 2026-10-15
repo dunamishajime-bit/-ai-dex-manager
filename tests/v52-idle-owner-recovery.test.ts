@@ -8,6 +8,7 @@ import {
     isMarginGuardFresh,
     protectedIdleSnapshotFingerprint,
     protectedIdleValidationFingerprint,
+    protectedIdleValidationMatches,
     validateProtectedIdleSnapshot,
     type ProtectedIdleValidation,
     type ProtectedIdleVenueSnapshot,
@@ -148,6 +149,7 @@ test("final signed-read comparison ignores observation timestamp drift", () => {
         protectedIdleValidationFingerprint(first),
         protectedIdleValidationFingerprint(second),
     );
+    assert.equal(protectedIdleValidationMatches(first, second), true);
 });
 
 test("extra venue position fails closed instead of clearing the global hold", () => {

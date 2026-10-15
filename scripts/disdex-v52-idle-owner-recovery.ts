@@ -110,6 +110,10 @@ export function protectedIdleValidationFingerprint(input: ProtectedIdleValidatio
     });
 }
 
+export function protectedIdleValidationMatches(left: ProtectedIdleValidation, right: ProtectedIdleValidation): boolean {
+    return protectedIdleValidationFingerprint(left) === protectedIdleValidationFingerprint(right);
+}
+
 function finitePositive(value: unknown): value is number {
     return Number.isFinite(Number(value)) && Number(value) > 0;
 }
@@ -436,7 +440,7 @@ async function main() {
         const verifyState = await readIdleState(statePath, candidateSha);
         const verifySnapshot = await readSnapshot(client, verifyState);
         const verifyResult = validateProtectedIdleSnapshot(verifySnapshot, candidateSha, Date.now());
-        if (protectedIdleValidationFingerprint(verifyResult) !== protectedIdleValidationFingerprint(observations[observations.length - 1])) throw new Error("V52_IDLE_OWNER_RECOVERY_FINAL_GET_MISMATCH");
+        if (!protectedIdleValidationMatches(verifyResult, observations[observations.length - 1])) throw new Error("V52_IDLE_OWNER_RECOVERY_FINAL_GET_MISMATCH");
         const stateArchive = await archiveBytes(statePath, beforeState, requestId, "idle-state");
         const killArchive = await archiveBytes(killPath, beforeKill, requestId, "kill-switch");
         if (verifyOnly) {
@@ -464,7 +468,7 @@ async function main() {
         const postResult = validateProtectedIdleSnapshot(postSnapshot, candidateSha, Date.now());
         const cleared = await readSharedKillSwitch({ DISDEX_SHARED_KILL_SWITCH_FILE: killPath } as unknown as NodeJS.ProcessEnv);
         if (cleared.active) throw new Error("V52_IDLE_OWNER_RECOVERY_CLEAR_VERIFY_FAILED");
-        if (JSON.stringify(postResult) !== JSON.stringify(verifyResult)) throw new Error("V52_IDLE_OWNER_RECOVERY_VENUE_CHANGED_AFTER_CLEAR");
+        if (!protectedIdleValidationMatches(postResult, verifyResult)) throw new Error("V52_IDLE_OWNER_RECOVERY_VENUE_CHANGED_AFTER_CLEAR");
         console.log(JSON.stringify({ status: "V52_IDLE_OWNER_RECOVERY_APPLY_PASS", candidateSha, sharedKillSwitchCleared: true, signedReadOnlyConsecutive: observations.length, stateArchive, killArchive, ...postResult, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 }));
     } catch (error) {
         if (apply) {
