@@ -36,6 +36,8 @@ export interface DirectTradeCommand {
     maxSlippageBps: number;
     reason: string;
     requireVenueMargin5xCross?: boolean;
+    /** Optional pre-order gross cap. Never rounds a lot upwards. */
+    maxEntryNotionalUsd?: number;
 }
 
 export interface DirectTradeResult {
@@ -547,6 +549,13 @@ export class AsterDirectTradeExecutor implements DirectTradeExecutor {
             );
         }
         const normalized = await this.normalizeMarketQuantity(symbol, command.quantity, executablePrice, { allowBelowMinNotional: command.reduceOnly === true });
+        if (command.maxEntryNotionalUsd !== undefined && command.reduceOnly !== true) {
+            if (!Number.isFinite(command.maxEntryNotionalUsd) || command.maxEntryNotionalUsd <= 0 ||
+                !Number.isFinite(normalized.notional) ||
+                normalized.notional > command.maxEntryNotionalUsd * (1 + 1e-9)) {
+                throw new Error("ENTRY_NOTIONAL_CAP_EXCEEDED_BEFORE_ORDER:" + symbol);
+            }
+        }
         try {
             const raw = await this.client.placeMarketOrder({
                 symbol,
