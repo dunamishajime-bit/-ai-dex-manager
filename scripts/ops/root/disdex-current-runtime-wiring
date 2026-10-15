@@ -1660,6 +1660,10 @@ EnvironmentFile=${V4_CONTRACT_ENV_FILE}
 Environment=DISDEX_RELEASE_SHA=${V4_PRIMARY_SHA}
 Environment=V12_V4_LIVE_ACK=${V4_PRIMARY_SHA}
 Environment=V12_V4_OPERATION_MODE=CERTIFIED
+Environment=DISDEX_TRADE_FILL_NOTIFICATION_ENABLED=true
+Environment=DISDEX_TRADE_FILL_NOTIFICATION_MODE=live
+Environment=DISDEX_TRADE_FILL_NOTIFICATION_SPOOL_PATH=${SHARED_ROOT}/trade-fill-notifications/inbox.jsonl
+Environment=DISDEX_TRADE_FILL_STRATEGY_ID=V12_V4
 Environment=V12_V4_HEALTH_STATE_PATH=/var/lib/disdex/v12-v4/heartbeat.json"
   else
     write_atomic "${V12_DROPIN_DIR}/zzzzzzzzzzzz-current-release-contract.conf" "[Unit]
@@ -1739,6 +1743,10 @@ ExecStartPre=+/bin/sh -c 'if [ -e /var/lib/disdex/fet-brk48-residual/state.json 
 Environment=DISDEX_RUNTIME_COMMIT_SHA=${DEPLOYED_SHA}
 Environment=DISDEX_RELEASE_SHA=${DEPLOYED_SHA}
 Environment=FET_BRK48_LIVE_ENABLED=true
+Environment=DISDEX_TRADE_FILL_NOTIFICATION_ENABLED=true
+Environment=DISDEX_TRADE_FILL_NOTIFICATION_MODE=live
+Environment=DISDEX_TRADE_FILL_NOTIFICATION_SPOOL_PATH=${SHARED_ROOT}/trade-fill-notifications/inbox.jsonl
+Environment=DISDEX_TRADE_FILL_STRATEGY_ID=FET_BRK48_RESIDUAL
 Environment=FET_BRK48_STATE_PATH=/var/lib/disdex/fet-brk48-residual/state.json
 Environment=CRYPTO_GROSS_CAP=3.0
 Environment=TOTAL_GROSS_CAP=4.25
@@ -1771,7 +1779,11 @@ Environment=DISDEX_V96_KILL_SWITCH_FILE=/var/lib/disdex/shared/kill-switch.json"
   # provide a SHA-pinned override file loaded last by the HYPE unit.  The unit
   # ExecStartPre still requires the exact operator artifact, so this flag alone
   # can never activate real-money trading.
-  write_atomic "$HYPE_OPERATOR_ENV_FILE" "DISDEX_HYPE_ZEC_OPERATOR_ARMED=true"
+  write_atomic "$HYPE_OPERATOR_ENV_FILE" "DISDEX_HYPE_ZEC_OPERATOR_ARMED=true
+DISDEX_TRADE_FILL_NOTIFICATION_ENABLED=true
+DISDEX_TRADE_FILL_NOTIFICATION_MODE=live
+DISDEX_TRADE_FILL_NOTIFICATION_SPOOL_PATH=${SHARED_ROOT}/trade-fill-notifications/inbox.jsonl
+DISDEX_TRADE_FILL_STRATEGY_ID=HYPE_LONG"
 
   write_atomic "${V52_DROPIN_DIR}/zzzzzzzzzzzz-current-release-paths.conf" "[Unit]
 StartLimitIntervalSec=300s
@@ -1809,6 +1821,9 @@ Environment=DISDEX_RUNTIME_SHA=${DEPLOYED_SHA}
 Environment=DISDEX_RELEASE_SHA=${DEPLOYED_SHA}
 Environment=DISDEX_RELEASE_ROOT=${CURRENT_RELEASE}
 Environment=DISDEX_TRADE_FILL_STRATEGY_ID=IDLE_PRIORITY_SHORT
+Environment=DISDEX_TRADE_FILL_NOTIFICATION_ENABLED=true
+Environment=DISDEX_TRADE_FILL_NOTIFICATION_MODE=live
+Environment=DISDEX_TRADE_FILL_NOTIFICATION_SPOOL_PATH=${SHARED_ROOT}/trade-fill-notifications/inbox.jsonl
 Environment=DISDEX_OPERATOR_ACTIVATION_PATH=${OPERATOR_ACTIVATION_RUNTIME_PATH}
 WorkingDirectory=${CURRENT_RELEASE}
 ExecStartPre=
