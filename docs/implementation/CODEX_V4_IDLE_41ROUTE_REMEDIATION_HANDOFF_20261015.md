@@ -6,7 +6,7 @@ Status: **NOT YET CERTIFIED FOR PRODUCTION**. This document authorizes no live o
 ## Exact source
 Repository: `dunamishajime-bit/-ai-dex-manager`
 Branch: `fix/idle-margin-flat-freshness-20261015`
-Candidate HEAD after staged fixes: `139090a734ec7bf78800fc9ecc42f90f0f5885d6`.
+Implementation patch SHA: `139090a734ec7bf78800fc9ecc42f90f0f5885d6`. This handoff document was committed afterward, so **resolve and freeze the current remote branch HEAD before any certificate or operator artifact; never reuse the implementation-only SHA as the final release SHA**.
 
 Observed production at last successful read-only VPS audit (2026-10-15 10:58 JST, must reconfirm):
 - Peer/current trading release: `e8cc2e73f8d3981d708ee52f013241597c038b10`.
