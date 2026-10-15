@@ -18,6 +18,7 @@ import { buildBaselineAdmissionEvidence } from "./idle-priority-short-baseline-a
 import { assertIdleParityCertificate } from "./idle-priority-short-parity-cert";
 import { computeIdlePriorityFeatures, evaluateIdleGenericCandidate, evaluateIdlePriorityShort, type IdleFeatures, type IdleSignal } from "./idle-priority-short-signal";
 import { FileIdlePriorityShortStateStore, type IdleOwnedPosition, type IdlePending, type IdleState } from "./idle-priority-short-state";
+import { idleMarginGuardMaxAgeMs } from "./idle-margin-age-policy";
 import type { IdlePriorityMarketSnapshot } from "./idle-priority-short-market-data";
 import { writeIdleDecisionDetails, IDLE_DECISION_DETAILS_SCHEMA } from "./idle-priority-decision-diagnostics";
 import { evaluateIdleResidualLong } from "./idle-residual-long-signal";
@@ -450,7 +451,17 @@ export class IdlePriorityShortRunner {
         const kill = await readSharedKillSwitch(process.env);
         const risk = await readSharedCryptoDailyRisk(this.dependencies.runtime.riskPath, this.now());
         let marginHealthy = false;
-        try { marginHealthy = await readMarginHealthy(this.dependencies.runtime.marginPath, this.now(), this.dependencies.runtime.marginMaxAgeMs); } catch { marginHealthy = false; }
+        // The guard reports HEALTHY every 300s. Preserve the strict configured
+        // freshness gate whenever there is exposure; permit a bounded 330s
+        // tolerance only with a fresh, independently flat signed account snapshot.
+        const marginMaxAgeMs = idleMarginGuardMaxAgeMs({
+            configuredMaxAgeMs: this.dependencies.runtime.marginMaxAgeMs,
+            accountEquity: equity,
+            positions,
+            pendingCryptoGross: pendingAggregate.cryptoGross,
+            pendingStockGross: pendingAggregate.stockGross,
+        });
+        try { marginHealthy = await readMarginHealthy(this.dependencies.runtime.marginPath, this.now(), marginMaxAgeMs); } catch { marginHealthy = false; }
         const baseInput = {
             runtimeMode: this.dependencies.runtime.mode,
             operatorArmed: true,
