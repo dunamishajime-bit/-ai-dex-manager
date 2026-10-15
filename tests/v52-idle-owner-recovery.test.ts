@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+    protectedIdleSnapshotFingerprint,
     validateProtectedIdleSnapshot,
     type ProtectedIdleVenueSnapshot,
 } from "../scripts/disdex-v52-idle-owner-recovery";
@@ -75,6 +76,23 @@ test("protected Idle venue snapshot accepts exact short positions and STOP/TP ow
     assert.deepEqual(result.symbols, ["DOTUSDT"]);
     assert.equal(result.positionCount, 1);
     assert.equal(result.protectiveOrderCount, 2);
+});
+
+test("signed-read stability ignores mark-price movement but tracks ownership-critical drift", () => {
+    const first = snapshot();
+    const second = snapshot();
+    second.venuePositions[0].markPrice = "1.2345";
+
+    assert.equal(
+        protectedIdleSnapshotFingerprint(first),
+        protectedIdleSnapshotFingerprint(second),
+    );
+
+    second.venuePositions[0].positionAmt = "-64.9";
+    assert.notEqual(
+        protectedIdleSnapshotFingerprint(first),
+        protectedIdleSnapshotFingerprint(second),
+    );
 });
 
 test("extra venue position fails closed instead of clearing the global hold", () => {

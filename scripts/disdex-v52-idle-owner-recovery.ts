@@ -49,6 +49,51 @@ export type ProtectedIdleValidation = {
     capturedAt: number;
 };
 
+/**
+ * Build the signed-read stability key from ownership-critical fields only.
+ * Mark price is deliberately excluded because it is expected to move between
+ * consecutive read-only observations and does not change who owns or protects
+ * the position.
+ */
+export function protectedIdleSnapshotFingerprint(input: ProtectedIdleVenueSnapshot): string {
+    const state = input.state.positions
+        .map((position) => [
+            position.symbol,
+            position.side,
+            position.quantity,
+            position.entryPrice,
+            position.stopPrice,
+            position.takeProfitPrice,
+            position.stopClientOrderId,
+            position.takeProfitClientOrderId,
+            position.protectionVerified,
+        ])
+        .sort((left, right) => String(left[0]).localeCompare(String(right[0])));
+    const positions = nonFlatPositions(input.venuePositions)
+        .map((position) => [
+            position.symbol,
+            position.positionAmt,
+            position.entryPrice,
+            position.leverage,
+            position.marginType,
+            position.positionSide,
+        ])
+        .sort((left, right) => String(left[0]).localeCompare(String(right[0])));
+    const orders = input.openOrders
+        .map((order) => [
+            order.symbol,
+            order.clientOrderId,
+            order.type,
+            order.side,
+            order.origQty ?? order.executedQty,
+            order.stopPrice,
+            order.reduceOnly,
+            order.status,
+        ])
+        .sort((left, right) => String(left[1]).localeCompare(String(right[1])));
+    return JSON.stringify({ state, positions, orders });
+}
+
 function finitePositive(value: unknown): value is number {
     return Number.isFinite(Number(value)) && Number(value) > 0;
 }
@@ -331,7 +376,7 @@ async function main() {
         const currentState = await readIdleState(statePath, candidateSha);
         const snapshot = await readSnapshot(client, currentState);
         const validated = validateProtectedIdleSnapshot(snapshot, candidateSha, Date.now());
-        const fingerprint = JSON.stringify({ symbols: validated.symbols, positions: snapshot.venuePositions.filter((row) => Number(row.positionAmt) !== 0).map((row) => [row.symbol, row.positionAmt, row.entryPrice, row.markPrice]), orders: snapshot.openOrders.map((row) => [row.symbol, row.clientOrderId, row.type, row.origQty, row.stopPrice, row.status]).sort() });
+        const fingerprint = protectedIdleSnapshotFingerprint(snapshot);
         if (previousFingerprint && fingerprint !== previousFingerprint) throw new Error("V52_IDLE_OWNER_RECOVERY_SIGNED_GETS_NOT_STABLE");
         previousFingerprint = fingerprint;
         observations.push(validated);
