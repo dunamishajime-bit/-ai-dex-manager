@@ -1820,6 +1820,7 @@ ExecStart=
 ExecStart=${CURRENT_RELEASE}/node_modules/.bin/tsx scripts/disdex-idle-priority-short-live-runner.ts --daemon
 ReadWritePaths=${IDLE_PRIORITY_STATE_ROOT} ${SHARED_ROOT}"
 
+  ensure_idle_parity_certificate_access
   migrate_quality102_state_lineage
   if [[ "$PRIMARY_V12_MODE" == "V4" ]]; then
     assert_retired_legacy_v12_flat
@@ -1835,7 +1836,6 @@ ReadWritePaths=${IDLE_PRIORITY_STATE_ROOT} ${SHARED_ROOT}"
   normalize_position_recovery_state_lineage
   write_v4_primary_runtime_artifacts
   migrate_v4_execution_lineage
-  ensure_idle_parity_certificate_access
   systemctl daemon-reload
   if [[ "$PRIMARY_V12_MODE" == "V4" ]]; then
     persistently_mask_legacy_v12
