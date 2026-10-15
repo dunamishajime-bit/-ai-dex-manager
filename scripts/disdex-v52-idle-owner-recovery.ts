@@ -289,12 +289,28 @@ async function readSnapshot(client: AsterV3Client, state: IdleState): Promise<Pr
     return { state, venuePositions, openOrders, capturedAt: Date.now() };
 }
 
+export const DEFAULT_V52_IDLE_OWNER_MARGIN_MAX_AGE_MS = 360_000;
+
+export function isMarginGuardFresh(
+    value: { stage?: unknown; ordersAllowed?: unknown; checkedAt?: unknown; updatedAt?: unknown },
+    nowMs = Date.now(),
+    maxAgeMs = DEFAULT_V52_IDLE_OWNER_MARGIN_MAX_AGE_MS,
+): boolean {
+    if (value.stage !== "HEALTHY" || value.ordersAllowed !== true) return false;
+    const checkedAt = Number(value.checkedAt ?? value.updatedAt ?? 0);
+    return Number.isFinite(checkedAt)
+        && checkedAt > 0
+        && Number.isFinite(nowMs)
+        && Number.isFinite(maxAgeMs)
+        && maxAgeMs >= 0
+        && nowMs - checkedAt <= maxAgeMs;
+}
+
 async function readMarginHealthy(path: string) {
     const value = JSON.parse(await readFile(path, "utf8")) as { stage?: unknown; ordersAllowed?: unknown; checkedAt?: unknown; updatedAt?: unknown };
     if (value.stage !== "HEALTHY" || value.ordersAllowed !== true) throw new Error("MARGIN_GUARD_NOT_HEALTHY");
-    const checkedAt = Number(value.checkedAt ?? value.updatedAt ?? 0);
-    const maxAge = numberEnv("DISDEX_V52_IDLE_OWNER_MARGIN_MAX_AGE_MS", 90_000);
-    if (!Number.isFinite(checkedAt) || checkedAt <= 0 || Date.now() - checkedAt > maxAge) throw new Error("MARGIN_GUARD_STALE");
+    const maxAge = numberEnv("DISDEX_V52_IDLE_OWNER_MARGIN_MAX_AGE_MS", DEFAULT_V52_IDLE_OWNER_MARGIN_MAX_AGE_MS);
+    if (!isMarginGuardFresh(value, Date.now(), maxAge)) throw new Error("MARGIN_GUARD_STALE");
 }
 
 async function archiveBytes(path: string, bytes: Buffer, requestId: string, label: string) {

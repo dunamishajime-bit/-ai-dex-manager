@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import {
+    DEFAULT_V52_IDLE_OWNER_MARGIN_MAX_AGE_MS,
+    isMarginGuardFresh,
     protectedIdleSnapshotFingerprint,
     validateProtectedIdleSnapshot,
     type ProtectedIdleVenueSnapshot,
@@ -92,6 +94,25 @@ test("signed-read stability ignores mark-price movement but tracks ownership-cri
     assert.notEqual(
         protectedIdleSnapshotFingerprint(first),
         protectedIdleSnapshotFingerprint(second),
+    );
+});
+
+test("margin freshness default covers the configured five-minute guard poll", () => {
+    const checkedAt = 1_000_000;
+    assert.equal(DEFAULT_V52_IDLE_OWNER_MARGIN_MAX_AGE_MS, 360_000);
+    assert.equal(
+        isMarginGuardFresh(
+            { stage: "HEALTHY", ordersAllowed: true, checkedAt },
+            checkedAt + 300_000,
+        ),
+        true,
+    );
+    assert.equal(
+        isMarginGuardFresh(
+            { stage: "HEALTHY", ordersAllowed: true, checkedAt },
+            checkedAt + 360_001,
+        ),
+        false,
     );
 });
 
