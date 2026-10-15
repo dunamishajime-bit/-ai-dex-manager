@@ -56,3 +56,8 @@ This section supersedes historical claims of persistent signed-Aster unavailabil
 
 ## Explicit boundary
 **User requested all fixes. Work has produced tested source and notification mitigation, but the active old release is unchanged. Do not claim complete restoration; Kill Switch must not be cleared without a legitimate new release and live venue protection reconfirmation.**
+
+## Source CI confirmed after later code changes
+- Exact code-integrating commit `0f326b9f16aa7b4cdeea8edec150bd452dbe5ad9`: GitHub Actions `38750548666`, **SUCCESS** for Python V52 Idle owner test, shell syntax, all four notification configuration mappings, Idle rate-budget retry behavior, and TypeScript typecheck. <https://github.com/dunamishajime-bit/-ai-dex-manager/actions/runs/38750548666>
+- Later doc-only commit(s) change the branch HEAD; freeze and verify exact new final release SHA, parent lineage, and operator artifact at cutover. The CI result certifies source changes, not an actual venue, risk, or release cutover.
+- Site retains existing 2026-10-15 live common SHA `8b67d2...` until explicitly migrated; V4 independent SHA `6f97d2...`. Don't mistake isolated staged file for promoted release.
