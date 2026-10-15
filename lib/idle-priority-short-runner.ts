@@ -19,6 +19,7 @@ import { assertIdleParityCertificate } from "./idle-priority-short-parity-cert";
 import { computeIdlePriorityFeatures, evaluateIdleGenericCandidate, evaluateIdlePriorityShort, type IdleFeatures, type IdleSignal } from "./idle-priority-short-signal";
 import { FileIdlePriorityShortStateStore, type IdleOwnedPosition, type IdlePending, type IdleState } from "./idle-priority-short-state";
 import { idleMarginGuardMaxAgeMs } from "./idle-margin-age-policy";
+import { evaluateIdleOneStepFloor } from "./idle-quantity-feasibility";
 import type { IdlePriorityMarketSnapshot } from "./idle-priority-short-market-data";
 import { writeIdleDecisionDetails, IDLE_DECISION_DETAILS_SCHEMA } from "./idle-priority-decision-diagnostics";
 import { evaluateIdleResidualLong } from "./idle-residual-long-signal";
@@ -495,8 +496,27 @@ export class IdlePriorityShortRunner {
         if (this.dependencies.runtime.mode !== "LIVE") return { status: "shadow", message: `IDLE_SHADOW_ENTRY:${symbol}`, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
         await assertOperatorActivation(this.dependencies.runtime);
         await this.dependencies.executor.getAccountSnapshot();
-        const normalized = await this.dependencies.executor.normalizeMarketQuantity(symbol, equity / quote.bidPrice, quote.bidPrice);
-        if (normalized.notional / equity < 1 - 1e-6) return { status: "held", message: `IDLE_FULL_1X_NOT_REALIZABLE_AFTER_ROUNDING:${symbol}`, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+        let normalized: Awaited<ReturnType<typeof this.dependencies.executor.normalizeMarketQuantity>>;
+        try {
+            normalized = await this.dependencies.executor.normalizeMarketQuantity(symbol, equity / quote.bidPrice, quote.bidPrice);
+        } catch (error) {
+            const reason = `IDLE_VENUE_QUANTITY_REJECTED:${symbol}:${error instanceof Error ? error.message : String(error)}`;
+            state.lastDecision = { decisionTs: signal.features.decisionTs, symbol, route: signal.route, accepted: false, reason };
+            await this.dependencies.stateStore.save(state);
+            return { status: "held", message: reason, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+        }
+        const lot = evaluateIdleOneStepFloor({
+            symbol, equityUsd: equity, referencePrice: quote.bidPrice,
+            normalizedQuantity: normalized.quantity, normalizedNotional: normalized.notional,
+            minQuantity: normalized.minQuantity, maxQuantity: normalized.maxQuantity,
+            quantityStep: normalized.stepSize, minNotional: normalized.minNotional,
+        });
+        if (!lot.accepted) {
+            const reason = `IDLE_QUANTITY_REJECTED:${symbol}:${lot.code}:actualGross=${lot.actualGross ?? "UNKNOWN"}:minQty=${normalized.minQuantity}:minNotional=${normalized.minNotional}:step=${normalized.stepSize}`;
+            state.lastDecision = { decisionTs: signal.features.decisionTs, symbol, route: signal.route, accepted: false, reason };
+            await this.dependencies.stateStore.save(state);
+            return { status: "held", message: reason, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+        }
         const clientOrderId = deterministicIdleClientOrderId({ action: "ENTRY", symbol, signalTs: signal.features.signalTs });
         const reservation = await lock.reserve({ strategyId: IDLE_PRIORITY_SHORT_STRATEGY, symbol, side: "SHORT", gross: 1, notionalUsd: equity });
         const pending: IdlePending = { action: "ENTRY", phase: "planned", symbol, route: signal.route, clientOrderId, idempotencyKey: clientOrderId, reservationId: reservation.reservationId, quantity: normalized.quantity, expectedPrice: quote.bidPrice, signalTs: signal.features.signalTs, decisionTs: signal.features.decisionTs, holdHours: signal.holdHours as 12 | 24, createdAt: this.now(), updatedAt: this.now(), reason: signal.reason };
