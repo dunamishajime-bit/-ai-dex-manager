@@ -119,6 +119,7 @@
     "strategy:idle-priority-short:live:selftest": "tsx scripts/disdex-idle-priority-short-live-runner.ts --self-test",
     "strategy:idle-priority-short:benign-recovery:selftest": "tsx scripts/disdex-idle-priority-short-benign-state-recovery.ts --self-test",
     "strategy:idle-priority-short:protected-rate-budget-recovery:selftest": "tsx scripts/disdex-idle-priority-short-protected-rate-budget-recovery.ts --self-test",
+    "strategy:v52-idle-owner-recovery:selftest": "tsx scripts/disdex-v52-idle-owner-recovery.ts --self-test && tsx --test tests/v52-idle-owner-recovery.test.ts",
     "strategy:hype-zec-long:state:migrate:selftest": "tsx scripts/disdex-hype-zec-long-state-migrate.ts --self-test",
     "strategy:hype-zec-long:benign-recovery:selftest": "tsx scripts/disdex-hype-zec-benign-market-data-recovery.ts --self-test",
     "strategy:idle-priority-short:parity:evidence": "tsx scripts/idle-priority-short-parity-evidence.ts",

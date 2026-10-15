@@ -1,0 +1,44 @@
+name: V52 Idle owner recovery fail-closed verification
+
+on:
+  push:
+    branches:
+      - fix/v52-idle-owner-recovery-20261016
+    paths:
+      - scripts/disdex-v52-idle-owner-recovery.ts
+      - tests/v52-idle-owner-recovery.test.ts
+      - package.json
+      - scripts/ops/root/disdex-current-runtime-wiring
+      - .github/workflows/v52-idle-owner-recovery-20261016.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  owner-recovery-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci --ignore-scripts
+      - name: TypeScript and fail-closed tests
+        run: |
+          npx tsc --noEmit
+          npm run strategy:v52-idle-owner-recovery:selftest
+          python -m py_compile scripts/disdex_strict_portfolio_planner.py
+          python -m unittest discover -s tests -p 'test_disdex_v52_idle_owned_position.py' -v
+      - name: Static mutation boundary checks
+        run: |
+          ! grep -nE 'placeMarketOrder|placeConditionalOrder|placeStopMarketOrder|cancelOrder' scripts/disdex-v52-idle-owner-recovery.ts
+          grep -q 'readOnlyRateLimitMaxRetries: 0' scripts/disdex-v52-idle-owner-recovery.ts
+          grep -q 'ordersSent: 0' scripts/disdex-v52-idle-owner-recovery.ts
+          grep -q 'positionChangesSent: 0' scripts/disdex-v52-idle-owner-recovery.ts

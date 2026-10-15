@@ -257,6 +257,7 @@ validate_release_artifacts() {
     "$CURRENT_RELEASE/lib/disdex-aster-global-rate-budget.ts"
     "$CURRENT_RELEASE/scripts/disdex-aster-readonly-recovery-gate.ts"
     "$CURRENT_RELEASE/scripts/disdex-aster-upstream-live-recovery.ts"
+    "$CURRENT_RELEASE/scripts/disdex-v52-idle-owner-recovery.ts"
     "$CURRENT_RELEASE/scripts/disdex-aster-trade-history-git-sync.ts"
     "$CURRENT_RELEASE/lib/disdex-aster-trade-history-sync.ts"
     "$CURRENT_RELEASE/scripts/ops/root/disdex-v12-kill-switch-auto-repair"
