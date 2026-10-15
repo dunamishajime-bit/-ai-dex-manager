@@ -380,7 +380,7 @@ async function main() {
         const postState = await readIdleState(statePath, candidateSha);
         const postSnapshot = await readSnapshot(client, postState);
         const postResult = validateProtectedIdleSnapshot(postSnapshot, candidateSha, Date.now());
-        const cleared = await readSharedKillSwitch({ DISDEX_SHARED_KILL_SWITCH_FILE: killPath });
+        const cleared = await readSharedKillSwitch({ DISDEX_SHARED_KILL_SWITCH_FILE: killPath } as unknown as NodeJS.ProcessEnv);
         if (cleared.active) throw new Error("V52_IDLE_OWNER_RECOVERY_CLEAR_VERIFY_FAILED");
         if (JSON.stringify(postResult) !== JSON.stringify(verifyResult)) throw new Error("V52_IDLE_OWNER_RECOVERY_VENUE_CHANGED_AFTER_CLEAR");
         console.log(JSON.stringify({ status: "V52_IDLE_OWNER_RECOVERY_APPLY_PASS", candidateSha, sharedKillSwitchCleared: true, signedReadOnlyConsecutive: observations.length, stateArchive, killArchive, ...postResult, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 }));
