@@ -36,6 +36,19 @@ export function classifyIdleFlatRateBudgetDeferral(state: IdleState, error: unkn
     return `IDLE_RATE_BUDGET_DEFERRED:${deferred.reason}`;
 }
 
+/**
+ * A saturated read-only rate budget must not turn a previously protected
+ * position into a terminal manual-review state.  No new exposure is allowed
+ * while this result is returned; the daemon keeps its heartbeat and retries
+ * until it can perform the normal venue ownership/protection readback.
+ */
+export function classifyIdleProtectedPositionRateBudgetDeferral(state: IdleState, error: unknown) {
+    const deferred = classifyAsterRateBudgetFailure(error);
+    if (!deferred || state.manualReview || state.pending || state.positions.length === 0) return undefined;
+    if (state.positions.some((position) => position.protectionVerified !== true)) return undefined;
+    return `IDLE_PROTECTED_POSITION_RATE_BUDGET_DEFERRED:${deferred.reason}`;
+}
+
 export type IdlePriorityShortTickResult = {
     status: "disabled" | "locked" | "shadow" | "held" | "no-change" | "completed" | "manual-review";
     message: string;
@@ -750,6 +763,10 @@ export class IdlePriorityShortRunner {
             }
             const state = await this.dependencies.stateStore.load().catch(() => undefined);
             if (state) {
+                const protectedDeferred = classifyIdleProtectedPositionRateBudgetDeferral(state, error);
+                if (protectedDeferred) {
+                    return { status: "held", message: protectedDeferred, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+                }
                 const deferred = classifyIdleFlatRateBudgetDeferral(state, error);
                 if (deferred) {
                     return { status: "held", message: deferred, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };

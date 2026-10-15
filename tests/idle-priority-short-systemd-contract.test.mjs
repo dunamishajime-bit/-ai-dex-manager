@@ -102,4 +102,5 @@ test("HYPE and Idle daemon loops retry transient account-lock collisions without
   assert.match(hype, /DISDEX_HYPE_ZEC_LOCK_RETRY_MS/);
   assert.match(idle, /nextAccountLockAwareWaitMs\(result\.status, normalWaitMs, lockRetryMs\)/);
   assert.match(idle, /DISDEX_IDLE_PRIORITY_LOCK_RETRY_MS/);
+  assert.match(idle, /IDLE_PROTECTED_POSITION_RATE_BUDGET_DEFERRED:/);
 });
