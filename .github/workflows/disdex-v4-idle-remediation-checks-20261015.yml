@@ -1,0 +1,56 @@
+name: DisDex V4 Idle remediation tests (no deployment)
+on:
+  push:
+    branches: [fix/idle-margin-flat-freshness-20261015]
+    paths:
+      - "lib/idle-*"
+      - "lib/v12-v4-independent-route-audit.ts"
+      - "tests/idle-*"
+      - "tests/v12-v4-independent-route-audit.test.ts"
+      - "scripts/research/v4-idle-rejection-decomposition-20261015.py"
+      - ".github/workflows/disdex-v4-idle-remediation-checks-20261015.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - name: Install dependencies without lifecycle scripts
+        run: npm ci --ignore-scripts
+      - name: Pure quantity, margin and 41-route tests
+        run: |
+          node --import tsx --test \
+            tests/idle-margin-age-policy.test.ts \
+            tests/idle-quantity-audit.test.ts \
+            tests/idle-quantity-feasibility.test.ts \
+            tests/idle-priority-short-baseline-admission.test.ts \
+            tests/v12-v4-idle-baseline-snapshot.test.ts \
+            tests/v12-v4-independent-route-audit.test.ts \
+            tests/v12-v4-historical-all41-coverage.test.ts
+      - name: Root strict typechecks
+        run: npm run typecheck
+      - name: Replay original rejection ledgers at 10, 20, 30 bps
+        run: |
+          python3 scripts/research/v4-idle-rejection-decomposition-20261015.py > /tmp/disdex-v4-idle-decomposition.json
+          python3 - <<'PY'
+          import json
+          r=json.load(open("/tmp/disdex-v4-idle-decomposition.json"))
+          assert len(r)==3
+          assert [x["costBps"] for x in r]==[10,20,30]
+          assert [x["v12"]["grossRoom"]["count"] for x in r]==[52,58,60]
+          assert r[0]["v12"]["venueMinQuantity"]["count"]==11
+          assert r[0]["v12"]["venueMinNotional"]["count"]==4
+          assert r[0]["idle"]["quantityBlock"]["count"]==87
+          assert all(x["ordersSent"]==x["tradingMutation"]==0 for x in r)
+          print("FORMAL_ORIGINAL_REJECTION_REPLAY_PASS")
+          PY
+      - name: Explicitly nonproduction
+        run: echo "Read-only evidence and isolated CI; no Aster credentials, deploy, runner activation, or LIVE authority."
