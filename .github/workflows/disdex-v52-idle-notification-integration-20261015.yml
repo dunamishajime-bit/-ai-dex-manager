@@ -7,6 +7,7 @@ on:
       - "tests/test_disdex_v52_idle_owned_position.py"
       - "scripts/ops/root/disdex-current-runtime-wiring"
       - "lib/direct-trade-executor.ts"
+      - "scripts/disdex-idle-priority-short-live-runner.ts"
       - ".github/workflows/disdex-v52-idle-notification-integration-20261015.yml"
   workflow_dispatch:
 permissions:
@@ -43,6 +44,12 @@ jobs:
           for s in ('V12_V4','FET_BRK48_RESIDUAL','IDLE_PRIORITY_SHORT'):
               assert 'Environment=DISDEX_TRADE_FILL_STRATEGY_ID='+s in p
           print('V4_IDLE_FET_HYPE_NOTIFICATION_CONTRACT_PASS')
+          r=open('scripts/disdex-idle-priority-short-live-runner.ts').read()
+          assert 'IDLE_PROTECTED_POSITION_RATE_BUDGET_DEFERRED:' in r
+          assert 'DISDEX_IDLE_PRIORITY_RATE_BUDGET_RETRY_MS' in r
+          assert 'Math.max(30_000, Math.min(120_000' in r
+          assert 'rateBudgetDeferred\n            ? budgetRetryMs' in r
+          print('IDLE_RATE_BUDGET_BACKOFF_SOURCE_PASS')
           PY
       - name: TypeScript checks
         run: npm run typecheck
