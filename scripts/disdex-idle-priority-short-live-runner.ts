@@ -140,7 +140,15 @@ async function main() {
             && (result.message.startsWith("IDLE_RATE_BUDGET_DEFERRED:")
                 || result.message.startsWith("IDLE_PROTECTED_POSITION_RATE_BUDGET_DEFERRED:")
                 || result.message.startsWith("IDLE_RESIDUAL_RATE_BUDGET_DEFERRED:"));
-        await delay.wait(rateBudgetDeferred ? lockRetryMs : nextAccountLockAwareWaitMs(result.status, normalWaitMs, lockRetryMs));
+        // A venue rate-budget refusal means the shared budget is congested,
+        // not that the account-order lock needs its short 8s retry.
+        // Do not repeatedly reissue read requests while live resident STOPs
+        // are already protecting the position. Only the defer path backs off.
+        const budgetRetryMs = Math.max(30_000, Math.min(120_000,
+            numberEnv("DISDEX_IDLE_PRIORITY_RATE_BUDGET_RETRY_MS", 60_000)));
+        await delay.wait(rateBudgetDeferred
+            ? budgetRetryMs
+            : nextAccountLockAwareWaitMs(result.status, normalWaitMs, lockRetryMs));
     } while (!stopping);
 }
 
