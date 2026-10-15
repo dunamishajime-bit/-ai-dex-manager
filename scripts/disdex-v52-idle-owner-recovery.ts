@@ -32,6 +32,7 @@ const DEFAULT_MARGIN_PATH = "/var/lib/disdex/shared/margin-risk/guard-live.json"
 const DEFAULT_LOCK_PATH = "/var/lib/disdex/shared/account-order.lock";
 const DEFAULT_PENDING_PATH = "/var/lib/disdex/shared/pending-exposure.json";
 const DEFAULT_MAX_STATE_AGE_MS = 20 * 60_000;
+export const DEFAULT_V52_IDLE_OWNER_RECOVERY_MAX_QUEUE_MS = 10_000;
 
 type IdleProtectionState = IdleState["positions"][number];
 
@@ -379,6 +380,13 @@ async function main() {
     const risk = await readSharedCryptoDailyRisk(riskPath);
     if (!risk.ok) throw new Error(`V52_IDLE_OWNER_RECOVERY_SHARED_RISK_NOT_READY:${risk.reason}`);
     await readMarginHealthy(marginPath);
+    // Protected ownership recovery performs a high-weight openOrders GET while
+    // peer safety readers may be using the same budget.  Keep the shared lock
+    // and rate gate intact, but give this read-only reconciliation a bounded
+    // queue window large enough to wait instead of falsely failing closed.
+    if (!String(process.env.DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS || "").trim()) {
+        process.env.DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS = String(DEFAULT_V52_IDLE_OWNER_RECOVERY_MAX_QUEUE_MS);
+    }
     const client = new AsterV3Client({
         baseUrl: process.env.ASTER_FUTURES_BASE_URL,
         userAddress: process.env.ASTER_USER_ADDRESS,

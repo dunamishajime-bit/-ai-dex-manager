@@ -3,6 +3,7 @@ import test from "node:test";
 
 import {
     DEFAULT_V52_IDLE_OWNER_MARGIN_MAX_AGE_MS,
+    DEFAULT_V52_IDLE_OWNER_RECOVERY_MAX_QUEUE_MS,
     isMarginGuardFresh,
     protectedIdleSnapshotFingerprint,
     protectedIdleValidationFingerprint,
@@ -116,6 +117,10 @@ test("margin freshness default covers the configured five-minute guard poll", ()
         ),
         false,
     );
+});
+
+test("protected recovery has a bounded read-only queue window for open-order reconciliation", () => {
+    assert.equal(DEFAULT_V52_IDLE_OWNER_RECOVERY_MAX_QUEUE_MS, 10_000);
 });
 
 test("final signed-read comparison ignores observation timestamp drift", () => {
