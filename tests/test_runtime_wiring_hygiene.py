@@ -12,6 +12,12 @@ class RuntimeWiringHygieneTest(unittest.TestCase):
         self.assertIn('local ops_source_release="$CURRENT_RELEASE"', source)
         self.assertNotIn('ops_source_release="$V4_PRIMARY_RELEASE"', source)
 
+    def test_idle_parity_certificate_is_readable_by_deploy_runner(self):
+        source = WIRING.read_text(encoding="utf-8")
+        self.assertIn("ensure_idle_parity_certificate_access", source)
+        self.assertIn('[[ ! -L "$certificate" && -f "$certificate" ]]', source)
+        self.assertIn('chmod 0644 "$certificate"', source)
+
     def test_watchdog_ignores_inactive_and_failed_historical_instances(self):
         source = WATCHDOG.read_text(encoding="utf-8")
         self.assertIn('if (match && !new Set(["inactive", "failed"]).has(match[2])) units.push(match[1]);', source)

@@ -92,6 +92,23 @@ require_root_for_apply() {
   }
 }
 
+ensure_idle_parity_certificate_access() {
+  local certificate
+  for certificate in \
+    "${SHARED_ROOT}/idle-priority-parity-cert.json" \
+    "${SHARED_ROOT}/idle-residual-long-parity-cert.json"; do
+    [[ -e "$certificate" ]] || continue
+    [[ ! -L "$certificate" && -f "$certificate" ]] || {
+      printf 'Idle parity certificate is not a regular file: %s\n' "$certificate" >&2
+      return 1
+    }
+    # These certificates contain no credentials.  The deploy-owned Idle
+    # daemons must be able to read them, while root remains the sole writer.
+    chown root:root "$certificate"
+    chmod 0644 "$certificate"
+  done
+}
+
 resolve_current() {
   [[ -L "$TRADING_CURRENT" ]] || {
     printf 'current release link is missing: %s\n' "$TRADING_CURRENT" >&2
@@ -1818,6 +1835,7 @@ ReadWritePaths=${IDLE_PRIORITY_STATE_ROOT} ${SHARED_ROOT}"
   normalize_position_recovery_state_lineage
   write_v4_primary_runtime_artifacts
   migrate_v4_execution_lineage
+  ensure_idle_parity_certificate_access
   systemctl daemon-reload
   if [[ "$PRIMARY_V12_MODE" == "V4" ]]; then
     persistently_mask_legacy_v12
