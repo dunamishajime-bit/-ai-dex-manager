@@ -36,6 +36,30 @@ Candidate rejection counts:
 - 20bps V12 gross 58; 30bps V12 gross 60.
 - 41/41 historical route coverage does NOT mean independently evaluating all 41 at each LIVE opportunity.
 
+## Independently rerun portfolio BT on owner PC — completed
+The original research engine at
+`C:/Users/dis/DisDex-five-improvements-20261008/scripts/research/run_v12_v2_integrated_confirm_20261009.py`
+was rerun in isolated output at
+`C:/Users/dis/DisDex-V4-Idle-Isolated-Research-20261015`.
+All 10/20/30bps scenarios exactly reproduced frozen asset/PF/MTM DD/WR/trade counts and accounting; original repo data was not overwritten.
+
+**Isolated Idle-only 1% venue-step floor check**:
+`C:/Users/dis/DisDex-V4-Idle-Only-1pct-20261015`.
+Kept the original portfolio, V12, Residual and other strategies' quantity rules unchanged, and required Idle accepted quantity to be a true venue one-step floor with notional at least 0.99 of equity. Results at 10/20/30bps **all exactly equal original benchmark** (1,222 / 1,224 / 1,218 total trades; same equity, PF, MTM DD, WR). Thus the new 1% bound does not drop accepted historical Idle trades relative to original BT. Crucially, the formal research engine already supported venue-step floor; the current Idle LIVE path was stricter. This test is model parity, not exchange fill proof.
+
+A first draft using the wrong strictness expression also altered Residual admission and reduced portfolio PnL. That test was **invalid for the Idle-only question and explicitly rejected**; do not cite it as evidence of the intended change.
+
+**Research-only +0.25 Gross cap expansion**:
+`C:/Users/dis/DisDex-V4-Gross025-Hypothesis-20261015`.
+Caps V12 3.00→3.25, Crypto 3.50→3.75, Total 4.75→5.00; family stays 2.50.
+- 10bps: ¥279,956,227.45, PF 3.69547, DD -20.84084%, 1,224 trades.
+- 20bps: ¥224,255,660.05, PF 3.37835, DD -21.65329%, 1,227 trades.
+- 30bps: ¥168,517,544.11, PF 3.12396, DD -22.67278%, 1,221 trades.
+All profits fell and DD increased versus original; **reject direct cap expansion** and retain existing caps. Alternative priority reallocation still needs a separate causal BT.
+
+GitHub isolated check <https://github.com/dunamishajime-bit/-ai-dex-manager/actions/runs/38673880209>
+finished SUCCESS on implementation SHA `139090a734ec7bf78800fc9ecc42f90f0f5885d6`: quantity/margin/41-route tests, root typechecks, and exact original 10/20/30bps rejection ledger assertions all PASS. Subsequent handoff-document commits are not implementation changes.
+
 ## Codex mandatory remaining certifications and cutover sequence
 A. Read root `AGENTS.md` and `docs/ops/DISDEX_VPS_SSH_ACCESS_20261012.md`; establish owner-PC Git SSH -CheckOnly.
 B. Compare GitHub candidate tree against actual peer `e8cc...` and V4 `6f97...`; DO NOT replace independent V4 source with older peer code or mass-promote peers. Check whether to produce separate V4 and peer release SHAs, both properly approved.
