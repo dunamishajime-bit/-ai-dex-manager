@@ -104,3 +104,15 @@ test("HYPE and Idle daemon loops retry transient account-lock collisions without
   assert.match(idle, /DISDEX_IDLE_PRIORITY_LOCK_RETRY_MS/);
   assert.match(idle, /IDLE_PROTECTED_POSITION_RATE_BUDGET_DEFERRED:/);
 });
+
+test("runtime wiring routes protected Idle rate-budget state through the protected recovery path", async () => {
+  const wiring = await readFile("scripts/ops/root/disdex-current-runtime-wiring", "utf8");
+  assert.match(wiring, /disdex-idle-priority-short-protected-rate-budget-recovery\.ts/);
+  assert.match(wiring, /--source-sha "\$source_sha"/);
+  assert.match(wiring, /--expected-sha "\$DEPLOYED_SHA"/);
+  assert.match(wiring, /IDLE_PROTECTED_RATE_BUDGET_RECOVERY_PASS/);
+  assert.match(wiring, /IDLE_PROTECTED_STATE_ALREADY_RECONCILED/);
+  assert.match(wiring, /manual_review=/);
+  assert.match(wiring, /IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED/);
+  assert.match(wiring, /protectionVerified/);
+});

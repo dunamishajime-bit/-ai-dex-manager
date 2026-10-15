@@ -216,6 +216,7 @@ validate_release_artifacts() {
     "$CURRENT_RELEASE/scripts/disdex-hype-zec-core-preempt.ts"
     "$CURRENT_RELEASE/scripts/disdex-idle-priority-short-live-runner.ts"
     "$CURRENT_RELEASE/scripts/disdex-idle-priority-short-benign-state-recovery.ts"
+    "$CURRENT_RELEASE/scripts/disdex-idle-priority-short-protected-rate-budget-recovery.ts"
     "$CURRENT_RELEASE/scripts/disdex-idle-priority-short-state-migrate.ts"
     "$CURRENT_RELEASE/scripts/disdex-idle-residual-long-state-migrate.ts"
     "$CURRENT_RELEASE/lib/idle-priority-short-runner.ts"
@@ -335,6 +336,44 @@ migrate_idle_residual_state_lineage() {
 }
 
 recover_idle_benign_state() {
+  local state_path="$IDLE_PRIORITY_STATE_ROOT/state.json"
+  if [[ -f "$state_path" ]]; then
+    local manual_review source_sha
+    manual_review="$(/usr/bin/jq -r '.manualReview // empty' "$state_path")"
+    if [[ "$manual_review" =~ ^IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:[0-9]+$ ]]; then
+      source_sha="$(state_runtime_sha "$state_path")"
+      [[ "$source_sha" =~ ^[0-9a-f]{40}$ ]] || {
+        printf 'Idle protected rate-budget state has invalid source SHA: %s\n' "$source_sha" >&2
+        return 1
+      }
+      load_runtime_migration_environment
+      "$CURRENT_RELEASE/node_modules/.bin/tsx" \
+        "$CURRENT_RELEASE/scripts/disdex-idle-priority-short-protected-rate-budget-recovery.ts" \
+        --apply \
+        --state-path "$state_path" \
+        --source-sha "$source_sha" \
+        --expected-sha "$DEPLOYED_SHA"
+      printf 'IDLE_PROTECTED_RATE_BUDGET_RECOVERY_PASS sourceSha=%s targetSha=%s ordersSent=0 cancelsSent=0 positionChangesSent=0\n' \
+        "$source_sha" "$DEPLOYED_SHA"
+      return 0
+    fi
+
+    # A protected, already-reconciled position is not a benign flat-state
+    # recovery case.  Leave its venue protection and state untouched; the
+    # subsequent lineage migration and daemon preflight perform the normal
+    # SHA/read-back checks.  Unknown review/pending/protection states remain
+    # fail-closed through the existing benign recovery helper.
+    if /usr/bin/jq -e '
+      (.pending // null) == null and
+      (.manualReview // null) == null and
+      ((.positions // []) | length > 0) and
+      ((.positions // []) | all(.protectionVerified == true))
+    ' "$state_path" >/dev/null 2>&1; then
+      printf 'IDLE_PROTECTED_STATE_ALREADY_RECONCILED positions=%s ordersSent=0 cancelsSent=0 positionChangesSent=0\n' \
+        "$(/usr/bin/jq '(.positions // []) | length' "$state_path")"
+      return 0
+    fi
+  fi
   local recovery_release="$CURRENT_RELEASE"
   if [[ "$PRIMARY_V12_MODE" == "V4" ]]; then
     recovery_release="$V4_PRIMARY_RELEASE"
