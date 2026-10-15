@@ -627,9 +627,12 @@ check_units() {
 
 prepare_managed_unit_templates_for_apply() {
   require_root_for_apply
+  # V4 owns only the primary V4 service template.  Peer services, support
+  # daemons, and this wiring helper must remain sourced from the current
+  # release so a V4 cutover cannot overwrite newer peer-safety fixes with the
+  # older primary-release helper.
   local ops_source_release="$CURRENT_RELEASE"
   if [[ "$PRIMARY_V12_MODE" == "V4" ]]; then
-    ops_source_release="$V4_PRIMARY_RELEASE"
     install -o root -g root -m 0644 \
       "$V4_PRIMARY_RELEASE/deploy/systemd/disdex-v12-v4@.service" \
       /etc/systemd/system/disdex-v12-v4@.service

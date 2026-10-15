@@ -7,6 +7,11 @@ WATCHDOG = ROOT / "scripts" / "ops" / "root" / "disdex-runner-watchdog-current.m
 
 
 class RuntimeWiringHygieneTest(unittest.TestCase):
+    def test_v4_mode_keeps_runtime_wiring_helper_on_current_release(self):
+        source = WIRING.read_text(encoding="utf-8")
+        self.assertIn('local ops_source_release="$CURRENT_RELEASE"', source)
+        self.assertNotIn('ops_source_release="$V4_PRIMARY_RELEASE"', source)
+
     def test_watchdog_ignores_inactive_and_failed_historical_instances(self):
         source = WATCHDOG.read_text(encoding="utf-8")
         self.assertIn('if (match && !new Set(["inactive", "failed"]).has(match[2])) units.push(match[1]);', source)
