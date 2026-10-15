@@ -1,0 +1,50 @@
+name: V52 Idle ownership and fill notification integration
+on:
+  push:
+    branches: [fix/v52-idle-ownership-guard-20261015]
+    paths:
+      - "scripts/disdex_strict_portfolio_planner.py"
+      - "tests/test_disdex_v52_idle_owned_position.py"
+      - "scripts/ops/root/disdex-current-runtime-wiring"
+      - "lib/direct-trade-executor.ts"
+      - ".github/workflows/disdex-v52-idle-notification-integration-20261015.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  certify-source-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: npm ci --ignore-scripts
+      - name: Shell syntax, protected Idle owner, and locked caps
+        run: |
+          bash -n scripts/ops/root/disdex-current-runtime-wiring
+          python3 -m py_compile scripts/disdex_strict_portfolio_planner.py
+          python3 -m unittest discover -s tests -p test_disdex_v52_idle_owned_position.py -v
+          python3 scripts/disdex_strict_portfolio_planner.py
+      - name: Ensure active unit generator pins fill notifications
+        run: |
+          python3 - <<'PY'
+          p=open('scripts/ops/root/disdex-current-runtime-wiring').read()
+          assert p.count('Environment=DISDEX_TRADE_FILL_NOTIFICATION_ENABLED=true')>=3
+          assert p.count('DISDEX_TRADE_FILL_NOTIFICATION_ENABLED=true')>=4
+          for s in ('V12_V4','FET_BRK48_RESIDUAL','HYPE_LONG','IDLE_PRIORITY_SHORT'):
+              assert 'DISDEX_TRADE_FILL_STRATEGY_ID='+s in p
+          for s in ('V12_V4','FET_BRK48_RESIDUAL','IDLE_PRIORITY_SHORT'):
+              assert 'Environment=DISDEX_TRADE_FILL_STRATEGY_ID='+s in p
+          print('V4_IDLE_FET_HYPE_NOTIFICATION_CONTRACT_PASS')
+          PY
+      - name: TypeScript checks
+        run: npm run typecheck
+      - name: No real-money operations
+        run: echo "All steps source-only. No Aster credentials, trading order, Kill Switch clearing, or release activation."
