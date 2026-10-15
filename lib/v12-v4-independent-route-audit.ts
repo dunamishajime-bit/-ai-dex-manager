@@ -24,7 +24,7 @@ function allocationOrder(route: string):number {
   if (route==="CONT_SHORT_MID_AGE24_48") return 0;
   const m=/^REC_([GXYZ])(\d+)/.exec(route);
   if (!m) return -1;
-  return ({G:10,X:30,Y:60,Z:100} as Record<string,number>)[m[1]]+Number(m[2]);
+  return ({G:10,X:30,Y:60,Z:60} as Record<string,number>)[m[1]]+Number(m[2]);
 }
 export function identifyFallbacks(verdicts: readonly IndependentRouteVerdict[], initialRoute:string|null) {
   const initial=verdicts.find(v=>v.route===initialRoute);
