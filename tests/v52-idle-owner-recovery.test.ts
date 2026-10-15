@@ -5,6 +5,7 @@ import {
     DEFAULT_V52_IDLE_OWNER_MARGIN_MAX_AGE_MS,
     DEFAULT_V52_IDLE_OWNER_RECOVERY_MAX_QUEUE_MS,
     ensureProtectedIdleRecoveryQueueWindow,
+    isRecoverableIdleOwnerKillReason,
     isMarginGuardFresh,
     protectedIdleSnapshotFingerprint,
     protectedIdleValidationFingerprint,
@@ -135,6 +136,30 @@ test("protected recovery raises a shorter runtime queue window without bypassing
         if (previous === undefined) delete process.env.DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS;
         else process.env.DISDEX_ASTER_GLOBAL_MAX_QUEUE_MS = previous;
     }
+});
+
+test("protected recovery can retry only the exact prior fail-closed rollback reason", () => {
+    assert.equal(isRecoverableIdleOwnerKillReason({
+        active: true,
+        action: "HOLD_PROTECTED",
+        recoverable: true,
+        reason: "V52 recoverable tick error: Unknown non-flat Aster symbol requires manual review: DOTUSDT",
+        operator: "disdex-v52-aster-only",
+    }), true);
+    assert.equal(isRecoverableIdleOwnerKillReason({
+        active: true,
+        action: "HOLD_PROTECTED",
+        reason: "V52 owner recovery post-check failed: V52_IDLE_OWNER_RECOVERY_VENUE_CHANGED_AFTER_CLEAR",
+        previousReason: "V52 recoverable tick error: Unknown non-flat Aster symbol requires manual review: DOTUSDT",
+        operator: "V52_IDLE_OWNER_RECOVERY_V1_ROLLBACK_FAIL_CLOSED",
+    }), true);
+    assert.equal(isRecoverableIdleOwnerKillReason({
+        active: true,
+        action: "HOLD_PROTECTED",
+        reason: "V52 owner recovery post-check failed: arbitrary",
+        previousReason: "V52 recoverable tick error: Unknown non-flat Aster symbol requires manual review: DOTUSDT",
+        operator: "V52_IDLE_OWNER_RECOVERY_V1_ROLLBACK_FAIL_CLOSED",
+    }), false);
 });
 
 test("final signed-read comparison ignores observation timestamp drift", () => {

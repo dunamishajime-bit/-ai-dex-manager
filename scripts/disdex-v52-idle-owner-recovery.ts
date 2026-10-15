@@ -355,15 +355,26 @@ async function atomicJsonWrite(path: string, value: unknown) {
     }
 }
 
-function rawKillReasonIsAllowlisted(value: unknown): value is { active: true; action: "HOLD_PROTECTED"; recoverable: true; reason: string; operator?: string } {
+export function isRecoverableIdleOwnerKillReason(value: unknown): value is { active: true; action: "HOLD_PROTECTED"; reason: string; operator?: string } {
     if (!value || typeof value !== "object") return false;
     const kill = value as Record<string, unknown>;
-    return kill.active === true
+    const original = kill.active === true
         && kill.action === "HOLD_PROTECTED"
         && kill.recoverable === true
         && typeof kill.reason === "string"
         && kill.reason.startsWith("V52 recoverable tick error: Unknown non-flat Aster symbol requires manual review:")
         && (kill.operator === undefined || kill.operator === "disdex-v52-aster-only");
+    if (original) return true;
+    return kill.active === true
+        && kill.action === "HOLD_PROTECTED"
+        && kill.operator === "V52_IDLE_OWNER_RECOVERY_V1_ROLLBACK_FAIL_CLOSED"
+        && kill.reason === "V52 owner recovery post-check failed: V52_IDLE_OWNER_RECOVERY_VENUE_CHANGED_AFTER_CLEAR"
+        && typeof kill.previousReason === "string"
+        && kill.previousReason.startsWith("V52 recoverable tick error: Unknown non-flat Aster symbol requires manual review:");
+}
+
+function rawKillReasonIsAllowlisted(value: unknown): value is { active: true; action: "HOLD_PROTECTED"; recoverable?: true; reason: string; operator?: string } {
+    return isRecoverableIdleOwnerKillReason(value);
 }
 
 async function main() {
