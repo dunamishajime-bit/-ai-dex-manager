@@ -45,3 +45,11 @@ test('Q102 startup preserves the existing FET profit-floor STOP and rejects malf
  for(const bad of [{...stop,reduceOnly:false},{...stop,type:'LIMIT'},{...stop,quantity:1},{...stop,clientOrderId:'manual-stop'}])assert.deepEqual(findQ102PreflightAllManagedProtectiveOrders([bad],[p]),[]);
  assert.deepEqual(findQ102PreflightAllManagedProtectiveOrders([stop,{...stop,clientOrderId:'fet-stop-aaaaaaaaaaaaaaaaaaaaaa'}],[p]),[]);
 });
+
+test('Q102 preflight recognizes a fully protected Idle SHORT position owned by another runner', async () => {
+ const {findQ102PreflightAllManagedProtectiveOrders}=await import('../scripts/disdex-quality102-causal-v1-live-runner');
+ const p:DirectPosition={...position,symbol:'JUPUSDT',quantity:-225,positionSide:'BOTH',entryPrice:.3048,markPrice:.3003};
+ const stop:DirectOpenOrder={...protectiveOrder,symbol:'JUPUSDT',side:'BUY',type:'STOP_MARKET',quantity:225,clientOrderId:'idle-stop-af98ca4a29c5db85186244'};
+ const tp:DirectOpenOrder={...protectiveOrder,symbol:'JUPUSDT',side:'BUY',type:'TAKE_PROFIT_MARKET',quantity:225,clientOrderId:'idle-tp-69f0923893132bd78182f1'};
+ assert.deepEqual(findQ102PreflightAllManagedProtectiveOrders([stop,tp],[p]),[stop,tp]);
+});

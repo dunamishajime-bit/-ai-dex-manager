@@ -43,7 +43,7 @@ import { releaseIdleResidualLongForFormalEntry } from "@/lib/idle-residual-long-
 import { readQuality102CausalV1Ownership, quality102OwnsOrder, quality102OwnsPosition, type Quality102CausalV1OwnershipSnapshot } from "@/lib/disdex-quality102-causal-v1-ownership";
 import { reduceQuality102CausalV1ForBaseConflict } from "@/lib/disdex-quality102-causal-v1-live-reduction";
 import { reduceFetBrk48ForCoreConflict } from "@/lib/fet-brk48-live-reduction";
-import { findManagedOrdinaryResidentStops, findManagedFetBrk48ProtectiveOrders, findManagedPenguRecoveryV8ProtectiveOrders, findManagedV12ProtectiveOrders } from "@/lib/disdex-managed-protective-orders";
+import { findManagedIdlePriorityShortProtectiveOrders, findManagedOrdinaryResidentStops, findManagedFetBrk48ProtectiveOrders, findManagedPenguRecoveryV8ProtectiveOrders, findManagedV12ProtectiveOrders } from "@/lib/disdex-managed-protective-orders";
 import type { V12AsterLiveAdapter } from "@/lib/v12-aster-live-adapter";
 import { reduceV12DynamicResidualForCoreConflict } from "@/lib/v12-dynamic-residual-live-reduction";
 import {
@@ -195,6 +195,7 @@ function unmanagedCrossSleeveOpenOrders(
         ...findManagedPenguRecoveryV8ProtectiveOrders(openOrders, positions),
         ...findManagedV12ProtectiveOrders(openOrders, positions),
         ...findManagedFetBrk48ProtectiveOrders(openOrders, positions),
+        ...findManagedIdlePriorityShortProtectiveOrders(openOrders, positions),
     ]);
     return openOrders.filter(
         (order) => !quality102OwnsOrder(quality102Ownership, order)

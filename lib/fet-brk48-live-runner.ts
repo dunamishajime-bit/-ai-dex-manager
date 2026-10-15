@@ -15,6 +15,7 @@ import { readSharedCryptoDailyRiskWithRolloverRetry } from "@/lib/disdex-shared-
 import { assertSharedKillSwitchAllowsNewEntry } from "@/lib/disdex-shared-kill-switch";
 import {
   findManagedFetBrk48ProtectiveOrders,
+  findManagedIdlePriorityShortProtectiveOrders,
   findManagedOrdinaryResidentStops,
   findManagedPenguRecoveryV8ProtectiveOrders,
   findManagedV12ProtectiveOrders,
@@ -545,6 +546,7 @@ export class FetBrk48LiveRunner {
         ...findManagedPenguRecoveryV8ProtectiveOrders(openOrders, positions),
         ...findManagedV12ProtectiveOrders(openOrders, positions),
         ...findManagedFetBrk48ProtectiveOrders(openOrders, positions),
+        ...findManagedIdlePriorityShortProtectiveOrders(openOrders, positions),
       ]);
       const unmanaged = openOrders.filter((order) => !managed.has(order) && !quality102OwnsOrder(q102, order));
       if (unmanaged.length) return { status: "blocked", message: "FET_UNMANAGED_OPEN_ORDER_CONFLICT", ordersSent: 0 };

@@ -7,7 +7,7 @@ import { AsterV3Client } from "@/lib/aster-v3-client";
 import { readQuality102CausalV1Ownership, quality102OwnsPosition, type Quality102CausalV1OwnershipSnapshot } from "@/lib/disdex-quality102-causal-v1-ownership";
 import { reduceQuality102CausalV1ForBaseConflict } from "@/lib/disdex-quality102-causal-v1-live-reduction";
 import { reduceFetBrk48ForCoreConflict } from "@/lib/fet-brk48-live-reduction";
-import { findManagedOrdinaryResidentStops, findManagedFetBrk48ProtectiveOrders, findManagedHypeZecProtectiveOrders, findManagedPenguRecoveryV8ProtectiveOrders, findManagedV12ProtectiveOrders } from "@/lib/disdex-managed-protective-orders";
+import { findManagedIdlePriorityShortProtectiveOrders, findManagedOrdinaryResidentStops, findManagedFetBrk48ProtectiveOrders, findManagedHypeZecProtectiveOrders, findManagedPenguRecoveryV8ProtectiveOrders, findManagedV12ProtectiveOrders } from "@/lib/disdex-managed-protective-orders";
 import type { DirectMarketQuote, DirectPosition, DirectTradeResult } from "@/lib/direct-trade-executor";
 import { readSharedCryptoDailyRisk } from "@/lib/disdex-shared-crypto-daily-risk";
 import { readPortfolioDdGovernor } from "@/lib/disdex-portfolio-dd-governor";
@@ -169,6 +169,7 @@ export class V12StrictAsterLiveAdapter extends V12AsterLiveAdapter {
             ...findManagedV12ProtectiveOrders(openOrders, positions),
             ...findManagedFetBrk48ProtectiveOrders(openOrders, positions),
             ...findManagedHypeZecProtectiveOrders(openOrders, positions),
+            ...findManagedIdlePriorityShortProtectiveOrders(openOrders, positions),
         ]);
         const unmanagedOpenOrders = openOrders.filter((order) => !managedProtectiveOrders.has(order));
         if (unmanagedOpenOrders.length > 0) throw new Error("STRICT_PORTFOLIO_OPEN_ORDER_CONFLICT");
@@ -228,6 +229,7 @@ export class V12StrictAsterLiveAdapter extends V12AsterLiveAdapter {
                     ...findManagedV12ProtectiveOrders(workingOpenOrders, workingPositions),
                     ...findManagedFetBrk48ProtectiveOrders(workingOpenOrders, workingPositions),
                     ...findManagedHypeZecProtectiveOrders(workingOpenOrders, workingPositions),
+                    ...findManagedIdlePriorityShortProtectiveOrders(workingOpenOrders, workingPositions),
                 ]);
                 if (workingOpenOrders.some((order) => !refreshedManaged.has(order))) throw new Error("STRICT_PORTFOLIO_OPEN_ORDER_CONFLICT_AFTER_FET_PREEMPT");
                 quality102Ownership = await readQuality102CausalV1Ownership({ expectedRuntimeSha: process.env.DISDEX_Q102_RUNTIME_SHA || process.env.DISDEX_RUNTIME_COMMIT_SHA });

@@ -194,6 +194,60 @@ export function findManagedHypeZecProtectiveOrders(
     return openOrders.filter((order) => managed.has(order));
 }
 
+type IdlePriorityShortProtectionCandidate = {
+    order: DirectOpenOrder;
+    position: DirectPosition;
+    leg: "STOP" | "TP";
+    remainingQuantity: number;
+};
+
+function idlePriorityShortProtectionCandidate(
+    order: DirectOpenOrder,
+    positions: readonly DirectPosition[],
+): IdlePriorityShortProtectionCandidate | undefined {
+    const symbol = String(order.symbol || "").trim().toUpperCase();
+    const match = /^idle-(stop|tp)-[a-f0-9]{16,36}$/i.exec(String(order.clientOrderId || ""));
+    if (!symbol || !match || order.reduceOnly !== true) return undefined;
+    if (!["NEW", "PARTIALLY_FILLED", "PENDING_NEW"].includes(String(order.status || "").toUpperCase())) return undefined;
+    const leg = match[1].toLowerCase() === "stop" ? "STOP" : "TP";
+    const type = String(order.type || "").toUpperCase();
+    if ((leg === "STOP" && type !== "STOP_MARKET") || (leg === "TP" && type !== "TAKE_PROFIT_MARKET")) return undefined;
+    if (!(Number.isFinite(order.quantity) && order.quantity > 0) || !(Number.isFinite(order.executedQuantity) && order.executedQuantity >= 0 && order.executedQuantity <= order.quantity)) return undefined;
+    const position = positions.find((row) => row.symbol.toUpperCase() === symbol && row.quantity < -MIN_REMAINING_QUANTITY);
+    if (!position || order.side !== "BUY") return undefined;
+    const remainingQuantity = order.quantity - order.executedQuantity;
+    const tolerance = Math.max(1e-8, Math.abs(position.quantity) * PROTECTION_TOLERANCE_PCT);
+    if (remainingQuantity <= MIN_REMAINING_QUANTITY || Math.abs(remainingQuantity - Math.abs(position.quantity)) > tolerance) return undefined;
+    return { order, position, leg, remainingQuantity };
+}
+
+/**
+ * Idle SHORT owns one full-quantity STOP and one full-quantity TP.  Other
+ * runners may observe those reduce-only orders during their read-only
+ * preflight, but they must only treat the pair as managed when both legs
+ * match the live short position exactly.  Any mismatch remains fail-closed.
+ */
+export function findManagedIdlePriorityShortProtectiveOrders(
+    openOrders: readonly DirectOpenOrder[],
+    positions: readonly DirectPosition[],
+): DirectOpenOrder[] {
+    const candidates = openOrders
+        .map((order) => idlePriorityShortProtectionCandidate(order, positions))
+        .filter((entry): entry is IdlePriorityShortProtectionCandidate => Boolean(entry));
+    if (candidates.length === 0) return [];
+    const clientOrderIds = new Set(candidates.map(({ order }) => order.clientOrderId));
+    if (clientOrderIds.size !== candidates.length) return [];
+
+    const managed = new Set<DirectOpenOrder>();
+    for (const position of positions) {
+        if (!Number.isFinite(position.quantity) || position.quantity >= -MIN_REMAINING_QUANTITY) continue;
+        const matching = candidates.filter(({ position: candidatePosition }) => candidatePosition === position);
+        if (matching.filter((entry) => entry.leg === "STOP").length !== 1 || matching.filter((entry) => entry.leg === "TP").length !== 1) continue;
+        for (const entry of matching) managed.add(entry.order);
+    }
+    return openOrders.filter((order) => managed.has(order));
+}
+
 export function isManagedHypeZecProtectiveOrder(
     order: DirectOpenOrder,
     openOrders: readonly DirectOpenOrder[],

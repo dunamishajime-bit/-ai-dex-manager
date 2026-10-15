@@ -42,7 +42,7 @@ import { classifyAsterRateBudgetFailure } from "@/lib/disdex-aster-rate-budget-p
 import { quality102GovernorGross, readPortfolioDdGovernor } from "@/lib/disdex-portfolio-dd-governor";
 import { aggregatePendingExposure, readPendingExposureRegistry } from "@/lib/disdex-pending-exposure-registry";
 import { classifyAsterSymbol } from "@/lib/disdex-aster-portfolio-classifier";
-import { findManagedOrdinaryResidentStops, findManagedFetBrk48ProtectiveOrders, findManagedHypeZecProtectiveOrders, findManagedPenguRecoveryV8ProtectiveOrders, findManagedV12ProtectiveOrders } from "@/lib/disdex-managed-protective-orders";
+import { findManagedIdlePriorityShortProtectiveOrders, findManagedOrdinaryResidentStops, findManagedFetBrk48ProtectiveOrders, findManagedHypeZecProtectiveOrders, findManagedPenguRecoveryV8ProtectiveOrders, findManagedV12ProtectiveOrders } from "@/lib/disdex-managed-protective-orders";
 import { reduceV12DynamicResidualForCoreConflict } from "@/lib/v12-dynamic-residual-live-reduction";
 import { reduceFetBrk48ForCoreConflict } from "@/lib/fet-brk48-live-reduction";
 import { isHypeZecSoleSharedCapacityCause, releaseHypeZecCapacityForPriorityEntry } from "@/lib/hype-zec-priority-capacity";
@@ -259,6 +259,7 @@ function managedProtectiveOrders(
         ...findManagedPenguRecoveryV8ProtectiveOrders(openOrders, positions),
         ...findManagedV12ProtectiveOrders(openOrders, positions),
         ...findManagedFetBrk48ProtectiveOrders(openOrders, positions),
+        ...findManagedIdlePriorityShortProtectiveOrders(openOrders, positions),
     ]);
     return openOrders.filter((order) => managed.has(order));
 }
