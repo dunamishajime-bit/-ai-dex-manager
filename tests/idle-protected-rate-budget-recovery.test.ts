@@ -11,6 +11,7 @@ import {
 } from "../scripts/disdex-idle-priority-short-protected-rate-budget-recovery";
 
 const SHA = "a".repeat(40);
+const TARGET_SHA = "b".repeat(40);
 const REVIEW = "IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:3098";
 
 function state(manualReview: string | null = REVIEW) {
@@ -93,6 +94,33 @@ test("protected rate-budget recovery refuses missing or mismatched protection an
       /IDLE_PROTECTED_RATE_BUDGET_RECOVERY_PROTECTION_INVALID/,
     );
     assert.deepEqual(JSON.parse(await readFile(statePath, "utf8")), original);
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test("protected rate-budget recovery migrates an already-reconciled protected position without clearing state", async () => {
+  const root = await mkdtemp(join(tmpdir(), "idle-protected-rate-budget-migrate-"));
+  try {
+    const statePath = join(root, "state.json");
+    const original = state(null);
+    await writeFile(statePath, `${JSON.stringify(original, null, 2)}\n`, { mode: 0o600 });
+    const result = await recoverIdleProtectedRateBudgetState({
+      statePath,
+      sourceSha: SHA,
+      expectedSha: TARGET_SHA,
+      venue: {
+        async getPositions() { return positions; },
+        async getOpenOrders() { return orders; },
+      },
+      now: () => 200,
+    });
+    assert.equal(result.status, "IDLE_PROTECTED_RATE_BUDGET_RECOVERY_PASS");
+    const after = JSON.parse(await readFile(statePath, "utf8"));
+    assert.equal(after.runtimeSha, TARGET_SHA);
+    assert.equal(after.manualReview, null);
+    assert.equal(after.lastDecision, undefined);
+    assert.deepEqual(after.positions, original.positions);
   } finally {
     await rm(root, { recursive: true, force: true });
   }

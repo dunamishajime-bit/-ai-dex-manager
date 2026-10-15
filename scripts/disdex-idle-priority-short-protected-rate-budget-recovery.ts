@@ -96,7 +96,8 @@ async function assertProtectedVenueReadback(state: IdleState, venue: IdleProtect
 function assertStateShape(raw: unknown, sourceSha: string, expectedSha: string) {
   if (!raw || typeof raw !== "object") throw new Error("IDLE_PROTECTED_RATE_BUDGET_RECOVERY_STATE_INVALID");
   const state = normalizeIdleState(raw, sourceSha);
-  if (!state.manualReview || !BENIGN_RATE_BUDGET_REVIEW.test(state.manualReview)) {
+  const alreadyReconciled = state.manualReview === null;
+  if (!alreadyReconciled && !BENIGN_RATE_BUDGET_REVIEW.test(state.manualReview || "")) {
     throw new Error("IDLE_PROTECTED_RATE_BUDGET_RECOVERY_REVIEW_INVALID");
   }
   if (state.pending) throw new Error("IDLE_PROTECTED_RATE_BUDGET_RECOVERY_PENDING_PRESENT");
@@ -104,7 +105,7 @@ function assertStateShape(raw: unknown, sourceSha: string, expectedSha: string) 
     throw new Error("IDLE_PROTECTED_RATE_BUDGET_RECOVERY_PROTECTION_STATE_INVALID");
   }
   void expectedSha;
-  return state;
+  return { state, alreadyReconciled };
 }
 
 async function exactBackup(statePath: string, backupPath: string, beforeBytes: Buffer, metadata: Awaited<ReturnType<typeof lstat>>) {
@@ -140,7 +141,7 @@ export async function recoverIdleProtectedRateBudgetState(input: {
   if (!metadata.isFile()) throw new Error("IDLE_PROTECTED_RATE_BUDGET_RECOVERY_NOT_REGULAR_FILE");
   const beforeBytes = await readFile(statePath);
   const before = JSON.parse(beforeBytes.toString("utf8"));
-  const checked = assertStateShape(before, sourceSha, expectedSha);
+  const { state: checked, alreadyReconciled } = assertStateShape(before, sourceSha, expectedSha);
   await assertProtectedVenueReadback(checked, input.venue);
   const now = input.now || Date.now;
   const backupPath = resolve(input.backupPath || `${statePath}.before-protected-rate-budget-recovery-${sourceSha}-${now()}`);
@@ -149,9 +150,11 @@ export async function recoverIdleProtectedRateBudgetState(input: {
     ...before,
     runtimeSha: expectedSha,
     updatedAt: now(),
-    manualReview: null,
-    lastDecision: { decisionTs: now(), accepted: false, reason: "IDLE_PROTECTED_RATE_BUDGET_RECOVERY" },
-    failures: [...(Array.isArray(before.failures) ? before.failures : []), { message: "IDLE_PROTECTED_RATE_BUDGET_RECOVERY", occurredAt: now() }].slice(-100),
+    ...(alreadyReconciled ? {} : {
+      manualReview: null,
+      lastDecision: { decisionTs: now(), accepted: false, reason: "IDLE_PROTECTED_RATE_BUDGET_RECOVERY" },
+      failures: [...(Array.isArray(before.failures) ? before.failures : []), { message: "IDLE_PROTECTED_RATE_BUDGET_RECOVERY", occurredAt: now() }].slice(-100),
+    }),
   };
   normalizeIdleState(after, expectedSha);
   const temporary = `${statePath}.${process.pid}.${now()}.protected-rate-budget-recovery.tmp`;

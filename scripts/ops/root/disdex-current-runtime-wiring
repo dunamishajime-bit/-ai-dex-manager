@@ -322,6 +322,38 @@ migrate_hype_state_lineage() {
 }
 
 migrate_idle_state_lineage() {
+  local state_path="$IDLE_PRIORITY_STATE_ROOT/state.json"
+  [[ -f "$state_path" ]] || return 0
+  local from_sha
+  from_sha="$(state_runtime_sha "$state_path")"
+  [[ "$from_sha" =~ ^[0-9a-f]{40}$ ]] || {
+    printf 'Idle state runtime SHA is invalid: %s\n' "$from_sha" >&2
+    return 1
+  }
+  [[ "$from_sha" == "$DEPLOYED_SHA" ]] && return 0
+
+  # The generic lineage migrator is intentionally flat-only.  A live Idle
+  # position with already verified venue protection must use the read-only
+  # protected migration path so its STOP/TP ownership is checked before only
+  # the runtime SHA is advanced.
+  if /usr/bin/jq -e '
+    (.pending // null) == null and
+    (.manualReview // null) == null and
+    ((.positions // []) | length > 0) and
+    ((.positions // []) | all(.protectionVerified == true))
+  ' "$state_path" >/dev/null 2>&1; then
+    load_runtime_migration_environment
+    "$CURRENT_RELEASE/node_modules/.bin/tsx" \
+      "$CURRENT_RELEASE/scripts/disdex-idle-priority-short-protected-rate-budget-recovery.ts" \
+      --apply \
+      --state-path "$state_path" \
+      --source-sha "$from_sha" \
+      --expected-sha "$DEPLOYED_SHA"
+    printf 'IDLE_PROTECTED_STATE_SHA_MIGRATE_PASS sourceSha=%s targetSha=%s ordersSent=0 cancelsSent=0 positionChangesSent=0\n' \
+      "$from_sha" "$DEPLOYED_SHA"
+    return 0
+  fi
+
   "$CURRENT_RELEASE/node_modules/.bin/tsx" \
     "$CURRENT_RELEASE/scripts/disdex-idle-priority-short-state-migrate.ts" \
     --state-path "$IDLE_PRIORITY_STATE_ROOT/state.json" \

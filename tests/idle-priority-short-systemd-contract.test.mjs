@@ -112,6 +112,7 @@ test("runtime wiring routes protected Idle rate-budget state through the protect
   assert.match(wiring, /--expected-sha "\$DEPLOYED_SHA"/);
   assert.match(wiring, /IDLE_PROTECTED_RATE_BUDGET_RECOVERY_PASS/);
   assert.match(wiring, /IDLE_PROTECTED_STATE_ALREADY_RECONCILED/);
+  assert.match(wiring, /migrate_idle_state_lineage\(\)[\s\S]*IDLE_PROTECTED_STATE_SHA_MIGRATE_PASS/);
   assert.match(wiring, /manual_review=/);
   assert.match(wiring, /IDLE_RUNNER_FAIL_CLOSED:ASTER_GLOBAL_RATE_BUDGET_SATURATED/);
   assert.match(wiring, /protectionVerified/);
