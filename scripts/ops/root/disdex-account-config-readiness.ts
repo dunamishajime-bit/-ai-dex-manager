@@ -2,6 +2,7 @@ import { readFile, realpath, writeFile, rename } from "node:fs/promises";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { configurationPlan, hasUnresolvedIntent } from "./disdex-account-config-policy.mjs";
+import { classifyAccountConfigReadinessRateBudgetDeferral } from "../../../lib/disdex-account-config-readiness-policy";
 async function main() {
  const root=await realpath("/home/deploy/disdex-trading/current");
  const sha=(await readFile(join(root,".disdex-release-sha"),"utf8")).trim();
@@ -42,4 +43,8 @@ async function main() {
   await writeFile(tmp,JSON.stringify(result,null,2)+"\n",{mode:0o600});await rename(tmp,output);console.log(JSON.stringify(result));
  } finally { await handle.release(); }
 }
-main().catch(e=>{console.error(JSON.stringify({status:"CONFIG_FAIL_CLOSED",reason:e.message,ordersSent:0}));process.exitCode=1;});
+main().catch(e=>{
+ const deferred=classifyAccountConfigReadinessRateBudgetDeferral(e);
+ if(deferred){console.log(JSON.stringify({...deferred,ordersSent:0,cancelsSent:0,positionChangesSent:0}));return;}
+ console.error(JSON.stringify({status:"CONFIG_FAIL_CLOSED",reason:e instanceof Error?e.message:String(e),ordersSent:0}));process.exitCode=1;
+});
