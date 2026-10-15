@@ -3,6 +3,7 @@ from __future__ import annotations
 import math
 import os
 import json
+import hashlib
 import re
 import time
 from dataclasses import dataclass
@@ -261,6 +262,94 @@ KNOWN_BASE_SYMBOLS = frozenset({
 })
 
 
+
+IDLE_FROZEN_OWNER_SYMBOLS = frozenset({"TAOUSDT", "TIAUSDT", "DOTUSDT", "JUPUSDT", "RENDERUSDT"})
+IDLE_PROTECTED_STATE_SCHEMA = "disdex-idle-priority-state/v2"
+
+
+def _idle_protected_entry_client_order_id(action: str, symbol: str, signal_ts: int) -> str:
+    digest = hashlib.sha256(
+        f"IDLE_PRIORITY_SHORT|{action}|{symbol}|{signal_ts}".encode("utf-8")
+    ).hexdigest()[:22]
+    return f"idle-{action.lower()}-{digest}"[:36]
+
+
+def _validated_idle_owned_notional(
+    symbol: str,
+    venue_qty: float,
+    venue_price: float,
+    venue_entry_price: float,
+    venue_positions: list[dict] | tuple[dict, ...],
+    *,
+    now_ms: float | None = None,
+) -> float:
+    """Account strictly matched, STOP-readback-proven Idle SHORT as known crypto.
+
+    Never authorizes an entry, modifies STOPs, or silently whitelists an
+    unfamiliar position. Venue holdings must already come from signed GET.
+    """
+    def fail(detail: str) -> None:
+        raise RuntimeError(f"IDLE_VERIFIED_OWNER_MISMATCH:{symbol}:{detail}")
+    if symbol not in IDLE_FROZEN_OWNER_SYMBOLS or venue_qty >= -EPSILON:
+        fail("SYMBOL_OR_SIDE")
+    expected_sha = str(os.environ.get("DISDEX_RUNTIME_COMMIT_SHA") or "").strip().lower()
+    if not _SHA256_RE.fullmatch(expected_sha):
+        fail("RUNTIME_SHA_UNSET")
+    path = Path(os.environ.get("DISDEX_IDLE_PRIORITY_STATE_PATH") or "/var/lib/disdex/idle-priority/state.json")
+    try:
+        document = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeError, json.JSONDecodeError) as error:
+        raise RuntimeError(f"IDLE_VERIFIED_OWNER_MISMATCH:{symbol}:STATE_UNAVAILABLE") from error
+    if not isinstance(document, dict) or document.get("schema") != IDLE_PROTECTED_STATE_SCHEMA:
+        fail("SCHEMA")
+    if str(document.get("runtimeSha") or "").lower() != expected_sha:
+        fail("RELEASE_SHA")
+    if document.get("pending") is not None or document.get("manualReview") is not None:
+        fail("PENDING_OR_MANUAL_REVIEW")
+    positions = document.get("positions")
+    if not isinstance(positions, list):
+        fail("POSITION_SCHEMA")
+    rows = [p for p in positions if isinstance(p, dict) and p.get("symbol") == symbol]
+    if len(rows) != 1:
+        fail("OWNED_SYMBOL_COUNT")
+    owned = rows[0]
+    if owned.get("side") != "SHORT" or owned.get("protectionVerified") is not True:
+        fail("UNPROTECTED")
+    if not all(isinstance(x, (int, float)) and math.isfinite(x)
+               for x in (owned.get("quantity"), owned.get("entryPrice"), owned.get("signalTs"), owned.get("entryTs"), owned.get("exitTs"), document.get("updatedAt"))):
+        fail("INVALID_NUMERIC_EVIDENCE")
+    qty = float(owned["quantity"])
+    price = float(owned["entryPrice"])
+    if qty <= 0 or price <= 0 or float(owned["signalTs"]) <= 0:
+        fail("INVALID_POSITION")
+    if abs(abs(venue_qty) - qty) > max(1e-8, qty * 1e-7):
+        fail("VENUE_QTY")
+    if venue_entry_price <= 0 or abs(venue_entry_price - price) > price * 1e-5:
+        fail("VENUE_ENTRY_PRICE")
+    if sum(str(p.get("symbol") or "").upper() == symbol and abs(float(p.get("positionAmt", 0))) > EPSILON for p in venue_positions) != 1:
+        fail("VENUE_POSITION_DUPLICATE")
+    clock = float(now_ms if now_ms is not None else time.time() * 1000)
+    updated_at = float(document["updatedAt"])
+    entry_at = float(owned["entryTs"])
+    signal_at = int(owned["signalTs"])
+    deadline = float(owned["exitTs"])
+    if not math.isfinite(clock) or updated_at > clock + 5000 or entry_at > clock + 5000 or entry_at < signal_at:
+        fail("FUTURE_OR_ORDERING")
+    # A signed venue position match is mandatory, but do not reject an
+    # otherwise-known protected Idle hold merely because the runner is slowed
+    # by a shared rate-budget queue. The strategy's own time exit is bounded.
+    if clock - updated_at > 30 * 3600_000 or clock > deadline + 2 * 3600_000:
+        fail("STALE_OWNER")
+    if owned.get("stopClientOrderId") != _idle_protected_entry_client_order_id("STOP", symbol, signal_at) or \
+       owned.get("takeProfitClientOrderId") != _idle_protected_entry_client_order_id("TP", symbol, signal_at):
+        fail("PROTECTION_ID")
+    stop_price = float(owned.get("stopPrice") or 0)
+    tp_price = float(owned.get("takeProfitPrice") or 0)
+    if not (stop_price > price > tp_price > 0):
+        fail("PROTECTION_PRICE")
+    return abs(venue_qty) * venue_price
+
+
 def quality102_crypto_notional_from_positions(
     rows: list[dict] | tuple[dict, ...],
     *,
@@ -319,6 +408,12 @@ def quality102_crypto_notional_from_positions(
             except (OSError, ValueError, TypeError, KeyError, AttributeError) as error:
                 raise RuntimeError("Unknown non-flat Aster symbol requires manual review: FETUSDT:FET_STATE_POSITION_MISMATCH") from error
             total += abs(quantity) * price
+            continue
+        if symbol in IDLE_FROZEN_OWNER_SYMBOLS:
+            total += _validated_idle_owned_notional(
+                symbol, quantity, price, _quality102_finite(row.get("entryPrice"), f"{symbol}.entryPrice", positive=True),
+                rows, now_ms=now_ms,
+            )
             continue
         if owned is None or symbol != owned.symbol:
             raise RuntimeError(f"Unknown non-flat Aster symbol requires manual review: {symbol}")
