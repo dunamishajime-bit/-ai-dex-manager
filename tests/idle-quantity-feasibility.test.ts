@@ -27,7 +27,7 @@ test("reject minimum venue constraints independently",()=>{
   assert.equal(evaluateIdleOneStepFloor({...tia,minQuantity:140}).code,"VENUE_MIN_QTY");
 });
 test("reject rounding shortfall greater than 1%, even when step-valid",()=>{
-  const r=evaluateIdleOneStepFloor({...tia,equityUsd:5.47,normalizedQuantity:10,normalizedNotional:5.467});
+  const r=evaluateIdleOneStepFloor({...tia,equityUsd:5.46,normalizedQuantity:9,normalizedNotional:9*0.5467,minNotional:1});
   assert.equal(r.accepted,false);
 });
 test("inconsistent notional and non-finite inputs fail closed",()=>{
