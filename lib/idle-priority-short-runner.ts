@@ -525,9 +525,19 @@ export class IdlePriorityShortRunner {
         try {
             state.pending.phase = "submitted";
             await this.dependencies.stateStore.save(state);
-            const result = await this.dependencies.executor.executeMarket({ requestId: clientOrderId, clientOrderId, symbol, side: "SELL", positionSide: "BOTH", quantity: normalized.quantity, expectedPrice: quote.bidPrice, maxSlippageBps: this.dependencies.runtime.maximumSlippageBps, reason: `IDLE_PRIORITY_SHORT_ENTRY:${signal.route}`, requireVenueMargin5xCross: true });
+            const result = await this.dependencies.executor.executeMarket({ requestId: clientOrderId, clientOrderId, symbol, side: "SELL", positionSide: "BOTH", quantity: normalized.quantity, expectedPrice: quote.bidPrice, maxSlippageBps: this.dependencies.runtime.maximumSlippageBps, reason: `IDLE_PRIORITY_SHORT_ENTRY:${signal.route}`, requireVenueMargin5xCross: true, maxEntryNotionalUsd: equity });
             return await this.finalizeEntry(state, pending, result, lock);
         } catch (error) {
+            // This specific error is thrown by the executor BEFORE any order request.
+            // Do not strand a reservation or put a flat account in manual review.
+            if (error instanceof Error && error.message.startsWith("ENTRY_NOTIONAL_CAP_EXCEEDED_BEFORE_ORDER:")) {
+                state.pending = null;
+                const reason = `IDLE_ENTRY_PREORDER_GROSS_LIMIT:${symbol}`;
+                state.lastDecision = { decisionTs: signal.features.decisionTs, symbol, route: signal.route, accepted: false, reason };
+                await this.dependencies.stateStore.save(state);
+                await lock.releaseReservation(reservation.reservationId);
+                return { status: "held", message: reason, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+            }
             return this.manualReview(state, `IDLE_ENTRY_ERROR:${error instanceof Error ? error.message : String(error)}`);
         }
     }
