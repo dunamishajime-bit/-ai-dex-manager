@@ -1900,6 +1900,7 @@ self_test() {
     scripts/disdex-hype-zec-core-preempt.ts \
     scripts/disdex-idle-priority-short-live-runner.ts \
     scripts/disdex-idle-priority-short-benign-state-recovery.ts \
+    scripts/disdex-idle-priority-short-protected-rate-budget-recovery.ts \
     scripts/disdex-idle-priority-short-state-migrate.ts \
     scripts/disdex-idle-residual-long-state-migrate.ts \
     lib/idle-priority-short-runner.ts \
