@@ -1,0 +1,32 @@
+name: V12 V4 three exit floors — isolated release preflight
+on:
+  push:
+    branches:
+      - feature/v12v4-three-exit-floors-from-live-6f97-20261016
+    paths:
+      - "lib/exit-profit-floor-three*.ts"
+      - "lib/v12-v4-production-lifecycle.ts"
+      - "lib/v12-v4-live-exit-feed.ts"
+      - "lib/v12-v4-runner-engine.ts"
+      - "tests/exit-profit-floor-three*.test.ts"
+      - "tests/v12-v4-three-exit-profit-floor-shadow.test.ts"
+      - ".github/workflows/v12v4-three-exit-shadow-preflight-20261016.yml"
+  workflow_dispatch:
+jobs:
+  release-shadow-compatibility:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - name: Install frozen dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: TypeScript typecheck
+        run: npx tsc --noEmit --pretty false
+      - name: Pure 3-floor policy, H1 observer and stop-cutover mocks
+        run: npx tsx --test tests/exit-profit-floor-three.test.ts tests/exit-profit-floor-three-observers.test.ts tests/exit-profit-floor-three-cutover.test.ts
+      - name: V4 exact H1 durable journal and existing lifecycle regression
+        run: npx tsx --test tests/v12-v4-three-exit-profit-floor-shadow.test.ts tests/v12-v4-production-lifecycle.test.ts tests/v12-v4-live-exit-feed.test.ts tests/v12-v4-runner-engine.test.ts tests/v12-v4-resident-stop-owners.test.ts
