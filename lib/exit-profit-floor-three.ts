@@ -11,6 +11,8 @@
 export const THREE_EXIT_FLOOR_POLICY_ID =
     "DD1296_Q102_MR_V4_G5_X05_H1_FLOOR_20261016" as const;
 export const EXIT_FLOOR_HOUR_MS = 3_600_000;
+/** Both independent signed position and STOP reads must be fresh at decision time. */
+export const THREE_EXIT_FLOOR_SIGNED_MAX_AGE_MS = 30_000;
 
 export type ExitFloorOwner = "Q102" | "V12_V4";
 export type ExitFloorSide = "LONG" | "SHORT";
@@ -199,7 +201,9 @@ export function previewThreeExitFloorReplacement(input:{
         return response("BLOCKED","PROFIT_FLOOR_NOT_CAUSALLY_ARMED");
     if(!Number.isFinite(at)||at<state.effectiveFromTs||
         p.capturedAt<state.effectiveFromTs||o.capturedAt<state.effectiveFromTs||
-        p.capturedAt>at||o.capturedAt>at)
+        p.capturedAt>at||o.capturedAt>at||
+        at-p.capturedAt>THREE_EXIT_FLOOR_SIGNED_MAX_AGE_MS||
+        at-o.capturedAt>THREE_EXIT_FLOOR_SIGNED_MAX_AGE_MS)
         return response("BLOCKED","VENUE_SIGNED_EVIDENCE_TOO_OLD");
     if(o.symbol!==state.symbol||p.symbol!==state.symbol||p.side!==state.side||
         o.side!==(state.side==="LONG"?"SELL":"BUY")||o.type!=="STOP_MARKET"||
