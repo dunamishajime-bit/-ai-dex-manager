@@ -8,6 +8,7 @@ import {executeV4WithContentionAudit} from "../lib/v12-v4-lock-contention-observ
 import {V4ExecutionStore} from "../lib/v12-v4-execution-store";
 import {initializeV4SignedFlatState} from "../lib/v12-v4-signed-bootstrap";
 import {V4RunnerEngine} from "../lib/v12-v4-runner-engine";
+import {FileThreeExitFloorShadowStore} from "../lib/exit-profit-floor-three-shadow-store";
 import {loadV4ClosedCandles,buildV4LiveDecisionBatch} from "../lib/v12-v4-live-candidate-builder";
 import {buildV4RunnerGateTelemetry} from "../lib/v12-v4-gate-telemetry";
 import {productionExitSpec} from "../lib/v12-v4-production-lifecycle";
@@ -211,6 +212,8 @@ export async function buildV4ProductionRuntime(){
   store,accountLock:lock,adapter,client,pendingRegistryPath,
   // OFF by default. Pure journalled H1 observation; never grants order authority.
   threeExitFloorShadowEnabled:process.env.DISDEX_EXIT_FLOOR_THREE_SHADOW==="1",
+  threeExitFloorShadowStore:process.env.DISDEX_EXIT_FLOOR_THREE_SHADOW==="1"
+   ?new FileThreeExitFloorShadowStore(store.path+".profit-floor-three-shadow.json","V12_V4"):undefined,
   fetchDecision,fetchPeers:()=>loadPeers(releaseSha,peerLineageMode),peerLineageMode,
   fetchExitFeed:async symbol=>{
    const now=Date.now(),rows=await client.getKlines(symbol,"1h",500);
