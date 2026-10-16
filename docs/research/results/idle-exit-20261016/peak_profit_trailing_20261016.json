@@ -1,0 +1,258 @@
+{
+  "date_jst": "2026-10-16",
+  "study": "Idle SHORT peak-profit trailing / research-only",
+  "status": "NO_LIVE_PROMOTION__H1_INTEGRATED_NEGATIVE_AND_NO_FULL8_5M_CAUSAL_PARITY",
+  "arm_definition": "Favorable return from entry >= arm at completed bar close; rolling historical max completed close profit; SHORT BUY STOP at entryPrice*(1-maxProfit+gap); effective only on subsequent bar; fill at max(stopPrice,nextBarOpen), extra slippage sensitivity where noted.",
+  "frozen_reference": {
+    "source_v4": "6f97d2cf03877674ec1a845f6c08414f32899f36",
+    "costs_bps": [
+      10,
+      30
+    ],
+    "initial_jpy": 10000,
+    "from": "2025-08-10",
+    "to": "2026-08-10"
+  },
+  "baseline8": {
+    "10": {
+      "finalJPY": 291326103,
+      "PF": 4.04899,
+      "DDPct": -20.420014,
+      "trades": 1222
+    },
+    "30": {
+      "finalJPY": 174749524,
+      "PF": 3.27764,
+      "DDPct": -18.388765,
+      "trades": 1218
+    }
+  },
+  "five_minute_accepted_trade_screen": {
+    "10": {
+      "n": 47,
+      "originalPF": 1.5816,
+      "arm3gap1DOTRENDER": {
+        "PF": 1.5432,
+        "stops": 8,
+        "deltaWeightedPctPoints": -1.98084
+      },
+      "arm4gap0point5DOTRENDER": {
+        "PF": 1.6478,
+        "stops": 6,
+        "deltaWeightedPctPoints": 3.41029,
+        "earlyDeltaPctPoints": 2.90507,
+        "lateDeltaPctPoints": 0.50522,
+        "additional50bpsPF": 1.5919,
+        "additional100bpsPF": 1.5361
+      },
+      "arm4gap0point5ALL": {
+        "PF": 1.408,
+        "deltaWeightedPctPoints": -8.95001
+      }
+    },
+    "30": {
+      "n": 53,
+      "originalPF": 1.3743,
+      "arm3gap1DOTRENDER": {
+        "PF": 1.4138,
+        "stops": 11,
+        "deltaWeightedPctPoints": 1.32891
+      },
+      "arm4gap0point5DOTRENDER": {
+        "PF": 1.5012,
+        "stops": 9,
+        "deltaWeightedPctPoints": 6.83077,
+        "earlyDeltaPctPoints": 2.90737,
+        "lateDeltaPctPoints": 3.92339,
+        "additional50bpsPF": 1.4325,
+        "additional100bpsPF": 1.3638
+      },
+      "arm4gap0point5ALL": {
+        "PF": 1.3048,
+        "deltaWeightedPctPoints": -5.52953
+      }
+    },
+    "uniqueTradesAcrossCosts": 56,
+    "bars": 12012,
+    "missingBars": 0
+  },
+  "full8_H1_integrated": {
+    "all_arm3_gap1": {
+      "10": {
+        "equityJPY": 282156735,
+        "deltaJPY": -9169368,
+        "PF": 4.0186,
+        "DDPct": -20.4162
+      },
+      "30": {
+        "equityJPY": 159021085,
+        "deltaJPY": -15728439,
+        "PF": 3.2236,
+        "DDPct": -18.4016
+      }
+    },
+    "dotrender_arm3_gap1": {
+      "10": {
+        "equityJPY": 287975419,
+        "deltaJPY": -3350684,
+        "PF": 4.046,
+        "DDPct": -20.4093
+      },
+      "30": {
+        "equityJPY": 170511732,
+        "deltaJPY": -4237792,
+        "PF": 3.232,
+        "DDPct": -18.3916
+      }
+    },
+    "dotrender_arm4_gap1": {
+      "10": {
+        "equityJPY": 291172853,
+        "deltaJPY": -153249,
+        "PF": 4.049,
+        "DDPct": -20.4193
+      },
+      "30": {
+        "equityJPY": 172650973,
+        "deltaJPY": -2098551,
+        "PF": 3.2331,
+        "DDPct": -18.389
+      }
+    },
+    "dotrender_arm4_gap0point5": {
+      "10": {
+        "equityJPY": 290784877,
+        "deltaJPY": -541225,
+        "PF": 4.0493,
+        "DDPct": -20.4178
+      },
+      "30": {
+        "equityJPY": 175324803,
+        "deltaJPY": 575278,
+        "PF": 3.2389,
+        "DDPct": -18.387
+      }
+    },
+    "taotia_arm3_gap1": {
+      "10": {
+        "equityJPY": 285412276,
+        "deltaJPY": -5913826,
+        "PF": 4.0219,
+        "DDPct": -20.427
+      },
+      "30": {
+        "equityJPY": 163147855,
+        "deltaJPY": -11601669,
+        "PF": 3.2665,
+        "DDPct": -18.4015
+      }
+    },
+    "dotrender_arm3_gap1_wick": {
+      "10": {
+        "equityJPY": 290143864,
+        "deltaJPY": -1182238,
+        "PF": 4.0623,
+        "DDPct": -20.9145
+      },
+      "30": {
+        "equityJPY": 169909960,
+        "deltaJPY": -4839564,
+        "PF": 3.2071,
+        "DDPct": -22.7745
+      }
+    }
+  },
+  "interactionWith3Change": {
+    "previous3change": {
+      "10": {
+        "equityJPY": 302658260,
+        "PF": 4.1748,
+        "DDPct": -20.2376
+      },
+      "30": {
+        "equityJPY": 198928950,
+        "PF": 3.6347,
+        "DDPct": -18.341
+      }
+    },
+    "dotrender_arm3_gap1_plus3": {
+      "10": {
+        "equityJPY": 298760703,
+        "deltaVs3JPY": -3897557,
+        "PF": 4.1753,
+        "DDPct": -20.3792
+      },
+      "30": {
+        "equityJPY": 188673931,
+        "deltaVs3JPY": -10255019,
+        "PF": 3.5645,
+        "DDPct": -18.3876
+      }
+    },
+    "dotrender_arm4_gap0point5_plus3": {
+      "10": {
+        "equityJPY": 301697724,
+        "deltaVs3JPY": -960536,
+        "PF": 4.1765,
+        "DDPct": -20.2726
+      },
+      "30": {
+        "equityJPY": 193645161,
+        "deltaVs3JPY": -5283789,
+        "PF": 3.533,
+        "DDPct": -21.2135
+      }
+    }
+  },
+  "alreadyObservedLiveExamples_5m": {
+    "JUPUSDT": {
+      "entryPrice": 0.3048,
+      "qty": 225,
+      "arm3gap1HypotheticalExitJST": "2026-10-15 20:35",
+      "exitPrice": 0.295048,
+      "grossProfitUSD": 2.1942,
+      "returnPct": 3.199
+    },
+    "DOTUSDT": {
+      "entryPrice": 1.087,
+      "qty": 65.9,
+      "arm3gap1HypotheticalExitJST": "2026-10-15 23:05",
+      "exitPrice": 1.05887,
+      "grossProfitUSD": 1.8538,
+      "returnPct": 2.588,
+      "peak5mConfirmedCloseGainPct": 3.588,
+      "peakH1ConfirmedCloseGainPct": 2.668
+    }
+  },
+  "disclaimers": [
+    "5m eventwise performance compares original accepted fixed entries only and does not replay shared-wallet gross/slots/positions reallocation.",
+    "8-strategy integration uses H1 completed bar data, which misses significant intrahour peak events; H1 integrated result is not a 5m full strategy replay.",
+    "Post-hoc parameter selection, no clean out-of-sample/forward; only 6-9 activated 5m observed stops in best fixed-entry model.",
+    "Dynamic resident STOP updates and execution under Aster with auth, reduceOnly, partial fill, rate-limit, restart are untested; no orders changed.",
+    "Data complete in 56 accepted 5m trade histories only, NOT entire candidate universe."
+  ],
+  "codeTests": {
+    "passed": 9,
+    "total": 9
+  },
+  "five_minute_accepted_trade_concentration": {
+    "10bps": {
+      "armed4gap0point5DOTRENDERChanged": 6,
+      "better": 4,
+      "worse": 2,
+      "largestBeneficialWeightedPctPoints": 2.3095,
+      "totalGainWeightedPctPoints": 3.4103,
+      "largestWinnerShareOfNetGainPct": 67.7,
+      "remainingGainAfterRemovingLargestWeightedPctPoints": 1.1008
+    },
+    "30bps": {
+      "armed4gap0point5DOTRENDERChanged": 9,
+      "better": 6,
+      "worse": 3,
+      "largestBeneficialWeightedPctPoints": 6.116,
+      "totalGainWeightedPctPoints": 6.8308,
+      "largestWinnerShareOfNetGainPct": 89.5,
+      "remainingGainAfterRemovingLargestWeightedPctPoints": 0.7148
+    }
+  }
+}

@@ -1,0 +1,128 @@
+{
+  "status": "RESEARCH_ONLY_BLOCKED_EXTERNAL_EFFECT_SAMPLE_AND_VENUE_CERTIFICATION",
+  "date_jst": "2026-10-16",
+  "reference": {
+    "source_v4_commit": "6f97d2cf03877674ec1a845f6c08414f32899f36",
+    "source_frozen_engine": "DisDex-five-improvements-20261008/scripts/research/run_v12_v4_priority_gross_v2_sweep.py",
+    "production_common_sha_at_2026_10_16_09_35_jst": "020eb3c5b95186d23bd6406af1986747d442a5bd",
+    "v4_order_enabled_at_audit": false,
+    "pangu_events_unchanged_10bps": 67,
+    "pangu_events_unchanged_30bps": 67,
+    "baseline_replay_parity": "EXACT_10_AND_30_BPS"
+  },
+  "policies": {
+    "Q102:MR": {
+      "activate_favorable_return": 0.03,
+      "protected_return": 0.01
+    },
+    "V12:REC_G5_SLOW_TREND": {
+      "activate_favorable_return": 0.02,
+      "protected_return": 0.005
+    },
+    "V12:REC_X05_TIME_36H": {
+      "activate_favorable_return": 0.025,
+      "protected_return": 0.01
+    },
+    "all_other_strategies": "UNCHANGED",
+    "PENGU": "UNTOUCHED"
+  },
+  "results": {
+    "baseline_10bps": {
+      "final_jpy": 291326102.62,
+      "PF": 4.048992,
+      "max_mtm_dd_pct": -20.420014,
+      "win_pct": 71.603928,
+      "trades": 1222
+    },
+    "base_30bps": {
+      "final_jpy": 174749524.318,
+      "PF": 3.277641,
+      "max_mtm_dd_pct": -18.388765,
+      "win_pct": 68.308703,
+      "trades": 1218
+    },
+    "three_10bps": {
+      "final_jpy": 302658260.101,
+      "delta_jpy": 11332157.481,
+      "PF": 4.174832,
+      "max_mtm_dd_pct": -20.237637,
+      "win_pct": 72.349103,
+      "trades": 1226,
+      "actual_changed_exits": 18
+    },
+    "three_30bps": {
+      "final_jpy": 198928949.984,
+      "delta_jpy": 24179425.666,
+      "PF": 3.634717,
+      "max_mtm_dd_pct": -18.340997,
+      "win_pct": 69.312602,
+      "trades": 1222,
+      "actual_changed_exits": 18
+    },
+    "stop_additional_slippage_50bps": {
+      "10bps": {
+        "final_jpy": 296930355.503,
+        "delta_jpy": 5604252.882,
+        "PF": 4.158929,
+        "max_mtm_dd_pct": -20.369316
+      },
+      "30bps": {
+        "final_jpy": 190919035.356,
+        "delta_jpy": 16169511.038,
+        "PF": 3.59971,
+        "max_mtm_dd_pct": -18.387704
+      }
+    },
+    "stop_additional_slippage_100bps": {
+      "10bps": {
+        "final_jpy": 293318704.695,
+        "delta_jpy": 1992602.075,
+        "PF": 4.119445,
+        "max_mtm_dd_pct": -20.426484
+      },
+      "30bps": {
+        "final_jpy": 187528829.918,
+        "delta_jpy": 12779305.599,
+        "PF": 3.559027,
+        "max_mtm_dd_pct": -18.387599
+      }
+    },
+    "largest_saved_trade_left_unchanged": {
+      "10bps": {
+        "final_jpy": 300477318.733,
+        "delta_jpy": 9151216.112,
+        "PF": 4.096272,
+        "max_mtm_dd_pct": -20.237637
+      },
+      "30bps": {
+        "final_jpy": 196774069.227,
+        "delta_jpy": 22024544.908,
+        "PF": 3.545807,
+        "max_mtm_dd_pct": -18.340997
+      }
+    }
+  },
+  "external_period": {
+    "start_date": "2026-08-11",
+    "end_date": "2026-10-04",
+    "g5_candidates": 2,
+    "x05_candidates": 1,
+    "profit_floors_armed": 0,
+    "profit_floor_fills": 0,
+    "delta_return_pct_points": 0,
+    "v4_selected_repaired_route_only_benchmark": {
+      "n": 258,
+      "PF_10bps": 0.5700272991734117
+    },
+    "disclaimer": "historical external previously viewed for other V4 research; not pristine, not full8; no Q102 MR certification"
+  },
+  "causal_invariant_tests": {
+    "passed": 10,
+    "total": 10,
+    "github_actions_run_id": 38831627319,
+    "github_actions_conclusion": "success"
+  },
+  "research_only": true,
+  "live_runtime_changed": false,
+  "venue_orders_sent": 0
+}

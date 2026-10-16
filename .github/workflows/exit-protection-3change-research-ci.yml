@@ -1,0 +1,26 @@
+name: Exit-protection 3-change research checks
+
+on:
+  push:
+    branches:
+      - research/exit-protection-3candidate-validation-20261016
+    paths:
+      - "scripts/research/exit_protection_3change_*.py"
+      - "scripts/research/test_exit_protection_3change_20261016.py"
+      - ".github/workflows/exit-protection-3change-research-ci.yml"
+  workflow_dispatch:
+
+jobs:
+  research-static-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Python source compiles (no venue credentials)
+        run: |
+          python3 -m py_compile scripts/research/exit_protection_3change_integrated_20261016.py
+          python3 -m py_compile scripts/research/exit_protection_3change_stress_20261016.py
+          python3 -m py_compile scripts/research/exit_protection_3change_external_20261016.py
+          python3 -m py_compile scripts/research/exit_protection_3change_leaveoneout_20261016.py
+      - name: Test causal timing, route isolation, gap and PENGU immutability
+        run: python3 scripts/research/test_exit_protection_3change_20261016.py
