@@ -155,9 +155,21 @@ async function readPrimaryMode(paths: SourcePaths, currentSha: string): Promise<
   }
   const mode = entries.get("DISDEX_PRIMARY_V12_RUNNER");
   if (mode !== "V4" && mode !== "LEGACY") throw new Error("V12_PRIMARY_MODE_SOURCE_INVALID");
-  for (const key of ["DISDEX_V12_V4_PRIMARY_SHA", "DISDEX_V12_V4_PEER_SHA"]) {
-    const value = entries.get(key);
-    if (value !== undefined && normalizeSha(value) !== currentSha) throw new Error("V12_PRIMARY_MODE_SOURCE_INVALID");
+  const primarySha = entries.get("DISDEX_V12_V4_PRIMARY_SHA");
+  const peerSha = entries.get("DISDEX_V12_V4_PEER_SHA");
+  if (mode === "V4") {
+    // V4 is intentionally a mixed-lineage topology: the primary V4 service
+    // may run its own exact release while unchanged peer runners remain on
+    // the current common release.  The later systemd/heartbeat attestation
+    // binds the primary SHA to the sole active V4 unit, so accepting a
+    // different primary SHA here does not weaken the safety gate.
+    if (!primarySha || !normalizeSha(primarySha) || !peerSha || normalizeSha(peerSha) !== currentSha) {
+      throw new Error("V12_PRIMARY_MODE_SOURCE_INVALID");
+    }
+  } else {
+    for (const value of [primarySha, peerSha]) {
+      if (value !== undefined && normalizeSha(value) !== currentSha) throw new Error("V12_PRIMARY_MODE_SOURCE_INVALID");
+    }
   }
   return mode;
 }
@@ -424,13 +436,26 @@ export async function loadV12V4HpObservability(options: V12V4HpObservabilityOpti
   const primaryPermissionIndex = errors.indexOf("V12_PRIMARY_MODE_SOURCE_PERMISSION_DENIED");
   const productionV4Unit = runnerSha ? `disdex-v12-v4@${runnerSha}.service` : null;
   if (v12PrimaryMode === "UNKNOWN" && primaryPermissionIndex >= 0 && currentSha && runnerSha &&
-    currentSha === runnerSha && activeRunnerSha === runnerSha && activeRunnerId === productionV4Unit &&
+    activeRunnerSha === runnerSha && activeRunnerId === productionV4Unit &&
     activeRunnerState === "active/running" && v4RunnerMode === "CERTIFIED" && legacyV12RunnerActive === false) {
     v12PrimaryMode = "V4";
     errors.splice(primaryPermissionIndex, 1);
   }
 
   const shaMismatch = !!(currentSha && runnerSha && currentSha !== runnerSha);
+  // V4 intentionally runs as an independently attested primary release while
+  // the unchanged peer runners remain pinned to the common current release.
+  // The exact systemd unit, fresh heartbeat, certified mode, V4 primary mode,
+  // and absence of the legacy authority are all required before this mixed
+  // lineage can be treated as LIVE.  This does not make a SHA mismatch pass
+  // by itself; it only recognizes the explicitly certified V4 topology.
+  const independentV4ReleaseAttested = !!(
+    currentSha && runnerSha && activeRunnerSha === runnerSha &&
+    activeRunnerId === productionV4Unit &&
+    activeRunnerState === "active/running" && heartbeatFresh &&
+    v4RunnerMode === "CERTIFIED" && v12PrimaryMode === "V4" &&
+    legacyV12RunnerActive === false
+  );
   const runtimeErrors = errors.filter(error => !/^(V4_DECISION_|V4_CANDIDATE_|V4_FILTERED_)/.test(error));
   const sourceIntegrityError = runtimeErrors.some(error =>
     /SCHEMA|POLICY|SAFETY|CONFLICTED|MISMATCH|INCOMPLETE|UNSAFE|OUTSIDE|ROW_INVALID|IDENTITY_INVALID|JSON_SOURCE_INVALID|DUPLICATE/.test(error));
@@ -439,7 +464,7 @@ export async function loadV12V4HpObservability(options: V12V4HpObservabilityOpti
     activeRunnerState !== "active/running" || legacyV12RunnerActive === null;
 
   let displayStatus: V12V4HpDisplayStatus;
-  if (shaMismatch) displayStatus = "SHA_MISMATCH";
+  if (shaMismatch && !independentV4ReleaseAttested) displayStatus = "SHA_MISMATCH";
   else if (sourceIntegrityError) displayStatus = "SOURCE_ERROR";
   else if (staleEvidence) displayStatus = "STALE";
   else if (v4RunnerMode === "SHADOW") displayStatus = "SHADOW";
@@ -447,8 +472,7 @@ export async function loadV12V4HpObservability(options: V12V4HpObservabilityOpti
   else if (runtimeEvidenceUnavailable) displayStatus = "UNAVAILABLE";
   else if (v4RunnerMode === "CANARY" || v12PrimaryMode === "LEGACY") displayStatus = "STAGED_NOT_LIVE";
   else if (v4RunnerMode === "UNKNOWN" || v12PrimaryMode === "UNKNOWN") displayStatus = "UNAVAILABLE";
-  else if (currentSha === runnerSha && activeRunnerSha === runnerSha && heartbeatFresh &&
-    v4RunnerMode === "CERTIFIED" && v12PrimaryMode === "V4" && legacyV12RunnerActive === false) displayStatus = "LIVE_VERIFIED";
+  else if (independentV4ReleaseAttested) displayStatus = "LIVE_VERIFIED";
   else displayStatus = "STAGED_NOT_LIVE";
 
   return {

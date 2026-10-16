@@ -240,3 +240,29 @@ test("stale V4 heartbeat is visibly stale while missing optional decision teleme
     await rm(missingFixture.root, { recursive: true, force: true });
   }
 });
+
+test("mixed-SHA V4 primary contract accepts an independently attested V4 release", async () => {
+  const f = await fixture({
+    heartbeatSha: OTHER_SHA,
+    operationMode: "CERTIFIED",
+    activeService: "production",
+    primaryMode: "V4",
+    legacyRunnerActive: false,
+  });
+  try {
+    await writeFile(f.options.paths.primaryModePath!, [
+      "DISDEX_PRIMARY_V12_RUNNER=V4",
+      `DISDEX_V12_V4_PRIMARY_SHA=${OTHER_SHA}`,
+      `DISDEX_V12_V4_PEER_SHA=${SHA}`,
+      "",
+    ].join("\n"));
+    const result = await loadV12V4HpObservability(f.options);
+    assert.equal(result.displayStatus, "LIVE_VERIFIED", result.errors.join("|"));
+    assert.equal(result.actual.currentReleaseSha, SHA);
+    assert.equal(result.actual.v4ReleaseSha, OTHER_SHA);
+    assert.equal(result.actual.activeRunnerSha, OTHER_SHA);
+    assert.deepEqual(result.errors, []);
+  } finally {
+    await rm(f.root, { recursive: true, force: true });
+  }
+});
