@@ -14,6 +14,8 @@ import {V4OrderCycle} from "./v12-v4-order-cycle";
 import {verifyV4ResidentStops} from "./v12-v4-resident-stop-owners";
 import {planV4RetiredStops} from "./v12-v4-stop-retirement";
 import {appendV4ClosedExitBars,type V4ExitFeed} from "./v12-v4-live-exit-feed";
+import {observeThreeFloorH1History} from "./exit-profit-floor-three-observers";
+import type {FileThreeExitFloorShadowStore} from "./exit-profit-floor-three-shadow-store";
 import {applyProductionEvent,planProductionEntry,productionExitSpec,nativeEvidenceForProductionRoute,type EntryPlanInput} from "./v12-v4-production-lifecycle";
 import {buildV4AccountMark,type V4SignedMark} from "./v12-v4-peer-account-mark";
 import type {V4PeerSource,V4PeerLineageMode} from "./v12-v4-peer-state-owners";
@@ -46,8 +48,9 @@ export interface V4RunnerDependencies{
  referencePrice:(symbol:string)=>Promise<number>;
  minimumVenueOrderNotional:(symbol:string,price:number)=>Promise<number>;
  canaryEntry?:{maxNotionalUsd:number};
- /** Disabled by default. Journal read-only G5/X05 profit-floor observations; no venue orders. */
+ /** Disabled by default. Observes G5/X05, writing only a separate rollback-safe sidecar. */
  threeExitFloorShadowEnabled?:boolean;
+ threeExitFloorShadowStore?:Pick<FileThreeExitFloorShadowStore,"load"|"save">;
  peerLineageMode?:V4PeerLineageMode;
  now?:()=>number;
 }
@@ -310,9 +313,34 @@ export class V4RunnerEngine{
   for(const old of opens){
    if(!old.plannedExit){
     const feed=await d.fetchExitFeed(old.candidate.symbol);
-    const current=d.store.read(),updated=appendV4ClosedExitBars(current.state,old.id,feed,this.now(),
-      {threeExitFloorShadowEnabled:d.threeExitFloorShadowEnabled===true});
+    const current=d.store.read(),updated=appendV4ClosedExitBars(current.state,old.id,feed,this.now());
     if(updated!==current.state)d.store.commit(current.revision,{...current,state:updated});
+    // The V4 order ledger remains byte-identical to the original 6f97 release.
+    // Shadow observations are recorded separately while the account lock is held,
+    // AFTER the ordinary exit journal has committed, without any broker mutation.
+    if(d.threeExitFloorShadowEnabled===true&&
+       ["REC_G5_SLOW_TREND","REC_X05_TIME_36H"].includes(old.candidate.route)){
+      try{
+       if(!d.threeExitFloorShadowStore)throw Error("V4_EXIT_FLOOR_SHADOW_SIDECAR_NOT_CONFIGURED");
+       const leg=d.store.read().state.legs[old.id];
+       if(leg.status==="OPEN"&&leg.qty>0&&leg.entryNotional>0){
+        const prev=await d.threeExitFloorShadowStore.load(leg.id);
+        const candles=feed.closed
+         .filter(b=>leg.lastExitBarTs!==undefined&&b.openTs<=leg.lastExitBarTs)
+         .map(b=>({timestampMs:b.openTs,open:b.open,high:b.high,low:b.low,close:b.close}));
+        const sample=observeThreeFloorH1History({
+         identity:{owner:"V12_V4",route:leg.candidate.route,symbol:leg.candidate.symbol,
+          side:leg.candidate.effectiveSide,entryTs:leg.entryTs,
+          entryPrice:leg.entryNotional/leg.qty,entryQuantity:leg.qty,legId:leg.id},
+         closedCandles:candles,observedAt:this.now(),previous:prev,
+        });
+        if(sample.newBars>0&&sample.state)await d.threeExitFloorShadowStore.save(sample.state);
+       }
+      }catch(e){
+       console.warn(JSON.stringify({category:"V4_EXIT_FLOOR_SHADOW_ONLY",
+        message:e instanceof Error?e.message:"UNAVAILABLE",ordersSent:0,orderEnabledUnchanged:true}));
+      }
+    }
    }
    const leg=d.store.read().state.legs[old.id];
    if(!leg.plannedExit)continue;
