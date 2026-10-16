@@ -9,6 +9,7 @@ on:
       - "lib/exit-profit-floor-three-cutover.ts"
       - "lib/disdex-quality102-causal-v1-state.ts"
       - "lib/disdex-quality102-causal-v1-runner.ts"
+      - "scripts/disdex-quality102-causal-v1-live-runner.ts"
       - "lib/v12-v4-production-lifecycle.ts"
       - "lib/v12-v4-live-exit-feed.ts"
       - "lib/v12-v4-runner-engine.ts"
