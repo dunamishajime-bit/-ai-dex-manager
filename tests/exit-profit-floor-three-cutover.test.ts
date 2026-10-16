@@ -109,6 +109,17 @@ test("partial/mismatched actual venue position is not authorized",()=>{
      orders:[stop,newStop],position:p,at:at+1500}).phase,"MANUAL_REVIEW");
  }
 });
+test("late signed new STOP readback expires instead of authorizing old STOP cancel",()=>{
+ const {j,stop,position,at}=awaitNew();
+ const candidate=placed(j,stop);
+ const result=advanceThreeFloorCutover(j,{type:"NEW_ORDER_READBACK",
+   orders:[stop,candidate],position:{...position,capturedAt:at+31_001},
+   at:at+31_001});
+ assert.equal(result.phase,"MANUAL_REVIEW");
+ const earlier=advanceThreeFloorCutover(j,{type:"NEW_ORDER_READBACK",
+   orders:[stop,candidate],position,at:at+31_001});
+ assert.equal(earlier.phase,"MANUAL_REVIEW");
+});
 test("failed old-stop cancellation remains manual review, never completed",()=>{
  const {j,newStop,stop,position,at}=verified();
  const next=advanceThreeFloorCutover(
