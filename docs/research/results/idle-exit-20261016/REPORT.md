@@ -127,3 +127,12 @@ The full-eight research engine may update many pre-admission prospective Idle ex
 Implementation would require signed Aster positions/orders, safely modifying STOP and TAKE_PROFIT reduceOnly quantities with atomic readback, restart persistence and shared gross/margin/rate-budget audits. No LIVE order settings, original protective STOPs, PENGU, operator artifacts or risk gates were modified.
 
 Reproducible research source: scripts/research/idle_peak3_floor_helper_20261016.py, idle_peak3_frozen_sweep_20261016.py, idle_peak3_full8_integrated_20261016.py and test_idle_peak3_floor_20261016.py. CI tested **9/9** causal isolation cases [success, run 38843233036](https://github.com/dunamishajime-bit/-ai-dex-manager/actions/runs/38843233036). Detailed numerical results in profit3_then_minus1_sweep.json.
+
+### Event-parity verification (additional independent check)
+
+For the specific three-percent-arm / negative-one-percent-floor standalone portfolio rerun:
+
+- **10bps:** All original accepted event tuples (entry, exit, price, symbol) unchanged across PENGU **67/67**, Idle **47/47**, V12 **828/828**, Q102 **136/136**, FET **7/7**, HYPE **28/28**. This is consistent with no accepted early stop.
+- **30bps:** PENGU **67/67** unchanged, V12 **824/824** unchanged, Q102 **136/136** unchanged, FET **7/7** unchanged. Idle has **52/53** original accepted tuples identical and one early DOT exit (2026-05-23), while HYPE also has an altered accepted event inventory (**23 original versus 24 candidate, with 22 exact matches**), confirming capital/admission changes **outside** the Idle single-leg screen.
+- Accordingly, the standalone Idle PF improvement at 30bps does not imply improved full-eight portfolio equity. Prior paper portfolio delta remains **-JPY3,602,631**.
+
