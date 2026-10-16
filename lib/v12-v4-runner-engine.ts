@@ -46,6 +46,8 @@ export interface V4RunnerDependencies{
  referencePrice:(symbol:string)=>Promise<number>;
  minimumVenueOrderNotional:(symbol:string,price:number)=>Promise<number>;
  canaryEntry?:{maxNotionalUsd:number};
+ /** Disabled by default. Journal read-only G5/X05 profit-floor observations; no venue orders. */
+ threeExitFloorShadowEnabled?:boolean;
  peerLineageMode?:V4PeerLineageMode;
  now?:()=>number;
 }
@@ -308,7 +310,8 @@ export class V4RunnerEngine{
   for(const old of opens){
    if(!old.plannedExit){
     const feed=await d.fetchExitFeed(old.candidate.symbol);
-    const current=d.store.read(),updated=appendV4ClosedExitBars(current.state,old.id,feed,this.now());
+    const current=d.store.read(),updated=appendV4ClosedExitBars(current.state,old.id,feed,this.now(),
+      {threeExitFloorShadowEnabled:d.threeExitFloorShadowEnabled===true});
     if(updated!==current.state)d.store.commit(current.revision,{...current,state:updated});
    }
    const leg=d.store.read().state.legs[old.id];
