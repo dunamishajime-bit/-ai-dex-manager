@@ -106,7 +106,7 @@ def causal_exit(x,policy,obs):
     break
   if newexit is None:return x
   newts,newpx,reason=newexit
- elif policy in ("q102mr_floor3","v4g5_floor2","v4x05_floor2p5","residual_floor2","combined","v4_only","combined_no_mr","combined_no_residual","combined_no_x05","combined_no_g5","idle_and_three","idle_and_three_slip50"):
+ elif policy in ("q102mr_floor3","v4g5_floor2","v4x05_floor2p5","residual_floor2","combined","v4_only","combined_no_mr","combined_no_residual","combined_no_x05","combined_no_g5","idle_and_three","idle_and_three_slip50","idle_partial1p5_combo3"):
   applied=False
   arm=0;lock=0
   if policy in ("q102mr_floor3","combined","combined_no_residual","combined_no_x05","combined_no_g5","idle_and_three","idle_and_three_slip50","idle_partial1p5_combo3") and stype=="Q102" and x.get("family")=="MR":
