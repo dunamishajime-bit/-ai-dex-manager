@@ -56,3 +56,19 @@ Only Q102 MR and two independent V4 routes are selected. No PENGU, HYPE, FET, Id
 - Do not delete the sidecar or invalidate existing STOP identities while positions may remain open. If any future order transition is started, rollback requires signed order+position readback and handoff to existing resident STOP owner, not merely a code rollback.
 
 **Status**: code created on two independent GitHub review branches; test results and latest exact commit SHAs are tracked in the respective CI/PR. No LIVE deployment, no STOP replacement, no transfer of risk authorization.
+
+## Final local isolated code verification (2026-10-16 JST)
+
+The staged candidates were cloned into **two new disposable, isolated source directories** on the user's authorized Windows PC, leaving existing research worktrees and the VPS Production state untouched. Node v24.13.1; dependencies installed with `npm ci --ignore-scripts --no-audit --no-fund`. No broker credentials or mutation APIs were called.
+
+- **Q102 branch** (`fd77f336f594acca9585a541a8ac8aee4cdc6a7c`): `node node_modules/typescript/bin/tsc --noEmit --pretty false` **PASS**. Local `node node_modules/tsx/dist/cli.mjs --test` for new policy/observer/cutover/sidecar and existing STOP ledger: **58 passed, 0 failed**.
+- **V12 V4 branch** (test fixture updated at `e4bf6fa9cbc820006ea16d34ef5d235a76d51a73`): same full TypeScript check **PASS**. Local new policy/observer/cutover/sidecar + exact independent V4 41-route lifecycle/exit feed/runner/STOP regression: **69 passed, 0 failed**. Initially one floating price assertion wrongly used strict equality for 100.49999999999999 vs 100.5; test updated to a <1e-9 tolerance and entire 69-suite rerun PASS.
+- Independent check against original GitHub blob SHA proves unchanged **Q102 state schema**, unchanged **V4 production event lifecycle**, and unchanged **V4 live exit feed**. No legacy state migrations or operator switches.
+- Targeted GitHub Actions queued amid repository-wide workflow backlog at time of local tests. Older staged revisions completed in CI SUCCESS, but do **not** claim latest branch GH CI has passed without separately confirming the exact final SHA.
+- Post-implementation VPS **read-only** audit at **2026-10-16 17:02:05 JST**:
+  - Common production exact SHA `ea289577256af9c19544a1883013a128bbb53ec5`, previous release `9df89474b36f01608ed6155697de342f861d3626`.
+  - Independently running V4 `6f97d2cf03877674ec1a845f6c08414f32899f36`, PID1216532, 0 restarts, active.
+  - Q102 common EA PID1216155, 0 restarts, active; PENGU PID1215747, 0 restarts, active.
+  - Shared Risk **tripped=true**, lossPct **5.638403%** versus 7.5% limit (latched). Shared Kill Switch **active=false**. Latched Shared Risk not reset or bypassed.
+  - Signed Aster position/order inventory was **not** fetched for this final audit; a local state/SHA/PID reading alone is NOT proof of protected venue status.
+- **Operational verdict**: model scope and off-by-default SIDE-CAR SHADOW fully staged/tested; zero Aster orders sent, zero STOPs cancelled, zero runners restarted, zero Production deployments. Real Aster reduceOnly-profit-STOP replacement, forward out-of-sample activation evidence and operator SHA-scoped authorization are STILL BLOCKED. DRAFT PR only, keep production untouched.
