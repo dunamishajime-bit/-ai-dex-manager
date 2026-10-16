@@ -28,6 +28,6 @@ jobs:
       - name: TypeScript typecheck
         run: npx tsc --noEmit --pretty false
       - name: Pure 3-floor policy, H1 observer and stop-cutover mocks
-        run: npx tsx --test tests/exit-profit-floor-three.test.ts tests/exit-profit-floor-three-observers.test.ts tests/exit-profit-floor-three-cutover.test.ts
+        run: npx tsx --test tests/exit-profit-floor-three.test.ts tests/exit-profit-floor-three-observers.test.ts tests/exit-profit-floor-three-cutover.test.ts tests/exit-profit-floor-three-shadow-store.test.ts
       - name: V4 exact H1 durable journal and existing lifecycle regression
         run: npx tsx --test tests/v12-v4-three-exit-profit-floor-shadow.test.ts tests/v12-v4-production-lifecycle.test.ts tests/v12-v4-live-exit-feed.test.ts tests/v12-v4-runner-engine.test.ts tests/v12-v4-resident-stop-owners.test.ts
