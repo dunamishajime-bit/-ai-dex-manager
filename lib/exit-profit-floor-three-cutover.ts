@@ -38,7 +38,7 @@ export interface ThreeFloorCutoverJournal {
  ordersSent:0; // The journal and this library never issue calls.
 }
 export type CutoverNext =
- "PERSIST_INITIAL_INTENT"|"PLACE_EXACT_NEW_CLIENT_ID_ONCE"|
+ "PERSIST_INITIAL_INTENT"|"RECORD_PLACE_INTENT_BEFORE_SUBMISSION"|
  "READ_NEW_ORDER_ONLY_NO_RETRY"|"PERSIST_NEW_VERIFICATION"|
  "RECORD_CANCEL_INTENT_BEFORE_CANCEL"|"READ_FINAL_NEW_AND_OLD"|
  "COMPLETE_NO_ACTION"|"STOP_AND_MANUAL_REVIEW";
@@ -96,7 +96,8 @@ export function prepareThreeFloorCutover(input:{
 export function nextThreeFloorCutoverAction(j:ThreeFloorCutoverJournal):CutoverNext{
  switch(j.phase){
  case "INTENT_DURABLE_WRITE_REQUIRED":return "PERSIST_INITIAL_INTENT";
- case "VENUE_PLACE_INFLIGHT":case "AWAIT_NEW_READBACK":return "READ_NEW_ORDER_ONLY_NO_RETRY";
+ case "VENUE_PLACE_INFLIGHT":return "RECORD_PLACE_INTENT_BEFORE_SUBMISSION";
+ case "AWAIT_NEW_READBACK":return "READ_NEW_ORDER_ONLY_NO_RETRY";
  case "NEW_VERIFIED":return "RECORD_CANCEL_INTENT_BEFORE_CANCEL";
  case "OLD_CANCEL_INFLIGHT":case "AWAIT_FINAL_READBACK":return "READ_FINAL_NEW_AND_OLD";
  case "COMPLETE":return "COMPLETE_NO_ACTION";
@@ -140,7 +141,7 @@ export function advanceThreeFloorCutover(j:ThreeFloorCutoverJournal,event:ThreeF
    if(j.phase!=="AWAIT_NEW_READBACK")break;
    return j; // No blind retry; read venue by exact clientOrderId.
  case "NEW_ORDER_READBACK":{
-   if(j.phase!=="AWAIT_NEW_READBACK"&&j.phase!=="VENUE_PLACE_INFLIGHT")break;
+   if(j.phase!=="AWAIT_NEW_READBACK")break;
    if(event.at<j.startedAt||!signedPosition(event.position,j,event.at))
       return unsafe(j,"NEW_READBACK_POSITION_DRIFT_OR_MARK_CROSSED");
    const newActive=event.orders.filter(o=>o.clientOrderId===j.newClientOrderId);
