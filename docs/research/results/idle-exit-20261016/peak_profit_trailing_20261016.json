@@ -234,5 +234,25 @@
   "codeTests": {
     "passed": 9,
     "total": 9
+  },
+  "five_minute_accepted_trade_concentration": {
+    "10bps": {
+      "armed4gap0point5DOTRENDERChanged": 6,
+      "better": 4,
+      "worse": 2,
+      "largestBeneficialWeightedPctPoints": 2.3095,
+      "totalGainWeightedPctPoints": 3.4103,
+      "largestWinnerShareOfNetGainPct": 67.7,
+      "remainingGainAfterRemovingLargestWeightedPctPoints": 1.1008
+    },
+    "30bps": {
+      "armed4gap0point5DOTRENDERChanged": 9,
+      "better": 6,
+      "worse": 3,
+      "largestBeneficialWeightedPctPoints": 6.116,
+      "totalGainWeightedPctPoints": 6.8308,
+      "largestWinnerShareOfNetGainPct": 89.5,
+      "remainingGainAfterRemovingLargestWeightedPctPoints": 0.7148
+    }
   }
 }
