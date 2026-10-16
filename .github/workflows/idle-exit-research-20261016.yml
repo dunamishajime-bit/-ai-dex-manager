@@ -1,0 +1,24 @@
+name: Idle exit research static verification
+on:
+  push:
+    branches:
+      - research/idle-profit-exit-validation-20261016
+    paths:
+      - "scripts/research/idle_*_20261016.py"
+      - "scripts/research/test_idle_exit_research_20261016.py"
+      - ".github/workflows/idle-exit-research-20261016.yml"
+  workflow_dispatch:
+jobs:
+  isolated-idle-exit-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile research scripts (no credentials / no venue calls)
+        run: |
+          python3 -m py_compile scripts/research/idle_conditional_exit_sweep_20261016.py
+          python3 -m py_compile scripts/research/idle_partial_exit_sweep_20261016.py
+          python3 -m py_compile scripts/research/idle_btc_rebound_integrated_20261016.py
+          python3 -m py_compile scripts/research/idle_partial_synthetic_full8_20261016.py
+      - name: Run isolated Idle causal and route invariants
+        run: python3 scripts/research/test_idle_exit_research_20261016.py
