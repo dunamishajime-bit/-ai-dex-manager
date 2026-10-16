@@ -1,6 +1,4 @@
 import { validateStopLedger } from "./resident-stop-ledger";
-import { validateThreeExitFloorShadowState } from "./exit-profit-floor-three-observers";
-import type { ExitFloorH1State } from "./exit-profit-floor-three";
 import { validateResidentStopProtection, type ResidentStopProtection } from "./venue-resident-stop";
 import { randomUUID } from "node:crypto";
 import { mkdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
@@ -47,7 +45,6 @@ export interface Quality102CausalV1State {
   lastCompletedIdempotencyKey?: string;
   position?: {
     stopLedger?: import("./resident-stop-ledger").StopLedger;
-    threeExitFloorShadow?: ExitFloorH1State;
     residentStop?: ResidentStopProtection;
     acceptedEntryGross?: number;
     symbol: string;
@@ -128,7 +125,7 @@ function optionalTimestamp(value: unknown, field: string): number | undefined {
 function normalizePosition(value: unknown): Quality102CausalV1State["position"] {
   if (value === undefined) return undefined;
   const raw = record(value, "position");
-  exactKeys(raw, ["symbol", "side", "quantity", "entryPrice", "entryTs", "hardStop", "bestPrice", "trailActive", "family", "variant", "layer", "exitPolicy", "maxHoldHours", "residentStop", "acceptedEntryGross", "stopLedger", "threeExitFloorShadow"], "position");
+  exactKeys(raw, ["symbol", "side", "quantity", "entryPrice", "entryTs", "hardStop", "bestPrice", "trailActive", "family", "variant", "layer", "exitPolicy", "maxHoldHours", "residentStop", "acceptedEntryGross", "stopLedger"], "position");
   if(raw.acceptedEntryGross!==undefined&&(!(typeof raw.acceptedEntryGross==="number"&&Number.isFinite(raw.acceptedEntryGross)&&raw.acceptedEntryGross>0&&raw.acceptedEntryGross<=3)))malformed("position.acceptedEntryGross");
   if (raw.side !== -1 && raw.side !== 1) malformed("position.side");
   if (raw.hardStop !== undefined && !(typeof raw.hardStop === "number" && Number.isFinite(raw.hardStop) && raw.hardStop > 0 && raw.hardStop <= 0.15)) malformed("position.hardStop");
@@ -143,7 +140,6 @@ function normalizePosition(value: unknown): Quality102CausalV1State["position"] 
     symbol: requiredString(raw.symbol, "position.symbol"), side: raw.side,
     ...(raw.acceptedEntryGross === undefined ? {} : { acceptedEntryGross: raw.acceptedEntryGross as number }),
     ...(raw.stopLedger === undefined ? {} : { stopLedger: validateStopLedger(raw.stopLedger) }),
-    ...(raw.threeExitFloorShadow === undefined ? {} : { threeExitFloorShadow: validateThreeExitFloorShadowState(raw.threeExitFloorShadow) }),
     ...(raw.residentStop === undefined ? {} : { residentStop: validateResidentStopProtection(raw.residentStop) }),
     quantity: positiveNumber(raw.quantity, "position.quantity"), entryPrice: positiveNumber(raw.entryPrice, "position.entryPrice"), entryTs: finiteNumber(raw.entryTs, "position.entryTs"),
     ...(raw.hardStop === undefined ? {} : { hardStop: raw.hardStop }), ...(raw.bestPrice === undefined ? {} : { bestPrice: raw.bestPrice }), ...(raw.trailActive === undefined ? {} : { trailActive: raw.trailActive }),
