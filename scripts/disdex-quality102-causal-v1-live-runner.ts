@@ -1,4 +1,5 @@
 import { AsterResidentStopGateway } from "../lib/venue-resident-stop";
+import { FileThreeExitFloorShadowStore } from "../lib/exit-profit-floor-three-shadow-store";
 import { findManagedOrdinaryResidentStops } from "../lib/disdex-managed-protective-orders";
 import "dotenv/config";
 
@@ -514,6 +515,9 @@ export function buildQuality102CausalV1Runner(env: NodeJS.ProcessEnv = process.e
         })
         : undefined;
     const runner = new Quality102CausalV1Runner({
+        threeExitFloorShadowStore: String(env.DISDEX_EXIT_FLOOR_THREE_SHADOW || "") === "1"
+            ? new FileThreeExitFloorShadowStore(resolve(config.stateRoot, "profit-floor-three-shadow.json"), "Q102")
+            : undefined,
         marketData: new Quality102CausalV1AsterMarketDataProvider(client, {
             symbols: config.symbols,
             historyHours: config.historyHours,
@@ -543,6 +547,8 @@ export function buildQuality102CausalV1Runner(env: NodeJS.ProcessEnv = process.e
         },
         config: {
             residentStopRequired: config.mode === "LIVE",
+            // Strictly observation-only. Defaults OFF; no resident STOP placement or cancellation.
+            threeExitFloorShadowEnabled: String(env.DISDEX_EXIT_FLOOR_THREE_SHADOW || "") === "1",
             mode: config.mode,
             enabled: config.enabled,
             liveTradingEnabled: config.liveTradingEnabled,

@@ -1,0 +1,31 @@
+name: Q102 MR exit profit floor — common-release isolated CI
+on:
+  push:
+    branches:
+      - feature/q102mr-three-exit-from-common-ea289-20261016
+    paths:
+      - "lib/exit-profit-floor-three*.ts"
+      - "lib/disdex-quality102-causal-v1-state.ts"
+      - "lib/disdex-quality102-causal-v1-runner.ts"
+      - "scripts/disdex-quality102-causal-v1-live-runner.ts"
+      - "tests/exit-profit-floor-three*.test.ts"
+      - ".github/workflows/q102mr-three-exit-preflight-20261016.yml"
+  workflow_dispatch:
+jobs:
+  q102-stop-shadow-no-pengu-mutation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+      - name: Install dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: TypeScript full compile with original Q102 common-lineage
+        run: npx tsc --noEmit --pretty false
+      - name: Causal three-route H1, signed-STOP preflight and simulated cutover
+        run: npx tsx --test tests/exit-profit-floor-three.test.ts tests/exit-profit-floor-three-observers.test.ts tests/exit-profit-floor-three-cutover.test.ts tests/exit-profit-floor-three-shadow-store.test.ts
+      - name: Existing Q102 and PENGU resident STOP regression
+        run: npx tsx --test tests/venue-resident-stop.test.ts tests/resident-stop-ledger.test.ts tests/resident-stop-observation.test.ts tests/resident-stop-runner-integration.test.ts
