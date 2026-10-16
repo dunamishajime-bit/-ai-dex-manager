@@ -49,6 +49,23 @@ export function classifyIdleProtectedPositionRateBudgetDeferral(state: IdleState
     return `IDLE_PROTECTED_POSITION_RATE_BUDGET_DEFERRED:${deferred.reason}`;
 }
 
+/**
+ * A protected position remains exchange-owned while a shared read-only rate
+ * budget is saturated. Persist a heartbeat so resident-stop observation does
+ * not mistake a safe retry deferral for a stale or unknown owner.
+ */
+export function heartbeatIdleProtectedRateBudgetDeferral(state: IdleState, reason: string, now: number): IdleState {
+    return {
+        ...state,
+        updatedAt: now,
+        lastDecision: {
+            decisionTs: now,
+            accepted: false,
+            reason,
+        },
+    };
+}
+
 export type IdlePriorityShortTickResult = {
     status: "disabled" | "locked" | "shadow" | "held" | "no-change" | "completed" | "manual-review";
     message: string;
@@ -765,6 +782,9 @@ export class IdlePriorityShortRunner {
             if (state) {
                 const protectedDeferred = classifyIdleProtectedPositionRateBudgetDeferral(state, error);
                 if (protectedDeferred) {
+                    await this.dependencies.stateStore.save(
+                        heartbeatIdleProtectedRateBudgetDeferral(state, protectedDeferred, this.now()),
+                    );
                     return { status: "held", message: protectedDeferred, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
                 }
                 const deferred = classifyIdleFlatRateBudgetDeferral(state, error);
