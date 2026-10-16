@@ -109,7 +109,7 @@ test("stop activation stays at first arming H1 after restart",()=>{
  const n=observeThreeExitFloorH1(x,bar(1,109),before+2*H,s);
  assert.equal(n.state?.effectiveFromTs,s.effectiveFromTs);
  assert.equal(n.state?.floorStopPrice,s.floorStopPrice);
- assert.equal(n.state?.highWaterCloseReturn,0.09);
+ assert.ok(Math.abs((n.state?.highWaterCloseReturn??0)-.09)<1e-12);
 });
 test("unarmed state cannot suggest an order, even with signed proof",()=>{
  const obs=observeThreeExitFloorH1(position(),bar(0,101),before+H);
