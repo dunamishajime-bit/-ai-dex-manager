@@ -98,3 +98,7 @@ Scripts require the exact frozen original research worktree pointed to by `DISDE
 Actions verified: [Idle static research CI success](https://github.com/dunamishajime-bit/-ai-dex-manager/actions/runs/38839310623). Research path does not place orders. The previously selected three-change research still lacks external activated cases and venue STOP lifecycle certification. **Keep all LIVE trading contracts unchanged.**
 
 **Final status: IDLE EXIT FLAW IDENTIFIED AND RESEARCH COMPARISONS COMPLETED; NO VERIFIED SAFER LIVE EXIT IMPROVEMENT YET.**
+
+## Follow-up production read-only verification (2026-10-16 11:16:48 JST)
+
+Common Production release remained `020eb3c5b95186d23bd6406af1986747d442a5bd`; Idle runner PID **653687** remained active with **0** restarts. Shared Kill Switch inactive. **Shared Risk remained tripped=true**, measured daily loss **7.9770%** above its configured 7.5% maximum, with local reported unrealized PnL **-5.4038 USDT**. Idle's local persisted DOT SHORT remained **65.9 contracts**, entry **1.087**, hard STOP **1.196**, TAKE_PROFIT **0.815**, local protectionVerified true, scheduled time exit 2026-10-16 **21:20 JST**. Pending and manual-review states were absent. This is a local VPS state read, **not independent signed Aster position/order proof**. Nothing was reset, cancelled, traded, or restarted for this study.
