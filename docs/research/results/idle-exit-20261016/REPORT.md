@@ -102,3 +102,28 @@ Actions verified: [Idle static research CI success](https://github.com/dunamisha
 ## Follow-up production read-only verification (2026-10-16 11:16:48 JST)
 
 Common Production release remained `020eb3c5b95186d23bd6406af1986747d442a5bd`; Idle runner PID **653687** remained active with **0** restarts. Shared Kill Switch inactive. **Shared Risk remained tripped=true**, measured daily loss **7.9770%** above its configured 7.5% maximum, with local reported unrealized PnL **-5.4038 USDT**. Idle's local persisted DOT SHORT remained **65.9 contracts**, entry **1.087**, hard STOP **1.196**, TAKE_PROFIT **0.815**, local protectionVerified true, scheduled time exit 2026-10-16 **21:20 JST**. Pending and manual-review states were absent. This is a local VPS state read, **not independent signed Aster position/order proof**. Nothing was reset, cancelled, traded, or restarted for this study.
+
+## Additional research: after +3% profit, stop if return declines to -1% (2026-10-16)
+
+This is **absolute position return relative to entry**, not a one-percentage-point drawdown from a +3% profit peak. For SHORT positions the proposed STOP trigger price is entryPrice × 1.01. The backtest activates the STOP only after a completed H1 close has exceeded +3% favorable movement; fill in a later H1 is at the STOP or adverse opening-gap price. Funding and exchange-side partial fills remain modeled, not certified.
+
+**Frozen accepted Idle entries**: 10bps had 47 trades, 13 reached +3%, **none** subsequently triggered the -1% STOP before normal exit. PF unchanged 1.5816. At 30bps, 53 accepted entries, 15 armed and **one** STOP triggered; standalone PF 1.3743 to 1.4124.
+
+| Modeled eight-strategy policy | 10bps final JPY | 10bps PF / DD | 30bps final JPY | 30bps PF / DD |
+|---|---:|---|---:|---|
+| Current development baseline | 291,326,103 | 4.049 / -20.420% | 174,749,524 | 3.278 / -18.389% |
+| Proposed Idle +3% arm, -1% STOP | **291,326,103** | 4.049 / -20.420% | **171,146,893** | 3.209 / -18.389% |
+| Idle +3% arm, +0.5% secured STOP | 286,882,023 | 4.052 / -20.406% | 168,135,793 | 3.235 / -18.395% |
+| Idle arm on +3% H1 intrabar wick, -1% STOP next H1 | 289,956,903 | 4.026 / -20.907% | 164,638,129 | 3.159 / **-22.758%** |
+| Prior Q102 MR + V12 V4 G5/X05 three-change research | 302,658,260 | 4.175 / -20.238% | 198,928,950 | 3.635 / -18.341% |
+| Three-change research + proposed Idle -1% STOP | **302,658,260** | 4.175 / -20.238% | **194,675,931** | 3.544 / -18.341% |
+
+**Interpretation**: the proposed STOP can surrender four percentage points from the +3% gain to the -1% loss threshold; it is NOT a profit lock. At 10bps there is no account-level change; at 30bps it reduces integrated equity by 3.6 million JPY versus original and by 4.25 million JPY versus the three-change research case. H1 intrabar-wick activation sensitivity is worse, but its within-bar ordering is uncertain (NOT authenticated tick simulation).
+
+The full-eight research engine may update many pre-admission prospective Idle exits (27 in the -1% floor case). These are NOT actual executed stops; accepted frozen-entry STOP events are 0 (10bps) and 1 (30bps). Keep these counts distinct.
+
+**VERDICT: DO NOT DEPLOY**. No independently demonstrated improvement over existing Idle exit policy. Alternative “+3% peak followed by a one-percentage-point decline, so secure +2%” is a different trailing contract and should be tested independently if that was intended.
+
+Implementation would require signed Aster positions/orders, safely modifying STOP and TAKE_PROFIT reduceOnly quantities with atomic readback, restart persistence and shared gross/margin/rate-budget audits. No LIVE order settings, original protective STOPs, PENGU, operator artifacts or risk gates were modified.
+
+Reproducible research source: scripts/research/idle_peak3_floor_helper_20261016.py, idle_peak3_frozen_sweep_20261016.py, idle_peak3_full8_integrated_20261016.py and test_idle_peak3_floor_20261016.py. CI tested **9/9** causal isolation cases [success, run 38843233036](https://github.com/dunamishajime-bit/-ai-dex-manager/actions/runs/38843233036). Detailed numerical results in profit3_then_minus1_sweep.json.
