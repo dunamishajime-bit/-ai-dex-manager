@@ -90,6 +90,8 @@ class IdleResearchCausality(unittest.TestCase):
  def test_partial_plus_three_actually_activates_q102_mr_and_v4_routes(self):
   # Guard against a subtle script error where inner route checks included
   # a combo policy but the outer dispatch did not.
+  # MR needs +3% on a completed H1; ensure the synthetic candle exceeds it.
+  self.pbook[("DOTUSDT",0)]=candle(100,101,96,96)
   q=row("Q102","DOTUSDT");q["family"]="MR"
   qnew=self.partial(q,"idle_partial1p5_combo3",obs())
   self.assertNotEqual(qnew["exit_price"],q["exit_price"])
