@@ -20,5 +20,6 @@ jobs:
           python3 -m py_compile scripts/research/idle_partial_exit_sweep_20261016.py
           python3 -m py_compile scripts/research/idle_btc_rebound_integrated_20261016.py
           python3 -m py_compile scripts/research/idle_partial_synthetic_full8_20261016.py
+          python3 -m py_compile scripts/research/idle_fixed_hold_sweep_20261016.py
       - name: Run isolated Idle causal and route invariants
         run: python3 scripts/research/test_idle_exit_research_20261016.py
