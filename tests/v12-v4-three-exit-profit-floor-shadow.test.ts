@@ -70,7 +70,7 @@ test("G5 and X05 shadow computations are separate from original V4 journal",asyn
     closedCandles:[{timestampMs:ts,open:102.9,high:103.9,low:101.9,close:102.9}],
     observedAt:ts+H});
    assert.equal(sample.state?.armed,true);
-   assert.equal(sample.state?.floorStopPrice,route==="REC_G5_SLOW_TREND"?100.5:101);
+   assert.ok(Math.abs((sample.state?.floorStopPrice??0)-(route==="REC_G5_SLOW_TREND"?100.5:101))<1e-9);
    await store.save(sample.state!);
    const recovered=new FileThreeExitFloorShadowStore(join(dir,"profit-floor.json"),"V12_V4");
    assert.deepEqual(await recovered.load(leg.id),sample.state);
