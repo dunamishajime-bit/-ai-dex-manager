@@ -1,0 +1,28 @@
+name: Three exit floors — staged implementation safety
+on:
+  push:
+    branches:
+      - feature/exit-floor-three-production-prep-20261016
+    paths:
+      - "lib/exit-profit-floor-three.ts"
+      - "tests/exit-profit-floor-three.test.ts"
+      - ".github/workflows/exit-floor-three-staged-ci-20261016.yml"
+  workflow_dispatch:
+jobs:
+  three-exit-floor-preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: "npm"
+      - name: Install frozen dependencies without post-install mutations
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Type-check full repository
+        run: npx tsc --noEmit --pretty false
+      - name: Three-change causal, route, and venue-preflight tests
+        run: npx tsx --test tests/exit-profit-floor-three.test.ts
+      - name: Existing resident STOP regression tests (PENGU/Q102)
+        run: npx tsx --test tests/venue-resident-stop.test.ts tests/resident-stop-ledger.test.ts tests/v12-v4-resident-stop-owners.test.ts tests/v12-v4-stop-fill-cycle.test.ts
