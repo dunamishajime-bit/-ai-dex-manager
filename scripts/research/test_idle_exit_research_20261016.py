@@ -87,6 +87,22 @@ class IdleResearchCausality(unittest.TestCase):
    x=row(strategy,symbol)
    self.assertIs(self.partial(x,"idle_partial1p5_half",obs()),x)
 
+ def test_partial_plus_three_actually_activates_q102_mr_and_v4_routes(self):
+  # Guard against a subtle script error where inner route checks included
+  # a combo policy but the outer dispatch did not.
+  q=row("Q102","DOTUSDT");q["family"]="MR"
+  qnew=self.partial(q,"idle_partial1p5_combo3",obs())
+  self.assertNotEqual(qnew["exit_price"],q["exit_price"])
+  v=row("V12","DOTUSDT");v["route"]="REC_G5_SLOW_TREND"
+  vnew=self.partial(v,"idle_partial1p5_combo3",obs())
+  self.assertNotEqual(vnew["exit_price"],v["exit_price"])
+  x=row("V12","DOTUSDT");x["route"]="REC_X05_TIME_36H"
+  self.pbook[("DOTUSDT",0)]=candle(100,101,96,97)
+  xnew=self.partial(x,"idle_partial1p5_combo3",obs())
+  self.assertNotEqual(xnew["exit_price"],x["exit_price"])
+  nonmr=row("Q102","DOTUSDT");nonmr["family"]="REV"
+  self.assertIs(self.partial(nonmr,"idle_partial1p5_combo3",obs()),nonmr)
+
  def test_partial_slippage_worsens_short_half(self):
   base=self.partial(row(),"idle_partial1p5_half",obs())
   slip=self.partial(row(),"idle_partial1p5_slip50",obs())
