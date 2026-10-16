@@ -209,6 +209,8 @@ export async function buildV4ProductionRuntime(){
  };
  const engine=new V4RunnerEngine({
   store,accountLock:lock,adapter,client,pendingRegistryPath,
+  // OFF by default. Pure journalled H1 observation; never grants order authority.
+  threeExitFloorShadowEnabled:process.env.DISDEX_EXIT_FLOOR_THREE_SHADOW==="1",
   fetchDecision,fetchPeers:()=>loadPeers(releaseSha,peerLineageMode),peerLineageMode,
   fetchExitFeed:async symbol=>{
    const now=Date.now(),rows=await client.getKlines(symbol,"1h",500);
