@@ -21,5 +21,10 @@ jobs:
           python3 -m py_compile scripts/research/idle_btc_rebound_integrated_20261016.py
           python3 -m py_compile scripts/research/idle_partial_synthetic_full8_20261016.py
           python3 -m py_compile scripts/research/idle_fixed_hold_sweep_20261016.py
+          python3 -m py_compile scripts/research/idle_peak3_floor_helper_20261016.py
+          python3 -m py_compile scripts/research/idle_peak3_frozen_sweep_20261016.py
+          python3 -m py_compile scripts/research/idle_peak3_full8_integrated_20261016.py
       - name: Run isolated Idle causal and route invariants
         run: python3 scripts/research/test_idle_exit_research_20261016.py
+      - name: Test +3% profit peak trigger and -1% adverse stop semantics
+        run: python3 scripts/research/test_idle_peak3_floor_20261016.py
