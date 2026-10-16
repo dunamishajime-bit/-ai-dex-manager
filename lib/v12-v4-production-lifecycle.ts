@@ -7,7 +7,6 @@
  * confirmed by run_v12_logic_dissection.initialize; pure protectiveLevels/nextTrailingStop are reused.
  */
 import { protectiveLevels, nextTrailingStop } from "./v12-x1-all";
-import { observeThreeExitFloorH1, type ExitFloorH1State } from "./exit-profit-floor-three";
 import { V12_X1_ALL } from "../config/v12X1AllRuntime";
 import { normalizeDisDexV96OrderQuantity } from "./disdex-v96-order-quantity";
 import { V12_V4_ROUTE_CATALOG, type V12V4ShadowCandidate } from "./v12-multilogic-v4-shadow";
@@ -44,8 +43,6 @@ export type Leg = {
   status: "PENDING_ENTRY" | "OPEN" | "PENDING_EXIT" | "CLOSED" | "CANCELLED";
   exitRemainingQty: number; realizedUsd: number; feesUsd: number; fundingUsd: number;
   lastExitBarTs?: number; plannedExit?: ExitDecision;
-  /** Optional journalled observation only. No order authority or changed original exit. */
-  threeExitFloorShadow?: ExitFloorH1State;
   nativeExitEvidence?:"WR60_BASELINE_1978_PARITY"; nativeStop?:number; nativePeak?:number; previousExitBar?:H1Bar;
 };
 export type ExitDecision = { exitTs: number; price: number; reason: string; priceModelOnly: true };
@@ -91,7 +88,6 @@ export type EntryEvent = { type: "RESERVE"; eventId: string; ts: number; leg: Le
 export type Event = EntryEvent |
   { type: "ACCOUNT_MARK"; eventId:string; ts:number; equityUsd:number; prices:Record<string,number>; foreign?:ForeignExposure[] } |
   { type: "EXIT_BAR"; eventId: string; ts: number; id: string; bar: H1Bar; nextOpen?: {ts:number;price:number} } |
-  { type: "EXIT_FLOOR_SHADOW_H1"; eventId: string; ts: number; id: string; barOpenTs: number } |
   { type: "ENTRY_FILL"; eventId: string; ts: number; id: string; qty: number; price: number; feeUsd: number } |
   { type: "ENTRY_TERMINAL"; eventId: string; ts: number; id: string } |
   { type: "EXIT_REQUEST"; eventId: string; ts: number; id: string; qty: number } |
@@ -233,23 +229,6 @@ export function applyProductionEvent(state: State, event: Event): State {
         const n=evaluateNativeProductionExit(l,event.bar,event.ts,event.nextOpen);l.nativeStop=n.stop;l.nativePeak=n.peak;l.previousExitBar=event.bar;
       }
       l.lastExitBarTs=event.bar.openTs;if(decision)l.plannedExit=decision;
-    } else if (event.type==="EXIT_FLOOR_SHADOW_H1") {
-      if(l.status!=="OPEN"||l.plannedExit||l.lastExitBarTs!==event.barOpenTs)
-        throw Error("V4_EXIT_FLOOR_SHADOW_LEG_NOT_OPEN_AT_CLOSED_H1");
-      const source=[...next.journal].reverse().find(e=>
-        e.type==="EXIT_BAR"&&e.id===event.id&&e.bar.openTs===event.barOpenTs);
-      if(!source||source.type!=="EXIT_BAR")
-        throw Error("V4_EXIT_FLOOR_SHADOW_SOURCE_EVENT_MISSING");
-      if(!(l.qty>0)||!(l.entryNotional>0))
-        throw Error("V4_EXIT_FLOOR_SHADOW_NO_ACTUAL_FILL");
-      const sample=observeThreeExitFloorH1({
-        owner:"V12_V4",route:l.candidate.route,symbol:l.candidate.symbol,
-        legId:l.id,side:l.candidate.effectiveSide,entryTs:l.entryTs,
-        entryPrice:l.entryNotional/l.qty,entryQuantity:l.qty,
-      },{...source.bar},event.ts,l.threeExitFloorShadow);
-      if(!sample.state||sample.kind==="NOT_TARGETED")
-        throw Error("V4_EXIT_FLOOR_SHADOW_UNSUPPORTED_ROUTE");
-      l.threeExitFloorShadow=sample.state;
     } else if (event.type==="ENTRY_FILL") {
       positive(event.qty,"FILL_QTY");positive(event.price,"FILL_PRICE");
       if (l.status!=="PENDING_ENTRY" || l.qty+event.qty>l.requestedQty+1e-12 ||
