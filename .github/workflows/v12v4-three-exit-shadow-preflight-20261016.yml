@@ -8,6 +8,7 @@ on:
       - "lib/v12-v4-production-lifecycle.ts"
       - "lib/v12-v4-live-exit-feed.ts"
       - "lib/v12-v4-runner-engine.ts"
+      - "scripts/v12-v4-production-runner.ts"
       - "tests/exit-profit-floor-three*.test.ts"
       - "tests/v12-v4-three-exit-profit-floor-shadow.test.ts"
       - ".github/workflows/v12v4-three-exit-shadow-preflight-20261016.yml"
