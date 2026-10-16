@@ -543,6 +543,8 @@ export function buildQuality102CausalV1Runner(env: NodeJS.ProcessEnv = process.e
         },
         config: {
             residentStopRequired: config.mode === "LIVE",
+            // Strictly observation-only. Defaults OFF; no resident STOP placement or cancellation.
+            threeExitFloorShadowEnabled: String(env.DISDEX_EXIT_FLOOR_THREE_SHADOW || "") === "1",
             mode: config.mode,
             enabled: config.enabled,
             liveTradingEnabled: config.liveTradingEnabled,
