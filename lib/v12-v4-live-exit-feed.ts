@@ -1,7 +1,8 @@
 /** Causal, journalled H1 exit evaluation for all 41 frozen exit contracts. */
 import {applyProductionEvent,productionExitSpec,HOUR,type H1Bar,type State} from "./v12-v4-production-lifecycle";
 export type V4ExitFeed={closed:H1Bar[];nextOpen?:{ts:number;price:number};nextOpens?:{ts:number;price:number}[]};
-export function appendV4ClosedExitBars(state:State,id:string,feed:V4ExitFeed,at:number):State{
+export function appendV4ClosedExitBars(state:State,id:string,feed:V4ExitFeed,at:number,
+ options:{threeExitFloorShadowEnabled?:boolean}={}):State{
  let next=state;
  const original=state.legs[id];
  if(!original)throw Error("V4_EXIT_FEED_UNKNOWN_LEG");
@@ -28,6 +29,11 @@ export function appendV4ClosedExitBars(state:State,id:string,feed:V4ExitFeed,at:
    (feed.nextOpen?.ts===boundary?feed.nextOpen:undefined)):undefined;
   next=applyProductionEvent(next,{type:"EXIT_BAR",id,eventId:"live-exit-bar:"+id+":"+barTs,
    ts:at,bar,nextOpen});
+  if(options.threeExitFloorShadowEnabled === true && !next.legs[id].plannedExit &&
+    ["REC_G5_SLOW_TREND","REC_X05_TIME_36H"].includes(next.legs[id].candidate.route)){
+    next=applyProductionEvent(next,{type:"EXIT_FLOOR_SHADOW_H1",id,
+      eventId:"shadow-profit-floor:"+id+":"+barTs,ts:at,barOpenTs:barTs});
+  }
   if(next.legs[id].plannedExit)break;
   barTs+=HOUR;
  }
