@@ -1,0 +1,257 @@
+{
+  "status": "RESEARCH_COMPLETE__LIVE_NOT_CERTIFIED",
+  "studyDate": "2026-10-16",
+  "developmentPeriod": {
+    "from": "2025-08-10",
+    "to": "2026-08-10"
+  },
+  "frozen_source": {
+    "v4": "6f97d2cf03877674ec1a845f6c08414f32899f36",
+    "originalFull8": "DisDex-five-improvements-20261008",
+    "baselineReproducibleExactAtBps": [
+      10,
+      30
+    ]
+  },
+  "methods": {
+    "frozenEntry": "PRICE_MODEL 10/30 bps, H1 causal after-bar activation, static original trade inventory",
+    "full8": "Full-eight gross/margin/admission modeled replay",
+    "partial": "Synthetic blended partial close price; no real partial fill, stop quantity, per-leg MTM, freed collateral or funding rerun. DO NOT TREAT AS CERTIFIED FULL VENUE BACKTEST"
+  },
+  "idleBaseline": {
+    "10bps": {
+      "n": 47,
+      "PF": 1.5816,
+      "winPct": 55.319,
+      "sumWeightedPctPoints": 29.97968
+    },
+    "30bps": {
+      "n": 53,
+      "PF": 1.3743,
+      "winPct": 54.717,
+      "sumWeightedPctPoints": 24.72015
+    }
+  },
+  "idleRouteMfe10bps": [
+    {
+      "symbol": "DOTUSDT",
+      "n": 21,
+      "avgBestCompletedCloseGainPct": 2.42,
+      "avgFinalPriceReturnPct": 0.5,
+      "avgGivebackPctPoints": 1.92
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "n": 12,
+      "avgBestCompletedCloseGainPct": 0.89,
+      "avgFinalPriceReturnPct": -1.62,
+      "avgGivebackPctPoints": 2.51
+    },
+    {
+      "symbol": "TAOUSDT",
+      "n": 6,
+      "avgBestCompletedCloseGainPct": 4.47,
+      "avgFinalPriceReturnPct": 3.3,
+      "avgGivebackPctPoints": 1.17
+    },
+    {
+      "symbol": "TIAUSDT",
+      "n": 4,
+      "avgBestCompletedCloseGainPct": 6.29,
+      "avgFinalPriceReturnPct": 5.15,
+      "avgGivebackPctPoints": 1.14
+    },
+    {
+      "symbol": "JUPUSDT",
+      "n": 4,
+      "avgBestCompletedCloseGainPct": 1.43,
+      "avgFinalPriceReturnPct": 0.84,
+      "avgGivebackPctPoints": 0.59
+    }
+  ],
+  "idleStandaloneCandidates": {
+    "btc3_rebound_dot_render": {
+      "condition": "peak close favorable >=1.5%; confirmed BTC 3h return >=0.5%; execute on next H1 open",
+      "frozenPF_10bps": 1.7671,
+      "frozenPF_30bps": 1.6151,
+      "nChanged10": 12,
+      "nChanged30": 13,
+      "firstSplitWorse": true,
+      "secondSplitBetter": true
+    },
+    "half_at1p5_dot_render": {
+      "condition": "reduce 50% at next H1 open after favorable >=1.5%; original remaining exit unchanged",
+      "frozenPF_10bps": 1.7676,
+      "frozenPF_30bps": 1.515,
+      "firstSplitWorse": true,
+      "secondSplitBetter": true
+    },
+    "DOT_time12h": {
+      "frozenDeltaPctPoints10": -16.8612,
+      "frozenDeltaPctPoints30": -11.29951
+    },
+    "RENDER_time4h": {
+      "frozenDeltaPctPoints10": 2.81438,
+      "frozenDeltaPctPoints30": -0.36179
+    }
+  },
+  "full8Baseline": {
+    "10bps": {
+      "equityJpy": 291326102.62,
+      "PF": 4.048992,
+      "maxMtmDDPct": -20.420014,
+      "trades": 1222
+    },
+    "30bps": {
+      "equityJpy": 174749524.318,
+      "PF": 3.277641,
+      "maxMtmDDPct": -18.388765,
+      "trades": 1218
+    }
+  },
+  "full8Candidates": {
+    "3change_Q102MR_V4G5_V4X05": {
+      "10bps": {
+        "equityJpy": 302658260.101,
+        "PF": 4.174832,
+        "DDPct": -20.237637
+      },
+      "30bps": {
+        "equityJpy": 198928949.984,
+        "PF": 3.634717,
+        "DDPct": -18.340997
+      }
+    },
+    "idleBTC3alone": {
+      "10bps": {
+        "equityJpy": 275882854,
+        "PF": 4.0246,
+        "DDPct": -20.903
+      },
+      "30bps": {
+        "equityJpy": 152289535,
+        "PF": 3.2102,
+        "DDPct": -22.836
+      }
+    },
+    "idleBTC3Plus3change": {
+      "10bps": {
+        "equityJpy": 295210421,
+        "PF": 4.1994,
+        "DDPct": -20.918
+      },
+      "30bps": {
+        "equityJpy": 175870910,
+        "PF": 3.3259,
+        "DDPct": -22.755
+      }
+    },
+    "idleHalf1p5AloneSynthetic": {
+      "10bps": {
+        "equityJpy": 295499466,
+        "PF": 4.06926,
+        "DDPct": -20.2594
+      },
+      "30bps": {
+        "equityJpy": 187303528,
+        "PF": 3.54867,
+        "DDPct": -19.0678
+      }
+    },
+    "idleHalf1p5Plus3changeSynthetic": {
+      "10bps": {
+        "equityJpy": 306142482,
+        "PF": 4.19546,
+        "DDPct": -20.0163
+      },
+      "30bps": {
+        "equityJpy": 197639143,
+        "PF": 3.64785,
+        "DDPct": -21.1903
+      }
+    },
+    "idleHalf2Plus3changeSynthetic": {
+      "10bps": {
+        "equityJpy": 302234167,
+        "PF": 4.1938,
+        "DDPct": -20.1662
+      },
+      "30bps": {
+        "equityJpy": 195731263,
+        "PF": 3.684,
+        "DDPct": -18.3397
+      }
+    },
+    "idleHalf2Plus3changeAddPartialSlip50Synthetic": {
+      "10bps": {
+        "equityJpy": 300533711,
+        "PF": 4.1907,
+        "DDPct": -20.2366
+      },
+      "30bps": {
+        "equityJpy": 192408059,
+        "PF": 3.6735,
+        "DDPct": -18.5516
+      }
+    },
+    "idleHalf3Plus3changeSynthetic": {
+      "10bps": {
+        "equityJpy": 302416275,
+        "PF": 4.1754,
+        "DDPct": -20.2467
+      },
+      "30bps": {
+        "equityJpy": 195429476,
+        "PF": 3.6811,
+        "DDPct": -18.3878
+      }
+    }
+  },
+  "representativeLiveCasePublicH1": {
+    "JUP_short": {
+      "entry": 0.3048,
+      "qty": 225,
+      "btc3_reboundCounterfactual": "2026-10-15 18:00 JST",
+      "price": 0.2988,
+      "grossPricePnlUSD": 1.35
+    },
+    "DOT_short": {
+      "entry": 1.087,
+      "qty": 65.9,
+      "btc3_reboundCounterfactual": "2026-10-16 00:00 JST",
+      "price": 1.097,
+      "grossPricePnlUSD": -0.659
+    },
+    "note": "Examined after observing losses; diagnostic example, not out-of-sample"
+  },
+  "venueStateReadOnlyAt": "2026-10-16T10:58:34+09:00",
+  "venueLocalRiskState": {
+    "source": "VPS state file, not independently signed exchange audit",
+    "sharedRiskTripped": true,
+    "lossPctAtFollowup": 7.587338283590199,
+    "maxLossPct": 7.5,
+    "unrealizedPnl": -5.1402,
+    "referenceEquity": 67.64729775,
+    "killSwitchActive": false,
+    "marginGuardHealthy": true,
+    "v4OrderEnabled": false,
+    "currentCommonSha": "020eb3c5b95186d23bd6406af1986747d442a5bd",
+    "independentV4Sha": "6f97d2cf03877674ec1a845f6c08414f32899f36"
+  },
+  "validation": {
+    "ciUrl": "https://github.com/dunamishajime-bit/-ai-dex-manager/actions/runs/38839310623",
+    "ciConclusion": "success",
+    "panguExitsIntact": true,
+    "existingLIVELogicUntouched": true,
+    "realOrdersSentByResearch": 0
+  },
+  "adoption": {
+    "idleBTC3": "REJECTED full8 negative",
+    "idleFixedHold": "REJECTED inconsistent 10/30 cost and early/later splits",
+    "idleHalf1p5": "REJECTED -30bps combo MTM DD -21.19%, synthetic model only",
+    "idleHalf2": "NOT_AUTHORIZED - limited PF/DD tradeoff but loses final equity against 3change; requires actual partial venue state model",
+    "idleHalf3": "REJECTED incremental final equity decline",
+    "q102V4Three": "RESEARCH_PREFERRED but forward activation N=0 and venue STOP lifecycle unproved",
+    "productionChange": "NONE"
+  }
+}
