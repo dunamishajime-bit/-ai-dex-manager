@@ -62,12 +62,12 @@ def causal_exit(x,policy,obs):
    if future is None:obs["h1gap"]+=1;return x
    newexit=(ts+168*H,float(future["open"]),"HYPE_MAX_168H")
   newts,newpx,reason=newexit
- elif policy in ("idle_partial1p5_half","idle_partial1p5_rel","idle_partial3_half","idle_partial1p5_combo3","idle_partial1p5_slip50") and stype=="IDLE" and (sym in ("DOTUSDT","RENDERUSDT") or (sym=="JUPUSDT" and policy=="idle_partial1p5_rel")):
+ elif policy in ("idle_partial1p5_half","idle_partial1p5_rel","idle_partial3_half","idle_partial1p5_combo3","idle_partial1p5_slip50","idle_partial2_combo3","idle_partial3_combo3","idle_partial2_combo3_slip50") and stype=="IDLE" and (sym in ("DOTUSDT","RENDERUSDT") or (sym=="JUPUSDT" and policy=="idle_partial1p5_rel")):
   # SYNTHETIC research blend, NOT two real exchange executions.
   # Preserve original exit timestamp and gross reservation to avoid falsely
   # crediting the portfolio with early freed slots.
   if sg!=-1:raise AssertionError("IDLE_SIDE_MUST_BE_SHORT")
-  gainTrigger=.03 if policy=="idle_partial3_half" else .015
+  gainTrigger=.03 if policy in ("idle_partial3_half","idle_partial3_combo3") else (.02 if policy in ("idle_partial2_combo3","idle_partial2_combo3_slip50") else .015)
   trigger=None;newexit=None
   for start in range(ts,oldexit,H):
    bar=hbar(sym,start)
@@ -106,14 +106,14 @@ def causal_exit(x,policy,obs):
     break
   if newexit is None:return x
   newts,newpx,reason=newexit
- elif policy in ("q102mr_floor3","v4g5_floor2","v4x05_floor2p5","residual_floor2","combined","v4_only","combined_no_mr","combined_no_residual","combined_no_x05","combined_no_g5","idle_and_three","idle_and_three_slip50","idle_partial1p5_combo3"):
+ elif policy in ("q102mr_floor3","v4g5_floor2","v4x05_floor2p5","residual_floor2","combined","v4_only","combined_no_mr","combined_no_residual","combined_no_x05","combined_no_g5","idle_and_three","idle_and_three_slip50","idle_partial1p5_combo3","idle_partial2_combo3","idle_partial3_combo3","idle_partial2_combo3_slip50"):
   applied=False
   arm=0;lock=0
-  if policy in ("q102mr_floor3","combined","combined_no_residual","combined_no_x05","combined_no_g5","idle_and_three","idle_and_three_slip50","idle_partial1p5_combo3") and stype=="Q102" and x.get("family")=="MR":
+  if policy in ("q102mr_floor3","combined","combined_no_residual","combined_no_x05","combined_no_g5","idle_and_three","idle_and_three_slip50","idle_partial1p5_combo3","idle_partial2_combo3","idle_partial3_combo3","idle_partial2_combo3_slip50") and stype=="Q102" and x.get("family")=="MR":
    arm,lock=.03,.01;applied=True
-  if policy in ("v4g5_floor2","combined","v4_only","combined_no_mr","combined_no_residual","combined_no_x05","idle_and_three","idle_and_three_slip50","idle_partial1p5_combo3") and stype=="V12" and x.get("route")=="REC_G5_SLOW_TREND":
+  if policy in ("v4g5_floor2","combined","v4_only","combined_no_mr","combined_no_residual","combined_no_x05","idle_and_three","idle_and_three_slip50","idle_partial1p5_combo3","idle_partial2_combo3","idle_partial3_combo3","idle_partial2_combo3_slip50") and stype=="V12" and x.get("route")=="REC_G5_SLOW_TREND":
    arm,lock=.02,.005;applied=True
-  if policy in ("v4x05_floor2p5","combined","v4_only","combined_no_mr","combined_no_residual","combined_no_g5","idle_and_three","idle_and_three_slip50","idle_partial1p5_combo3") and stype=="V12" and x.get("route")=="REC_X05_TIME_36H":
+  if policy in ("v4x05_floor2p5","combined","v4_only","combined_no_mr","combined_no_residual","combined_no_g5","idle_and_three","idle_and_three_slip50","idle_partial1p5_combo3","idle_partial2_combo3","idle_partial3_combo3","idle_partial2_combo3_slip50") and stype=="V12" and x.get("route")=="REC_X05_TIME_36H":
    arm,lock=.025,.01;applied=True
   if policy in ("residual_floor2","combined","combined_no_mr","combined_no_x05","combined_no_g5") and stype=="RESIDUAL":
    arm,lock=.02,.005;applied=True
