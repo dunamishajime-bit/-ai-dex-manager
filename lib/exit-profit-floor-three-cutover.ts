@@ -8,7 +8,7 @@
  */
 import {createHash} from "node:crypto";
 import {
- THREE_EXIT_FLOOR_POLICY_ID,previewThreeExitFloorReplacement,
+ THREE_EXIT_FLOOR_POLICY_ID,THREE_EXIT_FLOOR_SIGNED_MAX_AGE_MS,previewThreeExitFloorReplacement,
  type ExitFloorH1State,type ExistingSignedStop,type SignedFloorPosition,
 } from "./exit-profit-floor-three";
 
@@ -58,6 +58,7 @@ const safeNew=(o:ExistingSignedStop,j:ThreeFloorCutoverJournal)=>
 const signedPosition=(p:SignedFloorPosition,j:ThreeFloorCutoverJournal,ts:number)=>
  p.symbol===j.symbol&&p.side===j.side&&same(p.quantity,j.quantity)&&
  finite(p.markPrice)&&Number.isFinite(p.capturedAt)&&p.capturedAt>=j.effectiveFromTs&&p.capturedAt<=ts&&
+ ts-p.capturedAt<=THREE_EXIT_FLOOR_SIGNED_MAX_AGE_MS&&
  (j.side==="LONG"?p.markPrice>j.desiredStopPrice:p.markPrice<j.desiredStopPrice);
 
 /**
@@ -148,7 +149,10 @@ export function advanceThreeFloorCutover(j:ThreeFloorCutoverJournal,event:ThreeF
    const oldActive=event.orders.filter(o=>o.clientOrderId===j.oldClientOrderId);
    if(newActive.length===0)return j; // Ambiguous ACK; wait for new signed readback.
    if(newActive.length!==1||oldActive.length!==1||
-      !safeNew(newActive[0],j)||!safeOld(oldActive[0],j))
+      !safeNew(newActive[0],j)||!safeOld(oldActive[0],j)||
+      event.at-newActive[0].capturedAt>THREE_EXIT_FLOOR_SIGNED_MAX_AGE_MS||
+      event.at-oldActive[0].capturedAt>THREE_EXIT_FLOOR_SIGNED_MAX_AGE_MS||
+      newActive[0].capturedAt>event.at||oldActive[0].capturedAt>event.at)
       return unsafe(j,"NEW_OR_OLD_STOP_UNSAFE_AFTER_READBACK");
    return {...j,phase:"NEW_VERIFIED",readbackNewAt:event.at};
  }
@@ -164,7 +168,9 @@ export function advanceThreeFloorCutover(j:ThreeFloorCutoverJournal,event:ThreeF
       return unsafe(j,"FINAL_READBACK_POSITION_DRIFT");
    const newActive=event.orders.filter(o=>o.clientOrderId===j.newClientOrderId);
    const oldActive=event.orders.filter(o=>o.clientOrderId===j.oldClientOrderId);
-   if(newActive.length!==1||!safeNew(newActive[0],j))
+   if(newActive.length!==1||!safeNew(newActive[0],j)||
+      event.at-newActive[0].capturedAt>THREE_EXIT_FLOOR_SIGNED_MAX_AGE_MS||
+      newActive[0].capturedAt>event.at)
       return unsafe(j,"NEW_STOP_UNVERIFIED_AFTER_CANCEL");
    if(oldActive.length!==0)
       return unsafe(j,"OLD_STOP_STILL_ACTIVE_AFTER_CANCEL");
