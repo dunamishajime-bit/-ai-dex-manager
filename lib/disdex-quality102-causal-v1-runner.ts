@@ -2,6 +2,7 @@ import { quality102GrossForFamily } from "../config/integratedProductionRiskPoli
 import { appendStopIntent, reconcileStopLedger, retireStopLedger } from "./resident-stop-ledger";
 import { residentStopPlan, verifyResidentStopPartial, retireResidentStop, ensureResidentStop, type ResidentStopGateway } from "./venue-resident-stop";
 import { observeThreeFloorH1History } from "./exit-profit-floor-three-observers";
+import type { FileThreeExitFloorShadowStore } from "./exit-profit-floor-three-shadow-store";
 import { createHash, randomUUID } from "node:crypto";
 
 import {
@@ -147,6 +148,8 @@ export interface Quality102CausalV1AccountLock extends LiveRunnerLock {
 
 export interface Quality102CausalV1RunnerDependencies {
     residentStopGateway?: ResidentStopGateway;
+    /** Separate roll-back compatible H1 observation sidecar. Never affects entry or exit. */
+    threeExitFloorShadowStore?: Pick<FileThreeExitFloorShadowStore, "load" | "save">;
     marketData: { load(force?: boolean): Promise<Quality102CausalV1History> };
     executor: DirectTradeExecutor;
     stateStore: Quality102CausalV1StateStore;
@@ -1472,27 +1475,28 @@ export class Quality102CausalV1Runner {
                 const protectionBlocked = await this.protectPosition(state);
                 if (protectionBlocked) return protectionBlocked;
                 if (!state.position.hardStop || !state.position.bestPrice || state.position.trailActive === undefined) return this.manualReview(state, "Q102 active state lacks recovered exit metadata.");
-                // Research-only observer. Runs *after* signed portfolio and actual STOP validation,
-                // with no authority to place/cancel/replace orders or change Q102 exit conditions.
+                // Research-only H1 observer writes an entirely separate atomic sidecar.
+                // The existing Q102 state file and STOP state remain byte-schema-compatible
+                // with the prior release, including an immediate rollback.
                 if (this.dependencies.config.threeExitFloorShadowEnabled === true && state.position.family === "MR") {
                     try {
                         const p = state.position;
+                        const shadowStore=this.dependencies.threeExitFloorShadowStore;
+                        if(!shadowStore)throw new Error("Q102_EXIT_FLOOR_SHADOW_SIDECAR_NOT_CONFIGURED");
                         const candles = history.candlesBySymbol[p.symbol];
                         if (!candles?.length) throw new Error("Q102_MR_EXIT_FLOOR_H1_MISSING");
+                        const legId=`Q102:${p.symbol}:${p.entryTs}:${p.side}`;
+                        const previous=await shadowStore.load(legId);
                         const sample = observeThreeFloorH1History({
                             identity: {
                                 owner: "Q102", symbol: p.symbol, side: p.side > 0 ? "LONG" : "SHORT",
                                 entryTs: p.entryTs, entryPrice: p.entryPrice, entryQuantity: p.quantity,
-                                legId: `Q102:${p.symbol}:${p.entryTs}:${p.side}`,
-                                family: "MR",
+                                legId, family: "MR",
                             },
-                            closedCandles: candles,
-                            observedAt: this.now(),
-                            previous: p.threeExitFloorShadow,
+                            closedCandles: candles, observedAt: this.now(), previous,
                         });
                         if (sample.newBars > 0 && sample.state) {
-                            state.position = { ...p, threeExitFloorShadow: sample.state };
-                            await this.dependencies.stateStore.save(state);
+                            await shadowStore.save(sample.state);
                             if (sample.armedOnThisCall) this.log.info("Q102 MR exit-floor SHADOW armed; ordersSent=0", {
                                 policyId: sample.state.policyId,
                                 symbol: p.symbol,
@@ -1502,7 +1506,6 @@ export class Quality102CausalV1Runner {
                             });
                         }
                     } catch (shadowError) {
-                        // Shadow cannot disable existing stop, market EXIT, or shared risk.
                         this.log.warn("Q102 MR exit-floor shadow unavailable; live exit unchanged.", {
                             reason: shadowError instanceof Error ? shadowError.message : String(shadowError),
                             ordersSent: 0,
