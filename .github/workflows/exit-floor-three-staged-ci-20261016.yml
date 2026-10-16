@@ -5,7 +5,15 @@ on:
       - feature/exit-floor-three-production-prep-20261016
     paths:
       - "lib/exit-profit-floor-three.ts"
+      - "lib/exit-profit-floor-three-observers.ts"
+      - "lib/disdex-quality102-causal-v1-state.ts"
+      - "lib/disdex-quality102-causal-v1-runner.ts"
+      - "lib/v12-v4-production-lifecycle.ts"
+      - "lib/v12-v4-live-exit-feed.ts"
+      - "lib/v12-v4-runner-engine.ts"
       - "tests/exit-profit-floor-three.test.ts"
+      - "tests/exit-profit-floor-three-observers.test.ts"
+      - "tests/v12-v4-three-exit-profit-floor-shadow.test.ts"
       - ".github/workflows/exit-floor-three-staged-ci-20261016.yml"
   workflow_dispatch:
 jobs:
@@ -23,6 +31,6 @@ jobs:
       - name: Type-check full repository
         run: npx tsc --noEmit --pretty false
       - name: Three-change causal, route, and venue-preflight tests
-        run: npx tsx --test tests/exit-profit-floor-three.test.ts
+        run: npx tsx --test tests/exit-profit-floor-three.test.ts tests/exit-profit-floor-three-observers.test.ts tests/v12-v4-three-exit-profit-floor-shadow.test.ts
       - name: Existing resident STOP regression tests (PENGU/Q102)
         run: npx tsx --test tests/venue-resident-stop.test.ts tests/resident-stop-ledger.test.ts tests/v12-v4-resident-stop-owners.test.ts tests/v12-v4-stop-fill-cycle.test.ts
