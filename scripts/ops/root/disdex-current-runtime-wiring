@@ -37,6 +37,7 @@ WATCHDOG_DROPIN_DIR="/etc/systemd/system/disdex-runner-watchdog.service.d"
 SNAPSHOT_DROPIN_DIR="/etc/systemd/system/disdex-runner-health-snapshot.service.d"
 POSITION_RECOVERY_DROPIN_DIR="/etc/systemd/system/disdex-runner-position-recovery.service.d"
 FILL_NOTIFIER_DROPIN_DIR="/etc/systemd/system/disdex-trade-fill-notifier.service.d"
+ACCOUNT_CONFIG_DROPIN_DIR="/etc/systemd/system/disdex-account-config-readiness.service.d"
 CURRENT_SUPPORT_OVERRIDE="zzzzzzzzzzzzzzzzzzzz-current-release.conf"
 AUTO_REPAIR_DROPIN_DIR="/etc/systemd/system/disdex-v12-kill-switch-auto-repair.service.d"
 AUTO_REPAIR_PATH_DROPIN_DIR="/etc/systemd/system/disdex-v12-kill-switch-auto-repair.path.d"
@@ -714,6 +715,19 @@ write_atomic() {
   chown root:root "$temporary"
   mv -f -- "$temporary" "$target"
   trap - RETURN
+}
+
+retarget_account_config_readiness() {
+  write_atomic "${ACCOUNT_CONFIG_DROPIN_DIR}/${CURRENT_SUPPORT_OVERRIDE}" "[Service]
+EnvironmentFile=
+EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env
+EnvironmentFile=/etc/disdex/disdex-v12-pengu-v2-v52.env
+EnvironmentFile=/etc/disdex/current-runtime/${DEPLOYED_SHA}.env
+Environment=DISDEX_CONFIG_RUNTIME_SHA=${DEPLOYED_SHA}
+WorkingDirectory=${CURRENT_RELEASE}
+ExecStart=
+ExecStart=${CURRENT_RELEASE}/node_modules/.bin/tsx ${CURRENT_RELEASE}/scripts/ops/root/disdex-account-config-readiness.ts --apply --ack-flat-config-5x-cross"
+  printf 'DISDEX_ACCOUNT_CONFIG_READINESS_RETARGETED unit=disdex-account-config-readiness.service sha=%s\n' "$DEPLOYED_SHA"
 }
 
 write_atomic_preserve_existing() {
@@ -1462,6 +1476,8 @@ DISDEX_V52_ASTER_ONLY_STATE_DIR=/var/lib/disdex/v52-aster-only
 DISDEX_V52_ASTER_ONLY_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json
 PENGU_DUAL_LS_V2_STATE_DIR=${PENGU_STATE_ROOT}
 PENGU_DUAL_LS_V2_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json"
+
+  retarget_account_config_readiness
 
   # The shared contract env intentionally points at the root-only canonical
   # approval artifact for root-owned helpers.  Idle runs as deploy, so load a

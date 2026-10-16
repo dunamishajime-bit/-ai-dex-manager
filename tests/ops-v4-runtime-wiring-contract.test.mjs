@@ -78,3 +78,10 @@ test("V4 wiring runs Idle benign recovery from the pinned V4 primary release", (
   assert.match(recovery, /"\$recovery_release\/scripts\/disdex-idle-priority-short-benign-state-recovery\.ts"/);
   assert.doesNotMatch(recovery, /"\$CURRENT_RELEASE\/scripts\/disdex-idle-priority-short-benign-state-recovery\.ts"/);
 });
+
+test("current wiring retargets account-config readiness to the exact current release", () => {
+  assert.match(wiring, /disdex-account-config-readiness\.service/);
+  assert.match(wiring, /DISDEX_CONFIG_RUNTIME_SHA=\$\{DEPLOYED_SHA\}/);
+  assert.match(wiring, /current-runtime\/\$\{DEPLOYED_SHA\}\.env/);
+  assert.match(wiring, /\$\{CURRENT_RELEASE\}\/scripts\/ops\/root\/disdex-account-config-readiness\.ts/);
+});
