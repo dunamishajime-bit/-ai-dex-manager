@@ -28,6 +28,8 @@ jobs:
           python3 -m py_compile scripts/research/idle_profit_trailing_frozen_20261016.py
           python3 -m py_compile scripts/research/idle_profit_trailing_full8_20261016.py
           python3 -m py_compile scripts/research/idle_profit_trailing_5m_20261016.py
+          python3 -m py_compile scripts/research/idle_profit_trailing_sensitivity_grid_20261016.py
+          python3 -m py_compile scripts/research/idle_profit_trailing_arm4half_full8_20261016.py
       - name: Run isolated Idle causal and route invariants
         run: python3 scripts/research/test_idle_exit_research_20261016.py
       - name: Test +3% profit peak trigger and -1% adverse stop semantics
