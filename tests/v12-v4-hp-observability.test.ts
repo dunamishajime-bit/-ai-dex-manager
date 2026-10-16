@@ -266,3 +266,27 @@ test("mixed-SHA V4 primary contract accepts an independently attested V4 release
     await rm(f.root, { recursive: true, force: true });
   }
 });
+
+test("inactive mixed-SHA V4 is staged, not a SHA mismatch", async () => {
+  const f = await fixture({
+    heartbeatSha: OTHER_SHA,
+    operationMode: "CERTIFIED",
+    activeService: "none",
+    primaryMode: "V4",
+    legacyRunnerActive: false,
+  });
+  try {
+    await writeFile(f.options.paths.primaryModePath!, [
+      "DISDEX_PRIMARY_V12_RUNNER=V4",
+      `DISDEX_V12_V4_PRIMARY_SHA=${OTHER_SHA}`,
+      `DISDEX_V12_V4_PEER_SHA=${SHA}`,
+      "",
+    ].join("\n"));
+    const result = await loadV12V4HpObservability(f.options);
+    assert.equal(result.displayStatus, "STAGED_NOT_LIVE");
+    assert.equal(result.actual.activeRunnerState, "inactive");
+    assert.notEqual(result.displayStatus, "SHA_MISMATCH");
+  } finally {
+    await rm(f.root, { recursive: true, force: true });
+  }
+});

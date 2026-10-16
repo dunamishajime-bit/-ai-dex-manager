@@ -460,15 +460,26 @@ export async function loadV12V4HpObservability(options: V12V4HpObservabilityOpti
   const sourceIntegrityError = runtimeErrors.some(error =>
     /SCHEMA|POLICY|SAFETY|CONFLICTED|MISMATCH|INCOMPLETE|UNSAFE|OUTSIDE|ROW_INVALID|IDENTITY_INVALID|JSON_SOURCE_INVALID|DUPLICATE/.test(error));
   const staleEvidence = !!heartbeat && !heartbeatFresh;
+  const stagedCertifiedV4 = !!(
+    currentSha && runnerSha && heartbeatFresh &&
+    v4RunnerMode === "CERTIFIED" && v12PrimaryMode === "V4" &&
+    legacyV12RunnerActive === false && activeRunnerState !== "active/running"
+  );
   const runtimeEvidenceUnavailable = !currentSha || !heartbeat || !heartbeatFresh ||
     activeRunnerState !== "active/running" || legacyV12RunnerActive === null;
 
   let displayStatus: V12V4HpDisplayStatus;
-  if (shaMismatch && !independentV4ReleaseAttested) displayStatus = "SHA_MISMATCH";
+  // A mixed-SHA topology is not itself an error while the independent V4
+  // service is stopped or only staged.  Report the real lifecycle state so
+  // the HP does not turn an intentional fail-closed stop into a false SHA
+  // alarm.  Once an active V4 unit exists, an un-attested SHA mismatch is
+  // still a hard error.
+  if (shaMismatch && activeRunnerState === "active/running" && !independentV4ReleaseAttested) displayStatus = "SHA_MISMATCH";
   else if (sourceIntegrityError) displayStatus = "SOURCE_ERROR";
   else if (staleEvidence) displayStatus = "STALE";
   else if (v4RunnerMode === "SHADOW") displayStatus = "SHADOW";
   else if (activeRunnerState === "duplicate" || activeRunnerState === "release-path-mismatch" || legacyV12RunnerActive === true) displayStatus = "SOURCE_ERROR";
+  else if (stagedCertifiedV4) displayStatus = "STAGED_NOT_LIVE";
   else if (runtimeEvidenceUnavailable) displayStatus = "UNAVAILABLE";
   else if (v4RunnerMode === "CANARY" || v12PrimaryMode === "LEGACY") displayStatus = "STAGED_NOT_LIVE";
   else if (v4RunnerMode === "UNKNOWN" || v12PrimaryMode === "UNKNOWN") displayStatus = "UNAVAILABLE";
