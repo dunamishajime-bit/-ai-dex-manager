@@ -1,0 +1,131 @@
+{
+  "status": "RESEARCH_VERDICT_DO_NOT_DEPLOY",
+  "created_jst": "2026-10-16",
+  "user_rule": "For each Idle SHORT, after max favorable return during holding reaches +3%, if subsequent position return drops to -1%, exit at STOP.",
+  "model_convention": "Arm after completed H1 close crosses favorable +3%, stop starts next completed H1 interval; SHORT stopPrice = entry*1.01; when reached use worse of open and stopPrice; existing exit before modeled stop at final bar has precedence.",
+  "frozen_source": "C:/Users/dis/DisDex-five-improvements-20261008",
+  "reference_baseline": {
+    "10bps": {
+      "finalJPY": 291326102.62,
+      "PF": 4.048992,
+      "maxDrawdownPct": -20.420014
+    },
+    "30bps": {
+      "finalJPY": 174749524.318,
+      "PF": 3.277641,
+      "maxDrawdownPct": -18.388765
+    }
+  },
+  "independent_idle_accepted_trades": {
+    "10bps": {
+      "n": 47,
+      "profit_3pct_armed": 13,
+      "floor_minus_1pct_stop_triggered": 0,
+      "PF_original": 1.5816,
+      "PF_candidate": 1.5816
+    },
+    "30bps": {
+      "n": 53,
+      "profit_3pct_armed": 15,
+      "floor_minus_1pct_stop_triggered": 1,
+      "PF_original": 1.3743,
+      "PF_candidate": 1.4124
+    }
+  },
+  "full8": {
+    "entry_profit3_stop_at_negative1_close_10bps": {
+      "finalJPY": 291326103,
+      "incrementJPY": 0,
+      "PF": 4.04899,
+      "DDpct": -20.42,
+      "n": 1222
+    },
+    "entry_profit3_stop_at_negative1_close_30bps": {
+      "finalJPY": 171146893,
+      "incrementJPY": -3602631,
+      "PF": 3.20853,
+      "DDpct": -18.3888,
+      "n": 1219
+    },
+    "entry_profit3_stop_at_positive0point5_close_10bps": {
+      "finalJPY": 286882023,
+      "incrementJPY": -4444080,
+      "PF": 4.05167,
+      "DDpct": -20.4059,
+      "n": 1222
+    },
+    "entry_profit3_stop_at_positive0point5_close_30bps": {
+      "finalJPY": 168135793,
+      "incrementJPY": -6613732,
+      "PF": 3.23474,
+      "DDpct": -18.3945,
+      "n": 1220
+    },
+    "entry_profit3_stop_at_negative1_wick_10bps": {
+      "finalJPY": 289956903,
+      "incrementJPY": -1369200,
+      "PF": 4.02641,
+      "DDpct": -20.9069,
+      "n": 1222
+    },
+    "entry_profit3_stop_at_negative1_wick_30bps": {
+      "finalJPY": 164638129,
+      "incrementJPY": -10111395,
+      "PF": 3.15904,
+      "DDpct": -22.7578,
+      "n": 1219
+    },
+    "prior_three_change_reference_10bps": {
+      "finalJPY": 302658260,
+      "PF": 4.17483,
+      "DDpct": -20.2376
+    },
+    "prior_three_change_reference_30bps": {
+      "finalJPY": 198928950,
+      "PF": 3.63472,
+      "DDpct": -18.341
+    },
+    "prior_three_plus_idle_negative1_10bps": {
+      "finalJPY": 302658260,
+      "change_vs_prior_threeJPY": 0,
+      "PF": 4.17483,
+      "DDpct": -20.2376,
+      "n": 1226
+    },
+    "prior_three_plus_idle_negative1_30bps": {
+      "finalJPY": 194675931,
+      "change_vs_prior_threeJPY": -4253019,
+      "PF": 3.54387,
+      "DDpct": -18.341,
+      "n": 1223
+    },
+    "prior_three_plus_idle_positive0point5_10bps": {
+      "finalJPY": 298570394,
+      "change_vs_prior_threeJPY": -4087866,
+      "PF": 4.18175,
+      "DDpct": -20.386,
+      "n": 1226
+    },
+    "prior_three_plus_idle_positive0point5_30bps": {
+      "finalJPY": 187905629,
+      "change_vs_prior_threeJPY": -11023321,
+      "PF": 3.56692,
+      "DDpct": -18.3869,
+      "n": 1223
+    }
+  },
+  "simulationCaveats": [
+    "Model snapshots used, no authenticated Aster stop lifecycle testing, no live orders.",
+    "Completed H1 close cannot represent intrabar real-time marking precisely; wick activation has unknown within-bar ordering and is only sensitivity.",
+    "Exact accepted events can differ due to full account allocation, so frozen entry comparisons do not prove integrated effect.",
+    "Research period used to select other prior exit rules; not a fresh independent forward test.",
+    "Venue resident protective STOP/TP mutation requires signed order/qty readback, partial fill and restart parity. Current Idle hard STOP remains unchanged.",
+    "PENGU trade behavior untouched."
+  ],
+  "unitTests": {
+    "passed": 9,
+    "total": 9,
+    "githubCI": "https://github.com/dunamishajime-bit/-ai-dex-manager/actions/runs/38843233036",
+    "status": "success"
+  }
+}
