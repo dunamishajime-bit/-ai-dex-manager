@@ -208,7 +208,7 @@ export function previewThreeExitFloorReplacement(input:{
         !valid(p.quantity)||!valid(o.quantity)||Math.abs(p.quantity-o.quantity)>tolerance(p.quantity)||
         !valid(o.stopPrice)||!valid(p.markPrice))
         return response("BLOCKED","VENUE_POSITION_AND_STOP_IDENTITY_UNCERTIFIED");
-    if(!valid(n)||!valid(state.floorStopPrice))
+    if(!valid(n)||!valid(state.floorStopPrice??0))
         return response("BLOCKED","STOP_PRICE_NORMALIZATION_INVALID");
     const long=state.side==="LONG";
     // Conservatively rounded profit price must secure at least the modeled floor.
