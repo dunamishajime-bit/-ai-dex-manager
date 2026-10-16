@@ -142,6 +142,12 @@ test("normalized price cannot weaken selected profit floor",()=>{
  const s=arm();const f=proof(s);
  assert.equal(previewThreeExitFloorReplacement({...f,normalizedRequestedStopPrice:100.99}).kind,"BLOCKED");
 });
+test("signed position and STOP snapshots stale by >30 seconds block preflight",()=>{
+ const s=arm(),f=proof(s);
+ assert.equal(previewThreeExitFloorReplacement({...f,observedAt:f.observedAt+31_000}).kind,"BLOCKED");
+ assert.equal(previewThreeExitFloorReplacement({...f,
+   signedStop:{...f.signedStop,capturedAt:f.observedAt-31_000}}).kind,"BLOCKED");
+});
 test("signed evidence cannot precede completed H1 activation",()=>{
  const s=arm(),f=proof(s);
  assert.equal(previewThreeExitFloorReplacement({...f,signedStop:{...f.signedStop,capturedAt:s.effectiveFromTs!-1}}).kind,"BLOCKED");
