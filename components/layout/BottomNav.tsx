@@ -1,14 +1,15 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, CalendarDays, FileText, Home, Settings, Wallet } from "lucide-react";
+import { Activity, BarChart3, CalendarDays, FileText, Home, Settings, Wallet } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { icon: Home, label: "ホーム", href: "/" },
   { icon: BarChart3, label: "\u30c0\u30c3\u30b7\u30e5", href: "/positions" },
+  { icon: Activity, label: "リアル", href: "/realtime" },
   { icon: BarChart3, label: "判定状況", href: "/decision-status" },
   { icon: Wallet, label: "ウォレット", href: "/wallets" },
   { icon: CalendarDays, label: "損益", href: "/performance" },
@@ -35,6 +36,7 @@ function BottomNavItem({ icon: Icon, label, href }: (typeof NAV_ITEMS)[number]) 
   return (
     <Link
       href={href}
+      aria-label={href === "/realtime" ? "リアルタイム" : label}
       className={cn(
         "relative flex flex-1 flex-col items-center justify-center gap-1 px-1 py-2 text-center transition-all duration-200",
         isActive ? "text-[#f0df9c]" : "text-white/45 hover:text-white/72 active:text-[#f0df9c]",
