@@ -49,7 +49,7 @@ jobs:
       - name: Q102 and Idle runner self-tests
         run: |
           npx tsx scripts/disdex-quality102-causal-v1-runner-selftest.ts
-          npx tsx scripts/disdex-quality102-causal-v1-live-runner.ts --self-test
+          npx tsx scripts/disdex-quality102-causal-v1-live-runner-selftest.ts
           npx tsx scripts/disdex-quality102-causal-v1-state-selftest.ts
           npx tsx scripts/disdex-idle-priority-short-live-runner.ts --self-test
       - name: HYPE and shared risk self-tests
