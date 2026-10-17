@@ -69,6 +69,7 @@ async function main() {
             marketCache = { at: now, value };
             return value;
         },
+        loadFiveMinute: (symbol: Parameters<typeof provider.loadFiveMinute>[0]) => provider.loadFiveMinute(symbol),
     };
     const coreStateStore = new FileIdlePriorityShortStateStore(runtime.statePath, runtime.runtimeSha);
     const residualStateStore = new FileIdleResidualLongStateStore(residualRuntime.statePath, residualRuntime.runtimeSha);

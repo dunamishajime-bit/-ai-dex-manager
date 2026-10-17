@@ -8,11 +8,11 @@ export const IDLE_PRIORITY_SHORT_POLICY = {
   emergencyStopPct: 10,
   emergencyTakeProfitPct: 25,
   routes: {
-    TAOUSDT: { route: "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2", archetype: "BREAKOUT", rel24Max: -0.02, holdHours: 12 },
-    TIAUSDT: { route: "IDLE_TIA_BREAKDOWN_SHORT_VOLCAP100", archetype: "BREAKOUT", volumeRatioMax: 100, holdHours: 24 },
-    DOTUSDT: { route: "IDLE_DOT_MOMENTUM_SHORT_BTCREL", archetype: "MOMENTUM", btc24Max: 0, rel24Max: 0, holdHours: 24 },
-    JUPUSDT: { route: "IDLE_JUP_RELATIVE_SHORT", archetype: "RELATIVE", holdHours: 12 },
-    RENDERUSDT: { route: "IDLE_RENDER_RELATIVE_SHORT", archetype: "RELATIVE", holdHours: 12 },
+    TAOUSDT: { route: "IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2", archetype: "BREAKOUT", rel24Max: -0.02, holdHours: 12, gross: 1.0 },
+    TIAUSDT: { route: "IDLE_TIA_BREAKDOWN_SHORT_VOLCAP100", archetype: "BREAKOUT", volumeRatioMax: 100, holdHours: 24, gross: 1.0 },
+    DOTUSDT: { route: "IDLE_DOT_MOMENTUM_SHORT_BTCREL", archetype: "MOMENTUM", btc24Max: 0, rel24Max: 0, holdHours: 24, gross: 0.25 },
+    JUPUSDT: { route: "IDLE_JUP_RELATIVE_SHORT", archetype: "RELATIVE", holdHours: 12, gross: 1.0 },
+    RENDERUSDT: { route: "IDLE_RENDER_RELATIVE_SHORT", archetype: "RELATIVE", holdHours: 12, gross: 0.25 },
   },
   generic: {
     // Historical 495-row candidate lifecycle.  Generic archetype selection

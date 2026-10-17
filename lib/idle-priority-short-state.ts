@@ -16,12 +16,16 @@ export type IdleOwnedPosition={
   entryPrice:number;
   quantity:number;
   holdHours:12|24;
-  gross:1;
+  gross:number;
   stopPrice:number;
   takeProfitPrice:number;
   stopClientOrderId:string;
   takeProfitClientOrderId:string;
   protectionVerified:true;
+  trailArmed?: boolean;
+  bestConfirmed5mGainPct?: number;
+  trailingStopPrice?: number;
+  lastConfirmed5mTs?: number;
 };
 
 export type IdlePending={
@@ -40,6 +44,7 @@ export type IdlePending={
   updatedAt:number;
   reason:string;
   reservationId?:string;
+  gross?:number;
 };
 
 export type IdleDecision={
@@ -69,6 +74,7 @@ function validSha(v:unknown){return /^[0-9a-f]{40}$/i.test(String(v||""));}
 function validSymbol(v:unknown):v is IdlePrioritySymbol{return SYMBOLS.has(String(v));}
 function routeFor(symbol:IdlePrioritySymbol){return IDLE_PRIORITY_SHORT_POLICY.routes[symbol].route;}
 function holdFor(symbol:IdlePrioritySymbol){return IDLE_PRIORITY_SHORT_POLICY.routes[symbol].holdHours;}
+function grossFor(symbol:IdlePrioritySymbol){return IDLE_PRIORITY_SHORT_POLICY.routes[symbol].gross;}
 
 export function emptyIdleState(runtimeSha:string,now=Date.now()):IdleState{
  if(!validSha(runtimeSha))throw new Error("IDLE_STATE_RUNTIME_SHA_INVALID");
@@ -78,10 +84,15 @@ export function emptyIdleState(runtimeSha:string,now=Date.now()):IdleState{
 function validatePosition(p:IdleOwnedPosition){
  if(!p||!validSymbol(p.symbol)||p.side!=="SHORT"||p.route!==routeFor(p.symbol))throw new Error("IDLE_STATE_POSITION_INVALID");
  if(!validTs(p.signalTs)||!validTs(p.entryTs)||!validTs(p.exitTs)||p.exitTs<=p.entryTs)throw new Error("IDLE_STATE_POSITION_INVALID");
- if(!finitePositive(p.entryPrice)||!finitePositive(p.quantity)||p.gross!==1||p.holdHours!==holdFor(p.symbol))throw new Error("IDLE_STATE_POSITION_INVALID");
+ if(!finitePositive(p.entryPrice)||!finitePositive(p.quantity)||Math.abs(p.gross-grossFor(p.symbol))>1e-9||p.holdHours!==holdFor(p.symbol))throw new Error("IDLE_STATE_POSITION_INVALID");
  if(p.exitTs!==p.entryTs+p.holdHours*3_600_000)throw new Error("IDLE_STATE_POSITION_INVALID");
- if(!finitePositive(p.stopPrice)||!finitePositive(p.takeProfitPrice)||p.stopPrice<=p.entryPrice||p.takeProfitPrice>=p.entryPrice)throw new Error("IDLE_STATE_POSITION_INVALID");
+ const trailingStop = p.trailArmed === true && p.trailingStopPrice !== undefined;
+ if(!finitePositive(p.stopPrice)||!finitePositive(p.takeProfitPrice)||(!trailingStop && p.stopPrice<=p.entryPrice)||(trailingStop && p.stopPrice>p.entryPrice)||p.takeProfitPrice>=p.entryPrice)throw new Error("IDLE_STATE_POSITION_INVALID");
  if(!p.stopClientOrderId||!p.takeProfitClientOrderId||p.protectionVerified!==true)throw new Error("IDLE_STATE_POSITION_INVALID");
+ if(p.trailArmed!==undefined&&typeof p.trailArmed!=="boolean")throw new Error("IDLE_STATE_POSITION_INVALID");
+ for(const value of [p.bestConfirmed5mGainPct,p.trailingStopPrice,p.lastConfirmed5mTs])if(value!==undefined&&!Number.isFinite(value))throw new Error("IDLE_STATE_POSITION_INVALID");
+ if(p.trailingStopPrice!==undefined&&!trailingStop)throw new Error("IDLE_STATE_POSITION_INVALID");
+ if(trailingStop && Math.abs(p.stopPrice-p.trailingStopPrice!)>Math.max(1e-10,Math.abs(p.stopPrice)*1e-9))throw new Error("IDLE_STATE_POSITION_INVALID");
 }
 
 function validatePending(p:IdlePending){
@@ -90,6 +101,7 @@ function validatePending(p:IdlePending){
  if(!p.clientOrderId||!p.idempotencyKey||!finitePositive(p.quantity)||!finitePositive(p.expectedPrice))throw new Error("IDLE_STATE_PENDING_INVALID");
  if(!validTs(p.signalTs)||!validTs(p.decisionTs)||!validTs(p.createdAt)||!validTs(p.updatedAt)||!p.reason)throw new Error("IDLE_STATE_PENDING_INVALID");
  if(p.reservationId!=null&&typeof p.reservationId!=="string")throw new Error("IDLE_STATE_PENDING_INVALID");
+ if(p.gross!==undefined&&(!Number.isFinite(p.gross)||p.gross<=0||Math.abs(p.gross-grossFor(p.symbol))>1e-9))throw new Error("IDLE_STATE_PENDING_INVALID");
 }
 
 export function normalizeIdleState(raw:unknown,runtimeSha:string):IdleState{

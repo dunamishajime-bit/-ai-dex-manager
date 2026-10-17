@@ -47,6 +47,7 @@ import { reduceV12DynamicResidualForCoreConflict } from "@/lib/v12-dynamic-resid
 import { reduceFetBrk48ForCoreConflict } from "@/lib/fet-brk48-live-reduction";
 import { isHypeZecSoleSharedCapacityCause, releaseHypeZecCapacityForPriorityEntry } from "@/lib/hype-zec-priority-capacity";
 import { releaseIdleResidualLongForFormalEntry } from "@/lib/idle-residual-long-preemption";
+import { applyQ102ProfitFloorBar, moreProtectiveStop, type ConfirmedFiveMinuteBar } from "@/lib/disdex-exit-overlay-contract";
 import type { V12AsterLiveAdapter } from "@/lib/v12-aster-live-adapter";
 import type {
     DirectAccountSnapshot,
@@ -83,12 +84,13 @@ export interface Quality102CausalV1TickResult {
     message: string;
     signal?: Quality102CausalV1Signal;
     idempotencyKey?: string;
-    exitReason?: "hard_stop" | "trail_5pct_after_12pct" | "72h_time" | "time" | "shared_risk_flatten";
+    exitReason?: "hard_stop" | "profit_floor_0p5" | "trail_5pct_after_12pct" | "72h_time" | "time" | "shared_risk_flatten";
     ordersSent?: number;
 }
 
 export interface Quality102CausalV1RunnerConfig {
     residentStopRequired?: boolean;
+    profitFloorEnabled?: boolean;
     mode: Quality102CausalV1Mode;
     enabled: boolean;
     liveTradingEnabled: boolean;
@@ -144,7 +146,7 @@ export interface Quality102CausalV1AccountLock extends LiveRunnerLock {
 
 export interface Quality102CausalV1RunnerDependencies {
     residentStopGateway?: ResidentStopGateway;
-    marketData: { load(force?: boolean): Promise<Quality102CausalV1History> };
+    marketData: { load(force?: boolean): Promise<Quality102CausalV1History>; loadFiveMinute?(symbol: string): Promise<ConfirmedFiveMinuteBar> };
     executor: DirectTradeExecutor;
     stateStore: Quality102CausalV1StateStore;
     lock: Quality102CausalV1AccountLock;
@@ -436,10 +438,11 @@ export function quality102ExitReasonForState(
     statePosition: NonNullable<Quality102CausalV1State["position"]>,
     markPrice: number,
     now: number,
-): "hard_stop" | "trail_5pct_after_12pct" | "72h_time" | "time" | undefined {
+): "hard_stop" | "profit_floor_0p5" | "trail_5pct_after_12pct" | "72h_time" | "time" | undefined {
     const hardStop = statePosition.hardStop;
     if (!(hardStop && Number.isFinite(markPrice) && markPrice > 0 && Number.isFinite(now) && now >= statePosition.entryTs)) return undefined;
     const long = statePosition.side > 0;
+    if (statePosition.profitFloorArmed && statePosition.profitFloorStopPrice && ((long && markPrice <= statePosition.profitFloorStopPrice) || (!long && markPrice >= statePosition.profitFloorStopPrice))) return "profit_floor_0p5";
     const stopPrice = long ? statePosition.entryPrice * (1 - hardStop) : statePosition.entryPrice * (1 + hardStop);
     if ((long && markPrice <= stopPrice) || (!long && markPrice >= stopPrice)) return "hard_stop";
 
@@ -673,7 +676,8 @@ export class Quality102CausalV1Runner {
         if(actual && (remaining>p.quantity+1e-8 || actualSide(actual)!==p.side))return this.manualReview(state,"Q102_RESIDENT_STOP_POSITION_MISMATCH");
         if(actual&&Math.abs(remaining-p.quantity)<=1e-8)return;
         const g=this.dependencies.residentStopGateway!;
-        const plan=residentStopPlan({strategy:"Q102",symbol:p.symbol,side:p.side,entryTs:p.entryTs,entryPrice:p.entryPrice,quantity:p.quantity,stopFraction:p.hardStop!});
+        const baseStop = p.side > 0 ? p.entryPrice * (1 - p.hardStop!) : p.entryPrice * (1 + p.hardStop!);
+        const plan=residentStopPlan({strategy:"Q102",symbol:p.symbol,side:p.side,entryTs:p.entryTs,entryPrice:p.entryPrice,quantity:p.quantity,stopFraction:p.hardStop!,stopPriceOverride:moreProtectiveStop(p.side > 0 ? "LONG" : "SHORT", baseStop, p.profitFloorStopPrice)});
         p.stopLedger=p.stopLedger??appendStopIntent(undefined,plan,p.quantity,(p.acceptedEntryGross ?? quality102GrossForFamily(p.family,p.side)));
         try{
             const proof=await reconcileStopLedger(p.stopLedger,remaining,id=>this.dependencies.executor.reconcileOrder(p.symbol,id),state.pending);
@@ -700,13 +704,48 @@ export class Quality102CausalV1Runner {
         }catch(error){return this.manualReview(state,"Q102_RESIDENT_STOP_FILL_RECONCILIATION:"+(error instanceof Error?error.message:String(error)));}
     }
 
+    private async updateProfitFloorState(state: Quality102CausalV1State): Promise<"profit_floor_0p5" | "manual_review" | undefined> {
+        const position = state.position;
+        if (!position || this.dependencies.config.profitFloorEnabled !== true) return undefined;
+        const loader = this.dependencies.marketData.loadFiveMinute;
+        if (!loader) {
+            await this.manualReview(state, "Q102_PROFIT_FLOOR_5M_SOURCE_UNAVAILABLE");
+            return "manual_review";
+        }
+        try {
+            const bar = await loader(position.symbol);
+            const transition = applyQ102ProfitFloorBar({
+                side: position.side > 0 ? "LONG" : "SHORT",
+                entryPrice: position.entryPrice,
+                state: {
+                    armed: position.profitFloorArmed === true,
+                    stopPrice: position.profitFloorStopPrice,
+                    bestGainPct: position.profitFloorBestGainPct ?? 0,
+                    lastConfirmedBarTs: position.profitFloorLastConfirmed5mTs,
+                },
+                bar,
+            });
+            position.profitFloorArmed = transition.state.armed;
+            position.profitFloorStopPrice = transition.state.stopPrice;
+            position.profitFloorBestGainPct = transition.state.bestGainPct;
+            position.profitFloorLastConfirmed5mTs = transition.state.lastConfirmedBarTs;
+            await this.dependencies.stateStore.save(state);
+            return transition.stopHit ? "profit_floor_0p5" : undefined;
+        } catch (error) {
+            await this.manualReview(state, `Q102_PROFIT_FLOOR_5M_REVIEW:${error instanceof Error ? error.message : String(error)}`);
+            return "manual_review";
+        }
+    }
+
     private async protectPosition(state: Quality102CausalV1State): Promise<Quality102CausalV1TickResult | undefined> {
         const p = state.position;
         if (!p || !this.dependencies.config.residentStopRequired) return;
         const g = this.dependencies.residentStopGateway;
         if (!g) return this.manualReview(state, "Q102_RESIDENT_STOP_GATEWAY_UNAVAILABLE");
         try {
-            p.residentStop = await ensureResidentStop(g, { strategy: "Q102", symbol: p.symbol, side: p.side, entryTs: p.entryTs, entryPrice: p.entryPrice, quantity: p.quantity, stopFraction: p.hardStop! }, p.residentStop, this.now(), async plan=>{ p.stopLedger=appendStopIntent(p.stopLedger,plan,p.quantity,(p.acceptedEntryGross ?? quality102GrossForFamily(p.family,p.side)));await this.dependencies.stateStore.save(state); });
+            const baseStop = p.side > 0 ? p.entryPrice * (1 - p.hardStop!) : p.entryPrice * (1 + p.hardStop!);
+            const effectiveStop = moreProtectiveStop(p.side > 0 ? "LONG" : "SHORT", baseStop, p.profitFloorStopPrice);
+            p.residentStop = await ensureResidentStop(g, { strategy: "Q102", symbol: p.symbol, side: p.side, entryTs: p.entryTs, entryPrice: p.entryPrice, quantity: p.quantity, stopFraction: p.hardStop!, stopPriceOverride: effectiveStop }, p.residentStop, this.now(), async plan=>{ p.stopLedger=appendStopIntent(p.stopLedger,plan,p.quantity,(p.acceptedEntryGross ?? quality102GrossForFamily(p.family,p.side)));await this.dependencies.stateStore.save(state); });
             await this.dependencies.stateStore.save(state);
         } catch (error) { if(p.residentStop)p.residentStop={...p.residentStop,protected:false,readBackStatus:"UNVERIFIED"}; return this.manualReview(state, `Q102_RESIDENT_STOP_UNVERIFIED:${error instanceof Error ? error.message : String(error)}`); }
     }
@@ -729,6 +768,8 @@ export class Quality102CausalV1Runner {
             hardStop,
             bestPrice: entryPrice,
             trailActive: false,
+            profitFloorArmed: false,
+            profitFloorBestGainPct: 0,
             acceptedEntryGross: pending.targetGross,
             family: pending.family,
             variant: pending.variant,
@@ -800,7 +841,10 @@ export class Quality102CausalV1Runner {
             const gateway = this.dependencies.residentStopGateway;
             if (!gateway) return this.manualReview(state, "Q102_BASE_REDUCTION_RESIDENT_STOP_GATEWAY_UNAVAILABLE");
             try {
-                if (expectedRemaining > EPSILON && actual) nextStop = await ensureResidentStop(gateway, { strategy: "Q102", symbol: position.symbol, side: position.side, entryTs: position.entryTs, entryPrice: position.entryPrice, quantity: Math.abs(actual.quantity), stopFraction: position.hardStop! }, position.residentStop, this.now(), async plan=>{position.stopLedger=appendStopIntent(position.stopLedger,plan,position.quantity,position.acceptedEntryGross??quality102GrossForFamily(position.family,position.side));await this.dependencies.stateStore.save(state);});
+                if (expectedRemaining > EPSILON && actual) {
+                    const baseStop = position.side > 0 ? position.entryPrice * (1 - position.hardStop!) : position.entryPrice * (1 + position.hardStop!);
+                    nextStop = await ensureResidentStop(gateway, { strategy: "Q102", symbol: position.symbol, side: position.side, entryTs: position.entryTs, entryPrice: position.entryPrice, quantity: Math.abs(actual.quantity), stopFraction: position.hardStop!, stopPriceOverride: moreProtectiveStop(position.side > 0 ? "LONG" : "SHORT", baseStop, position.profitFloorStopPrice) }, position.residentStop, this.now(), async plan=>{position.stopLedger=appendStopIntent(position.stopLedger,plan,position.quantity,position.acceptedEntryGross??quality102GrossForFamily(position.family,position.side));await this.dependencies.stateStore.save(state);});
+                }
                 else await retireResidentStop(gateway, position.residentStop);
             } catch (error) { return this.manualReview(state, `Q102_BASE_REDUCTION_STOP_RECONCILIATION:${error instanceof Error ? error.message : String(error)}`); }
         }
@@ -1466,6 +1510,8 @@ export class Quality102CausalV1Runner {
             if (state.position && !actual) return this.manualReview(state, "Q102 state expects a position but exchange returned none.");
             if (!state.position && actual) return this.manualReview(state, "Q102 exchange position is unmanaged.");
             if (state.position) {
+                const profitFloorReason = await this.updateProfitFloorState(state);
+                if (profitFloorReason === "manual_review") return { status: "manual-review", message: "Q102_PROFIT_FLOOR_MANUAL_REVIEW", ordersSent: 0 };
                 const protectionBlocked = await this.protectPosition(state);
                 if (protectionBlocked) return protectionBlocked;
                 if (!state.position.hardStop || !state.position.bestPrice || state.position.trailActive === undefined) return this.manualReview(state, "Q102 active state lacks recovered exit metadata.");
@@ -1474,7 +1520,7 @@ export class Quality102CausalV1Runner {
                 await this.updateTrailingState(state, quote);
                 const reason = sharedRisk?.flattenExisting
                     ? "shared_risk_flatten"
-                    : quality102ExitReasonForState(state.position, quote.midPrice, quote.updatedAt);
+                    : profitFloorReason || quality102ExitReasonForState(state.position, quote.midPrice, quote.updatedAt);
                 if (!reason) {
                     return {
                         status: "held",

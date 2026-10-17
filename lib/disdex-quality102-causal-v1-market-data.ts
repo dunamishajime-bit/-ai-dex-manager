@@ -4,6 +4,7 @@ import { dirname, resolve } from "node:path";
 import { AsterApiError, AsterV3Client, isAsterDepositRequirementError, isAsterIpBanError, type AsterKline } from "./aster-v3-client";
 import { QUALITY102_HOUR_MS, type Quality102Candle } from "./disdex-quality102-causal-pipeline";
 import type { Quality102CausalV1History } from "./disdex-quality102-causal-v1-signal";
+import type { ConfirmedFiveMinuteBar } from "./disdex-exit-overlay-contract";
 
 const MINIMUM_HISTORY_HOURS = 181 * 24;
 const DEFAULT_HISTORY_HOURS = 225 * 24;
@@ -148,12 +149,12 @@ export class Quality102CausalV1AsterMarketDataProvider {
         this.lastRequestAt = Date.now();
     }
 
-    private async getKlines(symbol: string, limit: number, startTime: number, endTime: number): Promise<AsterKline[]> {
+    private async getKlines(symbol: string, interval: "1h" | "5m", limit: number, startTime: number, endTime: number): Promise<AsterKline[]> {
         let lastRateError: unknown;
         for (let attempt = 0; attempt < this.rateLimitAttempts; attempt += 1) {
             await this.waitForRequestSlot();
             try {
-                return await this.client.getKlines(symbol, "1h", limit, { startTime, endTime });
+                return await this.client.getKlines(symbol, interval, limit, { startTime, endTime });
             } catch (error) {
                 if (isAsterDepositRequirementError(error)) {
                     throw new Error("ASTER_FUTURES_V3_DEPOSIT_REQUIREMENT_5050_FAIL_CLOSED");
@@ -180,7 +181,7 @@ export class Quality102CausalV1AsterMarketDataProvider {
             // candle itself is valid. Keep the inclusive local range intact,
             // but make the venue request strictly wider at that boundary.
             const requestEnd = pageStart === pageEnd ? pageEnd + 1 : pageEnd;
-            const rows = await this.getKlines(symbol, this.pageLimit, pageStart, requestEnd);
+            const rows = await this.getKlines(symbol, "1h", this.pageLimit, pageStart, requestEnd);
             if (!Array.isArray(rows)) throw new Error(`QUALITY102_ASTER_KLINE_RESPONSE_INVALID:${symbol}`);
             pages.push(rows);
             pageEnd = pageStart - QUALITY102_HOUR_MS;
@@ -286,7 +287,7 @@ export class Quality102CausalV1AsterMarketDataProvider {
         // or later intrabar price is introduced.
         const requestEndTime = Math.max(timestampMs + 1, now);
         for (let attempt = 0; ; attempt += 1) {
-            const rows = await this.getKlines(symbol, 1, timestampMs, requestEndTime);
+            const rows = await this.getKlines(symbol, "1h", 1, timestampMs, requestEndTime);
             const row = rows.find((candidate) => Number(candidate[0]) === timestampMs);
             if (row) {
                 const open = finiteNumber(row[1], "currentOpen");
@@ -334,5 +335,21 @@ export class Quality102CausalV1AsterMarketDataProvider {
         const nextHourBoundary = currentHourOpenTs + QUALITY102_HOUR_MS;
         this.cached = { expiresAt: Math.min(now + this.cacheTtlMs, nextHourBoundary), history };
         return history;
+    }
+
+    /**
+     * Read-only latest completed 5m candle used by the Q102 profit floor.
+     * It deliberately does not expose the current unfinished candle.
+     */
+    async loadFiveMinute(symbol: string): Promise<ConfirmedFiveMinuteBar> {
+        const now = this.now();
+        const interval = 5 * 60_000;
+        const currentOpen = Math.floor(now / interval) * interval;
+        const rows = await this.getKlines(symbol.toUpperCase(), "5m", 3, currentOpen - 2 * interval, Math.max(currentOpen + 1, now));
+        const row = rows.filter((value) => Number(value[6]) < now).sort((left, right) => Number(left[0]) - Number(right[0])).at(-1);
+        if (!row) throw new Error(`QUALITY102_5M_CANDLE_UNAVAILABLE:${symbol}`);
+        const result = { timestampMs: Number(row[0]), open: Number(row[1]), high: Number(row[2]), low: Number(row[3]), close: Number(row[4]) };
+        if (!Object.values(result).every((value) => Number.isFinite(value) && value > 0) || result.high < Math.max(result.open, result.close) || result.low > Math.min(result.open, result.close)) throw new Error(`QUALITY102_5M_CANDLE_INVALID:${symbol}`);
+        return result;
     }
 }

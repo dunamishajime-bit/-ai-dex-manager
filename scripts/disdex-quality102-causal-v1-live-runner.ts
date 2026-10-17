@@ -133,6 +133,7 @@ export interface Quality102CausalV1LiveResolvedConfig {
     liveTradingEnabled: boolean;
     liveExecutionEnabled: boolean;
     operatorArmed: boolean;
+    profitFloorEnabled?: boolean;
     runtimeCommitSha: string;
     expectedRuntimeCommitSha: string;
     selectorMode: string;
@@ -246,6 +247,7 @@ export function resolveQuality102CausalV1LiveConfig(env: NodeJS.ProcessEnv = pro
         liveTradingEnabled: runtime.liveTradingEnabled,
         liveExecutionEnabled: runtime.liveExecutionEnabled,
         operatorArmed: runtime.operatorArmed,
+        profitFloorEnabled: boolEnv(env, "QUALITY102_Q102_PROFIT_FLOOR_ENABLED", false),
         runtimeCommitSha: runtimeSha,
         expectedRuntimeCommitSha: runtimeSha,
         selectorMode: String(env.QUALITY102_CAUSAL_V1_SELECTOR_MODE || "").trim().toUpperCase(),
@@ -543,6 +545,7 @@ export function buildQuality102CausalV1Runner(env: NodeJS.ProcessEnv = process.e
         },
         config: {
             residentStopRequired: config.mode === "LIVE",
+            profitFloorEnabled: config.profitFloorEnabled,
             mode: config.mode,
             enabled: config.enabled,
             liveTradingEnabled: config.liveTradingEnabled,

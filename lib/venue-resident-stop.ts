@@ -11,13 +11,14 @@ export interface ResidentStopGateway {
  getOrder(symbol:string,id:string):Promise<ResidentStopOrder>;
  cancel(symbol:string,id:string):Promise<void>;
 }
-export interface ResidentStopPosition { strategy:'PENGU'|'Q102'; symbol:string; side:1|-1; entryTs:number; entryPrice:number; quantity:number; stopFraction:number }
+export interface ResidentStopPosition { strategy:'PENGU'|'Q102'; symbol:string; side:1|-1; entryTs:number; entryPrice:number; quantity:number; stopFraction:number; stopPriceOverride?:number }
 export interface ResidentStopProtection { protected:boolean; clientOrderId:string; orderId:number; symbol:string; side:'BUY'|'SELL'; quantity:number; originalQuantity:number; stopPrice:number; readBackStatus:'VERIFIED'|'UNVERIFIED'; lastReconciledAt:number }
 const positive=(v:number)=>Number.isFinite(v)&&v>0;
 const same=(a:number,b:number)=>Math.abs(a-b)<=Math.max(1e-10,Math.abs(b)*1e-9);
 export function residentStopPlan(p:ResidentStopPosition):ResidentStopPlan {
  if(!positive(p.entryTs)||!positive(p.entryPrice)||!positive(p.quantity)||!positive(p.stopFraction)||p.stopFraction>=1||![1,-1].includes(p.side)||!p.symbol)throw Error('RESIDENT_STOP_INVALID_ACTUAL_FILL');
- const stopPrice=p.entryPrice*(1-p.side*p.stopFraction);
+ const stopPrice=p.stopPriceOverride === undefined ? p.entryPrice*(1-p.side*p.stopFraction) : p.stopPriceOverride;
+ if(!positive(stopPrice)|| (p.side===1 && stopPrice>=p.entryPrice) || (p.side===-1 && stopPrice<=p.entryPrice)) throw Error('RESIDENT_STOP_PRICE_OVERRIDE_INVALID');
  const digest=createHash('sha256').update(`${p.strategy}|${p.symbol}|${p.side}|${p.entryTs}|${p.entryPrice}|${p.quantity}|${stopPrice}`).digest('hex').slice(0,22);
  return{symbol:p.symbol.toUpperCase(),side:p.side===1?'SELL':'BUY',quantity:p.quantity,stopPrice,reduceOnly:true,clientOrderId:`${p.strategy.toLowerCase()}-stop-${digest}`};
 }

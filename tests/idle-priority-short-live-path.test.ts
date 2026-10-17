@@ -69,6 +69,13 @@ test("accepted admission is exactly one gross", () => {
     assert.deepEqual(evaluateIdleLiveAdmission(base), { accepted: true, reason: "IDLE_LIVE_ADMISSION_ACCEPTED", gross: 1 });
 });
 
+test("DOT and RENDER accept only their fixed 0.25x gross without partial sizing", () => {
+    const dot = evaluateIdleLiveAdmission({ ...base, symbol: "DOTUSDT", fullCryptoGrossAvailable: 0.25, fullTotalGrossAvailable: 0.25 });
+    assert.deepEqual(dot, { accepted: true, reason: "IDLE_LIVE_ADMISSION_ACCEPTED", gross: 0.25 });
+    const render = evaluateIdleLiveAdmission({ ...base, symbol: "RENDERUSDT", fullCryptoGrossAvailable: 0.249999, fullTotalGrossAvailable: 0.25 });
+    assert.deepEqual(render, { accepted: false, reason: "GROSS_CAPACITY_UNAVAILABLE:0.25X", gross: 0 });
+});
+
 test("protection plan is deterministic SHORT-only and uses stop/TP contract", () => {
     const plan = buildIdleProtectionPlan({ symbol: "DOTUSDT", signalTs: 1_700_000_000_000, entryPrice: 100, quantity: 2 });
     assert.equal(plan.side, "SHORT");

@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { assertHypeZecLiveGate, type HypeZecLongRuntime } from "../config/hypeZecLongRuntime";
 import { HYPE_ZEC_LONG_POLICY, type HypeZecStrategy } from "../config/hypeZecLongPolicy";
 import { HYPE_TREND_LONG_POLICY } from "../config/hypeTrendLongPolicy";
+import { calculateWalletRiskStop, moreProtectiveStop } from "./disdex-exit-overlay-contract";
 import { classifyAsterSymbol } from "./disdex-aster-portfolio-classifier";
 import { aggregatePendingExposure, readPendingExposureRegistry } from "./disdex-pending-exposure-registry";
 import { readSharedCryptoDailyRisk } from "./disdex-shared-crypto-daily-risk";
@@ -367,7 +368,22 @@ export class HypeZecLongRunner {
     const trendTakeProfit = this.dependencies.runtime.signalMode === "TREND" && signal.trailingDistance
       ? actualEntry + signal.trailingDistance
       : signal.takeProfitPrice;
-    const levels = buildHypeZecProtection({ strategy: signal.strategy, entryPrice: actualEntry, tickSize: filters.tickSize, quantity: actualQty, stepSize: filters.stepSize, stopPriceOverride: trendStop, takeProfitPriceOverride: trendTakeProfit });
+    const acceptedEntryGross = Math.max(EPSILON, Math.abs(Number(actual.notionalUsd || actualQty * actualEntry)) / Math.max(equity, EPSILON));
+    const walletRiskStop = signal.strategy === "HYPE_LONG"
+      ? calculateWalletRiskStop({
+        side: "LONG",
+        entryPrice: actualEntry,
+        equity,
+        acceptedGross: acceptedEntryGross,
+        walletRiskPct: HYPE_ZEC_LONG_POLICY.HYPE_LONG.walletStopRiskPct,
+        roundTripCostBps: 2 * this.dependencies.runtime.feeBpsPerSide + this.dependencies.runtime.maximumSlippageBps + this.dependencies.runtime.fundingBps,
+      }).stopPrice
+      : undefined;
+    // The approved HYPE overlay uses the wallet-risk stop after the fill.  ZEC
+    // and the entry signal remain unchanged; the stop is installed only after
+    // actual position/read-back data has been obtained.
+    const effectiveStop = walletRiskStop === undefined ? trendStop : moreProtectiveStop("LONG", trendStop, walletRiskStop);
+    const levels = buildHypeZecProtection({ strategy: signal.strategy, entryPrice: actualEntry, tickSize: filters.tickSize, quantity: actualQty, stepSize: filters.stepSize, stopPriceOverride: effectiveStop, takeProfitPriceOverride: trendTakeProfit });
     const stopId = hashId([idempotencyKey, "STOP"], "hz-stop");
     const tpId = hashId([idempotencyKey, "TP"], "hz-tp");
     try {
@@ -378,7 +394,7 @@ export class HypeZecLongRunner {
     } catch (error) {
       return this.manualReview(state, `HYPE_ZEC_PROTECTION_INSTALL_FAILED:${error instanceof Error ? error.message : String(error)}`);
     }
-    const position: HypeZecLongPositionState = { strategy: signal.strategy, symbol, side: "LONG", positionId: idempotencyKey, quantity: actualQty, entryPrice: actual.entryPrice || signal.entryPrice, entryTs: this.now(), signalTs: signal.signalTs, stopPrice: levels.stopPrice, takeProfitPrice: levels.takeProfitPrice, stopClientOrderId: stopId, takeProfitClientOrderId: tpId, stopReadBackAt: this.now(), peakPrice: actual.markPrice || signal.entryPrice, updatedAt: this.now() };
+    const position: HypeZecLongPositionState = { strategy: signal.strategy, symbol, side: "LONG", positionId: idempotencyKey, quantity: actualQty, entryPrice: actual.entryPrice || signal.entryPrice, entryTs: this.now(), signalTs: signal.signalTs, stopPrice: levels.stopPrice, takeProfitPrice: levels.takeProfitPrice, stopClientOrderId: stopId, takeProfitClientOrderId: tpId, stopReadBackAt: this.now(), peakPrice: actual.markPrice || signal.entryPrice, acceptedEntryGross, walletStopRiskPct: signal.strategy === "HYPE_LONG" ? HYPE_ZEC_LONG_POLICY.HYPE_LONG.walletStopRiskPct : undefined, updatedAt: this.now() };
     state.positions = [...(state.positions || []).filter((row) => row.strategy !== signal.strategy), position];
     state.pending = undefined;
     await stateStoreSave(this.dependencies.stateStore, state);

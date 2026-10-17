@@ -2,8 +2,10 @@ import type { AsterKline, AsterV3Client } from "./aster-v3-client";
 import { IDLE_PRIORITY_SHORT_POLICY, type IdlePrioritySymbol } from "../config/idlePriorityShortPolicy";
 import { IDLE_RESIDUAL_LONG_POLICY, type IdleResidualLongSymbol } from "../config/idleResidualLongPolicy";
 import type { IdleH1Candle } from "./idle-priority-short-signal";
+import type { ConfirmedFiveMinuteBar } from "./disdex-exit-overlay-contract";
 
 const HOUR = 3_600_000;
+const FIVE_MINUTE = 5 * 60_000;
 const MIN_BARS = 90;
 
 function finitePositive(value: unknown, code: string) {
@@ -80,5 +82,32 @@ export class IdlePriorityAsterMarketDataProvider {
     // Force an explicit positive close at the signal boundary before signal math.
     finitePositive(btc.rows.at(-1)?.close, "IDLE_MARKET_DATA_BTC_CLOSE_INVALID");
     return { decisionTs: btc.decisionTs, btc: btc.rows, symbols: mapped, residualSymbols: residualMapped };
+  }
+
+  /** Read the latest completed Aster 5m candle only; never use the forming bar. */
+  async loadFiveMinute(symbol: IdlePrioritySymbol): Promise<ConfirmedFiveMinuteBar> {
+    const now = (this.options.now || Date.now)();
+    const currentOpen = Math.floor(now / FIVE_MINUTE) * FIVE_MINUTE;
+    const latestClosedOpen = currentOpen - FIVE_MINUTE;
+    const rows = await this.client.getKlines(symbol, "5m", 3, {
+      startTime: latestClosedOpen - 2 * FIVE_MINUTE,
+      endTime: currentOpen + 1,
+    });
+    const row = rows.find((candidate) => Number(candidate[0]) === latestClosedOpen && Number(candidate[6]) < now);
+    if (!row) throw new Error(`IDLE_5M_CANDLE_UNAVAILABLE:${symbol}:${latestClosedOpen}`);
+    const result: ConfirmedFiveMinuteBar = {
+      timestampMs: Number(row[0]),
+      open: Number(row[1]),
+      high: Number(row[2]),
+      low: Number(row[3]),
+      close: Number(row[4]),
+    };
+    if (!Object.values(result).every((value) => Number.isFinite(value) && value > 0)
+      || result.high < Math.max(result.open, result.close)
+      || result.low > Math.min(result.open, result.close)
+      || result.high < result.low) {
+      throw new Error(`IDLE_5M_CANDLE_INVALID:${symbol}:${latestClosedOpen}`);
+    }
+    return result;
   }
 }

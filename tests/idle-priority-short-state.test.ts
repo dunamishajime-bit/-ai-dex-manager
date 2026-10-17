@@ -18,6 +18,11 @@ test("unknown symbol ownership is rejected",()=>assert.throws(()=>normalizeIdleS
 test("unverified protection is rejected",()=>assert.throws(()=>normalizeIdleState({...emptyIdleState(sha),positions:[{...pos,protectionVerified:false}]} as any,sha),/POSITION_INVALID/));
 test("wrong route or hold contract is rejected",()=>assert.throws(()=>normalizeIdleState({...emptyIdleState(sha),positions:[{...pos,holdHours:24,exitTs:93_600_000}]} as any,sha),/POSITION_INVALID/));
 test("valid protected position survives normalization",()=>assert.equal(normalizeIdleState({...emptyIdleState(sha),positions:[pos]},sha).positions[0].symbol,"TAOUSDT"));
+test("DOT trailing protection may move below entry only after the trail is armed",()=>{
+ const trailing={...pos,symbol:"DOTUSDT",route:"IDLE_DOT_MOMENTUM_SHORT_BTCREL",holdHours:24,exitTs:93_600_000,gross:0.25,stopPrice:98,trailingStopPrice:98,trailArmed:true,bestConfirmed5mGainPct:0.04,lastConfirmed5mTs:10_800_000};
+ assert.equal(normalizeIdleState({...emptyIdleState(sha),positions:[trailing]},sha).positions[0].trailingStopPrice,98);
+ assert.throws(()=>normalizeIdleState({...emptyIdleState(sha),positions:[{...trailing,trailArmed:false}]} as any,sha),/POSITION_INVALID/);
+});
 test("pending entry is explicit and validated",()=>{
  const pending={action:"ENTRY",phase:"planned",symbol:"DOTUSDT",route:"IDLE_DOT_MOMENTUM_SHORT_BTCREL",clientOrderId:"idle-entry",idempotencyKey:"k",quantity:2,expectedPrice:10,signalTs:3_600_000,decisionTs:7_200_000,holdHours:24,createdAt:1,updatedAt:1,reason:"ENTRY"} as const;
  assert.equal(normalizeIdleState({...emptyIdleState(sha),pending},sha).pending?.symbol,"DOTUSDT");

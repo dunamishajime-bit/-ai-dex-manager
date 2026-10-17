@@ -8,6 +8,8 @@ type LongSleevePolicy = {
   strategy: HypeZecStrategy;
   symbol: "HYPEUSDT" | "ZECUSDT";
   riskPct: number;
+  /** Post-fill emergency stop budget.  This is independent from entry sizing. */
+  walletStopRiskPct?: number;
   maximumGross: number;
   leverage: 5;
   marginType: "cross";
@@ -42,6 +44,7 @@ export const HYPE_ZEC_LONG_POLICY: Readonly<Record<HypeZecStrategy, LongSleevePo
     strategy: "HYPE_LONG",
     symbol: "HYPEUSDT",
     riskPct: INTEGRATED_PRODUCTION_RISK_POLICY.hypeLongRiskPct,
+    walletStopRiskPct: 2,
     maximumGross: INTEGRATED_PRODUCTION_RISK_POLICY.hypeZecMaximumGross,
     leverage: 5,
     marginType: "cross",

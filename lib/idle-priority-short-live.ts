@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { IDLE_PRIORITY_SHORT_POLICY, type IdlePrioritySymbol } from "../config/idlePriorityShortPolicy";
 
 export type IdleLiveAdmissionInput = {
+    symbol?: IdlePrioritySymbol;
     runtimeMode: "SHADOW" | "LIVE";
     operatorArmed: boolean;
     candidateAccepted: boolean;
@@ -65,12 +66,13 @@ export function normalizeIdleBaselineAdmission(raw: unknown, expectedRuntimeSha:
 export type IdleLiveAdmissionResult = {
     accepted: boolean;
     reason: string;
-    gross: 0 | 1;
+    gross: number;
 };
 
 const EPSILON = 1e-9;
 
 export function evaluateIdleLiveAdmission(input: IdleLiveAdmissionInput): IdleLiveAdmissionResult {
+    const requestedGross = input.symbol ? IDLE_PRIORITY_SHORT_POLICY.routes[input.symbol].gross : 1;
     if (input.runtimeMode !== "LIVE" || !input.operatorArmed) return { accepted: false, reason: "OPERATOR_LIVE_ACTIVATION_REQUIRED", gross: 0 };
     if (!input.baselineFresh || !input.baselineSourceComplete || input.baselineDecisionTs !== input.decisionTs) {
         return { accepted: false, reason: "BASELINE_ADMISSION_UNAVAILABLE", gross: 0 };
@@ -88,10 +90,10 @@ export function evaluateIdleLiveAdmission(input: IdleLiveAdmissionInput): IdleLi
     if (input.killSwitchActive) return { accepted: false, reason: "SHARED_KILL_SWITCH_ACTIVE", gross: 0 };
     if (!input.venueFiveXCrossConfirmed) return { accepted: false, reason: "VENUE_5X_CROSS_UNCONFIRMED", gross: 0 };
     if (!input.candidateAccepted || input.candidateSide !== "SHORT") return { accepted: false, reason: "SHORT_SIGNAL_NOT_ACCEPTED", gross: 0 };
-    if (input.fullCryptoGrossAvailable < 1 - EPSILON || input.fullTotalGrossAvailable < 1 - EPSILON) {
-        return { accepted: false, reason: "FULL_1X_CAPACITY_UNAVAILABLE", gross: 0 };
+    if (input.fullCryptoGrossAvailable < requestedGross - EPSILON || input.fullTotalGrossAvailable < requestedGross - EPSILON) {
+        return { accepted: false, reason: requestedGross === 1 ? "FULL_1X_CAPACITY_UNAVAILABLE" : `GROSS_CAPACITY_UNAVAILABLE:${requestedGross}X`, gross: 0 };
     }
-    return { accepted: true, reason: "IDLE_LIVE_ADMISSION_ACCEPTED", gross: 1 };
+    return { accepted: true, reason: "IDLE_LIVE_ADMISSION_ACCEPTED", gross: requestedGross };
 }
 
 export function deterministicIdleClientOrderId(input: { action: "ENTRY" | "EXIT" | "STOP" | "TP"; symbol: string; signalTs: number }) {

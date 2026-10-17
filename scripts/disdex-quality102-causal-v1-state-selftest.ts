@@ -104,6 +104,22 @@ async function main() {
 
     const statePath = join(root, "runner-live.json");
     const store = new FileQuality102CausalV1StateStore(statePath, "LIVE", RUNTIME_SHA);
+    const profitFloorState: Quality102CausalV1State = {
+      ...createQuality102CausalV1State("LIVE", RUNTIME_SHA),
+      position: {
+        symbol: "BTCUSDT", side: 1, quantity: 0.002, entryPrice: 100_000, entryTs: 1_788_444_000_000,
+        hardStop: 0.06, bestPrice: 102_500, trailActive: false,
+        profitFloorArmed: true, profitFloorStopPrice: 100_500, profitFloorBestGainPct: 0.025,
+        profitFloorLastConfirmed5mTs: 1_788_451_200_000,
+        family: "REV", variant: "REV24_T0.05_H24", layer: "S3",
+        exitPolicy: "FIXED_HOLD_STOP", maxHoldHours: 24,
+      },
+    };
+    await store.save(profitFloorState);
+    const reloadedProfitFloor = await new FileQuality102CausalV1StateStore(statePath, "LIVE", RUNTIME_SHA).load();
+    assert.equal(reloadedProfitFloor.position?.profitFloorArmed, true);
+    assert.equal(reloadedProfitFloor.position?.profitFloorStopPrice, 100_500);
+    assert.equal(reloadedProfitFloor.position?.profitFloorLastConfirmed5mTs, 1_788_451_200_000);
     for (const phase of ["planned", "submitted", "manual_review"] as const) {
       const stateWithPending = pendingState(phase);
       await store.save(stateWithPending);

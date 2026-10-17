@@ -21,6 +21,10 @@ export interface HypeZecLongPositionState {
   stopOrderId?: number;
   stopReadBackAt?: number;
   peakPrice: number;
+  /** Actual accepted gross used to derive the HYPE wallet-risk stop. */
+  acceptedEntryGross?: number;
+  /** Persist the contract used for restart/reconciliation audit. */
+  walletStopRiskPct?: number;
   updatedAt: number;
 }
 

@@ -23,6 +23,7 @@ import { evaluateIdleOneStepFloor } from "./idle-quantity-feasibility";
 import type { IdlePriorityMarketSnapshot } from "./idle-priority-short-market-data";
 import { writeIdleDecisionDetails, IDLE_DECISION_DETAILS_SCHEMA } from "./idle-priority-decision-diagnostics";
 import { evaluateIdleResidualLong } from "./idle-residual-long-signal";
+import { applyIdleProfitTrailBar, type ConfirmedFiveMinuteBar } from "./disdex-exit-overlay-contract";
 
 const EPSILON = 1e-9;
 const MAX_QUOTE_AGE_MS = 5 * 60_000;
@@ -76,7 +77,7 @@ export type IdlePriorityShortTickResult = {
 };
 
 export type IdlePriorityShortRunnerDependencies = {
-    marketData: { load(): Promise<IdlePriorityMarketSnapshot> };
+    marketData: { load(): Promise<IdlePriorityMarketSnapshot>; loadFiveMinute?(symbol: IdlePrioritySymbol): Promise<ConfirmedFiveMinuteBar> };
     executor: AsterDirectTradeExecutor;
     adapter: V12AsterLiveAdapter;
     client: AsterV3Client;
@@ -313,13 +314,36 @@ export class IdlePriorityShortRunner {
             entryPrice: actual.entryPrice,
             quantity: positionQuantity(actual),
             holdHours: pending.holdHours,
-            gross: 1,
+            gross: pending.gross ?? IDLE_PRIORITY_SHORT_POLICY.routes[symbol].gross,
             stopPrice: stop.price,
             takeProfitPrice: takeProfit.price,
             stopClientOrderId: plan.stopClientOrderId,
             takeProfitClientOrderId: plan.takeProfitClientOrderId,
             protectionVerified: true,
+            trailArmed: false,
+            bestConfirmed5mGainPct: 0,
         };
+    }
+
+    private async replaceTrailingStop(owned: IdleOwnedPosition, nextStopPrice: number, barTs: number): Promise<{ clientOrderId: string; stopPrice: number }> {
+        const normalized = await this.dependencies.adapter.normalizeStopPrice(owned.symbol, nextStopPrice);
+        const clientOrderId = deterministicIdleClientOrderId({ action: "STOP", symbol: owned.symbol, signalTs: owned.signalTs + barTs });
+        await this.dependencies.adapter.placeStopMarket({ symbol: owned.symbol, side: "BUY", quantity: owned.quantity, stopPrice: normalized.price, clientOrderId, reduceOnly: true });
+        await this.protectionReadBack(owned.symbol, {
+            symbol: owned.symbol,
+            side: "SHORT",
+            quantity: owned.quantity,
+            stopPrice: normalized.price,
+            takeProfitPrice: owned.takeProfitPrice,
+            stopClientOrderId: clientOrderId,
+            takeProfitClientOrderId: owned.takeProfitClientOrderId,
+        }, owned.quantity);
+        // The old resident STOP is cancelled only after the replacement has
+        // been independently read back.  A failed cancellation remains a
+        // manual-review condition in the caller rather than an unprotected
+        // position.
+        await this.dependencies.adapter.cancel(owned.stopClientOrderId);
+        return { clientOrderId, stopPrice: normalized.price };
     }
 
     private async safetyCloseUnprotectedEntry(state: IdleState, pending: IdlePending, actual: DirectPosition, lock: AccountLockHandle, protectionError: string): Promise<IdlePriorityShortTickResult> {
@@ -494,6 +518,7 @@ export class IdlePriorityShortRunner {
         });
         try { marginHealthy = await readMarginHealthy(this.dependencies.runtime.marginPath, this.now(), marginMaxAgeMs); } catch { marginHealthy = false; }
         const baseInput = {
+            symbol,
             runtimeMode: this.dependencies.runtime.mode,
             operatorArmed: true,
             candidateAccepted: signal.accepted,
@@ -528,7 +553,8 @@ export class IdlePriorityShortRunner {
         await this.dependencies.executor.getAccountSnapshot();
         let normalized: Awaited<ReturnType<typeof this.dependencies.executor.normalizeMarketQuantity>>;
         try {
-            normalized = await this.dependencies.executor.normalizeMarketQuantity(symbol, equity / quote.bidPrice, quote.bidPrice);
+            const requestedGross = IDLE_PRIORITY_SHORT_POLICY.routes[symbol].gross;
+            normalized = await this.dependencies.executor.normalizeMarketQuantity(symbol, equity * requestedGross / quote.bidPrice, quote.bidPrice);
         } catch (error) {
             const reason = `IDLE_VENUE_QUANTITY_REJECTED:${symbol}:${error instanceof Error ? error.message : String(error)}`;
             state.lastDecision = { decisionTs: signal.features.decisionTs, symbol, route: signal.route, accepted: false, reason };
@@ -548,14 +574,15 @@ export class IdlePriorityShortRunner {
             return { status: "held", message: reason, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
         }
         const clientOrderId = deterministicIdleClientOrderId({ action: "ENTRY", symbol, signalTs: signal.features.signalTs });
-        const reservation = await lock.reserve({ strategyId: IDLE_PRIORITY_SHORT_STRATEGY, symbol, side: "SHORT", gross: 1, notionalUsd: equity });
-        const pending: IdlePending = { action: "ENTRY", phase: "planned", symbol, route: signal.route, clientOrderId, idempotencyKey: clientOrderId, reservationId: reservation.reservationId, quantity: normalized.quantity, expectedPrice: quote.bidPrice, signalTs: signal.features.signalTs, decisionTs: signal.features.decisionTs, holdHours: signal.holdHours as 12 | 24, createdAt: this.now(), updatedAt: this.now(), reason: signal.reason };
+        const requestedGross = IDLE_PRIORITY_SHORT_POLICY.routes[symbol].gross;
+        const reservation = await lock.reserve({ strategyId: IDLE_PRIORITY_SHORT_STRATEGY, symbol, side: "SHORT", gross: admission.gross, notionalUsd: equity * admission.gross });
+        const pending: IdlePending = { action: "ENTRY", phase: "planned", symbol, route: signal.route, clientOrderId, idempotencyKey: clientOrderId, reservationId: reservation.reservationId, quantity: normalized.quantity, expectedPrice: quote.bidPrice, signalTs: signal.features.signalTs, decisionTs: signal.features.decisionTs, holdHours: signal.holdHours as 12 | 24, createdAt: this.now(), updatedAt: this.now(), reason: signal.reason, gross: requestedGross };
         state.pending = pending;
         await this.dependencies.stateStore.save(state);
         try {
             state.pending.phase = "submitted";
             await this.dependencies.stateStore.save(state);
-            const result = await this.dependencies.executor.executeMarket({ requestId: clientOrderId, clientOrderId, symbol, side: "SELL", positionSide: "BOTH", quantity: normalized.quantity, expectedPrice: quote.bidPrice, maxSlippageBps: this.dependencies.runtime.maximumSlippageBps, reason: `IDLE_PRIORITY_SHORT_ENTRY:${signal.route}`, requireVenueMargin5xCross: true, maxEntryNotionalUsd: equity });
+            const result = await this.dependencies.executor.executeMarket({ requestId: clientOrderId, clientOrderId, symbol, side: "SELL", positionSide: "BOTH", quantity: normalized.quantity, expectedPrice: quote.bidPrice, maxSlippageBps: this.dependencies.runtime.maximumSlippageBps, reason: `IDLE_PRIORITY_SHORT_ENTRY:${signal.route}`, requireVenueMargin5xCross: true, maxEntryNotionalUsd: equity * admission.gross });
             return await this.finalizeEntry(state, pending, result, lock);
         } catch (error) {
             // This specific error is thrown by the executor BEFORE any order request.
@@ -646,7 +673,39 @@ export class IdlePriorityShortRunner {
                 if (!actual) return this.manualReview(state, `IDLE_POSITION_MISSING:${owned.symbol}`);
                 const quote = await this.dependencies.executor.getMarketQuote(owned.symbol);
                 if (!quoteFresh(quote, this.now())) return { status: "held", message: `IDLE_HELD_QUOTE_STALE:${owned.symbol}`, symbol: owned.symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
-                const exitReason = quote.askPrice >= owned.stopPrice ? "HARD_STOP" : quote.bidPrice <= owned.takeProfitPrice ? "TAKE_PROFIT" : this.now() >= owned.exitTs ? "FIXED_HOLD_EXIT" : undefined;
+                let trailExit = false;
+                if (owned.symbol === "DOTUSDT" || owned.symbol === "RENDERUSDT") {
+                    const loadFiveMinute = this.dependencies.marketData.loadFiveMinute;
+                    if (!loadFiveMinute) return this.manualReview(state, `IDLE_TRAIL_5M_SOURCE_UNAVAILABLE:${owned.symbol}`);
+                    const bar = await loadFiveMinute(owned.symbol);
+                    const trail = applyIdleProfitTrailBar({
+                        side: "SHORT",
+                        entryPrice: owned.entryPrice,
+                        state: {
+                            armed: owned.trailArmed === true,
+                            bestGainPct: owned.bestConfirmed5mGainPct ?? 0,
+                            stopPrice: owned.trailingStopPrice,
+                            lastConfirmedBarTs: owned.lastConfirmed5mTs,
+                        },
+                        bar,
+                    });
+                    trailExit = trail.stopHit;
+                    if (!trail.stopHit && trail.state.stopPrice !== owned.trailingStopPrice) {
+                        try {
+                            const replacement = await this.replaceTrailingStop(owned, trail.state.stopPrice!, bar.timestampMs);
+                            owned.stopClientOrderId = replacement.clientOrderId;
+                            owned.stopPrice = replacement.stopPrice;
+                            owned.trailingStopPrice = replacement.stopPrice;
+                        } catch (error) {
+                            return this.manualReview(state, `IDLE_TRAIL_STOP_REPLACEMENT_UNVERIFIED:${owned.symbol}:${error instanceof Error ? error.message : String(error)}`);
+                        }
+                    }
+                    owned.trailArmed = trail.state.armed;
+                    owned.bestConfirmed5mGainPct = trail.state.bestGainPct;
+                    owned.lastConfirmed5mTs = trail.state.lastConfirmedBarTs;
+                    await this.dependencies.stateStore.save(state);
+                }
+                const exitReason = trailExit ? "PROFIT_TRAIL_3_GIVEBACK_1P5" : quote.askPrice >= owned.stopPrice ? "HARD_STOP" : quote.bidPrice <= owned.takeProfitPrice ? "TAKE_PROFIT" : this.now() >= owned.exitTs ? "FIXED_HOLD_EXIT" : undefined;
                 if (exitReason && this.dependencies.runtime.mode === "LIVE") return await this.exitPosition(state, owned, actual, lock, exitReason);
                 if (exitReason) return { status: "shadow", message: `IDLE_SHADOW_EXIT:${owned.symbol}:${exitReason}`, symbol: owned.symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
             }
@@ -749,7 +808,8 @@ export class IdlePriorityShortRunner {
                 const exposure = coreAndSidecarExposure(positions, equity, new Set(state.positions.map((row) => row.symbol)));
                 const fullCryptoGrossAvailable = INTEGRATED_CRYPTO_CAP - exposure.cryptoGross - pendingAggregate.cryptoGross;
                 const fullTotalGrossAvailable = INTEGRATED_TOTAL_CAP - exposure.totalGross - pendingAggregate.cryptoGross - pendingAggregate.stockGross;
-                if (fullCryptoGrossAvailable + EPSILON < signals.length || fullTotalGrossAvailable + EPSILON < signals.length) {
+                const requestedGross = signals.reduce((sum, signal) => sum + IDLE_PRIORITY_SHORT_POLICY.routes[signal.symbol].gross, 0);
+                if (fullCryptoGrossAvailable + EPSILON < requestedGross || fullTotalGrossAvailable + EPSILON < requestedGross) {
                     state.lastDecision = { decisionTs: market.decisionTs, accepted: false, reason: "IDLE_MULTI_SIGNAL_CAPACITY_AMBIGUOUS" };
                     await this.dependencies.stateStore.save(state);
                     return { status: "held", message: "IDLE_MULTI_SIGNAL_CAPACITY_AMBIGUOUS", ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
