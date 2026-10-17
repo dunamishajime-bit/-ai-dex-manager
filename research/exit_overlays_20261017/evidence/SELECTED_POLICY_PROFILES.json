@@ -1,0 +1,29 @@
+[
+  {
+    "id": "Q102_06_FLOOR_2_TO_0p5",
+    "strategy": "Q102",
+    "name": "FLOOR_2_TO_0p5",
+    "arm": 0.02,
+    "floor": 0.005
+  },
+  {
+    "id": "HYPE_LONG_01_HARD_WALLET_2",
+    "strategy": "HYPE_LONG",
+    "name": "HARD_WALLET_2",
+    "risk": 0.02
+  },
+  {
+    "id": "IDLE_12_TRAIL_2_GIVEBACK_1",
+    "strategy": "IDLE",
+    "name": "TRAIL_2_GIVEBACK_1",
+    "trail_arm": 0.02,
+    "giveback": 0.01
+  },
+  {
+    "id": "IDLE_13_TRAIL_3_GIVEBACK_1p5",
+    "strategy": "IDLE",
+    "name": "TRAIL_3_GIVEBACK_1p5",
+    "trail_arm": 0.03,
+    "giveback": 0.015
+  }
+]

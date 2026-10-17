@@ -1,0 +1,815 @@
+[
+  {
+    "id": "IDLE_00_BASELINE",
+    "strategy": "IDLE",
+    "name": "BASELINE"
+  },
+  {
+    "id": "IDLE_01_HARD_WALLET_2",
+    "strategy": "IDLE",
+    "name": "HARD_WALLET_2",
+    "risk": 0.02
+  },
+  {
+    "id": "IDLE_02_HARD_WALLET_3",
+    "strategy": "IDLE",
+    "name": "HARD_WALLET_3",
+    "risk": 0.03
+  },
+  {
+    "id": "IDLE_03_HARD_WALLET_4",
+    "strategy": "IDLE",
+    "name": "HARD_WALLET_4",
+    "risk": 0.04
+  },
+  {
+    "id": "IDLE_04_HARD_WALLET_2_SLIP50",
+    "strategy": "IDLE",
+    "name": "HARD_WALLET_2_SLIP50",
+    "risk": 0.02,
+    "slip": 50
+  },
+  {
+    "id": "IDLE_05_HARD_WALLET_3_SLIP50",
+    "strategy": "IDLE",
+    "name": "HARD_WALLET_3_SLIP50",
+    "risk": 0.03,
+    "slip": 50
+  },
+  {
+    "id": "IDLE_06_FLOOR_2_TO_0p5",
+    "strategy": "IDLE",
+    "name": "FLOOR_2_TO_0p5",
+    "arm": 0.02,
+    "floor": 0.005
+  },
+  {
+    "id": "IDLE_07_FLOOR_3_TO_1",
+    "strategy": "IDLE",
+    "name": "FLOOR_3_TO_1",
+    "arm": 0.03,
+    "floor": 0.01
+  },
+  {
+    "id": "IDLE_08_FLOOR_1p5_TO_0p5",
+    "strategy": "IDLE",
+    "name": "FLOOR_1p5_TO_0p5",
+    "arm": 0.015,
+    "floor": 0.005
+  },
+  {
+    "id": "IDLE_09_FLOOR_5_TO_2",
+    "strategy": "IDLE",
+    "name": "FLOOR_5_TO_2",
+    "arm": 0.05,
+    "floor": 0.02
+  },
+  {
+    "id": "IDLE_10_RISK3_FLOOR2",
+    "strategy": "IDLE",
+    "name": "RISK3_FLOOR2",
+    "risk": 0.03,
+    "arm": 0.02,
+    "floor": 0.005
+  },
+  {
+    "id": "IDLE_11_RISK3_FLOOR3",
+    "strategy": "IDLE",
+    "name": "RISK3_FLOOR3",
+    "risk": 0.03,
+    "arm": 0.03,
+    "floor": 0.01
+  },
+  {
+    "id": "IDLE_12_TRAIL_2_GIVEBACK_1",
+    "strategy": "IDLE",
+    "name": "TRAIL_2_GIVEBACK_1",
+    "trail_arm": 0.02,
+    "giveback": 0.01
+  },
+  {
+    "id": "IDLE_13_TRAIL_3_GIVEBACK_1p5",
+    "strategy": "IDLE",
+    "name": "TRAIL_3_GIVEBACK_1p5",
+    "trail_arm": 0.03,
+    "giveback": 0.015
+  },
+  {
+    "id": "IDLE_14_RISK3_TRAIL2",
+    "strategy": "IDLE",
+    "name": "RISK3_TRAIL2",
+    "risk": 0.03,
+    "trail_arm": 0.02,
+    "giveback": 0.01
+  },
+  {
+    "id": "IDLE_15_REVERSAL_3BAR_0p8",
+    "strategy": "IDLE",
+    "name": "REVERSAL_3BAR_0p8",
+    "rev": 0.008
+  },
+  {
+    "id": "IDLE_16_REVERSAL_BTC15_0p5",
+    "strategy": "IDLE",
+    "name": "REVERSAL_BTC15_0p5",
+    "btc": 0.005
+  },
+  {
+    "id": "IDLE_17_REVERSAL_BTC30_1",
+    "strategy": "IDLE",
+    "name": "REVERSAL_BTC30_1",
+    "btc": 0.01,
+    "btcminutes": 30
+  },
+  {
+    "id": "IDLE_18_FLOOR2_REVERSAL",
+    "strategy": "IDLE",
+    "name": "FLOOR2_REVERSAL",
+    "arm": 0.02,
+    "floor": 0.005,
+    "rev": 0.008
+  },
+  {
+    "id": "IDLE_19_RISK3_REVERSAL",
+    "strategy": "IDLE",
+    "name": "RISK3_REVERSAL",
+    "risk": 0.03,
+    "rev": 0.008
+  },
+  {
+    "id": "IDLE_20_ATR_ENTRY_6",
+    "strategy": "IDLE",
+    "name": "ATR_ENTRY_6",
+    "atrinit": 6
+  },
+  {
+    "id": "IDLE_21_ATR_TRAIL_5",
+    "strategy": "IDLE",
+    "name": "ATR_TRAIL_5",
+    "atrtrail": 5,
+    "trail_arm": 0.02
+  },
+  {
+    "id": "IDLE_22_VOLUME_SHOCK_2p5",
+    "strategy": "IDLE",
+    "name": "VOLUME_SHOCK_2p5",
+    "volume": 2.5
+  },
+  {
+    "id": "IDLE_23_RISK3_FLOOR2_REVERSAL",
+    "strategy": "IDLE",
+    "name": "RISK3_FLOOR2_REVERSAL",
+    "risk": 0.03,
+    "arm": 0.02,
+    "floor": 0.005,
+    "rev": 0.008,
+    "btc": 0.005
+  },
+  {
+    "id": "Q102_00_BASELINE",
+    "strategy": "Q102",
+    "name": "BASELINE"
+  },
+  {
+    "id": "Q102_01_HARD_WALLET_2",
+    "strategy": "Q102",
+    "name": "HARD_WALLET_2",
+    "risk": 0.02
+  },
+  {
+    "id": "Q102_02_HARD_WALLET_3",
+    "strategy": "Q102",
+    "name": "HARD_WALLET_3",
+    "risk": 0.03
+  },
+  {
+    "id": "Q102_03_HARD_WALLET_4",
+    "strategy": "Q102",
+    "name": "HARD_WALLET_4",
+    "risk": 0.04
+  },
+  {
+    "id": "Q102_04_HARD_WALLET_2_SLIP50",
+    "strategy": "Q102",
+    "name": "HARD_WALLET_2_SLIP50",
+    "risk": 0.02,
+    "slip": 50
+  },
+  {
+    "id": "Q102_05_HARD_WALLET_3_SLIP50",
+    "strategy": "Q102",
+    "name": "HARD_WALLET_3_SLIP50",
+    "risk": 0.03,
+    "slip": 50
+  },
+  {
+    "id": "Q102_06_FLOOR_2_TO_0p5",
+    "strategy": "Q102",
+    "name": "FLOOR_2_TO_0p5",
+    "arm": 0.02,
+    "floor": 0.005
+  },
+  {
+    "id": "Q102_07_FLOOR_3_TO_1",
+    "strategy": "Q102",
+    "name": "FLOOR_3_TO_1",
+    "arm": 0.03,
+    "floor": 0.01
+  },
+  {
+    "id": "Q102_08_FLOOR_1p5_TO_0p5",
+    "strategy": "Q102",
+    "name": "FLOOR_1p5_TO_0p5",
+    "arm": 0.015,
+    "floor": 0.005
+  },
+  {
+    "id": "Q102_09_FLOOR_5_TO_2",
+    "strategy": "Q102",
+    "name": "FLOOR_5_TO_2",
+    "arm": 0.05,
+    "floor": 0.02
+  },
+  {
+    "id": "Q102_10_RISK3_FLOOR2",
+    "strategy": "Q102",
+    "name": "RISK3_FLOOR2",
+    "risk": 0.03,
+    "arm": 0.02,
+    "floor": 0.005
+  },
+  {
+    "id": "Q102_11_RISK3_FLOOR3",
+    "strategy": "Q102",
+    "name": "RISK3_FLOOR3",
+    "risk": 0.03,
+    "arm": 0.03,
+    "floor": 0.01
+  },
+  {
+    "id": "Q102_12_TRAIL_2_GIVEBACK_1",
+    "strategy": "Q102",
+    "name": "TRAIL_2_GIVEBACK_1",
+    "trail_arm": 0.02,
+    "giveback": 0.01
+  },
+  {
+    "id": "Q102_13_TRAIL_3_GIVEBACK_1p5",
+    "strategy": "Q102",
+    "name": "TRAIL_3_GIVEBACK_1p5",
+    "trail_arm": 0.03,
+    "giveback": 0.015
+  },
+  {
+    "id": "Q102_14_RISK3_TRAIL2",
+    "strategy": "Q102",
+    "name": "RISK3_TRAIL2",
+    "risk": 0.03,
+    "trail_arm": 0.02,
+    "giveback": 0.01
+  },
+  {
+    "id": "Q102_15_REVERSAL_3BAR_0p8",
+    "strategy": "Q102",
+    "name": "REVERSAL_3BAR_0p8",
+    "rev": 0.008
+  },
+  {
+    "id": "Q102_16_REVERSAL_BTC15_0p5",
+    "strategy": "Q102",
+    "name": "REVERSAL_BTC15_0p5",
+    "btc": 0.005
+  },
+  {
+    "id": "Q102_17_REVERSAL_BTC30_1",
+    "strategy": "Q102",
+    "name": "REVERSAL_BTC30_1",
+    "btc": 0.01,
+    "btcminutes": 30
+  },
+  {
+    "id": "Q102_18_FLOOR2_REVERSAL",
+    "strategy": "Q102",
+    "name": "FLOOR2_REVERSAL",
+    "arm": 0.02,
+    "floor": 0.005,
+    "rev": 0.008
+  },
+  {
+    "id": "Q102_19_RISK3_REVERSAL",
+    "strategy": "Q102",
+    "name": "RISK3_REVERSAL",
+    "risk": 0.03,
+    "rev": 0.008
+  },
+  {
+    "id": "PENGU_00_BASELINE",
+    "strategy": "PENGU",
+    "name": "BASELINE"
+  },
+  {
+    "id": "PENGU_01_HARD_WALLET_2",
+    "strategy": "PENGU",
+    "name": "HARD_WALLET_2",
+    "risk": 0.02
+  },
+  {
+    "id": "PENGU_02_HARD_WALLET_3",
+    "strategy": "PENGU",
+    "name": "HARD_WALLET_3",
+    "risk": 0.03
+  },
+  {
+    "id": "PENGU_03_HARD_WALLET_4",
+    "strategy": "PENGU",
+    "name": "HARD_WALLET_4",
+    "risk": 0.04
+  },
+  {
+    "id": "PENGU_04_HARD_WALLET_2_SLIP50",
+    "strategy": "PENGU",
+    "name": "HARD_WALLET_2_SLIP50",
+    "risk": 0.02,
+    "slip": 50
+  },
+  {
+    "id": "PENGU_05_HARD_WALLET_3_SLIP50",
+    "strategy": "PENGU",
+    "name": "HARD_WALLET_3_SLIP50",
+    "risk": 0.03,
+    "slip": 50
+  },
+  {
+    "id": "PENGU_06_FLOOR_2_TO_0p5",
+    "strategy": "PENGU",
+    "name": "FLOOR_2_TO_0p5",
+    "arm": 0.02,
+    "floor": 0.005
+  },
+  {
+    "id": "PENGU_07_FLOOR_3_TO_1",
+    "strategy": "PENGU",
+    "name": "FLOOR_3_TO_1",
+    "arm": 0.03,
+    "floor": 0.01
+  },
+  {
+    "id": "PENGU_08_FLOOR_1p5_TO_0p5",
+    "strategy": "PENGU",
+    "name": "FLOOR_1p5_TO_0p5",
+    "arm": 0.015,
+    "floor": 0.005
+  },
+  {
+    "id": "PENGU_09_FLOOR_5_TO_2",
+    "strategy": "PENGU",
+    "name": "FLOOR_5_TO_2",
+    "arm": 0.05,
+    "floor": 0.02
+  },
+  {
+    "id": "PENGU_10_RISK3_FLOOR2",
+    "strategy": "PENGU",
+    "name": "RISK3_FLOOR2",
+    "risk": 0.03,
+    "arm": 0.02,
+    "floor": 0.005
+  },
+  {
+    "id": "PENGU_11_RISK3_FLOOR3",
+    "strategy": "PENGU",
+    "name": "RISK3_FLOOR3",
+    "risk": 0.03,
+    "arm": 0.03,
+    "floor": 0.01
+  },
+  {
+    "id": "PENGU_12_TRAIL_2_GIVEBACK_1",
+    "strategy": "PENGU",
+    "name": "TRAIL_2_GIVEBACK_1",
+    "trail_arm": 0.02,
+    "giveback": 0.01
+  },
+  {
+    "id": "PENGU_13_TRAIL_3_GIVEBACK_1p5",
+    "strategy": "PENGU",
+    "name": "TRAIL_3_GIVEBACK_1p5",
+    "trail_arm": 0.03,
+    "giveback": 0.015
+  },
+  {
+    "id": "PENGU_14_RISK3_TRAIL2",
+    "strategy": "PENGU",
+    "name": "RISK3_TRAIL2",
+    "risk": 0.03,
+    "trail_arm": 0.02,
+    "giveback": 0.01
+  },
+  {
+    "id": "PENGU_15_REVERSAL_3BAR_0p8",
+    "strategy": "PENGU",
+    "name": "REVERSAL_3BAR_0p8",
+    "rev": 0.008
+  },
+  {
+    "id": "HYPE_LONG_00_BASELINE",
+    "strategy": "HYPE_LONG",
+    "name": "BASELINE"
+  },
+  {
+    "id": "HYPE_LONG_01_HARD_WALLET_2",
+    "strategy": "HYPE_LONG",
+    "name": "HARD_WALLET_2",
+    "risk": 0.02
+  },
+  {
+    "id": "HYPE_LONG_02_HARD_WALLET_3",
+    "strategy": "HYPE_LONG",
+    "name": "HARD_WALLET_3",
+    "risk": 0.03
+  },
+  {
+    "id": "HYPE_LONG_03_HARD_WALLET_4",
+    "strategy": "HYPE_LONG",
+    "name": "HARD_WALLET_4",
+    "risk": 0.04
+  },
+  {
+    "id": "HYPE_LONG_04_HARD_WALLET_2_SLIP50",
+    "strategy": "HYPE_LONG",
+    "name": "HARD_WALLET_2_SLIP50",
+    "risk": 0.02,
+    "slip": 50
+  },
+  {
+    "id": "HYPE_LONG_05_HARD_WALLET_3_SLIP50",
+    "strategy": "HYPE_LONG",
+    "name": "HARD_WALLET_3_SLIP50",
+    "risk": 0.03,
+    "slip": 50
+  },
+  {
+    "id": "HYPE_LONG_06_FLOOR_2_TO_0p5",
+    "strategy": "HYPE_LONG",
+    "name": "FLOOR_2_TO_0p5",
+    "arm": 0.02,
+    "floor": 0.005
+  },
+  {
+    "id": "HYPE_LONG_07_FLOOR_3_TO_1",
+    "strategy": "HYPE_LONG",
+    "name": "FLOOR_3_TO_1",
+    "arm": 0.03,
+    "floor": 0.01
+  },
+  {
+    "id": "HYPE_LONG_08_FLOOR_1p5_TO_0p5",
+    "strategy": "HYPE_LONG",
+    "name": "FLOOR_1p5_TO_0p5",
+    "arm": 0.015,
+    "floor": 0.005
+  },
+  {
+    "id": "HYPE_LONG_09_FLOOR_5_TO_2",
+    "strategy": "HYPE_LONG",
+    "name": "FLOOR_5_TO_2",
+    "arm": 0.05,
+    "floor": 0.02
+  },
+  {
+    "id": "HYPE_LONG_10_RISK3_FLOOR2",
+    "strategy": "HYPE_LONG",
+    "name": "RISK3_FLOOR2",
+    "risk": 0.03,
+    "arm": 0.02,
+    "floor": 0.005
+  },
+  {
+    "id": "HYPE_LONG_11_RISK3_FLOOR3",
+    "strategy": "HYPE_LONG",
+    "name": "RISK3_FLOOR3",
+    "risk": 0.03,
+    "arm": 0.03,
+    "floor": 0.01
+  },
+  {
+    "id": "V12_00_BASELINE",
+    "strategy": "V12",
+    "name": "BASELINE"
+  },
+  {
+    "id": "V12_01_HARD_WALLET_2",
+    "strategy": "V12",
+    "name": "HARD_WALLET_2",
+    "risk": 0.02
+  },
+  {
+    "id": "V12_02_HARD_WALLET_3",
+    "strategy": "V12",
+    "name": "HARD_WALLET_3",
+    "risk": 0.03
+  },
+  {
+    "id": "V12_03_HARD_WALLET_4",
+    "strategy": "V12",
+    "name": "HARD_WALLET_4",
+    "risk": 0.04
+  },
+  {
+    "id": "V12_04_HARD_WALLET_2_SLIP50",
+    "strategy": "V12",
+    "name": "HARD_WALLET_2_SLIP50",
+    "risk": 0.02,
+    "slip": 50
+  },
+  {
+    "id": "V12_05_HARD_WALLET_3_SLIP50",
+    "strategy": "V12",
+    "name": "HARD_WALLET_3_SLIP50",
+    "risk": 0.03,
+    "slip": 50
+  },
+  {
+    "id": "V12_06_FLOOR_2_TO_0p5",
+    "strategy": "V12",
+    "name": "FLOOR_2_TO_0p5",
+    "arm": 0.02,
+    "floor": 0.005
+  },
+  {
+    "id": "V12_07_FLOOR_3_TO_1",
+    "strategy": "V12",
+    "name": "FLOOR_3_TO_1",
+    "arm": 0.03,
+    "floor": 0.01
+  },
+  {
+    "id": "V12_08_FLOOR_1p5_TO_0p5",
+    "strategy": "V12",
+    "name": "FLOOR_1p5_TO_0p5",
+    "arm": 0.015,
+    "floor": 0.005
+  },
+  {
+    "id": "V12_09_FLOOR_5_TO_2",
+    "strategy": "V12",
+    "name": "FLOOR_5_TO_2",
+    "arm": 0.05,
+    "floor": 0.02
+  },
+  {
+    "id": "V12_10_RISK3_FLOOR2",
+    "strategy": "V12",
+    "name": "RISK3_FLOOR2",
+    "risk": 0.03,
+    "arm": 0.02,
+    "floor": 0.005
+  },
+  {
+    "id": "V12_11_RISK3_FLOOR3",
+    "strategy": "V12",
+    "name": "RISK3_FLOOR3",
+    "risk": 0.03,
+    "arm": 0.03,
+    "floor": 0.01
+  },
+  {
+    "id": "V12_12_TRAIL_2_GIVEBACK_1",
+    "strategy": "V12",
+    "name": "TRAIL_2_GIVEBACK_1",
+    "trail_arm": 0.02,
+    "giveback": 0.01
+  },
+  {
+    "id": "V12_13_TRAIL_3_GIVEBACK_1p5",
+    "strategy": "V12",
+    "name": "TRAIL_3_GIVEBACK_1p5",
+    "trail_arm": 0.03,
+    "giveback": 0.015
+  },
+  {
+    "id": "V12_14_RISK3_TRAIL2",
+    "strategy": "V12",
+    "name": "RISK3_TRAIL2",
+    "risk": 0.03,
+    "trail_arm": 0.02,
+    "giveback": 0.01
+  },
+  {
+    "id": "V12_15_REVERSAL_3BAR_0p8",
+    "strategy": "V12",
+    "name": "REVERSAL_3BAR_0p8",
+    "rev": 0.008
+  },
+  {
+    "id": "V12_16_REVERSAL_BTC15_0p5",
+    "strategy": "V12",
+    "name": "REVERSAL_BTC15_0p5",
+    "btc": 0.005
+  },
+  {
+    "id": "V12_17_REVERSAL_BTC30_1",
+    "strategy": "V12",
+    "name": "REVERSAL_BTC30_1",
+    "btc": 0.01,
+    "btcminutes": 30
+  },
+  {
+    "id": "V12_18_FLOOR2_REVERSAL",
+    "strategy": "V12",
+    "name": "FLOOR2_REVERSAL",
+    "arm": 0.02,
+    "floor": 0.005,
+    "rev": 0.008
+  },
+  {
+    "id": "V12_19_RISK3_REVERSAL",
+    "strategy": "V12",
+    "name": "RISK3_REVERSAL",
+    "risk": 0.03,
+    "rev": 0.008
+  },
+  {
+    "id": "RESIDUAL_00_BASELINE",
+    "strategy": "RESIDUAL",
+    "name": "BASELINE"
+  },
+  {
+    "id": "RESIDUAL_01_HARD_WALLET_2",
+    "strategy": "RESIDUAL",
+    "name": "HARD_WALLET_2",
+    "risk": 0.02
+  },
+  {
+    "id": "RESIDUAL_02_HARD_WALLET_3",
+    "strategy": "RESIDUAL",
+    "name": "HARD_WALLET_3",
+    "risk": 0.03
+  },
+  {
+    "id": "RESIDUAL_03_HARD_WALLET_4",
+    "strategy": "RESIDUAL",
+    "name": "HARD_WALLET_4",
+    "risk": 0.04
+  },
+  {
+    "id": "RESIDUAL_04_HARD_WALLET_2_SLIP50",
+    "strategy": "RESIDUAL",
+    "name": "HARD_WALLET_2_SLIP50",
+    "risk": 0.02,
+    "slip": 50
+  },
+  {
+    "id": "RESIDUAL_05_HARD_WALLET_3_SLIP50",
+    "strategy": "RESIDUAL",
+    "name": "HARD_WALLET_3_SLIP50",
+    "risk": 0.03,
+    "slip": 50
+  },
+  {
+    "id": "RESIDUAL_06_FLOOR_2_TO_0p5",
+    "strategy": "RESIDUAL",
+    "name": "FLOOR_2_TO_0p5",
+    "arm": 0.02,
+    "floor": 0.005
+  },
+  {
+    "id": "RESIDUAL_07_FLOOR_3_TO_1",
+    "strategy": "RESIDUAL",
+    "name": "FLOOR_3_TO_1",
+    "arm": 0.03,
+    "floor": 0.01
+  },
+  {
+    "id": "RESIDUAL_08_FLOOR_1p5_TO_0p5",
+    "strategy": "RESIDUAL",
+    "name": "FLOOR_1p5_TO_0p5",
+    "arm": 0.015,
+    "floor": 0.005
+  },
+  {
+    "id": "RESIDUAL_09_FLOOR_5_TO_2",
+    "strategy": "RESIDUAL",
+    "name": "FLOOR_5_TO_2",
+    "arm": 0.05,
+    "floor": 0.02
+  },
+  {
+    "id": "RESIDUAL_10_RISK3_FLOOR2",
+    "strategy": "RESIDUAL",
+    "name": "RISK3_FLOOR2",
+    "risk": 0.03,
+    "arm": 0.02,
+    "floor": 0.005
+  },
+  {
+    "id": "RESIDUAL_11_RISK3_FLOOR3",
+    "strategy": "RESIDUAL",
+    "name": "RISK3_FLOOR3",
+    "risk": 0.03,
+    "arm": 0.03,
+    "floor": 0.01
+  },
+  {
+    "id": "V52_00_BASELINE",
+    "strategy": "V52",
+    "name": "BASELINE"
+  },
+  {
+    "id": "V52_01_HARD_WALLET_2",
+    "strategy": "V52",
+    "name": "HARD_WALLET_2",
+    "risk": 0.02
+  },
+  {
+    "id": "V52_02_HARD_WALLET_3",
+    "strategy": "V52",
+    "name": "HARD_WALLET_3",
+    "risk": 0.03
+  },
+  {
+    "id": "V52_03_HARD_WALLET_4",
+    "strategy": "V52",
+    "name": "HARD_WALLET_4",
+    "risk": 0.04
+  },
+  {
+    "id": "V52_04_HARD_WALLET_2_SLIP50",
+    "strategy": "V52",
+    "name": "HARD_WALLET_2_SLIP50",
+    "risk": 0.02,
+    "slip": 50
+  },
+  {
+    "id": "V52_05_HARD_WALLET_3_SLIP50",
+    "strategy": "V52",
+    "name": "HARD_WALLET_3_SLIP50",
+    "risk": 0.03,
+    "slip": 50
+  },
+  {
+    "id": "V52_06_FLOOR_2_TO_0p5",
+    "strategy": "V52",
+    "name": "FLOOR_2_TO_0p5",
+    "arm": 0.02,
+    "floor": 0.005
+  },
+  {
+    "id": "V52_07_FLOOR_3_TO_1",
+    "strategy": "V52",
+    "name": "FLOOR_3_TO_1",
+    "arm": 0.03,
+    "floor": 0.01
+  },
+  {
+    "id": "FET_00_BASELINE",
+    "strategy": "FET",
+    "name": "BASELINE"
+  },
+  {
+    "id": "FET_01_HARD_WALLET_2",
+    "strategy": "FET",
+    "name": "HARD_WALLET_2",
+    "risk": 0.02
+  },
+  {
+    "id": "FET_02_HARD_WALLET_3",
+    "strategy": "FET",
+    "name": "HARD_WALLET_3",
+    "risk": 0.03
+  },
+  {
+    "id": "FET_03_HARD_WALLET_4",
+    "strategy": "FET",
+    "name": "HARD_WALLET_4",
+    "risk": 0.04
+  },
+  {
+    "id": "FET_04_HARD_WALLET_2_SLIP50",
+    "strategy": "FET",
+    "name": "HARD_WALLET_2_SLIP50",
+    "risk": 0.02,
+    "slip": 50
+  },
+  {
+    "id": "FET_05_HARD_WALLET_3_SLIP50",
+    "strategy": "FET",
+    "name": "HARD_WALLET_3_SLIP50",
+    "risk": 0.03,
+    "slip": 50
+  },
+  {
+    "id": "FET_06_FLOOR_2_TO_0p5",
+    "strategy": "FET",
+    "name": "FLOOR_2_TO_0p5",
+    "arm": 0.02,
+    "floor": 0.005
+  },
+  {
+    "id": "FET_07_FLOOR_3_TO_1",
+    "strategy": "FET",
+    "name": "FLOOR_3_TO_1",
+    "arm": 0.03,
+    "floor": 0.01
+  }
+]

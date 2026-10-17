@@ -1,0 +1,92 @@
+{
+  "policy": "BASE_QH",
+  "cost_bps": 30,
+  "final_jpy": 94237423.90010537,
+  "max_dd_pct": -16.8184,
+  "pf": 2.844423999952042,
+  "win_pct": 68.939,
+  "annual_trades": 1291,
+  "all_trades_by_strategy": {
+    "FET": 8,
+    "HYPE_LONG": 35,
+    "IDLE": 64,
+    "PENGU": 67,
+    "Q102": 181,
+    "RESIDUAL": 27,
+    "V12": 822,
+    "V52": 87
+  },
+  "accounting": "PASS",
+  "idle_by_symbol": {
+    "DOTUSDT": {
+      "n": 24,
+      "max_gross": 1.0,
+      "min_gross": 0.99652,
+      "gross_avg": 0.9993,
+      "loss_below2": 7,
+      "loss_below3": 5,
+      "loss_below5": 1,
+      "worst_pct": -10.299,
+      "win_pct": 58.33
+    },
+    "JUPUSDT": {
+      "n": 7,
+      "max_gross": 1.0,
+      "min_gross": 0.99999,
+      "gross_avg": 1.0,
+      "loss_below2": 0,
+      "loss_below3": 0,
+      "loss_below5": 0,
+      "worst_pct": -1.8,
+      "win_pct": 71.43
+    },
+    "RENDERUSDT": {
+      "n": 19,
+      "max_gross": 1.0,
+      "min_gross": 0.99997,
+      "gross_avg": 0.99999,
+      "loss_below2": 6,
+      "loss_below3": 3,
+      "loss_below5": 2,
+      "worst_pct": -7.64,
+      "win_pct": 42.11
+    },
+    "TAOUSDT": {
+      "n": 7,
+      "max_gross": 1.0,
+      "min_gross": 0.99998,
+      "gross_avg": 1.0,
+      "loss_below2": 1,
+      "loss_below3": 0,
+      "loss_below5": 0,
+      "worst_pct": -2.091,
+      "win_pct": 71.43
+    },
+    "TIAUSDT": {
+      "n": 7,
+      "max_gross": 1.0,
+      "min_gross": 0.99995,
+      "gross_avg": 0.99998,
+      "loss_below2": 1,
+      "loss_below3": 0,
+      "loss_below5": 0,
+      "worst_pct": -2.54,
+      "win_pct": 85.71
+    }
+  },
+  "sizing_candidate_N": 0,
+  "five_minute_exit_changes": {
+    "changed": 212,
+    "byStrategy": {
+      "Q102": 170,
+      "HYPE_LONG": 42
+    },
+    "byReason": {
+      "5M_PROTECTIVE_STOP": 212
+    },
+    "warnings": {
+      "ENTRY_PRICE_DIFFERENCE_FETUSDT": 1
+    }
+  },
+  "elapsed": 11.54
+}
