@@ -1,0 +1,79 @@
+name: Q102 HYPE Idle Exit Overlay Source CI (No Venue)
+
+on:
+  push:
+    branches:
+      - codex/q102-hype-idle-exit-overlay-20261017
+    paths:
+      - ".github/workflows/q102-hype-idle-exit-overlay-source-ci-20261018.yml"
+      - "config/hypeZecLongPolicy.ts"
+      - "config/idlePriorityShortPolicy.ts"
+      - "lib/disdex-exit-overlay-contract.ts"
+      - "lib/disdex-quality102-causal-v1-*.ts"
+      - "lib/hype-zec-long-runner*.ts"
+      - "lib/idle-priority-short-*.ts"
+      - "lib/venue-resident-stop.ts"
+      - "scripts/disdex-quality102-causal-v1-*.ts"
+      - "scripts/disdex-idle-priority-short-*.ts"
+      - "tests/exit-overlay-contract.test.ts"
+      - "tests/idle-priority-short-*.test.ts"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: q102-hype-idle-exit-source-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  certify-source-only:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    steps:
+      - name: Checkout immutable source revision
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+      - name: Node 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Install locked dependencies, no lifecycle scripts
+        run: npm ci --ignore-scripts
+      - name: Exit, resident STOP, and Idle overlay contract tests (no venue)
+        run: |
+          npx tsx --test tests/exit-overlay-contract.test.ts tests/venue-resident-stop.test.ts tests/resident-stop-ledger.test.ts tests/resident-stop-runner-integration.test.ts tests/idle-priority-short-live-path.test.ts tests/idle-priority-short-market-data.test.ts tests/idle-priority-short-state.test.ts
+      - name: Q102 and Idle runner self-tests
+        run: |
+          npx tsx scripts/disdex-quality102-causal-v1-runner-selftest.ts
+          npx tsx scripts/disdex-quality102-causal-v1-live-runner.ts --self-test
+          npx tsx scripts/disdex-quality102-causal-v1-state-selftest.ts
+          npx tsx scripts/disdex-idle-priority-short-live-runner.ts --self-test
+      - name: HYPE and shared risk self-tests
+        run: |
+          npx tsx scripts/disdex-hype-zec-long-live-runner.ts --self-test
+          npx tsx scripts/disdex-shared-crypto-risk-selftest.ts
+      - name: TypeScript source and research typechecking
+        run: |
+          npx tsc --noEmit
+          npx tsc --noEmit -p tsconfig.research.json
+      - name: Commit and patch integrity
+        run: |
+          test "$(git rev-list --count HEAD^..HEAD)" = 1
+          git diff HEAD^ HEAD --check
+          printf '%s\\n' "CI_SOURCE_SHA=$(git rev-parse HEAD)"
+      - name: Write immutable source-only evidence
+        if: success()
+        run: |
+          mkdir -p evidence
+          printf 'status=SOURCE_ONLY_CI_PASS\\nsource_sha=%s\\nvenue_orders_sent=0 (not tested; no venue credentials supplied)\\nproduction_activation=false\\n' "$(git rev-parse HEAD)" > evidence/source-cert.txt
+      - name: Publish source-only CI record
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: q102-hype-idle-exit-source-${{ github.sha }}
+          path: evidence/source-cert.txt
+          retention-days: 30
