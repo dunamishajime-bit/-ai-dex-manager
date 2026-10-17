@@ -86,8 +86,9 @@ export default function HomePage() {
             <SummaryCard title="実建玉 / 未決済注文" value={snapshot ? `${positions.length} / ${snapshot.orders.count}` : "未取得"} detail={snapshot ? `保護注文 ${snapshot.orders.protectionCount} / ${snapshot.capturedAt.replace("T", " ").slice(0, 16)} UTC` : liveError || "Aster実データを取得できません"} />
           </div>
         </section>
-        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
           <QuickLink href="/positions" title="ダッシュボード" detail="V12、PENGU V2、FET、V52、Quality102の実建玉・保護注文・リスク状態を確認します。" icon={BarChart3} />
+          <QuickLink href="/realtime" title="リアルタイム判定" detail="全通貨ランキング、各ロジックのスコア、判定理由、データ鮮度を30秒更新で確認します。" icon={Activity} />
           <QuickLink href="/wallets" title="AsterDEXウォレット" detail="口座残高、利用可能残高、ウォレット情報を確認します。" icon={Wallet} />
           <QuickLink href="/performance" title="成績" detail="実約定に基づく損益と保有期間を確認します。" icon={Coins} />
           <QuickLink href="/settings" title="設定" detail="認証と表示設定を確認します。実売買設定はここから変更しません。" icon={Settings} />
