@@ -71,6 +71,18 @@ test("full-live wiring promotes only the exact flat limited-scope V52 state",()=
  assert.match(wiring,/\.newOrdersAllowed=true/);
  assert.match(wiring,/\.orderEnabled=true/);
  assert.match(wiring,/before-full-live-/);
+ assert.match(wiring,/V52_FULL_LIVE_STATE_SHA_MIGRATE_PASS/);
+ assert.match(wiring,/before-live-lineage-/);
+ assert.match(wiring,/V52_FULL_LIVE_STATE_PROMOTE_ALREADY_READY/);
+});
+
+test("a previously completed flat V52 full-live promotion is retry-safe",()=>{
+ assert.match(wiring,/\.mode == "LIVE"/);
+ assert.match(wiring,/\.status == "ready"/);
+ assert.match(wiring,/\.ordersAllowed == true/);
+ assert.match(wiring,/\.newOrdersAllowed == true/);
+ assert.match(wiring,/\.orderEnabled == true/);
+ assert.match(wiring,/return 0/);
 });
 
 test("V52 promotion success log uses one shell continuation",()=>{

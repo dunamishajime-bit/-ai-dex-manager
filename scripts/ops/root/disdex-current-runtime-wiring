@@ -544,6 +544,65 @@ migrate_v52_disabled_state_lineage() {
   }
   [[ "$from_sha" == "$DEPLOYED_SHA" ]] && return 0
 
+  # A previous full-live cutover may have completed the audited V52 promotion
+  # before the surrounding wiring command was interrupted.  Preserve that
+  # already-LIVE, flat state and advance only its runtime lineage on the next
+  # exact-release cutover.  Never downgrade it back to the limited-overlay
+  # DISABLED marker just to make a retry pass.
+  if /usr/bin/jq -e '
+    .strategyId == "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96" and
+    .mode == "LIVE" and
+    .status == "ready" and
+    (.disabledReason // null) == null and
+    (.positions | type == "object" and length == 0) and
+    (.pending // null) == null and
+    (.manualReview // null) == null and
+    .ordersAllowed == true and
+    .newOrdersAllowed == true and
+    .orderEnabled == true
+  ' "$state_path" >/dev/null; then
+    local live_backup_path="${state_path}.before-live-lineage-${DEPLOYED_SHA}"
+    if [[ -e "$live_backup_path" ]]; then
+      cmp -s "$state_path" "$live_backup_path" || {
+        printf 'V52 LIVE lineage backup already exists but is not an exact pre-migration copy: %s\n' "$live_backup_path" >&2
+        return 1
+      }
+    else
+      cp -a "$state_path" "$live_backup_path"
+    fi
+    local live_uid live_gid live_mode live_temporary
+    live_uid="$(stat -c '%u' "$state_path")"
+    live_gid="$(stat -c '%g' "$state_path")"
+    live_mode="$(stat -c '%a' "$state_path")"
+    live_temporary="$(mktemp "${state_path}.live-lineage.XXXXXX")"
+    if ! /usr/bin/jq --arg sha "$DEPLOYED_SHA" '.runtimeCommitSha=$sha | .updatedAt=(now * 1000 | floor)' "$state_path" > "$live_temporary"; then
+      rm -f -- "$live_temporary"
+      return 1
+    fi
+    chown "$live_uid:$live_gid" "$live_temporary"
+    chmod "$live_mode" "$live_temporary"
+    mv -Tf "$live_temporary" "$state_path"
+    /usr/bin/jq -e --arg sha "$DEPLOYED_SHA" '
+      .runtimeCommitSha == $sha and
+      .strategyId == "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96" and
+      .mode == "LIVE" and
+      .status == "ready" and
+      (.disabledReason // null) == null and
+      (.positions | type == "object" and length == 0) and
+      (.pending // null) == null and
+      (.manualReview // null) == null and
+      .ordersAllowed == true and
+      .newOrdersAllowed == true and
+      .orderEnabled == true
+    ' "$state_path" >/dev/null || {
+      printf 'V52_LIVE_STATE_SHA_MIGRATE_READBACK_FAIL path=%s backup=%s\n' "$state_path" "$live_backup_path" >&2
+      return 1
+    }
+    printf 'V52_FULL_LIVE_STATE_SHA_MIGRATE_PASS fromSha=%s toSha=%s backup=%s ordersSent=0 cancelsSent=0 positionChangesSent=0\n' \
+      "$from_sha" "$DEPLOYED_SHA" "$live_backup_path"
+    return 0
+  fi
+
   # V52 is intentionally disabled in the limited-overlay deployment.  Advance
   # its lineage only when the state is the exact, flat, order-disabled marker;
   # a positioned, pending, reviewed, or otherwise unknown state must remain
@@ -1406,6 +1465,23 @@ promote_v52_full_live_flat_state() {
     (.newOrdersAllowed == false) and
     (.orderEnabled == false)
   ' "$state_path" >/dev/null || {
+    if /usr/bin/jq -e --arg sha "$DEPLOYED_SHA" '
+      (.runtimeCommitSha == $sha) and
+      (.strategyId == "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96") and
+      (.mode == "LIVE") and
+      (.status == "ready") and
+      (.disabledReason // null) == null and
+      (.positions | type == "object" and length == 0) and
+      (.pending // null) == null and
+      (.manualReview // null) == null and
+      (.ordersAllowed == true) and
+      (.newOrdersAllowed == true) and
+      (.orderEnabled == true)
+    ' "$state_path" >/dev/null; then
+      printf 'V52_FULL_LIVE_STATE_PROMOTE_ALREADY_READY path=%s sha=%s ordersSent=0 cancelSent=0 positionChangesSent=0\n' \
+        "$state_path" "$DEPLOYED_SHA"
+      return 0
+    fi
     printf 'V52_FULL_LIVE_STATE_PROMOTE_NOT_FLAT path=%s ordersSent=0 cancelSent=0 positionChangesSent=0\n' "$state_path" >&2
     return 1
   }
