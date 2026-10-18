@@ -2,6 +2,7 @@ import { execFile as execFileCallback } from "node:child_process";
 import { mkdir, readFile, readlink, rename, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { promisify } from "node:util";
+import { isIntentionallyDisabledV52State } from "../../../lib/disdex-health-disabled-peer.mjs";
 
 const execFile = promisify(execFileCallback);
 const SYSTEMCTL = "/usr/bin/systemctl";
@@ -412,6 +413,53 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
         service = await serviceSnapshot(runner.unit);
     } catch {
         serviceError = `${runner.key} service observation failed`;
+    }
+    const v52IntentionallyDisabled = runner.key === "V52"
+        && Boolean(service)
+        && service.active === false
+        && isIntentionallyDisabledV52State(state)
+        && String(state?.runtimeCommitSha || "").toLowerCase() === runner.expectedSha;
+    if (v52IntentionallyDisabled) {
+        const updatedAt = Math.max(
+            Number(state?.updatedAt || 0),
+            Number(state?.lastReconciledAt || 0),
+            Number(state?.initialDaemonReconciliation?.completedAt || 0),
+        );
+        return {
+            heartbeat: {
+                schema: "disdex-runner-heartbeat/v1",
+                runnerId: runner.runnerId,
+                serviceUnit: runner.unit,
+                runtimeSha: runner.expectedSha,
+                expectedSha: runner.expectedSha,
+                workingDirectory: runner.releaseRoot,
+                mode: "DISABLED",
+                liveEnabled: false,
+                safetyState: "DISABLED",
+                orderPermission: "DENIED_DISABLED",
+                newOrdersAllowed: false,
+                healthReason: "V52 intentionally disabled for LIMITED_OVERLAY_LIVE; flat peer state verified",
+                heartbeatAt: now,
+                lastTickAt: updatedAt > 0 ? updatedAt : now,
+                mainPid: 0,
+                nRestarts: Number(service.nRestarts || 0),
+                serviceResult: String(service.result || "disabled"),
+            },
+            diagnostics: {
+                active: false,
+                disabled: true,
+                processPresent: false,
+                cwdCurrent: false,
+                commandCurrent: false,
+                execCurrent: true,
+                stateFresh: updatedAt > 0 && now - updatedAt <= runner.maxStateAgeMs,
+                strategyOk: true,
+                orderPermission: "DENIED_DISABLED",
+                mainPid: 0,
+                nRestarts: Number(service.nRestarts || 0),
+                serviceResult: String(service.result || "disabled"),
+            },
+        };
     }
     const updatedAt = Math.max(
         Number(state?.updatedAt || 0),
