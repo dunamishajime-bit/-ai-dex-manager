@@ -73,6 +73,29 @@ test("baseline admission evidence is produced from current decision snapshots an
     }
 });
 
+test("explicitly disabled V52 peer is a safe current non-acceptance for limited overlays", async () => {
+    const f = await fixture();
+    try {
+        await writeFile(f.paths.v52Path, JSON.stringify({
+            schemaVersion: 3,
+            strategyId: "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96",
+            mode: "DISABLED",
+            status: "intentional-stop",
+            positions: {},
+            pending: null,
+            manualReview: null,
+            ordersAllowed: false,
+            newOrdersAllowed: false,
+            orderEnabled: false,
+            disabledReason: "LIMITED_OVERLAY_SCOPE_V52_PEER_DISABLED",
+        }));
+        const result = await buildBaselineAdmissionEvidence(f.input);
+        assert.equal(result.baselineAcceptedThisTimestamp, 0);
+    } finally {
+        await rm(f.root, { recursive: true, force: true });
+    }
+});
+
 test("same-timestamp baseline acceptance blocks Idle admission", async () => {
     const f = await fixture();
     try {

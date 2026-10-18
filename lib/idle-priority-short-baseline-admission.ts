@@ -124,6 +124,24 @@ function acceptedByFet(snapshot: JsonRecord, decisionTs: number) {
 
 function acceptedByV52(snapshot: JsonRecord, decisionTs: number) {
     if (snapshot.strategyId !== "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96") throw new Error("BASELINE_ADMISSION_SOURCE_MALFORMED");
+    // A limited-overlay deployment intentionally keeps V52 disabled.  That
+    // explicit, flat stop is a current non-acceptance, not a missing tick.
+    // Keep the shape strict so an arbitrary stale/failed V52 state cannot
+    // silently authorize an Idle admission.
+    const positions = snapshot.positions;
+    const flat = (Array.isArray(positions) && positions.length === 0)
+        || (positions !== null && typeof positions === "object" && !Array.isArray(positions) && Object.keys(positions as object).length === 0);
+    if (snapshot.mode === "DISABLED"
+        && snapshot.status === "intentional-stop"
+        && snapshot.disabledReason === "LIMITED_OVERLAY_SCOPE_V52_PEER_DISABLED"
+        && flat
+        && snapshot.pending === null
+        && snapshot.manualReview === null
+        && snapshot.ordersAllowed === false
+        && snapshot.newOrdersAllowed === false
+        && snapshot.orderEnabled === false) {
+        return false;
+    }
     if (finite(snapshot.idleAdmissionDecisionTs) !== decisionTs || (finite(snapshot.updatedAt) ?? 0) < decisionTs) {
         throw new Error("BASELINE_ADMISSION_SOURCE_STALE_OR_TS_MISMATCH");
     }
