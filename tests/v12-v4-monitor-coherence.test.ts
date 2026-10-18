@@ -40,6 +40,13 @@ test("watchdog V4 mode targets only the V4 service and V12_V4 operator scope",()
  assert.match(watchdog,/evaluateOperatorActivationGate/);
 });
 
+test("watchdog can intentionally disable V12 recovery without disabling peer monitoring",()=>{
+ assert.match(watchdog,/mode === "DISABLED"/);
+ assert.match(watchdog,/DISDEX_WATCHDOG_V12_DISABLED_REASON/);
+ assert.match(watchdog,/return OTHER_RUNNERS/);
+ assert.match(watchdog,/V12_DISABLED_COMPETING_AUTHORITY/);
+});
+
 test("runtime wiring persists V4 primary and permanently retires legacy recovery paths",()=>{
  assert.match(wiring,/DISDEX_PRIMARY_V12_RUNNER/);
  assert.match(wiring,/\.v12-primary\.env/);

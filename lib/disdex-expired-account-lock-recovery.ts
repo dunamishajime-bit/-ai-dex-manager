@@ -11,12 +11,16 @@ export type ExpiredAccountLockRecoveryResult = {
   reservationCount: number;
   bytes: number;
   sha256: string;
+  ownerPidMissing?: boolean;
 };
 
 type RecoveryInspectionOptions = {
   now: number;
   expectedOwnerId: string;
   ownerAlive: boolean;
+  /** Missing PID is allowed only with an independent process-absence proof. */
+  allowMissingOwnerPid?: boolean;
+  ownerProcessAbsent?: boolean;
 };
 
 type RecoveryInput = RecoveryInspectionOptions & {
@@ -50,7 +54,10 @@ export function inspectExpiredAccountOrderLock(
   const ownerId = String(value.ownerId || "");
   if (!ownerId) throw new Error("ACCOUNT_LOCK_OWNER_INVALID");
   if (ownerId !== options.expectedOwnerId) throw new Error("ACCOUNT_LOCK_OWNER_MISMATCH");
-  if (!/:[0-9]+$/.test(ownerId)) throw new Error("ACCOUNT_LOCK_OWNER_PID_MISSING");
+  const ownerPidMissing = !/:[0-9]+$/.test(ownerId);
+  if (ownerPidMissing && (!options.allowMissingOwnerPid || options.ownerProcessAbsent !== true)) {
+    throw new Error(options.allowMissingOwnerPid ? "ACCOUNT_LOCK_OWNER_ABSENCE_PROOF_REQUIRED" : "ACCOUNT_LOCK_OWNER_PID_MISSING");
+  }
   const expiresAt = finite(value.expiresAt, "EXPIRES_AT");
   if (!Number.isFinite(options.now) || options.now < 0) throw new Error("ACCOUNT_LOCK_RECOVERY_NOW_INVALID");
   if (expiresAt > options.now) throw new Error("ACCOUNT_LOCK_NOT_EXPIRED");
@@ -64,6 +71,7 @@ export function inspectExpiredAccountOrderLock(
     ownerId,
     expiresAt,
     reservationCount: reservations.length,
+    ...(ownerPidMissing ? { ownerPidMissing: true } : {}),
   };
 }
 

@@ -66,6 +66,39 @@ test("unexpired, malformed, and missing owner pid fail closed", () => {
   );
 });
 
+test("missing owner pid is eligible only with an explicit external absence proof", () => {
+  const owner = "V12_V4_RUNNER";
+  const lock = { ...BASE, ownerId: owner };
+
+  assert.throws(
+    () => inspectExpiredAccountOrderLock(lock, {
+      now: 3_000,
+      expectedOwnerId: owner,
+      ownerAlive: false,
+      allowMissingOwnerPid: true,
+      ownerProcessAbsent: false,
+    }),
+    /ACCOUNT_LOCK_OWNER_ABSENCE_PROOF_REQUIRED/,
+  );
+
+  assert.deepEqual(
+    inspectExpiredAccountOrderLock(lock, {
+      now: 3_000,
+      expectedOwnerId: owner,
+      ownerAlive: false,
+      allowMissingOwnerPid: true,
+      ownerProcessAbsent: true,
+    }),
+    {
+      status: "EXPIRED_ACCOUNT_LOCK_RECOVERY_ELIGIBLE",
+      ownerId: owner,
+      expiresAt: 2_000,
+      reservationCount: 0,
+      ownerPidMissing: true,
+    },
+  );
+});
+
 test("archive is atomic, preserves exact bytes, and rejects symlinks", async (t) => {
   const root = await mkdtemp(join(tmpdir(), "disdex-expired-lock-"));
   const lockPath = join(root, "account-order.lock");

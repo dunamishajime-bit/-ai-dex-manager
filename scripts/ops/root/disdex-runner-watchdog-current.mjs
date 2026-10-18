@@ -155,6 +155,12 @@ function runnersForEnv(env) {
     const mode = String(env.DISDEX_WATCHDOG_V12_MODE || "LEGACY").trim().toUpperCase();
     if (mode === "LEGACY") return RUNNERS;
     if (mode === "V4") return [V4_V12_RUNNER, ...OTHER_RUNNERS];
+    if (mode === "DISABLED") {
+        if (!String(env.DISDEX_WATCHDOG_V12_DISABLED_REASON || "").trim()) {
+            throw new Error("watchdog disabled V12 mode requires an explicit reason");
+        }
+        return OTHER_RUNNERS;
+    }
     throw new Error("watchdog V12 mode is invalid");
 }
 
@@ -299,6 +305,7 @@ function operatorActivationPathForRunner(runner, env, defaultPath) {
 }
 
 function buildConfig(env) {
+    const v12Mode = String(env.DISDEX_WATCHDOG_V12_MODE || "LEGACY").trim().toUpperCase();
     const healthRoot = env.DISDEX_WATCHDOG_HEALTH_ROOT || DEFAULT_HEALTH_ROOT;
     const releaseRoot = env.DISDEX_WATCHDOG_RELEASE_ROOT;
     const expectedSha = String(env.DISDEX_WATCHDOG_EXPECTED_SHA || "").trim().toLowerCase();
@@ -334,7 +341,7 @@ function buildConfig(env) {
         if (!pathWithin(healthRoot, path) || !isAbsoluteCanonicalPath(path)) throw new Error("watchdog private path escapes health root");
     }
     const primaryV12 = runnerConfig.V12_V4 ?? runnerConfig.V12_X1_ALL;
-    const sharedRiskExpectedSha = String(env.DISDEX_WATCHDOG_SHARED_RISK_EXPECTED_SHA || primaryV12.expectedSha).trim().toLowerCase();
+    const sharedRiskExpectedSha = String(env.DISDEX_WATCHDOG_SHARED_RISK_EXPECTED_SHA || primaryV12?.expectedSha || "").trim().toLowerCase();
     if (!exactSha(sharedRiskExpectedSha)) throw new Error("shared crypto risk writer release pin is invalid");
     const marginGuardExpectedSha = String(env.DISDEX_WATCHDOG_MARGIN_GUARD_EXPECTED_SHA || expectedSha).trim().toLowerCase();
     if (!exactSha(marginGuardExpectedSha)) throw new Error("margin guard release pin is invalid");
@@ -356,7 +363,7 @@ function buildConfig(env) {
             script: "scripts/disdex_v96_v52_margin_guard_runtime.py",
         },
     ];
-    return { healthRoot, releaseRoot, expectedSha, approvedSha, sharedRiskExpectedSha, sharedRiskUnit, marginGuardExpectedSha, marginGuardUnit, safetyDaemons, runnerConfig, statePath, auditPath, lockPath, operatorActivationPath };
+    return { healthRoot, releaseRoot, expectedSha, approvedSha, v12Mode, v12DisabledReason: String(env.DISDEX_WATCHDOG_V12_DISABLED_REASON || "").trim(), sharedRiskExpectedSha, sharedRiskUnit, marginGuardExpectedSha, marginGuardUnit, safetyDaemons, runnerConfig, statePath, auditPath, lockPath, operatorActivationPath };
 }
 
 async function assertRelease(config) {
@@ -617,7 +624,17 @@ async function run(config) {
         }
         let compositionInvariantError;
         try {
-            if (config.runnerConfig.V12_V4) {
+            if (config.v12Mode === "DISABLED") {
+                const activeLegacyV12Units = parseNonInactiveServiceUnits(await systemctl([
+                    "list-units", "--all", "--type=service", "--no-legend", LEGACY_V12_RUNNER.unitPattern,
+                ]), LEGACY_V12_RUNNER.unitPrefix);
+                const activeV4Units = parseNonInactiveServiceUnits(await systemctl([
+                    "list-units", "--all", "--type=service", "--no-legend", V4_V12_RUNNER.unitPattern,
+                ]), V4_V12_RUNNER.unitPrefix);
+                if (activeLegacyV12Units.length > 0 || activeV4Units.length > 0) {
+                    throw new Error(`V12_DISABLED_COMPETING_AUTHORITY:${[...activeLegacyV12Units, ...activeV4Units].join(",")}`);
+                }
+            } else if (config.runnerConfig.V12_V4) {
                 const activeLegacyV12Units = parseNonInactiveServiceUnits(await systemctl([
                     "list-units", "--all", "--type=service", "--no-legend", LEGACY_V12_RUNNER.unitPattern,
                 ]), LEGACY_V12_RUNNER.unitPrefix);
@@ -703,6 +720,8 @@ async function run(config) {
             observedAt: now,
             releaseSha: config.expectedSha,
             releaseRoot: config.releaseRoot,
+            v12Mode: config.v12Mode,
+            v12DisabledReason: config.v12DisabledReason || null,
             exitCode: hasHardError ? 1 : 0,
             restartCalls,
             decisions,
