@@ -140,8 +140,14 @@ async function writeV4Health(releaseSha:string,operationMode:string,result:{
  if(!path.startsWith("/var/lib/disdex/v12-v4/"))throw Error("V4_HEALTH_PATH_INVALID");
  await mkdir(dirname(path),{recursive:true,mode:0o700});
  const now=Date.now(),tmp=path+"."+process.pid+"."+now+".tmp";
+ const serviceUnit=String(process.env.V12_V4_SERVICE_UNIT??`disdex-v12-v4@${releaseSha}.service`).trim();
+ const workingDirectory=String(process.env.DISDEX_RELEASE_ROOT??process.cwd()).trim();
+ const failed=result.status.toLowerCase()==="failed";
+ const deferred=result.reason.startsWith("V4_RATE_BUDGET_DEFERRED");
  const payload={
-  schema:V4_HEALTH_SCHEMA,strategyId:"V12_V4",releaseSha,runtimeSha:releaseSha,
+  schema:V4_HEALTH_SCHEMA,runnerId:"V12_V4",serviceUnit,expectedSha:releaseSha,workingDirectory,
+  liveEnabled:true,limitedLive:operationMode==="CANARY",safetyState:failed?"BLOCKED":deferred?"DEFERRED_FAIL_CLOSED":"HEALTHY",
+  heartbeatAt:now,mainPid:process.pid,strategyId:"V12_V4",releaseSha,runtimeSha:releaseSha,
   operationMode,mode:"LIVE",updatedAt:now,lastTickAt:result.eventTs,
   status:result.status,reason:result.reason,candidateCount:result.candidateCount,
   orderEnabled:result.orderEnabled,

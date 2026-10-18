@@ -19,6 +19,22 @@ test("V4 daemon emits an exact-release heartbeat after each successful tick",()=
  assert.match(runner,/await writeV4Health\(releaseSha,operationMode,result\)/);
 });
 
+test("V4 heartbeat includes the fields required by the release-pinned watchdog",()=>{
+ assert.match(runner,/runnerId:"V12_V4"/);
+ assert.match(runner,/serviceUnit/);
+ assert.match(runner,/expectedSha:releaseSha/);
+ assert.match(runner,/workingDirectory/);
+ assert.match(runner,/liveEnabled/);
+ assert.match(runner,/safetyState/);
+ assert.match(runner,/heartbeatAt:now/);
+ assert.match(runner,/mainPid:process\.pid/);
+});
+
+test("watchdog accepts the V4-specific heartbeat schema only for V12_V4",()=>{
+ assert.match(watchdog,/runner\.key === "V12_V4"/);
+ assert.match(watchdog,/disdex-v12-v4-runner-heartbeat\/v1/);
+});
+
 test("health snapshot can replace legacy V12 with V4 only by explicit mode",()=>{
  assert.match(snapshot,/DISDEX_HEALTH_SNAPSHOT_V12_MODE/);
  assert.match(snapshot,/key: "V12_V4"/);
@@ -129,6 +145,12 @@ test("coherence guard follows the persistent V4 primary marker",()=>{
 	assert.match(coherence,/V12_EXPECTED_UNIT="disdex-v12-v4@\$V4_PRIMARY_SHA\.service"/);
  assert.match(coherence,/legacy_v12_persistently_retired/);
  assert.match(coherence,/DISDEX_PRIMARY_V12_RUNNER="\$PRIMARY_V12_MODE"/);
+});
+
+test("coherence repair is single-flight and defers overlapping repairs",()=>{
+ assert.match(coherence,/COHERENCE_LOCK_PATH/);
+ assert.match(coherence,/flock -n 9/);
+ assert.match(coherence,/reason=repair-in-progress/);
 });
 
 test("V12 DISABLED mode is explicit and does not disable peer monitoring",()=>{

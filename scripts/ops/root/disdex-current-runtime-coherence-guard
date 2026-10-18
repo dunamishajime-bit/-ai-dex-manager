@@ -12,6 +12,7 @@ HEALTH_DROPIN="/etc/systemd/system/disdex-runner-health-snapshot.service.d/zzzzz
 WATCHDOG_DROPIN="/etc/systemd/system/disdex-runner-watchdog.service.d/zzzzzzzzzzzzzzzzzzzz-current-release.conf"
 ALERT_DROPIN="/etc/systemd/system/disdex-runner-health-alert.service.d/zzzzzzzzzzzzzzzzzzzz-current-release.conf"
 V4_OPERATOR_ACTIVATION_PATH="/var/lib/disdex/shared/operator-activation/v12-v4-full.json"
+COHERENCE_LOCK_PATH="${DISDEX_CURRENT_RUNTIME_COHERENCE_LOCK_PATH:-/var/lib/disdex/runner-health/private/current-runtime-coherence.lock}"
 MONITOR_RUNTIME_SHA=""
 MONITOR_RUNTIME_ROOT=""
 
@@ -396,6 +397,12 @@ retire_stale_units() {
 
 repair_coherence() {
   [[ "$(id -u)" == "0" ]] || { echo "repair requires root" >&2; return 1; }
+  install -d -m 0700 -- "$(dirname -- "$COHERENCE_LOCK_PATH")"
+  exec 9>"$COHERENCE_LOCK_PATH"
+  if ! flock -n 9; then
+    printf 'DISDEX_CURRENT_RUNTIME_COHERENCE_DEFERRED sha=%s reason=repair-in-progress\n' "${DEPLOYED_SHA:-unknown}"
+    return 0
+  fi
   verify_current_units_active || return 20
   DISDEX_PRIMARY_V12_RUNNER="$PRIMARY_V12_MODE" DISDEX_V12_V4_PRIMARY_SHA="$V4_PRIMARY_SHA" /usr/local/sbin/disdex-current-runtime-wiring --apply
   retire_stale_units

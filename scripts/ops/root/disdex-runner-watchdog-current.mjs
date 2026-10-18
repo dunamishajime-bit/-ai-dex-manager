@@ -429,7 +429,8 @@ async function readHeartbeat(config, runner, now) {
     validateRunnerOwnedHeartbeat(value, runner.key);
     const required = ["schema", "runnerId", "serviceUnit", "runtimeSha", "expectedSha", "workingDirectory", "mode", "liveEnabled", "safetyState", "heartbeatAt", "lastTickAt"];
     for (const key of required) if (!(key in value)) throw new Error(`${runner.key} heartbeat.${key} is missing`);
-    if (value.schema !== "disdex-runner-heartbeat/v1" || value.runnerId !== runner.key) throw new Error(`${runner.key} heartbeat identity is invalid`);
+    const v4Schema = runner.key === "V12_V4" && value.schema === "disdex-v12-v4-runner-heartbeat/v1";
+    if ((value.schema !== "disdex-runner-heartbeat/v1" && !v4Schema) || value.runnerId !== runner.key) throw new Error(`${runner.key} heartbeat identity is invalid`);
     if (!serviceAllowed(runner, value.serviceUnit, runner.expectedSha) || value.serviceUnit !== runner.unit) throw new Error(`${runner.key} heartbeat service unit is invalid`);
     if (value.runtimeSha !== runner.expectedSha || value.expectedSha !== runner.expectedSha) throw new Error(`${runner.key} heartbeat SHA does not match release`);
     if (value.workingDirectory !== runner.expectedCwd) throw new Error(`${runner.key} heartbeat cwd does not match release`);
