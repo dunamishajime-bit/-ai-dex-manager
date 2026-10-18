@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import type { AsterKline } from "../lib/aster-v3-client";
+import { IDLE_PRIORITY_SHORT_POLICY } from "../config/idlePriorityShortPolicy";
+import { IDLE_RESIDUAL_LONG_POLICY } from "../config/idleResidualLongPolicy";
 import { IdlePriorityAsterMarketDataProvider, normalizeIdlePriorityH1, parseIdlePriorityH1 } from "../lib/idle-priority-short-market-data";
 
 const H=3_600_000;
@@ -34,6 +36,40 @@ test("fails closed when latest closed H1 is stale",()=>{
   const now=200*H+1;
   const rows=Array.from({length:95},(_,i)=>k((100+i)*H));
   assert.throws(()=>normalizeIdlePriorityH1(rows,"JUPUSDT",now),/IDLE_MARKET_DATA_STALE/);
+});
+test("reuses completed H1 snapshots inside one boundary and refreshes only at the next boundary",async()=>{
+  let now=200*H+30_000;
+  let calls=0;
+  const client={getKlines:async()=>{
+    calls+=1;
+    const decisionTs=Math.floor(now/H)*H;
+    return Array.from({length:100},(_,i)=>k((decisionTs-H)-((99-i)*H)));
+  }};
+  const provider=new IdlePriorityAsterMarketDataProvider(client as any,{now:()=>now,requestSpacingMs:0});
+  const expected=1+Object.keys(IDLE_PRIORITY_SHORT_POLICY.routes).length+Object.keys(IDLE_RESIDUAL_LONG_POLICY.routes).length;
+  await provider.load();
+  await provider.load();
+  assert.equal(calls,expected);
+  now=201*H+30_000;
+  await provider.load();
+  assert.equal(calls,expected*2);
+});
+test("invalid H1 snapshots are evicted so a later read can recover",async()=>{
+  const now=200*H+30_000;
+  let invalid=true;
+  let calls=0;
+  const client={getKlines:async()=>{
+    calls+=1;
+    const decisionTs=Math.floor(now/H)*H;
+    const rows=Array.from({length:100},(_,i)=>k((decisionTs-H)-((99-i)*H)));
+    if(invalid) rows.splice(20,1);
+    return rows;
+  }};
+  const provider=new IdlePriorityAsterMarketDataProvider(client as any,{now:()=>now,requestSpacingMs:0});
+  await assert.rejects(()=>provider.load(),/IDLE_MARKET_DATA_GAP/);
+  invalid=false;
+  await provider.load();
+  assert.ok(calls>1);
 });
 test("loads only the exact latest completed 5m candle for the trail",async()=>{
   const now=200*M+30_000;

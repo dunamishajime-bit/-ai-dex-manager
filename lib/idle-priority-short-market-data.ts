@@ -8,6 +8,39 @@ const HOUR = 3_600_000;
 const FIVE_MINUTE = 5 * 60_000;
 const MIN_BARS = 90;
 
+type H1Loader = () => Promise<AsterKline[]>;
+class CompletedH1SnapshotCache {
+  private readonly entries = new Map<string, { boundary: number; rows: AsterKline[] }>();
+  private readonly inFlight = new Map<string, Promise<AsterKline[]>>();
+
+  async load(symbol: string, limit: number, now: number, loader: H1Loader) {
+    const boundary = Math.floor(now / HOUR) * HOUR;
+    const key = `${symbol}|1h|${limit}`;
+    const cached = this.entries.get(key);
+    if (cached?.boundary === boundary) return cached.rows;
+    const pending = this.inFlight.get(key);
+    if (pending) return pending;
+    const request = loader().then((rows) => {
+      this.entries.set(key, { boundary, rows });
+      return rows;
+    }).finally(() => this.inFlight.delete(key));
+    this.inFlight.set(key, request);
+    return request;
+  }
+
+  invalidate(symbol: string, limit: number) {
+    this.entries.delete(`${symbol}|1h|${limit}`);
+  }
+
+  clear() {
+    this.entries.clear();
+  }
+}
+
+function sleep(ms: number) {
+  return ms > 0 ? new Promise<void>((resolve) => setTimeout(resolve, ms)) : Promise.resolve();
+}
+
 function finitePositive(value: unknown, code: string) {
   const n = Number(value);
   if (!Number.isFinite(n) || n <= 0) throw new Error(code);
@@ -54,10 +87,14 @@ export type IdlePriorityMarketSnapshot = {
 };
 
 export class IdlePriorityAsterMarketDataProvider {
+  private readonly cache = new CompletedH1SnapshotCache();
+  private readonly requestSpacingMs: number;
   constructor(
     private readonly client: AsterV3Client,
-    private readonly options: { limit?: number; now?: () => number } = {},
-  ) {}
+    private readonly options: { limit?: number; now?: () => number; requestSpacingMs?: number } = {},
+  ) {
+    this.requestSpacingMs = Math.max(0, Math.min(5_000, Math.floor(options.requestSpacingMs ?? 0)));
+  }
 
   async load(): Promise<IdlePriorityMarketSnapshot> {
     const now = (this.options.now || Date.now)();
@@ -65,17 +102,39 @@ export class IdlePriorityAsterMarketDataProvider {
     const symbols = Object.keys(IDLE_PRIORITY_SHORT_POLICY.routes) as IdlePrioritySymbol[];
     const residualSymbols = Object.keys(IDLE_RESIDUAL_LONG_POLICY.routes) as IdleResidualLongSymbol[];
     const requested = ["BTCUSDT", ...symbols, ...residualSymbols];
-    const result = await Promise.all(requested.map((symbol) => this.client.getKlines(symbol, "1h", limit)));
-    const btc = normalizeIdlePriorityH1(result[0], "BTCUSDT", now);
+    const result: AsterKline[][] = [];
+    for (const symbol of requested) {
+      result.push(await this.cache.load(symbol, limit, now, () => this.client.getKlines(symbol, "1h", limit)));
+      await sleep(this.requestSpacingMs);
+    }
+    let btc;
+    try {
+      btc = normalizeIdlePriorityH1(result[0], "BTCUSDT", now);
+    } catch (error) {
+      this.cache.clear();
+      throw error;
+    }
     const mapped = {} as Record<IdlePrioritySymbol, IdleH1Candle[]>;
     for (let i = 0; i < symbols.length; i += 1) {
-      const normalized = normalizeIdlePriorityH1(result[i + 1], symbols[i], now);
+      let normalized;
+      try {
+        normalized = normalizeIdlePriorityH1(result[i + 1], symbols[i], now);
+      } catch (error) {
+        this.cache.clear();
+        throw error;
+      }
       if (normalized.decisionTs !== btc.decisionTs) throw new Error("IDLE_MARKET_DATA_DECISION_TS_MISMATCH");
       mapped[symbols[i]] = normalized.rows;
     }
     const residualMapped = {} as Record<IdleResidualLongSymbol, IdleH1Candle[]>;
     for (let i = 0; i < residualSymbols.length; i += 1) {
-      const normalized = normalizeIdlePriorityH1(result[1 + symbols.length + i], residualSymbols[i], now);
+      let normalized;
+      try {
+        normalized = normalizeIdlePriorityH1(result[1 + symbols.length + i], residualSymbols[i], now);
+      } catch (error) {
+        this.cache.clear();
+        throw error;
+      }
       if (normalized.decisionTs !== btc.decisionTs) throw new Error("IDLE_RESIDUAL_MARKET_DATA_DECISION_TS_MISMATCH");
       residualMapped[residualSymbols[i]] = normalized.rows;
     }

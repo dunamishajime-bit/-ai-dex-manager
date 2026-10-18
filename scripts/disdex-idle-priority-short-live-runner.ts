@@ -59,7 +59,10 @@ async function main() {
         readRequestSpacingMs: numberEnv("V12_X1_ALL_REQUEST_SPACING_MS", 100),
     });
     const residualRuntime = resolveIdleResidualLongRuntime();
-    const provider = new IdlePriorityAsterMarketDataProvider(client, { limit: numberEnv("DISDEX_IDLE_PRIORITY_H1_LIMIT", 160) });
+    const provider = new IdlePriorityAsterMarketDataProvider(client, {
+        limit: numberEnv("DISDEX_IDLE_PRIORITY_H1_LIMIT", 160),
+        requestSpacingMs: numberEnv("DISDEX_IDLE_PRIORITY_REQUEST_SPACING_MS", 100),
+    });
     let marketCache: { at: number; value: Awaited<ReturnType<typeof provider.load>> } | undefined;
     const marketData = {
         load: async () => {

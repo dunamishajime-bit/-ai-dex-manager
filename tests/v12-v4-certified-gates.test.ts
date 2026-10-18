@@ -2,7 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {PRODUCTION_EXIT_CATALOG} from "../lib/v12-v4-production-lifecycle";
 import {V12_V4_V2_POLICY} from "../lib/v12-v4-v2-shadow";
-import {validateV4ProductionCertificate,readV4ProductionCertificate,assertV4CertifiedOrder} from "../lib/v12-v4-certified-gates";
+import {validateV4ProductionCertificate,readV4ProductionCertificate,assertV4CertifiedOrder,validateV4SharedExecutionEvidencePayloads} from "../lib/v12-v4-certified-gates";
+import {V12_V4_CERTIFIED_GROSS_CONTRACT} from "../lib/v12-v4-production-contract";
 const sha="a".repeat(40),proof="b".repeat(64),now=Date.parse("2026-10-10T02:00:00Z");
 const valid={
  schema:"disdex-v12-v4-production-certification/v2",approvedSha:sha,
@@ -16,6 +17,14 @@ const valid={
  },approvedGross:{v12:3,crypto:3.5,total:4.75,recovery:2.5},
  forwardUnderperformanceAcknowledged:true,
  operatorAcknowledgement:"I_AUTHORIZE_CERTIFIED_V12_V4_REAL_ORDERS",
+};
+const evidenceCapturedAt="2026-10-10T01:30:00.000Z";
+const evidencePayloads={
+ routeSourceParity:{schema:"disdex-v12-v4-evidence/route-source-parity-v1",status:"PASS",candidateSha:sha,capturedAt:evidenceCapturedAt,routeCount:41,sourceParity:true},
+ establishedAsterOrders:{schema:"disdex-v12-v4-evidence/established-orders-v1",status:"PASS",candidateSha:sha,capturedAt:evidenceCapturedAt,readOnly:true,mutationCalls:0},
+ signedAsterAccount:{schema:"disdex-v12-v4-evidence/signed-account-v1",status:"PASS",candidateSha:sha,capturedAt:evidenceCapturedAt,readOnly:true,signedGet:true,mutationCalls:0},
+ v4ExecutionTests:{schema:"disdex-v12-v4-evidence/execution-tests-v1",status:"PASS",candidateSha:sha,capturedAt:evidenceCapturedAt,testPasses:206,failCount:0,typecheck:true},
+ sharedRiskAndPeers:{schema:"disdex-v12-v4-evidence/shared-risk-v1",status:"PASS",candidateSha:sha,capturedAt:evidenceCapturedAt,sharedRiskHealthy:true,marginGuardHealthy:true,killSwitch:false,pendingCount:0},
 };
 test("certificate validation accepts only exact 41-route, SHA-bound and current independent proof metadata",()=>{
  assert.equal(validateV4ProductionCertificate(valid,sha,now).approvedSha,sha);
@@ -33,6 +42,32 @@ test("certificate validation accepts only exact 41-route, SHA-bound and current 
 });
 test("no application data can replace protected root operator approval path",async()=>{
  await assert.rejects(()=>readV4ProductionCertificate(sha,"/tmp/fake.json"),/PATH_OVERRIDE_DENIED/);
+});
+
+test("V4 certificate caps remain bound to the V4 engine, separate from peer caps",()=>{
+ assert.deepEqual(V12_V4_CERTIFIED_GROSS_CONTRACT,{v12:3,crypto:3.5,total:4.75,recovery:2.5});
+ assert.equal(valid.approvedGross.v12,V12_V4_CERTIFIED_GROSS_CONTRACT.v12);
+ assert.equal(valid.approvedGross.crypto,V12_V4_CERTIFIED_GROSS_CONTRACT.crypto);
+});
+
+test("current-SHA evidence payloads are content-validated before hashing grants authority",()=>{
+ assert.doesNotThrow(()=>validateV4SharedExecutionEvidencePayloads(evidencePayloads,sha,now));
+ assert.throws(()=>validateV4SharedExecutionEvidencePayloads({
+  ...evidencePayloads,
+  routeSourceParity:{...evidencePayloads.routeSourceParity,candidateSha:"c".repeat(40)},
+ },sha,now),/CANDIDATE_SHA/);
+ assert.throws(()=>validateV4SharedExecutionEvidencePayloads({
+  ...evidencePayloads,
+  signedAsterAccount:{...evidencePayloads.signedAsterAccount,mutationCalls:1},
+ },sha,now),/MUTATION/);
+ assert.throws(()=>validateV4SharedExecutionEvidencePayloads({
+  ...evidencePayloads,
+  sharedRiskAndPeers:{...evidencePayloads.sharedRiskAndPeers,marginGuardHealthy:false},
+ },sha,now),/HEALTH/);
+ assert.throws(()=>validateV4SharedExecutionEvidencePayloads({
+  ...evidencePayloads,
+  routeSourceParity:{...evidencePayloads.routeSourceParity,capturedAt:"2026-10-01T00:00:00.000Z"},
+ },sha,now),/STALE/);
 });
 
 test("missing or expired ENTRY certificate cannot trap already signed existing position",async()=>{
