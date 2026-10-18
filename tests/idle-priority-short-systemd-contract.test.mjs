@@ -30,7 +30,7 @@ test("runtime wiring performs formal HYPE state lineage migration before activat
   assert.match(wiring, /disdex-quality102-causal-v1-state-migrate\.ts/);
   assert.match(wiring, /disdex-flat-state-sha-migrate\.ts/);
   assert.match(wiring, /disdex-v12-runtime-lineage-recovery\.ts/);
-  assert.match(wiring, /migrate_quality102_state_lineage\s+if \[\[ "\$PRIMARY_V12_MODE" == "V4" \]\]; then\s+assert_retired_legacy_v12_flat\s+else\s+migrate_v12_state_lineage\s+fi\s+migrate_fet_state_lineage\s+recover_hype_benign_state/);
+  assert.match(wiring, /migrate_quality102_state_lineage\s+if \[\[ "\$PRIMARY_V12_MODE" == "V4" \]\]; then\s+assert_retired_legacy_v12_flat\s+else\s+migrate_v12_state_lineage\s+fi\s+migrate_fet_state_lineage\s+(?:migrate_v52_disabled_state_lineage\s+)?recover_hype_benign_state/);
   assert.match(wiring, /scripts\/disdex-idle-priority-short-state-migrate\.ts/);
   assert.match(wiring, /IDLE_OPERATOR_ENV_FILE=.*\.idle-operator\.env/);
   assert.match(wiring, /write_atomic "\$IDLE_OPERATOR_ENV_FILE" "DISDEX_OPERATOR_ACTIVATION_PATH=\$\{OPERATOR_ACTIVATION_RUNTIME_PATH\}[\s\S]*DISDEX_IDLE_PRIORITY_OPERATOR_ARMED=true/);
