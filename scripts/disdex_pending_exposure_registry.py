@@ -29,7 +29,15 @@ def _expected_sleeve(strategy_id: str) -> str:
     owner = str(strategy_id or "").strip().upper()
     if owner in {"V11_EQ", "V50_POST_OPEN_BASIS", "V52"} or "V52" in owner:
         return "STOCK"
-    if owner == "V12" or "V12_" in owner or "PENGU" in owner or "FET_BRK48" in owner or "QUALITY102" in owner:
+    if (
+        owner == "V12"
+        or "V12_" in owner
+        or "PENGU" in owner
+        or "FET_BRK48" in owner
+        or "QUALITY102" in owner
+        or "HYPE" in owner
+        or "IDLE" in owner
+    ):
         return "CRYPTO"
     raise RuntimeError(f"PENDING_EXPOSURE_OWNER_UNKNOWN:{strategy_id or 'EMPTY'}")
 
