@@ -164,9 +164,9 @@ class MarginAwareV52AsterOnlyEngine(previous.MarginAwareV52AsterOnlyEngine):
 def self_test() -> None:
     strict_planner_self_test()
     engine = object.__new__(MarginAwareV52AsterOnlyEngine)
-    engine.crypto_gross_cap = 2.0
-    engine.stock_gross_cap = 1.5
-    engine.portfolio_gross_cap = 2.5
+    engine.crypto_gross_cap = STRICT_CAPS.crypto_gross
+    engine.stock_gross_cap = STRICT_CAPS.stock_gross
+    engine.portfolio_gross_cap = STRICT_CAPS.total_gross
     engine.maximum_concurrent_stock_positions = 2
     engine.required_initial_leverage = 5
     engine.maximum_initial_margin_fraction = 0.70
