@@ -107,5 +107,12 @@ class DependencyLivenessHealthTest(unittest.TestCase):
         self.assertIn('ensure_safety_daemon_active "$SHARED_RISK_UNIT"', wiring)
         self.assertIn('ensure_safety_daemon_active "$MARGIN_UNIT"', wiring)
 
+    def test_wiring_migrates_only_explicitly_disabled_flat_v52_state(self):
+        wiring = WIRING.read_text(encoding="utf-8")
+        self.assertIn("migrate_v52_disabled_state_lineage", wiring)
+        self.assertIn("LIMITED_OVERLAY_SCOPE_V52_PEER_DISABLED", wiring)
+        self.assertIn("V52_DISABLED_STATE_SHA_MIGRATE_PASS", wiring)
+        self.assertIn("V52_DISABLED_STATE_SHA_MIGRATE_NOT_FLAT", wiring)
+
 if __name__ == "__main__":
     unittest.main()
