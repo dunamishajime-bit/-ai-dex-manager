@@ -20,6 +20,7 @@ on:
       - "scripts/disdex-account-order-lock-expired-recovery.ts"
       - "tests/exit-overlay-contract.test.ts"
       - "tests/disdex-expired-account-lock-recovery.test.ts"
+      - "tests/disdex-quality102-flat-state-sha-migrate.test.ts"
       - "tests/idle-priority-short-*.test.ts"
   workflow_dispatch:
 
@@ -49,7 +50,7 @@ jobs:
         run: npm ci --ignore-scripts
       - name: Exit, resident STOP, and Idle overlay contract tests (no venue)
         run: |
-          npx tsx --test tests/exit-overlay-contract.test.ts tests/disdex-expired-account-lock-recovery.test.ts tests/venue-resident-stop.test.ts tests/resident-stop-ledger.test.ts tests/resident-stop-runner-integration.test.ts tests/idle-priority-short-live-path.test.ts tests/idle-priority-short-market-data.test.ts tests/idle-priority-short-state.test.ts
+          npx tsx --test tests/exit-overlay-contract.test.ts tests/disdex-expired-account-lock-recovery.test.ts tests/disdex-quality102-flat-state-sha-migrate.test.ts tests/venue-resident-stop.test.ts tests/resident-stop-ledger.test.ts tests/resident-stop-runner-integration.test.ts tests/idle-priority-short-live-path.test.ts tests/idle-priority-short-market-data.test.ts tests/idle-priority-short-state.test.ts
       - name: Q102 and Idle runner self-tests
         run: |
           npx tsx scripts/disdex-quality102-causal-v1-runner-selftest.ts
