@@ -1165,7 +1165,7 @@ ensure_v52_intentional_stop_marker() {
   marker_dir="$(dirname -- "$V52_INTENTIONAL_STOP_MARKER")"
   marker_tmp="${V52_INTENTIONAL_STOP_MARKER}.tmp.$$"
   install -d -o root -g root -m 0755 "$marker_dir"
-  printf '{"schema":"disdex-v52-intentional-stop/v1","runtimeSha":"%s","reason":"LIMITED_OVERLAY_SCOPE_V52_PEER_DISABLED","createdAt":%s}\n' \\
+  printf '{"schema":"disdex-v52-intentional-stop/v1","runtimeSha":"%s","reason":"LIMITED_OVERLAY_SCOPE_V52_PEER_DISABLED","createdAt":%s}\n' \
     "$DEPLOYED_SHA" "$(date +%s%3N)" > "$marker_tmp"
   chown root:deploy "$marker_tmp"
   chmod 0640 "$marker_tmp"
