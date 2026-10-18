@@ -247,6 +247,13 @@ export class V4RunnerEngine{
    if(toRetire.some(cid=>openOrders.some(o=>o.clientOrderId===cid)))
     throw Error("V4_RETIRED_STOP_CANCEL_NOT_CONFIRMED");
   }
+  // Account reads can be delayed by the shared Aster rate budget. Refresh the
+  // peer systemd/state attestation immediately before the signed account mark
+  // so a valid peer is not rejected only because the earlier concurrent read
+  // completed more than the 15-second observation window ago. This does not
+  // relax the freshness gate: the refreshed attestation must still be active,
+  // exact-SHA, and fresh when v4PeerOwners validates it.
+  peers=await d.fetchPeers();
   const usdt=balances.find(b=>b.asset==="USDT");
   const walletUsd=Number(usdt?.balance);
   let unrealizedUsd=0;

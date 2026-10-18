@@ -12,6 +12,15 @@ function peers(now:number){return families.map(kind=>({kind,programSha:sha,raw:{
  updatedAt:now,...(kind==="V12"?{schema:"v12-x1-all-runner-state/v2",strategyId:"V12_X1.00_ALL",mode:"LIVE",activePositions:[]}:
  kind==="V52"?{positions:{}}:kind==="IDLE"||kind==="HYPE_LONG"?{positions:[]}:kind==="PENGU"?{version:2,strategyId:"PENGU_DUAL_LS_V2_FINAL",mode:"LIVE",position:null}:{position:null})
 }}));}
+function attestedPeers(observedAt:number,updatedAt:number){return families.map(kind=>({kind,programSha:sha,raw:{
+ updatedAt,...(kind==="V12"?{schema:"v12-x1-all-runner-state/v2",strategyId:"V12_X1.00_ALL",mode:"LIVE",activePositions:[]}:
+ kind==="V52"?{positions:{}}:kind==="HYPE_LONG"?{schema:"disdex-hype-zec-long/v1",mode:"LIVE",positions:[]}:kind==="IDLE"?{positions:[]}:
+ kind==="RESIDUAL"?{schema:"disdex-idle-residual-long-state/v1",position:null,pending:null,manualReview:null}:
+ kind==="PENGU"?{version:2,strategyId:"PENGU_DUAL_LS_V2_FINAL",mode:"LIVE",position:null}:
+ kind==="Q102"?{version:1,strategyId:"QUALITY102_CAUSAL_V1",position:null}:
+ {schema:"fet-brk48-residual-state/v1",strategyId:"FET_BRK48_RESIDUAL",position:null})},
+ service:{unit:`peer@${sha}.service`,active:true,retiredV12:false,observedAt,mainPid:123}
+ }));}
 test("runner takes real shared lock and signed account mark, then stays non-ordering with no signals",async()=>{
  const dir=mkdtempSync(join(tmpdir(),"v4-engine-"));const now=Date.now();
  try{
@@ -80,6 +89,35 @@ test("market-data prefetch failure stays fail-closed without terminating the V4 
   assert.equal(fetchAttempts,2);
   assert.equal(mutationCalls,0);
   assert.equal(store.read().state.journal.length,2);
+ }finally{rmSync(dir,{recursive:true,force:true});}
+});
+test("refreshes peer attestation after slow signed account reads",async()=>{
+ const dir=mkdtempSync(join(tmpdir(),"v4-peer-refresh-"));let time=Date.now(),peerCalls=0;
+ try{
+  const store=new V4ExecutionStore(join(dir,"orders.json"),sha);
+  store.initialize({equityUsd:1000,foreign:[],holdProtected:false});
+  const lock=new FileAccountOrderLock(join(dir,"account.lock"),120000,join(dir,"pending.json"));
+  const client:any={
+   getBalances:async()=>{await Promise.resolve();time+=16_000;return [{asset:"USDT",balance:"1000",availableBalance:"1000"}]},
+   getPositions:async()=>[],getOpenOrders:async()=>[],getUserTrades:async()=>[],getIncomeHistory:async()=>[],
+  };
+  const engine=new V4RunnerEngine({store,accountLock:lock,adapter:{} as any,client,
+   pendingRegistryPath:join(dir,"pending.json"),
+   fetchPeers:async()=>{peerCalls++;return attestedPeers(time,time-121_000)},
+   fetchExitFeed:async()=>({closed:[]}),fetchDecision:async()=>({
+    schema:"v12-v4-live-decision/v1",policyId:"V2_M150_D05_CORE_NATIVE",decisionTs:time-5_000,
+    capturedAtMs:time,sourceFingerprint:"peer-refresh",candidateCount:0,filteredCount:0,sourceCount:0,
+    nativeCoreEvents:[],entryAtrByCandidate:{},errors:[],candidates:[],filtered:[],orderEnabled:false,
+    realOrderEnabledV4:0,tradingMutation:0,
+   }),
+   assertAuthority:async()=>{throw Error("AUTHORITY_FORBIDDEN")},assertEntrySafety:async()=>{},assertSourceParity:async()=>{},
+   requiredResidentStop:async()=>{throw Error("STOP_NOT_CERTIFIED")},quantityNormalizer:{} as any,
+   referencePrice:async()=>{throw Error("NO_PRICE")},minimumVenueOrderNotional:async()=>{throw Error("NO_FILTER")},now:()=>time,
+  });
+  const result=await engine.tick();
+  assert.equal(result.status,"observing");
+  assert.equal(result.orderEnabled,false);
+  assert.equal(peerCalls,2,"peer service/state attestation must be refreshed after slow account reads");
  }finally{rmSync(dir,{recursive:true,force:true});}
 });
 test("candidate source errors and stale data remain fail-closed observations",async()=>{
