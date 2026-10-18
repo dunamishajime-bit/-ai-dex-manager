@@ -6,7 +6,7 @@
 import {createHash} from "node:crypto";
 import type {AsterV3Client,AsterKline} from "./aster-v3-client";
 import {V12_X1_ALL} from "../config/v12X1AllRuntime";
-import {resampleV12H1ToH2,type V12Bar} from "./v12-x1-all";
+import {resampleV12H1ToH2,computeV12Regime,buildV12DecisionObservation,type V12Bar} from "./v12-x1-all";
 import {computeNativeV4Sources} from "./v12-v4-native-source";
 import {stepNativeFailedBreakCore,type CoreMachineState,type NativeCoreEvent} from "./v12-v4-native-core";
 import {adaptProductionCandidates,computeProductionH1Features,type FeatureBar} from "./v12-v4-production-features";
@@ -19,6 +19,8 @@ export type V4LiveDecisionSnapshot={
  schema:"v12-v4-live-decision/v1";policyId:typeof V12_V4_V2_POLICY;decisionTs:number;capturedAtMs:number;
  sourceFingerprint:string;candidateCount:number;filteredCount:number;
  sourceCount:number;nativeCoreEvents:NativeCoreEvent[];entryAtrByCandidate:Record<string,number>;errors:string[];orderEnabled:false;realOrderEnabledV4:0;tradingMutation:0;
+ btcRegime?:string;nativeSources?:ReturnType<typeof computeNativeV4Sources>;
+ observedCandidates?:NonNullable<ReturnType<typeof buildV12DecisionObservation>>["candidates"];
  candidates:ReturnType<typeof adaptProductionCandidates>["candidates"];
  filtered:ReturnType<typeof adaptProductionCandidates>["filtered"];
 };
@@ -84,6 +86,8 @@ export function buildV4LiveDecisionBatch(h1:Record<string,V4VenueH1Bar[]>,captur
  if(!Number.isFinite(decisionTs)||decisionTs>capturedAtMs||
     capturedAtMs-decisionTs>TWO_HOURS+15*60_000)throw Error("V4_H2_STALE_OR_FUTURE");
  const source=computeNativeV4Sources(aligned,index,decisionTs);
+ const btcRegime=computeV12Regime(aligned.BTC,index)??"UNKNOWN";
+ const observation=buildV12DecisionObservation(aligned,index,capturedAtMs);
  const nativeCoreEvents=replayLiveNativeCore(aligned);
  const candidates:V4LiveDecisionSnapshot["candidates"]=[],filtered:V4LiveDecisionSnapshot["filtered"]=[];
  const entryAtrByCandidate:Record<string,number>={};
@@ -107,6 +111,8 @@ export function buildV4LiveDecisionBatch(h1:Record<string,V4VenueH1Bar[]>,captur
  const sourceFingerprint=createHash("sha256").update(JSON.stringify({decisionTs,h2:aligned,h1:h1.BTC.slice(-50)})).digest("hex");
  return {schema:"v12-v4-live-decision/v1",policyId:V12_V4_V2_POLICY,
   decisionTs,capturedAtMs,sourceFingerprint,candidateCount:candidates.length,filteredCount:filtered.length,
-  sourceCount:source.length,nativeCoreEvents,entryAtrByCandidate,errors,candidates:errors.length?[]:candidates,filtered,
+  sourceCount:source.length,nativeCoreEvents,entryAtrByCandidate,errors,btcRegime,nativeSources:source,
+  observedCandidates:observation?.candidates??[],
+  candidates:errors.length?[]:candidates,filtered,
   orderEnabled:false,realOrderEnabledV4:0,tradingMutation:0};
 }

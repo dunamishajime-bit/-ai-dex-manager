@@ -22,6 +22,8 @@ import type {V4ExecutionDocument} from "../lib/v12-v4-execution-store";
 import type {V4PreparedDecision,V4TickResult} from "../lib/v12-v4-runner-engine";
 const H2=7200000;
 const V4_HEALTH_SCHEMA="disdex-v12-v4-runner-heartbeat/v1";
+const V4_REALTIME_DECISION_SCHEMA="v12-v4-live-decision/v1";
+const V4_GATE_TELEMETRY_SCHEMA="disdex-v12-v4-gate-telemetry/v1";
 export type V4RateBudgetDefer={reason:string;waitMs:number};
 export function classifyV4RateBudgetDefer(error:unknown,doc:V4ExecutionDocument):V4RateBudgetDefer|undefined{
  const rate=classifyAsterRateBudgetFailure(error);
@@ -75,6 +77,61 @@ async function writeV4IdleBaselineSnapshot(releaseSha:string,prepared:V4Prepared
  const now=Date.now(),tmp=path+"."+process.pid+"."+now+".tmp";
  await writeFile(tmp,JSON.stringify(buildV4IdleBaselineSnapshot(releaseSha,prepared,now))+"\n",{encoding:"utf8",mode:0o600});
  await rename(tmp,path);
+}
+function telemetryPath(name:string,fallback:string){
+ const path=String(process.env[name]??fallback).trim();
+ if(!path.startsWith("/var/lib/disdex/v12-v4/"))throw Error("V4_TELEMETRY_PATH_INVALID:"+name);
+ return path;
+}
+async function writeAtomicJson(path:string,payload:Record<string,unknown>){
+ await mkdir(dirname(path),{recursive:true,mode:0o700});
+ const now=Date.now(),tmp=path+"."+process.pid+"."+now+".tmp";
+ await writeFile(tmp,JSON.stringify(payload)+"\n",{encoding:"utf8",mode:0o600});
+ await rename(tmp,path);
+}
+export function buildV4RealtimeDecisionTelemetry(releaseSha:string,operationMode:string,prepared:V4PreparedDecision|undefined,result:Pick<V4TickResult,"status"|"reason"|"eventTs"|"candidateCount"|"orderEnabled">,updatedAt=Date.now()):Record<string,unknown>{
+ const base={releaseSha,runtimeSha:releaseSha,sourceRuntimeSha:releaseSha,source:"RUNNER_SAME_CLOSED_CANDLE_BATCH",operationMode,
+  status:result.status,reason:result.reason,orderEnabled:result.orderEnabled,updatedAt,lastTickAt:result.eventTs};
+ if(!prepared||prepared.kind!=="READY")return {schema:V4_REALTIME_DECISION_SCHEMA,policyId:"V2_M150_D05_CORE_NATIVE",decisionTs:null,capturedAtMs:null,
+  sourceFingerprint:null,candidateCount:0,filteredCount:0,sourceCount:0,nativeCoreEvents:[],entryAtrByCandidate:{},errors:[prepared&&prepared.kind==="FAILED"?prepared.reason:"V4_PREPARE_NOT_AVAILABLE"],
+  candidates:[],filtered:[],realOrderEnabledV4:0,tradingMutation:0,stale:true,staleReason:prepared&&prepared.kind==="FAILED"?prepared.reason:"V4_PREPARE_NOT_AVAILABLE",...base};
+ const decision=prepared.decision;
+ return {...decision,...base,schema:V4_REALTIME_DECISION_SCHEMA,stale:false,staleReason:null};
+}
+export function buildV4GateTelemetry(releaseSha:string,operationMode:string,prepared:V4PreparedDecision|undefined,result:Pick<V4TickResult,"status"|"reason"|"eventTs"|"candidateCount"|"orderEnabled">,computedAtMs=Date.now()):Record<string,unknown>{
+ const base={schema:V4_GATE_TELEMETRY_SCHEMA,strategyId:"V12_V4",releaseSha,runtimeSha:releaseSha,activeRunnerSha:releaseSha,operationMode,
+  source:"RUNNER_SAME_CLOSED_CANDLE_BATCH",computedAtMs,updatedAt:computedAtMs,lastTickAt:result.eventTs,status:result.status,reason:result.reason,
+  stale:true,telemetryFresh:false};
+ if(!prepared||prepared.kind!=="READY")return {...base,decisionTs:null,capturedAtMs:null,sourceFingerprint:null,sourceCount:0,candidateCount:0,filteredCount:0,btcRegime:"UNKNOWN",symbolCount:0,symbols:[]};
+ const decision=prepared.decision;
+ const sourceBySymbol=new Map((decision.nativeSources??[]).map(source=>[source.source.symbol.replace(/USDT$/,""),source] as const));
+ const observedBySymbol=new Map((decision.observedCandidates??[]).map(candidate=>[candidate.symbol,candidate] as const));
+ const symbols=Array.from(new Set([
+  ...(decision.observedCandidates??[]).map(candidate=>candidate.symbol),
+  ...(decision.nativeSources??[]).map(source=>source.source.symbol.replace(/USDT$/,"")),
+  ...decision.candidates.map(candidate=>candidate.symbol),
+  ...decision.filtered.map(candidate=>candidate.symbol),
+ ])).sort().map(symbol=>{
+  const source=sourceBySymbol.get(symbol);
+  const observed=observedBySymbol.get(symbol);
+  const candidate=decision.candidates.find(row=>row.symbol===symbol);
+  const side=source?.source.side??observed?.side??(candidate as any)?.effectiveSide??(candidate as any)?.side??null;
+  const eligible=Boolean(source);
+  return {symbol:symbol+"USDT",nativeSide:side,sourceEligible:eligible,
+   sourceReason:source?.entryGateReason??observed?.signalReason??(eligible?"NATIVE_SIGNAL_SOURCE":"NO_NATIVE_SIGNAL_SOURCE"),
+   portfolioRank:source?.rank??observed?.portfolioRank??(candidate as any)?.rank??null,nativeScore:source?.score??observed?.score??(candidate as any)?.score??null,
+   gates:[{key:"NATIVE_ENTRY_SOURCE",state:eligible?"PASS":"BLOCK",actual:eligible?1:0,required:"V12_NATIVE_ENTRY_SOURCE",
+    reason:source?.entryGateReason??observed?.signalReason??(eligible?"NATIVE_SIGNAL_SOURCE":"NO_NATIVE_SIGNAL_SOURCE")}],
+   routeGate:{state:eligible?"PASS":"NOT_EVALUATED",routes:[],reason:eligible?"PRODUCTION_CANDIDATE_ADAPTER":observed?.signalReason??"NO_NATIVE_SIGNAL_SOURCE"}};
+ });
+ return {...base,decisionTs:decision.decisionTs,capturedAtMs:decision.capturedAtMs,sourceFingerprint:decision.sourceFingerprint,
+  sourceCount:decision.sourceCount,candidateCount:decision.candidateCount,filteredCount:decision.filteredCount,btcRegime:decision.btcRegime??"UNKNOWN",
+  symbolCount:symbols.length,symbols,stale:false,telemetryFresh:true};
+}
+async function writeV4DecisionTelemetry(releaseSha:string,operationMode:string,prepared:V4PreparedDecision|undefined,result:Pick<V4TickResult,"status"|"reason"|"eventTs"|"candidateCount"|"orderEnabled">){
+ const now=Date.now();
+ await writeAtomicJson(telemetryPath("V12_V4_REALTIME_DECISION_PATH","/var/lib/disdex/v12-v4/realtime-decision.json"),buildV4RealtimeDecisionTelemetry(releaseSha,operationMode,prepared,result,now));
+ await writeAtomicJson(telemetryPath("V12_V4_GATE_TELEMETRY_PATH","/var/lib/disdex/v12-v4/gate-telemetry.json"),buildV4GateTelemetry(releaseSha,operationMode,prepared,result,now));
 }
 async function writeV4Health(releaseSha:string,operationMode:string,result:{
  status:string;reason:string;eventTs:number;candidateCount:number;orderEnabled:boolean;
@@ -247,13 +304,14 @@ async function main(){
  process.once("SIGTERM",()=>{stopping=true;});
  do{
   let result:V4TickResult;
+  let prepared:V4PreparedDecision|undefined;
   let deferredWaitMs=0;
   let hadLockContention=false;
   try{
    // Complete H1/H2 market-data reads outside the account mutex when V4 has
    // no unresolved order or owned leg. Signed account and STOP recovery always
    // remain inside engine.tick() under the original exclusive lease.
-   const prepared=await engine.prepareFlatMarketDecision();
+   prepared=await engine.prepareFlatMarketDecision();
    await writeV4IdleBaselineSnapshot(releaseSha,prepared);
    result=await executeV4WithContentionAudit({
     operation:()=>engine.tick(prepared),releaseSha,operationMode,
@@ -266,6 +324,9 @@ async function main(){
    if(!deferred)throw error;
    deferredWaitMs=deferred.waitMs;
    result={status:"observing",reason:deferred.reason,eventTs:Date.now(),candidateCount:0,orderEnabled:false};
+  }
+  try{await writeV4DecisionTelemetry(releaseSha,operationMode,prepared,result);}catch(error){
+   console.error(JSON.stringify({level:"error",status:"V4_TELEMETRY_WRITE_FAILED",error:error instanceof Error?error.message:String(error)}));
   }
   await writeV4Health(releaseSha,operationMode,result);
   console.log(JSON.stringify({releaseSha,operationMode,timestamp:new Date().toISOString(),...result,
