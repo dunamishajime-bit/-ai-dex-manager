@@ -24,7 +24,10 @@ test("health snapshot can replace legacy V12 with V4 only by explicit mode",()=>
  assert.match(snapshot,/key: "V12_V4"/);
  assert.match(snapshot,/disdex-v12-v4@\$\{V12_PIN\.expectedSha\}\.service/);
  assert.match(snapshot,/\/var\/lib\/disdex\/v12-v4\/heartbeat\.json/);
- assert.match(snapshot,/operationMode \|\| ""\)\.toUpperCase\(\) === "CERTIFIED"/);
+ assert.match(snapshot,/\["CERTIFIED", "CANARY"\]\.includes\(String\(state\?\.operationMode \|\| ""\)\.toUpperCase\(\)\)/);
+ assert.match(snapshot,/DISABLED/);
+ assert.match(snapshot,/DENIED_DISABLED/);
+ assert.match(snapshot,/runnerOrderPermissions/);
 });
 
 test("watchdog V4 mode targets only the V4 service and V12_V4 operator scope",()=>{
@@ -67,6 +70,14 @@ test("coherence guard follows the persistent V4 primary marker",()=>{
 	assert.match(coherence,/V12_EXPECTED_UNIT="disdex-v12-v4@\$V4_PRIMARY_SHA\.service"/);
  assert.match(coherence,/legacy_v12_persistently_retired/);
  assert.match(coherence,/DISDEX_PRIMARY_V12_RUNNER="\$PRIMARY_V12_MODE"/);
+});
+
+test("V12 DISABLED mode is explicit and does not disable peer monitoring",()=>{
+ assert.match(wiring,/PRIMARY_V12_MODE.*DISABLED/);
+ assert.match(wiring,/persistently_disable_v12/);
+ assert.match(wiring,/DISDEX_HEALTH_SNAPSHOT_V12_DISABLED_REASON=/);
+ assert.match(wiring,/DISDEX_WATCHDOG_V12_DISABLED_REASON=/);
+ assert.match(coherence,/PRIMARY_V12_MODE.*DISABLED/);
 });
 
 test("safety daemons are enabled as well as started so coherence does not defer forever",()=>{

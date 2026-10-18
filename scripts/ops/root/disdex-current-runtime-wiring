@@ -144,11 +144,20 @@ resolve_current() {
     PRIMARY_V12_MODE="$(sed -n 's/^DISDEX_PRIMARY_V12_RUNNER=//p' "$PRIMARY_V12_MODE_FILE" | tail -n1)"
   fi
   PRIMARY_V12_MODE="${PRIMARY_V12_MODE:-LEGACY}"
-  [[ "$PRIMARY_V12_MODE" == "LEGACY" || "$PRIMARY_V12_MODE" == "V4" ]] || {
+  [[ "$PRIMARY_V12_MODE" == "LEGACY" || "$PRIMARY_V12_MODE" == "V4" || "$PRIMARY_V12_MODE" == "DISABLED" ]] || {
     printf 'invalid primary V12 mode: %s\n' "$PRIMARY_V12_MODE" >&2
     return 1
   }
   if [[ "$PRIMARY_V12_MODE" == "V4" ]]; then
+    V4_OPERATION_MODE="${DISDEX_V12_V4_OPERATION_MODE:-}"
+    if [[ -z "$V4_OPERATION_MODE" && -f "$PRIMARY_V12_MODE_FILE" ]]; then
+      V4_OPERATION_MODE="$(sed -n 's/^DISDEX_V12_V4_OPERATION_MODE=//p' "$PRIMARY_V12_MODE_FILE" | tail -n1)"
+    fi
+    V4_OPERATION_MODE="${V4_OPERATION_MODE:-CERTIFIED}"
+    [[ "$V4_OPERATION_MODE" == "CERTIFIED" || "$V4_OPERATION_MODE" == "CANARY" ]] || {
+      printf 'invalid V4 operation mode: %s\n' "$V4_OPERATION_MODE" >&2
+      return 1
+    }
     V4_PRIMARY_SHA="${DISDEX_V12_V4_PRIMARY_SHA:-}"
     if [[ -z "$V4_PRIMARY_SHA" && -f "$PRIMARY_V12_MODE_FILE" ]]; then
       V4_PRIMARY_SHA="$(sed -n 's/^DISDEX_V12_V4_PRIMARY_SHA=//p' "$PRIMARY_V12_MODE_FILE" | tail -n1)"
@@ -176,6 +185,7 @@ resolve_current() {
     MONITOR_RUNTIME_SHA="$V4_PRIMARY_SHA"
     MONITOR_RUNTIME_ROOT="$V4_PRIMARY_RELEASE"
   else
+    V4_OPERATION_MODE=""
     V4_PRIMARY_SHA=""
     V4_PRIMARY_RELEASE=""
     V4_CONTRACT_ENV_FILE=""
@@ -557,6 +567,11 @@ set_units() {
     V12_OPERATOR_RUNNER="V12_V4"
     V12_STATE_PATH="/var/lib/disdex/v12-v4/heartbeat.json"
     V12_HEARTBEAT_FILE="v12-v4.json"
+  elif [[ "$PRIMARY_V12_MODE" == "DISABLED" ]]; then
+    V12_UNIT=""
+    V12_OPERATOR_RUNNER=""
+    V12_STATE_PATH="/var/lib/disdex/v12-v4/heartbeat.json"
+    V12_HEARTBEAT_FILE="v12-v4.json"
   else
     V12_UNIT="disdex-v12-x1-all@${DEPLOYED_SHA}.service"
     V12_OPERATOR_RUNNER="V12_X1_ALL"
@@ -573,7 +588,8 @@ set_units() {
   V52_UNIT="disdex-v52-aster-only@${DEPLOYED_SHA}.service"
   MARGIN_UNIT="disdex-v12-v52-margin-guard@${DEPLOYED_SHA}.service"
   SHARED_RISK_UNIT="disdex-shared-crypto-risk@${DEPLOYED_SHA}.service"
-  V12_DROPIN_DIR="/etc/systemd/system/${V12_UNIT}.d"
+  V12_DROPIN_DIR=""
+  [[ -n "$V12_UNIT" ]] && V12_DROPIN_DIR="/etc/systemd/system/${V12_UNIT}.d"
   PENGU_DROPIN_DIR="/etc/systemd/system/${PENGU_UNIT}.d"
   Q102_DROPIN_DIR="/etc/systemd/system/${Q102_UNIT}.d"
   FET_DROPIN_DIR="/etc/systemd/system/${FET_UNIT}.d"
@@ -595,6 +611,7 @@ show_plan() {
   printf 'releaseMarker=%s\n' "$MARKER_SHA"
   printf 'primaryV12Mode=%s\n' "$PRIMARY_V12_MODE"
   printf 'v4PrimarySha=%s\n' "${V4_PRIMARY_SHA:-none}"
+  printf 'v4OperationMode=%s\n' "${V4_OPERATION_MODE:-none}"
   printf 'v4PrimaryRelease=%s\n' "${V4_PRIMARY_RELEASE:-none}"
   printf 'primaryV12ModeFile=%s\n' "$PRIMARY_V12_MODE_FILE"
   printf 'v12Unit=%s\n' "$V12_UNIT"
@@ -634,6 +651,7 @@ show_plan() {
 check_units() {
   local unit state load_state
   for unit in "$V12_UNIT" "$PENGU_UNIT" "$Q102_UNIT" "$FET_UNIT" "$HYPE_UNIT" "$V52_UNIT" "$MARGIN_UNIT" "$SHARED_RISK_UNIT" "$IDLE_UNIT"; do
+    [[ -n "$unit" ]] || continue
     load_state="$(systemctl show "$unit" -p LoadState --value 2>/dev/null || true)"
     state="$(systemctl show "$unit" -p ActiveState --value 2>/dev/null || true)"
     printf 'unit=%s loadState=%s activeState=%s\n' "$unit" "${load_state:-unknown}" "${state:-unknown}"
@@ -655,7 +673,7 @@ prepare_managed_unit_templates_for_apply() {
     install -o root -g root -m 0644 \
       "$V4_PRIMARY_RELEASE/deploy/systemd/disdex-v12-v4@.service" \
       /etc/systemd/system/disdex-v12-v4@.service
-  else
+  elif [[ "$PRIMARY_V12_MODE" == "LEGACY" ]]; then
     install -o root -g root -m 0644 \
       "$CURRENT_RELEASE/deploy/systemd/disdex-v12-x1-all@.service" \
       /etc/systemd/system/disdex-v12-x1-all@.service
@@ -768,6 +786,7 @@ write_v4_primary_runtime_artifacts() {
   }
   mode_content="DISDEX_PRIMARY_V12_RUNNER=V4
 DISDEX_V12_V4_PRIMARY_SHA=${V4_PRIMARY_SHA}
+DISDEX_V12_V4_OPERATION_MODE=${V4_OPERATION_MODE}
 DISDEX_V12_V4_PEER_SHA=${DEPLOYED_SHA}"
   env_content="DISDEX_RELEASE_SHA=${V4_PRIMARY_SHA}
 DISDEX_RUNTIME_SHA=${V4_PRIMARY_SHA}
@@ -817,7 +836,7 @@ DISDEX_IDLE_RESIDUAL_LONG_STATE_PATH=${IDLE_PRIORITY_STATE_ROOT}/residual-long-s
 DISDEX_IDLE_RESIDUAL_LONG_PARITY_CERT_PATH=${SHARED_ROOT}/idle-residual-long-parity-cert.json
 DISDEX_IDLE_RESIDUAL_LONG_MAX_SLIPPAGE_BPS=20
 V12_V4_LIVE_ACK=${V4_PRIMARY_SHA}
-V12_V4_OPERATION_MODE=CERTIFIED
+V12_V4_OPERATION_MODE=${V4_OPERATION_MODE}
 V12_V4_HEALTH_STATE_PATH=/var/lib/disdex/v12-v4/heartbeat.json
 V12_V4_EXECUTION_STORE_PATH=/var/lib/disdex/v12-v4/orders.json
 DISDEX_PENDING_EXPOSURE_REGISTRY_PATH=${PENDING_EXPOSURE_REGISTRY_PATH}
@@ -1228,6 +1247,7 @@ operator_activation_all_trading_ready() {
       --runner V12_V4 --activation-path "$V4_OPERATOR_ACTIVATION_PATH" >/dev/null 2>&1 || return 1
   fi
   for runner in "$V12_OPERATOR_RUNNER" PENGU_V8 QUALITY102_CAUSAL_V1 V52 FET_BRK48_RESIDUAL HYPE_TREND_LONG IDLE_PRIORITY_SHORT; do
+    [[ -n "$runner" ]] || continue
     [[ "$PRIMARY_V12_MODE" == "V4" && "$runner" == "V12_V4" ]] && continue
     gate="$peer_gate"
     release_root="$CURRENT_RELEASE"
@@ -1285,13 +1305,31 @@ persistently_mask_legacy_v12() {
   done
 }
 
+persistently_disable_v12() {
+  [[ "$PRIMARY_V12_MODE" == "DISABLED" ]] || return 0
+  local unit
+  {
+    systemctl list-unit-files 'disdex-v12-x1-all@*.service' --no-legend --no-pager 2>/dev/null | awk '{print $1}'
+    systemctl list-units --all --type=service --no-legend --no-pager 'disdex-v12-x1-all@*.service' 2>/dev/null | awk '{print $1}'
+    systemctl list-unit-files 'disdex-v12-v4@*.service' --no-legend --no-pager 2>/dev/null | awk '{print $1}'
+    systemctl list-units --all --type=service --no-legend --no-pager 'disdex-v12-v4@*.service' 2>/dev/null | awk '{print $1}'
+    systemctl list-unit-files 'disdex-v12-v4-canary@*.service' --no-legend --no-pager 2>/dev/null | awk '{print $1}'
+    systemctl list-units --all --type=service --no-legend --no-pager 'disdex-v12-v4-canary@*.service' 2>/dev/null | awk '{print $1}'
+  } | grep -E '^disdex-v12-(x1-all|v4|v4-canary)@[0-9a-f]{40}\.service$' | sort -u | while read -r unit; do
+    systemctl disable --now "$unit" >/dev/null 2>&1 || true
+    systemctl unmask --runtime "$unit" >/dev/null 2>&1 || true
+    systemctl mask "$unit" >/dev/null 2>&1 || true
+    printf 'DISDEX_V12_DISABLED_MASK unit=%s\n' "$unit"
+  done
+}
+
 apply_wiring() {
   require_root_for_apply
   assert_no_legacy_live_units
-  if [[ "$PRIMARY_V12_MODE" == "V4" ]]; then
+  if [[ "$PRIMARY_V12_MODE" == "V4" || "$PRIMARY_V12_MODE" == "DISABLED" ]]; then
     assert_v4_primary_singleton
     operator_activation_all_trading_ready || {
-      printf 'V4 full-LIVE or peer operator gate is not ready; wiring was not applied\n' >&2
+      printf 'V4 full-LIVE or limited peer operator gate is not ready; wiring was not applied\n' >&2
       return 1
     }
   fi
@@ -1493,6 +1531,7 @@ DISDEX_HEALTH_SNAPSHOT_RELEASE_ROOT=${MONITOR_RUNTIME_ROOT}
 DISDEX_HEALTH_SNAPSHOT_V12_EXPECTED_SHA=${V4_PRIMARY_SHA:-${DEPLOYED_SHA}}
 DISDEX_HEALTH_SNAPSHOT_V12_RELEASE_ROOT=${V4_PRIMARY_RELEASE:-${CURRENT_RELEASE}}
 DISDEX_HEALTH_SNAPSHOT_V12_MODE=${PRIMARY_V12_MODE}
+DISDEX_HEALTH_SNAPSHOT_V12_DISABLED_REASON=V12_V4_DISABLED_OR_LIMITED_PENDING_INDEPENDENT_VENUE_CERTIFICATION
 DISDEX_HEALTH_SNAPSHOT_PENGU_EXPECTED_SHA=${DEPLOYED_SHA}
 DISDEX_HEALTH_SNAPSHOT_PENGU_RELEASE_ROOT=${CURRENT_RELEASE}
 DISDEX_HEALTH_SNAPSHOT_V52_EXPECTED_SHA=${DEPLOYED_SHA}
@@ -1529,6 +1568,7 @@ DISDEX_WATCHDOG_RUNNER_ROOT=${MONITOR_RUNTIME_ROOT}
 DISDEX_WATCHDOG_V12_EXPECTED_SHA=${V4_PRIMARY_SHA:-${DEPLOYED_SHA}}
 DISDEX_WATCHDOG_V12_RELEASE_ROOT=${V4_PRIMARY_RELEASE:-${CURRENT_RELEASE}}
 DISDEX_WATCHDOG_V12_MODE=${PRIMARY_V12_MODE}
+DISDEX_WATCHDOG_V12_DISABLED_REASON=V12_V4_DISABLED_OR_LIMITED_PENDING_INDEPENDENT_VENUE_CERTIFICATION
 DISDEX_WATCHDOG_PENGU_EXPECTED_SHA=${DEPLOYED_SHA}
 DISDEX_WATCHDOG_PENGU_RELEASE_ROOT=${CURRENT_RELEASE}
 DISDEX_WATCHDOG_V52_EXPECTED_SHA=${DEPLOYED_SHA}
@@ -1676,13 +1716,13 @@ RestartSec=30s
 EnvironmentFile=${V4_CONTRACT_ENV_FILE}
 Environment=DISDEX_RELEASE_SHA=${V4_PRIMARY_SHA}
 Environment=V12_V4_LIVE_ACK=${V4_PRIMARY_SHA}
-Environment=V12_V4_OPERATION_MODE=CERTIFIED
+Environment=V12_V4_OPERATION_MODE=${V4_OPERATION_MODE}
 Environment=DISDEX_TRADE_FILL_NOTIFICATION_ENABLED=true
 Environment=DISDEX_TRADE_FILL_NOTIFICATION_MODE=live
 Environment=DISDEX_TRADE_FILL_NOTIFICATION_SPOOL_PATH=${SHARED_ROOT}/trade-fill-notifications/inbox.jsonl
 Environment=DISDEX_TRADE_FILL_STRATEGY_ID=V12_V4
 Environment=V12_V4_HEALTH_STATE_PATH=/var/lib/disdex/v12-v4/heartbeat.json"
-  else
+  elif [[ "$PRIMARY_V12_MODE" == "LEGACY" ]]; then
     write_atomic "${V12_DROPIN_DIR}/zzzzzzzzzzzz-current-release-contract.conf" "[Unit]
 StartLimitIntervalSec=300s
 StartLimitBurst=3
@@ -1878,6 +1918,15 @@ ReadWritePaths=${IDLE_PRIORITY_STATE_ROOT} ${SHARED_ROOT}"
     systemctl disable --now disdex-v12-three-hour-health-check.timer || true
     systemctl stop disdex-v12-three-hour-health-check.service || true
     printf 'DISDEX_V12_V4_LEGACY_RECOVERY_AUTOMATION_DISABLED\n'
+  elif [[ "$PRIMARY_V12_MODE" == "DISABLED" ]]; then
+    persistently_disable_v12
+    systemctl disable --now disdex-v12-kill-switch-auto-repair.path || true
+    systemctl stop disdex-v12-kill-switch-auto-repair.service || true
+    systemctl disable --now disdex-runner-position-recovery.timer || true
+    systemctl stop disdex-runner-position-recovery.service || true
+    systemctl disable --now disdex-v12-three-hour-health-check.timer || true
+    systemctl stop disdex-v12-three-hour-health-check.service || true
+    printf 'DISDEX_V12_DISABLED_RECOVERY_AUTOMATION_DISABLED\n'
   fi
   retire_stale_release_enabled_units
   reset_stale_release_failed_units
@@ -1908,16 +1957,26 @@ ReadWritePaths=${IDLE_PRIORITY_STATE_ROOT} ${SHARED_ROOT}"
         ensure_trading_unit_running "$unit"
         wait_aster_rate_budget_quiet "after-${unit}"
       done
-      wait_aster_rate_budget_quiet "before-${V12_UNIT}"
-      ensure_trading_unit_running "$V12_UNIT"
+      if [[ -n "$V12_UNIT" ]]; then
+        wait_aster_rate_budget_quiet "before-${V12_UNIT}"
+        ensure_trading_unit_running "$V12_UNIT"
+      fi
       systemctl enable --now disdex-runner-watchdog.timer
       if [[ "$PRIMARY_V12_MODE" == "LEGACY" ]]; then
         systemctl enable --now disdex-v12-kill-switch-auto-repair.path
         systemctl enable --now disdex-runner-position-recovery.timer
         ensure_monitor_timer_active "disdex-runner-position-recovery.timer"
         systemctl enable --now disdex-v12-three-hour-health-check.timer
-      else
+      elif [[ "$PRIMARY_V12_MODE" == "V4" ]]; then
         persistently_mask_legacy_v12
+        systemctl disable --now disdex-v12-kill-switch-auto-repair.path || true
+        systemctl stop disdex-v12-kill-switch-auto-repair.service || true
+        systemctl disable --now disdex-runner-position-recovery.timer || true
+        systemctl stop disdex-runner-position-recovery.service || true
+        systemctl disable --now disdex-v12-three-hour-health-check.timer || true
+        systemctl stop disdex-v12-three-hour-health-check.service || true
+      else
+        persistently_disable_v12
         systemctl disable --now disdex-v12-kill-switch-auto-repair.path || true
         systemctl stop disdex-v12-kill-switch-auto-repair.service || true
         systemctl disable --now disdex-runner-position-recovery.timer || true
@@ -2094,6 +2153,11 @@ self_test() {
   grep -q 'DISDEX_WATCHDOG_IDLE_EXPECTED_SHA=${DEPLOYED_SHA}' "$0"
   grep -q 'DISDEX_WATCHDOG_IDLE_SERVICE_UNIT=${IDLE_UNIT}' "$0"
   grep -q 'V12_OPERATOR_RUNNER="V12_V4"' "$0"
+  grep -Fq 'V4_OPERATION_MODE="${DISDEX_V12_V4_OPERATION_MODE:-}"' "$0"
+  grep -Fq 'DISDEX_V12_V4_OPERATION_MODE=${V4_OPERATION_MODE}' "$0"
+  grep -Fq 'persistently_disable_v12' "$0"
+  grep -Fq 'DISDEX_HEALTH_SNAPSHOT_V12_DISABLED_REASON=' "$0"
+  grep -Fq 'DISDEX_WATCHDOG_V12_DISABLED_REASON=' "$0"
   grep -q 'DISDEX_HEALTH_SNAPSHOT_V12_MODE=${PRIMARY_V12_MODE}' "$0"
   grep -q 'DISDEX_WATCHDOG_V12_MODE=${PRIMARY_V12_MODE}' "$0"
   grep -q 'DISDEX_V12_V4_LEGACY_PERSISTENT_MASK' "$0"

@@ -13,6 +13,9 @@ on:
       - 'scripts/disdex_v96_v52_margin_guard_runtime.py'
       - 'scripts/disdex_v96_v52_margin_guard_selftest.py'
       - 'scripts/disdex_v52_margin_aware_live_engine.py'
+      - 'tests/v12-v4-monitor-coherence.test.ts'
+      - 'tests/ops-v4-runtime-wiring-contract.test.mjs'
+      - 'tests/operator_activation_hardening.test.ts'
       - '.github/workflows/disdex-vps-ops-ci.yml'
   workflow_dispatch:
 
@@ -103,7 +106,10 @@ jobs:
           grep -Fq 'MaxRetentionSec=14day' ops/systemd/90-disdex-storage-guard.conf
 
           scripts/ops/root/disdex-current-runtime-wiring --self-test
+          bash -n scripts/ops/root/disdex-current-runtime-wiring
+          bash -n scripts/ops/root/disdex-current-runtime-coherence-guard
           python3 -m unittest tests/test_runtime_wiring_script.py tests/test_vps_ops_ci_contract.py
+          node --test --test-isolation=none tests/v12-v4-monitor-coherence.test.ts tests/ops-v4-runtime-wiring-contract.test.mjs tests/operator_activation_hardening.test.ts
           node --test --test-isolation=none tests/watchdog-release-lineage.test.ts
           grep -Fq 'disdex-v96-live.service' scripts/ops/root/disdex-current-runtime-wiring
           grep -Fq 'disdex-v96-live.service' scripts/ops/root/disdex-runner-watchdog-current.mjs

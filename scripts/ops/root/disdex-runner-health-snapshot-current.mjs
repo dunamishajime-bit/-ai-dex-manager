@@ -33,7 +33,7 @@ function runnerPin(expectedShaEnv, releaseRootEnv) {
 
 const V12_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_V12_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_V12_RELEASE_ROOT");
 const V12_MODE = String(process.env.DISDEX_HEALTH_SNAPSHOT_V12_MODE || "LEGACY").trim().toUpperCase();
-if (!["LEGACY","V4"].includes(V12_MODE)) throw new Error("V12 health snapshot mode is invalid");
+if (!["LEGACY","V4","DISABLED"].includes(V12_MODE)) throw new Error("V12 health snapshot mode is invalid");
 const PENGU_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_PENGU_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_PENGU_RELEASE_ROOT");
 const V52_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_V52_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_V52_RELEASE_ROOT");
 const Q102_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_Q102_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_Q102_RELEASE_ROOT");
@@ -41,7 +41,19 @@ const FET_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_FET_EXPECTED_SHA", "DISDEX_HEA
 const HYPE_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_HYPE_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_HYPE_RELEASE_ROOT");
 const IDLE_PIN = runnerPin("DISDEX_HEALTH_SNAPSHOT_IDLE_EXPECTED_SHA", "DISDEX_HEALTH_SNAPSHOT_IDLE_RELEASE_ROOT");
 
-const V12_RUNNER = V12_MODE === "V4" ? {
+const V12_RUNNER = V12_MODE === "DISABLED" ? {
+    key: "V12_V4",
+    runnerId: "V12_V4",
+    disabled: true,
+    disabledReason: String(process.env.DISDEX_HEALTH_SNAPSHOT_V12_DISABLED_REASON || "V12 V4 is intentionally disabled pending independent venue certification").trim(),
+    unit: "",
+    expectedSha: V12_PIN.expectedSha,
+    releaseRoot: V12_PIN.releaseRoot,
+    script: "scripts/v12-v4-production-runner.ts",
+    statePath: configuredPath("DISDEX_HEALTH_SNAPSHOT_V12_STATE_PATH", "/var/lib/disdex/v12-v4/heartbeat.json"),
+    heartbeatFile: "v12-v4.json",
+    maxStateAgeMs: 0,
+} : V12_MODE === "V4" ? {
     key: "V12_V4",
     runnerId: "V12_V4",
     unit: `disdex-v12-v4@${V12_PIN.expectedSha}.service`,
@@ -337,7 +349,7 @@ function stateIdentityMatches(runner, state) {
         return state?.schema === "disdex-v12-v4-runner-heartbeat/v1"
             && strategyId === "V12_V4"
             && String(state?.releaseSha || state?.runtimeSha || "").toLowerCase() === runner.expectedSha
-            && String(state?.operationMode || "").toUpperCase() === "CERTIFIED";
+            && ["CERTIFIED", "CANARY"].includes(String(state?.operationMode || "").toUpperCase());
     }
     return strategyId === runner.runnerId
         || (runner.key === "V12_X1_ALL" && strategyId === "V12_X1.00_ALL")
@@ -348,6 +360,45 @@ function stateIdentityMatches(runner, state) {
 }
 
 async function buildHeartbeat(runner, now, globalBlockReason) {
+    if (runner.disabled) {
+        const reason = runner.disabledReason || `${runner.key} is intentionally disabled`;
+        const heartbeat = {
+            schema: "disdex-runner-heartbeat/v1",
+            runnerId: runner.runnerId,
+            serviceUnit: null,
+            runtimeSha: runner.expectedSha,
+            expectedSha: runner.expectedSha,
+            workingDirectory: runner.releaseRoot,
+            mode: "DISABLED",
+            liveEnabled: false,
+            safetyState: "DISABLED",
+            orderPermission: "DENIED_DISABLED",
+            newOrdersAllowed: false,
+            healthReason: reason,
+            heartbeatAt: now,
+            lastTickAt: now,
+            mainPid: 0,
+            nRestarts: 0,
+            serviceResult: "disabled",
+        };
+        return {
+            heartbeat,
+            diagnostics: {
+                active: false,
+                disabled: true,
+                processPresent: false,
+                cwdCurrent: false,
+                commandCurrent: false,
+                execCurrent: false,
+                stateFresh: true,
+                strategyOk: false,
+                orderPermission: "DENIED_DISABLED",
+                mainPid: 0,
+                nRestarts: 0,
+                serviceResult: "disabled",
+            },
+        };
+    }
     let state;
     let stateError = "";
     try {
@@ -394,9 +445,13 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
         runtimeSha: runner.expectedSha,
         expectedSha: runner.expectedSha,
         workingDirectory: runner.releaseRoot,
-        mode: "LIVE",
+        mode: String(state?.operationMode || "LIVE").toUpperCase() === "CANARY" ? "CANARY" : "LIVE",
         liveEnabled: serviceActive,
         safetyState: blockedReason ? "BLOCKED" : "HEALTHY",
+        formalCertification: String(state?.operationMode || "").toUpperCase() === "CERTIFIED",
+        limitedLive: String(state?.operationMode || "").toUpperCase() === "CANARY",
+        orderPermission: blockedReason ? "DENIED_BLOCKED" : "ALLOWED",
+        newOrdersAllowed: !blockedReason,
         heartbeatAt: now,
         lastTickAt: updatedAt > 0 ? updatedAt : now,
         mainPid: Number(service?.pid || 0),
@@ -424,18 +479,24 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
     if (blockedReason) heartbeat.healthReason = blockedReason;
     return {
         heartbeat,
-        diagnostics: { active: serviceActive, processPresent, cwdCurrent, commandCurrent, execCurrent, stateFresh, strategyOk: stateIdentityMatches(runner, state), mainPid: Number(service?.pid || 0), nRestarts: Number(service?.nRestarts || 0), serviceResult: String(service?.result || "") },
+        diagnostics: { active: serviceActive, disabled: false, processPresent, cwdCurrent, commandCurrent, execCurrent, stateFresh, strategyOk: stateIdentityMatches(runner, state), orderPermission: blockedReason ? "DENIED_BLOCKED" : "ALLOWED", mainPid: Number(service?.pid || 0), nRestarts: Number(service?.nRestarts || 0), serviceResult: String(service?.result || "") },
     };
 }
 
 function summarizeOverallSafety(globalReasons, results) {
     const reasons = [...globalReasons];
     for (const result of results) {
-        if (result.safetyState !== "HEALTHY") reasons.push(`${result.runner} is ${result.safetyState}`);
+        if (result.safetyState === "BLOCKED") reasons.push(`${result.runner} is BLOCKED`);
     }
     const blockReasons = [...new Set(reasons.filter(Boolean))];
+    const disabledRunners = results.filter((result) => result.safetyState === "DISABLED").map((result) => result.runner);
+    const enabledRunnerBlocks = results.filter((result) => result.safetyState === "BLOCKED").map((result) => result.runner);
     return {
         blocked: blockReasons.length > 0,
+        globalBlocked: globalReasons.length > 0,
+        globalOrdersAllowed: globalReasons.length === 0,
+        disabledRunners,
+        enabledRunnerBlocks,
         blockReasons,
     };
 }
@@ -456,10 +517,23 @@ async function main() {
         results.push({ runner: runner.key, safetyState: heartbeat.safetyState, stateAt: heartbeat.lastTickAt, ...diagnostics });
     }
     const overall = summarizeOverallSafety(globalReasons, results);
+    const runnerOrderPermissions = Object.fromEntries(results.map((result) => [
+        result.runner,
+        overall.globalOrdersAllowed && result.safetyState === "HEALTHY" ? "ALLOWED" : result.safetyState === "DISABLED" ? "DENIED_DISABLED" : "DENIED_BLOCKED",
+    ]));
+    const overallSafetyState = overall.globalBlocked
+        ? "BLOCKED"
+        : overall.enabledRunnerBlocks.length > 0
+            ? "PARTIAL"
+            : "HEALTHY";
     console.log(JSON.stringify({
         status: "DISDEX_RUNNER_HEALTH_SNAPSHOT_PASS",
-        overallSafetyState: overall.blocked ? "BLOCKED" : "HEALTHY",
-        newOrdersAllowed: !overall.blocked,
+        overallSafetyState,
+        newOrdersAllowed: overall.globalOrdersAllowed,
+        globalOrdersAllowed: overall.globalOrdersAllowed,
+        runnerOrderPermissions,
+        disabledRunners: overall.disabledRunners,
+        enabledRunnerBlocks: overall.enabledRunnerBlocks,
         blockReasons: overall.blockReasons,
         sharedKillSwitchActive: Boolean(killReason),
         sharedRisk,
@@ -480,6 +554,16 @@ function selfTest() {
     if (!blockedDependency.blocked) throw new Error("dependency block did not block overall safety");
     const healthy = summarizeOverallSafety([], [{ runner: "V12_X1_ALL", safetyState: "HEALTHY" }]);
     if (healthy.blocked || healthy.blockReasons.length !== 0) throw new Error("healthy snapshot was blocked");
+    const disabledPeer = summarizeOverallSafety([], [
+        { runner: "V12_V4", safetyState: "DISABLED" },
+        { runner: "QUALITY102_CAUSAL_V1", safetyState: "HEALTHY" },
+    ]);
+    if (disabledPeer.blocked || disabledPeer.globalOrdersAllowed !== true || disabledPeer.disabledRunners[0] !== "V12_V4") throw new Error("disabled V12 blocked healthy peers");
+    const blockedPeer = summarizeOverallSafety([], [
+        { runner: "V12_V4", safetyState: "DISABLED" },
+        { runner: "QUALITY102_CAUSAL_V1", safetyState: "BLOCKED" },
+    ]);
+    if (!blockedPeer.blocked || blockedPeer.globalOrdersAllowed !== true || blockedPeer.enabledRunnerBlocks[0] !== "QUALITY102_CAUSAL_V1") throw new Error("peer block was not scoped");
     console.log("DISDEX_RUNNER_HEALTH_SNAPSHOT_SELFTEST_PASS");
 }
 

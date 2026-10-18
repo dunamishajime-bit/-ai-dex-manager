@@ -72,7 +72,7 @@ resolve_current() {
   if [[ -f "$PRIMARY_V12_MODE_FILE" ]]; then
     PRIMARY_V12_MODE="$(sed -n 's/^DISDEX_PRIMARY_V12_RUNNER=//p' "$PRIMARY_V12_MODE_FILE" | tail -n1)"
   fi
-  [[ "$PRIMARY_V12_MODE" == "LEGACY" || "$PRIMARY_V12_MODE" == "V4" ]] || {
+  [[ "$PRIMARY_V12_MODE" == "LEGACY" || "$PRIMARY_V12_MODE" == "V4" || "$PRIMARY_V12_MODE" == "DISABLED" ]] || {
     echo "invalid primary V12 mode" >&2
     return 1
   }
@@ -91,6 +91,15 @@ resolve_current() {
     MONITOR_RUNTIME_ROOT="$V4_PRIMARY_RELEASE"
     V12_EXPECTED_UNIT="disdex-v12-v4@$V4_PRIMARY_SHA.service"
     V12_OPERATOR_RUNNER="V12_V4"
+  elif [[ "$PRIMARY_V12_MODE" == "DISABLED" ]]; then
+    V4_PRIMARY_SHA=""
+    V4_PRIMARY_RELEASE=""
+    MONITOR_RUNTIME_SHA="$DEPLOYED_SHA"
+    MONITOR_RUNTIME_ROOT="$CURRENT_RELEASE"
+    FAMILIES[0]=""
+    HEARTBEATS[0]=""
+    V12_EXPECTED_UNIT=""
+    V12_OPERATOR_RUNNER=""
   else
     V4_PRIMARY_SHA=""
     V4_PRIMARY_RELEASE=""
@@ -112,6 +121,7 @@ build_current_units() {
   local index family sha root unit
   for index in "${!FAMILIES[@]}"; do
     family="${FAMILIES[$index]}"
+    [[ -n "$family" ]] || continue
     sha="$DEPLOYED_SHA"
     root="$CURRENT_RELEASE"
     if [[ "$PRIMARY_V12_MODE" == "V4" && "$index" -eq 0 ]]; then
@@ -241,6 +251,11 @@ monitor_pins_current() {
     grep -Fxq "ExecStartPre=/usr/bin/test -f $V4_PRIMARY_RELEASE/.disdex-release-sha" "$ALERT_DROPIN" || return 1
     grep -Fxq "ExecStartPre=/usr/bin/grep -Fxq $V4_PRIMARY_SHA $V4_PRIMARY_RELEASE/.disdex-release-sha" "$ALERT_DROPIN" || return 1
     grep -Fxq "DISDEX_HEALTH_SNAPSHOT_V12_STATE_PATH=/var/lib/disdex/v12-v4/heartbeat.json" "$HEALTH_ENV" || return 1
+  elif [[ "$PRIMARY_V12_MODE" == "DISABLED" ]]; then
+    grep -Fxq "DISDEX_HEALTH_SNAPSHOT_V12_RELEASE_ROOT=$CURRENT_RELEASE" "$HEALTH_ENV" || return 1
+    grep -Fxq "DISDEX_WATCHDOG_V12_RELEASE_ROOT=$CURRENT_RELEASE" "$WATCHDOG_ENV" || return 1
+    grep -Fxq "DISDEX_WATCHDOG_V12_OPERATOR_ACTIVATION_PATH=$V4_OPERATOR_ACTIVATION_PATH" "$WATCHDOG_ENV" || return 1
+    grep -Fxq "DISDEX_HEALTH_SNAPSHOT_V12_STATE_PATH=/var/lib/disdex/v12-v4/heartbeat.json" "$HEALTH_ENV" || return 1
   else
     grep -Fxq "Environment=DISDEX_ALERT_V12_EXPECTED_SHA=$DEPLOYED_SHA" "$ALERT_DROPIN" || return 1
   fi
@@ -281,6 +296,8 @@ operator_ready() {
     gate="$V4_PRIMARY_RELEASE/scripts/ops/root/disdex-live-operator-activation-gate.mjs"
     [[ -f "$gate" ]] || return 1
     /usr/bin/node "$gate" --release-root "$V4_PRIMARY_RELEASE" --sha "$V4_PRIMARY_SHA" --runner V12_V4 --activation-path "$V4_OPERATOR_ACTIVATION_PATH" >/dev/null 2>&1 || return 1
+  elif [[ "$PRIMARY_V12_MODE" == "DISABLED" ]]; then
+    :
   else
     gate="$CURRENT_RELEASE/scripts/ops/root/disdex-live-operator-activation-gate.mjs"
     [[ -f "$gate" ]] || return 1
@@ -312,7 +329,7 @@ support_runtime_current() {
 }
 
 legacy_v12_persistently_retired() {
-  [[ "$PRIMARY_V12_MODE" == "V4" ]] || return 0
+  [[ "$PRIMARY_V12_MODE" == "V4" || "$PRIMARY_V12_MODE" == "DISABLED" ]] || return 0
   local unit active enabled previous_target previous_sha
   {
     printf 'disdex-v12-x1-all@%s.service\n' "$DEPLOYED_SHA"

@@ -5,7 +5,18 @@ import { pathToFileURL } from "node:url";
 const SHA = /^[0-9a-f]{40}$/;
 const SCHEMA = "disdex-live-operator-activation/v1";
 const ACK = "I_ACK_REAL_MONEY_LIVE_ACTIVATION";
+const LIMITED_OVERLAY_ACK = "I_ACK_LIMITED_OVERLAY_LIVE_WITH_EXISTING_EVIDENCE";
 const DEFAULT_PATH = "/var/lib/disdex/shared/operator-activation/current.json";
+export const LIMITED_OVERLAY_RUNNERS = Object.freeze([
+  "QUALITY102_CAUSAL_V1",
+  "HYPE_TREND_LONG",
+  "IDLE_PRIORITY_SHORT",
+]);
+export const LIMITED_OVERLAY_UNCHANGED_PEERS = Object.freeze([
+  "PENGU_V8",
+  "V52",
+  "FET_BRK48_RESIDUAL",
+]);
 
 export const TRADING_RUNNERS = Object.freeze([
   "V12_X1_ALL",
@@ -60,11 +71,54 @@ export function validateOperatorActivationArtifact(artifact, input) {
   if (artifact.target !== input.target) {
     return { allowed: false, reason: "OPERATOR_LIVE_ACTIVATION_REQUIRED:TARGET_MISMATCH" };
   }
-  if (artifact.ordersEnabled !== true || artifact.operatorAcknowledgement !== ACK) {
+  if (artifact.ordersEnabled !== true) {
     return { allowed: false, reason: "OPERATOR_LIVE_ACTIVATION_REQUIRED:ACK_MISSING" };
   }
   if (!Array.isArray(artifact.approvedRunners) || !artifact.approvedRunners.includes(input.runner)) {
     return { allowed: false, reason: `OPERATOR_LIVE_ACTIVATION_REQUIRED:RUNNER_NOT_APPROVED:${input.runner}` };
+  }
+  const activationClass = String(artifact.activationClass || "FULL_LIVE").trim().toUpperCase();
+  if (activationClass === "LIMITED_OVERLAY_LIVE") {
+    if (input.runner === "V12_X1_ALL") {
+      return { allowed: false, reason: "OPERATOR_LIVE_ACTIVATION_REQUIRED:V12_DISABLED_FOR_LIMITED_OVERLAY" };
+    }
+    if (input.runner === "V12_V4" && artifact.v4CanaryAuthorized !== true) {
+      return { allowed: false, reason: "OPERATOR_LIVE_ACTIVATION_REQUIRED:V4_CANARY_AUTHORIZATION_REQUIRED" };
+    }
+    const limitedRunners = Array.isArray(artifact.limitedOverlayRunners) ? artifact.limitedOverlayRunners : [];
+    const unchangedPeers = Array.isArray(artifact.unchangedPeerRunners) ? artifact.unchangedPeerRunners : [];
+    const isV4Canary = input.runner === "V12_V4" && artifact.v4CanaryAuthorized === true;
+    if (!isV4Canary && !LIMITED_OVERLAY_RUNNERS.includes(input.runner) && !LIMITED_OVERLAY_UNCHANGED_PEERS.includes(input.runner)) {
+      return { allowed: false, reason: `OPERATOR_LIVE_ACTIVATION_REQUIRED:LIMITED_RUNNER_SCOPE_INVALID:${input.runner}` };
+    }
+    if (LIMITED_OVERLAY_RUNNERS.includes(input.runner) && !limitedRunners.includes(input.runner)) {
+      return { allowed: false, reason: `OPERATOR_LIVE_ACTIVATION_REQUIRED:LIMITED_OVERLAY_NOT_APPROVED:${input.runner}` };
+    }
+    if (LIMITED_OVERLAY_UNCHANGED_PEERS.includes(input.runner) && !unchangedPeers.includes(input.runner)) {
+      return { allowed: false, reason: `OPERATOR_LIVE_ACTIVATION_REQUIRED:UNCHANGED_PEER_NOT_APPROVED:${input.runner}` };
+    }
+    if (artifact.operatorAcknowledgement !== LIMITED_OVERLAY_ACK) {
+      return { allowed: false, reason: "OPERATOR_LIVE_ACTIVATION_REQUIRED:LIMITED_ACK_MISSING" };
+    }
+    if (artifact.existingEvidenceBaseline !== true
+      || artifact.formalCertification !== false
+      || artifact.venueLifecycleCertified !== false
+      || artifact.naturalSignalsOnly !== true
+      || artifact.stopReadbackRequired !== true
+      || artifact.testnetLifecycleRequired !== false
+      || artifact.existingStrategyGatesOnly !== true) {
+      return { allowed: false, reason: "OPERATOR_LIVE_ACTIVATION_REQUIRED:LIMITED_EVIDENCE_CONTRACT_INVALID" };
+    }
+    const initialPositionLimit = Number(artifact.initialPositionLimit);
+    if (!Number.isInteger(initialPositionLimit) || initialPositionLimit !== 1) {
+      return { allowed: false, reason: "OPERATOR_LIVE_ACTIVATION_REQUIRED:LIMITED_POSITION_LIMIT_INVALID" };
+    }
+    const evidence = artifact.evidence;
+    if (!evidence || evidence.ciRunId !== "39093213253" || evidence.signedAsterReadOnly !== true || evidence.positionsReconciled === false || evidence.pendingExposureReconciled === false || evidence.sharedRiskHealthy !== true || evidence.marginGuardHealthy !== true) {
+      return { allowed: false, reason: "OPERATOR_LIVE_ACTIVATION_REQUIRED:LIMITED_EXISTING_EVIDENCE_INVALID" };
+    }
+  } else if (activationClass !== "FULL_LIVE" || artifact.operatorAcknowledgement !== ACK) {
+    return { allowed: false, reason: "OPERATOR_LIVE_ACTIVATION_REQUIRED:ACK_MISSING" };
   }
   const approvedAt = Date.parse(String(artifact.approvedAt || ""));
   if (!Number.isFinite(approvedAt) || approvedAt <= 0 || approvedAt > Date.now() + 300_000) {
@@ -160,6 +214,19 @@ export async function evaluateAllOperatorActivationGates(input) {
   };
 }
 
+export async function evaluateLimitedOverlayActivationGates(input) {
+  const runners = [...LIMITED_OVERLAY_RUNNERS, ...LIMITED_OVERLAY_UNCHANGED_PEERS];
+  const results = [];
+  for (const runner of runners) {
+    const result = await evaluateOperatorActivationGate({ ...input, runner });
+    results.push({ runner, ...result });
+    if (!result.allowed) {
+      return { allowed: false, reason: result.reason || "OPERATOR_LIVE_ACTIVATION_REQUIRED", blockedRunner: runner, results };
+    }
+  }
+  return { allowed: true, reason: "OPERATOR_LIMITED_OVERLAY_ACTIVATION_CONFIRMED", results };
+}
+
 function arg(name) {
   const index = process.argv.indexOf(name);
   return index >= 0 ? process.argv[index + 1] : undefined;
@@ -195,6 +262,40 @@ function selfTest() {
   if (validateOperatorActivationArtifact({ ...artifact, approvedSha: "b".repeat(40) }, { sha, target: "target", runner: "V12_X1_ALL" }).allowed) {
     throw new Error("SHA_SCOPE_SELFTEST_FAILED");
   }
+  const limitedArtifact = {
+    ...artifact,
+    activationClass: "LIMITED_OVERLAY_LIVE",
+    approvedRunners: ["V12_V4", "QUALITY102_CAUSAL_V1", "HYPE_TREND_LONG", "IDLE_PRIORITY_SHORT", ...LIMITED_OVERLAY_UNCHANGED_PEERS],
+    limitedOverlayRunners: [...LIMITED_OVERLAY_RUNNERS],
+    unchangedPeerRunners: [...LIMITED_OVERLAY_UNCHANGED_PEERS],
+    operatorAcknowledgement: LIMITED_OVERLAY_ACK,
+    existingEvidenceBaseline: true,
+    formalCertification: false,
+    venueLifecycleCertified: false,
+    naturalSignalsOnly: true,
+    stopReadbackRequired: true,
+    testnetLifecycleRequired: false,
+    existingStrategyGatesOnly: true,
+    initialPositionLimit: 1,
+    evidence: {
+      ciRunId: "39093213253",
+      signedAsterReadOnly: true,
+      positionsReconciled: true,
+      pendingExposureReconciled: true,
+      sharedRiskHealthy: true,
+      marginGuardHealthy: true,
+    },
+    v4CanaryAuthorized: true,
+  };
+  if (!validateOperatorActivationArtifact(limitedArtifact, { sha, target: "target", runner: "QUALITY102_CAUSAL_V1" }).allowed) {
+    throw new Error("LIMITED_OVERLAY_ARTIFACT_SELFTEST_FAILED");
+  }
+  if (!validateOperatorActivationArtifact(limitedArtifact, { sha, target: "target", runner: "V12_V4" }).allowed) {
+    throw new Error("LIMITED_OVERLAY_V4_CANARY_SELFTEST_FAILED");
+  }
+  if (validateOperatorActivationArtifact({ ...limitedArtifact, evidence: { ...limitedArtifact.evidence, signedAsterReadOnly: false } }, { sha, target: "target", runner: "QUALITY102_CAUSAL_V1" }).allowed) {
+    throw new Error("LIMITED_OVERLAY_EVIDENCE_SELFTEST_FAILED");
+  }
   console.log("DISDEX_LIVE_OPERATOR_ACTIVATION_GATE_SELFTEST_PASS");
 }
 
@@ -204,7 +305,9 @@ async function cliMain() {
     sha: arg("--sha"),
     activationPath: arg("--activation-path") || DEFAULT_PATH,
   };
-  const result = process.argv.includes("--all")
+  const result = process.argv.includes("--limited-overlay")
+    ? await evaluateLimitedOverlayActivationGates(common)
+    : process.argv.includes("--all")
     ? await evaluateAllOperatorActivationGates(common)
     : await evaluateOperatorActivationGate({
         ...common,
