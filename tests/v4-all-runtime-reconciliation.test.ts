@@ -116,3 +116,16 @@ test("V4 wiring performs official flat execution-ledger lineage migration before
   assert.match(wiring, /V4_FLAT_LINEAGE_MIGRATION_AFTER_SIGNED_RECONCILIATION/);
   assert.match(wiring, /V12_V4_EXECUTION_STORE_PATH/);
 });
+
+test("limited overlay wiring treats an explicitly disabled flat V52 peer as intentional", () => {
+  assert.match(wiring, /v52_is_intentionally_disabled_flat\(\) \{/);
+  assert.match(wiring, /DISABLED_PEER_NOT_FLAT/);
+  assert.match(wiring, /\[\[ \"\$unit\" == \"\$V52_UNIT\" \]\] && v52_is_intentionally_disabled_flat/);
+  assert.match(wiring, /DISDEX_TRADING_UNIT_DISABLED_INTENTIONAL/);
+});
+
+test("limited overlay wiring does not pretend FET core preemption is certified", () => {
+  assert.match(wiring, /limited_overlay_scope_without_v52_preemption\(\) \{/);
+  assert.match(wiring, /fet_core_preemption_ready=\"false\"/);
+  assert.match(wiring, /FET_BRK48_CORE_PREEMPTION_READY=\$\{fet_core_preemption_ready\}/);
+});

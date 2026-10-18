@@ -1124,6 +1124,40 @@ ensure_monitor_timer_active() {
   return 1
 }
 
+v52_is_intentionally_disabled_flat() {
+  local state_path=/var/lib/disdex/v52-aster-only/runner-live.json
+  # Any exposed position/pending state is DISABLED_PEER_NOT_FLAT and must not
+  # be treated as a harmless limited-scope peer.
+  [[ -f "$state_path" && ! -L "$state_path" ]] || return 1
+  /usr/bin/jq -e '
+    (.strategyId == "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96") and
+    (.mode == "DISABLED") and
+    (.status == "intentional-stop") and
+    (.ordersAllowed == false) and
+    (.newOrdersAllowed == false) and
+    (.orderEnabled == false) and
+    ((.positions // {}) | length == 0) and
+    ((.pending // null) == null) and
+    ((.manualReview // null) == null)
+  ' "$state_path" >/dev/null
+}
+
+limited_overlay_scope_without_v52_preemption() {
+  [[ "$PRIMARY_V12_MODE" == "V4" ]] || return 1
+  [[ -f "$OPERATOR_ACTIVATION_PATH" && ! -L "$OPERATOR_ACTIVATION_PATH" ]] || return 1
+  /usr/bin/jq -e --arg sha "$DEPLOYED_SHA" '
+    (.approvedSha == $sha) and
+    (.activationClass == "LIMITED_OVERLAY_LIVE") and
+    (.ordersEnabled == true) and
+    (.v4CanaryAuthorized == true) and
+    ((.unchangedPeerRunners // []) | index("V52") != null) and
+    ((.unchangedPeerRunners // []) | index("FET_BRK48_RESIDUAL") != null) and
+    (.formalCertification == false) and
+    (.venueLifecycleCertified == false)
+  ' "$OPERATOR_ACTIVATION_PATH" >/dev/null || return 1
+  v52_is_intentionally_disabled_flat
+}
+
 ensure_trading_unit_running() {
   local unit="$1" load_state active_state sub_state attempt
   load_state="$(systemctl show "$unit" -p LoadState --value 2>/dev/null || true)"
@@ -1131,6 +1165,14 @@ ensure_trading_unit_running() {
     printf 'required trading unit is not loaded: %s\n' "$unit" >&2
     return 1
   }
+  # Limited Overlay LIVE deliberately leaves the unchanged V52 peer disabled.
+  # Its flat state is still attested by V4; starting the unit here would turn a
+  # safe disabled peer into an unauthorised full-V52 activation attempt.
+  if [[ "$unit" == "$V52_UNIT" ]] && v52_is_intentionally_disabled_flat && limited_overlay_scope_without_v52_preemption; then
+    systemctl disable --now "$unit" >/dev/null 2>&1 || true
+    printf 'DISDEX_TRADING_UNIT_DISABLED_INTENTIONAL unit=%s reason=LIMITED_OVERLAY_SCOPE_V52_PEER_DISABLED ordersSent=0 cancelSent=0 positionChangesSent=0\n' "$unit"
+    return 0
+  fi
   systemctl enable "$unit" >/dev/null 2>&1 || true
   systemctl reset-failed "$unit" >/dev/null 2>&1 || true
   # Start once and let the unit's bounded RestartSec handle a transient venue
@@ -1365,7 +1407,15 @@ apply_wiring() {
   [[ -f "$fet_readiness_guard" ]] || { printf 'FET preemption readiness guard missing\n' >&2; return 1; }
   # Read-only capability is explicit, exact-SHA, and defaults to false.
   local fet_core_preemption_ready
-  fet_core_preemption_ready="$(/usr/bin/python3 "$fet_readiness_guard" --approved-ready --sha "$DEPLOYED_SHA" --activation-path "$OPERATOR_ACTIVATION_PATH")"
+  if limited_overlay_scope_without_v52_preemption; then
+    # FET remains an unchanged peer in the limited scope.  Do not claim that
+    # its optional V52 preemption capability is certified while V52 is
+    # intentionally disabled; the FET runner will run with preemption false.
+    fet_core_preemption_ready="false"
+    printf 'DISDEX_LIMITED_OVERLAY_FET_PREEMPTION_NOT_CERTIFIED v52=DISABLED ordersSent=0 cancelSent=0 positionChangesSent=0\n'
+  else
+    fet_core_preemption_ready="$(/usr/bin/python3 "$fet_readiness_guard" --approved-ready --sha "$DEPLOYED_SHA" --activation-path "$OPERATOR_ACTIVATION_PATH")"
+  fi
   install -d -o deploy -g deploy -m 2770 /var/lib/disdex/shared
   install -d -o root -g root -m 0755 "${SHARED_ROOT}/operator-activation"
   if [[ -e "$V52_LEGACY_CRYPTO_ROOT" && ! -d "$V52_LEGACY_CRYPTO_ROOT" ]]; then
