@@ -292,6 +292,20 @@ function heartbeatFreshness(value, runner, now) {
     return { heartbeatFresh, runnerTickFresh, fresh: heartbeatFresh && runnerTickFresh };
 }
 
+function heartbeatModeAllowed(value, runnerKey) {
+    const mode = String(value?.mode || "").toUpperCase();
+    if (mode === "LIVE") return true;
+    // A V4 limited canary is intentionally not a formal full-LIVE run.  It is
+    // nevertheless a live-enabled, operator-approved production process and
+    // must remain under watchdog supervision.  Keep this exception narrow:
+    // only V12_V4 with all three explicit safety attestations is accepted.
+    return runnerKey === "V12_V4"
+        && mode === "CANARY"
+        && value?.liveEnabled === true
+        && value?.limitedLive === true
+        && value?.safetyState === "HEALTHY";
+}
+
 function operatorActivationPathForRunner(runner, env, defaultPath) {
     const configuredPath = runner.operatorActivationPathEnv
         ? env[runner.operatorActivationPathEnv]
@@ -419,7 +433,7 @@ async function readHeartbeat(config, runner, now) {
     if (!serviceAllowed(runner, value.serviceUnit, runner.expectedSha) || value.serviceUnit !== runner.unit) throw new Error(`${runner.key} heartbeat service unit is invalid`);
     if (value.runtimeSha !== runner.expectedSha || value.expectedSha !== runner.expectedSha) throw new Error(`${runner.key} heartbeat SHA does not match release`);
     if (value.workingDirectory !== runner.expectedCwd) throw new Error(`${runner.key} heartbeat cwd does not match release`);
-    if (String(value.mode).toUpperCase() !== "LIVE") throw new Error(`${runner.key} heartbeat mode is not LIVE`);
+    if (!heartbeatModeAllowed(value, runner.key)) throw new Error(`${runner.key} heartbeat mode is not LIVE or approved limited CANARY`);
     const healthReason = safeReason(value.healthReason || value.reason || "");
     if (value.liveEnabled !== true) return { present: true, valid: true, value, safeState: false, reason: healthReason || `${runner.key} service identity is not current` };
     if (value.safetyState !== "HEALTHY") return { present: true, valid: true, value, safeState: false, reason: healthReason || `safetyState=${value.safetyState}` };
@@ -944,6 +958,10 @@ function selfTest() {
     if (activationBlocked.action !== "HOLD_FAIL_CLOSED" || activationBlocked.operatorActivationBlocked !== true || !activationBlocked.reason.includes("OPERATOR_LIVE_ACTIVATION_REQUIRED")) throw new Error("operator activation restart-block self-test failed");
     const activationAllowed = applyOperatorActivationGateToRestart(restartRequested, { allowed: true, reason: "OPERATOR_LIVE_ACTIVATION_CONFIRMED" }, v12, decision);
     if (activationAllowed.action !== "RESTART") throw new Error("operator activation ready self-test failed");
+    if (!heartbeatModeAllowed({ mode: "CANARY", liveEnabled: true, limitedLive: true, safetyState: "HEALTHY" }, "V12_V4")) throw new Error("limited V4 canary heartbeat self-test failed");
+    if (heartbeatModeAllowed({ mode: "CANARY", liveEnabled: true, limitedLive: true, safetyState: "HEALTHY" }, "PENGU_V8")) throw new Error("limited V4 canary scope self-test failed");
+    if (heartbeatModeAllowed({ mode: "CANARY", liveEnabled: true, limitedLive: false, safetyState: "HEALTHY" }, "V12_V4")) throw new Error("unattested canary heartbeat self-test failed");
+    console.log("DISDEX_CURRENT_WATCHDOG_LIMITED_V4_CANARY_SELFTEST_PASS");
     console.log("DISDEX_CURRENT_WATCHDOG_OPERATOR_ACTIVATION_GATE_SELFTEST_PASS");
     const source = readFileSync(new URL(import.meta.url), "utf8");
     if (/(?:submitOrder|cancelOrder|closePosition|placeMarket|modifyPosition)\s*\(/.test(source)) throw new Error("forbidden operation self-test failed");

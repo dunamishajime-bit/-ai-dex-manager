@@ -9,6 +9,7 @@ TRADING_RELEASES="${TRADING_ROOT}/releases"
 TRADING_CURRENT="${TRADING_ROOT}/current"
 SHARED_ROOT="${DISDEX_SHARED_ROOT:-/var/lib/disdex/shared}"
 OPERATOR_ACTIVATION_PATH="${SHARED_ROOT}/operator-activation/current.json"
+V52_INTENTIONAL_STOP_MARKER="/var/lib/disdex/runner-health/v52.intentional-stop"
 # The canonical approval remains root:root and non-writable by deploy. Idle's
 # application-side defense-in-depth check needs a read-only root-generated
 # projection because the daemon itself runs as deploy. The root ExecStartPre
@@ -1158,6 +1159,20 @@ limited_overlay_scope_without_v52_preemption() {
   v52_is_intentionally_disabled_flat
 }
 
+ensure_v52_intentional_stop_marker() {
+  limited_overlay_scope_without_v52_preemption || return 1
+  local marker_dir marker_tmp
+  marker_dir="$(dirname -- "$V52_INTENTIONAL_STOP_MARKER")"
+  marker_tmp="${V52_INTENTIONAL_STOP_MARKER}.tmp.$$"
+  install -d -o root -g root -m 0755 "$marker_dir"
+  printf '{"schema":"disdex-v52-intentional-stop/v1","runtimeSha":"%s","reason":"LIMITED_OVERLAY_SCOPE_V52_PEER_DISABLED","createdAt":%s}\n' \\
+    "$DEPLOYED_SHA" "$(date +%s%3N)" > "$marker_tmp"
+  chown root:deploy "$marker_tmp"
+  chmod 0640 "$marker_tmp"
+  mv -f -- "$marker_tmp" "$V52_INTENTIONAL_STOP_MARKER"
+  printf 'DISDEX_V52_INTENTIONAL_STOP_MARKER_READY path=%s sha=%s ordersSent=0 cancelSent=0 positionChangesSent=0\n' "$V52_INTENTIONAL_STOP_MARKER" "$DEPLOYED_SHA"
+}
+
 ensure_trading_unit_running() {
   local unit="$1" load_state active_state sub_state attempt
   load_state="$(systemctl show "$unit" -p LoadState --value 2>/dev/null || true)"
@@ -1421,6 +1436,9 @@ apply_wiring() {
   if [[ -e "$V52_LEGACY_CRYPTO_ROOT" && ! -d "$V52_LEGACY_CRYPTO_ROOT" ]]; then
     printf 'V52 legacy crypto state path exists but is not a directory: %s\n' "$V52_LEGACY_CRYPTO_ROOT" >&2
     return 1
+  fi
+  if limited_overlay_scope_without_v52_preemption; then
+    ensure_v52_intentional_stop_marker
   fi
   if [[ ! -e "$V52_LEGACY_CRYPTO_ROOT" ]]; then
     install -d -o deploy -g deploy -m 0700 "$V52_LEGACY_CRYPTO_ROOT"

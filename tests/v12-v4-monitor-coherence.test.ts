@@ -43,6 +43,19 @@ test("watchdog V4 mode targets only the V4 service and V12_V4 operator scope",()
  assert.match(watchdog,/evaluateOperatorActivationGate/);
 });
 
+test("watchdog accepts only a healthy, live-enabled V4 limited canary heartbeat",()=>{
+ assert.match(watchdog,/limitedLive/);
+ assert.match(watchdog,/runner\.key === "V12_V4"/);
+ assert.match(watchdog,/mode === "CANARY"/);
+ assert.match(watchdog,/liveEnabled === true/);
+ assert.match(watchdog,/safetyState === "HEALTHY"/);
+});
+
+test("limited overlay wiring installs the V52 intentional-stop marker",()=>{
+ assert.match(wiring,/v52\.intentional-stop/);
+ assert.match(wiring,/ensure_v52_intentional_stop_marker/);
+});
+
 test("watchdog can intentionally disable V12 recovery without disabling peer monitoring",()=>{
  assert.match(watchdog,/mode === "DISABLED"/);
  assert.match(watchdog,/DISDEX_WATCHDOG_V12_DISABLED_REASON/);
