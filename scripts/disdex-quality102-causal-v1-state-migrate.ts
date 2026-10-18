@@ -45,7 +45,18 @@ async function exists(path: string): Promise<boolean> {
 }
 
 function stateWithRuntimeSha(state: Quality102CausalV1State, runtimeCommitSha: string): Quality102CausalV1State {
-  return { ...state, runtimeCommitSha };
+  return {
+    ...state,
+    runtimeCommitSha,
+    ...(state.initialDaemonReconciliation
+      ? {
+          initialDaemonReconciliation: {
+            ...state.initialDaemonReconciliation,
+            runtimeCommitSha,
+          },
+        }
+      : {}),
+  };
 }
 
 /**

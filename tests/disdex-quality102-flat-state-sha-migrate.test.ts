@@ -17,6 +17,10 @@ function state(overrides: Record<string, unknown> = {}) {
     ...createQuality102CausalV1State("LIVE", FROM),
     updatedAt: 100,
     failures: [],
+    initialDaemonReconciliation: {
+      runtimeCommitSha: FROM,
+      completedAt: 100,
+    },
     ...overrides,
   };
 }
@@ -38,6 +42,7 @@ test("flat Q102 state migrates with an exact backup and SHA-bound readback", asy
   assert.equal(result.status, "QUALITY102_STATE_MIGRATION_PASS");
   assert.equal((await readFile(result.backupPath)).equals(before), true);
   assert.equal(JSON.parse(await readFile(statePath, "utf8")).runtimeCommitSha, TO);
+  assert.equal(JSON.parse(await readFile(statePath, "utf8")).initialDaemonReconciliation.runtimeCommitSha, TO);
   assert.equal(result.ordersSent, 0);
   assert.equal(result.positionChangesSent, 0);
 });
