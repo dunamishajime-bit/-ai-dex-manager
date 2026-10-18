@@ -32,7 +32,7 @@ function currentV3Fixture() {
 
 test("V3 source validation does not require a preceding V4 canary fill or Testnet", () => {
   const validated = validateV4ProductionCertificate(currentV3Fixture(), sha, now);
-  assert.equal(validated.schema, "disdex-v12-v4-production-certification/v3");
+  if (validated.schema !== "disdex-v12-v4-production-certification/v3") throw new Error("DIRECT_V3_CERTIFICATION_REQUIRED");
   assert.equal(validated.venueEvidenceBasis, "ESTABLISHED_ASTER_PRODUCTION_EXECUTION");
   assert.equal(validated.risksAcknowledged.v4FirstLiveFillNotYetObserved, true);
   // Source validation is not root-file hashing, risk reconciliation or LIVE approval.
