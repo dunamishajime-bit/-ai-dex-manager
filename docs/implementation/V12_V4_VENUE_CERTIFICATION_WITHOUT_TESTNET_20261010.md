@@ -48,3 +48,28 @@ read-only preflight, so it was not usable for certification at that moment.
 Free funding attempts did not establish a usable Perps Testnet balance.
 The preferred path is now AUTHENTIC_PRODUCTION_HISTORY. This document does not
 authorize any Production mutation.
+
+
+## 2026-10-19 clarification: direct V3 certification, not mandatory canary
+
+The preceding 2026-10-10 guidance describes the original **V2** evidence contract.
+The current production code also implements
+`disdex-v12-v4-production-certification/v3` in
+`lib/v12-v4-certified-gates.ts`. This path expressly permits
+`ESTABLISHED_ASTER_PRODUCTION_EXECUTION` evidence without a preceding
+V4-specific first fill. Consequently **Testnet and a mandatory first
+Canary fill are not prerequisites** for direct V4 `CERTIFIED` activation
+when the current exact-SHA V3 evidence and operator approval validate.
+
+Do not conflate (a) allowing V4 to start with an authentic established
+venue history basis with (b) claiming a first V4-specific fill/STOP
+lifecycle has already been observed. The latter must remain truthfully
+unobserved until forward execution occurs.
+
+Neither the original V2 nor current V3 contract permits copying an older
+certificate to a new SHA, treating mismatched risk Gross caps as equal,
+misrepresenting `marginGuardHealthy=false` evidence, or enabling LIVE by
+flipping mode flags without a valid root certificate and separate operator
+authorization. See
+`docs/implementation/DIRECT_V4_CERTIFICATION_AND_FULL_LIVE_REPAIR_20261019.md`
+for scoped activation and repair prerequisites.
