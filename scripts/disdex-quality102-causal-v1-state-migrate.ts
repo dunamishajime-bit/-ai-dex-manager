@@ -14,6 +14,8 @@ export interface Quality102CausalV1StateMigrationInput {
   fromRuntimeSha: string;
   toRuntimeSha: string;
   backupPath?: string;
+  /** Test-only escape hatch; production CLI keeps the default ownership check enabled. */
+  normalizeOwnership?: boolean;
 }
 
 export interface Quality102CausalV1StateMigrationResult {
@@ -80,7 +82,7 @@ export async function migrateQuality102CausalV1State(
   // Production state is read by the deploy-owned Q102 daemon and Margin Guard.
   // Root-run migration must not leave a root:root 0600 file that those services
   // cannot read. Windows self-tests do not have the Linux deploy principal.
-  if (process.platform !== "win32") {
+  if (process.platform !== "win32" && input.normalizeOwnership !== false) {
     await normalizeLiveStateOwnership(statePath, { label: "QUALITY102_STATE_MIGRATION_STATE" });
   }
   const after = await new FileQuality102CausalV1StateStore(statePath, "LIVE", toRuntimeSha).load();

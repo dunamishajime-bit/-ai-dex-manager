@@ -33,6 +33,7 @@ test("flat Q102 state migrates with an exact backup and SHA-bound readback", asy
     fromRuntimeSha: FROM,
     toRuntimeSha: TO,
     backupPath,
+    normalizeOwnership: false,
   });
   assert.equal(result.status, "QUALITY102_STATE_MIGRATION_PASS");
   assert.equal((await readFile(result.backupPath)).equals(before), true);
