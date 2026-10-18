@@ -2285,7 +2285,6 @@ ReadWritePaths=${IDLE_PRIORITY_STATE_ROOT} ${SHARED_ROOT}"
   migrate_v52_disabled_state_lineage
   recover_hype_benign_state
   migrate_hype_state_lineage
-  promote_v52_full_live_flat_state
   recover_idle_benign_state
   migrate_idle_state_lineage
   migrate_idle_residual_state_lineage
@@ -2294,6 +2293,7 @@ ReadWritePaths=${IDLE_PRIORITY_STATE_ROOT} ${SHARED_ROOT}"
   migrate_v4_execution_lineage
   migrate_v4_telemetry_lineage
   systemctl daemon-reload
+  promote_v52_full_live_flat_state
   if [[ "$PRIMARY_V12_MODE" == "V4" ]]; then
     persistently_mask_legacy_v12
     systemctl disable --now disdex-v12-kill-switch-auto-repair.path || true
