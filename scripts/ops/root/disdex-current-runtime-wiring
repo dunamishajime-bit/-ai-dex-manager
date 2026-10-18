@@ -2284,8 +2284,8 @@ ReadWritePaths=${IDLE_PRIORITY_STATE_ROOT} ${SHARED_ROOT}"
   migrate_fet_state_lineage
   migrate_v52_disabled_state_lineage
   recover_hype_benign_state
-  promote_v52_full_live_flat_state
   migrate_hype_state_lineage
+  promote_v52_full_live_flat_state
   recover_idle_benign_state
   migrate_idle_state_lineage
   migrate_idle_residual_state_lineage
