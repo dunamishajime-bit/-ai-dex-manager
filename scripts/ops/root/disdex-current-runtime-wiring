@@ -1364,6 +1364,103 @@ archive_v52_intentional_stop_marker() {
     "$V52_INTENTIONAL_STOP_MARKER" "$archive_path"
 }
 
+full_live_operator_artifact_for_v52() {
+  [[ -f "$OPERATOR_ACTIVATION_PATH" && ! -L "$OPERATOR_ACTIVATION_PATH" ]] || return 1
+  /usr/bin/jq -e --arg sha "$DEPLOYED_SHA" '
+    (.approvedSha == $sha) and
+    (.activationClass == "FULL_LIVE") and
+    (.ordersEnabled == true) and
+    (.fetCorePreemptionReady == true) and
+    ((.approvedRunners // []) | index("V52") != null) and
+    ((.approvedRunners // []) | index("FET_BRK48_RESIDUAL") != null)
+  ' "$OPERATOR_ACTIVATION_PATH" >/dev/null
+}
+
+promote_v52_full_live_flat_state() {
+  # A DISABLED V52 state is valid only for the limited overlay. Full LIVE
+  # promotion is a separate audited transaction and only accepts the exact
+  # flat marker; positioned, pending, reviewed, or unknown state fails closed.
+  if limited_overlay_scope_without_v52_preemption; then
+    printf 'DISDEX_V52_FULL_LIVE_STATE_PROMOTE_SKIPPED_LIMITED_SCOPE ordersSent=0 cancelSent=0 positionChangesSent=0\n'
+    return 0
+  fi
+  full_live_operator_artifact_for_v52 || {
+    printf 'V52 full-live operator artifact is not exact, full-live, and FET-ready\n' >&2
+    return 1
+  }
+  local state_path=/var/lib/disdex/v52-aster-only/runner-live.json
+  [[ -f "$state_path" && ! -L "$state_path" ]] || {
+    printf 'V52 full-live state is missing or symlinked: %s\n' "$state_path" >&2
+    return 1
+  }
+  /usr/bin/jq -e --arg sha "$DEPLOYED_SHA" '
+    (.runtimeCommitSha == $sha) and
+    (.strategyId == "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96") and
+    (.mode == "DISABLED") and
+    (.status == "intentional-stop") and
+    (.disabledReason == "LIMITED_OVERLAY_SCOPE_V52_PEER_DISABLED") and
+    (.positions | type == "object" and length == 0) and
+    (.pending // null) == null and
+    (.manualReview // null) == null and
+    (.ordersAllowed == false) and
+    (.newOrdersAllowed == false) and
+    (.orderEnabled == false)
+  ' "$state_path" >/dev/null || {
+    printf 'V52_FULL_LIVE_STATE_PROMOTE_NOT_FLAT path=%s ordersSent=0 cancelSent=0 positionChangesSent=0\n' "$state_path" >&2
+    return 1
+  }
+  local backup_path="${state_path}.before-full-live-${DEPLOYED_SHA}"
+  if [[ -e "$backup_path" ]]; then
+    cmp -s "$state_path" "$backup_path" || {
+      printf 'V52 full-live backup already exists but is not the exact pre-promotion state: %s\n' "$backup_path" >&2
+      return 1
+    }
+  else
+    cp -a "$state_path" "$backup_path"
+  fi
+  local uid gid mode temporary
+  uid="$(stat -c '%u' "$state_path")"
+  gid="$(stat -c '%g' "$state_path")"
+  mode="$(stat -c '%a' "$state_path")"
+  temporary="$(mktemp "${state_path}.full-live.XXXXXX")"
+  if ! /usr/bin/jq --arg sha "$DEPLOYED_SHA" '
+    .runtimeCommitSha=$sha |
+    .mode="LIVE" |
+    .status="ready" |
+    .disabledReason=null |
+    .ordersAllowed=true |
+    .newOrdersAllowed=true |
+    .orderEnabled=true |
+    .operatorReviewRequired=false |
+    .lastReconciledAt=(now * 1000 | floor) |
+    .updatedAt=(now * 1000 | floor)
+  ' "$state_path" > "$temporary"; then
+    rm -f -- "$temporary"
+    return 1
+  fi
+  chown "$uid:$gid" "$temporary"
+  chmod "$mode" "$temporary"
+  mv -Tf "$temporary" "$state_path"
+  /usr/bin/jq -e --arg sha "$DEPLOYED_SHA" '
+    (.runtimeCommitSha == $sha) and
+    (.strategyId == "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96") and
+    (.mode == "LIVE") and
+    (.status == "ready") and
+    (.disabledReason == null) and
+    (.positions | type == "object" and length == 0) and
+    (.pending // null) == null and
+    (.manualReview // null) == null and
+    (.ordersAllowed == true) and
+    (.newOrdersAllowed == true) and
+    (.orderEnabled == true)
+  ' "$state_path" >/dev/null || {
+    printf 'V52_FULL_LIVE_STATE_PROMOTE_READBACK_FAIL path=%s backup=%s\n' "$state_path" "$backup_path" >&2
+    return 1
+  }
+  printf 'V52_FULL_LIVE_STATE_PROMOTE_PASS path=%s backup=%s sha=%s ordersSent=0 cancelSent=0 positionChangesSent=0\n' \\
+    "$state_path" "$backup_path" "$DEPLOYED_SHA"
+}
+
 ensure_trading_unit_running() {
   local unit="$1" load_state active_state sub_state attempt
   load_state="$(systemctl show "$unit" -p LoadState --value 2>/dev/null || true)"
@@ -2186,6 +2283,7 @@ ReadWritePaths=${IDLE_PRIORITY_STATE_ROOT} ${SHARED_ROOT}"
   fi
   migrate_fet_state_lineage
   migrate_v52_disabled_state_lineage
+  promote_v52_full_live_flat_state
   recover_hype_benign_state
   migrate_hype_state_lineage
   recover_idle_benign_state

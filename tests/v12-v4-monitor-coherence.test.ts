@@ -56,6 +56,31 @@ test("limited overlay wiring installs the V52 intentional-stop marker",()=>{
  assert.match(wiring,/ensure_v52_intentional_stop_marker/);
 });
 
+test("full-live wiring promotes only the exact flat limited-scope V52 state",()=>{
+ assert.match(wiring,/promote_v52_full_live_flat_state/);
+ assert.match(wiring,/V52_FULL_LIVE_STATE_PROMOTE_NOT_FLAT/);
+ assert.match(wiring,/V52_FULL_LIVE_STATE_PROMOTE_PASS/);
+ assert.match(wiring,/\.mode == "DISABLED"/);
+ assert.match(wiring,/\.status == "intentional-stop"/);
+ assert.match(wiring,/\.disabledReason == "LIMITED_OVERLAY_SCOPE_V52_PEER_DISABLED"/);
+ assert.match(wiring,/\.positions \| type == "object" and length == 0/);
+ assert.match(wiring,/\.pending \/\/ null\) == null/);
+ assert.match(wiring,/\.manualReview \/\/ null\) == null/);
+ assert.match(wiring,/\.mode="LIVE"/);
+ assert.match(wiring,/\.ordersAllowed=true/);
+ assert.match(wiring,/\.newOrdersAllowed=true/);
+ assert.match(wiring,/\.orderEnabled=true/);
+ assert.match(wiring,/before-full-live-/);
+});
+
+test("limited overlay keeps V52 disabled and does not use the full-live promotion",()=>{
+ const limited=wiring.indexOf("if limited_overlay_scope_without_v52_preemption; then\n    ensure_v52_intentional_stop_marker");
+ const promotion=wiring.indexOf("promote_v52_full_live_flat_state");
+ assert.ok(limited>=0);
+ assert.ok(promotion>=0);
+ assert.ok(promotion>wiring.indexOf("migrate_v52_disabled_state_lineage"));
+});
+
 test("watchdog can intentionally disable V12 recovery without disabling peer monitoring",()=>{
  assert.match(watchdog,/mode === "DISABLED"/);
  assert.match(watchdog,/DISDEX_WATCHDOG_V12_DISABLED_REASON/);
