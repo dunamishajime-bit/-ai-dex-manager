@@ -35,6 +35,9 @@ jobs:
         with:
           node-version: '24'
 
+      - name: Install Node dependencies for TypeScript contract tests
+        run: npm ci --ignore-scripts
+
       - name: Validate executable VPS safety boundaries
         shell: bash
         run: |
@@ -109,8 +112,8 @@ jobs:
           bash -n scripts/ops/root/disdex-current-runtime-wiring
           bash -n scripts/ops/root/disdex-current-runtime-coherence-guard
           python3 -m unittest tests/test_runtime_wiring_script.py tests/test_vps_ops_ci_contract.py
-          node --test --test-isolation=none tests/v12-v4-monitor-coherence.test.ts tests/ops-v4-runtime-wiring-contract.test.mjs tests/operator_activation_hardening.test.ts
-          node --test --test-isolation=none tests/watchdog-release-lineage.test.ts
+          npx tsx --test tests/v12-v4-monitor-coherence.test.ts tests/ops-v4-runtime-wiring-contract.test.mjs tests/operator_activation_hardening.test.ts
+          npx tsx --test tests/watchdog-release-lineage.test.ts
           grep -Fq 'disdex-v96-live.service' scripts/ops/root/disdex-current-runtime-wiring
           grep -Fq 'disdex-v96-live.service' scripts/ops/root/disdex-runner-watchdog-current.mjs
 
