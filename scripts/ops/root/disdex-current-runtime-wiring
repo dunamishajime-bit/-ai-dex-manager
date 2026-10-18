@@ -1348,6 +1348,22 @@ ensure_v52_intentional_stop_marker() {
   printf 'DISDEX_V52_INTENTIONAL_STOP_MARKER_READY path=%s sha=%s ordersSent=0 cancelSent=0 positionChangesSent=0\n' "$V52_INTENTIONAL_STOP_MARKER" "$DEPLOYED_SHA"
 }
 
+archive_v52_intentional_stop_marker() {
+  [[ -e "$V52_INTENTIONAL_STOP_MARKER" ]] || return 0
+  [[ ! -L "$V52_INTENTIONAL_STOP_MARKER" && -f "$V52_INTENTIONAL_STOP_MARKER" ]] || {
+    printf 'V52 intentional-stop marker is not a regular file: %s\n' "$V52_INTENTIONAL_STOP_MARKER" >&2
+    return 1
+  }
+  local archive_dir="$(dirname -- "$V52_INTENTIONAL_STOP_MARKER")/archive"
+  local archive_path="${archive_dir}/v52.intentional-stop.before-${DEPLOYED_SHA}-$(date -u +%Y%m%dT%H%M%SZ)-$$.json"
+  install -d -o root -g root -m 0755 "$archive_dir"
+  mv -T -- "$V52_INTENTIONAL_STOP_MARKER" "$archive_path"
+  chown root:root "$archive_path"
+  chmod 0640 "$archive_path"
+  printf 'DISDEX_V52_INTENTIONAL_STOP_MARKER_ARCHIVED path=%s archive=%s ordersSent=0 cancelSent=0 positionChangesSent=0\n' \
+    "$V52_INTENTIONAL_STOP_MARKER" "$archive_path"
+}
+
 ensure_trading_unit_running() {
   local unit="$1" load_state active_state sub_state attempt
   load_state="$(systemctl show "$unit" -p LoadState --value 2>/dev/null || true)"
@@ -1614,6 +1630,8 @@ apply_wiring() {
   fi
   if limited_overlay_scope_without_v52_preemption; then
     ensure_v52_intentional_stop_marker
+  else
+    archive_v52_intentional_stop_marker
   fi
   if [[ ! -e "$V52_LEGACY_CRYPTO_ROOT" ]]; then
     install -d -o deploy -g deploy -m 0700 "$V52_LEGACY_CRYPTO_ROOT"

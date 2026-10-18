@@ -49,6 +49,13 @@ class AsterUpstreamRuntimeWiringTests(unittest.TestCase):
         apply_block = source[source.index('apply_wiring()'):]
         self.assertIn('remove_stale_account_config_release_pin_dropins', apply_block)
 
+    def test_full_live_archives_limited_v52_intentional_stop_marker(self):
+        source = SOURCE.read_text(encoding="utf-8")
+        self.assertIn("archive_v52_intentional_stop_marker", source)
+        self.assertIn("V52_INTENTIONAL_STOP_MARKER", source)
+        apply_block = source[source.index("apply_wiring()"):]
+        self.assertIn("archive_v52_intentional_stop_marker", apply_block)
+
 
 class AutoRepairPathWiringTests(unittest.TestCase):
     def test_event_watcher_tracks_only_shared_kill_switch_and_is_rearmed(self):
