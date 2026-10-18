@@ -35,6 +35,13 @@ test("watchdog accepts the V4-specific heartbeat schema only for V12_V4",()=>{
  assert.match(watchdog,/disdex-v12-v4-runner-heartbeat\/v1/);
 });
 
+test("watchdog derives only missing monitor fields from an exact legacy V4 heartbeat",()=>{
+ assert.match(watchdog,/normalizeV4Heartbeat/);
+ assert.match(watchdog,/strategyId !== "V12_V4"/);
+ assert.match(watchdog,/releaseSha !== runner\.expectedSha/);
+ assert.match(watchdog,/heartbeatAt: value\.heartbeatAt \?\? value\.updatedAt/);
+});
+
 test("health snapshot can replace legacy V12 with V4 only by explicit mode",()=>{
  assert.match(snapshot,/DISDEX_HEALTH_SNAPSHOT_V12_MODE/);
  assert.match(snapshot,/key: "V12_V4"/);

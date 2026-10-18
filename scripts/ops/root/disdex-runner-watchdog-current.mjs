@@ -279,6 +279,26 @@ function validateRunnerOwnedHeartbeat(value, runnerKey) {
     if (value.lastDecision !== null && typeof value.lastDecision !== "string") throw new Error(`${runnerKey} heartbeat lastDecision is invalid`);
 }
 
+function normalizeV4Heartbeat(value, runner) {
+    const legacyV4 = runner.key === "V12_V4" && value.schema === "disdex-v12-v4-runner-heartbeat/v1";
+    if (!legacyV4) return value;
+    if (value.strategyId !== "V12_V4" || value.releaseSha !== runner.expectedSha || value.runtimeSha !== runner.expectedSha) {
+        throw new Error(`${runner.key} legacy heartbeat source identity is invalid`);
+    }
+    return {
+        ...value,
+        runnerId: value.runnerId ?? "V12_V4",
+        serviceUnit: value.serviceUnit ?? runner.unit,
+        expectedSha: value.expectedSha ?? runner.expectedSha,
+        workingDirectory: value.workingDirectory ?? runner.expectedCwd,
+        mode: value.mode ?? "LIVE",
+        liveEnabled: value.liveEnabled ?? true,
+        safetyState: value.safetyState ?? (String(value.status || "").toLowerCase() === "failed" ? "BLOCKED" : "HEALTHY"),
+        heartbeatAt: value.heartbeatAt ?? value.updatedAt,
+        lastTickAt: value.lastTickAt ?? value.updatedAt,
+    };
+}
+
 function runnerPaths(config, runner) {
     return {
         heartbeat: join(config.healthRoot, "heartbeats", runner.heartbeatFile),
@@ -426,6 +446,7 @@ async function readHeartbeat(config, runner, now) {
     let value;
     try { value = JSON.parse(raw); } catch { throw new Error(`${runner.key} heartbeat JSON is malformed`); }
     if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error(`${runner.key} heartbeat is not an object`);
+    value = normalizeV4Heartbeat(value, runner);
     validateRunnerOwnedHeartbeat(value, runner.key);
     const required = ["schema", "runnerId", "serviceUnit", "runtimeSha", "expectedSha", "workingDirectory", "mode", "liveEnabled", "safetyState", "heartbeatAt", "lastTickAt"];
     for (const key of required) if (!(key in value)) throw new Error(`${runner.key} heartbeat.${key} is missing`);
