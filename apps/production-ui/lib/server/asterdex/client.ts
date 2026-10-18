@@ -1,4 +1,8 @@
 import { privateKeyToAccount } from "viem/accounts";
+import {
+  deferProductionUiAsterRateBudget,
+  waitForProductionUiAsterRateSlot,
+} from "./rate-budget";
 
 const DEFAULT_BASE_URL = "https://fapi.asterdex.com";
 const DEFAULT_CHAIN_ID = 1666;
@@ -140,6 +144,42 @@ function buildQueryString(params: RequestParam[]) {
   return search.toString();
 }
 
+function requestWeight(pathname: string, params: RequestParam[]) {
+  const hasSymbol = params.some(([key, value]) => key === "symbol" && String(value || "").length > 0);
+  if (pathname === "/fapi/v3/balance" || pathname === "/fapi/v3/account" || pathname === "/fapi/v3/positionRisk") return 5;
+  if (pathname === "/fapi/v3/openOrders") return hasSymbol ? 1 : 40;
+  if (pathname === "/fapi/v3/userTrades") return 5;
+  if (pathname === "/fapi/v3/klines") {
+    const limit = Number(params.find(([key]) => key === "limit")?.[1] ?? 100);
+    return limit >= 500 ? 5 : limit >= 100 ? 2 : 1;
+  }
+  if (pathname === "/fapi/v3/ticker/24hr") return hasSymbol ? 1 : 40;
+  if (pathname === "/fapi/v3/ticker/price" || pathname === "/fapi/v3/ticker/bookTicker") return hasSymbol ? 1 : 2;
+  return 1;
+}
+
+function requestPriority(method: RequestMethod, pathname: string, params: RequestParam[]) {
+  const reduceOnly = params.some(([key, value]) => key === "reduceOnly" && (value === true || value === "true"));
+  if (reduceOnly || method === "DELETE") return "PROTECTIVE" as const;
+  if (method !== "GET") return "NEW_EXPOSURE" as const;
+  if (pathname === "/fapi/v3/positionRisk" || pathname === "/fapi/v3/openOrders" || pathname === "/fapi/v3/userTrades") return "RECONCILIATION" as const;
+  if (pathname === "/fapi/v3/ticker/price" || pathname === "/fapi/v3/ticker/bookTicker" || pathname === "/fapi/v3/ticker/24hr" || pathname === "/fapi/v3/klines") return "MARKET_DATA" as const;
+  return "RISK_READ" as const;
+}
+
+function retryAfterMs(headers: Headers, responseBody: string) {
+  const raw = headers.get("retry-after");
+  if (raw) {
+    const seconds = Number(raw);
+    if (Number.isFinite(seconds)) return Math.max(0, seconds * 1_000);
+    const timestamp = Date.parse(raw);
+    if (Number.isFinite(timestamp)) return Math.max(0, timestamp - Date.now());
+  }
+  const bannedUntil = responseBody.match(/until\s+(\d{10,})/i)?.[1];
+  if (bannedUntil) return Math.max(0, Number(bannedUntil) - Date.now());
+  return undefined;
+}
+
 let lastNonceBase = 0;
 let nonceOffset = 0;
 
@@ -181,6 +221,10 @@ export class AsterDexClient {
     pathname: string,
     businessParams: RequestParam[] = [],
   ): Promise<T> {
+    await waitForProductionUiAsterRateSlot(
+      requestWeight(pathname, businessParams),
+      requestPriority(method, pathname, businessParams),
+    );
     const nonce = nextNonce();
     const baseParams: RequestParam[] = [
       ["user", this.config.userAddress],
@@ -203,6 +247,12 @@ export class AsterDexClient {
 
     if (!response.ok) {
       const text = await response.text().catch(() => "");
+      if (response.status === 418 || response.status === 429) {
+        await deferProductionUiAsterRateBudget(
+          response.status,
+          Math.max(response.status === 418 ? 120_000 : 60_000, retryAfterMs(response.headers, text) ?? 0),
+        );
+      }
       throw new Error(`AsterDex ${method} ${pathname} failed: ${response.status} ${text}`.slice(0, 400));
     }
 
@@ -210,11 +260,21 @@ export class AsterDexClient {
   }
 
   private async publicRequest<T>(pathname: string, params: RequestParam[] = []): Promise<T> {
+    await waitForProductionUiAsterRateSlot(
+      requestWeight(pathname, params),
+      requestPriority("GET", pathname, params),
+    );
     const query = buildQueryString(params);
     const url = `${this.config.baseUrl}${pathname}${query ? `?${query}` : ""}`;
     const response = await fetch(url, { cache: "no-store" });
     if (!response.ok) {
       const text = await response.text().catch(() => "");
+      if (response.status === 418 || response.status === 429) {
+        await deferProductionUiAsterRateBudget(
+          response.status,
+          Math.max(response.status === 418 ? 120_000 : 60_000, retryAfterMs(response.headers, text) ?? 0),
+        );
+      }
       throw new Error(`AsterDex GET ${pathname} failed: ${response.status} ${text}`.slice(0, 400));
     }
     return response.json() as Promise<T>;
