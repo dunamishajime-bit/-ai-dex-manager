@@ -1237,6 +1237,26 @@ assert_current_live_target_ready() {
   "$tsx" "$CURRENT_RELEASE/scripts/disdex-current-live-target-readiness.ts" --require-implementation-ready
 }
 
+ensure_v4_canary_permit_runtime_access() {
+  [[ "$PRIMARY_V12_MODE" == "V4" && "$V4_OPERATION_MODE" == "CANARY" ]] || return 0
+  local permit=/etc/disdex/v12-v4-production-canary-permit.json
+  [[ -f "$permit" && ! -L "$permit" ]] || {
+    printf 'V4 canary permit is missing or symlinked: %s\n' "$permit" >&2
+    return 1
+  }
+  # The approval remains root-owned and non-writable by non-root. The V4
+  # daemon runs as deploy and its reader explicitly accepts the process GID;
+  # this makes the intended runtime projection durable across restart without
+  # making the approval artifact mutable by deploy.
+  chown root:deploy "$permit"
+  chmod 0640 "$permit"
+  [[ "$(stat -c '%U:%G:%a' "$permit")" == "root:deploy:640" ]] || {
+    printf 'V4 canary permit runtime ownership/mode is unsafe: %s\n' "$(stat -c '%U:%G:%a' "$permit")" >&2
+    return 1
+  }
+  printf 'DISDEX_V4_CANARY_PERMIT_RUNTIME_ACCESS_PASS path=%s owner=root group=deploy mode=640\n' "$permit"
+}
+
 operator_activation_all_trading_ready() {
   local runner gate peer_gate release_root sha activation_path
   peer_gate="$CURRENT_RELEASE/scripts/ops/root/disdex-live-operator-activation-gate.mjs"
@@ -1334,6 +1354,7 @@ apply_wiring() {
     }
   fi
   assert_current_live_target_ready
+  ensure_v4_canary_permit_runtime_access
   cd "$CURRENT_RELEASE" || return 1
   # All release-relative TypeScript invocations below must resolve aliases and
   # configuration from the exact immutable current release. systemd starts

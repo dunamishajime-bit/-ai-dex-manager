@@ -21,6 +21,12 @@ Environment=V12_V4_LIVE_ACK=%i
 ExecStartPre=/usr/bin/test -f /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
 ExecStartPre=/usr/bin/grep -Fxq %i /home/deploy/disdex-trading/releases/%i/.disdex-release-sha
 ExecStartPre=/usr/bin/bash /home/deploy/disdex-trading/releases/%i/scripts/ops/disdex-v12-mutual-exclusion-preflight.sh %i runtime
+# Root prepares a deploy-readable runtime view without making the approval
+# artifact writable by deploy. Missing or symlinked permits still fail closed.
+ExecStartPre=+/usr/bin/test -f /etc/disdex/v12-v4-production-canary-permit.json
+ExecStartPre=+/usr/bin/test ! -L /etc/disdex/v12-v4-production-canary-permit.json
+ExecStartPre=+/usr/bin/chown root:deploy /etc/disdex/v12-v4-production-canary-permit.json
+ExecStartPre=+/usr/bin/chmod 0640 /etc/disdex/v12-v4-production-canary-permit.json
 # V4 reads the FET peer state during attestation. Normalize the deploy-owned
 # state path as root before the unprivileged V4 process can read it; this is a
 # permission repair only and never changes state contents or trading intent.

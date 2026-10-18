@@ -14,6 +14,10 @@ test("V4 prepares the deploy-owned FET peer state before it reads peers", () => 
     v4Unit,
     /ExecStartPre=\+\/bin\/sh -c .*chown deploy:deploy \/var\/lib\/disdex\/fet-brk48-residual\/state\.json.*chmod 600/,
   );
+  assert.match(v4Unit, /ExecStartPre=\+\/usr\/bin\/test -f \/etc\/disdex\/v12-v4-production-canary-permit\.json/);
+  assert.match(v4Unit, /ExecStartPre=\+\/usr\/bin\/test ! -L \/etc\/disdex\/v12-v4-production-canary-permit\.json/);
+  assert.match(v4Unit, /ExecStartPre=\+\/usr\/bin\/chown root:deploy \/etc\/disdex\/v12-v4-production-canary-permit\.json/);
+  assert.match(v4Unit, /ExecStartPre=\+\/usr\/bin\/chmod 0640 \/etc\/disdex\/v12-v4-production-canary-permit\.json/);
 });
 
 test("V4 runtime wiring keeps V4 primary and all peer pins explicit", () => {
@@ -26,8 +30,16 @@ test("V4 runtime wiring keeps V4 primary and all peer pins explicit", () => {
 test("runtime migration commands execute from the exact release root", () => {
   assert.match(
     wiring,
-    /assert_current_live_target_ready\n\s+cd "\$CURRENT_RELEASE"\s+\|\| return 1/,
+    /assert_current_live_target_ready\n\s+ensure_v4_canary_permit_runtime_access\n\s+cd "\$CURRENT_RELEASE"\s+\|\| return 1/,
   );
+});
+
+test("V4 canary permit runtime access is root-prepared and durable", () => {
+  assert.match(wiring, /ensure_v4_canary_permit_runtime_access\(\) \{/);
+  assert.match(wiring, /ensure_v4_canary_permit_runtime_access\n\s+cd "\$CURRENT_RELEASE"/);
+  assert.match(wiring, /chown root:deploy "\$permit"/);
+  assert.match(wiring, /chmod 0640 "\$permit"/);
+  assert.match(wiring, /root:deploy:640/);
 });
 
 test("V4 wiring does not authorize legacy V12 and V4 together", () => {
