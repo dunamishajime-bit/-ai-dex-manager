@@ -18,6 +18,28 @@ const MARGIN_UNIT = String(process.env.DISDEX_HEALTH_SNAPSHOT_MARGIN_SERVICE_UNI
 const MARGIN_RELEASE_ROOT = String(process.env.DISDEX_HEALTH_SNAPSHOT_MARGIN_RELEASE_ROOT || `/home/deploy/disdex-trading/releases/${DEFAULT_EXPECTED_SHA}`).trim();
 const MARGIN_FRESHNESS_GRACE_MS = 120_000;
 const SHARED_RISK_FRESHNESS_GRACE_MS = 120_000;
+const ASTER_RATE_BUDGET_PATH = configuredPath("DISDEX_HEALTH_SNAPSHOT_RATE_BUDGET_PATH", "/var/lib/disdex/shared/aster-rate-budget.json");
+const RATE_BACKLOG_DEGRADED_MS = 10_000;
+function classifySharedAsterRateBudget(raw, now) {
+    if (!raw || raw.schema !== "disdex-aster-rate-budget/v1"
+        || !Number.isFinite(raw.nextAllowedAt) || raw.nextAllowedAt < 0) {
+        return { status: "UNKNOWN", backlogMs: null, warning: "ASTER_RATE_BUDGET_STATE_INVALID" };
+    }
+    const backlogMs = Math.max(0, Math.ceil(raw.nextAllowedAt - now));
+    const status = backlogMs > RATE_BACKLOG_DEGRADED_MS ? "DEGRADED" : "HEALTHY";
+    return {
+        status,
+        backlogMs,
+        warning: status === "DEGRADED" ? "ASTER_SHARED_RATE_BUDGET_BACKLOG" : null,
+        lastPriority: raw.lastPriority || null,
+        lastRateLimitStatus: raw.lastRateLimitStatus || null,
+    };
+}
+async function sharedAsterRateBudgetStatus(now) {
+    try { return classifySharedAsterRateBudget(await json(ASTER_RATE_BUDGET_PATH), now); }
+    catch { return { status: "UNKNOWN", backlogMs: null, warning: "ASTER_SHARED_RATE_BUDGET_UNAVAILABLE" }; }
+}
+
 const IDLE_PARITY_CERT_SCHEMA = "disdex-idle-priority-parity-cert/v3";
 const IDLE_PARITY_REPLAY_MODEL = "FIXED_BASELINE_ACCEPTED_INTENTS_DYNAMIC_GROSS_V1";
 
@@ -556,6 +578,7 @@ async function main() {
     const sharedRiskService = await safetyServiceStatus("Shared Risk", SHARED_RISK_UNIT, SHARED_RISK_RELEASE_ROOT, "scripts/disdex-shared-crypto-risk-writer.ts");
     const marginGuard = await marginGuardStatus(now);
     const marginGuardService = await safetyServiceStatus("Margin Guard", MARGIN_UNIT, MARGIN_RELEASE_ROOT, "scripts/disdex_v96_v52_margin_guard_runtime.py");
+    const asterRateBudget = await sharedAsterRateBudgetStatus(now);
     const globalReasons = [killReason, sharedRisk.reason, sharedRiskService.reason, marginGuard.reason, marginGuardService.reason].filter(Boolean);
     const globalBlockReason = globalReasons.join("; ");
     const results = [];
@@ -573,7 +596,9 @@ async function main() {
         ? "BLOCKED"
         : overall.enabledRunnerBlocks.length > 0
             ? "PARTIAL"
-            : "HEALTHY";
+            : asterRateBudget.status !== "HEALTHY"
+                ? "DEGRADED"
+                : "HEALTHY";
     console.log(JSON.stringify({
         status: "DISDEX_RUNNER_HEALTH_SNAPSHOT_PASS",
         overallSafetyState,
@@ -588,6 +613,7 @@ async function main() {
         sharedRiskService,
         marginGuard,
         marginGuardService,
+        asterRateBudget,
         readOnly: true,
         tradingEffects: { ordersSent: 0, cancelSent: 0, positionChangesSent: 0 },
         ordersSent: 0,
@@ -596,6 +622,13 @@ async function main() {
 }
 
 function selfTest() {
+    const healthyBudget = classifySharedAsterRateBudget({ schema: "disdex-aster-rate-budget/v1", nextAllowedAt: 11_000 }, 10_000);
+    const degradedBudget = classifySharedAsterRateBudget({ schema: "disdex-aster-rate-budget/v1", nextAllowedAt: 25_001 }, 10_000);
+    const invalidBudget = classifySharedAsterRateBudget({ schema: "unexpected", nextAllowedAt: 10_000 }, 10_000);
+    if (healthyBudget.status !== "HEALTHY" || degradedBudget.status !== "DEGRADED"
+        || degradedBudget.backlogMs !== 15_001 || invalidBudget.status !== "UNKNOWN") {
+        throw new Error("shared Aster rate-budget health self-test failed");
+    }
     const blockedRunner = summarizeOverallSafety([], [{ runner: "V12_X1_ALL", safetyState: "BLOCKED" }]);
     if (!blockedRunner.blocked || blockedRunner.blockReasons.length !== 1) throw new Error("runner block did not block overall safety");
     const blockedDependency = summarizeOverallSafety(["Shared Risk service identity is not current"], [{ runner: "V12_X1_ALL", safetyState: "HEALTHY" }]);
