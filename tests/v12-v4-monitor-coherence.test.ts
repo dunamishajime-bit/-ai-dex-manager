@@ -73,6 +73,15 @@ test("full-live wiring promotes only the exact flat limited-scope V52 state",()=
  assert.match(wiring,/before-full-live-/);
 });
 
+test("V52 promotion success log uses one shell continuation",()=>{
+ const expected=String.raw`printf 'V52_FULL_LIVE_STATE_PROMOTE_PASS path=%s backup=%s sha=%s ordersSent=0 cancelSent=0 positionChangesSent=0\n' \
+    "$state_path" "$backup_path" "$DEPLOYED_SHA"`;
+ const broken=String.raw`printf 'V52_FULL_LIVE_STATE_PROMOTE_PASS path=%s backup=%s sha=%s ordersSent=0 cancelSent=0 positionChangesSent=0\n' \\
+    "$state_path"`;
+ assert.ok(wiring.includes(expected));
+ assert.ok(!wiring.includes(broken));
+});
+
 test("limited overlay keeps V52 disabled and does not use the full-live promotion",()=>{
  const limited=wiring.indexOf("if limited_overlay_scope_without_v52_preemption; then\n    ensure_v52_intentional_stop_marker");
  const promotion=wiring.indexOf("promote_v52_full_live_flat_state");

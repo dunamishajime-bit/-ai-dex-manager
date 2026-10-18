@@ -1457,7 +1457,7 @@ promote_v52_full_live_flat_state() {
     printf 'V52_FULL_LIVE_STATE_PROMOTE_READBACK_FAIL path=%s backup=%s\n' "$state_path" "$backup_path" >&2
     return 1
   }
-  printf 'V52_FULL_LIVE_STATE_PROMOTE_PASS path=%s backup=%s sha=%s ordersSent=0 cancelSent=0 positionChangesSent=0\n' \\
+  printf 'V52_FULL_LIVE_STATE_PROMOTE_PASS path=%s backup=%s sha=%s ordersSent=0 cancelSent=0 positionChangesSent=0\n' \
     "$state_path" "$backup_path" "$DEPLOYED_SHA"
 }
 
