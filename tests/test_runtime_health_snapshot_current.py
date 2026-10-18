@@ -114,5 +114,18 @@ class DependencyLivenessHealthTest(unittest.TestCase):
         self.assertIn("V52_DISABLED_STATE_SHA_MIGRATE_PASS", wiring)
         self.assertIn("V52_DISABLED_STATE_SHA_MIGRATE_NOT_FLAT", wiring)
 
+    def test_v4_cutover_resets_stale_decision_telemetry_before_start(self):
+        wiring = WIRING.read_text(encoding="utf-8")
+        self.assertIn("migrate_v4_telemetry_lineage", wiring)
+        self.assertIn("/var/lib/disdex/v12-v4/realtime-decision.json", wiring)
+        self.assertIn("/var/lib/disdex/v12-v4/gate-telemetry.json", wiring)
+        self.assertIn("V4_TELEMETRY_LINEAGE_MIGRATION", wiring)
+        self.assertIn("V4_TELEMETRY_LINEAGE_MIGRATION_NOT_FLAT", wiring)
+        self.assertIn("sourceRuntimeSha", wiring)
+        self.assertLess(
+            wiring.index("migrate_v4_telemetry_lineage"),
+            wiring.index("ensure_trading_unit_running"),
+        )
+
 if __name__ == "__main__":
     unittest.main()

@@ -626,6 +626,89 @@ migrate_v4_execution_lineage() {
     --ack I_ACK_V12_V4_FLAT_LINEAGE_MIGRATION_AFTER_SIGNED_RECONCILIATION
 }
 
+migrate_v4_telemetry_lineage() {
+  [[ "$PRIMARY_V12_MODE" == "V4" ]] || return 0
+  local execution_path=/var/lib/disdex/v12-v4/orders.json
+  [[ -f "$execution_path" && ! -L "$execution_path" ]] || return 0
+
+  # Decision/gate telemetry is derived state, not an execution ledger.  It is
+  # nevertheless consumed by HP and monitoring, so an old SHA must never be
+  # presented as a current decision after a cutover.  Only reset telemetry
+  # when the V4 execution store is flat and has no pending intent/protection;
+  # a non-flat store requires the venue-backed migration path instead.
+  if ! /usr/bin/jq -e '
+    ((.state.legs // {}) | length) == 0 and
+    ((.intents // {}) | length) == 0 and
+    ((.protections // {}) | length) == 0 and
+    ((.pending // null) == null) and
+    ((.state.pending // null) == null)
+  ' "$execution_path" >/dev/null 2>&1; then
+    printf 'V4_TELEMETRY_LINEAGE_MIGRATION_NOT_FLAT ordersSent=0 cancelsSent=0 positionChangesSent=0\n' >&2
+    return 1
+  fi
+
+  local telemetry_path from_sha backup_path temporary observed_at migrated=0
+  for telemetry_path in \
+    /var/lib/disdex/v12-v4/realtime-decision.json \
+    /var/lib/disdex/v12-v4/gate-telemetry.json; do
+    [[ -e "$telemetry_path" ]] || continue
+    [[ -f "$telemetry_path" && ! -L "$telemetry_path" ]] || {
+      printf 'V4 telemetry is not a regular file: %s\n' "$telemetry_path" >&2
+      return 1
+    }
+    from_sha="$(/usr/bin/jq -r '.runtimeSha // .releaseSha // .runtimeCommitSha // empty' "$telemetry_path" 2>/dev/null || true)"
+    [[ "$from_sha" =~ ^[0-9a-f]{40}$ ]] || {
+      printf 'V4 telemetry runtime SHA is missing or invalid: %s\n' "$telemetry_path" >&2
+      return 1
+    }
+    [[ "$from_sha" == "$V4_PRIMARY_SHA" ]] && continue
+
+    backup_path="${telemetry_path}.before-${V4_PRIMARY_SHA}"
+    if [[ -e "$backup_path" ]]; then
+      [[ -f "$backup_path" && ! -L "$backup_path" ]] || {
+        printf 'V4 telemetry backup is not a regular file: %s\n' "$backup_path" >&2
+        return 1
+      }
+      cmp -s "$telemetry_path" "$backup_path" || {
+        printf 'V4 telemetry backup mismatch: %s\n' "$backup_path" >&2
+        return 1
+      }
+    else
+      cp -p -- "$telemetry_path" "$backup_path"
+      chown root:root "$backup_path"
+      chmod 0600 "$backup_path"
+    fi
+
+    observed_at="$(date +%s%3N)"
+    temporary="${telemetry_path}.${V4_PRIMARY_SHA}.$$.tmp"
+    /usr/bin/jq \
+      --arg old "$from_sha" \
+      --arg new "$V4_PRIMARY_SHA" \
+      --arg operationMode "$V4_OPERATION_MODE" \
+      --argjson observedAt "$observed_at" \
+      'del(.signal, .decision, .candidate, .score, .ranking, .rank, .symbol,
+          .side, .entryPrice, .exitPrice, .blockReason, .gateReason, .selected,
+          .candidates) |
+       . + {
+         sourceRuntimeSha: $old,
+         runtimeSha: $new,
+         releaseSha: $new,
+         operationMode: $operationMode,
+         status: "STALE_RESET",
+         stale: true,
+         staleReason: "V4_TELEMETRY_LINEAGE_MIGRATION",
+         updatedAt: $observedAt
+       }' "$telemetry_path" > "$temporary"
+    chown deploy:deploy "$temporary"
+    chmod 0600 "$temporary"
+    mv -f -- "$temporary" "$telemetry_path"
+    printf 'V4_TELEMETRY_LINEAGE_MIGRATION path=%s fromSha=%s toSha=%s backup=%s ordersSent=0 cancelsSent=0 positionChangesSent=0\n' \
+      "$telemetry_path" "$from_sha" "$V4_PRIMARY_SHA" "$backup_path"
+    migrated=1
+  done
+  [[ "$migrated" == 1 ]] || printf 'V4_TELEMETRY_LINEAGE_CURRENT sha=%s ordersSent=0 cancelsSent=0 positionChangesSent=0\n' "$V4_PRIMARY_SHA"
+}
+
 recover_hype_benign_state() {
   "$CURRENT_RELEASE/node_modules/.bin/tsx" \
     "$CURRENT_RELEASE/scripts/disdex-hype-zec-benign-market-data-recovery.ts" \
@@ -2072,6 +2155,7 @@ ReadWritePaths=${IDLE_PRIORITY_STATE_ROOT} ${SHARED_ROOT}"
   normalize_position_recovery_state_lineage
   write_v4_primary_runtime_artifacts
   migrate_v4_execution_lineage
+  migrate_v4_telemetry_lineage
   systemctl daemon-reload
   if [[ "$PRIMARY_V12_MODE" == "V4" ]]; then
     persistently_mask_legacy_v12
