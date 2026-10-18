@@ -53,6 +53,33 @@ test("dormant flat Residual may outlive six hours only with fresh exact service 
  assert.throws(()=>v4PeerOwners(dead,sha,now),/STALE_PEER_OWNER_SNAPSHOT/);
 });
 
+test("flat peer state may outlive six hours only with exact live service attestation",()=>{
+ const dormant=sources();
+ for(const source of dormant)source.raw.updatedAt=now-8*3600000;
+ dormant[3].raw={schemaVersion:3,strategyId:"DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96",
+  runtimeCommitSha:sha,mode:"DISABLED",status:"intentional-stop",updatedAt:now-8*3600000,
+  positions:{},pending:null,manualReview:null,ordersAllowed:false,newOrdersAllowed:false};
+ dormant[3].service={unit:"disdex-v52-aster-only@"+sha+".service",active:false,retiredV12:false,
+  disabled:true,observedAt:now,mainPid:0};
+ dormant[6].raw.schema="disdex-idle-priority-state/v2";
+ assert.deepEqual(v4PeerOwners(dormant,sha,now,"ATTEST_EACH_PEER"),[]);
+
+ const positioned=sources();
+ for(const source of positioned)source.raw.updatedAt=now-8*3600000;
+ positioned[1].raw.position={symbol:"PENGUUSDT",side:"SHORT",quantity:1};
+ assert.throws(()=>v4PeerOwners(positioned,sha,now,"ATTEST_EACH_PEER"),/STALE_PEER_OWNER_SNAPSHOT/);
+
+ const pending=sources();
+ for(const source of pending)source.raw.updatedAt=now-8*3600000;
+ pending[2].raw.pending={phase:"planned"};
+ assert.throws(()=>v4PeerOwners(pending,sha,now,"ATTEST_EACH_PEER"),/STALE_PEER_OWNER_SNAPSHOT/);
+
+ const dead=sources();
+ for(const source of dead)source.raw.updatedAt=now-8*3600000;
+ dead[4].service!.active=false;
+ assert.throws(()=>v4PeerOwners(dead,sha,now,"ATTEST_EACH_PEER"),/STALE_PEER_OWNER_SNAPSHOT/);
+});
+
 test("an explicitly disabled flat V52 peer is attested without inventing a live service",()=>{
  const disabled=sources();
  disabled[3].raw={

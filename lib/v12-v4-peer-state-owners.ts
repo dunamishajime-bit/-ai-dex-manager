@@ -13,6 +13,26 @@ export function liveV4PeerLineageMode(mode:"CERTIFIED"|"CANARY"):V4PeerLineageMo
  return "ATTEST_EACH_PEER";
 }
 
+function isKnownFlatPeerState(kind:V4PeerKind,r:Record<string,any>):boolean{
+ const noUnresolvedWork=r.position==null&&r.pending==null&&r.pendingOrder==null&&
+  r.manualReview==null&&r.manualReviewReason==null&&r.executionReview==null&&
+  r.bootstrapRequired==null;
+ if(!noUnresolvedWork)return false;
+ if(kind==="PENGU")return r.version===2&&r.strategyId==="PENGU_DUAL_LS_V2_FINAL"&&
+  r.mode==="LIVE"&&r.position==null&&r.positions==null&&r.activePositions==null;
+ if(kind==="Q102")return r.version===1&&r.strategyId==="QUALITY102_CAUSAL_V1"&&
+  r.position==null&&r.positions==null&&r.activePositions==null;
+ if(kind==="FET")return r.schema==="fet-brk48-residual-state/v1"&&
+  r.strategyId==="FET_BRK48_RESIDUAL"&&r.position==null&&r.positions==null&&r.activePositions==null;
+ if(kind==="HYPE_LONG")return r.schema==="disdex-hype-zec-long/v1"&&
+  r.mode==="LIVE"&&r.positions===undefined&&r.position==null;
+ if(kind==="IDLE")return r.schema==="disdex-idle-priority-state/v2"&&
+  Array.isArray(r.positions)&&r.positions.length===0&&r.position==null;
+ if(kind==="RESIDUAL")return r.schema==="disdex-idle-residual-long-state/v1"&&
+  r.position==null;
+ return false;
+}
+
 export function v4PeerOwners(sources:V4PeerSource[],expectedSha:string,now:number,
  lineageMode:V4PeerLineageMode="UNIFIED_RELEASE"):ForeignExposure[]{
  const kinds:V4PeerKind[]=["V12","PENGU","Q102","V52","FET","HYPE_LONG","IDLE","RESIDUAL"];
@@ -65,10 +85,10 @@ export function v4PeerOwners(sources:V4PeerSource[],expectedSha:string,now:numbe
    r.position==null&&r.pending==null&&r.manualReview==null;
   if(!Number.isFinite(r.updatedAt)||age<0||
     (age>120000&&!(
-      (liveObservation&&age<=6*3600000)||
+      (liveObservation&&(age<=6*3600000||isKnownFlatPeerState(s.kind,r)))||
       retiredObservation||
       durableFlatResidual||
-      (disabledObservation&&age<=6*3600000)
+      disabledObservation
     )))throw Error("STALE_PEER_OWNER_SNAPSHOT");
   if(r.pending||r.pendingOrder||r.manualReview||r.manualReviewReason||
      r.executionReview||r.bootstrapRequired)throw Error("PEER_PENDING_OR_MANUAL_REVIEW:"+s.kind);
