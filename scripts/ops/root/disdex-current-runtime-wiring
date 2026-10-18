@@ -903,6 +903,26 @@ ExecStart=${CURRENT_RELEASE}/node_modules/.bin/tsx ${CURRENT_RELEASE}/scripts/op
   printf 'DISDEX_ACCOUNT_CONFIG_READINESS_RETARGETED unit=disdex-account-config-readiness.service sha=%s\n' "$DEPLOYED_SHA"
 }
 
+remove_stale_account_config_release_pin_dropins() {
+  local current_dropin="${ACCOUNT_CONFIG_DROPIN_DIR}/${CURRENT_SUPPORT_OVERRIDE}"
+  local archive_dir="/var/lib/disdex/runtime-wiring-archive/account-config/$(date -u +%Y%m%dT%H%M%SZ)-$$"
+  local dropin
+  [[ -d "$ACCOUNT_CONFIG_DROPIN_DIR" ]] || return 0
+  while IFS= read -r -d '' dropin; do
+    [[ "$dropin" == "$current_dropin" ]] && continue
+    # Only archive release-pinned account-config overrides.  Preserve
+    # unrelated local policy drop-ins rather than treating every .conf file as
+    # stale.  The archive is root-owned so rollback remains auditable.
+    if grep -Eq '/home/deploy/disdex-trading/releases/[0-9a-f]{40}|DISDEX_CONFIG_RUNTIME_SHA=[0-9a-f]{40}' "$dropin"; then
+      install -d -o root -g root -m 0700 "$archive_dir"
+      mv -f -- "$dropin" "$archive_dir/"
+      chown root:root "$archive_dir/$(basename -- "$dropin")"
+      chmod 0600 "$archive_dir/$(basename -- "$dropin")"
+      printf 'DISDEX_ACCOUNT_CONFIG_STALE_DROPIN_ARCHIVED path=%s archive=%s\n' "$dropin" "$archive_dir/$(basename -- "$dropin")"
+    fi
+  done < <(find "$ACCOUNT_CONFIG_DROPIN_DIR" -maxdepth 1 -type f -name '*.conf' -print0)
+}
+
 write_atomic_preserve_existing() {
   local target="$1" content="$2" directory temporary backup
   directory="$(dirname -- "$target")"
@@ -1761,6 +1781,7 @@ PENGU_DUAL_LS_V2_STATE_DIR=${PENGU_STATE_ROOT}
 PENGU_DUAL_LS_V2_KILL_SWITCH_FILE=${SHARED_ROOT}/kill-switch.json"
 
   retarget_account_config_readiness
+  remove_stale_account_config_release_pin_dropins
 
   # The shared contract env intentionally points at the root-only canonical
   # approval artifact for root-owned helpers.  Idle runs as deploy, so load a

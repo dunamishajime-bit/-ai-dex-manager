@@ -30,8 +30,8 @@ class AsterUpstreamRuntimeWiringTests(unittest.TestCase):
         self.assertIn('systemctl reset-failed disdex-v12-kill-switch-auto-repair.service', source)
         self.assertIn('CURRENT_SUPPORT_OVERRIDE="zzzzzzzzzzzzzzzzzzzz-current-release.conf"', source)
         watchdog = source.split('write_atomic "${WATCHDOG_DROPIN_DIR}/${CURRENT_SUPPORT_OVERRIDE}"', 1)[1].split('write_atomic "${SNAPSHOT_DROPIN_DIR}/${CURRENT_SUPPORT_OVERRIDE}"', 1)[0]
-        self.assertIn('WorkingDirectory=${CURRENT_RELEASE}', watchdog)
-        self.assertIn('ExecStart=/usr/bin/node ${CURRENT_RELEASE}/scripts/ops/root/disdex-runner-watchdog-current.mjs', watchdog)
+        self.assertIn('WorkingDirectory=${MONITOR_RUNTIME_ROOT}', watchdog)
+        self.assertIn('ExecStart=/usr/bin/node ${MONITOR_RUNTIME_ROOT}/scripts/ops/root/disdex-runner-watchdog-current.mjs', watchdog)
 
     def test_apply_removes_only_stale_auto_repair_v52_sha_pin_dropins(self):
         source = SOURCE.read_text(encoding="utf-8")
@@ -40,6 +40,14 @@ class AsterUpstreamRuntimeWiringTests(unittest.TestCase):
         self.assertIn('[[ "$dropin" == "$current_dropin" ]] && continue', source)
         self.assertIn('rm -f -- "$dropin"', source)
         self.assertIn('remove_stale_auto_repair_unit_pin_dropins', source[source.index('apply_wiring()'):])
+
+    def test_apply_removes_stale_account_config_release_pin_dropins(self):
+        source = SOURCE.read_text(encoding="utf-8")
+        self.assertIn("remove_stale_account_config_release_pin_dropins", source)
+        self.assertIn('ACCOUNT_CONFIG_DROPIN_DIR', source)
+        self.assertIn('DISDEX_CONFIG_RUNTIME_SHA=', source)
+        apply_block = source[source.index('apply_wiring()'):]
+        self.assertIn('remove_stale_account_config_release_pin_dropins', apply_block)
 
 
 class AutoRepairPathWiringTests(unittest.TestCase):
