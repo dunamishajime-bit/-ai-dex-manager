@@ -54,6 +54,9 @@ export function v4PeerOwners(sources:V4PeerSource[],expectedSha:string,now:numbe
   const liveObservation=obs&&obs.active&&obs.mainPid>0&&
    obs.observedAt<=now&&now-obs.observedAt<=15000&&
    obs.unit.endsWith("@"+attestedSha+".service");
+  const disabledObservation=obs?.disabled===true&&
+   obs.observedAt<=now&&now-obs.observedAt<=15000&&
+   obs.unit.endsWith("@"+attestedSha+".service");
   const retiredObservation=retired&&obs?.observedAt!==undefined&&
    obs.observedAt<=now&&now-obs.observedAt<=15000;
   const age=now-r.updatedAt;
@@ -64,10 +67,18 @@ export function v4PeerOwners(sources:V4PeerSource[],expectedSha:string,now:numbe
     (age>120000&&!(
       (liveObservation&&age<=6*3600000)||
       retiredObservation||
-      durableFlatResidual
+      durableFlatResidual||
+      (disabledObservation&&age<=6*3600000)
     )))throw Error("STALE_PEER_OWNER_SNAPSHOT");
   if(r.pending||r.pendingOrder||r.manualReview||r.manualReviewReason||
      r.executionReview||r.bootstrapRequired)throw Error("PEER_PENDING_OR_MANUAL_REVIEW:"+s.kind);
+  if(disabledObservation){
+   if(s.kind!=="V52"||r.mode!=="DISABLED"||r.ordersAllowed!==false||r.newOrdersAllowed!==false||
+      !r.positions||typeof r.positions!=="object"||Object.keys(r.positions).length!==0||
+      r.position||r.activePositions?.length)
+    throw Error("DISABLED_PEER_NOT_FLAT:"+s.kind);
+   continue;
+  }
   if(s.kind==="V12"){
    if(r.schema!=="v12-x1-all-runner-state/v2"||
       r.strategyId!=="V12_X1.00_ALL"||r.mode!=="LIVE"||

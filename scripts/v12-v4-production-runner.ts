@@ -113,7 +113,14 @@ async function loadPeers(releaseSha:string,lineageMode:V4PeerLineageMode="UNIFIE
   let programSha=String(raw.runtimeCommitSha??raw.runtimeSha??"").toLowerCase();
   let programShaSource:"STATE"|"SYSTEMD"="STATE";
   let service;
-  if(kind!=="V12"&&lineageMode==="ATTEST_EACH_PEER"&&!/^[a-f0-9]{40}$/.test(programSha)){
+  const explicitlyDisabledV52=kind==="V52"&&raw.mode==="DISABLED"&&raw.ordersAllowed===false&&raw.newOrdersAllowed===false&&
+   raw.pending==null&&raw.pendingOrder==null&&raw.manualReview==null&&raw.manualReviewReason==null&&
+   raw.position==null&&raw.positions&&typeof raw.positions==="object"&&Object.keys(raw.positions).length===0&&
+   Number.isFinite(Number(raw.updatedAt));
+  if(explicitlyDisabledV52){
+   if(!/^[a-f0-9]{40}$/.test(programSha))throw Error("V4_DISABLED_PEER_RELEASE_NOT_ATTESTED:V52");
+   service={unit:"disdex-v52-aster-only@"+programSha+".service",active:false,retiredV12:false,disabled:true,observedAt:Date.now(),mainPid:0};
+  }else if(kind!=="V12"&&lineageMode==="ATTEST_EACH_PEER"&&!/^[a-f0-9]{40}$/.test(programSha)){
    const current=await observeCurrentV4PeerService(kind);
    programSha=current.sha;service=current.service;programShaSource="SYSTEMD";
   }else{
@@ -121,7 +128,7 @@ async function loadPeers(releaseSha:string,lineageMode:V4PeerLineageMode="UNIFIE
    const serviceSha=kind==="V12"||lineageMode==="UNIFIED_RELEASE"?releaseSha:programSha;
    service=await observeV4PeerService(kind,serviceSha);
   }
-  if(!service.retiredV12&&!service.active)throw Error("V4_PEER_SERVICE_NOT_ATTESTED:"+kind);
+  if(!service.retiredV12&&!service.active&&!service.disabled)throw Error("V4_PEER_SERVICE_NOT_ATTESTED:"+kind);
   return {kind,programSha,programShaSource,raw,service};
  }));
 }

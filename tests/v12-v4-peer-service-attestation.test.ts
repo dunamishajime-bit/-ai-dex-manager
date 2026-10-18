@@ -53,6 +53,24 @@ test("dormant flat Residual may outlive six hours only with fresh exact service 
  assert.throws(()=>v4PeerOwners(dead,sha,now),/STALE_PEER_OWNER_SNAPSHOT/);
 });
 
+test("an explicitly disabled flat V52 peer is attested without inventing a live service",()=>{
+ const disabled=sources();
+ disabled[3].raw={
+  schemaVersion:3,strategyId:"DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96",
+  runtimeCommitSha:sha,mode:"DISABLED",status:"intentional-stop",updatedAt:now,
+  positions:{},pending:null,manualReview:null,ordersAllowed:false,newOrdersAllowed:false,
+ };
+ disabled[3].programSha=sha;
+ disabled[3].service={
+  unit:"disdex-v52-aster-only@"+sha+".service",active:false,retiredV12:false,
+  disabled:true,observedAt:now,mainPid:0,
+ };
+ assert.deepEqual(v4PeerOwners(disabled,sha,now,"ATTEST_EACH_PEER"),[]);
+ const exposed=structuredClone(disabled);
+ exposed[3].raw.positions={DOGEUSDT:{quantity:1}};
+ assert.throws(()=>v4PeerOwners(exposed,sha,now,"ATTEST_EACH_PEER"),/DISABLED_PEER_NOT_FLAT/);
+});
+
 test("retired legacy V12 must be flat and cannot conceal pending work",()=>{
  const okay=sources();assert.deepEqual(v4PeerOwners(okay,sha,now),[]);
  const positioned=sources();positioned[0].raw.activePositions=[{symbol:"ADAUSDT",side:"LONG",quantity:3}];

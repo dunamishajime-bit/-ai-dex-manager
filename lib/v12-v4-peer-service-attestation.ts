@@ -14,6 +14,7 @@ const PREFIX:Record<Exclude<V4PeerKind,"V12">,string>={
 };
 export type V4ServiceObservation={
  unit:string;active:boolean;retiredV12:boolean;observedAt:number;mainPid:number;
+ disabled?:boolean;
 };
 export function parseV4SystemdShow(text:string,expectedUnit:string,now:number):V4ServiceObservation{
  const data=Object.fromEntries(text.split(/\r?\n/).filter(x=>x.includes("="))
