@@ -141,11 +141,36 @@ async function assertOperatorActivation(runtime: IdlePriorityShortRuntime) {
     if (!stats.isFile() || stats.isSymbolicLink()) throw new Error("OPERATOR_LIVE_ACTIVATION_REQUIRED:ARTIFACT_NOT_REGULAR_FILE");
     if (typeof stats.uid === "number" && (stats.uid !== 0 || stats.gid !== 0)) throw new Error("OPERATOR_LIVE_ACTIVATION_REQUIRED:ARTIFACT_NOT_ROOT_OWNED");
     if ((stats.mode & 0o022) !== 0) throw new Error("OPERATOR_LIVE_ACTIVATION_REQUIRED:ARTIFACT_WRITABLE_BY_NON_ROOT");
-    const artifact = JSON.parse(await readFile(runtime.operatorActivationPath, "utf8")) as { schema?: string; approvedSha?: string; target?: string; ordersEnabled?: boolean; operatorAcknowledgement?: string; approvedRunners?: unknown[]; approvedAt?: string };
+    const artifact = JSON.parse(await readFile(runtime.operatorActivationPath, "utf8")) as {
+        schema?: string; approvedSha?: string; target?: string; ordersEnabled?: boolean;
+        operatorAcknowledgement?: string; approvedRunners?: unknown[]; approvedAt?: string;
+        activationClass?: string; limitedOverlayRunners?: unknown[]; unchangedPeerRunners?: unknown[];
+        existingEvidenceBaseline?: boolean; formalCertification?: boolean; venueLifecycleCertified?: boolean;
+        naturalSignalsOnly?: boolean; stopReadbackRequired?: boolean; testnetLifecycleRequired?: boolean;
+        existingStrategyGatesOnly?: boolean; initialPositionLimit?: number;
+        evidence?: { ciRunId?: string; signedAsterReadOnly?: boolean; positionsReconciled?: boolean;
+            pendingExposureReconciled?: boolean; sharedRiskHealthy?: boolean; marginGuardHealthy?: boolean };
+    };
     if (artifact.schema !== "disdex-live-operator-activation/v1") throw new Error("OPERATOR_LIVE_ACTIVATION_REQUIRED:ARTIFACT_MISSING_OR_INVALID");
     if (String(artifact.approvedSha || "").toLowerCase() !== runtime.runtimeSha) throw new Error("OPERATOR_LIVE_ACTIVATION_REQUIRED:SHA_MISMATCH");
     if (artifact.target !== readiness.target) throw new Error("OPERATOR_LIVE_ACTIVATION_REQUIRED:TARGET_MISMATCH");
-    if (artifact.ordersEnabled !== true || artifact.operatorAcknowledgement !== "I_ACK_REAL_MONEY_LIVE_ACTIVATION") throw new Error("OPERATOR_LIVE_ACTIVATION_REQUIRED:ACK_MISSING");
+    if (artifact.ordersEnabled !== true) throw new Error("OPERATOR_LIVE_ACTIVATION_REQUIRED:ACK_MISSING");
+    const activationClass = String(artifact.activationClass || "FULL_LIVE").trim().toUpperCase();
+    if (activationClass === "LIMITED_OVERLAY_LIVE") {
+        const e = artifact.evidence;
+        if (artifact.operatorAcknowledgement !== "I_ACK_LIMITED_OVERLAY_LIVE_WITH_EXISTING_EVIDENCE"
+            || !artifact.limitedOverlayRunners?.includes(IDLE_PRIORITY_SHORT_STRATEGY)
+            || artifact.existingEvidenceBaseline !== true || artifact.formalCertification !== false
+            || artifact.venueLifecycleCertified !== false || artifact.naturalSignalsOnly !== true
+            || artifact.stopReadbackRequired !== true || artifact.testnetLifecycleRequired !== false
+            || artifact.existingStrategyGatesOnly !== true || artifact.initialPositionLimit !== 1
+            || e?.ciRunId !== "39093213253" || e.signedAsterReadOnly !== true
+            || e.positionsReconciled === false || e.pendingExposureReconciled === false
+            || e.sharedRiskHealthy !== true || e.marginGuardHealthy !== true)
+            throw new Error("OPERATOR_LIVE_ACTIVATION_REQUIRED:LIMITED_EVIDENCE_CONTRACT_INVALID");
+    } else if (activationClass !== "FULL_LIVE" || artifact.operatorAcknowledgement !== "I_ACK_REAL_MONEY_LIVE_ACTIVATION") {
+        throw new Error("OPERATOR_LIVE_ACTIVATION_REQUIRED:ACK_MISSING");
+    }
     if (!Array.isArray(artifact.approvedRunners) || !artifact.approvedRunners.includes(IDLE_PRIORITY_SHORT_STRATEGY)) throw new Error("OPERATOR_LIVE_ACTIVATION_REQUIRED:RUNNER_NOT_APPROVED:IDLE_PRIORITY_SHORT");
     const approvedAt = Date.parse(String(artifact.approvedAt || ""));
     if (!Number.isFinite(approvedAt) || approvedAt <= 0 || approvedAt > Date.now() + 300_000) throw new Error("OPERATOR_LIVE_ACTIVATION_REQUIRED:APPROVED_AT_INVALID");
