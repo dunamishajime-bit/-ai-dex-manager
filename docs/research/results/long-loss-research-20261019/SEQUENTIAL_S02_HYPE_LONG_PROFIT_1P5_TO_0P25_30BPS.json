@@ -1,0 +1,32 @@
+{
+  "policy": "S02_HYPE_LONG_PROFIT_1P5_TO_0P25",
+  "cost_bps": 30,
+  "full8_final_jpy": 94624880.72511986,
+  "full8_max_dd_pct": -17.3115,
+  "full8_pf": 2.747692342774224,
+  "win_pct": 68.802,
+  "closed_trades": 1311,
+  "accounting": "PASS",
+  "scenario_specs": [
+    {
+      "id": "HYPE_LONG_PROFIT_1P5_TO_0P25",
+      "target": "HYPE_LONG",
+      "side": "LONG",
+      "axis": "profit_reversal",
+      "arm_close_pct": 0.015,
+      "locked_profit_pct": 0.0025,
+      "stop_slip_bps": 10
+    }
+  ],
+  "exit_audit": {
+    "HYPE_LONG_PROFIT_1P5_TO_0P25": {
+      "preempted": 17,
+      "by_outcome": {
+        "original_win": 9,
+        "original_loss": 8
+      }
+    }
+  },
+  "model": "2026-10-17 latest8 M5 public historical normalized Aster, frozen V4 source",
+  "research_only": true
+}

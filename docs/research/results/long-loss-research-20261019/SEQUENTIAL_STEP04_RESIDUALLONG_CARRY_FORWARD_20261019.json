@@ -1,0 +1,678 @@
+{
+  "status": "S04_COMPLETE_RESEARCH_ONLY_NOT_LIVE_CERTIFIED",
+  "reference_input_sha256": "214d625cba8c9baf36478039d69e09c0a1ec3e60ee3874ec05b9cfbde6e0c0bc",
+  "stage": "S04",
+  "predecessor": "S02 HYPE LONG wallet STOP=1.5% (flat DD, lower loss both costs) provisional research carry-forward",
+  "source": "2026-10-17 full8 5m frozen replay",
+  "controls": [
+    {
+      "policy": "CUM_S02_HYPE_LONG_INITIAL_WALLET_1P5",
+      "cost_bps": 10,
+      "full8_final_jpy": 223577027.52434087,
+      "full8_max_dd_pct": -15.6206,
+      "full8_pf": 3.470877321919843,
+      "win_pct": 72.366,
+      "closed_trades": 1310,
+      "accounting": "PASS",
+      "scenario_specs": [
+        {
+          "id": "HYPE_LONG_INITIAL_WALLET_1P5",
+          "target": "HYPE_LONG",
+          "side": "LONG",
+          "axis": "initial_adverse",
+          "max_initial_wallet_loss_pct": 0.015,
+          "stop_slip_bps": 10
+        }
+      ],
+      "exit_audit": {
+        "HYPE_LONG_INITIAL_WALLET_1P5": {
+          "preempted": 12,
+          "by_outcome": {
+            "original_win": 1,
+            "original_loss": 11
+          }
+        }
+      },
+      "model": "2026-10-17 latest8 M5 public historical normalized Aster, frozen V4 source",
+      "research_only": true
+    },
+    {
+      "policy": "CUM_S02_HYPE_LONG_INITIAL_WALLET_1P5",
+      "cost_bps": 30,
+      "full8_final_jpy": 123603207.2710779,
+      "full8_max_dd_pct": -16.7878,
+      "full8_pf": 2.972359399654795,
+      "win_pct": 69.525,
+      "closed_trades": 1306,
+      "accounting": "PASS",
+      "scenario_specs": [
+        {
+          "id": "HYPE_LONG_INITIAL_WALLET_1P5",
+          "target": "HYPE_LONG",
+          "side": "LONG",
+          "axis": "initial_adverse",
+          "max_initial_wallet_loss_pct": 0.015,
+          "stop_slip_bps": 10
+        }
+      ],
+      "exit_audit": {
+        "HYPE_LONG_INITIAL_WALLET_1P5": {
+          "preempted": 12,
+          "by_outcome": {
+            "original_win": 1,
+            "original_loss": 11
+          }
+        }
+      },
+      "model": "2026-10-17 latest8 M5 public historical normalized Aster, frozen V4 source",
+      "research_only": true
+    }
+  ],
+  "baseline_target_loss": {
+    "10": {
+      "n": 29,
+      "wins": 15,
+      "losses": 14,
+      "negative_realized_sum_pnl_units": -45954.363,
+      "positive_realized_sum_pnl_units": 10823.2744,
+      "sum_negative_wallet_contributions_pp": -33.422,
+      "worst_trade_wallet_pct": -5.649,
+      "exit_reasons": {
+        "FORMAL_PRIORITY": 13,
+        "TIME_EXIT": 11,
+        "IDLE_SHORT_PRIORITY": 5
+      }
+    },
+    "30": {
+      "n": 28,
+      "wins": 12,
+      "losses": 16,
+      "negative_realized_sum_pnl_units": -23780.2443,
+      "positive_realized_sum_pnl_units": 2236.2657,
+      "sum_negative_wallet_contributions_pp": -36.5508,
+      "worst_trade_wallet_pct": -5.8435,
+      "exit_reasons": {
+        "FORMAL_PRIORITY": 12,
+        "TIME_EXIT": 11,
+        "IDLE_SHORT_PRIORITY": 5
+      }
+    }
+  },
+  "trials": [
+    {
+      "option": {
+        "id": "RESIDUAL_LONG_PROFIT_1P5_TO_0P25",
+        "target": "RESIDUAL",
+        "side": "LONG",
+        "axis": "profit_reversal",
+        "arm_close_pct": 0.015,
+        "locked_profit_pct": 0.0025,
+        "stop_slip_bps": 10
+      },
+      "policy": "S04_RESIDUAL_LONG_RESIDUAL_LONG_PROFIT_1P5_TO_0P25",
+      "cases": [
+        {
+          "cost_bps": 10,
+          "max_dd_pct": -15.6224,
+          "dd_delta_pctpoints": -0.0018,
+          "asset_jpy": 223628825.41993546,
+          "asset_delta_jpy": 51797.89559459686,
+          "RESIDUAL_LONG_baseline": {
+            "n": 29,
+            "wins": 15,
+            "losses": 14,
+            "negative_realized_sum_pnl_units": -45954.363,
+            "positive_realized_sum_pnl_units": 10823.2744,
+            "sum_negative_wallet_contributions_pp": -33.422,
+            "worst_trade_wallet_pct": -5.649,
+            "exit_reasons": {
+              "FORMAL_PRIORITY": 13,
+              "TIME_EXIT": 11,
+              "IDLE_SHORT_PRIORITY": 5
+            }
+          },
+          "RESIDUAL_LONG_candidate": {
+            "n": 32,
+            "wins": 19,
+            "losses": 13,
+            "negative_realized_sum_pnl_units": -45973.656,
+            "positive_realized_sum_pnl_units": 10832.1324,
+            "sum_negative_wallet_contributions_pp": -33.6329,
+            "worst_trade_wallet_pct": -5.649,
+            "exit_reasons": {
+              "FORMAL_PRIORITY": 13,
+              "RESEARCH_RESIDUAL_LONG_PROFIT_1P5_TO_0P25_5M_STOP": 6,
+              "TIME_EXIT": 8,
+              "IDLE_SHORT_PRIORITY": 5
+            }
+          },
+          "saved_aggregate_wallet_loss_pp": -0.2109,
+          "worst_loss_reduction_pctpoints": 0.0,
+          "exit_audit": {
+            "HYPE_LONG_INITIAL_WALLET_1P5": {
+              "preempted": 12,
+              "by_outcome": {
+                "original_win": 1,
+                "original_loss": 11
+              }
+            },
+            "RESIDUAL_LONG_PROFIT_1P5_TO_0P25": {
+              "preempted": 201,
+              "by_outcome": {
+                "original_win": 115,
+                "original_loss": 86
+              }
+            }
+          }
+        },
+        {
+          "cost_bps": 30,
+          "max_dd_pct": -16.7886,
+          "dd_delta_pctpoints": -0.0008,
+          "asset_jpy": 123572439.10872915,
+          "asset_delta_jpy": -30768.162348747253,
+          "RESIDUAL_LONG_baseline": {
+            "n": 28,
+            "wins": 12,
+            "losses": 16,
+            "negative_realized_sum_pnl_units": -23780.2443,
+            "positive_realized_sum_pnl_units": 2236.2657,
+            "sum_negative_wallet_contributions_pp": -36.5508,
+            "worst_trade_wallet_pct": -5.8435,
+            "exit_reasons": {
+              "FORMAL_PRIORITY": 12,
+              "TIME_EXIT": 11,
+              "IDLE_SHORT_PRIORITY": 5
+            }
+          },
+          "RESIDUAL_LONG_candidate": {
+            "n": 31,
+            "wins": 11,
+            "losses": 20,
+            "negative_realized_sum_pnl_units": -23770.0202,
+            "positive_realized_sum_pnl_units": 2235.322,
+            "sum_negative_wallet_contributions_pp": -36.3709,
+            "worst_trade_wallet_pct": -5.8435,
+            "exit_reasons": {
+              "FORMAL_PRIORITY": 12,
+              "RESEARCH_RESIDUAL_LONG_PROFIT_1P5_TO_0P25_5M_STOP": 6,
+              "TIME_EXIT": 8,
+              "IDLE_SHORT_PRIORITY": 5
+            }
+          },
+          "saved_aggregate_wallet_loss_pp": 0.1799,
+          "worst_loss_reduction_pctpoints": 0.0,
+          "exit_audit": {
+            "HYPE_LONG_INITIAL_WALLET_1P5": {
+              "preempted": 12,
+              "by_outcome": {
+                "original_win": 1,
+                "original_loss": 11
+              }
+            },
+            "RESIDUAL_LONG_PROFIT_1P5_TO_0P25": {
+              "preempted": 201,
+              "by_outcome": {
+                "original_win": 115,
+                "original_loss": 86
+              }
+            }
+          }
+        }
+      ],
+      "accept_dd_both_costs": false,
+      "accept_loss_reduction_flat_dd_both_costs": false
+    },
+    {
+      "option": {
+        "id": "RESIDUAL_LONG_PROFIT_2P5_TO_0P5",
+        "target": "RESIDUAL",
+        "side": "LONG",
+        "axis": "profit_reversal",
+        "arm_close_pct": 0.025,
+        "locked_profit_pct": 0.005,
+        "stop_slip_bps": 10
+      },
+      "policy": "S04_RESIDUAL_LONG_RESIDUAL_LONG_PROFIT_2P5_TO_0P5",
+      "cases": [
+        {
+          "cost_bps": 10,
+          "max_dd_pct": -15.6197,
+          "dd_delta_pctpoints": 0.0009,
+          "asset_jpy": 223769095.8198632,
+          "asset_delta_jpy": 192068.2955223322,
+          "RESIDUAL_LONG_baseline": {
+            "n": 29,
+            "wins": 15,
+            "losses": 14,
+            "negative_realized_sum_pnl_units": -45954.363,
+            "positive_realized_sum_pnl_units": 10823.2744,
+            "sum_negative_wallet_contributions_pp": -33.422,
+            "worst_trade_wallet_pct": -5.649,
+            "exit_reasons": {
+              "FORMAL_PRIORITY": 13,
+              "TIME_EXIT": 11,
+              "IDLE_SHORT_PRIORITY": 5
+            }
+          },
+          "RESIDUAL_LONG_candidate": {
+            "n": 31,
+            "wins": 17,
+            "losses": 14,
+            "negative_realized_sum_pnl_units": -46026.1348,
+            "positive_realized_sum_pnl_units": 10900.1031,
+            "sum_negative_wallet_contributions_pp": -33.9896,
+            "worst_trade_wallet_pct": -5.649,
+            "exit_reasons": {
+              "FORMAL_PRIORITY": 13,
+              "TIME_EXIT": 10,
+              "RESEARCH_RESIDUAL_LONG_PROFIT_2P5_TO_0P5_5M_STOP": 3,
+              "IDLE_SHORT_PRIORITY": 5
+            }
+          },
+          "saved_aggregate_wallet_loss_pp": -0.5676,
+          "worst_loss_reduction_pctpoints": 0.0,
+          "exit_audit": {
+            "HYPE_LONG_INITIAL_WALLET_1P5": {
+              "preempted": 12,
+              "by_outcome": {
+                "original_win": 1,
+                "original_loss": 11
+              }
+            },
+            "RESIDUAL_LONG_PROFIT_2P5_TO_0P5": {
+              "preempted": 82,
+              "by_outcome": {
+                "original_win": 49,
+                "original_loss": 33
+              }
+            }
+          }
+        },
+        {
+          "cost_bps": 30,
+          "max_dd_pct": -16.7884,
+          "dd_delta_pctpoints": -0.0006,
+          "asset_jpy": 123800449.87083091,
+          "asset_delta_jpy": 197242.5997530073,
+          "RESIDUAL_LONG_baseline": {
+            "n": 28,
+            "wins": 12,
+            "losses": 16,
+            "negative_realized_sum_pnl_units": -23780.2443,
+            "positive_realized_sum_pnl_units": 2236.2657,
+            "sum_negative_wallet_contributions_pp": -36.5508,
+            "worst_trade_wallet_pct": -5.8435,
+            "exit_reasons": {
+              "FORMAL_PRIORITY": 12,
+              "TIME_EXIT": 11,
+              "IDLE_SHORT_PRIORITY": 5
+            }
+          },
+          "RESIDUAL_LONG_candidate": {
+            "n": 30,
+            "wins": 15,
+            "losses": 15,
+            "negative_realized_sum_pnl_units": -23811.5151,
+            "positive_realized_sum_pnl_units": 2252.5319,
+            "sum_negative_wallet_contributions_pp": -36.0142,
+            "worst_trade_wallet_pct": -5.8435,
+            "exit_reasons": {
+              "FORMAL_PRIORITY": 12,
+              "TIME_EXIT": 10,
+              "RESEARCH_RESIDUAL_LONG_PROFIT_2P5_TO_0P5_5M_STOP": 3,
+              "IDLE_SHORT_PRIORITY": 5
+            }
+          },
+          "saved_aggregate_wallet_loss_pp": 0.5366,
+          "worst_loss_reduction_pctpoints": 0.0,
+          "exit_audit": {
+            "HYPE_LONG_INITIAL_WALLET_1P5": {
+              "preempted": 12,
+              "by_outcome": {
+                "original_win": 1,
+                "original_loss": 11
+              }
+            },
+            "RESIDUAL_LONG_PROFIT_2P5_TO_0P5": {
+              "preempted": 82,
+              "by_outcome": {
+                "original_win": 49,
+                "original_loss": 33
+              }
+            }
+          }
+        }
+      ],
+      "accept_dd_both_costs": false,
+      "accept_loss_reduction_flat_dd_both_costs": false
+    },
+    {
+      "option": {
+        "id": "RESIDUAL_LONG_INITIAL_WALLET_2P0",
+        "target": "RESIDUAL",
+        "side": "LONG",
+        "axis": "initial_adverse",
+        "max_initial_wallet_loss_pct": 0.02,
+        "stop_slip_bps": 10
+      },
+      "policy": "S04_RESIDUAL_LONG_RESIDUAL_LONG_INITIAL_WALLET_2P0",
+      "cases": [
+        {
+          "cost_bps": 10,
+          "max_dd_pct": -15.6204,
+          "dd_delta_pctpoints": 0.0002,
+          "asset_jpy": 226445616.71797314,
+          "asset_delta_jpy": 2868589.193632275,
+          "RESIDUAL_LONG_baseline": {
+            "n": 29,
+            "wins": 15,
+            "losses": 14,
+            "negative_realized_sum_pnl_units": -45954.363,
+            "positive_realized_sum_pnl_units": 10823.2744,
+            "sum_negative_wallet_contributions_pp": -33.422,
+            "worst_trade_wallet_pct": -5.649,
+            "exit_reasons": {
+              "FORMAL_PRIORITY": 13,
+              "TIME_EXIT": 11,
+              "IDLE_SHORT_PRIORITY": 5
+            }
+          },
+          "RESIDUAL_LONG_candidate": {
+            "n": 33,
+            "wins": 14,
+            "losses": 19,
+            "negative_realized_sum_pnl_units": -37112.7244,
+            "positive_realized_sum_pnl_units": 10825.4041,
+            "sum_negative_wallet_contributions_pp": -34.8245,
+            "worst_trade_wallet_pct": -2.4139,
+            "exit_reasons": {
+              "RESEARCH_RESIDUAL_LONG_INITIAL_WALLET_2P0_5M_STOP": 14,
+              "TIME_EXIT": 8,
+              "FORMAL_PRIORITY": 9,
+              "IDLE_SHORT_PRIORITY": 2
+            }
+          },
+          "saved_aggregate_wallet_loss_pp": -1.4025,
+          "worst_loss_reduction_pctpoints": 3.2351,
+          "exit_audit": {
+            "HYPE_LONG_INITIAL_WALLET_1P5": {
+              "preempted": 12,
+              "by_outcome": {
+                "original_win": 1,
+                "original_loss": 11
+              }
+            },
+            "RESIDUAL_LONG_INITIAL_WALLET_2P0": {
+              "preempted": 451,
+              "by_outcome": {
+                "original_win": 81,
+                "original_loss": 370
+              }
+            }
+          }
+        },
+        {
+          "cost_bps": 30,
+          "max_dd_pct": -16.7908,
+          "dd_delta_pctpoints": -0.003,
+          "asset_jpy": 125312680.78120567,
+          "asset_delta_jpy": 1709473.510127768,
+          "RESIDUAL_LONG_baseline": {
+            "n": 28,
+            "wins": 12,
+            "losses": 16,
+            "negative_realized_sum_pnl_units": -23780.2443,
+            "positive_realized_sum_pnl_units": 2236.2657,
+            "sum_negative_wallet_contributions_pp": -36.5508,
+            "worst_trade_wallet_pct": -5.8435,
+            "exit_reasons": {
+              "FORMAL_PRIORITY": 12,
+              "TIME_EXIT": 11,
+              "IDLE_SHORT_PRIORITY": 5
+            }
+          },
+          "RESIDUAL_LONG_candidate": {
+            "n": 32,
+            "wins": 11,
+            "losses": 21,
+            "negative_realized_sum_pnl_units": -18545.5915,
+            "positive_realized_sum_pnl_units": 2109.6423,
+            "sum_negative_wallet_contributions_pp": -39.6102,
+            "worst_trade_wallet_pct": -2.6117,
+            "exit_reasons": {
+              "RESEARCH_RESIDUAL_LONG_INITIAL_WALLET_2P0_5M_STOP": 14,
+              "TIME_EXIT": 8,
+              "FORMAL_PRIORITY": 8,
+              "IDLE_SHORT_PRIORITY": 2
+            }
+          },
+          "saved_aggregate_wallet_loss_pp": -3.0594,
+          "worst_loss_reduction_pctpoints": 3.2318,
+          "exit_audit": {
+            "HYPE_LONG_INITIAL_WALLET_1P5": {
+              "preempted": 12,
+              "by_outcome": {
+                "original_win": 1,
+                "original_loss": 11
+              }
+            },
+            "RESIDUAL_LONG_INITIAL_WALLET_2P0": {
+              "preempted": 451,
+              "by_outcome": {
+                "original_win": 81,
+                "original_loss": 370
+              }
+            }
+          }
+        }
+      ],
+      "accept_dd_both_costs": false,
+      "accept_loss_reduction_flat_dd_both_costs": false
+    },
+    {
+      "option": {
+        "id": "RESIDUAL_LONG_INITIAL_WALLET_3P0",
+        "target": "RESIDUAL",
+        "side": "LONG",
+        "axis": "initial_adverse",
+        "max_initial_wallet_loss_pct": 0.03,
+        "stop_slip_bps": 10
+      },
+      "policy": "S04_RESIDUAL_LONG_RESIDUAL_LONG_INITIAL_WALLET_3P0",
+      "cases": [
+        {
+          "cost_bps": 10,
+          "max_dd_pct": -15.6121,
+          "dd_delta_pctpoints": 0.0085,
+          "asset_jpy": 224283555.77562255,
+          "asset_delta_jpy": 706528.2512816787,
+          "RESIDUAL_LONG_baseline": {
+            "n": 29,
+            "wins": 15,
+            "losses": 14,
+            "negative_realized_sum_pnl_units": -45954.363,
+            "positive_realized_sum_pnl_units": 10823.2744,
+            "sum_negative_wallet_contributions_pp": -33.422,
+            "worst_trade_wallet_pct": -5.649,
+            "exit_reasons": {
+              "FORMAL_PRIORITY": 13,
+              "TIME_EXIT": 11,
+              "IDLE_SHORT_PRIORITY": 5
+            }
+          },
+          "RESIDUAL_LONG_candidate": {
+            "n": 31,
+            "wins": 13,
+            "losses": 18,
+            "negative_realized_sum_pnl_units": -37609.2549,
+            "positive_realized_sum_pnl_units": 10440.9513,
+            "sum_negative_wallet_contributions_pp": -35.5845,
+            "worst_trade_wallet_pct": -3.2049,
+            "exit_reasons": {
+              "RESEARCH_RESIDUAL_LONG_INITIAL_WALLET_3P0_5M_STOP": 7,
+              "TIME_EXIT": 10,
+              "FORMAL_PRIORITY": 10,
+              "IDLE_SHORT_PRIORITY": 4
+            }
+          },
+          "saved_aggregate_wallet_loss_pp": -2.1625,
+          "worst_loss_reduction_pctpoints": 2.4441,
+          "exit_audit": {
+            "HYPE_LONG_INITIAL_WALLET_1P5": {
+              "preempted": 12,
+              "by_outcome": {
+                "original_win": 1,
+                "original_loss": 11
+              }
+            },
+            "RESIDUAL_LONG_INITIAL_WALLET_3P0": {
+              "preempted": 271,
+              "by_outcome": {
+                "original_win": 21,
+                "original_loss": 250
+              }
+            }
+          }
+        },
+        {
+          "cost_bps": 30,
+          "max_dd_pct": -16.8001,
+          "dd_delta_pctpoints": -0.0123,
+          "asset_jpy": 121746270.61408514,
+          "asset_delta_jpy": -1856936.6569927633,
+          "RESIDUAL_LONG_baseline": {
+            "n": 28,
+            "wins": 12,
+            "losses": 16,
+            "negative_realized_sum_pnl_units": -23780.2443,
+            "positive_realized_sum_pnl_units": 2236.2657,
+            "sum_negative_wallet_contributions_pp": -36.5508,
+            "worst_trade_wallet_pct": -5.8435,
+            "exit_reasons": {
+              "FORMAL_PRIORITY": 12,
+              "TIME_EXIT": 11,
+              "IDLE_SHORT_PRIORITY": 5
+            }
+          },
+          "RESIDUAL_LONG_candidate": {
+            "n": 30,
+            "wins": 10,
+            "losses": 20,
+            "negative_realized_sum_pnl_units": -18615.1541,
+            "positive_realized_sum_pnl_units": 2038.3723,
+            "sum_negative_wallet_contributions_pp": -39.8498,
+            "worst_trade_wallet_pct": -3.4017,
+            "exit_reasons": {
+              "RESEARCH_RESIDUAL_LONG_INITIAL_WALLET_3P0_5M_STOP": 7,
+              "TIME_EXIT": 10,
+              "FORMAL_PRIORITY": 9,
+              "IDLE_SHORT_PRIORITY": 4
+            }
+          },
+          "saved_aggregate_wallet_loss_pp": -3.299,
+          "worst_loss_reduction_pctpoints": 2.4418,
+          "exit_audit": {
+            "HYPE_LONG_INITIAL_WALLET_1P5": {
+              "preempted": 12,
+              "by_outcome": {
+                "original_win": 1,
+                "original_loss": 11
+              }
+            },
+            "RESIDUAL_LONG_INITIAL_WALLET_3P0": {
+              "preempted": 271,
+              "by_outcome": {
+                "original_win": 21,
+                "original_loss": 250
+              }
+            }
+          }
+        }
+      ],
+      "accept_dd_both_costs": false,
+      "accept_loss_reduction_flat_dd_both_costs": false
+    }
+  ],
+  "selected_option": null,
+  "output_cumulative_specs": [
+    {
+      "id": "HYPE_LONG_INITIAL_WALLET_1P5",
+      "target": "HYPE_LONG",
+      "side": "LONG",
+      "axis": "initial_adverse",
+      "max_initial_wallet_loss_pct": 0.015,
+      "stop_slip_bps": 10
+    }
+  ],
+  "for_following_bt_reference": [
+    {
+      "policy": "CUM_S02_HYPE_LONG_INITIAL_WALLET_1P5",
+      "cost_bps": 10,
+      "full8_final_jpy": 223577027.52434087,
+      "full8_max_dd_pct": -15.6206,
+      "full8_pf": 3.470877321919843,
+      "win_pct": 72.366,
+      "closed_trades": 1310,
+      "accounting": "PASS",
+      "scenario_specs": [
+        {
+          "id": "HYPE_LONG_INITIAL_WALLET_1P5",
+          "target": "HYPE_LONG",
+          "side": "LONG",
+          "axis": "initial_adverse",
+          "max_initial_wallet_loss_pct": 0.015,
+          "stop_slip_bps": 10
+        }
+      ],
+      "exit_audit": {
+        "HYPE_LONG_INITIAL_WALLET_1P5": {
+          "preempted": 12,
+          "by_outcome": {
+            "original_win": 1,
+            "original_loss": 11
+          }
+        }
+      },
+      "model": "2026-10-17 latest8 M5 public historical normalized Aster, frozen V4 source",
+      "research_only": true
+    },
+    {
+      "policy": "CUM_S02_HYPE_LONG_INITIAL_WALLET_1P5",
+      "cost_bps": 30,
+      "full8_final_jpy": 123603207.2710779,
+      "full8_max_dd_pct": -16.7878,
+      "full8_pf": 2.972359399654795,
+      "win_pct": 69.525,
+      "closed_trades": 1306,
+      "accounting": "PASS",
+      "scenario_specs": [
+        {
+          "id": "HYPE_LONG_INITIAL_WALLET_1P5",
+          "target": "HYPE_LONG",
+          "side": "LONG",
+          "axis": "initial_adverse",
+          "max_initial_wallet_loss_pct": 0.015,
+          "stop_slip_bps": 10
+        }
+      ],
+      "exit_audit": {
+        "HYPE_LONG_INITIAL_WALLET_1P5": {
+          "preempted": 12,
+          "by_outcome": {
+            "original_win": 1,
+            "original_loss": 11
+          }
+        }
+      },
+      "model": "2026-10-17 latest8 M5 public historical normalized Aster, frozen V4 source",
+      "research_only": true
+    }
+  ],
+  "warnings": [
+    "Not a certified Aster signed STOP lifecycle",
+    "Model M5 normalized public data",
+    "In-sample research, requires forward/out-of-sample",
+    "No changes to LIVE or operator approval"
+  ]
+}

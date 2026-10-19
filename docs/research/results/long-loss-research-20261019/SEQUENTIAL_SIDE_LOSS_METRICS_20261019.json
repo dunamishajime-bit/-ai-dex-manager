@@ -1,0 +1,3200 @@
+{
+  "status": "PER_SIDE_LOSS_MEASURES_FOR_CAUSAL_FROZEN_EIGHT_STRATEGY_CUMULATIVE_TRIALS",
+  "selection_manifest": "C:\\Users\\dis\\Desktop\\disdex-idle-basket-bt-20261019\\docs\\research\\results\\long-loss-research-20261019\\SEQUENTIAL_FULL8_ACCEPTED_CHAIN_20261019.json",
+  "values": {
+    "S01_V12_SHORT_PROFIT_2_TO_0P5": {
+      "10": {
+        "FET_LONG": {
+          "n": 8,
+          "wins": 7,
+          "losses": 1,
+          "negative_realized_sum_pnl_units": -1084.8606,
+          "positive_realized_sum_pnl_units": 29289.7849,
+          "sum_negative_wallet_contributions_pp": -0.4475,
+          "worst_trade_wallet_pct": -0.4475,
+          "exit_reasons": {
+            "FET_24H_TIME_EXIT": 5,
+            "FET_PROFIT_FLOOR_STOP": 3
+          }
+        },
+        "HYPE_LONG_LONG": {
+          "n": 40,
+          "wins": 12,
+          "losses": 28,
+          "negative_realized_sum_pnl_units": -124185.0561,
+          "positive_realized_sum_pnl_units": 163432.5806,
+          "sum_negative_wallet_contributions_pp": -58.7206,
+          "worst_trade_wallet_pct": -2.169,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 28,
+            "TAKE_PROFIT": 12
+          }
+        },
+        "IDLE_SHORT": {
+          "n": 77,
+          "wins": 49,
+          "losses": 28,
+          "negative_realized_sum_pnl_units": -25135.2714,
+          "positive_realized_sum_pnl_units": 77590.7676,
+          "sum_negative_wallet_contributions_pp": -24.1565,
+          "worst_trade_wallet_pct": -3.5748,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 18,
+            "TIME_EXIT": 57,
+            "STOP": 2
+          }
+        },
+        "PENGU_LONG": {
+          "n": 47,
+          "wins": 35,
+          "losses": 12,
+          "negative_realized_sum_pnl_units": -38429.1385,
+          "positive_realized_sum_pnl_units": 132565.2477,
+          "sum_negative_wallet_contributions_pp": -52.5436,
+          "worst_trade_wallet_pct": -8.1298,
+          "exit_reasons": {
+            "RECOVERY_V8_TRAILING_STOP": 23,
+            "RECOVERY_V8_HARD_STOP": 5,
+            "LONG_TRAILING_STOP": 7,
+            "LONG_HARD_STOP": 3,
+            "RECOVERY_V8_MAX_HOLD": 9
+          }
+        },
+        "PENGU_SHORT": {
+          "n": 20,
+          "wins": 15,
+          "losses": 5,
+          "negative_realized_sum_pnl_units": -12930.6842,
+          "positive_realized_sum_pnl_units": 37194.997,
+          "sum_negative_wallet_contributions_pp": -13.4716,
+          "worst_trade_wallet_pct": -8.0885,
+          "exit_reasons": {
+            "SHORT_MAX_HOLD": 10,
+            "SHORT_V20_DEADLINE_EXIT": 1,
+            "SHORT_TRAILING_STOP": 7,
+            "SHORT_HARD_STOP": 2
+          }
+        },
+        "Q102_LONG": {
+          "n": 35,
+          "wins": 24,
+          "losses": 11,
+          "negative_realized_sum_pnl_units": -37627.5506,
+          "positive_realized_sum_pnl_units": 30139.0931,
+          "sum_negative_wallet_contributions_pp": -32.8743,
+          "worst_trade_wallet_pct": -6.5376,
+          "exit_reasons": {
+            "Q102_TIME_EXIT": 15,
+            "5M_PROTECTIVE_STOP": 15,
+            "Q102_HARD_STOP": 4,
+            "Q102_TRAIL_5_AFTER_12": 1
+          }
+        },
+        "Q102_SHORT": {
+          "n": 147,
+          "wins": 115,
+          "losses": 32,
+          "negative_realized_sum_pnl_units": -59918.0328,
+          "positive_realized_sum_pnl_units": 110214.4986,
+          "sum_negative_wallet_contributions_pp": -72.8828,
+          "worst_trade_wallet_pct": -7.6161,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 55,
+            "Q102_TIME_EXIT": 72,
+            "Q102_HARD_STOP": 6,
+            "FLOOR_combined_no_residual": 2,
+            "TIME_EXIT": 9,
+            "Q102_TRAIL_5_AFTER_12": 2,
+            "STOP": 1
+          }
+        },
+        "RESIDUAL_LONG": {
+          "n": 31,
+          "wins": 16,
+          "losses": 15,
+          "negative_realized_sum_pnl_units": -34744.0741,
+          "positive_realized_sum_pnl_units": 7896.5613,
+          "sum_negative_wallet_contributions_pp": -35.1229,
+          "worst_trade_wallet_pct": -5.649,
+          "exit_reasons": {
+            "FORMAL_PRIORITY": 13,
+            "TIME_EXIT": 12,
+            "IDLE_SHORT_PRIORITY": 6
+          }
+        },
+        "V12_LONG": {
+          "n": 148,
+          "wins": 126,
+          "losses": 22,
+          "negative_realized_sum_pnl_units": -6572.5594,
+          "positive_realized_sum_pnl_units": 142496.8346,
+          "sum_negative_wallet_contributions_pp": -5.6376,
+          "worst_trade_wallet_pct": -1.0952,
+          "exit_reasons": {
+            "RECOVERY_SYMBOL_PREEMPT:Q102": 5,
+            "TIME_48H": 12,
+            "REV_D0_T12": 15,
+            "REV_D0_T24": 10,
+            "REV_D2_T36": 21,
+            "REV_D0_T36": 9,
+            "REV_D0_T3": 10,
+            "V12_REVERSAL_PREEMPT:REC_Y06_REV_D0_T72": 12,
+            "RECOVERY_CORE_PREEMPT:Q102": 5,
+            "REV_D2_T24": 12,
+            "REV_D0_T6": 10,
+            "REV_D2_T9": 9,
+            "REV_D1_T3": 13,
+            "V12_REVERSAL_PREEMPT:REC_Y08_REV_D0_T6": 1,
+            "V12_REVERSAL_PREEMPT:REC_Y01_REV_D0_T72": 1,
+            "RECOVERY_SYMBOL_PREEMPT:V12": 1,
+            "V12_REVERSAL_PREEMPT:REC_Y03_REV_D0_T36": 2
+          }
+        },
+        "V12_SHORT": {
+          "n": 718,
+          "wins": 566,
+          "losses": 152,
+          "negative_realized_sum_pnl_units": -127539.6568,
+          "positive_realized_sum_pnl_units": 540661.0491,
+          "sum_negative_wallet_contributions_pp": -78.2861,
+          "worst_trade_wallet_pct": -4.0369,
+          "exit_reasons": {
+            "REV_D1_TP2_SL1_H36_TP": 10,
+            "RESEARCH_V12_SHORT_PROFIT_2_TO_0P5_5M_STOP": 233,
+            "REV_D0_T6": 12,
+            "REV_D2_T18": 9,
+            "REV_D0_T72": 64,
+            "ORIG_D2_TP1_SL1_H24_TP": 8,
+            "REPAIRED_REC_X06_TIME_12H_TIME18": 25,
+            "TP1.5_SL1_H24_STOP": 9,
+            "TIME_24H": 16,
+            "FLOOR_combined_no_residual": 8,
+            "ORIG_D2_TP1_SL1_H24_STOP": 2,
+            "TIME_12H": 31,
+            "REPAIRED_REC_G2_EARLY_BTC_OPPOSE_VOL_TIME6": 37,
+            "TP1.5_SL1_H24_TP": 9,
+            "V12_REVERSAL_PREEMPT:REC_Y12_REV_D0_T24": 2,
+            "SECOND_REPAIR_CONT_SHORT_MID_AGE24_48_TIME3": 13,
+            "SECOND_REPAIR_FAILED_BREAK_REV_SHORT_6H_TIME9": 31,
+            "RECOVERY_SYMBOL_PREEMPT:Q102": 18,
+            "RECOVERY_CORE_PREEMPT:Q102": 12,
+            "REC_G5_TIME48_REFINED": 15,
+            "REV_D2_T24": 8,
+            "V12_REVERSAL_PREEMPT:REC_Y15_REV_D0_T3": 3,
+            "SECOND_REPAIR_REC_G1_MID_REL_LOWVOL_TIME12": 11,
+            "TIME_36H": 24,
+            "REPAIRED_REC_G4_MATURE_REL_RANGE_TIME24": 11,
+            "TRAILING_CROSSED_BEFORE_REPLACEMENT": 24,
+            "V12_REVERSAL_PREEMPT:REC_Y02_REV_D0_T12": 2,
+            "TIME_48H": 11,
+            "STOP": 9,
+            "TIME_6H": 10,
+            "ORIG_D2_T6": 8,
+            "REV_D0_T36": 11,
+            "RECOVERY_CORE_PREEMPT:PENGU": 3,
+            "V12_REVERSAL_PREEMPT:REC_Y16_REV_D0_T6": 4,
+            "TAKE_PROFIT": 1,
+            "REV_D1_TP2_SL1_H36_STOP": 2,
+            "V12_REVERSAL_PREEMPT:REC_Y10_REV_D2_T24": 1,
+            "V12_REVERSAL_PREEMPT:REC_Y13_REV_D2_T36": 5,
+            "V12_REVERSAL_PREEMPT:REC_Y17_REV_D1_T3": 2,
+            "RECOVERY_SYMBOL_PREEMPT:V12": 3,
+            "RECOVERY_CORE_PREEMPT:V12": 1
+          }
+        },
+        "V52_LONG": {
+          "n": 36,
+          "wins": 32,
+          "losses": 4,
+          "negative_realized_sum_pnl_units": -7.4655,
+          "positive_realized_sum_pnl_units": 90954.1338,
+          "sum_negative_wallet_contributions_pp": -1.2271,
+          "worst_trade_wallet_pct": -0.5186,
+          "exit_reasons": {
+            "BASIS_CONVERGED": 30,
+            "BASIS_STOP": 1,
+            "TIME_OR_SESSION_FLAT": 5
+          }
+        },
+        "V52_SHORT": {
+          "n": 52,
+          "wins": 40,
+          "losses": 12,
+          "negative_realized_sum_pnl_units": -6973.5339,
+          "positive_realized_sum_pnl_units": 127359.48,
+          "sum_negative_wallet_contributions_pp": -4.3056,
+          "worst_trade_wallet_pct": -2.0395,
+          "exit_reasons": {
+            "BASIS_CONVERGED": 32,
+            "BASIS_STOP": 3,
+            "TIME_OR_SESSION_FLAT": 17
+          }
+        }
+      },
+      "30": {
+        "FET_LONG": {
+          "n": 8,
+          "wins": 6,
+          "losses": 2,
+          "negative_realized_sum_pnl_units": -904.3561,
+          "positive_realized_sum_pnl_units": 21095.1364,
+          "sum_negative_wallet_contributions_pp": -1.3315,
+          "worst_trade_wallet_pct": -1.225,
+          "exit_reasons": {
+            "FET_24H_TIME_EXIT": 5,
+            "FET_PROFIT_FLOOR_STOP": 3
+          }
+        },
+        "HYPE_LONG_LONG": {
+          "n": 39,
+          "wins": 12,
+          "losses": 27,
+          "negative_realized_sum_pnl_units": -42955.0893,
+          "positive_realized_sum_pnl_units": 43221.7215,
+          "sum_negative_wallet_contributions_pp": -63.3139,
+          "worst_trade_wallet_pct": -2.467,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 27,
+            "TAKE_PROFIT": 12
+          }
+        },
+        "IDLE_SHORT": {
+          "n": 85,
+          "wins": 51,
+          "losses": 34,
+          "negative_realized_sum_pnl_units": -44814.4937,
+          "positive_realized_sum_pnl_units": 37234.6872,
+          "sum_negative_wallet_contributions_pp": -50.9395,
+          "worst_trade_wallet_pct": -7.2354,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 17,
+            "TIME_EXIT": 66,
+            "STOP": 2
+          }
+        },
+        "PENGU_LONG": {
+          "n": 47,
+          "wins": 35,
+          "losses": 12,
+          "negative_realized_sum_pnl_units": -23597.0454,
+          "positive_realized_sum_pnl_units": 69547.6629,
+          "sum_negative_wallet_contributions_pp": -59.0192,
+          "worst_trade_wallet_pct": -8.3326,
+          "exit_reasons": {
+            "RECOVERY_V8_TRAILING_STOP": 23,
+            "RECOVERY_V8_HARD_STOP": 5,
+            "LONG_TRAILING_STOP": 7,
+            "LONG_HARD_STOP": 3,
+            "RECOVERY_V8_MAX_HOLD": 9
+          }
+        },
+        "PENGU_SHORT": {
+          "n": 20,
+          "wins": 15,
+          "losses": 5,
+          "negative_realized_sum_pnl_units": -12674.7079,
+          "positive_realized_sum_pnl_units": 15023.6183,
+          "sum_negative_wallet_contributions_pp": -17.7147,
+          "worst_trade_wallet_pct": -8.2965,
+          "exit_reasons": {
+            "SHORT_MAX_HOLD": 10,
+            "SHORT_V20_DEADLINE_EXIT": 1,
+            "SHORT_TRAILING_STOP": 7,
+            "SHORT_HARD_STOP": 2
+          }
+        },
+        "Q102_LONG": {
+          "n": 34,
+          "wins": 23,
+          "losses": 11,
+          "negative_realized_sum_pnl_units": -24793.6467,
+          "positive_realized_sum_pnl_units": 19182.5667,
+          "sum_negative_wallet_contributions_pp": -50.1596,
+          "worst_trade_wallet_pct": -10.6022,
+          "exit_reasons": {
+            "Q102_TIME_EXIT": 14,
+            "5M_PROTECTIVE_STOP": 15,
+            "Q102_HARD_STOP": 4,
+            "Q102_TRAIL_5_AFTER_12": 1
+          }
+        },
+        "Q102_SHORT": {
+          "n": 147,
+          "wins": 114,
+          "losses": 33,
+          "negative_realized_sum_pnl_units": -41590.9905,
+          "positive_realized_sum_pnl_units": 57009.8097,
+          "sum_negative_wallet_contributions_pp": -89.0482,
+          "worst_trade_wallet_pct": -7.8736,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 55,
+            "Q102_TIME_EXIT": 72,
+            "Q102_HARD_STOP": 6,
+            "FLOOR_combined_no_residual": 2,
+            "TIME_EXIT": 9,
+            "Q102_TRAIL_5_AFTER_12": 2,
+            "STOP": 1
+          }
+        },
+        "RESIDUAL_LONG": {
+          "n": 30,
+          "wins": 12,
+          "losses": 18,
+          "negative_realized_sum_pnl_units": -12005.7562,
+          "positive_realized_sum_pnl_units": 1082.6812,
+          "sum_negative_wallet_contributions_pp": -37.2912,
+          "worst_trade_wallet_pct": -5.8435,
+          "exit_reasons": {
+            "FORMAL_PRIORITY": 12,
+            "TIME_EXIT": 12,
+            "IDLE_SHORT_PRIORITY": 6
+          }
+        },
+        "V12_LONG": {
+          "n": 147,
+          "wins": 112,
+          "losses": 35,
+          "negative_realized_sum_pnl_units": -3083.7476,
+          "positive_realized_sum_pnl_units": 58924.8157,
+          "sum_negative_wallet_contributions_pp": -7.2675,
+          "worst_trade_wallet_pct": -1.152,
+          "exit_reasons": {
+            "RECOVERY_SYMBOL_PREEMPT:Q102": 5,
+            "TIME_48H": 11,
+            "REV_D0_T12": 15,
+            "REV_D0_T24": 10,
+            "REV_D2_T36": 21,
+            "REV_D0_T36": 9,
+            "REV_D0_T3": 10,
+            "V12_REVERSAL_PREEMPT:REC_Y06_REV_D0_T72": 12,
+            "RECOVERY_CORE_PREEMPT:Q102": 5,
+            "REV_D2_T24": 12,
+            "REV_D0_T6": 10,
+            "REV_D2_T9": 9,
+            "REV_D1_T3": 13,
+            "V12_REVERSAL_PREEMPT:REC_Y08_REV_D0_T6": 1,
+            "V12_REVERSAL_PREEMPT:REC_Y01_REV_D0_T72": 1,
+            "RECOVERY_SYMBOL_PREEMPT:V12": 1,
+            "V12_REVERSAL_PREEMPT:REC_Y03_REV_D0_T36": 2
+          }
+        },
+        "V12_SHORT": {
+          "n": 718,
+          "wins": 549,
+          "losses": 169,
+          "negative_realized_sum_pnl_units": -42522.0614,
+          "positive_realized_sum_pnl_units": 176101.5249,
+          "sum_negative_wallet_contributions_pp": -84.2607,
+          "worst_trade_wallet_pct": -3.9587,
+          "exit_reasons": {
+            "REV_D1_TP2_SL1_H36_TP": 10,
+            "RESEARCH_V12_SHORT_PROFIT_2_TO_0P5_5M_STOP": 232,
+            "REV_D0_T6": 12,
+            "REV_D2_T18": 9,
+            "REV_D0_T72": 60,
+            "ORIG_D2_TP1_SL1_H24_TP": 8,
+            "REPAIRED_REC_X06_TIME_12H_TIME18": 25,
+            "TP1.5_SL1_H24_STOP": 9,
+            "TIME_24H": 16,
+            "FLOOR_combined_no_residual": 8,
+            "ORIG_D2_TP1_SL1_H24_STOP": 2,
+            "TIME_12H": 31,
+            "REPAIRED_REC_G2_EARLY_BTC_OPPOSE_VOL_TIME6": 37,
+            "TP1.5_SL1_H24_TP": 9,
+            "V12_REVERSAL_PREEMPT:REC_Y12_REV_D0_T24": 2,
+            "SECOND_REPAIR_CONT_SHORT_MID_AGE24_48_TIME3": 13,
+            "SECOND_REPAIR_FAILED_BREAK_REV_SHORT_6H_TIME9": 31,
+            "RECOVERY_SYMBOL_PREEMPT:Q102": 18,
+            "RECOVERY_CORE_PREEMPT:Q102": 17,
+            "REC_G5_TIME48_REFINED": 14,
+            "REV_D2_T24": 8,
+            "V12_REVERSAL_PREEMPT:REC_Y15_REV_D0_T3": 3,
+            "SECOND_REPAIR_REC_G1_MID_REL_LOWVOL_TIME12": 11,
+            "TIME_36H": 24,
+            "REPAIRED_REC_G4_MATURE_REL_RANGE_TIME24": 10,
+            "TRAILING_CROSSED_BEFORE_REPLACEMENT": 24,
+            "V12_REVERSAL_PREEMPT:REC_Y02_REV_D0_T12": 2,
+            "TIME_48H": 10,
+            "STOP": 9,
+            "TIME_6H": 10,
+            "ORIG_D2_T6": 8,
+            "REV_D0_T36": 11,
+            "RECOVERY_CORE_PREEMPT:PENGU": 4,
+            "V12_REVERSAL_PREEMPT:REC_Y16_REV_D0_T6": 4,
+            "TAKE_PROFIT": 1,
+            "REV_D1_TP2_SL1_H36_STOP": 2,
+            "V12_REVERSAL_PREEMPT:REC_Y10_REV_D2_T24": 1,
+            "V12_REVERSAL_PREEMPT:REC_Y13_REV_D2_T36": 5,
+            "V12_REVERSAL_PREEMPT:REC_Y17_REV_D1_T3": 2,
+            "RECOVERY_SYMBOL_PREEMPT:V12": 3,
+            "RECOVERY_CORE_PREEMPT:V12": 3
+          }
+        },
+        "V52_LONG": {
+          "n": 35,
+          "wins": 30,
+          "losses": 5,
+          "negative_realized_sum_pnl_units": -681.5112,
+          "positive_realized_sum_pnl_units": 38579.6886,
+          "sum_negative_wallet_contributions_pp": -3.0416,
+          "worst_trade_wallet_pct": -0.9188,
+          "exit_reasons": {
+            "BASIS_CONVERGED": 29,
+            "BASIS_STOP": 1,
+            "TIME_OR_SESSION_FLAT": 5
+          }
+        },
+        "V52_SHORT": {
+          "n": 52,
+          "wins": 40,
+          "losses": 12,
+          "negative_realized_sum_pnl_units": -7489.6699,
+          "positive_realized_sum_pnl_units": 50580.2024,
+          "sum_negative_wallet_contributions_pp": -8.8822,
+          "worst_trade_wallet_pct": -1.9434,
+          "exit_reasons": {
+            "BASIS_CONVERGED": 32,
+            "BASIS_STOP": 3,
+            "TIME_OR_SESSION_FLAT": 17
+          }
+        }
+      }
+    },
+    "S01_V12_SHORT_PROFIT_3_TO_1": {
+      "10": {
+        "FET_LONG": {
+          "n": 8,
+          "wins": 7,
+          "losses": 1,
+          "negative_realized_sum_pnl_units": -1084.8606,
+          "positive_realized_sum_pnl_units": 28054.3875,
+          "sum_negative_wallet_contributions_pp": -0.4852,
+          "worst_trade_wallet_pct": -0.4852,
+          "exit_reasons": {
+            "FET_24H_TIME_EXIT": 5,
+            "FET_PROFIT_FLOOR_STOP": 3
+          }
+        },
+        "HYPE_LONG_LONG": {
+          "n": 38,
+          "wins": 11,
+          "losses": 27,
+          "negative_realized_sum_pnl_units": -111999.833,
+          "positive_realized_sum_pnl_units": 158463.4839,
+          "sum_negative_wallet_contributions_pp": -56.2642,
+          "worst_trade_wallet_pct": -2.169,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 27,
+            "TAKE_PROFIT": 11
+          }
+        },
+        "IDLE_SHORT": {
+          "n": 73,
+          "wins": 46,
+          "losses": 27,
+          "negative_realized_sum_pnl_units": -10334.582,
+          "positive_realized_sum_pnl_units": 70959.6099,
+          "sum_negative_wallet_contributions_pp": -20.5847,
+          "worst_trade_wallet_pct": -2.6876,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 14,
+            "TIME_EXIT": 57,
+            "STOP": 2
+          }
+        },
+        "PENGU_LONG": {
+          "n": 47,
+          "wins": 35,
+          "losses": 12,
+          "negative_realized_sum_pnl_units": -37901.281,
+          "positive_realized_sum_pnl_units": 129863.0139,
+          "sum_negative_wallet_contributions_pp": -53.2524,
+          "worst_trade_wallet_pct": -8.1298,
+          "exit_reasons": {
+            "RECOVERY_V8_TRAILING_STOP": 23,
+            "RECOVERY_V8_HARD_STOP": 5,
+            "LONG_TRAILING_STOP": 7,
+            "LONG_HARD_STOP": 3,
+            "RECOVERY_V8_MAX_HOLD": 9
+          }
+        },
+        "PENGU_SHORT": {
+          "n": 20,
+          "wins": 15,
+          "losses": 5,
+          "negative_realized_sum_pnl_units": -12925.2893,
+          "positive_realized_sum_pnl_units": 35854.3367,
+          "sum_negative_wallet_contributions_pp": -13.5449,
+          "worst_trade_wallet_pct": -8.0885,
+          "exit_reasons": {
+            "SHORT_MAX_HOLD": 10,
+            "SHORT_V20_DEADLINE_EXIT": 1,
+            "SHORT_TRAILING_STOP": 7,
+            "SHORT_HARD_STOP": 2
+          }
+        },
+        "Q102_LONG": {
+          "n": 34,
+          "wins": 23,
+          "losses": 11,
+          "negative_realized_sum_pnl_units": -37231.8911,
+          "positive_realized_sum_pnl_units": 27704.2563,
+          "sum_negative_wallet_contributions_pp": -34.2148,
+          "worst_trade_wallet_pct": -6.1711,
+          "exit_reasons": {
+            "Q102_TIME_EXIT": 14,
+            "5M_PROTECTIVE_STOP": 15,
+            "Q102_HARD_STOP": 4,
+            "Q102_TRAIL_5_AFTER_12": 1
+          }
+        },
+        "Q102_SHORT": {
+          "n": 147,
+          "wins": 115,
+          "losses": 32,
+          "negative_realized_sum_pnl_units": -58046.9451,
+          "positive_realized_sum_pnl_units": 105895.4073,
+          "sum_negative_wallet_contributions_pp": -72.8951,
+          "worst_trade_wallet_pct": -7.6161,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 55,
+            "Q102_TIME_EXIT": 72,
+            "Q102_HARD_STOP": 6,
+            "FLOOR_combined_no_residual": 2,
+            "TIME_EXIT": 9,
+            "Q102_TRAIL_5_AFTER_12": 2,
+            "STOP": 1
+          }
+        },
+        "RESIDUAL_LONG": {
+          "n": 31,
+          "wins": 16,
+          "losses": 15,
+          "negative_realized_sum_pnl_units": -32430.5483,
+          "positive_realized_sum_pnl_units": 7292.0092,
+          "sum_negative_wallet_contributions_pp": -35.0153,
+          "worst_trade_wallet_pct": -5.649,
+          "exit_reasons": {
+            "FORMAL_PRIORITY": 13,
+            "TIME_EXIT": 12,
+            "IDLE_SHORT_PRIORITY": 6
+          }
+        },
+        "V12_LONG": {
+          "n": 143,
+          "wins": 122,
+          "losses": 21,
+          "negative_realized_sum_pnl_units": -6295.3102,
+          "positive_realized_sum_pnl_units": 136848.63,
+          "sum_negative_wallet_contributions_pp": -5.4459,
+          "worst_trade_wallet_pct": -1.0953,
+          "exit_reasons": {
+            "RECOVERY_SYMBOL_PREEMPT:Q102": 5,
+            "TIME_48H": 12,
+            "REV_D0_T12": 15,
+            "REV_D0_T24": 10,
+            "REV_D2_T36": 21,
+            "REV_D0_T36": 9,
+            "REV_D0_T3": 10,
+            "V12_REVERSAL_PREEMPT:REC_Y06_REV_D0_T72": 11,
+            "RECOVERY_CORE_PREEMPT:Q102": 4,
+            "REV_D2_T24": 12,
+            "REV_D2_T9": 9,
+            "REV_D0_T6": 9,
+            "REV_D1_T3": 12,
+            "V12_REVERSAL_PREEMPT:REC_Y08_REV_D0_T6": 1,
+            "RECOVERY_SYMBOL_PREEMPT:V12": 1,
+            "V12_REVERSAL_PREEMPT:REC_Y03_REV_D0_T36": 2
+          }
+        },
+        "V12_SHORT": {
+          "n": 710,
+          "wins": 529,
+          "losses": 181,
+          "negative_realized_sum_pnl_units": -144726.9747,
+          "positive_realized_sum_pnl_units": 539645.8878,
+          "sum_negative_wallet_contributions_pp": -98.631,
+          "worst_trade_wallet_pct": -4.0369,
+          "exit_reasons": {
+            "REV_D1_TP2_SL1_H36_TP": 10,
+            "RESEARCH_V12_SHORT_PROFIT_3_TO_1_5M_STOP": 161,
+            "REV_D0_T6": 11,
+            "REV_D2_T18": 10,
+            "REV_D0_T72": 77,
+            "ORIG_D2_TP1_SL1_H24_TP": 9,
+            "REPAIRED_REC_X06_TIME_12H_TIME18": 27,
+            "TP1.5_SL1_H24_STOP": 9,
+            "TIME_24H": 21,
+            "FLOOR_combined_no_residual": 4,
+            "ORIG_D2_TP1_SL1_H24_STOP": 2,
+            "TIME_12H": 36,
+            "REPAIRED_REC_G2_EARLY_BTC_OPPOSE_VOL_TIME6": 39,
+            "V12_REVERSAL_PREEMPT:REC_Y12_REV_D0_T24": 2,
+            "SECOND_REPAIR_CONT_SHORT_MID_AGE24_48_TIME3": 15,
+            "SECOND_REPAIR_FAILED_BREAK_REV_SHORT_6H_TIME9": 35,
+            "RECOVERY_SYMBOL_PREEMPT:Q102": 20,
+            "RECOVERY_CORE_PREEMPT:Q102": 15,
+            "REV_D0_T36": 12,
+            "REC_G5_TIME48_REFINED": 16,
+            "REV_D2_T24": 8,
+            "V12_REVERSAL_PREEMPT:REC_Y15_REV_D0_T3": 5,
+            "SECOND_REPAIR_REC_G1_MID_REL_LOWVOL_TIME12": 12,
+            "TIME_36H": 32,
+            "REPAIRED_REC_G4_MATURE_REL_RANGE_TIME24": 13,
+            "TRAILING_CROSSED_BEFORE_REPLACEMENT": 26,
+            "V12_REVERSAL_PREEMPT:REC_Y02_REV_D0_T12": 2,
+            "TIME_48H": 16,
+            "STOP": 9,
+            "TIME_6H": 12,
+            "ORIG_D2_T6": 9,
+            "RECOVERY_CORE_PREEMPT:PENGU": 2,
+            "TP1.5_SL1_H24_TP": 10,
+            "V12_REVERSAL_PREEMPT:REC_Y16_REV_D0_T6": 4,
+            "V12_REVERSAL_PREEMPT:REC_Y05_REV_D2_T9": 1,
+            "TAKE_PROFIT": 1,
+            "REV_D1_TP2_SL1_H36_STOP": 2,
+            "V12_REVERSAL_PREEMPT:REC_Y10_REV_D2_T24": 1,
+            "V12_REVERSAL_PREEMPT:REC_Y13_REV_D2_T36": 5,
+            "V12_REVERSAL_PREEMPT:REC_Y17_REV_D1_T3": 3,
+            "RECOVERY_SYMBOL_PREEMPT:V12": 4,
+            "RECOVERY_CORE_PREEMPT:V12": 2
+          }
+        },
+        "V52_LONG": {
+          "n": 35,
+          "wins": 31,
+          "losses": 4,
+          "negative_realized_sum_pnl_units": -7.7794,
+          "positive_realized_sum_pnl_units": 89129.9807,
+          "sum_negative_wallet_contributions_pp": -1.2287,
+          "worst_trade_wallet_pct": -0.5201,
+          "exit_reasons": {
+            "BASIS_CONVERGED": 29,
+            "BASIS_STOP": 1,
+            "TIME_OR_SESSION_FLAT": 5
+          }
+        },
+        "V52_SHORT": {
+          "n": 52,
+          "wins": 40,
+          "losses": 12,
+          "negative_realized_sum_pnl_units": -6490.1568,
+          "positive_realized_sum_pnl_units": 122893.5945,
+          "sum_negative_wallet_contributions_pp": -4.3048,
+          "worst_trade_wallet_pct": -2.0395,
+          "exit_reasons": {
+            "BASIS_CONVERGED": 32,
+            "BASIS_STOP": 3,
+            "TIME_OR_SESSION_FLAT": 17
+          }
+        }
+      },
+      "30": {
+        "FET_LONG": {
+          "n": 8,
+          "wins": 6,
+          "losses": 2,
+          "negative_realized_sum_pnl_units": -858.4589,
+          "positive_realized_sum_pnl_units": 20346.2784,
+          "sum_negative_wallet_contributions_pp": -1.3315,
+          "worst_trade_wallet_pct": -1.225,
+          "exit_reasons": {
+            "FET_24H_TIME_EXIT": 5,
+            "FET_PROFIT_FLOOR_STOP": 3
+          }
+        },
+        "HYPE_LONG_LONG": {
+          "n": 37,
+          "wins": 11,
+          "losses": 26,
+          "negative_realized_sum_pnl_units": -34475.7086,
+          "positive_realized_sum_pnl_units": 41339.411,
+          "sum_negative_wallet_contributions_pp": -60.6421,
+          "worst_trade_wallet_pct": -2.467,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 26,
+            "TAKE_PROFIT": 11
+          }
+        },
+        "IDLE_SHORT": {
+          "n": 83,
+          "wins": 49,
+          "losses": 34,
+          "negative_realized_sum_pnl_units": -40816.3962,
+          "positive_realized_sum_pnl_units": 29353.1698,
+          "sum_negative_wallet_contributions_pp": -48.2093,
+          "worst_trade_wallet_pct": -7.2355,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 14,
+            "TIME_EXIT": 67,
+            "STOP": 2
+          }
+        },
+        "PENGU_LONG": {
+          "n": 47,
+          "wins": 35,
+          "losses": 12,
+          "negative_realized_sum_pnl_units": -23231.2616,
+          "positive_realized_sum_pnl_units": 67870.8082,
+          "sum_negative_wallet_contributions_pp": -59.3095,
+          "worst_trade_wallet_pct": -8.3326,
+          "exit_reasons": {
+            "RECOVERY_V8_TRAILING_STOP": 23,
+            "RECOVERY_V8_HARD_STOP": 5,
+            "LONG_TRAILING_STOP": 7,
+            "LONG_HARD_STOP": 3,
+            "RECOVERY_V8_MAX_HOLD": 9
+          }
+        },
+        "PENGU_SHORT": {
+          "n": 20,
+          "wins": 15,
+          "losses": 5,
+          "negative_realized_sum_pnl_units": -12580.5986,
+          "positive_realized_sum_pnl_units": 14526.518,
+          "sum_negative_wallet_contributions_pp": -17.8683,
+          "worst_trade_wallet_pct": -8.2965,
+          "exit_reasons": {
+            "SHORT_MAX_HOLD": 10,
+            "SHORT_V20_DEADLINE_EXIT": 1,
+            "SHORT_TRAILING_STOP": 7,
+            "SHORT_HARD_STOP": 2
+          }
+        },
+        "Q102_LONG": {
+          "n": 34,
+          "wins": 23,
+          "losses": 11,
+          "negative_realized_sum_pnl_units": -23949.6616,
+          "positive_realized_sum_pnl_units": 18844.1153,
+          "sum_negative_wallet_contributions_pp": -49.7763,
+          "worst_trade_wallet_pct": -10.6023,
+          "exit_reasons": {
+            "Q102_TIME_EXIT": 14,
+            "5M_PROTECTIVE_STOP": 15,
+            "Q102_HARD_STOP": 4,
+            "Q102_TRAIL_5_AFTER_12": 1
+          }
+        },
+        "Q102_SHORT": {
+          "n": 147,
+          "wins": 114,
+          "losses": 33,
+          "negative_realized_sum_pnl_units": -40260.4448,
+          "positive_realized_sum_pnl_units": 55671.2962,
+          "sum_negative_wallet_contributions_pp": -88.8457,
+          "worst_trade_wallet_pct": -7.8736,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 55,
+            "Q102_TIME_EXIT": 72,
+            "Q102_HARD_STOP": 6,
+            "FLOOR_combined_no_residual": 2,
+            "TIME_EXIT": 9,
+            "Q102_TRAIL_5_AFTER_12": 2,
+            "STOP": 1
+          }
+        },
+        "RESIDUAL_LONG": {
+          "n": 30,
+          "wins": 12,
+          "losses": 18,
+          "negative_realized_sum_pnl_units": -11570.5334,
+          "positive_realized_sum_pnl_units": 1044.9248,
+          "sum_negative_wallet_contributions_pp": -37.8158,
+          "worst_trade_wallet_pct": -5.8435,
+          "exit_reasons": {
+            "FORMAL_PRIORITY": 12,
+            "TIME_EXIT": 12,
+            "IDLE_SHORT_PRIORITY": 6
+          }
+        },
+        "V12_LONG": {
+          "n": 142,
+          "wins": 109,
+          "losses": 33,
+          "negative_realized_sum_pnl_units": -2943.7984,
+          "positive_realized_sum_pnl_units": 57060.0121,
+          "sum_negative_wallet_contributions_pp": -7.0138,
+          "worst_trade_wallet_pct": -1.1552,
+          "exit_reasons": {
+            "RECOVERY_SYMBOL_PREEMPT:Q102": 5,
+            "TIME_48H": 11,
+            "REV_D0_T12": 15,
+            "REV_D0_T24": 10,
+            "REV_D2_T36": 21,
+            "REV_D0_T36": 9,
+            "REV_D0_T3": 10,
+            "V12_REVERSAL_PREEMPT:REC_Y06_REV_D0_T72": 11,
+            "RECOVERY_CORE_PREEMPT:Q102": 4,
+            "REV_D2_T24": 12,
+            "REV_D2_T9": 9,
+            "REV_D0_T6": 9,
+            "REV_D1_T3": 12,
+            "V12_REVERSAL_PREEMPT:REC_Y08_REV_D0_T6": 1,
+            "RECOVERY_SYMBOL_PREEMPT:V12": 1,
+            "V12_REVERSAL_PREEMPT:REC_Y03_REV_D0_T36": 2
+          }
+        },
+        "V12_SHORT": {
+          "n": 707,
+          "wins": 508,
+          "losses": 199,
+          "negative_realized_sum_pnl_units": -57364.8389,
+          "positive_realized_sum_pnl_units": 178612.8877,
+          "sum_negative_wallet_contributions_pp": -108.0441,
+          "worst_trade_wallet_pct": -4.101,
+          "exit_reasons": {
+            "REV_D1_TP2_SL1_H36_TP": 10,
+            "RESEARCH_V12_SHORT_PROFIT_3_TO_1_5M_STOP": 157,
+            "REV_D0_T6": 11,
+            "REV_D2_T18": 10,
+            "REV_D0_T72": 78,
+            "ORIG_D2_TP1_SL1_H24_TP": 9,
+            "REPAIRED_REC_X06_TIME_12H_TIME18": 27,
+            "TP1.5_SL1_H24_STOP": 9,
+            "TIME_24H": 20,
+            "FLOOR_combined_no_residual": 4,
+            "ORIG_D2_TP1_SL1_H24_STOP": 2,
+            "TIME_12H": 37,
+            "REPAIRED_REC_G2_EARLY_BTC_OPPOSE_VOL_TIME6": 39,
+            "V12_REVERSAL_PREEMPT:REC_Y12_REV_D0_T24": 2,
+            "SECOND_REPAIR_CONT_SHORT_MID_AGE24_48_TIME3": 15,
+            "SECOND_REPAIR_FAILED_BREAK_REV_SHORT_6H_TIME9": 35,
+            "RECOVERY_SYMBOL_PREEMPT:Q102": 20,
+            "RECOVERY_CORE_PREEMPT:Q102": 19,
+            "REV_D0_T36": 11,
+            "REC_G5_TIME48_REFINED": 15,
+            "REV_D2_T24": 8,
+            "V12_REVERSAL_PREEMPT:REC_Y15_REV_D0_T3": 5,
+            "SECOND_REPAIR_REC_G1_MID_REL_LOWVOL_TIME12": 12,
+            "TIME_36H": 31,
+            "REPAIRED_REC_G4_MATURE_REL_RANGE_TIME24": 12,
+            "TRAILING_CROSSED_BEFORE_REPLACEMENT": 26,
+            "V12_REVERSAL_PREEMPT:REC_Y02_REV_D0_T12": 2,
+            "TIME_48H": 15,
+            "STOP": 9,
+            "TIME_6H": 12,
+            "ORIG_D2_T6": 9,
+            "RECOVERY_CORE_PREEMPT:PENGU": 5,
+            "TP1.5_SL1_H24_TP": 10,
+            "V12_REVERSAL_PREEMPT:REC_Y16_REV_D0_T6": 4,
+            "V12_REVERSAL_PREEMPT:REC_Y05_REV_D2_T9": 1,
+            "TAKE_PROFIT": 1,
+            "REV_D1_TP2_SL1_H36_STOP": 2,
+            "V12_REVERSAL_PREEMPT:REC_Y10_REV_D2_T24": 1,
+            "V12_REVERSAL_PREEMPT:REC_Y13_REV_D2_T36": 5,
+            "V12_REVERSAL_PREEMPT:REC_Y17_REV_D1_T3": 3,
+            "RECOVERY_SYMBOL_PREEMPT:V12": 4
+          }
+        },
+        "V52_LONG": {
+          "n": 35,
+          "wins": 30,
+          "losses": 5,
+          "negative_realized_sum_pnl_units": -682.6683,
+          "positive_realized_sum_pnl_units": 37650.1096,
+          "sum_negative_wallet_contributions_pp": -3.053,
+          "worst_trade_wallet_pct": -0.9181,
+          "exit_reasons": {
+            "BASIS_CONVERGED": 29,
+            "BASIS_STOP": 1,
+            "TIME_OR_SESSION_FLAT": 5
+          }
+        },
+        "V52_SHORT": {
+          "n": 52,
+          "wins": 40,
+          "losses": 12,
+          "negative_realized_sum_pnl_units": -7144.3888,
+          "positive_realized_sum_pnl_units": 49244.0327,
+          "sum_negative_wallet_contributions_pp": -8.6115,
+          "worst_trade_wallet_pct": -1.6319,
+          "exit_reasons": {
+            "BASIS_CONVERGED": 32,
+            "BASIS_STOP": 3,
+            "TIME_OR_SESSION_FLAT": 17
+          }
+        }
+      }
+    },
+    "S01_V12_SHORT_INITIAL_WALLET_1P0": {
+      "10": {
+        "FET_LONG": {
+          "n": 8,
+          "wins": 7,
+          "losses": 1,
+          "negative_realized_sum_pnl_units": -675.4993,
+          "positive_realized_sum_pnl_units": 21959.8247,
+          "sum_negative_wallet_contributions_pp": -1.0259,
+          "worst_trade_wallet_pct": -1.0259,
+          "exit_reasons": {
+            "FET_24H_TIME_EXIT": 5,
+            "FET_PROFIT_FLOOR_STOP": 3
+          }
+        },
+        "HYPE_LONG_LONG": {
+          "n": 41,
+          "wins": 13,
+          "losses": 28,
+          "negative_realized_sum_pnl_units": -39407.3546,
+          "positive_realized_sum_pnl_units": 63883.3242,
+          "sum_negative_wallet_contributions_pp": -59.0425,
+          "worst_trade_wallet_pct": -2.2167,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 28,
+            "TAKE_PROFIT": 13
+          }
+        },
+        "IDLE_SHORT": {
+          "n": 86,
+          "wins": 55,
+          "losses": 31,
+          "negative_realized_sum_pnl_units": -34418.7611,
+          "positive_realized_sum_pnl_units": 43098.5354,
+          "sum_negative_wallet_contributions_pp": -42.7156,
+          "worst_trade_wallet_pct": -7.0285,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 18,
+            "TIME_EXIT": 66,
+            "STOP": 2
+          }
+        },
+        "PENGU_LONG": {
+          "n": 47,
+          "wins": 35,
+          "losses": 12,
+          "negative_realized_sum_pnl_units": -22165.4572,
+          "positive_realized_sum_pnl_units": 70146.2556,
+          "sum_negative_wallet_contributions_pp": -56.1111,
+          "worst_trade_wallet_pct": -8.1406,
+          "exit_reasons": {
+            "RECOVERY_V8_TRAILING_STOP": 23,
+            "RECOVERY_V8_HARD_STOP": 5,
+            "LONG_TRAILING_STOP": 7,
+            "LONG_HARD_STOP": 3,
+            "RECOVERY_V8_MAX_HOLD": 9
+          }
+        },
+        "PENGU_SHORT": {
+          "n": 20,
+          "wins": 15,
+          "losses": 5,
+          "negative_realized_sum_pnl_units": -12298.4688,
+          "positive_realized_sum_pnl_units": 14684.0604,
+          "sum_negative_wallet_contributions_pp": -16.2767,
+          "worst_trade_wallet_pct": -8.0885,
+          "exit_reasons": {
+            "SHORT_MAX_HOLD": 10,
+            "SHORT_V20_DEADLINE_EXIT": 1,
+            "SHORT_TRAILING_STOP": 7,
+            "SHORT_HARD_STOP": 2
+          }
+        },
+        "Q102_LONG": {
+          "n": 34,
+          "wins": 23,
+          "losses": 11,
+          "negative_realized_sum_pnl_units": -22110.7664,
+          "positive_realized_sum_pnl_units": 21324.0564,
+          "sum_negative_wallet_contributions_pp": -47.7299,
+          "worst_trade_wallet_pct": -10.2122,
+          "exit_reasons": {
+            "Q102_TIME_EXIT": 14,
+            "5M_PROTECTIVE_STOP": 15,
+            "Q102_HARD_STOP": 4,
+            "Q102_TRAIL_5_AFTER_12": 1
+          }
+        },
+        "Q102_SHORT": {
+          "n": 147,
+          "wins": 115,
+          "losses": 32,
+          "negative_realized_sum_pnl_units": -41299.9653,
+          "positive_realized_sum_pnl_units": 66159.2958,
+          "sum_negative_wallet_contributions_pp": -83.5705,
+          "worst_trade_wallet_pct": -7.6161,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 55,
+            "Q102_TIME_EXIT": 72,
+            "Q102_HARD_STOP": 6,
+            "FLOOR_combined_no_residual": 2,
+            "TIME_EXIT": 9,
+            "Q102_TRAIL_5_AFTER_12": 2,
+            "STOP": 1
+          }
+        },
+        "RESIDUAL_LONG": {
+          "n": 33,
+          "wins": 18,
+          "losses": 15,
+          "negative_realized_sum_pnl_units": -11369.6015,
+          "positive_realized_sum_pnl_units": 1948.1095,
+          "sum_negative_wallet_contributions_pp": -32.6842,
+          "worst_trade_wallet_pct": -6.3913,
+          "exit_reasons": {
+            "FORMAL_PRIORITY": 15,
+            "TIME_EXIT": 12,
+            "IDLE_SHORT_PRIORITY": 6
+          }
+        },
+        "V12_LONG": {
+          "n": 157,
+          "wins": 131,
+          "losses": 26,
+          "negative_realized_sum_pnl_units": -2881.4835,
+          "positive_realized_sum_pnl_units": 66159.0216,
+          "sum_negative_wallet_contributions_pp": -6.3659,
+          "worst_trade_wallet_pct": -1.0936,
+          "exit_reasons": {
+            "RECOVERY_SYMBOL_PREEMPT:Q102": 6,
+            "TIME_48H": 15,
+            "REV_D0_T12": 15,
+            "REV_D0_T24": 12,
+            "REV_D2_T36": 22,
+            "REV_D0_T36": 9,
+            "REV_D0_T3": 10,
+            "V12_REVERSAL_PREEMPT:REC_Y06_REV_D0_T72": 12,
+            "REV_D2_T24": 12,
+            "REV_D0_T6": 10,
+            "REV_D2_T9": 9,
+            "REV_D1_T3": 13,
+            "V12_REVERSAL_PREEMPT:REC_Y03_REV_D0_T36": 4,
+            "V12_REVERSAL_PREEMPT:REC_Y08_REV_D0_T6": 1,
+            "V12_REVERSAL_PREEMPT:REC_Y01_REV_D0_T72": 3,
+            "RECOVERY_CORE_PREEMPT:Q102": 2,
+            "RECOVERY_SYMBOL_PREEMPT:V12": 1,
+            "RECOVERY_CORE_PREEMPT:V12": 1
+          }
+        },
+        "V12_SHORT": {
+          "n": 686,
+          "wins": 249,
+          "losses": 437,
+          "negative_realized_sum_pnl_units": -81809.3967,
+          "positive_realized_sum_pnl_units": 175214.231,
+          "sum_negative_wallet_contributions_pp": -152.1556,
+          "worst_trade_wallet_pct": -1.2015,
+          "exit_reasons": {
+            "RESEARCH_V12_SHORT_INITIAL_WALLET_1P0_5M_STOP": 423,
+            "REV_D1_TP2_SL1_H36_TP": 10,
+            "REV_D2_T18": 4,
+            "ORIG_D2_TP1_SL1_H24_TP": 8,
+            "FLOOR_combined_no_residual": 7,
+            "ORIG_D2_TP1_SL1_H24_STOP": 2,
+            "TP1.5_SL1_H24_TP": 6,
+            "REV_D0_T72": 25,
+            "SECOND_REPAIR_FAILED_BREAK_REV_SHORT_6H_TIME9": 22,
+            "TIME_12H": 12,
+            "REPAIRED_REC_G2_EARLY_BTC_OPPOSE_VOL_TIME6": 17,
+            "REC_G5_TIME48_REFINED": 7,
+            "V12_REVERSAL_PREEMPT:REC_Y15_REV_D0_T3": 3,
+            "REPAIRED_REC_G4_MATURE_REL_RANGE_TIME24": 5,
+            "TRAILING_CROSSED_BEFORE_REPLACEMENT": 18,
+            "REPAIRED_REC_X06_TIME_12H_TIME18": 10,
+            "STOP": 6,
+            "RECOVERY_CORE_PREEMPT:Q102": 10,
+            "REV_D0_T6": 9,
+            "TIME_6H": 4,
+            "TIME_36H": 15,
+            "ORIG_D2_T6": 8,
+            "TIME_24H": 7,
+            "REV_D0_T36": 7,
+            "V12_REVERSAL_PREEMPT:REC_Y16_REV_D0_T6": 3,
+            "TIME_48H": 8,
+            "TAKE_PROFIT": 1,
+            "SECOND_REPAIR_CONT_SHORT_MID_AGE24_48_TIME3": 7,
+            "RECOVERY_CORE_PREEMPT:PENGU": 4,
+            "SECOND_REPAIR_REC_G1_MID_REL_LOWVOL_TIME12": 5,
+            "V12_REVERSAL_PREEMPT:REC_Y13_REV_D2_T36": 4,
+            "TP1.5_SL1_H24_STOP": 1,
+            "REV_D2_T24": 5,
+            "RECOVERY_SYMBOL_PREEMPT:Q102": 3
+          }
+        },
+        "V52_LONG": {
+          "n": 35,
+          "wins": 31,
+          "losses": 4,
+          "negative_realized_sum_pnl_units": -5.8186,
+          "positive_realized_sum_pnl_units": 51341.8192,
+          "sum_negative_wallet_contributions_pp": -1.2279,
+          "worst_trade_wallet_pct": -0.5195,
+          "exit_reasons": {
+            "BASIS_CONVERGED": 29,
+            "BASIS_STOP": 1,
+            "TIME_OR_SESSION_FLAT": 5
+          }
+        },
+        "V52_SHORT": {
+          "n": 52,
+          "wins": 40,
+          "losses": 12,
+          "negative_realized_sum_pnl_units": -3584.8242,
+          "positive_realized_sum_pnl_units": 70680.6654,
+          "sum_negative_wallet_contributions_pp": -4.6851,
+          "worst_trade_wallet_pct": -2.0067,
+          "exit_reasons": {
+            "BASIS_CONVERGED": 32,
+            "BASIS_STOP": 3,
+            "TIME_OR_SESSION_FLAT": 17
+          }
+        }
+      },
+      "30": {
+        "FET_LONG": {
+          "n": 8,
+          "wins": 6,
+          "losses": 2,
+          "negative_realized_sum_pnl_units": -279.2595,
+          "positive_realized_sum_pnl_units": 7174.3043,
+          "sum_negative_wallet_contributions_pp": -1.3315,
+          "worst_trade_wallet_pct": -1.225,
+          "exit_reasons": {
+            "FET_24H_TIME_EXIT": 5,
+            "FET_PROFIT_FLOOR_STOP": 3
+          }
+        },
+        "HYPE_LONG_LONG": {
+          "n": 40,
+          "wins": 13,
+          "losses": 27,
+          "negative_realized_sum_pnl_units": -12591.5041,
+          "positive_realized_sum_pnl_units": 16632.932,
+          "sum_negative_wallet_contributions_pp": -62.9995,
+          "worst_trade_wallet_pct": -2.467,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 27,
+            "TAKE_PROFIT": 13
+          }
+        },
+        "IDLE_SHORT": {
+          "n": 99,
+          "wins": 59,
+          "losses": 40,
+          "negative_realized_sum_pnl_units": -19412.2608,
+          "positive_realized_sum_pnl_units": 26909.4469,
+          "sum_negative_wallet_contributions_pp": -54.609,
+          "worst_trade_wallet_pct": -7.2355,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 17,
+            "TIME_EXIT": 80,
+            "STOP": 2
+          }
+        },
+        "PENGU_LONG": {
+          "n": 46,
+          "wins": 34,
+          "losses": 12,
+          "negative_realized_sum_pnl_units": -13142.7489,
+          "positive_realized_sum_pnl_units": 29897.5024,
+          "sum_negative_wallet_contributions_pp": -65.2707,
+          "worst_trade_wallet_pct": -8.3326,
+          "exit_reasons": {
+            "RECOVERY_V8_TRAILING_STOP": 22,
+            "RECOVERY_V8_HARD_STOP": 5,
+            "LONG_TRAILING_STOP": 7,
+            "LONG_HARD_STOP": 3,
+            "RECOVERY_V8_MAX_HOLD": 9
+          }
+        },
+        "PENGU_SHORT": {
+          "n": 20,
+          "wins": 15,
+          "losses": 5,
+          "negative_realized_sum_pnl_units": -8819.1211,
+          "positive_realized_sum_pnl_units": 5345.568,
+          "sum_negative_wallet_contributions_pp": -22.7378,
+          "worst_trade_wallet_pct": -8.2965,
+          "exit_reasons": {
+            "SHORT_MAX_HOLD": 10,
+            "SHORT_V20_DEADLINE_EXIT": 1,
+            "SHORT_TRAILING_STOP": 7,
+            "SHORT_HARD_STOP": 2
+          }
+        },
+        "Q102_LONG": {
+          "n": 34,
+          "wins": 23,
+          "losses": 11,
+          "negative_realized_sum_pnl_units": -9177.6375,
+          "positive_realized_sum_pnl_units": 7723.3229,
+          "sum_negative_wallet_contributions_pp": -54.6326,
+          "worst_trade_wallet_pct": -10.6022,
+          "exit_reasons": {
+            "Q102_TIME_EXIT": 14,
+            "5M_PROTECTIVE_STOP": 15,
+            "Q102_HARD_STOP": 4,
+            "Q102_TRAIL_5_AFTER_12": 1
+          }
+        },
+        "Q102_SHORT": {
+          "n": 146,
+          "wins": 113,
+          "losses": 33,
+          "negative_realized_sum_pnl_units": -19521.4812,
+          "positive_realized_sum_pnl_units": 30361.4385,
+          "sum_negative_wallet_contributions_pp": -102.1286,
+          "worst_trade_wallet_pct": -11.782,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 54,
+            "Q102_TIME_EXIT": 72,
+            "Q102_HARD_STOP": 6,
+            "FLOOR_combined_no_residual": 2,
+            "TIME_EXIT": 9,
+            "Q102_TRAIL_5_AFTER_12": 2,
+            "STOP": 1
+          }
+        },
+        "RESIDUAL_LONG": {
+          "n": 40,
+          "wins": 18,
+          "losses": 22,
+          "negative_realized_sum_pnl_units": -7761.0341,
+          "positive_realized_sum_pnl_units": 2875.937,
+          "sum_negative_wallet_contributions_pp": -39.3025,
+          "worst_trade_wallet_pct": -6.585,
+          "exit_reasons": {
+            "FORMAL_PRIORITY": 18,
+            "TIME_EXIT": 16,
+            "IDLE_SHORT_PRIORITY": 6
+          }
+        },
+        "V12_LONG": {
+          "n": 154,
+          "wins": 115,
+          "losses": 39,
+          "negative_realized_sum_pnl_units": -1110.968,
+          "positive_realized_sum_pnl_units": 20440.4483,
+          "sum_negative_wallet_contributions_pp": -8.1777,
+          "worst_trade_wallet_pct": -1.1515,
+          "exit_reasons": {
+            "RECOVERY_SYMBOL_PREEMPT:Q102": 6,
+            "TIME_48H": 14,
+            "REV_D0_T12": 13,
+            "REV_D0_T24": 12,
+            "REV_D2_T36": 22,
+            "REV_D0_T36": 9,
+            "REV_D0_T3": 10,
+            "V12_REVERSAL_PREEMPT:REC_Y06_REV_D0_T72": 12,
+            "REV_D2_T24": 12,
+            "REV_D0_T6": 10,
+            "REV_D2_T9": 9,
+            "REV_D1_T3": 13,
+            "V12_REVERSAL_PREEMPT:REC_Y03_REV_D0_T36": 4,
+            "V12_REVERSAL_PREEMPT:REC_Y08_REV_D0_T6": 1,
+            "V12_REVERSAL_PREEMPT:REC_Y01_REV_D0_T72": 3,
+            "RECOVERY_CORE_PREEMPT:Q102": 2,
+            "RECOVERY_SYMBOL_PREEMPT:V12": 1,
+            "RECOVERY_CORE_PREEMPT:V12": 1
+          }
+        },
+        "V12_SHORT": {
+          "n": 683,
+          "wins": 241,
+          "losses": 442,
+          "negative_realized_sum_pnl_units": -27597.8649,
+          "positive_realized_sum_pnl_units": 44843.688,
+          "sum_negative_wallet_contributions_pp": -178.511,
+          "worst_trade_wallet_pct": -1.4026,
+          "exit_reasons": {
+            "RESEARCH_V12_SHORT_INITIAL_WALLET_1P0_5M_STOP": 421,
+            "REV_D1_TP2_SL1_H36_TP": 10,
+            "REV_D2_T18": 4,
+            "ORIG_D2_TP1_SL1_H24_TP": 8,
+            "FLOOR_combined_no_residual": 7,
+            "ORIG_D2_TP1_SL1_H24_STOP": 2,
+            "TP1.5_SL1_H24_TP": 6,
+            "REV_D0_T72": 25,
+            "SECOND_REPAIR_FAILED_BREAK_REV_SHORT_6H_TIME9": 22,
+            "TIME_12H": 12,
+            "REPAIRED_REC_G2_EARLY_BTC_OPPOSE_VOL_TIME6": 17,
+            "REC_G5_TIME48_REFINED": 6,
+            "V12_REVERSAL_PREEMPT:REC_Y15_REV_D0_T3": 3,
+            "REPAIRED_REC_G4_MATURE_REL_RANGE_TIME24": 4,
+            "TRAILING_CROSSED_BEFORE_REPLACEMENT": 18,
+            "REPAIRED_REC_X06_TIME_12H_TIME18": 10,
+            "STOP": 5,
+            "RECOVERY_CORE_PREEMPT:Q102": 16,
+            "REV_D0_T6": 9,
+            "TIME_6H": 4,
+            "TIME_36H": 13,
+            "ORIG_D2_T6": 8,
+            "TIME_24H": 6,
+            "REV_D0_T36": 7,
+            "V12_REVERSAL_PREEMPT:REC_Y16_REV_D0_T6": 3,
+            "TIME_48H": 7,
+            "TAKE_PROFIT": 1,
+            "SECOND_REPAIR_CONT_SHORT_MID_AGE24_48_TIME3": 7,
+            "RECOVERY_CORE_PREEMPT:PENGU": 4,
+            "SECOND_REPAIR_REC_G1_MID_REL_LOWVOL_TIME12": 5,
+            "V12_REVERSAL_PREEMPT:REC_Y13_REV_D2_T36": 4,
+            "TP1.5_SL1_H24_STOP": 1,
+            "REV_D2_T24": 5,
+            "RECOVERY_SYMBOL_PREEMPT:Q102": 3
+          }
+        },
+        "V52_LONG": {
+          "n": 34,
+          "wins": 29,
+          "losses": 5,
+          "negative_realized_sum_pnl_units": -302.9551,
+          "positive_realized_sum_pnl_units": 11710.4161,
+          "sum_negative_wallet_contributions_pp": -3.1405,
+          "worst_trade_wallet_pct": -0.9186,
+          "exit_reasons": {
+            "BASIS_CONVERGED": 28,
+            "BASIS_STOP": 1,
+            "TIME_OR_SESSION_FLAT": 5
+          }
+        },
+        "V52_SHORT": {
+          "n": 52,
+          "wins": 40,
+          "losses": 12,
+          "negative_realized_sum_pnl_units": -2810.9017,
+          "positive_realized_sum_pnl_units": 15865.1948,
+          "sum_negative_wallet_contributions_pp": -9.7527,
+          "worst_trade_wallet_pct": -2.388,
+          "exit_reasons": {
+            "BASIS_CONVERGED": 32,
+            "BASIS_STOP": 3,
+            "TIME_OR_SESSION_FLAT": 17
+          }
+        }
+      }
+    },
+    "S01_V12_SHORT_INITIAL_WALLET_1P5": {
+      "10": {
+        "FET_LONG": {
+          "n": 8,
+          "wins": 7,
+          "losses": 1,
+          "negative_realized_sum_pnl_units": -890.5252,
+          "positive_realized_sum_pnl_units": 23031.5724,
+          "sum_negative_wallet_contributions_pp": -1.0259,
+          "worst_trade_wallet_pct": -1.0259,
+          "exit_reasons": {
+            "FET_24H_TIME_EXIT": 5,
+            "FET_PROFIT_FLOOR_STOP": 3
+          }
+        },
+        "HYPE_LONG_LONG": {
+          "n": 40,
+          "wins": 12,
+          "losses": 28,
+          "negative_realized_sum_pnl_units": -48851.4535,
+          "positive_realized_sum_pnl_units": 79897.7508,
+          "sum_negative_wallet_contributions_pp": -59.0522,
+          "worst_trade_wallet_pct": -2.2167,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 28,
+            "TAKE_PROFIT": 12
+          }
+        },
+        "IDLE_SHORT": {
+          "n": 80,
+          "wins": 51,
+          "losses": 29,
+          "negative_realized_sum_pnl_units": -30488.7698,
+          "positive_realized_sum_pnl_units": 33291.2601,
+          "sum_negative_wallet_contributions_pp": -37.7826,
+          "worst_trade_wallet_pct": -7.0285,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 16,
+            "TIME_EXIT": 62,
+            "STOP": 2
+          }
+        },
+        "PENGU_LONG": {
+          "n": 47,
+          "wins": 35,
+          "losses": 12,
+          "negative_realized_sum_pnl_units": -24398.1635,
+          "positive_realized_sum_pnl_units": 81764.8273,
+          "sum_negative_wallet_contributions_pp": -55.3194,
+          "worst_trade_wallet_pct": -8.1406,
+          "exit_reasons": {
+            "RECOVERY_V8_TRAILING_STOP": 23,
+            "RECOVERY_V8_HARD_STOP": 5,
+            "LONG_TRAILING_STOP": 7,
+            "LONG_HARD_STOP": 3,
+            "RECOVERY_V8_MAX_HOLD": 9
+          }
+        },
+        "PENGU_SHORT": {
+          "n": 20,
+          "wins": 15,
+          "losses": 5,
+          "negative_realized_sum_pnl_units": -12837.4658,
+          "positive_realized_sum_pnl_units": 18775.1979,
+          "sum_negative_wallet_contributions_pp": -15.6077,
+          "worst_trade_wallet_pct": -8.0885,
+          "exit_reasons": {
+            "SHORT_MAX_HOLD": 10,
+            "SHORT_V20_DEADLINE_EXIT": 1,
+            "SHORT_TRAILING_STOP": 7,
+            "SHORT_HARD_STOP": 2
+          }
+        },
+        "Q102_LONG": {
+          "n": 34,
+          "wins": 23,
+          "losses": 11,
+          "negative_realized_sum_pnl_units": -26512.2718,
+          "positive_realized_sum_pnl_units": 23220.4043,
+          "sum_negative_wallet_contributions_pp": -44.9082,
+          "worst_trade_wallet_pct": -10.0498,
+          "exit_reasons": {
+            "Q102_TIME_EXIT": 14,
+            "5M_PROTECTIVE_STOP": 15,
+            "Q102_HARD_STOP": 4,
+            "Q102_TRAIL_5_AFTER_12": 1
+          }
+        },
+        "Q102_SHORT": {
+          "n": 147,
+          "wins": 115,
+          "losses": 32,
+          "negative_realized_sum_pnl_units": -45037.4824,
+          "positive_realized_sum_pnl_units": 74537.1803,
+          "sum_negative_wallet_contributions_pp": -81.185,
+          "worst_trade_wallet_pct": -7.6161,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 55,
+            "Q102_TIME_EXIT": 72,
+            "Q102_HARD_STOP": 6,
+            "FLOOR_combined_no_residual": 2,
+            "TIME_EXIT": 9,
+            "Q102_TRAIL_5_AFTER_12": 2,
+            "STOP": 1
+          }
+        },
+        "RESIDUAL_LONG": {
+          "n": 33,
+          "wins": 18,
+          "losses": 15,
+          "negative_realized_sum_pnl_units": -14350.9812,
+          "positive_realized_sum_pnl_units": 2360.4088,
+          "sum_negative_wallet_contributions_pp": -32.3678,
+          "worst_trade_wallet_pct": -6.3913,
+          "exit_reasons": {
+            "FORMAL_PRIORITY": 15,
+            "TIME_EXIT": 12,
+            "IDLE_SHORT_PRIORITY": 6
+          }
+        },
+        "V12_LONG": {
+          "n": 159,
+          "wins": 135,
+          "losses": 24,
+          "negative_realized_sum_pnl_units": -2957.0942,
+          "positive_realized_sum_pnl_units": 78389.1141,
+          "sum_negative_wallet_contributions_pp": -5.864,
+          "worst_trade_wallet_pct": -1.0944,
+          "exit_reasons": {
+            "RECOVERY_SYMBOL_PREEMPT:Q102": 6,
+            "TIME_48H": 15,
+            "REV_D0_T12": 15,
+            "REV_D0_T24": 11,
+            "REV_D2_T36": 22,
+            "REV_D0_T36": 9,
+            "REV_D0_T3": 10,
+            "V12_REVERSAL_PREEMPT:REC_Y06_REV_D0_T72": 15,
+            "V12_REVERSAL_PREEMPT:REC_Y18_REV_D2_T18": 2,
+            "REV_D2_T24": 12,
+            "REV_D0_T6": 10,
+            "REV_D2_T9": 9,
+            "REV_D1_T3": 13,
+            "V12_REVERSAL_PREEMPT:REC_Y03_REV_D0_T36": 4,
+            "V12_REVERSAL_PREEMPT:REC_Y08_REV_D0_T6": 1,
+            "V12_REVERSAL_PREEMPT:REC_Y01_REV_D0_T72": 3,
+            "RECOVERY_CORE_PREEMPT:Q102": 1,
+            "RECOVERY_SYMBOL_PREEMPT:V12": 1
+          }
+        },
+        "V12_SHORT": {
+          "n": 692,
+          "wins": 323,
+          "losses": 369,
+          "negative_realized_sum_pnl_units": -103843.8497,
+          "positive_realized_sum_pnl_units": 257350.0496,
+          "sum_negative_wallet_contributions_pp": -169.1043,
+          "worst_trade_wallet_pct": -1.7018,
+          "exit_reasons": {
+            "REV_D1_TP2_SL1_H36_TP": 10,
+            "RESEARCH_V12_SHORT_INITIAL_WALLET_1P5_5M_STOP": 331,
+            "REV_D0_T6": 10,
+            "REV_D2_T18": 8,
+            "REV_D0_T72": 34,
+            "ORIG_D2_TP1_SL1_H24_TP": 9,
+            "FLOOR_combined_no_residual": 7,
+            "ORIG_D2_TP1_SL1_H24_STOP": 2,
+            "TIME_12H": 23,
+            "TP1.5_SL1_H24_TP": 11,
+            "V12_REVERSAL_PREEMPT:REC_Y12_REV_D0_T24": 1,
+            "SECOND_REPAIR_FAILED_BREAK_REV_SHORT_6H_TIME9": 25,
+            "REV_D2_T24": 10,
+            "REPAIRED_REC_G2_EARLY_BTC_OPPOSE_VOL_TIME6": 28,
+            "V12_REVERSAL_PREEMPT:REC_Y15_REV_D0_T3": 4,
+            "SECOND_REPAIR_REC_G1_MID_REL_LOWVOL_TIME12": 10,
+            "REC_G5_TIME48_REFINED": 7,
+            "REPAIRED_REC_G4_MATURE_REL_RANGE_TIME24": 11,
+            "TRAILING_CROSSED_BEFORE_REPLACEMENT": 18,
+            "REPAIRED_REC_X06_TIME_12H_TIME18": 10,
+            "STOP": 8,
+            "RECOVERY_CORE_PREEMPT:Q102": 9,
+            "TIME_6H": 5,
+            "TIME_36H": 20,
+            "RECOVERY_SYMBOL_PREEMPT:Q102": 8,
+            "TP1.5_SL1_H24_STOP": 3,
+            "ORIG_D2_T6": 8,
+            "SECOND_REPAIR_CONT_SHORT_MID_AGE24_48_TIME3": 10,
+            "TIME_24H": 14,
+            "REV_D0_T36": 12,
+            "V12_REVERSAL_PREEMPT:REC_Y16_REV_D0_T6": 4,
+            "TIME_48H": 10,
+            "TAKE_PROFIT": 1,
+            "REV_D1_TP2_SL1_H36_STOP": 1,
+            "RECOVERY_CORE_PREEMPT:PENGU": 3,
+            "V12_REVERSAL_PREEMPT:REC_Y13_REV_D2_T36": 5,
+            "V12_REVERSAL_PREEMPT:REC_Y17_REV_D1_T3": 1,
+            "RECOVERY_CORE_PREEMPT:V12": 1
+          }
+        },
+        "V52_LONG": {
+          "n": 35,
+          "wins": 31,
+          "losses": 4,
+          "negative_realized_sum_pnl_units": -5.957,
+          "positive_realized_sum_pnl_units": 60289.2611,
+          "sum_negative_wallet_contributions_pp": -1.2269,
+          "worst_trade_wallet_pct": -0.5187,
+          "exit_reasons": {
+            "BASIS_CONVERGED": 29,
+            "BASIS_STOP": 1,
+            "TIME_OR_SESSION_FLAT": 5
+          }
+        },
+        "V52_SHORT": {
+          "n": 52,
+          "wins": 40,
+          "losses": 12,
+          "negative_realized_sum_pnl_units": -4126.5329,
+          "positive_realized_sum_pnl_units": 82450.4308,
+          "sum_negative_wallet_contributions_pp": -4.5847,
+          "worst_trade_wallet_pct": -2.0106,
+          "exit_reasons": {
+            "BASIS_CONVERGED": 32,
+            "BASIS_STOP": 3,
+            "TIME_OR_SESSION_FLAT": 17
+          }
+        }
+      },
+      "30": {
+        "FET_LONG": {
+          "n": 8,
+          "wins": 6,
+          "losses": 2,
+          "negative_realized_sum_pnl_units": -347.6743,
+          "positive_realized_sum_pnl_units": 8822.3178,
+          "sum_negative_wallet_contributions_pp": -1.3315,
+          "worst_trade_wallet_pct": -1.225,
+          "exit_reasons": {
+            "FET_24H_TIME_EXIT": 5,
+            "FET_PROFIT_FLOOR_STOP": 3
+          }
+        },
+        "HYPE_LONG_LONG": {
+          "n": 39,
+          "wins": 12,
+          "losses": 27,
+          "negative_realized_sum_pnl_units": -15197.3394,
+          "positive_realized_sum_pnl_units": 20695.7471,
+          "sum_negative_wallet_contributions_pp": -63.0244,
+          "worst_trade_wallet_pct": -2.467,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 27,
+            "TAKE_PROFIT": 12
+          }
+        },
+        "IDLE_SHORT": {
+          "n": 94,
+          "wins": 56,
+          "losses": 38,
+          "negative_realized_sum_pnl_units": -23675.4647,
+          "positive_realized_sum_pnl_units": 23820.0019,
+          "sum_negative_wallet_contributions_pp": -58.5866,
+          "worst_trade_wallet_pct": -8.6059,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 15,
+            "TIME_EXIT": 78,
+            "STOP": 1
+          }
+        },
+        "PENGU_LONG": {
+          "n": 46,
+          "wins": 34,
+          "losses": 12,
+          "negative_realized_sum_pnl_units": -16085.1973,
+          "positive_realized_sum_pnl_units": 36912.5043,
+          "sum_negative_wallet_contributions_pp": -65.271,
+          "worst_trade_wallet_pct": -8.3326,
+          "exit_reasons": {
+            "RECOVERY_V8_TRAILING_STOP": 22,
+            "RECOVERY_V8_HARD_STOP": 5,
+            "LONG_TRAILING_STOP": 7,
+            "LONG_HARD_STOP": 3,
+            "RECOVERY_V8_MAX_HOLD": 9
+          }
+        },
+        "PENGU_SHORT": {
+          "n": 20,
+          "wins": 15,
+          "losses": 5,
+          "negative_realized_sum_pnl_units": -10850.9658,
+          "positive_realized_sum_pnl_units": 6672.5063,
+          "sum_negative_wallet_contributions_pp": -22.6203,
+          "worst_trade_wallet_pct": -8.2965,
+          "exit_reasons": {
+            "SHORT_MAX_HOLD": 10,
+            "SHORT_V20_DEADLINE_EXIT": 1,
+            "SHORT_TRAILING_STOP": 7,
+            "SHORT_HARD_STOP": 2
+          }
+        },
+        "Q102_LONG": {
+          "n": 34,
+          "wins": 23,
+          "losses": 11,
+          "negative_realized_sum_pnl_units": -11654.8393,
+          "positive_realized_sum_pnl_units": 9680.274,
+          "sum_negative_wallet_contributions_pp": -54.9659,
+          "worst_trade_wallet_pct": -10.6022,
+          "exit_reasons": {
+            "Q102_TIME_EXIT": 14,
+            "5M_PROTECTIVE_STOP": 15,
+            "Q102_HARD_STOP": 4,
+            "Q102_TRAIL_5_AFTER_12": 1
+          }
+        },
+        "Q102_SHORT": {
+          "n": 145,
+          "wins": 112,
+          "losses": 33,
+          "negative_realized_sum_pnl_units": -21608.8304,
+          "positive_realized_sum_pnl_units": 33872.3582,
+          "sum_negative_wallet_contributions_pp": -98.9985,
+          "worst_trade_wallet_pct": -9.3705,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 54,
+            "Q102_TIME_EXIT": 72,
+            "Q102_HARD_STOP": 6,
+            "TIME_EXIT": 9,
+            "Q102_TRAIL_5_AFTER_12": 2,
+            "STOP": 1,
+            "FLOOR_combined_no_residual": 1
+          }
+        },
+        "RESIDUAL_LONG": {
+          "n": 40,
+          "wins": 18,
+          "losses": 22,
+          "negative_realized_sum_pnl_units": -9584.8841,
+          "positive_realized_sum_pnl_units": 3463.6224,
+          "sum_negative_wallet_contributions_pp": -39.4153,
+          "worst_trade_wallet_pct": -6.585,
+          "exit_reasons": {
+            "FORMAL_PRIORITY": 18,
+            "TIME_EXIT": 16,
+            "IDLE_SHORT_PRIORITY": 6
+          }
+        },
+        "V12_LONG": {
+          "n": 156,
+          "wins": 119,
+          "losses": 37,
+          "negative_realized_sum_pnl_units": -1397.0949,
+          "positive_realized_sum_pnl_units": 24320.0701,
+          "sum_negative_wallet_contributions_pp": -7.6874,
+          "worst_trade_wallet_pct": -1.1544,
+          "exit_reasons": {
+            "RECOVERY_SYMBOL_PREEMPT:Q102": 6,
+            "TIME_48H": 13,
+            "REV_D0_T12": 12,
+            "REV_D0_T24": 11,
+            "REV_D2_T36": 21,
+            "REV_D0_T36": 9,
+            "REV_D0_T3": 10,
+            "V12_REVERSAL_PREEMPT:REC_Y06_REV_D0_T72": 15,
+            "V12_REVERSAL_PREEMPT:REC_Y18_REV_D2_T18": 2,
+            "REV_D2_T24": 12,
+            "REV_D0_T6": 10,
+            "REV_D2_T9": 9,
+            "REV_D1_T3": 13,
+            "V12_REVERSAL_PREEMPT:REC_Y03_REV_D0_T36": 4,
+            "V12_REVERSAL_PREEMPT:REC_Y08_REV_D0_T6": 1,
+            "V12_REVERSAL_PREEMPT:REC_Y01_REV_D0_T72": 3,
+            "RECOVERY_CORE_PREEMPT:Q102": 3,
+            "RECOVERY_SYMBOL_PREEMPT:V12": 1,
+            "RECOVERY_CORE_PREEMPT:V12": 1
+          }
+        },
+        "V12_SHORT": {
+          "n": 687,
+          "wins": 310,
+          "losses": 377,
+          "negative_realized_sum_pnl_units": -34195.363,
+          "positive_realized_sum_pnl_units": 66195.5021,
+          "sum_negative_wallet_contributions_pp": -190.8299,
+          "worst_trade_wallet_pct": -1.9018,
+          "exit_reasons": {
+            "REV_D1_TP2_SL1_H36_TP": 10,
+            "RESEARCH_V12_SHORT_INITIAL_WALLET_1P5_5M_STOP": 326,
+            "REV_D0_T6": 10,
+            "REV_D2_T18": 8,
+            "REV_D0_T72": 32,
+            "ORIG_D2_TP1_SL1_H24_TP": 9,
+            "FLOOR_combined_no_residual": 7,
+            "ORIG_D2_TP1_SL1_H24_STOP": 2,
+            "TIME_12H": 22,
+            "TP1.5_SL1_H24_TP": 10,
+            "V12_REVERSAL_PREEMPT:REC_Y12_REV_D0_T24": 1,
+            "SECOND_REPAIR_FAILED_BREAK_REV_SHORT_6H_TIME9": 25,
+            "REV_D2_T24": 10,
+            "REPAIRED_REC_G2_EARLY_BTC_OPPOSE_VOL_TIME6": 28,
+            "V12_REVERSAL_PREEMPT:REC_Y15_REV_D0_T3": 4,
+            "SECOND_REPAIR_REC_G1_MID_REL_LOWVOL_TIME12": 9,
+            "REC_G5_TIME48_REFINED": 7,
+            "REPAIRED_REC_G4_MATURE_REL_RANGE_TIME24": 10,
+            "TRAILING_CROSSED_BEFORE_REPLACEMENT": 18,
+            "REPAIRED_REC_X06_TIME_12H_TIME18": 10,
+            "STOP": 7,
+            "RECOVERY_CORE_PREEMPT:Q102": 18,
+            "TIME_6H": 5,
+            "TIME_36H": 18,
+            "RECOVERY_SYMBOL_PREEMPT:Q102": 8,
+            "TP1.5_SL1_H24_STOP": 3,
+            "ORIG_D2_T6": 8,
+            "SECOND_REPAIR_CONT_SHORT_MID_AGE24_48_TIME3": 10,
+            "TIME_24H": 13,
+            "REV_D0_T36": 12,
+            "V12_REVERSAL_PREEMPT:REC_Y16_REV_D0_T6": 4,
+            "TIME_48H": 9,
+            "TAKE_PROFIT": 1,
+            "REV_D1_TP2_SL1_H36_STOP": 1,
+            "RECOVERY_CORE_PREEMPT:PENGU": 5,
+            "V12_REVERSAL_PREEMPT:REC_Y13_REV_D2_T36": 5,
+            "V12_REVERSAL_PREEMPT:REC_Y17_REV_D1_T3": 1,
+            "RECOVERY_CORE_PREEMPT:V12": 1
+          }
+        },
+        "V52_LONG": {
+          "n": 34,
+          "wins": 29,
+          "losses": 5,
+          "negative_realized_sum_pnl_units": -363.62,
+          "positive_realized_sum_pnl_units": 14747.6839,
+          "sum_negative_wallet_contributions_pp": -3.1425,
+          "worst_trade_wallet_pct": -0.9173,
+          "exit_reasons": {
+            "BASIS_CONVERGED": 28,
+            "BASIS_STOP": 1,
+            "TIME_OR_SESSION_FLAT": 5
+          }
+        },
+        "V52_SHORT": {
+          "n": 52,
+          "wins": 40,
+          "losses": 12,
+          "negative_realized_sum_pnl_units": -3515.6119,
+          "positive_realized_sum_pnl_units": 19775.3188,
+          "sum_negative_wallet_contributions_pp": -9.7453,
+          "worst_trade_wallet_pct": -2.3939,
+          "exit_reasons": {
+            "BASIS_CONVERGED": 32,
+            "BASIS_STOP": 3,
+            "TIME_OR_SESSION_FLAT": 17
+          }
+        }
+      }
+    },
+    "S02_HYPE_LONG_PROFIT_1P5_TO_0P25": {
+      "10": {
+        "FET_LONG": {
+          "n": 8,
+          "wins": 7,
+          "losses": 1,
+          "negative_realized_sum_pnl_units": -1084.8606,
+          "positive_realized_sum_pnl_units": 30239.4105,
+          "sum_negative_wallet_contributions_pp": -0.3577,
+          "worst_trade_wallet_pct": -0.3577,
+          "exit_reasons": {
+            "FET_24H_TIME_EXIT": 5,
+            "FET_PROFIT_FLOOR_STOP": 3
+          }
+        },
+        "HYPE_LONG_LONG": {
+          "n": 39,
+          "wins": 17,
+          "losses": 22,
+          "negative_realized_sum_pnl_units": -117214.929,
+          "positive_realized_sum_pnl_units": 67629.7896,
+          "sum_negative_wallet_contributions_pp": -46.0124,
+          "worst_trade_wallet_pct": -2.149,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 22,
+            "TAKE_PROFIT": 5,
+            "RESEARCH_HYPE_LONG_PROFIT_1P5_TO_0P25_5M_STOP": 12
+          }
+        },
+        "IDLE_SHORT": {
+          "n": 70,
+          "wins": 43,
+          "losses": 27,
+          "negative_realized_sum_pnl_units": -18450.5302,
+          "positive_realized_sum_pnl_units": 87318.0626,
+          "sum_negative_wallet_contributions_pp": -22.555,
+          "worst_trade_wallet_pct": -2.6876,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 14,
+            "TIME_EXIT": 54,
+            "STOP": 2
+          }
+        },
+        "PENGU_LONG": {
+          "n": 47,
+          "wins": 35,
+          "losses": 12,
+          "negative_realized_sum_pnl_units": -39174.388,
+          "positive_realized_sum_pnl_units": 141219.0045,
+          "sum_negative_wallet_contributions_pp": -50.245,
+          "worst_trade_wallet_pct": -8.1298,
+          "exit_reasons": {
+            "RECOVERY_V8_TRAILING_STOP": 23,
+            "RECOVERY_V8_HARD_STOP": 5,
+            "LONG_TRAILING_STOP": 7,
+            "LONG_HARD_STOP": 3,
+            "RECOVERY_V8_MAX_HOLD": 9
+          }
+        },
+        "PENGU_SHORT": {
+          "n": 20,
+          "wins": 15,
+          "losses": 5,
+          "negative_realized_sum_pnl_units": -13016.3193,
+          "positive_realized_sum_pnl_units": 40034.646,
+          "sum_negative_wallet_contributions_pp": -13.274,
+          "worst_trade_wallet_pct": -8.0886,
+          "exit_reasons": {
+            "SHORT_MAX_HOLD": 10,
+            "SHORT_V20_DEADLINE_EXIT": 1,
+            "SHORT_TRAILING_STOP": 7,
+            "SHORT_HARD_STOP": 2
+          }
+        },
+        "Q102_LONG": {
+          "n": 35,
+          "wins": 24,
+          "losses": 11,
+          "negative_realized_sum_pnl_units": -38711.2047,
+          "positive_realized_sum_pnl_units": 31217.8734,
+          "sum_negative_wallet_contributions_pp": -28.8329,
+          "worst_trade_wallet_pct": -6.0468,
+          "exit_reasons": {
+            "Q102_TIME_EXIT": 15,
+            "5M_PROTECTIVE_STOP": 15,
+            "Q102_HARD_STOP": 4,
+            "Q102_TRAIL_5_AFTER_12": 1
+          }
+        },
+        "Q102_SHORT": {
+          "n": 147,
+          "wins": 115,
+          "losses": 32,
+          "negative_realized_sum_pnl_units": -66667.0904,
+          "positive_realized_sum_pnl_units": 121080.0329,
+          "sum_negative_wallet_contributions_pp": -72.0867,
+          "worst_trade_wallet_pct": -7.6161,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 55,
+            "Q102_TIME_EXIT": 72,
+            "Q102_HARD_STOP": 6,
+            "FLOOR_combined_no_residual": 2,
+            "TIME_EXIT": 9,
+            "Q102_TRAIL_5_AFTER_12": 2,
+            "STOP": 1
+          }
+        },
+        "RESIDUAL_LONG": {
+          "n": 29,
+          "wins": 15,
+          "losses": 14,
+          "negative_realized_sum_pnl_units": -38489.9222,
+          "positive_realized_sum_pnl_units": 9953.6286,
+          "sum_negative_wallet_contributions_pp": -33.4219,
+          "worst_trade_wallet_pct": -5.649,
+          "exit_reasons": {
+            "FORMAL_PRIORITY": 13,
+            "TIME_EXIT": 11,
+            "IDLE_SHORT_PRIORITY": 5
+          }
+        },
+        "V12_LONG": {
+          "n": 142,
+          "wins": 120,
+          "losses": 22,
+          "negative_realized_sum_pnl_units": -7834.5648,
+          "positive_realized_sum_pnl_units": 160084.2504,
+          "sum_negative_wallet_contributions_pp": -5.386,
+          "worst_trade_wallet_pct": -1.096,
+          "exit_reasons": {
+            "RECOVERY_SYMBOL_PREEMPT:Q102": 5,
+            "TIME_48H": 12,
+            "REV_D0_T12": 15,
+            "REV_D0_T24": 10,
+            "REV_D2_T36": 21,
+            "REV_D0_T36": 9,
+            "REV_D0_T3": 10,
+            "V12_REVERSAL_PREEMPT:REC_Y06_REV_D0_T72": 10,
+            "RECOVERY_CORE_PREEMPT:Q102": 4,
+            "REV_D2_T24": 12,
+            "REV_D2_T9": 9,
+            "REV_D0_T6": 9,
+            "REV_D1_T3": 11,
+            "V12_REVERSAL_PREEMPT:REC_Y08_REV_D0_T6": 1,
+            "V12_REVERSAL_PREEMPT:REC_Y01_REV_D0_T72": 1,
+            "RECOVERY_SYMBOL_PREEMPT:V12": 1,
+            "V12_REVERSAL_PREEMPT:REC_Y03_REV_D0_T36": 2
+          }
+        },
+        "V12_SHORT": {
+          "n": 690,
+          "wins": 491,
+          "losses": 199,
+          "negative_realized_sum_pnl_units": -181959.2478,
+          "positive_realized_sum_pnl_units": 773677.8016,
+          "sum_negative_wallet_contributions_pp": -109.4688,
+          "worst_trade_wallet_pct": -4.0369,
+          "exit_reasons": {
+            "REV_D1_TP2_SL1_H36_TP": 9,
+            "REV_D0_T6": 10,
+            "REV_D2_T18": 10,
+            "REV_D0_T36": 16,
+            "REV_D0_T72": 134,
+            "ORIG_D2_TP1_SL1_H24_TP": 9,
+            "REPAIRED_REC_X06_TIME_12H_TIME18": 35,
+            "TP1.5_SL1_H24_STOP": 9,
+            "TIME_24H": 37,
+            "FLOOR_combined_no_residual": 13,
+            "ORIG_D2_TP1_SL1_H24_STOP": 2,
+            "TIME_12H": 42,
+            "REPAIRED_REC_G2_EARLY_BTC_OPPOSE_VOL_TIME6": 39,
+            "TP1.5_SL1_H24_TP": 12,
+            "V12_REVERSAL_PREEMPT:REC_Y12_REV_D0_T24": 2,
+            "SECOND_REPAIR_CONT_SHORT_MID_AGE24_48_TIME3": 15,
+            "SECOND_REPAIR_FAILED_BREAK_REV_SHORT_6H_TIME9": 35,
+            "RECOVERY_SYMBOL_PREEMPT:Q102": 19,
+            "RECOVERY_CORE_PREEMPT:Q102": 24,
+            "REC_G5_TIME48_REFINED": 16,
+            "REV_D2_T24": 9,
+            "V12_REVERSAL_PREEMPT:REC_Y15_REV_D0_T3": 5,
+            "SECOND_REPAIR_REC_G1_MID_REL_LOWVOL_TIME12": 15,
+            "TIME_36H": 40,
+            "REPAIRED_REC_G4_MATURE_REL_RANGE_TIME24": 17,
+            "TRAILING_CROSSED_BEFORE_REPLACEMENT": 27,
+            "V12_REVERSAL_PREEMPT:REC_Y02_REV_D0_T12": 2,
+            "STOP": 9,
+            "TIME_48H": 21,
+            "RECOVERY_CORE_PREEMPT:PENGU": 4,
+            "RECOVERY_CORE_PREEMPT:V12": 8,
+            "TIME_6H": 13,
+            "ORIG_D2_T6": 10,
+            "V12_REVERSAL_PREEMPT:REC_Y16_REV_D0_T6": 4,
+            "V12_REVERSAL_PREEMPT:REC_Y05_REV_D2_T9": 1,
+            "TAKE_PROFIT": 1,
+            "REV_D1_TP2_SL1_H36_STOP": 2,
+            "V12_REVERSAL_PREEMPT:REC_Y10_REV_D2_T24": 2,
+            "V12_REVERSAL_PREEMPT:REC_Y13_REV_D2_T36": 5,
+            "V12_REVERSAL_PREEMPT:REC_Y17_REV_D1_T3": 3,
+            "RECOVERY_SYMBOL_PREEMPT:V12": 4
+          }
+        },
+        "V52_LONG": {
+          "n": 35,
+          "wins": 31,
+          "losses": 4,
+          "negative_realized_sum_pnl_units": -8.9288,
+          "positive_realized_sum_pnl_units": 95580.7118,
+          "sum_negative_wallet_contributions_pp": -1.2276,
+          "worst_trade_wallet_pct": -0.5186,
+          "exit_reasons": {
+            "BASIS_CONVERGED": 29,
+            "BASIS_STOP": 1,
+            "TIME_OR_SESSION_FLAT": 5
+          }
+        },
+        "V52_SHORT": {
+          "n": 52,
+          "wins": 40,
+          "losses": 12,
+          "negative_realized_sum_pnl_units": -8234.2149,
+          "positive_realized_sum_pnl_units": 139433.0307,
+          "sum_negative_wallet_contributions_pp": -4.2522,
+          "worst_trade_wallet_pct": -2.0395,
+          "exit_reasons": {
+            "BASIS_CONVERGED": 32,
+            "BASIS_STOP": 3,
+            "TIME_OR_SESSION_FLAT": 17
+          }
+        }
+      },
+      "30": {
+        "FET_LONG": {
+          "n": 8,
+          "wins": 6,
+          "losses": 2,
+          "negative_realized_sum_pnl_units": -1414.5062,
+          "positive_realized_sum_pnl_units": 24237.0107,
+          "sum_negative_wallet_contributions_pp": -1.0883,
+          "worst_trade_wallet_pct": -0.9984,
+          "exit_reasons": {
+            "FET_24H_TIME_EXIT": 5,
+            "FET_PROFIT_FLOOR_STOP": 3
+          }
+        },
+        "HYPE_LONG_LONG": {
+          "n": 37,
+          "wins": 5,
+          "losses": 32,
+          "negative_realized_sum_pnl_units": -57094.4541,
+          "positive_realized_sum_pnl_units": 27619.3316,
+          "sum_negative_wallet_contributions_pp": -49.1107,
+          "worst_trade_wallet_pct": -2.447,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 20,
+            "TAKE_PROFIT": 5,
+            "RESEARCH_HYPE_LONG_PROFIT_1P5_TO_0P25_5M_STOP": 12
+          }
+        },
+        "IDLE_SHORT": {
+          "n": 75,
+          "wins": 47,
+          "losses": 28,
+          "negative_realized_sum_pnl_units": -24275.5293,
+          "positive_realized_sum_pnl_units": 51869.9864,
+          "sum_negative_wallet_contributions_pp": -32.6056,
+          "worst_trade_wallet_pct": -7.2355,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 14,
+            "TIME_EXIT": 59,
+            "STOP": 2
+          }
+        },
+        "PENGU_LONG": {
+          "n": 47,
+          "wins": 35,
+          "losses": 12,
+          "negative_realized_sum_pnl_units": -30365.9947,
+          "positive_realized_sum_pnl_units": 100345.9687,
+          "sum_negative_wallet_contributions_pp": -56.7215,
+          "worst_trade_wallet_pct": -8.3326,
+          "exit_reasons": {
+            "RECOVERY_V8_TRAILING_STOP": 23,
+            "RECOVERY_V8_HARD_STOP": 5,
+            "LONG_TRAILING_STOP": 7,
+            "LONG_HARD_STOP": 3,
+            "RECOVERY_V8_MAX_HOLD": 9
+          }
+        },
+        "PENGU_SHORT": {
+          "n": 20,
+          "wins": 15,
+          "losses": 5,
+          "negative_realized_sum_pnl_units": -13450.575,
+          "positive_realized_sum_pnl_units": 25334.6117,
+          "sum_negative_wallet_contributions_pp": -15.8174,
+          "worst_trade_wallet_pct": -8.2965,
+          "exit_reasons": {
+            "SHORT_MAX_HOLD": 10,
+            "SHORT_V20_DEADLINE_EXIT": 1,
+            "SHORT_TRAILING_STOP": 7,
+            "SHORT_HARD_STOP": 2
+          }
+        },
+        "Q102_LONG": {
+          "n": 34,
+          "wins": 23,
+          "losses": 11,
+          "negative_realized_sum_pnl_units": -33375.9813,
+          "positive_realized_sum_pnl_units": 23057.688,
+          "sum_negative_wallet_contributions_pp": -44.184,
+          "worst_trade_wallet_pct": -7.3879,
+          "exit_reasons": {
+            "Q102_TIME_EXIT": 14,
+            "5M_PROTECTIVE_STOP": 15,
+            "Q102_HARD_STOP": 4,
+            "Q102_TRAIL_5_AFTER_12": 1
+          }
+        },
+        "Q102_SHORT": {
+          "n": 147,
+          "wins": 114,
+          "losses": 33,
+          "negative_realized_sum_pnl_units": -54957.4232,
+          "positive_realized_sum_pnl_units": 74561.9339,
+          "sum_negative_wallet_contributions_pp": -83.1277,
+          "worst_trade_wallet_pct": -7.8736,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 55,
+            "Q102_TIME_EXIT": 72,
+            "Q102_HARD_STOP": 6,
+            "FLOOR_combined_no_residual": 2,
+            "TIME_EXIT": 9,
+            "Q102_TRAIL_5_AFTER_12": 2,
+            "STOP": 1
+          }
+        },
+        "RESIDUAL_LONG": {
+          "n": 28,
+          "wins": 12,
+          "losses": 16,
+          "negative_realized_sum_pnl_units": -18603.1941,
+          "positive_realized_sum_pnl_units": 2021.371,
+          "sum_negative_wallet_contributions_pp": -36.5515,
+          "worst_trade_wallet_pct": -5.8435,
+          "exit_reasons": {
+            "FORMAL_PRIORITY": 12,
+            "TIME_EXIT": 11,
+            "IDLE_SHORT_PRIORITY": 5
+          }
+        },
+        "V12_LONG": {
+          "n": 140,
+          "wins": 108,
+          "losses": 32,
+          "negative_realized_sum_pnl_units": -5360.1259,
+          "positive_realized_sum_pnl_units": 85423.5563,
+          "sum_negative_wallet_contributions_pp": -6.2483,
+          "worst_trade_wallet_pct": -1.155,
+          "exit_reasons": {
+            "RECOVERY_SYMBOL_PREEMPT:Q102": 5,
+            "TIME_48H": 10,
+            "REV_D0_T12": 15,
+            "REV_D0_T24": 10,
+            "REV_D2_T36": 21,
+            "REV_D0_T36": 9,
+            "REV_D0_T3": 10,
+            "V12_REVERSAL_PREEMPT:REC_Y06_REV_D0_T72": 10,
+            "RECOVERY_CORE_PREEMPT:Q102": 4,
+            "REV_D2_T24": 12,
+            "REV_D2_T9": 9,
+            "REV_D0_T6": 9,
+            "REV_D1_T3": 11,
+            "V12_REVERSAL_PREEMPT:REC_Y08_REV_D0_T6": 1,
+            "V12_REVERSAL_PREEMPT:REC_Y01_REV_D0_T72": 1,
+            "RECOVERY_SYMBOL_PREEMPT:V12": 1,
+            "V12_REVERSAL_PREEMPT:REC_Y03_REV_D0_T36": 2
+          }
+        },
+        "V12_SHORT": {
+          "n": 688,
+          "wins": 467,
+          "losses": 221,
+          "negative_realized_sum_pnl_units": -91986.028,
+          "positive_realized_sum_pnl_units": 390051.72,
+          "sum_negative_wallet_contributions_pp": -119.8885,
+          "worst_trade_wallet_pct": -3.9585,
+          "exit_reasons": {
+            "REV_D1_TP2_SL1_H36_TP": 9,
+            "REV_D0_T6": 10,
+            "REV_D2_T18": 9,
+            "REV_D0_T36": 16,
+            "REV_D0_T72": 132,
+            "ORIG_D2_TP1_SL1_H24_TP": 9,
+            "REPAIRED_REC_X06_TIME_12H_TIME18": 35,
+            "TP1.5_SL1_H24_STOP": 9,
+            "TIME_24H": 37,
+            "FLOOR_combined_no_residual": 13,
+            "ORIG_D2_TP1_SL1_H24_STOP": 2,
+            "TIME_12H": 42,
+            "REPAIRED_REC_G2_EARLY_BTC_OPPOSE_VOL_TIME6": 39,
+            "TP1.5_SL1_H24_TP": 12,
+            "V12_REVERSAL_PREEMPT:REC_Y12_REV_D0_T24": 2,
+            "SECOND_REPAIR_CONT_SHORT_MID_AGE24_48_TIME3": 15,
+            "SECOND_REPAIR_FAILED_BREAK_REV_SHORT_6H_TIME9": 35,
+            "RECOVERY_SYMBOL_PREEMPT:Q102": 19,
+            "RECOVERY_CORE_PREEMPT:Q102": 28,
+            "REC_G5_TIME48_REFINED": 15,
+            "REV_D2_T24": 9,
+            "V12_REVERSAL_PREEMPT:REC_Y15_REV_D0_T3": 5,
+            "SECOND_REPAIR_REC_G1_MID_REL_LOWVOL_TIME12": 15,
+            "TIME_36H": 40,
+            "REPAIRED_REC_G4_MATURE_REL_RANGE_TIME24": 17,
+            "TRAILING_CROSSED_BEFORE_REPLACEMENT": 27,
+            "V12_REVERSAL_PREEMPT:REC_Y02_REV_D0_T12": 2,
+            "STOP": 9,
+            "TIME_48H": 21,
+            "RECOVERY_CORE_PREEMPT:PENGU": 4,
+            "RECOVERY_CORE_PREEMPT:V12": 6,
+            "TIME_6H": 13,
+            "ORIG_D2_T6": 10,
+            "V12_REVERSAL_PREEMPT:REC_Y16_REV_D0_T6": 4,
+            "V12_REVERSAL_PREEMPT:REC_Y05_REV_D2_T9": 1,
+            "TAKE_PROFIT": 1,
+            "REV_D1_TP2_SL1_H36_STOP": 2,
+            "V12_REVERSAL_PREEMPT:REC_Y10_REV_D2_T24": 2,
+            "V12_REVERSAL_PREEMPT:REC_Y13_REV_D2_T36": 5,
+            "V12_REVERSAL_PREEMPT:REC_Y17_REV_D1_T3": 3,
+            "RECOVERY_SYMBOL_PREEMPT:V12": 4
+          }
+        },
+        "V52_LONG": {
+          "n": 35,
+          "wins": 30,
+          "losses": 5,
+          "negative_realized_sum_pnl_units": -684.897,
+          "positive_realized_sum_pnl_units": 59242.6505,
+          "sum_negative_wallet_contributions_pp": -2.9421,
+          "worst_trade_wallet_pct": -0.9165,
+          "exit_reasons": {
+            "BASIS_CONVERGED": 29,
+            "BASIS_STOP": 1,
+            "TIME_OR_SESSION_FLAT": 5
+          }
+        },
+        "V52_SHORT": {
+          "n": 52,
+          "wins": 40,
+          "losses": 12,
+          "negative_realized_sum_pnl_units": -10342.1529,
+          "positive_realized_sum_pnl_units": 75700.0282,
+          "sum_negative_wallet_contributions_pp": -8.687,
+          "worst_trade_wallet_pct": -2.4413,
+          "exit_reasons": {
+            "BASIS_CONVERGED": 32,
+            "BASIS_STOP": 3,
+            "TIME_OR_SESSION_FLAT": 17
+          }
+        }
+      }
+    },
+    "S02_HYPE_LONG_INITIAL_WALLET_1P5": {
+      "10": {
+        "FET_LONG": {
+          "n": 8,
+          "wins": 7,
+          "losses": 1,
+          "negative_realized_sum_pnl_units": -1084.8606,
+          "positive_realized_sum_pnl_units": 30239.4105,
+          "sum_negative_wallet_contributions_pp": -0.3286,
+          "worst_trade_wallet_pct": -0.3286,
+          "exit_reasons": {
+            "FET_24H_TIME_EXIT": 5,
+            "FET_PROFIT_FLOOR_STOP": 3
+          }
+        },
+        "HYPE_LONG_LONG": {
+          "n": 34,
+          "wins": 11,
+          "losses": 23,
+          "negative_realized_sum_pnl_units": -126186.283,
+          "positive_realized_sum_pnl_units": 226830.9559,
+          "sum_negative_wallet_contributions_pp": -43.2641,
+          "worst_trade_wallet_pct": -2.169,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 16,
+            "TAKE_PROFIT": 11,
+            "RESEARCH_HYPE_LONG_INITIAL_WALLET_1P5_5M_STOP": 7
+          }
+        },
+        "IDLE_SHORT": {
+          "n": 71,
+          "wins": 44,
+          "losses": 27,
+          "negative_realized_sum_pnl_units": -15337.8649,
+          "positive_realized_sum_pnl_units": 90237.5549,
+          "sum_negative_wallet_contributions_pp": -20.5621,
+          "worst_trade_wallet_pct": -2.6876,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 15,
+            "TIME_EXIT": 54,
+            "STOP": 2
+          }
+        },
+        "PENGU_LONG": {
+          "n": 47,
+          "wins": 35,
+          "losses": 12,
+          "negative_realized_sum_pnl_units": -39210.1777,
+          "positive_realized_sum_pnl_units": 141681.9155,
+          "sum_negative_wallet_contributions_pp": -49.4282,
+          "worst_trade_wallet_pct": -8.1298,
+          "exit_reasons": {
+            "RECOVERY_V8_TRAILING_STOP": 23,
+            "RECOVERY_V8_HARD_STOP": 5,
+            "LONG_TRAILING_STOP": 7,
+            "LONG_HARD_STOP": 3,
+            "RECOVERY_V8_MAX_HOLD": 9
+          }
+        },
+        "PENGU_SHORT": {
+          "n": 20,
+          "wins": 15,
+          "losses": 5,
+          "negative_realized_sum_pnl_units": -13016.3193,
+          "positive_realized_sum_pnl_units": 40034.646,
+          "sum_negative_wallet_contributions_pp": -12.9787,
+          "worst_trade_wallet_pct": -8.0886,
+          "exit_reasons": {
+            "SHORT_MAX_HOLD": 10,
+            "SHORT_V20_DEADLINE_EXIT": 1,
+            "SHORT_TRAILING_STOP": 7,
+            "SHORT_HARD_STOP": 2
+          }
+        },
+        "Q102_LONG": {
+          "n": 35,
+          "wins": 24,
+          "losses": 11,
+          "negative_realized_sum_pnl_units": -38827.4357,
+          "positive_realized_sum_pnl_units": 31301.9008,
+          "sum_negative_wallet_contributions_pp": -27.957,
+          "worst_trade_wallet_pct": -6.0468,
+          "exit_reasons": {
+            "Q102_TIME_EXIT": 15,
+            "5M_PROTECTIVE_STOP": 15,
+            "Q102_HARD_STOP": 4,
+            "Q102_TRAIL_5_AFTER_12": 1
+          }
+        },
+        "Q102_SHORT": {
+          "n": 147,
+          "wins": 115,
+          "losses": 32,
+          "negative_realized_sum_pnl_units": -68196.8698,
+          "positive_realized_sum_pnl_units": 123817.7851,
+          "sum_negative_wallet_contributions_pp": -71.1652,
+          "worst_trade_wallet_pct": -7.6161,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 55,
+            "Q102_TIME_EXIT": 72,
+            "Q102_HARD_STOP": 6,
+            "FLOOR_combined_no_residual": 2,
+            "TIME_EXIT": 9,
+            "Q102_TRAIL_5_AFTER_12": 2,
+            "STOP": 1
+          }
+        },
+        "RESIDUAL_LONG": {
+          "n": 29,
+          "wins": 15,
+          "losses": 14,
+          "negative_realized_sum_pnl_units": -45954.363,
+          "positive_realized_sum_pnl_units": 10823.2744,
+          "sum_negative_wallet_contributions_pp": -33.422,
+          "worst_trade_wallet_pct": -5.649,
+          "exit_reasons": {
+            "FORMAL_PRIORITY": 13,
+            "TIME_EXIT": 11,
+            "IDLE_SHORT_PRIORITY": 5
+          }
+        },
+        "V12_LONG": {
+          "n": 142,
+          "wins": 120,
+          "losses": 22,
+          "negative_realized_sum_pnl_units": -8605.3491,
+          "positive_realized_sum_pnl_units": 175033.5387,
+          "sum_negative_wallet_contributions_pp": -5.3498,
+          "worst_trade_wallet_pct": -1.0962,
+          "exit_reasons": {
+            "RECOVERY_SYMBOL_PREEMPT:Q102": 5,
+            "TIME_48H": 12,
+            "REV_D0_T12": 15,
+            "REV_D0_T24": 10,
+            "REV_D2_T36": 21,
+            "REV_D0_T36": 9,
+            "REV_D0_T3": 10,
+            "V12_REVERSAL_PREEMPT:REC_Y06_REV_D0_T72": 10,
+            "RECOVERY_CORE_PREEMPT:Q102": 4,
+            "REV_D2_T24": 12,
+            "REV_D2_T9": 9,
+            "REV_D0_T6": 9,
+            "REV_D1_T3": 11,
+            "V12_REVERSAL_PREEMPT:REC_Y08_REV_D0_T6": 1,
+            "V12_REVERSAL_PREEMPT:REC_Y01_REV_D0_T72": 1,
+            "RECOVERY_SYMBOL_PREEMPT:V12": 1,
+            "V12_REVERSAL_PREEMPT:REC_Y03_REV_D0_T36": 2
+          }
+        },
+        "V12_SHORT": {
+          "n": 690,
+          "wins": 491,
+          "losses": 199,
+          "negative_realized_sum_pnl_units": -206654.6458,
+          "positive_realized_sum_pnl_units": 873810.0856,
+          "sum_negative_wallet_contributions_pp": -108.4246,
+          "worst_trade_wallet_pct": -3.835,
+          "exit_reasons": {
+            "REV_D1_TP2_SL1_H36_TP": 9,
+            "REV_D0_T6": 10,
+            "REV_D2_T18": 10,
+            "REV_D0_T36": 16,
+            "REV_D0_T72": 137,
+            "ORIG_D2_TP1_SL1_H24_TP": 9,
+            "REPAIRED_REC_X06_TIME_12H_TIME18": 35,
+            "TP1.5_SL1_H24_STOP": 9,
+            "TIME_24H": 37,
+            "FLOOR_combined_no_residual": 13,
+            "ORIG_D2_TP1_SL1_H24_STOP": 2,
+            "TIME_12H": 42,
+            "REPAIRED_REC_G2_EARLY_BTC_OPPOSE_VOL_TIME6": 39,
+            "TP1.5_SL1_H24_TP": 12,
+            "V12_REVERSAL_PREEMPT:REC_Y12_REV_D0_T24": 2,
+            "SECOND_REPAIR_CONT_SHORT_MID_AGE24_48_TIME3": 14,
+            "SECOND_REPAIR_FAILED_BREAK_REV_SHORT_6H_TIME9": 35,
+            "RECOVERY_SYMBOL_PREEMPT:Q102": 19,
+            "RECOVERY_CORE_PREEMPT:Q102": 24,
+            "REC_G5_TIME48_REFINED": 16,
+            "REV_D2_T24": 9,
+            "V12_REVERSAL_PREEMPT:REC_Y15_REV_D0_T3": 5,
+            "SECOND_REPAIR_REC_G1_MID_REL_LOWVOL_TIME12": 15,
+            "TIME_36H": 40,
+            "REPAIRED_REC_G4_MATURE_REL_RANGE_TIME24": 17,
+            "TRAILING_CROSSED_BEFORE_REPLACEMENT": 27,
+            "V12_REVERSAL_PREEMPT:REC_Y02_REV_D0_T12": 2,
+            "STOP": 9,
+            "TIME_48H": 21,
+            "RECOVERY_CORE_PREEMPT:PENGU": 4,
+            "RECOVERY_CORE_PREEMPT:V12": 6,
+            "TIME_6H": 13,
+            "ORIG_D2_T6": 10,
+            "V12_REVERSAL_PREEMPT:REC_Y16_REV_D0_T6": 4,
+            "V12_REVERSAL_PREEMPT:REC_Y05_REV_D2_T9": 1,
+            "TAKE_PROFIT": 1,
+            "REV_D1_TP2_SL1_H36_STOP": 2,
+            "V12_REVERSAL_PREEMPT:REC_Y10_REV_D2_T24": 2,
+            "V12_REVERSAL_PREEMPT:REC_Y13_REV_D2_T36": 5,
+            "V12_REVERSAL_PREEMPT:REC_Y17_REV_D1_T3": 3,
+            "RECOVERY_SYMBOL_PREEMPT:V12": 4
+          }
+        },
+        "V52_LONG": {
+          "n": 35,
+          "wins": 31,
+          "losses": 4,
+          "negative_realized_sum_pnl_units": -8.9288,
+          "positive_realized_sum_pnl_units": 96598.276,
+          "sum_negative_wallet_contributions_pp": -1.2276,
+          "worst_trade_wallet_pct": -0.5186,
+          "exit_reasons": {
+            "BASIS_CONVERGED": 29,
+            "BASIS_STOP": 1,
+            "TIME_OR_SESSION_FLAT": 5
+          }
+        },
+        "V52_SHORT": {
+          "n": 52,
+          "wins": 40,
+          "losses": 12,
+          "negative_realized_sum_pnl_units": -8365.1267,
+          "positive_realized_sum_pnl_units": 143017.3393,
+          "sum_negative_wallet_contributions_pp": -4.1565,
+          "worst_trade_wallet_pct": -2.0395,
+          "exit_reasons": {
+            "BASIS_CONVERGED": 32,
+            "BASIS_STOP": 3,
+            "TIME_OR_SESSION_FLAT": 17
+          }
+        }
+      },
+      "30": {
+        "FET_LONG": {
+          "n": 8,
+          "wins": 6,
+          "losses": 2,
+          "negative_realized_sum_pnl_units": -1414.5062,
+          "positive_realized_sum_pnl_units": 24408.8956,
+          "sum_negative_wallet_contributions_pp": -0.9751,
+          "worst_trade_wallet_pct": -0.8945,
+          "exit_reasons": {
+            "FET_24H_TIME_EXIT": 5,
+            "FET_PROFIT_FLOOR_STOP": 3
+          }
+        },
+        "HYPE_LONG_LONG": {
+          "n": 34,
+          "wins": 11,
+          "losses": 23,
+          "negative_realized_sum_pnl_units": -76079.3716,
+          "positive_realized_sum_pnl_units": 103299.007,
+          "sum_negative_wallet_contributions_pp": -49.1807,
+          "worst_trade_wallet_pct": -2.467,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 16,
+            "TAKE_PROFIT": 11,
+            "RESEARCH_HYPE_LONG_INITIAL_WALLET_1P5_5M_STOP": 7
+          }
+        },
+        "IDLE_SHORT": {
+          "n": 74,
+          "wins": 48,
+          "losses": 26,
+          "negative_realized_sum_pnl_units": -7789.9062,
+          "positive_realized_sum_pnl_units": 63831.66,
+          "sum_negative_wallet_contributions_pp": -21.8444,
+          "worst_trade_wallet_pct": -2.7403,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 14,
+            "TIME_EXIT": 58,
+            "STOP": 2
+          }
+        },
+        "PENGU_LONG": {
+          "n": 47,
+          "wins": 35,
+          "losses": 12,
+          "negative_realized_sum_pnl_units": -31768.207,
+          "positive_realized_sum_pnl_units": 104916.0966,
+          "sum_negative_wallet_contributions_pp": -55.9592,
+          "worst_trade_wallet_pct": -8.3326,
+          "exit_reasons": {
+            "RECOVERY_V8_TRAILING_STOP": 23,
+            "RECOVERY_V8_HARD_STOP": 5,
+            "LONG_TRAILING_STOP": 7,
+            "LONG_HARD_STOP": 3,
+            "RECOVERY_V8_MAX_HOLD": 9
+          }
+        },
+        "PENGU_SHORT": {
+          "n": 20,
+          "wins": 15,
+          "losses": 5,
+          "negative_realized_sum_pnl_units": -13450.575,
+          "positive_realized_sum_pnl_units": 27180.3083,
+          "sum_negative_wallet_contributions_pp": -14.9828,
+          "worst_trade_wallet_pct": -8.2965,
+          "exit_reasons": {
+            "SHORT_MAX_HOLD": 10,
+            "SHORT_V20_DEADLINE_EXIT": 1,
+            "SHORT_TRAILING_STOP": 7,
+            "SHORT_HARD_STOP": 2
+          }
+        },
+        "Q102_LONG": {
+          "n": 34,
+          "wins": 23,
+          "losses": 11,
+          "negative_realized_sum_pnl_units": -34767.5597,
+          "positive_realized_sum_pnl_units": 23131.3933,
+          "sum_negative_wallet_contributions_pp": -42.7209,
+          "worst_trade_wallet_pct": -7.1565,
+          "exit_reasons": {
+            "Q102_TIME_EXIT": 14,
+            "5M_PROTECTIVE_STOP": 15,
+            "Q102_HARD_STOP": 4,
+            "Q102_TRAIL_5_AFTER_12": 1
+          }
+        },
+        "Q102_SHORT": {
+          "n": 147,
+          "wins": 114,
+          "losses": 33,
+          "negative_realized_sum_pnl_units": -55878.4744,
+          "positive_realized_sum_pnl_units": 76306.0864,
+          "sum_negative_wallet_contributions_pp": -80.566,
+          "worst_trade_wallet_pct": -7.8736,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 55,
+            "Q102_TIME_EXIT": 72,
+            "Q102_HARD_STOP": 6,
+            "FLOOR_combined_no_residual": 2,
+            "TIME_EXIT": 9,
+            "Q102_TRAIL_5_AFTER_12": 2,
+            "STOP": 1
+          }
+        },
+        "RESIDUAL_LONG": {
+          "n": 28,
+          "wins": 12,
+          "losses": 16,
+          "negative_realized_sum_pnl_units": -23780.2443,
+          "positive_realized_sum_pnl_units": 2236.2657,
+          "sum_negative_wallet_contributions_pp": -36.5508,
+          "worst_trade_wallet_pct": -5.8435,
+          "exit_reasons": {
+            "FORMAL_PRIORITY": 12,
+            "TIME_EXIT": 11,
+            "IDLE_SHORT_PRIORITY": 5
+          }
+        },
+        "V12_LONG": {
+          "n": 140,
+          "wins": 108,
+          "losses": 32,
+          "negative_realized_sum_pnl_units": -6706.3018,
+          "positive_realized_sum_pnl_units": 100037.9811,
+          "sum_negative_wallet_contributions_pp": -6.2461,
+          "worst_trade_wallet_pct": -1.1546,
+          "exit_reasons": {
+            "RECOVERY_SYMBOL_PREEMPT:Q102": 5,
+            "TIME_48H": 10,
+            "REV_D0_T12": 15,
+            "REV_D0_T24": 10,
+            "REV_D2_T36": 21,
+            "REV_D0_T36": 9,
+            "REV_D0_T3": 10,
+            "V12_REVERSAL_PREEMPT:REC_Y06_REV_D0_T72": 10,
+            "RECOVERY_CORE_PREEMPT:Q102": 4,
+            "REV_D2_T24": 12,
+            "REV_D2_T9": 9,
+            "REV_D0_T6": 9,
+            "REV_D1_T3": 11,
+            "V12_REVERSAL_PREEMPT:REC_Y08_REV_D0_T6": 1,
+            "V12_REVERSAL_PREEMPT:REC_Y01_REV_D0_T72": 1,
+            "RECOVERY_SYMBOL_PREEMPT:V12": 1,
+            "V12_REVERSAL_PREEMPT:REC_Y03_REV_D0_T36": 2
+          }
+        },
+        "V12_SHORT": {
+          "n": 687,
+          "wins": 466,
+          "losses": 221,
+          "negative_realized_sum_pnl_units": -132482.274,
+          "positive_realized_sum_pnl_units": 500183.525,
+          "sum_negative_wallet_contributions_pp": -121.9625,
+          "worst_trade_wallet_pct": -4.101,
+          "exit_reasons": {
+            "REV_D1_TP2_SL1_H36_TP": 9,
+            "REV_D0_T6": 10,
+            "REV_D2_T18": 9,
+            "REV_D0_T36": 16,
+            "REV_D0_T72": 134,
+            "ORIG_D2_TP1_SL1_H24_TP": 9,
+            "REPAIRED_REC_X06_TIME_12H_TIME18": 35,
+            "TP1.5_SL1_H24_STOP": 9,
+            "TIME_24H": 37,
+            "FLOOR_combined_no_residual": 13,
+            "ORIG_D2_TP1_SL1_H24_STOP": 2,
+            "TIME_12H": 42,
+            "REPAIRED_REC_G2_EARLY_BTC_OPPOSE_VOL_TIME6": 39,
+            "TP1.5_SL1_H24_TP": 12,
+            "V12_REVERSAL_PREEMPT:REC_Y12_REV_D0_T24": 2,
+            "SECOND_REPAIR_CONT_SHORT_MID_AGE24_48_TIME3": 15,
+            "SECOND_REPAIR_FAILED_BREAK_REV_SHORT_6H_TIME9": 35,
+            "RECOVERY_SYMBOL_PREEMPT:Q102": 19,
+            "RECOVERY_CORE_PREEMPT:Q102": 27,
+            "REC_G5_TIME48_REFINED": 15,
+            "REV_D2_T24": 9,
+            "V12_REVERSAL_PREEMPT:REC_Y15_REV_D0_T3": 5,
+            "SECOND_REPAIR_REC_G1_MID_REL_LOWVOL_TIME12": 15,
+            "TIME_36H": 40,
+            "REPAIRED_REC_G4_MATURE_REL_RANGE_TIME24": 17,
+            "TRAILING_CROSSED_BEFORE_REPLACEMENT": 27,
+            "V12_REVERSAL_PREEMPT:REC_Y02_REV_D0_T12": 2,
+            "STOP": 9,
+            "TIME_48H": 21,
+            "RECOVERY_CORE_PREEMPT:PENGU": 4,
+            "RECOVERY_CORE_PREEMPT:V12": 4,
+            "TIME_6H": 13,
+            "ORIG_D2_T6": 10,
+            "V12_REVERSAL_PREEMPT:REC_Y16_REV_D0_T6": 4,
+            "V12_REVERSAL_PREEMPT:REC_Y05_REV_D2_T9": 1,
+            "TAKE_PROFIT": 1,
+            "REV_D1_TP2_SL1_H36_STOP": 2,
+            "V12_REVERSAL_PREEMPT:REC_Y10_REV_D2_T24": 2,
+            "V12_REVERSAL_PREEMPT:REC_Y13_REV_D2_T36": 5,
+            "V12_REVERSAL_PREEMPT:REC_Y17_REV_D1_T3": 3,
+            "RECOVERY_SYMBOL_PREEMPT:V12": 4
+          }
+        },
+        "V52_LONG": {
+          "n": 35,
+          "wins": 30,
+          "losses": 5,
+          "negative_realized_sum_pnl_units": -684.897,
+          "positive_realized_sum_pnl_units": 67496.3753,
+          "sum_negative_wallet_contributions_pp": -2.9138,
+          "worst_trade_wallet_pct": -0.9165,
+          "exit_reasons": {
+            "BASIS_CONVERGED": 29,
+            "BASIS_STOP": 1,
+            "TIME_OR_SESSION_FLAT": 5
+          }
+        },
+        "V52_SHORT": {
+          "n": 52,
+          "wins": 40,
+          "losses": 12,
+          "negative_realized_sum_pnl_units": -10953.9024,
+          "positive_realized_sum_pnl_units": 83302.1249,
+          "sum_negative_wallet_contributions_pp": -8.3368,
+          "worst_trade_wallet_pct": -2.4413,
+          "exit_reasons": {
+            "BASIS_CONVERGED": 32,
+            "BASIS_STOP": 3,
+            "TIME_OR_SESSION_FLAT": 17
+          }
+        }
+      }
+    },
+    "LATEST_20261017_BASELINE": {
+      "10": {
+        "FET_LONG": {
+          "n": 8,
+          "wins": 7,
+          "losses": 1,
+          "negative_realized_sum_pnl_units": -1084.8606,
+          "positive_realized_sum_pnl_units": 30239.4105,
+          "sum_negative_wallet_contributions_pp": -0.3351,
+          "worst_trade_wallet_pct": -0.3351,
+          "exit_reasons": {
+            "FET_24H_TIME_EXIT": 5,
+            "FET_PROFIT_FLOOR_STOP": 3
+          }
+        },
+        "HYPE_LONG_LONG": {
+          "n": 34,
+          "wins": 11,
+          "losses": 23,
+          "negative_realized_sum_pnl_units": -129979.7838,
+          "positive_realized_sum_pnl_units": 223964.8675,
+          "sum_negative_wallet_contributions_pp": -47.3575,
+          "worst_trade_wallet_pct": -2.169,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 23,
+            "TAKE_PROFIT": 11
+          }
+        },
+        "IDLE_SHORT": {
+          "n": 71,
+          "wins": 44,
+          "losses": 27,
+          "negative_realized_sum_pnl_units": -15162.0392,
+          "positive_realized_sum_pnl_units": 98549.4209,
+          "sum_negative_wallet_contributions_pp": -20.5622,
+          "worst_trade_wallet_pct": -2.6876,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 14,
+            "TIME_EXIT": 55,
+            "STOP": 2
+          }
+        },
+        "PENGU_LONG": {
+          "n": 47,
+          "wins": 35,
+          "losses": 12,
+          "negative_realized_sum_pnl_units": -39174.388,
+          "positive_realized_sum_pnl_units": 141219.0045,
+          "sum_negative_wallet_contributions_pp": -49.5892,
+          "worst_trade_wallet_pct": -8.1298,
+          "exit_reasons": {
+            "RECOVERY_V8_TRAILING_STOP": 23,
+            "RECOVERY_V8_HARD_STOP": 5,
+            "LONG_TRAILING_STOP": 7,
+            "LONG_HARD_STOP": 3,
+            "RECOVERY_V8_MAX_HOLD": 9
+          }
+        },
+        "PENGU_SHORT": {
+          "n": 20,
+          "wins": 15,
+          "losses": 5,
+          "negative_realized_sum_pnl_units": -13016.3193,
+          "positive_realized_sum_pnl_units": 40034.646,
+          "sum_negative_wallet_contributions_pp": -12.9879,
+          "worst_trade_wallet_pct": -8.0886,
+          "exit_reasons": {
+            "SHORT_MAX_HOLD": 10,
+            "SHORT_V20_DEADLINE_EXIT": 1,
+            "SHORT_TRAILING_STOP": 7,
+            "SHORT_HARD_STOP": 2
+          }
+        },
+        "Q102_LONG": {
+          "n": 35,
+          "wins": 24,
+          "losses": 11,
+          "negative_realized_sum_pnl_units": -38723.1335,
+          "positive_realized_sum_pnl_units": 31272.1065,
+          "sum_negative_wallet_contributions_pp": -28.2154,
+          "worst_trade_wallet_pct": -6.0468,
+          "exit_reasons": {
+            "Q102_TIME_EXIT": 15,
+            "5M_PROTECTIVE_STOP": 15,
+            "Q102_HARD_STOP": 4,
+            "Q102_TRAIL_5_AFTER_12": 1
+          }
+        },
+        "Q102_SHORT": {
+          "n": 147,
+          "wins": 115,
+          "losses": 32,
+          "negative_realized_sum_pnl_units": -67601.4932,
+          "positive_realized_sum_pnl_units": 122849.9906,
+          "sum_negative_wallet_contributions_pp": -71.214,
+          "worst_trade_wallet_pct": -7.6161,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 55,
+            "Q102_TIME_EXIT": 72,
+            "Q102_HARD_STOP": 6,
+            "FLOOR_combined_no_residual": 2,
+            "TIME_EXIT": 9,
+            "Q102_TRAIL_5_AFTER_12": 2,
+            "STOP": 1
+          }
+        },
+        "RESIDUAL_LONG": {
+          "n": 29,
+          "wins": 15,
+          "losses": 14,
+          "negative_realized_sum_pnl_units": -45526.2342,
+          "positive_realized_sum_pnl_units": 10615.3262,
+          "sum_negative_wallet_contributions_pp": -33.4219,
+          "worst_trade_wallet_pct": -5.649,
+          "exit_reasons": {
+            "FORMAL_PRIORITY": 13,
+            "TIME_EXIT": 11,
+            "IDLE_SHORT_PRIORITY": 5
+          }
+        },
+        "V12_LONG": {
+          "n": 142,
+          "wins": 120,
+          "losses": 22,
+          "negative_realized_sum_pnl_units": -8502.2381,
+          "positive_realized_sum_pnl_units": 173863.0882,
+          "sum_negative_wallet_contributions_pp": -5.3499,
+          "worst_trade_wallet_pct": -1.096,
+          "exit_reasons": {
+            "RECOVERY_SYMBOL_PREEMPT:Q102": 5,
+            "TIME_48H": 12,
+            "REV_D0_T12": 15,
+            "REV_D0_T24": 10,
+            "REV_D2_T36": 21,
+            "REV_D0_T36": 9,
+            "REV_D0_T3": 10,
+            "V12_REVERSAL_PREEMPT:REC_Y06_REV_D0_T72": 10,
+            "RECOVERY_CORE_PREEMPT:Q102": 4,
+            "REV_D2_T24": 12,
+            "REV_D2_T9": 9,
+            "REV_D0_T6": 9,
+            "REV_D1_T3": 11,
+            "V12_REVERSAL_PREEMPT:REC_Y08_REV_D0_T6": 1,
+            "V12_REVERSAL_PREEMPT:REC_Y01_REV_D0_T72": 1,
+            "RECOVERY_SYMBOL_PREEMPT:V12": 1,
+            "V12_REVERSAL_PREEMPT:REC_Y03_REV_D0_T36": 2
+          }
+        },
+        "V12_SHORT": {
+          "n": 690,
+          "wins": 491,
+          "losses": 199,
+          "negative_realized_sum_pnl_units": -205275.8009,
+          "positive_realized_sum_pnl_units": 868709.2804,
+          "sum_negative_wallet_contributions_pp": -108.4435,
+          "worst_trade_wallet_pct": -3.835,
+          "exit_reasons": {
+            "REV_D1_TP2_SL1_H36_TP": 9,
+            "REV_D0_T6": 10,
+            "REV_D2_T18": 10,
+            "REV_D0_T36": 16,
+            "REV_D0_T72": 137,
+            "ORIG_D2_TP1_SL1_H24_TP": 9,
+            "REPAIRED_REC_X06_TIME_12H_TIME18": 35,
+            "TP1.5_SL1_H24_STOP": 9,
+            "TIME_24H": 37,
+            "FLOOR_combined_no_residual": 13,
+            "ORIG_D2_TP1_SL1_H24_STOP": 2,
+            "TIME_12H": 42,
+            "REPAIRED_REC_G2_EARLY_BTC_OPPOSE_VOL_TIME6": 39,
+            "TP1.5_SL1_H24_TP": 12,
+            "V12_REVERSAL_PREEMPT:REC_Y12_REV_D0_T24": 2,
+            "SECOND_REPAIR_CONT_SHORT_MID_AGE24_48_TIME3": 14,
+            "SECOND_REPAIR_FAILED_BREAK_REV_SHORT_6H_TIME9": 35,
+            "RECOVERY_SYMBOL_PREEMPT:Q102": 19,
+            "RECOVERY_CORE_PREEMPT:Q102": 24,
+            "REC_G5_TIME48_REFINED": 16,
+            "REV_D2_T24": 9,
+            "V12_REVERSAL_PREEMPT:REC_Y15_REV_D0_T3": 5,
+            "SECOND_REPAIR_REC_G1_MID_REL_LOWVOL_TIME12": 15,
+            "TIME_36H": 40,
+            "REPAIRED_REC_G4_MATURE_REL_RANGE_TIME24": 17,
+            "TRAILING_CROSSED_BEFORE_REPLACEMENT": 27,
+            "V12_REVERSAL_PREEMPT:REC_Y02_REV_D0_T12": 2,
+            "STOP": 9,
+            "TIME_48H": 21,
+            "RECOVERY_CORE_PREEMPT:PENGU": 4,
+            "RECOVERY_CORE_PREEMPT:V12": 6,
+            "TIME_6H": 13,
+            "ORIG_D2_T6": 10,
+            "V12_REVERSAL_PREEMPT:REC_Y16_REV_D0_T6": 4,
+            "V12_REVERSAL_PREEMPT:REC_Y05_REV_D2_T9": 1,
+            "TAKE_PROFIT": 1,
+            "REV_D1_TP2_SL1_H36_STOP": 2,
+            "V12_REVERSAL_PREEMPT:REC_Y10_REV_D2_T24": 2,
+            "V12_REVERSAL_PREEMPT:REC_Y13_REV_D2_T36": 5,
+            "V12_REVERSAL_PREEMPT:REC_Y17_REV_D1_T3": 3,
+            "RECOVERY_SYMBOL_PREEMPT:V12": 4
+          }
+        },
+        "V52_LONG": {
+          "n": 35,
+          "wins": 31,
+          "losses": 4,
+          "negative_realized_sum_pnl_units": -8.9288,
+          "positive_realized_sum_pnl_units": 96203.818,
+          "sum_negative_wallet_contributions_pp": -1.2276,
+          "worst_trade_wallet_pct": -0.5186,
+          "exit_reasons": {
+            "BASIS_CONVERGED": 29,
+            "BASIS_STOP": 1,
+            "TIME_OR_SESSION_FLAT": 5
+          }
+        },
+        "V52_SHORT": {
+          "n": 52,
+          "wins": 40,
+          "losses": 12,
+          "negative_realized_sum_pnl_units": -8253.5907,
+          "positive_realized_sum_pnl_units": 141978.6235,
+          "sum_negative_wallet_contributions_pp": -4.1651,
+          "worst_trade_wallet_pct": -2.0395,
+          "exit_reasons": {
+            "BASIS_CONVERGED": 32,
+            "BASIS_STOP": 3,
+            "TIME_OR_SESSION_FLAT": 17
+          }
+        }
+      },
+      "30": {
+        "FET_LONG": {
+          "n": 8,
+          "wins": 6,
+          "losses": 2,
+          "negative_realized_sum_pnl_units": -1414.5062,
+          "positive_realized_sum_pnl_units": 24211.7717,
+          "sum_negative_wallet_contributions_pp": -1.0038,
+          "worst_trade_wallet_pct": -0.9208,
+          "exit_reasons": {
+            "FET_24H_TIME_EXIT": 5,
+            "FET_PROFIT_FLOOR_STOP": 3
+          }
+        },
+        "HYPE_LONG_LONG": {
+          "n": 34,
+          "wins": 11,
+          "losses": 23,
+          "negative_realized_sum_pnl_units": -80531.4706,
+          "positive_realized_sum_pnl_units": 99904.96,
+          "sum_negative_wallet_contributions_pp": -53.8154,
+          "worst_trade_wallet_pct": -2.467,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 23,
+            "TAKE_PROFIT": 11
+          }
+        },
+        "IDLE_SHORT": {
+          "n": 74,
+          "wins": 48,
+          "losses": 26,
+          "negative_realized_sum_pnl_units": -7580.026,
+          "positive_realized_sum_pnl_units": 62051.5708,
+          "sum_negative_wallet_contributions_pp": -21.8444,
+          "worst_trade_wallet_pct": -2.7402,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 14,
+            "TIME_EXIT": 58,
+            "STOP": 2
+          }
+        },
+        "PENGU_LONG": {
+          "n": 47,
+          "wins": 35,
+          "losses": 12,
+          "negative_realized_sum_pnl_units": -31322.9606,
+          "positive_realized_sum_pnl_units": 103506.0901,
+          "sum_negative_wallet_contributions_pp": -55.9625,
+          "worst_trade_wallet_pct": -8.3326,
+          "exit_reasons": {
+            "RECOVERY_V8_TRAILING_STOP": 23,
+            "RECOVERY_V8_HARD_STOP": 5,
+            "LONG_TRAILING_STOP": 7,
+            "LONG_HARD_STOP": 3,
+            "RECOVERY_V8_MAX_HOLD": 9
+          }
+        },
+        "PENGU_SHORT": {
+          "n": 20,
+          "wins": 15,
+          "losses": 5,
+          "negative_realized_sum_pnl_units": -13450.575,
+          "positive_realized_sum_pnl_units": 26514.5315,
+          "sum_negative_wallet_contributions_pp": -15.0107,
+          "worst_trade_wallet_pct": -8.2965,
+          "exit_reasons": {
+            "SHORT_MAX_HOLD": 10,
+            "SHORT_V20_DEADLINE_EXIT": 1,
+            "SHORT_TRAILING_STOP": 7,
+            "SHORT_HARD_STOP": 2
+          }
+        },
+        "Q102_LONG": {
+          "n": 34,
+          "wins": 23,
+          "losses": 11,
+          "negative_realized_sum_pnl_units": -34275.9763,
+          "positive_realized_sum_pnl_units": 23090.5936,
+          "sum_negative_wallet_contributions_pp": -43.098,
+          "worst_trade_wallet_pct": -7.3514,
+          "exit_reasons": {
+            "Q102_TIME_EXIT": 14,
+            "5M_PROTECTIVE_STOP": 15,
+            "Q102_HARD_STOP": 4,
+            "Q102_TRAIL_5_AFTER_12": 1
+          }
+        },
+        "Q102_SHORT": {
+          "n": 147,
+          "wins": 114,
+          "losses": 33,
+          "negative_realized_sum_pnl_units": -55503.7481,
+          "positive_realized_sum_pnl_units": 75511.573,
+          "sum_negative_wallet_contributions_pp": -80.7272,
+          "worst_trade_wallet_pct": -7.8736,
+          "exit_reasons": {
+            "5M_PROTECTIVE_STOP": 55,
+            "Q102_TIME_EXIT": 72,
+            "Q102_HARD_STOP": 6,
+            "FLOOR_combined_no_residual": 2,
+            "TIME_EXIT": 9,
+            "Q102_TRAIL_5_AFTER_12": 2,
+            "STOP": 1
+          }
+        },
+        "RESIDUAL_LONG": {
+          "n": 28,
+          "wins": 12,
+          "losses": 16,
+          "negative_realized_sum_pnl_units": -23126.8022,
+          "positive_realized_sum_pnl_units": 2177.2696,
+          "sum_negative_wallet_contributions_pp": -36.5515,
+          "worst_trade_wallet_pct": -5.8435,
+          "exit_reasons": {
+            "FORMAL_PRIORITY": 12,
+            "TIME_EXIT": 11,
+            "IDLE_SHORT_PRIORITY": 5
+          }
+        },
+        "V12_LONG": {
+          "n": 140,
+          "wins": 108,
+          "losses": 32,
+          "negative_realized_sum_pnl_units": -6576.3355,
+          "positive_realized_sum_pnl_units": 98139.2752,
+          "sum_negative_wallet_contributions_pp": -6.2483,
+          "worst_trade_wallet_pct": -1.155,
+          "exit_reasons": {
+            "RECOVERY_SYMBOL_PREEMPT:Q102": 5,
+            "TIME_48H": 10,
+            "REV_D0_T12": 15,
+            "REV_D0_T24": 10,
+            "REV_D2_T36": 21,
+            "REV_D0_T36": 9,
+            "REV_D0_T3": 10,
+            "V12_REVERSAL_PREEMPT:REC_Y06_REV_D0_T72": 10,
+            "RECOVERY_CORE_PREEMPT:Q102": 4,
+            "REV_D2_T24": 12,
+            "REV_D2_T9": 9,
+            "REV_D0_T6": 9,
+            "REV_D1_T3": 11,
+            "V12_REVERSAL_PREEMPT:REC_Y08_REV_D0_T6": 1,
+            "V12_REVERSAL_PREEMPT:REC_Y01_REV_D0_T72": 1,
+            "RECOVERY_SYMBOL_PREEMPT:V12": 1,
+            "V12_REVERSAL_PREEMPT:REC_Y03_REV_D0_T36": 2
+          }
+        },
+        "V12_SHORT": {
+          "n": 688,
+          "wins": 467,
+          "losses": 221,
+          "negative_realized_sum_pnl_units": -112314.6685,
+          "positive_realized_sum_pnl_units": 498815.7265,
+          "sum_negative_wallet_contributions_pp": -119.4242,
+          "worst_trade_wallet_pct": -3.9585,
+          "exit_reasons": {
+            "REV_D1_TP2_SL1_H36_TP": 9,
+            "REV_D0_T6": 10,
+            "REV_D2_T18": 9,
+            "REV_D0_T36": 16,
+            "REV_D0_T72": 133,
+            "ORIG_D2_TP1_SL1_H24_TP": 9,
+            "REPAIRED_REC_X06_TIME_12H_TIME18": 35,
+            "TP1.5_SL1_H24_STOP": 9,
+            "TIME_24H": 37,
+            "FLOOR_combined_no_residual": 13,
+            "ORIG_D2_TP1_SL1_H24_STOP": 2,
+            "TIME_12H": 42,
+            "REPAIRED_REC_G2_EARLY_BTC_OPPOSE_VOL_TIME6": 39,
+            "TP1.5_SL1_H24_TP": 12,
+            "V12_REVERSAL_PREEMPT:REC_Y12_REV_D0_T24": 2,
+            "SECOND_REPAIR_CONT_SHORT_MID_AGE24_48_TIME3": 15,
+            "SECOND_REPAIR_FAILED_BREAK_REV_SHORT_6H_TIME9": 35,
+            "RECOVERY_SYMBOL_PREEMPT:Q102": 19,
+            "RECOVERY_CORE_PREEMPT:Q102": 27,
+            "REC_G5_TIME48_REFINED": 15,
+            "REV_D2_T24": 9,
+            "V12_REVERSAL_PREEMPT:REC_Y15_REV_D0_T3": 5,
+            "SECOND_REPAIR_REC_G1_MID_REL_LOWVOL_TIME12": 15,
+            "TIME_36H": 40,
+            "REPAIRED_REC_G4_MATURE_REL_RANGE_TIME24": 17,
+            "TRAILING_CROSSED_BEFORE_REPLACEMENT": 27,
+            "V12_REVERSAL_PREEMPT:REC_Y02_REV_D0_T12": 2,
+            "STOP": 9,
+            "TIME_48H": 21,
+            "RECOVERY_CORE_PREEMPT:PENGU": 4,
+            "RECOVERY_CORE_PREEMPT:V12": 6,
+            "TIME_6H": 13,
+            "ORIG_D2_T6": 10,
+            "V12_REVERSAL_PREEMPT:REC_Y16_REV_D0_T6": 4,
+            "V12_REVERSAL_PREEMPT:REC_Y05_REV_D2_T9": 1,
+            "TAKE_PROFIT": 1,
+            "REV_D1_TP2_SL1_H36_STOP": 2,
+            "V12_REVERSAL_PREEMPT:REC_Y10_REV_D2_T24": 2,
+            "V12_REVERSAL_PREEMPT:REC_Y13_REV_D2_T36": 5,
+            "V12_REVERSAL_PREEMPT:REC_Y17_REV_D1_T3": 3,
+            "RECOVERY_SYMBOL_PREEMPT:V12": 4
+          }
+        },
+        "V52_LONG": {
+          "n": 35,
+          "wins": 30,
+          "losses": 5,
+          "negative_realized_sum_pnl_units": -684.897,
+          "positive_realized_sum_pnl_units": 66337.8142,
+          "sum_negative_wallet_contributions_pp": -2.9133,
+          "worst_trade_wallet_pct": -0.9165,
+          "exit_reasons": {
+            "BASIS_CONVERGED": 29,
+            "BASIS_STOP": 1,
+            "TIME_OR_SESSION_FLAT": 5
+          }
+        },
+        "V52_SHORT": {
+          "n": 52,
+          "wins": 40,
+          "losses": 12,
+          "negative_realized_sum_pnl_units": -10838.0942,
+          "positive_realized_sum_pnl_units": 82264.9532,
+          "sum_negative_wallet_contributions_pp": -8.36,
+          "worst_trade_wallet_pct": -2.4413,
+          "exit_reasons": {
+            "BASIS_CONVERGED": 32,
+            "BASIS_STOP": 3,
+            "TIME_OR_SESSION_FLAT": 17
+          }
+        }
+      }
+    }
+  }
+}
