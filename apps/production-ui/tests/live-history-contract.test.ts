@@ -9,7 +9,39 @@ import {
 import { parseFillLineageEvidenceLine } from "../lib/server/fill-lineage-evidence";
 import { deriveTradeHistoryAttribution } from "../lib/trade-history-attribution";
 import { mergeTradeHistoryEntries } from "../lib/server/trade-history-source";
+import { createHistoryRequestCoordinator } from "../lib/server/history-request-coordinator";
 import type { TradeHistoryEntry } from "../lib/server/trade-history-db";
+
+test("history request coordinator shares one in-flight official fetch", async () => {
+  const coordinator = createHistoryRequestCoordinator();
+  let calls = 0;
+  const work = async () => {
+    calls += 1;
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    return { entries: ["official-fill"] };
+  };
+
+  const [first, second] = await Promise.all([
+    coordinator.run(work),
+    coordinator.run(work),
+  ]);
+
+  assert.equal(calls, 1);
+  assert.deepEqual(first, second);
+});
+
+test("history request coordinator keeps the last successful data on refresh failure", async () => {
+  const coordinator = createHistoryRequestCoordinator<{ entries: string[] }>();
+  const first = await coordinator.run(async () => ({ entries: ["official-fill"] }));
+  assert.deepEqual(first, { entries: ["official-fill"] });
+
+  const stale = await coordinator.run(async () => {
+    throw new Error("ASTER_GLOBAL_RATE_BUDGET_SATURATED");
+  });
+
+  assert.deepEqual(stale, { entries: ["official-fill"] });
+  assert.equal(coordinator.lastError?.message, "ASTER_GLOBAL_RATE_BUDGET_SATURATED");
+});
 
 test("Aster pagination continues beyond twenty full pages", async () => {
   let calls = 0;

@@ -13,6 +13,7 @@ import {
   type HistoryCoverage,
   type SymbolHistoryResult,
 } from "@/lib/server/live-history-contract";
+import { createHistoryRequestCoordinator } from "@/lib/server/history-request-coordinator";
 
 const Q102_HISTORY_SYMBOLS = [
   "AAVEUSDT", "APTUSDT", "ARBUSDT", "AVAXUSDT", "DOGEUSDT", "DOTUSDT",
@@ -48,6 +49,11 @@ type Book = { netQuantity: number; lots: Lot[] };
 type LivePosition = { symbol?: string; positionAmt?: string | number; positionSide?: string };
 
 let cache: { expiresAt: number; entries: TradeHistoryEntry[]; coverage: HistoryCoverage; error?: string } | null = null;
+const historyRequest = createHistoryRequestCoordinator<{
+  entries: TradeHistoryEntry[];
+  coverage: HistoryCoverage;
+  error?: string;
+}>();
 
 export type AsterTradeHistoryResult = {
   entries: TradeHistoryEntry[];
@@ -394,12 +400,18 @@ export async function loadAsterTradeHistory(): Promise<AsterTradeHistoryResult> 
     };
   }
 
-  let result: { entries: TradeHistoryEntry[]; coverage: HistoryCoverage; error?: string };
-  try {
-    result = await fetchAsterTrades();
-  } catch (error) {
+  const result = await historyRequest.run(async () => {
+    const next = await fetchAsterTrades();
+    // An empty refresh after a successful history fetch is not allowed to erase
+    // the last known official ledger. Keep the prior data and surface the
+    // refresh failure as stale/partial instead of rendering an empty page.
+    if (cache?.entries.length && next.entries.length === 0) {
+      throw new Error(next.error || "Official history refresh returned no fills.");
+    }
+    return next;
+  }).catch((error) => {
     const errorMessage = error instanceof Error ? error.message : "Official history request failed.";
-    result = {
+    return {
       entries: [],
       coverage: buildHistoryCoverage({
         requestedSymbols: ASTER_HISTORY_SYMBOLS,
@@ -410,13 +422,27 @@ export async function loadAsterTradeHistory(): Promise<AsterTradeHistoryResult> 
       }),
       error: errorMessage,
     };
-  }
-  cache = { expiresAt: now + CACHE_TTL_MS, entries: result.entries, coverage: result.coverage, error: result.error };
+  });
+
+  const stale = historyRequest.lastRunUsedStale;
+  const coverage = stale
+    ? {
+      ...result.coverage,
+      status: result.coverage.status === "COMPLETE" ? "PARTIAL" as const : result.coverage.status,
+      failedSymbols: [
+        ...result.coverage.failedSymbols,
+        { symbol: "ACCOUNT_HISTORY", reason: historyRequest.lastError?.message || "Official history refresh failed; showing last successful data." },
+      ],
+      refreshedAt: new Date(now).toISOString(),
+    }
+    : result.coverage;
+  const error = stale ? historyRequest.lastError?.message : result.error;
+  cache = { expiresAt: now + CACHE_TTL_MS, entries: result.entries, coverage, error };
   return {
     entries: result.entries,
     source: result.entries.length > 0 ? "aster" : "unavailable",
     refreshedAt: new Date(now).toISOString(),
-    coverage: result.coverage,
-    error: result.error,
+    coverage,
+    error,
   };
 }
