@@ -1,0 +1,280 @@
+import assert from "node:assert/strict";
+import { test } from "node:test";
+
+import {
+    DEFAULT_ACCEPTANCE_GATES,
+    applyCandidatePolicy,
+    acceptCandidate,
+    buildCandidateGrid,
+    freezeAcceptedStage,
+    type ResearchProductionPolicy,
+} from "../lib/backtest/dd-reduction/policies";
+import { SEQUENTIAL_STAGES, type StageId } from "../lib/backtest/dd-reduction/stages";
+import type {
+    AcceptanceGates,
+    BaselineSummary,
+    CandidatePolicy,
+    CandidateSummary,
+    Direction,
+    FrozenStageSet,
+    ProductionPolicy,
+} from "../lib/backtest/dd-reduction/types";
+
+const HASH = "a".repeat(64);
+
+function baseline(overrides: Partial<ResearchProductionPolicy> = {}): ResearchProductionPolicy {
+    return {
+        sourceHash: HASH,
+        configHash: HASH,
+        resultHash: HASH,
+        strategy: "V12_V4",
+        direction: "LONG",
+        policyHash: HASH,
+        reason: "production-baseline",
+        fee: 0,
+        funding: 0,
+        slippage: 0,
+        entryPolicy: "entry-v1",
+        sizingPolicy: "sizing-v1",
+        grossCap: 1_500,
+        sharedRiskCap: 500,
+        marginGuard: "margin-v1",
+        leverage: 1,
+        initialStopBps: 500,
+        profitFloorBps: 0,
+        trailingGivebackBps: 100,
+        timeStopBars: null,
+        supportedDirections: ["LONG", "SHORT"],
+        ...overrides,
+    };
+}
+
+function candidateSummary(overrides: Partial<CandidateSummary> = {}): CandidateSummary {
+    return {
+        sourceHash: HASH,
+        configHash: HASH,
+        resultHash: HASH,
+        candidateId: "V12_V4_LONG:initial-stop:250",
+        stageId: "V12_V4_LONG",
+        strategy: "V12_V4",
+        direction: "LONG",
+        policyHash: HASH,
+        accepted: true,
+        status: "AVAILABLE",
+        reason: "candidate-replay",
+        fee: 1,
+        funding: 2,
+        slippage: 3,
+        metrics: {
+            normalDdImprovementBps: 120,
+            severeDdImprovementBps: 140,
+            oosDdImprovementBps: 10,
+            walkForwardImprovementBps: 5,
+            profitFactorDeclinePct: 5,
+            finalEquityDeclinePct: 1,
+            tradeCountRatio: 0.95,
+            capacityRegression: 0,
+            safetyRegression: 0,
+            costStressPass: 1,
+            candidateSelectionUsesFuturePnl: 0,
+        },
+        ...overrides,
+    };
+}
+
+function baselineSummary(overrides: Partial<BaselineSummary> = {}): BaselineSummary {
+    return {
+        sourceHash: HASH,
+        configHash: HASH,
+        resultHash: HASH,
+        strategy: "V12_V4",
+        direction: "LONG",
+        policyHash: HASH,
+        reason: "baseline-replay",
+        fee: 1,
+        funding: 2,
+        slippage: 3,
+        metrics: {},
+        ...overrides,
+    };
+}
+
+function gates(overrides: Partial<AcceptanceGates> = {}): AcceptanceGates {
+    return {
+        ...DEFAULT_ACCEPTANCE_GATES,
+        ...overrides,
+    };
+}
+
+function initialFrozen(): FrozenStageSet {
+    return {
+        sourceHash: HASH,
+        configHash: HASH,
+        resultHash: HASH,
+        policyHash: HASH,
+        stageIds: [],
+        policies: [],
+        reason: "initial-frozen-set",
+    };
+}
+
+test("keeps the sequential stage order immutable", () => {
+    assert.deepEqual(SEQUENTIAL_STAGES, [
+        "V12_V4_LONG",
+        "V12_V4_SHORT",
+        "Q102_LONG",
+        "Q102_SHORT",
+        "PENGU_LONG",
+        "PENGU_SHORT",
+        "FET",
+        "HYPE_LONG",
+        "IDLE_SHORT",
+        "IDLE_RESIDUAL",
+        "V52",
+    ] satisfies readonly StageId[]);
+});
+
+test("builds independent Long and Short grids without inventing shared policy state", () => {
+    const base = baseline();
+    const longGrid = buildCandidateGrid("V12_V4_LONG", "LONG", base);
+    const shortGrid = buildCandidateGrid("V12_V4_SHORT", "SHORT", base);
+
+    assert.ok(longGrid.length > 0);
+    assert.ok(shortGrid.length > 0);
+    assert.ok(longGrid.every((candidate) => candidate.direction === "LONG"));
+    assert.ok(shortGrid.every((candidate) => candidate.direction === "SHORT"));
+    assert.notDeepEqual(longGrid.map((candidate) => candidate.candidateId), shortGrid.map((candidate) => candidate.candidateId));
+    assert.equal(base.direction, "LONG");
+    assert.deepEqual(base.supportedDirections, ["LONG", "SHORT"]);
+});
+
+test("searches one protection axis at a time in the declared order", () => {
+    const grid = buildCandidateGrid("V12_V4_LONG", "LONG", baseline());
+    const axes = grid.map((candidate) => candidate.axis);
+
+    assert.deepEqual([...new Set(axes)], ["initial-stop", "profit-floor", "trail", "time-stop"]);
+    assert.equal(axes[0], "initial-stop");
+    assert.equal(axes.findIndex((axis) => axis === "profit-floor") > axes.findIndex((axis) => axis === "initial-stop"), true);
+    assert.equal(axes.findIndex((axis) => axis === "trail") > axes.findIndex((axis) => axis === "profit-floor"), true);
+    assert.equal(axes.findIndex((axis) => axis === "time-stop") > axes.findIndex((axis) => axis === "trail"), true);
+
+    for (const candidate of grid.filter((entry) => entry.applicability === "AVAILABLE")) {
+        const changed = [
+            candidate.initialStopBps !== 500,
+            candidate.profitFloorBps !== 0,
+            candidate.trailingGivebackBps !== 100,
+            candidate.timeStopBars !== null,
+        ].filter(Boolean).length;
+        assert.equal(changed, 1);
+    }
+});
+
+test("applies only protection changes and preserves entry, sizing, Gross, and shared-risk controls", () => {
+    const base = baseline();
+    const candidate = buildCandidateGrid("V12_V4_LONG", "LONG", base).find((entry) => entry.axis === "initial-stop");
+    assert.ok(candidate);
+
+    const applied = applyCandidatePolicy(base, candidate);
+
+    assert.notEqual(applied, base);
+    assert.equal(applied.entryPolicy, base.entryPolicy);
+    assert.equal(applied.sizingPolicy, base.sizingPolicy);
+    assert.equal(applied.grossCap, base.grossCap);
+    assert.equal(applied.sharedRiskCap, base.sharedRiskCap);
+    assert.equal(applied.marginGuard, base.marginGuard);
+    assert.equal(applied.leverage, base.leverage);
+    assert.equal(applied.initialStopBps, candidate.initialStopBps);
+    assert.equal(applied.profitFloorBps, base.profitFloorBps);
+    assert.equal(applied.trailingGivebackBps, base.trailingGivebackBps);
+    assert.equal(applied.timeStopBars, base.timeStopBars);
+});
+
+test("accepts only candidates that pass every predeclared DD, OOS, performance, safety, and cost gate", () => {
+    const candidate = candidateSummary();
+    const acceptanceGates = gates();
+    const before = structuredClone(acceptanceGates);
+    const decision = acceptCandidate(candidate, baselineSummary(), acceptanceGates);
+
+    assert.equal(decision.accepted, true);
+    assert.equal(decision.status, "ACCEPTED");
+    assert.deepEqual(acceptanceGates, before);
+    assert.deepEqual(decision.gateResults, {
+        normalDrawdown: true,
+        severeDrawdown: true,
+        outOfSample: true,
+        walkForward: true,
+        profitFactor: true,
+        finalEquity: true,
+        tradeCount: true,
+        capacity: true,
+        safety: true,
+        costStress: true,
+        noFutureSelection: true,
+    });
+});
+
+test("rejects a candidate when any fixed gate fails instead of tuning the gate from results", () => {
+    const acceptanceGates = gates();
+    const before = structuredClone(acceptanceGates);
+    const rejected = acceptCandidate(candidateSummary({ metrics: { ...candidateSummary().metrics, severeDdImprovementBps: 99 } }), baselineSummary(), acceptanceGates);
+
+    assert.equal(rejected.accepted, false);
+    assert.equal(rejected.status, "REJECTED");
+    assert.match(rejected.reason, /severeDrawdown/);
+    assert.deepEqual(acceptanceGates, before);
+});
+
+test("records an unavailable production direction as NOT_APPLICABLE without creating a Short policy", () => {
+    const base = baseline({ supportedDirections: ["LONG"] });
+    const grid = buildCandidateGrid("V12_V4_SHORT", "SHORT", base);
+    assert.equal(grid.length, 1);
+    assert.equal(grid[0]?.applicability, "NOT_APPLICABLE");
+    assert.equal(grid[0]?.direction, "SHORT");
+    assert.equal(grid[0]?.reason, "NOT_APPLICABLE");
+
+    const decision = acceptCandidate(candidateSummary({
+        candidateId: grid[0]?.candidateId,
+        stageId: "V12_V4_SHORT",
+        direction: "SHORT",
+        status: "NOT_APPLICABLE",
+        accepted: false,
+        reason: "NOT_APPLICABLE",
+        metrics: {},
+    }), baselineSummary({ direction: "SHORT" }), gates());
+    assert.equal(decision.status, "NOT_APPLICABLE");
+    assert.equal(decision.accepted, false);
+});
+
+test("freezes accepted policy evidence and excludes rejected candidates", () => {
+    const base = baseline();
+    const acceptedPolicy = buildCandidateGrid("V12_V4_LONG", "LONG", base).find((entry) => entry.axis === "initial-stop");
+    assert.ok(acceptedPolicy);
+    const accepted = acceptCandidate(candidateSummary({ candidateId: acceptedPolicy.candidateId, candidatePolicy: acceptedPolicy }), baselineSummary(), gates());
+    const frozen = freezeAcceptedStage(initialFrozen(), accepted);
+
+    assert.equal(frozen.stageIds.includes("V12_V4_LONG"), true);
+    assert.equal(frozen.policies.some((policy) => policy.candidateId === acceptedPolicy.candidateId), true);
+
+    const rejected = acceptCandidate(candidateSummary({ candidateId: "rejected-candidate", metrics: { ...candidateSummary().metrics, normalDdImprovementBps: 0 } }), baselineSummary(), gates());
+    const afterRejected = freezeAcceptedStage(frozen, rejected);
+    assert.equal(afterRejected.policies.some((policy) => policy.candidateId === "rejected-candidate"), false);
+    assert.equal(afterRejected.stageIds.filter((stageId) => stageId === "V12_V4_LONG").length, 1);
+});
+
+test("does not mutate Production policy state while freezing research replay evidence", () => {
+    const base = baseline();
+    const candidate = buildCandidateGrid("V12_V4_LONG", "LONG", base).find((entry) => entry.axis === "trail");
+    assert.ok(candidate);
+    const before = structuredClone(base);
+    const applied = applyCandidatePolicy(base, candidate);
+    const decision = acceptCandidate(candidateSummary({ candidateId: candidate.candidateId }), baselineSummary(), gates());
+    freezeAcceptedStage(initialFrozen(), decision);
+
+    assert.deepEqual(base, before);
+    assert.equal(applied.entryPolicy, base.entryPolicy);
+    assert.equal(applied.sharedRiskCap, base.sharedRiskCap);
+});
+
+void (undefined as Direction | undefined);
+void (undefined as CandidatePolicy | undefined);
+void (undefined as ProductionPolicy | undefined);

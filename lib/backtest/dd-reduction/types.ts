@@ -1,5 +1,21 @@
 export type Direction = "LONG" | "SHORT";
 export type StrategyId = "V12_V4" | "PENGU" | "Q102" | "FET" | "HYPE" | "IDLE" | "V52";
+export type StageId =
+    | "V12_V4_LONG"
+    | "V12_V4_SHORT"
+    | "Q102_LONG"
+    | "Q102_SHORT"
+    | "PENGU_LONG"
+    | "PENGU_SHORT"
+    | "FET"
+    | "HYPE_LONG"
+    | "IDLE_SHORT"
+    | "IDLE_RESIDUAL"
+    | "V52";
+export type PolicyAxis = "initial-stop" | "profit-floor" | "trail" | "time-stop" | "none";
+export type PolicyApplicability = "AVAILABLE" | "NOT_APPLICABLE";
+export type AcceptanceStatus = "ACCEPTED" | "REJECTED" | "NOT_APPLICABLE";
+export type CandidateStatus = "AVAILABLE" | "NOT_APPLICABLE";
 
 export type JsonPrimitive = string | number | boolean | null;
 export interface JsonObject {
@@ -347,10 +363,24 @@ export interface ProductionPolicy {
     fee: number;
     funding: number;
     slippage: number;
+    entryPolicy: string;
+    sizingPolicy: string;
+    grossCap: number;
+    sharedRiskCap: number;
+    marginGuard: string;
+    leverage: number;
+    initialStopBps: number;
+    profitFloorBps: number;
+    trailingGivebackBps: number;
+    timeStopBars: number | null;
+    supportedDirections: readonly Direction[];
 }
 
 export interface CandidatePolicy extends ProductionPolicy {
     candidateId: string;
+    stageId: StageId;
+    axis: PolicyAxis;
+    applicability: PolicyApplicability;
     requestedGross: number;
     acceptedGross: number;
     reservation: Reservation | null;
@@ -361,10 +391,13 @@ export interface CandidateSummary {
     configHash: string;
     resultHash: string;
     candidateId: string;
+    stageId?: StageId;
     strategy: StrategyId;
     direction: Direction;
     policyHash: string;
     accepted: boolean;
+    status?: CandidateStatus;
+    candidatePolicy?: CandidatePolicy | null;
     reason: string;
     fee: number;
     funding: number;
@@ -396,6 +429,15 @@ export interface AcceptanceGates {
     oosDrawdownMustNotWorsen: boolean;
     requireSafetyTests: boolean;
     reason: string;
+    normalDrawdownImprovementBps?: number;
+    severeDrawdownImprovementBps?: number;
+    oosDrawdownImprovementBps?: number;
+    walkForwardImprovementBps?: number;
+    maxFinalEquityDeclinePct?: number;
+    minTradeCountRatio?: number;
+    requireCostStress?: boolean;
+    declaredAtTs?: number;
+    gateHash?: string;
 }
 
 export interface AcceptanceDecision {
@@ -409,6 +451,10 @@ export interface AcceptanceDecision {
     fee: number;
     funding: number;
     slippage: number;
+    status?: AcceptanceStatus;
+    stageId?: StageId;
+    candidateId?: string;
+    candidatePolicy?: CandidatePolicy | null;
 }
 
 export interface FrozenStageSet {
@@ -419,6 +465,7 @@ export interface FrozenStageSet {
     stageIds: readonly string[];
     policies: readonly CandidatePolicy[];
     reason: string;
+    stageDecisions?: readonly AcceptanceDecision[];
 }
 
 export interface ComparisonReport {
