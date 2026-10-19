@@ -66,6 +66,8 @@ function policyCapManifest(policies: readonly ProductionPolicy[]): CanonicalCapM
     const cryptoGross = first.cryptoGrossCap ?? totalGross;
     const strategyGross = first.strategyGrossCap ?? first.sharedRiskCap;
     const perStrategy: Record<string, number> = {};
+    const perStrategyTotalGross: Record<string, number> = {};
+    const perStrategyCryptoGross: Record<string, number> = {};
     const perSymbol: Record<string, number> = {};
     for (const policy of policies) {
         const policyTotal = policy.totalGrossCap ?? policy.aggregateGrossCap ?? policy.grossCap;
@@ -74,6 +76,8 @@ function policyCapManifest(policies: readonly ProductionPolicy[]): CanonicalCapM
         const policyStrategy = policy.strategyGrossCap ?? policy.sharedRiskCap;
         if (perStrategy[policy.strategy] !== undefined && perStrategy[policy.strategy] !== policyStrategy) throw new Error(`SOURCE_ERROR: conflicting strategy cap declaration for ${policy.strategy}`);
         perStrategy[policy.strategy] = policyStrategy;
+        perStrategyTotalGross[policy.strategy] = policyTotal;
+        perStrategyCryptoGross[policy.strategy] = policyCrypto;
         for (const [strategy, cap] of Object.entries(policy.perStrategyGrossCaps ?? {})) {
             if (perStrategy[strategy] !== undefined && perStrategy[strategy] !== cap) throw new Error(`SOURCE_ERROR: conflicting strategy cap declaration for ${strategy}`);
             perStrategy[strategy] = cap;
@@ -83,7 +87,7 @@ function policyCapManifest(policies: readonly ProductionPolicy[]): CanonicalCapM
             perSymbol[symbol] = cap;
         }
     }
-    const manifest = { totalGross, cryptoGross, strategyGross, perStrategy, perSymbol };
+    const manifest = { totalGross, cryptoGross, strategyGross, perStrategy, perStrategyTotalGross, perStrategyCryptoGross, perSymbol };
     return { ...manifest, hash: hashJson(manifest as unknown as JsonValue) };
 }
 

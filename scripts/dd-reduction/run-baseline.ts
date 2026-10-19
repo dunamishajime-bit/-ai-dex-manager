@@ -355,6 +355,8 @@ export interface CanonicalCapManifest {
     readonly cryptoGross: number;
     readonly strategyGross: number;
     readonly perStrategy: Readonly<Record<string, number>>;
+    readonly perStrategyTotalGross: Readonly<Record<string, number>>;
+    readonly perStrategyCryptoGross: Readonly<Record<string, number>>;
     readonly perSymbol: Readonly<Record<string, number>>;
     readonly hash: string;
 }
@@ -371,18 +373,24 @@ export function buildSourceCapManifest(source: CanonicalSource): CanonicalCapMan
     const cryptoGross = capNumber(first, "cryptoGrossCap", totalGross);
     const strategyGross = capNumber(first, "strategyGrossCap", requiredConfigNumber(first, "sharedRiskCap"));
     const perStrategy: Record<string, number> = {};
+    const perStrategyTotalGross: Record<string, number> = {};
+    const perStrategyCryptoGross: Record<string, number> = {};
     const perSymbol: Record<string, number> = {};
     for (const entry of source.strategyConfigs) {
         const config = entry.config;
-        const explicitTotal = jsonNumber(config, "totalGrossCap") ?? jsonNumber(config, "aggregateGrossCap");
-        const explicitCrypto = jsonNumber(config, "cryptoGrossCap");
+        const effectiveTotal = capNumber(config, "totalGrossCap", capNumber(config, "aggregateGrossCap", requiredConfigNumber(config, "grossCap")));
+        const effectiveCrypto = capNumber(config, "cryptoGrossCap", effectiveTotal);
         const explicitStrategy = jsonNumber(config, "strategyGrossCap");
-        if ((explicitTotal !== null && explicitTotal !== totalGross) || (explicitCrypto !== null && explicitCrypto !== cryptoGross)) {
+        if (effectiveTotal !== totalGross || effectiveCrypto !== cryptoGross) {
             throw new Error(`SOURCE_ERROR: conflicting aggregate cap manifest for ${entry.strategy}`);
         }
         const strategyCap = explicitStrategy ?? requiredConfigNumber(config, "sharedRiskCap");
         if (perStrategy[entry.strategy] !== undefined && perStrategy[entry.strategy] !== strategyCap) throw new Error(`SOURCE_ERROR: conflicting strategy cap manifest for ${entry.strategy}`);
+        if (perStrategyTotalGross[entry.strategy] !== undefined && perStrategyTotalGross[entry.strategy] !== effectiveTotal) throw new Error(`SOURCE_ERROR: conflicting total cap manifest for ${entry.strategy}`);
+        if (perStrategyCryptoGross[entry.strategy] !== undefined && perStrategyCryptoGross[entry.strategy] !== effectiveCrypto) throw new Error(`SOURCE_ERROR: conflicting crypto cap manifest for ${entry.strategy}`);
         perStrategy[entry.strategy] = strategyCap;
+        perStrategyTotalGross[entry.strategy] = effectiveTotal;
+        perStrategyCryptoGross[entry.strategy] = effectiveCrypto;
         for (const [symbol, cap] of Object.entries(jsonNumberRecord(config, "perSymbolGrossCaps") ?? {})) {
             if (perSymbol[symbol] !== undefined && perSymbol[symbol] !== cap) throw new Error(`SOURCE_ERROR: conflicting symbol cap manifest for ${symbol}`);
             perSymbol[symbol] = cap;
@@ -392,7 +400,7 @@ export function buildSourceCapManifest(source: CanonicalSource): CanonicalCapMan
             perStrategy[strategy] = cap;
         }
     }
-    const manifest = { totalGross, cryptoGross, strategyGross, perStrategy, perSymbol };
+    const manifest = { totalGross, cryptoGross, strategyGross, perStrategy, perStrategyTotalGross, perStrategyCryptoGross, perSymbol };
     return { ...manifest, hash: hashJson(manifest as unknown as JsonValue) };
 }
 
@@ -402,7 +410,8 @@ export function assertPolicyCaps(policies: readonly ProductionPolicy[], manifest
         const total = policy.totalGrossCap ?? policy.aggregateGrossCap ?? policy.grossCap;
         const crypto = policy.cryptoGrossCap ?? total;
         const strategy = policy.strategyGrossCap ?? policy.sharedRiskCap;
-        if (total !== manifest.totalGross || crypto !== manifest.cryptoGross || strategy !== manifest.perStrategy[policy.strategy]) throw new Error(`SOURCE_ERROR: policy cap declaration is not authoritative for ${policy.strategy}`);
+        if (total !== manifest.totalGross || crypto !== manifest.cryptoGross || total !== manifest.perStrategyTotalGross[policy.strategy]
+            || crypto !== manifest.perStrategyCryptoGross[policy.strategy] || strategy !== manifest.perStrategy[policy.strategy]) throw new Error(`SOURCE_ERROR: policy cap declaration is not authoritative for ${policy.strategy}`);
         for (const [name, cap] of Object.entries(policy.perStrategyGrossCaps ?? {})) if (manifest.perStrategy[name] !== cap) throw new Error(`SOURCE_ERROR: policy strategy cap mismatch for ${name}`);
         for (const [name, cap] of Object.entries(policy.perSymbolGrossCaps ?? {})) if (manifest.perSymbol[name] !== cap) throw new Error(`SOURCE_ERROR: policy symbol cap mismatch for ${name}`);
     }

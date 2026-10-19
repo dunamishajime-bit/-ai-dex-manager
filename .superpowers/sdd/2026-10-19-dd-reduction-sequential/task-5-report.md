@@ -123,3 +123,18 @@ Third-remediation verification:
 - `npx tsc --noEmit --incremental false` — passed, exit code 0.
 - Changed-file ESLint, including source parsing and emulator tests — passed, exit code 0.
 - `git diff --check` — passed; Git reported only normal LF-to-CRLF working-copy normalization warnings.
+
+## Fourth independent-review remediation
+
+The final review identified two P1 issues, now addressed:
+
+1. Source-wide cap normalization now computes effective total and crypto caps for every strategy using the same fallback order as `policyFromSource` (`totalGrossCap`, `aggregateGrossCap`, then `grossCap`; `cryptoGrossCap`, then effective total). Any cross-strategy effective-cap conflict, including an implicit `grossCap` conflict, fails closed. The normalized per-strategy total/crypto declarations are included in the cap manifest hash.
+2. Closed baseline trades are no longer seeded into `state.positions`. They are reconstructed through generated entry/exit lifecycle executions and kept separate from source-seeded open exposure. Complete closed-trade reconstruction requires entry, exit, fill, cost, source-hash, quantity, and realized-PnL consistency; missing or inconsistent lifecycle evidence fails closed. Parity regressions cover closed-trade omission, mutation, source deletion after independent replay, and incomplete lifecycle evidence.
+
+Fourth-remediation verification:
+
+- `npx tsx --test tests/dd-reduction-runner.test.ts` — 33 tests passed, 0 failed.
+- Combined Task 1–5 DD-reduction suite — 100 tests passed, 0 failed.
+- `npx tsc --noEmit --incremental false` — passed, exit code 0.
+- Changed-file ESLint — passed, exit code 0.
+- `git diff --check` — passed; Git reported only normal LF-to-CRLF working-copy normalization warnings.

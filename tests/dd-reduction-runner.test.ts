@@ -532,6 +532,25 @@ test("baseline parity rejects a mutated replay-derived trade ledger", async () =
     }
 });
 
+test("baseline parity rejects a source closed-trade deletion after independent replay", async () => {
+    const fixture = await makeFixture({ withBaselineLedger: true });
+    try {
+        const source = await loadCanonicalSource({
+            sourceRoot: fixture.args.sourceRoot, dataRoot: fixture.args.dataRoot, productionSha: fixture.args.productionSha,
+            startTs: fixture.args.startTs, endTs: fixture.args.endTs, initialEquity: fixture.args.initialEquity, deposits: fixture.args.deposits,
+            feeBps: fixture.args.feeBps, slippageBps: fixture.args.slippageBps, fundingSource: fixture.args.fundingSource,
+        });
+        const policy = policyFromSource(source, fixture.args.stage);
+        const replay = replayIntegrated(source, buildBaselineReplayConfig(fixture.args, source, policy, HASH));
+        const changedSource = { ...source, baselineLedger: [] };
+        const parity = evaluateBaselineParity(changedSource, policy, replay);
+        assert.equal(parity.passed, false);
+        assert.match(parity.reason, /replay\.completeLedger|tradeCount/);
+    } finally {
+        await cleanup(fixture.root);
+    }
+});
+
 test("refuses to overwrite an immutable deterministic baseline artifact directory", async () => {
     const fixture = await makeFixture({ withBaselineLedger: true });
     const previousOutputRoot = process.env.DISDEX_AI_OUTPUT_ROOT;
@@ -712,6 +731,11 @@ test("baseline replay uses the source-wide authoritative caps across strategies"
             strategyConfigs: [first, { ...first, strategy: "Q102" as const, config: { ...first.config, totalGrossCap: 1_600 } }],
         };
         assert.throws(() => buildBaselineReplayConfig(fixture.args, conflictingSource, policy, HASH), /conflicting aggregate cap manifest/);
+        const implicitGrossConflictSource = {
+            ...multiStrategySource,
+            strategyConfigs: [first, { ...first, strategy: "Q102" as const, config: { ...first.config, grossCap: 1_600 } }],
+        };
+        assert.throws(() => buildBaselineReplayConfig(fixture.args, implicitGrossConflictSource, policy, HASH), /conflicting aggregate cap manifest/);
     } finally {
         await cleanup(fixture.root);
     }

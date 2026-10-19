@@ -1014,10 +1014,48 @@ test("does not seed resident exposure or Gross from closed baseline ledger entri
     const source = replaySource([bar({ ts: startTs })], [], [makeBaseline("closed", closedExit), makeBaseline("open", null)]);
     const replay = replayIntegrated(source, replayConfig({ startTs, endTs: startTs }));
 
-    assert.deepEqual(replay.positions.map((entry) => entry.positionId), ["baseline:closed", "baseline:open"]);
-    assert.deepEqual(replay.baselineTradeLedger.map((entry) => entry.tradeId), ["closed", "open"]);
+    assert.deepEqual(replay.positions.map((entry) => entry.positionId), ["baseline:open"]);
+    assert.deepEqual(replay.baselineTradeLedger.map((entry) => entry.tradeId).sort(), ["closed", "open"]);
     assert.deepEqual(replay.positions.filter((entry) => entry.exit === null).map((entry) => entry.positionId), ["baseline:open"]);
     assert.equal(replay.portfolio.at(-1)?.acceptedGross, 100);
+});
+
+test("fails closed when a closed baseline trade lacks reconstructable lifecycle evidence", () => {
+    const startTs = 1_700_000_000_000;
+    const source = replaySource([bar({ ts: startTs })], [], [{
+        sourceHash: HASH,
+        ts: startTs,
+        strategy: "V12_V4",
+        direction: "LONG",
+        symbol: "BTCUSDT",
+        requestedGross: 100,
+        acceptedGross: 100,
+        reservation: null,
+        fill: null,
+        exit: null,
+        reason: "baseline",
+        fee: 0,
+        funding: 0,
+        slippage: 0,
+        policyHash: HASH,
+        configHash: HASH,
+        resultHash: HASH,
+        tradeId: "closed-incomplete",
+        entry: null,
+        finalExit: {
+            sourceHash: HASH,
+            ts: startTs + 1,
+            price: 101,
+            quantity: 1,
+            gross: 101,
+            fee: 0,
+            funding: 0,
+            slippage: 0,
+            realizedPnl: 1,
+            reason: "closed",
+        },
+    }]);
+    assert.throws(() => replayIntegrated(source, replayConfig({ startTs, endTs: startTs })), /BASELINE_PARITY_CLOSED_LIFECYCLE_INCOMPLETE/);
 });
 
 test("marks all open symbols from the same timestamp snapshot", () => {

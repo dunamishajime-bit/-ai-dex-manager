@@ -373,8 +373,8 @@ function positionFromEntry(event: ExecutionLifecycleEvent): PositionLifecycleWit
 }
 
 function baselinePosition(entry: BaselineLedgerEntry): PositionLifecycleWithProtection | null {
-    if (entry.entry === null) return null;
-    const position = positionWithProtection({
+    if (entry.entry === null || entry.finalExit !== null) return null;
+    return positionWithProtection({
         sourceHash: entry.sourceHash,
         positionId: `baseline:${entry.tradeId}`,
         strategy: entry.strategy,
@@ -394,9 +394,89 @@ function baselinePosition(entry: BaselineLedgerEntry): PositionLifecycleWithProt
         resultHash: entry.resultHash,
         events: [],
     });
-    return entry.finalExit === null
-        ? position
-        : { ...position, remainingQuantity: 0, protectedQuantity: 0, protection: null };
+}
+
+function baselineLifecycleEvidence(entry: BaselineLedgerEntry): { readonly entry: ExecutionLifecycleEvent; readonly exit: ExecutionLifecycleEvent } {
+    if (entry.entry === null || entry.finalExit === null) throw new Error(`BASELINE_PARITY_CLOSED_LIFECYCLE_INCOMPLETE:${entry.tradeId}`);
+    if (entry.entry.sourceHash !== entry.sourceHash || entry.finalExit.sourceHash !== entry.sourceHash
+        || entry.entry.quantity <= 0 || entry.finalExit.quantity <= 0 || entry.finalExit.quantity > entry.entry.quantity
+        || entry.fee !== entry.entry.fee + entry.finalExit.fee || entry.funding !== entry.entry.funding + entry.finalExit.funding
+        || entry.slippage !== entry.entry.slippage + entry.finalExit.slippage) {
+        throw new Error(`BASELINE_PARITY_CLOSED_LIFECYCLE_INCOMPLETE:${entry.tradeId}`);
+    }
+    const positionId = `baseline:${entry.tradeId}`;
+    return {
+        entry: {
+            sourceHash: entry.sourceHash,
+            ts: entry.entry.ts,
+            strategy: entry.strategy,
+            direction: entry.direction,
+            symbol: entry.symbol,
+            requestedGross: entry.requestedGross,
+            acceptedGross: entry.acceptedGross,
+            reservation: entry.reservation,
+            fill: entry.entry,
+            exit: null,
+            reason: entry.reason,
+            fee: entry.fee,
+            funding: entry.funding,
+            slippage: entry.slippage,
+            policyHash: entry.policyHash,
+            configHash: entry.configHash,
+            resultHash: entry.resultHash,
+            eventId: `baseline-entry:${entry.tradeId}`,
+            eventType: "FILL",
+            positionId,
+            executionKind: "ENTRY",
+            clientOrderId: `baseline-entry:${entry.tradeId}`,
+            quantity: entry.entry.quantity,
+            executionStatus: "FILLED",
+            price: entry.entry.price,
+        },
+        exit: {
+            sourceHash: entry.sourceHash,
+            ts: entry.finalExit.ts,
+            strategy: entry.strategy,
+            direction: entry.direction,
+            symbol: entry.symbol,
+            requestedGross: entry.requestedGross,
+            acceptedGross: entry.acceptedGross,
+            reservation: entry.reservation,
+            fill: null,
+            exit: null,
+            reason: entry.finalExit.reason,
+            fee: entry.finalExit.fee,
+            funding: entry.finalExit.funding,
+            slippage: entry.finalExit.slippage,
+            policyHash: entry.policyHash,
+            configHash: entry.configHash,
+            resultHash: entry.resultHash,
+            eventId: `baseline-exit:${entry.tradeId}`,
+            eventType: "EXIT",
+            positionId,
+            executionKind: "NORMAL_EXIT",
+            clientOrderId: `baseline-exit:${entry.tradeId}`,
+            quantity: entry.finalExit.quantity,
+            executionStatus: "FILLED",
+            price: entry.finalExit.price,
+        },
+    };
+}
+
+function replayClosedBaselinePositions(source: CanonicalSource): readonly PositionLifecycle[] {
+    return source.baselineLedger.filter((entry) => entry.finalExit !== null).map((entry) => {
+        const lifecycle = baselineLifecycleEvidence(entry);
+        const opened = positionFromEntry(lifecycle.entry);
+        if (opened === null) throw new Error(`BASELINE_PARITY_CLOSED_LIFECYCLE_INCOMPLETE:${entry.tradeId}`);
+        const closed = applyExecutionToPosition(opened, lifecycle.exit);
+        if (closed.exit === null || closed.exit.ts !== entry.finalExit!.ts || closed.exit.price !== entry.finalExit!.price
+            || closed.exit.quantity !== entry.finalExit!.quantity || closed.exit.fee !== entry.finalExit!.fee
+            || closed.exit.funding !== entry.finalExit!.funding || closed.exit.slippage !== entry.finalExit!.slippage
+            || closed.exit.realizedPnl !== entry.finalExit!.realizedPnl) {
+            throw new Error(`BASELINE_PARITY_CLOSED_LIFECYCLE_INCOMPLETE:${entry.tradeId}`);
+        }
+        return closed;
+    });
 }
 
 export function reconcileLifecycle(state: PortfolioState, event: LifecycleEvent): PortfolioRuntimeState;
@@ -547,8 +627,8 @@ function accountingReconciliation(state: PortfolioRuntimeState, prices: Readonly
     };
 }
 
-function replayBaselineTradeLedger(positions: readonly PositionLifecycle[]): readonly BaselineLedgerEntry[] {
-    return positions.filter((position) => position.positionId.startsWith("baseline:") && position.entryFill !== null).map((position) => ({
+function replayBaselineTradeLedger(positions: readonly PositionLifecycle[], closedBaselinePositions: readonly PositionLifecycle[]): readonly BaselineLedgerEntry[] {
+    return [...positions, ...closedBaselinePositions].filter((position) => position.positionId.startsWith("baseline:") && position.entryFill !== null).map((position) => ({
         sourceHash: position.sourceHash,
         ts: position.entryFill!.ts,
         strategy: position.strategy,
@@ -645,6 +725,7 @@ function applyDeposit(state: PortfolioRuntimeState, amount: number): PortfolioRu
 }
 
 export function replayIntegrated(source: CanonicalSource, config: ReplayConfigWithRuntime): IntegratedReplayResult {
+    const closedBaselinePositions = replayClosedBaselinePositions(source);
     let state = initialState(source, config);
     const decisions: readonly CandidateDecisionWithExecution[] = [...source.candidateEvents]
         .filter((candidate) => candidate.ts >= config.startTs && candidate.ts <= config.endTs)
@@ -792,7 +873,7 @@ export function replayIntegrated(source: CanonicalSource, config: ReplayConfigWi
         rejectionCount,
         preemption: { supported: false, count: null, reason: "PREEMPTION_UNSUPPORTED_IN_TASK_2" },
         preemptionCount: null,
-        baselineTradeLedger: replayBaselineTradeLedger(state.positions),
+        baselineTradeLedger: replayBaselineTradeLedger(state.positions, closedBaselinePositions),
     };
     return result;
 }
