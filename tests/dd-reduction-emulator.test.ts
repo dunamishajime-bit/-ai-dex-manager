@@ -18,6 +18,7 @@ import {
 } from "../lib/backtest/dd-reduction/protection";
 import type {
     CandidateDecision,
+    BaselineLedgerEntry,
     CanonicalSource,
     ExecutionBar,
     ExecutionFill,
@@ -153,6 +154,62 @@ function position(overrides: Partial<PositionLifecycleWithProtection> = {}): Pos
         remainingQuantity: 10,
         protectedQuantity: 10,
         protection: null,
+        ...overrides,
+    };
+}
+
+function replaySource(
+    bars: readonly ExecutionBar[],
+    candidates: readonly CandidateDecision[] = [],
+    baselineLedger: readonly BaselineLedgerEntry[] = [],
+): CanonicalSource {
+    const seriesBySymbol = new Map<string, ExecutionBar[]>();
+    for (const marketBar of bars) {
+        const symbolBars = seriesBySymbol.get(marketBar.symbol) ?? [];
+        symbolBars.push(marketBar);
+        seriesBySymbol.set(marketBar.symbol, symbolBars);
+    }
+    const firstTs = Math.min(...bars.map((marketBar) => marketBar.ts));
+    const lastTs = Math.max(...bars.map((marketBar) => marketBar.ts));
+    return {
+        input: {
+            sourceRoot: "fixture-source",
+            dataRoot: "fixture-data",
+            productionSha: HASH,
+            startTs: firstTs,
+            endTs: lastTs,
+            initialEquity: 1_000,
+            deposits: [],
+            feeBps: 0,
+            slippageBps: 0,
+            fundingSource: "fixture",
+        },
+        productionSha: HASH,
+        productionFiles: [],
+        sourceFiles: [],
+        productionSources: [],
+        strategyConfigs: [],
+        candleSeries: [...seriesBySymbol.entries()].map(([symbol, symbolBars]) => ({ sourceHash: HASH, symbol, timeframe: "1h", bars: symbolBars })),
+        funding: [],
+        baselineLedger,
+        candidateEvents: candidates,
+        sourceHashes: [],
+    };
+}
+
+function replayConfig(overrides: Partial<ReplayConfigWithRuntime> = {}): ReplayConfigWithRuntime {
+    return {
+        sourceHash: HASH,
+        configHash: HASH,
+        startTs: 1_700_000_000_000,
+        endTs: 1_700_010_000_000,
+        initialEquity: 1_000,
+        feeBps: 0,
+        slippageBps: 0,
+        fundingSource: "fixture",
+        policyHash: HASH,
+        caps: { totalGross: 10_000, cryptoGross: 10_000, strategyGross: 10_000 },
+        protectionReadback: true,
         ...overrides,
     };
 }
@@ -721,7 +778,222 @@ test("integrated replay applies policy protection, baseline state, exits, and me
     assert.ok(replay.positions.some((entry) => entry.positionId === "baseline-leg"));
     assert.match(JSON.stringify(replay.protectionLedger), /GIVEBACK/);
     assert.ok(replay.positions.find((entry) => entry.positionId === "replay-leg")?.exit !== null);
+    const replayLeg = replay.positions.find((entry) => entry.positionId === "replay-leg") as PositionLifecycleWithProtection | undefined;
+    assert.equal(replayLeg?.protection?.barsHeld, 3);
     assert.ok(new Set(replay.equityMtmTimeline.map((entry) => entry.equity)).size > 1);
+});
+
+test("integrated replay merges candidates, executions, deposits, and bars causally by timestamp", () => {
+    const startTs = 1_700_000_000_000;
+    const entryTs = startTs + 3_600_000;
+    const source = replaySource(
+        [bar({ ts: startTs }), bar({ ts: entryTs })],
+        [candidate({ candidateId: "causal-entry", ts: entryTs, fill: fill(100, 1, entryTs) })],
+    );
+    const replay = replayIntegrated(source, replayConfig({ startTs, endTs: entryTs, deposits: [{ ts: entryTs, amount: 100 }] }));
+
+    assert.equal(replay.equityMtmTimeline[1]?.positions.length, 0);
+    assert.equal(replay.equityMtmTimeline.at(-1)?.positions.length, 1);
+    assert.equal(replay.equityMtmTimeline.at(-1)?.cash, 1_100);
+});
+
+test("combines generated protective triggers and supplied same-bar executions under one STOP-first priority pass", () => {
+    const startTs = 1_700_000_000_000;
+    const source = replaySource(
+        [bar({ ts: startTs, low: 94, close: 95 })],
+        [candidate({ candidateId: "same-bar-origin", ts: startTs, fill: fill(100, 10, startTs) })],
+    );
+    const normalExit: ExecutionLifecycleEvent = {
+        sourceHash: HASH,
+        ts: startTs,
+        strategy: "V12_V4",
+        direction: "LONG",
+        symbol: "BTCUSDT",
+        requestedGross: 1_000,
+        acceptedGross: 1_000,
+        reservation: null,
+        fill: null,
+        exit: null,
+        reason: "SUPPLIED_NORMAL_EXIT",
+        fee: 0,
+        funding: 0,
+        slippage: 0,
+        policyHash: HASH,
+        configHash: HASH,
+        resultHash: HASH,
+        eventId: "supplied-normal-exit",
+        eventType: "EXIT",
+        positionId: "same-bar-origin",
+        executionKind: "NORMAL_EXIT",
+        clientOrderId: "supplied-normal-intent",
+        quantity: 10,
+        price: 101,
+        executionStatus: "FILLED",
+    };
+    const replay = replayIntegrated(source, replayConfig({
+        startTs,
+        endTs: startTs,
+        directionPolicies: { LONG: policy("LONG") },
+        executionEvents: [normalExit],
+    }));
+
+    assert.equal(replay.positions.find((entry) => entry.positionId === "same-bar-origin")?.exit?.reason, "INITIAL_STOP");
+    assert.ok(replay.events.some((event) => event.eventId === "supplied-normal-exit"));
+});
+
+test("full and partial exits release accepted Gross by symbol and strategy and record realized PnL", () => {
+    const initial = state({
+        acceptedGross: 1_000,
+        reservedGross: 0,
+        pendingGross: 0,
+        grossBySymbol: { BTCUSDT: 1_000 },
+        grossByStrategy: { V12_V4: 1_000 },
+        positions: [position({ acceptedGross: 1_000, requestedGross: 1_000 })],
+    });
+    const exited = reconcileLifecycle(initial, {
+        sourceHash: HASH,
+        ts: 1_700_003_600_000,
+        strategy: "V12_V4",
+        direction: "LONG",
+        symbol: "BTCUSDT",
+        requestedGross: 1_000,
+        acceptedGross: 1_000,
+        reservation: null,
+        fill: null,
+        exit: null,
+        reason: "realized-exit",
+        fee: 1,
+        funding: 2,
+        slippage: 3,
+        policyHash: HASH,
+        configHash: HASH,
+        resultHash: HASH,
+        eventId: "realized-exit-1",
+        eventType: "EXIT",
+        positionId: "leg-1",
+        executionKind: "NORMAL_EXIT",
+        clientOrderId: "realized-exit-intent",
+        quantity: 10,
+        price: 110,
+        executionStatus: "FILLED",
+    });
+
+    assert.equal(exited.acceptedGross, 0);
+    assert.equal(exited.grossBySymbol.BTCUSDT, 0);
+    assert.equal(exited.grossByStrategy.V12_V4, 0);
+    assert.equal(exited.positions[0]?.exit?.realizedPnl, 100);
+    assert.equal(exited.fee, 1);
+    assert.equal(exited.funding, 2);
+    assert.equal(exited.slippage, 3);
+});
+
+test("partial exit realized PnL remains in the trade event ledger before the final exit", () => {
+    const initial = state({
+        acceptedGross: 1_000,
+        grossBySymbol: { BTCUSDT: 1_000 },
+        grossByStrategy: { V12_V4: 1_000 },
+        positions: [position({ acceptedGross: 1_000, requestedGross: 1_000 })],
+    });
+    const partial = reconcileLifecycle(initial, {
+        sourceHash: HASH,
+        ts: 1_700_003_600_000,
+        strategy: "V12_V4",
+        direction: "LONG",
+        symbol: "BTCUSDT",
+        requestedGross: 1_000,
+        acceptedGross: 1_000,
+        reservation: null,
+        fill: null,
+        exit: null,
+        reason: "partial-realized-exit",
+        fee: 0,
+        funding: 0,
+        slippage: 0,
+        policyHash: HASH,
+        configHash: HASH,
+        resultHash: HASH,
+        eventId: "partial-realized-exit-1",
+        eventType: "PARTIAL_FILL",
+        positionId: "leg-1",
+        executionKind: "NORMAL_EXIT",
+        clientOrderId: "partial-realized-exit-intent",
+        quantity: 5,
+        price: 110,
+        executionStatus: "PARTIAL_FILLED",
+    });
+
+    assert.equal(partial.positions[0]?.exit, null);
+    assert.equal(partial.positions[0]?.events.at(-1)?.exit?.realizedPnl, 50);
+});
+
+test("does not seed resident exposure or Gross from closed baseline ledger entries", () => {
+    const startTs = 1_700_000_000_000;
+    const closedExit = {
+        sourceHash: HASH,
+        ts: startTs - 1,
+        price: 105,
+        quantity: 1,
+        gross: 105,
+        fee: 0,
+        funding: 0,
+        slippage: 0,
+        realizedPnl: 5,
+        reason: "closed-before-replay",
+    };
+    const makeBaseline = (tradeId: string, finalExit: BaselineLedgerEntry["finalExit"]): BaselineLedgerEntry => ({
+        sourceHash: HASH,
+        ts: startTs,
+        strategy: "V12_V4",
+        direction: "LONG",
+        symbol: "BTCUSDT",
+        requestedGross: 100,
+        acceptedGross: 100,
+        reservation: null,
+        fill: null,
+        exit: null,
+        reason: "baseline",
+        fee: 0,
+        funding: 0,
+        slippage: 0,
+        policyHash: HASH,
+        configHash: HASH,
+        resultHash: HASH,
+        tradeId,
+        entry: fill(100, 1, startTs),
+        finalExit,
+    });
+    const source = replaySource([bar({ ts: startTs })], [], [makeBaseline("closed", closedExit), makeBaseline("open", null)]);
+    const replay = replayIntegrated(source, replayConfig({ startTs, endTs: startTs }));
+
+    assert.deepEqual(replay.positions.map((entry) => entry.positionId), ["baseline:open"]);
+    assert.equal(replay.portfolio.at(-1)?.acceptedGross, 100);
+});
+
+test("marks all open symbols from the same timestamp snapshot", () => {
+    const startTs = 1_700_000_000_000;
+    const source = replaySource([
+        bar({ ts: startTs, symbol: "BTCUSDT", open: 110, high: 110, low: 110, close: 110 }),
+        bar({ ts: startTs, symbol: "ETHUSDT", open: 220, high: 220, low: 220, close: 220 }),
+    ]);
+    const config = replayConfig({
+        startTs,
+        endTs: startTs,
+        baselinePositions: [
+            position({ positionId: "btc-open", symbol: "BTCUSDT", acceptedGross: 100, requestedGross: 100, entryFill: fill(100, 1, startTs), remainingQuantity: 1 }),
+            position({ positionId: "eth-open", symbol: "ETHUSDT", acceptedGross: 200, requestedGross: 200, entryFill: fill(200, 1, startTs), remainingQuantity: 1 }),
+        ],
+    });
+    const replay = replayIntegrated(source, config);
+
+    assert.equal(replay.equityMtmTimeline.at(-1)?.equity, 1_030);
+});
+
+test("marks preemption as explicitly unsupported instead of claiming a zero count", () => {
+    const startTs = 1_700_000_000_000;
+    const replay = replayIntegrated(replaySource([bar({ ts: startTs })]), replayConfig({ startTs, endTs: startTs }));
+
+    assert.match(JSON.stringify(replay), /PREEMPTION_UNSUPPORTED/);
+    assert.doesNotMatch(JSON.stringify(replay), /"preemptionCount":0/);
 });
 
 const _candidateReservationState: CandidateReservationState | null = null;

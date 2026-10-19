@@ -29,6 +29,7 @@ export interface GrossCaps {
 
 export type ExecutionOrdering = "ENTRY" | "STOP" | "NORMAL_EXIT" | "TAKE_PROFIT" | "TIME_STOP";
 export type ExecutionStatus = "FILLED" | "PARTIAL_FILLED" | "UNKNOWN";
+export type ReplayStreamKind = "CANDIDATE" | "EXECUTION" | "DEPOSIT" | "MARKET";
 
 export interface ExecutionLifecycleEvent extends LifecycleEvent {
     readonly executionKind: ExecutionOrdering;
@@ -80,6 +81,7 @@ export interface ReplayConfigWithRuntime extends ReplayConfig {
     readonly baselinePositions?: readonly PositionLifecycle[];
     readonly executionEvents?: readonly ExecutionLifecycleEvent[];
     readonly protectionReadback?: boolean;
+    readonly streamOrdering?: readonly ReplayStreamKind[];
 }
 
 export interface ProtectionLedgerEntry extends ProtectionEvent {
@@ -88,15 +90,34 @@ export interface ProtectionLedgerEntry extends ProtectionEvent {
     readonly trigger: string;
 }
 
+export interface PreemptionSummary {
+    readonly supported: false;
+    readonly count: null;
+    readonly reason: "PREEMPTION_UNSUPPORTED_IN_TASK_2";
+}
+
+export interface AccountingReconciliation {
+    readonly cash: number;
+    readonly equity: number;
+    readonly realizedPnl: number;
+    readonly unrealizedPnl: number;
+    readonly fee: number;
+    readonly funding: number;
+    readonly slippage: number;
+    readonly difference: number;
+    readonly balanced: boolean;
+}
+
 export interface ReplayLedgers {
     readonly decisionLedger: readonly CandidateDecision[];
     readonly reservationLedger: readonly Reservation[];
     readonly protectionLedger: readonly ProtectionLedgerEntry[];
     readonly tradeLedger: readonly PositionLifecycle[];
     readonly equityMtmTimeline: readonly PortfolioState[];
-    readonly accountingReconciliation: readonly string[];
+    readonly accountingReconciliation: AccountingReconciliation;
     readonly rejectionCount: number;
-    readonly preemptionCount: number;
+    readonly preemption: PreemptionSummary;
+    readonly preemptionCount: null;
 }
 
 export type IntegratedReplayResult = IntegratedReplay & ReplayLedgers;
@@ -222,8 +243,10 @@ function executionEvent(event: LifecycleEvent): ExecutionLifecycleEvent {
     };
 }
 
-function exitFromEvent(event: ExecutionLifecycleEvent, quantity: number): ExecutionExit {
+function exitFromEvent(position: PositionLifecycleWithProtection, event: ExecutionLifecycleEvent, quantity: number): ExecutionExit {
     const price = event.price ?? event.fill?.price ?? 0;
+    const entryPrice = position.entryFill?.price ?? price;
+    const move = position.direction === "LONG" ? price - entryPrice : entryPrice - price;
     return {
         sourceHash: event.sourceHash,
         ts: event.ts,
@@ -233,7 +256,7 @@ function exitFromEvent(event: ExecutionLifecycleEvent, quantity: number): Execut
         fee: event.fee,
         funding: event.funding,
         slippage: event.slippage,
-        realizedPnl: 0,
+        realizedPnl: move * quantity,
         reason: event.reason,
     };
 }
@@ -245,6 +268,9 @@ function applyExecutionToPosition(
     const currentQuantity = Math.max(0, position.remainingQuantity);
     const fillQuantity = Math.min(currentQuantity, Math.max(0, event.quantity));
     if (fillQuantity === 0 || position.exit !== null) return position;
+    const ledgerEvent: LifecycleEvent = event.executionKind === "ENTRY"
+        ? event
+        : { ...event, exit: exitFromEvent(position, event, fillQuantity) };
     const remainingQuantity = Math.max(0, currentQuantity - fillQuantity);
     if (event.executionStatus === "PARTIAL_FILLED" || remainingQuantity > 0) {
         const existingProtection = position.protection;
@@ -274,13 +300,14 @@ function applyExecutionToPosition(
                 reprotectQuantity: remainingQuantity,
                 events: [...existingProtection.events, { kind: "REPROTECT", ts: event.ts, quantity: remainingQuantity, price: event.price ?? existingProtection.stopPrice, reason: "PARTIAL_PROTECTIVE_FILL" }],
             };
-        return { ...position, remainingQuantity, protectedQuantity: remainingQuantity, protection };
+        return { ...position, remainingQuantity, protectedQuantity: remainingQuantity, protection, events: [...position.events, ledgerEvent] };
     }
     return {
         ...position,
         remainingQuantity: 0,
         protectedQuantity: 0,
-        exit: exitFromEvent(event, fillQuantity),
+        exit: exitFromEvent(position, event, fillQuantity),
+        events: [...position.events, ledgerEvent],
     };
 }
 
@@ -300,6 +327,7 @@ function reconcilePositions(
                 exit: null,
                 remainingQuantity: position.entryFill?.quantity ?? position.remainingQuantity,
                 protectedQuantity: position.entryFill?.quantity ?? position.protectedQuantity,
+                events: position.events.filter((candidate) => candidate.ts !== event.ts),
             }
             : { ...position };
         const executions = rebuildSameTimestamp ? sameTimestampExecutions : [event];
@@ -337,7 +365,7 @@ function positionFromEntry(event: ExecutionLifecycleEvent): PositionLifecycleWit
 }
 
 function baselinePosition(entry: BaselineLedgerEntry): PositionLifecycleWithProtection | null {
-    if (entry.entry === null) return null;
+    if (entry.entry === null || entry.finalExit !== null) return null;
     return positionWithProtection({
         sourceHash: entry.sourceHash,
         positionId: `baseline:${entry.tradeId}`,
@@ -383,8 +411,17 @@ export function reconcileLifecycle(state: PortfolioState, event: LifecycleEvent)
         ? reconcilePositions(runtime, lifecycleEvent, nextEvents)
         : [...runtime.positions.filter((position) => position.positionId !== lifecycleEvent.positionId), entryPosition];
     const entryGross = lifecycleEvent.executionKind === "ENTRY" ? lifecycleEvent.fill?.gross ?? lifecycleEvent.acceptedGross : 0;
+    const exitQuantity = lifecycleEvent.executionKind === "ENTRY" || priorPosition === undefined
+        ? 0
+        : Math.min(priorPosition.remainingQuantity, lifecycleEvent.quantity);
+    const priorEntryQuantity = priorPosition?.entryFill?.quantity ?? 0;
+    const releasedGross = priorEntryQuantity > 0 ? priorPosition!.acceptedGross * (exitQuantity / priorEntryQuantity) : 0;
     const reservedAfterEntry = lifecycleEvent.executionKind === "ENTRY" ? Math.max(0, runtime.reservedGross - entryGross) : runtime.reservedGross;
-    const acceptedAfterEntry = lifecycleEvent.executionKind === "ENTRY" ? runtime.acceptedGross + entryGross : runtime.acceptedGross;
+    const acceptedAfterEntry = lifecycleEvent.executionKind === "ENTRY"
+        ? runtime.acceptedGross + entryGross
+        : Math.max(0, runtime.acceptedGross - releasedGross);
+    const realized = priorPosition === undefined ? 0 : realizedPnl(priorPosition, lifecycleEvent);
+    const executionCosts = lifecycleEvent.fee + lifecycleEvent.funding + lifecycleEvent.slippage;
     return stateCopy(runtime, {
         events: nextEvents,
         positions,
@@ -392,9 +429,13 @@ export function reconcileLifecycle(state: PortfolioState, event: LifecycleEvent)
         reason: "LIFECYCLE_RECONCILED",
         reservedGross: reservedAfterEntry,
         acceptedGross: acceptedAfterEntry,
-        cash: runtime.cash + (priorPosition === undefined ? 0 : realizedPnl(priorPosition, lifecycleEvent)) - lifecycleEvent.fee,
-        grossBySymbol: lifecycleEvent.executionKind === "ENTRY" ? { ...runtime.grossBySymbol, [lifecycleEvent.symbol]: (runtime.grossBySymbol[lifecycleEvent.symbol] ?? 0) + entryGross } : runtime.grossBySymbol,
-        grossByStrategy: lifecycleEvent.executionKind === "ENTRY" ? { ...runtime.grossByStrategy, [lifecycleEvent.strategy]: (runtime.grossByStrategy[lifecycleEvent.strategy] ?? 0) + entryGross } : runtime.grossByStrategy,
+        cash: runtime.cash + (lifecycleEvent.executionKind === "ENTRY" ? 0 : realized) - executionCosts,
+        grossBySymbol: lifecycleEvent.executionKind === "ENTRY"
+            ? { ...runtime.grossBySymbol, [lifecycleEvent.symbol]: (runtime.grossBySymbol[lifecycleEvent.symbol] ?? 0) + entryGross }
+            : { ...runtime.grossBySymbol, [lifecycleEvent.symbol]: Math.max(0, (runtime.grossBySymbol[lifecycleEvent.symbol] ?? 0) - releasedGross) },
+        grossByStrategy: lifecycleEvent.executionKind === "ENTRY"
+            ? { ...runtime.grossByStrategy, [lifecycleEvent.strategy]: (runtime.grossByStrategy[lifecycleEvent.strategy] ?? 0) + entryGross }
+            : { ...runtime.grossByStrategy, [lifecycleEvent.strategy]: Math.max(0, (runtime.grossByStrategy[lifecycleEvent.strategy] ?? 0) - releasedGross) },
         fee: runtime.fee + lifecycleEvent.fee,
         funding: runtime.funding + lifecycleEvent.funding,
         slippage: runtime.slippage + lifecycleEvent.slippage,
@@ -402,7 +443,7 @@ export function reconcileLifecycle(state: PortfolioState, event: LifecycleEvent)
 }
 
 function initialState(source: CanonicalSource, config: ReplayConfigWithRuntime): PortfolioRuntimeState {
-    const configuredBaseline = config.baselinePositions?.map(positionWithProtection) ?? [];
+    const configuredBaseline = config.baselinePositions?.map(positionWithProtection).filter((position) => position.exit === null && position.remainingQuantity > 0) ?? [];
     const sourceBaseline = source.baselineLedger.map(baselinePosition).filter((position): position is PositionLifecycleWithProtection => position !== null);
     const baselinePositions = [...sourceBaseline, ...configuredBaseline];
     const baselineGrossBySymbol: Record<string, number> = {};
@@ -459,15 +500,39 @@ function unrealizedPnl(position: PositionLifecycleWithProtection, close: number)
     return move * position.remainingQuantity;
 }
 
-function markToMarket(state: PortfolioRuntimeState, bar: ExecutionBar, depositAmount: number): PortfolioRuntimeState {
+function markToMarket(state: PortfolioRuntimeState, ts: number, prices: ReadonlyMap<string, number>, depositAmount: number): PortfolioRuntimeState {
     const cash = state.cash + depositAmount;
-    const unrealized = state.positions.filter((position) => position.symbol === bar.symbol).reduce((total, position) => total + unrealizedPnl(position, bar.close), 0);
+    const unrealized = state.positions.reduce((total, position) => {
+        const price = prices.get(position.symbol);
+        return price === undefined ? total : total + unrealizedPnl(position, price);
+    }, 0);
     return stateCopy(state, {
-        ts: bar.ts,
+        ts,
         cash,
         equity: cash + unrealized,
         reason: "MARK_TO_MARKET",
     });
+}
+
+function accountingReconciliation(state: PortfolioRuntimeState, prices: ReadonlyMap<string, number>): AccountingReconciliation {
+    const realized = state.positions.reduce((total, position) => total + position.events.reduce((eventTotal, event) => eventTotal + (event.exit?.realizedPnl ?? 0), 0), 0);
+    const unrealized = state.positions.reduce((total, position) => {
+        const price = prices.get(position.symbol);
+        return price === undefined ? total : total + unrealizedPnl(position, price);
+    }, 0);
+    const difference = state.equity - (state.cash + unrealized);
+    if (Math.abs(difference) > 1e-8) throw new Error("ACCOUNTING_IMBALANCE");
+    return {
+        cash: state.cash,
+        equity: state.equity,
+        realizedPnl: realized,
+        unrealizedPnl: unrealized,
+        fee: state.fee,
+        funding: state.funding,
+        slippage: state.slippage,
+        difference,
+        balanced: true,
+    };
 }
 
 function protectionLedgerEntries(position: PositionLifecycleWithProtection, decision: ReturnType<typeof applyProtectionPolicy>): readonly ProtectionLedgerEntry[] {
@@ -510,71 +575,139 @@ function protectiveExecutionEvent(position: PositionLifecycleWithProtection, bar
     };
 }
 
+interface ReplayTimestampGroup {
+    readonly candidates: CandidateDecisionWithExecution[];
+    readonly executions: ExecutionLifecycleEvent[];
+    readonly deposits: number[];
+    readonly bars: ExecutionBar[];
+}
+
+function streamPriority(kind: ReplayStreamKind, ordering: readonly ReplayStreamKind[]): number {
+    const index = ordering.indexOf(kind);
+    return index === -1 ? ordering.length : index;
+}
+
+function candidateFillEvent(decision: CandidateDecisionWithExecution): ExecutionLifecycleEvent | null {
+    if (decision.fill === null) return null;
+    return {
+        ...decision,
+        ts: decision.fill.ts,
+        eventId: `fill:${decision.candidateId}`,
+        eventType: decision.fill.gross < decision.acceptedGross ? "PARTIAL_FILL" : "FILL",
+        positionId: decision.candidateId,
+        executionKind: "ENTRY",
+        clientOrderId: decision.clientOrderId ?? decision.candidateId,
+        quantity: decision.fill.quantity,
+        executionStatus: decision.fill.gross < decision.acceptedGross ? "PARTIAL_FILLED" : "FILLED",
+        price: decision.fill.price,
+    };
+}
+
+function applyDeposit(state: PortfolioRuntimeState, amount: number): PortfolioRuntimeState {
+    return stateCopy(state, { cash: state.cash + amount, equity: state.equity + amount, reason: "DEPOSIT_APPLIED" });
+}
+
 export function replayIntegrated(source: CanonicalSource, config: ReplayConfigWithRuntime): IntegratedReplayResult {
     let state = initialState(source, config);
-    const decisions: readonly CandidateDecisionWithExecution[] = [...source.candidateEvents].filter((candidate) => candidate.ts >= config.startTs && candidate.ts <= config.endTs).sort((left, right) => left.ts - right.ts || left.candidateId.localeCompare(right.candidateId));
+    const decisions: readonly CandidateDecisionWithExecution[] = [...source.candidateEvents]
+        .filter((candidate) => candidate.ts >= config.startTs && candidate.ts <= config.endTs)
+        .sort((left, right) => left.ts - right.ts || left.candidateId.localeCompare(right.candidateId));
     const reservations: Reservation[] = [];
     const protectionLedger: ProtectionLedgerEntry[] = [];
-    let rejectionCount = 0;
+    const timeline: PortfolioState[] = [state];
+    const prices = new Map<string, number>();
+    const groups = new Map<number, ReplayTimestampGroup>();
+    const streamOrdering = config.streamOrdering ?? ["CANDIDATE", "DEPOSIT", "EXECUTION", "MARKET"];
+    const getGroup = (ts: number): ReplayTimestampGroup => {
+        const existing = groups.get(ts);
+        if (existing !== undefined) return existing;
+        const created: ReplayTimestampGroup = { candidates: [], executions: [], deposits: [], bars: [] };
+        groups.set(ts, created);
+        return created;
+    };
+    for (const decision of decisions) getGroup(decision.ts).candidates.push(decision);
+    for (const event of (config.executionEvents ?? []).filter((event) => event.ts >= config.startTs && event.ts <= config.endTs)) getGroup(event.ts).executions.push(event);
+    for (const deposit of (config.deposits ?? source.input.deposits).filter((deposit) => deposit.ts > config.startTs && deposit.ts <= config.endTs)) getGroup(deposit.ts).deposits.push(deposit.amount);
+    for (const marketBar of executionBars(source, config.startTs, config.endTs)) getGroup(marketBar.ts).bars.push(marketBar);
     for (const decision of decisions) {
-        const result = reserveCandidate(state, decision);
-        state = result.state;
-        if (result.accepted && result.reservation !== null) {
-            reservations.push(result.reservation);
-            if (decision.fill !== null) {
-                state = reconcileLifecycle(state, {
-                    ...decision,
-                    eventId: `fill:${decision.candidateId}`,
-                    eventType: decision.fill.gross < decision.acceptedGross ? "PARTIAL_FILL" : "FILL",
-                    positionId: decision.candidateId,
-                    executionKind: "ENTRY",
-                    clientOrderId: decision.clientOrderId ?? decision.candidateId,
-                    quantity: decision.fill.quantity,
-                    executionStatus: decision.fill.gross < decision.acceptedGross ? "PARTIAL_FILLED" : "FILLED",
-                    price: decision.fill.price,
+        const fillEvent = candidateFillEvent(decision);
+        if (fillEvent !== null) getGroup(fillEvent.ts).executions.push(fillEvent);
+    }
+
+    let rejectionCount = 0;
+    const marketPriority = streamPriority("MARKET", streamOrdering);
+    for (const ts of [...groups.keys()].sort((left, right) => left - right)) {
+        const group = groups.get(ts)!;
+        const processCandidates = (): void => {
+            for (const decision of group.candidates.sort((left, right) => left.candidateId.localeCompare(right.candidateId))) {
+                const result = reserveCandidate(state, decision);
+                state = result.state;
+                if (result.accepted && result.reservation !== null) reservations.push(result.reservation);
+                else rejectionCount += 1;
+            }
+        };
+        const processDeposits = (): void => {
+            for (const amount of group.deposits) state = applyDeposit(state, amount);
+        };
+        const entryExecutions = group.executions.filter((event) => event.executionKind === "ENTRY");
+        const exitExecutions = group.executions.filter((event) => event.executionKind !== "ENTRY");
+        const processEntries = (): void => {
+            for (const event of [...entryExecutions].sort((left, right) => left.eventId.localeCompare(right.eventId))) state = reconcileLifecycle(state, event);
+        };
+        const orderedActions = [...(["CANDIDATE", "DEPOSIT", "EXECUTION"] as const)].sort((left, right) => streamPriority(left, streamOrdering) - streamPriority(right, streamOrdering));
+        if (group.bars.length === 0) {
+            for (const action of orderedActions) {
+                if (action === "CANDIDATE") processCandidates();
+                else if (action === "DEPOSIT") processDeposits();
+                else processEntries();
+            }
+            const orderedExits = [...exitExecutions].sort((left, right) => eventPriority(state, left) - eventPriority(state, right) || left.eventId.localeCompare(right.eventId));
+            for (const event of orderedExits) state = reconcileLifecycle(state, event);
+            continue;
+        }
+        for (const action of orderedActions) {
+            if (streamPriority(action, streamOrdering) >= marketPriority) continue;
+            if (action === "CANDIDATE") processCandidates();
+            else if (action === "DEPOSIT") processDeposits();
+            else processEntries();
+        }
+        const generatedExits: ExecutionLifecycleEvent[] = [];
+        for (const marketBar of group.bars.sort((left, right) => left.symbol.localeCompare(right.symbol))) {
+            prices.set(marketBar.symbol, marketBar.close);
+            const currentPositions = [...state.positions];
+            for (const currentPosition of currentPositions) {
+                if (currentPosition.symbol !== marketBar.symbol || currentPosition.exit !== null || currentPosition.remainingQuantity <= 0) continue;
+                const policy = config.directionPolicies?.[currentPosition.direction];
+                if (policy === undefined) continue;
+                const decision = applyProtectionPolicy(currentPosition, policy, marketBar);
+                state = stateCopy(state, {
+                    positions: state.positions.map((position) => position.positionId === currentPosition.positionId
+                        ? { ...position, protection: decision.protection, protectedQuantity: decision.protection.protectedQuantity }
+                        : position),
                 });
+                protectionLedger.push(...protectionLedgerEntries(currentPosition, decision));
+                const protectiveEvent = protectiveExecutionEvent(currentPosition, marketBar, decision);
+                if (protectiveEvent !== null) generatedExits.push(protectiveEvent);
             }
         }
-        else rejectionCount += 1;
-    }
-    const timeline: PortfolioState[] = [state];
-    const marketBars = [...executionBars(source, config.startTs, config.endTs)].sort((left, right) => left.ts - right.ts || left.symbol.localeCompare(right.symbol));
-    const executionEvents = [...(config.executionEvents ?? [])].filter((event) => event.ts >= config.startTs && event.ts <= config.endTs).sort((left, right) => left.ts - right.ts || left.eventId.localeCompare(right.eventId));
-    const deposits = [...(config.deposits ?? source.input.deposits)].filter((deposit) => deposit.ts > config.startTs && deposit.ts <= config.endTs).sort((left, right) => left.ts - right.ts);
-    let executionIndex = 0;
-    let depositIndex = 0;
-    for (const marketBar of marketBars) {
-        while (executionIndex < executionEvents.length && executionEvents[executionIndex]!.ts <= marketBar.ts) {
-            state = reconcileLifecycle(state, executionEvents[executionIndex]!);
-            executionIndex += 1;
-        }
-        const currentPositions = [...state.positions];
-        for (const currentPosition of currentPositions) {
-            if (currentPosition.symbol !== marketBar.symbol || currentPosition.exit !== null || currentPosition.remainingQuantity <= 0) continue;
-            const policy = config.directionPolicies?.[currentPosition.direction];
-            if (policy === undefined) continue;
-            const decision = applyProtectionPolicy(currentPosition, policy, marketBar);
-            state = stateCopy(state, {
-                positions: state.positions.map((position) => position.positionId === currentPosition.positionId
-                    ? { ...position, protection: decision.protection, protectedQuantity: decision.protection.protectedQuantity }
-                    : position),
-            });
-            protectionLedger.push(...protectionLedgerEntries(currentPosition, decision));
-            const protectiveEvent = protectiveExecutionEvent(currentPosition, marketBar, decision);
-            if (protectiveEvent !== null) state = reconcileLifecycle(state, protectiveEvent);
-        }
-        let depositAmount = 0;
-        while (depositIndex < deposits.length && deposits[depositIndex]!.ts <= marketBar.ts) {
-            depositAmount += deposits[depositIndex]!.amount;
-            depositIndex += 1;
-        }
-        state = markToMarket(state, marketBar, depositAmount);
+        const combinedExits = [...exitExecutions, ...generatedExits].sort((left, right) => eventPriority(state, left) - eventPriority(state, right) || left.eventId.localeCompare(right.eventId));
+        for (const event of combinedExits) state = reconcileLifecycle(state, event);
+        state = markToMarket(state, ts, prices, 0);
         timeline.push(state);
+        let postMarketDeposit = false;
+        for (const action of orderedActions) {
+            if (streamPriority(action, streamOrdering) < marketPriority) continue;
+            if (action === "CANDIDATE") processCandidates();
+            else if (action === "DEPOSIT") {
+                processDeposits();
+                postMarketDeposit = true;
+            } else processEntries();
+        }
+        if (postMarketDeposit) timeline.push(state);
     }
-    while (executionIndex < executionEvents.length) {
-        state = reconcileLifecycle(state, executionEvents[executionIndex]!);
-        executionIndex += 1;
-    }
+    const lastTs = timeline.at(-1)?.ts ?? config.startTs;
+    state = markToMarket(state, lastTs, prices, 0);
+    if (timeline.length > 1) timeline[timeline.length - 1] = state;
     const result: IntegratedReplayResult = {
         sourceHash: config.sourceHash,
         configHash: config.configHash,
@@ -592,9 +725,10 @@ export function replayIntegrated(source: CanonicalSource, config: ReplayConfigWi
         protectionLedger,
         tradeLedger: state.positions,
         equityMtmTimeline: timeline,
-        accountingReconciliation: ["cash + realizedPnl + unrealizedPnl = equity"],
+        accountingReconciliation: accountingReconciliation(state, prices),
         rejectionCount,
-        preemptionCount: 0,
+        preemption: { supported: false, count: null, reason: "PREEMPTION_UNSUPPORTED_IN_TASK_2" },
+        preemptionCount: null,
     };
     return result;
 }
