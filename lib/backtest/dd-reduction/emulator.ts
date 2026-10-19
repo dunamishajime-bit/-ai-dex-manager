@@ -631,7 +631,7 @@ export function replayIntegrated(source: CanonicalSource, config: ReplayConfigWi
     for (const marketBar of executionBars(source, config.startTs, config.endTs)) getGroup(marketBar.ts).bars.push(marketBar);
     for (const decision of decisions) {
         const fillEvent = candidateFillEvent(decision);
-        if (fillEvent !== null) getGroup(fillEvent.ts).executions.push(fillEvent);
+        if (fillEvent !== null) getGroup(fillEvent.ts);
     }
 
     let rejectionCount = 0;
@@ -642,16 +642,36 @@ export function replayIntegrated(source: CanonicalSource, config: ReplayConfigWi
             for (const decision of group.candidates.sort((left, right) => left.candidateId.localeCompare(right.candidateId))) {
                 const result = reserveCandidate(state, decision);
                 state = result.state;
-                if (result.accepted && result.reservation !== null) reservations.push(result.reservation);
-                else rejectionCount += 1;
+                if (result.accepted && result.reservation !== null) {
+                    reservations.push(result.reservation);
+                    const fillEvent = candidateFillEvent(decision);
+                    if (fillEvent !== null) {
+                        if (fillEvent.ts < decision.ts) {
+                            state = stateCopy(state, {
+                                manualReview: [...state.manualReview, `UNCAUSAL_CANDIDATE_FILL:${decision.candidateId}`],
+                                reason: "MANUAL_REVIEW_UNCAUSAL_CANDIDATE_FILL",
+                            });
+                        } else {
+                            getGroup(fillEvent.ts).executions.push(fillEvent);
+                        }
+                    }
+                } else {
+                    rejectionCount += 1;
+                    if (decision.fill !== null) {
+                        state = stateCopy(state, {
+                            manualReview: [...state.manualReview, `UNADMITTED_CANDIDATE_FILL:${decision.candidateId}`],
+                            reason: "MANUAL_REVIEW_UNADMITTED_CANDIDATE_FILL",
+                        });
+                    }
+                }
             }
         };
         const processDeposits = (): void => {
             for (const amount of group.deposits) state = applyDeposit(state, amount);
         };
-        const entryExecutions = group.executions.filter((event) => event.executionKind === "ENTRY");
         const exitExecutions = group.executions.filter((event) => event.executionKind !== "ENTRY");
         const processEntries = (): void => {
+            const entryExecutions = group.executions.filter((event) => event.executionKind === "ENTRY");
             for (const event of [...entryExecutions].sort((left, right) => left.eventId.localeCompare(right.eventId))) state = reconcileLifecycle(state, event);
         };
         const orderedActions = [...(["CANDIDATE", "DEPOSIT", "EXECUTION"] as const)].sort((left, right) => streamPriority(left, streamOrdering) - streamPriority(right, streamOrdering));

@@ -797,6 +797,26 @@ test("integrated replay merges candidates, executions, deposits, and bars causal
     assert.equal(replay.equityMtmTimeline.at(-1)?.cash, 1_100);
 });
 
+test("rejected candidates with attached fills never create exposure or accepted Gross", () => {
+    const startTs = 1_700_000_000_000;
+    const denied = candidate({
+        candidateId: "denied-with-fill",
+        ts: startTs,
+        accepted: false,
+        rejectionReason: "GROSS_CAP_TOTAL",
+        fill: fill(100, 1, startTs),
+    });
+    const replay = replayIntegrated(
+        replaySource([bar({ ts: startTs })], [denied]),
+        replayConfig({ startTs, endTs: startTs }),
+    );
+
+    assert.deepEqual(replay.positions, []);
+    assert.equal(replay.portfolio.at(-1)?.acceptedGross, 0);
+    assert.equal(replay.reservationLedger.length, 0);
+    assert.match(replay.reason, /MANUAL_REVIEW/);
+});
+
 test("combines generated protective triggers and supplied same-bar executions under one STOP-first priority pass", () => {
     const startTs = 1_700_000_000_000;
     const source = replaySource(
