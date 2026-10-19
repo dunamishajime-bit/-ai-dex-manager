@@ -33,6 +33,7 @@ export interface GrossCaps {
 export type ExecutionOrdering = "ENTRY" | "STOP" | "NORMAL_EXIT" | "TAKE_PROFIT" | "TIME_STOP";
 export type ExecutionStatus = "FILLED" | "PARTIAL_FILLED" | "UNKNOWN";
 export type ReplayStreamKind = "CANDIDATE" | "EXECUTION" | "DEPOSIT" | "MARKET";
+const MONEY_TOLERANCE = 1e-8;
 
 export interface ExecutionLifecycleEvent extends LifecycleEvent {
     readonly executionKind: ExecutionOrdering;
@@ -406,10 +407,15 @@ function baselineLifecycleEvidence(entry: BaselineLedgerEntry, startTs: number, 
     if (!Number.isFinite(entry.entry.price) || entry.entry.price <= 0 || !Number.isFinite(entry.finalExit.price) || entry.finalExit.price <= 0
         || !Number.isFinite(entry.entry.quantity) || entry.entry.quantity <= 0 || !Number.isFinite(entry.finalExit.quantity)
         || entry.finalExit.quantity <= 0 || entry.finalExit.quantity > entry.entry.quantity
-        || Math.abs(entry.entry.gross - entry.entry.price * entry.entry.quantity) > 1e-8
-        || Math.abs(entry.finalExit.gross - entry.finalExit.price * entry.finalExit.quantity) > 1e-8
-        || entry.fee !== entry.entry.fee + entry.finalExit.fee || entry.funding !== entry.entry.funding + entry.finalExit.funding
-        || entry.slippage !== entry.entry.slippage + entry.finalExit.slippage) {
+        || !Number.isFinite(entry.entry.gross) || !Number.isFinite(entry.finalExit.gross)
+        || !Number.isFinite(entry.fee) || !Number.isFinite(entry.entry.fee) || !Number.isFinite(entry.finalExit.fee)
+        || !Number.isFinite(entry.funding) || !Number.isFinite(entry.entry.funding) || !Number.isFinite(entry.finalExit.funding)
+        || !Number.isFinite(entry.slippage) || !Number.isFinite(entry.entry.slippage) || !Number.isFinite(entry.finalExit.slippage)
+        || Math.abs(entry.entry.gross - entry.entry.price * entry.entry.quantity) > MONEY_TOLERANCE
+        || Math.abs(entry.finalExit.gross - entry.finalExit.price * entry.finalExit.quantity) > MONEY_TOLERANCE
+        || Math.abs(entry.fee - (entry.entry.fee + entry.finalExit.fee)) > MONEY_TOLERANCE
+        || Math.abs(entry.funding - (entry.entry.funding + entry.finalExit.funding)) > MONEY_TOLERANCE
+        || Math.abs(entry.slippage - (entry.entry.slippage + entry.finalExit.slippage)) > MONEY_TOLERANCE) {
         throw new Error(`BASELINE_PARITY_CLOSED_LIFECYCLE_INVALID:${entry.tradeId}`);
     }
     const positionId = `baseline:${entry.tradeId}`;

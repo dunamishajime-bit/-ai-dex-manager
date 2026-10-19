@@ -160,3 +160,15 @@ Fifth-remediation verification:
 - `npx tsc --noEmit --incremental false` — passed, exit code 0.
 - Changed-file ESLint — passed, exit code 0.
 - `git diff --check` — passed; Git reported only normal LF-to-CRLF working-copy normalization warnings.
+
+## Sixth independent-review remediation
+
+Closed lifecycle cost reconciliation now uses the same fixed `1e-8` money tolerance already used for gross reconciliation. This accepts semantically equal floating-point sums such as `0.1 + 0.2` versus `0.3`, while preserving fail-closed behavior for differences beyond the tolerance. Gross and fee/funding/slippage values are also explicitly required to be finite before reconciliation. Regression coverage fixes the positive floating-point case and rejects a `0.00000002` cost mismatch.
+
+Sixth-remediation verification:
+
+- `npx tsx --test tests/dd-reduction-runner.test.ts` — 33 tests passed, 0 failed.
+- Combined Task 1–5 DD-reduction suite — 103 tests passed, 0 failed.
+- `npx tsc --noEmit --incremental false` — passed, exit code 0.
+- Changed-file ESLint — passed, exit code 0.
+- `git diff --check` — passed; Git reported only normal LF-to-CRLF working-copy normalization warnings.

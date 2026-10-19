@@ -1096,6 +1096,82 @@ test("fails closed when a closed baseline exit precedes its entry", () => {
     assert.throws(() => replayIntegrated(source, replayConfig({ startTs, endTs: startTs })), /BASELINE_PARITY_CLOSED_LIFECYCLE_CAUSAL/);
 });
 
+test("accepts semantically equal floating-point closed lifecycle costs", () => {
+    const startTs = 1_700_000_000_000;
+    const source = replaySource([bar({ ts: startTs })], [], [{
+        sourceHash: HASH,
+        ts: startTs,
+        strategy: "V12_V4",
+        direction: "LONG",
+        symbol: "BTCUSDT",
+        requestedGross: 100,
+        acceptedGross: 100,
+        reservation: null,
+        fill: null,
+        exit: null,
+        reason: "baseline",
+        fee: 0.3,
+        funding: 0,
+        slippage: 0,
+        policyHash: HASH,
+        configHash: HASH,
+        resultHash: HASH,
+        tradeId: "closed-floating-cost",
+        entry: { ...fill(100, 1, startTs), fee: 0.1 },
+        finalExit: {
+            sourceHash: HASH,
+            ts: startTs + 1,
+            price: 101,
+            quantity: 1,
+            gross: 101,
+            fee: 0.2,
+            funding: 0,
+            slippage: 0,
+            realizedPnl: 1,
+            reason: "closed",
+        },
+    }]);
+    assert.doesNotThrow(() => replayIntegrated(source, replayConfig({ startTs, endTs: startTs + 1 })));
+});
+
+test("rejects closed lifecycle costs beyond the money precision tolerance", () => {
+    const startTs = 1_700_000_000_000;
+    const source = replaySource([bar({ ts: startTs })], [], [{
+        sourceHash: HASH,
+        ts: startTs,
+        strategy: "V12_V4",
+        direction: "LONG",
+        symbol: "BTCUSDT",
+        requestedGross: 100,
+        acceptedGross: 100,
+        reservation: null,
+        fill: null,
+        exit: null,
+        reason: "baseline",
+        fee: 0.30000002,
+        funding: 0,
+        slippage: 0,
+        policyHash: HASH,
+        configHash: HASH,
+        resultHash: HASH,
+        tradeId: "closed-cost-mismatch",
+        entry: { ...fill(100, 1, startTs), fee: 0.1 },
+        finalExit: {
+            sourceHash: HASH,
+            ts: startTs + 1,
+            price: 101,
+            quantity: 1,
+            gross: 101,
+            fee: 0.2,
+            funding: 0,
+            slippage: 0,
+            realizedPnl: 1,
+            reason: "closed",
+        },
+    }]);
+    assert.throws(() => replayIntegrated(source, replayConfig({ startTs, endTs: startTs + 1 })), /BASELINE_PARITY_CLOSED_LIFECYCLE_INVALID/);
+});
+
 test("marks all open symbols from the same timestamp snapshot", () => {
     const startTs = 1_700_000_000_000;
     const source = replaySource([
