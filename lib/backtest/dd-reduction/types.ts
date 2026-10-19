@@ -26,6 +26,13 @@ export interface SourceHash {
     bytes: number;
 }
 
+export type SourceFileKind = "production" | "candle" | "funding" | "baseline" | "candidate";
+
+export interface SourceFileSnapshot extends SourceHash {
+    kind: SourceFileKind;
+    content: string;
+}
+
 export interface ProductionSource {
     path: string;
     sha256: string;
@@ -445,6 +452,9 @@ export interface AttributionReport {
 
 export interface CanonicalSource {
     input: CanonicalSourceInput;
+    productionSha: string;
+    productionFiles: readonly SourceFileSnapshot[];
+    sourceFiles: readonly SourceFileSnapshot[];
     productionSources: readonly ProductionSource[];
     strategyConfigs: readonly StrategyConfigSource[];
     candleSeries: readonly CandleSeries[];
