@@ -49,6 +49,7 @@ function priorLineages(previous: FrozenStageSet): readonly FrozenStageLineage[] 
             policyHash: decision?.policyHash ?? policy?.policyHash ?? previous.policyHash,
             candidateId: decision?.candidateId ?? policy?.candidateId,
             candidatePolicy: decision?.candidatePolicy ?? policy ?? null,
+            decisionIndex: decision === undefined ? index : decisions.indexOf(decision),
         };
     });
 }
@@ -404,6 +405,7 @@ export function freezeAcceptedStage(previous: FrozenStageSet, decision: Acceptan
             policyHash: decision.policyHash,
             candidateId: decision.candidateId,
             candidatePolicy: null,
+            decisionIndex: decisions.length - 1,
         }];
         return {
             ...previous,
@@ -439,6 +441,7 @@ export function freezeAcceptedStage(previous: FrozenStageSet, decision: Acceptan
         policyHash: decision.policyHash,
         candidateId: decision.candidateId,
         candidatePolicy: decision.candidatePolicy,
+        decisionIndex: decisions.length - 1,
     }];
     return {
         ...previous,

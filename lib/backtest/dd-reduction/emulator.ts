@@ -121,6 +121,7 @@ export interface ReplayLedgers {
     readonly rejectionCount: number;
     readonly preemption: PreemptionSummary;
     readonly preemptionCount: null;
+    readonly baselineTradeLedger: readonly BaselineLedgerEntry[];
 }
 
 export type IntegratedReplayResult = IntegratedReplay & ReplayLedgers;
@@ -540,6 +541,23 @@ function accountingReconciliation(state: PortfolioRuntimeState, prices: Readonly
     };
 }
 
+function replayBaselineTradeLedger(source: CanonicalSource, positions: readonly PositionLifecycle[]): readonly BaselineLedgerEntry[] {
+    const byId = new Map(positions.filter((position) => position.positionId.startsWith("baseline:")).map((position) => [position.positionId.slice("baseline:".length), position]));
+    return source.baselineLedger.flatMap((entry) => {
+        if (entry.finalExit !== null) return [entry];
+        const position = byId.get(entry.tradeId);
+        if (position === undefined) return [];
+        return [{
+            ...entry,
+            acceptedGross: position.acceptedGross,
+            fee: position.fee,
+            funding: position.funding,
+            slippage: position.slippage,
+            finalExit: position.exit,
+        }];
+    });
+}
+
 function protectionLedgerEntries(position: PositionLifecycleWithProtection, decision: ReturnType<typeof applyProtectionPolicy>): readonly ProtectionLedgerEntry[] {
     return decision.events.map((event) => ({
         ...event,
@@ -760,6 +778,7 @@ export function replayIntegrated(source: CanonicalSource, config: ReplayConfigWi
         rejectionCount,
         preemption: { supported: false, count: null, reason: "PREEMPTION_UNSUPPORTED_IN_TASK_2" },
         preemptionCount: null,
+        baselineTradeLedger: replayBaselineTradeLedger(source, state.positions),
     };
     return result;
 }

@@ -386,6 +386,7 @@ export interface ProductionPolicy {
     strategyGrossCap?: number;
     perStrategyGrossCaps?: Readonly<Record<string, number>>;
     perSymbolGrossCaps?: Readonly<Record<string, number>>;
+    capManifestHash?: string;
 }
 
 export interface CandidatePolicy extends ProductionPolicy {
@@ -482,6 +483,25 @@ export interface FrozenStageLineage {
     policyHash: string;
     candidateId?: string;
     candidatePolicy?: CandidatePolicy | null;
+    decisionIndex: number;
+}
+
+export interface ProtectionReadbackOrder {
+    readonly clientOrderId: string;
+    readonly status: "READ_BACK";
+    readonly quantity: number;
+    readonly price?: number;
+}
+
+export interface ProtectionReadbackEvidence {
+    readonly sourceHash: string;
+    readonly configHash: string;
+    readonly frozenStageHash: string;
+    readonly stageId: StageId;
+    readonly candidateId: string;
+    readonly available: boolean;
+    readonly orders: readonly ProtectionReadbackOrder[];
+    readonly lineageHash: string;
 }
 
 export interface FrozenStageSet {

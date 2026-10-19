@@ -79,12 +79,31 @@ The causal emulator now accepts an explicit strategy-specific protection policy 
 
 Remediation verification:
 
-- `npx tsx --test tests/dd-reduction-runner.test.ts` — 23 tests passed, 0 failed.
-- Combined Task 1–5 DD-reduction suite — 89 tests passed, 0 failed.
+- `npx tsx --test tests/dd-reduction-runner.test.ts` — 29 tests passed, 0 failed.
+- Combined Task 1–5 DD-reduction suite — 95 tests passed, 0 failed.
 - `npx tsc --noEmit --incremental false` — passed, exit code 0.
 - Changed-file ESLint — passed, exit code 0.
 - `git diff --check` — passed, exit code 0.
 
 Latest remediation verification covers two accepted stages plus reload, `NOT_APPLICABLE` then accepted plus reload, substituted evaluation windows, full canonical parity fields, concurrent same-run artifact creation, manual-review propagation, and differing prior/current cap fixtures.
 
-Remediation commits: `4239aa2e` (`fix: close sequential runner lineage and parity gaps`), followed by the current local repair commit.
+## Second independent-review remediation
+
+The second review found six additional gaps in the first remediation. The runner now also:
+
+1. Persists every decision, including rejected attempts, and binds an accepted or `NOT_APPLICABLE` frozen lineage to an explicit `decisionIndex`; reload validation therefore preserves rejected-then-accepted retry history instead of assuming decision-array and lineage-array positions match.
+2. Builds a replay-side complete baseline trade ledger, including closed entries and current projections for open entries, and requires its canonical identity to match the production baseline ledger before baseline or stage acceptance.
+3. Rejects every non-empty legacy frozen policy set that lacks normalized `stageLineages` and `aggregateHash`; only an empty initial frozen state can use the legacy shape.
+4. Loads and validates protection-order read-back evidence against source, configuration, frozen-stage, stage, candidate, and evidence hashes. A filled candidate cannot replay without bound positive read-back evidence; missing read-back is covered by a negative regression test.
+5. Creates an authoritative source-level cap manifest for aggregate, strategy, and symbol limits, rejects conflicting declarations, and validates frozen policy caps against that manifest rather than allowing last-writer-wins behavior.
+6. Adds a multi-strategy, multi-symbol lost-prior-logic regression proving attribution is matched by strategy and symbol and does not cross-contaminate PnL.
+
+Second-remediation verification:
+
+- `npx tsx --test tests/dd-reduction-runner.test.ts` — 29 tests passed, 0 failed.
+- Combined Task 1–5 DD-reduction suite — 95 tests passed, 0 failed.
+- `npx tsc --noEmit --incremental false` — passed, exit code 0.
+- Changed-file ESLint, including emulator and policy modules — passed, exit code 0.
+- `git diff --check` — passed; Git reported only normal LF-to-CRLF working-copy normalization warnings.
+
+Remediation commits: `4239aa2e` (`fix: close sequential runner lineage and parity gaps`), followed by this second-pass local repair commit.

@@ -11,9 +11,11 @@ import type {
     CanonicalSource,
     Direction,
     FrozenStageSet,
+    BaselineLedgerEntry,
     JsonObject,
     JsonValue,
     ProductionPolicy,
+    ProtectionReadbackEvidence,
     StageId,
     StageResult,
 } from "../../lib/backtest/dd-reduction/types";
@@ -43,6 +45,8 @@ export interface RunnerArgs {
     readonly evaluationEvidenceHash?: string;
     readonly evaluationEvidence?: EvaluationEvidence;
     readonly executionEvents?: readonly ExecutionLifecycleEvent[];
+    readonly protectionReadbackPath?: string;
+    readonly protectionReadbackEvidence?: ProtectionReadbackEvidence;
 }
 
 export interface EvaluationEvidence {
@@ -61,6 +65,52 @@ export interface EvaluationEvidence {
     readonly gateHash: string;
     readonly lineageHash: string;
     readonly metrics: Readonly<Record<string, number>>;
+}
+
+export function hashProtectionReadbackEvidence(evidence: ProtectionReadbackEvidence): string {
+    return hashJson({
+        available: evidence.available,
+        candidateId: evidence.candidateId,
+        configHash: evidence.configHash,
+        frozenStageHash: evidence.frozenStageHash,
+        orders: evidence.orders as unknown as JsonValue,
+        sourceHash: evidence.sourceHash,
+        stageId: evidence.stageId,
+    });
+}
+
+export function validateProtectionReadback(evidence: ProtectionReadbackEvidence, expected: {
+    readonly sourceHash: string;
+    readonly configHash: string;
+    readonly frozenStageHash: string;
+    readonly stageId: StageId;
+    readonly candidateId: string;
+    readonly requireOrder: boolean;
+}): void {
+    if (!evidence.available || evidence.sourceHash !== expected.sourceHash || evidence.configHash !== expected.configHash
+        || evidence.frozenStageHash !== expected.frozenStageHash || evidence.stageId !== expected.stageId || evidence.candidateId !== expected.candidateId
+        || hashProtectionReadbackEvidence(evidence) !== evidence.lineageHash) throw new Error("PROTECTION_READBACK_INVALID_LINEAGE");
+    if (evidence.orders.some((order) => order.status !== "READ_BACK" || order.clientOrderId.length === 0 || !Number.isFinite(order.quantity) || order.quantity <= 0
+        || (order.price !== undefined && (!Number.isFinite(order.price) || order.price <= 0)))) throw new Error("PROTECTION_READBACK_INVALID");
+    if (expected.requireOrder && !evidence.orders.some((order) => order.clientOrderId === expected.candidateId)) throw new Error("PROTECTION_READBACK_ORDER_MISSING");
+}
+
+export async function loadProtectionReadback(args: RunnerArgs): Promise<ProtectionReadbackEvidence | null> {
+    if (args.protectionReadbackEvidence !== undefined) return args.protectionReadbackEvidence;
+    if (args.protectionReadbackPath === undefined) return null;
+    const parsed = JSON.parse(await readFile(args.protectionReadbackPath, "utf8")) as JsonValue;
+    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) throw new Error("PROTECTION_READBACK_INVALID");
+    const object = parsed as JsonObject;
+    const ordersValue = object.orders;
+    if (typeof object.sourceHash !== "string" || typeof object.configHash !== "string" || typeof object.frozenStageHash !== "string" || typeof object.stageId !== "string"
+        || typeof object.candidateId !== "string" || typeof object.available !== "boolean" || !Array.isArray(ordersValue) || typeof object.lineageHash !== "string") throw new Error("PROTECTION_READBACK_INVALID");
+    const orders = ordersValue.map((value) => {
+        if (typeof value !== "object" || value === null || Array.isArray(value)) throw new Error("PROTECTION_READBACK_INVALID");
+        const order = value as JsonObject;
+        if (typeof order.clientOrderId !== "string" || order.status !== "READ_BACK" || typeof order.quantity !== "number") throw new Error("PROTECTION_READBACK_INVALID");
+        return { clientOrderId: order.clientOrderId, status: "READ_BACK" as const, quantity: order.quantity, price: typeof order.price === "number" ? order.price : undefined };
+    });
+    return { sourceHash: object.sourceHash, configHash: object.configHash, frozenStageHash: object.frozenStageHash, stageId: object.stageId as StageId, candidateId: object.candidateId, available: object.available, orders, lineageHash: object.lineageHash };
 }
 
 export interface RunIdInput {
@@ -194,6 +244,7 @@ export function parseRunnerArgs(args: readonly string[] = process.argv.slice(2))
         fundingSource,
         frozenStagePath: args.includes("--frozen-stage") ? resolve(requiredFlag(args, "--frozen-stage")) : undefined,
         evaluationEvidencePath: args.includes("--evaluation-evidence") ? resolve(requiredFlag(args, "--evaluation-evidence")) : undefined,
+        protectionReadbackPath: args.includes("--protection-readback") ? resolve(requiredFlag(args, "--protection-readback")) : undefined,
     };
     if (result.candidate.trim().length === 0) throw new Error("--candidate must be non-empty");
     return result;
@@ -264,6 +315,52 @@ function requiredConfigString(config: JsonObject, key: string): string {
     return value;
 }
 
+export interface CanonicalCapManifest {
+    readonly totalGross: number;
+    readonly cryptoGross: number;
+    readonly strategyGross: number;
+    readonly perStrategy: Readonly<Record<string, number>>;
+    readonly perSymbol: Readonly<Record<string, number>>;
+    readonly hash: string;
+}
+
+function capNumber(config: JsonObject, key: string, fallback: number): number {
+    return jsonNumber(config, key) ?? fallback;
+}
+
+export function buildSourceCapManifest(source: CanonicalSource): CanonicalCapManifest {
+    const first = source.strategyConfigs[0]?.config;
+    if (first === undefined) throw new Error("SOURCE_ERROR: production cap manifest is absent");
+    const grossFallback = requiredConfigNumber(first, "grossCap");
+    const totalGross = capNumber(first, "totalGrossCap", capNumber(first, "aggregateGrossCap", grossFallback));
+    const cryptoGross = capNumber(first, "cryptoGrossCap", totalGross);
+    const strategyGross = capNumber(first, "strategyGrossCap", requiredConfigNumber(first, "sharedRiskCap"));
+    const perStrategy: Record<string, number> = {};
+    const perSymbol: Record<string, number> = {};
+    for (const entry of source.strategyConfigs) {
+        const config = entry.config;
+        const explicitTotal = jsonNumber(config, "totalGrossCap") ?? jsonNumber(config, "aggregateGrossCap");
+        const explicitCrypto = jsonNumber(config, "cryptoGrossCap");
+        const explicitStrategy = jsonNumber(config, "strategyGrossCap");
+        if ((explicitTotal !== null && explicitTotal !== totalGross) || (explicitCrypto !== null && explicitCrypto !== cryptoGross)) {
+            throw new Error(`SOURCE_ERROR: conflicting aggregate cap manifest for ${entry.strategy}`);
+        }
+        const strategyCap = explicitStrategy ?? requiredConfigNumber(config, "sharedRiskCap");
+        if (perStrategy[entry.strategy] !== undefined && perStrategy[entry.strategy] !== strategyCap) throw new Error(`SOURCE_ERROR: conflicting strategy cap manifest for ${entry.strategy}`);
+        perStrategy[entry.strategy] = strategyCap;
+        for (const [symbol, cap] of Object.entries(jsonNumberRecord(config, "perSymbolGrossCaps") ?? {})) {
+            if (perSymbol[symbol] !== undefined && perSymbol[symbol] !== cap) throw new Error(`SOURCE_ERROR: conflicting symbol cap manifest for ${symbol}`);
+            perSymbol[symbol] = cap;
+        }
+        for (const [strategy, cap] of Object.entries(jsonNumberRecord(config, "perStrategyGrossCaps") ?? {})) {
+            if (perStrategy[strategy] !== undefined && perStrategy[strategy] !== cap) throw new Error(`SOURCE_ERROR: conflicting strategy cap manifest for ${strategy}`);
+            perStrategy[strategy] = cap;
+        }
+    }
+    const manifest = { totalGross, cryptoGross, strategyGross, perStrategy, perSymbol };
+    return { ...manifest, hash: hashJson(manifest as unknown as JsonValue) };
+}
+
 export function policyFromSource(source: CanonicalSource, stage: StageId): ProductionPolicy {
     const strategy = strategyForStage(stage);
     const strategyConfig = source.strategyConfigs.find((entry) => entry.strategy === strategy);
@@ -281,6 +378,7 @@ export function policyFromSource(source: CanonicalSource, stage: StageId): Produ
     const totalGrossCap = jsonNumber(strategyConfig.config, "totalGrossCap") ?? jsonNumber(strategyConfig.config, "aggregateGrossCap") ?? grossCap;
     const cryptoGrossCap = jsonNumber(strategyConfig.config, "cryptoGrossCap") ?? totalGrossCap;
     const strategyGrossCap = jsonNumber(strategyConfig.config, "strategyGrossCap") ?? sharedRiskCap;
+    const capManifest = buildSourceCapManifest(source);
     const base: ProductionPolicy = {
         sourceHash: source.manifest?.sourceSha ?? source.productionSha,
         configHash: strategyConfig.configHash,
@@ -309,6 +407,7 @@ export function policyFromSource(source: CanonicalSource, stage: StageId): Produ
         strategyGrossCap,
         perStrategyGrossCaps: jsonNumberRecord(strategyConfig.config, "perStrategyGrossCaps"),
         perSymbolGrossCaps: jsonNumberRecord(strategyConfig.config, "perSymbolGrossCaps"),
+        capManifestHash: capManifest.hash,
     };
     return { ...base, policyHash: hashJson(base as unknown as JsonObject) };
 }
@@ -369,9 +468,6 @@ function canonicalLedgerEntry(value: unknown): JsonObject {
         fee: ledgerNumber(object.fee),
         funding: ledgerNumber(object.funding),
         slippage: ledgerNumber(object.slippage),
-        policyHash: typeof object.policyHash === "string" ? object.policyHash : null,
-        configHash: typeof object.configHash === "string" ? object.configHash : null,
-        resultHash: typeof object.resultHash === "string" ? object.resultHash : null,
     };
 }
 
@@ -379,7 +475,7 @@ function canonicalLedgerHash(entries: readonly unknown[]): string {
     return hashJson([...entries].map(canonicalLedgerEntry).sort((left, right) => String(left.tradeId).localeCompare(String(right.tradeId))) as unknown as JsonValue);
 }
 
-export function evaluateBaselineParity(source: CanonicalSource, policy: ProductionPolicy, replay: { readonly positions: readonly { readonly positionId: string; readonly acceptedGross: number }[] }): BaselineParityCheck {
+export function evaluateBaselineParity(source: CanonicalSource, policy: ProductionPolicy, replay: { readonly positions: readonly { readonly positionId: string; readonly acceptedGross: number }[]; readonly baselineTradeLedger?: readonly BaselineLedgerEntry[] }): BaselineParityCheck {
     const ledgerHash = hashJson(source.baselineLedger as unknown as JsonValue);
     const evidence = baselineParityObject(source, policy);
     const expectedTradeCount = source.baselineLedger.length;
@@ -396,6 +492,9 @@ export function evaluateBaselineParity(source: CanonicalSource, policy: Producti
     const productionEntries = evidence?.entries ?? evidence?.ledger;
     if (!Array.isArray(productionEntries)) mismatches.push("production.baselineParity.entries");
     else if (canonicalLedgerHash(source.baselineLedger) !== canonicalLedgerHash(productionEntries)) mismatches.push("canonicalLedger");
+    const replayLedger = replay.baselineTradeLedger;
+    if (!Array.isArray(replayLedger)) mismatches.push("replay.completeLedgerMissing");
+    else if (canonicalLedgerHash(source.baselineLedger) !== canonicalLedgerHash(replayLedger)) mismatches.push("replay.completeLedger");
     if (actualOpen.length !== expectedOpen.length) mismatches.push("replay.openTradeCount");
     if (actualOpenAcceptedGross !== expectedOpenAcceptedGross) mismatches.push("replay.openAcceptedGross");
     const expectedIds = expectedOpen.map((entry) => `baseline:${entry.tradeId}`).sort();
@@ -522,6 +621,7 @@ function replayConfig(args: RunnerArgs, source: CanonicalSource, policy: Product
         perStrategyCaps,
         perSymbolCaps,
         executionEvents: args.executionEvents,
+        protectionReadback: args.protectionReadbackEvidence?.available === true,
     };
 }
 
@@ -588,6 +688,19 @@ export async function runBaseline(args: RunnerArgs): Promise<StageResult> {
         if (manifest === undefined) throw new Error("SOURCE_ERROR: canonical source manifest is absent");
         const hashes = resultHashes(args, manifest.sourceSha);
         const policy = policyFromSource(source, args.stage);
+        const protectionReadback = await loadProtectionReadback(args);
+        const requiresReadback = source.candidateEvents.some((candidate) => candidate.fill !== null);
+        if (requiresReadback && protectionReadback === null) throw new Error("PROTECTION_READBACK_UNAVAILABLE");
+        if (protectionReadback !== null) {
+            validateProtectionReadback(protectionReadback, {
+                sourceHash: manifest.sourceSha,
+                configHash: hashes.configHash,
+                frozenStageHash: hashJson({ baseline: true, sourceHash: manifest.sourceSha, configHash: hashes.configHash }),
+                stageId: args.stage,
+                candidateId: args.candidate,
+                requireOrder: requiresReadback,
+            });
+        }
         if (source.baselineLedger.length === 0) {
             return persistResult(args, failedResult(args, "BASELINE_PARITY_BLOCKED", "BASELINE_PARITY_BLOCKED: baseline ledger evidence is absent", manifest.sourceSha), {
                 manifest,
@@ -595,7 +708,7 @@ export async function runBaseline(args: RunnerArgs): Promise<StageResult> {
                 parity: "ABSENT",
             });
         }
-        const replay = replayIntegrated(source, replayConfig(args, source, policy, hashes.configHash));
+        const replay = replayIntegrated(source, replayConfig({ ...args, protectionReadbackEvidence: protectionReadback ?? undefined }, source, policy, hashes.configHash));
         assertReplaySafety(replay);
         if (!replay.accountingReconciliation.balanced) throw new Error("ACCOUNTING_FAILURE: replay reconciliation is not balanced");
         const parity = evaluateBaselineParity(source, policy, replay);
@@ -662,7 +775,8 @@ function parseFrozenStage(value: JsonValue, path: string): FrozenStageSet {
             if (typeof entry !== "object" || entry === null || Array.isArray(entry)) throw new Error(`FROZEN_STAGE_LINEAGE_INVALID: ${path} lineage ${index}`);
             const lineage = entry as JsonObject;
             if (lineage.stageId !== completedStageIds[index] || (lineage.status !== "ACCEPTED" && lineage.status !== "NOT_APPLICABLE")
-                || !isHash(lineage.sourceHash) || !isHash(lineage.configHash) || !isHash(lineage.resultHash) || !isHash(lineage.policyHash)) {
+                || !isHash(lineage.sourceHash) || !isHash(lineage.configHash) || !isHash(lineage.resultHash) || !isHash(lineage.policyHash)
+                || typeof lineage.decisionIndex !== "number" || !Number.isInteger(lineage.decisionIndex) || lineage.decisionIndex < 0) {
                 throw new Error(`FROZEN_STAGE_LINEAGE_INVALID: ${path} lineage ${index}`);
             }
             if (lineage.status === "ACCEPTED") {
@@ -683,14 +797,14 @@ function parseFrozenStage(value: JsonValue, path: string): FrozenStageSet {
         if (policies.length !== accepted.length) throw new Error(`FROZEN_STAGE_INVALID: ${path} must contain one policy for every accepted stage`);
         if (completedStageIds.length > 0 && (!Array.isArray(object.stageDecisions) || object.stageDecisions.length < completedStageIds.length)) throw new Error(`FROZEN_STAGE_METADATA: ${path} stageDecisions are required for completed stages`);
         if (Array.isArray(object.stageDecisions)) {
-            for (const [index, decisionValue] of object.stageDecisions.entries()) {
-                const lineage = lineages[index];
-                if (index >= completedStageIds.length) continue;
-                if (typeof decisionValue !== "object" || decisionValue === null || Array.isArray(decisionValue) || lineage === undefined) throw new Error(`FROZEN_STAGE_DECISION_INVALID: ${path} decision ${index}`);
+            for (const [index, lineage] of lineages.entries()) {
+                const decisionIndex = lineage.decisionIndex as number;
+                const decisionValue = (object.stageDecisions as readonly JsonValue[])[decisionIndex];
+                if (decisionValue === undefined || typeof decisionValue !== "object" || decisionValue === null || Array.isArray(decisionValue)) throw new Error(`FROZEN_STAGE_DECISION_INVALID: ${path} decision ${decisionIndex}`);
                 const decision = decisionValue as JsonObject;
-                if (decision.stageId !== lineage.stageId || decision.status !== lineage.status || decision.sourceHash !== lineage.sourceHash || decision.configHash !== lineage.configHash || decision.resultHash !== lineage.resultHash || decision.policyHash !== lineage.policyHash) throw new Error(`FROZEN_STAGE_DECISION_INVALID: ${path} decision ${index} lineage mismatch`);
-                if (lineage.status === "ACCEPTED" && (typeof decision.candidatePolicy !== "object" || decision.candidatePolicy === null || Array.isArray(decision.candidatePolicy))) throw new Error(`FROZEN_STAGE_DECISION_INVALID: ${path} accepted decision ${index} policy missing`);
-                if (lineage.status === "NOT_APPLICABLE" && decision.candidatePolicy !== null && decision.candidatePolicy !== undefined) throw new Error(`FROZEN_STAGE_DECISION_INVALID: ${path} NOT_APPLICABLE decision ${index} carries a policy`);
+                if (decision.stageId !== lineage.stageId || decision.status !== lineage.status || decision.sourceHash !== lineage.sourceHash || decision.configHash !== lineage.configHash || decision.resultHash !== lineage.resultHash || decision.policyHash !== lineage.policyHash) throw new Error(`FROZEN_STAGE_DECISION_INVALID: ${path} decision ${decisionIndex} lineage mismatch`);
+                if (lineage.status === "ACCEPTED" && (typeof decision.candidatePolicy !== "object" || decision.candidatePolicy === null || Array.isArray(decision.candidatePolicy))) throw new Error(`FROZEN_STAGE_DECISION_INVALID: ${path} accepted decision ${decisionIndex} policy missing`);
+                if (lineage.status === "NOT_APPLICABLE" && decision.candidatePolicy !== null && decision.candidatePolicy !== undefined) throw new Error(`FROZEN_STAGE_DECISION_INVALID: ${path} NOT_APPLICABLE decision ${decisionIndex} carries a policy`);
             }
         }
         const aggregateHash = object.aggregateHash;
@@ -706,16 +820,7 @@ function parseFrozenStage(value: JsonValue, path: string): FrozenStageSet {
     }
     const normalizedStageIds = stageIds.filter((entry): entry is StageId => typeof entry === "string" && (SEQUENTIAL_STAGES as readonly string[]).includes(entry));
     if (normalizedStageIds.length !== stageIds.length || normalizedStageIds.some((entry, index) => entry !== SEQUENTIAL_STAGES[index])) throw new Error(`FROZEN_STAGE_INVALID: ${path} is not a cumulative sequential prefix`);
-    if (policies.length !== stageIds.length) throw new Error(`FROZEN_STAGE_INVALID: ${path} must contain one policy for every accepted stage`);
-    for (const [index, policyValue] of policies.entries()) {
-        if (typeof policyValue !== "object" || policyValue === null || Array.isArray(policyValue)) throw new Error(`FROZEN_STAGE_POLICY_INVALID: ${path} policy ${index} is not an object`);
-        const policy = policyValue as JsonObject;
-        const policyStage = policy.stageId;
-        if (typeof policyStage !== "string" || policyStage !== normalizedStageIds[index] || policy.strategy !== strategyForStage(policyStage as StageId)
-            || (policy.direction !== "LONG" && policy.direction !== "SHORT") || !stageAcceptsDirection(policyStage as StageId, policy.direction)
-            || policy.applicability !== "AVAILABLE" || typeof policy.candidateId !== "string" || policy.candidateId.length === 0
-            || typeof policy.policyHash !== "string" || policy.policyHash.length === 0) throw new Error(`FROZEN_STAGE_POLICY_INVALID: ${path} policy ${index} lineage or metadata mismatch`);
-    }
+    if (normalizedStageIds.length > 0 || policies.length > 0 || completedStageIds.length > 0) throw new Error(`FROZEN_STAGE_LINEAGE_REQUIRED: ${path} non-empty legacy frozen sets require stageLineages and aggregateHash`);
     return { sourceHash, configHash, resultHash, policyHash, stageIds: normalizedStageIds, policies: policies as unknown as FrozenStageSet["policies"], reason, completedStageIds: normalizedStageIds, stageDecisions: Array.isArray(object.stageDecisions) ? object.stageDecisions as unknown as FrozenStageSet["stageDecisions"] : undefined };
 }
 

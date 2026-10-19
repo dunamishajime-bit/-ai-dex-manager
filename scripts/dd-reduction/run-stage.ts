@@ -20,13 +20,18 @@ import {
     assertRunnerOutputRoot,
     buildConfigHash,
     buildRunId,
+    buildSourceCapManifest,
     evaluateBaselineParity,
+    hashJson,
     hashEvaluationEvidence,
     hashFrozenStageSet,
     loadFrozenStageSet,
+    loadProtectionReadback,
     parseRunnerArgs,
     policyFromSource,
+    validateProtectionReadback,
     type EvaluationEvidence,
+    type CanonicalCapManifest,
     type RunnerArgs,
     writeFrozenStageSet,
 } from "./run-baseline";
@@ -51,15 +56,52 @@ export function buildReplayPolicySet(frozen: FrozenStageSet, current: Production
     return [...policies.values()];
 }
 
+function policyCapManifest(policies: readonly ProductionPolicy[]): CanonicalCapManifest {
+    const first = policies[0];
+    if (first === undefined) throw new Error("SOURCE_ERROR: replay cap manifest is absent");
+    const totalGross = first.totalGrossCap ?? first.aggregateGrossCap ?? first.grossCap;
+    const cryptoGross = first.cryptoGrossCap ?? totalGross;
+    const strategyGross = first.strategyGrossCap ?? first.sharedRiskCap;
+    const perStrategy: Record<string, number> = {};
+    const perSymbol: Record<string, number> = {};
+    for (const policy of policies) {
+        const policyTotal = policy.totalGrossCap ?? policy.aggregateGrossCap ?? policy.grossCap;
+        const policyCrypto = policy.cryptoGrossCap ?? policyTotal;
+        if (policyTotal !== totalGross || policyCrypto !== cryptoGross) throw new Error("SOURCE_ERROR: conflicting aggregate cap declarations");
+        const policyStrategy = policy.strategyGrossCap ?? policy.sharedRiskCap;
+        if (perStrategy[policy.strategy] !== undefined && perStrategy[policy.strategy] !== policyStrategy) throw new Error(`SOURCE_ERROR: conflicting strategy cap declaration for ${policy.strategy}`);
+        perStrategy[policy.strategy] = policyStrategy;
+        for (const [strategy, cap] of Object.entries(policy.perStrategyGrossCaps ?? {})) {
+            if (perStrategy[strategy] !== undefined && perStrategy[strategy] !== cap) throw new Error(`SOURCE_ERROR: conflicting strategy cap declaration for ${strategy}`);
+            perStrategy[strategy] = cap;
+        }
+        for (const [symbol, cap] of Object.entries(policy.perSymbolGrossCaps ?? {})) {
+            if (perSymbol[symbol] !== undefined && perSymbol[symbol] !== cap) throw new Error(`SOURCE_ERROR: conflicting symbol cap declaration for ${symbol}`);
+            perSymbol[symbol] = cap;
+        }
+    }
+    const manifest = { totalGross, cryptoGross, strategyGross, perStrategy, perSymbol };
+    return { ...manifest, hash: hashJson(manifest as unknown as JsonValue) };
+}
+
+function assertPolicyCaps(policies: readonly ProductionPolicy[], manifest: CanonicalCapManifest): void {
+    for (const policy of policies) {
+        if (policy.capManifestHash !== undefined && policy.capManifestHash !== manifest.hash) throw new Error("SOURCE_ERROR: policy cap manifest hash mismatch");
+        const total = policy.totalGrossCap ?? policy.aggregateGrossCap ?? policy.grossCap;
+        const crypto = policy.cryptoGrossCap ?? total;
+        const strategy = policy.strategyGrossCap ?? policy.sharedRiskCap;
+        if (total !== manifest.totalGross || crypto !== manifest.cryptoGross || strategy !== manifest.perStrategy[policy.strategy]) throw new Error(`SOURCE_ERROR: policy cap declaration is not authoritative for ${policy.strategy}`);
+        for (const [name, cap] of Object.entries(policy.perStrategyGrossCaps ?? {})) if (manifest.perStrategy[name] !== cap) throw new Error(`SOURCE_ERROR: policy strategy cap mismatch for ${name}`);
+        for (const [name, cap] of Object.entries(policy.perSymbolGrossCaps ?? {})) if (manifest.perSymbol[name] !== cap) throw new Error(`SOURCE_ERROR: policy symbol cap mismatch for ${name}`);
+    }
+}
+
 export function buildReplayConfig(args: RunnerArgs, source: CanonicalSource, frozen: FrozenStageSet, policy: ProductionPolicy, configHash: string): ReplayConfigWithRuntime {
     const policies = buildReplayPolicySet(frozen, policy);
-    const perStrategyCaps: Record<string, number> = {};
-    const perSymbolCaps: Record<string, number> = {};
-    for (const entry of policies) {
-        perStrategyCaps[entry.strategy] = entry.strategyGrossCap ?? entry.sharedRiskCap;
-        for (const [symbol, cap] of Object.entries(entry.perSymbolGrossCaps ?? {})) perSymbolCaps[symbol] = cap;
-        for (const [strategy, cap] of Object.entries(entry.perStrategyGrossCaps ?? {})) perStrategyCaps[strategy] = cap;
-    }
+    const manifest = source.strategyConfigs.length > 0 ? buildSourceCapManifest(source) : policyCapManifest(policies);
+    assertPolicyCaps(policies, manifest);
+    const perStrategyCaps = manifest.perStrategy;
+    const perSymbolCaps = manifest.perSymbol;
     return {
         sourceHash: source.manifest?.sourceSha ?? source.productionSha,
         configHash,
@@ -84,15 +126,16 @@ export function buildReplayConfig(args: RunnerArgs, source: CanonicalSource, fro
         })),
         directionPolicies: directionPolicies(policy),
         caps: {
-            totalGross: policy.totalGrossCap ?? policy.aggregateGrossCap ?? policy.grossCap,
-            cryptoGross: policy.cryptoGrossCap ?? policy.totalGrossCap ?? policy.aggregateGrossCap ?? policy.grossCap,
-            strategyGross: policy.strategyGrossCap ?? policy.sharedRiskCap,
+            totalGross: manifest.totalGross,
+            cryptoGross: manifest.cryptoGross,
+            strategyGross: manifest.perStrategy[policy.strategy] ?? manifest.strategyGross,
             perStrategy: perStrategyCaps,
             perSymbol: perSymbolCaps,
         },
         perStrategyCaps,
         perSymbolCaps,
         executionEvents: args.executionEvents,
+        protectionReadback: args.protectionReadbackEvidence?.available === true,
     };
 }
 
@@ -253,7 +296,13 @@ export function assertFrozenStageReady(frozen: FrozenStageSet, stage: StageId): 
                 || !stageAcceptsDirection(policy.stageId, policy.direction) || policy.applicability !== "AVAILABLE"
                 || policy.sourceHash !== lineage.sourceHash || policy.configHash !== lineage.configHash || policy.resultHash !== lineage.resultHash || policy.policyHash !== lineage.policyHash;
         })) throw new Error("FROZEN_STAGE_POLICY_INVALID: policy lineage is incomplete");
+        if (frozen.stageLineages.some((lineage) => {
+            const decision = frozen.stageDecisions?.[lineage.decisionIndex];
+            return decision === undefined || decision.stageId !== lineage.stageId || decision.status !== lineage.status
+                || decision.sourceHash !== lineage.sourceHash || decision.configHash !== lineage.configHash || decision.resultHash !== lineage.resultHash || decision.policyHash !== lineage.policyHash;
+        })) throw new Error("FROZEN_STAGE_DECISION_INVALID: stage decision does not match lineage");
     } else {
+        if (frozen.stageIds.length > 0 || frozen.policies.length > 0 || completed.length > 0) throw new Error("FROZEN_STAGE_LINEAGE_REQUIRED: non-empty frozen sets require stageLineages");
         if (frozen.stageIds.some((entry, index) => entry !== SEQUENTIAL_STAGES.filter((stageId) => completed.includes(stageId))[index])) throw new Error("FROZEN_STAGE_METADATA: accepted stage prefix mismatch");
         if (frozen.policies.length !== frozen.stageIds.length) throw new Error("FROZEN_STAGE_METADATA: policy count does not match accepted stages");
         if (frozen.policies.some((policy, index) => policy.stageId !== frozen.stageIds[index]
@@ -328,8 +377,20 @@ export async function runStage(args: RunnerArgs): Promise<StageResult> {
     const frozenStageHash = hashFrozenStageSet(frozen);
     const evaluationConfigHash = buildEvaluationConfigHash(args, sourceHash, frozenStageHash);
     const evaluationGateHash = buildEvaluationGateHash(sourceHash, evaluationConfigHash, currentPolicy.policyHash, args.startTs);
+    const protectionReadback = await loadProtectionReadback(args);
+    const requiresReadback = source.candidateEvents.some((candidate) => candidate.fill !== null);
+    if (selected.applicability === "AVAILABLE" && requiresReadback && protectionReadback === null) throw new Error("PROTECTION_READBACK_UNAVAILABLE");
+    if (protectionReadback !== null) validateProtectionReadback(protectionReadback, {
+        sourceHash,
+        configHash: evaluationConfigHash,
+        frozenStageHash,
+        stageId: args.stage,
+        candidateId: args.candidate,
+        requireOrder: requiresReadback,
+    });
     const identityArgs: RunnerArgs = {
         ...args,
+        protectionReadbackEvidence: protectionReadback ?? undefined,
         frozenStageHash,
         evaluationEvidenceHash: evidence === null ? "MISSING" : hashEvaluationEvidence(evidence),
     };
@@ -339,7 +400,8 @@ export async function runStage(args: RunnerArgs): Promise<StageResult> {
     const candidateLineage = selected.applicability === "AVAILABLE"
         ? { ...selected, sourceHash, configHash, resultHash: runId }
         : null;
-    const baselineReplay = replayFor(args, source, frozen, baselineLineage, configHash);
+    const replayArgs = { ...args, protectionReadbackEvidence: protectionReadback ?? undefined };
+    const baselineReplay = replayFor(replayArgs, source, frozen, baselineLineage, configHash);
     validateReplayBoundary(baselineReplay, args.startTs, args.endTs);
     const baselineMetrics = replayMetrics(baselineReplay, args.initialEquity);
     if (!baselineReplay.accountingReconciliation.balanced) throw new Error("ACCOUNTING_FAILURE: baseline replay reconciliation is not balanced");
@@ -403,7 +465,7 @@ export async function runStage(args: RunnerArgs): Promise<StageResult> {
     }
 
     if (candidateLineage === null) throw new Error("CANDIDATE_POLICY_MISSING");
-    const candidateReplay = replayFor(args, source, frozen, candidateLineage, configHash);
+    const candidateReplay = replayFor(replayArgs, source, frozen, candidateLineage, configHash);
     validateReplayBoundary(candidateReplay, args.startTs, args.endTs);
     if (!candidateReplay.accountingReconciliation.balanced) throw new Error("ACCOUNTING_FAILURE: candidate replay reconciliation is not balanced");
     const baselineSummary: BaselineSummary = {

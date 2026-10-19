@@ -5,23 +5,26 @@ import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
 
-import { canonicalDirectorySha } from "../lib/backtest/dd-reduction/source";
+import { canonicalDirectorySha, loadCanonicalSource } from "../lib/backtest/dd-reduction/source";
 import {
     assertRunnerOutputRoot,
     buildConfigHash,
     buildRunId,
     hashEvaluationEvidence,
     hashFrozenStageSet,
+    hashProtectionReadbackEvidence,
     hashJson,
     loadFrozenStageSet,
     parseRunnerArgs,
     runBaseline,
+    evaluateBaselineParity,
+    policyFromSource,
     type EvaluationEvidence,
     type RunnerArgs,
 } from "../scripts/dd-reduction/run-baseline";
 import { buildEvaluationConfigHash, buildEvaluationGateHash, buildReplayConfig, buildReplayPolicySet, calculateLostPriorLogicPnl, runStage, assertFrozenStageReady, validateReplayBoundary } from "../scripts/dd-reduction/run-stage";
 import { compareStage } from "../scripts/dd-reduction/compare-stage";
-import type { CandidatePolicy, FrozenStageSet, JsonValue, StageResult } from "../lib/backtest/dd-reduction/types";
+import type { CandidatePolicy, FrozenStageSet, JsonValue, ProtectionReadbackEvidence, StageResult } from "../lib/backtest/dd-reduction/types";
 import type { IntegratedReplayResult } from "../lib/backtest/dd-reduction/emulator";
 
 const HASH = "a".repeat(64);
@@ -106,7 +109,7 @@ function frozenSet(overrides: Partial<FrozenStageSet> = {}): FrozenStageSet {
     };
 }
 
-async function makeFixture(options: { readonly withBaselineLedger?: boolean; readonly corruptParity?: boolean; readonly shortOnly?: boolean } = {}): Promise<{ root: string; args: RunnerArgs }> {
+async function makeFixture(options: { readonly withBaselineLedger?: boolean; readonly corruptParity?: boolean; readonly shortOnly?: boolean; readonly withCandidateFill?: boolean } = {}): Promise<{ root: string; args: RunnerArgs }> {
     const root = await mkdtemp(join(tmpdir(), "dd-reduction-runner-"));
     await mkdir(join(root, "source"), { recursive: true });
     await mkdir(join(root, "data"), { recursive: true });
@@ -161,14 +164,38 @@ async function makeFixture(options: { readonly withBaselineLedger?: boolean; rea
     if (options.withBaselineLedger === true) {
         await writeFile(join(root, "source", "baseline-ledger.json"), baselineContent, "utf8");
     }
+    const candidateContent = JSON.stringify([{
+        sourceHash: HASH,
+        ts: START,
+        strategy: "V12_V4",
+        direction: "LONG",
+        symbol: "BTCUSDT",
+        requestedGross: 100,
+        acceptedGross: 100,
+        reservation: null,
+        fill: { sourceHash: HASH, ts: START, price: 100, quantity: 1, gross: 100, fee: 0, funding: 0, slippage: 0, reason: "fixture-candidate" },
+        exit: null,
+        reason: "fixture-candidate",
+        fee: 0,
+        funding: 0,
+        slippage: 0,
+        policyHash: HASH,
+        configHash: HASH,
+        resultHash: HASH,
+        candidateId: "V12_V4_LONG:LONG:initial-stop:250",
+        accepted: true,
+        rejectionReason: null,
+    }]);
+    if (options.withCandidateFill === true) await writeFile(join(root, "source", "candidate-events.json"), candidateContent, "utf8");
     await writeFile(join(root, "data", "BTCUSDT-1h.json"), JSON.stringify([
-        { ts: START, symbol: "BTCUSDT", timeframe: "1h", open: 100, high: 101, low: 99, close: 100, volume: 1 },
-        { ts: START + 60 * 60 * 1_000, symbol: "BTCUSDT", timeframe: "1h", open: 100, high: 102, low: 98, close: 101, volume: 1 },
+        { ts: START, symbol: "BTCUSDT", timeframe: "1h", open: 100, high: 100, low: 100, close: 100, volume: 1 },
+        { ts: START + 60 * 60 * 1_000, symbol: "BTCUSDT", timeframe: "1h", open: 100, high: 100, low: 100, close: 100, volume: 1 },
     ]), "utf8");
     const sourceFiles = [{ path: "production.json", content: production }];
     if (options.withBaselineLedger === true) {
         sourceFiles.push({ path: "baseline-ledger.json", content: baselineContent });
     }
+    if (options.withCandidateFill === true) sourceFiles.push({ path: "candidate-events.json", content: candidateContent });
     const productionSha = canonicalDirectorySha(sourceFiles);
     const args = runnerArgs(root, join(root, "research-output"));
     return { root, args: { ...args, productionSha } };
@@ -208,8 +235,8 @@ test("changes config identity when frozen lineage changes", () => {
 
 test("rejects skipped, duplicate, and inconsistent frozen stage transitions", () => {
     assert.throws(() => assertFrozenStageReady(frozenSet(), "Q102_LONG"), /FROZEN_STAGE_ORDER/);
-    assert.throws(() => assertFrozenStageReady(frozenSet({ stageIds: ["V12_V4_LONG"], completedStageIds: ["V12_V4_LONG"] }), "V12_V4_LONG"), /FROZEN_STAGE_ORDER|FROZEN_STAGE_METADATA/);
-    assert.throws(() => assertFrozenStageReady(frozenSet({ stageIds: ["V12_V4_LONG"], completedStageIds: [] }), "V12_V4_SHORT"), /FROZEN_STAGE_METADATA/);
+    assert.throws(() => assertFrozenStageReady(frozenSet({ stageIds: ["V12_V4_LONG"], completedStageIds: ["V12_V4_LONG"] }), "V12_V4_LONG"), /FROZEN_STAGE_ORDER|FROZEN_STAGE_METADATA|FROZEN_STAGE_LINEAGE_REQUIRED/);
+    assert.throws(() => assertFrozenStageReady(frozenSet({ stageIds: ["V12_V4_LONG"], completedStageIds: [] }), "V12_V4_SHORT"), /FROZEN_STAGE_METADATA|FROZEN_STAGE_LINEAGE_REQUIRED/);
 });
 
 test("preserves two frozen policies sharing a direction by strategy identity", () => {
@@ -303,6 +330,29 @@ test("calculates non-zero PnL lost by prior frozen logic from replay evidence", 
     assert.equal(calculateLostPriorLogicPnl(makeReplay(100), makeReplay(40), frozen), 60);
 });
 
+test("attributes lost prior-logic PnL across multiple frozen strategies and symbols", () => {
+    const v12 = candidatePolicy("V12_V4_LONG", "V12_V4", "LONG");
+    const q102 = candidatePolicy("Q102_LONG", "Q102", "LONG");
+    const frozen = frozenSet({ stageIds: ["V12_V4_LONG", "Q102_LONG"], completedStageIds: ["V12_V4_LONG", "Q102_LONG"], policies: [v12, q102] });
+    const makeReplay = (values: readonly { strategy: "V12_V4" | "Q102"; symbol: string; pnl: number }[]): IntegratedReplayResult => ({
+        sourceHash: HASH, configHash: HASH, resultHash: HASH, policyHash: HASH, reason: "fixture", fee: 0, funding: 0, slippage: 0,
+        events: [], positions: [], portfolio: [], decisionLedger: [], reservationLedger: [], protectionLedger: [], equityMtmTimeline: [], rejectionCount: 0,
+        preemption: { supported: false, count: null, reason: "PREEMPTION_UNSUPPORTED_IN_TASK_2" }, preemptionCount: null,
+        tradeLedger: values.map((value, index) => ({
+            sourceHash: HASH, positionId: `position-${index}`, strategy: value.strategy, direction: "LONG", symbol: value.symbol, requestedGross: 100, acceptedGross: 100,
+            reservation: null, entryFill: null, exit: null, reason: "fixture", fee: 0, funding: 0, slippage: 0, policyHash: HASH, configHash: HASH, resultHash: HASH,
+            events: [{ eventId: `exit-${index}`, eventType: "EXIT", positionId: `position-${index}`, sourceHash: HASH, ts: START, strategy: value.strategy, direction: "LONG", symbol: value.symbol,
+                requestedGross: 100, acceptedGross: 100, reservation: null, fill: null, exit: { sourceHash: HASH, ts: START, price: 101, quantity: 1, gross: 100, fee: 0, funding: 0, slippage: 0, realizedPnl: value.pnl, reason: "fixture" },
+                reason: "fixture", fee: 0, funding: 0, slippage: 0, policyHash: HASH, configHash: HASH, resultHash: HASH }],
+        })),
+        accountingReconciliation: { cash: 0, equity: 0, realizedPnl: values.reduce((sum, value) => sum + value.pnl, 0), unrealizedPnl: 0, fee: 0, funding: 0, slippage: 0, difference: 0, balanced: true },
+        baselineTradeLedger: [],
+    } as unknown as IntegratedReplayResult);
+    const baseline = makeReplay([{ strategy: "V12_V4", symbol: "BTCUSDT", pnl: 100 }, { strategy: "Q102", symbol: "ETHUSDT", pnl: 50 }]);
+    const candidate = makeReplay([{ strategy: "V12_V4", symbol: "BTCUSDT", pnl: 80 }, { strategy: "Q102", symbol: "ETHUSDT", pnl: 40 }]);
+    assert.equal(calculateLostPriorLogicPnl(baseline, candidate, frozen), 30);
+});
+
 test("reports divergence, direct and lost PnL, cost deltas, conflicts, and DD decomposition", () => {
     const baseline = {
         sourceHash: HASH,
@@ -354,19 +404,27 @@ test("loads the cumulative frozen stage set without selecting or rewriting candi
     const root = await mkdtemp(join(tmpdir(), "dd-reduction-frozen-"));
     try {
         const path = join(root, "frozen-stage.json");
+        const longPolicy = { ...candidatePolicy("V12_V4_LONG", "V12_V4", "LONG"), policyHash: HASH };
+        const shortPolicy = { ...candidatePolicy("V12_V4_SHORT", "V12_V4", "SHORT"), policyHash: HASH };
+        const lineages = [
+            { stageId: "V12_V4_LONG", status: "ACCEPTED", sourceHash: HASH, configHash: HASH, resultHash: HASH, policyHash: HASH, candidateId: longPolicy.candidateId, candidatePolicy: longPolicy, decisionIndex: 0 },
+            { stageId: "V12_V4_SHORT", status: "ACCEPTED", sourceHash: HASH, configHash: HASH, resultHash: HASH, policyHash: HASH, candidateId: shortPolicy.candidateId, candidatePolicy: shortPolicy, decisionIndex: 1 },
+        ] as const;
         await writeFile(path, JSON.stringify({
             sourceHash: HASH,
             configHash: HASH,
             resultHash: HASH,
             policyHash: HASH,
             stageIds: ["V12_V4_LONG", "V12_V4_SHORT"],
-            policies: [candidatePolicy("V12_V4_LONG", "V12_V4", "LONG"), candidatePolicy("V12_V4_SHORT", "V12_V4", "SHORT")],
+            policies: [longPolicy, shortPolicy],
             reason: "FROZEN_RESEARCH_POLICY_ONLY",
             completedStageIds: ["V12_V4_LONG", "V12_V4_SHORT"],
             stageDecisions: [
-                { stageId: "V12_V4_LONG", status: "ACCEPTED", accepted: true, candidateId: "V12_V4_LONG:candidate", policyHash: `${HASH}:V12_V4_LONG`, sourceHash: HASH, configHash: HASH, resultHash: HASH, candidatePolicy: candidatePolicy("V12_V4_LONG", "V12_V4", "LONG") },
-                { stageId: "V12_V4_SHORT", status: "ACCEPTED", accepted: true, candidateId: "V12_V4_SHORT:candidate", policyHash: `${HASH}:V12_V4_SHORT`, sourceHash: HASH, configHash: HASH, resultHash: HASH, candidatePolicy: candidatePolicy("V12_V4_SHORT", "V12_V4", "SHORT") },
+                { stageId: "V12_V4_LONG", status: "ACCEPTED", accepted: true, candidateId: longPolicy.candidateId, policyHash: HASH, sourceHash: HASH, configHash: HASH, resultHash: HASH, candidatePolicy: longPolicy },
+                { stageId: "V12_V4_SHORT", status: "ACCEPTED", accepted: true, candidateId: shortPolicy.candidateId, policyHash: HASH, sourceHash: HASH, configHash: HASH, resultHash: HASH, candidatePolicy: shortPolicy },
             ],
+            stageLineages: lineages,
+            aggregateHash: hashJson(lineages as unknown as JsonValue),
         }), "utf8");
 
         const frozen = await loadFrozenStageSet(path);
@@ -427,6 +485,26 @@ test("rejects a non-empty but mismatched canonical baseline ledger", async () =>
     } finally {
         if (previousOutputRoot === undefined) delete process.env.DISDEX_AI_OUTPUT_ROOT;
         else process.env.DISDEX_AI_OUTPUT_ROOT = previousOutputRoot;
+        await cleanup(fixture.root);
+    }
+});
+
+test("baseline parity fails when replay omits a canonical trade from its complete ledger", async () => {
+    const fixture = await makeFixture({ withBaselineLedger: true });
+    try {
+        const source = await loadCanonicalSource({
+            sourceRoot: fixture.args.sourceRoot, dataRoot: fixture.args.dataRoot, productionSha: fixture.args.productionSha,
+            startTs: fixture.args.startTs, endTs: fixture.args.endTs, initialEquity: fixture.args.initialEquity, deposits: fixture.args.deposits,
+            feeBps: fixture.args.feeBps, slippageBps: fixture.args.slippageBps, fundingSource: fixture.args.fundingSource,
+        });
+        const policy = policyFromSource(source, fixture.args.stage);
+        const parity = evaluateBaselineParity(source, policy, {
+            positions: [{ positionId: "baseline:baseline-1", acceptedGross: 100 }],
+            baselineTradeLedger: [],
+        });
+        assert.equal(parity.passed, false);
+        assert.match(parity.reason, /replay\.completeLedger/);
+    } finally {
         await cleanup(fixture.root);
     }
 });
@@ -544,8 +622,8 @@ test("accepts a cumulative frozen set with accepted and not-applicable stage rec
     try {
         const path = join(root, "frozen-stage.json");
         const stageLineages = [
-            { stageId: "V12_V4_LONG", status: "NOT_APPLICABLE", sourceHash: HASH, configHash: HASH, resultHash: HASH, policyHash: HASH, candidatePolicy: null },
-            { stageId: "V12_V4_SHORT", status: "ACCEPTED", sourceHash: HASH, configHash: HASH, resultHash: HASH, policyHash: HASH, candidatePolicy: { ...candidatePolicy("V12_V4_SHORT", "V12_V4", "SHORT"), policyHash: HASH } },
+            { stageId: "V12_V4_LONG", status: "NOT_APPLICABLE", sourceHash: HASH, configHash: HASH, resultHash: HASH, policyHash: HASH, candidatePolicy: null, decisionIndex: 0 },
+            { stageId: "V12_V4_SHORT", status: "ACCEPTED", sourceHash: HASH, configHash: HASH, resultHash: HASH, policyHash: HASH, candidatePolicy: { ...candidatePolicy("V12_V4_SHORT", "V12_V4", "SHORT"), policyHash: HASH }, decisionIndex: 1 },
         ] as const;
         const frozen = {
             ...frozenSet(),
@@ -578,12 +656,71 @@ test("runner replay config preserves aggregate, strategy, and symbol cap lineage
     assert.deepEqual(config.perSymbolCaps, { BTCUSDT: 2_500 });
 });
 
+test("fails closed when current and frozen cap declarations conflict", () => {
+    const current = { ...candidatePolicy("V12_V4_LONG", "V12_V4", "LONG"), aggregateGrossCap: 9_000, totalGrossCap: 9_000, cryptoGrossCap: 7_000, strategyGrossCap: 3_000, perStrategyGrossCaps: { V12_V4: 3_000 }, perSymbolGrossCaps: { BTCUSDT: 2_500 } };
+    const prior = { ...candidatePolicy("Q102_LONG", "Q102", "LONG"), aggregateGrossCap: 8_000, totalGrossCap: 8_000, cryptoGrossCap: 7_000, strategyGrossCap: 4_000, perStrategyGrossCaps: { Q102: 4_000 }, perSymbolGrossCaps: { BTCUSDT: 2_500 } };
+    assert.throws(() => buildReplayConfig(runnerArgs("C:/fixture", "C:/output"), { manifest: { sourceSha: HASH }, strategyConfigs: [], baselineLedger: [], candidateEvents: [], productionSha: HASH } as never, frozenSet({ stageIds: ["Q102_LONG"], completedStageIds: ["Q102_LONG"], policies: [prior] }), current, HASH), /conflicting aggregate cap declaration/);
+    const symbolConflict = { ...prior, aggregateGrossCap: 9_000, totalGrossCap: 9_000, perSymbolGrossCaps: { BTCUSDT: 2_400 } };
+    assert.throws(() => buildReplayConfig(runnerArgs("C:/fixture", "C:/output"), { manifest: { sourceSha: HASH }, strategyConfigs: [], baselineLedger: [], candidateEvents: [], productionSha: HASH } as never, frozenSet({ stageIds: ["Q102_LONG"], completedStageIds: ["Q102_LONG"], policies: [symbolConflict] }), current, HASH), /conflicting symbol cap declaration/);
+});
+
 test("runner rejects a manual-review candidate fill before its decision", () => {
     assert.throws(() => validateReplayBoundary({ reason: "MANUAL_REVIEW_REQUIRED", decisionLedger: [{ candidateId: "candidate", accepted: true, ts: START, fill: { ts: START - 1 } }] } as never), /CANDIDATE_FILL_BEFORE_DECISION|MANUAL_REVIEW_REQUIRED/);
 });
 
 test("runner rejects a candidate fill outside the evaluation window", () => {
     assert.throws(() => validateReplayBoundary({ reason: "REPLAY_COMPLETE", decisionLedger: [{ candidateId: "candidate", accepted: true, ts: START, fill: { ts: END + 1 } }] } as never, START, END), /CANDIDATE_FILL_OUTSIDE_WINDOW/);
+});
+
+test("replays a filled candidate only with bound protection-readback evidence", async () => {
+    const fixture = await makeFixture({ withBaselineLedger: true, withCandidateFill: true });
+    const previousOutputRoot = process.env.DISDEX_AI_OUTPUT_ROOT;
+    process.env.DISDEX_AI_OUTPUT_ROOT = fixture.args.outputRoot;
+    try {
+        const source = await loadCanonicalSource({
+            sourceRoot: fixture.args.sourceRoot, dataRoot: fixture.args.dataRoot, productionSha: fixture.args.productionSha,
+            startTs: fixture.args.startTs, endTs: fixture.args.endTs, initialEquity: fixture.args.initialEquity, deposits: fixture.args.deposits,
+            feeBps: fixture.args.feeBps, slippageBps: fixture.args.slippageBps, fundingSource: fixture.args.fundingSource,
+        });
+        const sourceHash = source.manifest!.sourceSha;
+        const baselineConfigHash = buildConfigHash(fixture.args, sourceHash);
+        const baselineFrozenHash = hashJson({ baseline: true, sourceHash, configHash: baselineConfigHash });
+        const baselineReadbackBase: ProtectionReadbackEvidence = {
+            sourceHash, configHash: baselineConfigHash, frozenStageHash: baselineFrozenHash, stageId: fixture.args.stage, candidateId: fixture.args.candidate,
+            available: true, orders: [{ clientOrderId: fixture.args.candidate, status: "READ_BACK", quantity: 1, price: 100 }], lineageHash: "",
+        };
+        const baselineReadback = { ...baselineReadbackBase, lineageHash: hashProtectionReadbackEvidence(baselineReadbackBase) };
+        const baseline = await runBaseline({ ...fixture.args, protectionReadbackEvidence: baselineReadback });
+        assert.equal(baseline.status, "ACCEPTED");
+        const initialFrozen = frozenSet({ sourceHash, configHash: baseline.configHash, resultHash: baseline.resultHash, policyHash: baseline.policyHash });
+        const initialPath = join(fixture.root, "initial-frozen.json");
+        await writeFile(initialPath, JSON.stringify(initialFrozen), "utf8");
+        const frozenStageHash = hashFrozenStageSet(initialFrozen);
+        const evaluationConfigHash = buildEvaluationConfigHash(fixture.args, sourceHash, frozenStageHash);
+        const readbackBase: ProtectionReadbackEvidence = {
+            sourceHash, configHash: evaluationConfigHash, frozenStageHash, stageId: fixture.args.stage, candidateId: fixture.args.candidate,
+            available: true, orders: [{ clientOrderId: fixture.args.candidate, status: "READ_BACK", quantity: 1, price: 100 }], lineageHash: "",
+        };
+        const readback = { ...readbackBase, lineageHash: hashProtectionReadbackEvidence(readbackBase) };
+        const evidenceBase: EvaluationEvidence = {
+            sourceHash, configHash: evaluationConfigHash, frozenStageHash, stageId: fixture.args.stage, candidateId: fixture.args.candidate,
+            startTs: START, endTs: END, initialEquity: 10_000, deposits: [], feeBps: 4, slippageBps: 2, fundingSource: "fixture-funding",
+            gateHash: buildEvaluationGateHash(sourceHash, evaluationConfigHash, baseline.policyHash, START), lineageHash: "", metrics: {
+                normalDdImprovementBps: 100, severeDdImprovementBps: 100, oosDdImprovementBps: 0, walkForwardImprovementBps: 0, profitFactorDeclinePct: 0,
+                finalEquityDeclinePct: 0, tradeCountRatio: 1, capacityRegression: 0, safetyRegression: 0, costStressPass: 1, candidateSelectionUsesFuturePnl: 0,
+            },
+        };
+        const accepted = await runStage({ ...fixture.args, frozenStagePath: initialPath, protectionReadbackEvidence: readback, evaluationEvidence: { ...evidenceBase, lineageHash: hashEvaluationEvidence(evidenceBase) } });
+        assert.equal(accepted.status, "ACCEPTED");
+        await assert.rejects(
+            () => runStage({ ...fixture.args, frozenStagePath: initialPath, evaluationEvidence: { ...evidenceBase, lineageHash: hashEvaluationEvidence(evidenceBase) } }),
+            /PROTECTION_READBACK_UNAVAILABLE/,
+        );
+    } finally {
+        if (previousOutputRoot === undefined) delete process.env.DISDEX_AI_OUTPUT_ROOT;
+        else process.env.DISDEX_AI_OUTPUT_ROOT = previousOutputRoot;
+        await cleanup(fixture.root);
+    }
 });
 
 test("same deterministic baseline run has one atomic artifact winner", async () => {
@@ -647,6 +784,68 @@ test("accepts two sequential stages and reloads the cumulative frozen artifact",
         if (previousOutputRoot === undefined) delete process.env.DISDEX_AI_OUTPUT_ROOT;
         else process.env.DISDEX_AI_OUTPUT_ROOT = previousOutputRoot;
         await cleanup(fixture.root);
+    }
+});
+
+test("persists a rejected attempt and reloads an accepted retry for the same stage", async () => {
+    const fixture = await makeFixture({ withBaselineLedger: true });
+    const previousOutputRoot = process.env.DISDEX_AI_OUTPUT_ROOT;
+    process.env.DISDEX_AI_OUTPUT_ROOT = fixture.args.outputRoot;
+    const metrics = {
+        normalDdImprovementBps: 100, severeDdImprovementBps: 100, oosDdImprovementBps: 0, walkForwardImprovementBps: 0,
+        profitFactorDeclinePct: 0, finalEquityDeclinePct: 0, tradeCountRatio: 1, capacityRegression: 0, safetyRegression: 0,
+        costStressPass: 1, candidateSelectionUsesFuturePnl: 0,
+    };
+    try {
+        const baseline = await runBaseline(fixture.args);
+        const initialFrozen = frozenSet({ sourceHash: baseline.sourceHash, configHash: baseline.configHash, resultHash: baseline.resultHash, policyHash: baseline.policyHash });
+        const initialPath = join(fixture.root, "initial-frozen.json");
+        await writeFile(initialPath, JSON.stringify(initialFrozen), "utf8");
+        const rejectedArgs: RunnerArgs = { ...fixture.args, candidate: "V12_V4_LONG:LONG:profit-floor:25" };
+        const frozenHash0 = hashFrozenStageSet(initialFrozen);
+        const rejectedConfigHash = buildEvaluationConfigHash(rejectedArgs, baseline.sourceHash, frozenHash0);
+        const rejectedEvidence: EvaluationEvidence = {
+            sourceHash: baseline.sourceHash, configHash: rejectedConfigHash, frozenStageHash: frozenHash0, stageId: rejectedArgs.stage, candidateId: rejectedArgs.candidate,
+            startTs: START, endTs: END, initialEquity: 10_000, deposits: [], feeBps: 4, slippageBps: 2, fundingSource: "fixture-funding",
+            gateHash: buildEvaluationGateHash(baseline.sourceHash, rejectedConfigHash, baseline.policyHash, START), lineageHash: "", metrics: { ...metrics, normalDdImprovementBps: 0, severeDdImprovementBps: 0 },
+        };
+        const rejected = await runStage({ ...rejectedArgs, frozenStagePath: initialPath, evaluationEvidence: { ...rejectedEvidence, lineageHash: hashEvaluationEvidence(rejectedEvidence) } });
+        assert.equal(rejected.status, "REJECTED");
+        const rejectedFrozenPath = join(fixture.args.outputRoot, rejectedArgs.stage, rejected.runId!, "frozen-stage.json");
+        const rejectedFrozen = await loadFrozenStageSet(rejectedFrozenPath);
+        assert.equal(rejectedFrozen.stageLineages, undefined);
+        assert.equal(rejectedFrozen.stageDecisions?.[0]?.status, "REJECTED");
+
+        const retryArgs: RunnerArgs = { ...fixture.args, candidate: "V12_V4_LONG:LONG:initial-stop:250" };
+        const retryFrozenHash = hashFrozenStageSet(rejectedFrozen);
+        const retryConfigHash = buildEvaluationConfigHash(retryArgs, baseline.sourceHash, retryFrozenHash);
+        const retryEvidence: EvaluationEvidence = {
+            sourceHash: baseline.sourceHash, configHash: retryConfigHash, frozenStageHash: retryFrozenHash, stageId: retryArgs.stage, candidateId: retryArgs.candidate,
+            startTs: START, endTs: END, initialEquity: 10_000, deposits: [], feeBps: 4, slippageBps: 2, fundingSource: "fixture-funding",
+            gateHash: buildEvaluationGateHash(baseline.sourceHash, retryConfigHash, baseline.policyHash, START), lineageHash: "", metrics,
+        };
+        const accepted = await runStage({ ...retryArgs, frozenStagePath: rejectedFrozenPath, evaluationEvidence: { ...retryEvidence, lineageHash: hashEvaluationEvidence(retryEvidence) } });
+        assert.equal(accepted.status, "ACCEPTED");
+        const reloaded = await loadFrozenStageSet(join(fixture.args.outputRoot, retryArgs.stage, accepted.runId!, "frozen-stage.json"));
+        assert.deepEqual(reloaded.stageIds, ["V12_V4_LONG"]);
+        assert.equal(reloaded.stageLineages?.[0]?.decisionIndex, 1);
+        assert.deepEqual(reloaded.stageDecisions?.map((decision) => decision.status), ["REJECTED", "ACCEPTED"]);
+        assertFrozenStageReady(reloaded, "V12_V4_SHORT");
+    } finally {
+        if (previousOutputRoot === undefined) delete process.env.DISDEX_AI_OUTPUT_ROOT;
+        else process.env.DISDEX_AI_OUTPUT_ROOT = previousOutputRoot;
+        await cleanup(fixture.root);
+    }
+});
+
+test("rejects non-empty legacy frozen policies whose lineage is not normalized", async () => {
+    const root = await mkdtemp(join(tmpdir(), "dd-reduction-legacy-lineage-"));
+    try {
+        const path = join(root, "legacy.json");
+        await writeFile(path, JSON.stringify({ ...frozenSet({ stageIds: ["V12_V4_LONG"], completedStageIds: ["V12_V4_LONG"], policies: [{ ...candidatePolicy("V12_V4_LONG", "V12_V4", "LONG"), sourceHash: "b".repeat(64) }] }) }), "utf8");
+        await assert.rejects(() => loadFrozenStageSet(path), /FROZEN_STAGE_LINEAGE_REQUIRED/);
+    } finally {
+        await cleanup(root);
     }
 });
 
