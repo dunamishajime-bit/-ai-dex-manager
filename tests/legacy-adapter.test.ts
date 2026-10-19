@@ -25,6 +25,19 @@ test("legacy protection evidence fails closed when current fields are not exact"
     assert.equal(evidence.knownLegacyFields.profitArmBps, 250);
 });
 
+test("legacy protection evidence treats null policy fields as unresolved", () => {
+    const evidence = normalizeLegacyProtectionEvidence({
+        oldV12Hybrid: {},
+        currentFields: {
+            initialStopBps: null,
+            profitFloorBps: null,
+            trailingGivebackBps: null,
+            timeStopBars: null,
+        },
+    });
+    assert.deepEqual(evidence.unresolvedFields, ["initialStopBps", "profitFloorBps", "trailingGivebackBps", "timeStopBars"]);
+});
+
 test("mapping report carries the explicit non-canonical classification", () => {
     const report = buildLegacyMappingReport({
         strategyIds: ["V12", "PENGU", "RESIDUAL"],

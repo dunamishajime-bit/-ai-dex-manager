@@ -80,7 +80,7 @@ export function normalizeLegacyProtectionEvidence(input: {
     readonly currentFields: Readonly<Record<string, unknown>>;
 }): LegacyProtectionEvidence {
     const unresolvedFields = ["initialStopBps", "profitFloorBps", "trailingGivebackBps", "timeStopBars"]
-        .filter((field) => typeof input.currentFields[field] !== "number" && input.currentFields[field] !== null);
+        .filter((field) => !Number.isFinite(input.currentFields[field]));
     return {
         status: LEGACY_PROTECTION_STATUS,
         unresolvedFields,

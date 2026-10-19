@@ -1,7 +1,10 @@
 import { readFileSync, readdirSync } from "node:fs";
-import { run } from "node:test";
+import { execFile as execFileCallback } from "node:child_process";
+import { promisify } from "node:util";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+
+const execFile = promisify(execFileCallback);
 
 const scriptDirectory = resolve(fileURLToPath(import.meta.url), "..");
 const repositoryRoot = resolve(scriptDirectory, "..", "..");
@@ -36,25 +39,49 @@ const testFiles = readdirSync(testsDirectory)
 assertTestDiscovery(testFiles);
 process.stdout.write(`DD_REDUCTION_TEST_DISCOVERY files=${testFiles.length}\n`);
 
-const testRun = run({
-    files: testFiles.map((name) => join(testsDirectory, name)),
-    concurrency: 1,
-});
-
 let completed = 0;
 let failed = 0;
 let skipped = 0;
 let todo = 0;
-const expectedTopLevelNames = new Set(testFiles.map((name) => join(testsDirectory, name).replaceAll("\\", "/")));
 
-for await (const event of testRun) {
-    if (event.type !== "test:complete") continue;
-    const result = event.data;
-    if (result.details?.skipped === true) skipped += 1;
-    if (result.details?.todo === true) todo += 1;
-    if (!expectedTopLevelNames.has(String(result.name).replaceAll("\\", "/"))) continue;
+const tsxExecutable = process.execPath;
+const tsxCli = join(repositoryRoot, "node_modules", "tsx", "dist", "cli.mjs");
+for (const name of testFiles) {
+    const file = join(testsDirectory, name);
+    let stdout = "";
+    let stderr = "";
+    try {
+        const result = await execFile(tsxExecutable, [tsxCli, "--test", file], {
+            cwd: repositoryRoot,
+            encoding: "utf8",
+            maxBuffer: 16 * 1024 * 1024,
+            shell: false,
+        });
+        stdout = result.stdout;
+        stderr = result.stderr;
+    } catch (error) {
+        stdout = typeof error === "object" && error !== null && "stdout" in error ? String(error.stdout) : "";
+        stderr = typeof error === "object" && error !== null && "stderr" in error ? String(error.stderr) : "";
+        throw new Error(`TEST_FAILURES: ${name} exited non-zero\n${stdout}\n${stderr}`);
+    }
+
+    const summary = (label) => {
+        const match = stdout.match(new RegExp(`ℹ ${label}\\s+(\\d+)`));
+        if (match === null) throw new Error(`TEST_ACCOUNTING_MISMATCH: ${name} missing '${label}' summary`);
+        return Number(match[1]);
+    };
+    const tests = summary("tests");
+    const passed = summary("pass");
+    const failedInFile = summary("fail");
+    const skippedInFile = summary("skipped");
+    const todoInFile = summary("todo");
+    if (tests <= 0 || passed + failedInFile + skippedInFile + todoInFile !== tests) {
+        throw new Error(`TEST_ACCOUNTING_MISMATCH: ${name} tests=${tests} pass=${passed} fail=${failedInFile} skipped=${skippedInFile} todo=${todoInFile}`);
+    }
     completed += 1;
-    if (result.details?.passed !== true) failed += 1;
+    failed += failedInFile;
+    skipped += skippedInFile;
+    todo += todoInFile;
 }
 
 if (completed !== testFiles.length) throw new Error(`TEST_ACCOUNTING_MISMATCH: completed=${completed} discovered=${testFiles.length}`);
