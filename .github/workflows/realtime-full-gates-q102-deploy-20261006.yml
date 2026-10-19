@@ -155,6 +155,13 @@ jobs:
           archive="/tmp/disdex-realtime-ui-$TARGET_SHA.tar.gz"
           dropin_dir=/etc/systemd/system/ai-dex-manager-ui.service.d
           canonical="$dropin_dir/90-current-ui-release.conf"
+          # The VPS retains historical UI drop-ins.  A later lexical entry can
+          # override the canonical file, so keep one dedicated final override
+          # whose long tilde prefix sorts after the retained history without
+          # deleting any of it.  250 + 5 filename bytes is the ext4
+          # 255-byte component limit and sorts after retained history.
+          final_prefix="$(printf '%*s' 250 '' | tr ' ' '~')"
+          final_dropin="$dropin_dir/${final_prefix}.conf"
           current=/home/deploy/disdex-trading/current
 
           trading_sha_before="$(tr -d '[:space:]' < "$current/.disdex-release-sha")"
@@ -169,12 +176,18 @@ jobs:
           old_ui="$(systemctl show "$ui_service" -p WorkingDirectory --value)"
           [[ -n "$old_ui" && -d "$old_ui" && -s "$archive" ]]
           canonical_backup="/tmp/90-current-ui-release.conf.before-$TARGET_SHA"
+          final_dropin_backup="/tmp/codex-ui-current-release.conf.before-$TARGET_SHA"
           canonical_existed=0
+          final_dropin_existed=0
           if [[ -f "$canonical" ]]; then
             cp -a "$canonical" "$canonical_backup"
             canonical_existed=1
           fi
-          echo "UI_PREFLIGHT old_ui=$old_ui trading_sha=$trading_sha_before runners=${#runner_units[@]} canonical_existed=$canonical_existed"
+          if [[ -f "$final_dropin" ]]; then
+            cp -a "$final_dropin" "$final_dropin_backup"
+            final_dropin_existed=1
+          fi
+          echo "UI_PREFLIGHT old_ui=$old_ui trading_sha=$trading_sha_before runners=${#runner_units[@]} canonical_existed=$canonical_existed final_dropin_existed=$final_dropin_existed"
 
           rm -rf "$release"
           install -d -o deploy -g deploy -m 0750 "$release"
@@ -196,6 +209,18 @@ jobs:
           chmod 0644 "$canonical"
           chown root:root "$canonical"
 
+          cat > "$final_dropin" <<EOF
+          [Service]
+          WorkingDirectory=$release
+          Environment=DISDEX_UI_RELEASE_SHA=$TARGET_SHA
+          Environment=HOSTNAME=127.0.0.1
+          ExecStart=
+          ExecStart=/usr/bin/node server.js
+          EOF
+          sed -i 's/^[[:space:]]*//' "$final_dropin"
+          chmod 0644 "$final_dropin"
+          chown root:root "$final_dropin"
+
           rollback() {
             rc=$?
             set +e
@@ -204,10 +229,15 @@ jobs:
             else
               rm -f "$canonical"
             fi
+            if [[ "$final_dropin_existed" == 1 && -f "$final_dropin_backup" ]]; then
+              cp -a "$final_dropin_backup" "$final_dropin"
+            else
+              rm -f "$final_dropin"
+            fi
             systemctl daemon-reload
             systemctl restart "$ui_service"
             rm -rf "$release"
-            rm -f "$archive" "$canonical_backup"
+            rm -f "$archive" "$canonical_backup" "$final_dropin_backup"
             echo "ROLLBACK=PREVIOUS_UI_RESTORED"
             exit "$rc"
           }
@@ -264,7 +294,7 @@ jobs:
                   assert row["fresh"] and all(g["state"]=="OK" for g in row["gates"] if g.get("kind") not in {"reference","shadow"})
           print("COMPLETE_SCORE_100_INVARIANT=PASS")
           PY
-          rm -f "$archive" "$canonical_backup"
+          rm -f "$archive" "$canonical_backup" "$final_dropin_backup"
           trap - ERR
           echo "STATUS=REALTIME_RANKING_SHOW_UI_DEPLOYED"
           echo "UI_SHA=$TARGET_SHA"
