@@ -49,6 +49,8 @@ interface CollectedFile extends SourceFileSnapshot {
 
 type StableValue = string | number | boolean | null | undefined | object | readonly StableValue[];
 
+const MAX_MISSING_BARS = 1_000_000;
+
 function sha256(value: string): string {
     return createHash("sha256").update(value, "utf8").digest("hex");
 }
@@ -260,6 +262,21 @@ function validateProductionValue(value: JsonValue, path: string): void {
     if (Object.prototype.hasOwnProperty.call(object, "direction")) requiredDirection(object, "direction", "PRODUCTION_SOURCE");
 }
 
+function parseProductionSource(file: CollectedFile): ProductionSource {
+    const value = productionValue(file);
+    const object = asObject(value);
+    if (object === null || Object.keys(object).length === 0) {
+        throw new SourceContractError("INVALID_PRODUCTION_SOURCE", `${file.path} must contain a non-empty production object`);
+    }
+    const strategy = requiredStrategy(object, "strategy", "PRODUCTION_SOURCE");
+    const config = asObject(object.config);
+    if (config === null || Object.keys(config).length === 0) {
+        throw new SourceContractError("INVALID_PRODUCTION_SOURCE", `${file.path}.config must be a non-empty object`);
+    }
+    validateProductionValue(value, file.path);
+    return { path: file.relativePath, sha256: file.sha256, content: value };
+}
+
 function inferredSeriesMetadata(file: CollectedFile): { symbol: string; timeframe: string } | null {
     const name = basename(file.relativePath, extname(file.relativePath));
     const match = /^(?<symbol>[A-Za-z0-9:.]+)[_-](?<timeframe>\d+[mhd])$/i.exec(name);
@@ -410,7 +427,12 @@ function timeframeMs(timeframe: string): number {
     if (!match) throw new SourceContractError("TIMEFRAME_NOT_SUPPORTED", `unsupported timeframe: ${timeframe}`);
     const multiplier = Number(match[1]);
     const unit = match[2].toLowerCase();
-    return multiplier * (unit === "m" ? 60_000 : unit === "h" ? 3_600_000 : 86_400_000);
+    const unitMs = unit === "m" ? 60_000 : unit === "h" ? 3_600_000 : 86_400_000;
+    const interval = multiplier * unitMs;
+    if (!(multiplier > 0) || !Number.isFinite(multiplier) || !(interval > 0) || !Number.isFinite(interval)) {
+        throw new SourceContractError("TIMEFRAME_NOT_SUPPORTED", `timeframe must have a positive finite interval: ${timeframe}`);
+    }
+    return interval;
 }
 
 function validateInput(input: CanonicalSourceInput): void {
@@ -437,7 +459,15 @@ function seriesManifest(series: CandleSeries, input: CanonicalSourceInput): Sour
         const previous = bars[index - 1]?.ts;
         const current = bars[index]?.ts;
         if (previous === undefined || current === undefined) continue;
-        for (let timestamp = previous + interval; timestamp < current; timestamp += interval) missing.push(timestamp);
+        let timestamp = previous + interval;
+        if (timestamp <= previous || !Number.isFinite(timestamp)) throw new SourceContractError("TIMEFRAME_NOT_SUPPORTED", `${series.symbol}/${series.timeframe} interval cannot advance timestamps safely`);
+        while (timestamp < current) {
+            if (missing.length >= MAX_MISSING_BARS) throw new SourceContractError("GAP_TOO_LARGE", `${series.symbol}/${series.timeframe} gap exceeds the validation limit`);
+            missing.push(timestamp);
+            const next = timestamp + interval;
+            if (next <= timestamp || !Number.isFinite(next)) throw new SourceContractError("TIMEFRAME_NOT_SUPPORTED", `${series.symbol}/${series.timeframe} interval cannot advance timestamps safely`);
+            timestamp = next;
+        }
     }
     if (missing.length > 0) throw new SourceContractError("GAP_DETECTED", `${series.symbol}/${series.timeframe} has missing timestamp(s): ${missing.join(",")}`);
     return {
@@ -460,6 +490,52 @@ function sourceRelativePath(file: SourceFileSnapshot): string {
     return file.path.replace(/^source\//, "");
 }
 
+function collectedSnapshot(file: SourceFileSnapshot): CollectedFile {
+    const label = file.path.startsWith("source/") ? "source" : file.path.startsWith("data/") ? "data" : null;
+    if (label === null) throw new SourceContractError("SOURCE_MATERIAL_MISMATCH", `${file.path} is not rooted under source/ or data/`);
+    return { ...file, label, relativePath: file.path.slice(`${label}/`.length) };
+}
+
+function canonicalCandleSeries(series: readonly CandleSeries[]): readonly CandleSeries[] {
+    return [...series]
+        .sort((left, right) => sourceSeriesKey(left.symbol, left.timeframe).localeCompare(sourceSeriesKey(right.symbol, right.timeframe)))
+        .map((item) => ({ ...item, bars: [...item.bars].sort((left, right) => left.ts - right.ts) }));
+}
+
+function dataCandleSeries(files: readonly SourceFileSnapshot[]): readonly CandleSeries[] {
+    const seriesMap = new Map<string, ExecutionBar[]>();
+    for (const snapshot of files) {
+        const file = collectedSnapshot(snapshot);
+        if (file.kind === "funding") continue;
+        for (const bar of parseCandleRows(file)) {
+            const key = sourceSeriesKey(bar.symbol, bar.timeframe);
+            const existing = seriesMap.get(key) ?? [];
+            existing.push(bar);
+            seriesMap.set(key, existing);
+        }
+    }
+    return [...seriesMap.entries()].sort(([left], [right]) => left.localeCompare(right)).map(([key, bars]) => {
+        const [symbol, timeframe] = key.split("\u0000");
+        return { sourceHash: sha256([...new Set(bars.map((bar) => bar.sourceHash))].sort().join("\n")), symbol: symbol ?? "", timeframe: timeframe ?? "", bars };
+    });
+}
+
+function deepFreeze<T>(value: T): T {
+    if (value === null || (typeof value !== "object" && typeof value !== "function") || Object.isFrozen(value)) return value;
+    for (const key of Reflect.ownKeys(value as object)) {
+        const descriptor = Object.getOwnPropertyDescriptor(value as object, key);
+        if (descriptor !== undefined && "value" in descriptor) deepFreeze(descriptor.value);
+    }
+    return Object.freeze(value);
+}
+
+function immutableInput(input: CanonicalSourceInput): CanonicalSourceInput {
+    return deepFreeze({
+        ...input,
+        deposits: input.deposits.map((deposit) => ({ ...deposit })),
+    });
+}
+
 function validateProductionMaterial(source: CanonicalSource): readonly SourceFileSnapshot[] {
     const allFiles = [...source.sourceFiles].sort((left, right) => left.path.localeCompare(right.path));
     const sourceFiles = allFiles.filter((file) => file.path.startsWith("source/"));
@@ -479,9 +555,19 @@ function validateProductionMaterial(source: CanonicalSource): readonly SourceFil
     return sourceFiles;
 }
 
+function validateDataMaterial(source: CanonicalSource): void {
+    const dataFiles = source.sourceFiles.filter((file) => file.path.startsWith("data/"));
+    const expectedSeries = dataCandleSeries(dataFiles);
+    if (expectedSeries.length === 0) throw new SourceContractError("CANDLE_SOURCE_MISSING", "no candle series was found under dataRoot");
+    if (stableJson(canonicalCandleSeries(source.candleSeries)) !== stableJson(canonicalCandleSeries(expectedSeries))) {
+        throw new SourceContractError("SOURCE_MATERIAL_MISMATCH", "canonical candle series does not match immutable data snapshots");
+    }
+}
+
 export async function buildSourceManifest(source: CanonicalSource): Promise<SourceManifest> {
     validateInput(source.input);
     validateProductionMaterial(source);
+    validateDataMaterial(source);
     const allFiles = [...source.sourceFiles].sort((left, right) => left.path.localeCompare(right.path));
     const sourceHashes = allFiles.map(snapshotIdentity);
     const dataHashes = sourceHashes.filter((item) => item.path.startsWith("data/"));
@@ -489,7 +575,7 @@ export async function buildSourceManifest(source: CanonicalSource): Promise<Sour
         .sort((left, right) => sourceSeriesKey(left.symbol, left.timeframe).localeCompare(sourceSeriesKey(right.symbol, right.timeframe)))
         .map((item) => seriesManifest(item, source.input));
     if (new Set(series.map((item) => sourceSeriesKey(item.symbol, item.timeframe))).size !== series.length) throw new SourceContractError("DUPLICATE_SERIES", "manifest contains more than one symbol/timeframe series");
-    return {
+    return deepFreeze({
         manifestVersion: 1,
         sourceSha: sha256(sourceHashes.map((item) => `${item.path}\n${item.sha256}\n${item.bytes}`).join("\n")),
         productionSha: source.input.productionSha,
@@ -503,7 +589,7 @@ export async function buildSourceManifest(source: CanonicalSource): Promise<Sour
         feeBps: source.input.feeBps,
         slippageBps: source.input.slippageBps,
         fundingSource: source.input.fundingSource,
-    };
+    });
 }
 
 export function assertSourceManifest(manifest: SourceManifest, expected: ExpectedSourceManifest): void {
@@ -528,23 +614,23 @@ export function assertSourceManifest(manifest: SourceManifest, expected: Expecte
 
 export async function loadCanonicalSource(input: CanonicalSourceInput): Promise<CanonicalSource> {
     validateInput(input);
+    const inputSnapshot = immutableInput(input);
     const collectedSourceFiles = await collectFiles(input.sourceRoot, "source");
     const collectedDataFiles = await collectFiles(input.dataRoot, "data");
     const productionSha = canonicalDirectorySha(collectedSourceFiles.map((file) => ({ path: file.relativePath, content: file.content })));
     if (productionSha !== input.productionSha) throw new SourceContractError("PRODUCTION_SHA_MISMATCH", `expected ${input.productionSha}, received ${productionSha}`);
 
-    const productionSources: ProductionSource[] = collectedSourceFiles.filter((file) => file.kind === "production").map((file) => {
-        const content = productionValue(file);
-        validateProductionValue(content, file.path);
-        return { path: file.relativePath, sha256: file.sha256, content };
-    });
+    const productionFiles = collectedSourceFiles.filter((file) => file.kind === "production");
+    if (productionFiles.length === 0) throw new SourceContractError("PRODUCTION_SOURCE_MISSING", "no production strategy/config source was found under sourceRoot");
+    const productionSources: ProductionSource[] = productionFiles.map(parseProductionSource);
     const strategyConfigs: StrategyConfigSource[] = productionSources.flatMap((source) => {
         const object = asObject(source.content);
-        if (object === null || !Object.prototype.hasOwnProperty.call(object, "config")) return [];
+        if (object === null) throw new SourceContractError("INVALID_PRODUCTION_SOURCE", `${source.path} must contain a production object`);
         const config = asObject(object.config);
-        if (config === null) throw new SourceContractError("INVALID_PRODUCTION_SOURCE", `${source.path}.config must be an object`);
+        if (config === null || Object.keys(config).length === 0) throw new SourceContractError("INVALID_PRODUCTION_SOURCE", `${source.path}.config must be a non-empty object`);
         return [{ sourceHash: source.sha256, strategy: requiredStrategy(object, "strategy", "PRODUCTION_SOURCE"), configHash: sha256(stableJson(config)), config }];
     });
+    if (strategyConfigs.length !== productionSources.length || strategyConfigs.length === 0) throw new SourceContractError("PRODUCTION_SOURCE_MISSING", "expected a non-empty strategy/config source set");
 
     const seriesMap = new Map<string, ExecutionBar[]>();
     const funding: FundingRecord[] = collectedSourceFiles.filter((file) => file.kind === "funding").flatMap(parseFundingRows);
@@ -573,7 +659,7 @@ export async function loadCanonicalSource(input: CanonicalSourceInput): Promise<
     const allFiles = Object.freeze([...sourceFiles, ...dataFiles]);
     const sourceHashes = Object.freeze(allFiles.map(snapshotIdentity).sort((left, right) => left.path.localeCompare(right.path)));
     const source: CanonicalSource = {
-        input,
+        input: inputSnapshot,
         productionSha,
         productionFiles: sourceFiles,
         sourceFiles: allFiles,
@@ -586,5 +672,5 @@ export async function loadCanonicalSource(input: CanonicalSourceInput): Promise<
         sourceHashes,
     };
     const manifest = await buildSourceManifest(source);
-    return { ...source, manifest };
+    return deepFreeze({ ...source, manifest });
 }

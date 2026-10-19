@@ -76,6 +76,7 @@ async function makeFixture(options: {
     candleRows?: readonly Record<string, number>[];
     candleFiles?: readonly FixtureFile[];
     sourceFiles?: readonly FixtureFile[];
+    productionContent?: string;
     addSecretFile?: boolean;
     endTs?: number;
 } = {}): Promise<Fixture> {
@@ -85,7 +86,7 @@ async function makeFixture(options: {
     await mkdir(sourceRoot, { recursive: true });
     await mkdir(dataRoot, { recursive: true });
 
-    const production = { name: "production.json", content: JSON.stringify({ strategy: "V12_V4", config: { risk: "sanitized" } }) };
+    const production = { name: "production.json", content: options.productionContent ?? JSON.stringify({ strategy: "V12_V4", config: { risk: "sanitized" } }) };
     const sourceFiles = [production, ...(options.sourceFiles ?? [])];
     for (const file of sourceFiles) await writeFile(join(sourceRoot, file.name), file.content, "utf8");
     if (options.addSecretFile) await writeFile(join(sourceRoot, ".env"), "PRIVATE_KEY=must-not-be-read", "utf8");
@@ -128,6 +129,22 @@ test("rejects a production source SHA mismatch", async () => {
         await assert.rejects(() => loadCanonicalSource({ ...fixture.input, productionSha: "0".repeat(64) }), /PRODUCTION_SHA_MISMATCH|production.*sha/i);
     } finally {
         await cleanup(fixture);
+    }
+});
+
+test("rejects empty, array, scalar, and config-less production sources", async () => {
+    for (const productionContent of [
+        JSON.stringify({}),
+        JSON.stringify([]),
+        JSON.stringify("production"),
+        JSON.stringify({ strategy: "V12_V4" }),
+    ]) {
+        const fixture = await makeFixture({ productionContent });
+        try {
+            await assert.rejects(() => loadCanonicalSource(fixture.input), /INVALID_PRODUCTION_SOURCE|PRODUCTION_SOURCE_MISSING|production.*config/i);
+        } finally {
+            await cleanup(fixture);
+        }
     }
 });
 
@@ -180,6 +197,19 @@ test("rejects malformed candle rows instead of dropping the file", async () => {
         await assert.rejects(() => loadCanonicalSource(fixture.input), /INVALID_CANDLE_ROW|candle.*row/i);
     } finally {
         await cleanup(fixture);
+    }
+});
+
+test("rejects zero and overflowing timeframe intervals before gap validation", async () => {
+    for (const timeframe of ["0m", "0h", "0d", `${"9".repeat(400)}h`]) {
+        const fixture = await makeFixture({
+            candleFiles: [candleFile("BTCUSDT-1h.json", [candle(START_TS), candle(START_TS + HOUR)], "BTCUSDT", timeframe)],
+        });
+        try {
+            await assert.rejects(() => loadCanonicalSource(fixture.input), /TIMEFRAME_NOT_SUPPORTED|timeframe/i);
+        } finally {
+            await cleanup(fixture);
+        }
     }
 });
 
@@ -266,6 +296,47 @@ test("builds a stable manifest and asserts its immutable fields", async () => {
             productionSha: fixture.input.productionSha,
             series: [{ symbol: "BTCUSDT", timeframe: "1h", firstTs: START_TS, lastTs: START_TS + HOUR, rowCount: 2, missing: [], duplicates: [], sha256: firstManifest.series[0]?.sha256 ?? "" }],
         });
+    } finally {
+        await cleanup(fixture);
+    }
+});
+
+test("deeply freezes returned source material and binds candle series to snapshots", async () => {
+    const fixture = await makeFixture();
+    try {
+        const source = await loadCanonicalSource(fixture.input);
+        const manifest = source.manifest;
+        assert.ok(manifest);
+        assert.ok(Object.isFrozen(source));
+        assert.ok(Object.isFrozen(source.input));
+        assert.ok(Object.isFrozen(source.candleSeries));
+        assert.ok(Object.isFrozen(source.candleSeries[0]));
+        assert.ok(Object.isFrozen(source.candleSeries[0]?.bars));
+        assert.ok(Object.isFrozen(source.candleSeries[0]?.bars[0]));
+        assert.ok(Object.isFrozen(manifest));
+        assert.ok(Object.isFrozen(manifest.sourceHashes));
+        assert.ok(Object.isFrozen(manifest.sourceHashes[0]));
+        assert.ok(Object.isFrozen(manifest.series));
+        assert.ok(Object.isFrozen(manifest.series[0]));
+        assert.ok(Object.isFrozen(manifest.series[0]?.missing));
+        assert.ok(Object.isFrozen(manifest.deposits));
+
+        assert.throws(() => {
+            (manifest as { sourceSha: string }).sourceSha = "mutated";
+        }, TypeError);
+        assert.throws(() => {
+            (source.candleSeries[0]!.bars[0] as { close: number }).close = 999;
+        }, TypeError);
+        assert.equal(source.candleSeries[0]?.bars[0]?.close, 101);
+
+        const mutatedBars = source.candleSeries.map((series) => ({
+            ...series,
+            bars: series.bars.map((bar) => ({ ...bar, close: bar.close + 1 })),
+        }));
+        await assert.rejects(
+            () => buildSourceManifest({ ...source, candleSeries: mutatedBars }),
+            /SOURCE_MATERIAL_MISMATCH|candle.*material/i,
+        );
     } finally {
         await cleanup(fixture);
     }

@@ -8,69 +8,69 @@ export interface JsonObject {
 export type JsonValue = JsonPrimitive | JsonObject | readonly JsonValue[];
 
 export interface CanonicalSourceInput {
-    sourceRoot: string;
-    dataRoot: string;
-    productionSha: string;
-    startTs: number;
-    endTs: number;
-    initialEquity: number;
-    deposits: readonly { ts: number; amount: number }[];
-    feeBps: number;
-    slippageBps: number;
-    fundingSource: string;
+    readonly sourceRoot: string;
+    readonly dataRoot: string;
+    readonly productionSha: string;
+    readonly startTs: number;
+    readonly endTs: number;
+    readonly initialEquity: number;
+    readonly deposits: readonly { readonly ts: number; readonly amount: number }[];
+    readonly feeBps: number;
+    readonly slippageBps: number;
+    readonly fundingSource: string;
 }
 
 export interface SourceHash {
-    path: string;
-    sha256: string;
-    bytes: number;
+    readonly path: string;
+    readonly sha256: string;
+    readonly bytes: number;
 }
 
 export type SourceFileKind = "production" | "candle" | "funding" | "baseline" | "candidate";
 
 export interface SourceFileSnapshot extends SourceHash {
-    kind: SourceFileKind;
-    content: string;
+    readonly kind: SourceFileKind;
+    readonly content: string;
 }
 
 export interface ProductionSource {
-    path: string;
-    sha256: string;
-    content: JsonValue;
+    readonly path: string;
+    readonly sha256: string;
+    readonly content: JsonValue;
 }
 
 export interface StrategyConfigSource {
-    sourceHash: string;
-    strategy: StrategyId;
-    configHash: string;
-    config: JsonObject;
+    readonly sourceHash: string;
+    readonly strategy: StrategyId;
+    readonly configHash: string;
+    readonly config: JsonObject;
 }
 
 export interface ExecutionBar {
-    sourceHash: string;
-    ts: number;
-    symbol: string;
-    timeframe: string;
-    open: number;
-    high: number;
-    low: number;
-    close: number;
-    volume: number;
+    readonly sourceHash: string;
+    readonly ts: number;
+    readonly symbol: string;
+    readonly timeframe: string;
+    readonly open: number;
+    readonly high: number;
+    readonly low: number;
+    readonly close: number;
+    readonly volume: number;
 }
 
 export interface CandleSeries {
-    sourceHash: string;
-    symbol: string;
-    timeframe: string;
-    bars: readonly ExecutionBar[];
+    readonly sourceHash: string;
+    readonly symbol: string;
+    readonly timeframe: string;
+    readonly bars: readonly ExecutionBar[];
 }
 
 export interface FundingRecord {
-    sourceHash: string;
-    ts: number;
-    symbol: string;
-    rate: number;
-    source: string;
+    readonly sourceHash: string;
+    readonly ts: number;
+    readonly symbol: string;
+    readonly rate: number;
+    readonly source: string;
 }
 
 export interface Reservation {
@@ -155,30 +155,30 @@ export interface BaselineLedgerEntry extends LifecycleEvidence {
 }
 
 export interface SourceSeriesManifest {
-    symbol: string;
-    timeframe: string;
-    firstTs: number;
-    lastTs: number;
-    rowCount: number;
-    missing: readonly number[];
-    duplicates: readonly number[];
-    sha256: string;
+    readonly symbol: string;
+    readonly timeframe: string;
+    readonly firstTs: number;
+    readonly lastTs: number;
+    readonly rowCount: number;
+    readonly missing: readonly number[];
+    readonly duplicates: readonly number[];
+    readonly sha256: string;
 }
 
 export interface SourceManifest {
-    manifestVersion: 1;
-    sourceSha: string;
-    productionSha: string;
-    dataSha: string;
-    sourceHashes: readonly SourceHash[];
-    series: readonly SourceSeriesManifest[];
-    startTs: number;
-    endTs: number;
-    initialEquity: number;
-    deposits: readonly { ts: number; amount: number }[];
-    feeBps: number;
-    slippageBps: number;
-    fundingSource: string;
+    readonly manifestVersion: 1;
+    readonly sourceSha: string;
+    readonly productionSha: string;
+    readonly dataSha: string;
+    readonly sourceHashes: readonly SourceHash[];
+    readonly series: readonly SourceSeriesManifest[];
+    readonly startTs: number;
+    readonly endTs: number;
+    readonly initialEquity: number;
+    readonly deposits: readonly { readonly ts: number; readonly amount: number }[];
+    readonly feeBps: number;
+    readonly slippageBps: number;
+    readonly fundingSource: string;
 }
 
 export interface ExpectedSourceSeriesManifest {
@@ -451,16 +451,16 @@ export interface AttributionReport {
 }
 
 export interface CanonicalSource {
-    input: CanonicalSourceInput;
-    productionSha: string;
-    productionFiles: readonly SourceFileSnapshot[];
-    sourceFiles: readonly SourceFileSnapshot[];
-    productionSources: readonly ProductionSource[];
-    strategyConfigs: readonly StrategyConfigSource[];
-    candleSeries: readonly CandleSeries[];
-    funding: readonly FundingRecord[];
-    baselineLedger: readonly BaselineLedgerEntry[];
-    candidateEvents: readonly CandidateDecision[];
-    sourceHashes: readonly SourceHash[];
-    manifest?: SourceManifest;
+    readonly input: CanonicalSourceInput;
+    readonly productionSha: string;
+    readonly productionFiles: readonly SourceFileSnapshot[];
+    readonly sourceFiles: readonly SourceFileSnapshot[];
+    readonly productionSources: readonly ProductionSource[];
+    readonly strategyConfigs: readonly StrategyConfigSource[];
+    readonly candleSeries: readonly CandleSeries[];
+    readonly funding: readonly FundingRecord[];
+    readonly baselineLedger: readonly BaselineLedgerEntry[];
+    readonly candidateEvents: readonly CandidateDecision[];
+    readonly sourceHashes: readonly SourceHash[];
+    readonly manifest?: SourceManifest;
 }
