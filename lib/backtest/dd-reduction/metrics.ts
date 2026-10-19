@@ -217,7 +217,7 @@ export function summarizeDrawdown(timeline: readonly EquityPoint[]): DrawdownSum
         }
     }
     if (active !== null) {
-        const episode = makeEpisode(active.peak, active.trough, null);
+        const episode = makeEpisode(active.peak, active.trough, null, points.at(-1)?.ts);
         episodes.push(episode);
         timeUnderWaterMs += episode.timeUnderWaterMs;
     }
@@ -243,7 +243,7 @@ export function summarizeDrawdown(timeline: readonly EquityPoint[]): DrawdownSum
     };
 }
 
-function makeEpisode(peak: EquityPoint, trough: EquityPoint, recovery: EquityPoint | null): DrawdownEpisode {
+function makeEpisode(peak: EquityPoint, trough: EquityPoint, recovery: EquityPoint | null, finalTs?: number): DrawdownEpisode {
     return {
         peakTs: peak.ts,
         troughTs: trough.ts,
@@ -252,7 +252,7 @@ function makeEpisode(peak: EquityPoint, trough: EquityPoint, recovery: EquityPoi
         troughEquity: trough.equity,
         drawdown: peak.equity - trough.equity,
         drawdownPct: peak.equity > 0 ? (peak.equity - trough.equity) / peak.equity * 100 : 0,
-        timeUnderWaterMs: Math.max(0, (recovery?.ts ?? trough.ts) - peak.ts),
+        timeUnderWaterMs: Math.max(0, (recovery?.ts ?? finalTs ?? trough.ts) - peak.ts),
     };
 }
 

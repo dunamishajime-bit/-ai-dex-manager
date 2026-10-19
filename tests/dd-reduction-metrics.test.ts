@@ -11,8 +11,10 @@ import type {
     ExecutionExit,
     ExecutionFill,
     IntegratedReplay,
+    LifecycleEvent,
     StageResult,
     TradePath,
+    PositionLifecycle,
 } from "../lib/backtest/dd-reduction/types";
 
 const HASH = "a".repeat(64);
@@ -149,6 +151,7 @@ test("summarizes multiple drawdowns, recovery, and an unrecovered final drawdown
         { ts: 30, equity: 110, realizedEquity: 105, logic: "OVERLAY", direction: "SHORT" },
         { ts: 40, equity: 104, realizedEquity: 103, logic: "OVERLAY", direction: "SHORT" },
         { ts: 50, equity: 102, realizedEquity: 101, logic: "CORE", direction: "LONG" },
+        { ts: 60, equity: 103, realizedEquity: 102, logic: "CORE", direction: "LONG" },
     ];
 
     const result = summarizeDrawdown(timeline);
@@ -158,7 +161,7 @@ test("summarizes multiple drawdowns, recovery, and an unrecovered final drawdown
     assert.equal(result.episodes.length, 2);
     assert.equal(result.episodes[0].recoveryTs, 20);
     assert.equal(result.episodes[1].recoveryTs, null);
-    assert.equal(result.timeUnderWaterMs, 40);
+    assert.equal(result.timeUnderWaterMs, 50);
     assert.equal(result.peak.ts, 30);
     assert.equal(result.trough.ts, 50);
     assert.equal(result.recovery, null);
@@ -202,6 +205,74 @@ test("attributes accepted trades separately from rejected and unfilled candidate
     assert.ok(result.byLogic.some((item) => item.key === "OVERLAY"));
 });
 
+test("includes exit-event costs in net attribution while keeping gross realized PnL cost-free", () => {
+    const exitEvent: LifecycleEvent = {
+        sourceHash: HASH,
+        ts: 1_700_007_200_000,
+        strategy: "V12_V4",
+        direction: "LONG",
+        symbol: "BTCUSDT",
+        requestedGross: 1_000,
+        acceptedGross: 1_000,
+        reservation: null,
+        fill: null,
+        exit: exit(110, 10, 1_700_007_200_000, 100, 2, 3, 4, "NORMAL_EXIT"),
+        reason: "fixture-position",
+        fee: 2,
+        funding: 3,
+        slippage: 4,
+        policyHash: HASH,
+        configHash: HASH,
+        resultHash: HASH,
+        eventId: "exit-cost-event",
+        eventType: "EXIT",
+        positionId: "cost-trade",
+    };
+    const position: PositionLifecycle = {
+        sourceHash: HASH,
+        positionId: "cost-trade",
+        strategy: "V12_V4",
+        direction: "LONG",
+        symbol: "BTCUSDT",
+        requestedGross: 1_000,
+        acceptedGross: 1_000,
+        reservation: null,
+        entryFill: fill(100, 10),
+        exit: exitEvent.exit,
+        reason: "fixture-position",
+        fee: 1,
+        funding: 2,
+        slippage: 3,
+        policyHash: HASH,
+        configHash: HASH,
+        resultHash: HASH,
+        events: [exitEvent],
+    };
+    const replay = {
+        sourceHash: HASH,
+        configHash: HASH,
+        resultHash: HASH,
+        policyHash: HASH,
+        reason: "REPLAY_COMPLETE",
+        fee: 3,
+        funding: 5,
+        slippage: 7,
+        events: [],
+        portfolio: [],
+        positions: [position],
+        tradeLedger: [position],
+        decisionLedger: [],
+    } as IntegratedReplay;
+
+    const result = attributeReplay(replay);
+
+    assert.equal(result.grossRealizedPnl, 100);
+    assert.equal(result.realizedPnl, 85);
+    assert.equal(result.netPnl, 85);
+    assert.equal(result.byLogic.find((item) => item.key === "CORE")?.realizedPnl, 100);
+    assert.equal(result.byLogic.find((item) => item.key === "CORE")?.netPnl, 85);
+});
+
 test("writes unrounded CSV, JSONL, JSON, and SHA256-indexed stage artifacts", async () => {
     const outDir = await mkdtemp(join(tmpdir(), "dd-reduction-stage-"));
     const result: StageResult = {
@@ -220,7 +291,15 @@ test("writes unrounded CSV, JSONL, JSON, and SHA256-indexed stage artifacts", as
         metrics: { maxDrawdownPct: 1.234567891234, givebackPct: 9.876543219876 },
     };
 
-    const index = await writeStageArtifacts(result, outDir);
+    const previousRoot = process.env.DISDEX_AI_OUTPUT_ROOT;
+    process.env.DISDEX_AI_OUTPUT_ROOT = outDir;
+    let index: Awaited<ReturnType<typeof writeStageArtifacts>>;
+    try {
+        index = await writeStageArtifacts(result, outDir);
+    } finally {
+        if (previousRoot === undefined) delete process.env.DISDEX_AI_OUTPUT_ROOT;
+        else process.env.DISDEX_AI_OUTPUT_ROOT = previousRoot;
+    }
     const names = await readdir(outDir);
     assert.ok(names.includes("stage-result.csv"));
     assert.ok(names.includes("stage-result.jsonl"));
@@ -230,4 +309,35 @@ test("writes unrounded CSV, JSONL, JSON, and SHA256-indexed stage artifacts", as
     assert.match(await readFile(join(outDir, "stage-result.json"), "utf8"), /1\.234567891234/);
     assert.match(await readFile(join(outDir, "stage-result.csv"), "utf8"), /9\.876543219876/);
     assert.equal(JSON.parse(await readFile(join(outDir, "sha256-index.json"), "utf8")).files.length, 3);
+});
+
+test("rejects the Desktop root and arbitrary Desktop descendants while allowing a configured research root", async () => {
+    const outDir = await mkdtemp(join(tmpdir(), "dd-reduction-containment-"));
+    const result: StageResult = {
+        sourceHash: HASH,
+        configHash: HASH,
+        resultHash: HASH,
+        stageId: "stage-3-containment",
+        strategy: "V12_V4",
+        direction: "LONG",
+        accepted: true,
+        reason: "fixture",
+        fee: 0,
+        funding: 0,
+        slippage: 0,
+        policyHash: HASH,
+        metrics: {},
+    };
+    const desktopRoot = "C:\\Users\\dis\\Desktop";
+    await assert.rejects(() => writeStageArtifacts(result, desktopRoot), /RESEARCH_OUTPUT/);
+    await assert.rejects(() => writeStageArtifacts(result, join(desktopRoot, "arbitrary-child")), /RESEARCH_OUTPUT/);
+
+    const previousRoot = process.env.DISDEX_AI_OUTPUT_ROOT;
+    process.env.DISDEX_AI_OUTPUT_ROOT = outDir;
+    try {
+        await writeStageArtifacts(result, join(outDir, "approved-run"));
+    } finally {
+        if (previousRoot === undefined) delete process.env.DISDEX_AI_OUTPUT_ROOT;
+        else process.env.DISDEX_AI_OUTPUT_ROOT = previousRoot;
+    }
 });

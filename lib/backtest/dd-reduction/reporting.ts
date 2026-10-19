@@ -72,7 +72,13 @@ function routeFor(strategy: string, reason: string): AttributionRoute {
 
 function positionNetPnl(position: PositionLifecycle): { readonly realizedPnl: number; readonly netPnl: number } {
     const realizedPnl = position.events.reduce((total, event) => total + (event.exit?.realizedPnl ?? 0), 0);
-    return { realizedPnl, netPnl: realizedPnl - position.fee - position.funding - position.slippage };
+    const exitFee = position.events.reduce((total, event) => total + (event.exit?.fee ?? 0), 0);
+    const exitFunding = position.events.reduce((total, event) => total + (event.exit?.funding ?? 0), 0);
+    const exitSlippage = position.events.reduce((total, event) => total + (event.exit?.slippage ?? 0), 0);
+    return {
+        realizedPnl,
+        netPnl: realizedPnl - position.fee - position.funding - position.slippage - exitFee - exitFunding - exitSlippage,
+    };
 }
 
 function emptyBucket(key: string, route: AttributionRoute): AttributionBucket {
@@ -190,12 +196,27 @@ function csvCell(value: string | number | boolean): string {
     return /[",\r\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
 }
 
+function isWithin(root: string, candidate: string): boolean {
+    const fromRoot = relative(root, candidate);
+    return fromRoot === "" || (!fromRoot.startsWith("..") && !isAbsolute(fromRoot));
+}
+
 function assertSafeOutputDirectory(outDir: string): string {
     const resolved = resolve(outDir);
-    if (basename(resolved).toLowerCase() === "desktop") throw new Error("RESEARCH_OUTPUT_MUST_NOT_BE_DESKTOP_ROOT");
     const repository = resolve(process.cwd());
-    const fromRepository = relative(repository, resolved);
-    if (fromRepository === "" || (!fromRepository.startsWith("..") && !isAbsolute(fromRepository))) throw new Error("RESEARCH_OUTPUT_MUST_NOT_BE_INSIDE_REPOSITORY");
+    if (isWithin(repository, resolved)) throw new Error("RESEARCH_OUTPUT_MUST_NOT_BE_INSIDE_REPOSITORY");
+
+    const desktopRoot = resolve("C:/Users/dis/Desktop");
+    const defaultResearchRoot = resolve("C:/Users/dis/Desktop/DisDex_AI_Files/01_BT_Research");
+    const configuredRoot = process.env.DISDEX_AI_OUTPUT_ROOT?.trim();
+    const researchRoot = resolve(configuredRoot || defaultResearchRoot);
+    if (isWithin(desktopRoot, researchRoot) && !isWithin(defaultResearchRoot, researchRoot)) {
+        throw new Error("RESEARCH_OUTPUT_ROOT_MUST_BE_APPROVED_RESEARCH_HIERARCHY");
+    }
+    if (basename(researchRoot).toLowerCase() === "desktop" || isWithin(desktopRoot, researchRoot) && researchRoot === desktopRoot) {
+        throw new Error("RESEARCH_OUTPUT_MUST_NOT_BE_DESKTOP_ROOT");
+    }
+    if (!isWithin(researchRoot, resolved)) throw new Error("RESEARCH_OUTPUT_MUST_BE_WITHIN_APPROVED_ROOT");
     return resolved;
 }
 
