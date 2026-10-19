@@ -16,7 +16,7 @@ const base=process.env.REALTIME_TEST_BASE||'http://127.0.0.1:3018';
   };
  },user);
  let scores=[80,60,40],version=Date.now();
- const data=()=>({ok:true,checkedAt:version,runtimeSha:'fixture',metric:'fixture',errors:{},rows:['A','B','C'].map((id,i)=>({id,symbol:id+'USDT',logic:'V12',side:'LONG',score:scores[i],gates:[],reason:'fixture',fresh:true,checkedAt:version}))});
+ const data=()=>({ok:true,checkedAt:version,runtimeSha:'fixture',metric:'fixture',errors:{},rows:['A','B','C'].map((id,i)=>({id,symbol:id+'USDT',logic:'V12',logicName:'V12 V4',side:'LONG',score:scores[i],preview:{price:100+i,priceAt:version,referenceAt:version-60000,minuteChangePct:0,score:scores[i],status:'ONE_MINUTE_REFERENCE'},gates:[],reason:'fixture',fresh:true,checkedAt:version}))});
  await ctx.route('**/*',async r=>{
   if(!['GET','HEAD'].includes(r.request().method()))return r.abort();
   if(r.request().url().includes('/api/auth/users'))return r.fulfill({json:{success:true,users:[user]}});
@@ -28,7 +28,18 @@ const base=process.env.REALTIME_TEST_BASE||'http://127.0.0.1:3018';
  await page.waitForFunction(()=>document.querySelectorAll('[data-ranking-row]').length===3);
  async function update(values){scores=values;version+=1000;await page.getByRole('button',{name:/^更新 ·/}).click();}
  await update([80,90,95]);
- await page.waitForFunction(()=>document.querySelector('[data-ranking-moving=true]'));
+ try{
+  await page.waitForFunction(()=>document.querySelector('[data-ranking-moving=true]'));
+ }catch(error){
+  console.error('RANKING_MOTION_DEBUG',JSON.stringify(await page.evaluate(()=>({
+   rows:[...document.querySelectorAll('[data-ranking-row]')].map(n=>({id:n.dataset.rankingRow,text:n.textContent,moving:n.dataset.rankingMoving,completed:n.dataset.rankingCompleted})),
+   flyers:[...document.querySelectorAll('.ranking-flyer')].map(n=>({currency:n.dataset.rankingCurrency,moving:n.dataset.rankingMoving})),
+   animations:window.__anim,
+   buttons:[...document.querySelectorAll('button')].map(n=>n.textContent).filter(Boolean).slice(0,20),
+   body:document.body.innerText.slice(0,2000)
+  }))));
+  throw error;
+ }
  const first=await page.evaluate(()=>[...new Set([...document.querySelectorAll('[data-ranking-moving=true]')].map(n=>n.dataset.rankingCurrency))]);
  if(first.length!==1)throw Error('Multiple currencies moving concurrently: '+first);
  await page.waitForFunction(()=>document.querySelector('[data-ranking-completed=true]'));
@@ -42,7 +53,7 @@ const base=process.env.REALTIME_TEST_BASE||'http://127.0.0.1:3018';
  const groups=[];for(const a of animations){if(groups.at(-1)?.id!==a.id)groups.push(a);}
  if(groups.length<3)throw Error('Expected multiple serial currency steps');
  for(let i=1;i<groups.length;i++)if(groups[i].at-groups[i-1].at<groups[i-1].duration-100)throw Error('Steps overlap');
- if(animations.some(a=>a.duration!==3600))throw Error('Expected slower 3600ms currency motion');
+ if(animations.some(a=>a.duration!==1500))throw Error('Expected full 1500ms currency motion');
  if(await page.locator('.rank-batch-completed').count())throw Error('Outlines remained after final landing');
  if(await page.locator('[data-ranking-row],[data-ranking-leader]').evaluateAll(ns=>ns.some(n=>n.style.opacity==='0')))throw Error('Original left hidden');
  await page.evaluate(()=>window.__anim=[]);
@@ -61,7 +72,7 @@ const base=process.env.REALTIME_TEST_BASE||'http://127.0.0.1:3018';
  await page.setViewportSize({width:390,height:844});
  if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth))throw Error('Mobile horizontal overflow');
  if(errors.length)throw Error(errors.join(';'));
- console.log('SERIAL_3600MS_RETAINED_OUTLINES_FINAL_CLEANUP_QUEUED_UPDATE_OFF_REDUCED_FILTER_MOBILE_PASS');
+ console.log('SERIAL_1500MS_RETAINED_OUTLINES_FINAL_CLEANUP_QUEUED_UPDATE_OFF_REDUCED_FILTER_MOBILE_PASS');
  console.log(JSON.stringify(groups.map(({id,at,duration})=>({id,at:Math.round(at),duration}))));
  }finally{await browser.close();}
 })().catch(e=>{console.error(e.stack);process.exit(1)});
