@@ -1,0 +1,31 @@
+{
+  "policy": "S01_V12_SHORT_INITIAL_WALLET_1P0",
+  "cost_bps": 10,
+  "full8_final_jpy": 62485435.22384849,
+  "full8_max_dd_pct": -24.9147,
+  "full8_pf": 2.4504855247167656,
+  "win_pct": 54.383,
+  "closed_trades": 1346,
+  "accounting": "PASS",
+  "scenario_specs": [
+    {
+      "id": "V12_SHORT_INITIAL_WALLET_1P0",
+      "target": "V12",
+      "side": "SHORT",
+      "axis": "initial_adverse",
+      "max_initial_wallet_loss_pct": 0.01,
+      "stop_slip_bps": 10
+    }
+  ],
+  "exit_audit": {
+    "V12_SHORT_INITIAL_WALLET_1P0": {
+      "preempted": 500,
+      "by_outcome": {
+        "original_win": 303,
+        "original_loss": 197
+      }
+    }
+  },
+  "model": "2026-10-17 latest8 M5 public historical normalized Aster, frozen V4 source",
+  "research_only": true
+}

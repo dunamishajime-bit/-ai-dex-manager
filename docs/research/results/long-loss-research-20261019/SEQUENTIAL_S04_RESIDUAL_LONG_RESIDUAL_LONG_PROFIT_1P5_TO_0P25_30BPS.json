@@ -1,0 +1,47 @@
+{
+  "policy": "S04_RESIDUAL_LONG_RESIDUAL_LONG_PROFIT_1P5_TO_0P25",
+  "cost_bps": 30,
+  "full8_final_jpy": 123572439.10872915,
+  "full8_max_dd_pct": -16.7886,
+  "full8_pf": 2.972357580385176,
+  "win_pct": 69.29,
+  "closed_trades": 1309,
+  "accounting": "PASS",
+  "scenario_specs": [
+    {
+      "id": "HYPE_LONG_INITIAL_WALLET_1P5",
+      "target": "HYPE_LONG",
+      "side": "LONG",
+      "axis": "initial_adverse",
+      "max_initial_wallet_loss_pct": 0.015,
+      "stop_slip_bps": 10
+    },
+    {
+      "id": "RESIDUAL_LONG_PROFIT_1P5_TO_0P25",
+      "target": "RESIDUAL",
+      "side": "LONG",
+      "axis": "profit_reversal",
+      "arm_close_pct": 0.015,
+      "locked_profit_pct": 0.0025,
+      "stop_slip_bps": 10
+    }
+  ],
+  "exit_audit": {
+    "HYPE_LONG_INITIAL_WALLET_1P5": {
+      "preempted": 12,
+      "by_outcome": {
+        "original_win": 1,
+        "original_loss": 11
+      }
+    },
+    "RESIDUAL_LONG_PROFIT_1P5_TO_0P25": {
+      "preempted": 201,
+      "by_outcome": {
+        "original_win": 115,
+        "original_loss": 86
+      }
+    }
+  },
+  "model": "2026-10-17 latest8 M5 public historical normalized Aster, frozen V4 source",
+  "research_only": true
+}

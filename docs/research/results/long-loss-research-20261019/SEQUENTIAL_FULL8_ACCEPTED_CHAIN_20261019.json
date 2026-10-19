@@ -1,0 +1,642 @@
+{
+  "status": "RESEARCH_ONLY_SELECTION_VALIDATION_PENDING",
+  "source_8logic": "2026-10-17 5m + 8 strategies, frozen 2026-10-08 V12 V4",
+  "selection": "both 10 and 30 bps maxDD strictly better, in-sample screening not LIVE",
+  "latest_reference": {
+    "10": {
+      "final_jpy": 222818966.87803495,
+      "max_dd_pct": -15.62063681288941,
+      "trade_count": 1310
+    },
+    "30": {
+      "final_jpy": 124289206.81827945,
+      "max_dd_pct": -16.78776877493442,
+      "trade_count": 1307
+    }
+  },
+  "stages": [
+    {
+      "stage": "S01",
+      "side_scope": "V12 SHORT",
+      "input_cumulative_ids": [],
+      "trials": [
+        {
+          "candidate": {
+            "id": "V12_SHORT_PROFIT_2_TO_0P5",
+            "target": "V12",
+            "side": "SHORT",
+            "axis": "profit_reversal",
+            "arm_close_pct": 0.02,
+            "locked_profit_pct": 0.005,
+            "stop_slip_bps": 10
+          },
+          "policy": "S01_V12_SHORT_PROFIT_2_TO_0P5",
+          "metrics": [
+            {
+              "policy": "S01_V12_SHORT_PROFIT_2_TO_0P5",
+              "cost_bps": 10,
+              "full8_final_jpy": 160665374.9790688,
+              "full8_max_dd_pct": -18.1776,
+              "full8_pf": 3.1354344163910453,
+              "win_pct": 76.306,
+              "closed_trades": 1359,
+              "accounting": "PASS",
+              "scenario_specs": [
+                {
+                  "id": "V12_SHORT_PROFIT_2_TO_0P5",
+                  "target": "V12",
+                  "side": "SHORT",
+                  "axis": "profit_reversal",
+                  "arm_close_pct": 0.02,
+                  "locked_profit_pct": 0.005,
+                  "stop_slip_bps": 10
+                }
+              ],
+              "exit_audit": {
+                "V12_SHORT_PROFIT_2_TO_0P5": {
+                  "preempted": 269,
+                  "by_outcome": {
+                    "original_win": 212,
+                    "original_loss": 57
+                  }
+                }
+              },
+              "model": "2026-10-17 latest8 M5 public historical normalized Aster, frozen V4 source",
+              "research_only": true
+            },
+            {
+              "policy": "S01_V12_SHORT_PROFIT_2_TO_0P5",
+              "cost_bps": 30,
+              "full8_final_jpy": 52336008.95736882,
+              "full8_max_dd_pct": -19.4826,
+              "full8_pf": 2.285314015334252,
+              "win_pct": 73.348,
+              "closed_trades": 1362,
+              "accounting": "PASS",
+              "scenario_specs": [
+                {
+                  "id": "V12_SHORT_PROFIT_2_TO_0P5",
+                  "target": "V12",
+                  "side": "SHORT",
+                  "axis": "profit_reversal",
+                  "arm_close_pct": 0.02,
+                  "locked_profit_pct": 0.005,
+                  "stop_slip_bps": 10
+                }
+              ],
+              "exit_audit": {
+                "V12_SHORT_PROFIT_2_TO_0P5": {
+                  "preempted": 269,
+                  "by_outcome": {
+                    "original_win": 212,
+                    "original_loss": 57
+                  }
+                }
+              },
+              "model": "2026-10-17 latest8 M5 public historical normalized Aster, frozen V4 source",
+              "research_only": true
+            }
+          ],
+          "dd_delta_pctpoints": [
+            -2.557,
+            -2.6948
+          ],
+          "accept_dd": false,
+          "delta_assets_jpy": [
+            -62153591.89896616,
+            -71953197.86091062
+          ]
+        },
+        {
+          "candidate": {
+            "id": "V12_SHORT_PROFIT_3_TO_1",
+            "target": "V12",
+            "side": "SHORT",
+            "axis": "profit_reversal",
+            "arm_close_pct": 0.03,
+            "locked_profit_pct": 0.01,
+            "stop_slip_bps": 10
+          },
+          "policy": "S01_V12_SHORT_PROFIT_3_TO_1",
+          "metrics": [
+            {
+              "policy": "S01_V12_SHORT_PROFIT_3_TO_1",
+              "cost_bps": 10,
+              "full8_final_jpy": 157258311.99120444,
+              "full8_max_dd_pct": -16.9032,
+              "full8_pf": 3.1614411453068896,
+              "win_pct": 73.991,
+              "closed_trades": 1338,
+              "accounting": "PASS",
+              "scenario_specs": [
+                {
+                  "id": "V12_SHORT_PROFIT_3_TO_1",
+                  "target": "V12",
+                  "side": "SHORT",
+                  "axis": "profit_reversal",
+                  "arm_close_pct": 0.03,
+                  "locked_profit_pct": 0.01,
+                  "stop_slip_bps": 10
+                }
+              ],
+              "exit_audit": {
+                "V12_SHORT_PROFIT_3_TO_1": {
+                  "preempted": 192,
+                  "by_outcome": {
+                    "original_win": 167,
+                    "original_loss": 25
+                  }
+                }
+              },
+              "model": "2026-10-17 latest8 M5 public historical normalized Aster, frozen V4 source",
+              "research_only": true
+            },
+            {
+              "policy": "S01_V12_SHORT_PROFIT_3_TO_1",
+              "cost_bps": 30,
+              "full8_final_jpy": 49994823.18497486,
+              "full8_max_dd_pct": -18.6801,
+              "full8_pf": 2.2337280673047646,
+              "win_pct": 70.939,
+              "closed_trades": 1342,
+              "accounting": "PASS",
+              "scenario_specs": [
+                {
+                  "id": "V12_SHORT_PROFIT_3_TO_1",
+                  "target": "V12",
+                  "side": "SHORT",
+                  "axis": "profit_reversal",
+                  "arm_close_pct": 0.03,
+                  "locked_profit_pct": 0.01,
+                  "stop_slip_bps": 10
+                }
+              ],
+              "exit_audit": {
+                "V12_SHORT_PROFIT_3_TO_1": {
+                  "preempted": 192,
+                  "by_outcome": {
+                    "original_win": 167,
+                    "original_loss": 25
+                  }
+                }
+              },
+              "model": "2026-10-17 latest8 M5 public historical normalized Aster, frozen V4 source",
+              "research_only": true
+            }
+          ],
+          "dd_delta_pctpoints": [
+            -1.2826,
+            -1.8923
+          ],
+          "accept_dd": false,
+          "delta_assets_jpy": [
+            -65560654.88683051,
+            -74294383.6333046
+          ]
+        },
+        {
+          "candidate": {
+            "id": "V12_SHORT_INITIAL_WALLET_1P0",
+            "target": "V12",
+            "side": "SHORT",
+            "axis": "initial_adverse",
+            "max_initial_wallet_loss_pct": 0.01,
+            "stop_slip_bps": 10
+          },
+          "policy": "S01_V12_SHORT_INITIAL_WALLET_1P0",
+          "metrics": [
+            {
+              "policy": "S01_V12_SHORT_INITIAL_WALLET_1P0",
+              "cost_bps": 10,
+              "full8_final_jpy": 62485435.22384849,
+              "full8_max_dd_pct": -24.9147,
+              "full8_pf": 2.4504855247167656,
+              "win_pct": 54.383,
+              "closed_trades": 1346,
+              "accounting": "PASS",
+              "scenario_specs": [
+                {
+                  "id": "V12_SHORT_INITIAL_WALLET_1P0",
+                  "target": "V12",
+                  "side": "SHORT",
+                  "axis": "initial_adverse",
+                  "max_initial_wallet_loss_pct": 0.01,
+                  "stop_slip_bps": 10
+                }
+              ],
+              "exit_audit": {
+                "V12_SHORT_INITIAL_WALLET_1P0": {
+                  "preempted": 500,
+                  "by_outcome": {
+                    "original_win": 303,
+                    "original_loss": 197
+                  }
+                }
+              },
+              "model": "2026-10-17 latest8 M5 public historical normalized Aster, frozen V4 source",
+              "research_only": true
+            },
+            {
+              "policy": "S01_V12_SHORT_INITIAL_WALLET_1P0",
+              "cost_bps": 30,
+              "full8_final_jpy": 15409228.72519141,
+              "full8_max_dd_pct": -26.3523,
+              "full8_pf": 1.7937179344247935,
+              "win_pct": 52.065,
+              "closed_trades": 1356,
+              "accounting": "PASS",
+              "scenario_specs": [
+                {
+                  "id": "V12_SHORT_INITIAL_WALLET_1P0",
+                  "target": "V12",
+                  "side": "SHORT",
+                  "axis": "initial_adverse",
+                  "max_initial_wallet_loss_pct": 0.01,
+                  "stop_slip_bps": 10
+                }
+              ],
+              "exit_audit": {
+                "V12_SHORT_INITIAL_WALLET_1P0": {
+                  "preempted": 500,
+                  "by_outcome": {
+                    "original_win": 303,
+                    "original_loss": 197
+                  }
+                }
+              },
+              "model": "2026-10-17 latest8 M5 public historical normalized Aster, frozen V4 source",
+              "research_only": true
+            }
+          ],
+          "dd_delta_pctpoints": [
+            -9.2941,
+            -9.5645
+          ],
+          "accept_dd": false,
+          "delta_assets_jpy": [
+            -160333531.65418646,
+            -108879978.09308803
+          ]
+        },
+        {
+          "candidate": {
+            "id": "V12_SHORT_INITIAL_WALLET_1P5",
+            "target": "V12",
+            "side": "SHORT",
+            "axis": "initial_adverse",
+            "max_initial_wallet_loss_pct": 0.015,
+            "stop_slip_bps": 10
+          },
+          "policy": "S01_V12_SHORT_INITIAL_WALLET_1P5",
+          "metrics": [
+            {
+              "policy": "S01_V12_SHORT_INITIAL_WALLET_1P5",
+              "cost_bps": 10,
+              "full8_final_jpy": 79345808.15729594,
+              "full8_max_dd_pct": -19.8679,
+              "full8_pf": 2.594196748063963,
+              "win_pct": 59.762,
+              "closed_trades": 1347,
+              "accounting": "PASS",
+              "scenario_specs": [
+                {
+                  "id": "V12_SHORT_INITIAL_WALLET_1P5",
+                  "target": "V12",
+                  "side": "SHORT",
+                  "axis": "initial_adverse",
+                  "max_initial_wallet_loss_pct": 0.015,
+                  "stop_slip_bps": 10
+                }
+              ],
+              "exit_audit": {
+                "V12_SHORT_INITIAL_WALLET_1P5": {
+                  "preempted": 396,
+                  "by_outcome": {
+                    "original_win": 221,
+                    "original_loss": 175
+                  }
+                }
+              },
+              "model": "2026-10-17 latest8 M5 public historical normalized Aster, frozen V4 source",
+              "research_only": true
+            },
+            {
+              "policy": "S01_V12_SHORT_INITIAL_WALLET_1P5",
+              "cost_bps": 30,
+              "full8_final_jpy": 19090301.02487651,
+              "full8_max_dd_pct": -21.2798,
+              "full8_pf": 1.811581018152367,
+              "win_pct": 57.122,
+              "closed_trades": 1355,
+              "accounting": "PASS",
+              "scenario_specs": [
+                {
+                  "id": "V12_SHORT_INITIAL_WALLET_1P5",
+                  "target": "V12",
+                  "side": "SHORT",
+                  "axis": "initial_adverse",
+                  "max_initial_wallet_loss_pct": 0.015,
+                  "stop_slip_bps": 10
+                }
+              ],
+              "exit_audit": {
+                "V12_SHORT_INITIAL_WALLET_1P5": {
+                  "preempted": 396,
+                  "by_outcome": {
+                    "original_win": 221,
+                    "original_loss": 175
+                  }
+                }
+              },
+              "model": "2026-10-17 latest8 M5 public historical normalized Aster, frozen V4 source",
+              "research_only": true
+            }
+          ],
+          "dd_delta_pctpoints": [
+            -4.2473,
+            -4.492
+          ],
+          "accept_dd": false,
+          "delta_assets_jpy": [
+            -143473158.720739,
+            -105198905.79340294
+          ]
+        }
+      ],
+      "selected_research_candidate": null,
+      "output_cumulative_ids": [],
+      "post_selection_control": [
+        {
+          "policy": "LATEST_20261017_BASELINE",
+          "cost_bps": 10,
+          "full8_final_jpy": 222818966.87803495,
+          "full8_max_dd_pct": -15.6206,
+          "full8_pf": 3.4587962777009813,
+          "win_pct": 72.366,
+          "closed_trades": 1310,
+          "accounting": "PASS",
+          "scenario_specs": [],
+          "exit_audit": {},
+          "model": "2026-10-17 latest8 M5 public historical normalized Aster, frozen V4 source",
+          "research_only": true
+        },
+        {
+          "policy": "LATEST_20261017_BASELINE",
+          "cost_bps": 30,
+          "full8_final_jpy": 124289206.81827945,
+          "full8_max_dd_pct": -16.7878,
+          "full8_pf": 3.0785603081685435,
+          "win_pct": 69.549,
+          "closed_trades": 1307,
+          "accounting": "PASS",
+          "scenario_specs": [],
+          "exit_audit": {},
+          "model": "2026-10-17 latest8 M5 public historical normalized Aster, frozen V4 source",
+          "research_only": true
+        }
+      ]
+    },
+    {
+      "stage": "S02",
+      "side_scope": "HYPE LONG",
+      "input_cumulative_ids": [],
+      "trials": [
+        {
+          "candidate": {
+            "id": "HYPE_LONG_PROFIT_1P5_TO_0P25",
+            "target": "HYPE_LONG",
+            "side": "LONG",
+            "axis": "profit_reversal",
+            "arm_close_pct": 0.015,
+            "locked_profit_pct": 0.0025,
+            "stop_slip_bps": 10
+          },
+          "policy": "S02_HYPE_LONG_PROFIT_1P5_TO_0P25",
+          "metrics": [
+            {
+              "policy": "S02_HYPE_LONG_PROFIT_1P5_TO_0P25",
+              "cost_bps": 10,
+              "full8_final_jpy": 184728396.46752086,
+              "full8_max_dd_pct": -15.6206,
+              "full8_pf": 3.1976648605591578,
+              "win_pct": 72.527,
+              "closed_trades": 1314,
+              "accounting": "PASS",
+              "scenario_specs": [
+                {
+                  "id": "HYPE_LONG_PROFIT_1P5_TO_0P25",
+                  "target": "HYPE_LONG",
+                  "side": "LONG",
+                  "axis": "profit_reversal",
+                  "arm_close_pct": 0.015,
+                  "locked_profit_pct": 0.0025,
+                  "stop_slip_bps": 10
+                }
+              ],
+              "exit_audit": {
+                "HYPE_LONG_PROFIT_1P5_TO_0P25": {
+                  "preempted": 17,
+                  "by_outcome": {
+                    "original_win": 9,
+                    "original_loss": 8
+                  }
+                }
+              },
+              "model": "2026-10-17 latest8 M5 public historical normalized Aster, frozen V4 source",
+              "research_only": true
+            },
+            {
+              "policy": "S02_HYPE_LONG_PROFIT_1P5_TO_0P25",
+              "cost_bps": 30,
+              "full8_final_jpy": 94624880.72511986,
+              "full8_max_dd_pct": -17.3115,
+              "full8_pf": 2.747692342774224,
+              "win_pct": 68.802,
+              "closed_trades": 1311,
+              "accounting": "PASS",
+              "scenario_specs": [
+                {
+                  "id": "HYPE_LONG_PROFIT_1P5_TO_0P25",
+                  "target": "HYPE_LONG",
+                  "side": "LONG",
+                  "axis": "profit_reversal",
+                  "arm_close_pct": 0.015,
+                  "locked_profit_pct": 0.0025,
+                  "stop_slip_bps": 10
+                }
+              ],
+              "exit_audit": {
+                "HYPE_LONG_PROFIT_1P5_TO_0P25": {
+                  "preempted": 17,
+                  "by_outcome": {
+                    "original_win": 9,
+                    "original_loss": 8
+                  }
+                }
+              },
+              "model": "2026-10-17 latest8 M5 public historical normalized Aster, frozen V4 source",
+              "research_only": true
+            }
+          ],
+          "dd_delta_pctpoints": [
+            0.0,
+            -0.5237
+          ],
+          "accept_dd": false,
+          "delta_assets_jpy": [
+            -38090570.41051409,
+            -29664326.093159586
+          ]
+        },
+        {
+          "candidate": {
+            "id": "HYPE_LONG_INITIAL_WALLET_1P5",
+            "target": "HYPE_LONG",
+            "side": "LONG",
+            "axis": "initial_adverse",
+            "max_initial_wallet_loss_pct": 0.015,
+            "stop_slip_bps": 10
+          },
+          "policy": "S02_HYPE_LONG_INITIAL_WALLET_1P5",
+          "metrics": [
+            {
+              "policy": "S02_HYPE_LONG_INITIAL_WALLET_1P5",
+              "cost_bps": 10,
+              "full8_final_jpy": 223577027.52434087,
+              "full8_max_dd_pct": -15.6206,
+              "full8_pf": 3.470877321919843,
+              "win_pct": 72.366,
+              "closed_trades": 1310,
+              "accounting": "PASS",
+              "scenario_specs": [
+                {
+                  "id": "HYPE_LONG_INITIAL_WALLET_1P5",
+                  "target": "HYPE_LONG",
+                  "side": "LONG",
+                  "axis": "initial_adverse",
+                  "max_initial_wallet_loss_pct": 0.015,
+                  "stop_slip_bps": 10
+                }
+              ],
+              "exit_audit": {
+                "HYPE_LONG_INITIAL_WALLET_1P5": {
+                  "preempted": 12,
+                  "by_outcome": {
+                    "original_win": 1,
+                    "original_loss": 11
+                  }
+                }
+              },
+              "model": "2026-10-17 latest8 M5 public historical normalized Aster, frozen V4 source",
+              "research_only": true
+            },
+            {
+              "policy": "S02_HYPE_LONG_INITIAL_WALLET_1P5",
+              "cost_bps": 30,
+              "full8_final_jpy": 123603207.2710779,
+              "full8_max_dd_pct": -16.7878,
+              "full8_pf": 2.972359399654795,
+              "win_pct": 69.525,
+              "closed_trades": 1306,
+              "accounting": "PASS",
+              "scenario_specs": [
+                {
+                  "id": "HYPE_LONG_INITIAL_WALLET_1P5",
+                  "target": "HYPE_LONG",
+                  "side": "LONG",
+                  "axis": "initial_adverse",
+                  "max_initial_wallet_loss_pct": 0.015,
+                  "stop_slip_bps": 10
+                }
+              ],
+              "exit_audit": {
+                "HYPE_LONG_INITIAL_WALLET_1P5": {
+                  "preempted": 12,
+                  "by_outcome": {
+                    "original_win": 1,
+                    "original_loss": 11
+                  }
+                }
+              },
+              "model": "2026-10-17 latest8 M5 public historical normalized Aster, frozen V4 source",
+              "research_only": true
+            }
+          ],
+          "dd_delta_pctpoints": [
+            0.0,
+            0.0
+          ],
+          "accept_dd": false,
+          "delta_assets_jpy": [
+            758060.6463059187,
+            -685999.547201544
+          ]
+        }
+      ],
+      "selected_research_candidate": null,
+      "output_cumulative_ids": [],
+      "post_selection_control": [
+        {
+          "policy": "LATEST_20261017_BASELINE",
+          "cost_bps": 10,
+          "full8_final_jpy": 222818966.87803495,
+          "full8_max_dd_pct": -15.6206,
+          "full8_pf": 3.4587962777009813,
+          "win_pct": 72.366,
+          "closed_trades": 1310,
+          "accounting": "PASS",
+          "scenario_specs": [],
+          "exit_audit": {},
+          "model": "2026-10-17 latest8 M5 public historical normalized Aster, frozen V4 source",
+          "research_only": true
+        },
+        {
+          "policy": "LATEST_20261017_BASELINE",
+          "cost_bps": 30,
+          "full8_final_jpy": 124289206.81827945,
+          "full8_max_dd_pct": -16.7878,
+          "full8_pf": 3.0785603081685435,
+          "win_pct": 69.549,
+          "closed_trades": 1307,
+          "accounting": "PASS",
+          "scenario_specs": [],
+          "exit_audit": {},
+          "model": "2026-10-17 latest8 M5 public historical normalized Aster, frozen V4 source",
+          "research_only": true
+        }
+      ]
+    }
+  ],
+  "cumulative_research_adopted_specs": [],
+  "current_cumulative_control": [
+    {
+      "policy": "LATEST_20261017_BASELINE",
+      "cost_bps": 10,
+      "full8_final_jpy": 222818966.87803495,
+      "full8_max_dd_pct": -15.6206,
+      "full8_pf": 3.4587962777009813,
+      "win_pct": 72.366,
+      "closed_trades": 1310,
+      "accounting": "PASS",
+      "scenario_specs": [],
+      "exit_audit": {},
+      "model": "2026-10-17 latest8 M5 public historical normalized Aster, frozen V4 source",
+      "research_only": true
+    },
+    {
+      "policy": "LATEST_20261017_BASELINE",
+      "cost_bps": 30,
+      "full8_final_jpy": 124289206.81827945,
+      "full8_max_dd_pct": -16.7878,
+      "full8_pf": 3.0785603081685435,
+      "win_pct": 69.549,
+      "closed_trades": 1307,
+      "accounting": "PASS",
+      "scenario_specs": [],
+      "exit_audit": {},
+      "model": "2026-10-17 latest8 M5 public historical normalized Aster, frozen V4 source",
+      "research_only": true
+    }
+  ],
+  "safety": "no LIVE changes / no submitted orders / profit-stop signed venue certification pending"
+}

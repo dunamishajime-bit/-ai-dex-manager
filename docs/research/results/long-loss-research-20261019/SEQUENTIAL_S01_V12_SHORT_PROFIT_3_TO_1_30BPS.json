@@ -1,0 +1,32 @@
+{
+  "policy": "S01_V12_SHORT_PROFIT_3_TO_1",
+  "cost_bps": 30,
+  "full8_final_jpy": 49994823.18497486,
+  "full8_max_dd_pct": -18.6801,
+  "full8_pf": 2.2337280673047646,
+  "win_pct": 70.939,
+  "closed_trades": 1342,
+  "accounting": "PASS",
+  "scenario_specs": [
+    {
+      "id": "V12_SHORT_PROFIT_3_TO_1",
+      "target": "V12",
+      "side": "SHORT",
+      "axis": "profit_reversal",
+      "arm_close_pct": 0.03,
+      "locked_profit_pct": 0.01,
+      "stop_slip_bps": 10
+    }
+  ],
+  "exit_audit": {
+    "V12_SHORT_PROFIT_3_TO_1": {
+      "preempted": 192,
+      "by_outcome": {
+        "original_win": 167,
+        "original_loss": 25
+      }
+    }
+  },
+  "model": "2026-10-17 latest8 M5 public historical normalized Aster, frozen V4 source",
+  "research_only": true
+}

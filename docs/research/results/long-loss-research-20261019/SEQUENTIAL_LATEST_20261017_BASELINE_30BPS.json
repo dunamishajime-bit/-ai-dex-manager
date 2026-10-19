@@ -1,0 +1,14 @@
+{
+  "policy": "LATEST_20261017_BASELINE",
+  "cost_bps": 30,
+  "full8_final_jpy": 124289206.81827945,
+  "full8_max_dd_pct": -16.7878,
+  "full8_pf": 3.0785603081685435,
+  "win_pct": 69.549,
+  "closed_trades": 1307,
+  "accounting": "PASS",
+  "scenario_specs": [],
+  "exit_audit": {},
+  "model": "2026-10-17 latest8 M5 public historical normalized Aster, frozen V4 source",
+  "research_only": true
+}

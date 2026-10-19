@@ -1,0 +1,31 @@
+{
+  "policy": "S02_HYPE_LONG_INITIAL_WALLET_1P5",
+  "cost_bps": 10,
+  "full8_final_jpy": 223577027.52434087,
+  "full8_max_dd_pct": -15.6206,
+  "full8_pf": 3.470877321919843,
+  "win_pct": 72.366,
+  "closed_trades": 1310,
+  "accounting": "PASS",
+  "scenario_specs": [
+    {
+      "id": "HYPE_LONG_INITIAL_WALLET_1P5",
+      "target": "HYPE_LONG",
+      "side": "LONG",
+      "axis": "initial_adverse",
+      "max_initial_wallet_loss_pct": 0.015,
+      "stop_slip_bps": 10
+    }
+  ],
+  "exit_audit": {
+    "HYPE_LONG_INITIAL_WALLET_1P5": {
+      "preempted": 12,
+      "by_outcome": {
+        "original_win": 1,
+        "original_loss": 11
+      }
+    }
+  },
+  "model": "2026-10-17 latest8 M5 public historical normalized Aster, frozen V4 source",
+  "research_only": true
+}
