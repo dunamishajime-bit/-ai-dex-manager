@@ -428,7 +428,12 @@ export function policyFromSource(source: CanonicalSource, stage: StageId): Produ
     if (supportedDirections === null) throw new Error(`SOURCE_ERROR: supportedDirections for ${strategy} is absent`);
     const timeStopValue = strategyConfig.config.timeStopBars;
     const timeStopBars = timeStopValue === null ? null : jsonNumber(strategyConfig.config, "timeStopBars");
-    if (timeStopValue !== null && timeStopBars === null) throw new Error(`SOURCE_ERROR: production config missing finite timeStopBars`);
+    const missingPolicyFields = ["initialStopBps", "profitFloorBps", "trailingGivebackBps"]
+        .filter((field) => jsonNumber(strategyConfig.config, field) === null);
+    if (timeStopValue !== null && timeStopBars === null) missingPolicyFields.push("timeStopBars");
+    if (missingPolicyFields.length > 0) {
+        throw new Error(`SOURCE_ERROR: production config missing finite policy fields: ${missingPolicyFields.join(", ")}`);
+    }
     const grossCap = requiredConfigNumber(strategyConfig.config, "grossCap");
     const sharedRiskCap = requiredConfigNumber(strategyConfig.config, "sharedRiskCap");
     const totalGrossCap = jsonNumber(strategyConfig.config, "totalGrossCap") ?? jsonNumber(strategyConfig.config, "aggregateGrossCap") ?? grossCap;

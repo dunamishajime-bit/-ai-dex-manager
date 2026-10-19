@@ -214,6 +214,32 @@ async function makeFixture(options: { readonly withBaselineLedger?: boolean; rea
     return { root, args: { ...args, productionSha } };
 }
 
+test("reports every missing production protection field before replay", async () => {
+    const fixture = await makeFixture();
+    try {
+        const source = await loadCanonicalSource({
+            sourceRoot: fixture.args.sourceRoot, dataRoot: fixture.args.dataRoot, productionSha: fixture.args.productionSha,
+            startTs: fixture.args.startTs, endTs: fixture.args.endTs, initialEquity: fixture.args.initialEquity, deposits: fixture.args.deposits,
+            feeBps: fixture.args.feeBps, slippageBps: fixture.args.slippageBps, fundingSource: fixture.args.fundingSource,
+        });
+        const brokenSource = {
+            ...source,
+            strategyConfigs: source.strategyConfigs.map((entry) => ({
+                ...entry,
+                config: Object.fromEntries(Object.entries(entry.config).filter(([key]) => ![
+                    "initialStopBps", "profitFloorBps", "trailingGivebackBps", "timeStopBars",
+                ].includes(key))),
+            })),
+        };
+        assert.throws(
+            () => policyFromSource(brokenSource, fixture.args.stage),
+            /initialStopBps, profitFloorBps, trailingGivebackBps, timeStopBars/,
+        );
+    } finally {
+        await cleanup(fixture.root);
+    }
+});
+
 async function cleanup(root: string): Promise<void> {
     await rm(root, { recursive: true, force: true });
 }
