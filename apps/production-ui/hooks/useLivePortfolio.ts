@@ -39,6 +39,9 @@ export type LivePortfolioSnapshot = {
       type: string;
       status: string;
       quantity: number;
+      price: number | null;
+      stopPrice: number | null;
+      activationPrice: number | null;
       reduceOnly: boolean;
       closePosition: boolean;
       protection: boolean;

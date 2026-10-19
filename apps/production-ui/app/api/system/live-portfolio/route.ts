@@ -33,11 +33,19 @@ type OpenOrder = {
   reduceOnly?: boolean | string;
   closePosition?: boolean | string;
   origQty?: string | number;
+  price?: string | number;
+  stopPrice?: string | number;
+  activationPrice?: string | number;
 };
 
 function finite(value: unknown) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function finiteOrNull(value: unknown) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
 }
 
 function bool(value: unknown) {
@@ -112,6 +120,9 @@ export async function GET() {
         type,
         status: String(order.status || ""),
         quantity: finite(order.origQty),
+        price: finiteOrNull(order.price),
+        stopPrice: finiteOrNull(order.stopPrice),
+        activationPrice: finiteOrNull(order.activationPrice),
         reduceOnly,
         closePosition,
         protection: reduceOnly || closePosition || /STOP|TAKE_PROFIT/i.test(type),

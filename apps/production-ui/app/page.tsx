@@ -32,6 +32,11 @@ function QuickLink({ href, title, detail, icon: Icon }: { href: string; title: s
   );
 }
 
+function formatVenuePrice(value: number | null) {
+  if (value == null || !Number.isFinite(value)) return "取引所未返却";
+  return value.toLocaleString("en-US", { useGrouping: false, maximumFractionDigits: 8 });
+}
+
 function V52Top2Summary() {
   const { snapshot: runtime } = useProductionRuntime();
   const v52 = runtime?.v52;
@@ -71,6 +76,10 @@ export default function HomePage() {
   const balance = snapshot?.account.balanceUsd ?? (typeof wallet?.lastAsterAccountBalanceUsd === "number" ? wallet.lastAsterAccountBalanceUsd : null);
   const available = snapshot?.account.availableUsd ?? (typeof wallet?.lastAsterAvailableBalanceUsd === "number" ? wallet.lastAsterAvailableBalanceUsd : null);
   const positions = snapshot?.positions ?? [];
+  const protectionBySymbol = snapshot?.orders.items.filter((order) => order.protection).reduce<Record<string, typeof snapshot.orders.items>>((grouped, order) => {
+    (grouped[order.symbol] ||= []).push(order);
+    return grouped;
+  }, {}) ?? {};
   const liveStatus = v12RuntimeStatus?.status === "LIVE" ? "V12 LIVE確認済み" : v12RuntimeStatus?.status === "STALE" ? "V12 要確認" : v12StatusLoading ? "LIVE状態を確認中" : "LIVE状態未取得";
 
   return (
@@ -117,7 +126,7 @@ export default function HomePage() {
         <section className="panel-gold rounded-[30px] p-4 md:p-5">
           <div className="flex items-center justify-between gap-3"><div className="flex items-center gap-2 text-sm font-bold"><BarChart3 className="h-4 w-4 text-gold-100" />現在のAster実建玉</div><span className="text-[11px] text-white/55">30秒ごとに再取得</span></div>
           <div className="mt-3 space-y-2">
-            {positions.length ? positions.map((position) => <div key={`${position.symbol}-${position.positionSide}`} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3"><div><div className="font-bold">{position.symbol} <span className={position.side === "LONG" ? "text-profit" : "text-loss"}>{position.side}</span></div><div className="text-xs text-white/60">数量 {position.quantity.toFixed(6)} / 建玉評価額 {formatPrice(position.notionalUsd)}</div></div><div className="text-right"><div className={position.unrealizedPnlUsd >= 0 ? "text-profit" : "text-loss"}>{formatPrice(position.unrealizedPnlUsd)}</div><div className="text-xs text-white/55">Entry {position.entryPrice > 0 ? position.entryPrice.toFixed(6) : "—"} / Mark {position.markPrice > 0 ? position.markPrice.toFixed(6) : "—"}</div></div></div>) : <div className="rounded-2xl border border-dashed border-white/10 px-4 py-6 text-center text-sm text-white/65">{snapshot ? "現在、Asterで確認できる実建玉はありません。" : "Aster実建玉を取得できません。"}</div>}
+            {positions.length ? positions.map((position) => { const orders = protectionBySymbol[position.symbol] ?? []; const stop = orders.find((order) => /STOP/i.test(order.type) && !/TAKE_PROFIT/i.test(order.type)); const takeProfit = orders.find((order) => /TAKE_PROFIT/i.test(order.type)); const stopPrice = stop?.stopPrice ?? stop?.activationPrice ?? stop?.price ?? null; const takeProfitPrice = takeProfit?.stopPrice ?? takeProfit?.activationPrice ?? takeProfit?.price ?? null; return <div key={`${position.symbol}-${position.positionSide}`} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3"><div><div className="font-bold">{position.symbol} <span className={position.side === "LONG" ? "text-profit" : "text-loss"}>{position.side}</span></div><div className="text-xs text-white/60">数量 {position.quantity.toFixed(6)} / 建玉評価額 {formatPrice(position.notionalUsd)}</div><div className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-white/70"><span className="text-rose-200">損切り価格 <span className="font-mono font-bold">{formatVenuePrice(stopPrice)}</span></span><span className="text-emerald-200">利確価格 <span className="font-mono font-bold">{formatVenuePrice(takeProfitPrice)}</span></span></div></div><div className="text-right"><div className={position.unrealizedPnlUsd >= 0 ? "text-profit" : "text-loss"}>{formatPrice(position.unrealizedPnlUsd)}</div><div className="text-xs text-white/55">Entry {position.entryPrice > 0 ? position.entryPrice.toFixed(6) : "—"} / Mark {position.markPrice > 0 ? position.markPrice.toFixed(6) : "—"}</div></div></div>; }) : <div className="rounded-2xl border border-dashed border-white/10 px-4 py-6 text-center text-sm text-white/65">{snapshot ? "現在、Asterで確認できる実建玉はありません。" : "Aster実建玉を取得できません。"}</div>}
           </div>
           <p className="mt-3 text-[11px] leading-5 text-white/55">この表示はAsterの読み取り結果です。HPから注文・取消・決済・建玉変更は行いません。</p>
         </section>

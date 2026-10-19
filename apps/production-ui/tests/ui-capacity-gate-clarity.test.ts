@@ -42,9 +42,23 @@ test("positions UI separates entry orders, protection orders and gross headroom"
   assert.match(page, /保護注文/);
   assert.match(page, /STOP_MARKET/);
   assert.match(page, /TAKE_PROFIT_MARKET/);
+  assert.match(page, /損切り価格/);
+  assert.match(page, /利確価格/);
+  assert.match(page, /stopPrice/);
   assert.match(hook, /entryOrderCount/);
+  assert.match(hook, /stopPrice/);
   assert.match(route, /entryOrderCount/);
+  assert.match(route, /stopPrice/);
+  assert.match(route, /activationPrice/);
   assert.match(route, /readV12Usage/);
+});
+
+test("home dashboard exposes read-only STOP and TP prices for held positions", async () => {
+  const page = await readFile("app/page.tsx", "utf8");
+  assert.match(page, /損切り価格/);
+  assert.match(page, /利確価格/);
+  assert.match(page, /protectionBySymbol/);
+  assert.match(page, /stopPrice/);
 });
 
 test("decision UI labels runner gate as authoritative", async () => {
