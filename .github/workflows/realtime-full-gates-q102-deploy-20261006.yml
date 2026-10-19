@@ -96,10 +96,19 @@ jobs:
           PORT=3018 HOSTNAME=127.0.0.1 node .deploy-ui/server.js > /tmp/ranking-preview.log 2>&1 &
           preview_pid=$!
           trap 'kill "$preview_pid" || true' EXIT
+          ready=0
           for attempt in $(seq 1 30); do
-            if curl -fsS -H 'Cookie: disdex_auth=1' http://127.0.0.1:3018/realtime >/dev/null; then break; fi
+            if curl -fsS -H 'Cookie: disdex_auth=1' http://127.0.0.1:3018/realtime >/dev/null; then
+              ready=1
+              break
+            fi
             sleep 1
           done
+          if [ "$ready" -ne 1 ]; then
+            echo 'Preview server did not become ready; startup log follows:'
+            cat /tmp/ranking-preview.log
+            exit 1
+          fi
           PLAYWRIGHT_MODULE=/tmp/ranking-browser/node_modules/playwright REALTIME_TEST_BASE=http://127.0.0.1:3018 node tests/realtime-ranking-motion.browser.cjs
 
       - name: Initialize root SSH
