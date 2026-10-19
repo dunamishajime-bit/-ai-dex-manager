@@ -9,7 +9,7 @@ const execFile = promisify(execFileCallback);
 const scriptDirectory = resolve(fileURLToPath(import.meta.url), "..");
 const repositoryRoot = resolve(scriptDirectory, "..", "..");
 const testsDirectory = join(repositoryRoot, "tests");
-const testFilePattern = /^dd-reduction-.*\.test\.ts$/;
+const testFilePattern = /^(?:dd-reduction-.*|legacy-adapter)\.test\.ts$/;
 const requiredTestFiles = [
     "dd-reduction-ci.test.ts",
     "dd-reduction-emulator.test.ts",
@@ -17,6 +17,7 @@ const requiredTestFiles = [
     "dd-reduction-policy.test.ts",
     "dd-reduction-runner.test.ts",
     "dd-reduction-source.test.ts",
+    "legacy-adapter.test.ts",
 ];
 
 export function assertTestDiscovery(testFiles) {
@@ -62,7 +63,9 @@ for (const name of testFiles) {
     } catch (error) {
         stdout = typeof error === "object" && error !== null && "stdout" in error ? String(error.stdout) : "";
         stderr = typeof error === "object" && error !== null && "stderr" in error ? String(error.stderr) : "";
-        throw new Error(`TEST_FAILURES: ${name} exited non-zero\n${stdout}\n${stderr}`);
+        const message = error instanceof Error ? error.message : String(error);
+        const code = typeof error === "object" && error !== null && "code" in error ? String(error.code) : "unknown";
+        throw new Error(`TEST_FAILURES: ${name} exited non-zero code=${code} ${message}\n${stdout}\n${stderr}`);
     }
 
     const summary = (label) => {

@@ -18,7 +18,7 @@ test("discovers every DD reduction fixture test and fails closed on silent outco
     const testScript = packageJson.scripts?.["dd:reduction:test"] ?? "";
     const runner = await readRepositoryFile("scripts/dd-reduction/run-tests.mjs");
     const testFiles = (await readdir(join(repositoryRoot, "tests")))
-        .filter((name) => /^dd-reduction-.*\.test\.ts$/.test(name))
+        .filter((name) => /^(?:dd-reduction-.*|legacy-adapter)\.test\.ts$/.test(name))
         .sort();
     const fixtureTestSources = await Promise.all(testFiles
         .filter((name) => name !== "dd-reduction-ci.test.ts")
@@ -32,13 +32,14 @@ test("discovers every DD reduction fixture test and fails closed on silent outco
     assert.match(runner, /testFiles\.length\s*===\s*0/);
     assert.match(runner, /TEST_SKIPPED_OR_TODO/);
     assert.match(runner, /requiredTestFiles/);
+    assert.match(runner, /legacy-adapter/);
     assert.match(runner, /execFile/);
     assert.match(runner, /--test/);
     assert.match(runner, /TEST_ACCOUNTING_MISMATCH/);
     assert.match(runner, /TEST_FAILURES/);
     assert.match(runner, /TEST_SKIPPED/);
     assert.match(runner, /TEST_TODO/);
-    assert.ok(testFiles.length >= 5, `expected the existing DD reduction fixture suite, found ${testFiles.length}`);
+    assert.ok(testFiles.length >= 6, `expected the existing DD reduction fixture suite, found ${testFiles.length}`);
     assert.ok(fixtureTestSources.every((source) => source.includes("assertFixtureIdentity")), "every DD reduction fixture module must validate its direct fixtures");
 });
 

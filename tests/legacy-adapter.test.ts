@@ -4,8 +4,10 @@ import test from "node:test";
 import { assertFixtureIdentity, FIXTURE_HASH } from "../lib/backtest/dd-reduction/fixture-identity";
 import {
     buildLegacyMappingReport,
+    lifecycleFields,
     mapLegacyStrategy,
     normalizeLegacyProtectionEvidence,
+    parseFiveMinuteCsv,
 } from "../scripts/dd-reduction/legacy-adapter";
 
 test("legacy strategy mapping preserves unsupported residual logic as unresolved", () => {
@@ -48,4 +50,38 @@ test("mapping report carries the explicit non-canonical classification", () => {
     assert.equal(report.classification, "LEGACY_NON_CANONICAL_RECONSTRUCTION");
     assert.equal(report.strategyMappings.RESIDUAL.status, "UNREPRESENTED_CURRENT_STRATEGY");
     assert.equal(report.protection.status, "PROTECTION_FIELDS_UNRESOLVED");
+});
+
+test("legacy lifecycle normalization rejects missing required fill fields", () => {
+    assert.throws(
+        () => lifecycleFields({ strategy_id: "V12", side: "SHORT", candidate_id: "missing-price", candidate_requested_gross: 1, accepted_gross: 1, entry_ts_ms: 1, quantity: 1, entry_fee: 0 }, "source", "config", "", true),
+        /LEGACY_LIFECYCLE_FIELD_UNRESOLVED: entryPrice/,
+    );
+    assert.throws(
+        () => lifecycleFields({ strategy_id: "V12", side: "UNKNOWN", candidate_id: "bad-side" }, "source", "config", "", false),
+        /LEGACY_LIFECYCLE_FIELD_UNRESOLVED: side=/,
+    );
+    assert.throws(
+        () => lifecycleFields({ strategy_id: "V12", side: "LONG", candidate_id: "missing-exit-fee", candidate_requested_gross: 1, accepted_gross: 1, entry_ts_ms: 1, entry_price: 100, quantity: 1, entry_fee: 0, exit_ts_ms: 2, exit_price: 101, total_pnl_jpy: 1 }, "source", "config", "", true, true),
+        /LEGACY_LIFECYCLE_FIELD_UNRESOLVED: exitFee/,
+    );
+});
+
+test("legacy accepted candidate omits an unproven exit instead of inventing fees or pnl", () => {
+    const normalized = lifecycleFields({
+        strategy_id: "V12", side: "LONG", candidate_id: "candidate-without-close-proof", candidate_requested_gross: 1, accepted_gross: 1,
+        entry_ts_ms: 1, entry_price: 100, quantity: 1, modeled_entry_fee_settlement: 0.1,
+        candidate_exit_ts_ms: 2, candidate_exit_price_usd: 101, candidate_exit_reason: "MODELED_EXIT",
+    }, "source", "config", "", true);
+    assert.equal(normalized.exit, null);
+    assert.equal((normalized.reconstructionAssumptions as { exitLifecycle: string }).exitLifecycle, "UNAVAILABLE_EXIT_OMITTED");
+    assert.equal(normalized.fee, 0.1);
+});
+
+test("legacy five-minute parser rejects duplicates and incomplete hours", () => {
+    const duplicate = "1754784000000,1,1,1,1,1\n1754784000000,1,1,1,1,1\n";
+    assert.throws(() => parseFiveMinuteCsv(duplicate, 1754784000000, 1754787600000), /duplicate legacy five-minute bar/);
+    const incomplete = Array.from({ length: 11 }, (_, index) => `${1754784000000 + index * 300000},1,1,1,1,1`).join("\n");
+    const parsed = parseFiveMinuteCsv(incomplete, 1754784000000, 1754787600000);
+    assert.equal(parsed.rowsPerHour.get(1754784000000), 11);
 });

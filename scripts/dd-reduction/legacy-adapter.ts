@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { execFile as execFileCallback } from "node:child_process";
-import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, unlink, writeFile } from "node:fs/promises";
 import { promisify } from "node:util";
 import { join, resolve } from "node:path";
 
@@ -154,57 +154,121 @@ function strategyId(row: JsonRecord): string {
 }
 
 function side(row: JsonRecord): "LONG" | "SHORT" {
-    return row.side === "SHORT" ? "SHORT" : "LONG";
+    if (row.side === "LONG" || row.side === "SHORT") return row.side;
+    throw new Error(`LEGACY_LIFECYCLE_FIELD_UNRESOLVED: side=${String(row.side)}`);
 }
 
 function oldTs(row: JsonRecord, key: string, fallback: string): number {
     return finiteNumber(row[key], finiteNumber(row[fallback], 0));
 }
 
-function lifecycleFields(row: JsonRecord, sourceHash: string, configHash: string, resultHash: string, accepted: boolean): JsonRecord {
+function requiredFinite(value: unknown, field: string, row: JsonRecord): number {
+    if (!Number.isFinite(value)) throw new Error(`LEGACY_LIFECYCLE_FIELD_UNRESOLVED: ${field} candidate=${String(row.candidate_id ?? row.position_id ?? "unknown")}`);
+    return value as number;
+}
+
+function requiredPositive(value: unknown, field: string, row: JsonRecord): number {
+    const numberValue = requiredFinite(value, field, row);
+    if (numberValue <= 0) throw new Error(`LEGACY_LIFECYCLE_FIELD_INVALID: ${field}=${numberValue} candidate=${String(row.candidate_id ?? row.position_id ?? "unknown")}`);
+    return numberValue;
+}
+
+function optionalLegacyValue(row: JsonRecord, ...keys: string[]): number | null {
+    for (const key of keys) {
+        const value = row[key];
+        if (value === undefined || value === null) continue;
+        if (!Number.isFinite(value)) throw new Error(`LEGACY_LIFECYCLE_FIELD_INVALID: ${key} candidate=${String(row.candidate_id ?? row.position_id ?? "unknown")}`);
+        return value as number;
+    }
+    return null;
+}
+
+export function lifecycleFields(
+    row: JsonRecord,
+    sourceHash: string,
+    configHash: string,
+    resultHash: string,
+    accepted: boolean,
+    requireClosedLifecycle = false,
+): JsonRecord {
     const strategy = mapLegacyStrategy(strategyId(row)).current;
     if (strategy === null) throw new Error(`unsupported legacy strategy cannot be normalized: ${strategyId(row)}`);
-    const requestedGross = finiteNumber(row.candidate_requested_gross, finiteNumber(row.requested_gross, finiteNumber(row.accepted_gross)));
-    const acceptedGross = accepted ? finiteNumber(row.accepted_gross, requestedGross) : 0;
-    const entryTs = oldTs(row, "entry_ts_ms", "signal_ts_ms");
+    const requestedGross = accepted
+        ? requiredPositive(row.candidate_requested_gross ?? row.requested_gross ?? row.accepted_gross, "requestedGross", row)
+        : finiteNumber(row.candidate_requested_gross, finiteNumber(row.requested_gross, finiteNumber(row.accepted_gross)));
+    const acceptedGross = accepted ? requiredPositive(row.accepted_gross ?? requestedGross, "acceptedGross", row) : 0;
+    const entryTs = accepted
+        ? requiredPositive(row.entry_ts_ms ?? row.signal_ts_ms, "entryTs", row)
+        : oldTs(row, "entry_ts_ms", "signal_ts_ms");
     const exitTs = oldTs(row, "exit_ts_ms", "candidate_exit_ts_ms");
-    const entryPrice = finiteNumber(row.entry_price, finiteNumber(row.modeled_entry_price_usd));
-    const exitPrice = finiteNumber(row.exit_price, finiteNumber(row.candidate_exit_price_usd, entryPrice));
-    const quantity = finiteNumber(row.quantity, finiteNumber(row.original_quantity, finiteNumber(row.modeled_entry_quantity)));
-    const entryFee = finiteNumber(row.entry_fee, finiteNumber(row.modeled_entry_fee_settlement));
-    const exitFee = finiteNumber(row.exit_fee);
+    const entryPrice = accepted
+        ? requiredPositive(row.entry_price ?? row.modeled_entry_price_usd ?? row.candidate_entry_price_usd, "entryPrice", row)
+        : finiteNumber(row.entry_price, finiteNumber(row.modeled_entry_price_usd));
+    const exitPriceValue = exitTs > 0 ? optionalLegacyValue(row, "exit_price", "candidate_exit_price_usd") : null;
+    if (accepted && requireClosedLifecycle && exitTs > 0 && exitPriceValue === null) {
+        throw new Error(`LEGACY_LIFECYCLE_FIELD_UNRESOLVED: exitPrice candidate=${String(row.candidate_id ?? row.position_id ?? "unknown")}`);
+    }
+    const exitPrice = exitPriceValue ?? 0;
+    const quantity = accepted
+        ? requiredPositive(row.quantity ?? row.original_quantity ?? row.modeled_entry_quantity, "quantity", row)
+        : finiteNumber(row.quantity, finiteNumber(row.original_quantity, finiteNumber(row.modeled_entry_quantity)));
+    const entryFee = accepted
+        ? requiredFinite(row.entry_fee ?? row.modeled_entry_fee_settlement, "entryFee", row)
+        : finiteNumber(row.entry_fee, finiteNumber(row.modeled_entry_fee_settlement));
+    const exitFeeValue = exitTs > 0 ? optionalLegacyValue(row, "exit_fee", "modeled_exit_fee_settlement") : null;
+    if (accepted && requireClosedLifecycle && exitTs > 0 && exitFeeValue === null) {
+        throw new Error(`LEGACY_LIFECYCLE_FIELD_UNRESOLVED: exitFee candidate=${String(row.candidate_id ?? row.position_id ?? "unknown")}`);
+    }
+    const exitFee = exitFeeValue ?? 0;
+    const legacyFundingPnl = optionalLegacyValue(row, "funding_pnl", "funding");
     const funding = 0;
     const fill = accepted ? {
         sourceHash, ts: entryTs, price: entryPrice, quantity, gross: acceptedGross, fee: entryFee, funding, slippage: 0,
         reason: "LEGACY_MODELED_ENTRY",
     } : null;
-    const exit = accepted && exitTs > 0 ? {
+    const realizedPnlValue = exitTs > 0 ? optionalLegacyValue(row, "total_pnl_jpy", "modeled_realized_pnl_jpy_at_exit_fx") : null;
+    if (accepted && requireClosedLifecycle && exitTs > 0 && realizedPnlValue === null) {
+        throw new Error(`LEGACY_LIFECYCLE_FIELD_UNRESOLVED: realizedPnl candidate=${String(row.candidate_id ?? row.position_id ?? "unknown")}`);
+    }
+    const canReplayExit = accepted && exitTs > 0 && exitPriceValue !== null && exitFeeValue !== null && realizedPnlValue !== null;
+    const exit = canReplayExit ? {
         sourceHash, ts: exitTs, price: exitPrice, quantity, gross: acceptedGross, fee: exitFee, funding, slippage: 0,
-        realizedPnl: finiteNumber(row.total_pnl_jpy), reason: nonEmptyString(row.exit_reason_actual ?? row.candidate_exit_reason, "LEGACY_MODELED_EXIT"),
+        realizedPnl: realizedPnlValue as number, reason: nonEmptyString(row.exit_reason_actual ?? row.candidate_exit_reason, "LEGACY_MODELED_EXIT"),
     } : null;
     return {
         sourceHash, ts: entryTs, strategy, direction: side(row), symbol: nonEmptyString(row.symbol, "UNKNOWN"), requestedGross, acceptedGross,
         reservation: accepted ? { sourceHash, ts: entryTs, requestedGross, acceptedGross, reservedGross: acceptedGross, reason: "LEGACY_MODELED_RESERVATION" } : null,
         fill, exit, reason: accepted ? "LEGACY_MODELED_ENTRY" : nonEmptyString(row.reason, "LEGACY_REJECTED"), fee: entryFee + exitFee, funding,
         slippage: 0, policyHash: hashJson({ legacy: true, policy: "UNRESOLVED", strategy }), configHash, resultHash,
+        reconstructionAssumptions: {
+            funding: legacyFundingPnl === null ? "UNAVAILABLE_NOT_REPLAYED" : "LEGACY_VALUE_NOT_REPLAYED",
+            slippage: "NOT_PERSISTED_IN_LEGACY_ARTIFACT",
+            exitLifecycle: accepted && exitTs > 0 && !canReplayExit ? "UNAVAILABLE_EXIT_OMITTED" : "AVAILABLE_IN_SOURCE",
+        },
     };
 }
 
 function legacyBaselineRow(row: JsonRecord, sourceHash: string, configHash: string): JsonRecord {
-    const resultHash = hashJson(row);
+    const normalized = lifecycleFields(row, sourceHash, configHash, "", true, true);
+    const { resultHash: _ignoredResultHash, ...hashable } = normalized;
+    const resultHash = hashJson(hashable);
     return {
-        ...lifecycleFields(row, sourceHash, configHash, resultHash, true),
+        ...normalized,
+        resultHash,
         tradeId: nonEmptyString(row.position_id ?? row.candidate_id, resultHash),
-        entry: lifecycleFields(row, sourceHash, configHash, resultHash, true).fill,
-        finalExit: lifecycleFields(row, sourceHash, configHash, resultHash, true).exit,
+        entry: normalized.fill,
+        finalExit: normalized.exit,
     };
 }
 
 function legacyCandidateRow(row: JsonRecord, sourceHash: string, configHash: string): JsonRecord {
-    const accepted = row.decision === "ACCEPTED_MODELED_ENTRY" || row.upstream_status === "MODELED_CLOSED_TRADE";
-    const resultHash = hashJson(row);
+    const accepted = row.decision === "ACCEPTED_MODELED_ENTRY";
+    const normalized = lifecycleFields(row, sourceHash, configHash, "", accepted);
+    const { resultHash: _ignoredResultHash, ...hashable } = normalized;
+    const resultHash = hashJson(hashable);
     return {
-        ...lifecycleFields(row, sourceHash, configHash, resultHash, accepted),
+        ...normalized,
+        resultHash,
         candidateId: nonEmptyString(row.candidate_id, resultHash),
         accepted,
         rejectionReason: accepted ? null : nonEmptyString(row.reason, "LEGACY_REJECTED"),
@@ -215,8 +279,9 @@ function canonicalDirectorySha(files: readonly { path: string; content: string }
     return sha256([...files].sort((left, right) => left.path.localeCompare(right.path)).map((file) => `${file.path}\n${file.content}`).join("\n"));
 }
 
-function parseFiveMinuteCsv(content: string, startTs: number, endTs: number): Map<number, { open: number; high: number; low: number; close: number; volume: number }> {
+export function parseFiveMinuteCsv(content: string, startTs: number, endTs: number): { bars: Map<number, { open: number; high: number; low: number; close: number; volume: number }>; rowsPerHour: Map<number, number> } {
     const bars = new Map<number, { open: number; high: number; low: number; close: number; volume: number }>();
+    const rowsPerHour = new Map<number, number>();
     for (const line of content.split(/\r?\n/)) {
         if (line.trim().length === 0) continue;
         const cells = line.split(",");
@@ -228,41 +293,69 @@ function parseFiveMinuteCsv(content: string, startTs: number, endTs: number): Ma
         const close = Number(cells[4]);
         const volume = Number(cells[5]);
         if (![open, high, low, close, volume].every(Number.isFinite)) throw new Error(`invalid Binance Vision 5m row at ${ts}`);
+        if (bars.has(ts)) throw new Error(`duplicate legacy five-minute bar at ${ts}`);
         const hour = Math.floor(ts / HOUR_MS) * HOUR_MS;
-        const current = bars.get(hour);
-        if (current === undefined) bars.set(hour, { open, high, low, close, volume });
-        else {
-            current.high = Math.max(current.high, high);
-            current.low = Math.min(current.low, low);
-            current.close = close;
-            current.volume += volume;
-        }
+        bars.set(ts, { open, high, low, close, volume });
+        rowsPerHour.set(hour, (rowsPerHour.get(hour) ?? 0) + 1);
     }
-    return bars;
+    return { bars, rowsPerHour };
 }
 
-async function aggregateSymbol(symbol: string, cacheRoot: string, startTs: number, endTs: number): Promise<{ rows: JsonRecord[]; files: FileSnapshot[] }> {
+async function aggregateSymbol(symbol: string, cacheRoot: string, startTs: number, endTs: number): Promise<{ rows: JsonRecord[]; files: FileSnapshot[]; fiveMinuteCoverage: JsonRecord }> {
     const directory = join(cacheRoot, symbol);
     const entries = (await readdir(directory)).filter((name) => name.toLowerCase().endsWith(".zip")).sort();
     if (entries.length !== 13) throw new Error(`legacy Binance cache is incomplete for ${symbol}: ${entries.length} monthly files`);
     const aggregate = new Map<number, { open: number; high: number; low: number; close: number; volume: number }>();
+    const rowsPerHour = new Map<number, number>();
     const files: FileSnapshot[] = [];
     for (const entry of entries) {
         const zipPath = join(directory, entry);
         files.push(await snapshot(zipPath));
         const extracted = await execFile("tar.exe", ["-xOf", zipPath], { encoding: "utf8", maxBuffer: 8 * 1024 * 1024 });
-        for (const [ts, bar] of parseFiveMinuteCsv(extracted.stdout, startTs, endTs)) {
+        const parsed = parseFiveMinuteCsv(extracted.stdout, startTs, endTs);
+        for (const [hour, count] of parsed.rowsPerHour) rowsPerHour.set(hour, (rowsPerHour.get(hour) ?? 0) + count);
+        for (const [ts, bar] of parsed.bars) {
             const current = aggregate.get(ts);
-            if (current === undefined) aggregate.set(ts, bar);
-            else throw new Error(`duplicate legacy hourly bar for ${symbol} at ${ts}`);
+            if (current !== undefined) throw new Error(`duplicate legacy five-minute bar for ${symbol} at ${ts}`);
+            aggregate.set(ts, bar);
         }
     }
-    const rows: JsonRecord[] = [...aggregate.entries()].sort(([left], [right]) => left - right).map(([ts, bar]) => ({ ts, symbol, timeframe: "1h", ...bar }));
     const expectedCount = (endTs - startTs) / HOUR_MS;
+    for (let hour = startTs; hour < endTs; hour += HOUR_MS) {
+        const count = rowsPerHour.get(hour) ?? 0;
+        if (count !== 12) throw new Error(`legacy hourly bucket is incomplete for ${symbol} at ${hour}: fiveMinuteRows=${count}, expected=12`);
+    }
+    const rows: JsonRecord[] = [...aggregate.entries()].sort(([left], [right]) => left - right).reduce<JsonRecord[]>((result, [ts, bar]) => {
+        const hour = Math.floor(ts / HOUR_MS) * HOUR_MS;
+        const existing = result.at(-1);
+        if (existing?.ts === hour) {
+            existing.high = Math.max(Number(existing.high), bar.high);
+            existing.low = Math.min(Number(existing.low), bar.low);
+            existing.close = bar.close;
+            existing.volume = Number(existing.volume) + bar.volume;
+        } else {
+            result.push({ ts: hour, symbol, timeframe: "1h", open: bar.open, high: bar.high, low: bar.low, close: bar.close, volume: bar.volume });
+        }
+        return result;
+    }, []);
     if (rows.length !== expectedCount || rows[0]?.ts !== startTs || rows.at(-1)?.ts !== endTs - HOUR_MS) {
         throw new Error(`legacy hourly coverage is incomplete for ${symbol}: rows=${rows.length}, expected=${expectedCount}`);
     }
-    return { rows, files };
+    const fiveMinuteRows = [...rowsPerHour.values()].reduce((sum, count) => sum + count, 0);
+    return {
+        rows,
+        files,
+        fiveMinuteCoverage: {
+            timeframe: "5m",
+            expectedRowsPerHour: 12,
+            totalRows: fiveMinuteRows,
+            expectedTotalRows: rows.length * 12,
+            hours: rows.length,
+            incompleteHours: 0,
+            duplicateRows: 0,
+            coverageStatus: "COMPLETE_5M_TO_1H",
+        },
+    };
 }
 
 export interface LegacyAdapterArgs {
@@ -328,9 +421,35 @@ export async function reconstructLegacy(args: LegacyAdapterArgs): Promise<JsonRe
     const productionContent = `${JSON.stringify(production, null, 2)}\n`;
     await writeFile(join(sourceRoot, "legacy-production.json"), productionContent, "utf8");
     const baselineRows = trades.filter((row) => strategyId(row) === "V12").map((row) => legacyBaselineRow(row, tradeSnapshot.sha256, configHash));
-    const candidateRows = decisions.filter((row) => mapLegacyStrategy(strategyId(row)).current !== null).map((row) => legacyCandidateRow(row, decisionSnapshot.sha256, configHash));
+    const candidateRows: JsonRecord[] = [];
+    const unresolvedCandidateRows: JsonRecord[] = [];
+    for (const row of decisions.filter((candidate) => mapLegacyStrategy(strategyId(candidate)).current !== null)) {
+        try {
+            candidateRows.push(legacyCandidateRow(row, decisionSnapshot.sha256, configHash));
+        } catch (error: unknown) {
+            const message = error instanceof Error ? error.message : String(error);
+            const isRejected = row.decision !== "ACCEPTED_MODELED_ENTRY";
+            if (!isRejected || !message.startsWith("LEGACY_LIFECYCLE_FIELD_UNRESOLVED:")) throw error;
+            unresolvedCandidateRows.push({
+                candidateId: nonEmptyString(row.candidate_id, "UNRESOLVED_CANDIDATE"),
+                strategyId: strategyId(row),
+                symbol: nonEmptyString(row.symbol, "UNKNOWN"),
+                decision: nonEmptyString(row.decision, "UNKNOWN"),
+                reason: nonEmptyString(row.reason, "LEGACY_REJECTED"),
+                unresolvedReason: message,
+                rawSourceHash: decisionSnapshot.sha256,
+            });
+        }
+    }
     await writeFile(join(sourceRoot, "legacy-baseline-ledger.jsonl"), `${baselineRows.map((row) => JSON.stringify(row)).join("\n")}\n`, "utf8");
     await writeFile(join(sourceRoot, "legacy-candidate-events.jsonl"), `${candidateRows.map((row) => JSON.stringify(row)).join("\n")}\n`, "utf8");
+    const unresolvedCandidatePath = join(reportRoot, "legacy-candidate-unresolved.jsonl");
+    try {
+        await unlink(join(sourceRoot, "legacy-candidate-unresolved.jsonl"));
+    } catch {
+        // The legacy reconstruction output may be newly created and have no stale file to remove.
+    }
+    await writeFile(unresolvedCandidatePath, `${unresolvedCandidateRows.map((row) => JSON.stringify(row)).join("\n")}\n`, "utf8");
 
     const dataFiles: FileSnapshot[] = [];
     const series: JsonRecord[] = [];
@@ -341,7 +460,7 @@ export async function reconstructLegacy(args: LegacyAdapterArgs): Promise<JsonRe
         await writeFile(target, content, "utf8");
         const targetSnapshot = await snapshot(target);
         dataFiles.push(...aggregated.files);
-        series.push({ symbol, timeframe: "1h", firstTs: startTs, lastTs: endTs - HOUR_MS, rowCount: aggregated.rows.length, sha256: hashJson(aggregated.rows), materialSha256: targetSnapshot.sha256, materialBytes: targetSnapshot.bytes });
+        series.push({ symbol, timeframe: "1h", firstTs: startTs, lastTs: endTs - HOUR_MS, rowCount: aggregated.rows.length, sha256: hashJson(aggregated.rows), materialSha256: targetSnapshot.sha256, materialBytes: targetSnapshot.bytes, fiveMinuteCoverage: aggregated.fiveMinuteCoverage });
     }
 
     const sourceFiles = [
@@ -363,13 +482,17 @@ export async function reconstructLegacy(args: LegacyAdapterArgs): Promise<JsonRe
         slippageBps: 0,
         fundingSource: "LEGACY_PUBLIC_BINANCE_VISION_PRICE_ONLY_NO_FUNDING_REPLAY",
         legacyArtifacts: [tradeSnapshot, decisionSnapshot, metricsSnapshot],
+        unresolvedCandidateArtifact: await snapshot(unresolvedCandidatePath),
         legacyRuntimeSha: runtimeSha,
+        candidateRows: candidateRows.length,
+        unresolvedCandidateRows: unresolvedCandidateRows.length,
+        unresolvedCandidateReasons: unresolvedCandidateRows.map((row) => row.unresolvedReason),
         series,
         cacheFiles: dataFiles,
         generatedAt: new Date().toISOString(),
     };
     await writeFile(join(reportRoot, "legacy-source-manifest.json"), `${JSON.stringify(sourceManifest, null, 2)}\n`, "utf8");
-    await writeFile(join(reportRoot, "legacy-mapping-report.json"), `${JSON.stringify({ ...mapping, oldRunRoot: legacyRunRoot, oldStrategyIds: strategyIds, sourceArtifactCounts: { trades: trades.length, candidateDecisions: decisions.length, v12BaselineRows: baselineRows.length, supportedCandidateRows: candidateRows.length } }, null, 2)}\n`, "utf8");
+    await writeFile(join(reportRoot, "legacy-mapping-report.json"), `${JSON.stringify({ ...mapping, oldRunRoot: legacyRunRoot, oldStrategyIds: strategyIds, sourceArtifactCounts: { trades: trades.length, candidateDecisions: decisions.length, v12BaselineRows: baselineRows.length, supportedCandidateRows: candidateRows.length, unresolvedCandidateRows: unresolvedCandidateRows.length } }, null, 2)}\n`, "utf8");
 
     const comparison: JsonRecord = { classification: LEGACY_CLASSIFICATION, source: { scenarioId, costBps: metrics.round_trip_cost_bps, finalEquityJpy: metrics.final_equity_jpy, maxMtmDrawdown: metrics.maximum_mtm_drawdown, closedTrades: metrics.closed_trades, profitFactor: metrics.profit_factor, winRate: metrics.win_rate } };
     if (args.legacyThirtyBpsRunRoot !== undefined) {
@@ -409,6 +532,8 @@ export async function reconstructLegacy(args: LegacyAdapterArgs): Promise<JsonRe
         "",
         "The current protection contract is intentionally unresolved. The legacy V12 hybrid values are recorded in `reports/legacy-mapping-report.json`; no values are substituted into the current runner.",
         "",
+        `There are ${unresolvedCandidateRows.length} supported legacy candidate rows with unresolved lifecycle fields. They are preserved in reports/legacy-candidate-unresolved.jsonl and are excluded from the normalized candidate ledger; this is an explicit non-canonical omission, not an inferred direction or fill.`,
+        "",
         "Run `dd:reduction:source` against `reports/legacy-source-manifest.json` and run the baseline only as a fail-closed diagnostic. A protection-field error is expected and must not be treated as a successful replay.",
         "",
     ].join("\n"), "utf8");
@@ -423,7 +548,7 @@ export async function reconstructLegacy(args: LegacyAdapterArgs): Promise<JsonRe
         "",
     ].join("\n"), "utf8");
 
-    return { classification: LEGACY_CLASSIFICATION, outputRoot, sourceRoot, dataRoot, productionSha, baselineRows: baselineRows.length, candidateRows: candidateRows.length, series: series.length, protectionStatus: LEGACY_PROTECTION_STATUS };
+    return { classification: LEGACY_CLASSIFICATION, outputRoot, sourceRoot, dataRoot, productionSha, baselineRows: baselineRows.length, candidateRows: candidateRows.length, unresolvedCandidateRows: unresolvedCandidateRows.length, series: series.length, protectionStatus: LEGACY_PROTECTION_STATUS };
 }
 
 function requiredFlag(args: readonly string[], name: string): string {
