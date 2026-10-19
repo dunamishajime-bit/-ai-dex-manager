@@ -14,7 +14,7 @@
         "dd:reduction:source": "tsx scripts/dd-reduction/verify-source.ts",
         "dd:reduction:baseline": "tsx scripts/dd-reduction/run-baseline.ts",
         "dd:reduction:stage": "tsx scripts/dd-reduction/run-stage.ts",
-        "dd:reduction:test": "tsx --test tests/dd-reduction-source.test.ts tests/dd-reduction-emulator.test.ts tests/dd-reduction-metrics.test.ts tests/dd-reduction-policy.test.ts tests/dd-reduction-runner.test.ts"
+        "dd:reduction:test": "tsx scripts/dd-reduction/run-tests.mjs"
     },
     "dependencies": {
         "@google/generative-ai": "^0.24.1",
