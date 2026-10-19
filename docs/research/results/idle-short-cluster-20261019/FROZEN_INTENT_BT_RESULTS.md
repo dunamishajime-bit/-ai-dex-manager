@@ -92,3 +92,32 @@ Audit and test a precise UTC-day incremental MTM loss metric, **while retaining 
 - Independently test 2026-10-19 event at original price/clock and whether each variant would have admitted JUP, TAO, TIA.
 - Require robust forward-triggered OOS, not zero-veto HOLD, before parameter promotion.
 - No LIVE switch or orders from this PR.
+
+## Additional causal closed-loss cooldown experiment
+
+A separate **entry-time causal** frozen replay activated portfolio-wide Idle SHORT cooldown **only after a previously admitted position actually exited at a realized negative return**. Previous exits at or before the candidate entry clock were processed first; skipped trades do not subsequently contribute phantom loss alerts.
+
+| Cooldown after any closed loser | Accepted | Winners | PF 10bps | Weighted return contribution 10bps |
+|---|---:|---:|---:|---:|
+| None | 61 | 48 | 5.861 | +76.183% |
+| 6h | 60 | 47 | 5.766 | +74.704% |
+| 24h | 58 | 46 | 6.049 | +74.732% |
+| 48h | 56 | 44 | 5.707 | +69.671% |
+
+The 6h cooldown excluded a **winning JUP** trade (+1.479% weighted), while the 24h cooldown excluded two winners and one smaller loser. This does **not** support automatically imposing a broad post-realized-loss pause. It is not a substitute for a fresh *open-position* PnL / resident STOP risk check at a new admission.
+
+## Historical full-portfolio anchor was independently replay-verified; changed-variant DD is still unknown
+
+Separately ran the untouched `docs/research/results/trail020-idle-doge-avax-controlling-20261002/replay-ledger.py` on the archived **Trail0.20 + Idle + DOGE/AVAX** portfolio ledger (this is **a different older portfolio composition than the current V4/Exit Overlay production**). All three immutable original reference assertions passed:
+
+| Cost | Historical base entries | Profit factor | Official historical max H1 MTM DD | Official historical final equity JPY |
+|---|---:|---:|---:|---:|
+| 10bps | 1,390 | 2.3323 | -21.3596% | 1,319,918,379 |
+| 20bps | 1,388 | 2.0916 | -22.2766% | 418,296,811 |
+| 30bps | 1,382 | 1.8747 | -23.3606% | 118,566,759 |
+
+These are exact **prior unchanged historical reference values**. Do not transplant them into ATR/gross candidate variants or claim that current production would earn them. The new strategies' integrated DD, trade re-admission, formal compounding and liquidity have **not** been re-simulated: only the frozen 61 accepted-intent filter replay has been executed.
+
+## Priority for next work
+
+The combined ATR<=2.5% + Gross<=1.5x filter left 54 entries, 44 winners and 10 losers in the fixed replay with 10bps weighted sum +76.616%, 20bps +73.316%, and 30bps +70.016%. The gross restriction limits nominal initial resident-STOP-at-risk to <=15% of equity (actual accepted historical maxima were 1.25x / 12.5%) before costs and slippage. The historical aggregate benefit over unchanged source (+0.433 percentage points of weighted return) is **not robust proof**: about 95% of the ATR-only gain came from removing a single major JUP loss, and the forward HOLD slice had no affected ATR trades. Treat this as a candidate for price- and ownership-causal formal validation, not a deployable policy.
