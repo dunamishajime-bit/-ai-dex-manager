@@ -817,6 +817,35 @@ test("rejected candidates with attached fills never create exposure or accepted 
     assert.match(replay.reason, /MANUAL_REVIEW/);
 });
 
+test("candidate fills outside the replay window never create exposure", () => {
+    const startTs = 1_700_000_000_000;
+    const endTs = startTs + 3_600_000;
+    const replay = replayIntegrated(
+        replaySource([bar({ ts: startTs })], [candidate({ candidateId: "fill-after-end", ts: startTs, fill: fill(100, 1, endTs + 1) })]),
+        replayConfig({ startTs, endTs }),
+    );
+
+    assert.deepEqual(replay.positions, []);
+    assert.equal(replay.portfolio.at(-1)?.acceptedGross, 0);
+    assert.match(replay.reason, /MANUAL_REVIEW/);
+});
+
+test("candidate fills before their decision timestamp fail closed", () => {
+    const startTs = 1_700_000_000_000;
+    const decisionTs = startTs + 3_600_000;
+    const replay = replayIntegrated(
+        replaySource(
+            [bar({ ts: startTs }), bar({ ts: decisionTs })],
+            [candidate({ candidateId: "fill-before-decision", ts: decisionTs, fill: fill(100, 1, startTs) })],
+        ),
+        replayConfig({ startTs, endTs: decisionTs }),
+    );
+
+    assert.deepEqual(replay.positions, []);
+    assert.equal(replay.portfolio.at(-1)?.acceptedGross, 0);
+    assert.match(replay.reason, /MANUAL_REVIEW/);
+});
+
 test("combines generated protective triggers and supplied same-bar executions under one STOP-first priority pass", () => {
     const startTs = 1_700_000_000_000;
     const source = replaySource(

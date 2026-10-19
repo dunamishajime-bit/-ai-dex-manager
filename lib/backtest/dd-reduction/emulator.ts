@@ -631,7 +631,7 @@ export function replayIntegrated(source: CanonicalSource, config: ReplayConfigWi
     for (const marketBar of executionBars(source, config.startTs, config.endTs)) getGroup(marketBar.ts).bars.push(marketBar);
     for (const decision of decisions) {
         const fillEvent = candidateFillEvent(decision);
-        if (fillEvent !== null) getGroup(fillEvent.ts);
+        if (fillEvent !== null && fillEvent.ts >= config.startTs && fillEvent.ts <= config.endTs) getGroup(fillEvent.ts);
     }
 
     let rejectionCount = 0;
@@ -650,6 +650,11 @@ export function replayIntegrated(source: CanonicalSource, config: ReplayConfigWi
                             state = stateCopy(state, {
                                 manualReview: [...state.manualReview, `UNCAUSAL_CANDIDATE_FILL:${decision.candidateId}`],
                                 reason: "MANUAL_REVIEW_UNCAUSAL_CANDIDATE_FILL",
+                            });
+                        } else if (fillEvent.ts < config.startTs || fillEvent.ts > config.endTs) {
+                            state = stateCopy(state, {
+                                manualReview: [...state.manualReview, `OUT_OF_WINDOW_CANDIDATE_FILL:${decision.candidateId}`],
+                                reason: "MANUAL_REVIEW_OUT_OF_WINDOW_CANDIDATE_FILL",
                             });
                         } else {
                             getGroup(fillEvent.ts).executions.push(fillEvent);
