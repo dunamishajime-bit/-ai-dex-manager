@@ -1,0 +1,433 @@
+import assert from "node:assert/strict";
+import { test } from "node:test";
+
+import {
+    reconcileLifecycle,
+    replayIntegrated,
+    reserveCandidate,
+    type CandidateReservationState,
+    type ExecutionLifecycleEvent,
+    type PortfolioRuntimeState,
+    type ReplayConfigWithRuntime,
+} from "../lib/backtest/dd-reduction/emulator";
+import {
+    applyProtectionPolicy,
+    type PositionLifecycleWithProtection,
+    type ProtectionPolicyInput,
+} from "../lib/backtest/dd-reduction/protection";
+import type {
+    CandidateDecision,
+    CanonicalSource,
+    ExecutionBar,
+    ExecutionFill,
+    PositionLifecycle,
+} from "../lib/backtest/dd-reduction/types";
+
+const HASH = "a".repeat(64);
+
+function fill(price: number, quantity: number, ts = 1_700_000_000_000): ExecutionFill {
+    return {
+        sourceHash: HASH,
+        ts,
+        price,
+        quantity,
+        gross: price * quantity,
+        fee: 0,
+        funding: 0,
+        slippage: 0,
+        reason: "fixture-entry",
+    };
+}
+
+function bar(overrides: Partial<ExecutionBar> = {}): ExecutionBar {
+    return {
+        sourceHash: HASH,
+        ts: 1_700_000_000_000,
+        symbol: "BTCUSDT",
+        timeframe: "1h",
+        open: 100,
+        high: 100,
+        low: 100,
+        close: 100,
+        volume: 1,
+        ...overrides,
+    };
+}
+
+function candidate(overrides: Partial<CandidateDecision> = {}): CandidateDecision {
+    return {
+        sourceHash: HASH,
+        ts: 1_700_000_000_000,
+        strategy: "V12_V4",
+        direction: "LONG",
+        symbol: "BTCUSDT",
+        requestedGross: 100,
+        acceptedGross: 100,
+        reservation: null,
+        fill: null,
+        exit: null,
+        reason: "fixture-candidate",
+        fee: 0,
+        funding: 0,
+        slippage: 0,
+        policyHash: HASH,
+        configHash: HASH,
+        resultHash: HASH,
+        candidateId: "candidate-1",
+        accepted: true,
+        rejectionReason: null,
+        ...overrides,
+    };
+}
+
+function state(overrides: Partial<PortfolioRuntimeState> = {}): PortfolioRuntimeState {
+    return {
+        sourceHash: HASH,
+        ts: 1_700_000_000_000,
+        cash: 1_000,
+        equity: 1_000,
+        reservedGross: 100,
+        acceptedGross: 700,
+        pendingGross: 100,
+        positions: [],
+        events: [],
+        reason: "fixture-state",
+        fee: 0,
+        funding: 0,
+        slippage: 0,
+        policyHash: HASH,
+        configHash: HASH,
+        resultHash: HASH,
+        caps: { totalGross: 1_000, cryptoGross: 1_000, strategyGross: 1_000 },
+        grossBySymbol: { BTCUSDT: 700 },
+        grossByStrategy: { V12_V4: 700 },
+        reservedCandidateIds: [],
+        intentLedger: {},
+        eventOrdering: ["STOP", "NORMAL_EXIT"],
+        manualReview: [],
+        ...overrides,
+    };
+}
+
+function policy(direction: "LONG" | "SHORT"): ProtectionPolicyInput {
+    return {
+        policyHash: HASH,
+        configHash: HASH,
+        strategy: "V12_V4",
+        direction,
+        initialStopBps: 500,
+        profitActivationBps: 100,
+        profitFloorBps: 20,
+        trailActivationBps: 200,
+        trailRetraceBps: 50,
+        timeStopBars: null,
+        tickSize: 0.1,
+    };
+}
+
+function position(overrides: Partial<PositionLifecycleWithProtection> = {}): PositionLifecycleWithProtection {
+    const base: PositionLifecycle = {
+        sourceHash: HASH,
+        positionId: "leg-1",
+        strategy: "V12_V4",
+        direction: "LONG",
+        symbol: "BTCUSDT",
+        requestedGross: 1_000,
+        acceptedGross: 1_000,
+        reservation: null,
+        entryFill: fill(100, 10),
+        exit: null,
+        reason: "fixture-position",
+        fee: 0,
+        funding: 0,
+        slippage: 0,
+        policyHash: HASH,
+        configHash: HASH,
+        resultHash: HASH,
+        events: [],
+    };
+    return {
+        ...base,
+        remainingQuantity: 10,
+        protectedQuantity: 10,
+        protection: null,
+        ...overrides,
+    };
+}
+
+test("rejects a candidate whose worst-case fill breaches the total Gross cap", () => {
+    const result = reserveCandidate(state(), candidate({ requestedGross: 150, acceptedGross: 150 }));
+
+    assert.equal(result.accepted, false);
+    assert.match(result.reason, /GROSS_CAP/);
+    assert.equal(result.state.reservedGross, 100);
+    assert.equal(result.state.pendingGross, 100);
+});
+
+test("does not double-use pending or reserved Gross and is idempotent by candidate intent", () => {
+    const initial = state({ acceptedGross: 400, reservedGross: 100, pendingGross: 50, grossBySymbol: { BTCUSDT: 400 }, grossByStrategy: { V12_V4: 400 } });
+    const first = reserveCandidate(initial, candidate({ requestedGross: 100, acceptedGross: 100 }));
+    const duplicate = reserveCandidate(first.state, candidate({ requestedGross: 100, acceptedGross: 100 }));
+
+    assert.equal(first.accepted, true);
+    assert.equal(first.state.reservedGross, 200);
+    assert.equal(duplicate.accepted, false);
+    assert.match(duplicate.reason, /IDEMPOTENT/);
+    assert.equal(duplicate.state.reservedGross, 200);
+});
+
+test("computes conservative initial stops and profit floors in opposite LONG and SHORT directions", () => {
+    const longInitial = applyProtectionPolicy(position(), policy("LONG"), bar());
+    const shortInitial = applyProtectionPolicy(position({ direction: "SHORT" }), policy("SHORT"), bar());
+    const longProfit = applyProtectionPolicy(position({ protection: longInitial.protection }), policy("LONG"), bar({ high: 103, low: 99, close: 102 }));
+    const shortProfit = applyProtectionPolicy(position({ direction: "SHORT", protection: shortInitial.protection }), policy("SHORT"), bar({ high: 101, low: 97, close: 98 }));
+
+    assert.equal(longInitial.stopPrice, 95);
+    assert.equal(shortInitial.stopPrice, 105);
+    assert.equal(longProfit.protection?.profitFloorPrice, 100.2);
+    assert.equal(shortProfit.protection?.profitFloorPrice, 99.8);
+    assert.ok(longProfit.stopPrice > 100);
+    assert.ok(shortProfit.stopPrice < 100);
+});
+
+test("persists MFE activation and records profit-floor/trail giveback", () => {
+    const initial = applyProtectionPolicy(position(), policy("LONG"), bar());
+    const activated = applyProtectionPolicy(
+        position({ protection: initial.protection }),
+        policy("LONG"),
+        bar({ ts: 1_700_003_600_000, high: 103, low: 99, close: 102 }),
+    );
+    const giveback = applyProtectionPolicy(
+        position({ protection: activated.protection }),
+        policy("LONG"),
+        bar({ ts: 1_700_007_200_000, high: 103, low: 100, close: 100.5 }),
+    );
+
+    assert.equal(activated.protection?.activated, true);
+    assert.equal(activated.protection?.mfeBps, 300);
+    assert.equal(activated.protection?.profitFloorPrice, 100.2);
+    assert.equal(giveback.trigger, "TRAIL");
+    assert.ok(giveback.protection?.givebackBps > 0);
+    assert.ok(giveback.protection?.trailPrice !== null);
+    assert.match(giveback.events.map((event) => event.kind).join(","), /GIVEBACK/);
+});
+
+test("applies deterministic STOP-before-normal-EXIT ordering on one bar", () => {
+    const first = reconcileLifecycle(
+        state({ eventOrdering: ["STOP", "NORMAL_EXIT"], positions: [position()] }),
+        {
+            sourceHash: HASH,
+            ts: 1_700_000_000_000,
+            strategy: "V12_V4",
+            direction: "LONG",
+            symbol: "BTCUSDT",
+            requestedGross: 1_000,
+            acceptedGross: 1_000,
+            reservation: null,
+            fill: null,
+            exit: null,
+            reason: "same-bar-stop",
+            fee: 0,
+            funding: 0,
+            slippage: 0,
+            policyHash: HASH,
+            configHash: HASH,
+            resultHash: HASH,
+            eventId: "stop-1",
+            eventType: "EXIT",
+            positionId: "leg-1",
+            executionKind: "STOP",
+            clientOrderId: "stop-intent-1",
+            quantity: 10,
+            executionStatus: "FILLED",
+        },
+    );
+    const second = reconcileLifecycle(first, {
+        sourceHash: HASH,
+        ts: 1_700_000_000_000,
+        strategy: "V12_V4",
+        direction: "LONG",
+        symbol: "BTCUSDT",
+        requestedGross: 1_000,
+        acceptedGross: 1_000,
+        reservation: null,
+        fill: null,
+        exit: null,
+        reason: "same-bar-normal-exit",
+        fee: 0,
+        funding: 0,
+        slippage: 0,
+        policyHash: HASH,
+        configHash: HASH,
+        resultHash: HASH,
+        eventId: "exit-1",
+        eventType: "EXIT",
+        positionId: "leg-1",
+        executionKind: "NORMAL_EXIT",
+        clientOrderId: "exit-intent-1",
+        quantity: 10,
+        executionStatus: "FILLED",
+    });
+
+    assert.equal(second.events[0]?.eventId, "stop-1");
+    assert.equal(second.events[1]?.eventId, "exit-1");
+    assert.equal(second.positions.find((entry) => entry.positionId === "leg-1")?.exit?.reason, "same-bar-stop");
+});
+
+test("reprotects only the residual quantity after a partial protective fill", () => {
+    const initial = state({ positions: [position(), position({ positionId: "leg-2", direction: "SHORT" })] });
+    const next = reconcileLifecycle(initial, {
+        sourceHash: HASH,
+        ts: 1_700_003_600_000,
+        strategy: "V12_V4",
+        direction: "LONG",
+        symbol: "BTCUSDT",
+        requestedGross: 1_000,
+        acceptedGross: 1_000,
+        reservation: null,
+        fill: null,
+        exit: null,
+        reason: "protective-partial-fill",
+        fee: 0,
+        funding: 0,
+        slippage: 0,
+        policyHash: HASH,
+        configHash: HASH,
+        resultHash: HASH,
+        eventId: "stop-partial-1",
+        eventType: "PARTIAL_FILL",
+        positionId: "leg-1",
+        executionKind: "STOP",
+        clientOrderId: "stop-intent-1",
+        quantity: 4,
+        executionStatus: "PARTIAL_FILLED",
+    });
+    assert.equal(next.positions.find((entry) => entry.positionId === "leg-1")?.remainingQuantity, 6);
+    assert.equal(next.positions.find((entry) => entry.positionId === "leg-1")?.protection?.reprotectQuantity, 6);
+    assert.equal(next.positions.find((entry) => entry.positionId === "leg-2")?.remainingQuantity, 10);
+    assert.equal(next.positions.find((entry) => entry.positionId === "leg-2")?.exit, null);
+});
+
+test("recovers idempotently and fails closed on unknown execution status", () => {
+    const existing = state({ intentLedger: { "stop-intent-1": "FILLED" }, positions: [position()] });
+    const duplicate = reconcileLifecycle(existing, {
+        sourceHash: HASH,
+        ts: 1_700_003_600_000,
+        strategy: "V12_V4",
+        direction: "LONG",
+        symbol: "BTCUSDT",
+        requestedGross: 1_000,
+        acceptedGross: 1_000,
+        reservation: null,
+        fill: null,
+        exit: null,
+        reason: "restart-recovery",
+        fee: 0,
+        funding: 0,
+        slippage: 0,
+        policyHash: HASH,
+        configHash: HASH,
+        resultHash: HASH,
+        eventId: "recovered-stop-1",
+        eventType: "PROTECTION",
+        positionId: "leg-1",
+        executionKind: "STOP",
+        clientOrderId: "stop-intent-1",
+        quantity: 10,
+        executionStatus: "FILLED",
+    });
+    const unknown = reconcileLifecycle(duplicate, {
+        sourceHash: HASH,
+        ts: 1_700_007_200_000,
+        strategy: "V12_V4",
+        direction: "LONG",
+        symbol: "BTCUSDT",
+        requestedGross: 1_000,
+        acceptedGross: 1_000,
+        reservation: null,
+        fill: null,
+        exit: null,
+        reason: "venue-ambiguous",
+        fee: 0,
+        funding: 0,
+        slippage: 0,
+        policyHash: HASH,
+        configHash: HASH,
+        resultHash: HASH,
+        eventId: "unknown-1",
+        eventType: "PROTECTION",
+        positionId: "leg-1",
+        executionKind: "STOP",
+        clientOrderId: "stop-intent-2",
+        quantity: 10,
+        executionStatus: "UNKNOWN",
+    });
+
+    assert.equal(duplicate.events.length, existing.events.length);
+    assert.equal(unknown.manualReview.length, 1);
+    assert.match(unknown.manualReview[0] ?? "", /UNKNOWN_EXECUTION/);
+    assert.equal(unknown.positions[0]?.exit, null);
+});
+
+test("does not confirm new exposure when protective-order read-back is unavailable", () => {
+    const stateWithoutReadback = {
+        ...state({ acceptedGross: 400, reservedGross: 100, pendingGross: 50 }),
+        protectionReadback: false,
+    } as CandidateReservationState & { readonly protectionReadback: boolean };
+    const result = reserveCandidate(stateWithoutReadback, candidate({ requestedGross: 100, acceptedGross: 100 }));
+
+    assert.equal(result.accepted, false);
+    assert.match(result.reason, /PROTECTION_READBACK_REQUIRED/);
+    assert.equal(result.state.reservedGross, 100);
+});
+
+test("integrated replay converts a reserved candidate fill into a resident position", () => {
+    const source: CanonicalSource = {
+        input: {
+            sourceRoot: "fixture-source",
+            dataRoot: "fixture-data",
+            productionSha: HASH,
+            startTs: 1_700_000_000_000,
+            endTs: 1_700_003_600_000,
+            initialEquity: 1_000,
+            deposits: [],
+            feeBps: 0,
+            slippageBps: 0,
+            fundingSource: "fixture",
+        },
+        productionSha: HASH,
+        productionFiles: [],
+        sourceFiles: [],
+        productionSources: [],
+        strategyConfigs: [],
+        candleSeries: [{ sourceHash: HASH, symbol: "BTCUSDT", timeframe: "1h", bars: [bar()] }],
+        funding: [],
+        baselineLedger: [],
+        candidateEvents: [candidate({ acceptedGross: 200, requestedGross: 200, fill: fill(100, 2) })],
+        sourceHashes: [],
+    };
+    const config: ReplayConfigWithRuntime = {
+        sourceHash: HASH,
+        configHash: HASH,
+        startTs: 1_700_000_000_000,
+        endTs: 1_700_003_600_000,
+        initialEquity: 1_000,
+        feeBps: 0,
+        slippageBps: 0,
+        fundingSource: "fixture",
+        policyHash: HASH,
+        caps: { totalGross: 1_000, cryptoGross: 1_000, strategyGross: 1_000 },
+    };
+    const replay = replayIntegrated(source, config);
+
+    assert.equal(replay.decisionLedger.length, 1);
+    assert.equal(replay.reservationLedger.length, 1);
+    assert.equal(replay.positions[0]?.entryFill?.quantity, 2);
+    assert.equal(replay.portfolio.at(-1)?.reservedGross, 0);
+    assert.equal(replay.portfolio.at(-1)?.acceptedGross, 200);
+});
+
+const _candidateReservationState: CandidateReservationState | null = null;
+const _executionLifecycleEvent: ExecutionLifecycleEvent | null = null;
+void _candidateReservationState;
+void _executionLifecycleEvent;
