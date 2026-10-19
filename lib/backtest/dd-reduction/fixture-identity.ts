@@ -68,23 +68,26 @@ const positionSchema: FixtureIdentitySchema = {
         reservation: nullable(["sourceHash"]),
         entryFill: nullable(["sourceHash"]),
         exit: nullable(["sourceHash"]),
+        events: { items: eventSchema, required: [] },
     },
-    nested: { events: { items: eventSchema, required: [] } },
 };
 const stateSchema: FixtureIdentitySchema = {
     required: LIFECYCLE_FIELDS,
-    nested: {
+    requiredNested: {
         positions: { items: positionSchema, required: [] },
         events: { items: eventSchema, required: [] },
     },
 };
 const sourceSchema: FixtureIdentitySchema = {
     required: ["productionSha"],
-    requiredNested: { input: { required: ["productionSha"] } },
-    nested: {
+    requiredNested: {
+        input: { required: ["productionSha"] },
         candleSeries: {
             required: [],
-            items: { required: ["sourceHash"], nested: { bars: { items: fillSchema, required: [] } } },
+            items: {
+                required: ["sourceHash"],
+                requiredNested: { bars: { items: fillSchema, required: [] } },
+            },
         },
         baselineLedger: { required: [], items: baselineRowSchema },
         candidateEvents: { required: [], items: eventSchema },
@@ -108,8 +111,8 @@ export const FIXTURE_SCHEMAS = {
             reservation: nullable(["sourceHash"]),
             entry: nullable(["sourceHash"]),
             exit: nullable(["sourceHash"]),
+            bars: { items: fillSchema, required: [] },
         },
-        nested: { bars: { items: fillSchema, required: [] } },
     },
     position: {
         ...positionSchema,
@@ -120,14 +123,14 @@ export const FIXTURE_SCHEMAS = {
     },
     candidateSummary: {
         required: LIFECYCLE_FIELDS,
-        nested: {
+        requiredNested: {
             candidatePolicy: { ...policySchema, nullable: true },
             baselinePolicy: policySchema,
         },
     },
     frozenSet: {
         required: LIFECYCLE_FIELDS,
-        nested: { policies: { required: [], items: policySchema } },
+        requiredNested: { policies: { required: [], items: policySchema } },
     },
     replayConfig: { required: ["sourceHash", "configHash", "policyHash"] },
     state: stateSchema,

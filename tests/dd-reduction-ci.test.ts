@@ -84,6 +84,79 @@ test("rejects missing, placeholder, and nested direct-fixture identity hashes", 
     );
 });
 
+test("rejects omitted required nested fixture containers", () => {
+    const policy = {
+        sourceHash: FIXTURE_HASH,
+        configHash: FIXTURE_HASH,
+        policyHash: FIXTURE_HASH,
+        resultHash: FIXTURE_HASH,
+    };
+    const candidateSummary = {
+        ...policy,
+        candidatePolicy: policy,
+        baselinePolicy: policy,
+    };
+    const { baselinePolicy: _baselinePolicy, ...candidateWithoutBaselinePolicy } = candidateSummary;
+    assert.throws(
+        () => assertFixtureIdentity(candidateWithoutBaselinePolicy, FIXTURE_SCHEMAS.candidateSummary, "missing-baseline-policy"),
+        /FIXTURE_NESTED_MISSING.*baselinePolicy/,
+    );
+    const { candidatePolicy: _candidatePolicy, ...candidateWithoutCandidatePolicy } = candidateSummary;
+    assert.throws(
+        () => assertFixtureIdentity(candidateWithoutCandidatePolicy, FIXTURE_SCHEMAS.candidateSummary, "missing-candidate-policy"),
+        /FIXTURE_NESTED_MISSING.*candidatePolicy/,
+    );
+
+    const frozenSet = { ...policy, policies: [] };
+    const { policies: _policies, ...frozenWithoutPolicies } = frozenSet;
+    assert.throws(
+        () => assertFixtureIdentity(frozenWithoutPolicies, FIXTURE_SCHEMAS.frozenSet, "missing-frozen-policies"),
+        /FIXTURE_NESTED_MISSING.*policies/,
+    );
+
+    const state = { ...policy, positions: [], events: [] };
+    const { positions: _positions, ...stateWithoutPositions } = state;
+    assert.throws(
+        () => assertFixtureIdentity(stateWithoutPositions, FIXTURE_SCHEMAS.state, "missing-state-positions"),
+        /FIXTURE_NESTED_MISSING.*positions/,
+    );
+    const { events: _events, ...stateWithoutEvents } = state;
+    assert.throws(
+        () => assertFixtureIdentity(stateWithoutEvents, FIXTURE_SCHEMAS.state, "missing-state-events"),
+        /FIXTURE_NESTED_MISSING.*events/,
+    );
+
+    const tradePath = { ...policy, reservation: null, entry: null, exit: null, bars: [] };
+    const { bars: _bars, ...tradePathWithoutBars } = tradePath;
+    assert.throws(
+        () => assertFixtureIdentity(tradePathWithoutBars, FIXTURE_SCHEMAS.tradePath, "missing-trade-bars"),
+        /FIXTURE_NESTED_MISSING.*bars/,
+    );
+
+    const source = {
+        productionSha: FIXTURE_HASH,
+        input: { productionSha: FIXTURE_HASH },
+        candleSeries: [],
+        baselineLedger: [],
+        candidateEvents: [],
+    };
+    const { candleSeries: _candleSeries, ...sourceWithoutCandleSeries } = source;
+    assert.throws(
+        () => assertFixtureIdentity({ productionSha: FIXTURE_HASH, source: sourceWithoutCandleSeries }, FIXTURE_SCHEMAS.replaySource, "missing-source-candle-series"),
+        /FIXTURE_NESTED_MISSING.*candleSeries/,
+    );
+    const { baselineLedger: _baselineLedger, ...sourceWithoutBaselineLedger } = source;
+    assert.throws(
+        () => assertFixtureIdentity({ productionSha: FIXTURE_HASH, source: sourceWithoutBaselineLedger }, FIXTURE_SCHEMAS.replaySource, "missing-source-baseline-ledger"),
+        /FIXTURE_NESTED_MISSING.*baselineLedger/,
+    );
+    const { candidateEvents: _candidateEvents, ...sourceWithoutCandidateEvents } = source;
+    assert.throws(
+        () => assertFixtureIdentity({ productionSha: FIXTURE_HASH, source: sourceWithoutCandidateEvents }, FIXTURE_SCHEMAS.replaySource, "missing-source-candidate-events"),
+        /FIXTURE_NESTED_MISSING.*candidateEvents/,
+    );
+});
+
 test("keeps the DD reduction workflow deterministic, read-only, and offline", async () => {
     const workflow = await readRepositoryFile(".github/workflows/dd-reduction-sequential.yml");
 
