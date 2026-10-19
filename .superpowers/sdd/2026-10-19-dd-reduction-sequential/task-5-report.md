@@ -138,3 +138,25 @@ Fourth-remediation verification:
 - `npx tsc --noEmit --incremental false` — passed, exit code 0.
 - Changed-file ESLint — passed, exit code 0.
 - `git diff --check` — passed; Git reported only normal LF-to-CRLF working-copy normalization warnings.
+
+## Fifth independent-review remediation
+
+An additional audit found that closed baseline lifecycle reconstruction accepted an exit timestamp earlier than its entry timestamp. The replay now fails closed before generating lifecycle executions when:
+
+- `finalExit.ts < entry.ts`;
+- entry or exit is outside the configured replay window;
+- entry/exit price or quantity is non-finite or non-positive;
+- exit quantity exceeds entry quantity;
+- entry or exit gross does not match price × quantity;
+- entry/exit lifecycle order is not causal; or
+- the previously required cost and metadata consistency checks fail.
+
+The explicit reasons are `BASELINE_PARITY_CLOSED_LIFECYCLE_CAUSAL` and `BASELINE_PARITY_CLOSED_LIFECYCLE_INVALID`, both keyed by trade ID. A TDD regression first reproduced the missing exception, then passed after the validation was added.
+
+Fifth-remediation verification:
+
+- `npx tsx --test tests/dd-reduction-runner.test.ts` — 33 tests passed, 0 failed.
+- Combined Task 1–5 DD-reduction suite — 101 tests passed, 0 failed.
+- `npx tsc --noEmit --incremental false` — passed, exit code 0.
+- Changed-file ESLint — passed, exit code 0.
+- `git diff --check` — passed; Git reported only normal LF-to-CRLF working-copy normalization warnings.

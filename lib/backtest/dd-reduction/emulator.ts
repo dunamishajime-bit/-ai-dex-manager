@@ -396,13 +396,21 @@ function baselinePosition(entry: BaselineLedgerEntry): PositionLifecycleWithProt
     });
 }
 
-function baselineLifecycleEvidence(entry: BaselineLedgerEntry): { readonly entry: ExecutionLifecycleEvent; readonly exit: ExecutionLifecycleEvent } {
+function baselineLifecycleEvidence(entry: BaselineLedgerEntry, startTs: number, endTs: number): { readonly entry: ExecutionLifecycleEvent; readonly exit: ExecutionLifecycleEvent } {
     if (entry.entry === null || entry.finalExit === null) throw new Error(`BASELINE_PARITY_CLOSED_LIFECYCLE_INCOMPLETE:${entry.tradeId}`);
     if (entry.entry.sourceHash !== entry.sourceHash || entry.finalExit.sourceHash !== entry.sourceHash
-        || entry.entry.quantity <= 0 || entry.finalExit.quantity <= 0 || entry.finalExit.quantity > entry.entry.quantity
+        || entry.entry.ts < startTs || entry.entry.ts > endTs || entry.finalExit.ts < startTs || entry.finalExit.ts > endTs
+        || entry.finalExit.ts < entry.entry.ts) {
+        throw new Error(`BASELINE_PARITY_CLOSED_LIFECYCLE_CAUSAL:${entry.tradeId}`);
+    }
+    if (!Number.isFinite(entry.entry.price) || entry.entry.price <= 0 || !Number.isFinite(entry.finalExit.price) || entry.finalExit.price <= 0
+        || !Number.isFinite(entry.entry.quantity) || entry.entry.quantity <= 0 || !Number.isFinite(entry.finalExit.quantity)
+        || entry.finalExit.quantity <= 0 || entry.finalExit.quantity > entry.entry.quantity
+        || Math.abs(entry.entry.gross - entry.entry.price * entry.entry.quantity) > 1e-8
+        || Math.abs(entry.finalExit.gross - entry.finalExit.price * entry.finalExit.quantity) > 1e-8
         || entry.fee !== entry.entry.fee + entry.finalExit.fee || entry.funding !== entry.entry.funding + entry.finalExit.funding
         || entry.slippage !== entry.entry.slippage + entry.finalExit.slippage) {
-        throw new Error(`BASELINE_PARITY_CLOSED_LIFECYCLE_INCOMPLETE:${entry.tradeId}`);
+        throw new Error(`BASELINE_PARITY_CLOSED_LIFECYCLE_INVALID:${entry.tradeId}`);
     }
     const positionId = `baseline:${entry.tradeId}`;
     return {
@@ -463,9 +471,9 @@ function baselineLifecycleEvidence(entry: BaselineLedgerEntry): { readonly entry
     };
 }
 
-function replayClosedBaselinePositions(source: CanonicalSource): readonly PositionLifecycle[] {
+function replayClosedBaselinePositions(source: CanonicalSource, startTs: number, endTs: number): readonly PositionLifecycle[] {
     return source.baselineLedger.filter((entry) => entry.finalExit !== null).map((entry) => {
-        const lifecycle = baselineLifecycleEvidence(entry);
+        const lifecycle = baselineLifecycleEvidence(entry, startTs, endTs);
         const opened = positionFromEntry(lifecycle.entry);
         if (opened === null) throw new Error(`BASELINE_PARITY_CLOSED_LIFECYCLE_INCOMPLETE:${entry.tradeId}`);
         const closed = applyExecutionToPosition(opened, lifecycle.exit);
@@ -725,7 +733,7 @@ function applyDeposit(state: PortfolioRuntimeState, amount: number): PortfolioRu
 }
 
 export function replayIntegrated(source: CanonicalSource, config: ReplayConfigWithRuntime): IntegratedReplayResult {
-    const closedBaselinePositions = replayClosedBaselinePositions(source);
+    const closedBaselinePositions = replayClosedBaselinePositions(source, config.startTs, config.endTs);
     let state = initialState(source, config);
     const decisions: readonly CandidateDecisionWithExecution[] = [...source.candidateEvents]
         .filter((candidate) => candidate.ts >= config.startTs && candidate.ts <= config.endTs)
