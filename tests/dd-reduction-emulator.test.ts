@@ -24,11 +24,12 @@ import type {
     ExecutionFill,
     PositionLifecycle,
 } from "../lib/backtest/dd-reduction/types";
+import { assertFixtureIdentity, FIXTURE_HASH } from "../lib/backtest/dd-reduction/fixture-identity";
 
-const HASH = "a".repeat(64);
+const HASH = FIXTURE_HASH;
 
 function fill(price: number, quantity: number, ts = 1_700_000_000_000): ExecutionFill {
-    return {
+    return assertFixtureIdentity({
         sourceHash: HASH,
         ts,
         price,
@@ -38,11 +39,11 @@ function fill(price: number, quantity: number, ts = 1_700_000_000_000): Executio
         funding: 0,
         slippage: 0,
         reason: "fixture-entry",
-    };
+    }, ["sourceHash"], "emulator.fill");
 }
 
 function bar(overrides: Partial<ExecutionBar> = {}): ExecutionBar {
-    return {
+    return assertFixtureIdentity({
         sourceHash: HASH,
         ts: 1_700_000_000_000,
         symbol: "BTCUSDT",
@@ -53,11 +54,11 @@ function bar(overrides: Partial<ExecutionBar> = {}): ExecutionBar {
         close: 100,
         volume: 1,
         ...overrides,
-    };
+    }, ["sourceHash"], "emulator.bar");
 }
 
 function candidate(overrides: Partial<CandidateDecisionWithExecution> = {}): CandidateDecision {
-    return {
+    return assertFixtureIdentity({
         sourceHash: HASH,
         ts: 1_700_000_000_000,
         strategy: "V12_V4",
@@ -79,11 +80,11 @@ function candidate(overrides: Partial<CandidateDecisionWithExecution> = {}): Can
         accepted: true,
         rejectionReason: null,
         ...overrides,
-    };
+    }, ["sourceHash", "configHash", "policyHash", "resultHash"], "emulator.candidate");
 }
 
 function state(overrides: Partial<PortfolioRuntimeState> = {}): PortfolioRuntimeState {
-    return {
+    return assertFixtureIdentity({
         sourceHash: HASH,
         ts: 1_700_000_000_000,
         cash: 1_000,
@@ -109,11 +110,11 @@ function state(overrides: Partial<PortfolioRuntimeState> = {}): PortfolioRuntime
         manualReview: [],
         protectionReadback: true,
         ...overrides,
-    };
+    }, ["sourceHash", "configHash", "policyHash", "resultHash"], "emulator.state");
 }
 
 function policy(direction: "LONG" | "SHORT"): ProtectionPolicyInput {
-    return {
+    return assertFixtureIdentity({
         policyHash: HASH,
         configHash: HASH,
         strategy: "V12_V4",
@@ -125,7 +126,7 @@ function policy(direction: "LONG" | "SHORT"): ProtectionPolicyInput {
         trailRetraceBps: 50,
         timeStopBars: null,
         tickSize: 0.1,
-    };
+    }, ["configHash", "policyHash"], "emulator.policy");
 }
 
 function position(overrides: Partial<PositionLifecycleWithProtection> = {}): PositionLifecycleWithProtection {
@@ -149,13 +150,14 @@ function position(overrides: Partial<PositionLifecycleWithProtection> = {}): Pos
         resultHash: HASH,
         events: [],
     };
-    return {
+    const result = {
         ...base,
         remainingQuantity: 10,
         protectedQuantity: 10,
         protection: null,
         ...overrides,
     };
+    return assertFixtureIdentity(result, ["sourceHash", "configHash", "policyHash", "resultHash"], "emulator.position");
 }
 
 function replaySource(
@@ -171,7 +173,7 @@ function replaySource(
     }
     const firstTs = Math.min(...bars.map((marketBar) => marketBar.ts));
     const lastTs = Math.max(...bars.map((marketBar) => marketBar.ts));
-    return {
+    const source = {
         input: {
             sourceRoot: "fixture-source",
             dataRoot: "fixture-data",
@@ -195,10 +197,11 @@ function replaySource(
         candidateEvents: candidates,
         sourceHashes: [],
     };
+    return assertFixtureIdentity({ productionSha: source.productionSha, source }, ["productionSha"], "emulator.replaySource").source;
 }
 
 function replayConfig(overrides: Partial<ReplayConfigWithRuntime> = {}): ReplayConfigWithRuntime {
-    return {
+    return assertFixtureIdentity({
         sourceHash: HASH,
         configHash: HASH,
         startTs: 1_700_000_000_000,
@@ -211,7 +214,7 @@ function replayConfig(overrides: Partial<ReplayConfigWithRuntime> = {}): ReplayC
         caps: { totalGross: 10_000, cryptoGross: 10_000, strategyGross: 10_000 },
         protectionReadback: true,
         ...overrides,
-    };
+    }, ["sourceHash", "configHash", "policyHash"], "emulator.replayConfig");
 }
 
 test("rejects a candidate whose worst-case fill breaches the total Gross cap", () => {

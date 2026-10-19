@@ -16,8 +16,9 @@ import type {
     TradePath,
     PositionLifecycle,
 } from "../lib/backtest/dd-reduction/types";
+import { assertFixtureIdentity, FIXTURE_HASH } from "../lib/backtest/dd-reduction/fixture-identity";
 
-const HASH = "a".repeat(64);
+const HASH = FIXTURE_HASH;
 type TradePathWithExits = TradePath & { readonly exits: readonly ExecutionExit[] };
 
 function assertApprox(actual: number, expected: number, epsilon = 1e-9): void {
@@ -25,7 +26,7 @@ function assertApprox(actual: number, expected: number, epsilon = 1e-9): void {
 }
 
 function fill(price: number, quantity: number, ts = 1_700_000_000_000, fee = 0, funding = 0, slippage = 0): ExecutionFill {
-    return {
+    return assertFixtureIdentity({
         sourceHash: HASH,
         ts,
         price,
@@ -35,11 +36,11 @@ function fill(price: number, quantity: number, ts = 1_700_000_000_000, fee = 0, 
         funding,
         slippage,
         reason: "fixture-entry",
-    };
+    }, ["sourceHash"], "metrics.fill");
 }
 
 function exit(price: number, quantity: number, ts: number, realizedPnl: number, fee = 0, funding = 0, slippage = 0, reason = "NORMAL_EXIT"): ExecutionExit {
-    return {
+    return assertFixtureIdentity({
         sourceHash: HASH,
         ts,
         price,
@@ -50,11 +51,11 @@ function exit(price: number, quantity: number, ts: number, realizedPnl: number, 
         slippage,
         realizedPnl,
         reason,
-    };
+    }, ["sourceHash"], "metrics.exit");
 }
 
 function bar(ts: number, open: number, high: number, low: number, close: number): ExecutionBar {
-    return {
+    return assertFixtureIdentity({
         sourceHash: HASH,
         ts,
         symbol: "BTCUSDT",
@@ -64,11 +65,11 @@ function bar(ts: number, open: number, high: number, low: number, close: number)
         low,
         close,
         volume: 1,
-    };
+    }, ["sourceHash"], "metrics.bar");
 }
 
 function path(overrides: Partial<TradePath> = {}): TradePath {
-    return {
+    return assertFixtureIdentity({
         sourceHash: HASH,
         tradeId: "trade-1",
         strategy: "V12_V4",
@@ -88,7 +89,7 @@ function path(overrides: Partial<TradePath> = {}): TradePath {
         resultHash: HASH,
         bars: [],
         ...overrides,
-    };
+    }, ["sourceHash", "configHash", "policyHash", "resultHash"], "metrics.path");
 }
 
 test("calculates LONG MFE, MAE, initial adverse excursion, and giveback after profit turns into loss", () => {

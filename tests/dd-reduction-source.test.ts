@@ -12,6 +12,7 @@ import {
     loadCanonicalSource,
 } from "../lib/backtest/dd-reduction/source";
 import type { CanonicalSourceInput } from "../lib/backtest/dd-reduction/types";
+import { assertFixtureIdentity, FIXTURE_HASH } from "../lib/backtest/dd-reduction/fixture-identity";
 
 interface FixtureFile {
     name: string;
@@ -27,7 +28,7 @@ interface Fixture {
 
 const START_TS = 1_700_000_000_000;
 const HOUR = 3_600_000;
-const HASH = "a".repeat(64);
+const HASH = FIXTURE_HASH;
 
 function sha256(value: string): string {
     return createHash("sha256").update(value).digest("hex");
@@ -42,7 +43,7 @@ function candleFile(name: string, rows: readonly Record<string, number>[], symbo
 }
 
 function lifecycleFields(overrides: Record<string, string | number | boolean | null> = {}): string {
-    return JSON.stringify({
+    const row = {
         sourceHash: HASH,
         ts: START_TS,
         strategy: "V12_V4",
@@ -61,15 +62,21 @@ function lifecycleFields(overrides: Record<string, string | number | boolean | n
         configHash: HASH,
         resultHash: HASH,
         ...overrides,
-    });
+    };
+    assertFixtureIdentity(row, ["sourceHash", "configHash", "policyHash", "resultHash"], "source.lifecycleFields");
+    return JSON.stringify(row);
 }
 
 function baselineRow(overrides: Record<string, string | number | boolean | null> = {}): string {
-    return JSON.stringify({ ...JSON.parse(lifecycleFields()), tradeId: "trade-1", entry: null, finalExit: null, ...overrides });
+    const row = { ...JSON.parse(lifecycleFields()), tradeId: "trade-1", entry: null, finalExit: null, ...overrides };
+    assertFixtureIdentity(row, ["sourceHash", "configHash", "policyHash", "resultHash"], "source.baselineRow");
+    return JSON.stringify(row);
 }
 
 function candidateRow(overrides: Record<string, string | number | boolean | null> = {}): string {
-    return JSON.stringify({ ...JSON.parse(lifecycleFields()), candidateId: "candidate-1", accepted: true, rejectionReason: null, ...overrides });
+    const row = { ...JSON.parse(lifecycleFields()), candidateId: "candidate-1", accepted: true, rejectionReason: null, ...overrides };
+    assertFixtureIdentity(row, ["sourceHash", "configHash", "policyHash", "resultHash"], "source.candidateRow");
+    return JSON.stringify(row);
 }
 
 async function makeFixture(options: {
@@ -94,7 +101,7 @@ async function makeFixture(options: {
     const dataFiles = options.candleFiles ?? [candleFile("BTCUSDT-1h.json", options.candleRows ?? [candle(START_TS), candle(START_TS + HOUR, 102)])];
     for (const file of dataFiles) await writeFile(join(dataRoot, file.name), file.content, "utf8");
 
-    return {
+    const fixture = {
         root,
         sourceRoot,
         dataRoot,
@@ -111,6 +118,7 @@ async function makeFixture(options: {
             fundingSource: "fixture-funding",
         },
     };
+    return assertFixtureIdentity({ productionSha: fixture.input.productionSha, fixture }, ["productionSha"], "source.makeFixture").fixture;
 }
 
 async function cleanup(fixture: Fixture): Promise<void> {

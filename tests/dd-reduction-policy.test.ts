@@ -2,11 +2,11 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import {
-    DEFAULT_ACCEPTANCE_GATES,
     applyCandidatePolicy,
     acceptCandidate,
     buildCandidateGrid,
     freezeAcceptedStage,
+    predeclareAcceptanceGates,
     type ResearchProductionPolicy,
 } from "../lib/backtest/dd-reduction/policies";
 import { SEQUENTIAL_STAGES, type StageId } from "../lib/backtest/dd-reduction/stages";
@@ -19,11 +19,12 @@ import type {
     FrozenStageSet,
     ProductionPolicy,
 } from "../lib/backtest/dd-reduction/types";
+import { assertFixtureIdentity, FIXTURE_HASH } from "../lib/backtest/dd-reduction/fixture-identity";
 
-const HASH = "a".repeat(64);
+const HASH = FIXTURE_HASH;
 
 function baseline(overrides: Partial<ResearchProductionPolicy> = {}): ResearchProductionPolicy {
-    return {
+    const base: ResearchProductionPolicy = {
         sourceHash: HASH,
         configHash: HASH,
         resultHash: HASH,
@@ -45,14 +46,15 @@ function baseline(overrides: Partial<ResearchProductionPolicy> = {}): ResearchPr
         trailingGivebackBps: 100,
         timeStopBars: null,
         supportedDirections: ["LONG", "SHORT"],
-        ...overrides,
     };
+    assertFixtureIdentity(base, ["sourceHash", "configHash", "policyHash", "resultHash"], "policy.baseline");
+    return { ...base, ...overrides };
 }
 
 function candidateSummary(overrides: Partial<CandidateSummary> = {}): CandidateSummary {
     const defaultPolicy = buildCandidateGrid("V12_V4_LONG", "LONG", baseline())[0];
     assert.ok(defaultPolicy);
-    return {
+    const base: CandidateSummary = {
         sourceHash: HASH,
         configHash: HASH,
         resultHash: HASH,
@@ -82,12 +84,13 @@ function candidateSummary(overrides: Partial<CandidateSummary> = {}): CandidateS
             costStressPass: 1,
             candidateSelectionUsesFuturePnl: 0,
         },
-        ...overrides,
     };
+    assertFixtureIdentity(base, ["sourceHash", "configHash", "policyHash", "resultHash"], "policy.candidateSummary");
+    return { ...base, ...overrides };
 }
 
 function baselineSummary(overrides: Partial<BaselineSummary> = {}): BaselineSummary {
-    return {
+    const base: BaselineSummary = {
         sourceHash: HASH,
         configHash: HASH,
         resultHash: HASH,
@@ -99,19 +102,25 @@ function baselineSummary(overrides: Partial<BaselineSummary> = {}): BaselineSumm
         funding: 2,
         slippage: 3,
         metrics: {},
-        ...overrides,
     };
+    assertFixtureIdentity(base, ["sourceHash", "configHash", "policyHash", "resultHash"], "policy.baselineSummary");
+    return { ...base, ...overrides };
 }
 
 function gates(overrides: Partial<AcceptanceGates> = {}): AcceptanceGates {
-    return {
-        ...DEFAULT_ACCEPTANCE_GATES,
-        ...overrides,
-    };
+    const base = predeclareAcceptanceGates({
+        sourceHash: HASH,
+        configHash: HASH,
+        resultHash: HASH,
+        policyHash: HASH,
+        declaredAtTs: 1_700_000_000_000,
+    });
+    assertFixtureIdentity(base, ["sourceHash", "configHash", "policyHash", "resultHash"], "policy.gates");
+    return { ...base, ...overrides };
 }
 
 function initialFrozen(): FrozenStageSet {
-    return {
+    return assertFixtureIdentity({
         sourceHash: HASH,
         configHash: HASH,
         resultHash: HASH,
@@ -119,7 +128,7 @@ function initialFrozen(): FrozenStageSet {
         stageIds: [],
         policies: [],
         reason: "initial-frozen-set",
-    };
+    }, ["sourceHash", "configHash", "policyHash", "resultHash"], "policy.initialFrozen");
 }
 
 test("keeps the sequential stage order immutable", () => {

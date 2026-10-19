@@ -30,8 +30,9 @@ import { compareStage } from "../scripts/dd-reduction/compare-stage";
 import type { CandidatePolicy, FrozenStageSet, JsonValue, ProtectionReadbackEvidence, StageResult } from "../lib/backtest/dd-reduction/types";
 import { replayIntegrated } from "../lib/backtest/dd-reduction/emulator";
 import type { IntegratedReplayResult } from "../lib/backtest/dd-reduction/emulator";
+import { assertFixtureIdentity, FIXTURE_HASH } from "../lib/backtest/dd-reduction/fixture-identity";
 
-const HASH = "a".repeat(64);
+const HASH = FIXTURE_HASH;
 const START = 1_700_000_000_000;
 const END = START + 60 * 60 * 1_000;
 
@@ -49,7 +50,7 @@ function requiredCliArgs(outputRoot: string): readonly string[] {
 }
 
 function runnerArgs(root: string, outputRoot: string): RunnerArgs {
-    return {
+    return assertFixtureIdentity({
         sourceRoot: join(root, "source"),
         dataRoot: join(root, "data"),
         productionSha: HASH,
@@ -63,17 +64,17 @@ function runnerArgs(root: string, outputRoot: string): RunnerArgs {
         feeBps: 4,
         slippageBps: 2,
         fundingSource: "fixture-funding",
-    };
+    }, ["productionSha"], "runner.runnerArgs");
 }
 
 function candidatePolicy(stageId: CandidatePolicy["stageId"], strategy: CandidatePolicy["strategy"], direction: CandidatePolicy["direction"]): CandidatePolicy {
-    return {
+    const policy = {
         sourceHash: HASH,
         configHash: HASH,
         resultHash: HASH,
         strategy,
         direction,
-        policyHash: `${HASH}:${stageId}`,
+        policyHash: hashJson({ fixture: HASH, stageId, strategy, direction }),
         reason: "frozen",
         fee: 0,
         funding: 0,
@@ -96,11 +97,12 @@ function candidatePolicy(stageId: CandidatePolicy["stageId"], strategy: Candidat
         requestedGross: 1_500,
         acceptedGross: 1_500,
         reservation: null,
-    };
+    } satisfies CandidatePolicy;
+    return assertFixtureIdentity(policy, ["sourceHash", "configHash", "policyHash", "resultHash"], "runner.candidatePolicy");
 }
 
 function frozenSet(overrides: Partial<FrozenStageSet> = {}): FrozenStageSet {
-    return {
+    const base: FrozenStageSet = {
         sourceHash: HASH,
         configHash: HASH,
         resultHash: HASH,
@@ -109,8 +111,9 @@ function frozenSet(overrides: Partial<FrozenStageSet> = {}): FrozenStageSet {
         policies: [],
         reason: "FROZEN_RESEARCH_POLICY_ONLY",
         completedStageIds: [],
-        ...overrides,
     };
+    assertFixtureIdentity(base, ["sourceHash", "configHash", "policyHash", "resultHash"], "runner.frozenSet");
+    return { ...base, ...overrides };
 }
 
 async function makeFixture(options: { readonly withBaselineLedger?: boolean; readonly corruptParity?: boolean; readonly shortOnly?: boolean; readonly withCandidateFill?: boolean } = {}): Promise<{ root: string; args: RunnerArgs }> {
@@ -139,6 +142,7 @@ async function makeFixture(options: { readonly withBaselineLedger?: boolean; rea
         entry: { sourceHash: HASH, ts: START, price: 100, quantity: 1, gross: 100, fee: 0, funding: 0, slippage: 0, reason: "fixture" },
         finalExit: null,
     }];
+    baselineRows.forEach((row, index) => assertFixtureIdentity(row, ["sourceHash", "configHash", "policyHash", "resultHash"], `runner.baselineRows[${index}]`));
     const baselineContent = JSON.stringify(baselineRows);
     const baselineParity = options.withBaselineLedger === true ? {
         ledgerHash: options.corruptParity === true ? "b".repeat(64) : hashJson(baselineRows as unknown as JsonValue),
@@ -168,7 +172,7 @@ async function makeFixture(options: { readonly withBaselineLedger?: boolean; rea
     if (options.withBaselineLedger === true) {
         await writeFile(join(root, "source", "baseline-ledger.json"), baselineContent, "utf8");
     }
-    const candidateContent = JSON.stringify([{
+    const candidateRows = [{
         sourceHash: HASH,
         ts: START,
         strategy: "V12_V4",
@@ -189,7 +193,9 @@ async function makeFixture(options: { readonly withBaselineLedger?: boolean; rea
         candidateId: "V12_V4_LONG:LONG:initial-stop:250",
         accepted: true,
         rejectionReason: null,
-    }]);
+    }];
+    candidateRows.forEach((row, index) => assertFixtureIdentity(row, ["sourceHash", "configHash", "policyHash", "resultHash"], `runner.candidateRows[${index}]`));
+    const candidateContent = JSON.stringify(candidateRows);
     if (options.withCandidateFill === true) await writeFile(join(root, "source", "candidate-events.json"), candidateContent, "utf8");
     await writeFile(join(root, "data", "BTCUSDT-1h.json"), JSON.stringify([
         { ts: START, symbol: "BTCUSDT", timeframe: "1h", open: 100, high: 100, low: 100, close: 100, volume: 1 },

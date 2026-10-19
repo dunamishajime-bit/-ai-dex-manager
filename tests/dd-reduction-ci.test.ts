@@ -3,6 +3,7 @@ import { readdir, readFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
+import { assertFixtureIdentity, FIXTURE_HASH } from "../lib/backtest/dd-reduction/fixture-identity";
 
 const repositoryRoot = resolve(fileURLToPath(import.meta.url), "..", "..");
 
@@ -19,6 +20,9 @@ test("discovers every DD reduction fixture test and fails closed on silent outco
     const testFiles = (await readdir(join(repositoryRoot, "tests")))
         .filter((name) => /^dd-reduction-.*\.test\.ts$/.test(name))
         .sort();
+    const fixtureTestSources = await Promise.all(testFiles
+        .filter((name) => name !== "dd-reduction-ci.test.ts")
+        .map((name) => readRepositoryFile(`tests/${name}`)));
 
     assert.match(testScript, /run-tests\.mjs/);
     assert.match(testScript, /tsx scripts\/dd-reduction\/run-tests\.mjs/);
@@ -32,6 +36,34 @@ test("discovers every DD reduction fixture test and fails closed on silent outco
     assert.match(runner, /concurrency:\s*1/);
     assert.match(runner, /TEST_ACCOUNTING_MISMATCH/);
     assert.ok(testFiles.length >= 5, `expected the existing DD reduction fixture suite, found ${testFiles.length}`);
+    assert.ok(fixtureTestSources.every((source) => source.includes("assertFixtureIdentity")), "every DD reduction fixture module must validate its direct fixtures");
+});
+
+test("rejects missing, placeholder, and nested direct-fixture identity hashes", () => {
+    const required = ["sourceHash", "productionSha", "configHash", "policyHash", "resultHash"] as const;
+    const valid = {
+        sourceHash: FIXTURE_HASH,
+        productionSha: FIXTURE_HASH,
+        configHash: FIXTURE_HASH,
+        policyHash: FIXTURE_HASH,
+        resultHash: FIXTURE_HASH,
+    };
+
+    assert.doesNotThrow(() => assertFixtureIdentity(valid, required, "valid-fixture"));
+    for (const field of required) {
+        assert.throws(
+            () => assertFixtureIdentity({ ...valid, [field]: undefined }, required, `missing-${field}`),
+            new RegExp(`FIXTURE_HASH_INVALID.*${field}`),
+        );
+        assert.throws(
+            () => assertFixtureIdentity({ ...valid, [field]: "a".repeat(64) }, required, `placeholder-${field}`),
+            new RegExp(`FIXTURE_HASH_INVALID.*${field}`),
+        );
+    }
+    assert.throws(
+        () => assertFixtureIdentity({ ...valid, nested: { policyHash: undefined } }, required, "nested-missing"),
+        /FIXTURE_HASH_INVALID.*nested\.policyHash/,
+    );
 });
 
 test("keeps the DD reduction workflow deterministic, read-only, and offline", async () => {
