@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     const analytics = await loadLivePerformanceAnalytics();
-    return NextResponse.json({ ok: true, analytics });
+    return NextResponse.json({ ok: true, analytics, coverage: analytics.coverage });
   } catch (error) {
     return NextResponse.json(
       { ok: false, error: error instanceof Error ? error.message : "LIVE performance analytics failed" },

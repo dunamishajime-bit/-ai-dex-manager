@@ -23,6 +23,12 @@ test("existing performance page includes live total asset and PnL charts", () =>
   assert.match(files.performance, /LivePerformanceOverviewCharts/);
 });
 
+test("history and performance expose visible source coverage", () => {
+  assert.match(files.api, /coverage/);
+  assert.match(files.history, /coverage/);
+  assert.match(files.performance, /coverage/);
+});
+
 test("trade history and performance analytics render monetary values in JPY", () => {
   assert.match(files.history, /formatJpyFromUsd/);
   assert.doesNotMatch(files.history, /function formatUsd/);

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { loadAsterTradeHistory } from "@/lib/server/aster-trade-history";
 import { loadTradeHistoryEntries } from "@/lib/server/trade-history-db";
 import { selectTradeHistorySource } from "@/lib/server/trade-history-source";
+import { buildLocalFallbackCoverage } from "@/lib/server/live-history-contract";
 
 export const dynamic = "force-dynamic";
 
@@ -11,7 +12,13 @@ export async function GET(req: NextRequest) {
   const authenticated = req.cookies.get("disdex_auth")?.value === "1";
   const aster = authenticated
     ? await loadAsterTradeHistory()
-    : { entries: [], source: "unavailable" as const, refreshedAt: new Date().toISOString(), error: "Authentication required for Aster account history." };
+    : {
+      entries: [],
+      source: "unavailable" as const,
+      refreshedAt: new Date().toISOString(),
+      coverage: buildLocalFallbackCoverage(localEntries, new Date().toISOString(), "Aster公式履歴は認証済み画面でのみ取得できます。"),
+      error: "Authentication required for Aster account history.",
+    };
   // Official Aster fills are authoritative when present. If the account has no
   // official fills yet, expose the existing recovered ledger as an explicit,
   // read-only fallback so the calendar is not silently empty.
@@ -20,6 +27,18 @@ export async function GET(req: NextRequest) {
   entries.sort((left, right) => Date.parse(right.executedAt) - Date.parse(left.executedAt));
   const officialEntries = aster.source === "aster" ? aster.entries : [];
   const localLedgerMerged = selected.source === "aster" && entries.length > officialEntries.length;
+  const coverage = aster.source === "aster"
+    ? {
+      ...aster.coverage,
+      totalFills: entries.length,
+      mergedLocalEntries: Math.max(0, entries.length - officialEntries.length),
+    }
+    : buildLocalFallbackCoverage(localEntries, aster.refreshedAt, aster.error || "Aster公式履歴を取得できませんでした。");
+  const coverageNotice = coverage.status === "COMPLETE"
+    ? undefined
+    : coverage.status === "PARTIAL"
+      ? `履歴取得状態: PARTIAL（${coverage.completedSymbols.length}/${coverage.requestedSymbols.length || "公式対象外"} symbols / 欠落を含む可能性があります）`
+      : "履歴取得状態: UNAVAILABLE（完全な公式履歴を取得できていません）";
 
   return NextResponse.json({
     ok: true,
@@ -31,11 +50,12 @@ export async function GET(req: NextRequest) {
     },
     officialHistory: selected.source === "aster",
     historySource: selected.source,
-    historyNotice: selected.source === "local-fallback"
-      ? "Aster公式約定が0件のため、保存済みの取引ledgerを読み取り専用で表示しています。"
+    coverage,
+    historyNotice: coverageNotice || (selected.source === "local-fallback"
+      ? "Aster公式約定が取得できないため、保存済みの取引ledgerを読み取り専用で表示しています。"
       : localLedgerMerged
         ? "Aster公式約定に保存済みledgerの未取得分を重複排除して補完表示しています。"
-        : undefined,
+        : undefined),
     refreshedAt: aster.refreshedAt,
     readOnlyError: aster.error,
   });

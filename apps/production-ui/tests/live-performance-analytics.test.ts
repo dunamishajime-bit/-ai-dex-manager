@@ -52,12 +52,42 @@ test("live performance joins Aster official trades to production fill metadata",
     assert.equal(result.totals.netPnlUsd, 0.75);
     assert.equal(result.assetSeriesBasis, "RECONSTRUCTED_REALIZED_WALLET");
     assert.ok(Math.abs(Number(result.assetSeries.at(-1)?.assetUsd) - 100) < 1e-9);
+    assert.equal(result.coverage.source, "LOCAL_FALLBACK");
+    assert.equal(result.coverage.status, "PARTIAL");
+    assert.equal(result.coverage.totalFills, result.trades.length);
 
     const v12 = result.logicSummaries.find((row) => row.logic === "V12");
     const pengu = result.logicSummaries.find((row) => row.logic === "PENGU");
     assert.ok(Math.abs(Number(v12?.netPnlUsd) - 1.8) < 1e-9);
     assert.ok(Math.abs(Number(pengu?.netPnlUsd) + 1.05) < 1e-9);
     assert.equal(result.trades.find((row) => row.logic === "PENGU")?.variant, "PENGU Short V20");
+  } finally {
+    await rm(dir, { recursive: true, force: true });
+  }
+});
+
+test("performance summaries include IDLE and retain the same normalized fill set", async () => {
+  const dir = await mkdtemp(join(tmpdir(), "disdex-live-performance-idle-"));
+  const historyPath = join(dir, "history.json");
+  const marginGuardPath = join(dir, "guard.json");
+  try {
+    await writeFile(historyPath, JSON.stringify({
+      entries: [{
+        id: "idle-1",
+        orderId: "idle-order-1",
+        symbol: "DOTUSDT",
+        side: "SELL",
+        realizedPnl: 1.5,
+        commission: 0.02,
+        time: 1000,
+        strategyId: "IDLE",
+      }],
+    }), "utf8");
+    await writeFile(marginGuardPath, JSON.stringify({ totalMarginBalanceUsd: 50 }), "utf8");
+    const result = await loadLivePerformanceAnalytics({ historyPath, marginGuardPath });
+    assert.equal(result.trades.length, 1);
+    assert.equal(result.logicSummaries.find((row) => row.logic === "IDLE")?.fillCount, 1);
+    assert.equal(result.monthly.reduce((sum, row) => sum + Object.values(row.byLogic).reduce((inner, value) => inner + value, 0), 0), 1.48);
   } finally {
     await rm(dir, { recursive: true, force: true });
   }

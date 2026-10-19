@@ -145,3 +145,26 @@ export function buildHistoryCoverage(input: {
   };
 }
 
+export function buildLocalFallbackCoverage(
+  entries: readonly Array<{ executedAt?: string; sourceSymbol?: string; destSymbol?: string }>,
+  refreshedAt: string,
+  reason = "Aster公式履歴を取得できないため、保存済みledgerを表示しています。",
+): HistoryCoverage {
+  const symbols = [...new Set(entries.flatMap((entry) => [entry.sourceSymbol, entry.destSymbol]))]
+    .filter((symbol) => symbol && !["USDT", "USDC", "BUSD", "FDUSD"].includes(symbol));
+  const sorted = entries.map((entry) => entry.executedAt).filter(Boolean).sort();
+  return {
+    status: entries.length ? "PARTIAL" : "UNAVAILABLE",
+    source: entries.length ? "LOCAL_FALLBACK" : "EMPTY",
+    requestedSymbols: symbols,
+    completedSymbols: [],
+    failedSymbols: entries.length ? [{ symbol: "ACCOUNT_HISTORY", reason }] : [],
+    pagesBySymbol: {},
+    totalFills: entries.length,
+    ...(sorted[0] ? { oldestExecutedAt: sorted[0] } : {}),
+    ...(sorted.at(-1) ? { newestExecutedAt: sorted.at(-1) } : {}),
+    mergedLocalEntries: entries.length,
+    refreshedAt,
+  };
+}
+

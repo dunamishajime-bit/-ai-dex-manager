@@ -25,8 +25,19 @@ type TradeHistoryEntry = {
   openedAt?: string;
   closedAt?: string;
   tradeStatus?: "open" | "closed" | "unmatched_exit";
-  strategyId?: "V12" | "V52" | "PENGU" | "QUALITY102" | "UNKNOWN";
+  strategyId?: "V12" | "V52" | "PENGU" | "QUALITY102" | "FET" | "HYPE" | "IDLE" | "UNKNOWN";
   netPnlUsd?: number;
+};
+
+type HistoryCoverage = {
+  status: "COMPLETE" | "PARTIAL" | "UNAVAILABLE";
+  source: "ASTER_OFFICIAL" | "LOCAL_FALLBACK" | "EMPTY";
+  requestedSymbols: string[];
+  completedSymbols: string[];
+  failedSymbols: Array<{ symbol: string; reason: string }>;
+  totalFills: number;
+  mergedLocalEntries: number;
+  refreshedAt: string;
 };
 
 type ClosedTrade = TradeHistoryEntry & {
@@ -193,6 +204,7 @@ export default function PerformancePage() {
   const [error, setError] = useState<string | null>(null);
   const [historySource, setHistorySource] = useState<"aster" | "local-fallback" | "empty">("empty");
   const [historyNotice, setHistoryNotice] = useState<string | null>(null);
+  const [coverage, setCoverage] = useState<HistoryCoverage | null>(null);
   const [monthCursor, setMonthCursor] = useState(() => startOfMonth(new Date()));
 
   async function loadEntries() {
@@ -205,6 +217,7 @@ export default function PerformancePage() {
       setEntries(Array.isArray(data.entries) ? data.entries : []);
       setHistorySource(data.historySource === "aster" || data.historySource === "local-fallback" ? data.historySource : "empty");
       setHistoryNotice(typeof data.historyNotice === "string" ? data.historyNotice : null);
+      setCoverage(data.coverage && typeof data.coverage === "object" ? data.coverage as HistoryCoverage : null);
     } catch (loadError) {
       setError(loadError instanceof Error ? loadError.message : "Official trade history could not be loaded.");
     } finally {
@@ -318,6 +331,20 @@ export default function PerformancePage() {
       {historyNotice ? (
         <div className="rounded-lg border border-sky-500/25 bg-sky-500/10 px-4 py-3 text-sm text-sky-100">
           {historyNotice}
+        </div>
+      ) : null}
+
+      {coverage ? (
+        <div className={`rounded-lg border px-4 py-3 text-sm ${coverage.status === "COMPLETE" ? "border-emerald-500/25 bg-emerald-500/10 text-emerald-100" : coverage.status === "PARTIAL" ? "border-amber-500/25 bg-amber-500/10 text-amber-100" : "border-red-500/25 bg-red-500/10 text-red-100"}`}>
+          <div className="font-semibold">履歴取得状態: {coverage.status} / {coverage.source}</div>
+          <div className="mt-1 text-xs opacity-80">
+            約定 {coverage.totalFills}件 / 公式対象 {coverage.requestedSymbols.length} symbols / 完了 {coverage.completedSymbols.length} symbols / ローカル補完 {coverage.mergedLocalEntries}件 / 更新 {new Date(coverage.refreshedAt).toLocaleString("ja-JP")}
+          </div>
+          {coverage.failedSymbols.length ? (
+            <div className="mt-1 text-xs opacity-80">
+              未取得: {coverage.failedSymbols.map((item) => `${item.symbol}（${item.reason}）`).join("、")}
+            </div>
+          ) : null}
         </div>
       ) : null}
 

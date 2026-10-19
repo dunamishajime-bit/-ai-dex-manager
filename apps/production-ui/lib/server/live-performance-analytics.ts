@@ -3,8 +3,11 @@ import { readFile } from "node:fs/promises";
 import { loadAsterTradeHistory } from "@/lib/server/aster-trade-history";
 import { HISTORICAL_FILL_LINEAGE_BY_ORDER_ID } from "@/lib/server/historical-fill-lineage";
 import type { TradeHistoryEntry } from "@/lib/server/trade-history-db";
+import { loadTradeHistoryEntries } from "@/lib/server/trade-history-db";
+import { selectTradeHistorySource } from "@/lib/server/trade-history-source";
+import { buildLocalFallbackCoverage, type HistoryCoverage } from "@/lib/server/live-history-contract";
 
-export const LIVE_LOGIC_KEYS = ["V12", "PENGU", "Q102", "FET", "HYPE", "V52", "UNATTRIBUTED"] as const;
+export const LIVE_LOGIC_KEYS = ["V12", "PENGU", "Q102", "FET", "HYPE", "IDLE", "V52", "UNATTRIBUTED"] as const;
 export type LiveLogicKey = (typeof LIVE_LOGIC_KEYS)[number];
 
 type AsterHistoryRow = {
@@ -20,6 +23,7 @@ type AsterHistoryRow = {
   commissionAsset?: string;
   time?: number;
   executedAt?: string;
+  strategyId?: string;
 };
 
 type FillEvent = {
@@ -112,6 +116,7 @@ export type LiveLogicSummary = {
 export type LivePerformanceAnalytics = {
   generatedAt: string | null;
   source: "ASTER_OFFICIAL_USER_TRADES";
+  coverage: HistoryCoverage;
   attribution: {
     matched: number;
     total: number;
@@ -249,6 +254,7 @@ function classifyStrategy(event?: FillEvent): { logic: LiveLogicKey; variant: st
     return { logic: "Q102", variant: family ? `Q102 ${family}` : "Q102 Causal V4", strategyId };
   }
   if (upper === "HYPE_LONG" || upper.includes("HYPE_ZEC_HYPE_LONG")) return { logic: "HYPE", variant: "HYPE LONG", strategyId: "HYPE_LONG" };
+  if (upper === "IDLE" || upper.startsWith("IDLE_")) return { logic: "IDLE", variant: "Idle", strategyId };
   if (upper.includes("FET_BRK48") || upper === "FET") {
     return { logic: "FET", variant: "FET BRK48", strategyId };
   }
@@ -268,6 +274,7 @@ function logicFromOfficialHistory(entry: TradeHistoryEntry): { logic: LiveLogicK
   if (strategy.includes("QUALITY102") || strategy === "Q102") return { logic: "Q102", attributed: true };
   if (strategy.includes("PENGU")) return { logic: "PENGU", attributed: true };
   if (strategy === "HYPE" || strategy === "HYPE_LONG") return { logic: "HYPE", attributed: true };
+  if (strategy === "IDLE") return { logic: "IDLE", attributed: true };
   if (strategy.includes("FET")) return { logic: "FET", attributed: true };
   if (strategy.includes("V52") || strategy.includes("V11") || strategy.includes("V50")) return { logic: "V52", attributed: true };
   if (strategy.includes("V12")) return { logic: "V12", attributed: true };
@@ -281,6 +288,7 @@ function variantFromOfficialHistory(entry: TradeHistoryEntry, logic: LiveLogicKe
   if (logic === "Q102") return route ? `Q102 ${route}` : "Q102 Causal V4";
   if (logic === "FET") return route ? `FET ${route}` : "FET BRK48";
   if (logic === "HYPE") return route ? `HYPE ${route}` : "HYPE LONG";
+  if (logic === "IDLE") return route ? `Idle ${route}` : "Idle";
   if (logic === "V52") return route ? `V52 / ${route}` : "V52";
   return "未分類";
 }
@@ -345,7 +353,7 @@ function pointLabel(iso: string) {
 }
 
 function emptyLogicRecord(): Record<LiveLogicKey, number> {
-  return { V12: 0, PENGU: 0, Q102: 0, FET: 0, HYPE: 0, V52: 0, UNATTRIBUTED: 0 };
+  return { V12: 0, PENGU: 0, Q102: 0, FET: 0, HYPE: 0, IDLE: 0, V52: 0, UNATTRIBUTED: 0 };
 }
 
 function normalizeEquityHistory(raw: unknown): EquityPoint[] {
@@ -369,12 +377,13 @@ export async function loadLivePerformanceAnalytics(paths: LivePerformancePaths =
   const marginGuardPath = paths.marginGuardPath || DEFAULT_MARGIN_GUARD;
   const equityHistoryPath = paths.equityHistoryPath || DEFAULT_EQUITY_HISTORY;
 
-  const [officialHistory, history, fills, marginGuard, equityRaw] = await Promise.all([
+  const [officialHistory, history, fills, marginGuard, equityRaw, localLedgerEntries] = await Promise.all([
     paths.historyPath ? Promise.resolve(null) : loadAsterTradeHistory(),
     readJson<HistorySnapshot>(historyPath),
     readFillEvents(fillSpoolPath),
     readJson<MarginGuardSnapshot>(marginGuardPath),
     readJson<unknown>(equityHistoryPath),
+    paths.historyPath ? Promise.resolve([] as TradeHistoryEntry[]) : loadTradeHistoryEntries(),
   ]);
 
   const fillByOrderId = new Map<string, FillEvent>();
@@ -390,7 +399,11 @@ export async function loadLivePerformanceAnalytics(paths: LivePerformancePaths =
   const snapshotTrades = entries.map((row, index): LivePerformanceTrade => {
     const orderId = row.orderId == null ? "" : String(row.orderId);
     const fill = orderId ? fillByOrderId.get(orderId) : undefined;
-    const classified = classifyStrategy(fill);
+    const classified = classifyStrategy(fill || {
+      strategyId: row.strategyId,
+      symbol: row.symbol,
+      reason: "local history strategy attribution",
+    });
     const realizedPnlUsd = finite(row.realizedPnl);
     const commissionUsd = Math.max(0, finite(row.commission));
     const executedAt = isoFrom(row);
@@ -413,9 +426,16 @@ export async function loadLivePerformanceAnalytics(paths: LivePerformancePaths =
       attributed: Boolean(fill),
     };
   });
+  const selectedHistory = officialHistory?.source === "aster"
+    ? selectTradeHistorySource(officialHistory.entries, localLedgerEntries)
+    : localLedgerEntries.length
+      ? { entries: localLedgerEntries, source: "local-fallback" as const }
+      : { entries: [], source: "empty" as const };
+  const unifiedEntries = selectedHistory.entries;
+
   // Use explicit order-ID evidence from persisted fill spool when official fills lack attribution.
   // Never attribute historical sidecar orders by symbol alone.
-  const officialTrades = officialHistory?.entries?.map((entry) => {
+  const officialTrades = unifiedEntries.map((entry) => {
     const trade = liveTradeFromOfficialHistoryEntry(entry);
     if (trade.attributed || !entry.orderId) return trade;
     const fill = fillByOrderId.get(String(entry.orderId));
@@ -426,9 +446,25 @@ export async function loadLivePerformanceAnalytics(paths: LivePerformancePaths =
       variant: classified.variant, strategyId: classified.strategyId,
       clientOrderId: fill.clientOrderId ? String(fill.clientOrderId) : trade.clientOrderId,
       attributed: true };
-  }) || [];
-  const trades = (officialTrades.length ? officialTrades : snapshotTrades)
+  });
+  const trades = (paths.historyPath
+    ? snapshotTrades
+    : officialTrades.length ? officialTrades : snapshotTrades)
     .sort((a, b) => Date.parse(a.executedAt) - Date.parse(b.executedAt));
+
+  const coverage: HistoryCoverage = paths.historyPath
+    ? buildLocalFallbackCoverage(
+      entries.map((row) => ({ executedAt: isoFrom(row), sourceSymbol: String(row.symbol || ""), destSymbol: "USDT" })),
+      history?.generatedAt || new Date().toISOString(),
+      "指定されたローカル履歴スナップショットを読み取り専用で表示しています。",
+    )
+    : officialHistory?.source === "aster"
+      ? {
+        ...officialHistory.coverage,
+        totalFills: trades.length,
+        mergedLocalEntries: Math.max(0, trades.length - officialHistory.entries.length),
+      }
+      : buildLocalFallbackCoverage(unifiedEntries, new Date().toISOString(), officialHistory?.error);
 
   const fundingRows = Array.isArray(history?.fundingIncome) ? history!.fundingIncome! : [];
   const fundingEvents = fundingRows.map((row) => ({
@@ -541,6 +577,7 @@ export async function loadLivePerformanceAnalytics(paths: LivePerformancePaths =
   return {
     generatedAt: officialHistory?.refreshedAt || history?.generatedAt || null,
     source: "ASTER_OFFICIAL_USER_TRADES",
+    coverage,
     attribution: {
       matched,
       total: trades.length,
