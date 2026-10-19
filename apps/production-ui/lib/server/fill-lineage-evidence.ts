@@ -32,6 +32,8 @@ function strategyFromClientOrderId(clientOrderId: string | undefined) {
   if (value.startsWith("fet-")) return "FET_BRK48_RESIDUAL";
   if (value.startsWith("v12-")) return "V12_X1.00_ALL";
   if (value.startsWith("dualls2-") || value.startsWith("rec-v8-")) return "PENGU_DUAL_LS_V2_FINAL";
+  if (value.startsWith("hz-")) return "HYPE_LONG";
+  if (value.startsWith("idle-")) return "IDLE";
   return undefined;
 }
 

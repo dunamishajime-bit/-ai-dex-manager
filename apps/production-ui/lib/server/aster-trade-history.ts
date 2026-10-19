@@ -7,6 +7,12 @@ import type { TradeHistoryEntry } from "@/lib/server/trade-history-db";
 import { DIST_TERMINAL_LIVE_CONFIG as liveConfig } from "@/lib/disterminal-live-config";
 import { deriveTradeHistoryAttribution, type TradeHistoryAttribution } from "@/lib/trade-history-attribution";
 import { forcedExitCauseFromEvidence, loadFillLineageEvidence, routeFromFillEvidence, type FillLineageEvidence } from "@/lib/server/fill-lineage-evidence";
+import {
+  buildHistoryCoverage,
+  paginateAsterUserTrades,
+  type HistoryCoverage,
+  type SymbolHistoryResult,
+} from "@/lib/server/live-history-contract";
 
 const Q102_HISTORY_SYMBOLS = [
   "AAVEUSDT", "APTUSDT", "ARBUSDT", "AVAXUSDT", "DOGEUSDT", "DOTUSDT",
@@ -18,6 +24,12 @@ const Q102_HISTORY_SYMBOLS = [
 const ASTER_HISTORY_SYMBOLS: readonly string[] = Array.from(new Set([
   ...liveConfig.cryptoSymbols,
   ...Q102_HISTORY_SYMBOLS,
+  "HYPEUSDT",
+  "ZECUSDT",
+  "PENGUUSDT",
+  "RENDERUSDT",
+  "TAOUSDT",
+  "TIAUSDT",
   ...liveConfig.stockSymbols,
 ]));
 const CACHE_TTL_MS = 60_000;
@@ -35,12 +47,13 @@ type Lot = {
 type Book = { netQuantity: number; lots: Lot[] };
 type LivePosition = { symbol?: string; positionAmt?: string | number; positionSide?: string };
 
-let cache: { expiresAt: number; entries: TradeHistoryEntry[]; error?: string } | null = null;
+let cache: { expiresAt: number; entries: TradeHistoryEntry[]; coverage: HistoryCoverage; error?: string } | null = null;
 
 export type AsterTradeHistoryResult = {
   entries: TradeHistoryEntry[];
   source: "aster" | "unavailable";
   refreshedAt: string;
+  coverage: HistoryCoverage;
   error?: string;
 };
 
@@ -68,6 +81,7 @@ function strategyFromEvidence(evidence: FillLineageEvidence | undefined, fallbac
   if (value.includes("PENGU")) return "PENGU";
   if (value.includes("V52") || value.includes("V11EQ") || value.includes("V50")) return "V52";
   if (value.includes("FET")) return "FET";
+  if (value.includes("IDLE")) return "IDLE";
   if (value.includes("V96")) return "V96";
   if (value.includes("V12")) return "V12";
   return fallback;
@@ -265,43 +279,54 @@ function toHistoryEntry(
 }
 
 async function fetchSymbolTrades(client: AsterDexClient, symbol: string) {
-  const rows: AsterDexUserTrade[] = [];
-  const seen = new Set<string>();
-  let fromId: number | undefined;
-
-  for (let page = 0; page < 20; page += 1) {
-    const pageRows = await client.getUserTrades(symbol, { limit: 1000, fromId });
-    if (!Array.isArray(pageRows) || pageRows.length === 0) break;
-    let newRows = 0;
-    for (const row of pageRows) {
-      const key = String(row.id ?? String(row.orderId ?? "unknown") + ":" + String(row.time ?? "unknown") + ":" + String(row.qty ?? "unknown"));
-      if (!seen.has(key)) {
-        seen.add(key);
-        rows.push(row);
-        newRows += 1;
-      }
-    }
-    if (pageRows.length < 1000 || newRows === 0) break;
-    const ids = pageRows.map((row) => Number(row.id)).filter(Number.isFinite);
-    const lastId = ids.length ? Math.max(...ids) : undefined;
-    if (lastId === undefined || fromId === lastId + 1) break;
-    fromId = lastId + 1;
-  }
-
-  return rows.sort((left, right) => finite(left.time) - finite(right.time));
+  const result = await paginateAsterUserTrades(
+    ({ limit, fromId }) => client.getUserTrades(symbol, { limit, fromId }),
+    { pageSize: 1000, maxPages: 1000 },
+  );
+  return {
+    ...result,
+    rows: result.rows.sort((left, right) => finite(left.time) - finite(right.time)),
+  };
 }
 
-async function fetchAsterTrades(): Promise<{ entries: TradeHistoryEntry[]; error?: string }> {
+async function fetchAsterTrades(): Promise<{
+  entries: TradeHistoryEntry[];
+  coverage: HistoryCoverage;
+  error?: string;
+}> {
   const config = loadAsterDexClientConfig();
-  if (!config) return { entries: [], error: "Aster official history credentials are not configured." };
+  const refreshedAt = new Date().toISOString();
+  if (!config) {
+    return {
+      entries: [],
+      coverage: buildHistoryCoverage({
+        requestedSymbols: ASTER_HISTORY_SYMBOLS,
+        symbols: ASTER_HISTORY_SYMBOLS.map((symbol) => ({ symbol, status: "FAILED", pages: 0, fills: 0, error: "Aster official history credentials are not configured." })),
+        entries: [],
+        source: "EMPTY",
+        refreshedAt,
+      }),
+      error: "Aster official history credentials are not configured.",
+    };
+  }
   const client = new AsterDexClient(config);
   const entries: TradeHistoryEntry[] = [];
   const errors: string[] = [];
+  const symbolResults: SymbolHistoryResult[] = [];
   const fillEvidence = await loadFillLineageEvidence();
 
   for (const symbol of ASTER_HISTORY_SYMBOLS) {
     try {
-      const rows = await fetchSymbolTrades(client, symbol);
+      const pageResult = await fetchSymbolTrades(client, symbol);
+      const rows = pageResult.rows;
+      symbolResults.push({
+        symbol,
+        status: pageResult.truncated || pageResult.error ? "PARTIAL" : "COMPLETE",
+        pages: pageResult.pages,
+        fills: rows.length,
+        ...(pageResult.error ? { error: pageResult.error } : {}),
+      });
+      if (pageResult.error) errors.push(symbol + ": " + pageResult.error);
       const books = new Map<Direction, Book>([
         ["LONG", { netQuantity: 0, lots: [] }],
         ["SHORT", { netQuantity: 0, lots: [] }],
@@ -324,6 +349,13 @@ async function fetchAsterTrades(): Promise<{ entries: TradeHistoryEntry[]; error
       }
     } catch (error) {
       errors.push(symbol + ": " + (error instanceof Error ? error.message : "Official history request failed."));
+      symbolResults.push({
+        symbol,
+        status: "FAILED",
+        pages: 0,
+        fills: 0,
+        error: error instanceof Error ? error.message : "Official history request failed.",
+      });
     }
   }
 
@@ -339,6 +371,13 @@ async function fetchAsterTrades(): Promise<{ entries: TradeHistoryEntry[]; error
   entries.sort((left, right) => Date.parse(right.executedAt) - Date.parse(left.executedAt));
   return {
     entries,
+    coverage: buildHistoryCoverage({
+      requestedSymbols: ASTER_HISTORY_SYMBOLS,
+      symbols: symbolResults,
+      entries,
+      source: "ASTER_OFFICIAL",
+      refreshedAt,
+    }),
     error: errors.length ? errors.slice(0, 2).join("; ") : undefined,
   };
 }
@@ -350,21 +389,34 @@ export async function loadAsterTradeHistory(): Promise<AsterTradeHistoryResult> 
       entries: cache.entries,
       source: cache.entries.length > 0 ? "aster" : "unavailable",
       refreshedAt: new Date(now).toISOString(),
+      coverage: cache.coverage,
       error: cache.error,
     };
   }
 
-  let result: { entries: TradeHistoryEntry[]; error?: string };
+  let result: { entries: TradeHistoryEntry[]; coverage: HistoryCoverage; error?: string };
   try {
     result = await fetchAsterTrades();
   } catch (error) {
-    result = { entries: [], error: error instanceof Error ? error.message : "Official history request failed." };
+    const errorMessage = error instanceof Error ? error.message : "Official history request failed.";
+    result = {
+      entries: [],
+      coverage: buildHistoryCoverage({
+        requestedSymbols: ASTER_HISTORY_SYMBOLS,
+        symbols: ASTER_HISTORY_SYMBOLS.map((symbol) => ({ symbol, status: "FAILED", pages: 0, fills: 0, error: errorMessage })),
+        entries: [],
+        source: "EMPTY",
+        refreshedAt: new Date(now).toISOString(),
+      }),
+      error: errorMessage,
+    };
   }
-  cache = { expiresAt: now + CACHE_TTL_MS, entries: result.entries, error: result.error };
+  cache = { expiresAt: now + CACHE_TTL_MS, entries: result.entries, coverage: result.coverage, error: result.error };
   return {
     entries: result.entries,
     source: result.entries.length > 0 ? "aster" : "unavailable",
     refreshedAt: new Date(now).toISOString(),
+    coverage: result.coverage,
     error: result.error,
   };
 }

@@ -105,6 +105,14 @@ test("official fills inherit explicit route attribution from the matching local 
   assert.deepEqual(merged[0].attribution, local[0].attribution);
 });
 
+test("two official partial fills sharing an order remain separate trade records", () => {
+  const official = [
+    { ...baseEntry, id: "aster:ETHUSDT:t-1", tradeId: "t-1", orderId: "same-order", sourceAmount: 0.4 },
+    { ...baseEntry, id: "aster:ETHUSDT:t-2", tradeId: "t-2", orderId: "same-order", sourceAmount: 0.6 },
+  ];
+  assert.equal(mergeTradeHistoryEntries(official, []).length, 2);
+});
+
 test("calendar and history use the same net PnL value when commission is available", () => {
   assert.equal(displayTradePnlUsd({ realizedPnlUsd: 10, netPnlUsd: 9.5 }), 9.5);
   assert.equal(displayTradePnlUsd({ realizedPnlUsd: -2 }), -2);

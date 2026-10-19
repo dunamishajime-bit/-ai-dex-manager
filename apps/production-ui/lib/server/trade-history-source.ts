@@ -8,6 +8,9 @@ function identityKeys(entry: TradeHistoryEntry) {
   if (entry.tradeId) {
     keys.push(`trade:${entry.tradeId}`);
     if (entry.provider) keys.push(`trade:${entry.provider}:${entry.tradeId}`);
+    // A single order may contain multiple partial fills. Once a venue trade ID
+    // exists, order ID must not become a shared dedupe key.
+    return keys;
   }
   if (entry.orderId) {
     keys.push(`order:${entry.orderId}`);
@@ -18,6 +21,22 @@ function identityKeys(entry: TradeHistoryEntry) {
     keys.push(`tx:${entry.provider || "unknown"}:${entry.txHash}`);
   }
   return keys.length ? keys : [`id:${entry.id}`];
+}
+
+function sameFill(left: TradeHistoryEntry, right: TradeHistoryEntry) {
+  if (left.tradeId && right.tradeId) {
+    return left.tradeId === right.tradeId && (!left.provider || !right.provider || left.provider === right.provider);
+  }
+  if (left.orderId && right.orderId && left.orderId === right.orderId) {
+    const leftTime = Date.parse(left.executedAt);
+    const rightTime = Date.parse(right.executedAt);
+    const sameTime = Number.isFinite(leftTime) && Number.isFinite(rightTime)
+      ? Math.abs(leftTime - rightTime) <= 1000
+      : true;
+    const sameQuantity = Math.abs(Number(left.sourceAmount || 0) - Number(right.sourceAmount || 0)) <= 1e-10;
+    return sameTime && sameQuantity;
+  }
+  return left.txHash !== undefined && right.txHash !== undefined && left.txHash === right.txHash;
 }
 
 function attributionFor(entry: TradeHistoryEntry, source: "official-fill" | "local-ledger") {
@@ -62,9 +81,8 @@ export function mergeTradeHistoryEntries(
   }
 
   for (const rawEntry of officialEntries) {
-    const localMatch = identityKeys(rawEntry)
-      .map((key) => localByIdentity.get(key))
-      .find(Boolean);
+    const localMatch = localEntries.find((local) => sameFill(rawEntry, local))
+      || identityKeys(rawEntry).map((key) => localByIdentity.get(key)).find(Boolean);
     const entry = localMatch ? enrichOfficialEntry(rawEntry, localMatch) : rawEntry;
     const keys = identityKeys(entry);
     if (keys.some((key) => seen.has(key))) continue;
@@ -73,8 +91,8 @@ export function mergeTradeHistoryEntries(
   }
 
   for (const rawEntry of localEntries) {
+    if (merged.some((entry) => sameFill(entry, rawEntry))) continue;
     const keys = identityKeys(rawEntry);
-    if (keys.some((key) => seen.has(key))) continue;
     merged.push({
       ...rawEntry,
       attribution: attributionFor(rawEntry, "local-ledger"),
