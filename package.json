@@ -10,7 +10,11 @@
         "auth:persistence:selftest": "tsx scripts/auth-persistence-selftest.ts",
         "disterminal:readonly-surface:selftest": "tsx scripts/disterminal-readonly-surface-selftest.ts",
         "bt:v7:current": "tsx scripts/backtest-v7-current-fast.ts",
-        "bt:v7:live": "tsx scripts/backtest-v7-live-equivalent-fast.ts"
+        "bt:v7:live": "tsx scripts/backtest-v7-live-equivalent-fast.ts",
+        "dd:reduction:source": "tsx scripts/dd-reduction/verify-source.ts",
+        "dd:reduction:baseline": "tsx scripts/dd-reduction/run-baseline.ts",
+        "dd:reduction:stage": "tsx scripts/dd-reduction/run-stage.ts",
+        "dd:reduction:test": "tsx --test tests/dd-reduction-source.test.ts tests/dd-reduction-emulator.test.ts tests/dd-reduction-metrics.test.ts tests/dd-reduction-policy.test.ts tests/dd-reduction-runner.test.ts"
     },
     "dependencies": {
         "@google/generative-ai": "^0.24.1",

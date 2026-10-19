@@ -16,6 +16,7 @@ export type PolicyAxis = "initial-stop" | "profit-floor" | "trail" | "time-stop"
 export type PolicyApplicability = "AVAILABLE" | "NOT_APPLICABLE";
 export type AcceptanceStatus = "ACCEPTED" | "REJECTED" | "NOT_APPLICABLE";
 export type CandidateStatus = "AVAILABLE" | "NOT_APPLICABLE";
+export type StageRunStatus = "ACCEPTED" | "REJECTED" | "BASELINE_PARITY_BLOCKED" | "SOURCE_ERROR" | "NOT_APPLICABLE";
 
 export type JsonPrimitive = string | number | boolean | null;
 export interface JsonObject {
@@ -340,6 +341,9 @@ export interface StageResult {
     slippage: number;
     policyHash: string;
     metrics: Readonly<Record<string, number>>;
+    status?: StageRunStatus;
+    runId?: string;
+    artifactPaths?: readonly string[];
 }
 
 export interface StageArtifactIndex {
@@ -466,7 +470,7 @@ export interface FrozenStageSet {
     configHash: string;
     resultHash: string;
     policyHash: string;
-    stageIds: readonly string[];
+    stageIds: readonly StageId[];
     policies: readonly CandidatePolicy[];
     reason: string;
     stageDecisions?: readonly AcceptanceDecision[];
@@ -485,6 +489,13 @@ export interface ComparisonReport {
     fee: number;
     funding: number;
     slippage: number;
+    directPnl: number;
+    lostPriorLogicPnl: number;
+    feeDelta: number;
+    fundingDelta: number;
+    slippageDelta: number;
+    grossConflicts: number;
+    ddDecomposition: Readonly<Record<string, number>>;
 }
 
 export interface AttributionReport {
