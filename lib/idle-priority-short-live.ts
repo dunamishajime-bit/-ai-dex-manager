@@ -23,6 +23,8 @@ export type IdleLiveAdmissionInput = {
     fullCryptoGrossAvailable: number;
     fullTotalGrossAvailable: number;
     sameSymbolIdleActive: boolean;
+    allowPartialGross?: boolean;
+    minimumPartialGross?: number;
 };
 
 export const IDLE_BASELINE_ADMISSION_SCHEMA = "disdex-idle-baseline-admission/v1" as const;
@@ -90,8 +92,15 @@ export function evaluateIdleLiveAdmission(input: IdleLiveAdmissionInput): IdleLi
     if (input.killSwitchActive) return { accepted: false, reason: "SHARED_KILL_SWITCH_ACTIVE", gross: 0 };
     if (!input.venueFiveXCrossConfirmed) return { accepted: false, reason: "VENUE_5X_CROSS_UNCONFIRMED", gross: 0 };
     if (!input.candidateAccepted || input.candidateSide !== "SHORT") return { accepted: false, reason: "SHORT_SIGNAL_NOT_ACCEPTED", gross: 0 };
-    if (input.fullCryptoGrossAvailable < requestedGross - EPSILON || input.fullTotalGrossAvailable < requestedGross - EPSILON) {
-        return { accepted: false, reason: requestedGross === 1 ? "FULL_1X_CAPACITY_UNAVAILABLE" : `GROSS_CAPACITY_UNAVAILABLE:${requestedGross}X`, gross: 0 };
+    const availableGross = Math.min(requestedGross, input.fullCryptoGrossAvailable, input.fullTotalGrossAvailable);
+    if (availableGross < requestedGross - EPSILON) {
+        const floor = input.minimumPartialGross ?? 0.25;
+        if (input.allowPartialGross !== true || !Number.isFinite(floor) || floor <= 0
+            || !Number.isFinite(availableGross) || availableGross < floor - EPSILON) {
+            return { accepted: false, reason: requestedGross === 1 ? "FULL_1X_CAPACITY_UNAVAILABLE"
+                : "GROSS_CAPACITY_UNAVAILABLE:" + requestedGross + "X", gross: 0 };
+        }
+        return { accepted: true, reason: "IDLE_LIVE_ADMISSION_PARTIAL_CAPACITY", gross: availableGross };
     }
     return { accepted: true, reason: "IDLE_LIVE_ADMISSION_ACCEPTED", gross: requestedGross };
 }

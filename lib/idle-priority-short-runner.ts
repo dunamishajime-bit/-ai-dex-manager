@@ -20,6 +20,8 @@ import { computeIdlePriorityFeatures, evaluateIdleGenericCandidate, evaluateIdle
 import { FileIdlePriorityShortStateStore, type IdleOwnedPosition, type IdlePending, type IdleState } from "./idle-priority-short-state";
 import { idleMarginGuardMaxAgeMs } from "./idle-margin-age-policy";
 import { evaluateIdleOneStepFloor } from "./idle-quantity-feasibility";
+import { IDLE_SHORT_BASKET_ADOPTED_CANDIDATE, evaluateIdleShortBasketCandidate } from "./idle-priority-short-basket-adopted";
+import { buildIdleCrossRunnerStopRiskReadback } from "./idle-priority-short-basket-venue-bridge";
 import type { IdlePriorityMarketSnapshot } from "./idle-priority-short-market-data";
 import { writeIdleDecisionDetails, IDLE_DECISION_DETAILS_SCHEMA } from "./idle-priority-decision-diagnostics";
 import { evaluateIdleResidualLong } from "./idle-residual-long-signal";
@@ -484,6 +486,14 @@ export class IdlePriorityShortRunner {
 
     private async enter(state: IdleState, signal: IdleSignal, account: DirectAccountSnapshot, positions: DirectPosition[], lock: AccountLockHandle, pendingAggregate: ReturnType<typeof aggregatePendingExposure>): Promise<IdlePriorityShortTickResult> {
         const symbol = signal.symbol;
+        // Causal, fully confirmed H1 ATR feature; never recompute using an open bar.
+        if (!Number.isFinite(signal.features.atrRatio)
+            || signal.features.atrRatio > IDLE_SHORT_BASKET_ADOPTED_CANDIDATE.atrRatioMax) {
+            const reason = "IDLE_ATR_OVER_2P5_PCT";
+            state.lastDecision = { decisionTs: signal.features.decisionTs, symbol, route: signal.route, accepted: false, reason };
+            await this.dependencies.stateStore.save(state);
+            return { status: "held", message: reason, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+        }
         const quote = await this.dependencies.executor.getMarketQuote(symbol);
         if (!quoteFresh(quote, this.now())) return { status: "held", message: `IDLE_ENTRY_QUOTE_STALE:${symbol}`, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
         const equity = account.walletBalance + positions.reduce((sum, position) => sum + Number(position.unrealizedPnl || 0), 0);
@@ -568,6 +578,8 @@ export class IdlePriorityShortRunner {
             fullCryptoGrossAvailable,
             fullTotalGrossAvailable,
             sameSymbolIdleActive: Boolean(state.positions.find((position) => position.symbol === symbol)),
+            allowPartialGross: true,
+            minimumPartialGross: IDLE_SHORT_BASKET_ADOPTED_CANDIDATE.minResearchGross,
         } as const;
         const admission = evaluateIdleLiveAdmission(baseInput);
         state.lastDecision = { decisionTs: signal.features.decisionTs, symbol, route: signal.route, accepted: admission.accepted, reason: admission.reason };
@@ -576,38 +588,75 @@ export class IdlePriorityShortRunner {
         if (this.dependencies.runtime.mode !== "LIVE") return { status: "shadow", message: `IDLE_SHADOW_ENTRY:${symbol}`, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
         await assertOperatorActivation(this.dependencies.runtime);
         await this.dependencies.executor.getAccountSnapshot();
+        // Cross-runner risk must be proven from fresh authenticated venue STOPs and
+        // verified pending reservations while THIS SAME shared-account lock is held.
+        // The v1 pending registry lacks signed STOP-risk amounts: any active pending
+        // SHORT without a separately verified proof is blocked, never estimated.
         let normalized: Awaited<ReturnType<typeof this.dependencies.executor.normalizeMarketQuantity>>;
+        let basketOrderGross = 0;
         try {
             const requestedGross = IDLE_PRIORITY_SHORT_POLICY.routes[symbol].gross;
-            normalized = await this.dependencies.executor.normalizeMarketQuantity(symbol, equity * requestedGross / quote.bidPrice, quote.bidPrice);
+            const venueFilters = await this.dependencies.executor.normalizeMarketQuantity(
+                symbol, equity * requestedGross / quote.bidPrice, quote.bidPrice);
+            const riskReadback = buildIdleCrossRunnerStopRiskReadback({
+                nowMs: this.now(),
+                signedAccountReadbackComplete: true,
+                positions,
+                openOrders: await this.dependencies.executor.getOpenOrders(),
+                pendingRegistry: await readPendingExposureRegistry(this.dependencies.runtime.pendingExposurePath),
+                signedPendingStopRisks: [], // fail closed until a real cross-runner proof writer is certified
+            });
+            if (!riskReadback.ok) throw new Error(riskReadback.reason);
+            const basket = evaluateIdleShortBasketCandidate({
+                nowMs: this.now(),
+                sharedAccountLockHeld: true,
+                signedExposureSnapshotComplete: true,
+                equityUsd: equity,
+                atrRatio: signal.features.atrRatio,
+                requestedGross: admission.gross,
+                cryptoAndTotalGrossRoom: Math.max(0, Math.min(fullCryptoGrossAvailable, fullTotalGrossAvailable)),
+                entryPrice: quote.bidPrice,
+                quantityStep: venueFilters.stepSize,
+                venueMinQuantity: venueFilters.minQuantity,
+                venueMinNotionalUsd: Math.max(1e-9, venueFilters.minNotional),
+                existingShorts: riskReadback.existingShorts,
+                pendingShortReservations: riskReadback.pendingShortReservations,
+            });
+            if (!basket.allowed) throw new Error(basket.reason);
+            normalized = await this.dependencies.executor.normalizeMarketQuantity(
+                symbol, basket.quantity, quote.bidPrice);
+            if (normalized.quantity > basket.quantity + EPSILON
+                || normalized.notional > basket.orderNotionalUsd + Math.max(1e-8, basket.orderNotionalUsd * 1e-9)
+                || normalized.notional <= 0) throw new Error("IDLE_BASKET_VENUE_QUANTITY_ENLARGED");
+            basketOrderGross = normalized.notional / equity;
+            if (basketOrderGross + EPSILON < IDLE_SHORT_BASKET_ADOPTED_CANDIDATE.minResearchGross)
+                throw new Error("IDLE_BASKET_QUANTITY_BELOW_APPROVED_FLOOR");
+            // Preserve the original strict one-step 1.0x contract for full-size orders.
+            if (basketOrderGross >= 0.99) {
+                const fullLot = evaluateIdleOneStepFloor({
+                    symbol, equityUsd: equity, referencePrice: quote.bidPrice,
+                    normalizedQuantity: normalized.quantity, normalizedNotional: normalized.notional,
+                    minQuantity: normalized.minQuantity, maxQuantity: normalized.maxQuantity,
+                    quantityStep: normalized.stepSize, minNotional: normalized.minNotional,
+                });
+                if (!fullLot.accepted) throw new Error("IDLE_FULLSIZE_QUANTITY_REJECTED:" + fullLot.code);
+            }
         } catch (error) {
-            const reason = `IDLE_VENUE_QUANTITY_REJECTED:${symbol}:${error instanceof Error ? error.message : String(error)}`;
-            state.lastDecision = { decisionTs: signal.features.decisionTs, symbol, route: signal.route, accepted: false, reason };
-            await this.dependencies.stateStore.save(state);
-            return { status: "held", message: reason, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
-        }
-        const lot = evaluateIdleOneStepFloor({
-            symbol, equityUsd: equity, referencePrice: quote.bidPrice,
-            normalizedQuantity: normalized.quantity, normalizedNotional: normalized.notional,
-            minQuantity: normalized.minQuantity, maxQuantity: normalized.maxQuantity,
-            quantityStep: normalized.stepSize, minNotional: normalized.minNotional,
-        });
-        if (!lot.accepted) {
-            const reason = `IDLE_QUANTITY_REJECTED:${symbol}:${lot.code}:actualGross=${lot.actualGross ?? "UNKNOWN"}:minQty=${normalized.minQuantity}:minNotional=${normalized.minNotional}:step=${normalized.stepSize}`;
+            const reason = "IDLE_BASKET_ENTRY_REJECTED:" + symbol + ":" +
+                (error instanceof Error ? error.message : String(error));
             state.lastDecision = { decisionTs: signal.features.decisionTs, symbol, route: signal.route, accepted: false, reason };
             await this.dependencies.stateStore.save(state);
             return { status: "held", message: reason, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
         }
         const clientOrderId = deterministicIdleClientOrderId({ action: "ENTRY", symbol, signalTs: signal.features.signalTs });
-        const requestedGross = IDLE_PRIORITY_SHORT_POLICY.routes[symbol].gross;
-        const reservation = await lock.reserve({ strategyId: IDLE_PRIORITY_SHORT_STRATEGY, symbol, side: "SHORT", gross: admission.gross, notionalUsd: equity * admission.gross });
-        const pending: IdlePending = { action: "ENTRY", phase: "planned", symbol, route: signal.route, clientOrderId, idempotencyKey: clientOrderId, reservationId: reservation.reservationId, quantity: normalized.quantity, expectedPrice: quote.bidPrice, signalTs: signal.features.signalTs, decisionTs: signal.features.decisionTs, holdHours: signal.holdHours as 12 | 24, createdAt: this.now(), updatedAt: this.now(), reason: signal.reason, gross: requestedGross };
+        const reservation = await lock.reserve({ strategyId: IDLE_PRIORITY_SHORT_STRATEGY, symbol, side: "SHORT", gross: basketOrderGross, notionalUsd: normalized.notional });
+        const pending: IdlePending = { action: "ENTRY", phase: "planned", symbol, route: signal.route, clientOrderId, idempotencyKey: clientOrderId, reservationId: reservation.reservationId, quantity: normalized.quantity, expectedPrice: quote.bidPrice, signalTs: signal.features.signalTs, decisionTs: signal.features.decisionTs, holdHours: signal.holdHours as 12 | 24, createdAt: this.now(), updatedAt: this.now(), reason: signal.reason, gross: basketOrderGross };
         state.pending = pending;
         await this.dependencies.stateStore.save(state);
         try {
             state.pending.phase = "submitted";
             await this.dependencies.stateStore.save(state);
-            const result = await this.dependencies.executor.executeMarket({ requestId: clientOrderId, clientOrderId, symbol, side: "SELL", positionSide: "BOTH", quantity: normalized.quantity, expectedPrice: quote.bidPrice, maxSlippageBps: this.dependencies.runtime.maximumSlippageBps, reason: `IDLE_PRIORITY_SHORT_ENTRY:${signal.route}`, requireVenueMargin5xCross: true, maxEntryNotionalUsd: equity * admission.gross });
+            const result = await this.dependencies.executor.executeMarket({ requestId: clientOrderId, clientOrderId, symbol, side: "SELL", positionSide: "BOTH", quantity: normalized.quantity, expectedPrice: quote.bidPrice, maxSlippageBps: this.dependencies.runtime.maximumSlippageBps, reason: `IDLE_PRIORITY_SHORT_ENTRY:${signal.route}`, requireVenueMargin5xCross: true, maxEntryNotionalUsd: equity * basketOrderGross });
             return await this.finalizeEntry(state, pending, result, lock);
         } catch (error) {
             // This specific error is thrown by the executor BEFORE any order request.
