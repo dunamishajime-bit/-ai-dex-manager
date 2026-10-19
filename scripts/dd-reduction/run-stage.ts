@@ -31,6 +31,8 @@ import {
     loadProtectionReadback,
     parseRunnerArgs,
     policyFromSource,
+    protectionContractHash,
+    protectionPolicyInput,
     protectionReadbackExpectations,
     validateProtectionReadback,
     type EvaluationEvidence,
@@ -110,14 +112,7 @@ export function buildReplayConfig(args: RunnerArgs, source: CanonicalSource, fro
         deposits: args.deposits,
         fixedBaselinePolicy: policy.policyHash,
         strategyPolicies: policies.map((entry) => ({
-            policyHash: entry.policyHash,
-            configHash: entry.configHash,
-            strategy: entry.strategy,
-            direction: entry.direction,
-            initialStopBps: entry.initialStopBps,
-            profitFloorBps: entry.profitFloorBps,
-            trailingGivebackBps: entry.trailingGivebackBps,
-            timeStopBars: entry.timeStopBars,
+            ...protectionPolicyInput(entry),
         })),
         directionPolicies: directionPolicies(policy),
         caps: {
@@ -131,21 +126,14 @@ export function buildReplayConfig(args: RunnerArgs, source: CanonicalSource, fro
         perSymbolCaps,
         executionEvents: args.executionEvents,
         protectionReadbackEvidence: args.protectionReadbackEvidence,
+        protectionContract: policy.nativeAtr,
+        protectionContractHash: protectionContractHash(policy),
     };
 }
 
 function directionPolicies(current: ProductionPolicy): ReplayConfigWithRuntime["directionPolicies"] {
     return {
-        [current.direction]: {
-            policyHash: current.policyHash,
-            configHash: current.configHash,
-            strategy: current.strategy,
-            direction: current.direction,
-            initialStopBps: current.initialStopBps,
-            profitFloorBps: current.profitFloorBps,
-            trailingGivebackBps: current.trailingGivebackBps,
-            timeStopBars: current.timeStopBars,
-        },
+        [current.direction]: protectionPolicyInput(current),
     };
 }
 
@@ -362,6 +350,7 @@ export async function runStage(args: RunnerArgs): Promise<StageResult> {
     const frozen = await frozenFor(args);
     if (frozen.sourceHash !== source.manifest.sourceSha) throw new Error("FROZEN_STAGE_SOURCE_MISMATCH");
     const currentPolicy = policyFromSource(source, args.stage);
+    const currentProtectionContractHash = protectionContractHash(currentPolicy);
     const grid = buildCandidateGrid(args.stage, currentPolicy.direction, currentPolicy);
     const selected = grid.find((candidate) => candidate.candidateId === args.candidate);
     if (selected === undefined) throw new Error(`CANDIDATE_NOT_IN_PREDECLARED_GRID: ${args.candidate}`);
@@ -372,7 +361,7 @@ export async function runStage(args: RunnerArgs): Promise<StageResult> {
     const frozenStageHash = hashFrozenStageSet(frozen);
     const protectionReadback = await loadProtectionReadback(args);
     const protectionReadbackHash = protectionReadback === null ? undefined : hashProtectionReadbackEvidence(protectionReadback);
-    const identityArgs = { ...args, protectionReadbackHash };
+    const identityArgs = { ...args, protectionReadbackHash, protectionContractHash: currentProtectionContractHash };
     const evaluationConfigHash = buildEvaluationConfigHash(identityArgs, sourceHash, frozenStageHash);
     const evaluationGateHash = buildEvaluationGateHash(sourceHash, evaluationConfigHash, currentPolicy.policyHash, args.startTs);
     const filledCandidates = protectionReadbackExpectations(source);
@@ -457,6 +446,8 @@ export async function runStage(args: RunnerArgs): Promise<StageResult> {
             metrics: {},
             status: statusFromDecision(decision.status, decision.accepted),
             runId,
+            protectionMode: selected.protectionMode,
+            protectionContract: selected.nativeAtr,
         };
         return persist(args, result, nextFrozen, source.manifest);
     }
@@ -572,6 +563,8 @@ export async function runStage(args: RunnerArgs): Promise<StageResult> {
         metrics: { ...metrics, directPnl: comparison.directPnl, lostPriorLogicPnl: comparison.lostPriorLogicPnl, grossConflicts: comparison.grossConflicts },
         status: statusFromDecision(decision.status, decision.accepted),
         runId,
+        protectionMode: candidateLineage.protectionMode,
+        protectionContract: candidateLineage.nativeAtr,
     };
     return persist(args, result, nextFrozen, { manifest: source.manifest, gates, parity, evaluationEvidence: evidence, comparison, frozen: nextFrozen });
 }

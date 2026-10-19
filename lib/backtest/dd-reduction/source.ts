@@ -146,6 +146,23 @@ function requiredNumber(row: JsonObject, key: string, context: string): number {
     return value;
 }
 
+function optionalNumber(row: JsonObject, key: string, context: string): number | undefined {
+    if (!Object.prototype.hasOwnProperty.call(row, key)) return undefined;
+    return requiredNumber(row, key, context);
+}
+
+function optionalString(row: JsonObject, key: string, context: string): string | undefined {
+    if (!Object.prototype.hasOwnProperty.call(row, key)) return undefined;
+    return requiredString(row, key, context);
+}
+
+function optionalBoolean(row: JsonObject, key: string, context: string): boolean | undefined {
+    if (!Object.prototype.hasOwnProperty.call(row, key)) return undefined;
+    const value = row[key];
+    if (typeof value !== "boolean") throw new SourceContractError(`INVALID_${context}`, `${key} must be boolean`);
+    return value;
+}
+
 function requiredHash(row: JsonObject, key: string, context: string): string {
     const value = requiredString(row, key, context);
     if (!/^[a-f0-9]{64}$/i.test(value)) throw new SourceContractError(`INVALID_${context}`, `${key} must be a SHA256 hex string`);
@@ -294,6 +311,22 @@ function parseCandleRows(file: CollectedFile): ExecutionBar[] {
         const timeframe = Object.prototype.hasOwnProperty.call(row, "timeframe") ? requiredString(row, "timeframe", "CANDLE_ROW") : inferred?.timeframe;
         if (symbol === undefined || timeframe === undefined) throw new SourceContractError("INVALID_CANDLE_ROW", `${file.path}:${index + 1} must explicitly provide symbol/timeframe or use a recognized filename`);
         timeframeMs(timeframe);
+        const atr = optionalNumber(row, "atr", "CANDLE_ROW");
+        const atrLookbackBars = optionalNumber(row, "atrLookbackBars", "CANDLE_ROW");
+        const atrSourceTimeframe = optionalString(row, "atrSourceTimeframe", "CANDLE_ROW");
+        const atrComputedThroughTs = optionalNumber(row, "atrComputedThroughTs", "CANDLE_ROW");
+        const atrHistoryComplete = optionalBoolean(row, "atrHistoryComplete", "CANDLE_ROW");
+        const inputTimeframe = optionalString(row, "inputTimeframe", "CANDLE_ROW");
+        const strategyTimeframe = optionalString(row, "strategyTimeframe", "CANDLE_ROW");
+        const strategyBarKey = optionalString(row, "strategyBarKey", "CANDLE_ROW");
+        const strategyBarIndex = optionalNumber(row, "strategyBarIndex", "CANDLE_ROW");
+        const inputBarIndex = optionalNumber(row, "inputBarIndex", "CANDLE_ROW");
+        const sameBarOrderKnown = optionalBoolean(row, "sameBarOrderKnown", "CANDLE_ROW");
+        if (atr !== undefined && (atrLookbackBars === undefined || atrSourceTimeframe === undefined || atrComputedThroughTs === undefined
+            || atrHistoryComplete === undefined || inputTimeframe === undefined || strategyTimeframe === undefined || strategyBarKey === undefined
+            || strategyBarIndex === undefined || inputBarIndex === undefined || sameBarOrderKnown === undefined)) {
+            throw new SourceContractError("INCOMPLETE_ATR_METADATA", `${file.path}:${index + 1} must include complete causal ATR and timeframe metadata`);
+        }
         return {
             sourceHash: file.sha256,
             ts,
@@ -304,6 +337,17 @@ function parseCandleRows(file: CollectedFile): ExecutionBar[] {
             low: requiredNumber(row, "low", "CANDLE_ROW"),
             close: requiredNumber(row, "close", "CANDLE_ROW"),
             volume: requiredNumber(row, "volume", "CANDLE_ROW"),
+            ...(inputTimeframe === undefined ? {} : { inputTimeframe }),
+            ...(strategyTimeframe === undefined ? {} : { strategyTimeframe }),
+            ...(strategyBarKey === undefined ? {} : { strategyBarKey }),
+            ...(strategyBarIndex === undefined ? {} : { strategyBarIndex }),
+            ...(inputBarIndex === undefined ? {} : { inputBarIndex }),
+            ...(atr === undefined ? {} : { atr }),
+            ...(atrLookbackBars === undefined ? {} : { atrLookbackBars }),
+            ...(atrSourceTimeframe === undefined ? {} : { atrSourceTimeframe }),
+            ...(atrComputedThroughTs === undefined ? {} : { atrComputedThroughTs }),
+            ...(atrHistoryComplete === undefined ? {} : { atrHistoryComplete }),
+            ...(sameBarOrderKnown === undefined ? {} : { sameBarOrderKnown }),
         };
     });
 }
@@ -471,6 +515,17 @@ function seriesManifest(series: CandleSeries, input: CanonicalSourceInput): Sour
         }
     }
     if (missing.length > 0) throw new SourceContractError("GAP_DETECTED", `${series.symbol}/${series.timeframe} has missing timestamp(s): ${missing.join(",")}`);
+    const metadataValues = <T>(name: string, values: readonly (T | undefined)[]): T | undefined => {
+        const present = values.filter((value): value is T => value !== undefined);
+        if (present.length === 0) return undefined;
+        if (present.length !== values.length || new Set(present).size !== 1) throw new SourceContractError("ATR_METADATA_MISMATCH", `${series.symbol}/${series.timeframe} has inconsistent ${name}`);
+        return present[0];
+    };
+    const inputTimeframe = metadataValues("inputTimeframe", bars.map((bar) => bar.inputTimeframe));
+    const strategyTimeframe = metadataValues("strategyTimeframe", bars.map((bar) => bar.strategyTimeframe));
+    const atrLookbackBars = metadataValues("atrLookbackBars", bars.map((bar) => bar.atrLookbackBars));
+    const atrSourceTimeframe = metadataValues("atrSourceTimeframe", bars.map((bar) => bar.atrSourceTimeframe));
+    const sameBarOrderKnown = metadataValues("sameBarOrderKnown", bars.map((bar) => bar.sameBarOrderKnown));
     return {
         symbol: series.symbol,
         timeframe: series.timeframe,
@@ -480,6 +535,11 @@ function seriesManifest(series: CandleSeries, input: CanonicalSourceInput): Sour
         missing,
         duplicates,
         sha256: sha256(stableJson(bars)),
+        ...(inputTimeframe === undefined ? {} : { inputTimeframe }),
+        ...(strategyTimeframe === undefined ? {} : { strategyTimeframe }),
+        ...(atrLookbackBars === undefined ? {} : { atrLookbackBars }),
+        ...(atrSourceTimeframe === undefined ? {} : { atrSourceTimeframe }),
+        ...(sameBarOrderKnown === undefined ? {} : { sameBarOrderKnown }),
     };
 }
 
@@ -605,7 +665,7 @@ export function assertSourceManifest(manifest: SourceManifest, expected: Expecte
         for (const [index, expectedSeries] of expected.series.entries()) {
             const actual = manifest.series.find((item) => (expectedSeries.symbol === undefined || item.symbol === expectedSeries.symbol) && (expectedSeries.timeframe === undefined || item.timeframe === expectedSeries.timeframe)) ?? manifest.series[index];
             if (actual === undefined) throw new SourceContractError("MANIFEST_MISMATCH", "expected series is missing");
-            for (const field of ["symbol", "timeframe", "firstTs", "lastTs", "rowCount", "missing", "duplicates", "sha256"] as const) {
+            for (const field of ["symbol", "timeframe", "firstTs", "lastTs", "rowCount", "missing", "duplicates", "sha256", "inputTimeframe", "strategyTimeframe", "atrLookbackBars", "atrSourceTimeframe", "sameBarOrderKnown"] as const) {
                 const expectedValue = expectedSeries[field];
                 if (expectedValue !== undefined && stableJson(actual[field] as StableValue) !== stableJson(expectedValue as StableValue)) throw new SourceContractError("MANIFEST_MISMATCH", `series ${actual.symbol}/${actual.timeframe} ${field} does not match`);
             }

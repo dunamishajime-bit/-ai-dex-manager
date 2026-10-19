@@ -11,6 +11,7 @@ import type {
     FrozenStageLineage,
     FrozenStageSet,
     ProductionPolicy,
+    NativeAtrProtectionContract,
     StageId,
     StrategyId,
 } from "./types";
@@ -149,7 +150,14 @@ const CANDIDATE_VALUES = {
     timeStopBars: (base: number | null): readonly (number | null)[] => base === null ? [12, 24] : [Math.max(1, base - 4), base + 4],
 } as const;
 
-function asCandidatePolicy(base: ProductionPolicy, candidateId: string, stageId: StageId, direction: Direction, axis: CandidatePolicy["axis"], applicability: CandidatePolicy["applicability"], reason: string, controls: Partial<Pick<ProductionPolicy, "initialStopBps" | "profitFloorBps" | "trailingGivebackBps" | "timeStopBars">> = {}): CandidatePolicy {
+const NATIVE_ATR_CANDIDATE_VALUES = {
+    stopAtr: (base: number): readonly number[] => [Math.max(0.001, base - 0.25), base + 0.25],
+    takeProfitAtr: (base: number): readonly number[] => [Math.max(0.001, base - 0.25), base + 0.25],
+    trailingAtr: (base: number): readonly number[] => [Math.max(0.001, base - 0.05), base + 0.05],
+    maxHoldBars: (base: number): readonly number[] => [Math.max(1, base - 2), base + 2],
+} as const;
+
+function asCandidatePolicy(base: ProductionPolicy, candidateId: string, stageId: StageId, direction: Direction, axis: CandidatePolicy["axis"], applicability: CandidatePolicy["applicability"], reason: string, controls: Partial<Pick<ProductionPolicy, "initialStopBps" | "profitFloorBps" | "trailingGivebackBps" | "timeStopBars">> & { nativeAtr?: NativeAtrProtectionContract } = {}): CandidatePolicy {
     return {
         ...base,
         direction,
@@ -190,6 +198,24 @@ export function buildCandidateGrid(stage: StageId, direction: Direction, baselin
         )];
     }
 
+    if (baseline.protectionMode === "NATIVE_ATR" && baseline.nativeAtr !== undefined) {
+        const contract = baseline.nativeAtr;
+        const candidates: CandidatePolicy[] = [];
+        for (const value of distinctValues(NATIVE_ATR_CANDIDATE_VALUES.stopAtr(contract.stopAtr), contract.stopAtr)) {
+            candidates.push(asCandidatePolicy(baseline, `${stage}:${direction}:stop-atr:${value}`, stage, direction, "initial-stop", "AVAILABLE", "GRID_NATIVE_ATR_STOP", { nativeAtr: { ...contract, stopAtr: value } }));
+        }
+        for (const value of distinctValues(NATIVE_ATR_CANDIDATE_VALUES.takeProfitAtr(contract.takeProfitAtr), contract.takeProfitAtr)) {
+            candidates.push(asCandidatePolicy(baseline, `${stage}:${direction}:take-profit-atr:${value}`, stage, direction, "profit-floor", "AVAILABLE", "GRID_NATIVE_ATR_TAKE_PROFIT", { nativeAtr: { ...contract, takeProfitAtr: value } }));
+        }
+        for (const value of distinctValues(NATIVE_ATR_CANDIDATE_VALUES.trailingAtr(contract.trailingAtr), contract.trailingAtr)) {
+            candidates.push(asCandidatePolicy(baseline, `${stage}:${direction}:trailing-atr:${value}`, stage, direction, "trail", "AVAILABLE", "GRID_NATIVE_ATR_TRAIL", { nativeAtr: { ...contract, trailingAtr: value } }));
+        }
+        for (const value of distinctValues(NATIVE_ATR_CANDIDATE_VALUES.maxHoldBars(contract.maxHoldBars), contract.maxHoldBars)) {
+            candidates.push(asCandidatePolicy(baseline, `${stage}:${direction}:max-hold-bars:${value}`, stage, direction, "time-stop", "AVAILABLE", "GRID_NATIVE_ATR_TIME_STOP", { nativeAtr: { ...contract, maxHoldBars: value } }));
+        }
+        return candidates;
+    }
+
     const candidates: CandidatePolicy[] = [];
     for (const value of distinctValues(CANDIDATE_VALUES.initialStopBps(baseline.initialStopBps), baseline.initialStopBps)) {
         const candidateId = `${stage}:${direction}:initial-stop:${value}`;
@@ -221,6 +247,8 @@ export function applyCandidatePolicy(base: ProductionPolicy, candidate: Candidat
         profitFloorBps: candidate.profitFloorBps,
         trailingGivebackBps: candidate.trailingGivebackBps,
         timeStopBars: candidate.timeStopBars,
+        protectionMode: candidate.protectionMode,
+        nativeAtr: candidate.nativeAtr,
     };
 }
 

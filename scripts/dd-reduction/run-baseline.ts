@@ -4,6 +4,7 @@ import { dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { replayIntegrated, type ExecutionLifecycleEvent, type IntegratedReplayResult, type ReplayConfigWithRuntime } from "../../lib/backtest/dd-reduction/emulator";
+import type { ProtectionPolicyInput } from "../../lib/backtest/dd-reduction/protection";
 import { attributeReplay, writeStageArtifacts } from "../../lib/backtest/dd-reduction/reporting";
 import { loadCanonicalSource, SourceContractError } from "../../lib/backtest/dd-reduction/source";
 import { directionForStage, SEQUENTIAL_STAGES, stageAcceptsDirection, strategyForStage } from "../../lib/backtest/dd-reduction/stages";
@@ -15,6 +16,7 @@ import type {
     JsonObject,
     JsonValue,
     ProductionPolicy,
+    NativeAtrProtectionContract,
     ProtectionReadbackEvidence,
     StageId,
     StageResult,
@@ -48,6 +50,7 @@ export interface RunnerArgs {
     readonly executionEvents?: readonly ExecutionLifecycleEvent[];
     readonly protectionReadbackPath?: string;
     readonly protectionReadbackEvidence?: ProtectionReadbackEvidence;
+    readonly protectionContractHash?: string;
 }
 
 export interface EvaluationEvidence {
@@ -171,6 +174,27 @@ function stableJson(value: JsonValue | readonly JsonValue[]): string {
 
 export function hashJson(value: JsonValue | readonly JsonValue[]): string {
     return createHash("sha256").update(stableJson(value), "utf8").digest("hex");
+}
+
+export function protectionContractHash(policy: Pick<ProductionPolicy, "protectionMode" | "nativeAtr">): string | undefined {
+    return policy.protectionMode === "NATIVE_ATR" && policy.nativeAtr !== undefined
+        ? hashJson(policy.nativeAtr as unknown as JsonValue)
+        : undefined;
+}
+
+export function protectionPolicyInput(policy: ProductionPolicy): ProtectionPolicyInput {
+    return {
+        policyHash: policy.policyHash,
+        configHash: policy.configHash,
+        strategy: policy.strategy,
+        direction: policy.direction,
+        initialStopBps: policy.initialStopBps,
+        profitFloorBps: policy.profitFloorBps,
+        trailingGivebackBps: policy.trailingGivebackBps,
+        timeStopBars: policy.timeStopBars,
+        mode: policy.protectionMode,
+        atrContract: policy.nativeAtr,
+    };
 }
 
 export function hashFrozenStageSet(frozen: FrozenStageSet): string {
@@ -350,6 +374,28 @@ function requiredConfigString(config: JsonObject, key: string): string {
     return value;
 }
 
+function nativeAtrContractFromConfig(config: JsonObject): NativeAtrProtectionContract {
+    const contract = {
+        mode: "NATIVE_ATR" as const,
+        atrLookbackBars: requiredConfigNumber(config, "atrLookbackBars"),
+        atrSourceTimeframe: requiredConfigString(config, "atrSourceTimeframe"),
+        inputTimeframe: requiredConfigString(config, "inputTimeframe"),
+        strategyTimeframe: requiredConfigString(config, "strategyTimeframe"),
+        stopAtr: requiredConfigNumber(config, "stopAtr"),
+        takeProfitAtr: requiredConfigNumber(config, "takeProfitAtr"),
+        trailingAtr: requiredConfigNumber(config, "trailingAtr"),
+        maxHoldBars: requiredConfigNumber(config, "maxHoldBars"),
+        holdClock: requiredConfigString(config, "holdClock") as "STRATEGY_BARS",
+        sameBarPolicy: requiredConfigString(config, "sameBarPolicy") as "STOP_FIRST_FAIL_CLOSED",
+    };
+    if (contract.atrLookbackBars !== 31 || !Number.isInteger(contract.atrLookbackBars)
+        || contract.holdClock !== "STRATEGY_BARS" || contract.sameBarPolicy !== "STOP_FIRST_FAIL_CLOSED"
+        || !Number.isInteger(contract.maxHoldBars) || contract.maxHoldBars <= 0) {
+        throw new Error("SOURCE_ERROR: native ATR contract is invalid or not the canonical 31-bar/strategy-clock/fail-closed contract");
+    }
+    return contract;
+}
+
 export interface CanonicalCapManifest {
     readonly totalGross: number;
     readonly cryptoGross: number;
@@ -426,14 +472,16 @@ export function policyFromSource(source: CanonicalSource, stage: StageId): Produ
     if (direction !== "LONG" && direction !== "SHORT") throw new Error(`SOURCE_ERROR: direction for ${stage} is absent`);
     const supportedDirections = jsonDirections(strategyConfig.config);
     if (supportedDirections === null) throw new Error(`SOURCE_ERROR: supportedDirections for ${strategy} is absent`);
+    const protectionModeValue = jsonString(strategyConfig.config, "protectionMode") ?? "FIXED_BPS";
+    if (protectionModeValue !== "FIXED_BPS" && protectionModeValue !== "NATIVE_ATR") throw new Error(`SOURCE_ERROR: unsupported protectionMode ${protectionModeValue}`);
+    const protectionMode = protectionModeValue as "FIXED_BPS" | "NATIVE_ATR";
+    const nativeAtr = protectionMode === "NATIVE_ATR" ? nativeAtrContractFromConfig(strategyConfig.config) : undefined;
     const timeStopValue = strategyConfig.config.timeStopBars;
-    const timeStopBars = timeStopValue === null ? null : jsonNumber(strategyConfig.config, "timeStopBars");
-    const missingPolicyFields = ["initialStopBps", "profitFloorBps", "trailingGivebackBps"]
+    const timeStopBars = protectionMode === "NATIVE_ATR" ? null : timeStopValue === null ? null : jsonNumber(strategyConfig.config, "timeStopBars");
+    const missingPolicyFields = protectionMode === "NATIVE_ATR" ? [] : ["initialStopBps", "profitFloorBps", "trailingGivebackBps"]
         .filter((field) => jsonNumber(strategyConfig.config, field) === null);
-    if (timeStopValue !== null && timeStopBars === null) missingPolicyFields.push("timeStopBars");
-    if (missingPolicyFields.length > 0) {
-        throw new Error(`SOURCE_ERROR: production config missing finite policy fields: ${missingPolicyFields.join(", ")}`);
-    }
+    if (protectionMode === "FIXED_BPS" && timeStopValue !== null && timeStopBars === null) missingPolicyFields.push("timeStopBars");
+    if (missingPolicyFields.length > 0) throw new Error(`SOURCE_ERROR: production config missing finite policy fields: ${missingPolicyFields.join(", ")}`);
     const grossCap = requiredConfigNumber(strategyConfig.config, "grossCap");
     const sharedRiskCap = requiredConfigNumber(strategyConfig.config, "sharedRiskCap");
     const totalGrossCap = jsonNumber(strategyConfig.config, "totalGrossCap") ?? jsonNumber(strategyConfig.config, "aggregateGrossCap") ?? grossCap;
@@ -457,9 +505,9 @@ export function policyFromSource(source: CanonicalSource, stage: StageId): Produ
         sharedRiskCap,
         marginGuard: requiredConfigString(strategyConfig.config, "marginGuard"),
         leverage: requiredConfigNumber(strategyConfig.config, "leverage"),
-        initialStopBps: requiredConfigNumber(strategyConfig.config, "initialStopBps"),
-        profitFloorBps: requiredConfigNumber(strategyConfig.config, "profitFloorBps"),
-        trailingGivebackBps: requiredConfigNumber(strategyConfig.config, "trailingGivebackBps"),
+        initialStopBps: protectionMode === "NATIVE_ATR" ? 0 : requiredConfigNumber(strategyConfig.config, "initialStopBps"),
+        profitFloorBps: protectionMode === "NATIVE_ATR" ? 0 : requiredConfigNumber(strategyConfig.config, "profitFloorBps"),
+        trailingGivebackBps: protectionMode === "NATIVE_ATR" ? 0 : requiredConfigNumber(strategyConfig.config, "trailingGivebackBps"),
         timeStopBars,
         supportedDirections,
         aggregateGrossCap: totalGrossCap,
@@ -469,6 +517,8 @@ export function policyFromSource(source: CanonicalSource, stage: StageId): Produ
         perStrategyGrossCaps: jsonNumberRecord(strategyConfig.config, "perStrategyGrossCaps"),
         perSymbolGrossCaps: jsonNumberRecord(strategyConfig.config, "perSymbolGrossCaps"),
         capManifestHash: capManifest.hash,
+        protectionMode,
+        nativeAtr,
     };
     return { ...base, policyHash: hashJson(base as unknown as JsonObject) };
 }
@@ -607,6 +657,7 @@ export function buildConfigHash(args: RunnerArgs, sourceHash: string): string {
         frozenStageHash: args.frozenStageHash ?? null,
         evaluationEvidenceHash: args.evaluationEvidenceHash ?? null,
         protectionReadbackHash: args.protectionReadbackHash ?? null,
+        protectionContractHash: args.protectionContractHash ?? null,
     });
 }
 
@@ -664,17 +715,10 @@ export function buildBaselineReplayConfig(args: RunnerArgs, source: CanonicalSou
         deposits: args.deposits,
         fixedBaselinePolicy: policy.policyHash,
         directionPolicies: {
-            [policy.direction]: {
-                policyHash: policy.policyHash,
-                configHash: policy.configHash,
-                strategy: policy.strategy,
-                direction: policy.direction,
-                initialStopBps: policy.initialStopBps,
-                profitFloorBps: policy.profitFloorBps,
-                trailingGivebackBps: policy.trailingGivebackBps,
-                timeStopBars: policy.timeStopBars,
-            },
+            [policy.direction]: protectionPolicyInput(policy),
         },
+        protectionContract: policy.nativeAtr,
+        protectionContractHash: protectionContractHash(policy),
         caps: {
             totalGross: manifest.totalGross,
             cryptoGross: manifest.cryptoGross,
@@ -753,7 +797,7 @@ export async function runBaseline(args: RunnerArgs): Promise<StageResult> {
         const policy = policyFromSource(source, args.stage);
         const protectionReadback = await loadProtectionReadback(args);
         const protectionReadbackHash = protectionReadback === null ? undefined : hashProtectionReadbackEvidence(protectionReadback);
-        const hashes = resultHashes({ ...args, protectionReadbackHash }, manifest.sourceSha);
+        const hashes = resultHashes({ ...args, protectionReadbackHash, protectionContractHash: protectionContractHash(policy) }, manifest.sourceSha);
         const filledCandidates = protectionReadbackExpectations(source);
         if (filledCandidates.length > 0 && protectionReadback === null) throw new Error("PROTECTION_READBACK_UNAVAILABLE");
         if (protectionReadback !== null) {
@@ -800,6 +844,8 @@ export async function runBaseline(args: RunnerArgs): Promise<StageResult> {
             metrics: replayMetrics(replay, args.initialEquity),
             status: "ACCEPTED",
             runId: hashes.runId,
+            protectionMode: policy.protectionMode,
+            protectionContract: policy.nativeAtr,
         };
         return persistResult(args, result, { manifest, parity, runId: hashes.runId });
     } catch (error) {

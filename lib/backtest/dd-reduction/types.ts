@@ -17,6 +17,33 @@ export type PolicyApplicability = "AVAILABLE" | "NOT_APPLICABLE";
 export type AcceptanceStatus = "ACCEPTED" | "REJECTED" | "NOT_APPLICABLE";
 export type CandidateStatus = "AVAILABLE" | "NOT_APPLICABLE";
 export type StageRunStatus = "ACCEPTED" | "REJECTED" | "BASELINE_PARITY_BLOCKED" | "SOURCE_ERROR" | "NOT_APPLICABLE";
+export type ProtectionMode = "FIXED_BPS" | "NATIVE_ATR";
+export type HoldClock = "INPUT_BARS" | "STRATEGY_BARS";
+export type SameBarPolicy = "STOP_FIRST_FAIL_CLOSED";
+
+export interface NativeAtrProtectionContract {
+    readonly mode: "NATIVE_ATR";
+    readonly atrLookbackBars: number;
+    readonly atrSourceTimeframe: string;
+    readonly inputTimeframe: string;
+    readonly strategyTimeframe: string;
+    readonly stopAtr: number;
+    readonly takeProfitAtr: number;
+    readonly trailingAtr: number;
+    readonly maxHoldBars: number;
+    readonly holdClock: "STRATEGY_BARS";
+    readonly sameBarPolicy: SameBarPolicy;
+}
+
+export interface AtrProtectionSnapshot {
+    readonly mode: "NATIVE_ATR";
+    readonly entryAtr: number;
+    readonly entryAtrComputedThroughTs: number;
+    readonly entryStrategyBarKey: string;
+    readonly strategyBarsHeld: number;
+    readonly holdClock: "STRATEGY_BARS";
+    readonly sameBarPolicy: SameBarPolicy;
+}
 
 export type JsonPrimitive = string | number | boolean | null;
 export interface JsonObject {
@@ -73,6 +100,18 @@ export interface ExecutionBar {
     readonly low: number;
     readonly close: number;
     readonly volume: number;
+    /** Optional causal ATR/timeframe metadata. Fixed-bps bars do not require it. */
+    readonly inputTimeframe?: string;
+    readonly strategyTimeframe?: string;
+    readonly strategyBarKey?: string;
+    readonly strategyBarIndex?: number;
+    readonly inputBarIndex?: number;
+    readonly atr?: number;
+    readonly atrLookbackBars?: number;
+    readonly atrSourceTimeframe?: string;
+    readonly atrComputedThroughTs?: number;
+    readonly atrHistoryComplete?: boolean;
+    readonly sameBarOrderKnown?: boolean;
 }
 
 export interface CandleSeries {
@@ -181,6 +220,11 @@ export interface SourceSeriesManifest {
     readonly missing: readonly number[];
     readonly duplicates: readonly number[];
     readonly sha256: string;
+    readonly inputTimeframe?: string;
+    readonly strategyTimeframe?: string;
+    readonly atrLookbackBars?: number;
+    readonly atrSourceTimeframe?: string;
+    readonly sameBarOrderKnown?: boolean;
 }
 
 export interface SourceManifest {
@@ -208,6 +252,11 @@ export interface ExpectedSourceSeriesManifest {
     missing?: readonly number[];
     duplicates?: readonly number[];
     sha256?: string;
+    inputTimeframe?: string;
+    strategyTimeframe?: string;
+    atrLookbackBars?: number;
+    atrSourceTimeframe?: string;
+    sameBarOrderKnown?: boolean;
 }
 
 export interface ExpectedSourceManifest {
@@ -282,6 +331,8 @@ export interface ReplayConfig {
     policyHash: string;
     perStrategyCaps?: Readonly<Record<string, number>>;
     perSymbolCaps?: Readonly<Record<string, number>>;
+    readonly protectionContract?: NativeAtrProtectionContract;
+    readonly protectionContractHash?: string;
 }
 
 export interface ProtectionPolicy {
@@ -293,6 +344,8 @@ export interface ProtectionPolicy {
     trailingGivebackBps: number;
     timeStopBars: number | null;
     configHash: string;
+    readonly protectionMode?: ProtectionMode;
+    readonly nativeAtr?: NativeAtrProtectionContract;
 }
 
 export interface IntegratedReplay {
@@ -347,6 +400,8 @@ export interface StageResult {
     status?: StageRunStatus;
     runId?: string;
     artifactPaths?: readonly string[];
+    protectionMode?: ProtectionMode;
+    protectionContract?: NativeAtrProtectionContract;
 }
 
 export interface StageArtifactIndex {
@@ -388,6 +443,8 @@ export interface ProductionPolicy {
     perStrategyGrossCaps?: Readonly<Record<string, number>>;
     perSymbolGrossCaps?: Readonly<Record<string, number>>;
     capManifestHash?: string;
+    protectionMode?: ProtectionMode;
+    nativeAtr?: NativeAtrProtectionContract;
 }
 
 export interface CandidatePolicy extends ProductionPolicy {

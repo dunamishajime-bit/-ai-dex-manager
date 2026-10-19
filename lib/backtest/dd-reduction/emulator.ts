@@ -698,7 +698,7 @@ function protectiveExecutionEvent(position: PositionLifecycleWithProtection, bar
         eventId: `protection-exit:${position.positionId}:${bar.ts}`,
         eventType: "EXIT",
         positionId: position.positionId,
-        executionKind: decision.trigger === "TIME_STOP" ? "TIME_STOP" : "STOP",
+        executionKind: decision.trigger === "TIME_STOP" ? "TIME_STOP" : decision.trigger === "TAKE_PROFIT" ? "TAKE_PROFIT" : "STOP",
         clientOrderId: `${decision.protection.clientOrderId}:${bar.ts}`,
         quantity: position.remainingQuantity,
         price: decision.trigger === "TIME_STOP" ? bar.close : decision.stopPrice,
