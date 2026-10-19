@@ -3,7 +3,7 @@ import { readdir, readFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { test } from "node:test";
-import { assertFixtureIdentity, FIXTURE_HASH } from "../lib/backtest/dd-reduction/fixture-identity";
+import { assertFixtureIdentity, FIXTURE_HASH, FIXTURE_SCHEMAS } from "../lib/backtest/dd-reduction/fixture-identity";
 
 const repositoryRoot = resolve(fileURLToPath(import.meta.url), "..", "..");
 
@@ -63,6 +63,24 @@ test("rejects missing, placeholder, and nested direct-fixture identity hashes", 
     assert.throws(
         () => assertFixtureIdentity({ ...valid, nested: { policyHash: undefined } }, required, "nested-missing"),
         /FIXTURE_HASH_INVALID.*nested\.policyHash/,
+    );
+
+    const validEvent = { ...valid, reservation: null, fill: { sourceHash: FIXTURE_HASH }, exit: null };
+    assert.doesNotThrow(() => assertFixtureIdentity(validEvent, FIXTURE_SCHEMAS.event, "valid-event"));
+    assert.throws(
+        () => assertFixtureIdentity({ ...validEvent, fill: {} }, FIXTURE_SCHEMAS.event, "nested-fill-missing"),
+        /FIXTURE_HASH_INVALID.*fill\.sourceHash/,
+    );
+    const { fill: _fill, ...eventWithoutFill } = validEvent;
+    assert.throws(
+        () => assertFixtureIdentity(eventWithoutFill, FIXTURE_SCHEMAS.event, "nested-fill-absent"),
+        /FIXTURE_NESTED_MISSING.*fill/,
+    );
+
+    const validPolicyBundle = { ...valid, policy: { sourceHash: FIXTURE_HASH, configHash: FIXTURE_HASH, policyHash: FIXTURE_HASH, resultHash: FIXTURE_HASH } };
+    assert.throws(
+        () => assertFixtureIdentity({ ...validPolicyBundle, policy: { ...validPolicyBundle.policy, policyHash: "invalid" } }, FIXTURE_SCHEMAS.policyBundle, "nested-policy-override"),
+        /FIXTURE_HASH_INVALID.*policy\.policyHash/,
     );
 });
 

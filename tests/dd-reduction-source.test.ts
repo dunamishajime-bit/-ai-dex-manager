@@ -12,7 +12,7 @@ import {
     loadCanonicalSource,
 } from "../lib/backtest/dd-reduction/source";
 import type { CanonicalSourceInput } from "../lib/backtest/dd-reduction/types";
-import { assertFixtureIdentity, FIXTURE_HASH } from "../lib/backtest/dd-reduction/fixture-identity";
+import { assertFixtureIdentity, FIXTURE_HASH, FIXTURE_SCHEMAS } from "../lib/backtest/dd-reduction/fixture-identity";
 
 interface FixtureFile {
     name: string;
@@ -63,19 +63,19 @@ function lifecycleFields(overrides: Record<string, string | number | boolean | n
         resultHash: HASH,
         ...overrides,
     };
-    assertFixtureIdentity(row, ["sourceHash", "configHash", "policyHash", "resultHash"], "source.lifecycleFields");
+    assertFixtureIdentity(row, FIXTURE_SCHEMAS.candidateRow, "source.lifecycleFields");
     return JSON.stringify(row);
 }
 
 function baselineRow(overrides: Record<string, string | number | boolean | null> = {}): string {
     const row = { ...JSON.parse(lifecycleFields()), tradeId: "trade-1", entry: null, finalExit: null, ...overrides };
-    assertFixtureIdentity(row, ["sourceHash", "configHash", "policyHash", "resultHash"], "source.baselineRow");
+    assertFixtureIdentity(row, FIXTURE_SCHEMAS.baselineRow, "source.baselineRow");
     return JSON.stringify(row);
 }
 
 function candidateRow(overrides: Record<string, string | number | boolean | null> = {}): string {
     const row = { ...JSON.parse(lifecycleFields()), candidateId: "candidate-1", accepted: true, rejectionReason: null, ...overrides };
-    assertFixtureIdentity(row, ["sourceHash", "configHash", "policyHash", "resultHash"], "source.candidateRow");
+    assertFixtureIdentity(row, FIXTURE_SCHEMAS.candidateRow, "source.candidateRow");
     return JSON.stringify(row);
 }
 

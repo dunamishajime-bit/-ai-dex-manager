@@ -16,7 +16,7 @@ import type {
     TradePath,
     PositionLifecycle,
 } from "../lib/backtest/dd-reduction/types";
-import { assertFixtureIdentity, FIXTURE_HASH } from "../lib/backtest/dd-reduction/fixture-identity";
+import { assertFixtureIdentity, FIXTURE_HASH, FIXTURE_SCHEMAS } from "../lib/backtest/dd-reduction/fixture-identity";
 
 const HASH = FIXTURE_HASH;
 type TradePathWithExits = TradePath & { readonly exits: readonly ExecutionExit[] };
@@ -36,7 +36,7 @@ function fill(price: number, quantity: number, ts = 1_700_000_000_000, fee = 0, 
         funding,
         slippage,
         reason: "fixture-entry",
-    }, ["sourceHash"], "metrics.fill");
+    }, FIXTURE_SCHEMAS.fill, "metrics.fill");
 }
 
 function exit(price: number, quantity: number, ts: number, realizedPnl: number, fee = 0, funding = 0, slippage = 0, reason = "NORMAL_EXIT"): ExecutionExit {
@@ -51,7 +51,7 @@ function exit(price: number, quantity: number, ts: number, realizedPnl: number, 
         slippage,
         realizedPnl,
         reason,
-    }, ["sourceHash"], "metrics.exit");
+    }, FIXTURE_SCHEMAS.exit, "metrics.exit");
 }
 
 function bar(ts: number, open: number, high: number, low: number, close: number): ExecutionBar {
@@ -65,7 +65,7 @@ function bar(ts: number, open: number, high: number, low: number, close: number)
         low,
         close,
         volume: 1,
-    }, ["sourceHash"], "metrics.bar");
+    }, FIXTURE_SCHEMAS.bar, "metrics.bar");
 }
 
 function path(overrides: Partial<TradePath> = {}): TradePath {
@@ -89,7 +89,7 @@ function path(overrides: Partial<TradePath> = {}): TradePath {
         resultHash: HASH,
         bars: [],
         ...overrides,
-    }, ["sourceHash", "configHash", "policyHash", "resultHash"], "metrics.path");
+    }, FIXTURE_SCHEMAS.tradePath, "metrics.path");
 }
 
 test("calculates LONG MFE, MAE, initial adverse excursion, and giveback after profit turns into loss", () => {

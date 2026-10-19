@@ -19,7 +19,7 @@ import type {
     FrozenStageSet,
     ProductionPolicy,
 } from "../lib/backtest/dd-reduction/types";
-import { assertFixtureIdentity, FIXTURE_HASH } from "../lib/backtest/dd-reduction/fixture-identity";
+import { assertFixtureIdentity, FIXTURE_HASH, FIXTURE_SCHEMAS } from "../lib/backtest/dd-reduction/fixture-identity";
 
 const HASH = FIXTURE_HASH;
 
@@ -47,8 +47,7 @@ function baseline(overrides: Partial<ResearchProductionPolicy> = {}): ResearchPr
         timeStopBars: null,
         supportedDirections: ["LONG", "SHORT"],
     };
-    assertFixtureIdentity(base, ["sourceHash", "configHash", "policyHash", "resultHash"], "policy.baseline");
-    return { ...base, ...overrides };
+    return assertFixtureIdentity({ ...base, ...overrides }, FIXTURE_SCHEMAS.policy, "policy.baseline");
 }
 
 function candidateSummary(overrides: Partial<CandidateSummary> = {}): CandidateSummary {
@@ -85,8 +84,7 @@ function candidateSummary(overrides: Partial<CandidateSummary> = {}): CandidateS
             candidateSelectionUsesFuturePnl: 0,
         },
     };
-    assertFixtureIdentity(base, ["sourceHash", "configHash", "policyHash", "resultHash"], "policy.candidateSummary");
-    return { ...base, ...overrides };
+    return assertFixtureIdentity({ ...base, ...overrides }, FIXTURE_SCHEMAS.candidateSummary, "policy.candidateSummary");
 }
 
 function baselineSummary(overrides: Partial<BaselineSummary> = {}): BaselineSummary {
@@ -103,8 +101,7 @@ function baselineSummary(overrides: Partial<BaselineSummary> = {}): BaselineSumm
         slippage: 3,
         metrics: {},
     };
-    assertFixtureIdentity(base, ["sourceHash", "configHash", "policyHash", "resultHash"], "policy.baselineSummary");
-    return { ...base, ...overrides };
+    return assertFixtureIdentity({ ...base, ...overrides }, FIXTURE_SCHEMAS.policy, "policy.baselineSummary");
 }
 
 function gates(overrides: Partial<AcceptanceGates> = {}): AcceptanceGates {
@@ -115,8 +112,7 @@ function gates(overrides: Partial<AcceptanceGates> = {}): AcceptanceGates {
         policyHash: HASH,
         declaredAtTs: 1_700_000_000_000,
     });
-    assertFixtureIdentity(base, ["sourceHash", "configHash", "policyHash", "resultHash"], "policy.gates");
-    return { ...base, ...overrides };
+    return assertFixtureIdentity({ ...base, ...overrides }, FIXTURE_SCHEMAS.gates, "policy.gates");
 }
 
 function initialFrozen(): FrozenStageSet {
@@ -159,6 +155,10 @@ test("builds independent Long and Short grids without inventing shared policy st
     assert.notDeepEqual(longGrid.map((candidate) => candidate.candidateId), shortGrid.map((candidate) => candidate.candidateId));
     assert.equal(base.direction, "LONG");
     assert.deepEqual(base.supportedDirections, ["LONG", "SHORT"]);
+});
+
+test("fails closed when a policy identity override is invalid", () => {
+    assert.throws(() => baseline({ configHash: "invalid" }), /FIXTURE_HASH_INVALID.*policy\.baseline\.configHash/);
 });
 
 test("searches one protection axis at a time in the declared order", () => {
@@ -266,9 +266,7 @@ test("rejects caller-tuned or incomplete acceptance gate manifests and mismatche
     assert.equal(missingDeclaration.accepted, false);
     assert.match(missingDeclaration.reason, /gates/);
 
-    const mismatchedSource = acceptCandidate(candidateSummary({ sourceHash: "b".repeat(64) }), baselineSummary(), gates());
-    assert.equal(mismatchedSource.accepted, false);
-    assert.match(mismatchedSource.reason, /provenance/);
+    assert.throws(() => candidateSummary({ sourceHash: "b".repeat(64) }), /FIXTURE_HASH_INVALID.*policy\.candidateSummary\.sourceHash/);
 });
 
 test("records an unavailable production direction as NOT_APPLICABLE without creating a Short policy", () => {

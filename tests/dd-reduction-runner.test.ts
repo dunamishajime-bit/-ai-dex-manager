@@ -30,7 +30,7 @@ import { compareStage } from "../scripts/dd-reduction/compare-stage";
 import type { CandidatePolicy, FrozenStageSet, JsonValue, ProtectionReadbackEvidence, StageResult } from "../lib/backtest/dd-reduction/types";
 import { replayIntegrated } from "../lib/backtest/dd-reduction/emulator";
 import type { IntegratedReplayResult } from "../lib/backtest/dd-reduction/emulator";
-import { assertFixtureIdentity, FIXTURE_HASH } from "../lib/backtest/dd-reduction/fixture-identity";
+import { assertFixtureIdentity, FIXTURE_HASH, FIXTURE_SCHEMAS } from "../lib/backtest/dd-reduction/fixture-identity";
 
 const HASH = FIXTURE_HASH;
 const START = 1_700_000_000_000;
@@ -98,7 +98,7 @@ function candidatePolicy(stageId: CandidatePolicy["stageId"], strategy: Candidat
         acceptedGross: 1_500,
         reservation: null,
     } satisfies CandidatePolicy;
-    return assertFixtureIdentity(policy, ["sourceHash", "configHash", "policyHash", "resultHash"], "runner.candidatePolicy");
+    return assertFixtureIdentity(policy, FIXTURE_SCHEMAS.policy, "runner.candidatePolicy");
 }
 
 function frozenSet(overrides: Partial<FrozenStageSet> = {}): FrozenStageSet {
@@ -112,9 +112,12 @@ function frozenSet(overrides: Partial<FrozenStageSet> = {}): FrozenStageSet {
         reason: "FROZEN_RESEARCH_POLICY_ONLY",
         completedStageIds: [],
     };
-    assertFixtureIdentity(base, ["sourceHash", "configHash", "policyHash", "resultHash"], "runner.frozenSet");
-    return { ...base, ...overrides };
+    return assertFixtureIdentity({ ...base, ...overrides }, FIXTURE_SCHEMAS.frozenSet, "runner.frozenSet");
 }
+
+test("fails closed when a frozen-set identity override is invalid", () => {
+    assert.throws(() => frozenSet({ policyHash: "invalid" }), /FIXTURE_HASH_INVALID.*runner\.frozenSet\.policyHash/);
+});
 
 async function makeFixture(options: { readonly withBaselineLedger?: boolean; readonly corruptParity?: boolean; readonly shortOnly?: boolean; readonly withCandidateFill?: boolean } = {}): Promise<{ root: string; args: RunnerArgs }> {
     const root = await mkdtemp(join(tmpdir(), "dd-reduction-runner-"));
@@ -142,7 +145,7 @@ async function makeFixture(options: { readonly withBaselineLedger?: boolean; rea
         entry: { sourceHash: HASH, ts: START, price: 100, quantity: 1, gross: 100, fee: 0, funding: 0, slippage: 0, reason: "fixture" },
         finalExit: null,
     }];
-    baselineRows.forEach((row, index) => assertFixtureIdentity(row, ["sourceHash", "configHash", "policyHash", "resultHash"], `runner.baselineRows[${index}]`));
+    baselineRows.forEach((row, index) => assertFixtureIdentity(row, FIXTURE_SCHEMAS.baselineRow, `runner.baselineRows[${index}]`));
     const baselineContent = JSON.stringify(baselineRows);
     const baselineParity = options.withBaselineLedger === true ? {
         ledgerHash: options.corruptParity === true ? "b".repeat(64) : hashJson(baselineRows as unknown as JsonValue),
@@ -194,7 +197,7 @@ async function makeFixture(options: { readonly withBaselineLedger?: boolean; rea
         accepted: true,
         rejectionReason: null,
     }];
-    candidateRows.forEach((row, index) => assertFixtureIdentity(row, ["sourceHash", "configHash", "policyHash", "resultHash"], `runner.candidateRows[${index}]`));
+    candidateRows.forEach((row, index) => assertFixtureIdentity(row, FIXTURE_SCHEMAS.candidateRow, `runner.candidateRows[${index}]`));
     const candidateContent = JSON.stringify(candidateRows);
     if (options.withCandidateFill === true) await writeFile(join(root, "source", "candidate-events.json"), candidateContent, "utf8");
     await writeFile(join(root, "data", "BTCUSDT-1h.json"), JSON.stringify([
@@ -955,7 +958,7 @@ test("rejects non-empty legacy frozen policies whose lineage is not normalized",
     const root = await mkdtemp(join(tmpdir(), "dd-reduction-legacy-lineage-"));
     try {
         const path = join(root, "legacy.json");
-        await writeFile(path, JSON.stringify({ ...frozenSet({ stageIds: ["V12_V4_LONG"], completedStageIds: ["V12_V4_LONG"], policies: [{ ...candidatePolicy("V12_V4_LONG", "V12_V4", "LONG"), sourceHash: "b".repeat(64) }] }) }), "utf8");
+        await writeFile(path, JSON.stringify({ ...frozenSet({ stageIds: ["V12_V4_LONG"], completedStageIds: ["V12_V4_LONG"] }), policies: [{ ...candidatePolicy("V12_V4_LONG", "V12_V4", "LONG"), sourceHash: "b".repeat(64) }] }), "utf8");
         await assert.rejects(() => loadFrozenStageSet(path), /FROZEN_STAGE_LINEAGE_REQUIRED/);
     } finally {
         await cleanup(root);

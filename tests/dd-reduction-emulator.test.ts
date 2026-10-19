@@ -24,7 +24,7 @@ import type {
     ExecutionFill,
     PositionLifecycle,
 } from "../lib/backtest/dd-reduction/types";
-import { assertFixtureIdentity, FIXTURE_HASH } from "../lib/backtest/dd-reduction/fixture-identity";
+import { assertFixtureIdentity, FIXTURE_HASH, FIXTURE_SCHEMAS } from "../lib/backtest/dd-reduction/fixture-identity";
 
 const HASH = FIXTURE_HASH;
 
@@ -39,7 +39,7 @@ function fill(price: number, quantity: number, ts = 1_700_000_000_000): Executio
         funding: 0,
         slippage: 0,
         reason: "fixture-entry",
-    }, ["sourceHash"], "emulator.fill");
+    }, FIXTURE_SCHEMAS.fill, "emulator.fill");
 }
 
 function bar(overrides: Partial<ExecutionBar> = {}): ExecutionBar {
@@ -54,7 +54,7 @@ function bar(overrides: Partial<ExecutionBar> = {}): ExecutionBar {
         close: 100,
         volume: 1,
         ...overrides,
-    }, ["sourceHash"], "emulator.bar");
+    }, FIXTURE_SCHEMAS.bar, "emulator.bar");
 }
 
 function candidate(overrides: Partial<CandidateDecisionWithExecution> = {}): CandidateDecision {
@@ -80,7 +80,7 @@ function candidate(overrides: Partial<CandidateDecisionWithExecution> = {}): Can
         accepted: true,
         rejectionReason: null,
         ...overrides,
-    }, ["sourceHash", "configHash", "policyHash", "resultHash"], "emulator.candidate");
+    }, FIXTURE_SCHEMAS.candidateRow, "emulator.candidate");
 }
 
 function state(overrides: Partial<PortfolioRuntimeState> = {}): PortfolioRuntimeState {
@@ -110,7 +110,7 @@ function state(overrides: Partial<PortfolioRuntimeState> = {}): PortfolioRuntime
         manualReview: [],
         protectionReadback: true,
         ...overrides,
-    }, ["sourceHash", "configHash", "policyHash", "resultHash"], "emulator.state");
+    }, FIXTURE_SCHEMAS.state, "emulator.state");
 }
 
 function policy(direction: "LONG" | "SHORT"): ProtectionPolicyInput {
@@ -126,7 +126,7 @@ function policy(direction: "LONG" | "SHORT"): ProtectionPolicyInput {
         trailRetraceBps: 50,
         timeStopBars: null,
         tickSize: 0.1,
-    }, ["configHash", "policyHash"], "emulator.policy");
+    }, FIXTURE_SCHEMAS.policyInput, "emulator.policy");
 }
 
 function position(overrides: Partial<PositionLifecycleWithProtection> = {}): PositionLifecycleWithProtection {
@@ -157,7 +157,7 @@ function position(overrides: Partial<PositionLifecycleWithProtection> = {}): Pos
         protection: null,
         ...overrides,
     };
-    return assertFixtureIdentity(result, ["sourceHash", "configHash", "policyHash", "resultHash"], "emulator.position");
+    return assertFixtureIdentity(result, FIXTURE_SCHEMAS.position, "emulator.position");
 }
 
 function replaySource(
@@ -197,7 +197,7 @@ function replaySource(
         candidateEvents: candidates,
         sourceHashes: [],
     };
-    return assertFixtureIdentity({ productionSha: source.productionSha, source }, ["productionSha"], "emulator.replaySource").source;
+    return assertFixtureIdentity({ productionSha: source.productionSha, source }, FIXTURE_SCHEMAS.replaySource, "emulator.replaySource").source;
 }
 
 function replayConfig(overrides: Partial<ReplayConfigWithRuntime> = {}): ReplayConfigWithRuntime {
@@ -214,7 +214,7 @@ function replayConfig(overrides: Partial<ReplayConfigWithRuntime> = {}): ReplayC
         caps: { totalGross: 10_000, cryptoGross: 10_000, strategyGross: 10_000 },
         protectionReadback: true,
         ...overrides,
-    }, ["sourceHash", "configHash", "policyHash"], "emulator.replayConfig");
+    }, FIXTURE_SCHEMAS.replayConfig, "emulator.replayConfig");
 }
 
 test("rejects a candidate whose worst-case fill breaches the total Gross cap", () => {
