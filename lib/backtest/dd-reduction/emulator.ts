@@ -78,6 +78,7 @@ export interface ReplayConfigWithRuntime extends ReplayConfig {
     readonly eventOrdering?: readonly ExecutionOrdering[];
     readonly fixedBaselinePolicy?: string;
     readonly directionPolicies?: Partial<Record<Direction, ProtectionPolicyInput>>;
+    readonly strategyPolicies?: readonly ProtectionPolicyInput[];
     readonly baselinePositions?: readonly PositionLifecycle[];
     readonly executionEvents?: readonly ExecutionLifecycleEvent[];
     readonly protectionReadback?: boolean;
@@ -702,7 +703,8 @@ export function replayIntegrated(source: CanonicalSource, config: ReplayConfigWi
             const currentPositions = [...state.positions];
             for (const currentPosition of currentPositions) {
                 if (currentPosition.symbol !== marketBar.symbol || currentPosition.exit !== null || currentPosition.remainingQuantity <= 0) continue;
-                const policy = config.directionPolicies?.[currentPosition.direction];
+                const policy = config.strategyPolicies?.find((entry) => entry.strategy === currentPosition.strategy && entry.direction === currentPosition.direction)
+                    ?? config.directionPolicies?.[currentPosition.direction];
                 if (policy === undefined) continue;
                 const decision = applyProtectionPolicy(currentPosition, policy, marketBar);
                 state = stateCopy(state, {

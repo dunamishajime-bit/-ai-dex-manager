@@ -1,12 +1,12 @@
 import { createHash } from "node:crypto";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { replayIntegrated, type IntegratedReplayResult, type ReplayConfigWithRuntime } from "../../lib/backtest/dd-reduction/emulator";
 import { attributeReplay, writeStageArtifacts } from "../../lib/backtest/dd-reduction/reporting";
 import { loadCanonicalSource, SourceContractError } from "../../lib/backtest/dd-reduction/source";
-import { directionForStage, SEQUENTIAL_STAGES, strategyForStage } from "../../lib/backtest/dd-reduction/stages";
+import { directionForStage, SEQUENTIAL_STAGES, stageAcceptsDirection, strategyForStage } from "../../lib/backtest/dd-reduction/stages";
 import type {
     CanonicalSource,
     Direction,
@@ -38,6 +38,17 @@ export interface RunnerArgs {
     readonly fundingSource: string;
     readonly frozenStagePath?: string;
     readonly priorFrozenStage?: FrozenStageSet;
+    readonly frozenStageHash?: string;
+    readonly evaluationEvidencePath?: string;
+    readonly evaluationEvidenceHash?: string;
+    readonly evaluationEvidence?: EvaluationEvidence;
+}
+
+export interface EvaluationEvidence {
+    readonly sourceHash: string;
+    readonly candidateId: string;
+    readonly lineageHash: string;
+    readonly metrics: Readonly<Record<string, number>>;
 }
 
 export interface RunIdInput {
@@ -61,8 +72,20 @@ function stableJson(value: JsonValue | readonly JsonValue[]): string {
     return JSON.stringify(value) ?? "null";
 }
 
-function hashJson(value: JsonValue | readonly JsonValue[]): string {
+export function hashJson(value: JsonValue | readonly JsonValue[]): string {
     return createHash("sha256").update(stableJson(value), "utf8").digest("hex");
+}
+
+export function hashFrozenStageSet(frozen: FrozenStageSet): string {
+    return hashJson(frozen as unknown as JsonValue);
+}
+
+export function hashEvaluationEvidence(evidence: EvaluationEvidence): string {
+    return hashJson({
+        candidateId: evidence.candidateId,
+        metrics: evidence.metrics as JsonValue,
+        sourceHash: evidence.sourceHash,
+    });
 }
 
 function isWithin(root: string, candidate: string): boolean {
@@ -147,6 +170,7 @@ export function parseRunnerArgs(args: readonly string[] = process.argv.slice(2))
         slippageBps: finiteFlag(args, "--slippage-bps", 0),
         fundingSource,
         frozenStagePath: args.includes("--frozen-stage") ? resolve(requiredFlag(args, "--frozen-stage")) : undefined,
+        evaluationEvidencePath: args.includes("--evaluation-evidence") ? resolve(requiredFlag(args, "--evaluation-evidence")) : undefined,
     };
     if (result.candidate.trim().length === 0) throw new Error("--candidate must be non-empty");
     return result;
@@ -243,6 +267,56 @@ export function policyFromSource(source: CanonicalSource, stage: StageId): Produ
     return { ...base, policyHash: hashJson(base as unknown as JsonObject) };
 }
 
+export interface BaselineParityCheck {
+    readonly passed: boolean;
+    readonly reason: string;
+    readonly ledgerHash: string;
+    readonly expectedTradeCount: number;
+    readonly actualOpenTradeCount: number;
+    readonly expectedOpenAcceptedGross: number;
+    readonly actualOpenAcceptedGross: number;
+}
+
+function baselineParityObject(source: CanonicalSource, policy: ProductionPolicy): JsonObject | null {
+    const config = source.strategyConfigs.find((entry) => entry.strategy === policy.strategy)?.config;
+    const value = config?.baselineParity;
+    return typeof value === "object" && value !== null && !Array.isArray(value) ? value as JsonObject : null;
+}
+
+function parityNumber(value: JsonValue | undefined): number | null {
+    return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+export function evaluateBaselineParity(source: CanonicalSource, policy: ProductionPolicy, replay: { readonly positions: readonly { readonly positionId: string; readonly acceptedGross: number }[] }): BaselineParityCheck {
+    const ledgerHash = hashJson(source.baselineLedger as unknown as JsonValue);
+    const evidence = baselineParityObject(source, policy);
+    const expectedTradeCount = source.baselineLedger.length;
+    const expectedOpen = source.baselineLedger.filter((entry) => entry.finalExit === null && entry.entry !== null);
+    const expectedOpenAcceptedGross = expectedOpen.reduce((total, entry) => total + entry.acceptedGross, 0);
+    const actualOpen = replay.positions.filter((position) => position.positionId.startsWith("baseline:"));
+    const actualOpenAcceptedGross = actualOpen.reduce((total, position) => total + position.acceptedGross, 0);
+    const mismatches: string[] = [];
+    if (evidence === null) mismatches.push("production.baselineParity.missing");
+    if (evidence?.ledgerHash !== ledgerHash) mismatches.push("ledgerHash");
+    if (parityNumber(evidence?.tradeCount) !== expectedTradeCount) mismatches.push("tradeCount");
+    if (parityNumber(evidence?.openTradeCount) !== expectedOpen.length) mismatches.push("openTradeCount");
+    if (parityNumber(evidence?.openAcceptedGross) !== expectedOpenAcceptedGross) mismatches.push("openAcceptedGross");
+    if (actualOpen.length !== expectedOpen.length) mismatches.push("replay.openTradeCount");
+    if (actualOpenAcceptedGross !== expectedOpenAcceptedGross) mismatches.push("replay.openAcceptedGross");
+    const expectedIds = expectedOpen.map((entry) => `baseline:${entry.tradeId}`).sort();
+    const actualIds = actualOpen.map((position) => position.positionId).sort();
+    if (expectedIds.join(",") !== actualIds.join(",")) mismatches.push("replay.tradeIds");
+    return {
+        passed: mismatches.length === 0,
+        reason: mismatches.length === 0 ? "BASELINE_PARITY_PASS" : `BASELINE_PARITY_BLOCKED:${mismatches.join(",")}`,
+        ledgerHash,
+        expectedTradeCount,
+        actualOpenTradeCount: actualOpen.length,
+        expectedOpenAcceptedGross,
+        actualOpenAcceptedGross,
+    };
+}
+
 function inputFor(args: RunnerArgs): Parameters<typeof loadCanonicalSource>[0] {
     return {
         sourceRoot: args.sourceRoot,
@@ -275,6 +349,8 @@ export function buildConfigHash(args: RunnerArgs, sourceHash: string): string {
         slippageBps: args.slippageBps,
         startTs: args.startTs,
         stage: args.stage,
+        frozenStageHash: args.frozenStageHash ?? null,
+        evaluationEvidenceHash: args.evaluationEvidenceHash ?? null,
     });
 }
 
@@ -369,7 +445,14 @@ function replayMetrics(replay: IntegratedReplayResult, initialEquity: number): R
 }
 
 async function persistResult(args: RunnerArgs, result: StageResult, extra: Record<string, object | string | number | boolean | null> = {}): Promise<StageResult> {
-    const runDirectory = join(assertRunnerOutputRoot(args.outputRoot), args.stage);
+    const runDirectory = join(assertRunnerOutputRoot(args.outputRoot), args.stage, result.runId ?? result.resultHash);
+    await mkdir(dirname(runDirectory), { recursive: true });
+    try {
+        const existing = await readdir(runDirectory);
+        if (existing.length > 0) throw new Error("RESEARCH_ARTIFACT_EXISTS: deterministic run directory is immutable");
+    } catch (error) {
+        if (!(error instanceof Error) || !("code" in error) || (error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+    }
     const artifactIndex = await writeStageArtifacts(result, runDirectory);
     await writeFile(join(runDirectory, "run-manifest.json"), JSON.stringify({ ...extra, result, artifactIndex }, null, 2), "utf8");
     return { ...result, artifactPaths: artifactIndex.artifactPaths };
@@ -399,6 +482,14 @@ export async function runBaseline(args: RunnerArgs): Promise<StageResult> {
         }
         const replay = replayIntegrated(source, replayConfig(args, source, policy, hashes.configHash));
         if (!replay.accountingReconciliation.balanced) throw new Error("ACCOUNTING_FAILURE: replay reconciliation is not balanced");
+        const parity = evaluateBaselineParity(source, policy, replay);
+        if (!parity.passed) {
+            return persistResult(args, failedResult(args, "BASELINE_PARITY_BLOCKED", parity.reason, manifest.sourceSha), {
+                manifest,
+                runId: hashes.runId,
+                parity,
+            });
+        }
         const result: StageResult = {
             sourceHash: manifest.sourceSha,
             configHash: hashes.configHash,
@@ -407,7 +498,7 @@ export async function runBaseline(args: RunnerArgs): Promise<StageResult> {
             strategy: policy.strategy,
             direction: policy.direction,
             accepted: true,
-            reason: `BASELINE_PARITY_PASS:${hashJson(source.baselineLedger as unknown as JsonValue)}`,
+            reason: parity.reason,
             fee: replay.fee,
             funding: replay.funding,
             slippage: replay.slippage,
@@ -416,7 +507,7 @@ export async function runBaseline(args: RunnerArgs): Promise<StageResult> {
             status: "ACCEPTED",
             runId: hashes.runId,
         };
-        return persistResult(args, result, { manifest, parity: "PASS", runId: hashes.runId });
+        return persistResult(args, result, { manifest, parity, runId: hashes.runId });
     } catch (error) {
         const result = failedResult(args, error instanceof SourceContractError ? "SOURCE_ERROR" : "SOURCE_ERROR", `SOURCE_ERROR: ${errorMessage(error)}`);
         return persistResult(args, result, { parity: "SOURCE_ERROR", error: errorMessage(error) });
@@ -444,16 +535,67 @@ function parseFrozenStage(value: JsonValue, path: string): FrozenStageSet {
     if (normalizedStageIds.length !== stageIds.length || normalizedStageIds.some((entry, index) => entry !== SEQUENTIAL_STAGES[index])) {
         throw new Error(`FROZEN_STAGE_INVALID: ${path} is not a cumulative sequential prefix`);
     }
-    if (policies.length > stageIds.length) throw new Error(`FROZEN_STAGE_INVALID: ${path} contains more policies than stages`);
+    const completedStageIdsValue = object.completedStageIds;
+    const completedStageIds = Array.isArray(completedStageIdsValue)
+        ? completedStageIdsValue.filter((entry): entry is StageId => typeof entry === "string" && (SEQUENTIAL_STAGES as readonly string[]).includes(entry))
+        : normalizedStageIds;
+    if (completedStageIds.length !== (Array.isArray(completedStageIdsValue) ? completedStageIdsValue.length : normalizedStageIds.length)
+        || completedStageIds.some((entry, index) => entry !== SEQUENTIAL_STAGES[index])) {
+        throw new Error(`FROZEN_STAGE_METADATA: ${path} completedStageIds is not an exact sequential prefix`);
+    }
+    if (policies.length !== stageIds.length) throw new Error(`FROZEN_STAGE_INVALID: ${path} must contain one policy for every accepted stage`);
+    const policyStages: StageId[] = [];
+    for (const [index, policyValue] of policies.entries()) {
+        if (typeof policyValue !== "object" || policyValue === null || Array.isArray(policyValue)) throw new Error(`FROZEN_STAGE_POLICY_INVALID: ${path} policy ${index} is not an object`);
+        const policy = policyValue as JsonObject;
+        const policyStage = policy.stageId;
+        const policyStrategy = policy.strategy;
+        const policyDirection = policy.direction;
+        const policyApplicability = policy.applicability;
+        const candidateId = policy.candidateId;
+        const policyHashValue = policy.policyHash;
+        if (typeof policyStage !== "string" || !(SEQUENTIAL_STAGES as readonly string[]).includes(policyStage)
+            || typeof policyStrategy !== "string" || policyStrategy !== strategyForStage(policyStage as StageId)
+            || (policyDirection !== "LONG" && policyDirection !== "SHORT")
+            || !stageAcceptsDirection(policyStage as StageId, policyDirection)
+            || policyApplicability !== "AVAILABLE"
+            || typeof candidateId !== "string" || candidateId.length === 0
+            || typeof policyHashValue !== "string" || policyHashValue.length === 0
+            || policy.sourceHash !== sourceHash || policy.configHash !== configHash || policy.resultHash !== resultHash) {
+            throw new Error(`FROZEN_STAGE_POLICY_INVALID: ${path} policy ${index} lineage or metadata mismatch`);
+        }
+        policyStages.push(policyStage as StageId);
+    }
+    if (policyStages.some((entry, index) => entry !== normalizedStageIds[index])) throw new Error(`FROZEN_STAGE_POLICY_INVALID: ${path} policy stage order mismatch`);
+    if (completedStageIds.length > 0 && (!Array.isArray(object.stageDecisions) || object.stageDecisions.length < completedStageIds.length)) throw new Error(`FROZEN_STAGE_METADATA: ${path} stageDecisions are required for completed stages`);
+    if (Array.isArray(object.stageDecisions)) {
+        for (const [index, decisionValue] of object.stageDecisions.entries()) {
+            if (typeof decisionValue !== "object" || decisionValue === null || Array.isArray(decisionValue)) throw new Error(`FROZEN_STAGE_DECISION_INVALID: ${path} decision ${index} is not an object`);
+            const decision = decisionValue as JsonObject;
+            const decisionStage = decision.stageId;
+            if (index < completedStageIds.length && decisionStage !== completedStageIds[index]) throw new Error(`FROZEN_STAGE_DECISION_INVALID: ${path} decision ${index} stage mismatch`);
+            if (decisionStage !== undefined && (typeof decisionStage !== "string" || !(SEQUENTIAL_STAGES as readonly string[]).includes(decisionStage))) throw new Error(`FROZEN_STAGE_DECISION_INVALID: ${path} decision ${index} stage is invalid`);
+            if (index < completedStageIds.length && decision.status === "ACCEPTED") {
+                const decisionPolicy = decision.candidatePolicy;
+                if (typeof decisionPolicy !== "object" || decisionPolicy === null || Array.isArray(decisionPolicy)) throw new Error(`FROZEN_STAGE_DECISION_INVALID: ${path} decision ${index} accepted policy is missing`);
+                const policyObject = decisionPolicy as JsonObject;
+                if (policyObject.stageId !== decisionStage || policyObject.candidateId !== decision.candidateId || policyObject.policyHash !== decision.policyHash || policyObject.sourceHash !== decision.sourceHash || policyObject.configHash !== decision.configHash || policyObject.resultHash !== decision.resultHash) {
+                    throw new Error(`FROZEN_STAGE_DECISION_INVALID: ${path} decision ${index} policy lineage mismatch`);
+                }
+            }
+            if (index < completedStageIds.length && decision.status === "NOT_APPLICABLE" && decision.candidatePolicy !== null && decision.candidatePolicy !== undefined) throw new Error(`FROZEN_STAGE_DECISION_INVALID: ${path} NOT_APPLICABLE decision ${index} carries a policy`);
+        }
+    }
     return {
         sourceHash,
         configHash,
         resultHash,
         policyHash,
         stageIds: normalizedStageIds,
-        policies: policies as FrozenStageSet["policies"],
+        policies: policies as unknown as FrozenStageSet["policies"],
         reason,
-        completedStageIds: Array.isArray(object.completedStageIds) ? object.completedStageIds.filter((entry): entry is StageId => typeof entry === "string" && (SEQUENTIAL_STAGES as readonly string[]).includes(entry)) : normalizedStageIds,
+        completedStageIds,
+        stageDecisions: Array.isArray(object.stageDecisions) ? object.stageDecisions as unknown as FrozenStageSet["stageDecisions"] : undefined,
     };
 }
 

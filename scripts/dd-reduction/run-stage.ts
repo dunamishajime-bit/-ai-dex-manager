@@ -1,9 +1,11 @@
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { readFile } from "node:fs/promises";
 
 import { replayIntegrated, type IntegratedReplayResult, type ReplayConfigWithRuntime } from "../../lib/backtest/dd-reduction/emulator";
-import { acceptCandidate, buildCandidateGrid, predeclareAcceptanceGates } from "../../lib/backtest/dd-reduction/policies";
+import { acceptCandidate, buildCandidateGrid, freezeAcceptedStage, predeclareAcceptanceGates } from "../../lib/backtest/dd-reduction/policies";
 import { loadCanonicalSource } from "../../lib/backtest/dd-reduction/source";
+import { SEQUENTIAL_STAGES, stageAcceptsDirection, strategyForStage } from "../../lib/backtest/dd-reduction/stages";
 import type {
     BaselineSummary,
     CandidatePolicy,
@@ -18,16 +20,21 @@ import {
     assertRunnerOutputRoot,
     buildConfigHash,
     buildRunId,
+    evaluateBaselineParity,
+    hashEvaluationEvidence,
+    hashFrozenStageSet,
     loadFrozenStageSet,
     parseRunnerArgs,
     policyFromSource,
+    type EvaluationEvidence,
     type RunnerArgs,
     writeFrozenStageSet,
 } from "./run-baseline";
 import { compareStage } from "./compare-stage";
 import { writeStageArtifacts } from "../../lib/backtest/dd-reduction/reporting";
-import { mkdir, writeFile } from "node:fs/promises";
+import { mkdir, readdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import type { JsonObject, JsonValue, StageId } from "../../lib/backtest/dd-reduction/types";
 
 function errorMessage(error: unknown): string {
     return error instanceof Error ? error.message : "unknown stage runner error";
@@ -37,20 +44,26 @@ function lineagePolicy(policy: ProductionPolicy, sourceHash: string, configHash:
     return { ...policy, sourceHash, configHash, resultHash };
 }
 
-function directionPolicies(frozen: FrozenStageSet, current: ProductionPolicy): ReplayConfigWithRuntime["directionPolicies"] {
-    const policies = new Map<string, CandidatePolicy>();
-    for (const policy of frozen.policies) policies.set(policy.direction, policy);
-    policies.set(current.direction, current as CandidatePolicy);
-    return Object.fromEntries([...policies.entries()].map(([direction, policy]) => [direction, {
-        policyHash: policy.policyHash,
-        configHash: policy.configHash,
-        strategy: policy.strategy,
-        direction: policy.direction,
-        initialStopBps: policy.initialStopBps,
-        profitFloorBps: policy.profitFloorBps,
-        trailingGivebackBps: policy.trailingGivebackBps,
-        timeStopBars: policy.timeStopBars,
-    }])) as ReplayConfigWithRuntime["directionPolicies"];
+export function buildReplayPolicySet(frozen: FrozenStageSet, current: ProductionPolicy): readonly ProductionPolicy[] {
+    const policies = new Map<string, ProductionPolicy>();
+    for (const policy of frozen.policies) policies.set(`${policy.strategy}:${policy.direction}`, policy);
+    policies.set(`${current.strategy}:${current.direction}`, current);
+    return [...policies.values()];
+}
+
+function directionPolicies(current: ProductionPolicy): ReplayConfigWithRuntime["directionPolicies"] {
+    return {
+        [current.direction]: {
+            policyHash: current.policyHash,
+            configHash: current.configHash,
+            strategy: current.strategy,
+            direction: current.direction,
+            initialStopBps: current.initialStopBps,
+            profitFloorBps: current.profitFloorBps,
+            trailingGivebackBps: current.trailingGivebackBps,
+            timeStopBars: current.timeStopBars,
+        },
+    };
 }
 
 function replayFor(args: RunnerArgs, source: CanonicalSource, frozen: FrozenStageSet, policy: ProductionPolicy, configHash: string): IntegratedReplayResult {
@@ -66,7 +79,17 @@ function replayFor(args: RunnerArgs, source: CanonicalSource, frozen: FrozenStag
         policyHash: policy.policyHash,
         deposits: args.deposits,
         fixedBaselinePolicy: policy.policyHash,
-        directionPolicies: directionPolicies(frozen, policy),
+        strategyPolicies: buildReplayPolicySet(frozen, policy).map((entry) => ({
+            policyHash: entry.policyHash,
+            configHash: entry.configHash,
+            strategy: entry.strategy,
+            direction: entry.direction,
+            initialStopBps: entry.initialStopBps,
+            profitFloorBps: entry.profitFloorBps,
+            trailingGivebackBps: entry.trailingGivebackBps,
+            timeStopBars: entry.timeStopBars,
+        })),
+        directionPolicies: directionPolicies(policy),
         caps: { totalGross: policy.grossCap, cryptoGross: policy.grossCap, strategyGross: policy.grossCap },
     });
 }
@@ -93,27 +116,75 @@ function replayMetrics(replay: IntegratedReplayResult, initialEquity: number): R
     };
 }
 
-function candidateMetrics(baseline: Readonly<Record<string, number>>, candidate: Readonly<Record<string, number>>, initialEquity: number): Readonly<Record<string, number>> {
-    const baselineDd = baseline.maxDrawdown ?? 0;
-    const candidateDd = candidate.maxDrawdown ?? 0;
-    const baselineEquity = baseline.finalEquity ?? initialEquity;
-    const candidateEquity = candidate.finalEquity ?? initialEquity;
-    const baselineCount = baseline.candidateCount ?? 0;
-    const candidateCount = candidate.candidateCount ?? 0;
-    return {
-        ...candidate,
-        normalDdImprovementBps: ((baselineDd - candidateDd) / initialEquity) * 10_000,
-        severeDdImprovementBps: ((baselineDd - candidateDd) / initialEquity) * 10_000,
-        oosDdImprovementBps: ((baselineDd - candidateDd) / initialEquity) * 10_000,
-        walkForwardImprovementBps: ((baselineDd - candidateDd) / initialEquity) * 10_000,
-        profitFactorDeclinePct: 0,
-        finalEquityDeclinePct: baselineEquity === 0 ? 0 : ((baselineEquity - candidateEquity) / baselineEquity) * 100,
-        tradeCountRatio: baselineCount === 0 ? 1 : candidateCount / baselineCount,
-        capacityRegression: (candidate.grossConflicts ?? 0) - (baseline.grossConflicts ?? 0),
-        safetyRegression: candidate.accountingBalanced === 1 ? 0 : 1,
-        costStressPass: candidate.accountingBalanced === 1 ? 1 : 0,
-        candidateSelectionUsesFuturePnl: 0,
-    };
+function netPnlForStrategy(replay: IntegratedReplayResult, strategy: string): number {
+    const positions = replay.tradeLedger ?? replay.positions;
+    return positions.filter((position) => position.strategy === strategy).reduce((total, position) => {
+        const realized = position.events.reduce((sum, event) => sum + (event.exit?.realizedPnl ?? 0), 0);
+        const exitCosts = position.events.reduce((sum, event) => sum + (event.exit?.fee ?? 0) + (event.exit?.funding ?? 0) + (event.exit?.slippage ?? 0), 0);
+        return total + realized - position.fee - position.funding - position.slippage - exitCosts;
+    }, 0);
+}
+
+export function calculateLostPriorLogicPnl(baseline: IntegratedReplayResult, candidate: IntegratedReplayResult, frozen: FrozenStageSet): number {
+    const strategies = new Set(frozen.policies.map((policy) => policy.strategy));
+    let lost = 0;
+    for (const strategy of strategies) lost += netPnlForStrategy(baseline, strategy) - netPnlForStrategy(candidate, strategy);
+    return lost;
+}
+
+function requiredMetricEvidence(evidence: EvaluationEvidence, sourceHash: string, candidateId: string): Readonly<Record<string, number>> {
+    if (evidence.sourceHash !== sourceHash || evidence.candidateId !== candidateId || hashEvaluationEvidence(evidence) !== evidence.lineageHash) {
+        throw new Error("METRIC_EVIDENCE_INVALID_LINEAGE");
+    }
+    const required = [
+        "normalDdImprovementBps",
+        "severeDdImprovementBps",
+        "oosDdImprovementBps",
+        "walkForwardImprovementBps",
+        "profitFactorDeclinePct",
+        "finalEquityDeclinePct",
+        "tradeCountRatio",
+        "capacityRegression",
+        "safetyRegression",
+        "costStressPass",
+        "candidateSelectionUsesFuturePnl",
+    ] as const;
+    for (const name of required) {
+        const value = evidence.metrics[name];
+        if (typeof value !== "number" || !Number.isFinite(value)) throw new Error(`METRIC_EVIDENCE_UNAVAILABLE:${name}`);
+    }
+    return evidence.metrics;
+}
+
+async function loadEvaluationEvidence(args: RunnerArgs): Promise<EvaluationEvidence | null> {
+    if (args.evaluationEvidence !== undefined) return args.evaluationEvidence;
+    if (args.evaluationEvidencePath === undefined) return null;
+    const parsed = JSON.parse(await readFile(args.evaluationEvidencePath, "utf8")) as JsonValue;
+    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) throw new Error("METRIC_EVIDENCE_INVALID");
+    const object = parsed as JsonObject;
+    if (typeof object.sourceHash !== "string" || typeof object.candidateId !== "string" || typeof object.lineageHash !== "string" || typeof object.metrics !== "object" || object.metrics === null || Array.isArray(object.metrics)) throw new Error("METRIC_EVIDENCE_INVALID");
+    return { sourceHash: object.sourceHash, candidateId: object.candidateId, lineageHash: object.lineageHash, metrics: object.metrics as Readonly<Record<string, number>> };
+}
+
+export function assertFrozenStageReady(frozen: FrozenStageSet, stage: StageId): void {
+    const completed = frozen.completedStageIds ?? frozen.stageIds;
+    if (frozen.stageIds.some((entry, index) => entry !== SEQUENTIAL_STAGES.filter((stageId) => completed.includes(stageId))[index])) throw new Error("FROZEN_STAGE_METADATA: accepted stage prefix mismatch");
+    if (completed.some((entry, index) => entry !== SEQUENTIAL_STAGES[index]) || new Set(completed).size !== completed.length) throw new Error("FROZEN_STAGE_METADATA: completed stage prefix is invalid");
+    if (frozen.policies.length !== frozen.stageIds.length) throw new Error("FROZEN_STAGE_METADATA: policy count does not match accepted stages");
+    if (frozen.policies.some((policy, index) => policy.stageId !== frozen.stageIds[index]
+        || strategyForStage(policy.stageId) !== policy.strategy
+        || !stageAcceptsDirection(policy.stageId, policy.direction)
+        || policy.applicability !== "AVAILABLE"
+        || policy.sourceHash !== frozen.sourceHash
+        || policy.configHash !== frozen.configHash
+        || policy.resultHash !== frozen.resultHash
+        || policy.policyHash !== frozen.policyHash
+        || policy.configHash.length === 0
+        || policy.resultHash.length === 0
+        || policy.policyHash.length === 0)) throw new Error("FROZEN_STAGE_POLICY_INVALID: policy lineage is incomplete");
+    if (completed.length > 0 && (frozen.stageDecisions === undefined || frozen.stageDecisions.length < completed.length)) throw new Error("FROZEN_STAGE_METADATA: stage decisions are missing");
+    const expected = SEQUENTIAL_STAGES[completed.length];
+    if (expected !== stage) throw new Error(`FROZEN_STAGE_ORDER: expected ${expected ?? "COMPLETE"}, received ${stage}`);
 }
 
 function statusFromDecision(status: string | undefined, accepted: boolean): StageRunStatus {
@@ -122,14 +193,24 @@ function statusFromDecision(status: string | undefined, accepted: boolean): Stag
 }
 
 async function frozenFor(args: RunnerArgs): Promise<FrozenStageSet> {
-    if (args.priorFrozenStage !== undefined) return args.priorFrozenStage;
-    if (args.frozenStagePath === undefined) throw new Error("FROZEN_STAGE_REQUIRED: --frozen-stage is required");
-    return loadFrozenStageSet(args.frozenStagePath);
+    const frozen = args.priorFrozenStage !== undefined
+        ? args.priorFrozenStage
+        : args.frozenStagePath === undefined
+            ? (() => { throw new Error("FROZEN_STAGE_REQUIRED: --frozen-stage is required"); })()
+            : await loadFrozenStageSet(args.frozenStagePath);
+    assertFrozenStageReady(frozen, args.stage);
+    return frozen;
 }
 
 async function persist(args: RunnerArgs, result: StageResult, frozen: FrozenStageSet, manifest: unknown): Promise<StageResult> {
-    const outputDirectory = join(assertRunnerOutputRoot(args.outputRoot), args.stage);
-    await mkdir(outputDirectory, { recursive: true });
+    const outputDirectory = join(assertRunnerOutputRoot(args.outputRoot), args.stage, result.runId ?? result.resultHash);
+    await mkdir(join(assertRunnerOutputRoot(args.outputRoot), args.stage), { recursive: true });
+    try {
+        const existing = await readdir(outputDirectory);
+        if (existing.length > 0) throw new Error("RESEARCH_ARTIFACT_EXISTS: deterministic stage run directory is immutable");
+    } catch (error) {
+        if (!(error instanceof Error) || !("code" in error) || (error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+    }
     const index = await writeStageArtifacts(result, outputDirectory);
     await writeFrozenStageSet(join(outputDirectory, "frozen-stage.json"), frozen);
     await writeFile(join(outputDirectory, "run-manifest.json"), JSON.stringify({ manifest, result, frozen }, null, 2), "utf8");
@@ -158,9 +239,16 @@ export async function runStage(args: RunnerArgs): Promise<StageResult> {
     const grid = buildCandidateGrid(args.stage, currentPolicy.direction, currentPolicy);
     const selected = grid.find((candidate) => candidate.candidateId === args.candidate);
     if (selected === undefined) throw new Error(`CANDIDATE_NOT_IN_PREDECLARED_GRID: ${args.candidate}`);
+    const evidence = await loadEvaluationEvidence(args);
+    if (selected.applicability === "AVAILABLE" && evidence === null) throw new Error("METRIC_EVIDENCE_UNAVAILABLE: required OOS, walk-forward, PF, and cost-stress evidence is absent");
 
     const sourceHash = source.manifest.sourceSha;
-    const configHash = buildConfigHash(args, sourceHash);
+    const identityArgs: RunnerArgs = {
+        ...args,
+        frozenStageHash: hashFrozenStageSet(frozen),
+        evaluationEvidenceHash: evidence === null ? "MISSING" : hashEvaluationEvidence(evidence),
+    };
+    const configHash = buildConfigHash(identityArgs, sourceHash);
     const runId = buildRunId({ sourceHash, configHash, stage: args.stage, candidate: args.candidate });
     const baselineLineage = lineagePolicy(currentPolicy, sourceHash, configHash, runId);
     const candidateLineage = selected.applicability === "AVAILABLE"
@@ -169,6 +257,8 @@ export async function runStage(args: RunnerArgs): Promise<StageResult> {
     const baselineReplay = replayFor(args, source, frozen, baselineLineage, configHash);
     const baselineMetrics = replayMetrics(baselineReplay, args.initialEquity);
     if (!baselineReplay.accountingReconciliation.balanced) throw new Error("ACCOUNTING_FAILURE: baseline replay reconciliation is not balanced");
+    const parity = evaluateBaselineParity(source, baselineLineage, baselineReplay);
+    if (!parity.passed) throw new Error(parity.reason);
 
     if (selected.applicability === "NOT_APPLICABLE") {
         const baselineSummary: BaselineSummary = {
@@ -205,7 +295,7 @@ export async function runStage(args: RunnerArgs): Promise<StageResult> {
         };
         const gates = predeclareAcceptanceGates({ sourceHash, configHash, resultHash: runId, policyHash: baselineLineage.policyHash, declaredAtTs: args.startTs });
         const decision = acceptCandidate(candidateSummary, baselineSummary, gates);
-        const nextFrozen: FrozenStageSet = { ...frozen, sourceHash, configHash, resultHash: runId, policyHash: baselineLineage.policyHash, stageDecisions: [...(frozen.stageDecisions ?? []), decision], completedStageIds: [...(frozen.completedStageIds ?? frozen.stageIds), args.stage], stageIds: [...frozen.stageIds, args.stage] };
+        const nextFrozen = freezeAcceptedStage(frozen, decision);
         const result: StageResult = {
             sourceHash,
             configHash,
@@ -243,7 +333,13 @@ export async function runStage(args: RunnerArgs): Promise<StageResult> {
         metrics: baselineMetrics,
     };
     const candidateRawMetrics = replayMetrics(candidateReplay, args.initialEquity);
-    const metrics = candidateMetrics(baselineMetrics, candidateRawMetrics, args.initialEquity);
+    if (evidence === null) throw new Error("METRIC_EVIDENCE_UNAVAILABLE");
+    const evaluationMetrics = requiredMetricEvidence(evidence, sourceHash, candidateLineage.candidateId);
+    const metrics = {
+        ...evaluationMetrics,
+        ...candidateRawMetrics,
+        lostPriorLogicPnl: calculateLostPriorLogicPnl(baselineReplay, candidateReplay, frozen),
+    };
     const candidateSummary: CandidateSummary = {
         sourceHash,
         configHash,
@@ -265,9 +361,8 @@ export async function runStage(args: RunnerArgs): Promise<StageResult> {
     };
     const gates = predeclareAcceptanceGates({ sourceHash, configHash, resultHash: runId, policyHash: baselineLineage.policyHash, declaredAtTs: args.startTs });
     const decision = acceptCandidate(candidateSummary, baselineSummary, gates);
-    const nextFrozen: FrozenStageSet = decision.status === "ACCEPTED" && decision.candidatePolicy !== null && decision.candidatePolicy !== undefined
-        ? { ...frozen, sourceHash, configHash, resultHash: runId, policyHash: decision.policyHash, stageIds: [...frozen.stageIds, args.stage], policies: [...frozen.policies, decision.candidatePolicy], completedStageIds: [...(frozen.completedStageIds ?? frozen.stageIds), args.stage], stageDecisions: [...(frozen.stageDecisions ?? []), decision], reason: "FROZEN_RESEARCH_POLICY_ONLY" }
-        : { ...frozen, stageDecisions: [...(frozen.stageDecisions ?? []), decision] };
+    const nextFrozen = freezeAcceptedStage(frozen, decision);
+    if (decision.accepted && !nextFrozen.stageIds.includes(args.stage)) throw new Error("FROZEN_STAGE_TRANSITION_REJECTED: canonical freeze did not accept the expected stage");
     const comparison = compareStage({
         sourceHash,
         configHash,
@@ -318,7 +413,7 @@ export async function runStage(args: RunnerArgs): Promise<StageResult> {
         status: statusFromDecision(decision.status, decision.accepted),
         runId,
     };
-    return persist(args, result, nextFrozen, { manifest: source.manifest, gates, comparison, frozen: nextFrozen });
+    return persist(args, result, nextFrozen, { manifest: source.manifest, gates, parity, evaluationEvidence: evidence, comparison, frozen: nextFrozen });
 }
 
 if (process.argv[1] !== undefined && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
