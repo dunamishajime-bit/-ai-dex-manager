@@ -1,0 +1,1966 @@
+{
+  "status": "COMPLETED_COMBINED_EXPERIMENTS_WITH_MARKET_DATA_GAPS",
+  "prior_status": "COMPLETED_EIGHT_SCOPES_RESEARCH_ONLY",
+  "prior_sha256": "5634674403ee92f182484fef79a9808378fb78a715c2eca8366bdd172d65f529",
+  "initial_specs": [],
+  "stages": [
+    {
+      "id": "C01",
+      "scope": "HYPE_LONG_LONG",
+      "controls": [
+        {
+          "dd": -15.6206,
+          "asset": 222818966.87803495
+        },
+        {
+          "dd": -16.7878,
+          "asset": 124289206.81827945
+        }
+      ],
+      "case_results": [
+        {
+          "policy": "C01_HYPE_LONG_LONG_P20_F5_I15",
+          "specs": [
+            {
+              "id": "C01_HYPE_LONG_LONG_P20_F5_I15_PROFIT",
+              "target": "HYPE_LONG",
+              "side": "LONG",
+              "axis": "profit_reversal",
+              "arm_close_pct": 0.02,
+              "locked_profit_pct": 0.005,
+              "stop_slip_bps": 10
+            },
+            {
+              "id": "C01_HYPE_LONG_LONG_P20_F5_I15_INITIAL",
+              "target": "HYPE_LONG",
+              "side": "LONG",
+              "axis": "initial_adverse",
+              "max_initial_wallet_loss_pct": 0.015,
+              "stop_slip_bps": 10
+            }
+          ],
+          "two_costs": [
+            {
+              "cost": 10,
+              "dd": -15.6206,
+              "dd_delta_pp": 0.0,
+              "asset": 213778881.11447424,
+              "pf": 3.478864498412116,
+              "trades": 1311,
+              "negative_loss_saved_pp": 11.634,
+              "worst_trade_saved_pp": 0.02,
+              "win_change": 5
+            },
+            {
+              "cost": 30,
+              "dd": -16.7878,
+              "dd_delta_pp": 0.0,
+              "asset": 119117842.85582922,
+              "pf": 3.14529941480233,
+              "trades": 1308,
+              "negative_loss_saved_pp": 13.5401,
+              "worst_trade_saved_pp": 0.02,
+              "win_change": 5
+            }
+          ],
+          "status": "DONE",
+          "passes": true,
+          "slippage_stress_0_1_2": [
+            {
+              "slippage_percent": 0.0,
+              "cases": [
+                {
+                  "cost_bps": 10,
+                  "DD_improvement_pp": 0.0,
+                  "loss_saved_pp": 12.2359
+                },
+                {
+                  "cost_bps": 30,
+                  "DD_improvement_pp": 0.0,
+                  "loss_saved_pp": 14.137
+                }
+              ],
+              "status": "DONE"
+            },
+            {
+              "slippage_percent": 1.0,
+              "cases": [
+                {
+                  "cost_bps": 10,
+                  "DD_improvement_pp": 0.0,
+                  "loss_saved_pp": -2.526
+                },
+                {
+                  "cost_bps": 30,
+                  "DD_improvement_pp": -1.9463,
+                  "loss_saved_pp": 1.5321
+                }
+              ],
+              "status": "DONE"
+            },
+            {
+              "slippage_percent": 2.0,
+              "cases": [
+                {
+                  "cost_bps": 10,
+                  "DD_improvement_pp": -2.3107,
+                  "loss_saved_pp": -20.5943
+                },
+                {
+                  "cost_bps": 30,
+                  "DD_improvement_pp": -5.4293,
+                  "loss_saved_pp": -20.4201
+                }
+              ],
+              "status": "DONE"
+            }
+          ]
+        },
+        {
+          "policy": "C01_HYPE_LONG_LONG_P20_F5_I25",
+          "specs": [
+            {
+              "id": "C01_HYPE_LONG_LONG_P20_F5_I25_PROFIT",
+              "target": "HYPE_LONG",
+              "side": "LONG",
+              "axis": "profit_reversal",
+              "arm_close_pct": 0.02,
+              "locked_profit_pct": 0.005,
+              "stop_slip_bps": 10
+            },
+            {
+              "id": "C01_HYPE_LONG_LONG_P20_F5_I25_INITIAL",
+              "target": "HYPE_LONG",
+              "side": "LONG",
+              "axis": "initial_adverse",
+              "max_initial_wallet_loss_pct": 0.025,
+              "stop_slip_bps": 10
+            }
+          ],
+          "two_costs": [
+            {
+              "cost": 10,
+              "dd": -15.6206,
+              "dd_delta_pp": 0.0,
+              "asset": 211198331.81985733,
+              "pf": 3.4509199155921073,
+              "trades": 1312,
+              "negative_loss_saved_pp": 8.4147,
+              "worst_trade_saved_pp": 0.02,
+              "win_change": 5
+            },
+            {
+              "cost": 30,
+              "dd": -16.7878,
+              "dd_delta_pp": 0.0,
+              "asset": 116452606.38799843,
+              "pf": 3.107753093423765,
+              "trades": 1308,
+              "negative_loss_saved_pp": 10.2461,
+              "worst_trade_saved_pp": 0.02,
+              "win_change": 5
+            }
+          ],
+          "status": "DONE",
+          "passes": true,
+          "slippage_stress_0_1_2": [
+            {
+              "slippage_percent": 0.0,
+              "cases": [
+                {
+                  "cost_bps": 10,
+                  "DD_improvement_pp": 0.0,
+                  "loss_saved_pp": 8.5266
+                },
+                {
+                  "cost_bps": 30,
+                  "DD_improvement_pp": 0.0,
+                  "loss_saved_pp": 10.363
+                }
+              ],
+              "status": "DONE"
+            },
+            {
+              "slippage_percent": 1.0,
+              "cases": [
+                {
+                  "cost_bps": 10,
+                  "DD_improvement_pp": 0.0,
+                  "loss_saved_pp": -1.0883
+                },
+                {
+                  "cost_bps": 30,
+                  "DD_improvement_pp": -1.5029,
+                  "loss_saved_pp": 2.5583
+                }
+              ],
+              "status": "DONE"
+            },
+            {
+              "slippage_percent": 2.0,
+              "cases": [
+                {
+                  "cost_bps": 10,
+                  "DD_improvement_pp": -1.0495,
+                  "loss_saved_pp": -13.3368
+                },
+                {
+                  "cost_bps": 30,
+                  "DD_improvement_pp": -4.1068,
+                  "loss_saved_pp": -14.5933
+                }
+              ],
+              "status": "DONE"
+            }
+          ]
+        },
+        {
+          "policy": "C01_HYPE_LONG_LONG_P30_F10_I15",
+          "specs": [
+            {
+              "id": "C01_HYPE_LONG_LONG_P30_F10_I15_PROFIT",
+              "target": "HYPE_LONG",
+              "side": "LONG",
+              "axis": "profit_reversal",
+              "arm_close_pct": 0.03,
+              "locked_profit_pct": 0.01,
+              "stop_slip_bps": 10
+            },
+            {
+              "id": "C01_HYPE_LONG_LONG_P30_F10_I15_INITIAL",
+              "target": "HYPE_LONG",
+              "side": "LONG",
+              "axis": "initial_adverse",
+              "max_initial_wallet_loss_pct": 0.015,
+              "stop_slip_bps": 10
+            }
+          ],
+          "two_costs": [
+            {
+              "cost": 10,
+              "dd": -15.6206,
+              "dd_delta_pp": 0.0,
+              "asset": 210861977.75684753,
+              "pf": 3.3379178365964215,
+              "trades": 1312,
+              "negative_loss_saved_pp": 4.5168,
+              "worst_trade_saved_pp": 0.0,
+              "win_change": 1
+            },
+            {
+              "cost": 30,
+              "dd": -16.7878,
+              "dd_delta_pp": 0.0,
+              "asset": 118467121.06341664,
+              "pf": 3.0330672402975276,
+              "trades": 1307,
+              "negative_loss_saved_pp": 6.3061,
+              "worst_trade_saved_pp": 0.0,
+              "win_change": 1
+            }
+          ],
+          "status": "DONE",
+          "passes": true
+        },
+        {
+          "policy": "C01_HYPE_LONG_LONG_P30_F10_I25",
+          "specs": [
+            {
+              "id": "C01_HYPE_LONG_LONG_P30_F10_I25_PROFIT",
+              "target": "HYPE_LONG",
+              "side": "LONG",
+              "axis": "profit_reversal",
+              "arm_close_pct": 0.03,
+              "locked_profit_pct": 0.01,
+              "stop_slip_bps": 10
+            },
+            {
+              "id": "C01_HYPE_LONG_LONG_P30_F10_I25_INITIAL",
+              "target": "HYPE_LONG",
+              "side": "LONG",
+              "axis": "initial_adverse",
+              "max_initial_wallet_loss_pct": 0.025,
+              "stop_slip_bps": 10
+            }
+          ],
+          "two_costs": [
+            {
+              "cost": 10,
+              "dd": -15.6206,
+              "dd_delta_pp": 0.0,
+              "asset": 207710670.11347723,
+              "pf": 3.298795659509955,
+              "trades": 1312,
+              "negative_loss_saved_pp": 0.8415,
+              "worst_trade_saved_pp": 0.0,
+              "win_change": 1
+            },
+            {
+              "cost": 30,
+              "dd": -16.7878,
+              "dd_delta_pp": 0.0,
+              "asset": 115791284.80531695,
+              "pf": 2.9988671707588694,
+              "trades": 1307,
+              "negative_loss_saved_pp": 3.0124,
+              "worst_trade_saved_pp": 0.0,
+              "win_change": 1
+            }
+          ],
+          "status": "DONE",
+          "passes": true
+        }
+      ],
+      "selected": null,
+      "status": "NOMINAL_IMPROVEMENT_BUT_STRESS_FAILED",
+      "final_specs": []
+    },
+    {
+      "id": "C02",
+      "scope": "RESIDUAL_LONG",
+      "controls": [
+        {
+          "dd": -15.6206,
+          "asset": 222818966.87803495
+        },
+        {
+          "dd": -16.7878,
+          "asset": 124289206.81827945
+        }
+      ],
+      "case_results": [
+        {
+          "policy": "C02_RESIDUAL_LONG_P20_F5_I15",
+          "specs": [
+            {
+              "id": "C02_RESIDUAL_LONG_P20_F5_I15_PROFIT",
+              "target": "RESIDUAL",
+              "side": "LONG",
+              "axis": "profit_reversal",
+              "arm_close_pct": 0.02,
+              "locked_profit_pct": 0.005,
+              "stop_slip_bps": 10
+            },
+            {
+              "id": "C02_RESIDUAL_LONG_P20_F5_I15_INITIAL",
+              "target": "RESIDUAL",
+              "side": "LONG",
+              "axis": "initial_adverse",
+              "max_initial_wallet_loss_pct": 0.015,
+              "stop_slip_bps": 10
+            }
+          ],
+          "two_costs": [
+            {
+              "cost": 10,
+              "dd": -15.616,
+              "dd_delta_pp": 0.0046,
+              "asset": 225457973.98461953,
+              "pf": 3.569378208659255,
+              "trades": 1320,
+              "negative_loss_saved_pp": -1.3122,
+              "worst_trade_saved_pp": 3.9413,
+              "win_change": -1
+            },
+            {
+              "cost": 30,
+              "dd": -16.8136,
+              "dd_delta_pp": -0.0258,
+              "asset": 123636675.26254794,
+              "pf": 3.15255473979708,
+              "trades": 1316,
+              "negative_loss_saved_pp": -3.4347,
+              "worst_trade_saved_pp": 3.9374,
+              "win_change": 0
+            }
+          ],
+          "status": "DONE",
+          "passes": false
+        },
+        {
+          "policy": "C02_RESIDUAL_LONG_P20_F5_I25",
+          "specs": [
+            {
+              "id": "C02_RESIDUAL_LONG_P20_F5_I25_PROFIT",
+              "target": "RESIDUAL",
+              "side": "LONG",
+              "axis": "profit_reversal",
+              "arm_close_pct": 0.02,
+              "locked_profit_pct": 0.005,
+              "stop_slip_bps": 10
+            },
+            {
+              "id": "C02_RESIDUAL_LONG_P20_F5_I25_INITIAL",
+              "target": "RESIDUAL",
+              "side": "LONG",
+              "axis": "initial_adverse",
+              "max_initial_wallet_loss_pct": 0.025,
+              "stop_slip_bps": 10
+            }
+          ],
+          "two_costs": [
+            {
+              "cost": 10,
+              "dd": -15.6221,
+              "dd_delta_pp": -0.0015,
+              "asset": 224241870.13334167,
+              "pf": 3.5152632814893017,
+              "trades": 1313,
+              "negative_loss_saved_pp": -5.1397,
+              "worst_trade_saved_pp": 2.9429,
+              "win_change": -1
+            },
+            {
+              "cost": 30,
+              "dd": -16.8043,
+              "dd_delta_pp": -0.0165,
+              "asset": 121034164.06040584,
+              "pf": 3.1105057451354963,
+              "trades": 1310,
+              "negative_loss_saved_pp": -6.7305,
+              "worst_trade_saved_pp": 2.9013,
+              "win_change": 0
+            }
+          ],
+          "status": "DONE",
+          "passes": false
+        },
+        {
+          "policy": "C02_RESIDUAL_LONG_P30_F10_I15",
+          "specs": [
+            {
+              "id": "C02_RESIDUAL_LONG_P30_F10_I15_PROFIT",
+              "target": "RESIDUAL",
+              "side": "LONG",
+              "axis": "profit_reversal",
+              "arm_close_pct": 0.03,
+              "locked_profit_pct": 0.01,
+              "stop_slip_bps": 10
+            },
+            {
+              "id": "C02_RESIDUAL_LONG_P30_F10_I15_INITIAL",
+              "target": "RESIDUAL",
+              "side": "LONG",
+              "axis": "initial_adverse",
+              "max_initial_wallet_loss_pct": 0.015,
+              "stop_slip_bps": 10
+            }
+          ],
+          "two_costs": [
+            {
+              "cost": 10,
+              "dd": -15.6168,
+              "dd_delta_pp": 0.0038,
+              "asset": 225962455.15846667,
+              "pf": 3.568012003579453,
+              "trades": 1319,
+              "negative_loss_saved_pp": -3.0458,
+              "worst_trade_saved_pp": 3.9413,
+              "win_change": -1
+            },
+            {
+              "cost": 30,
+              "dd": -16.8164,
+              "dd_delta_pp": -0.0286,
+              "asset": 122377367.0426074,
+              "pf": 3.1496266930511427,
+              "trades": 1317,
+              "negative_loss_saved_pp": -4.8477,
+              "worst_trade_saved_pp": 3.9374,
+              "win_change": 0
+            }
+          ],
+          "status": "DONE",
+          "passes": false
+        },
+        {
+          "policy": "C02_RESIDUAL_LONG_P30_F10_I25",
+          "specs": [
+            {
+              "id": "C02_RESIDUAL_LONG_P30_F10_I25_PROFIT",
+              "target": "RESIDUAL",
+              "side": "LONG",
+              "axis": "profit_reversal",
+              "arm_close_pct": 0.03,
+              "locked_profit_pct": 0.01,
+              "stop_slip_bps": 10
+            },
+            {
+              "id": "C02_RESIDUAL_LONG_P30_F10_I25_INITIAL",
+              "target": "RESIDUAL",
+              "side": "LONG",
+              "axis": "initial_adverse",
+              "max_initial_wallet_loss_pct": 0.025,
+              "stop_slip_bps": 10
+            }
+          ],
+          "two_costs": [
+            {
+              "cost": 10,
+              "dd": -15.6183,
+              "dd_delta_pp": 0.0023,
+              "asset": 224196224.2680621,
+              "pf": 3.510930962072442,
+              "trades": 1312,
+              "negative_loss_saved_pp": -6.2784,
+              "worst_trade_saved_pp": 2.943,
+              "win_change": -1
+            },
+            {
+              "cost": 30,
+              "dd": -16.8078,
+              "dd_delta_pp": -0.02,
+              "asset": 121706275.83645615,
+              "pf": 3.112196420987479,
+              "trades": 1311,
+              "negative_loss_saved_pp": -7.1668,
+              "worst_trade_saved_pp": 2.9402,
+              "win_change": 0
+            }
+          ],
+          "status": "DONE",
+          "passes": false
+        }
+      ],
+      "selected": null,
+      "status": "NO_COMBINATION_IMPROVED_BOTH_COST_CASES",
+      "final_specs": []
+    },
+    {
+      "id": "C03",
+      "scope": "Q102_LONG",
+      "controls": [
+        {
+          "dd": -15.6206,
+          "asset": 222818966.87803495
+        },
+        {
+          "dd": -16.7878,
+          "asset": 124289206.81827945
+        }
+      ],
+      "case_results": [
+        {
+          "policy": "C03_Q102_LONG_P20_F5_I15",
+          "specs": [
+            {
+              "id": "C03_Q102_LONG_P20_F5_I15_PROFIT",
+              "target": "Q102",
+              "side": "LONG",
+              "axis": "profit_reversal",
+              "arm_close_pct": 0.02,
+              "locked_profit_pct": 0.005,
+              "stop_slip_bps": 10
+            },
+            {
+              "id": "C03_Q102_LONG_P20_F5_I15_INITIAL",
+              "target": "Q102",
+              "side": "LONG",
+              "axis": "initial_adverse",
+              "max_initial_wallet_loss_pct": 0.015,
+              "stop_slip_bps": 10
+            }
+          ],
+          "two_costs": [
+            {
+              "cost": 10,
+              "dd": -31.4079,
+              "dd_delta_pp": -15.7873,
+              "asset": 200373773.65205473,
+              "pf": 3.3800358608450676,
+              "trades": 1326,
+              "negative_loss_saved_pp": 2.3974,
+              "worst_trade_saved_pp": 2.6539,
+              "win_change": -6
+            },
+            {
+              "cost": 30,
+              "dd": -32.3712,
+              "dd_delta_pp": -15.5834,
+              "asset": 79535386.18302731,
+              "pf": 2.703219619468662,
+              "trades": 1322,
+              "negative_loss_saved_pp": 0.9672,
+              "worst_trade_saved_pp": 3.5542,
+              "win_change": -6
+            }
+          ],
+          "status": "DONE",
+          "passes": false
+        },
+        {
+          "policy": "C03_Q102_LONG_P20_F5_I25",
+          "specs": [
+            {
+              "id": "C03_Q102_LONG_P20_F5_I25_PROFIT",
+              "target": "Q102",
+              "side": "LONG",
+              "axis": "profit_reversal",
+              "arm_close_pct": 0.02,
+              "locked_profit_pct": 0.005,
+              "stop_slip_bps": 10
+            },
+            {
+              "id": "C03_Q102_LONG_P20_F5_I25_INITIAL",
+              "target": "Q102",
+              "side": "LONG",
+              "axis": "initial_adverse",
+              "max_initial_wallet_loss_pct": 0.025,
+              "stop_slip_bps": 10
+            }
+          ],
+          "two_costs": [
+            {
+              "cost": 10,
+              "dd": -31.4487,
+              "dd_delta_pp": -15.8281,
+              "asset": 195212468.21742123,
+              "pf": 3.314116597125466,
+              "trades": 1323,
+              "negative_loss_saved_pp": 0.5399,
+              "worst_trade_saved_pp": 2.5696,
+              "win_change": -3
+            },
+            {
+              "cost": 30,
+              "dd": -32.3463,
+              "dd_delta_pp": -15.5585,
+              "asset": 73493560.25847688,
+              "pf": 2.5864087563646576,
+              "trades": 1318,
+              "negative_loss_saved_pp": -3.5021,
+              "worst_trade_saved_pp": 1.5494,
+              "win_change": -3
+            }
+          ],
+          "status": "DONE",
+          "passes": false
+        },
+        {
+          "policy": "C03_Q102_LONG_P30_F10_I15",
+          "specs": [
+            {
+              "id": "C03_Q102_LONG_P30_F10_I15_PROFIT",
+              "target": "Q102",
+              "side": "LONG",
+              "axis": "profit_reversal",
+              "arm_close_pct": 0.03,
+              "locked_profit_pct": 0.01,
+              "stop_slip_bps": 10
+            },
+            {
+              "id": "C03_Q102_LONG_P30_F10_I15_INITIAL",
+              "target": "Q102",
+              "side": "LONG",
+              "axis": "initial_adverse",
+              "max_initial_wallet_loss_pct": 0.015,
+              "stop_slip_bps": 10
+            }
+          ],
+          "two_costs": [
+            {
+              "cost": 10,
+              "dd": -31.4079,
+              "dd_delta_pp": -15.7873,
+              "asset": 201230503.46713132,
+              "pf": 3.38599169574429,
+              "trades": 1326,
+              "negative_loss_saved_pp": 2.4297,
+              "worst_trade_saved_pp": 2.6539,
+              "win_change": -6
+            },
+            {
+              "cost": 30,
+              "dd": -32.3712,
+              "dd_delta_pp": -15.5834,
+              "asset": 77702787.23072089,
+              "pf": 2.6723215232690305,
+              "trades": 1322,
+              "negative_loss_saved_pp": 0.984,
+              "worst_trade_saved_pp": 3.5542,
+              "win_change": -6
+            }
+          ],
+          "status": "DONE",
+          "passes": false
+        },
+        {
+          "policy": "C03_Q102_LONG_P30_F10_I25",
+          "specs": [
+            {
+              "id": "C03_Q102_LONG_P30_F10_I25_PROFIT",
+              "target": "Q102",
+              "side": "LONG",
+              "axis": "profit_reversal",
+              "arm_close_pct": 0.03,
+              "locked_profit_pct": 0.01,
+              "stop_slip_bps": 10
+            },
+            {
+              "id": "C03_Q102_LONG_P30_F10_I25_INITIAL",
+              "target": "Q102",
+              "side": "LONG",
+              "axis": "initial_adverse",
+              "max_initial_wallet_loss_pct": 0.025,
+              "stop_slip_bps": 10
+            }
+          ],
+          "two_costs": [
+            {
+              "cost": 10,
+              "dd": -31.4424,
+              "dd_delta_pp": -15.8218,
+              "asset": 197334705.42484176,
+              "pf": 3.3196588692725233,
+              "trades": 1322,
+              "negative_loss_saved_pp": 0.7641,
+              "worst_trade_saved_pp": 2.5845,
+              "win_change": -3
+            },
+            {
+              "cost": 30,
+              "dd": -32.3379,
+              "dd_delta_pp": -15.5501,
+              "asset": 74883421.30030411,
+              "pf": 2.6032452446807577,
+              "trades": 1319,
+              "negative_loss_saved_pp": -3.3548,
+              "worst_trade_saved_pp": 1.5494,
+              "win_change": -3
+            }
+          ],
+          "status": "DONE",
+          "passes": false
+        }
+      ],
+      "selected": null,
+      "status": "NO_COMBINATION_IMPROVED_BOTH_COST_CASES",
+      "final_specs": []
+    },
+    {
+      "id": "C04",
+      "scope": "V12_LONG",
+      "controls": [
+        {
+          "dd": -15.6206,
+          "asset": 222818966.87803495
+        },
+        {
+          "dd": -16.7878,
+          "asset": 124289206.81827945
+        }
+      ],
+      "case_results": [
+        {
+          "policy": "C04_V12_LONG_P20_F5_I15",
+          "specs": [
+            {
+              "id": "C04_V12_LONG_P20_F5_I15_PROFIT",
+              "target": "V12",
+              "side": "LONG",
+              "axis": "profit_reversal",
+              "arm_close_pct": 0.02,
+              "locked_profit_pct": 0.005,
+              "stop_slip_bps": 10
+            },
+            {
+              "id": "C04_V12_LONG_P20_F5_I15_INITIAL",
+              "target": "V12",
+              "side": "LONG",
+              "axis": "initial_adverse",
+              "max_initial_wallet_loss_pct": 0.015,
+              "stop_slip_bps": 10
+            }
+          ],
+          "two_costs": [
+            {
+              "cost": 10,
+              "dd": -20.572,
+              "dd_delta_pp": -4.9514,
+              "asset": 179320357.96931675,
+              "pf": 3.264389910080842,
+              "trades": 1323,
+              "negative_loss_saved_pp": -19.425,
+              "worst_trade_saved_pp": 0.0704,
+              "win_change": -25
+            },
+            {
+              "cost": 30,
+              "dd": -22.5533,
+              "dd_delta_pp": -5.7655,
+              "asset": 59067554.20132141,
+              "pf": 2.4034459326785615,
+              "trades": 1327,
+              "negative_loss_saved_pp": -22.2252,
+              "worst_trade_saved_pp": 0.011,
+              "win_change": -18
+            }
+          ],
+          "status": "DONE",
+          "passes": false
+        },
+        {
+          "policy": "C04_V12_LONG_P20_F5_I25",
+          "specs": [
+            {
+              "id": "C04_V12_LONG_P20_F5_I25_PROFIT",
+              "target": "V12",
+              "side": "LONG",
+              "axis": "profit_reversal",
+              "arm_close_pct": 0.02,
+              "locked_profit_pct": 0.005,
+              "stop_slip_bps": 10
+            },
+            {
+              "id": "C04_V12_LONG_P20_F5_I25_INITIAL",
+              "target": "V12",
+              "side": "LONG",
+              "axis": "initial_adverse",
+              "max_initial_wallet_loss_pct": 0.025,
+              "stop_slip_bps": 10
+            }
+          ],
+          "two_costs": [
+            {
+              "cost": 10,
+              "dd": -21.386,
+              "dd_delta_pp": -5.7654,
+              "asset": 180166210.0926719,
+              "pf": 3.318894494963026,
+              "trades": 1320,
+              "negative_loss_saved_pp": -22.3161,
+              "worst_trade_saved_pp": -0.5276,
+              "win_change": -13
+            },
+            {
+              "cost": 30,
+              "dd": -22.993,
+              "dd_delta_pp": -6.2052,
+              "asset": 54846585.73647131,
+              "pf": 2.34567200785912,
+              "trades": 1324,
+              "negative_loss_saved_pp": -25.062,
+              "worst_trade_saved_pp": -0.587,
+              "win_change": -6
+            }
+          ],
+          "status": "DONE",
+          "passes": false
+        },
+        {
+          "policy": "C04_V12_LONG_P30_F10_I15",
+          "specs": [
+            {
+              "id": "C04_V12_LONG_P30_F10_I15_PROFIT",
+              "target": "V12",
+              "side": "LONG",
+              "axis": "profit_reversal",
+              "arm_close_pct": 0.03,
+              "locked_profit_pct": 0.01,
+              "stop_slip_bps": 10
+            },
+            {
+              "id": "C04_V12_LONG_P30_F10_I15_INITIAL",
+              "target": "V12",
+              "side": "LONG",
+              "axis": "initial_adverse",
+              "max_initial_wallet_loss_pct": 0.015,
+              "stop_slip_bps": 10
+            }
+          ],
+          "two_costs": [
+            {
+              "cost": 10,
+              "dd": -20.6091,
+              "dd_delta_pp": -4.9885,
+              "asset": 179245176.81531006,
+              "pf": 3.2450582847615665,
+              "trades": 1324,
+              "negative_loss_saved_pp": -21.9116,
+              "worst_trade_saved_pp": 0.0701,
+              "win_change": -29
+            },
+            {
+              "cost": 30,
+              "dd": -22.3937,
+              "dd_delta_pp": -5.6059,
+              "asset": 59762753.92029206,
+              "pf": 2.3941606978693417,
+              "trades": 1328,
+              "negative_loss_saved_pp": -25.3999,
+              "worst_trade_saved_pp": 0.0103,
+              "win_change": -24
+            }
+          ],
+          "status": "DONE",
+          "passes": false
+        },
+        {
+          "policy": "C04_V12_LONG_P30_F10_I25",
+          "specs": [
+            {
+              "id": "C04_V12_LONG_P30_F10_I25_PROFIT",
+              "target": "V12",
+              "side": "LONG",
+              "axis": "profit_reversal",
+              "arm_close_pct": 0.03,
+              "locked_profit_pct": 0.01,
+              "stop_slip_bps": 10
+            },
+            {
+              "id": "C04_V12_LONG_P30_F10_I25_INITIAL",
+              "target": "V12",
+              "side": "LONG",
+              "axis": "initial_adverse",
+              "max_initial_wallet_loss_pct": 0.025,
+              "stop_slip_bps": 10
+            }
+          ],
+          "two_costs": [
+            {
+              "cost": 10,
+              "dd": -21.4408,
+              "dd_delta_pp": -5.8202,
+              "asset": 180769229.2539962,
+              "pf": 3.276768330716797,
+              "trades": 1322,
+              "negative_loss_saved_pp": -25.2665,
+              "worst_trade_saved_pp": -0.5275,
+              "win_change": -19
+            },
+            {
+              "cost": 30,
+              "dd": -23.076,
+              "dd_delta_pp": -6.2882,
+              "asset": 60030927.37230335,
+              "pf": 2.4039488977096553,
+              "trades": 1324,
+              "negative_loss_saved_pp": -28.1811,
+              "worst_trade_saved_pp": -0.5869,
+              "win_change": -14
+            }
+          ],
+          "status": "DONE",
+          "passes": false
+        }
+      ],
+      "selected": null,
+      "status": "NO_COMBINATION_IMPROVED_BOTH_COST_CASES",
+      "final_specs": []
+    },
+    {
+      "id": "C05",
+      "scope": "Q102_SHORT",
+      "controls": [
+        {
+          "dd": -15.6206,
+          "asset": 222818966.87803495
+        },
+        {
+          "dd": -16.7878,
+          "asset": 124289206.81827945
+        }
+      ],
+      "case_results": [
+        {
+          "policy": "C05_Q102_SHORT_P20_F5_I15",
+          "specs": [
+            {
+              "id": "C05_Q102_SHORT_P20_F5_I15_PROFIT",
+              "target": "Q102",
+              "side": "SHORT",
+              "axis": "profit_reversal",
+              "arm_close_pct": 0.02,
+              "locked_profit_pct": 0.005,
+              "stop_slip_bps": 10
+            },
+            {
+              "id": "C05_Q102_SHORT_P20_F5_I15_INITIAL",
+              "target": "Q102",
+              "side": "SHORT",
+              "axis": "initial_adverse",
+              "max_initial_wallet_loss_pct": 0.015,
+              "stop_slip_bps": 10
+            }
+          ],
+          "two_costs": [
+            {
+              "cost": 10,
+              "dd": -25.5356,
+              "dd_delta_pp": -9.915,
+              "asset": 143468990.1577617,
+              "pf": 3.1258789411765027,
+              "trades": 1378,
+              "negative_loss_saved_pp": -55.8353,
+              "worst_trade_saved_pp": 3.6422,
+              "win_change": -14
+            },
+            {
+              "cost": 30,
+              "dd": -27.4427,
+              "dd_delta_pp": -10.6549,
+              "asset": 39880902.10466656,
+              "pf": 2.0841255465480053,
+              "trades": 1386,
+              "negative_loss_saved_pp": -77.3606,
+              "worst_trade_saved_pp": 3.5726,
+              "win_change": -15
+            }
+          ],
+          "status": "DONE",
+          "passes": false
+        },
+        {
+          "policy": "C05_Q102_SHORT_P20_F5_I25",
+          "specs": [
+            {
+              "id": "C05_Q102_SHORT_P20_F5_I25_PROFIT",
+              "target": "Q102",
+              "side": "SHORT",
+              "axis": "profit_reversal",
+              "arm_close_pct": 0.02,
+              "locked_profit_pct": 0.005,
+              "stop_slip_bps": 10
+            },
+            {
+              "id": "C05_Q102_SHORT_P20_F5_I25_INITIAL",
+              "target": "Q102",
+              "side": "SHORT",
+              "axis": "initial_adverse",
+              "max_initial_wallet_loss_pct": 0.025,
+              "stop_slip_bps": 10
+            }
+          ],
+          "two_costs": [
+            {
+              "cost": 10,
+              "dd": -19.6271,
+              "dd_delta_pp": -4.0065,
+              "asset": 210884967.7986733,
+              "pf": 3.245919946608946,
+              "trades": 1342,
+              "negative_loss_saved_pp": -35.1136,
+              "worst_trade_saved_pp": 4.1472,
+              "win_change": -4
+            },
+            {
+              "cost": 30,
+              "dd": -21.0765,
+              "dd_delta_pp": -4.2887,
+              "asset": 97238264.29803473,
+              "pf": 2.6116255266469977,
+              "trades": 1340,
+              "negative_loss_saved_pp": -44.9996,
+              "worst_trade_saved_pp": 4.1516,
+              "win_change": -4
+            }
+          ],
+          "status": "DONE",
+          "passes": false
+        },
+        {
+          "policy": "C05_Q102_SHORT_P30_F10_I15",
+          "specs": [
+            {
+              "id": "C05_Q102_SHORT_P30_F10_I15_PROFIT",
+              "target": "Q102",
+              "side": "SHORT",
+              "axis": "profit_reversal",
+              "arm_close_pct": 0.03,
+              "locked_profit_pct": 0.01,
+              "stop_slip_bps": 10
+            },
+            {
+              "id": "C05_Q102_SHORT_P30_F10_I15_INITIAL",
+              "target": "Q102",
+              "side": "SHORT",
+              "axis": "initial_adverse",
+              "max_initial_wallet_loss_pct": 0.015,
+              "stop_slip_bps": 10
+            }
+          ],
+          "two_costs": [
+            {
+              "cost": 10,
+              "dd": -23.5465,
+              "dd_delta_pp": -7.9259,
+              "asset": 163020848.5727147,
+              "pf": 3.041905827950427,
+              "trades": 1372,
+              "negative_loss_saved_pp": -50.2316,
+              "worst_trade_saved_pp": 3.6655,
+              "win_change": -18
+            },
+            {
+              "cost": 30,
+              "dd": -25.007,
+              "dd_delta_pp": -8.2192,
+              "asset": 56678934.85022609,
+              "pf": 2.2127955234149077,
+              "trades": 1374,
+              "negative_loss_saved_pp": -69.0702,
+              "worst_trade_saved_pp": 3.1801,
+              "win_change": -19
+            }
+          ],
+          "status": "DONE",
+          "passes": false
+        },
+        {
+          "policy": "C05_Q102_SHORT_P30_F10_I25",
+          "specs": [
+            {
+              "id": "C05_Q102_SHORT_P30_F10_I25_PROFIT",
+              "target": "Q102",
+              "side": "SHORT",
+              "axis": "profit_reversal",
+              "arm_close_pct": 0.03,
+              "locked_profit_pct": 0.01,
+              "stop_slip_bps": 10
+            },
+            {
+              "id": "C05_Q102_SHORT_P30_F10_I25_INITIAL",
+              "target": "Q102",
+              "side": "SHORT",
+              "axis": "initial_adverse",
+              "max_initial_wallet_loss_pct": 0.025,
+              "stop_slip_bps": 10
+            }
+          ],
+          "two_costs": [
+            {
+              "cost": 10,
+              "dd": -19.5964,
+              "dd_delta_pp": -3.9758,
+              "asset": 205866361.73643392,
+              "pf": 3.204711935269106,
+              "trades": 1349,
+              "negative_loss_saved_pp": -38.9226,
+              "worst_trade_saved_pp": 4.147,
+              "win_change": -4
+            },
+            {
+              "cost": 30,
+              "dd": -21.1153,
+              "dd_delta_pp": -4.3275,
+              "asset": 93756615.09722258,
+              "pf": 2.6043203428558046,
+              "trades": 1340,
+              "negative_loss_saved_pp": -49.2958,
+              "worst_trade_saved_pp": 4.1511,
+              "win_change": -4
+            }
+          ],
+          "status": "DONE",
+          "passes": false
+        }
+      ],
+      "selected": null,
+      "status": "NO_COMBINATION_IMPROVED_BOTH_COST_CASES",
+      "final_specs": []
+    },
+    {
+      "id": "C06",
+      "scope": "V12_SHORT",
+      "controls": [
+        {
+          "dd": -15.6206,
+          "asset": 222818966.87803495
+        },
+        {
+          "dd": -16.7878,
+          "asset": 124289206.81827945
+        }
+      ],
+      "case_results": [
+        {
+          "policy": "C06_V12_SHORT_P20_F5_I15",
+          "specs": [
+            {
+              "id": "C06_V12_SHORT_P20_F5_I15_PROFIT",
+              "target": "V12",
+              "side": "SHORT",
+              "axis": "profit_reversal",
+              "arm_close_pct": 0.02,
+              "locked_profit_pct": 0.005,
+              "stop_slip_bps": 10
+            },
+            {
+              "id": "C06_V12_SHORT_P20_F5_I15_INITIAL",
+              "target": "V12",
+              "side": "SHORT",
+              "axis": "initial_adverse",
+              "max_initial_wallet_loss_pct": 0.015,
+              "stop_slip_bps": 10
+            }
+          ],
+          "two_costs": [
+            {
+              "cost": 10,
+              "dd": -23.7188,
+              "dd_delta_pp": -8.0982,
+              "asset": 56845257.14194905,
+              "pf": 2.4742304745577006,
+              "trades": 1376,
+              "negative_loss_saved_pp": -33.7965,
+              "worst_trade_saved_pp": 2.1348,
+              "win_change": -91
+            },
+            {
+              "cost": 30,
+              "dd": -25.1685,
+              "dd_delta_pp": -8.3807,
+              "asset": 14464456.474069195,
+              "pf": 1.8550739930332816,
+              "trades": 1380,
+              "negative_loss_saved_pp": -39.8166,
+              "worst_trade_saved_pp": 2.0567,
+              "win_change": -81
+            }
+          ],
+          "status": "DONE",
+          "passes": false
+        },
+        {
+          "policy": "C06_V12_SHORT_P20_F5_I25",
+          "specs": [
+            {
+              "id": "C06_V12_SHORT_P20_F5_I25_PROFIT",
+              "target": "V12",
+              "side": "SHORT",
+              "axis": "profit_reversal",
+              "arm_close_pct": 0.02,
+              "locked_profit_pct": 0.005,
+              "stop_slip_bps": 10
+            },
+            {
+              "id": "C06_V12_SHORT_P20_F5_I25_INITIAL",
+              "target": "V12",
+              "side": "SHORT",
+              "axis": "initial_adverse",
+              "max_initial_wallet_loss_pct": 0.025,
+              "stop_slip_bps": 10
+            }
+          ],
+          "two_costs": [
+            {
+              "cost": 10,
+              "dd": -17.8052,
+              "dd_delta_pp": -2.1846,
+              "asset": 87148943.03875883,
+              "pf": 2.8820371726179643,
+              "trades": 1377,
+              "negative_loss_saved_pp": -32.7785,
+              "worst_trade_saved_pp": 1.1313,
+              "win_change": -15
+            },
+            {
+              "cost": 30,
+              "dd": -19.1365,
+              "dd_delta_pp": -2.3487,
+              "asset": 22541276.48496642,
+              "pf": 1.8783758167805356,
+              "trades": 1384,
+              "negative_loss_saved_pp": -34.8723,
+              "worst_trade_saved_pp": 1.0651,
+              "win_change": -8
+            }
+          ],
+          "status": "DONE",
+          "passes": false
+        },
+        {
+          "policy": "C06_V12_SHORT_P30_F10_I15",
+          "specs": [
+            {
+              "id": "C06_V12_SHORT_P30_F10_I15_PROFIT",
+              "target": "V12",
+              "side": "SHORT",
+              "axis": "profit_reversal",
+              "arm_close_pct": 0.03,
+              "locked_profit_pct": 0.01,
+              "stop_slip_bps": 10
+            },
+            {
+              "id": "C06_V12_SHORT_P30_F10_I15_INITIAL",
+              "target": "V12",
+              "side": "SHORT",
+              "axis": "initial_adverse",
+              "max_initial_wallet_loss_pct": 0.015,
+              "stop_slip_bps": 10
+            }
+          ],
+          "two_costs": [
+            {
+              "cost": 10,
+              "dd": -21.6985,
+              "dd_delta_pp": -6.0779,
+              "asset": 67218100.9490035,
+              "pf": 2.4610353180750253,
+              "trades": 1366,
+              "negative_loss_saved_pp": -46.3074,
+              "worst_trade_saved_pp": 2.1337,
+              "win_change": -125
+            },
+            {
+              "cost": 30,
+              "dd": -23.1242,
+              "dd_delta_pp": -6.3364,
+              "asset": 17828811.029820897,
+              "pf": 1.8468417499450978,
+              "trades": 1376,
+              "negative_loss_saved_pp": -54.0522,
+              "worst_trade_saved_pp": 2.0606,
+              "win_change": -113
+            }
+          ],
+          "status": "DONE",
+          "passes": false
+        },
+        {
+          "policy": "C06_V12_SHORT_P30_F10_I25",
+          "specs": [
+            {
+              "id": "C06_V12_SHORT_P30_F10_I25_PROFIT",
+              "target": "V12",
+              "side": "SHORT",
+              "axis": "profit_reversal",
+              "arm_close_pct": 0.03,
+              "locked_profit_pct": 0.01,
+              "stop_slip_bps": 10
+            },
+            {
+              "id": "C06_V12_SHORT_P30_F10_I25_INITIAL",
+              "target": "V12",
+              "side": "SHORT",
+              "axis": "initial_adverse",
+              "max_initial_wallet_loss_pct": 0.025,
+              "stop_slip_bps": 10
+            }
+          ],
+          "two_costs": [
+            {
+              "cost": 10,
+              "dd": -18.2044,
+              "dd_delta_pp": -2.5838,
+              "asset": 91316674.80815324,
+              "pf": 2.753529180029982,
+              "trades": 1356,
+              "negative_loss_saved_pp": -46.5629,
+              "worst_trade_saved_pp": 1.1345,
+              "win_change": -53
+            },
+            {
+              "cost": 30,
+              "dd": -19.5669,
+              "dd_delta_pp": -2.7791,
+              "asset": 26133665.585800607,
+              "pf": 1.8795738249170248,
+              "trades": 1370,
+              "negative_loss_saved_pp": -50.1387,
+              "worst_trade_saved_pp": 1.0565,
+              "win_change": -44
+            }
+          ],
+          "status": "DONE",
+          "passes": false
+        }
+      ],
+      "selected": null,
+      "status": "NO_COMBINATION_IMPROVED_BOTH_COST_CASES",
+      "final_specs": []
+    },
+    {
+      "id": "C07",
+      "scope": "IDLE_SHORT",
+      "controls": [
+        {
+          "dd": -15.6206,
+          "asset": 222818966.87803495
+        },
+        {
+          "dd": -16.7878,
+          "asset": 124289206.81827945
+        }
+      ],
+      "case_results": [
+        {
+          "policy": "C07_IDLE_SHORT_P20_F5_I15",
+          "specs": [
+            {
+              "id": "C07_IDLE_SHORT_P20_F5_I15_PROFIT",
+              "target": "IDLE",
+              "side": "SHORT",
+              "axis": "profit_reversal",
+              "arm_close_pct": 0.02,
+              "locked_profit_pct": 0.005,
+              "stop_slip_bps": 10
+            },
+            {
+              "id": "C07_IDLE_SHORT_P20_F5_I15_INITIAL",
+              "target": "IDLE",
+              "side": "SHORT",
+              "axis": "initial_adverse",
+              "max_initial_wallet_loss_pct": 0.015,
+              "stop_slip_bps": 10
+            }
+          ],
+          "two_costs": [
+            {
+              "cost": 10,
+              "dd": -19.1937,
+              "dd_delta_pp": -3.5731,
+              "asset": 189023640.41529402,
+              "pf": 3.345217081289815,
+              "trades": 1326,
+              "negative_loss_saved_pp": -15.4678,
+              "worst_trade_saved_pp": 0.9492,
+              "win_change": -12
+            },
+            {
+              "cost": 30,
+              "dd": -21.1103,
+              "dd_delta_pp": -4.3225,
+              "asset": 73266346.87160437,
+              "pf": 2.6980359791819417,
+              "trades": 1327,
+              "negative_loss_saved_pp": -25.7295,
+              "worst_trade_saved_pp": 0.8002,
+              "win_change": -12
+            }
+          ],
+          "status": "DONE",
+          "passes": false
+        },
+        {
+          "policy": "C07_IDLE_SHORT_P20_F5_I25",
+          "specs": [
+            {
+              "id": "C07_IDLE_SHORT_P20_F5_I25_PROFIT",
+              "target": "IDLE",
+              "side": "SHORT",
+              "axis": "profit_reversal",
+              "arm_close_pct": 0.02,
+              "locked_profit_pct": 0.005,
+              "stop_slip_bps": 10
+            },
+            {
+              "id": "C07_IDLE_SHORT_P20_F5_I25_INITIAL",
+              "target": "IDLE",
+              "side": "SHORT",
+              "axis": "initial_adverse",
+              "max_initial_wallet_loss_pct": 0.025,
+              "stop_slip_bps": 10
+            }
+          ],
+          "two_costs": [
+            {
+              "cost": 10,
+              "dd": -15.6179,
+              "dd_delta_pp": 0.0027,
+              "asset": 197578451.22735122,
+              "pf": 3.263347361486379,
+              "trades": 1321,
+              "negative_loss_saved_pp": -12.1219,
+              "worst_trade_saved_pp": -0.0226,
+              "win_change": -7
+            },
+            {
+              "cost": 30,
+              "dd": -17.7391,
+              "dd_delta_pp": -0.9513,
+              "asset": 90210779.98680352,
+              "pf": 2.7878192653665086,
+              "trades": 1316,
+              "negative_loss_saved_pp": -21.0691,
+              "worst_trade_saved_pp": -0.1726,
+              "win_change": -8
+            }
+          ],
+          "status": "DONE",
+          "passes": false
+        },
+        {
+          "policy": "C07_IDLE_SHORT_P30_F10_I15",
+          "specs": [
+            {
+              "id": "C07_IDLE_SHORT_P30_F10_I15_PROFIT",
+              "target": "IDLE",
+              "side": "SHORT",
+              "axis": "profit_reversal",
+              "arm_close_pct": 0.03,
+              "locked_profit_pct": 0.01,
+              "stop_slip_bps": 10
+            },
+            {
+              "id": "C07_IDLE_SHORT_P30_F10_I15_INITIAL",
+              "target": "IDLE",
+              "side": "SHORT",
+              "axis": "initial_adverse",
+              "max_initial_wallet_loss_pct": 0.015,
+              "stop_slip_bps": 10
+            }
+          ],
+          "two_costs": [
+            {
+              "cost": 10,
+              "dd": -19.1937,
+              "dd_delta_pp": -3.5731,
+              "asset": 196889456.8198502,
+              "pf": 3.4924865215306844,
+              "trades": 1323,
+              "negative_loss_saved_pp": -15.9472,
+              "worst_trade_saved_pp": 0.9492,
+              "win_change": -17
+            },
+            {
+              "cost": 30,
+              "dd": -21.1103,
+              "dd_delta_pp": -4.3225,
+              "asset": 79059610.56601587,
+              "pf": 2.830382395350538,
+              "trades": 1323,
+              "negative_loss_saved_pp": -26.7368,
+              "worst_trade_saved_pp": 0.8002,
+              "win_change": -19
+            }
+          ],
+          "status": "DONE",
+          "passes": false
+        },
+        {
+          "policy": "C07_IDLE_SHORT_P30_F10_I25",
+          "specs": [
+            {
+              "id": "C07_IDLE_SHORT_P30_F10_I25_PROFIT",
+              "target": "IDLE",
+              "side": "SHORT",
+              "axis": "profit_reversal",
+              "arm_close_pct": 0.03,
+              "locked_profit_pct": 0.01,
+              "stop_slip_bps": 10
+            },
+            {
+              "id": "C07_IDLE_SHORT_P30_F10_I25_INITIAL",
+              "target": "IDLE",
+              "side": "SHORT",
+              "axis": "initial_adverse",
+              "max_initial_wallet_loss_pct": 0.025,
+              "stop_slip_bps": 10
+            }
+          ],
+          "two_costs": [
+            {
+              "cost": 10,
+              "dd": -15.6177,
+              "dd_delta_pp": 0.0029,
+              "asset": 199579348.26069197,
+              "pf": 3.446971944757635,
+              "trades": 1319,
+              "negative_loss_saved_pp": -17.3369,
+              "worst_trade_saved_pp": -0.0226,
+              "win_change": -11
+            },
+            {
+              "cost": 30,
+              "dd": -17.7391,
+              "dd_delta_pp": -0.9513,
+              "asset": 89277280.34440565,
+              "pf": 2.9056526008725325,
+              "trades": 1315,
+              "negative_loss_saved_pp": -26.4414,
+              "worst_trade_saved_pp": -0.1726,
+              "win_change": -12
+            }
+          ],
+          "status": "DONE",
+          "passes": false
+        }
+      ],
+      "selected": null,
+      "status": "NO_COMBINATION_IMPROVED_BOTH_COST_CASES",
+      "final_specs": []
+    },
+    {
+      "id": "C08",
+      "scope": "FET_LONG",
+      "controls": [
+        {
+          "dd": -15.6206,
+          "asset": 222818966.87803495
+        },
+        {
+          "dd": -16.7878,
+          "asset": 124289206.81827945
+        }
+      ],
+      "case_results": [
+        {
+          "policy": "C08_FET_LONG_P20_F5_I15",
+          "specs": [
+            {
+              "id": "C08_FET_LONG_P20_F5_I15_PROFIT",
+              "target": "FET",
+              "side": "LONG",
+              "axis": "profit_reversal",
+              "arm_close_pct": 0.02,
+              "locked_profit_pct": 0.005,
+              "stop_slip_bps": 10
+            },
+            {
+              "id": "C08_FET_LONG_P20_F5_I15_INITIAL",
+              "target": "FET",
+              "side": "LONG",
+              "axis": "initial_adverse",
+              "max_initial_wallet_loss_pct": 0.015,
+              "stop_slip_bps": 10
+            }
+          ],
+          "two_costs": [
+            {
+              "cost": 10,
+              "dd": -15.6206,
+              "dd_delta_pp": 0.0,
+              "asset": 213291834.82735452,
+              "pf": 3.3691869661904623,
+              "trades": 1311,
+              "negative_loss_saved_pp": -3.7099,
+              "worst_trade_saved_pp": -1.1843,
+              "win_change": -3
+            },
+            {
+              "cost": 30,
+              "dd": -16.7878,
+              "dd_delta_pp": 0.0,
+              "asset": 105572918.21331023,
+              "pf": 2.8571532358805785,
+              "trades": 1306,
+              "negative_loss_saved_pp": -5.8374,
+              "worst_trade_saved_pp": -0.9765,
+              "win_change": -2
+            }
+          ],
+          "status": "DONE",
+          "passes": false
+        },
+        {
+          "policy": "C08_FET_LONG_P20_F5_I25",
+          "specs": [
+            {
+              "id": "C08_FET_LONG_P20_F5_I25_PROFIT",
+              "target": "FET",
+              "side": "LONG",
+              "axis": "profit_reversal",
+              "arm_close_pct": 0.02,
+              "locked_profit_pct": 0.005,
+              "stop_slip_bps": 10
+            },
+            {
+              "id": "C08_FET_LONG_P20_F5_I25_INITIAL",
+              "target": "FET",
+              "side": "LONG",
+              "axis": "initial_adverse",
+              "max_initial_wallet_loss_pct": 0.025,
+              "stop_slip_bps": 10
+            }
+          ],
+          "two_costs": [
+            {
+              "cost": 10,
+              "dd": -15.6206,
+              "dd_delta_pp": 0.0,
+              "asset": 210493302.73702267,
+              "pf": 3.3086556525648323,
+              "trades": 1313,
+              "negative_loss_saved_pp": -2.7969,
+              "worst_trade_saved_pp": -1.881,
+              "win_change": -1
+            },
+            {
+              "cost": 30,
+              "dd": -16.7878,
+              "dd_delta_pp": 0.0,
+              "asset": 105103503.25182158,
+              "pf": 2.8586559613209195,
+              "trades": 1307,
+              "negative_loss_saved_pp": -4.2627,
+              "worst_trade_saved_pp": -1.9623,
+              "win_change": 0
+            }
+          ],
+          "status": "DONE",
+          "passes": false
+        },
+        {
+          "policy": "C08_FET_LONG_P30_F10_I15",
+          "specs": [
+            {
+              "id": "C08_FET_LONG_P30_F10_I15_PROFIT",
+              "target": "FET",
+              "side": "LONG",
+              "axis": "profit_reversal",
+              "arm_close_pct": 0.03,
+              "locked_profit_pct": 0.01,
+              "stop_slip_bps": 10
+            },
+            {
+              "id": "C08_FET_LONG_P30_F10_I15_INITIAL",
+              "target": "FET",
+              "side": "LONG",
+              "axis": "initial_adverse",
+              "max_initial_wallet_loss_pct": 0.015,
+              "stop_slip_bps": 10
+            }
+          ],
+          "two_costs": [
+            {
+              "cost": 10,
+              "dd": -15.6206,
+              "dd_delta_pp": 0.0,
+              "asset": 213553347.0008073,
+              "pf": 3.371038862046745,
+              "trades": 1311,
+              "negative_loss_saved_pp": -3.7099,
+              "worst_trade_saved_pp": -1.1843,
+              "win_change": -3
+            },
+            {
+              "cost": 30,
+              "dd": -16.7878,
+              "dd_delta_pp": 0.0,
+              "asset": 105965477.57092847,
+              "pf": 2.8617795802456536,
+              "trades": 1306,
+              "negative_loss_saved_pp": -5.8374,
+              "worst_trade_saved_pp": -0.9765,
+              "win_change": -2
+            }
+          ],
+          "status": "DONE",
+          "passes": false
+        },
+        {
+          "policy": "C08_FET_LONG_P30_F10_I25",
+          "specs": [
+            {
+              "id": "C08_FET_LONG_P30_F10_I25_PROFIT",
+              "target": "FET",
+              "side": "LONG",
+              "axis": "profit_reversal",
+              "arm_close_pct": 0.03,
+              "locked_profit_pct": 0.01,
+              "stop_slip_bps": 10
+            },
+            {
+              "id": "C08_FET_LONG_P30_F10_I25_INITIAL",
+              "target": "FET",
+              "side": "LONG",
+              "axis": "initial_adverse",
+              "max_initial_wallet_loss_pct": 0.025,
+              "stop_slip_bps": 10
+            }
+          ],
+          "two_costs": [
+            {
+              "cost": 10,
+              "dd": -15.6206,
+              "dd_delta_pp": 0.0,
+              "asset": 214910970.06495723,
+              "pf": 3.369205336563677,
+              "trades": 1312,
+              "negative_loss_saved_pp": -2.7357,
+              "worst_trade_saved_pp": -1.8336,
+              "win_change": -1
+            },
+            {
+              "cost": 30,
+              "dd": -16.7878,
+              "dd_delta_pp": 0.0,
+              "asset": 112464826.06056362,
+              "pf": 2.971036617817368,
+              "trades": 1307,
+              "negative_loss_saved_pp": -4.1924,
+              "worst_trade_saved_pp": -1.9623,
+              "win_change": 0
+            }
+          ],
+          "status": "DONE",
+          "passes": false
+        }
+      ],
+      "selected": null,
+      "status": "NO_COMBINATION_IMPROVED_BOTH_COST_CASES",
+      "final_specs": []
+    },
+    {
+      "id": "C09",
+      "scope": "Q102_HIGH_VOL_LONG",
+      "status": "NO_MATERIAL_IMPROVEMENT",
+      "cases": [
+        {
+          "stop_slip_bps": 0,
+          "policy": "TARGET_Q102_HIGHVOL_LONG_PROFIT5F3_SLIP0",
+          "metrics": [
+            {
+              "cost": 10,
+              "dd": -15.6206,
+              "dd_delta_pp": 0.0,
+              "asset": 222826482.37591702,
+              "pf": 3.4588775699426724,
+              "negative_loss_saved_pp": 0.0,
+              "worst_trade_saved_pp": 0.0
+            },
+            {
+              "cost": 30,
+              "dd": -16.7878,
+              "dd_delta_pp": 0.0,
+              "asset": 124297469.94927359,
+              "pf": 3.07869592427683,
+              "negative_loss_saved_pp": 0.0,
+              "worst_trade_saved_pp": 0.0
+            }
+          ],
+          "status": "DONE"
+        },
+        {
+          "stop_slip_bps": 100,
+          "policy": "TARGET_Q102_HIGHVOL_LONG_PROFIT5F3_SLIP100",
+          "metrics": [
+            {
+              "cost": 10,
+              "dd": -15.6206,
+              "dd_delta_pp": 0.0,
+              "asset": 222823431.8220473,
+              "pf": 3.4588444181689066,
+              "negative_loss_saved_pp": 0.0,
+              "worst_trade_saved_pp": 0.0
+            },
+            {
+              "cost": 30,
+              "dd": -16.7878,
+              "dd_delta_pp": 0.0,
+              "asset": 124294073.42436448,
+              "pf": 3.0786405889083452,
+              "negative_loss_saved_pp": 0.0,
+              "worst_trade_saved_pp": 0.0
+            }
+          ],
+          "status": "DONE"
+        },
+        {
+          "stop_slip_bps": 200,
+          "policy": "TARGET_Q102_HIGHVOL_LONG_PROFIT5F3_SLIP200",
+          "metrics": [
+            {
+              "cost": 10,
+              "dd": -15.6206,
+              "dd_delta_pp": 0.0,
+              "asset": 222820422.9018615,
+              "pf": 3.4588121248358012,
+              "negative_loss_saved_pp": 0.0,
+              "worst_trade_saved_pp": 0.0
+            },
+            {
+              "cost": 30,
+              "dd": -16.7878,
+              "dd_delta_pp": 0.0,
+              "asset": 124290692.75944942,
+              "pf": 3.078584814868326,
+              "negative_loss_saved_pp": 0.0,
+              "worst_trade_saved_pp": 0.0
+            }
+          ],
+          "status": "DONE"
+        }
+      ],
+      "selected": null
+    }
+  ],
+  "current_specs": [],
+  "controls_before": [
+    {
+      "dd": -15.6206,
+      "equity": 222818966.87803495
+    },
+    {
+      "dd": -16.7878,
+      "equity": 124289206.81827945
+    }
+  ],
+  "not_live": true,
+  "data_coverage": {
+    "FET_LONG": {
+      "valid": 8,
+      "trades": 8
+    },
+    "HYPE_LONG_LONG": {
+      "valid": 34,
+      "trades": 34
+    },
+    "IDLE_SHORT": {
+      "valid": 71,
+      "trades": 71
+    },
+    "PENGU_LONG": {
+      "valid": 47,
+      "trades": 47
+    },
+    "PENGU_SHORT": {
+      "valid": 20,
+      "trades": 20
+    },
+    "Q102_LONG": {
+      "valid": 35,
+      "trades": 35
+    },
+    "Q102_SHORT": {
+      "valid": 147,
+      "trades": 147
+    },
+    "RESIDUAL_LONG": {
+      "valid": 29,
+      "trades": 29
+    },
+    "V12_LONG": {
+      "valid": 142,
+      "trades": 142
+    },
+    "V12_SHORT": {
+      "valid": 690,
+      "trades": 690
+    },
+    "V52_LONG": {
+      "valid": 16,
+      "trades": 35
+    },
+    "V52_SHORT": {
+      "valid": 32,
+      "trades": 52
+    }
+  },
+  "blocked": [
+    "V52_LONG: 5m coverage 16/35",
+    "V52_SHORT: 5m coverage 32/52"
+  ],
+  "final_integrated_replay": [
+    {
+      "cost_bps": 10,
+      "final_jpy": 222818966.87803495,
+      "max_dd_pct": -15.6206,
+      "pf": 3.4587962777009813,
+      "trade_count": 1310,
+      "win_pct": 72.366,
+      "accounting": "PASS"
+    },
+    {
+      "cost_bps": 30,
+      "final_jpy": 124289206.81827945,
+      "max_dd_pct": -16.7878,
+      "pf": 3.0785603081685435,
+      "trade_count": 1307,
+      "win_pct": 69.549,
+      "accounting": "PASS"
+    }
+  ],
+  "finished_utc": "2026-10-19T08:44:28Z"
+}

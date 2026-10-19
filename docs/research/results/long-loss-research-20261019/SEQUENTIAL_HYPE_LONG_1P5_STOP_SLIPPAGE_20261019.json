@@ -1,0 +1,112 @@
+{
+  "status": "COMPLETE_STRESS_CASES_RESEARCH_ONLY",
+  "baseline": [
+    {
+      "policy": "LATEST_20261017_BASELINE",
+      "cost_bps": 10,
+      "full8_final_jpy": 222818966.87803495,
+      "full8_max_dd_pct": -15.6206,
+      "full8_pf": 3.4587962777009813,
+      "win_pct": 72.366,
+      "closed_trades": 1310,
+      "accounting": "PASS",
+      "scenario_specs": [],
+      "exit_audit": {},
+      "model": "2026-10-17 latest8 M5 public historical normalized Aster, frozen V4 source",
+      "research_only": true
+    },
+    {
+      "policy": "LATEST_20261017_BASELINE",
+      "cost_bps": 30,
+      "full8_final_jpy": 124289206.81827945,
+      "full8_max_dd_pct": -16.7878,
+      "full8_pf": 3.0785603081685435,
+      "win_pct": 69.549,
+      "closed_trades": 1307,
+      "accounting": "PASS",
+      "scenario_specs": [],
+      "exit_audit": {},
+      "model": "2026-10-17 latest8 M5 public historical normalized Aster, frozen V4 source",
+      "research_only": true
+    }
+  ],
+  "studies": [
+    {
+      "stop_slippage_pct": 0.0,
+      "cases": [
+        {
+          "cost_bps": 10,
+          "dd_pct": -15.6206,
+          "dd_delta_pctpoints": 0.0,
+          "final_jpy": 224148148.72083235,
+          "pnl_pf": 3.477565283742342,
+          "count": 1310,
+          "hype_loss_saved_wallet_pp": 4.6967,
+          "worst_loss_improved_pp": 0.0
+        },
+        {
+          "cost_bps": 30,
+          "dd_pct": -16.7878,
+          "dd_delta_pctpoints": 0.0,
+          "final_jpy": 124091710.54415245,
+          "pnl_pf": 2.978650996548124,
+          "count": 1306,
+          "hype_loss_saved_wallet_pp": 5.2294,
+          "worst_loss_improved_pp": 0.0
+        }
+      ]
+    },
+    {
+      "stop_slippage_pct": 1.0,
+      "cases": [
+        {
+          "cost_bps": 10,
+          "dd_pct": -15.6206,
+          "dd_delta_pctpoints": 0.0,
+          "final_jpy": 221095454.56340593,
+          "pnl_pf": 3.4252870733574814,
+          "count": 1310,
+          "hype_loss_saved_wallet_pp": -1.3495,
+          "worst_loss_improved_pp": -0.4627
+        },
+        {
+          "cost_bps": 30,
+          "dd_pct": -16.7878,
+          "dd_delta_pctpoints": 0.0,
+          "final_jpy": 123110145.01313902,
+          "pnl_pf": 3.049152273566088,
+          "count": 1307,
+          "hype_loss_saved_wallet_pp": -1.1955,
+          "worst_loss_improved_pp": -0.3655
+        }
+      ]
+    },
+    {
+      "stop_slippage_pct": 2.0,
+      "cases": [
+        {
+          "cost_bps": 10,
+          "dd_pct": -15.6206,
+          "dd_delta_pctpoints": 0.0,
+          "final_jpy": 214750824.19421816,
+          "pnl_pf": 3.323331290635371,
+          "count": 1311,
+          "hype_loss_saved_wallet_pp": -7.7018,
+          "worst_loss_improved_pp": -1.4636
+        },
+        {
+          "cost_bps": 30,
+          "dd_pct": -16.7878,
+          "dd_delta_pctpoints": 0.0,
+          "final_jpy": 117789287.07043101,
+          "pnl_pf": 2.975803268670179,
+          "count": 1307,
+          "hype_loss_saved_wallet_pp": -7.1632,
+          "worst_loss_improved_pp": -1.3654
+        }
+      ]
+    }
+  ],
+  "no_live_change": true,
+  "robust_to_2pct_slippage": false
+}

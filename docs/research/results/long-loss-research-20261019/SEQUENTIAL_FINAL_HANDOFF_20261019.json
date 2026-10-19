@@ -1,0 +1,82 @@
+{
+  "status": "COMPLETED_RESEARCH_WITH_V52_STOCK_M5_CERTIFICATION_GAP",
+  "research_only": true,
+  "side_acceptances": [],
+  "post_combination_specs": [],
+  "original_controls": {
+    "10": {
+      "policy": "LATEST_20261017_BASELINE",
+      "cost_bps": 10,
+      "full8_final_jpy": 222818966.87803495,
+      "full8_max_dd_pct": -15.6206,
+      "full8_pf": 3.4587962777009813,
+      "win_pct": 72.366,
+      "closed_trades": 1310,
+      "accounting": "PASS",
+      "scenario_specs": [],
+      "exit_audit": {},
+      "model": "2026-10-17 latest8 M5 public historical normalized Aster, frozen V4 source",
+      "research_only": true
+    },
+    "30": {
+      "policy": "LATEST_20261017_BASELINE",
+      "cost_bps": 30,
+      "full8_final_jpy": 124289206.81827945,
+      "full8_max_dd_pct": -16.7878,
+      "full8_pf": 3.0785603081685435,
+      "win_pct": 69.549,
+      "closed_trades": 1307,
+      "accounting": "PASS",
+      "scenario_specs": [],
+      "exit_audit": {},
+      "model": "2026-10-17 latest8 M5 public historical normalized Aster, frozen V4 source",
+      "research_only": true
+    }
+  },
+  "final_portfolio": [
+    {
+      "cost_bps": 10,
+      "final_jpy": 222818966.87803495,
+      "max_dd_pct": -15.6206,
+      "pf": 3.4587962777009813,
+      "trade_count": 1310,
+      "win_pct": 72.366,
+      "accounting": "PASS"
+    },
+    {
+      "cost_bps": 30,
+      "final_jpy": 124289206.81827945,
+      "max_dd_pct": -16.7878,
+      "pf": 3.0785603081685435,
+      "trade_count": 1307,
+      "win_pct": 69.549,
+      "accounting": "PASS"
+    }
+  ],
+  "source_sha256": {
+    "SEQUENTIAL_FOUR_SCOPE_CUMULATIVE_HANDOFF_20261019.json": "23214169f8fff0a01376f30f9587bd0e77179ea188a907d019109585d97090b2",
+    "SEQUENTIAL_STEP05_TO_12_CUMULATIVE_20261019.json": "b0554d234d55aad1045b3039741c22f6d6f628bded8be338906864bbd35b108c",
+    "SEQUENTIAL_ROBUST_BASELINE_9SIDES_20261019.json": "5634674403ee92f182484fef79a9808378fb78a715c2eca8366bdd172d65f529",
+    "SEQUENTIAL_COMBINED_ROBUST_TWO_AXIS_AND_HV_20261019.json": "bbad928b3a897efd799a9c6bd1fc0bb4a247a73f3dd8fce8f5dbe87172df9998",
+    "SEQUENTIAL_HYPE_LONG_1P5_STOP_SLIPPAGE_20261019.json": "e2f03b7d5d39c98ead829cba01cddb6d498f7f3840e0280eba54b94a961e7569",
+    "LATEST_8LOGIC_SIDE_LOSS_M5_CLASSIFICATION_20261019.json": "5cffba88174e1c7af2e1592c0ac1644fca534cbb0f96af35d42d537dc63a655b"
+  },
+  "rejected_hype_due_to_slippage": true,
+  "V52_M5_coverage": {
+    "LONG": {
+      "valid": 16,
+      "total": 35
+    },
+    "SHORT": {
+      "valid": 32,
+      "total": 52
+    }
+  },
+  "uncertainties": [
+    "Actual venue STOP readback/partial fill absent",
+    "historical M5 public prices scaled to Aster H1",
+    "Yahoo Finance historical V52 5m parity missing",
+    "independent forward holdout absent"
+  ],
+  "production_changed": false
+}
