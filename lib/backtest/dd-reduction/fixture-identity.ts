@@ -6,6 +6,10 @@ export interface FixtureIdentitySchema {
     readonly required: readonly FixtureIdentityField[];
     readonly requiredNested?: Readonly<Record<string, FixtureIdentitySchema>>;
     readonly nested?: Readonly<Record<string, FixtureIdentitySchema>>;
+    readonly conditionalRequiredNested?: readonly {
+        readonly when: (value: Record<string, unknown>) => boolean;
+        readonly nested: Readonly<Record<string, FixtureIdentitySchema>>;
+    }[];
     readonly items?: FixtureIdentitySchema;
     readonly nullable?: boolean;
 }
@@ -123,10 +127,12 @@ export const FIXTURE_SCHEMAS = {
     },
     candidateSummary: {
         required: LIFECYCLE_FIELDS,
-        requiredNested: {
-            candidatePolicy: { ...policySchema, nullable: true },
-            baselinePolicy: policySchema,
-        },
+        requiredNested: { baselinePolicy: policySchema },
+        nested: { candidatePolicy: { ...policySchema, nullable: true } },
+        conditionalRequiredNested: [{
+            when: (value) => value.status === "AVAILABLE" || value.accepted === true,
+            nested: { candidatePolicy: policySchema },
+        }],
     },
     frozenSet: {
         required: LIFECYCLE_FIELDS,
@@ -155,6 +161,15 @@ function validateSchema(value: unknown, schema: FixtureIdentitySchema, path: str
             throw new Error(`FIXTURE_NESTED_MISSING: ${path}.${key} is required by the fixture identity schema`);
         }
         validateSchema(value[key], nestedSchema, `${path}.${key}`);
+    }
+    for (const rule of schema.conditionalRequiredNested ?? []) {
+        if (!rule.when(value)) continue;
+        for (const [key, nestedSchema] of Object.entries(rule.nested)) {
+            if (!Object.prototype.hasOwnProperty.call(value, key)) {
+                throw new Error(`FIXTURE_NESTED_MISSING: ${path}.${key} is required by the conditional fixture identity schema`);
+            }
+            validateSchema(value[key], nestedSchema, `${path}.${key}`);
+        }
     }
     for (const [key, nestedSchema] of Object.entries(schema.nested ?? {})) {
         if (Object.prototype.hasOwnProperty.call(value, key)) validateSchema(value[key], nestedSchema, `${path}.${key}`);

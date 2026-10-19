@@ -238,10 +238,10 @@ test("rejects a candidate when any fixed gate fails instead of tuning the gate f
 });
 
 test("rejects an accepted candidate when its policy evidence is missing or does not match its identity", () => {
-    const missingPolicy = acceptCandidate(candidateSummary({ candidatePolicy: null }), baselineSummary(), gates());
-    assert.equal(missingPolicy.accepted, false);
-    assert.equal(missingPolicy.status, "REJECTED");
-    assert.match(missingPolicy.reason, /candidatePolicy/);
+    assert.throws(
+        () => candidateSummary({ candidatePolicy: null }),
+        /FIXTURE_IDENTITY_INVALID: policy\.candidateSummary\.candidatePolicy must be an object/,
+    );
 
     const policy = buildCandidateGrid("V12_V4_LONG", "LONG", baseline())[0];
     assert.ok(policy);

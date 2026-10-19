@@ -93,6 +93,8 @@ test("rejects omitted required nested fixture containers", () => {
     };
     const candidateSummary = {
         ...policy,
+        accepted: true,
+        status: "AVAILABLE",
         candidatePolicy: policy,
         baselinePolicy: policy,
     };
@@ -105,6 +107,17 @@ test("rejects omitted required nested fixture containers", () => {
     assert.throws(
         () => assertFixtureIdentity(candidateWithoutCandidatePolicy, FIXTURE_SCHEMAS.candidateSummary, "missing-candidate-policy"),
         /FIXTURE_NESTED_MISSING.*candidatePolicy/,
+    );
+    const notApplicableSummary = {
+        ...policy,
+        accepted: false,
+        status: "NOT_APPLICABLE",
+        baselinePolicy: policy,
+    };
+    assert.doesNotThrow(() => assertFixtureIdentity(notApplicableSummary, FIXTURE_SCHEMAS.candidateSummary, "not-applicable-without-candidate-policy"));
+    assert.throws(
+        () => assertFixtureIdentity({ ...notApplicableSummary, candidatePolicy: { ...policy, policyHash: "invalid" } }, FIXTURE_SCHEMAS.candidateSummary, "not-applicable-invalid-candidate-policy"),
+        /FIXTURE_HASH_INVALID.*candidatePolicy\.policyHash/,
     );
 
     const frozenSet = { ...policy, policies: [] };
