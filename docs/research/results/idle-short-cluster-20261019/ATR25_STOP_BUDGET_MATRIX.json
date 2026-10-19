@@ -1,0 +1,1542 @@
+{
+  "status": "ATR2_5_ADOPTED_FOR_RESEARCH_PROXY_ONLY__FORMAL_BT_BLOCKED_BY_MISSING_EVIDENCE",
+  "change_scope": "isolated research worktree; no LIVE/VPS or risk latch writes",
+  "selection": {
+    "atr_gate_pct": 2.5,
+    "atr_comparator_pct": 2.7,
+    "blanket_gross_cap": null,
+    "profit_locked_only_add_on": "CANDIDATE_NOT_ADOPTED",
+    "risk_budget_selection": "UNDETERMINED",
+    "ranking_policy_selection": "UNDETERMINED"
+  },
+  "source_sha256": {
+    "research/idle_priority_61_intents.json": "2262cc6b2433fb25c200eee399ad4135e76a40ecf654bf1b7b0eb7655aa8865d",
+    "research/idle_priority_61_target_net.json": "19a700170010d0c392fde05bc8c6a861cb59eb3e64eed596c1686556a7c711a0",
+    "research/idle_priority_393_generic_candidate_features.csv": "8dc3a7d2b532bec1007e6fa7447c09d43427693cfd4b4e7462907dd90eb312e7"
+  },
+  "baseline_atr25": {
+    "10bps": {
+      "trades": 58,
+      "wins": 47,
+      "win_rate_pct": 81.034,
+      "pf": 10.7619,
+      "weighted_sum_return_pct": 82.9454,
+      "mean_weighted_return_pct": 1.4301
+    },
+    "20bps": {
+      "trades": 58,
+      "wins": 47,
+      "win_rate_pct": 81.034,
+      "pf": 9.6637,
+      "weighted_sum_return_pct": 79.2454,
+      "mean_weighted_return_pct": 1.3663
+    },
+    "30bps": {
+      "trades": 58,
+      "wins": 46,
+      "win_rate_pct": 79.31,
+      "pf": 8.6576,
+      "weighted_sum_return_pct": 75.5454,
+      "mean_weighted_return_pct": 1.3025
+    },
+    "pre_may_2026": {
+      "trades": 42,
+      "wins": 34,
+      "win_rate_pct": 80.952,
+      "pf": 14.8019,
+      "weighted_sum_return_pct": 59.602,
+      "mean_weighted_return_pct": 1.4191
+    },
+    "may_2026_onward": {
+      "trades": 16,
+      "wins": 13,
+      "win_rate_pct": 81.25,
+      "pf": 6.5866,
+      "weighted_sum_return_pct": 23.3433,
+      "mean_weighted_return_pct": 1.459
+    },
+    "highest_open_gross": 2.25
+  },
+  "baseline_atr27_comparator": {
+    "10bps": {
+      "trades": 60,
+      "wins": 48,
+      "win_rate_pct": 80.0,
+      "pf": 9.9529,
+      "weighted_sum_return_pct": 82.6271,
+      "mean_weighted_return_pct": 1.3771
+    },
+    "20bps": {
+      "trades": 60,
+      "wins": 48,
+      "win_rate_pct": 80.0,
+      "pf": 8.9565,
+      "weighted_sum_return_pct": 78.8021,
+      "mean_weighted_return_pct": 1.3134
+    },
+    "30bps": {
+      "trades": 60,
+      "wins": 47,
+      "win_rate_pct": 78.333,
+      "pf": 8.0417,
+      "weighted_sum_return_pct": 74.9771,
+      "mean_weighted_return_pct": 1.2496
+    }
+  },
+  "atr25_stop_budget_proxy_6_cases": [
+    {
+      "atr_pct": 2.5,
+      "budget_pct": 15.0,
+      "adverse_gap_pct": 0.0,
+      "same_h1_priority": "frozen_symbol_order",
+      "one_per_h1": false,
+      "10bps": {
+        "trades": 54,
+        "wins": 44,
+        "win_rate_pct": 81.481,
+        "pf": 11.5833,
+        "weighted_sum_return_pct": 76.6163,
+        "mean_weighted_return_pct": 1.4188
+      },
+      "20bps": {
+        "trades": 54,
+        "wins": 44,
+        "win_rate_pct": 81.481,
+        "pf": 10.4124,
+        "weighted_sum_return_pct": 73.3163,
+        "mean_weighted_return_pct": 1.3577
+      },
+      "30bps": {
+        "trades": 54,
+        "wins": 43,
+        "win_rate_pct": 79.63,
+        "pf": 9.3275,
+        "weighted_sum_return_pct": 70.0163,
+        "mean_weighted_return_pct": 1.2966
+      },
+      "pre_may_2026": {
+        "trades": 38,
+        "wins": 31,
+        "win_rate_pct": 81.579,
+        "pf": 18.4046,
+        "weighted_sum_return_pct": 53.273,
+        "mean_weighted_return_pct": 1.4019
+      },
+      "may_2026_onward": {
+        "trades": 16,
+        "wins": 13,
+        "win_rate_pct": 81.25,
+        "pf": 6.5866,
+        "weighted_sum_return_pct": 23.3433,
+        "mean_weighted_return_pct": 1.459
+      },
+      "max_historical_open_gross": 1.25,
+      "max_nominal_at_stop_pct": 12.5,
+      "blocked_winners": 4,
+      "blocked_losers": 3,
+      "excluded": [
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1768798800000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": -1.25752
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1769702400000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": 1.8186
+        },
+        {
+          "symbol": "RENDERUSDT",
+          "entry_ts_ms": 1769893200000,
+          "reason": "ATR2_5_EXCEED",
+          "weighted_return_pct": -0.73224
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770325200000,
+          "reason": "ATR2_5_EXCEED",
+          "weighted_return_pct": 0.41398
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1770375600000,
+          "reason": "ATR2_5_EXCEED",
+          "weighted_return_pct": -6.44422
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770706800000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": 1.15378
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770750000000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": 4.61416
+        }
+      ],
+      "same_h1_diagnostics": []
+    },
+    {
+      "atr_pct": 2.5,
+      "budget_pct": 20.0,
+      "adverse_gap_pct": 0.0,
+      "same_h1_priority": "frozen_symbol_order",
+      "one_per_h1": false,
+      "10bps": {
+        "trades": 57,
+        "wins": 46,
+        "win_rate_pct": 80.702,
+        "pf": 10.6261,
+        "weighted_sum_return_pct": 81.7916,
+        "mean_weighted_return_pct": 1.4349
+      },
+      "20bps": {
+        "trades": 57,
+        "wins": 46,
+        "win_rate_pct": 80.702,
+        "pf": 9.5485,
+        "weighted_sum_return_pct": 78.1916,
+        "mean_weighted_return_pct": 1.3718
+      },
+      "30bps": {
+        "trades": 57,
+        "wins": 45,
+        "win_rate_pct": 78.947,
+        "pf": 8.5609,
+        "weighted_sum_return_pct": 74.5916,
+        "mean_weighted_return_pct": 1.3086
+      },
+      "pre_may_2026": {
+        "trades": 41,
+        "wins": 33,
+        "win_rate_pct": 80.488,
+        "pf": 14.5348,
+        "weighted_sum_return_pct": 58.4483,
+        "mean_weighted_return_pct": 1.4256
+      },
+      "may_2026_onward": {
+        "trades": 16,
+        "wins": 13,
+        "win_rate_pct": 81.25,
+        "pf": 6.5866,
+        "weighted_sum_return_pct": 23.3433,
+        "mean_weighted_return_pct": 1.459
+      },
+      "max_historical_open_gross": 2.0,
+      "max_nominal_at_stop_pct": 20.0,
+      "blocked_winners": 2,
+      "blocked_losers": 2,
+      "excluded": [
+        {
+          "symbol": "RENDERUSDT",
+          "entry_ts_ms": 1769893200000,
+          "reason": "ATR2_5_EXCEED",
+          "weighted_return_pct": -0.73224
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770325200000,
+          "reason": "ATR2_5_EXCEED",
+          "weighted_return_pct": 0.41398
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1770375600000,
+          "reason": "ATR2_5_EXCEED",
+          "weighted_return_pct": -6.44422
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770706800000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": 1.15378
+        }
+      ],
+      "same_h1_diagnostics": []
+    },
+    {
+      "atr_pct": 2.5,
+      "budget_pct": 15.0,
+      "adverse_gap_pct": 1.0,
+      "same_h1_priority": "frozen_symbol_order",
+      "one_per_h1": false,
+      "10bps": {
+        "trades": 54,
+        "wins": 44,
+        "win_rate_pct": 81.481,
+        "pf": 11.5833,
+        "weighted_sum_return_pct": 76.6163,
+        "mean_weighted_return_pct": 1.4188
+      },
+      "20bps": {
+        "trades": 54,
+        "wins": 44,
+        "win_rate_pct": 81.481,
+        "pf": 10.4124,
+        "weighted_sum_return_pct": 73.3163,
+        "mean_weighted_return_pct": 1.3577
+      },
+      "30bps": {
+        "trades": 54,
+        "wins": 43,
+        "win_rate_pct": 79.63,
+        "pf": 9.3275,
+        "weighted_sum_return_pct": 70.0163,
+        "mean_weighted_return_pct": 1.2966
+      },
+      "pre_may_2026": {
+        "trades": 38,
+        "wins": 31,
+        "win_rate_pct": 81.579,
+        "pf": 18.4046,
+        "weighted_sum_return_pct": 53.273,
+        "mean_weighted_return_pct": 1.4019
+      },
+      "may_2026_onward": {
+        "trades": 16,
+        "wins": 13,
+        "win_rate_pct": 81.25,
+        "pf": 6.5866,
+        "weighted_sum_return_pct": 23.3433,
+        "mean_weighted_return_pct": 1.459
+      },
+      "max_historical_open_gross": 1.25,
+      "max_nominal_at_stop_pct": 13.75,
+      "blocked_winners": 4,
+      "blocked_losers": 3,
+      "excluded": [
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1768798800000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": -1.25752
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1769702400000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": 1.8186
+        },
+        {
+          "symbol": "RENDERUSDT",
+          "entry_ts_ms": 1769893200000,
+          "reason": "ATR2_5_EXCEED",
+          "weighted_return_pct": -0.73224
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770325200000,
+          "reason": "ATR2_5_EXCEED",
+          "weighted_return_pct": 0.41398
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1770375600000,
+          "reason": "ATR2_5_EXCEED",
+          "weighted_return_pct": -6.44422
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770706800000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": 1.15378
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770750000000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": 4.61416
+        }
+      ],
+      "same_h1_diagnostics": []
+    },
+    {
+      "atr_pct": 2.5,
+      "budget_pct": 20.0,
+      "adverse_gap_pct": 1.0,
+      "same_h1_priority": "frozen_symbol_order",
+      "one_per_h1": false,
+      "10bps": {
+        "trades": 54,
+        "wins": 44,
+        "win_rate_pct": 81.481,
+        "pf": 11.5833,
+        "weighted_sum_return_pct": 76.6163,
+        "mean_weighted_return_pct": 1.4188
+      },
+      "20bps": {
+        "trades": 54,
+        "wins": 44,
+        "win_rate_pct": 81.481,
+        "pf": 10.4124,
+        "weighted_sum_return_pct": 73.3163,
+        "mean_weighted_return_pct": 1.3577
+      },
+      "30bps": {
+        "trades": 54,
+        "wins": 43,
+        "win_rate_pct": 79.63,
+        "pf": 9.3275,
+        "weighted_sum_return_pct": 70.0163,
+        "mean_weighted_return_pct": 1.2966
+      },
+      "pre_may_2026": {
+        "trades": 38,
+        "wins": 31,
+        "win_rate_pct": 81.579,
+        "pf": 18.4046,
+        "weighted_sum_return_pct": 53.273,
+        "mean_weighted_return_pct": 1.4019
+      },
+      "may_2026_onward": {
+        "trades": 16,
+        "wins": 13,
+        "win_rate_pct": 81.25,
+        "pf": 6.5866,
+        "weighted_sum_return_pct": 23.3433,
+        "mean_weighted_return_pct": 1.459
+      },
+      "max_historical_open_gross": 1.25,
+      "max_nominal_at_stop_pct": 13.75,
+      "blocked_winners": 4,
+      "blocked_losers": 3,
+      "excluded": [
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1768798800000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": -1.25752
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1769702400000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": 1.8186
+        },
+        {
+          "symbol": "RENDERUSDT",
+          "entry_ts_ms": 1769893200000,
+          "reason": "ATR2_5_EXCEED",
+          "weighted_return_pct": -0.73224
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770325200000,
+          "reason": "ATR2_5_EXCEED",
+          "weighted_return_pct": 0.41398
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1770375600000,
+          "reason": "ATR2_5_EXCEED",
+          "weighted_return_pct": -6.44422
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770706800000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": 1.15378
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770750000000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": 4.61416
+        }
+      ],
+      "same_h1_diagnostics": []
+    },
+    {
+      "atr_pct": 2.5,
+      "budget_pct": 15.0,
+      "adverse_gap_pct": 2.0,
+      "same_h1_priority": "frozen_symbol_order",
+      "one_per_h1": false,
+      "10bps": {
+        "trades": 54,
+        "wins": 44,
+        "win_rate_pct": 81.481,
+        "pf": 11.5833,
+        "weighted_sum_return_pct": 76.6163,
+        "mean_weighted_return_pct": 1.4188
+      },
+      "20bps": {
+        "trades": 54,
+        "wins": 44,
+        "win_rate_pct": 81.481,
+        "pf": 10.4124,
+        "weighted_sum_return_pct": 73.3163,
+        "mean_weighted_return_pct": 1.3577
+      },
+      "30bps": {
+        "trades": 54,
+        "wins": 43,
+        "win_rate_pct": 79.63,
+        "pf": 9.3275,
+        "weighted_sum_return_pct": 70.0163,
+        "mean_weighted_return_pct": 1.2966
+      },
+      "pre_may_2026": {
+        "trades": 38,
+        "wins": 31,
+        "win_rate_pct": 81.579,
+        "pf": 18.4046,
+        "weighted_sum_return_pct": 53.273,
+        "mean_weighted_return_pct": 1.4019
+      },
+      "may_2026_onward": {
+        "trades": 16,
+        "wins": 13,
+        "win_rate_pct": 81.25,
+        "pf": 6.5866,
+        "weighted_sum_return_pct": 23.3433,
+        "mean_weighted_return_pct": 1.459
+      },
+      "max_historical_open_gross": 1.25,
+      "max_nominal_at_stop_pct": 15.0,
+      "blocked_winners": 4,
+      "blocked_losers": 3,
+      "excluded": [
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1768798800000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": -1.25752
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1769702400000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": 1.8186
+        },
+        {
+          "symbol": "RENDERUSDT",
+          "entry_ts_ms": 1769893200000,
+          "reason": "ATR2_5_EXCEED",
+          "weighted_return_pct": -0.73224
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770325200000,
+          "reason": "ATR2_5_EXCEED",
+          "weighted_return_pct": 0.41398
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1770375600000,
+          "reason": "ATR2_5_EXCEED",
+          "weighted_return_pct": -6.44422
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770706800000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": 1.15378
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770750000000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": 4.61416
+        }
+      ],
+      "same_h1_diagnostics": []
+    },
+    {
+      "atr_pct": 2.5,
+      "budget_pct": 20.0,
+      "adverse_gap_pct": 2.0,
+      "same_h1_priority": "frozen_symbol_order",
+      "one_per_h1": false,
+      "10bps": {
+        "trades": 54,
+        "wins": 44,
+        "win_rate_pct": 81.481,
+        "pf": 11.5833,
+        "weighted_sum_return_pct": 76.6163,
+        "mean_weighted_return_pct": 1.4188
+      },
+      "20bps": {
+        "trades": 54,
+        "wins": 44,
+        "win_rate_pct": 81.481,
+        "pf": 10.4124,
+        "weighted_sum_return_pct": 73.3163,
+        "mean_weighted_return_pct": 1.3577
+      },
+      "30bps": {
+        "trades": 54,
+        "wins": 43,
+        "win_rate_pct": 79.63,
+        "pf": 9.3275,
+        "weighted_sum_return_pct": 70.0163,
+        "mean_weighted_return_pct": 1.2966
+      },
+      "pre_may_2026": {
+        "trades": 38,
+        "wins": 31,
+        "win_rate_pct": 81.579,
+        "pf": 18.4046,
+        "weighted_sum_return_pct": 53.273,
+        "mean_weighted_return_pct": 1.4019
+      },
+      "may_2026_onward": {
+        "trades": 16,
+        "wins": 13,
+        "win_rate_pct": 81.25,
+        "pf": 6.5866,
+        "weighted_sum_return_pct": 23.3433,
+        "mean_weighted_return_pct": 1.459
+      },
+      "max_historical_open_gross": 1.25,
+      "max_nominal_at_stop_pct": 15.0,
+      "blocked_winners": 4,
+      "blocked_losers": 3,
+      "excluded": [
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1768798800000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": -1.25752
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1769702400000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": 1.8186
+        },
+        {
+          "symbol": "RENDERUSDT",
+          "entry_ts_ms": 1769893200000,
+          "reason": "ATR2_5_EXCEED",
+          "weighted_return_pct": -0.73224
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770325200000,
+          "reason": "ATR2_5_EXCEED",
+          "weighted_return_pct": 0.41398
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1770375600000,
+          "reason": "ATR2_5_EXCEED",
+          "weighted_return_pct": -6.44422
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770706800000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": 1.15378
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770750000000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": 4.61416
+        }
+      ],
+      "same_h1_diagnostics": []
+    }
+  ],
+  "atr25_same_h1_one_per_hour_ranked_6_cases": [
+    {
+      "atr_pct": 2.5,
+      "budget_pct": 15.0,
+      "adverse_gap_pct": 0.0,
+      "same_h1_priority": "causal_proxy_rank",
+      "one_per_h1": true,
+      "10bps": {
+        "trades": 53,
+        "wins": 43,
+        "win_rate_pct": 81.132,
+        "pf": 11.5253,
+        "weighted_sum_return_pct": 76.1962,
+        "mean_weighted_return_pct": 1.4377
+      },
+      "20bps": {
+        "trades": 53,
+        "wins": 43,
+        "win_rate_pct": 81.132,
+        "pf": 10.3617,
+        "weighted_sum_return_pct": 72.9212,
+        "mean_weighted_return_pct": 1.3759
+      },
+      "30bps": {
+        "trades": 53,
+        "wins": 42,
+        "win_rate_pct": 79.245,
+        "pf": 9.2835,
+        "weighted_sum_return_pct": 69.6462,
+        "mean_weighted_return_pct": 1.3141
+      },
+      "pre_may_2026": {
+        "trades": 37,
+        "wins": 30,
+        "win_rate_pct": 81.081,
+        "pf": 18.2673,
+        "weighted_sum_return_pct": 52.8528,
+        "mean_weighted_return_pct": 1.4285
+      },
+      "may_2026_onward": {
+        "trades": 16,
+        "wins": 13,
+        "win_rate_pct": 81.25,
+        "pf": 6.5866,
+        "weighted_sum_return_pct": 23.3433,
+        "mean_weighted_return_pct": 1.459
+      },
+      "max_historical_open_gross": 1.25,
+      "max_nominal_at_stop_pct": 12.5,
+      "blocked_winners": 5,
+      "blocked_losers": 3,
+      "excluded": [
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1768798800000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": -1.25752
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1769702400000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": 1.8186
+        },
+        {
+          "symbol": "RENDERUSDT",
+          "entry_ts_ms": 1769893200000,
+          "reason": "ATR2_5_EXCEED",
+          "weighted_return_pct": -0.73224
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770325200000,
+          "reason": "ATR2_5_EXCEED",
+          "weighted_return_pct": 0.41398
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1770375600000,
+          "reason": "ATR2_5_EXCEED",
+          "weighted_return_pct": -6.44422
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770706800000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": 1.15378
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770750000000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": 4.61416
+        },
+        {
+          "symbol": "RENDERUSDT",
+          "entry_ts_ms": 1776538800000,
+          "reason": "SAME_H1_LOWER_RANK",
+          "weighted_return_pct": 0.42019
+        }
+      ],
+      "same_h1_diagnostics": [
+        {
+          "utc_h1": "2026-04-18T19:00:00+00:00",
+          "candidate_rank": [
+            {
+              "symbol": "TAOUSDT",
+              "route": "TAO_BREAKDOWN_SHORT_RELWEAK2",
+              "entry_ts_ms": 1776538800000,
+              "atr_pct": 1.1401,
+              "preentry_score": 3.8331981,
+              "prior_completed_trades": 7,
+              "prior_completed_mean_return_pct": 3.6134,
+              "has_calibrated_forward_ev": false,
+              "nominal_10pct_stop_risk_pct_of_wallet": 10.0,
+              "ranking_score_per_atr_risk": 3.2464865,
+              "rank": 1,
+              "ranking_basis": "PRIOR_COMPLETED_ROUTE_MEAN_IN_SAMPLE_NOT_CALIBRATED_EV"
+            },
+            {
+              "symbol": "RENDERUSDT",
+              "route": "RENDER_RELATIVE_SHORT",
+              "entry_ts_ms": 1776538800000,
+              "atr_pct": 0.9689,
+              "preentry_score": 3.9648965,
+              "prior_completed_trades": 11,
+              "prior_completed_mean_return_pct": 0.8453,
+              "has_calibrated_forward_ev": false,
+              "nominal_10pct_stop_risk_pct_of_wallet": 2.5,
+              "ranking_score_per_atr_risk": 2.1603247,
+              "rank": 2,
+              "ranking_basis": "PRIOR_COMPLETED_ROUTE_MEAN_IN_SAMPLE_NOT_CALIBRATED_EV"
+            }
+          ],
+          "historical_truth_used_for_priority": false
+        }
+      ]
+    },
+    {
+      "atr_pct": 2.5,
+      "budget_pct": 20.0,
+      "adverse_gap_pct": 0.0,
+      "same_h1_priority": "causal_proxy_rank",
+      "one_per_h1": true,
+      "10bps": {
+        "trades": 56,
+        "wins": 45,
+        "win_rate_pct": 80.357,
+        "pf": 10.5766,
+        "weighted_sum_return_pct": 81.3714,
+        "mean_weighted_return_pct": 1.4531
+      },
+      "20bps": {
+        "trades": 56,
+        "wins": 45,
+        "win_rate_pct": 80.357,
+        "pf": 9.5053,
+        "weighted_sum_return_pct": 77.7964,
+        "mean_weighted_return_pct": 1.3892
+      },
+      "30bps": {
+        "trades": 56,
+        "wins": 44,
+        "win_rate_pct": 78.571,
+        "pf": 8.5234,
+        "weighted_sum_return_pct": 74.2214,
+        "mean_weighted_return_pct": 1.3254
+      },
+      "pre_may_2026": {
+        "trades": 40,
+        "wins": 32,
+        "win_rate_pct": 80.0,
+        "pf": 14.4375,
+        "weighted_sum_return_pct": 58.0281,
+        "mean_weighted_return_pct": 1.4507
+      },
+      "may_2026_onward": {
+        "trades": 16,
+        "wins": 13,
+        "win_rate_pct": 81.25,
+        "pf": 6.5866,
+        "weighted_sum_return_pct": 23.3433,
+        "mean_weighted_return_pct": 1.459
+      },
+      "max_historical_open_gross": 2.0,
+      "max_nominal_at_stop_pct": 20.0,
+      "blocked_winners": 3,
+      "blocked_losers": 2,
+      "excluded": [
+        {
+          "symbol": "RENDERUSDT",
+          "entry_ts_ms": 1769893200000,
+          "reason": "ATR2_5_EXCEED",
+          "weighted_return_pct": -0.73224
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770325200000,
+          "reason": "ATR2_5_EXCEED",
+          "weighted_return_pct": 0.41398
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1770375600000,
+          "reason": "ATR2_5_EXCEED",
+          "weighted_return_pct": -6.44422
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770706800000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": 1.15378
+        },
+        {
+          "symbol": "RENDERUSDT",
+          "entry_ts_ms": 1776538800000,
+          "reason": "SAME_H1_LOWER_RANK",
+          "weighted_return_pct": 0.42019
+        }
+      ],
+      "same_h1_diagnostics": [
+        {
+          "utc_h1": "2026-04-18T19:00:00+00:00",
+          "candidate_rank": [
+            {
+              "symbol": "TAOUSDT",
+              "route": "TAO_BREAKDOWN_SHORT_RELWEAK2",
+              "entry_ts_ms": 1776538800000,
+              "atr_pct": 1.1401,
+              "preentry_score": 3.8331981,
+              "prior_completed_trades": 7,
+              "prior_completed_mean_return_pct": 3.6134,
+              "has_calibrated_forward_ev": false,
+              "nominal_10pct_stop_risk_pct_of_wallet": 10.0,
+              "ranking_score_per_atr_risk": 3.2464865,
+              "rank": 1,
+              "ranking_basis": "PRIOR_COMPLETED_ROUTE_MEAN_IN_SAMPLE_NOT_CALIBRATED_EV"
+            },
+            {
+              "symbol": "RENDERUSDT",
+              "route": "RENDER_RELATIVE_SHORT",
+              "entry_ts_ms": 1776538800000,
+              "atr_pct": 0.9689,
+              "preentry_score": 3.9648965,
+              "prior_completed_trades": 11,
+              "prior_completed_mean_return_pct": 0.8453,
+              "has_calibrated_forward_ev": false,
+              "nominal_10pct_stop_risk_pct_of_wallet": 2.5,
+              "ranking_score_per_atr_risk": 2.1603247,
+              "rank": 2,
+              "ranking_basis": "PRIOR_COMPLETED_ROUTE_MEAN_IN_SAMPLE_NOT_CALIBRATED_EV"
+            }
+          ],
+          "historical_truth_used_for_priority": false
+        }
+      ]
+    },
+    {
+      "atr_pct": 2.5,
+      "budget_pct": 15.0,
+      "adverse_gap_pct": 1.0,
+      "same_h1_priority": "causal_proxy_rank",
+      "one_per_h1": true,
+      "10bps": {
+        "trades": 53,
+        "wins": 43,
+        "win_rate_pct": 81.132,
+        "pf": 11.5253,
+        "weighted_sum_return_pct": 76.1962,
+        "mean_weighted_return_pct": 1.4377
+      },
+      "20bps": {
+        "trades": 53,
+        "wins": 43,
+        "win_rate_pct": 81.132,
+        "pf": 10.3617,
+        "weighted_sum_return_pct": 72.9212,
+        "mean_weighted_return_pct": 1.3759
+      },
+      "30bps": {
+        "trades": 53,
+        "wins": 42,
+        "win_rate_pct": 79.245,
+        "pf": 9.2835,
+        "weighted_sum_return_pct": 69.6462,
+        "mean_weighted_return_pct": 1.3141
+      },
+      "pre_may_2026": {
+        "trades": 37,
+        "wins": 30,
+        "win_rate_pct": 81.081,
+        "pf": 18.2673,
+        "weighted_sum_return_pct": 52.8528,
+        "mean_weighted_return_pct": 1.4285
+      },
+      "may_2026_onward": {
+        "trades": 16,
+        "wins": 13,
+        "win_rate_pct": 81.25,
+        "pf": 6.5866,
+        "weighted_sum_return_pct": 23.3433,
+        "mean_weighted_return_pct": 1.459
+      },
+      "max_historical_open_gross": 1.25,
+      "max_nominal_at_stop_pct": 13.75,
+      "blocked_winners": 5,
+      "blocked_losers": 3,
+      "excluded": [
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1768798800000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": -1.25752
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1769702400000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": 1.8186
+        },
+        {
+          "symbol": "RENDERUSDT",
+          "entry_ts_ms": 1769893200000,
+          "reason": "ATR2_5_EXCEED",
+          "weighted_return_pct": -0.73224
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770325200000,
+          "reason": "ATR2_5_EXCEED",
+          "weighted_return_pct": 0.41398
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1770375600000,
+          "reason": "ATR2_5_EXCEED",
+          "weighted_return_pct": -6.44422
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770706800000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": 1.15378
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770750000000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": 4.61416
+        },
+        {
+          "symbol": "RENDERUSDT",
+          "entry_ts_ms": 1776538800000,
+          "reason": "SAME_H1_LOWER_RANK",
+          "weighted_return_pct": 0.42019
+        }
+      ],
+      "same_h1_diagnostics": [
+        {
+          "utc_h1": "2026-04-18T19:00:00+00:00",
+          "candidate_rank": [
+            {
+              "symbol": "TAOUSDT",
+              "route": "TAO_BREAKDOWN_SHORT_RELWEAK2",
+              "entry_ts_ms": 1776538800000,
+              "atr_pct": 1.1401,
+              "preentry_score": 3.8331981,
+              "prior_completed_trades": 7,
+              "prior_completed_mean_return_pct": 3.6134,
+              "has_calibrated_forward_ev": false,
+              "nominal_10pct_stop_risk_pct_of_wallet": 10.0,
+              "ranking_score_per_atr_risk": 3.2464865,
+              "rank": 1,
+              "ranking_basis": "PRIOR_COMPLETED_ROUTE_MEAN_IN_SAMPLE_NOT_CALIBRATED_EV"
+            },
+            {
+              "symbol": "RENDERUSDT",
+              "route": "RENDER_RELATIVE_SHORT",
+              "entry_ts_ms": 1776538800000,
+              "atr_pct": 0.9689,
+              "preentry_score": 3.9648965,
+              "prior_completed_trades": 11,
+              "prior_completed_mean_return_pct": 0.8453,
+              "has_calibrated_forward_ev": false,
+              "nominal_10pct_stop_risk_pct_of_wallet": 2.5,
+              "ranking_score_per_atr_risk": 2.1603247,
+              "rank": 2,
+              "ranking_basis": "PRIOR_COMPLETED_ROUTE_MEAN_IN_SAMPLE_NOT_CALIBRATED_EV"
+            }
+          ],
+          "historical_truth_used_for_priority": false
+        }
+      ]
+    },
+    {
+      "atr_pct": 2.5,
+      "budget_pct": 20.0,
+      "adverse_gap_pct": 1.0,
+      "same_h1_priority": "causal_proxy_rank",
+      "one_per_h1": true,
+      "10bps": {
+        "trades": 53,
+        "wins": 43,
+        "win_rate_pct": 81.132,
+        "pf": 11.5253,
+        "weighted_sum_return_pct": 76.1962,
+        "mean_weighted_return_pct": 1.4377
+      },
+      "20bps": {
+        "trades": 53,
+        "wins": 43,
+        "win_rate_pct": 81.132,
+        "pf": 10.3617,
+        "weighted_sum_return_pct": 72.9212,
+        "mean_weighted_return_pct": 1.3759
+      },
+      "30bps": {
+        "trades": 53,
+        "wins": 42,
+        "win_rate_pct": 79.245,
+        "pf": 9.2835,
+        "weighted_sum_return_pct": 69.6462,
+        "mean_weighted_return_pct": 1.3141
+      },
+      "pre_may_2026": {
+        "trades": 37,
+        "wins": 30,
+        "win_rate_pct": 81.081,
+        "pf": 18.2673,
+        "weighted_sum_return_pct": 52.8528,
+        "mean_weighted_return_pct": 1.4285
+      },
+      "may_2026_onward": {
+        "trades": 16,
+        "wins": 13,
+        "win_rate_pct": 81.25,
+        "pf": 6.5866,
+        "weighted_sum_return_pct": 23.3433,
+        "mean_weighted_return_pct": 1.459
+      },
+      "max_historical_open_gross": 1.25,
+      "max_nominal_at_stop_pct": 13.75,
+      "blocked_winners": 5,
+      "blocked_losers": 3,
+      "excluded": [
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1768798800000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": -1.25752
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1769702400000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": 1.8186
+        },
+        {
+          "symbol": "RENDERUSDT",
+          "entry_ts_ms": 1769893200000,
+          "reason": "ATR2_5_EXCEED",
+          "weighted_return_pct": -0.73224
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770325200000,
+          "reason": "ATR2_5_EXCEED",
+          "weighted_return_pct": 0.41398
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1770375600000,
+          "reason": "ATR2_5_EXCEED",
+          "weighted_return_pct": -6.44422
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770706800000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": 1.15378
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770750000000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": 4.61416
+        },
+        {
+          "symbol": "RENDERUSDT",
+          "entry_ts_ms": 1776538800000,
+          "reason": "SAME_H1_LOWER_RANK",
+          "weighted_return_pct": 0.42019
+        }
+      ],
+      "same_h1_diagnostics": [
+        {
+          "utc_h1": "2026-04-18T19:00:00+00:00",
+          "candidate_rank": [
+            {
+              "symbol": "TAOUSDT",
+              "route": "TAO_BREAKDOWN_SHORT_RELWEAK2",
+              "entry_ts_ms": 1776538800000,
+              "atr_pct": 1.1401,
+              "preentry_score": 3.8331981,
+              "prior_completed_trades": 7,
+              "prior_completed_mean_return_pct": 3.6134,
+              "has_calibrated_forward_ev": false,
+              "nominal_10pct_stop_risk_pct_of_wallet": 10.0,
+              "ranking_score_per_atr_risk": 3.2464865,
+              "rank": 1,
+              "ranking_basis": "PRIOR_COMPLETED_ROUTE_MEAN_IN_SAMPLE_NOT_CALIBRATED_EV"
+            },
+            {
+              "symbol": "RENDERUSDT",
+              "route": "RENDER_RELATIVE_SHORT",
+              "entry_ts_ms": 1776538800000,
+              "atr_pct": 0.9689,
+              "preentry_score": 3.9648965,
+              "prior_completed_trades": 11,
+              "prior_completed_mean_return_pct": 0.8453,
+              "has_calibrated_forward_ev": false,
+              "nominal_10pct_stop_risk_pct_of_wallet": 2.5,
+              "ranking_score_per_atr_risk": 2.1603247,
+              "rank": 2,
+              "ranking_basis": "PRIOR_COMPLETED_ROUTE_MEAN_IN_SAMPLE_NOT_CALIBRATED_EV"
+            }
+          ],
+          "historical_truth_used_for_priority": false
+        }
+      ]
+    },
+    {
+      "atr_pct": 2.5,
+      "budget_pct": 15.0,
+      "adverse_gap_pct": 2.0,
+      "same_h1_priority": "causal_proxy_rank",
+      "one_per_h1": true,
+      "10bps": {
+        "trades": 53,
+        "wins": 43,
+        "win_rate_pct": 81.132,
+        "pf": 11.5253,
+        "weighted_sum_return_pct": 76.1962,
+        "mean_weighted_return_pct": 1.4377
+      },
+      "20bps": {
+        "trades": 53,
+        "wins": 43,
+        "win_rate_pct": 81.132,
+        "pf": 10.3617,
+        "weighted_sum_return_pct": 72.9212,
+        "mean_weighted_return_pct": 1.3759
+      },
+      "30bps": {
+        "trades": 53,
+        "wins": 42,
+        "win_rate_pct": 79.245,
+        "pf": 9.2835,
+        "weighted_sum_return_pct": 69.6462,
+        "mean_weighted_return_pct": 1.3141
+      },
+      "pre_may_2026": {
+        "trades": 37,
+        "wins": 30,
+        "win_rate_pct": 81.081,
+        "pf": 18.2673,
+        "weighted_sum_return_pct": 52.8528,
+        "mean_weighted_return_pct": 1.4285
+      },
+      "may_2026_onward": {
+        "trades": 16,
+        "wins": 13,
+        "win_rate_pct": 81.25,
+        "pf": 6.5866,
+        "weighted_sum_return_pct": 23.3433,
+        "mean_weighted_return_pct": 1.459
+      },
+      "max_historical_open_gross": 1.25,
+      "max_nominal_at_stop_pct": 15.0,
+      "blocked_winners": 5,
+      "blocked_losers": 3,
+      "excluded": [
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1768798800000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": -1.25752
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1769702400000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": 1.8186
+        },
+        {
+          "symbol": "RENDERUSDT",
+          "entry_ts_ms": 1769893200000,
+          "reason": "ATR2_5_EXCEED",
+          "weighted_return_pct": -0.73224
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770325200000,
+          "reason": "ATR2_5_EXCEED",
+          "weighted_return_pct": 0.41398
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1770375600000,
+          "reason": "ATR2_5_EXCEED",
+          "weighted_return_pct": -6.44422
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770706800000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": 1.15378
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770750000000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": 4.61416
+        },
+        {
+          "symbol": "RENDERUSDT",
+          "entry_ts_ms": 1776538800000,
+          "reason": "SAME_H1_LOWER_RANK",
+          "weighted_return_pct": 0.42019
+        }
+      ],
+      "same_h1_diagnostics": [
+        {
+          "utc_h1": "2026-04-18T19:00:00+00:00",
+          "candidate_rank": [
+            {
+              "symbol": "TAOUSDT",
+              "route": "TAO_BREAKDOWN_SHORT_RELWEAK2",
+              "entry_ts_ms": 1776538800000,
+              "atr_pct": 1.1401,
+              "preentry_score": 3.8331981,
+              "prior_completed_trades": 7,
+              "prior_completed_mean_return_pct": 3.6134,
+              "has_calibrated_forward_ev": false,
+              "nominal_10pct_stop_risk_pct_of_wallet": 10.0,
+              "ranking_score_per_atr_risk": 3.2464865,
+              "rank": 1,
+              "ranking_basis": "PRIOR_COMPLETED_ROUTE_MEAN_IN_SAMPLE_NOT_CALIBRATED_EV"
+            },
+            {
+              "symbol": "RENDERUSDT",
+              "route": "RENDER_RELATIVE_SHORT",
+              "entry_ts_ms": 1776538800000,
+              "atr_pct": 0.9689,
+              "preentry_score": 3.9648965,
+              "prior_completed_trades": 11,
+              "prior_completed_mean_return_pct": 0.8453,
+              "has_calibrated_forward_ev": false,
+              "nominal_10pct_stop_risk_pct_of_wallet": 2.5,
+              "ranking_score_per_atr_risk": 2.1603247,
+              "rank": 2,
+              "ranking_basis": "PRIOR_COMPLETED_ROUTE_MEAN_IN_SAMPLE_NOT_CALIBRATED_EV"
+            }
+          ],
+          "historical_truth_used_for_priority": false
+        }
+      ]
+    },
+    {
+      "atr_pct": 2.5,
+      "budget_pct": 20.0,
+      "adverse_gap_pct": 2.0,
+      "same_h1_priority": "causal_proxy_rank",
+      "one_per_h1": true,
+      "10bps": {
+        "trades": 53,
+        "wins": 43,
+        "win_rate_pct": 81.132,
+        "pf": 11.5253,
+        "weighted_sum_return_pct": 76.1962,
+        "mean_weighted_return_pct": 1.4377
+      },
+      "20bps": {
+        "trades": 53,
+        "wins": 43,
+        "win_rate_pct": 81.132,
+        "pf": 10.3617,
+        "weighted_sum_return_pct": 72.9212,
+        "mean_weighted_return_pct": 1.3759
+      },
+      "30bps": {
+        "trades": 53,
+        "wins": 42,
+        "win_rate_pct": 79.245,
+        "pf": 9.2835,
+        "weighted_sum_return_pct": 69.6462,
+        "mean_weighted_return_pct": 1.3141
+      },
+      "pre_may_2026": {
+        "trades": 37,
+        "wins": 30,
+        "win_rate_pct": 81.081,
+        "pf": 18.2673,
+        "weighted_sum_return_pct": 52.8528,
+        "mean_weighted_return_pct": 1.4285
+      },
+      "may_2026_onward": {
+        "trades": 16,
+        "wins": 13,
+        "win_rate_pct": 81.25,
+        "pf": 6.5866,
+        "weighted_sum_return_pct": 23.3433,
+        "mean_weighted_return_pct": 1.459
+      },
+      "max_historical_open_gross": 1.25,
+      "max_nominal_at_stop_pct": 15.0,
+      "blocked_winners": 5,
+      "blocked_losers": 3,
+      "excluded": [
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1768798800000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": -1.25752
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1769702400000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": 1.8186
+        },
+        {
+          "symbol": "RENDERUSDT",
+          "entry_ts_ms": 1769893200000,
+          "reason": "ATR2_5_EXCEED",
+          "weighted_return_pct": -0.73224
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770325200000,
+          "reason": "ATR2_5_EXCEED",
+          "weighted_return_pct": 0.41398
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1770375600000,
+          "reason": "ATR2_5_EXCEED",
+          "weighted_return_pct": -6.44422
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770706800000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": 1.15378
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770750000000,
+          "reason": "STOP_BUDGET_PROXY",
+          "weighted_return_pct": 4.61416
+        },
+        {
+          "symbol": "RENDERUSDT",
+          "entry_ts_ms": 1776538800000,
+          "reason": "SAME_H1_LOWER_RANK",
+          "weighted_return_pct": 0.42019
+        }
+      ],
+      "same_h1_diagnostics": [
+        {
+          "utc_h1": "2026-04-18T19:00:00+00:00",
+          "candidate_rank": [
+            {
+              "symbol": "TAOUSDT",
+              "route": "TAO_BREAKDOWN_SHORT_RELWEAK2",
+              "entry_ts_ms": 1776538800000,
+              "atr_pct": 1.1401,
+              "preentry_score": 3.8331981,
+              "prior_completed_trades": 7,
+              "prior_completed_mean_return_pct": 3.6134,
+              "has_calibrated_forward_ev": false,
+              "nominal_10pct_stop_risk_pct_of_wallet": 10.0,
+              "ranking_score_per_atr_risk": 3.2464865,
+              "rank": 1,
+              "ranking_basis": "PRIOR_COMPLETED_ROUTE_MEAN_IN_SAMPLE_NOT_CALIBRATED_EV"
+            },
+            {
+              "symbol": "RENDERUSDT",
+              "route": "RENDER_RELATIVE_SHORT",
+              "entry_ts_ms": 1776538800000,
+              "atr_pct": 0.9689,
+              "preentry_score": 3.9648965,
+              "prior_completed_trades": 11,
+              "prior_completed_mean_return_pct": 0.8453,
+              "has_calibrated_forward_ev": false,
+              "nominal_10pct_stop_risk_pct_of_wallet": 2.5,
+              "ranking_score_per_atr_risk": 2.1603247,
+              "rank": 2,
+              "ranking_basis": "PRIOR_COMPLETED_ROUTE_MEAN_IN_SAMPLE_NOT_CALIBRATED_EV"
+            }
+          ],
+          "historical_truth_used_for_priority": false
+        }
+      ]
+    }
+  ],
+  "same_h1_ranked_examples": [
+    {
+      "utc_h1": "2026-04-18T19:00:00+00:00",
+      "candidate_rank": [
+        {
+          "symbol": "TAOUSDT",
+          "route": "TAO_BREAKDOWN_SHORT_RELWEAK2",
+          "entry_ts_ms": 1776538800000,
+          "atr_pct": 1.1401,
+          "preentry_score": 3.8331981,
+          "prior_completed_trades": 7,
+          "prior_completed_mean_return_pct": 3.6134,
+          "has_calibrated_forward_ev": false,
+          "nominal_10pct_stop_risk_pct_of_wallet": 10.0,
+          "ranking_score_per_atr_risk": 3.2464865,
+          "rank": 1,
+          "ranking_basis": "PRIOR_COMPLETED_ROUTE_MEAN_IN_SAMPLE_NOT_CALIBRATED_EV"
+        },
+        {
+          "symbol": "RENDERUSDT",
+          "route": "RENDER_RELATIVE_SHORT",
+          "entry_ts_ms": 1776538800000,
+          "atr_pct": 0.9689,
+          "preentry_score": 3.9648965,
+          "prior_completed_trades": 11,
+          "prior_completed_mean_return_pct": 0.8453,
+          "has_calibrated_forward_ev": false,
+          "nominal_10pct_stop_risk_pct_of_wallet": 2.5,
+          "ranking_score_per_atr_risk": 2.1603247,
+          "rank": 2,
+          "ranking_basis": "PRIOR_COMPLETED_ROUTE_MEAN_IN_SAMPLE_NOT_CALIBRATED_EV"
+        }
+      ],
+      "historical_truth_used_for_priority": false
+    }
+  ],
+  "profit_protection": {
+    "eligibility": "requires net positive at signed verified resident STOP, full reduceOnly qty and reconcilable fees",
+    "historical_exposure_status": "UNKNOWN__NO_SIGNED_HISTORICAL_STOP_READBACK",
+    "hypothetical": [
+      {
+        "description": "SHORT100 currently95, STOP101",
+        "entry": 100,
+        "mark": 95,
+        "stop": 101,
+        "net_floor_bps_ex_fees": -100
+      },
+      {
+        "description": "SHORT100 currently95, STOP98",
+        "entry": 100,
+        "mark": 95,
+        "stop": 98,
+        "net_floor_bps_ex_fees": 200
+      }
+    ],
+    "historical_profit_protected_only_bt": null
+  },
+  "latency": [
+    {
+      "delay_min": 5,
+      "status": "UNCOMPUTABLE_WITH_FROZEN_H1_INTENTS",
+      "required": "venue-matched 5m (or finer) prices, quote spreads, order event clocks, signal validity, path STOP"
+    },
+    {
+      "delay_min": 10,
+      "status": "UNCOMPUTABLE_WITH_FROZEN_H1_INTENTS",
+      "required": "venue-matched 5m (or finer) prices, quote spreads, order event clocks, signal validity, path STOP"
+    },
+    {
+      "delay_min": 15,
+      "status": "UNCOMPUTABLE_WITH_FROZEN_H1_INTENTS",
+      "required": "venue-matched 5m (or finer) prices, quote spreads, order event clocks, signal validity, path STOP"
+    },
+    {
+      "delay_min": 30,
+      "status": "UNCOMPUTABLE_WITH_FROZEN_H1_INTENTS",
+      "required": "venue-matched 5m (or finer) prices, quote spreads, order event clocks, signal validity, path STOP"
+    }
+  ],
+  "integrated_v4_q102_hype_pengu_v52_fet_asset_and_dd": null,
+  "limitations": [
+    "Frozen accepted intents only: rejected Idle signals are not replaced by other strategies.",
+    "STOP budget proxy uses each position's original gross and uniform 10% STOP; never historical venue STOP.",
+    "RISK: no price path, mark-to-market equity, shared SHORT across runners or margin ownership.",
+    "Same-H1 rank feature score is an a priori heuristic, NOT statistical expected value;",
+    "Route prior completed outcome mean, where available, is from older realized trades only.",
+    "Missing 5m/cross-venue fills and signed STOP snapshots: latency and profit-locked variants are NOT backtested.",
+    "ATR2.5% was selected after inspecting the historical outlier; prospective/untouched validation needed.",
+    "Net-weighted return attribution IS NOT portfolio final wealth or max drawdown."
+  ]
+}

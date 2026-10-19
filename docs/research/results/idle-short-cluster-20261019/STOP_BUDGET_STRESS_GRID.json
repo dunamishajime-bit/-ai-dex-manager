@@ -1,0 +1,1740 @@
+{
+  "status": "RESEARCH_PROXY_ONLY_NOT_SIGNED_STOP_NOT_INTEGRATED_BT",
+  "head_sha": "4d422b5f54c6e0efb349d1906cf7d7168c3bd800",
+  "source_hashes": {
+    "research/idle_priority_61_intents.json": "2262cc6b2433fb25c200eee399ad4135e76a40ecf654bf1b7b0eb7655aa8865d",
+    "research/idle_priority_61_target_net.json": "19a700170010d0c392fde05bc8c6a861cb59eb3e64eed596c1686556a7c711a0",
+    "research/idle_priority_393_generic_candidate_features.csv": "8dc3a7d2b532bec1007e6fa7447c09d43427693cfd4b4e7462907dd90eb312e7"
+  },
+  "base": {
+    "trades": 61,
+    "wins": 48,
+    "win_rate_pct": 78.689,
+    "pf": 5.8607,
+    "weighted_sum_return_pct": 76.1829,
+    "mean_weighted_return_pct": 1.2489
+  },
+  "historical": [
+    {
+      "budget_pct": 10.0,
+      "gap_pct": 0.0,
+      "max_gross_proxy": 1.0,
+      "trades": 52,
+      "wins": 40,
+      "pf10": 5.008,
+      "sum10": 57.7782,
+      "sum20": 54.6782,
+      "sum30": 51.5782,
+      "historical_max_gross": 1.0,
+      "max_proxy_initial_stop_risk_pct": 10.0,
+      "excluded_winners": 8,
+      "excluded_losers": 1,
+      "excluded": [
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1768798800000,
+          "gross_weighted_10bps_return_pct": -1.2575,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1769702400000,
+          "gross_weighted_10bps_return_pct": 1.8186,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1770681600000,
+          "gross_weighted_10bps_return_pct": 4.1105,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770706800000,
+          "gross_weighted_10bps_return_pct": 1.1538,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1770724800000,
+          "gross_weighted_10bps_return_pct": 2.0978,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TIAUSDT",
+          "entry_ts_ms": 1773846000000,
+          "gross_weighted_10bps_return_pct": 2.8189,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1776538800000,
+          "gross_weighted_10bps_return_pct": 1.5726,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TIAUSDT",
+          "entry_ts_ms": 1779919200000,
+          "gross_weighted_10bps_return_pct": 5.5389,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "RENDERUSDT",
+          "entry_ts_ms": 1782633600000,
+          "gross_weighted_10bps_return_pct": 0.5512,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        }
+      ]
+    },
+    {
+      "budget_pct": 12.5,
+      "gap_pct": 0.0,
+      "max_gross_proxy": 1.25,
+      "trades": 57,
+      "wins": 45,
+      "pf10": 5.8456,
+      "sum10": 69.8539,
+      "sum20": 66.3289,
+      "sum30": 62.8039,
+      "historical_max_gross": 1.25,
+      "max_proxy_initial_stop_risk_pct": 12.5,
+      "excluded_winners": 3,
+      "excluded_losers": 1,
+      "excluded": [
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1768798800000,
+          "gross_weighted_10bps_return_pct": -1.2575,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1769702400000,
+          "gross_weighted_10bps_return_pct": 1.8186,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770706800000,
+          "gross_weighted_10bps_return_pct": 1.1538,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770750000000,
+          "gross_weighted_10bps_return_pct": 4.6142,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        }
+      ]
+    },
+    {
+      "budget_pct": 15.0,
+      "gap_pct": 0.0,
+      "max_gross_proxy": 1.5,
+      "trades": 57,
+      "wins": 45,
+      "pf10": 5.8456,
+      "sum10": 69.8539,
+      "sum20": 66.3289,
+      "sum30": 62.8039,
+      "historical_max_gross": 1.25,
+      "max_proxy_initial_stop_risk_pct": 12.5,
+      "excluded_winners": 3,
+      "excluded_losers": 1,
+      "excluded": [
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1768798800000,
+          "gross_weighted_10bps_return_pct": -1.2575,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1769702400000,
+          "gross_weighted_10bps_return_pct": 1.8186,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770706800000,
+          "gross_weighted_10bps_return_pct": 1.1538,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770750000000,
+          "gross_weighted_10bps_return_pct": 4.6142,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        }
+      ]
+    },
+    {
+      "budget_pct": 17.5,
+      "gap_pct": 0.0,
+      "max_gross_proxy": 1.75,
+      "trades": 57,
+      "wins": 45,
+      "pf10": 5.8456,
+      "sum10": 69.8539,
+      "sum20": 66.3289,
+      "sum30": 62.8039,
+      "historical_max_gross": 1.25,
+      "max_proxy_initial_stop_risk_pct": 12.5,
+      "excluded_winners": 3,
+      "excluded_losers": 1,
+      "excluded": [
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1768798800000,
+          "gross_weighted_10bps_return_pct": -1.2575,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1769702400000,
+          "gross_weighted_10bps_return_pct": 1.8186,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770706800000,
+          "gross_weighted_10bps_return_pct": 1.1538,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770750000000,
+          "gross_weighted_10bps_return_pct": 4.6142,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        }
+      ]
+    },
+    {
+      "budget_pct": 20.0,
+      "gap_pct": 0.0,
+      "max_gross_proxy": 2.0,
+      "trades": 60,
+      "wins": 47,
+      "pf10": 5.7871,
+      "sum10": 75.0291,
+      "sum20": 71.2041,
+      "sum30": 67.3791,
+      "historical_max_gross": 2.0,
+      "max_proxy_initial_stop_risk_pct": 20.0,
+      "excluded_winners": 1,
+      "excluded_losers": 0,
+      "excluded": [
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770706800000,
+          "gross_weighted_10bps_return_pct": 1.1538,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        }
+      ]
+    },
+    {
+      "budget_pct": 22.5,
+      "gap_pct": 0.0,
+      "max_gross_proxy": 2.25,
+      "trades": 61,
+      "wins": 48,
+      "pf10": 5.8607,
+      "sum10": 76.1829,
+      "sum20": 72.2579,
+      "sum30": 68.3329,
+      "historical_max_gross": 2.25,
+      "max_proxy_initial_stop_risk_pct": 22.5,
+      "excluded_winners": 0,
+      "excluded_losers": 0,
+      "excluded": []
+    },
+    {
+      "budget_pct": 10.0,
+      "gap_pct": 1.0,
+      "max_gross_proxy": 0.909091,
+      "trades": 29,
+      "wins": 22,
+      "pf10": 3.1482,
+      "sum10": 9.7547,
+      "sum20": 9.0297,
+      "sum30": 8.3047,
+      "historical_max_gross": 0.5,
+      "max_proxy_initial_stop_risk_pct": 5.5,
+      "excluded_winners": 26,
+      "excluded_losers": 6,
+      "excluded": [
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1768780800000,
+          "gross_weighted_10bps_return_pct": 4.2252,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1768798800000,
+          "gross_weighted_10bps_return_pct": -1.2575,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TIAUSDT",
+          "entry_ts_ms": 1769666400000,
+          "gross_weighted_10bps_return_pct": 9.5935,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1769702400000,
+          "gross_weighted_10bps_return_pct": 1.8186,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1769943600000,
+          "gross_weighted_10bps_return_pct": 1.4792,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770325200000,
+          "gross_weighted_10bps_return_pct": 0.414,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1770375600000,
+          "gross_weighted_10bps_return_pct": -6.4442,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1770580800000,
+          "gross_weighted_10bps_return_pct": 0.8352,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1770681600000,
+          "gross_weighted_10bps_return_pct": 4.1105,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770706800000,
+          "gross_weighted_10bps_return_pct": 1.1538,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1770724800000,
+          "gross_weighted_10bps_return_pct": 2.0978,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770750000000,
+          "gross_weighted_10bps_return_pct": 4.6142,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1771441200000,
+          "gross_weighted_10bps_return_pct": -0.2672,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1771833600000,
+          "gross_weighted_10bps_return_pct": 0.7929,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TIAUSDT",
+          "entry_ts_ms": 1772125200000,
+          "gross_weighted_10bps_return_pct": 2.2954,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TIAUSDT",
+          "entry_ts_ms": 1772820000000,
+          "gross_weighted_10bps_return_pct": 0.6378,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TIAUSDT",
+          "entry_ts_ms": 1772938800000,
+          "gross_weighted_10bps_return_pct": -0.036,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TIAUSDT",
+          "entry_ts_ms": 1773846000000,
+          "gross_weighted_10bps_return_pct": 2.8189,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1774494000000,
+          "gross_weighted_10bps_return_pct": 1.5329,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1775779200000,
+          "gross_weighted_10bps_return_pct": 13.3352,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1776538800000,
+          "gross_weighted_10bps_return_pct": 1.5726,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1779663600000,
+          "gross_weighted_10bps_return_pct": -1.6,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TIAUSDT",
+          "entry_ts_ms": 1779919200000,
+          "gross_weighted_10bps_return_pct": 5.5389,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1782615600000,
+          "gross_weighted_10bps_return_pct": 2.3782,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1782666000000,
+          "gross_weighted_10bps_return_pct": 1.2692,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1783537200000,
+          "gross_weighted_10bps_return_pct": 0.1315,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1783580400000,
+          "gross_weighted_10bps_return_pct": 2.4522,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1783886400000,
+          "gross_weighted_10bps_return_pct": 0.244,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TIAUSDT",
+          "entry_ts_ms": 1784206800000,
+          "gross_weighted_10bps_return_pct": 5.3518,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TIAUSDT",
+          "entry_ts_ms": 1784296800000,
+          "gross_weighted_10bps_return_pct": 6.119,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1784775600000,
+          "gross_weighted_10bps_return_pct": 0.7484,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TIAUSDT",
+          "entry_ts_ms": 1785297600000,
+          "gross_weighted_10bps_return_pct": -1.5277,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        }
+      ]
+    },
+    {
+      "budget_pct": 12.5,
+      "gap_pct": 1.0,
+      "max_gross_proxy": 1.136364,
+      "trades": 52,
+      "wins": 40,
+      "pf10": 5.008,
+      "sum10": 57.7782,
+      "sum20": 54.6782,
+      "sum30": 51.5782,
+      "historical_max_gross": 1.0,
+      "max_proxy_initial_stop_risk_pct": 11.0,
+      "excluded_winners": 8,
+      "excluded_losers": 1,
+      "excluded": [
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1768798800000,
+          "gross_weighted_10bps_return_pct": -1.2575,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1769702400000,
+          "gross_weighted_10bps_return_pct": 1.8186,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1770681600000,
+          "gross_weighted_10bps_return_pct": 4.1105,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770706800000,
+          "gross_weighted_10bps_return_pct": 1.1538,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1770724800000,
+          "gross_weighted_10bps_return_pct": 2.0978,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TIAUSDT",
+          "entry_ts_ms": 1773846000000,
+          "gross_weighted_10bps_return_pct": 2.8189,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1776538800000,
+          "gross_weighted_10bps_return_pct": 1.5726,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TIAUSDT",
+          "entry_ts_ms": 1779919200000,
+          "gross_weighted_10bps_return_pct": 5.5389,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "RENDERUSDT",
+          "entry_ts_ms": 1782633600000,
+          "gross_weighted_10bps_return_pct": 0.5512,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        }
+      ]
+    },
+    {
+      "budget_pct": 15.0,
+      "gap_pct": 1.0,
+      "max_gross_proxy": 1.363636,
+      "trades": 57,
+      "wins": 45,
+      "pf10": 5.8456,
+      "sum10": 69.8539,
+      "sum20": 66.3289,
+      "sum30": 62.8039,
+      "historical_max_gross": 1.25,
+      "max_proxy_initial_stop_risk_pct": 13.75,
+      "excluded_winners": 3,
+      "excluded_losers": 1,
+      "excluded": [
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1768798800000,
+          "gross_weighted_10bps_return_pct": -1.2575,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1769702400000,
+          "gross_weighted_10bps_return_pct": 1.8186,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770706800000,
+          "gross_weighted_10bps_return_pct": 1.1538,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770750000000,
+          "gross_weighted_10bps_return_pct": 4.6142,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        }
+      ]
+    },
+    {
+      "budget_pct": 17.5,
+      "gap_pct": 1.0,
+      "max_gross_proxy": 1.590909,
+      "trades": 57,
+      "wins": 45,
+      "pf10": 5.8456,
+      "sum10": 69.8539,
+      "sum20": 66.3289,
+      "sum30": 62.8039,
+      "historical_max_gross": 1.25,
+      "max_proxy_initial_stop_risk_pct": 13.75,
+      "excluded_winners": 3,
+      "excluded_losers": 1,
+      "excluded": [
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1768798800000,
+          "gross_weighted_10bps_return_pct": -1.2575,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1769702400000,
+          "gross_weighted_10bps_return_pct": 1.8186,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770706800000,
+          "gross_weighted_10bps_return_pct": 1.1538,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770750000000,
+          "gross_weighted_10bps_return_pct": 4.6142,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        }
+      ]
+    },
+    {
+      "budget_pct": 20.0,
+      "gap_pct": 1.0,
+      "max_gross_proxy": 1.818182,
+      "trades": 57,
+      "wins": 45,
+      "pf10": 5.8456,
+      "sum10": 69.8539,
+      "sum20": 66.3289,
+      "sum30": 62.8039,
+      "historical_max_gross": 1.25,
+      "max_proxy_initial_stop_risk_pct": 13.75,
+      "excluded_winners": 3,
+      "excluded_losers": 1,
+      "excluded": [
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1768798800000,
+          "gross_weighted_10bps_return_pct": -1.2575,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1769702400000,
+          "gross_weighted_10bps_return_pct": 1.8186,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770706800000,
+          "gross_weighted_10bps_return_pct": 1.1538,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770750000000,
+          "gross_weighted_10bps_return_pct": 4.6142,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        }
+      ]
+    },
+    {
+      "budget_pct": 22.5,
+      "gap_pct": 1.0,
+      "max_gross_proxy": 2.045455,
+      "trades": 60,
+      "wins": 47,
+      "pf10": 5.7871,
+      "sum10": 75.0291,
+      "sum20": 71.2041,
+      "sum30": 67.3791,
+      "historical_max_gross": 2.0,
+      "max_proxy_initial_stop_risk_pct": 22.0,
+      "excluded_winners": 1,
+      "excluded_losers": 0,
+      "excluded": [
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770706800000,
+          "gross_weighted_10bps_return_pct": 1.1538,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        }
+      ]
+    },
+    {
+      "budget_pct": 10.0,
+      "gap_pct": 2.0,
+      "max_gross_proxy": 0.833333,
+      "trades": 29,
+      "wins": 22,
+      "pf10": 3.1482,
+      "sum10": 9.7547,
+      "sum20": 9.0297,
+      "sum30": 8.3047,
+      "historical_max_gross": 0.5,
+      "max_proxy_initial_stop_risk_pct": 6.0,
+      "excluded_winners": 26,
+      "excluded_losers": 6,
+      "excluded": [
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1768780800000,
+          "gross_weighted_10bps_return_pct": 4.2252,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1768798800000,
+          "gross_weighted_10bps_return_pct": -1.2575,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TIAUSDT",
+          "entry_ts_ms": 1769666400000,
+          "gross_weighted_10bps_return_pct": 9.5935,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1769702400000,
+          "gross_weighted_10bps_return_pct": 1.8186,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1769943600000,
+          "gross_weighted_10bps_return_pct": 1.4792,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770325200000,
+          "gross_weighted_10bps_return_pct": 0.414,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1770375600000,
+          "gross_weighted_10bps_return_pct": -6.4442,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1770580800000,
+          "gross_weighted_10bps_return_pct": 0.8352,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1770681600000,
+          "gross_weighted_10bps_return_pct": 4.1105,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770706800000,
+          "gross_weighted_10bps_return_pct": 1.1538,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1770724800000,
+          "gross_weighted_10bps_return_pct": 2.0978,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770750000000,
+          "gross_weighted_10bps_return_pct": 4.6142,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1771441200000,
+          "gross_weighted_10bps_return_pct": -0.2672,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1771833600000,
+          "gross_weighted_10bps_return_pct": 0.7929,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TIAUSDT",
+          "entry_ts_ms": 1772125200000,
+          "gross_weighted_10bps_return_pct": 2.2954,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TIAUSDT",
+          "entry_ts_ms": 1772820000000,
+          "gross_weighted_10bps_return_pct": 0.6378,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TIAUSDT",
+          "entry_ts_ms": 1772938800000,
+          "gross_weighted_10bps_return_pct": -0.036,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TIAUSDT",
+          "entry_ts_ms": 1773846000000,
+          "gross_weighted_10bps_return_pct": 2.8189,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1774494000000,
+          "gross_weighted_10bps_return_pct": 1.5329,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1775779200000,
+          "gross_weighted_10bps_return_pct": 13.3352,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1776538800000,
+          "gross_weighted_10bps_return_pct": 1.5726,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1779663600000,
+          "gross_weighted_10bps_return_pct": -1.6,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TIAUSDT",
+          "entry_ts_ms": 1779919200000,
+          "gross_weighted_10bps_return_pct": 5.5389,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1782615600000,
+          "gross_weighted_10bps_return_pct": 2.3782,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1782666000000,
+          "gross_weighted_10bps_return_pct": 1.2692,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1783537200000,
+          "gross_weighted_10bps_return_pct": 0.1315,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1783580400000,
+          "gross_weighted_10bps_return_pct": 2.4522,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1783886400000,
+          "gross_weighted_10bps_return_pct": 0.244,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TIAUSDT",
+          "entry_ts_ms": 1784206800000,
+          "gross_weighted_10bps_return_pct": 5.3518,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TIAUSDT",
+          "entry_ts_ms": 1784296800000,
+          "gross_weighted_10bps_return_pct": 6.119,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1784775600000,
+          "gross_weighted_10bps_return_pct": 0.7484,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TIAUSDT",
+          "entry_ts_ms": 1785297600000,
+          "gross_weighted_10bps_return_pct": -1.5277,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        }
+      ]
+    },
+    {
+      "budget_pct": 12.5,
+      "gap_pct": 2.0,
+      "max_gross_proxy": 1.041667,
+      "trades": 52,
+      "wins": 40,
+      "pf10": 5.008,
+      "sum10": 57.7782,
+      "sum20": 54.6782,
+      "sum30": 51.5782,
+      "historical_max_gross": 1.0,
+      "max_proxy_initial_stop_risk_pct": 12.0,
+      "excluded_winners": 8,
+      "excluded_losers": 1,
+      "excluded": [
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1768798800000,
+          "gross_weighted_10bps_return_pct": -1.2575,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1769702400000,
+          "gross_weighted_10bps_return_pct": 1.8186,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1770681600000,
+          "gross_weighted_10bps_return_pct": 4.1105,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770706800000,
+          "gross_weighted_10bps_return_pct": 1.1538,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1770724800000,
+          "gross_weighted_10bps_return_pct": 2.0978,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TIAUSDT",
+          "entry_ts_ms": 1773846000000,
+          "gross_weighted_10bps_return_pct": 2.8189,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1776538800000,
+          "gross_weighted_10bps_return_pct": 1.5726,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TIAUSDT",
+          "entry_ts_ms": 1779919200000,
+          "gross_weighted_10bps_return_pct": 5.5389,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "RENDERUSDT",
+          "entry_ts_ms": 1782633600000,
+          "gross_weighted_10bps_return_pct": 0.5512,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        }
+      ]
+    },
+    {
+      "budget_pct": 15.0,
+      "gap_pct": 2.0,
+      "max_gross_proxy": 1.25,
+      "trades": 57,
+      "wins": 45,
+      "pf10": 5.8456,
+      "sum10": 69.8539,
+      "sum20": 66.3289,
+      "sum30": 62.8039,
+      "historical_max_gross": 1.25,
+      "max_proxy_initial_stop_risk_pct": 15.0,
+      "excluded_winners": 3,
+      "excluded_losers": 1,
+      "excluded": [
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1768798800000,
+          "gross_weighted_10bps_return_pct": -1.2575,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1769702400000,
+          "gross_weighted_10bps_return_pct": 1.8186,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770706800000,
+          "gross_weighted_10bps_return_pct": 1.1538,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770750000000,
+          "gross_weighted_10bps_return_pct": 4.6142,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        }
+      ]
+    },
+    {
+      "budget_pct": 17.5,
+      "gap_pct": 2.0,
+      "max_gross_proxy": 1.458333,
+      "trades": 57,
+      "wins": 45,
+      "pf10": 5.8456,
+      "sum10": 69.8539,
+      "sum20": 66.3289,
+      "sum30": 62.8039,
+      "historical_max_gross": 1.25,
+      "max_proxy_initial_stop_risk_pct": 15.0,
+      "excluded_winners": 3,
+      "excluded_losers": 1,
+      "excluded": [
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1768798800000,
+          "gross_weighted_10bps_return_pct": -1.2575,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1769702400000,
+          "gross_weighted_10bps_return_pct": 1.8186,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770706800000,
+          "gross_weighted_10bps_return_pct": 1.1538,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770750000000,
+          "gross_weighted_10bps_return_pct": 4.6142,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        }
+      ]
+    },
+    {
+      "budget_pct": 20.0,
+      "gap_pct": 2.0,
+      "max_gross_proxy": 1.666667,
+      "trades": 57,
+      "wins": 45,
+      "pf10": 5.8456,
+      "sum10": 69.8539,
+      "sum20": 66.3289,
+      "sum30": 62.8039,
+      "historical_max_gross": 1.25,
+      "max_proxy_initial_stop_risk_pct": 15.0,
+      "excluded_winners": 3,
+      "excluded_losers": 1,
+      "excluded": [
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1768798800000,
+          "gross_weighted_10bps_return_pct": -1.2575,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1769702400000,
+          "gross_weighted_10bps_return_pct": 1.8186,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770706800000,
+          "gross_weighted_10bps_return_pct": 1.1538,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770750000000,
+          "gross_weighted_10bps_return_pct": 4.6142,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        }
+      ]
+    },
+    {
+      "budget_pct": 22.5,
+      "gap_pct": 2.0,
+      "max_gross_proxy": 1.875,
+      "trades": 57,
+      "wins": 45,
+      "pf10": 5.8456,
+      "sum10": 69.8539,
+      "sum20": 66.3289,
+      "sum30": 62.8039,
+      "historical_max_gross": 1.25,
+      "max_proxy_initial_stop_risk_pct": 15.0,
+      "excluded_winners": 3,
+      "excluded_losers": 1,
+      "excluded": [
+        {
+          "symbol": "JUPUSDT",
+          "entry_ts_ms": 1768798800000,
+          "gross_weighted_10bps_return_pct": -1.2575,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1769702400000,
+          "gross_weighted_10bps_return_pct": 1.8186,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770706800000,
+          "gross_weighted_10bps_return_pct": 1.1538,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        },
+        {
+          "symbol": "TAOUSDT",
+          "entry_ts_ms": 1770750000000,
+          "gross_weighted_10bps_return_pct": 4.6142,
+          "reason": "IDLE_SHORT_BASKET_GROSS"
+        }
+      ]
+    }
+  ],
+  "oct19_scenario": {
+    "wallet_usdt_approx": 61.82,
+    "reported_pre_entry_unrealized_usdt": 0.055,
+    "signed_stop_prices_unknown": true,
+    "trade_lineage_pending": true,
+    "legs_initial_notional_usdt": {
+      "JUPUSDT": 6.1666,
+      "TAOUSDT": 61.71528,
+      "TIAUSDT": 61.2541
+    },
+    "stress": [
+      {
+        "stress_gap_pct": 0.0,
+        "all_notionals_usdt": 129.13598,
+        "all_three_nominal_stop_risk_usdt": 12.913598,
+        "all_three_nominal_stop_risk_pct": 20.889,
+        "decisions": [
+          {
+            "budget_pct": 10.0,
+            "order": [
+              "JUPUSDT",
+              "TAOUSDT",
+              "TIAUSDT"
+            ],
+            "allowed": [
+              "JUPUSDT"
+            ],
+            "blocked": [
+              "TAOUSDT",
+              "TIAUSDT"
+            ],
+            "admitted_nominal_risk_pct": 0.9975
+          },
+          {
+            "budget_pct": 10.0,
+            "order": [
+              "JUPUSDT",
+              "TIAUSDT",
+              "TAOUSDT"
+            ],
+            "allowed": [
+              "JUPUSDT"
+            ],
+            "blocked": [
+              "TIAUSDT",
+              "TAOUSDT"
+            ],
+            "admitted_nominal_risk_pct": 0.9975
+          },
+          {
+            "budget_pct": 12.5,
+            "order": [
+              "JUPUSDT",
+              "TAOUSDT",
+              "TIAUSDT"
+            ],
+            "allowed": [
+              "JUPUSDT",
+              "TAOUSDT"
+            ],
+            "blocked": [
+              "TIAUSDT"
+            ],
+            "admitted_nominal_risk_pct": 10.9806
+          },
+          {
+            "budget_pct": 12.5,
+            "order": [
+              "JUPUSDT",
+              "TIAUSDT",
+              "TAOUSDT"
+            ],
+            "allowed": [
+              "JUPUSDT",
+              "TIAUSDT"
+            ],
+            "blocked": [
+              "TAOUSDT"
+            ],
+            "admitted_nominal_risk_pct": 10.906
+          },
+          {
+            "budget_pct": 15.0,
+            "order": [
+              "JUPUSDT",
+              "TAOUSDT",
+              "TIAUSDT"
+            ],
+            "allowed": [
+              "JUPUSDT",
+              "TAOUSDT"
+            ],
+            "blocked": [
+              "TIAUSDT"
+            ],
+            "admitted_nominal_risk_pct": 10.9806
+          },
+          {
+            "budget_pct": 15.0,
+            "order": [
+              "JUPUSDT",
+              "TIAUSDT",
+              "TAOUSDT"
+            ],
+            "allowed": [
+              "JUPUSDT",
+              "TIAUSDT"
+            ],
+            "blocked": [
+              "TAOUSDT"
+            ],
+            "admitted_nominal_risk_pct": 10.906
+          },
+          {
+            "budget_pct": 17.5,
+            "order": [
+              "JUPUSDT",
+              "TAOUSDT",
+              "TIAUSDT"
+            ],
+            "allowed": [
+              "JUPUSDT",
+              "TAOUSDT"
+            ],
+            "blocked": [
+              "TIAUSDT"
+            ],
+            "admitted_nominal_risk_pct": 10.9806
+          },
+          {
+            "budget_pct": 17.5,
+            "order": [
+              "JUPUSDT",
+              "TIAUSDT",
+              "TAOUSDT"
+            ],
+            "allowed": [
+              "JUPUSDT",
+              "TIAUSDT"
+            ],
+            "blocked": [
+              "TAOUSDT"
+            ],
+            "admitted_nominal_risk_pct": 10.906
+          },
+          {
+            "budget_pct": 20.0,
+            "order": [
+              "JUPUSDT",
+              "TAOUSDT",
+              "TIAUSDT"
+            ],
+            "allowed": [
+              "JUPUSDT",
+              "TAOUSDT"
+            ],
+            "blocked": [
+              "TIAUSDT"
+            ],
+            "admitted_nominal_risk_pct": 10.9806
+          },
+          {
+            "budget_pct": 20.0,
+            "order": [
+              "JUPUSDT",
+              "TIAUSDT",
+              "TAOUSDT"
+            ],
+            "allowed": [
+              "JUPUSDT",
+              "TIAUSDT"
+            ],
+            "blocked": [
+              "TAOUSDT"
+            ],
+            "admitted_nominal_risk_pct": 10.906
+          },
+          {
+            "budget_pct": 22.5,
+            "order": [
+              "JUPUSDT",
+              "TAOUSDT",
+              "TIAUSDT"
+            ],
+            "allowed": [
+              "JUPUSDT",
+              "TAOUSDT",
+              "TIAUSDT"
+            ],
+            "blocked": [],
+            "admitted_nominal_risk_pct": 20.889
+          },
+          {
+            "budget_pct": 22.5,
+            "order": [
+              "JUPUSDT",
+              "TIAUSDT",
+              "TAOUSDT"
+            ],
+            "allowed": [
+              "JUPUSDT",
+              "TIAUSDT",
+              "TAOUSDT"
+            ],
+            "blocked": [],
+            "admitted_nominal_risk_pct": 20.889
+          }
+        ]
+      },
+      {
+        "stress_gap_pct": 1.0,
+        "all_notionals_usdt": 129.13598,
+        "all_three_nominal_stop_risk_usdt": 14.204958,
+        "all_three_nominal_stop_risk_pct": 22.9779,
+        "decisions": [
+          {
+            "budget_pct": 10.0,
+            "order": [
+              "JUPUSDT",
+              "TAOUSDT",
+              "TIAUSDT"
+            ],
+            "allowed": [
+              "JUPUSDT"
+            ],
+            "blocked": [
+              "TAOUSDT",
+              "TIAUSDT"
+            ],
+            "admitted_nominal_risk_pct": 1.0973
+          },
+          {
+            "budget_pct": 10.0,
+            "order": [
+              "JUPUSDT",
+              "TIAUSDT",
+              "TAOUSDT"
+            ],
+            "allowed": [
+              "JUPUSDT"
+            ],
+            "blocked": [
+              "TIAUSDT",
+              "TAOUSDT"
+            ],
+            "admitted_nominal_risk_pct": 1.0973
+          },
+          {
+            "budget_pct": 12.5,
+            "order": [
+              "JUPUSDT",
+              "TAOUSDT",
+              "TIAUSDT"
+            ],
+            "allowed": [
+              "JUPUSDT",
+              "TAOUSDT"
+            ],
+            "blocked": [
+              "TIAUSDT"
+            ],
+            "admitted_nominal_risk_pct": 12.0786
+          },
+          {
+            "budget_pct": 12.5,
+            "order": [
+              "JUPUSDT",
+              "TIAUSDT",
+              "TAOUSDT"
+            ],
+            "allowed": [
+              "JUPUSDT",
+              "TIAUSDT"
+            ],
+            "blocked": [
+              "TAOUSDT"
+            ],
+            "admitted_nominal_risk_pct": 11.9966
+          },
+          {
+            "budget_pct": 15.0,
+            "order": [
+              "JUPUSDT",
+              "TAOUSDT",
+              "TIAUSDT"
+            ],
+            "allowed": [
+              "JUPUSDT",
+              "TAOUSDT"
+            ],
+            "blocked": [
+              "TIAUSDT"
+            ],
+            "admitted_nominal_risk_pct": 12.0786
+          },
+          {
+            "budget_pct": 15.0,
+            "order": [
+              "JUPUSDT",
+              "TIAUSDT",
+              "TAOUSDT"
+            ],
+            "allowed": [
+              "JUPUSDT",
+              "TIAUSDT"
+            ],
+            "blocked": [
+              "TAOUSDT"
+            ],
+            "admitted_nominal_risk_pct": 11.9966
+          },
+          {
+            "budget_pct": 17.5,
+            "order": [
+              "JUPUSDT",
+              "TAOUSDT",
+              "TIAUSDT"
+            ],
+            "allowed": [
+              "JUPUSDT",
+              "TAOUSDT"
+            ],
+            "blocked": [
+              "TIAUSDT"
+            ],
+            "admitted_nominal_risk_pct": 12.0786
+          },
+          {
+            "budget_pct": 17.5,
+            "order": [
+              "JUPUSDT",
+              "TIAUSDT",
+              "TAOUSDT"
+            ],
+            "allowed": [
+              "JUPUSDT",
+              "TIAUSDT"
+            ],
+            "blocked": [
+              "TAOUSDT"
+            ],
+            "admitted_nominal_risk_pct": 11.9966
+          },
+          {
+            "budget_pct": 20.0,
+            "order": [
+              "JUPUSDT",
+              "TAOUSDT",
+              "TIAUSDT"
+            ],
+            "allowed": [
+              "JUPUSDT",
+              "TAOUSDT"
+            ],
+            "blocked": [
+              "TIAUSDT"
+            ],
+            "admitted_nominal_risk_pct": 12.0786
+          },
+          {
+            "budget_pct": 20.0,
+            "order": [
+              "JUPUSDT",
+              "TIAUSDT",
+              "TAOUSDT"
+            ],
+            "allowed": [
+              "JUPUSDT",
+              "TIAUSDT"
+            ],
+            "blocked": [
+              "TAOUSDT"
+            ],
+            "admitted_nominal_risk_pct": 11.9966
+          },
+          {
+            "budget_pct": 22.5,
+            "order": [
+              "JUPUSDT",
+              "TAOUSDT",
+              "TIAUSDT"
+            ],
+            "allowed": [
+              "JUPUSDT",
+              "TAOUSDT"
+            ],
+            "blocked": [
+              "TIAUSDT"
+            ],
+            "admitted_nominal_risk_pct": 12.0786
+          },
+          {
+            "budget_pct": 22.5,
+            "order": [
+              "JUPUSDT",
+              "TIAUSDT",
+              "TAOUSDT"
+            ],
+            "allowed": [
+              "JUPUSDT",
+              "TIAUSDT"
+            ],
+            "blocked": [
+              "TAOUSDT"
+            ],
+            "admitted_nominal_risk_pct": 11.9966
+          }
+        ]
+      },
+      {
+        "stress_gap_pct": 2.0,
+        "all_notionals_usdt": 129.13598,
+        "all_three_nominal_stop_risk_usdt": 15.496318,
+        "all_three_nominal_stop_risk_pct": 25.0668,
+        "decisions": [
+          {
+            "budget_pct": 10.0,
+            "order": [
+              "JUPUSDT",
+              "TAOUSDT",
+              "TIAUSDT"
+            ],
+            "allowed": [
+              "JUPUSDT"
+            ],
+            "blocked": [
+              "TAOUSDT",
+              "TIAUSDT"
+            ],
+            "admitted_nominal_risk_pct": 1.197
+          },
+          {
+            "budget_pct": 10.0,
+            "order": [
+              "JUPUSDT",
+              "TIAUSDT",
+              "TAOUSDT"
+            ],
+            "allowed": [
+              "JUPUSDT"
+            ],
+            "blocked": [
+              "TIAUSDT",
+              "TAOUSDT"
+            ],
+            "admitted_nominal_risk_pct": 1.197
+          },
+          {
+            "budget_pct": 12.5,
+            "order": [
+              "JUPUSDT",
+              "TAOUSDT",
+              "TIAUSDT"
+            ],
+            "allowed": [
+              "JUPUSDT"
+            ],
+            "blocked": [
+              "TAOUSDT",
+              "TIAUSDT"
+            ],
+            "admitted_nominal_risk_pct": 1.197
+          },
+          {
+            "budget_pct": 12.5,
+            "order": [
+              "JUPUSDT",
+              "TIAUSDT",
+              "TAOUSDT"
+            ],
+            "allowed": [
+              "JUPUSDT"
+            ],
+            "blocked": [
+              "TIAUSDT",
+              "TAOUSDT"
+            ],
+            "admitted_nominal_risk_pct": 1.197
+          },
+          {
+            "budget_pct": 15.0,
+            "order": [
+              "JUPUSDT",
+              "TAOUSDT",
+              "TIAUSDT"
+            ],
+            "allowed": [
+              "JUPUSDT",
+              "TAOUSDT"
+            ],
+            "blocked": [
+              "TIAUSDT"
+            ],
+            "admitted_nominal_risk_pct": 13.1767
+          },
+          {
+            "budget_pct": 15.0,
+            "order": [
+              "JUPUSDT",
+              "TIAUSDT",
+              "TAOUSDT"
+            ],
+            "allowed": [
+              "JUPUSDT",
+              "TIAUSDT"
+            ],
+            "blocked": [
+              "TAOUSDT"
+            ],
+            "admitted_nominal_risk_pct": 13.0872
+          },
+          {
+            "budget_pct": 17.5,
+            "order": [
+              "JUPUSDT",
+              "TAOUSDT",
+              "TIAUSDT"
+            ],
+            "allowed": [
+              "JUPUSDT",
+              "TAOUSDT"
+            ],
+            "blocked": [
+              "TIAUSDT"
+            ],
+            "admitted_nominal_risk_pct": 13.1767
+          },
+          {
+            "budget_pct": 17.5,
+            "order": [
+              "JUPUSDT",
+              "TIAUSDT",
+              "TAOUSDT"
+            ],
+            "allowed": [
+              "JUPUSDT",
+              "TIAUSDT"
+            ],
+            "blocked": [
+              "TAOUSDT"
+            ],
+            "admitted_nominal_risk_pct": 13.0872
+          },
+          {
+            "budget_pct": 20.0,
+            "order": [
+              "JUPUSDT",
+              "TAOUSDT",
+              "TIAUSDT"
+            ],
+            "allowed": [
+              "JUPUSDT",
+              "TAOUSDT"
+            ],
+            "blocked": [
+              "TIAUSDT"
+            ],
+            "admitted_nominal_risk_pct": 13.1767
+          },
+          {
+            "budget_pct": 20.0,
+            "order": [
+              "JUPUSDT",
+              "TIAUSDT",
+              "TAOUSDT"
+            ],
+            "allowed": [
+              "JUPUSDT",
+              "TIAUSDT"
+            ],
+            "blocked": [
+              "TAOUSDT"
+            ],
+            "admitted_nominal_risk_pct": 13.0872
+          },
+          {
+            "budget_pct": 22.5,
+            "order": [
+              "JUPUSDT",
+              "TAOUSDT",
+              "TIAUSDT"
+            ],
+            "allowed": [
+              "JUPUSDT",
+              "TAOUSDT"
+            ],
+            "blocked": [
+              "TIAUSDT"
+            ],
+            "admitted_nominal_risk_pct": 13.1767
+          },
+          {
+            "budget_pct": 22.5,
+            "order": [
+              "JUPUSDT",
+              "TIAUSDT",
+              "TAOUSDT"
+            ],
+            "allowed": [
+              "JUPUSDT",
+              "TIAUSDT"
+            ],
+            "blocked": [
+              "TAOUSDT"
+            ],
+            "admitted_nominal_risk_pct": 13.0872
+          }
+        ]
+      }
+    ]
+  },
+  "limitations": [
+    "Frozen historical accepted-intent replay; no alternate baseline re-admission",
+    "Risk proxy uses original notional and assumed 10% price STOP, not actual resident STOP or live mark",
+    "No actual fees, slippage distribution, partial fills or correlation-adjusted stress",
+    "No historical locked-profit, opening/closing hourly MTM marks, current-V4 portfolio DD",
+    "Oct-19 event illustrative only, not venue-confirmed order lineage"
+  ]
+}
