@@ -1,0 +1,679 @@
+{
+  "case": "ATR_BUDGET20_PARTIAL_GAP2_OTHERSTOP15",
+  "cost_bps": 30,
+  "source": "2026-10-17 latest frozen H1 8-strategy portfolio + 5m Q102/HYPE/Idle overlays",
+  "case_config": {
+    "basket": true,
+    "partial": true,
+    "gap_pct": 2,
+    "other_stop_pct": 15
+  },
+  "research_only": true,
+  "model_limitations": [
+    "Other-runner historical resident STOPs unknown. Non-Idle SHORT assumed a static initial STOP at other_stop_pct of entry, with no profit locking.",
+    "Idle resident STOP assumed initial 10%, with 0-2% adverse gap and roundtrip 10bps assumed in new-order loss budget; physical STOP fills are NOT replayed.",
+    "Only Idle admission and size change; all eight source engine candidate/exits otherwise unchanged.",
+    "H1 atomic simulator has no actual pending async order reservation, venue signatures, margin orders or account-lock latency.",
+    "In-sample public market M5 normalized on historical Aster H1; not Aster tick execution.",
+    "No exact current trading LIVE certification or 2026-Oct19 updated entry signatures."
+  ],
+  "final_jpy": 82333709.7523952,
+  "max_dd_pct": -16.7848,
+  "pf": 2.4371905147018746,
+  "win_pct": 68.807,
+  "trades": 1308,
+  "accounting": "PASS",
+  "trade_counts": {
+    "FET": 8,
+    "HYPE_LONG": 36,
+    "IDLE": 69,
+    "PENGU": 67,
+    "Q102": 181,
+    "RESIDUAL": 30,
+    "V12": 830,
+    "V52": 87
+  },
+  "baseline_jpy": 124289206.81827945,
+  "baseline_dd_pct": -16.78776877493442,
+  "delta_jpy": -41955497.06588425,
+  "dd_improvement_pp": 0.0029687749344198266,
+  "idle_trades": 69,
+  "idle_trade_details": [
+    {
+      "symbol": "DOTUSDT",
+      "entry_ts_ms": 1755489600000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24874953544887868,
+      "side": "SHORT",
+      "pnl": 0.5040891599999984,
+      "exit_ts_ms": 1755576000000
+    },
+    {
+      "symbol": "DOTUSDT",
+      "entry_ts_ms": 1756461600000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24801259964883227,
+      "side": "SHORT",
+      "pnl": 0.06027448000000196,
+      "exit_ts_ms": 1756548000000
+    },
+    {
+      "symbol": "DOTUSDT",
+      "entry_ts_ms": 1758290400000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24917505537974402,
+      "side": "SHORT",
+      "pnl": 0.9013536767131758,
+      "exit_ts_ms": 1758346500000
+    },
+    {
+      "symbol": "DOTUSDT",
+      "entry_ts_ms": 1759867200000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24822670871479238,
+      "side": "SHORT",
+      "pnl": -0.9719794200000051,
+      "exit_ts_ms": 1759953600000
+    },
+    {
+      "symbol": "DOTUSDT",
+      "entry_ts_ms": 1760241600000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24957955727998832,
+      "side": "SHORT",
+      "pnl": -7.200499190000006,
+      "exit_ts_ms": 1760302800000
+    },
+    {
+      "symbol": "DOTUSDT",
+      "entry_ts_ms": 1760436000000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.2494807626022701,
+      "side": "SHORT",
+      "pnl": -2.738643770000002,
+      "exit_ts_ms": 1760522400000
+    },
+    {
+      "symbol": "DOTUSDT",
+      "entry_ts_ms": 1760713200000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24975160632378693,
+      "side": "SHORT",
+      "pnl": -1.3886335586680074,
+      "exit_ts_ms": 1760799600000
+    },
+    {
+      "symbol": "DOTUSDT",
+      "entry_ts_ms": 1763056800000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24995191479552412,
+      "side": "SHORT",
+      "pnl": 3.9479967200839328,
+      "exit_ts_ms": 1763072100000
+    },
+    {
+      "symbol": "DOTUSDT",
+      "entry_ts_ms": 1763323200000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.2498090037966439,
+      "side": "SHORT",
+      "pnl": 13.157541090540041,
+      "exit_ts_ms": 1763409600000
+    },
+    {
+      "symbol": "DOTUSDT",
+      "entry_ts_ms": 1763413200000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24998598143405024,
+      "side": "SHORT",
+      "pnl": -13.876610786749982,
+      "exit_ts_ms": 1763499600000
+    },
+    {
+      "symbol": "DOTUSDT",
+      "entry_ts_ms": 1763578800000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24988958079604148,
+      "side": "SHORT",
+      "pnl": 10.473865518724011,
+      "exit_ts_ms": 1763665200000
+    },
+    {
+      "symbol": "TAOUSDT",
+      "entry_ts_ms": 1768784400000,
+      "requested_gross": 0.839120725347382,
+      "accepted_gross": 0.8391087306466961,
+      "side": "SHORT",
+      "pnl": 0.8215720144884013,
+      "exit_ts_ms": 1768827600000
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "entry_ts_ms": 1768831200000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24998070811932135,
+      "side": "SHORT",
+      "pnl": -29.874267409280023,
+      "exit_ts_ms": 1768874400000
+    },
+    {
+      "symbol": "TAOUSDT",
+      "entry_ts_ms": 1768928400000,
+      "requested_gross": 0.5776364513431884,
+      "accepted_gross": 0.5776036350020882,
+      "side": "SHORT",
+      "pnl": -48.62613522562914,
+      "exit_ts_ms": 1768971600000
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "entry_ts_ms": 1769097600000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24998893634378155,
+      "side": "SHORT",
+      "pnl": -82.58437332514796,
+      "exit_ts_ms": 1769140800000
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "entry_ts_ms": 1769230800000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.2499804800443781,
+      "side": "SHORT",
+      "pnl": 8.389084795282127,
+      "exit_ts_ms": 1769274000000
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "entry_ts_ms": 1769274000000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.2499700501126154,
+      "side": "SHORT",
+      "pnl": 4.3748978633193705,
+      "exit_ts_ms": 1769317200000
+    },
+    {
+      "symbol": "TIAUSDT",
+      "entry_ts_ms": 1769666400000,
+      "requested_gross": 1.0,
+      "accepted_gross": 0.9999967532741124,
+      "side": "SHORT",
+      "pnl": 635.8571373000702,
+      "exit_ts_ms": 1769752800000
+    },
+    {
+      "symbol": "DOTUSDT",
+      "entry_ts_ms": 1769896800000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.2499988108328335,
+      "side": "SHORT",
+      "pnl": 19.55494059000002,
+      "exit_ts_ms": 1769983200000
+    },
+    {
+      "symbol": "DOTUSDT",
+      "entry_ts_ms": 1769990400000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24998565261549952,
+      "side": "SHORT",
+      "pnl": -96.52263255666588,
+      "exit_ts_ms": 1770076800000
+    },
+    {
+      "symbol": "JUPUSDT",
+      "entry_ts_ms": 1770573600000,
+      "requested_gross": 0.4103070568932918,
+      "accepted_gross": 0.41030176245798883,
+      "side": "SHORT",
+      "pnl": -31.756626210670518,
+      "exit_ts_ms": 1770616800000
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "entry_ts_ms": 1770638400000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24999731619062193,
+      "side": "SHORT",
+      "pnl": -117.3965584275001,
+      "exit_ts_ms": 1770681600000
+    },
+    {
+      "symbol": "JUPUSDT",
+      "entry_ts_ms": 1770645600000,
+      "requested_gross": 0.8998351513727245,
+      "accepted_gross": 0.7540071011520242,
+      "side": "SHORT",
+      "pnl": -26.702537828736446,
+      "exit_ts_ms": 1770688800000
+    },
+    {
+      "symbol": "TAOUSDT",
+      "entry_ts_ms": 1771441200000,
+      "requested_gross": 1.0,
+      "accepted_gross": 0.9999973036459093,
+      "side": "SHORT",
+      "pnl": -97.26531475317245,
+      "exit_ts_ms": 1771484400000
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "entry_ts_ms": 1771513200000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.2499931339858446,
+      "side": "SHORT",
+      "pnl": -183.53672480492776,
+      "exit_ts_ms": 1771556400000
+    },
+    {
+      "symbol": "JUPUSDT",
+      "entry_ts_ms": 1771524000000,
+      "requested_gross": 1.0,
+      "accepted_gross": 0.7508556280958913,
+      "side": "SHORT",
+      "pnl": -297.34336479973024,
+      "exit_ts_ms": 1771567200000
+    },
+    {
+      "symbol": "JUPUSDT",
+      "entry_ts_ms": 1771833600000,
+      "requested_gross": 1.0,
+      "accepted_gross": 0.9999981446786578,
+      "side": "SHORT",
+      "pnl": 109.00177536153541,
+      "exit_ts_ms": 1771876800000
+    },
+    {
+      "symbol": "TIAUSDT",
+      "entry_ts_ms": 1772125200000,
+      "requested_gross": 1.0,
+      "accepted_gross": 0.99999136575125,
+      "side": "SHORT",
+      "pnl": 576.620121740157,
+      "exit_ts_ms": 1772211600000
+    },
+    {
+      "symbol": "DOTUSDT",
+      "entry_ts_ms": 1772460000000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24999958588234458,
+      "side": "SHORT",
+      "pnl": 86.4873190618435,
+      "exit_ts_ms": 1772546400000
+    },
+    {
+      "symbol": "DOTUSDT",
+      "entry_ts_ms": 1772917200000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24999804664431355,
+      "side": "SHORT",
+      "pnl": -177.90759667720812,
+      "exit_ts_ms": 1773003600000
+    },
+    {
+      "symbol": "TIAUSDT",
+      "entry_ts_ms": 1772938800000,
+      "requested_gross": 1.0,
+      "accepted_gross": 0.7503147710255709,
+      "side": "SHORT",
+      "pnl": -90.1358991546085,
+      "exit_ts_ms": 1773025200000
+    },
+    {
+      "symbol": "DOTUSDT",
+      "entry_ts_ms": 1774170000000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24999884800308683,
+      "side": "SHORT",
+      "pnl": 291.35682904233926,
+      "exit_ts_ms": 1774218300000
+    },
+    {
+      "symbol": "JUPUSDT",
+      "entry_ts_ms": 1774494000000,
+      "requested_gross": 1.0,
+      "accepted_gross": 0.9999982439234977,
+      "side": "SHORT",
+      "pnl": 805.3850307932029,
+      "exit_ts_ms": 1774537200000
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "entry_ts_ms": 1776034800000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24999914375231205,
+      "side": "SHORT",
+      "pnl": 347.21746312499926,
+      "exit_ts_ms": 1776078000000
+    },
+    {
+      "symbol": "DOTUSDT",
+      "entry_ts_ms": 1776067200000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24999884116983173,
+      "side": "SHORT",
+      "pnl": -126.60420301315199,
+      "exit_ts_ms": 1776153600000
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "entry_ts_ms": 1776168000000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.2499987193437752,
+      "side": "SHORT",
+      "pnl": 443.766696374998,
+      "exit_ts_ms": 1776211200000
+    },
+    {
+      "symbol": "TAOUSDT",
+      "entry_ts_ms": 1776186000000,
+      "requested_gross": 0.45365640247586625,
+      "accepted_gross": 0.4536537725417735,
+      "side": "SHORT",
+      "pnl": -1083.578281031,
+      "exit_ts_ms": 1776229200000
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "entry_ts_ms": 1776214800000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24999881770848015,
+      "side": "SHORT",
+      "pnl": -604.4987022399993,
+      "exit_ts_ms": 1776258000000
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "entry_ts_ms": 1776362400000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.2499988876733376,
+      "side": "SHORT",
+      "pnl": 70.7318081150001,
+      "exit_ts_ms": 1776405600000
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "entry_ts_ms": 1776513600000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.2499984081267479,
+      "side": "SHORT",
+      "pnl": 474.9161497475005,
+      "exit_ts_ms": 1776556800000
+    },
+    {
+      "symbol": "TAOUSDT",
+      "entry_ts_ms": 1776538800000,
+      "requested_gross": 0.7338252147217081,
+      "accepted_gross": 0.7338250372893868,
+      "side": "SHORT",
+      "pnl": 796.352111361751,
+      "exit_ts_ms": 1776582000000
+    },
+    {
+      "symbol": "JUPUSDT",
+      "entry_ts_ms": 1777521600000,
+      "requested_gross": 1.0,
+      "accepted_gross": 0.9999994888946487,
+      "side": "SHORT",
+      "pnl": 1342.2055207300043,
+      "exit_ts_ms": 1777564800000
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "entry_ts_ms": 1779516000000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24999876009563365,
+      "side": "SHORT",
+      "pnl": 697.899682373681,
+      "exit_ts_ms": 1779528900000
+    },
+    {
+      "symbol": "DOTUSDT",
+      "entry_ts_ms": 1779498000000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24999999413433677,
+      "side": "SHORT",
+      "pnl": 888.9549893667353,
+      "exit_ts_ms": 1779541200000
+    },
+    {
+      "symbol": "JUPUSDT",
+      "entry_ts_ms": 1779526800000,
+      "requested_gross": 1.0,
+      "accepted_gross": 0.5181383788730122,
+      "side": "SHORT",
+      "pnl": -7913.676877170004,
+      "exit_ts_ms": 1779570000000
+    },
+    {
+      "symbol": "JUPUSDT",
+      "entry_ts_ms": 1779663600000,
+      "requested_gross": 1.0,
+      "accepted_gross": 0.9999991798459229,
+      "side": "SHORT",
+      "pnl": -2848.3607237200026,
+      "exit_ts_ms": 1779706800000
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "entry_ts_ms": 1779876000000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.2499992465124699,
+      "side": "SHORT",
+      "pnl": 1225.2505027549992,
+      "exit_ts_ms": 1779919200000
+    },
+    {
+      "symbol": "TAOUSDT",
+      "entry_ts_ms": 1779933600000,
+      "requested_gross": 1.0,
+      "accepted_gross": 0.9999998869302311,
+      "side": "SHORT",
+      "pnl": 3653.700731437324,
+      "exit_ts_ms": 1779976800000
+    },
+    {
+      "symbol": "DOTUSDT",
+      "entry_ts_ms": 1780246800000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24999942515914075,
+      "side": "SHORT",
+      "pnl": 591.4974253967235,
+      "exit_ts_ms": 1780333200000
+    },
+    {
+      "symbol": "TIAUSDT",
+      "entry_ts_ms": 1780416000000,
+      "requested_gross": 1.0,
+      "accepted_gross": 0.6653856589960429,
+      "side": "SHORT",
+      "pnl": 954.7784999999944,
+      "exit_ts_ms": 1780502400000
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "entry_ts_ms": 1781100000000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24999970854145925,
+      "side": "SHORT",
+      "pnl": 2729.2367229769197,
+      "exit_ts_ms": 1781131500000
+    },
+    {
+      "symbol": "TAOUSDT",
+      "entry_ts_ms": 1781128800000,
+      "requested_gross": 1.0,
+      "accepted_gross": 0.7678556604721554,
+      "side": "SHORT",
+      "pnl": -9352.152492773932,
+      "exit_ts_ms": 1781172000000
+    },
+    {
+      "symbol": "TAOUSDT",
+      "entry_ts_ms": 1781805600000,
+      "requested_gross": 0.2550358947468608,
+      "accepted_gross": 0.2550352303425388,
+      "side": "SHORT",
+      "pnl": 199.93658377477408,
+      "exit_ts_ms": 1781848800000
+    },
+    {
+      "symbol": "TIAUSDT",
+      "entry_ts_ms": 1781798400000,
+      "requested_gross": 0.49159539400064173,
+      "accepted_gross": 0.3356907971556549,
+      "side": "SHORT",
+      "pnl": -5942.058746100001,
+      "exit_ts_ms": 1781884800000
+    },
+    {
+      "symbol": "JUPUSDT",
+      "entry_ts_ms": 1782108000000,
+      "requested_gross": 1.0,
+      "accepted_gross": 0.601353772602276,
+      "side": "SHORT",
+      "pnl": 2463.199727999992,
+      "exit_ts_ms": 1782151200000
+    },
+    {
+      "symbol": "DOTUSDT",
+      "entry_ts_ms": 1782223200000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.2499999031467416,
+      "side": "SHORT",
+      "pnl": 1598.4004980000018,
+      "exit_ts_ms": 1782309600000
+    },
+    {
+      "symbol": "JUPUSDT",
+      "entry_ts_ms": 1782622800000,
+      "requested_gross": 0.7468679158145868,
+      "accepted_gross": 0.4880871827553689,
+      "side": "SHORT",
+      "pnl": 3300.981824000004,
+      "exit_ts_ms": 1782666000000
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "entry_ts_ms": 1782633600000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24999984026304028,
+      "side": "SHORT",
+      "pnl": 2233.6605813742904,
+      "exit_ts_ms": 1782676800000
+    },
+    {
+      "symbol": "JUPUSDT",
+      "entry_ts_ms": 1782666000000,
+      "requested_gross": 0.8887194347449021,
+      "accepted_gross": 0.47458096653574494,
+      "side": "SHORT",
+      "pnl": 2204.605675999986,
+      "exit_ts_ms": 1782709200000
+    },
+    {
+      "symbol": "JUPUSDT",
+      "entry_ts_ms": 1783710000000,
+      "requested_gross": 1.0,
+      "accepted_gross": 0.4335910516588892,
+      "side": "SHORT",
+      "pnl": -3506.137322999986,
+      "exit_ts_ms": 1783753200000
+    },
+    {
+      "symbol": "TIAUSDT",
+      "entry_ts_ms": 1783710000000,
+      "requested_gross": 1.0,
+      "accepted_gross": 0.25294296256980875,
+      "side": "SHORT",
+      "pnl": -6386.584660500002,
+      "exit_ts_ms": 1783796400000
+    },
+    {
+      "symbol": "JUPUSDT",
+      "entry_ts_ms": 1783861200000,
+      "requested_gross": 0.8102366569909468,
+      "accepted_gross": 0.44049362328552727,
+      "side": "SHORT",
+      "pnl": -285.3905440000053,
+      "exit_ts_ms": 1783904400000
+    },
+    {
+      "symbol": "TAOUSDT",
+      "entry_ts_ms": 1784019600000,
+      "requested_gross": 1.0,
+      "accepted_gross": 0.8461435063398934,
+      "side": "SHORT",
+      "pnl": -12725.93908700002,
+      "exit_ts_ms": 1784062800000
+    },
+    {
+      "symbol": "JUPUSDT",
+      "entry_ts_ms": 1784221200000,
+      "requested_gross": 0.95882574919294,
+      "accepted_gross": 0.4417009072884975,
+      "side": "SHORT",
+      "pnl": 5115.413663000011,
+      "exit_ts_ms": 1784264400000
+    },
+    {
+      "symbol": "TIAUSDT",
+      "entry_ts_ms": 1784206800000,
+      "requested_gross": 1.0,
+      "accepted_gross": 0.2626258782458449,
+      "side": "SHORT",
+      "pnl": 6206.466842999993,
+      "exit_ts_ms": 1784293200000
+    },
+    {
+      "symbol": "JUPUSDT",
+      "entry_ts_ms": 1784268000000,
+      "requested_gross": 0.7164397716369563,
+      "accepted_gross": 0.40472822293778976,
+      "side": "SHORT",
+      "pnl": -6473.089632999988,
+      "exit_ts_ms": 1784311200000
+    },
+    {
+      "symbol": "JUPUSDT",
+      "entry_ts_ms": 1784768400000,
+      "requested_gross": 0.7836400389456551,
+      "accepted_gross": 0.42045279355448717,
+      "side": "SHORT",
+      "pnl": -490.9569209999943,
+      "exit_ts_ms": 1784811600000
+    },
+    {
+      "symbol": "TAOUSDT",
+      "entry_ts_ms": 1784775600000,
+      "requested_gross": 0.29774874323341777,
+      "accepted_gross": 0.29774864217376906,
+      "side": "SHORT",
+      "pnl": 774.4808310848413,
+      "exit_ts_ms": 1784818800000
+    },
+    {
+      "symbol": "TAOUSDT",
+      "entry_ts_ms": 1785204000000,
+      "requested_gross": 0.3111288166584333,
+      "accepted_gross": 0.31112877747404016,
+      "side": "SHORT",
+      "pnl": -1095.6833743165973,
+      "exit_ts_ms": 1785247200000
+    }
+  ],
+  "idle_rejected_reasons": {
+    "IDLE:CORE_SIGNAL_OR_POSITION": 326,
+    "IDLE:BASKET20_LT_MIN025": 79,
+    "IDLE:FILLED_SYMBOL_COOLDOWN": 84,
+    "IDLE:MULTI_SIGNAL_CAPACITY_AMBIGUOUS": 90,
+    "IDLE:FULL_1X_QUANTITY_BLOCK": 1,
+    "IDLE:FULL_1X_UNAVAILABLE": 16,
+    "IDLE:ATR25_GATE": 19,
+    "IDLE:HYPE_SIDECAR_ACTIVE": 3,
+    "IDLE:SYMBOL_OWNED_BY_IDLE": 4,
+    "IDLE:BASKET20_VENUE_FLOOR_BELOW_MIN025": 3
+  },
+  "idle_capped_or_venue_rounded_trades": 18,
+  "observations": 694,
+  "timing_seconds": 9.23
+}

@@ -1,0 +1,588 @@
+{
+  "case": "ATR_BUDGET20_PARTIAL_GAP2_OTHERSTOP15",
+  "cost_bps": 10,
+  "source": "2026-10-17 latest frozen H1 8-strategy portfolio + 5m Q102/HYPE/Idle overlays",
+  "case_config": {
+    "basket": true,
+    "partial": true,
+    "gap_pct": 2,
+    "other_stop_pct": 15
+  },
+  "research_only": true,
+  "model_limitations": [
+    "Other-runner historical resident STOPs unknown. Non-Idle SHORT assumed a static initial STOP at other_stop_pct of entry, with no profit locking.",
+    "Idle resident STOP assumed initial 10%, with 0-2% adverse gap and roundtrip 10bps assumed in new-order loss budget; physical STOP fills are NOT replayed.",
+    "Only Idle admission and size change; all eight source engine candidate/exits otherwise unchanged.",
+    "H1 atomic simulator has no actual pending async order reservation, venue signatures, margin orders or account-lock latency.",
+    "In-sample public market M5 normalized on historical Aster H1; not Aster tick execution.",
+    "No exact current trading LIVE certification or 2026-Oct19 updated entry signatures."
+  ],
+  "final_jpy": 183931296.32289013,
+  "max_dd_pct": -15.6201,
+  "pf": 2.984470099278039,
+  "win_pct": 72.043,
+  "trades": 1302,
+  "accounting": "PASS",
+  "trade_counts": {
+    "FET": 8,
+    "HYPE_LONG": 38,
+    "IDLE": 59,
+    "PENGU": 67,
+    "Q102": 182,
+    "RESIDUAL": 30,
+    "V12": 830,
+    "V52": 88
+  },
+  "baseline_jpy": 222818966.87803495,
+  "baseline_dd_pct": -15.62063681288941,
+  "delta_jpy": -38887670.55514482,
+  "dd_improvement_pp": 0.0005368128894094326,
+  "idle_trades": 59,
+  "idle_trade_details": [
+    {
+      "symbol": "DOTUSDT",
+      "entry_ts_ms": 1756472400000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24777464281991263,
+      "side": "SHORT",
+      "pnl": 0.38465067500194494,
+      "exit_ts_ms": 1756504200000
+    },
+    {
+      "symbol": "DOTUSDT",
+      "entry_ts_ms": 1758290400000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.2494907084890146,
+      "side": "SHORT",
+      "pnl": 1.0491180420608868,
+      "exit_ts_ms": 1758346500000
+    },
+    {
+      "symbol": "DOTUSDT",
+      "entry_ts_ms": 1759867200000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24874029003036172,
+      "side": "SHORT",
+      "pnl": -1.0605960200000064,
+      "exit_ts_ms": 1759953600000
+    },
+    {
+      "symbol": "DOTUSDT",
+      "entry_ts_ms": 1760241600000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24992936301277707,
+      "side": "SHORT",
+      "pnl": -8.688353870000007,
+      "exit_ts_ms": 1760302800000
+    },
+    {
+      "symbol": "DOTUSDT",
+      "entry_ts_ms": 1760436000000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24982225497437788,
+      "side": "SHORT",
+      "pnl": -3.232740130000003,
+      "exit_ts_ms": 1760522400000
+    },
+    {
+      "symbol": "DOTUSDT",
+      "entry_ts_ms": 1760713200000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24972832843438952,
+      "side": "SHORT",
+      "pnl": -1.5363243314720094,
+      "exit_ts_ms": 1760799600000
+    },
+    {
+      "symbol": "DOTUSDT",
+      "entry_ts_ms": 1763056800000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24988108973670622,
+      "side": "SHORT",
+      "pnl": 6.553049266660526,
+      "exit_ts_ms": 1763072100000
+    },
+    {
+      "symbol": "DOTUSDT",
+      "entry_ts_ms": 1763323200000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.2499894010950943,
+      "side": "SHORT",
+      "pnl": 20.341914954480057,
+      "exit_ts_ms": 1763409600000
+    },
+    {
+      "symbol": "DOTUSDT",
+      "entry_ts_ms": 1763413200000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.2499523845929153,
+      "side": "SHORT",
+      "pnl": -19.507032680249978,
+      "exit_ts_ms": 1763499600000
+    },
+    {
+      "symbol": "DOTUSDT",
+      "entry_ts_ms": 1763578800000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24994014737786327,
+      "side": "SHORT",
+      "pnl": 16.74789416539201,
+      "exit_ts_ms": 1763665200000
+    },
+    {
+      "symbol": "TAOUSDT",
+      "entry_ts_ms": 1768780800000,
+      "requested_gross": 0.8971586524272931,
+      "accepted_gross": 0.8971522195680409,
+      "side": "SHORT",
+      "pnl": 421.79040095133274,
+      "exit_ts_ms": 1768824000000
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "entry_ts_ms": 1768831200000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24998927057845058,
+      "side": "SHORT",
+      "pnl": -48.949085109256046,
+      "exit_ts_ms": 1768874400000
+    },
+    {
+      "symbol": "TAOUSDT",
+      "entry_ts_ms": 1768928400000,
+      "requested_gross": 0.556601842563856,
+      "accepted_gross": 0.5565958140294802,
+      "side": "SHORT",
+      "pnl": -72.8752270866107,
+      "exit_ts_ms": 1768971600000
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "entry_ts_ms": 1769097600000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24998673110895467,
+      "side": "SHORT",
+      "pnl": -147.28500164095195,
+      "exit_ts_ms": 1769140800000
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "entry_ts_ms": 1769230800000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24998363478437413,
+      "side": "SHORT",
+      "pnl": 21.646003317419737,
+      "exit_ts_ms": 1769274000000
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "entry_ts_ms": 1769274000000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.2499990083777985,
+      "side": "SHORT",
+      "pnl": 14.178823578768739,
+      "exit_ts_ms": 1769317200000
+    },
+    {
+      "symbol": "TIAUSDT",
+      "entry_ts_ms": 1769666400000,
+      "requested_gross": 1.0,
+      "accepted_gross": 0.9999879492531009,
+      "side": "SHORT",
+      "pnl": 1226.5040862705607,
+      "exit_ts_ms": 1769752800000
+    },
+    {
+      "symbol": "DOTUSDT",
+      "entry_ts_ms": 1769896800000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24999797792062278,
+      "side": "SHORT",
+      "pnl": 47.54080716000004,
+      "exit_ts_ms": 1769983200000
+    },
+    {
+      "symbol": "DOTUSDT",
+      "entry_ts_ms": 1769990400000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.2499985689538882,
+      "side": "SHORT",
+      "pnl": -178.1555945734578,
+      "exit_ts_ms": 1770076800000
+    },
+    {
+      "symbol": "JUPUSDT",
+      "entry_ts_ms": 1770573600000,
+      "requested_gross": 0.4121752317898307,
+      "accepted_gross": 0.41217318738957864,
+      "side": "SHORT",
+      "pnl": -36.309864245488015,
+      "exit_ts_ms": 1770616800000
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "entry_ts_ms": 1770638400000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.2499990232804985,
+      "side": "SHORT",
+      "pnl": -221.80854631750015,
+      "exit_ts_ms": 1770681600000
+    },
+    {
+      "symbol": "JUPUSDT",
+      "entry_ts_ms": 1770645600000,
+      "requested_gross": 0.9014096891580046,
+      "accepted_gross": 0.7540660191764854,
+      "side": "SHORT",
+      "pnl": -1.4273117577609185,
+      "exit_ts_ms": 1770688800000
+    },
+    {
+      "symbol": "TAOUSDT",
+      "entry_ts_ms": 1771441200000,
+      "requested_gross": 1.0,
+      "accepted_gross": 0.99999866272523,
+      "side": "SHORT",
+      "pnl": -122.84080343464072,
+      "exit_ts_ms": 1771484400000
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "entry_ts_ms": 1771513200000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24999978282384083,
+      "side": "SHORT",
+      "pnl": -371.50728981471946,
+      "exit_ts_ms": 1771556400000
+    },
+    {
+      "symbol": "JUPUSDT",
+      "entry_ts_ms": 1771524000000,
+      "requested_gross": 1.0,
+      "accepted_gross": 0.7509574881589018,
+      "side": "SHORT",
+      "pnl": -572.9665913084765,
+      "exit_ts_ms": 1771567200000
+    },
+    {
+      "symbol": "JUPUSDT",
+      "entry_ts_ms": 1771833600000,
+      "requested_gross": 1.0,
+      "accepted_gross": 0.9999977989869864,
+      "side": "SHORT",
+      "pnl": 317.2409100659728,
+      "exit_ts_ms": 1771876800000
+    },
+    {
+      "symbol": "TIAUSDT",
+      "entry_ts_ms": 1772125200000,
+      "requested_gross": 1.0,
+      "accepted_gross": 0.999998560711183,
+      "side": "SHORT",
+      "pnl": 1397.5963932853933,
+      "exit_ts_ms": 1772211600000
+    },
+    {
+      "symbol": "DOTUSDT",
+      "entry_ts_ms": 1772460000000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24999855236148627,
+      "side": "SHORT",
+      "pnl": 229.83199379784287,
+      "exit_ts_ms": 1772546400000
+    },
+    {
+      "symbol": "DOTUSDT",
+      "entry_ts_ms": 1772917200000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24999914822815023,
+      "side": "SHORT",
+      "pnl": -354.65168800990836,
+      "exit_ts_ms": 1773003600000
+    },
+    {
+      "symbol": "TIAUSDT",
+      "entry_ts_ms": 1772938800000,
+      "requested_gross": 1.0,
+      "accepted_gross": 0.7503745065180251,
+      "side": "SHORT",
+      "pnl": -56.789339845042065,
+      "exit_ts_ms": 1773025200000
+    },
+    {
+      "symbol": "DOTUSDT",
+      "entry_ts_ms": 1774170000000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.2499991828638381,
+      "side": "SHORT",
+      "pnl": 745.3624327022334,
+      "exit_ts_ms": 1774218300000
+    },
+    {
+      "symbol": "JUPUSDT",
+      "entry_ts_ms": 1774494000000,
+      "requested_gross": 1.0,
+      "accepted_gross": 0.9999989873105746,
+      "side": "SHORT",
+      "pnl": 2173.164925243041,
+      "exit_ts_ms": 1774537200000
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "entry_ts_ms": 1776034800000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.2499995187053398,
+      "side": "SHORT",
+      "pnl": 984.1708079249979,
+      "exit_ts_ms": 1776078000000
+    },
+    {
+      "symbol": "DOTUSDT",
+      "entry_ts_ms": 1776067200000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24999950044954503,
+      "side": "SHORT",
+      "pnl": -223.916215020928,
+      "exit_ts_ms": 1776153600000
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "entry_ts_ms": 1776168000000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.2499995486272954,
+      "side": "SHORT",
+      "pnl": 1233.3861054074953,
+      "exit_ts_ms": 1776211200000
+    },
+    {
+      "symbol": "TAOUSDT",
+      "entry_ts_ms": 1776186000000,
+      "requested_gross": 0.46124168083059336,
+      "accepted_gross": 0.4612412578744264,
+      "side": "SHORT",
+      "pnl": -2609.2107584169994,
+      "exit_ts_ms": 1776229200000
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "entry_ts_ms": 1776214800000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24999922988644416,
+      "side": "SHORT",
+      "pnl": -1435.062977159998,
+      "exit_ts_ms": 1776258000000
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "entry_ts_ms": 1776362400000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24999925872375492,
+      "side": "SHORT",
+      "pnl": 283.50599050500034,
+      "exit_ts_ms": 1776405600000
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "entry_ts_ms": 1776513600000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.2499992069634566,
+      "side": "SHORT",
+      "pnl": 1340.4498840400013,
+      "exit_ts_ms": 1776556800000
+    },
+    {
+      "symbol": "TAOUSDT",
+      "entry_ts_ms": 1776538800000,
+      "requested_gross": 0.7387627856641379,
+      "accepted_gross": 0.7387627534016127,
+      "side": "SHORT",
+      "pnl": 2395.421714762253,
+      "exit_ts_ms": 1776582000000
+    },
+    {
+      "symbol": "JUPUSDT",
+      "entry_ts_ms": 1777521600000,
+      "requested_gross": 1.0,
+      "accepted_gross": 0.7559877364248858,
+      "side": "SHORT",
+      "pnl": 3044.4850000000083,
+      "exit_ts_ms": 1777564800000
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "entry_ts_ms": 1779516000000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.2499995924451288,
+      "side": "SHORT",
+      "pnl": 1978.0477586113645,
+      "exit_ts_ms": 1779528900000
+    },
+    {
+      "symbol": "DOTUSDT",
+      "entry_ts_ms": 1779498000000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.2499997717873706,
+      "side": "SHORT",
+      "pnl": 2466.947448906209,
+      "exit_ts_ms": 1779541200000
+    },
+    {
+      "symbol": "JUPUSDT",
+      "entry_ts_ms": 1779526800000,
+      "requested_gross": 1.0,
+      "accepted_gross": 0.5002334539795649,
+      "side": "SHORT",
+      "pnl": -19217.97750000001,
+      "exit_ts_ms": 1779570000000
+    },
+    {
+      "symbol": "JUPUSDT",
+      "entry_ts_ms": 1779663600000,
+      "requested_gross": 1.0,
+      "accepted_gross": 0.5103450741258996,
+      "side": "SHORT",
+      "pnl": -3171.2475000000027,
+      "exit_ts_ms": 1779706800000
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "entry_ts_ms": 1779876000000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.2499999211415262,
+      "side": "SHORT",
+      "pnl": 3092.7191494849976,
+      "exit_ts_ms": 1779919200000
+    },
+    {
+      "symbol": "TAOUSDT",
+      "entry_ts_ms": 1779933600000,
+      "requested_gross": 1.0,
+      "accepted_gross": 0.9999995055551351,
+      "side": "SHORT",
+      "pnl": 9466.23497896817,
+      "exit_ts_ms": 1779976800000
+    },
+    {
+      "symbol": "DOTUSDT",
+      "entry_ts_ms": 1780246800000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24999976879480035,
+      "side": "SHORT",
+      "pnl": 1612.8039223358849,
+      "exit_ts_ms": 1780333200000
+    },
+    {
+      "symbol": "TIAUSDT",
+      "entry_ts_ms": 1780416000000,
+      "requested_gross": 1.0,
+      "accepted_gross": 0.277622402801355,
+      "side": "SHORT",
+      "pnl": 1179.5384999999944,
+      "exit_ts_ms": 1780502400000
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "entry_ts_ms": 1781100000000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24999988475713789,
+      "side": "SHORT",
+      "pnl": 7219.251062710966,
+      "exit_ts_ms": 1781131500000
+    },
+    {
+      "symbol": "TAOUSDT",
+      "entry_ts_ms": 1781128800000,
+      "requested_gross": 1.0,
+      "accepted_gross": 0.6733322573567101,
+      "side": "SHORT",
+      "pnl": -20035.12828140001,
+      "exit_ts_ms": 1781172000000
+    },
+    {
+      "symbol": "JUPUSDT",
+      "entry_ts_ms": 1781132400000,
+      "requested_gross": 1.0,
+      "accepted_gross": 0.2502453698888785,
+      "side": "SHORT",
+      "pnl": -8139.370491000007,
+      "exit_ts_ms": 1781175600000
+    },
+    {
+      "symbol": "DOTUSDT",
+      "entry_ts_ms": 1781766000000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24999995367812558,
+      "side": "SHORT",
+      "pnl": 3893.042318871845,
+      "exit_ts_ms": 1781808300000
+    },
+    {
+      "symbol": "TAOUSDT",
+      "entry_ts_ms": 1781805600000,
+      "requested_gross": 0.42192277730888855,
+      "accepted_gross": 0.42192252106931694,
+      "side": "SHORT",
+      "pnl": 1457.2823842411244,
+      "exit_ts_ms": 1781848800000
+    },
+    {
+      "symbol": "JUPUSDT",
+      "entry_ts_ms": 1782108000000,
+      "requested_gross": 1.0,
+      "accepted_gross": 0.2479856027691757,
+      "side": "SHORT",
+      "pnl": 2882.699727999992,
+      "exit_ts_ms": 1782151200000
+    },
+    {
+      "symbol": "DOTUSDT",
+      "entry_ts_ms": 1782223200000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24999991436292038,
+      "side": "SHORT",
+      "pnl": 4212.600809200004,
+      "exit_ts_ms": 1782309600000
+    },
+    {
+      "symbol": "RENDERUSDT",
+      "entry_ts_ms": 1782633600000,
+      "requested_gross": 0.25,
+      "accepted_gross": 0.24999992213977124,
+      "side": "SHORT",
+      "pnl": 5500.512014998748,
+      "exit_ts_ms": 1782676800000
+    },
+    {
+      "symbol": "TAOUSDT",
+      "entry_ts_ms": 1784019600000,
+      "requested_gross": 1.0,
+      "accepted_gross": 0.38495437792128406,
+      "side": "SHORT",
+      "pnl": -11925.15908700002,
+      "exit_ts_ms": 1784062800000
+    },
+    {
+      "symbol": "TAOUSDT",
+      "entry_ts_ms": 1784775600000,
+      "requested_gross": 0.7672752008478553,
+      "accepted_gross": 0.3770747974687999,
+      "side": "SHORT",
+      "pnl": 2990.350391599993,
+      "exit_ts_ms": 1784818800000
+    }
+  ],
+  "idle_rejected_reasons": {
+    "IDLE:CORE_SIGNAL_OR_POSITION": 326,
+    "IDLE:BASKET20_LT_MIN025": 75,
+    "IDLE:BASKET20_VENUE_FLOOR_BELOW_MIN025": 37,
+    "IDLE:FILLED_SYMBOL_COOLDOWN": 73,
+    "IDLE:MULTI_SIGNAL_CAPACITY_AMBIGUOUS": 84,
+    "IDLE:FULL_1X_UNAVAILABLE": 13,
+    "IDLE:ATR25_GATE": 21,
+    "IDLE:HYPE_SIDECAR_ACTIVE": 4,
+    "IDLE:SYMBOL_OWNED_BY_IDLE": 2
+  },
+  "idle_capped_or_venue_rounded_trades": 12,
+  "observations": 694,
+  "timing_seconds": 9.03
+}

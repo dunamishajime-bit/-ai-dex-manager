@@ -1,0 +1,348 @@
+{
+  "status": "RESEARCH_COMPLETED_REJECT_INTEGRATED_LIVE_PROMOTION",
+  "date": "2026-10-19",
+  "anchor": "2026-10-17 latest eight-strategy frozen full8 research; 2025-08-10 through 2026-08-10",
+  "initial_jpy": 10000,
+  "costs_bps": [
+    10,
+    30
+  ],
+  "baseline": {
+    "10": {
+      "final_jpy": 222818966.87803495,
+      "max_dd_pct": -15.62063681288941,
+      "pf": 3.4587962777009813,
+      "trades": 1310
+    },
+    "30": {
+      "final_jpy": 124289206.81827945,
+      "max_dd_pct": -16.78776877493442,
+      "pf": 3.0785603081685435,
+      "trades": 1307
+    }
+  },
+  "scenarios": {
+    "ATR_ONLY": {
+      "10": {
+        "final_jpy": 225159278.33502594,
+        "max_dd_pct": -15.6206,
+        "pf": 3.4715875069703057,
+        "win_pct": 72.511,
+        "trades": 1306,
+        "idle_trades": 67,
+        "delta_jpy": 2340311.456990987,
+        "dd_improvement_pp": 3.6812889410597904e-05,
+        "idle_rejected_reasons": {
+          "IDLE:CORE_SIGNAL_OR_POSITION": 326,
+          "IDLE:FILLED_SYMBOL_COOLDOWN": 86,
+          "IDLE:MULTI_SIGNAL_CAPACITY_AMBIGUOUS": 92,
+          "IDLE:SYMBOL_OWNED_BY_IDLE": 3,
+          "IDLE:FULL_1X_UNAVAILABLE": 48,
+          "IDLE:ATR25_GATE": 11,
+          "IDLE:HYPE_SIDECAR_ACTIVE": 1,
+          "IDLE:FULL_1X_QUANTITY_BLOCK": 60
+        }
+      },
+      "30": {
+        "final_jpy": 123091562.64108318,
+        "max_dd_pct": -16.7878,
+        "pf": 2.958535806381294,
+        "win_pct": 69.662,
+        "trades": 1302,
+        "idle_trades": 70,
+        "delta_jpy": -1197644.1771962643,
+        "dd_improvement_pp": -3.122506558028704e-05,
+        "idle_rejected_reasons": {
+          "IDLE:CORE_SIGNAL_OR_POSITION": 326,
+          "IDLE:FILLED_SYMBOL_COOLDOWN": 86,
+          "IDLE:MULTI_SIGNAL_CAPACITY_AMBIGUOUS": 95,
+          "IDLE:SYMBOL_OWNED_BY_IDLE": 3,
+          "IDLE:FULL_1X_UNAVAILABLE": 49,
+          "IDLE:ATR25_GATE": 9,
+          "IDLE:HYPE_SIDECAR_ACTIVE": 1,
+          "IDLE:FULL_1X_QUANTITY_BLOCK": 55
+        }
+      }
+    },
+    "ATR_BUDGET20_FULL_REJECT_GAP2_OTHERSTOP10": {
+      "10": {
+        "final_jpy": 198337058.45246524,
+        "max_dd_pct": -15.6105,
+        "pf": 3.3016505013981226,
+        "win_pct": 72.355,
+        "trades": 1295,
+        "idle_trades": 53,
+        "delta_jpy": -24481908.425569713,
+        "dd_improvement_pp": 0.010136812889410152,
+        "idle_rejected_reasons": {
+          "IDLE:CORE_SIGNAL_OR_POSITION": 326,
+          "IDLE:BASKET20_FULL_REJECT": 72,
+          "IDLE:FILLED_SYMBOL_COOLDOWN": 59,
+          "IDLE:MULTI_SIGNAL_CAPACITY_AMBIGUOUS": 83,
+          "IDLE:SYMBOL_OWNED_BY_IDLE": 3,
+          "IDLE:FULL_1X_UNAVAILABLE": 41,
+          "IDLE:ATR25_GATE": 16,
+          "IDLE:HYPE_SIDECAR_ACTIVE": 4,
+          "IDLE:FULL_1X_QUANTITY_BLOCK": 37
+        }
+      },
+      "30": {
+        "final_jpy": 94577503.45639959,
+        "max_dd_pct": -16.7994,
+        "pf": 2.7945759196347297,
+        "win_pct": 69.404,
+        "trades": 1291,
+        "idle_trades": 56,
+        "delta_jpy": -29711703.361879855,
+        "dd_improvement_pp": -0.011631225065578121,
+        "idle_rejected_reasons": {
+          "IDLE:CORE_SIGNAL_OR_POSITION": 326,
+          "IDLE:BASKET20_FULL_REJECT": 70,
+          "IDLE:FILLED_SYMBOL_COOLDOWN": 62,
+          "IDLE:MULTI_SIGNAL_CAPACITY_AMBIGUOUS": 86,
+          "IDLE:SYMBOL_OWNED_BY_IDLE": 3,
+          "IDLE:FULL_1X_UNAVAILABLE": 42,
+          "IDLE:ATR25_GATE": 16,
+          "IDLE:HYPE_SIDECAR_ACTIVE": 3,
+          "IDLE:FULL_1X_QUANTITY_BLOCK": 30
+        }
+      }
+    },
+    "ATR_BUDGET20_PARTIAL_GAP2_OTHERSTOP10": {
+      "10": {
+        "final_jpy": 183894334.81604007,
+        "max_dd_pct": -15.6228,
+        "pf": 2.9383605786680995,
+        "win_pct": 71.844,
+        "trades": 1307,
+        "idle_trades": 65,
+        "delta_jpy": -38924632.06199488,
+        "dd_improvement_pp": -0.002163187110589604,
+        "idle_rejected_reasons": {
+          "IDLE:CORE_SIGNAL_OR_POSITION": 326,
+          "IDLE:BASKET20_LT_MIN025": 62,
+          "IDLE:BASKET20_VENUE_FLOOR_BELOW_MIN025": 43,
+          "IDLE:FILLED_SYMBOL_COOLDOWN": 74,
+          "IDLE:MULTI_SIGNAL_CAPACITY_AMBIGUOUS": 83,
+          "IDLE:SYMBOL_OWNED_BY_IDLE": 3,
+          "IDLE:FULL_1X_UNAVAILABLE": 13,
+          "IDLE:ATR25_GATE": 21,
+          "IDLE:HYPE_SIDECAR_ACTIVE": 4
+        }
+      },
+      "30": {
+        "final_jpy": 85908974.51061265,
+        "max_dd_pct": -16.7994,
+        "pf": 2.4559136109694806,
+        "win_pct": 68.65,
+        "trades": 1311,
+        "idle_trades": 75,
+        "delta_jpy": -38380232.30766679,
+        "dd_improvement_pp": -0.011631225065578121,
+        "idle_rejected_reasons": {
+          "IDLE:CORE_SIGNAL_OR_POSITION": 326,
+          "IDLE:BASKET20_LT_MIN025": 68,
+          "IDLE:FILLED_SYMBOL_COOLDOWN": 89,
+          "IDLE:MULTI_SIGNAL_CAPACITY_AMBIGUOUS": 88,
+          "IDLE:SYMBOL_OWNED_BY_IDLE": 5,
+          "IDLE:FULL_1X_UNAVAILABLE": 16,
+          "IDLE:ATR25_GATE": 19,
+          "IDLE:HYPE_SIDECAR_ACTIVE": 3,
+          "IDLE:BASKET20_VENUE_FLOOR_BELOW_MIN025": 5
+        }
+      }
+    },
+    "ATR_BUDGET20_PARTIAL_GAP0_OTHERSTOP10": {
+      "10": {
+        "final_jpy": 186127368.26759773,
+        "max_dd_pct": -15.6151,
+        "pf": 2.9693472016222793,
+        "win_pct": 71.887,
+        "trades": 1309,
+        "idle_trades": 69,
+        "delta_jpy": -36691598.610437214,
+        "dd_improvement_pp": 0.005536812889410214,
+        "idle_rejected_reasons": {
+          "IDLE:CORE_SIGNAL_OR_POSITION": 326,
+          "IDLE:BASKET20_LT_MIN025": 42,
+          "IDLE:BASKET20_VENUE_FLOOR_BELOW_MIN025": 47,
+          "IDLE:FILLED_SYMBOL_COOLDOWN": 84,
+          "IDLE:MULTI_SIGNAL_CAPACITY_AMBIGUOUS": 82,
+          "IDLE:SYMBOL_OWNED_BY_IDLE": 3,
+          "IDLE:FULL_1X_UNAVAILABLE": 19,
+          "IDLE:ATR25_GATE": 19,
+          "IDLE:HYPE_SIDECAR_ACTIVE": 3
+        }
+      },
+      "30": {
+        "final_jpy": 86663304.67226765,
+        "max_dd_pct": -16.8183,
+        "pf": 2.472822237339462,
+        "win_pct": 68.721,
+        "trades": 1314,
+        "idle_trades": 78,
+        "delta_jpy": -37625902.1460118,
+        "dd_improvement_pp": -0.03053122506558026,
+        "idle_rejected_reasons": {
+          "IDLE:CORE_SIGNAL_OR_POSITION": 326,
+          "IDLE:BASKET20_LT_MIN025": 48,
+          "IDLE:FILLED_SYMBOL_COOLDOWN": 101,
+          "IDLE:MULTI_SIGNAL_CAPACITY_AMBIGUOUS": 86,
+          "IDLE:SYMBOL_OWNED_BY_IDLE": 3,
+          "IDLE:FULL_1X_UNAVAILABLE": 23,
+          "IDLE:ATR25_GATE": 18,
+          "IDLE:HYPE_SIDECAR_ACTIVE": 3,
+          "IDLE:BASKET20_VENUE_FLOOR_BELOW_MIN025": 8
+        }
+      }
+    },
+    "ATR_BUDGET20_PARTIAL_GAP1_OTHERSTOP10": {
+      "10": {
+        "final_jpy": 184250871.7976339,
+        "max_dd_pct": -15.6151,
+        "pf": 2.9405074225173635,
+        "win_pct": 71.942,
+        "trades": 1308,
+        "idle_trades": 66,
+        "delta_jpy": -38568095.08040106,
+        "dd_improvement_pp": 0.005536812889410214,
+        "idle_rejected_reasons": {
+          "IDLE:CORE_SIGNAL_OR_POSITION": 326,
+          "IDLE:BASKET20_LT_MIN025": 53,
+          "IDLE:BASKET20_VENUE_FLOOR_BELOW_MIN025": 44,
+          "IDLE:FILLED_SYMBOL_COOLDOWN": 77,
+          "IDLE:MULTI_SIGNAL_CAPACITY_AMBIGUOUS": 84,
+          "IDLE:SYMBOL_OWNED_BY_IDLE": 3,
+          "IDLE:FULL_1X_UNAVAILABLE": 16,
+          "IDLE:ATR25_GATE": 20,
+          "IDLE:HYPE_SIDECAR_ACTIVE": 4,
+          "IDLE:FULL_1X_QUANTITY_BLOCK": 1
+        }
+      },
+      "30": {
+        "final_jpy": 86702380.38844647,
+        "max_dd_pct": -16.8183,
+        "pf": 2.472253222117028,
+        "win_pct": 68.75,
+        "trades": 1312,
+        "idle_trades": 76,
+        "delta_jpy": -37586826.42983298,
+        "dd_improvement_pp": -0.03053122506558026,
+        "idle_rejected_reasons": {
+          "IDLE:CORE_SIGNAL_OR_POSITION": 326,
+          "IDLE:BASKET20_LT_MIN025": 58,
+          "IDLE:FILLED_SYMBOL_COOLDOWN": 94,
+          "IDLE:MULTI_SIGNAL_CAPACITY_AMBIGUOUS": 88,
+          "IDLE:SYMBOL_OWNED_BY_IDLE": 5,
+          "IDLE:FULL_1X_UNAVAILABLE": 20,
+          "IDLE:ATR25_GATE": 19,
+          "IDLE:HYPE_SIDECAR_ACTIVE": 3,
+          "IDLE:BASKET20_VENUE_FLOOR_BELOW_MIN025": 5
+        }
+      }
+    },
+    "ATR_BUDGET20_PARTIAL_GAP2_OTHERSTOP5": {
+      "10": {
+        "final_jpy": 186172942.45106715,
+        "max_dd_pct": -15.6242,
+        "pf": 2.9683339100914052,
+        "win_pct": 71.863,
+        "trades": 1315,
+        "idle_trades": 76,
+        "delta_jpy": -36646024.4269678,
+        "dd_improvement_pp": -0.003563187110589894,
+        "idle_rejected_reasons": {
+          "IDLE:CORE_SIGNAL_OR_POSITION": 326,
+          "IDLE:FILLED_SYMBOL_COOLDOWN": 94,
+          "IDLE:BASKET20_VENUE_FLOOR_BELOW_MIN025": 46,
+          "IDLE:BASKET20_LT_MIN025": 24,
+          "IDLE:MULTI_SIGNAL_CAPACITY_AMBIGUOUS": 84,
+          "IDLE:SYMBOL_OWNED_BY_IDLE": 3,
+          "IDLE:FULL_1X_UNAVAILABLE": 19,
+          "IDLE:ATR25_GATE": 19,
+          "IDLE:HYPE_SIDECAR_ACTIVE": 3
+        }
+      },
+      "30": {
+        "final_jpy": 86882284.42511702,
+        "max_dd_pct": -16.8036,
+        "pf": 2.4771478305719947,
+        "win_pct": 68.712,
+        "trades": 1320,
+        "idle_trades": 84,
+        "delta_jpy": -37406922.39316243,
+        "dd_improvement_pp": -0.01583122506557899,
+        "idle_rejected_reasons": {
+          "IDLE:CORE_SIGNAL_OR_POSITION": 326,
+          "IDLE:FILLED_SYMBOL_COOLDOWN": 113,
+          "IDLE:BASKET20_VENUE_FLOOR_BELOW_MIN025": 10,
+          "IDLE:BASKET20_LT_MIN025": 28,
+          "IDLE:MULTI_SIGNAL_CAPACITY_AMBIGUOUS": 87,
+          "IDLE:SYMBOL_OWNED_BY_IDLE": 3,
+          "IDLE:FULL_1X_UNAVAILABLE": 22,
+          "IDLE:ATR25_GATE": 18,
+          "IDLE:HYPE_SIDECAR_ACTIVE": 3
+        }
+      }
+    },
+    "ATR_BUDGET20_PARTIAL_GAP2_OTHERSTOP15": {
+      "10": {
+        "final_jpy": 183931296.32289013,
+        "max_dd_pct": -15.6201,
+        "pf": 2.984470099278039,
+        "win_pct": 72.043,
+        "trades": 1302,
+        "idle_trades": 59,
+        "delta_jpy": -38887670.55514482,
+        "dd_improvement_pp": 0.0005368128894094326,
+        "idle_rejected_reasons": {
+          "IDLE:CORE_SIGNAL_OR_POSITION": 326,
+          "IDLE:BASKET20_LT_MIN025": 75,
+          "IDLE:BASKET20_VENUE_FLOOR_BELOW_MIN025": 37,
+          "IDLE:FILLED_SYMBOL_COOLDOWN": 73,
+          "IDLE:MULTI_SIGNAL_CAPACITY_AMBIGUOUS": 84,
+          "IDLE:FULL_1X_UNAVAILABLE": 13,
+          "IDLE:ATR25_GATE": 21,
+          "IDLE:HYPE_SIDECAR_ACTIVE": 4,
+          "IDLE:SYMBOL_OWNED_BY_IDLE": 2
+        }
+      },
+      "30": {
+        "final_jpy": 82333709.7523952,
+        "max_dd_pct": -16.7848,
+        "pf": 2.4371905147018746,
+        "win_pct": 68.807,
+        "trades": 1308,
+        "idle_trades": 69,
+        "delta_jpy": -41955497.06588425,
+        "dd_improvement_pp": 0.0029687749344198266,
+        "idle_rejected_reasons": {
+          "IDLE:CORE_SIGNAL_OR_POSITION": 326,
+          "IDLE:BASKET20_LT_MIN025": 79,
+          "IDLE:FILLED_SYMBOL_COOLDOWN": 84,
+          "IDLE:MULTI_SIGNAL_CAPACITY_AMBIGUOUS": 90,
+          "IDLE:FULL_1X_QUANTITY_BLOCK": 1,
+          "IDLE:FULL_1X_UNAVAILABLE": 16,
+          "IDLE:ATR25_GATE": 19,
+          "IDLE:HYPE_SIDECAR_ACTIVE": 3,
+          "IDLE:SYMBOL_OWNED_BY_IDLE": 4,
+          "IDLE:BASKET20_VENUE_FLOOR_BELOW_MIN025": 3
+        }
+      }
+    }
+  },
+  "all_accounting": "PASS",
+  "fatal_caveats": [
+    "Historical Aster venue-signed resident STOP data is absent; other-runner SHORT STOP widths modeled 5/10/15%. This is NOT a signed STOP lifecycle BT.",
+    "Historical pending reservation ledger is absent in frozen atomic H1 simulator; no model of live cross-runner pending exposure.",
+    "Partial scenarios widen fractional venue admission beyond DOT/RENDER to all Idle routes, changing eligible trade set; control scenario preserves original sizing feasibility.",
+    "The 0.25x pre-order minimum uses up to 1% one-step venue-rounding allowance; staged runtime quantity gate must be aligned before any activation.",
+    "In-sample only; public M5 rescaled to Aster historical H1, incomplete independent stock M5 and real execution evidence.",
+    "No LIVE/cutover actions; operator, margin, kill switch and protective STOP gates not bypassed."
+  ],
+  "source_sha256": {
+    "research_scenario_source": "12582879d2638610acc8d9379eb5b0474a088ed774aa6dc62010a51b0829fe76",
+    "full8_replay_bootstrap": "f861140de0a123aef0e4ce93f21e6b0b83ec9f9594921c4bca0439fc65f56108"
+  },
+  "adoption": "REJECT full ATR2.5 + SHORT STOP risk20 + residual sizing as a production upgrade on latest full8"
+}
