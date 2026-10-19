@@ -1,0 +1,6621 @@
+{
+  "source": "Canonical 61 exact H1 entry/exit price parity, preserved archive source SHA in companion report",
+  "note": "Standalone Idle H1-only capital starts 1 and compounds. Original other runners, funding, signed STOP/path, 5m, margin and re-admission NOT replayed.",
+  "results": [
+    {
+      "scenario": "ATR25_ONLY_NO_BASKET",
+      "gap_assumption": 0.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "entry",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": null,
+      "adverse_stop_gap_pct": 1.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 10.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.233463,
+      "max_h1_mtm_drawdown_pct": -5.9027,
+      "peak_h1_gross": 2.2736,
+      "peak_entry_nominal_stop_risk_pct": 24.6273,
+      "trades": 58,
+      "winners": 47,
+      "losers": 11,
+      "pf": 9.9325,
+      "realized_winning_total_normalized": 1.371549,
+      "realized_losing_total_normalized": 0.138087,
+      "largest_realized_loss_normalized": -0.034649,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 0,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [],
+      "final_marks": [
+        [
+          1785369600000,
+          2.218765930751
+        ],
+        [
+          1785373200000,
+          2.21444845914
+        ],
+        [
+          1785376800000,
+          2.203654780113
+        ],
+        [
+          1785380400000,
+          2.217326773547
+        ],
+        [
+          1785384000000,
+          2.233462604115
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_FULL_OR_REJECT",
+      "gap_assumption": 0.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "entry",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 0.0,
+      "partial_sizing": false,
+      "min_gross": 0.25,
+      "cost_bps": 10.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.208935,
+      "max_h1_mtm_drawdown_pct": -5.9027,
+      "peak_h1_gross": 1.9889,
+      "peak_entry_nominal_stop_risk_pct": 19.9569,
+      "trades": 57,
+      "winners": 46,
+      "losers": 11,
+      "pf": 9.8334,
+      "realized_winning_total_normalized": 1.345795,
+      "realized_losing_total_normalized": 0.136859,
+      "largest_realized_loss_normalized": -0.034269,
+      "rejected_winners": 2,
+      "rejected_losers": 2,
+      "downsized_winners": 0,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 27,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.7983916033348771
+        }
+      ],
+      "downsized": [],
+      "final_marks": [
+        [
+          1785369600000,
+          2.19439995132
+        ],
+        [
+          1785373200000,
+          2.190129893194
+        ],
+        [
+          1785376800000,
+          2.179454747878
+        ],
+        [
+          1785380400000,
+          2.192976598612
+        ],
+        [
+          1785384000000,
+          2.208935229182
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_PARTIAL_MIN025",
+      "gap_assumption": 0.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "entry",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 0.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 10.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.226926,
+      "max_h1_mtm_drawdown_pct": -5.9027,
+      "peak_h1_gross": 2.0404,
+      "peak_entry_nominal_stop_risk_pct": 20.0,
+      "trades": 58,
+      "winners": 47,
+      "losers": 11,
+      "pf": 9.9063,
+      "realized_winning_total_normalized": 1.364686,
+      "realized_losing_total_normalized": 0.13776,
+      "largest_realized_loss_normalized": -0.034548,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 2,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [
+        {
+          "idx": 27,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770706800000,
+          "gross": 0.7983916033348771,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 1.0370534642565097,
+          "entry_equity": 1.29892832029388
+        },
+        {
+          "idx": 28,
+          "symbol": "JUPUSDT",
+          "historical_win": true,
+          "entry_ts": 1770724800000,
+          "gross": 0.9637108067568397,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 1.2563035988035367,
+          "entry_equity": 1.303610574868777
+        }
+      ],
+      "final_marks": [
+        [
+          1785369600000,
+          2.212272638559
+        ],
+        [
+          1785373200000,
+          2.207967802172
+        ],
+        [
+          1785376800000,
+          2.197205711205
+        ],
+        [
+          1785380400000,
+          2.210837693097
+        ],
+        [
+          1785384000000,
+          2.22692630162
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_ONLY_NO_BASKET",
+      "gap_assumption": 0.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": null,
+      "adverse_stop_gap_pct": 1.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 10.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.233463,
+      "max_h1_mtm_drawdown_pct": -5.9027,
+      "peak_h1_gross": 2.2736,
+      "peak_entry_nominal_stop_risk_pct": 28.0166,
+      "trades": 58,
+      "winners": 47,
+      "losers": 11,
+      "pf": 9.9325,
+      "realized_winning_total_normalized": 1.371549,
+      "realized_losing_total_normalized": 0.138087,
+      "largest_realized_loss_normalized": -0.034649,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 0,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [],
+      "final_marks": [
+        [
+          1785369600000,
+          2.218765930751
+        ],
+        [
+          1785373200000,
+          2.21444845914
+        ],
+        [
+          1785376800000,
+          2.203654780113
+        ],
+        [
+          1785380400000,
+          2.217326773547
+        ],
+        [
+          1785384000000,
+          2.233462604115
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_FULL_OR_REJECT",
+      "gap_assumption": 0.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 0.0,
+      "partial_sizing": false,
+      "min_gross": 0.25,
+      "cost_bps": 10.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.102534,
+      "max_h1_mtm_drawdown_pct": -5.9027,
+      "peak_h1_gross": 1.2915,
+      "peak_entry_nominal_stop_risk_pct": 13.8099,
+      "trades": 54,
+      "winners": 44,
+      "losers": 10,
+      "pf": 10.3726,
+      "realized_winning_total_normalized": 1.220168,
+      "realized_losing_total_normalized": 0.117634,
+      "largest_realized_loss_normalized": -0.032618,
+      "rejected_winners": 4,
+      "rejected_losers": 3,
+      "downsized_winners": 0,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 14,
+          "reason": "STOP_BUDGET",
+          "historical_win": false,
+          "requested_gross": 1.0,
+          "room_gross": 0.6252681009020908
+        },
+        {
+          "idx": 19,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.4285614131603023
+        },
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 27,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.41940346035434295
+        },
+        {
+          "idx": 29,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.9360524781340456
+        }
+      ],
+      "downsized": [],
+      "final_marks": [
+        [
+          1785369600000,
+          2.08869925653
+        ],
+        [
+          1785373200000,
+          2.084634880194
+        ],
+        [
+          1785376800000,
+          2.074473939354
+        ],
+        [
+          1785380400000,
+          2.087344464418
+        ],
+        [
+          1785384000000,
+          2.102534393578
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_PARTIAL_MIN025",
+      "gap_assumption": 0.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 0.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 10.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.202246,
+      "max_h1_mtm_drawdown_pct": -5.9027,
+      "peak_h1_gross": 1.9254,
+      "peak_entry_nominal_stop_risk_pct": 20.0,
+      "trades": 58,
+      "winners": 47,
+      "losers": 11,
+      "pf": 10.1554,
+      "realized_winning_total_normalized": 1.333562,
+      "realized_losing_total_normalized": 0.131315,
+      "largest_realized_loss_normalized": -0.034165,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 3,
+      "downsized_losers": 1,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [
+        {
+          "idx": 14,
+          "symbol": "JUPUSDT",
+          "historical_win": false,
+          "entry_ts": 1768798800000,
+          "gross": 0.6252681009020908,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.6912203116970403,
+          "entry_equity": 1.105478291151905
+        },
+        {
+          "idx": 19,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1769702400000,
+          "gross": 0.4285614131603025,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.5034658198429304,
+          "entry_equity": 1.1747810334352478
+        },
+        {
+          "idx": 27,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770706800000,
+          "gross": 0.419403460354343,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.5419338942563614,
+          "entry_equity": 1.292154084276023
+        },
+        {
+          "idx": 29,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770750000000,
+          "gross": 0.9437586183588279,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 1.2422511888557828,
+          "entry_equity": 1.3162806301213184
+        }
+      ],
+      "final_marks": [
+        [
+          1785369600000,
+          2.187755221521
+        ],
+        [
+          1785373200000,
+          2.1834980933
+        ],
+        [
+          1785376800000,
+          2.172855272746
+        ],
+        [
+          1785380400000,
+          2.186336178781
+        ],
+        [
+          1785384000000,
+          2.202246485987
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_PARTIAL_PROFIT_LOCK",
+      "gap_assumption": 0.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": [
+        0.05,
+        0.015
+      ],
+      "stop_amendments": 11,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 0.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 10.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.213792,
+      "max_h1_mtm_drawdown_pct": -5.9027,
+      "peak_h1_gross": 1.9742,
+      "peak_entry_nominal_stop_risk_pct": 20.0,
+      "trades": 58,
+      "winners": 47,
+      "losers": 11,
+      "pf": 9.8532,
+      "realized_winning_total_normalized": 1.350894,
+      "realized_losing_total_normalized": 0.137102,
+      "largest_realized_loss_normalized": -0.034344,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 2,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [
+        {
+          "idx": 27,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770706800000,
+          "gross": 0.41940346035434317,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.5447750322835079,
+          "entry_equity": 1.29892832029388
+        },
+        {
+          "idx": 29,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770750000000,
+          "gross": 0.9437586183588278,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 1.2487638043783247,
+          "entry_equity": 1.3231813517633282
+        }
+      ],
+      "final_marks": [
+        [
+          1785369600000,
+          2.199224728448
+        ],
+        [
+          1785373200000,
+          2.194945281842
+        ],
+        [
+          1785376800000,
+          2.184246665328
+        ],
+        [
+          1785380400000,
+          2.197798246246
+        ],
+        [
+          1785384000000,
+          2.213791964694
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_PARTIAL_PROFIT_LOCK",
+      "gap_assumption": 0.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": [
+        0.06,
+        0.025
+      ],
+      "stop_amendments": 8,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 0.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 10.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.213792,
+      "max_h1_mtm_drawdown_pct": -5.9027,
+      "peak_h1_gross": 1.9742,
+      "peak_entry_nominal_stop_risk_pct": 20.0,
+      "trades": 58,
+      "winners": 47,
+      "losers": 11,
+      "pf": 9.8532,
+      "realized_winning_total_normalized": 1.350894,
+      "realized_losing_total_normalized": 0.137102,
+      "largest_realized_loss_normalized": -0.034344,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 2,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [
+        {
+          "idx": 27,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770706800000,
+          "gross": 0.41940346035434317,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.5447750322835079,
+          "entry_equity": 1.29892832029388
+        },
+        {
+          "idx": 29,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770750000000,
+          "gross": 0.9437586183588278,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 1.2487638043783247,
+          "entry_equity": 1.3231813517633282
+        }
+      ],
+      "final_marks": [
+        [
+          1785369600000,
+          2.199224728448
+        ],
+        [
+          1785373200000,
+          2.194945281842
+        ],
+        [
+          1785376800000,
+          2.184246665328
+        ],
+        [
+          1785380400000,
+          2.197798246246
+        ],
+        [
+          1785384000000,
+          2.213791964694
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_ONLY_NO_BASKET",
+      "gap_assumption": 1.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "entry",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": null,
+      "adverse_stop_gap_pct": 1.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 10.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.233463,
+      "max_h1_mtm_drawdown_pct": -5.9027,
+      "peak_h1_gross": 2.2736,
+      "peak_entry_nominal_stop_risk_pct": 24.6273,
+      "trades": 58,
+      "winners": 47,
+      "losers": 11,
+      "pf": 9.9325,
+      "realized_winning_total_normalized": 1.371549,
+      "realized_losing_total_normalized": 0.138087,
+      "largest_realized_loss_normalized": -0.034649,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 0,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [],
+      "final_marks": [
+        [
+          1785369600000,
+          2.218765930751
+        ],
+        [
+          1785373200000,
+          2.21444845914
+        ],
+        [
+          1785376800000,
+          2.203654780113
+        ],
+        [
+          1785380400000,
+          2.217326773547
+        ],
+        [
+          1785384000000,
+          2.233462604115
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_FULL_OR_REJECT",
+      "gap_assumption": 1.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "entry",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 1.0,
+      "partial_sizing": false,
+      "min_gross": 0.25,
+      "cost_bps": 10.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.102534,
+      "max_h1_mtm_drawdown_pct": -5.9027,
+      "peak_h1_gross": 1.2915,
+      "peak_entry_nominal_stop_risk_pct": 13.7641,
+      "trades": 54,
+      "winners": 44,
+      "losers": 10,
+      "pf": 10.3726,
+      "realized_winning_total_normalized": 1.220168,
+      "realized_losing_total_normalized": 0.117634,
+      "largest_realized_loss_normalized": -0.032618,
+      "rejected_winners": 4,
+      "rejected_losers": 3,
+      "downsized_winners": 0,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 14,
+          "reason": "STOP_BUDGET",
+          "historical_win": false,
+          "requested_gross": 1.0,
+          "room_gross": 0.8584360666710801
+        },
+        {
+          "idx": 19,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.8803065006817483
+        },
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 27,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.6168110757784133
+        },
+        {
+          "idx": 29,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.8227393364226426
+        }
+      ],
+      "downsized": [],
+      "final_marks": [
+        [
+          1785369600000,
+          2.08869925653
+        ],
+        [
+          1785373200000,
+          2.084634880194
+        ],
+        [
+          1785376800000,
+          2.074473939354
+        ],
+        [
+          1785380400000,
+          2.087344464418
+        ],
+        [
+          1785384000000,
+          2.102534393578
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_PARTIAL_MIN025",
+      "gap_assumption": 1.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "entry",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 1.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 10.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.209146,
+      "max_h1_mtm_drawdown_pct": -5.9027,
+      "peak_h1_gross": 1.8446,
+      "peak_entry_nominal_stop_risk_pct": 20.0,
+      "trades": 58,
+      "winners": 47,
+      "losers": 11,
+      "pf": 9.9631,
+      "realized_winning_total_normalized": 1.344047,
+      "realized_losing_total_normalized": 0.134902,
+      "largest_realized_loss_normalized": -0.034272,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 4,
+      "downsized_losers": 1,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [
+        {
+          "idx": 14,
+          "symbol": "JUPUSDT",
+          "historical_win": false,
+          "entry_ts": 1768798800000,
+          "gross": 0.8584360666710801,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.9489824360467084,
+          "entry_equity": 1.105478291151905
+        },
+        {
+          "idx": 19,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1769702400000,
+          "gross": 0.8803065006817483,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 1.0311091032726294,
+          "entry_equity": 1.1713069282961024
+        },
+        {
+          "idx": 27,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770706800000,
+          "gross": 0.6168110757784134,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.800967088226532,
+          "entry_equity": 1.298561455330085
+        },
+        {
+          "idx": 28,
+          "symbol": "JUPUSDT",
+          "historical_win": true,
+          "entry_ts": 1770724800000,
+          "gross": 0.9638494099475987,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 1.2575143350246487,
+          "entry_equity": 1.304679260106634
+        },
+        {
+          "idx": 29,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770750000000,
+          "gross": 0.8686505060720422,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 1.1513571547461023,
+          "entry_equity": 1.3254549979512862
+        }
+      ],
+      "final_marks": [
+        [
+          1785369600000,
+          2.194608923708
+        ],
+        [
+          1785373200000,
+          2.190338458944
+        ],
+        [
+          1785376800000,
+          2.179662297036
+        ],
+        [
+          1785380400000,
+          2.193185435453
+        ],
+        [
+          1785384000000,
+          2.209145585762
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_ONLY_NO_BASKET",
+      "gap_assumption": 1.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": null,
+      "adverse_stop_gap_pct": 1.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 10.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.233463,
+      "max_h1_mtm_drawdown_pct": -5.9027,
+      "peak_h1_gross": 2.2736,
+      "peak_entry_nominal_stop_risk_pct": 28.0166,
+      "trades": 58,
+      "winners": 47,
+      "losers": 11,
+      "pf": 9.9325,
+      "realized_winning_total_normalized": 1.371549,
+      "realized_losing_total_normalized": 0.138087,
+      "largest_realized_loss_normalized": -0.034649,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 0,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [],
+      "final_marks": [
+        [
+          1785369600000,
+          2.218765930751
+        ],
+        [
+          1785373200000,
+          2.21444845914
+        ],
+        [
+          1785376800000,
+          2.203654780113
+        ],
+        [
+          1785380400000,
+          2.217326773547
+        ],
+        [
+          1785384000000,
+          2.233462604115
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_FULL_OR_REJECT",
+      "gap_assumption": 1.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 1.0,
+      "partial_sizing": false,
+      "min_gross": 0.25,
+      "cost_bps": 10.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.102534,
+      "max_h1_mtm_drawdown_pct": -5.9027,
+      "peak_h1_gross": 1.2915,
+      "peak_entry_nominal_stop_risk_pct": 15.046,
+      "trades": 54,
+      "winners": 44,
+      "losers": 10,
+      "pf": 10.3726,
+      "realized_winning_total_normalized": 1.220168,
+      "realized_losing_total_normalized": 0.117634,
+      "largest_realized_loss_normalized": -0.032618,
+      "rejected_winners": 4,
+      "rejected_losers": 3,
+      "downsized_winners": 0,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 14,
+          "reason": "STOP_BUDGET",
+          "historical_win": false,
+          "requested_gross": 1.0,
+          "room_gross": 0.48137768709749656
+        },
+        {
+          "idx": 19,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.30452540480213797
+        },
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 27,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.2722451074555119
+        },
+        {
+          "idx": 29,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.7606894431620269
+        }
+      ],
+      "downsized": [],
+      "final_marks": [
+        [
+          1785369600000,
+          2.08869925653
+        ],
+        [
+          1785373200000,
+          2.084634880194
+        ],
+        [
+          1785376800000,
+          2.074473939354
+        ],
+        [
+          1785380400000,
+          2.087344464418
+        ],
+        [
+          1785384000000,
+          2.102534393578
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_PARTIAL_MIN025",
+      "gap_assumption": 1.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 1.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 10.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.180805,
+      "max_h1_mtm_drawdown_pct": -5.9027,
+      "peak_h1_gross": 1.7495,
+      "peak_entry_nominal_stop_risk_pct": 20.0,
+      "trades": 58,
+      "winners": 47,
+      "losers": 11,
+      "pf": 10.2076,
+      "realized_winning_total_normalized": 1.309047,
+      "realized_losing_total_normalized": 0.128242,
+      "largest_realized_loss_normalized": -0.033832,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 3,
+      "downsized_losers": 1,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [
+        {
+          "idx": 14,
+          "symbol": "JUPUSDT",
+          "historical_win": false,
+          "entry_ts": 1768798800000,
+          "gross": 0.48137768709749656,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.5321525829311969,
+          "entry_equity": 1.105478291151905
+        },
+        {
+          "idx": 19,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1769702400000,
+          "gross": 0.3045254048021379,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.3584035438974378,
+          "entry_equity": 1.1769249404012996
+        },
+        {
+          "idx": 27,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770706800000,
+          "gross": 0.27224510745551206,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.35165635132580786,
+          "entry_equity": 1.2916902515255393
+        },
+        {
+          "idx": 29,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770750000000,
+          "gross": 0.7656711900011531,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 1.0058028096966092,
+          "entry_equity": 1.3136223784195071
+        }
+      ],
+      "final_marks": [
+        [
+          1785369600000,
+          2.166455258911
+        ],
+        [
+          1785373200000,
+          2.162239578047
+        ],
+        [
+          1785376800000,
+          2.151700375886
+        ],
+        [
+          1785380400000,
+          2.165050031956
+        ],
+        [
+          1785384000000,
+          2.180805436573
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_PARTIAL_PROFIT_LOCK",
+      "gap_assumption": 1.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": [
+        0.05,
+        0.015
+      ],
+      "stop_amendments": 11,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 1.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 10.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.193026,
+      "max_h1_mtm_drawdown_pct": -5.9027,
+      "peak_h1_gross": 1.9742,
+      "peak_entry_nominal_stop_risk_pct": 20.0,
+      "trades": 58,
+      "winners": 47,
+      "losers": 11,
+      "pf": 9.7682,
+      "realized_winning_total_normalized": 1.329089,
+      "realized_losing_total_normalized": 0.136063,
+      "largest_realized_loss_normalized": -0.034022,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 2,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [
+        {
+          "idx": 27,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770706800000,
+          "gross": 0.27224510745551206,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.35362688013541516,
+          "entry_equity": 1.29892832029388
+        },
+        {
+          "idx": 29,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770750000000,
+          "gross": 0.7656711900011531,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 1.0114388899375,
+          "entry_equity": 1.3209833452607467
+        }
+      ],
+      "final_marks": [
+        [
+          1785369600000,
+          2.178595129231
+        ],
+        [
+          1785373200000,
+          2.17435582553
+        ],
+        [
+          1785376800000,
+          2.163757566277
+        ],
+        [
+          1785380400000,
+          2.177182027998
+        ],
+        [
+          1785384000000,
+          2.19302571903
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_PARTIAL_PROFIT_LOCK",
+      "gap_assumption": 1.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": [
+        0.06,
+        0.025
+      ],
+      "stop_amendments": 8,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 1.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 10.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.193026,
+      "max_h1_mtm_drawdown_pct": -5.9027,
+      "peak_h1_gross": 1.9742,
+      "peak_entry_nominal_stop_risk_pct": 20.0,
+      "trades": 58,
+      "winners": 47,
+      "losers": 11,
+      "pf": 9.7682,
+      "realized_winning_total_normalized": 1.329089,
+      "realized_losing_total_normalized": 0.136063,
+      "largest_realized_loss_normalized": -0.034022,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 2,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [
+        {
+          "idx": 27,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770706800000,
+          "gross": 0.27224510745551206,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.35362688013541516,
+          "entry_equity": 1.29892832029388
+        },
+        {
+          "idx": 29,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770750000000,
+          "gross": 0.7656711900011531,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 1.0114388899375,
+          "entry_equity": 1.3209833452607467
+        }
+      ],
+      "final_marks": [
+        [
+          1785369600000,
+          2.178595129231
+        ],
+        [
+          1785373200000,
+          2.17435582553
+        ],
+        [
+          1785376800000,
+          2.163757566277
+        ],
+        [
+          1785380400000,
+          2.177182027998
+        ],
+        [
+          1785384000000,
+          2.19302571903
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_ONLY_NO_BASKET",
+      "gap_assumption": 2.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "entry",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": null,
+      "adverse_stop_gap_pct": 1.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 10.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.233463,
+      "max_h1_mtm_drawdown_pct": -5.9027,
+      "peak_h1_gross": 2.2736,
+      "peak_entry_nominal_stop_risk_pct": 24.6273,
+      "trades": 58,
+      "winners": 47,
+      "losers": 11,
+      "pf": 9.9325,
+      "realized_winning_total_normalized": 1.371549,
+      "realized_losing_total_normalized": 0.138087,
+      "largest_realized_loss_normalized": -0.034649,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 0,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [],
+      "final_marks": [
+        [
+          1785369600000,
+          2.218765930751
+        ],
+        [
+          1785373200000,
+          2.21444845914
+        ],
+        [
+          1785376800000,
+          2.203654780113
+        ],
+        [
+          1785380400000,
+          2.217326773547
+        ],
+        [
+          1785384000000,
+          2.233462604115
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_FULL_OR_REJECT",
+      "gap_assumption": 2.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "entry",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 2.0,
+      "partial_sizing": false,
+      "min_gross": 0.25,
+      "cost_bps": 10.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.102534,
+      "max_h1_mtm_drawdown_pct": -5.9027,
+      "peak_h1_gross": 1.2915,
+      "peak_entry_nominal_stop_risk_pct": 15.0154,
+      "trades": 54,
+      "winners": 44,
+      "losers": 10,
+      "pf": 10.3726,
+      "realized_winning_total_normalized": 1.220168,
+      "realized_losing_total_normalized": 0.117634,
+      "largest_realized_loss_normalized": -0.032618,
+      "rejected_winners": 4,
+      "rejected_losers": 3,
+      "downsized_winners": 0,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 14,
+          "reason": "STOP_BUDGET",
+          "historical_win": false,
+          "requested_gross": 1.0,
+          "room_gross": 0.7071120515372272
+        },
+        {
+          "idx": 19,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.7289841410193971
+        },
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 27,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.46546877096240974
+        },
+        {
+          "idx": 29,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.6714126192427488
+        }
+      ],
+      "downsized": [],
+      "final_marks": [
+        [
+          1785369600000,
+          2.08869925653
+        ],
+        [
+          1785373200000,
+          2.084634880194
+        ],
+        [
+          1785376800000,
+          2.074473939354
+        ],
+        [
+          1785380400000,
+          2.087344464418
+        ],
+        [
+          1785384000000,
+          2.102534393578
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_PARTIAL_MIN025",
+      "gap_assumption": 2.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "entry",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 2.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 10.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.189038,
+      "max_h1_mtm_drawdown_pct": -5.9027,
+      "peak_h1_gross": 1.6868,
+      "peak_entry_nominal_stop_risk_pct": 20.0,
+      "trades": 58,
+      "winners": 47,
+      "losers": 11,
+      "pf": 10.0221,
+      "realized_winning_total_normalized": 1.32083,
+      "realized_losing_total_normalized": 0.131792,
+      "largest_realized_loss_normalized": -0.03396,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 4,
+      "downsized_losers": 1,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [
+        {
+          "idx": 14,
+          "symbol": "JUPUSDT",
+          "historical_win": false,
+          "entry_ts": 1768798800000,
+          "gross": 0.7071120515372272,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.7816970223862917,
+          "entry_equity": 1.105478291151905
+        },
+        {
+          "idx": 19,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1769702400000,
+          "gross": 0.7289841410193973,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.8555077896693782,
+          "entry_equity": 1.1735615928119543
+        },
+        {
+          "idx": 27,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770706800000,
+          "gross": 0.46546877096241007,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.6040053953925146,
+          "entry_equity": 1.2976281827536231
+        },
+        {
+          "idx": 28,
+          "symbol": "JUPUSDT",
+          "historical_win": true,
+          "entry_ts": 1770724800000,
+          "gross": 0.9636846016867209,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 1.2575489682585477,
+          "entry_equity": 1.3049383232413188
+        },
+        {
+          "idx": 29,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770750000000,
+          "gross": 0.7149979767411921,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.9454007231219232,
+          "entry_equity": 1.3222425151898436
+        }
+      ],
+      "final_marks": [
+        [
+          1785369600000,
+          2.174633491757
+        ],
+        [
+          1785373200000,
+          2.170401896961
+        ],
+        [
+          1785376800000,
+          2.159822909973
+        ],
+        [
+          1785380400000,
+          2.173222960158
+        ],
+        [
+          1785384000000,
+          2.18903784044
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_ONLY_NO_BASKET",
+      "gap_assumption": 2.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": null,
+      "adverse_stop_gap_pct": 1.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 10.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.233463,
+      "max_h1_mtm_drawdown_pct": -5.9027,
+      "peak_h1_gross": 2.2736,
+      "peak_entry_nominal_stop_risk_pct": 28.0166,
+      "trades": 58,
+      "winners": 47,
+      "losers": 11,
+      "pf": 9.9325,
+      "realized_winning_total_normalized": 1.371549,
+      "realized_losing_total_normalized": 0.138087,
+      "largest_realized_loss_normalized": -0.034649,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 0,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [],
+      "final_marks": [
+        [
+          1785369600000,
+          2.218765930751
+        ],
+        [
+          1785373200000,
+          2.21444845914
+        ],
+        [
+          1785376800000,
+          2.203654780113
+        ],
+        [
+          1785380400000,
+          2.217326773547
+        ],
+        [
+          1785384000000,
+          2.233462604115
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_FULL_OR_REJECT",
+      "gap_assumption": 2.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 2.0,
+      "partial_sizing": false,
+      "min_gross": 0.25,
+      "cost_bps": 10.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.102534,
+      "max_h1_mtm_drawdown_pct": -5.9027,
+      "peak_h1_gross": 1.2915,
+      "peak_entry_nominal_stop_risk_pct": 16.2822,
+      "trades": 54,
+      "winners": 44,
+      "losers": 10,
+      "pf": 10.3726,
+      "realized_winning_total_normalized": 1.220168,
+      "realized_losing_total_normalized": 0.117634,
+      "largest_realized_loss_normalized": -0.032618,
+      "rejected_winners": 4,
+      "rejected_losers": 3,
+      "downsized_winners": 0,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 14,
+          "reason": "STOP_BUDGET",
+          "historical_win": false,
+          "requested_gross": 1.0,
+          "room_gross": 0.36144904078742257
+        },
+        {
+          "idx": 19,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.20114485162435092
+        },
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 27,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.14959272506439616
+        },
+        {
+          "idx": 29,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.6145292449880126
+        }
+      ],
+      "downsized": [],
+      "final_marks": [
+        [
+          1785369600000,
+          2.08869925653
+        ],
+        [
+          1785373200000,
+          2.084634880194
+        ],
+        [
+          1785376800000,
+          2.074473939354
+        ],
+        [
+          1785380400000,
+          2.087344464418
+        ],
+        [
+          1785384000000,
+          2.102534393578
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_PARTIAL_MIN025",
+      "gap_assumption": 2.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 2.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 10.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.151469,
+      "max_h1_mtm_drawdown_pct": -5.9027,
+      "peak_h1_gross": 1.6029,
+      "peak_entry_nominal_stop_risk_pct": 20.0,
+      "trades": 56,
+      "winners": 45,
+      "losers": 11,
+      "pf": 10.2039,
+      "realized_winning_total_normalized": 1.276575,
+      "realized_losing_total_normalized": 0.125107,
+      "largest_realized_loss_normalized": -0.033377,
+      "rejected_winners": 3,
+      "rejected_losers": 2,
+      "downsized_winners": 1,
+      "downsized_losers": 1,
+      "rejected": [
+        {
+          "idx": 19,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.2011448516243511
+        },
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 27,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.14959272506439614
+        }
+      ],
+      "downsized": [
+        {
+          "idx": 14,
+          "symbol": "JUPUSDT",
+          "historical_win": false,
+          "entry_ts": 1768798800000,
+          "gross": 0.36144904078742257,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.3995740679481751,
+          "entry_equity": 1.105478291151905
+        },
+        {
+          "idx": 29,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770750000000,
+          "gross": 0.6145292449880128,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.8016731415047109,
+          "entry_equity": 1.3045321244562553
+        }
+      ],
+      "final_marks": [
+        [
+          1785369600000,
+          2.137311456873
+        ],
+        [
+          1785373200000,
+          2.133152486604
+        ],
+        [
+          1785376800000,
+          2.122755060933
+        ],
+        [
+          1785380400000,
+          2.13592513345
+        ],
+        [
+          1785384000000,
+          2.151468591667
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_PARTIAL_PROFIT_LOCK",
+      "gap_assumption": 2.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": [
+        0.05,
+        0.015
+      ],
+      "stop_amendments": 11,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 2.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 10.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.171894,
+      "max_h1_mtm_drawdown_pct": -5.9027,
+      "peak_h1_gross": 1.9742,
+      "peak_entry_nominal_stop_risk_pct": 20.0,
+      "trades": 57,
+      "winners": 46,
+      "losers": 11,
+      "pf": 9.6803,
+      "realized_winning_total_normalized": 1.3069,
+      "realized_losing_total_normalized": 0.135006,
+      "largest_realized_loss_normalized": -0.033694,
+      "rejected_winners": 2,
+      "rejected_losers": 2,
+      "downsized_winners": 1,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 27,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.1495927250643962
+        }
+      ],
+      "downsized": [
+        {
+          "idx": 29,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770750000000,
+          "gross": 0.6145292449880131,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.8092840103666753,
+          "entry_equity": 1.3169170010492521
+        }
+      ],
+      "final_marks": [
+        [
+          1785369600000,
+          2.157602516125
+        ],
+        [
+          1785373200000,
+          2.153404061713
+        ],
+        [
+          1785376800000,
+          2.142907925683
+        ],
+        [
+          1785380400000,
+          2.156203031321
+        ],
+        [
+          1785384000000,
+          2.171894054944
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_PARTIAL_PROFIT_LOCK",
+      "gap_assumption": 2.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": [
+        0.06,
+        0.025
+      ],
+      "stop_amendments": 8,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 2.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 10.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.171894,
+      "max_h1_mtm_drawdown_pct": -5.9027,
+      "peak_h1_gross": 1.9742,
+      "peak_entry_nominal_stop_risk_pct": 20.0,
+      "trades": 57,
+      "winners": 46,
+      "losers": 11,
+      "pf": 9.6803,
+      "realized_winning_total_normalized": 1.3069,
+      "realized_losing_total_normalized": 0.135006,
+      "largest_realized_loss_normalized": -0.033694,
+      "rejected_winners": 2,
+      "rejected_losers": 2,
+      "downsized_winners": 1,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 27,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.1495927250643962
+        }
+      ],
+      "downsized": [
+        {
+          "idx": 29,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770750000000,
+          "gross": 0.6145292449880131,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.8092840103666753,
+          "entry_equity": 1.3169170010492521
+        }
+      ],
+      "final_marks": [
+        [
+          1785369600000,
+          2.157602516125
+        ],
+        [
+          1785373200000,
+          2.153404061713
+        ],
+        [
+          1785376800000,
+          2.142907925683
+        ],
+        [
+          1785380400000,
+          2.156203031321
+        ],
+        [
+          1785384000000,
+          2.171894054944
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_ONLY_NO_BASKET",
+      "gap_assumption": 0.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "entry",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": null,
+      "adverse_stop_gap_pct": 1.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 20.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.154139,
+      "max_h1_mtm_drawdown_pct": -6.1167,
+      "peak_h1_gross": 2.2761,
+      "peak_entry_nominal_stop_risk_pct": 24.6545,
+      "trades": 58,
+      "winners": 47,
+      "losers": 11,
+      "pf": 8.9619,
+      "realized_winning_total_normalized": 1.299097,
+      "realized_losing_total_normalized": 0.144958,
+      "largest_realized_loss_normalized": -0.035642,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 0,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [],
+      "final_marks": [
+        [
+          1785369600000,
+          2.14104474321
+        ],
+        [
+          1785373200000,
+          2.136876377846
+        ],
+        [
+          1785376800000,
+          2.126455464437
+        ],
+        [
+          1785380400000,
+          2.139655288089
+        ],
+        [
+          1785384000000,
+          2.154138968272
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_FULL_OR_REJECT",
+      "gap_assumption": 0.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "entry",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 0.0,
+      "partial_sizing": false,
+      "min_gross": 0.25,
+      "cost_bps": 20.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.132509,
+      "max_h1_mtm_drawdown_pct": -6.1167,
+      "peak_h1_gross": 1.9905,
+      "peak_entry_nominal_stop_risk_pct": 19.9731,
+      "trades": 57,
+      "winners": 46,
+      "losers": 11,
+      "pf": 8.8764,
+      "realized_winning_total_normalized": 1.276295,
+      "realized_losing_total_normalized": 0.143785,
+      "largest_realized_loss_normalized": -0.035284,
+      "rejected_winners": 2,
+      "rejected_losers": 2,
+      "downsized_winners": 0,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 27,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.796990305153399
+        }
+      ],
+      "downsized": [],
+      "final_marks": [
+        [
+          1785369600000,
+          2.119546670406
+        ],
+        [
+          1785373200000,
+          2.115420159292
+        ],
+        [
+          1785376800000,
+          2.105103881508
+        ],
+        [
+          1785380400000,
+          2.118171166701
+        ],
+        [
+          1785384000000,
+          2.132509417317
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_PARTIAL_MIN025",
+      "gap_assumption": 0.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "entry",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 0.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 20.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.148259,
+      "max_h1_mtm_drawdown_pct": -6.1167,
+      "peak_h1_gross": 2.0403,
+      "peak_entry_nominal_stop_risk_pct": 20.0,
+      "trades": 58,
+      "winners": 47,
+      "losers": 11,
+      "pf": 8.9388,
+      "realized_winning_total_normalized": 1.292899,
+      "realized_losing_total_normalized": 0.144639,
+      "largest_realized_loss_normalized": -0.035545,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 2,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [
+        {
+          "idx": 27,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770706800000,
+          "gross": 0.796990305153399,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 1.0245141788013852,
+          "entry_equity": 1.2854788473295093
+        },
+        {
+          "idx": 28,
+          "symbol": "JUPUSDT",
+          "historical_win": true,
+          "entry_ts": 1770724800000,
+          "gross": 0.9631063929797231,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 1.2414434274217414,
+          "entry_equity": 1.2889992595531221
+        }
+      ],
+      "final_marks": [
+        [
+          1785369600000,
+          2.135200693962
+        ],
+        [
+          1785373200000,
+          2.131043706283
+        ],
+        [
+          1785376800000,
+          2.120651237086
+        ],
+        [
+          1785380400000,
+          2.133815031402
+        ],
+        [
+          1785384000000,
+          2.148259177923
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_ONLY_NO_BASKET",
+      "gap_assumption": 0.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": null,
+      "adverse_stop_gap_pct": 1.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 20.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.154139,
+      "max_h1_mtm_drawdown_pct": -6.1167,
+      "peak_h1_gross": 2.2761,
+      "peak_entry_nominal_stop_risk_pct": 28.0392,
+      "trades": 58,
+      "winners": 47,
+      "losers": 11,
+      "pf": 8.9619,
+      "realized_winning_total_normalized": 1.299097,
+      "realized_losing_total_normalized": 0.144958,
+      "largest_realized_loss_normalized": -0.035642,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 0,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [],
+      "final_marks": [
+        [
+          1785369600000,
+          2.14104474321
+        ],
+        [
+          1785373200000,
+          2.136876377846
+        ],
+        [
+          1785376800000,
+          2.126455464437
+        ],
+        [
+          1785380400000,
+          2.139655288089
+        ],
+        [
+          1785384000000,
+          2.154138968272
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_FULL_OR_REJECT",
+      "gap_assumption": 0.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 0.0,
+      "partial_sizing": false,
+      "min_gross": 0.25,
+      "cost_bps": 20.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.035669,
+      "max_h1_mtm_drawdown_pct": -6.1167,
+      "peak_h1_gross": 1.2922,
+      "peak_entry_nominal_stop_risk_pct": 13.8172,
+      "trades": 54,
+      "winners": 44,
+      "losers": 10,
+      "pf": 9.3804,
+      "realized_winning_total_normalized": 1.159251,
+      "realized_losing_total_normalized": 0.123582,
+      "largest_realized_loss_normalized": -0.033682,
+      "rejected_winners": 4,
+      "rejected_losers": 3,
+      "downsized_winners": 0,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 14,
+          "reason": "STOP_BUDGET",
+          "historical_win": false,
+          "requested_gross": 1.0,
+          "room_gross": 0.6239862201723273
+        },
+        {
+          "idx": 19,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.4273987548819612
+        },
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 27,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.4181917717923641
+        },
+        {
+          "idx": 29,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.934463031143115
+        }
+      ],
+      "downsized": [],
+      "final_marks": [
+        [
+          1785369600000,
+          2.023294943946
+        ],
+        [
+          1785373200000,
+          2.019355823761
+        ],
+        [
+          1785376800000,
+          2.009508023299
+        ],
+        [
+          1785380400000,
+          2.021981903885
+        ],
+        [
+          1785384000000,
+          2.035669033487
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_PARTIAL_MIN025",
+      "gap_assumption": 0.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 0.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 20.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.127075,
+      "max_h1_mtm_drawdown_pct": -6.1167,
+      "peak_h1_gross": 1.9253,
+      "peak_entry_nominal_stop_risk_pct": 20.0,
+      "trades": 58,
+      "winners": 47,
+      "losers": 11,
+      "pf": 9.175,
+      "realized_winning_total_normalized": 1.264943,
+      "realized_losing_total_normalized": 0.137868,
+      "largest_realized_loss_normalized": -0.035194,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 3,
+      "downsized_losers": 1,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [
+        {
+          "idx": 14,
+          "symbol": "JUPUSDT",
+          "historical_win": false,
+          "entry_ts": 1768798800000,
+          "gross": 0.6239862201723273,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.6872461333263087,
+          "entry_equity": 1.1013803047389585
+        },
+        {
+          "idx": 19,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1769702400000,
+          "gross": 0.4273987548819612,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.49908205945994544,
+          "entry_equity": 1.1677199658613457
+        },
+        {
+          "idx": 27,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770706800000,
+          "gross": 0.41819177179236394,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.5352665401498451,
+          "entry_equity": 1.2799547390798733
+        },
+        {
+          "idx": 29,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770750000000,
+          "gross": 0.9419367838154518,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 1.226295364817438,
+          "entry_equity": 1.3018871179976117
+        }
+      ],
+      "final_marks": [
+        [
+          1785369600000,
+          2.114144852282
+        ],
+        [
+          1785373200000,
+          2.11002885788
+        ],
+        [
+          1785376800000,
+          2.099738871877
+        ],
+        [
+          1785380400000,
+          2.112772854148
+        ],
+        [
+          1785384000000,
+          2.127074562694
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_PARTIAL_PROFIT_LOCK",
+      "gap_assumption": 0.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": [
+        0.05,
+        0.015
+      ],
+      "stop_amendments": 11,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 0.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 20.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.136255,
+      "max_h1_mtm_drawdown_pct": -6.1167,
+      "peak_h1_gross": 1.9757,
+      "peak_entry_nominal_stop_risk_pct": 20.0,
+      "trades": 58,
+      "winners": 47,
+      "losers": 11,
+      "pf": 8.8913,
+      "realized_winning_total_normalized": 1.280243,
+      "realized_losing_total_normalized": 0.143988,
+      "largest_realized_loss_normalized": -0.035346,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 2,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [
+        {
+          "idx": 27,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770706800000,
+          "gross": 0.4181917717923639,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.5375766767663331,
+          "entry_equity": 1.2854788473295093
+        },
+        {
+          "idx": 29,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770750000000,
+          "gross": 0.9419367838154518,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 1.231587886603129,
+          "entry_equity": 1.3075058833719215
+        }
+      ],
+      "final_marks": [
+        [
+          1785369600000,
+          2.123269210091
+        ],
+        [
+          1785373200000,
+          2.119135451625
+        ],
+        [
+          1785376800000,
+          2.108801055461
+        ],
+        [
+          1785380400000,
+          2.121891290603
+        ],
+        [
+          1785384000000,
+          2.136254723352
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_PARTIAL_PROFIT_LOCK",
+      "gap_assumption": 0.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": [
+        0.06,
+        0.025
+      ],
+      "stop_amendments": 8,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 0.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 20.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.136255,
+      "max_h1_mtm_drawdown_pct": -6.1167,
+      "peak_h1_gross": 1.9757,
+      "peak_entry_nominal_stop_risk_pct": 20.0,
+      "trades": 58,
+      "winners": 47,
+      "losers": 11,
+      "pf": 8.8913,
+      "realized_winning_total_normalized": 1.280243,
+      "realized_losing_total_normalized": 0.143988,
+      "largest_realized_loss_normalized": -0.035346,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 2,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [
+        {
+          "idx": 27,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770706800000,
+          "gross": 0.4181917717923639,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.5375766767663331,
+          "entry_equity": 1.2854788473295093
+        },
+        {
+          "idx": 29,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770750000000,
+          "gross": 0.9419367838154518,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 1.231587886603129,
+          "entry_equity": 1.3075058833719215
+        }
+      ],
+      "final_marks": [
+        [
+          1785369600000,
+          2.123269210091
+        ],
+        [
+          1785373200000,
+          2.119135451625
+        ],
+        [
+          1785376800000,
+          2.108801055461
+        ],
+        [
+          1785380400000,
+          2.121891290603
+        ],
+        [
+          1785384000000,
+          2.136254723352
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_ONLY_NO_BASKET",
+      "gap_assumption": 1.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "entry",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": null,
+      "adverse_stop_gap_pct": 1.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 20.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.154139,
+      "max_h1_mtm_drawdown_pct": -6.1167,
+      "peak_h1_gross": 2.2761,
+      "peak_entry_nominal_stop_risk_pct": 24.6545,
+      "trades": 58,
+      "winners": 47,
+      "losers": 11,
+      "pf": 8.9619,
+      "realized_winning_total_normalized": 1.299097,
+      "realized_losing_total_normalized": 0.144958,
+      "largest_realized_loss_normalized": -0.035642,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 0,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [],
+      "final_marks": [
+        [
+          1785369600000,
+          2.14104474321
+        ],
+        [
+          1785373200000,
+          2.136876377846
+        ],
+        [
+          1785376800000,
+          2.126455464437
+        ],
+        [
+          1785380400000,
+          2.139655288089
+        ],
+        [
+          1785384000000,
+          2.154138968272
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_FULL_OR_REJECT",
+      "gap_assumption": 1.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "entry",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 1.0,
+      "partial_sizing": false,
+      "min_gross": 0.25,
+      "cost_bps": 20.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.035669,
+      "max_h1_mtm_drawdown_pct": -6.1167,
+      "peak_h1_gross": 1.2922,
+      "peak_entry_nominal_stop_risk_pct": 13.7713,
+      "trades": 54,
+      "winners": 44,
+      "losers": 10,
+      "pf": 9.3804,
+      "realized_winning_total_normalized": 1.159251,
+      "realized_losing_total_normalized": 0.123582,
+      "largest_realized_loss_normalized": -0.033682,
+      "rejected_winners": 4,
+      "rejected_losers": 3,
+      "downsized_winners": 0,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 14,
+          "reason": "STOP_BUDGET",
+          "historical_win": false,
+          "requested_gross": 1.0,
+          "room_gross": 0.8571978936190506
+        },
+        {
+          "idx": 19,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.8790692110379856
+        },
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 27,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.6156467462251147
+        },
+        {
+          "idx": 29,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.8213794868527033
+        }
+      ],
+      "downsized": [],
+      "final_marks": [
+        [
+          1785369600000,
+          2.023294943946
+        ],
+        [
+          1785373200000,
+          2.019355823761
+        ],
+        [
+          1785376800000,
+          2.009508023299
+        ],
+        [
+          1785380400000,
+          2.021981903885
+        ],
+        [
+          1785384000000,
+          2.035669033487
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_PARTIAL_MIN025",
+      "gap_assumption": 1.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "entry",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 1.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 20.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.132169,
+      "max_h1_mtm_drawdown_pct": -6.1167,
+      "peak_h1_gross": 1.8446,
+      "peak_entry_nominal_stop_risk_pct": 20.0,
+      "trades": 58,
+      "winners": 47,
+      "losers": 11,
+      "pf": 8.9938,
+      "realized_winning_total_normalized": 1.273801,
+      "realized_losing_total_normalized": 0.141632,
+      "largest_realized_loss_normalized": -0.035279,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 4,
+      "downsized_losers": 1,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [
+        {
+          "idx": 14,
+          "symbol": "JUPUSDT",
+          "historical_win": false,
+          "entry_ts": 1768798800000,
+          "gross": 0.8571978936190506,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.9441008772957433,
+          "entry_equity": 1.1013803047389585
+        },
+        {
+          "idx": 19,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1769702400000,
+          "gross": 0.8790692110379857,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 1.023225653937867,
+          "entry_equity": 1.1639875917502156
+        },
+        {
+          "idx": 27,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770706800000,
+          "gross": 0.6156467462251144,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.7913788012629791,
+          "entry_equity": 1.2854430013889937
+        },
+        {
+          "idx": 28,
+          "symbol": "JUPUSDT",
+          "historical_win": true,
+          "entry_ts": 1770724800000,
+          "gross": 0.9633285063733353,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 1.243175793476142,
+          "entry_equity": 1.290500369553429
+        },
+        {
+          "idx": 29,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770750000000,
+          "gross": 0.867511449254375,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 1.1363155650891725,
+          "entry_equity": 1.3098565627760121
+        }
+      ],
+      "final_marks": [
+        [
+          1785369600000,
+          2.119208263482
+        ],
+        [
+          1785373200000,
+          2.115082411208
+        ],
+        [
+          1785376800000,
+          2.104767780521
+        ],
+        [
+          1785380400000,
+          2.117832979391
+        ],
+        [
+          1785384000000,
+          2.132168940761
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_ONLY_NO_BASKET",
+      "gap_assumption": 1.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": null,
+      "adverse_stop_gap_pct": 1.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 20.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.154139,
+      "max_h1_mtm_drawdown_pct": -6.1167,
+      "peak_h1_gross": 2.2761,
+      "peak_entry_nominal_stop_risk_pct": 28.0392,
+      "trades": 58,
+      "winners": 47,
+      "losers": 11,
+      "pf": 8.9619,
+      "realized_winning_total_normalized": 1.299097,
+      "realized_losing_total_normalized": 0.144958,
+      "largest_realized_loss_normalized": -0.035642,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 0,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [],
+      "final_marks": [
+        [
+          1785369600000,
+          2.14104474321
+        ],
+        [
+          1785373200000,
+          2.136876377846
+        ],
+        [
+          1785376800000,
+          2.126455464437
+        ],
+        [
+          1785380400000,
+          2.139655288089
+        ],
+        [
+          1785384000000,
+          2.154138968272
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_FULL_OR_REJECT",
+      "gap_assumption": 1.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 1.0,
+      "partial_sizing": false,
+      "min_gross": 0.25,
+      "cost_bps": 20.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.035669,
+      "max_h1_mtm_drawdown_pct": -6.1167,
+      "peak_h1_gross": 1.2922,
+      "peak_entry_nominal_stop_risk_pct": 15.054,
+      "trades": 54,
+      "winners": 44,
+      "losers": 10,
+      "pf": 9.3804,
+      "realized_winning_total_normalized": 1.159251,
+      "realized_losing_total_normalized": 0.123582,
+      "largest_realized_loss_normalized": -0.033682,
+      "rejected_winners": 4,
+      "rejected_losers": 3,
+      "downsized_winners": 0,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 14,
+          "reason": "STOP_BUDGET",
+          "historical_win": false,
+          "requested_gross": 1.0,
+          "room_gross": 0.4803009567321884
+        },
+        {
+          "idx": 19,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.30354094595552183
+        },
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 27,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.2712219454739742
+        },
+        {
+          "idx": 29,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.7593476096164904
+        }
+      ],
+      "downsized": [],
+      "final_marks": [
+        [
+          1785369600000,
+          2.023294943946
+        ],
+        [
+          1785373200000,
+          2.019355823761
+        ],
+        [
+          1785376800000,
+          2.009508023299
+        ],
+        [
+          1785380400000,
+          2.021981903885
+        ],
+        [
+          1785384000000,
+          2.035669033487
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_PARTIAL_MIN025",
+      "gap_assumption": 1.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 1.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 20.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.107588,
+      "max_h1_mtm_drawdown_pct": -6.1167,
+      "peak_h1_gross": 1.7495,
+      "peak_entry_nominal_stop_risk_pct": 20.0,
+      "trades": 58,
+      "winners": 47,
+      "losers": 11,
+      "pf": 9.2249,
+      "realized_winning_total_normalized": 1.242251,
+      "realized_losing_total_normalized": 0.134663,
+      "largest_realized_loss_normalized": -0.034872,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 3,
+      "downsized_losers": 1,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [
+        {
+          "idx": 14,
+          "symbol": "JUPUSDT",
+          "historical_win": false,
+          "entry_ts": 1768798800000,
+          "gross": 0.4803009567321884,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.528994014092111,
+          "entry_equity": 1.1013803047389585
+        },
+        {
+          "idx": 19,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1769702400000,
+          "gross": 0.30354094595552167,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.355148837469077,
+          "entry_equity": 1.1700195383891223
+        },
+        {
+          "idx": 27,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770706800000,
+          "gross": 0.27122194547397355,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.34711929792479856,
+          "entry_equity": 1.2798348500826167
+        },
+        {
+          "idx": 29,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770750000000,
+          "gross": 0.7641746554694281,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.9932668260339433,
+          "entry_equity": 1.2997903279372505
+        }
+      ],
+      "final_marks": [
+        [
+          1785369600000,
+          2.094776810699
+        ],
+        [
+          1785373200000,
+          2.090698523625
+        ],
+        [
+          1785376800000,
+          2.080502805938
+        ],
+        [
+          1785380400000,
+          2.093417381675
+        ],
+        [
+          1785384000000,
+          2.10758806983
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_PARTIAL_PROFIT_LOCK",
+      "gap_assumption": 1.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": [
+        0.05,
+        0.015
+      ],
+      "stop_amendments": 11,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 1.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 20.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.116882,
+      "max_h1_mtm_drawdown_pct": -6.1167,
+      "peak_h1_gross": 1.9757,
+      "peak_entry_nominal_stop_risk_pct": 20.0,
+      "trades": 58,
+      "winners": 47,
+      "losers": 11,
+      "pf": 8.8138,
+      "realized_winning_total_normalized": 1.25982,
+      "realized_losing_total_normalized": 0.142938,
+      "largest_realized_loss_normalized": -0.035026,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 2,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [
+        {
+          "idx": 27,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770706800000,
+          "gross": 0.2712219454739739,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.348650073838351,
+          "entry_equity": 1.2854788473295093
+        },
+        {
+          "idx": 29,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770750000000,
+          "gross": 0.7641746554694276,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.9976470749630943,
+          "entry_equity": 1.3055223276807657
+        }
+      ],
+      "final_marks": [
+        [
+          1785369600000,
+          2.104014654591
+        ],
+        [
+          1785373200000,
+          2.099918382508
+        ],
+        [
+          1785376800000,
+          2.0896777023
+        ],
+        [
+          1785380400000,
+          2.102649230564
+        ],
+        [
+          1785384000000,
+          2.116882410629
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_PARTIAL_PROFIT_LOCK",
+      "gap_assumption": 1.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": [
+        0.06,
+        0.025
+      ],
+      "stop_amendments": 8,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 1.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 20.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.116882,
+      "max_h1_mtm_drawdown_pct": -6.1167,
+      "peak_h1_gross": 1.9757,
+      "peak_entry_nominal_stop_risk_pct": 20.0,
+      "trades": 58,
+      "winners": 47,
+      "losers": 11,
+      "pf": 8.8138,
+      "realized_winning_total_normalized": 1.25982,
+      "realized_losing_total_normalized": 0.142938,
+      "largest_realized_loss_normalized": -0.035026,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 2,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [
+        {
+          "idx": 27,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770706800000,
+          "gross": 0.2712219454739739,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.348650073838351,
+          "entry_equity": 1.2854788473295093
+        },
+        {
+          "idx": 29,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770750000000,
+          "gross": 0.7641746554694276,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.9976470749630943,
+          "entry_equity": 1.3055223276807657
+        }
+      ],
+      "final_marks": [
+        [
+          1785369600000,
+          2.104014654591
+        ],
+        [
+          1785373200000,
+          2.099918382508
+        ],
+        [
+          1785376800000,
+          2.0896777023
+        ],
+        [
+          1785380400000,
+          2.102649230564
+        ],
+        [
+          1785384000000,
+          2.116882410629
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_ONLY_NO_BASKET",
+      "gap_assumption": 2.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "entry",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": null,
+      "adverse_stop_gap_pct": 1.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 20.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.154139,
+      "max_h1_mtm_drawdown_pct": -6.1167,
+      "peak_h1_gross": 2.2761,
+      "peak_entry_nominal_stop_risk_pct": 24.6545,
+      "trades": 58,
+      "winners": 47,
+      "losers": 11,
+      "pf": 8.9619,
+      "realized_winning_total_normalized": 1.299097,
+      "realized_losing_total_normalized": 0.144958,
+      "largest_realized_loss_normalized": -0.035642,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 0,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [],
+      "final_marks": [
+        [
+          1785369600000,
+          2.14104474321
+        ],
+        [
+          1785373200000,
+          2.136876377846
+        ],
+        [
+          1785376800000,
+          2.126455464437
+        ],
+        [
+          1785380400000,
+          2.139655288089
+        ],
+        [
+          1785384000000,
+          2.154138968272
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_FULL_OR_REJECT",
+      "gap_assumption": 2.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "entry",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 2.0,
+      "partial_sizing": false,
+      "min_gross": 0.25,
+      "cost_bps": 20.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.035669,
+      "max_h1_mtm_drawdown_pct": -6.1167,
+      "peak_h1_gross": 1.2922,
+      "peak_entry_nominal_stop_risk_pct": 15.0233,
+      "trades": 54,
+      "winners": 44,
+      "losers": 10,
+      "pf": 9.3804,
+      "realized_winning_total_normalized": 1.159251,
+      "realized_losing_total_normalized": 0.123582,
+      "largest_realized_loss_normalized": -0.033682,
+      "rejected_winners": 4,
+      "rejected_losers": 3,
+      "downsized_winners": 0,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 14,
+          "reason": "STOP_BUDGET",
+          "historical_win": false,
+          "requested_gross": 1.0,
+          "room_gross": 0.7060645095460841
+        },
+        {
+          "idx": 19,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.7279391352871215
+        },
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 27,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.4644768243897229
+        },
+        {
+          "idx": 29,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.6702406847784109
+        }
+      ],
+      "downsized": [],
+      "final_marks": [
+        [
+          1785369600000,
+          2.023294943946
+        ],
+        [
+          1785373200000,
+          2.019355823761
+        ],
+        [
+          1785376800000,
+          2.009508023299
+        ],
+        [
+          1785380400000,
+          2.021981903885
+        ],
+        [
+          1785384000000,
+          2.035669033487
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_PARTIAL_MIN025",
+      "gap_assumption": 2.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "entry",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 2.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 20.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.114012,
+      "max_h1_mtm_drawdown_pct": -6.1167,
+      "peak_h1_gross": 1.6868,
+      "peak_entry_nominal_stop_risk_pct": 20.0,
+      "trades": 58,
+      "winners": 47,
+      "losers": 11,
+      "pf": 9.05,
+      "realized_winning_total_normalized": 1.252399,
+      "realized_losing_total_normalized": 0.138387,
+      "largest_realized_loss_normalized": -0.034978,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 4,
+      "downsized_losers": 1,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [
+        {
+          "idx": 14,
+          "symbol": "JUPUSDT",
+          "historical_win": false,
+          "entry_ts": 1768798800000,
+          "gross": 0.7060645095460841,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.7776455446892294,
+          "entry_equity": 1.1013803047389585
+        },
+        {
+          "idx": 19,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1769702400000,
+          "gross": 0.7279391352871214,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.8490728412707763,
+          "entry_equity": 1.1664063657408337
+        },
+        {
+          "idx": 27,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770706800000,
+          "gross": 0.4644768243897228,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.5968073018752832,
+          "entry_equity": 1.2849022180157852
+        },
+        {
+          "idx": 28,
+          "symbol": "JUPUSDT",
+          "historical_win": true,
+          "entry_ts": 1770724800000,
+          "gross": 0.9632337970033658,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 1.243764297518267,
+          "entry_equity": 1.2912382241856917
+        },
+        {
+          "idx": 29,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770750000000,
+          "gross": 0.7140519510172789,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.9334552586913092,
+          "entry_equity": 1.307265188984437
+        }
+      ],
+      "final_marks": [
+        [
+          1785369600000,
+          2.101161773325
+        ],
+        [
+          1785373200000,
+          2.09707105547
+        ],
+        [
+          1785376800000,
+          2.086844260833
+        ],
+        [
+          1785380400000,
+          2.099798200707
+        ],
+        [
+          1785384000000,
+          2.11401208168
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_ONLY_NO_BASKET",
+      "gap_assumption": 2.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": null,
+      "adverse_stop_gap_pct": 1.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 20.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.154139,
+      "max_h1_mtm_drawdown_pct": -6.1167,
+      "peak_h1_gross": 2.2761,
+      "peak_entry_nominal_stop_risk_pct": 28.0392,
+      "trades": 58,
+      "winners": 47,
+      "losers": 11,
+      "pf": 8.9619,
+      "realized_winning_total_normalized": 1.299097,
+      "realized_losing_total_normalized": 0.144958,
+      "largest_realized_loss_normalized": -0.035642,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 0,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [],
+      "final_marks": [
+        [
+          1785369600000,
+          2.14104474321
+        ],
+        [
+          1785373200000,
+          2.136876377846
+        ],
+        [
+          1785376800000,
+          2.126455464437
+        ],
+        [
+          1785380400000,
+          2.139655288089
+        ],
+        [
+          1785384000000,
+          2.154138968272
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_FULL_OR_REJECT",
+      "gap_assumption": 2.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 2.0,
+      "partial_sizing": false,
+      "min_gross": 0.25,
+      "cost_bps": 20.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.035669,
+      "max_h1_mtm_drawdown_pct": -6.1167,
+      "peak_h1_gross": 1.2922,
+      "peak_entry_nominal_stop_risk_pct": 16.2908,
+      "trades": 54,
+      "winners": 44,
+      "losers": 10,
+      "pf": 9.3804,
+      "realized_winning_total_normalized": 1.159251,
+      "realized_losing_total_normalized": 0.123582,
+      "largest_realized_loss_normalized": -0.033682,
+      "rejected_winners": 4,
+      "rejected_losers": 3,
+      "downsized_winners": 0,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 14,
+          "reason": "STOP_BUDGET",
+          "historical_win": false,
+          "requested_gross": 1.0,
+          "room_gross": 0.36052339103583253
+        },
+        {
+          "idx": 19,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.20029175748273306
+        },
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 27,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.1487063331852661
+        },
+        {
+          "idx": 29,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.6133695294420491
+        }
+      ],
+      "downsized": [],
+      "final_marks": [
+        [
+          1785369600000,
+          2.023294943946
+        ],
+        [
+          1785373200000,
+          2.019355823761
+        ],
+        [
+          1785376800000,
+          2.009508023299
+        ],
+        [
+          1785380400000,
+          2.021981903885
+        ],
+        [
+          1785384000000,
+          2.035669033487
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_PARTIAL_MIN025",
+      "gap_assumption": 2.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 2.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 20.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.081007,
+      "max_h1_mtm_drawdown_pct": -6.1167,
+      "peak_h1_gross": 1.6028,
+      "peak_entry_nominal_stop_risk_pct": 20.0,
+      "trades": 56,
+      "winners": 45,
+      "losers": 11,
+      "pf": 9.2249,
+      "realized_winning_total_normalized": 1.212438,
+      "realized_losing_total_normalized": 0.131431,
+      "largest_realized_loss_normalized": -0.034432,
+      "rejected_winners": 3,
+      "rejected_losers": 2,
+      "downsized_winners": 1,
+      "downsized_losers": 1,
+      "rejected": [
+        {
+          "idx": 19,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.2002917574827333
+        },
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 27,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.14870633318526608
+        }
+      ],
+      "downsized": [
+        {
+          "idx": 14,
+          "symbol": "JUPUSDT",
+          "historical_win": false,
+          "entry_ts": 1768798800000,
+          "gross": 0.36052339103583253,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.39707336228456797,
+          "entry_equity": 1.1013803047389585
+        },
+        {
+          "idx": 29,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770750000000,
+          "gross": 0.6133695294420494,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.7922926036366393,
+          "entry_equity": 1.2917051884813173
+        }
+      ],
+      "final_marks": [
+        [
+          1785369600000,
+          2.068357662772
+        ],
+        [
+          1785373200000,
+          2.064330810709
+        ],
+        [
+          1785376800000,
+          2.054263680552
+        ],
+        [
+          1785380400000,
+          2.067015378751
+        ],
+        [
+          1785384000000,
+          2.081007347386
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_PARTIAL_PROFIT_LOCK",
+      "gap_assumption": 2.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": [
+        0.05,
+        0.015
+      ],
+      "stop_amendments": 11,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 2.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 20.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.09737,
+      "max_h1_mtm_drawdown_pct": -6.1167,
+      "peak_h1_gross": 1.9757,
+      "peak_entry_nominal_stop_risk_pct": 20.0,
+      "trades": 57,
+      "winners": 46,
+      "losers": 11,
+      "pf": 8.7345,
+      "realized_winning_total_normalized": 1.23925,
+      "realized_losing_total_normalized": 0.14188,
+      "largest_realized_loss_normalized": -0.034703,
+      "rejected_winners": 2,
+      "rejected_losers": 2,
+      "downsized_winners": 1,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 27,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.14870633318526602
+        }
+      ],
+      "downsized": [
+        {
+          "idx": 29,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770750000000,
+          "gross": 0.6133695294420493,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.7985223733700035,
+          "entry_equity": 1.3018618223444818
+        }
+      ],
+      "final_marks": [
+        [
+          1785369600000,
+          2.084621088565
+        ],
+        [
+          1785373200000,
+          2.080562573501
+        ],
+        [
+          1785376800000,
+          2.070416285843
+        ],
+        [
+          1785380400000,
+          2.08326825021
+        ],
+        [
+          1785384000000,
+          2.097370237218
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_PARTIAL_PROFIT_LOCK",
+      "gap_assumption": 2.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": [
+        0.06,
+        0.025
+      ],
+      "stop_amendments": 8,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 2.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 20.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.09737,
+      "max_h1_mtm_drawdown_pct": -6.1167,
+      "peak_h1_gross": 1.9757,
+      "peak_entry_nominal_stop_risk_pct": 20.0,
+      "trades": 57,
+      "winners": 46,
+      "losers": 11,
+      "pf": 8.7345,
+      "realized_winning_total_normalized": 1.23925,
+      "realized_losing_total_normalized": 0.14188,
+      "largest_realized_loss_normalized": -0.034703,
+      "rejected_winners": 2,
+      "rejected_losers": 2,
+      "downsized_winners": 1,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 27,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.14870633318526602
+        }
+      ],
+      "downsized": [
+        {
+          "idx": 29,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770750000000,
+          "gross": 0.6133695294420493,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.7985223733700035,
+          "entry_equity": 1.3018618223444818
+        }
+      ],
+      "final_marks": [
+        [
+          1785369600000,
+          2.084621088565
+        ],
+        [
+          1785373200000,
+          2.080562573501
+        ],
+        [
+          1785376800000,
+          2.070416285843
+        ],
+        [
+          1785380400000,
+          2.08326825021
+        ],
+        [
+          1785384000000,
+          2.097370237218
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_ONLY_NO_BASKET",
+      "gap_assumption": 0.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "entry",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": null,
+      "adverse_stop_gap_pct": 1.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 30.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.077556,
+      "max_h1_mtm_drawdown_pct": -6.3305,
+      "peak_h1_gross": 2.2786,
+      "peak_entry_nominal_stop_risk_pct": 24.6818,
+      "trades": 58,
+      "winners": 46,
+      "losers": 12,
+      "pf": 8.0528,
+      "realized_winning_total_normalized": 1.230341,
+      "realized_losing_total_normalized": 0.152785,
+      "largest_realized_loss_normalized": -0.036524,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 0,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [],
+      "final_marks": [
+        [
+          1785369600000,
+          2.065971516486
+        ],
+        [
+          1785373200000,
+          2.061947252038
+        ],
+        [
+          1785376800000,
+          2.051886590918
+        ],
+        [
+          1785380400000,
+          2.064630095003
+        ],
+        [
+          1785384000000,
+          2.077556032409
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_FULL_OR_REJECT",
+      "gap_assumption": 0.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "entry",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 0.0,
+      "partial_sizing": false,
+      "min_gross": 0.25,
+      "cost_bps": 30.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.058658,
+      "max_h1_mtm_drawdown_pct": -6.3305,
+      "peak_h1_gross": 1.9921,
+      "peak_entry_nominal_stop_risk_pct": 19.9892,
+      "trades": 57,
+      "winners": 45,
+      "losers": 12,
+      "pf": 7.9801,
+      "realized_winning_total_normalized": 1.210325,
+      "realized_losing_total_normalized": 0.151667,
+      "largest_realized_loss_normalized": -0.036192,
+      "rejected_winners": 2,
+      "rejected_losers": 2,
+      "downsized_winners": 0,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 27,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.795591214789878
+        }
+      ],
+      "downsized": [],
+      "final_marks": [
+        [
+          1785369600000,
+          2.04717878418
+        ],
+        [
+          1785373200000,
+          2.043191125719
+        ],
+        [
+          1785376800000,
+          2.033221979564
+        ],
+        [
+          1785380400000,
+          2.045849564693
+        ],
+        [
+          1785384000000,
+          2.058657923672
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_PARTIAL_MIN025",
+      "gap_assumption": 0.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "entry",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 0.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 30.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.072304,
+      "max_h1_mtm_drawdown_pct": -6.3305,
+      "peak_h1_gross": 2.0402,
+      "peak_entry_nominal_stop_risk_pct": 20.0,
+      "trades": 58,
+      "winners": 46,
+      "losers": 12,
+      "pf": 8.0327,
+      "realized_winning_total_normalized": 1.224778,
+      "realized_losing_total_normalized": 0.152474,
+      "largest_realized_loss_normalized": -0.036432,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 2,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [
+        {
+          "idx": 27,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770706800000,
+          "gross": 0.795591214789878,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 1.0121170410726266,
+          "entry_equity": 1.2721571357973513
+        },
+        {
+          "idx": 28,
+          "symbol": "JUPUSDT",
+          "historical_win": true,
+          "entry_ts": 1770724800000,
+          "gross": 0.9625024147321667,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 1.2267482358665198,
+          "entry_equity": 1.274540424096374
+        }
+      ],
+      "final_marks": [
+        [
+          1785369600000,
+          2.060749017671
+        ],
+        [
+          1785373200000,
+          2.056734926024
+        ],
+        [
+          1785376800000,
+          2.046699696907
+        ],
+        [
+          1785380400000,
+          2.059410987122
+        ],
+        [
+          1785384000000,
+          2.072304249493
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_ONLY_NO_BASKET",
+      "gap_assumption": 0.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": null,
+      "adverse_stop_gap_pct": 1.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 30.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.077556,
+      "max_h1_mtm_drawdown_pct": -6.3305,
+      "peak_h1_gross": 2.2786,
+      "peak_entry_nominal_stop_risk_pct": 28.0618,
+      "trades": 58,
+      "winners": 46,
+      "losers": 12,
+      "pf": 8.0528,
+      "realized_winning_total_normalized": 1.230341,
+      "realized_losing_total_normalized": 0.152785,
+      "largest_realized_loss_normalized": -0.036524,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 0,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [],
+      "final_marks": [
+        [
+          1785369600000,
+          2.065971516486
+        ],
+        [
+          1785373200000,
+          2.061947252038
+        ],
+        [
+          1785376800000,
+          2.051886590918
+        ],
+        [
+          1785380400000,
+          2.064630095003
+        ],
+        [
+          1785384000000,
+          2.077556032409
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_FULL_OR_REJECT",
+      "gap_assumption": 0.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 0.0,
+      "partial_sizing": false,
+      "min_gross": 0.25,
+      "cost_bps": 30.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 1.970875,
+      "max_h1_mtm_drawdown_pct": -6.3305,
+      "peak_h1_gross": 1.2929,
+      "peak_entry_nominal_stop_risk_pct": 13.8245,
+      "trades": 54,
+      "winners": 43,
+      "losers": 11,
+      "pf": 8.4406,
+      "realized_winning_total_normalized": 1.101357,
+      "realized_losing_total_normalized": 0.130483,
+      "largest_realized_loss_normalized": -0.034649,
+      "rejected_winners": 4,
+      "rejected_losers": 3,
+      "downsized_winners": 0,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 14,
+          "reason": "STOP_BUDGET",
+          "historical_win": false,
+          "requested_gross": 1.0,
+          "room_gross": 0.622706264694177
+        },
+        {
+          "idx": 19,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.4262377263009742
+        },
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 27,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.4169817305524037
+        },
+        {
+          "idx": 29,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.9328756698787197
+        }
+      ],
+      "downsized": [],
+      "final_marks": [
+        [
+          1785369600000,
+          1.959884888465
+        ],
+        [
+          1785373200000,
+          1.95606726803
+        ],
+        [
+          1785376800000,
+          1.946523216944
+        ],
+        [
+          1785380400000,
+          1.95861234832
+        ],
+        [
+          1785384000000,
+          1.970874545155
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_PARTIAL_MIN025",
+      "gap_assumption": 0.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 0.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 30.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.054423,
+      "max_h1_mtm_drawdown_pct": -6.3305,
+      "peak_h1_gross": 1.9252,
+      "peak_entry_nominal_stop_risk_pct": 20.0,
+      "trades": 58,
+      "winners": 46,
+      "losers": 12,
+      "pf": 8.2528,
+      "realized_winning_total_normalized": 1.199806,
+      "realized_losing_total_normalized": 0.145382,
+      "largest_realized_loss_normalized": -0.036118,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 3,
+      "downsized_losers": 1,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [
+        {
+          "idx": 14,
+          "symbol": "JUPUSDT",
+          "historical_win": false,
+          "entry_ts": 1768798800000,
+          "gross": 0.622706264694177,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.6832932843482394,
+          "entry_equity": 1.0972963066042347
+        },
+        {
+          "idx": 19,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1769702400000,
+          "gross": 0.42623772630097423,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.4947343188030409,
+          "entry_equity": 1.160700445492007
+        },
+        {
+          "idx": 27,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770706800000,
+          "gross": 0.41698173055240306,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.5286778718303818,
+          "entry_equity": 1.267868189644682
+        },
+        {
+          "idx": 29,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770750000000,
+          "gross": 0.9401177555460373,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 1.21054153474612,
+          "entry_equity": 1.2876488371853116
+        }
+      ],
+      "final_marks": [
+        [
+          1785369600000,
+          2.042967904211
+        ],
+        [
+          1785373200000,
+          2.038988448038
+        ],
+        [
+          1785376800000,
+          2.029039807605
+        ],
+        [
+          1785380400000,
+          2.04164141882
+        ],
+        [
+          1785384000000,
+          2.054423432048
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_PARTIAL_PROFIT_LOCK",
+      "gap_assumption": 0.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": [
+        0.05,
+        0.015
+      ],
+      "stop_amendments": 11,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 0.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 30.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.061373,
+      "max_h1_mtm_drawdown_pct": -6.3305,
+      "peak_h1_gross": 1.9771,
+      "peak_entry_nominal_stop_risk_pct": 20.0,
+      "trades": 58,
+      "winners": 46,
+      "losers": 12,
+      "pf": 7.9906,
+      "realized_winning_total_normalized": 1.213201,
+      "realized_losing_total_normalized": 0.151828,
+      "largest_realized_loss_normalized": -0.03624,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 2,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [
+        {
+          "idx": 27,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770706800000,
+          "gross": 0.4169817305524033,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.5304662840193682,
+          "entry_equity": 1.2721571357973513
+        },
+        {
+          "idx": 29,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770750000000,
+          "gross": 0.9401177555460375,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 1.214636556216413,
+          "entry_equity": 1.2920046973380797
+        }
+      ],
+      "final_marks": [
+        [
+          1785369600000,
+          2.049878858682
+        ],
+        [
+          1785373200000,
+          2.045885940799
+        ],
+        [
+          1785376800000,
+          2.035903646092
+        ],
+        [
+          1785380400000,
+          2.048547886054
+        ],
+        [
+          1785384000000,
+          2.061373138293
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_PARTIAL_PROFIT_LOCK",
+      "gap_assumption": 0.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": [
+        0.06,
+        0.025
+      ],
+      "stop_amendments": 8,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 0.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 30.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.061373,
+      "max_h1_mtm_drawdown_pct": -6.3305,
+      "peak_h1_gross": 1.9771,
+      "peak_entry_nominal_stop_risk_pct": 20.0,
+      "trades": 58,
+      "winners": 46,
+      "losers": 12,
+      "pf": 7.9906,
+      "realized_winning_total_normalized": 1.213201,
+      "realized_losing_total_normalized": 0.151828,
+      "largest_realized_loss_normalized": -0.03624,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 2,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [
+        {
+          "idx": 27,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770706800000,
+          "gross": 0.4169817305524033,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.5304662840193682,
+          "entry_equity": 1.2721571357973513
+        },
+        {
+          "idx": 29,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770750000000,
+          "gross": 0.9401177555460375,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 1.214636556216413,
+          "entry_equity": 1.2920046973380797
+        }
+      ],
+      "final_marks": [
+        [
+          1785369600000,
+          2.049878858682
+        ],
+        [
+          1785373200000,
+          2.045885940799
+        ],
+        [
+          1785376800000,
+          2.035903646092
+        ],
+        [
+          1785380400000,
+          2.048547886054
+        ],
+        [
+          1785384000000,
+          2.061373138293
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_ONLY_NO_BASKET",
+      "gap_assumption": 1.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "entry",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": null,
+      "adverse_stop_gap_pct": 1.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 30.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.077556,
+      "max_h1_mtm_drawdown_pct": -6.3305,
+      "peak_h1_gross": 2.2786,
+      "peak_entry_nominal_stop_risk_pct": 24.6818,
+      "trades": 58,
+      "winners": 46,
+      "losers": 12,
+      "pf": 8.0528,
+      "realized_winning_total_normalized": 1.230341,
+      "realized_losing_total_normalized": 0.152785,
+      "largest_realized_loss_normalized": -0.036524,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 0,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [],
+      "final_marks": [
+        [
+          1785369600000,
+          2.065971516486
+        ],
+        [
+          1785373200000,
+          2.061947252038
+        ],
+        [
+          1785376800000,
+          2.051886590918
+        ],
+        [
+          1785380400000,
+          2.064630095003
+        ],
+        [
+          1785384000000,
+          2.077556032409
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_FULL_OR_REJECT",
+      "gap_assumption": 1.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "entry",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 1.0,
+      "partial_sizing": false,
+      "min_gross": 0.25,
+      "cost_bps": 30.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 1.970875,
+      "max_h1_mtm_drawdown_pct": -6.3305,
+      "peak_h1_gross": 1.2929,
+      "peak_entry_nominal_stop_risk_pct": 13.7786,
+      "trades": 54,
+      "winners": 43,
+      "losers": 11,
+      "pf": 8.4406,
+      "realized_winning_total_normalized": 1.101357,
+      "realized_losing_total_normalized": 0.130483,
+      "largest_realized_loss_normalized": -0.034649,
+      "rejected_winners": 4,
+      "rejected_losers": 3,
+      "downsized_winners": 0,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 14,
+          "reason": "STOP_BUDGET",
+          "historical_win": false,
+          "requested_gross": 1.0,
+          "room_gross": 0.8559615252945416
+        },
+        {
+          "idx": 19,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.8778337540074737
+        },
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 27,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.6144839413215528
+        },
+        {
+          "idx": 29,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.8200210887206388
+        }
+      ],
+      "downsized": [],
+      "final_marks": [
+        [
+          1785369600000,
+          1.959884888465
+        ],
+        [
+          1785373200000,
+          1.95606726803
+        ],
+        [
+          1785376800000,
+          1.946523216944
+        ],
+        [
+          1785380400000,
+          1.95861234832
+        ],
+        [
+          1785384000000,
+          1.970874545155
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_PARTIAL_MIN025",
+      "gap_assumption": 1.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "entry",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 1.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 30.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.057825,
+      "max_h1_mtm_drawdown_pct": -6.3305,
+      "peak_h1_gross": 1.8445,
+      "peak_entry_nominal_stop_risk_pct": 20.0,
+      "trades": 58,
+      "winners": 46,
+      "losers": 12,
+      "pf": 8.0846,
+      "realized_winning_total_normalized": 1.207139,
+      "realized_losing_total_normalized": 0.149314,
+      "largest_realized_loss_normalized": -0.036177,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 4,
+      "downsized_losers": 1,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [
+        {
+          "idx": 14,
+          "symbol": "JUPUSDT",
+          "historical_win": false,
+          "entry_ts": 1768798800000,
+          "gross": 0.8559615252945416,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.9392434203010277,
+          "entry_equity": 1.0972963066042347
+        },
+        {
+          "idx": 19,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1769702400000,
+          "gross": 0.8778337540074738,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 1.0154010698004372,
+          "entry_equity": 1.156712264896335
+        },
+        {
+          "idx": 27,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770706800000,
+          "gross": 0.6144839413215529,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.7819017793274557,
+          "entry_equity": 1.27245274733436
+        },
+        {
+          "idx": 28,
+          "symbol": "JUPUSDT",
+          "historical_win": true,
+          "entry_ts": 1770724800000,
+          "gross": 0.9628080235729696,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 1.228996860839018,
+          "entry_equity": 1.2764713533215322
+        },
+        {
+          "idx": 29,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770750000000,
+          "gross": 0.8663742220325926,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 1.1214672480245045,
+          "entry_equity": 1.2944374607469742
+        }
+      ],
+      "final_marks": [
+        [
+          1785369600000,
+          2.046350306407
+        ],
+        [
+          1785373200000,
+          2.042364261721
+        ],
+        [
+          1785376800000,
+          2.032399150005
+        ],
+        [
+          1785380400000,
+          2.045021624845
+        ],
+        [
+          1785384000000,
+          2.057824800378
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_ONLY_NO_BASKET",
+      "gap_assumption": 1.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": null,
+      "adverse_stop_gap_pct": 1.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 30.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.077556,
+      "max_h1_mtm_drawdown_pct": -6.3305,
+      "peak_h1_gross": 2.2786,
+      "peak_entry_nominal_stop_risk_pct": 28.0618,
+      "trades": 58,
+      "winners": 46,
+      "losers": 12,
+      "pf": 8.0528,
+      "realized_winning_total_normalized": 1.230341,
+      "realized_losing_total_normalized": 0.152785,
+      "largest_realized_loss_normalized": -0.036524,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 0,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [],
+      "final_marks": [
+        [
+          1785369600000,
+          2.065971516486
+        ],
+        [
+          1785373200000,
+          2.061947252038
+        ],
+        [
+          1785376800000,
+          2.051886590918
+        ],
+        [
+          1785380400000,
+          2.064630095003
+        ],
+        [
+          1785384000000,
+          2.077556032409
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_FULL_OR_REJECT",
+      "gap_assumption": 1.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 1.0,
+      "partial_sizing": false,
+      "min_gross": 0.25,
+      "cost_bps": 30.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 1.970875,
+      "max_h1_mtm_drawdown_pct": -6.3305,
+      "peak_h1_gross": 1.2929,
+      "peak_entry_nominal_stop_risk_pct": 15.0619,
+      "trades": 54,
+      "winners": 43,
+      "losers": 11,
+      "pf": 8.4406,
+      "realized_winning_total_normalized": 1.101357,
+      "realized_losing_total_normalized": 0.130483,
+      "largest_realized_loss_normalized": -0.034649,
+      "rejected_winners": 4,
+      "rejected_losers": 3,
+      "downsized_winners": 0,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 14,
+          "reason": "STOP_BUDGET",
+          "historical_win": false,
+          "requested_gross": 1.0,
+          "room_gross": 0.4792255650515731
+        },
+        {
+          "idx": 19,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.3025576085839356
+        },
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 27,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.27019988629871783
+        },
+        {
+          "idx": 29,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.7580071315116444
+        }
+      ],
+      "downsized": [],
+      "final_marks": [
+        [
+          1785369600000,
+          1.959884888465
+        ],
+        [
+          1785373200000,
+          1.95606726803
+        ],
+        [
+          1785376800000,
+          1.946523216944
+        ],
+        [
+          1785380400000,
+          1.95861234832
+        ],
+        [
+          1785384000000,
+          1.970874545155
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_PARTIAL_MIN025",
+      "gap_assumption": 1.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 1.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 30.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.036783,
+      "max_h1_mtm_drawdown_pct": -6.3305,
+      "peak_h1_gross": 1.7494,
+      "peak_entry_nominal_stop_risk_pct": 20.0,
+      "trades": 58,
+      "winners": 46,
+      "losers": 12,
+      "pf": 8.299,
+      "realized_winning_total_normalized": 1.178828,
+      "realized_losing_total_normalized": 0.142045,
+      "largest_realized_loss_normalized": -0.035807,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 3,
+      "downsized_losers": 1,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [
+        {
+          "idx": 14,
+          "symbol": "JUPUSDT",
+          "historical_win": false,
+          "entry_ts": 1768798800000,
+          "gross": 0.4792255650515731,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.5258524425614186,
+          "entry_equity": 1.0972963066042347
+        },
+        {
+          "idx": 19,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1769702400000,
+          "gross": 0.30255760858393554,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.35192099205882227,
+          "entry_equity": 1.1631536675145036
+        },
+        {
+          "idx": 27,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770706800000,
+          "gross": 0.27019988629871744,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.34263658204582864,
+          "entry_equity": 1.2680855892997283
+        },
+        {
+          "idx": 29,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770750000000,
+          "gross": 0.7626801960267016,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.9808840923921047,
+          "entry_equity": 1.286101432162746
+        }
+      ],
+      "final_marks": [
+        [
+          1785369600000,
+          2.025426199554
+        ],
+        [
+          1785373200000,
+          2.021480912515
+        ],
+        [
+          1785376800000,
+          2.011617694918
+        ],
+        [
+          1785380400000,
+          2.024111103874
+        ],
+        [
+          1785384000000,
+          2.036783365843
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_PARTIAL_PROFIT_LOCK",
+      "gap_assumption": 1.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": [
+        0.05,
+        0.015
+      ],
+      "stop_amendments": 11,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 1.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 30.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.043323,
+      "max_h1_mtm_drawdown_pct": -6.3305,
+      "peak_h1_gross": 1.9771,
+      "peak_entry_nominal_stop_risk_pct": 20.0,
+      "trades": 58,
+      "winners": 46,
+      "losers": 12,
+      "pf": 7.9204,
+      "realized_winning_total_normalized": 1.194083,
+      "realized_losing_total_normalized": 0.15076,
+      "largest_realized_loss_normalized": -0.035922,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 2,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [
+        {
+          "idx": 27,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770706800000,
+          "gross": 0.27019988629871716,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.343736713446546,
+          "entry_equity": 1.2721571357973513
+        },
+        {
+          "idx": 29,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770750000000,
+          "gross": 0.7626801960267016,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.9840334974674817,
+          "entry_equity": 1.290230823605954
+        }
+      ],
+      "final_marks": [
+        [
+          1785369600000,
+          2.031929401718
+        ],
+        [
+          1785373200000,
+          2.027971447223
+        ],
+        [
+          1785376800000,
+          2.018076560983
+        ],
+        [
+          1785380400000,
+          2.030610083553
+        ],
+        [
+          1785384000000,
+          2.043323033393
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_PARTIAL_PROFIT_LOCK",
+      "gap_assumption": 1.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": [
+        0.06,
+        0.025
+      ],
+      "stop_amendments": 8,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 1.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 30.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.043323,
+      "max_h1_mtm_drawdown_pct": -6.3305,
+      "peak_h1_gross": 1.9771,
+      "peak_entry_nominal_stop_risk_pct": 20.0,
+      "trades": 58,
+      "winners": 46,
+      "losers": 12,
+      "pf": 7.9204,
+      "realized_winning_total_normalized": 1.194083,
+      "realized_losing_total_normalized": 0.15076,
+      "largest_realized_loss_normalized": -0.035922,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 2,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [
+        {
+          "idx": 27,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770706800000,
+          "gross": 0.27019988629871716,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.343736713446546,
+          "entry_equity": 1.2721571357973513
+        },
+        {
+          "idx": 29,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770750000000,
+          "gross": 0.7626801960267016,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.9840334974674817,
+          "entry_equity": 1.290230823605954
+        }
+      ],
+      "final_marks": [
+        [
+          1785369600000,
+          2.031929401718
+        ],
+        [
+          1785373200000,
+          2.027971447223
+        ],
+        [
+          1785376800000,
+          2.018076560983
+        ],
+        [
+          1785380400000,
+          2.030610083553
+        ],
+        [
+          1785384000000,
+          2.043323033393
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_ONLY_NO_BASKET",
+      "gap_assumption": 2.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "entry",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": null,
+      "adverse_stop_gap_pct": 1.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 30.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.077556,
+      "max_h1_mtm_drawdown_pct": -6.3305,
+      "peak_h1_gross": 2.2786,
+      "peak_entry_nominal_stop_risk_pct": 24.6818,
+      "trades": 58,
+      "winners": 46,
+      "losers": 12,
+      "pf": 8.0528,
+      "realized_winning_total_normalized": 1.230341,
+      "realized_losing_total_normalized": 0.152785,
+      "largest_realized_loss_normalized": -0.036524,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 0,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [],
+      "final_marks": [
+        [
+          1785369600000,
+          2.065971516486
+        ],
+        [
+          1785373200000,
+          2.061947252038
+        ],
+        [
+          1785376800000,
+          2.051886590918
+        ],
+        [
+          1785380400000,
+          2.064630095003
+        ],
+        [
+          1785384000000,
+          2.077556032409
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_FULL_OR_REJECT",
+      "gap_assumption": 2.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "entry",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 2.0,
+      "partial_sizing": false,
+      "min_gross": 0.25,
+      "cost_bps": 30.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 1.970875,
+      "max_h1_mtm_drawdown_pct": -6.3305,
+      "peak_h1_gross": 1.2929,
+      "peak_entry_nominal_stop_risk_pct": 15.0312,
+      "trades": 54,
+      "winners": 43,
+      "losers": 11,
+      "pf": 8.4406,
+      "realized_winning_total_normalized": 1.101357,
+      "realized_losing_total_normalized": 0.130483,
+      "largest_realized_loss_normalized": -0.034649,
+      "rejected_winners": 4,
+      "rejected_losers": 3,
+      "downsized_winners": 0,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 14,
+          "reason": "STOP_BUDGET",
+          "historical_win": false,
+          "requested_gross": 1.0,
+          "room_gross": 0.705018268631342
+        },
+        {
+          "idx": 19,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.7268954559089338
+        },
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 27,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.4634859402502888
+        },
+        {
+          "idx": 29,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.6690696841461778
+        }
+      ],
+      "downsized": [],
+      "final_marks": [
+        [
+          1785369600000,
+          1.959884888465
+        ],
+        [
+          1785373200000,
+          1.95606726803
+        ],
+        [
+          1785376800000,
+          1.946523216944
+        ],
+        [
+          1785380400000,
+          1.95861234832
+        ],
+        [
+          1785384000000,
+          1.970874545155
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_PARTIAL_MIN025",
+      "gap_assumption": 2.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "entry",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 2.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 30.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.041508,
+      "max_h1_mtm_drawdown_pct": -6.3305,
+      "peak_h1_gross": 1.6868,
+      "peak_entry_nominal_stop_risk_pct": 20.0,
+      "trades": 58,
+      "winners": 46,
+      "losers": 12,
+      "pf": 8.1368,
+      "realized_winning_total_normalized": 1.187444,
+      "realized_losing_total_normalized": 0.145935,
+      "largest_realized_loss_normalized": -0.03589,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 4,
+      "downsized_losers": 1,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [
+        {
+          "idx": 14,
+          "symbol": "JUPUSDT",
+          "historical_win": false,
+          "entry_ts": 1768798800000,
+          "gross": 0.705018268631342,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.7736139422576838,
+          "entry_equity": 1.0972963066042347
+        },
+        {
+          "idx": 19,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1769702400000,
+          "gross": 0.7268954559089335,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.8426848727529231,
+          "entry_equity": 1.1592930811476911
+        },
+        {
+          "idx": 27,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770706800000,
+          "gross": 0.4634859402502886,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.5896916626806297,
+          "entry_equity": 1.2722967655980855
+        },
+        {
+          "idx": 28,
+          "symbol": "JUPUSDT",
+          "historical_win": true,
+          "entry_ts": 1770724800000,
+          "gross": 0.9627833985936709,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 1.2301268730948365,
+          "entry_equity": 1.2776776945797692
+        },
+        {
+          "idx": 29,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770750000000,
+          "gross": 0.7131072598309922,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.9216578428822276,
+          "entry_equity": 1.2924533163505618
+        }
+      ],
+      "final_marks": [
+        [
+          1785369600000,
+          2.030124897085
+        ],
+        [
+          1785373200000,
+          2.026170457548
+        ],
+        [
+          1785376800000,
+          2.016284358704
+        ],
+        [
+          1785380400000,
+          2.028806750572
+        ],
+        [
+          1785384000000,
+          2.041508410366
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_ONLY_NO_BASKET",
+      "gap_assumption": 2.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": null,
+      "adverse_stop_gap_pct": 1.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 30.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.077556,
+      "max_h1_mtm_drawdown_pct": -6.3305,
+      "peak_h1_gross": 2.2786,
+      "peak_entry_nominal_stop_risk_pct": 28.0618,
+      "trades": 58,
+      "winners": 46,
+      "losers": 12,
+      "pf": 8.0528,
+      "realized_winning_total_normalized": 1.230341,
+      "realized_losing_total_normalized": 0.152785,
+      "largest_realized_loss_normalized": -0.036524,
+      "rejected_winners": 1,
+      "rejected_losers": 2,
+      "downsized_winners": 0,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        }
+      ],
+      "downsized": [],
+      "final_marks": [
+        [
+          1785369600000,
+          2.065971516486
+        ],
+        [
+          1785373200000,
+          2.061947252038
+        ],
+        [
+          1785376800000,
+          2.051886590918
+        ],
+        [
+          1785380400000,
+          2.064630095003
+        ],
+        [
+          1785384000000,
+          2.077556032409
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_FULL_OR_REJECT",
+      "gap_assumption": 2.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 2.0,
+      "partial_sizing": false,
+      "min_gross": 0.25,
+      "cost_bps": 30.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 1.970875,
+      "max_h1_mtm_drawdown_pct": -6.3305,
+      "peak_h1_gross": 1.2929,
+      "peak_entry_nominal_stop_risk_pct": 16.2994,
+      "trades": 54,
+      "winners": 43,
+      "losers": 11,
+      "pf": 8.4406,
+      "realized_winning_total_normalized": 1.101357,
+      "realized_losing_total_normalized": 0.130483,
+      "largest_realized_loss_normalized": -0.034649,
+      "rejected_winners": 4,
+      "rejected_losers": 3,
+      "downsized_winners": 0,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 14,
+          "reason": "STOP_BUDGET",
+          "historical_win": false,
+          "requested_gross": 1.0,
+          "room_gross": 0.3595986808108981
+        },
+        {
+          "idx": 19,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.1994394389495304
+        },
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 27,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.14782067616867037
+        },
+        {
+          "idx": 29,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.6122106693485713
+        }
+      ],
+      "downsized": [],
+      "final_marks": [
+        [
+          1785369600000,
+          1.959884888465
+        ],
+        [
+          1785373200000,
+          1.95606726803
+        ],
+        [
+          1785376800000,
+          1.946523216944
+        ],
+        [
+          1785380400000,
+          1.95861234832
+        ],
+        [
+          1785384000000,
+          1.970874545155
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_PARTIAL_MIN025",
+      "gap_assumption": 2.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": null,
+      "stop_amendments": 0,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 2.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 30.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.012802,
+      "max_h1_mtm_drawdown_pct": -6.3305,
+      "peak_h1_gross": 1.6028,
+      "peak_entry_nominal_stop_risk_pct": 20.0,
+      "trades": 56,
+      "winners": 44,
+      "losers": 12,
+      "pf": 8.3014,
+      "realized_winning_total_normalized": 1.151515,
+      "realized_losing_total_normalized": 0.138713,
+      "largest_realized_loss_normalized": -0.035386,
+      "rejected_winners": 3,
+      "rejected_losers": 2,
+      "downsized_winners": 1,
+      "downsized_losers": 1,
+      "rejected": [
+        {
+          "idx": 19,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.19943943894952995
+        },
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 27,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.1478206761686705
+        }
+      ],
+      "downsized": [
+        {
+          "idx": 14,
+          "symbol": "JUPUSDT",
+          "historical_win": false,
+          "entry_ts": 1768798800000,
+          "gross": 0.3595986808108981,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.39458630431355357,
+          "entry_equity": 1.0972963066042347
+        },
+        {
+          "idx": 29,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770750000000,
+          "gross": 0.6122106693485713,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.7830161796002113,
+          "entry_equity": 1.2789979312732125
+        }
+      ],
+      "final_marks": [
+        [
+          1785369600000,
+          2.001578684764
+        ],
+        [
+          1785373200000,
+          1.99767984982
+        ],
+        [
+          1785376800000,
+          1.987932762462
+        ],
+        [
+          1785380400000,
+          2.000279073116
+        ],
+        [
+          1785384000000,
+          2.012802130954
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_PARTIAL_PROFIT_LOCK",
+      "gap_assumption": 2.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": [
+        0.05,
+        0.015
+      ],
+      "stop_amendments": 11,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 2.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 30.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.025341,
+      "max_h1_mtm_drawdown_pct": -6.3305,
+      "peak_h1_gross": 1.9771,
+      "peak_entry_nominal_stop_risk_pct": 20.0,
+      "trades": 57,
+      "winners": 45,
+      "losers": 12,
+      "pf": 7.8494,
+      "realized_winning_total_normalized": 1.175038,
+      "realized_losing_total_normalized": 0.149697,
+      "largest_realized_loss_normalized": -0.035606,
+      "rejected_winners": 2,
+      "rejected_losers": 2,
+      "downsized_winners": 1,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 27,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.14782067616866998
+        }
+      ],
+      "downsized": [
+        {
+          "idx": 29,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770750000000,
+          "gross": 0.612210669348571,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.7878939673911999,
+          "entry_equity": 1.286965430101972
+        }
+      ],
+      "final_marks": [
+        [
+          1785369600000,
+          2.014047489784
+        ],
+        [
+          1785373200000,
+          2.010124367106
+        ],
+        [
+          1785376800000,
+          2.00031656041
+        ],
+        [
+          1785380400000,
+          2.012739782225
+        ],
+        [
+          1785384000000,
+          2.025340852267
+        ]
+      ]
+    },
+    {
+      "scenario": "ATR25_BUDGET20_PARTIAL_PROFIT_LOCK",
+      "gap_assumption": 2.0,
+      "status": "IDLE_ONLY_H1_MTM_COMPOUNDING_NOT_INTEGRATED_BT",
+      "atr25": true,
+      "risk_basis": "mark",
+      "profit_lock": [
+        0.06,
+        0.025
+      ],
+      "stop_amendments": 8,
+      "risk_budget_pct": 20.0,
+      "adverse_stop_gap_pct": 2.0,
+      "partial_sizing": true,
+      "min_gross": 0.25,
+      "cost_bps": 30.0,
+      "start_capital_normalized": 1.0,
+      "final_equity_multiple": 2.025341,
+      "max_h1_mtm_drawdown_pct": -6.3305,
+      "peak_h1_gross": 1.9771,
+      "peak_entry_nominal_stop_risk_pct": 20.0,
+      "trades": 57,
+      "winners": 45,
+      "losers": 12,
+      "pf": 7.8494,
+      "realized_winning_total_normalized": 1.175038,
+      "realized_losing_total_normalized": 0.149697,
+      "largest_realized_loss_normalized": -0.035606,
+      "rejected_winners": 2,
+      "rejected_losers": 2,
+      "downsized_winners": 1,
+      "downsized_losers": 0,
+      "rejected": [
+        {
+          "idx": 20,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 22,
+          "reason": "ATR",
+          "historical_win": true
+        },
+        {
+          "idx": 23,
+          "reason": "ATR",
+          "historical_win": false
+        },
+        {
+          "idx": 27,
+          "reason": "STOP_BUDGET",
+          "historical_win": true,
+          "requested_gross": 1.0,
+          "room_gross": 0.14782067616866998
+        }
+      ],
+      "downsized": [
+        {
+          "idx": 29,
+          "symbol": "TAOUSDT",
+          "historical_win": true,
+          "entry_ts": 1770750000000,
+          "gross": 0.612210669348571,
+          "requested": 1.0,
+          "risk_room_before_usd_units": 0.7878939673911999,
+          "entry_equity": 1.286965430101972
+        }
+      ],
+      "final_marks": [
+        [
+          1785369600000,
+          2.014047489784
+        ],
+        [
+          1785373200000,
+          2.010124367106
+        ],
+        [
+          1785376800000,
+          2.00031656041
+        ],
+        [
+          1785380400000,
+          2.012739782225
+        ],
+        [
+          1785384000000,
+          2.025340852267
+        ]
+      ]
+    }
+  ]
+}
