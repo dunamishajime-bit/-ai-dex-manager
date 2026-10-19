@@ -286,6 +286,43 @@ test("records an unavailable production direction as NOT_APPLICABLE without crea
     assert.equal(decision.accepted, false);
 });
 
+test("rejects NOT_APPLICABLE when the Production stage and direction are actually supported", () => {
+    const decision = acceptCandidate(candidateSummary({
+        stageId: "V12_V4_LONG",
+        direction: "LONG",
+        policyHash: HASH,
+        status: "NOT_APPLICABLE",
+        accepted: false,
+        candidatePolicy: null,
+        baselinePolicy: baseline(),
+        reason: "NOT_APPLICABLE",
+        metrics: {},
+    }), baselineSummary(), gates());
+
+    assert.equal(decision.accepted, false);
+    assert.equal(decision.status, "REJECTED");
+    assert.match(decision.reason, /NOT_APPLICABLE|supported|applicable/);
+});
+
+test("rejects a Q102 stage carrying a relabeled V12 policy", () => {
+    const v12Policy = buildCandidateGrid("V12_V4_LONG", "LONG", baseline())[0];
+    assert.ok(v12Policy);
+    const relabeledPolicy = { ...v12Policy, stageId: "Q102_LONG" as const };
+    const decision = acceptCandidate(candidateSummary({
+        stageId: "Q102_LONG",
+        strategy: "V12_V4",
+        direction: "LONG",
+        candidateId: relabeledPolicy.candidateId,
+        policyHash: relabeledPolicy.policyHash,
+        candidatePolicy: relabeledPolicy,
+        baselinePolicy: baseline(),
+    }), baselineSummary(), gates());
+
+    assert.equal(decision.accepted, false);
+    assert.equal(decision.status, "REJECTED");
+    assert.match(decision.reason, /stage|strategy|metadata/i);
+});
+
 test("freezes accepted policy evidence and excludes rejected candidates", () => {
     const base = baseline();
     const acceptedPolicy = buildCandidateGrid("V12_V4_LONG", "LONG", base).find((entry) => entry.axis === "initial-stop");

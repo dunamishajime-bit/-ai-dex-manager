@@ -456,6 +456,9 @@ export interface AcceptanceDecision {
     stageId?: StageId;
     candidateId?: string;
     candidatePolicy?: CandidatePolicy | null;
+    strategy?: StrategyId;
+    direction?: Direction;
+    baselinePolicy?: ProductionPolicy;
 }
 
 export interface FrozenStageSet {

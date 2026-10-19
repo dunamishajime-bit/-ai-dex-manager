@@ -11,6 +11,7 @@ import type {
     FrozenStageSet,
     ProductionPolicy,
     StageId,
+    StrategyId,
 } from "./types";
 import { SEQUENTIAL_STAGES, directionForStage, stageAcceptsDirection, strategyForStage } from "./stages";
 
@@ -213,18 +214,38 @@ function provenanceFailures(candidate: CandidateSummary, baseline: BaselineSumma
     return failures;
 }
 
+function stageMetadataFailures(stage: StageId | undefined, strategy: StrategyId | undefined, direction: Direction | undefined): readonly string[] {
+    if (stage === undefined || strategy === undefined || direction === undefined) return ["stage.metadata.missing"];
+    const failures: string[] = [];
+    if (strategyForStage(stage) !== strategy) failures.push("stage.metadata.strategy");
+    const expectedDirection = directionForStage(stage);
+    if (expectedDirection !== null && expectedDirection !== direction) failures.push("stage.metadata.direction");
+    if (!stageAcceptsDirection(stage, direction)) failures.push("stage.metadata.applicability");
+    return failures;
+}
+
+function baselinePolicyFailures(candidate: CandidateSummary, baseline: BaselineSummary): readonly string[] {
+    const base = candidate.baselinePolicy;
+    if (base === undefined) return ["baselinePolicy"];
+    const failures = stageMetadataFailures(candidate.stageId, candidate.strategy, candidate.direction).slice();
+    if (base.strategy !== baseline.strategy) failures.push("baselinePolicy.strategy");
+    if (base.policyHash !== baseline.policyHash) failures.push("baselinePolicy.policyHash");
+    if (base.sourceHash !== baseline.sourceHash || base.configHash !== baseline.configHash || base.resultHash !== baseline.resultHash) failures.push("baselinePolicy.provenance");
+    return failures;
+}
+
 function candidatePolicyFailures(candidate: CandidateSummary, baseline: BaselineSummary): readonly string[] {
     const policy = candidate.candidatePolicy;
     const base = candidate.baselinePolicy;
-    const failures: string[] = [];
+    const failures: string[] = baselinePolicyFailures(candidate, baseline).slice();
     if (policy === undefined || policy === null || policy.applicability !== "AVAILABLE") return ["candidatePolicy"];
     if (base === undefined) return ["baselinePolicy"];
     if (candidate.stageId === undefined || policy.stageId !== candidate.stageId) failures.push("candidatePolicy.stageId");
     if (policy.candidateId !== candidate.candidateId) failures.push("candidatePolicy.candidateId");
     if (policy.strategy !== candidate.strategy || policy.direction !== candidate.direction) failures.push("candidatePolicy.identity");
+    failures.push(...stageMetadataFailures(policy.stageId, policy.strategy, policy.direction));
     if (candidate.policyHash !== policy.policyHash) failures.push("candidatePolicy.policyHash");
     if (policy.strategy !== baseline.strategy || base.strategy !== baseline.strategy) failures.push("candidatePolicy.strategy");
-    if (base.policyHash !== baseline.policyHash) failures.push("baselinePolicy.policyHash");
     if (policy.sourceHash !== candidate.sourceHash || policy.configHash !== candidate.configHash || policy.resultHash !== candidate.resultHash) failures.push("candidatePolicy.provenance");
     if (base.sourceHash !== baseline.sourceHash || base.configHash !== baseline.configHash || base.resultHash !== baseline.resultHash) failures.push("baselinePolicy.provenance");
     if (policy.entryPolicy !== base.entryPolicy || policy.sizingPolicy !== base.sizingPolicy || policy.grossCap !== base.grossCap || policy.sharedRiskCap !== base.sharedRiskCap || policy.marginGuard !== base.marginGuard || policy.leverage !== base.leverage || policy.supportedDirections.join(",") !== base.supportedDirections.join(",")) {
@@ -250,6 +271,9 @@ export function acceptCandidate(candidate: CandidateSummary, baseline: BaselineS
         slippage: candidate.slippage,
         stageId: candidate.stageId,
         candidateId: candidate.candidateId,
+        strategy: candidate.strategy,
+        direction: candidate.direction,
+        baselinePolicy: candidate.baselinePolicy,
     };
 
     const provenance = provenanceFailures(candidate, baseline, gates);
@@ -258,8 +282,15 @@ export function acceptCandidate(candidate: CandidateSummary, baseline: BaselineS
     }
 
     if (status === "NOT_APPLICABLE") {
+        const notApplicableFailures = baselinePolicyFailures(candidate, baseline);
+        if (notApplicableFailures.length > 0) {
+            return { ...common, accepted: false, status: "REJECTED", reason: `REJECTED_NOT_APPLICABLE:${notApplicableFailures.join(",")}`, gateResults: { applicability: false }, candidatePolicy: null };
+        }
         if (candidate.candidatePolicy !== null && candidate.candidatePolicy !== undefined) {
             return { ...common, accepted: false, status: "REJECTED", reason: "REJECTED_candidatePolicy:NOT_APPLICABLE_MUST_HAVE_NO_POLICY", gateResults: { candidatePolicy: false }, candidatePolicy: null };
+        }
+        if (candidate.baselinePolicy?.supportedDirections.includes(candidate.direction) === true) {
+            return { ...common, accepted: false, status: "REJECTED", reason: "REJECTED_NOT_APPLICABLE:SUPPORTED_DIRECTION", gateResults: { applicability: false }, candidatePolicy: null };
         }
         return {
             ...common,
@@ -326,7 +357,9 @@ export function freezeAcceptedStage(previous: FrozenStageSet, decision: Acceptan
     }
 
     if (decision.status === "NOT_APPLICABLE") {
-        if (decision.candidatePolicy !== null && decision.candidatePolicy !== undefined || decisionStage === undefined || expectedStage !== decisionStage) {
+        const decisionMetadataFailures = stageMetadataFailures(decisionStage, decision.strategy, decision.direction);
+        const supportedDirection = decision.baselinePolicy?.supportedDirections.includes(decision.direction ?? "LONG") === true;
+        if (decision.candidatePolicy !== null && decision.candidatePolicy !== undefined || decisionStage === undefined || expectedStage !== decisionStage || decision.baselinePolicy === undefined || decisionMetadataFailures.length > 0 || supportedDirection) {
             return { ...previous, stageDecisions: [...decisions.slice(0, -1), rejectedDecision(decision, `REJECTED_STAGE_ORDER:expected=${expectedStage ?? "COMPLETE"}`)], reason: `REJECTED_STAGE_ORDER:expected=${expectedStage ?? "COMPLETE"}` };
         }
         return { ...previous, completedStageIds: [...completedStageIds, decisionStage], stageDecisions: decisions, reason: "FROZEN_NOT_APPLICABLE_STAGE" };
@@ -337,7 +370,9 @@ export function freezeAcceptedStage(previous: FrozenStageSet, decision: Acceptan
     }
 
     const duplicateStage = decisionStage !== undefined && previous.stageIds.includes(decisionStage);
-    if (expectedStage === undefined || decisionStage !== expectedStage || duplicateStage || decision.candidatePolicy.stageId !== decisionStage || decision.candidatePolicy.candidateId !== decision.candidateId || decision.candidatePolicy.applicability !== "AVAILABLE") {
+    const policyMetadataFailures = stageMetadataFailures(decision.candidatePolicy.stageId, decision.candidatePolicy.strategy, decision.candidatePolicy.direction);
+    const decisionIdentityMismatch = decision.strategy !== undefined && decision.strategy !== decision.candidatePolicy.strategy || decision.direction !== undefined && decision.direction !== decision.candidatePolicy.direction;
+    if (expectedStage === undefined || decisionStage !== expectedStage || duplicateStage || decision.candidatePolicy.stageId !== decisionStage || decision.candidatePolicy.candidateId !== decision.candidateId || decision.candidatePolicy.applicability !== "AVAILABLE" || policyMetadataFailures.length > 0 || decisionIdentityMismatch) {
         const reason = duplicateStage
             ? `REJECTED_DUPLICATE_STAGE:${decisionStage}`
             : `REJECTED_STAGE_ORDER:expected=${expectedStage ?? "COMPLETE"}`;
