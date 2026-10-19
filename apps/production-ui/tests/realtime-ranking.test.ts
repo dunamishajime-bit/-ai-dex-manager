@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { currentRankRow, fetObservationExpiry, evaluateFet, freshTimestamp, updateFetClock, gateScore, rankRows, rankChanges, type RankRow } from '../lib/realtime-ranking';
+import { currentRankRow, fetObservationExpiry, evaluateFet, freshTimestamp, updateFetClock, gateScore, logicNameForRuntimeLogic, rankRows, rankChanges, type RankRow } from '../lib/realtime-ranking';
 const H = 3600000;
 const now = Date.UTC(2026,9,4,13,2);
 function bars(close=101,volume=120){return Array.from({length:73},(_,i)=>[now-now%H-(73-i)*H,100,i===72?Math.max(100,close):100,99,i===72?close:100,i===72?volume:100,now-now%H-(72-i)*H-1]);}
@@ -22,6 +22,17 @@ test('FET entry clock is independent of technical signal',()=>{
 const row=(id:string,score:number|null):RankRow=>({id,symbol:id,logic:'X',side:'LONG',score,gates:[],reason:'',fresh:score!==null,checkedAt:now});
 test('unknown scores last and ties stable',()=>{
  assert.deepEqual(rankRows([row('z',null),row('b',80),row('a',80)]).map(r=>r.id),['a','b','z']);
+});
+test('runtime logic names are explicit and preserve unknown names',()=>{
+ assert.equal(logicNameForRuntimeLogic('V12'),'V12 V4');
+ assert.equal(logicNameForRuntimeLogic('Q102'),'Q102 Causal V4');
+ assert.equal(logicNameForRuntimeLogic('PENGU'),'PENGU');
+ assert.equal(logicNameForRuntimeLogic('FET'),'FET BRK48');
+ assert.equal(logicNameForRuntimeLogic('HYPE'),'HYPE LONG');
+ assert.equal(logicNameForRuntimeLogic('Idle Short'),'Idle Short');
+ assert.equal(logicNameForRuntimeLogic('Idle Long'),'Idle Long');
+ assert.equal(logicNameForRuntimeLogic('V52'),'V52');
+ assert.equal(logicNameForRuntimeLogic('future-runtime'),'future-runtime');
 });
 test('known execution blocks rank behind available candidates despite higher signal score',()=>{
  const blocked={...row('held',100),gates:[{key:'holding',label:'holding',state:'NO' as const,detail:'',kind:'execution' as const}]};

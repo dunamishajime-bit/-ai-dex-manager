@@ -1,5 +1,5 @@
 import { readFile } from 'node:fs/promises';
-import { fetObservationExpiry,freshTimestamp,hypeRankingFresh,gateScore,rankRows,type Gate,type RankRow } from '@/lib/realtime-ranking';
+import { fetObservationExpiry,freshTimestamp,hypeRankingFresh,gateScore,logicNameForRuntimeLogic,rankRows,type Gate,type RankRow } from '@/lib/realtime-ranking';
 import { loadCurrentProductionRuntime,extractObjectNumber } from './current-production-runtime';
 import { loadDecisionStatus } from './disdex-decision-status';
 import { loadQuality102SymbolObservability } from './quality102-symbol-observability';
@@ -17,7 +17,7 @@ const ROOT='/home/deploy/disdex-trading/current';
 async function json(path:string){const s=await readFile(path,'utf8');if(s.length>2*1024*1024)throw Error('SNAPSHOT_TOO_LARGE');return obj(JSON.parse(s));}
 function flag(key:string,label:string,value:unknown,detail:string,kind:Gate['kind']='signal'):Gate{return {key,label,state:typeof value==='boolean'?value?'OK':'NO':'UNKNOWN',detail,kind};}
 function minimum(key:string,label:string,value:unknown,threshold:number):Gate{const n=num(value);return {key,label,state:n===undefined?'UNKNOWN':n>=threshold?'OK':'NO',actual:n,required:'≥ '+threshold,detail:n===undefined?'実測未取得':n>=threshold?'必要値を通過':'必要値未達',progress:n===undefined?undefined:threshold>0?n/threshold:0};}
-function make(symbol:string,logic:string,side:string,gates:Gate[],fresh:boolean,checkedAt:number,reason:string):RankRow{return {id:logic+':'+symbol+':'+side,symbol,logic,side,gates,fresh,checkedAt,reason:!fresh?'観測が古い・未取得 / '+reason:reason,score:gateScore(gates,fresh),href:'/decision-status/'+(logic.startsWith('Idle')?'idle-priority':logic.toLowerCase())};}
+function make(symbol:string,logic:string,side:string,gates:Gate[],fresh:boolean,checkedAt:number,reason:string):RankRow{return {id:logic+':'+symbol+':'+side,symbol,logic,logicName:logicNameForRuntimeLogic(logic),side,gates,fresh,checkedAt,reason:!fresh?'観測が古い・未取得 / '+reason:reason,score:gateScore(gates,fresh),href:'/decision-status/'+(logic.startsWith('Idle')?'idle-priority':logic.toLowerCase())};}
 const SOURCES=['V12','Q102','PENGU','FET','HYPE','Idle','V52'];
 async function observe(){
  const now=Date.now(),current=await loadCurrentProductionRuntime(),rows:RankRow[]=[],errors:Record<string,string>={};

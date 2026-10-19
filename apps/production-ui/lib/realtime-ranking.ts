@@ -1,6 +1,15 @@
 export type Gate = { key:string; label:string; state:'OK'|'NO'|'UNKNOWN'; actual?:number|string; required?:number|string; detail:string; kind?:'signal'|'execution'|'reference'|'shadow'; progress?:number };
 import type { RankingPricePreview } from './realtime-ranking-preview';
-export type RankRow = { id:string; symbol:string; logic:string; side:string; score:number|null; gates:Gate[]; reason:string; fresh:boolean; checkedAt:number; rank?:number; previewRank?:number; preview?:RankingPricePreview; href?:string };
+export type RankRow = { id:string; symbol:string; logic:string; logicName?:string; side:string; score:number|null; gates:Gate[]; reason:string; fresh:boolean; checkedAt:number; rank?:number; previewRank?:number; preview?:RankingPricePreview; href?:string };
+export function logicNameForRuntimeLogic(logic:string){
+ switch(logic){
+  case 'V12': return 'V12 V4';
+  case 'Q102': return 'Q102 Causal V4';
+  case 'FET': return 'FET BRK48';
+  case 'HYPE': return 'HYPE LONG';
+  default: return logic;
+ }
+}
 export function executionBlocked(row:RankRow){return row.gates.some(g=>g.kind==='execution'&&g.state==='NO');}
 export function rankRows(rows:RankRow[]){const tier=(r:RankRow)=>r.score===null?0:executionBlocked(r)?1:2;return [...rows].sort((a,b)=>tier(b)-tier(a)||(b.score??-1)-(a.score??-1)||a.id.localeCompare(b.id)).map((r,i)=>({...r,rank:r.score===null?undefined:i+1}));}
 export function rankChanges(previous:string[],next:string[]){const result:Record<string,number>={};if(!previous.length)return result;next.forEach((id,i)=>{const old=previous.indexOf(id);if(old<0)result[id]=0;else if(old!==i)result[id]=old-i;});return result;}

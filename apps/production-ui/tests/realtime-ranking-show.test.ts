@@ -1,8 +1,21 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import * as ranking from '../lib/realtime-ranking';
 import type { RankRow } from '../lib/realtime-ranking';
 const row=(id:string,score=80):RankRow=>({id,symbol:id+'USDT',logic:'V12',side:'LONG',score,gates:[],reason:'',fresh:true,checkedAt:1});
+test('realtime board renders explicit runtime logic names without changing the 30-second contract',()=>{
+ const testDir=dirname(fileURLToPath(import.meta.url));
+ const source=readFileSync(resolve(testDir,'../components/features/RealtimeRankingBoard.tsx'),'utf8');
+ assert.match(source,/logicName/);
+ assert.match(source,/RANKING_PAGE_REFRESH_MS/);
+ assert.match(source,/title=.*logicName/);
+ const observability=readFileSync(resolve(testDir,'../lib/server/realtime-ranking-observability.ts'),'utf8');
+ assert.match(observability,/logicNameForRuntimeLogic/);
+ assert.match(observability,/refreshSeconds:30/);
+});
 test('only existing fresh candidates rising in authoritative order are show events',()=>{
  assert.equal(typeof ranking.risingRankEvents,'function');
  const before=[row('a',90),row('b',80),row('c',70)],after=[row('c',95),row('a',90),row('b',80),row('new',60)];
