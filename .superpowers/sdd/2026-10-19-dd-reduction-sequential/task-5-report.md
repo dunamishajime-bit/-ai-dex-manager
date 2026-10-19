@@ -107,3 +107,19 @@ Second-remediation verification:
 - `git diff --check` — passed; Git reported only normal LF-to-CRLF working-copy normalization warnings.
 
 Remediation commits: `4239aa2e` (`fix: close sequential runner lineage and parity gaps`), followed by this second-pass local repair commit.
+
+## Third independent-review remediation
+
+The next review identified three P1 issues, now addressed:
+
+1. Replay baseline ledgers are derived from actual replay positions, including closed baseline positions, rather than copying closed entries from the canonical source. Complete parity therefore rejects omitted or mutated replay trades; the runner suite covers both cases.
+2. Baseline replay constructs the same source-wide authoritative cap manifest used by stage replay. Multi-strategy baseline coverage verifies distinct per-strategy caps and fail-closed behavior for conflicting aggregate declarations.
+3. Protection read-back is now a full replay-bound evidence object. Each filled candidate must have exactly one read-back order bound by candidate ID, client order ID, symbol, side, quantity, and price. The read-back content hash participates in config/evaluation identity without a hash cycle, and the full evidence object is passed into replay. Tests cover missing evidence, multiple fills with one order, candidate mismatch, quantity mismatch, and price mismatch.
+
+Third-remediation verification:
+
+- `npx tsx --test tests/dd-reduction-runner.test.ts` — 32 tests passed, 0 failed.
+- Combined Task 1–5 DD-reduction suite — 98 tests passed, 0 failed.
+- `npx tsc --noEmit --incremental false` — passed, exit code 0.
+- Changed-file ESLint, including source parsing and emulator tests — passed, exit code 0.
+- `git diff --check` — passed; Git reported only normal LF-to-CRLF working-copy normalization warnings.

@@ -416,6 +416,7 @@ function parseCandidateRows(file: CollectedFile): CandidateDecision[] {
         return {
             ...lifecycleEvidence(row, "CANDIDATE_ROW"),
             candidateId: requiredString(row, "candidateId", "CANDIDATE_ROW"),
+            clientOrderId: row.clientOrderId === undefined ? undefined : requiredString(row, "clientOrderId", "CANDIDATE_ROW"),
             accepted,
             rejectionReason,
         };

@@ -43,6 +43,7 @@ export interface RunnerArgs {
     readonly frozenStageHash?: string;
     readonly evaluationEvidencePath?: string;
     readonly evaluationEvidenceHash?: string;
+    readonly protectionReadbackHash?: string;
     readonly evaluationEvidence?: EvaluationEvidence;
     readonly executionEvents?: readonly ExecutionLifecycleEvent[];
     readonly protectionReadbackPath?: string;
@@ -71,12 +72,30 @@ export function hashProtectionReadbackEvidence(evidence: ProtectionReadbackEvide
     return hashJson({
         available: evidence.available,
         candidateId: evidence.candidateId,
-        configHash: evidence.configHash,
-        frozenStageHash: evidence.frozenStageHash,
-        orders: evidence.orders as unknown as JsonValue,
+        orders: [...evidence.orders].sort((left, right) => left.candidateId.localeCompare(right.candidateId)) as unknown as JsonValue,
         sourceHash: evidence.sourceHash,
         stageId: evidence.stageId,
     });
+}
+
+export interface ProtectionReadbackExpectation {
+    readonly candidateId: string;
+    readonly clientOrderId: string;
+    readonly symbol: string;
+    readonly side: Direction;
+    readonly quantity: number;
+    readonly price: number;
+}
+
+export function protectionReadbackExpectations(source: CanonicalSource): readonly ProtectionReadbackExpectation[] {
+    return source.candidateEvents.filter((candidate) => candidate.fill !== null).map((candidate) => ({
+        candidateId: candidate.candidateId,
+        clientOrderId: candidate.clientOrderId ?? candidate.candidateId,
+        symbol: candidate.symbol,
+        side: candidate.direction,
+        quantity: candidate.fill!.quantity,
+        price: candidate.fill!.price,
+    }));
 }
 
 export function validateProtectionReadback(evidence: ProtectionReadbackEvidence, expected: {
@@ -85,14 +104,29 @@ export function validateProtectionReadback(evidence: ProtectionReadbackEvidence,
     readonly frozenStageHash: string;
     readonly stageId: StageId;
     readonly candidateId: string;
-    readonly requireOrder: boolean;
+    readonly filledCandidates: readonly ProtectionReadbackExpectation[];
 }): void {
     if (!evidence.available || evidence.sourceHash !== expected.sourceHash || evidence.configHash !== expected.configHash
         || evidence.frozenStageHash !== expected.frozenStageHash || evidence.stageId !== expected.stageId || evidence.candidateId !== expected.candidateId
         || hashProtectionReadbackEvidence(evidence) !== evidence.lineageHash) throw new Error("PROTECTION_READBACK_INVALID_LINEAGE");
     if (evidence.orders.some((order) => order.status !== "READ_BACK" || order.clientOrderId.length === 0 || !Number.isFinite(order.quantity) || order.quantity <= 0
-        || (order.price !== undefined && (!Number.isFinite(order.price) || order.price <= 0)))) throw new Error("PROTECTION_READBACK_INVALID");
-    if (expected.requireOrder && !evidence.orders.some((order) => order.clientOrderId === expected.candidateId)) throw new Error("PROTECTION_READBACK_ORDER_MISSING");
+        || order.symbol.length === 0 || (order.side !== "LONG" && order.side !== "SHORT") || !Number.isFinite(order.price) || order.price <= 0
+        || order.candidateId.length === 0)) throw new Error("PROTECTION_READBACK_INVALID");
+    if (evidence.orders.length !== expected.filledCandidates.length) throw new Error("PROTECTION_READBACK_ONE_TO_ONE_MISMATCH");
+    const expectedByCandidate = new Map(expected.filledCandidates.map((candidate) => [candidate.candidateId, candidate]));
+    const actualByCandidate = new Map(evidence.orders.map((order) => [order.candidateId, order]));
+    const expectedClientOrderIds = new Set(expected.filledCandidates.map((candidate) => candidate.clientOrderId));
+    const actualClientOrderIds = new Set(evidence.orders.map((order) => order.clientOrderId));
+    if (expectedClientOrderIds.size !== expected.filledCandidates.length || actualClientOrderIds.size !== evidence.orders.length) throw new Error("PROTECTION_READBACK_DUPLICATE_CLIENT_ORDER");
+    if (actualByCandidate.size !== evidence.orders.length) throw new Error("PROTECTION_READBACK_DUPLICATE_CANDIDATE");
+    for (const expectedCandidate of expected.filledCandidates) {
+        const actual = actualByCandidate.get(expectedCandidate.candidateId);
+        if (actual === undefined || actual.clientOrderId !== expectedCandidate.clientOrderId || actual.symbol !== expectedCandidate.symbol
+            || actual.side !== expectedCandidate.side || actual.quantity !== expectedCandidate.quantity || actual.price !== expectedCandidate.price) {
+            throw new Error(`PROTECTION_READBACK_ORDER_MISMATCH:${expectedCandidate.candidateId}`);
+        }
+    }
+    if (actualByCandidate.size !== expectedByCandidate.size) throw new Error("PROTECTION_READBACK_ONE_TO_ONE_MISMATCH");
 }
 
 export async function loadProtectionReadback(args: RunnerArgs): Promise<ProtectionReadbackEvidence | null> {
@@ -107,8 +141,9 @@ export async function loadProtectionReadback(args: RunnerArgs): Promise<Protecti
     const orders = ordersValue.map((value) => {
         if (typeof value !== "object" || value === null || Array.isArray(value)) throw new Error("PROTECTION_READBACK_INVALID");
         const order = value as JsonObject;
-        if (typeof order.clientOrderId !== "string" || order.status !== "READ_BACK" || typeof order.quantity !== "number") throw new Error("PROTECTION_READBACK_INVALID");
-        return { clientOrderId: order.clientOrderId, status: "READ_BACK" as const, quantity: order.quantity, price: typeof order.price === "number" ? order.price : undefined };
+        if (typeof order.candidateId !== "string" || typeof order.clientOrderId !== "string" || typeof order.symbol !== "string" || (order.side !== "LONG" && order.side !== "SHORT")
+            || order.status !== "READ_BACK" || typeof order.quantity !== "number" || typeof order.price !== "number") throw new Error("PROTECTION_READBACK_INVALID");
+        return { candidateId: order.candidateId, clientOrderId: order.clientOrderId, symbol: order.symbol, side: order.side as Direction, status: "READ_BACK" as const, quantity: order.quantity, price: order.price };
     });
     return { sourceHash: object.sourceHash, configHash: object.configHash, frozenStageHash: object.frozenStageHash, stageId: object.stageId as StageId, candidateId: object.candidateId, available: object.available, orders, lineageHash: object.lineageHash };
 }
@@ -361,6 +396,18 @@ export function buildSourceCapManifest(source: CanonicalSource): CanonicalCapMan
     return { ...manifest, hash: hashJson(manifest as unknown as JsonValue) };
 }
 
+export function assertPolicyCaps(policies: readonly ProductionPolicy[], manifest: CanonicalCapManifest): void {
+    for (const policy of policies) {
+        if (policy.capManifestHash !== undefined && policy.capManifestHash !== manifest.hash) throw new Error("SOURCE_ERROR: policy cap manifest hash mismatch");
+        const total = policy.totalGrossCap ?? policy.aggregateGrossCap ?? policy.grossCap;
+        const crypto = policy.cryptoGrossCap ?? total;
+        const strategy = policy.strategyGrossCap ?? policy.sharedRiskCap;
+        if (total !== manifest.totalGross || crypto !== manifest.cryptoGross || strategy !== manifest.perStrategy[policy.strategy]) throw new Error(`SOURCE_ERROR: policy cap declaration is not authoritative for ${policy.strategy}`);
+        for (const [name, cap] of Object.entries(policy.perStrategyGrossCaps ?? {})) if (manifest.perStrategy[name] !== cap) throw new Error(`SOURCE_ERROR: policy strategy cap mismatch for ${name}`);
+        for (const [name, cap] of Object.entries(policy.perSymbolGrossCaps ?? {})) if (manifest.perSymbol[name] !== cap) throw new Error(`SOURCE_ERROR: policy symbol cap mismatch for ${name}`);
+    }
+}
+
 export function policyFromSource(source: CanonicalSource, stage: StageId): ProductionPolicy {
     const strategy = strategyForStage(stage);
     const strategyConfig = source.strategyConfigs.find((entry) => entry.strategy === strategy);
@@ -545,6 +592,7 @@ export function buildConfigHash(args: RunnerArgs, sourceHash: string): string {
         stage: args.stage,
         frozenStageHash: args.frozenStageHash ?? null,
         evaluationEvidenceHash: args.evaluationEvidenceHash ?? null,
+        protectionReadbackHash: args.protectionReadbackHash ?? null,
     });
 }
 
@@ -584,9 +632,11 @@ function failedResult(args: RunnerArgs, status: StageResult["status"], reason: s
     };
 }
 
-function replayConfig(args: RunnerArgs, source: CanonicalSource, policy: ProductionPolicy, configHash: string): ReplayConfigWithRuntime {
-    const perStrategyCaps = policy.perStrategyGrossCaps ?? { [policy.strategy]: policy.strategyGrossCap ?? policy.sharedRiskCap };
-    const perSymbolCaps = policy.perSymbolGrossCaps;
+export function buildBaselineReplayConfig(args: RunnerArgs, source: CanonicalSource, policy: ProductionPolicy, configHash: string): ReplayConfigWithRuntime {
+    const manifest = buildSourceCapManifest(source);
+    assertPolicyCaps([policy], manifest);
+    const perStrategyCaps = manifest.perStrategy;
+    const perSymbolCaps = manifest.perSymbol;
     return {
         sourceHash: source.manifest?.sourceSha ?? source.productionSha,
         configHash,
@@ -612,16 +662,16 @@ function replayConfig(args: RunnerArgs, source: CanonicalSource, policy: Product
             },
         },
         caps: {
-            totalGross: policy.totalGrossCap ?? policy.aggregateGrossCap ?? policy.grossCap,
-            cryptoGross: policy.cryptoGrossCap ?? policy.totalGrossCap ?? policy.aggregateGrossCap ?? policy.grossCap,
-            strategyGross: policy.strategyGrossCap ?? policy.sharedRiskCap,
+            totalGross: manifest.totalGross,
+            cryptoGross: manifest.cryptoGross,
+            strategyGross: manifest.perStrategy[policy.strategy] ?? manifest.strategyGross,
             perStrategy: perStrategyCaps,
             perSymbol: perSymbolCaps,
         },
         perStrategyCaps,
         perSymbolCaps,
         executionEvents: args.executionEvents,
-        protectionReadback: args.protectionReadbackEvidence?.available === true,
+        protectionReadbackEvidence: args.protectionReadbackEvidence,
     };
 }
 
@@ -686,11 +736,12 @@ export async function runBaseline(args: RunnerArgs): Promise<StageResult> {
         source = await loadSource(args);
         const manifest = source.manifest;
         if (manifest === undefined) throw new Error("SOURCE_ERROR: canonical source manifest is absent");
-        const hashes = resultHashes(args, manifest.sourceSha);
         const policy = policyFromSource(source, args.stage);
         const protectionReadback = await loadProtectionReadback(args);
-        const requiresReadback = source.candidateEvents.some((candidate) => candidate.fill !== null);
-        if (requiresReadback && protectionReadback === null) throw new Error("PROTECTION_READBACK_UNAVAILABLE");
+        const protectionReadbackHash = protectionReadback === null ? undefined : hashProtectionReadbackEvidence(protectionReadback);
+        const hashes = resultHashes({ ...args, protectionReadbackHash }, manifest.sourceSha);
+        const filledCandidates = protectionReadbackExpectations(source);
+        if (filledCandidates.length > 0 && protectionReadback === null) throw new Error("PROTECTION_READBACK_UNAVAILABLE");
         if (protectionReadback !== null) {
             validateProtectionReadback(protectionReadback, {
                 sourceHash: manifest.sourceSha,
@@ -698,7 +749,7 @@ export async function runBaseline(args: RunnerArgs): Promise<StageResult> {
                 frozenStageHash: hashJson({ baseline: true, sourceHash: manifest.sourceSha, configHash: hashes.configHash }),
                 stageId: args.stage,
                 candidateId: args.candidate,
-                requireOrder: requiresReadback,
+                filledCandidates,
             });
         }
         if (source.baselineLedger.length === 0) {
@@ -708,7 +759,7 @@ export async function runBaseline(args: RunnerArgs): Promise<StageResult> {
                 parity: "ABSENT",
             });
         }
-        const replay = replayIntegrated(source, replayConfig({ ...args, protectionReadbackEvidence: protectionReadback ?? undefined }, source, policy, hashes.configHash));
+        const replay = replayIntegrated(source, buildBaselineReplayConfig({ ...args, protectionReadbackEvidence: protectionReadback ?? undefined }, source, policy, hashes.configHash));
         assertReplaySafety(replay);
         if (!replay.accountingReconciliation.balanced) throw new Error("ACCOUNTING_FAILURE: replay reconciliation is not balanced");
         const parity = evaluateBaselineParity(source, policy, replay);

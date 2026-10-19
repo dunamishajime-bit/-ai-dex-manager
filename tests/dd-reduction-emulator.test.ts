@@ -1014,7 +1014,9 @@ test("does not seed resident exposure or Gross from closed baseline ledger entri
     const source = replaySource([bar({ ts: startTs })], [], [makeBaseline("closed", closedExit), makeBaseline("open", null)]);
     const replay = replayIntegrated(source, replayConfig({ startTs, endTs: startTs }));
 
-    assert.deepEqual(replay.positions.map((entry) => entry.positionId), ["baseline:open"]);
+    assert.deepEqual(replay.positions.map((entry) => entry.positionId), ["baseline:closed", "baseline:open"]);
+    assert.deepEqual(replay.baselineTradeLedger.map((entry) => entry.tradeId), ["closed", "open"]);
+    assert.deepEqual(replay.positions.filter((entry) => entry.exit === null).map((entry) => entry.positionId), ["baseline:open"]);
     assert.equal(replay.portfolio.at(-1)?.acceptedGross, 100);
 });
 

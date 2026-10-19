@@ -161,6 +161,7 @@ export interface CanonicalEvent extends LifecycleEvidence {
 
 export interface CandidateDecision extends LifecycleEvidence {
     candidateId: string;
+    clientOrderId?: string;
     accepted: boolean;
     rejectionReason: string | null;
 }
@@ -487,10 +488,13 @@ export interface FrozenStageLineage {
 }
 
 export interface ProtectionReadbackOrder {
+    readonly candidateId: string;
     readonly clientOrderId: string;
+    readonly symbol: string;
+    readonly side: Direction;
     readonly status: "READ_BACK";
     readonly quantity: number;
-    readonly price?: number;
+    readonly price: number;
 }
 
 export interface ProtectionReadbackEvidence {

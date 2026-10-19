@@ -21,6 +21,8 @@ import {
     buildConfigHash,
     buildRunId,
     buildSourceCapManifest,
+    assertPolicyCaps,
+    hashProtectionReadbackEvidence,
     evaluateBaselineParity,
     hashJson,
     hashEvaluationEvidence,
@@ -29,6 +31,7 @@ import {
     loadProtectionReadback,
     parseRunnerArgs,
     policyFromSource,
+    protectionReadbackExpectations,
     validateProtectionReadback,
     type EvaluationEvidence,
     type CanonicalCapManifest,
@@ -84,18 +87,6 @@ function policyCapManifest(policies: readonly ProductionPolicy[]): CanonicalCapM
     return { ...manifest, hash: hashJson(manifest as unknown as JsonValue) };
 }
 
-function assertPolicyCaps(policies: readonly ProductionPolicy[], manifest: CanonicalCapManifest): void {
-    for (const policy of policies) {
-        if (policy.capManifestHash !== undefined && policy.capManifestHash !== manifest.hash) throw new Error("SOURCE_ERROR: policy cap manifest hash mismatch");
-        const total = policy.totalGrossCap ?? policy.aggregateGrossCap ?? policy.grossCap;
-        const crypto = policy.cryptoGrossCap ?? total;
-        const strategy = policy.strategyGrossCap ?? policy.sharedRiskCap;
-        if (total !== manifest.totalGross || crypto !== manifest.cryptoGross || strategy !== manifest.perStrategy[policy.strategy]) throw new Error(`SOURCE_ERROR: policy cap declaration is not authoritative for ${policy.strategy}`);
-        for (const [name, cap] of Object.entries(policy.perStrategyGrossCaps ?? {})) if (manifest.perStrategy[name] !== cap) throw new Error(`SOURCE_ERROR: policy strategy cap mismatch for ${name}`);
-        for (const [name, cap] of Object.entries(policy.perSymbolGrossCaps ?? {})) if (manifest.perSymbol[name] !== cap) throw new Error(`SOURCE_ERROR: policy symbol cap mismatch for ${name}`);
-    }
-}
-
 export function buildReplayConfig(args: RunnerArgs, source: CanonicalSource, frozen: FrozenStageSet, policy: ProductionPolicy, configHash: string): ReplayConfigWithRuntime {
     const policies = buildReplayPolicySet(frozen, policy);
     const manifest = source.strategyConfigs.length > 0 ? buildSourceCapManifest(source) : policyCapManifest(policies);
@@ -135,7 +126,7 @@ export function buildReplayConfig(args: RunnerArgs, source: CanonicalSource, fro
         perStrategyCaps,
         perSymbolCaps,
         executionEvents: args.executionEvents,
-        protectionReadback: args.protectionReadbackEvidence?.available === true,
+        protectionReadbackEvidence: args.protectionReadbackEvidence,
     };
 }
 
@@ -375,26 +366,28 @@ export async function runStage(args: RunnerArgs): Promise<StageResult> {
 
     const sourceHash = source.manifest.sourceSha;
     const frozenStageHash = hashFrozenStageSet(frozen);
-    const evaluationConfigHash = buildEvaluationConfigHash(args, sourceHash, frozenStageHash);
-    const evaluationGateHash = buildEvaluationGateHash(sourceHash, evaluationConfigHash, currentPolicy.policyHash, args.startTs);
     const protectionReadback = await loadProtectionReadback(args);
-    const requiresReadback = source.candidateEvents.some((candidate) => candidate.fill !== null);
-    if (selected.applicability === "AVAILABLE" && requiresReadback && protectionReadback === null) throw new Error("PROTECTION_READBACK_UNAVAILABLE");
+    const protectionReadbackHash = protectionReadback === null ? undefined : hashProtectionReadbackEvidence(protectionReadback);
+    const identityArgs = { ...args, protectionReadbackHash };
+    const evaluationConfigHash = buildEvaluationConfigHash(identityArgs, sourceHash, frozenStageHash);
+    const evaluationGateHash = buildEvaluationGateHash(sourceHash, evaluationConfigHash, currentPolicy.policyHash, args.startTs);
+    const filledCandidates = protectionReadbackExpectations(source);
+    if (selected.applicability === "AVAILABLE" && filledCandidates.length > 0 && protectionReadback === null) throw new Error("PROTECTION_READBACK_UNAVAILABLE");
     if (protectionReadback !== null) validateProtectionReadback(protectionReadback, {
         sourceHash,
         configHash: evaluationConfigHash,
         frozenStageHash,
         stageId: args.stage,
         candidateId: args.candidate,
-        requireOrder: requiresReadback,
+        filledCandidates,
     });
-    const identityArgs: RunnerArgs = {
-        ...args,
+    const identityRunnerArgs: RunnerArgs = {
+        ...identityArgs,
         protectionReadbackEvidence: protectionReadback ?? undefined,
         frozenStageHash,
         evaluationEvidenceHash: evidence === null ? "MISSING" : hashEvaluationEvidence(evidence),
     };
-    const configHash = buildConfigHash(identityArgs, sourceHash);
+    const configHash = buildConfigHash(identityRunnerArgs, sourceHash);
     const runId = buildRunId({ sourceHash, configHash, stage: args.stage, candidate: args.candidate });
     const baselineLineage = lineagePolicy(currentPolicy, sourceHash, configHash, runId);
     const candidateLineage = selected.applicability === "AVAILABLE"

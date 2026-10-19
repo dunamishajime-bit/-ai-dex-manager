@@ -9,6 +9,7 @@ import type {
     LifecycleEvent,
     PortfolioState,
     PositionLifecycle,
+    ProtectionReadbackEvidence,
     ReplayConfig,
     Reservation,
 } from "./types";
@@ -84,6 +85,7 @@ export interface ReplayConfigWithRuntime extends ReplayConfig {
     readonly baselinePositions?: readonly PositionLifecycle[];
     readonly executionEvents?: readonly ExecutionLifecycleEvent[];
     readonly protectionReadback?: boolean;
+    readonly protectionReadbackEvidence?: ProtectionReadbackEvidence;
     readonly streamOrdering?: readonly ReplayStreamKind[];
 }
 
@@ -371,8 +373,8 @@ function positionFromEntry(event: ExecutionLifecycleEvent): PositionLifecycleWit
 }
 
 function baselinePosition(entry: BaselineLedgerEntry): PositionLifecycleWithProtection | null {
-    if (entry.entry === null || entry.finalExit !== null) return null;
-    return positionWithProtection({
+    if (entry.entry === null) return null;
+    const position = positionWithProtection({
         sourceHash: entry.sourceHash,
         positionId: `baseline:${entry.tradeId}`,
         strategy: entry.strategy,
@@ -392,6 +394,9 @@ function baselinePosition(entry: BaselineLedgerEntry): PositionLifecycleWithProt
         resultHash: entry.resultHash,
         events: [],
     });
+    return entry.finalExit === null
+        ? position
+        : { ...position, remainingQuantity: 0, protectedQuantity: 0, protection: null };
 }
 
 export function reconcileLifecycle(state: PortfolioState, event: LifecycleEvent): PortfolioRuntimeState;
@@ -452,15 +457,16 @@ function initialState(source: CanonicalSource, config: ReplayConfigWithRuntime):
     const configuredBaseline = config.baselinePositions?.map(positionWithProtection).filter((position) => position.exit === null && position.remainingQuantity > 0) ?? [];
     const sourceBaseline = source.baselineLedger.map(baselinePosition).filter((position): position is PositionLifecycleWithProtection => position !== null);
     const baselinePositions = [...sourceBaseline, ...configuredBaseline];
+    const activeBaseline = baselinePositions.filter((position) => position.exit === null && position.remainingQuantity > 0);
     const baselineGrossBySymbol: Record<string, number> = {};
     const baselineGrossByStrategy: Record<string, number> = {};
-    for (const baseline of baselinePositions) {
+    for (const baseline of activeBaseline) {
         baselineGrossBySymbol[baseline.symbol] = (baselineGrossBySymbol[baseline.symbol] ?? 0) + baseline.acceptedGross;
         baselineGrossByStrategy[baseline.strategy] = (baselineGrossByStrategy[baseline.strategy] ?? 0) + baseline.acceptedGross;
     }
     const deposits = config.deposits ?? source.input.deposits;
     const initialDeposits = deposits.filter((deposit) => deposit.ts <= config.startTs).reduce((total, deposit) => total + deposit.amount, 0);
-    const baselineGross = baselinePositions.reduce((total, position) => total + position.acceptedGross, 0);
+    const baselineGross = activeBaseline.reduce((total, position) => total + position.acceptedGross, 0);
     return {
         sourceHash: config.sourceHash,
         ts: config.startTs,
@@ -485,7 +491,7 @@ function initialState(source: CanonicalSource, config: ReplayConfigWithRuntime):
         eventOrdering: config.eventOrdering ?? ["STOP", "NORMAL_EXIT", "TAKE_PROFIT", "TIME_STOP", "ENTRY"],
         manualReview: [],
         events: [],
-        protectionReadback: config.protectionReadback === true,
+        protectionReadback: config.protectionReadback === true || config.protectionReadbackEvidence?.available === true,
     };
 }
 
@@ -541,21 +547,29 @@ function accountingReconciliation(state: PortfolioRuntimeState, prices: Readonly
     };
 }
 
-function replayBaselineTradeLedger(source: CanonicalSource, positions: readonly PositionLifecycle[]): readonly BaselineLedgerEntry[] {
-    const byId = new Map(positions.filter((position) => position.positionId.startsWith("baseline:")).map((position) => [position.positionId.slice("baseline:".length), position]));
-    return source.baselineLedger.flatMap((entry) => {
-        if (entry.finalExit !== null) return [entry];
-        const position = byId.get(entry.tradeId);
-        if (position === undefined) return [];
-        return [{
-            ...entry,
-            acceptedGross: position.acceptedGross,
-            fee: position.fee,
-            funding: position.funding,
-            slippage: position.slippage,
-            finalExit: position.exit,
-        }];
-    });
+function replayBaselineTradeLedger(positions: readonly PositionLifecycle[]): readonly BaselineLedgerEntry[] {
+    return positions.filter((position) => position.positionId.startsWith("baseline:") && position.entryFill !== null).map((position) => ({
+        sourceHash: position.sourceHash,
+        ts: position.entryFill!.ts,
+        strategy: position.strategy,
+        direction: position.direction,
+        symbol: position.symbol,
+        requestedGross: position.requestedGross,
+        acceptedGross: position.acceptedGross,
+        reservation: position.reservation,
+        fill: null,
+        exit: position.exit,
+        reason: position.reason,
+        fee: position.fee,
+        funding: position.funding,
+        slippage: position.slippage,
+        policyHash: position.policyHash,
+        configHash: position.configHash,
+        resultHash: position.resultHash,
+        tradeId: position.positionId.slice("baseline:".length),
+        entry: position.entryFill,
+        finalExit: position.exit,
+    }));
 }
 
 function protectionLedgerEntries(position: PositionLifecycleWithProtection, decision: ReturnType<typeof applyProtectionPolicy>): readonly ProtectionLedgerEntry[] {
@@ -778,7 +792,7 @@ export function replayIntegrated(source: CanonicalSource, config: ReplayConfigWi
         rejectionCount,
         preemption: { supported: false, count: null, reason: "PREEMPTION_UNSUPPORTED_IN_TASK_2" },
         preemptionCount: null,
-        baselineTradeLedger: replayBaselineTradeLedger(source, state.positions),
+        baselineTradeLedger: replayBaselineTradeLedger(state.positions),
     };
     return result;
 }

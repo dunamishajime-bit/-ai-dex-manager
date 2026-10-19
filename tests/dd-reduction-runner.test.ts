@@ -8,6 +8,7 @@ import { test } from "node:test";
 import { canonicalDirectorySha, loadCanonicalSource } from "../lib/backtest/dd-reduction/source";
 import {
     assertRunnerOutputRoot,
+    buildBaselineReplayConfig,
     buildConfigHash,
     buildRunId,
     hashEvaluationEvidence,
@@ -19,12 +20,15 @@ import {
     runBaseline,
     evaluateBaselineParity,
     policyFromSource,
+    protectionReadbackExpectations,
+    validateProtectionReadback,
     type EvaluationEvidence,
     type RunnerArgs,
 } from "../scripts/dd-reduction/run-baseline";
 import { buildEvaluationConfigHash, buildEvaluationGateHash, buildReplayConfig, buildReplayPolicySet, calculateLostPriorLogicPnl, runStage, assertFrozenStageReady, validateReplayBoundary } from "../scripts/dd-reduction/run-stage";
 import { compareStage } from "../scripts/dd-reduction/compare-stage";
 import type { CandidatePolicy, FrozenStageSet, JsonValue, ProtectionReadbackEvidence, StageResult } from "../lib/backtest/dd-reduction/types";
+import { replayIntegrated } from "../lib/backtest/dd-reduction/emulator";
 import type { IntegratedReplayResult } from "../lib/backtest/dd-reduction/emulator";
 
 const HASH = "a".repeat(64);
@@ -509,6 +513,25 @@ test("baseline parity fails when replay omits a canonical trade from its complet
     }
 });
 
+test("baseline parity rejects a mutated replay-derived trade ledger", async () => {
+    const fixture = await makeFixture({ withBaselineLedger: true });
+    try {
+        const source = await loadCanonicalSource({
+            sourceRoot: fixture.args.sourceRoot, dataRoot: fixture.args.dataRoot, productionSha: fixture.args.productionSha,
+            startTs: fixture.args.startTs, endTs: fixture.args.endTs, initialEquity: fixture.args.initialEquity, deposits: fixture.args.deposits,
+            feeBps: fixture.args.feeBps, slippageBps: fixture.args.slippageBps, fundingSource: fixture.args.fundingSource,
+        });
+        const policy = policyFromSource(source, fixture.args.stage);
+        const replay = replayIntegrated(source, buildBaselineReplayConfig(fixture.args, source, policy, HASH));
+        const mutatedLedger = replay.baselineTradeLedger.map((entry) => ({ ...entry, acceptedGross: entry.acceptedGross + 1 }));
+        const parity = evaluateBaselineParity(source, policy, { positions: replay.positions, baselineTradeLedger: mutatedLedger });
+        assert.equal(parity.passed, false);
+        assert.match(parity.reason, /replay\.completeLedger/);
+    } finally {
+        await cleanup(fixture.root);
+    }
+});
+
 test("refuses to overwrite an immutable deterministic baseline artifact directory", async () => {
     const fixture = await makeFixture({ withBaselineLedger: true });
     const previousOutputRoot = process.env.DISDEX_AI_OUTPUT_ROOT;
@@ -664,6 +687,36 @@ test("fails closed when current and frozen cap declarations conflict", () => {
     assert.throws(() => buildReplayConfig(runnerArgs("C:/fixture", "C:/output"), { manifest: { sourceSha: HASH }, strategyConfigs: [], baselineLedger: [], candidateEvents: [], productionSha: HASH } as never, frozenSet({ stageIds: ["Q102_LONG"], completedStageIds: ["Q102_LONG"], policies: [symbolConflict] }), current, HASH), /conflicting symbol cap declaration/);
 });
 
+test("baseline replay uses the source-wide authoritative caps across strategies", async () => {
+    const fixture = await makeFixture({ withBaselineLedger: true });
+    try {
+        const source = await loadCanonicalSource({
+            sourceRoot: fixture.args.sourceRoot, dataRoot: fixture.args.dataRoot, productionSha: fixture.args.productionSha,
+            startTs: fixture.args.startTs, endTs: fixture.args.endTs, initialEquity: fixture.args.initialEquity, deposits: fixture.args.deposits,
+            feeBps: fixture.args.feeBps, slippageBps: fixture.args.slippageBps, fundingSource: fixture.args.fundingSource,
+        });
+        const first = source.strategyConfigs[0]!;
+        const multiStrategySource = {
+            ...source,
+            strategyConfigs: [
+                first,
+                { ...first, strategy: "Q102" as const, config: { ...first.config, sharedRiskCap: 250 } },
+            ],
+        };
+        const policy = policyFromSource(multiStrategySource, fixture.args.stage);
+        const replayConfig = buildBaselineReplayConfig(fixture.args, multiStrategySource, policy, HASH);
+        assert.equal(replayConfig.caps?.totalGross, 1_500);
+        assert.deepEqual(replayConfig.caps?.perStrategy, { V12_V4: 500, Q102: 250 });
+        const conflictingSource = {
+            ...multiStrategySource,
+            strategyConfigs: [first, { ...first, strategy: "Q102" as const, config: { ...first.config, totalGrossCap: 1_600 } }],
+        };
+        assert.throws(() => buildBaselineReplayConfig(fixture.args, conflictingSource, policy, HASH), /conflicting aggregate cap manifest/);
+    } finally {
+        await cleanup(fixture.root);
+    }
+});
+
 test("runner rejects a manual-review candidate fill before its decision", () => {
     assert.throws(() => validateReplayBoundary({ reason: "MANUAL_REVIEW_REQUIRED", decisionLedger: [{ candidateId: "candidate", accepted: true, ts: START, fill: { ts: START - 1 } }] } as never), /CANDIDATE_FILL_BEFORE_DECISION|MANUAL_REVIEW_REQUIRED/);
 });
@@ -683,29 +736,35 @@ test("replays a filled candidate only with bound protection-readback evidence", 
             feeBps: fixture.args.feeBps, slippageBps: fixture.args.slippageBps, fundingSource: fixture.args.fundingSource,
         });
         const sourceHash = source.manifest!.sourceSha;
-        const baselineConfigHash = buildConfigHash(fixture.args, sourceHash);
-        const baselineFrozenHash = hashJson({ baseline: true, sourceHash, configHash: baselineConfigHash });
         const baselineReadbackBase: ProtectionReadbackEvidence = {
-            sourceHash, configHash: baselineConfigHash, frozenStageHash: baselineFrozenHash, stageId: fixture.args.stage, candidateId: fixture.args.candidate,
-            available: true, orders: [{ clientOrderId: fixture.args.candidate, status: "READ_BACK", quantity: 1, price: 100 }], lineageHash: "",
+            sourceHash, configHash: "", frozenStageHash: "", stageId: fixture.args.stage, candidateId: fixture.args.candidate,
+            available: true, orders: [{ candidateId: fixture.args.candidate, clientOrderId: fixture.args.candidate, symbol: "BTCUSDT", side: "LONG", status: "READ_BACK", quantity: 1, price: 100 }], lineageHash: "",
         };
-        const baselineReadback = { ...baselineReadbackBase, lineageHash: hashProtectionReadbackEvidence(baselineReadbackBase) };
+        const baselineProtectionReadbackHash = hashProtectionReadbackEvidence(baselineReadbackBase);
+        const baselineConfigWithReadbackHash = buildConfigHash({ ...fixture.args, protectionReadbackHash: baselineProtectionReadbackHash }, sourceHash);
+        const baselineFrozenHash = hashJson({ baseline: true, sourceHash, configHash: baselineConfigWithReadbackHash });
+        const baselineReadbackWithConfig = { ...baselineReadbackBase, configHash: baselineConfigWithReadbackHash, frozenStageHash: baselineFrozenHash };
+        const baselineReadback = { ...baselineReadbackWithConfig, lineageHash: hashProtectionReadbackEvidence(baselineReadbackWithConfig) };
         const baseline = await runBaseline({ ...fixture.args, protectionReadbackEvidence: baselineReadback });
         assert.equal(baseline.status, "ACCEPTED");
+        assert.notEqual(baseline.configHash, buildConfigHash(fixture.args, sourceHash));
         const initialFrozen = frozenSet({ sourceHash, configHash: baseline.configHash, resultHash: baseline.resultHash, policyHash: baseline.policyHash });
         const initialPath = join(fixture.root, "initial-frozen.json");
         await writeFile(initialPath, JSON.stringify(initialFrozen), "utf8");
         const frozenStageHash = hashFrozenStageSet(initialFrozen);
-        const evaluationConfigHash = buildEvaluationConfigHash(fixture.args, sourceHash, frozenStageHash);
         const readbackBase: ProtectionReadbackEvidence = {
-            sourceHash, configHash: evaluationConfigHash, frozenStageHash, stageId: fixture.args.stage, candidateId: fixture.args.candidate,
-            available: true, orders: [{ clientOrderId: fixture.args.candidate, status: "READ_BACK", quantity: 1, price: 100 }], lineageHash: "",
+            sourceHash, configHash: "", frozenStageHash, stageId: fixture.args.stage, candidateId: fixture.args.candidate,
+            available: true, orders: [{ candidateId: fixture.args.candidate, clientOrderId: fixture.args.candidate, symbol: "BTCUSDT", side: "LONG", status: "READ_BACK", quantity: 1, price: 100 }], lineageHash: "",
         };
-        const readback = { ...readbackBase, lineageHash: hashProtectionReadbackEvidence(readbackBase) };
+        const readbackProtectionHash = hashProtectionReadbackEvidence(readbackBase);
+        const evaluationConfigWithReadbackHash = buildEvaluationConfigHash({ ...fixture.args, protectionReadbackHash: readbackProtectionHash }, sourceHash, frozenStageHash);
+        const readbackWithConfig = { ...readbackBase, configHash: evaluationConfigWithReadbackHash };
+        const readback = { ...readbackWithConfig, lineageHash: hashProtectionReadbackEvidence(readbackWithConfig) };
+        assert.notEqual(evaluationConfigWithReadbackHash, buildEvaluationConfigHash(fixture.args, sourceHash, frozenStageHash));
         const evidenceBase: EvaluationEvidence = {
-            sourceHash, configHash: evaluationConfigHash, frozenStageHash, stageId: fixture.args.stage, candidateId: fixture.args.candidate,
+            sourceHash, configHash: evaluationConfigWithReadbackHash, frozenStageHash, stageId: fixture.args.stage, candidateId: fixture.args.candidate,
             startTs: START, endTs: END, initialEquity: 10_000, deposits: [], feeBps: 4, slippageBps: 2, fundingSource: "fixture-funding",
-            gateHash: buildEvaluationGateHash(sourceHash, evaluationConfigHash, baseline.policyHash, START), lineageHash: "", metrics: {
+            gateHash: buildEvaluationGateHash(sourceHash, evaluationConfigWithReadbackHash, baseline.policyHash, START), lineageHash: "", metrics: {
                 normalDdImprovementBps: 100, severeDdImprovementBps: 100, oosDdImprovementBps: 0, walkForwardImprovementBps: 0, profitFactorDeclinePct: 0,
                 finalEquityDeclinePct: 0, tradeCountRatio: 1, capacityRegression: 0, safetyRegression: 0, costStressPass: 1, candidateSelectionUsesFuturePnl: 0,
             },
@@ -721,6 +780,30 @@ test("replays a filled candidate only with bound protection-readback evidence", 
         else process.env.DISDEX_AI_OUTPUT_ROOT = previousOutputRoot;
         await cleanup(fixture.root);
     }
+});
+
+test("requires one-to-one protection readback identity for every filled candidate", () => {
+    const candidate = {
+        sourceHash: HASH, ts: START, strategy: "V12_V4" as const, direction: "LONG" as const, symbol: "BTCUSDT",
+        requestedGross: 100, acceptedGross: 100, reservation: null, fill: { sourceHash: HASH, ts: START, price: 100, quantity: 1, gross: 100, fee: 0, funding: 0, slippage: 0, reason: "fixture" },
+        exit: null, reason: "fixture", fee: 0, funding: 0, slippage: 0, policyHash: HASH, configHash: HASH, resultHash: HASH,
+        candidateId: "candidate-a", accepted: true, rejectionReason: null,
+    };
+    const second = { ...candidate, candidateId: "candidate-b", symbol: "ETHUSDT" };
+    const source = { candidateEvents: [candidate, second] } as never;
+    const filledCandidates = protectionReadbackExpectations(source);
+    const makeEvidence = (orders: ProtectionReadbackEvidence["orders"]): ProtectionReadbackEvidence => {
+        const base: ProtectionReadbackEvidence = {
+            sourceHash: HASH, configHash: HASH, frozenStageHash: HASH, stageId: "V12_V4_LONG", candidateId: "candidate-a", available: true, orders, lineageHash: "",
+        };
+        return { ...base, lineageHash: hashProtectionReadbackEvidence(base) };
+    };
+    const expected = { sourceHash: HASH, configHash: HASH, frozenStageHash: HASH, stageId: "V12_V4_LONG" as const, candidateId: "candidate-a", filledCandidates };
+    const firstOrder = { candidateId: "candidate-a", clientOrderId: "candidate-a", symbol: "BTCUSDT", side: "LONG" as const, status: "READ_BACK" as const, quantity: 1, price: 100 };
+    assert.throws(() => validateProtectionReadback(makeEvidence([firstOrder]), expected), /ONE_TO_ONE/);
+    assert.throws(() => validateProtectionReadback(makeEvidence([firstOrder, { ...firstOrder, candidateId: "wrong-candidate", clientOrderId: "candidate-b", symbol: "ETHUSDT" }]), expected), /ORDER_MISMATCH|ONE_TO_ONE/);
+    assert.throws(() => validateProtectionReadback(makeEvidence([firstOrder, { ...firstOrder, candidateId: "candidate-b", clientOrderId: "candidate-b", symbol: "ETHUSDT", quantity: 2 }]), expected), /ORDER_MISMATCH/);
+    assert.throws(() => validateProtectionReadback(makeEvidence([firstOrder, { ...firstOrder, candidateId: "candidate-b", clientOrderId: "candidate-b", symbol: "ETHUSDT", price: 101 }]), expected), /ORDER_MISMATCH/);
 });
 
 test("same deterministic baseline run has one atomic artifact winner", async () => {
