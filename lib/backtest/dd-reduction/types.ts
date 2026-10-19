@@ -279,6 +279,8 @@ export interface ReplayConfig {
     slippageBps: number;
     fundingSource: string;
     policyHash: string;
+    perStrategyCaps?: Readonly<Record<string, number>>;
+    perSymbolCaps?: Readonly<Record<string, number>>;
 }
 
 export interface ProtectionPolicy {
@@ -378,6 +380,12 @@ export interface ProductionPolicy {
     trailingGivebackBps: number;
     timeStopBars: number | null;
     supportedDirections: readonly Direction[];
+    aggregateGrossCap?: number;
+    totalGrossCap?: number;
+    cryptoGrossCap?: number;
+    strategyGrossCap?: number;
+    perStrategyGrossCaps?: Readonly<Record<string, number>>;
+    perSymbolGrossCaps?: Readonly<Record<string, number>>;
 }
 
 export interface CandidatePolicy extends ProductionPolicy {
@@ -465,6 +473,17 @@ export interface AcceptanceDecision {
     baselinePolicy?: ProductionPolicy;
 }
 
+export interface FrozenStageLineage {
+    stageId: StageId;
+    status: "ACCEPTED" | "NOT_APPLICABLE";
+    sourceHash: string;
+    configHash: string;
+    resultHash: string;
+    policyHash: string;
+    candidateId?: string;
+    candidatePolicy?: CandidatePolicy | null;
+}
+
 export interface FrozenStageSet {
     sourceHash: string;
     configHash: string;
@@ -475,6 +494,8 @@ export interface FrozenStageSet {
     reason: string;
     stageDecisions?: readonly AcceptanceDecision[];
     completedStageIds?: readonly StageId[];
+    stageLineages?: readonly FrozenStageLineage[];
+    aggregateHash?: string;
 }
 
 export interface ComparisonReport {

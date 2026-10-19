@@ -25,6 +25,8 @@ export interface GrossCaps {
     readonly totalGross: number;
     readonly cryptoGross: number;
     readonly strategyGross: number;
+    readonly perStrategy?: Readonly<Record<string, number>>;
+    readonly perSymbol?: Readonly<Record<string, number>>;
 }
 
 export type ExecutionOrdering = "ENTRY" | "STOP" | "NORMAL_EXIT" | "TAKE_PROFIT" | "TIME_STOP";
@@ -193,11 +195,13 @@ export function reserveCandidate(
         + (runtime.pendingGrossByStrategy?.[candidate.strategy] ?? 0)
         + (runtime.reservedGrossByStrategy?.[candidate.strategy] ?? 0)
         + gross;
+    const strategyCap = runtime.caps.perStrategy?.[candidate.strategy] ?? runtime.caps.strategyGross;
+    const symbolCap = runtime.caps.perSymbol?.[candidate.symbol] ?? runtime.caps.cryptoGross;
     const capReason = totalAfterWorstCase > runtime.caps.totalGross
         ? "GROSS_CAP_TOTAL"
-        : symbolAfterWorstCase > runtime.caps.cryptoGross
+        : symbolAfterWorstCase > symbolCap
             ? "GROSS_CAP_CRYPTO"
-            : strategyAfterWorstCase > runtime.caps.strategyGross
+            : strategyAfterWorstCase > strategyCap
                 ? "GROSS_CAP_STRATEGY"
                 : null;
     if (capReason !== null) return { accepted: false, state: runtime, reservation: null, reason: capReason, preemptedCandidateIds: [] };

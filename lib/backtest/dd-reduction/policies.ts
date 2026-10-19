@@ -8,6 +8,7 @@ import type {
     CandidatePolicy,
     CandidateSummary,
     Direction,
+    FrozenStageLineage,
     FrozenStageSet,
     ProductionPolicy,
     StageId,
@@ -20,6 +21,37 @@ export type StrictAcceptanceGates = AcceptanceGates & {
     readonly declaredAtTs: number;
     readonly gateHash: string;
 };
+
+function frozenLineageHash(lineages: readonly FrozenStageLineage[]): string {
+    const stable = (value: unknown): string => {
+        if (Array.isArray(value)) return `[${value.map(stable).join(",")}]`;
+        if (typeof value === "object" && value !== null) {
+            return `{${Object.entries(value as Record<string, unknown>).filter(([, entry]) => entry !== undefined).sort(([left], [right]) => left.localeCompare(right)).map(([key, entry]) => `${JSON.stringify(key)}:${stable(entry)}`).join(",")}}`;
+        }
+        return JSON.stringify(value) ?? "null";
+    };
+    return createHash("sha256").update(stable(lineages), "utf8").digest("hex");
+}
+
+function priorLineages(previous: FrozenStageSet): readonly FrozenStageLineage[] {
+    if (previous.stageLineages !== undefined) return previous.stageLineages;
+    const decisions = previous.stageDecisions ?? [];
+    const completed = previous.completedStageIds ?? previous.stageIds;
+    return completed.map((stageId, index) => {
+        const decision = decisions[index];
+        const policy = previous.policies.find((entry) => entry.stageId === stageId);
+        return {
+            stageId,
+            status: decision?.status === "NOT_APPLICABLE" ? "NOT_APPLICABLE" : "ACCEPTED",
+            sourceHash: decision?.sourceHash ?? policy?.sourceHash ?? previous.sourceHash,
+            configHash: decision?.configHash ?? policy?.configHash ?? previous.configHash,
+            resultHash: decision?.resultHash ?? policy?.resultHash ?? previous.resultHash,
+            policyHash: decision?.policyHash ?? policy?.policyHash ?? previous.policyHash,
+            candidateId: decision?.candidateId ?? policy?.candidateId,
+            candidatePolicy: decision?.candidatePolicy ?? policy ?? null,
+        };
+    });
+}
 
 type CandidateMetricName =
     | "normalDdImprovementBps"
@@ -120,7 +152,7 @@ function asCandidatePolicy(base: ProductionPolicy, candidateId: string, stageId:
     return {
         ...base,
         direction,
-        policyHash: `${base.policyHash}:${candidateId}`,
+        policyHash: createHash("sha256").update(`${base.policyHash}:${candidateId}`, "utf8").digest("hex"),
         candidateId,
         stageId,
         axis,
@@ -345,6 +377,7 @@ export function freezeAcceptedStage(previous: FrozenStageSet, decision: Acceptan
     const decisions = [...(previous.stageDecisions ?? []), decision];
     const completedStageIds = [...(previous.completedStageIds ?? (previous.stageDecisions ?? []).filter((entry) => entry.status === "ACCEPTED" || entry.status === "NOT_APPLICABLE").flatMap((entry) => entry.stageId === undefined ? [] : [entry.stageId]))];
     if (completedStageIds.length === 0 && previous.stageIds.length > 0) completedStageIds.push(...previous.stageIds as StageId[]);
+    const lineages = [...priorLineages(previous)];
 
     const invalidPrefix = completedStageIds.some((stageId, index) => stageId !== SEQUENTIAL_STAGES[index])
         || previous.policies.length !== previous.stageIds.length
@@ -362,7 +395,24 @@ export function freezeAcceptedStage(previous: FrozenStageSet, decision: Acceptan
         if (decision.candidatePolicy !== null && decision.candidatePolicy !== undefined || decisionStage === undefined || expectedStage !== decisionStage || decision.baselinePolicy === undefined || decisionMetadataFailures.length > 0 || supportedDirection) {
             return { ...previous, stageDecisions: [...decisions.slice(0, -1), rejectedDecision(decision, `REJECTED_STAGE_ORDER:expected=${expectedStage ?? "COMPLETE"}`)], reason: `REJECTED_STAGE_ORDER:expected=${expectedStage ?? "COMPLETE"}` };
         }
-        return { ...previous, completedStageIds: [...completedStageIds, decisionStage], stageDecisions: decisions, reason: "FROZEN_NOT_APPLICABLE_STAGE" };
+        const nextLineages = [...lineages, {
+            stageId: decisionStage,
+            status: "NOT_APPLICABLE" as const,
+            sourceHash: decision.sourceHash,
+            configHash: decision.configHash,
+            resultHash: decision.resultHash,
+            policyHash: decision.policyHash,
+            candidateId: decision.candidateId,
+            candidatePolicy: null,
+        }];
+        return {
+            ...previous,
+            stageLineages: nextLineages,
+            aggregateHash: frozenLineageHash(nextLineages),
+            completedStageIds: [...completedStageIds, decisionStage],
+            stageDecisions: decisions,
+            reason: "FROZEN_NOT_APPLICABLE_STAGE",
+        };
     }
 
     if (decision.status !== "ACCEPTED" || !decision.accepted || decision.candidatePolicy === null || decision.candidatePolicy === undefined) {
@@ -380,6 +430,16 @@ export function freezeAcceptedStage(previous: FrozenStageSet, decision: Acceptan
     }
 
     const stageIds = [...previous.stageIds, decisionStage];
+    const nextLineages = [...lineages, {
+        stageId: decisionStage,
+        status: "ACCEPTED" as const,
+        sourceHash: decision.sourceHash,
+        configHash: decision.configHash,
+        resultHash: decision.resultHash,
+        policyHash: decision.policyHash,
+        candidateId: decision.candidateId,
+        candidatePolicy: decision.candidatePolicy,
+    }];
     return {
         ...previous,
         sourceHash: decision.sourceHash,
@@ -390,6 +450,8 @@ export function freezeAcceptedStage(previous: FrozenStageSet, decision: Acceptan
         policies: [...previous.policies, decision.candidatePolicy],
         completedStageIds: [...completedStageIds, decisionStage],
         stageDecisions: decisions,
+        stageLineages: nextLineages,
+        aggregateHash: frozenLineageHash(nextLineages),
         reason: "FROZEN_RESEARCH_POLICY_ONLY",
     };
 }

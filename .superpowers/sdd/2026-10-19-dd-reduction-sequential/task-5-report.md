@@ -67,20 +67,24 @@ The independent review identified eight lineage/acceptance issues. The remediati
 1. Routes every accepted or `NOT_APPLICABLE` stage through Task 4's `freezeAcceptedStage` transition and rejects skipped, duplicate, inconsistent, or out-of-order stages before replay.
 2. Preserves frozen replay policies by `strategy:direction`, so same-direction strategies cannot overwrite one another.
 3. Requires explicit hashed evaluation evidence for normal/severe/OOS/walk-forward DD, PF, trade-count/capacity, safety, cost stress, and no-future-selection gates. Missing or invalid evidence fails closed.
-4. Compares canonical baseline parity evidence against the loaded baseline ledger and replay open positions/gross/trade IDs; non-empty but mismatched ledgers are `BASELINE_PARITY_BLOCKED`.
-5. Uses `<output-root>/<stage>/<runId>` immutable artifact directories and rejects rerun overwrite.
-6. Includes frozen-stage content hash and evaluation-evidence hash in the stage config identity.
-7. Validates frozen accepted-stage prefix, completed-stage prefix, policy metadata/lineage, and decision-policy identity before loading.
+4. Compares production baseline parity against the complete canonical ledger identity, including open/closed status, IDs, fills, exits, quantities, fee/funding/slippage, and realized PnL with explicit numeric normalization, in addition to replay open-position reconciliation. Missing, extra, or mismatched ledger evidence blocks with `BASELINE_PARITY_BLOCKED`.
+5. Uses exclusive run-directory creation under `<output-root>/<stage>/<runId>` so concurrent identical runs have one artifact winner; ordinary reruns remain immutable and rejected.
+6. Binds external evaluation evidence to source/config/frozen-stage hashes, stage/candidate identity, time window, equity/deposits, fee/slippage/funding inputs, gate-manifest hash, and a complete evidence hash. Substituted windows or frozen inputs fail closed.
+7. Represents every completed stage in per-stage frozen lineages, including `NOT_APPLICABLE`, and stores a separate aggregate frozen-set hash. Accepted policies validate against their own stage lineage, allowing cumulative accepted-stage reloads and NA-then-accepted progression.
 8. Calculates lost prior-logic PnL from strategy-level replay trade evidence instead of hardcoding zero.
+9. Propagates canonical aggregate, shared-risk, per-strategy, and per-symbol gross limits into the emulator, while preserving distinct prior frozen strategy policies.
+10. Propagates emulator manual-review safety markers to the stage boundary and fails closed for uncausal, out-of-window, unadmitted, or unknown execution evidence.
 
 The causal emulator now accepts an explicit strategy-specific protection policy list with direction fallback, preserving distinct strategy policies in integrated replay.
 
 Remediation verification:
 
-- `npx tsx --test tests/dd-reduction-runner.test.ts` — 15 passed, 0 failed.
-- Combined Task 1–5 DD-reduction suite — 81 passed, 0 failed.
+- `npx tsx --test tests/dd-reduction-runner.test.ts` — 23 tests passed, 0 failed.
+- Combined Task 1–5 DD-reduction suite — 89 tests passed, 0 failed.
 - `npx tsc --noEmit --incremental false` — passed, exit code 0.
 - Changed-file ESLint — passed, exit code 0.
 - `git diff --check` — passed, exit code 0.
 
-Remediation commit: `4239aa2e` (`fix: close sequential runner lineage and parity gaps`).
+Latest remediation verification covers two accepted stages plus reload, `NOT_APPLICABLE` then accepted plus reload, substituted evaluation windows, full canonical parity fields, concurrent same-run artifact creation, manual-review propagation, and differing prior/current cap fixtures.
+
+Remediation commits: `4239aa2e` (`fix: close sequential runner lineage and parity gaps`), followed by the current local repair commit.

@@ -11,6 +11,7 @@ import {
     buildConfigHash,
     buildRunId,
     hashEvaluationEvidence,
+    hashFrozenStageSet,
     hashJson,
     loadFrozenStageSet,
     parseRunnerArgs,
@@ -18,9 +19,9 @@ import {
     type EvaluationEvidence,
     type RunnerArgs,
 } from "../scripts/dd-reduction/run-baseline";
-import { buildReplayPolicySet, calculateLostPriorLogicPnl, runStage, assertFrozenStageReady } from "../scripts/dd-reduction/run-stage";
+import { buildEvaluationConfigHash, buildEvaluationGateHash, buildReplayConfig, buildReplayPolicySet, calculateLostPriorLogicPnl, runStage, assertFrozenStageReady, validateReplayBoundary } from "../scripts/dd-reduction/run-stage";
 import { compareStage } from "../scripts/dd-reduction/compare-stage";
-import type { CandidatePolicy, FrozenStageSet, JsonValue } from "../lib/backtest/dd-reduction/types";
+import type { CandidatePolicy, FrozenStageSet, JsonValue, StageResult } from "../lib/backtest/dd-reduction/types";
 import type { IntegratedReplayResult } from "../lib/backtest/dd-reduction/emulator";
 
 const HASH = "a".repeat(64);
@@ -105,7 +106,7 @@ function frozenSet(overrides: Partial<FrozenStageSet> = {}): FrozenStageSet {
     };
 }
 
-async function makeFixture(options: { readonly withBaselineLedger?: boolean; readonly corruptParity?: boolean } = {}): Promise<{ root: string; args: RunnerArgs }> {
+async function makeFixture(options: { readonly withBaselineLedger?: boolean; readonly corruptParity?: boolean; readonly shortOnly?: boolean } = {}): Promise<{ root: string; args: RunnerArgs }> {
     const root = await mkdtemp(join(tmpdir(), "dd-reduction-runner-"));
     await mkdir(join(root, "source"), { recursive: true });
     await mkdir(join(root, "data"), { recursive: true });
@@ -137,6 +138,7 @@ async function makeFixture(options: { readonly withBaselineLedger?: boolean; rea
         tradeCount: 1,
         openTradeCount: 1,
         openAcceptedGross: 100,
+        entries: baselineRows,
     } : undefined;
     const production = JSON.stringify({
         strategy: "V12_V4",
@@ -151,7 +153,7 @@ async function makeFixture(options: { readonly withBaselineLedger?: boolean; rea
             profitFloorBps: 0,
             trailingGivebackBps: 100,
             timeStopBars: null,
-            supportedDirections: ["LONG", "SHORT"],
+            supportedDirections: options.shortOnly === true ? ["SHORT"] : ["LONG", "SHORT"],
             ...(baselineParity === undefined ? {} : { baselineParity }),
         },
     });
@@ -453,7 +455,7 @@ test("runs a parity-backed baseline and a fixed candidate against the cumulative
         assert.match(baseline.reason, /BASELINE_PARITY_PASS/);
 
         const frozenPath = join(fixture.root, "prior-frozen-stage.json");
-        await writeFile(frozenPath, JSON.stringify({
+        const priorFrozen = {
             sourceHash: baseline.sourceHash,
             configHash: baseline.configHash,
             resultHash: baseline.resultHash,
@@ -462,7 +464,8 @@ test("runs a parity-backed baseline and a fixed candidate against the cumulative
             policies: [],
             reason: "FROZEN_RESEARCH_POLICY_ONLY",
             completedStageIds: [],
-        }), "utf8");
+        } as FrozenStageSet;
+        await writeFile(frozenPath, JSON.stringify(priorFrozen), "utf8");
         const metrics = {
             normalDdImprovementBps: 100,
             severeDdImprovementBps: 100,
@@ -476,16 +479,208 @@ test("runs a parity-backed baseline and a fixed candidate against the cumulative
             costStressPass: 1,
             candidateSelectionUsesFuturePnl: 0,
         };
+        const frozenStageHash = hashFrozenStageSet(priorFrozen);
+        const evaluationConfigHash = buildEvaluationConfigHash(fixture.args, baseline.sourceHash, frozenStageHash);
         const evaluationEvidence: EvaluationEvidence = {
             sourceHash: baseline.sourceHash,
+            configHash: evaluationConfigHash,
+            frozenStageHash,
+            stageId: fixture.args.stage,
             candidateId: fixture.args.candidate,
-            lineageHash: hashEvaluationEvidence({ sourceHash: baseline.sourceHash, candidateId: fixture.args.candidate, lineageHash: "", metrics }),
+            startTs: fixture.args.startTs,
+            endTs: fixture.args.endTs,
+            initialEquity: fixture.args.initialEquity,
+            deposits: fixture.args.deposits,
+            feeBps: fixture.args.feeBps,
+            slippageBps: fixture.args.slippageBps,
+            fundingSource: fixture.args.fundingSource,
+            gateHash: buildEvaluationGateHash(baseline.sourceHash, evaluationConfigHash, baseline.policyHash, fixture.args.startTs),
+            lineageHash: "",
             metrics,
         };
-        const stage = await runStage({ ...fixture.args, frozenStagePath: frozenPath, evaluationEvidence });
+        const boundEvidence = { ...evaluationEvidence, lineageHash: hashEvaluationEvidence(evaluationEvidence) };
+        const stage = await runStage({ ...fixture.args, frozenStagePath: frozenPath, evaluationEvidence: boundEvidence });
         assert.equal(stage.stageId, "V12_V4_LONG");
         assert.equal(stage.status, "ACCEPTED");
+        const substitutedWindowEvidence = { ...boundEvidence, endTs: END + 1 };
+        await assert.rejects(
+            () => runStage({ ...fixture.args, frozenStagePath: frozenPath, evaluationEvidence: { ...substitutedWindowEvidence, lineageHash: hashEvaluationEvidence(substitutedWindowEvidence) } }),
+            /METRIC_EVIDENCE_INVALID_LINEAGE/,
+        );
         assert.equal(stage.accepted, true);
+    } finally {
+        if (previousOutputRoot === undefined) delete process.env.DISDEX_AI_OUTPUT_ROOT;
+        else process.env.DISDEX_AI_OUTPUT_ROOT = previousOutputRoot;
+        await cleanup(fixture.root);
+    }
+});
+
+test("requires evaluation evidence to bind the complete run identity", () => {
+    const evidence = {
+        sourceHash: HASH,
+        configHash: HASH,
+        frozenStageHash: HASH,
+        stageId: "V12_V4_LONG" as const,
+        candidateId: "V12_V4_LONG:candidate",
+        startTs: START,
+        endTs: END,
+        initialEquity: 10_000,
+        deposits: [],
+        feeBps: 4,
+        slippageBps: 2,
+        fundingSource: "fixture-funding",
+        gateHash: HASH,
+        lineageHash: "",
+        metrics: { normalDdImprovementBps: 1 },
+    };
+    const valid = { ...evidence, lineageHash: hashEvaluationEvidence(evidence) };
+    assert.equal(hashEvaluationEvidence(valid), valid.lineageHash);
+    assert.notEqual(hashEvaluationEvidence({ ...valid, endTs: END + 1 }), valid.lineageHash);
+    assert.notEqual(hashEvaluationEvidence({ ...valid, frozenStageHash: "b".repeat(64) }), valid.lineageHash);
+});
+
+test("accepts a cumulative frozen set with accepted and not-applicable stage records after reload", async () => {
+    const root = await mkdtemp(join(tmpdir(), "dd-reduction-frozen-lineage-"));
+    try {
+        const path = join(root, "frozen-stage.json");
+        const stageLineages = [
+            { stageId: "V12_V4_LONG", status: "NOT_APPLICABLE", sourceHash: HASH, configHash: HASH, resultHash: HASH, policyHash: HASH, candidatePolicy: null },
+            { stageId: "V12_V4_SHORT", status: "ACCEPTED", sourceHash: HASH, configHash: HASH, resultHash: HASH, policyHash: HASH, candidatePolicy: { ...candidatePolicy("V12_V4_SHORT", "V12_V4", "SHORT"), policyHash: HASH } },
+        ] as const;
+        const frozen = {
+            ...frozenSet(),
+            stageIds: ["V12_V4_SHORT"],
+            policies: [{ ...candidatePolicy("V12_V4_SHORT", "V12_V4", "SHORT"), policyHash: HASH }],
+            completedStageIds: ["V12_V4_LONG", "V12_V4_SHORT"],
+            stageDecisions: [
+                { stageId: "V12_V4_LONG", status: "NOT_APPLICABLE", accepted: false, candidateId: "V12_V4_LONG:na", policyHash: HASH, sourceHash: HASH, configHash: HASH, resultHash: HASH, candidatePolicy: null },
+                { stageId: "V12_V4_SHORT", status: "ACCEPTED", accepted: true, candidateId: "V12_V4_SHORT:candidate", policyHash: HASH, sourceHash: HASH, configHash: HASH, resultHash: HASH, candidatePolicy: { ...candidatePolicy("V12_V4_SHORT", "V12_V4", "SHORT"), policyHash: HASH } },
+            ],
+            stageLineages,
+            aggregateHash: hashJson(stageLineages as unknown as JsonValue),
+        };
+        await writeFile(path, JSON.stringify(frozen), "utf8");
+        const loaded = await loadFrozenStageSet(path);
+        assert.deepEqual(loaded.completedStageIds, ["V12_V4_LONG", "V12_V4_SHORT"]);
+        assert.deepEqual(loaded.stageIds, ["V12_V4_SHORT"]);
+        assertFrozenStageReady(loaded, "Q102_LONG");
+    } finally {
+        await cleanup(root);
+    }
+});
+
+test("runner replay config preserves aggregate, strategy, and symbol cap lineage", () => {
+    const current = { ...candidatePolicy("V12_V4_LONG", "V12_V4", "LONG"), grossCap: 1_500, sharedRiskCap: 500, aggregateGrossCap: 9_000, cryptoGrossCap: 7_000, strategyGrossCap: 3_000, perStrategyGrossCaps: { V12_V4: 3_000, Q102: 4_000 }, perSymbolGrossCaps: { BTCUSDT: 2_500 } };
+    const prior = { ...candidatePolicy("Q102_LONG", "Q102", "LONG"), grossCap: 800, sharedRiskCap: 250, aggregateGrossCap: 9_000, cryptoGrossCap: 7_000, strategyGrossCap: 4_000, perStrategyGrossCaps: { Q102: 4_000 }, perSymbolGrossCaps: { BTCUSDT: 2_500 } };
+    const config = buildReplayConfig(runnerArgs("C:/fixture", "C:/output"), { manifest: { sourceSha: HASH }, strategyConfigs: [], baselineLedger: [], candidateEvents: [], productionSha: HASH } as never, frozenSet({ stageIds: ["Q102_LONG"], completedStageIds: ["Q102_LONG"], policies: [prior] }), current, HASH);
+    assert.deepEqual(config.caps, { totalGross: 9_000, cryptoGross: 7_000, strategyGross: 3_000, perStrategy: { Q102: 4_000, V12_V4: 3_000 }, perSymbol: { BTCUSDT: 2_500 } });
+    assert.deepEqual(config.perStrategyCaps, { Q102: 4_000, V12_V4: 3_000 });
+    assert.deepEqual(config.perSymbolCaps, { BTCUSDT: 2_500 });
+});
+
+test("runner rejects a manual-review candidate fill before its decision", () => {
+    assert.throws(() => validateReplayBoundary({ reason: "MANUAL_REVIEW_REQUIRED", decisionLedger: [{ candidateId: "candidate", accepted: true, ts: START, fill: { ts: START - 1 } }] } as never), /CANDIDATE_FILL_BEFORE_DECISION|MANUAL_REVIEW_REQUIRED/);
+});
+
+test("runner rejects a candidate fill outside the evaluation window", () => {
+    assert.throws(() => validateReplayBoundary({ reason: "REPLAY_COMPLETE", decisionLedger: [{ candidateId: "candidate", accepted: true, ts: START, fill: { ts: END + 1 } }] } as never, START, END), /CANDIDATE_FILL_OUTSIDE_WINDOW/);
+});
+
+test("same deterministic baseline run has one atomic artifact winner", async () => {
+    const fixture = await makeFixture({ withBaselineLedger: true });
+    const previousOutputRoot = process.env.DISDEX_AI_OUTPUT_ROOT;
+    process.env.DISDEX_AI_OUTPUT_ROOT = fixture.args.outputRoot;
+    try {
+        const results = await Promise.allSettled([runBaseline(fixture.args), runBaseline(fixture.args)]);
+        const fulfilled = results.filter((entry): entry is PromiseFulfilledResult<StageResult> => entry.status === "fulfilled");
+        const rejected = results.filter((entry): entry is PromiseRejectedResult => entry.status === "rejected");
+        assert.equal(fulfilled.length, 1);
+        assert.equal(rejected.length, 1);
+        assert.match(String(rejected[0]?.reason), /RESEARCH_ARTIFACT_EXISTS/);
+    } finally {
+        if (previousOutputRoot === undefined) delete process.env.DISDEX_AI_OUTPUT_ROOT;
+        else process.env.DISDEX_AI_OUTPUT_ROOT = previousOutputRoot;
+        await cleanup(fixture.root);
+    }
+});
+
+test("accepts two sequential stages and reloads the cumulative frozen artifact", async () => {
+    const fixture = await makeFixture({ withBaselineLedger: true });
+    const previousOutputRoot = process.env.DISDEX_AI_OUTPUT_ROOT;
+    process.env.DISDEX_AI_OUTPUT_ROOT = fixture.args.outputRoot;
+    const metrics = {
+        normalDdImprovementBps: 100, severeDdImprovementBps: 100, oosDdImprovementBps: 0, walkForwardImprovementBps: 0,
+        profitFactorDeclinePct: 0, finalEquityDeclinePct: 0, tradeCountRatio: 1, capacityRegression: 0, safetyRegression: 0,
+        costStressPass: 1, candidateSelectionUsesFuturePnl: 0,
+    };
+    try {
+        const baseline0 = await runBaseline(fixture.args);
+        const initialFrozen = frozenSet({ sourceHash: baseline0.sourceHash, configHash: baseline0.configHash, resultHash: baseline0.resultHash, policyHash: baseline0.policyHash });
+        const initialPath = join(fixture.root, "initial-frozen.json");
+        await writeFile(initialPath, JSON.stringify(initialFrozen), "utf8");
+        const frozenHash0 = hashFrozenStageSet(initialFrozen);
+        const evidence0Base: EvaluationEvidence = {
+            sourceHash: baseline0.sourceHash, configHash: buildEvaluationConfigHash(fixture.args, baseline0.sourceHash, frozenHash0), frozenStageHash: frozenHash0,
+            stageId: fixture.args.stage, candidateId: fixture.args.candidate, startTs: START, endTs: END, initialEquity: 10_000, deposits: [], feeBps: 4, slippageBps: 2,
+            fundingSource: "fixture-funding", gateHash: buildEvaluationGateHash(baseline0.sourceHash, buildEvaluationConfigHash(fixture.args, baseline0.sourceHash, frozenHash0), baseline0.policyHash, START), lineageHash: "", metrics,
+        };
+        const stage0 = await runStage({ ...fixture.args, frozenStagePath: initialPath, evaluationEvidence: { ...evidence0Base, lineageHash: hashEvaluationEvidence(evidence0Base) } });
+        assert.equal(stage0.status, "ACCEPTED");
+        const stage0FrozenPath = join(fixture.args.outputRoot, fixture.args.stage, stage0.runId!, "frozen-stage.json");
+        const stage1Args: RunnerArgs = { ...fixture.args, stage: "V12_V4_SHORT", candidate: "V12_V4_SHORT:SHORT:initial-stop:250" };
+        const baseline1 = await runBaseline(stage1Args);
+        const frozen0 = await loadFrozenStageSet(stage0FrozenPath);
+        const frozenHash1 = hashFrozenStageSet(frozen0);
+        const configHash1 = buildEvaluationConfigHash(stage1Args, baseline1.sourceHash, frozenHash1);
+        const evidence1Base: EvaluationEvidence = {
+            sourceHash: baseline1.sourceHash, configHash: configHash1, frozenStageHash: frozenHash1, stageId: stage1Args.stage, candidateId: stage1Args.candidate,
+            startTs: START, endTs: END, initialEquity: 10_000, deposits: [], feeBps: 4, slippageBps: 2, fundingSource: "fixture-funding",
+            gateHash: buildEvaluationGateHash(baseline1.sourceHash, configHash1, baseline1.policyHash, START), lineageHash: "", metrics,
+        };
+        const stage1 = await runStage({ ...stage1Args, frozenStagePath: stage0FrozenPath, evaluationEvidence: { ...evidence1Base, lineageHash: hashEvaluationEvidence(evidence1Base) } });
+        assert.equal(stage1.status, "ACCEPTED");
+        const reloaded = await loadFrozenStageSet(join(fixture.args.outputRoot, stage1Args.stage, stage1.runId!, "frozen-stage.json"));
+        assert.deepEqual(reloaded.stageIds, ["V12_V4_LONG", "V12_V4_SHORT"]);
+        assert.deepEqual(reloaded.completedStageIds, ["V12_V4_LONG", "V12_V4_SHORT"]);
+        assertFrozenStageReady(reloaded, "Q102_LONG");
+    } finally {
+        if (previousOutputRoot === undefined) delete process.env.DISDEX_AI_OUTPUT_ROOT;
+        else process.env.DISDEX_AI_OUTPUT_ROOT = previousOutputRoot;
+        await cleanup(fixture.root);
+    }
+});
+
+test("accepts a NOT_APPLICABLE first stage followed by an accepted stage after reload", async () => {
+    const fixture = await makeFixture({ withBaselineLedger: true, shortOnly: true });
+    const previousOutputRoot = process.env.DISDEX_AI_OUTPUT_ROOT;
+    process.env.DISDEX_AI_OUTPUT_ROOT = fixture.args.outputRoot;
+    try {
+        const baseline0 = await runBaseline(fixture.args);
+        const initialFrozen = frozenSet({ sourceHash: baseline0.sourceHash, configHash: baseline0.configHash, resultHash: baseline0.resultHash, policyHash: baseline0.policyHash });
+        const initialPath = join(fixture.root, "initial-frozen.json");
+        await writeFile(initialPath, JSON.stringify(initialFrozen), "utf8");
+        const stage0Args = { ...fixture.args, candidate: "V12_V4_LONG:LONG:NOT_APPLICABLE" };
+        const stage0 = await runStage({ ...stage0Args, frozenStagePath: initialPath });
+        assert.equal(stage0.status, "NOT_APPLICABLE");
+        const frozenPath = join(fixture.args.outputRoot, stage0Args.stage, stage0.runId!, "frozen-stage.json");
+        const frozen0 = await loadFrozenStageSet(frozenPath);
+        const stage1Args: RunnerArgs = { ...fixture.args, stage: "V12_V4_SHORT", candidate: "V12_V4_SHORT:SHORT:initial-stop:250" };
+        const baseline1 = await runBaseline(stage1Args);
+        const frozenHash = hashFrozenStageSet(frozen0);
+        const configHash = buildEvaluationConfigHash(stage1Args, baseline1.sourceHash, frozenHash);
+        const evidence: EvaluationEvidence = {
+            sourceHash: baseline1.sourceHash, configHash, frozenStageHash: frozenHash, stageId: stage1Args.stage, candidateId: stage1Args.candidate,
+            startTs: START, endTs: END, initialEquity: 10_000, deposits: [], feeBps: 4, slippageBps: 2, fundingSource: "fixture-funding",
+            gateHash: buildEvaluationGateHash(baseline1.sourceHash, configHash, baseline1.policyHash, START), lineageHash: "", metrics: {
+                normalDdImprovementBps: 100, severeDdImprovementBps: 100, oosDdImprovementBps: 0, walkForwardImprovementBps: 0, profitFactorDeclinePct: 0,
+                finalEquityDeclinePct: 0, tradeCountRatio: 1, capacityRegression: 0, safetyRegression: 0, costStressPass: 1, candidateSelectionUsesFuturePnl: 0,
+            },
+        };
+        const stage1 = await runStage({ ...stage1Args, frozenStagePath: frozenPath, evaluationEvidence: { ...evidence, lineageHash: hashEvaluationEvidence(evidence) } });
+        const reloaded = await loadFrozenStageSet(join(fixture.args.outputRoot, stage1Args.stage, stage1.runId!, "frozen-stage.json"));
+        assert.deepEqual(reloaded.stageIds, ["V12_V4_SHORT"]);
+        assert.deepEqual(reloaded.completedStageIds, ["V12_V4_LONG", "V12_V4_SHORT"]);
+        assertFrozenStageReady(reloaded, "Q102_LONG");
     } finally {
         if (previousOutputRoot === undefined) delete process.env.DISDEX_AI_OUTPUT_ROOT;
         else process.env.DISDEX_AI_OUTPUT_ROOT = previousOutputRoot;

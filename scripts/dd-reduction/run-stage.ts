@@ -32,7 +32,7 @@ import {
 } from "./run-baseline";
 import { compareStage } from "./compare-stage";
 import { writeStageArtifacts } from "../../lib/backtest/dd-reduction/reporting";
-import { mkdir, readdir, writeFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import type { JsonObject, JsonValue, StageId } from "../../lib/backtest/dd-reduction/types";
 
@@ -51,6 +51,51 @@ export function buildReplayPolicySet(frozen: FrozenStageSet, current: Production
     return [...policies.values()];
 }
 
+export function buildReplayConfig(args: RunnerArgs, source: CanonicalSource, frozen: FrozenStageSet, policy: ProductionPolicy, configHash: string): ReplayConfigWithRuntime {
+    const policies = buildReplayPolicySet(frozen, policy);
+    const perStrategyCaps: Record<string, number> = {};
+    const perSymbolCaps: Record<string, number> = {};
+    for (const entry of policies) {
+        perStrategyCaps[entry.strategy] = entry.strategyGrossCap ?? entry.sharedRiskCap;
+        for (const [symbol, cap] of Object.entries(entry.perSymbolGrossCaps ?? {})) perSymbolCaps[symbol] = cap;
+        for (const [strategy, cap] of Object.entries(entry.perStrategyGrossCaps ?? {})) perStrategyCaps[strategy] = cap;
+    }
+    return {
+        sourceHash: source.manifest?.sourceSha ?? source.productionSha,
+        configHash,
+        startTs: args.startTs,
+        endTs: args.endTs,
+        initialEquity: args.initialEquity,
+        feeBps: args.feeBps,
+        slippageBps: args.slippageBps,
+        fundingSource: args.fundingSource,
+        policyHash: policy.policyHash,
+        deposits: args.deposits,
+        fixedBaselinePolicy: policy.policyHash,
+        strategyPolicies: policies.map((entry) => ({
+            policyHash: entry.policyHash,
+            configHash: entry.configHash,
+            strategy: entry.strategy,
+            direction: entry.direction,
+            initialStopBps: entry.initialStopBps,
+            profitFloorBps: entry.profitFloorBps,
+            trailingGivebackBps: entry.trailingGivebackBps,
+            timeStopBars: entry.timeStopBars,
+        })),
+        directionPolicies: directionPolicies(policy),
+        caps: {
+            totalGross: policy.totalGrossCap ?? policy.aggregateGrossCap ?? policy.grossCap,
+            cryptoGross: policy.cryptoGrossCap ?? policy.totalGrossCap ?? policy.aggregateGrossCap ?? policy.grossCap,
+            strategyGross: policy.strategyGrossCap ?? policy.sharedRiskCap,
+            perStrategy: perStrategyCaps,
+            perSymbol: perSymbolCaps,
+        },
+        perStrategyCaps,
+        perSymbolCaps,
+        executionEvents: args.executionEvents,
+    };
+}
+
 function directionPolicies(current: ProductionPolicy): ReplayConfigWithRuntime["directionPolicies"] {
     return {
         [current.direction]: {
@@ -67,31 +112,7 @@ function directionPolicies(current: ProductionPolicy): ReplayConfigWithRuntime["
 }
 
 function replayFor(args: RunnerArgs, source: CanonicalSource, frozen: FrozenStageSet, policy: ProductionPolicy, configHash: string): IntegratedReplayResult {
-    return replayIntegrated(source, {
-        sourceHash: source.manifest?.sourceSha ?? source.productionSha,
-        configHash,
-        startTs: args.startTs,
-        endTs: args.endTs,
-        initialEquity: args.initialEquity,
-        feeBps: args.feeBps,
-        slippageBps: args.slippageBps,
-        fundingSource: args.fundingSource,
-        policyHash: policy.policyHash,
-        deposits: args.deposits,
-        fixedBaselinePolicy: policy.policyHash,
-        strategyPolicies: buildReplayPolicySet(frozen, policy).map((entry) => ({
-            policyHash: entry.policyHash,
-            configHash: entry.configHash,
-            strategy: entry.strategy,
-            direction: entry.direction,
-            initialStopBps: entry.initialStopBps,
-            profitFloorBps: entry.profitFloorBps,
-            trailingGivebackBps: entry.trailingGivebackBps,
-            timeStopBars: entry.timeStopBars,
-        })),
-        directionPolicies: directionPolicies(policy),
-        caps: { totalGross: policy.grossCap, cryptoGross: policy.grossCap, strategyGross: policy.grossCap },
-    });
+    return replayIntegrated(source, buildReplayConfig(args, source, frozen, policy, configHash));
 }
 
 function replayMetrics(replay: IntegratedReplayResult, initialEquity: number): Readonly<Record<string, number>> {
@@ -116,6 +137,23 @@ function replayMetrics(replay: IntegratedReplayResult, initialEquity: number): R
     };
 }
 
+export function validateReplayBoundary(replay: Pick<IntegratedReplayResult, "reason" | "decisionLedger" | "portfolio">, startTs = Number.NEGATIVE_INFINITY, endTs = Number.POSITIVE_INFINITY): void {
+    if (replay.reason === "MANUAL_REVIEW_REQUIRED") throw new Error("MANUAL_REVIEW_REQUIRED: replay safety marker is present");
+    for (const decision of replay.decisionLedger) {
+        const fill = decision.fill;
+        if (fill !== null && fill !== undefined) {
+            if (fill.ts < decision.ts) throw new Error(`CANDIDATE_FILL_BEFORE_DECISION:${decision.candidateId}`);
+            if (fill.ts < startTs || fill.ts > endTs) throw new Error(`CANDIDATE_FILL_OUTSIDE_WINDOW:${decision.candidateId}`);
+            if (!decision.accepted) throw new Error(`UNADMITTED_CANDIDATE_FILL:${decision.candidateId}`);
+        }
+    }
+    for (const point of replay.portfolio) {
+        const state = point as unknown as { readonly manualReview?: readonly string[]; readonly events?: readonly { readonly executionStatus?: string }[] };
+        if ((state.manualReview?.length ?? 0) > 0) throw new Error(`MANUAL_REVIEW_REQUIRED:${state.manualReview?.join(",")}`);
+        if (state.events?.some((event) => event.executionStatus === "UNKNOWN")) throw new Error("UNKNOWN_EXECUTION: replay contains unknown execution status");
+    }
+}
+
 function netPnlForStrategy(replay: IntegratedReplayResult, strategy: string): number {
     const positions = replay.tradeLedger ?? replay.positions;
     return positions.filter((position) => position.strategy === strategy).reduce((total, position) => {
@@ -132,8 +170,34 @@ export function calculateLostPriorLogicPnl(baseline: IntegratedReplayResult, can
     return lost;
 }
 
-function requiredMetricEvidence(evidence: EvaluationEvidence, sourceHash: string, candidateId: string): Readonly<Record<string, number>> {
-    if (evidence.sourceHash !== sourceHash || evidence.candidateId !== candidateId || hashEvaluationEvidence(evidence) !== evidence.lineageHash) {
+export function buildEvaluationConfigHash(args: RunnerArgs, sourceHash: string, frozenStageHash: string): string {
+    return buildConfigHash({ ...args, frozenStageHash, evaluationEvidenceHash: undefined }, sourceHash);
+}
+
+export function buildEvaluationGateHash(sourceHash: string, configHash: string, policyHash: string, startTs: number): string {
+    return predeclareAcceptanceGates({ sourceHash, configHash, resultHash: configHash, policyHash, declaredAtTs: startTs }).gateHash ?? "";
+}
+
+function requiredMetricEvidence(evidence: EvaluationEvidence, expected: {
+    readonly sourceHash: string;
+    readonly configHash: string;
+    readonly frozenStageHash: string;
+    readonly stageId: StageId;
+    readonly candidateId: string;
+    readonly startTs: number;
+    readonly endTs: number;
+    readonly initialEquity: number;
+    readonly deposits: readonly { readonly ts: number; readonly amount: number }[];
+    readonly feeBps: number;
+    readonly slippageBps: number;
+    readonly fundingSource: string;
+    readonly gateHash: string;
+}): Readonly<Record<string, number>> {
+    if (evidence.sourceHash !== expected.sourceHash || evidence.configHash !== expected.configHash || evidence.frozenStageHash !== expected.frozenStageHash
+        || evidence.stageId !== expected.stageId || evidence.candidateId !== expected.candidateId || evidence.startTs !== expected.startTs || evidence.endTs !== expected.endTs
+        || evidence.initialEquity !== expected.initialEquity || JSON.stringify(evidence.deposits) !== JSON.stringify(expected.deposits)
+        || evidence.feeBps !== expected.feeBps || evidence.slippageBps !== expected.slippageBps || evidence.fundingSource !== expected.fundingSource
+        || evidence.gateHash !== expected.gateHash || hashEvaluationEvidence(evidence) !== evidence.lineageHash) {
         throw new Error("METRIC_EVIDENCE_INVALID_LINEAGE");
     }
     const required = [
@@ -162,26 +226,44 @@ async function loadEvaluationEvidence(args: RunnerArgs): Promise<EvaluationEvide
     const parsed = JSON.parse(await readFile(args.evaluationEvidencePath, "utf8")) as JsonValue;
     if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) throw new Error("METRIC_EVIDENCE_INVALID");
     const object = parsed as JsonObject;
-    if (typeof object.sourceHash !== "string" || typeof object.candidateId !== "string" || typeof object.lineageHash !== "string" || typeof object.metrics !== "object" || object.metrics === null || Array.isArray(object.metrics)) throw new Error("METRIC_EVIDENCE_INVALID");
-    return { sourceHash: object.sourceHash, candidateId: object.candidateId, lineageHash: object.lineageHash, metrics: object.metrics as Readonly<Record<string, number>> };
+    if (typeof object.sourceHash !== "string" || typeof object.configHash !== "string" || typeof object.frozenStageHash !== "string" || typeof object.stageId !== "string"
+        || typeof object.candidateId !== "string" || typeof object.startTs !== "number" || typeof object.endTs !== "number" || typeof object.initialEquity !== "number"
+        || !Array.isArray(object.deposits) || typeof object.feeBps !== "number" || typeof object.slippageBps !== "number" || typeof object.fundingSource !== "string"
+        || typeof object.gateHash !== "string" || typeof object.lineageHash !== "string" || typeof object.metrics !== "object" || object.metrics === null || Array.isArray(object.metrics)) throw new Error("METRIC_EVIDENCE_INVALID");
+    return {
+        sourceHash: object.sourceHash, configHash: object.configHash, frozenStageHash: object.frozenStageHash, stageId: object.stageId as StageId,
+        candidateId: object.candidateId, startTs: object.startTs, endTs: object.endTs, initialEquity: object.initialEquity,
+        deposits: object.deposits as unknown as EvaluationEvidence["deposits"], feeBps: object.feeBps, slippageBps: object.slippageBps,
+        fundingSource: object.fundingSource, gateHash: object.gateHash, lineageHash: object.lineageHash, metrics: object.metrics as Readonly<Record<string, number>>,
+    };
 }
 
 export function assertFrozenStageReady(frozen: FrozenStageSet, stage: StageId): void {
     const completed = frozen.completedStageIds ?? frozen.stageIds;
-    if (frozen.stageIds.some((entry, index) => entry !== SEQUENTIAL_STAGES.filter((stageId) => completed.includes(stageId))[index])) throw new Error("FROZEN_STAGE_METADATA: accepted stage prefix mismatch");
     if (completed.some((entry, index) => entry !== SEQUENTIAL_STAGES[index]) || new Set(completed).size !== completed.length) throw new Error("FROZEN_STAGE_METADATA: completed stage prefix is invalid");
-    if (frozen.policies.length !== frozen.stageIds.length) throw new Error("FROZEN_STAGE_METADATA: policy count does not match accepted stages");
-    if (frozen.policies.some((policy, index) => policy.stageId !== frozen.stageIds[index]
-        || strategyForStage(policy.stageId) !== policy.strategy
-        || !stageAcceptsDirection(policy.stageId, policy.direction)
-        || policy.applicability !== "AVAILABLE"
-        || policy.sourceHash !== frozen.sourceHash
-        || policy.configHash !== frozen.configHash
-        || policy.resultHash !== frozen.resultHash
-        || policy.policyHash !== frozen.policyHash
-        || policy.configHash.length === 0
-        || policy.resultHash.length === 0
-        || policy.policyHash.length === 0)) throw new Error("FROZEN_STAGE_POLICY_INVALID: policy lineage is incomplete");
+    if (frozen.stageLineages !== undefined) {
+        if (frozen.stageLineages.length !== completed.length) throw new Error("FROZEN_STAGE_METADATA: stage lineage count does not match completed stages");
+        if (frozen.stageLineages.some((lineage, index) => lineage.stageId !== completed[index] || (lineage.status !== "ACCEPTED" && lineage.status !== "NOT_APPLICABLE"))) throw new Error("FROZEN_STAGE_METADATA: stage lineage prefix is invalid");
+        const accepted = frozen.stageLineages.filter((lineage) => lineage.status === "ACCEPTED");
+        if (accepted.map((lineage) => lineage.stageId).join(",") !== frozen.stageIds.join(",")) throw new Error("FROZEN_STAGE_METADATA: accepted stage prefix mismatch");
+        if (frozen.policies.length !== accepted.length) throw new Error("FROZEN_STAGE_METADATA: policy count does not match accepted stages");
+        if (frozen.policies.some((policy, index) => {
+            const lineage = accepted[index];
+            return lineage === undefined || policy.stageId !== lineage.stageId || strategyForStage(policy.stageId) !== policy.strategy
+                || !stageAcceptsDirection(policy.stageId, policy.direction) || policy.applicability !== "AVAILABLE"
+                || policy.sourceHash !== lineage.sourceHash || policy.configHash !== lineage.configHash || policy.resultHash !== lineage.resultHash || policy.policyHash !== lineage.policyHash;
+        })) throw new Error("FROZEN_STAGE_POLICY_INVALID: policy lineage is incomplete");
+    } else {
+        if (frozen.stageIds.some((entry, index) => entry !== SEQUENTIAL_STAGES.filter((stageId) => completed.includes(stageId))[index])) throw new Error("FROZEN_STAGE_METADATA: accepted stage prefix mismatch");
+        if (frozen.policies.length !== frozen.stageIds.length) throw new Error("FROZEN_STAGE_METADATA: policy count does not match accepted stages");
+        if (frozen.policies.some((policy, index) => policy.stageId !== frozen.stageIds[index]
+            || strategyForStage(policy.stageId) !== policy.strategy
+            || !stageAcceptsDirection(policy.stageId, policy.direction)
+            || policy.applicability !== "AVAILABLE"
+            || policy.configHash.length === 0
+            || policy.resultHash.length === 0
+            || policy.policyHash.length === 0)) throw new Error("FROZEN_STAGE_POLICY_INVALID: policy lineage is incomplete");
+    }
     if (completed.length > 0 && (frozen.stageDecisions === undefined || frozen.stageDecisions.length < completed.length)) throw new Error("FROZEN_STAGE_METADATA: stage decisions are missing");
     const expected = SEQUENTIAL_STAGES[completed.length];
     if (expected !== stage) throw new Error(`FROZEN_STAGE_ORDER: expected ${expected ?? "COMPLETE"}, received ${stage}`);
@@ -206,10 +288,10 @@ async function persist(args: RunnerArgs, result: StageResult, frozen: FrozenStag
     const outputDirectory = join(assertRunnerOutputRoot(args.outputRoot), args.stage, result.runId ?? result.resultHash);
     await mkdir(join(assertRunnerOutputRoot(args.outputRoot), args.stage), { recursive: true });
     try {
-        const existing = await readdir(outputDirectory);
-        if (existing.length > 0) throw new Error("RESEARCH_ARTIFACT_EXISTS: deterministic stage run directory is immutable");
+        await mkdir(outputDirectory);
     } catch (error) {
-        if (!(error instanceof Error) || !("code" in error) || (error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
+        if (error instanceof Error && "code" in error && (error as NodeJS.ErrnoException).code === "EEXIST") throw new Error("RESEARCH_ARTIFACT_EXISTS: deterministic stage run directory is immutable");
+        throw error;
     }
     const index = await writeStageArtifacts(result, outputDirectory);
     await writeFrozenStageSet(join(outputDirectory, "frozen-stage.json"), frozen);
@@ -243,9 +325,12 @@ export async function runStage(args: RunnerArgs): Promise<StageResult> {
     if (selected.applicability === "AVAILABLE" && evidence === null) throw new Error("METRIC_EVIDENCE_UNAVAILABLE: required OOS, walk-forward, PF, and cost-stress evidence is absent");
 
     const sourceHash = source.manifest.sourceSha;
+    const frozenStageHash = hashFrozenStageSet(frozen);
+    const evaluationConfigHash = buildEvaluationConfigHash(args, sourceHash, frozenStageHash);
+    const evaluationGateHash = buildEvaluationGateHash(sourceHash, evaluationConfigHash, currentPolicy.policyHash, args.startTs);
     const identityArgs: RunnerArgs = {
         ...args,
-        frozenStageHash: hashFrozenStageSet(frozen),
+        frozenStageHash,
         evaluationEvidenceHash: evidence === null ? "MISSING" : hashEvaluationEvidence(evidence),
     };
     const configHash = buildConfigHash(identityArgs, sourceHash);
@@ -255,6 +340,7 @@ export async function runStage(args: RunnerArgs): Promise<StageResult> {
         ? { ...selected, sourceHash, configHash, resultHash: runId }
         : null;
     const baselineReplay = replayFor(args, source, frozen, baselineLineage, configHash);
+    validateReplayBoundary(baselineReplay, args.startTs, args.endTs);
     const baselineMetrics = replayMetrics(baselineReplay, args.initialEquity);
     if (!baselineReplay.accountingReconciliation.balanced) throw new Error("ACCOUNTING_FAILURE: baseline replay reconciliation is not balanced");
     const parity = evaluateBaselineParity(source, baselineLineage, baselineReplay);
@@ -318,6 +404,7 @@ export async function runStage(args: RunnerArgs): Promise<StageResult> {
 
     if (candidateLineage === null) throw new Error("CANDIDATE_POLICY_MISSING");
     const candidateReplay = replayFor(args, source, frozen, candidateLineage, configHash);
+    validateReplayBoundary(candidateReplay, args.startTs, args.endTs);
     if (!candidateReplay.accountingReconciliation.balanced) throw new Error("ACCOUNTING_FAILURE: candidate replay reconciliation is not balanced");
     const baselineSummary: BaselineSummary = {
         sourceHash,
@@ -334,7 +421,21 @@ export async function runStage(args: RunnerArgs): Promise<StageResult> {
     };
     const candidateRawMetrics = replayMetrics(candidateReplay, args.initialEquity);
     if (evidence === null) throw new Error("METRIC_EVIDENCE_UNAVAILABLE");
-    const evaluationMetrics = requiredMetricEvidence(evidence, sourceHash, candidateLineage.candidateId);
+    const evaluationMetrics = requiredMetricEvidence(evidence, {
+        sourceHash,
+        configHash: evaluationConfigHash,
+        frozenStageHash,
+        stageId: args.stage,
+        candidateId: candidateLineage.candidateId,
+        startTs: args.startTs,
+        endTs: args.endTs,
+        initialEquity: args.initialEquity,
+        deposits: args.deposits,
+        feeBps: args.feeBps,
+        slippageBps: args.slippageBps,
+        fundingSource: args.fundingSource,
+        gateHash: evaluationGateHash,
+    });
     const metrics = {
         ...evaluationMetrics,
         ...candidateRawMetrics,
