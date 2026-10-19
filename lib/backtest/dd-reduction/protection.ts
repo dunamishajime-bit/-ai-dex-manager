@@ -20,6 +20,7 @@ export interface ProtectionPolicyInput {
     readonly trailActivation?: number;
     readonly trailRetraceBps?: number;
     readonly trailRetrace?: number;
+    readonly trailingGivebackBps?: number;
     readonly timeStopBars?: number | null;
     readonly timeStop?: number | null;
     readonly tickSize?: number;
@@ -161,7 +162,7 @@ export function applyProtectionPolicy(
     const activationBps = bpsOrPercent(policy.profitActivation ?? policy.profitActivationBps, 100);
     const floorBps = bpsOrPercent(policy.profitFloor ?? policy.profitFloorBps, 0);
     const trailActivationBps = bpsOrPercent(policy.trailActivation ?? policy.trailActivationBps, activationBps);
-    const retraceBps = bpsOrPercent(policy.trailRetrace ?? policy.trailRetraceBps, 0);
+    const retraceBps = bpsOrPercent(policy.trailRetrace ?? policy.trailRetraceBps ?? policy.trailingGivebackBps, 0);
     const timeStopBars = policy.timeStop ?? policy.timeStopBars ?? null;
     const previous = runtimePosition.protection;
     const mfePrice = previous === null
@@ -201,8 +202,7 @@ export function applyProtectionPolicy(
     if (timeStopBars !== null && barsHeld >= timeStopBars) trigger = "TIME_STOP";
     else if ((direction === "LONG" && adversePrice(direction, bar) <= stopPrice) || (direction === "SHORT" && adversePrice(direction, bar) >= stopPrice)) {
         trigger = trailPrice !== null ? "TRAIL" : floorPrice !== null ? "PROFIT_FLOOR" : "INITIAL_STOP";
-    } else if (trailPrice !== null && givebackBps > 0) trigger = "TRAIL";
-    else if (floorPrice !== null) trigger = "PROFIT_FLOOR";
+    }
 
     const protection: ProtectionState = {
         entryPrice,

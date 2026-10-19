@@ -6,6 +6,7 @@ import {
     replayIntegrated,
     reserveCandidate,
     type CandidateReservationState,
+    type CandidateDecisionWithExecution,
     type ExecutionLifecycleEvent,
     type PortfolioRuntimeState,
     type ReplayConfigWithRuntime,
@@ -54,7 +55,7 @@ function bar(overrides: Partial<ExecutionBar> = {}): ExecutionBar {
     };
 }
 
-function candidate(overrides: Partial<CandidateDecision> = {}): CandidateDecision {
+function candidate(overrides: Partial<CandidateDecisionWithExecution> = {}): CandidateDecision {
     return {
         sourceHash: HASH,
         ts: 1_700_000_000_000,
@@ -105,6 +106,7 @@ function state(overrides: Partial<PortfolioRuntimeState> = {}): PortfolioRuntime
         intentLedger: {},
         eventOrdering: ["STOP", "NORMAL_EXIT"],
         manualReview: [],
+        protectionReadback: true,
         ...overrides,
     };
 }
@@ -239,6 +241,7 @@ test("applies deterministic STOP-before-normal-EXIT ordering on one bar", () => 
             executionKind: "STOP",
             clientOrderId: "stop-intent-1",
             quantity: 10,
+            price: 95,
             executionStatus: "FILLED",
         },
     );
@@ -266,6 +269,7 @@ test("applies deterministic STOP-before-normal-EXIT ordering on one bar", () => 
         executionKind: "NORMAL_EXIT",
         clientOrderId: "exit-intent-1",
         quantity: 10,
+        price: 101,
         executionStatus: "FILLED",
     });
 
@@ -300,6 +304,7 @@ test("reprotects only the residual quantity after a partial protective fill", ()
         executionKind: "STOP",
         clientOrderId: "stop-intent-1",
         quantity: 4,
+        price: 95,
         executionStatus: "PARTIAL_FILLED",
     });
     assert.equal(next.positions.find((entry) => entry.positionId === "leg-1")?.remainingQuantity, 6);
@@ -308,9 +313,9 @@ test("reprotects only the residual quantity after a partial protective fill", ()
     assert.equal(next.positions.find((entry) => entry.positionId === "leg-2")?.exit, null);
 });
 
-test("recovers idempotently and fails closed on unknown execution status", () => {
+test("reconciles restart execution, deduplicates the same event id, and fails closed on unknown status", () => {
     const existing = state({ intentLedger: { "stop-intent-1": "FILLED" }, positions: [position()] });
-    const duplicate = reconcileLifecycle(existing, {
+    const recoveredEvent: ExecutionLifecycleEvent = {
         sourceHash: HASH,
         ts: 1_700_003_600_000,
         strategy: "V12_V4",
@@ -334,9 +339,12 @@ test("recovers idempotently and fails closed on unknown execution status", () =>
         executionKind: "STOP",
         clientOrderId: "stop-intent-1",
         quantity: 10,
+        price: 95,
         executionStatus: "FILLED",
-    });
-    const unknown = reconcileLifecycle(duplicate, {
+    };
+    const duplicate = reconcileLifecycle(existing, recoveredEvent);
+    const replayed = reconcileLifecycle(duplicate, recoveredEvent);
+    const unknown = reconcileLifecycle(replayed, {
         sourceHash: HASH,
         ts: 1_700_007_200_000,
         strategy: "V12_V4",
@@ -363,10 +371,11 @@ test("recovers idempotently and fails closed on unknown execution status", () =>
         executionStatus: "UNKNOWN",
     });
 
-    assert.equal(duplicate.events.length, existing.events.length);
+    assert.equal(duplicate.events.length, existing.events.length + 1);
+    assert.equal(replayed.events.length, duplicate.events.length);
     assert.equal(unknown.manualReview.length, 1);
     assert.match(unknown.manualReview[0] ?? "", /UNKNOWN_EXECUTION/);
-    assert.equal(unknown.positions[0]?.exit, null);
+    assert.equal(unknown.positions[0]?.exit?.reason, "restart-recovery");
 });
 
 test("does not confirm new exposure when protective-order read-back is unavailable", () => {
@@ -417,6 +426,7 @@ test("integrated replay converts a reserved candidate fill into a resident posit
         fundingSource: "fixture",
         policyHash: HASH,
         caps: { totalGross: 1_000, cryptoGross: 1_000, strategyGross: 1_000 },
+        protectionReadback: true,
     };
     const replay = replayIntegrated(source, config);
 
@@ -425,6 +435,293 @@ test("integrated replay converts a reserved candidate fill into a resident posit
     assert.equal(replay.positions[0]?.entryFill?.quantity, 2);
     assert.equal(replay.portfolio.at(-1)?.reservedGross, 0);
     assert.equal(replay.portfolio.at(-1)?.acceptedGross, 200);
+});
+
+test("normalizes worst-case Gross upward to requested and accepted amounts", () => {
+    const result = reserveCandidate(
+        state({
+            acceptedGross: 50,
+            reservedGross: 0,
+            pendingGross: 0,
+            caps: { totalGross: 120, cryptoGross: 1_000, strategyGross: 1_000 },
+            grossBySymbol: { BTCUSDT: 50 },
+            grossByStrategy: { V12_V4: 50 },
+        }),
+        candidate({ requestedGross: 100, acceptedGross: 100, worstCaseGross: 1 }),
+    );
+
+    assert.equal(result.accepted, false);
+    assert.match(result.reason, /GROSS_CAP_TOTAL/);
+});
+
+test("does not charge aggregate pending or reserved Gross to unrelated symbol and strategy buckets", () => {
+    const result = reserveCandidate(
+        state({
+            acceptedGross: 0,
+            reservedGross: 100,
+            pendingGross: 100,
+            caps: { totalGross: 1_000, cryptoGross: 100, strategyGross: 100 },
+            grossBySymbol: {},
+            grossByStrategy: {},
+        }),
+        candidate({ symbol: "ETHUSDT", strategy: "PENGU", requestedGross: 100, acceptedGross: 100 }),
+    );
+
+    assert.equal(result.accepted, true);
+});
+
+test("fails closed when protective-order read-back is missing or undefined", () => {
+    const { protectionReadback: _readback, ...stateWithoutReadback } = state();
+    const result = reserveCandidate(stateWithoutReadback, candidate());
+
+    assert.equal(result.accepted, false);
+    assert.match(result.reason, /PROTECTION_READBACK_REQUIRED/);
+});
+
+test("reorders same-timestamp events so STOP wins even when normal EXIT arrives first", () => {
+    const normalFirst = reconcileLifecycle(state({ positions: [position()] }), {
+        sourceHash: HASH,
+        ts: 1_700_000_000_000,
+        strategy: "V12_V4",
+        direction: "LONG",
+        symbol: "BTCUSDT",
+        requestedGross: 1_000,
+        acceptedGross: 1_000,
+        reservation: null,
+        fill: null,
+        exit: null,
+        reason: "same-bar-normal-first",
+        fee: 0,
+        funding: 0,
+        slippage: 0,
+        policyHash: HASH,
+        configHash: HASH,
+        resultHash: HASH,
+        eventId: "normal-first",
+        eventType: "EXIT",
+        positionId: "leg-1",
+        executionKind: "NORMAL_EXIT",
+        clientOrderId: "normal-first-intent",
+        quantity: 10,
+        price: 101,
+        executionStatus: "FILLED",
+    });
+    const stopSecond = reconcileLifecycle(normalFirst, {
+        sourceHash: HASH,
+        ts: 1_700_000_000_000,
+        strategy: "V12_V4",
+        direction: "LONG",
+        symbol: "BTCUSDT",
+        requestedGross: 1_000,
+        acceptedGross: 1_000,
+        reservation: null,
+        fill: null,
+        exit: null,
+        reason: "same-bar-stop-second",
+        fee: 0,
+        funding: 0,
+        slippage: 0,
+        policyHash: HASH,
+        configHash: HASH,
+        resultHash: HASH,
+        eventId: "stop-second",
+        eventType: "EXIT",
+        positionId: "leg-1",
+        executionKind: "STOP",
+        clientOrderId: "stop-second-intent",
+        quantity: 10,
+        price: 95,
+        executionStatus: "FILLED",
+    });
+
+    assert.deepEqual(stopSecond.events.slice(0, 2).map((event) => event.eventId), ["stop-second", "normal-first"]);
+    assert.equal(stopSecond.positions[0]?.exit?.reason, "same-bar-stop-second");
+});
+
+test("fails closed for FILLED execution with invalid quantity or price without completing intent", () => {
+    const result = reconcileLifecycle(state({ positions: [position()] }), {
+        sourceHash: HASH,
+        ts: 1_700_000_000_000,
+        strategy: "V12_V4",
+        direction: "LONG",
+        symbol: "BTCUSDT",
+        requestedGross: 1_000,
+        acceptedGross: 1_000,
+        reservation: null,
+        fill: null,
+        exit: null,
+        reason: "invalid-fill",
+        fee: 0,
+        funding: 0,
+        slippage: 0,
+        policyHash: HASH,
+        configHash: HASH,
+        resultHash: HASH,
+        eventId: "invalid-fill-1",
+        eventType: "EXIT",
+        positionId: "leg-1",
+        executionKind: "STOP",
+        clientOrderId: "invalid-fill-intent",
+        quantity: 0,
+        price: Number.NaN,
+        executionStatus: "FILLED",
+    });
+
+    assert.equal(result.events.length, 0);
+    assert.equal(result.intentLedger["invalid-fill-intent"], undefined);
+    assert.equal(result.manualReview.length, 1);
+    assert.equal(result.positions[0]?.exit, null);
+});
+
+test("accumulates partial fills with the same client order intent when event ids differ", () => {
+    const first = reconcileLifecycle(state({ positions: [position()] }), {
+        sourceHash: HASH,
+        ts: 1_700_000_000_000,
+        strategy: "V12_V4",
+        direction: "LONG",
+        symbol: "BTCUSDT",
+        requestedGross: 1_000,
+        acceptedGross: 1_000,
+        reservation: null,
+        fill: null,
+        exit: null,
+        reason: "partial-one",
+        fee: 0,
+        funding: 0,
+        slippage: 0,
+        policyHash: HASH,
+        configHash: HASH,
+        resultHash: HASH,
+        eventId: "partial-one",
+        eventType: "PARTIAL_FILL",
+        positionId: "leg-1",
+        executionKind: "STOP",
+        clientOrderId: "shared-stop-intent",
+        quantity: 4,
+        price: 95,
+        executionStatus: "PARTIAL_FILLED",
+    });
+    const second = reconcileLifecycle(first, {
+        sourceHash: HASH,
+        ts: 1_700_003_600_000,
+        strategy: "V12_V4",
+        direction: "LONG",
+        symbol: "BTCUSDT",
+        requestedGross: 1_000,
+        acceptedGross: 1_000,
+        reservation: null,
+        fill: null,
+        exit: null,
+        reason: "partial-two",
+        fee: 0,
+        funding: 0,
+        slippage: 0,
+        policyHash: HASH,
+        configHash: HASH,
+        resultHash: HASH,
+        eventId: "partial-two",
+        eventType: "PARTIAL_FILL",
+        positionId: "leg-1",
+        executionKind: "STOP",
+        clientOrderId: "shared-stop-intent",
+        quantity: 3,
+        price: 95,
+        executionStatus: "PARTIAL_FILLED",
+    });
+
+    assert.equal(second.events.length, 2);
+    assert.equal(second.positions[0]?.remainingQuantity, 3);
+});
+
+test("does not trigger a profit floor merely because MFE activation occurred", () => {
+    const floorOnlyPolicy = { ...policy("LONG"), trailActivationBps: 1_000 };
+    const initial = applyProtectionPolicy(position(), floorOnlyPolicy, bar());
+    const activated = applyProtectionPolicy(
+        position({ protection: initial.protection }),
+        floorOnlyPolicy,
+        bar({ ts: 1_700_003_600_000, high: 103, low: 100.5, close: 102 }),
+    );
+
+    assert.equal(activated.protection?.activated, true);
+    assert.equal(activated.trigger, "NONE");
+});
+
+test("uses Task 1 trailingGivebackBps when the Task 2 trail alias is absent", () => {
+    const trailingPolicy = {
+        ...policy("LONG"),
+        trailRetraceBps: undefined,
+        trailingGivebackBps: 50,
+    } as ProtectionPolicyInput & { readonly trailingGivebackBps: number };
+    const initial = applyProtectionPolicy(position(), trailingPolicy, bar());
+    const activated = applyProtectionPolicy(
+        position({ protection: initial.protection }),
+        trailingPolicy,
+        bar({ ts: 1_700_003_600_000, high: 103, low: 99, close: 102 }),
+    );
+    const trailed = applyProtectionPolicy(
+        position({ protection: activated.protection }),
+        trailingPolicy,
+        bar({ ts: 1_700_007_200_000, high: 103, low: 100, close: 100.5 }),
+    );
+
+    assert.equal(trailed.protection?.trailPrice, 102.5);
+});
+
+test("integrated replay applies policy protection, baseline state, exits, and meaningful MTM", () => {
+    const source: CanonicalSource = {
+        input: {
+            sourceRoot: "fixture-source",
+            dataRoot: "fixture-data",
+            productionSha: HASH,
+            startTs: 1_700_000_000_000,
+            endTs: 1_700_007_200_000,
+            initialEquity: 1_000,
+            deposits: [],
+            feeBps: 0,
+            slippageBps: 0,
+            fundingSource: "fixture",
+        },
+        productionSha: HASH,
+        productionFiles: [],
+        sourceFiles: [],
+        productionSources: [],
+        strategyConfigs: [],
+        candleSeries: [{
+            sourceHash: HASH,
+            symbol: "BTCUSDT",
+            timeframe: "1h",
+            bars: [
+                bar({ ts: 1_700_000_000_000 }),
+                bar({ ts: 1_700_003_600_000, high: 103, low: 102.8, close: 102.9 }),
+                bar({ ts: 1_700_007_200_000, high: 103, low: 100, close: 100.5 }),
+            ],
+        }],
+        funding: [],
+        baselineLedger: [],
+        candidateEvents: [candidate({ candidateId: "replay-leg", acceptedGross: 1_000, requestedGross: 1_000, fill: fill(100, 10) })],
+        sourceHashes: [],
+    };
+    const config = {
+        sourceHash: HASH,
+        configHash: HASH,
+        startTs: 1_700_000_000_000,
+        endTs: 1_700_007_200_000,
+        initialEquity: 1_000,
+        feeBps: 0,
+        slippageBps: 0,
+        fundingSource: "fixture",
+        policyHash: HASH,
+        caps: { totalGross: 5_000, cryptoGross: 5_000, strategyGross: 5_000 },
+        protectionReadback: true,
+        directionPolicies: { LONG: policy("LONG") },
+        baselinePositions: [position({ positionId: "baseline-leg", entryFill: fill(100, 1) })],
+    } as ReplayConfigWithRuntime & { readonly baselinePositions: readonly PositionLifecycle[] };
+    const replay = replayIntegrated(source, config);
+
+    assert.ok(replay.positions.some((entry) => entry.positionId === "baseline-leg"));
+    assert.match(JSON.stringify(replay.protectionLedger), /GIVEBACK/);
+    assert.ok(replay.positions.find((entry) => entry.positionId === "replay-leg")?.exit !== null);
+    assert.ok(new Set(replay.equityMtmTimeline.map((entry) => entry.equity)).size > 1);
 });
 
 const _candidateReservationState: CandidateReservationState | null = null;
