@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import type {
     AcceptanceDecision,
     AcceptanceGates,
@@ -11,9 +12,13 @@ import type {
     ProductionPolicy,
     StageId,
 } from "./types";
-import { directionForStage, stageAcceptsDirection, strategyForStage } from "./stages";
+import { SEQUENTIAL_STAGES, directionForStage, stageAcceptsDirection, strategyForStage } from "./stages";
 
 export type ResearchProductionPolicy = ProductionPolicy;
+export type StrictAcceptanceGates = AcceptanceGates & {
+    readonly declaredAtTs: number;
+    readonly gateHash: string;
+};
 
 type CandidateMetricName =
     | "normalDdImprovementBps"
@@ -42,11 +47,11 @@ const METRIC_NAMES: readonly CandidateMetricName[] = [
     "candidateSelectionUsesFuturePnl",
 ];
 
-export const DEFAULT_ACCEPTANCE_GATES: AcceptanceGates = Object.freeze({
-    sourceHash: "",
-    configHash: "",
-    resultHash: "",
-    policyHash: "",
+const DEFAULT_GATE_MANIFEST: StrictAcceptanceGates = {
+    sourceHash: "a".repeat(64),
+    configHash: "a".repeat(64),
+    resultHash: "a".repeat(64),
+    policyHash: "a".repeat(64),
     maxDrawdownImprovementBps: 100,
     maxProfitFactorDeclinePct: 10,
     oosDrawdownMustNotWorsen: true,
@@ -59,8 +64,49 @@ export const DEFAULT_ACCEPTANCE_GATES: AcceptanceGates = Object.freeze({
     maxFinalEquityDeclinePct: 5,
     minTradeCountRatio: 0.9,
     requireCostStress: true,
-    gateHash: "PREDECLARED_V1",
+    declaredAtTs: 1_700_000_000_000,
+    gateHash: "",
+};
+
+function gateManifestPayload(gates: AcceptanceGates): string {
+    return JSON.stringify({
+        sourceHash: gates.sourceHash,
+        configHash: gates.configHash,
+        resultHash: gates.resultHash,
+        policyHash: gates.policyHash,
+        maxDrawdownImprovementBps: gates.maxDrawdownImprovementBps,
+        maxProfitFactorDeclinePct: gates.maxProfitFactorDeclinePct,
+        oosDrawdownMustNotWorsen: gates.oosDrawdownMustNotWorsen,
+        requireSafetyTests: gates.requireSafetyTests,
+        reason: gates.reason,
+        normalDrawdownImprovementBps: gates.normalDrawdownImprovementBps ?? null,
+        severeDrawdownImprovementBps: gates.severeDrawdownImprovementBps ?? null,
+        oosDrawdownImprovementBps: gates.oosDrawdownImprovementBps ?? null,
+        walkForwardImprovementBps: gates.walkForwardImprovementBps ?? null,
+        maxFinalEquityDeclinePct: gates.maxFinalEquityDeclinePct ?? null,
+        minTradeCountRatio: gates.minTradeCountRatio ?? null,
+        requireCostStress: gates.requireCostStress ?? null,
+        declaredAtTs: gates.declaredAtTs ?? null,
+    });
+}
+
+function gateManifestHash(gates: AcceptanceGates): string {
+    return createHash("sha256").update(gateManifestPayload(gates), "utf8").digest("hex");
+}
+
+export const DEFAULT_ACCEPTANCE_GATES: StrictAcceptanceGates = Object.freeze({
+    ...DEFAULT_GATE_MANIFEST,
+    gateHash: gateManifestHash(DEFAULT_GATE_MANIFEST),
 });
+
+export function predeclareAcceptanceGates(provenance: Pick<AcceptanceGates, "sourceHash" | "configHash" | "resultHash" | "policyHash" | "declaredAtTs">): StrictAcceptanceGates {
+    const manifest: StrictAcceptanceGates = {
+        ...DEFAULT_GATE_MANIFEST,
+        ...provenance,
+        gateHash: "",
+    };
+    return Object.freeze({ ...manifest, gateHash: gateManifestHash(manifest) });
+}
 
 const CANDIDATE_VALUES = {
     initialStopBps: (base: number): readonly number[] => [Math.max(1, base - 250), base + 250],
@@ -86,6 +132,10 @@ function asCandidatePolicy(base: ProductionPolicy, candidateId: string, stageId:
     };
 }
 
+function distinctValues<T>(values: readonly T[], baseline: T): readonly T[] {
+    return values.filter((value, index) => value !== baseline && values.indexOf(value) === index);
+}
+
 function isApplicable(stage: StageId, direction: Direction, baseline: ProductionPolicy): boolean {
     return strategyForStage(stage) === baseline.strategy
         && stageAcceptsDirection(stage, direction)
@@ -107,19 +157,19 @@ export function buildCandidateGrid(stage: StageId, direction: Direction, baselin
     }
 
     const candidates: CandidatePolicy[] = [];
-    for (const value of CANDIDATE_VALUES.initialStopBps(baseline.initialStopBps)) {
+    for (const value of distinctValues(CANDIDATE_VALUES.initialStopBps(baseline.initialStopBps), baseline.initialStopBps)) {
         const candidateId = `${stage}:${direction}:initial-stop:${value}`;
         candidates.push(asCandidatePolicy(baseline, candidateId, stage, direction, "initial-stop", "AVAILABLE", "GRID_INITIAL_STOP", { initialStopBps: value }));
     }
-    for (const value of CANDIDATE_VALUES.profitFloorBps(baseline.profitFloorBps)) {
+    for (const value of distinctValues(CANDIDATE_VALUES.profitFloorBps(baseline.profitFloorBps), baseline.profitFloorBps)) {
         const candidateId = `${stage}:${direction}:profit-floor:${value}`;
         candidates.push(asCandidatePolicy(baseline, candidateId, stage, direction, "profit-floor", "AVAILABLE", "GRID_PROFIT_FLOOR", { profitFloorBps: value }));
     }
-    for (const value of CANDIDATE_VALUES.trailingGivebackBps(baseline.trailingGivebackBps)) {
+    for (const value of distinctValues(CANDIDATE_VALUES.trailingGivebackBps(baseline.trailingGivebackBps), baseline.trailingGivebackBps)) {
         const candidateId = `${stage}:${direction}:trail:${value}`;
         candidates.push(asCandidatePolicy(baseline, candidateId, stage, direction, "trail", "AVAILABLE", "GRID_TRAIL", { trailingGivebackBps: value }));
     }
-    for (const value of CANDIDATE_VALUES.timeStopBars(baseline.timeStopBars)) {
+    for (const value of distinctValues(CANDIDATE_VALUES.timeStopBars(baseline.timeStopBars), baseline.timeStopBars)) {
         const candidateId = `${stage}:${direction}:time-stop:${value === null ? "none" : value}`;
         candidates.push(asCandidatePolicy(baseline, candidateId, stage, direction, "time-stop", "AVAILABLE", "GRID_TIME_STOP", { timeStopBars: value }));
     }
@@ -152,6 +202,42 @@ function decisionStatus(candidate: CandidateSummary): CandidateStatus {
     return candidate.status ?? "AVAILABLE";
 }
 
+function provenanceFailures(candidate: CandidateSummary, baseline: BaselineSummary, gates: AcceptanceGates): readonly string[] {
+    const failures: string[] = [];
+    if (gates.declaredAtTs === undefined || !Number.isFinite(gates.declaredAtTs)) failures.push("gates.declaredAtTs");
+    if (gates.gateHash === undefined || gates.gateHash !== gateManifestHash(gates)) failures.push("gates.gateHash");
+    for (const [name, value] of [["sourceHash", gates.sourceHash], ["configHash", gates.configHash], ["resultHash", gates.resultHash]] as const) {
+        if (value.length === 0 || value !== candidate[name] || value !== baseline[name]) failures.push(`provenance.${name}`);
+    }
+    if (gates.policyHash.length === 0 || gates.policyHash !== baseline.policyHash) failures.push("provenance.policyHash");
+    return failures;
+}
+
+function candidatePolicyFailures(candidate: CandidateSummary, baseline: BaselineSummary): readonly string[] {
+    const policy = candidate.candidatePolicy;
+    const base = candidate.baselinePolicy;
+    const failures: string[] = [];
+    if (policy === undefined || policy === null || policy.applicability !== "AVAILABLE") return ["candidatePolicy"];
+    if (base === undefined) return ["baselinePolicy"];
+    if (candidate.stageId === undefined || policy.stageId !== candidate.stageId) failures.push("candidatePolicy.stageId");
+    if (policy.candidateId !== candidate.candidateId) failures.push("candidatePolicy.candidateId");
+    if (policy.strategy !== candidate.strategy || policy.direction !== candidate.direction) failures.push("candidatePolicy.identity");
+    if (candidate.policyHash !== policy.policyHash) failures.push("candidatePolicy.policyHash");
+    if (policy.strategy !== baseline.strategy || base.strategy !== baseline.strategy) failures.push("candidatePolicy.strategy");
+    if (base.policyHash !== baseline.policyHash) failures.push("baselinePolicy.policyHash");
+    if (policy.sourceHash !== candidate.sourceHash || policy.configHash !== candidate.configHash || policy.resultHash !== candidate.resultHash) failures.push("candidatePolicy.provenance");
+    if (base.sourceHash !== baseline.sourceHash || base.configHash !== baseline.configHash || base.resultHash !== baseline.resultHash) failures.push("baselinePolicy.provenance");
+    if (policy.entryPolicy !== base.entryPolicy || policy.sizingPolicy !== base.sizingPolicy || policy.grossCap !== base.grossCap || policy.sharedRiskCap !== base.sharedRiskCap || policy.marginGuard !== base.marginGuard || policy.leverage !== base.leverage || policy.supportedDirections.join(",") !== base.supportedDirections.join(",")) {
+        failures.push("candidatePolicy.baseline-contract");
+    }
+    if (!policy.supportedDirections.includes(candidate.direction)) failures.push("candidatePolicy.direction-contract");
+    return failures;
+}
+
+function rejectedDecision(decision: AcceptanceDecision, reason: string): AcceptanceDecision {
+    return { ...decision, accepted: false, status: "REJECTED", reason, candidatePolicy: null };
+}
+
 export function acceptCandidate(candidate: CandidateSummary, baseline: BaselineSummary, gates: AcceptanceGates): AcceptanceDecision {
     const status = decisionStatus(candidate);
     const common = {
@@ -166,15 +252,28 @@ export function acceptCandidate(candidate: CandidateSummary, baseline: BaselineS
         candidateId: candidate.candidateId,
     };
 
+    const provenance = provenanceFailures(candidate, baseline, gates);
+    if (provenance.length > 0) {
+        return { ...common, accepted: false, status: "REJECTED", reason: `REJECTED_GATES:${provenance.join(",")}`, gateResults: { gates: false }, candidatePolicy: null };
+    }
+
     if (status === "NOT_APPLICABLE") {
+        if (candidate.candidatePolicy !== null && candidate.candidatePolicy !== undefined) {
+            return { ...common, accepted: false, status: "REJECTED", reason: "REJECTED_candidatePolicy:NOT_APPLICABLE_MUST_HAVE_NO_POLICY", gateResults: { candidatePolicy: false }, candidatePolicy: null };
+        }
         return {
             ...common,
             accepted: false,
             status: "NOT_APPLICABLE",
             reason: "NOT_APPLICABLE",
             gateResults: {},
-            candidatePolicy: candidate.candidatePolicy ?? null,
+            candidatePolicy: null,
         };
+    }
+
+    const policyFailures = candidatePolicyFailures(candidate, baseline);
+    if (policyFailures.length > 0) {
+        return { ...common, accepted: false, status: "REJECTED", reason: `REJECTED_candidatePolicy:${policyFailures.join(",")}`, gateResults: { candidatePolicy: false }, candidatePolicy: null };
     }
 
     const metrics = candidate.metrics;
@@ -213,13 +312,39 @@ export function acceptCandidate(candidate: CandidateSummary, baseline: BaselineS
 
 export function freezeAcceptedStage(previous: FrozenStageSet, decision: AcceptanceDecision): FrozenStageSet {
     const decisions = [...(previous.stageDecisions ?? []), decision];
-    if (decision.status !== "ACCEPTED" || decision.candidatePolicy === null || decision.candidatePolicy === undefined) {
+    const completedStageIds = [...(previous.completedStageIds ?? (previous.stageDecisions ?? []).filter((entry) => entry.status === "ACCEPTED" || entry.status === "NOT_APPLICABLE").flatMap((entry) => entry.stageId === undefined ? [] : [entry.stageId]))];
+    if (completedStageIds.length === 0 && previous.stageIds.length > 0) completedStageIds.push(...previous.stageIds as StageId[]);
+
+    const invalidPrefix = completedStageIds.some((stageId, index) => stageId !== SEQUENTIAL_STAGES[index])
+        || previous.policies.length !== previous.stageIds.length
+        || previous.policies.some((policy, index) => policy.stageId !== previous.stageIds[index]);
+    const expectedStage = SEQUENTIAL_STAGES[completedStageIds.length];
+    const decisionStage = decision.stageId;
+
+    if (invalidPrefix) {
+        return { ...previous, stageDecisions: [...decisions.slice(0, -1), rejectedDecision(decision, "REJECTED_FROZEN_STATE_INVALID")], reason: "REJECTED_FROZEN_STATE_INVALID" };
+    }
+
+    if (decision.status === "NOT_APPLICABLE") {
+        if (decision.candidatePolicy !== null && decision.candidatePolicy !== undefined || decisionStage === undefined || expectedStage !== decisionStage) {
+            return { ...previous, stageDecisions: [...decisions.slice(0, -1), rejectedDecision(decision, `REJECTED_STAGE_ORDER:expected=${expectedStage ?? "COMPLETE"}`)], reason: `REJECTED_STAGE_ORDER:expected=${expectedStage ?? "COMPLETE"}` };
+        }
+        return { ...previous, completedStageIds: [...completedStageIds, decisionStage], stageDecisions: decisions, reason: "FROZEN_NOT_APPLICABLE_STAGE" };
+    }
+
+    if (decision.status !== "ACCEPTED" || !decision.accepted || decision.candidatePolicy === null || decision.candidatePolicy === undefined) {
         return { ...previous, stageDecisions: decisions, reason: decision.reason };
     }
 
-    const stageIds = decision.stageId !== undefined && !previous.stageIds.includes(decision.stageId)
-        ? [...previous.stageIds, decision.stageId]
-        : [...previous.stageIds];
+    const duplicateStage = decisionStage !== undefined && previous.stageIds.includes(decisionStage);
+    if (expectedStage === undefined || decisionStage !== expectedStage || duplicateStage || decision.candidatePolicy.stageId !== decisionStage || decision.candidatePolicy.candidateId !== decision.candidateId || decision.candidatePolicy.applicability !== "AVAILABLE") {
+        const reason = duplicateStage
+            ? `REJECTED_DUPLICATE_STAGE:${decisionStage}`
+            : `REJECTED_STAGE_ORDER:expected=${expectedStage ?? "COMPLETE"}`;
+        return { ...previous, stageDecisions: [...decisions.slice(0, -1), rejectedDecision(decision, reason)], reason };
+    }
+
+    const stageIds = [...previous.stageIds, decisionStage];
     return {
         ...previous,
         sourceHash: decision.sourceHash,
@@ -228,6 +353,7 @@ export function freezeAcceptedStage(previous: FrozenStageSet, decision: Acceptan
         policyHash: decision.policyHash,
         stageIds,
         policies: [...previous.policies, decision.candidatePolicy],
+        completedStageIds: [...completedStageIds, decisionStage],
         stageDecisions: decisions,
         reason: "FROZEN_RESEARCH_POLICY_ONLY",
     };

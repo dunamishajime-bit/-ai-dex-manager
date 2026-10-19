@@ -398,6 +398,7 @@ export interface CandidateSummary {
     accepted: boolean;
     status?: CandidateStatus;
     candidatePolicy?: CandidatePolicy | null;
+    baselinePolicy?: ProductionPolicy;
     reason: string;
     fee: number;
     funding: number;
@@ -466,6 +467,7 @@ export interface FrozenStageSet {
     policies: readonly CandidatePolicy[];
     reason: string;
     stageDecisions?: readonly AcceptanceDecision[];
+    completedStageIds?: readonly StageId[];
 }
 
 export interface ComparisonReport {

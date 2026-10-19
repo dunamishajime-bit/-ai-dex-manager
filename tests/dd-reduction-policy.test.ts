@@ -50,17 +50,21 @@ function baseline(overrides: Partial<ResearchProductionPolicy> = {}): ResearchPr
 }
 
 function candidateSummary(overrides: Partial<CandidateSummary> = {}): CandidateSummary {
+    const defaultPolicy = buildCandidateGrid("V12_V4_LONG", "LONG", baseline())[0];
+    assert.ok(defaultPolicy);
     return {
         sourceHash: HASH,
         configHash: HASH,
         resultHash: HASH,
-        candidateId: "V12_V4_LONG:initial-stop:250",
+        candidateId: defaultPolicy.candidateId,
         stageId: "V12_V4_LONG",
         strategy: "V12_V4",
         direction: "LONG",
-        policyHash: HASH,
+        policyHash: defaultPolicy.policyHash,
         accepted: true,
         status: "AVAILABLE",
+        candidatePolicy: defaultPolicy,
+        baselinePolicy: baseline(),
         reason: "candidate-replay",
         fee: 1,
         funding: 2,
@@ -224,6 +228,40 @@ test("rejects a candidate when any fixed gate fails instead of tuning the gate f
     assert.deepEqual(acceptanceGates, before);
 });
 
+test("rejects an accepted candidate when its policy evidence is missing or does not match its identity", () => {
+    const missingPolicy = acceptCandidate(candidateSummary({ candidatePolicy: null }), baselineSummary(), gates());
+    assert.equal(missingPolicy.accepted, false);
+    assert.equal(missingPolicy.status, "REJECTED");
+    assert.match(missingPolicy.reason, /candidatePolicy/);
+
+    const policy = buildCandidateGrid("V12_V4_LONG", "LONG", baseline())[0];
+    assert.ok(policy);
+    const mismatchedPolicy = acceptCandidate(candidateSummary({
+        candidateId: "tampered-candidate-id",
+        candidatePolicy: policy,
+    }), baselineSummary(), gates());
+    assert.equal(mismatchedPolicy.accepted, false);
+    assert.match(mismatchedPolicy.reason, /candidatePolicy/);
+});
+
+test("rejects caller-tuned or incomplete acceptance gate manifests and mismatched provenance", () => {
+    const tunedThreshold = acceptCandidate(candidateSummary({ metrics: { ...candidateSummary().metrics, normalDdImprovementBps: 0, severeDdImprovementBps: 0 } }), baselineSummary(), gates({ normalDrawdownImprovementBps: 0, severeDrawdownImprovementBps: 0 }));
+    assert.equal(tunedThreshold.accepted, false);
+    assert.match(tunedThreshold.reason, /gates/);
+
+    const alteredHash = acceptCandidate(candidateSummary(), baselineSummary(), gates({ gateHash: "ALTERED" }));
+    assert.equal(alteredHash.accepted, false);
+    assert.match(alteredHash.reason, /gates/);
+
+    const missingDeclaration = acceptCandidate(candidateSummary(), baselineSummary(), gates({ declaredAtTs: undefined }));
+    assert.equal(missingDeclaration.accepted, false);
+    assert.match(missingDeclaration.reason, /gates/);
+
+    const mismatchedSource = acceptCandidate(candidateSummary({ sourceHash: "b".repeat(64) }), baselineSummary(), gates());
+    assert.equal(mismatchedSource.accepted, false);
+    assert.match(mismatchedSource.reason, /provenance/);
+});
+
 test("records an unavailable production direction as NOT_APPLICABLE without creating a Short policy", () => {
     const base = baseline({ supportedDirections: ["LONG"] });
     const grid = buildCandidateGrid("V12_V4_SHORT", "SHORT", base);
@@ -236,8 +274,11 @@ test("records an unavailable production direction as NOT_APPLICABLE without crea
         candidateId: grid[0]?.candidateId,
         stageId: "V12_V4_SHORT",
         direction: "SHORT",
+        policyHash: HASH,
         status: "NOT_APPLICABLE",
         accepted: false,
+        candidatePolicy: null,
+        baselinePolicy: baseline({ supportedDirections: ["LONG"] }),
         reason: "NOT_APPLICABLE",
         metrics: {},
     }), baselineSummary({ direction: "SHORT" }), gates());
@@ -259,6 +300,41 @@ test("freezes accepted policy evidence and excludes rejected candidates", () => 
     const afterRejected = freezeAcceptedStage(frozen, rejected);
     assert.equal(afterRejected.policies.some((policy) => policy.candidateId === "rejected-candidate"), false);
     assert.equal(afterRejected.stageIds.filter((stageId) => stageId === "V12_V4_LONG").length, 1);
+});
+
+test("freezes only the next sequential stage and only one policy per stage", () => {
+    const q102Base = baseline({ strategy: "Q102" });
+    const q102Policy = buildCandidateGrid("Q102_LONG", "LONG", q102Base)[0];
+    assert.ok(q102Policy);
+    const outOfOrder = acceptCandidate(candidateSummary({
+        candidateId: q102Policy.candidateId,
+        stageId: "Q102_LONG",
+        strategy: "Q102",
+        policyHash: q102Policy.policyHash,
+        candidatePolicy: q102Policy,
+        baselinePolicy: q102Base,
+    }), baselineSummary({ strategy: "Q102", policyHash: q102Base.policyHash }), gates());
+    const emptyResult = freezeAcceptedStage(initialFrozen(), outOfOrder);
+    assert.equal(emptyResult.policies.length, 0);
+    assert.match(emptyResult.reason, /V12_V4_LONG/);
+
+    const firstPolicy = buildCandidateGrid("V12_V4_LONG", "LONG", baseline())[0];
+    assert.ok(firstPolicy);
+    const firstDecision = acceptCandidate(candidateSummary({ candidateId: firstPolicy.candidateId, policyHash: firstPolicy.policyHash, candidatePolicy: firstPolicy }), baselineSummary(), gates());
+    const firstFrozen = freezeAcceptedStage(initialFrozen(), firstDecision);
+    const duplicate = freezeAcceptedStage(firstFrozen, firstDecision);
+    assert.equal(duplicate.policies.length, 1);
+    assert.match(duplicate.reason, /duplicate|next/i);
+});
+
+test("does not emit no-op candidates when baseline protection values are at the lower boundary", () => {
+    const boundary = baseline({ initialStopBps: 1, trailingGivebackBps: 1 });
+    const grid = buildCandidateGrid("V12_V4_LONG", "LONG", boundary).filter((candidate) => candidate.applicability === "AVAILABLE");
+
+    assert.ok(grid.length > 0);
+    assert.equal(grid.filter((candidate) => candidate.axis === "initial-stop").some((candidate) => candidate.initialStopBps === boundary.initialStopBps), false);
+    assert.equal(grid.filter((candidate) => candidate.axis === "trail").some((candidate) => candidate.trailingGivebackBps === boundary.trailingGivebackBps), false);
+    assert.equal(new Set(grid.map((candidate) => candidate.candidateId)).size, grid.length);
 });
 
 test("does not mutate Production policy state while freezing research replay evidence", () => {
