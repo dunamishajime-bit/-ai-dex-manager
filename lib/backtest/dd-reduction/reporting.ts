@@ -70,14 +70,20 @@ function routeFor(strategy: string, reason: string): AttributionRoute {
     return strategy === "IDLE" || /overlay|sidecar|addon|extra/i.test(reason) ? "OVERLAY" : "CORE";
 }
 
+function positionCosts(position: PositionLifecycle): { readonly fee: number; readonly funding: number; readonly slippage: number } {
+    return {
+        fee: position.fee + position.events.reduce((total, event) => total + (event.exit?.fee ?? 0), 0),
+        funding: position.funding + position.events.reduce((total, event) => total + (event.exit?.funding ?? 0), 0),
+        slippage: position.slippage + position.events.reduce((total, event) => total + (event.exit?.slippage ?? 0), 0),
+    };
+}
+
 function positionNetPnl(position: PositionLifecycle): { readonly realizedPnl: number; readonly netPnl: number } {
     const realizedPnl = position.events.reduce((total, event) => total + (event.exit?.realizedPnl ?? 0), 0);
-    const exitFee = position.events.reduce((total, event) => total + (event.exit?.fee ?? 0), 0);
-    const exitFunding = position.events.reduce((total, event) => total + (event.exit?.funding ?? 0), 0);
-    const exitSlippage = position.events.reduce((total, event) => total + (event.exit?.slippage ?? 0), 0);
+    const costs = positionCosts(position);
     return {
         realizedPnl,
-        netPnl: realizedPnl - position.fee - position.funding - position.slippage - exitFee - exitFunding - exitSlippage,
+        netPnl: realizedPnl - costs.fee - costs.funding - costs.slippage,
     };
 }
 
@@ -150,13 +156,14 @@ export function attributeReplay(replay: IntegratedReplay): AttributionReport {
         netPnl += pnl.netPnl;
         if (route === "CORE") corePnl += pnl.netPnl;
         else overlayPnl += pnl.netPnl;
+        const costs = positionCosts(position);
         const values: Partial<AttributionBucket> = {
             acceptedTrades: 1,
             realizedPnl: pnl.realizedPnl,
             netPnl: pnl.netPnl,
-            fee: position.fee,
-            funding: position.funding,
-            slippage: position.slippage,
+            fee: costs.fee,
+            funding: costs.funding,
+            slippage: costs.slippage,
         };
         for (const [map, key] of [[byLogic, route], [byStrategy, position.strategy], [byDirection, position.direction], [bySymbol, position.symbol], [byReason, position.reason]] as const) {
             bucketMapAdd(map, key, route, values);

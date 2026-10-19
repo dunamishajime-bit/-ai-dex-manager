@@ -269,8 +269,23 @@ test("includes exit-event costs in net attribution while keeping gross realized 
     assert.equal(result.grossRealizedPnl, 100);
     assert.equal(result.realizedPnl, 85);
     assert.equal(result.netPnl, 85);
-    assert.equal(result.byLogic.find((item) => item.key === "CORE")?.realizedPnl, 100);
-    assert.equal(result.byLogic.find((item) => item.key === "CORE")?.netPnl, 85);
+    const dimensions = [result.byLogic, result.byStrategy, result.byDirection, result.bySymbol, result.byReason];
+    for (const buckets of dimensions) {
+        const bucket = buckets[0];
+        assert.ok(bucket);
+        assert.equal(bucket.realizedPnl, 100);
+        assert.equal(bucket.fee, 3);
+        assert.equal(bucket.funding, 5);
+        assert.equal(bucket.slippage, 7);
+        assert.equal(bucket.netPnl, bucket.realizedPnl - bucket.fee - bucket.funding - bucket.slippage);
+    }
+    const core = result.byLogic.find((item) => item.key === "CORE");
+    assert.ok(core);
+    assert.equal(core.netPnl, 85);
+    assert.equal(core.netPnl, result.realizedPnl);
+    assert.equal(core.fee, result.fee);
+    assert.equal(core.funding, result.funding);
+    assert.equal(core.slippage, result.slippage);
 });
 
 test("writes unrounded CSV, JSONL, JSON, and SHA256-indexed stage artifacts", async () => {
