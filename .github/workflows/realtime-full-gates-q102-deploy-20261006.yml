@@ -72,6 +72,14 @@ jobs:
           cp -a .next/standalone/. .deploy-ui/
           cp -a .next/static .deploy-ui/.next/static
           if [ -d public ]; then cp -a public .deploy-ui/public; fi
+          # Next 16's standalone launcher still resolves the pinned Next runtime
+          # from node_modules. Keep the UI release self-contained; otherwise the
+          # browser smoke test and the VPS service can fail before the first page
+          # is served with MODULE_NOT_FOUND (for example cpu-profile.js).
+          test -f node_modules/next/dist/server/lib/cpu-profile.js
+          mkdir -p .deploy-ui/node_modules
+          cp -a node_modules/. .deploy-ui/node_modules/
+          test -f .deploy-ui/node_modules/next/dist/server/lib/cpu-profile.js
           printf '%s\n' "$TARGET_SHA" > .deploy-ui/.disdex-release-sha
           mkdir -p .deploy-ui/ops-refresh
           cp ../../ops/disdex-quality102-ranking-refresh.mjs ../../ops/systemd/disdex-quality102-ranking-refresh.service ../../ops/systemd/disdex-quality102-ranking-refresh.path .deploy-ui/ops-refresh/
