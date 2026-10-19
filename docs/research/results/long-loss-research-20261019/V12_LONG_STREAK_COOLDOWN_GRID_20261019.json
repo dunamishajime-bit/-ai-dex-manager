@@ -1,0 +1,586 @@
+{
+  "source_trades": 379,
+  "status": "fixed V12 pre-V4 accepted replay only, not integrated gross simulation",
+  "results": [
+    {
+      "n_losers_before_cooldown": 2,
+      "cooldown_hours": 3,
+      "full": {
+        "n": 26,
+        "wins_removed": 11,
+        "losers_avoided": 15,
+        "loss_avoided_pp": 2.5502,
+        "win_profit_lost_pp": 5.4837,
+        "net_delta_pp": -2.9335
+      },
+      "train": {
+        "n": 21,
+        "wins_removed": 8,
+        "losers_avoided": 13,
+        "loss_avoided_pp": 2.2612,
+        "win_profit_lost_pp": 4.622,
+        "net_delta_pp": -2.3607
+      },
+      "holdout": {
+        "n": 5,
+        "wins_removed": 3,
+        "losers_avoided": 2,
+        "loss_avoided_pp": 0.289,
+        "win_profit_lost_pp": 0.8617,
+        "net_delta_pp": -0.5727
+      },
+      "accepted_count": 353
+    },
+    {
+      "n_losers_before_cooldown": 2,
+      "cooldown_hours": 6,
+      "full": {
+        "n": 59,
+        "wins_removed": 35,
+        "losers_avoided": 24,
+        "loss_avoided_pp": 4.2273,
+        "win_profit_lost_pp": 24.8998,
+        "net_delta_pp": -20.6725
+      },
+      "train": {
+        "n": 46,
+        "wins_removed": 26,
+        "losers_avoided": 20,
+        "loss_avoided_pp": 3.6957,
+        "win_profit_lost_pp": 16.1126,
+        "net_delta_pp": -12.4169
+      },
+      "holdout": {
+        "n": 13,
+        "wins_removed": 9,
+        "losers_avoided": 4,
+        "loss_avoided_pp": 0.5316,
+        "win_profit_lost_pp": 8.7872,
+        "net_delta_pp": -8.2556
+      },
+      "accepted_count": 320
+    },
+    {
+      "n_losers_before_cooldown": 2,
+      "cooldown_hours": 12,
+      "full": {
+        "n": 88,
+        "wins_removed": 55,
+        "losers_avoided": 33,
+        "loss_avoided_pp": 5.757,
+        "win_profit_lost_pp": 35.8793,
+        "net_delta_pp": -30.1223
+      },
+      "train": {
+        "n": 68,
+        "wins_removed": 41,
+        "losers_avoided": 27,
+        "loss_avoided_pp": 4.9015,
+        "win_profit_lost_pp": 24.9028,
+        "net_delta_pp": -20.0013
+      },
+      "holdout": {
+        "n": 20,
+        "wins_removed": 14,
+        "losers_avoided": 6,
+        "loss_avoided_pp": 0.8556,
+        "win_profit_lost_pp": 10.9765,
+        "net_delta_pp": -10.121
+      },
+      "accepted_count": 291
+    },
+    {
+      "n_losers_before_cooldown": 2,
+      "cooldown_hours": 24,
+      "full": {
+        "n": 123,
+        "wins_removed": 76,
+        "losers_avoided": 47,
+        "loss_avoided_pp": 10.2413,
+        "win_profit_lost_pp": 58.6112,
+        "net_delta_pp": -48.3699
+      },
+      "train": {
+        "n": 95,
+        "wins_removed": 60,
+        "losers_avoided": 35,
+        "loss_avoided_pp": 6.1058,
+        "win_profit_lost_pp": 41.7165,
+        "net_delta_pp": -35.6106
+      },
+      "holdout": {
+        "n": 28,
+        "wins_removed": 16,
+        "losers_avoided": 12,
+        "loss_avoided_pp": 4.1355,
+        "win_profit_lost_pp": 16.8948,
+        "net_delta_pp": -12.7593
+      },
+      "accepted_count": 256
+    },
+    {
+      "n_losers_before_cooldown": 3,
+      "cooldown_hours": 3,
+      "full": {
+        "n": 12,
+        "wins_removed": 7,
+        "losers_avoided": 5,
+        "loss_avoided_pp": 1.177,
+        "win_profit_lost_pp": 6.4112,
+        "net_delta_pp": -5.2342
+      },
+      "train": {
+        "n": 11,
+        "wins_removed": 6,
+        "losers_avoided": 5,
+        "loss_avoided_pp": 1.177,
+        "win_profit_lost_pp": 6.3343,
+        "net_delta_pp": -5.1573
+      },
+      "holdout": {
+        "n": 1,
+        "wins_removed": 1,
+        "losers_avoided": 0,
+        "loss_avoided_pp": 0,
+        "win_profit_lost_pp": 0.0769,
+        "net_delta_pp": -0.0769
+      },
+      "accepted_count": 367
+    },
+    {
+      "n_losers_before_cooldown": 3,
+      "cooldown_hours": 6,
+      "full": {
+        "n": 26,
+        "wins_removed": 17,
+        "losers_avoided": 9,
+        "loss_avoided_pp": 1.2187,
+        "win_profit_lost_pp": 10.0472,
+        "net_delta_pp": -8.8285
+      },
+      "train": {
+        "n": 24,
+        "wins_removed": 15,
+        "losers_avoided": 9,
+        "loss_avoided_pp": 1.2187,
+        "win_profit_lost_pp": 7.8216,
+        "net_delta_pp": -6.6029
+      },
+      "holdout": {
+        "n": 2,
+        "wins_removed": 2,
+        "losers_avoided": 0,
+        "loss_avoided_pp": 0,
+        "win_profit_lost_pp": 2.2257,
+        "net_delta_pp": -2.2257
+      },
+      "accepted_count": 353
+    },
+    {
+      "n_losers_before_cooldown": 3,
+      "cooldown_hours": 12,
+      "full": {
+        "n": 37,
+        "wins_removed": 24,
+        "losers_avoided": 13,
+        "loss_avoided_pp": 4.3039,
+        "win_profit_lost_pp": 15.1012,
+        "net_delta_pp": -10.7972
+      },
+      "train": {
+        "n": 33,
+        "wins_removed": 21,
+        "losers_avoided": 12,
+        "loss_avoided_pp": 1.8421,
+        "win_profit_lost_pp": 12.7987,
+        "net_delta_pp": -10.9565
+      },
+      "holdout": {
+        "n": 4,
+        "wins_removed": 3,
+        "losers_avoided": 1,
+        "loss_avoided_pp": 2.4618,
+        "win_profit_lost_pp": 2.3025,
+        "net_delta_pp": 0.1593
+      },
+      "accepted_count": 342
+    },
+    {
+      "n_losers_before_cooldown": 3,
+      "cooldown_hours": 24,
+      "full": {
+        "n": 55,
+        "wins_removed": 36,
+        "losers_avoided": 19,
+        "loss_avoided_pp": 5.851,
+        "win_profit_lost_pp": 21.8032,
+        "net_delta_pp": -15.9523
+      },
+      "train": {
+        "n": 48,
+        "wins_removed": 30,
+        "losers_avoided": 18,
+        "loss_avoided_pp": 3.3892,
+        "win_profit_lost_pp": 18.8486,
+        "net_delta_pp": -15.4594
+      },
+      "holdout": {
+        "n": 7,
+        "wins_removed": 6,
+        "losers_avoided": 1,
+        "loss_avoided_pp": 2.4618,
+        "win_profit_lost_pp": 2.9547,
+        "net_delta_pp": -0.4929
+      },
+      "accepted_count": 324
+    },
+    {
+      "n_losers_before_cooldown": 4,
+      "cooldown_hours": 3,
+      "full": {
+        "n": 4,
+        "wins_removed": 3,
+        "losers_avoided": 1,
+        "loss_avoided_pp": 0.383,
+        "win_profit_lost_pp": 4.3209,
+        "net_delta_pp": -3.9379
+      },
+      "train": {
+        "n": 3,
+        "wins_removed": 2,
+        "losers_avoided": 1,
+        "loss_avoided_pp": 0.383,
+        "win_profit_lost_pp": 2.1722,
+        "net_delta_pp": -1.7891
+      },
+      "holdout": {
+        "n": 1,
+        "wins_removed": 1,
+        "losers_avoided": 0,
+        "loss_avoided_pp": 0,
+        "win_profit_lost_pp": 2.1487,
+        "net_delta_pp": -2.1487
+      },
+      "accepted_count": 375
+    },
+    {
+      "n_losers_before_cooldown": 4,
+      "cooldown_hours": 6,
+      "full": {
+        "n": 11,
+        "wins_removed": 10,
+        "losers_avoided": 1,
+        "loss_avoided_pp": 0.383,
+        "win_profit_lost_pp": 6.8335,
+        "net_delta_pp": -6.4505
+      },
+      "train": {
+        "n": 9,
+        "wins_removed": 8,
+        "losers_avoided": 1,
+        "loss_avoided_pp": 0.383,
+        "win_profit_lost_pp": 4.6079,
+        "net_delta_pp": -4.2249
+      },
+      "holdout": {
+        "n": 2,
+        "wins_removed": 2,
+        "losers_avoided": 0,
+        "loss_avoided_pp": 0,
+        "win_profit_lost_pp": 2.2256,
+        "net_delta_pp": -2.2256
+      },
+      "accepted_count": 368
+    },
+    {
+      "n_losers_before_cooldown": 4,
+      "cooldown_hours": 12,
+      "full": {
+        "n": 18,
+        "wins_removed": 14,
+        "losers_avoided": 4,
+        "loss_avoided_pp": 3.0482,
+        "win_profit_lost_pp": 10.3543,
+        "net_delta_pp": -7.3061
+      },
+      "train": {
+        "n": 15,
+        "wins_removed": 12,
+        "losers_avoided": 3,
+        "loss_avoided_pp": 0.5864,
+        "win_profit_lost_pp": 8.1287,
+        "net_delta_pp": -7.5423
+      },
+      "holdout": {
+        "n": 3,
+        "wins_removed": 2,
+        "losers_avoided": 1,
+        "loss_avoided_pp": 2.4618,
+        "win_profit_lost_pp": 2.2256,
+        "net_delta_pp": 0.2362
+      },
+      "accepted_count": 361
+    },
+    {
+      "n_losers_before_cooldown": 4,
+      "cooldown_hours": 24,
+      "full": {
+        "n": 32,
+        "wins_removed": 25,
+        "losers_avoided": 7,
+        "loss_avoided_pp": 4.1837,
+        "win_profit_lost_pp": 18.1797,
+        "net_delta_pp": -13.996
+      },
+      "train": {
+        "n": 25,
+        "wins_removed": 19,
+        "losers_avoided": 6,
+        "loss_avoided_pp": 1.7219,
+        "win_profit_lost_pp": 15.2372,
+        "net_delta_pp": -13.5153
+      },
+      "holdout": {
+        "n": 7,
+        "wins_removed": 6,
+        "losers_avoided": 1,
+        "loss_avoided_pp": 2.4618,
+        "win_profit_lost_pp": 2.9425,
+        "net_delta_pp": -0.4807
+      },
+      "accepted_count": 347
+    },
+    {
+      "n_losers_before_cooldown": 5,
+      "cooldown_hours": 3,
+      "full": {
+        "n": 0,
+        "wins_removed": 0,
+        "losers_avoided": 0,
+        "loss_avoided_pp": 0,
+        "win_profit_lost_pp": 0,
+        "net_delta_pp": 0
+      },
+      "train": {
+        "n": 0,
+        "wins_removed": 0,
+        "losers_avoided": 0,
+        "loss_avoided_pp": 0,
+        "win_profit_lost_pp": 0,
+        "net_delta_pp": 0
+      },
+      "holdout": {
+        "n": 0,
+        "wins_removed": 0,
+        "losers_avoided": 0,
+        "loss_avoided_pp": 0,
+        "win_profit_lost_pp": 0,
+        "net_delta_pp": 0
+      },
+      "accepted_count": 379
+    },
+    {
+      "n_losers_before_cooldown": 5,
+      "cooldown_hours": 6,
+      "full": {
+        "n": 1,
+        "wins_removed": 1,
+        "losers_avoided": 0,
+        "loss_avoided_pp": 0,
+        "win_profit_lost_pp": 0.5006,
+        "net_delta_pp": -0.5006
+      },
+      "train": {
+        "n": 1,
+        "wins_removed": 1,
+        "losers_avoided": 0,
+        "loss_avoided_pp": 0,
+        "win_profit_lost_pp": 0.5006,
+        "net_delta_pp": -0.5006
+      },
+      "holdout": {
+        "n": 0,
+        "wins_removed": 0,
+        "losers_avoided": 0,
+        "loss_avoided_pp": 0,
+        "win_profit_lost_pp": 0,
+        "net_delta_pp": 0
+      },
+      "accepted_count": 378
+    },
+    {
+      "n_losers_before_cooldown": 5,
+      "cooldown_hours": 12,
+      "full": {
+        "n": 1,
+        "wins_removed": 1,
+        "losers_avoided": 0,
+        "loss_avoided_pp": 0,
+        "win_profit_lost_pp": 0.5006,
+        "net_delta_pp": -0.5006
+      },
+      "train": {
+        "n": 1,
+        "wins_removed": 1,
+        "losers_avoided": 0,
+        "loss_avoided_pp": 0,
+        "win_profit_lost_pp": 0.5006,
+        "net_delta_pp": -0.5006
+      },
+      "holdout": {
+        "n": 0,
+        "wins_removed": 0,
+        "losers_avoided": 0,
+        "loss_avoided_pp": 0,
+        "win_profit_lost_pp": 0,
+        "net_delta_pp": 0
+      },
+      "accepted_count": 378
+    },
+    {
+      "n_losers_before_cooldown": 5,
+      "cooldown_hours": 24,
+      "full": {
+        "n": 1,
+        "wins_removed": 1,
+        "losers_avoided": 0,
+        "loss_avoided_pp": 0,
+        "win_profit_lost_pp": 0.5006,
+        "net_delta_pp": -0.5006
+      },
+      "train": {
+        "n": 1,
+        "wins_removed": 1,
+        "losers_avoided": 0,
+        "loss_avoided_pp": 0,
+        "win_profit_lost_pp": 0.5006,
+        "net_delta_pp": -0.5006
+      },
+      "holdout": {
+        "n": 0,
+        "wins_removed": 0,
+        "losers_avoided": 0,
+        "loss_avoided_pp": 0,
+        "win_profit_lost_pp": 0,
+        "net_delta_pp": 0
+      },
+      "accepted_count": 378
+    },
+    {
+      "n_losers_before_cooldown": 6,
+      "cooldown_hours": 3,
+      "full": {
+        "n": 0,
+        "wins_removed": 0,
+        "losers_avoided": 0,
+        "loss_avoided_pp": 0,
+        "win_profit_lost_pp": 0,
+        "net_delta_pp": 0
+      },
+      "train": {
+        "n": 0,
+        "wins_removed": 0,
+        "losers_avoided": 0,
+        "loss_avoided_pp": 0,
+        "win_profit_lost_pp": 0,
+        "net_delta_pp": 0
+      },
+      "holdout": {
+        "n": 0,
+        "wins_removed": 0,
+        "losers_avoided": 0,
+        "loss_avoided_pp": 0,
+        "win_profit_lost_pp": 0,
+        "net_delta_pp": 0
+      },
+      "accepted_count": 379
+    },
+    {
+      "n_losers_before_cooldown": 6,
+      "cooldown_hours": 6,
+      "full": {
+        "n": 0,
+        "wins_removed": 0,
+        "losers_avoided": 0,
+        "loss_avoided_pp": 0,
+        "win_profit_lost_pp": 0,
+        "net_delta_pp": 0
+      },
+      "train": {
+        "n": 0,
+        "wins_removed": 0,
+        "losers_avoided": 0,
+        "loss_avoided_pp": 0,
+        "win_profit_lost_pp": 0,
+        "net_delta_pp": 0
+      },
+      "holdout": {
+        "n": 0,
+        "wins_removed": 0,
+        "losers_avoided": 0,
+        "loss_avoided_pp": 0,
+        "win_profit_lost_pp": 0,
+        "net_delta_pp": 0
+      },
+      "accepted_count": 379
+    },
+    {
+      "n_losers_before_cooldown": 6,
+      "cooldown_hours": 12,
+      "full": {
+        "n": 0,
+        "wins_removed": 0,
+        "losers_avoided": 0,
+        "loss_avoided_pp": 0,
+        "win_profit_lost_pp": 0,
+        "net_delta_pp": 0
+      },
+      "train": {
+        "n": 0,
+        "wins_removed": 0,
+        "losers_avoided": 0,
+        "loss_avoided_pp": 0,
+        "win_profit_lost_pp": 0,
+        "net_delta_pp": 0
+      },
+      "holdout": {
+        "n": 0,
+        "wins_removed": 0,
+        "losers_avoided": 0,
+        "loss_avoided_pp": 0,
+        "win_profit_lost_pp": 0,
+        "net_delta_pp": 0
+      },
+      "accepted_count": 379
+    },
+    {
+      "n_losers_before_cooldown": 6,
+      "cooldown_hours": 24,
+      "full": {
+        "n": 0,
+        "wins_removed": 0,
+        "losers_avoided": 0,
+        "loss_avoided_pp": 0,
+        "win_profit_lost_pp": 0,
+        "net_delta_pp": 0
+      },
+      "train": {
+        "n": 0,
+        "wins_removed": 0,
+        "losers_avoided": 0,
+        "loss_avoided_pp": 0,
+        "win_profit_lost_pp": 0,
+        "net_delta_pp": 0
+      },
+      "holdout": {
+        "n": 0,
+        "wins_removed": 0,
+        "losers_avoided": 0,
+        "loss_avoided_pp": 0,
+        "win_profit_lost_pp": 0,
+        "net_delta_pp": 0
+      },
+      "accepted_count": 379
+    }
+  ]
+}
