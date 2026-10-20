@@ -225,6 +225,10 @@ function isWithin(root: string, candidate: string): boolean {
     return fromRoot === "" || (!fromRoot.startsWith("..") && !isAbsolute(fromRoot));
 }
 
+function normalizeWindowsPath(value: string): string {
+    return value.replace(/[\\/]+/g, "/").replace(/\/$/, "").toLowerCase();
+}
+
 function errorMessage(error: unknown): string {
     return error instanceof Error ? error.message : "unknown runner error";
 }
@@ -320,12 +324,17 @@ export function buildRunId(input: RunIdInput): string {
 
 export function assertRunnerOutputRoot(outputRoot: string): string {
     const resolved = resolve(outputRoot);
+    const desktopRootLiteral = "C:/Users/dis/Desktop";
+    const desktopRoot = resolve(desktopRootLiteral);
+    if (resolved === desktopRoot || normalizeWindowsPath(outputRoot) === normalizeWindowsPath(desktopRootLiteral)) {
+        throw new Error("RESEARCH_OUTPUT_MUST_NOT_BE_DESKTOP_ROOT");
+    }
     if (isWithin(SCRIPT_REPOSITORY_ROOT, resolved)) throw new Error("RESEARCH_OUTPUT_MUST_NOT_BE_INSIDE_REPOSITORY");
-    const desktopRoot = resolve("C:/Users/dis/Desktop");
-    if (resolved === desktopRoot) throw new Error("RESEARCH_OUTPUT_MUST_NOT_BE_DESKTOP_ROOT");
     const configuredRoot = process.env.DISDEX_AI_OUTPUT_ROOT?.trim();
     const approvedRoot = resolve(configuredRoot || DEFAULT_RESEARCH_ROOT);
-    if (approvedRoot === desktopRoot) throw new Error("RESEARCH_OUTPUT_ROOT_MUST_NOT_BE_DESKTOP_ROOT");
+    if (approvedRoot === desktopRoot || (configuredRoot !== undefined && normalizeWindowsPath(configuredRoot) === normalizeWindowsPath(desktopRootLiteral))) {
+        throw new Error("RESEARCH_OUTPUT_ROOT_MUST_NOT_BE_DESKTOP_ROOT");
+    }
     if (isWithin(desktopRoot, approvedRoot) && !isWithin(resolve(DEFAULT_RESEARCH_ROOT), approvedRoot)) {
         throw new Error("RESEARCH_OUTPUT_ROOT_MUST_BE_APPROVED_RESEARCH_HIERARCHY");
     }
