@@ -43,9 +43,19 @@ function candidate(overrides: Partial<DynamicAllocatorCandidate> = {}): DynamicA
         priority: 10,
         rank: 1,
         evidence_level: "ORIGINAL_EVIDENCE",
+        source_sha: "a".repeat(64),
+        evidence: {
+            level: "ORIGINAL_EVIDENCE",
+            sourceKind: "RAW_CANDIDATE_DECISIONS",
+            sourcePath: "fixture/dynamic-allocator.jsonl",
+            sourceSha256: "a".repeat(64),
+            rowNumber: 1,
+            sourceBytes: 128,
+        },
         validity: "VALID",
+        asset_class: "CRYPTO",
         ...overrides,
-    };
+    } as DynamicAllocatorCandidate;
 }
 
 test("accepts a candidate with an immutable before/after reservation ledger", () => {
@@ -85,6 +95,32 @@ test("produces the same state hashes for equal input and does not double-count f
         policy({ total_gross_cap: 200, crypto_gross_cap: 200 }),
     );
     assert.equal(nextSymbol.accepted, true);
+});
+
+test("accounts for crypto gross exactly once across fill and release", () => {
+    const state = createInitialAllocatorState({ available_margin: 1_000 });
+    const first = decideCandidate(state, candidate(), policy({ total_gross_cap: 1_000, crypto_gross_cap: 100 }));
+    const filled = confirmFill(first.state_after, first.reservation!.reservation_id, { fill_ts_ms: TS + 1, filled_gross: 100 });
+    assert.equal(filled.state_after.crypto_gross, 100);
+
+    const second = decideCandidate(
+        filled.state_after,
+        candidate({ candidate_id: "candidate-2", symbol: "ETHUSDT" }),
+        policy({ total_gross_cap: 1_000, crypto_gross_cap: 100 }),
+    );
+    assert.equal(second.reason, "GROSS_CAP_CRYPTO");
+
+    const released = releaseReservation(filled.state_after, first.reservation!.reservation_id, {
+        at_ts_ms: TS + 2,
+        reason: "EXIT",
+    });
+    assert.equal(released.state_after.crypto_gross, 0);
+    const reAdmitted = decideCandidate(
+        released.state_after,
+        candidate({ candidate_id: "candidate-3", symbol: "ETHUSDT" }),
+        policy({ total_gross_cap: 1_000, crypto_gross_cap: 100 }),
+    );
+    assert.equal(reAdmitted.accepted, true);
 });
 
 test("enforces total, crypto, strategy, and symbol gross caps including reservations", () => {
@@ -246,6 +282,30 @@ test("reservation expiry is explicit and single-use", () => {
     assert.equal(repeated.state_hash_before, repeated.state_hash_after);
 });
 
+test("rejects fills before creation and after expiry without mutating the reservation", () => {
+    const accepted = decideCandidate(createInitialAllocatorState({ available_margin: 1_000 }), candidate(), policy());
+    const reservationId = accepted.reservation!.reservation_id;
+    const beforeCreation = confirmFill(accepted.state_after, reservationId, { fill_ts_ms: TS - 1, filled_gross: 100 });
+    assert.equal(beforeCreation.reason, "FILL_GROSS_MISMATCH");
+    assert.equal(beforeCreation.state_hash_before, beforeCreation.state_hash_after);
+
+    const afterExpiry = confirmFill(accepted.state_after, reservationId, { fill_ts_ms: TS + 60_001, filled_gross: 100 });
+    assert.equal(afterExpiry.reason, "FILL_GROSS_MISMATCH");
+    assert.equal(afterExpiry.state_hash_before, afterExpiry.state_hash_after);
+});
+
+test("fails closed for missing or invalid asset class instead of defaulting to crypto", () => {
+    for (const assetClass of [null, "UNKNOWN"] as const) {
+        const result = decideCandidate(
+            createInitialAllocatorState({ available_margin: 1_000 }),
+            candidate({ candidate_id: `asset-${String(assetClass)}`, asset_class: assetClass }),
+            policy(),
+        );
+        assert.equal(result.reason, "DATA_MISSING");
+        assert.equal(result.reservation, null);
+    }
+});
+
 test("fill confirmation and protection registration are explicit lifecycle transitions", () => {
     const accepted = decideCandidate(createInitialAllocatorState({ available_margin: 1_000 }), candidate(), policy());
     const reservationId = accepted.reservation!.reservation_id;
@@ -292,4 +352,84 @@ test("release makes filled gross reusable and applies cooldown only with the exp
     assert.equal(released.state_after.reserved_gross, 0);
     assert.equal(released.state_after.gross_by_symbol.BTCUSDT, undefined);
     assert.equal(released.state_after.cooldown_by_symbol_side_strategy["BTCUSDT|LONG|V12"]?.until_ts_ms, TS + 60_000);
+});
+
+test("rejects invalid protection metadata without changing lifecycle state", () => {
+    const accepted = decideCandidate(createInitialAllocatorState({ available_margin: 1_000 }), candidate(), policy());
+    const filled = confirmFill(accepted.state_after, accepted.reservation!.reservation_id, { fill_ts_ms: TS + 1, filled_gross: 100 });
+    for (const protection of [
+        { protection_id: "", registered_ts_ms: TS + 2 },
+        { protection_id: "   ", registered_ts_ms: TS + 2 },
+        { protection_id: "stop-nan", registered_ts_ms: Number.NaN },
+        { protection_id: "stop-before-fill", registered_ts_ms: TS },
+    ]) {
+        const result = registerProtection(filled.state_after, accepted.reservation!.reservation_id, protection);
+        assert.equal(result.reason, "DATA_MISSING");
+        assert.equal(result.state_hash_before, result.state_hash_after);
+    }
+});
+
+test("rejects release timestamps, reasons, and cooldown source metadata that are not causal", () => {
+    const accepted = decideCandidate(createInitialAllocatorState({ available_margin: 1_000 }), candidate(), policy());
+    const reservationId = accepted.reservation!.reservation_id;
+    const beforeCreation = releaseReservation(accepted.state_after, reservationId, { at_ts_ms: TS - 1, reason: "EXIT" });
+    assert.equal(beforeCreation.reason, "DATA_MISSING");
+    const emptyReason = releaseReservation(accepted.state_after, reservationId, { at_ts_ms: TS + 1, reason: "   " });
+    assert.equal(emptyReason.reason, "DATA_MISSING");
+
+    const filled = confirmFill(accepted.state_after, reservationId, { fill_ts_ms: TS + 1, filled_gross: 100 });
+    const beforeFill = releaseReservation(filled.state_after, reservationId, { at_ts_ms: TS, reason: "EXIT" });
+    assert.equal(beforeFill.reason, "DATA_MISSING");
+    for (const source of [undefined, null, Number.NaN, TS + 4] as const) {
+        const result = releaseReservation(filled.state_after, reservationId, {
+            at_ts_ms: TS + 3,
+            reason: "STOP",
+            cooldown_until_ts_ms: TS + 60_000,
+            cooldown_source_event_ts_ms: source,
+        });
+        assert.equal(result.reason, "DATA_MISSING");
+        assert.equal(result.state_hash_before, result.state_hash_after);
+    }
+});
+
+test("requires usable source provenance for normalized evidence levels", () => {
+    for (const evidenceLevel of ["ORIGINAL_EVIDENCE", "CAUSALLY_REGENERATED"] as const) {
+        const missingProvenance = decideCandidate(
+            createInitialAllocatorState({ available_margin: 1_000 }),
+            candidate({ candidate_id: `missing-${evidenceLevel}`, evidence: { level: evidenceLevel }, source_sha: null }),
+            policy(),
+        );
+        assert.equal(missingProvenance.reason, "DATA_MISSING");
+
+        const invalidHash = decideCandidate(
+            createInitialAllocatorState({ available_margin: 1_000 }),
+            candidate({
+                candidate_id: `invalid-${evidenceLevel}`,
+                evidence_level: evidenceLevel,
+                evidence: {
+                    level: evidenceLevel,
+                    sourceKind: "RAW_CANDIDATE_DECISIONS",
+                    sourcePath: "fixture.jsonl",
+                    sourceSha256: "not-a-sha",
+                    rowNumber: 1,
+                    sourceBytes: 1,
+                },
+                source_sha: "not-a-sha",
+            }),
+            policy(),
+        );
+        assert.equal(invalidHash.reason, "DATA_MISSING");
+    }
+});
+
+test("requires a positive finite reservation TTL", () => {
+    for (const ttl of [undefined, 0, -1, Number.NaN, Number.POSITIVE_INFINITY] as const) {
+        const result = decideCandidate(
+            createInitialAllocatorState({ available_margin: 1_000 }),
+            candidate({ candidate_id: `ttl-${String(ttl)}` }),
+            policy({ reservation_ttl_ms: ttl }),
+        );
+        assert.equal(result.reason, "DATA_MISSING");
+        assert.equal(result.reservation, null);
+    }
 });

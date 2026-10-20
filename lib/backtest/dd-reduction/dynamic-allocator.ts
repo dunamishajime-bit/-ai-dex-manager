@@ -58,7 +58,21 @@ export interface DynamicAllocatorCandidate {
     readonly priority?: number | null;
     readonly rank?: number | null;
     readonly evidence_level?: EvidenceLevel | string | null;
-    readonly evidence?: { readonly level?: EvidenceLevel | string | null } | null;
+    readonly source_sha?: string | null;
+    readonly sourceSha?: string | null;
+    readonly evidence?: {
+        readonly level?: EvidenceLevel | string | null;
+        readonly sourceKind?: string | null;
+        readonly sourcePath?: string | null;
+        readonly sourceSha256?: string | null;
+        readonly rowNumber?: number | null;
+        readonly sourceBytes?: number | null;
+        readonly source_kind?: string | null;
+        readonly source_path?: string | null;
+        readonly source_sha256?: string | null;
+        readonly row_number?: number | null;
+        readonly source_bytes?: number | null;
+    } | null;
     readonly validity?: "VALID" | "INVALID" | "UNKNOWN" | string | null;
     readonly asset_class?: "CRYPTO" | "NON_CRYPTO" | string | null;
     readonly assetClass?: "CRYPTO" | "NON_CRYPTO" | string | null;
@@ -329,6 +343,30 @@ function candidateNumber(candidate: DynamicAllocatorCandidate, ...keys: readonly
     return null;
 }
 
+function validSha256(value: unknown): value is string {
+    return typeof value === "string" && /^[a-f0-9]{64}$/i.test(value);
+}
+
+function provenanceIsUsable(candidate: DynamicAllocatorCandidate, evidenceLevel: unknown): boolean {
+    if (evidenceLevel !== "ORIGINAL_EVIDENCE" && evidenceLevel !== "CAUSALLY_REGENERATED") return false;
+    const evidence = candidate.evidence;
+    if (evidence === null || evidence === undefined) return false;
+    const sourceKind = evidence.sourceKind ?? evidence.source_kind;
+    const sourcePath = evidence.sourcePath ?? evidence.source_path;
+    const sourceSha256 = evidence.sourceSha256 ?? evidence.source_sha256;
+    const rowNumber = evidence.rowNumber ?? evidence.row_number;
+    const sourceBytes = evidence.sourceBytes ?? evidence.source_bytes;
+    const sourceSha = candidate.source_sha ?? candidate.sourceSha;
+    const validSourceKind = sourceKind === "RAW_CANDIDATE_DECISIONS" || sourceKind === "SAVED_MARKET_DATA" || sourceKind === "STRATEGY_ADAPTER";
+    return evidence.level === evidenceLevel &&
+        validSourceKind &&
+        typeof sourcePath === "string" && sourcePath.trim().length > 0 &&
+        validSha256(sourceSha256) && validSha256(sourceSha) &&
+        sourceSha256.toLowerCase() === sourceSha.toLowerCase() &&
+        typeof rowNumber === "number" && Number.isInteger(rowNumber) && rowNumber > 0 &&
+        typeof sourceBytes === "number" && Number.isInteger(sourceBytes) && sourceBytes >= 0;
+}
+
 interface NormalizedCandidate {
     readonly candidate_id: string;
     readonly strategy_id: DynamicStrategyId;
@@ -369,7 +407,7 @@ function normalizeCandidate(candidate: DynamicAllocatorCandidate): NormalizedCan
         entryPrice === null ||
         priority === null ||
         validity !== "VALID" ||
-        evidence !== "ORIGINAL_EVIDENCE" && evidence !== "CAUSALLY_REGENERATED"
+        !provenanceIsUsable(candidate, evidence)
     ) return "DATA_MISSING";
     if (decisionTs > validUntil) return "ENTRY_EXPIRED";
     if (requestedGross <= 0 || entryPrice <= 0) return "DATA_MISSING";
@@ -377,7 +415,8 @@ function normalizeCandidate(candidate: DynamicAllocatorCandidate): NormalizedCan
     const quantity = rawQuantity ?? requestedGross / entryPrice;
     if (!Number.isFinite(quantity) || quantity <= 0) return "DATA_MISSING";
     const rawAssetClass = candidate.asset_class ?? candidate.assetClass;
-    const assetClass = rawAssetClass === "NON_CRYPTO" ? "NON_CRYPTO" : "CRYPTO";
+    if (rawAssetClass !== "CRYPTO" && rawAssetClass !== "NON_CRYPTO") return "DATA_MISSING";
+    const assetClass = rawAssetClass;
     return {
         candidate_id: candidateId,
         strategy_id: strategy as DynamicStrategyId,
@@ -510,6 +549,9 @@ export function decideCandidate(
     if (before.pending_gross + normalized.requested_gross > pendingCap) return result(false, id, "PENDING_GROSS", before, before, null);
     if (before.reserved_gross + normalized.requested_gross > reservedCap) return result(false, id, "RESERVED_GROSS", before, before, null);
 
+    const rawTtl = policy.reservation_ttl_ms ?? policy.reservation_ttl_ms_default;
+    if (typeof rawTtl !== "number" || !Number.isFinite(rawTtl) || rawTtl <= 0) return result(false, id, "DATA_MISSING", before, before, null);
+
     const reservedForSymbol = before.reserved_gross_by_symbol[symbol] ?? 0;
     const reservedForStrategy = before.reserved_gross_by_strategy[strategy] ?? 0;
     const reservationsForCapacity = activeReservations(before);
@@ -527,7 +569,7 @@ export function decideCandidate(
         return result(false, id, "GROSS_CAP_SYMBOL", before, before, null);
     }
 
-    const ttl = policyNumber(policy, "reservation_ttl_ms", "reservation_ttl_ms_default", 0);
+    const ttl = rawTtl;
     const reservation: ReservationRecord = {
         reservation_id: `reservation:${id}:${normalized.decision_ts_ms}`,
         candidate_id: id,
@@ -584,7 +626,7 @@ export function confirmFill(
     if (reservation === null) return transition(state, "DATA_MISSING", "FILL_REJECTED", () => null);
     if (reservation.status !== "PENDING") return transition(state, reservation.filled_gross > 0 ? "RESERVATION_ALREADY_FILLED" : "RESERVATION_NOT_PENDING", "FILL_REJECTED", () => null);
     const grossMatchesReservation = Number.isFinite(fill.filled_gross) && Math.abs(fill.filled_gross - reservation.reserved_gross) <= Number.EPSILON * Math.max(1, reservation.reserved_gross) * 16;
-    if (!Number.isFinite(fill.fill_ts_ms) || !grossMatchesReservation || fill.filled_gross <= 0 || fill.filled_gross > reservation.reserved_gross) {
+    if (!Number.isFinite(fill.fill_ts_ms) || fill.fill_ts_ms < reservation.created_ts_ms || fill.fill_ts_ms > reservation.expires_ts_ms || !grossMatchesReservation || fill.filled_gross <= 0 || fill.filled_gross > reservation.reserved_gross) {
         return transition(state, "FILL_GROSS_MISMATCH", "FILL_REJECTED", () => null);
     }
     return transition(state, null, "FILL_CONFIRMED", (next) => {
@@ -604,6 +646,7 @@ export function confirmFill(
         add(next.reserved_gross_by_strategy, reservation.strategy_id, -fill.filled_gross);
         add(next.reserved_gross_by_symbol, reservation.symbol, -fill.filled_gross);
         next.total_gross += fill.filled_gross;
+        if (reservation.asset_class === "CRYPTO") next.crypto_gross += fill.filled_gross;
         next.gross_by_strategy[reservation.strategy_id] = (next.gross_by_strategy[reservation.strategy_id] ?? 0) + fill.filled_gross;
         next.gross_by_symbol[reservation.symbol] = (next.gross_by_symbol[reservation.symbol] ?? 0) + fill.filled_gross;
         next.ownership = next.ownership.map((item) => item.reservation_id === reservationId ? { ...item, status: "OPEN", gross: fill.filled_gross } : item);
@@ -622,8 +665,11 @@ export function registerProtection(
     if (reservation.status === "RELEASED" || reservation.status === "EXPIRED") return transition(state, "RESERVATION_ALREADY_RELEASED", "PROTECTION_REJECTED", () => null);
     if (reservation.filled_gross <= 0) return transition(state, "PROTECTION_NOT_READY", "PROTECTION_REJECTED", () => null);
     if (reservation.protection_id !== null) return transition(state, "PROTECTION_NOT_READY", "PROTECTION_REJECTED", () => null);
+    if (typeof protection.protection_id !== "string" || protection.protection_id.trim().length === 0 || !Number.isFinite(protection.registered_ts_ms) || reservation.fill_ts_ms === null || protection.registered_ts_ms < reservation.fill_ts_ms) {
+        return transition(state, "DATA_MISSING", "PROTECTION_REJECTED", () => null);
+    }
     return transition(state, null, "PROTECTION_REGISTERED", (next) => {
-        const updated = { ...reservation, status: "PROTECTED" as const, protection_id: protection.protection_id };
+        const updated = { ...reservation, status: "PROTECTED" as const, protection_id: protection.protection_id.trim() };
         next.reservations = next.reservations.map((item) => item.reservation_id === reservationId ? updated : item);
         return updated;
     });
@@ -638,7 +684,15 @@ export function releaseReservation(
     const reservation = reservationFor(state, reservationId);
     if (reservation === null) return transition(state, "DATA_MISSING", "RELEASE_REJECTED", () => null);
     if (reservation.status === "RELEASED" || reservation.status === "EXPIRED") return transition(state, "RESERVATION_ALREADY_RELEASED", "RELEASE_REJECTED", () => null);
-    if (!Number.isFinite(request.at_ts_ms)) return transition(state, "DATA_MISSING", "RELEASE_REJECTED", () => null);
+    const hasCooldownMetadata = request.cooldown_until_ts_ms !== undefined || request.cooldown_source_event_ts_ms !== undefined;
+    const validCooldownMetadata = !hasCooldownMetadata || (
+        typeof request.cooldown_until_ts_ms === "number" && Number.isFinite(request.cooldown_until_ts_ms) &&
+        typeof request.cooldown_source_event_ts_ms === "number" && Number.isFinite(request.cooldown_source_event_ts_ms) &&
+        request.cooldown_source_event_ts_ms <= request.at_ts_ms
+    );
+    if (!Number.isFinite(request.at_ts_ms) || request.at_ts_ms < reservation.created_ts_ms || (reservation.fill_ts_ms !== null && request.at_ts_ms < reservation.fill_ts_ms) || typeof request.reason !== "string" || request.reason.trim().length === 0 || !validCooldownMetadata) {
+        return transition(state, "DATA_MISSING", "RELEASE_REJECTED", () => null);
+    }
     return transition(state, null, "RESERVATION_RELEASED", (next) => {
         const expired = request.reason === "EXPIRY";
         const updated: ReservationRecord = {
@@ -648,7 +702,7 @@ export function releaseReservation(
             filled_gross: 0,
             status: expired ? "EXPIRED" : "RELEASED",
             released_ts_ms: request.at_ts_ms,
-            release_reason: request.reason,
+            release_reason: request.reason.trim(),
         };
         next.reservations = next.reservations.map((item) => item.reservation_id === reservationId ? updated : item);
         next.pending_gross -= reservation.pending_gross;
@@ -658,6 +712,7 @@ export function releaseReservation(
         add(next.reserved_gross_by_strategy, reservation.strategy_id, -reservation.reserved_gross);
         add(next.reserved_gross_by_symbol, reservation.symbol, -reservation.reserved_gross);
         next.total_gross -= reservation.filled_gross;
+        if (reservation.asset_class === "CRYPTO") next.crypto_gross -= reservation.filled_gross;
         add(next.gross_by_strategy, reservation.strategy_id, -reservation.filled_gross);
         add(next.gross_by_symbol, reservation.symbol, -reservation.filled_gross);
         next.available_margin += reservation.pending_gross + reservation.filled_gross;
@@ -667,7 +722,7 @@ export function releaseReservation(
             next.cooldown_by_symbol_side_strategy[keyFor(reservation.symbol, reservation.side, reservation.strategy_id)] = {
                 until_ts_ms: cooldownUntil ?? null,
                 source_event_ts_ms: request.cooldown_source_event_ts_ms ?? null,
-                reason: request.reason,
+                reason: request.reason.trim(),
             };
         }
         return updated;
