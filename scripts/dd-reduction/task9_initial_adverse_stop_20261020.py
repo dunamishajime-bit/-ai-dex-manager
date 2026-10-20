@@ -26,7 +26,10 @@ OUTPUT = Path(
     r"C:/Users/dis/Desktop/DisDex_AI_Files/01_BT_Research/"
     r"2026-10-20_dd-reduction-initial-adverse-stop-audit"
 )
-BOOTSTRAP_REDIRECT = OUTPUT / "_legacy-bootstrap-cache"
+# Preserve any root-owned cache created by earlier runs.  Follow-up research
+# runs use a separate writable cache instead of deleting or changing the
+# permissions of existing evidence.
+BOOTSTRAP_REDIRECT = OUTPUT / "_legacy-bootstrap-cache-followup"
 
 PERIOD_START = 1754784000000
 PERIOD_END = 1786320000000
@@ -115,11 +118,17 @@ def _optional_finite(value) -> float | None:
 def classify_pnl(row: dict) -> dict[str, object]:
     """Classify a closed-trade PnL without converting missing data to a loss.
 
-    ``total_pnl_jpy`` is preferred.  The modeled exit-FX field is an explicit
-    fallback used by older ledgers.  If neither field is present, the result is
-    UNSETTLED and must not enter win/loss/PF counts.
+    The explicit modeled exit-FX field is the primary JPY source.  The legacy
+    ``total_pnl_jpy`` field is only a fallback for rows that predate the
+    normalized schema; in the canonical source it is settlement-currency
+    data despite its historical name.  If neither field is present, the
+    result is UNSETTLED and must not enter win/loss/PF counts.
     """
-    for field in ("total_pnl_jpy", "modeled_realized_pnl_jpy_at_exit_fx"):
+    # Historical ledgers used total_pnl_jpy for settlement currency while
+    # modeled_realized_pnl_jpy_at_exit_fx carries the actual JPY value.
+    # Prefer the explicit JPY field to keep PF, OOS, and attribution units
+    # consistent across canonical and changed rows.
+    for field in ("modeled_realized_pnl_jpy_at_exit_fx", "total_pnl_jpy"):
         value = _optional_finite(row.get(field))
         if value is None:
             continue
@@ -704,7 +713,7 @@ def _transform_rows(rows: list[dict], overlays: list[dict], source, cost_bps: in
     ordered = sorted(rows, key=lambda row: (int(row["entry_ts_ms"]), int(row.get("position_id", 0))))
     output = []
     baseline_lookup = baseline_lookup or {}
-    last_stop: dict[tuple[str, str, str], dict] = {}
+    stop_history: dict[tuple[str, str, str, str], list[dict]] = defaultdict(list)
     for row in ordered:
         if not is_filled_accepted_row(row):
             obs["unfilled_skipped"] += 1
@@ -714,8 +723,22 @@ def _transform_rows(rows: list[dict], overlays: list[dict], source, cost_bps: in
         for overlay in overlays:
             if not _matches(current, overlay):
                 continue
-            key = (str(current["strategy_id"]), str(current["symbol"]), str(current["side"]))
-            prior_stop = last_stop.get(key)
+            key = (
+                str(overlay.get("id", "")),
+                str(current["strategy_id"]),
+                str(current["symbol"]),
+                str(current["side"]),
+            )
+            entry_ts = int(current["entry_ts_ms"])
+            eligible_stops = [
+                stop for stop in stop_history.get(key, [])
+                if int(stop["ts_ms"]) <= entry_ts
+            ]
+            prior_stop = max(
+                eligible_stops,
+                key=lambda stop: int(stop["ts_ms"]),
+                default=None,
+            )
             if prior_stop is not None and not reentry_allowed(
                 int(prior_stop["ts_ms"]), int(current["entry_ts_ms"]),
                 float(overlay.get("reentry_hours", 0)),
@@ -746,12 +769,12 @@ def _transform_rows(rows: list[dict], overlays: list[dict], source, cost_bps: in
                 original_row=baseline_lookup.get(_position_key(current), current),
             )
             if int(current["exit_ts_ms"]) < before_exit:
-                last_stop[key] = {
+                stop_history[key].append({
                     "ts_ms": int(current["exit_ts_ms"]),
                     "position_id": current.get("position_id"),
                     "candidate_id": current.get("candidate_id"),
                     "side": current.get("side"),
-                }
+                })
         if not blocked:
             output.append(current)
     return output

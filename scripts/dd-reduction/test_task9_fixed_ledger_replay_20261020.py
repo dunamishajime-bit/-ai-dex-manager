@@ -41,6 +41,14 @@ class Task9FixedLedgerReplayTests(unittest.TestCase):
             "entry_ts_ms": 100,
         }))
 
+    def test_historical_pf_is_explicitly_settlement_unit(self):
+        rows = [
+            {"total_pnl_settlement": 2.0, "total_pnl_jpy": 300.0},
+            {"total_pnl_settlement": -1.0, "total_pnl_jpy": -100.0},
+        ]
+        self.assertEqual(MODULE._profit_factor_for_field(rows, "total_pnl_settlement"), 2.0)
+        self.assertEqual(MODULE._profit_factor_for_field(rows, "total_pnl_jpy"), 3.0)
+
     def test_canonical_baseline_paths_are_explicitly_read_only_inputs(self):
         self.assertIn("BASELINE", str(MODULE.CANONICAL_ROOT))
         self.assertEqual(MODULE.CASE_NAME, "V2_M150_D05_CORE_NATIVE")
@@ -84,6 +92,41 @@ class Task9FixedLedgerReplayTests(unittest.TestCase):
         self.assertEqual([e["event_type"] for e in generated], [
             "MODELED_ENTRY", "MODELED_PARTIAL_EXIT", "MODELED_EXIT"
         ])
+        self.assertAlmostEqual(changed["total_pnl_jpy"], changed["total_pnl_settlement"] * 100.0)
+        self.assertEqual(changed["pnl_unit"], "JPY")
+        self.assertEqual(MODULE.t9.classify_pnl(changed)["source"], "modeled_realized_pnl_jpy_at_exit_fx")
+
+    def test_independent_accounting_reconciliation_detects_wallet_mismatch(self):
+        events = [
+            {
+                "event_type": "MONTHLY_CONTRIBUTION",
+                "ts_ms": 1,
+                "settlement_cashflow": 100.0,
+                "wallet_after_event": 99.0,
+            }
+        ]
+        result = MODULE._reconcile_accounting(events)
+        self.assertEqual(result["status"], "FAIL")
+        self.assertGreater(result["wallet_delta_settlement"], 0.0)
+
+    def test_independent_accounting_reconciliation_passes_known_event_cashflows(self):
+        events = [
+            {
+                "event_type": "MONTHLY_CONTRIBUTION",
+                "ts_ms": 1,
+                "settlement_cashflow": 100.0,
+                "wallet_after_event": 100.0,
+            },
+            {
+                "event_type": "MODELED_ENTRY",
+                "ts_ms": 2,
+                "fee_settlement": 0.5,
+                "wallet_after_event": 99.5,
+            },
+        ]
+        result = MODULE._reconcile_accounting(events)
+        self.assertEqual(result["status"], "PASS")
+        self.assertAlmostEqual(result["wallet_delta_settlement"], 0.0)
 
 
 if __name__ == "__main__":

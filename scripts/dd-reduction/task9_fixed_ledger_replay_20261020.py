@@ -111,7 +111,9 @@ def load_canonical(cost_bps: int) -> tuple[list[dict], list[dict], Path, Path]:
     events = _canonical_path(cost_bps, "portfolio-events.jsonl")
     if not ledger.is_file() or not events.is_file():
         raise FileNotFoundError(f"canonical baseline missing for {cost_bps}bps: {ledger}")
-    return _jsonl(ledger), _jsonl(events), ledger, events
+    event_rows = _jsonl(events)
+    fx_at = _fx_lookup(event_rows)
+    return _normalize_pnl_units(_jsonl(ledger), fx_at), event_rows, ledger, events
 
 
 def sha256_file(path: Path) -> str:
@@ -142,6 +144,53 @@ def _fx_lookup(events: list[dict]):
         return values[max(0, index)]
 
     return at
+
+
+def _normalize_pnl_units(rows: list[dict], fx_at) -> list[dict]:
+    """Make settlement and JPY PnL explicit for every closed trade.
+
+    Historical source rows called the settlement-currency amount
+    total_pnl_jpy. The source also contains a modeled exit-FX JPY amount for
+    most rows. Preserve the old value under total_pnl_settlement and expose
+    one true JPY field for all downstream metrics.
+    """
+    normalized: list[dict] = []
+    for row in rows:
+        item = dict(row)
+        settlement = t9._optional_finite(
+            row.get("total_pnl_settlement", row.get("total_pnl_jpy"))
+        )
+        jpy = t9._optional_finite(row.get("modeled_realized_pnl_jpy_at_exit_fx"))
+        exit_ts = row.get("exit_ts_ms")
+        if jpy is None and settlement is not None and exit_ts is not None:
+            jpy = settlement * fx_at(int(exit_ts))
+        if settlement is not None:
+            item["total_pnl_settlement"] = settlement
+        if jpy is not None:
+            item["total_pnl_jpy"] = jpy
+            item["modeled_realized_pnl_jpy_at_exit_fx"] = jpy
+            item["pnl_unit"] = "JPY"
+        item["settlement_pnl_unit"] = "SETTLEMENT"
+        normalized.append(item)
+    return normalized
+
+
+def _profit_factor_for_field(rows: list[dict], field: str) -> float | None:
+    """Calculate PF from one explicitly named PnL unit.
+
+    The historical anchor used the legacy ``total_pnl_jpy`` field even though
+    those values are denominated in the row's settlement currency.  Keeping
+    this helper field-specific prevents a legacy parity check from being
+    silently mixed with the corrected JPY metrics used for research decisions.
+    """
+    values = []
+    for row in rows:
+        value = t9._optional_finite(row.get(field))
+        if value is not None:
+            values.append(value)
+    gains = sum(value for value in values if value > 0)
+    losses = -sum(value for value in values if value < 0)
+    return gains / losses if losses else None
 
 
 def _funding_by_position(events: list[dict]) -> dict[str, list[dict]]:
@@ -213,6 +262,7 @@ def _recalculate_changed_row(
     entry_fee = float(original.get("entry_fee") or 0.0)
     total = partial_price + final_price + funding_pnl - entry_fee - partial_fees - exit_fee
     fx = fx_at(exit_ts)
+    total_jpy = total * fx
     changed = dict(
         original,
         exit_ts_ms=exit_ts,
@@ -223,8 +273,11 @@ def _recalculate_changed_row(
         price_pnl=partial_price + final_price,
         exit_fee=exit_fee,
         funding_pnl=funding_pnl,
-        total_pnl_jpy=total,
-        modeled_realized_pnl_jpy_at_exit_fx=total * fx,
+        total_pnl_settlement=total,
+        total_pnl_jpy=total_jpy,
+        modeled_realized_pnl_jpy_at_exit_fx=total_jpy,
+        pnl_unit="JPY",
+        settlement_pnl_unit="SETTLEMENT",
         reference_fx_exit_jpy_per_usd=fx,
     )
     generated = []
@@ -289,6 +342,80 @@ def _event_identity(event: dict) -> tuple[str, str, str, int]:
         str(event.get("event_type", "")),
         int(event.get("ts_ms", 0)),
     )
+
+
+def _event_cashflow_settlement(event: dict) -> float | None:
+    kind = str(event.get("event_type"))
+    if kind == "MONTHLY_CONTRIBUTION":
+        return float(event.get("settlement_cashflow") or 0.0)
+    if kind == "MODELED_ENTRY":
+        return -float(event.get("fee_settlement") or 0.0)
+    if kind == "FUNDING":
+        return float(event.get("cashflow_settlement") or 0.0)
+    if kind in {"MODELED_PARTIAL_EXIT", "HYPE_PRIORITY_PARTIAL_EXIT", "MODELED_EXIT"}:
+        return float(event.get("net_cashflow_settlement") or 0.0)
+    return None
+
+
+def _reconcile_accounting(events: list[dict], tolerance: float = 1e-8) -> dict:
+    """Independently reconcile event cashflows against wallet snapshots."""
+    independent_wallet = 0.0
+    mismatches: list[dict] = []
+    unknown_events: list[str] = []
+    for ordinal, event in enumerate(events):
+        cashflow = _event_cashflow_settlement(event)
+        if cashflow is None:
+            unknown_events.append(str(event.get("event_type")))
+            continue
+        independent_wallet += cashflow
+        observed = event.get("wallet_after_event")
+        if observed is None or not math.isfinite(float(observed)):
+            mismatches.append({
+                "ordinal": ordinal,
+                "reason": "MISSING_OR_NONFINITE_WALLET",
+                "expected_wallet": independent_wallet,
+                "observed_wallet": observed,
+            })
+            continue
+        delta = independent_wallet - float(observed)
+        if abs(delta) > tolerance:
+            mismatches.append({
+                "ordinal": ordinal,
+                "reason": "EVENT_WALLET_MISMATCH",
+                "expected_wallet": independent_wallet,
+                "observed_wallet": float(observed),
+                "delta": delta,
+            })
+    observed_final = (
+        float(events[-1].get("wallet_after_event"))
+        if events and events[-1].get("wallet_after_event") is not None
+        else None
+    )
+    final_delta = (
+        independent_wallet - observed_final
+        if observed_final is not None
+        else None
+    )
+    status = (
+        "PASS"
+        if events
+        and not unknown_events
+        and observed_final is not None
+        and math.isfinite(independent_wallet)
+        and final_delta is not None
+        and abs(final_delta) <= tolerance
+        and not mismatches
+        else "FAIL"
+    )
+    return {
+        "status": status,
+        "independent_wallet_settlement": independent_wallet,
+        "observed_wallet_settlement": observed_final,
+        "wallet_delta_settlement": final_delta,
+        "event_mismatch_count": len(mismatches),
+        "unknown_event_types": sorted(set(unknown_events)),
+        "mismatches": mismatches[:25],
+    }
 
 
 def _replay_events(
@@ -390,12 +517,20 @@ def _replay_events(
     # The source bar paths are used for the corrected MTM timeline.  The
     # audit records missing/invalid marks instead of filling them optimistically.
     mtm = build_mtm_timeline(final_rows, normalized_events, source, fx_at, output_root)
+    independent_accounting = _reconcile_accounting(normalized_events)
     accounting = {
-        "status": "PASS" if normalized_events and math.isfinite(wallet) else "FAIL",
+        "status": (
+            "PASS"
+            if normalized_events
+            and math.isfinite(wallet)
+            and independent_accounting["status"] == "PASS"
+            else "FAIL"
+        ),
         "final_wallet_settlement": wallet,
         "event_count": len(normalized_events),
         "dropped_positions": len(dropped),
         "changed_positions": len(changed),
+        "independent_reconciliation": independent_accounting,
     }
     return list(final_rows.values()), normalized_events, {
         "dropped_positions": sorted(dropped, key=lambda value: int(value) if value.isdigit() else value),
@@ -788,14 +923,39 @@ def main() -> None:
             baseline_rows, baseline_events, [], source, cost, base_dir, h1_source
         )
         expected = t9.BASELINE_EXPECTED[cost]
+        legacy_settlement_pf = _profit_factor_for_field(
+            baseline_rows, "total_pnl_settlement"
+        )
+        legacy_settlement_pf_exact = math.isclose(
+            legacy_settlement_pf,
+            expected["pf"],
+            rel_tol=2e-10,
+            abs_tol=1e-8,
+        )
         baseline_control = {
             "canonical_ledger_sha256": sha256_file(source_ledger),
             "canonical_events_sha256": sha256_file(source_events),
             "rows": len(baseline_rows),
             "final_exact": math.isclose(base_metrics["final_equity_jpy"], expected["final"], rel_tol=2e-10, abs_tol=1e-4),
-            "pf_exact": math.isclose(base_metrics["profit_factor"], expected["pf"], rel_tol=2e-10, abs_tol=1e-8),
+            # ``pf_exact`` remains a compatibility alias for the historical
+            # anchor check.  It must never be interpreted as proof that the
+            # corrected JPY PF equals the settlement-unit anchor.
+            "pf_exact": legacy_settlement_pf_exact,
+            "historical_anchor_pf_unit": "SETTLEMENT",
+            "historical_anchor_pf": expected["pf"],
+            "legacy_settlement_pf": legacy_settlement_pf,
+            "legacy_settlement_pf_exact": legacy_settlement_pf_exact,
+            "corrected_jpy_pf": base_metrics["profit_factor"],
+            "corrected_jpy_pnl_unit": "JPY",
+            "corrected_jpy_pf_matches_legacy_anchor": math.isclose(
+                base_metrics["profit_factor"],
+                expected["pf"],
+                rel_tol=2e-10,
+                abs_tol=1e-8,
+            ),
             "trades_exact": len(baseline_rows) == expected["trades"],
             "accounting_pass": base_metrics["accounting"] == "PASS",
+            "independent_accounting_reconciliation": base_audit["replay_meta"]["accounting"]["independent_reconciliation"],
             "corrected_mtm_status": base_audit["replay_meta"]["mtm"].get("status"),
             "canonical_engine_dd_pct": expected["dd"],
             "corrected_h1_mtm_dd_pct": base_metrics["maximum_mtm_drawdown_pct"],

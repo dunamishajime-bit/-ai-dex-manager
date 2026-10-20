@@ -1,100 +1,120 @@
 # Task 9 研究エンジン監査・初期逆行STOP再検証 最終報告
 
-## 1. 結論
+## 1. 判定
 
 **STATUS: RESEARCH_ONLY_NONCANONICAL**
 
-Task 9 の研究エンジンを監査・修正し、固定受入台帳を使った因果的な再生で、Baseline と従来の50候補を再検証した。研究結果としては、V12 SHORT の複合候補が統合最大MTM DDを改善したが、これは研究用の候補であり、Production、VPS、LIVE、HP、operator artifact には反映していない。
+Production / VPS / LIVE / HP / operator artifact / Aster実口座は変更していない。実注文・取消・建玉変更も0件である。
 
-Production変更件数は **0**、実注文・取消・建玉変更は **0**。
+今回の修正後結果は、過去の `-12.9980%` / `-14.0069%` という旧研究値を正式値として維持しない。旧値は、固定Accepted台帳へ重ねた複合Overlayと、単位が混在したPF集計を含むため、修正後の正規化結果とは別物である。
 
-### 最重要結果
+今回確定した最良の固定台帳研究シナリオは、次の2 Overlayである。
 
-- 固定Baselineの10bps / 30bpsは、最終資産、PF、取引数、修正済みH1 MTM DD、Accountingの全項目で再現した。
-- 50候補の再検証結果は **ACCEPTED 3件、DD_IMPROVED_RESEARCH_ONLY 2件、REJECTED 45件**。
-- 最良の累積研究候補は "V12_SHORT_COMPOSITE_PCT2P0_12H_MFE1P0_STRUCTURE3_R12"。
-- この候補を累積統合した研究結果は、10bpsでDD -15.6206% → -12.9980%、30bpsで -16.7878% → -14.0069%。
-- ただし候補は、既存8ロジックの受入済み台帳へ研究用Overlayを重ねた RESEARCH_ONLY_NONCANONICAL であり、Production契約・実取引所ライフサイクル認証・LIVE採用を意味しない。
+1. `V12_SHORT_PCT2P0_12H_MFE1P0_R12`
+2. `V12_SHORT_COMPOSITE_ATR1P5_6H_MFE0P5_STRUCTURE3_R12`
 
-## 2. 固定条件と再現性
+ただし、これは既存Accepted台帳を固定した `FIXED_ACCEPTED_LEDGER_LIFECYCLE_OVERLAY` であり、STOP後の未採用Candidate再選定、動的Lot再計算、全候補の因果的再Admissionを行う完全動的BTではない。動的再Replayは未実装として明示的に保留している。
+
+## 2. 固定条件
 
 | 項目 | 条件 |
 | --- | --- |
-| 期間 | 2025-08-10 ～ 2026-08-10 |
+| 期間 | 2025-08-10〜2026-08-10 |
 | 初期資金 | ¥10,000 |
 | 積立 | なし |
 | 複利 | あり |
-| エンジン | H1 price-model replay |
+| 構成 | 2026-10-17固定8ロジック統合 |
+| 価格モデル | H1 price-model replay、初期逆行判定は保存済み5分足 |
 | コスト | 10bps / 30bps |
-| 基準Commit | 60c7793bf25f1e82059c25e9c4d840b8dbade9f7 |
-| Replay契約 | FIXED_ACCEPTED_LEDGER_LIFECYCLE_OVERLAY |
-| 実運用認証 | なし。研究結果としてのみ扱う |
+| 研究ブランチ | `codex/task9-engine-audit-dd-research-20261020` |
+| 研究契約 | `FIXED_ACCEPTED_LEDGER_LIFECYCLE_OVERLAY` |
+| Production変更 | 0 |
 
-固定台帳は、候補を再選別・再昇格するのではなく、既にAcceptedとなっているBaseline trade ledgerへ時系列Overlayを適用した。BaselineでRejectedだった候補を、Overlayによって新たに発注済みとして扱っていない。
+このBTは実Aster約定認証ではない。Historical L2約定、実STOP約定、実部分約定を証明するものではない。
 
-## 3. Baseline parity
+## 3. PnL単位修正とBaseline再現
 
-### 10bps
+Canonical行の `total_pnl_jpy` は、フィールド名に反して決済通貨単位（この台帳ではUSD）の値だった。修正後は以下を分離した。
 
-| 指標 | 固定基準 | 修正後再現 | 判定 |
-| --- | ---: | ---: | --- |
-| Final equity | ¥222,818,966.88 | ¥222,818,966.8780 | PASS |
-| PF | 3.458796 | 3.4587962777 | PASS |
-| Maximum MTM DD | -15.6206% | -15.6206368129% | PASS |
-| Closed trades | 1,310 | 1,310 | PASS |
-| Accounting | PASS | PASS | PASS |
+- `total_pnl_settlement`: 原台帳の決済通貨建てPnL
+- `modeled_realized_pnl_jpy_at_exit_fx`: Exit時FXで円換算したPnL
+- `total_pnl_jpy`: 修正後は明示的なJPY値
+- `pnl_unit`: `JPY`
+- `settlement_pnl_unit`: `SETTLEMENT`
 
-### 30bps
+従来PFは旧Settlement単位で再現し、研究上の主PFはJPY単位で再計算した。数値を旧PFへ合わせる補正は行っていない。
 
-| 指標 | 固定基準 | 修正後再現 | 判定 |
-| --- | ---: | ---: | --- |
-| Final equity | ¥124,289,206.82 | ¥124,289,206.8183 | PASS |
-| PF | 3.078560 | 3.0785603082 | PASS |
-| Maximum MTM DD | -16.7878% | -16.7877687749% | PASS |
-| Closed trades | 1,307 | 1,307 | PASS |
-| Accounting | PASS | PASS | PASS |
+| 指標 | 10bps | 30bps |
+| --- | ---: | ---: |
+| Final equity | ¥222,818,966.8780 | ¥124,289,206.8183 |
+| 旧Settlement PF | 3.4587962777 | 3.0785603082 |
+| 修正後JPY PF | 3.4624474030 | 3.0820985073 |
+| Maximum MTM DD | -15.6206368% | -16.7877688% |
+| Closed trades | 1,310 | 1,307 |
+| Accounting | PASS | PASS |
+| Final / trades / DD | PASS | PASS |
+| 旧Settlement PF parity | PASS | PASS |
 
-修正済みMTMは凍結H1バーの各時刻のOpenを使用し、BaselineのCanonical Engine DDと一致した。Baseline parityは数値合わせではなく、Ledger、Event、Accounting、MTM scheduleの一致として確認した。
+独立Accounting突合も実施した。イベントCashflowを再合計したWalletとイベント記録Walletの差は、10bpsで `2.33e-10` Settlement、30bpsで `0`、未知イベント0件、イベントWallet mismatch 0件だった。
 
-## 4. P0監査・修正結果
+## 4. P0監査・修正
 
 ### P0-1 元勝敗判定
 
-候補・約定済み行を分離し、損益を WIN / LOSS / FLAT / UNSETTLED に分類した。損益フィールド欠落をLOSSとして扱わず、未確定として分離した。STOP発動時には元Position ID、元Exit、元確定損益、元Outcome、実STOP後損益を保存する。
+修正済み。明示的JPY PnLを優先し、決済通貨のlegacyフィールドをそのまま勝敗へ使用しない。PnL欠落は `UNSETTLED` とし、LOSSへ暗黙変換しない。STOP監査には元Position ID、元Exit、元PnL、元Outcome、STOP後PnL、差額を保存した。
 
-### P0-2 Cooldown
+### P0-2 Cooldownの時間逆転
 
-Cooldownの根拠をAccepted Positionの実際のExitへ限定した。Gross不足、優先順位、Preemptionで未採用となったCandidateはCooldownを発生させない。AuditにはEntry時刻、Origin Exit時刻、再Entry可能時刻、STOPからの経過時間、拒否理由を保存する。
+修正済み。Cooldown候補は `stop_ts <= entry_ts` のSTOPだけに限定し、未来のSTOPで過去Entryを拒否しない。履歴キーにOverlay IDも含め、別OverlayのSTOPが相互にCooldownを作らないようにした。未採用Candidate、Gross不足、優先順位拒否はCooldown源にならない。
 
-Cooldown 0hでも28件の拒否が残ったが、その多くはSTOP後の保留時間ではなく、Baseline台帳における同一銘柄・方向の既存占有と重なる履歴であり、elapsed_hours_from_stop < 0 だった。STOP件数とCooldown件数は同一概念として集計していない。
+回帰テストで次を確認した。
 
-### P0-3 STOPと再配分
+- 未来STOPは過去Entryを拒否しない
+- STOP以前の実STOPだけがHoldoffを作る
+- 未約定CandidateはCooldown源にならない
+- same-directionの再EntryだけがHoldoff対象になる
 
-Accepted ledgerを時系列イベントへ展開し、STOP後の資金・Gross解放、後続Entry、既存建玉、同時刻のExit/Entry、二重Exitを同一Replayで処理した。未約定行へのSTOPは生成していない。AccountingはBaseline・候補ともPASS。
+### P0-3 STOPと資金再配分
 
-### P0-4 価格補正・構造判定
+固定Accepted台帳内では、STOPをLifecycleイベントへ展開し、STOP後の資金解放、既存建玉、部分Exit、二重Exit、後続Entry、MTMを再計算した。AccountingはPASS。
 
-apply_initial_stop と structure_confirmed の価格基準を統一し、補正後のEntry価格を構造判定にも渡すよう修正した。H1 MTMは固定Open、補助的5分足診断はCloseを使用し、未確定足・未来バーを参照しない。Stock系H1不足は保存済み5分足を診断用H1 fallbackとして使用し、対象と制限をManifestへ明記した。
+ただし、STOPで空いた枠へBaseline拒否Candidateを昇格する動的再Admissionは未実装である。したがって、固定台帳結果を完全なProduction-equivalent統合BTとは扱わない。
 
-### P0-5 Exit理由
+### P0-4 価格補正と構造判定
 
-予定Exitと実Exitを分離した。元Exit予定時刻・理由、実STOP時刻・理由、元想定PnL、STOP後PnL、差額、Position ID、Candidate ID、約定価格、コストをLedger/Auditへ保存した。
+修正済み。STOP判定と構造判定へ同じ補正後Entry価格を渡す。確定5分足だけを使い、未確定足・未来バーを参照しない。H1 MTMはCanonical定義に合わせてH1 Openを使用する。
+
+Stock系 `AMZNUSDT / METAUSDT / MSFTUSDT / NVDAUSDT / TSLAUSDT` は凍結H1原本が不足するため、診断用に保存済み5分足からH1 fallbackを使用した。これは実venue証拠ではなく、制約としてManifestへ記録した。
+
+### P0-5 Exit理由とPnL
+
+予定Exitと実Exitを分離した。追加STOPで閉じた場合は `exit_reason_actual`、元Exitは `planned_exit_reason` として保持し、Stop後価格・コスト・PnL差分を別記録した。
 
 ### P0-6 OOS
 
-OOSは実際のExit時刻で時系列ソートし、OOS境界を跨ぐTrade、既知PnL、未確定、Net PnL、PF、勝率、累積損益DDを分離集計した。BaselineとCandidateで同一境界を使用し、Candidate選択と最終認証を同じOOSへ繰り返し適用していない。
+OOSは実際のExit時刻順に並べ、境界を跨ぐTrade、既知PnL、未確定、PF、実現PnL、累積損益DDを分離した。なお、固定台帳候補の選定とOOS評価が完全独立した最終Holdoutではないため、OOS PASSはProduction認証ではない。
 
-### P0-7 正確なMTM DD
+### P0-7 MTM DD
 
-全H1評価時刻に、Wallet + Open Positionの未実現損益を再構成した。Peak、Trough、Recovery、Open Position、Gross、同時建玉、上位5つの独立DD Windowを保存した。ウォレット残高だけの近似を正式MTM DDとして使用していない。
+H1各評価時刻でWallet + Open Positionの未実現損益を復元した。Peak、Trough、Recovery、Open Position、Gross、同時建玉、上位DD Windowを保存している。Walletだけの実現損益DDを正式MTM DDとして扱っていない。
 
 ### P0-8 損失経路
 
-Positive-to-Negative、+1%以上からNegative、+3%以上からNegative、+5%以上からNegative、最終Loss / 最終Win、損益分岐点の複数回通過、MFEからExitまでのGiveback、初期逆行、3本連続初期逆行を分離して算出した。
+以下を別集計した。
 
-Baseline 10bps全体では、Positive-to-Negative 1,045件、+1%からNegative 470件、+3%からNegative 113件、+5%からNegative 30件、最終Loss after positive 296件だった。これらを同じ「利益から損失へ転落」とは扱っていない。
+- Positive→Negative
+- +1%→Negative
+- +3%→Negative
+- +5%→Negative
+- 最終Loss after positive
+- 最終Win after positive
+- Breakeven複数回通過
+- MFE / MAE / Giveback
+- 初期足逆行、3本連続初期逆行
 
-## 5. 50候補の再検証
+10bpsのBaseline診断では、Positive→Negative 1,045件、+1%→Negative 470件、+3%→Negative 113件、+5%→Negative 30件、最終Loss after positive 296件だった。これらを同一概念として扱っていない。
+
+## 5. 50候補の修正後再検証
 
 | 判定 | 件数 |
 | --- | ---: |
@@ -102,155 +122,105 @@ Baseline 10bps全体では、Positive-to-Negative 1,045件、+1%からNegative 4
 | DD_IMPROVED_RESEARCH_ONLY | 2 |
 | REJECTED | 45 |
 
-ACCEPTED:
+ACCEPTED候補は次の3件。
 
-1. V12_SHORT_PCT2P0_12H_MFE1P0_R12
-2. V12_SHORT_COMPOSITE_PCT2P0_12H_MFE1P0_STRUCTURE3_R12
-3. V12_SHORT_COMPOSITE_ATR1P5_6H_MFE0P5_STRUCTURE3_R12
+1. `V12_SHORT_PCT2P0_12H_MFE1P0_R12`
+2. `V12_SHORT_PCT2P0_6H_MFE0P5_R6`
+3. `V12_SHORT_COMPOSITE_ATR1P5_6H_MFE0P5_STRUCTURE3_R12`
 
-DD_IMPROVED_RESEARCH_ONLY:
+`V12_SHORT_COMPOSITE_PCT2P0_12H_MFE1P0_STRUCTURE3_R12` は、既に同じ単純Overlayが存在するため修正後の追加DD改善が0となり、累積採用対象ではない。
 
-1. V12_SHORT_PCT1P5_6H_MFE0P5_R12
-2. V12_SHORT_ATR1P5_6H_MFE0P5_R12
+DD_IMPROVED_RESEARCH_ONLYは次の2件。
 
-Phase別の累積採用:
+- `V12_SHORT_PCT1P5_6H_MFE0P5_R12`
+- `V12_SHORT_ATR1P5_6H_MFE0P5_R12`
 
-- V12 LONG: なし
-- V12 SHORT: V12_SHORT_PCT2P0_12H_MFE1P0_R12
-- Q102: なし
-- Idle: なし
-- FET: なし
-- HYPE: なし
-- V52: なし
-- V12 SHORT composite: V12_SHORT_COMPOSITE_PCT2P0_12H_MFE1P0_STRUCTURE3_R12
-- その他のComposite phase: なし
+## 6. 修正後の累積固定台帳結果
 
-## 6. 最良累積研究候補
+| 指標 | Baseline 10bps | 2 Overlay 10bps | 差分 | Baseline 30bps | 2 Overlay 30bps | 差分 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Final equity | ¥222,818,966.88 | ¥207,774,666.51 | -¥15,044,300.37 | ¥124,289,206.82 | ¥112,830,123.14 | -¥11,459,083.68 |
+| JPY PF | 3.462447 | 3.196193 | -0.266254 | 3.082099 | 2.760093 | -0.322005 |
+| Maximum MTM DD | -15.6206% | -14.5080% | +1.1126pt | -16.7878% | -15.9648% | +0.8229pt |
+| Win rate | 72.3664% | 69.1888% | -3.1776pt | 69.5486% | 66.6145% | -2.9341pt |
+| Closed trades | 1,310 | 1,282 | -28 | 1,307 | 1,279 | -28 |
+| OOS PF | 3.593058 | 3.276189 | -0.316869 | 3.214635 | 2.824939 | -0.389696 |
+| Accounting | PASS | PASS | - | PASS | PASS | - |
 
-最良累積構成は、次の2つをPhase順に適用したものとして保存されている。
+この結果はDDを約1.11pt / 0.82pt改善するが、最終資産とPFを削る。したがって研究上は `DD_IMPROVED_RESEARCH_ONLY` として扱い、Production Baselineへ自動反映しない。
 
-- V12_SHORT_PCT2P0_12H_MFE1P0_R12
-- V12_SHORT_COMPOSITE_PCT2P0_12H_MFE1P0_STRUCTURE3_R12
-
-この累積結果は、同じV12 SHORT領域へ複数の研究Overlayを重ねた研究シナリオである。Productionへそのまま移植してよいという意味ではない。単一候補単独の採否と累積Phaseの結果を混同しないこと。
-
-### 10bps
-
-| 指標 | Baseline | 最良累積候補 | 差分 |
-| --- | ---: | ---: | ---: |
-| Final equity | ¥222,818,966.88 | ¥230,257,745.09 | +¥7,438,778.22 |
-| PF | 3.458796 | 3.832445 | +0.373649 |
-| Maximum MTM DD | -15.6206% | -12.9980% | +2.6227pt |
-| Win rate | 72.3664% | 73.8702% | +1.5038pt |
-| Closed trades | 1,310 | 1,217 | -93 |
-| OOS PF | 3.58949 | 4.046825 | +0.457334 |
-| OOS net PnL | ¥1,121,832.56 | ¥1,164,269.19 | +¥42,436.63 |
-| OOS判定 | - | PASS | - |
-
-### 30bps
-
-| 指標 | Baseline | 最良累積候補 | 差分 |
-| --- | ---: | ---: | ---: |
-| Final equity | ¥124,289,206.82 | ¥128,761,458.14 | +¥4,472,251.32 |
-| PF | 3.078560 | 3.378958 | +0.300398 |
-| Maximum MTM DD | -16.7878% | -14.0069% | +2.7809pt |
-| Win rate | 69.5486% | 71.3932% | +1.8446pt |
-| Closed trades | 1,307 | 1,213 | -94 |
-| OOS PF | 3.211369 | 3.557997 | +0.346628 |
-| OOS net PnL | ¥661,219.76 | ¥685,811.66 | +¥24,591.90 |
-| OOS判定 | - | PASS | - |
-
-会計整合性は両コストでPASS。取引数減少は、未採用Candidateを後から補充した結果ではなく、Accepted Positionに対するSTOP・同一所有権・再Entry保留・Gross解放の結果である。
+旧報告の `-12.9980%` / `-14.0069%` は、修正後の単位統一・重複Overlay除外・再計算結果では再現されない。旧値を採用判断へ使用しない。
 
 ## 7. V12 SHORT深掘り
 
-固定STOP 2%、MFE 1%、Arm 12hを基準に、CooldownとArm時刻を分離した。
+修正後の `STOP 2% / arm 12h / MFE 1%` は、Cooldownを分離して比較した。
 
-| 条件 | 10bps DD | 10bps Final | 10bps Trades | 30bps DD | 30bps Final | 30bps Trades |
+| 条件 | 10bps DD | 10bps Final | 10bps STOP / Cooldown | 30bps DD | 30bps Final | 30bps STOP / Cooldown |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| STOP + Cooldown 0h | -14.2559% | ¥222,597,154 | 1,282 | -15.6320% | ¥123,458,836 | 1,279 |
-| STOP + Cooldown 3h | -14.8996% | ¥222,685,893 | 1,281 | -16.2492% | ¥123,503,481 | 1,278 |
-| STOP + Cooldown 6h | -14.4211% | ¥222,634,772 | 1,278 | -15.7938% | ¥123,478,802 | 1,275 |
-| STOP + Cooldown 12h | -14.6088% | ¥222,427,006 | 1,270 | -16.0079% | ¥123,634,847 | 1,267 |
-| STOP + Cooldown 24h | -14.7023% | ¥222,481,809 | 1,259 | -16.1046% | ¥123,668,863 | 1,255 |
+| Cooldown 0h | -15.4159% | ¥219,609,043 | 60 / 0 | -16.8642% | ¥121,862,955 | 60 / 0 |
+| Cooldown 3h | -15.3214% | ¥219,690,576 | 59 / 3 | -16.7413% | ¥121,903,321 | 59 / 3 |
+| Cooldown 6h | -14.8733% | ¥219,639,455 | 59 / 6 | -16.3178% | ¥121,878,642 | 59 / 6 |
+| Cooldown 12h | -15.0615% | ¥219,431,689 | 59 / 14 | -16.5327% | ¥122,034,687 | 59 / 14 |
+| Cooldown 24h | -15.1546% | ¥219,476,920 | 57 / 26 | -16.6292% | ¥122,063,326 | 57 / 26 |
 
-Arm時刻を0h～3hへ前倒ししたケースはDD・資産の両面で悪化した。単純な即時STOPは採用根拠にならない。3～6hの単純ATR候補も悪化し、V12 SHORTでは12hの初期情報蓄積とMFE条件が重要だった。
+Armを0h〜2hへ前倒ししたケースは10bps/30bpsともDDと資産が悪化した。単純な即時STOPは採用根拠にならない。
 
-単純な採用候補 V12_SHORT_PCT2P0_12H_MFE1P0_R12 では、10bpsでSTOP 53件、元Winner STOP 22件、元Loser STOP 31件、Cooldown reject 40件。30bpsではSTOP 54件、元Winner STOP 21件、元Loser STOP 33件、Cooldown reject 40件だった。
+## 8. P3/P5診断
 
-## 8. 損失経路・最大DD診断
+修正後Baselineの10bps診断では、最大Gross 5.07085x、最大同方向Gross 4.36907x、最大同時建玉13件、同一symbol/side含み損中追加102件、Preemption 123件だった。30bpsでは最大Gross 5.04479x、最大同方向Gross 4.64619x、含み損中追加99件、Preemption 125件だった。
 
-10bpsの全体診断:
+最大DDは10bpsで `2025-12-05 19:00 UTC` Peak〜`2025-12-10 23:00 UTC` Trough、30bpsで同じPeak〜`2025-12-10 23:00 UTC` Trough。回復時刻・上位5 Window・Open Position・Grossは `p0-p3-p5-diagnostics` に保存した。
 
-- max gross: 5.07085x
-- 最大同方向Gross: 4.36907x
-- 最大同時建玉数: 13
-- 同一Symbol/Sideの含み損中追加: 102件
-- Preemption: 123件
-- 初期逆行: 1,199件
-- 3本連続初期逆行: 375件
-- Positive-to-Negative: 1,045件
-- +1%からNegative: 470件
-- +3%からNegative: 113件
-- +5%からNegative: 30件
-- 最終Loss after positive: 296件
+## 9. 動的Replayの未解決条件
 
-30bpsの全体診断:
+今回の固定Replayは、早期STOPによる既存PositionのExit、資金解放、既存Accepted intentの後続イベント、MTMを検証できる。一方、次はまだ実装していない。
 
-- max gross: 5.04479x
-- 最大同方向Gross: 4.64619x
-- 最大同時建玉数: 13
-- 同一Symbol/Sideの含み損中追加: 99件
-- Preemption: 125件
+- STOPで空いたGrossへ、元Rejected Candidateを時系列再選定すること
+- 新しいWallet/Equityから後続Candidateの数量を再計算すること
+- Candidate順位・同時刻Tie-break・Shared Gross・Pending予約を全候補で再評価すること
+- 動的再配分後の新しい候補から再びSTOP/Cooldownを生成すること
+- 独立Holdoutで候補選定をせずに最終評価すること
 
-10bps最大DD:
+このため `DYNAMIC_REPLAY_STATUS.json` を追加し、`BLOCKED_DYNAMIC_RESELECTION_NOT_IMPLEMENTED` と明示した。ここを実装しない限り、固定OverlayのDD改善をProduction相当の統合BTとは呼ばない。
 
-- Peak: 2025-12-05 19:00 UTC
-- Trough: 2025-12-10 23:00 UTC
-- Recovery: 2025-12-13 19:00 UTC
-- DD: -15.6206368%
+### 動的Replayに必要な入力の実在性監査
 
-30bps最大DD:
+現時点で成果物として存在するcandidate入力は、`core-reference-candidates.jsonl.gz` の2,484行（V12 1,978、Q102 372、PENGU 113、FET 21、SHA256 `99b8d5d3...1591e69`）と、V52専用の `candidate-decisions.jsonl` 99行（採用88、事前割当除外11、SHA256 `5345f828...cc5e1bc`）である。前者には候補の状態はあるが、全候補の共有Allocatorによる拒否理由・予約状態はない。
 
-- Peak: 2025-12-05 19:00 UTC
-- Trough: 2025-12-10 23:00 UTC
-- Recovery: 2025-12-13 20:00 UTC
-- DD: -16.7877688%
+一方、基準1,310件にはRESIDUAL 29件、IDLE 71件、HYPE_LONG 34件、V52 87件が含まれるが、これら4系統の全候補イベント・拒否理由・pending reservationの一次台帳は今回の固定研究成果物内に存在しない。したがって、動的再Admissionを作るにはこの不足台帳が必要であり、既存のAccepted台帳や将来の損益から推測して補完することはしない。
 
-上位5つの独立DD Window、各時刻のOpen Position、Wallet/Unrealized、Gross、ロジック別損益は p0-p3-p5-diagnostics 配下の台帳へ保存した。
+## 10. テスト・再現性
 
-## 9. 研究上の判断
+- Python focused tests: **23/23 PASS**
+- AST parse: **PASS**
+- 全50候補修正後Replay: **完了 / exit code 0**
+- V12 SHORT focused 16ケース: **完了 / exit code 0**
+- P0/P3/P5 diagnostics 10bps/30bps: **完了 / exit code 0**
+- 独立Accounting reconciliation: **PASS**
+- Production変更: **0**
+- 実注文・取消・建玉変更: **0**
 
-単純な固定STOPを全ロジックへ広げるのは不適切だった。V12 SHORTの12h/MFE/構造条件は、10bps・30bps双方でDD改善とOOS PFを示したため、研究上の有望候補として残す。
+大容量台帳とMTMはGitへ複製せず、次へ保存した。
 
-一方、研究候補のAcceptanceはProduction採用の承認ではない。V12 V4/全Production Runnerの実装契約、実取引所でのSTOP設置・約定・再保護・再起動復元、部分約定、同時刻EXIT/ENTRY、rate budget、明示的Operator承認が別途必要である。
-
-このため、今回の成果だけで本番へ変更していない。ユーザー承認なしにProduction実装、VPS反映へ進めない。
-
-## 10. 成果物
-
-大容量の台帳・MTM timeline・候補別イベントは、Git管理対象へ複製せず、次の研究出力へ保存した。
-
-C:\Users\dis\Desktop\DisDex_AI_Files\01_BT_Research\2026-10-20_dd-reduction-initial-adverse-stop-audit\fixed-ledger-replay
+`C:\Users\dis\Desktop\DisDex_AI_Files\01_BT_Research\2026-10-20_dd-reduction-initial-adverse-stop-audit\fixed-ledger-replay`
 
 主な成果物:
 
-- task9-fixed-replay-summary.json
-- baseline-control-10bps.json
-- baseline-control-30bps.json
-- BASELINE/10bps/mtm/fixed-ledger-timeline.jsonl
-- BASELINE/30bps/mtm/fixed-ledger-timeline.jsonl
-- candidates/**/portfolio-trades.jsonl
-- candidates/**/portfolio-events.jsonl
-- candidates/**/mtm/fixed-ledger-timeline.jsonl
-- p0-p3-p5-diagnostics/**
-- focused-v12-short/v12-short-deep-summary.json
+- `task9-fixed-replay-summary.json`
+- `baseline-control-10bps.json`
+- `baseline-control-30bps.json`
+- `BASELINE/**/mtm/fixed-ledger-timeline.jsonl`
+- `candidates/**/portfolio-trades.jsonl`
+- `candidates/**/portfolio-events.jsonl`
+- `focused-v12-short/v12-short-deep-summary.json`
+- `p0-p3-p5-diagnostics/**`
 
-研究用リポジトリ内には、再実行コード、テスト、Manifest、最終報告のみを保存し、巨大な生成台帳をGitへ追加していない。
+## 11. 最終判断
 
-## 11. 制約・未解決
+今回のP0監査で、Cooldown未来参照、PnL単位混在、Accounting判定不足は修正・回帰検証できた。修正後の固定台帳研究では、V12 SHORTの12h/MFE条件にDD改善が残るが、利益とPFを削り、動的再配分も未実装である。
 
-- これはH1 price-model replayであり、実取引所の約定証明ではない。
-- Stock系の凍結H1ソース不足は、診断時のみ保存済み5分足からH1 fallbackを使用した。対象シンボルは AMZNUSDT / METAUSDT / MSFTUSDT / NVDAUSDT / TSLAUSDT。このfallbackは実venue証拠ではない。
-- 既存のroot-owned scripts/dd-reduction/__pycache__ は削除せず保全したため、py_compile のバイトコード書込みは権限エラーとなる。AST parse、Focused unittest、研究実行はPASSしている。権限のある保守担当が既存キャッシュを整理するまで、py_compileの完全PASSとは報告しない。
-- Production、VPS、LIVE、HP、operator artifact、実口座は変更していない。
+よって、現時点の正式判定は次のとおり。
+
+**RESEARCH_ONLY_NONCANONICAL / BLOCKED_DYNAMIC_RESELECTION_NOT_IMPLEMENTED**
+
+Production / VPS / LIVE / HP / operator artifactへ反映してはいけない。次の研究工程は、拒否Candidateを含む完全な因果Candidate event streamと、Shared Gross・Pending・動的Lotを持つ別Replayエンジンの実装である。

@@ -1,6 +1,8 @@
 import importlib.util
 import unittest
+from collections import Counter
 from pathlib import Path
+from unittest.mock import patch
 
 
 SCRIPT = Path(__file__).resolve().parent / "task9_initial_adverse_stop_20261020.py"
@@ -17,6 +19,15 @@ class Task9EngineAuditTests(unittest.TestCase):
         self.assertEqual(MODULE.classify_pnl({"total_pnl_jpy": 0})["status"], "FLAT")
         self.assertEqual(MODULE.classify_pnl({"total_pnl_jpy": 1.25})["status"], "WIN")
         self.assertEqual(MODULE.classify_pnl({"total_pnl_jpy": -1.25})["status"], "LOSS")
+
+    def test_explicit_jpy_pnl_wins_over_legacy_settlement_named_field(self):
+        result = MODULE.classify_pnl({
+            "total_pnl_jpy": -1.0,
+            "modeled_realized_pnl_jpy_at_exit_fx": 150.0,
+        })
+        self.assertEqual(result["status"], "WIN")
+        self.assertEqual(result["value"], 150.0)
+        self.assertEqual(result["source"], "modeled_realized_pnl_jpy_at_exit_fx")
 
     def test_exit_audit_preserves_original_exit_and_pnl(self):
         original = {
@@ -78,6 +89,123 @@ class Task9EngineAuditTests(unittest.TestCase):
         self.assertEqual(result["crossing_trades"], 1)
         self.assertEqual(result["net_pnl_jpy"], -1.0)
 
+    def test_future_stop_cannot_reject_an_earlier_entry(self):
+        rows = [
+            {
+                "position_id": 1,
+                "candidate_id": "C1",
+                "accepted": True,
+                "entry_ts_ms": 100,
+                "exit_ts_ms": 1000,
+                "strategy_id": "V12",
+                "symbol": "BTCUSDT",
+                "side": "SHORT",
+                "entry_price": 100.0,
+            },
+            {
+                "position_id": 2,
+                "candidate_id": "C2",
+                "accepted": True,
+                "entry_ts_ms": 200,
+                "exit_ts_ms": 1100,
+                "strategy_id": "V12",
+                "symbol": "BTCUSDT",
+                "side": "SHORT",
+                "entry_price": 100.0,
+            },
+        ]
+        overlay = {
+            "id": "TEST",
+            "strategy": "V12",
+            "sides": ["SHORT"],
+            "reentry_hours": 0,
+        }
+        observations = {
+            "eligible": 0,
+            "triggered": 0,
+            "original_winner_triggered": 0,
+            "original_loser_triggered": 0,
+            "original_unsettled_triggered": 0,
+            "reentry_rejected": 0,
+            "unfilled_skipped": 0,
+            "stop_decisions": [],
+            "cooldown_decisions": [],
+            "data_gap": 0,
+            "entry_mismatch": 0,
+            "atr_unavailable": 0,
+            "internal_gap": 0,
+            "structure_unconfirmed": 0,
+            "invalid_input": 0,
+            "by_reason": Counter(),
+        }
+
+        def fake_stop(row, *_args, **_kwargs):
+            return dict(row, exit_ts_ms=300) if row["position_id"] == 1 else row
+
+        with patch.object(MODULE, "_apply_initial_stop", side_effect=fake_stop):
+            output = MODULE._transform_rows(rows, [overlay], object(), 10, observations)
+
+        self.assertEqual([row["position_id"] for row in output], [1, 2])
+        self.assertEqual(observations["reentry_rejected"], 0)
+
+    def test_cooldown_uses_only_a_stop_at_or_before_entry(self):
+        rows = [
+            {
+                "position_id": 1,
+                "candidate_id": "C1",
+                "accepted": True,
+                "entry_ts_ms": 100,
+                "exit_ts_ms": 1000,
+                "strategy_id": "V12",
+                "symbol": "BTCUSDT",
+                "side": "SHORT",
+                "entry_price": 100.0,
+            },
+            {
+                "position_id": 2,
+                "candidate_id": "C2",
+                "accepted": True,
+                "entry_ts_ms": 400,
+                "exit_ts_ms": 1100,
+                "strategy_id": "V12",
+                "symbol": "BTCUSDT",
+                "side": "SHORT",
+                "entry_price": 100.0,
+            },
+        ]
+        overlay = {
+            "id": "TEST",
+            "strategy": "V12",
+            "sides": ["SHORT"],
+            "reentry_hours": 1,
+        }
+        observations = {
+            "eligible": 0,
+            "triggered": 0,
+            "original_winner_triggered": 0,
+            "original_loser_triggered": 0,
+            "original_unsettled_triggered": 0,
+            "reentry_rejected": 0,
+            "unfilled_skipped": 0,
+            "stop_decisions": [],
+            "cooldown_decisions": [],
+            "data_gap": 0,
+            "entry_mismatch": 0,
+            "atr_unavailable": 0,
+            "internal_gap": 0,
+            "structure_unconfirmed": 0,
+            "invalid_input": 0,
+            "by_reason": Counter(),
+        }
+
+        def fake_stop(row, *_args, **_kwargs):
+            return dict(row, exit_ts_ms=300) if row["position_id"] == 1 else row
+
+        with patch.object(MODULE, "_apply_initial_stop", side_effect=fake_stop):
+            output = MODULE._transform_rows(rows, [overlay], object(), 10, observations)
+
+        self.assertEqual([row["position_id"] for row in output], [1])
+        self.assertEqual(observations["reentry_rejected"], 1)
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

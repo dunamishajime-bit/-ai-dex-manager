@@ -1,0 +1,67 @@
+{
+  "status": "BLOCKED_DYNAMIC_RESELECTION_NOT_IMPLEMENTED",
+  "classification": "RESEARCH_ONLY_NONCANONICAL",
+  "reason": "The corrected Task 9 replay is a fixed accepted-ledger lifecycle overlay. It does not re-admit baseline-rejected candidates after an early STOP, recompute candidate ranking from the released Gross, or resize later entries from the changed dynamic equity.",
+  "fixed_replay": {
+    "accepted_baseline_positions_are_immutable": true,
+    "rejected_candidates_promoted": false,
+    "stop_lifecycle_replayed": true,
+    "cash_and_gross_release_replayed_for_retained_positions": true,
+    "independent_accounting_reconciliation": true,
+    "mtm_schedule": "H1"
+  },
+  "source_coverage_audit": {
+    "core_reference_candidates": {
+      "rows": 2484,
+      "modeled_closed_trade_rows": 2479,
+      "blocked_rows": 5,
+      "strategies": {
+        "V12": 1978,
+        "Q102": 372,
+        "PENGU": 113,
+        "FET": 21
+      },
+      "sha256": "99b8d5d304916e298496b82d67f1135fb47880144028a7bdf5deab7161591e69"
+    },
+    "candidate_decisions": {
+      "rows": 99,
+      "accepted_modeled_entry_rows": 88,
+      "excluded_preallocation_rows": 11,
+      "coverage": "V52_ONLY",
+      "sha256": "5345f8288076a4e30f2d37b6981ab4fab03d5104b193949f1652eb640cc5e1bc"
+    },
+    "accepted_baseline_ledger": {
+      "rows": 1310,
+      "strategy_trade_counts": {
+        "V12": 832,
+        "RESIDUAL": 29,
+        "Q102": 182,
+        "PENGU": 67,
+        "IDLE": 71,
+        "V52": 87,
+        "HYPE_LONG": 34,
+        "FET": 8
+      },
+      "source_has_allocation_rejections": false
+    },
+    "missing_for_dynamic_replay": [
+      "full candidate event stream for RESIDUAL",
+      "full candidate event stream for IDLE",
+      "full candidate event stream for HYPE_LONG",
+      "full candidate event stream for V52 beyond its 99-row decision file",
+      "per-timestamp rejection reason and deterministic allocator state for all strategies",
+      "rejected candidate entry sizing and pending reservation state"
+    ]
+  },
+  "required_for_dynamic_replay": [
+    "causal candidate event stream including rejected candidates",
+    "deterministic rank and tie-break replay at each timestamp",
+    "dynamic wallet/equity based quantity sizing",
+    "shared Gross and pending reservation re-admission after STOP",
+    "same-symbol ownership and cooldown state in the allocator",
+    "partial/unknown execution policy and accounting ledger",
+    "independent OOS and final holdout split"
+  ],
+  "production_changes": 0,
+  "live_claim": false
+}
