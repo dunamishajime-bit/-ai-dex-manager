@@ -527,19 +527,28 @@ test("malformed victim, reservation, ownership, and execution gross fail closed 
         assert.equal(result.reason, "DATA_MISSING");
         assert.equal(result.state_hash_before, result.state_hash_after);
     }
-    for (const field of ["filled_gross", "ownership_gross"] as const) {
-        const malformedState = field === "filled_gross"
-            ? { ...state, reservations: state.reservations.map((reservation) => ({ ...reservation, filled_gross: Number.NaN })) }
-            : { ...state, ownership: state.ownership.map((ownership) => ({ ...ownership, gross: 0 })) };
-        const result = releasePreemptionGross(malformedState, position, {
+    for (const value of [Number.NaN, Number.POSITIVE_INFINITY, -1]) {
+        const malformedReservation = { ...state, reservations: state.reservations.map((reservation) => ({ ...reservation, filled_gross: value })) };
+        const malformedReservationResult = releasePreemptionGross(malformedReservation, position, {
             exit_ts_ms: TS + 10,
             status: "FILLED",
             confirmed: true,
             filled_gross: 100,
         });
-        assert.equal(result.applied, false);
-        assert.equal(result.reason, "DATA_MISSING");
-        assert.equal(result.state_hash_before, result.state_hash_after);
+        assert.equal(malformedReservationResult.applied, false);
+        assert.equal(malformedReservationResult.reason, "DATA_MISSING");
+        assert.equal(malformedReservationResult.state_hash_before, malformedReservationResult.state_hash_after);
+
+        const malformedOwnership = { ...state, ownership: state.ownership.map((ownership) => ({ ...ownership, gross: value })) };
+        const malformedOwnershipResult = releasePreemptionGross(malformedOwnership, position, {
+            exit_ts_ms: TS + 10,
+            status: "FILLED",
+            confirmed: true,
+            filled_gross: 100,
+        });
+        assert.equal(malformedOwnershipResult.applied, false);
+        assert.equal(malformedOwnershipResult.reason, "DATA_MISSING");
+        assert.equal(malformedOwnershipResult.state_hash_before, malformedOwnershipResult.state_hash_after);
     }
     const malformedExecution = releasePreemptionGross(state, position, {
         exit_ts_ms: TS + 10,
@@ -550,4 +559,68 @@ test("malformed victim, reservation, ownership, and execution gross fail closed 
     assert.equal(malformedExecution.applied, false);
     assert.equal(malformedExecution.reason, "DATA_MISSING");
     assert.equal(malformedExecution.state_hash_before, malformedExecution.state_hash_after);
+});
+
+test("rejects malformed allocator aggregate scalars before normalization or release", () => {
+    const { state, position } = openVictim();
+    const scalarFields = ["total_gross", "crypto_gross", "pending_gross", "reserved_gross", "available_margin"] as const;
+    for (const field of scalarFields) {
+        for (const value of [Number.NaN, Number.POSITIVE_INFINITY, -1]) {
+            const malformedState = { ...state, [field]: value };
+            const result = releasePreemptionGross(malformedState, position, {
+                exit_ts_ms: TS + 10,
+                status: "FILLED",
+                confirmed: true,
+                filled_gross: 100,
+            });
+            assert.equal(result.applied, false, `${field}=${String(value)}`);
+            assert.equal(result.reason, "DATA_MISSING", `${field}=${String(value)}`);
+            assert.equal(result.state_hash_before, result.state_hash_after, `${field}=${String(value)}`);
+            assert.equal(result.released_gross, 0, `${field}=${String(value)}`);
+        }
+    }
+});
+
+test("rejects inconsistent gross maps and related pending/reserved maps before release", () => {
+    const { state, position } = openVictim();
+    const malformedStates = [
+        { ...state, gross_by_strategy: { V12: Number.NaN } },
+        { ...state, gross_by_strategy: { V12: Number.POSITIVE_INFINITY } },
+        { ...state, gross_by_strategy: { V12: -1 } },
+        { ...state, gross_by_symbol: { BTCUSDT: 99 } },
+        { ...state, pending_gross_by_strategy: { V12: 1 } },
+        { ...state, pending_gross_by_symbol: { BTCUSDT: 1 } },
+        { ...state, reserved_gross_by_strategy: { V12: Number.NaN } },
+        { ...state, reserved_gross_by_symbol: { BTCUSDT: Number.POSITIVE_INFINITY } },
+        { ...state, ownership_by_symbol: { BTCUSDT: [] } },
+        { ...state, reservation_ids: [] },
+    ];
+    for (const malformedState of malformedStates) {
+        const result = releasePreemptionGross(malformedState, position, {
+            exit_ts_ms: TS + 10,
+            status: "FILLED",
+            confirmed: true,
+            filled_gross: 100,
+        });
+        assert.equal(result.applied, false);
+        assert.equal(result.reason, "DATA_MISSING");
+        assert.equal(result.state_hash_before, result.state_hash_after);
+        assert.equal(result.released_gross, 0);
+    }
+});
+
+test("accepts valid zero pending/reserved values in a normal filled victim release", () => {
+    const { state, position } = openVictim();
+    assert.equal(state.pending_gross, 0);
+    assert.equal(state.reserved_gross, 0);
+    assert.equal(state.pending_gross_by_strategy.V12, undefined);
+    assert.equal(state.reserved_gross_by_symbol.BTCUSDT, undefined);
+    const result = releasePreemptionGross(state, position, {
+        exit_ts_ms: TS + 10,
+        status: "FILLED",
+        confirmed: true,
+        filled_gross: 100,
+    });
+    assert.equal(result.applied, true);
+    assert.equal(result.released_gross, 100);
 });

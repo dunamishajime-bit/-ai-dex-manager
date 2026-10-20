@@ -249,6 +249,123 @@ function victimIdentityReason(state: DynamicAllocatorState, victim: DynamicPreem
     return null;
 }
 
+function amountEqual(left: number, right: number): boolean {
+    const tolerance = 1e-9 * Math.max(1, Math.abs(left), Math.abs(right));
+    return Math.abs(left - right) <= tolerance;
+}
+
+function nonNegativeFinite(value: unknown): value is number {
+    return finite(value) && value >= 0;
+}
+
+function recordValuesAreNonNegativeFinite(value: unknown): value is Readonly<Record<string, number>> {
+    if (value === null || typeof value !== "object" || Array.isArray(value)) return false;
+    return Object.values(value as Record<string, unknown>).every((item) => nonNegativeFinite(item));
+}
+
+function mapMatches(actual: Readonly<Record<string, number>>, expected: Readonly<Record<string, number>>): boolean {
+    const keys = new Set([...Object.keys(actual), ...Object.keys(expected)]);
+    for (const key of keys) {
+        if (!amountEqual(actual[key] ?? 0, expected[key] ?? 0)) return false;
+    }
+    return true;
+}
+
+function allocatorStateIntegrityReason(input: unknown): PreemptionReason | null {
+    if (input === null || typeof input !== "object") return "DATA_MISSING";
+    const state = input as Partial<DynamicAllocatorState>;
+    const scalarFields = ["wallet_jpy", "equity_jpy", "available_margin", "total_gross", "crypto_gross", "pending_gross", "reserved_gross"] as const;
+    if (scalarFields.some((field) => !nonNegativeFinite(state[field]))) return "DATA_MISSING";
+    const mapFields = [
+        "gross_by_strategy",
+        "gross_by_symbol",
+        "pending_gross_by_strategy",
+        "pending_gross_by_symbol",
+        "reserved_gross_by_strategy",
+        "reserved_gross_by_symbol",
+    ] as const;
+    for (const field of mapFields) {
+        if (!recordValuesAreNonNegativeFinite(state[field])) return "DATA_MISSING";
+    }
+    if (!Array.isArray(state.reservations) || !Array.isArray(state.reservation_ids) || !Array.isArray(state.ownership) || state.ownership_by_symbol === null || typeof state.ownership_by_symbol !== "object" || Array.isArray(state.ownership_by_symbol)) return "DATA_MISSING";
+
+    const reservations = state.reservations;
+    const reservationIds = reservations.map((reservation) => reservation?.reservation_id);
+    if (reservationIds.some((id) => typeof id !== "string" || id.length === 0) || new Set(reservationIds).size !== reservationIds.length) return "DATA_MISSING";
+    if (state.reservation_ids.length !== reservationIds.length || state.reservation_ids.some((id, index) => id !== reservationIds[index])) return "DATA_MISSING";
+    const reservationById = new Map(reservations.map((reservation) => [reservation.reservation_id, reservation]));
+    const expectedGrossByStrategy: Record<string, number> = {};
+    const expectedGrossBySymbol: Record<string, number> = {};
+    const expectedPendingByStrategy: Record<string, number> = {};
+    const expectedPendingBySymbol: Record<string, number> = {};
+    const expectedReservedByStrategy: Record<string, number> = {};
+    const expectedReservedBySymbol: Record<string, number> = {};
+    let expectedTotalGross = 0;
+    let expectedCryptoGross = 0;
+    let expectedPendingGross = 0;
+    let expectedReservedGross = 0;
+    for (const reservation of reservations) {
+        if (reservation === null || typeof reservation !== "object") return "DATA_MISSING";
+        if (![reservation.requested_gross, reservation.reserved_gross, reservation.pending_gross, reservation.filled_gross].every(nonNegativeFinite) || !finite(reservation.quantity) || reservation.quantity <= 0 || !finite(reservation.entry_price) || reservation.entry_price <= 0 || !finite(reservation.priority) || !finite(reservation.created_ts_ms) || !finite(reservation.expires_ts_ms)) return "DATA_MISSING";
+        if (reservation.requested_gross <= 0 || reservation.reserved_gross > reservation.requested_gross || reservation.pending_gross > reservation.requested_gross || reservation.filled_gross > reservation.requested_gross) return "DATA_MISSING";
+        if (reservation.asset_class !== "CRYPTO" && reservation.asset_class !== "NON_CRYPTO") return "DATA_MISSING";
+        if (reservation.status === "PENDING") {
+            if (!amountEqual(reservation.pending_gross, reservation.requested_gross) || !amountEqual(reservation.reserved_gross, reservation.requested_gross) || reservation.filled_gross !== 0 || reservation.fill_ts_ms !== null) return "DATA_MISSING";
+        } else if (reservation.status === "FILLED" || reservation.status === "PROTECTED") {
+            if (!amountEqual(reservation.filled_gross, reservation.requested_gross) || reservation.pending_gross !== 0 || reservation.reserved_gross !== 0 || !finite(reservation.fill_ts_ms)) return "DATA_MISSING";
+        } else if (reservation.status === "RELEASED" || reservation.status === "EXPIRED") {
+            if (reservation.pending_gross !== 0 || reservation.reserved_gross !== 0 || reservation.filled_gross !== 0) return "DATA_MISSING";
+        } else {
+            return "DATA_MISSING";
+        }
+        const active = reservation.status !== "RELEASED" && reservation.status !== "EXPIRED";
+        if (!active) continue;
+        expectedTotalGross += reservation.filled_gross;
+        expectedPendingGross += reservation.pending_gross;
+        expectedReservedGross += reservation.reserved_gross;
+        if (reservation.asset_class === "CRYPTO") expectedCryptoGross += reservation.filled_gross;
+        expectedGrossByStrategy[reservation.strategy_id] = (expectedGrossByStrategy[reservation.strategy_id] ?? 0) + reservation.filled_gross;
+        expectedGrossBySymbol[reservation.symbol] = (expectedGrossBySymbol[reservation.symbol] ?? 0) + reservation.filled_gross;
+        expectedPendingByStrategy[reservation.strategy_id] = (expectedPendingByStrategy[reservation.strategy_id] ?? 0) + reservation.pending_gross;
+        expectedPendingBySymbol[reservation.symbol] = (expectedPendingBySymbol[reservation.symbol] ?? 0) + reservation.pending_gross;
+        expectedReservedByStrategy[reservation.strategy_id] = (expectedReservedByStrategy[reservation.strategy_id] ?? 0) + reservation.reserved_gross;
+        expectedReservedBySymbol[reservation.symbol] = (expectedReservedBySymbol[reservation.symbol] ?? 0) + reservation.reserved_gross;
+    }
+    const ownershipByReservation = new Map<string, DynamicAllocatorState["ownership"][number]>();
+    for (const ownership of state.ownership) {
+        if (ownership === null || typeof ownership !== "object" || typeof ownership.reservation_id !== "string" || !nonNegativeFinite(ownership.gross)) return "DATA_MISSING";
+        if (ownershipByReservation.has(ownership.reservation_id)) return "DATA_MISSING";
+        ownershipByReservation.set(ownership.reservation_id, ownership);
+        const reservation = reservationById.get(ownership.reservation_id);
+        if (reservation === undefined || ownership.candidate_id !== reservation.candidate_id || ownership.strategy_id !== reservation.strategy_id || ownership.symbol !== reservation.symbol || ownership.side !== reservation.side) return "DATA_MISSING";
+        if (ownership.status === "RELEASED") {
+            if (ownership.gross !== 0 || reservation.status !== "RELEASED" && reservation.status !== "EXPIRED") return "DATA_MISSING";
+        } else if (ownership.status === "RESERVED") {
+            if (reservation.status !== "PENDING" || !amountEqual(ownership.gross, reservation.pending_gross)) return "DATA_MISSING";
+        } else if (ownership.status === "OPEN") {
+            if ((reservation.status !== "FILLED" && reservation.status !== "PROTECTED") || !amountEqual(ownership.gross, reservation.filled_gross)) return "DATA_MISSING";
+        } else {
+            return "DATA_MISSING";
+        }
+    }
+    for (const reservation of reservations) {
+        const ownership = ownershipByReservation.get(reservation.reservation_id);
+        if (ownership === undefined) return "DATA_MISSING";
+    }
+    const expectedOwnershipBySymbol: Record<string, string[]> = {};
+    for (const ownership of state.ownership) {
+        if (ownership.status === "RELEASED") continue;
+        const ids = expectedOwnershipBySymbol[ownership.symbol] ?? [];
+        ids.push(ownership.reservation_id);
+        expectedOwnershipBySymbol[ownership.symbol] = ids.sort();
+    }
+    if (!Object.entries(state.ownership_by_symbol).every(([symbol, ids]) => Array.isArray(ids) && ids.every((id) => typeof id === "string")) || !Object.entries(expectedOwnershipBySymbol).every(([symbol, ids]) => JSON.stringify(state.ownership_by_symbol?.[symbol] ?? []) === JSON.stringify(ids)) || !Object.keys(state.ownership_by_symbol).every((symbol) => JSON.stringify(state.ownership_by_symbol?.[symbol] ?? []) === JSON.stringify(expectedOwnershipBySymbol[symbol] ?? []))) return "DATA_MISSING";
+    if (!amountEqual(state.total_gross!, expectedTotalGross) || !amountEqual(state.crypto_gross!, expectedCryptoGross) || !amountEqual(state.pending_gross!, expectedPendingGross) || !amountEqual(state.reserved_gross!, expectedReservedGross)) return "DATA_MISSING";
+    if (!mapMatches(state.gross_by_strategy!, expectedGrossByStrategy) || !mapMatches(state.gross_by_symbol!, expectedGrossBySymbol) || !mapMatches(state.pending_gross_by_strategy!, expectedPendingByStrategy) || !mapMatches(state.pending_gross_by_symbol!, expectedPendingBySymbol) || !mapMatches(state.reserved_gross_by_strategy!, expectedReservedByStrategy) || !mapMatches(state.reserved_gross_by_symbol!, expectedReservedBySymbol)) return "DATA_MISSING";
+    if (state.available_margin! < state.pending_gross!) return "DATA_MISSING";
+    return null;
+}
+
 function orderingFor(input: Pick<PreemptionEligibilityInput, "ordering_evidence" | "ordering_events" | "same_timestamp_order_unverifiable">): OrderingEvidence {
     if (input.ordering_events !== undefined) return classifyOrderingEvidence(input.ordering_events).ordering;
     if (input.ordering_evidence !== undefined) return input.ordering_evidence;
@@ -384,7 +501,9 @@ export function releasePreemptionGross(
     victim: DynamicPreemptionPosition,
     exit: ReleasePreemptionInput,
 ): PreemptionReleaseResult {
+    const rawIntegrityReason = allocatorStateIntegrityReason(state);
     const before = createInitialAllocatorState(state);
+    if (rawIntegrityReason !== null) return releaseResult(before, before, false, rawIntegrityReason, 0, "RELEASE_REJECTED");
     const reservation = before.reservations.find((item) => item.reservation_id === victim.reservation_id);
     if (reservation === undefined) return releaseResult(before, before, false, "DATA_MISSING", 0, "RELEASE_REJECTED");
     if (reservation.status === "RELEASED" || reservation.status === "EXPIRED") return releaseResult(before, before, false, "DUPLICATE_RELEASE", 0, "RELEASE_REJECTED");
