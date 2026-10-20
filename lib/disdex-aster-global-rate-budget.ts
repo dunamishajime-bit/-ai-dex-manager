@@ -202,7 +202,9 @@ async function readBudget(path: string): Promise<Partial<BudgetState>> {
   }
 }
 async function atomicWriteBudget(path: string, state: BudgetState) {
-  const temporary = `${path}.${process.pid}.${Date.now()}.tmp`;
+  // A process may schedule multiple budget writes within the same millisecond. Give
+  // each publication its own inode to prevent a shared temporary file race.
+  const temporary = `${path}.${process.pid}.${Date.now()}.${randomUUID()}.tmp`;
   try {
     await writeFile(temporary, `${JSON.stringify(state, null, 2)}\n`, { encoding: "utf8", mode: 0o660 });
     // Root-owned diagnostics/recovery helpers must never steal the shared
