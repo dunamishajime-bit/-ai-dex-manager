@@ -1,0 +1,42 @@
+{
+  "task": "task-4",
+  "status": "OBSERVATION_ONLY",
+  "formal_parity": "UNSUPPORTED",
+  "formal_parity_eligible": false,
+  "code_commit": "ec86f3b658fe790dbf4c8f865a173d2849f655dd",
+  "observations": [
+    {
+      "cost_bps": 10,
+      "expected_count": 123,
+      "observed_count": 123,
+      "classification": "OBSERVATION_ONLY",
+      "source_path": "docs/research/results/dd-reduction-initial-adverse-stop-audit-20261020/TASK9_ENGINE_AUDIT_FINAL_REPORT_JA.md",
+      "source_sha256": "e80a11de44815c82a9bd6eb917e6346ec5172e9a2c6a0627f48c3a7ce75a57a5",
+      "provenance": {
+        "manifest_path": "docs/research/results/dd-reduction-initial-adverse-stop-audit-20261020/manifest.json",
+        "manifest_sha256": "591c14589b9997e19bbb70ed568fdb5aaa21e6d90c418102a0adba6b6431bdef",
+        "verified": true
+      }
+    },
+    {
+      "cost_bps": 30,
+      "expected_count": 125,
+      "observed_count": 125,
+      "classification": "OBSERVATION_ONLY",
+      "source_path": "docs/research/results/dd-reduction-initial-adverse-stop-audit-20261020/TASK9_ENGINE_AUDIT_FINAL_REPORT_JA.md",
+      "source_sha256": "e80a11de44815c82a9bd6eb917e6346ec5172e9a2c6a0627f48c3a7ce75a57a5",
+      "provenance": {
+        "manifest_path": "docs/research/results/dd-reduction-initial-adverse-stop-audit-20261020/manifest.json",
+        "manifest_sha256": "591c14589b9997e19bbb70ed568fdb5aaa21e6d90c418102a0adba6b6431bdef",
+        "verified": true
+      }
+    }
+  ],
+  "tdd": {
+    "focused_tests": "22 passed, 0 failed",
+    "full_dd_suite": "13 files passed, 0 failed, 0 skipped, 0 todo",
+    "typescript": "passed",
+    "eslint": "passed",
+    "git_diff_check": "clean"
+  }
+}
