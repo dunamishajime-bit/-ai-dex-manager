@@ -624,3 +624,40 @@ test("accepts valid zero pending/reserved values in a normal filled victim relea
     assert.equal(result.applied, true);
     assert.equal(result.released_gross, 100);
 });
+
+test("applyPreemption rejects raw malformed allocator state before release or incoming re-admission", () => {
+    const { state, position } = openVictim();
+    const apply = (malformedState: typeof state) => applyPreemption({
+        state: malformedState,
+        incoming_candidate: candidate(),
+        victim_position: position,
+        mode: "WHOLE",
+        exit: { status: "FILLED", confirmed: true, filled_gross: 100, exit_ts_ms: TS + 10 },
+        policy: policy(),
+        ordering_events: [
+            { timestamp: TS + 10, kind: "PREEMPTION_EXIT", event_seq: 1, candidate_id: "victim-1" },
+            { timestamp: TS + 10, kind: "ENTRY", event_seq: 2, candidate_id: "incoming-1" },
+        ],
+    });
+    const malformedStates = [
+        { ...state, wallet_jpy: Number.NaN },
+        { ...state, equity_jpy: Number.POSITIVE_INFINITY },
+        { ...state, available_margin: -1 },
+        { ...state, pending_gross: Number.NaN },
+        { ...state, reserved_gross: Number.POSITIVE_INFINITY },
+        { ...state, gross_by_strategy: { V12: -1 } },
+        { ...state, gross_by_symbol: { BTCUSDT: Number.NaN } },
+        { ...state, reservations: state.reservations.map((reservation) => ({ ...reservation, filled_gross: Number.POSITIVE_INFINITY })) },
+        { ...state, ownership: state.ownership.map((ownership) => ({ ...ownership, gross: -1 })) },
+    ];
+    for (const malformedState of malformedStates) {
+        const result = apply(malformedState);
+        assert.equal(result.applied, false);
+        assert.equal(result.reason, "DATA_MISSING");
+        assert.equal(result.victim_release_applied, false);
+        assert.equal(result.gross_release, null);
+        assert.equal(result.incoming_admission, null);
+        assert.equal(result.state_hash_before, result.state_hash_after);
+        assert.deepEqual(result.state_after, result.state_before);
+    }
+});

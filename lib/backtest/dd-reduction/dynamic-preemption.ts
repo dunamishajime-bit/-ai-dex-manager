@@ -551,6 +551,8 @@ function rejectedApply(state: DynamicAllocatorState, reason: PreemptionReason | 
 
 /** Applies the causal whole-victim lifecycle; partial/unknown exits remain fail-closed. */
 export function applyPreemption(input: ApplyPreemptionInput): ApplyPreemptionResult {
+    const rawIntegrityReason = allocatorStateIntegrityReason(input.state);
+    if (rawIntegrityReason !== null) return rejectedApply(createInitialAllocatorState(input.state), rawIntegrityReason, orderingFor(input));
     const before = createInitialAllocatorState(input.state);
     const orderingEvidence = orderingFor(input);
     const existing = before.reservations.find((reservation) => reservation.reservation_id === input.victim_position.reservation_id);
