@@ -1,0 +1,111 @@
+{
+  "manifest_version": "TASK9_ENGINE_AUDIT_V6",
+  "status": "RESEARCH_ONLY_NONCANONICAL",
+  "production_changes": 0,
+  "branch_base": "codex/task9-engine-audit-dd-research-20261020",
+  "base_commit": "60c7793bf25f1e82059c25e9c4d840b8dbade9f7",
+  "period": {
+    "start": "2025-08-10",
+    "end": "2026-08-10",
+    "timezone": "UTC"
+  },
+  "capital": {
+    "initial_jpy": 10000,
+    "deposits": 0,
+    "compounding": true
+  },
+  "replay_contract": "FIXED_ACCEPTED_LEDGER_LIFECYCLE_OVERLAY",
+  "engine_audit_version": "TASK9_P0_ENGINE_AUDIT_V6_FIXED_LEDGER_H1_PARITY_COOLDOWN_TS",
+  "cost_bps": [10, 30],
+  "baseline": {
+    "10bps": {
+      "final_equity_jpy": 222818966.8780348,
+      "profit_factor": 3.4587962777009813,
+      "maximum_mtm_drawdown_pct": -15.620636812889444,
+      "closed_trades": 1310,
+      "accounting": "PASS",
+      "mtm": "COMPLETE_CORRECTED_H1_MTM"
+    },
+    "30bps": {
+      "final_equity_jpy": 124289206.8182794,
+      "profit_factor": 3.0785603081685435,
+      "maximum_mtm_drawdown_pct": -16.78776877493444,
+      "closed_trades": 1307,
+      "accounting": "PASS",
+      "mtm": "COMPLETE_CORRECTED_H1_MTM"
+    }
+  },
+  "candidate_classification": {
+    "total": 50,
+    "accepted": 3,
+    "dd_improved_research_only": 2,
+    "rejected": 45
+  },
+  "accepted_candidate_ids": [
+    "V12_SHORT_PCT2P0_12H_MFE1P0_R12",
+    "V12_SHORT_COMPOSITE_PCT2P0_12H_MFE1P0_STRUCTURE3_R12",
+    "V12_SHORT_COMPOSITE_ATR1P5_6H_MFE0P5_STRUCTURE3_R12"
+  ],
+  "dd_improved_research_only_ids": [
+    "V12_SHORT_PCT1P5_6H_MFE0P5_R12",
+    "V12_SHORT_ATR1P5_6H_MFE0P5_R12"
+  ],
+  "best_cumulative_candidate": {
+    "ids": [
+      "V12_SHORT_PCT2P0_12H_MFE1P0_R12",
+      "V12_SHORT_COMPOSITE_PCT2P0_12H_MFE1P0_STRUCTURE3_R12"
+    ],
+    "10bps": {
+      "final_equity_jpy": 230257745.0934433,
+      "profit_factor": 3.832445164947548,
+      "maximum_mtm_drawdown_pct": -12.99795459328209,
+      "dd_improvement_pp": 2.622682219607354,
+      "closed_trades": 1217,
+      "win_rate": 0.7387017255546425,
+      "oos_pf": 4.04682480998844,
+      "oos_net_pnl_jpy": 1164269.1891026183,
+      "oos_pass": true,
+      "accounting": "PASS"
+    },
+    "30bps": {
+      "final_equity_jpy": 128761458.13576792,
+      "profit_factor": 3.3789581539577638,
+      "maximum_mtm_drawdown_pct": -14.006881178502507,
+      "dd_improvement_pp": 2.780887596431933,
+      "closed_trades": 1213,
+      "win_rate": 0.7139323990107173,
+      "oos_pf": 3.557997146056311,
+      "oos_net_pnl_jpy": 685811.6644217666,
+      "oos_pass": true,
+      "accounting": "PASS"
+    }
+  },
+  "source_sha256": {
+    "task9_audit_script": "57f021920aeebfde39bd7d616e9ecbf124898f5ece3df730a1cbd76bb8457636",
+    "fixed_replay_script": "3e12d2d638be1f530f4345afe1773411e9061e50696e6b3a739459f5e1386411",
+    "v12_short_deep_script": "7bd77f26f477f5b470cd8ce25b4dadbcedf4a510bb11beb7c42864c402322d63",
+    "p0_p3_p5_diagnostics_script": "0b96317bb1a61724591112781c864ca6a1dee7df8d84100be8eb05cfde5908aa",
+    "engine_audit_test": "daf8e8186a6eb0cab55c8f3547460b330b410dc304ab0b2ed6a3c75b6922d1eb",
+    "fixed_replay_test": "f4614dc52520a646ff63014c9786b87ea48eb6113f3cca9b0c7b53b193bf6d0c",
+    "canonical_ledger_10bps": "6c7a2f6d73336109af852c233bfdcb9013cbe73ac06f83070b39b73306d20e78",
+    "canonical_events_10bps": "4020ef8181944999d59abc161444299061f225f4cde56e7b47745e00314a4166",
+    "canonical_ledger_30bps": "9cb346e7c4e341bd277de8b60256dd6e8efe9b7f266b54bc52ed5ccff0112e05",
+    "canonical_events_30bps": "b859f95983cbcc4587dcc83ae15f4ff330d545cc32596b2f30fe7611ac06c0e7"
+  },
+  "outputs": {
+    "external_research_root": "C:\\Users\\dis\\Desktop\\DisDex_AI_Files\\01_BT_Research\\2026-10-20_dd-reduction-initial-adverse-stop-audit\\fixed-ledger-replay",
+    "summary": "task9-fixed-replay-summary.json",
+    "baseline_control_10bps": "baseline-control-10bps.json",
+    "baseline_control_30bps": "baseline-control-30bps.json",
+    "diagnostics_root": "p0-p3-p5-diagnostics",
+    "focused_v12_short": "focused-v12-short/v12-short-deep-summary.json"
+  },
+  "verification": {
+    "baseline_parity": "PASS",
+    "accounting": "PASS",
+    "oos": "PASS_FOR_BEST_CUMULATIVE_SCENARIO",
+    "production_changed": false,
+    "live_claim": false,
+    "external_venue_certification": false
+  }
+}

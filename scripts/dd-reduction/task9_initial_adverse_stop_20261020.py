@@ -24,7 +24,7 @@ from pathlib import Path
 FROZEN_ROOT = Path(r"C:/Users/dis/DisDex-five-improvements-20261008")
 OUTPUT = Path(
     r"C:/Users/dis/Desktop/DisDex_AI_Files/01_BT_Research/"
-    r"2026-10-20_dd-reduction-initial-adverse-stop"
+    r"2026-10-20_dd-reduction-initial-adverse-stop-audit"
 )
 BOOTSTRAP_REDIRECT = OUTPUT / "_legacy-bootstrap-cache"
 
@@ -34,6 +34,7 @@ OOS_BOUNDARY = PERIOD_START + int((PERIOD_END - PERIOD_START) * 0.70)
 M5 = 300_000
 HOUR = 3_600_000
 HORIZONS_HOURS = (1, 2, 3, 4, 6, 12, 24)
+ENGINE_AUDIT_VERSION = "TASK9_P0_ENGINE_AUDIT_V6_FIXED_LEDGER_H1_PARITY_COOLDOWN_TS"
 
 BASELINE_EXPECTED = {
     10: {
@@ -54,10 +55,13 @@ _path_write_text = Path.write_text
 
 
 def _redirect_legacy_write_text(self: Path, data, *args, **kwargs):
-    raw = str(self)
-    frozen = str(FROZEN_ROOT)
+    # Legacy modules mix Windows backslashes and POSIX separators even on
+    # Windows.  Normalize only for the prefix comparison; retain the relative
+    # path components and redirect writes into the research cache.
+    raw = str(self).replace("\\", "/")
+    frozen = str(FROZEN_ROOT).replace("\\", "/").rstrip("/")
     if raw.lower().startswith(frozen.lower()):
-        relative = Path(raw[len(frozen):].lstrip("\\/"))
+        relative = Path(raw[len(frozen):].lstrip("/"))
         target = BOOTSTRAP_REDIRECT / relative
         target.parent.mkdir(parents=True, exist_ok=True)
         return _path_write_text(target, data, *args, **kwargs)
@@ -66,8 +70,9 @@ def _redirect_legacy_write_text(self: Path, data, *args, **kwargs):
 
 def _ensure_research_output_parent_write_text(self: Path, data, *args, **kwargs):
     """Create parents for files emitted by the frozen research adapter only."""
-    output_prefix = str(OUTPUT).lower()
-    if str(self).lower().startswith(output_prefix):
+    output_prefix = str(OUTPUT).replace("\\", "/").lower().rstrip("/")
+    current = str(self).replace("\\", "/").lower()
+    if current.startswith(output_prefix):
         self.parent.mkdir(parents=True, exist_ok=True)
     return _path_write_text(self, data, *args, **kwargs)
 
@@ -94,6 +99,112 @@ def directional_return(entry: float, price: float, side: str) -> float:
     """Return price movement in the position's favorable direction."""
     sign = 1.0 if side == "LONG" else -1.0
     return sign * (price / entry - 1.0)
+
+
+def _optional_finite(value) -> float | None:
+    """Return a finite number or None without treating missing data as zero."""
+    if value is None or value == "":
+        return None
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return None
+    return number if math.isfinite(number) else None
+
+
+def classify_pnl(row: dict) -> dict[str, object]:
+    """Classify a closed-trade PnL without converting missing data to a loss.
+
+    ``total_pnl_jpy`` is preferred.  The modeled exit-FX field is an explicit
+    fallback used by older ledgers.  If neither field is present, the result is
+    UNSETTLED and must not enter win/loss/PF counts.
+    """
+    for field in ("total_pnl_jpy", "modeled_realized_pnl_jpy_at_exit_fx"):
+        value = _optional_finite(row.get(field))
+        if value is None:
+            continue
+        status = "WIN" if value > 0 else "LOSS" if value < 0 else "FLAT"
+        return {"status": status, "value": value, "source": field}
+    return {"status": "UNSETTLED", "value": None, "source": None}
+
+
+def _position_key(row: dict) -> str:
+    value = row.get("position_id")
+    if value is None:
+        value = row.get("candidate_id")
+    return str(value) if value is not None else ""
+
+
+def is_filled_accepted_row(row: dict) -> bool:
+    """Identify an accepted/fill row eligible to own a STOP or Cooldown.
+
+    Candidate decision rows that were rejected or never filled are not
+    positions and therefore cannot create a STOP, release, or re-entry hold.
+    """
+    if row.get("accepted") is False:
+        return False
+    position_id = row.get("position_id", row.get("candidate_id"))
+    entry_ts = _optional_finite(row.get("entry_ts_ms"))
+    if position_id is None or entry_ts is None:
+        return False
+    decision = row.get("decision")
+    if decision is not None:
+        normalized = str(decision).upper()
+        if any(token in normalized for token in ("REJECT", "BLOCK", "SKIP", "NO_FILL", "UNFILLED")):
+            return False
+        if normalized not in {"ACCEPTED_MODELED_ENTRY", "ACCEPTED", "FILLED", "EXECUTED"}:
+            # Unknown decision labels are not enough to establish a fill, but
+            # the canonical trade ledger normally omits this field entirely.
+            return False
+    if row.get("accepted") is True:
+        return True
+    # The canonical portfolio-trades ledger is an execution ledger, not a
+    # candidate-decision ledger.  It has no accepted/decision field; the
+    # lifecycle fields are the fill evidence in that schema.
+    required = ("exit_ts_ms", "entry_price", "exit_price")
+    has_quantity = row.get("quantity") is not None or row.get("original_quantity") is not None
+    return all(row.get(field) is not None for field in required) and has_quantity
+
+
+def build_exit_audit(original: dict, actual: dict, overlay_id: str) -> dict:
+    """Keep original planned lifecycle and actual overlay lifecycle separate."""
+    original_outcome = classify_pnl(original)
+    actual_outcome = classify_pnl(actual)
+    original_reason = (
+        original.get("planned_exit_reason")
+        or original.get("exit_reason_actual")
+        or original.get("exit_reason")
+        or "UNRESOLVED"
+    )
+    actual_reason = (
+        actual.get("exit_reason_actual")
+        or actual.get("exit_reason")
+        or "UNRESOLVED"
+    )
+    original_pnl = original_outcome["value"]
+    actual_pnl = actual_outcome["value"]
+    return {
+        "overlay_id": overlay_id,
+        "position_id": original.get("position_id"),
+        "candidate_id": original.get("candidate_id"),
+        "strategy_id": original.get("strategy_id"),
+        "symbol": original.get("symbol"),
+        "side": original.get("side"),
+        "original_exit_ts_ms": original.get("planned_exit_ts_ms", original.get("exit_ts_ms")),
+        "original_exit_price": original.get("planned_exit_price", original.get("exit_price")),
+        "original_exit_reason": original_reason,
+        "original_pnl_jpy": original_pnl,
+        "original_pnl_source": original_outcome["source"],
+        "original_outcome": original_outcome["status"],
+        "actual_exit_ts_ms": actual.get("exit_ts_ms"),
+        "actual_exit_price": actual.get("exit_price"),
+        "actual_exit_reason": actual_reason,
+        "actual_pnl_jpy": actual_pnl,
+        "actual_pnl_source": actual_outcome["source"],
+        "actual_outcome": actual_outcome["status"],
+        "pnl_delta_jpy": (actual_pnl - original_pnl)
+        if actual_pnl is not None and original_pnl is not None else None,
+    }
 
 
 def directional_excursion(entry: float, high: float, low: float, side: str) -> dict[str, float]:
@@ -128,7 +239,8 @@ def reentry_allowed(last_stop_ts: int, entry_ts: int, holdoff_hours: float,
 
 def structure_confirmed(bars: list[tuple], index: int, entry: float,
                         side: str, window: int = 3,
-                        min_adverse_closes: int | None = None) -> bool:
+                        min_adverse_closes: int | None = None,
+                        price_scale: float = 1.0) -> bool:
     """Check only completed bars strictly before ``index``.
 
     This causal, direction-symmetric filter is used only by composite
@@ -136,9 +248,12 @@ def structure_confirmed(bars: list[tuple], index: int, entry: float,
     entry and enough of them to continue in that direction. The current bar
     is never used to decide whether the structure gate is true.
     """
-    if window <= 0 or index < window or entry <= 0:
+    if window <= 0 or index < window or entry <= 0 or not math.isfinite(price_scale) or price_scale <= 0:
         return False
-    closes = [float(bars[j][4]) for j in range(index - window, index)]
+    # The entry mismatch correction is part of the modeled execution price.
+    # Use the same corrected price basis here as the STOP path; comparing raw
+    # closes to a corrected entry can accept/reject the structure incorrectly.
+    closes = [float(bars[j][4]) * price_scale for j in range(index - window, index)]
     if len(closes) != window:
         return False
     required = min_adverse_closes if min_adverse_closes is not None else window
@@ -171,15 +286,16 @@ def _event_path(out_root: Path, policy_name: str, cost_bps: int) -> Path:
 
 
 def _profit_factor(rows: list[dict]) -> float | None:
-    wins = sum(float(row.get("total_pnl_jpy", 0.0)) for row in rows if float(row.get("total_pnl_jpy", 0.0)) > 0)
-    losses = abs(sum(float(row.get("total_pnl_jpy", 0.0)) for row in rows if float(row.get("total_pnl_jpy", 0.0)) < 0))
+    values = [classify_pnl(row)["value"] for row in rows]
+    wins = sum(value for value in values if isinstance(value, (int, float)) and value > 0)
+    losses = abs(sum(value for value in values if isinstance(value, (int, float)) and value < 0))
     return wins / losses if losses else None
 
 
 def _max_loss_streak(rows: list[dict]) -> int:
     best = current = 0
     for row in sorted(rows, key=lambda item: int(item["exit_ts_ms"])):
-        if float(row.get("total_pnl_jpy", 0.0)) < 0:
+        if classify_pnl(row)["status"] == "LOSS":
             current += 1
             best = max(best, current)
         else:
@@ -187,9 +303,11 @@ def _max_loss_streak(rows: list[dict]) -> int:
     return best
 
 
-def _oos_metrics(rows: list[dict], cost_bps: int) -> dict:
-    selected = [row for row in rows if int(row["exit_ts_ms"]) >= OOS_BOUNDARY]
-    pnls = [float(row.get("total_pnl_jpy", 0.0)) for row in selected]
+def _oos_metrics(rows: list[dict], cost_bps: int, boundary: int = OOS_BOUNDARY) -> dict:
+    ordered = sorted(rows, key=lambda row: (int(row["exit_ts_ms"]), int(row.get("position_id", 0))))
+    selected = [row for row in ordered if int(row["exit_ts_ms"]) >= boundary]
+    classified = [classify_pnl(row) for row in selected]
+    pnls = [item["value"] for item in classified if isinstance(item["value"], (int, float))]
     wins = [value for value in pnls if value > 0]
     losses = [value for value in pnls if value < 0]
     equity = peak = max_dd = 0.0
@@ -198,8 +316,11 @@ def _oos_metrics(rows: list[dict], cost_bps: int) -> dict:
         peak = max(peak, equity)
         max_dd = min(max_dd, equity - peak)
     return {
-        "boundary_utc": datetime.fromtimestamp(OOS_BOUNDARY / 1000, timezone.utc).isoformat(),
-        "trades": len(pnls),
+        "boundary_utc": datetime.fromtimestamp(boundary / 1000, timezone.utc).isoformat(),
+        "trades": len(selected),
+        "known_pnl_trades": len(pnls),
+        "unsettled_trades": sum(item["status"] == "UNSETTLED" for item in classified),
+        "crossing_trades": sum(int(row["entry_ts_ms"]) < boundary <= int(row["exit_ts_ms"]) for row in selected),
         "net_pnl_jpy": sum(pnls),
         "profit_factor": sum(wins) / abs(sum(losses)) if losses else None,
         "win_rate": len(wins) / len(pnls) if pnls else None,
@@ -324,26 +445,34 @@ def build_loss_path_diagnostics(rows: list[dict], source, cost_bps: int) -> dict
         for key in ("__ALL__", side, strategy, f"{strategy}:{side}"):
             target = by_side.setdefault(key, {"trades": 0, "wins": 0, "losses": 0, "mfe": [], "mae": [], "profit_to_negative": 0, "never_1pct_mfe_loss": 0})
             target["trades"] += 1
-            pnl = float(row.get("total_pnl_jpy", 0.0))
-            target["wins" if pnl > 0 else "losses"] += 1
+            outcome = classify_pnl(row)
+            pnl = outcome["value"]
+            if outcome["status"] == "WIN":
+                target["wins"] += 1
+            elif outcome["status"] == "LOSS":
+                target["losses"] += 1
+            else:
+                target.setdefault("unsettled", 0)
+                target["unsettled"] += 1
             target["mfe"].append(path["mfe_pct"])
             target["mae"].append(path["mae_pct"])
             if path["crossed_profit_then_negative"]:
                 target["profit_to_negative"] += 1
-            if pnl < 0 and path["mfe_pct"] < 1.0:
+            if outcome["status"] == "LOSS" and path["mfe_pct"] < 1.0:
                 target["never_1pct_mfe_loss"] += 1
         for hours, value in path["horizons"].items():
             if value is None:
                 continue
             horizon_acc[f"{strategy}:{side}"][hours].append(value["mark_return_pct"])
-        pnl = float(row.get("total_pnl_jpy", 0.0))
+        outcome = classify_pnl(row)
+        pnl = outcome["value"]
         for threshold in (1.0, 2.0, 3.0, 5.0):
             if path["mae_pct"] <= -threshold:
-                threshold_counts[f"{strategy}:{side}"][f"wins_reached_adverse_{threshold:g}pct"] += int(pnl > 0)
-                threshold_counts[f"{strategy}:{side}"][f"losses_reached_adverse_{threshold:g}pct"] += int(pnl < 0)
+                threshold_counts[f"{strategy}:{side}"][f"wins_reached_adverse_{threshold:g}pct"] += int(outcome["status"] == "WIN")
+                threshold_counts[f"{strategy}:{side}"][f"losses_reached_adverse_{threshold:g}pct"] += int(outcome["status"] == "LOSS")
         if path["crossed_profit_then_negative"]:
             profit_to_negative += 1
-        if pnl < 0 and path["mfe_pct"] < 1.0:
+        if outcome["status"] == "LOSS" and path["mfe_pct"] < 1.0:
             no_1pct_mfe_losses += 1
         if path["first_negative_ts_ms"] is not None:
             first_negative_hours.append((path["first_negative_ts_ms"] - int(row["entry_ts_ms"])) / HOUR)
@@ -394,9 +523,12 @@ def loss_causes(rows: list[dict]) -> dict:
         side = str(row.get("side"))
         key = f"{strategy}:{side}:{reason}"
         item = result.setdefault(key, {"trades": 0, "losses": 0, "pnl_jpy": 0.0})
-        pnl = float(row.get("total_pnl_jpy", 0.0))
+        outcome = classify_pnl(row)
+        pnl = outcome["value"] if isinstance(outcome["value"], (int, float)) else 0.0
         item["trades"] += 1
-        item["losses"] += int(pnl < 0)
+        item["losses"] += int(outcome["status"] == "LOSS")
+        item.setdefault("unsettled", 0)
+        item["unsettled"] += int(outcome["status"] == "UNSETTLED")
         item["pnl_jpy"] += pnl
     return result
 
@@ -438,7 +570,9 @@ def realized_dd_window(rows: list[dict], events: list[dict]) -> dict:
         if start <= exit_ts <= end:
             key = f"{row.get('strategy_id')}:{row.get('side')}"
             contributors[key]["trades"] += 1
-            contributors[key]["pnl_jpy"] += float(row.get("total_pnl_jpy", 0.0))
+            pnl = classify_pnl(row)["value"]
+            if isinstance(pnl, (int, float)):
+                contributors[key]["pnl_jpy"] += pnl
     return {
         "status": "REALIZED_EVENT_DD_PROXY",
         "peak_ts_ms": start,
@@ -468,7 +602,8 @@ def _matches(row: dict, overlay: dict) -> bool:
     return not sides or row.get("side") in sides
 
 
-def _apply_initial_stop(row: dict, overlay: dict, source, cost_bps: int, obs: dict) -> dict:
+def _apply_initial_stop(row: dict, overlay: dict, source, cost_bps: int,
+                        obs: dict, original_row: dict | None = None) -> dict:
     if not _matches(row, overlay):
         return row
     entry = float(row["entry_price"])
@@ -520,7 +655,8 @@ def _apply_initial_stop(row: dict, overlay: dict, source, cost_bps: int, obs: di
             structure_window = int(overlay.get("structure_bars", 0) or 0)
             if structure_window and not structure_confirmed(
                 bars, index, entry, side, structure_window,
-                overlay.get("structure_min_adverse_closes")
+                overlay.get("structure_min_adverse_closes"),
+                price_scale=scale,
             ):
                 obs["structure_unconfirmed"] += 1
                 peak = max(peak, directional_excursion(entry, high, low, side)["favorable"])
@@ -532,24 +668,47 @@ def _apply_initial_stop(row: dict, overlay: dict, source, cost_bps: int, obs: di
             if exit_ts < original_exit and fill > 0:
                 obs["triggered"] += 1
                 obs["by_reason"]["INITIAL_ADVERSE_STOP"] += 1
-                original_pnl = float(row.get("total_pnl_jpy", 0.0))
-                obs["original_winner_triggered" if original_pnl > 0 else "original_loser_triggered"] += 1
-                return dict(
+                source_row = original_row or row
+                outcome = classify_pnl(source_row)
+                counter = {
+                    "WIN": "original_winner_triggered",
+                    "LOSS": "original_loser_triggered",
+                    "UNSETTLED": "original_unsettled_triggered",
+                }.get(outcome["status"])
+                if counter:
+                    obs[counter] += 1
+                actual = dict(
                     row,
                     exit_ts_ms=exit_ts,
                     exit_price=fill,
                     exit_reason=f"RESEARCH_INITIAL_ADVERSE_STOP_{overlay['id']}",
                     unit_price_return=sign * (fill / entry - 1.0),
                 )
+                # The transformed row still carries the original settlement
+                # fields until the integrated engine recalculates the exit.
+                # Mark the audit's actual side as UNSETTLED rather than
+                # accidentally reusing the original PnL.
+                actual_snapshot = dict(actual)
+                actual_snapshot.pop("total_pnl_jpy", None)
+                actual_snapshot.pop("modeled_realized_pnl_jpy_at_exit_fx", None)
+                obs["stop_decisions"].append(
+                    build_exit_audit(source_row, actual_snapshot, overlay["id"])
+                )
+                return actual
         peak = max(peak, directional_excursion(entry, high, low, side)["favorable"])
     return row
 
 
-def _transform_rows(rows: list[dict], overlays: list[dict], source, cost_bps: int, obs: dict) -> list[dict]:
+def _transform_rows(rows: list[dict], overlays: list[dict], source, cost_bps: int,
+                    obs: dict, baseline_lookup: dict[str, dict] | None = None) -> list[dict]:
     ordered = sorted(rows, key=lambda row: (int(row["entry_ts_ms"]), int(row.get("position_id", 0))))
     output = []
-    last_stop: dict[tuple[str, str, str], int] = {}
+    baseline_lookup = baseline_lookup or {}
+    last_stop: dict[tuple[str, str, str], dict] = {}
     for row in ordered:
+        if not is_filled_accepted_row(row):
+            obs["unfilled_skipped"] += 1
+            continue
         current = row
         blocked = False
         for overlay in overlays:
@@ -558,17 +717,41 @@ def _transform_rows(rows: list[dict], overlays: list[dict], source, cost_bps: in
             key = (str(current["strategy_id"]), str(current["symbol"]), str(current["side"]))
             prior_stop = last_stop.get(key)
             if prior_stop is not None and not reentry_allowed(
-                prior_stop, int(current["entry_ts_ms"]), float(overlay.get("reentry_hours", 0)),
-                str(current["side"]), str(current["side"])
+                int(prior_stop["ts_ms"]), int(current["entry_ts_ms"]),
+                float(overlay.get("reentry_hours", 0)),
+                str(prior_stop.get("side", current["side"])), str(current["side"])
             ):
                 obs["reentry_rejected"] += 1
                 obs["by_reason"]["REENTRY_HOLDOFF"] += 1
+                obs["cooldown_decisions"].append({
+                    "entry_position_id": current.get("position_id"),
+                    "entry_candidate_id": current.get("candidate_id"),
+                    "entry_ts_ms": current.get("entry_ts_ms"),
+                    "origin_position_id": prior_stop.get("position_id"),
+                    "origin_exit_ts_ms": prior_stop.get("ts_ms"),
+                    "reentry_until_ts_ms": int(prior_stop["ts_ms"] + float(overlay.get("reentry_hours", 0)) * HOUR),
+                    "elapsed_hours_from_stop": (
+                        int(current["entry_ts_ms"]) - int(prior_stop["ts_ms"])
+                    ) / HOUR,
+                    "reason": "REENTRY_HOLDOFF",
+                    "strategy_id": current.get("strategy_id"),
+                    "symbol": current.get("symbol"),
+                    "side": current.get("side"),
+                })
                 blocked = True
                 break
             before_exit = int(current["exit_ts_ms"])
-            current = _apply_initial_stop(current, overlay, source, cost_bps, obs)
+            current = _apply_initial_stop(
+                current, overlay, source, cost_bps, obs,
+                original_row=baseline_lookup.get(_position_key(current), current),
+            )
             if int(current["exit_ts_ms"]) < before_exit:
-                last_stop[key] = int(current["exit_ts_ms"])
+                last_stop[key] = {
+                    "ts_ms": int(current["exit_ts_ms"]),
+                    "position_id": current.get("position_id"),
+                    "candidate_id": current.get("candidate_id"),
+                    "side": current.get("side"),
+                }
         if not blocked:
             output.append(current)
     return output
@@ -640,7 +823,12 @@ ALL_PHASES = PHASES + COMPOSITE_PHASES
 
 
 def _phase_result(rows: list[dict], output: dict, plan: dict | None, cost_bps: int, obs: dict, oos: dict) -> dict:
-    losses = [float(row.get("total_pnl_jpy", 0.0)) for row in rows if float(row.get("total_pnl_jpy", 0.0)) < 0]
+    losses = [
+        float(outcome["value"])
+        for row in rows
+        for outcome in [classify_pnl(row)]
+        if outcome["status"] == "LOSS"
+    ]
     return {
         "candidate": plan["id"] if plan else "CUMULATIVE_BASELINE",
         "plan": plan,
@@ -662,7 +850,8 @@ def _phase_result(rows: list[dict], output: dict, plan: dict | None, cost_bps: i
 
 
 def _run_engine(policy_name: str, phase: str, overlays: list[dict], cost_bps: int,
-                source, helper, previous_factory) -> dict:
+                source, helper, previous_factory,
+                baseline_lookup: dict[str, dict] | None = None) -> dict:
     # Cost is part of the replay identity.  Keeping 10bps and 30bps in the
     # same result path would silently reuse the first completed run and could
     # make the second baseline look like a parity failure.
@@ -686,7 +875,9 @@ def _run_engine(policy_name: str, phase: str, overlays: list[dict], cost_bps: in
     run_root = engine_root / engine_policy_name / f"{cost_bps}bps"
     result_path = run_root / "result.json"
     if result_path.exists():
-        return json.loads(result_path.read_text("utf-8"))
+        cached = json.loads(result_path.read_text("utf-8"))
+        if cached.get("engine_audit_version") == ENGINE_AUDIT_VERSION:
+            return cached
     # The frozen virtual-leg adapter writes the candidate file directly and
     # assumes the legacy case directory already exists.  The old cached
     # phases masked that assumption; create it explicitly for new composite
@@ -699,7 +890,11 @@ def _run_engine(policy_name: str, phase: str, overlays: list[dict], cost_bps: in
         "triggered": 0,
         "original_winner_triggered": 0,
         "original_loser_triggered": 0,
+        "original_unsettled_triggered": 0,
         "reentry_rejected": 0,
+        "unfilled_skipped": 0,
+        "stop_decisions": [],
+        "cooldown_decisions": [],
         "data_gap": 0,
         "entry_mismatch": 0,
         "atr_unavailable": 0,
@@ -710,11 +905,33 @@ def _run_engine(policy_name: str, phase: str, overlays: list[dict], cost_bps: in
     }
 
     def factory(base_filter, policy, _ignored_obs):
-        existing = previous_factory(base_filter, policy, _ignored_obs)
+        def observed_base(candidates, case):
+            raw = base_filter(candidates, case)
+            obs["base_filter_rows"] = len(raw)
+            obs["base_filter_strategies"] = dict(
+                Counter(str(item.get("strategy_id")) for item in raw)
+            )
+            if raw:
+                sample = raw[0]
+                obs["base_filter_sample"] = {
+                    key: sample.get(key)
+                    for key in (
+                        "strategy_id", "symbol", "side", "position_id", "candidate_id",
+                        "accepted", "decision", "entry_ts_ms", "exit_ts_ms",
+                        "entry_price", "exit_price", "quantity", "original_quantity",
+                        "requested_gross", "accepted_gross",
+                    )
+                }
+            return raw
+
+        existing = previous_factory(observed_base, policy, _ignored_obs)
 
         def wrapped(candidates, case):
             rows = existing(candidates, case)
-            return _transform_rows(rows, overlays, source, cost_bps, obs)
+            return _transform_rows(
+                rows, overlays, source, cost_bps, obs,
+                baseline_lookup=baseline_lookup,
+            )
 
         return wrapped
 
@@ -745,6 +962,34 @@ def _run_engine(policy_name: str, phase: str, overlays: list[dict], cost_bps: in
     output = result["output"]
     row = _phase_result(rows, output, overlays[-1] if overlays else None,
                         cost_bps, obs, _oos_metrics(rows, cost_bps))
+    row["engine_audit_version"] = ENGINE_AUDIT_VERSION
+    row["stop_audit"] = obs["stop_decisions"]
+    row["cooldown_audit"] = obs["cooldown_decisions"]
+    row["original_unsettled_triggered"] = obs["original_unsettled_triggered"]
+    row["unfilled_skipped"] = obs["unfilled_skipped"]
+    # The base filter recalculates modeled settlement after it receives the
+    # transformed lifecycle.  Enrich the audit from that final ledger so the
+    # actual STOP outcome is not confused with the immutable original row.
+    final_by_position = {_position_key(item): item for item in rows}
+    for audit in row["stop_audit"]:
+        final = final_by_position.get(str(audit.get("position_id")))
+        if final is None:
+            continue
+        actual = classify_pnl(final)
+        audit.update({
+            "actual_exit_ts_ms": final.get("exit_ts_ms"),
+            "actual_exit_price": final.get("exit_price"),
+            "actual_exit_reason": final.get("exit_reason_actual") or final.get("exit_reason"),
+            "actual_pnl_jpy": actual["value"],
+            "actual_pnl_source": actual["source"],
+            "actual_outcome": actual["status"],
+            "pnl_delta_jpy": (
+                actual["value"] - audit["original_pnl_jpy"]
+                if isinstance(actual["value"], (int, float))
+                and isinstance(audit.get("original_pnl_jpy"), (int, float))
+                else None
+            ),
+        })
     row["engine_seconds"] = elapsed
     row["ledger"] = str(ledger)
     row["all_overlays"] = overlays
@@ -831,6 +1076,14 @@ def main() -> None:
         print("TASK9_BASELINE_CONTROL_PASS", cost, flush=True)
 
     baseline_rows = {cost: _load_rows(result) for cost, result in baseline_results.items()}
+    baseline_lookup = {
+        cost: {
+            _position_key(row): row
+            for row in rows
+            if _position_key(row)
+        }
+        for cost, rows in baseline_rows.items()
+    }
     symbols = {str(row["symbol"]) for rows in baseline_rows.values() for row in rows}
     diagnostics = {str(cost): build_loss_path_diagnostics(rows, source, cost) for cost, rows in baseline_rows.items()}
     dd_window = {}
@@ -853,7 +1106,8 @@ def main() -> None:
             for cost in (10, 30):
                 policy_name = f"{phase}__{candidate['id']}__{cost}"
                 candidate_results[cost] = _run_engine(
-                    policy_name, phase, overlay_set, cost, source, helper, previous_factory
+                    policy_name, phase, overlay_set, cost, source, helper,
+                    previous_factory, baseline_lookup=baseline_lookup[cost]
                 )
             checks = {
                 str(cost): _acceptance(candidate_results[cost], current_baseline[cost])
