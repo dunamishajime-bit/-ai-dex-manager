@@ -1,0 +1,5263 @@
+{
+  "status": "COMPLETE_RESEARCH_ONLY_NONCANONICAL",
+  "classification": "RESEARCH_ONLY_NONCANONICAL",
+  "baseline": {
+    "10": {
+      "final_equity_jpy": 222818966.87803495,
+      "profit_factor": 3.4587962777009813,
+      "maximum_mtm_drawdown_pct": -15.62063681288941,
+      "win_rate": 0.7236641221374046,
+      "closed_trades": 1310,
+      "accounting": "PASS"
+    },
+    "30": {
+      "final_equity_jpy": 124289206.81827945,
+      "profit_factor": 3.0785603081685435,
+      "maximum_mtm_drawdown_pct": -16.78776877493442,
+      "win_rate": 0.6954858454475898,
+      "closed_trades": 1307,
+      "accounting": "PASS"
+    }
+  },
+  "phase_order": [
+    "V12_LONG",
+    "V12_SHORT",
+    "Q102",
+    "IDLE",
+    "FET",
+    "HYPE",
+    "V52",
+    "V12_LONG_COMPOSITE",
+    "V12_SHORT_COMPOSITE",
+    "Q102_COMPOSITE",
+    "IDLE_COMPOSITE",
+    "FET_COMPOSITE",
+    "HYPE_COMPOSITE",
+    "V52_COMPOSITE"
+  ],
+  "phases": [
+    {
+      "phase": "V12_LONG",
+      "candidate_count": 8,
+      "selection_status": "NO_ACCEPTED_CANDIDATE_BASELINE_UNCHANGED",
+      "selected_candidate": null,
+      "best_by_minimum_dd_improvement": "V12_LONG_PCT1P5_6H_MFE0P5_R12",
+      "candidates": [
+        {
+          "candidate": "V12_LONG_PCT1P0_3H_MFE0P5_R6",
+          "plan": {
+            "id": "V12_LONG_PCT1P0_3H_MFE0P5_R6",
+            "strategy": "V12",
+            "sides": [
+              "LONG"
+            ],
+            "stop_pct": 0.01,
+            "arm_hours": 3,
+            "mfe_gate_pct": 0.005,
+            "reentry_hours": 6
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 210002634.15094954,
+            "maximum_mtm_drawdown_pct": -15.626605611405264,
+            "profit_factor": 3.3235645410862333,
+            "win_rate_pct": 71.42857142857143,
+            "closed_trades": 1316,
+            "average_loss_jpy": -1518.0347218331335,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 328,
+              "net_pnl_jpy": 1059100.9857687976,
+              "profit_factor": 3.4305882580929405,
+              "win_rate": 0.7317073170731707,
+              "max_cumulative_pnl_drawdown_jpy": -102628.8566341243,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": -0.005968798515853635,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 170,
+              "triggered": 33,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 33,
+              "reentry_rejected": 3,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 33,
+                "REENTRY_HOLDOFF": 3
+              }
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 88796699.69924957,
+            "maximum_mtm_drawdown_pct": -16.819025902651575,
+            "profit_factor": 2.7095585082617655,
+            "win_rate_pct": 68.46915460776847,
+            "closed_trades": 1313,
+            "average_loss_jpy": -792.2857114945091,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 329,
+              "net_pnl_jpy": 473733.16748953436,
+              "profit_factor": 2.8587897898250585,
+              "win_rate": 0.6899696048632219,
+              "max_cumulative_pnl_drawdown_jpy": -40314.09016497462,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": -0.031257127717154276,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": false,
+              "final_equity_guard_pass": false,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 170,
+              "triggered": 33,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 33,
+              "reentry_rejected": 3,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 33,
+                "REENTRY_HOLDOFF": 3
+              }
+            }
+          }
+        },
+        {
+          "candidate": "V12_LONG_PCT1P5_6H_MFE0P5_R12",
+          "plan": {
+            "id": "V12_LONG_PCT1P5_6H_MFE0P5_R12",
+            "strategy": "V12",
+            "sides": [
+              "LONG"
+            ],
+            "stop_pct": 0.015,
+            "arm_hours": 6,
+            "mfe_gate_pct": 0.005,
+            "reentry_hours": 12
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 220145573.58226866,
+            "maximum_mtm_drawdown_pct": -15.62063681288941,
+            "profit_factor": 3.450045560226241,
+            "win_rate_pct": 72.15865751334859,
+            "closed_trades": 1311,
+            "average_loss_jpy": -1554.6889131924154,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 329,
+              "net_pnl_jpy": 1112074.415495029,
+              "profit_factor": 3.5946112893576623,
+              "win_rate": 0.7386018237082067,
+              "max_cumulative_pnl_drawdown_jpy": -96696.10626401275,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 171,
+              "triggered": 17,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 17,
+              "reentry_rejected": 2,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 17,
+                "REENTRY_HOLDOFF": 2
+              }
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 120947624.48350726,
+            "maximum_mtm_drawdown_pct": -16.78776877493442,
+            "profit_factor": 3.0594429886916124,
+            "win_rate_pct": 69.41896024464832,
+            "closed_trades": 1308,
+            "average_loss_jpy": -927.1944301877503,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 330,
+              "net_pnl_jpy": 644850.7244755059,
+              "profit_factor": 3.203239550777172,
+              "win_rate": 0.696969696969697,
+              "max_cumulative_pnl_drawdown_jpy": -53284.87651935627,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 171,
+              "triggered": 17,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 17,
+              "reentry_rejected": 2,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 17,
+                "REENTRY_HOLDOFF": 2
+              }
+            }
+          }
+        },
+        {
+          "candidate": "V12_LONG_PCT2P0_12H_MFE1P0_R12",
+          "plan": {
+            "id": "V12_LONG_PCT2P0_12H_MFE1P0_R12",
+            "strategy": "V12",
+            "sides": [
+              "LONG"
+            ],
+            "stop_pct": 0.02,
+            "arm_hours": 12,
+            "mfe_gate_pct": 0.01,
+            "reentry_hours": 12
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 216573603.74219185,
+            "maximum_mtm_drawdown_pct": -15.616362981841592,
+            "profit_factor": 3.4569928317749166,
+            "win_rate_pct": 71.86311787072243,
+            "closed_trades": 1315,
+            "average_loss_jpy": -1504.527498875566,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 329,
+              "net_pnl_jpy": 1098989.4914515081,
+              "profit_factor": 3.601503366557481,
+              "win_rate": 0.7386018237082067,
+              "max_cumulative_pnl_drawdown_jpy": -95505.15527291188,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": 0.004273831047818533,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 171,
+              "triggered": 19,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 19,
+              "reentry_rejected": 2,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 19,
+                "REENTRY_HOLDOFF": 2
+              }
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 92906606.36310963,
+            "maximum_mtm_drawdown_pct": -16.804603146297215,
+            "profit_factor": 2.790768154393036,
+            "win_rate_pct": 68.77380045696877,
+            "closed_trades": 1313,
+            "average_loss_jpy": -799.0887271120713,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 331,
+              "net_pnl_jpy": 497964.10805122205,
+              "profit_factor": 2.9588128422089492,
+              "win_rate": 0.6948640483383686,
+              "max_cumulative_pnl_drawdown_jpy": -41527.850901995436,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": -0.016834371362794087,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": false,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 171,
+              "triggered": 19,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 19,
+              "reentry_rejected": 2,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 19,
+                "REENTRY_HOLDOFF": 2
+              }
+            }
+          }
+        },
+        {
+          "candidate": "V12_LONG_PCT3P0_12H_NONE_R24",
+          "plan": {
+            "id": "V12_LONG_PCT3P0_12H_NONE_R24",
+            "strategy": "V12",
+            "sides": [
+              "LONG"
+            ],
+            "stop_pct": 0.03,
+            "arm_hours": 12,
+            "mfe_gate_pct": null,
+            "reentry_hours": 24
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 205275492.5435201,
+            "maximum_mtm_drawdown_pct": -19.789046023262014,
+            "profit_factor": 3.331409591724006,
+            "win_rate_pct": 71.9298245614035,
+            "closed_trades": 1311,
+            "average_loss_jpy": -1511.0183667071221,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 331,
+              "net_pnl_jpy": 1046279.4396714069,
+              "profit_factor": 3.4115902381111773,
+              "win_rate": 0.7371601208459214,
+              "max_cumulative_pnl_drawdown_jpy": -99547.22654959455,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": -4.168409210372603,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 165,
+              "triggered": 29,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 29,
+              "reentry_rejected": 8,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 29,
+                "REENTRY_HOLDOFF": 8
+              }
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 80197633.38269265,
+            "maximum_mtm_drawdown_pct": -21.830745136020624,
+            "profit_factor": 2.6476072727485396,
+            "win_rate_pct": 69.00763358778626,
+            "closed_trades": 1310,
+            "average_loss_jpy": -757.086512953603,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 333,
+              "net_pnl_jpy": 429513.542921589,
+              "profit_factor": 2.7655048850792934,
+              "win_rate": 0.6966966966966966,
+              "max_cumulative_pnl_drawdown_jpy": -34336.906254760805,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": -5.042976361086204,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": false,
+              "final_equity_guard_pass": false,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 165,
+              "triggered": 29,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 29,
+              "reentry_rejected": 8,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 29,
+                "REENTRY_HOLDOFF": 8
+              }
+            }
+          }
+        },
+        {
+          "candidate": "V12_LONG_ATR1P5_6H_MFE0P5_R12",
+          "plan": {
+            "id": "V12_LONG_ATR1P5_6H_MFE0P5_R12",
+            "strategy": "V12",
+            "sides": [
+              "LONG"
+            ],
+            "atr_mult": 1.5,
+            "atr_floor_pct": 0.01,
+            "atr_cap_pct": 0.04,
+            "arm_hours": 6,
+            "mfe_gate_pct": 0.005,
+            "reentry_hours": 12
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 217400446.90562183,
+            "maximum_mtm_drawdown_pct": -15.619976638894627,
+            "profit_factor": 3.420107156906159,
+            "win_rate_pct": 71.83206106870229,
+            "closed_trades": 1310,
+            "average_loss_jpy": -1537.4456510379496,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 327,
+              "net_pnl_jpy": 1099807.1224195587,
+              "profit_factor": 3.567320534431092,
+              "win_rate": 0.7339449541284404,
+              "max_cumulative_pnl_drawdown_jpy": -95780.70192780206,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0006601739947829088,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 168,
+              "triggered": 24,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 24,
+              "reentry_rejected": 5,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 24,
+                "REENTRY_HOLDOFF": 5
+              }
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 108991287.31212883,
+            "maximum_mtm_drawdown_pct": -16.810486091155695,
+            "profit_factor": 2.9022301574075344,
+            "win_rate_pct": 69.1131498470948,
+            "closed_trades": 1308,
+            "average_loss_jpy": -895.6253371786086,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 329,
+              "net_pnl_jpy": 578222.2125782218,
+              "profit_factor": 3.0136070251289575,
+              "win_rate": 0.6960486322188449,
+              "max_cumulative_pnl_drawdown_jpy": -48185.41182894405,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": -0.02271731622127504,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 168,
+              "triggered": 24,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 24,
+              "reentry_rejected": 5,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 24,
+                "REENTRY_HOLDOFF": 5
+              }
+            }
+          }
+        },
+        {
+          "candidate": "V12_LONG_ATR2P0_6H_MFE1P0_R12",
+          "plan": {
+            "id": "V12_LONG_ATR2P0_6H_MFE1P0_R12",
+            "strategy": "V12",
+            "sides": [
+              "LONG"
+            ],
+            "atr_mult": 2.0,
+            "atr_floor_pct": 0.01,
+            "atr_cap_pct": 0.05,
+            "arm_hours": 6,
+            "mfe_gate_pct": 0.01,
+            "reentry_hours": 12
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 202323993.76802814,
+            "maximum_mtm_drawdown_pct": -15.628133949356782,
+            "profit_factor": 3.336679235211345,
+            "win_rate_pct": 71.23287671232876,
+            "closed_trades": 1314,
+            "average_loss_jpy": -1446.6224396281987,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 328,
+              "net_pnl_jpy": 1036531.2840717341,
+              "profit_factor": 3.4546670745808044,
+              "win_rate": 0.7317073170731707,
+              "max_cumulative_pnl_drawdown_jpy": -99118.44143470342,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": -0.00749713646737149,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 166,
+              "triggered": 34,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 34,
+              "reentry_rejected": 7,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 34,
+                "REENTRY_HOLDOFF": 7
+              }
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 78027372.19073877,
+            "maximum_mtm_drawdown_pct": -16.801056992746975,
+            "profit_factor": 2.6457427982993447,
+            "win_rate_pct": 68.4451219512195,
+            "closed_trades": 1312,
+            "average_loss_jpy": -723.1805777030378,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 330,
+              "net_pnl_jpy": 419361.5782355365,
+              "profit_factor": 2.792626132266125,
+              "win_rate": 0.696969696969697,
+              "max_cumulative_pnl_drawdown_jpy": -33815.27484199451,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": -0.013288217812554848,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": false,
+              "final_equity_guard_pass": false,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 166,
+              "triggered": 34,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 34,
+              "reentry_rejected": 7,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 34,
+                "REENTRY_HOLDOFF": 7
+              }
+            }
+          }
+        },
+        {
+          "candidate": "V12_LONG_PCT2P0_6H_MFE0P5_R6",
+          "plan": {
+            "id": "V12_LONG_PCT2P0_6H_MFE0P5_R6",
+            "strategy": "V12",
+            "sides": [
+              "LONG"
+            ],
+            "stop_pct": 0.02,
+            "arm_hours": 6,
+            "mfe_gate_pct": 0.005,
+            "reentry_hours": 6
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 219010781.0846514,
+            "maximum_mtm_drawdown_pct": -15.62063681288941,
+            "profit_factor": 3.4466044569315137,
+            "win_rate_pct": 72.13740458015268,
+            "closed_trades": 1310,
+            "average_loss_jpy": -1548.8498797319767,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 329,
+              "net_pnl_jpy": 1107916.583911992,
+              "profit_factor": 3.5967758067126776,
+              "win_rate": 0.7386018237082067,
+              "max_cumulative_pnl_drawdown_jpy": -96317.17000850802,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 172,
+              "triggered": 14,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 14,
+              "reentry_rejected": 1,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 14,
+                "REENTRY_HOLDOFF": 1
+              }
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 119560302.68599339,
+            "maximum_mtm_drawdown_pct": -16.78776877493442,
+            "profit_factor": 3.052250547576088,
+            "win_rate_pct": 69.39556235654169,
+            "closed_trades": 1307,
+            "average_loss_jpy": -919.7703903452383,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 330,
+              "net_pnl_jpy": 638019.3924839287,
+              "profit_factor": 3.1994222900965337,
+              "win_rate": 0.696969696969697,
+              "max_cumulative_pnl_drawdown_jpy": -52693.59188789752,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 172,
+              "triggered": 14,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 14,
+              "reentry_rejected": 1,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 14,
+                "REENTRY_HOLDOFF": 1
+              }
+            }
+          }
+        },
+        {
+          "candidate": "V12_LONG_PCT3P0_3H_MFE0P5_R24",
+          "plan": {
+            "id": "V12_LONG_PCT3P0_3H_MFE0P5_R24",
+            "strategy": "V12",
+            "sides": [
+              "LONG"
+            ],
+            "stop_pct": 0.03,
+            "arm_hours": 3,
+            "mfe_gate_pct": 0.005,
+            "reentry_hours": 24
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 219688812.68038583,
+            "maximum_mtm_drawdown_pct": -15.62063681288941,
+            "profit_factor": 3.455042642219693,
+            "win_rate_pct": 72.21374045801527,
+            "closed_trades": 1310,
+            "average_loss_jpy": -1552.5587493893825,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 329,
+              "net_pnl_jpy": 1110401.2107167928,
+              "profit_factor": 3.5954776908402697,
+              "win_rate": 0.7386018237082067,
+              "max_cumulative_pnl_drawdown_jpy": -96543.8650445434,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 171,
+              "triggered": 10,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 10,
+              "reentry_rejected": 2,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 10,
+                "REENTRY_HOLDOFF": 2
+              }
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 120269852.71853197,
+            "maximum_mtm_drawdown_pct": -16.78776877493442,
+            "profit_factor": 3.06139222595466,
+            "win_rate_pct": 69.47207345065034,
+            "closed_trades": 1307,
+            "average_loss_jpy": -923.4348684947435,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 330,
+              "net_pnl_jpy": 641511.9207726219,
+              "profit_factor": 3.201371919540784,
+              "win_rate": 0.696969696969697,
+              "max_cumulative_pnl_drawdown_jpy": -52996.0635403163,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 171,
+              "triggered": 10,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 10,
+              "reentry_rejected": 2,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 10,
+                "REENTRY_HOLDOFF": 2
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "phase": "V12_SHORT",
+      "candidate_count": 8,
+      "selection_status": "NO_ACCEPTED_CANDIDATE_BASELINE_UNCHANGED",
+      "selected_candidate": null,
+      "best_by_minimum_dd_improvement": "V12_SHORT_PCT2P0_12H_MFE1P0_R12",
+      "candidates": [
+        {
+          "candidate": "V12_SHORT_PCT1P0_3H_MFE0P5_R6",
+          "plan": {
+            "id": "V12_SHORT_PCT1P0_3H_MFE0P5_R6",
+            "strategy": "V12",
+            "sides": [
+              "SHORT"
+            ],
+            "stop_pct": 0.01,
+            "arm_hours": 3,
+            "mfe_gate_pct": 0.005,
+            "reentry_hours": 6
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 182350094.97552785,
+            "maximum_mtm_drawdown_pct": -17.49171570021193,
+            "profit_factor": 3.159939518542814,
+            "win_rate_pct": 68.72616323417239,
+            "closed_trades": 1311,
+            "average_loss_jpy": -1300.3993251423597,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 329,
+              "net_pnl_jpy": 934915.3323116407,
+              "profit_factor": 3.275120476485496,
+              "win_rate": 0.7142857142857143,
+              "max_cumulative_pnl_drawdown_jpy": -78216.6134252008,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": -1.8710788873225201,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 747,
+              "triggered": 107,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 107,
+              "reentry_rejected": 38,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 107,
+                "REENTRY_HOLDOFF": 38
+              }
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 63674430.97348518,
+            "maximum_mtm_drawdown_pct": -18.903269228612597,
+            "profit_factor": 2.3901005136300633,
+            "win_rate_pct": 65.95419847328245,
+            "closed_trades": 1310,
+            "average_loss_jpy": -648.5338465598784,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 333,
+              "net_pnl_jpy": 339595.30279127776,
+              "profit_factor": 2.459433134907376,
+              "win_rate": 0.6756756756756757,
+              "max_cumulative_pnl_drawdown_jpy": -29562.53177431191,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": -2.1155004536781767,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": false,
+              "final_equity_guard_pass": false,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 747,
+              "triggered": 107,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 107,
+              "reentry_rejected": 38,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 107,
+                "REENTRY_HOLDOFF": 38
+              }
+            }
+          }
+        },
+        {
+          "candidate": "V12_SHORT_PCT1P5_6H_MFE0P5_R12",
+          "plan": {
+            "id": "V12_SHORT_PCT1P5_6H_MFE0P5_R12",
+            "strategy": "V12",
+            "sides": [
+              "SHORT"
+            ],
+            "stop_pct": 0.015,
+            "arm_hours": 6,
+            "mfe_gate_pct": 0.005,
+            "reentry_hours": 12
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 191737142.09799573,
+            "maximum_mtm_drawdown_pct": -14.79603474654827,
+            "profit_factor": 3.0682136206109085,
+            "win_rate_pct": 70.5837173579109,
+            "closed_trades": 1302,
+            "average_loss_jpy": -1528.6551355732208,
+            "maximum_loss_streak": 5,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 329,
+              "net_pnl_jpy": 966371.5680544268,
+              "profit_factor": 3.185371232964887,
+              "win_rate": 0.7203647416413373,
+              "max_cumulative_pnl_drawdown_jpy": -105608.36978247412,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": 0.8246020663411411,
+              "dd_pass": true,
+              "accounting_pass": true,
+              "oos_pass": false,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 740,
+              "triggered": 62,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 62,
+              "reentry_rejected": 45,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 62,
+                "REENTRY_HOLDOFF": 45
+              }
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 81201317.55516851,
+            "maximum_mtm_drawdown_pct": -15.69453502550584,
+            "profit_factor": 2.539603604135943,
+            "win_rate_pct": 68.12596006144393,
+            "closed_trades": 1302,
+            "average_loss_jpy": -802.5469863629198,
+            "maximum_loss_streak": 5,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 332,
+              "net_pnl_jpy": 429008.2165126403,
+              "profit_factor": 2.6280774147613974,
+              "win_rate": 0.6837349397590361,
+              "max_cumulative_pnl_drawdown_jpy": -39270.01179402438,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": 1.093233749428581,
+              "dd_pass": true,
+              "accounting_pass": true,
+              "oos_pass": false,
+              "final_equity_guard_pass": false,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 740,
+              "triggered": 62,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 62,
+              "reentry_rejected": 45,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 62,
+                "REENTRY_HOLDOFF": 45
+              }
+            }
+          }
+        },
+        {
+          "candidate": "V12_SHORT_PCT2P0_12H_MFE1P0_R12",
+          "plan": {
+            "id": "V12_SHORT_PCT2P0_12H_MFE1P0_R12",
+            "strategy": "V12",
+            "sides": [
+              "SHORT"
+            ],
+            "stop_pct": 0.02,
+            "arm_hours": 12,
+            "mfe_gate_pct": 0.01,
+            "reentry_hours": 12
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 207597322.2393877,
+            "maximum_mtm_drawdown_pct": -14.148448931839397,
+            "profit_factor": 3.3674055552997393,
+            "win_rate_pct": 70.93023255813954,
+            "closed_trades": 1290,
+            "average_loss_jpy": -1476.7844429845654,
+            "maximum_loss_streak": 7,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 329,
+              "net_pnl_jpy": 1073584.7906732755,
+              "profit_factor": 3.577178646206469,
+              "win_rate": 0.7325227963525835,
+              "max_cumulative_pnl_drawdown_jpy": -79975.33424076205,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": 1.4721878810500133,
+              "dd_pass": true,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": true
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 725,
+              "triggered": 67,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 67,
+              "reentry_rejected": 60,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 67,
+                "REENTRY_HOLDOFF": 60
+              }
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 89200847.7606441,
+            "maximum_mtm_drawdown_pct": -15.324385906759286,
+            "profit_factor": 2.8213230703190484,
+            "win_rate_pct": 68.50699844479004,
+            "closed_trades": 1286,
+            "average_loss_jpy": -763.6537983384959,
+            "maximum_loss_streak": 7,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 329,
+              "net_pnl_jpy": 482645.7968204099,
+              "profit_factor": 2.987109508037478,
+              "win_rate": 0.6960486322188449,
+              "max_cumulative_pnl_drawdown_jpy": -44584.30550972314,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": 1.4633828681751346,
+              "dd_pass": true,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": false,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 725,
+              "triggered": 67,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 67,
+              "reentry_rejected": 60,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 67,
+                "REENTRY_HOLDOFF": 60
+              }
+            }
+          }
+        },
+        {
+          "candidate": "V12_SHORT_PCT3P0_12H_NONE_R24",
+          "plan": {
+            "id": "V12_SHORT_PCT3P0_12H_NONE_R24",
+            "strategy": "V12",
+            "sides": [
+              "SHORT"
+            ],
+            "stop_pct": 0.03,
+            "arm_hours": 12,
+            "mfe_gate_pct": null,
+            "reentry_hours": 24
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 186393415.40431562,
+            "maximum_mtm_drawdown_pct": -14.974495762030793,
+            "profit_factor": 3.392739508281902,
+            "win_rate_pct": 69.45773524720893,
+            "closed_trades": 1254,
+            "average_loss_jpy": -1284.4970578933737,
+            "maximum_loss_streak": 7,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 323,
+              "net_pnl_jpy": 961609.9591105111,
+              "profit_factor": 3.5517650626185824,
+              "win_rate": 0.7275541795665634,
+              "max_cumulative_pnl_drawdown_jpy": -51403.394116695155,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": 0.646141050858617,
+              "dd_pass": true,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": true
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 666,
+              "triggered": 112,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 112,
+              "reentry_rejected": 119,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 112,
+                "REENTRY_HOLDOFF": 119
+              }
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 64619576.84049146,
+            "maximum_mtm_drawdown_pct": -16.159913630137247,
+            "profit_factor": 2.4630789165218845,
+            "win_rate_pct": 66.96,
+            "closed_trades": 1250,
+            "average_loss_jpy": -675.2988517846313,
+            "maximum_loss_streak": 7,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 326,
+              "net_pnl_jpy": 345794.3870953762,
+              "profit_factor": 2.5182609320182454,
+              "win_rate": 0.6901840490797546,
+              "max_cumulative_pnl_drawdown_jpy": -20447.20619125181,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": 0.6278551447971736,
+              "dd_pass": true,
+              "accounting_pass": true,
+              "oos_pass": false,
+              "final_equity_guard_pass": false,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 666,
+              "triggered": 112,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 112,
+              "reentry_rejected": 119,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 112,
+                "REENTRY_HOLDOFF": 119
+              }
+            }
+          }
+        },
+        {
+          "candidate": "V12_SHORT_ATR1P5_6H_MFE0P5_R12",
+          "plan": {
+            "id": "V12_SHORT_ATR1P5_6H_MFE0P5_R12",
+            "strategy": "V12",
+            "sides": [
+              "SHORT"
+            ],
+            "atr_mult": 1.5,
+            "atr_floor_pct": 0.01,
+            "atr_cap_pct": 0.04,
+            "arm_hours": 6,
+            "mfe_gate_pct": 0.005,
+            "reentry_hours": 12
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 191192817.07856315,
+            "maximum_mtm_drawdown_pct": -14.79603474654827,
+            "profit_factor": 3.1461024652949976,
+            "win_rate_pct": 70.18348623853211,
+            "closed_trades": 1308,
+            "average_loss_jpy": -1442.6264165578027,
+            "maximum_loss_streak": 5,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 331,
+              "net_pnl_jpy": 978071.7614231291,
+              "profit_factor": 3.2855919319672364,
+              "win_rate": 0.7220543806646526,
+              "max_cumulative_pnl_drawdown_jpy": -80164.59180922853,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": 0.8246020663411411,
+              "dd_pass": true,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": true
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 736,
+              "triggered": 74,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 74,
+              "reentry_rejected": 49,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 74,
+                "REENTRY_HOLDOFF": 49
+              }
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 73567252.44545028,
+            "maximum_mtm_drawdown_pct": -15.709752983816871,
+            "profit_factor": 2.4830585428363716,
+            "win_rate_pct": 67.61102603369066,
+            "closed_trades": 1306,
+            "average_loss_jpy": -740.5328637195588,
+            "maximum_loss_streak": 5,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 332,
+              "net_pnl_jpy": 389270.60491926275,
+              "profit_factor": 2.5631677972248377,
+              "win_rate": 0.6837349397590361,
+              "max_cumulative_pnl_drawdown_jpy": -36144.831237195875,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": 1.078015791117549,
+              "dd_pass": true,
+              "accounting_pass": true,
+              "oos_pass": false,
+              "final_equity_guard_pass": false,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 736,
+              "triggered": 74,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 74,
+              "reentry_rejected": 49,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 74,
+                "REENTRY_HOLDOFF": 49
+              }
+            }
+          }
+        },
+        {
+          "candidate": "V12_SHORT_ATR2P0_6H_MFE1P0_R12",
+          "plan": {
+            "id": "V12_SHORT_ATR2P0_6H_MFE1P0_R12",
+            "strategy": "V12",
+            "sides": [
+              "SHORT"
+            ],
+            "atr_mult": 2.0,
+            "atr_floor_pct": 0.01,
+            "atr_cap_pct": 0.05,
+            "arm_hours": 6,
+            "mfe_gate_pct": 0.01,
+            "reentry_hours": 12
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 168768895.40362766,
+            "maximum_mtm_drawdown_pct": -15.130455043405544,
+            "profit_factor": 3.0363008139433627,
+            "win_rate_pct": 68.21705426356588,
+            "closed_trades": 1290,
+            "average_loss_jpy": -1276.617378261734,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 329,
+              "net_pnl_jpy": 867814.025142745,
+              "profit_factor": 3.138498598613831,
+              "win_rate": 0.7142857142857143,
+              "max_cumulative_pnl_drawdown_jpy": -76231.4038736968,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": 0.4901817694838666,
+              "dd_pass": true,
+              "accounting_pass": true,
+              "oos_pass": false,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 704,
+              "triggered": 130,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 130,
+              "reentry_rejected": 81,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 130,
+                "REENTRY_HOLDOFF": 81
+              }
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 59703944.71891411,
+            "maximum_mtm_drawdown_pct": -16.50563784919772,
+            "profit_factor": 2.2907518785784666,
+            "win_rate_pct": 65.6832298136646,
+            "closed_trades": 1288,
+            "average_loss_jpy": -660.8178542855438,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 333,
+              "net_pnl_jpy": 316782.1398443811,
+              "profit_factor": 2.3252272928983198,
+              "win_rate": 0.6726726726726727,
+              "max_cumulative_pnl_drawdown_jpy": -30010.918331002642,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": 0.28213092573670195,
+              "dd_pass": true,
+              "accounting_pass": true,
+              "oos_pass": false,
+              "final_equity_guard_pass": false,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 704,
+              "triggered": 130,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 130,
+              "reentry_rejected": 81,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 130,
+                "REENTRY_HOLDOFF": 81
+              }
+            }
+          }
+        },
+        {
+          "candidate": "V12_SHORT_PCT2P0_6H_MFE0P5_R6",
+          "plan": {
+            "id": "V12_SHORT_PCT2P0_6H_MFE0P5_R6",
+            "strategy": "V12",
+            "sides": [
+              "SHORT"
+            ],
+            "stop_pct": 0.02,
+            "arm_hours": 6,
+            "mfe_gate_pct": 0.005,
+            "reentry_hours": 6
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 205833694.10605663,
+            "maximum_mtm_drawdown_pct": -15.196816020658343,
+            "profit_factor": 3.341015614026296,
+            "win_rate_pct": 70.93558282208589,
+            "closed_trades": 1304,
+            "average_loss_jpy": -1465.1161228149083,
+            "maximum_loss_streak": 5,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 328,
+              "net_pnl_jpy": 1054588.9639744656,
+              "profit_factor": 3.5735992256613454,
+              "win_rate": 0.7317073170731707,
+              "max_cumulative_pnl_drawdown_jpy": -100100.97860622604,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": 0.4238207922310675,
+              "dd_pass": true,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": true
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 754,
+              "triggered": 50,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 50,
+              "reentry_rejected": 31,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 50,
+                "REENTRY_HOLDOFF": 31
+              }
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 89495591.62401968,
+            "maximum_mtm_drawdown_pct": -16.37518537786532,
+            "profit_factor": 2.7978501833214287,
+            "win_rate_pct": 68.23076923076923,
+            "closed_trades": 1300,
+            "average_loss_jpy": -761.1457224762682,
+            "maximum_loss_streak": 5,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 329,
+              "net_pnl_jpy": 480802.404832664,
+              "profit_factor": 2.9728562767075846,
+              "win_rate": 0.6899696048632219,
+              "max_cumulative_pnl_drawdown_jpy": -39743.82900653017,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": 0.4125833970690991,
+              "dd_pass": true,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": false,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 754,
+              "triggered": 50,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 50,
+              "reentry_rejected": 31,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 50,
+                "REENTRY_HOLDOFF": 31
+              }
+            }
+          }
+        },
+        {
+          "candidate": "V12_SHORT_PCT3P0_3H_MFE0P5_R24",
+          "plan": {
+            "id": "V12_SHORT_PCT3P0_3H_MFE0P5_R24",
+            "strategy": "V12",
+            "sides": [
+              "SHORT"
+            ],
+            "stop_pct": 0.03,
+            "arm_hours": 3,
+            "mfe_gate_pct": 0.005,
+            "reentry_hours": 24
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 199730701.52005002,
+            "maximum_mtm_drawdown_pct": -17.084941912482144,
+            "profit_factor": 3.3662926104808353,
+            "win_rate_pct": 71.14197530864197,
+            "closed_trades": 1296,
+            "average_loss_jpy": -1425.2898307989706,
+            "maximum_loss_streak": 5,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 328,
+              "net_pnl_jpy": 1033690.681076449,
+              "profit_factor": 3.5777887165853755,
+              "win_rate": 0.7347560975609756,
+              "max_cumulative_pnl_drawdown_jpy": -97879.15375244361,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": -1.4643050995927336,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 740,
+              "triggered": 45,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 45,
+              "reentry_rejected": 45,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 45,
+                "REENTRY_HOLDOFF": 45
+              }
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 81972539.96244077,
+            "maximum_mtm_drawdown_pct": -18.40648117440281,
+            "profit_factor": 2.7065738991362522,
+            "win_rate_pct": 68.47405112316034,
+            "closed_trades": 1291,
+            "average_loss_jpy": -745.2703282920484,
+            "maximum_loss_streak": 5,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 330,
+              "net_pnl_jpy": 440051.00442345423,
+              "profit_factor": 2.8356045713070874,
+              "win_rate": 0.693939393939394,
+              "max_cumulative_pnl_drawdown_jpy": -35667.688219124975,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": -1.6187123994683894,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": false,
+              "final_equity_guard_pass": false,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 740,
+              "triggered": 45,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 45,
+              "reentry_rejected": 45,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 45,
+                "REENTRY_HOLDOFF": 45
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "phase": "Q102",
+      "candidate_count": 4,
+      "selection_status": "NO_ACCEPTED_CANDIDATE_BASELINE_UNCHANGED",
+      "selected_candidate": null,
+      "best_by_minimum_dd_improvement": "Q102_PCT3P0_12H_NONE_R24",
+      "candidates": [
+        {
+          "candidate": "Q102_PCT1P5_3H_MFE0P5_R6",
+          "plan": {
+            "id": "Q102_PCT1P5_3H_MFE0P5_R6",
+            "strategy": "Q102",
+            "sides": [
+              "LONG",
+              "SHORT"
+            ],
+            "stop_pct": 0.015,
+            "arm_hours": 3,
+            "mfe_gate_pct": 0.005,
+            "reentry_hours": 6
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 201764751.41775507,
+            "maximum_mtm_drawdown_pct": -18.599360111580985,
+            "profit_factor": 3.2826822422618296,
+            "win_rate_pct": 71.06254709871892,
+            "closed_trades": 1327,
+            "average_loss_jpy": -1453.6747792771066,
+            "maximum_loss_streak": 7,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 331,
+              "net_pnl_jpy": 1036733.9506314897,
+              "profit_factor": 3.469403404102244,
+              "win_rate": 0.7250755287009063,
+              "max_cumulative_pnl_drawdown_jpy": -98940.92436531594,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": -2.978723298691575,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 372,
+              "triggered": 48,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 48,
+              "reentry_rejected": 25,
+              "data_gap": 0,
+              "entry_mismatch": 1,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 48,
+                "REENTRY_HOLDOFF": 25
+              }
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 92519640.9673849,
+            "maximum_mtm_drawdown_pct": -20.303883928325494,
+            "profit_factor": 2.811295799275832,
+            "win_rate_pct": 68.22995461422087,
+            "closed_trades": 1322,
+            "average_loss_jpy": -768.0096654500907,
+            "maximum_loss_streak": 7,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 332,
+              "net_pnl_jpy": 494342.92458322464,
+              "profit_factor": 2.9165469865560887,
+              "win_rate": 0.6837349397590361,
+              "max_cumulative_pnl_drawdown_jpy": -41434.08861127595,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": -3.5161151533910733,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": false,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 372,
+              "triggered": 48,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 48,
+              "reentry_rejected": 25,
+              "data_gap": 0,
+              "entry_mismatch": 1,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 48,
+                "REENTRY_HOLDOFF": 25
+              }
+            }
+          }
+        },
+        {
+          "candidate": "Q102_PCT2P0_6H_MFE0P5_R12",
+          "plan": {
+            "id": "Q102_PCT2P0_6H_MFE0P5_R12",
+            "strategy": "Q102",
+            "sides": [
+              "LONG",
+              "SHORT"
+            ],
+            "stop_pct": 0.02,
+            "arm_hours": 6,
+            "mfe_gate_pct": 0.005,
+            "reentry_hours": 12
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 201340230.03326905,
+            "maximum_mtm_drawdown_pct": -20.129360957946872,
+            "profit_factor": 3.257138048948235,
+            "win_rate_pct": 71.4177407126611,
+            "closed_trades": 1319,
+            "average_loss_jpy": -1494.2720855856899,
+            "maximum_loss_streak": 7,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 331,
+              "net_pnl_jpy": 1030101.1528830442,
+              "profit_factor": 3.4010321224800695,
+              "win_rate": 0.7311178247734139,
+              "max_cumulative_pnl_drawdown_jpy": -98820.52877729444,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": -4.508724145057462,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 371,
+              "triggered": 33,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 33,
+              "reentry_rejected": 26,
+              "data_gap": 0,
+              "entry_mismatch": 1,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 33,
+                "REENTRY_HOLDOFF": 26
+              }
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 92519223.69970131,
+            "maximum_mtm_drawdown_pct": -21.63170637241516,
+            "profit_factor": 2.7702140039589764,
+            "win_rate_pct": 68.61702127659575,
+            "closed_trades": 1316,
+            "average_loss_jpy": -799.1486558979001,
+            "maximum_loss_streak": 7,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 332,
+              "net_pnl_jpy": 491667.7884786216,
+              "profit_factor": 2.855455518740992,
+              "win_rate": 0.6897590361445783,
+              "max_cumulative_pnl_drawdown_jpy": -41489.25575178693,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": -4.843937597480739,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": false,
+              "final_equity_guard_pass": false,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 371,
+              "triggered": 33,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 33,
+              "reentry_rejected": 26,
+              "data_gap": 0,
+              "entry_mismatch": 1,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 33,
+                "REENTRY_HOLDOFF": 26
+              }
+            }
+          }
+        },
+        {
+          "candidate": "Q102_PCT3P0_12H_NONE_R24",
+          "plan": {
+            "id": "Q102_PCT3P0_12H_NONE_R24",
+            "strategy": "Q102",
+            "sides": [
+              "LONG",
+              "SHORT"
+            ],
+            "stop_pct": 0.03,
+            "arm_hours": 12,
+            "mfe_gate_pct": null,
+            "reentry_hours": 24
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 230193454.5713614,
+            "maximum_mtm_drawdown_pct": -17.325083671489615,
+            "profit_factor": 3.507757917354987,
+            "win_rate_pct": 71.8299164768413,
+            "closed_trades": 1317,
+            "average_loss_jpy": -1562.5536651755037,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 332,
+              "net_pnl_jpy": 1165676.9931673538,
+              "profit_factor": 3.6592276296458013,
+              "win_rate": 0.7379518072289156,
+              "max_cumulative_pnl_drawdown_jpy": -68983.12906399101,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": -1.704446858600205,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 355,
+              "triggered": 33,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 33,
+              "reentry_rejected": 42,
+              "data_gap": 0,
+              "entry_mismatch": 1,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 33,
+                "REENTRY_HOLDOFF": 42
+              }
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 118979529.36517343,
+            "maximum_mtm_drawdown_pct": -19.74071824795123,
+            "profit_factor": 3.023030731997237,
+            "win_rate_pct": 68.67378048780488,
+            "closed_trades": 1312,
+            "average_loss_jpy": -903.6714149033655,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 330,
+              "net_pnl_jpy": 636925.970896595,
+              "profit_factor": 3.1412408182604157,
+              "win_rate": 0.693939393939394,
+              "max_cumulative_pnl_drawdown_jpy": -58163.09615048068,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": -2.952949473016808,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 355,
+              "triggered": 33,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 33,
+              "reentry_rejected": 42,
+              "data_gap": 0,
+              "entry_mismatch": 1,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 33,
+                "REENTRY_HOLDOFF": 42
+              }
+            }
+          }
+        },
+        {
+          "candidate": "Q102_ATR2P0_6H_MFE1P0_R12",
+          "plan": {
+            "id": "Q102_ATR2P0_6H_MFE1P0_R12",
+            "strategy": "Q102",
+            "sides": [
+              "LONG",
+              "SHORT"
+            ],
+            "atr_mult": 2.0,
+            "atr_floor_pct": 0.01,
+            "atr_cap_pct": 0.05,
+            "arm_hours": 6,
+            "mfe_gate_pct": 0.01,
+            "reentry_hours": 12
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 165964468.5179625,
+            "maximum_mtm_drawdown_pct": -28.44548011714719,
+            "profit_factor": 3.244442019869699,
+            "win_rate_pct": 70.84282460136674,
+            "closed_trades": 1317,
+            "average_loss_jpy": -1216.0996799810189,
+            "maximum_loss_streak": 7,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 327,
+              "net_pnl_jpy": 880184.7839355763,
+              "profit_factor": 3.311629165000254,
+              "win_rate": 0.7186544342507645,
+              "max_cumulative_pnl_drawdown_jpy": -86710.48960319033,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": -12.824843304257781,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": false,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 336,
+              "triggered": 59,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 59,
+              "reentry_rejected": 61,
+              "data_gap": 0,
+              "entry_mismatch": 1,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 59,
+                "REENTRY_HOLDOFF": 61
+              }
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 59325705.22214572,
+            "maximum_mtm_drawdown_pct": -29.76947905656906,
+            "profit_factor": 2.408025771965433,
+            "win_rate_pct": 68.00606520090979,
+            "closed_trades": 1319,
+            "average_loss_jpy": -630.4681252934593,
+            "maximum_loss_streak": 7,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 333,
+              "net_pnl_jpy": 319887.9610653703,
+              "profit_factor": 2.4048771447959747,
+              "win_rate": 0.6756756756756757,
+              "max_cumulative_pnl_drawdown_jpy": -27870.184285580413,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": -12.98171028163464,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": false,
+              "final_equity_guard_pass": false,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 336,
+              "triggered": 59,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 59,
+              "reentry_rejected": 61,
+              "data_gap": 0,
+              "entry_mismatch": 1,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 59,
+                "REENTRY_HOLDOFF": 61
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "phase": "IDLE",
+      "candidate_count": 4,
+      "selection_status": "NO_ACCEPTED_CANDIDATE_BASELINE_UNCHANGED",
+      "selected_candidate": null,
+      "best_by_minimum_dd_improvement": "IDLE_ATR2P0_6H_MFE1P0_R12",
+      "candidates": [
+        {
+          "candidate": "IDLE_PCT1P5_3H_MFE0P5_R6",
+          "plan": {
+            "id": "IDLE_PCT1P5_3H_MFE0P5_R6",
+            "strategy": "IDLE",
+            "sides": [
+              "LONG",
+              "SHORT"
+            ],
+            "stop_pct": 0.015,
+            "arm_hours": 3,
+            "mfe_gate_pct": 0.005,
+            "reentry_hours": 6
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 225611007.21248654,
+            "maximum_mtm_drawdown_pct": -15.629175571671839,
+            "profit_factor": 3.4338597460045923,
+            "win_rate_pct": 72.3159509202454,
+            "closed_trades": 1304,
+            "average_loss_jpy": -1621.6555595780121,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 328,
+              "net_pnl_jpy": 1126204.2009958308,
+              "profit_factor": 3.569017564802651,
+              "win_rate": 0.7378048780487805,
+              "max_cumulative_pnl_drawdown_jpy": -98485.26931814279,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": -0.008538758782428602,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 570,
+              "triggered": 99,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 99,
+              "reentry_rejected": 124,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 99,
+                "REENTRY_HOLDOFF": 124
+              }
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 120932912.89394104,
+            "maximum_mtm_drawdown_pct": -16.80329057513227,
+            "profit_factor": 3.054073461604823,
+            "win_rate_pct": 69.32515337423312,
+            "closed_trades": 1304,
+            "average_loss_jpy": -929.505112166567,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 329,
+              "net_pnl_jpy": 642942.4652047793,
+              "profit_factor": 3.196624110637236,
+              "win_rate": 0.6960486322188449,
+              "max_cumulative_pnl_drawdown_jpy": -53278.67983294086,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": -0.01552180019784899,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 570,
+              "triggered": 99,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 99,
+              "reentry_rejected": 124,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 99,
+                "REENTRY_HOLDOFF": 124
+              }
+            }
+          }
+        },
+        {
+          "candidate": "IDLE_PCT2P0_6H_MFE0P5_R12",
+          "plan": {
+            "id": "IDLE_PCT2P0_6H_MFE0P5_R12",
+            "strategy": "IDLE",
+            "sides": [
+              "LONG",
+              "SHORT"
+            ],
+            "stop_pct": 0.02,
+            "arm_hours": 6,
+            "mfe_gate_pct": 0.005,
+            "reentry_hours": 12
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 222022570.45043686,
+            "maximum_mtm_drawdown_pct": -15.625302067600899,
+            "profit_factor": 3.424122747792133,
+            "win_rate_pct": 72.11611917494271,
+            "closed_trades": 1309,
+            "average_loss_jpy": -1584.7122036658552,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 329,
+              "net_pnl_jpy": 1113469.129584826,
+              "profit_factor": 3.553209658645066,
+              "win_rate": 0.7355623100303952,
+              "max_cumulative_pnl_drawdown_jpy": -97313.9514479934,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": -0.004665254711488487,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 591,
+              "triggered": 76,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 76,
+              "reentry_rejected": 103,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 76,
+                "REENTRY_HOLDOFF": 103
+              }
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 118430129.73296434,
+            "maximum_mtm_drawdown_pct": -16.815710629894788,
+            "profit_factor": 3.0299210675083286,
+            "win_rate_pct": 69.21898928024503,
+            "closed_trades": 1306,
+            "average_loss_jpy": -916.5146679864679,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 330,
+              "net_pnl_jpy": 630400.7729558484,
+              "profit_factor": 3.1694327862961855,
+              "win_rate": 0.693939393939394,
+              "max_cumulative_pnl_drawdown_jpy": -52212.2885230587,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": -0.027941854960367607,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 591,
+              "triggered": 76,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 76,
+              "reentry_rejected": 103,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 76,
+                "REENTRY_HOLDOFF": 103
+              }
+            }
+          }
+        },
+        {
+          "candidate": "IDLE_PCT3P0_12H_NONE_R24",
+          "plan": {
+            "id": "IDLE_PCT3P0_12H_NONE_R24",
+            "strategy": "IDLE",
+            "sides": [
+              "LONG",
+              "SHORT"
+            ],
+            "stop_pct": 0.03,
+            "arm_hours": 12,
+            "mfe_gate_pct": null,
+            "reentry_hours": 24
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 211228602.46455237,
+            "maximum_mtm_drawdown_pct": -15.624842136642735,
+            "profit_factor": 3.310571007236415,
+            "win_rate_pct": 72.04874333587205,
+            "closed_trades": 1313,
+            "average_loss_jpy": -1573.138712680495,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 330,
+              "net_pnl_jpy": 1065682.6316490052,
+              "profit_factor": 3.4111531101470507,
+              "win_rate": 0.7333333333333333,
+              "max_cumulative_pnl_drawdown_jpy": -101809.22617266583,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": -0.004205323753325274,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 640,
+              "triggered": 49,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 49,
+              "reentry_rejected": 54,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 49,
+                "REENTRY_HOLDOFF": 54
+              }
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 103852937.34974577,
+            "maximum_mtm_drawdown_pct": -16.81637043167009,
+            "profit_factor": 2.8556553590155973,
+            "win_rate_pct": 69.04214559386973,
+            "closed_trades": 1305,
+            "average_loss_jpy": -874.8165772422858,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 328,
+              "net_pnl_jpy": 549458.6638809411,
+              "profit_factor": 2.9380974475788406,
+              "win_rate": 0.6890243902439024,
+              "max_cumulative_pnl_drawdown_jpy": -46006.200603171135,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": -0.02860165673567039,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 640,
+              "triggered": 49,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 49,
+              "reentry_rejected": 54,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 49,
+                "REENTRY_HOLDOFF": 54
+              }
+            }
+          }
+        },
+        {
+          "candidate": "IDLE_ATR2P0_6H_MFE1P0_R12",
+          "plan": {
+            "id": "IDLE_ATR2P0_6H_MFE1P0_R12",
+            "strategy": "IDLE",
+            "sides": [
+              "LONG",
+              "SHORT"
+            ],
+            "atr_mult": 2.0,
+            "atr_floor_pct": 0.01,
+            "atr_cap_pct": 0.05,
+            "arm_hours": 6,
+            "mfe_gate_pct": 0.01,
+            "reentry_hours": 12
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 217333430.8128443,
+            "maximum_mtm_drawdown_pct": -15.610914015969268,
+            "profit_factor": 3.6576368638068746,
+            "win_rate_pct": 71.6030534351145,
+            "closed_trades": 1310,
+            "average_loss_jpy": -1388.315754680605,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 328,
+              "net_pnl_jpy": 1119098.434802114,
+              "profit_factor": 3.890292272504502,
+              "win_rate": 0.7408536585365854,
+              "max_cumulative_pnl_drawdown_jpy": -95758.87543657375,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": 0.00972279692014233,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 522,
+              "triggered": 125,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 125,
+              "reentry_rejected": 172,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 125,
+                "REENTRY_HOLDOFF": 172
+              }
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 105081727.10559455,
+            "maximum_mtm_drawdown_pct": -16.801094107946966,
+            "profit_factor": 3.0879114926967666,
+            "win_rate_pct": 68.60643185298622,
+            "closed_trades": 1306,
+            "average_loss_jpy": -775.1909418095571,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 329,
+              "net_pnl_jpy": 570205.2447872659,
+              "profit_factor": 3.285854725900724,
+              "win_rate": 0.6960486322188449,
+              "max_cumulative_pnl_drawdown_jpy": -46527.21880271222,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": -0.01332533301254557,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 522,
+              "triggered": 125,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 125,
+              "reentry_rejected": 172,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 125,
+                "REENTRY_HOLDOFF": 172
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "phase": "FET",
+      "candidate_count": 4,
+      "selection_status": "NO_ACCEPTED_CANDIDATE_BASELINE_UNCHANGED",
+      "selected_candidate": null,
+      "best_by_minimum_dd_improvement": "FET_PCT1P5_3H_MFE0P5_R6",
+      "candidates": [
+        {
+          "candidate": "FET_PCT1P5_3H_MFE0P5_R6",
+          "plan": {
+            "id": "FET_PCT1P5_3H_MFE0P5_R6",
+            "strategy": "FET",
+            "sides": [
+              "LONG",
+              "SHORT"
+            ],
+            "stop_pct": 0.015,
+            "arm_hours": 3,
+            "mfe_gate_pct": 0.005,
+            "reentry_hours": 6
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 223739857.24886143,
+            "maximum_mtm_drawdown_pct": -15.62063681288941,
+            "profit_factor": 3.459665361443179,
+            "win_rate_pct": 72.36641221374046,
+            "closed_trades": 1310,
+            "average_loss_jpy": -1586.9369387713177,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 329,
+              "net_pnl_jpy": 1127648.6287860235,
+              "profit_factor": 3.589988106979633,
+              "win_rate": 0.7386018237082067,
+              "max_cumulative_pnl_drawdown_jpy": -97874.16568276845,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 21,
+              "triggered": 2,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 2,
+              "reentry_rejected": 0,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 2
+              }
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 125721753.83146559,
+            "maximum_mtm_drawdown_pct": -16.78776877493442,
+            "profit_factor": 3.0848041498404575,
+            "win_rate_pct": 69.62509563886763,
+            "closed_trades": 1307,
+            "average_loss_jpy": -959.266677429283,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 330,
+              "net_pnl_jpy": 670267.2971004891,
+              "profit_factor": 3.217827325944814,
+              "win_rate": 0.7,
+              "max_cumulative_pnl_drawdown_jpy": -55365.7443992942,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 21,
+              "triggered": 2,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 2,
+              "reentry_rejected": 0,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 2
+              }
+            }
+          }
+        },
+        {
+          "candidate": "FET_PCT2P0_6H_MFE0P5_R12",
+          "plan": {
+            "id": "FET_PCT2P0_6H_MFE0P5_R12",
+            "strategy": "FET",
+            "sides": [
+              "LONG",
+              "SHORT"
+            ],
+            "stop_pct": 0.02,
+            "arm_hours": 6,
+            "mfe_gate_pct": 0.005,
+            "reentry_hours": 12
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 222884269.63490924,
+            "maximum_mtm_drawdown_pct": -15.62063681288941,
+            "profit_factor": 3.4458339847788393,
+            "win_rate_pct": 72.36641221374046,
+            "closed_trades": 1310,
+            "average_loss_jpy": -1589.808085292983,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 329,
+              "net_pnl_jpy": 1122244.9915067104,
+              "profit_factor": 3.571438485025712,
+              "win_rate": 0.7386018237082067,
+              "max_cumulative_pnl_drawdown_jpy": -97594.90627477306,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 21,
+              "triggered": 2,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 2,
+              "reentry_rejected": 0,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 2
+              }
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 124445138.52663578,
+            "maximum_mtm_drawdown_pct": -16.78776877493442,
+            "profit_factor": 3.063888546897653,
+            "win_rate_pct": 69.62509563886763,
+            "closed_trades": 1307,
+            "average_loss_jpy": -959.1477343042284,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 330,
+              "net_pnl_jpy": 662204.5739614111,
+              "profit_factor": 3.1914912357842,
+              "win_rate": 0.7,
+              "max_cumulative_pnl_drawdown_jpy": -54791.67707599519,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 21,
+              "triggered": 2,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 2,
+              "reentry_rejected": 0,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 2
+              }
+            }
+          }
+        },
+        {
+          "candidate": "FET_PCT3P0_12H_NONE_R24",
+          "plan": {
+            "id": "FET_PCT3P0_12H_NONE_R24",
+            "strategy": "FET",
+            "sides": [
+              "LONG",
+              "SHORT"
+            ],
+            "stop_pct": 0.03,
+            "arm_hours": 12,
+            "mfe_gate_pct": null,
+            "reentry_hours": 24
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 223112817.08753067,
+            "maximum_mtm_drawdown_pct": -15.62063681288941,
+            "profit_factor": 3.4495606197314292,
+            "win_rate_pct": 72.36641221374046,
+            "closed_trades": 1310,
+            "average_loss_jpy": -1589.01723446756,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 329,
+              "net_pnl_jpy": 1123688.4293439805,
+              "profit_factor": 3.576435978102479,
+              "win_rate": 0.7386018237082067,
+              "max_cumulative_pnl_drawdown_jpy": -97669.4175601725,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 21,
+              "triggered": 3,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 3,
+              "reentry_rejected": 0,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 3
+              }
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 124783449.50126512,
+            "maximum_mtm_drawdown_pct": -16.78776877493442,
+            "profit_factor": 3.0694473979102104,
+            "win_rate_pct": 69.62509563886763,
+            "closed_trades": 1307,
+            "average_loss_jpy": -959.1720331058102,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 330,
+              "net_pnl_jpy": 664341.245606368,
+              "profit_factor": 3.1984921236666186,
+              "win_rate": 0.7,
+              "max_cumulative_pnl_drawdown_jpy": -54943.6643747199,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 21,
+              "triggered": 3,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 3,
+              "reentry_rejected": 0,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 3
+              }
+            }
+          }
+        },
+        {
+          "candidate": "FET_ATR2P0_6H_MFE1P0_R12",
+          "plan": {
+            "id": "FET_ATR2P0_6H_MFE1P0_R12",
+            "strategy": "FET",
+            "sides": [
+              "LONG",
+              "SHORT"
+            ],
+            "atr_mult": 2.0,
+            "atr_floor_pct": 0.01,
+            "atr_cap_pct": 0.05,
+            "arm_hours": 6,
+            "mfe_gate_pct": 0.01,
+            "reentry_hours": 12
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 222616340.75942928,
+            "maximum_mtm_drawdown_pct": -15.62063681288941,
+            "profit_factor": 3.4391377137351538,
+            "win_rate_pct": 72.29007633587786,
+            "closed_trades": 1310,
+            "average_loss_jpy": -1587.8698290900845,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 329,
+              "net_pnl_jpy": 1120552.8322980697,
+              "profit_factor": 3.562357984604934,
+              "win_rate": 0.7355623100303952,
+              "max_cumulative_pnl_drawdown_jpy": -97594.90627477306,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 20,
+              "triggered": 4,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 4,
+              "reentry_rejected": 1,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 4,
+                "REENTRY_HOLDOFF": 1
+              }
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 124154901.78814459,
+            "maximum_mtm_drawdown_pct": -16.78776877493442,
+            "profit_factor": 3.0527489159890044,
+            "win_rate_pct": 69.54858454475898,
+            "closed_trades": 1307,
+            "average_loss_jpy": -959.6860840207565,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 330,
+              "net_pnl_jpy": 660371.5249149287,
+              "profit_factor": 3.1769711981247735,
+              "win_rate": 0.696969696969697,
+              "max_cumulative_pnl_drawdown_jpy": -54791.67707599519,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 20,
+              "triggered": 4,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 4,
+              "reentry_rejected": 1,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 4,
+                "REENTRY_HOLDOFF": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "phase": "HYPE",
+      "candidate_count": 4,
+      "selection_status": "NO_ACCEPTED_CANDIDATE_BASELINE_UNCHANGED",
+      "selected_candidate": null,
+      "best_by_minimum_dd_improvement": "HYPE_PCT1P5_3H_MFE0P5_R6",
+      "candidates": [
+        {
+          "candidate": "HYPE_PCT1P5_3H_MFE0P5_R6",
+          "plan": {
+            "id": "HYPE_PCT1P5_3H_MFE0P5_R6",
+            "strategy": "HYPE_LONG",
+            "sides": [
+              "LONG",
+              "SHORT"
+            ],
+            "stop_pct": 0.015,
+            "arm_hours": 3,
+            "mfe_gate_pct": 0.005,
+            "reentry_hours": 6
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 222818966.87803495,
+            "maximum_mtm_drawdown_pct": -15.62063681288941,
+            "profit_factor": 3.4587962777009813,
+            "win_rate_pct": 72.36641221374046,
+            "closed_trades": 1310,
+            "average_loss_jpy": -1580.9635643100019,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 329,
+              "net_pnl_jpy": 1121832.5586877514,
+              "profit_factor": 3.589490491920463,
+              "win_rate": 0.7386018237082067,
+              "max_cumulative_pnl_drawdown_jpy": -97573.98274941987,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 60,
+              "triggered": 0,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 0,
+              "reentry_rejected": 0,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {}
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 124289206.81827945,
+            "maximum_mtm_drawdown_pct": -16.78776877493442,
+            "profit_factor": 3.0785603081685435,
+            "win_rate_pct": 69.54858454475898,
+            "closed_trades": 1307,
+            "average_loss_jpy": -948.7941214836525,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 330,
+              "net_pnl_jpy": 661219.7555996655,
+              "profit_factor": 3.2113694849061787,
+              "win_rate": 0.696969696969697,
+              "max_cumulative_pnl_drawdown_jpy": -54721.307936886384,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 60,
+              "triggered": 0,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 0,
+              "reentry_rejected": 0,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {}
+            }
+          }
+        },
+        {
+          "candidate": "HYPE_PCT2P0_6H_MFE0P5_R12",
+          "plan": {
+            "id": "HYPE_PCT2P0_6H_MFE0P5_R12",
+            "strategy": "HYPE_LONG",
+            "sides": [
+              "LONG",
+              "SHORT"
+            ],
+            "stop_pct": 0.02,
+            "arm_hours": 6,
+            "mfe_gate_pct": 0.005,
+            "reentry_hours": 12
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 222818966.87803495,
+            "maximum_mtm_drawdown_pct": -15.62063681288941,
+            "profit_factor": 3.4587962777009813,
+            "win_rate_pct": 72.36641221374046,
+            "closed_trades": 1310,
+            "average_loss_jpy": -1580.9635643100019,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 329,
+              "net_pnl_jpy": 1121832.5586877514,
+              "profit_factor": 3.589490491920463,
+              "win_rate": 0.7386018237082067,
+              "max_cumulative_pnl_drawdown_jpy": -97573.98274941987,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 60,
+              "triggered": 0,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 0,
+              "reentry_rejected": 0,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {}
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 124289206.81827945,
+            "maximum_mtm_drawdown_pct": -16.78776877493442,
+            "profit_factor": 3.0785603081685435,
+            "win_rate_pct": 69.54858454475898,
+            "closed_trades": 1307,
+            "average_loss_jpy": -948.7941214836525,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 330,
+              "net_pnl_jpy": 661219.7555996655,
+              "profit_factor": 3.2113694849061787,
+              "win_rate": 0.696969696969697,
+              "max_cumulative_pnl_drawdown_jpy": -54721.307936886384,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 60,
+              "triggered": 0,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 0,
+              "reentry_rejected": 0,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {}
+            }
+          }
+        },
+        {
+          "candidate": "HYPE_PCT3P0_12H_NONE_R24",
+          "plan": {
+            "id": "HYPE_PCT3P0_12H_NONE_R24",
+            "strategy": "HYPE_LONG",
+            "sides": [
+              "LONG",
+              "SHORT"
+            ],
+            "stop_pct": 0.03,
+            "arm_hours": 12,
+            "mfe_gate_pct": null,
+            "reentry_hours": 24
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 222818966.87803495,
+            "maximum_mtm_drawdown_pct": -15.62063681288941,
+            "profit_factor": 3.4587962777009813,
+            "win_rate_pct": 72.36641221374046,
+            "closed_trades": 1310,
+            "average_loss_jpy": -1580.9635643100019,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 329,
+              "net_pnl_jpy": 1121832.5586877514,
+              "profit_factor": 3.589490491920463,
+              "win_rate": 0.7386018237082067,
+              "max_cumulative_pnl_drawdown_jpy": -97573.98274941987,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 60,
+              "triggered": 0,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 0,
+              "reentry_rejected": 0,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {}
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 124289206.81827945,
+            "maximum_mtm_drawdown_pct": -16.78776877493442,
+            "profit_factor": 3.0785603081685435,
+            "win_rate_pct": 69.54858454475898,
+            "closed_trades": 1307,
+            "average_loss_jpy": -948.7941214836525,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 330,
+              "net_pnl_jpy": 661219.7555996655,
+              "profit_factor": 3.2113694849061787,
+              "win_rate": 0.696969696969697,
+              "max_cumulative_pnl_drawdown_jpy": -54721.307936886384,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 60,
+              "triggered": 0,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 0,
+              "reentry_rejected": 0,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {}
+            }
+          }
+        },
+        {
+          "candidate": "HYPE_ATR2P0_6H_MFE1P0_R12",
+          "plan": {
+            "id": "HYPE_ATR2P0_6H_MFE1P0_R12",
+            "strategy": "HYPE_LONG",
+            "sides": [
+              "LONG",
+              "SHORT"
+            ],
+            "atr_mult": 2.0,
+            "atr_floor_pct": 0.01,
+            "atr_cap_pct": 0.05,
+            "arm_hours": 6,
+            "mfe_gate_pct": 0.01,
+            "reentry_hours": 12
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 222818966.87803495,
+            "maximum_mtm_drawdown_pct": -15.62063681288941,
+            "profit_factor": 3.4587962777009813,
+            "win_rate_pct": 72.36641221374046,
+            "closed_trades": 1310,
+            "average_loss_jpy": -1580.9635643100019,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 329,
+              "net_pnl_jpy": 1121832.5586877514,
+              "profit_factor": 3.589490491920463,
+              "win_rate": 0.7386018237082067,
+              "max_cumulative_pnl_drawdown_jpy": -97573.98274941987,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 60,
+              "triggered": 0,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 0,
+              "reentry_rejected": 0,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {}
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 124289206.81827945,
+            "maximum_mtm_drawdown_pct": -16.78776877493442,
+            "profit_factor": 3.0785603081685435,
+            "win_rate_pct": 69.54858454475898,
+            "closed_trades": 1307,
+            "average_loss_jpy": -948.7941214836525,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 330,
+              "net_pnl_jpy": 661219.7555996655,
+              "profit_factor": 3.2113694849061787,
+              "win_rate": 0.696969696969697,
+              "max_cumulative_pnl_drawdown_jpy": -54721.307936886384,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 60,
+              "triggered": 0,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 0,
+              "reentry_rejected": 0,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {}
+            }
+          }
+        }
+      ]
+    },
+    {
+      "phase": "V52",
+      "candidate_count": 4,
+      "selection_status": "NO_ACCEPTED_CANDIDATE_BASELINE_UNCHANGED",
+      "selected_candidate": null,
+      "best_by_minimum_dd_improvement": "V52_PCT1P5_3H_MFE0P5_R6",
+      "candidates": [
+        {
+          "candidate": "V52_PCT1P5_3H_MFE0P5_R6",
+          "plan": {
+            "id": "V52_PCT1P5_3H_MFE0P5_R6",
+            "strategy": "V52",
+            "sides": [
+              "LONG",
+              "SHORT"
+            ],
+            "stop_pct": 0.015,
+            "arm_hours": 3,
+            "mfe_gate_pct": 0.005,
+            "reentry_hours": 6
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 222818966.87803495,
+            "maximum_mtm_drawdown_pct": -15.62063681288941,
+            "profit_factor": 3.4587962777009813,
+            "win_rate_pct": 72.36641221374046,
+            "closed_trades": 1310,
+            "average_loss_jpy": -1580.9635643100019,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 329,
+              "net_pnl_jpy": 1121832.5586877514,
+              "profit_factor": 3.589490491920463,
+              "win_rate": 0.7386018237082067,
+              "max_cumulative_pnl_drawdown_jpy": -97573.98274941987,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 0,
+              "triggered": 0,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 0,
+              "reentry_rejected": 0,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {}
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 124289206.81827945,
+            "maximum_mtm_drawdown_pct": -16.78776877493442,
+            "profit_factor": 3.0785603081685435,
+            "win_rate_pct": 69.54858454475898,
+            "closed_trades": 1307,
+            "average_loss_jpy": -948.7941214836525,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 330,
+              "net_pnl_jpy": 661219.7555996655,
+              "profit_factor": 3.2113694849061787,
+              "win_rate": 0.696969696969697,
+              "max_cumulative_pnl_drawdown_jpy": -54721.307936886384,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 0,
+              "triggered": 0,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 0,
+              "reentry_rejected": 0,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {}
+            }
+          }
+        },
+        {
+          "candidate": "V52_PCT2P0_6H_MFE0P5_R12",
+          "plan": {
+            "id": "V52_PCT2P0_6H_MFE0P5_R12",
+            "strategy": "V52",
+            "sides": [
+              "LONG",
+              "SHORT"
+            ],
+            "stop_pct": 0.02,
+            "arm_hours": 6,
+            "mfe_gate_pct": 0.005,
+            "reentry_hours": 12
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 222818966.87803495,
+            "maximum_mtm_drawdown_pct": -15.62063681288941,
+            "profit_factor": 3.4587962777009813,
+            "win_rate_pct": 72.36641221374046,
+            "closed_trades": 1310,
+            "average_loss_jpy": -1580.9635643100019,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 329,
+              "net_pnl_jpy": 1121832.5586877514,
+              "profit_factor": 3.589490491920463,
+              "win_rate": 0.7386018237082067,
+              "max_cumulative_pnl_drawdown_jpy": -97573.98274941987,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 0,
+              "triggered": 0,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 0,
+              "reentry_rejected": 0,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {}
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 124289206.81827945,
+            "maximum_mtm_drawdown_pct": -16.78776877493442,
+            "profit_factor": 3.0785603081685435,
+            "win_rate_pct": 69.54858454475898,
+            "closed_trades": 1307,
+            "average_loss_jpy": -948.7941214836525,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 330,
+              "net_pnl_jpy": 661219.7555996655,
+              "profit_factor": 3.2113694849061787,
+              "win_rate": 0.696969696969697,
+              "max_cumulative_pnl_drawdown_jpy": -54721.307936886384,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 0,
+              "triggered": 0,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 0,
+              "reentry_rejected": 0,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {}
+            }
+          }
+        },
+        {
+          "candidate": "V52_PCT3P0_12H_NONE_R24",
+          "plan": {
+            "id": "V52_PCT3P0_12H_NONE_R24",
+            "strategy": "V52",
+            "sides": [
+              "LONG",
+              "SHORT"
+            ],
+            "stop_pct": 0.03,
+            "arm_hours": 12,
+            "mfe_gate_pct": null,
+            "reentry_hours": 24
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 222818966.87803495,
+            "maximum_mtm_drawdown_pct": -15.62063681288941,
+            "profit_factor": 3.4587962777009813,
+            "win_rate_pct": 72.36641221374046,
+            "closed_trades": 1310,
+            "average_loss_jpy": -1580.9635643100019,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 329,
+              "net_pnl_jpy": 1121832.5586877514,
+              "profit_factor": 3.589490491920463,
+              "win_rate": 0.7386018237082067,
+              "max_cumulative_pnl_drawdown_jpy": -97573.98274941987,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 0,
+              "triggered": 0,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 0,
+              "reentry_rejected": 0,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {}
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 124289206.81827945,
+            "maximum_mtm_drawdown_pct": -16.78776877493442,
+            "profit_factor": 3.0785603081685435,
+            "win_rate_pct": 69.54858454475898,
+            "closed_trades": 1307,
+            "average_loss_jpy": -948.7941214836525,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 330,
+              "net_pnl_jpy": 661219.7555996655,
+              "profit_factor": 3.2113694849061787,
+              "win_rate": 0.696969696969697,
+              "max_cumulative_pnl_drawdown_jpy": -54721.307936886384,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 0,
+              "triggered": 0,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 0,
+              "reentry_rejected": 0,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {}
+            }
+          }
+        },
+        {
+          "candidate": "V52_ATR2P0_6H_MFE1P0_R12",
+          "plan": {
+            "id": "V52_ATR2P0_6H_MFE1P0_R12",
+            "strategy": "V52",
+            "sides": [
+              "LONG",
+              "SHORT"
+            ],
+            "atr_mult": 2.0,
+            "atr_floor_pct": 0.01,
+            "atr_cap_pct": 0.05,
+            "arm_hours": 6,
+            "mfe_gate_pct": 0.01,
+            "reentry_hours": 12
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 222818966.87803495,
+            "maximum_mtm_drawdown_pct": -15.62063681288941,
+            "profit_factor": 3.4587962777009813,
+            "win_rate_pct": 72.36641221374046,
+            "closed_trades": 1310,
+            "average_loss_jpy": -1580.9635643100019,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 329,
+              "net_pnl_jpy": 1121832.5586877514,
+              "profit_factor": 3.589490491920463,
+              "win_rate": 0.7386018237082067,
+              "max_cumulative_pnl_drawdown_jpy": -97573.98274941987,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 0,
+              "triggered": 0,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 0,
+              "reentry_rejected": 0,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {}
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 124289206.81827945,
+            "maximum_mtm_drawdown_pct": -16.78776877493442,
+            "profit_factor": 3.0785603081685435,
+            "win_rate_pct": 69.54858454475898,
+            "closed_trades": 1307,
+            "average_loss_jpy": -948.7941214836525,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 330,
+              "net_pnl_jpy": 661219.7555996655,
+              "profit_factor": 3.2113694849061787,
+              "win_rate": 0.696969696969697,
+              "max_cumulative_pnl_drawdown_jpy": -54721.307936886384,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 0,
+              "triggered": 0,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 0,
+              "reentry_rejected": 0,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "invalid_input": 0,
+              "by_reason": {}
+            }
+          }
+        }
+      ]
+    },
+    {
+      "phase": "V12_LONG_COMPOSITE",
+      "candidate_count": 2,
+      "selection_status": "NO_ACCEPTED_CANDIDATE_BASELINE_UNCHANGED",
+      "selected_candidate": null,
+      "best_by_minimum_dd_improvement": "V12_LONG_COMPOSITE_PCT2P0_12H_MFE1P0_STRUCTURE3_R12",
+      "candidates": [
+        {
+          "candidate": "V12_LONG_COMPOSITE_PCT2P0_12H_MFE1P0_STRUCTURE3_R12",
+          "plan": {
+            "id": "V12_LONG_COMPOSITE_PCT2P0_12H_MFE1P0_STRUCTURE3_R12",
+            "strategy": "V12",
+            "sides": [
+              "LONG"
+            ],
+            "stop_pct": 0.02,
+            "arm_hours": 12,
+            "mfe_gate_pct": 0.01,
+            "structure_bars": 3,
+            "structure_min_adverse_closes": 3,
+            "reentry_hours": 12
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 217383889.09914476,
+            "maximum_mtm_drawdown_pct": -15.62178391364909,
+            "profit_factor": 3.4540763093114673,
+            "win_rate_pct": 71.88449848024317,
+            "closed_trades": 1316,
+            "average_loss_jpy": -1511.951525523847,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 329,
+              "net_pnl_jpy": 1101956.0454783547,
+              "profit_factor": 3.5999123893738507,
+              "win_rate": 0.7386018237082067,
+              "max_cumulative_pnl_drawdown_jpy": -95775.49888502364,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": -0.001147100759679276,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 171,
+              "triggered": 19,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 19,
+              "reentry_rejected": 2,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "structure_unconfirmed": 22,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 19,
+                "REENTRY_HOLDOFF": 2
+              }
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 92711779.04579821,
+            "maximum_mtm_drawdown_pct": -16.804603146297215,
+            "profit_factor": 2.789902389586302,
+            "win_rate_pct": 68.77380045696877,
+            "closed_trades": 1313,
+            "average_loss_jpy": -797.7985299150596,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 331,
+              "net_pnl_jpy": 496982.68897398247,
+              "profit_factor": 2.9579124059598247,
+              "win_rate": 0.6948640483383686,
+              "max_cumulative_pnl_drawdown_jpy": -41444.70269863319,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": -0.016834371362794087,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": false,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 171,
+              "triggered": 19,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 19,
+              "reentry_rejected": 2,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "structure_unconfirmed": 22,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 19,
+                "REENTRY_HOLDOFF": 2
+              }
+            }
+          }
+        },
+        {
+          "candidate": "V12_LONG_COMPOSITE_ATR1P5_6H_MFE0P5_STRUCTURE3_R12",
+          "plan": {
+            "id": "V12_LONG_COMPOSITE_ATR1P5_6H_MFE0P5_STRUCTURE3_R12",
+            "strategy": "V12",
+            "sides": [
+              "LONG"
+            ],
+            "atr_mult": 1.5,
+            "atr_floor_pct": 0.01,
+            "atr_cap_pct": 0.04,
+            "arm_hours": 6,
+            "mfe_gate_pct": 0.005,
+            "structure_bars": 3,
+            "structure_min_adverse_closes": 2,
+            "reentry_hours": 12
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 217389102.673038,
+            "maximum_mtm_drawdown_pct": -15.619976638894627,
+            "profit_factor": 3.420078151510425,
+            "win_rate_pct": 71.83206106870229,
+            "closed_trades": 1310,
+            "average_loss_jpy": -1537.3838470169064,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 327,
+              "net_pnl_jpy": 1099765.488091486,
+              "profit_factor": 3.5673418348566104,
+              "win_rate": 0.7339449541284404,
+              "max_cumulative_pnl_drawdown_jpy": -95776.88681709021,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0006601739947829088,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 168,
+              "triggered": 24,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 24,
+              "reentry_rejected": 5,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "structure_unconfirmed": 7,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 24,
+                "REENTRY_HOLDOFF": 5
+              }
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 108976953.44343537,
+            "maximum_mtm_drawdown_pct": -16.810486091155695,
+            "profit_factor": 2.902159467392968,
+            "win_rate_pct": 69.1131498470948,
+            "closed_trades": 1308,
+            "average_loss_jpy": -895.5408182012113,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 329,
+              "net_pnl_jpy": 578151.0185784039,
+              "profit_factor": 3.0135669549850745,
+              "win_rate": 0.6960486322188449,
+              "max_cumulative_pnl_drawdown_jpy": -48179.31138671568,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": -0.02271731622127504,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 168,
+              "triggered": 24,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 24,
+              "reentry_rejected": 5,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "structure_unconfirmed": 7,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 24,
+                "REENTRY_HOLDOFF": 5
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "phase": "V12_SHORT_COMPOSITE",
+      "candidate_count": 2,
+      "selection_status": "NO_ACCEPTED_CANDIDATE_BASELINE_UNCHANGED",
+      "selected_candidate": null,
+      "best_by_minimum_dd_improvement": "V12_SHORT_COMPOSITE_PCT2P0_12H_MFE1P0_STRUCTURE3_R12",
+      "candidates": [
+        {
+          "candidate": "V12_SHORT_COMPOSITE_PCT2P0_12H_MFE1P0_STRUCTURE3_R12",
+          "plan": {
+            "id": "V12_SHORT_COMPOSITE_PCT2P0_12H_MFE1P0_STRUCTURE3_R12",
+            "strategy": "V12",
+            "sides": [
+              "SHORT"
+            ],
+            "stop_pct": 0.02,
+            "arm_hours": 12,
+            "mfe_gate_pct": 0.01,
+            "structure_bars": 3,
+            "structure_min_adverse_closes": 3,
+            "reentry_hours": 12
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 208190060.08270684,
+            "maximum_mtm_drawdown_pct": -14.167678348295642,
+            "profit_factor": 3.3616130229375325,
+            "win_rate_pct": 70.99767981438515,
+            "closed_trades": 1293,
+            "average_loss_jpy": -1484.6337976420086,
+            "maximum_loss_streak": 7,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 329,
+              "net_pnl_jpy": 1075592.2651714107,
+              "profit_factor": 3.572550013335162,
+              "win_rate": 0.7325227963525835,
+              "max_cumulative_pnl_drawdown_jpy": -80261.097251878,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": 1.4529584645937685,
+              "dd_pass": true,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": true
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 726,
+              "triggered": 65,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 65,
+              "reentry_rejected": 59,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "structure_unconfirmed": 144,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 65,
+                "REENTRY_HOLDOFF": 59
+              }
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 85820013.37610891,
+            "maximum_mtm_drawdown_pct": -15.30609450518,
+            "profit_factor": 2.7336678415925397,
+            "win_rate_pct": 68.50271528316524,
+            "closed_trades": 1289,
+            "average_loss_jpy": -769.9528706210938,
+            "maximum_loss_streak": 7,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 330,
+              "net_pnl_jpy": 461677.30592607905,
+              "profit_factor": 2.874150233457843,
+              "win_rate": 0.696969696969697,
+              "max_cumulative_pnl_drawdown_jpy": -42344.018529214954,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": 1.4816742697544196,
+              "dd_pass": true,
+              "accounting_pass": true,
+              "oos_pass": false,
+              "final_equity_guard_pass": false,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 726,
+              "triggered": 65,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 65,
+              "reentry_rejected": 59,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "structure_unconfirmed": 144,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 65,
+                "REENTRY_HOLDOFF": 59
+              }
+            }
+          }
+        },
+        {
+          "candidate": "V12_SHORT_COMPOSITE_ATR1P5_6H_MFE0P5_STRUCTURE3_R12",
+          "plan": {
+            "id": "V12_SHORT_COMPOSITE_ATR1P5_6H_MFE0P5_STRUCTURE3_R12",
+            "strategy": "V12",
+            "sides": [
+              "SHORT"
+            ],
+            "atr_mult": 1.5,
+            "atr_floor_pct": 0.01,
+            "atr_cap_pct": 0.04,
+            "arm_hours": 6,
+            "mfe_gate_pct": 0.005,
+            "structure_bars": 3,
+            "structure_min_adverse_closes": 2,
+            "reentry_hours": 12
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 190967530.0311152,
+            "maximum_mtm_drawdown_pct": -14.79603474654827,
+            "profit_factor": 3.146781800957381,
+            "win_rate_pct": 70.18348623853211,
+            "closed_trades": 1308,
+            "average_loss_jpy": -1440.4704681196288,
+            "maximum_loss_streak": 5,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 331,
+              "net_pnl_jpy": 977096.4517954397,
+              "profit_factor": 3.285919566811782,
+              "win_rate": 0.7220543806646526,
+              "max_cumulative_pnl_drawdown_jpy": -80062.64229769818,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": 0.8246020663411411,
+              "dd_pass": true,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": true
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 736,
+              "triggered": 74,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 74,
+              "reentry_rejected": 49,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "structure_unconfirmed": 24,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 74,
+                "REENTRY_HOLDOFF": 49
+              }
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 76038373.451831,
+            "maximum_mtm_drawdown_pct": -15.69459582785071,
+            "profit_factor": 2.523810124059146,
+            "win_rate_pct": 67.61102603369066,
+            "closed_trades": 1306,
+            "average_loss_jpy": -744.9414051896579,
+            "maximum_loss_streak": 5,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 332,
+              "net_pnl_jpy": 405167.03278847033,
+              "profit_factor": 2.6132325436634827,
+              "win_rate": 0.6837349397590361,
+              "max_cumulative_pnl_drawdown_jpy": -37592.40080002218,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": 1.0931729470837102,
+              "dd_pass": true,
+              "accounting_pass": true,
+              "oos_pass": false,
+              "final_equity_guard_pass": false,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 736,
+              "triggered": 74,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 74,
+              "reentry_rejected": 49,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "structure_unconfirmed": 24,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 74,
+                "REENTRY_HOLDOFF": 49
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "phase": "Q102_COMPOSITE",
+      "candidate_count": 2,
+      "selection_status": "NO_ACCEPTED_CANDIDATE_BASELINE_UNCHANGED",
+      "selected_candidate": null,
+      "best_by_minimum_dd_improvement": "Q102_COMPOSITE_ATR1P5_6H_MFE0P5_STRUCTURE3_R12",
+      "candidates": [
+        {
+          "candidate": "Q102_COMPOSITE_PCT2P0_12H_MFE1P0_STRUCTURE3_R12",
+          "plan": {
+            "id": "Q102_COMPOSITE_PCT2P0_12H_MFE1P0_STRUCTURE3_R12",
+            "strategy": "Q102",
+            "sides": [
+              "LONG",
+              "SHORT"
+            ],
+            "stop_pct": 0.02,
+            "arm_hours": 12,
+            "mfe_gate_pct": 0.01,
+            "structure_bars": 3,
+            "structure_min_adverse_closes": 3,
+            "reentry_hours": 12
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 219787858.93528926,
+            "maximum_mtm_drawdown_pct": -18.429294581714963,
+            "profit_factor": 3.5760416266714077,
+            "win_rate_pct": 72.03972498090145,
+            "closed_trades": 1309,
+            "average_loss_jpy": -1472.2117201440628,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 329,
+              "net_pnl_jpy": 1121399.6812225147,
+              "profit_factor": 3.726722942519879,
+              "win_rate": 0.7416413373860182,
+              "max_cumulative_pnl_drawdown_jpy": -95866.94355627813,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": -2.8086577688255527,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 371,
+              "triggered": 23,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 23,
+              "reentry_rejected": 26,
+              "data_gap": 0,
+              "entry_mismatch": 1,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "structure_unconfirmed": 32,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 23,
+                "REENTRY_HOLDOFF": 26
+              }
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 93552424.73686054,
+            "maximum_mtm_drawdown_pct": -19.80480983001961,
+            "profit_factor": 2.9228708005578596,
+            "win_rate_pct": 68.81226053639847,
+            "closed_trades": 1305,
+            "average_loss_jpy": -754.8879740832145,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 330,
+              "net_pnl_jpy": 505071.69950874447,
+              "profit_factor": 3.116307973380695,
+              "win_rate": 0.696969696969697,
+              "max_cumulative_pnl_drawdown_jpy": -40669.45905116142,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": -3.0170410550851905,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 371,
+              "triggered": 23,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 23,
+              "reentry_rejected": 26,
+              "data_gap": 0,
+              "entry_mismatch": 1,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "structure_unconfirmed": 32,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 23,
+                "REENTRY_HOLDOFF": 26
+              }
+            }
+          }
+        },
+        {
+          "candidate": "Q102_COMPOSITE_ATR1P5_6H_MFE0P5_STRUCTURE3_R12",
+          "plan": {
+            "id": "Q102_COMPOSITE_ATR1P5_6H_MFE0P5_STRUCTURE3_R12",
+            "strategy": "Q102",
+            "sides": [
+              "LONG",
+              "SHORT"
+            ],
+            "atr_mult": 1.5,
+            "atr_floor_pct": 0.01,
+            "atr_cap_pct": 0.04,
+            "arm_hours": 6,
+            "mfe_gate_pct": 0.005,
+            "structure_bars": 3,
+            "structure_min_adverse_closes": 2,
+            "reentry_hours": 12
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 202320656.80843753,
+            "maximum_mtm_drawdown_pct": -18.065311505557048,
+            "profit_factor": 3.251556121538363,
+            "win_rate_pct": 71.33131618759455,
+            "closed_trades": 1322,
+            "average_loss_jpy": -1497.3280027235755,
+            "maximum_loss_streak": 7,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 331,
+              "net_pnl_jpy": 1030129.190702461,
+              "profit_factor": 3.3850044426669967,
+              "win_rate": 0.7280966767371602,
+              "max_cumulative_pnl_drawdown_jpy": -99112.28612843587,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": -2.444674692667638,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 371,
+              "triggered": 37,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 37,
+              "reentry_rejected": 26,
+              "data_gap": 0,
+              "entry_mismatch": 1,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "structure_unconfirmed": 11,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 37,
+                "REENTRY_HOLDOFF": 26
+              }
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 91510586.62823915,
+            "maximum_mtm_drawdown_pct": -19.77438853444128,
+            "profit_factor": 2.7700719890611287,
+            "win_rate_pct": 68.38514025777104,
+            "closed_trades": 1319,
+            "average_loss_jpy": -782.9160884296589,
+            "maximum_loss_streak": 7,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 332,
+              "net_pnl_jpy": 485356.4377664157,
+              "profit_factor": 2.8504457299312436,
+              "win_rate": 0.6867469879518072,
+              "max_cumulative_pnl_drawdown_jpy": -40913.29494352109,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": -2.9866197595068584,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": false,
+              "final_equity_guard_pass": false,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 371,
+              "triggered": 37,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 37,
+              "reentry_rejected": 26,
+              "data_gap": 0,
+              "entry_mismatch": 1,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "structure_unconfirmed": 11,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 37,
+                "REENTRY_HOLDOFF": 26
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "phase": "IDLE_COMPOSITE",
+      "candidate_count": 2,
+      "selection_status": "NO_ACCEPTED_CANDIDATE_BASELINE_UNCHANGED",
+      "selected_candidate": null,
+      "best_by_minimum_dd_improvement": "IDLE_COMPOSITE_PCT2P0_12H_MFE1P0_STRUCTURE3_R12",
+      "candidates": [
+        {
+          "candidate": "IDLE_COMPOSITE_PCT2P0_12H_MFE1P0_STRUCTURE3_R12",
+          "plan": {
+            "id": "IDLE_COMPOSITE_PCT2P0_12H_MFE1P0_STRUCTURE3_R12",
+            "strategy": "IDLE",
+            "sides": [
+              "LONG",
+              "SHORT"
+            ],
+            "stop_pct": 0.02,
+            "arm_hours": 12,
+            "mfe_gate_pct": 0.01,
+            "structure_bars": 3,
+            "structure_min_adverse_closes": 3,
+            "reentry_hours": 12
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 209722601.56866944,
+            "maximum_mtm_drawdown_pct": -15.625012364490976,
+            "profit_factor": 3.3514214920085035,
+            "win_rate_pct": 71.787072243346,
+            "closed_trades": 1315,
+            "average_loss_jpy": -1518.2397648385306,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 331,
+              "net_pnl_jpy": 1062421.8005294725,
+              "profit_factor": 3.4432544721327583,
+              "win_rate": 0.7341389728096677,
+              "max_cumulative_pnl_drawdown_jpy": -101421.65724922414,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": -0.004375551601565775,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 673,
+              "triggered": 38,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 38,
+              "reentry_rejected": 21,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "structure_unconfirmed": 87,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 38,
+                "REENTRY_HOLDOFF": 21
+              }
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 101628349.94595988,
+            "maximum_mtm_drawdown_pct": -16.778993471076376,
+            "profit_factor": 2.863290688676315,
+            "win_rate_pct": 68.8787185354691,
+            "closed_trades": 1311,
+            "average_loss_jpy": -844.209085533861,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 331,
+              "net_pnl_jpy": 540665.2028340335,
+              "profit_factor": 2.9777563167317727,
+              "win_rate": 0.6918429003021148,
+              "max_cumulative_pnl_drawdown_jpy": -45185.659170858795,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": 0.008775303858044481,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 673,
+              "triggered": 38,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 38,
+              "reentry_rejected": 21,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "structure_unconfirmed": 87,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 38,
+                "REENTRY_HOLDOFF": 21
+              }
+            }
+          }
+        },
+        {
+          "candidate": "IDLE_COMPOSITE_ATR1P5_6H_MFE0P5_STRUCTURE3_R12",
+          "plan": {
+            "id": "IDLE_COMPOSITE_ATR1P5_6H_MFE0P5_STRUCTURE3_R12",
+            "strategy": "IDLE",
+            "sides": [
+              "LONG",
+              "SHORT"
+            ],
+            "atr_mult": 1.5,
+            "atr_floor_pct": 0.01,
+            "atr_cap_pct": 0.04,
+            "arm_hours": 6,
+            "mfe_gate_pct": 0.005,
+            "structure_bars": 3,
+            "structure_min_adverse_closes": 2,
+            "reentry_hours": 12
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 222200072.23949742,
+            "maximum_mtm_drawdown_pct": -15.630386739032554,
+            "profit_factor": 3.424248703454861,
+            "win_rate_pct": 72.03972498090145,
+            "closed_trades": 1309,
+            "average_loss_jpy": -1581.5637512605083,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 329,
+              "net_pnl_jpy": 1114111.0972143945,
+              "profit_factor": 3.5528596611845256,
+              "win_rate": 0.7355623100303952,
+              "max_cumulative_pnl_drawdown_jpy": -97371.94996316195,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": -0.009749926143143739,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 582,
+              "triggered": 87,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 87,
+              "reentry_rejected": 112,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "structure_unconfirmed": 58,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 87,
+                "REENTRY_HOLDOFF": 112
+              }
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 118732653.63235126,
+            "maximum_mtm_drawdown_pct": -16.80253063631193,
+            "profit_factor": 3.0309305956482473,
+            "win_rate_pct": 69.14241960183767,
+            "closed_trades": 1306,
+            "average_loss_jpy": -916.1204226651306,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 330,
+              "net_pnl_jpy": 631884.529659588,
+              "profit_factor": 3.170260236899794,
+              "win_rate": 0.693939393939394,
+              "max_cumulative_pnl_drawdown_jpy": -52341.07981688052,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": -0.014761861377508012,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 582,
+              "triggered": 87,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 87,
+              "reentry_rejected": 112,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "structure_unconfirmed": 58,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 87,
+                "REENTRY_HOLDOFF": 112
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "phase": "FET_COMPOSITE",
+      "candidate_count": 2,
+      "selection_status": "NO_ACCEPTED_CANDIDATE_BASELINE_UNCHANGED",
+      "selected_candidate": null,
+      "best_by_minimum_dd_improvement": "FET_COMPOSITE_PCT2P0_12H_MFE1P0_STRUCTURE3_R12",
+      "candidates": [
+        {
+          "candidate": "FET_COMPOSITE_PCT2P0_12H_MFE1P0_STRUCTURE3_R12",
+          "plan": {
+            "id": "FET_COMPOSITE_PCT2P0_12H_MFE1P0_STRUCTURE3_R12",
+            "strategy": "FET",
+            "sides": [
+              "LONG",
+              "SHORT"
+            ],
+            "stop_pct": 0.02,
+            "arm_hours": 12,
+            "mfe_gate_pct": 0.01,
+            "structure_bars": 3,
+            "structure_min_adverse_closes": 3,
+            "reentry_hours": 12
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 223112817.08753067,
+            "maximum_mtm_drawdown_pct": -15.62063681288941,
+            "profit_factor": 3.4495606197314292,
+            "win_rate_pct": 72.36641221374046,
+            "closed_trades": 1310,
+            "average_loss_jpy": -1589.01723446756,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 329,
+              "net_pnl_jpy": 1123688.4293439805,
+              "profit_factor": 3.576435978102479,
+              "win_rate": 0.7386018237082067,
+              "max_cumulative_pnl_drawdown_jpy": -97669.4175601725,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 21,
+              "triggered": 1,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 1,
+              "reentry_rejected": 0,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "structure_unconfirmed": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 1
+              }
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 124783449.50126512,
+            "maximum_mtm_drawdown_pct": -16.78776877493442,
+            "profit_factor": 3.0694473979102104,
+            "win_rate_pct": 69.62509563886763,
+            "closed_trades": 1307,
+            "average_loss_jpy": -959.1720331058102,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 330,
+              "net_pnl_jpy": 664341.245606368,
+              "profit_factor": 3.1984921236666186,
+              "win_rate": 0.7,
+              "max_cumulative_pnl_drawdown_jpy": -54943.6643747199,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 21,
+              "triggered": 1,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 1,
+              "reentry_rejected": 0,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "structure_unconfirmed": 0,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 1
+              }
+            }
+          }
+        },
+        {
+          "candidate": "FET_COMPOSITE_ATR1P5_6H_MFE0P5_STRUCTURE3_R12",
+          "plan": {
+            "id": "FET_COMPOSITE_ATR1P5_6H_MFE0P5_STRUCTURE3_R12",
+            "strategy": "FET",
+            "sides": [
+              "LONG",
+              "SHORT"
+            ],
+            "atr_mult": 1.5,
+            "atr_floor_pct": 0.01,
+            "atr_cap_pct": 0.04,
+            "arm_hours": 6,
+            "mfe_gate_pct": 0.005,
+            "structure_bars": 3,
+            "structure_min_adverse_closes": 2,
+            "reentry_hours": 12
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 222884269.63490924,
+            "maximum_mtm_drawdown_pct": -15.62063681288941,
+            "profit_factor": 3.4458339847788393,
+            "win_rate_pct": 72.36641221374046,
+            "closed_trades": 1310,
+            "average_loss_jpy": -1589.808085292983,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 329,
+              "net_pnl_jpy": 1122244.9915067104,
+              "profit_factor": 3.571438485025712,
+              "win_rate": 0.7386018237082067,
+              "max_cumulative_pnl_drawdown_jpy": -97594.90627477306,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 21,
+              "triggered": 2,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 2,
+              "reentry_rejected": 0,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "structure_unconfirmed": 2,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 2
+              }
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 124445138.52663578,
+            "maximum_mtm_drawdown_pct": -16.78776877493442,
+            "profit_factor": 3.063888546897653,
+            "win_rate_pct": 69.62509563886763,
+            "closed_trades": 1307,
+            "average_loss_jpy": -959.1477343042284,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 330,
+              "net_pnl_jpy": 662204.5739614111,
+              "profit_factor": 3.1914912357842,
+              "win_rate": 0.7,
+              "max_cumulative_pnl_drawdown_jpy": -54791.67707599519,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 21,
+              "triggered": 2,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 2,
+              "reentry_rejected": 0,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "structure_unconfirmed": 2,
+              "invalid_input": 0,
+              "by_reason": {
+                "INITIAL_ADVERSE_STOP": 2
+              }
+            }
+          }
+        }
+      ]
+    },
+    {
+      "phase": "HYPE_COMPOSITE",
+      "candidate_count": 2,
+      "selection_status": "NO_ACCEPTED_CANDIDATE_BASELINE_UNCHANGED",
+      "selected_candidate": null,
+      "best_by_minimum_dd_improvement": "HYPE_COMPOSITE_PCT2P0_12H_MFE1P0_STRUCTURE3_R12",
+      "candidates": [
+        {
+          "candidate": "HYPE_COMPOSITE_PCT2P0_12H_MFE1P0_STRUCTURE3_R12",
+          "plan": {
+            "id": "HYPE_COMPOSITE_PCT2P0_12H_MFE1P0_STRUCTURE3_R12",
+            "strategy": "HYPE_LONG",
+            "sides": [
+              "LONG",
+              "SHORT"
+            ],
+            "stop_pct": 0.02,
+            "arm_hours": 12,
+            "mfe_gate_pct": 0.01,
+            "structure_bars": 3,
+            "structure_min_adverse_closes": 3,
+            "reentry_hours": 12
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 222818966.87803495,
+            "maximum_mtm_drawdown_pct": -15.62063681288941,
+            "profit_factor": 3.4587962777009813,
+            "win_rate_pct": 72.36641221374046,
+            "closed_trades": 1310,
+            "average_loss_jpy": -1580.9635643100019,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 329,
+              "net_pnl_jpy": 1121832.5586877514,
+              "profit_factor": 3.589490491920463,
+              "win_rate": 0.7386018237082067,
+              "max_cumulative_pnl_drawdown_jpy": -97573.98274941987,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 60,
+              "triggered": 0,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 0,
+              "reentry_rejected": 0,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "structure_unconfirmed": 0,
+              "invalid_input": 0,
+              "by_reason": {}
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 124289206.81827945,
+            "maximum_mtm_drawdown_pct": -16.78776877493442,
+            "profit_factor": 3.0785603081685435,
+            "win_rate_pct": 69.54858454475898,
+            "closed_trades": 1307,
+            "average_loss_jpy": -948.7941214836525,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 330,
+              "net_pnl_jpy": 661219.7555996655,
+              "profit_factor": 3.2113694849061787,
+              "win_rate": 0.696969696969697,
+              "max_cumulative_pnl_drawdown_jpy": -54721.307936886384,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 60,
+              "triggered": 0,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 0,
+              "reentry_rejected": 0,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "structure_unconfirmed": 0,
+              "invalid_input": 0,
+              "by_reason": {}
+            }
+          }
+        },
+        {
+          "candidate": "HYPE_COMPOSITE_ATR1P5_6H_MFE0P5_STRUCTURE3_R12",
+          "plan": {
+            "id": "HYPE_COMPOSITE_ATR1P5_6H_MFE0P5_STRUCTURE3_R12",
+            "strategy": "HYPE_LONG",
+            "sides": [
+              "LONG",
+              "SHORT"
+            ],
+            "atr_mult": 1.5,
+            "atr_floor_pct": 0.01,
+            "atr_cap_pct": 0.04,
+            "arm_hours": 6,
+            "mfe_gate_pct": 0.005,
+            "structure_bars": 3,
+            "structure_min_adverse_closes": 2,
+            "reentry_hours": 12
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 222818966.87803495,
+            "maximum_mtm_drawdown_pct": -15.62063681288941,
+            "profit_factor": 3.4587962777009813,
+            "win_rate_pct": 72.36641221374046,
+            "closed_trades": 1310,
+            "average_loss_jpy": -1580.9635643100019,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 329,
+              "net_pnl_jpy": 1121832.5586877514,
+              "profit_factor": 3.589490491920463,
+              "win_rate": 0.7386018237082067,
+              "max_cumulative_pnl_drawdown_jpy": -97573.98274941987,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 60,
+              "triggered": 0,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 0,
+              "reentry_rejected": 0,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "structure_unconfirmed": 0,
+              "invalid_input": 0,
+              "by_reason": {}
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 124289206.81827945,
+            "maximum_mtm_drawdown_pct": -16.78776877493442,
+            "profit_factor": 3.0785603081685435,
+            "win_rate_pct": 69.54858454475898,
+            "closed_trades": 1307,
+            "average_loss_jpy": -948.7941214836525,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 330,
+              "net_pnl_jpy": 661219.7555996655,
+              "profit_factor": 3.2113694849061787,
+              "win_rate": 0.696969696969697,
+              "max_cumulative_pnl_drawdown_jpy": -54721.307936886384,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 60,
+              "triggered": 0,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 0,
+              "reentry_rejected": 0,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "structure_unconfirmed": 0,
+              "invalid_input": 0,
+              "by_reason": {}
+            }
+          }
+        }
+      ]
+    },
+    {
+      "phase": "V52_COMPOSITE",
+      "candidate_count": 2,
+      "selection_status": "NO_ACCEPTED_CANDIDATE_BASELINE_UNCHANGED",
+      "selected_candidate": null,
+      "best_by_minimum_dd_improvement": "V52_COMPOSITE_PCT2P0_12H_MFE1P0_STRUCTURE3_R12",
+      "candidates": [
+        {
+          "candidate": "V52_COMPOSITE_PCT2P0_12H_MFE1P0_STRUCTURE3_R12",
+          "plan": {
+            "id": "V52_COMPOSITE_PCT2P0_12H_MFE1P0_STRUCTURE3_R12",
+            "strategy": "V52",
+            "sides": [
+              "LONG",
+              "SHORT"
+            ],
+            "stop_pct": 0.02,
+            "arm_hours": 12,
+            "mfe_gate_pct": 0.01,
+            "structure_bars": 3,
+            "structure_min_adverse_closes": 3,
+            "reentry_hours": 12
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 222818966.87803495,
+            "maximum_mtm_drawdown_pct": -15.62063681288941,
+            "profit_factor": 3.4587962777009813,
+            "win_rate_pct": 72.36641221374046,
+            "closed_trades": 1310,
+            "average_loss_jpy": -1580.9635643100019,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 329,
+              "net_pnl_jpy": 1121832.5586877514,
+              "profit_factor": 3.589490491920463,
+              "win_rate": 0.7386018237082067,
+              "max_cumulative_pnl_drawdown_jpy": -97573.98274941987,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 0,
+              "triggered": 0,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 0,
+              "reentry_rejected": 0,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "structure_unconfirmed": 0,
+              "invalid_input": 0,
+              "by_reason": {}
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 124289206.81827945,
+            "maximum_mtm_drawdown_pct": -16.78776877493442,
+            "profit_factor": 3.0785603081685435,
+            "win_rate_pct": 69.54858454475898,
+            "closed_trades": 1307,
+            "average_loss_jpy": -948.7941214836525,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 330,
+              "net_pnl_jpy": 661219.7555996655,
+              "profit_factor": 3.2113694849061787,
+              "win_rate": 0.696969696969697,
+              "max_cumulative_pnl_drawdown_jpy": -54721.307936886384,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 0,
+              "triggered": 0,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 0,
+              "reentry_rejected": 0,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "structure_unconfirmed": 0,
+              "invalid_input": 0,
+              "by_reason": {}
+            }
+          }
+        },
+        {
+          "candidate": "V52_COMPOSITE_ATR1P5_6H_MFE0P5_STRUCTURE3_R12",
+          "plan": {
+            "id": "V52_COMPOSITE_ATR1P5_6H_MFE0P5_STRUCTURE3_R12",
+            "strategy": "V52",
+            "sides": [
+              "LONG",
+              "SHORT"
+            ],
+            "atr_mult": 1.5,
+            "atr_floor_pct": 0.01,
+            "atr_cap_pct": 0.04,
+            "arm_hours": 6,
+            "mfe_gate_pct": 0.005,
+            "structure_bars": 3,
+            "structure_min_adverse_closes": 2,
+            "reentry_hours": 12
+          },
+          "accepted_both_costs": false,
+          "10bps": {
+            "final_equity_jpy": 222818966.87803495,
+            "maximum_mtm_drawdown_pct": -15.62063681288941,
+            "profit_factor": 3.4587962777009813,
+            "win_rate_pct": 72.36641221374046,
+            "closed_trades": 1310,
+            "average_loss_jpy": -1580.9635643100019,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 329,
+              "net_pnl_jpy": 1121832.5586877514,
+              "profit_factor": 3.589490491920463,
+              "win_rate": 0.7386018237082067,
+              "max_cumulative_pnl_drawdown_jpy": -97573.98274941987,
+              "cost_bps": 10
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 0,
+              "triggered": 0,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 0,
+              "reentry_rejected": 0,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "structure_unconfirmed": 0,
+              "invalid_input": 0,
+              "by_reason": {}
+            }
+          },
+          "30bps": {
+            "final_equity_jpy": 124289206.81827945,
+            "maximum_mtm_drawdown_pct": -16.78776877493442,
+            "profit_factor": 3.0785603081685435,
+            "win_rate_pct": 69.54858454475898,
+            "closed_trades": 1307,
+            "average_loss_jpy": -948.7941214836525,
+            "maximum_loss_streak": 6,
+            "oos": {
+              "boundary_utc": "2026-04-22T12:00:00+00:00",
+              "trades": 330,
+              "net_pnl_jpy": 661219.7555996655,
+              "profit_factor": 3.2113694849061787,
+              "win_rate": 0.696969696969697,
+              "max_cumulative_pnl_drawdown_jpy": -54721.307936886384,
+              "cost_bps": 30
+            },
+            "checks": {
+              "dd_improvement_pp": 0.0,
+              "dd_pass": false,
+              "accounting_pass": true,
+              "oos_pass": true,
+              "final_equity_guard_pass": true,
+              "accepted": false
+            },
+            "accounting": "PASS",
+            "observations": {
+              "eligible": 0,
+              "triggered": 0,
+              "original_winner_triggered": 0,
+              "original_loser_triggered": 0,
+              "reentry_rejected": 0,
+              "data_gap": 0,
+              "entry_mismatch": 0,
+              "atr_unavailable": 0,
+              "internal_gap": 0,
+              "structure_unconfirmed": 0,
+              "invalid_input": 0,
+              "by_reason": {}
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "accepted_cumulative_overlays": [],
+  "pengu_unchanged": true,
+  "production_changes": 0,
+  "production_certification": false,
+  "acceptance_contract": {
+    "dd_improvement_min_percentage_points_at_each_cost": 0.1,
+    "oos_profit_factor_min_ratio": 0.9,
+    "oos_net_pnl_positive": true,
+    "final_equity_min_ratio": 0.75,
+    "accounting": "PASS"
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "10": {
+    "status": "REALIZED_EVENT_DD_PROXY",
+    "peak_ts_ms": 1783080000000,
+    "trough_ts_ms": 1783332000000,
+    "recovery_ts_ms": 1784383200000,
+    "drawdown_settlement": -97651.53403450176,
+    "contributors": {
+      "V12:SHORT": {
+        "trades": 23,
+        "pnl_jpy": 21674.581540247058
+      },
+      "PENGU:LONG": {
+        "trades": 3,
+        "pnl_jpy": 7461.093296400014
+      },
+      "V12:LONG": {
+        "trades": 5,
+        "pnl_jpy": -304.6834515070932
+      },
+      "Q102:SHORT": {
+        "trades": 7,
+        "pnl_jpy": -9494.762311800021
+      },
+      "HYPE_LONG:LONG": {
+        "trades": 1,
+        "pnl_jpy": -13469.58431617645
+      },
+      "V52:SHORT": {
+        "trades": 3,
+        "pnl_jpy": 4984.115999999931
+      },
+      "V52:LONG": {
+        "trades": 1,
+        "pnl_jpy": 9462.770000000028
+      },
+      "Q102:LONG": {
+        "trades": 1,
+        "pnl_jpy": 6.852602999999709
+      }
+    },
+    "limitation": "wallet-after-event proxy; not full MTM series"
+  },
+  "30": {
+    "status": "REALIZED_EVENT_DD_PROXY",
+    "peak_ts_ms": 1783051200000,
+    "trough_ts_ms": 1783332000000,
+    "recovery_ts_ms": 1783634400000,
+    "drawdown_settlement": -54900.00289933034,
+    "contributors": {
+      "V12:LONG": {
+        "trades": 6,
+        "pnl_jpy": 11342.168112130319
+      },
+      "V12:SHORT": {
+        "trades": 17,
+        "pnl_jpy": 26212.99961668038
+      },
+      "PENGU:LONG": {
+        "trades": 2,
+        "pnl_jpy": 3686.2130000000043
+      },
+      "Q102:SHORT": {
+        "trades": 4,
+        "pnl_jpy": -12406.088586800013
+      },
+      "HYPE_LONG:LONG": {
+        "trades": 1,
+        "pnl_jpy": -15773.819439897432
+      },
+      "V52:SHORT": {
+        "trades": 2,
+        "pnl_jpy": -311.1520000000421
+      },
+      "V52:LONG": {
+        "trades": 1,
+        "pnl_jpy": 7948.310000000027
+      }
+    },
+    "limitation": "wallet-after-event proxy; not full MTM series"
+  }
+}

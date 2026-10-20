@@ -1,0 +1,299 @@
+{
+  "classification": "RESEARCH_ONLY_NONCANONICAL",
+  "period": {
+    "start_utc": "2025-08-10T00:00:00Z",
+    "end_utc": "2026-08-10T00:00:00Z"
+  },
+  "initial_capital_jpy": 10000,
+  "monthly_deposits": 0,
+  "costs_bps": [
+    10,
+    30
+  ],
+  "engine": "fixed 2026-10-17 eight-logic H1 price-model replay",
+  "phase_order": [
+    "V12_LONG",
+    "V12_SHORT",
+    "Q102",
+    "IDLE",
+    "FET",
+    "HYPE",
+    "V52",
+    "V12_LONG_COMPOSITE",
+    "V12_SHORT_COMPOSITE",
+    "Q102_COMPOSITE",
+    "IDLE_COMPOSITE",
+    "FET_COMPOSITE",
+    "HYPE_COMPOSITE",
+    "V52_COMPOSITE"
+  ],
+  "horizons_hours": [
+    1,
+    2,
+    3,
+    4,
+    6,
+    12,
+    24
+  ],
+  "production_changes": 0,
+  "production_certification": false,
+  "source_sha256": {
+    "task8_baseline_runner": "834747c00ea20c87a86d8f53028d3b451d4e8642b3bd83d0f9d034ca6144bbc0",
+    "task9_runner": "cb5151068aff21df800a0d3026327d65e25710769d78d60c1513fb0f53848f3a",
+    "compound_reference": "445e915a9b494158ddb501e7c8aaf7248bc87d2c5a72cbc79ee1e2fe8b0d88d7"
+  },
+  "data_quality": {
+    "AAVEUSDT": {
+      "rows": 114048,
+      "first_ts_ms": 1754006400000,
+      "last_ts_ms": 1788220500000,
+      "missing_5m_intervals": 0,
+      "duplicate_timestamps": 0
+    },
+    "ADAUSDT": {
+      "rows": 114048,
+      "first_ts_ms": 1754006400000,
+      "last_ts_ms": 1788220500000,
+      "missing_5m_intervals": 0,
+      "duplicate_timestamps": 0
+    },
+    "AMZNUSDT": {
+      "rows": 58576,
+      "first_ts_ms": 1770648000000,
+      "last_ts_ms": 1788220500000,
+      "missing_5m_intervals": 0,
+      "duplicate_timestamps": 0
+    },
+    "APTUSDT": {
+      "rows": 114048,
+      "first_ts_ms": 1754006400000,
+      "last_ts_ms": 1788220500000,
+      "missing_5m_intervals": 0,
+      "duplicate_timestamps": 0
+    },
+    "ARBUSDT": {
+      "rows": 114048,
+      "first_ts_ms": 1754006400000,
+      "last_ts_ms": 1788220500000,
+      "missing_5m_intervals": 0,
+      "duplicate_timestamps": 0
+    },
+    "ATOMUSDT": {
+      "rows": 114048,
+      "first_ts_ms": 1754006400000,
+      "last_ts_ms": 1788220500000,
+      "missing_5m_intervals": 0,
+      "duplicate_timestamps": 0
+    },
+    "AVAXUSDT": {
+      "rows": 114048,
+      "first_ts_ms": 1754006400000,
+      "last_ts_ms": 1788220500000,
+      "missing_5m_intervals": 0,
+      "duplicate_timestamps": 0
+    },
+    "BNBUSDT": {
+      "rows": 114048,
+      "first_ts_ms": 1754006400000,
+      "last_ts_ms": 1788220500000,
+      "missing_5m_intervals": 0,
+      "duplicate_timestamps": 0
+    },
+    "BTCUSDT": {
+      "rows": 114048,
+      "first_ts_ms": 1754006400000,
+      "last_ts_ms": 1788220500000,
+      "missing_5m_intervals": 0,
+      "duplicate_timestamps": 0
+    },
+    "DOGEUSDT": {
+      "rows": 114048,
+      "first_ts_ms": 1754006400000,
+      "last_ts_ms": 1788220500000,
+      "missing_5m_intervals": 0,
+      "duplicate_timestamps": 0
+    },
+    "DOTUSDT": {
+      "rows": 114048,
+      "first_ts_ms": 1754006400000,
+      "last_ts_ms": 1788220500000,
+      "missing_5m_intervals": 0,
+      "duplicate_timestamps": 0
+    },
+    "ENAUSDT": {
+      "rows": 114048,
+      "first_ts_ms": 1754006400000,
+      "last_ts_ms": 1788220500000,
+      "missing_5m_intervals": 0,
+      "duplicate_timestamps": 0
+    },
+    "ETHUSDT": {
+      "rows": 114048,
+      "first_ts_ms": 1754006400000,
+      "last_ts_ms": 1788220500000,
+      "missing_5m_intervals": 0,
+      "duplicate_timestamps": 0
+    },
+    "FETUSDT": {
+      "rows": 114048,
+      "first_ts_ms": 1754006400000,
+      "last_ts_ms": 1788220500000,
+      "missing_5m_intervals": 0,
+      "duplicate_timestamps": 0
+    },
+    "HYPEUSDT": {
+      "rows": 114048,
+      "first_ts_ms": 1754006400000,
+      "last_ts_ms": 1788220500000,
+      "missing_5m_intervals": 0,
+      "duplicate_timestamps": 0
+    },
+    "INJUSDT": {
+      "rows": 114048,
+      "first_ts_ms": 1754006400000,
+      "last_ts_ms": 1788220500000,
+      "missing_5m_intervals": 0,
+      "duplicate_timestamps": 0
+    },
+    "JUPUSDT": {
+      "rows": 114048,
+      "first_ts_ms": 1754006400000,
+      "last_ts_ms": 1788220500000,
+      "missing_5m_intervals": 0,
+      "duplicate_timestamps": 0
+    },
+    "LINKUSDT": {
+      "rows": 114048,
+      "first_ts_ms": 1754006400000,
+      "last_ts_ms": 1788220500000,
+      "missing_5m_intervals": 0,
+      "duplicate_timestamps": 0
+    },
+    "LTCUSDT": {
+      "rows": 114048,
+      "first_ts_ms": 1754006400000,
+      "last_ts_ms": 1788220500000,
+      "missing_5m_intervals": 0,
+      "duplicate_timestamps": 0
+    },
+    "METAUSDT": {
+      "rows": 45618,
+      "first_ts_ms": 1774535400000,
+      "last_ts_ms": 1788220500000,
+      "missing_5m_intervals": 0,
+      "duplicate_timestamps": 0
+    },
+    "MSFTUSDT": {
+      "rows": 38430,
+      "first_ts_ms": 1776691800000,
+      "last_ts_ms": 1788220500000,
+      "missing_5m_intervals": 0,
+      "duplicate_timestamps": 0
+    },
+    "NEARUSDT": {
+      "rows": 114048,
+      "first_ts_ms": 1754006400000,
+      "last_ts_ms": 1788220500000,
+      "missing_5m_intervals": 0,
+      "duplicate_timestamps": 0
+    },
+    "NVDAUSDT": {
+      "rows": 45616,
+      "first_ts_ms": 1774536000000,
+      "last_ts_ms": 1788220500000,
+      "missing_5m_intervals": 0,
+      "duplicate_timestamps": 0
+    },
+    "ONDOUSDT": {
+      "rows": 114048,
+      "first_ts_ms": 1754006400000,
+      "last_ts_ms": 1788220500000,
+      "missing_5m_intervals": 0,
+      "duplicate_timestamps": 0
+    },
+    "OPUSDT": {
+      "rows": 114048,
+      "first_ts_ms": 1754006400000,
+      "last_ts_ms": 1788220500000,
+      "missing_5m_intervals": 0,
+      "duplicate_timestamps": 0
+    },
+    "PENGUUSDT": {
+      "rows": 114048,
+      "first_ts_ms": 1754006400000,
+      "last_ts_ms": 1788220500000,
+      "missing_5m_intervals": 0,
+      "duplicate_timestamps": 0
+    },
+    "RENDERUSDT": {
+      "rows": 114048,
+      "first_ts_ms": 1754006400000,
+      "last_ts_ms": 1788220500000,
+      "missing_5m_intervals": 0,
+      "duplicate_timestamps": 0
+    },
+    "SEIUSDT": {
+      "rows": 114048,
+      "first_ts_ms": 1754006400000,
+      "last_ts_ms": 1788220500000,
+      "missing_5m_intervals": 0,
+      "duplicate_timestamps": 0
+    },
+    "SOLUSDT": {
+      "rows": 114048,
+      "first_ts_ms": 1754006400000,
+      "last_ts_ms": 1788220500000,
+      "missing_5m_intervals": 0,
+      "duplicate_timestamps": 0
+    },
+    "SUIUSDT": {
+      "rows": 114048,
+      "first_ts_ms": 1754006400000,
+      "last_ts_ms": 1788220500000,
+      "missing_5m_intervals": 0,
+      "duplicate_timestamps": 0
+    },
+    "TAOUSDT": {
+      "rows": 114048,
+      "first_ts_ms": 1754006400000,
+      "last_ts_ms": 1788220500000,
+      "missing_5m_intervals": 0,
+      "duplicate_timestamps": 0
+    },
+    "TIAUSDT": {
+      "rows": 114048,
+      "first_ts_ms": 1754006400000,
+      "last_ts_ms": 1788220500000,
+      "missing_5m_intervals": 0,
+      "duplicate_timestamps": 0
+    },
+    "TSLAUSDT": {
+      "rows": 62034,
+      "first_ts_ms": 1769610600000,
+      "last_ts_ms": 1788220500000,
+      "missing_5m_intervals": 0,
+      "duplicate_timestamps": 0
+    },
+    "UNIUSDT": {
+      "rows": 114048,
+      "first_ts_ms": 1754006400000,
+      "last_ts_ms": 1788220500000,
+      "missing_5m_intervals": 0,
+      "duplicate_timestamps": 0
+    },
+    "XRPUSDT": {
+      "rows": 114048,
+      "first_ts_ms": 1754006400000,
+      "last_ts_ms": 1788220500000,
+      "missing_5m_intervals": 0,
+      "duplicate_timestamps": 0
+    }
+  },
+  "results": "task9-summary.json",
+  "report": "TASK9_INITIAL_ADVERSE_STOP_FINAL_REPORT_JA.md",
+  "candidate_comparison": "candidate-comparison.json",
+  "sha256_index": "sha256-index.json",
+  "candidate_count": 50,
+  "composite_candidate_count": 14
+}
