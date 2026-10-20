@@ -20,8 +20,10 @@ observations; they are not treated as dynamic-engine parity evidence.
 - Final targeted implementation/test fixes: `ec86f3b658fe790dbf4c8f865a173d2849f655dd`
 - Allocator-integrity fix round: `c7420f91f47f58bd96078d65db01bccfac85c02c`
 - Raw `applyPreemption` integrity guard round: `61bbed144ab39f2dfada7feb378e3ef9e2a4831f`
+- Structural-container fail-closed round: `ce0060f96e1b7b2c9e12e4d51869ff9ebf5458d3`
 
-The final implementation/test commit is `61bbed144ab39f2dfada7feb378e3ef9e2a4831f`.
+The final implementation/test commit is
+`ce0060f96e1b7b2c9e12e4d51869ff9ebf5458d3`.
 
 ## Task 4 behavior covered
 
@@ -39,6 +41,11 @@ The final implementation/test commit is `61bbed144ab39f2dfada7feb378e3ef9e2a4831
   `createInitialAllocatorState`, eligibility, release, or incoming re-admission;
   malformed NaN/Infinity/negative/inconsistent state cannot be normalized into
   an accepted preemption.
+- Structurally invalid raw containers, including `null`, non-array reservation,
+  ownership, or reservation-id containers, and invalid map containers, fail
+  closed without throwing. Direct release and combined apply return
+  `DATA_MISSING`, no release or incoming admission, equal before/after hashes,
+  and a safe empty baseline result.
 - Same-timestamp preemption requires nonempty authoritative event evidence with
   matching `PREEMPTION_EXIT` and `ENTRY` identities/timestamps, unique valid
   nonnegative sequence values, and exit sequence before entry sequence.
@@ -61,8 +68,13 @@ The final implementation/test commit is `61bbed144ab39f2dfada7feb378e3ef9e2a4831
 The final targeted regression run was performed after the final code changes:
 
 ```text
-npx tsx --test tests/dd-reduction-dynamic-preemption.test.ts tests/dd-reduction-dynamic-sizing.test.ts
-→ tests 26, pass 26, fail 0, skipped 0, todo 0
+npx tsx --test tests/dd-reduction-dynamic-preemption.test.ts
+→ tests 21, pass 21, fail 0, skipped 0, todo 0
+
+npx tsx --test tests/dd-reduction-dynamic-sizing.test.ts
+→ tests 6, pass 6, fail 0, skipped 0, todo 0
+
+Focused total: 27 passed, 0 failed, 0 skipped, 0 todo
 ```
 
 The full required DD reduction suite was run after the implementation commit
@@ -78,10 +90,10 @@ npm run dd:reduction:test
 Additional final checks:
 
 ```text
-npx tsc --noEmit --incremental false --pretty false
+npx tsc --noEmit
 → exit 0
 
-npx eslint lib/backtest/dd-reduction/dynamic-preemption.ts lib/backtest/dd-reduction/dynamic-sizing.ts tests/dd-reduction-dynamic-preemption.test.ts tests/dd-reduction-dynamic-sizing.test.ts
+npx eslint lib/backtest/dd-reduction/dynamic-preemption.ts tests/dd-reduction-dynamic-preemption.test.ts tests/dd-reduction-dynamic-sizing.test.ts
 → exit 0
 
 git diff --check
