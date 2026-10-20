@@ -1,0 +1,34 @@
+name: Idle HYPE atomic persistence regression
+on:
+  pull_request:
+    paths:
+      - 'lib/disdex-aster-global-rate-budget.ts'
+      - 'lib/idle-priority-short-state.ts'
+      - 'lib/hype-zec-long-runner-state.ts'
+      - 'tests/aster-global-rate-budget.test.ts'
+      - 'tests/idle-priority-short-state.test.ts'
+      - 'tests/hype-zec-long-state.test.ts'
+      - '.github/workflows/idle-hype-atomic-persistence-regression.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  state-persistence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Shared budget state tests
+        run: ./node_modules/.bin/tsx --test tests/aster-global-rate-budget.test.ts
+      - name: HYPE persisted state tests
+        run: ./node_modules/.bin/tsx --test tests/hype-zec-long-state.test.ts
+      - name: Idle persisted state tests
+        run: ./node_modules/.bin/tsx --test tests/idle-priority-short-state.test.ts
