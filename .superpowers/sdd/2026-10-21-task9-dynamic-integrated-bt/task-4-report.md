@@ -21,9 +21,10 @@ observations; they are not treated as dynamic-engine parity evidence.
 - Allocator-integrity fix round: `c7420f91f47f58bd96078d65db01bccfac85c02c`
 - Raw `applyPreemption` integrity guard round: `61bbed144ab39f2dfada7feb378e3ef9e2a4831f`
 - Structural-container fail-closed round: `ce0060f96e1b7b2c9e12e4d51869ff9ebf5458d3`
+- Raw cooldown-state integrity round: `894e99402f50bb0d7dd2548d7b2539f01a4d9e0f`
 
 The final implementation/test commit is
-`ce0060f96e1b7b2c9e12e4d51869ff9ebf5458d3`.
+`894e99402f50bb0d7dd2548d7b2539f01a4d9e0f`.
 
 ## Task 4 behavior covered
 
@@ -46,6 +47,12 @@ The final implementation/test commit is
   closed without throwing. Direct release and combined apply return
   `DATA_MISSING`, no release or incoming admission, equal before/after hashes,
   and a safe empty baseline result.
+- Raw cooldown state is validated before normalization, release, or admission:
+  the container must be a plain record, keys must use the
+  `symbol|side|strategy` format with supported side/strategy values, and each
+  record must have a nonempty reason plus finite nonnegative nullable timestamps
+  with consistent nullability and chronological ordering. Malformed cooldown
+  containers and records fail closed in both direct release and combined apply.
 - Same-timestamp preemption requires nonempty authoritative event evidence with
   matching `PREEMPTION_EXIT` and `ENTRY` identities/timestamps, unique valid
   nonnegative sequence values, and exit sequence before entry sequence.
@@ -69,12 +76,12 @@ The final targeted regression run was performed after the final code changes:
 
 ```text
 npx tsx --test tests/dd-reduction-dynamic-preemption.test.ts
-→ tests 21, pass 21, fail 0, skipped 0, todo 0
+→ tests 22, pass 22, fail 0, skipped 0, todo 0
 
 npx tsx --test tests/dd-reduction-dynamic-sizing.test.ts
 → tests 6, pass 6, fail 0, skipped 0, todo 0
 
-Focused total: 27 passed, 0 failed, 0 skipped, 0 todo
+Focused total: 28 passed, 0 failed, 0 skipped, 0 todo
 ```
 
 The full required DD reduction suite was run after the implementation commit
