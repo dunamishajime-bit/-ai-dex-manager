@@ -502,8 +502,11 @@ export function releasePreemptionGross(
     exit: ReleasePreemptionInput,
 ): PreemptionReleaseResult {
     const rawIntegrityReason = allocatorStateIntegrityReason(state);
+    if (rawIntegrityReason !== null) {
+        const safeBaseline = createInitialAllocatorState();
+        return releaseResult(safeBaseline, safeBaseline, false, rawIntegrityReason, 0, "RELEASE_REJECTED");
+    }
     const before = createInitialAllocatorState(state);
-    if (rawIntegrityReason !== null) return releaseResult(before, before, false, rawIntegrityReason, 0, "RELEASE_REJECTED");
     const reservation = before.reservations.find((item) => item.reservation_id === victim.reservation_id);
     if (reservation === undefined) return releaseResult(before, before, false, "DATA_MISSING", 0, "RELEASE_REJECTED");
     if (reservation.status === "RELEASED" || reservation.status === "EXPIRED") return releaseResult(before, before, false, "DUPLICATE_RELEASE", 0, "RELEASE_REJECTED");
@@ -552,7 +555,7 @@ function rejectedApply(state: DynamicAllocatorState, reason: PreemptionReason | 
 /** Applies the causal whole-victim lifecycle; partial/unknown exits remain fail-closed. */
 export function applyPreemption(input: ApplyPreemptionInput): ApplyPreemptionResult {
     const rawIntegrityReason = allocatorStateIntegrityReason(input.state);
-    if (rawIntegrityReason !== null) return rejectedApply(createInitialAllocatorState(input.state), rawIntegrityReason, orderingFor(input));
+    if (rawIntegrityReason !== null) return rejectedApply(createInitialAllocatorState(), rawIntegrityReason, orderingFor(input));
     const before = createInitialAllocatorState(input.state);
     const orderingEvidence = orderingFor(input);
     const existing = before.reservations.find((reservation) => reservation.reservation_id === input.victim_position.reservation_id);

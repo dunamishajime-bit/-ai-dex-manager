@@ -661,3 +661,52 @@ test("applyPreemption rejects raw malformed allocator state before release or in
         assert.deepEqual(result.state_after, result.state_before);
     }
 });
+
+test("release and apply fail closed for structurally invalid allocator containers without throwing", () => {
+    const { state, position } = openVictim();
+    const malformedStates: unknown[] = [
+        null,
+        { ...state, reservations: {} },
+        { ...state, ownership: {} },
+        { ...state, reservation_ids: {} },
+        { ...state, gross_by_strategy: [] },
+        { ...state, gross_by_symbol: null },
+        { ...state, ownership_by_symbol: [] },
+    ];
+    const apply = (malformedState: unknown) => applyPreemption({
+        state: malformedState as never,
+        incoming_candidate: candidate(),
+        victim_position: position,
+        mode: "WHOLE",
+        exit: { status: "FILLED", confirmed: true, filled_gross: 100, exit_ts_ms: TS + 10 },
+        policy: policy(),
+        ordering_events: [
+            { timestamp: TS + 10, kind: "PREEMPTION_EXIT", event_seq: 1, candidate_id: "victim-1" },
+            { timestamp: TS + 10, kind: "ENTRY", event_seq: 2, candidate_id: "incoming-1" },
+        ],
+    });
+    for (const malformedState of malformedStates) {
+        assert.doesNotThrow(() => {
+            const result = releasePreemptionGross(malformedState as never, position, {
+                exit_ts_ms: TS + 10,
+                status: "FILLED",
+                confirmed: true,
+                filled_gross: 100,
+            });
+            assert.equal(result.applied, false);
+            assert.equal(result.reason, "DATA_MISSING");
+            assert.equal(result.released_gross, 0);
+            assert.equal(result.state_hash_before, result.state_hash_after);
+        });
+        assert.doesNotThrow(() => {
+            const result = apply(malformedState);
+            assert.equal(result.applied, false);
+            assert.equal(result.reason, "DATA_MISSING");
+            assert.equal(result.victim_release_applied, false);
+            assert.equal(result.gross_release, null);
+            assert.equal(result.incoming_admission, null);
+            assert.equal(result.state_hash_before, result.state_hash_after);
+            assert.deepEqual(result.state_after, result.state_before);
+        });
+    }
+});
