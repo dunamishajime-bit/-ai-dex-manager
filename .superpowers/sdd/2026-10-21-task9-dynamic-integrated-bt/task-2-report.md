@@ -155,3 +155,77 @@ The repository's default `npx tsc --noEmit` attempted to write `tsconfig.tsbuild
 - Missing `event_seq` is never promoted to production-canonical evidence, even when the fallback ordering is fully deterministic.
 - For unresolved same-timestamp STOP/ENTRY events, the implementation preserves all events and produces a deterministic display/replay order, but formal parity remains ineligible.
 - Canonical hashing is for caller-supplied allocator state only; it does not read runtime files or secret material and is not a general cyclic-object serializer.
+
+## Review hardening follow-up
+
+The review fix is implemented in the same research-only boundary.
+
+### RED
+
+Command:
+
+```text
+node --import tsx --test --test-isolation=none tests/dd-reduction-dynamic-ordering.test.ts
+```
+
+Before the fix, the new tests produced:
+
+```text
+EXIT=1
+ℹ tests 8
+ℹ pass 5
+ℹ fail 3
+
+✖ rejects negative and fractional event_seq values at the ordering evidence boundary
+  actual: CANONICAL_ORDERING
+  expected: NONCANONICAL_ORDERING
+✖ rejects duplicate event_seq values within one same-timestamp stream
+  actual: CANONICAL_ORDERING
+  expected: NONCANONICAL_ORDERING
+✖ uses locale-independent UTF-16 code-unit ordering for tie-breaks
+  actual: ["ä", "z"]
+  expected: ["z", "ä"]
+```
+
+### Fix
+
+- The exported classifier now validates `event_seq` as a non-negative integer and emits `INVALID_EVENT_SEQUENCE` for negative, fractional, `NaN`, infinite, or otherwise malformed values.
+- Same-timestamp valid sequence collisions emit `DUPLICATE_EVENT_SEQUENCE`; fallback sorting cannot promote a collision to canonical evidence.
+- Sequence evidence classification distinguishes invalid, duplicate, and missing sequence reasons while always setting `formalParityEligible` to false for those cases.
+- The source-normalization integration fixture confirms normalized valid sequences remain intact and duplicate same-timestamp sequences are classified noncanonical by the exported boundary. Existing source normalization continues to fail-close malformed negative/fractional sequences.
+- The tie-break now compares UTF-16 code units explicitly and does not depend on locale data or `localeCompare`.
+
+### GREEN
+
+Focused ordering result:
+
+```text
+EXIT=0
+ℹ tests 8
+ℹ pass 8
+ℹ fail 0
+```
+
+Focused ordering plus source integration result:
+
+```text
+EXIT=0
+ℹ tests 27
+ℹ pass 27
+ℹ fail 0
+```
+
+Final full-suite result:
+
+```text
+EXIT=0
+DD_REDUCTION_TEST_DISCOVERY files=10
+DD_REDUCTION_TEST_SUMMARY files=10 passed=10 failed=0 skipped=0 todo=0
+```
+
+Final type check and lint both exited `0`:
+
+```text
+npx tsc --noEmit --incremental false
+npx eslint lib/backtest/dd-reduction/dynamic-ordering.ts lib/backtest/dd-reduction/dynamic-state.ts tests/dd-reduction-dynamic-ordering.test.ts tests/dd-reduction-dynamic-source.test.ts
+```

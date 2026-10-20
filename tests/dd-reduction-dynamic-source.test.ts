@@ -15,6 +15,7 @@ import {
     EVIDENCE_LEVELS,
     type DynamicCandidateEvent,
 } from "../lib/backtest/dd-reduction/dynamic-types";
+import { classifyOrderingEvidence } from "../lib/backtest/dd-reduction/dynamic-ordering";
 import { assertFixtureIdentity, FIXTURE_HASH } from "../lib/backtest/dd-reduction/fixture-identity";
 import { buildCandidateCoverage } from "../scripts/dd-reduction/build-candidate-coverage";
 
@@ -213,6 +214,20 @@ test("marks a supplied negative or fractional event_seq fail-closed with an expl
         assert.equal(event.failClosed, true);
         assert.match(event.reason ?? "", /malformed event_seq/i);
     }
+});
+
+test("keeps normalized valid event_seq values and exposes same-timestamp collisions as noncanonical", () => {
+    const result = normalizeDynamicCandidates({
+        records: [rawRecord([
+            rawRow({ candidateId: "collision-a", event_seq: 9 }),
+            rawRow({ candidateId: "collision-b", event_seq: 9 }),
+        ])],
+    });
+
+    assert.deepEqual(result.events.map((event) => event.event_seq), [9, 9]);
+    const evidence = classifyOrderingEvidence(result.events);
+    assert.ok(evidence.reasons.includes("DUPLICATE_EVENT_SEQUENCE"));
+    assert.equal(evidence.formalParityEligible, false);
 });
 
 test("rejects duplicate candidate IDs instead of silently merging observations", () => {

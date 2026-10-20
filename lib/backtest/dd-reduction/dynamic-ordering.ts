@@ -32,6 +32,8 @@ export type DynamicOrderingInput = DynamicOrderingEvent;
 export type OrderingEvidence = "CANONICAL_ORDERING" | "NONCANONICAL_ORDERING";
 
 export type OrderingEvidenceReason =
+    | "INVALID_EVENT_SEQUENCE"
+    | "DUPLICATE_EVENT_SEQUENCE"
     | "MISSING_EVENT_SEQUENCE"
     | "SAME_TIMESTAMP_ORDER_UNVERIFIABLE";
 
@@ -101,8 +103,22 @@ function timestampOf(event: DynamicOrderingInput): number {
     ) ?? Number.POSITIVE_INFINITY;
 }
 
+type EventSequenceStatus = "missing" | "valid" | "invalid";
+
+interface EventSequenceResult {
+    readonly status: EventSequenceStatus;
+    readonly value: number | null;
+}
+
 function sequenceOf(event: DynamicOrderingInput): number | null {
-    return firstFinite(event.event_seq, event.eventSeq);
+    return sequenceResult(event).value;
+}
+
+function sequenceResult(event: DynamicOrderingInput): EventSequenceResult {
+    const raw: unknown = event.event_seq !== undefined ? event.event_seq : event.eventSeq;
+    if (raw === undefined || raw === null || raw === "") return { status: "missing", value: null };
+    if (typeof raw === "number" && Number.isInteger(raw) && raw >= 0) return { status: "valid", value: raw };
+    return { status: "invalid", value: null };
 }
 
 function priorityOf(event: DynamicOrderingInput): number | null {
@@ -144,6 +160,15 @@ function tieBreakKey(event: DynamicOrderingInput): string {
     ].join("\u0000");
 }
 
+function compareCodeUnits(left: string, right: string): number {
+    const length = Math.min(left.length, right.length);
+    for (let index = 0; index < length; index += 1) {
+        const difference = left.charCodeAt(index) - right.charCodeAt(index);
+        if (difference !== 0) return difference;
+    }
+    return left.length - right.length;
+}
+
 function compareEvents(left: DynamicOrderingInput, right: DynamicOrderingInput): number {
     const timestampComparison = timestampOf(left) - timestampOf(right);
     if (timestampComparison !== 0) return timestampComparison;
@@ -163,7 +188,7 @@ function compareEvents(left: DynamicOrderingInput, right: DynamicOrderingInput):
     const rankComparison = compareNullableNumber(rankOf(left), rankOf(right));
     if (rankComparison !== 0) return rankComparison;
 
-    return tieBreakKey(left).localeCompare(tieBreakKey(right), "en");
+    return compareCodeUnits(tieBreakKey(left), tieBreakKey(right));
 }
 
 /**
@@ -188,7 +213,21 @@ function hasStopEntryPair(events: readonly DynamicOrderingInput[]): boolean {
         const hasStop = group.some((event) => STOP_KINDS.has(kindOf(event)));
         const hasEntry = group.some((event) => ENTRY_KINDS.has(kindOf(event)));
         if (!hasStop || !hasEntry) continue;
-        if (group.some((event) => sequenceOf(event) === null)) return true;
+        if (group.some((event) => sequenceResult(event).status !== "valid")) return true;
+    }
+    return false;
+}
+
+function hasDuplicateSequenceInTimestampStream(events: readonly DynamicOrderingInput[]): boolean {
+    const byTimestamp = new Map<number, Set<number>>();
+    for (const event of events) {
+        const timestamp = timestampOf(event);
+        const sequence = sequenceResult(event);
+        if (!Number.isFinite(timestamp) || sequence.status !== "valid" || sequence.value === null) continue;
+        const sequences = byTimestamp.get(timestamp) ?? new Set<number>();
+        if (sequences.has(sequence.value)) return true;
+        sequences.add(sequence.value);
+        byTimestamp.set(timestamp, sequences);
     }
     return false;
 }
@@ -199,7 +238,9 @@ function hasStopEntryPair(events: readonly DynamicOrderingInput[]): boolean {
  */
 export function classifyOrderingEvidence(events: readonly DynamicOrderingInput[]): OrderingEvidenceResult {
     const reasons: OrderingEvidenceReason[] = [];
-    if (events.some((event) => sequenceOf(event) === null)) reasons.push("MISSING_EVENT_SEQUENCE");
+    if (events.some((event) => sequenceResult(event).status === "invalid")) reasons.push("INVALID_EVENT_SEQUENCE");
+    if (hasDuplicateSequenceInTimestampStream(events)) reasons.push("DUPLICATE_EVENT_SEQUENCE");
+    if (events.some((event) => sequenceResult(event).status === "missing")) reasons.push("MISSING_EVENT_SEQUENCE");
     if (hasStopEntryPair(events)) reasons.push("SAME_TIMESTAMP_ORDER_UNVERIFIABLE");
 
     const ordering: OrderingEvidence = reasons.length === 0 ? "CANONICAL_ORDERING" : "NONCANONICAL_ORDERING";

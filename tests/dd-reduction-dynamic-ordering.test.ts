@@ -63,6 +63,36 @@ test("uses priority, rank, and candidate ID as a deterministic noncanonical fall
     assert.equal(evidence.formalParityEligible, false);
 });
 
+test("rejects negative and fractional event_seq values at the ordering evidence boundary", () => {
+    for (const eventSeq of [-1, 1.5, Number.NaN, Number.POSITIVE_INFINITY]) {
+        const evidence = classifyOrderingEvidence([event({ event_seq: eventSeq })]);
+
+        assert.equal(evidence.ordering, "NONCANONICAL_ORDERING");
+        assert.ok(evidence.reasons.includes("INVALID_EVENT_SEQUENCE"));
+        assert.equal(evidence.formalParityEligible, false);
+    }
+});
+
+test("rejects duplicate event_seq values within one same-timestamp stream", () => {
+    const evidence = classifyOrderingEvidence([
+        event({ candidate_id: "first", event_seq: 7 }),
+        event({ candidate_id: "second", event_seq: 7 }),
+    ]);
+
+    assert.equal(evidence.ordering, "NONCANONICAL_ORDERING");
+    assert.ok(evidence.reasons.includes("DUPLICATE_EVENT_SEQUENCE"));
+    assert.equal(evidence.formalParityEligible, false);
+});
+
+test("uses locale-independent UTF-16 code-unit ordering for tie-breaks", () => {
+    const events = [
+        event({ candidate_id: "ä", event_id: null, event_seq: null, priority: null, rank: null }),
+        event({ candidate_id: "z", event_id: null, event_seq: null, priority: null, rank: null }),
+    ];
+
+    assert.deepEqual(orderDynamicEvents(events).map((item) => item.candidate_id), ["z", "ä"]);
+});
+
 test("keeps unresolved same-timestamp STOP and ENTRY precedence fail-closed", () => {
     const events = [
         event({ candidate_id: "entry", event_id: "entry-event", kind: "ENTRY", event_seq: null, priority: null, rank: null }),
