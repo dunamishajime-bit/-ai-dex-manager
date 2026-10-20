@@ -61,6 +61,12 @@ function firstValue(row: CandidateRow, paths: readonly string[]): unknown {
     return undefined;
 }
 
+function eventSequenceValue(row: CandidateRow, paths: (names: readonly string[]) => string[]): unknown {
+    const snakeCaseValue = firstValue(row, paths(["event_seq", "seq", "timestamps.event_seq"]));
+    if (snakeCaseValue !== undefined && snakeCaseValue !== null && snakeCaseValue !== "") return snakeCaseValue;
+    return firstValue(row, paths(["eventSeq"]));
+}
+
 function candidateField(row: CandidateRow, kind: CandidateSourceRecord["kind"], field: string, paths: readonly string[], required = true): unknown {
     const value = firstValue(row, paths);
     if (value === undefined && required) error(`INVALID_${kind}`, `${field} is required for ${kind}`);
@@ -111,7 +117,7 @@ function adaptCandidateRow(row: CandidateRow, kind: CandidateSourceRecord["kind"
         side: firstValue(row, paths(["side"])),
         signalTsMs: firstValue(row, paths(["signalTsMs", "signal_ts_ms", "signal_ts", "timestamps.signal_ts_ms"])),
         decisionTsMs: firstValue(row, paths(["decisionTsMs", "decision_ts_ms", "decision_ts", "ts", "timestamps.decision_ts_ms"])),
-        eventSeq: firstValue(row, paths(["eventSeq", "event_seq", "seq", "timestamps.event_seq"])),
+        eventSeq: eventSequenceValue(row, paths),
         rank: firstValue(row, paths(["rank", "ranking.rank"])),
         score: firstValue(row, paths(["score", "ranking.score"])),
         priority: firstValue(row, paths(["priority", "ranking.priority"])),

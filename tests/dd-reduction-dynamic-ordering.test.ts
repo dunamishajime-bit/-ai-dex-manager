@@ -73,6 +73,24 @@ test("rejects negative and fractional event_seq values at the ordering evidence 
     }
 });
 
+test("falls back to a valid camelCase eventSeq when event_seq is explicitly empty", () => {
+    for (const eventSeq of [null, ""] as const) {
+        const evidence = classifyOrderingEvidence([event({ event_seq: eventSeq, eventSeq: 4 })]);
+
+        assert.equal(evidence.ordering, "CANONICAL_ORDERING");
+        assert.deepEqual(evidence.reasons, []);
+        assert.equal(evidence.formalParityEligible, true);
+    }
+});
+
+test("keeps a genuinely malformed non-null event_seq fail-closed despite a valid eventSeq alias", () => {
+    const evidence = classifyOrderingEvidence([event({ event_seq: "4" as never, eventSeq: 4 })]);
+
+    assert.equal(evidence.ordering, "NONCANONICAL_ORDERING");
+    assert.ok(evidence.reasons.includes("INVALID_EVENT_SEQUENCE"));
+    assert.equal(evidence.formalParityEligible, false);
+});
+
 test("rejects duplicate event_seq values within one same-timestamp stream", () => {
     const evidence = classifyOrderingEvidence([
         event({ candidate_id: "first", event_seq: 7 }),

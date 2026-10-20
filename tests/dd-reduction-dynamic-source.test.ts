@@ -227,6 +227,45 @@ test("keeps normalized valid event_seq values and exposes same-timestamp collisi
     assert.deepEqual(result.events.map((event) => event.event_seq), [9, 9]);
     const evidence = classifyOrderingEvidence(result.events);
     assert.ok(evidence.reasons.includes("DUPLICATE_EVENT_SEQUENCE"));
+    assert.equal(evidence.ordering, "NONCANONICAL_ORDERING");
+    assert.equal(evidence.formalParityEligible, false);
+});
+
+test("uses a valid camelCase eventSeq when event_seq is explicitly empty", () => {
+    for (const eventSeq of [null, ""] as const) {
+        const result = normalizeDynamicCandidates({
+            records: [rawRecord([rawRow({ candidateId: `camel-case-sequence-${String(eventSeq)}`, event_seq: eventSeq, eventSeq: 12 })])],
+        });
+        const event = result.events[0] as DynamicCandidateEvent;
+
+        assert.equal(event.event_seq, 12);
+        assert.equal(event.failClosed, false);
+    }
+});
+
+test("keeps a malformed non-null event_seq fail-closed despite a valid eventSeq alias", () => {
+    const result = normalizeDynamicCandidates({
+        records: [rawRecord([rawRow({ candidateId: "malformed-snake-sequence", event_seq: "12", eventSeq: 12 })])],
+    });
+    const event = result.events[0] as DynamicCandidateEvent;
+
+    assert.equal(event.event_seq, null);
+    assert.equal(event.failClosed, true);
+    assert.match(event.reason ?? "", /malformed event_seq/i);
+});
+
+test("detects duplicate sequences when one normalized source row uses the eventSeq alias", () => {
+    const result = normalizeDynamicCandidates({
+        records: [rawRecord([
+            rawRow({ candidateId: "alias-collision", event_seq: null, eventSeq: 9 }),
+            rawRow({ candidateId: "snake-collision", event_seq: 9 }),
+        ])],
+    });
+
+    assert.deepEqual(result.events.map((event) => event.event_seq), [9, 9]);
+    const evidence = classifyOrderingEvidence(result.events);
+    assert.ok(evidence.reasons.includes("DUPLICATE_EVENT_SEQUENCE"));
+    assert.equal(evidence.ordering, "NONCANONICAL_ORDERING");
     assert.equal(evidence.formalParityEligible, false);
 });
 

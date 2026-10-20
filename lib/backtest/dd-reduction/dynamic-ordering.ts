@@ -14,8 +14,8 @@ export interface DynamicOrderingEvent {
     readonly ts?: number | null;
     readonly signal_ts_ms?: number | null;
     readonly decision_ts_ms?: number | null;
-    readonly event_seq?: number | null;
-    readonly eventSeq?: number | null;
+    readonly event_seq?: number | null | "";
+    readonly eventSeq?: number | null | "";
     readonly priority?: number | null;
     readonly rank?: number | null;
     readonly kind?: string | null;
@@ -115,7 +115,8 @@ function sequenceOf(event: DynamicOrderingInput): number | null {
 }
 
 function sequenceResult(event: DynamicOrderingInput): EventSequenceResult {
-    const raw: unknown = event.event_seq !== undefined ? event.event_seq : event.eventSeq;
+    const eventSeq: unknown = event.event_seq;
+    const raw: unknown = eventSeq === undefined || eventSeq === null || eventSeq === "" ? event.eventSeq : eventSeq;
     if (raw === undefined || raw === null || raw === "") return { status: "missing", value: null };
     if (typeof raw === "number" && Number.isInteger(raw) && raw >= 0) return { status: "valid", value: raw };
     return { status: "invalid", value: null };
