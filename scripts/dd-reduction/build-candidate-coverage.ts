@@ -1,4 +1,5 @@
 import { readFile, mkdir, writeFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
 import { extname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -11,6 +12,7 @@ import type {
     CandidateSourceRecord,
     EvidenceLevel,
 } from "../../lib/backtest/dd-reduction/dynamic-types";
+import { EVIDENCE_LEVELS } from "../../lib/backtest/dd-reduction/dynamic-types";
 
 function requiredFlag(args: readonly string[], name: string): string {
     const index = args.indexOf(name);
@@ -37,6 +39,20 @@ function numberListFlag(args: readonly string[], name: string, fallback: readonl
     const parsed = values.flatMap((value) => value.split(",").map(Number));
     if (parsed.some((value) => !Number.isFinite(value) || value < 0)) throw new Error(`${name} must contain non-negative finite numbers`);
     return parsed;
+}
+
+function optionalFlag(args: readonly string[], name: string): string | undefined {
+    const index = args.indexOf(name);
+    const value = index >= 0 ? args[index + 1] : undefined;
+    if (index >= 0 && (value === undefined || value.startsWith("--"))) throw new Error(`${name} requires a value`);
+    return value;
+}
+
+function evidenceFlag(args: readonly string[], name: string, fallback: EvidenceLevel): EvidenceLevel {
+    const value = optionalFlag(args, name);
+    if (value === undefined) return fallback;
+    if (!EVIDENCE_LEVELS.includes(value as EvidenceLevel)) throw new Error(`${name} must be one of ${EVIDENCE_LEVELS.join(", ")}`);
+    return value as EvidenceLevel;
 }
 
 function csvLine(line: string): string[] {
@@ -96,23 +112,26 @@ function rowsFromContent(content: string, path: string): readonly Readonly<Recor
     return [object];
 }
 
-async function hashFile(path: string): Promise<string> {
-    const { createHash } = await import("node:crypto");
-    return createHash("sha256").update(await readFile(path)).digest("hex");
+function hashBytes(content: Uint8Array): string {
+    return createHash("sha256").update(content).digest("hex");
 }
 
 async function record(path: string, kind: CandidateSourceKind, evidence: EvidenceLevel): Promise<CandidateSourceRecord> {
     const absolutePath = resolve(path);
-    const content = await readFile(absolutePath, "utf8");
-    return { kind, path: absolutePath, sourceSha256: await hashFile(absolutePath), evidence, rows: rowsFromContent(content, absolutePath) };
+    const bytes = await readFile(absolutePath);
+    const content = bytes.toString("utf8");
+    return { kind, path: absolutePath, sourceSha256: hashBytes(bytes), sourceBytes: bytes.byteLength, evidence, rows: rowsFromContent(content, absolutePath) };
 }
 
 export async function buildCandidateCoverage(args: readonly string[] = process.argv.slice(2)): Promise<void> {
     const outputDir = resolve(requiredFlag(args, "--output-dir"));
     const records: CandidateSourceRecord[] = [];
-    for (const path of repeatedFlag(args, "--raw-ledger")) records.push(await record(path, "RAW_CANDIDATE_DECISIONS", "ORIGINAL_EVIDENCE"));
-    for (const path of repeatedFlag(args, "--market-data")) records.push(await record(path, "SAVED_MARKET_DATA", "CAUSALLY_REGENERATED"));
-    for (const path of repeatedFlag(args, "--strategy-adapter")) records.push(await record(path, "STRATEGY_ADAPTER", "CAUSALLY_REGENERATED"));
+    const rawEvidence = evidenceFlag(args, "--raw-evidence", "ORIGINAL_EVIDENCE");
+    const marketEvidence = evidenceFlag(args, "--market-evidence", "CAUSALLY_REGENERATED");
+    const adapterEvidence = evidenceFlag(args, "--strategy-evidence", "CAUSALLY_REGENERATED");
+    for (const path of repeatedFlag(args, "--raw-ledger")) records.push(await record(path, "RAW_CANDIDATE_DECISIONS", rawEvidence));
+    for (const path of repeatedFlag(args, "--market-data")) records.push(await record(path, "SAVED_MARKET_DATA", marketEvidence));
+    for (const path of repeatedFlag(args, "--strategy-adapter")) records.push(await record(path, "STRATEGY_ADAPTER", adapterEvidence));
     if (records.length === 0) throw new Error("at least one of --raw-ledger, --market-data, or --strategy-adapter is required");
     const result = normalizeDynamicCandidates({
         records,

@@ -1,4 +1,7 @@
 import assert from "node:assert/strict";
+import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { test } from "node:test";
 
 import {
@@ -12,6 +15,7 @@ import {
     type DynamicCandidateEvent,
 } from "../lib/backtest/dd-reduction/dynamic-types";
 import { assertFixtureIdentity, FIXTURE_HASH } from "../lib/backtest/dd-reduction/fixture-identity";
+import { buildCandidateCoverage } from "../scripts/dd-reduction/build-candidate-coverage";
 
 const SOURCE_HASH = FIXTURE_HASH;
 const TS = 1_700_000_000_000;
@@ -43,6 +47,7 @@ function rawRecord(rows: readonly Record<string, unknown>[], overrides: Partial<
         kind: "RAW_CANDIDATE_DECISIONS",
         path: "raw-candidate-decisions.jsonl",
         sourceSha256: SOURCE_HASH,
+        sourceBytes: Buffer.byteLength(rows.map((row) => JSON.stringify(row)).join("\n"), "utf8"),
         evidence: "ORIGINAL_EVIDENCE",
         rows,
         ...overrides,
@@ -65,6 +70,105 @@ test("normalizes a raw candidate decision with original evidence", () => {
     assert.equal(event.failClosed, false);
     assert.equal(event.evidence.level, "ORIGINAL_EVIDENCE");
     assert.equal(event.evidence.sourceKind, "RAW_CANDIDATE_DECISIONS");
+});
+
+test("emits the exact candidate event contract and keeps observed status separate from allocator acceptance", () => {
+    const result = normalizeDynamicCandidates({
+        records: [rawRecord([rawRow({
+            event_id: "event-1",
+            stage_id: "V12_SHORT",
+            route: "short-entry",
+            family: "V12_SHORT",
+            signal_ts_ms: TS - 1_000,
+            decision_ts_ms: TS,
+            event_seq: 7,
+            rank: 2,
+            score: 0.8,
+            priority: 9,
+            status: "REJECTED",
+            entry_valid_until_ms: TS + 60_000,
+            requested_gross: 250,
+            worst_case_gross: 275,
+            entry_price: 100,
+            entry_price_source: "SAVED_MARKET_DATA",
+            planned_exit: { kind: "TIME_STOP", bars: 12 },
+            source_sha: SOURCE_HASH,
+            config_sha: "b".repeat(64),
+            data_sha: "c".repeat(64),
+            accepted: true,
+        })])],
+    });
+    const event = result.events[0] as DynamicCandidateEvent;
+    assert.equal(event.candidate_id, "candidate-1");
+    assert.equal(event.event_id, "event-1");
+    assert.equal(event.strategy_id, "V12");
+    assert.equal(event.stage_id, "V12_SHORT");
+    assert.equal(event.route, "short-entry");
+    assert.equal(event.family, "V12_SHORT");
+    assert.equal(event.signal_ts_ms, TS - 1_000);
+    assert.equal(event.decision_ts_ms, TS);
+    assert.equal(event.event_seq, 7);
+    assert.equal(event.rank, 2);
+    assert.equal(event.score, 0.8);
+    assert.equal(event.priority, 9);
+    assert.equal(event.candidate_status, "REJECTED");
+    assert.equal(event.observed_status, "REJECTED");
+    assert.equal(event.entry_valid_until_ms, TS + 60_000);
+    assert.equal(event.requested_gross, 250);
+    assert.equal(event.worst_case_gross, 275);
+    assert.equal(event.entry_price, 100);
+    assert.equal(event.entry_price_source, "SAVED_MARKET_DATA");
+    assert.deepEqual(event.planned_exit, { kind: "TIME_STOP", bars: 12 });
+    assert.equal(event.source_sha, SOURCE_HASH);
+    assert.equal(event.config_sha, "b".repeat(64));
+    assert.equal(event.data_sha, "c".repeat(64));
+    assert.equal(event.evidence_level, "ORIGINAL_EVIDENCE");
+    assert.equal(event.allocator_accepted, true);
+    assert.equal(event.failClosed, false);
+});
+
+test("maps legacy snake_case and nested candidate fields without filling missing evidence", () => {
+    const result = normalizeDynamicCandidates({
+        records: [rawRecord([{
+            candidate_id: "legacy-1",
+            event_id: "legacy-event-1",
+            strategy_id: "Q102",
+            stage_id: "Q102_LONG",
+            route: "legacy-route",
+            family: "legacy-family",
+            symbol: "ETHUSDT",
+            side: "SHORT",
+            timestamps: { signal_ts_ms: TS - 2_000, decision_ts_ms: TS, event_seq: 4 },
+            ranking: { rank: 3, score: 0.4, priority: 6 },
+            entry: { price: 200, price_source: "MARKET_CACHE" },
+            gross: { requested_gross: 300, worst_case_gross: 330 },
+            hashes: { source_sha: SOURCE_HASH, config_sha: "b".repeat(64), data_sha: "c".repeat(64) },
+            validity: "VALID",
+        }], { evidence: "CAUSALLY_REGENERATED" })],
+    });
+    const event = result.events[0] as DynamicCandidateEvent;
+    assert.equal(event.candidateId, "legacy-1");
+    assert.equal(event.strategy_id, "Q102");
+    assert.equal(event.signal_ts_ms, TS - 2_000);
+    assert.equal(event.decision_ts_ms, TS);
+    assert.equal(event.event_seq, 4);
+    assert.equal(event.entry_price, 200);
+    assert.equal(event.requested_gross, 300);
+    assert.equal(event.worst_case_gross, 330);
+    assert.equal(event.source_sha, SOURCE_HASH);
+    assert.equal(event.evidence_level, "CAUSALLY_REGENERATED");
+    assert.equal(event.observed_status, "UNKNOWN");
+    assert.equal(event.failClosed, false);
+});
+
+test("preserves MISSING evidence as explicit fail-closed provenance", () => {
+    const result = normalizeDynamicCandidates({
+        records: [rawRecord([rawRow({ candidateId: "missing-evidence" })], { evidence: "MISSING" })],
+    });
+    const event = result.events[0] as DynamicCandidateEvent;
+    assert.equal(event.evidence_level, "MISSING");
+    assert.equal(event.failClosed, true);
+    assert.match(event.reason ?? "", /evidence level MISSING/i);
 });
 
 test("rejects duplicate candidate IDs instead of silently merging observations", () => {
@@ -107,11 +211,12 @@ test("builds reproducible 10bps and 30bps coverage with source hashes and row co
             rawRecord([
                 rawRow({ candidateId: "v12-1", strategy: "V12" }),
                 rawRow({ candidateId: "q102-1", strategy: "Q102" }),
-            ]),
+            ], { sourceBytes: 1234 }),
             {
                 kind: "SAVED_MARKET_DATA",
                 path: "market.json",
                 sourceSha256: "b".repeat(64),
+                sourceBytes: 5678,
                 evidence: "CAUSALLY_REGENERATED",
                 rows: [{ candidateId: "market-only", strategy: "IDLE", ts: TS + 1, symbol: "BTCUSDT", side: "SHORT", price: 99, validity: "VALID" }],
             },
@@ -121,6 +226,7 @@ test("builds reproducible 10bps and 30bps coverage with source hashes and row co
     });
     const manifest = buildCandidateSourceManifest(result);
     assert.equal(manifest.observedRowCount, 3);
+    assert.equal(manifest.normalizedRowCount, 3);
     assert.equal(manifest.failClosedRowCount, 0);
     assert.deepEqual(manifest.costScenarios.map((scenario) => [scenario.feeBps, scenario.slippageBps]), [[10, 10], [30, 30]]);
     assert.equal(manifest.strategyCounts.V12, 1);
@@ -129,4 +235,62 @@ test("builds reproducible 10bps and 30bps coverage with source hashes and row co
     assert.equal(manifest.sourceHashes.length, 2);
     assert.equal(manifest.sha256Index.length, 2);
     assert.equal(manifest.sha256Index[0]?.sha256.length, 64);
+    assert.equal(manifest.sha256Index.find((entry) => entry.path === "market.json")?.bytes, 5678);
+    assert.equal(manifest.sha256Index.find((entry) => entry.path === "raw-candidate-decisions.jsonl")?.bytes, 1234);
+});
+
+test("counts only admitted events as normalized rows", () => {
+    const result = normalizeDynamicCandidates({
+        records: [rawRecord([
+            rawRow({ candidateId: "admitted" }),
+            rawRow({ candidateId: "fail-closed", side: undefined, price: undefined, validity: undefined }),
+        ])],
+    });
+    const manifest = buildCandidateSourceManifest(result);
+    assert.equal(manifest.observedRowCount, 2);
+    assert.equal(manifest.failClosedRowCount, 1);
+    assert.equal(manifest.normalizedRowCount, 1);
+});
+
+test("rejects malformed timestamps, source hashes, and incompatible cost scenarios", () => {
+    assert.throws(() => normalizeDynamicCandidates({ records: [rawRecord([rawRow({ ts: "not-a-timestamp" })])] }), /INVALID_TIMESTAMP/);
+    assert.throws(() => normalizeDynamicCandidates({ records: [rawRecord([rawRow()], { sourceSha256: "invalid" })] }), /INVALID_SOURCE_HASH/);
+    assert.throws(() => normalizeDynamicCandidates({ records: [rawRecord([rawRow()])], feeBps: [10, 30], slippageBps: [10, 20, 30] }), /INVALID_COST_SCENARIO/);
+});
+
+test("CLI parses JSON, JSONL, and CSV source-specific inputs with explicit evidence and source bytes", async () => {
+    const root = await mkdtemp(join(tmpdir(), "dd-dynamic-cli-fixture-"));
+    const rawPath = join(root, "raw.json");
+    const marketPath = join(root, "market.jsonl");
+    const adapterPath = join(root, "adapter.csv");
+    const outputDir = join(root, "output");
+    const rawContent = JSON.stringify([rawRow({ candidateId: "cli-raw" })]);
+    const marketContent = `${JSON.stringify({ candidate: { candidate_id: "cli-market", strategy_id: "IDLE", symbol: "BTCUSDT", side: "SHORT", price: 99, ts: TS + 1 }, validity: "VALID" })}\n`;
+    const adapterContent = "candidate_id,strategy_id,symbol,side,ts,price,validity,evidence_level\ncli-adapter,HYPE_LONG,BTCUSDT,LONG,1700000000002,101,VALID,UNVERIFIABLE\n";
+    await writeFile(rawPath, rawContent, "utf8");
+    await writeFile(marketPath, marketContent, "utf8");
+    await writeFile(adapterPath, adapterContent, "utf8");
+    try {
+        await buildCandidateCoverage([
+            "--output-dir", outputDir,
+            "--raw-ledger", rawPath,
+            "--market-data", marketPath,
+            "--strategy-adapter", adapterPath,
+            "--raw-evidence", "MISSING",
+        ]);
+        const manifest = JSON.parse(await readFile(join(outputDir, "candidate-source-manifest.json"), "utf8")) as {
+            observedRowCount: number;
+            failClosedRowCount: number;
+            sourceHashes: readonly { path: string; bytes: number }[];
+        };
+        assert.equal(manifest.observedRowCount, 3);
+        assert.equal(manifest.failClosedRowCount, 2);
+        assert.equal(manifest.sourceHashes.find((entry) => entry.path.endsWith("raw.json"))?.bytes, Buffer.byteLength(rawContent));
+        assert.equal(manifest.sourceHashes.find((entry) => entry.path.endsWith("market.jsonl"))?.bytes, Buffer.byteLength(marketContent));
+        assert.equal(manifest.sourceHashes.find((entry) => entry.path.endsWith("adapter.csv"))?.bytes, Buffer.byteLength(adapterContent));
+        await readFile(join(outputDir, "candidate-source-coverage-matrix.json"), "utf8");
+        await readFile(join(outputDir, "candidate-source-sha256-index.json"), "utf8");
+    } finally {
+        await rm(root, { recursive: true, force: true });
+    }
 });
