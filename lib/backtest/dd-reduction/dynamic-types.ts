@@ -125,3 +125,22 @@ export interface CandidateSourceManifest {
     readonly sourceHashes: readonly SourceHashIndexEntry[];
     readonly sha256Index: readonly SourceHashIndexEntry[];
 }
+
+/**
+ * Public allocator contracts consumed by later dynamic replay modules.
+ * Runtime implementation remains in dynamic-allocator.ts.
+ */
+export type {
+    AllocationDecision,
+    AllocationRejectionReason,
+    AllocationTransition,
+    CooldownRecord,
+    DynamicAllocatorCandidate,
+    DynamicAllocatorPolicy,
+    DynamicAllocatorState,
+    FillConfirmation,
+    OwnershipRecord,
+    ProtectionRegistration,
+    ReleaseRequest,
+    ReservationRecord,
+} from "./dynamic-allocator";
