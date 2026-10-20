@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import { sizeDynamicEntry, type DynamicSizingInput } from "../lib/backtest/dd-reduction/dynamic-sizing";
+import { createInitialAllocatorState, decideCandidate, type DynamicAllocatorCandidate, type DynamicAllocatorPolicy } from "../lib/backtest/dd-reduction/dynamic-allocator";
 import { assertFixtureIdentity, FIXTURE_HASH } from "../lib/backtest/dd-reduction/fixture-identity";
 
 const TS = 1_700_000_000_000;
@@ -52,6 +53,50 @@ test("rounds down to quantity step and rejects a result below min quantity or no
     const tooSmall = sizeDynamicEntry(input({ available_margin: 9, pending_gross: 0, gross_cap: 9, min_qty: 0, min_notional: 10 }));
     assert.equal(tooSmall.accepted, false);
     assert.equal(tooSmall.reason, "MIN_NOTIONAL");
+});
+
+test("does not subtract Task 3 pending gross twice when sizing from an allocator decision state", () => {
+    const allocatorCandidate: DynamicAllocatorCandidate = {
+        candidate_id: "pending-sizing",
+        strategy_id: "V12",
+        symbol: "BTCUSDT",
+        side: "LONG",
+        decision_ts_ms: TS,
+        entry_valid_until_ms: TS + 30_000,
+        requested_gross: 100,
+        quantity: 1,
+        entry_price: 100,
+        priority: 1,
+        evidence_level: "ORIGINAL_EVIDENCE",
+        source_sha: "c".repeat(64),
+        evidence: {
+            level: "ORIGINAL_EVIDENCE",
+            sourceKind: "RAW_CANDIDATE_DECISIONS",
+            sourcePath: "fixture/sizing.jsonl",
+            sourceSha256: "c".repeat(64),
+            rowNumber: 1,
+            sourceBytes: 128,
+        },
+        validity: "VALID",
+        asset_class: "CRYPTO",
+    };
+    const allocatorPolicy: DynamicAllocatorPolicy = {
+        total_gross_cap: 1_000,
+        crypto_gross_cap: 1_000,
+        strategy_gross_caps: { V12: 1_000 },
+        symbol_gross_caps: { BTCUSDT: 1_000 },
+        reservation_ttl_ms: 60_000,
+    };
+    const decision = decideCandidate(createInitialAllocatorState({ available_margin: 500 }), allocatorCandidate, allocatorPolicy);
+    assert.equal(decision.accepted, true);
+    const result = sizeDynamicEntry(input({
+        available_margin: decision.state_after.available_margin,
+        pending_gross: decision.state_after.pending_gross,
+        strategy_gross: decision.state_after.gross_by_strategy.V12 ?? 0,
+        gross_cap: 400,
+    }));
+    assert.equal(result.accepted, true);
+    assert.equal(result.gross, 390);
 });
 
 test("rejects a rounded quantity that would exceed an explicit gross cap", () => {

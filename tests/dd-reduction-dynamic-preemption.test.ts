@@ -5,6 +5,7 @@ import {
     applyPreemption,
     eligiblePreemption,
     releasePreemptionGross,
+    observeHistoricalPreemptionCount,
     type DynamicPreemptionCandidate,
     type DynamicPreemptionPosition,
 } from "../lib/backtest/dd-reduction/dynamic-preemption";
@@ -112,13 +113,15 @@ test("eligiblePreemption accepts an explicit whole victim only when incoming pri
         incoming_candidate: candidate(),
         victim_position: position,
         mode: "WHOLE",
-        exit_ts_ms: TS + 10,
+        exit_ts_ms: TS + 9,
+        ordering_evidence: "CANONICAL_ORDERING",
     });
 
     assert.equal(result.eligible, true);
     assert.equal(result.mode, "WHOLE");
     assert.equal(result.requested_gross, 100);
-    assert.equal(result.released_gross, 100);
+    assert.equal(result.releasable_gross, 100);
+    assert.equal(result.released_gross, 0);
     assert.equal(result.reason, null);
 });
 
@@ -128,7 +131,8 @@ test("rejects protected victims and priority losers without changing allocator s
         incoming_candidate: candidate(),
         victim_position: { ...position, protected: true },
         mode: "WHOLE",
-        exit_ts_ms: TS + 10,
+        exit_ts_ms: TS + 9,
+        ordering_evidence: "CANONICAL_ORDERING",
     });
     assert.equal(protectedResult.eligible, false);
     assert.equal(protectedResult.reason, "VICTIM_PROTECTED");
@@ -137,7 +141,8 @@ test("rejects protected victims and priority losers without changing allocator s
         incoming_candidate: candidate({ priority: 20 }),
         victim_position: position,
         mode: "WHOLE",
-        exit_ts_ms: TS + 10,
+        exit_ts_ms: TS + 9,
+        ordering_evidence: "CANONICAL_ORDERING",
     });
     assert.equal(loser.eligible, false);
     assert.equal(loser.reason, "INCOMING_PRIORITY_LOST");
@@ -149,7 +154,8 @@ test("same-priority candidates use deterministic candidate-id tie-break", () => 
         incoming_candidate: candidate({ candidate_id: "aaa", priority: 10 }),
         victim_position: { ...position, candidate_id: "zzz", priority: 10 },
         mode: "WHOLE",
-        exit_ts_ms: TS + 10,
+        exit_ts_ms: TS + 9,
+        ordering_evidence: "CANONICAL_ORDERING",
     });
     assert.equal(winner.eligible, true);
 
@@ -157,7 +163,8 @@ test("same-priority candidates use deterministic candidate-id tie-break", () => 
         incoming_candidate: candidate({ candidate_id: "zzz", priority: 10 }),
         victim_position: { ...position, candidate_id: "aaa", priority: 10 },
         mode: "WHOLE",
-        exit_ts_ms: TS + 10,
+        exit_ts_ms: TS + 9,
+        ordering_evidence: "CANONICAL_ORDERING",
     });
     assert.equal(loser.eligible, false);
     assert.equal(loser.reason, "INCOMING_PRIORITY_LOST");
@@ -170,7 +177,8 @@ test("partial and unknown execution are explicit fail-closed boundaries", () => 
         victim_position: position,
         mode: "PARTIAL",
         requested_gross: 50,
-        exit_ts_ms: TS + 10,
+        exit_ts_ms: TS + 9,
+        ordering_evidence: "CANONICAL_ORDERING",
     });
     assert.equal(partial.eligible, true);
     assert.equal(partial.mode, "PARTIAL");
@@ -179,8 +187,9 @@ test("partial and unknown execution are explicit fail-closed boundaries", () => 
         incoming_candidate: candidate(),
         victim_position: position,
         mode: "WHOLE",
-        exit_ts_ms: TS + 10,
+        exit_ts_ms: TS + 9,
         exit_status: "UNKNOWN",
+        ordering_evidence: "CANONICAL_ORDERING",
     });
     assert.equal(unknown.eligible, false);
     assert.equal(unknown.reason, "UNKNOWN_EXECUTION");
@@ -212,6 +221,10 @@ test("whole preemption enforces exit confirmation, release, cooldown, then incom
         exit: { status: "FILLED", confirmed: true, filled_gross: 100, exit_ts_ms: TS + 10 },
         cooldown: { until_ts_ms: TS + 60_000, source_event_ts_ms: TS + 10 },
         policy: policy(),
+        ordering_events: [
+            { timestamp: TS + 10, kind: "PREEMPTION_EXIT", event_seq: 1 },
+            { timestamp: TS + 10, kind: "ENTRY", event_seq: 2 },
+        ],
     });
     assert.equal(result.applied, true);
     assert.equal(result.lifecycle, "VICTIM_EXIT_RELEASE_COOLDOWN_READMIT");
@@ -267,8 +280,165 @@ test("protection registration makes a victim ineligible without exposing a mutab
         victim_position: position,
         allocator_state: protectedState.state_after,
         mode: "WHOLE",
-        exit_ts_ms: TS + 10,
+        exit_ts_ms: TS + 9,
+        ordering_evidence: "CANONICAL_ORDERING",
     });
     assert.equal(result.eligible, false);
     assert.equal(result.reason, "VICTIM_PROTECTED");
+});
+
+test("applyPreemption uses authoritative allocator protection even when victim metadata omits protection fields", () => {
+    const { state, position } = openVictim();
+    const protectedState = registerProtection(state, position.reservation_id, {
+        protection_id: "stop-authoritative",
+        registered_ts_ms: TS + 2,
+    });
+    assert.equal(protectedState.applied, true);
+    const { protected: _protected, protection_id: _protectionId, protection_verified: _verified, ...untrustedPosition } = position;
+    const result = applyPreemption({
+        state: protectedState.state_after,
+        incoming_candidate: candidate(),
+        victim_position: untrustedPosition,
+        mode: "WHOLE",
+        exit: { status: "FILLED", confirmed: true, filled_gross: 100, exit_ts_ms: TS + 10 },
+        policy: policy(),
+        ordering_evidence: "CANONICAL_ORDERING",
+    });
+    assert.equal(result.applied, false);
+    assert.equal(result.reason, "VICTIM_PROTECTED");
+    assert.equal(result.victim_release_applied, false);
+});
+
+test("ordering evidence is required and event evidence overrides contradictory caller metadata", () => {
+    const { position } = openVictim();
+    const missing = eligiblePreemption({
+        incoming_candidate: candidate(),
+        victim_position: position,
+        mode: "WHOLE",
+        exit_ts_ms: TS + 10,
+    });
+    assert.equal(missing.eligible, false);
+    assert.equal(missing.reason, "NONCANONICAL_ORDERING");
+
+    const contradictory = eligiblePreemption({
+        incoming_candidate: candidate({ decision_ts_ms: TS + 10 }),
+        victim_position: position,
+        mode: "WHOLE",
+        exit_ts_ms: TS + 9,
+        ordering_evidence: "CANONICAL_ORDERING",
+        ordering_events: [
+            { timestamp: TS + 10, kind: "PREEMPTION_EXIT" },
+            { timestamp: TS + 10, kind: "ENTRY" },
+        ],
+    });
+    assert.equal(contradictory.eligible, false);
+    assert.equal(contradictory.reason, "NONCANONICAL_ORDERING");
+});
+
+test("rejects a future exit and requires event sequence evidence for equal decision/exit timestamps", () => {
+    const { position } = openVictim();
+    const future = eligiblePreemption({
+        incoming_candidate: candidate({ decision_ts_ms: TS + 10 }),
+        victim_position: position,
+        mode: "WHOLE",
+        exit_ts_ms: TS + 11,
+        ordering_evidence: "CANONICAL_ORDERING",
+    });
+    assert.equal(future.eligible, false);
+    assert.equal(future.reason, "TEMPORAL_ORDER_INVALID");
+
+    const equalWithoutSequence = eligiblePreemption({
+        incoming_candidate: candidate({ decision_ts_ms: TS + 10 }),
+        victim_position: position,
+        mode: "WHOLE",
+        exit_ts_ms: TS + 10,
+        ordering_evidence: "CANONICAL_ORDERING",
+    });
+    assert.equal(equalWithoutSequence.eligible, false);
+    assert.equal(equalWithoutSequence.reason, "NONCANONICAL_ORDERING");
+
+    const equalWithSequence = eligiblePreemption({
+        incoming_candidate: candidate({ decision_ts_ms: TS + 10 }),
+        victim_position: position,
+        mode: "WHOLE",
+        exit_ts_ms: TS + 10,
+        ordering_events: [
+            { timestamp: TS + 10, kind: "PREEMPTION_EXIT", event_seq: 1 },
+            { timestamp: TS + 10, kind: "ENTRY", event_seq: 2 },
+        ],
+    });
+    assert.equal(equalWithSequence.eligible, true);
+});
+
+test("validates exact open victim identity before eligibility and direct release", () => {
+    const { state, position } = openVictim();
+    const mismatched = eligiblePreemption({
+        incoming_candidate: candidate(),
+        victim_position: { ...position, symbol: "ETHUSDT" },
+        allocator_state: state,
+        mode: "WHOLE",
+        exit_ts_ms: TS + 10,
+        ordering_evidence: "CANONICAL_ORDERING",
+    });
+    assert.equal(mismatched.eligible, false);
+    assert.equal(mismatched.reason, "VICTIM_IDENTITY_MISMATCH");
+
+    const pending = decideCandidate(createInitialAllocatorState({ available_margin: 1_000 }), victimCandidate(), policy());
+    assert.equal(pending.accepted, true);
+    const pendingPosition = { ...position, reservation_id: pending.reservation!.reservation_id, status: "OPEN" as const };
+    const pendingRelease = releasePreemptionGross(pending.state_after, pendingPosition, {
+        exit_ts_ms: TS + 10,
+        status: "FILLED",
+        confirmed: true,
+        filled_gross: 100,
+    });
+    assert.equal(pendingRelease.applied, false);
+    assert.equal(pendingRelease.reason, "VICTIM_NOT_OPEN");
+});
+
+test("reports successful victim release separately when incoming re-admission fails", () => {
+    const { state, position } = openVictim();
+    const result = applyPreemption({
+        state,
+        incoming_candidate: candidate({ requested_gross: 2_000 }),
+        victim_position: position,
+        mode: "WHOLE",
+        exit: { status: "FILLED", confirmed: true, filled_gross: 100, exit_ts_ms: TS + 9 },
+        policy: policy(),
+        ordering_evidence: "CANONICAL_ORDERING",
+    });
+    assert.equal(result.applied, false);
+    assert.equal(result.lifecycle, "VICTIM_RELEASED_INCOMING_REJECTED");
+    assert.equal(result.victim_release_applied, true);
+    assert.equal(result.gross_release?.applied, true);
+    assert.equal(result.incoming_admission?.accepted, false);
+});
+
+test("historical 123/125 counts are observation-only and require provenance", () => {
+    const tenBps = observeHistoricalPreemptionCount({
+        cost_bps: 10,
+        observed_count: 123,
+        source_path: "historical-observation.json",
+        source_sha256: "b".repeat(64),
+    });
+    assert.equal(tenBps.status, "OBSERVED");
+    assert.equal(tenBps.expected_count, 123);
+    assert.equal(tenBps.matches_expected, true);
+    assert.equal(tenBps.formal_parity_eligible, false);
+    assert.equal(tenBps.classification, "OBSERVATION_ONLY");
+
+    const mismatch = observeHistoricalPreemptionCount({
+        cost_bps: 30,
+        observed_count: 124,
+        source_path: "historical-observation.json",
+        source_sha256: "b".repeat(64),
+    });
+    assert.equal(mismatch.status, "UNSUPPORTED");
+    assert.equal(mismatch.reason, "COUNT_MISMATCH");
+    assert.equal(mismatch.formal_parity_eligible, false);
+
+    const missing = observeHistoricalPreemptionCount({ cost_bps: 30, observed_count: 125, source_path: "", source_sha256: null });
+    assert.equal(missing.status, "UNSUPPORTED");
+    assert.equal(missing.reason, "MISSING_PROVENANCE");
+    assert.equal(missing.formal_parity_eligible, false);
 });

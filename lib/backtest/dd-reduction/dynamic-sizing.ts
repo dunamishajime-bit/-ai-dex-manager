@@ -99,7 +99,9 @@ export function sizeDynamicEntry(input: DynamicSizingInput): DynamicSizingResult
     }
     const costRateBps = input.fee_bps + input.funding_bps + input.slippage_bps;
     const costRate = costRateBps / 10_000;
-    const marginCapacity = input.available_margin - input.pending_gross - input.margin_reserve;
+    // Task 3 already subtracts pending reservations from available_margin.
+    // Keep pending_gross in the decision snapshot, but do not subtract it again.
+    const marginCapacity = input.available_margin - input.margin_reserve;
     const walletCapacity = Math.min(input.wallet_jpy, input.equity_jpy);
     const strategyCapacity = input.strategy_gross_cap - input.strategy_gross;
     const baseGross = Math.min(walletCapacity, marginCapacity, strategyCapacity, input.gross_cap);
@@ -109,7 +111,7 @@ export function sizeDynamicEntry(input: DynamicSizingInput): DynamicSizingResult
     const quantity = floorToStep(rawQuantity, input.quantity_step);
     const gross = quantity * input.price;
     const costReserve = gross * costRate;
-    if (!Number.isFinite(quantity) || !Number.isFinite(gross) || gross > input.gross_cap + 1e-9 || gross > strategyCapacity + 1e-9 || gross + costReserve > marginCapacity + 1e-9 || gross + costReserve > walletCapacity + 1e-9) {
+    if (!Number.isFinite(quantity) || !Number.isFinite(gross) || gross > input.gross_cap || gross > strategyCapacity || gross + costReserve > marginCapacity || gross + costReserve > walletCapacity) {
         return rejected(input, "GROSS_CAP", rawQuantity, rawGross);
     }
     if (quantity < input.min_qty) return rejected(input, "MIN_QTY", rawQuantity, rawGross);
