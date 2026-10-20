@@ -8,7 +8,9 @@ The implementation is limited to deterministic ordering, ordering-evidence class
 
 ## Commit
 
-- `feat(research): make dynamic event ordering deterministic`
+- `5c07008a82e25eca2108d3a1888dbd820a9848a2` — `feat(research): make dynamic event ordering deterministic`
+- `0667ebd7ad5d0d2b3c2f9cd97834715970591d48` — `fix(research): harden dynamic ordering evidence`
+- `d24c51d5c403cc67ff36fecc3d41650bb6d6073f` — `fix(research): fail closed on uncaused cooldowns`
 
 ## TDD evidence
 
@@ -229,3 +231,78 @@ Final type check and lint both exited `0`:
 npx tsc --noEmit --incremental false
 npx eslint lib/backtest/dd-reduction/dynamic-ordering.ts lib/backtest/dd-reduction/dynamic-state.ts tests/dd-reduction-dynamic-ordering.test.ts tests/dd-reduction-dynamic-source.test.ts
 ```
+
+## Causal cooldown review fix
+
+Implementation commit:
+
+```text
+d24c51d5c403cc67ff36fecc3d41650bb6d6073f
+```
+
+The explicit contract is now fail closed: when a finite `cooldownUntilTsMs` is supplied, `sourceEventTsMs` must also be a finite timestamp at or before the candidate decision. A missing, `null`, `NaN`, infinite, or future source timestamp returns `false`. A valid causal source timestamp preserves the existing active-cooldown behavior.
+
+### RED
+
+Command:
+
+```text
+node --import tsx --test --test-isolation=none tests/dd-reduction-dynamic-ordering.test.ts
+```
+
+Result before the implementation change:
+
+```text
+EXIT_CODE=1
+ℹ tests 9
+ℹ pass 8
+ℹ fail 1
+
+✖ fails closed when an active cooldown lacks a finite causal source timestamp
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  true !== false
+```
+
+### GREEN
+
+Focused ordering/state result:
+
+```text
+EXIT_CODE=0
+ℹ tests 9
+ℹ pass 9
+ℹ fail 0
+ℹ skipped 0
+ℹ todo 0
+```
+
+Focused ordering/state plus source-integration result:
+
+```text
+node --import tsx --test --test-isolation=none tests/dd-reduction-dynamic-ordering.test.ts tests/dd-reduction-dynamic-source.test.ts
+EXIT_CODE=0
+ℹ tests 28
+ℹ pass 28
+ℹ fail 0
+ℹ skipped 0
+ℹ todo 0
+```
+
+The focused result retains the duplicate valid same-timestamp `event_seq` regression and confirms `DUPLICATE_EVENT_SEQUENCE`, `NONCANONICAL_ORDERING`, and `formalParityEligible: false` at both the direct ordering boundary and normalized-source integration boundary.
+
+Required full verification:
+
+```text
+npm run dd:reduction:test
+EXIT_CODE=0
+DD_REDUCTION_TEST_DISCOVERY files=10
+DD_REDUCTION_TEST_SUMMARY files=10 passed=10 failed=0 skipped=0 todo=0
+
+npx tsc --noEmit --incremental false --pretty false
+EXIT_CODE=0
+
+git diff --check
+EXIT_CODE=0
+```
+
+No Production, VPS, LIVE, HP, Aster, allocator, replay, or unrelated research files were changed by this fix.
