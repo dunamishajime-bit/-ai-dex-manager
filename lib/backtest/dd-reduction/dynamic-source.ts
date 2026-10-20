@@ -127,7 +127,7 @@ function adaptCandidateRow(row: CandidateRow, kind: CandidateSourceRecord["kind"
         dataSha: firstValue(row, paths(["dataSha", "data_sha", "dataHash", "hashes.data_sha"])),
         validity: firstValue(row, paths(["validity", "entryValidity", "entry_validity"])),
         accepted: firstValue(row, paths(["allocatorAccepted", "allocator_accepted", "accepted"])),
-        evidenceLevel: firstValue(row, ["evidence_level", "evidenceLevel", "provenance.evidence_level", "provenance.evidence"]),
+        evidenceLevel: firstValue(row, paths(["evidence_level", "evidenceLevel", "provenance.evidence_level", "provenance.evidence"])),
     };
 }
 
@@ -158,6 +158,12 @@ function optionalNumber(value: unknown, field: string, context: string): number 
     if (value === undefined || value === null || value === "") return null;
     if (typeof value !== "number" || !Number.isFinite(value)) error(`INVALID_${context}`, `${field} must be a finite number`);
     return value;
+}
+
+function eventSequence(value: unknown): { readonly value: number | null; readonly reason: string | null } {
+    if (value === undefined || value === null || value === "") return { value: null, reason: null };
+    if (typeof value === "number" && Number.isInteger(value) && value >= 0) return { value, reason: null };
+    return { value: null, reason: `malformed event_seq: expected a non-negative integer, received ${String(value)}` };
 }
 
 function optionalStringValue(value: unknown, field: string, context: string): string | null {
@@ -250,8 +256,10 @@ function normalizeRow(row: Readonly<Record<string, unknown>>, record: CandidateS
     else error("INVALID_VALIDITY", `${record.path}:${rowIndex} validity must be VALID, INVALID, or UNKNOWN`);
 
     const level = evidenceLevel(adapted.evidenceLevel, record.evidence, "CANDIDATE_ROW");
-    const sourceSha = optionalHash(adapted.sourceSha, record.sourceSha256, "source_sha", "CANDIDATE_ROW");
+    const verifiedSourceSha = sourceHash(record.sourceSha256, record.path);
+    const sourceSha = optionalHash(adapted.sourceSha, verifiedSourceSha, "source_sha", "CANDIDATE_ROW");
     if (sourceSha === null) error("INVALID_CANDIDATE_ROW", "source_sha is required");
+    if (sourceSha !== verifiedSourceSha) error("SOURCE_HASH_MISMATCH", `${record.path}:${rowIndex} source_sha does not match the verified source record hash`);
     const evidence: CandidateEvidence = {
         level,
         sourceKind: record.kind,
@@ -261,14 +269,15 @@ function normalizeRow(row: Readonly<Record<string, unknown>>, record: CandidateS
         sourceBytes: record.sourceBytes,
     };
     const evidenceFailClosed = level === "MISSING" || level === "UNVERIFIABLE";
-    const failClosed = missingFields.length > 0 || evidenceFailClosed || validity !== "VALID";
+    const sequence = eventSequence(adapted.eventSeq);
+    const failClosed = missingFields.length > 0 || evidenceFailClosed || validity !== "VALID" || sequence.reason !== null;
     const reason = missingFields.length > 0
         ? `missing required fields: ${missingFields.join(", ")}`
         : evidenceFailClosed
             ? `evidence level ${level} is fail-closed`
             : validity !== "VALID"
                 ? `candidate validity is ${validity}`
-                : null;
+                : sequence.reason;
     const observed = observedStatus(adapted.status, "CANDIDATE_ROW");
     const allocatorAccepted = optionalBoolean({ accepted: adapted.accepted }, "accepted", "CANDIDATE_ROW");
     const configSha = optionalHash(adapted.configSha, null, "config_sha", "CANDIDATE_ROW");
@@ -280,7 +289,6 @@ function normalizeRow(row: Readonly<Record<string, unknown>>, record: CandidateS
     const entryPriceSource = optionalStringValue(adapted.entryPriceSource, "entry_price_source", "CANDIDATE_ROW");
     const plannedExit = (adapted.plannedExit === undefined ? null : adapted.plannedExit) as PlannedExit;
     const signalTsMs = optionalNumber(adapted.signalTsMs, "signal_ts_ms", "CANDIDATE_ROW");
-    const eventSeq = optionalNumber(adapted.eventSeq, "event_seq", "CANDIDATE_ROW");
     const rank = optionalNumber(adapted.rank, "rank", "CANDIDATE_ROW");
     const score = optionalNumber(adapted.score, "score", "CANDIDATE_ROW");
     const priority = optionalNumber(adapted.priority, "priority", "CANDIDATE_ROW");
@@ -296,7 +304,7 @@ function normalizeRow(row: Readonly<Record<string, unknown>>, record: CandidateS
         family,
         signal_ts_ms: signalTsMs,
         decision_ts_ms: decisionTsMs,
-        event_seq: eventSeq,
+        event_seq: sequence.value,
         rank,
         score,
         priority,

@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -171,6 +172,49 @@ test("preserves MISSING evidence as explicit fail-closed provenance", () => {
     assert.match(event.reason ?? "", /evidence level MISSING/i);
 });
 
+test("preserves nested MISSING and UNVERIFIABLE evidence for source-specific containers", () => {
+    const nested = (kind: CandidateSourceRecord["kind"], evidence: "MISSING" | "UNVERIFIABLE", candidateId: string): CandidateSourceRecord => ({
+        kind,
+        path: `${kind.toLowerCase()}.json`,
+        sourceSha256: SOURCE_HASH,
+        sourceBytes: 1,
+        evidence: "CAUSALLY_REGENERATED",
+        rows: kind === "SAVED_MARKET_DATA"
+            ? [{ candidate: { candidate_id: candidateId, strategy_id: "IDLE", symbol: "BTCUSDT", side: "LONG", price: 100, ts: TS, evidence_level: evidence, validity: "VALID" } }]
+            : [{ signal: { candidate_id: candidateId, strategy_id: "V52", symbol: "BTCUSDT", side: "SHORT", price: 101, ts: TS, evidence_level: evidence, validity: "VALID" } }],
+    });
+    const result = normalizeDynamicCandidates({ records: [nested("SAVED_MARKET_DATA", "MISSING", "nested-missing"), nested("STRATEGY_ADAPTER", "UNVERIFIABLE", "nested-unverifiable")] });
+    assert.equal(result.events[0]?.evidence_level, "MISSING");
+    assert.equal(result.events[0]?.failClosed, true);
+    assert.equal(result.events[1]?.evidence_level, "UNVERIFIABLE");
+    assert.equal(result.events[1]?.failClosed, true);
+});
+
+test("fails closed with a source-specific identity error for every adapter kind", () => {
+    const rows = [{ strategy: "V12", symbol: "BTCUSDT", side: "LONG", price: 100, ts: TS, validity: "VALID" }];
+    for (const kind of ["RAW_CANDIDATE_DECISIONS", "SAVED_MARKET_DATA", "STRATEGY_ADAPTER"] as const) {
+        const record: CandidateSourceRecord = { kind, path: `${kind}.json`, sourceSha256: SOURCE_HASH, sourceBytes: 1, evidence: "ORIGINAL_EVIDENCE", rows };
+        assert.throws(() => normalizeDynamicCandidates({ records: [record] }), new RegExp(`INVALID_${kind}`));
+    }
+});
+
+test("rejects a row source hash that diverges from the verified record file hash", () => {
+    assert.throws(
+        () => normalizeDynamicCandidates({ records: [rawRecord([rawRow({ source_sha: "d".repeat(64) })])] }),
+        /SOURCE_HASH_MISMATCH/,
+    );
+});
+
+test("marks a supplied negative or fractional event_seq fail-closed with an explicit sequence reason", () => {
+    for (const eventSeq of [-1, 1.5, "2"]) {
+        const result = normalizeDynamicCandidates({ records: [rawRecord([rawRow({ candidateId: `bad-seq-${String(eventSeq)}`, event_seq: eventSeq })])] });
+        const event = result.events[0] as DynamicCandidateEvent;
+        assert.equal(event.event_seq, null);
+        assert.equal(event.failClosed, true);
+        assert.match(event.reason ?? "", /malformed event_seq/i);
+    }
+});
+
 test("rejects duplicate candidate IDs instead of silently merging observations", () => {
     assert.throws(
         () => normalizeDynamicCandidates({ records: [rawRecord([rawRow(), rawRow({ ts: TS + 1 })])] }),
@@ -256,6 +300,24 @@ test("rejects malformed timestamps, source hashes, and incompatible cost scenari
     assert.throws(() => normalizeDynamicCandidates({ records: [rawRecord([rawRow({ ts: "not-a-timestamp" })])] }), /INVALID_TIMESTAMP/);
     assert.throws(() => normalizeDynamicCandidates({ records: [rawRecord([rawRow()], { sourceSha256: "invalid" })] }), /INVALID_SOURCE_HASH/);
     assert.throws(() => normalizeDynamicCandidates({ records: [rawRecord([rawRow()])], feeBps: [10, 30], slippageBps: [10, 20, 30] }), /INVALID_COST_SCENARIO/);
+});
+
+test("indexes the exact verified fixture hash and byte length", () => {
+    const content = `${JSON.stringify(rawRow({ candidateId: "hashed-fixture" }))}\n`;
+    const hash = createHash("sha256").update(content, "utf8").digest("hex");
+    const result = normalizeDynamicCandidates({
+        records: [{
+            kind: "RAW_CANDIDATE_DECISIONS",
+            path: "fixture.jsonl",
+            sourceSha256: hash,
+            sourceBytes: Buffer.byteLength(content, "utf8"),
+            evidence: "ORIGINAL_EVIDENCE",
+            rows: [JSON.parse(content) as Record<string, unknown>],
+        }],
+    });
+    const entry = buildCandidateSourceManifest(result).sha256Index[0];
+    assert.equal(entry?.sha256, hash);
+    assert.equal(entry?.bytes, Buffer.byteLength(content, "utf8"));
 });
 
 test("CLI parses JSON, JSONL, and CSV source-specific inputs with explicit evidence and source bytes", async () => {
