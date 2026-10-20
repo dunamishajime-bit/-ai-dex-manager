@@ -222,8 +222,8 @@ test("whole preemption enforces exit confirmation, release, cooldown, then incom
         cooldown: { until_ts_ms: TS + 60_000, source_event_ts_ms: TS + 10 },
         policy: policy(),
         ordering_events: [
-            { timestamp: TS + 10, kind: "PREEMPTION_EXIT", event_seq: 1 },
-            { timestamp: TS + 10, kind: "ENTRY", event_seq: 2 },
+            { timestamp: TS + 10, kind: "PREEMPTION_EXIT", event_seq: 1, candidate_id: "victim-1" },
+            { timestamp: TS + 10, kind: "ENTRY", event_seq: 2, candidate_id: "incoming-1" },
         ],
     });
     assert.equal(result.applied, true);
@@ -363,8 +363,8 @@ test("rejects a future exit and requires event sequence evidence for equal decis
         mode: "WHOLE",
         exit_ts_ms: TS + 10,
         ordering_events: [
-            { timestamp: TS + 10, kind: "PREEMPTION_EXIT", event_seq: 1 },
-            { timestamp: TS + 10, kind: "ENTRY", event_seq: 2 },
+            { timestamp: TS + 10, kind: "PREEMPTION_EXIT", event_seq: 1, candidate_id: "victim-1" },
+            { timestamp: TS + 10, kind: "ENTRY", event_seq: 2, candidate_id: "incoming-1" },
         ],
     });
     assert.equal(equalWithSequence.eligible, true);
@@ -415,30 +415,139 @@ test("reports successful victim release separately when incoming re-admission fa
 });
 
 test("historical 123/125 counts are observation-only and require provenance", () => {
+    const observationPath = "docs/research/results/dd-reduction-initial-adverse-stop-audit-20261020/TASK9_ENGINE_AUDIT_FINAL_REPORT_JA.md";
+    const observationSha = "e80a11de44815c82a9bd6eb917e6346ec5172e9a2c6a0627f48c3a7ce75a57a5";
+    const manifestPath = "docs/research/results/dd-reduction-initial-adverse-stop-audit-20261020/manifest.json";
+    const manifestSha = "591c14589b9997e19bbb70ed568fdb5aaa21e6d90c418102a0adba6b6431bdef";
     const tenBps = observeHistoricalPreemptionCount({
         cost_bps: 10,
         observed_count: 123,
-        source_path: "historical-observation.json",
-        source_sha256: "b".repeat(64),
+        source_path: observationPath,
+        source_sha256: observationSha,
+        provenance: { manifest_path: manifestPath, manifest_sha256: manifestSha },
     });
     assert.equal(tenBps.status, "OBSERVED");
     assert.equal(tenBps.expected_count, 123);
     assert.equal(tenBps.matches_expected, true);
     assert.equal(tenBps.formal_parity_eligible, false);
     assert.equal(tenBps.classification, "OBSERVATION_ONLY");
+    assert.equal(tenBps.source_path, observationPath);
+    assert.equal(tenBps.source_sha256, observationSha);
+    assert.equal(tenBps.provenance.manifest_path, manifestPath);
+    assert.equal(tenBps.provenance.verified, true);
 
     const mismatch = observeHistoricalPreemptionCount({
         cost_bps: 30,
         observed_count: 124,
-        source_path: "historical-observation.json",
-        source_sha256: "b".repeat(64),
+        source_path: observationPath,
+        source_sha256: observationSha,
+        provenance: { manifest_path: manifestPath, manifest_sha256: manifestSha },
     });
     assert.equal(mismatch.status, "UNSUPPORTED");
     assert.equal(mismatch.reason, "COUNT_MISMATCH");
     assert.equal(mismatch.formal_parity_eligible, false);
 
-    const missing = observeHistoricalPreemptionCount({ cost_bps: 30, observed_count: 125, source_path: "", source_sha256: null });
+    const missing = observeHistoricalPreemptionCount({ cost_bps: 30, observed_count: 125, source_path: "", source_sha256: null, provenance: null });
     assert.equal(missing.status, "UNSUPPORTED");
     assert.equal(missing.reason, "MISSING_PROVENANCE");
     assert.equal(missing.formal_parity_eligible, false);
+
+    const nonexistent = observeHistoricalPreemptionCount({
+        cost_bps: 10,
+        observed_count: 123,
+        source_path: "docs/research/missing-historical-report.md",
+        source_sha256: observationSha,
+        provenance: { manifest_path: manifestPath, manifest_sha256: manifestSha },
+    });
+    assert.equal(nonexistent.status, "UNSUPPORTED");
+    assert.equal(nonexistent.reason, "PROVENANCE_NOT_FOUND");
+
+    const mismatched = observeHistoricalPreemptionCount({
+        cost_bps: 10,
+        observed_count: 123,
+        source_path: observationPath,
+        source_sha256: "0".repeat(64),
+        provenance: { manifest_path: manifestPath, manifest_sha256: manifestSha },
+    });
+    assert.equal(mismatched.status, "UNSUPPORTED");
+    assert.equal(mismatched.reason, "PROVENANCE_MISMATCH");
+
+    const invalidCost = observeHistoricalPreemptionCount({
+        cost_bps: 20,
+        observed_count: 123,
+        source_path: observationPath,
+        source_sha256: observationSha,
+        provenance: { manifest_path: manifestPath, manifest_sha256: manifestSha },
+    });
+    assert.equal(invalidCost.status, "UNSUPPORTED");
+    assert.equal(invalidCost.reason, "INVALID_COST_BPS");
+});
+
+test("same-timestamp ordering requires matching nonempty exit-before-entry evidence", () => {
+    const { position } = openVictim();
+    const base = {
+        incoming_candidate: candidate({ decision_ts_ms: TS + 10 }),
+        victim_position: position,
+        mode: "WHOLE" as const,
+        exit_ts_ms: TS + 10,
+    };
+    const cases = [
+        [],
+        [{ timestamp: TS + 10, kind: "OTHER", event_seq: 1, candidate_id: "incoming-1" }],
+        [
+            { timestamp: TS + 10, kind: "ENTRY", event_seq: 1, candidate_id: "incoming-1" },
+            { timestamp: TS + 10, kind: "PREEMPTION_EXIT", event_seq: 2, candidate_id: "victim-1" },
+        ],
+        [
+            { timestamp: TS + 10, kind: "PREEMPTION_EXIT", event_seq: 1, candidate_id: "victim-1" },
+            { timestamp: TS + 10, kind: "ENTRY", event_seq: 1, candidate_id: "incoming-1" },
+        ],
+        [
+            { timestamp: TS + 10, kind: "PREEMPTION_EXIT", event_seq: 1, candidate_id: "wrong-victim" },
+            { timestamp: TS + 10, kind: "ENTRY", event_seq: 2, candidate_id: "incoming-1" },
+        ],
+    ] as const;
+    for (const ordering_events of cases) {
+        const result = eligiblePreemption({ ...base, ordering_events });
+        assert.equal(result.eligible, false);
+        assert.equal(result.reason, "NONCANONICAL_ORDERING");
+    }
+});
+
+test("malformed victim, reservation, ownership, and execution gross fail closed without state changes", () => {
+    const { state, position } = openVictim();
+    for (const gross of [0, -1, Number.NaN, Number.POSITIVE_INFINITY]) {
+        const result = releasePreemptionGross(state, { ...position, gross }, {
+            exit_ts_ms: TS + 10,
+            status: "FILLED",
+            confirmed: true,
+            filled_gross: 100,
+        });
+        assert.equal(result.applied, false);
+        assert.equal(result.reason, "DATA_MISSING");
+        assert.equal(result.state_hash_before, result.state_hash_after);
+    }
+    for (const field of ["filled_gross", "ownership_gross"] as const) {
+        const malformedState = field === "filled_gross"
+            ? { ...state, reservations: state.reservations.map((reservation) => ({ ...reservation, filled_gross: Number.NaN })) }
+            : { ...state, ownership: state.ownership.map((ownership) => ({ ...ownership, gross: 0 })) };
+        const result = releasePreemptionGross(malformedState, position, {
+            exit_ts_ms: TS + 10,
+            status: "FILLED",
+            confirmed: true,
+            filled_gross: 100,
+        });
+        assert.equal(result.applied, false);
+        assert.equal(result.reason, "DATA_MISSING");
+        assert.equal(result.state_hash_before, result.state_hash_after);
+    }
+    const malformedExecution = releasePreemptionGross(state, position, {
+        exit_ts_ms: TS + 10,
+        status: "FILLED",
+        confirmed: true,
+        filled_gross: Number.POSITIVE_INFINITY,
+    });
+    assert.equal(malformedExecution.applied, false);
+    assert.equal(malformedExecution.reason, "DATA_MISSING");
+    assert.equal(malformedExecution.state_hash_before, malformedExecution.state_hash_after);
 });

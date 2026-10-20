@@ -1,3 +1,6 @@
+import { createHash } from "node:crypto";
+import { readFileSync, statSync } from "node:fs";
+import { isAbsolute, resolve } from "node:path";
 import { classifyOrderingEvidence, type DynamicOrderingInput, type OrderingEvidence } from "./dynamic-ordering";
 import {
     createInitialAllocatorState,
@@ -137,14 +140,28 @@ export interface ApplyPreemptionResult {
     readonly incoming_admission: ReturnType<typeof decideCandidate> | null;
 }
 
+export interface HistoricalPreemptionProvenanceInput {
+    readonly manifest_path: string | null | undefined;
+    readonly manifest_sha256: string | null | undefined;
+}
+
 export interface HistoricalPreemptionObservationInput {
-    readonly cost_bps: 10 | 30;
+    readonly cost_bps: number;
     readonly observed_count: number | null | undefined;
     readonly source_path: string | null | undefined;
     readonly source_sha256: string | null | undefined;
+    readonly provenance?: HistoricalPreemptionProvenanceInput | null;
 }
 
-export type HistoricalPreemptionObservationReason = "MISSING_PROVENANCE" | "OBSERVATION_MISSING" | "COUNT_MISMATCH";
+export type HistoricalPreemptionObservationReason = "INVALID_COST_BPS" | "MISSING_PROVENANCE" | "OBSERVATION_MISSING" | "COUNT_MISMATCH" | "PROVENANCE_NOT_FOUND" | "PROVENANCE_MISMATCH";
+
+export interface HistoricalPreemptionProvenanceResult {
+    readonly manifest_path: string | null;
+    readonly manifest_sha256: string | null;
+    readonly source_verified: boolean;
+    readonly manifest_verified: boolean;
+    readonly verified: boolean;
+}
 
 export interface HistoricalPreemptionObservationResult {
     readonly status: "OBSERVED" | "UNSUPPORTED";
@@ -154,6 +171,9 @@ export interface HistoricalPreemptionObservationResult {
     readonly matches_expected: boolean;
     readonly formal_parity_eligible: false;
     readonly reason: HistoricalPreemptionObservationReason | null;
+    readonly source_path: string | null;
+    readonly source_sha256: string | null;
+    readonly provenance: HistoricalPreemptionProvenanceResult;
 }
 
 function text(value: unknown): string | null {
@@ -211,6 +231,7 @@ function victimIdentityReason(state: DynamicAllocatorState, victim: DynamicPreem
     if (reservation.status === "RELEASED" || reservation.status === "EXPIRED") return "VICTIM_ALREADY_EXITED";
     if (reservation.status !== "FILLED") return "VICTIM_NOT_OPEN";
     const ownership = state.ownership.find((item) => item.reservation_id === victim.reservation_id);
+    if (!finite(victim.gross) || victim.gross <= 0 || !finite(reservation.filled_gross) || reservation.filled_gross <= 0 || ownership === undefined || !finite(ownership.gross) || ownership.gross <= 0) return "DATA_MISSING";
     if (
         reservation.candidate_id !== victim.candidate_id ||
         reservation.strategy_id !== victim.strategy_id ||
@@ -234,6 +255,51 @@ function orderingFor(input: Pick<PreemptionEligibilityInput, "ordering_evidence"
     return "NONCANONICAL_ORDERING";
 }
 
+function eventTimestamp(event: DynamicOrderingInput): number | null {
+    const record = event as DynamicOrderingInput & { readonly timestamp?: number | null; readonly timestamp_ms?: number | null; readonly ts_ms?: number | null };
+    for (const value of [record.timestamp, record.timestamp_ms, record.ts_ms, record.ts, record.decision_ts_ms, record.signal_ts_ms]) {
+        if (finite(value)) return value;
+    }
+    return null;
+}
+
+function eventKind(event: DynamicOrderingInput): string {
+    const record = event as DynamicOrderingInput & { readonly event_kind?: string | null; readonly eventType?: string | null; readonly type?: string | null; readonly action?: string | null };
+    return (record.kind ?? record.event_kind ?? record.eventType ?? record.type ?? record.action ?? "").toUpperCase();
+}
+
+function eventSequence(event: DynamicOrderingInput): number | null {
+    const record = event as DynamicOrderingInput & { readonly eventSeq?: number | null };
+    const value = record.event_seq ?? record.eventSeq;
+    return typeof value === "number" && Number.isInteger(value) && value >= 0 ? value : null;
+}
+
+function eventIdentity(event: DynamicOrderingInput): string | null {
+    const record = event as DynamicOrderingInput & { readonly position_id?: string | null; readonly reservation_id?: string | null };
+    return text(record.candidate_id) ?? text(record.candidateId) ?? text(record.position_id) ?? text(record.reservation_id);
+}
+
+function orderingReason(input: PreemptionEligibilityInput, incomingDecisionTs: number, exitTsMs: number): PreemptionReason | null {
+    if (input.ordering_events !== undefined) {
+        if (input.ordering_events.length === 0 || classifyOrderingEvidence(input.ordering_events).ordering !== "CANONICAL_ORDERING") return "NONCANONICAL_ORDERING";
+        if (exitTsMs !== incomingDecisionTs) return null;
+        if (input.ordering_events.length !== 2) return "NONCANONICAL_ORDERING";
+        const exitEvents = input.ordering_events.filter((event) => eventKind(event) === "PREEMPTION_EXIT");
+        const entryEvents = input.ordering_events.filter((event) => eventKind(event) === "ENTRY");
+        if (exitEvents.length !== 1 || entryEvents.length !== 1) return "NONCANONICAL_ORDERING";
+        const exitEvent = exitEvents[0];
+        const entryEvent = entryEvents[0];
+        if (eventTimestamp(exitEvent) !== exitTsMs || eventTimestamp(entryEvent) !== incomingDecisionTs) return "NONCANONICAL_ORDERING";
+        const exitSequence = eventSequence(exitEvent);
+        const entrySequence = eventSequence(entryEvent);
+        if (exitSequence === null || entrySequence === null || exitSequence >= entrySequence || exitSequence === entrySequence) return "NONCANONICAL_ORDERING";
+        if (eventIdentity(exitEvent) !== input.victim_position.candidate_id || eventIdentity(entryEvent) !== candidateId(input.incoming_candidate)) return "NONCANONICAL_ORDERING";
+        return null;
+    }
+    if (input.ordering_evidence !== "CANONICAL_ORDERING" || exitTsMs === incomingDecisionTs) return "NONCANONICAL_ORDERING";
+    return null;
+}
+
 /**
  * Checks only causal eligibility. It never releases gross or mutates allocator
  * state; lifecycle transitions belong to applyPreemption/releasePreemptionGross.
@@ -253,7 +319,6 @@ export function eligiblePreemption(
         ? inputOrIncoming as PreemptionEligibilityInput
         : { ...positionalOptions, incoming_candidate: inputOrIncoming as DynamicPreemptionCandidate, victim_position: positionalVictim } as PreemptionEligibilityInput;
     const orderingEvidence = orderingFor(input);
-    if (orderingEvidence !== "CANONICAL_ORDERING") return emptyResult(input, "NONCANONICAL_ORDERING", orderingEvidence);
     if (input.mode !== "WHOLE" && input.mode !== "PARTIAL") return emptyResult(input, "DATA_MISSING", orderingEvidence);
     if (!finite(input.exit_ts_ms) || !finite(input.victim_position?.gross) || input.victim_position.gross <= 0) return emptyResult(input, "DATA_MISSING", orderingEvidence);
     if (!text(input.victim_position.position_id) || !text(input.victim_position.reservation_id) || !text(input.victim_position.candidate_id)) return emptyResult(input, "DATA_MISSING", orderingEvidence);
@@ -271,7 +336,8 @@ export function eligiblePreemption(
     if (input.exit_status === "UNKNOWN") return emptyResult(input, "UNKNOWN_EXECUTION", orderingEvidence);
     const incomingDecisionTs = input.incoming_candidate.decision_ts_ms ?? input.incoming_candidate.decisionTsMs ?? input.incoming_candidate.ts;
     if (!finite(incomingDecisionTs) || input.exit_ts_ms > incomingDecisionTs) return emptyResult(input, "TEMPORAL_ORDER_INVALID", orderingEvidence);
-    if (input.exit_ts_ms === incomingDecisionTs && input.ordering_events === undefined) return emptyResult(input, "NONCANONICAL_ORDERING", orderingEvidence);
+    const orderReason = orderingReason(input, incomingDecisionTs, input.exit_ts_ms);
+    if (orderReason !== null) return emptyResult(input, orderReason, orderingEvidence);
     const incomingId = candidateId(input.incoming_candidate);
     const incomingPriority = candidatePriority(input.incoming_candidate);
     if (incomingId === null || incomingPriority === null || !finite(input.victim_position.priority)) return emptyResult(input, "DATA_MISSING", orderingEvidence);
@@ -325,6 +391,7 @@ export function releasePreemptionGross(
     const identityReason = victimIdentityReason(before, victim);
     if (identityReason !== null) return releaseResult(before, before, false, identityReason, 0, "RELEASE_REJECTED");
     if (exit.status === "UNKNOWN") return releaseResult(before, before, false, "UNKNOWN_EXECUTION", 0, "RELEASE_REJECTED");
+    if (!finite(exit.filled_gross) || exit.filled_gross <= 0) return releaseResult(before, before, false, "DATA_MISSING", 0, "RELEASE_REJECTED");
     if (exit.status === "PARTIAL" || exit.filled_gross !== reservation.filled_gross || exit.filled_gross !== victim.gross) {
         return releaseResult(before, before, false, "PARTIAL_EXECUTION_UNSUPPORTED", 0, "RELEASE_REJECTED");
     }
@@ -413,18 +480,35 @@ export function applyPreemption(input: ApplyPreemptionInput): ApplyPreemptionRes
 
 /** Records historical counts as provenance-bound observations, never parity evidence. */
 export function observeHistoricalPreemptionCount(input: HistoricalPreemptionObservationInput): HistoricalPreemptionObservationResult {
-    const expectedCount = input.cost_bps === 10 ? 123 : 125;
+    const expectedCount = input.cost_bps === 10 ? 123 : input.cost_bps === 30 ? 125 : null;
     const observedCount = typeof input.observed_count === "number" && Number.isInteger(input.observed_count) && input.observed_count >= 0 ? input.observed_count : null;
-    const provenanceUsable = typeof input.source_path === "string" && input.source_path.trim().length > 0 && typeof input.source_sha256 === "string" && /^[a-f0-9]{64}$/i.test(input.source_sha256);
-    if (!provenanceUsable) {
-        return { status: "UNSUPPORTED", classification: "UNSUPPORTED", expected_count: expectedCount, observed_count: observedCount, matches_expected: false, formal_parity_eligible: false, reason: "MISSING_PROVENANCE" };
-    }
+    const provenance = input.provenance;
+    const provenanceResult = { manifest_path: provenance?.manifest_path ?? null, manifest_sha256: provenance?.manifest_sha256 ?? null, source_verified: false, manifest_verified: false, verified: false };
+    const base = (status: "OBSERVED" | "UNSUPPORTED", classification: "OBSERVATION_ONLY" | "UNSUPPORTED", reason: HistoricalPreemptionObservationReason | null, matchesExpected: boolean): HistoricalPreemptionObservationResult => ({ status, classification, expected_count: expectedCount ?? 0, observed_count: observedCount, matches_expected: matchesExpected, formal_parity_eligible: false, reason, source_path: input.source_path ?? null, source_sha256: input.source_sha256 ?? null, provenance: provenanceResult });
+    if (expectedCount === null) return base("UNSUPPORTED", "UNSUPPORTED", "INVALID_COST_BPS", false);
+    if (typeof input.source_path !== "string" || input.source_path.trim().length === 0 || typeof input.source_sha256 !== "string" || !/^[a-f0-9]{64}$/i.test(input.source_sha256) || provenance === null || provenance === undefined || typeof provenance.manifest_path !== "string" || provenance.manifest_path.trim().length === 0 || typeof provenance.manifest_sha256 !== "string" || !/^[a-f0-9]{64}$/i.test(provenance.manifest_sha256)) return base("UNSUPPORTED", "UNSUPPORTED", "MISSING_PROVENANCE", false);
+    const digest = (pathValue: string): string | null => {
+        try {
+            const absolute = isAbsolute(pathValue) ? pathValue : resolve(process.cwd(), pathValue);
+            if (!statSync(absolute).isFile()) return null;
+            return createHash("sha256").update(readFileSync(absolute)).digest("hex");
+        } catch {
+            return null;
+        }
+    };
+    const sourceDigest = digest(input.source_path);
+    const manifestDigest = digest(provenance.manifest_path);
+    provenanceResult.source_verified = sourceDigest !== null && sourceDigest.toLowerCase() === input.source_sha256.toLowerCase();
+    provenanceResult.manifest_verified = manifestDigest !== null && manifestDigest.toLowerCase() === provenance.manifest_sha256.toLowerCase();
+    provenanceResult.verified = provenanceResult.source_verified && provenanceResult.manifest_verified;
+    if (sourceDigest === null || manifestDigest === null) return base("UNSUPPORTED", "UNSUPPORTED", "PROVENANCE_NOT_FOUND", false);
+    if (!provenanceResult.verified) return base("UNSUPPORTED", "UNSUPPORTED", "PROVENANCE_MISMATCH", false);
     if (observedCount === null) {
-        return { status: "UNSUPPORTED", classification: "UNSUPPORTED", expected_count: expectedCount, observed_count: null, matches_expected: false, formal_parity_eligible: false, reason: "OBSERVATION_MISSING" };
+        return base("UNSUPPORTED", "UNSUPPORTED", "OBSERVATION_MISSING", false);
     }
     if (observedCount !== expectedCount) {
-        return { status: "UNSUPPORTED", classification: "UNSUPPORTED", expected_count: expectedCount, observed_count: observedCount, matches_expected: false, formal_parity_eligible: false, reason: "COUNT_MISMATCH" };
+        return base("UNSUPPORTED", "UNSUPPORTED", "COUNT_MISMATCH", false);
     }
-    return { status: "OBSERVED", classification: "OBSERVATION_ONLY", expected_count: expectedCount, observed_count: observedCount, matches_expected: true, formal_parity_eligible: false, reason: null };
+    return base("OBSERVED", "OBSERVATION_ONLY", null, true);
 }
 
