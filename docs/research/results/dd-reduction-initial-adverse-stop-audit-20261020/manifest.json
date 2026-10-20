@@ -82,13 +82,39 @@
       "accounting": "PASS"
     }
   },
+  "final_cumulative_gate": {
+    "baseline_scope": "INITIAL_FIXED_BASELINE",
+    "minimum_dd_improvement_pp": 0.1,
+    "minimum_oos_pf_retention": 0.9,
+    "minimum_final_equity_retention": 0.75,
+    "10bps": {
+      "dd_improvement_pp": 1.1126119393462535,
+      "oos_pf_retention_ratio": 0.9118107146733136,
+      "oos_pf_guard_pass": true,
+      "final_equity_retention_ratio": 0.9324819579606191,
+      "final_equity_guard_pass": true,
+      "accounting_pass": true,
+      "accepted": true
+    },
+    "30bps": {
+      "dd_improvement_pp": 0.8229388345665338,
+      "oos_pf_retention_ratio": 0.8787743673575098,
+      "oos_pf_guard_pass": false,
+      "final_equity_retention_ratio": 0.9078030669446302,
+      "final_equity_guard_pass": true,
+      "accounting_pass": true,
+      "accepted": false
+    },
+    "accepted": false,
+    "status": "FAIL_INITIAL_BASELINE_30BPS_OOS_PF_RETENTION"
+  },
   "source_sha256": {
     "task9_audit_script": "ffbb1c71ec91bddd1855b49ef32970dddaa6d852095b6cf8a11dc642da2b210b",
-    "fixed_replay_script": "adfa1b6cb51ec492bd0755fa6fcdc78fca76013e9f13e9ff2dcbb2bd117fbc78",
+    "fixed_replay_script": "0c209e96530996f5c4fada7668bcef2f47b4751414134f827956cfec82a00ae8",
     "v12_short_deep_script": "7bd77f26f477f5b470cd8ce25b4dadbcedf4a510bb11beb7c42864c402322d63",
     "p0_p3_p5_diagnostics_script": "0b96317bb1a61724591112781c864ca6a1dee7df8d84100be8eb05cfde5908aa",
     "engine_audit_test": "d8a6def84eebe72d0a2b4c833c266caf616e37a19f06d24bdcdc29aafd596ed1",
-    "fixed_replay_test": "fbef737d910e112ddad12cdb9606afd84635bf73f995c9de1f6a7aa0507af324",
+    "fixed_replay_test": "f8abbb738c0f818f121732ea1d29c5d535b0157dedd43cc5583c90e7e69a60fe",
     "canonical_ledger_10bps": "6c7a2f6d73336109af852c233bfdcb9013cbe73ac06f83070b39b73306d20e78",
     "canonical_events_10bps": "4020ef8181944999d59abc161444299061f225f4cde56e7b47745e00314a4166",
     "canonical_ledger_30bps": "9cb346e7c4e341bd277de8b60256dd6e8efe9b7f266b54bc52ed5ccff0112e05",
@@ -109,6 +135,7 @@
     "baseline_corrected_jpy_pf": "RECALCULATED_NOT_LEGACY_ANCHOR",
     "accounting": "PASS",
     "oos": "PASS_FOR_FIXED_LEDGER_RESEARCH_SCENARIO",
+    "final_cumulative_gate": "FAIL_INITIAL_BASELINE_30BPS_OOS_PF_RETENTION",
     "dynamic_candidate_reselection": "NOT_IMPLEMENTED",
     "dynamic_reallocation": "NOT_IMPLEMENTED",
     "production_changed": false,

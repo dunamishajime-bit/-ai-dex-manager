@@ -149,6 +149,8 @@ DD_IMPROVED_RESEARCH_ONLYは次の2件。
 
 この結果はDDを約1.11pt / 0.82pt改善するが、最終資産とPFを削る。したがって研究上は `DD_IMPROVED_RESEARCH_ONLY` として扱い、Production Baselineへ自動反映しない。
 
+さらに、累積構成専用の最終Gateを、各phase直前のBaselineではなく初期固定Baselineに対して再評価した。10bpsはOOS PF保全率 `91.1811%`、最終資産保全率 `93.2482%`でPASSしたが、30bpsはOOS PF保全率 `87.8774%`で、要求する90%を下回った。最終累積構成のGateは `FAIL_INITIAL_BASELINE_30BPS_OOS_PF_RETENTION` であり、2 Overlayを正式ACCEPTEDとは扱わない。
+
 旧報告の `-12.9980%` / `-14.0069%` は、修正後の単位統一・重複Overlay除外・再計算結果では再現されない。旧値を採用判断へ使用しない。
 
 ## 7. V12 SHORT深掘り
@@ -191,7 +193,7 @@ Armを0h〜2hへ前倒ししたケースは10bps/30bpsともDDと資産が悪化
 
 ## 10. テスト・再現性
 
-- Python focused tests: **23/23 PASS**
+- Python focused tests: **24/24 PASS**
 - AST parse: **PASS**
 - 全50候補修正後Replay: **完了 / exit code 0**
 - V12 SHORT focused 16ケース: **完了 / exit code 0**

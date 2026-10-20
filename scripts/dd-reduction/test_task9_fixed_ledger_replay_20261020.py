@@ -49,6 +49,41 @@ class Task9FixedLedgerReplayTests(unittest.TestCase):
         self.assertEqual(MODULE._profit_factor_for_field(rows, "total_pnl_settlement"), 2.0)
         self.assertEqual(MODULE._profit_factor_for_field(rows, "total_pnl_jpy"), 3.0)
 
+    def test_final_cumulative_gate_uses_initial_baseline_oos(self):
+        baseline = {
+            10: {
+                "final_equity_jpy": 100.0,
+                "maximum_mtm_drawdown_pct": -10.0,
+                "accounting": "PASS",
+                "oos": {"profit_factor": 3.5931, "net_pnl_jpy": 10.0},
+            },
+            30: {
+                "final_equity_jpy": 100.0,
+                "maximum_mtm_drawdown_pct": -10.0,
+                "accounting": "PASS",
+                "oos": {"profit_factor": 3.2146, "net_pnl_jpy": 10.0},
+            },
+        }
+        cumulative = {
+            10: {
+                "final_equity_jpy": 80.0,
+                "maximum_mtm_drawdown_pct": -9.0,
+                "accounting": "PASS",
+                "oos": {"profit_factor": 3.2762, "net_pnl_jpy": 9.0},
+            },
+            30: {
+                "final_equity_jpy": 80.0,
+                "maximum_mtm_drawdown_pct": -9.0,
+                "accounting": "PASS",
+                "oos": {"profit_factor": 2.8249, "net_pnl_jpy": 9.0},
+            },
+        }
+        result = MODULE._final_cumulative_gate(cumulative, baseline)
+        self.assertFalse(result["accepted"])
+        self.assertTrue(result["per_cost"]["10"]["oos_pf_guard_pass"])
+        self.assertFalse(result["per_cost"]["30"]["oos_pf_guard_pass"])
+        self.assertEqual(result["baseline_scope"], "INITIAL_FIXED_BASELINE")
+
     def test_canonical_baseline_paths_are_explicitly_read_only_inputs(self):
         self.assertIn("BASELINE", str(MODULE.CANONICAL_ROOT))
         self.assertEqual(MODULE.CASE_NAME, "V2_M150_D05_CORE_NATIVE")

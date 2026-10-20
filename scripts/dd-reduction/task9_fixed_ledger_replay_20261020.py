@@ -193,6 +193,78 @@ def _profit_factor_for_field(rows: list[dict], field: str) -> float | None:
     return gains / losses if losses else None
 
 
+def _final_cumulative_gate(
+    cumulative_by_cost: dict[int, dict],
+    initial_baseline_by_cost: dict[int, dict],
+    minimum_dd_improvement_pp: float = 0.10,
+    minimum_oos_pf_retention: float = 0.90,
+    minimum_final_equity_retention: float = 0.75,
+) -> dict:
+    """Apply the acceptance gate to the final cumulative configuration.
+
+    Phase selection is intentionally allowed to compare a candidate with the
+    immediately preceding cumulative configuration.  That local comparison
+    is not sufficient for the final configuration: cumulative overlays can
+    erode the original OOS PF or final equity while every incremental phase
+    still passes.  This helper always compares the final cumulative result to
+    the immutable initial baseline.
+    """
+    per_cost: dict[str, dict] = {}
+    for cost in (10, 30):
+        candidate = cumulative_by_cost[cost]
+        baseline = initial_baseline_by_cost[cost]
+        candidate_oos = candidate.get("oos") or {}
+        baseline_oos = baseline.get("oos") or {}
+        candidate_pf = candidate_oos.get("profit_factor")
+        baseline_pf = baseline_oos.get("profit_factor")
+        oos_pf_retention = (
+            candidate_pf / baseline_pf
+            if candidate_pf is not None and baseline_pf not in (None, 0)
+            else None
+        )
+        final_equity_retention = (
+            candidate.get("final_equity_jpy") / baseline.get("final_equity_jpy")
+            if baseline.get("final_equity_jpy") not in (None, 0)
+            else None
+        )
+        checks = {
+            "dd_improvement_pp": (
+                candidate.get("maximum_mtm_drawdown_pct", 0.0)
+                - baseline.get("maximum_mtm_drawdown_pct", 0.0)
+            ),
+            "accounting_pass": candidate.get("accounting") == "PASS",
+            "oos_pf_retention_ratio": oos_pf_retention,
+            "oos_pf_guard_pass": bool(
+                oos_pf_retention is not None
+                and oos_pf_retention >= minimum_oos_pf_retention
+                and candidate_oos.get("net_pnl_jpy", 0.0) > 0
+            ),
+            "final_equity_retention_ratio": final_equity_retention,
+            "final_equity_guard_pass": bool(
+                final_equity_retention is not None
+                and final_equity_retention >= minimum_final_equity_retention
+            ),
+        }
+        checks["dd_guard_pass"] = checks["dd_improvement_pp"] >= minimum_dd_improvement_pp
+        checks["accepted"] = all(
+            (
+                checks["dd_guard_pass"],
+                checks["accounting_pass"],
+                checks["oos_pf_guard_pass"],
+                checks["final_equity_guard_pass"],
+            )
+        )
+        per_cost[str(cost)] = checks
+    return {
+        "baseline_scope": "INITIAL_FIXED_BASELINE",
+        "minimum_dd_improvement_pp": minimum_dd_improvement_pp,
+        "minimum_oos_pf_retention": minimum_oos_pf_retention,
+        "minimum_final_equity_retention": minimum_final_equity_retention,
+        "per_cost": per_cost,
+        "accepted": all(item["accepted"] for item in per_cost.values()),
+    }
+
+
 def _funding_by_position(events: list[dict]) -> dict[str, list[dict]]:
     result: dict[str, list[dict]] = collections.defaultdict(list)
     for event in events:
@@ -995,7 +1067,8 @@ def main() -> None:
     baseline_by_cost = {cost: load_canonical(cost)[:2] for cost in (10, 30)}
     phase_reports = []
     cumulative: list[dict] = []
-    current_baseline = {cost: summaries[str(cost)]["baseline"] for cost in (10, 30)}
+    initial_baseline = {cost: summaries[str(cost)]["baseline"] for cost in (10, 30)}
+    current_baseline = dict(initial_baseline)
     for phase in t9.ALL_PHASES:
         candidate_summaries = []
         for candidate in t9.candidate_grid(phase):
@@ -1093,6 +1166,24 @@ def main() -> None:
         )
         print("TASK9_FIXED_PHASE_COMPLETE", json.dumps({"phase": phase, "selection": selection}, ensure_ascii=False), flush=True)
 
+    final_cumulative_gate = _final_cumulative_gate(current_baseline, initial_baseline)
+    final_cumulative = {
+        str(cost): {
+            key: current_baseline[cost].get(key)
+            for key in (
+                "final_equity_jpy",
+                "profit_factor",
+                "maximum_mtm_drawdown_pct",
+                "win_rate",
+                "closed_trades",
+                "strategy_trades",
+                "strategy_pnl_jpy",
+                "accounting",
+                "oos",
+            )
+        }
+        for cost in (10, 30)
+    }
     final = {
         "status": "COMPLETE_RESEARCH_ONLY_NONCANONICAL",
         "classification": "RESEARCH_ONLY_NONCANONICAL",
@@ -1100,6 +1191,8 @@ def main() -> None:
         "production_changes": 0,
         "phase_reports": phase_reports,
         "accepted_cumulative_overlays": cumulative,
+        "final_cumulative": final_cumulative,
+        "final_cumulative_gate": final_cumulative_gate,
         "baseline": summaries,
         "source_sha256": {
             "task9_audit": sha256_file(TASK9_PATH),

@@ -10,6 +10,21 @@
     "independent_accounting_reconciliation": true,
     "mtm_schedule": "H1"
   },
+  "final_cumulative_gate": {
+    "baseline_scope": "INITIAL_FIXED_BASELINE",
+    "10bps": {
+      "oos_pf_retention_ratio": 0.9118107146733136,
+      "final_equity_retention_ratio": 0.9324819579606191,
+      "accepted": true
+    },
+    "30bps": {
+      "oos_pf_retention_ratio": 0.8787743673575098,
+      "final_equity_retention_ratio": 0.9078030669446302,
+      "accepted": false
+    },
+    "accepted": false,
+    "status": "FAIL_INITIAL_BASELINE_30BPS_OOS_PF_RETENTION"
+  },
   "source_coverage_audit": {
     "core_reference_candidates": {
       "rows": 2484,
