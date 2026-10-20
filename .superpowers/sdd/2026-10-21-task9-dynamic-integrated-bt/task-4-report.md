@@ -19,8 +19,9 @@ observations; they are not treated as dynamic-engine parity evidence.
 - Review fix round 1: `57239927ef41dea57abeca88811c2e04695b22eb`
 - Final targeted implementation/test fixes: `ec86f3b658fe790dbf4c8f865a173d2849f655dd`
 - Allocator-integrity fix round: `c7420f91f47f58bd96078d65db01bccfac85c02c`
+- Raw `applyPreemption` integrity guard round: `61bbed144ab39f2dfada7feb378e3ef9e2a4831f`
 
-The final implementation/test commit is `c7420f91f47f58bd96078d65db01bccfac85c02c`.
+The final implementation/test commit is `61bbed144ab39f2dfada7feb378e3ef9e2a4831f`.
 
 ## Task 4 behavior covered
 
@@ -34,6 +35,10 @@ The final implementation/test commit is `c7420f91f47f58bd96078d65db01bccfac85c02
   reservation and ownership records, matching aggregate sums, and valid
   ownership indexes. Malformed state is rejected before `releaseReservation`
   and preserves state hashes and release outcome.
+- `applyPreemption` performs the same raw-state integrity check before
+  `createInitialAllocatorState`, eligibility, release, or incoming re-admission;
+  malformed NaN/Infinity/negative/inconsistent state cannot be normalized into
+  an accepted preemption.
 - Same-timestamp preemption requires nonempty authoritative event evidence with
   matching `PREEMPTION_EXIT` and `ENTRY` identities/timestamps, unique valid
   nonnegative sequence values, and exit sequence before entry sequence.
@@ -57,7 +62,7 @@ The final targeted regression run was performed after the final code changes:
 
 ```text
 npx tsx --test tests/dd-reduction-dynamic-preemption.test.ts tests/dd-reduction-dynamic-sizing.test.ts
-→ tests 25, pass 25, fail 0, skipped 0, todo 0
+→ tests 26, pass 26, fail 0, skipped 0, todo 0
 ```
 
 The full required DD reduction suite was run after the implementation commit

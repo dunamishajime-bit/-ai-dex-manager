@@ -3,7 +3,7 @@
   "status": "OBSERVATION_ONLY",
   "formal_parity": "UNSUPPORTED",
   "formal_parity_eligible": false,
-  "code_commit": "c7420f91f47f58bd96078d65db01bccfac85c02c",
+  "code_commit": "61bbed144ab39f2dfada7feb378e3ef9e2a4831f",
   "observations": [
     {
       "cost_bps": 10,
@@ -33,7 +33,7 @@
     }
   ],
   "tdd": {
-    "focused_tests": "25 passed, 0 failed",
+    "focused_tests": "26 passed, 0 failed",
     "full_dd_suite": "13 files passed, 0 failed, 0 skipped, 0 todo",
     "typescript": "passed",
     "eslint": "passed",
