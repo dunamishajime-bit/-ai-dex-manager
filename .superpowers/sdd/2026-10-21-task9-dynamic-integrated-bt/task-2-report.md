@@ -6,6 +6,17 @@ Implemented in the research-only worktree on branch `codex/task9-engine-audit-dd
 
 The implementation is limited to deterministic ordering, ordering-evidence classification, canonical allocator-state hashing, and replay-time cooldown visibility. Production, VPS, LIVE, HP, Aster, operator-artifact, Shared Risk, Margin Guard, Kill Switch, and generic emulator behavior were not changed.
 
+## Provenance
+
+This report is a research-only evidence record for branch `codex/task9-engine-audit-dd-research-20261020`.
+
+- Baseline ordering implementation: `5c07008a82e25eca2108d3a1888dbd820a9848a2`.
+- Ordering-evidence hardening: `0667ebd7ad5d0d2b3c2f9cd97834715970591d48`.
+- Causal cooldown hardening: `d24c51d5c403cc67ff36fecc3d41650bb6d6073f`.
+- Preceding report-evidence commit: `0f61af3cf40a6e054dcbef2c30729ae922e52b96`.
+- Current code/test fix commit: `d82a812001386ade6720980fa75978340983e7ee`.
+- The final report/provenance commit is recorded exactly in `task-2-report-provenance-ledger.json`, committed in the immediately following ledger commit. This two-step chain is intentional: a Git commit cannot embed its own SHA because changing the embedded value changes the SHA. The ledger therefore records the immutable preceding report-evidence SHA, the code/test fix SHA, and the exact final report/provenance commit SHA after that report commit exists.
+
 ## Commit
 
 - `5c07008a82e25eca2108d3a1888dbd820a9848a2` — `feat(research): make dynamic event ordering deterministic`
@@ -306,3 +317,73 @@ EXIT_CODE=0
 ```
 
 No Production, VPS, LIVE, HP, Aster, allocator, replay, or unrelated research files were changed by this fix.
+
+## Fix-round evidence (2026-10-21)
+
+### Review findings addressed
+
+- Added the provenance section above and a machine-readable ledger recording the final report/provenance commit without making a self-referential hash claim.
+- Added exact final verification commands and captured exit statuses below.
+- The normalized duplicate-sequence integration test now asserts `ordering === "NONCANONICAL_ORDERING"` in addition to `DUPLICATE_EVENT_SEQUENCE` and `formalParityEligible: false`.
+- Restored `event_seq`/`eventSeq` compatibility: explicit `null` or `""` values fall back to a valid `eventSeq`; a genuinely malformed non-null `event_seq` remains invalid and fail-closed. Tests cover direct ordering, source normalization, and duplicate detection through the camelCase alias.
+
+### TDD fix-round evidence
+
+Focused RED command before the implementation change:
+
+```text
+node --import tsx --test --test-isolation=none tests/dd-reduction-dynamic-ordering.test.ts tests/dd-reduction-dynamic-source.test.ts
+EXIT_CODE=1
+ℹ tests 32
+ℹ pass 31
+ℹ fail 1
+✖ falls back to a valid camelCase eventSeq when event_seq is explicitly empty
+  actual: NONCANONICAL_ORDERING
+  expected: CANONICAL_ORDERING
+```
+
+The first sandboxed invocation was blocked before test loading by Windows `spawn EPERM` from the bundled esbuild worker; the escalated invocation reached the expected behavioral failure above.
+
+### Final verification commands and captured outcomes
+
+Focused ordering/source tests:
+
+```text
+node --import tsx --test --test-isolation=none tests/dd-reduction-dynamic-ordering.test.ts tests/dd-reduction-dynamic-source.test.ts
+EXIT_CODE=0
+ℹ tests 33
+ℹ pass 33
+ℹ fail 0
+```
+
+Full DD-reduction suite:
+
+```text
+npm run dd:reduction:test
+EXIT_CODE=0
+DD_REDUCTION_TEST_DISCOVERY files=10
+DD_REDUCTION_TEST_SUMMARY files=10 passed=10 failed=0 skipped=0 todo=0
+```
+
+Typecheck:
+
+```text
+npx tsc --noEmit --incremental false --pretty false
+EXIT_CODE=0
+```
+
+Exact final lint command:
+
+```text
+npx eslint lib/backtest/dd-reduction/dynamic-ordering.ts lib/backtest/dd-reduction/dynamic-state.ts tests/dd-reduction-dynamic-ordering.test.ts tests/dd-reduction-dynamic-source.test.ts
+EXIT_CODE=0
+```
+
+Diff check:
+
+```text
+git diff --check
+EXIT_CODE=0
+```
+
+The final fix-round implementation/test diff is limited to `dynamic-ordering.ts`, `dynamic-source.ts`, `dd-reduction-dynamic-ordering.test.ts`, and `dd-reduction-dynamic-source.test.ts`; the report and provenance ledger are research-only evidence files. No Production, VPS, LIVE, HP, Aster, allocator, replay, or operational paths were changed.
