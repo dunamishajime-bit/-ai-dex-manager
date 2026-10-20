@@ -337,6 +337,22 @@ test("fails closed on a partial fill until the execution lifecycle contract hand
     assert.equal(partial.state_hash_before, partial.state_hash_after);
 });
 
+test("rejects a near-equal partial fill without mutating gross accounting", () => {
+    const accepted = decideCandidate(createInitialAllocatorState({ available_margin: 1_000 }), candidate(), policy());
+    const reservationId = accepted.reservation!.reservation_id;
+    const nearEqualPartial = confirmFill(accepted.state_after, reservationId, {
+        fill_ts_ms: TS + 2,
+        filled_gross: 100 - 1e-13,
+    });
+    assert.equal(nearEqualPartial.applied, false);
+    assert.equal(nearEqualPartial.reason, "FILL_GROSS_MISMATCH");
+    assert.equal(nearEqualPartial.state_hash_before, nearEqualPartial.state_hash_after);
+    assert.equal(nearEqualPartial.state_after.crypto_gross, accepted.state_after.crypto_gross);
+    assert.equal(nearEqualPartial.state_after.pending_gross, accepted.state_after.pending_gross);
+    assert.equal(nearEqualPartial.state_after.reserved_gross, accepted.state_after.reserved_gross);
+    assert.deepEqual(nearEqualPartial.state_after.reservations, accepted.state_after.reservations);
+});
+
 test("release makes filled gross reusable and applies cooldown only with the explicit causal release", () => {
     const accepted = decideCandidate(createInitialAllocatorState({ available_margin: 1_000 }), candidate(), policy());
     const reservationId = accepted.reservation!.reservation_id;
@@ -432,4 +448,22 @@ test("requires a positive finite reservation TTL", () => {
         assert.equal(result.reason, "DATA_MISSING");
         assert.equal(result.reservation, null);
     }
+});
+
+test("rejects a finite TTL when reservation expiry arithmetic overflows", () => {
+    const decisionTs = Number.MAX_VALUE / 2;
+    const result = decideCandidate(
+        createInitialAllocatorState({ available_margin: 1_000 }),
+        candidate({
+            candidate_id: "ttl-overflow",
+            decision_ts_ms: decisionTs,
+            entry_valid_until_ms: Number.MAX_VALUE,
+        }),
+        policy({ reservation_ttl_ms: Number.MAX_VALUE }),
+    );
+    assert.equal(result.accepted, false);
+    assert.equal(result.reason, "DATA_MISSING");
+    assert.equal(result.reservation, null);
+    assert.equal(result.state_hash_before, result.state_hash_after);
+    assert.deepEqual(result.state_after, result.state_before);
 });

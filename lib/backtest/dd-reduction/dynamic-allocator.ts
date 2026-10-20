@@ -551,6 +551,8 @@ export function decideCandidate(
 
     const rawTtl = policy.reservation_ttl_ms ?? policy.reservation_ttl_ms_default;
     if (typeof rawTtl !== "number" || !Number.isFinite(rawTtl) || rawTtl <= 0) return result(false, id, "DATA_MISSING", before, before, null);
+    const expiresTsMs = normalized.decision_ts_ms + rawTtl;
+    if (!Number.isFinite(expiresTsMs)) return result(false, id, "DATA_MISSING", before, before, null);
 
     const reservedForSymbol = before.reserved_gross_by_symbol[symbol] ?? 0;
     const reservedForStrategy = before.reserved_gross_by_strategy[strategy] ?? 0;
@@ -569,7 +571,6 @@ export function decideCandidate(
         return result(false, id, "GROSS_CAP_SYMBOL", before, before, null);
     }
 
-    const ttl = rawTtl;
     const reservation: ReservationRecord = {
         reservation_id: `reservation:${id}:${normalized.decision_ts_ms}`,
         candidate_id: id,
@@ -585,7 +586,7 @@ export function decideCandidate(
         entry_price: normalized.entry_price,
         priority: normalized.priority,
         created_ts_ms: normalized.decision_ts_ms,
-        expires_ts_ms: normalized.decision_ts_ms + Math.max(0, ttl),
+        expires_ts_ms: expiresTsMs,
         status: "PENDING",
         fill_ts_ms: null,
         protection_id: null,
@@ -625,7 +626,7 @@ export function confirmFill(
     const reservation = reservationFor(state, reservationId);
     if (reservation === null) return transition(state, "DATA_MISSING", "FILL_REJECTED", () => null);
     if (reservation.status !== "PENDING") return transition(state, reservation.filled_gross > 0 ? "RESERVATION_ALREADY_FILLED" : "RESERVATION_NOT_PENDING", "FILL_REJECTED", () => null);
-    const grossMatchesReservation = Number.isFinite(fill.filled_gross) && Math.abs(fill.filled_gross - reservation.reserved_gross) <= Number.EPSILON * Math.max(1, reservation.reserved_gross) * 16;
+    const grossMatchesReservation = Number.isFinite(fill.filled_gross) && fill.filled_gross === reservation.reserved_gross;
     if (!Number.isFinite(fill.fill_ts_ms) || fill.fill_ts_ms < reservation.created_ts_ms || fill.fill_ts_ms > reservation.expires_ts_ms || !grossMatchesReservation || fill.filled_gross <= 0 || fill.filled_gross > reservation.reserved_gross) {
         return transition(state, "FILL_GROSS_MISMATCH", "FILL_REJECTED", () => null);
     }
