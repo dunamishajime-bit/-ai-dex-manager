@@ -132,3 +132,16 @@ test("does not let a future STOP create cooldown for an earlier candidate decisi
     assert.equal(isCooldownActiveAt({ candidateDecisionTsMs: TS, cooldownUntilTsMs: TS + 60_000, sourceEventTsMs: TS - 1 }), true);
     assert.equal(isCooldownActiveAt({ candidateDecisionTsMs: TS, cooldownUntilTsMs: TS + 60_000, sourceEventTsMs: TS + 1 }), false);
 });
+
+test("fails closed when an active cooldown lacks a finite causal source timestamp", () => {
+    for (const sourceEventTsMs of [undefined, null, Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY]) {
+        assert.equal(
+            isCooldownActiveAt({
+                candidateDecisionTsMs: TS,
+                cooldownUntilTsMs: TS + 60_000,
+                sourceEventTsMs,
+            }),
+            false,
+        );
+    }
+});

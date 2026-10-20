@@ -40,8 +40,8 @@ export interface CooldownAtDecisionInput {
 }
 
 /**
- * A cooldown is causally visible only when its source event is not in the
- * future relative to the candidate decision being replayed.
+ * A finite cooldown is causally visible only when it has a finite source
+ * event timestamp that is not in the future relative to the replayed decision.
  */
 export function isCooldownActiveAt(input: CooldownAtDecisionInput): boolean {
     if (!Number.isFinite(input.candidateDecisionTsMs)) {
@@ -51,9 +51,8 @@ export function isCooldownActiveAt(input: CooldownAtDecisionInput): boolean {
     if (!Number.isFinite(input.cooldownUntilTsMs)) {
         throw new RangeError("cooldownUntilTsMs must be finite when provided");
     }
-    if (input.sourceEventTsMs !== null && input.sourceEventTsMs !== undefined) {
-        if (!Number.isFinite(input.sourceEventTsMs)) throw new RangeError("sourceEventTsMs must be finite when provided");
-        if (input.sourceEventTsMs > input.candidateDecisionTsMs) return false;
-    }
+    const sourceEventTsMs = input.sourceEventTsMs;
+    if (typeof sourceEventTsMs !== "number" || !Number.isFinite(sourceEventTsMs)) return false;
+    if (sourceEventTsMs > input.candidateDecisionTsMs) return false;
     return input.cooldownUntilTsMs > input.candidateDecisionTsMs;
 }
