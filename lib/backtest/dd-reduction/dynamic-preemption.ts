@@ -14,7 +14,7 @@ import {
     type ReservationStatus,
 } from "./dynamic-allocator";
 import { hashAllocatorState } from "./dynamic-state";
-import type { CandidateSide, DynamicStrategyId } from "./dynamic-types";
+import { DYNAMIC_STRATEGY_IDS, type CandidateSide, type DynamicStrategyId } from "./dynamic-types";
 
 export type PreemptionMode = "WHOLE" | "PARTIAL";
 export type PreemptionExitStatus = "FILLED" | "PARTIAL" | "UNKNOWN";
@@ -263,6 +263,37 @@ function recordValuesAreNonNegativeFinite(value: unknown): value is Readonly<Rec
     return Object.values(value as Record<string, unknown>).every((item) => nonNegativeFinite(item));
 }
 
+function cooldownMapIsValid(value: unknown): value is Readonly<Record<string, {
+    readonly until_ts_ms: number | null;
+    readonly source_event_ts_ms: number | null;
+    readonly reason: string;
+}>> {
+    if (value === null || typeof value !== "object" || Array.isArray(value)) return false;
+    const prototype = Object.getPrototypeOf(value);
+    if (prototype !== Object.prototype && prototype !== null) return false;
+    const seenKeys = new Set<string>();
+    for (const [key, rawRecord] of Object.entries(value as Record<string, unknown>)) {
+        if (seenKeys.has(key)) return false;
+        seenKeys.add(key);
+        const [symbol, side, strategy] = key.split("|");
+        if (
+            key.split("|").length !== 3 ||
+            symbol.length === 0 ||
+            (side !== "LONG" && side !== "SHORT") ||
+            !DYNAMIC_STRATEGY_IDS.includes(strategy as DynamicStrategyId)
+        ) return false;
+        if (rawRecord === null || typeof rawRecord !== "object" || Array.isArray(rawRecord)) return false;
+        const record = rawRecord as Record<string, unknown>;
+        const until = record.until_ts_ms;
+        const source = record.source_event_ts_ms;
+        const nullableNonNegative = (item: unknown): item is number | null => item === null || nonNegativeFinite(item);
+        if (!nullableNonNegative(until) || !nullableNonNegative(source) || typeof record.reason !== "string" || record.reason.trim().length === 0) return false;
+        if ((until === null) !== (source === null)) return false;
+        if (until !== null && source !== null && source > until) return false;
+    }
+    return true;
+}
+
 function mapMatches(actual: Readonly<Record<string, number>>, expected: Readonly<Record<string, number>>): boolean {
     const keys = new Set([...Object.keys(actual), ...Object.keys(expected)]);
     for (const key of keys) {
@@ -287,6 +318,7 @@ function allocatorStateIntegrityReason(input: unknown): PreemptionReason | null 
     for (const field of mapFields) {
         if (!recordValuesAreNonNegativeFinite(state[field])) return "DATA_MISSING";
     }
+    if (!cooldownMapIsValid(state.cooldown_by_symbol_side_strategy)) return "DATA_MISSING";
     if (!Array.isArray(state.reservations) || !Array.isArray(state.reservation_ids) || !Array.isArray(state.ownership) || state.ownership_by_symbol === null || typeof state.ownership_by_symbol !== "object" || Array.isArray(state.ownership_by_symbol)) return "DATA_MISSING";
 
     const reservations = state.reservations;

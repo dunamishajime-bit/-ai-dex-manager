@@ -710,3 +710,67 @@ test("release and apply fail closed for structurally invalid allocator container
         });
     }
 });
+
+test("release and apply fail closed for malformed cooldown containers and records without throwing", () => {
+    const { state, position } = openVictim();
+    const validRecord = {
+        until_ts_ms: TS + 60_000,
+        source_event_ts_ms: TS + 10,
+        reason: "STOP",
+    };
+    const malformedCooldowns: unknown[] = [
+        null,
+        [],
+        42,
+        { "BTCUSDT|LONG|Q102": null },
+        { "BTCUSDT|LONG|Q102": [] },
+        { "BTCUSDT|LONG|Q102": { ...validRecord, until_ts_ms: Number.NaN } },
+        { "BTCUSDT|LONG|Q102": { ...validRecord, source_event_ts_ms: Number.POSITIVE_INFINITY } },
+        { "BTCUSDT|LONG|Q102": { ...validRecord, until_ts_ms: -1 } },
+        { "BTCUSDT|LONG|Q102": { ...validRecord, source_event_ts_ms: -1 } },
+        { "BTCUSDT|LONG|Q102": { ...validRecord, source_event_ts_ms: TS + 70_000 } },
+        { "BTCUSDT|LONG|Q102": { ...validRecord, reason: " " } },
+        { "BTCUSDT|BAD|Q102": validRecord },
+        { "BTCUSDT|LONG|UNKNOWN": validRecord },
+        { "BTCUSDT|LONG": validRecord },
+        { "BTCUSDT|LONG|Q102|EXTRA": validRecord },
+        { "BTC|USDT|LONG|Q102": validRecord },
+    ];
+    const apply = (cooldownState: unknown) => applyPreemption({
+        state: { ...state, cooldown_by_symbol_side_strategy: cooldownState as never },
+        incoming_candidate: candidate(),
+        victim_position: position,
+        mode: "WHOLE",
+        exit: { status: "FILLED", confirmed: true, filled_gross: 100, exit_ts_ms: TS + 10 },
+        policy: policy(),
+        ordering_events: [
+            { timestamp: TS + 10, kind: "PREEMPTION_EXIT", event_seq: 1, candidate_id: "victim-1" },
+            { timestamp: TS + 10, kind: "ENTRY", event_seq: 2, candidate_id: "incoming-1" },
+        ],
+    });
+    for (const cooldownState of malformedCooldowns) {
+        const malformedState = { ...state, cooldown_by_symbol_side_strategy: cooldownState as never };
+        assert.doesNotThrow(() => {
+            const result = releasePreemptionGross(malformedState, position, {
+                exit_ts_ms: TS + 10,
+                status: "FILLED",
+                confirmed: true,
+                filled_gross: 100,
+            });
+            assert.equal(result.applied, false);
+            assert.equal(result.reason, "DATA_MISSING");
+            assert.equal(result.released_gross, 0);
+            assert.equal(result.state_hash_before, result.state_hash_after);
+        });
+        assert.doesNotThrow(() => {
+            const result = apply(cooldownState);
+            assert.equal(result.applied, false);
+            assert.equal(result.reason, "DATA_MISSING");
+            assert.equal(result.victim_release_applied, false);
+            assert.equal(result.gross_release, null);
+            assert.equal(result.incoming_admission, null);
+            assert.equal(result.state_hash_before, result.state_hash_after);
+            assert.deepEqual(result.state_after, result.state_before);
+        });
+    }
+});
