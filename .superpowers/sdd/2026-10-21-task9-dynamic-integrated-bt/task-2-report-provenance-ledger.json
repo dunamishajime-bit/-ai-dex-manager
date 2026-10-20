@@ -1,0 +1,22 @@
+{
+  "schema": "disdex.task2.report-provenance.v1",
+  "branch": "codex/task9-engine-audit-dd-research-20261020",
+  "preceding_report_evidence_commit": "0f61af3cf40a6e054dcbef2c30729ae922e52b96",
+  "code_tests_fix_commit": "d82a812001386ade6720980fa75978340983e7ee",
+  "final_report_provenance_commit": "db37a83f9e41c78a14b707faf67b0295316fad63",
+  "chain": [
+    {
+      "commit": "0f61af3cf40a6e054dcbef2c30729ae922e52b96",
+      "role": "preceding Task 2 report-evidence commit"
+    },
+    {
+      "commit": "d82a812001386ade6720980fa75978340983e7ee",
+      "role": "event_seq/eventSeq implementation and regression tests"
+    },
+    {
+      "commit": "db37a83f9e41c78a14b707faf67b0295316fad63",
+      "role": "final report/provenance update"
+    }
+  ],
+  "self_reference_note": "The final report/provenance commit SHA is recorded here after that commit was created. It is intentionally not embedded in the report commit itself because embedding a commit's own SHA would change the commit hash."
+}
