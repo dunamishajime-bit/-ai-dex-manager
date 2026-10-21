@@ -114,8 +114,29 @@ def execute_new_replay(repo: Path, model_root: Path, output: Path, shared: dict,
         require(all(row.get("economicMetrics") is None and not row.get("economicAcceptanceEligible")
                     for row in result["cases"]),
                 "new Task9 emitted unsupported economic results while parity is blocked")
+    # Pinpoint the first old-versus-new candidate evidence gap; do not
+    # substitute modeled legacy fills for independent Task9 execution proof.
+    first_divergence_file = output / f"first-divergence-{cost}bps.json"
+    compare = subprocess.run([
+        sys.executable, "-B", str(HERE / "verify-task9-first-divergence.py"),
+        "--legacy-decisions", str(src),
+        "--legacy-trades", str(src.with_name("portfolio-trades.jsonl")),
+        "--new-task9-run", str(out_file),
+        "--cost-bps", str(cost),
+        "--output", str(first_divergence_file),
+    ], cwd=repo, capture_output=True, text=True, timeout=90, check=False)
+    require(compare.returncode in (0, 2),
+            f"first-divergence verifier failed {cost}bps: {compare.stderr[-500:]}")
+    proof = json.loads(first_divergence_file.read_text("utf8"))
+    require(proof["sourceCandidateSha256"] == digest(src), "candidate provenance changed")
+    require(proof["costBps"] == cost and proof["productionChanges"] == 0,
+            "first-divergence cost/production marker mismatch")
+    require(not proof["economicParityProven"],
+            "first-divergence trace parity unexpectedly claimed without registered canonical trace directories")
     return {
         "costBps": cost,
+        "firstDivergence": proof["firstDivergence"],
+        "firstDivergenceReport": str(first_divergence_file),
         "sourceCandidateJsonl": str(src),
         "sourceSha256": digest(src),
         "runnerExit": run.returncode,
