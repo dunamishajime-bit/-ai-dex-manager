@@ -1,0 +1,44 @@
+{
+  "schema": "hype-entry-research-adoption-v1",
+  "status": "USER_ADOPTED_FOR_ALL_FUTURE_RESEARCH_BT_NOT_LIVE",
+  "adoptedAt": "2026-10-22",
+  "strategyId": "HYPE_LONG",
+  "policyId": "HYPE_BTC3H_LE0P6_REL3H_GE2P0",
+  "preEntry": {
+    "btc3hMaxPct": 0.6,
+    "hypeMinusBtc3hMinPercentagePoints": 2,
+    "barInterval": "5m",
+    "lookbackBars": 36,
+    "onlyFullyCompletedBars": true,
+    "failClosedOnMissingHistory": true
+  },
+  "existingHype75Exit": "UNCHANGED_PENDING_NEW_EXIT_ECONOMIC_VALIDATION",
+  "otherLockedOverlays": [
+    "V12 V4 user-adopted 4 exits",
+    "Q102 user-adopted 3 exits"
+  ],
+  "dynamicEightLogicReselection": true,
+  "historicalAnchor": {
+    "sourceCommit": "a40b72af98ce7e923beb3c4f7474c3fb42d4d7c3",
+    "periodStart": "2025-08-10",
+    "periodEnd": "2026-08-10",
+    "initialCapitalJPY": 10000,
+    "tenBps": {
+      "equityJPY": 244636192.77287373,
+      "maxDdpct": -14.603309760733396,
+      "hypeWins": 12,
+      "hypeLosses": 6
+    },
+    "thirtyBps": {
+      "equityJPY": 140458101.84898156,
+      "maxDdpct": -15.80770763869479,
+      "hypeWins": 12,
+      "hypeLosses": 5
+    }
+  },
+  "researchCaveats": [
+    "Small HYPE subset (18 trades at 10bps, 17 at 30bps), optimized in-sample",
+    "Independent unified Task9 TypeScript economic parity not yet certified",
+    "Operator approval, venue execution and LIVE change are separate"
+  ]
+}
