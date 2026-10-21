@@ -61,5 +61,7 @@ jobs:
         run: python scripts/dd-reduction/verify-task9-sourcebacked-5m-artifacts.py
       - name: Verify unified frozen-source and Task 9 policy bridge
         run: python scripts/dd-reduction/verify-task9-unified-bridge.py
+      - name: Verify Task 9 first-divergence gate fixtures
+        run: python scripts/dd-reduction/test_task9_first_divergence.py
       - name: Check patch whitespace
         run: git diff --check
