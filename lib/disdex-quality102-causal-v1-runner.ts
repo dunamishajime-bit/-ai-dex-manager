@@ -447,7 +447,7 @@ export function quality102ExitReasonForState(
     statePosition: NonNullable<Quality102CausalV1State["position"]>,
     markPrice: number,
     now: number,
-): "hard_stop" | "profit_floor_0p5" | "trail_5pct_after_12pct" | "72h_time" | "time" | undefined {
+): "hard_stop" | "profit_floor_0p5" | "profit_floor_1p0" | "trail_5pct_after_12pct" | "72h_time" | "time" | undefined {
     const hardStop = statePosition.hardStop;
     if (!(hardStop && Number.isFinite(markPrice) && markPrice > 0 && Number.isFinite(now) && now >= statePosition.entryTs)) return undefined;
     const long = statePosition.side > 0;
