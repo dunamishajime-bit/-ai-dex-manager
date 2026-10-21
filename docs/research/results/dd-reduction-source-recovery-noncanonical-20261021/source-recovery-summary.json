@@ -15,6 +15,10 @@
     "10bps": 3185,
     "30bps": 3185
   },
+  "causallyRegeneratedFieldCount": {
+    "10bps": 0,
+    "30bps": 0
+  },
   "inputSha256": {
     "10bps": "eac68287e6f4e644c588b8689ce1dc67226abccea21bea09e29c0aeda0c1a3e2",
     "30bps": "77087b72c7e9279d001b58e351d7e932a9b3dabcb58d9ccbf7f1a0fd28a7c5d1"

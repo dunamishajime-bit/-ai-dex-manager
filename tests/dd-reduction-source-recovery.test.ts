@@ -1,10 +1,12 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 
-import { rebuildNoncanonicalBaseline } from "../scripts/dd-reduction/rebuild-noncanonical-baseline";
+import { rebuildNoncanonicalBaseline, hashSourceBytesForProvenance } from "../scripts/dd-reduction/rebuild-noncanonical-baseline";
+import { createInitialAllocatorState, decideCandidate } from "../lib/backtest/dd-reduction/dynamic-allocator";
 import { assertFixtureIdentity, FIXTURE_HASH } from "../lib/backtest/dd-reduction/fixture-identity";
 
 function assertSourceRecoveryFixtureIdentity(): void {
@@ -107,13 +109,106 @@ function completeReplayCandidate(overrides: Record<string, unknown> = {}): Recor
         evidence_level: "ORIGINAL_EVIDENCE",
         evidence_source_kind: "RAW_CANDIDATE_DECISIONS",
         evidence_source_path: "candidate-decisions.jsonl",
-        evidence_source_sha256: "a".repeat(64),
+        evidence_source_sha256: createHash("sha256").update("provisional-fixture-source", "utf8").digest("hex"),
         evidence_row_number: 1,
         evidence_source_bytes: 100,
-        source_sha: "a".repeat(64),
+        source_sha: createHash("sha256").update("provisional-fixture-source", "utf8").digest("hex"),
         ...overrides,
     };
 }
+
+async function writeCompleteReplayFixture(source: string): Promise<string> {
+    const strategies = ["V12", "Q102", "PENGU", "FET", "RESIDUAL", "IDLE", "V52", "HYPE_LONG"];
+    const provisional = strategies.map((strategy, index) => completeReplayCandidate({
+        candidate_id: `READY-${index + 1}`,
+        strategy_id: strategy,
+        evidence_row_number: index + 1,
+    }));
+    await writeFile(source, provisional.map((row) => JSON.stringify(row)).join("\n") + "\n", "utf8");
+    const provisionalBytes = await readFile(source);
+    const sourceHash = hashSourceBytesForProvenance(provisionalBytes);
+    const finalRows = provisional.map((row) => ({
+        ...row,
+        source_sha: sourceHash,
+        evidence_source_sha256: sourceHash,
+    }));
+    await writeFile(source, finalRows.map((row) => JSON.stringify(row)).join("\n") + "\n", "utf8");
+    assert.equal(hashSourceBytesForProvenance(await readFile(source)), sourceHash);
+    return sourceHash;
+}
+
+test("accepts a complete hashed fixture and remains compatible with the dynamic allocator", async () => {
+    await withTemp(async (dir) => {
+        const source = join(dir, "complete-candidate-decisions.jsonl");
+        const sourceHash = await writeCompleteReplayFixture(source);
+        const report = await rebuildNoncanonicalBaseline(source, join(dir, "out"), 10);
+        assert.equal(report.replayReadyRows, 8);
+        assert.equal(report.failClosedRows, 0);
+        assert.equal(report.formalParity, false);
+        assert.equal(report.economicBacktest, false);
+        const rows = (await readFile(join(dir, "out", "reconstructed-candidate-ledger.jsonl"), "utf8"))
+            .trim().split("\n").map((line) => JSON.parse(line) as {
+                candidateId: string;
+                strategyId: string;
+                fields: Record<string, { value: unknown }>;
+            });
+        assert.equal(rows.length, 8);
+        assert.equal(rows[0]?.fields.sourceSha?.value, sourceHash);
+        assert.equal(rows[0]?.fields.evidenceSourceSha256?.value, sourceHash);
+        const first = rows[0];
+        const allocatorDecision = decideCandidate(
+            createInitialAllocatorState({ available_margin: 1_000 }),
+            {
+                candidate_id: first.candidateId,
+                strategy_id: first.strategyId,
+                symbol: first.fields.symbol.value as string,
+                side: first.fields.side.value as "LONG" | "SHORT",
+                decision_ts_ms: first.fields.decisionTsMs.value as number,
+                entry_valid_until_ms: first.fields.entryValidUntilMs.value as number,
+                requested_gross: first.fields.requestedGross.value as number,
+                quantity: first.fields.quantity.value as number,
+                entry_price: first.fields.entryPrice.value as number,
+                priority: first.fields.priority.value as number,
+                evidence_level: first.fields.evidenceLevel.value as "ORIGINAL_EVIDENCE",
+                source_sha: first.fields.sourceSha.value as string,
+                evidence: {
+                    level: first.fields.evidenceLevel.value as "ORIGINAL_EVIDENCE",
+                    sourceKind: first.fields.evidenceSourceKind.value as "RAW_CANDIDATE_DECISIONS",
+                    sourcePath: first.fields.evidenceSourcePath.value as string,
+                    sourceSha256: first.fields.evidenceSourceSha256.value as string,
+                    rowNumber: first.fields.evidenceRowNumber.value as number,
+                    sourceBytes: first.fields.evidenceSourceBytes.value as number,
+                },
+                validity: first.fields.validity.value as "VALID",
+                asset_class: first.fields.assetClass.value as "CRYPTO",
+            },
+            {
+                total_gross_cap: 1_000,
+                crypto_gross_cap: 1_000,
+                reservation_ttl_ms: 60_000,
+                min_qty: 0.001,
+                min_notional: 0.01,
+            },
+        );
+        assert.equal(allocatorDecision.accepted, true);
+        assert.equal(allocatorDecision.reason, null);
+    });
+});
+
+test("keeps the observed 3,185-row ledger free of causal regeneration", async () => {
+    const summary = JSON.parse(await readFile(join(process.cwd(), "docs", "research", "results", "dd-reduction-source-recovery-noncanonical-20261021", "source-recovery-summary.json"), "utf8")) as {
+        observedRows: { "10bps": number; "30bps": number };
+        replayReadyRows: { "10bps": number; "30bps": number };
+        formalParity: boolean;
+        economicBacktest: boolean;
+        causallyRegeneratedFieldCount: { "10bps": number; "30bps": number };
+    };
+    assert.deepEqual(summary.observedRows, { "10bps": 3_185, "30bps": 3_185 });
+    assert.deepEqual(summary.replayReadyRows, { "10bps": 0, "30bps": 0 });
+    assert.deepEqual(summary.causallyRegeneratedFieldCount, { "10bps": 0, "30bps": 0 });
+    assert.equal(summary.formalParity, false);
+    assert.equal(summary.economicBacktest, false);
+});
 
 test("requires allocator validity, usable provenance, and positive domains before replayReady", async () => {
     await withTemp(async (dir) => {

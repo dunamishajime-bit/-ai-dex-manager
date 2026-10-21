@@ -72,6 +72,7 @@ interface SourceRow extends JsonObject {
 const STRATEGIES = new Set<string>(DYNAMIC_STRATEGY_IDS);
 const ALLOWED_DECISIONS = new Set(["ACCEPTED_MODELED_ENTRY", "REJECTED_PORTFOLIO", "EXCLUDED_PREALLOCATION"]);
 const ALLOWED_SOURCE_KINDS = new Set(["RAW_CANDIDATE_DECISIONS", "SAVED_MARKET_DATA", "STRATEGY_ADAPTER"]);
+const SELF_REFERENTIAL_HASH_FIELDS = new Set(["source_sha", "sourceSha", "evidence_source_sha256", "evidenceSourceSha256"]);
 
 const FIELD_ALIASES: Readonly<Record<string, readonly string[]>> = {
     candidateId: ["candidate_id", "candidateId"],
@@ -254,6 +255,33 @@ function canonicalJson(value: unknown, omitKeys: ReadonlySet<string> = new Set()
     return JSON.stringify(stableCanonicalize(value, omitKeys));
 }
 
+/**
+ * Hash the source bytes used as provenance. Legacy source files without
+ * embedded provenance hashes retain their exact byte hash. Complete fixture
+ * rows may embed this hash, so those four self-referential fields are removed
+ * from the canonical source representation before hashing.
+ */
+export function hashSourceBytesForProvenance(bytes: Uint8Array): string {
+    const text = Buffer.from(bytes).toString("utf8");
+    const lines = text.split(/\r?\n/).filter((line) => line.trim() !== "");
+    let hasSelfReferentialHash = false;
+    const rows: JsonObject[] = [];
+    for (const line of lines) {
+        try {
+            const parsed = JSON.parse(line) as unknown;
+            if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) return hash(bytes);
+            const row = parsed as JsonObject;
+            if (Object.keys(row).some((key) => SELF_REFERENTIAL_HASH_FIELDS.has(key))) hasSelfReferentialHash = true;
+            rows.push(row);
+        } catch {
+            return hash(bytes);
+        }
+    }
+    if (!hasSelfReferentialHash) return hash(bytes);
+    const canonical = rows.map((row) => canonicalJson(row, SELF_REFERENTIAL_HASH_FIELDS)).join("\n") + (rows.length > 0 ? "\n" : "");
+    return hash(Buffer.from(canonical, "utf8"));
+}
+
 function unique(values: readonly string[]): string[] {
     return [...new Set(values)].sort();
 }
@@ -293,7 +321,7 @@ export async function rebuildNoncanonicalBaseline(inputPath: string, outputDir: 
     const sourcePath = resolve(inputPath);
     const output = resolve(outputDir);
     const bytes = await readFile(sourcePath);
-    const sourceSha256 = hash(bytes);
+    const sourceSha256 = hashSourceBytesForProvenance(bytes);
     const rows = readJsonl(bytes.toString("utf8"), sourcePath);
     const initialRows = rows.map((row) => buildRow(row, sourcePath, sourceSha256));
     const decisionCounts: Record<string, number> = {};
@@ -317,6 +345,7 @@ export async function rebuildNoncanonicalBaseline(inputPath: string, outputDir: 
         "Only values physically present in candidate-decisions.jsonl are classified as ORIGINAL_EVIDENCE.",
         "No validity window, priority/tie-break, quantity, asset class, or entry equity is inferred from gross, rank, timestamps, or outcome fields.",
         "sourcePath is display/provenance metadata only and is excluded from canonical report and ledger hashes.",
+        "When a fixture embeds source_sha/evidence_source_sha256, those self-referential hash fields are excluded from the provenance hash; legacy sources without them retain their exact byte hash.",
         "A row is replayReady only when it satisfies the Dynamic Allocator validity, provenance, identity, domain, and coverage contracts.",
     ];
     const limitations = [
