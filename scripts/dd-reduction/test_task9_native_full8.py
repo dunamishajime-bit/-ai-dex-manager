@@ -58,6 +58,15 @@ class TestNativeCapture(unittest.TestCase):
         self.assertIn('task9-mtm.jsonl', result)
         self.assertIn('source_venue_signed', result)
 
+    def test_cumulative_long_is_opt_in_and_side_scoped(self):
+        default = capture.instrument(original_source())
+        cumulative = capture.instrument(original_source(), enable_v12_long=True)
+        marker = 'RESEARCH_INITIAL_ADVERSE_STOP_V12_LONG_PCT2P0_12H_MFE1P0_R12'
+        self.assertNotIn(marker, default)
+        self.assertIn(marker, cumulative)
+        self.assertIn('task9_stop_cooldown_by_symbol_side[k]', cumulative)
+        self.assertIn('(candidate["symbol"], candidate["side"])', cumulative)
+
     def test_capture_rejects_missing_source_anchor(self):
         text = original_source().replace('candidate_decisions.append({', 'candidate_decisions.append(((')
         with self.assertRaisesRegex(RuntimeError, "DECISION_CAPTURE_ANCHOR_DRIFT"):

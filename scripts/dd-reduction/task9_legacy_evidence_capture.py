@@ -10,7 +10,7 @@ import hashlib
 VERSION = "task9-canonical-source-evidence-v1"
 
 
-def instrument(source: str) -> str:
+def instrument(source: str, *, enable_v12_long: bool = False) -> str:
     needle = "        candidate_decisions.append({\n"
     if source.count(needle) != 1:
         raise RuntimeError(f"DECISION_CAPTURE_ANCHOR_DRIFT:{source.count(needle)}")
@@ -137,10 +137,19 @@ def instrument(source: str) -> str:
     if source.count(marker) != 1:
         raise RuntimeError("TASK9_MTM_RESULT_ANCHOR_DRIFT")
     source = source.replace(marker, marker + '\n        "task9_mtm_trace": task9_mtm_trace,', 1)
+    if enable_v12_long:
+        # An opt-in cumulative research case: add V12 LONG to actual accepted
+        # STOP exits only. The default SHORT-only replay is byte-for-byte
+        # unchanged to retain its frozen 20/20 SHA proof.
+        short_marker = 'if str(reason).startswith("RESEARCH_INITIAL_ADVERSE_STOP_V12_SHORT_PCT2P5_12H_MFE1P0_R12"):'
+        long_marker = 'str(reason).startswith("RESEARCH_INITIAL_ADVERSE_STOP_V12_LONG_PCT2P0_12H_MFE1P0_R12")'
+        if source.count(short_marker) != 1:
+            raise RuntimeError("TASK9_CUMULATIVE_STOP_MARKER_DRIFT")
+        source = source.replace(short_marker, short_marker[:-1] + " or " + long_marker + ":", 1)
     return source
 
 
-def install_legacy_capture(helper) -> None:
+def install_legacy_capture(helper, *, enable_v12_long: bool = False) -> None:
     # run_one installs sweep.patch immediately before compiling the original
     # allocator; wrapping that function adds only forensic columns.
     sweep = helper.base.sweep
@@ -150,7 +159,7 @@ def install_legacy_capture(helper) -> None:
 
     def evidence_patch(source, strict):
         original = old_patch(source, strict)
-        return instrument(original)
+        return instrument(original, enable_v12_long=enable_v12_long)
 
     evidence_patch._task9_capture = True
     sweep.patch = evidence_patch

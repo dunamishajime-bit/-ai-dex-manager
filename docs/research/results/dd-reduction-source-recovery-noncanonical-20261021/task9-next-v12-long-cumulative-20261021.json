@@ -1,0 +1,274 @@
+{
+  "cases": {
+    "CARRY_SHORT_THEN_ADD_V12_LONG_10bps": {
+      "acceptedCandidateCount": 1314,
+      "accounting": "PASS",
+      "candidateCount": 3185,
+      "closedTrades": 1314,
+      "confirmedCooldownRejections": 20,
+      "confirmedStopExits": 63,
+      "finalEquityJpy": 197659615.39891216,
+      "h1Marks": 8761,
+      "maxDrawdownPct": -14.79603474654827,
+      "profitFactor": 3.197417631053263,
+      "stopBySide": {
+        "LONG": 11,
+        "SHORT": 52
+      },
+      "vsCarriedShort": {
+        "ddImprovementPp": 0.0,
+        "equityRetention": 0.9667940953023042
+      },
+      "vsFrozenBaseline": {
+        "ddImprovementPp": 0.8246020663411411,
+        "equityRetention": 0.8870861317075653
+      }
+    },
+    "CARRY_SHORT_THEN_ADD_V12_LONG_30bps": {
+      "acceptedCandidateCount": 1312,
+      "accounting": "PASS",
+      "candidateCount": 3185,
+      "closedTrades": 1312,
+      "confirmedCooldownRejections": 20,
+      "confirmedStopExits": 62,
+      "finalEquityJpy": 79969990.97874291,
+      "h1Marks": 8761,
+      "maxDrawdownPct": -15.401072637661596,
+      "profitFactor": 2.6337446129100814,
+      "stopBySide": {
+        "LONG": 11,
+        "SHORT": 51
+      },
+      "vsCarriedShort": {
+        "ddImprovementPp": 0.01063085328645208,
+        "equityRetention": 0.8770461614616654
+      },
+      "vsFrozenBaseline": {
+        "ddImprovementPp": 1.3866961372728248,
+        "equityRetention": 0.6434186284225412
+      }
+    },
+    "V12_LONG_ALONE_10bps": {
+      "acceptedCandidateCount": 1315,
+      "accounting": "PASS",
+      "candidateCount": 3185,
+      "closedTrades": 1315,
+      "confirmedCooldownRejections": 0,
+      "confirmedStopExits": 12,
+      "finalEquityJpy": 216573603.74219185,
+      "h1Marks": 8761,
+      "maxDrawdownPct": -15.616362981841592,
+      "profitFactor": 3.4569928317749166,
+      "stopBySide": {
+        "LONG": 12
+      },
+      "vsCarriedShort": {
+        "ddImprovementPp": -0.8203282352933225,
+        "equityRetention": 1.0593063275658101
+      },
+      "vsFrozenBaseline": {
+        "ddImprovementPp": 0.004273831047818533,
+        "equityRetention": 0.9719711332327394
+      }
+    },
+    "V12_LONG_ALONE_30bps": {
+      "acceptedCandidateCount": 1313,
+      "accounting": "PASS",
+      "candidateCount": 3185,
+      "closedTrades": 1313,
+      "confirmedCooldownRejections": 0,
+      "confirmedStopExits": 11,
+      "finalEquityJpy": 92906606.36310963,
+      "h1Marks": 8761,
+      "maxDrawdownPct": -16.804603146297215,
+      "profitFactor": 2.790768154393036,
+      "stopBySide": {
+        "LONG": 11
+      },
+      "vsCarriedShort": {
+        "ddImprovementPp": -1.3928996553491668,
+        "equityRetention": 1.0189244926494316
+      },
+      "vsFrozenBaseline": {
+        "ddImprovementPp": -0.016834371362794087,
+        "equityRetention": 0.7475034135421459
+      }
+    }
+  },
+  "firstFull8EngineValidatedSha": "f6df8bf3",
+  "independentRepeatShaProof": {
+    "compared": 20,
+    "exactMatches": 20,
+    "ledgerDigestPairs": [
+      {
+        "case": "V12_LONG_ALONE",
+        "costBps": 10,
+        "exact": true,
+        "file": "candidate-decisions.jsonl",
+        "sha256": "c7126a80d587af520c903677d492a4d3c663d4e1a47dc5c6fcfea9b3a91fc2a7"
+      },
+      {
+        "case": "V12_LONG_ALONE",
+        "costBps": 10,
+        "exact": true,
+        "file": "portfolio-trades.jsonl",
+        "sha256": "9b5ecdbfa7d0984b9d7be797f842f4ef61260404e41db41cbd3e0e781e15f9a8"
+      },
+      {
+        "case": "V12_LONG_ALONE",
+        "costBps": 10,
+        "exact": true,
+        "file": "portfolio-events.jsonl",
+        "sha256": "f4cfb63863a82b525a6e4941c7c184d4c79980a95dd6bdea3e13d192c6350d34"
+      },
+      {
+        "case": "V12_LONG_ALONE",
+        "costBps": 10,
+        "exact": true,
+        "file": "task9-mtm.jsonl",
+        "sha256": "bf6b01798de4d45cd5bda165c97824faf2205d016ea362f5ac32b3bc01d16661"
+      },
+      {
+        "case": "V12_LONG_ALONE",
+        "costBps": 10,
+        "exact": true,
+        "file": "metrics.json",
+        "sha256": "f37b4df4333552c812dd3ee0fdeaac9fd094e120c364597ee69e6d4597c33307"
+      },
+      {
+        "case": "V12_LONG_ALONE",
+        "costBps": 30,
+        "exact": true,
+        "file": "candidate-decisions.jsonl",
+        "sha256": "e68a1e343df4af97d851c8fb58e4672dcef11046a158d1edbd557601e9cf8b6f"
+      },
+      {
+        "case": "V12_LONG_ALONE",
+        "costBps": 30,
+        "exact": true,
+        "file": "portfolio-trades.jsonl",
+        "sha256": "f3745768d8ccea5120f6a701017618c47afb407b23633d8ba6cff7c3c848becc"
+      },
+      {
+        "case": "V12_LONG_ALONE",
+        "costBps": 30,
+        "exact": true,
+        "file": "portfolio-events.jsonl",
+        "sha256": "04d020f363ae2ed500340e7d200d48976e286c99dbeb4de79b7966f001790db9"
+      },
+      {
+        "case": "V12_LONG_ALONE",
+        "costBps": 30,
+        "exact": true,
+        "file": "task9-mtm.jsonl",
+        "sha256": "200522a378d5cd582649e7f55820241bceff9dad22f35188f8887144b613b7a0"
+      },
+      {
+        "case": "V12_LONG_ALONE",
+        "costBps": 30,
+        "exact": true,
+        "file": "metrics.json",
+        "sha256": "defb3ba69244277ffc1c73cb70b4015de8ffbf56adf2c9a22f43f4bcd386c6e4"
+      },
+      {
+        "case": "CARRY_SHORT_THEN_ADD_V12_LONG",
+        "costBps": 10,
+        "exact": true,
+        "file": "candidate-decisions.jsonl",
+        "sha256": "5df065a47441736a3f9a92940bcf23bc4bc2c53f98b94419ec489a2c963caa3d"
+      },
+      {
+        "case": "CARRY_SHORT_THEN_ADD_V12_LONG",
+        "costBps": 10,
+        "exact": true,
+        "file": "portfolio-trades.jsonl",
+        "sha256": "654f3b03de3c56a451ce5e52a436adc5fdd7a635a1a23941d74435f27e01316b"
+      },
+      {
+        "case": "CARRY_SHORT_THEN_ADD_V12_LONG",
+        "costBps": 10,
+        "exact": true,
+        "file": "portfolio-events.jsonl",
+        "sha256": "709fb1bf44138d1c2de4070639fea57c8f7c6e3a5cf40ab2ca929c7cd91a6537"
+      },
+      {
+        "case": "CARRY_SHORT_THEN_ADD_V12_LONG",
+        "costBps": 10,
+        "exact": true,
+        "file": "task9-mtm.jsonl",
+        "sha256": "0db76bd206d34a8d25a7e34e664be6bbc8d6f4d942bafbc2bd574b42098a3e84"
+      },
+      {
+        "case": "CARRY_SHORT_THEN_ADD_V12_LONG",
+        "costBps": 10,
+        "exact": true,
+        "file": "metrics.json",
+        "sha256": "aa23927c752a4f8bc3555147b113af47740d8be74d895813a044c131b901c301"
+      },
+      {
+        "case": "CARRY_SHORT_THEN_ADD_V12_LONG",
+        "costBps": 30,
+        "exact": true,
+        "file": "candidate-decisions.jsonl",
+        "sha256": "7b7741fd2c97eb830162582e935ee5d1c590e5d101cf9d83f8827f8f71614c93"
+      },
+      {
+        "case": "CARRY_SHORT_THEN_ADD_V12_LONG",
+        "costBps": 30,
+        "exact": true,
+        "file": "portfolio-trades.jsonl",
+        "sha256": "ebb5880f1cb534f52653ac8ea30c298528fcec4b604d014c8a15be052793c049"
+      },
+      {
+        "case": "CARRY_SHORT_THEN_ADD_V12_LONG",
+        "costBps": 30,
+        "exact": true,
+        "file": "portfolio-events.jsonl",
+        "sha256": "4c629016a8967485d727b0ab5ec749b85ca2e23687683825572f0747a5582d1a"
+      },
+      {
+        "case": "CARRY_SHORT_THEN_ADD_V12_LONG",
+        "costBps": 30,
+        "exact": true,
+        "file": "task9-mtm.jsonl",
+        "sha256": "f9c401911250bff56d490cd0bcc5a5ae267fbc704bdde6ceba62441ad2c08226"
+      },
+      {
+        "case": "CARRY_SHORT_THEN_ADD_V12_LONG",
+        "costBps": 30,
+        "exact": true,
+        "file": "metrics.json",
+        "sha256": "ce2b627f877edb3fc7c5cacd958c9533192f7a6b810a42854d5c5ffa1bdf2214"
+      }
+    ],
+    "status": "PASS_20_OUT_OF_20_NEXT_LONG_LEDGER_SHAS"
+  },
+  "independentTypeScriptAllocatorParityProven": false,
+  "initialCapitalJpy": 10000,
+  "liveChanges": 0,
+  "newPolicyId": "V12_LONG_PCT2P0_12H_MFE1P0_R12",
+  "predecessorPolicyId": "V12_SHORT_PCT2P5_12H_MFE1P0_R12",
+  "predecessorResearchGate": "FAIL_BELOW_75PCT_30BPS_EQUITY_RETENTION",
+  "productionChanges": 0,
+  "researchGates": {
+    "CARRY_SHORT_THEN_ADD_V12_LONG": {
+      "bothCostAccountingPass": true,
+      "bothCostDDImprove0p1Pp": true,
+      "bothCostEquityRetention75Pct": false,
+      "previousShortWasResearchRejected": true,
+      "researchOnly": true
+    },
+    "V12_LONG_ALONE": {
+      "bothCostAccountingPass": true,
+      "bothCostDDImprove0p1Pp": false,
+      "bothCostEquityRetention75Pct": false,
+      "previousShortWasResearchRejected": true,
+      "researchOnly": true
+    }
+  },
+  "sample": "2025-08-10_to_2026-08-10",
+  "schemaVersion": 1,
+  "sourceMarketArchiveSha256": "10cdc48705a6f9e310cd0aecc95ce781af24325b1a99c2eb9aaefe3bd2953934",
+  "status": "RESEARCH_ONLY_CUMULATIVE_V12_LONG_NOT_LIVE",
+  "venueFillParityProven": false
+}

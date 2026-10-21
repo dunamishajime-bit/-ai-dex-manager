@@ -69,6 +69,10 @@ jobs:
         run: python scripts/dd-reduction/test_task9_native_full8.py
       - name: Verify independent native core economics and 20 ledger SHA research evidence
         run: python scripts/dd-reduction/verify-task9-native-compact-artifacts.py
+      - name: Verify V12 LONG next-step cumulative research and repeat SHA evidence
+        run: python scripts/dd-reduction/verify-task9-next-v12-long-artifacts.py
+      - name: Regression-test V12 LONG opt-in causal cooldown (no LIVE change)
+        run: python scripts/dd-reduction/test_task9_native_full8.py
       - name: Lint native core cross-language verifier
         run: npx eslint scripts/dd-reduction/run-task9-native-full8-unified.ts
       - name: Check patch whitespace
