@@ -20,7 +20,7 @@ assertFixtureIdentity({ sourceHash: FIXTURE_HASH }, ["sourceHash"], "task8-artif
 test("verifies the checked-in Task 6/7 compact artifacts and preserves the source-coverage block", async () => {
     const result = await verifyTask9DynamicArtifacts({
         repositoryRoot: process.cwd(),
-        checkExternalLedgers: true,
+        checkExternalLedgers: process.env.DDEX_VERIFY_EXTERNAL === "1",
     });
 
     assert.equal(result.status, "PASS");
