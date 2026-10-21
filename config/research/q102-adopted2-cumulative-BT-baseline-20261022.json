@@ -1,0 +1,74 @@
+{
+  "id": "Q102_PB_LONG_INITIAL_AND_HV_SHORT_PROFIT_USER_ADOPTED_20261022",
+  "status": "OFFICIALLY_ADOPTED_FOR_ALL_SUBSEQUENT_RESEARCH_BT_NOT_LIVE",
+  "scope": "All future 8-strategy compound historical BTs; do not change any of V12 V4 four accepted rules",
+  "originalV4FourRuleHandoffSha": "4081eb37fe23f884a4d1fa93e2b608e388bf7071",
+  "priorQ102DeepResearchSha": "b9ee034d7d085647f146689475920223c53fb2f1",
+  "priorQ102TimeExitResearchSha": "67c78d82aae20cdee22808975fac09fdd86a7623",
+  "period": [
+    "2025-08-10",
+    "2026-08-10"
+  ],
+  "initialCapitalJpy": 10000,
+  "additionalDeposits": 0,
+  "compounding": true,
+  "costsBps": [
+    10,
+    30
+  ],
+  "fixedQ102AdditionalPolicies": [
+    {
+      "side": "LONG",
+      "family": "PB",
+      "id": "Q102_PB_LONG_INIT1P5_3H_MFE0P5",
+      "ageElapsedHoursAtLeast": 3,
+      "maxFavorablePctStrictlyBelow": 0.5,
+      "entryRelativeAdverseTriggerPctAtLeast": 1.5,
+      "action": "Causal reduce-only early exit; trade-price model, not venue proof"
+    },
+    {
+      "side": "SHORT",
+      "family": "HIGH_VOL",
+      "id": "Q102_HIGH_VOL_SHORT_PROFIT3_TO1",
+      "armedOnCompletedM5CloseFavorablePctAtLeast": 3,
+      "residentStopFloorFromEntryPct": 1,
+      "retainExistingM5CloseGain2PctToEntryPlus0p5PctGuard": true,
+      "monotonicStopTightening": true
+    }
+  ],
+  "preserveV4FourAdoptedExitPolicies": true,
+  "preserveOtherQ102FamiliesAndSides": true,
+  "historicalCumulativeFrozenBaseline": {
+    "10": {
+      "finalEquityJpy": 195452680.3474182,
+      "maxMtmDdPct": -14.603309760733396,
+      "profitFactor": 3.155691489962669,
+      "closedTrades": 1323,
+      "q102TradeCount": 183,
+      "acceptedShortStopCooldownEvents": 52
+    },
+    "30": {
+      "finalEquityJpy": 82997204.05155437,
+      "maxMtmDdPct": -15.75383475906923,
+      "profitFactor": 2.6237616684773792,
+      "closedTrades": 1320,
+      "q102TradeCount": 182,
+      "acceptedShortStopCooldownEvents": 51
+    }
+  },
+  "sourceEvidence": {
+    "btResult": "OWNER_PC_2026-10-22_q102_timeexit_risk_continued_after_v4",
+    "V4ShortCooldownFromAcceptedFills": true,
+    "sourceArchiveSha256": "10cdc48705a6f9e310cd0aecc95ce781af24325b1a99c2eb9aaefe3bd2953934"
+  },
+  "currentProductionAndLiveDeploymentProven": false,
+  "currentVenueAuthSTOPReadbackProven": false,
+  "independentLatestTask9RuntimeParityProven": false,
+  "unvalidatedNewCandidate": {
+    "family": "HIGH_VOL",
+    "side": "LONG",
+    "ageElapsedHoursAtLeast": 2,
+    "twoConsecutiveCompletedH1ClosesEachEntryRelativeLossPctAtLeast": 3,
+    "candidateNotAdoptedYet": true
+  }
+}
