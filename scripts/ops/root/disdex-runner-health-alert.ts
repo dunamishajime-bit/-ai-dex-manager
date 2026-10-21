@@ -97,9 +97,15 @@ async function readCurrentReleaseSha() {
 }
 
 function resolveServiceUnit(runner: typeof runners[number], currentReleaseSha: string | undefined) {
+  // Each release-pinned runner can be independently deployed without changing
+  // the global/current release or weakening the exact unit-to-SHA comparison.
   const expectedShaOverride = runner.id === "V12"
     ? process.env.DISDEX_ALERT_V12_EXPECTED_SHA
-    : undefined;
+    : runner.id === "HYPE_TREND_LONG"
+      ? process.env.DISDEX_ALERT_HYPE_EXPECTED_SHA
+      : runner.id === "IDLE_PRIORITY_SHORT"
+        ? process.env.DISDEX_ALERT_IDLE_EXPECTED_SHA
+        : undefined;
   const resolved = resolveRunnerServiceUnit(runner.id, currentReleaseSha, process.env[runner.unitEnv], expectedShaOverride);
   if (!resolved.unit) return resolved;
   if (!unitExists(resolved.unit)) {
