@@ -13,8 +13,7 @@ import {
     type DynamicReplayResult,
 } from "../../lib/backtest/dd-reduction/dynamic-replay";
 import type { DynamicAllocatorCandidate } from "../../lib/backtest/dd-reduction/dynamic-allocator";
-import type {
-    CandidateSourceKind,
+import { DYNAMIC_STRATEGY_IDS, type CandidateSourceKind,
     CandidateSourceRecord,
     DynamicCandidateEvent,
     EvidenceLevel,
@@ -159,6 +158,7 @@ const REPOSITORY_ROOT = resolve(fileURLToPath(import.meta.url), "../..");
 const DEFAULT_OUTPUT_DIR = resolve(process.env.DISDEX_AI_OUTPUT_ROOT ?? "C:\\Users\\dis\\Desktop\\DisDex_AI_Files", "01_BT_Research", "2026-10-21_task9_dynamic_v12_short");
 const OOS_START_MS = Date.parse("2026-01-01T00:00:00.000Z");
 const OOS_END_MS = Date.parse("2026-04-30T23:59:59.999Z");
+const HOLDOUT_START_MS = Date.parse("2026-06-01T00:00:00.000Z");
 
 function fail(code: string, message: string): never { throw new Task9DynamicInputError(code, message); }
 function isInside(root: string, candidate: string): boolean { const path = relative(root, candidate); return path === "" || (!path.startsWith("..") && !isAbsolute(path)); }
@@ -179,14 +179,16 @@ function policyFor(name: Task9CaseName): Task9CasePolicy {
     return policy;
 }
 
-function allocatorCandidate(event: DynamicCandidateEvent): DynamicAllocatorCandidate | null {
-    if (event.failClosed || event.side === null || event.price === null || event.entry_valid_until_ms === null || event.requested_gross === null || event.priority === null || event.decision_ts_ms === null) return null;
+function allocatorCandidate(event: DynamicCandidateEvent, raw: Readonly<Record<string, unknown>>): DynamicAllocatorCandidate | null {
+    const quantity = number(raw.quantity ?? raw.modeled_entry_quantity);
+    const assetClass = raw.asset_class ?? raw.assetClass;
+    if (event.failClosed || event.side === null || event.price === null || event.entry_valid_until_ms === null || event.requested_gross === null || event.priority === null || event.decision_ts_ms === null || quantity === null || quantity <= 0 || (assetClass !== "CRYPTO" && assetClass !== "NON_CRYPTO")) return null;
     return {
         candidate_id: event.candidate_id, strategy_id: event.strategy_id, symbol: event.symbol, side: event.side,
         signal_ts_ms: event.signal_ts_ms, decision_ts_ms: event.decision_ts_ms, entry_valid_until_ms: event.entry_valid_until_ms,
         requested_gross: event.requested_gross, worst_case_gross: event.worst_case_gross, entry_price: event.price,
-        priority: event.priority, evidence_level: event.evidence_level, source_sha: event.source_sha, evidence: event.evidence,
-        validity: event.validity, asset_class: "CRYPTO", protection_verified: false,
+        priority: event.priority, quantity, evidence_level: event.evidence_level, source_sha: event.source_sha, evidence: event.evidence,
+        validity: event.validity, asset_class: assetClass, protection_verified: false,
     };
 }
 
@@ -198,7 +200,7 @@ function outcome(exit: Readonly<Record<string, unknown>> | null): "WINNER" | "LO
 }
 
 function lifecycleEvents(event: DynamicCandidateEvent, raw: Readonly<Record<string, unknown>>, policy: Task9CasePolicy, costBps: Task9CostBps): { readonly events: readonly ReplayEvent[]; readonly stops: readonly Task9StopEvent[] } {
-    const candidate = allocatorCandidate(event);
+    const candidate = allocatorCandidate(event, raw);
     if (candidate === null || event.decision_ts_ms === null || event.event_seq === null) return { events: [], stops: [] };
     const splitValue = raw.data_split === "OOS" ? "OOS" : "IS";
     const entry: ReplayEvent = { event_id: event.event_id ?? `candidate:${event.candidate_id}`, event_seq: event.event_seq, timestamp_ms: event.decision_ts_ms, kind: "ENTRY", candidate, data_split: splitValue };
@@ -300,30 +302,46 @@ function ledgerHashes(replay: DynamicReplayResult): Readonly<Record<string, stri
 function sourceCoverage(source: ReturnType<typeof normalizeDynamicCandidates>, replayableRows: number): Task9SourceCoverage {
     const reasons: string[] = [];
     if (source.failClosedRowCount > 0) reasons.push(`${source.failClosedRowCount} rows are fail-closed because canonical candidate fields are incomplete`);
+    if (replayableRows !== source.observedRowCount) reasons.push(`partial replay coverage: ${replayableRows}/${source.observedRowCount} rows; partial subsets must not produce economic BT metrics`);
+    for (const strategy of DYNAMIC_STRATEGY_IDS) {
+        if ((source.strategyCounts[strategy] ?? 0) === 0) reasons.push(`missing strategy coverage: ${strategy}`);
+    }
     if (replayableRows === 0) reasons.push("zero replayable rows; economic BT metrics are unavailable");
     return { observedRows: source.observedRowCount, normalizedRows: source.events.length - source.failClosedRowCount, failClosedRows: source.failClosedRowCount, replayableRows, status: reasons.length === 0 ? "COMPLETE" : "INCOMPLETE", reasons, sourceHashes: source.sourceHashes.map((item) => ({ path: item.path, sha256: item.sha256, bytes: item.bytes })) };
 }
 
+/** Split membership is anchored to the event's causal decision time, never its exit or outcome. */
+function causalResearchSplit(event: DynamicCandidateEvent, raw: Readonly<Record<string, unknown>>): "IS" | "OOS" | "HOLDOUT" | null {
+    const ts = event.decision_ts_ms;
+    if (ts === null || !Number.isFinite(ts)) return null;
+    const split = ts < OOS_START_MS ? "IS" : ts <= OOS_END_MS ? "OOS" : ts >= HOLDOUT_START_MS ? "HOLDOUT" : null;
+    if (split === null || (raw.data_split !== undefined && raw.data_split !== split)) return null;
+    return split;
+}
+
 function caseResult(policy: Task9CasePolicy, costBps: Task9CostBps, normalized: ReturnType<typeof normalizeDynamicCandidates>, rawById: ReadonlyMap<string, Readonly<Record<string, unknown>>>, source: Task9SourceCoverage, marketData: readonly ReplayMarketMark[]): Task9CaseResult {
-    const replayable = normalized.events.filter((event) => allocatorCandidate(event) !== null);
-    const allEvents: ReplayEvent[] = [];
+    const replayable = normalized.events.filter((event) => allocatorCandidate(event, rawById.get(event.candidate_id) ?? {}) !== null);
+    const splitEvents: Record<"IS" | "OOS" | "HOLDOUT", ReplayEvent[]> = { IS: [], OOS: [], HOLDOUT: [] };
     const plannedStops: Task9StopEvent[] = [];
+    let unverifiedSplitCount = 0;
     for (const event of replayable) {
-        const built = lifecycleEvents(event, rawById.get(event.candidate_id) ?? {}, policy, costBps);
-        allEvents.push(...built.events);
+        const raw = rawById.get(event.candidate_id) ?? {};
+        const split = causalResearchSplit(event, raw);
+        if (split === null) { unverifiedSplitCount += 1; continue; }
+        const built = lifecycleEvents(event, raw, policy, costBps);
+        // Each split has an independent allocator, wallet, and position state.
+        splitEvents[split].push(...built.events.map((entry) => ({ ...entry, data_split: undefined })));
         plannedStops.push(...built.stops);
     }
-    const baseReplay = replayDynamicPortfolio(allEvents.filter((event) => event.data_split !== "OOS"), replayPolicy(costBps, "IS"), marketData);
-    const oosEvents = allEvents.filter((event) => event.data_split === "OOS").map((event) => ({ ...event, data_split: "OOS" as const }));
-    const holdoutEvents = allEvents.filter((event) => rawById.get(event.event_id.split(":")[0])?.data_split === "HOLDOUT").map((event) => ({ ...event, data_split: undefined }));
-    const oosReplay = replayDynamicPortfolio(oosEvents.map((event) => ({ ...event, data_split: undefined })), replayPolicy(costBps, "IS"), marketData);
-    const holdoutReplay = replayDynamicPortfolio(holdoutEvents, replayPolicy(costBps, "HOLDOUT"), marketData);
+    const baseReplay = replayDynamicPortfolio(splitEvents.IS, replayPolicy(costBps, "IS"), marketData);
+    const oosReplay = replayDynamicPortfolio(splitEvents.OOS, replayPolicy(costBps, "IS"), marketData);
+    const holdoutReplay = replayDynamicPortfolio(splitEvents.HOLDOUT, replayPolicy(costBps, "HOLDOUT"), marketData);
     const acceptedIds = new Set(baseReplay.execution_ledger.filter((item) => item.kind === "ENTRY" && item.accepted).map((item) => item.event_id.split(":")[0]));
     const stops = plannedStops.filter((stop) => acceptedIds.has(stop.candidateId));
     const splits = { OOS: splitResult(oosReplay), HOLDOUT: splitResult(holdoutReplay) } as const;
     const diagnostic = { finalEquityJpy: baseReplay.mtm_timeline.at(-1)?.equity_jpy ?? baseReplay.accounting.wallet_jpy, tradeCount: baseReplay.charge_ledger.length, replayableRows: source.replayableRows };
     const cooldownExclusions = plannedStops.reduce((count, stop) => count + replayable.filter((event) => {
-        const candidate = allocatorCandidate(event);
+        const candidate = allocatorCandidate(event, rawById.get(event.candidate_id) ?? {});
         return candidate !== null && candidate.symbol === replayable.find((item) => item.candidate_id === stop.candidateId)?.symbol && typeof candidate.decision_ts_ms === "number" && candidate.decision_ts_ms > stop.timestampMs && candidate.decision_ts_ms < stop.timestampMs + (policy.overlayRules[0]?.reentryHours ?? 0) * 3_600_000;
     }).length, 0);
     const lifecycleAudit: Task9LifecycleAudit = {
@@ -333,7 +351,7 @@ function caseResult(policy: Task9CasePolicy, costBps: Task9CostBps, normalized: 
         preemptionCount: baseReplay.preemption_ledger.length,
         maximumSameDirectionGross: baseReplay.allocator_state_snapshots.flatMap((snapshot) => Object.values(snapshot.allocator_after.gross_by_symbol)).reduce((max, value) => Math.max(max, value), 0),
     };
-    const blocked = source.replayableRows === 0;
+    const blocked = source.status !== "COMPLETE" || unverifiedSplitCount > 0 || marketData.length === 0 || splitEvents.OOS.length === 0 || splitEvents.HOLDOUT.length === 0;
     const replayPass = baseReplay.status === "PASS" && oosReplay.status === "PASS" && holdoutReplay.status === "PASS";
     const metrics = blocked || !replayPass ? null : metricResult(baseReplay, stops, splits);
     const classification: Task9Classification = blocked ? "BLOCKED_INCOMPLETE_SOURCE_COVERAGE" : !replayPass ? "BLOCKED_REPLAY" : policy.name === "BASELINE" ? "REJECTED" : "DD_IMPROVED_RESEARCH_ONLY";
@@ -349,7 +367,7 @@ function bestCaseSupported(cases: readonly Task9CaseResult[], costs: readonly Ta
 }
 
 function buildGate(cases: readonly Task9CaseResult[], source: Task9SourceCoverage, costs: readonly Task9CostBps[]): Task9CumulativeGate {
-    if (source.replayableRows === 0) return { status: "BLOCKED_INCOMPLETE_SOURCE_COVERAGE", oosPfRetention: { "10": null, "30": null }, finalEquityRetention: { "10": null, "30": null }, minimumOosPfRetention: 0.9, minimumFinalEquityRetention: 0.75, economicAcceptanceEligible: false };
+    if (source.status !== "COMPLETE" || cases.some((item) => item.classification === "BLOCKED_INCOMPLETE_SOURCE_COVERAGE")) return { status: "BLOCKED_INCOMPLETE_SOURCE_COVERAGE", oosPfRetention: { "10": null, "30": null }, finalEquityRetention: { "10": null, "30": null }, minimumOosPfRetention: 0.9, minimumFinalEquityRetention: 0.75, economicAcceptanceEligible: false };
     const baseline = new Map(cases.filter((item) => item.caseName === "BASELINE").map((item) => [item.costBps, item]));
     const oosPfRetention: Record<string, number | null> = {}; const finalEquityRetention: Record<string, number | null> = {};
     for (const cost of costs) { const base = baseline.get(cost)?.economicMetrics; const candidate = cases.find((item) => item.caseName === "A_PLUS_C" && item.costBps === cost)?.economicMetrics; oosPfRetention[String(cost)] = base?.oosPf && candidate?.oosPf ? candidate.oosPf / base.oosPf : null; finalEquityRetention[String(cost)] = base?.finalEquityJpy && candidate?.finalEquityJpy ? candidate.finalEquityJpy / base.finalEquityJpy : null; }
@@ -383,9 +401,9 @@ export async function runTask9Dynamic(options: Task9DynamicOptions): Promise<Tas
     const records = await resolveSources(options); const cases = normalizeCases(options.cases); const costs = normalizeCosts(options.costs); const results: Task9CaseResult[] = []; let combinedCoverage: Task9SourceCoverage | null = null;
     for (const cost of costs) {
         const normalized = normalizeDynamicCandidates({ records, feeBps: cost, slippageBps: cost });
-        const replayable = normalized.events.filter((event) => allocatorCandidate(event) !== null).length;
-        const coverage = sourceCoverage(normalized, replayable); combinedCoverage ??= coverage;
         const rawById = new Map(records.flatMap((source) => source.rows.map((row) => [String(row.candidate_id ?? row.candidateId ?? ""), row] as const)).filter(([id]) => id.length > 0));
+        const replayable = normalized.events.filter((event) => allocatorCandidate(event, rawById.get(event.candidate_id) ?? {}) !== null).length;
+        const coverage = sourceCoverage(normalized, replayable); combinedCoverage ??= coverage;
         for (const name of cases) results.push(caseResult(policyFor(name), cost, normalized, rawById, coverage, options.marketData ?? []));
     }
     if (combinedCoverage === null) fail("SOURCE_MISSING", "no cost scenario was selected");

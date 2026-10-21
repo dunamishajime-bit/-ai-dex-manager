@@ -41,6 +41,8 @@ function row(candidateId: string, overrides: Record<string, unknown> = {}) {
         requested_gross: 100,
         worst_case_gross: 100,
         entry_price: 100,
+        quantity: 1,
+        asset_class: "CRYPTO",
         source_sha: SOURCE_SHA,
         candidate_status: "ACCEPTED",
         planned_exit: {
@@ -99,6 +101,14 @@ test("overlay event construction is causal and cannot target rejected or unfille
     assert.equal(events.some((event) => event.event_id.includes("unfilled-candidate") && event.kind === "PROTECTION_STOP"), false);
 });
 
+test("quantity and asset class must be source-backed before reaching the allocator", () => {
+    const policy = TASK9_DYNAMIC_CASES.find((item) => item.name === "BASELINE")!;
+    assert.equal(buildCaseReplayEvents([row("missing-quantity", { quantity: null })], policy, 10).length, 0);
+    assert.equal(buildCaseReplayEvents([row("missing-class", { asset_class: null })], policy, 10).length, 0);
+    assert.equal(buildCaseReplayEvents([row("bad-quantity", { quantity: Number.NaN })], policy, 10).length, 0);
+    assert.ok(buildCaseReplayEvents([row("ready")], policy, 10).length > 0);
+});
+
 test("dynamic cases classify original winner, loser, and unknown STOP outcomes without double STOP", async () => {
     await withOutput(async (outputDir) => {
         const result = await runTask9Dynamic({ outputDir, sourceRecords: [source([
@@ -113,8 +123,10 @@ test("dynamic cases classify original winner, loser, and unknown STOP outcomes w
         const caseResult = result.cases[0]!;
         assert.deepEqual(caseResult.stopEvents.map((event) => event.originalOutcome), ["WINNER", "LOSER", "UNKNOWN"]);
         assert.equal(caseResult.stopEvents.length, 3);
-        assert.equal(caseResult.economicMetrics?.stopEvents, 3);
-        assert.equal(caseResult.economicMetrics?.duplicateStops, 0);
+        // A three-row V12-only fixture is diagnostic, never a formal eight-strategy economic BT.
+        assert.equal(caseResult.classification, "BLOCKED_INCOMPLETE_SOURCE_COVERAGE");
+        assert.equal(caseResult.economicMetrics, null);
+        assert.equal(caseResult.economicAcceptanceEligible, false);
     });
 });
 
@@ -156,6 +168,54 @@ test("zero replayable rows fail closed for every case and never become economic 
             assert.equal(item.diagnosticMetrics.finalEquityJpy, 10_000);
             assert.equal(item.diagnosticMetrics.tradeCount, 0);
         }
+    });
+});
+
+test("one valid candidate never launders an incomplete eight-strategy source into economic metrics", async () => {
+    await withOutput(async (outputDir) => {
+        const strategies = ["V12", "Q102", "PENGU", "FET", "RESIDUAL", "IDLE", "V52", "HYPE_LONG"];
+        const rows = strategies.map((strategy, i) => row(`candidate-${i}`, {
+            strategy_id: strategy, event_seq: i + 1, symbol: `ASSET${i}USDT`,
+        }));
+        rows.push(row("missing-price", { strategy_id: "V12", event_seq: 99, entry_price: null }));
+        const result = await runTask9Dynamic({
+            outputDir, sourceRecords: [source(rows)], costs: [10], cases: ["BASELINE"],
+            marketData: [{ timestamp_ms: START, symbol: "BTCUSDT", price: 100, fx_rate: 1, timeframe: "H1" }],
+        });
+        const item = result.cases[0]!;
+        assert.ok(item.sourceCoverage.replayableRows > 0);
+        assert.equal(item.sourceCoverage.status, "INCOMPLETE");
+        assert.ok(item.sourceCoverage.reasons.some((reason) => reason.includes("partial replay coverage")));
+        assert.equal(item.classification, "BLOCKED_INCOMPLETE_SOURCE_COVERAGE");
+        assert.equal(item.economicMetrics, null);
+        assert.equal(result.cumulativeGate.economicAcceptanceEligible, false);
+    });
+});
+
+test("Holdout outcomes do not enter the IS baseline accounting", async () => {
+    await withOutput(async (outputDir) => {
+        const holdout = row("holdout-winner", {
+            symbol: "ETHUSDT", event_seq: 2,
+            decision_ts_ms: HOLDOUT_START, signal_ts_ms: HOLDOUT_START,
+            entry_valid_until_ms: HOLDOUT_START + 86_400_000,
+            data_split: "HOLDOUT",
+            planned_exit: {
+                fill: { timestamp_ms: HOLDOUT_START + 1, price: 100, evidence_id: "holdout-fill" },
+                original_exit: { timestamp_ms: HOLDOUT_START + 3_600_000, price: 120, settlement_pnl: 1000 },
+            },
+        });
+        const isOnly = await runTask9Dynamic({
+            outputDir: join(outputDir, "is-only"), sourceRecords: [source([row("is-one")])],
+            cases: ["BASELINE"], costs: [10],
+        });
+        const mixed = await runTask9Dynamic({
+            outputDir: join(outputDir, "with-holdout"), sourceRecords: [source([row("is-one"), holdout])],
+            cases: ["BASELINE"], costs: [10],
+        });
+        assert.equal(mixed.cases[0]?.diagnosticMetrics.finalEquityJpy, isOnly.cases[0]?.diagnosticMetrics.finalEquityJpy);
+        assert.equal(mixed.cases[0]?.diagnosticMetrics.tradeCount, isOnly.cases[0]?.diagnosticMetrics.tradeCount);
+        assert.deepEqual(mixed.cases[0]?.ledgerHashes, isOnly.cases[0]?.ledgerHashes);
+        assert.equal(mixed.cases[0]?.economicMetrics, null);
     });
 });
 
