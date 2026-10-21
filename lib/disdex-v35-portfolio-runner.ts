@@ -155,7 +155,7 @@ export function buildDisDexV35RebalanceActions(input: {
                 : "Open or increase the position toward the V35 target.";
         }
         const deltaNotionalUsd = deltaQuantity * quote.midPrice;
-        if (Math.abs(deltaNotionalUsd) + 1e-9 < tolerance) continue;
+        if (!reduceOnly && Math.abs(deltaNotionalUsd) + 1e-9 < tolerance) continue;
         if (reduceOnly && position) {
             deltaQuantity = Math.sign(deltaQuantity) * Math.min(Math.abs(deltaQuantity), Math.abs(currentQuantity));
         }

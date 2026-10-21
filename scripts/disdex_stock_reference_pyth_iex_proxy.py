@@ -15,9 +15,36 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any, Dict, Optional
 
 import websocket
+from zoneinfo import ZoneInfo
 
 SYMBOLS = ("AMZN", "META", "MSFT", "NVDA", "TSLA")
 UTC = dt.timezone.utc
+NEW_YORK = ZoneInfo("America/New_York")
+
+
+def regular_us_equity_session(value: dt.datetime | None = None) -> bool:
+    """Return whether the NYSE/Nasdaq regular session is open.
+
+    This is used only to classify health. It never makes a stale quote
+    executable: freshnessReady remains false until every per-symbol
+    quote passes the normal 5-second two-source policy.
+    """
+    local = (value or dt.datetime.now(tz=UTC)).astimezone(NEW_YORK)
+    if local.weekday() >= 5:
+        return False
+    seconds = local.hour * 3600 + local.minute * 60 + local.second
+    return 9 * 3600 + 30 * 60 <= seconds < 16 * 3600
+
+
+def market_label() -> str:
+    return "US equities 09:30-16:00 America/New_York"
+
+# V52 reference-quality policy. These are ceilings, not fallbacks: every
+# quote still requires both connected sources and passes all validations below.
+DEFAULT_PYTH_MAX_AGE_MS = 5000
+DEFAULT_IEX_MAX_AGE_MS = 5000
+DEFAULT_PYTH_MAX_CONFIDENCE_BPS = 25.0
+DEFAULT_REFERENCE_MAX_CROSS_SOURCE_BPS = 50.0
 
 
 def now_ms() -> int:
@@ -197,17 +224,95 @@ class QuoteStore:
             "pythFeedId": pyth.feed_id,
         }, None
 
-    def health(self) -> dict:
+    def health(self, *, pyth_max_age_ms: int, iex_max_age_ms: int,
+               max_confidence_bps: float, max_cross_bps: float) -> dict:
+        """Return connection and quote-quality health without changing state."""
         with self._lock:
-            return {
-                "status": "ok" if self._pyth_connected and self._iex_connected else "degraded",
-                "pythConnected": self._pyth_connected,
-                "iexConnected": self._iex_connected,
-                "pythError": self._pyth_error,
-                "iexError": self._iex_error,
-                "pythSymbols": {symbol: {"price": q.price, "timestamp": q.timestamp_ms, "ageMs": q.age_ms, "confidenceBps": q.confidence_bps} for symbol, q in self._pyth.items()},
-                "iexSymbols": {symbol: {"bid": q.bid, "ask": q.ask, "timestamp": q.timestamp_ms, "ageMs": q.age_ms} for symbol, q in self._iex.items()},
-            }
+            pyth_connected = self._pyth_connected
+            iex_connected = self._iex_connected
+            pyth_error = self._pyth_error
+            iex_error = self._iex_error
+            pyth_quotes = dict(self._pyth)
+            iex_quotes = dict(self._iex)
+
+        quote_status: Dict[str, dict] = {}
+        all_quotes_valid = True
+        for symbol in SYMBOLS:
+            pyth = pyth_quotes.get(symbol)
+            iex = iex_quotes.get(symbol)
+            errors: list[dict] = []
+            row: dict = {"pythPresent": pyth is not None, "iexPresent": iex is not None}
+            if pyth is None:
+                errors.append({"error": "pyth_quote_unavailable", "symbol": symbol})
+            else:
+                row.update({"pythTimestamp": pyth.timestamp_ms, "pythReceivedAt": pyth.received_ms,
+                            "pythAgeMs": pyth.age_ms, "pythConfidenceBps": pyth.confidence_bps})
+                if pyth.age_ms > pyth_max_age_ms:
+                    errors.append({"error": "pyth_quote_stale", "symbol": symbol,
+                                   "ageMs": pyth.age_ms, "maximumAgeMs": pyth_max_age_ms})
+                elif pyth.confidence_bps > max_confidence_bps:
+                    errors.append({"error": "pyth_confidence_too_wide", "symbol": symbol,
+                                   "confidenceBps": pyth.confidence_bps,
+                                   "maximumConfidenceBps": max_confidence_bps})
+            if iex is None:
+                errors.append({"error": "iex_quote_unavailable", "symbol": symbol})
+            else:
+                row.update({"iexTimestamp": iex.timestamp_ms, "iexReceivedAt": iex.received_ms,
+                            "iexAgeMs": iex.age_ms})
+                if iex.age_ms > iex_max_age_ms:
+                    errors.append({"error": "iex_quote_stale", "symbol": symbol,
+                                   "ageMs": iex.age_ms, "maximumAgeMs": iex_max_age_ms})
+            if pyth is not None and iex is not None and iex.price > 0:
+                cross_bps = abs(pyth.price / iex.price - 1.0) * 10_000.0
+                row["crossSourceDifferenceBps"] = cross_bps
+                if cross_bps > max_cross_bps:
+                    errors.append({"error": "cross_source_divergence", "symbol": symbol,
+                                   "crossSourceDifferenceBps": cross_bps,
+                                   "maximumCrossSourceBps": max_cross_bps})
+            if errors:
+                all_quotes_valid = False
+                row["valid"] = False
+                row["errors"] = errors
+            else:
+                row["valid"] = True
+            quote_status[symbol] = row
+
+        connected = pyth_connected and iex_connected
+        session_open = regular_us_equity_session()
+        # Outside regular hours a connected stream is expected to have no
+        # fresh equity quote. Report that state explicitly as deferred.
+        # freshnessReady remains false and /quote still rejects stale or
+        # missing data, preserving the fail-closed entry gate.
+        if connected and all_quotes_valid:
+            status = "ok"
+        elif connected and not session_open:
+            status = "deferred"
+        else:
+            status = "degraded"
+        return {
+            "status": status,
+            "freshnessReady": all_quotes_valid,
+            "marketOpen": session_open,
+            "marketLabel": market_label(),
+            "healthReason": (
+                "READY"
+                if status == "ok"
+                else "MARKET_CLOSED_REFERENCE_DEFERRED"
+                if status == "deferred"
+                else "REFERENCE_SOURCE_OR_QUOTE_QUALITY_NOT_READY"
+            ),
+            "pythConnected": pyth_connected,
+            "iexConnected": iex_connected,
+            "pythError": pyth_error,
+            "iexError": iex_error,
+            "validationThresholds": {"pythMaximumAgeMs": pyth_max_age_ms,
+                                      "iexMaximumAgeMs": iex_max_age_ms,
+                                      "maximumConfidenceBps": max_confidence_bps,
+                                      "maximumCrossSourceBps": max_cross_bps},
+            "quoteStatus": quote_status,
+            "pythSymbols": {symbol: {"price": q.price, "timestamp": q.timestamp_ms, "ageMs": q.age_ms, "confidenceBps": q.confidence_bps} for symbol, q in pyth_quotes.items()},
+            "iexSymbols": {symbol: {"bid": q.bid, "ask": q.ask, "timestamp": q.timestamp_ms, "ageMs": q.age_ms} for symbol, q in iex_quotes.items()},
+        }
 
 
 class PythStream(threading.Thread):
@@ -327,12 +432,17 @@ class AlpacaIexStream(threading.Thread):
                 connection.send(json.dumps({"action": "subscribe", "quotes": list(SYMBOLS)}))
                 self.store.set_connected("iex", True)
                 backoff = 1.0
+                timeout_streak = 0
                 while not self.stop_event.is_set():
                     connection.settimeout(5)
                     try:
                         raw = connection.recv()
                     except websocket.WebSocketTimeoutException:
+                        timeout_streak += 1
+                        if timeout_streak >= 12:
+                            raise TimeoutError("Alpaca IEX websocket idle for 60s")
                         continue
+                    timeout_streak = 0
                     for row in self._rows(raw):
                         self.store.update_iex(row)
             except Exception as error:
@@ -361,12 +471,23 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("cache-control", "no-store")
         self.send_header("content-length", str(len(body)))
         self.end_headers()
-        self.wfile.write(body)
+        try:
+            self.wfile.write(body)
+        except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
+            # A probe or reverse proxy may close after receiving headers. A
+            # client disconnect must not flood the journal or look like a
+            # reference-stream failure.
+            return
 
     def do_GET(self) -> None:
         parsed = urllib.parse.urlparse(self.path)
         if parsed.path == "/health":
-            self._json(HTTPStatus.OK, self.server.quote_store.health())  # type: ignore[attr-defined]
+            self._json(HTTPStatus.OK, self.server.quote_store.health(  # type: ignore[attr-defined]
+                pyth_max_age_ms=self.server.pyth_max_age_ms,
+                iex_max_age_ms=self.server.iex_max_age_ms,
+                max_confidence_bps=self.server.max_confidence_bps,
+                max_cross_bps=self.server.max_cross_bps,
+            ))
             return
         if parsed.path != "/quote":
             self._json(HTTPStatus.NOT_FOUND, {"error": "not_found"})
@@ -394,24 +515,69 @@ class ReferenceServer(ThreadingHTTPServer):
     def __init__(self, address: tuple[str, int], store: QuoteStore):
         super().__init__(address, Handler)
         self.quote_store = store
-        self.pyth_max_age_ms = int_env("DISDEX_PYTH_MAX_AGE_MS", 1200)
-        self.iex_max_age_ms = int_env("DISDEX_IEX_MAX_AGE_MS", 1500)
-        self.max_confidence_bps = float_env("DISDEX_PYTH_MAX_CONFIDENCE_BPS", 10.0)
-        self.max_cross_bps = float_env("DISDEX_REFERENCE_MAX_CROSS_SOURCE_BPS", 20.0)
+        self.pyth_max_age_ms = int_env("DISDEX_PYTH_MAX_AGE_MS", DEFAULT_PYTH_MAX_AGE_MS)
+        self.iex_max_age_ms = int_env("DISDEX_IEX_MAX_AGE_MS", DEFAULT_IEX_MAX_AGE_MS)
+        self.max_confidence_bps = float_env("DISDEX_PYTH_MAX_CONFIDENCE_BPS", DEFAULT_PYTH_MAX_CONFIDENCE_BPS)
+        self.max_cross_bps = float_env("DISDEX_REFERENCE_MAX_CROSS_SOURCE_BPS", DEFAULT_REFERENCE_MAX_CROSS_SOURCE_BPS)
 
 
 def self_test() -> None:
+    assert DEFAULT_PYTH_MAX_AGE_MS == 5000
+    assert DEFAULT_IEX_MAX_AGE_MS == 5000
+    assert DEFAULT_PYTH_MAX_CONFIDENCE_BPS == 25.0
+    assert DEFAULT_REFERENCE_MAX_CROSS_SOURCE_BPS == 50.0
+    assert regular_us_equity_session(dt.datetime(2026, 8, 17, 14, 0, tzinfo=NEW_YORK)) is True
+    assert regular_us_equity_session(dt.datetime(2026, 8, 17, 16, 0, tzinfo=NEW_YORK)) is False
+    assert regular_us_equity_session(dt.datetime(2026, 8, 16, 12, 0, tzinfo=NEW_YORK)) is False
     assert parse_rfc3339_ms("2026-07-25T01:02:03.123456789Z") == 1784941323123
     store = QuoteStore()
     now_seconds = int(time.time())
     store.update_pyth("NVDA", {"price": {"price": "1201200", "conf": "200", "expo": -4, "publish_time": now_seconds}}, "feed")
     store.update_iex({"T": "q", "S": "NVDA", "bp": 120.10, "ap": 120.14, "t": dt.datetime.now(tz=UTC).isoformat().replace("+00:00", "Z")})
-    payload, error = store.validated("NVDA", pyth_max_age_ms=2000, iex_max_age_ms=2000, max_confidence_bps=10, max_cross_bps=20)
+    payload, error = store.validated("NVDA", pyth_max_age_ms=5000, iex_max_age_ms=5000, max_confidence_bps=25, max_cross_bps=50)
     assert error is None and payload is not None
     assert abs(payload["price"] - 120.12) < 1e-9
     assert payload["source"] == "pyth-core-validated-by-alpaca-iex"
-    bad, error = store.validated("NVDA", pyth_max_age_ms=2000, iex_max_age_ms=2000, max_confidence_bps=0.01, max_cross_bps=20)
+
+    stale_pyth = QuoteStore()
+    stale_pyth._pyth["NVDA"] = PythQuote("NVDA", 120.12, 0.2, now_ms() - 5001, now_ms(), "feed")
+    stale_pyth._iex["NVDA"] = IexQuote("NVDA", 120.10, 120.14, now_ms(), now_ms())
+    bad, error = stale_pyth.validated("NVDA", pyth_max_age_ms=5000, iex_max_age_ms=5000, max_confidence_bps=25, max_cross_bps=50)
+    assert bad is None and error and error["error"] == "pyth_quote_stale"
+
+    stale_iex = QuoteStore()
+    stale_iex._pyth["NVDA"] = PythQuote("NVDA", 120.12, 0.2, now_ms(), now_ms(), "feed")
+    stale_iex._iex["NVDA"] = IexQuote("NVDA", 120.10, 120.14, now_ms() - 5001, now_ms())
+    bad, error = stale_iex.validated("NVDA", pyth_max_age_ms=5000, iex_max_age_ms=5000, max_confidence_bps=25, max_cross_bps=50)
+    assert bad is None and error and error["error"] == "iex_quote_stale"
+
+    wide_confidence = QuoteStore()
+    wide_confidence._pyth["NVDA"] = PythQuote("NVDA", 120.12, 120.12 * 26 / 10_000, now_ms(), now_ms(), "feed")
+    wide_confidence._iex["NVDA"] = IexQuote("NVDA", 120.10, 120.14, now_ms(), now_ms())
+    bad, error = wide_confidence.validated("NVDA", pyth_max_age_ms=5000, iex_max_age_ms=5000, max_confidence_bps=25, max_cross_bps=50)
     assert bad is None and error and error["error"] == "pyth_confidence_too_wide"
+    health = store.health(pyth_max_age_ms=2000, iex_max_age_ms=2000, max_confidence_bps=10, max_cross_bps=20)
+    assert health["quoteStatus"]["NVDA"]["valid"] is True
+    stale_health = QuoteStore()
+    stale_health._pyth["NVDA"] = PythQuote("NVDA", 120.12, 0.01, now_ms(), now_ms(), "feed")
+    stale_health._iex["NVDA"] = IexQuote("NVDA", 120.10, 120.14, now_ms() - 2001, now_ms())
+    stale_health_payload = stale_health.health(pyth_max_age_ms=2000, iex_max_age_ms=2000, max_confidence_bps=10, max_cross_bps=20)
+    assert stale_health_payload["status"] == "degraded"
+    assert stale_health_payload["quoteStatus"]["NVDA"]["errors"][0]["error"] == "iex_quote_stale"
+    divergent = QuoteStore()
+    divergent._pyth["NVDA"] = PythQuote("NVDA", 120.12, 0.01, now_ms(), now_ms(), "feed")
+    divergent._iex["NVDA"] = IexQuote("NVDA", 121.00, 121.04, now_ms(), now_ms())
+    divergent_health = divergent.health(pyth_max_age_ms=2000, iex_max_age_ms=2000, max_confidence_bps=10, max_cross_bps=20)
+    assert divergent_health["quoteStatus"]["NVDA"]["errors"][-1]["error"] == "cross_source_divergence"
+    divergent_validation = QuoteStore()
+    divergent_validation._pyth["NVDA"] = PythQuote("NVDA", 120.12, 0.2, now_ms(), now_ms(), "feed")
+    divergent_validation._iex["NVDA"] = IexQuote("NVDA", 121.00, 121.04, now_ms(), now_ms())
+    bad, error = divergent_validation.validated("NVDA", pyth_max_age_ms=5000, iex_max_age_ms=5000, max_confidence_bps=25, max_cross_bps=50)
+    assert bad is None and error and error["error"] == "cross_source_divergence"
+
+    missing = QuoteStore()
+    bad, error = missing.validated("NVDA", pyth_max_age_ms=5000, iex_max_age_ms=5000, max_confidence_bps=25, max_cross_bps=50)
+    assert bad is None and error and error["error"] == "pyth_quote_unavailable"
     print("Pyth Core + Alpaca IEX reference proxy self-test: PASS")
 
 

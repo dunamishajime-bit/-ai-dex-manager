@@ -1,0 +1,61 @@
+name: DisDex Account Risk Release Identity CI
+
+on:
+  pull_request:
+    paths:
+      - "scripts/disdex-v96-v52-prepare-account-risk.py"
+      - "ops/systemd/disdex-v96-v52-account-risk@.service"
+      - ".github/workflows/disdex-account-risk-release-identity-ci.yml"
+  push:
+    branches:
+      - codex/v52-market-hours-preflight
+    paths:
+      - "scripts/disdex-v96-v52-prepare-account-risk.py"
+      - "ops/systemd/disdex-v96-v52-account-risk@.service"
+      - ".github/workflows/disdex-account-risk-release-identity-ci.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  account-risk-release-identity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout exact commit
+        uses: actions/checkout@v4
+
+      - name: Compile account-risk preparation
+        run: |
+          python3 -m py_compile \
+            scripts/disdex-v96-v52-prepare-account-risk.py \
+            scripts/disdex_v13d_v11eq_stock_live_engine.py
+
+      - name: Verify immutable release authority behavior
+        run: |
+          DISDEX_V96_RUNTIME_COMMIT_SHA=bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb \
+            python3 scripts/disdex-v96-v52-prepare-account-risk.py --self-test \
+            | tee /tmp/account-risk-release-selftest.log
+          grep -Fq \
+            'V96/V52 account-risk immutable-release authority self-test: PASS' \
+            /tmp/account-risk-release-selftest.log
+          grep -Fq \
+            'staleEnvironmentRuntimeShaIgnored=true' \
+            /tmp/account-risk-release-selftest.log
+
+      - name: Verify production boundary remains fail closed
+        run: |
+          grep -Fq '_derive_authoritative_release_sha' \
+            scripts/disdex-v96-v52-prepare-account-risk.py
+          grep -Fq 'os.path.samefile(executed_script, expected_script)' \
+            scripts/disdex-v96-v52-prepare-account-risk.py
+          grep -Fq 'expected.is_symlink()' \
+            scripts/disdex-v96-v52-prepare-account-risk.py
+          grep -Fq 'Immutable release SHA marker mismatch' \
+            scripts/disdex-v96-v52-prepare-account-risk.py
+          grep -Fq 'runtimeShaSource": "executedImmutableRelease"' \
+            scripts/disdex-v96-v52-prepare-account-risk.py
+          grep -Fq 'staleEnvironmentRuntimeShaIgnored' \
+            scripts/disdex-v96-v52-prepare-account-risk.py
+          grep -Fq 'WorkingDirectory=/home/deploy/disdex-trading/releases/%i' \
+            ops/systemd/disdex-v96-v52-account-risk@.service
