@@ -1,0 +1,51 @@
+name: Dis-Dex V35 Core Only V37
+
+on:
+  push:
+    branches:
+      - research/v35-core-only-v37
+    paths:
+      - scripts/research_lab_*.py
+      - .github/workflows/disdex-v35-core-only-v37.yml
+  pull_request:
+    paths:
+      - scripts/research_lab_*.py
+      - .github/workflows/disdex-v35-core-only-v37.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Python syntax check
+        run: python -m py_compile scripts/research_lab_v35_core_only_v37.py scripts/research_lab_aster_v35_core_only_v37_runner.py
+      - name: Run V35 core-only validation on Aster public history
+        shell: bash
+        run: |
+          mkdir -p .research-state
+          set -o pipefail
+          python scripts/research_lab_aster_v35_core_only_v37_runner.py 2>&1 | tee .research-state/disdex-v35-core-only-v37-run.log
+      - name: Upload V37 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: disdex-v35-core-only-v37
+          path: |
+            .research-state/disdex-v35-core-only-v37.json
+            .research-state/disdex-v35-core-only-v37.md
+            .research-state/disdex-v35-core-only-v37-run.log
+          if-no-files-found: warn
+          retention-days: 30
