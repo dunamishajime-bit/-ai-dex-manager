@@ -83,6 +83,27 @@ class TestFirstDivergence(unittest.TestCase):
         self.assertEqual(result["firstDivergence"]["stage"], "INDEPENDENT_TRACES_MISSING")
         self.assertFalse(result["economicParityProven"])
 
+    def test_fake_matching_excerpt_cannot_certify_one_year(self):
+        common = {
+            "event_seq": 1, "priority": 1, "entry_valid_until_ms": 3000,
+            "worst_case_gross": 0.5, "asset_class": "CRYPTO", "quantity": 12,
+        }
+        self.save([dict(self.accepted, **common), dict(self.rejected, **common)])
+        report = json.loads(self.new.read_text("utf-8"))
+        report["cases"][0]["sourceCoverage"]["status"] = "COMPLETE"
+        self.new.write_text(json.dumps(report), "utf-8")
+        root = Path(self.temp.name)
+        old, new = root / "old-ledgers", root / "new-ledgers"
+        old.mkdir(); new.mkdir()
+        for name in mod.SEGMENTS:
+            for target in (old, new):
+                (target/f"{name}.jsonl").write_text('{"ts_ms":123,"price":4.2}\n', "utf-8")
+        # A 1-row matching excerpt must never replace 3,185 candidates and
+        # 8,760 hourly MTM marks as a verified annual integrated portfolio.
+        item = mod.verify(self.decisions, self.trades, self.new, 10, old, new)
+        self.assertEqual(item["firstDivergence"]["stage"], "INCOMPLETE_CANONICAL_TRACE_COVERAGE")
+        self.assertFalse(item["economicParityProven"])
+
     def test_trade_ledger_duplicate_fails_closed(self):
         self.trades.write_text('{"candidate_id":"C001"}\n{"candidate_id":"C001"}\n', "utf-8")
         with self.assertRaisesRegex(ValueError, "candidate/fill/trade IDs"):
