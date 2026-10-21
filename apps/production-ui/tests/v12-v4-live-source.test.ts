@@ -5,6 +5,7 @@ import test from "node:test";
 
 import {
   adaptV12V4DecisionToState,
+  isV12V4Heartbeat,
   loadV12V4LiveSource,
 } from "../lib/server/v12-v4-live-source";
 import { evaluateV12V4RuntimeBadge } from "../lib/server/v12-runtime-status";
@@ -78,4 +79,17 @@ test("V12 V4 badge requires healthy fresh runtime and matching SHA", () => {
   assert.equal(good.status, "LIVE");
   const bad = evaluateV12V4RuntimeBadge({ now, expectedReleaseSha: "b".repeat(40), heartbeat, decision, sharedKill: { active: false } });
   assert.equal(bad.status, "UNCONFIRMED");
+});
+
+test("V12 V4 accepts the shared production runner heartbeat envelope", () => {
+  assert.equal(isV12V4Heartbeat({
+    schema: "disdex-runner-heartbeat/v1",
+    runnerId: "V12_V4",
+    runtimeSha: sha,
+  }), true);
+  assert.equal(isV12V4Heartbeat({
+    schema: "disdex-runner-heartbeat/v1",
+    runnerId: "PENGU",
+    runtimeSha: sha,
+  }), false);
 });

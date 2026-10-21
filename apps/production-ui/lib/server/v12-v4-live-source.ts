@@ -83,7 +83,11 @@ async function readJsonFromCandidates(paths: string[]) {
 
 export function isV12V4Heartbeat(value: unknown): value is Json {
   const row = object(value);
-  return row?.schema === "disdex-v12-v4-runner-heartbeat/v1" && row.runnerId === "V12_V4";
+  // Production V4 uses the shared runner heartbeat envelope while older
+  // staged releases used the V4-specific schema name. The runner identity
+  // remains the authoritative discriminator.
+  return (row?.schema === "disdex-runner-heartbeat/v1" || row?.schema === "disdex-v12-v4-runner-heartbeat/v1")
+    && row.runnerId === "V12_V4";
 }
 
 export function adaptV12V4DecisionToState(source: V12V4LiveSource): Json | null {
