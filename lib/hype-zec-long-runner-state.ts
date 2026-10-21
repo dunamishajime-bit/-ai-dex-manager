@@ -64,6 +64,7 @@ function normalizedState(value: unknown, expectedRuntimeSha?: string, expectedMo
   const raw = value as Partial<HypeZecLongRunnerState>;
   if (raw.schema !== HYPE_ZEC_LONG_STATE_SCHEMA || typeof raw.runtimeCommitSha !== "string" || !raw.runtimeCommitSha.trim()) throw new Error("HYPE_ZEC_LONG_STATE_MALFORMED");
   if (expectedRuntimeSha && raw.runtimeCommitSha.toLowerCase() !== expectedRuntimeSha.toLowerCase()) throw new Error(`HYPE_ZEC_LONG_STATE_RUNTIME_SHA_MISMATCH:${raw.runtimeCommitSha}:${expectedRuntimeSha}`);
+  if (raw.mode !== "LIVE" && raw.mode !== "PAPER" && raw.mode !== "SHADOW") throw new Error("HYPE_ZEC_LONG_STATE_MODE_INVALID");
   if (expectedMode && raw.mode !== expectedMode) throw new Error(`HYPE_ZEC_LONG_STATE_MODE_MISMATCH:${raw.mode}:${expectedMode}`);
   const updatedAt = Number(raw.updatedAt);
   if (!Number.isFinite(updatedAt) || updatedAt <= 0) throw new Error("HYPE_ZEC_LONG_STATE_TIMESTAMP_INVALID");
@@ -74,7 +75,7 @@ function normalizedState(value: unknown, expectedRuntimeSha?: string, expectedMo
   return {
     schema: HYPE_ZEC_LONG_STATE_SCHEMA,
     runtimeCommitSha: raw.runtimeCommitSha,
-    mode: raw.mode === "LIVE" || raw.mode === "PAPER" ? raw.mode : "SHADOW",
+    mode: raw.mode,
     updatedAt,
     lastDecisionTs: raw.lastDecisionTs,
     lastDecision: raw.lastDecision,

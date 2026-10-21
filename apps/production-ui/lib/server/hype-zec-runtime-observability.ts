@@ -152,9 +152,12 @@ export async function loadHypeZecRuntimeObservability(now=Date.now()):Promise<Hy
     const last=obj(state?.lastDecision);
     const specific=last?.strategy===key?last:null;
     const fresh=ageMs!==null&&ageMs>=-60_000&&ageMs<=180_000;
+    const protection=pos?str(pos.stopClientOrderId)&&str(pos.takeProfitClientOrderId)&&Number.isFinite(Number(pos.stopReadBackAt))&&Number(pos.stopReadBackAt)>0?{status:"VERIFIED" as const,stopClientOrderId:str(pos.stopClientOrderId),takeProfitClientOrderId:str(pos.takeProfitClientOrderId)}:{status:"UNVERIFIED" as const}:{status:"NONE" as const};
+    const unprotectedPosition=Boolean(pos&&protection.status!=="VERIFIED");
+    const deferralReason=str(specific?.reason)?.includes("RATE_BUDGET")?str(specific?.reason):undefined;
     const status: HypeZecSleeve["status"]=!sourceDeployed||!stateAvailable?"NOT_DEPLOYED":
       !shaOk?"BLOCKED":!fresh?"STALE":mode!=="LIVE"?"SHADOW":
-      !active||!cleanState||killActive!==false?"UNCONFIRMED":"LIVE";
+      !active||!cleanState||killActive!==false||unprotectedPosition?"UNCONFIRMED":"LIVE";
     const gates:HypeZecGate[]=[
       go("DEPLOYED","本番ソース・Runner接続",sourceDeployed&&stateAvailable&&shaOk&&active,active?"active":"未起動",
         "新SHA・systemd active・state一致","判定と発注可能性は別物","RUNNER_STATE"),
@@ -174,9 +177,7 @@ export async function loadHypeZecRuntimeObservability(now=Date.now()):Promise<Hy
       gates.push(go(g,label,null,undefined,undefined,!p?"Productionの実設定待ち":marketError||"公開15分足待機"));
     gates.push(go("VENUE_AND_PORTFOLIO","5x Cross・容量・保護注文",
       null,undefined,"注文直前の実Runner read-back","この欄は市場条件が成立しても、実Runnerの注文直前照合を証明しません","EXECUTION"));
-    const protection=pos?str(pos.stopClientOrderId)&&str(pos.takeProfitClientOrderId)?{status:"VERIFIED" as const,stopClientOrderId:str(pos.stopClientOrderId),takeProfitClientOrderId:str(pos.takeProfitClientOrderId)}:{status:"UNVERIFIED" as const}:{status:"NONE" as const};
-    const deferralReason=str(specific?.reason)?.includes("RATE_BUDGET")?str(specific?.reason):undefined;
-    const orderPermission={allowed:status==="LIVE"&&!state?.pending&&!str(state?.manualReview),reason:status!=="LIVE"?`HYPE_ZEC_ORDER_PERMISSION_BLOCKED:${status}`:state?.pending?"HYPE_ZEC_ORDER_PERMISSION_BLOCKED:PENDING":str(state?.manualReview)?"HYPE_ZEC_ORDER_PERMISSION_BLOCKED:MANUAL_REVIEW":"HYPE_ZEC_ORDER_PERMISSION_AVAILABLE"};
+    const orderPermission={allowed:status==="LIVE"&&!state?.pending&&!str(state?.manualReview)&&!deferralReason&&!unprotectedPosition,reason:status!=="LIVE"?`HYPE_ZEC_ORDER_PERMISSION_BLOCKED:${status}${unprotectedPosition?":PROTECTION_UNVERIFIED":""}`:state?.pending?"HYPE_ZEC_ORDER_PERMISSION_BLOCKED:PENDING":str(state?.manualReview)?"HYPE_ZEC_ORDER_PERMISSION_BLOCKED:MANUAL_REVIEW":deferralReason?`HYPE_ZEC_ORDER_PERMISSION_BLOCKED:${deferralReason}`:unprotectedPosition?"HYPE_ZEC_ORDER_PERMISSION_BLOCKED:PROTECTION_UNVERIFIED":"HYPE_ZEC_ORDER_PERMISSION_AVAILABLE"};
     results[key]={strategy:key,symbol,status,runtimeSha:releaseSha,stateSha,stateMode:mode,serviceActive:active,
       stateUpdatedAt:updatedAt,lastDecision:specific?{
         accepted:specific.accepted===true,reason:str(specific.reason)||"未取得",at:num(state?.lastDecisionTs)}:undefined,

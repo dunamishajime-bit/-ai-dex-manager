@@ -23,7 +23,9 @@ export function buildV4RankRow(candidate:Obj,fresh:boolean,checkedAt:number,fall
  const side=text(candidate.side),eligible=candidate.signalEligible===true;
  const gates:Gate[]=[
   flag('v4-source','V12 V4 realtime decision',fresh,'V4 heartbeat / realtime-decisionのSHAと鮮度を照合','execution'),
-  flag('authoritative','V12 V4実Runner Signal Gate',typeof candidate.signalEligible==='boolean'?eligible:undefined,text(candidate.signalReason)||fallbackReason),
+  // Native V4 score is display-only. Keep signal-ineligible rows out of the
+  // actionable top-three group without changing the runner's order path.
+  flag('authoritative','V12 V4実Runner Signal Gate',typeof candidate.signalEligible==='boolean'?eligible:undefined,text(candidate.signalReason)||fallbackReason,'execution'),
   flag('execution','資金競合・保有・Margin Guard',undefined,'発注時の実Runner確認待ち','execution'),
  ];
  const row=make(text(candidate.symbol).replace(/USDT$/,'')+'USDT','V12',side||'WAIT',gates,fresh,checkedAt,text(candidate.signalReason)||fallbackReason);

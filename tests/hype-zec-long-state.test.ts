@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtemp, readFile, stat } from "node:fs/promises";
+import { mkdtemp, readFile, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
@@ -69,4 +69,18 @@ test("HYPE protected rate-budget deferral refreshes heartbeat without clearing p
   assert.equal(next.manualReview, undefined);
   assert.equal(next.lastDecisionTs, now);
   assert.equal(next.lastDecision?.reason, "HYPE_ZEC_PROTECTED_RATE_BUDGET_DEFERRED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:5007");
+});
+
+test("HYPE/ZEC state store rejects an invalid mode instead of coercing it to SHADOW", async () => {
+  const root = await mkdtemp(join(tmpdir(), "hype-zec-state-"));
+  const path = join(root, "runner.json");
+  const sha = "a".repeat(40);
+  await writeFile(path, JSON.stringify({
+    schema: "disdex-hype-zec-long/v1",
+    runtimeCommitSha: sha,
+    mode: "UNKNOWN",
+    updatedAt: Date.now(),
+    failures: [],
+  }), { mode: 0o600 });
+  await assert.rejects(() => new FileHypeZecLongRunnerStateStore(path, sha, "SHADOW").load(), /MODE_INVALID/);
 });
