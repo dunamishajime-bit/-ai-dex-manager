@@ -1,0 +1,60 @@
+{
+  "status": "PASS_10_OF_10",
+  "case": "X3_AFTER2_STOP_MINUS5",
+  "sourceRepeatNumericExact": true,
+  "ledgers": [
+    {
+      "costBps": 10,
+      "ledger": "candidate-decisions.jsonl",
+      "sha256": "0cc8025192c5d03285eafbdfb9a40ae80e94f8d358df7296e3eee141c871fed4"
+    },
+    {
+      "costBps": 10,
+      "ledger": "portfolio-trades.jsonl",
+      "sha256": "e25e8d3b416146ab1af12566e7a243d13c28a125f7b95aac9eb91b49966f206d"
+    },
+    {
+      "costBps": 10,
+      "ledger": "portfolio-events.jsonl",
+      "sha256": "dfbf72c1fb7578fe4f6472151be1cedd9bad22bd0db735352731c092dd14f036"
+    },
+    {
+      "costBps": 10,
+      "ledger": "task9-mtm.jsonl",
+      "sha256": "f170ef3325ae7d1c868f724e9f1648dde24e808ccc829b5ca0206dc24d5b38e9"
+    },
+    {
+      "costBps": 10,
+      "ledger": "metrics.json",
+      "sha256": "934d48aa747ac115a5499f760062532a8c278d683a595fffc7ae4e5547dd8b01"
+    },
+    {
+      "costBps": 30,
+      "ledger": "candidate-decisions.jsonl",
+      "sha256": "b9ef19110bd320a7b7771636e4f08d65fa9d430fbdf7ec52f63de0deceecdb77"
+    },
+    {
+      "costBps": 30,
+      "ledger": "portfolio-trades.jsonl",
+      "sha256": "776046bba02be430aad63cee187a96e703c11af253f59e05693efa168bea2456"
+    },
+    {
+      "costBps": 30,
+      "ledger": "portfolio-events.jsonl",
+      "sha256": "6db6fabfb26c675873f7d34e2c47bc1268218c1b78f6a283a63948a9f29d49e8"
+    },
+    {
+      "costBps": 30,
+      "ledger": "task9-mtm.jsonl",
+      "sha256": "2de35b1d96ed85a7d0fb9fab0e59e6f34fbe37eb21abfa21fb94f6aa1db90aa2"
+    },
+    {
+      "costBps": 30,
+      "ledger": "metrics.json",
+      "sha256": "1f3d98d5d1771eb33fda2854c88249477924fa823bd7353bf5dcb735e5ab100d"
+    }
+  ],
+  "realExchangeVenueCertified": false,
+  "independentNewTask9EngineParity": false,
+  "liveChanged": false
+}
