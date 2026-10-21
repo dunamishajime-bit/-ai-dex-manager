@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 
-import { emptyIdleResidualLongState } from "../lib/idle-residual-long-state";
+import { emptyIdleResidualLongState, writeIdleResidualLongState, readIdleResidualLongState } from "../lib/idle-residual-long-state";
 import { migrateIdleResidualLongState } from "../scripts/disdex-idle-residual-long-state-migrate";
 
 const FROM="a".repeat(40);
@@ -48,5 +48,28 @@ test("residual state migration refuses exposure, pending, and manual review", as
         /IDLE_RESIDUAL_STATE_SHA_MIGRATE_REVIEW_OR_EXPOSURE_PRESENT/,
       );
     }finally{await rm(root,{recursive:true,force:true});}
+  }
+});
+
+test("Idle residual state uses unique temp paths for 64 concurrent writes", async () => {
+  const root = await mkdtemp(join(tmpdir(), "idle-residual-concurrent-"));
+  const path = join(root, "state.json");
+  const initial = emptyIdleResidualLongState(FROM);
+  const clock = Date.now;
+  Date.now = () => 1700000000000;
+  try {
+    const attempts = await Promise.allSettled(Array.from({ length: 64 }, (_, i) =>
+      writeIdleResidualLongState(path, {
+        ...initial,
+        lastDecision: { decisionTs: i + 1, accepted: false, reason: "NO_SIGNAL" },
+      })));
+    assert.equal(attempts.filter((x) => x.status === "rejected").length, 0);
+    const updated = await readIdleResidualLongState(path, FROM);
+    assert.equal(updated.runtimeSha, FROM);
+    assert.equal(updated.position, null);
+    assert.equal(updated.pending, null);
+  } finally {
+    Date.now = clock;
+    await rm(root, { recursive: true, force: true });
   }
 });
