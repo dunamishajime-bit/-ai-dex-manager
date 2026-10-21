@@ -1,0 +1,68 @@
+{
+  "status": "COMBINED_Q102_FROZEN_V4_LAST_TWO_COOLDOWN_ITERATIONS_SHA_MATCH",
+  "candidate": "Q102_PB3H_LOSS_PLUS_Q102_PROFIT3_TO1",
+  "sourceV4Fixed": true,
+  "realVenueCertified": false,
+  "files": [
+    {
+      "costBps": 10,
+      "name": "candidate-decisions.jsonl",
+      "sha256": "b19473603a2371469737764b5e3368dae0c0a2208603b45b4a7307aad462204f",
+      "match": true
+    },
+    {
+      "costBps": 10,
+      "name": "portfolio-trades.jsonl",
+      "sha256": "88c8e1059252f65ec87ad669bbd0ecd26e8c168b406a376a35e8a882d813eee0",
+      "match": true
+    },
+    {
+      "costBps": 10,
+      "name": "portfolio-events.jsonl",
+      "sha256": "033557b7f2c21d9c080898fbeb2c92f8f0a562596f0bd8cdb7731590c3187761",
+      "match": true
+    },
+    {
+      "costBps": 10,
+      "name": "task9-mtm.jsonl",
+      "sha256": "50642c725586b25231b0440c777a0a25eb69c12a001b891182820c01029072d5",
+      "match": true
+    },
+    {
+      "costBps": 10,
+      "name": "metrics.json",
+      "sha256": "4e7446411715e9b6f5b89e15ba03ab88fcda34c960ceb36f6a3c81c2e1c58cd3",
+      "match": true
+    },
+    {
+      "costBps": 30,
+      "name": "candidate-decisions.jsonl",
+      "sha256": "406e1896e64193457da2f3d9baf8ff4e72a833edc1eea0124b8f4e54a8fa0231",
+      "match": true
+    },
+    {
+      "costBps": 30,
+      "name": "portfolio-trades.jsonl",
+      "sha256": "3ba1ed887eb1f8b45ab5326b6c1f1a90221a8532b44a2869fead5bc7b64c9cec",
+      "match": true
+    },
+    {
+      "costBps": 30,
+      "name": "portfolio-events.jsonl",
+      "sha256": "13698577c7fd43f56eb673210531efa42fd9519a672d91b1cc46b9e10aa5d334",
+      "match": true
+    },
+    {
+      "costBps": 30,
+      "name": "task9-mtm.jsonl",
+      "sha256": "699f5e71189a4c768c666817d18bc2ecaf334b008753f26f1aea5bc3beb6cdb5",
+      "match": true
+    },
+    {
+      "costBps": 30,
+      "name": "metrics.json",
+      "sha256": "305001c379dc128fa7328b28a1162e400f11af55ad9ca97f061680aa57c0643f",
+      "match": true
+    }
+  ]
+}

@@ -1,0 +1,1457 @@
+{
+  "method": {
+    "status": "Q102_DEEP_FULL8_9_CANDIDATES_RESEARCH_COMPLETE_NOT_LIVE",
+    "V4FixedSourceSha": "febb75a511f7be02a40e67ae6c426b0d24feaafb",
+    "V4OriginalHandoffSha": "4081eb37fe23f884a4d1fa93e2b608e388bf7071",
+    "period": "2025-08-10 to 2026-08-10",
+    "initialJpy": 10000,
+    "costBps": [
+      10,
+      30
+    ],
+    "sourceArchiveSha256": "10cdc48705a6f9e310cd0aecc95ce781af24325b1a99c2eb9aaefe3bd2953934",
+    "sourceScripts": {
+      "analyze-q102-entry-paths-after-v4-20261022.py": "057a63ad6200f6b7ebeaf01d568914d676cd91d66553e558794529a2477513b6",
+      "analyze-q102-prearm-stop-sensitivity-20261022.py": "58134bca6796af428ef1de9ae12f7ec8ad9f99dc0081557f6226ab23f566bbca",
+      "run-q102-path-prioritized-after-v4-20261022.py": "543bb3854f0ef72ab5425c2ffc8f04c269935057c70b24d1d7aba54cdfc1bc4a",
+      "run-q102-prearm-family-exits-after-v4-20261022.py": "3b79c669c8afb5283fdee92c91a81f536345fd9be1f9335e5934bb144b105a59",
+      "run-q102-focused-family-guard-after-v4-20261022.py": "61d3c422f237177b8127343b76a3c40a402f950b4dea0e3521af329a613aa3d8",
+      "run-q102-combined-risk-and-profit-after-v4-20261022.py": "e6d36a01265e6a5e167326173e59329d06e603291cb7b87307ce1ffb1afa3e55"
+    },
+    "priceCoverage5mQ102": {
+      "10": {
+        "OK": 182
+      },
+      "30": {
+        "OK": 181
+      }
+    },
+    "researchOnly": true,
+    "currentTask9IndependentTSParity": false,
+    "signedExchangeOrdersReadback": false,
+    "productionModified": false,
+    "Q102NewRulesAdopted": false,
+    "legacyResearchProfitExitMarker": "Tiered profit guards emit generic ARM2_FLOOR0P5 label; overlay policy gives real threshold, correct before LIVE implementation"
+  },
+  "baseline": {
+    "10": {
+      "finalEquityJpy": 191750055.32685158,
+      "maxMtmDdPct": -14.603309760733396,
+      "profitFactor": 3.175048774826471,
+      "winRate": 0.7065959059893859,
+      "closedTrades": 1319,
+      "closedByStrategySide": {
+        "V12_SHORT": 691,
+        "RESIDUAL_LONG": 30,
+        "Q102_LONG": 35,
+        "Q102_SHORT": 147,
+        "PENGU_LONG": 47,
+        "V12_LONG": 144,
+        "IDLE_SHORT": 70,
+        "PENGU_SHORT": 20,
+        "V52_LONG": 35,
+        "V52_SHORT": 52,
+        "HYPE_LONG_LONG": 40,
+        "FET_LONG": 8
+      },
+      "exitReasons": {
+        "RESEARCH_V4_SHORT_PROFIT_SHORT_TIME37_5P_TO_2P_BULL2": 40,
+        "RESEARCH_INITIAL_ADVERSE_STOP_V12_SHORT_PCT2P5_12H_MFE1P0_R12": 52,
+        "RESEARCH_V4_LONG_TIME37_M5_EMERGENCY_LONG_TIME37_2P_ARM_MINUS5": 4,
+        "RESEARCH_V4_LONG_H1_CONFIRMED_LONG_X3_3P_TO_1P_BEAR2": 1
+      },
+      "ddImprovementVersusSourceBaselinePp": 1.0173270521560145,
+      "q102TradeCount": 182,
+      "oos": {
+        "boundary_utc": "2026-04-22T12:00:00+00:00",
+        "trades": 332,
+        "known_pnl_trades": 332,
+        "unsettled_trades": 0,
+        "crossing_trades": 2,
+        "net_pnl_jpy": 158116633.9148704,
+        "profit_factor": 3.2536739693713272,
+        "win_rate": 0.7319277108433735,
+        "max_cumulative_pnl_drawdown_jpy": -17246336.01951289,
+        "cost_bps": 10
+      },
+      "accounting": "PASS",
+      "venueCertified": false,
+      "acceptedShortStopCooldownEvents": 52,
+      "cooldownPasses": [
+        {
+          "iteration": 0,
+          "observedAdmittedInitialShortStops": 52,
+          "enforcedPriorCooldownEventCount": 0,
+          "policyId": "V4_ACCEPTED_ALL4_20261021",
+          "finalEquityJpy": 191750055.32685158
+        },
+        {
+          "iteration": 1,
+          "observedAdmittedInitialShortStops": 52,
+          "enforcedPriorCooldownEventCount": 52,
+          "policyId": "V4_ACCEPTED_ALL4_20261021",
+          "finalEquityJpy": 191750055.32685158
+        },
+        {
+          "iteration": 2,
+          "observedAdmittedInitialShortStops": 52,
+          "enforcedPriorCooldownEventCount": 52,
+          "policyId": "V4_ACCEPTED_ALL4_20261021",
+          "finalEquityJpy": 191750055.32685158
+        }
+      ],
+      "cooldownModel": "ADMITTED_FILL_FIXED_POINT"
+    },
+    "30": {
+      "finalEquityJpy": 74740267.7840667,
+      "maxMtmDdPct": -15.778153069011314,
+      "profitFactor": 2.5810666001785227,
+      "winRate": 0.6831306990881459,
+      "closedTrades": 1316,
+      "closedByStrategySide": {
+        "V12_SHORT": 689,
+        "RESIDUAL_LONG": 29,
+        "Q102_LONG": 34,
+        "Q102_SHORT": 147,
+        "PENGU_LONG": 47,
+        "V12_LONG": 143,
+        "IDLE_SHORT": 74,
+        "PENGU_SHORT": 20,
+        "V52_LONG": 35,
+        "V52_SHORT": 52,
+        "HYPE_LONG_LONG": 38,
+        "FET_LONG": 8
+      },
+      "exitReasons": {
+        "RESEARCH_V4_SHORT_PROFIT_SHORT_TIME37_5P_TO_2P_BULL2": 42,
+        "RESEARCH_INITIAL_ADVERSE_STOP_V12_SHORT_PCT2P5_12H_MFE1P0_R12": 51,
+        "RESEARCH_V4_LONG_TIME37_M5_EMERGENCY_LONG_TIME37_2P_ARM_MINUS5": 4,
+        "RESEARCH_V4_LONG_H1_CONFIRMED_LONG_X3_3P_TO_1P_BEAR2": 1
+      },
+      "ddImprovementVersusSourceBaselinePp": 1.0096157059231068,
+      "q102TradeCount": 181,
+      "oos": {
+        "boundary_utc": "2026-04-22T12:00:00+00:00",
+        "trades": 334,
+        "known_pnl_trades": 334,
+        "unsettled_trades": 0,
+        "crossing_trades": 2,
+        "net_pnl_jpy": 64437211.76818284,
+        "profit_factor": 2.6508736357139395,
+        "win_rate": 0.6946107784431138,
+        "max_cumulative_pnl_drawdown_jpy": -5938601.523498751,
+        "cost_bps": 30
+      },
+      "accounting": "PASS",
+      "venueCertified": false,
+      "acceptedShortStopCooldownEvents": 51,
+      "cooldownPasses": [
+        {
+          "iteration": 0,
+          "observedAdmittedInitialShortStops": 51,
+          "enforcedPriorCooldownEventCount": 0,
+          "policyId": "V4_ACCEPTED_ALL4_20261021",
+          "finalEquityJpy": 74740267.7840667
+        },
+        {
+          "iteration": 1,
+          "observedAdmittedInitialShortStops": 51,
+          "enforcedPriorCooldownEventCount": 51,
+          "policyId": "V4_ACCEPTED_ALL4_20261021",
+          "finalEquityJpy": 74740267.7840667
+        },
+        {
+          "iteration": 2,
+          "observedAdmittedInitialShortStops": 51,
+          "enforcedPriorCooldownEventCount": 51,
+          "policyId": "V4_ACCEPTED_ALL4_20261021",
+          "finalEquityJpy": 74740267.7840667
+        }
+      ],
+      "cooldownModel": "ADMITTED_FILL_FIXED_POINT"
+    }
+  },
+  "existingQ102ExitReasons": {
+    "10": {
+      "Q102_TIME_EXIT": {
+        "count": 87,
+        "wins": 57,
+        "losses": 30,
+        "grossWinJpy": 15070122.901973542,
+        "grossLossJpy": -9903666.800597886
+      },
+      "5M_PROTECTIVE_STOP": {
+        "count": 70,
+        "wins": 70,
+        "losses": 0,
+        "grossWinJpy": 4187079.850991742,
+        "grossLossJpy": 0.0
+      },
+      "Q102_HARD_STOP": {
+        "count": 10,
+        "wins": 0,
+        "losses": 10,
+        "grossWinJpy": 0.0,
+        "grossLossJpy": -4956406.634724263
+      },
+      "FLOOR_combined_no_residual": {
+        "count": 2,
+        "wins": 2,
+        "losses": 0,
+        "grossWinJpy": 464190.6206303479,
+        "grossLossJpy": 0.0
+      },
+      "TIME_EXIT": {
+        "count": 9,
+        "wins": 7,
+        "losses": 2,
+        "grossWinJpy": 2913770.3310414236,
+        "grossLossJpy": -231202.34712646372
+      },
+      "Q102_TRAIL_5_AFTER_12": {
+        "count": 3,
+        "wins": 3,
+        "losses": 0,
+        "grossWinJpy": 186396.0026133952,
+        "grossLossJpy": 0.0
+      },
+      "STOP": {
+        "count": 1,
+        "wins": 0,
+        "losses": 1,
+        "grossWinJpy": 0.0,
+        "grossLossJpy": -795706.666488954
+      }
+    },
+    "30": {
+      "Q102_TIME_EXIT": {
+        "count": 86,
+        "wins": 55,
+        "losses": 31,
+        "grossWinJpy": 9548556.697496947,
+        "grossLossJpy": -7415100.229713189
+      },
+      "5M_PROTECTIVE_STOP": {
+        "count": 70,
+        "wins": 70,
+        "losses": 0,
+        "grossWinJpy": 1249609.0595105037,
+        "grossLossJpy": 0.0
+      },
+      "Q102_HARD_STOP": {
+        "count": 10,
+        "wins": 0,
+        "losses": 10,
+        "grossWinJpy": 0.0,
+        "grossLossJpy": -3620105.7510574576
+      },
+      "FLOOR_combined_no_residual": {
+        "count": 2,
+        "wins": 2,
+        "losses": 0,
+        "grossWinJpy": 363786.93570211425,
+        "grossLossJpy": 0.0
+      },
+      "TIME_EXIT": {
+        "count": 9,
+        "wins": 7,
+        "losses": 2,
+        "grossWinJpy": 1812354.8384628843,
+        "grossLossJpy": -235185.305227376
+      },
+      "Q102_TRAIL_5_AFTER_12": {
+        "count": 3,
+        "wins": 3,
+        "losses": 0,
+        "grossWinJpy": 134081.6752473162,
+        "grossLossJpy": 0.0
+      },
+      "STOP": {
+        "count": 1,
+        "wins": 0,
+        "losses": 1,
+        "grossWinJpy": 0.0,
+        "grossLossJpy": -829397.2458492437
+      }
+    }
+  },
+  "cases": {
+    "Q102_PB_LONG_INIT1P5_3H_MFE0P5": {
+      "policy": {
+        "id": "Q102_PB_LONG_INIT1P5_3H_MFE0P5",
+        "strategy": "Q102",
+        "sides": [
+          "LONG"
+        ],
+        "family": "PB",
+        "kind": "early_adverse",
+        "arm_hours": 3,
+        "stop_pct": 0.015,
+        "mfe_gate_pct": 0.005,
+        "reentry_hours": 0
+      },
+      "costs": {
+        "10": {
+          "finalEquityJpy": 194790627.8352257,
+          "maxMtmDdPct": -14.603309760733396,
+          "profitFactor": 3.150996010778369,
+          "closedTrades": 1321,
+          "q102Trades": 183,
+          "newQ102Exits": 2,
+          "reasonMarkers": {
+            "RESEARCH_INITIAL_ADVERSE_STOP_Q102_PB_LONG_INIT1P5_3H_MFE0P5": 2
+          },
+          "equityDeltaJpy": 3040572.5083741248,
+          "ddImprovementPp": 0.0,
+          "shortAcceptedStopCooldownEvents": 52,
+          "accounting": "PASS"
+        },
+        "30": {
+          "finalEquityJpy": 82651842.69996582,
+          "maxMtmDdPct": -15.778153069011314,
+          "profitFactor": 2.6137829917614597,
+          "closedTrades": 1318,
+          "q102Trades": 182,
+          "newQ102Exits": 2,
+          "reasonMarkers": {
+            "RESEARCH_INITIAL_ADVERSE_STOP_Q102_PB_LONG_INIT1P5_3H_MFE0P5": 2
+          },
+          "equityDeltaJpy": 7911574.915899113,
+          "ddImprovementPp": 0.0,
+          "shortAcceptedStopCooldownEvents": 51,
+          "accounting": "PASS"
+        }
+      },
+      "allFourV4RulesFixed": true
+    },
+    "Q102_PROFIT_ARM3_FLOOR1": {
+      "policy": {
+        "id": "Q102_PROFIT_ARM3_FLOOR1",
+        "strategy": "Q102",
+        "sides": [
+          "LONG",
+          "SHORT"
+        ],
+        "kind": "profit_floor",
+        "arm": 0.03,
+        "floor": 0.01
+      },
+      "costs": {
+        "10": {
+          "finalEquityJpy": 192313629.0531862,
+          "maxMtmDdPct": -14.359864999290162,
+          "profitFactor": 3.179525328660987,
+          "closedTrades": 1325,
+          "q102Trades": 182,
+          "newQ102Exits": 33,
+          "reasonMarkers": {
+            "RESEARCH_Q102_PROFIT_ARM2_FLOOR0P5": 33
+          },
+          "equityDeltaJpy": 563573.7263346314,
+          "ddImprovementPp": 0.24344476144323401,
+          "shortAcceptedStopCooldownEvents": 52,
+          "accounting": "PASS"
+        },
+        "30": {
+          "finalEquityJpy": 72039763.77694805,
+          "maxMtmDdPct": -15.823048987954147,
+          "profitFactor": 2.568422759818618,
+          "closedTrades": 1319,
+          "q102Trades": 181,
+          "newQ102Exits": 33,
+          "reasonMarkers": {
+            "RESEARCH_Q102_PROFIT_ARM2_FLOOR0P5": 33
+          },
+          "equityDeltaJpy": -2700504.007118657,
+          "ddImprovementPp": -0.04489591894283329,
+          "shortAcceptedStopCooldownEvents": 51,
+          "accounting": "PASS"
+        }
+      },
+      "allFourV4RulesFixed": true
+    },
+    "Q102_PROFIT_ARM5_FLOOR2": {
+      "policy": {
+        "id": "Q102_PROFIT_ARM5_FLOOR2",
+        "strategy": "Q102",
+        "sides": [
+          "LONG",
+          "SHORT"
+        ],
+        "kind": "profit_floor",
+        "arm": 0.05,
+        "floor": 0.02
+      },
+      "costs": {
+        "10": {
+          "finalEquityJpy": 190597242.35712242,
+          "maxMtmDdPct": -14.603309760733396,
+          "profitFactor": 3.179185634707832,
+          "closedTrades": 1321,
+          "q102Trades": 183,
+          "newQ102Exits": 12,
+          "reasonMarkers": {
+            "RESEARCH_Q102_PROFIT_ARM2_FLOOR0P5": 12
+          },
+          "equityDeltaJpy": -1152812.9697291553,
+          "ddImprovementPp": 0.0,
+          "shortAcceptedStopCooldownEvents": 52,
+          "accounting": "PASS"
+        },
+        "30": {
+          "finalEquityJpy": 71191774.49160132,
+          "maxMtmDdPct": -15.778153069011314,
+          "profitFactor": 2.5513938701663754,
+          "closedTrades": 1319,
+          "q102Trades": 182,
+          "newQ102Exits": 12,
+          "reasonMarkers": {
+            "RESEARCH_Q102_PROFIT_ARM2_FLOOR0P5": 12
+          },
+          "equityDeltaJpy": -3548493.292465389,
+          "ddImprovementPp": 0.0,
+          "shortAcceptedStopCooldownEvents": 51,
+          "accounting": "PASS"
+        }
+      },
+      "allFourV4RulesFixed": true
+    },
+    "Q102_FAMILY_PREARM3H_CAPPED6": {
+      "policy": {
+        "id": "Q102_FAMILY_PREARM3H_CAPPED6",
+        "strategy": "Q102",
+        "sides": [
+          "LONG",
+          "SHORT"
+        ],
+        "kind": "family_prearm_bundle"
+      },
+      "costs": {
+        "10": {
+          "finalEquityJpy": 185410042.35646603,
+          "maxMtmDdPct": -15.318813789858076,
+          "profitFactor": 3.036036193153259,
+          "closedTrades": 1329,
+          "q102Trades": 184,
+          "newQ102Exits": 21,
+          "reasonMarkers": {
+            "RESEARCH_INITIAL_ADVERSE_STOP_Q102_FAMILY_PREARM_MR_SHORT": 10,
+            "RESEARCH_INITIAL_ADVERSE_STOP_Q102_FAMILY_PREARM_REV_LONG": 2,
+            "RESEARCH_INITIAL_ADVERSE_STOP_Q102_FAMILY_PREARM_REV_SHORT": 4,
+            "RESEARCH_INITIAL_ADVERSE_STOP_Q102_FAMILY_PREARM_PB_LONG": 3,
+            "RESEARCH_INITIAL_ADVERSE_STOP_Q102_FAMILY_PREARM_HIGH_VOL_LONG": 2
+          },
+          "equityDeltaJpy": -6340012.970385551,
+          "ddImprovementPp": -0.7155040291246806,
+          "shortAcceptedStopCooldownEvents": 52,
+          "accounting": "PASS"
+        },
+        "30": {
+          "finalEquityJpy": 64300481.05440264,
+          "maxMtmDdPct": -16.150925367155157,
+          "profitFactor": 2.258517347697697,
+          "closedTrades": 1322,
+          "q102Trades": 183,
+          "newQ102Exits": 21,
+          "reasonMarkers": {
+            "RESEARCH_INITIAL_ADVERSE_STOP_Q102_FAMILY_PREARM_MR_SHORT": 10,
+            "RESEARCH_INITIAL_ADVERSE_STOP_Q102_FAMILY_PREARM_REV_LONG": 2,
+            "RESEARCH_INITIAL_ADVERSE_STOP_Q102_FAMILY_PREARM_REV_SHORT": 4,
+            "RESEARCH_INITIAL_ADVERSE_STOP_Q102_FAMILY_PREARM_PB_LONG": 3,
+            "RESEARCH_INITIAL_ADVERSE_STOP_Q102_FAMILY_PREARM_HIGH_VOL_LONG": 2
+          },
+          "equityDeltaJpy": -10439786.729664065,
+          "ddImprovementPp": -0.3727722981438433,
+          "shortAcceptedStopCooldownEvents": 51,
+          "accounting": "PASS"
+        }
+      },
+      "allFourV4RulesFixed": true
+    },
+    "Q102_MR_SHORT_PREARM4P0_H3": {
+      "policy": {
+        "id": "Q102_MR_SHORT_PREARM4P0_H3",
+        "strategy": "Q102",
+        "sides": [
+          "SHORT"
+        ],
+        "family": "MR",
+        "kind": "early_adverse",
+        "arm_hours": 3,
+        "stop_pct": 0.04,
+        "mfe_gate_pct": 0.02,
+        "reentry_hours": 0
+      },
+      "costs": {
+        "10": {
+          "finalEquityJpy": 188287996.70375472,
+          "maxMtmDdPct": -15.318813789858076,
+          "profitFactor": 3.1011436166436357,
+          "closedTrades": 1320,
+          "q102Trades": 183,
+          "newQ102Exits": 10,
+          "reasonMarkers": {
+            "RESEARCH_INITIAL_ADVERSE_STOP_Q102_MR_SHORT_PREARM4P0_H3": 10
+          },
+          "equityDeltaJpy": -3462058.6230968535,
+          "ddImprovementPp": -0.7155040291246806,
+          "shortAcceptedStopCooldownEvents": 52,
+          "accounting": "PASS"
+        },
+        "30": {
+          "finalEquityJpy": 67459705.50863594,
+          "maxMtmDdPct": -16.150925367155157,
+          "profitFactor": 2.3197147961710516,
+          "closedTrades": 1317,
+          "q102Trades": 182,
+          "newQ102Exits": 10,
+          "reasonMarkers": {
+            "RESEARCH_INITIAL_ADVERSE_STOP_Q102_MR_SHORT_PREARM4P0_H3": 10
+          },
+          "equityDeltaJpy": -7280562.275430769,
+          "ddImprovementPp": -0.3727722981438433,
+          "shortAcceptedStopCooldownEvents": 51,
+          "accounting": "PASS"
+        }
+      },
+      "allFourV4RulesFixed": true
+    },
+    "Q102_HV_LONG_PREARM3P0_H3": {
+      "policy": {
+        "id": "Q102_HV_LONG_PREARM3P0_H3",
+        "strategy": "Q102",
+        "sides": [
+          "LONG"
+        ],
+        "family": "HIGH_VOL",
+        "kind": "early_adverse",
+        "arm_hours": 3,
+        "stop_pct": 0.03,
+        "mfe_gate_pct": 0.02,
+        "reentry_hours": 0
+      },
+      "costs": {
+        "10": {
+          "finalEquityJpy": 190396119.5108758,
+          "maxMtmDdPct": -14.603309760733396,
+          "profitFactor": 3.1536205707341964,
+          "closedTrades": 1322,
+          "q102Trades": 183,
+          "newQ102Exits": 2,
+          "reasonMarkers": {
+            "RESEARCH_INITIAL_ADVERSE_STOP_Q102_HV_LONG_PREARM3P0_H3": 2
+          },
+          "equityDeltaJpy": -1353935.8159757853,
+          "ddImprovementPp": 0.0,
+          "shortAcceptedStopCooldownEvents": 52,
+          "accounting": "PASS"
+        },
+        "30": {
+          "finalEquityJpy": 73745954.32145236,
+          "maxMtmDdPct": -15.778153069011314,
+          "profitFactor": 2.5614788071095385,
+          "closedTrades": 1319,
+          "q102Trades": 182,
+          "newQ102Exits": 2,
+          "reasonMarkers": {
+            "RESEARCH_INITIAL_ADVERSE_STOP_Q102_HV_LONG_PREARM3P0_H3": 2
+          },
+          "equityDeltaJpy": -994313.4626143426,
+          "ddImprovementPp": 0.0,
+          "shortAcceptedStopCooldownEvents": 51,
+          "accounting": "PASS"
+        }
+      },
+      "allFourV4RulesFixed": true
+    },
+    "Q102_MR_SHORT_PROFIT3_FLOOR1": {
+      "policy": {
+        "id": "Q102_MR_SHORT_PROFIT3_FLOOR1",
+        "strategy": "Q102",
+        "sides": [
+          "SHORT"
+        ],
+        "family": "MR",
+        "kind": "profit_floor",
+        "arm": 0.03,
+        "floor": 0.01
+      },
+      "costs": {
+        "10": {
+          "finalEquityJpy": 189309687.23069772,
+          "maxMtmDdPct": -14.368379080129623,
+          "profitFactor": 3.181235239533955,
+          "closedTrades": 1321,
+          "q102Trades": 182,
+          "newQ102Exits": 8,
+          "reasonMarkers": {
+            "RESEARCH_Q102_PROFIT_ARM2_FLOOR0P5": 8
+          },
+          "equityDeltaJpy": -2440368.0961538553,
+          "ddImprovementPp": 0.23493068060377276,
+          "shortAcceptedStopCooldownEvents": 52,
+          "accounting": "PASS"
+        },
+        "30": {
+          "finalEquityJpy": 72031170.83272733,
+          "maxMtmDdPct": -15.800140565133724,
+          "profitFactor": 2.571925808525907,
+          "closedTrades": 1316,
+          "q102Trades": 181,
+          "newQ102Exits": 8,
+          "reasonMarkers": {
+            "RESEARCH_Q102_PROFIT_ARM2_FLOOR0P5": 8
+          },
+          "equityDeltaJpy": -2709096.951339379,
+          "ddImprovementPp": -0.021987496122410022,
+          "shortAcceptedStopCooldownEvents": 51,
+          "accounting": "PASS"
+        }
+      },
+      "allFourV4RulesFixed": true
+    },
+    "Q102_HIGH_VOL_SHORT_PROFIT3_FLOOR1": {
+      "policy": {
+        "id": "Q102_HIGH_VOL_SHORT_PROFIT3_FLOOR1",
+        "strategy": "Q102",
+        "sides": [
+          "SHORT"
+        ],
+        "family": "HIGH_VOL",
+        "kind": "profit_floor",
+        "arm": 0.03,
+        "floor": 0.01
+      },
+      "costs": {
+        "10": {
+          "finalEquityJpy": 192412075.4140432,
+          "maxMtmDdPct": -14.603309760733396,
+          "profitFactor": 3.179945242340771,
+          "closedTrades": 1321,
+          "q102Trades": 182,
+          "newQ102Exits": 7,
+          "reasonMarkers": {
+            "RESEARCH_Q102_PROFIT_ARM2_FLOOR0P5": 7
+          },
+          "equityDeltaJpy": 662020.0871916115,
+          "ddImprovementPp": 0.0,
+          "shortAcceptedStopCooldownEvents": 52,
+          "accounting": "PASS"
+        },
+        "30": {
+          "finalEquityJpy": 75063858.32888927,
+          "maxMtmDdPct": -15.75383475906923,
+          "profitFactor": 2.5909138769243167,
+          "closedTrades": 1318,
+          "q102Trades": 181,
+          "newQ102Exits": 7,
+          "reasonMarkers": {
+            "RESEARCH_Q102_PROFIT_ARM2_FLOOR0P5": 7
+          },
+          "equityDeltaJpy": 323590.54482255876,
+          "ddImprovementPp": 0.024318309942083616,
+          "shortAcceptedStopCooldownEvents": 51,
+          "accounting": "PASS"
+        }
+      },
+      "allFourV4RulesFixed": true
+    },
+    "Q102_PB3H_LOSS_PLUS_Q102_PROFIT3_TO1": {
+      "policy": {
+        "id": "Q102_PB3H_LOSS_PLUS_Q102_PROFIT3_TO1",
+        "strategy": "Q102",
+        "sides": [
+          "LONG",
+          "SHORT"
+        ],
+        "kind": "pb_early_plus_profit",
+        "arm": 0.03,
+        "floor": 0.01
+      },
+      "costs": {
+        "10": {
+          "finalEquityJpy": 195323811.39881918,
+          "maxMtmDdPct": -14.359864999290162,
+          "profitFactor": 3.154859102689656,
+          "closedTrades": 1327,
+          "q102Trades": 183,
+          "newQ102Exits": 35,
+          "reasonMarkers": {
+            "RESEARCH_Q102_PROFIT_ARM2_FLOOR0P5": 33,
+            "RESEARCH_INITIAL_ADVERSE_STOP_Q102_PB_LONG_1P5_3H": 2
+          },
+          "equityDeltaJpy": 3573756.071967602,
+          "ddImprovementPp": 0.24344476144323401,
+          "shortAcceptedStopCooldownEvents": 52,
+          "accounting": "PASS"
+        },
+        "30": {
+          "finalEquityJpy": 79716311.7182058,
+          "maxMtmDdPct": -15.823048987954147,
+          "profitFactor": 2.602471747064559,
+          "closedTrades": 1321,
+          "q102Trades": 182,
+          "newQ102Exits": 35,
+          "reasonMarkers": {
+            "RESEARCH_Q102_PROFIT_ARM2_FLOOR0P5": 33,
+            "RESEARCH_INITIAL_ADVERSE_STOP_Q102_PB_LONG_1P5_3H": 2
+          },
+          "equityDeltaJpy": 4976043.934139088,
+          "ddImprovementPp": -0.04489591894283329,
+          "shortAcceptedStopCooldownEvents": 51,
+          "accounting": "PASS"
+        }
+      },
+      "allFourV4RulesFixed": true
+    }
+  },
+  "lossGroups10bps": {
+    "BRK/LONG": {
+      "all": {
+        "n": 9,
+        "medianMfePct": 4.545454545454541,
+        "medianMfeClosePct": 3.93258426966292,
+        "medianMaePct": 2.14504596527069,
+        "medianHoldHours": 12.0,
+        "mfeHighLowAtLeast2": 7,
+        "mfeCloseAtLeast2": 7,
+        "mfeHighLowAtLeast3": 7,
+        "mfeHighLowAtLeast5": 2,
+        "maeAtLeast2": 5,
+        "maeAtLeast3": 4,
+        "maeAtLeast5": 2,
+        "oldPnlJpySum": 75320.63522559631
+      },
+      "losers": {
+        "n": 2,
+        "medianMfePct": 0.6597128062087565,
+        "medianMfeClosePct": 0.5576163173594662,
+        "medianMaePct": 6.214891721225741,
+        "medianHoldHours": 22.0,
+        "mfeHighLowAtLeast2": 0,
+        "mfeCloseAtLeast2": 0,
+        "mfeHighLowAtLeast3": 0,
+        "mfeHighLowAtLeast5": 0,
+        "maeAtLeast2": 2,
+        "maeAtLeast3": 2,
+        "maeAtLeast5": 1,
+        "oldPnlJpySum": -533700.6061558935
+      },
+      "winners": {
+        "n": 7,
+        "medianMfePct": 4.561581348200727,
+        "medianMfeClosePct": 4.2532146389713255,
+        "medianMaePct": 1.8245614035087652,
+        "medianHoldHours": 5.166666666666667,
+        "mfeHighLowAtLeast2": 7,
+        "mfeCloseAtLeast2": 7,
+        "mfeHighLowAtLeast3": 7,
+        "mfeHighLowAtLeast5": 2,
+        "maeAtLeast2": 3,
+        "maeAtLeast3": 2,
+        "maeAtLeast5": 1,
+        "oldPnlJpySum": 609021.2413814899
+      },
+      "guardExitCounts": {
+        "arm2_floor0.5": {
+          "losers": 0,
+          "winners": 6
+        },
+        "arm3_floor1": {
+          "losers": 0,
+          "winners": 5
+        },
+        "arm5_floor2": {
+          "losers": 0,
+          "winners": 1
+        }
+      },
+      "earlyExitCounts": {
+        "3h_stop1.5_mfeLT0.5": {
+          "losers": 1,
+          "winners": 0
+        },
+        "6h_stop2_mfeLT0.5": {
+          "losers": 1,
+          "winners": 0
+        },
+        "6h_stop2.5_mfeLT0.5": {
+          "losers": 1,
+          "winners": 0
+        },
+        "12h_stop2.5_mfeLT1": {
+          "losers": 0,
+          "winners": 1
+        },
+        "12h_stop3_mfeLT1": {
+          "losers": 0,
+          "winners": 1
+        }
+      }
+    },
+    "BRK/SHORT": {
+      "all": {
+        "n": 4,
+        "medianMfePct": 2.292435550452443,
+        "medianMfeClosePct": 2.25593920008747,
+        "medianMaePct": 2.323595505617986,
+        "medianHoldHours": 21.416666666666664,
+        "mfeHighLowAtLeast2": 3,
+        "mfeCloseAtLeast2": 3,
+        "mfeHighLowAtLeast3": 1,
+        "mfeHighLowAtLeast5": 1,
+        "maeAtLeast2": 3,
+        "maeAtLeast3": 1,
+        "maeAtLeast5": 1,
+        "oldPnlJpySum": 376721.6810367977
+      },
+      "losers": {
+        "n": 1,
+        "medianMfePct": 1.0923185341790043,
+        "medianMfeClosePct": 0.6694855532064836,
+        "medianMaePct": 8.632840028188852,
+        "medianHoldHours": 21.0,
+        "mfeHighLowAtLeast2": 0,
+        "mfeCloseAtLeast2": 0,
+        "mfeHighLowAtLeast3": 0,
+        "mfeHighLowAtLeast5": 0,
+        "maeAtLeast2": 1,
+        "maeAtLeast3": 1,
+        "maeAtLeast5": 1,
+        "oldPnlJpySum": -1865.631798174147
+      },
+      "winners": {
+        "n": 3,
+        "medianMfePct": 2.3220973782771437,
+        "medianMfeClosePct": 2.3220973782771437,
+        "medianMaePct": 2.247191011235968,
+        "medianHoldHours": 21.833333333333332,
+        "mfeHighLowAtLeast2": 3,
+        "mfeCloseAtLeast2": 3,
+        "mfeHighLowAtLeast3": 1,
+        "mfeHighLowAtLeast5": 1,
+        "maeAtLeast2": 2,
+        "maeAtLeast3": 0,
+        "maeAtLeast5": 0,
+        "oldPnlJpySum": 378587.3128349719
+      },
+      "guardExitCounts": {
+        "arm2_floor0.5": {
+          "losers": 0,
+          "winners": 2
+        },
+        "arm3_floor1": {
+          "losers": 0,
+          "winners": 1
+        },
+        "arm5_floor2": {
+          "losers": 0,
+          "winners": 1
+        }
+      },
+      "earlyExitCounts": {
+        "3h_stop1.5_mfeLT0.5": {
+          "losers": 1,
+          "winners": 1
+        },
+        "6h_stop2_mfeLT0.5": {
+          "losers": 0,
+          "winners": 0
+        },
+        "6h_stop2.5_mfeLT0.5": {
+          "losers": 0,
+          "winners": 0
+        },
+        "12h_stop2.5_mfeLT1": {
+          "losers": 0,
+          "winners": 0
+        },
+        "12h_stop3_mfeLT1": {
+          "losers": 0,
+          "winners": 0
+        }
+      }
+    },
+    "HIGH_VOL/LONG": {
+      "all": {
+        "n": 6,
+        "medianMfePct": 3.441790123818822,
+        "medianMfeClosePct": 3.3119386552857732,
+        "medianMaePct": 1.633587855207279,
+        "medianHoldHours": 19.541666666666664,
+        "mfeHighLowAtLeast2": 5,
+        "mfeCloseAtLeast2": 5,
+        "mfeHighLowAtLeast3": 4,
+        "mfeHighLowAtLeast5": 2,
+        "maeAtLeast2": 3,
+        "maeAtLeast3": 1,
+        "maeAtLeast5": 1,
+        "oldPnlJpySum": -2004253.911958904
+      },
+      "losers": {
+        "n": 1,
+        "medianMfePct": 1.3843941028407025,
+        "medianMfeClosePct": 1.321467098166118,
+        "medianMaePct": 10.050341603739671,
+        "medianHoldHours": 72.0,
+        "mfeHighLowAtLeast2": 0,
+        "mfeCloseAtLeast2": 0,
+        "mfeHighLowAtLeast3": 0,
+        "mfeHighLowAtLeast5": 0,
+        "maeAtLeast2": 1,
+        "maeAtLeast3": 1,
+        "maeAtLeast5": 1,
+        "oldPnlJpySum": -2322300.2211902305
+      },
+      "winners": {
+        "n": 5,
+        "medianMfePct": 3.734201455381081,
+        "medianMfeClosePct": 3.6767522022213672,
+        "medianMaePct": 0.9309060819197291,
+        "medianHoldHours": 12.75,
+        "mfeHighLowAtLeast2": 5,
+        "mfeCloseAtLeast2": 5,
+        "mfeHighLowAtLeast3": 4,
+        "mfeHighLowAtLeast5": 2,
+        "maeAtLeast2": 2,
+        "maeAtLeast3": 0,
+        "maeAtLeast5": 0,
+        "oldPnlJpySum": 318046.30923132645
+      },
+      "guardExitCounts": {
+        "arm2_floor0.5": {
+          "losers": 0,
+          "winners": 4
+        },
+        "arm3_floor1": {
+          "losers": 0,
+          "winners": 2
+        },
+        "arm5_floor2": {
+          "losers": 0,
+          "winners": 1
+        }
+      },
+      "earlyExitCounts": {
+        "3h_stop1.5_mfeLT0.5": {
+          "losers": 0,
+          "winners": 0
+        },
+        "6h_stop2_mfeLT0.5": {
+          "losers": 0,
+          "winners": 0
+        },
+        "6h_stop2.5_mfeLT0.5": {
+          "losers": 0,
+          "winners": 0
+        },
+        "12h_stop2.5_mfeLT1": {
+          "losers": 0,
+          "winners": 0
+        },
+        "12h_stop3_mfeLT1": {
+          "losers": 0,
+          "winners": 0
+        }
+      }
+    },
+    "HIGH_VOL/SHORT": {
+      "all": {
+        "n": 26,
+        "medianMfePct": 3.602820665322226,
+        "medianMfeClosePct": 3.145406488615543,
+        "medianMaePct": 1.6085604621245273,
+        "medianHoldHours": 13.75,
+        "mfeHighLowAtLeast2": 24,
+        "mfeCloseAtLeast2": 24,
+        "mfeHighLowAtLeast3": 17,
+        "mfeHighLowAtLeast5": 5,
+        "maeAtLeast2": 10,
+        "maeAtLeast3": 6,
+        "maeAtLeast5": 5,
+        "oldPnlJpySum": -77721.16373670184
+      },
+      "losers": {
+        "n": 1,
+        "medianMfePct": 1.256897608828944,
+        "medianMfeClosePct": 1.134273451870016,
+        "medianMaePct": 6.652360515021469,
+        "medianHoldHours": 72.0,
+        "mfeHighLowAtLeast2": 0,
+        "mfeCloseAtLeast2": 0,
+        "mfeHighLowAtLeast3": 0,
+        "mfeHighLowAtLeast5": 0,
+        "maeAtLeast2": 1,
+        "maeAtLeast3": 1,
+        "maeAtLeast5": 1,
+        "oldPnlJpySum": -1500404.940849816
+      },
+      "winners": {
+        "n": 25,
+        "medianMfePct": 3.6449730205924347,
+        "medianMfeClosePct": 3.2362459546925404,
+        "medianMaePct": 1.5298617240364947,
+        "medianHoldHours": 13.583333333333334,
+        "mfeHighLowAtLeast2": 24,
+        "mfeCloseAtLeast2": 24,
+        "mfeHighLowAtLeast3": 17,
+        "mfeHighLowAtLeast5": 5,
+        "maeAtLeast2": 9,
+        "maeAtLeast3": 5,
+        "maeAtLeast5": 4,
+        "oldPnlJpySum": 1422683.777113114
+      },
+      "guardExitCounts": {
+        "arm2_floor0.5": {
+          "losers": 0,
+          "winners": 21
+        },
+        "arm3_floor1": {
+          "losers": 0,
+          "winners": 11
+        },
+        "arm5_floor2": {
+          "losers": 0,
+          "winners": 3
+        }
+      },
+      "earlyExitCounts": {
+        "3h_stop1.5_mfeLT0.5": {
+          "losers": 0,
+          "winners": 3
+        },
+        "6h_stop2_mfeLT0.5": {
+          "losers": 0,
+          "winners": 2
+        },
+        "6h_stop2.5_mfeLT0.5": {
+          "losers": 0,
+          "winners": 2
+        },
+        "12h_stop2.5_mfeLT1": {
+          "losers": 0,
+          "winners": 2
+        },
+        "12h_stop3_mfeLT1": {
+          "losers": 0,
+          "winners": 1
+        }
+      }
+    },
+    "MR/SHORT": {
+      "all": {
+        "n": 49,
+        "medianMfePct": 2.609861770167121,
+        "medianMfeClosePct": 2.347140039447748,
+        "medianMaePct": 1.817398794142979,
+        "medianHoldHours": 12.0,
+        "mfeHighLowAtLeast2": 31,
+        "mfeCloseAtLeast2": 30,
+        "mfeHighLowAtLeast3": 21,
+        "mfeHighLowAtLeast5": 6,
+        "maeAtLeast2": 20,
+        "maeAtLeast3": 14,
+        "maeAtLeast5": 5,
+        "oldPnlJpySum": -461279.64175254613
+      },
+      "losers": {
+        "n": 14,
+        "medianMfePct": 1.2239065059171772,
+        "medianMfeClosePct": 0.9932525700975969,
+        "medianMaePct": 4.573292705445057,
+        "medianHoldHours": 24.0,
+        "mfeHighLowAtLeast2": 1,
+        "mfeCloseAtLeast2": 0,
+        "mfeHighLowAtLeast3": 0,
+        "mfeHighLowAtLeast5": 0,
+        "maeAtLeast2": 12,
+        "maeAtLeast3": 11,
+        "maeAtLeast5": 5,
+        "oldPnlJpySum": -5164587.259341518
+      },
+      "winners": {
+        "n": 35,
+        "medianMfePct": 3.3371609013922665,
+        "medianMfeClosePct": 3.017573939134166,
+        "medianMaePct": 1.0549177784672739,
+        "medianHoldHours": 12.0,
+        "mfeHighLowAtLeast2": 30,
+        "mfeCloseAtLeast2": 30,
+        "mfeHighLowAtLeast3": 21,
+        "mfeHighLowAtLeast5": 6,
+        "maeAtLeast2": 8,
+        "maeAtLeast3": 3,
+        "maeAtLeast5": 0,
+        "oldPnlJpySum": 4703307.617588973
+      },
+      "guardExitCounts": {
+        "arm2_floor0.5": {
+          "losers": 0,
+          "winners": 17
+        },
+        "arm3_floor1": {
+          "losers": 0,
+          "winners": 12
+        },
+        "arm5_floor2": {
+          "losers": 0,
+          "winners": 1
+        }
+      },
+      "earlyExitCounts": {
+        "3h_stop1.5_mfeLT0.5": {
+          "losers": 4,
+          "winners": 5
+        },
+        "6h_stop2_mfeLT0.5": {
+          "losers": 2,
+          "winners": 3
+        },
+        "6h_stop2.5_mfeLT0.5": {
+          "losers": 2,
+          "winners": 2
+        },
+        "12h_stop2.5_mfeLT1": {
+          "losers": 2,
+          "winners": 0
+        },
+        "12h_stop3_mfeLT1": {
+          "losers": 2,
+          "winners": 0
+        }
+      }
+    },
+    "PB/LONG": {
+      "all": {
+        "n": 12,
+        "medianMfePct": 2.518976487369806,
+        "medianMfeClosePct": 2.3747030957657067,
+        "medianMaePct": 1.391429947039004,
+        "medianHoldHours": 12.0,
+        "mfeHighLowAtLeast2": 8,
+        "mfeCloseAtLeast2": 8,
+        "mfeHighLowAtLeast3": 3,
+        "mfeHighLowAtLeast5": 1,
+        "maeAtLeast2": 4,
+        "maeAtLeast3": 3,
+        "maeAtLeast5": 1,
+        "oldPnlJpySum": 1199362.167200801
+      },
+      "losers": {
+        "n": 4,
+        "medianMfePct": 0.8250214780125109,
+        "medianMfeClosePct": 0.5973711577177743,
+        "medianMaePct": 3.721668194633504,
+        "medianHoldHours": 12.0,
+        "mfeHighLowAtLeast2": 0,
+        "mfeCloseAtLeast2": 0,
+        "mfeHighLowAtLeast3": 0,
+        "mfeHighLowAtLeast5": 0,
+        "maeAtLeast2": 3,
+        "maeAtLeast3": 3,
+        "maeAtLeast5": 1,
+        "oldPnlJpySum": -1430911.197960968
+      },
+      "winners": {
+        "n": 8,
+        "medianMfePct": 2.7428872651662606,
+        "medianMfeClosePct": 2.5375536381559427,
+        "medianMaePct": 1.1339803178514034,
+        "medianHoldHours": 12.0,
+        "mfeHighLowAtLeast2": 8,
+        "mfeCloseAtLeast2": 8,
+        "mfeHighLowAtLeast3": 3,
+        "mfeHighLowAtLeast5": 1,
+        "maeAtLeast2": 1,
+        "maeAtLeast3": 0,
+        "maeAtLeast5": 0,
+        "oldPnlJpySum": 2630273.3651617686
+      },
+      "guardExitCounts": {
+        "arm2_floor0.5": {
+          "losers": 0,
+          "winners": 3
+        },
+        "arm3_floor1": {
+          "losers": 0,
+          "winners": 0
+        },
+        "arm5_floor2": {
+          "losers": 0,
+          "winners": 1
+        }
+      },
+      "earlyExitCounts": {
+        "3h_stop1.5_mfeLT0.5": {
+          "losers": 2,
+          "winners": 0
+        },
+        "6h_stop2_mfeLT0.5": {
+          "losers": 1,
+          "winners": 0
+        },
+        "6h_stop2.5_mfeLT0.5": {
+          "losers": 1,
+          "winners": 0
+        },
+        "12h_stop2.5_mfeLT1": {
+          "losers": 0,
+          "winners": 0
+        },
+        "12h_stop3_mfeLT1": {
+          "losers": 0,
+          "winners": 0
+        }
+      }
+    },
+    "PB/SHORT": {
+      "all": {
+        "n": 11,
+        "medianMfePct": 2.0793950850661713,
+        "medianMfeClosePct": 1.9848771266540721,
+        "medianMaePct": 1.434034416826004,
+        "medianHoldHours": 12.0,
+        "mfeHighLowAtLeast2": 6,
+        "mfeCloseAtLeast2": 4,
+        "mfeHighLowAtLeast3": 4,
+        "mfeHighLowAtLeast5": 3,
+        "maeAtLeast2": 2,
+        "maeAtLeast3": 1,
+        "maeAtLeast5": 1,
+        "oldPnlJpySum": 1072202.1079819265
+      },
+      "losers": {
+        "n": 2,
+        "medianMfePct": 1.192959959892409,
+        "medianMfeClosePct": 1.0278696374568908,
+        "medianMaePct": 4.522276106092302,
+        "medianHoldHours": 10.5,
+        "mfeHighLowAtLeast2": 1,
+        "mfeCloseAtLeast2": 0,
+        "mfeHighLowAtLeast3": 0,
+        "mfeHighLowAtLeast5": 0,
+        "maeAtLeast2": 2,
+        "maeAtLeast3": 1,
+        "maeAtLeast5": 1,
+        "oldPnlJpySum": -1033070.2864885157
+      },
+      "winners": {
+        "n": 9,
+        "medianMfePct": 2.0793950850661713,
+        "medianMfeClosePct": 1.9848771266540721,
+        "medianMaePct": 0.7591933570581283,
+        "medianHoldHours": 12.0,
+        "mfeHighLowAtLeast2": 5,
+        "mfeCloseAtLeast2": 4,
+        "mfeHighLowAtLeast3": 4,
+        "mfeHighLowAtLeast5": 3,
+        "maeAtLeast2": 0,
+        "maeAtLeast3": 0,
+        "maeAtLeast5": 0,
+        "oldPnlJpySum": 2105272.394470442
+      },
+      "guardExitCounts": {
+        "arm2_floor0.5": {
+          "losers": 0,
+          "winners": 0
+        },
+        "arm3_floor1": {
+          "losers": 0,
+          "winners": 0
+        },
+        "arm5_floor2": {
+          "losers": 0,
+          "winners": 0
+        }
+      },
+      "earlyExitCounts": {
+        "3h_stop1.5_mfeLT0.5": {
+          "losers": 1,
+          "winners": 0
+        },
+        "6h_stop2_mfeLT0.5": {
+          "losers": 1,
+          "winners": 0
+        },
+        "6h_stop2.5_mfeLT0.5": {
+          "losers": 0,
+          "winners": 0
+        },
+        "12h_stop2.5_mfeLT1": {
+          "losers": 0,
+          "winners": 0
+        },
+        "12h_stop3_mfeLT1": {
+          "losers": 0,
+          "winners": 0
+        }
+      }
+    },
+    "REV/LONG": {
+      "all": {
+        "n": 8,
+        "medianMfePct": 1.834855949795755,
+        "medianMfeClosePct": 1.7254693999399273,
+        "medianMaePct": 1.546726403164774,
+        "medianHoldHours": 8.0,
+        "mfeHighLowAtLeast2": 4,
+        "mfeCloseAtLeast2": 4,
+        "mfeHighLowAtLeast3": 3,
+        "mfeHighLowAtLeast5": 1,
+        "maeAtLeast2": 4,
+        "maeAtLeast3": 3,
+        "maeAtLeast5": 2,
+        "oldPnlJpySum": -471979.51317565277
+      },
+      "losers": {
+        "n": 4,
+        "medianMfePct": 0.8829919111564388,
+        "medianMfeClosePct": 0.5566969387187704,
+        "medianMaePct": 5.1756475661543115,
+        "medianHoldHours": 7.0,
+        "mfeHighLowAtLeast2": 0,
+        "mfeCloseAtLeast2": 0,
+        "mfeHighLowAtLeast3": 0,
+        "mfeHighLowAtLeast5": 0,
+        "maeAtLeast2": 4,
+        "maeAtLeast3": 3,
+        "maeAtLeast5": 2,
+        "oldPnlJpySum": -1731958.5437478188
+      },
+      "winners": {
+        "n": 4,
+        "medianMfePct": 3.9881037898297222,
+        "medianMfeClosePct": 3.6705658838396493,
+        "medianMaePct": 0.41646571818986594,
+        "medianHoldHours": 9.666666666666668,
+        "mfeHighLowAtLeast2": 4,
+        "mfeCloseAtLeast2": 4,
+        "mfeHighLowAtLeast3": 3,
+        "mfeHighLowAtLeast5": 1,
+        "maeAtLeast2": 0,
+        "maeAtLeast3": 0,
+        "maeAtLeast5": 0,
+        "oldPnlJpySum": 1259979.030572166
+      },
+      "guardExitCounts": {
+        "arm2_floor0.5": {
+          "losers": 0,
+          "winners": 2
+        },
+        "arm3_floor1": {
+          "losers": 0,
+          "winners": 1
+        },
+        "arm5_floor2": {
+          "losers": 0,
+          "winners": 0
+        }
+      },
+      "earlyExitCounts": {
+        "3h_stop1.5_mfeLT0.5": {
+          "losers": 0,
+          "winners": 0
+        },
+        "6h_stop2_mfeLT0.5": {
+          "losers": 0,
+          "winners": 0
+        },
+        "6h_stop2.5_mfeLT0.5": {
+          "losers": 0,
+          "winners": 0
+        },
+        "12h_stop2.5_mfeLT1": {
+          "losers": 0,
+          "winners": 0
+        },
+        "12h_stop3_mfeLT1": {
+          "losers": 0,
+          "winners": 0
+        }
+      }
+    },
+    "REV/SHORT": {
+      "all": {
+        "n": 57,
+        "medianMfePct": 2.999000333222257,
+        "medianMfeClosePct": 2.7624309392265234,
+        "medianMaePct": 1.2930039251904744,
+        "medianHoldHours": 12.0,
+        "mfeHighLowAtLeast2": 37,
+        "mfeCloseAtLeast2": 35,
+        "mfeHighLowAtLeast3": 28,
+        "mfeHighLowAtLeast5": 17,
+        "maeAtLeast2": 24,
+        "maeAtLeast3": 9,
+        "maeAtLeast5": 3,
+        "oldPnlJpySum": 7226204.89749157
+      },
+      "losers": {
+        "n": 14,
+        "medianMfePct": 1.00661687992199,
+        "medianMfeClosePct": 0.8257228765876035,
+        "medianMaePct": 2.6816353707994725,
+        "medianHoldHours": 10.0,
+        "mfeHighLowAtLeast2": 0,
+        "mfeCloseAtLeast2": 0,
+        "mfeHighLowAtLeast3": 0,
+        "mfeHighLowAtLeast5": 0,
+        "maeAtLeast2": 13,
+        "maeAtLeast3": 6,
+        "maeAtLeast5": 3,
+        "oldPnlJpySum": -2168183.76140463
+      },
+      "winners": {
+        "n": 43,
+        "medianMfePct": 4.119733648640245,
+        "medianMfeClosePct": 3.850909733262675,
+        "medianMaePct": 0.758653390232331,
+        "medianHoldHours": 12.0,
+        "mfeHighLowAtLeast2": 37,
+        "mfeCloseAtLeast2": 35,
+        "mfeHighLowAtLeast3": 28,
+        "mfeHighLowAtLeast5": 17,
+        "maeAtLeast2": 11,
+        "maeAtLeast3": 3,
+        "maeAtLeast5": 0,
+        "oldPnlJpySum": 9394388.6588962
+      },
+      "guardExitCounts": {
+        "arm2_floor0.5": {
+          "losers": 0,
+          "winners": 15
+        },
+        "arm3_floor1": {
+          "losers": 0,
+          "winners": 10
+        },
+        "arm5_floor2": {
+          "losers": 0,
+          "winners": 4
+        }
+      },
+      "earlyExitCounts": {
+        "3h_stop1.5_mfeLT0.5": {
+          "losers": 5,
+          "winners": 4
+        },
+        "6h_stop2_mfeLT0.5": {
+          "losers": 4,
+          "winners": 3
+        },
+        "6h_stop2.5_mfeLT0.5": {
+          "losers": 1,
+          "winners": 2
+        },
+        "12h_stop2.5_mfeLT1": {
+          "losers": 2,
+          "winners": 1
+        },
+        "12h_stop3_mfeLT1": {
+          "losers": 1,
+          "winners": 1
+        }
+      }
+    }
+  }
+}
