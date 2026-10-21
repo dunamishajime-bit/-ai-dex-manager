@@ -35,3 +35,22 @@ test("HYPE/ZEC state store rejects a stale runtime SHA", async () => {
     /RUNTIME_SHA_MISMATCH/,
   );
 });
+
+test("HYPE state uses unique temporary files for concurrent writes", async () => {
+  const root = await mkdtemp(join(tmpdir(), "hype-zec-concurrent-"));
+  const path = join(root, "runner.json");
+  const sha = "d".repeat(40);
+  const store = new FileHypeZecLongRunnerStateStore(path, sha, "LIVE");
+  const state = await store.load();
+  const clock = Date.now;
+  Date.now = () => 1700000000000;
+  try {
+    const attempts = await Promise.allSettled(
+      Array.from({ length: 64 }, (_, i) => store.save({ ...state, lastDecisionTs: i + 1 })),
+    );
+    assert.equal(attempts.filter((x) => x.status === "rejected").length, 0);
+    assert.equal(JSON.parse(await readFile(path, "utf8")).runtimeCommitSha, sha);
+  } finally {
+    Date.now = clock;
+  }
+});

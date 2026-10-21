@@ -86,6 +86,14 @@ test("shared budget publishes state with atomic rename", () => {
   assert.match(source, /rename\(temporary, path\)/);
   assert.doesNotMatch(source, /writeFile\(path, `\$\{JSON\.stringify\(state/);
 });
+test("shared budget never reuses a temporary path for same-PID same-millisecond writes", () => {
+  // The previous PID+millisecond filename could collide when two async writes
+  // overlapped and leave trailing JSON from an older, longer payload.
+  const source = readFileSync(resolve("lib/disdex-aster-global-rate-budget.ts"), "utf8");
+  assert.match(source, /const temporary = `\$\{path\}\.\$\{process\.pid\}\.\$\{Date\.now\(\)\}\.\$\{randomUUID\(\)\}\.tmp`/);
+  assert.match(source, /rename\(temporary, path\)/);
+});
+
 
 test("shared budget never evicts an old lock owned by a live process", async () => {
   const directory = await mkdtemp(join(tmpdir(), "disdex-aster-budget-live-lock-"));

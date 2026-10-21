@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import {emptyIdleState,normalizeIdleState,IDLE_STATE_SCHEMA} from "../lib/idle-priority-short-state";
+import {emptyIdleState,normalizeIdleState,IDLE_STATE_SCHEMA,readIdleState,writeIdleState} from "../lib/idle-priority-short-state";
+import { mkdtemp, readFile } from "node:fs/promises";
+import { join } from "node:path";
+import { tmpdir } from "node:os";
 const sha="a".repeat(40);
 const pos={
  symbol:"TAOUSDT",route:"IDLE_TAO_BREAKDOWN_SHORT_RELWEAK2",side:"SHORT",
@@ -26,4 +29,25 @@ test("DOT trailing protection may move below entry only after the trail is armed
 test("pending entry is explicit and validated",()=>{
  const pending={action:"ENTRY",phase:"planned",symbol:"DOTUSDT",route:"IDLE_DOT_MOMENTUM_SHORT_BTCREL",clientOrderId:"idle-entry",idempotencyKey:"k",quantity:2,expectedPrice:10,signalTs:3_600_000,decisionTs:7_200_000,holdHours:24,createdAt:1,updatedAt:1,reason:"ENTRY"} as const;
  assert.equal(normalizeIdleState({...emptyIdleState(sha),pending},sha).pending?.symbol,"DOTUSDT");
+});
+
+test("Idle state uses unique temporary files for concurrent writes", async () => {
+  const root = await mkdtemp(join(tmpdir(), "idle-state-concurrent-"));
+  const path = join(root, "runner.json");
+  const state = emptyIdleState(sha);
+  const clock = Date.now;
+  Date.now = () => 1700000000000;
+  try {
+    const attempts = await Promise.allSettled(
+      Array.from({ length: 64 }, (_, i) =>
+        writeIdleState(path, { ...state, lastDecision: {
+          decisionTs: i + 1, accepted: false, reason: "NO_SIGNAL",
+        } })),
+    );
+    assert.equal(attempts.filter((x) => x.status === "rejected").length, 0);
+    assert.equal(JSON.parse(await readFile(path, "utf8")).runtimeSha, sha);
+    assert.equal((await readIdleState(path, sha)).positions.length, 0);
+  } finally {
+    Date.now = clock;
+  }
 });
