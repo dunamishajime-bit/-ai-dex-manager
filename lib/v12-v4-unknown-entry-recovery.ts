@@ -28,7 +28,7 @@ export function assertUnknownEntryNoVenueExecution(
   const intent=doc.intents[clientOrderId],leg=intent&&doc.state.legs[intent.legId],protection=leg&&doc.protections[leg.id];
   if(!intent||!leg||!protection)throw Error("V4_UNKNOWN_ENTRY_RECOVERY_IDENTITY_MISSING");
   if(intent.action!=="ENTRY"||intent.stage!=="UNKNOWN"||leg.status!=="PENDING_ENTRY"||leg.qty!==0||
-    protection.phase!=="ENTRY_SENT"||protection.protectedQty!==0)
+    !(protection.phase==="ENTRY_PREPARED"||protection.phase==="ENTRY_SENT")||protection.protectedQty!==0)
     throw Error("V4_UNKNOWN_ENTRY_RECOVERY_STATE_NOT_BENIGN");
   if(!Number.isFinite(evidence.observedAt)||evidence.observedAt<intent.updatedAt||evidence.observedAt<protection.updatedAt)
     throw Error("V4_UNKNOWN_ENTRY_RECOVERY_TIMESTAMP_INVALID");

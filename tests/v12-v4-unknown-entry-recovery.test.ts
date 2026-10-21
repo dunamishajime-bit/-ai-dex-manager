@@ -11,3 +11,9 @@ test("unknown entry recovery accepts only a signed no-venue-execution proof",()=
  assert.throws(()=>assertUnknownEntryNoVenueExecution(base,"cid",evidence({positions:[{symbol:"LTCUSDT",positionAmt:"0.1"}]})),/POSITION_PRESENT/);
  assert.throws(()=>assertUnknownEntryNoVenueExecution(base,"cid",evidence({order:{status:"NOT_FOUND",code:-2012}})),/ORDER_EVIDENCE_INVALID/);
 });
+
+test("unknown entry recovery also accepts an unsent prepared entry with the same signed no-venue proof",()=>{
+ const prepared=structuredClone(base);
+ prepared.protections["LTCUSDT:r:SHORT:1000"].phase="ENTRY_PREPARED";
+ assert.doesNotThrow(()=>assertUnknownEntryNoVenueExecution(prepared,"cid",evidence()));
+});

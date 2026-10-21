@@ -25,6 +25,10 @@ export type V4PreparedDecision =
 
 export type V4TickResult={status:"locked"|"observing"|"blocked"|"submitted"|"exited";reason:string;
  eventTs:number;candidateCount:number;orderEnabled:boolean};
+export function hasUnresolvedV4EntryLifecycle(doc: Pick<V4ExecutionDocument,"intents"|"state">): boolean {
+ return Object.values(doc.intents).some(intent=>intent.action==="ENTRY"&&intent.stage!=="TERMINAL")||
+  Object.values(doc.state.legs).some(leg=>leg.status==="PENDING_ENTRY"||leg.reservationUsd>1e-12);
+}
 function safeDecisionFailureReason(error:unknown){
  const raw=error instanceof Error?error.message:"NON_ERROR_DECISION_FAILURE";
  return raw.replace(/\b(0x[a-fA-F0-9]{40,64})\b/g,"[REDACTED]")
@@ -284,6 +288,9 @@ export class V4RunnerEngine{
   verifyV4ResidentStops(current.state,current.intents,openOrders);
   const exit=await this.processExitBars(dispatcher,cycle);
   if(exit)return exit;
+  const afterExit=d.store.read();
+  if(hasUnresolvedV4EntryLifecycle(afterExit))
+   return {status:"blocked",reason:"V4_ENTRY_RECONCILIATION_REQUIRED",eventTs:this.now(),candidateCount:0,orderEnabled:false};
   // Recheck the actual H2 boundary after waiting and after all signed account
   // and protective STOP reconciliation. Never carry a pre-lock candidate across
   // an H2 boundary or a newly nonflat/unknown V4 state.
