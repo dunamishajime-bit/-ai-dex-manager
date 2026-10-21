@@ -1,0 +1,22 @@
+# Microstructure Robustness Validation
+
+## Verdict
+
+**ROBUSTNESS PASS.**
+
+The first screen is not accepted merely because its annualized holdout number is high. This validation asks whether the result survives removal of PENGU and whether the PENGU price-gap signal remains profitable after adding a Binance hedge and two-venue execution costs.
+
+## Headline controls
+
+- Full universe, all available features: holdout CAGR 85.19%, max DD -7.14%.
+- Without PENGU: holdout CAGR -41.07%, max DD -14.09%.
+- PENGU hedged spread: holdout CAGR 7856.07%, max DD -6.84%.
+
+Full ablations are in `robustness_ablations.csv`; market-neutral comparisons are in `spread_construction_results.csv`; timestamp alignment and gap distributions are in `gap_alignment_diagnostics.csv`.
+
+## Interpretation rule
+
+Aster-only PENGU profitability without profitability in the hedged spread can reflect directional market exposure rather than convergence of the cross-venue dislocation. Conversely, a positive hedged result is stronger evidence that the price ratio itself mean-reverts after costs.
+
+The validation period is only three months. Even a robustness pass permits prospective paper trading only, not capital deployment.
+

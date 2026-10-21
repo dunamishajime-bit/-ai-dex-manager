@@ -1,0 +1,2 @@
+symbol,rows,aster_zero_quote_volume_ratio,aster_missing_quote_volume_ratio,aster_zero_trades_ratio,aster_missing_trades_ratio,aster_median_quote_volume,binance_median_quote_volume,holdout_gap_std_bps,holdout_return_corr
+PENGUUSDT,78624,0.51130698005698,0.0,0.51130698005698,0.0,0.0,167789.822974,41.06474891960487,0.5481304009614173

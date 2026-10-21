@@ -1,0 +1,75 @@
+name: Trading committee basis backtest
+
+on:
+  push:
+    branches:
+      - analysis/trading-committee-basis-20260715
+    paths:
+      - "research/microstructure_parts/**"
+      - "research/trading_committee_basis.py"
+      - "research/trading_committee_tail.py"
+      - "research/trading_committee_tail_rapid.py"
+      - "research/trading_committee_tail_fullfast.py"
+      - "research/TRADING_COMMITTEE_BASIS.md"
+      - ".github/workflows/btc-simple-backtest.yml"
+  pull_request:
+    branches:
+      - master
+    paths:
+      - "research/microstructure_parts/**"
+      - "research/trading_committee_basis.py"
+      - "research/trading_committee_tail.py"
+      - "research/trading_committee_tail_rapid.py"
+      - "research/trading_committee_tail_fullfast.py"
+      - "research/TRADING_COMMITTEE_BASIS.md"
+      - ".github/workflows/btc-simple-backtest.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      PYTHONUNBUFFERED: "1"
+      MICRO_START: "2025-01-01"
+      MICRO_HOLDOUT: "2026-01-01"
+      MICRO_END: "2026-07-01"
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: python -m pip install --upgrade pip pandas numpy requests
+      - name: Restore extended market-data cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/aster_binance_microstructure
+          key: trading-committee-basis-202501-202606-v1
+      - name: Assemble market-data module
+        run: cat research/microstructure_parts/*.part > research/aster_binance_microstructure.py
+      - name: Validate syntax
+        run: |
+          python -m py_compile research/aster_binance_microstructure.py
+          python -m py_compile research/trading_committee_basis.py
+          python -m py_compile research/trading_committee_tail.py
+          python -m py_compile research/trading_committee_tail_rapid.py
+          python -m py_compile research/trading_committee_tail_fullfast.py
+      - name: Run full event-first tail grid
+        run: |
+          set -o pipefail
+          python -m research.trading_committee_tail_fullfast 2>&1 | tee trading_committee_tail.log
+      - name: Upload research report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trading-committee-tail-report
+          path: |
+            backtest_output_trading_committee_tail/
+            trading_committee_tail.log
+          if-no-files-found: warn
