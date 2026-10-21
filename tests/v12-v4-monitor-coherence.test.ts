@@ -222,3 +222,11 @@ test("V12 health alert independently pins full-live SHA while peers remain on cu
  assert.match(wiring,/ExecStart=\/usr\/bin\/node \$\{MONITOR_RUNTIME_ROOT\}\/scripts\/ops\/root\/disdex-runner-watchdog-current\.mjs/);
  assert.match(wiring,/ExecStartPre=\/usr\/bin\/grep -Fxq \$\{V4_PRIMARY_SHA:-\$\{DEPLOYED_SHA\}\}/);
 });
+
+test("runner abnormal-state email includes read-only systemd termination and restart evidence",()=>{
+ assert.match(alert,/"ExecMainCode"/);
+ assert.match(alert,/"ExecMainStatus"/);
+ assert.match(alert,/"NRestarts"/);
+ assert.match(alert,/Result=/);
+ assert.match(alert,/ExecMainStatus=/);
+});

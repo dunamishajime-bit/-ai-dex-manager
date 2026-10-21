@@ -52,6 +52,22 @@ export async function retryV4FlatBootstrapRateBudget<T>(input:{
   }
  }
 }
+// Retain a running reconciliation loop during precisely classified local rate-
+// budget contention. When an intent, owned leg or resident STOP exists, this is
+// NOT a benign defer: publish a BLOCKED fail-closed heartbeat, prohibit new
+// orders for this tick and retry the original signed reconciliation on the next
+// iteration. Unknown or non-budget errors retain the fatal path.
+export type V4DaemonRateBudgetOutcome={status:"observing"|"blocked";reason:string;waitMs:number};
+export function classifyV4DaemonRateBudgetOutcome(
+ error:unknown,doc:V4ExecutionDocument,
+):V4DaemonRateBudgetOutcome|undefined{
+ const rate=classifyAsterRateBudgetFailure(error);
+ if(!rate)return;
+ const flat=classifyV4RateBudgetDefer(error,doc);
+ if(flat)return {...flat,status:"observing"};
+ return {status:"blocked",reason:"V4_RATE_BUDGET_RECONCILIATION_BLOCKED:"+rate.reason,
+  waitMs:Math.max(15000,nextAsterRateBudgetRetryMs(0,1000,15000,rate.waitMs??0,()=>0.5))};
+}
 function v4HealthPath(){
  return String(process.env.V12_V4_HEALTH_STATE_PATH??"/var/lib/disdex/v12-v4/heartbeat.json").trim();
 }
@@ -142,7 +158,7 @@ async function writeV4Health(releaseSha:string,operationMode:string,result:{
  const now=Date.now(),tmp=path+"."+process.pid+"."+now+".tmp";
  const serviceUnit=String(process.env.V12_V4_SERVICE_UNIT??`disdex-v12-v4@${releaseSha}.service`).trim();
  const workingDirectory=String(process.env.DISDEX_RELEASE_ROOT??process.cwd()).trim();
- const failed=result.status.toLowerCase()==="failed";
+ const failed=result.status==="blocked"||result.status.toLowerCase()==="failed";
  const deferred=result.reason.startsWith("V4_RATE_BUDGET_DEFERRED");
  const payload={
   schema:V4_HEALTH_SCHEMA,runnerId:"V12_V4",serviceUnit,expectedSha:releaseSha,workingDirectory,
@@ -326,10 +342,10 @@ async function main(){
     onContention:()=>{hadLockContention=true;},
    });
   }catch(error){
-   const deferred=classifyV4RateBudgetDefer(error,store.read());
-   if(!deferred)throw error;
-   deferredWaitMs=deferred.waitMs;
-   result={status:"observing",reason:deferred.reason,eventTs:Date.now(),candidateCount:0,orderEnabled:false};
+   const budget=classifyV4DaemonRateBudgetOutcome(error,store.read());
+   if(!budget)throw error;
+   deferredWaitMs=budget.waitMs;
+   result={status:budget.status,reason:budget.reason,eventTs:Date.now(),candidateCount:0,orderEnabled:false};
   }
   try{await writeV4DecisionTelemetry(releaseSha,operationMode,prepared,result);}catch(error){
    console.error(JSON.stringify({level:"error",status:"V4_TELEMETRY_WRITE_FAILED",error:error instanceof Error?error.message:String(error)}));

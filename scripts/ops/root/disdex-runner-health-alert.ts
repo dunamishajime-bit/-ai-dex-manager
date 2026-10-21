@@ -123,7 +123,7 @@ function serviceStatus(unit: string, conflict = false): { status: RunnerHealthSt
   if (conflict) return { status: "UNKNOWN", detail: "同一ロジックのactive serviceが複数あるためFail Closed" };
   if (!unit) return { status: "UNKNOWN", detail: "systemd service名が未設定" };
   try {
-    const raw = execFileSync("/usr/bin/systemctl", ["show", unit, "-p", "ActiveState", "-p", "SubState", "-p", "MainPID"], { encoding: "utf8" }).trim();
+    const raw = execFileSync("/usr/bin/systemctl", ["show", unit, "-p", "ActiveState", "-p", "SubState", "-p", "MainPID", "-p", "Result", "-p", "ExecMainCode", "-p", "ExecMainStatus", "-p", "NRestarts"], { encoding: "utf8" }).trim();
     const values = Object.fromEntries(raw.split(/\r?\n/)
       .map((line) => line.split("=", 2))
       .filter(([key, value]) => Boolean(key && value)));
@@ -137,7 +137,8 @@ function serviceStatus(unit: string, conflict = false): { status: RunnerHealthSt
         : ["inactive", "deactivating", "dead"].includes(activeState)
           ? "INACTIVE"
           : "UNKNOWN";
-    return { status, detail: `ActiveState=${activeState} / SubState=${subState} / MainPID=${mainPid}` };
+    const exitDetail = `Result=${values.Result || "unknown"} / ExecMainCode=${values.ExecMainCode || "unknown"} / ExecMainStatus=${values.ExecMainStatus || "unknown"} / NRestarts=${values.NRestarts || "unknown"}`;
+    return { status, detail: `ActiveState=${activeState} / SubState=${subState} / MainPID=${mainPid} / ${exitDetail}` };
   } catch (error) {
     return { status: "UNKNOWN", detail: `systemd状態取得失敗: ${error instanceof Error ? error.message : "不明なエラー"}` };
   }
