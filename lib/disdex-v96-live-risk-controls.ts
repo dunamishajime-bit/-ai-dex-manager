@@ -3,14 +3,17 @@ import { readFile } from "node:fs/promises";
 import { DISDEX_V96_LIVE_PROMOTION, DISDEX_V96_STRATEGY_ID } from "@/config/disdexV96Runtime";
 
 export interface DisDexV96OperatorOverrideApproval {
-    status: "APPROVED" | "REJECTED";
+    status: "APPROVED" | "REJECTED" | "REVOKED";
     strategyId: string;
     configFingerprint: string;
     approvedCommitSha: string;
     operator: string;
     reason: string;
     approvedAt: string;
-    expiresAt: string;
+    expiresAt?: string;
+    revokedAt?: string;
+    revokedBy?: string;
+    revokeReason?: string;
     forwardEvidenceBypassAccepted: true;
     initialPenguGrossCap: number;
     maximumPortfolioGross: number;
@@ -40,6 +43,8 @@ export interface DisDexV96DailyRiskState {
     trippedAt?: number;
     tripReason?: string;
     lastCheckedAt: number;
+    latchName?: "portfolioDailyLossLatch";
+    resetReason?: "UTC_DAY_ROLLOVER" | "INITIALIZED" | "TRIPPED";
 }
 
 export interface DisDexV96OperatorOverrideResult {
@@ -61,7 +66,7 @@ function canonical(value: unknown): string {
     if (Array.isArray(value)) return `[${value.map(canonical).join(",")}]`;
     if (value && typeof value === "object") {
         const object = value as Record<string, unknown>;
-        return `{${Object.keys(object).sort().map((key) => `${JSON.stringify(key)}:${canonical(object[key])}`).join(",")}}`;
+        return `{${Object.keys(object).filter((key) => object[key] !== undefined).sort().map((key) => `${JSON.stringify(key)}:${canonical(object[key])}`).join(",")}}`;
     }
     return JSON.stringify(value);
 }
@@ -75,6 +80,9 @@ export function disDexV96OperatorOverrideArtifactSha256(
 export function evaluateDisDexV96OperatorOverride(input: {
     approval?: DisDexV96OperatorOverrideApproval;
     configFingerprint: string;
+    maximumGross?: number;
+    maximumDailyLossPct?: number;
+    initialPenguGrossCap?: number;
     now?: number;
 }): DisDexV96OperatorOverrideResult {
     const reasons: string[] = [];
@@ -93,16 +101,10 @@ export function evaluateDisDexV96OperatorOverride(input: {
     }
     if (approval.forwardEvidenceBypassAccepted !== true) reasons.push("Forward Evidence bypass acceptance is missing.");
     const approvedAt = Date.parse(approval.approvedAt);
-    const expiresAt = Date.parse(approval.expiresAt);
-    if (!Number.isFinite(approvedAt) || !Number.isFinite(expiresAt) || expiresAt <= approvedAt) {
-        reasons.push("Operator Override validity timestamps are invalid.");
-    } else {
-        if (now < approvedAt) reasons.push("Operator Override is not active yet.");
-        if (now >= expiresAt) reasons.push("Operator Override has expired.");
-        if (expiresAt - approvedAt > DISDEX_V96_LIVE_PROMOTION.maximumOverrideValidityHours * 3_600_000) {
-            reasons.push("Operator Override validity exceeds the repository maximum.");
-        }
-    }
+    if (!Number.isFinite(approvedAt)) reasons.push("Operator Override approvedAt is invalid.");
+    if (approval.expiresAt) reasons.push("Legacy time-bounded Operator Override must be reissued.");
+    if (approval.revokedAt || approval.revokedBy || approval.revokeReason) reasons.push("Operator Override has been revoked.");
+    if (now < approvedAt) reasons.push("Operator Override is not active yet.");
     if (!(approval.initialPenguGrossCap > 0
         && approval.initialPenguGrossCap <= DISDEX_V96_LIVE_PROMOTION.maximumOverridePenguGross + 1e-12)) {
         reasons.push("Operator Override PENGU Gross cap exceeds the allowed initial limit.");
@@ -118,22 +120,17 @@ export function evaluateDisDexV96OperatorOverride(input: {
     if (approval.maximumDailyLossUsd !== undefined && !(approval.maximumDailyLossUsd > 0)) {
         reasons.push("Operator Override daily loss USD limit must be positive when supplied.");
     }
-    const expectedHash = disDexV96OperatorOverrideArtifactSha256({
-        status: approval.status,
-        strategyId: approval.strategyId,
-        configFingerprint: approval.configFingerprint,
-        approvedCommitSha: approval.approvedCommitSha,
-        operator: approval.operator,
-        reason: approval.reason,
-        approvedAt: approval.approvedAt,
-        expiresAt: approval.expiresAt,
-        forwardEvidenceBypassAccepted: approval.forwardEvidenceBypassAccepted,
-        initialPenguGrossCap: approval.initialPenguGrossCap,
-        maximumPortfolioGross: approval.maximumPortfolioGross,
-        maximumDailyLossPct: approval.maximumDailyLossPct,
-        maximumDailyLossUsd: approval.maximumDailyLossUsd,
-        acknowledgement: approval.acknowledgement,
-    });
+    if (input.maximumGross !== undefined && Math.abs(approval.maximumPortfolioGross - input.maximumGross) > 1e-12) {
+        reasons.push("Operator Override maximum Gross does not match the runtime risk setting.");
+    }
+    if (input.maximumDailyLossPct !== undefined && Math.abs(approval.maximumDailyLossPct - input.maximumDailyLossPct) > 1e-12) {
+        reasons.push("Operator Override daily loss limit does not match the runtime risk setting.");
+    }
+    if (input.initialPenguGrossCap !== undefined && Math.abs(approval.initialPenguGrossCap - input.initialPenguGrossCap) > 1e-12) {
+        reasons.push("Operator Override initial PENGU Gross does not match the runtime risk setting.");
+    }
+    const { artifactSha256: _artifactSha256, ...approvalFields } = approval;
+    const expectedHash = disDexV96OperatorOverrideArtifactSha256(approvalFields);
     if (approval.artifactSha256 !== expectedHash) reasons.push("Operator Override artifact SHA-256 mismatch.");
     return { allowed: reasons.length === 0, reasons, approval };
 }
@@ -152,6 +149,24 @@ export function updateDisDexV96DailyRisk(input: {
     const now = input.now ?? Date.now();
     const day = utcDay(now);
     const equity = Math.max(0, finite(input.equity));
+    const dayChanged = Boolean(input.previous && input.previous.utcDay !== day);
+    if (dayChanged) {
+        return {
+            utcDay: day,
+            dayStartEquity: equity,
+            lastEquity: equity,
+            lossUsd: 0,
+            lossPct: 0,
+            lossLimitUsd: Math.min(
+                equity * Math.max(0, finite(input.maximumDailyLossPct)) / 100,
+                input.maximumDailyLossUsd && input.maximumDailyLossUsd > 0 ? input.maximumDailyLossUsd : Number.POSITIVE_INFINITY,
+            ),
+            tripped: false,
+            lastCheckedAt: now,
+            latchName: "portfolioDailyLossLatch",
+            resetReason: "UTC_DAY_ROLLOVER",
+        };
+    }
     if (input.previous?.tripped) {
         const lossUsd = Math.max(input.previous.lossUsd, input.previous.dayStartEquity - equity, 0);
         const lossPct = input.previous.dayStartEquity > 0
@@ -159,11 +174,12 @@ export function updateDisDexV96DailyRisk(input: {
             : input.previous.lossPct;
         return {
             ...input.previous,
+            latchName: "portfolioDailyLossLatch",
             lastEquity: equity,
             lossUsd,
             lossPct,
             tripped: true,
-            tripReason: input.previous.tripReason || "V96 daily loss trip remains latched until manual review.",
+            tripReason: input.previous.tripReason || "V96 portfolio daily loss trip remains latched until manual review.",
             lastCheckedAt: now,
         };
     }

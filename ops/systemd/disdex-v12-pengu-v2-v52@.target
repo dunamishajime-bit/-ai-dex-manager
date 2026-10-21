@@ -1,0 +1,8 @@
+[Unit]
+Description=DisDex V12 + PENGU V2 + V52 LIVE composition (%i)
+Requires=disdex-shared-crypto-risk@%i.service disdex-v12-v52-margin-guard@%i.service disdex-pengu-dual-ls-v2@%i.service disdex-v52-aster-only@%i.service disdex-v12-x1-all@%i.service
+After=network-online.target disdex-shared-crypto-risk@%i.service disdex-v12-v52-margin-guard@%i.service disdex-pengu-dual-ls-v2@%i.service disdex-v52-aster-only@%i.service disdex-v12-x1-all@%i.service
+Wants=network-online.target
+
+[Install]
+WantedBy=multi-user.target

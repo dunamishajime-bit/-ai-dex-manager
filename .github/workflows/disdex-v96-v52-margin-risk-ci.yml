@@ -1,0 +1,122 @@
+name: DisDex V96 V52 Margin Risk CI
+
+on:
+  pull_request:
+    paths:
+      - 'config/disdexV96Runtime.ts'
+      - 'config/disdexStockRouterV13DV11EqRuntime.ts'
+      - 'lib/direct-trade-executor.ts'
+      - 'lib/disdex-v96-execution-capacity.ts'
+      - 'scripts/disdex-v96-live-runner.ts'
+      - 'scripts/disdex-v96-live-preflight.ts'
+      - 'scripts/disdex-v13d-v11eq-v96-live-preflight.ts'
+      - 'scripts/disdex-v13d-v11eq-v96-live-runner.ts'
+      - 'scripts/disdex-v13d-v11eq-v96-strategy-preflight.ts'
+      - 'scripts/disdex_v96_v52_margin_risk_policy.py'
+      - 'scripts/disdex_v96_v52_margin_guard.py'
+      - 'scripts/disdex_v96_v52_margin_guard_runtime.py'
+      - 'scripts/disdex_v96_v52_margin_guard_selftest.py'
+      - 'scripts/disdex_v52_margin_aware_live_engine.py'
+      - 'scripts/disdex-v96-v52-prepare-account-risk.py'
+      - 'scripts/ops/**'
+      - 'ops/systemd/**'
+      - '.github/workflows/disdex-v96-v52-margin-risk-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-margin-risk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Validate TypeScript and strategy contracts
+        run: |
+          set -Eeuo pipefail
+          npm run strategy:disdex-v96:typecheck
+          npm run strategy:disdex-v13d-v11eq-v96:contract:typecheck
+          npm run strategy:disdex-v13d-v11eq-v96:contract:selftest
+          npm run strategy:disdex-v13d-v11eq-v96:supervisor:selftest
+          npm run strategy:disdex-v96:execution:selftest
+
+      - name: Validate adaptive risk, serialized emergency stop-loss and retention
+        run: |
+          set -Eeuo pipefail
+          python3 -m py_compile \
+            scripts/disdex_v11eq_aster_only_live_engine.py \
+            scripts/disdex_v52_aster_only_live_engine.py \
+            scripts/disdex_v96_v52_margin_risk_policy.py \
+            scripts/disdex_v96_v52_margin_guard.py \
+            scripts/disdex_v96_v52_margin_guard_runtime.py \
+            scripts/disdex_v96_v52_margin_guard_selftest.py \
+            scripts/disdex_v52_margin_aware_live_engine.py \
+            scripts/disdex-v96-v52-prepare-account-risk.py \
+            scripts/ops/root/disdex-vps-retention-cleanup
+          python3 scripts/disdex_v52_aster_only_live_engine.py --self-test
+          python3 scripts/disdex_v96_v52_margin_risk_policy.py
+          python3 scripts/disdex_v96_v52_margin_guard.py --self-test
+          python3 scripts/disdex_v96_v52_margin_guard_runtime.py --self-test
+          python3 scripts/disdex_v96_v52_margin_guard_selftest.py
+          python3 scripts/disdex_v52_margin_aware_live_engine.py --self-test
+          python3 scripts/ops/root/disdex-vps-retention-cleanup --self-test
+
+      - name: Validate fixed deployment boundary
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          bash -n scripts/ops/disdex-v96-v52-live-policy.sh
+          bash -n scripts/ops/disdex-v96-v52-live-policy-selftest.sh
+          bash -n scripts/ops/disdex-v96-v52-approval-policy-wrapper.sh
+          bash -n scripts/ops/disdex-v96-v52-candidate-preflight.sh
+          bash -n scripts/ops/disdex-v96-v52-live.sh
+          bash -n scripts/ops/root/disdex-v96-v52-release-readiness
+          bash -n scripts/ops/root/install-disdex-vps-control
+          bash scripts/ops/disdex-v96-v52-live-policy-selftest.sh
+
+          grep -Fq 'export DISDEX_V96_MAX_GROSS=1.5' scripts/ops/disdex-v96-v52-live-policy.sh
+          grep -Fq 'export DISDEX_V52_STOCK_GROSS_CAP=1.5' scripts/ops/disdex-v96-v52-live-policy.sh
+          grep -Fq 'export DISDEX_V52_PORTFOLIO_GROSS_CAP=2.5' scripts/ops/disdex-v96-v52-live-policy.sh
+          grep -Fq 'export DISDEX_V96_V52_REQUIRED_INITIAL_LEVERAGE=5' scripts/ops/disdex-v96-v52-live-policy.sh
+          grep -Fq 'export DISDEX_V96_V52_PREORDER_MARGIN_GUARD_ENABLED=true' scripts/ops/disdex-v96-v52-live-policy.sh
+          grep -Fq 'export DISDEX_V96_V52_MARGIN_GUARD_SCRIPT=scripts/disdex_v96_v52_margin_guard_runtime.py' scripts/ops/disdex-v96-v52-live-policy.sh
+          grep -Fq 'HEALTHY_POLL_INTERVAL_MS = 5 * 60_000' scripts/disdex_v96_v52_margin_risk_policy.py
+          grep -Fq 'WARNING_POLL_INTERVAL_MS = 60_000' scripts/disdex_v96_v52_margin_risk_policy.py
+          grep -Fq 'WARNING_MARGIN_RATIO_PCT = 50.0' scripts/disdex_v96_v52_margin_risk_policy.py
+          grep -Fq 'REDUCE_MARGIN_RATIO_PCT = 65.0' scripts/disdex_v96_v52_margin_risk_policy.py
+          grep -Fq 'CRITICAL_MARGIN_RATIO_PCT = 75.0' scripts/disdex_v96_v52_margin_risk_policy.py
+          grep -Fq '_wait_without_account_calls' scripts/disdex_v96_v52_margin_guard_runtime.py
+          grep -Fq 'interrupt_on_kill_switch=False' scripts/disdex_v96_v52_margin_guard_runtime.py
+          grep -Fq 'reduceOnly": "true"' scripts/disdex_v96_v52_margin_guard_runtime.py
+          grep -Fq 'emergency-flatten.lock' scripts/disdex_v96_v52_margin_guard_runtime.py
+          grep -Fq 'CONCURRENT_FLATTEN_ALREADY_COMPLETED' scripts/disdex_v96_v52_margin_guard_runtime.py
+          grep -Fq -- '--preorder-check' lib/direct-trade-executor.ts
+          grep -Fq 'command.reduceOnly !== true' lib/direct-trade-executor.ts
+          grep -Fq 'scripts/disdex_v96_v52_margin_guard_runtime.py' scripts/ops/disdex-v96-v52-live.sh
+          grep -Fq 'startupWaitLoop=false' scripts/ops/disdex-v96-v52-live.sh
+          grep -Fq 'DISDEX_VPS_RETENTION_CLEANUP_SELFTEST_PASS' scripts/ops/root/disdex-vps-retention-cleanup
+          grep -Fq 'OnCalendar=daily' ops/systemd/disdex-vps-retention.timer
+          grep -Fq 'SystemMaxUse=256M' ops/systemd/90-disdex-storage-guard.conf
+
+      - name: Validate promotion rollback isolation
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          bash scripts/ops/disdex-v96-v52-promotion-rollback-selftest.sh
+          sudo bash scripts/ops/root/disdex-vps-control trading-promote-selftest all
+
+      - name: Validate one-shot release readiness gate
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          sudo bash scripts/ops/root/disdex-v96-v52-release-readiness "$(pwd -P)" source

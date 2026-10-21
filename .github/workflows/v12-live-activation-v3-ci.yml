@@ -1,0 +1,68 @@
+name: V12 LIVE activation V3 CI
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'scripts/ops/root/disdex-v12-live-activate-from-sha-v3'
+      - 'scripts/ops/disdex-v12-current-release-delta-audit-v2.sh'
+      - 'scripts/ops/root/disdex-v96-to-v12-live-migrate-final'
+      - 'scripts/ops/root/install-disdex-v12-live'
+      - 'scripts/disdex-v12-stale-local-state-recovery.ts'
+      - '.github/workflows/v12-live-activation-v3-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  final-activation-contract:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate final V3 activation boundary
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          activate=scripts/ops/root/disdex-v12-live-activate-from-sha-v3
+          audit=scripts/ops/disdex-v12-current-release-delta-audit-v2.sh
+          migrate=scripts/ops/root/disdex-v96-to-v12-live-migrate-final
+          install=scripts/ops/root/install-disdex-v12-live
+          recovery=scripts/disdex-v12-stale-local-state-recovery.ts
+          for script in "$activate" "$audit" "$migrate" "$install"; do bash -n "$script"; done
+          test -f "$recovery"
+          grep -Fq 'I_ACKNOWLEDGE_V12_EXACT_SHA_LIVE_ACTIVATION_V3' "$activate"
+          grep -Fq 'git -C "$source_repo" archive "$sha"' "$activate"
+          grep -Fq 'disdex-v12-current-release-delta-audit-v2.sh' "$activate"
+          grep -Fq 'disdex-v96-to-v12-live-migrate-final' "$activate"
+          grep -Fq 'V12_V3_PHASE=FULL_TREE_VPS_DELTA_AUDIT' "$activate"
+          grep -Fq 'V12_V3_PHASE=PARTIAL_ACTIVATION_RECOVERY' "$activate"
+          grep -Fq 'merge-base --is-ancestor "$previous_sha" "$sha"' "$activate"
+          grep -Fq 'PENGU_POST_QUIESCE' "$activate"
+          grep -Fq 'ACCOUNT_POST_QUIESCE' "$activate"
+          grep -Fq 'V12_PARTIAL_RESUME_PREVIOUS_TARGET_ENABLED' "$activate"
+          grep -Fq 'V12_V3_PHASE=HARDENED_LIVE_MIGRATION' "$activate"
+          grep -Fq 'STATUS: LIVE_ACTIVATED_VERIFIED' "$activate"
+          grep -Fq 'ORDERS_SENT_FOR_TESTING=0' "$activate"
+          grep -Fq 'ARTIFICIAL_LIVE_ORDERS=0' "$activate"
+          grep -Fq '/usr/bin/python3' "$activate"
+          ! grep -Eq '^[[:space:]]+python[[:space:]]' "$activate"
+          grep -Fq 'VPS_RELEASE_DELTA_BLOCKED' "$audit"
+          grep -Fq 'VPS_RELEASE_DELTA_REVIEW_REQUIRED' "$audit"
+          grep -Fq 'VPS_RELEASE_FULL_TREE_DELTA_PRESERVATION_PASS' "$audit"
+          grep -Fq 'SECRET_LIKE_PATH_EXCLUDED' "$audit"
+          grep -Fq 'secretsRead=false' "$audit"
+          grep -Fq 'v12_start_attempted=true' "$migrate"
+          grep -Fq 'Automatic V96 restart is prohibited' "$migrate"
+          grep -Fq 'V12_LIVE_INSTALL_PREEXISTING_SHARED_RISK_REUSE_READY' "$install"
+          grep -Fq 'V12_LIVE_INSTALL_PREEXISTING_SHARED_RISK_RESTARTED' "$install"
+          grep -Fq 'cmp -s "$installed_risk_unit" "$repo_root/ops/systemd/disdex-shared-crypto-risk@.service"' "$install"
+          grep -Fq 'cmp -s "$installed_risk_env" "$repo_root/ops/env/disdex-v12-pengu-v2-v52.env.example"' "$install"
+          grep -Fq 'V96_TO_V12_SHARED_RISK_REUSE_READY' "$migrate"
+          grep -Fq 'V96_TO_V12_SHARED_RISK_REUSED=TRUE' "$migrate"
+          grep -Fq 'cmp -s "$installed_unit" "$release/ops/systemd/disdex-shared-crypto-risk@.service"' "$migrate"
+          grep -Fq 'cmp -s "$installed_env" "$release/ops/env/disdex-v12-pengu-v2-v52.env.example"' "$migrate"
+          ! grep -Fq 'systemctl stop "$shared_risk_unit"' "$install" "$migrate"
+          ! grep -Eq '\beval\b|\b(bash|sh)[[:space:]]+-c\b' "$activate" "$audit" "$migrate" "$install"
+          ! grep -Eq 'placeMarket|place_limit|submitOrder|curl[[:space:]].*(order|fapi)' "$activate" "$audit" "$migrate" "$install"
+          echo V12_LIVE_ACTIVATION_V3_CI_PASS

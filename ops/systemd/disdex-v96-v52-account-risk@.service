@@ -1,0 +1,24 @@
+[Unit]
+Description=DisDex V96 plus V52 fixed 5x cross account-risk preparation for release %i
+After=network-online.target
+Wants=network-online.target
+Conflicts=disdex-v96-v52-live.service
+
+[Service]
+Type=oneshot
+User=deploy
+Group=deploy
+WorkingDirectory=/home/deploy/disdex-trading/releases/%i
+EnvironmentFile=/etc/disdex/disdex-v13d-v11eq-v96.env
+EnvironmentFile=-/etc/disdex/disdex-v96-v52-live-overrides.env
+Environment=DISDEX_V96_RUNTIME_COMMIT_SHA=%i
+Environment=DISDEX_V96_V52_ACCOUNT_RISK_ACKNOWLEDGEMENT=I_APPROVE_DISDEX_V96_V52_FIXED_5X_CROSS_MARGIN
+Environment=PYTHONPATH=/home/deploy/dis-dex-manager/.venv-stock/lib/python3.12/site-packages
+ExecStart=/usr/bin/python3 scripts/disdex-v96-v52-prepare-account-risk.py
+TimeoutStartSec=10min
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=read-only
+ReadOnlyPaths=/home/deploy/disdex-trading/releases/%i
+UMask=0077

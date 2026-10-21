@@ -1,0 +1,46 @@
+name: V96 Decommission Preparation CI
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'scripts/ops/disdex-v96-decommission-source-audit.sh'
+      - 'scripts/ops/root/disdex-v96-runtime-decommission-readiness'
+      - 'docs/implementation/V12_LIVE_AND_V96_DECOMMISSION_CODEX_HANDOFF_20260820.md'
+      - '.github/workflows/v96-decommission-prep-ci.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  decommission-prep:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate shell syntax
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          bash -n scripts/ops/disdex-v96-decommission-source-audit.sh
+          bash -n scripts/ops/root/disdex-v96-runtime-decommission-readiness
+      - name: Prove preparation audit is read-only
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          bash scripts/ops/disdex-v96-decommission-source-audit.sh . --pre
+          ! grep -Eq '\bsystemctl[[:space:]]+(stop|disable|enable|restart)|\brm[[:space:]]+-|\bmv[[:space:]]+' scripts/ops/disdex-v96-decommission-source-audit.sh
+          ! grep -Eq '\bsystemctl[[:space:]]+(stop|disable|enable|restart)|\brm[[:space:]]+-|\bmv[[:space:]]+' scripts/ops/root/disdex-v96-runtime-decommission-readiness
+      - name: Validate handoff safety invariants
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          handoff=docs/implementation/V12_LIVE_AND_V96_DECOMMISSION_CODEX_HANDOFF_20260820.md
+          grep -Fq 'STATUS: LIVE_ACTIVATED_VERIFIED' "$handoff"
+          grep -Fq 'STATUS: V96_RUNTIME_DECOMMISSION_READY' "$handoff"
+          grep -Fq 'STATUS: V96_DECOMMISSION_SOURCE_CLEAN' "$handoff"
+          grep -Fq 'STATUS: V12_LIVE_V96_DECOMMISSIONED' "$handoff"
+          grep -Fq 'ORDERS_SENT_FOR_TESTING=0' "$handoff"
+          grep -Fq 'No SHADOW period. No synthetic/artificial LIVE order.' "$handoff"
+          grep -Fq 'Remove V96↔V12 start interlocks only after the V96 trading service definitions no longer exist.' "$handoff"
+          grep -Fq 'remove V96/V12 mutual-exclusion helpers/drop-ins because V96 no longer exists' "$handoff"
