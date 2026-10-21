@@ -1,0 +1,199 @@
+{
+  "v4FixedBaselineSha": "4081eb37fe23f884a4d1fa93e2b608e388bf7071",
+  "status": "Q102_EXPLORATORY_LOSS_CONCENTRATION_AFTER_PINNED_V4",
+  "period": "2025-08-10 to 2026-08-10",
+  "costs": {
+    "10": {
+      "q102Trades": 182,
+      "familySide": {
+        "BRK/LONG": {
+          "trades": 9,
+          "wins": 7,
+          "losses": 2,
+          "winRatePct": 77.77777777777777,
+          "sumLossJpy": -533700.6061558935,
+          "netPnlJpy": 75320.63522559631,
+          "worstSingleLossJpy": -504299.20231542824,
+          "meanLossJpy": -266850.30307794677
+        },
+        "BRK/SHORT": {
+          "trades": 4,
+          "wins": 3,
+          "losses": 1,
+          "winRatePct": 75.0,
+          "sumLossJpy": -1865.631798174147,
+          "netPnlJpy": 376721.6810367977,
+          "worstSingleLossJpy": -1865.631798174147,
+          "meanLossJpy": -1865.631798174147
+        },
+        "HIGH_VOL/LONG": {
+          "trades": 6,
+          "wins": 5,
+          "losses": 1,
+          "winRatePct": 83.33333333333333,
+          "sumLossJpy": -2322300.2211902305,
+          "netPnlJpy": -2004253.911958904,
+          "worstSingleLossJpy": -2322300.2211902305,
+          "meanLossJpy": -2322300.2211902305
+        },
+        "HIGH_VOL/SHORT": {
+          "trades": 26,
+          "wins": 25,
+          "losses": 1,
+          "winRatePct": 96.15384615384616,
+          "sumLossJpy": -1500404.940849816,
+          "netPnlJpy": -77721.16373670184,
+          "worstSingleLossJpy": -1500404.940849816,
+          "meanLossJpy": -1500404.940849816
+        },
+        "MR/SHORT": {
+          "trades": 49,
+          "wins": 35,
+          "losses": 14,
+          "winRatePct": 71.42857142857143,
+          "sumLossJpy": -5164587.259341518,
+          "netPnlJpy": -461279.64175254613,
+          "worstSingleLossJpy": -1987427.0852338402,
+          "meanLossJpy": -368899.0899529656
+        },
+        "PB/LONG": {
+          "trades": 12,
+          "wins": 8,
+          "losses": 4,
+          "winRatePct": 66.66666666666667,
+          "sumLossJpy": -1430911.197960968,
+          "netPnlJpy": 1199362.167200801,
+          "worstSingleLossJpy": -956511.4814621866,
+          "meanLossJpy": -357727.799490242
+        },
+        "PB/SHORT": {
+          "trades": 11,
+          "wins": 9,
+          "losses": 2,
+          "winRatePct": 81.81818181818181,
+          "sumLossJpy": -1033070.2864885157,
+          "netPnlJpy": 1072202.1079819265,
+          "worstSingleLossJpy": -794555.9048969089,
+          "meanLossJpy": -516535.14324425784
+        },
+        "REV/LONG": {
+          "trades": 8,
+          "wins": 4,
+          "losses": 4,
+          "winRatePct": 50.0,
+          "sumLossJpy": -1731958.5437478188,
+          "netPnlJpy": -471979.51317565277,
+          "worstSingleLossJpy": -908064.4547679544,
+          "meanLossJpy": -432989.6359369547
+        },
+        "REV/SHORT": {
+          "trades": 57,
+          "wins": 43,
+          "losses": 14,
+          "winRatePct": 75.43859649122807,
+          "sumLossJpy": -2168183.76140463,
+          "netPnlJpy": 7226204.89749157,
+          "worstSingleLossJpy": -795706.666488954,
+          "meanLossJpy": -154870.26867175926
+        }
+      }
+    },
+    "30": {
+      "q102Trades": 181,
+      "familySide": {
+        "BRK/LONG": {
+          "trades": 9,
+          "wins": 7,
+          "losses": 2,
+          "winRatePct": 77.77777777777777,
+          "sumLossJpy": -218002.179361305,
+          "netPnlJpy": -36194.55456425851,
+          "worstSingleLossJpy": -199951.04454709243,
+          "meanLossJpy": -109001.0896806525
+        },
+        "BRK/SHORT": {
+          "trades": 4,
+          "wins": 3,
+          "losses": 1,
+          "winRatePct": 75.0,
+          "sumLossJpy": -1480.3589670312645,
+          "netPnlJpy": 110967.92076458866,
+          "worstSingleLossJpy": -1480.3589670312645,
+          "meanLossJpy": -1480.3589670312645
+        },
+        "HIGH_VOL/LONG": {
+          "trades": 6,
+          "wins": 5,
+          "losses": 1,
+          "winRatePct": 83.33333333333333,
+          "sumLossJpy": -1036591.7331390035,
+          "netPnlJpy": -873127.388276355,
+          "worstSingleLossJpy": -1036591.7331390035,
+          "meanLossJpy": -1036591.7331390035
+        },
+        "HIGH_VOL/SHORT": {
+          "trades": 26,
+          "wins": 25,
+          "losses": 1,
+          "winRatePct": 96.15384615384616,
+          "sumLossJpy": -1274779.561275087,
+          "netPnlJpy": -877517.1906370159,
+          "worstSingleLossJpy": -1274779.561275087,
+          "meanLossJpy": -1274779.561275087
+        },
+        "MR/SHORT": {
+          "trades": 49,
+          "wins": 35,
+          "losses": 14,
+          "winRatePct": 71.42857142857143,
+          "sumLossJpy": -3650318.334997362,
+          "netPnlJpy": -1951251.9937192441,
+          "worstSingleLossJpy": -2085671.801996846,
+          "meanLossJpy": -260737.023928383
+        },
+        "PB/LONG": {
+          "trades": 11,
+          "wins": 7,
+          "losses": 4,
+          "winRatePct": 63.63636363636363,
+          "sumLossJpy": -1530735.2711497818,
+          "netPnlJpy": 483119.9480841147,
+          "worstSingleLossJpy": -988916.9636354194,
+          "meanLossJpy": -382683.81778744544
+        },
+        "PB/SHORT": {
+          "trades": 11,
+          "wins": 8,
+          "losses": 3,
+          "winRatePct": 72.72727272727273,
+          "sumLossJpy": -1106973.093095022,
+          "netPnlJpy": 798416.75979864,
+          "worstSingleLossJpy": -826541.2024914105,
+          "meanLossJpy": -368991.031031674
+        },
+        "REV/LONG": {
+          "trades": 8,
+          "wins": 4,
+          "losses": 4,
+          "winRatePct": 50.0,
+          "sumLossJpy": -1545771.3177449042,
+          "netPnlJpy": -714825.6083870915,
+          "worstSingleLossJpy": -946645.5347447066,
+          "meanLossJpy": -386442.82943622605
+        },
+        "REV/SHORT": {
+          "trades": 57,
+          "wins": 43,
+          "losses": 14,
+          "winRatePct": 75.43859649122807,
+          "sumLossJpy": -1735136.68211777,
+          "netPnlJpy": 4069012.781509121,
+          "worstSingleLossJpy": -829397.2458492437,
+          "meanLossJpy": -123938.33443698357
+        }
+      }
+    }
+  },
+  "signedVenueCertified": false,
+  "modelWarning": "Relative per-family loss and in-sample risk diagnostics, not family cutoff adoption"
+}

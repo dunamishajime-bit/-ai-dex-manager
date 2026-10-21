@@ -1,0 +1,87 @@
+{
+  "status": "V4_ACCEPTED_STOP_COOLDOWN_FIXED_POINT_LEDGER_REPLAY",
+  "sourceHandoffSha": "4081eb37fe23f884a4d1fa93e2b608e388bf7071",
+  "runCostBps": [
+    10,
+    30
+  ],
+  "comparisonIterations": [
+    1,
+    2
+  ],
+  "files": [
+    {
+      "costBps": 10,
+      "name": "candidate-decisions.jsonl",
+      "sha256iter1": "1f309650cdd8beaef5e3bc314dcb1c3b2ef39c3888b08a1c6a1c9dea910194ab",
+      "sha256iter2": "1f309650cdd8beaef5e3bc314dcb1c3b2ef39c3888b08a1c6a1c9dea910194ab",
+      "identical": true
+    },
+    {
+      "costBps": 10,
+      "name": "portfolio-trades.jsonl",
+      "sha256iter1": "72f424a565ab77e0a1bd7b8d3f08af683055269680d9cc6deda59bd760ef3c91",
+      "sha256iter2": "72f424a565ab77e0a1bd7b8d3f08af683055269680d9cc6deda59bd760ef3c91",
+      "identical": true
+    },
+    {
+      "costBps": 10,
+      "name": "portfolio-events.jsonl",
+      "sha256iter1": "99d282afbf3604b1caf1ff8321096b8915ccdbf8fff9bc571659a08fc3ef9f00",
+      "sha256iter2": "99d282afbf3604b1caf1ff8321096b8915ccdbf8fff9bc571659a08fc3ef9f00",
+      "identical": true
+    },
+    {
+      "costBps": 10,
+      "name": "task9-mtm.jsonl",
+      "sha256iter1": "49de38639f8baa26fe2de652e7d0c82abf75125547bde589f93321fec5dfc311",
+      "sha256iter2": "49de38639f8baa26fe2de652e7d0c82abf75125547bde589f93321fec5dfc311",
+      "identical": true
+    },
+    {
+      "costBps": 10,
+      "name": "metrics.json",
+      "sha256iter1": "87a03a2b7e479e191acf50c6f0d7acce4bec0cb4226fe4961e3bbfa3b95d7cce",
+      "sha256iter2": "87a03a2b7e479e191acf50c6f0d7acce4bec0cb4226fe4961e3bbfa3b95d7cce",
+      "identical": true
+    },
+    {
+      "costBps": 30,
+      "name": "candidate-decisions.jsonl",
+      "sha256iter1": "0620a179c22f8a03d1da06da66898eb83bf4544817a48188ccdc8bed63a70d23",
+      "sha256iter2": "0620a179c22f8a03d1da06da66898eb83bf4544817a48188ccdc8bed63a70d23",
+      "identical": true
+    },
+    {
+      "costBps": 30,
+      "name": "portfolio-trades.jsonl",
+      "sha256iter1": "4b7ad60ba0a9170b6a36a537e4dbb82086bcfa6d2eed3e5805ca81e4077644d6",
+      "sha256iter2": "4b7ad60ba0a9170b6a36a537e4dbb82086bcfa6d2eed3e5805ca81e4077644d6",
+      "identical": true
+    },
+    {
+      "costBps": 30,
+      "name": "portfolio-events.jsonl",
+      "sha256iter1": "5ab8177db574aa52373fc861c1c3bccf8965617dc3a4b0b04628a0d97405dec2",
+      "sha256iter2": "5ab8177db574aa52373fc861c1c3bccf8965617dc3a4b0b04628a0d97405dec2",
+      "identical": true
+    },
+    {
+      "costBps": 30,
+      "name": "task9-mtm.jsonl",
+      "sha256iter1": "1391ad0c0a64bc47cb54c0902537cf0381eeb8937a1d8d1642c8cf60284d0f9a",
+      "sha256iter2": "1391ad0c0a64bc47cb54c0902537cf0381eeb8937a1d8d1642c8cf60284d0f9a",
+      "identical": true
+    },
+    {
+      "costBps": 30,
+      "name": "metrics.json",
+      "sha256iter1": "6c167522b2bac3c439ef5b63e7cccc62c8cee73eeb56a3071f18436cd6a462ba",
+      "sha256iter2": "6c167522b2bac3c439ef5b63e7cccc62c8cee73eeb56a3071f18436cd6a462ba",
+      "identical": true
+    }
+  ],
+  "sourceModelOnly": true,
+  "realVenueCertified": false,
+  "tradesAndMTMIdenticalBothCosts": true
+}

@@ -1,0 +1,164 @@
+{
+  "id": "V12_V4_FOUR_20261021_FINAL_USER_RESEARCH_ADOPTION",
+  "status": "PINNED_CUMULATIVE_RESEARCH_BT_BASELINE_NOT_LIVE",
+  "adoptedAtJst": "2026-10-21",
+  "originalHandoffSha": "4081eb37fe23f884a4d1fa93e2b608e388bf7071",
+  "researchSources": "Full 8-logic 5m price model, accepted-signed-fill cooldown model only, not real exchange",
+  "dateRange": "2025-08-10 to 2026-08-10",
+  "initialCapitalJpy": 10000,
+  "costBps": [
+    10,
+    30
+  ],
+  "sourceArchiveSha256": "10cdc48705a6f9e310cd0aecc95ce781af24325b1a99c2eb9aaefe3bd2953934",
+  "fourPolicies": {
+    "longTime37DefensiveStop": "MFE+2% observed completed M5 => emergency trigger entry-5%; initial entry-8%; persist armed",
+    "longProfitThreeRoutes": "X09/X10/X14 only; MFE+3%, close gain<=+1%, 2 completed bearish H1",
+    "shortInitialAllRoutes": "all 41 V4 SHORT routes; 12h after entry, prior MFE<1%, adverse>=+2.5%; same symbol SHORT 12h cooldown after ADMITTED STOP FILL only",
+    "shortProfitTime37": "TIME37 SHORT only; prior MFE+5%, gain<=+2%, 2 completed bullish H1"
+  },
+  "baseline": {
+    "10": {
+      "finalEquityJpy": 191750055.32685158,
+      "maxMtmDdPct": -14.603309760733396,
+      "profitFactor": 3.175048774826471,
+      "winRate": 0.7065959059893859,
+      "closedTrades": 1319,
+      "closedByStrategySide": {
+        "V12_SHORT": 691,
+        "RESIDUAL_LONG": 30,
+        "Q102_LONG": 35,
+        "Q102_SHORT": 147,
+        "PENGU_LONG": 47,
+        "V12_LONG": 144,
+        "IDLE_SHORT": 70,
+        "PENGU_SHORT": 20,
+        "V52_LONG": 35,
+        "V52_SHORT": 52,
+        "HYPE_LONG_LONG": 40,
+        "FET_LONG": 8
+      },
+      "exitReasons": {
+        "RESEARCH_V4_SHORT_PROFIT_SHORT_TIME37_5P_TO_2P_BULL2": 40,
+        "RESEARCH_INITIAL_ADVERSE_STOP_V12_SHORT_PCT2P5_12H_MFE1P0_R12": 52,
+        "RESEARCH_V4_LONG_TIME37_M5_EMERGENCY_LONG_TIME37_2P_ARM_MINUS5": 4,
+        "RESEARCH_V4_LONG_H1_CONFIRMED_LONG_X3_3P_TO_1P_BEAR2": 1
+      },
+      "ddImprovementVersusSourceBaselinePp": 1.0173270521560145,
+      "q102TradeCount": 182,
+      "oos": {
+        "boundary_utc": "2026-04-22T12:00:00+00:00",
+        "trades": 332,
+        "known_pnl_trades": 332,
+        "unsettled_trades": 0,
+        "crossing_trades": 2,
+        "net_pnl_jpy": 158116633.9148704,
+        "profit_factor": 3.2536739693713272,
+        "win_rate": 0.7319277108433735,
+        "max_cumulative_pnl_drawdown_jpy": -17246336.01951289,
+        "cost_bps": 10
+      },
+      "accounting": "PASS",
+      "venueCertified": false,
+      "acceptedShortStopCooldownEvents": 52,
+      "cooldownPasses": [
+        {
+          "iteration": 0,
+          "observedAdmittedInitialShortStops": 52,
+          "enforcedPriorCooldownEventCount": 0,
+          "policyId": "V4_ACCEPTED_ALL4_20261021",
+          "finalEquityJpy": 191750055.32685158
+        },
+        {
+          "iteration": 1,
+          "observedAdmittedInitialShortStops": 52,
+          "enforcedPriorCooldownEventCount": 52,
+          "policyId": "V4_ACCEPTED_ALL4_20261021",
+          "finalEquityJpy": 191750055.32685158
+        },
+        {
+          "iteration": 2,
+          "observedAdmittedInitialShortStops": 52,
+          "enforcedPriorCooldownEventCount": 52,
+          "policyId": "V4_ACCEPTED_ALL4_20261021",
+          "finalEquityJpy": 191750055.32685158
+        }
+      ],
+      "cooldownModel": "ADMITTED_FILL_FIXED_POINT"
+    },
+    "30": {
+      "finalEquityJpy": 74740267.7840667,
+      "maxMtmDdPct": -15.778153069011314,
+      "profitFactor": 2.5810666001785227,
+      "winRate": 0.6831306990881459,
+      "closedTrades": 1316,
+      "closedByStrategySide": {
+        "V12_SHORT": 689,
+        "RESIDUAL_LONG": 29,
+        "Q102_LONG": 34,
+        "Q102_SHORT": 147,
+        "PENGU_LONG": 47,
+        "V12_LONG": 143,
+        "IDLE_SHORT": 74,
+        "PENGU_SHORT": 20,
+        "V52_LONG": 35,
+        "V52_SHORT": 52,
+        "HYPE_LONG_LONG": 38,
+        "FET_LONG": 8
+      },
+      "exitReasons": {
+        "RESEARCH_V4_SHORT_PROFIT_SHORT_TIME37_5P_TO_2P_BULL2": 42,
+        "RESEARCH_INITIAL_ADVERSE_STOP_V12_SHORT_PCT2P5_12H_MFE1P0_R12": 51,
+        "RESEARCH_V4_LONG_TIME37_M5_EMERGENCY_LONG_TIME37_2P_ARM_MINUS5": 4,
+        "RESEARCH_V4_LONG_H1_CONFIRMED_LONG_X3_3P_TO_1P_BEAR2": 1
+      },
+      "ddImprovementVersusSourceBaselinePp": 1.0096157059231068,
+      "q102TradeCount": 181,
+      "oos": {
+        "boundary_utc": "2026-04-22T12:00:00+00:00",
+        "trades": 334,
+        "known_pnl_trades": 334,
+        "unsettled_trades": 0,
+        "crossing_trades": 2,
+        "net_pnl_jpy": 64437211.76818284,
+        "profit_factor": 2.6508736357139395,
+        "win_rate": 0.6946107784431138,
+        "max_cumulative_pnl_drawdown_jpy": -5938601.523498751,
+        "cost_bps": 30
+      },
+      "accounting": "PASS",
+      "venueCertified": false,
+      "acceptedShortStopCooldownEvents": 51,
+      "cooldownPasses": [
+        {
+          "iteration": 0,
+          "observedAdmittedInitialShortStops": 51,
+          "enforcedPriorCooldownEventCount": 0,
+          "policyId": "V4_ACCEPTED_ALL4_20261021",
+          "finalEquityJpy": 74740267.7840667
+        },
+        {
+          "iteration": 1,
+          "observedAdmittedInitialShortStops": 51,
+          "enforcedPriorCooldownEventCount": 51,
+          "policyId": "V4_ACCEPTED_ALL4_20261021",
+          "finalEquityJpy": 74740267.7840667
+        },
+        {
+          "iteration": 2,
+          "observedAdmittedInitialShortStops": 51,
+          "enforcedPriorCooldownEventCount": 51,
+          "policyId": "V4_ACCEPTED_ALL4_20261021",
+          "finalEquityJpy": 74740267.7840667
+        }
+      ],
+      "cooldownModel": "ADMITTED_FILL_FIXED_POINT"
+    }
+  },
+  "lockedInSubsequentQ102Trials": true,
+  "rejectedReasonForRollback": "Never rollback adopted V4 during Q102 or subsequent strategy BT comparisons",
+  "Q102Reference": "existing optional +2% confirmed M5 CLOSE to resident +0.5% stop; must compare with adopted V4 locked",
+  "productionReleaseCertified": false,
+  "signedVenueVenueProofCertified": false,
+  "latestIndependentTask9TSParityForAll4": false
+}

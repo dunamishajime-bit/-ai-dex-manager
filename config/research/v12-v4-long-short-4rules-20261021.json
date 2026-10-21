@@ -1,6 +1,6 @@
 {
   "contractId": "V12_V4_LONG_SHORT_4_EXIT_RULES_20261021",
-  "status": "USER_SELECTED_FOR_CODEX_IMPLEMENTATION_NOT_LIVE",
+  "status": "FORMALLY_ADOPTED_FOR_ALL_FUTURE_BT_NOT_LIVE",
   "strategies": [
     "V12_V4"
   ],
@@ -81,11 +81,45 @@
     "longSelectedSourceSha": "40107b7ae487b102687b462dfd1f3ba5c9492b56",
     "longPurePolicySha": "f63314c066df7a3721880733f841c1b931a47f34",
     "shortPurePolicySha": "519356c47de1a09a170bd5823fcd34efe7503964",
-    "full4RulesCombined8LogicEconomicBt": "NOT_DONE",
-    "independentLatestTask9LiveParity": "NOT_DONE",
-    "signedVenueLifecycleProof": "NOT_DONE",
+    "full4RulesCombined8LogicEconomicBt": "COMPLETE_8LOGIC_NATIVE_PRICE_MODEL_10_AND_30_BPS",
+    "independentLatestTask9LiveParity": "NOT_PROVEN_FOR_FULL4",
+    "signedVenueLifecycleProof": "NOT_PROVEN",
     "productionDeployed": false,
     "orderStateChanged": false,
-    "researchSourceSha": "ef256afc74b4a7b1eaeeceecf69cba285570a2d7"
+    "researchSourceSha": "ef256afc74b4a7b1eaeeceecf69cba285570a2d7",
+    "shortCooldownAcceptedOnlyFixedpoint": "PASS_IN_HISTORICAL_MODEL"
+  },
+  "researchAdoption": {
+    "isCanonicalCumulativeBaseline": true,
+    "futureBacktestsMustCarryAllFourV4Rules": true,
+    "frozenResearchBaseOriginSha": "4081eb37fe23f884a4d1fa93e2b608e388bf7071",
+    "proof": "docs/research/results/v4-locked-cumulative-next-q102-20261021/V12_V4_USER_ADOPTED_FOUR_RULE_CUMULATIVE_BASELINE_20261021.json",
+    "cooldownProof": "docs/research/results/v4-locked-cumulative-next-q102-20261021/V4_LOCKED_ACCEPTED_COOLDOWN_ITERATION_LEDGER_PROOF_20261021.json",
+    "costsBps": [
+      10,
+      30
+    ],
+    "initialJpy": 10000,
+    "period": "2025-08-10 to 2026-08-10",
+    "baselineByCostBps": {
+      "10": {
+        "finalEquityJpy": 191750055.32685158,
+        "maxMtmDdPct": -14.603309760733396,
+        "profitFactor": 3.175048774826471,
+        "closedTrades": 1319,
+        "acceptedShortStopCooldownEvents": 52
+      },
+      "30": {
+        "finalEquityJpy": 74740267.7840667,
+        "maxMtmDdPct": -15.778153069011314,
+        "profitFactor": 2.5810666001785227,
+        "closedTrades": 1316,
+        "acceptedShortStopCooldownEvents": 51
+      }
+    },
+    "otherStrategiesRemainUnchanged": true,
+    "nextStrategy": "Q102",
+    "q102ExtraRuleAdopted": false,
+    "liveReleaseUnchangedByStudy": true
   }
 }

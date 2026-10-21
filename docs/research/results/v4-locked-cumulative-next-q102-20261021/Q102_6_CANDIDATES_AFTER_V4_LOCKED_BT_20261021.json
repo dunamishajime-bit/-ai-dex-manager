@@ -1,0 +1,1092 @@
+{
+  "status": "V4_FOUR_ADOPTED_LOCKED_Q102_6_RESEARCH_CASES_COMPLETE_NO_Q102_ADOPTION",
+  "dateJst": "2026-10-21",
+  "frozenHandoffSha": "4081eb37fe23f884a4d1fa93e2b608e388bf7071",
+  "period": "2025-08-10 to 2026-08-10",
+  "initialCapitalJpy": 10000,
+  "additionalDepositsJpy": 0,
+  "baseCostBps": 10,
+  "stressCostBps": 30,
+  "sourceArchiveSha256": "10cdc48705a6f9e310cd0aecc95ce781af24325b1a99c2eb9aaefe3bd2953934",
+  "V4LockedBaseline": {
+    "10": {
+      "finalEquityJpy": 191750055.32685158,
+      "maxMtmDdPct": -14.603309760733396,
+      "profitFactor": 3.175048774826471,
+      "closedTrades": 1319,
+      "acceptedShortStopCooldownEvents": 52
+    },
+    "30": {
+      "finalEquityJpy": 74740267.7840667,
+      "maxMtmDdPct": -15.778153069011314,
+      "profitFactor": 2.5810666001785227,
+      "closedTrades": 1316,
+      "acceptedShortStopCooldownEvents": 51
+    }
+  },
+  "researchEngineSourceSha256": "23d45034095aecf2291eb257fba4b0b05dc8b4c91327b454602f433567cb9e8c",
+  "V4AlreadyAdoptedAndNeverReverted": true,
+  "Q102NewAdditionsAdopted": [],
+  "results": {
+    "Q102_PROFIT_ARM2_FLOOR0P5": {
+      "rules": [
+        {
+          "id": "V4_ACCEPTED_ALL4_20261021",
+          "strategy": "V12",
+          "sides": [
+            "LONG",
+            "SHORT"
+          ]
+        },
+        {
+          "id": "Q102_PROFIT_ARM2_FLOOR0P5",
+          "strategy": "Q102",
+          "sides": [
+            "LONG",
+            "SHORT"
+          ],
+          "kind": "profit_floor",
+          "arm": 0.02,
+          "floor": 0.005
+        }
+      ],
+      "costs": {
+        "10": {
+          "finalEquityJpy": 191750055.32685158,
+          "maxMtmDdPct": -14.603309760733396,
+          "profitFactor": 3.175048774826471,
+          "winRate": 0.7065959059893859,
+          "closedTrades": 1319,
+          "closedByStrategySide": {
+            "V12_SHORT": 691,
+            "RESIDUAL_LONG": 30,
+            "Q102_LONG": 35,
+            "Q102_SHORT": 147,
+            "PENGU_LONG": 47,
+            "V12_LONG": 144,
+            "IDLE_SHORT": 70,
+            "PENGU_SHORT": 20,
+            "V52_LONG": 35,
+            "V52_SHORT": 52,
+            "HYPE_LONG_LONG": 40,
+            "FET_LONG": 8
+          },
+          "exitReasons": {
+            "RESEARCH_V4_SHORT_PROFIT_SHORT_TIME37_5P_TO_2P_BULL2": 40,
+            "RESEARCH_INITIAL_ADVERSE_STOP_V12_SHORT_PCT2P5_12H_MFE1P0_R12": 52,
+            "RESEARCH_V4_LONG_TIME37_M5_EMERGENCY_LONG_TIME37_2P_ARM_MINUS5": 4,
+            "RESEARCH_V4_LONG_H1_CONFIRMED_LONG_X3_3P_TO_1P_BEAR2": 1
+          },
+          "ddImprovementVersusSourceBaselinePp": 1.0173270521560145,
+          "q102TradeCount": 182,
+          "oos": {
+            "boundary_utc": "2026-04-22T12:00:00+00:00",
+            "trades": 332,
+            "known_pnl_trades": 332,
+            "unsettled_trades": 0,
+            "crossing_trades": 2,
+            "net_pnl_jpy": 158116633.9148704,
+            "profit_factor": 3.2536739693713272,
+            "win_rate": 0.7319277108433735,
+            "max_cumulative_pnl_drawdown_jpy": -17246336.01951289,
+            "cost_bps": 10
+          },
+          "accounting": "PASS",
+          "venueCertified": false,
+          "acceptedShortStopCooldownEvents": 52,
+          "cooldownPasses": [
+            {
+              "iteration": 0,
+              "observedAdmittedInitialShortStops": 52,
+              "enforcedPriorCooldownEventCount": 0,
+              "policyId": "Q102_PROFIT_ARM2_FLOOR0P5",
+              "finalEquityJpy": 191750055.32685158
+            },
+            {
+              "iteration": 1,
+              "observedAdmittedInitialShortStops": 52,
+              "enforcedPriorCooldownEventCount": 52,
+              "policyId": "Q102_PROFIT_ARM2_FLOOR0P5",
+              "finalEquityJpy": 191750055.32685158
+            },
+            {
+              "iteration": 2,
+              "observedAdmittedInitialShortStops": 52,
+              "enforcedPriorCooldownEventCount": 52,
+              "policyId": "Q102_PROFIT_ARM2_FLOOR0P5",
+              "finalEquityJpy": 191750055.32685158
+            }
+          ],
+          "cooldownModel": "ADMITTED_FILL_FIXED_POINT",
+          "addedQ102Exits": 0,
+          "deltaEquityVsLockedJpy": 0.0,
+          "deltaDrawdownVsLockedPp": 0.0,
+          "equityRetentionVsLocked": 1.0
+        },
+        "30": {
+          "finalEquityJpy": 74740267.7840667,
+          "maxMtmDdPct": -15.778153069011314,
+          "profitFactor": 2.5810666001785227,
+          "winRate": 0.6831306990881459,
+          "closedTrades": 1316,
+          "closedByStrategySide": {
+            "V12_SHORT": 689,
+            "RESIDUAL_LONG": 29,
+            "Q102_LONG": 34,
+            "Q102_SHORT": 147,
+            "PENGU_LONG": 47,
+            "V12_LONG": 143,
+            "IDLE_SHORT": 74,
+            "PENGU_SHORT": 20,
+            "V52_LONG": 35,
+            "V52_SHORT": 52,
+            "HYPE_LONG_LONG": 38,
+            "FET_LONG": 8
+          },
+          "exitReasons": {
+            "RESEARCH_V4_SHORT_PROFIT_SHORT_TIME37_5P_TO_2P_BULL2": 42,
+            "RESEARCH_INITIAL_ADVERSE_STOP_V12_SHORT_PCT2P5_12H_MFE1P0_R12": 51,
+            "RESEARCH_V4_LONG_TIME37_M5_EMERGENCY_LONG_TIME37_2P_ARM_MINUS5": 4,
+            "RESEARCH_V4_LONG_H1_CONFIRMED_LONG_X3_3P_TO_1P_BEAR2": 1
+          },
+          "ddImprovementVersusSourceBaselinePp": 1.0096157059231068,
+          "q102TradeCount": 181,
+          "oos": {
+            "boundary_utc": "2026-04-22T12:00:00+00:00",
+            "trades": 334,
+            "known_pnl_trades": 334,
+            "unsettled_trades": 0,
+            "crossing_trades": 2,
+            "net_pnl_jpy": 64437211.76818284,
+            "profit_factor": 2.6508736357139395,
+            "win_rate": 0.6946107784431138,
+            "max_cumulative_pnl_drawdown_jpy": -5938601.523498751,
+            "cost_bps": 30
+          },
+          "accounting": "PASS",
+          "venueCertified": false,
+          "acceptedShortStopCooldownEvents": 51,
+          "cooldownPasses": [
+            {
+              "iteration": 0,
+              "observedAdmittedInitialShortStops": 51,
+              "enforcedPriorCooldownEventCount": 0,
+              "policyId": "Q102_PROFIT_ARM2_FLOOR0P5",
+              "finalEquityJpy": 74740267.7840667
+            },
+            {
+              "iteration": 1,
+              "observedAdmittedInitialShortStops": 51,
+              "enforcedPriorCooldownEventCount": 51,
+              "policyId": "Q102_PROFIT_ARM2_FLOOR0P5",
+              "finalEquityJpy": 74740267.7840667
+            },
+            {
+              "iteration": 2,
+              "observedAdmittedInitialShortStops": 51,
+              "enforcedPriorCooldownEventCount": 51,
+              "policyId": "Q102_PROFIT_ARM2_FLOOR0P5",
+              "finalEquityJpy": 74740267.7840667
+            }
+          ],
+          "cooldownModel": "ADMITTED_FILL_FIXED_POINT",
+          "addedQ102Exits": 0,
+          "deltaEquityVsLockedJpy": 0.0,
+          "deltaDrawdownVsLockedPp": 0.0,
+          "equityRetentionVsLocked": 1.0
+        }
+      },
+      "all4Locked": true,
+      "passesBothCostDDGate0p1Pp": false
+    },
+    "Q102_INIT_2P5_6H_MFE0P5": {
+      "rules": [
+        {
+          "id": "V4_ACCEPTED_ALL4_20261021",
+          "strategy": "V12",
+          "sides": [
+            "LONG",
+            "SHORT"
+          ]
+        },
+        {
+          "id": "Q102_INIT_2P5_6H_MFE0P5",
+          "strategy": "Q102",
+          "sides": [
+            "LONG",
+            "SHORT"
+          ],
+          "kind": "early_adverse",
+          "arm_hours": 6,
+          "stop_pct": 0.025,
+          "mfe_gate_pct": 0.005,
+          "reentry_hours": 0
+        }
+      ],
+      "costs": {
+        "10": {
+          "finalEquityJpy": 181728640.9314144,
+          "maxMtmDdPct": -18.464193179239253,
+          "profitFactor": 3.114597441734627,
+          "winRate": 0.7018867924528301,
+          "closedTrades": 1325,
+          "closedByStrategySide": {
+            "V12_SHORT": 690,
+            "RESIDUAL_LONG": 30,
+            "Q102_LONG": 37,
+            "Q102_SHORT": 153,
+            "PENGU_LONG": 47,
+            "V12_LONG": 143,
+            "IDLE_SHORT": 73,
+            "PENGU_SHORT": 20,
+            "V52_LONG": 35,
+            "V52_SHORT": 52,
+            "HYPE_LONG_LONG": 37,
+            "FET_LONG": 8
+          },
+          "exitReasons": {
+            "RESEARCH_V4_SHORT_PROFIT_SHORT_TIME37_5P_TO_2P_BULL2": 41,
+            "RESEARCH_INITIAL_ADVERSE_STOP_V12_SHORT_PCT2P5_12H_MFE1P0_R12": 51,
+            "RESEARCH_INITIAL_ADVERSE_STOP_Q102_INIT_2P5_6H_MFE0P5": 11,
+            "RESEARCH_V4_LONG_TIME37_M5_EMERGENCY_LONG_TIME37_2P_ARM_MINUS5": 4,
+            "RESEARCH_V4_LONG_H1_CONFIRMED_LONG_X3_3P_TO_1P_BEAR2": 1
+          },
+          "ddImprovementVersusSourceBaselinePp": -2.8435563663498424,
+          "q102TradeCount": 190,
+          "oos": {
+            "boundary_utc": "2026-04-22T12:00:00+00:00",
+            "trades": 334,
+            "known_pnl_trades": 334,
+            "unsettled_trades": 0,
+            "crossing_trades": 2,
+            "net_pnl_jpy": 151152169.30214435,
+            "profit_factor": 3.1766085004777054,
+            "win_rate": 0.7275449101796407,
+            "max_cumulative_pnl_drawdown_jpy": -17387769.751096204,
+            "cost_bps": 10
+          },
+          "accounting": "PASS",
+          "venueCertified": false,
+          "acceptedShortStopCooldownEvents": 51,
+          "cooldownPasses": [
+            {
+              "iteration": 0,
+              "observedAdmittedInitialShortStops": 51,
+              "enforcedPriorCooldownEventCount": 0,
+              "policyId": "Q102_INIT_2P5_6H_MFE0P5",
+              "finalEquityJpy": 181728640.9314144
+            },
+            {
+              "iteration": 1,
+              "observedAdmittedInitialShortStops": 51,
+              "enforcedPriorCooldownEventCount": 51,
+              "policyId": "Q102_INIT_2P5_6H_MFE0P5",
+              "finalEquityJpy": 181728640.9314144
+            },
+            {
+              "iteration": 2,
+              "observedAdmittedInitialShortStops": 51,
+              "enforcedPriorCooldownEventCount": 51,
+              "policyId": "Q102_INIT_2P5_6H_MFE0P5",
+              "finalEquityJpy": 181728640.9314144
+            }
+          ],
+          "cooldownModel": "ADMITTED_FILL_FIXED_POINT",
+          "addedQ102Exits": 11,
+          "deltaEquityVsLockedJpy": -10021414.395437181,
+          "deltaDrawdownVsLockedPp": -3.860883418505857,
+          "equityRetentionVsLocked": 0.9477370977632577
+        },
+        "30": {
+          "finalEquityJpy": 63873670.676173665,
+          "maxMtmDdPct": -20.370582395112336,
+          "profitFactor": 2.3727029969357116,
+          "winRate": 0.6772247360482655,
+          "closedTrades": 1326,
+          "closedByStrategySide": {
+            "V12_SHORT": 689,
+            "RESIDUAL_LONG": 29,
+            "Q102_LONG": 36,
+            "Q102_SHORT": 153,
+            "PENGU_LONG": 47,
+            "V12_LONG": 142,
+            "IDLE_SHORT": 79,
+            "PENGU_SHORT": 20,
+            "V52_LONG": 35,
+            "V52_SHORT": 52,
+            "HYPE_LONG_LONG": 36,
+            "FET_LONG": 8
+          },
+          "exitReasons": {
+            "RESEARCH_V4_SHORT_PROFIT_SHORT_TIME37_5P_TO_2P_BULL2": 42,
+            "RESEARCH_INITIAL_ADVERSE_STOP_V12_SHORT_PCT2P5_12H_MFE1P0_R12": 51,
+            "RESEARCH_INITIAL_ADVERSE_STOP_Q102_INIT_2P5_6H_MFE0P5": 11,
+            "RESEARCH_V4_LONG_TIME37_M5_EMERGENCY_LONG_TIME37_2P_ARM_MINUS5": 4,
+            "RESEARCH_V4_LONG_H1_CONFIRMED_LONG_X3_3P_TO_1P_BEAR2": 1
+          },
+          "ddImprovementVersusSourceBaselinePp": -3.582813620177916,
+          "q102TradeCount": 189,
+          "oos": {
+            "boundary_utc": "2026-04-22T12:00:00+00:00",
+            "trades": 337,
+            "known_pnl_trades": 337,
+            "unsettled_trades": 0,
+            "crossing_trades": 2,
+            "net_pnl_jpy": 54199265.16981724,
+            "profit_factor": 2.3842101679877414,
+            "win_rate": 0.6884272997032641,
+            "max_cumulative_pnl_drawdown_jpy": -5059830.695856832,
+            "cost_bps": 30
+          },
+          "accounting": "PASS",
+          "venueCertified": false,
+          "acceptedShortStopCooldownEvents": 51,
+          "cooldownPasses": [
+            {
+              "iteration": 0,
+              "observedAdmittedInitialShortStops": 51,
+              "enforcedPriorCooldownEventCount": 0,
+              "policyId": "Q102_INIT_2P5_6H_MFE0P5",
+              "finalEquityJpy": 63873670.676173665
+            },
+            {
+              "iteration": 1,
+              "observedAdmittedInitialShortStops": 51,
+              "enforcedPriorCooldownEventCount": 51,
+              "policyId": "Q102_INIT_2P5_6H_MFE0P5",
+              "finalEquityJpy": 63873670.676173665
+            },
+            {
+              "iteration": 2,
+              "observedAdmittedInitialShortStops": 51,
+              "enforcedPriorCooldownEventCount": 51,
+              "policyId": "Q102_INIT_2P5_6H_MFE0P5",
+              "finalEquityJpy": 63873670.676173665
+            }
+          ],
+          "cooldownModel": "ADMITTED_FILL_FIXED_POINT",
+          "addedQ102Exits": 11,
+          "deltaEquityVsLockedJpy": -10866597.107893042,
+          "deltaDrawdownVsLockedPp": -4.592429326101023,
+          "equityRetentionVsLocked": 0.8546085339259434
+        }
+      },
+      "all4Locked": true,
+      "passesBothCostDDGate0p1Pp": false
+    },
+    "Q102_BOTH_PROFIT2_AND_INITIAL6H": {
+      "rules": [
+        {
+          "id": "V4_ACCEPTED_ALL4_20261021",
+          "strategy": "V12",
+          "sides": [
+            "LONG",
+            "SHORT"
+          ]
+        },
+        {
+          "id": "Q102_BOTH_PROFIT2_AND_INITIAL6H",
+          "strategy": "Q102",
+          "sides": [
+            "LONG",
+            "SHORT"
+          ],
+          "kind": "q102_both",
+          "arm": 0.02,
+          "floor": 0.005,
+          "arm_hours": 6,
+          "stop_pct": 0.025,
+          "mfe_gate_pct": 0.005,
+          "reentry_hours": 0
+        }
+      ],
+      "costs": {
+        "10": {
+          "finalEquityJpy": 181728640.9314144,
+          "maxMtmDdPct": -18.464193179239253,
+          "profitFactor": 3.114597441734627,
+          "winRate": 0.7018867924528301,
+          "closedTrades": 1325,
+          "closedByStrategySide": {
+            "V12_SHORT": 690,
+            "RESIDUAL_LONG": 30,
+            "Q102_LONG": 37,
+            "Q102_SHORT": 153,
+            "PENGU_LONG": 47,
+            "V12_LONG": 143,
+            "IDLE_SHORT": 73,
+            "PENGU_SHORT": 20,
+            "V52_LONG": 35,
+            "V52_SHORT": 52,
+            "HYPE_LONG_LONG": 37,
+            "FET_LONG": 8
+          },
+          "exitReasons": {
+            "RESEARCH_V4_SHORT_PROFIT_SHORT_TIME37_5P_TO_2P_BULL2": 41,
+            "RESEARCH_INITIAL_ADVERSE_STOP_V12_SHORT_PCT2P5_12H_MFE1P0_R12": 51,
+            "RESEARCH_INITIAL_ADVERSE_STOP_Q102_BOTH_PROFIT2_AND_INITIAL6H": 11,
+            "RESEARCH_V4_LONG_TIME37_M5_EMERGENCY_LONG_TIME37_2P_ARM_MINUS5": 4,
+            "RESEARCH_V4_LONG_H1_CONFIRMED_LONG_X3_3P_TO_1P_BEAR2": 1
+          },
+          "ddImprovementVersusSourceBaselinePp": -2.8435563663498424,
+          "q102TradeCount": 190,
+          "oos": {
+            "boundary_utc": "2026-04-22T12:00:00+00:00",
+            "trades": 334,
+            "known_pnl_trades": 334,
+            "unsettled_trades": 0,
+            "crossing_trades": 2,
+            "net_pnl_jpy": 151152169.30214435,
+            "profit_factor": 3.1766085004777054,
+            "win_rate": 0.7275449101796407,
+            "max_cumulative_pnl_drawdown_jpy": -17387769.751096204,
+            "cost_bps": 10
+          },
+          "accounting": "PASS",
+          "venueCertified": false,
+          "acceptedShortStopCooldownEvents": 51,
+          "cooldownPasses": [
+            {
+              "iteration": 0,
+              "observedAdmittedInitialShortStops": 51,
+              "enforcedPriorCooldownEventCount": 0,
+              "policyId": "Q102_BOTH_PROFIT2_AND_INITIAL6H",
+              "finalEquityJpy": 181728640.9314144
+            },
+            {
+              "iteration": 1,
+              "observedAdmittedInitialShortStops": 51,
+              "enforcedPriorCooldownEventCount": 51,
+              "policyId": "Q102_BOTH_PROFIT2_AND_INITIAL6H",
+              "finalEquityJpy": 181728640.9314144
+            },
+            {
+              "iteration": 2,
+              "observedAdmittedInitialShortStops": 51,
+              "enforcedPriorCooldownEventCount": 51,
+              "policyId": "Q102_BOTH_PROFIT2_AND_INITIAL6H",
+              "finalEquityJpy": 181728640.9314144
+            }
+          ],
+          "cooldownModel": "ADMITTED_FILL_FIXED_POINT",
+          "addedQ102Exits": 11,
+          "deltaEquityVsLockedJpy": -10021414.395437181,
+          "deltaDrawdownVsLockedPp": -3.860883418505857,
+          "equityRetentionVsLocked": 0.9477370977632577
+        },
+        "30": {
+          "finalEquityJpy": 63873670.676173665,
+          "maxMtmDdPct": -20.370582395112336,
+          "profitFactor": 2.3727029969357116,
+          "winRate": 0.6772247360482655,
+          "closedTrades": 1326,
+          "closedByStrategySide": {
+            "V12_SHORT": 689,
+            "RESIDUAL_LONG": 29,
+            "Q102_LONG": 36,
+            "Q102_SHORT": 153,
+            "PENGU_LONG": 47,
+            "V12_LONG": 142,
+            "IDLE_SHORT": 79,
+            "PENGU_SHORT": 20,
+            "V52_LONG": 35,
+            "V52_SHORT": 52,
+            "HYPE_LONG_LONG": 36,
+            "FET_LONG": 8
+          },
+          "exitReasons": {
+            "RESEARCH_V4_SHORT_PROFIT_SHORT_TIME37_5P_TO_2P_BULL2": 42,
+            "RESEARCH_INITIAL_ADVERSE_STOP_V12_SHORT_PCT2P5_12H_MFE1P0_R12": 51,
+            "RESEARCH_INITIAL_ADVERSE_STOP_Q102_BOTH_PROFIT2_AND_INITIAL6H": 11,
+            "RESEARCH_V4_LONG_TIME37_M5_EMERGENCY_LONG_TIME37_2P_ARM_MINUS5": 4,
+            "RESEARCH_V4_LONG_H1_CONFIRMED_LONG_X3_3P_TO_1P_BEAR2": 1
+          },
+          "ddImprovementVersusSourceBaselinePp": -3.582813620177916,
+          "q102TradeCount": 189,
+          "oos": {
+            "boundary_utc": "2026-04-22T12:00:00+00:00",
+            "trades": 337,
+            "known_pnl_trades": 337,
+            "unsettled_trades": 0,
+            "crossing_trades": 2,
+            "net_pnl_jpy": 54199265.16981724,
+            "profit_factor": 2.3842101679877414,
+            "win_rate": 0.6884272997032641,
+            "max_cumulative_pnl_drawdown_jpy": -5059830.695856832,
+            "cost_bps": 30
+          },
+          "accounting": "PASS",
+          "venueCertified": false,
+          "acceptedShortStopCooldownEvents": 51,
+          "cooldownPasses": [
+            {
+              "iteration": 0,
+              "observedAdmittedInitialShortStops": 51,
+              "enforcedPriorCooldownEventCount": 0,
+              "policyId": "Q102_BOTH_PROFIT2_AND_INITIAL6H",
+              "finalEquityJpy": 63873670.676173665
+            },
+            {
+              "iteration": 1,
+              "observedAdmittedInitialShortStops": 51,
+              "enforcedPriorCooldownEventCount": 51,
+              "policyId": "Q102_BOTH_PROFIT2_AND_INITIAL6H",
+              "finalEquityJpy": 63873670.676173665
+            },
+            {
+              "iteration": 2,
+              "observedAdmittedInitialShortStops": 51,
+              "enforcedPriorCooldownEventCount": 51,
+              "policyId": "Q102_BOTH_PROFIT2_AND_INITIAL6H",
+              "finalEquityJpy": 63873670.676173665
+            }
+          ],
+          "cooldownModel": "ADMITTED_FILL_FIXED_POINT",
+          "addedQ102Exits": 11,
+          "deltaEquityVsLockedJpy": -10866597.107893042,
+          "deltaDrawdownVsLockedPp": -4.592429326101023,
+          "equityRetentionVsLocked": 0.8546085339259434
+        }
+      },
+      "all4Locked": true,
+      "passesBothCostDDGate0p1Pp": false
+    },
+    "Q102_MR_SHORT_INIT2P5_6H": {
+      "rules": [
+        {
+          "id": "V4_ACCEPTED_ALL4_20261021",
+          "strategy": "V12",
+          "sides": [
+            "LONG",
+            "SHORT"
+          ]
+        },
+        {
+          "id": "Q102_MR_SHORT_INIT2P5_6H",
+          "strategy": "Q102",
+          "sides": [
+            "SHORT"
+          ],
+          "family": "MR",
+          "kind": "early_adverse",
+          "arm_hours": 6,
+          "stop_pct": 0.025,
+          "mfe_gate_pct": 0.005,
+          "reentry_hours": 0
+        }
+      ],
+      "costs": {
+        "10": {
+          "finalEquityJpy": 189118790.96779352,
+          "maxMtmDdPct": -14.603309760733396,
+          "profitFactor": 3.1815509433366325,
+          "winRate": 0.7024981074943225,
+          "closedTrades": 1321,
+          "closedByStrategySide": {
+            "V12_SHORT": 691,
+            "RESIDUAL_LONG": 29,
+            "Q102_LONG": 36,
+            "Q102_SHORT": 149,
+            "PENGU_LONG": 47,
+            "V12_LONG": 143,
+            "IDLE_SHORT": 72,
+            "PENGU_SHORT": 20,
+            "V52_LONG": 35,
+            "V52_SHORT": 52,
+            "HYPE_LONG_LONG": 39,
+            "FET_LONG": 8
+          },
+          "exitReasons": {
+            "RESEARCH_V4_SHORT_PROFIT_SHORT_TIME37_5P_TO_2P_BULL2": 40,
+            "RESEARCH_INITIAL_ADVERSE_STOP_V12_SHORT_PCT2P5_12H_MFE1P0_R12": 52,
+            "RESEARCH_INITIAL_ADVERSE_STOP_Q102_MR_SHORT_INIT2P5_6H": 4,
+            "RESEARCH_V4_LONG_TIME37_M5_EMERGENCY_LONG_TIME37_2P_ARM_MINUS5": 4,
+            "RESEARCH_V4_LONG_H1_CONFIRMED_LONG_X3_3P_TO_1P_BEAR2": 1
+          },
+          "ddImprovementVersusSourceBaselinePp": 1.0173270521560145,
+          "q102TradeCount": 185,
+          "oos": {
+            "boundary_utc": "2026-04-22T12:00:00+00:00",
+            "trades": 332,
+            "known_pnl_trades": 332,
+            "unsettled_trades": 0,
+            "crossing_trades": 2,
+            "net_pnl_jpy": 156546048.1855408,
+            "profit_factor": 3.2610760545792923,
+            "win_rate": 0.7319277108433735,
+            "max_cumulative_pnl_drawdown_jpy": -16950940.466623828,
+            "cost_bps": 10
+          },
+          "accounting": "PASS",
+          "venueCertified": false,
+          "acceptedShortStopCooldownEvents": 52,
+          "cooldownPasses": [
+            {
+              "iteration": 0,
+              "observedAdmittedInitialShortStops": 52,
+              "enforcedPriorCooldownEventCount": 0,
+              "policyId": "Q102_MR_SHORT_INIT2P5_6H",
+              "finalEquityJpy": 189118790.96779352
+            },
+            {
+              "iteration": 1,
+              "observedAdmittedInitialShortStops": 52,
+              "enforcedPriorCooldownEventCount": 52,
+              "policyId": "Q102_MR_SHORT_INIT2P5_6H",
+              "finalEquityJpy": 189118790.96779352
+            },
+            {
+              "iteration": 2,
+              "observedAdmittedInitialShortStops": 52,
+              "enforcedPriorCooldownEventCount": 52,
+              "policyId": "Q102_MR_SHORT_INIT2P5_6H",
+              "finalEquityJpy": 189118790.96779352
+            }
+          ],
+          "cooldownModel": "ADMITTED_FILL_FIXED_POINT",
+          "addedQ102Exits": 4,
+          "deltaEquityVsLockedJpy": -2631264.3590580523,
+          "deltaDrawdownVsLockedPp": 0.0,
+          "equityRetentionVsLocked": 0.9862776344206374
+        },
+        "30": {
+          "finalEquityJpy": 72822273.10173976,
+          "maxMtmDdPct": -15.801215604834217,
+          "profitFactor": 2.574801820243599,
+          "winRate": 0.6798179059180577,
+          "closedTrades": 1318,
+          "closedByStrategySide": {
+            "V12_SHORT": 689,
+            "RESIDUAL_LONG": 28,
+            "Q102_LONG": 35,
+            "Q102_SHORT": 149,
+            "PENGU_LONG": 47,
+            "V12_LONG": 142,
+            "IDLE_SHORT": 76,
+            "PENGU_SHORT": 20,
+            "V52_LONG": 35,
+            "V52_SHORT": 52,
+            "HYPE_LONG_LONG": 37,
+            "FET_LONG": 8
+          },
+          "exitReasons": {
+            "RESEARCH_V4_SHORT_PROFIT_SHORT_TIME37_5P_TO_2P_BULL2": 42,
+            "RESEARCH_INITIAL_ADVERSE_STOP_V12_SHORT_PCT2P5_12H_MFE1P0_R12": 51,
+            "RESEARCH_INITIAL_ADVERSE_STOP_Q102_MR_SHORT_INIT2P5_6H": 4,
+            "RESEARCH_V4_LONG_TIME37_M5_EMERGENCY_LONG_TIME37_2P_ARM_MINUS5": 4,
+            "RESEARCH_V4_LONG_H1_CONFIRMED_LONG_X3_3P_TO_1P_BEAR2": 1
+          },
+          "ddImprovementVersusSourceBaselinePp": 0.986553170100203,
+          "q102TradeCount": 184,
+          "oos": {
+            "boundary_utc": "2026-04-22T12:00:00+00:00",
+            "trades": 334,
+            "known_pnl_trades": 334,
+            "unsettled_trades": 0,
+            "crossing_trades": 2,
+            "net_pnl_jpy": 62900771.3420979,
+            "profit_factor": 2.644344931870562,
+            "win_rate": 0.6946107784431138,
+            "max_cumulative_pnl_drawdown_jpy": -5752349.635932304,
+            "cost_bps": 30
+          },
+          "accounting": "PASS",
+          "venueCertified": false,
+          "acceptedShortStopCooldownEvents": 51,
+          "cooldownPasses": [
+            {
+              "iteration": 0,
+              "observedAdmittedInitialShortStops": 51,
+              "enforcedPriorCooldownEventCount": 0,
+              "policyId": "Q102_MR_SHORT_INIT2P5_6H",
+              "finalEquityJpy": 72822273.10173976
+            },
+            {
+              "iteration": 1,
+              "observedAdmittedInitialShortStops": 51,
+              "enforcedPriorCooldownEventCount": 51,
+              "policyId": "Q102_MR_SHORT_INIT2P5_6H",
+              "finalEquityJpy": 72822273.10173976
+            },
+            {
+              "iteration": 2,
+              "observedAdmittedInitialShortStops": 51,
+              "enforcedPriorCooldownEventCount": 51,
+              "policyId": "Q102_MR_SHORT_INIT2P5_6H",
+              "finalEquityJpy": 72822273.10173976
+            }
+          ],
+          "cooldownModel": "ADMITTED_FILL_FIXED_POINT",
+          "addedQ102Exits": 4,
+          "deltaEquityVsLockedJpy": -1917994.6823269427,
+          "deltaDrawdownVsLockedPp": -0.02306253582290374,
+          "equityRetentionVsLocked": 0.9743378671338421
+        }
+      },
+      "all4Locked": true,
+      "passesBothCostDDGate0p1Pp": false
+    },
+    "Q102_HV_LONG_INIT2P5_6H": {
+      "rules": [
+        {
+          "id": "V4_ACCEPTED_ALL4_20261021",
+          "strategy": "V12",
+          "sides": [
+            "LONG",
+            "SHORT"
+          ]
+        },
+        {
+          "id": "Q102_HV_LONG_INIT2P5_6H",
+          "strategy": "Q102",
+          "sides": [
+            "LONG"
+          ],
+          "family": "HIGH_VOL",
+          "kind": "early_adverse",
+          "arm_hours": 6,
+          "stop_pct": 0.025,
+          "mfe_gate_pct": 0.005,
+          "reentry_hours": 0
+        }
+      ],
+      "costs": {
+        "10": {
+          "finalEquityJpy": 191750055.32685158,
+          "maxMtmDdPct": -14.603309760733396,
+          "profitFactor": 3.175048774826471,
+          "winRate": 0.7065959059893859,
+          "closedTrades": 1319,
+          "closedByStrategySide": {
+            "V12_SHORT": 691,
+            "RESIDUAL_LONG": 30,
+            "Q102_LONG": 35,
+            "Q102_SHORT": 147,
+            "PENGU_LONG": 47,
+            "V12_LONG": 144,
+            "IDLE_SHORT": 70,
+            "PENGU_SHORT": 20,
+            "V52_LONG": 35,
+            "V52_SHORT": 52,
+            "HYPE_LONG_LONG": 40,
+            "FET_LONG": 8
+          },
+          "exitReasons": {
+            "RESEARCH_V4_SHORT_PROFIT_SHORT_TIME37_5P_TO_2P_BULL2": 40,
+            "RESEARCH_INITIAL_ADVERSE_STOP_V12_SHORT_PCT2P5_12H_MFE1P0_R12": 52,
+            "RESEARCH_V4_LONG_TIME37_M5_EMERGENCY_LONG_TIME37_2P_ARM_MINUS5": 4,
+            "RESEARCH_V4_LONG_H1_CONFIRMED_LONG_X3_3P_TO_1P_BEAR2": 1
+          },
+          "ddImprovementVersusSourceBaselinePp": 1.0173270521560145,
+          "q102TradeCount": 182,
+          "oos": {
+            "boundary_utc": "2026-04-22T12:00:00+00:00",
+            "trades": 332,
+            "known_pnl_trades": 332,
+            "unsettled_trades": 0,
+            "crossing_trades": 2,
+            "net_pnl_jpy": 158116633.9148704,
+            "profit_factor": 3.2536739693713272,
+            "win_rate": 0.7319277108433735,
+            "max_cumulative_pnl_drawdown_jpy": -17246336.01951289,
+            "cost_bps": 10
+          },
+          "accounting": "PASS",
+          "venueCertified": false,
+          "acceptedShortStopCooldownEvents": 52,
+          "cooldownPasses": [
+            {
+              "iteration": 0,
+              "observedAdmittedInitialShortStops": 52,
+              "enforcedPriorCooldownEventCount": 0,
+              "policyId": "Q102_HV_LONG_INIT2P5_6H",
+              "finalEquityJpy": 191750055.32685158
+            },
+            {
+              "iteration": 1,
+              "observedAdmittedInitialShortStops": 52,
+              "enforcedPriorCooldownEventCount": 52,
+              "policyId": "Q102_HV_LONG_INIT2P5_6H",
+              "finalEquityJpy": 191750055.32685158
+            },
+            {
+              "iteration": 2,
+              "observedAdmittedInitialShortStops": 52,
+              "enforcedPriorCooldownEventCount": 52,
+              "policyId": "Q102_HV_LONG_INIT2P5_6H",
+              "finalEquityJpy": 191750055.32685158
+            }
+          ],
+          "cooldownModel": "ADMITTED_FILL_FIXED_POINT",
+          "addedQ102Exits": 0,
+          "deltaEquityVsLockedJpy": 0.0,
+          "deltaDrawdownVsLockedPp": 0.0,
+          "equityRetentionVsLocked": 1.0
+        },
+        "30": {
+          "finalEquityJpy": 74740267.7840667,
+          "maxMtmDdPct": -15.778153069011314,
+          "profitFactor": 2.5810666001785227,
+          "winRate": 0.6831306990881459,
+          "closedTrades": 1316,
+          "closedByStrategySide": {
+            "V12_SHORT": 689,
+            "RESIDUAL_LONG": 29,
+            "Q102_LONG": 34,
+            "Q102_SHORT": 147,
+            "PENGU_LONG": 47,
+            "V12_LONG": 143,
+            "IDLE_SHORT": 74,
+            "PENGU_SHORT": 20,
+            "V52_LONG": 35,
+            "V52_SHORT": 52,
+            "HYPE_LONG_LONG": 38,
+            "FET_LONG": 8
+          },
+          "exitReasons": {
+            "RESEARCH_V4_SHORT_PROFIT_SHORT_TIME37_5P_TO_2P_BULL2": 42,
+            "RESEARCH_INITIAL_ADVERSE_STOP_V12_SHORT_PCT2P5_12H_MFE1P0_R12": 51,
+            "RESEARCH_V4_LONG_TIME37_M5_EMERGENCY_LONG_TIME37_2P_ARM_MINUS5": 4,
+            "RESEARCH_V4_LONG_H1_CONFIRMED_LONG_X3_3P_TO_1P_BEAR2": 1
+          },
+          "ddImprovementVersusSourceBaselinePp": 1.0096157059231068,
+          "q102TradeCount": 181,
+          "oos": {
+            "boundary_utc": "2026-04-22T12:00:00+00:00",
+            "trades": 334,
+            "known_pnl_trades": 334,
+            "unsettled_trades": 0,
+            "crossing_trades": 2,
+            "net_pnl_jpy": 64437211.76818284,
+            "profit_factor": 2.6508736357139395,
+            "win_rate": 0.6946107784431138,
+            "max_cumulative_pnl_drawdown_jpy": -5938601.523498751,
+            "cost_bps": 30
+          },
+          "accounting": "PASS",
+          "venueCertified": false,
+          "acceptedShortStopCooldownEvents": 51,
+          "cooldownPasses": [
+            {
+              "iteration": 0,
+              "observedAdmittedInitialShortStops": 51,
+              "enforcedPriorCooldownEventCount": 0,
+              "policyId": "Q102_HV_LONG_INIT2P5_6H",
+              "finalEquityJpy": 74740267.7840667
+            },
+            {
+              "iteration": 1,
+              "observedAdmittedInitialShortStops": 51,
+              "enforcedPriorCooldownEventCount": 51,
+              "policyId": "Q102_HV_LONG_INIT2P5_6H",
+              "finalEquityJpy": 74740267.7840667
+            },
+            {
+              "iteration": 2,
+              "observedAdmittedInitialShortStops": 51,
+              "enforcedPriorCooldownEventCount": 51,
+              "policyId": "Q102_HV_LONG_INIT2P5_6H",
+              "finalEquityJpy": 74740267.7840667
+            }
+          ],
+          "cooldownModel": "ADMITTED_FILL_FIXED_POINT",
+          "addedQ102Exits": 0,
+          "deltaEquityVsLockedJpy": 0.0,
+          "deltaDrawdownVsLockedPp": 0.0,
+          "equityRetentionVsLocked": 1.0
+        }
+      },
+      "all4Locked": true,
+      "passesBothCostDDGate0p1Pp": false
+    },
+    "Q102_INIT_2P5_12H_MFE1": {
+      "rules": [
+        {
+          "id": "V4_ACCEPTED_ALL4_20261021",
+          "strategy": "V12",
+          "sides": [
+            "LONG",
+            "SHORT"
+          ]
+        },
+        {
+          "id": "Q102_INIT_2P5_12H_MFE1",
+          "strategy": "Q102",
+          "sides": [
+            "LONG",
+            "SHORT"
+          ],
+          "kind": "early_adverse",
+          "arm_hours": 12,
+          "stop_pct": 0.025,
+          "mfe_gate_pct": 0.01,
+          "reentry_hours": 0
+        }
+      ],
+      "costs": {
+        "10": {
+          "finalEquityJpy": 188654501.92504966,
+          "maxMtmDdPct": -17.339876825250833,
+          "profitFactor": 3.2111979875098986,
+          "winRate": 0.7027231467473525,
+          "closedTrades": 1322,
+          "closedByStrategySide": {
+            "V12_SHORT": 691,
+            "RESIDUAL_LONG": 31,
+            "Q102_LONG": 37,
+            "Q102_SHORT": 149,
+            "PENGU_LONG": 47,
+            "V12_LONG": 143,
+            "IDLE_SHORT": 71,
+            "PENGU_SHORT": 20,
+            "V52_LONG": 35,
+            "V52_SHORT": 52,
+            "HYPE_LONG_LONG": 38,
+            "FET_LONG": 8
+          },
+          "exitReasons": {
+            "RESEARCH_V4_SHORT_PROFIT_SHORT_TIME37_5P_TO_2P_BULL2": 40,
+            "RESEARCH_INITIAL_ADVERSE_STOP_V12_SHORT_PCT2P5_12H_MFE1P0_R12": 52,
+            "RESEARCH_INITIAL_ADVERSE_STOP_Q102_INIT_2P5_12H_MFE1": 8,
+            "RESEARCH_V4_LONG_TIME37_M5_EMERGENCY_LONG_TIME37_2P_ARM_MINUS5": 4,
+            "RESEARCH_V4_LONG_H1_CONFIRMED_LONG_X3_3P_TO_1P_BEAR2": 1
+          },
+          "ddImprovementVersusSourceBaselinePp": -1.719240012361423,
+          "q102TradeCount": 186,
+          "oos": {
+            "boundary_utc": "2026-04-22T12:00:00+00:00",
+            "trades": 333,
+            "known_pnl_trades": 333,
+            "unsettled_trades": 0,
+            "crossing_trades": 2,
+            "net_pnl_jpy": 157181356.18215853,
+            "profit_factor": 3.27688572830702,
+            "win_rate": 0.7297297297297297,
+            "max_cumulative_pnl_drawdown_jpy": -16899549.709223643,
+            "cost_bps": 10
+          },
+          "accounting": "PASS",
+          "venueCertified": false,
+          "acceptedShortStopCooldownEvents": 52,
+          "cooldownPasses": [
+            {
+              "iteration": 0,
+              "observedAdmittedInitialShortStops": 52,
+              "enforcedPriorCooldownEventCount": 0,
+              "policyId": "Q102_INIT_2P5_12H_MFE1",
+              "finalEquityJpy": 188654501.92504966
+            },
+            {
+              "iteration": 1,
+              "observedAdmittedInitialShortStops": 52,
+              "enforcedPriorCooldownEventCount": 52,
+              "policyId": "Q102_INIT_2P5_12H_MFE1",
+              "finalEquityJpy": 188654501.92504966
+            },
+            {
+              "iteration": 2,
+              "observedAdmittedInitialShortStops": 52,
+              "enforcedPriorCooldownEventCount": 52,
+              "policyId": "Q102_INIT_2P5_12H_MFE1",
+              "finalEquityJpy": 188654501.92504966
+            }
+          ],
+          "cooldownModel": "ADMITTED_FILL_FIXED_POINT",
+          "addedQ102Exits": 8,
+          "deltaEquityVsLockedJpy": -3095553.401801914,
+          "deltaDrawdownVsLockedPp": -2.7365670645174376,
+          "equityRetentionVsLocked": 0.9838563102549028
+        },
+        "30": {
+          "finalEquityJpy": 63455874.85180079,
+          "maxMtmDdPct": -19.155070331054837,
+          "profitFactor": 2.413268004814864,
+          "winRate": 0.678030303030303,
+          "closedTrades": 1320,
+          "closedByStrategySide": {
+            "V12_SHORT": 689,
+            "RESIDUAL_LONG": 30,
+            "Q102_LONG": 36,
+            "Q102_SHORT": 149,
+            "PENGU_LONG": 47,
+            "V12_LONG": 141,
+            "IDLE_SHORT": 77,
+            "PENGU_SHORT": 20,
+            "V52_LONG": 35,
+            "V52_SHORT": 52,
+            "HYPE_LONG_LONG": 36,
+            "FET_LONG": 8
+          },
+          "exitReasons": {
+            "RESEARCH_V4_SHORT_PROFIT_SHORT_TIME37_5P_TO_2P_BULL2": 40,
+            "RESEARCH_INITIAL_ADVERSE_STOP_V12_SHORT_PCT2P5_12H_MFE1P0_R12": 53,
+            "RESEARCH_INITIAL_ADVERSE_STOP_Q102_INIT_2P5_12H_MFE1": 8,
+            "RESEARCH_V4_LONG_TIME37_M5_EMERGENCY_LONG_TIME37_2P_ARM_MINUS5": 4,
+            "RESEARCH_V4_LONG_H1_CONFIRMED_LONG_X3_3P_TO_1P_BEAR2": 1
+          },
+          "ddImprovementVersusSourceBaselinePp": -2.3673015561204167,
+          "q102TradeCount": 185,
+          "oos": {
+            "boundary_utc": "2026-04-22T12:00:00+00:00",
+            "trades": 336,
+            "known_pnl_trades": 336,
+            "unsettled_trades": 0,
+            "crossing_trades": 2,
+            "net_pnl_jpy": 54522892.90544169,
+            "profit_factor": 2.4415385486553274,
+            "win_rate": 0.6904761904761905,
+            "max_cumulative_pnl_drawdown_jpy": -5016392.398373343,
+            "cost_bps": 30
+          },
+          "accounting": "PASS",
+          "venueCertified": false,
+          "acceptedShortStopCooldownEvents": 53,
+          "cooldownPasses": [
+            {
+              "iteration": 0,
+              "observedAdmittedInitialShortStops": 53,
+              "enforcedPriorCooldownEventCount": 0,
+              "policyId": "Q102_INIT_2P5_12H_MFE1",
+              "finalEquityJpy": 63455874.85180079
+            },
+            {
+              "iteration": 1,
+              "observedAdmittedInitialShortStops": 53,
+              "enforcedPriorCooldownEventCount": 53,
+              "policyId": "Q102_INIT_2P5_12H_MFE1",
+              "finalEquityJpy": 63455874.85180079
+            },
+            {
+              "iteration": 2,
+              "observedAdmittedInitialShortStops": 53,
+              "enforcedPriorCooldownEventCount": 53,
+              "policyId": "Q102_INIT_2P5_12H_MFE1",
+              "finalEquityJpy": 63455874.85180079
+            }
+          ],
+          "cooldownModel": "ADMITTED_FILL_FIXED_POINT",
+          "addedQ102Exits": 8,
+          "deltaEquityVsLockedJpy": -11284392.932265915,
+          "deltaDrawdownVsLockedPp": -3.3769172620435235,
+          "equityRetentionVsLocked": 0.8490185643317758
+        }
+      },
+      "all4Locked": true,
+      "passesBothCostDDGate0p1Pp": false
+    }
+  },
+  "researchConclusion": "NO_Q102_CHANGE_QUALIFIED_AFTER_V4_LOCKED",
+  "nextResearchFocus": [
+    "Family MR SHORT risk tails versus winners",
+    "HIGH_VOL LONG low N 6; do not tune on one outlier",
+    "Q102 actual live optional profit floor enabled state and venue readback",
+    "Source model gross reallocation and holdout causal testing"
+  ],
+  "sourceCaveats": [
+    "Native historical full8 dynamic allocator, not signed venue/L2.",
+    "Q102 profit +2 close -> +0.5 floor uses completed M5 CLOSE to arm; never high-only.",
+    "SHORT V4 12h cooldown uses accepted-stop fixedpoint model, not merely proposal.",
+    "Independent current LIVE 8-logic Task9 parity with four policies unverified.",
+    "No production deployment or exchange order manipulation."
+  ]
+}
