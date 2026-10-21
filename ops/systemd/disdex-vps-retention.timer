@@ -1,0 +1,12 @@
+[Unit]
+Description=Run DisDex bounded VPS retention cleanup daily
+
+[Timer]
+OnCalendar=daily
+RandomizedDelaySec=1h
+Persistent=true
+AccuracySec=5min
+Unit=disdex-vps-retention.service
+
+[Install]
+WantedBy=timers.target

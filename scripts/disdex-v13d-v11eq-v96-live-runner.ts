@@ -12,11 +12,16 @@ import {
 } from "../config/disdexStockRouterV13DV11EqRuntime";
 import { markCombinedV96MigrationActivated } from "../lib/disdex-v96-combined-state-migration";
 
-const LIVE_ACKNOWLEDGEMENT = "I_ACCEPT_REAL_MONEY_V96_V11EQ_ASTER_ONLY" as const;
+const LIVE_ACKNOWLEDGEMENT = "I_ACCEPT_REAL_MONEY_V96_V52_ASTER_ONLY" as const;
 const V96_KILL_SWITCH_STRATEGY_ID = "DISDEX_V35_STRONG_RESERVED_PENGU_V96" as const;
 
+const READ_ONLY_PREFLIGHT_SCRIPT = "scripts/disdex-v96-v52-readonly-preflight.ts" as const;
+const VERIFIED_PREFLIGHT_SCRIPT = "scripts/disdex-v13d-v11eq-v96-strategy-preflight.ts" as const;
+const MARGIN_AWARE_V52_ENGINE = "scripts/disdex_v52_margin_aware_live_engine.py" as const;
+
 type RunnerMode = "paper" | "live";
-type ManagedChild = { name: "crypto-v96" | "stock-v11eq-aster-only"; process: ChildProcess };
+type ManagedChild = { name: "crypto-v96" | "pengu-dual-ls-v1" | "stock-v52-aster-only"; process: ChildProcess };
+type V52PreflightStatus = "ACTIVE" | "WAITING_MARKET_CLOSED" | "BLOCKED_DATA_UNAVAILABLE";
 
 function boolEnv(name: string, fallback = false) {
     const value = process.env[name];
@@ -25,9 +30,7 @@ function boolEnv(name: string, fallback = false) {
 }
 
 function mode(): RunnerMode {
-    return String(process.env.DISDEX_V13D_V11EQ_V96_RUNNER_MODE || "paper").toLowerCase() === "live"
-        ? "live"
-        : "paper";
+    return String(process.env.DISDEX_V13D_V11EQ_V96_RUNNER_MODE || "paper").toLowerCase() === "live" ? "live" : "paper";
 }
 
 function combinedPaths() {
@@ -35,6 +38,7 @@ function combinedPaths() {
     return {
         stateRoot,
         cryptoStateRoot: resolve(stateRoot, "crypto-v96"),
+        penguStateRoot: resolve(stateRoot, "crypto-v96", "pengu-dual-ls-v1"),
         stockStateRoot: resolve(stateRoot, "stock"),
         killSwitchPath: resolve(process.env.DISDEX_V13D_V11EQ_V96_KILL_SWITCH_FILE || resolve(stateRoot, "kill-switch.json")),
     };
@@ -46,11 +50,23 @@ export function buildCombinedChildEnvironment(runnerMode: RunnerMode) {
         ...process.env,
         DISDEX_V13D_V11EQ_V96_RUNNER_MODE: runnerMode,
         DISDEX_V13D_V11EQ_V96_COMBINED_STATE_ROOT: paths.stateRoot,
-        DISDEX_V13D_V11EQ_V96_STATE_DIR: paths.stockStateRoot,
+        DISDEX_V13D_V11EQ_V96_STATE_DIR: paths.stateRoot,
         DISDEX_V13D_V11EQ_V96_KILL_SWITCH_FILE: paths.killSwitchPath,
-        DISDEX_V11EQ_ASTER_ONLY_RUNNER_MODE: runnerMode,
-        DISDEX_V11EQ_ASTER_ONLY_STATE_DIR: paths.stockStateRoot,
-        DISDEX_V11EQ_ASTER_ONLY_KILL_SWITCH_FILE: paths.killSwitchPath,
+        DISDEX_V52_ASTER_ONLY_RUNNER_MODE: runnerMode,
+        DISDEX_V52_ASTER_ONLY_STATE_DIR: paths.stockStateRoot,
+        DISDEX_V52_ASTER_ONLY_KILL_SWITCH_FILE: paths.killSwitchPath,
+        DISDEX_V52_CRYPTO_GROSS_CAP: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoSleeveGrossCap),
+        DISDEX_V52_STOCK_GROSS_CAP: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.stockSleeveGrossCap),
+        DISDEX_V52_PORTFOLIO_GROSS_CAP: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.portfolioGrossCap),
+        DISDEX_V52_V11_GROSS_CAP: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.v11MaximumGross),
+        DISDEX_V52_V50_GROSS_CAP: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.v50MaximumGross),
+        DISDEX_V52_RESERVED_FIRST_STOCK_GROSS: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.reservedFirstStockGross),
+        DISDEX_V52_MINIMUM_FIRST_STOCK_GROSS: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.minimumFirstStockGross),
+        DISDEX_V52_MINIMUM_SECOND_STOCK_GROSS: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.minimumSecondStockGross),
+        DISDEX_V52_MAX_CONCURRENT_STOCK_POSITIONS: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.maximumConcurrentStockPositions),
+        DISDEX_V96_V52_REQUIRED_INITIAL_LEVERAGE: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoInitialLeverage),
+        DISDEX_V96_V52_MAX_INITIAL_MARGIN_FRACTION: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.maximumInitialMarginFraction),
+        DISDEX_V96_V52_MIN_AVAILABLE_BALANCE_FRACTION: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.minimumAvailableBalanceFractionAfterOrder),
         DISDEX_V96_RUNNER_MODE: runnerMode,
         DISDEX_V96_STATE_DIR: paths.cryptoStateRoot,
         DISDEX_V96_KILL_SWITCH_FILE: paths.killSwitchPath,
@@ -58,6 +74,17 @@ export function buildCombinedChildEnvironment(runnerMode: RunnerMode) {
         DISDEX_V96_PAPER_MAX_GROSS: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoSleeveGrossCap + 0.05),
         DISDEX_V96_RUNNER_INTERVAL_MS: process.env.DISDEX_V96_RUNNER_INTERVAL_MS || "30000",
         DISDEX_V96_CONFIG_MIGRATION_MODE: runnerMode === "live" ? "true" : "false",
+        PENGU_LEGACY_CORE_ENABLED: "false",
+        PENGU_DUAL_LS_V1_ENABLED: "true",
+        PENGU_DUAL_LS_V1_MODE: runnerMode === "live" ? "LIVE" : "PAPER",
+        PENGU_DUAL_LS_V1_LIVE_TRADING_ENABLED: runnerMode === "live" ? "true" : "false",
+        PENGU_DUAL_LS_V1_LIVE_EXECUTION_ENABLED: runnerMode === "live" ? "true" : "false",
+        PENGU_DUAL_LS_V1_STATE_DIR: paths.penguStateRoot,
+        PENGU_DUAL_LS_V1_LOCK_PATH: resolve(paths.cryptoStateRoot, `runner-${runnerMode}.lock`),
+        PENGU_DUAL_LS_V1_KILL_SWITCH_FILE: paths.killSwitchPath,
+        PENGU_DUAL_LS_V1_PORTFOLIO_DAILY_LOSS_STATE_FILE: resolve(paths.cryptoStateRoot, `runner-${runnerMode}.json`),
+        PENGU_DUAL_LS_V1_PORTFOLIO_GROSS_CAP: String(DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoSleeveGrossCap),
+        PENGU_DUAL_LS_V1_MAX_DAILY_LOSS_PCT: "5",
     } as NodeJS.ProcessEnv;
 }
 
@@ -66,12 +93,46 @@ export function assertCombinedLiveActivation(runnerMode: RunnerMode) {
     if (!DISDEX_V13D_V11EQ_V96_RUNTIME.liveTradingEnabled || !DISDEX_V13D_V11EQ_V96_RUNTIME.orderSubmissionAllowed) {
         throw new Error("Repository combined runtime is not LIVE-enabled.");
     }
-    if (!boolEnv("DISDEX_V11EQ_ASTER_ONLY_LIVE_EXECUTION_ENABLED", false)) {
-        throw new Error("LIVE requires DISDEX_V11EQ_ASTER_ONLY_LIVE_EXECUTION_ENABLED=true.");
+    if (!boolEnv("DISDEX_V52_ASTER_ONLY_LIVE_EXECUTION_ENABLED", false)) {
+        throw new Error("LIVE requires DISDEX_V52_ASTER_ONLY_LIVE_EXECUTION_ENABLED=true.");
     }
-    if (process.env.DISDEX_V11EQ_ASTER_ONLY_LIVE_ACKNOWLEDGEMENT !== LIVE_ACKNOWLEDGEMENT) {
+    if (process.env.DISDEX_V52_ASTER_ONLY_LIVE_ACKNOWLEDGEMENT !== LIVE_ACKNOWLEDGEMENT) {
         throw new Error(`LIVE requires acknowledgement ${LIVE_ACKNOWLEDGEMENT}.`);
     }
+}
+
+export function livePreflightScripts() {
+    return [READ_ONLY_PREFLIGHT_SCRIPT, VERIFIED_PREFLIGHT_SCRIPT] as const;
+}
+
+export function shouldHoldFailClosed(runnerMode: RunnerMode, daemon: boolean) {
+    return runnerMode === "live" && daemon;
+}
+
+function shouldStartV52Worker(status: V52PreflightStatus) {
+    return status === "ACTIVE";
+}
+
+async function holdFailClosed(reason: string) {
+    console.error(JSON.stringify({
+        level: "error",
+        event: "disdex-v96-v52-supervisor-fail-closed-hold",
+        reason,
+        childrenStarted: false,
+        ordersSent: false,
+        stateChangedBySupervisor: false,
+        restartRequiredAfterApproval: true,
+    }));
+    await new Promise<void>((resolveStop) => {
+        let stopped = false;
+        const stop = () => {
+            if (stopped) return;
+            stopped = true;
+            resolveStop();
+        };
+        process.once("SIGINT", stop);
+        process.once("SIGTERM", stop);
+    });
 }
 
 async function activateSharedKillSwitch(path: string, reason: string) {
@@ -80,7 +141,7 @@ async function activateSharedKillSwitch(path: string, reason: string) {
         strategyId: V96_KILL_SWITCH_STRATEGY_ID,
         action: "FLATTEN_MANAGED",
         reason,
-        operator: "disdex-v13d-v11eq-v96-supervisor",
+        operator: "disdex-v96-v52-supervisor",
         activatedAt: new Date().toISOString(),
         combinedStrategyId: DISDEX_V13D_V11EQ_V96_STRATEGY_ID,
     };
@@ -88,16 +149,54 @@ async function activateSharedKillSwitch(path: string, reason: string) {
     await writeFile(path, `${JSON.stringify(command, null, 2)}\n`, { encoding: "utf8", mode: 0o600 });
 }
 
-function spawnManagedChildren(runnerMode: RunnerMode, daemon: boolean): ManagedChild[] {
+function spawnManagedChildren(runnerMode: RunnerMode, daemon: boolean, v52PreflightStatus: V52PreflightStatus = "ACTIVE"): ManagedChild[] {
     const env = buildCombinedChildEnvironment(runnerMode);
     const tsx = resolve(process.env.DISDEX_TSX_BIN || "node_modules/.bin/tsx");
     const python = process.env.DISDEX_PYTHON_BIN || "python3";
     const runFlag = daemon ? "--daemon" : "--once";
     const crypto = spawn(tsx, ["scripts/disdex-v96-live-runner.ts", runFlag], { cwd: process.cwd(), env, stdio: "inherit" });
-    const stock = spawn(python, ["scripts/disdex_v11eq_aster_only_live_engine.py", "--mode", runnerMode, runFlag], {
-        cwd: process.cwd(), env, stdio: "inherit",
+    const pengu = spawn(tsx, ["scripts/disdex-pengu-dual-ls-v1-live-runner.ts", runFlag], { cwd: process.cwd(), env, stdio: "inherit" });
+    const children: ManagedChild[] = [{ name: "crypto-v96", process: crypto }, { name: "pengu-dual-ls-v1", process: pengu }];
+    if (shouldStartV52Worker(v52PreflightStatus)) {
+        const stock = spawn(python, [MARGIN_AWARE_V52_ENGINE, "--mode", runnerMode, runFlag], { cwd: process.cwd(), env, stdio: "inherit" });
+        children.push({ name: "stock-v52-aster-only", process: stock });
+    }
+    return children;
+}
+
+function runCommand(command: string, args: string[], env: NodeJS.ProcessEnv) {
+    return new Promise<void>((resolveRun, reject) => {
+        const child = spawn(command, args, { cwd: process.cwd(), env, stdio: "inherit" });
+        child.once("error", reject);
+        child.once("exit", (code, signal) => {
+            if (code === 0) resolveRun();
+            else reject(new Error(`${command} ${args.join(" ")} failed: code=${code}, signal=${signal || "none"}`));
+        });
     });
-    return [{ name: "crypto-v96", process: crypto }, { name: "stock-v11eq-aster-only", process: stock }];
+}
+
+function runCapture(command: string, args: string[], env: NodeJS.ProcessEnv) {
+    return new Promise<{ code: number | null; stdout: string; stderr: string }>((resolveRun, reject) => {
+        const child = spawn(command, args, { cwd: process.cwd(), env, stdio: ["ignore", "pipe", "pipe"] });
+        let stdout = "";
+        let stderr = "";
+        child.stdout.on("data", (chunk) => { stdout += String(chunk); });
+        child.stderr.on("data", (chunk) => { stderr += String(chunk); });
+        child.once("error", reject);
+        child.once("exit", (code) => resolveRun({ code, stdout, stderr }));
+    });
+}
+
+function parsePreflightSummary(output: string): { v52Preflight?: { status?: V52PreflightStatus } } {
+    for (const line of output.split(/\r?\n/).map((value) => value.trim()).filter(Boolean).reverse()) {
+        try {
+            const parsed = JSON.parse(line) as { v52Preflight?: { status?: V52PreflightStatus } };
+            if (parsed && typeof parsed === "object") return parsed;
+        } catch {
+            // Ignore non-JSON diagnostics. The final structured result is authoritative.
+        }
+    }
+    throw new Error("Strategy-specific preflight returned no structured result.");
 }
 
 function waitForExit(child: ManagedChild) {
@@ -118,17 +217,39 @@ async function runSupervisor(runnerMode: RunnerMode, daemon: boolean) {
     assertCombinedLiveActivation(runnerMode);
     const paths = combinedPaths();
     let migrationId: string | undefined;
+    let v52PreflightStatus: V52PreflightStatus = "ACTIVE";
     if (runnerMode === "live") {
         const runtimeCommitSha = String(process.env.DISDEX_V96_RUNTIME_COMMIT_SHA || "").trim();
         if (!runtimeCommitSha) throw new Error("Combined LIVE activation requires DISDEX_V96_RUNTIME_COMMIT_SHA.");
-        const activation = await markCombinedV96MigrationActivated({
-            combinedRoot: paths.stateRoot,
-            runtimeCommitSha,
-        });
+        const env = buildCombinedChildEnvironment(runnerMode);
+        const tsx = resolve(process.env.DISDEX_TSX_BIN || "node_modules/.bin/tsx");
+        try {
+            for (const script of livePreflightScripts()) {
+                if (script === VERIFIED_PREFLIGHT_SCRIPT) {
+                    const result = await runCapture(tsx, [script], env);
+                    if (result.code !== 0) throw new Error("Strategy-specific live preflight failed; fail-closed.");
+                    const summary = parsePreflightSummary(result.stdout);
+                    const status = summary.v52Preflight?.status;
+                    if (status !== "ACTIVE" && status !== "WAITING_MARKET_CLOSED" && status !== "BLOCKED_DATA_UNAVAILABLE") {
+                        throw new Error("Strategy-specific preflight did not return a valid V52 status.");
+                    }
+                    v52PreflightStatus = status;
+                    console.log(result.stdout.trim());
+                } else {
+                    await runCommand(tsx, [script], env);
+                }
+            }
+        } catch (error) {
+            const reason = error instanceof Error ? error.message : String(error);
+            if (!shouldHoldFailClosed(runnerMode, daemon)) throw error;
+            await holdFailClosed(reason);
+            return;
+        }
+        const activation = await markCombinedV96MigrationActivated({ combinedRoot: paths.stateRoot, runtimeCommitSha });
         migrationId = activation.migrationId;
     }
-    await Promise.all([mkdir(paths.cryptoStateRoot, { recursive: true }), mkdir(paths.stockStateRoot, { recursive: true })]);
-    const children = spawnManagedChildren(runnerMode, daemon);
+    await Promise.all([mkdir(paths.cryptoStateRoot, { recursive: true }), mkdir(paths.penguStateRoot, { recursive: true }), mkdir(paths.stockStateRoot, { recursive: true })]);
+    const children = spawnManagedChildren(runnerMode, daemon, v52PreflightStatus);
     let intentionalStop = false;
     const stop = async () => {
         if (intentionalStop) return;
@@ -138,14 +259,23 @@ async function runSupervisor(runnerMode: RunnerMode, daemon: boolean) {
     process.once("SIGINT", () => { void stop(); });
     process.once("SIGTERM", () => { void stop(); });
     console.log(JSON.stringify({
-        event: "disdex-v13d-v11eq-v96-supervisor-start",
+        event: "disdex-v96-v52-supervisor-start",
         strategyId: DISDEX_V13D_V11EQ_V96_STRATEGY_ID,
         runnerMode,
         daemon,
         migrationId,
+        authenticatedPreflightPassed: runnerMode === "live",
         cryptoGrossCap: DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoSleeveGrossCap,
         stockGrossCap: DISDEX_V13D_V11EQ_V96_ALLOCATION.stockSleeveGrossCap,
         totalGrossCap: DISDEX_V13D_V11EQ_V96_ALLOCATION.portfolioGrossCap,
+        reservedFirstStockGross: DISDEX_V13D_V11EQ_V96_ALLOCATION.reservedFirstStockGross,
+        minimumSecondStockGross: DISDEX_V13D_V11EQ_V96_ALLOCATION.minimumSecondStockGross,
+        requiredInitialLeverage: DISDEX_V13D_V11EQ_V96_ALLOCATION.cryptoInitialLeverage,
+        maximumInitialMarginFraction: DISDEX_V13D_V11EQ_V96_ALLOCATION.maximumInitialMarginFraction,
+        minimumAvailableBalanceFractionAfterOrder: DISDEX_V13D_V11EQ_V96_ALLOCATION.minimumAvailableBalanceFractionAfterOrder,
+        v52Engine: MARGIN_AWARE_V52_ENGINE,
+        v52PreflightStatus,
+        v52WorkerStarted: shouldStartV52Worker(v52PreflightStatus),
         killSwitchPath: paths.killSwitchPath,
     }));
     if (!daemon) {
@@ -171,20 +301,41 @@ function selfTest() {
     const previousMode = process.env.DISDEX_V13D_V11EQ_V96_RUNNER_MODE;
     const previousState = process.env.DISDEX_V13D_V11EQ_V96_STATE_DIR;
     process.env.DISDEX_V13D_V11EQ_V96_RUNNER_MODE = "paper";
-    process.env.DISDEX_V13D_V11EQ_V96_STATE_DIR = ".runtime-state/selftest-combined";
+    process.env.DISDEX_V13D_V11EQ_V96_STATE_DIR = ".runtime-state/selftest-v96-v52";
     const env = buildCombinedChildEnvironment("paper");
-    assert.equal(env.DISDEX_V96_MAX_GROSS, "1");
+    assert.equal(env.DISDEX_V96_MAX_GROSS, "1.5");
+    assert.equal(env.DISDEX_V52_CRYPTO_GROSS_CAP, "1.5");
+    assert.equal(env.DISDEX_V52_STOCK_GROSS_CAP, "1.5");
+    assert.equal(env.DISDEX_V52_PORTFOLIO_GROSS_CAP, "2.5");
+    assert.equal(env.DISDEX_V52_V11_GROSS_CAP, "1");
+    assert.equal(env.DISDEX_V52_V50_GROSS_CAP, "1");
+    assert.equal(env.DISDEX_V52_RESERVED_FIRST_STOCK_GROSS, "1");
+    assert.equal(env.DISDEX_V52_MINIMUM_SECOND_STOCK_GROSS, "0.25");
+    assert.equal(env.DISDEX_V52_MAX_CONCURRENT_STOCK_POSITIONS, "2");
+    assert.equal(env.DISDEX_V96_V52_REQUIRED_INITIAL_LEVERAGE, "5");
+    assert.equal(env.DISDEX_V96_V52_MAX_INITIAL_MARGIN_FRACTION, "0.7");
+    assert.equal(env.DISDEX_V96_V52_MIN_AVAILABLE_BALANCE_FRACTION, "0.2");
     assert.equal(env.DISDEX_V96_RUNNER_MODE, "paper");
     assert.equal(env.DISDEX_V96_CONFIG_MIGRATION_MODE, "false");
-    assert.equal(env.DISDEX_V13D_V11EQ_V96_RUNNER_MODE, "paper");
-    assert.match(String(env.DISDEX_V13D_V11EQ_V96_COMBINED_STATE_ROOT), /selftest-combined$/);
+    assert.equal(env.PENGU_LEGACY_CORE_ENABLED, "false");
+    assert.equal(env.PENGU_DUAL_LS_V1_ENABLED, "true");
+    assert.equal(env.PENGU_DUAL_LS_V1_MODE, "PAPER");
+    assert.equal(env.PENGU_DUAL_LS_V1_PORTFOLIO_GROSS_CAP, "1.5");
     assert.match(String(env.DISDEX_V96_KILL_SWITCH_FILE), /kill-switch\.json$/);
+    assert.deepEqual(livePreflightScripts(), [READ_ONLY_PREFLIGHT_SCRIPT, VERIFIED_PREFLIGHT_SCRIPT]);
+    assert.equal(shouldStartV52Worker("ACTIVE"), true);
+    assert.equal(shouldStartV52Worker("WAITING_MARKET_CLOSED"), false);
+    assert.equal(shouldStartV52Worker("BLOCKED_DATA_UNAVAILABLE"), false);
+    assert.equal(shouldHoldFailClosed("live", true), true);
+    assert.equal(shouldHoldFailClosed("live", false), false);
+    assert.equal(shouldHoldFailClosed("paper", true), false);
     assert.doesNotThrow(() => assertCombinedLiveActivation("paper"));
+    assert.equal(MARGIN_AWARE_V52_ENGINE, DISDEX_V13D_V11EQ_V96_RUNTIME.pythonStockEngine);
     if (previousMode === undefined) delete process.env.DISDEX_V13D_V11EQ_V96_RUNNER_MODE;
     else process.env.DISDEX_V13D_V11EQ_V96_RUNNER_MODE = previousMode;
     if (previousState === undefined) delete process.env.DISDEX_V13D_V11EQ_V96_STATE_DIR;
     else process.env.DISDEX_V13D_V11EQ_V96_STATE_DIR = previousState;
-    console.log("V13D + V11-EQ + V96 supervisor self-test: PASS");
+    console.log("V96 + V52 margin-aware supervisor self-test: PASS");
 }
 
 async function main() {
@@ -193,10 +344,6 @@ async function main() {
 }
 
 main().catch((error) => {
-    console.error(JSON.stringify({
-        level: "fatal",
-        event: "disdex-v13d-v11eq-v96-supervisor-failed",
-        message: error instanceof Error ? error.message : String(error),
-    }));
+    console.error(JSON.stringify({ level: "fatal", event: "disdex-v96-v52-supervisor-failed", message: error instanceof Error ? error.message : String(error) }));
     process.exitCode = 1;
 });
