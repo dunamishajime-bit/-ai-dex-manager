@@ -33,7 +33,7 @@ import { buildQuality102CausalV4DecisionSnapshot } from "../lib/disdex-quality10
 import { SignedPaperDirectTradeExecutor } from "../lib/signed-paper-direct-trade-executor";
 import { V12AsterLiveAdapter } from "../lib/v12-aster-live-adapter";
 import { classifyAsterSymbol } from "../lib/disdex-aster-portfolio-classifier";
-import { findManagedV12ProtectiveOrders, findManagedFetBrk48ProtectiveOrders, findManagedIdlePriorityShortProtectiveOrders } from "../lib/disdex-managed-protective-orders";
+import { findManagedV12ProtectiveOrders, findManagedV12V4ProtectiveOrders, findManagedFetBrk48ProtectiveOrders, findManagedIdlePriorityShortProtectiveOrders } from "../lib/disdex-managed-protective-orders";
 
 const SHA_PATTERN = /^[0-9a-f]{40}$/i;
 const DEFAULT_STATE_ROOT = "/var/lib/disdex/quality102-causal-v1";
@@ -123,6 +123,7 @@ export function findQ102PreflightManagedProtectiveOrders(
 export function findQ102PreflightAllManagedProtectiveOrders(openOrders: readonly DirectOpenOrder[], positions: readonly DirectPosition[]): DirectOpenOrder[] {
     return [...findManagedOrdinaryResidentStops(openOrders, positions), ...findQ102PreflightManagedProtectiveOrders(openOrders, positions),
         ...findManagedV12ProtectiveOrders(openOrders, positions),
+        ...findManagedV12V4ProtectiveOrders(openOrders, positions),
         ...findManagedFetBrk48ProtectiveOrders(openOrders, positions),
         ...findManagedIdlePriorityShortProtectiveOrders(openOrders, positions)];
 }

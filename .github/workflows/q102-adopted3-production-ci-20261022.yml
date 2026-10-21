@@ -48,7 +48,8 @@ jobs:
           npx tsx --test \
             tests/disdex-quality102-adopted-exit-policy.test.ts \
             tests/disdex-quality102-adopted-state.test.ts \
-            tests/disdex-quality102-causal-v1-runner-adopted2.test.ts
+            tests/disdex-quality102-causal-v1-runner-adopted2.test.ts \
+            tests/quality102-preflight-protective-order.test.ts
           npm run strategy:quality102-causal-v1:runtime:selftest
           npm run strategy:quality102-causal-v1:signal:selftest
           npm run strategy:quality102-causal-v1:state:selftest

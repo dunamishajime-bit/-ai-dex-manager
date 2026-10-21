@@ -113,6 +113,81 @@ export function findManagedV12ProtectiveOrders(
     return openOrders.filter((order) => managed.has(order));
 }
 
+type V12V4ProtectionCandidate = {
+    order: DirectOpenOrder;
+    position: DirectPosition;
+    leg: "STOP" | "TP";
+    remainingQuantity: number;
+};
+
+/**
+ * V12 V4 uses durable order identities (`v12-v4-<28 hex>`) and may have a
+ * resident STOP without a TAKE_PROFIT_MARKET companion.  The older V12
+ * classifier intentionally requires a STOP/TP pair, so keeping V4 separate
+ * avoids weakening that legacy ownership contract while allowing Q102's
+ * read-only preflight to recognize a real V4 STOP-only position.
+ */
+function v12V4ProtectionCandidate(
+    order: DirectOpenOrder,
+    positions: readonly DirectPosition[],
+): V12V4ProtectionCandidate | undefined {
+    const symbol = String(order.symbol || "").trim().toUpperCase();
+    const clientOrderId = String(order.clientOrderId || "");
+    if (!symbol || !/^v12-v4-[0-9a-f]{28}$/i.test(clientOrderId)) return undefined;
+    if (order.reduceOnly !== true || !["NEW", "PARTIALLY_FILLED"].includes(String(order.status || "").toUpperCase())) return undefined;
+
+    const type = String(order.type || "").toUpperCase();
+    const leg = type === "STOP_MARKET" ? "STOP" : type === "TAKE_PROFIT_MARKET" ? "TP" : undefined;
+    if (!leg || !Number.isFinite(order.stopPrice) || order.stopPrice! <= 0) return undefined;
+    if (!Number.isFinite(order.quantity) || order.quantity <= 0) return undefined;
+    if (!Number.isFinite(order.executedQuantity) || order.executedQuantity < 0 || order.executedQuantity > order.quantity) return undefined;
+
+    const matchingPositions = positions.filter((position) =>
+        position.symbol.toUpperCase() === symbol
+        && Number.isFinite(position.quantity)
+        && Math.abs(position.quantity) > MIN_REMAINING_QUANTITY,
+    );
+    // One-way V4 ownership is unambiguous only when exactly one live position
+    // exists for a symbol.  Multiple legs remain fail-closed here.
+    if (matchingPositions.length !== 1) return undefined;
+    const position = matchingPositions[0];
+    const expectedSide = position.quantity > 0 ? "SELL" : "BUY";
+    if (order.side !== expectedSide) return undefined;
+
+    const remainingQuantity = order.quantity - order.executedQuantity;
+    const tolerance = Math.max(1e-8, Math.abs(position.quantity) * PROTECTION_TOLERANCE_PCT);
+    if (remainingQuantity <= MIN_REMAINING_QUANTITY || Math.abs(remainingQuantity - Math.abs(position.quantity)) > tolerance) return undefined;
+    return { order, position, leg, remainingQuantity };
+}
+
+export function findManagedV12V4ProtectiveOrders(
+    openOrders: readonly DirectOpenOrder[],
+    positions: readonly DirectPosition[],
+): DirectOpenOrder[] {
+    const candidates = openOrders
+        .map((order) => v12V4ProtectionCandidate(order, positions))
+        .filter((entry): entry is V12V4ProtectionCandidate => Boolean(entry));
+    if (candidates.length === 0) return [];
+
+    const clientOrderIds = new Set(candidates.map(({ order }) => order.clientOrderId));
+    if (clientOrderIds.size !== candidates.length) return [];
+
+    const managed = new Set<DirectOpenOrder>();
+    for (const position of positions) {
+        if (!Number.isFinite(position.quantity) || Math.abs(position.quantity) <= MIN_REMAINING_QUANTITY) continue;
+        const matching = candidates.filter(({ position: candidatePosition }) => candidatePosition === position);
+        const stops = matching.filter((entry) => entry.leg === "STOP");
+        const takeProfits = matching.filter((entry) => entry.leg === "TP");
+        // Exactly one resident STOP is mandatory.  TP is optional because
+        // V4 can intentionally run with STOP-only protection during a
+        // lifecycle transition or after a TP has been retired.
+        if (stops.length !== 1 || takeProfits.length > 1) continue;
+        managed.add(stops[0].order);
+        if (takeProfits.length === 1) managed.add(takeProfits[0].order);
+    }
+    return openOrders.filter((order) => managed.has(order));
+}
+
 type FetProtectionCandidate = {
     order: DirectOpenOrder;
     position: DirectPosition;
