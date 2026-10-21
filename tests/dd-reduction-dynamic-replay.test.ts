@@ -7,6 +7,8 @@ assertFixtureIdentity({ sourceHash: FIXTURE_HASH, configHash: FIXTURE_HASH, poli
 
 const policy: DynamicReplayPolicy = {
     initial_wallet_jpy: 10_000,
+    settlement_currency: "USDT",
+    h1_interval_ms: 1_000,
     allocator: {
         total_gross_cap: 2_000,
         crypto_gross_cap: 2_000,
@@ -31,11 +33,11 @@ test("single reducer separates entry, protection, exit, realized pnl, and MTM", 
     const result = replayDynamicPortfolio([
         event("deposit", "DEPOSIT", 0, { amount_jpy: 1_000 }),
         event("entry", "ENTRY", 1_000, { candidate }),
-        event("fill", "ENTRY_FILL", 1_001, { reservation_id: "reservation:c1:1000", filled_gross: 1_000, fill_price: 100, slippage_bps: 0, gap_bps: 0 }),
+        event("fill", "ENTRY_FILL", 1_001, { reservation_id: "reservation:c1:1000", filled_gross: 1_000, fill_price: 100, slippage_bps: 0, gap_bps: 0, execution_evidence: { source: "fixture", evidence_id: "fill-1", observed_ts_ms: 1_001 } }),
         event("protect", "PROTECTION_REGISTRATION", 1_002, { reservation_id: "reservation:c1:1000", protection_id: "stop:c1" }),
         event("mark", "MARK", 2_000),
-        event("exit", "NORMAL_EXIT", 3_000, { reservation_id: "reservation:c1:1000", settlement_pnl: 100, settlement_currency: "USDT", fx_rate: 1, fee_settlement: 2, funding_settlement: 3, exit_price: 110, slippage_bps: 0, gap_bps: 0, exit_reason: "TAKE_PROFIT", cooldown_until_ts_ms: 4_000, cooldown_source_event_ts_ms: 3_000 }),
-    ], policy, [{ timestamp_ms: 2_000, symbol: "BTCUSDT", price: 110, fx_rate: 1 }]);
+        event("exit", "NORMAL_EXIT", 3_000, { reservation_id: "reservation:c1:1000", settlement_pnl: 100, settlement_currency: "USDT", fx_rate: 1, fee_settlement: 2, funding_settlement: 3, exit_price: 110, slippage_bps: 0, gap_bps: 0, execution_evidence: { source: "fixture", evidence_id: "exit-1", observed_ts_ms: 3_000 }, exit_reason: "TAKE_PROFIT", cooldown_until_ts_ms: 4_000, cooldown_source_event_ts_ms: 3_000 }),
+    ], policy, [{ timestamp_ms: 2_000, symbol: "BTCUSDT", price: 110, fx_rate: 1, timeframe: "H1" }]);
     assert.equal(result.status, "PASS");
     assert.equal(result.accounting.accounting_reconciliation, "PASS");
     assert.equal(result.accounting.realized_pnl_jpy, 100);
@@ -49,8 +51,8 @@ test("single reducer separates entry, protection, exit, realized pnl, and MTM", 
 test("settlement pnl and JPY pnl use an explicit FX rate", () => {
     const result = replayDynamicPortfolio([
         event("entry", "ENTRY", 1_000, { candidate }),
-        event("fill", "ENTRY_FILL", 1_001, { reservation_id: "reservation:c1:1000", filled_gross: 1_000, fill_price: 100, slippage_bps: 0, gap_bps: 0 }),
-        event("exit", "NORMAL_EXIT", 2_000, { reservation_id: "reservation:c1:1000", settlement_pnl: 10, settlement_currency: "USDT", fx_rate: 150, fee_settlement: 0, funding_settlement: 0, exit_price: 110, slippage_bps: 0, gap_bps: 0, exit_reason: "TIME_STOP" }),
+        event("fill", "ENTRY_FILL", 1_001, { reservation_id: "reservation:c1:1000", filled_gross: 1_000, fill_price: 100, slippage_bps: 0, gap_bps: 0, execution_evidence: { source: "fixture", evidence_id: "fill-2", observed_ts_ms: 1_001 } }),
+        event("exit", "NORMAL_EXIT", 2_000, { reservation_id: "reservation:c1:1000", settlement_pnl: 10, settlement_currency: "USDT", fx_rate: 150, fee_settlement: 0, funding_settlement: 0, exit_price: 110, slippage_bps: 0, gap_bps: 0, execution_evidence: { source: "fixture", evidence_id: "exit-2", observed_ts_ms: 2_000 }, exit_reason: "TIME_STOP" }),
     ], policy);
     assert.equal(result.status, "PASS");
     assert.equal(result.accounting.realized_pnl_jpy, 1_500);
@@ -102,7 +104,7 @@ test("duplicate event ids fail before a second charge", () => {
 test("exit settlement fields are required and are never zero-filled", () => {
     const result = replayDynamicPortfolio([
         event("entry", "ENTRY", 1_000, { candidate }),
-        event("fill", "ENTRY_FILL", 1_001, { reservation_id: "reservation:c1:1000", filled_gross: 1_000, fill_price: 100, slippage_bps: 0, gap_bps: 0 }),
+        event("fill", "ENTRY_FILL", 1_001, { reservation_id: "reservation:c1:1000", filled_gross: 1_000, fill_price: 100, slippage_bps: 0, gap_bps: 0, execution_evidence: { source: "fixture", evidence_id: "fill-3", observed_ts_ms: 1_001 } }),
         event("exit", "NORMAL_EXIT", 2_000, { reservation_id: "reservation:c1:1000", exit_price: 110, exit_reason: "TIME_STOP" }),
     ], policy);
     assert.equal(result.status, "FAIL");
@@ -126,7 +128,7 @@ test("an exit cannot release a pending reservation", () => {
 test("a protection stop requires active protection and execution evidence", () => {
     const result = replayDynamicPortfolio([
         event("entry", "ENTRY", 1_000, { candidate }),
-        event("fill", "ENTRY_FILL", 1_001, { reservation_id: "reservation:c1:1000", filled_gross: 1_000, fill_price: 100, slippage_bps: 0, gap_bps: 0 }),
+        event("fill", "ENTRY_FILL", 1_001, { reservation_id: "reservation:c1:1000", filled_gross: 1_000, fill_price: 100, slippage_bps: 0, gap_bps: 0, execution_evidence: { source: "fixture", evidence_id: "fill-4", observed_ts_ms: 1_001 } }),
         event("stop", "PROTECTION_STOP", 2_000, {
             reservation_id: "reservation:c1:1000", protection_id: "stop:c1", settlement_pnl: -10,
             settlement_currency: "USDT", fx_rate: 1, fee_settlement: 0, funding_settlement: 0,
@@ -162,11 +164,11 @@ test("preemption reuses the Task 4 lifecycle and admits only after confirmed who
     const incoming = { ...candidate, candidate_id: "incoming", symbol: "ETHUSDT", decision_ts_ms: 2_000, priority: 0 };
     const result = replayDynamicPortfolio([
         event("entry", "ENTRY", 1_000, { candidate }),
-        event("fill", "ENTRY_FILL", 1_001, { reservation_id: "reservation:c1:1000", filled_gross: 1_000, fill_price: 100, slippage_bps: 0, gap_bps: 0 }),
+        event("fill", "ENTRY_FILL", 1_001, { reservation_id: "reservation:c1:1000", filled_gross: 1_000, fill_price: 100, slippage_bps: 0, gap_bps: 0, execution_evidence: { source: "fixture", evidence_id: "fill-preempt", observed_ts_ms: 1_001 } }),
         event("preempt", "PREEMPTION_EXIT", 2_000, {
             reservation_id: "reservation:c1:1000", incoming_candidate: incoming,
             victim_position: { position_id: "victim-1", reservation_id: "reservation:c1:1000", candidate_id: "c1", strategy_id: "V12", symbol: "BTCUSDT", side: "LONG", gross: 1_000, quantity: 10, entry_price: 100, priority: 1, status: "OPEN" },
-            mode: "WHOLE", exit_status: "FILLED", confirmed: true, execution_evidence: true, filled_gross: 1_000,
+            mode: "WHOLE", exit_status: "FILLED", confirmed: true, execution_evidence: { source: "fixture", evidence_id: "exit-preempt", observed_ts_ms: 2_000 }, filled_gross: 1_000,
             exit_price: 90, slippage_bps: 0, gap_bps: 0, settlement_pnl: -10, settlement_currency: "USDT", fx_rate: 1, fee_settlement: 0, funding_settlement: 0,
             cooldown_until_ts_ms: 3_000, cooldown_source_event_ts_ms: 2_000,
             ordering_events: [
@@ -188,4 +190,77 @@ test("an explicitly mislabeled OOS event fails closed at the boundary", () => {
     assert.equal(result.status, "FAIL");
     assert.equal(result.rejection, "DATA_MISSING");
     assert.equal(result.oos_boundary.classification, "EXPLICIT");
+});
+
+test("candidate validation and priority are validation-only before a single ENTRY reservation", () => {
+    const result = replayDynamicPortfolio([
+        event("validation", "CANDIDATE_VALIDATION", 1_000, { candidate }),
+        event("priority", "CANDIDATE_PRIORITY", 1_001, { candidate }),
+        event("entry", "ENTRY", 1_002, { candidate }),
+    ], policy);
+    assert.equal(result.status, "PASS");
+    assert.equal(result.execution_ledger[0]?.allocator_after.reservations.length, 0);
+    assert.equal(result.execution_ledger[1]?.allocator_after.reservations.length, 0);
+    assert.equal(result.reservation_ledger.length, 1);
+    assert.equal(result.allocator_state.reservations.length, 1);
+});
+
+test("unsupported fixed phases fail closed instead of becoming silent no-ops", () => {
+    const result = replayDynamicPortfolio([
+        event("sizing", "SIZING", 1_000, { candidate }),
+    ], policy);
+    assert.equal(result.status, "FAIL");
+    assert.equal(result.rejection, "UNSUPPORTED_PHASE");
+});
+
+test("ENTRY and ENTRY_FILL both enforce entry_valid_until_ms", () => {
+    const expiredEntry = replayDynamicPortfolio([
+        event("entry", "ENTRY", 2_000, { candidate: { ...candidate, entry_valid_until_ms: 1_500 } }),
+    ], policy);
+    assert.equal(expiredEntry.status, "FAIL");
+    assert.equal(expiredEntry.rejection, "ALLOCATOR_REJECTED");
+
+    const expiredFill = replayDynamicPortfolio([
+        event("entry", "ENTRY", 1_000, { candidate: { ...candidate, entry_valid_until_ms: 1_500 } }),
+        Object.assign(event("fill", "ENTRY_FILL", 2_000, { reservation_id: "reservation:c1:1000", filled_gross: 1_000, fill_price: 100, slippage_bps: 0, gap_bps: 0 }), { execution_evidence: { source: "fixture", evidence_id: "fill-expired", observed_ts_ms: 2_000 } }),
+    ], policy);
+    assert.equal(expiredFill.status, "FAIL");
+    assert.equal(expiredFill.rejection, "DATA_MISSING");
+});
+
+test("non-zero slippage or gap is not silently ignored", () => {
+    const result = replayDynamicPortfolio([
+        event("entry", "ENTRY", 1_000, { candidate }),
+        Object.assign(event("fill", "ENTRY_FILL", 1_001, { reservation_id: "reservation:c1:1000", filled_gross: 1_000, fill_price: 101, slippage_bps: 10, gap_bps: 0 }), { execution_evidence: { source: "fixture", evidence_id: "fill-slippage", observed_ts_ms: 1_001 } }),
+    ], policy);
+    assert.equal(result.status, "FAIL");
+    assert.equal(result.rejection, "DATA_MISSING");
+});
+
+test("ENTRY_FILL requires typed execution evidence", () => {
+    const result = replayDynamicPortfolio([
+        event("entry", "ENTRY", 1_000, { candidate }),
+        event("fill", "ENTRY_FILL", 1_001, { reservation_id: "reservation:c1:1000", filled_gross: 1_000, fill_price: 100, slippage_bps: 0, gap_bps: 0 }),
+    ], policy);
+    assert.equal(result.status, "FAIL");
+    assert.equal(result.rejection, "DATA_MISSING");
+});
+
+test("normal exits require typed execution evidence", () => {
+    const result = replayDynamicPortfolio([
+        event("entry", "ENTRY", 1_000, { candidate }),
+        event("fill", "ENTRY_FILL", 1_001, { reservation_id: "reservation:c1:1000", filled_gross: 1_000, fill_price: 100, slippage_bps: 0, gap_bps: 0, execution_evidence: { source: "fixture", evidence_id: "fill-exit-evidence", observed_ts_ms: 1_001 } }),
+        event("exit", "NORMAL_EXIT", 2_000, { reservation_id: "reservation:c1:1000", settlement_pnl: 0, settlement_currency: "USDT", fx_rate: 1, fee_settlement: 0, funding_settlement: 0, exit_price: 100, slippage_bps: 0, gap_bps: 0, exit_reason: "TIME_STOP" }),
+    ], policy);
+    assert.equal(result.status, "FAIL");
+    assert.equal(result.rejection, "DATA_MISSING");
+});
+
+test("OOS candidate selection is rejected rather than inheriting IS allocator state", () => {
+    const result = replayDynamicPortfolio([
+        event("is-entry", "ENTRY", 1_000, { candidate, data_split: "IS" }),
+        event("oos-entry", "ENTRY", 2_000, { candidate: { ...candidate, candidate_id: "oos", decision_ts_ms: 2_000 }, data_split: "OOS" }),
+    ], { ...policy, oos_start_ts_ms: 2_000 });
+    assert.equal(result.status, "FAIL");
+    assert.equal(result.rejection, "DATA_MISSING");
 });
