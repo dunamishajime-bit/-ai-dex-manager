@@ -1,0 +1,250 @@
+    if not trades.empty:
+        trades["entry_time"] = pd.to_datetime(trades["entry_time"], utc=True)
+        tmask = trades["entry_time"] >= start
+        if end is not None:
+            tmask &= trades["entry_time"] < end
+        trades = trades.loc[tmask]
+    sd = ret.std(ddof=1)
+    sharpe = float(ret.mean() / sd * math.sqrt(ANNUAL_BARS)) if sd > 0 else float("nan")
+    gains = trades.loc[trades.get("net_pnl", pd.Series(dtype=float)) > 0, "net_pnl"].sum() if not trades.empty else 0.0
+    losses = -trades.loc[trades.get("net_pnl", pd.Series(dtype=float)) < 0, "net_pnl"].sum() if not trades.empty else 0.0
+    loss_flags = list((trades["net_pnl"] < 0).astype(int)) if not trades.empty else []
+    max_consecutive = run = 0
+    for flag in loss_flags:
+        run = run + 1 if flag else 0
+        max_consecutive = max(max_consecutive, run)
+    active_monthly = monthly[monthly.abs() > 1e-8]
+    return {
+        "start": str(ret.index.min()), "end": str(ret.index.max()),
+        "total_return": float((1 + ret).prod() - 1), "cagr": cagr(ret),
+        "max_drawdown": max_dd(ret), "sharpe": sharpe,
+        "average_month": float(monthly.mean()), "median_month": float(monthly.median()),
+        "best_month": float(monthly.max()), "worst_month": float(monthly.min()),
+        "positive_month_ratio": float((monthly > 0).mean()),
+        "active_months": int(len(active_monthly)),
+        "active_month_median": float(active_monthly.median()) if len(active_monthly) else 0.0,
+        "best_day": float(daily.max()), "worst_day": float(daily.min()),
+        "trades": int(len(trades)),
+        "win_rate": float((trades["net_pnl"] > 0).mean()) if len(trades) else 0.0,
+        "profit_factor": float(gains / losses) if losses > 0 else float("inf") if gains > 0 else 0.0,
+        "average_trade": float(trades["net_pnl"].mean()) if len(trades) else 0.0,
+        "max_consecutive_losses": int(max_consecutive),
+        "liquidations": int((trades.get("reason", pd.Series(dtype=str)) == "liquidation").sum()) if len(trades) else 0,
+        "average_gross": float(sim.gross.loc[mask].mean()),
+        "max_gross": float(sim.gross.loc[mask].max()),
+        "average_margin": float(sim.margin.loc[mask].mean()),
+        "max_margin": float(sim.margin.loc[mask].max()),
+        "trading_cost_total": float(sim.costs.loc[mask].sum()),
+        "funding_total": float(sim.funding.loc[mask].sum()),
+    }
+
+
+def selection_score(dev: dict, val: dict) -> float:
+    penalty = 0.0
+    if dev["total_return"] <= 0 or val["total_return"] <= 0:
+        penalty -= 5.0
+    if dev["trades"] < 60 or val["trades"] < 25:
+        penalty -= 2.0
+    if dev["max_drawdown"] < -0.45 or val["max_drawdown"] < -0.45:
+        penalty -= 3.0
+    if dev["liquidations"] or val["liquidations"]:
+        penalty -= 4.0
+    return (
+        1.2 * min(dev["cagr"], val["cagr"])
+        + 0.35 * (dev["cagr"] + val["cagr"])
+        + 0.18 * min(dev["sharpe"], val["sharpe"])
+        + 0.40 * min(dev["median_month"], val["median_month"])
+        + 0.75 * min(dev["max_drawdown"], val["max_drawdown"])
+        + 0.10 * min(dev["positive_month_ratio"], val["positive_month_ratio"])
+        + penalty
+    )
+
+
+def bootstrap_monthly(monthly: pd.Series, n: int = 20000) -> dict:
+    values = monthly.dropna().to_numpy(float)
+    if len(values) == 0:
+        return {}
+    rng = np.random.default_rng(20260716)
+    samples = rng.choice(values, size=(n, len(values)), replace=True)
+    eq = np.cumprod(1 + samples, axis=1)
+    totals = eq[:, -1] - 1
+    peaks = np.maximum.accumulate(eq, axis=1)
+    dds = np.min(eq / peaks - 1, axis=1)
+    annual = eq[:, -1] ** (12 / len(values)) - 1
+    return {
+        "p_loss": float((totals < 0).mean()),
+        "p_dd_below_50": float((dds <= -0.50).mean()),
+        "annual_p10": float(np.quantile(annual, 0.10)),
+        "annual_p50": float(np.quantile(annual, 0.50)),
+        "annual_p90": float(np.quantile(annual, 0.90)),
+        "dd_p05": float(np.quantile(dds, 0.05)),
+    }
+
+
+def fmt_pct(x: float) -> str:
+    return "n/a" if not np.isfinite(x) else f"{100 * x:.2f}%"
+
+
+def main() -> None:
+    OUT.mkdir(parents=True, exist_ok=True)
+    data, funding = load_data()
+    panel = aligned_panel(data)
+    fx = build_features(panel)
+    sig_specs = {s.name: s for s in signal_specs()}
+    ex_specs = {e.name: e for e in exit_specs()}
+    risk_map = {r.name: r for r in risk_specs()}
+    sig_cache = {name: precompute_signal(fx, spec) for name, spec in sig_specs.items()}
+    candidates = build_candidates()
+    rows = []
+    print(f"Evaluating {len(candidates)} multi-asset range candidates")
+    for n, candidate in enumerate(candidates, start=1):
+        sim = simulate(
+            fx, funding, sig_cache[candidate.signal],
+            ex_specs[candidate.exit], risk_map[candidate.risk],
+        )
+        dev = summarize(sim, START, DEV_END)
+        val = summarize(sim, DEV_END, VAL_END)
+        rows.append({
+            **asdict(candidate),
+            **{f"dev_{k}": v for k, v in dev.items()},
+            **{f"val_{k}": v for k, v in val.items()},
+            "selection_score": selection_score(dev, val),
+        })
+        if n % 12 == 0:
+            print(f"Evaluated {n}/{len(candidates)}")
+    ranking = pd.DataFrame(rows).sort_values(["selection_score", "val_cagr"], ascending=False)
+    passed = ranking[
+        (ranking["dev_total_return"] > 0) & (ranking["val_total_return"] > 0)
+        & (ranking["dev_trades"] >= 60) & (ranking["val_trades"] >= 25)
+        & (ranking["dev_max_drawdown"] >= -0.45) & (ranking["val_max_drawdown"] >= -0.45)
+        & (ranking["dev_liquidations"] == 0) & (ranking["val_liquidations"] == 0)
+    ]
+    selected_row = (passed if len(passed) else ranking).iloc[0]
+    selected = next(c for c in candidates if c.name == selected_row["name"])
+    selected_sim = simulate(
+        fx, funding, sig_cache[selected.signal], ex_specs[selected.exit], risk_map[selected.risk]
+    )
+    dev_stats = summarize(selected_sim, START, DEV_END)
+    val_stats = summarize(selected_sim, DEV_END, VAL_END)
+    hold_stats = summarize(selected_sim, VAL_END, FINAL_END)
+
+    stress_rows = []
+    for cost_bps in [4, 6, 8, 10]:
+        for funding_mult in [1.0, 1.5, 2.0]:
+            sim = simulate(
+                fx, funding, sig_cache[selected.signal], ex_specs[selected.exit], risk_map[selected.risk],
+                one_way_cost=cost_bps / 10000, funding_multiplier=funding_mult,
+            )
+            stress_rows.append({"cost_bps": cost_bps, "funding_multiplier": funding_mult, **summarize(sim, VAL_END, FINAL_END)})
+    delay_rows = []
+    for delay in [1, 2, 3, 4]:
+        sim = simulate(
+            fx, funding, sig_cache[selected.signal], ex_specs[selected.exit], risk_map[selected.risk],
+            entry_delay_bars=delay,
+        )
+        delay_rows.append({"delay_bars": delay, **summarize(sim, VAL_END, FINAL_END)})
+    leverage_rows = []
+    for risk_name, risk in risk_map.items():
+        sim = simulate(fx, funding, sig_cache[selected.signal], ex_specs[selected.exit], risk)
+        leverage_rows.append({"risk_spec": risk_name, **asdict(risk), **summarize(sim, VAL_END, FINAL_END)})
+    scale_rows = []
+    for mult in [0.50, 0.75, 1.0, 1.25, 1.50]:
+        sim = simulate(
+            fx, funding, sig_cache[selected.signal], ex_specs[selected.exit], risk_map[selected.risk],
+            risk_multiplier=mult,
+        )
+        scale_rows.append({"risk_multiplier": mult, **summarize(sim, VAL_END, FINAL_END)})
+
+    # Nearby logic checks: same risk, neighboring signal and exit specifications.
+    neighbor_rows = []
+    selected_sig_idx = list(sig_specs).index(selected.signal)
+    selected_ex_idx = list(ex_specs).index(selected.exit)
+    signal_names = list(sig_specs)
+    exit_names = list(ex_specs)
+    for si in sorted(set([max(0, selected_sig_idx - 1), selected_sig_idx, min(len(signal_names) - 1, selected_sig_idx + 1)])):
+        for ei in sorted(set([max(0, selected_ex_idx - 1), selected_ex_idx, min(len(exit_names) - 1, selected_ex_idx + 1)])):
+            sname, ename = signal_names[si], exit_names[ei]
+            sim = simulate(fx, funding, sig_cache[sname], ex_specs[ename], risk_map[selected.risk])
+            neighbor_rows.append({"signal": sname, "exit": ename, **summarize(sim, VAL_END, FINAL_END)})
+
+    hold_ret = selected_sim.returns.loc[(selected_sim.returns.index >= VAL_END) & (selected_sim.returns.index < FINAL_END)]
+    monthly = (1 + hold_ret).resample("ME").prod() - 1
+    yearly = (1 + hold_ret).resample("YE").prod() - 1
+    bootstrap = bootstrap_monthly(monthly)
+    trades = selected_sim.trades.copy()
+    if not trades.empty:
+        trades["entry_time"] = pd.to_datetime(trades["entry_time"], utc=True)
+        trades = trades.loc[(trades["entry_time"] >= VAL_END) & (trades["entry_time"] < FINAL_END)]
+        symbol_contrib = trades.groupby("symbol")["net_pnl"].agg(["sum", "count", "mean"]).sort_values("sum", ascending=False)
+    else:
+        symbol_contrib = pd.DataFrame(columns=["sum", "count", "mean"])
+
+    ranking.to_csv(OUT / "candidate_selection.csv", index=False)
+    pd.DataFrame(stress_rows).to_csv(OUT / "stress.csv", index=False)
+    pd.DataFrame(delay_rows).to_csv(OUT / "delay.csv", index=False)
+    pd.DataFrame(leverage_rows).to_csv(OUT / "leverage_comparison.csv", index=False)
+    pd.DataFrame(scale_rows).to_csv(OUT / "risk_scaling.csv", index=False)
+    pd.DataFrame(neighbor_rows).to_csv(OUT / "neighbors.csv", index=False)
+    monthly.rename("return").to_csv(OUT / "holdout_monthly.csv")
+    yearly.rename("return").to_csv(OUT / "holdout_yearly.csv")
+    trades.to_csv(OUT / "holdout_trades.csv", index=False)
+    symbol_contrib.to_csv(OUT / "symbol_contribution.csv")
+    pd.DataFrame({"return": selected_sim.returns, "equity": selected_sim.equity, "gross": selected_sim.gross, "margin": selected_sim.margin}).to_csv(OUT / "equity.csv")
+    with open(OUT / "summary.json", "w") as fh:
+        json.dump({
+            "selected": asdict(selected), "signal": asdict(sig_specs[selected.signal]),
+            "exit": asdict(ex_specs[selected.exit]), "risk": asdict(risk_map[selected.risk]),
+            "preholdout_passed": int(len(passed)), "development": dev_stats,
+            "validation": val_stats, "holdout": hold_stats, "bootstrap": bootstrap,
+        }, fh, indent=2, default=str)
+
+    base_stress = next(r for r in stress_rows if r["cost_bps"] == 10 and r["funding_multiplier"] == 1.5)
+    positive_neighbors = float(np.mean([r["total_return"] > 0 for r in neighbor_rows])) if neighbor_rows else 0.0
+    verdict = (
+        "PAPER_CANDIDATE" if (
+            hold_stats["cagr"] >= 0.30 and hold_stats["median_month"] >= 0.01
+            and hold_stats["max_drawdown"] >= -0.40 and hold_stats["sharpe"] >= 1.0
+            and hold_stats["trades"] >= 100 and hold_stats["liquidations"] == 0
+            and base_stress["cagr"] >= 0.20 and positive_neighbors >= 0.70
+        ) else "REJECT"
+    )
+    report = f"""# Multi-asset leveraged range-reversion validation
+
+## Verdict
+
+**{verdict}** — research only; do not merge or deploy live from this result.
+
+## Selected before holdout
+
+- Candidate: `{selected.name}`
+- Signal: `{selected.signal}` {asdict(sig_specs[selected.signal])}
+- Exit: `{selected.exit}` {asdict(ex_specs[selected.exit])}
+- Risk/leverage: `{selected.risk}` {asdict(risk_map[selected.risk])}
+- Pre-holdout candidates passing gates: {len(passed)} / {len(candidates)}
+
+## Period results
+
+| Period | Total | CAGR | Max DD | Sharpe | Median month | Best month | Worst month | Trades | Win rate | PF | Liquidations |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Development 2021-22 | {fmt_pct(dev_stats['total_return'])} | {fmt_pct(dev_stats['cagr'])} | {fmt_pct(dev_stats['max_drawdown'])} | {dev_stats['sharpe']:.2f} | {fmt_pct(dev_stats['median_month'])} | {fmt_pct(dev_stats['best_month'])} | {fmt_pct(dev_stats['worst_month'])} | {dev_stats['trades']} | {fmt_pct(dev_stats['win_rate'])} | {dev_stats['profit_factor']:.2f} | {dev_stats['liquidations']} |
+| Validation 2023 | {fmt_pct(val_stats['total_return'])} | {fmt_pct(val_stats['cagr'])} | {fmt_pct(val_stats['max_drawdown'])} | {val_stats['sharpe']:.2f} | {fmt_pct(val_stats['median_month'])} | {fmt_pct(val_stats['best_month'])} | {fmt_pct(val_stats['worst_month'])} | {val_stats['trades']} | {fmt_pct(val_stats['win_rate'])} | {val_stats['profit_factor']:.2f} | {val_stats['liquidations']} |
+| Holdout 2024-2026H1 | {fmt_pct(hold_stats['total_return'])} | {fmt_pct(hold_stats['cagr'])} | {fmt_pct(hold_stats['max_drawdown'])} | {hold_stats['sharpe']:.2f} | {fmt_pct(hold_stats['median_month'])} | {fmt_pct(hold_stats['best_month'])} | {fmt_pct(hold_stats['worst_month'])} | {hold_stats['trades']} | {fmt_pct(hold_stats['win_rate'])} | {hold_stats['profit_factor']:.2f} | {hold_stats['liquidations']} |
+
+## Holdout tails and capacity
+
+- Best day: {fmt_pct(hold_stats['best_day'])}
+- Worst day: {fmt_pct(hold_stats['worst_day'])}
+- Average gross notional / equity: {hold_stats['average_gross']:.2f}x
+- Maximum gross notional / equity: {hold_stats['max_gross']:.2f}x
+- Average isolated margin / equity: {fmt_pct(hold_stats['average_margin'])}
+- Maximum isolated margin / equity: {fmt_pct(hold_stats['max_margin'])}
+- Maximum consecutive losing trades: {hold_stats['max_consecutive_losses']}
+- 10 bps + 1.5x funding stress CAGR: {fmt_pct(base_stress['cagr'])}
+- Positive nearby-setting ratio: {fmt_pct(positive_neighbors)}
+
+## Bootstrap
+
+```json
+{json.dumps(bootstrap, indent=2)}
+```
+
