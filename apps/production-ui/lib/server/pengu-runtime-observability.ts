@@ -351,7 +351,7 @@ function buildExecutionTrace(
 export async function loadPenguRuntimeObservability(): Promise<PenguRuntimeStatus> {
   const capturedAt = new Date().toISOString();
   const currentRuntime = await loadCurrentProductionRuntime().catch(() => null);
-  const expectedReleaseSha = currentRuntime?.releaseSha ?? liveConfig.vpsObservedReleases.pengu;
+  const expectedReleaseSha = currentRuntime?.productionReleaseShas.pengu ?? liveConfig.vpsObservedReleases.pengu;
   const configured = configuredPath();
   if (!configured) return unavailable(capturedAt, false, "PENGU runner stateの絶対パスがUIサービスに設定されていません。", expectedReleaseSha);
   if (!isAbsolute(configured.value)) return unavailable(capturedAt, true, `${configured.name}は絶対パスで設定してください。`, expectedReleaseSha);

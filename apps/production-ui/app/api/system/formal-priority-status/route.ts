@@ -1,4 +1,5 @@
 import { loadFormalBtAnchor } from "@/lib/server/formal-bt-anchor";
+import { adaptV12V4DecisionToState, loadV12V4LiveSource } from "@/lib/server/v12-v4-live-source";
 import { readFile } from "node:fs/promises";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -23,11 +24,13 @@ export async function GET(req: NextRequest) {
   const releaseShaPath = process.env.DISDEX_RELEASE_SHA_PATH || "/home/deploy/disdex-trading/current/.disdex-release-sha";
   const v12StatePath = process.env.DISDEX_V12_STATE_PATH || "/var/lib/disdex/v12-x1-all/runner.json";
   const q102StatePath = process.env.DISDEX_Q102_STATE_PATH || "/var/lib/disdex/quality102-causal-v1/state.json";
-  const [releaseSha, v12, q102] = await Promise.all([
+  const [releaseSha, legacyV12, q102, v12V4] = await Promise.all([
     textFile(releaseShaPath),
     jsonFile(v12StatePath),
     jsonFile(q102StatePath),
+    loadV12V4LiveSource(),
   ]);
+  const v12 = v12V4.available ? adaptV12V4DecisionToState(v12V4) || legacyV12 : legacyV12;
 
   const symbolLastExitTs = v12?.symbolLastExitTs && typeof v12.symbolLastExitTs === "object" ? v12.symbolLastExitTs : {};
   const symbolCooldownUntilTs = v12?.symbolCooldownUntilTs && typeof v12.symbolCooldownUntilTs === "object" ? v12.symbolCooldownUntilTs : {};
@@ -61,6 +64,9 @@ export async function GET(req: NextRequest) {
       manualReview: v12?.manualReview || null,
       q102RuntimeSha: q102?.runtimeCommitSha || q102?.runtimeSha || null,
       q102Pending: q102?.pending || null,
+      v12Source: v12V4.available ? "VPS_V12_V4_REALTIME_DECISION" : "VPS_V12_LEGACY_STATE",
+      v12PolicyId: v12V4.policyId || null,
+      v12CandidateCount: v12V4.candidateCount ?? null,
     },
     updatedAt: Date.now(),
   });

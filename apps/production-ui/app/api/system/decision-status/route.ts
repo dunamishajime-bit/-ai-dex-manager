@@ -7,6 +7,7 @@ import { loadV52Top2Observability } from "@/lib/server/v52-top2-observability";
 import { loadPenguRuntimeObservability } from "@/lib/server/pengu-runtime-observability";
 import { loadQuality102RuntimeObservability } from "@/lib/server/quality102-runtime-observability";
 import { loadFetRuntimeObservability } from "@/lib/server/fet-runtime-observability";
+import { loadCurrentProductionRuntime } from "@/lib/server/current-production-runtime";
 import { loadV12RuntimeBadge } from "@/lib/server/v12-runtime-status";
 export const dynamic = "force-dynamic";
 export async function GET(req: NextRequest) {
@@ -40,14 +41,14 @@ export async function GET(req: NextRequest) {
       };
     }
     const v12V4Shadow = await loadV12V4ShadowObservability();
-    const expectedRuntimeSha = snapshot.runtime.units[0]?.releaseSha;
+    const currentRuntime = await loadCurrentProductionRuntime();
     const [v52Top2Observability, penguRuntime, quality102Runtime, fetRuntime] = await Promise.all([
       loadV52Top2Observability(),
       loadPenguRuntimeObservability(),
       loadQuality102RuntimeObservability(),
-      loadFetRuntimeObservability({ expectedReleaseSha: expectedRuntimeSha }),
+      loadFetRuntimeObservability({ expectedReleaseSha: currentRuntime.productionReleaseShas.fet }),
     ]);
-    const v12Badge = await loadV12RuntimeBadge({ configured: v12Observability.wiring.runnerStateConfigured, state: v12Observability.runnerState, expectedReleaseSha: expectedRuntimeSha });
+    const v12Badge = await loadV12RuntimeBadge({ configured: v12Observability.wiring.runnerStateConfigured, state: v12Observability.runnerState, expectedReleaseSha: currentRuntime.productionReleaseShas.v12 });
     const runtime = {
       ...snapshot.runtime,
       units: snapshot.runtime.units.map((unit) => {

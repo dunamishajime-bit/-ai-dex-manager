@@ -8,6 +8,7 @@ import { loadHypeRuntimeObservability } from './hype-runtime-observability';
 import { loadFetGates } from './fet-gate-observability';
 import { DIST_TERMINAL_LIVE_CONFIG } from '@/lib/disterminal-live-config';
 import {loadPublicAsterQuoteBatch,publicAsterPreviewForRow} from './realtime-ranking-market-preview';
+import { loadV12V4LiveSource } from './v12-v4-live-source';
 type Obj=Record<string,unknown>;
 const obj=(v:unknown):Obj=>v&&typeof v==='object'&&!Array.isArray(v)?v as Obj:{};
 const list=(v:unknown)=>Array.isArray(v)?v.map(obj):[];
@@ -23,8 +24,23 @@ async function observe(){
  const now=Date.now(),current=await loadCurrentProductionRuntime(),rows:RankRow[]=[],errors:Record<string,string>={};
  const jobs=[
   async()=>{
+   const v4=await loadV12V4LiveSource();
+   if(v4.available&&v4.decision){
+    const at=num(v4.decision.updatedAt)??num(v4.decision.capturedAtMs)??v4.heartbeatAt??0;
+    const fresh=v4.fresh&&v4.runtimeSha===current.v12V4.runtimeSha;
+    for(const r of list(v4.decision.observedCandidates)){
+     const side=text(r.side),eligible=r.signalEligible===true;
+     const gates:Gate[]=[
+      flag('v4-source','V12 V4 realtime decision',fresh,'V4 heartbeat / realtime-decisionのSHAと鮮度を照合','execution'),
+      flag('authoritative','V12 V4実Runner Signal Gate',typeof r.signalEligible==='boolean'?eligible:undefined,text(r.signalReason)||text(v4.decision.reason)),
+      flag('execution','資金競合・保有・Margin Guard',undefined,'発注時の実Runner確認待ち','execution'),
+     ];
+     rows.push(make(text(r.symbol).replace(/USDT$/,'')+'USDT','V12',side||'WAIT',gates,fresh,at,text(r.signalReason)||text(v4.decision.reason)));
+    }
+    return;
+   }
    const [d,s,source]=await Promise.all([json(process.env.V12_DECISION_SNAPSHOT_PATH||'/var/lib/disdex/v12-x1-all/decision-snapshot.json'),json(process.env.V12_X1_ALL_STATE_PATH||'/var/lib/disdex/v12-x1-all/runner.json'),readFile(ROOT+'/config/v12X1AllRuntime.ts','utf8')]);
-   const at=num(d.observedAt)??num(d.referenceTs)??0,fresh=s.runtimeCommitSha===current.releaseSha&&s.mode==='LIVE'&&now-Number(s.updatedAt)>=-60000&&now-Number(s.updatedAt)<=3*3600000&&now-at>=-60000&&now-at<=3*3600000;
+   const at=num(d.observedAt)??num(d.referenceTs)??0,fresh=s.runtimeCommitSha===current.productionReleaseShas.v12&&s.mode==='LIVE'&&now-Number(s.updatedAt)>=-60000&&now-Number(s.updatedAt)<=3*3600000&&now-at>=-60000&&now-at<=3*3600000;
    const vol=extractObjectNumber(source,'minimumVolumeRatio'),mom=extractObjectNumber(source,'minimumMomentumPct');
    for(const r of list(d.candidates)){
     const side=text(r.side),gates=[minimum('volume','出来高比率',r.volumeRatio,vol),minimum('momentum',side==='SHORT'?'下落モメンタム':'上昇モメンタム',side==='SHORT'&&num(r.momentum)!==undefined?-Number(r.momentum):r.momentum,mom)];
@@ -75,18 +91,18 @@ async function observe(){
    const d=await loadHypeRuntimeObservability(),s=d.sleeves.HYPE_LONG;
    const gates:Gate[]=s.gates.map(g=>({key:g.key,label:g.label,state:g.status==='PASS'?'OK':g.status==='BLOCKED'?'NO':'UNKNOWN',actual:g.actual,required:g.threshold,detail:g.reason,kind:g.source==='PUBLIC_CANDLES'||['TREND_ALIGNMENT_NOT_MET','REGIME_SLOPE_NOT_MET','BREAKOUT_NOT_MET','DISTANCE_FROM_SLOW_EMA_TOO_LARGE'].includes(g.key)?'signal':'execution'}));
    gates.push(flag('position','新規保有枠',!s.position&&!s.pending,s.position?'HYPE保有中':s.pending?'保留注文あり':'保有なし','execution'));
-   rows.push(make('HYPEUSDT','HYPE','LONG',gates,hypeRankingFresh(s,current.releaseSha,now),s.lastDecision?.at||0,s.note));
+   rows.push(make('HYPEUSDT','HYPE','LONG',gates,hypeRankingFresh(s,current.productionReleaseShas.hype,now),s.lastDecision?.at||0,s.note));
   },
   async()=>{
    const d=await json(process.env.DISDEX_IDLE_PRIORITY_DECISION_DETAILS_PATH||'/var/lib/disdex/idle-priority/decision-details.json');
-   const at=num(d.updatedAt)??0,fresh=d.runtimeSha===current.releaseSha&&now-at>=-60000&&now-at<=2*3600000;
+   const at=num(d.updatedAt)??0,fresh=d.runtimeSha===current.productionReleaseShas.idle&&now-at>=-60000&&now-at<=2*3600000;
    const [state,residual]=await Promise.all([json('/var/lib/disdex/idle-priority/state.json').catch(()=>({})),json('/var/lib/disdex/idle-priority/residual-long-state.json').catch(()=>({}))]);
    for(const r of [...list(d.symbols),...list(d.residual)]){
     const isLong=!!r.decision,decision=obj(r.decision||r.routeDecision),generic=obj(r.generic),gates:Gate[]=[];
     if(!isLong)gates.push(flag('generic','汎用候補の成立',generic.accepted,text(generic.reason)));
     gates.push(flag('route','通貨専用 '+text(r.route),decision.accepted,text(decision.reason)));
     if(!isLong)gates.push(flag('cooldown','通貨Cooldown',r.cooldownAllowed,'実約定したSHORTエントリーから12時間（未達・未約定候補では開始しない）','execution'));
-    const holding=obj(isLong?residual:state),hasPosition=!!holding.position||list(holding.positions).length>0,holdingFresh=holding.runtimeSha===current.releaseSha&&now-Number(holding.updatedAt)>=-60000&&now-Number(holding.updatedAt)<2*3600000;
+    const holding=obj(isLong?residual:state),hasPosition=!!holding.position||list(holding.positions).length>0,holdingFresh=holding.runtimeSha===current.productionReleaseShas.idle&&now-Number(holding.updatedAt)>=-60000&&now-Number(holding.updatedAt)<2*3600000;
     gates.push(flag('holding','Idle保有・保留なし',holdingFresh?!hasPosition&&!holding.pending&&!holding.manualReview:undefined,hasPosition?'Idle保有中':holding.pending?'Idle注文処理中':holdingFresh?'保有状態確認済み（共有枠は別途確認）':'保有状態の観測未確認','execution'));
     gates.push(flag('capacity','優先ロジック空き・残余Gross',undefined,'優先ロジックの保有・同時候補・証拠金をRunnerが最終確認','execution'));
     rows.push(make(text(r.symbol),isLong?'Idle Long':'Idle Short',isLong?'LONG':'SHORT',gates,fresh,at,text(decision.reason)));

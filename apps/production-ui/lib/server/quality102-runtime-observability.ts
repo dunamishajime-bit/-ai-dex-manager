@@ -152,7 +152,7 @@ export async function loadQuality102RuntimeObservability(): Promise<Quality102Ru
     const mode = text(heartbeat?.mode) ?? text(state.mode);
     const safetyState = text(heartbeat?.safetyState);
     const runtimeSha = text(heartbeat?.runtimeSha ?? state.runtimeCommitSha);
-    const expectedReleaseSha = text(heartbeat?.expectedSha) ?? currentRuntime?.releaseSha ?? config.quality102Runtime.expectedReleaseSha;
+    const expectedReleaseSha = text(heartbeat?.expectedSha) ?? currentRuntime?.productionReleaseShas.quality102 ?? config.quality102Runtime.expectedReleaseSha;
     const selector = object(heartbeat?.quality102);
     const selectorMode = text(selector?.selectorMode) ?? config.quality102Runtime.selectorMode;
     const historicalSelectorParity = bool(selector?.historicalSelectorParity) ?? false;

@@ -4,6 +4,7 @@ import { isAbsolute } from "node:path";
 
 import { DIST_TERMINAL_LIVE_CONFIG as config } from "@/lib/disterminal-live-config";
 import { loadCurrentProductionRuntime, type CurrentProductionRuntime } from "@/lib/server/current-production-runtime";
+import { adaptV12V4DecisionToState, loadV12V4LiveSource } from "@/lib/server/v12-v4-live-source";
 
 type Sleeve = "V12" | "V52";
 type Status = "発火候補" | "候補に近い" | "条件不足" | "対象時間外" | "取得不能";
@@ -96,30 +97,39 @@ export function runtimeSnapshot(
   const q102 = currentRuntime?.quality102;
   const v52 = currentRuntime?.v52;
   const hype = currentRuntime?.runtimeLineage.units.hype;
+  const v12V4 = currentRuntime?.v12V4;
+  const runnerShas = currentRuntime?.productionReleaseShas;
+  const v12ReleaseSha = v12V4?.runtimeSha || currentRuntime?.productionReleaseShas.v12 || releaseSha;
   return {
     checkedAt,
     units: [
       {
         id: v12?.strategyId ?? "V12_X1.00_ALL",
-        label: v12 ? v12.strategyId : "V12 runtime unavailable",
+        label: v12V4?.available
+          ? `V12 V4 / ${v12V4.policyId || "V2_M150_D05_CORE_NATIVE"}`
+          : v12 ? v12.strategyId : "V12 runtime unavailable",
         status: "UNCONFIRMED",
-        releaseSha,
+        releaseSha: v12ReleaseSha,
         venue: "Aster Futures V3",
-        timeframe: "closed H1 -> H2",
-        entryPolicy: v12 && caps
+        timeframe: v12V4?.available ? "V4 closed-candle realtime decision" : "closed H1 -> H2",
+        entryPolicy: v12V4?.available
+          ? `${v12V4.policyId || "V2_M150_D05_CORE_NATIVE"} / 41 routes / current V4 heartbeat + realtime decision`
+          : v12 && caps
           ? `Score>=${v12.neutralScoreThreshold.toFixed(4)} / Strong ${v12.strongRegimeQualityScoreMinimum.toFixed(2)}-${v12.strongRegimeQualityScoreMaximum.toFixed(2)} + ATR/Price>=${(v12.strongRegimeQualityMinimumAtrRatio * 100).toFixed(1)}% / Top${v12.maximumPositions} / Base ${caps.v12BaseGross.toFixed(2)}x / Dynamic ${caps.v12DynamicGross.toFixed(2)}x / per-position ${caps.v12PerPositionGross.toFixed(2)}x`
           : "Production runtime unavailable; no static contract fallback.",
         protection: caps
           ? `Crypto ${caps.cryptoGross.toFixed(2)}x / Total ${caps.totalGross.toFixed(2)}x / daily loss ${caps.sharedCryptoDailyLossPct}% / Aster 5x Cross`
           : "Production runtime unavailable.",
-        note: "LIVE is shown only when VPS state and current Production contract are both readable.",
-        reason: "Waiting for V12 runner state.",
+        note: v12V4?.available
+          ? "V12 V4はV4専用heartbeatとrealtime-decisionを読み取り専用で表示しています。共通Production SHAとは独立したV4 runtime SHAです。"
+          : "LIVE is shown only when VPS state and current Production contract are both readable.",
+        reason: v12V4?.errors?.[0] || "Waiting for V12 runner state.",
       },
       {
         id: pengu?.strategyId ?? "PENGU_DUAL_LS_V2_FINAL",
         label: pengu?.strategyId ?? "PENGU runtime unavailable",
         status: "UNCONFIRMED",
-        releaseSha,
+        releaseSha: runnerShas?.pengu || releaseSha,
         venue: "Aster PENGUUSDT",
         timeframe: "closed PENGU/BTC H1",
         entryPolicy: pengu && caps
@@ -135,7 +145,7 @@ export function runtimeSnapshot(
         id: "QUALITY102_CAUSAL_V1",
         label: q102 ? `Q102 ${q102.selectorMode}` : "Q102 runtime unavailable",
         status: "UNCONFIRMED",
-        releaseSha,
+        releaseSha: runnerShas?.quality102 || releaseSha,
         venue: "Aster Futures crypto sleeve",
         timeframe: "causal LIVE data only",
         entryPolicy: q102 && caps
@@ -151,7 +161,7 @@ export function runtimeSnapshot(
         id: "FET_BRK48_RESIDUAL",
         label: "FET BRK48 Residual",
         status: "UNCONFIRMED",
-        releaseSha,
+        releaseSha: runnerShas?.fet || releaseSha,
         venue: "Aster Futures FETUSDT",
         timeframe: "BRK48 residual signal",
         entryPolicy: "FET BRK48 / 確定72h return ≥ +2% / 決済後24h再Entry禁止 / hold24h / Hard Stop5% / +5%到達後floor+0.5%",
@@ -169,7 +179,7 @@ export function runtimeSnapshot(
             : hype.matchesCurrent && hype.mode?.toUpperCase() === "LIVE"
               ? "LIVE"
               : "UNCONFIRMED",
-        releaseSha: hype?.runtimeSha || releaseSha,
+        releaseSha: hype?.runtimeSha || runnerShas?.hype || releaseSha,
         venue: "Aster Futures HYPEUSDT",
         timeframe: "closed H1 trend / breakout",
         entryPolicy: currentRuntime?.hype ? `${currentRuntime.hype.profile} / Gross ${currentRuntime.hype.maximumGross.toFixed(2)}x / Entry・Exit・stop logic維持` : "Production runtime unavailable.",
@@ -184,7 +194,7 @@ export function runtimeSnapshot(
         id: "DISDEX_V52_V11EQ_V50_ASTER_ONLY_PLUS_CRYPTO_V96",
         label: v52 ? `V52 ${v52.policyId}` : "V52 runtime unavailable",
         status: "UNCONFIRMED",
-        releaseSha,
+        releaseSha: runnerShas?.v52 || releaseSha,
         venue: "Aster-only stock sleeves",
         timeframe: "US stock V11_EQ / V50 windows",
         entryPolicy: v52
@@ -220,6 +230,7 @@ function v12ItemsFromSnapshot(state: JsonObject, checkedAt: string): DecisionSta
   if (!candidates.length) return config.v12Symbols.map((symbol) => unavailableItem(symbol, "V12", checkedAt, "V12 decision snapshotに候補がありません。"));
 
   const btcRegime = text(state.btcRegime ?? state.regime) || "UNKNOWN";
+  const isV4 = state.schema === "v12-v4-live-decision/v1";
   const referenceTs = finite(state.referenceTs);
   return candidates
     .map((candidate, index) => {
@@ -238,7 +249,7 @@ function v12ItemsFromSnapshot(state: JsonObject, checkedAt: string): DecisionSta
         side: candidateSide,
         reason: `V12 runner候補Rank${rank}。score=${score.toFixed(4)} / BTC regime=${btcRegime}。候補順位は発火・発注成立を意味しません。実runnerのSignal Gate・共有risk・容量Gateを別途確認します。`,
         checkedAt,
-        source: "VPS V12 sanitized decision snapshot",
+        source: isV4 ? "VPS V12 V4 realtime decision snapshot" : "VPS V12 sanitized decision snapshot",
         dataUpdatedAt: referenceTs === undefined ? undefined : new Date(referenceTs).toISOString(),
       } satisfies DecisionStatusItem;
     })
@@ -331,10 +342,16 @@ export async function loadDecisionStatus(options: { force?: boolean } = {}): Pro
   let v12State: JsonObject | null = null;
   let v52State: JsonObject | null = null;
 
-  try {
-    v12State = await readState(process.env.V12_DECISION_SNAPSHOT_PATH || process.env.V12_X1_ALL_STATE_PATH, "V12 decision snapshot");
-  } catch (error) {
-    errors.push(error instanceof Error ? error.message : "V12 decision snapshotを読み取れません。");
+  const v12V4Source = await loadV12V4LiveSource();
+  if (v12V4Source.available && v12V4Source.decision) {
+    v12State = adaptV12V4DecisionToState(v12V4Source);
+    if (!v12State) errors.push("V12 V4 realtime decisionをHP用snapshotへ変換できません。");
+  } else {
+    try {
+      v12State = await readState(process.env.V12_DECISION_SNAPSHOT_PATH || process.env.V12_X1_ALL_STATE_PATH, "V12 decision snapshot");
+    } catch (error) {
+      errors.push(error instanceof Error ? error.message : "V12 decision snapshotを読み取れません。");
+    }
   }
 
   const market = newYorkMarketClock(new Date(now));

@@ -3,6 +3,7 @@ import { isAbsolute } from "node:path";
 
 import { AsterDexClient, loadAsterDexClientConfig } from "@/lib/server/asterdex/client";
 import { loadAsterTradeHistory } from "@/lib/server/aster-trade-history";
+import { adaptV12V4DecisionToState, adaptV12V4HeartbeatToState, loadV12V4LiveSource } from "@/lib/server/v12-v4-live-source";
 
 const V12_BASE_SYMBOLS = new Set([
   "BTC", "ETH", "BNB", "SOL", "LINK", "AVAX", "DOGE", "INJ", "XRP", "ADA", "LTC", "ATOM", "AAVE", "NEAR",
@@ -333,12 +334,21 @@ function buildExecutionTrace(
 
 export async function loadV12DecisionObservability() {
   const errors: string[] = [];
-  const [runnerFile, decisionFile, riskFile, history] = await Promise.all([
+  const v12V4Source = await loadV12V4LiveSource();
+  const [legacyRunnerFile, legacyDecisionFile, riskFile, history] = await Promise.all([
     readJsonFromEnvPath("V12_X1_ALL_STATE_PATH"),
     readJsonFromEnvPath("V12_DECISION_SNAPSHOT_PATH"),
     readJsonFromEnvPath("DISDEX_SHARED_CRYPTO_DAILY_RISK_PATH"),
     loadAsterTradeHistory(),
   ]);
+  const v4RunnerState = v12V4Source.available ? adaptV12V4HeartbeatToState(v12V4Source) : null;
+  const v4DecisionState = v12V4Source.available && v12V4Source.decision ? adaptV12V4DecisionToState(v12V4Source) : null;
+  const runnerFile = v4RunnerState
+    ? { configured: true as const, value: v4RunnerState as unknown, error: undefined }
+    : legacyRunnerFile;
+  const decisionFile = v4DecisionState
+    ? { configured: true as const, value: v4DecisionState as unknown, error: undefined }
+    : legacyDecisionFile;
   if (runnerFile.error) errors.push(`runner-state: ${runnerFile.error}`);
   if (decisionFile.error) errors.push(`decision-snapshot: ${decisionFile.error}`);
   if (riskFile.error) errors.push(`shared-risk: ${riskFile.error}`);

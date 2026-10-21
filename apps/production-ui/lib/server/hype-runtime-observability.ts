@@ -1,6 +1,6 @@
 import {readFile} from 'node:fs/promises';
 import {join} from 'node:path';
-import {extractObjectNumber} from './current-production-runtime';
+import {extractObjectNumber, loadCurrentProductionRuntime} from './current-production-runtime';
 import type {HypeZecGate,HypeZecSleeve} from './hype-zec-runtime-observability';
 export type HypeGate=HypeZecGate;
 export type HypeSleeve=HypeZecSleeve & {strategy:'HYPE_LONG';symbol:'HYPEUSDT'};
@@ -9,7 +9,9 @@ async function json(path:string){try{return JSON.parse(await readFile(path,'utf8
 /** HYPE75 H1 runner is authoritative; legacy 15m sidecar gates are not its Entry logic. */
 export async function loadHypeRuntimeObservability(now=Date.now(),options:{releaseRoot?:string;stateRoot?:string}={}):Promise<HypeOverview>{
  const root=options.releaseRoot??'/home/deploy/disdex-trading/current',stateRoot=options.stateRoot??'/var/lib/disdex';
- const sha=(await readFile(join(root,'.disdex-release-sha'),'utf8')).trim();if(!/^[a-f0-9]{40}$/.test(sha))throw Error('HYPE75_CURRENT_SHA_INVALID');
+ const markerSha=(await readFile(join(root,'.disdex-release-sha'),'utf8')).trim();if(!/^[a-f0-9]{40}$/.test(markerSha))throw Error('HYPE75_CURRENT_SHA_INVALID');
+ const currentRuntime=await loadCurrentProductionRuntime().catch(()=>null);
+ const sha=currentRuntime?.productionReleaseShas.hype||markerSha;
  const [source,state,hb,kill]=await Promise.all([readFile(join(root,'config/hypeTrendLongPolicy.ts'),'utf8'),json(join(stateRoot,'hype-zec-long/runner.json')),json(join(stateRoot,'runner-health/heartbeats/hype-trend-long.json')),json(join(stateRoot,'shared/kill-switch.json'))]);
  const n=(key:string)=>extractObjectNumber(source,key);
  const shaOk=state?.runtimeCommitSha===sha&&hb?.runtimeSha===sha&&hb?.expectedSha===sha;

@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
+import { loadV12V4LiveSource, type V12V4LiveSource } from "./v12-v4-live-source";
 
 const CURRENT_MARKER = "/home/deploy/disdex-trading/current/.disdex-release-sha";
 const CURRENT_RELEASE_ROOT = "/home/deploy/disdex-trading/current";
@@ -12,6 +13,7 @@ const HEARTBEAT_PATHS = Object.freeze({
   v52: "/var/lib/disdex/runner-health/heartbeats/v52.json",
   fet: "/var/lib/disdex/fet-brk48-residual/state.json",
   hype: "/var/lib/disdex/runner-health/heartbeats/hype-trend-long.json",
+  idle: "/var/lib/disdex/runner-health/heartbeats/idle-priority-short.json",
 });
 
 type EnvMap = Record<string, string>;
@@ -30,10 +32,11 @@ export type CurrentProductionRuntime = {
     v52: string;
     fet: string;
     hype: string;
+    idle: string;
   };
   runtimeLineage: {
     synchronized: boolean;
-    units: Record<"v12" | "pengu" | "quality102" | "v52" | "fet" | "hype", {
+    units: Record<"v12" | "pengu" | "quality102" | "v52" | "fet" | "hype" | "idle", {
       runtimeSha?: string;
       expectedSha?: string;
       mode?: string;
@@ -45,6 +48,31 @@ export type CurrentProductionRuntime = {
       matchesCurrent: boolean;
       error?: string;
     }>;
+  };
+  v12V4: {
+    available: boolean;
+    fresh: boolean;
+    heartbeatPath?: string;
+    decisionPath?: string;
+    runtimeSha?: string;
+    expectedSha?: string;
+    policyId?: string;
+    operationMode?: string;
+    status?: string;
+    mode?: string;
+    liveEnabled?: boolean;
+    orderPermission?: string;
+    newOrdersAllowed?: boolean;
+    safetyState?: string;
+    mainPid?: number;
+    nRestarts?: number;
+    heartbeatAt?: number;
+    decisionTs?: number;
+    updatedAt?: number;
+    candidateCount?: number;
+    filteredCount?: number;
+    sourceCount?: number;
+    errors: string[];
   };
   caps: {
     v12BaseGross: number;
@@ -171,11 +199,29 @@ function v52Number(value: unknown, key: string): number {
 
 type RuntimeUnitKey = keyof typeof HEARTBEAT_PATHS;
 
-async function loadRuntimeLineage(releaseSha: string): Promise<CurrentProductionRuntime["runtimeLineage"]> {
+async function readHeartbeat(paths: string[]) {
+  const errors: string[] = [];
+  for (const path of [...new Set(paths.filter(Boolean))]) {
+    try {
+      const raw = JSON.parse(await readFile(path, "utf8")) as Record<string, unknown>;
+      return { raw, path, errors };
+    } catch (error) {
+      errors.push(`${path}:${error instanceof Error ? error.message : "HEARTBEAT_UNAVAILABLE"}`);
+    }
+  }
+  return { raw: null, path: undefined, errors };
+}
+
+async function loadRuntimeLineage(releaseSha: string, v12V4: V12V4LiveSource): Promise<CurrentProductionRuntime["runtimeLineage"]> {
   const units = {} as CurrentProductionRuntime["runtimeLineage"]["units"];
   for (const [unit, path] of Object.entries(HEARTBEAT_PATHS) as Array<[RuntimeUnitKey, string]>) {
     try {
-      const raw = JSON.parse(await readFile(path, "utf8")) as Record<string, unknown>;
+      const paths = unit === "v12"
+        ? [v12V4.heartbeatPath || "/var/lib/disdex/runner-health/heartbeats/v12-v4.json", "/var/lib/disdex/v12-v4/heartbeat.json", path]
+        : [path];
+      const heartbeat = await readHeartbeat(paths);
+      if (!heartbeat.raw) throw new Error(heartbeat.errors.join(" / ") || "HEARTBEAT_UNAVAILABLE");
+      const raw = heartbeat.raw;
       const runtimeSha = typeof raw.runtimeSha === "string" ? raw.runtimeSha.trim()
         : unit === "fet" && typeof raw.runtimeCommitSha === "string" ? raw.runtimeCommitSha.trim() : undefined;
       const expectedSha = typeof raw.expectedSha === "string" ? raw.expectedSha.trim()
@@ -193,7 +239,12 @@ async function loadRuntimeLineage(releaseSha: string): Promise<CurrentProduction
             ? Number(raw.updatedAt)
             : undefined,
         healthReason: typeof raw.healthReason === "string" ? raw.healthReason : undefined,
-        matchesCurrent: runtimeSha === releaseSha && expectedSha === releaseSha,
+        // Runner releases are intentionally independent in the current VPS
+        // topology (V4 and HYPE/Idle can be on a dedicated immutable SHA).
+        // A unit is coherent when its own runtime SHA matches its declared
+        // expected SHA. Only legacy heartbeats without an expected SHA fall
+        // back to the common current release marker.
+        matchesCurrent: Boolean(runtimeSha) && (expectedSha ? runtimeSha === expectedSha : runtimeSha === releaseSha),
       };
     } catch (error) {
       units[unit] = {
@@ -225,7 +276,8 @@ export async function loadCurrentProductionRuntime(): Promise<CurrentProductionR
   const v12Source = await readFile(join(CURRENT_RELEASE_ROOT, "config", "v12X1AllRuntime.ts"), "utf8");
   const penguSource = await readFile(join(CURRENT_RELEASE_ROOT, "config", "penguDualLsV2Runtime.ts"), "utf8");
   const penguRecoverySource = await readFile(join(CURRENT_RELEASE_ROOT, "config", "penguRecoveryV8.ts"), "utf8");
-  const runtimeLineage = await loadRuntimeLineage(releaseSha);
+  const v12V4Source = await loadV12V4LiveSource();
+  const runtimeLineage = await loadRuntimeLineage(releaseSha, v12V4Source);
   const target = JSON.parse(await readFile(join(CURRENT_RELEASE_ROOT,"docs/implementation/FINAL_PRODUCTION_TARGET_DD1296_20261005.json"),"utf8"));
   const hypeSource = await readFile(join(CURRENT_RELEASE_ROOT,"config/hypeTrendLongPolicy.ts"),"utf8");
   const v52Raw = JSON.parse(await readFile(join(CURRENT_RELEASE_ROOT, "config", "v52V50Runtime.json"), "utf8")) as Record<string, unknown>;
@@ -245,14 +297,40 @@ export async function loadCurrentProductionRuntime(): Promise<CurrentProductionR
     source: "VPS_CURRENT_RUNTIME",
     releaseSha,
     productionReleaseShas: {
-      v12: releaseSha,
-      pengu: releaseSha,
-      quality102: releaseSha,
-      v52: releaseSha,
-      fet: releaseSha,
-      hype: releaseSha,
+      v12: runtimeLineage.units.v12.expectedSha || runtimeLineage.units.v12.runtimeSha || releaseSha,
+      pengu: runtimeLineage.units.pengu.expectedSha || runtimeLineage.units.pengu.runtimeSha || releaseSha,
+      quality102: runtimeLineage.units.quality102.expectedSha || runtimeLineage.units.quality102.runtimeSha || releaseSha,
+      v52: runtimeLineage.units.v52.expectedSha || runtimeLineage.units.v52.runtimeSha || releaseSha,
+      fet: runtimeLineage.units.fet.expectedSha || runtimeLineage.units.fet.runtimeSha || releaseSha,
+      hype: runtimeLineage.units.hype.expectedSha || runtimeLineage.units.hype.runtimeSha || releaseSha,
+      idle: runtimeLineage.units.idle.expectedSha || runtimeLineage.units.idle.runtimeSha || releaseSha,
     },
     runtimeLineage,
+    v12V4: {
+      available: v12V4Source.available,
+      fresh: v12V4Source.fresh,
+      heartbeatPath: v12V4Source.heartbeatPath,
+      decisionPath: v12V4Source.decisionPath,
+      runtimeSha: v12V4Source.runtimeSha,
+      expectedSha: v12V4Source.expectedSha,
+      policyId: v12V4Source.policyId,
+      operationMode: v12V4Source.operationMode,
+      status: v12V4Source.status,
+      mode: v12V4Source.mode,
+      liveEnabled: v12V4Source.liveEnabled,
+      orderPermission: v12V4Source.orderPermission,
+      newOrdersAllowed: v12V4Source.newOrdersAllowed,
+      safetyState: v12V4Source.safetyState,
+      mainPid: v12V4Source.mainPid,
+      nRestarts: v12V4Source.nRestarts,
+      heartbeatAt: v12V4Source.heartbeatAt,
+      decisionTs: v12V4Source.decisionTs,
+      updatedAt: v12V4Source.updatedAt,
+      candidateCount: v12V4Source.candidateCount,
+      filteredCount: v12V4Source.filteredCount,
+      sourceCount: v12V4Source.sourceCount,
+      errors: v12V4Source.errors,
+    },
     caps: {
       v12BaseGross: requiredNumber(env, "V12_BASE_GROSS_CAP"),
       v12DynamicGross: requiredNumber(env, "V12_DYNAMIC_GROSS_CAP"),

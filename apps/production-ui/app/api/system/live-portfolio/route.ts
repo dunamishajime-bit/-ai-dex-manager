@@ -53,6 +53,26 @@ function bool(value: unknown) {
 }
 
 async function readV12Usage() {
+  const v4OrdersPath = String(process.env.V12_V4_ORDERS_PATH || "/var/lib/disdex/v12-v4/orders.json").trim();
+  if (isAbsolute(v4OrdersPath)) {
+    try {
+      const raw = JSON.parse(await readFile(v4OrdersPath, "utf8")) as { state?: { legs?: Record<string, unknown> } };
+      const legs = raw.state?.legs && typeof raw.state.legs === "object" ? Object.values(raw.state.legs) : [];
+      const positions = legs.filter((value) => {
+        if (!value || typeof value !== "object") return false;
+        const leg = value as Record<string, unknown>;
+        const quantity = finite(leg.quantity ?? leg.qty ?? leg.remainingQty);
+        const status = String(leg.status || leg.phase || "OPEN").toUpperCase();
+        return quantity > 0 && !["CLOSED", "EXITED", "FLAT", "CANCELLED"].includes(status);
+      }) as Array<Record<string, unknown>>;
+      return {
+        positionCount: positions.length,
+        gross: positions.reduce((sum, position) => sum + finite(position.gross ?? position.requestedGross), 0),
+        symbols: positions.map((position) => String(position.symbol || "").toUpperCase()).filter(Boolean),
+        source: "VPS_V12_V4_ORDERS",
+      };
+    } catch { /* Fall through to the legacy state only when V4 state is unavailable. */ }
+  }
   const statePath = String(process.env.V12_X1_ALL_STATE_PATH || "").trim();
   if (!statePath || !isAbsolute(statePath)) return null;
   try {
@@ -62,6 +82,7 @@ async function readV12Usage() {
       positionCount: positions.length,
       gross: positions.reduce((sum, position) => sum + finite(position.gross), 0),
       symbols: positions.map((position) => String(position.symbol || "").toUpperCase()).filter(Boolean),
+      source: "VPS_V12_LEGACY_STATE",
     };
   } catch {
     return null;
