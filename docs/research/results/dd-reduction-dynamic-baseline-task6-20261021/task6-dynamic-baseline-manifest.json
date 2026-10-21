@@ -1,0 +1,68 @@
+{
+  "task": "Task 6 overlay-free dynamic baseline and first divergence",
+  "classification": "BLOCKED_WITH_EVIDENCE",
+  "period": {"start": "2025-08-10", "end": "2026-08-10", "timezone": "UTC"},
+  "initial_wallet_jpy": 10000,
+  "deposits_jpy": 0,
+  "compounding": true,
+  "price_model": "H1",
+  "overlay_policy": "NONE",
+  "adverse_stop_rules_applied": false,
+  "candidate_source": {
+    "expected_rows": 3185,
+    "observed_rows": 3185,
+    "strategy_coverage": ["V12", "Q102", "PENGU", "FET", "RESIDUAL", "IDLE", "V52", "HYPE_LONG"],
+    "normalized_rows": 0,
+    "fail_closed_rows": 3185,
+    "replayable_rows": 0,
+    "status": "INCOMPLETE",
+    "reason": "The available candidate-decisions source does not provide canonical validity and entry_price fields required by the Task 1 source contract; no values were synthesized.",
+    "source_sha256": {
+      "10": "eac68287e6f4e644c588b8689ce1dc67226abccea21bea09e29c0aeda0c1a3e2",
+      "30": "77087b72c7e9279d001b58e351d7e932a9b3dabcb58d9ccbf7f1a0fd28a7c5d1"
+    },
+    "source_bytes": {"10": 2572924, "30": 2571687}
+  },
+  "anchors": {
+    "10": {"final_equity_jpy": 222818966.878, "jpy_profit_factor": 3.4624474, "trades": 1310, "mtm_drawdown_pct": -15.6206368},
+    "30": {"final_equity_jpy": 124289206.8183, "jpy_profit_factor": 3.0820985, "trades": 1307, "mtm_drawdown_pct": -16.7877688}
+  },
+  "runs": {
+    "10": {
+      "output_dir": "C:\\Users\\dis\\Desktop\\DisDex_AI_Files\\01_BT_Research\\2026-10-21_dynamic_baseline_task6\\cost-10bps",
+      "parity_classification": "BLOCKED_INCOMPLETE_SOURCE_COVERAGE",
+      "result_hash": "9a5a791acbdafbff028a59bb57b4f4e46f7cde26bf995269b2496f5711c11f2d",
+      "allocator_hash": "c70ca0ba30705030d956ee05774b0022d03682355025b512f51ae7add30e0168",
+      "ledger_hashes": {
+        "execution-ledger.jsonl": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "reservation-ledger.jsonl": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "preemption-ledger.jsonl": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "allocator-state-snapshots.jsonl": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "mtm-timeline.jsonl": "fdc61944079da9d33153711bfccc1718849928b6e725fb467f6355c3f77f54a6"
+      },
+      "first_divergence": {"basis": "ANCHOR_METRIC", "metric": "final_equity_jpy", "dynamic": 10000, "anchor": 222818966.878, "event_id": null}
+    },
+    "30": {
+      "output_dir": "C:\\Users\\dis\\Desktop\\DisDex_AI_Files\\01_BT_Research\\2026-10-21_dynamic_baseline_task6\\cost-30bps",
+      "parity_classification": "BLOCKED_INCOMPLETE_SOURCE_COVERAGE",
+      "result_hash": "322622a44cec90ffc8e5c16bc41af539d206ce8349b3289078266a785d1a1ab7",
+      "allocator_hash": "c70ca0ba30705030d956ee05774b0022d03682355025b512f51ae7add30e0168",
+      "ledger_hashes": {
+        "execution-ledger.jsonl": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "reservation-ledger.jsonl": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "preemption-ledger.jsonl": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "allocator-state-snapshots.jsonl": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+        "mtm-timeline.jsonl": "fdc61944079da9d33153711bfccc1718849928b6e725fb467f6355c3f77f54a6"
+      },
+      "first_divergence": {"basis": "ANCHOR_METRIC", "metric": "final_equity_jpy", "dynamic": 10000, "anchor": 124289206.8183, "event_id": null}
+    }
+  },
+  "verification": {
+    "focused_dynamic_baseline": "7/7 pass",
+    "dd_reduction_suite": "16/16 files pass, 0 failed, 0 skipped, 0 todo",
+    "typescript": "exit 0",
+    "targeted_eslint": "exit 0",
+    "git_diff_check": "exit 0",
+    "independent_replay": {"10": true, "30": true}
+  }
+}
