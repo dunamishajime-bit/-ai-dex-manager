@@ -1,0 +1,60 @@
+{
+  "report_version": 1,
+  "classification": "BLOCKED_WITH_EVIDENCE",
+  "dynamic_status": "BLOCKED_INCOMPLETE_SOURCE_COVERAGE",
+  "economic_acceptance_eligible": false,
+  "formal_parity": false,
+  "source_coverage": {
+    "expected_rows": 3185,
+    "observed_rows": {
+      "10": 3185,
+      "30": 3185
+    },
+    "normalized_rows": {
+      "10": 0,
+      "30": 0
+    },
+    "fail_closed_rows": {
+      "10": 3185,
+      "30": 3185
+    },
+    "replayable_rows": {
+      "10": 0,
+      "30": 0
+    },
+    "coverage_status": "INCOMPLETE",
+    "reason": "Canonical validity, entry_price, and complete lifecycle/allocator evidence are unavailable; no missing values were synthesized."
+  },
+  "task6_overlay_free_baseline": {
+    "classification": "BLOCKED_INCOMPLETE_SOURCE_COVERAGE",
+    "costs_bps": [10, 30],
+    "result_hashes": {
+      "10": "9a5a791acbdafbff028a59bb57b4f4e46f7cde26bf995269b2496f5711c11f2d",
+      "30": "322622a44cec90ffc8e5c16bc41af539d206ce8349b3289078266a785d1a1ab7"
+    },
+    "repeat_hashes_verified": true,
+    "economic_metrics_available": false
+  },
+  "task7_dynamic_cases": {
+    "case_count": 16,
+    "blocked_case_count": 16,
+    "all_cases_blocked_for_source_coverage": true,
+    "economic_acceptance_eligible": false,
+    "zero_trade_output_is_diagnostic_only": true,
+    "historical_fixed_replay": "RESEARCH_ONLY_NONCANONICAL; preserved and not used as dynamic BT"
+  },
+  "preservation": {
+    "fixed_replay_manifest": "manifest.json",
+    "fixed_replay_status": "RESEARCH_ONLY_NONCANONICAL",
+    "dynamic_replay_status": "BLOCKED_DYNAMIC_RESELECTION_NOT_IMPLEMENTED",
+    "prior_task6_report_preserved": true,
+    "prior_task7_status_preserved": true,
+    "production_changes": 0,
+    "live_claim": false
+  },
+  "verification_scope": {
+    "raw_ledgers": "C:\\Users\\dis\\Desktop\\DisDex_AI_Files\\01_BT_Research\\ referenced only; not copied into Git",
+    "formal_parity_claim": false,
+    "economic_acceptance_claim": false
+  }
+}

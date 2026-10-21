@@ -324,7 +324,7 @@ function caseResult(policy: Task9CasePolicy, costBps: Task9CostBps, normalized: 
     const diagnostic = { finalEquityJpy: baseReplay.mtm_timeline.at(-1)?.equity_jpy ?? baseReplay.accounting.wallet_jpy, tradeCount: baseReplay.charge_ledger.length, replayableRows: source.replayableRows };
     const cooldownExclusions = plannedStops.reduce((count, stop) => count + replayable.filter((event) => {
         const candidate = allocatorCandidate(event);
-        return candidate !== null && candidate.symbol === replayable.find((item) => item.candidate_id === stop.candidateId)?.symbol && candidate.decision_ts_ms !== null && candidate.decision_ts_ms > stop.timestampMs && candidate.decision_ts_ms < stop.timestampMs + (policy.overlayRules[0]?.reentryHours ?? 0) * 3_600_000;
+        return candidate !== null && candidate.symbol === replayable.find((item) => item.candidate_id === stop.candidateId)?.symbol && typeof candidate.decision_ts_ms === "number" && candidate.decision_ts_ms > stop.timestampMs && candidate.decision_ts_ms < stop.timestampMs + (policy.overlayRules[0]?.reentryHours ?? 0) * 3_600_000;
     }).length, 0);
     const lifecycleAudit: Task9LifecycleAudit = {
         cooldownExclusions,
@@ -339,7 +339,7 @@ function caseResult(policy: Task9CasePolicy, costBps: Task9CostBps, normalized: 
     const classification: Task9Classification = blocked ? "BLOCKED_INCOMPLETE_SOURCE_COVERAGE" : !replayPass ? "BLOCKED_REPLAY" : policy.name === "BASELINE" ? "REJECTED" : "DD_IMPROVED_RESEARCH_ONLY";
     const hashes = ledgerHashes(baseReplay);
     return {
-        caseName: policy.name, costBps, classification, economicAcceptanceEligible: metrics !== null && classification === "ACCEPTED", economicMetrics: metrics, diagnosticMetrics: diagnostic,
+        caseName: policy.name, costBps, classification, economicAcceptanceEligible: metrics !== null && classification === ("ACCEPTED" as Task9Classification), economicMetrics: metrics, diagnosticMetrics: diagnostic,
         sourceCoverage: source, stopEvents: stops, lifecycleAudit, splits, ledgerHashes: hashes, resultHash: hashCanonical({ policy, costBps, source, metrics, diagnostic, lifecycleAudit, hashes }), replayStatus: baseReplay.status, replayRejection: baseReplay.rejection,
     };
 }
@@ -376,7 +376,7 @@ async function resolveSources(options: Task9DynamicOptions): Promise<readonly Ca
     return Promise.all(options.sourceSpecs.map(loadSourceRecord));
 }
 function normalizeCases(cases: readonly Task9CaseName[] | undefined): readonly Task9CaseName[] { const values = cases ?? TASK9_DYNAMIC_CASES.map((item) => item.name); if (new Set(values).size !== values.length) fail("CASE_DUPLICATE", "case names must be unique"); values.forEach(policyFor); return values; }
-function normalizeCosts(costs: readonly Task9CostBps[] | undefined): readonly Task9CostBps[] { const values = costs ?? [10, 30]; if (values.some((cost) => cost !== 10 && cost !== 30)) fail("COST_INVALID", "costs must be 10 or 30 bps"); return [...new Set(values)]; }
+function normalizeCosts(costs: readonly Task9CostBps[] | undefined): readonly Task9CostBps[] { const values: readonly Task9CostBps[] = costs ?? [10, 30]; if (values.some((cost) => cost !== 10 && cost !== 30)) fail("COST_INVALID", "costs must be 10 or 30 bps"); return Array.from(new Set<Task9CostBps>(values)); }
 
 export async function runTask9Dynamic(options: Task9DynamicOptions): Promise<Task9DynamicRun> {
     const outputDir = resolve(options.outputDir || DEFAULT_OUTPUT_DIR); if (isInside(REPOSITORY_ROOT, outputDir)) fail("OUTPUT_IN_REPOSITORY", `raw dynamic outputs must be outside ${REPOSITORY_ROOT}`);
@@ -405,7 +405,7 @@ function parseKind(value: string): CandidateSourceKind { if (value === "RAW_CAND
 export function parseTask9DynamicArgs(args: readonly string[]): Task9DynamicArgs {
     const paths = repeated(args, "--source"); const kinds = repeated(args, "--source-kind"); if (paths.length === 0) fail("SOURCE_MISSING", "at least one --source is required"); if (paths.length !== kinds.length) fail("AMBIGUOUS_SOURCE_CLASSIFICATION", "each source needs one source-kind");
     const selectedCases = repeated(args, "--case"); const selectedCosts = repeated(args, "--cost-bps");
-    const costs = (selectedCosts.length === 0 ? [10, 30] : selectedCosts.map((value) => { if (value !== "10" && value !== "30") fail("COST_INVALID", value); return Number(value) as Task9CostBps; }));
+    const costs: readonly Task9CostBps[] = selectedCosts.length === 0 ? [10, 30] : selectedCosts.map((value): Task9CostBps => { if (value !== "10" && value !== "30") fail("COST_INVALID", value); return Number(value) as Task9CostBps; });
     return { outputDir: resolve(valueFlag(args, "--output") ?? DEFAULT_OUTPUT_DIR), sourceSpecs: paths.map((path, index) => ({ path, kind: parseKind(kinds[index] as string) })), cases: selectedCases.length === 0 ? TASK9_DYNAMIC_CASES.map((item) => item.name) : selectedCases.map(parseCase), costs, verifyDeterminism: args.includes("--verify-determinism") };
 }
 

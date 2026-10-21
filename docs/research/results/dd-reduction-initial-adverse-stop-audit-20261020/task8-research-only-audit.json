@@ -1,0 +1,33 @@
+{
+  "audit_version": 1,
+  "audit_status": "PASS",
+  "scope": "research-only",
+  "production_changes": 0,
+  "live_claim": false,
+  "forbidden_paths": [],
+  "forbidden_markers": [],
+  "audited_path_allowlist": [
+    ".github/workflows/task9-dynamic-integrated-bt.yml",
+    "scripts/dd-reduction/verify-task9-dynamic-artifacts.ts",
+    "tests/dd-reduction-dynamic-artifacts.test.ts",
+    "docs/research/results/dd-reduction-initial-adverse-stop-audit-20261020/manifest.json",
+    "docs/research/results/dd-reduction-initial-adverse-stop-audit-20261020/task8-comparison-status.json",
+    "docs/research/results/dd-reduction-initial-adverse-stop-audit-20261020/task8-research-only-audit.json",
+    "docs/research/results/dd-reduction-initial-adverse-stop-audit-20261020/TASK8_FINAL_RESEARCH_REPORT_JA.md",
+    "package.json",
+    "scripts/dd-reduction/run-task9-dynamic.ts",
+    "tests/dd-reduction-dynamic-preemption.test.ts"
+  ],
+  "excluded_operational_surfaces": [
+    "Production",
+    "VPS",
+    "LIVE",
+    "HP",
+    "Aster",
+    "operator",
+    "Shared Risk",
+    "Margin Guard",
+    "Kill Switch"
+  ],
+  "method": "Changed-path allowlist plus compact artifact mutation-marker verification; raw research ledgers remain outside Git."
+}

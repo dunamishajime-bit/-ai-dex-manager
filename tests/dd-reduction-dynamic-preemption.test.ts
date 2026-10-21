@@ -418,7 +418,7 @@ test("historical 123/125 counts are observation-only and require provenance", ()
     const observationPath = "docs/research/results/dd-reduction-initial-adverse-stop-audit-20261020/TASK9_ENGINE_AUDIT_FINAL_REPORT_JA.md";
     const observationSha = "e80a11de44815c82a9bd6eb917e6346ec5172e9a2c6a0627f48c3a7ce75a57a5";
     const manifestPath = "docs/research/results/dd-reduction-initial-adverse-stop-audit-20261020/manifest.json";
-    const manifestSha = "591c14589b9997e19bbb70ed568fdb5aaa21e6d90c418102a0adba6b6431bdef";
+    const manifestSha = "7aec37cab3efae22e347b41890a5d049481327d29d22f1f3040321d0e483417d";
     const tenBps = observeHistoricalPreemptionCount({
         cost_bps: 10,
         observed_count: 123,

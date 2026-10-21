@@ -141,5 +141,35 @@
     "production_changed": false,
     "live_claim": false,
     "external_venue_certification": false
+  },
+  "task8_final_verification": {
+    "classification": "BLOCKED_WITH_EVIDENCE",
+    "dynamic_status": "BLOCKED_INCOMPLETE_SOURCE_COVERAGE",
+    "economic_acceptance_eligible": false,
+    "formal_parity": false,
+    "source_coverage": {
+      "expected_rows": 3185,
+      "observed_rows": { "10": 3185, "30": 3185 },
+      "normalized_rows": { "10": 0, "30": 0 },
+      "fail_closed_rows": { "10": 3185, "30": 3185 },
+      "replayable_rows": { "10": 0, "30": 0 }
+    },
+    "artifact_verifier": "scripts/dd-reduction/verify-task9-dynamic-artifacts.ts",
+    "comparison_status": "task8-comparison-status.json",
+    "research_only_audit": "task8-research-only-audit.json",
+    "final_report": "TASK8_FINAL_RESEARCH_REPORT_JA.md",
+    "ci_workflow": ".github/workflows/task9-dynamic-integrated-bt.yml",
+    "raw_ledgers": "C:\\Users\\dis\\Desktop\\DisDex_AI_Files\\01_BT_Research\\ (external; not copied into Git)",
+    "verification": {
+      "dd_reduction_suite": "18/18 files pass, 0 failed, 0 skipped, 0 todo",
+      "typescript": "exit 0",
+      "python_discovery": "24/24 pass",
+      "targeted_lint": "exit 0",
+      "git_diff_check": "exit 0",
+      "artifact_verifier": "PASS; external Task 6 ledgers and source references checked",
+      "ci_job": "real non-skipped job defined"
+    },
+    "production_changes": 0,
+    "live_claim": false
   }
 }

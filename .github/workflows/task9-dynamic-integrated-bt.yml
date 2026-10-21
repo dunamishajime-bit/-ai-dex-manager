@@ -1,0 +1,57 @@
+name: Task 9 dynamic research verification
+
+on:
+  push:
+    paths:
+      - ".github/workflows/task9-dynamic-integrated-bt.yml"
+      - "docs/research/results/dd-reduction-dynamic-baseline-task6-20261021/**"
+      - "docs/research/results/dd-reduction-initial-adverse-stop-audit-20261020/**"
+      - "lib/backtest/dd-reduction/**"
+      - "scripts/dd-reduction/**"
+      - "tests/dd-reduction-*.test.ts"
+      - "package.json"
+      - "package-lock.json"
+  pull_request:
+    paths:
+      - ".github/workflows/task9-dynamic-integrated-bt.yml"
+      - "docs/research/results/dd-reduction-dynamic-baseline-task6-20261021/**"
+      - "docs/research/results/dd-reduction-initial-adverse-stop-audit-20261020/**"
+      - "lib/backtest/dd-reduction/**"
+      - "scripts/dd-reduction/**"
+      - "tests/dd-reduction-*.test.ts"
+      - "package.json"
+      - "package-lock.json"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: task9-dynamic-research-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify-task9-dynamic-research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - name: Check out research branch
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Run complete DD reduction test discovery
+        run: npm run dd:reduction:test
+      - name: Type-check without emitting files
+        run: npx tsc --noEmit --incremental false --pretty false
+      - name: Run applicable Python discovery
+        run: python -m unittest discover -s scripts/dd-reduction -p 'test_*.py' -q
+      - name: Lint Task 9 verifier and artifact test
+        run: npx eslint scripts/dd-reduction/verify-task9-dynamic-artifacts.ts tests/dd-reduction-dynamic-artifacts.test.ts
+      - name: Verify compact research artifacts and fail-closed classifications
+        run: npm run dd:reduction:artifacts
+      - name: Check patch whitespace
+        run: git diff --check
