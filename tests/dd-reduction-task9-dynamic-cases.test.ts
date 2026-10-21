@@ -185,10 +185,50 @@ test("one valid candidate never launders an incomplete eight-strategy source int
         const item = result.cases[0]!;
         assert.ok(item.sourceCoverage.replayableRows > 0);
         assert.equal(item.sourceCoverage.status, "INCOMPLETE");
-        assert.ok(item.sourceCoverage.reasons.some((reason) => reason.includes("partial replay coverage")));
+        assert.ok(item.sourceCoverage.reasons.some((reason) => reason.includes("partial actionable replay coverage")));
         assert.equal(item.classification, "BLOCKED_INCOMPLETE_SOURCE_COVERAGE");
         assert.equal(item.economicMetrics, null);
         assert.equal(result.cumulativeGate.economicAcceptanceEligible, false);
+    });
+});
+
+test("source-backed preallocation exclusions are accounted separately from actionable rejected candidates", async () => {
+    await withOutput(async (outputDir) => {
+        const strategies = ["V12", "Q102", "PENGU", "FET", "RESIDUAL", "IDLE", "V52", "HYPE_LONG"];
+        const ready = strategies.map((strategy, index) => row(`ready-${index}`, {
+            strategy_id: strategy, event_seq: index + 1, symbol: `SYMBOL${index}USDT`,
+            decision: "ACCEPTED_MODELED_ENTRY",
+        }));
+        const excluded = row("excluded-before-allocation", {
+            strategy_id: "V52", event_seq: 100, decision: "EXCLUDED_PREALLOCATION",
+            reason: "SINGLE_V50_SLOT_ALREADY_OPEN", candidate_status: "NOT_APPLICABLE",
+            side: null, entry_price: null, quantity: null,
+        });
+        const result = await runTask9Dynamic({
+            outputDir, sourceRecords: [source([...ready, excluded])],
+            costs: [10], cases: ["BASELINE"],
+        });
+        assert.equal(result.sourceCoverage.observedRows, 9);
+        assert.equal(result.sourceCoverage.replayableRows, 8);
+        assert.equal(result.sourceCoverage.verifiedExcludedRows, 1);
+        assert.equal(result.sourceCoverage.status, "COMPLETE");
+        // The research scenario remains blocked because OOS/Holdout and MTM marks are unproven.
+        assert.equal(result.cases[0]?.economicMetrics, null);
+        const invalidExcluded = await runTask9Dynamic({
+            outputDir: join(outputDir, "invalid-exclusion"),
+            sourceRecords: [source([...ready, { ...excluded, reason: "" }])],
+            costs: [10], cases: ["BASELINE"],
+        });
+        assert.equal(invalidExcluded.sourceCoverage.status, "INCOMPLETE");
+        assert.equal(invalidExcluded.sourceCoverage.verifiedExcludedRows, 0);
+        assert.equal(invalidExcluded.cases[0]?.economicMetrics, null);
+        const rejected = await runTask9Dynamic({
+            outputDir: join(outputDir, "rejected"),
+            sourceRecords: [source([...ready, { ...excluded, decision: "REJECTED_PORTFOLIO", reason: "NO_GROSS_ROOM" }])],
+            costs: [10], cases: ["BASELINE"],
+        });
+        assert.equal(rejected.sourceCoverage.status, "INCOMPLETE");
+        assert.equal(rejected.sourceCoverage.verifiedExcludedRows, 0);
     });
 });
 

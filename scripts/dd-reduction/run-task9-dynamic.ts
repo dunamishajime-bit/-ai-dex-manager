@@ -126,6 +126,7 @@ export interface Task9SourceCoverage {
     readonly normalizedRows: number;
     readonly failClosedRows: number;
     readonly replayableRows: number;
+    readonly verifiedExcludedRows: number;
     readonly status: "COMPLETE" | "INCOMPLETE";
     readonly reasons: readonly string[];
     readonly sourceHashes: readonly { readonly path: string; readonly sha256: string; readonly bytes: number }[];
@@ -299,15 +300,32 @@ function ledgerHashes(replay: DynamicReplayResult): Readonly<Record<string, stri
         "preemption-ledger.jsonl": hashCanonical(replay.preemption_ledger), "allocator-state-snapshots.jsonl": hashCanonical(replay.allocator_state_snapshots), "mtm-timeline.jsonl": hashCanonical(replay.mtm_timeline),
     };
 }
-function sourceCoverage(source: ReturnType<typeof normalizeDynamicCandidates>, replayableRows: number): Task9SourceCoverage {
+function sourceCoverage(source: ReturnType<typeof normalizeDynamicCandidates>, replayableRows: number, rawById: ReadonlyMap<string, Readonly<Record<string, unknown>>>): Task9SourceCoverage {
     const reasons: string[] = [];
-    if (source.failClosedRowCount > 0) reasons.push(`${source.failClosedRowCount} rows are fail-closed because canonical candidate fields are incomplete`);
-    if (replayableRows !== source.observedRowCount) reasons.push(`partial replay coverage: ${replayableRows}/${source.observedRowCount} rows; partial subsets must not produce economic BT metrics`);
+    const exclusions = source.events.filter((event) => rawById.get(event.candidate_id)?.decision === "EXCLUDED_PREALLOCATION");
+    const verifiedExcluded = exclusions.filter((event) => {
+        const raw = rawById.get(event.candidate_id);
+        return raw !== undefined && typeof raw.reason === "string" && raw.reason.trim().length > 0
+            && raw.strategy_id === event.strategy_id && raw.candidate_id === event.candidate_id
+            && Number.isFinite(raw.decision_ts_ms) && raw.decision_ts_ms === event.decision_ts_ms
+            && (event.evidence_level === "ORIGINAL_EVIDENCE" || event.evidence_level === "CAUSALLY_REGENERATED");
+    });
+    // Preallocation exclusions do not become synthetic trades, even if they lack side/price.
+    // An ordinary rejected portfolio decision, however, must remain eligible for a causal
+    // allocator re-admission check and must not be exempted from source coverage.
+    const actionableFailClosed = source.events.filter((event) =>
+        event.failClosed && rawById.get(event.candidate_id)?.decision !== "EXCLUDED_PREALLOCATION").length;
+    const expectedReplayable = source.observedRowCount - verifiedExcluded.length;
+    if (exclusions.length !== verifiedExcluded.length) reasons.push("unverified preallocation exclusions; missing reason or incompatible provenance");
+    if (actionableFailClosed > 0) reasons.push(`${actionableFailClosed} actionable rows are fail-closed because canonical candidate fields are incomplete`);
+    if (replayableRows !== expectedReplayable) reasons.push(`partial actionable replay coverage: ${replayableRows}/${expectedReplayable} rows; partial subsets must not produce economic BT metrics`);
     for (const strategy of DYNAMIC_STRATEGY_IDS) {
         if ((source.strategyCounts[strategy] ?? 0) === 0) reasons.push(`missing strategy coverage: ${strategy}`);
     }
     if (replayableRows === 0) reasons.push("zero replayable rows; economic BT metrics are unavailable");
-    return { observedRows: source.observedRowCount, normalizedRows: source.events.length - source.failClosedRowCount, failClosedRows: source.failClosedRowCount, replayableRows, status: reasons.length === 0 ? "COMPLETE" : "INCOMPLETE", reasons, sourceHashes: source.sourceHashes.map((item) => ({ path: item.path, sha256: item.sha256, bytes: item.bytes })) };
+    return { observedRows: source.observedRowCount, normalizedRows: source.events.length - source.failClosedRowCount, failClosedRows: source.failClosedRowCount, replayableRows,
+        verifiedExcludedRows: verifiedExcluded.length, status: reasons.length === 0 ? "COMPLETE" : "INCOMPLETE", reasons,
+        sourceHashes: source.sourceHashes.map((item) => ({ path: item.path, sha256: item.sha256, bytes: item.bytes })) };
 }
 
 /** Split membership is anchored to the event's causal decision time, never its exit or outcome. */
@@ -320,7 +338,8 @@ function causalResearchSplit(event: DynamicCandidateEvent, raw: Readonly<Record<
 }
 
 function caseResult(policy: Task9CasePolicy, costBps: Task9CostBps, normalized: ReturnType<typeof normalizeDynamicCandidates>, rawById: ReadonlyMap<string, Readonly<Record<string, unknown>>>, source: Task9SourceCoverage, marketData: readonly ReplayMarketMark[]): Task9CaseResult {
-    const replayable = normalized.events.filter((event) => allocatorCandidate(event, rawById.get(event.candidate_id) ?? {}) !== null);
+    const replayable = normalized.events.filter((event) => rawById.get(event.candidate_id)?.decision !== "EXCLUDED_PREALLOCATION"
+        && allocatorCandidate(event, rawById.get(event.candidate_id) ?? {}) !== null);
     const splitEvents: Record<"IS" | "OOS" | "HOLDOUT", ReplayEvent[]> = { IS: [], OOS: [], HOLDOUT: [] };
     const plannedStops: Task9StopEvent[] = [];
     let unverifiedSplitCount = 0;
@@ -402,8 +421,9 @@ export async function runTask9Dynamic(options: Task9DynamicOptions): Promise<Tas
     for (const cost of costs) {
         const normalized = normalizeDynamicCandidates({ records, feeBps: cost, slippageBps: cost });
         const rawById = new Map(records.flatMap((source) => source.rows.map((row) => [String(row.candidate_id ?? row.candidateId ?? ""), row] as const)).filter(([id]) => id.length > 0));
-        const replayable = normalized.events.filter((event) => allocatorCandidate(event, rawById.get(event.candidate_id) ?? {}) !== null).length;
-        const coverage = sourceCoverage(normalized, replayable); combinedCoverage ??= coverage;
+        const replayable = normalized.events.filter((event) => rawById.get(event.candidate_id)?.decision !== "EXCLUDED_PREALLOCATION"
+            && allocatorCandidate(event, rawById.get(event.candidate_id) ?? {}) !== null).length;
+        const coverage = sourceCoverage(normalized, replayable, rawById); combinedCoverage ??= coverage;
         for (const name of cases) results.push(caseResult(policyFor(name), cost, normalized, rawById, coverage, options.marketData ?? []));
     }
     if (combinedCoverage === null) fail("SOURCE_MISSING", "no cost scenario was selected");

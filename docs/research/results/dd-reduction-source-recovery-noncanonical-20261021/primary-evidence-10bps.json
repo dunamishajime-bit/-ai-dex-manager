@@ -1,0 +1,152 @@
+{
+  "acceptedCandidates": 1310,
+  "allPortfolioEventRows": 7836,
+  "candidateSymbolsWithoutH1InExaminedInputDirectory": [
+    "AAVEUSDT",
+    "ADAUSDT",
+    "AMZNUSDT",
+    "APTUSDT",
+    "ARBUSDT",
+    "ATOMUSDT",
+    "AVAXUSDT",
+    "DOGEUSDT",
+    "DOTUSDT",
+    "ENAUSDT",
+    "FETUSDT",
+    "INJUSDT",
+    "JUPUSDT",
+    "LINKUSDT",
+    "LTCUSDT",
+    "METAUSDT",
+    "MSFTUSDT",
+    "NEARUSDT",
+    "NVDAUSDT",
+    "ONDOUSDT",
+    "OPUSDT",
+    "RENDERUSDT",
+    "SEIUSDT",
+    "SUIUSDT",
+    "TAOUSDT",
+    "TIAUSDT",
+    "TSLAUSDT",
+    "UNIUSDT",
+    "XRPUSDT"
+  ],
+  "checks": {
+    "acceptedToModeledEntryIdsExact": true,
+    "acceptedToTradeIdsExact": true,
+    "allCandidateRowsPresent": true,
+    "allCandidateSymbolsHaveSavedH1": false,
+    "allModeledEntriesHistoricalFillVerified": false,
+    "allRejectedRowsCarryQuantityAndEquity": false,
+    "allocatorDecisionPriorityAndExpiryPresent": false,
+    "allowedDecisionKinds": true,
+    "savedH1Continuity": true,
+    "strategyIdsExact": true
+  },
+  "classification": "BLOCKED_INCOMPLETE_SOURCE_COVERAGE",
+  "costBps": 10,
+  "decisionCounts": {
+    "ACCEPTED_MODELED_ENTRY": 1310,
+    "EXCLUDED_PREALLOCATION": 16,
+    "REJECTED_PORTFOLIO": 1859
+  },
+  "economicBacktest": false,
+  "eventTypeCounts": {
+    "FUNDING": 5205,
+    "HYPE_PRIORITY_PARTIAL_EXIT": 6,
+    "MODELED_ENTRY": 1310,
+    "MODELED_EXIT": 1310,
+    "MODELED_PARTIAL_EXIT": 4,
+    "MONTHLY_CONTRIBUTION": 1
+  },
+  "formalParity": false,
+  "historicalFillVerification": {
+    "False": 1310
+  },
+  "inputSha256": {
+    "candidateDecisions": "eac68287e6f4e644c588b8689ce1dc67226abccea21bea09e29c0aeda0c1a3e2",
+    "portfolioEvents": "4020ef8181944999d59abc161444299061f225f4cde56e7b47745e00314a4166",
+    "portfolioTrades": "6c7a2f6d73336109af852c233bfdcb9013cbe73ac06f83070b39b73306d20e78"
+  },
+  "knownNotEstablished": [
+    "rejected-candidate dynamic sizing/equity/lot validation",
+    "same-timestamp allocator priority and tie-break",
+    "candidate validity/expiry and preemption re-admission",
+    "all 35 symbols full market/MTM marks, including V52 non-crypto source",
+    "fee/funding/protection/execution truth for hypothetical alternative trades",
+    "dynamic integrated baseline exact parity, OOS, holdout and DD improvement"
+  ],
+  "liveClaim": false,
+  "modeledEntryEvents": 1310,
+  "modeledTradeRows": 1310,
+  "observedCandidates": 3185,
+  "preallocationExclusions": 16,
+  "productionChanges": 0,
+  "rejectedPortfolioCandidates": 1859,
+  "savedH1Series": {
+    "BNBUSDT": {
+      "available": true,
+      "bars": 8760,
+      "continuousH1": true,
+      "endTsMs": 1786316400000,
+      "sourceSha256": "ee10a93b53d074b9a722aafd83fbcb1bf472b9cec46956e741000d36b35b3683",
+      "startTsMs": 1754784000000
+    },
+    "BTCUSDT": {
+      "available": true,
+      "bars": 8760,
+      "continuousH1": true,
+      "endTsMs": 1786316400000,
+      "sourceSha256": "aba7f6c5f1175c6554651cd5cf40ab03e0d518d3ac44c0dfab21d56e5b65a27c",
+      "startTsMs": 1754784000000
+    },
+    "ETHUSDT": {
+      "available": true,
+      "bars": 8760,
+      "continuousH1": true,
+      "endTsMs": 1786316400000,
+      "sourceSha256": "ff002a2799fd851609964353da44c09d4d15278f677385f088e9f5d7f778e244",
+      "startTsMs": 1754784000000
+    },
+    "HYPEUSDT": {
+      "available": true,
+      "bars": 7715,
+      "continuousH1": true,
+      "endTsMs": 1786316400000,
+      "sourceSha256": "72634705a11a753e82c2ea6b5f5b347da397ed7a4bad2060be3d181175fe26a4",
+      "startTsMs": 1758546000000
+    },
+    "PENGUUSDT": {
+      "available": true,
+      "bars": 8760,
+      "continuousH1": true,
+      "endTsMs": 1786316400000,
+      "sourceSha256": "547664a34ed9dc326ec93f7d62652e781109e8ce3785c62a035cd0e83e077b07",
+      "startTsMs": 1754784000000
+    },
+    "SOLUSDT": {
+      "available": true,
+      "bars": 8760,
+      "continuousH1": true,
+      "endTsMs": 1786316400000,
+      "sourceSha256": "29dea2a03d9f8dc866115647eec39ad928d9162bcbb5ab8ebc7c915212888b13",
+      "startTsMs": 1754784000000
+    }
+  },
+  "savedH1Symbols": 6,
+  "schemaVersion": 1,
+  "sourceKind": "PRESERVED_H1_MODELED_RESEARCH",
+  "strategyCounts": {
+    "FET": 21,
+    "HYPE_LONG": 60,
+    "IDLE": 694,
+    "PENGU": 113,
+    "Q102": 398,
+    "RESIDUAL": 842,
+    "V12": 958,
+    "V52": 99
+  },
+  "symbolsInCandidates": 35,
+  "verifiedPreallocationExclusionRows": 16
+}

@@ -51,8 +51,10 @@ jobs:
         run: npx tsc --noEmit --incremental false --pretty false
       - name: Run self-contained Python research discovery
         run: python scripts/dd-reduction/run-task9-python-discovery.py
-      - name: Lint Task 9 verifier and artifact test
-        run: npx eslint scripts/dd-reduction/verify-task9-dynamic-artifacts.ts tests/dd-reduction-dynamic-artifacts.test.ts
+      - name: Verify historical model source provenance and fail-closed boundaries
+        run: python scripts/dd-reduction/test_task9_existing_evidence.py
+      - name: Lint Task 9 research runner, verifier, and tests
+        run: npx eslint scripts/dd-reduction/run-task9-dynamic.ts tests/dd-reduction-task9-dynamic-cases.test.ts scripts/dd-reduction/verify-task9-dynamic-artifacts.ts tests/dd-reduction-dynamic-artifacts.test.ts
       - name: Verify compact research artifacts and fail-closed classifications
         run: npm run dd:reduction:artifacts
       - name: Check patch whitespace
