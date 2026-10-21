@@ -25,24 +25,27 @@ test("accounting reconciliation is independent of the allocator state", () => {
     const result = replayDynamicPortfolio([
         ev("d", "DEPOSIT", 0, { amount_jpy: 1_000 }),
         ev("e", "ENTRY", 1_000, { candidate }),
-        ev("f", "ENTRY_FILL", 1_001, { reservation_id: "reservation:a1:1000", filled_gross: 500 }),
-        ev("x", "NORMAL_EXIT", 2_000, { reservation_id: "reservation:a1:1000", settlement_pnl: -10, fx_rate: 2, fee_settlement: 1, funding_settlement: -2, exit_reason: "STOP" }),
+        ev("f", "ENTRY_FILL", 1_001, { reservation_id: "reservation:a1:1000", filled_gross: 500, fill_price: 100, slippage_bps: 0, gap_bps: 0 }),
+        ev("x", "NORMAL_EXIT", 2_000, { reservation_id: "reservation:a1:1000", settlement_pnl: -10, settlement_currency: "USDT", fx_rate: 2, fee_settlement: 1, funding_settlement: -2, exit_price: 102, slippage_bps: 0, gap_bps: 0, exit_reason: "STOP" }),
     ], policy);
     assert.equal(result.accounting.expected_wallet_jpy, 10_974);
     assert.equal(result.accounting.wallet_jpy, 10_974);
     assert.equal(result.accounting.reconciliation_delta_jpy, 0);
     assert.equal(result.accounting.accounting_reconciliation, "PASS");
+    assert.equal(result.allocator_state.wallet_jpy, result.accounting.wallet_jpy);
+    assert.equal(result.allocator_state.equity_jpy, result.accounting.wallet_jpy);
+    assert.equal(result.accounting.charge_reconciliation, "PASS");
 });
 test("MTM drawdown is separate from realized PnL and records peak/trough/recovery", () => {
     const result = replayDynamicPortfolio([
         ev("e", "ENTRY", 1_000, { candidate }),
-        ev("f", "ENTRY_FILL", 1_001, { reservation_id: "reservation:a1:1000", filled_gross: 500 }),
+        ev("f", "ENTRY_FILL", 1_001, { reservation_id: "reservation:a1:1000", filled_gross: 500, fill_price: 100, slippage_bps: 0, gap_bps: 0 }),
         ev("m1", "MARK", 2_000),
         ev("m2", "MARK", 3_000),
-        ev("x", "NORMAL_EXIT", 4_000, { reservation_id: "reservation:a1:1000", settlement_pnl: 0, exit_reason: "TIME_STOP" }),
+        ev("x", "NORMAL_EXIT", 4_000, { reservation_id: "reservation:a1:1000", settlement_pnl: 0, settlement_currency: "USDT", fx_rate: 1, fee_settlement: 0, funding_settlement: 0, exit_price: 100, slippage_bps: 0, gap_bps: 0, exit_reason: "TIME_STOP" }),
     ], policy, [
-        { timestamp_ms: 2_000, symbol: "ETHUSDT", price: 120 },
-        { timestamp_ms: 3_000, symbol: "ETHUSDT", price: 80 },
+        { timestamp_ms: 2_000, symbol: "ETHUSDT", price: 120, fx_rate: 1 },
+        { timestamp_ms: 3_000, symbol: "ETHUSDT", price: 80, fx_rate: 1 },
     ]);
     assert.equal(result.accounting.realized_pnl_jpy, 0);
     assert.equal(result.mtm_timeline.find((point) => point.timestamp_ms === 2_000)?.unrealized_pnl_jpy, -100);
@@ -53,9 +56,9 @@ test("MTM drawdown is separate from realized PnL and records peak/trough/recover
 test("fee and funding are not charged twice", () => {
     const result = replayDynamicPortfolio([
         ev("e", "ENTRY", 1_000, { candidate }),
-        ev("f", "ENTRY_FILL", 1_001, { reservation_id: "reservation:a1:1000", filled_gross: 500 }),
-        ev("fund", "FUNDING", 1_500, { funding_settlement: 2, fx_rate: 100 }),
-        ev("x", "NORMAL_EXIT", 2_000, { reservation_id: "reservation:a1:1000", settlement_pnl: 0, fee_settlement: 1, fx_rate: 100, exit_reason: "TIME_STOP" }),
+        ev("f", "ENTRY_FILL", 1_001, { reservation_id: "reservation:a1:1000", filled_gross: 500, fill_price: 100, slippage_bps: 0, gap_bps: 0 }),
+        ev("fund", "FUNDING", 1_500, { funding_settlement: 2, settlement_pnl: 0, settlement_currency: "USDT", fee_settlement: 0, fx_rate: 100 }),
+        ev("x", "NORMAL_EXIT", 2_000, { reservation_id: "reservation:a1:1000", settlement_pnl: 0, settlement_currency: "USDT", fee_settlement: 1, funding_settlement: 0, fx_rate: 100, exit_price: 100, slippage_bps: 0, gap_bps: 0, exit_reason: "TIME_STOP" }),
     ], policy);
     assert.equal(result.accounting.funding_jpy, 200);
     assert.equal(result.accounting.fees_jpy, 100);

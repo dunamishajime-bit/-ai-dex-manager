@@ -31,11 +31,11 @@ test("single reducer separates entry, protection, exit, realized pnl, and MTM", 
     const result = replayDynamicPortfolio([
         event("deposit", "DEPOSIT", 0, { amount_jpy: 1_000 }),
         event("entry", "ENTRY", 1_000, { candidate }),
-        event("fill", "ENTRY_FILL", 1_001, { reservation_id: "reservation:c1:1000", filled_gross: 1_000 }),
+        event("fill", "ENTRY_FILL", 1_001, { reservation_id: "reservation:c1:1000", filled_gross: 1_000, fill_price: 100, slippage_bps: 0, gap_bps: 0 }),
         event("protect", "PROTECTION_REGISTRATION", 1_002, { reservation_id: "reservation:c1:1000", protection_id: "stop:c1" }),
         event("mark", "MARK", 2_000),
-        event("exit", "NORMAL_EXIT", 3_000, { reservation_id: "reservation:c1:1000", settlement_pnl: 100, fx_rate: 1, fee_settlement: 2, funding_settlement: 3, exit_reason: "TAKE_PROFIT", cooldown_until_ts_ms: 4_000, cooldown_source_event_ts_ms: 3_000 }),
-    ], policy, [{ timestamp_ms: 2_000, symbol: "BTCUSDT", price: 110 }]);
+        event("exit", "NORMAL_EXIT", 3_000, { reservation_id: "reservation:c1:1000", settlement_pnl: 100, settlement_currency: "USDT", fx_rate: 1, fee_settlement: 2, funding_settlement: 3, exit_price: 110, slippage_bps: 0, gap_bps: 0, exit_reason: "TAKE_PROFIT", cooldown_until_ts_ms: 4_000, cooldown_source_event_ts_ms: 3_000 }),
+    ], policy, [{ timestamp_ms: 2_000, symbol: "BTCUSDT", price: 110, fx_rate: 1 }]);
     assert.equal(result.status, "PASS");
     assert.equal(result.accounting.accounting_reconciliation, "PASS");
     assert.equal(result.accounting.realized_pnl_jpy, 100);
@@ -49,8 +49,8 @@ test("single reducer separates entry, protection, exit, realized pnl, and MTM", 
 test("settlement pnl and JPY pnl use an explicit FX rate", () => {
     const result = replayDynamicPortfolio([
         event("entry", "ENTRY", 1_000, { candidate }),
-        event("fill", "ENTRY_FILL", 1_001, { reservation_id: "reservation:c1:1000", filled_gross: 1_000 }),
-        event("exit", "NORMAL_EXIT", 2_000, { reservation_id: "reservation:c1:1000", settlement_pnl: 10, fx_rate: 150, exit_reason: "TIME_STOP" }),
+        event("fill", "ENTRY_FILL", 1_001, { reservation_id: "reservation:c1:1000", filled_gross: 1_000, fill_price: 100, slippage_bps: 0, gap_bps: 0 }),
+        event("exit", "NORMAL_EXIT", 2_000, { reservation_id: "reservation:c1:1000", settlement_pnl: 10, settlement_currency: "USDT", fx_rate: 150, fee_settlement: 0, funding_settlement: 0, exit_price: 110, slippage_bps: 0, gap_bps: 0, exit_reason: "TIME_STOP" }),
     ], policy);
     assert.equal(result.status, "PASS");
     assert.equal(result.accounting.realized_pnl_jpy, 1_500);
@@ -97,4 +97,95 @@ test("duplicate event ids fail before a second charge", () => {
     assert.equal(result.status, "FAIL");
     assert.equal(result.rejection, "DUPLICATE_EVENT");
     assert.equal(result.accounting.wallet_jpy, 10_100);
+});
+
+test("exit settlement fields are required and are never zero-filled", () => {
+    const result = replayDynamicPortfolio([
+        event("entry", "ENTRY", 1_000, { candidate }),
+        event("fill", "ENTRY_FILL", 1_001, { reservation_id: "reservation:c1:1000", filled_gross: 1_000, fill_price: 100, slippage_bps: 0, gap_bps: 0 }),
+        event("exit", "NORMAL_EXIT", 2_000, { reservation_id: "reservation:c1:1000", exit_price: 110, exit_reason: "TIME_STOP" }),
+    ], policy);
+    assert.equal(result.status, "FAIL");
+    assert.equal(result.rejection, "DATA_MISSING");
+    assert.equal(result.accounting.wallet_jpy, 10_000);
+});
+
+test("an exit cannot release a pending reservation", () => {
+    const result = replayDynamicPortfolio([
+        event("entry", "ENTRY", 1_000, { candidate }),
+        event("exit", "NORMAL_EXIT", 1_001, {
+            reservation_id: "reservation:c1:1000", settlement_pnl: 0, settlement_currency: "USDT", fx_rate: 1,
+            fee_settlement: 0, funding_settlement: 0, exit_price: 100, slippage_bps: 0, gap_bps: 0, exit_reason: "TIME_STOP",
+        }),
+    ], policy);
+    assert.equal(result.status, "FAIL");
+    assert.equal(result.rejection, "DATA_MISSING");
+    assert.equal(result.accounting.wallet_jpy, 10_000);
+});
+
+test("a protection stop requires active protection and execution evidence", () => {
+    const result = replayDynamicPortfolio([
+        event("entry", "ENTRY", 1_000, { candidate }),
+        event("fill", "ENTRY_FILL", 1_001, { reservation_id: "reservation:c1:1000", filled_gross: 1_000, fill_price: 100, slippage_bps: 0, gap_bps: 0 }),
+        event("stop", "PROTECTION_STOP", 2_000, {
+            reservation_id: "reservation:c1:1000", protection_id: "stop:c1", settlement_pnl: -10,
+            settlement_currency: "USDT", fx_rate: 1, fee_settlement: 0, funding_settlement: 0,
+            exit_price: 90, slippage_bps: 0, gap_bps: 0, exit_reason: "STOP",
+        }),
+    ], policy);
+    assert.equal(result.status, "FAIL");
+    assert.equal(result.rejection, "DATA_MISSING");
+});
+
+test("future entry and exit references fail closed before any wallet charge", () => {
+    const result = replayDynamicPortfolio([
+        event("exit", "NORMAL_EXIT", 1_000, {
+            reservation_id: "reservation:c1:2000", settlement_pnl: 10, settlement_currency: "USDT", fx_rate: 1,
+            fee_settlement: 0, funding_settlement: 0, exit_price: 110, slippage_bps: 0, gap_bps: 0, exit_reason: "TIME_STOP",
+        }),
+        event("entry", "ENTRY", 2_000, { candidate: { ...candidate, decision_ts_ms: 2_000 } }),
+    ], policy);
+    assert.equal(result.status, "FAIL");
+    assert.equal(result.rejection, "FUTURE_EVENT_REFERENCE");
+    assert.equal(result.accounting.wallet_jpy, 10_000);
+});
+
+test("non-finite mark price or FX fails closed", () => {
+    const result = replayDynamicPortfolio([
+        event("mark", "MARK", 2_000),
+    ], policy, [{ timestamp_ms: 2_000, symbol: "BTCUSDT", price: Number.NaN, fx_rate: 1 }]);
+    assert.equal(result.status, "FAIL");
+    assert.equal(result.rejection, "DATA_MISSING");
+});
+
+test("preemption reuses the Task 4 lifecycle and admits only after confirmed whole release", () => {
+    const incoming = { ...candidate, candidate_id: "incoming", symbol: "ETHUSDT", decision_ts_ms: 2_000, priority: 0 };
+    const result = replayDynamicPortfolio([
+        event("entry", "ENTRY", 1_000, { candidate }),
+        event("fill", "ENTRY_FILL", 1_001, { reservation_id: "reservation:c1:1000", filled_gross: 1_000, fill_price: 100, slippage_bps: 0, gap_bps: 0 }),
+        event("preempt", "PREEMPTION_EXIT", 2_000, {
+            reservation_id: "reservation:c1:1000", incoming_candidate: incoming,
+            victim_position: { position_id: "victim-1", reservation_id: "reservation:c1:1000", candidate_id: "c1", strategy_id: "V12", symbol: "BTCUSDT", side: "LONG", gross: 1_000, quantity: 10, entry_price: 100, priority: 1, status: "OPEN" },
+            mode: "WHOLE", exit_status: "FILLED", confirmed: true, execution_evidence: true, filled_gross: 1_000,
+            exit_price: 90, slippage_bps: 0, gap_bps: 0, settlement_pnl: -10, settlement_currency: "USDT", fx_rate: 1, fee_settlement: 0, funding_settlement: 0,
+            cooldown_until_ts_ms: 3_000, cooldown_source_event_ts_ms: 2_000,
+            ordering_events: [
+                { timestamp: 2_000, kind: "PREEMPTION_EXIT", event_seq: 1, candidate_id: "c1" },
+                { timestamp: 2_000, kind: "ENTRY", event_seq: 2, candidate_id: "incoming" },
+            ],
+        }),
+    ], policy);
+    assert.equal(result.status, "PASS");
+    assert.equal(result.preemption_ledger.length, 1);
+    assert.equal(result.allocator_state.reservations.find((item) => item.candidate_id === "c1")?.status, "RELEASED");
+    assert.equal(result.allocator_state.reservations.find((item) => item.candidate_id === "incoming")?.status, "PENDING");
+});
+
+test("an explicitly mislabeled OOS event fails closed at the boundary", () => {
+    const result = replayDynamicPortfolio([
+        event("entry", "ENTRY", 1_000, { candidate, data_split: "OOS" }),
+    ], { ...policy, oos_start_ts_ms: 2_000 });
+    assert.equal(result.status, "FAIL");
+    assert.equal(result.rejection, "DATA_MISSING");
+    assert.equal(result.oos_boundary.classification, "EXPLICIT");
 });

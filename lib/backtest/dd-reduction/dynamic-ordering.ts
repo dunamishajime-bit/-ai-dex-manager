@@ -64,7 +64,7 @@ const EVENT_PHASE_ORDER: Readonly<Record<string, number>> = {
     PREEMPTION_ELIGIBILITY: 10,
     SIZING: 11,
     RESERVATION: 12,
-    ENTRY: 13,
+    ENTRY: 12,
     ENTRY_FILL: 13,
     PROTECTION_REGISTRATION: 14,
     STATE_HASH: 15,
