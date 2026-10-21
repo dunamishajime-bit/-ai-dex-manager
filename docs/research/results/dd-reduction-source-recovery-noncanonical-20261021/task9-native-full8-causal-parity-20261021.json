@@ -1,0 +1,239 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS_NATIVE_SINGLE_ECONOMIC_CORE_CROSS_LANGUAGE_PARITY",
+  "policyId": "V12_SHORT_PCT2P5_12H_MFE1P0_R12",
+  "modelSource": "FROZEN_FULL8_H1_PRICE_MODEL_5M_OVERLAY_RESEARCH_ONLY",
+  "nativePythonLedgerParity": "PASS_NATIVE_SINGLE_CORE_FULL8_ECONOMIC_AND_STOP_CAUSAL_PARITY",
+  "nativeTypeScriptLedgerParity": "PASS_NATIVE_SINGLE_ECONOMIC_CORE_CROSS_LANGUAGE_PARITY",
+  "numberOfScenarios": 4,
+  "strategies": 8,
+  "candidatesPerScenario": 3185,
+  "actionablePerScenario": 3169,
+  "h1MarksPerScenario": 8761,
+  "independentRepeatShaProof": {
+    "status": "PASS_20_OUT_OF_20_INDEPENDENT_LEDGER_SHAS",
+    "compared": 20,
+    "exactMatches": 20,
+    "modelLedgerDigestPairs": [
+      {
+        "costBps": 10,
+        "case": "BASELINE",
+        "file": "candidate-decisions.jsonl",
+        "sha256": "5bd2ee4957a880b894ad5fb37e5d98aef95085ef1774ad17e45188baa290b68a",
+        "exact": true
+      },
+      {
+        "costBps": 10,
+        "case": "BASELINE",
+        "file": "portfolio-trades.jsonl",
+        "sha256": "6c7a2f6d73336109af852c233bfdcb9013cbe73ac06f83070b39b73306d20e78",
+        "exact": true
+      },
+      {
+        "costBps": 10,
+        "case": "BASELINE",
+        "file": "portfolio-events.jsonl",
+        "sha256": "4020ef8181944999d59abc161444299061f225f4cde56e7b47745e00314a4166",
+        "exact": true
+      },
+      {
+        "costBps": 10,
+        "case": "BASELINE",
+        "file": "task9-mtm.jsonl",
+        "sha256": "17db67ed20f3bb146998b27bbd213418ad083464b7b1855c13f4cc005e396908",
+        "exact": true
+      },
+      {
+        "costBps": 10,
+        "case": "BASELINE",
+        "file": "metrics.json",
+        "sha256": "07a8f6abf82c9470d0a8fa3d2360745b4aaab0f5d5964fcbe36ce886b57b7b18",
+        "exact": true
+      },
+      {
+        "costBps": 10,
+        "case": "V12_SHORT_PCT2P5_12H_MFE1P0_R12",
+        "file": "candidate-decisions.jsonl",
+        "sha256": "667161d94d3b5db63edfc9330416e132a4e57585c5185bd1116eeceff189dbe8",
+        "exact": true
+      },
+      {
+        "costBps": 10,
+        "case": "V12_SHORT_PCT2P5_12H_MFE1P0_R12",
+        "file": "portfolio-trades.jsonl",
+        "sha256": "dcb678b62a2317c682bbdb085fd0520f364cdb561483fe1817b060dec7644071",
+        "exact": true
+      },
+      {
+        "costBps": 10,
+        "case": "V12_SHORT_PCT2P5_12H_MFE1P0_R12",
+        "file": "portfolio-events.jsonl",
+        "sha256": "f961efa9c0a7d702a24a07590264f1b2f053d25785de5e792f563bdb2925e4ed",
+        "exact": true
+      },
+      {
+        "costBps": 10,
+        "case": "V12_SHORT_PCT2P5_12H_MFE1P0_R12",
+        "file": "task9-mtm.jsonl",
+        "sha256": "9e3ae772f120056ed52561598f830e75fdbd01c60c5752bf345659cbf85af890",
+        "exact": true
+      },
+      {
+        "costBps": 10,
+        "case": "V12_SHORT_PCT2P5_12H_MFE1P0_R12",
+        "file": "metrics.json",
+        "sha256": "2be24d7ee9e0bab2ed1dfbac284ac6fd9bc0d4ddff8f283bff8f705b42d3d635",
+        "exact": true
+      },
+      {
+        "costBps": 30,
+        "case": "BASELINE",
+        "file": "candidate-decisions.jsonl",
+        "sha256": "4070429e69830ba673ab6082c4b63fc77bd99abf182708add883c4161fd271c2",
+        "exact": true
+      },
+      {
+        "costBps": 30,
+        "case": "BASELINE",
+        "file": "portfolio-trades.jsonl",
+        "sha256": "9cb346e7c4e341bd277de8b60256dd6e8efe9b7f266b54bc52ed5ccff0112e05",
+        "exact": true
+      },
+      {
+        "costBps": 30,
+        "case": "BASELINE",
+        "file": "portfolio-events.jsonl",
+        "sha256": "b859f95983cbcc4587dcc83ae15f4ff330d545cc32596b2f30fe7611ac06c0e7",
+        "exact": true
+      },
+      {
+        "costBps": 30,
+        "case": "BASELINE",
+        "file": "task9-mtm.jsonl",
+        "sha256": "10a8c8a0579b244eb1fe3bdacc26a2ad96376e1f48b8ea017803d713e43537a6",
+        "exact": true
+      },
+      {
+        "costBps": 30,
+        "case": "BASELINE",
+        "file": "metrics.json",
+        "sha256": "60ab0ffc1b44d381a17ae94b57336c11d808b0fb6cdfe7a013d1f07c3cf432b4",
+        "exact": true
+      },
+      {
+        "costBps": 30,
+        "case": "V12_SHORT_PCT2P5_12H_MFE1P0_R12",
+        "file": "candidate-decisions.jsonl",
+        "sha256": "d2f90643c7c276a068f656c019ec7ff13fdb80b31dee62da594bd89926d61bbf",
+        "exact": true
+      },
+      {
+        "costBps": 30,
+        "case": "V12_SHORT_PCT2P5_12H_MFE1P0_R12",
+        "file": "portfolio-trades.jsonl",
+        "sha256": "09772f3869417a3c288c555905876821dcf3a63d872a90d290a603688a6b6ba6",
+        "exact": true
+      },
+      {
+        "costBps": 30,
+        "case": "V12_SHORT_PCT2P5_12H_MFE1P0_R12",
+        "file": "portfolio-events.jsonl",
+        "sha256": "148a92d9bd7b488988308bb0d0ec8e7a5349a1bc4f7c0c43d1c0be061e75ee01",
+        "exact": true
+      },
+      {
+        "costBps": 30,
+        "case": "V12_SHORT_PCT2P5_12H_MFE1P0_R12",
+        "file": "task9-mtm.jsonl",
+        "sha256": "24afded9ead2184a6777238e61405d18ac16e8d28e75a89e8606501224f60e3e",
+        "exact": true
+      },
+      {
+        "costBps": 30,
+        "case": "V12_SHORT_PCT2P5_12H_MFE1P0_R12",
+        "file": "metrics.json",
+        "sha256": "4f099c938f9b8f7788febb8dd086b70cc2571c25fa5d2d8beba222193ab4e16e",
+        "exact": true
+      }
+    ]
+  },
+  "costs": {
+    "10": {
+      "baseline": {
+        "finalEquityJpy": 222818966.87803495,
+        "profitFactor": 3.4587962777009813,
+        "maxDrawdownPct": -15.62063681288941,
+        "tradeCount": 1310,
+        "modeledStopExits": 0,
+        "stopCooldownRejected": 0,
+        "h1MtmPoints": 8761,
+        "sha256": {
+          "candidate-decisions.jsonl": "5bd2ee4957a880b894ad5fb37e5d98aef95085ef1774ad17e45188baa290b68a",
+          "portfolio-trades.jsonl": "6c7a2f6d73336109af852c233bfdcb9013cbe73ac06f83070b39b73306d20e78",
+          "portfolio-events.jsonl": "4020ef8181944999d59abc161444299061f225f4cde56e7b47745e00314a4166",
+          "task9-mtm.jsonl": "17db67ed20f3bb146998b27bbd213418ad083464b7b1855c13f4cc005e396908",
+          "metrics.json": "07a8f6abf82c9470d0a8fa3d2360745b4aaab0f5d5964fcbe36ce886b57b7b18"
+        }
+      },
+      "stopWithConfirmedCooldown": {
+        "finalEquityJpy": 204448513.24532193,
+        "profitFactor": 3.19660317544494,
+        "maxDrawdownPct": -14.79603474654827,
+        "tradeCount": 1311,
+        "modeledStopExits": 52,
+        "stopCooldownRejected": 20,
+        "h1MtmPoints": 8761,
+        "sha256": {
+          "candidate-decisions.jsonl": "667161d94d3b5db63edfc9330416e132a4e57585c5185bd1116eeceff189dbe8",
+          "portfolio-trades.jsonl": "dcb678b62a2317c682bbdb085fd0520f364cdb561483fe1817b060dec7644071",
+          "portfolio-events.jsonl": "f961efa9c0a7d702a24a07590264f1b2f053d25785de5e792f563bdb2925e4ed",
+          "task9-mtm.jsonl": "9e3ae772f120056ed52561598f830e75fdbd01c60c5752bf345659cbf85af890",
+          "metrics.json": "2be24d7ee9e0bab2ed1dfbac284ac6fd9bc0d4ddff8f283bff8f705b42d3d635"
+        }
+      },
+      "equityRetention": 0.9175543541463034,
+      "ddImprovementPp": 0.8246020663411411
+    },
+    "30": {
+      "baseline": {
+        "finalEquityJpy": 124289206.81827945,
+        "profitFactor": 3.0785603081685435,
+        "maxDrawdownPct": -16.78776877493442,
+        "tradeCount": 1307,
+        "modeledStopExits": 0,
+        "stopCooldownRejected": 0,
+        "h1MtmPoints": 8761,
+        "sha256": {
+          "candidate-decisions.jsonl": "4070429e69830ba673ab6082c4b63fc77bd99abf182708add883c4161fd271c2",
+          "portfolio-trades.jsonl": "9cb346e7c4e341bd277de8b60256dd6e8efe9b7f266b54bc52ed5ccff0112e05",
+          "portfolio-events.jsonl": "b859f95983cbcc4587dcc83ae15f4ff330d545cc32596b2f30fe7611ac06c0e7",
+          "task9-mtm.jsonl": "10a8c8a0579b244eb1fe3bdacc26a2ad96376e1f48b8ea017803d713e43537a6",
+          "metrics.json": "60ab0ffc1b44d381a17ae94b57336c11d808b0fb6cdfe7a013d1f07c3cf432b4"
+        }
+      },
+      "stopWithConfirmedCooldown": {
+        "finalEquityJpy": 91181051.22935231,
+        "profitFactor": 2.74999870212464,
+        "maxDrawdownPct": -15.411703490948048,
+        "tradeCount": 1308,
+        "modeledStopExits": 51,
+        "stopCooldownRejected": 20,
+        "h1MtmPoints": 8761,
+        "sha256": {
+          "candidate-decisions.jsonl": "d2f90643c7c276a068f656c019ec7ff13fdb80b31dee62da594bd89926d61bbf",
+          "portfolio-trades.jsonl": "09772f3869417a3c288c555905876821dcf3a63d872a90d290a603688a6b6ba6",
+          "portfolio-events.jsonl": "148a92d9bd7b488988308bb0d0ec8e7a5349a1bc4f7c0c43d1c0be061e75ee01",
+          "task9-mtm.jsonl": "24afded9ead2184a6777238e61405d18ac16e8d28e75a89e8606501224f60e3e",
+          "metrics.json": "4f099c938f9b8f7788febb8dd086b70cc2571c25fa5d2d8beba222193ab4e16e"
+        }
+      },
+      "equityRetention": 0.7336200267386543,
+      "ddImprovementPp": 1.3760652839863727
+    }
+  },
+  "researchGate": "FAIL_BELOW_75PCT_30BPS_EQUITY_RETENTION",
+  "standaloneTask9DynamicReducerIndependentEconomicParity": false,
+  "signedVenueFillEvidence": false,
+  "liveChanges": 0,
+  "productionChanges": 0
+}

@@ -175,6 +175,7 @@ def compare(candidate: dict, baseline: dict) -> dict:
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
+    parser.add_argument("--emit-evidence", action="store_true", help="Record native allocator candidate decision provenance")
     parser.add_argument("--candidates", nargs="*", default=[name for _, name in CANDIDATES])
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
@@ -188,6 +189,9 @@ def main() -> None:
     timestamp = datetime.now(timezone.utc).isoformat()
     started = time.monotonic()
     source, helper = original.task8.legacy.bootstrap()
+    if args.emit_evidence:
+        from task9_legacy_evidence_capture import install_legacy_capture
+        install_legacy_capture(helper)
     original.Path.write_text = original._path_write_text
     original.task8.legacy.ensure_baseline(helper)
     previous_factory = helper.experiment_filter

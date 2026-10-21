@@ -156,6 +156,8 @@ def main() -> None:
     parser.add_argument("--output", type=Path, default=DEFAULT_OUTPUT)
     parser.add_argument("--refresh-model", action="store_true",
                         help="Re-run source-backed full8 economic model with canonical shared rule")
+    parser.add_argument("--native-evidence", action="store_true",
+                        help="Use native full8 causal allocator, modeled STOP cooldown, complete MTM and independent Python/TS financial verification")
     args = parser.parse_args()
     repo = REPO
     model_root = args.model_root.resolve()
@@ -173,6 +175,8 @@ def main() -> None:
             sys.executable, "-B", str(HERE / "run-task9-sourcebacked-5m-bt-20261021.py"),
             "--output", str(model_root), "--candidates", shared["policyId"],
         ]
+        if args.native_evidence:
+            command.append("--emit-evidence")
         proc = subprocess.run(command, cwd=repo, capture_output=True, text=True, timeout=400, check=False)
         require(proc.returncode == 0, f"source-backed full8 refresh failed: {proc.stderr[-600:]}")
     model = validate_model(model_root, shared)
@@ -182,11 +186,32 @@ def main() -> None:
     # Replaying without errors is NOT proof of matching economics or lifecycles.
     # A dedicated first-divergence comparator for all candidate/order/MTM
     # fields must be implemented before this bridge may report FULL PARITY.
-    parity = False
+    parity = False  # The standalone TypeScript allocator is NOT independently equivalent.
+    native: dict | None = None
+    if args.native_evidence:
+        native_proof = output / "task9-native-full8-parity.json"
+        native_ts = output / "task9-cross-language-unified-audit.json"
+        command = [sys.executable, "-B", str(HERE / "verify-task9-native-full8-parity.py"),
+                   "--model-root", str(model_root), "--output", str(native_proof)]
+        proof = subprocess.run(command, cwd=repo, capture_output=True, text=True, timeout=145, check=False)
+        require(proof.returncode == 0,
+                f"native financial/cooldown/H1 trace audit failed: {proof.stderr[-650:]}")
+        js_command = ["node.exe", "--import", "tsx", str(HERE / "run-task9-native-full8-unified.ts"),
+                      "--model-root", str(model_root), "--native-audit", str(native_proof),
+                      "--output", str(native_ts)]
+        verified = subprocess.run(js_command, cwd=repo, capture_output=True, text=True, timeout=145, check=False)
+        require(verified.returncode == 0,
+                f"independent TypeScript financial ledger parity failed: {verified.stderr[-650:]}")
+        native = json.loads(native_ts.read_text("utf8"))
+        require(native["status"] == "PASS_NATIVE_SINGLE_ECONOMIC_CORE_CROSS_LANGUAGE_PARITY"
+                and native["separateTypeScriptReducerParityProven"] is False
+                and native["venueFillParityProven"] is False,
+                "economic authority or venue certification misrepresented")
     merged = {
         "schemaVersion": 1,
-        "status": "UNIFIED_ENGINE_PARITY_VERIFIED" if parity
-                  else "UNIFIED_RESEARCH_BRIDGE_COMPLETE_DYNAMIC_PARITY_BLOCKED",
+        "status": ("PASS_NATIVE_SINGLE_ECONOMIC_CORE_CROSS_LANGUAGE_PARITY"
+                   if native is not None
+                   else "UNIFIED_RESEARCH_BRIDGE_COMPLETE_DYNAMIC_PARITY_BLOCKED"),
         "policyId": shared["policyId"],
         "policySha256": digest(POLICY_PATH),
         "policyStage": shared["selectionMode"],
@@ -196,6 +221,10 @@ def main() -> None:
         "full8ModelResearchGate": model["researchCostGates"][shared["policyId"]],
         "full8ModelCostResults": model["candidateResults"][shared["policyId"]]["results"],
         "newTask9CostReplays": task9,
+        "nativeSharedEconomicCoreParityProven": native is not None,
+        "nativeSharedCoreProof": native,
+        "nativeResearchGate": native["researchGate"] if native is not None else None,
+        "standaloneTypeScriptAllocatorParityProven": False,
         "economicParityProven": parity,
         "cooldownParityProven": False,
         "fullLifecycleStopParityProven": False,
@@ -203,13 +232,16 @@ def main() -> None:
         "newTask9EconomicMetricsAdopted": False,
         "productionChanges": 0,
         "liveChanges": 0,
-        "nextUnresolved": [
-            "actual rejected-candidate quantity/equity/priority/expiry in Task9",
-            "original-model PnL/funding/margin/protective-fill source bridge",
-            "time-sequential STOP-confirmed cooldown and gross re-admission",
-            "source-backed mark-to-market marks and same chronological wallet",
+        "nextUnresolved": ([
+            "standalone TypeScript dynamic allocator is not parity-proven; direct it to the now unified native source of economic truth or retain as a diagnostic only",
+            "live-venue signed STOP/fill/partial/pending evidence cannot be inferred from modeled price data",
+            "independent untouched future holdout and strategy-specific live readiness still required",
+            "30bps 2.5%-STOP modeled equity retention is below the current 75% research gate",
+        ] if native is not None else [
+            "native evidence with admitted-only STOP cooldown and full H1 MTM",
+            "unified core ledger equivalence and independent Python/TypeScript verification",
             "formal transaction-level plus IS/OOS/Holdout economic parity",
-        ] if not parity else [],
+        ]),
     }
     manifest = output / "task9-unified-bridge.json"
     manifest.write_text(json.dumps(merged, ensure_ascii=False, indent=2) + "\n", encoding="utf8")

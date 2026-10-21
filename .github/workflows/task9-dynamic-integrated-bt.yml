@@ -9,6 +9,7 @@ on:
       - "docs/research/results/dd-reduction-source-recovery-noncanonical-20261021/**"
       - "lib/backtest/dd-reduction/**"
       - "scripts/dd-reduction/**"
+      - "config/research/task9-unified-v12-short-20261021.json"
       - "tests/dd-reduction-*.test.ts"
       - "package.json"
       - "package-lock.json"
@@ -20,6 +21,7 @@ on:
       - "docs/research/results/dd-reduction-source-recovery-noncanonical-20261021/**"
       - "lib/backtest/dd-reduction/**"
       - "scripts/dd-reduction/**"
+      - "config/research/task9-unified-v12-short-20261021.json"
       - "tests/dd-reduction-*.test.ts"
       - "package.json"
       - "package-lock.json"
@@ -63,5 +65,11 @@ jobs:
         run: python scripts/dd-reduction/verify-task9-unified-bridge.py
       - name: Verify Task 9 first-divergence gate fixtures
         run: python scripts/dd-reduction/test_task9_first_divergence.py
+      - name: Verify native causal-source STOP / cooldown instrumentation regression
+        run: python scripts/dd-reduction/test_task9_native_full8.py
+      - name: Verify independent native core economics and 20 ledger SHA research evidence
+        run: python scripts/dd-reduction/verify-task9-native-compact-artifacts.py
+      - name: Lint native core cross-language verifier
+        run: npx eslint scripts/dd-reduction/run-task9-native-full8-unified.ts
       - name: Check patch whitespace
         run: git diff --check
