@@ -15,6 +15,7 @@ import {
   type RunnerAlertRecord,
 } from "../../../lib/server/runner-health-notification";
 import {
+  expectedShaOverrideEnv,
   resolveRunnerServiceUnit,
   type AlertRunnerId,
 } from "../../../lib/server/runner-service-resolution";
@@ -97,9 +98,8 @@ async function readCurrentReleaseSha() {
 }
 
 function resolveServiceUnit(runner: typeof runners[number], currentReleaseSha: string | undefined) {
-  const expectedShaOverride = runner.id === "V12"
-    ? process.env.DISDEX_ALERT_V12_EXPECTED_SHA
-    : undefined;
+  const expectedShaEnv = expectedShaOverrideEnv(runner.id);
+  const expectedShaOverride = expectedShaEnv ? process.env[expectedShaEnv] : undefined;
   const resolved = resolveRunnerServiceUnit(runner.id, currentReleaseSha, process.env[runner.unitEnv], expectedShaOverride);
   if (!resolved.unit) return resolved;
   if (!unitExists(resolved.unit)) {

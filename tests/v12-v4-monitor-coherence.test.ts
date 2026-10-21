@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import {execFileSync} from "node:child_process";
 import {resolve} from "node:path";
 import {readFileSync} from "node:fs";
-import {resolveRunnerServiceUnit} from "../lib/server/runner-service-resolution";
+import {expectedShaOverrideEnv, resolveRunnerServiceUnit} from "../lib/server/runner-service-resolution";
 
 const runner=readFileSync("scripts/v12-v4-production-runner.ts","utf8");
 const snapshot=readFileSync("scripts/ops/root/disdex-runner-health-snapshot-current.mjs","utf8");
@@ -223,7 +223,8 @@ test("V12 health alert independently pins full-live SHA while peers remain on cu
  assert.equal(peer.failClosed,false);
  assert.equal(peer.releaseSha,current);
  assert.equal(bad.failClosed,true);
- assert.match(alert,/DISDEX_ALERT_V12_EXPECTED_SHA/);
+ assert.equal(expectedShaOverrideEnv("V12"),"DISDEX_ALERT_V12_EXPECTED_SHA");
+ assert.match(alert,/expectedShaOverrideEnv\(runner\.id\)/);
  assert.match(alert,/function runnerLabel/);
  assert.match(wiring,/DISDEX_ALERT_V12_EXPECTED_SHA=\$\{V4_PRIMARY_SHA:-\$\{DEPLOYED_SHA\}\}/);
  assert.match(wiring,/DISDEX_WATCHDOG_EXPECTED_SHA=\$\{MONITOR_RUNTIME_SHA\}/);

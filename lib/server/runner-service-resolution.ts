@@ -23,6 +23,19 @@ const SERVICE_PREFIX: Record<AlertRunnerId, string> = {
   MARGIN_GUARD: "disdex-v12-v52-margin-guard@",
 };
 
+export function expectedShaOverrideEnv(runnerId: AlertRunnerId) {
+  switch (runnerId) {
+    case "V12":
+      return "DISDEX_ALERT_V12_EXPECTED_SHA";
+    case "HYPE_TREND_LONG":
+      return "DISDEX_ALERT_HYPE_EXPECTED_SHA";
+    case "IDLE_PRIORITY_SHORT":
+      return "DISDEX_ALERT_IDLE_EXPECTED_SHA";
+    default:
+      return undefined;
+  }
+}
+
 export function normalizeCurrentReleaseSha(value: string | undefined) {
   const sha = value?.trim().toLowerCase() || "";
   return RELEASE_SHA_PATTERN.test(sha) ? sha : undefined;

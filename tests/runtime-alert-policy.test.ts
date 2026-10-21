@@ -8,6 +8,7 @@ import {
 } from "../lib/server/runtime-alert-policy";
 import {
   expectedRunnerServiceUnit,
+  expectedShaOverrideEnv,
   normalizeCurrentReleaseSha,
   resolveRunnerServiceUnit,
 } from "../lib/server/runner-service-resolution";
@@ -82,6 +83,19 @@ test("per-runner SHA override requires an explicit exact runner unit", () => {
   assert.equal(missingUnit.failClosed, true);
   assert.equal(peerOverride.failClosed, false);
   assert.equal(peerOverride.unit, `disdex-pengu-dual-ls-v2@${v4Sha}.service`);
+});
+
+test("pinned HYPE and Idle units use explicit SHA overrides instead of false UNKNOWN", () => {
+  const peerSha = "ce1edeead8d0f9e5d88e829d415057117502a335";
+  const pinnedSha = "1f9a514159b34d719832b70d788cf529d2b55112";
+  assert.equal(expectedShaOverrideEnv("HYPE_TREND_LONG"), "DISDEX_ALERT_HYPE_EXPECTED_SHA");
+  assert.equal(expectedShaOverrideEnv("IDLE_PRIORITY_SHORT"), "DISDEX_ALERT_IDLE_EXPECTED_SHA");
+  const hype = resolveRunnerServiceUnit("HYPE_TREND_LONG", peerSha, `disdex-hype-long@${pinnedSha}.service`, pinnedSha);
+  const idle = resolveRunnerServiceUnit("IDLE_PRIORITY_SHORT", peerSha, `disdex-idle-priority-short@${pinnedSha}.service`, pinnedSha);
+  assert.equal(hype.failClosed, false);
+  assert.equal(idle.failClosed, false);
+  assert.equal(hype.releaseSha, pinnedSha);
+  assert.equal(idle.releaseSha, pinnedSha);
 });
 
 
