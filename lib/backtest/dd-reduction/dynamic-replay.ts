@@ -574,7 +574,7 @@ export function replayDynamicPortfolio(
             const incomingCandidate = event.incoming_candidate ?? event.candidate;
             const incomingCausality = incomingCandidate === undefined ? "DATA_MISSING" : candidateCausality(event, incomingCandidate);
             const evidenceKey = executionEvidenceKey(event);
-            if (incomingCausality !== null || settlement === null || !validPrice(event.exit_price) || !executionFieldsPresent(event) || !event.victim_position || incomingCandidate === undefined || !event.reservation_id || !finite(event.filled_gross) || event.exit_status === undefined || !executionEvidence(event, event.timestamp_ms) || evidenceKey === null || executionEvidenceKeys.has(evidenceKey)) { failure = incomingCausality ?? "DATA_MISSING"; break; }
+            if (split === "OOS" || incomingCausality !== null || settlement === null || !validPrice(event.exit_price) || !executionFieldsPresent(event) || !event.victim_position || incomingCandidate === undefined || !event.reservation_id || !finite(event.filled_gross) || event.exit_status === undefined || !executionEvidence(event, event.timestamp_ms) || evidenceKey === null || executionEvidenceKeys.has(evidenceKey)) { failure = split === "OOS" ? "DATA_MISSING" : incomingCausality ?? "DATA_MISSING"; break; }
             if (event.exit_status === "PARTIAL") { failure = "PARTIAL_EXECUTION_UNSUPPORTED"; break; }
             if (event.exit_status === "UNKNOWN") { failure = "UNKNOWN_EXECUTION"; break; }
             const sameTimestamp = ordered.filter((item) => item.timestamp_ms === event.timestamp_ms).map((item) => ({ ...item, candidate_id: item.victim_position?.candidate_id ?? item.candidate?.candidate_id ?? item.incoming_candidate?.candidate_id }));
@@ -582,6 +582,12 @@ export function replayDynamicPortfolio(
             if (!transition.victim_release_applied) { accepted = false; reason = transition.reason; failure = transition.reason === "PARTIAL_EXECUTION_UNSUPPORTED" ? "PARTIAL_EXECUTION_UNSUPPORTED" : transition.reason === "UNKNOWN_EXECUTION" ? "UNKNOWN_EXECUTION" : "DATA_MISSING"; break; }
             allocator = transition.state_after; lifecycle = transition.lifecycle === "VICTIM_RELEASED_INCOMING_REJECTED" ? "VICTIM_RELEASED_INCOMING_REJECTED" : null; accepted = transition.applied || lifecycle === "VICTIM_RELEASED_INCOMING_REJECTED"; reason = transition.reason;
             if (!accepted) { failure = "DATA_MISSING"; break; }
+            if (transition.applied) {
+                const incomingReservation = transition.incoming_admission?.reservation;
+                const incomingExpiry = candidateExpiry(incomingCandidate);
+                if (incomingReservation === null || incomingReservation === undefined || incomingExpiry === null) { failure = "DATA_MISSING"; break; }
+                reservationExpiry.set(incomingReservation.reservation_id, incomingExpiry);
+            }
             executionEvidenceKeys.add(evidenceKey);
             const key = `reservation:${event.reservation_id}`;
             if (charged.has(key)) { failure = "DUPLICATE_CHARGE"; break; }

@@ -183,6 +183,28 @@ test("preemption reuses the Task 4 lifecycle and admits only after confirmed who
     assert.equal(result.allocator_state.reservations.find((item) => item.candidate_id === "incoming")?.status, "PENDING");
 });
 
+test("preemption admission preserves incoming candidate expiry for later fill validation", () => {
+    const incoming = { ...candidate, candidate_id: "incoming-expiring", symbol: "ETHUSDT", decision_ts_ms: 2_000, entry_valid_until_ms: 2_500, priority: 0 };
+    const result = replayDynamicPortfolio([
+        event("entry", "ENTRY", 1_000, { candidate }),
+        event("fill", "ENTRY_FILL", 1_001, { reservation_id: "reservation:c1:1000", filled_gross: 1_000, fill_price: 100, slippage_bps: 0, gap_bps: 0, execution_evidence: { source: "fixture", evidence_id: "fill-preempt-admission", observed_ts_ms: 1_001 } }),
+        event("preempt", "PREEMPTION_EXIT", 2_000, {
+            reservation_id: "reservation:c1:1000", incoming_candidate: incoming,
+            victim_position: { position_id: "victim-admission", reservation_id: "reservation:c1:1000", candidate_id: "c1", strategy_id: "V12", symbol: "BTCUSDT", side: "LONG", gross: 1_000, quantity: 10, entry_price: 100, priority: 1, status: "OPEN" },
+            mode: "WHOLE", exit_status: "FILLED", confirmed: true, execution_evidence: { source: "fixture", evidence_id: "exit-preempt-admission", observed_ts_ms: 2_000 }, filled_gross: 1_000,
+            exit_price: 90, slippage_bps: 0, gap_bps: 0, settlement_pnl: -10, settlement_currency: "USDT", fx_rate: 1, fee_settlement: 0, funding_settlement: 0,
+            ordering_events: [
+                { timestamp: 2_000, kind: "PREEMPTION_EXIT", event_seq: 1, candidate_id: "c1" },
+                { timestamp: 2_000, kind: "ENTRY", event_seq: 2, candidate_id: "incoming-expiring" },
+            ],
+        }),
+        event("incoming-fill", "ENTRY_FILL", 3_000, { reservation_id: "reservation:incoming-expiring:2000", filled_gross: 1_000, fill_price: 100, slippage_bps: 0, gap_bps: 0, execution_evidence: { source: "fixture", evidence_id: "fill-incoming-expired", observed_ts_ms: 3_000 } }),
+    ], policy);
+    assert.equal(result.status, "FAIL");
+    assert.equal(result.rejection, "DATA_MISSING");
+    assert.equal(result.allocator_state.reservations.find((item) => item.candidate_id === "incoming-expiring")?.status, "PENDING");
+});
+
 test("preemption rejects an expired incoming candidate before releasing the victim", () => {
     const incoming = { ...candidate, candidate_id: "expired-incoming", symbol: "ETHUSDT", decision_ts_ms: 2_000, entry_valid_until_ms: 1_500, priority: 0 };
     const result = replayDynamicPortfolio([
@@ -310,6 +332,29 @@ test("IS-open lifecycle may carry into OOS without carrying candidate selection 
         assert.equal(leakage.status, "FAIL");
         assert.equal(leakage.rejection, "DATA_MISSING");
     }
+});
+
+test("OOS preemption with an incoming candidate is rejected without victim release or admission", () => {
+    const incoming = { ...candidate, candidate_id: "oos-incoming", symbol: "ETHUSDT", decision_ts_ms: 2_000, priority: 0 };
+    const result = replayDynamicPortfolio([
+        event("entry", "ENTRY", 1_000, { candidate, data_split: "IS" }),
+        event("fill", "ENTRY_FILL", 1_001, { reservation_id: "reservation:c1:1000", filled_gross: 1_000, fill_price: 100, slippage_bps: 0, gap_bps: 0, execution_evidence: { source: "fixture", evidence_id: "fill-oos-preempt", observed_ts_ms: 1_001 }, data_split: "IS" }),
+        event("oos-preempt", "PREEMPTION_EXIT", 2_000, {
+            reservation_id: "reservation:c1:1000", incoming_candidate: incoming, data_split: "OOS",
+            victim_position: { position_id: "victim-oos", reservation_id: "reservation:c1:1000", candidate_id: "c1", strategy_id: "V12", symbol: "BTCUSDT", side: "LONG", gross: 1_000, quantity: 10, entry_price: 100, priority: 1, status: "OPEN" },
+            mode: "WHOLE", exit_status: "FILLED", confirmed: true, execution_evidence: { source: "fixture", evidence_id: "exit-oos-preempt", observed_ts_ms: 2_000 }, filled_gross: 1_000,
+            exit_price: 90, slippage_bps: 0, gap_bps: 0, settlement_pnl: -10, settlement_currency: "USDT", fx_rate: 1, fee_settlement: 0, funding_settlement: 0,
+            ordering_events: [
+                { timestamp: 2_000, kind: "PREEMPTION_EXIT", event_seq: 1, candidate_id: "c1" },
+                { timestamp: 2_000, kind: "ENTRY", event_seq: 2, candidate_id: "oos-incoming" },
+            ],
+        }),
+    ], { ...policy, oos_start_ts_ms: 2_000, oos_end_ts_ms: 3_000 });
+    assert.equal(result.status, "FAIL");
+    assert.equal(result.rejection, "DATA_MISSING");
+    assert.equal(result.allocator_state.reservations.find((item) => item.candidate_id === "c1")?.status, "FILLED");
+    assert.equal(result.allocator_state.reservations.some((item) => item.candidate_id === "oos-incoming"), false);
+    assert.equal(result.charge_ledger.length, 0);
 });
 
 test("candidate validation and priority are validation-only before a single ENTRY reservation", () => {
