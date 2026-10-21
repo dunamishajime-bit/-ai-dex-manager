@@ -23,7 +23,7 @@ import task9_initial_adverse_stop_20261020 as original  # noqa: E402
 
 DEFAULT_OUTPUT = Path(
     r"C:/Users/dis/Desktop/DisDex_AI_Files/01_BT_Research/"
-    r"2026-10-21_task9_full8_5m_replay"
+    r"2026-10-21_task9_full8_5m_replay_fixed"
 )
 ARCHIVE = Path(
     r"C:/Users/dis/Desktop/DisDex_AI_Files/01_BT_Research/"
