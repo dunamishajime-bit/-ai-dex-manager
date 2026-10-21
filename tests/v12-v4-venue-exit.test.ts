@@ -51,3 +51,18 @@ test("ACK with missing signed trades fails without state mutation",async()=>{
  assert.throws(()=>reconcileV4ExitTrades(state,id,"cid",order,[],ts+5,ts+86400000),/HISTORY_INCOMPLETE/);
  assert.equal(state.legs[id].qty,5);
 });
+test("short initial-adverse exit stores only signed actual-fill cooldown",async()=>{
+ const {state,id,ts,symbol}=await setup();
+ const leg=state.legs[id];
+ leg.candidate.effectiveSide="SHORT";
+ const order:any={symbol,clientOrderId:"early-cid",orderId:61,status:"FILLED",side:"BUY",reduceOnly:true,
+  quantity:5,executedQuantity:5,averagePrice:102.5,quoteQuantity:512.5};
+ leg.plannedExit={exitTs:ts+10,price:102.5,reason:"V4_SHORT_INITIAL_ADVERSE_CANDIDATE",priceModelOnly:true};
+ const actualFillTs=ts+7;
+ const trades=[{symbol,id:11,orderId:61,side:"BUY",price:"102.5",qty:"5",commission:".3",commissionAsset:"USDT",time:actualFillTs}];
+ const result=reconcileV4ExitTrades(state,id,"early-cid",order,trades,ts+8,ts+8);
+ assert.equal(result.state.cooldown[symbol+":SHORT"],actualFillTs+12*3_600_000);
+ assert.equal(result.state.cooldown[symbol+":"+leg.candidate.route],undefined);
+ assert.equal(result.state.journal.at(-1)?.type,"EXIT_FILL");
+ assert.equal((result.state.journal.at(-1) as any).actualFillTs,actualFillTs);
+});

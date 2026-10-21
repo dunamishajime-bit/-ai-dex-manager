@@ -134,6 +134,7 @@ export interface Quality102CausalV1LiveResolvedConfig {
     liveExecutionEnabled: boolean;
     operatorArmed: boolean;
     profitFloorEnabled?: boolean;
+    adoptedExitPoliciesEnabled?: boolean;
     runtimeCommitSha: string;
     expectedRuntimeCommitSha: string;
     selectorMode: string;
@@ -248,6 +249,7 @@ export function resolveQuality102CausalV1LiveConfig(env: NodeJS.ProcessEnv = pro
         liveExecutionEnabled: runtime.liveExecutionEnabled,
         operatorArmed: runtime.operatorArmed,
         profitFloorEnabled: boolEnv(env, "QUALITY102_Q102_PROFIT_FLOOR_ENABLED", false),
+        adoptedExitPoliciesEnabled: boolEnv(env, "QUALITY102_Q102_ADOPTED_EXIT_POLICIES_ENABLED", false),
         runtimeCommitSha: runtimeSha,
         expectedRuntimeCommitSha: runtimeSha,
         selectorMode: String(env.QUALITY102_CAUSAL_V1_SELECTOR_MODE || "").trim().toUpperCase(),
@@ -298,6 +300,11 @@ export function assertQuality102CausalV1ReadOnlyPreflightConfiguration(
     }
     const ack = String(env.QUALITY102_CAUSAL_V1_LIVE_ACK || "").trim().toLowerCase();
     if (ack !== config.runtimeCommitSha.toLowerCase()) throw new Error("QUALITY102_CAUSAL_V1_LIVE_ACK_MUST_MATCH_RUNTIME_SHA");
+    if (config.adoptedExitPoliciesEnabled) {
+        const adoptedAck = String(env.QUALITY102_Q102_ADOPTED_EXIT_POLICIES_ACK || "").trim().toLowerCase();
+        if (adoptedAck !== config.runtimeCommitSha.toLowerCase()) throw new Error("QUALITY102_Q102_ADOPTED_EXIT_POLICIES_ACK_MUST_MATCH_RUNTIME_SHA");
+        if (!config.profitFloorEnabled) throw new Error("QUALITY102_Q102_ADOPTED_EXIT_POLICIES_EXISTING_FLOOR_REQUIRED");
+    }
     if (boolEnv(env, "QUALITY102_LIVE_SELECTOR_PARITY") || boolEnv(env, "QUALITY102_LIVE_ENABLED")) {
         throw new Error("QUALITY102_HISTORICAL_SELECTOR_FLAG_MUST_REMAIN_FAIL_CLOSED");
     }
@@ -546,6 +553,7 @@ export function buildQuality102CausalV1Runner(env: NodeJS.ProcessEnv = process.e
         config: {
             residentStopRequired: config.mode === "LIVE",
             profitFloorEnabled: config.profitFloorEnabled,
+            adoptedExitPoliciesEnabled: config.adoptedExitPoliciesEnabled,
             mode: config.mode,
             enabled: config.enabled,
             liveTradingEnabled: config.liveTradingEnabled,

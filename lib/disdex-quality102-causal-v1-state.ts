@@ -59,6 +59,10 @@ export interface Quality102CausalV1State {
     profitFloorStopPrice?: number;
     profitFloorBestGainPct?: number;
     profitFloorLastConfirmed5mTs?: number;
+    profitFloorStage?: 0 | 1 | 2;
+    initialAdverseBestGainPct?: number;
+    h1LossConsecutive?: number;
+    h1LastConfirmedCloseTs?: number;
     family?: Quality102CausalFamily;
     variant?: string;
     layer?: Quality102CausalLayer;
@@ -129,13 +133,17 @@ function optionalTimestamp(value: unknown, field: string): number | undefined {
 function normalizePosition(value: unknown): Quality102CausalV1State["position"] {
   if (value === undefined) return undefined;
   const raw = record(value, "position");
-  exactKeys(raw, ["symbol", "side", "quantity", "entryPrice", "entryTs", "hardStop", "bestPrice", "trailActive", "profitFloorArmed", "profitFloorStopPrice", "profitFloorBestGainPct", "profitFloorLastConfirmed5mTs", "family", "variant", "layer", "exitPolicy", "maxHoldHours", "residentStop", "acceptedEntryGross", "stopLedger"], "position");
+  exactKeys(raw, ["symbol", "side", "quantity", "entryPrice", "entryTs", "hardStop", "bestPrice", "trailActive", "profitFloorArmed", "profitFloorStopPrice", "profitFloorBestGainPct", "profitFloorLastConfirmed5mTs", "profitFloorStage", "initialAdverseBestGainPct", "h1LossConsecutive", "h1LastConfirmedCloseTs", "family", "variant", "layer", "exitPolicy", "maxHoldHours", "residentStop", "acceptedEntryGross", "stopLedger"], "position");
   if(raw.acceptedEntryGross!==undefined&&(!(typeof raw.acceptedEntryGross==="number"&&Number.isFinite(raw.acceptedEntryGross)&&raw.acceptedEntryGross>0&&raw.acceptedEntryGross<=3)))malformed("position.acceptedEntryGross");
   if (raw.side !== -1 && raw.side !== 1) malformed("position.side");
   if (raw.hardStop !== undefined && !(typeof raw.hardStop === "number" && Number.isFinite(raw.hardStop) && raw.hardStop > 0 && raw.hardStop <= 0.15)) malformed("position.hardStop");
   if (raw.bestPrice !== undefined && !(typeof raw.bestPrice === "number" && Number.isFinite(raw.bestPrice) && raw.bestPrice > 0)) malformed("position.bestPrice");
   if (raw.trailActive !== undefined && typeof raw.trailActive !== "boolean") malformed("position.trailActive");
   if (raw.profitFloorArmed !== undefined && typeof raw.profitFloorArmed !== "boolean") malformed("position.profitFloorArmed");
+  if (raw.profitFloorStage !== undefined && raw.profitFloorStage !== 0 && raw.profitFloorStage !== 1 && raw.profitFloorStage !== 2) malformed("position.profitFloorStage");
+  for (const [value, field] of [[raw.initialAdverseBestGainPct, "position.initialAdverseBestGainPct"], [raw.h1LossConsecutive, "position.h1LossConsecutive"], [raw.h1LastConfirmedCloseTs, "position.h1LastConfirmedCloseTs"]] as const) {
+    if (value !== undefined && !(typeof value === "number" && Number.isFinite(value) && value >= 0)) malformed(field);
+  }
   for (const [value, field] of [[raw.profitFloorStopPrice, "position.profitFloorStopPrice"], [raw.profitFloorBestGainPct, "position.profitFloorBestGainPct"], [raw.profitFloorLastConfirmed5mTs, "position.profitFloorLastConfirmed5mTs"]] as const) {
     if (value !== undefined && !(typeof value === "number" && Number.isFinite(value))) malformed(field);
   }
@@ -151,7 +159,7 @@ function normalizePosition(value: unknown): Quality102CausalV1State["position"] 
     ...(raw.residentStop === undefined ? {} : { residentStop: validateResidentStopProtection(raw.residentStop) }),
     quantity: positiveNumber(raw.quantity, "position.quantity"), entryPrice: positiveNumber(raw.entryPrice, "position.entryPrice"), entryTs: finiteNumber(raw.entryTs, "position.entryTs"),
     ...(raw.hardStop === undefined ? {} : { hardStop: raw.hardStop }), ...(raw.bestPrice === undefined ? {} : { bestPrice: raw.bestPrice }), ...(raw.trailActive === undefined ? {} : { trailActive: raw.trailActive }),
-    ...(raw.profitFloorArmed === undefined ? {} : { profitFloorArmed: raw.profitFloorArmed as boolean }), ...(raw.profitFloorStopPrice === undefined ? {} : { profitFloorStopPrice: raw.profitFloorStopPrice as number }), ...(raw.profitFloorBestGainPct === undefined ? {} : { profitFloorBestGainPct: raw.profitFloorBestGainPct as number }), ...(raw.profitFloorLastConfirmed5mTs === undefined ? {} : { profitFloorLastConfirmed5mTs: raw.profitFloorLastConfirmed5mTs as number }),
+    ...(raw.profitFloorArmed === undefined ? {} : { profitFloorArmed: raw.profitFloorArmed as boolean }), ...(raw.profitFloorStopPrice === undefined ? {} : { profitFloorStopPrice: raw.profitFloorStopPrice as number }), ...(raw.profitFloorBestGainPct === undefined ? {} : { profitFloorBestGainPct: raw.profitFloorBestGainPct as number }), ...(raw.profitFloorLastConfirmed5mTs === undefined ? {} : { profitFloorLastConfirmed5mTs: raw.profitFloorLastConfirmed5mTs as number }), ...(raw.profitFloorStage === undefined ? {} : { profitFloorStage: raw.profitFloorStage as 0 | 1 | 2 }), ...(raw.initialAdverseBestGainPct === undefined ? {} : { initialAdverseBestGainPct: raw.initialAdverseBestGainPct as number }), ...(raw.h1LossConsecutive === undefined ? {} : { h1LossConsecutive: raw.h1LossConsecutive as number }), ...(raw.h1LastConfirmedCloseTs === undefined ? {} : { h1LastConfirmedCloseTs: raw.h1LastConfirmedCloseTs as number }),
     ...(raw.family === undefined ? {} : { family: raw.family as Quality102CausalFamily }), ...(variant === undefined ? {} : { variant }), ...(raw.layer === undefined ? {} : { layer: raw.layer as Quality102CausalLayer }),
     ...(raw.exitPolicy === undefined ? {} : { exitPolicy: raw.exitPolicy as Quality102CausalExitPolicy }), ...(raw.maxHoldHours === undefined ? {} : { maxHoldHours: raw.maxHoldHours }),
   };

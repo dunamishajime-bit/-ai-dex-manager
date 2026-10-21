@@ -14,6 +14,7 @@ import {V4OrderCycle} from "./v12-v4-order-cycle";
 import {verifyV4ResidentStops} from "./v12-v4-resident-stop-owners";
 import {planV4RetiredStops} from "./v12-v4-stop-retirement";
 import {appendV4ClosedExitBars,type V4ExitFeed} from "./v12-v4-live-exit-feed";
+import {createV4FourRuleState,desiredV4FourRuleStop} from "./v12-v4-four-rule-policy";
 import {applyProductionEvent,planProductionEntry,productionExitSpec,nativeEvidenceForProductionRoute,type EntryPlanInput} from "./v12-v4-production-lifecycle";
 import {buildV4AccountMark,type V4SignedMark} from "./v12-v4-peer-account-mark";
 import type {V4PeerSource,V4PeerLineageMode} from "./v12-v4-peer-state-owners";
@@ -107,7 +108,12 @@ export class V4RunnerEngine{
   if(!leg||leg.qty<=0||leg.status==="CLOSED"||leg.status==="CANCELLED")return true;
   if(!(leg.entryNotional>0)||!(leg.entryAtr&&leg.entryAtr>0))throw Error("V4_PROTECTION_RECOVERY_ENTRY_EVIDENCE_MISSING:"+legId);
   const average=leg.entryNotional/leg.qty;
-  const raw=await d.requiredResidentStop({route:leg.candidate.route,symbol:leg.candidate.symbol,side:leg.candidate.effectiveSide,entryPrice:average,atr14:leg.entryAtr});
+  const approvedRaw=await d.requiredResidentStop({route:leg.candidate.route,symbol:leg.candidate.symbol,side:leg.candidate.effectiveSide,entryPrice:average,atr14:leg.entryAtr});
+  const policyRaw=desiredV4FourRuleStop({route:leg.candidate.route,side:leg.candidate.effectiveSide,
+   fill:average,state:leg.fourRuleState??createV4FourRuleState()});
+  if(policyRaw!==undefined&&leg.candidate.effectiveSide==="LONG"&&policyRaw<approvedRaw)
+   throw Error("V4_FOUR_RULE_STOP_LOOSENS_APPROVED_PROTECTION:"+legId);
+  const raw=policyRaw===undefined?approvedRaw:policyRaw;
   if(!(raw>0)||!Number.isFinite(raw)||(leg.candidate.effectiveSide==="LONG"?raw>=average:raw<=average))throw Error("V4_PROTECTION_RECOVERY_STOP_INVALID:"+legId);
   const normalized=await d.adapter.normalizeStopPrice(leg.candidate.symbol,raw),desired=normalized.price;
   if(!(desired>0)||!Number.isFinite(desired))throw Error("V4_PROTECTION_RECOVERY_STOP_NORMALIZATION_INVALID:"+legId);
@@ -317,6 +323,9 @@ export class V4RunnerEngine{
     const feed=await d.fetchExitFeed(old.candidate.symbol);
     const current=d.store.read(),updated=appendV4ClosedExitBars(current.state,old.id,feed,this.now());
     if(updated!==current.state)d.store.commit(current.revision,{...current,state:updated});
+    const afterPolicy=d.store.read().state.legs[old.id];
+    if(afterPolicy&&afterPolicy.status==="OPEN"&&!afterPolicy.plannedExit)
+     await this.ensureResidentProtection(old.id,dispatcher,cycle);
    }
    const leg=d.store.read().state.legs[old.id];
    if(!leg.plannedExit)continue;

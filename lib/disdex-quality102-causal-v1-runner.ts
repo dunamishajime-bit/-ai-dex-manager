@@ -48,6 +48,14 @@ import { reduceFetBrk48ForCoreConflict } from "@/lib/fet-brk48-live-reduction";
 import { isHypeZecSoleSharedCapacityCause, releaseHypeZecCapacityForPriorityEntry } from "@/lib/hype-zec-priority-capacity";
 import { releaseIdleResidualLongForFormalEntry } from "@/lib/idle-residual-long-preemption";
 import { applyQ102ProfitFloorBar, moreProtectiveStop, type ConfirmedFiveMinuteBar } from "@/lib/disdex-exit-overlay-contract";
+import {
+    advanceQ102HighVolShortProfitFloor,
+    evaluateQ102HighVolLongH1Loss,
+    evaluateQ102PbLongInitialAdverse,
+    favorableGainPct,
+    type Q102AdoptedExitReason,
+} from "@/lib/disdex-quality102-adopted-exit-policy";
+import type { Quality102Candle } from "@/lib/disdex-quality102-causal-pipeline";
 import type { V12AsterLiveAdapter } from "@/lib/v12-aster-live-adapter";
 import type {
     DirectAccountSnapshot,
@@ -84,13 +92,14 @@ export interface Quality102CausalV1TickResult {
     message: string;
     signal?: Quality102CausalV1Signal;
     idempotencyKey?: string;
-    exitReason?: "hard_stop" | "profit_floor_0p5" | "trail_5pct_after_12pct" | "72h_time" | "time" | "shared_risk_flatten";
+    exitReason?: "hard_stop" | "profit_floor_0p5" | "profit_floor_1p0" | "trail_5pct_after_12pct" | "72h_time" | "time" | "shared_risk_flatten" | Q102AdoptedExitReason;
     ordersSent?: number;
 }
 
 export interface Quality102CausalV1RunnerConfig {
     residentStopRequired?: boolean;
     profitFloorEnabled?: boolean;
+    adoptedExitPoliciesEnabled?: boolean;
     mode: Quality102CausalV1Mode;
     enabled: boolean;
     liveTradingEnabled: boolean;
@@ -442,7 +451,9 @@ export function quality102ExitReasonForState(
     const hardStop = statePosition.hardStop;
     if (!(hardStop && Number.isFinite(markPrice) && markPrice > 0 && Number.isFinite(now) && now >= statePosition.entryTs)) return undefined;
     const long = statePosition.side > 0;
-    if (statePosition.profitFloorArmed && statePosition.profitFloorStopPrice && ((long && markPrice <= statePosition.profitFloorStopPrice) || (!long && markPrice >= statePosition.profitFloorStopPrice))) return "profit_floor_0p5";
+    if (statePosition.profitFloorArmed && statePosition.profitFloorStopPrice && ((long && markPrice <= statePosition.profitFloorStopPrice) || (!long && markPrice >= statePosition.profitFloorStopPrice))) {
+        return statePosition.profitFloorStage === 2 ? "profit_floor_1p0" : "profit_floor_0p5";
+    }
     const stopPrice = long ? statePosition.entryPrice * (1 - hardStop) : statePosition.entryPrice * (1 + hardStop);
     if ((long && markPrice <= stopPrice) || (!long && markPrice >= stopPrice)) return "hard_stop";
 
@@ -463,6 +474,63 @@ export function quality102ExitReasonForState(
     const maxHoldHours = statePosition.maxHoldHours || QUALITY102_HIGH_VOL_MAX_HOLD_HOURS;
     if (now - statePosition.entryTs >= maxHoldHours * HOUR_MS) return "72h_time";
     return undefined;
+}
+
+/**
+ * Evaluate only the explicitly adopted Q102 exit overlays.  This helper is
+ * deliberately separate from the historical/base exit function so enabling
+ * the overlays cannot change another Q102 family, side, or exit policy.
+ */
+export function quality102AdoptedExitReasonForState(
+    statePosition: NonNullable<Quality102CausalV1State["position"]>,
+    markPrice: number,
+    now: number,
+    candles: readonly Quality102Candle[],
+    enabled: boolean,
+): {
+    reason?: Q102AdoptedExitReason;
+    maxFavorablePct: number;
+    h1LossConsecutive: number;
+    h1LastConfirmedCloseTs?: number;
+} {
+    const side = statePosition.side > 0 ? "LONG" : "SHORT";
+    const bestPrice = statePosition.bestPrice && Number.isFinite(statePosition.bestPrice)
+        ? statePosition.bestPrice
+        : statePosition.entryPrice;
+    const observedMfe = favorableGainPct(side, statePosition.entryPrice, bestPrice);
+    const maxFavorablePct = Math.max(
+        Number.isFinite(statePosition.initialAdverseBestGainPct)
+            ? statePosition.initialAdverseBestGainPct || 0
+            : 0,
+        observedMfe,
+    );
+    if (!enabled) return { maxFavorablePct, h1LossConsecutive: statePosition.h1LossConsecutive || 0, ...(statePosition.h1LastConfirmedCloseTs === undefined ? {} : { h1LastConfirmedCloseTs: statePosition.h1LastConfirmedCloseTs }) };
+
+    const pbReason = evaluateQ102PbLongInitialAdverse({
+        family: statePosition.family,
+        side,
+        entryPrice: statePosition.entryPrice,
+        entryTs: statePosition.entryTs,
+        now,
+        markPrice,
+        maxFavorablePct,
+    });
+    if (pbReason) return { reason: pbReason, maxFavorablePct, h1LossConsecutive: statePosition.h1LossConsecutive || 0, ...(statePosition.h1LastConfirmedCloseTs === undefined ? {} : { h1LastConfirmedCloseTs: statePosition.h1LastConfirmedCloseTs }) };
+
+    const h1 = evaluateQ102HighVolLongH1Loss({
+        family: statePosition.family,
+        side,
+        entryPrice: statePosition.entryPrice,
+        entryTs: statePosition.entryTs,
+        now,
+        candles,
+    });
+    return {
+        ...(h1.reason === undefined ? {} : { reason: h1.reason }),
+        maxFavorablePct,
+        h1LossConsecutive: h1.consecutiveLossCloses,
+        ...(h1.lastConfirmedCloseTs === undefined ? {} : { h1LastConfirmedCloseTs: h1.lastConfirmedCloseTs }),
+    };
 }
 
 export class Quality102CausalV1Runner {
@@ -704,9 +772,12 @@ export class Quality102CausalV1Runner {
         }catch(error){return this.manualReview(state,"Q102_RESIDENT_STOP_FILL_RECONCILIATION:"+(error instanceof Error?error.message:String(error)));}
     }
 
-    private async updateProfitFloorState(state: Quality102CausalV1State): Promise<"profit_floor_0p5" | "manual_review" | undefined> {
+    private async updateProfitFloorState(state: Quality102CausalV1State): Promise<"profit_floor_0p5" | "profit_floor_1p0" | "manual_review" | undefined> {
         const position = state.position;
-        if (!position || this.dependencies.config.profitFloorEnabled !== true) return undefined;
+        const adoptedHighVolShort = position?.family === "HIGH_VOL"
+            && position.side < 0
+            && this.dependencies.config.adoptedExitPoliciesEnabled === true;
+        if (!position || (this.dependencies.config.profitFloorEnabled !== true && !adoptedHighVolShort)) return undefined;
         const loader = this.dependencies.marketData.loadFiveMinute;
         if (!loader) {
             await this.manualReview(state, "Q102_PROFIT_FLOOR_5M_SOURCE_UNAVAILABLE");
@@ -714,23 +785,40 @@ export class Quality102CausalV1Runner {
         }
         try {
             const bar = await loader(position.symbol);
-            const transition = applyQ102ProfitFloorBar({
-                side: position.side > 0 ? "LONG" : "SHORT",
-                entryPrice: position.entryPrice,
-                state: {
-                    armed: position.profitFloorArmed === true,
-                    stopPrice: position.profitFloorStopPrice,
-                    bestGainPct: position.profitFloorBestGainPct ?? 0,
-                    lastConfirmedBarTs: position.profitFloorLastConfirmed5mTs,
-                },
-                bar,
-            });
+            const transition = adoptedHighVolShort
+                ? advanceQ102HighVolShortProfitFloor({
+                    family: position.family,
+                    side: "SHORT",
+                    entryPrice: position.entryPrice,
+                    state: {
+                        armed: position.profitFloorArmed === true,
+                        stage: position.profitFloorStage ?? (position.profitFloorArmed ? 1 : 0),
+                        stopPrice: position.profitFloorStopPrice,
+                        bestGainPct: position.profitFloorBestGainPct ?? 0,
+                        lastConfirmedBarTs: position.profitFloorLastConfirmed5mTs,
+                    },
+                    bar,
+                })
+                : applyQ102ProfitFloorBar({
+                    side: position.side > 0 ? "LONG" : "SHORT",
+                    entryPrice: position.entryPrice,
+                    state: {
+                        armed: position.profitFloorArmed === true,
+                        stopPrice: position.profitFloorStopPrice,
+                        bestGainPct: position.profitFloorBestGainPct ?? 0,
+                        lastConfirmedBarTs: position.profitFloorLastConfirmed5mTs,
+                    },
+                    bar,
+                });
             position.profitFloorArmed = transition.state.armed;
             position.profitFloorStopPrice = transition.state.stopPrice;
             position.profitFloorBestGainPct = transition.state.bestGainPct;
             position.profitFloorLastConfirmed5mTs = transition.state.lastConfirmedBarTs;
+            if ("stage" in transition.state) position.profitFloorStage = transition.state.stage;
             await this.dependencies.stateStore.save(state);
-            return transition.stopHit ? "profit_floor_0p5" : undefined;
+            return transition.stopHit
+                ? ("stage" in transition.state && transition.state.stage === 2 ? "profit_floor_1p0" : "profit_floor_0p5")
+                : undefined;
         } catch (error) {
             await this.manualReview(state, `Q102_PROFIT_FLOOR_5M_REVIEW:${error instanceof Error ? error.message : String(error)}`);
             return "manual_review";
@@ -770,6 +858,9 @@ export class Quality102CausalV1Runner {
             trailActive: false,
             profitFloorArmed: false,
             profitFloorBestGainPct: 0,
+            profitFloorStage: 0,
+            initialAdverseBestGainPct: 0,
+            h1LossConsecutive: 0,
             acceptedEntryGross: pending.targetGross,
             family: pending.family,
             variant: pending.variant,
@@ -1049,16 +1140,51 @@ export class Quality102CausalV1Runner {
 
     private async updateTrailingState(state: Quality102CausalV1State, quote: DirectMarketQuote): Promise<void> {
         const position = state.position;
-        if (!position || position.exitPolicy === "FIXED_HOLD_STOP") return;
+        if (!position) return;
         const bestPrice = position.side > 0
             ? Math.max(position.bestPrice || position.entryPrice, quote.midPrice)
             : Math.min(position.bestPrice || position.entryPrice, quote.midPrice);
-        const trailActive = position.trailActive === true
+        const trailActive = position.exitPolicy === "FIXED_HOLD_STOP"
+            ? position.trailActive === true
+            : position.trailActive === true
             || (position.side > 0 ? bestPrice / position.entryPrice - 1 : 1 - bestPrice / position.entryPrice) >= QUALITY102_HIGH_VOL_TRAIL_TRIGGER - 1e-15;
-        if (bestPrice !== position.bestPrice || trailActive !== position.trailActive) {
-            state.position = { ...position, bestPrice, trailActive };
+        const observedMfe = favorableGainPct(position.side > 0 ? "LONG" : "SHORT", position.entryPrice, bestPrice);
+        const maxFavorablePct = Math.max(position.initialAdverseBestGainPct ?? 0, observedMfe);
+        if (bestPrice !== position.bestPrice || trailActive !== position.trailActive || maxFavorablePct !== position.initialAdverseBestGainPct) {
+            state.position = { ...position, bestPrice, trailActive, initialAdverseBestGainPct: maxFavorablePct };
             await this.dependencies.stateStore.save(state);
         }
+    }
+
+    private async updateAdoptedPolicyState(
+        state: Quality102CausalV1State,
+        history: Quality102CausalV1History,
+        quote: DirectMarketQuote,
+    ): Promise<Q102AdoptedExitReason | undefined> {
+        const position = state.position;
+        if (!position || this.dependencies.config.adoptedExitPoliciesEnabled !== true) return undefined;
+        const candles = history.candlesBySymbol[position.symbol.toUpperCase()] || [];
+        const transition = quality102AdoptedExitReasonForState(
+            position,
+            quote.midPrice,
+            quote.updatedAt,
+            candles,
+            true,
+        );
+        const next = {
+            ...position,
+            initialAdverseBestGainPct: transition.maxFavorablePct,
+            h1LossConsecutive: transition.h1LossConsecutive,
+            ...(transition.h1LastConfirmedCloseTs === undefined ? {} : { h1LastConfirmedCloseTs: transition.h1LastConfirmedCloseTs }),
+        };
+        const changed = next.initialAdverseBestGainPct !== position.initialAdverseBestGainPct
+            || next.h1LossConsecutive !== position.h1LossConsecutive
+            || next.h1LastConfirmedCloseTs !== position.h1LastConfirmedCloseTs;
+        if (changed) {
+            state.position = next;
+            await this.dependencies.stateStore.save(state);
+        }
+        return transition.reason;
     }
 
     private async executePending(state: Quality102CausalV1State, lock: Quality102CausalV1LockHandle): Promise<Quality102CausalV1TickResult> {
@@ -1518,9 +1644,10 @@ export class Quality102CausalV1Runner {
                 const quote = await this.dependencies.executor.getMarketQuote(state.position.symbol);
                 if (!validQuote(quote, state.position.symbol, this.now(), this.dependencies.config.maxDataAgeMs ?? MAX_DATA_AGE_MS)) return { status: "blocked-local", message: "Q102 active mark quote is stale or invalid.", ordersSent: 0 };
                 await this.updateTrailingState(state, quote);
+                const adoptedReason = await this.updateAdoptedPolicyState(state, history, quote);
                 const reason = sharedRisk?.flattenExisting
                     ? "shared_risk_flatten"
-                    : profitFloorReason || quality102ExitReasonForState(state.position, quote.midPrice, quote.updatedAt);
+                    : profitFloorReason || quality102ExitReasonForState(state.position, quote.midPrice, quote.updatedAt) || adoptedReason;
                 if (!reason) {
                     return {
                         status: "held",

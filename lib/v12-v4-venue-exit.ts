@@ -1,5 +1,6 @@
 import type {V12AsterOrderView} from "./v12-aster-live-adapter";
 import type {V4VenueTrade} from "./v12-v4-venue-fills";
+import {cooldownAfterV4ShortInitialFill} from "./v12-v4-four-rule-policy";
 import {applyProductionEvent,type State,type Event} from "./v12-v4-production-lifecycle";
 /** An ACK cannot prove a realized exit. Only signed user trades count. */
 export function reconcileV4ExitTrades(state:State,id:string,cid:string,order:V12AsterOrderView,
@@ -17,16 +18,19 @@ export function reconcileV4ExitTrades(state:State,id:string,cid:string,order:V12
   requested>exitRequest.qty+1e-8)throw Error("V4_EXIT_ORDER_QTY_INVALID");
  let quantity=0,quote=0,next=state;
  const seen=new Set<string>(),events:Event[]=[];
+ const earlyShortExit=leg.plannedExit?.reason==="V4_SHORT_INITIAL_ADVERSE_CANDIDATE";
+ let actualFillTs:number|undefined;
  for(const trade of trades){
   if(trade.symbol!==order.symbol||String(trade.orderId)!==String(order.orderId)||
    trade.side!==order.side||trade.commissionAsset!=="USDT"||
-   !Number.isFinite(trade.time)||trade.time<leg.entryTs||trade.time>at||trade.time>cooldownUntil)throw Error("V4_EXIT_TRADE_NOT_OWNED");
+   !Number.isFinite(trade.time)||trade.time<leg.entryTs||trade.time>at)throw Error("V4_EXIT_TRADE_NOT_OWNED");
   const key=trade.symbol+":"+String(trade.id);
   if(trade.id===undefined||trade.id===null||seen.has(key))throw Error("V4_EXIT_TRADE_DUPLICATE");
   seen.add(key);
   const qty=Number(trade.qty),price=Number(trade.price),fee=Number(trade.commission);
   if(!(qty>0)||!(price>0)||!Number.isFinite(fee)||fee<0)throw Error("V4_EXIT_FILL_INVALID");
   quantity+=qty;quote+=qty*price;
+  actualFillTs=actualFillTs===undefined?trade.time:Math.max(actualFillTs,trade.time);
   events.push({type:"EXIT_FILL",eventId:"venue-exit:"+key,ts:at,id,qty,price,feeUsd:fee,cooldownUntil});
  }
  if(Math.abs(quantity-executed)>Math.max(1e-8,executed*1e-10))
@@ -34,6 +38,21 @@ export function reconcileV4ExitTrades(state:State,id:string,cid:string,order:V12
  if(executed>0&&(Math.abs(quote-order.quoteQuantity)>Math.max(1e-6,quote*1e-8)||
   Math.abs(quote/executed-order.averagePrice)>Math.max(1e-8,order.averagePrice*1e-8)))
   throw Error("V4_EXIT_EXECUTION_PRICE_MISMATCH");
+ const earlyCooldown=cooldownAfterV4ShortInitialFill({
+  side:leg.candidate.effectiveSide,
+  reason:earlyShortExit?"V4_SHORT_INITIAL_ADVERSE_FILLED":"OTHER_EXIT",
+  actualFillTs,
+ });
+ if(earlyCooldown!==undefined){
+  for(const event of events){
+   if(event.type==="EXIT_FILL"){
+    event.cooldownUntil=earlyCooldown;
+    event.cooldownKey=leg.candidate.symbol+":SHORT";
+    event.actualFillTs=actualFillTs;
+    event.routeCooldown=false;
+   }
+  }
+ }
  for(const event of events){
   const old=next.journal.find(x=>x.eventId===event.eventId);
   if(old){

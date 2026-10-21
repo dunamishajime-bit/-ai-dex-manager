@@ -1,4 +1,4 @@
-import {V12_V4_MAXIMUM_DRAWDOWN} from "../config/v12V4AdoptionRiskPolicy";
+import {observeV4FourRuleH1,observeV4FourRuleM5,createV4FourRuleState,type V4FourRuleH1Bar,type V4FourRuleM5Bar,type V4FourRuleState} from "./v12-v4-four-rule-policy";
 /**
  * Executable OFFLINE V4 lifecycle. No venue mutation dependency or order authority.
  * Journal records are data; persistence is caller-owned and must complete before consumption.
@@ -45,6 +45,7 @@ export type Leg = {
   exitRemainingQty: number; realizedUsd: number; feesUsd: number; fundingUsd: number;
   lastExitBarTs?: number; plannedExit?: ExitDecision;
   nativeExitEvidence?:"WR60_BASELINE_1978_PARITY"; nativeStop?:number; nativePeak?:number; previousExitBar?:H1Bar;
+  fourRuleState?:V4FourRuleState;
 };
 export type ExitDecision = { exitTs: number; price: number; reason: string; priceModelOnly: true };
 function positive(n: number, label: string) {
@@ -88,11 +89,12 @@ export type InitialState = { equityUsd: number; foreign: ForeignExposure[]; hold
 export type EntryEvent = { type: "RESERVE"; eventId: string; ts: number; leg: Leg };
 export type Event = EntryEvent |
   { type: "ACCOUNT_MARK"; eventId:string; ts:number; equityUsd:number; prices:Record<string,number>; foreign?:ForeignExposure[] } |
+  { type: "M5_POLICY_BAR"; eventId:string; ts:number; id:string; bar:V4FourRuleM5Bar } |
   { type: "EXIT_BAR"; eventId: string; ts: number; id: string; bar: H1Bar; nextOpen?: {ts:number;price:number} } |
   { type: "ENTRY_FILL"; eventId: string; ts: number; id: string; qty: number; price: number; feeUsd: number } |
   { type: "ENTRY_TERMINAL"; eventId: string; ts: number; id: string } |
   { type: "EXIT_REQUEST"; eventId: string; ts: number; id: string; qty: number } |
-  { type: "EXIT_FILL"; eventId: string; ts: number; id: string; qty: number; price: number; feeUsd: number; cooldownUntil: number } |
+  { type: "EXIT_FILL"; eventId: string; ts: number; id: string; qty: number; price: number; feeUsd: number; cooldownUntil: number; cooldownKey?:string; actualFillTs?:number; routeCooldown?:boolean } |
   { type: "FUNDING"; eventId: string; ts: number; id: string; amountUsd: number } |
   { type: "FUNDING_SCAN"; eventId: string; ts: number; fromMs: number; throughMs: number };
 export type State = { initial: InitialState; foreign:ForeignExposure[]; foreignBasisEquityUsd:number; executionReview?:string; equityUsd:number; equityPeakUsd:number; maxDrawdown:number; prices:Record<string,number>; legs: Record<string, Leg>; journal: Event[]; cooldown: Record<string, number> };
@@ -133,14 +135,14 @@ export async function planProductionEntry(state: State, input: EntryPlanInput): 
   const { candidate:c } = input;
   if (state.initial.holdProtected) throw Error("HOLD_PROTECTED");
   if(state.executionReview)throw Error("UNRESOLVED_EXECUTION_REVIEW:"+state.executionReview);
-  if(state.maxDrawdown>V12_V4_MAXIMUM_DRAWDOWN+1e-12)throw Error("EQUITY_DD_OVER_OPERATOR_LIMIT");
   if (!Number.isFinite(input.ts) || input.ts !== c.eligibleEntryTs || input.ts % HOUR !== 0) throw Error("ENTRY_TIME_MISMATCH");
   const observedAtMs=input.observedAtMs??input.ts;
   if(!Number.isFinite(observedAtMs)||observedAtMs<input.ts||observedAtMs-input.ts>15*60_000||
     observedAtMs<(state.journal.at(-1)?.ts??0))throw Error("ENTRY_LIVE_OBSERVATION_STALE_OR_REVERSED");
   if (state.foreign.some(x=>x.symbol === c.symbol)) throw Error("FOREIGN_SYMBOL_OWNERSHIP");
   if (state.legs[key(c)] || state.journal.some(x=>x.eventId===input.eventId)) throw Error("DUPLICATE_ENTRY");
-  if ((state.cooldown[c.symbol+":"+c.route]??0)>input.ts) throw Error("COOLDOWN");
+  if ((state.cooldown[c.symbol+":"+c.route]??0)>input.ts ||
+      (c.effectiveSide==="SHORT"&&(state.cooldown[c.symbol+":SHORT"]??0)>input.ts)) throw Error("COOLDOWN");
   const spec = productionExitSpec(c.route);
   if(spec.kind==="NATIVE"&&(input.nativeExitEvidence!==spec.source||input.ts%(2*HOUR)!==0))throw Error("NATIVE_SOURCE_ATR_EVIDENCE_REQUIRED");
   if (spec.kind==="ATR"||spec.kind==="NATIVE") positive(input.entryAtr!, "ENTRY_ATR");
@@ -174,6 +176,7 @@ export async function planProductionEntry(state: State, input: EntryPlanInput): 
     id:key(c), candidate:structuredClone(c), qty:0, entryNotional:0, requestedQty:p.normalized.quantity,
     reservationUsd:notional, entryTs:c.eligibleEntryTs, entryAtr:input.entryAtr,nativeExitEvidence:input.nativeExitEvidence, status:"PENDING_ENTRY",
     exitRemainingQty:0, realizedUsd:0, feesUsd:0, fundingUsd:0,
+    fourRuleState:createV4FourRuleState(),
   }};
 }
 export function applyProductionEvent(state: State, event: Event): State {
@@ -212,11 +215,13 @@ export function applyProductionEvent(state: State, event: Event): State {
       (productionExitSpec(c.route).kind==="NATIVE"&&(l.nativeExitEvidence!=="WR60_BASELINE_1978_PARITY"||!l.entryAtr||l.entryTs%(2*HOUR)!==0))) throw Error("INVALID_RESERVATION");
     const active=Object.values(next.legs).filter(x=>x.status!=="CLOSED"&&x.status!=="CANCELLED");
     if(active.some(x=>x.candidate.symbol===c.symbol&&x.candidate.effectiveSide!==c.effectiveSide) ||
-      (recovery(l)&&active.filter(x=>x.candidate.route===c.route).length>=16) || (next.cooldown[c.symbol+":"+c.route]??0)>event.ts) throw Error("RESERVATION_OWNERSHIP_RECHECK_FAILED");
+      (recovery(l)&&active.filter(x=>x.candidate.route===c.route).length>=16) ||
+      (next.cooldown[c.symbol+":"+c.route]??0)>event.ts ||
+      (c.effectiveSide==="SHORT"&&(next.cooldown[c.symbol+":SHORT"]??0)>event.ts)) throw Error("RESERVATION_OWNERSHIP_RECHECK_FAILED");
     if (next.legs[event.leg.id]) throw Error("DUPLICATE_LEG");
     // Re-check immutable event against current reservations; planned events may race.
     const g=productionGross(next), add=event.leg.reservationUsd/next.equityUsd;
-    if (next.initial.holdProtected || next.executionReview || next.maxDrawdown>V12_V4_MAXIMUM_DRAWDOWN+1e-12 || next.foreign.some(x=>x.symbol===event.leg.candidate.symbol) ||
+    if (next.initial.holdProtected || next.executionReview || next.foreign.some(x=>x.symbol===event.leg.candidate.symbol) ||
       (recovery(event.leg)&&g.recovery+add>2.5+1e-12)||g.v12+add>3+1e-12||g.crypto+add>3.5+1e-12||g.total+add>4.75+1e-12)
       throw Error("RESERVATION_RECHECK_FAILED");
     next.legs[event.leg.id]=structuredClone(event.leg);
@@ -227,10 +232,22 @@ export function applyProductionEvent(state: State, event: Event): State {
       if(l.status!=="OPEN"||l.plannedExit)throw Error("INVALID_EXIT_BAR_STATE");
       if(event.ts<event.bar.openTs+HOUR || event.ts-event.bar.openTs>72*HOUR || event.bar.openTs!==(l.lastExitBarTs===undefined?l.entryTs:l.lastExitBarTs+HOUR)) throw Error("EXIT_BAR_STREAM_GAP");
       const decision=evaluateProductionExit(l,event.bar,event.ts,event.nextOpen);
+      const policy=observeV4FourRuleH1({route:l.candidate.route,side:l.candidate.effectiveSide,entryTs:l.entryTs,
+       fill:l.entryNotional/l.qty,state:l.fourRuleState??createV4FourRuleState(),bar:{...event.bar,observedAt:event.ts}});
+      l.fourRuleState=policy.state;
       if(productionExitSpec(l.candidate.route).kind==="NATIVE"){
         const n=evaluateNativeProductionExit(l,event.bar,event.ts,event.nextOpen);l.nativeStop=n.stop;l.nativePeak=n.peak;l.previousExitBar=event.bar;
       }
-      l.lastExitBarTs=event.bar.openTs;if(decision)l.plannedExit=decision;
+      l.lastExitBarTs=event.bar.openTs;
+      if(decision)l.plannedExit=decision;
+      else if(policy.exitCandidate)l.plannedExit={exitTs:policy.exitCandidate.exitTs,price:policy.exitCandidate.modelPrice,reason:policy.exitCandidate.reason,priceModelOnly:true};
+    } else if (event.type==="M5_POLICY_BAR") {
+      if(l.status!=="OPEN"||l.plannedExit)throw Error("INVALID_M5_POLICY_BAR_STATE");
+      if(event.bar.openTs+300_000>event.ts)throw Error("V4_FOUR_RULE_M5_EVENT_NOT_CLOSED");
+      const policy=observeV4FourRuleM5({route:l.candidate.route,side:l.candidate.effectiveSide,entryTs:l.entryTs,
+       fill:l.entryNotional/l.qty,state:l.fourRuleState??createV4FourRuleState(),bar:event.bar});
+      l.fourRuleState=policy.state;
+      if(policy.exitCandidate)l.plannedExit={exitTs:policy.exitCandidate.exitTs,price:policy.exitCandidate.modelPrice,reason:policy.exitCandidate.reason,priceModelOnly:true};
     } else if (event.type==="ENTRY_FILL") {
       positive(event.qty,"FILL_QTY");positive(event.price,"FILL_PRICE");
       if (l.status!=="PENDING_ENTRY" || l.qty+event.qty>l.requestedQty+1e-12 ||
@@ -248,11 +265,15 @@ export function applyProductionEvent(state: State, event: Event): State {
     } else if (event.type==="EXIT_FILL") {
       positive(event.qty,"EXIT_FILL_QTY");positive(event.price,"EXIT_FILL_PRICE");
       if(l.status!=="PENDING_EXIT"||event.qty>l.exitRemainingQty+1e-12||event.qty>l.qty+1e-12||
-        !Number.isFinite(event.feeUsd)||event.feeUsd<0||!Number.isFinite(event.cooldownUntil)||event.cooldownUntil<event.ts) throw Error("INVALID_EXIT_FILL");
+        !Number.isFinite(event.feeUsd)||event.feeUsd<0||!Number.isFinite(event.cooldownUntil)||event.cooldownUntil<event.ts||
+        (event.actualFillTs!==undefined&&(!Number.isFinite(event.actualFillTs)||event.actualFillTs<l.entryTs||event.actualFillTs>event.ts))) throw Error("INVALID_EXIT_FILL");
       const basis=l.entryNotional/l.qty, sg=l.candidate.effectiveSide==="LONG"?1:-1;
       l.realizedUsd+=sg*(event.price-basis)*event.qty;l.entryNotional-=basis*event.qty;
       l.qty-=event.qty;l.exitRemainingQty-=event.qty;l.feesUsd+=event.feeUsd;
-      if(l.qty<=1e-12){l.qty=0;l.entryNotional=0;l.status="CLOSED";next.cooldown[l.candidate.symbol+":"+l.candidate.route]=event.cooldownUntil;}
+      if(l.qty<=1e-12){l.qty=0;l.entryNotional=0;l.status="CLOSED";
+       if(event.routeCooldown!==false)next.cooldown[l.candidate.symbol+":"+l.candidate.route]=event.cooldownUntil;
+       if(event.cooldownKey)next.cooldown[event.cooldownKey]=event.cooldownUntil;
+      }
       else if(l.exitRemainingQty<=1e-12){l.exitRemainingQty=0;l.status="OPEN";}
     } else if(event.type==="FUNDING") {
       if(!Number.isFinite(event.amountUsd)||l.qty<=0) throw Error("INVALID_FUNDING");

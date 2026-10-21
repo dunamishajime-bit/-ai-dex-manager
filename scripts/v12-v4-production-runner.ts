@@ -249,10 +249,18 @@ export async function buildV4ProductionRuntime(){
   store,accountLock:lock,adapter,client,pendingRegistryPath,
   fetchDecision,fetchPeers:()=>loadPeers(releaseSha,peerLineageMode),peerLineageMode,
   fetchExitFeed:async symbol=>{
-   const now=Date.now(),rows=await client.getKlines(symbol,"1h",500);
-   return {closed:rows.filter(x=>Number(x[0])+3600000<=now&&Number(x[6])<now)
+   const now=Date.now();
+   const [rows,m5rows]=await Promise.all([
+    client.getKlines(symbol,"1h",500),
+    client.getKlines(symbol,"5m",1000),
+   ]);
+   return {
+    closed:rows.filter(x=>Number(x[0])+3600000<=now&&Number(x[6])<now)
      .map(x=>({openTs:Number(x[0]),open:Number(x[1]),high:Number(x[2]),low:Number(x[3]),close:Number(x[4])})),
-    nextOpens:rows.filter(x=>Number(x[0])<=now).map(x=>({ts:Number(x[0]),price:Number(x[1])}))};
+    closedM5:m5rows.filter(x=>Number(x[0])+300000<=now&&Number(x[6])<now)
+     .map(x=>({openTs:Number(x[0]),open:Number(x[1]),high:Number(x[2]),low:Number(x[3]),close:Number(x[4]),observedAt:now})),
+    nextOpens:rows.filter(x=>Number(x[0])<=now).map(x=>({ts:Number(x[0]),price:Number(x[1])})),
+   };
   },
   quantityNormalizer:adapter.executor,
   referencePrice:async symbol=>{

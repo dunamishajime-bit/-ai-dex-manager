@@ -42,3 +42,36 @@ test("recording closed H1 later than its close time preserves journal ordering",
  assert.equal(next.legs[e.leg.id].lastExitBarTs,e.ts);
  assert.throws(()=>appendV4ClosedExitBars(state,e.leg.id,{closed:[]},at),/EXIT_FEED_GAP/);
 });
+test("M5 policy stream arms the durable TIME37 long stop before H1 processing",async()=>{
+ const H=3600000,entryTs=200*H;
+ const base=evaluateV12V4Routes({symbol:"ETHUSDT",sourceSide:"SHORT",sourceSignalTs:entryTs,age:2,volRatio:.5,er24:.5})[0];
+ const candidate={...base,route:"REC_X09_TIME_48H",family:"RECOVERY_X",effectiveSide:"LONG" as const,requestedGross:.1};
+ let state=createProductionState({equityUsd:1000,foreign:[],holdProtected:false});
+ const e=await planProductionEntry(state,{candidate,ts:entryTs,eventId:"m5-reserve",referencePrice:100,entryAtr:1,minimumOrderNotionalUsd:5,
+  quantityNormalizer:{normalizeMarketQuantity:async(_s:string,q:number,p:number)=>({quantity:q,notional:q*p})} as any});
+ state=applyProductionEvent(state,e);
+ state=applyProductionEvent(state,{type:"ENTRY_FILL",id:e.leg.id,eventId:"m5-fill",ts:entryTs+1,qty:1,price:100,feeUsd:0});
+ state=applyProductionEvent(state,{type:"ENTRY_TERMINAL",id:e.leg.id,eventId:"m5-terminal",ts:entryTs+2});
+ const closedM5=[
+  {openTs:entryTs,open:100,high:101.5,low:99.8,close:101,observedAt:entryTs+10*300000},
+  {openTs:entryTs+300000,open:101,high:102.1,low:100.5,close:101.8,observedAt:entryTs+10*300000},
+  ...Array.from({length:8},(_,i)=>({openTs:entryTs+(i+2)*300000,open:101.8,high:102,low:101.5,close:101.8,observedAt:entryTs+10*300000})),
+ ];
+ const next=appendV4ClosedExitBars(state,e.leg.id,{closed:[],closedM5},entryTs+10*300000);
+ assert.equal(next.legs[e.leg.id].fourRuleState?.longTimeStopStage,"ARMED");
+ assert.equal(next.legs[e.leg.id].plannedExit,undefined);
+});
+test("M5 short adverse policy becomes an exit candidate only after the 12-hour causal boundary",async()=>{
+ const H=3600000,entryTs=200*H;
+ const base=evaluateV12V4Routes({symbol:"ETHUSDT",sourceSide:"SHORT",sourceSignalTs:entryTs,age:2,volRatio:.5,er24:.5})[0];
+ const candidate={...base,route:"REC_X09_TIME_48H",family:"RECOVERY_X",effectiveSide:"SHORT" as const,requestedGross:.1};
+ let state=createProductionState({equityUsd:1000,foreign:[],holdProtected:false});
+ const e=await planProductionEntry(state,{candidate,ts:entryTs,eventId:"short-m5-reserve",referencePrice:100,entryAtr:1,minimumOrderNotionalUsd:5,
+  quantityNormalizer:{normalizeMarketQuantity:async(_s:string,q:number,p:number)=>({quantity:q,notional:q*p})} as any});
+ state=applyProductionEvent(state,e);
+ state=applyProductionEvent(state,{type:"ENTRY_FILL",id:e.leg.id,eventId:"short-m5-fill",ts:entryTs+1,qty:1,price:100,feeUsd:0});
+ state=applyProductionEvent(state,{type:"ENTRY_TERMINAL",id:e.leg.id,eventId:"short-m5-terminal",ts:entryTs+2});
+ const closedM5=Array.from({length:145},(_,i)=>({openTs:entryTs+i*300000,open:99.9,high:i===144?102.5:100.1,low:99.6,close:i===144?102:99.9,observedAt:entryTs+145*300000}));
+ const next=appendV4ClosedExitBars(state,e.leg.id,{closed:[],closedM5},entryTs+145*300000);
+ assert.equal(next.legs[e.leg.id].plannedExit?.reason,"V4_SHORT_INITIAL_ADVERSE_CANDIDATE");
+});

@@ -39,6 +39,17 @@ assert.equal(config.maximumGross, 3.0);
 assert.equal(config.cryptoGrossCap, 3);
 assert.equal(config.totalGrossCap, 4.25);
 assert.doesNotThrow(() => assertQuality102CausalV1LiveActivation(config, baseEnv));
+const adoptedEnv: NodeJS.ProcessEnv = {
+    ...baseEnv,
+    QUALITY102_Q102_PROFIT_FLOOR_ENABLED: "true",
+    QUALITY102_Q102_ADOPTED_EXIT_POLICIES_ENABLED: "true",
+    QUALITY102_Q102_ADOPTED_EXIT_POLICIES_ACK: SHA,
+};
+const adoptedConfig = resolveQuality102CausalV1LiveConfig(adoptedEnv);
+assert.equal(adoptedConfig.adoptedExitPoliciesEnabled, true);
+assert.doesNotThrow(() => assertQuality102CausalV1LiveActivation(adoptedConfig, adoptedEnv));
+assert.throws(() => assertQuality102CausalV1LiveActivation(adoptedConfig, { ...adoptedEnv, QUALITY102_Q102_ADOPTED_EXIT_POLICIES_ACK: "b".repeat(40) }), /ADOPTED_EXIT_POLICIES_ACK/);
+assert.throws(() => assertQuality102CausalV1LiveActivation({ ...adoptedConfig, profitFloorEnabled: false }, adoptedEnv), /EXISTING_FLOOR_REQUIRED/);
 assert.equal(shouldRunQuality102CausalV1PreflightHistoryCheck(baseEnv), true);
 assert.equal(shouldRunQuality102CausalV1PreflightHistoryCheck({ ...baseEnv, QUALITY102_CAUSAL_V1_PREFLIGHT_HISTORY_CHECK: "false" }), false);
 assert.equal(shouldRunQuality102CausalV1PreflightHistoryCheck({ ...baseEnv, PREFLIGHT_HISTORY_CHECK: "false" }), false);

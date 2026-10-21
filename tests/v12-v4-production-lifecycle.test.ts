@@ -151,13 +151,28 @@ test("reversal preemption waits for actual closes and cannot delete an opposing 
  assert.equal(state.legs[r.leg.id].status,"PENDING_ENTRY");
  assert.equal(state.legs[r.leg.id].reservationUsd,100);
 });
-test("equity DD admission fails closed and existing virtual-leg exits remain available",async()=>{
+test("DD21 is a research measurement, not a live entry kill switch",async()=>{
  let state=createProductionState(initial);
  state=applyProductionEvent(state,{type:"ACCOUNT_MARK",eventId:"dd",ts,equityUsd:780,prices:{}});
  assert.ok(state.maxDrawdown>0.21);
- await assert.rejects(reserve(state),/DD_OVER_OPERATOR_LIMIT/);
- const r=await reserve(createProductionState(initial));
- assert.throws(()=>applyProductionEvent(state,r),/RESERVATION_RECHECK_FAILED/);
+ const r=await reserve(state);
+ assert.doesNotThrow(()=>applyProductionEvent(state,r));
+});
+test("short initial-adverse cooldown is actual-fill and direction scoped",async()=>{
+ let state=createProductionState(initial);
+ const shortCandidate={...candidate("REC_X01_TIME_24H"),effectiveSide:"SHORT" as const};
+ const r=await reserve(state,shortCandidate,"short-reserve");
+ state=applyProductionEvent(state,r);
+ state=applyProductionEvent(state,{type:"ENTRY_FILL",id:r.leg.id,eventId:"short-fill",ts:ts+1,qty:1,price:30,feeUsd:0});
+ state=applyProductionEvent(state,{type:"ENTRY_TERMINAL",id:r.leg.id,eventId:"short-terminal",ts:ts+2});
+ state=applyProductionEvent(state,{type:"EXIT_REQUEST",id:r.leg.id,eventId:"short-exit-request",ts:ts+3,qty:1});
+ const actualFillTs=ts+4;
+ state=applyProductionEvent(state,{type:"EXIT_FILL",id:r.leg.id,eventId:"short-exit-fill",ts:ts+5,qty:1,price:31,feeUsd:0,
+  cooldownUntil:actualFillTs+12*HOUR,cooldownKey:"ETHUSDT:SHORT",actualFillTs,routeCooldown:false});
+ const retry={...shortCandidate,eligibleEntryTs:ts+HOUR,sourceSignalTs:ts+HOUR};
+ await assert.rejects(planProductionEntry(state,{candidate:retry,ts:ts+HOUR,eventId:"short-retry",referencePrice:30,minimumOrderNotionalUsd:5,quantityNormalizer:normalizer}),/COOLDOWN/);
+ const longRetry={...retry,effectiveSide:"LONG" as const};
+ await assert.doesNotReject(planProductionEntry(state,{candidate:longRetry,ts:ts+HOUR,eventId:"long-retry",referencePrice:30,minimumOrderNotionalUsd:5,quantityNormalizer:normalizer}));
 });
 test("closing records cooldown; caller cannot release foreign ownership or forge reservations",async()=>{
  let state=createProductionState(initial),r=await reserve(state);state=applyProductionEvent(state,r);
