@@ -1,0 +1,5201 @@
+{
+  "metadata": {
+    "status": "HYPE_WINRATE_CAUSAL_H1_ENTRY_4POLICY_FULL8_ECONOMIC_MODEL_VERIFIED_RESEARCH_ONLY",
+    "date": "2026-10-22",
+    "window": "2025-08-10 to 2026-08-10",
+    "startJpy": 10000,
+    "noDeposits": true,
+    "costsBps": [
+      10,
+      30
+    ],
+    "method": "Pre-entry completed M5 BTC and HYPE close returns over last 3h; relative BTC percentage points; only HYPE candidate vetos, before native chronological allocator",
+    "V4FourAndQ102ThreeUserAdoptedRetained": true,
+    "HYPEExistingStopsAndEntryBaseGatesRetained": true,
+    "ownerPCArchiveSha256": "10cdc48705a6f9e310cd0aecc95ce781af24325b1a99c2eb9aaefe3bd2953934",
+    "sourceSha256": {
+      "analyze-hype-entry-winrate-after-q102v4-20261022.py": "c781a3527bc77f57f2fe0f77e223831b1f2477f670877190d0b5ea4437da76f3",
+      "run-hype-entry-winrate-after-v4-q102adopted3-20261022.py": "2005bab9a234de92c6e9b4e5c4ca6436ab637127eac0d5236b905c990436ce0c",
+      "test-hype-entry-winrate-preallocation-20261022.py": "7ac6a946bce8a9dabb00a92cf830b7f7bba31ece74b835b59ab152e8c15490cc",
+      "build-hype-entry-winrate-report-20261022.py": "29cc8ee0357edb3dcf897c44d716456ae6e8cf69a38f6e2795ca688bd85df3e9"
+    },
+    "HYPEGateAuditedAllNewAdmittedNativeTrades": true,
+    "subgroupScreenIsNotAnIntegratedBacktest": true,
+    "screenTrainHoldoutNotUntouchedForPostSelection": true,
+    "independentFutureUnseenHoldoutRequired": true,
+    "currentLIVEAndVenueStopAuthenticationNotVerified": true,
+    "latestTask9IndependentTSFull8ParityNotVerified": true,
+    "productionOrdersChanged": false,
+    "noNewHYPEEntrypolicyFormallyAdoptedYet": true
+  },
+  "baselineSevenUserAdopted": {
+    "10": {
+      "finalEquityJpy": 198324735.05909136,
+      "maxMtmDdPct": -14.603309760733396,
+      "profitFactor": 3.164798912181309,
+      "closedTrades": 1326
+    },
+    "30": {
+      "finalEquityJpy": 88431930.94000964,
+      "maxMtmDdPct": -15.75383475906923,
+      "profitFactor": 2.7301229466853947,
+      "closedTrades": 1323
+    }
+  },
+  "screen": {
+    "10": {
+      "trainBase": {
+        "trades": 28,
+        "wins": 8,
+        "losses": 20,
+        "winRatePct": 28.57142857142857,
+        "totalOriginalPnLJpy": 1121971.1588367512
+      },
+      "holdoutBase": {
+        "trades": 12,
+        "wins": 4,
+        "losses": 8,
+        "winRatePct": 33.33333333333333,
+        "totalOriginalPnLJpy": 8331425.0983520895
+      },
+      "allBase": {
+        "trades": 40,
+        "wins": 12,
+        "losses": 28,
+        "winRatePct": 30.0,
+        "totalOriginalPnLJpy": 9453396.257188842
+      },
+      "chronologicalSplit": {
+        "trainEndTs": 1779285600000,
+        "holdoutStartTs": 1779570000000
+      },
+      "topTrainingOnly": [
+        {
+          "feature": "BTC3hPct",
+          "direction": "lte",
+          "threshold": 0.3785598220579445,
+          "train": {
+            "trades": 9,
+            "wins": 5,
+            "losses": 4,
+            "winRatePct": 55.55555555555556,
+            "totalOriginalPnLJpy": 4457975.3520430215
+          },
+          "holdout": {
+            "trades": 8,
+            "wins": 2,
+            "losses": 6,
+            "winRatePct": 25.0,
+            "totalOriginalPnLJpy": 3198566.8982880204
+          },
+          "full": {
+            "trades": 17,
+            "wins": 7,
+            "losses": 10,
+            "winRatePct": 41.17647058823529,
+            "totalOriginalPnLJpy": 7656542.250331041
+          }
+        },
+        {
+          "feature": "BTC3hPct",
+          "direction": "lte",
+          "threshold": 0.5862128859554172,
+          "train": {
+            "trades": 12,
+            "wins": 6,
+            "losses": 6,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 3885074.4035750474
+          },
+          "holdout": {
+            "trades": 10,
+            "wins": 4,
+            "losses": 6,
+            "winRatePct": 40.0,
+            "totalOriginalPnLJpy": 11265179.855426554
+          },
+          "full": {
+            "trades": 22,
+            "wins": 10,
+            "losses": 12,
+            "winRatePct": 45.45454545454545,
+            "totalOriginalPnLJpy": 15150254.259001601
+          }
+        },
+        {
+          "feature": "VOL1hToPrior2hRatio",
+          "direction": "gte",
+          "threshold": 1.8656152130372479,
+          "train": {
+            "trades": 12,
+            "wins": 6,
+            "losses": 6,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 5731642.65308193
+          },
+          "holdout": {
+            "trades": 6,
+            "wins": 2,
+            "losses": 4,
+            "winRatePct": 33.33333333333333,
+            "totalOriginalPnLJpy": 880794.7447847417
+          },
+          "full": {
+            "trades": 18,
+            "wins": 8,
+            "losses": 10,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 6612437.397866672
+          }
+        },
+        {
+          "feature": "BTC3hPct",
+          "direction": "lte",
+          "threshold": 0.8087757052997357,
+          "train": {
+            "trades": 15,
+            "wins": 7,
+            "losses": 8,
+            "winRatePct": 46.666666666666664,
+            "totalOriginalPnLJpy": 5029884.006011414
+          },
+          "holdout": {
+            "trades": 11,
+            "wins": 4,
+            "losses": 7,
+            "winRatePct": 36.36363636363637,
+            "totalOriginalPnLJpy": 9719317.641925212
+          },
+          "full": {
+            "trades": 26,
+            "wins": 11,
+            "losses": 15,
+            "winRatePct": 42.30769230769231,
+            "totalOriginalPnLJpy": 14749201.647936625
+          }
+        },
+        {
+          "feature": "BTC48hPct",
+          "direction": "lte",
+          "threshold": 0.824046751883456,
+          "train": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 2787613.444116142
+          },
+          "holdout": {
+            "trades": 8,
+            "wins": 2,
+            "losses": 6,
+            "winRatePct": 25.0,
+            "totalOriginalPnLJpy": -1014598.8547994713
+          },
+          "full": {
+            "trades": 17,
+            "wins": 6,
+            "losses": 11,
+            "winRatePct": 35.294117647058826,
+            "totalOriginalPnLJpy": 1773014.589316671
+          }
+        },
+        {
+          "feature": "BTC6hPct",
+          "direction": "lte",
+          "threshold": 0.278179643103349,
+          "train": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 2407057.808330151
+          },
+          "holdout": {
+            "trades": 7,
+            "wins": 2,
+            "losses": 5,
+            "winRatePct": 28.57142857142857,
+            "totalOriginalPnLJpy": 5623936.483678528
+          },
+          "full": {
+            "trades": 16,
+            "wins": 6,
+            "losses": 10,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 8030994.292008678
+          }
+        },
+        {
+          "feature": "HYPE_EMA12GapEMA48pct",
+          "direction": "gte",
+          "threshold": 2.5398856650487467,
+          "train": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 1185245.040627866
+          },
+          "holdout": {
+            "trades": 7,
+            "wins": 2,
+            "losses": 5,
+            "winRatePct": 28.57142857142857,
+            "totalOriginalPnLJpy": 4667106.990668876
+          },
+          "full": {
+            "trades": 16,
+            "wins": 6,
+            "losses": 10,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 5852352.031296742
+          }
+        },
+        {
+          "feature": "REL48hPct",
+          "direction": "gte",
+          "threshold": 10.054763627650743,
+          "train": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 2502310.3861162434
+          },
+          "holdout": {
+            "trades": 6,
+            "wins": 2,
+            "losses": 4,
+            "winRatePct": 33.33333333333333,
+            "totalOriginalPnLJpy": 7116443.229510785
+          },
+          "full": {
+            "trades": 15,
+            "wins": 6,
+            "losses": 9,
+            "winRatePct": 40.0,
+            "totalOriginalPnLJpy": 9618753.615627028
+          }
+        },
+        {
+          "feature": "HYPE48hPct",
+          "direction": "gte",
+          "threshold": 11.449319476453446,
+          "train": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 2446466.101251992
+          },
+          "holdout": {
+            "trades": 5,
+            "wins": 2,
+            "losses": 3,
+            "winRatePct": 40.0,
+            "totalOriginalPnLJpy": 8662305.443012126
+          },
+          "full": {
+            "trades": 14,
+            "wins": 6,
+            "losses": 8,
+            "winRatePct": 42.857142857142854,
+            "totalOriginalPnLJpy": 11108771.54426412
+          }
+        },
+        {
+          "feature": "VOL1hToPrior2hRatio",
+          "direction": "gte",
+          "threshold": 1.9843946828096803,
+          "train": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 4472064.899547312
+          },
+          "holdout": {
+            "trades": 4,
+            "wins": 2,
+            "losses": 2,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 4058691.047407185
+          },
+          "full": {
+            "trades": 13,
+            "wins": 6,
+            "losses": 7,
+            "winRatePct": 46.15384615384615,
+            "totalOriginalPnLJpy": 8530755.946954498
+          }
+        },
+        {
+          "feature": "HYPE12hPct",
+          "direction": "gte",
+          "threshold": 5.6350141751345895,
+          "train": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 2715533.919367527
+          },
+          "holdout": {
+            "trades": 3,
+            "wins": 1,
+            "losses": 2,
+            "winRatePct": 33.33333333333333,
+            "totalOriginalPnLJpy": 915338.0695263357
+          },
+          "full": {
+            "trades": 12,
+            "wins": 5,
+            "losses": 7,
+            "winRatePct": 41.66666666666667,
+            "totalOriginalPnLJpy": 3630871.988893863
+          }
+        },
+        {
+          "feature": "REL3hPct",
+          "direction": "gte",
+          "threshold": 3.357846634207551,
+          "train": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 2957417.0562986094
+          },
+          "holdout": {
+            "trades": 3,
+            "wins": 2,
+            "losses": 1,
+            "winRatePct": 66.66666666666666,
+            "totalOriginalPnLJpy": 9243427.273764767
+          },
+          "full": {
+            "trades": 12,
+            "wins": 6,
+            "losses": 6,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 12200844.330063377
+          }
+        },
+        {
+          "feature": "REL12hPct",
+          "direction": "gte",
+          "threshold": 5.382528360367078,
+          "train": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 1702514.935544086
+          },
+          "holdout": {
+            "trades": 3,
+            "wins": 1,
+            "losses": 2,
+            "winRatePct": 33.33333333333333,
+            "totalOriginalPnLJpy": 892255.5317477996
+          },
+          "full": {
+            "trades": 12,
+            "wins": 5,
+            "losses": 7,
+            "winRatePct": 41.66666666666667,
+            "totalOriginalPnLJpy": 2594770.4672918855
+          }
+        },
+        {
+          "feature": "REL1hPct",
+          "direction": "gte",
+          "threshold": 1.326936501300402,
+          "train": {
+            "trades": 14,
+            "wins": 6,
+            "losses": 8,
+            "winRatePct": 42.857142857142854,
+            "totalOriginalPnLJpy": 5596388.882109693
+          },
+          "holdout": {
+            "trades": 8,
+            "wins": 2,
+            "losses": 6,
+            "winRatePct": 25.0,
+            "totalOriginalPnLJpy": 1942501.9627882193
+          },
+          "full": {
+            "trades": 22,
+            "wins": 8,
+            "losses": 14,
+            "winRatePct": 36.36363636363637,
+            "totalOriginalPnLJpy": 7538890.844897913
+          }
+        },
+        {
+          "feature": "VOL1hToPrior2hRatio",
+          "direction": "gte",
+          "threshold": 1.6774159596546825,
+          "train": {
+            "trades": 14,
+            "wins": 6,
+            "losses": 8,
+            "winRatePct": 42.857142857142854,
+            "totalOriginalPnLJpy": 4696729.014953015
+          },
+          "holdout": {
+            "trades": 7,
+            "wins": 2,
+            "losses": 5,
+            "winRatePct": 28.57142857142857,
+            "totalOriginalPnLJpy": -530180.3365669162
+          },
+          "full": {
+            "trades": 21,
+            "wins": 8,
+            "losses": 13,
+            "winRatePct": 38.095238095238095,
+            "totalOriginalPnLJpy": 4166548.6783860996
+          }
+        },
+        {
+          "feature": "BTC6hPct",
+          "direction": "lte",
+          "threshold": 0.6569851036368757,
+          "train": {
+            "trades": 12,
+            "wins": 5,
+            "losses": 7,
+            "winRatePct": 41.66666666666667,
+            "totalOriginalPnLJpy": 1978652.5285179385
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 3,
+            "losses": 6,
+            "winRatePct": 33.33333333333333,
+            "totalOriginalPnLJpy": 8319561.054166321
+          },
+          "full": {
+            "trades": 21,
+            "wins": 8,
+            "losses": 13,
+            "winRatePct": 38.095238095238095,
+            "totalOriginalPnLJpy": 10298213.58268426
+          }
+        },
+        {
+          "feature": "BTC48hPct",
+          "direction": "lte",
+          "threshold": 0.9677688406061646,
+          "train": {
+            "trades": 12,
+            "wins": 5,
+            "losses": 7,
+            "winRatePct": 41.66666666666667,
+            "totalOriginalPnLJpy": 4978064.8897902
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 2,
+            "losses": 7,
+            "winRatePct": 22.22222222222222,
+            "totalOriginalPnLJpy": -2536494.414849412
+          },
+          "full": {
+            "trades": 21,
+            "wins": 7,
+            "losses": 14,
+            "winRatePct": 33.33333333333333,
+            "totalOriginalPnLJpy": 2441570.4749407875
+          }
+        },
+        {
+          "feature": "REL12hPct",
+          "direction": "gte",
+          "threshold": 3.3968730377532452,
+          "train": {
+            "trades": 12,
+            "wins": 5,
+            "losses": 7,
+            "winRatePct": 41.66666666666667,
+            "totalOriginalPnLJpy": 1827161.7630997528
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 12881330.53734519
+          },
+          "full": {
+            "trades": 21,
+            "wins": 9,
+            "losses": 12,
+            "winRatePct": 42.857142857142854,
+            "totalOriginalPnLJpy": 14708492.300444944
+          }
+        },
+        {
+          "feature": "REL48hPct",
+          "direction": "gte",
+          "threshold": 8.553518320884933,
+          "train": {
+            "trades": 12,
+            "wins": 5,
+            "losses": 7,
+            "winRatePct": 41.66666666666667,
+            "totalOriginalPnLJpy": 5016659.635693848
+          },
+          "holdout": {
+            "trades": 8,
+            "wins": 3,
+            "losses": 5,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 9922988.278696861
+          },
+          "full": {
+            "trades": 20,
+            "wins": 8,
+            "losses": 12,
+            "winRatePct": 40.0,
+            "totalOriginalPnLJpy": 14939647.914390707
+          }
+        },
+        {
+          "feature": "VOL6hToPrior2hRatio",
+          "direction": "lte",
+          "threshold": 1.3422213701577508,
+          "train": {
+            "trades": 12,
+            "wins": 5,
+            "losses": 7,
+            "winRatePct": 41.66666666666667,
+            "totalOriginalPnLJpy": -1943735.9726548349
+          },
+          "holdout": {
+            "trades": 8,
+            "wins": 3,
+            "losses": 5,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 6908322.450079972
+          },
+          "full": {
+            "trades": 20,
+            "wins": 8,
+            "losses": 12,
+            "winRatePct": 40.0,
+            "totalOriginalPnLJpy": 4964586.477425137
+          }
+        },
+        {
+          "feature": "REL3hPct",
+          "direction": "gte",
+          "threshold": 2.708330382257107,
+          "train": {
+            "trades": 12,
+            "wins": 5,
+            "losses": 7,
+            "winRatePct": 41.66666666666667,
+            "totalOriginalPnLJpy": 2899871.631609141
+          },
+          "holdout": {
+            "trades": 5,
+            "wins": 3,
+            "losses": 2,
+            "winRatePct": 60.0,
+            "totalOriginalPnLJpy": 11902361.733413061
+          },
+          "full": {
+            "trades": 17,
+            "wins": 8,
+            "losses": 9,
+            "winRatePct": 47.05882352941176,
+            "totalOriginalPnLJpy": 14802233.365022201
+          }
+        },
+        {
+          "feature": "REL1hPct",
+          "direction": "gte",
+          "threshold": 1.4669175869105322,
+          "train": {
+            "trades": 12,
+            "wins": 5,
+            "losses": 7,
+            "winRatePct": 41.66666666666667,
+            "totalOriginalPnLJpy": 2553313.271183885
+          },
+          "holdout": {
+            "trades": 4,
+            "wins": 1,
+            "losses": 3,
+            "winRatePct": 25.0,
+            "totalOriginalPnLJpy": -342744.38884580624
+          },
+          "full": {
+            "trades": 16,
+            "wins": 6,
+            "losses": 10,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 2210568.882338079
+          }
+        },
+        {
+          "feature": "BTC3hPct",
+          "direction": "lte",
+          "threshold": 0.9139138135578984,
+          "train": {
+            "trades": 17,
+            "wins": 7,
+            "losses": 10,
+            "winRatePct": 41.17647058823529,
+            "totalOriginalPnLJpy": 4351001.881400421
+          },
+          "holdout": {
+            "trades": 11,
+            "wins": 4,
+            "losses": 7,
+            "winRatePct": 36.36363636363637,
+            "totalOriginalPnLJpy": 9719317.641925212
+          },
+          "full": {
+            "trades": 28,
+            "wins": 11,
+            "losses": 17,
+            "winRatePct": 39.285714285714285,
+            "totalOriginalPnLJpy": 14070319.523325633
+          }
+        },
+        {
+          "feature": "REL12hPct",
+          "direction": "gte",
+          "threshold": 2.4137285404618902,
+          "train": {
+            "trades": 17,
+            "wins": 7,
+            "losses": 10,
+            "winRatePct": 41.17647058823529,
+            "totalOriginalPnLJpy": 5070187.724123881
+          },
+          "holdout": {
+            "trades": 10,
+            "wins": 4,
+            "losses": 6,
+            "winRatePct": 40.0,
+            "totalOriginalPnLJpy": 11277903.312814651
+          },
+          "full": {
+            "trades": 27,
+            "wins": 11,
+            "losses": 16,
+            "winRatePct": 40.74074074074074,
+            "totalOriginalPnLJpy": 16348091.036938531
+          }
+        },
+        {
+          "feature": "BTC48hPct",
+          "direction": "lte",
+          "threshold": 2.0601104281696037,
+          "train": {
+            "trades": 17,
+            "wins": 7,
+            "losses": 10,
+            "winRatePct": 41.17647058823529,
+            "totalOriginalPnLJpy": 5105048.009983097
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 2,
+            "losses": 7,
+            "winRatePct": 22.22222222222222,
+            "totalOriginalPnLJpy": -2536494.414849412
+          },
+          "full": {
+            "trades": 26,
+            "wins": 9,
+            "losses": 17,
+            "winRatePct": 34.61538461538461,
+            "totalOriginalPnLJpy": 2568553.5951336846
+          }
+        },
+        {
+          "feature": "REL1hPct",
+          "direction": "gte",
+          "threshold": 1.1593553527985412,
+          "train": {
+            "trades": 17,
+            "wins": 7,
+            "losses": 10,
+            "winRatePct": 41.17647058823529,
+            "totalOriginalPnLJpy": 6496463.907249301
+          },
+          "holdout": {
+            "trades": 8,
+            "wins": 2,
+            "losses": 6,
+            "winRatePct": 25.0,
+            "totalOriginalPnLJpy": 1942501.9627882193
+          },
+          "full": {
+            "trades": 25,
+            "wins": 9,
+            "losses": 16,
+            "winRatePct": 36.0,
+            "totalOriginalPnLJpy": 8438965.87003752
+          }
+        },
+        {
+          "feature": "BTC6hPct",
+          "direction": "lte",
+          "threshold": 0.9481667950085981,
+          "train": {
+            "trades": 15,
+            "wins": 6,
+            "losses": 9,
+            "winRatePct": 40.0,
+            "totalOriginalPnLJpy": 4265352.941550885
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 3,
+            "losses": 6,
+            "winRatePct": 33.33333333333333,
+            "totalOriginalPnLJpy": 8319561.054166321
+          },
+          "full": {
+            "trades": 24,
+            "wins": 9,
+            "losses": 15,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 12584913.995717205
+          }
+        },
+        {
+          "feature": "BTC48hPct",
+          "direction": "lte",
+          "threshold": 1.5839795054781725,
+          "train": {
+            "trades": 15,
+            "wins": 6,
+            "losses": 9,
+            "winRatePct": 40.0,
+            "totalOriginalPnLJpy": 4631510.128268283
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 2,
+            "losses": 7,
+            "winRatePct": 22.22222222222222,
+            "totalOriginalPnLJpy": -2536494.414849412
+          },
+          "full": {
+            "trades": 24,
+            "wins": 8,
+            "losses": 16,
+            "winRatePct": 33.33333333333333,
+            "totalOriginalPnLJpy": 2095015.7134188707
+          }
+        },
+        {
+          "feature": "VOL6hToPrior2hRatio",
+          "direction": "lte",
+          "threshold": 1.5501292290635331,
+          "train": {
+            "trades": 15,
+            "wins": 6,
+            "losses": 9,
+            "winRatePct": 40.0,
+            "totalOriginalPnLJpy": 413317.0543012063
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 13848519.110745281
+          },
+          "full": {
+            "trades": 24,
+            "wins": 10,
+            "losses": 14,
+            "winRatePct": 41.66666666666667,
+            "totalOriginalPnLJpy": 14261836.165046487
+          }
+        },
+        {
+          "feature": "REL12hPct",
+          "direction": "gte",
+          "threshold": 2.9331600982478223,
+          "train": {
+            "trades": 14,
+            "wins": 5,
+            "losses": 9,
+            "winRatePct": 35.714285714285715,
+            "totalOriginalPnLJpy": 1139724.1238735635
+          },
+          "holdout": {
+            "trades": 10,
+            "wins": 4,
+            "losses": 6,
+            "winRatePct": 40.0,
+            "totalOriginalPnLJpy": 11277903.312814651
+          },
+          "full": {
+            "trades": 24,
+            "wins": 9,
+            "losses": 15,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 12417627.436688215
+          }
+        },
+        {
+          "feature": "HYPE5mReturnPct",
+          "direction": "gte",
+          "threshold": 0.12012325690711201,
+          "train": {
+            "trades": 14,
+            "wins": 5,
+            "losses": 9,
+            "winRatePct": 35.714285714285715,
+            "totalOriginalPnLJpy": 1306720.2096489877
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 3,
+            "losses": 6,
+            "winRatePct": 33.33333333333333,
+            "totalOriginalPnLJpy": 5814677.327167555
+          },
+          "full": {
+            "trades": 23,
+            "wins": 8,
+            "losses": 15,
+            "winRatePct": 34.78260869565217,
+            "totalOriginalPnLJpy": 7121397.536816542
+          }
+        },
+        {
+          "feature": "HYPE_DistanceEMA12_pct",
+          "direction": "gte",
+          "threshold": 1.525830647832982,
+          "train": {
+            "trades": 14,
+            "wins": 5,
+            "losses": 9,
+            "winRatePct": 35.714285714285715,
+            "totalOriginalPnLJpy": 1202147.4392489733
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 12822881.410643127
+          },
+          "full": {
+            "trades": 23,
+            "wins": 9,
+            "losses": 14,
+            "winRatePct": 39.130434782608695,
+            "totalOriginalPnLJpy": 14025028.8498921
+          }
+        },
+        {
+          "feature": "HYPE_EMA12GapEMA48pct",
+          "direction": "gte",
+          "threshold": 2.020447255678026,
+          "train": {
+            "trades": 14,
+            "wins": 5,
+            "losses": 9,
+            "winRatePct": 35.714285714285715,
+            "totalOriginalPnLJpy": 2063976.3731609222
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 12733719.947807409
+          },
+          "full": {
+            "trades": 23,
+            "wins": 9,
+            "losses": 14,
+            "winRatePct": 39.130434782608695,
+            "totalOriginalPnLJpy": 14797696.320968332
+          }
+        },
+        {
+          "feature": "HYPE12hPct",
+          "direction": "gte",
+          "threshold": 4.25198517734251,
+          "train": {
+            "trades": 14,
+            "wins": 5,
+            "losses": 9,
+            "winRatePct": 35.714285714285715,
+            "totalOriginalPnLJpy": 2013080.3465106755
+          },
+          "holdout": {
+            "trades": 8,
+            "wins": 2,
+            "losses": 6,
+            "winRatePct": 25.0,
+            "totalOriginalPnLJpy": 335721.20256902603
+          },
+          "full": {
+            "trades": 22,
+            "wins": 7,
+            "losses": 15,
+            "winRatePct": 31.818181818181817,
+            "totalOriginalPnLJpy": 2348801.549079702
+          }
+        },
+        {
+          "feature": "REL6hPct",
+          "direction": "gte",
+          "threshold": 2.5786358883692406,
+          "train": {
+            "trades": 14,
+            "wins": 5,
+            "losses": 9,
+            "winRatePct": 35.714285714285715,
+            "totalOriginalPnLJpy": 1871572.8077466513
+          },
+          "holdout": {
+            "trades": 8,
+            "wins": 2,
+            "losses": 6,
+            "winRatePct": 25.0,
+            "totalOriginalPnLJpy": 1267286.075793168
+          },
+          "full": {
+            "trades": 22,
+            "wins": 7,
+            "losses": 15,
+            "winRatePct": 31.818181818181817,
+            "totalOriginalPnLJpy": 3138858.8835398196
+          }
+        },
+        {
+          "feature": "REL48hPct",
+          "direction": "gte",
+          "threshold": 7.878498572984638,
+          "train": {
+            "trades": 14,
+            "wins": 5,
+            "losses": 9,
+            "winRatePct": 35.714285714285715,
+            "totalOriginalPnLJpy": 4228841.0098408
+          },
+          "holdout": {
+            "trades": 8,
+            "wins": 3,
+            "losses": 5,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 9922988.278696861
+          },
+          "full": {
+            "trades": 22,
+            "wins": 8,
+            "losses": 14,
+            "winRatePct": 36.36363636363637,
+            "totalOriginalPnLJpy": 14151829.28853766
+          }
+        },
+        {
+          "feature": "REL3hPct",
+          "direction": "gte",
+          "threshold": 2.263189350624084,
+          "train": {
+            "trades": 14,
+            "wins": 5,
+            "losses": 9,
+            "winRatePct": 35.714285714285715,
+            "totalOriginalPnLJpy": 2251202.0879376344
+          },
+          "holdout": {
+            "trades": 7,
+            "wins": 4,
+            "losses": 3,
+            "winRatePct": 57.14285714285714,
+            "totalOriginalPnLJpy": 16704951.746699259
+          },
+          "full": {
+            "trades": 21,
+            "wins": 9,
+            "losses": 12,
+            "winRatePct": 42.857142857142854,
+            "totalOriginalPnLJpy": 18956153.834636893
+          }
+        },
+        {
+          "feature": "HYPE3hPct",
+          "direction": "gte",
+          "threshold": 3.2988735062370322,
+          "train": {
+            "trades": 14,
+            "wins": 5,
+            "losses": 9,
+            "winRatePct": 35.714285714285715,
+            "totalOriginalPnLJpy": 2700213.316302964
+          },
+          "holdout": {
+            "trades": 5,
+            "wins": 3,
+            "losses": 2,
+            "winRatePct": 60.0,
+            "totalOriginalPnLJpy": 12073054.860729378
+          },
+          "full": {
+            "trades": 19,
+            "wins": 8,
+            "losses": 11,
+            "winRatePct": 42.10526315789473,
+            "totalOriginalPnLJpy": 14773268.177032342
+          }
+        },
+        {
+          "feature": "BTC6hPct",
+          "direction": "lte",
+          "threshold": 1.1558403392214256,
+          "train": {
+            "trades": 17,
+            "wins": 6,
+            "losses": 11,
+            "winRatePct": 35.294117647058826,
+            "totalOriginalPnLJpy": 3087350.9434809405
+          },
+          "holdout": {
+            "trades": 10,
+            "wins": 3,
+            "losses": 7,
+            "winRatePct": 30.0,
+            "totalOriginalPnLJpy": 5870224.815324412
+          },
+          "full": {
+            "trades": 27,
+            "wins": 9,
+            "losses": 18,
+            "winRatePct": 33.33333333333333,
+            "totalOriginalPnLJpy": 8957575.758805353
+          }
+        },
+        {
+          "feature": "VOL1hToPrior2hRatio",
+          "direction": "gte",
+          "threshold": 1.4757968950030587,
+          "train": {
+            "trades": 17,
+            "wins": 6,
+            "losses": 11,
+            "winRatePct": 35.294117647058826,
+            "totalOriginalPnLJpy": 3153098.1791704637
+          },
+          "holdout": {
+            "trades": 10,
+            "wins": 2,
+            "losses": 8,
+            "winRatePct": 20.0,
+            "totalOriginalPnLJpy": -4985830.653691321
+          },
+          "full": {
+            "trades": 27,
+            "wins": 8,
+            "losses": 19,
+            "winRatePct": 29.629629629629626,
+            "totalOriginalPnLJpy": -1832732.4745208567
+          }
+        },
+        {
+          "feature": "HYPE5mReturnPct",
+          "direction": "gte",
+          "threshold": 0.005584564264360381,
+          "train": {
+            "trades": 17,
+            "wins": 6,
+            "losses": 11,
+            "winRatePct": 35.294117647058826,
+            "totalOriginalPnLJpy": 572178.1509594332
+          },
+          "holdout": {
+            "trades": 10,
+            "wins": 4,
+            "losses": 6,
+            "winRatePct": 40.0,
+            "totalOriginalPnLJpy": 12191736.418545656
+          },
+          "full": {
+            "trades": 27,
+            "wins": 10,
+            "losses": 17,
+            "winRatePct": 37.03703703703704,
+            "totalOriginalPnLJpy": 12763914.56950509
+          }
+        },
+        {
+          "feature": "BTC1hPct",
+          "direction": "lte",
+          "threshold": 0.3553418965274613,
+          "train": {
+            "trades": 17,
+            "wins": 6,
+            "losses": 11,
+            "winRatePct": 35.294117647058826,
+            "totalOriginalPnLJpy": 1969251.8870351512
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 12676154.93677821
+          },
+          "full": {
+            "trades": 26,
+            "wins": 10,
+            "losses": 16,
+            "winRatePct": 38.46153846153847,
+            "totalOriginalPnLJpy": 14645406.823813362
+          }
+        },
+        {
+          "feature": "VOL6hToPrior2hRatio",
+          "direction": "lte",
+          "threshold": 1.6144500092063627,
+          "train": {
+            "trades": 17,
+            "wins": 6,
+            "losses": 11,
+            "winRatePct": 35.294117647058826,
+            "totalOriginalPnLJpy": 351686.91193383106
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 13848519.110745281
+          },
+          "full": {
+            "trades": 26,
+            "wins": 10,
+            "losses": 16,
+            "winRatePct": 38.46153846153847,
+            "totalOriginalPnLJpy": 14200206.022679111
+          }
+        },
+        {
+          "feature": "HYPE_DistanceEMA12_pct",
+          "direction": "gte",
+          "threshold": 1.3400522819146499,
+          "train": {
+            "trades": 17,
+            "wins": 6,
+            "losses": 11,
+            "winRatePct": 35.294117647058826,
+            "totalOriginalPnLJpy": 2853546.5922113196
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 12822881.410643127
+          },
+          "full": {
+            "trades": 26,
+            "wins": 10,
+            "losses": 16,
+            "winRatePct": 38.46153846153847,
+            "totalOriginalPnLJpy": 15676428.002854448
+          }
+        },
+        {
+          "feature": "HYPE_EMA12GapEMA48pct",
+          "direction": "gte",
+          "threshold": 1.8267124066124962,
+          "train": {
+            "trades": 17,
+            "wins": 6,
+            "losses": 11,
+            "winRatePct": 35.294117647058826,
+            "totalOriginalPnLJpy": 1911021.9320708476
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 12733719.947807409
+          },
+          "full": {
+            "trades": 26,
+            "wins": 10,
+            "losses": 16,
+            "winRatePct": 38.46153846153847,
+            "totalOriginalPnLJpy": 14644741.879878256
+          }
+        },
+        {
+          "feature": "REL48hPct",
+          "direction": "gte",
+          "threshold": 6.128248191518315,
+          "train": {
+            "trades": 17,
+            "wins": 6,
+            "losses": 11,
+            "winRatePct": 35.294117647058826,
+            "totalOriginalPnLJpy": 2838719.1680334383
+          },
+          "holdout": {
+            "trades": 8,
+            "wins": 3,
+            "losses": 5,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 9922988.278696861
+          },
+          "full": {
+            "trades": 25,
+            "wins": 9,
+            "losses": 16,
+            "winRatePct": 36.0,
+            "totalOriginalPnLJpy": 12761707.446730299
+          }
+        },
+        {
+          "feature": "VOL3hToPrior2hRatio",
+          "direction": "lte",
+          "threshold": 1.8885722592459846,
+          "train": {
+            "trades": 17,
+            "wins": 6,
+            "losses": 11,
+            "winRatePct": 35.294117647058826,
+            "totalOriginalPnLJpy": 806554.8607372427
+          },
+          "holdout": {
+            "trades": 8,
+            "wins": 3,
+            "losses": 5,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 6070145.400169465
+          },
+          "full": {
+            "trades": 25,
+            "wins": 9,
+            "losses": 16,
+            "winRatePct": 36.0,
+            "totalOriginalPnLJpy": 6876700.2609067075
+          }
+        },
+        {
+          "feature": "REL3hPct",
+          "direction": "gte",
+          "threshold": 1.9931915134093092,
+          "train": {
+            "trades": 17,
+            "wins": 6,
+            "losses": 11,
+            "winRatePct": 35.294117647058826,
+            "totalOriginalPnLJpy": 3918028.691550775
+          },
+          "holdout": {
+            "trades": 7,
+            "wins": 4,
+            "losses": 3,
+            "winRatePct": 57.14285714285714,
+            "totalOriginalPnLJpy": 16704951.746699259
+          },
+          "full": {
+            "trades": 24,
+            "wins": 10,
+            "losses": 14,
+            "winRatePct": 41.66666666666667,
+            "totalOriginalPnLJpy": 20622980.438250035
+          }
+        },
+        {
+          "feature": "HYPE6hPct",
+          "direction": "lte",
+          "threshold": 3.741488414619476,
+          "train": {
+            "trades": 17,
+            "wins": 6,
+            "losses": 11,
+            "winRatePct": 35.294117647058826,
+            "totalOriginalPnLJpy": 747333.3637427522
+          },
+          "holdout": {
+            "trades": 6,
+            "wins": 2,
+            "losses": 4,
+            "winRatePct": 33.33333333333333,
+            "totalOriginalPnLJpy": 3967774.384417077
+          },
+          "full": {
+            "trades": 23,
+            "wins": 8,
+            "losses": 15,
+            "winRatePct": 34.78260869565217,
+            "totalOriginalPnLJpy": 4715107.7481598295
+          }
+        },
+        {
+          "feature": "HYPE1hPct",
+          "direction": "gte",
+          "threshold": 1.5057811239580499,
+          "train": {
+            "trades": 17,
+            "wins": 6,
+            "losses": 11,
+            "winRatePct": 35.294117647058826,
+            "totalOriginalPnLJpy": 2800904.0972987614
+          },
+          "holdout": {
+            "trades": 5,
+            "wins": 1,
+            "losses": 4,
+            "winRatePct": 20.0,
+            "totalOriginalPnLJpy": -1685795.3787778271
+          },
+          "full": {
+            "trades": 22,
+            "wins": 7,
+            "losses": 15,
+            "winRatePct": 31.818181818181817,
+            "totalOriginalPnLJpy": 1115108.718520934
+          }
+        },
+        {
+          "feature": "BTC3hPct",
+          "direction": "lte",
+          "threshold": 1.2847920060095053,
+          "train": {
+            "trades": 20,
+            "wins": 7,
+            "losses": 13,
+            "winRatePct": 35.0,
+            "totalOriginalPnLJpy": 2749270.0096166637
+          },
+          "holdout": {
+            "trades": 11,
+            "wins": 4,
+            "losses": 7,
+            "winRatePct": 36.36363636363637,
+            "totalOriginalPnLJpy": 9719317.641925212
+          },
+          "full": {
+            "trades": 31,
+            "wins": 11,
+            "losses": 20,
+            "winRatePct": 35.483870967741936,
+            "totalOriginalPnLJpy": 12468587.651541876
+          }
+        },
+        {
+          "feature": "REL12hPct",
+          "direction": "gte",
+          "threshold": 1.9339665865260258,
+          "train": {
+            "trades": 20,
+            "wins": 7,
+            "losses": 13,
+            "winRatePct": 35.0,
+            "totalOriginalPnLJpy": 3782962.1839100006
+          },
+          "holdout": {
+            "trades": 11,
+            "wins": 4,
+            "losses": 7,
+            "winRatePct": 36.36363636363637,
+            "totalOriginalPnLJpy": 9890010.769241529
+          },
+          "full": {
+            "trades": 31,
+            "wins": 11,
+            "losses": 20,
+            "winRatePct": 35.483870967741936,
+            "totalOriginalPnLJpy": 13672972.95315153
+          }
+        },
+        {
+          "feature": "BTC24hPct",
+          "direction": "gte",
+          "threshold": 0.00017902538580472083,
+          "train": {
+            "trades": 20,
+            "wins": 7,
+            "losses": 13,
+            "winRatePct": 35.0,
+            "totalOriginalPnLJpy": 2888249.6345383525
+          },
+          "holdout": {
+            "trades": 10,
+            "wins": 3,
+            "losses": 7,
+            "winRatePct": 30.0,
+            "totalOriginalPnLJpy": 5524880.049166014
+          },
+          "full": {
+            "trades": 30,
+            "wins": 10,
+            "losses": 20,
+            "winRatePct": 33.33333333333333,
+            "totalOriginalPnLJpy": 8413129.683704367
+          }
+        },
+        {
+          "feature": "HYPE5mReturnPct",
+          "direction": "gte",
+          "threshold": -0.04189875289593026,
+          "train": {
+            "trades": 20,
+            "wins": 7,
+            "losses": 13,
+            "winRatePct": 35.0,
+            "totalOriginalPnLJpy": -380571.74070279876
+          },
+          "holdout": {
+            "trades": 10,
+            "wins": 4,
+            "losses": 6,
+            "winRatePct": 40.0,
+            "totalOriginalPnLJpy": 12191736.418545656
+          },
+          "full": {
+            "trades": 30,
+            "wins": 11,
+            "losses": 19,
+            "winRatePct": 36.666666666666664,
+            "totalOriginalPnLJpy": 11811164.677842857
+          }
+        },
+        {
+          "feature": "BTC48hPct",
+          "direction": "lte",
+          "threshold": 2.287805700021983,
+          "train": {
+            "trades": 20,
+            "wins": 7,
+            "losses": 13,
+            "winRatePct": 35.0,
+            "totalOriginalPnLJpy": 3638817.694873541
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 2,
+            "losses": 7,
+            "winRatePct": 22.22222222222222,
+            "totalOriginalPnLJpy": -2536494.414849412
+          },
+          "full": {
+            "trades": 29,
+            "wins": 9,
+            "losses": 20,
+            "winRatePct": 31.03448275862069,
+            "totalOriginalPnLJpy": 1102323.280024129
+          }
+        },
+        {
+          "feature": "VOL3hToPrior2hRatio",
+          "direction": "lte",
+          "threshold": 2.0306977682013927,
+          "train": {
+            "trades": 20,
+            "wins": 7,
+            "losses": 13,
+            "winRatePct": 35.0,
+            "totalOriginalPnLJpy": 3338738.6124447323
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 13010342.060834775
+          },
+          "full": {
+            "trades": 29,
+            "wins": 11,
+            "losses": 18,
+            "winRatePct": 37.93103448275862,
+            "totalOriginalPnLJpy": 16349080.673279507
+          }
+        },
+        {
+          "feature": "HYPE24hDistanceFromHighPct",
+          "direction": "gte",
+          "threshold": -0.7189189189189094,
+          "train": {
+            "trades": 20,
+            "wins": 7,
+            "losses": 13,
+            "winRatePct": 35.0,
+            "totalOriginalPnLJpy": 3805311.092439116
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 3,
+            "losses": 6,
+            "winRatePct": 33.33333333333333,
+            "totalOriginalPnLJpy": 7416087.028825754
+          },
+          "full": {
+            "trades": 29,
+            "wins": 10,
+            "losses": 19,
+            "winRatePct": 34.48275862068966,
+            "totalOriginalPnLJpy": 11221398.12126487
+          }
+        },
+        {
+          "feature": "HYPE_DistanceEMA240_pct",
+          "direction": "gte",
+          "threshold": 8.429706651174062,
+          "train": {
+            "trades": 20,
+            "wins": 7,
+            "losses": 13,
+            "winRatePct": 35.0,
+            "totalOriginalPnLJpy": 2810975.6769891647
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 13795163.643076196
+          },
+          "full": {
+            "trades": 29,
+            "wins": 11,
+            "losses": 18,
+            "winRatePct": 37.93103448275862,
+            "totalOriginalPnLJpy": 16606139.32006536
+          }
+        },
+        {
+          "feature": "HYPE1hPct",
+          "direction": "gte",
+          "threshold": 1.2819277108433669,
+          "train": {
+            "trades": 20,
+            "wins": 7,
+            "losses": 13,
+            "winRatePct": 35.0,
+            "totalOriginalPnLJpy": 4519871.563066913
+          },
+          "holdout": {
+            "trades": 8,
+            "wins": 1,
+            "losses": 7,
+            "winRatePct": 12.5,
+            "totalOriginalPnLJpy": -6385587.241450211
+          },
+          "full": {
+            "trades": 28,
+            "wins": 8,
+            "losses": 20,
+            "winRatePct": 28.57142857142857,
+            "totalOriginalPnLJpy": -1865715.6783832982
+          }
+        },
+        {
+          "feature": "REL1hPct",
+          "direction": "gte",
+          "threshold": 0.9006497294129168,
+          "train": {
+            "trades": 20,
+            "wins": 7,
+            "losses": 13,
+            "winRatePct": 35.0,
+            "totalOriginalPnLJpy": 4393503.218406577
+          },
+          "holdout": {
+            "trades": 8,
+            "wins": 2,
+            "losses": 6,
+            "winRatePct": 25.0,
+            "totalOriginalPnLJpy": 1942501.9627882193
+          },
+          "full": {
+            "trades": 28,
+            "wins": 9,
+            "losses": 19,
+            "winRatePct": 32.142857142857146,
+            "totalOriginalPnLJpy": 6336005.181194796
+          }
+        }
+      ],
+      "topTrainAndHoldoutNonWorse": [
+        {
+          "feature": "BTC3hPct",
+          "direction": "lte",
+          "threshold": 0.5862128859554172,
+          "train": {
+            "trades": 12,
+            "wins": 6,
+            "losses": 6,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 3885074.4035750474
+          },
+          "holdout": {
+            "trades": 10,
+            "wins": 4,
+            "losses": 6,
+            "winRatePct": 40.0,
+            "totalOriginalPnLJpy": 11265179.855426554
+          },
+          "full": {
+            "trades": 22,
+            "wins": 10,
+            "losses": 12,
+            "winRatePct": 45.45454545454545,
+            "totalOriginalPnLJpy": 15150254.259001601
+          }
+        },
+        {
+          "feature": "VOL1hToPrior2hRatio",
+          "direction": "gte",
+          "threshold": 1.8656152130372479,
+          "train": {
+            "trades": 12,
+            "wins": 6,
+            "losses": 6,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 5731642.65308193
+          },
+          "holdout": {
+            "trades": 6,
+            "wins": 2,
+            "losses": 4,
+            "winRatePct": 33.33333333333333,
+            "totalOriginalPnLJpy": 880794.7447847417
+          },
+          "full": {
+            "trades": 18,
+            "wins": 8,
+            "losses": 10,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 6612437.397866672
+          }
+        },
+        {
+          "feature": "BTC3hPct",
+          "direction": "lte",
+          "threshold": 0.8087757052997357,
+          "train": {
+            "trades": 15,
+            "wins": 7,
+            "losses": 8,
+            "winRatePct": 46.666666666666664,
+            "totalOriginalPnLJpy": 5029884.006011414
+          },
+          "holdout": {
+            "trades": 11,
+            "wins": 4,
+            "losses": 7,
+            "winRatePct": 36.36363636363637,
+            "totalOriginalPnLJpy": 9719317.641925212
+          },
+          "full": {
+            "trades": 26,
+            "wins": 11,
+            "losses": 15,
+            "winRatePct": 42.30769230769231,
+            "totalOriginalPnLJpy": 14749201.647936625
+          }
+        },
+        {
+          "feature": "REL48hPct",
+          "direction": "gte",
+          "threshold": 10.054763627650743,
+          "train": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 2502310.3861162434
+          },
+          "holdout": {
+            "trades": 6,
+            "wins": 2,
+            "losses": 4,
+            "winRatePct": 33.33333333333333,
+            "totalOriginalPnLJpy": 7116443.229510785
+          },
+          "full": {
+            "trades": 15,
+            "wins": 6,
+            "losses": 9,
+            "winRatePct": 40.0,
+            "totalOriginalPnLJpy": 9618753.615627028
+          }
+        },
+        {
+          "feature": "HYPE48hPct",
+          "direction": "gte",
+          "threshold": 11.449319476453446,
+          "train": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 2446466.101251992
+          },
+          "holdout": {
+            "trades": 5,
+            "wins": 2,
+            "losses": 3,
+            "winRatePct": 40.0,
+            "totalOriginalPnLJpy": 8662305.443012126
+          },
+          "full": {
+            "trades": 14,
+            "wins": 6,
+            "losses": 8,
+            "winRatePct": 42.857142857142854,
+            "totalOriginalPnLJpy": 11108771.54426412
+          }
+        },
+        {
+          "feature": "VOL1hToPrior2hRatio",
+          "direction": "gte",
+          "threshold": 1.9843946828096803,
+          "train": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 4472064.899547312
+          },
+          "holdout": {
+            "trades": 4,
+            "wins": 2,
+            "losses": 2,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 4058691.047407185
+          },
+          "full": {
+            "trades": 13,
+            "wins": 6,
+            "losses": 7,
+            "winRatePct": 46.15384615384615,
+            "totalOriginalPnLJpy": 8530755.946954498
+          }
+        },
+        {
+          "feature": "HYPE12hPct",
+          "direction": "gte",
+          "threshold": 5.6350141751345895,
+          "train": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 2715533.919367527
+          },
+          "holdout": {
+            "trades": 3,
+            "wins": 1,
+            "losses": 2,
+            "winRatePct": 33.33333333333333,
+            "totalOriginalPnLJpy": 915338.0695263357
+          },
+          "full": {
+            "trades": 12,
+            "wins": 5,
+            "losses": 7,
+            "winRatePct": 41.66666666666667,
+            "totalOriginalPnLJpy": 3630871.988893863
+          }
+        },
+        {
+          "feature": "REL3hPct",
+          "direction": "gte",
+          "threshold": 3.357846634207551,
+          "train": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 2957417.0562986094
+          },
+          "holdout": {
+            "trades": 3,
+            "wins": 2,
+            "losses": 1,
+            "winRatePct": 66.66666666666666,
+            "totalOriginalPnLJpy": 9243427.273764767
+          },
+          "full": {
+            "trades": 12,
+            "wins": 6,
+            "losses": 6,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 12200844.330063377
+          }
+        },
+        {
+          "feature": "REL12hPct",
+          "direction": "gte",
+          "threshold": 5.382528360367078,
+          "train": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 1702514.935544086
+          },
+          "holdout": {
+            "trades": 3,
+            "wins": 1,
+            "losses": 2,
+            "winRatePct": 33.33333333333333,
+            "totalOriginalPnLJpy": 892255.5317477996
+          },
+          "full": {
+            "trades": 12,
+            "wins": 5,
+            "losses": 7,
+            "winRatePct": 41.66666666666667,
+            "totalOriginalPnLJpy": 2594770.4672918855
+          }
+        },
+        {
+          "feature": "BTC6hPct",
+          "direction": "lte",
+          "threshold": 0.6569851036368757,
+          "train": {
+            "trades": 12,
+            "wins": 5,
+            "losses": 7,
+            "winRatePct": 41.66666666666667,
+            "totalOriginalPnLJpy": 1978652.5285179385
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 3,
+            "losses": 6,
+            "winRatePct": 33.33333333333333,
+            "totalOriginalPnLJpy": 8319561.054166321
+          },
+          "full": {
+            "trades": 21,
+            "wins": 8,
+            "losses": 13,
+            "winRatePct": 38.095238095238095,
+            "totalOriginalPnLJpy": 10298213.58268426
+          }
+        },
+        {
+          "feature": "REL12hPct",
+          "direction": "gte",
+          "threshold": 3.3968730377532452,
+          "train": {
+            "trades": 12,
+            "wins": 5,
+            "losses": 7,
+            "winRatePct": 41.66666666666667,
+            "totalOriginalPnLJpy": 1827161.7630997528
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 12881330.53734519
+          },
+          "full": {
+            "trades": 21,
+            "wins": 9,
+            "losses": 12,
+            "winRatePct": 42.857142857142854,
+            "totalOriginalPnLJpy": 14708492.300444944
+          }
+        },
+        {
+          "feature": "REL48hPct",
+          "direction": "gte",
+          "threshold": 8.553518320884933,
+          "train": {
+            "trades": 12,
+            "wins": 5,
+            "losses": 7,
+            "winRatePct": 41.66666666666667,
+            "totalOriginalPnLJpy": 5016659.635693848
+          },
+          "holdout": {
+            "trades": 8,
+            "wins": 3,
+            "losses": 5,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 9922988.278696861
+          },
+          "full": {
+            "trades": 20,
+            "wins": 8,
+            "losses": 12,
+            "winRatePct": 40.0,
+            "totalOriginalPnLJpy": 14939647.914390707
+          }
+        },
+        {
+          "feature": "VOL6hToPrior2hRatio",
+          "direction": "lte",
+          "threshold": 1.3422213701577508,
+          "train": {
+            "trades": 12,
+            "wins": 5,
+            "losses": 7,
+            "winRatePct": 41.66666666666667,
+            "totalOriginalPnLJpy": -1943735.9726548349
+          },
+          "holdout": {
+            "trades": 8,
+            "wins": 3,
+            "losses": 5,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 6908322.450079972
+          },
+          "full": {
+            "trades": 20,
+            "wins": 8,
+            "losses": 12,
+            "winRatePct": 40.0,
+            "totalOriginalPnLJpy": 4964586.477425137
+          }
+        },
+        {
+          "feature": "REL3hPct",
+          "direction": "gte",
+          "threshold": 2.708330382257107,
+          "train": {
+            "trades": 12,
+            "wins": 5,
+            "losses": 7,
+            "winRatePct": 41.66666666666667,
+            "totalOriginalPnLJpy": 2899871.631609141
+          },
+          "holdout": {
+            "trades": 5,
+            "wins": 3,
+            "losses": 2,
+            "winRatePct": 60.0,
+            "totalOriginalPnLJpy": 11902361.733413061
+          },
+          "full": {
+            "trades": 17,
+            "wins": 8,
+            "losses": 9,
+            "winRatePct": 47.05882352941176,
+            "totalOriginalPnLJpy": 14802233.365022201
+          }
+        },
+        {
+          "feature": "BTC3hPct",
+          "direction": "lte",
+          "threshold": 0.9139138135578984,
+          "train": {
+            "trades": 17,
+            "wins": 7,
+            "losses": 10,
+            "winRatePct": 41.17647058823529,
+            "totalOriginalPnLJpy": 4351001.881400421
+          },
+          "holdout": {
+            "trades": 11,
+            "wins": 4,
+            "losses": 7,
+            "winRatePct": 36.36363636363637,
+            "totalOriginalPnLJpy": 9719317.641925212
+          },
+          "full": {
+            "trades": 28,
+            "wins": 11,
+            "losses": 17,
+            "winRatePct": 39.285714285714285,
+            "totalOriginalPnLJpy": 14070319.523325633
+          }
+        },
+        {
+          "feature": "REL12hPct",
+          "direction": "gte",
+          "threshold": 2.4137285404618902,
+          "train": {
+            "trades": 17,
+            "wins": 7,
+            "losses": 10,
+            "winRatePct": 41.17647058823529,
+            "totalOriginalPnLJpy": 5070187.724123881
+          },
+          "holdout": {
+            "trades": 10,
+            "wins": 4,
+            "losses": 6,
+            "winRatePct": 40.0,
+            "totalOriginalPnLJpy": 11277903.312814651
+          },
+          "full": {
+            "trades": 27,
+            "wins": 11,
+            "losses": 16,
+            "winRatePct": 40.74074074074074,
+            "totalOriginalPnLJpy": 16348091.036938531
+          }
+        },
+        {
+          "feature": "BTC6hPct",
+          "direction": "lte",
+          "threshold": 0.9481667950085981,
+          "train": {
+            "trades": 15,
+            "wins": 6,
+            "losses": 9,
+            "winRatePct": 40.0,
+            "totalOriginalPnLJpy": 4265352.941550885
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 3,
+            "losses": 6,
+            "winRatePct": 33.33333333333333,
+            "totalOriginalPnLJpy": 8319561.054166321
+          },
+          "full": {
+            "trades": 24,
+            "wins": 9,
+            "losses": 15,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 12584913.995717205
+          }
+        },
+        {
+          "feature": "VOL6hToPrior2hRatio",
+          "direction": "lte",
+          "threshold": 1.5501292290635331,
+          "train": {
+            "trades": 15,
+            "wins": 6,
+            "losses": 9,
+            "winRatePct": 40.0,
+            "totalOriginalPnLJpy": 413317.0543012063
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 13848519.110745281
+          },
+          "full": {
+            "trades": 24,
+            "wins": 10,
+            "losses": 14,
+            "winRatePct": 41.66666666666667,
+            "totalOriginalPnLJpy": 14261836.165046487
+          }
+        },
+        {
+          "feature": "REL12hPct",
+          "direction": "gte",
+          "threshold": 2.9331600982478223,
+          "train": {
+            "trades": 14,
+            "wins": 5,
+            "losses": 9,
+            "winRatePct": 35.714285714285715,
+            "totalOriginalPnLJpy": 1139724.1238735635
+          },
+          "holdout": {
+            "trades": 10,
+            "wins": 4,
+            "losses": 6,
+            "winRatePct": 40.0,
+            "totalOriginalPnLJpy": 11277903.312814651
+          },
+          "full": {
+            "trades": 24,
+            "wins": 9,
+            "losses": 15,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 12417627.436688215
+          }
+        },
+        {
+          "feature": "HYPE5mReturnPct",
+          "direction": "gte",
+          "threshold": 0.12012325690711201,
+          "train": {
+            "trades": 14,
+            "wins": 5,
+            "losses": 9,
+            "winRatePct": 35.714285714285715,
+            "totalOriginalPnLJpy": 1306720.2096489877
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 3,
+            "losses": 6,
+            "winRatePct": 33.33333333333333,
+            "totalOriginalPnLJpy": 5814677.327167555
+          },
+          "full": {
+            "trades": 23,
+            "wins": 8,
+            "losses": 15,
+            "winRatePct": 34.78260869565217,
+            "totalOriginalPnLJpy": 7121397.536816542
+          }
+        },
+        {
+          "feature": "HYPE_DistanceEMA12_pct",
+          "direction": "gte",
+          "threshold": 1.525830647832982,
+          "train": {
+            "trades": 14,
+            "wins": 5,
+            "losses": 9,
+            "winRatePct": 35.714285714285715,
+            "totalOriginalPnLJpy": 1202147.4392489733
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 12822881.410643127
+          },
+          "full": {
+            "trades": 23,
+            "wins": 9,
+            "losses": 14,
+            "winRatePct": 39.130434782608695,
+            "totalOriginalPnLJpy": 14025028.8498921
+          }
+        },
+        {
+          "feature": "HYPE_EMA12GapEMA48pct",
+          "direction": "gte",
+          "threshold": 2.020447255678026,
+          "train": {
+            "trades": 14,
+            "wins": 5,
+            "losses": 9,
+            "winRatePct": 35.714285714285715,
+            "totalOriginalPnLJpy": 2063976.3731609222
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 12733719.947807409
+          },
+          "full": {
+            "trades": 23,
+            "wins": 9,
+            "losses": 14,
+            "winRatePct": 39.130434782608695,
+            "totalOriginalPnLJpy": 14797696.320968332
+          }
+        },
+        {
+          "feature": "REL48hPct",
+          "direction": "gte",
+          "threshold": 7.878498572984638,
+          "train": {
+            "trades": 14,
+            "wins": 5,
+            "losses": 9,
+            "winRatePct": 35.714285714285715,
+            "totalOriginalPnLJpy": 4228841.0098408
+          },
+          "holdout": {
+            "trades": 8,
+            "wins": 3,
+            "losses": 5,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 9922988.278696861
+          },
+          "full": {
+            "trades": 22,
+            "wins": 8,
+            "losses": 14,
+            "winRatePct": 36.36363636363637,
+            "totalOriginalPnLJpy": 14151829.28853766
+          }
+        },
+        {
+          "feature": "REL3hPct",
+          "direction": "gte",
+          "threshold": 2.263189350624084,
+          "train": {
+            "trades": 14,
+            "wins": 5,
+            "losses": 9,
+            "winRatePct": 35.714285714285715,
+            "totalOriginalPnLJpy": 2251202.0879376344
+          },
+          "holdout": {
+            "trades": 7,
+            "wins": 4,
+            "losses": 3,
+            "winRatePct": 57.14285714285714,
+            "totalOriginalPnLJpy": 16704951.746699259
+          },
+          "full": {
+            "trades": 21,
+            "wins": 9,
+            "losses": 12,
+            "winRatePct": 42.857142857142854,
+            "totalOriginalPnLJpy": 18956153.834636893
+          }
+        },
+        {
+          "feature": "HYPE3hPct",
+          "direction": "gte",
+          "threshold": 3.2988735062370322,
+          "train": {
+            "trades": 14,
+            "wins": 5,
+            "losses": 9,
+            "winRatePct": 35.714285714285715,
+            "totalOriginalPnLJpy": 2700213.316302964
+          },
+          "holdout": {
+            "trades": 5,
+            "wins": 3,
+            "losses": 2,
+            "winRatePct": 60.0,
+            "totalOriginalPnLJpy": 12073054.860729378
+          },
+          "full": {
+            "trades": 19,
+            "wins": 8,
+            "losses": 11,
+            "winRatePct": 42.10526315789473,
+            "totalOriginalPnLJpy": 14773268.177032342
+          }
+        },
+        {
+          "feature": "HYPE5mReturnPct",
+          "direction": "gte",
+          "threshold": 0.005584564264360381,
+          "train": {
+            "trades": 17,
+            "wins": 6,
+            "losses": 11,
+            "winRatePct": 35.294117647058826,
+            "totalOriginalPnLJpy": 572178.1509594332
+          },
+          "holdout": {
+            "trades": 10,
+            "wins": 4,
+            "losses": 6,
+            "winRatePct": 40.0,
+            "totalOriginalPnLJpy": 12191736.418545656
+          },
+          "full": {
+            "trades": 27,
+            "wins": 10,
+            "losses": 17,
+            "winRatePct": 37.03703703703704,
+            "totalOriginalPnLJpy": 12763914.56950509
+          }
+        },
+        {
+          "feature": "BTC1hPct",
+          "direction": "lte",
+          "threshold": 0.3553418965274613,
+          "train": {
+            "trades": 17,
+            "wins": 6,
+            "losses": 11,
+            "winRatePct": 35.294117647058826,
+            "totalOriginalPnLJpy": 1969251.8870351512
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 12676154.93677821
+          },
+          "full": {
+            "trades": 26,
+            "wins": 10,
+            "losses": 16,
+            "winRatePct": 38.46153846153847,
+            "totalOriginalPnLJpy": 14645406.823813362
+          }
+        },
+        {
+          "feature": "VOL6hToPrior2hRatio",
+          "direction": "lte",
+          "threshold": 1.6144500092063627,
+          "train": {
+            "trades": 17,
+            "wins": 6,
+            "losses": 11,
+            "winRatePct": 35.294117647058826,
+            "totalOriginalPnLJpy": 351686.91193383106
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 13848519.110745281
+          },
+          "full": {
+            "trades": 26,
+            "wins": 10,
+            "losses": 16,
+            "winRatePct": 38.46153846153847,
+            "totalOriginalPnLJpy": 14200206.022679111
+          }
+        },
+        {
+          "feature": "HYPE_DistanceEMA12_pct",
+          "direction": "gte",
+          "threshold": 1.3400522819146499,
+          "train": {
+            "trades": 17,
+            "wins": 6,
+            "losses": 11,
+            "winRatePct": 35.294117647058826,
+            "totalOriginalPnLJpy": 2853546.5922113196
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 12822881.410643127
+          },
+          "full": {
+            "trades": 26,
+            "wins": 10,
+            "losses": 16,
+            "winRatePct": 38.46153846153847,
+            "totalOriginalPnLJpy": 15676428.002854448
+          }
+        },
+        {
+          "feature": "HYPE_EMA12GapEMA48pct",
+          "direction": "gte",
+          "threshold": 1.8267124066124962,
+          "train": {
+            "trades": 17,
+            "wins": 6,
+            "losses": 11,
+            "winRatePct": 35.294117647058826,
+            "totalOriginalPnLJpy": 1911021.9320708476
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 12733719.947807409
+          },
+          "full": {
+            "trades": 26,
+            "wins": 10,
+            "losses": 16,
+            "winRatePct": 38.46153846153847,
+            "totalOriginalPnLJpy": 14644741.879878256
+          }
+        },
+        {
+          "feature": "REL48hPct",
+          "direction": "gte",
+          "threshold": 6.128248191518315,
+          "train": {
+            "trades": 17,
+            "wins": 6,
+            "losses": 11,
+            "winRatePct": 35.294117647058826,
+            "totalOriginalPnLJpy": 2838719.1680334383
+          },
+          "holdout": {
+            "trades": 8,
+            "wins": 3,
+            "losses": 5,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 9922988.278696861
+          },
+          "full": {
+            "trades": 25,
+            "wins": 9,
+            "losses": 16,
+            "winRatePct": 36.0,
+            "totalOriginalPnLJpy": 12761707.446730299
+          }
+        },
+        {
+          "feature": "VOL3hToPrior2hRatio",
+          "direction": "lte",
+          "threshold": 1.8885722592459846,
+          "train": {
+            "trades": 17,
+            "wins": 6,
+            "losses": 11,
+            "winRatePct": 35.294117647058826,
+            "totalOriginalPnLJpy": 806554.8607372427
+          },
+          "holdout": {
+            "trades": 8,
+            "wins": 3,
+            "losses": 5,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 6070145.400169465
+          },
+          "full": {
+            "trades": 25,
+            "wins": 9,
+            "losses": 16,
+            "winRatePct": 36.0,
+            "totalOriginalPnLJpy": 6876700.2609067075
+          }
+        },
+        {
+          "feature": "REL3hPct",
+          "direction": "gte",
+          "threshold": 1.9931915134093092,
+          "train": {
+            "trades": 17,
+            "wins": 6,
+            "losses": 11,
+            "winRatePct": 35.294117647058826,
+            "totalOriginalPnLJpy": 3918028.691550775
+          },
+          "holdout": {
+            "trades": 7,
+            "wins": 4,
+            "losses": 3,
+            "winRatePct": 57.14285714285714,
+            "totalOriginalPnLJpy": 16704951.746699259
+          },
+          "full": {
+            "trades": 24,
+            "wins": 10,
+            "losses": 14,
+            "winRatePct": 41.66666666666667,
+            "totalOriginalPnLJpy": 20622980.438250035
+          }
+        },
+        {
+          "feature": "HYPE6hPct",
+          "direction": "lte",
+          "threshold": 3.741488414619476,
+          "train": {
+            "trades": 17,
+            "wins": 6,
+            "losses": 11,
+            "winRatePct": 35.294117647058826,
+            "totalOriginalPnLJpy": 747333.3637427522
+          },
+          "holdout": {
+            "trades": 6,
+            "wins": 2,
+            "losses": 4,
+            "winRatePct": 33.33333333333333,
+            "totalOriginalPnLJpy": 3967774.384417077
+          },
+          "full": {
+            "trades": 23,
+            "wins": 8,
+            "losses": 15,
+            "winRatePct": 34.78260869565217,
+            "totalOriginalPnLJpy": 4715107.7481598295
+          }
+        },
+        {
+          "feature": "BTC3hPct",
+          "direction": "lte",
+          "threshold": 1.2847920060095053,
+          "train": {
+            "trades": 20,
+            "wins": 7,
+            "losses": 13,
+            "winRatePct": 35.0,
+            "totalOriginalPnLJpy": 2749270.0096166637
+          },
+          "holdout": {
+            "trades": 11,
+            "wins": 4,
+            "losses": 7,
+            "winRatePct": 36.36363636363637,
+            "totalOriginalPnLJpy": 9719317.641925212
+          },
+          "full": {
+            "trades": 31,
+            "wins": 11,
+            "losses": 20,
+            "winRatePct": 35.483870967741936,
+            "totalOriginalPnLJpy": 12468587.651541876
+          }
+        }
+      ]
+    },
+    "30": {
+      "trainBase": {
+        "trades": 26,
+        "wins": 8,
+        "losses": 18,
+        "winRatePct": 30.76923076923077,
+        "totalOriginalPnLJpy": 160947.7969665266
+      },
+      "holdoutBase": {
+        "trades": 12,
+        "wins": 5,
+        "losses": 7,
+        "winRatePct": 41.66666666666667,
+        "totalOriginalPnLJpy": 3389573.561118413
+      },
+      "allBase": {
+        "trades": 38,
+        "wins": 13,
+        "losses": 25,
+        "winRatePct": 34.21052631578947,
+        "totalOriginalPnLJpy": 3550521.35808494
+      },
+      "chronologicalSplit": {
+        "trainEndTs": 1779285600000,
+        "holdoutStartTs": 1779588000000
+      },
+      "topTrainingOnly": [
+        {
+          "feature": "BTC3hPct",
+          "direction": "lte",
+          "threshold": 0.3785598220579445,
+          "train": {
+            "trades": 9,
+            "wins": 5,
+            "losses": 4,
+            "winRatePct": 55.55555555555556,
+            "totalOriginalPnLJpy": 1344665.1709626499
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 3,
+            "losses": 6,
+            "winRatePct": 33.33333333333333,
+            "totalOriginalPnLJpy": 1219345.6056390512
+          },
+          "full": {
+            "trades": 18,
+            "wins": 8,
+            "losses": 10,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 2564010.776601701
+          }
+        },
+        {
+          "feature": "BTC6hPct",
+          "direction": "lte",
+          "threshold": 0.2797011972575536,
+          "train": {
+            "trades": 9,
+            "wins": 5,
+            "losses": 4,
+            "winRatePct": 55.55555555555556,
+            "totalOriginalPnLJpy": 856397.0967789212
+          },
+          "holdout": {
+            "trades": 8,
+            "wins": 3,
+            "losses": 5,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 3002181.2376775346
+          },
+          "full": {
+            "trades": 17,
+            "wins": 8,
+            "losses": 9,
+            "winRatePct": 47.05882352941176,
+            "totalOriginalPnLJpy": 3858578.334456456
+          }
+        },
+        {
+          "feature": "BTC3hPct",
+          "direction": "lte",
+          "threshold": 0.5862128859554172,
+          "train": {
+            "trades": 11,
+            "wins": 6,
+            "losses": 5,
+            "winRatePct": 54.54545454545454,
+            "totalOriginalPnLJpy": 1251353.294629193
+          },
+          "holdout": {
+            "trades": 11,
+            "wins": 5,
+            "losses": 6,
+            "winRatePct": 45.45454545454545,
+            "totalOriginalPnLJpy": 4030147.708726891
+          },
+          "full": {
+            "trades": 22,
+            "wins": 11,
+            "losses": 11,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 5281501.003356083
+          }
+        },
+        {
+          "feature": "BTC3hPct",
+          "direction": "lte",
+          "threshold": 0.7459894168074577,
+          "train": {
+            "trades": 13,
+            "wins": 7,
+            "losses": 6,
+            "winRatePct": 53.84615384615385,
+            "totalOriginalPnLJpy": 1567497.4622016028
+          },
+          "holdout": {
+            "trades": 12,
+            "wins": 5,
+            "losses": 7,
+            "winRatePct": 41.66666666666667,
+            "totalOriginalPnLJpy": 3389573.561118413
+          },
+          "full": {
+            "trades": 25,
+            "wins": 12,
+            "losses": 13,
+            "winRatePct": 48.0,
+            "totalOriginalPnLJpy": 4957071.023320016
+          }
+        },
+        {
+          "feature": "REL48hPct",
+          "direction": "gte",
+          "threshold": 10.054763627650743,
+          "train": {
+            "trades": 8,
+            "wins": 4,
+            "losses": 4,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 922054.6616199826
+          },
+          "holdout": {
+            "trades": 6,
+            "wins": 2,
+            "losses": 4,
+            "winRatePct": 33.33333333333333,
+            "totalOriginalPnLJpy": 2176683.26410694
+          },
+          "full": {
+            "trades": 14,
+            "wins": 6,
+            "losses": 8,
+            "winRatePct": 42.857142857142854,
+            "totalOriginalPnLJpy": 3098737.9257269227
+          }
+        },
+        {
+          "feature": "HYPE_EMA12GapEMA48pct",
+          "direction": "gte",
+          "threshold": 2.6176788848139454,
+          "train": {
+            "trades": 8,
+            "wins": 4,
+            "losses": 4,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 409910.39034334704
+          },
+          "holdout": {
+            "trades": 6,
+            "wins": 2,
+            "losses": 4,
+            "winRatePct": 33.33333333333333,
+            "totalOriginalPnLJpy": 1023868.8747556554
+          },
+          "full": {
+            "trades": 14,
+            "wins": 6,
+            "losses": 8,
+            "winRatePct": 42.857142857142854,
+            "totalOriginalPnLJpy": 1433779.2650990025
+          }
+        },
+        {
+          "feature": "HYPE48hPct",
+          "direction": "gte",
+          "threshold": 11.449319476453446,
+          "train": {
+            "trades": 8,
+            "wins": 4,
+            "losses": 4,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 902674.0873305593
+          },
+          "holdout": {
+            "trades": 5,
+            "wins": 2,
+            "losses": 3,
+            "winRatePct": 40.0,
+            "totalOriginalPnLJpy": 2817257.411715417
+          },
+          "full": {
+            "trades": 13,
+            "wins": 6,
+            "losses": 7,
+            "winRatePct": 46.15384615384615,
+            "totalOriginalPnLJpy": 3719931.4990459764
+          }
+        },
+        {
+          "feature": "VOL1hToPrior2hRatio",
+          "direction": "gte",
+          "threshold": 2.0814369368535415,
+          "train": {
+            "trades": 8,
+            "wins": 4,
+            "losses": 4,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 1574790.6653796108
+          },
+          "holdout": {
+            "trades": 5,
+            "wins": 3,
+            "losses": 2,
+            "winRatePct": 60.0,
+            "totalOriginalPnLJpy": 1854296.9515078694
+          },
+          "full": {
+            "trades": 13,
+            "wins": 7,
+            "losses": 6,
+            "winRatePct": 53.84615384615385,
+            "totalOriginalPnLJpy": 3429087.6168874805
+          }
+        },
+        {
+          "feature": "REL3hPct",
+          "direction": "gte",
+          "threshold": 3.357846634207551,
+          "train": {
+            "trades": 8,
+            "wins": 4,
+            "losses": 4,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 1053711.5653232022
+          },
+          "holdout": {
+            "trades": 3,
+            "wins": 2,
+            "losses": 1,
+            "winRatePct": 66.66666666666666,
+            "totalOriginalPnLJpy": 3192220.088613853
+          },
+          "full": {
+            "trades": 11,
+            "wins": 6,
+            "losses": 5,
+            "winRatePct": 54.54545454545454,
+            "totalOriginalPnLJpy": 4245931.653937056
+          }
+        },
+        {
+          "feature": "REL12hPct",
+          "direction": "gte",
+          "threshold": 5.382528360367078,
+          "train": {
+            "trades": 8,
+            "wins": 4,
+            "losses": 4,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 617587.0729565115
+          },
+          "holdout": {
+            "trades": 3,
+            "wins": 1,
+            "losses": 2,
+            "winRatePct": 33.33333333333333,
+            "totalOriginalPnLJpy": 72508.9590182514
+          },
+          "full": {
+            "trades": 11,
+            "wins": 5,
+            "losses": 6,
+            "winRatePct": 45.45454545454545,
+            "totalOriginalPnLJpy": 690096.0319747629
+          }
+        },
+        {
+          "feature": "BTC48hPct",
+          "direction": "lte",
+          "threshold": 1.2625392353836862,
+          "train": {
+            "trades": 13,
+            "wins": 6,
+            "losses": 7,
+            "winRatePct": 46.15384615384615,
+            "totalOriginalPnLJpy": 1426848.0360001444
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 3,
+            "losses": 6,
+            "winRatePct": 33.33333333333333,
+            "totalOriginalPnLJpy": 422647.70450637105
+          },
+          "full": {
+            "trades": 22,
+            "wins": 9,
+            "losses": 13,
+            "winRatePct": 40.909090909090914,
+            "totalOriginalPnLJpy": 1849495.7405065156
+          }
+        },
+        {
+          "feature": "BTC6hPct",
+          "direction": "lte",
+          "threshold": 0.6569851036368757,
+          "train": {
+            "trades": 11,
+            "wins": 5,
+            "losses": 6,
+            "winRatePct": 45.45454545454545,
+            "totalOriginalPnLJpy": 656126.9411367523
+          },
+          "holdout": {
+            "trades": 10,
+            "wins": 4,
+            "losses": 6,
+            "winRatePct": 40.0,
+            "totalOriginalPnLJpy": 3856783.331984503
+          },
+          "full": {
+            "trades": 21,
+            "wins": 9,
+            "losses": 12,
+            "winRatePct": 42.857142857142854,
+            "totalOriginalPnLJpy": 4512910.273121255
+          }
+        },
+        {
+          "feature": "BTC48hPct",
+          "direction": "lte",
+          "threshold": 0.9677688406061646,
+          "train": {
+            "trades": 11,
+            "wins": 5,
+            "losses": 6,
+            "winRatePct": 45.45454545454545,
+            "totalOriginalPnLJpy": 1583310.8859182012
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 3,
+            "losses": 6,
+            "winRatePct": 33.33333333333333,
+            "totalOriginalPnLJpy": 422647.70450637105
+          },
+          "full": {
+            "trades": 20,
+            "wins": 8,
+            "losses": 12,
+            "winRatePct": 40.0,
+            "totalOriginalPnLJpy": 2005958.5904245721
+          }
+        },
+        {
+          "feature": "REL12hPct",
+          "direction": "gte",
+          "threshold": 3.3968730377532452,
+          "train": {
+            "trades": 11,
+            "wins": 5,
+            "losses": 6,
+            "winRatePct": 45.45454545454545,
+            "totalOriginalPnLJpy": 615889.5885552405
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 3227711.3738710815
+          },
+          "full": {
+            "trades": 20,
+            "wins": 9,
+            "losses": 11,
+            "winRatePct": 45.0,
+            "totalOriginalPnLJpy": 3843600.962426322
+          }
+        },
+        {
+          "feature": "REL48hPct",
+          "direction": "gte",
+          "threshold": 8.553518320884933,
+          "train": {
+            "trades": 11,
+            "wins": 5,
+            "losses": 6,
+            "winRatePct": 45.45454545454545,
+            "totalOriginalPnLJpy": 1699830.5067766118
+          },
+          "holdout": {
+            "trades": 8,
+            "wins": 3,
+            "losses": 5,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 3048210.941634164
+          },
+          "full": {
+            "trades": 19,
+            "wins": 8,
+            "losses": 11,
+            "winRatePct": 42.10526315789473,
+            "totalOriginalPnLJpy": 4748041.4484107755
+          }
+        },
+        {
+          "feature": "VOL6hToPrior2hRatio",
+          "direction": "lte",
+          "threshold": 1.3152279753272726,
+          "train": {
+            "trades": 11,
+            "wins": 5,
+            "losses": 6,
+            "winRatePct": 45.45454545454545,
+            "totalOriginalPnLJpy": -575918.600223237
+          },
+          "holdout": {
+            "trades": 8,
+            "wins": 4,
+            "losses": 4,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 3946942.0182451936
+          },
+          "full": {
+            "trades": 19,
+            "wins": 9,
+            "losses": 10,
+            "winRatePct": 47.368421052631575,
+            "totalOriginalPnLJpy": 3371023.4180219565
+          }
+        },
+        {
+          "feature": "VOL1hToPrior2hRatio",
+          "direction": "gte",
+          "threshold": 1.8830637414996465,
+          "train": {
+            "trades": 11,
+            "wins": 5,
+            "losses": 6,
+            "winRatePct": 45.45454545454545,
+            "totalOriginalPnLJpy": 1669054.4918732413
+          },
+          "holdout": {
+            "trades": 7,
+            "wins": 3,
+            "losses": 4,
+            "winRatePct": 42.857142857142854,
+            "totalOriginalPnLJpy": 512950.21730922896
+          },
+          "full": {
+            "trades": 18,
+            "wins": 8,
+            "losses": 10,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 2182004.70918247
+          }
+        },
+        {
+          "feature": "REL3hPct",
+          "direction": "gte",
+          "threshold": 2.708330382257107,
+          "train": {
+            "trades": 11,
+            "wins": 5,
+            "losses": 6,
+            "winRatePct": 45.45454545454545,
+            "totalOriginalPnLJpy": 1024766.2715721462
+          },
+          "holdout": {
+            "trades": 5,
+            "wins": 3,
+            "losses": 2,
+            "winRatePct": 60.0,
+            "totalOriginalPnLJpy": 4030133.222505013
+          },
+          "full": {
+            "trades": 16,
+            "wins": 8,
+            "losses": 8,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 5054899.494077159
+          }
+        },
+        {
+          "feature": "BTC48hPct",
+          "direction": "lte",
+          "threshold": 0.8590984473411556,
+          "train": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 854517.7530534911
+          },
+          "holdout": {
+            "trades": 8,
+            "wins": 3,
+            "losses": 5,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 1052668.94719357
+          },
+          "full": {
+            "trades": 17,
+            "wins": 7,
+            "losses": 10,
+            "winRatePct": 41.17647058823529,
+            "totalOriginalPnLJpy": 1907186.7002470612
+          }
+        },
+        {
+          "feature": "BTC3hPct",
+          "direction": "lte",
+          "threshold": 0.9139138135578984,
+          "train": {
+            "trades": 16,
+            "wins": 7,
+            "losses": 9,
+            "winRatePct": 43.75,
+            "totalOriginalPnLJpy": 1292544.4450331645
+          },
+          "holdout": {
+            "trades": 12,
+            "wins": 5,
+            "losses": 7,
+            "winRatePct": 41.66666666666667,
+            "totalOriginalPnLJpy": 3389573.561118413
+          },
+          "full": {
+            "trades": 28,
+            "wins": 12,
+            "losses": 16,
+            "winRatePct": 42.857142857142854,
+            "totalOriginalPnLJpy": 4682118.006151577
+          }
+        },
+        {
+          "feature": "REL12hPct",
+          "direction": "gte",
+          "threshold": 2.4137285404618902,
+          "train": {
+            "trades": 16,
+            "wins": 7,
+            "losses": 9,
+            "winRatePct": 43.75,
+            "totalOriginalPnLJpy": 1605304.2377159519
+          },
+          "holdout": {
+            "trades": 11,
+            "wins": 5,
+            "losses": 6,
+            "winRatePct": 45.45454545454545,
+            "totalOriginalPnLJpy": 4036283.764221421
+          },
+          "full": {
+            "trades": 27,
+            "wins": 12,
+            "losses": 15,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 5641588.001937373
+          }
+        },
+        {
+          "feature": "BTC48hPct",
+          "direction": "lte",
+          "threshold": 2.0601104281696037,
+          "train": {
+            "trades": 16,
+            "wins": 7,
+            "losses": 9,
+            "winRatePct": 43.75,
+            "totalOriginalPnLJpy": 1583075.958517834
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 3,
+            "losses": 6,
+            "winRatePct": 33.33333333333333,
+            "totalOriginalPnLJpy": 422647.70450637105
+          },
+          "full": {
+            "trades": 25,
+            "wins": 10,
+            "losses": 15,
+            "winRatePct": 40.0,
+            "totalOriginalPnLJpy": 2005723.663024205
+          }
+        },
+        {
+          "feature": "REL1hPct",
+          "direction": "gte",
+          "threshold": 1.1593553527985412,
+          "train": {
+            "trades": 16,
+            "wins": 7,
+            "losses": 9,
+            "winRatePct": 43.75,
+            "totalOriginalPnLJpy": 2095300.997943827
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 3,
+            "losses": 6,
+            "winRatePct": 33.33333333333333,
+            "totalOriginalPnLJpy": 1603084.4085413571
+          },
+          "full": {
+            "trades": 25,
+            "wins": 10,
+            "losses": 15,
+            "winRatePct": 40.0,
+            "totalOriginalPnLJpy": 3698385.406485184
+          }
+        },
+        {
+          "feature": "HYPE5mReturnPct",
+          "direction": "gte",
+          "threshold": 0.03533256779435501,
+          "train": {
+            "trades": 14,
+            "wins": 6,
+            "losses": 8,
+            "winRatePct": 42.857142857142854,
+            "totalOriginalPnLJpy": 412466.5223386635
+          },
+          "holdout": {
+            "trades": 10,
+            "wins": 5,
+            "losses": 5,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 5796057.757545119
+          },
+          "full": {
+            "trades": 24,
+            "wins": 11,
+            "losses": 13,
+            "winRatePct": 45.83333333333333,
+            "totalOriginalPnLJpy": 6208524.279883782
+          }
+        },
+        {
+          "feature": "REL1hPct",
+          "direction": "gte",
+          "threshold": 1.326936501300402,
+          "train": {
+            "trades": 14,
+            "wins": 6,
+            "losses": 8,
+            "winRatePct": 42.857142857142854,
+            "totalOriginalPnLJpy": 1721198.0782495397
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 3,
+            "losses": 6,
+            "winRatePct": 33.33333333333333,
+            "totalOriginalPnLJpy": 1603084.4085413571
+          },
+          "full": {
+            "trades": 23,
+            "wins": 9,
+            "losses": 14,
+            "winRatePct": 39.130434782608695,
+            "totalOriginalPnLJpy": 3324282.486790897
+          }
+        },
+        {
+          "feature": "REL3hPct",
+          "direction": "gte",
+          "threshold": 2.0969255784292207,
+          "train": {
+            "trades": 14,
+            "wins": 6,
+            "losses": 8,
+            "winRatePct": 42.857142857142854,
+            "totalOriginalPnLJpy": 1753115.249626575
+          },
+          "holdout": {
+            "trades": 8,
+            "wins": 5,
+            "losses": 3,
+            "winRatePct": 62.5,
+            "totalOriginalPnLJpy": 7101100.1983647775
+          },
+          "full": {
+            "trades": 22,
+            "wins": 11,
+            "losses": 11,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 8854215.447991353
+          }
+        },
+        {
+          "feature": "REL48hPct",
+          "direction": "gte",
+          "threshold": 7.365491695982573,
+          "train": {
+            "trades": 14,
+            "wins": 6,
+            "losses": 8,
+            "winRatePct": 42.857142857142854,
+            "totalOriginalPnLJpy": 1337663.2258214455
+          },
+          "holdout": {
+            "trades": 8,
+            "wins": 3,
+            "losses": 5,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 3048210.941634164
+          },
+          "full": {
+            "trades": 22,
+            "wins": 9,
+            "losses": 13,
+            "winRatePct": 40.909090909090914,
+            "totalOriginalPnLJpy": 4385874.167455609
+          }
+        },
+        {
+          "feature": "VOL1hToPrior2hRatio",
+          "direction": "gte",
+          "threshold": 1.6774159596546825,
+          "train": {
+            "trades": 14,
+            "wins": 6,
+            "losses": 8,
+            "winRatePct": 42.857142857142854,
+            "totalOriginalPnLJpy": 1233737.5342497646
+          },
+          "holdout": {
+            "trades": 8,
+            "wins": 3,
+            "losses": 5,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": -100145.44215771451
+          },
+          "full": {
+            "trades": 22,
+            "wins": 9,
+            "losses": 13,
+            "winRatePct": 40.909090909090914,
+            "totalOriginalPnLJpy": 1133592.09209205
+          }
+        },
+        {
+          "feature": "REL12hPct",
+          "direction": "gte",
+          "threshold": 2.2172956432909396,
+          "train": {
+            "trades": 18,
+            "wins": 7,
+            "losses": 11,
+            "winRatePct": 38.88888888888889,
+            "totalOriginalPnLJpy": 1315379.3125517871
+          },
+          "holdout": {
+            "trades": 11,
+            "wins": 5,
+            "losses": 6,
+            "winRatePct": 45.45454545454545,
+            "totalOriginalPnLJpy": 4036283.764221421
+          },
+          "full": {
+            "trades": 29,
+            "wins": 12,
+            "losses": 17,
+            "winRatePct": 41.37931034482759,
+            "totalOriginalPnLJpy": 5351663.076773208
+          }
+        },
+        {
+          "feature": "HYPE24hDistanceFromHighPct",
+          "direction": "gte",
+          "threshold": -0.6452616030474867,
+          "train": {
+            "trades": 18,
+            "wins": 7,
+            "losses": 11,
+            "winRatePct": 38.88888888888889,
+            "totalOriginalPnLJpy": 1281851.646084467
+          },
+          "holdout": {
+            "trades": 10,
+            "wins": 4,
+            "losses": 6,
+            "winRatePct": 40.0,
+            "totalOriginalPnLJpy": 2703968.9426332186
+          },
+          "full": {
+            "trades": 28,
+            "wins": 11,
+            "losses": 17,
+            "winRatePct": 39.285714285714285,
+            "totalOriginalPnLJpy": 3985820.5887176855
+          }
+        },
+        {
+          "feature": "HYPE5mReturnPct",
+          "direction": "gte",
+          "threshold": 0.002474206398295209,
+          "train": {
+            "trades": 18,
+            "wins": 7,
+            "losses": 11,
+            "winRatePct": 38.88888888888889,
+            "totalOriginalPnLJpy": -25324.18485778923
+          },
+          "holdout": {
+            "trades": 10,
+            "wins": 5,
+            "losses": 5,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 5796057.757545119
+          },
+          "full": {
+            "trades": 28,
+            "wins": 12,
+            "losses": 16,
+            "winRatePct": 42.857142857142854,
+            "totalOriginalPnLJpy": 5770733.57268733
+          }
+        },
+        {
+          "feature": "REL1hPct",
+          "direction": "gte",
+          "threshold": 0.9006497294129168,
+          "train": {
+            "trades": 18,
+            "wins": 7,
+            "losses": 11,
+            "winRatePct": 38.88888888888889,
+            "totalOriginalPnLJpy": 1514383.9950808485
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 3,
+            "losses": 6,
+            "winRatePct": 33.33333333333333,
+            "totalOriginalPnLJpy": 1603084.4085413571
+          },
+          "full": {
+            "trades": 27,
+            "wins": 10,
+            "losses": 17,
+            "winRatePct": 37.03703703703704,
+            "totalOriginalPnLJpy": 3117468.4036222054
+          }
+        },
+        {
+          "feature": "HYPE1hPct",
+          "direction": "gte",
+          "threshold": 1.2819277108433669,
+          "train": {
+            "trades": 18,
+            "wins": 7,
+            "losses": 11,
+            "winRatePct": 38.88888888888889,
+            "totalOriginalPnLJpy": 1561442.8352472775
+          },
+          "holdout": {
+            "trades": 8,
+            "wins": 2,
+            "losses": 6,
+            "winRatePct": 25.0,
+            "totalOriginalPnLJpy": -903531.0615873012
+          },
+          "full": {
+            "trades": 26,
+            "wins": 9,
+            "losses": 17,
+            "winRatePct": 34.61538461538461,
+            "totalOriginalPnLJpy": 657911.7736599762
+          }
+        },
+        {
+          "feature": "BTC6hPct",
+          "direction": "lte",
+          "threshold": 0.9136314299005077,
+          "train": {
+            "trades": 13,
+            "wins": 5,
+            "losses": 8,
+            "winRatePct": 38.46153846153847,
+            "totalOriginalPnLJpy": 312105.2111692868
+          },
+          "holdout": {
+            "trades": 10,
+            "wins": 4,
+            "losses": 6,
+            "winRatePct": 40.0,
+            "totalOriginalPnLJpy": 3856783.331984503
+          },
+          "full": {
+            "trades": 23,
+            "wins": 9,
+            "losses": 14,
+            "winRatePct": 39.130434782608695,
+            "totalOriginalPnLJpy": 4168888.54315379
+          }
+        },
+        {
+          "feature": "BTC12hPct",
+          "direction": "lte",
+          "threshold": 1.0429586272645563,
+          "train": {
+            "trades": 13,
+            "wins": 5,
+            "losses": 8,
+            "winRatePct": 38.46153846153847,
+            "totalOriginalPnLJpy": 1160267.8249320919
+          },
+          "holdout": {
+            "trades": 10,
+            "wins": 4,
+            "losses": 6,
+            "winRatePct": 40.0,
+            "totalOriginalPnLJpy": 3856783.331984503
+          },
+          "full": {
+            "trades": 23,
+            "wins": 9,
+            "losses": 14,
+            "winRatePct": 39.130434782608695,
+            "totalOriginalPnLJpy": 5017051.156916595
+          }
+        },
+        {
+          "feature": "VOL6hToPrior2hRatio",
+          "direction": "lte",
+          "threshold": 1.5225458471820499,
+          "train": {
+            "trades": 13,
+            "wins": 5,
+            "losses": 8,
+            "winRatePct": 38.46153846153847,
+            "totalOriginalPnLJpy": -860643.6412039761
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 5,
+            "losses": 4,
+            "winRatePct": 55.55555555555556,
+            "totalOriginalPnLJpy": 6453557.488373851
+          },
+          "full": {
+            "trades": 22,
+            "wins": 10,
+            "losses": 12,
+            "winRatePct": 45.45454545454545,
+            "totalOriginalPnLJpy": 5592913.847169876
+          }
+        },
+        {
+          "feature": "VOL3hToPrior2hRatio",
+          "direction": "lte",
+          "threshold": 1.8719355379882514,
+          "train": {
+            "trades": 13,
+            "wins": 5,
+            "losses": 8,
+            "winRatePct": 38.46153846153847,
+            "totalOriginalPnLJpy": -430564.3720493675
+          },
+          "holdout": {
+            "trades": 8,
+            "wins": 4,
+            "losses": 4,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 2836567.9777674205
+          },
+          "full": {
+            "trades": 21,
+            "wins": 9,
+            "losses": 12,
+            "winRatePct": 42.857142857142854,
+            "totalOriginalPnLJpy": 2406003.605718053
+          }
+        },
+        {
+          "feature": "HYPE6hRangePct",
+          "direction": "lte",
+          "threshold": 4.856589829315494,
+          "train": {
+            "trades": 13,
+            "wins": 5,
+            "losses": 8,
+            "winRatePct": 38.46153846153847,
+            "totalOriginalPnLJpy": 83682.54975252156
+          },
+          "holdout": {
+            "trades": 7,
+            "wins": 2,
+            "losses": 5,
+            "winRatePct": 28.57142857142857,
+            "totalOriginalPnLJpy": -674174.2050226637
+          },
+          "full": {
+            "trades": 20,
+            "wins": 7,
+            "losses": 13,
+            "winRatePct": 35.0,
+            "totalOriginalPnLJpy": -590491.6552701421
+          }
+        },
+        {
+          "feature": "HYPE6hPct",
+          "direction": "lte",
+          "threshold": 3.210986991634024,
+          "train": {
+            "trades": 13,
+            "wins": 5,
+            "losses": 8,
+            "winRatePct": 38.46153846153847,
+            "totalOriginalPnLJpy": -127123.73700955618
+          },
+          "holdout": {
+            "trades": 6,
+            "wins": 2,
+            "losses": 4,
+            "winRatePct": 33.33333333333333,
+            "totalOriginalPnLJpy": 1119214.3319370984
+          },
+          "full": {
+            "trades": 19,
+            "wins": 7,
+            "losses": 12,
+            "winRatePct": 36.84210526315789,
+            "totalOriginalPnLJpy": 992090.5949275421
+          }
+        },
+        {
+          "feature": "HYPE6hPct",
+          "direction": "lte",
+          "threshold": 5.7670483854327825,
+          "train": {
+            "trades": 21,
+            "wins": 8,
+            "losses": 13,
+            "winRatePct": 38.095238095238095,
+            "totalOriginalPnLJpy": 925762.6043405412
+          },
+          "holdout": {
+            "trades": 11,
+            "wins": 4,
+            "losses": 7,
+            "winRatePct": 36.36363636363637,
+            "totalOriginalPnLJpy": 882958.0909897551
+          },
+          "full": {
+            "trades": 32,
+            "wins": 12,
+            "losses": 20,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 1808720.6953302962
+          }
+        },
+        {
+          "feature": "HYPE12hPct",
+          "direction": "gte",
+          "threshold": 2.62037954016221,
+          "train": {
+            "trades": 21,
+            "wins": 8,
+            "losses": 13,
+            "winRatePct": 38.095238095238095,
+            "totalOriginalPnLJpy": 1355808.8175384153
+          },
+          "holdout": {
+            "trades": 11,
+            "wins": 5,
+            "losses": 6,
+            "winRatePct": 45.45454545454545,
+            "totalOriginalPnLJpy": 4036283.764221421
+          },
+          "full": {
+            "trades": 32,
+            "wins": 13,
+            "losses": 19,
+            "winRatePct": 40.625,
+            "totalOriginalPnLJpy": 5392092.5817598365
+          }
+        },
+        {
+          "feature": "HYPE6hRangePct",
+          "direction": "lte",
+          "threshold": 7.407641700404843,
+          "train": {
+            "trades": 21,
+            "wins": 8,
+            "losses": 13,
+            "winRatePct": 38.095238095238095,
+            "totalOriginalPnLJpy": 925762.6043405412
+          },
+          "holdout": {
+            "trades": 11,
+            "wins": 5,
+            "losses": 6,
+            "winRatePct": 45.45454545454545,
+            "totalOriginalPnLJpy": 4030147.708726891
+          },
+          "full": {
+            "trades": 32,
+            "wins": 13,
+            "losses": 19,
+            "winRatePct": 40.625,
+            "totalOriginalPnLJpy": 4955910.313067432
+          }
+        },
+        {
+          "feature": "HYPE_DistanceEMA240_pct",
+          "direction": "gte",
+          "threshold": 7.483683824079068,
+          "train": {
+            "trades": 21,
+            "wins": 8,
+            "losses": 13,
+            "winRatePct": 38.095238095238095,
+            "totalOriginalPnLJpy": 1280220.2746025287
+          },
+          "holdout": {
+            "trades": 11,
+            "wins": 4,
+            "losses": 7,
+            "winRatePct": 36.36363636363637,
+            "totalOriginalPnLJpy": 1905979.9726356142
+          },
+          "full": {
+            "trades": 32,
+            "wins": 12,
+            "losses": 20,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 3186200.247238143
+          }
+        },
+        {
+          "feature": "BTC1hPct",
+          "direction": "lte",
+          "threshold": 0.5728967645163285,
+          "train": {
+            "trades": 21,
+            "wins": 8,
+            "losses": 13,
+            "winRatePct": 38.095238095238095,
+            "totalOriginalPnLJpy": 860576.4985117392
+          },
+          "holdout": {
+            "trades": 10,
+            "wins": 5,
+            "losses": 5,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 4643243.368193834
+          },
+          "full": {
+            "trades": 31,
+            "wins": 13,
+            "losses": 18,
+            "winRatePct": 41.935483870967744,
+            "totalOriginalPnLJpy": 5503819.866705573
+          }
+        },
+        {
+          "feature": "HYPE24hDistanceFromHighPct",
+          "direction": "gte",
+          "threshold": -0.8846680753244907,
+          "train": {
+            "trades": 21,
+            "wins": 8,
+            "losses": 13,
+            "winRatePct": 38.095238095238095,
+            "totalOriginalPnLJpy": 682285.6656354032
+          },
+          "holdout": {
+            "trades": 10,
+            "wins": 4,
+            "losses": 6,
+            "winRatePct": 40.0,
+            "totalOriginalPnLJpy": 2703968.9426332186
+          },
+          "full": {
+            "trades": 31,
+            "wins": 12,
+            "losses": 19,
+            "winRatePct": 38.70967741935484,
+            "totalOriginalPnLJpy": 3386254.608268622
+          }
+        },
+        {
+          "feature": "HYPE6hPct",
+          "direction": "gte",
+          "threshold": 2.3869664056579865,
+          "train": {
+            "trades": 21,
+            "wins": 8,
+            "losses": 13,
+            "winRatePct": 38.095238095238095,
+            "totalOriginalPnLJpy": 1451940.3873772519
+          },
+          "holdout": {
+            "trades": 8,
+            "wins": 3,
+            "losses": 5,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 974012.4504279357
+          },
+          "full": {
+            "trades": 29,
+            "wins": 11,
+            "losses": 18,
+            "winRatePct": 37.93103448275862,
+            "totalOriginalPnLJpy": 2425952.837805188
+          }
+        },
+        {
+          "feature": "BTC6hPct",
+          "direction": "lte",
+          "threshold": 1.1558403392214256,
+          "train": {
+            "trades": 16,
+            "wins": 6,
+            "losses": 10,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 877477.6257016857
+          },
+          "holdout": {
+            "trades": 11,
+            "wins": 4,
+            "losses": 7,
+            "winRatePct": 36.36363636363637,
+            "totalOriginalPnLJpy": 2063394.795024741
+          },
+          "full": {
+            "trades": 27,
+            "wins": 10,
+            "losses": 17,
+            "winRatePct": 37.03703703703704,
+            "totalOriginalPnLJpy": 2940872.420726427
+          }
+        },
+        {
+          "feature": "BTC1hPct",
+          "direction": "lte",
+          "threshold": 0.3429779969167601,
+          "train": {
+            "trades": 16,
+            "wins": 6,
+            "losses": 10,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 421849.39122550655
+          },
+          "holdout": {
+            "trades": 10,
+            "wins": 5,
+            "losses": 5,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 4643243.368193834
+          },
+          "full": {
+            "trades": 26,
+            "wins": 11,
+            "losses": 15,
+            "winRatePct": 42.30769230769231,
+            "totalOriginalPnLJpy": 5065092.759419341
+          }
+        },
+        {
+          "feature": "VOL1hToPrior2hRatio",
+          "direction": "gte",
+          "threshold": 1.4757968950030587,
+          "train": {
+            "trades": 16,
+            "wins": 6,
+            "losses": 10,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 780149.1808012199
+          },
+          "holdout": {
+            "trades": 10,
+            "wins": 3,
+            "losses": 7,
+            "winRatePct": 30.0,
+            "totalOriginalPnLJpy": -1370740.832453391
+          },
+          "full": {
+            "trades": 26,
+            "wins": 9,
+            "losses": 17,
+            "winRatePct": 34.61538461538461,
+            "totalOriginalPnLJpy": -590591.651652171
+          }
+        },
+        {
+          "feature": "HYPE5mReturnPct",
+          "direction": "gte",
+          "threshold": 0.005584564264360381,
+          "train": {
+            "trades": 16,
+            "wins": 6,
+            "losses": 10,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 108442.9932675781
+          },
+          "holdout": {
+            "trades": 10,
+            "wins": 5,
+            "losses": 5,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 5796057.757545119
+          },
+          "full": {
+            "trades": 26,
+            "wins": 11,
+            "losses": 15,
+            "winRatePct": 42.30769230769231,
+            "totalOriginalPnLJpy": 5904500.750812697
+          }
+        },
+        {
+          "feature": "VOL6hToPrior2hRatio",
+          "direction": "lte",
+          "threshold": 1.5709779418973762,
+          "train": {
+            "trades": 16,
+            "wins": 6,
+            "losses": 10,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": -122592.70079703387
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 5,
+            "losses": 4,
+            "winRatePct": 55.55555555555556,
+            "totalOriginalPnLJpy": 6453557.488373851
+          },
+          "full": {
+            "trades": 25,
+            "wins": 11,
+            "losses": 14,
+            "winRatePct": 44.0,
+            "totalOriginalPnLJpy": 6330964.787576818
+          }
+        },
+        {
+          "feature": "REL3hPct",
+          "direction": "gte",
+          "threshold": 1.9931915134093092,
+          "train": {
+            "trades": 16,
+            "wins": 6,
+            "losses": 10,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 1209862.0808353827
+          },
+          "holdout": {
+            "trades": 8,
+            "wins": 5,
+            "losses": 3,
+            "winRatePct": 62.5,
+            "totalOriginalPnLJpy": 7101100.1983647775
+          },
+          "full": {
+            "trades": 24,
+            "wins": 11,
+            "losses": 13,
+            "winRatePct": 45.83333333333333,
+            "totalOriginalPnLJpy": 8310962.279200161
+          }
+        },
+        {
+          "feature": "REL48hPct",
+          "direction": "gte",
+          "threshold": 6.128248191518315,
+          "train": {
+            "trades": 16,
+            "wins": 6,
+            "losses": 10,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 786129.8484952218
+          },
+          "holdout": {
+            "trades": 8,
+            "wins": 3,
+            "losses": 5,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 3048210.941634164
+          },
+          "full": {
+            "trades": 24,
+            "wins": 9,
+            "losses": 15,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 3834340.790129386
+          }
+        },
+        {
+          "feature": "VOL3hToPrior2hRatio",
+          "direction": "lte",
+          "threshold": 1.8940572683307084,
+          "train": {
+            "trades": 16,
+            "wins": 6,
+            "losses": 10,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 220420.56497117403
+          },
+          "holdout": {
+            "trades": 8,
+            "wins": 4,
+            "losses": 4,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 2836567.9777674205
+          },
+          "full": {
+            "trades": 24,
+            "wins": 10,
+            "losses": 14,
+            "winRatePct": 41.66666666666667,
+            "totalOriginalPnLJpy": 3056988.5427385946
+          }
+        },
+        {
+          "feature": "HYPE_DistanceEMA12_pct",
+          "direction": "gte",
+          "threshold": 1.321410329790984,
+          "train": {
+            "trades": 16,
+            "wins": 6,
+            "losses": 10,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 878247.9118077629
+          },
+          "holdout": {
+            "trades": 8,
+            "wins": 4,
+            "losses": 4,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 3795807.077892764
+          },
+          "full": {
+            "trades": 24,
+            "wins": 10,
+            "losses": 14,
+            "winRatePct": 41.66666666666667,
+            "totalOriginalPnLJpy": 4674054.989700527
+          }
+        },
+        {
+          "feature": "HYPE6hPct",
+          "direction": "lte",
+          "threshold": 3.741488414619476,
+          "train": {
+            "trades": 16,
+            "wins": 6,
+            "losses": 10,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 111956.36485067742
+          },
+          "holdout": {
+            "trades": 7,
+            "wins": 3,
+            "losses": 4,
+            "winRatePct": 42.857142857142854,
+            "totalOriginalPnLJpy": 2445393.0980307707
+          },
+          "full": {
+            "trades": 23,
+            "wins": 9,
+            "losses": 14,
+            "winRatePct": 39.130434782608695,
+            "totalOriginalPnLJpy": 2557349.4628814477
+          }
+        },
+        {
+          "feature": "HYPE1hPct",
+          "direction": "gte",
+          "threshold": 1.5057811239580499,
+          "train": {
+            "trades": 16,
+            "wins": 6,
+            "losses": 10,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 822260.8752677039
+          },
+          "holdout": {
+            "trades": 5,
+            "wins": 2,
+            "losses": 3,
+            "winRatePct": 40.0,
+            "totalOriginalPnLJpy": 1067836.9152985383
+          },
+          "full": {
+            "trades": 21,
+            "wins": 8,
+            "losses": 13,
+            "winRatePct": 38.095238095238095,
+            "totalOriginalPnLJpy": 1890097.790566242
+          }
+        },
+        {
+          "feature": "REL24hPct",
+          "direction": "gte",
+          "threshold": 5.923121410600007,
+          "train": {
+            "trades": 8,
+            "wins": 3,
+            "losses": 5,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": -557679.266838449
+          },
+          "holdout": {
+            "trades": 11,
+            "wins": 4,
+            "losses": 7,
+            "winRatePct": 36.36363636363637,
+            "totalOriginalPnLJpy": 1905979.9726356142
+          },
+          "full": {
+            "trades": 19,
+            "wins": 7,
+            "losses": 12,
+            "winRatePct": 36.84210526315789,
+            "totalOriginalPnLJpy": 1348300.705797165
+          }
+        },
+        {
+          "feature": "HYPE24hPct",
+          "direction": "gte",
+          "threshold": 7.046709060976797,
+          "train": {
+            "trades": 8,
+            "wins": 3,
+            "losses": 5,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": -405305.9100047974
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 3,
+            "losses": 6,
+            "winRatePct": 33.33333333333333,
+            "totalOriginalPnLJpy": 1068066.838744454
+          },
+          "full": {
+            "trades": 17,
+            "wins": 6,
+            "losses": 11,
+            "winRatePct": 35.294117647058826,
+            "totalOriginalPnLJpy": 662760.9287396568
+          }
+        },
+        {
+          "feature": "HYPE5mReturnPct",
+          "direction": "gte",
+          "threshold": 0.2861993693912268,
+          "train": {
+            "trades": 8,
+            "wins": 3,
+            "losses": 5,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 536822.9553241435
+          },
+          "holdout": {
+            "trades": 6,
+            "wins": 3,
+            "losses": 3,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 3355112.024372553
+          },
+          "full": {
+            "trades": 14,
+            "wins": 6,
+            "losses": 8,
+            "winRatePct": 42.857142857142854,
+            "totalOriginalPnLJpy": 3891934.9796966966
+          }
+        }
+      ],
+      "topTrainAndHoldoutNonWorse": [
+        {
+          "feature": "BTC3hPct",
+          "direction": "lte",
+          "threshold": 0.5862128859554172,
+          "train": {
+            "trades": 11,
+            "wins": 6,
+            "losses": 5,
+            "winRatePct": 54.54545454545454,
+            "totalOriginalPnLJpy": 1251353.294629193
+          },
+          "holdout": {
+            "trades": 11,
+            "wins": 5,
+            "losses": 6,
+            "winRatePct": 45.45454545454545,
+            "totalOriginalPnLJpy": 4030147.708726891
+          },
+          "full": {
+            "trades": 22,
+            "wins": 11,
+            "losses": 11,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 5281501.003356083
+          }
+        },
+        {
+          "feature": "BTC3hPct",
+          "direction": "lte",
+          "threshold": 0.7459894168074577,
+          "train": {
+            "trades": 13,
+            "wins": 7,
+            "losses": 6,
+            "winRatePct": 53.84615384615385,
+            "totalOriginalPnLJpy": 1567497.4622016028
+          },
+          "holdout": {
+            "trades": 12,
+            "wins": 5,
+            "losses": 7,
+            "winRatePct": 41.66666666666667,
+            "totalOriginalPnLJpy": 3389573.561118413
+          },
+          "full": {
+            "trades": 25,
+            "wins": 12,
+            "losses": 13,
+            "winRatePct": 48.0,
+            "totalOriginalPnLJpy": 4957071.023320016
+          }
+        },
+        {
+          "feature": "VOL1hToPrior2hRatio",
+          "direction": "gte",
+          "threshold": 2.0814369368535415,
+          "train": {
+            "trades": 8,
+            "wins": 4,
+            "losses": 4,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 1574790.6653796108
+          },
+          "holdout": {
+            "trades": 5,
+            "wins": 3,
+            "losses": 2,
+            "winRatePct": 60.0,
+            "totalOriginalPnLJpy": 1854296.9515078694
+          },
+          "full": {
+            "trades": 13,
+            "wins": 7,
+            "losses": 6,
+            "winRatePct": 53.84615384615385,
+            "totalOriginalPnLJpy": 3429087.6168874805
+          }
+        },
+        {
+          "feature": "REL3hPct",
+          "direction": "gte",
+          "threshold": 3.357846634207551,
+          "train": {
+            "trades": 8,
+            "wins": 4,
+            "losses": 4,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 1053711.5653232022
+          },
+          "holdout": {
+            "trades": 3,
+            "wins": 2,
+            "losses": 1,
+            "winRatePct": 66.66666666666666,
+            "totalOriginalPnLJpy": 3192220.088613853
+          },
+          "full": {
+            "trades": 11,
+            "wins": 6,
+            "losses": 5,
+            "winRatePct": 54.54545454545454,
+            "totalOriginalPnLJpy": 4245931.653937056
+          }
+        },
+        {
+          "feature": "REL12hPct",
+          "direction": "gte",
+          "threshold": 3.3968730377532452,
+          "train": {
+            "trades": 11,
+            "wins": 5,
+            "losses": 6,
+            "winRatePct": 45.45454545454545,
+            "totalOriginalPnLJpy": 615889.5885552405
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 4,
+            "losses": 5,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 3227711.3738710815
+          },
+          "full": {
+            "trades": 20,
+            "wins": 9,
+            "losses": 11,
+            "winRatePct": 45.0,
+            "totalOriginalPnLJpy": 3843600.962426322
+          }
+        },
+        {
+          "feature": "VOL6hToPrior2hRatio",
+          "direction": "lte",
+          "threshold": 1.3152279753272726,
+          "train": {
+            "trades": 11,
+            "wins": 5,
+            "losses": 6,
+            "winRatePct": 45.45454545454545,
+            "totalOriginalPnLJpy": -575918.600223237
+          },
+          "holdout": {
+            "trades": 8,
+            "wins": 4,
+            "losses": 4,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 3946942.0182451936
+          },
+          "full": {
+            "trades": 19,
+            "wins": 9,
+            "losses": 10,
+            "winRatePct": 47.368421052631575,
+            "totalOriginalPnLJpy": 3371023.4180219565
+          }
+        },
+        {
+          "feature": "VOL1hToPrior2hRatio",
+          "direction": "gte",
+          "threshold": 1.8830637414996465,
+          "train": {
+            "trades": 11,
+            "wins": 5,
+            "losses": 6,
+            "winRatePct": 45.45454545454545,
+            "totalOriginalPnLJpy": 1669054.4918732413
+          },
+          "holdout": {
+            "trades": 7,
+            "wins": 3,
+            "losses": 4,
+            "winRatePct": 42.857142857142854,
+            "totalOriginalPnLJpy": 512950.21730922896
+          },
+          "full": {
+            "trades": 18,
+            "wins": 8,
+            "losses": 10,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 2182004.70918247
+          }
+        },
+        {
+          "feature": "REL3hPct",
+          "direction": "gte",
+          "threshold": 2.708330382257107,
+          "train": {
+            "trades": 11,
+            "wins": 5,
+            "losses": 6,
+            "winRatePct": 45.45454545454545,
+            "totalOriginalPnLJpy": 1024766.2715721462
+          },
+          "holdout": {
+            "trades": 5,
+            "wins": 3,
+            "losses": 2,
+            "winRatePct": 60.0,
+            "totalOriginalPnLJpy": 4030133.222505013
+          },
+          "full": {
+            "trades": 16,
+            "wins": 8,
+            "losses": 8,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 5054899.494077159
+          }
+        },
+        {
+          "feature": "BTC3hPct",
+          "direction": "lte",
+          "threshold": 0.9139138135578984,
+          "train": {
+            "trades": 16,
+            "wins": 7,
+            "losses": 9,
+            "winRatePct": 43.75,
+            "totalOriginalPnLJpy": 1292544.4450331645
+          },
+          "holdout": {
+            "trades": 12,
+            "wins": 5,
+            "losses": 7,
+            "winRatePct": 41.66666666666667,
+            "totalOriginalPnLJpy": 3389573.561118413
+          },
+          "full": {
+            "trades": 28,
+            "wins": 12,
+            "losses": 16,
+            "winRatePct": 42.857142857142854,
+            "totalOriginalPnLJpy": 4682118.006151577
+          }
+        },
+        {
+          "feature": "REL12hPct",
+          "direction": "gte",
+          "threshold": 2.4137285404618902,
+          "train": {
+            "trades": 16,
+            "wins": 7,
+            "losses": 9,
+            "winRatePct": 43.75,
+            "totalOriginalPnLJpy": 1605304.2377159519
+          },
+          "holdout": {
+            "trades": 11,
+            "wins": 5,
+            "losses": 6,
+            "winRatePct": 45.45454545454545,
+            "totalOriginalPnLJpy": 4036283.764221421
+          },
+          "full": {
+            "trades": 27,
+            "wins": 12,
+            "losses": 15,
+            "winRatePct": 44.44444444444444,
+            "totalOriginalPnLJpy": 5641588.001937373
+          }
+        },
+        {
+          "feature": "HYPE5mReturnPct",
+          "direction": "gte",
+          "threshold": 0.03533256779435501,
+          "train": {
+            "trades": 14,
+            "wins": 6,
+            "losses": 8,
+            "winRatePct": 42.857142857142854,
+            "totalOriginalPnLJpy": 412466.5223386635
+          },
+          "holdout": {
+            "trades": 10,
+            "wins": 5,
+            "losses": 5,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 5796057.757545119
+          },
+          "full": {
+            "trades": 24,
+            "wins": 11,
+            "losses": 13,
+            "winRatePct": 45.83333333333333,
+            "totalOriginalPnLJpy": 6208524.279883782
+          }
+        },
+        {
+          "feature": "REL3hPct",
+          "direction": "gte",
+          "threshold": 2.0969255784292207,
+          "train": {
+            "trades": 14,
+            "wins": 6,
+            "losses": 8,
+            "winRatePct": 42.857142857142854,
+            "totalOriginalPnLJpy": 1753115.249626575
+          },
+          "holdout": {
+            "trades": 8,
+            "wins": 5,
+            "losses": 3,
+            "winRatePct": 62.5,
+            "totalOriginalPnLJpy": 7101100.1983647775
+          },
+          "full": {
+            "trades": 22,
+            "wins": 11,
+            "losses": 11,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 8854215.447991353
+          }
+        },
+        {
+          "feature": "REL12hPct",
+          "direction": "gte",
+          "threshold": 2.2172956432909396,
+          "train": {
+            "trades": 18,
+            "wins": 7,
+            "losses": 11,
+            "winRatePct": 38.88888888888889,
+            "totalOriginalPnLJpy": 1315379.3125517871
+          },
+          "holdout": {
+            "trades": 11,
+            "wins": 5,
+            "losses": 6,
+            "winRatePct": 45.45454545454545,
+            "totalOriginalPnLJpy": 4036283.764221421
+          },
+          "full": {
+            "trades": 29,
+            "wins": 12,
+            "losses": 17,
+            "winRatePct": 41.37931034482759,
+            "totalOriginalPnLJpy": 5351663.076773208
+          }
+        },
+        {
+          "feature": "HYPE5mReturnPct",
+          "direction": "gte",
+          "threshold": 0.002474206398295209,
+          "train": {
+            "trades": 18,
+            "wins": 7,
+            "losses": 11,
+            "winRatePct": 38.88888888888889,
+            "totalOriginalPnLJpy": -25324.18485778923
+          },
+          "holdout": {
+            "trades": 10,
+            "wins": 5,
+            "losses": 5,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 5796057.757545119
+          },
+          "full": {
+            "trades": 28,
+            "wins": 12,
+            "losses": 16,
+            "winRatePct": 42.857142857142854,
+            "totalOriginalPnLJpy": 5770733.57268733
+          }
+        },
+        {
+          "feature": "VOL6hToPrior2hRatio",
+          "direction": "lte",
+          "threshold": 1.5225458471820499,
+          "train": {
+            "trades": 13,
+            "wins": 5,
+            "losses": 8,
+            "winRatePct": 38.46153846153847,
+            "totalOriginalPnLJpy": -860643.6412039761
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 5,
+            "losses": 4,
+            "winRatePct": 55.55555555555556,
+            "totalOriginalPnLJpy": 6453557.488373851
+          },
+          "full": {
+            "trades": 22,
+            "wins": 10,
+            "losses": 12,
+            "winRatePct": 45.45454545454545,
+            "totalOriginalPnLJpy": 5592913.847169876
+          }
+        },
+        {
+          "feature": "VOL3hToPrior2hRatio",
+          "direction": "lte",
+          "threshold": 1.8719355379882514,
+          "train": {
+            "trades": 13,
+            "wins": 5,
+            "losses": 8,
+            "winRatePct": 38.46153846153847,
+            "totalOriginalPnLJpy": -430564.3720493675
+          },
+          "holdout": {
+            "trades": 8,
+            "wins": 4,
+            "losses": 4,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 2836567.9777674205
+          },
+          "full": {
+            "trades": 21,
+            "wins": 9,
+            "losses": 12,
+            "winRatePct": 42.857142857142854,
+            "totalOriginalPnLJpy": 2406003.605718053
+          }
+        },
+        {
+          "feature": "HYPE12hPct",
+          "direction": "gte",
+          "threshold": 2.62037954016221,
+          "train": {
+            "trades": 21,
+            "wins": 8,
+            "losses": 13,
+            "winRatePct": 38.095238095238095,
+            "totalOriginalPnLJpy": 1355808.8175384153
+          },
+          "holdout": {
+            "trades": 11,
+            "wins": 5,
+            "losses": 6,
+            "winRatePct": 45.45454545454545,
+            "totalOriginalPnLJpy": 4036283.764221421
+          },
+          "full": {
+            "trades": 32,
+            "wins": 13,
+            "losses": 19,
+            "winRatePct": 40.625,
+            "totalOriginalPnLJpy": 5392092.5817598365
+          }
+        },
+        {
+          "feature": "HYPE6hRangePct",
+          "direction": "lte",
+          "threshold": 7.407641700404843,
+          "train": {
+            "trades": 21,
+            "wins": 8,
+            "losses": 13,
+            "winRatePct": 38.095238095238095,
+            "totalOriginalPnLJpy": 925762.6043405412
+          },
+          "holdout": {
+            "trades": 11,
+            "wins": 5,
+            "losses": 6,
+            "winRatePct": 45.45454545454545,
+            "totalOriginalPnLJpy": 4030147.708726891
+          },
+          "full": {
+            "trades": 32,
+            "wins": 13,
+            "losses": 19,
+            "winRatePct": 40.625,
+            "totalOriginalPnLJpy": 4955910.313067432
+          }
+        },
+        {
+          "feature": "BTC1hPct",
+          "direction": "lte",
+          "threshold": 0.5728967645163285,
+          "train": {
+            "trades": 21,
+            "wins": 8,
+            "losses": 13,
+            "winRatePct": 38.095238095238095,
+            "totalOriginalPnLJpy": 860576.4985117392
+          },
+          "holdout": {
+            "trades": 10,
+            "wins": 5,
+            "losses": 5,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 4643243.368193834
+          },
+          "full": {
+            "trades": 31,
+            "wins": 13,
+            "losses": 18,
+            "winRatePct": 41.935483870967744,
+            "totalOriginalPnLJpy": 5503819.866705573
+          }
+        },
+        {
+          "feature": "BTC1hPct",
+          "direction": "lte",
+          "threshold": 0.3429779969167601,
+          "train": {
+            "trades": 16,
+            "wins": 6,
+            "losses": 10,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 421849.39122550655
+          },
+          "holdout": {
+            "trades": 10,
+            "wins": 5,
+            "losses": 5,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 4643243.368193834
+          },
+          "full": {
+            "trades": 26,
+            "wins": 11,
+            "losses": 15,
+            "winRatePct": 42.30769230769231,
+            "totalOriginalPnLJpy": 5065092.759419341
+          }
+        },
+        {
+          "feature": "HYPE5mReturnPct",
+          "direction": "gte",
+          "threshold": 0.005584564264360381,
+          "train": {
+            "trades": 16,
+            "wins": 6,
+            "losses": 10,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 108442.9932675781
+          },
+          "holdout": {
+            "trades": 10,
+            "wins": 5,
+            "losses": 5,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 5796057.757545119
+          },
+          "full": {
+            "trades": 26,
+            "wins": 11,
+            "losses": 15,
+            "winRatePct": 42.30769230769231,
+            "totalOriginalPnLJpy": 5904500.750812697
+          }
+        },
+        {
+          "feature": "VOL6hToPrior2hRatio",
+          "direction": "lte",
+          "threshold": 1.5709779418973762,
+          "train": {
+            "trades": 16,
+            "wins": 6,
+            "losses": 10,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": -122592.70079703387
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 5,
+            "losses": 4,
+            "winRatePct": 55.55555555555556,
+            "totalOriginalPnLJpy": 6453557.488373851
+          },
+          "full": {
+            "trades": 25,
+            "wins": 11,
+            "losses": 14,
+            "winRatePct": 44.0,
+            "totalOriginalPnLJpy": 6330964.787576818
+          }
+        },
+        {
+          "feature": "REL3hPct",
+          "direction": "gte",
+          "threshold": 1.9931915134093092,
+          "train": {
+            "trades": 16,
+            "wins": 6,
+            "losses": 10,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 1209862.0808353827
+          },
+          "holdout": {
+            "trades": 8,
+            "wins": 5,
+            "losses": 3,
+            "winRatePct": 62.5,
+            "totalOriginalPnLJpy": 7101100.1983647775
+          },
+          "full": {
+            "trades": 24,
+            "wins": 11,
+            "losses": 13,
+            "winRatePct": 45.83333333333333,
+            "totalOriginalPnLJpy": 8310962.279200161
+          }
+        },
+        {
+          "feature": "VOL3hToPrior2hRatio",
+          "direction": "lte",
+          "threshold": 1.8940572683307084,
+          "train": {
+            "trades": 16,
+            "wins": 6,
+            "losses": 10,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 220420.56497117403
+          },
+          "holdout": {
+            "trades": 8,
+            "wins": 4,
+            "losses": 4,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 2836567.9777674205
+          },
+          "full": {
+            "trades": 24,
+            "wins": 10,
+            "losses": 14,
+            "winRatePct": 41.66666666666667,
+            "totalOriginalPnLJpy": 3056988.5427385946
+          }
+        },
+        {
+          "feature": "HYPE_DistanceEMA12_pct",
+          "direction": "gte",
+          "threshold": 1.321410329790984,
+          "train": {
+            "trades": 16,
+            "wins": 6,
+            "losses": 10,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 878247.9118077629
+          },
+          "holdout": {
+            "trades": 8,
+            "wins": 4,
+            "losses": 4,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 3795807.077892764
+          },
+          "full": {
+            "trades": 24,
+            "wins": 10,
+            "losses": 14,
+            "winRatePct": 41.66666666666667,
+            "totalOriginalPnLJpy": 4674054.989700527
+          }
+        },
+        {
+          "feature": "HYPE6hPct",
+          "direction": "lte",
+          "threshold": 3.741488414619476,
+          "train": {
+            "trades": 16,
+            "wins": 6,
+            "losses": 10,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 111956.36485067742
+          },
+          "holdout": {
+            "trades": 7,
+            "wins": 3,
+            "losses": 4,
+            "winRatePct": 42.857142857142854,
+            "totalOriginalPnLJpy": 2445393.0980307707
+          },
+          "full": {
+            "trades": 23,
+            "wins": 9,
+            "losses": 14,
+            "winRatePct": 39.130434782608695,
+            "totalOriginalPnLJpy": 2557349.4628814477
+          }
+        },
+        {
+          "feature": "HYPE5mReturnPct",
+          "direction": "gte",
+          "threshold": 0.2861993693912268,
+          "train": {
+            "trades": 8,
+            "wins": 3,
+            "losses": 5,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 536822.9553241435
+          },
+          "holdout": {
+            "trades": 6,
+            "wins": 3,
+            "losses": 3,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 3355112.024372553
+          },
+          "full": {
+            "trades": 14,
+            "wins": 6,
+            "losses": 8,
+            "winRatePct": 42.857142857142854,
+            "totalOriginalPnLJpy": 3891934.9796966966
+          }
+        },
+        {
+          "feature": "HYPE_DistanceEMA48_pct",
+          "direction": "gte",
+          "threshold": 4.9965371971839145,
+          "train": {
+            "trades": 8,
+            "wins": 3,
+            "losses": 5,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": -994788.9197506189
+          },
+          "holdout": {
+            "trades": 6,
+            "wins": 3,
+            "losses": 3,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 2986204.939031057
+          },
+          "full": {
+            "trades": 14,
+            "wins": 6,
+            "losses": 8,
+            "winRatePct": 42.857142857142854,
+            "totalOriginalPnLJpy": 1991416.019280438
+          }
+        },
+        {
+          "feature": "HYPE_DistanceEMA240_pct",
+          "direction": "gte",
+          "threshold": 11.197748474852398,
+          "train": {
+            "trades": 8,
+            "wins": 3,
+            "losses": 5,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": 442185.223966624
+          },
+          "holdout": {
+            "trades": 6,
+            "wins": 3,
+            "losses": 3,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 3374360.591360111
+          },
+          "full": {
+            "trades": 14,
+            "wins": 6,
+            "losses": 8,
+            "winRatePct": 42.857142857142854,
+            "totalOriginalPnLJpy": 3816545.815326735
+          }
+        },
+        {
+          "feature": "HYPE_DistanceEMA12_pct",
+          "direction": "gte",
+          "threshold": 2.3069780898279157,
+          "train": {
+            "trades": 8,
+            "wins": 3,
+            "losses": 5,
+            "winRatePct": 37.5,
+            "totalOriginalPnLJpy": -653562.5589572636
+          },
+          "holdout": {
+            "trades": 4,
+            "wins": 3,
+            "losses": 1,
+            "winRatePct": 75.0,
+            "totalOriginalPnLJpy": 5445919.012056999
+          },
+          "full": {
+            "trades": 12,
+            "wins": 6,
+            "losses": 6,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 4792356.453099736
+          }
+        },
+        {
+          "feature": "BTC3hPct",
+          "direction": "lte",
+          "threshold": 1.2847920060095053,
+          "train": {
+            "trades": 19,
+            "wins": 7,
+            "losses": 12,
+            "winRatePct": 36.84210526315789,
+            "totalOriginalPnLJpy": 635260.4922111603
+          },
+          "holdout": {
+            "trades": 12,
+            "wins": 5,
+            "losses": 7,
+            "winRatePct": 41.66666666666667,
+            "totalOriginalPnLJpy": 3389573.561118413
+          },
+          "full": {
+            "trades": 31,
+            "wins": 12,
+            "losses": 19,
+            "winRatePct": 38.70967741935484,
+            "totalOriginalPnLJpy": 4024834.0533295735
+          }
+        },
+        {
+          "feature": "BTC24hPct",
+          "direction": "lte",
+          "threshold": 2.0033311143173194,
+          "train": {
+            "trades": 19,
+            "wins": 7,
+            "losses": 12,
+            "winRatePct": 36.84210526315789,
+            "totalOriginalPnLJpy": 829595.7063765419
+          },
+          "holdout": {
+            "trades": 12,
+            "wins": 5,
+            "losses": 7,
+            "winRatePct": 41.66666666666667,
+            "totalOriginalPnLJpy": 3389573.561118413
+          },
+          "full": {
+            "trades": 31,
+            "wins": 12,
+            "losses": 19,
+            "winRatePct": 38.70967741935484,
+            "totalOriginalPnLJpy": 4219169.267494955
+          }
+        },
+        {
+          "feature": "BTC1hPct",
+          "direction": "lte",
+          "threshold": 0.46461051799129294,
+          "train": {
+            "trades": 19,
+            "wins": 7,
+            "losses": 12,
+            "winRatePct": 36.84210526315789,
+            "totalOriginalPnLJpy": 718497.9444522979
+          },
+          "holdout": {
+            "trades": 10,
+            "wins": 5,
+            "losses": 5,
+            "winRatePct": 50.0,
+            "totalOriginalPnLJpy": 4643243.368193834
+          },
+          "full": {
+            "trades": 29,
+            "wins": 12,
+            "losses": 17,
+            "winRatePct": 41.37931034482759,
+            "totalOriginalPnLJpy": 5361741.312646132
+          }
+        },
+        {
+          "feature": "REL1hPct",
+          "direction": "lte",
+          "threshold": 1.6719995551653932,
+          "train": {
+            "trades": 19,
+            "wins": 7,
+            "losses": 12,
+            "winRatePct": 36.84210526315789,
+            "totalOriginalPnLJpy": -453670.59915277286
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 5,
+            "losses": 4,
+            "winRatePct": 55.55555555555556,
+            "totalOriginalPnLJpy": 5318264.566326294
+          },
+          "full": {
+            "trades": 28,
+            "wins": 12,
+            "losses": 16,
+            "winRatePct": 42.857142857142854,
+            "totalOriginalPnLJpy": 4864593.967173521
+          }
+        },
+        {
+          "feature": "VOL3hToPrior2hRatio",
+          "direction": "lte",
+          "threshold": 2.13346693686922,
+          "train": {
+            "trades": 19,
+            "wins": 7,
+            "losses": 12,
+            "winRatePct": 36.84210526315789,
+            "totalOriginalPnLJpy": 833532.5944872332
+          },
+          "holdout": {
+            "trades": 9,
+            "wins": 5,
+            "losses": 4,
+            "winRatePct": 55.55555555555556,
+            "totalOriginalPnLJpy": 5343183.447896078
+          },
+          "full": {
+            "trades": 28,
+            "wins": 12,
+            "losses": 16,
+            "winRatePct": 42.857142857142854,
+            "totalOriginalPnLJpy": 6176716.042383312
+          }
+        }
+      ]
+    }
+  },
+  "cases": {
+    "HYPE_BTC3H_LE0P6": {
+      "policy": {
+        "id": "HYPE_BTC3H_LE0P6",
+        "btc3hMaxPct": 0.6
+      },
+      "costs": {
+        "10": {
+          "hypeAcceptedTrades": 23,
+          "hypeWins": 12,
+          "hypeLosses": 11,
+          "hypeWinRatePct": 52.17391304347826,
+          "hypeRealizedPnlJpy": 25192731.567232918,
+          "finalEquityJpy": 229913263.66771564,
+          "maxMtmDdPct": -14.603309760733396,
+          "profitFactor": 3.5787060259368726,
+          "closedTrades": 1309,
+          "equityVsSevenAdoptedJpy": 31588528.60862428,
+          "ddVsSevenAdoptedPp": 0.0,
+          "accounting": "PASS"
+        },
+        "30": {
+          "hypeAcceptedTrades": 21,
+          "hypeWins": 11,
+          "hypeLosses": 10,
+          "hypeWinRatePct": 52.38095238095238,
+          "hypeRealizedPnlJpy": 7781359.2673489,
+          "finalEquityJpy": 125796883.54878265,
+          "maxMtmDdPct": -15.80770763869479,
+          "profitFactor": 3.000552437249256,
+          "closedTrades": 1304,
+          "equityVsSevenAdoptedJpy": 37364952.60877301,
+          "ddVsSevenAdoptedPp": -0.05387287962556009,
+          "accounting": "PASS"
+        }
+      },
+      "preservesAllSevenAdoptedExitRules": true
+    },
+    "HYPE_REL3H_GE3P0": {
+      "policy": {
+        "id": "HYPE_REL3H_GE3P0",
+        "hypeMinusBtc3hMinPct": 3.0
+      },
+      "costs": {
+        "10": {
+          "hypeAcceptedTrades": 16,
+          "hypeWins": 8,
+          "hypeLosses": 8,
+          "hypeWinRatePct": 50.0,
+          "hypeRealizedPnlJpy": 16790808.04031852,
+          "finalEquityJpy": 217743793.58731714,
+          "maxMtmDdPct": -14.603309760733396,
+          "profitFactor": 3.7720536121336288,
+          "closedTrades": 1301,
+          "equityVsSevenAdoptedJpy": 19419058.52822578,
+          "ddVsSevenAdoptedPp": 0.0,
+          "accounting": "PASS"
+        },
+        "30": {
+          "hypeAcceptedTrades": 15,
+          "hypeWins": 8,
+          "hypeLosses": 7,
+          "hypeWinRatePct": 53.333333333333336,
+          "hypeRealizedPnlJpy": 6317261.662539882,
+          "finalEquityJpy": 102693847.02078447,
+          "maxMtmDdPct": -15.811463681476013,
+          "profitFactor": 2.9821004365349455,
+          "closedTrades": 1301,
+          "equityVsSevenAdoptedJpy": 14261916.080774829,
+          "ddVsSevenAdoptedPp": -0.05762892240678319,
+          "accounting": "PASS"
+        }
+      },
+      "preservesAllSevenAdoptedExitRules": true
+    },
+    "HYPE_BTC3H_LE0P8_REL3H_GE2P0": {
+      "policy": {
+        "id": "HYPE_BTC3H_LE0P8_REL3H_GE2P0",
+        "btc3hMaxPct": 0.8,
+        "hypeMinusBtc3hMinPct": 2.0
+      },
+      "costs": {
+        "10": {
+          "hypeAcceptedTrades": 20,
+          "hypeWins": 12,
+          "hypeLosses": 8,
+          "hypeWinRatePct": 60.0,
+          "hypeRealizedPnlJpy": 32873239.80796126,
+          "finalEquityJpy": 238941721.2669801,
+          "maxMtmDdPct": -14.603309760733396,
+          "profitFactor": 3.817183033106349,
+          "closedTrades": 1306,
+          "equityVsSevenAdoptedJpy": 40616986.20788875,
+          "ddVsSevenAdoptedPp": 0.0,
+          "accounting": "PASS"
+        },
+        "30": {
+          "hypeAcceptedTrades": 19,
+          "hypeWins": 12,
+          "hypeLosses": 7,
+          "hypeWinRatePct": 63.1578947368421,
+          "hypeRealizedPnlJpy": 15724284.10729652,
+          "finalEquityJpy": 136460249.71796387,
+          "maxMtmDdPct": -15.80770763869479,
+          "profitFactor": 3.3160536004736763,
+          "closedTrades": 1302,
+          "equityVsSevenAdoptedJpy": 48028318.777954236,
+          "ddVsSevenAdoptedPp": -0.05387287962556009,
+          "accounting": "PASS"
+        }
+      },
+      "preservesAllSevenAdoptedExitRules": true
+    },
+    "HYPE_BTC3H_LE0P6_REL3H_GE2P0": {
+      "policy": {
+        "id": "HYPE_BTC3H_LE0P6_REL3H_GE2P0",
+        "btc3hMaxPct": 0.6,
+        "hypeMinusBtc3hMinPct": 2.0
+      },
+      "costs": {
+        "10": {
+          "hypeAcceptedTrades": 18,
+          "hypeWins": 12,
+          "hypeLosses": 6,
+          "hypeWinRatePct": 66.66666666666667,
+          "hypeRealizedPnlJpy": 36469795.50904447,
+          "finalEquityJpy": 244636192.77287373,
+          "maxMtmDdPct": -14.603309760733396,
+          "profitFactor": 3.9455834161040158,
+          "closedTrades": 1304,
+          "equityVsSevenAdoptedJpy": 46311457.71378237,
+          "ddVsSevenAdoptedPp": 0.0,
+          "accounting": "PASS"
+        },
+        "30": {
+          "hypeAcceptedTrades": 17,
+          "hypeWins": 12,
+          "hypeLosses": 5,
+          "hypeWinRatePct": 70.58823529411765,
+          "hypeRealizedPnlJpy": 17780809.869600438,
+          "finalEquityJpy": 140458101.84898156,
+          "maxMtmDdPct": -15.80770763869479,
+          "profitFactor": 3.3989430170488366,
+          "closedTrades": 1300,
+          "equityVsSevenAdoptedJpy": 52026170.90897192,
+          "ddVsSevenAdoptedPp": -0.05387287962556009,
+          "accounting": "PASS"
+        }
+      },
+      "preservesAllSevenAdoptedExitRules": true
+    }
+  }
+}

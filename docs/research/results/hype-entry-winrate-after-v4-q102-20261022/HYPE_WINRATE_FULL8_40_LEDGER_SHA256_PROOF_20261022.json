@@ -1,0 +1,285 @@
+{
+  "proof": [
+    {
+      "policy": "HYPE_BTC3H_LE0P6",
+      "costBps": 10,
+      "file": "candidate-decisions.jsonl",
+      "sha256": "d4c854be73c13786cf86e01c7fce2cc1812daf2a90d98a478be953300f89a104",
+      "identicalLastTwoCooldownPasses": true
+    },
+    {
+      "policy": "HYPE_BTC3H_LE0P6",
+      "costBps": 10,
+      "file": "portfolio-trades.jsonl",
+      "sha256": "d5c481538288daac0a7d6483f529372ccd13b3b3c0d3347df8cfbadc0226164e",
+      "identicalLastTwoCooldownPasses": true
+    },
+    {
+      "policy": "HYPE_BTC3H_LE0P6",
+      "costBps": 10,
+      "file": "portfolio-events.jsonl",
+      "sha256": "bec1866da37d91858c31c8f4eec4f711b579d798f08cf22181961360d7faa7a4",
+      "identicalLastTwoCooldownPasses": true
+    },
+    {
+      "policy": "HYPE_BTC3H_LE0P6",
+      "costBps": 10,
+      "file": "task9-mtm.jsonl",
+      "sha256": "9d5809d1a204929642d11b267f0bee3ac82cb20b24eaebabf69c2ea978335dd9",
+      "identicalLastTwoCooldownPasses": true
+    },
+    {
+      "policy": "HYPE_BTC3H_LE0P6",
+      "costBps": 10,
+      "file": "metrics.json",
+      "sha256": "c90131b741ec917026e05b6d14357941128d7968b8f009fe3dc891312fbc3a49",
+      "identicalLastTwoCooldownPasses": true
+    },
+    {
+      "policy": "HYPE_BTC3H_LE0P6",
+      "costBps": 30,
+      "file": "candidate-decisions.jsonl",
+      "sha256": "1d30c852fafe8f6631f526e656790712d0d64c7042851c4970530b366b3696a4",
+      "identicalLastTwoCooldownPasses": true
+    },
+    {
+      "policy": "HYPE_BTC3H_LE0P6",
+      "costBps": 30,
+      "file": "portfolio-trades.jsonl",
+      "sha256": "0db640f92cebd288fe58616e5c29b53a0b738d3b9762de3558a1460372595ad9",
+      "identicalLastTwoCooldownPasses": true
+    },
+    {
+      "policy": "HYPE_BTC3H_LE0P6",
+      "costBps": 30,
+      "file": "portfolio-events.jsonl",
+      "sha256": "48e1fe58ce5a4e95a4da3f4aaa311a917c9c6eb9d469140f31aa51836ab736a3",
+      "identicalLastTwoCooldownPasses": true
+    },
+    {
+      "policy": "HYPE_BTC3H_LE0P6",
+      "costBps": 30,
+      "file": "task9-mtm.jsonl",
+      "sha256": "01c98671555ec07585f7f309eb9928c43f73b7fdab75cf9ab691e7151d231c04",
+      "identicalLastTwoCooldownPasses": true
+    },
+    {
+      "policy": "HYPE_BTC3H_LE0P6",
+      "costBps": 30,
+      "file": "metrics.json",
+      "sha256": "e8a03ac60faba37976fe9373bf1548751c6dddf5d3d500965a6892354824b8ee",
+      "identicalLastTwoCooldownPasses": true
+    },
+    {
+      "policy": "HYPE_REL3H_GE3P0",
+      "costBps": 10,
+      "file": "candidate-decisions.jsonl",
+      "sha256": "b21f369ba51537e5dd3b8abca448b822abe748638d5f62cca5ca8a58bfa509de",
+      "identicalLastTwoCooldownPasses": true
+    },
+    {
+      "policy": "HYPE_REL3H_GE3P0",
+      "costBps": 10,
+      "file": "portfolio-trades.jsonl",
+      "sha256": "6d97e730fe98a37800380fbc0505da18dea1691324cf4dfb5aacd2cba86147b9",
+      "identicalLastTwoCooldownPasses": true
+    },
+    {
+      "policy": "HYPE_REL3H_GE3P0",
+      "costBps": 10,
+      "file": "portfolio-events.jsonl",
+      "sha256": "d9ae2fdc35c974caf08d73b6a6c5aaa0fc6dffb545d55ce65a649a4a2c2c1403",
+      "identicalLastTwoCooldownPasses": true
+    },
+    {
+      "policy": "HYPE_REL3H_GE3P0",
+      "costBps": 10,
+      "file": "task9-mtm.jsonl",
+      "sha256": "d0fe75d5dfdb91f7a97d2c2fe41534141df35cbd97d8a9d35f3a7b29a428a1df",
+      "identicalLastTwoCooldownPasses": true
+    },
+    {
+      "policy": "HYPE_REL3H_GE3P0",
+      "costBps": 10,
+      "file": "metrics.json",
+      "sha256": "c393a92cc6b7c9add75cd8b62de6090edede804ca3e31ac443e88b75809c4990",
+      "identicalLastTwoCooldownPasses": true
+    },
+    {
+      "policy": "HYPE_REL3H_GE3P0",
+      "costBps": 30,
+      "file": "candidate-decisions.jsonl",
+      "sha256": "b58f06a987735df9cb6d4886fda835a7cc803c90ee1d46a39df208d1e186085f",
+      "identicalLastTwoCooldownPasses": true
+    },
+    {
+      "policy": "HYPE_REL3H_GE3P0",
+      "costBps": 30,
+      "file": "portfolio-trades.jsonl",
+      "sha256": "b975b8e3c8a7e7114fda2d01689e55042fa1c5569a8eac7f3866cefe4c04a8a8",
+      "identicalLastTwoCooldownPasses": true
+    },
+    {
+      "policy": "HYPE_REL3H_GE3P0",
+      "costBps": 30,
+      "file": "portfolio-events.jsonl",
+      "sha256": "ebd854d2fa6b4286021ff1c6d712c6a3e05b930c86dc16f240a461f9ea46a33d",
+      "identicalLastTwoCooldownPasses": true
+    },
+    {
+      "policy": "HYPE_REL3H_GE3P0",
+      "costBps": 30,
+      "file": "task9-mtm.jsonl",
+      "sha256": "05ac5ba3987b67f47c815c9953928ee23419723ce819142365b4bd2c96458c27",
+      "identicalLastTwoCooldownPasses": true
+    },
+    {
+      "policy": "HYPE_REL3H_GE3P0",
+      "costBps": 30,
+      "file": "metrics.json",
+      "sha256": "e59631caede8d774c497aa037bef07a1d5391d5035519022f7710c77e14251e4",
+      "identicalLastTwoCooldownPasses": true
+    },
+    {
+      "policy": "HYPE_BTC3H_LE0P8_REL3H_GE2P0",
+      "costBps": 10,
+      "file": "candidate-decisions.jsonl",
+      "sha256": "21d33bf1fc3a629a7aefccdd3c47b8c4405314af889cc0f7c849eb786ae5e1bb",
+      "identicalLastTwoCooldownPasses": true
+    },
+    {
+      "policy": "HYPE_BTC3H_LE0P8_REL3H_GE2P0",
+      "costBps": 10,
+      "file": "portfolio-trades.jsonl",
+      "sha256": "8b492f7e0a999642cc5f64415b30236287deeffdc27ca1792fefe511a04efd0d",
+      "identicalLastTwoCooldownPasses": true
+    },
+    {
+      "policy": "HYPE_BTC3H_LE0P8_REL3H_GE2P0",
+      "costBps": 10,
+      "file": "portfolio-events.jsonl",
+      "sha256": "5daf455baec33d5fd02ecea40357dd868731098f6abf710664950da8b2a3bea9",
+      "identicalLastTwoCooldownPasses": true
+    },
+    {
+      "policy": "HYPE_BTC3H_LE0P8_REL3H_GE2P0",
+      "costBps": 10,
+      "file": "task9-mtm.jsonl",
+      "sha256": "c0e5d6bc03dea52a3f90902358126e32caf149a68f77885f8f6b2abf294373a8",
+      "identicalLastTwoCooldownPasses": true
+    },
+    {
+      "policy": "HYPE_BTC3H_LE0P8_REL3H_GE2P0",
+      "costBps": 10,
+      "file": "metrics.json",
+      "sha256": "37956e29fabae70e0b0ff6d13891d938f3fb2783d83561718a706cca8206bd2c",
+      "identicalLastTwoCooldownPasses": true
+    },
+    {
+      "policy": "HYPE_BTC3H_LE0P8_REL3H_GE2P0",
+      "costBps": 30,
+      "file": "candidate-decisions.jsonl",
+      "sha256": "c3ce7bb62ad55f79934553af9b320e341d3913f5f4f5d6c16888ce20e1205a88",
+      "identicalLastTwoCooldownPasses": true
+    },
+    {
+      "policy": "HYPE_BTC3H_LE0P8_REL3H_GE2P0",
+      "costBps": 30,
+      "file": "portfolio-trades.jsonl",
+      "sha256": "8138c88120cc32491f7dffa4f87c6b4180a5999a7b0b26b7d81dc17f128321e2",
+      "identicalLastTwoCooldownPasses": true
+    },
+    {
+      "policy": "HYPE_BTC3H_LE0P8_REL3H_GE2P0",
+      "costBps": 30,
+      "file": "portfolio-events.jsonl",
+      "sha256": "94a635b60b05a3cd06ce0830b6475d76d858a0090f0178b8bc2077549fd2139f",
+      "identicalLastTwoCooldownPasses": true
+    },
+    {
+      "policy": "HYPE_BTC3H_LE0P8_REL3H_GE2P0",
+      "costBps": 30,
+      "file": "task9-mtm.jsonl",
+      "sha256": "46d553cba3c9b36b8352c81fe854e48690859760936c9badf1d0b23301d9f706",
+      "identicalLastTwoCooldownPasses": true
+    },
+    {
+      "policy": "HYPE_BTC3H_LE0P8_REL3H_GE2P0",
+      "costBps": 30,
+      "file": "metrics.json",
+      "sha256": "c9f0b569a3431752e95d3edb7e44a1d93e0ac7bd12b6a9a6ed008eded51d57ec",
+      "identicalLastTwoCooldownPasses": true
+    },
+    {
+      "policy": "HYPE_BTC3H_LE0P6_REL3H_GE2P0",
+      "costBps": 10,
+      "file": "candidate-decisions.jsonl",
+      "sha256": "0d0d5999a0a0b778ed50f85765c26f7ed798ef1c05ba5bec4870ed74e4078d19",
+      "identicalLastTwoCooldownPasses": true
+    },
+    {
+      "policy": "HYPE_BTC3H_LE0P6_REL3H_GE2P0",
+      "costBps": 10,
+      "file": "portfolio-trades.jsonl",
+      "sha256": "d16ca661dbe84b30a8c25ac8a6f66399806447cc70b30507ce04b32c67427878",
+      "identicalLastTwoCooldownPasses": true
+    },
+    {
+      "policy": "HYPE_BTC3H_LE0P6_REL3H_GE2P0",
+      "costBps": 10,
+      "file": "portfolio-events.jsonl",
+      "sha256": "202f2623288dcd597bb6608a0d60b8f352ef7412b9fdb542b92e87ff146ae2cd",
+      "identicalLastTwoCooldownPasses": true
+    },
+    {
+      "policy": "HYPE_BTC3H_LE0P6_REL3H_GE2P0",
+      "costBps": 10,
+      "file": "task9-mtm.jsonl",
+      "sha256": "2b5bb3a0ef9cccb8a39807678fcf32ed58bb2977d7ad480fe0cf6b27500ecd90",
+      "identicalLastTwoCooldownPasses": true
+    },
+    {
+      "policy": "HYPE_BTC3H_LE0P6_REL3H_GE2P0",
+      "costBps": 10,
+      "file": "metrics.json",
+      "sha256": "55affabcfcc10f71eaef3ac5083a07f86b9e4257504e7db76561970d9ad7fc5c",
+      "identicalLastTwoCooldownPasses": true
+    },
+    {
+      "policy": "HYPE_BTC3H_LE0P6_REL3H_GE2P0",
+      "costBps": 30,
+      "file": "candidate-decisions.jsonl",
+      "sha256": "86779d235b7edfe575053d63d304ec0ea084cad33f2e706f978eec07cd24a0ad",
+      "identicalLastTwoCooldownPasses": true
+    },
+    {
+      "policy": "HYPE_BTC3H_LE0P6_REL3H_GE2P0",
+      "costBps": 30,
+      "file": "portfolio-trades.jsonl",
+      "sha256": "3662c9e9d98583ee9d322aa15c4fef53c834bd3c2ff2a2d252cf85d07dde790d",
+      "identicalLastTwoCooldownPasses": true
+    },
+    {
+      "policy": "HYPE_BTC3H_LE0P6_REL3H_GE2P0",
+      "costBps": 30,
+      "file": "portfolio-events.jsonl",
+      "sha256": "7aa8242b6d61c6941cc8c93fa5664d06e1a7c406dea3cdd7af6985f05f6bf127",
+      "identicalLastTwoCooldownPasses": true
+    },
+    {
+      "policy": "HYPE_BTC3H_LE0P6_REL3H_GE2P0",
+      "costBps": 30,
+      "file": "task9-mtm.jsonl",
+      "sha256": "08ad0ddd3d11df625be730bc33d851a0b651618578a9cd2ee70f78bccfb155ca",
+      "identicalLastTwoCooldownPasses": true
+    },
+    {
+      "policy": "HYPE_BTC3H_LE0P6_REL3H_GE2P0",
+      "costBps": 30,
+      "file": "metrics.json",
+      "sha256": "c79b6ca3c045dfe0b5a5b839a7edd2aafc4f9d616756d16fa3ae85950f57fb9f",
+      "identicalLastTwoCooldownPasses": true
+    }
+  ],
+  "filesExact": 40
+}
