@@ -160,6 +160,24 @@ def verify(decisions_path, trades_path, task9_path, cost, old_dir=None, new_dir=
                "replayableRows": coverage.get("replayableRows")}
     if gap is None:
         gap = canonical_compare(old_dir, new_dir)
+    if gap is None:
+        # Exact JSON equality is not enough: it must cover the ENTIRE original
+        # replay, not a conveniently matching excerpt of trade/mark records.
+        expected_candidates = len(decisions)
+        expected_trades = len(trades)
+        expected_h1_marks = 8760  # Full 2025-08-10 to 2026-08-10 research year.
+        segment_count = {
+            name: len(read_jsonl(old_dir / f"{name}.jsonl"))
+            for name in SEGMENTS
+        }
+        if (segment_count["candidate_order"] != expected_candidates
+                or segment_count["trade_ledger"] != expected_trades
+                or segment_count["mark_to_market_timeline"] < expected_h1_marks):
+            gap = {"stage": "INCOMPLETE_CANONICAL_TRACE_COVERAGE",
+                   "expectedCandidateRows": expected_candidates,
+                   "expectedClosedTrades": expected_trades,
+                   "minimumHourlyMarketMarks": expected_h1_marks,
+                   "actualSegmentCounts": segment_count}
     return {"schemaVersion": 1,
             "status": "COMPLETE_TRACE_PARITY" if gap is None else "BLOCKED_FIRST_DIVERGENCE",
             "costBps": cost, "totalCandidates": len(decisions),
