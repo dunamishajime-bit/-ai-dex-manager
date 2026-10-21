@@ -192,6 +192,29 @@ test("one valid candidate never launders an incomplete eight-strategy source int
     });
 });
 
+test("nonempty prices without MTM replay cannot be misreported as zero drawdown", async () => {
+    await withOutput(async (outputDir) => {
+        const strategies = ["V12", "Q102", "PENGU", "FET", "RESIDUAL", "IDLE", "V52", "HYPE_LONG"];
+        const rows = strategies.flatMap((strategy, index) => [
+            row(`is-${index}`, { strategy_id: strategy, event_seq: index + 1, planned_exit: null, data_split: "IS" }),
+            row(`oos-${index}`, { strategy_id: strategy, event_seq: index + 1, planned_exit: null,
+                data_split: "OOS", decision_ts_ms: OOS_START, signal_ts_ms: OOS_START, entry_valid_until_ms: OOS_START + 86_400_000 }),
+            row(`holdout-${index}`, { strategy_id: strategy, event_seq: index + 1, planned_exit: null,
+                data_split: "HOLDOUT", decision_ts_ms: HOLDOUT_START, signal_ts_ms: HOLDOUT_START, entry_valid_until_ms: HOLDOUT_START + 86_400_000 }),
+        ]);
+        const result = await runTask9Dynamic({
+            outputDir, sourceRecords: [source(rows)], cases: ["BASELINE"], costs: [10],
+            marketData: [{ timestamp_ms: START, symbol: "BTCUSDT", price: 100, fx_rate: 1, timeframe: "H1" }],
+        });
+        const item = result.cases[0]!;
+        assert.equal(item.sourceCoverage.status, "COMPLETE");
+        assert.equal(item.sourceCoverage.replayableRows, 24);
+        assert.equal(item.classification, "BLOCKED_INCOMPLETE_SOURCE_COVERAGE");
+        assert.equal(item.economicMetrics, null);
+        assert.equal(item.economicAcceptanceEligible, false);
+    });
+});
+
 test("source-backed preallocation exclusions are accounted separately from actionable rejected candidates", async () => {
     await withOutput(async (outputDir) => {
         const strategies = ["V12", "Q102", "PENGU", "FET", "RESIDUAL", "IDLE", "V52", "HYPE_LONG"];

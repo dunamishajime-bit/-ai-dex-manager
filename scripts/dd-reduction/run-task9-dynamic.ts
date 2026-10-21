@@ -286,7 +286,7 @@ function metricResult(replay: DynamicReplayResult, stops: readonly Task9StopEven
     const cooldownExclusions = replay.execution_ledger.filter((item) => item.reason === "COOLDOWN_ACTIVE").length;
     const grossReadmissions = replay.preemption_ledger.filter((item) => item.lifecycle === "VICTIM_RELEASED_INCOMING_REJECTED").length;
     return {
-        finalEquityJpy: replay.mtm_timeline.at(-1)?.equity_jpy ?? replay.accounting.wallet_jpy, jpyProfitFactor: profitFactor(closed), mtmMaxDdPct: replay.maximum_mtm_dd?.drawdown_pct ?? 0,
+        finalEquityJpy: replay.mtm_timeline.at(-1)?.equity_jpy ?? replay.accounting.wallet_jpy, jpyProfitFactor: profitFactor(closed), mtmMaxDdPct: replay.mtm_timeline.length > 1 ? (replay.maximum_mtm_dd?.drawdown_pct ?? 0) : null,
         oosPf: splits.OOS.profitFactor, oosNetPnlJpy: splits.OOS.netPnlJpy, holdoutPf: splits.HOLDOUT.profitFactor, holdoutNetPnlJpy: splits.HOLDOUT.netPnlJpy,
         winRate: closed.length === 0 ? null : closed.filter((item) => item.pnl_jpy > 0).length / closed.length, tradeCount: closed.length,
         stopEvents: stops.length, duplicateStops: 0, cooldownExclusions, grossReadmissions, dynamicLotObservations: acceptedEntries,
@@ -370,7 +370,14 @@ function caseResult(policy: Task9CasePolicy, costBps: Task9CostBps, normalized: 
         preemptionCount: baseReplay.preemption_ledger.length,
         maximumSameDirectionGross: baseReplay.allocator_state_snapshots.flatMap((snapshot) => Object.values(snapshot.allocator_after.gross_by_symbol)).reduce((max, value) => Math.max(max, value), 0),
     };
-    const blocked = source.status !== "COMPLETE" || unverifiedSplitCount > 0 || marketData.length === 0 || splitEvents.OOS.length === 0 || splitEvents.HOLDOUT.length === 0;
+    // A nonempty list of prices is NOT MTM evidence. Real MARK events must be
+    // emitted and reconciled in every split before any economic/DD claim.
+    const markReplayComplete = (["IS", "OOS", "HOLDOUT"] as const).every((split) =>
+        splitEvents[split].some((event) => event.kind === "MARK"))
+        && baseReplay.mtm_timeline.length > 1
+        && oosReplay.mtm_timeline.length > 1 && holdoutReplay.mtm_timeline.length > 1;
+    const blocked = source.status !== "COMPLETE" || unverifiedSplitCount > 0 || marketData.length === 0
+        || splitEvents.OOS.length === 0 || splitEvents.HOLDOUT.length === 0 || !markReplayComplete;
     const replayPass = baseReplay.status === "PASS" && oosReplay.status === "PASS" && holdoutReplay.status === "PASS";
     const metrics = blocked || !replayPass ? null : metricResult(baseReplay, stops, splits);
     const classification: Task9Classification = blocked ? "BLOCKED_INCOMPLETE_SOURCE_COVERAGE" : !replayPass ? "BLOCKED_REPLAY" : policy.name === "BASELINE" ? "REJECTED" : "DD_IMPROVED_RESEARCH_ONLY";

@@ -30,6 +30,11 @@ Historical fill verification is FALSE for every modeled entry observed: these ar
 | portfolio-events.jsonl | 4020ef8181944999d59abc161444299061f225f4cde56e7b47745e00314a4166 | b859f95983cbcc4587dcc83ae15f4ff330d545cc32596b2f30fe7611ac06c0e7 |
 | portfolio-trades.jsonl | 6c7a2f6d73336109af852c233bfdcb9013cbe73ac06f83070b39b73306d20e78 | 9cb346e7c4e341bd277de8b60256dd6e8efe9b7f266b54bc52ed5ccff0112e05 |
 
+## Economic/MTM fail-closed guard
+- The Task 9 runner must not report DD=0 solely because it has an initial cash/equity point. A confirmed chronological MARK replay must exist in IS, OOS and independent Holdout before economic metrics are generated.
+- Input market prices are not themselves proof that the portfolio was marked to market. The current runner does not produce the required source-backed MARK event stream for this historical dataset and remains blocked.
+- The guard is regression-tested with a complete synthetic eight-strategy candidate set and nonempty, but insufficient, market data.
+
 ## Reproducibility and next requirements
 - Code: scripts/dd-reduction/audit-task9-existing-evidence.py
 - Synthetic self-contained tests: scripts/dd-reduction/test_task9_existing_evidence.py
