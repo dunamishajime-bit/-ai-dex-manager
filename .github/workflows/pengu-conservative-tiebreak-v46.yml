@@ -1,0 +1,57 @@
+name: PENGU Conservative Tiebreak V46
+
+on:
+  push:
+    branches:
+      - research/pengu-dual-engine-v39
+    paths:
+      - scripts/research_lab_pengu_conservative_tiebreak_v46.py
+      - scripts/research_lab_pengu_regime_aware_dual_engine_v45.py
+      - scripts/research_lab_pengu_long_regime_gate_v44.py
+      - scripts/research_lab_pengu_recovery_dual_engine_v41.py
+      - scripts/research_lab_pengu_long_completion_v40.py
+      - scripts/research_lab_pengu_dual_engine_v39.py
+      - .github/workflows/pengu-conservative-tiebreak-v46.yml
+  pull_request:
+    branches:
+      - master
+    paths:
+      - scripts/research_lab_pengu_conservative_tiebreak_v46.py
+      - scripts/research_lab_pengu_regime_aware_dual_engine_v45.py
+      - scripts/research_lab_pengu_long_regime_gate_v44.py
+      - scripts/research_lab_pengu_recovery_dual_engine_v41.py
+      - scripts/research_lab_pengu_long_completion_v40.py
+      - scripts/research_lab_pengu_dual_engine_v39.py
+      - .github/workflows/pengu-conservative-tiebreak-v46.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Syntax check
+        run: python -m py_compile scripts/research_lab_pengu_conservative_tiebreak_v46.py
+      - name: Run PENGU conservative tiebreak
+        env:
+          RESEARCH_AUTONOMOUS_STATE_DIR: .research-state
+        run: python scripts/research_lab_pengu_conservative_tiebreak_v46.py
+      - name: Upload V46 evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pengu-conservative-tiebreak-v46
+          path: |
+            .research-state/pengu-conservative-tiebreak-v46.json
+            .research-state/pengu-conservative-tiebreak-v46.md
+          if-no-files-found: warn
+          retention-days: 30
