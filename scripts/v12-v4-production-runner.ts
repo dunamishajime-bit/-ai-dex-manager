@@ -68,6 +68,21 @@ export function classifyV4DaemonRateBudgetOutcome(
  return {status:"blocked",reason:"V4_RATE_BUDGET_RECONCILIATION_BLOCKED:"+rate.reason,
   waitMs:Math.max(15000,nextAsterRateBudgetRetryMs(0,1000,15000,rate.waitMs??0,()=>0.5))};
 }
+// Certification evidence can become stale while the process is otherwise
+// healthy.  This is a safety BLOCKED state, not a daemon-fatal condition:
+// no order is allowed, the signed reconciliation loop remains alive, and the
+// next tick can recover after a newly captured exact-SHA evidence bundle is
+// installed.  Keep unknown certification failures fatal so a malformed or
+// mismatched artifact is never hidden as a benign retry.
+export type V4DaemonFailClosedOutcome={status:"blocked";reason:string;waitMs:number};
+export function classifyV4DaemonFailClosedOutcome(
+ error:unknown,_doc:V4ExecutionDocument,
+):V4DaemonFailClosedOutcome|undefined{
+ const raw=error instanceof Error?error.message:String(error);
+ const match=/^V4_EVIDENCE_STALE:([A-Za-z0-9_.-]+)$/.exec(raw);
+ if(!match)return;
+ return {status:"blocked",reason:`V4_CERTIFICATION_EVIDENCE_STALE:${match[1]}`,waitMs:300000};
+}
 function v4HealthPath(){
  return String(process.env.V12_V4_HEALTH_STATE_PATH??"/var/lib/disdex/v12-v4/heartbeat.json").trim();
 }
@@ -342,7 +357,8 @@ async function main(){
     onContention:()=>{hadLockContention=true;},
    });
   }catch(error){
-   const budget=classifyV4DaemonRateBudgetOutcome(error,store.read());
+   const staleEvidence=classifyV4DaemonFailClosedOutcome(error,store.read());
+   const budget=staleEvidence?staleEvidence:classifyV4DaemonRateBudgetOutcome(error,store.read());
    if(!budget)throw error;
    deferredWaitMs=budget.waitMs;
    result={status:budget.status,reason:budget.reason,eventTs:Date.now(),candidateCount:0,orderEnabled:false};

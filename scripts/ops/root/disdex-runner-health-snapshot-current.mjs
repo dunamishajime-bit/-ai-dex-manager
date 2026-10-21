@@ -497,10 +497,20 @@ async function buildHeartbeat(runner, now, globalBlockReason) {
     const identityOk = serviceActive && processPresent && cwdCurrent && commandCurrent && execCurrent;
     const parityReason = await idleParityReason(runner);
     const manualReviewReason = state?.manualReview ? `${runner.key} manual review is active` : "";
+    const runtimeFailClosed = runner.key === "V12_V4" && (
+        String(state?.safetyState || "").toUpperCase() === "BLOCKED"
+        || String(state?.status || "").toLowerCase() === "blocked"
+        || (state?.orderEnabled === false && String(state?.reason || "").startsWith("V4_"))
+    );
+    const runtimeFailClosedReason = runtimeFailClosed
+        ? `${runner.key} runtime fail-closed: ${String(state?.reason || "BLOCKED")}`
+        : "";
     const blockedReason = globalBlockReason || stateError || serviceError || parityReason || !releaseValid(runner)
         ? (globalBlockReason || stateError || serviceError || parityReason || "release pin is invalid")
         : manualReviewReason
             ? manualReviewReason
+            : runtimeFailClosed
+                ? runtimeFailClosedReason
             : !identityOk
                 ? `${runner.key} service identity is not current`
                 : !stateIdentityMatches(runner, state)

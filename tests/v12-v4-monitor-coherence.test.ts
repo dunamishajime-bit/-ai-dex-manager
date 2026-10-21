@@ -74,6 +74,15 @@ test("watchdog accepts only a healthy, live-enabled V4 limited canary heartbeat"
  assert.match(watchdog,/safetyState === "HEALTHY"/);
 });
 
+test("V4 stale-evidence BLOCKED heartbeat is propagated to health and held by watchdog",()=>{
+ assert.match(runner,/V4_CERTIFICATION_EVIDENCE_STALE/);
+ assert.match(snapshot,/runtimeFailClosed/);
+ assert.match(snapshot,/state\?\.safetyState \|\| ""/);
+ assert.match(snapshot,/state\?\.orderEnabled === false/);
+ assert.match(watchdog,/runtimeFailClosed/);
+ assert.match(watchdog,/HOLD_FAIL_CLOSED/);
+});
+
 test("limited overlay wiring installs the V52 intentional-stop marker",()=>{
  assert.match(wiring,/v52\.intentional-stop/);
  assert.match(wiring,/ensure_v52_intentional_stop_marker/);

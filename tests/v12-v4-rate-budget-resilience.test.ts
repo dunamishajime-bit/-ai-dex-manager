@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import {classifyV4RateBudgetDefer,classifyV4DaemonRateBudgetOutcome,retryV4FlatBootstrapRateBudget} from "../scripts/v12-v4-production-runner";
+import {classifyV4RateBudgetDefer,classifyV4DaemonRateBudgetOutcome,classifyV4DaemonFailClosedOutcome,retryV4FlatBootstrapRateBudget} from "../scripts/v12-v4-production-runner";
 import type {V4ExecutionDocument} from "../lib/v12-v4-execution-store";
 
 function doc(overrides:Record<string,unknown>={}):V4ExecutionDocument{
@@ -107,10 +107,34 @@ test("daemon flat budget contention remains observing, non-budget exceptions rem
  }
 });
 
+test("stale certification evidence becomes a durable BLOCKED retry, not a daemon crash",()=>{
+ const outcome=classifyV4DaemonFailClosedOutcome(
+  new Error("V4_EVIDENCE_STALE:routeSourceParity"),doc());
+ assert.deepEqual(outcome,{
+  status:"blocked",
+  reason:"V4_CERTIFICATION_EVIDENCE_STALE:routeSourceParity",
+  waitMs:300000,
+ });
+});
+
+test("unknown certification failures remain fatal instead of being hidden",()=>{
+ assert.equal(classifyV4DaemonFailClosedOutcome(
+  new Error("V4_EVIDENCE_SHA_MISMATCH:routeSourceParity"),doc()),undefined);
+ assert.equal(classifyV4DaemonFailClosedOutcome(
+  new Error("V4_CERTIFICATION_NOT_APPROVED"),doc()),undefined);
+});
+
 test("daemon blocked budget branch is wired to status-dependent BLOCKED health, with no order path",()=>{
  const src=require("node:fs").readFileSync("scripts/v12-v4-production-runner.ts","utf8");
  assert.match(src,/classifyV4DaemonRateBudgetOutcome\(error,store\.read\(\)\)/);
  assert.match(src,/result=\{status:budget\.status,reason:budget\.reason,eventTs:Date\.now\(\),candidateCount:0,orderEnabled:false\}/);
  assert.match(src,/const failed=result\.status==="blocked"\|\|result\.status\.toLowerCase\(\)==="failed"/);
  assert.match(src,/safetyState:failed\?"BLOCKED"/);
+});
+
+test("stale evidence branch is wired before the rate-budget branch and cannot enable orders",()=>{
+ const src=require("node:fs").readFileSync("scripts/v12-v4-production-runner.ts","utf8");
+ assert.match(src,/const staleEvidence=classifyV4DaemonFailClosedOutcome\(error,store\.read\(\)\)/);
+ assert.match(src,/const budget=staleEvidence\?staleEvidence:classifyV4DaemonRateBudgetOutcome\(error,store\.read\(\)\)/);
+ assert.match(src,/orderEnabled:false/);
 });

@@ -581,7 +581,9 @@ async function evaluateRunner(config, runner, state, now) {
     if (!identityHealthy) {
         const safetyReason = safeReason(heartbeat.reason || "");
         const serviceIdentityBlock = safetyReason.includes("service identity is not current");
-        if (heartbeat.valid && heartbeat.safeState === false && !serviceIdentityBlock) {
+        const runtimeFailClosed = runner.key === "V12_V4"
+            && safetyReason.startsWith("V12_V4 runtime fail-closed:");
+        if (heartbeat.valid && heartbeat.safeState === false && (runtimeFailClosed || !serviceIdentityBlock)) {
             return { result: decision("HOLD_FAIL_CLOSED", safetyReason || "heartbeat safety state is not healthy", runner), attempts, clearAttempts: false };
         }
         const reason = !service.active || service.mainPid <= 0 ? "service is not active" : process.cwd !== runner.expectedCwd ? "process cwd is not pinned to release" : "process command is not pinned to runner";
