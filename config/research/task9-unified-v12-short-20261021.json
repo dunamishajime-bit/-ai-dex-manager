@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "policyId": "V12_SHORT_PCT2P5_12H_MFE1P0_R12",
+  "task9CaseName": "SOURCE_BACKED_V12_SHORT_2P5",
+  "strategy": "V12",
+  "side": "SHORT",
+  "stopPct": 0.025,
+  "armHours": 12,
+  "mfeGatePct": 0.01,
+  "reentryHours": 12,
+  "selectionMode": "POST_HOC_EXPLORATORY",
+  "sourcePriceEngine": "FROZEN_FULL8_20261017_H1_PRICE_MODEL_WITH_M5_OVERLAY",
+  "task9DynamicEngine": "TASK9_CAUSAL_REPLAY",
+  "economicAuthority": "FROZEN_SOURCE_BACKED_FULL8_UNTIL_PARITY",
+  "coordinatorOnly": true,
+  "standaloneBaselineAnchors": {
+    "10bps": {
+      "finalEquityJpy": 222818966.87803495,
+      "profitFactor": 3.4587962777009813,
+      "maxDrawdownPct": -15.62063681288941,
+      "closedTrades": 1310
+    },
+    "30bps": {
+      "finalEquityJpy": 124289206.81827945,
+      "profitFactor": 3.0785603081685435,
+      "maxDrawdownPct": -16.78776877493442,
+      "closedTrades": 1307
+    }
+  },
+  "unifiedPromotionGate": {
+    "independentLedgerParityRequired": true,
+    "stopFillThenCooldownRequired": true,
+    "markToMarketSeriesRequired": true,
+    "allStrategiesCompleteRequired": true,
+    "noProductionChanges": true
+  }
+}

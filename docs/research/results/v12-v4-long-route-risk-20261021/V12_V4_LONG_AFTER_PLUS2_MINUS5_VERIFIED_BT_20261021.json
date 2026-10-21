@@ -1,0 +1,290 @@
+{
+  "status": "8LOGIC_BT_VERIFIED_RESEARCH_ONLY_X3_MINUS5_NO_EXTRA_EXIT",
+  "period": "2025-08-10 through 2026-08-10",
+  "initialCapitalJpy": 10000,
+  "depositsAfterInitial": 0,
+  "costsBps": [
+    10,
+    30
+  ],
+  "scriptSha256": "44150467be04e73f6230c6628aace852efebf74fe278123d1c26da585cf77146",
+  "sourceArchiveSha256": "10cdc48705a6f9e310cd0aecc95ce781af24325b1a99c2eb9aaefe3bd2953934",
+  "reference": {
+    "baseline": {
+      "10": {
+        "finalEquityJpy": 222818966.87803495,
+        "maxMtmDdPct": -15.62063681288941,
+        "profitFactor": 3.4587962777009813
+      },
+      "30": {
+        "finalEquityJpy": 124289206.81827945,
+        "maxMtmDdPct": -16.78776877493442,
+        "profitFactor": 3.0785603081685435
+      }
+    },
+    "selectedPlus3ToPlus1": {
+      "10": {
+        "finalEquityJpy": 222373710.67972845,
+        "maxMtmDdPct": -15.62063681288941,
+        "profitFactor": 3.460034050355703
+      },
+      "30": {
+        "finalEquityJpy": 123696117.15444088,
+        "maxMtmDdPct": -16.78776877493442,
+        "profitFactor": 3.077989707530853
+      }
+    }
+  },
+  "cases": {
+    "X3_AFTER2_STOP_MINUS5": {
+      "rule": {
+        "id": "X3_AFTER2_STOP_MINUS5",
+        "mode": "layered_h1_and_m5_stop",
+        "strategy": "V12",
+        "sides": [
+          "LONG"
+        ],
+        "routes": [
+          "REC_X09_TIME_48H",
+          "REC_X10_TIME_48H",
+          "REC_X14_TIME_48H"
+        ],
+        "mfe_gte": 0.03,
+        "close_floor": 0.01,
+        "bear_bars": 2,
+        "pre_arm_mfe": 0.02,
+        "m5_floor": -0.05
+      },
+      "costs": {
+        "10": {
+          "finalEquityJpy": 222373710.67972845,
+          "deltaVsSelectedJpy": 0.0,
+          "deltaVsBaselineJpy": -445256.1983065009,
+          "profitFactor": 3.460034050355703,
+          "maxMtmDdPct": -15.62063681288941,
+          "ddImprovementPp": 0.0,
+          "closedTrades": 1310,
+          "admittedV12LongStops": 1,
+          "historicalLosersImproved": 0,
+          "historicalWinnersExitedEarly": 1,
+          "accounting": "PASS"
+        },
+        "30": {
+          "finalEquityJpy": 123696117.15444088,
+          "deltaVsSelectedJpy": 0.0,
+          "deltaVsBaselineJpy": -593089.6638385653,
+          "profitFactor": 3.077989707530853,
+          "maxMtmDdPct": -16.78776877493442,
+          "ddImprovementPp": 0.0,
+          "closedTrades": 1307,
+          "admittedV12LongStops": 1,
+          "historicalLosersImproved": 0,
+          "historicalWinnersExitedEarly": 1,
+          "accounting": "PASS"
+        }
+      }
+    },
+    "TIME37_AFTER2_STOP_MINUS5": {
+      "rule": {
+        "id": "TIME37_AFTER2_STOP_MINUS5",
+        "mode": "layered_h1_and_m5_stop",
+        "strategy": "V12",
+        "sides": [
+          "LONG"
+        ],
+        "routes": [
+          "CONT_SHORT_MID_AGE24_48",
+          "FAILED_BREAK_REV_SHORT_6H",
+          "REC_G1_MID_REL_LOWVOL",
+          "REC_G2_EARLY_BTC_OPPOSE_VOL",
+          "REC_G4_MATURE_REL_RANGE",
+          "REC_G5_SLOW_TREND",
+          "REC_X01_TIME_24H",
+          "REC_X02_TIME_36H",
+          "REC_X03_TIME_12H",
+          "REC_X04_TIME_24H",
+          "REC_X05_TIME_36H",
+          "REC_X06_TIME_12H",
+          "REC_X07_TIME_6H",
+          "REC_X08_TIME_48H",
+          "REC_X09_TIME_48H",
+          "REC_X10_TIME_48H",
+          "REC_X11_TIME_48H",
+          "REC_X12_TIME_12H",
+          "REC_X14_TIME_48H",
+          "REC_Y01_REV_D0_T72",
+          "REC_Y02_REV_D0_T12",
+          "REC_Y03_REV_D0_T36",
+          "REC_Y04_REV_D2_T36",
+          "REC_Y05_REV_D2_T9",
+          "REC_Y06_REV_D0_T72",
+          "REC_Y07_REV_D0_T72",
+          "REC_Y08_REV_D0_T6",
+          "REC_Y09_REV_D2_T24",
+          "REC_Y10_REV_D2_T24",
+          "REC_Y11_REV_D0_T36",
+          "REC_Y12_REV_D0_T24",
+          "REC_Y13_REV_D2_T36",
+          "REC_Y15_REV_D0_T3",
+          "REC_Y16_REV_D0_T6",
+          "REC_Y17_REV_D1_T3",
+          "REC_Y18_REV_D2_T18",
+          "REC_Z14_ORIG_D2_T6"
+        ],
+        "mfe_gte": 0.03,
+        "close_floor": 0.01,
+        "bear_bars": 2,
+        "pre_arm_mfe": 0.02,
+        "m5_floor": -0.05
+      },
+      "costs": {
+        "10": {
+          "finalEquityJpy": 216725170.26954138,
+          "deltaVsSelectedJpy": -5648540.410187066,
+          "deltaVsBaselineJpy": -6093796.6084935665,
+          "profitFactor": 3.3708571081583734,
+          "maxMtmDdPct": -15.624061212035,
+          "ddImprovementPp": -0.003424399145590229,
+          "closedTrades": 1311,
+          "admittedV12LongStops": 9,
+          "historicalLosersImproved": 0,
+          "historicalWinnersExitedEarly": 8,
+          "accounting": "PASS"
+        },
+        "30": {
+          "finalEquityJpy": 115339339.6074713,
+          "deltaVsSelectedJpy": -8356777.546969578,
+          "deltaVsBaselineJpy": -8949867.210808143,
+          "profitFactor": 2.9527473104922426,
+          "maxMtmDdPct": -16.80951407641711,
+          "ddImprovementPp": -0.021745301482688717,
+          "closedTrades": 1307,
+          "admittedV12LongStops": 9,
+          "historicalLosersImproved": 0,
+          "historicalWinnersExitedEarly": 6,
+          "accounting": "PASS"
+        }
+      }
+    },
+    "X3_AFTER2_STOP_MINUS4": {
+      "rule": {
+        "id": "X3_AFTER2_STOP_MINUS4",
+        "mode": "layered_h1_and_m5_stop",
+        "strategy": "V12",
+        "sides": [
+          "LONG"
+        ],
+        "routes": [
+          "REC_X09_TIME_48H",
+          "REC_X10_TIME_48H",
+          "REC_X14_TIME_48H"
+        ],
+        "mfe_gte": 0.03,
+        "close_floor": 0.01,
+        "bear_bars": 2,
+        "pre_arm_mfe": 0.02,
+        "m5_floor": -0.04
+      },
+      "costs": {
+        "10": {
+          "finalEquityJpy": 222873279.21738908,
+          "deltaVsSelectedJpy": 499568.53766062856,
+          "deltaVsBaselineJpy": 54312.339354127645,
+          "profitFactor": 3.458561591238774,
+          "maxMtmDdPct": -15.6247745935161,
+          "ddImprovementPp": -0.004137780626690457,
+          "closedTrades": 1309,
+          "admittedV12LongStops": 2,
+          "historicalLosersImproved": 0,
+          "historicalWinnersExitedEarly": 2,
+          "accounting": "PASS"
+        },
+        "30": {
+          "finalEquityJpy": 121415902.45165256,
+          "deltaVsSelectedJpy": -2280214.702788323,
+          "deltaVsBaselineJpy": -2873304.3666268885,
+          "profitFactor": 3.0732741875591043,
+          "maxMtmDdPct": -16.818407056543073,
+          "ddImprovementPp": -0.030638281608652562,
+          "closedTrades": 1306,
+          "admittedV12LongStops": 2,
+          "historicalLosersImproved": 0,
+          "historicalWinnersExitedEarly": 2,
+          "accounting": "PASS"
+        }
+      }
+    },
+    "X3_AFTER2_STOP_MINUS6": {
+      "rule": {
+        "id": "X3_AFTER2_STOP_MINUS6",
+        "mode": "layered_h1_and_m5_stop",
+        "strategy": "V12",
+        "sides": [
+          "LONG"
+        ],
+        "routes": [
+          "REC_X09_TIME_48H",
+          "REC_X10_TIME_48H",
+          "REC_X14_TIME_48H"
+        ],
+        "mfe_gte": 0.03,
+        "close_floor": 0.01,
+        "bear_bars": 2,
+        "pre_arm_mfe": 0.02,
+        "m5_floor": -0.06
+      },
+      "costs": {
+        "10": {
+          "finalEquityJpy": 222373710.67972845,
+          "deltaVsSelectedJpy": 0.0,
+          "deltaVsBaselineJpy": -445256.1983065009,
+          "profitFactor": 3.460034050355703,
+          "maxMtmDdPct": -15.62063681288941,
+          "ddImprovementPp": 0.0,
+          "closedTrades": 1310,
+          "admittedV12LongStops": 1,
+          "historicalLosersImproved": 0,
+          "historicalWinnersExitedEarly": 1,
+          "accounting": "PASS"
+        },
+        "30": {
+          "finalEquityJpy": 123696117.15444088,
+          "deltaVsSelectedJpy": 0.0,
+          "deltaVsBaselineJpy": -593089.6638385653,
+          "profitFactor": 3.077989707530853,
+          "maxMtmDdPct": -16.78776877493442,
+          "ddImprovementPp": 0.0,
+          "closedTrades": 1307,
+          "admittedV12LongStops": 1,
+          "historicalLosersImproved": 0,
+          "historicalWinnersExitedEarly": 1,
+          "accounting": "PASS"
+        }
+      }
+    }
+  },
+  "replayShaProof": "V12_V4_LONG_PLUS2_TO_MINUS5_SHA_PROOF_20261021.json",
+  "selectedPolicyStatus": "USER_SELECTED_RESEARCH_ONLY_NOT_ACTIVATED_ON_VENUE",
+  "marketFillContract": "M5 resident-like assumed, arm from earlier M5, gap adverse open",
+  "stopRule": {
+    "side": "LONG",
+    "mfeArmPct": 2.0,
+    "candidateStopPctFromEntry": -5.0,
+    "currentTimeRouteEmergencyStopPctFromEntry": -8.0,
+    "profitGuard": "MFE >= +3% then return <= +1% plus two completed bearish H1 closes"
+  },
+  "liveMutation": {
+    "VPS": false,
+    "orders": false,
+    "positions": false,
+    "stopOrders": false
+  },
+  "caveats": [
+    "No signed venue order or exact cancel/replace certification",
+    "3-route -5% additional 5m STOP never triggered for an accepted trade in the checked sample",
+    "All 37 route -5% has worse portfolio DD and profits in both costs",
+    "Historical all8 Task9 research allocator but not independently certified current TypeScript dynamic allocator",
+    "No claim of guaranteed -5% fill during gaps and slippage",
+    "Not proven to reduce current global worst DD, which had no V4 LONG exposure"
+  ]
+}

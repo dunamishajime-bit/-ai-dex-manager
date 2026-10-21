@@ -1,0 +1,91 @@
+{
+  "contractId": "V12_V4_LONG_SHORT_4_EXIT_RULES_20261021",
+  "status": "USER_SELECTED_FOR_CODEX_IMPLEMENTATION_NOT_LIVE",
+  "strategies": [
+    "V12_V4"
+  ],
+  "modelPeriod": {
+    "start": "2025-08-10",
+    "end": "2026-08-10",
+    "initialJpy": 10000,
+    "costBps": [
+      10,
+      30
+    ],
+    "source8LogicCausalParityRequired": true,
+    "combined4RuleBtCompleted": false
+  },
+  "long": {
+    "initialEmergencyTimeLongStopFromEntryPct": -8,
+    "lossProtection": {
+      "routeKind": "TIME",
+      "routeCount": 37,
+      "side": "LONG",
+      "onPreviousCompletedM5PeakMfePctAtLeast": 2,
+      "desiredResidentStopFromEntryPct": -5,
+      "perLegPersisted": true,
+      "monotonicNoLoosening": true,
+      "venueReduceOnlyStopAndSignedReadbackRequired": true
+    },
+    "profitGiveback": {
+      "scope": [
+        "REC_X09_TIME_48H",
+        "REC_X10_TIME_48H",
+        "REC_X14_TIME_48H"
+      ],
+      "peakMfePctAtLeast": 3,
+      "completedH1CloseGainPctAtMost": 1,
+      "consecutiveCompletedBearishH1": 2,
+      "execute": "next executable reduce-only market exit",
+      "marketFillNotGuaranteedAtFloor": true
+    }
+  },
+  "short": {
+    "initialEmergencyTimeShortStopFromEntryPct": 8,
+    "initialAdverseExit": {
+      "routeCount": 41,
+      "side": "SHORT",
+      "afterElapsedHours": 12,
+      "peakMfePctLessThan": 1,
+      "adversePctAtLeast": 2.5,
+      "execute": "causally qualified reduce-only exit",
+      "cooldownHours": 12,
+      "cooldownOnlyAfterVenueConfirmedExitFill": true,
+      "cooldownKey": [
+        "symbol",
+        "SHORT"
+      ]
+    },
+    "profitGiveback": {
+      "routeKind": "TIME",
+      "routeCount": 37,
+      "side": "SHORT",
+      "peakMfePctAtLeast": 5,
+      "completedH1GainPctAtMost": 2,
+      "consecutiveCompletedBullishH1": 2,
+      "execute": "next executable reduce-only market cover",
+      "marketFillNotGuaranteedAtFloor": true
+    }
+  },
+  "executionPrecedence": "earliest causally eligible filled exit; one closing ownership for one position",
+  "unmodifiedStrategyIds": [
+    "PENGU",
+    "Q102",
+    "V52",
+    "FET",
+    "HYPE_LONG",
+    "IDLE",
+    "RESIDUAL"
+  ],
+  "verification": {
+    "longSelectedSourceSha": "40107b7ae487b102687b462dfd1f3ba5c9492b56",
+    "longPurePolicySha": "f63314c066df7a3721880733f841c1b931a47f34",
+    "shortPurePolicySha": "519356c47de1a09a170bd5823fcd34efe7503964",
+    "full4RulesCombined8LogicEconomicBt": "NOT_DONE",
+    "independentLatestTask9LiveParity": "NOT_DONE",
+    "signedVenueLifecycleProof": "NOT_DONE",
+    "productionDeployed": false,
+    "orderStateChanged": false,
+    "researchSourceSha": "ef256afc74b4a7b1eaeeceecf69cba285570a2d7"
+  }
+}

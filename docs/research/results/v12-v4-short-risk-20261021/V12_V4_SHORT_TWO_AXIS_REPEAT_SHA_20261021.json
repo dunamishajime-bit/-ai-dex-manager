@@ -1,0 +1,58 @@
+{
+  "case": "SHORT_BOTH_2P5_AND_5P_TO_2P",
+  "sha256Matched": 10,
+  "ledgerEntries": [
+    {
+      "bps": 10,
+      "file": "candidate-decisions.jsonl",
+      "sha256": "acec68214579540889a6c0fafb3637fcd44000ef424512fb8c82aa2d4ebcfa1f"
+    },
+    {
+      "bps": 10,
+      "file": "portfolio-trades.jsonl",
+      "sha256": "193347f594de8fe12d2bacdafed22b6c86760ca87a09fef3b3f1c30c9e248f1d"
+    },
+    {
+      "bps": 10,
+      "file": "portfolio-events.jsonl",
+      "sha256": "08fc49154d1c902bf8e3e097d027ed1ae4320470babc1660be607c0921722017"
+    },
+    {
+      "bps": 10,
+      "file": "task9-mtm.jsonl",
+      "sha256": "7f2d21ff8ec81893aaf29c78190bac530670c9b2b0716e48f60d7e476b9fb011"
+    },
+    {
+      "bps": 10,
+      "file": "metrics.json",
+      "sha256": "41539c66b758e25f5569c3252bd2241d323ba23f7ef9f98528055f5cb9282763"
+    },
+    {
+      "bps": 30,
+      "file": "candidate-decisions.jsonl",
+      "sha256": "93a10e261c46b68b3a65690e172691c5bc67398718f4c72e3dae44337d6f3e68"
+    },
+    {
+      "bps": 30,
+      "file": "portfolio-trades.jsonl",
+      "sha256": "34f66b9fc042fa487b17447aefe13509f56a9ca46ab65b94b9d312055884320b"
+    },
+    {
+      "bps": 30,
+      "file": "portfolio-events.jsonl",
+      "sha256": "1f67c303af7fb031f617cd2f0a4290a5d8d69305c312fe9240e6a891ec22ba68"
+    },
+    {
+      "bps": 30,
+      "file": "task9-mtm.jsonl",
+      "sha256": "1d835918ec5863664b214095bd1329f107bc664bbcfa7a31a90821e81a3003f4"
+    },
+    {
+      "bps": 30,
+      "file": "metrics.json",
+      "sha256": "000692c05aba14fd25df1b67037e3b4c09289ec9b4adc84c6c13ba3fb4c9002e"
+    }
+  ],
+  "signedVenueCertified": false,
+  "productionModified": false
+}

@@ -1,0 +1,58 @@
+{
+  "case": "X3_PLUS3TO1_AND_PLUS2_FLOOR_ZERO",
+  "status": "PASS_10_OF_10",
+  "exact": 10,
+  "files": [
+    {
+      "bps": 10,
+      "file": "candidate-decisions.jsonl",
+      "sha256": "ffa9c2ceac54cdc8e049c09a74fadb391bbd54503a61429cf0a0ec94ef2fa145"
+    },
+    {
+      "bps": 10,
+      "file": "portfolio-trades.jsonl",
+      "sha256": "b8a2a272db0103272fa2fac2abbf06fb2b5f0fe68698d5865804e8a1f55c5e09"
+    },
+    {
+      "bps": 10,
+      "file": "portfolio-events.jsonl",
+      "sha256": "b0220c957bf33db8a81336191b0b97feb4d2bfe4c77aa38e6f89935a42d43d3e"
+    },
+    {
+      "bps": 10,
+      "file": "task9-mtm.jsonl",
+      "sha256": "ed4ed3092b42829763fde5616a430275f663cf76a7a64009757f26356f454b9c"
+    },
+    {
+      "bps": 10,
+      "file": "metrics.json",
+      "sha256": "469cc761750f51b312a4ebf36212aaa0348e9a2cfede899038a14595952a6f1e"
+    },
+    {
+      "bps": 30,
+      "file": "candidate-decisions.jsonl",
+      "sha256": "e6ca3a2c14aab4c00c0c07374d2f5cb615c8c6e866c3839a998a7a3815df2472"
+    },
+    {
+      "bps": 30,
+      "file": "portfolio-trades.jsonl",
+      "sha256": "e0394b01048aaf6b504595c1b032ca426b3b8d8ba54ed0383351a2d9bd572e0f"
+    },
+    {
+      "bps": 30,
+      "file": "portfolio-events.jsonl",
+      "sha256": "d46b56e5cc7b32310de6e44e527974619c1a8b834b9d44d2cb94701f3cdeb2c2"
+    },
+    {
+      "bps": 30,
+      "file": "task9-mtm.jsonl",
+      "sha256": "ac07b1237e4928eda8d0c0f6e95889e8cf1f94ccc6b32f5d582a4730e7f12daf"
+    },
+    {
+      "bps": 30,
+      "file": "metrics.json",
+      "sha256": "aa09c711fe9c00afe0245897a32ab223bf4bbbfe4f6af55a78b81b2a6460cc51"
+    }
+  ],
+  "liveMutated": false
+}

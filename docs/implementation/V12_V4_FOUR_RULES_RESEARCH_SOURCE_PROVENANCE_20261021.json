@@ -1,0 +1,467 @@
+{
+  "status": "SOURCE_GIT_BLOB_EXACT_76_OF_76",
+  "sourceBranch": "research/v4-short-two-axis-20261021",
+  "sourceCommit": "ef256afc74b4a7b1eaeeceecf69cba285570a2d7",
+  "sourceFileCount": 76,
+  "archiveMarketZipsIncluded": false,
+  "historicalMarketArchiveLocation": "owner PC historic Task9 source archive",
+  "productionCodeChangedByResearchImport": false,
+  "assets": [
+    {
+      "path": "config/research/task9-unified-v12-short-20261021.json",
+      "gitBlobSha1": "23ebaa7d37d98f36d75b39c03c127890bcfd426f",
+      "sha256": "3f982baf2daaf074d39d892d4c7184175f6a9fa3d6141dff77d399650cd24010",
+      "bytes": 1138
+    },
+    {
+      "path": "docs/implementation/V12_V4_LONG_USER_SELECTED_PROFIT_GUARD_20261021.md",
+      "gitBlobSha1": "75b0976e0b08e7efd9da9def85cfe741a7d578e6",
+      "sha256": "9ab8109efad99ed492dfa018316ba48e6bcc7957fe0e1afb5ec075046a593081",
+      "bytes": 4588
+    },
+    {
+      "path": "docs/research/results/v12-v4-long-route-risk-20261021/V12_V4_LONG_AFTER_PLUS2_MINUS5_VERIFIED_BT_20261021.json",
+      "gitBlobSha1": "2122014b75ffdc60dd01ef1f7505b4ef66e5817c",
+      "sha256": "df1682dec60d3b1016db2e7845b3779f4c63e1d667357dcdb0c4e1ec73591eb5",
+      "bytes": 9238
+    },
+    {
+      "path": "docs/research/results/v12-v4-long-route-risk-20261021/V12_V4_LONG_AFTER_PLUS2_MINUS5_VERIFIED_BT_20261021.md",
+      "gitBlobSha1": "d3843bfc09b5cfb0494bf9a462a35832dadbd6d8",
+      "sha256": "9b34806f997b9cbba07026c4ae3407888ddaa4bf8e4f213bd28d8da0c3b280d0",
+      "bytes": 3305
+    },
+    {
+      "path": "docs/research/results/v12-v4-long-route-risk-20261021/V12_V4_LONG_FROZEN_TIME37_ROUTE_CATALOG_20261021.json",
+      "gitBlobSha1": "5dcb635752d6d06f9ff7fa55b7b5244056a08f03",
+      "sha256": "70bffeff4332eb0eb42aec64564af623a9441404976aefecac2d87a3113555c5",
+      "bytes": 1093
+    },
+    {
+      "path": "docs/research/results/v12-v4-long-route-risk-20261021/V12_V4_LONG_H1_TWO_AXIS_RESEARCH_20261021.json",
+      "gitBlobSha1": "1be6fbee2b04037074ecdb6355c3e64c0da1af96",
+      "sha256": "214f1152ed8f0a0ada357c3f6f4fd0c0530e870bc47736b823318eaf05c87416",
+      "bytes": 22297
+    },
+    {
+      "path": "docs/research/results/v12-v4-long-route-risk-20261021/V12_V4_LONG_H1_TWO_AXIS_RESEARCH_20261021.md",
+      "gitBlobSha1": "8d1bc21dea810707a6597303258e8bd929100536",
+      "sha256": "a68d2434ebc4f1e2a580af10e39b49066f8bf84bc77cc51c93cc16241d03782a",
+      "bytes": 4944
+    },
+    {
+      "path": "docs/research/results/v12-v4-long-route-risk-20261021/V12_V4_LONG_INDEPENDENT_REPLAY_SHA_PROOF_20261021.json",
+      "gitBlobSha1": "a3ae6180c28b4c106006a355e23306c9af6aebdc",
+      "sha256": "ae20e1c16df4dc1e56e3f4190a9502ee86b8a29f5a530b4b65c1d74daf2d06bb",
+      "bytes": 4337
+    },
+    {
+      "path": "docs/research/results/v12-v4-long-route-risk-20261021/V12_V4_LONG_PLUS2_TO_MINUS5_SHA_PROOF_20261021.json",
+      "gitBlobSha1": "aad53ce081ead4ab4edc85d969d3166ae10fb373",
+      "sha256": "06e4f7cab7308d5bb87d8f373ff2c1da94238f1a6c0375968b065471a0a5902c",
+      "bytes": 1791
+    },
+    {
+      "path": "docs/research/results/v12-v4-long-route-risk-20261021/V12_V4_LONG_ROUTE_DD_REPORT_20261021.md",
+      "gitBlobSha1": "b9d5bd82b6ab48f741c901ae840ed4f69d236e0f",
+      "sha256": "7afce8115155e977edce0e7c2afedf6323b263a0f5c1c21c9472bfe42252b895",
+      "bytes": 5956
+    },
+    {
+      "path": "docs/research/results/v12-v4-long-route-risk-20261021/V12_V4_LONG_ROUTE_DD_SUMMARY_20261021.json",
+      "gitBlobSha1": "f6a11d211d48d3c2aba9a9a86a9ee13af425edcd",
+      "sha256": "2ca5bd1858c25323f5539bd5c949b8d51a6ed8d9c24a153b80e64445f6076916",
+      "bytes": 21056
+    },
+    {
+      "path": "docs/research/results/v12-v4-long-route-risk-20261021/V12_V4_LONG_SELECTED_PLUS3_PLUS1_AND_PLUS2_BACKUP_20261021.json",
+      "gitBlobSha1": "54b37776f233cbcf1d450c1de9a76fb8cb60277b",
+      "sha256": "ce7db43caf0126fb5f7e1fe567e51bc98e8b3aed5afc0e0f44f2ef0161dc8283",
+      "bytes": 13056
+    },
+    {
+      "path": "docs/research/results/v12-v4-long-route-risk-20261021/V12_V4_LONG_SELECTED_PLUS3_PLUS1_AND_PLUS2_BACKUP_20261021.md",
+      "gitBlobSha1": "fb24c3568efa33eafb311ba727f99c0e3d881316",
+      "sha256": "e86586d71955b30099cba7367223596143a0e0d1d81e9c6d19eeea90deaaf3d4",
+      "bytes": 2760
+    },
+    {
+      "path": "docs/research/results/v12-v4-long-route-risk-20261021/V12_V4_LONG_TIME37_PLUS2_RESIDENT_LIKE_COMPARISON_20261021.json",
+      "gitBlobSha1": "ae298184c7c58a7f4fd0915da46b7ed3d5be1f68",
+      "sha256": "e95309ea5a5d3f69aca90a7c5a9b437d7b39a637919d88ca40319ed123ce8587",
+      "bytes": 14499
+    },
+    {
+      "path": "docs/research/results/v12-v4-long-route-risk-20261021/V12_V4_LONG_TIME37_PLUS2_RESIDENT_LIKE_COMPARISON_20261021.md",
+      "gitBlobSha1": "1e93b10bef38b19658c192b5fe27c993228e2617",
+      "sha256": "137841286999b0f89e1e867c66f0cf532fa104df7caf89642c3b1477407083df",
+      "bytes": 4781
+    },
+    {
+      "path": "docs/research/results/v12-v4-long-route-risk-20261021/V12_V4_LONG_TIME37_X3_REPEAT_SHA_PROOF_20261021.json",
+      "gitBlobSha1": "b4e6df7950d27b5c4ab95c2eb7125c7ff4bd8ff0",
+      "sha256": "08777c2df306855a3eef8db1d64c72d24ae8fb2987d953003f19c16cf390322c",
+      "bytes": 1636
+    },
+    {
+      "path": "docs/research/results/v12-v4-short-risk-20261021/V12_V4_SHORT_TWO_AXIS_ECONOMIC_BT_20261021.json",
+      "gitBlobSha1": "d8fafcdf4641d07fecd6d4fa36e3042dce859dc6",
+      "sha256": "6e2d54772a6703502443538247147bd0cfa5567a624f879eeebbc0ef3da3d913",
+      "bytes": 28369
+    },
+    {
+      "path": "docs/research/results/v12-v4-short-risk-20261021/V12_V4_SHORT_TWO_AXIS_REPEAT_SHA_20261021.json",
+      "gitBlobSha1": "6a2dceec230be412aefa5912e3ff02ba39b9ac4e",
+      "sha256": "df853add87cd69a00e5c73c6ded9bce9f482c5f62acc856e6d4423de2dcbd86b",
+      "bytes": 1658
+    },
+    {
+      "path": "docs/research/results/v12-v4-short-risk-20261021/V12_V4_SHORT_TWO_AXIS_RESEARCH_REPORT_20261021.md",
+      "gitBlobSha1": "3bc249a836e01dbd302439b878dbf17840949c0b",
+      "sha256": "f9e4105f1bcad37b8e6748d6b17c5c1e6952b6aaadaea9847c724939ad9508b8",
+      "bytes": 3642
+    },
+    {
+      "path": "scripts/dd-reduction/audit-task9-existing-evidence.py",
+      "gitBlobSha1": "7386773d37569e10c9f15e6484bb11addd21db99",
+      "sha256": "31bd0ebfa798f0067c96ec22128b511c329073f7a28e24b93e8861c961b14176",
+      "bytes": 9083
+    },
+    {
+      "path": "scripts/dd-reduction/build-candidate-coverage.ts",
+      "gitBlobSha1": "cfdd2eb5fedb7723d84333ad08835626573b1ada",
+      "sha256": "8447fd4a0762308f7b586593af3bf41445b20fd16268af5f466cb4640031c872",
+      "bytes": 7814
+    },
+    {
+      "path": "scripts/dd-reduction/build-task9-dynamic-report.ts",
+      "gitBlobSha1": "6614fe65ea0ae3be33d05b35be0fc284cb33b2f3",
+      "sha256": "aa8ca87ffbdb01d3c2b3328828e70ab94f9525decc28bd94fff22076ddc71f4c",
+      "bytes": 4686
+    },
+    {
+      "path": "scripts/dd-reduction/build_task9_report_20261020.py",
+      "gitBlobSha1": "c978d639ad94224946fab94492090aa7d6d89ffd",
+      "sha256": "50c8cf88fc7f360782d3b2faa5a99b975aca843f324599209a32949a74d4fe7d",
+      "bytes": 16161
+    },
+    {
+      "path": "scripts/dd-reduction/compare-dynamic-baseline.ts",
+      "gitBlobSha1": "7342e4e71513ea6ea5f15d05bb39569c264ff6af",
+      "sha256": "7246464702191ed82abe34910635fef518bfb38658a56cd3eae760d8f88a3cbe",
+      "bytes": 9057
+    },
+    {
+      "path": "scripts/dd-reduction/compare-stage.ts",
+      "gitBlobSha1": "0ad4e9cb61683048bc7655eea8cd0ae93418da84",
+      "sha256": "d3d1fbcd5d904707400648b02eca0d304b3b41a9ab735a3a92010499b5ada9a9",
+      "bytes": 4792
+    },
+    {
+      "path": "scripts/dd-reduction/legacy-adapter.ts",
+      "gitBlobSha1": "eaa9f8eaf1d6ab92d01b7b103f79de38ae2c8ab8",
+      "sha256": "3f4152bf982eb586fbae00273b28e2e1b354a21a2fd2cc8cec5b43683ba23346",
+      "bytes": 33660
+    },
+    {
+      "path": "scripts/dd-reduction/prepare-native-atr-diagnostic.ts",
+      "gitBlobSha1": "0f304eb6371071ae83210ae311cef637b621b9b6",
+      "sha256": "313bac6c8373210f2e78507a83bd0779e3f0c227460592312b5c5d9c623ee820",
+      "bytes": 9221
+    },
+    {
+      "path": "scripts/dd-reduction/rebuild-noncanonical-baseline.ts",
+      "gitBlobSha1": "658c660dcbad82d60c762bfba507053103f795bf",
+      "sha256": "8baa1c3566827a7fced37cde440262250337aaa076d30ac8afb86242570f1b36",
+      "bytes": 23117
+    },
+    {
+      "path": "scripts/dd-reduction/run-baseline.ts",
+      "gitBlobSha1": "2fe0aa0ccae23aebd9e95db54f10356653abe7ad",
+      "sha256": "e37494876d8e544b1995a58da3bceb5cfa8145d82ad67a57fc53fb94c7456739",
+      "bytes": 54724
+    },
+    {
+      "path": "scripts/dd-reduction/run-dynamic.ts",
+      "gitBlobSha1": "78c2784b94241212c2e71c89fbaf0504fa2d5a69",
+      "sha256": "b5f740918f6caf26c561e3d7b3bb0a763dfafd961311e64eba4815109920a49a",
+      "bytes": 26305
+    },
+    {
+      "path": "scripts/dd-reduction/run-stage.ts",
+      "gitBlobSha1": "15b11492910963d18be27a2ea27e10d2f47ede4b",
+      "sha256": "1145fe0c58878d440bd488ffc30cf72054c0cdd0e56b39aca91534202aff383d",
+      "bytes": 31776
+    },
+    {
+      "path": "scripts/dd-reduction/run-task9-dynamic.ts",
+      "gitBlobSha1": "f58044c9b868e3dabf6085da79e0163776038e53",
+      "sha256": "271be73ee5cd727261ecb2c88ad976f8345f16d44bde5c049e4c5ec69dffa2a4",
+      "bytes": 38754
+    },
+    {
+      "path": "scripts/dd-reduction/run-task9-native-full8-unified.ts",
+      "gitBlobSha1": "e30a57736ea989f0675f5a84dafd4c444f514406",
+      "sha256": "1c8ee40833c6cb2e22644fa64d0fbe02a8ac299b1b2a5efe6bef891e60096b06",
+      "bytes": 10738
+    },
+    {
+      "path": "scripts/dd-reduction/run-task9-next-v12-long-cumulative-20261021.py",
+      "gitBlobSha1": "46ccc277340ad3de9d9d44b717431beb9b80623b",
+      "sha256": "02e309b11252c3c41d3e26140de105c26212628e1e07eb5c2d15b50ed11387ba",
+      "bytes": 9296
+    },
+    {
+      "path": "scripts/dd-reduction/run-task9-python-discovery.py",
+      "gitBlobSha1": "8aeb35960a87568c073e8a1c94075241c4eef503",
+      "sha256": "a69de62af4464fa235a7d30d6996cd96f7c8b6aba0c0c9bb334d83ccde9f5b41",
+      "bytes": 1508
+    },
+    {
+      "path": "scripts/dd-reduction/run-task9-sourcebacked-5m-bt-20261021.py",
+      "gitBlobSha1": "38feaeb9c3490c67ffba4afdacde48328a42390d",
+      "sha256": "83bc565fbc4c471aac2497a9768c3618606c95035f79ff6d19e88fb1edad2aa0",
+      "bytes": 17074
+    },
+    {
+      "path": "scripts/dd-reduction/run-task9-unified-research-20261021.py",
+      "gitBlobSha1": "3a2faa29992da1ece4ebe208d38eb80bc222cdaa",
+      "sha256": "e056c2fed0da226923064afbe85ee8dce1eb132a2c966975f95bb49f062d0492",
+      "bytes": 14149
+    },
+    {
+      "path": "scripts/dd-reduction/run-task9-v4-long-after2-stopminus5-20261021.py",
+      "gitBlobSha1": "d4ba03a41d8b0badd75d4e9eb73087dc61cbf55b",
+      "sha256": "44150467be04e73f6230c6628aace852efebf74fe278123d1c26da585cf77146",
+      "bytes": 1709
+    },
+    {
+      "path": "scripts/dd-reduction/run-task9-v4-long-route-risk-20261021.py",
+      "gitBlobSha1": "a71d6748e23883026ae547c0d4f024d68942c7be",
+      "sha256": "c64d6dc71070c55d7e6ef18a6bbc5f575469da0becef6fc9d61c43c7beb2f1fc",
+      "bytes": 13419
+    },
+    {
+      "path": "scripts/dd-reduction/run-task9-v4-long-staged-profit-20261021.py",
+      "gitBlobSha1": "b6cfae59384f1c498a1a256ce62e0332d9db158b",
+      "sha256": "386f38b49f13721eaaeebc073411952d0dde5a9fc0a57f84a9a2dba1929950c8",
+      "bytes": 8933
+    },
+    {
+      "path": "scripts/dd-reduction/run-task9-v4-long-time37-profit-stop-20261021.py",
+      "gitBlobSha1": "70f45cb0edb630a77f9ad51a325ba0e1a3a2a51e",
+      "sha256": "f913a86fb6e7a680c0aa3d8e0758520488c483caed4ac970611a284ffe23c63b",
+      "bytes": 4574
+    },
+    {
+      "path": "scripts/dd-reduction/run-task9-v4-long-two-axis-20261021.py",
+      "gitBlobSha1": "9789cd45d7e2f17813658e964e51dbb62187b82d",
+      "sha256": "2448eba45418034bb82304e086fe372f2a89d4a59550d0ad969af71a91c4d62d",
+      "bytes": 7767
+    },
+    {
+      "path": "scripts/dd-reduction/run-task9-v4-short-two-axis-20261021.py",
+      "gitBlobSha1": "9922a66492486f44ca29ebe85e2eca1c543b6453",
+      "sha256": "cbe8e1ec01a43e2fcc5a76dfcaf40a5ebd28344eea4349fabefec9c48df72eb0",
+      "bytes": 8703
+    },
+    {
+      "path": "scripts/dd-reduction/run-tests.mjs",
+      "gitBlobSha1": "318d69b4e86cc36c57258bf2d5c4450637e28af6",
+      "sha256": "dce509017128e37e83e3b289861e3166b7fc9c592f9584fa5d076c98e4d59628",
+      "bytes": 4238
+    },
+    {
+      "path": "scripts/dd-reduction/task9_fixed_ledger_replay_20261020.py",
+      "gitBlobSha1": "88f4c8ee9068c71173656505e88baa165250d918",
+      "sha256": "0c209e96530996f5c4fada7668bcef2f47b4751414134f827956cfec82a00ae8",
+      "bytes": 51151
+    },
+    {
+      "path": "scripts/dd-reduction/task9_initial_adverse_stop_20261020.py",
+      "gitBlobSha1": "3a5e60577caab87a8eebb0aff22dbd6be7207255",
+      "sha256": "ffbb1c71ec91bddd1855b49ef32970dddaa6d852095b6cf8a11dc642da2b210b",
+      "bytes": 54720
+    },
+    {
+      "path": "scripts/dd-reduction/task9_legacy_evidence_capture.py",
+      "gitBlobSha1": "8d5f57d30a744fbb1931256d55e4d303f50bfbac",
+      "sha256": "5bbc959057d2eeecaf9c5b3cce490747ade96d4f876a8080f0ae743df87310b2",
+      "bytes": 9415
+    },
+    {
+      "path": "scripts/dd-reduction/task9_p0_p3p5_diagnostics_20261020.py",
+      "gitBlobSha1": "1e79f9b126483e70d7ed05c0612d6989457a075e",
+      "sha256": "0b96317bb1a61724591112781c864ca6a1dee7df8d84100be8eb05cfde5908aa",
+      "bytes": 16711
+    },
+    {
+      "path": "scripts/dd-reduction/task9_v12_short_deep_20261020.py",
+      "gitBlobSha1": "3e4c7b9f9eee5ddb1f52c244758a7b533918c89d",
+      "sha256": "7bd77f26f477f5b470cd8ce25b4dadbcedf4a510bb11beb7c42864c402322d63",
+      "bytes": 5923
+    },
+    {
+      "path": "scripts/dd-reduction/test-v4-long-after2-stopminus5-20261021.py",
+      "gitBlobSha1": "9e907211e1b82dda08a04f9c4654486ae3362067",
+      "sha256": "7ce9b5bda3930954bfad3ce1aa2c48bb7a23c913e7fa4c59c1fbee67187717eb",
+      "bytes": 2760
+    },
+    {
+      "path": "scripts/dd-reduction/test-v4-long-route-risk-20261021.py",
+      "gitBlobSha1": "71aed9be2519a5a17034ee22af8c3dae389975e0",
+      "sha256": "54b199ec4eb9367fb23807cc738ce63ca6356f9f59b793e22539bc9e73e43f98",
+      "bytes": 2491
+    },
+    {
+      "path": "scripts/dd-reduction/test-v4-long-staged-profit-20261021.py",
+      "gitBlobSha1": "e1ca21afc5aa2057599480c48f5e10e80c5a67c2",
+      "sha256": "8abfac325b552096c8d505239a89055f21612ab98807c321b075ed209c1b7764",
+      "bytes": 3585
+    },
+    {
+      "path": "scripts/dd-reduction/test-v4-long-time37-profit-stop-20261021.py",
+      "gitBlobSha1": "443be33169b50dfe371b39e0502187b6bd5ea8c9",
+      "sha256": "2300cb705284e39ec4049fdbf4119facba1aa927a2e858f043d815a2051741a6",
+      "bytes": 2981
+    },
+    {
+      "path": "scripts/dd-reduction/test-v4-long-two-axis-20261021.py",
+      "gitBlobSha1": "babbe682bbfc92892a5b18b11cbc9c6059874654",
+      "sha256": "1748cd061046ee840a92a35d6590876fe1cd1f966e5177cfe687cc5487085c56",
+      "bytes": 2732
+    },
+    {
+      "path": "scripts/dd-reduction/test-v4-short-two-axis-20261021.py",
+      "gitBlobSha1": "e0565ccf29d650c0c1a604a269180a59751db9d5",
+      "sha256": "78fd8a9782462305e435c392cda344332bcadc1a2b7d3ac11dfb1d9da3053649",
+      "bytes": 3467
+    },
+    {
+      "path": "scripts/dd-reduction/test_task8_artifact_contract_20261021.py",
+      "gitBlobSha1": "07903182f3a366d4ddd41ac0d77f40a45a922caf",
+      "sha256": "8ac763ea447d8c2c84a259e676f9891ac72d286fb268e73b0aaa6bce33f6c6f5",
+      "bytes": 2577
+    },
+    {
+      "path": "scripts/dd-reduction/test_task9_engine_audit_20261020.py",
+      "gitBlobSha1": "6a21a91735c76eadc9fb701f5ab29a9845b30462",
+      "sha256": "d8a6def84eebe72d0a2b4c833c266caf616e37a19f06d24bdcdc29aafd596ed1",
+      "bytes": 8047
+    },
+    {
+      "path": "scripts/dd-reduction/test_task9_existing_evidence.py",
+      "gitBlobSha1": "b9eedcb1e01524c2ef8f1eccddc30e5e7fd13441",
+      "sha256": "ed2cb6621843c09cfa11299740dfe1a6cc0721503f973b3d0875f0c0529086fb",
+      "bytes": 4542
+    },
+    {
+      "path": "scripts/dd-reduction/test_task9_first_divergence.py",
+      "gitBlobSha1": "bcf4e17f136952843c5607bb809f77f5f5b45fa6",
+      "sha256": "cc197b419dd65427693821b2b560327816ace1e1f4ea16541b0c23a72eb6b9de",
+      "bytes": 6710
+    },
+    {
+      "path": "scripts/dd-reduction/test_task9_fixed_ledger_replay_20261020.py",
+      "gitBlobSha1": "9824269dd5a15bac65d1a8b76b83a1c5e6a3a2c7",
+      "sha256": "f8abbb738c0f818f121732ea1d29c5d535b0157dedd43cc5583c90e7e69a60fe",
+      "bytes": 6777
+    },
+    {
+      "path": "scripts/dd-reduction/test_task9_initial_adverse_stop.py",
+      "gitBlobSha1": "e5043dc79d713752d87246964f0b1f33abc76993",
+      "sha256": "703de64990137bad0dc9cb7ee95a845fcfeb51c9eebe8f78f64e4af93752ad09",
+      "bytes": 3395
+    },
+    {
+      "path": "scripts/dd-reduction/test_task9_native_full8.py",
+      "gitBlobSha1": "c570894622482f239eada95823b0b1194fdd424d",
+      "sha256": "030dfec651ed19319190068348cc3a0fb2101c4fd7bd8e36ef5111dbbe43efb5",
+      "bytes": 4681
+    },
+    {
+      "path": "scripts/dd-reduction/verify-source.ts",
+      "gitBlobSha1": "d55c09d4a9da0e8d899df991532788088841e76b",
+      "sha256": "f5f980505973339ae7557fbadeb6c001c6aabd2215422fa2405e171192922fb4",
+      "bytes": 2863
+    },
+    {
+      "path": "scripts/dd-reduction/verify-task9-dynamic-artifacts.ts",
+      "gitBlobSha1": "b16efffcf3f11015ef052e4a88156c205feab482",
+      "sha256": "ba012b6e987b994cb29131be3a1bd184ec26941ab37c78b98b4f797adc8cfe75",
+      "bytes": 17283
+    },
+    {
+      "path": "scripts/dd-reduction/verify-task9-first-divergence.py",
+      "gitBlobSha1": "9d15ac9bd9a190eb712c3e1c8a2909b7c975d722",
+      "sha256": "35e6db06a6069be5ceefec96774a357dc51d4b0dd1005e55b1745991edf96bf9",
+      "bytes": 9787
+    },
+    {
+      "path": "scripts/dd-reduction/verify-task9-native-compact-artifacts.py",
+      "gitBlobSha1": "d7b951f2bb47f0ab2f3c204e4c3a08ea21c3bfc0",
+      "sha256": "b0b5d3ca2ec6aa5c86558cda1f0be6eb67ae50bd9d8c5b22b0fb927f6f99bed1",
+      "bytes": 6166
+    },
+    {
+      "path": "scripts/dd-reduction/verify-task9-native-full8-parity.py",
+      "gitBlobSha1": "af1bd0da7a624e433a8db7fd9cab9882cfe21a3a",
+      "sha256": "f116c3c0b127b70ae2a60dcd362924fe18c5492d2c93c714dd450cf5c16f8c00",
+      "bytes": 10462
+    },
+    {
+      "path": "scripts/dd-reduction/verify-task9-next-v12-long-artifacts.py",
+      "gitBlobSha1": "d7967f607a5baa488b8c6def8d5226101cac7ae3",
+      "sha256": "4e8509c0935892efd0fc386e3b543ff8d10d86bb17e85c7147c2aa906580f3bf",
+      "bytes": 4234
+    },
+    {
+      "path": "scripts/dd-reduction/verify-task9-sourcebacked-5m-artifacts.py",
+      "gitBlobSha1": "cd2d444eb8f55264d8d1eeb5468f0bf617a5b538",
+      "sha256": "62a6b2dc3812394751c012d357958e3051d4121ecf0104da2e007b42d441ecea",
+      "bytes": 5202
+    },
+    {
+      "path": "scripts/dd-reduction/verify-task9-unified-bridge.py",
+      "gitBlobSha1": "976e2cb0594edd0ac93ba0236957d315766f94e3",
+      "sha256": "f7de792c62350a57248698d9d2174a945fbf8113455ad543e984d361d1877d2c",
+      "bytes": 3450
+    },
+    {
+      "path": "scripts/dd-reduction/verify-v4-long-after2-stopminus5-20261021.py",
+      "gitBlobSha1": "596931ab0f8119f163c90079c5ae665fd7a62ea2",
+      "sha256": "a30a89e16053e9530a3118bee328583aa18c7798ab4577c44dd643996871637d",
+      "bytes": 2036
+    },
+    {
+      "path": "scripts/dd-reduction/verify-v4-long-route-dd-compact-20261021.py",
+      "gitBlobSha1": "45ff407ceb401bd7b9ae154b96934474eba5b1f0",
+      "sha256": "8a3c19070d5e61e8eecef46cfd8676765bffe926acd761b9cda6942d29bed4a8",
+      "bytes": 2129
+    },
+    {
+      "path": "scripts/dd-reduction/verify-v4-long-staged-selection-20261021.py",
+      "gitBlobSha1": "55b3f9b3e6a2831a5e5b97bfce6726193edb7d7d",
+      "sha256": "2fd0503cefd247652a37b7ea1d42ea1bd8cfaa93ea6b1ea19b53866bead00ecc",
+      "bytes": 2464
+    },
+    {
+      "path": "scripts/dd-reduction/verify-v4-long-time37-economic-20261021.py",
+      "gitBlobSha1": "384c6312ad8c9e8a9fa287924b181f3b97723d94",
+      "sha256": "6f9dc6c2663be8bd9bd9eaa7cd2e9a43d36610d7962ee9cb71ce91067f123e9d",
+      "bytes": 2134
+    },
+    {
+      "path": "scripts/dd-reduction/verify-v4-long-two-axis-20261021.py",
+      "gitBlobSha1": "48dae3ba5d7b31e14b143b02df324057308f6f73",
+      "sha256": "add76be8148e20e1bdf343fa35c626c297cbd5517775ca3ed7a59d48ef92ee6e",
+      "bytes": 1410
+    },
+    {
+      "path": "scripts/dd-reduction/verify-v4-short-two-axis-20261021.py",
+      "gitBlobSha1": "0482571ca965929238ef02de13d0d94e137ecc22",
+      "sha256": "b6c88fc407cf40b1eb32b543bc1ff3d6a64854ed89405a932211d0e32cb34cae",
+      "bytes": 2352
+    }
+  ]
+}

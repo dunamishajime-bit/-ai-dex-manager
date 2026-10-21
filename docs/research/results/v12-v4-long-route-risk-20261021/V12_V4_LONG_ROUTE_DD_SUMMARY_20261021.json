@@ -1,0 +1,693 @@
+{
+  "schemaVersion": 1,
+  "status": "RESEARCH_ONLY_NO_DD_IMPROVING_CANDIDATE",
+  "period": "2025-08-10_to_2026-08-10",
+  "scriptSha256": "c64d6dc71070c55d7e6ef18a6bbc5f575469da0becef6fc9d61c43c7beb2f1fc",
+  "sourceArchiveSha256": "10cdc48705a6f9e310cd0aecc95ce781af24325b1a99c2eb9aaefe3bd2953934",
+  "baseline": {
+    "10": {
+      "finalEquityJpy": 222818966.87803495,
+      "maxMtmDdPct": -15.62063681288941,
+      "profitFactor": 3.4587962777009813,
+      "closedTrades": 1310,
+      "longLossMetrics": {
+        "trades": 142,
+        "wins": 120,
+        "losses": 22,
+        "avgLossJpy": -61769.90136558356,
+        "worstLossJpy": -296539.13312759524,
+        "sumLossJpy": -1358937.8300428384,
+        "netPnlJpy": 26457886.154616706,
+        "byRoute": {
+          "REC_X09_TIME_48H": {
+            "n": 9,
+            "wins": 5,
+            "losses": 4,
+            "netPnlJpy": 363817.68983185844,
+            "avgLossJpy": -7545.320382719567
+          },
+          "REC_X10_TIME_48H": {
+            "n": 14,
+            "wins": 10,
+            "losses": 4,
+            "netPnlJpy": 3412116.3269959833,
+            "avgLossJpy": -154477.0173752937
+          },
+          "REC_X14_TIME_48H": {
+            "n": 7,
+            "wins": 4,
+            "losses": 3,
+            "netPnlJpy": -39315.55768523589,
+            "avgLossJpy": -56806.67189958417
+          },
+          "REC_Y02_REV_D0_T12": {
+            "n": 15,
+            "wins": 15,
+            "losses": 0,
+            "netPnlJpy": 4116828.7382215736,
+            "avgLossJpy": null
+          },
+          "REC_Y04_REV_D2_T36": {
+            "n": 10,
+            "wins": 8,
+            "losses": 2,
+            "netPnlJpy": 1532298.7093392785,
+            "avgLossJpy": -133905.60291661494
+          },
+          "REC_Y05_REV_D2_T9": {
+            "n": 9,
+            "wins": 9,
+            "losses": 0,
+            "netPnlJpy": 1807186.598144863,
+            "avgLossJpy": null
+          },
+          "REC_Y10_REV_D2_T24": {
+            "n": 12,
+            "wins": 10,
+            "losses": 2,
+            "netPnlJpy": 4737347.511791903,
+            "avgLossJpy": -614.5324169714424
+          },
+          "REC_Y11_REV_D0_T36": {
+            "n": 11,
+            "wins": 10,
+            "losses": 1,
+            "netPnlJpy": 488478.2831509621,
+            "avgLossJpy": -26162.89134626306
+          },
+          "REC_Y12_REV_D0_T24": {
+            "n": 12,
+            "wins": 12,
+            "losses": 0,
+            "netPnlJpy": 6847449.639200897,
+            "avgLossJpy": null
+          },
+          "REC_Y13_REV_D2_T36": {
+            "n": 13,
+            "wins": 10,
+            "losses": 3,
+            "netPnlJpy": 2160037.381100299,
+            "avgLossJpy": -79919.33774333612
+          },
+          "REC_Y15_REV_D0_T3": {
+            "n": 10,
+            "wins": 10,
+            "losses": 0,
+            "netPnlJpy": 14559.426269238582,
+            "avgLossJpy": null
+          },
+          "REC_Y16_REV_D0_T6": {
+            "n": 9,
+            "wins": 9,
+            "losses": 0,
+            "netPnlJpy": 565309.8569253895,
+            "avgLossJpy": null
+          },
+          "REC_Y17_REV_D1_T3": {
+            "n": 11,
+            "wins": 8,
+            "losses": 3,
+            "netPnlJpy": 451771.5513296945,
+            "avgLossJpy": -1822.4293561961924
+          }
+        }
+      }
+    },
+    "30": {
+      "finalEquityJpy": 124289206.81827945,
+      "maxMtmDdPct": -16.78776877493442,
+      "profitFactor": 3.0785603081685435,
+      "closedTrades": 1307,
+      "longLossMetrics": {
+        "trades": 140,
+        "wins": 108,
+        "losses": 32,
+        "avgLossJpy": -32897.21729860039,
+        "worstLossJpy": -280960.4922164672,
+        "sumLossJpy": -1052710.9535552126,
+        "netPnlJpy": 14669296.174189847,
+        "byRoute": {
+          "REC_X09_TIME_48H": {
+            "n": 7,
+            "wins": 5,
+            "losses": 2,
+            "netPnlJpy": 143621.80384651962,
+            "avgLossJpy": -8464.543941596388
+          },
+          "REC_X10_TIME_48H": {
+            "n": 14,
+            "wins": 10,
+            "losses": 4,
+            "netPnlJpy": 1866904.8646293753,
+            "avgLossJpy": -105125.49612076278
+          },
+          "REC_X14_TIME_48H": {
+            "n": 7,
+            "wins": 4,
+            "losses": 3,
+            "netPnlJpy": -75489.75069440062,
+            "avgLossJpy": -41997.66667259875
+          },
+          "REC_Y02_REV_D0_T12": {
+            "n": 15,
+            "wins": 14,
+            "losses": 1,
+            "netPnlJpy": 2344702.7326690597,
+            "avgLossJpy": -903.422796552091
+          },
+          "REC_Y04_REV_D2_T36": {
+            "n": 10,
+            "wins": 5,
+            "losses": 5,
+            "netPnlJpy": 643926.6021061623,
+            "avgLossJpy": -27517.33074737057
+          },
+          "REC_Y05_REV_D2_T9": {
+            "n": 9,
+            "wins": 9,
+            "losses": 0,
+            "netPnlJpy": 864604.1616256654,
+            "avgLossJpy": null
+          },
+          "REC_Y10_REV_D2_T24": {
+            "n": 12,
+            "wins": 9,
+            "losses": 3,
+            "netPnlJpy": 2491628.8323361976,
+            "avgLossJpy": -637.6863984123487
+          },
+          "REC_Y11_REV_D0_T36": {
+            "n": 11,
+            "wins": 9,
+            "losses": 2,
+            "netPnlJpy": 160064.6794032786,
+            "avgLossJpy": -24796.044702768406
+          },
+          "REC_Y12_REV_D0_T24": {
+            "n": 12,
+            "wins": 10,
+            "losses": 2,
+            "netPnlJpy": 5026832.169894711,
+            "avgLossJpy": -21.31372976581551
+          },
+          "REC_Y13_REV_D2_T36": {
+            "n": 13,
+            "wins": 9,
+            "losses": 4,
+            "netPnlJpy": 819624.80426624,
+            "avgLossJpy": -71733.9570883312
+          },
+          "REC_Y15_REV_D0_T3": {
+            "n": 10,
+            "wins": 8,
+            "losses": 2,
+            "netPnlJpy": 572.2842710527183,
+            "avgLossJpy": -2155.254202127674
+          },
+          "REC_Y16_REV_D0_T6": {
+            "n": 9,
+            "wins": 9,
+            "losses": 0,
+            "netPnlJpy": 220654.49372401525,
+            "avgLossJpy": null
+          },
+          "REC_Y17_REV_D1_T3": {
+            "n": 11,
+            "wins": 7,
+            "losses": 4,
+            "netPnlJpy": 161648.4961119703,
+            "avgLossJpy": -2000.6729549704942
+          }
+        }
+      }
+    }
+  },
+  "cases": {
+    "X09_X14_INITIAL_2P5_H6": {
+      "rule": {
+        "id": "X09_X14_INITIAL_2P5_H6",
+        "strategy": "V12",
+        "sides": [
+          "LONG"
+        ],
+        "routes": [
+          "REC_X09_TIME_48H",
+          "REC_X14_TIME_48H"
+        ],
+        "stop_pct": 0.025,
+        "arm_hours": 6,
+        "mfe_gate_pct": 0.005,
+        "reentry_hours": 0
+      },
+      "costs": {
+        "10": {
+          "finalEquityJpy": 222818966.87803495,
+          "maxMtmDdPct": -15.62063681288941,
+          "profitFactor": 3.4587962777009813,
+          "closedTrades": 1310,
+          "ddImprovementPp": 0.0,
+          "equityRetention": 1.0,
+          "admittedV12LongStopExits": 0,
+          "originalWinnersExitedEarly": 0,
+          "originalLosersImproved": 0,
+          "accounting": "PASS",
+          "dataGaps": 0,
+          "researchOnly": true
+        },
+        "30": {
+          "finalEquityJpy": 124289206.81827945,
+          "maxMtmDdPct": -16.78776877493442,
+          "profitFactor": 3.0785603081685435,
+          "closedTrades": 1307,
+          "ddImprovementPp": 0.0,
+          "equityRetention": 1.0,
+          "admittedV12LongStopExits": 0,
+          "originalWinnersExitedEarly": 0,
+          "originalLosersImproved": 0,
+          "accounting": "PASS",
+          "dataGaps": 0,
+          "researchOnly": true
+        }
+      },
+      "gate": {
+        "bothCostDDImproveAtLeast0p10pp": false,
+        "bothCostEquityRetentionAtLeast75pct": true,
+        "bothAccountingPass": true,
+        "profitFactorRetentionAtLeast90pct": true,
+        "actualStopExitsBothCosts": false,
+        "passesExploratoryGate": false
+      }
+    },
+    "X09_X14_INITIAL_2P5_H6_S3": {
+      "rule": {
+        "id": "X09_X14_INITIAL_2P5_H6_S3",
+        "strategy": "V12",
+        "sides": [
+          "LONG"
+        ],
+        "routes": [
+          "REC_X09_TIME_48H",
+          "REC_X14_TIME_48H"
+        ],
+        "stop_pct": 0.025,
+        "arm_hours": 6,
+        "mfe_gate_pct": 0.005,
+        "structure_bars": 3,
+        "structure_min_adverse_closes": 2,
+        "reentry_hours": 0
+      },
+      "costs": {
+        "10": {
+          "finalEquityJpy": 222818966.87803495,
+          "maxMtmDdPct": -15.62063681288941,
+          "profitFactor": 3.4587962777009813,
+          "closedTrades": 1310,
+          "ddImprovementPp": 0.0,
+          "equityRetention": 1.0,
+          "admittedV12LongStopExits": 0,
+          "originalWinnersExitedEarly": 0,
+          "originalLosersImproved": 0,
+          "accounting": "PASS",
+          "dataGaps": 0,
+          "researchOnly": true
+        },
+        "30": {
+          "finalEquityJpy": 124289206.81827945,
+          "maxMtmDdPct": -16.78776877493442,
+          "profitFactor": 3.0785603081685435,
+          "closedTrades": 1307,
+          "ddImprovementPp": 0.0,
+          "equityRetention": 1.0,
+          "admittedV12LongStopExits": 0,
+          "originalWinnersExitedEarly": 0,
+          "originalLosersImproved": 0,
+          "accounting": "PASS",
+          "dataGaps": 0,
+          "researchOnly": true
+        }
+      },
+      "gate": {
+        "bothCostDDImproveAtLeast0p10pp": false,
+        "bothCostEquityRetentionAtLeast75pct": true,
+        "bothAccountingPass": true,
+        "profitFactorRetentionAtLeast90pct": true,
+        "actualStopExitsBothCosts": false,
+        "passesExploratoryGate": false
+      }
+    },
+    "X09_X10_X14_INITIAL_3P0_H12_S3": {
+      "rule": {
+        "id": "X09_X10_X14_INITIAL_3P0_H12_S3",
+        "strategy": "V12",
+        "sides": [
+          "LONG"
+        ],
+        "routes": [
+          "REC_X09_TIME_48H",
+          "REC_X10_TIME_48H",
+          "REC_X14_TIME_48H"
+        ],
+        "stop_pct": 0.03,
+        "arm_hours": 12,
+        "mfe_gate_pct": 0.01,
+        "structure_bars": 3,
+        "structure_min_adverse_closes": 2,
+        "reentry_hours": 0
+      },
+      "costs": {
+        "10": {
+          "finalEquityJpy": 224109273.71852666,
+          "maxMtmDdPct": -15.624071144629493,
+          "profitFactor": 3.4547034261564673,
+          "closedTrades": 1311,
+          "ddImprovementPp": -0.0034343317400828965,
+          "equityRetention": 1.0057908303703695,
+          "admittedV12LongStopExits": 3,
+          "originalWinnersExitedEarly": 0,
+          "originalLosersImproved": 0,
+          "accounting": "PASS",
+          "dataGaps": 0,
+          "researchOnly": true
+        },
+        "30": {
+          "finalEquityJpy": 124167343.84739184,
+          "maxMtmDdPct": -16.78776877493442,
+          "profitFactor": 3.07829528235278,
+          "closedTrades": 1307,
+          "ddImprovementPp": 0.0,
+          "equityRetention": 0.9990195208899694,
+          "admittedV12LongStopExits": 1,
+          "originalWinnersExitedEarly": 0,
+          "originalLosersImproved": 0,
+          "accounting": "PASS",
+          "dataGaps": 0,
+          "researchOnly": true
+        }
+      },
+      "gate": {
+        "bothCostDDImproveAtLeast0p10pp": false,
+        "bothCostEquityRetentionAtLeast75pct": true,
+        "bothAccountingPass": true,
+        "profitFactorRetentionAtLeast90pct": true,
+        "actualStopExitsBothCosts": true,
+        "passesExploratoryGate": false
+      }
+    },
+    "X09_X10_X14_INITIAL_2P5_H6_S3": {
+      "rule": {
+        "id": "X09_X10_X14_INITIAL_2P5_H6_S3",
+        "strategy": "V12",
+        "sides": [
+          "LONG"
+        ],
+        "routes": [
+          "REC_X09_TIME_48H",
+          "REC_X10_TIME_48H",
+          "REC_X14_TIME_48H"
+        ],
+        "stop_pct": 0.025,
+        "arm_hours": 6,
+        "mfe_gate_pct": 0.005,
+        "structure_bars": 3,
+        "structure_min_adverse_closes": 2,
+        "reentry_hours": 0
+      },
+      "costs": {
+        "10": {
+          "finalEquityJpy": 222756088.32547337,
+          "maxMtmDdPct": -15.62063681288941,
+          "profitFactor": 3.4587631145283186,
+          "closedTrades": 1310,
+          "ddImprovementPp": 0.0,
+          "equityRetention": 0.999717804307943,
+          "admittedV12LongStopExits": 1,
+          "originalWinnersExitedEarly": 0,
+          "originalLosersImproved": 0,
+          "accounting": "PASS",
+          "dataGaps": 0,
+          "researchOnly": true
+        },
+        "30": {
+          "finalEquityJpy": 124185041.2671563,
+          "maxMtmDdPct": -16.78776877493442,
+          "profitFactor": 3.078324248960127,
+          "closedTrades": 1307,
+          "ddImprovementPp": 0.0,
+          "equityRetention": 0.999161909921306,
+          "admittedV12LongStopExits": 1,
+          "originalWinnersExitedEarly": 0,
+          "originalLosersImproved": 0,
+          "accounting": "PASS",
+          "dataGaps": 0,
+          "researchOnly": true
+        }
+      },
+      "gate": {
+        "bothCostDDImproveAtLeast0p10pp": false,
+        "bothCostEquityRetentionAtLeast75pct": true,
+        "bothAccountingPass": true,
+        "profitFactorRetentionAtLeast90pct": true,
+        "actualStopExitsBothCosts": true,
+        "passesExploratoryGate": false
+      }
+    },
+    "Y04_Y13_Y17_INITIAL_2P5_H6_S3": {
+      "rule": {
+        "id": "Y04_Y13_Y17_INITIAL_2P5_H6_S3",
+        "strategy": "V12",
+        "sides": [
+          "LONG"
+        ],
+        "routes": [
+          "REC_Y04_REV_D2_T36",
+          "REC_Y13_REV_D2_T36",
+          "REC_Y17_REV_D1_T3"
+        ],
+        "stop_pct": 0.025,
+        "arm_hours": 6,
+        "mfe_gate_pct": 0.005,
+        "structure_bars": 3,
+        "structure_min_adverse_closes": 2,
+        "reentry_hours": 0
+      },
+      "costs": {
+        "10": {
+          "finalEquityJpy": 222946547.9637235,
+          "maxMtmDdPct": -15.62063681288941,
+          "profitFactor": 3.4600303595218183,
+          "closedTrades": 1310,
+          "ddImprovementPp": 0.0,
+          "equityRetention": 1.0005725773145622,
+          "admittedV12LongStopExits": 1,
+          "originalWinnersExitedEarly": 0,
+          "originalLosersImproved": 1,
+          "accounting": "PASS",
+          "dataGaps": 0,
+          "researchOnly": true
+        },
+        "30": {
+          "finalEquityJpy": 124361879.6837411,
+          "maxMtmDdPct": -16.78776877493442,
+          "profitFactor": 3.0792126168913403,
+          "closedTrades": 1307,
+          "ddImprovementPp": 0.0,
+          "equityRetention": 1.0005847077740861,
+          "admittedV12LongStopExits": 1,
+          "originalWinnersExitedEarly": 0,
+          "originalLosersImproved": 1,
+          "accounting": "PASS",
+          "dataGaps": 0,
+          "researchOnly": true
+        }
+      },
+      "gate": {
+        "bothCostDDImproveAtLeast0p10pp": false,
+        "bothCostEquityRetentionAtLeast75pct": true,
+        "bothAccountingPass": true,
+        "profitFactorRetentionAtLeast90pct": true,
+        "actualStopExitsBothCosts": true,
+        "passesExploratoryGate": false
+      }
+    },
+    "X09_X14_PROFIT_3P0_FLOOR0P5_T2P0": {
+      "rule": {
+        "id": "X09_X14_PROFIT_3P0_FLOOR0P5_T2P0",
+        "strategy": "V12",
+        "sides": [
+          "LONG"
+        ],
+        "routes": [
+          "REC_X09_TIME_48H",
+          "REC_X14_TIME_48H"
+        ],
+        "mode": "profit_guard",
+        "mfe_threshold": 0.03,
+        "profit_floor": 0.005,
+        "giveback_pct": 0.02,
+        "arm_hours": 1,
+        "reentry_hours": 0
+      },
+      "costs": {
+        "10": {
+          "finalEquityJpy": 223842907.6632313,
+          "maxMtmDdPct": -15.73462321190544,
+          "profitFactor": 3.4556926612908434,
+          "closedTrades": 1308,
+          "ddImprovementPp": -0.1139863990160297,
+          "equityRetention": 1.0045953932896423,
+          "admittedV12LongStopExits": 5,
+          "originalWinnersExitedEarly": 4,
+          "originalLosersImproved": 1,
+          "accounting": "PASS",
+          "dataGaps": 0,
+          "researchOnly": true
+        },
+        "30": {
+          "finalEquityJpy": 121903694.70017965,
+          "maxMtmDdPct": -16.80667114857056,
+          "profitFactor": 3.074360533658427,
+          "closedTrades": 1307,
+          "ddImprovementPp": -0.018902373636141334,
+          "equityRetention": 0.9808067636831281,
+          "admittedV12LongStopExits": 5,
+          "originalWinnersExitedEarly": 4,
+          "originalLosersImproved": 1,
+          "accounting": "PASS",
+          "dataGaps": 0,
+          "researchOnly": true
+        }
+      },
+      "gate": {
+        "bothCostDDImproveAtLeast0p10pp": false,
+        "bothCostEquityRetentionAtLeast75pct": true,
+        "bothAccountingPass": true,
+        "profitFactorRetentionAtLeast90pct": true,
+        "actualStopExitsBothCosts": true,
+        "passesExploratoryGate": false
+      }
+    },
+    "X09_X10_X14_PROFIT_4P0_FLOOR1P0_T2P5": {
+      "rule": {
+        "id": "X09_X10_X14_PROFIT_4P0_FLOOR1P0_T2P5",
+        "strategy": "V12",
+        "sides": [
+          "LONG"
+        ],
+        "routes": [
+          "REC_X09_TIME_48H",
+          "REC_X10_TIME_48H",
+          "REC_X14_TIME_48H"
+        ],
+        "mode": "profit_guard",
+        "mfe_threshold": 0.04,
+        "profit_floor": 0.01,
+        "giveback_pct": 0.025,
+        "arm_hours": 1,
+        "reentry_hours": 0
+      },
+      "costs": {
+        "10": {
+          "finalEquityJpy": 220641153.92255569,
+          "maxMtmDdPct": -15.831487416409196,
+          "profitFactor": 3.426510942065513,
+          "closedTrades": 1308,
+          "ddImprovementPp": -0.2108506035197859,
+          "equityRetention": 0.9902260880840035,
+          "admittedV12LongStopExits": 8,
+          "originalWinnersExitedEarly": 8,
+          "originalLosersImproved": 0,
+          "accounting": "PASS",
+          "dataGaps": 0,
+          "researchOnly": true
+        },
+        "30": {
+          "finalEquityJpy": 118629971.6042205,
+          "maxMtmDdPct": -16.81864448487905,
+          "profitFactor": 3.0386340955190216,
+          "closedTrades": 1307,
+          "ddImprovementPp": -0.03087570994463107,
+          "equityRetention": 0.9544672030747352,
+          "admittedV12LongStopExits": 8,
+          "originalWinnersExitedEarly": 8,
+          "originalLosersImproved": 0,
+          "accounting": "PASS",
+          "dataGaps": 0,
+          "researchOnly": true
+        }
+      },
+      "gate": {
+        "bothCostDDImproveAtLeast0p10pp": false,
+        "bothCostEquityRetentionAtLeast75pct": true,
+        "bothAccountingPass": true,
+        "profitFactorRetentionAtLeast90pct": true,
+        "actualStopExitsBothCosts": true,
+        "passesExploratoryGate": false
+      }
+    },
+    "X09_X14_DUAL_INITIAL_AND_PROFIT": {
+      "rule": {
+        "id": "X09_X14_DUAL_INITIAL_AND_PROFIT",
+        "strategy": "V12",
+        "sides": [
+          "LONG"
+        ],
+        "routes": [
+          "REC_X09_TIME_48H",
+          "REC_X14_TIME_48H"
+        ],
+        "mode": "dual",
+        "stop_pct": 0.025,
+        "arm_hours": 6,
+        "mfe_gate_pct": 0.005,
+        "structure_bars": 3,
+        "structure_min_adverse_closes": 2,
+        "profit_threshold": 0.03,
+        "profit_floor": 0.005,
+        "giveback_pct": 0.02,
+        "reentry_hours": 0
+      },
+      "costs": {
+        "10": {
+          "finalEquityJpy": 223842907.6632313,
+          "maxMtmDdPct": -15.73462321190544,
+          "profitFactor": 3.4556926612908434,
+          "closedTrades": 1308,
+          "ddImprovementPp": -0.1139863990160297,
+          "equityRetention": 1.0045953932896423,
+          "admittedV12LongStopExits": 5,
+          "originalWinnersExitedEarly": 4,
+          "originalLosersImproved": 1,
+          "accounting": "PASS",
+          "dataGaps": 0,
+          "researchOnly": true
+        },
+        "30": {
+          "finalEquityJpy": 121903694.70017965,
+          "maxMtmDdPct": -16.80667114857056,
+          "profitFactor": 3.074360533658427,
+          "closedTrades": 1307,
+          "ddImprovementPp": -0.018902373636141334,
+          "equityRetention": 0.9808067636831281,
+          "admittedV12LongStopExits": 5,
+          "originalWinnersExitedEarly": 4,
+          "originalLosersImproved": 1,
+          "accounting": "PASS",
+          "dataGaps": 0,
+          "researchOnly": true
+        }
+      },
+      "gate": {
+        "bothCostDDImproveAtLeast0p10pp": false,
+        "bothCostEquityRetentionAtLeast75pct": true,
+        "bothAccountingPass": true,
+        "profitFactorRetentionAtLeast90pct": true,
+        "actualStopExitsBothCosts": true,
+        "passesExploratoryGate": false
+      }
+    }
+  },
+  "replayFinancialReconciliation": "PASS_SHARED_ECONOMIC_ALLOCATOR_ACCOUNTING_10_AND_30_BPS",
+  "independentTypeScriptAllocatorParity": false,
+  "signedVenueStopParity": false,
+  "liveChanged": false
+}
