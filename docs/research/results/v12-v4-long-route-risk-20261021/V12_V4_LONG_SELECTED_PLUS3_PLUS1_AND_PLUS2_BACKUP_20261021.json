@@ -1,0 +1,431 @@
+{
+  "status": "USER_SELECTED_PLUS3_TO_PLUS1_RESEARCH_ONLY__PLUS2_BACKUPS_REJECTED",
+  "scope": "V12 V4 LONG TIME X09,X10,X14; not other V4 LONG routes",
+  "selectedPolicy": {
+    "rule": {
+      "id": "PROFIT_X_3P0_FLOOR1P0_BEAR2",
+      "mode": "profit_h1",
+      "routes": [
+        "REC_X09_TIME_48H",
+        "REC_X10_TIME_48H",
+        "REC_X14_TIME_48H"
+      ],
+      "mfe_gte": 0.03,
+      "close_floor": 0.01,
+      "bear_bars": 2,
+      "strategy": "V12",
+      "sides": [
+        "LONG"
+      ]
+    },
+    "costs": {
+      "10": {
+        "finalEquityJpy": 222373710.67972845,
+        "maxMtmDdPct": -15.62063681288941,
+        "ddImprovementPp": 0.0,
+        "profitFactor": 3.460034050355703,
+        "closedTrades": 1310,
+        "admittedLongExits": 1,
+        "originalLosersImproved": 0,
+        "originalWinnersExitedEarly": 1,
+        "longAvgLossJpy": -61567.33960730795,
+        "longWorstLossJpy": -295696.4929197972,
+        "accounting": "PASS"
+      },
+      "30": {
+        "finalEquityJpy": 123696117.15444088,
+        "maxMtmDdPct": -16.78776877493442,
+        "ddImprovementPp": 0.0,
+        "profitFactor": 3.077989707530853,
+        "closedTrades": 1307,
+        "admittedLongExits": 1,
+        "originalLosersImproved": 0,
+        "originalWinnersExitedEarly": 1,
+        "longAvgLossJpy": -32703.572141938832,
+        "longWorstLossJpy": -279423.0110379937,
+        "accounting": "PASS"
+      }
+    },
+    "gate10and30ddImproveAtLeast0p1pt": false
+  },
+  "economicStatus": "USER_SELECTED_NOT_ECONOMIC_DD_GATE_PASS",
+  "existingPinnedEmergencyStopPriceRatioLong": 0.92,
+  "emergencyStopVerifiedVenueNow": false,
+  "selectedProfitFloorGuaranteedByH1Only": false,
+  "baseline": {
+    "10": {
+      "finalEquityJpy": 222818966.87803495,
+      "maxMtmDdPct": -15.62063681288941,
+      "profitFactor": 3.4587962777009813,
+      "closedTrades": 1310,
+      "longLossMetrics": {
+        "trades": 142,
+        "wins": 120,
+        "losses": 22,
+        "avgLossJpy": -61769.90136558356,
+        "worstLossJpy": -296539.13312759524,
+        "sumLossJpy": -1358937.8300428384,
+        "netPnlJpy": 26457886.154616706,
+        "byRoute": {
+          "REC_X09_TIME_48H": {
+            "n": 9,
+            "wins": 5,
+            "losses": 4,
+            "netPnlJpy": 363817.68983185844,
+            "avgLossJpy": -7545.320382719567
+          },
+          "REC_X10_TIME_48H": {
+            "n": 14,
+            "wins": 10,
+            "losses": 4,
+            "netPnlJpy": 3412116.3269959833,
+            "avgLossJpy": -154477.0173752937
+          },
+          "REC_X14_TIME_48H": {
+            "n": 7,
+            "wins": 4,
+            "losses": 3,
+            "netPnlJpy": -39315.55768523589,
+            "avgLossJpy": -56806.67189958417
+          },
+          "REC_Y02_REV_D0_T12": {
+            "n": 15,
+            "wins": 15,
+            "losses": 0,
+            "netPnlJpy": 4116828.7382215736,
+            "avgLossJpy": null
+          },
+          "REC_Y04_REV_D2_T36": {
+            "n": 10,
+            "wins": 8,
+            "losses": 2,
+            "netPnlJpy": 1532298.7093392785,
+            "avgLossJpy": -133905.60291661494
+          },
+          "REC_Y05_REV_D2_T9": {
+            "n": 9,
+            "wins": 9,
+            "losses": 0,
+            "netPnlJpy": 1807186.598144863,
+            "avgLossJpy": null
+          },
+          "REC_Y10_REV_D2_T24": {
+            "n": 12,
+            "wins": 10,
+            "losses": 2,
+            "netPnlJpy": 4737347.511791903,
+            "avgLossJpy": -614.5324169714424
+          },
+          "REC_Y11_REV_D0_T36": {
+            "n": 11,
+            "wins": 10,
+            "losses": 1,
+            "netPnlJpy": 488478.2831509621,
+            "avgLossJpy": -26162.89134626306
+          },
+          "REC_Y12_REV_D0_T24": {
+            "n": 12,
+            "wins": 12,
+            "losses": 0,
+            "netPnlJpy": 6847449.639200897,
+            "avgLossJpy": null
+          },
+          "REC_Y13_REV_D2_T36": {
+            "n": 13,
+            "wins": 10,
+            "losses": 3,
+            "netPnlJpy": 2160037.381100299,
+            "avgLossJpy": -79919.33774333612
+          },
+          "REC_Y15_REV_D0_T3": {
+            "n": 10,
+            "wins": 10,
+            "losses": 0,
+            "netPnlJpy": 14559.426269238582,
+            "avgLossJpy": null
+          },
+          "REC_Y16_REV_D0_T6": {
+            "n": 9,
+            "wins": 9,
+            "losses": 0,
+            "netPnlJpy": 565309.8569253895,
+            "avgLossJpy": null
+          },
+          "REC_Y17_REV_D1_T3": {
+            "n": 11,
+            "wins": 8,
+            "losses": 3,
+            "netPnlJpy": 451771.5513296945,
+            "avgLossJpy": -1822.4293561961924
+          }
+        }
+      }
+    },
+    "30": {
+      "finalEquityJpy": 124289206.81827945,
+      "maxMtmDdPct": -16.78776877493442,
+      "profitFactor": 3.0785603081685435,
+      "closedTrades": 1307,
+      "longLossMetrics": {
+        "trades": 140,
+        "wins": 108,
+        "losses": 32,
+        "avgLossJpy": -32897.21729860039,
+        "worstLossJpy": -280960.4922164672,
+        "sumLossJpy": -1052710.9535552126,
+        "netPnlJpy": 14669296.174189847,
+        "byRoute": {
+          "REC_X09_TIME_48H": {
+            "n": 7,
+            "wins": 5,
+            "losses": 2,
+            "netPnlJpy": 143621.80384651962,
+            "avgLossJpy": -8464.543941596388
+          },
+          "REC_X10_TIME_48H": {
+            "n": 14,
+            "wins": 10,
+            "losses": 4,
+            "netPnlJpy": 1866904.8646293753,
+            "avgLossJpy": -105125.49612076278
+          },
+          "REC_X14_TIME_48H": {
+            "n": 7,
+            "wins": 4,
+            "losses": 3,
+            "netPnlJpy": -75489.75069440062,
+            "avgLossJpy": -41997.66667259875
+          },
+          "REC_Y02_REV_D0_T12": {
+            "n": 15,
+            "wins": 14,
+            "losses": 1,
+            "netPnlJpy": 2344702.7326690597,
+            "avgLossJpy": -903.422796552091
+          },
+          "REC_Y04_REV_D2_T36": {
+            "n": 10,
+            "wins": 5,
+            "losses": 5,
+            "netPnlJpy": 643926.6021061623,
+            "avgLossJpy": -27517.33074737057
+          },
+          "REC_Y05_REV_D2_T9": {
+            "n": 9,
+            "wins": 9,
+            "losses": 0,
+            "netPnlJpy": 864604.1616256654,
+            "avgLossJpy": null
+          },
+          "REC_Y10_REV_D2_T24": {
+            "n": 12,
+            "wins": 9,
+            "losses": 3,
+            "netPnlJpy": 2491628.8323361976,
+            "avgLossJpy": -637.6863984123487
+          },
+          "REC_Y11_REV_D0_T36": {
+            "n": 11,
+            "wins": 9,
+            "losses": 2,
+            "netPnlJpy": 160064.6794032786,
+            "avgLossJpy": -24796.044702768406
+          },
+          "REC_Y12_REV_D0_T24": {
+            "n": 12,
+            "wins": 10,
+            "losses": 2,
+            "netPnlJpy": 5026832.169894711,
+            "avgLossJpy": -21.31372976581551
+          },
+          "REC_Y13_REV_D2_T36": {
+            "n": 13,
+            "wins": 9,
+            "losses": 4,
+            "netPnlJpy": 819624.80426624,
+            "avgLossJpy": -71733.9570883312
+          },
+          "REC_Y15_REV_D0_T3": {
+            "n": 10,
+            "wins": 8,
+            "losses": 2,
+            "netPnlJpy": 572.2842710527183,
+            "avgLossJpy": -2155.254202127674
+          },
+          "REC_Y16_REV_D0_T6": {
+            "n": 9,
+            "wins": 9,
+            "losses": 0,
+            "netPnlJpy": 220654.49372401525,
+            "avgLossJpy": null
+          },
+          "REC_Y17_REV_D1_T3": {
+            "n": 11,
+            "wins": 7,
+            "losses": 4,
+            "netPnlJpy": 161648.4961119703,
+            "avgLossJpy": -2000.6729549704942
+          }
+        }
+      }
+    }
+  },
+  "sourceArchiveSha256": "10cdc48705a6f9e310cd0aecc95ce781af24325b1a99c2eb9aaefe3bd2953934",
+  "sourceScriptSha256": "386f38b49f13721eaaeebc073411952d0dde5a9fc0a57f84a9a2dba1929950c8",
+  "stagedCases": {
+    "STAGED_X_2P_TO_MINUS2P_3P_TO_PLUS1P": {
+      "policy": {
+        "id": "STAGED_X_2P_TO_MINUS2P_3P_TO_PLUS1P",
+        "mode": "staged_profit_h1",
+        "routes": [
+          "REC_X09_TIME_48H",
+          "REC_X10_TIME_48H",
+          "REC_X14_TIME_48H"
+        ],
+        "mfe_gte": 0.03,
+        "close_floor": 0.01,
+        "early_mfe_gte": 0.02,
+        "early_close_floor": -0.02,
+        "bear_bars": 2,
+        "strategy": "V12",
+        "sides": [
+          "LONG"
+        ]
+      },
+      "costs": {
+        "10": {
+          "finalEquityJpy": 222662477.04232824,
+          "profitFactor": 3.4570151921759193,
+          "maxMtmDdPct": -15.628168447041768,
+          "ddImprovementPp": -0.007531634152357469,
+          "equityRetention": 0.9992976817104068,
+          "closedTrades": 1310,
+          "originalLosersImproved": 0,
+          "originalWinnersExitedEarly": 3,
+          "admittedLongStopExits": 4,
+          "accounting": "PASS"
+        },
+        "30": {
+          "finalEquityJpy": 121092629.64364123,
+          "profitFactor": 3.0710831061347106,
+          "maxMtmDdPct": -16.81967061732155,
+          "ddImprovementPp": -0.031901842387128454,
+          "equityRetention": 0.9742811362589846,
+          "closedTrades": 1307,
+          "originalLosersImproved": 0,
+          "originalWinnersExitedEarly": 3,
+          "admittedLongStopExits": 4,
+          "accounting": "PASS"
+        }
+      },
+      "economicDDGateBothCosts": false
+    },
+    "STAGED_X_2P_TO_MINUS1P_3P_TO_PLUS1P": {
+      "policy": {
+        "id": "STAGED_X_2P_TO_MINUS1P_3P_TO_PLUS1P",
+        "mode": "staged_profit_h1",
+        "routes": [
+          "REC_X09_TIME_48H",
+          "REC_X10_TIME_48H",
+          "REC_X14_TIME_48H"
+        ],
+        "mfe_gte": 0.03,
+        "close_floor": 0.01,
+        "early_mfe_gte": 0.02,
+        "early_close_floor": -0.01,
+        "bear_bars": 2,
+        "strategy": "V12",
+        "sides": [
+          "LONG"
+        ]
+      },
+      "costs": {
+        "10": {
+          "finalEquityJpy": 223256074.5761166,
+          "profitFactor": 3.455532255048789,
+          "maxMtmDdPct": -15.621871405065024,
+          "ddImprovementPp": -0.0012345921756136136,
+          "equityRetention": 1.0019617167434445,
+          "closedTrades": 1308,
+          "originalLosersImproved": 1,
+          "originalWinnersExitedEarly": 3,
+          "admittedLongStopExits": 5,
+          "accounting": "PASS"
+        },
+        "30": {
+          "finalEquityJpy": 121069925.17861567,
+          "profitFactor": 3.070664190057369,
+          "maxMtmDdPct": -16.819860453853785,
+          "ddImprovementPp": -0.0320916789193646,
+          "equityRetention": 0.9740984617886361,
+          "closedTrades": 1307,
+          "originalLosersImproved": 0,
+          "originalWinnersExitedEarly": 3,
+          "admittedLongStopExits": 5,
+          "accounting": "PASS"
+        }
+      },
+      "economicDDGateBothCosts": false
+    },
+    "STAGED_X_2P_TO_BREAK_EVEN_3P_TO_PLUS1P": {
+      "policy": {
+        "id": "STAGED_X_2P_TO_BREAK_EVEN_3P_TO_PLUS1P",
+        "mode": "staged_profit_h1",
+        "routes": [
+          "REC_X09_TIME_48H",
+          "REC_X10_TIME_48H",
+          "REC_X14_TIME_48H"
+        ],
+        "mfe_gte": 0.03,
+        "close_floor": 0.01,
+        "early_mfe_gte": 0.02,
+        "early_close_floor": 0,
+        "bear_bars": 2,
+        "strategy": "V12",
+        "sides": [
+          "LONG"
+        ]
+      },
+      "costs": {
+        "10": {
+          "finalEquityJpy": 220220336.58654177,
+          "profitFactor": 3.4582595574652033,
+          "maxMtmDdPct": -15.622807636877178,
+          "ddImprovementPp": -0.0021708239877682445,
+          "equityRetention": 0.9883374816430435,
+          "closedTrades": 1309,
+          "originalLosersImproved": 2,
+          "originalWinnersExitedEarly": 5,
+          "admittedLongStopExits": 7,
+          "accounting": "PASS"
+        },
+        "30": {
+          "finalEquityJpy": 118019363.51616958,
+          "profitFactor": 3.0597712953918155,
+          "maxMtmDdPct": -16.804099902664728,
+          "ddImprovementPp": -0.016331127730307315,
+          "equityRetention": 0.9495544024890522,
+          "closedTrades": 1308,
+          "originalLosersImproved": 1,
+          "originalWinnersExitedEarly": 5,
+          "admittedLongStopExits": 7,
+          "accounting": "PASS"
+        }
+      },
+      "economicDDGateBothCosts": false
+    }
+  },
+  "operation": {
+    "orders": 0,
+    "cancels": 0,
+    "positions": 0,
+    "vpsChanged": false,
+    "productionChanged": false
+  },
+  "limitations": [
+    "Price model and H1/M5 causal research only; not signed Aster STOP/fill proof",
+    "No independently verified parity to new Task9 engine or current LIVE runtime release",
+    "No confirmed live Stop upgrade from -8% to positive profit lock; prior runner rejects LONG STOP >= entry",
+    "BT observed +2 tier cases do not improve max DD across 10/30bps and therefore NOT adopted"
+  ]
+}
