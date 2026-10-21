@@ -1,0 +1,133 @@
+{
+  "status": "PASS_20_OF_20_INDEPENDENT_BYPASS_NO_FUTURE_SOURCE_INJECTION",
+  "compared": 20,
+  "exactMatches": 20,
+  "cases": [
+    "Y04_Y13_Y17_INITIAL_2P5_H6_S3",
+    "X09_X14_PROFIT_3P0_FLOOR0P5_T2P0"
+  ],
+  "files": [
+    {
+      "case": "Y04_Y13_Y17_INITIAL_2P5_H6_S3",
+      "costBps": 10,
+      "file": "candidate-decisions.jsonl",
+      "sha256": "a065a87bd44f7289ab124753daa335545fc46dc40e6e4877208cd2e83a4f7389"
+    },
+    {
+      "case": "Y04_Y13_Y17_INITIAL_2P5_H6_S3",
+      "costBps": 10,
+      "file": "portfolio-trades.jsonl",
+      "sha256": "552f7032bd9827f88dbd3deaa65f7d44ddd677bced6832bdb27d90790f140195"
+    },
+    {
+      "case": "Y04_Y13_Y17_INITIAL_2P5_H6_S3",
+      "costBps": 10,
+      "file": "portfolio-events.jsonl",
+      "sha256": "a5914d236498ed0c3c79b48c504d4f6f69aba2017df26073c4b586a469a195cc"
+    },
+    {
+      "case": "Y04_Y13_Y17_INITIAL_2P5_H6_S3",
+      "costBps": 10,
+      "file": "task9-mtm.jsonl",
+      "sha256": "2f21f2999a15f3fa08968919087e78b892782b782dd12286f3cddb0105834c31"
+    },
+    {
+      "case": "Y04_Y13_Y17_INITIAL_2P5_H6_S3",
+      "costBps": 10,
+      "file": "metrics.json",
+      "sha256": "65c94c44bee0dcd1731224ff6838eda062c3415887e4925c839197b4b1eb5b4c"
+    },
+    {
+      "case": "Y04_Y13_Y17_INITIAL_2P5_H6_S3",
+      "costBps": 30,
+      "file": "candidate-decisions.jsonl",
+      "sha256": "2787745a417da7d7a0d27317a86036d0fc79f4d0fac349f48a45fbfcb9cc1774"
+    },
+    {
+      "case": "Y04_Y13_Y17_INITIAL_2P5_H6_S3",
+      "costBps": 30,
+      "file": "portfolio-trades.jsonl",
+      "sha256": "2a855706b7085a689acaee2394dab0092707454043052fd9e8d608ac866ea826"
+    },
+    {
+      "case": "Y04_Y13_Y17_INITIAL_2P5_H6_S3",
+      "costBps": 30,
+      "file": "portfolio-events.jsonl",
+      "sha256": "7098620bf2a60fbb35fbc763465c370e765fba9a834d4553f49a9b02342641e1"
+    },
+    {
+      "case": "Y04_Y13_Y17_INITIAL_2P5_H6_S3",
+      "costBps": 30,
+      "file": "task9-mtm.jsonl",
+      "sha256": "323dc9ac5c332e38e78dc2aebcfbb16301afe033fedb467bdc8b4ae7c3f105a0"
+    },
+    {
+      "case": "Y04_Y13_Y17_INITIAL_2P5_H6_S3",
+      "costBps": 30,
+      "file": "metrics.json",
+      "sha256": "eb16dcdeb22eba33219ec4384dd6a6d4ba9b287dd4ceacdc3a140cb6b4d669b8"
+    },
+    {
+      "case": "X09_X14_PROFIT_3P0_FLOOR0P5_T2P0",
+      "costBps": 10,
+      "file": "candidate-decisions.jsonl",
+      "sha256": "7b7938fe50bee6a7d47aced62882025affe83011983a6e9b06ce6047cf11722d"
+    },
+    {
+      "case": "X09_X14_PROFIT_3P0_FLOOR0P5_T2P0",
+      "costBps": 10,
+      "file": "portfolio-trades.jsonl",
+      "sha256": "ccd93957bfab0952bedeac36846486f01a984ee15fbd0661d7fb313885dfe084"
+    },
+    {
+      "case": "X09_X14_PROFIT_3P0_FLOOR0P5_T2P0",
+      "costBps": 10,
+      "file": "portfolio-events.jsonl",
+      "sha256": "00c079f76d3b468154a4dd069ab1d1e71a5c8acc79c795875afb2a26d61a26c1"
+    },
+    {
+      "case": "X09_X14_PROFIT_3P0_FLOOR0P5_T2P0",
+      "costBps": 10,
+      "file": "task9-mtm.jsonl",
+      "sha256": "a5fdc5e9ad8589cb2675c0c3cd1cd16848a3e2953fbbc75e8efd2e20a526ed4c"
+    },
+    {
+      "case": "X09_X14_PROFIT_3P0_FLOOR0P5_T2P0",
+      "costBps": 10,
+      "file": "metrics.json",
+      "sha256": "a69e8630b97a2532af0418e55b72638271b5eafa2adceeaaf005e7b540cce467"
+    },
+    {
+      "case": "X09_X14_PROFIT_3P0_FLOOR0P5_T2P0",
+      "costBps": 30,
+      "file": "candidate-decisions.jsonl",
+      "sha256": "34bf6c889bd5fc0fa84edfde414a345b4fb7eab108e97bd83fc53ff60328fc59"
+    },
+    {
+      "case": "X09_X14_PROFIT_3P0_FLOOR0P5_T2P0",
+      "costBps": 30,
+      "file": "portfolio-trades.jsonl",
+      "sha256": "9686fcca1382faa4c8da0b0cc80e81396b8f63d2c7a6a47b9fb141fc34da4a51"
+    },
+    {
+      "case": "X09_X14_PROFIT_3P0_FLOOR0P5_T2P0",
+      "costBps": 30,
+      "file": "portfolio-events.jsonl",
+      "sha256": "2b35df54c0725ceff07dd7c82fac646461bd266e5d92d77ddb20437bf84accba"
+    },
+    {
+      "case": "X09_X14_PROFIT_3P0_FLOOR0P5_T2P0",
+      "costBps": 30,
+      "file": "task9-mtm.jsonl",
+      "sha256": "e60869776e9560c3c4167e1e7fcb8ed0435f434f0044c7b6e9b5073e54f29803"
+    },
+    {
+      "case": "X09_X14_PROFIT_3P0_FLOOR0P5_T2P0",
+      "costBps": 30,
+      "file": "metrics.json",
+      "sha256": "398ee62a2907ecbc37fc27448610f3090563876f0939a9b57325002d047374a6"
+    }
+  ],
+  "signedVenueParity": false,
+  "liveChanged": false
+}
