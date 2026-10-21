@@ -1,0 +1,138 @@
+    ]
+    neighbor_holdout = []
+    for row in neighborhood.itertuples(index=False):
+        sim = simulate(fx, make_target(cmap[row.name]), funding_event)
+        stats = summarize(sim, VAL_END, FINAL_END)
+        neighbor_holdout.append({"name": row.name, **stats, "selected": row.name in selected_set})
+    neighborhood_df = pd.DataFrame(neighbor_holdout)
+    neighbor_positive = float((neighborhood_df["total_return"] > 0).mean()) if len(neighborhood_df) else 0.0
+
+    pos = ensemble.positions.loc[holdout_ret.index]
+    gross_contrib = (pos * fx["asset_return"].loc[holdout_ret.index]).sum(axis=0)
+    positive_contrib = gross_contrib.clip(lower=0)
+    symbol_concentration = float(positive_contrib.max() / positive_contrib.sum()) if positive_contrib.sum() > 0 else 1.0
+    month_positive = monthly.clip(lower=0)
+    month_concentration = float(month_positive.max() / month_positive.sum()) if month_positive.sum() > 0 else 1.0
+    symbol_rows = [
+        {"symbol": s, "gross_return_contribution": float(v)}
+        for s, v in gross_contrib.sort_values(ascending=False).items()
+    ]
+
+    stress = next(x for x in sensitivity if x["cost_bps"] == 10 and x["funding_multiplier"] == 1.5)
+    best_scale = max(scales, key=lambda x: x["cagr"] if x["max_drawdown"] >= -0.35 else -999)
+    gates = {
+        "development_positive": dev_stats["total_return"] > 0,
+        "validation_positive": val_stats["total_return"] > 0,
+        "holdout_cagr_ge_25pct": holdout_stats["cagr"] >= 0.25,
+        "holdout_sharpe_ge_1": holdout_stats["sharpe"] >= 1.0,
+        "holdout_dd_within_35pct": holdout_stats["max_drawdown"] >= -0.35,
+        "stress_positive": stress["total_return"] > 0,
+        "nearby_positive_ge_60pct": neighbor_positive >= 0.60,
+        "symbol_concentration_le_40pct": symbol_concentration <= 0.40,
+        "month_concentration_le_40pct": month_concentration <= 0.40,
+        "scaled_cagr_ge_40pct": best_scale["cagr"] >= 0.40,
+    }
+    verdict = "APPROVE FOR FORWARD PAPER TEST" if all(gates.values()) else "REJECT FOR DEPLOYMENT"
+
+    ranking.to_csv(OUT / "candidate_selection.csv", index=False)
+    pd.DataFrame(members).to_csv(OUT / "selected_members_holdout.csv", index=False)
+    pd.DataFrame(sensitivity).to_csv(OUT / "sensitivity.csv", index=False)
+    pd.DataFrame(delay_rows).to_csv(OUT / "delay_sensitivity.csv", index=False)
+    pd.DataFrame(scales).to_csv(OUT / "risk_scales.csv", index=False)
+    pd.DataFrame(sleeve_rows).to_csv(OUT / "sleeve_ablation.csv", index=False)
+    neighborhood_df.to_csv(OUT / "neighborhood_holdout.csv", index=False)
+    pd.DataFrame(symbol_rows).to_csv(OUT / "symbol_contributions.csv", index=False)
+    monthly.rename("return").to_csv(OUT / "holdout_monthly.csv")
+    export = ensemble.positions.copy()
+    export["strategy_return"] = ensemble.returns
+    export["equity"] = ensemble.equity
+    export["turnover"] = ensemble.turnover
+    export["funding_cost"] = ensemble.funding_cost
+    export.to_csv(OUT / "positions_and_equity.csv")
+
+    metrics = {
+        "verdict": verdict,
+        "universe_requested": UNIVERSE,
+        "universe_loaded": symbols,
+        "funding_rows": funding_coverage,
+        "candidate_count": len(grid),
+        "pre_holdout_passed": int(len(passed)),
+        "selected": [asdict(c) for c in chosen],
+        "development": dev_stats,
+        "validation": val_stats,
+        "holdout": holdout_stats,
+        "full": full_stats,
+        "stress_10bps_1_5x_funding": stress,
+        "best_risk_scale_with_dd_gate": best_scale,
+        "nearby_positive_ratio": neighbor_positive,
+        "symbol_profit_concentration": symbol_concentration,
+        "month_profit_concentration": month_concentration,
+        "bootstrap": bootstrap,
+        "gates": gates,
+    }
+    (OUT / "metrics.json").write_text(json.dumps(metrics, indent=2, default=str), encoding="utf-8")
+
+    report = f"""# Integrated Profit Portfolio Validation
+
+## Verdict
+
+**{verdict}**
+
+This test combines multi-asset trend, cross-sectional momentum and breakout/volume/funding event continuation. Candidate selection used 2021-2022 development and 2023 validation only. The final 2024-2026H1 holdout was not used for selection.
+
+## Test design
+
+- Requested universe: {', '.join(UNIVERSE)}
+- Loaded contracts: {', '.join(symbols)}
+- Development: 2021-2022
+- Validation: 2023
+- Untouched holdout: 2024-01-01 through 2026-06-30
+- Integrated candidates: {len(grid)}
+- Candidates passing pre-holdout gates: {len(passed)}
+- Selected frozen ensemble: {', '.join(names)}
+- Execution: signal after completed 4H bar, fill at next 4H open
+- Base cost: 6 bps per unit of position change
+- Funding: actual symbol-level settled Binance funding
+- Universe includes LUNAUSDT and FTTUSDT where historical files exist, to reduce pure survivor bias
+
+## Frozen ensemble
+
+| Period | Return | CAGR | Max DD | Sharpe | Positive months | Annual turnover | Avg gross |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Development | {fmt_pct(dev_stats['total_return'])} | {fmt_pct(dev_stats['cagr'])} | {fmt_pct(dev_stats['max_drawdown'])} | {dev_stats['sharpe']:.2f} | {fmt_pct(dev_stats['positive_month_ratio'])} | {dev_stats['annual_turnover']:.1f} | {dev_stats['average_gross']:.2f} |
+| Validation | {fmt_pct(val_stats['total_return'])} | {fmt_pct(val_stats['cagr'])} | {fmt_pct(val_stats['max_drawdown'])} | {val_stats['sharpe']:.2f} | {fmt_pct(val_stats['positive_month_ratio'])} | {val_stats['annual_turnover']:.1f} | {val_stats['average_gross']:.2f} |
+| Final holdout | {fmt_pct(holdout_stats['total_return'])} | {fmt_pct(holdout_stats['cagr'])} | {fmt_pct(holdout_stats['max_drawdown'])} | {holdout_stats['sharpe']:.2f} | {fmt_pct(holdout_stats['positive_month_ratio'])} | {holdout_stats['annual_turnover']:.1f} | {holdout_stats['average_gross']:.2f} |
+
+## Profit mandate checks
+
+- Holdout CAGR >= 25%: {gates['holdout_cagr_ge_25pct']}
+- Holdout Sharpe >= 1.0: {gates['holdout_sharpe_ge_1']}
+- Maximum drawdown within 35%: {gates['holdout_dd_within_35pct']}
+- Positive at 10 bps and 1.5x funding stress: {gates['stress_positive']}
+- Nearby configurations positive >= 60%: {gates['nearby_positive_ge_60pct']} ({neighbor_positive:.1%})
+- No symbol contributes over 40% of positive gross P&L: {gates['symbol_concentration_le_40pct']} ({symbol_concentration:.1%})
+- No month contributes over 40% of positive return: {gates['month_concentration_le_40pct']} ({month_concentration:.1%})
+- Best DD-compliant scale reaches 40% CAGR: {gates['scaled_cagr_ge_40pct']} ({best_scale['scale']}x, {fmt_pct(best_scale['cagr'])})
+
+## Stress case
+
+At 10 bps per position change and 1.5x realized funding, holdout return was {fmt_pct(stress['total_return'])}, CAGR {fmt_pct(stress['cagr'])}, drawdown {fmt_pct(stress['max_drawdown'])}, Sharpe {stress['sharpe']:.2f}.
+
+## Bootstrap
+
+{json.dumps(bootstrap, indent=2)}
+
+## Limits
+
+1. A historical major-coin list still contains universe-selection judgment, although failed/delisted contracts were deliberately included.
+2. Binance is the execution proxy; Aster fees, funding, liquidity, ADL and outages can differ.
+3. Candle execution cannot reproduce intrabar gaps or order-book impact.
+4. The event sleeve uses breakout, volume, range and funding information. Historical OI, liquidation and external token-event archives are not fabricated.
+5. Passing this report would approve only a forward paper test, not live capital.
+"""
+    (OUT / "report.md").write_text(report, encoding="utf-8")
+    print(report)
+
+
+if __name__ == "__main__":
+    main()
