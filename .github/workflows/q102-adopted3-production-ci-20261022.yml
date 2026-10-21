@@ -1,0 +1,78 @@
+name: Q102 adopted three-exit production candidate CI
+
+on:
+  push:
+    branches:
+      - codex/q102-adopted2-hvlong-h1-2h-production-20261022
+  pull_request:
+    paths:
+      - lib/disdex-quality102-adopted-exit-policy.ts
+      - lib/disdex-quality102-causal-v1-*.ts
+      - scripts/disdex-quality102-causal-v1-*.ts
+      - tests/disdex-quality102-*.test.ts
+      - tests/v12-v4-*.test.ts
+      - lib/v12-v4-*.ts
+      - scripts/v12-v4-*.ts
+      - .github/workflows/q102-adopted3-production-ci-20261022.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: q102-adopted3-production-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Checkout exact candidate
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: TypeScript typecheck
+        run: npm run typecheck
+
+      - name: Q102 adopted policy and durable-state tests
+        run: |
+          npx tsx --test \
+            tests/disdex-quality102-adopted-exit-policy.test.ts \
+            tests/disdex-quality102-adopted-state.test.ts \
+            tests/disdex-quality102-causal-v1-runner-adopted2.test.ts
+          npm run strategy:quality102-causal-v1:runtime:selftest
+          npm run strategy:quality102-causal-v1:signal:selftest
+          npm run strategy:quality102-causal-v1:state:selftest
+          npm run strategy:quality102-causal-v1:runner:selftest
+          npm run strategy:quality102-causal-v4:selftest
+
+      - name: V12 V4 regression and exit lifecycle tests
+        run: |
+          npx tsx --test \
+            tests/v12-v4-execution-foundation.test.ts \
+            tests/v12-v4-live-exit-feed.test.ts \
+            tests/v12-v4-production-lifecycle.test.ts \
+            tests/v12-v4-venue-exit.test.ts \
+            tests/v12-v4-four-rule-policy.test.ts
+
+      - name: Existing shared safety contracts
+        run: |
+          npm run strategy:shared-crypto-risk:selftest
+          npm run strategy:executor:selftest
+          npm run strategy:v12-x1-all:selftest
+
+      - name: Assert no activation flag is enabled by source defaults
+        shell: bash
+        run: |
+          set -euo pipefail
+          ! git grep -n -E 'QUALITY102_LIVE_ENABLED=(true|1)|QUALITY102_LIVE_SELECTOR_PARITY=(true|1)' -- config lib scripts
+          echo 'Q102_ADOPTED3_NON_MUTATING_CI_PASS'
