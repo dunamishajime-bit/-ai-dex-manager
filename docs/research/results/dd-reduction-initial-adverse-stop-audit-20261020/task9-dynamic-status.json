@@ -1,0 +1,53 @@
+{
+  "task": "Task 7 V12 SHORT dynamic case runner/reporter",
+  "classification": "BLOCKED_INCOMPLETE_SOURCE_COVERAGE",
+  "economic_acceptance_eligible": false,
+  "production_changes": 0,
+  "live_claim": false,
+  "source_coverage": {
+    "expected_rows": 3185,
+    "observed_rows": { "10": 3185, "30": 3185 },
+    "normalized_rows": { "10": 0, "30": 0 },
+    "fail_closed_rows": { "10": 3185, "30": 3185 },
+    "replayable_rows": { "10": 0, "30": 0 },
+    "status": "INCOMPLETE",
+    "reason": "The available candidate-decisions source does not provide canonical validity and entry_price fields required by the Task 1 source contract; no values were synthesized.",
+    "source_sha256": {
+      "10": "eac68287e6f4e644c588b8689ce1dc67226abccea21bea09e29c0aeda0c1a3e2",
+      "30": "77087b72c7e9279d001b58e351d7e932a9b3dabcb58d9ccbf7f1a0fd28a7c5d1"
+    }
+  },
+  "cases": [
+    { "case": "BASELINE", "cost_bps": 10, "classification": "BLOCKED_INCOMPLETE_SOURCE_COVERAGE" },
+    { "case": "A", "cost_bps": 10, "classification": "BLOCKED_INCOMPLETE_SOURCE_COVERAGE" },
+    { "case": "B", "cost_bps": 10, "classification": "BLOCKED_INCOMPLETE_SOURCE_COVERAGE" },
+    { "case": "C", "cost_bps": 10, "classification": "BLOCKED_INCOMPLETE_SOURCE_COVERAGE" },
+    { "case": "A_PLUS_C", "cost_bps": 10, "classification": "BLOCKED_INCOMPLETE_SOURCE_COVERAGE" },
+    { "case": "B_PLUS_C", "cost_bps": 10, "classification": "BLOCKED_INCOMPLETE_SOURCE_COVERAGE" },
+    { "case": "A_PLUS_B", "cost_bps": 10, "classification": "BLOCKED_INCOMPLETE_SOURCE_COVERAGE" },
+    { "case": "BEST_QUALIFIED", "cost_bps": 10, "classification": "BLOCKED_INCOMPLETE_SOURCE_COVERAGE" },
+    { "case": "BASELINE", "cost_bps": 30, "classification": "BLOCKED_INCOMPLETE_SOURCE_COVERAGE" },
+    { "case": "A", "cost_bps": 30, "classification": "BLOCKED_INCOMPLETE_SOURCE_COVERAGE" },
+    { "case": "B", "cost_bps": 30, "classification": "BLOCKED_INCOMPLETE_SOURCE_COVERAGE" },
+    { "case": "C", "cost_bps": 30, "classification": "BLOCKED_INCOMPLETE_SOURCE_COVERAGE" },
+    { "case": "A_PLUS_C", "cost_bps": 30, "classification": "BLOCKED_INCOMPLETE_SOURCE_COVERAGE" },
+    { "case": "B_PLUS_C", "cost_bps": 30, "classification": "BLOCKED_INCOMPLETE_SOURCE_COVERAGE" },
+    { "case": "A_PLUS_B", "cost_bps": 30, "classification": "BLOCKED_INCOMPLETE_SOURCE_COVERAGE" },
+    { "case": "BEST_QUALIFIED", "cost_bps": 30, "classification": "BLOCKED_INCOMPLETE_SOURCE_COVERAGE" }
+  ],
+  "cumulative_gate": {
+    "status": "BLOCKED_INCOMPLETE_SOURCE_COVERAGE",
+    "oos_pf_retention": { "10": null, "30": null },
+    "final_equity_retention": { "10": null, "30": null },
+    "minimum_oos_pf_retention": 0.9,
+    "minimum_final_equity_retention": 0.75
+  },
+  "diagnostic_only": {
+    "final_equity_jpy": 10000,
+    "trade_count": 0,
+    "economic_metrics": null,
+    "zero_trade_result_is_not_a_backtest_metric": true
+  },
+  "historical_fixed_replay": "RESEARCH_ONLY_NONCANONICAL; not used as a dynamic BT",
+  "output_root": "C:\\Users\\dis\\Desktop\\DisDex_AI_Files\\01_BT_Research\\2026-10-21_task9_dynamic_v12_short"
+}

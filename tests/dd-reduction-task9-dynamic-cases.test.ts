@@ -1,0 +1,183 @@
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { test } from "node:test";
+import assert from "node:assert/strict";
+
+import {
+    TASK9_DYNAMIC_CASES,
+    buildCaseReplayEvents,
+    runTask9Dynamic,
+} from "../scripts/dd-reduction/run-task9-dynamic";
+import { buildTask9DynamicReport } from "../scripts/dd-reduction/build-task9-dynamic-report";
+import type { CandidateSourceRecord } from "../lib/backtest/dd-reduction/dynamic-types";
+import { assertFixtureIdentity, FIXTURE_HASH } from "../lib/backtest/dd-reduction/fixture-identity";
+
+assertFixtureIdentity(
+    { sourceHash: FIXTURE_HASH, productionSha: FIXTURE_HASH, configHash: FIXTURE_HASH, policyHash: FIXTURE_HASH, resultHash: FIXTURE_HASH },
+    ["sourceHash", "productionSha", "configHash", "policyHash", "resultHash"],
+    "task9.dynamic-cases",
+);
+
+const SOURCE_SHA = "b".repeat(64);
+const START = 1_750_000_000_000;
+const OOS_START = Date.parse("2026-01-15T00:00:00.000Z");
+const HOLDOUT_START = Date.parse("2026-06-01T00:00:00.000Z");
+
+function row(candidateId: string, overrides: Record<string, unknown> = {}) {
+    return {
+        candidate_id: candidateId,
+        event_id: `${candidateId}:decision`,
+        strategy_id: "V12",
+        symbol: "BTCUSDT",
+        side: "SHORT",
+        signal_ts_ms: START,
+        decision_ts_ms: START,
+        event_seq: 1,
+        rank: 1,
+        priority: 1,
+        validity: "VALID",
+        entry_valid_until_ms: START + 86_400_000,
+        requested_gross: 100,
+        worst_case_gross: 100,
+        entry_price: 100,
+        source_sha: SOURCE_SHA,
+        candidate_status: "ACCEPTED",
+        planned_exit: {
+            fill: { timestamp_ms: START + 1, price: 100, evidence_id: `${candidateId}:fill` },
+            original_exit: { timestamp_ms: START + 3_600_000, price: 100, settlement_pnl: 10 },
+            adverse_stop: { triggered: true, timestamp_ms: START + 7_200_000, price: 102, settlement_pnl: -2 },
+        },
+        ...overrides,
+    };
+}
+
+function source(rows: readonly Record<string, unknown>[]): CandidateSourceRecord {
+    return {
+        kind: "STRATEGY_ADAPTER",
+        path: "fixture://task9-dynamic-cases.jsonl",
+        sourceSha256: SOURCE_SHA,
+        sourceBytes: 4096,
+        evidence: "CAUSALLY_REGENERATED",
+        rows,
+    };
+}
+
+async function withOutput<T>(fn: (outputDir: string) => Promise<T>): Promise<T> {
+    const outputDir = await mkdtemp(join(tmpdir(), "dd-task9-dynamic-"));
+    try {
+        return await fn(outputDir);
+    } finally {
+        await rm(outputDir, { recursive: true, force: true });
+    }
+}
+
+function completeFixture() {
+    return source([
+        row("accepted-filled", { event_seq: 1 }),
+        row("rejected-candidate", { event_seq: 2, candidate_status: "REJECTED" }),
+        row("unfilled-candidate", { event_seq: 3, planned_exit: null }),
+    ]);
+}
+
+test("Task 9 V12 SHORT policies are unique and preserve the named candidates", () => {
+    const names = TASK9_DYNAMIC_CASES.map((item) => item.name);
+    assert.equal(new Set(names).size, names.length);
+    assert.deepEqual(names, ["BASELINE", "A", "B", "C", "A_PLUS_C", "B_PLUS_C", "A_PLUS_B", "BEST_QUALIFIED"]);
+    assert.equal(TASK9_DYNAMIC_CASES.find((item) => item.name === "A")?.candidateId, "V12_SHORT_PCT2P0_12H_MFE1P0_R12");
+    assert.equal(TASK9_DYNAMIC_CASES.find((item) => item.name === "B")?.candidateId, "V12_SHORT_PCT2P0_6H_MFE0P5_R6");
+    assert.equal(TASK9_DYNAMIC_CASES.find((item) => item.name === "C")?.candidateId, "V12_SHORT_COMPOSITE_ATR1P5_6H_MFE0P5_STRUCTURE3_R12");
+});
+
+test("overlay event construction is causal and cannot target rejected or unfilled candidates", () => {
+    const events = buildCaseReplayEvents(completeFixture().rows, TASK9_DYNAMIC_CASES.find((item) => item.name === "A")!, 10);
+    const stopEvents = events.filter((event) => event.kind === "PROTECTION_STOP");
+    assert.equal(stopEvents.length, 1);
+    assert.equal(stopEvents[0]?.reservation_id, "reservation:accepted-filled:1750000000000");
+    assert.equal(new Set(events.filter((event) => event.kind === "PROTECTION_STOP").map((event) => event.reservation_id)).size, 1);
+    assert.equal(events.some((event) => event.event_id.includes("rejected-candidate") && event.kind === "PROTECTION_STOP"), false);
+    assert.equal(events.some((event) => event.event_id.includes("unfilled-candidate") && event.kind === "PROTECTION_STOP"), false);
+});
+
+test("dynamic cases classify original winner, loser, and unknown STOP outcomes without double STOP", async () => {
+    await withOutput(async (outputDir) => {
+        const result = await runTask9Dynamic({ outputDir, sourceRecords: [source([
+            row("winner", { event_seq: 1 }),
+            row("loser", { event_seq: 2, symbol: "ETHUSDT", planned_exit: { fill: { timestamp_ms: START + 1, price: 100, evidence_id: "loser:fill" }, original_exit: { timestamp_ms: START + 3_600_000, price: 100, settlement_pnl: -10 }, adverse_stop: { triggered: true, timestamp_ms: START + 7_200_000, price: 102, settlement_pnl: -2 } } }),
+            row("unknown", { event_seq: 3, symbol: "SOLUSDT", planned_exit: { fill: { timestamp_ms: START + 1, price: 100, evidence_id: "unknown:fill" }, original_exit: { timestamp_ms: START + 3_600_000, price: 100, settlement_pnl: null }, adverse_stop: { triggered: true, timestamp_ms: START + 7_200_000, price: 102, settlement_pnl: -2 } } }),
+        ])], cases: ["A"], costs: [10], marketData: [
+            { timestamp_ms: START + 7_200_000, symbol: "BTCUSDT", price: 102, fx_rate: 1, timeframe: "H1" },
+            { timestamp_ms: START + 7_200_000, symbol: "ETHUSDT", price: 102, fx_rate: 1, timeframe: "H1" },
+            { timestamp_ms: START + 7_200_000, symbol: "SOLUSDT", price: 102, fx_rate: 1, timeframe: "H1" },
+        ] });
+        const caseResult = result.cases[0]!;
+        assert.deepEqual(caseResult.stopEvents.map((event) => event.originalOutcome), ["WINNER", "LOSER", "UNKNOWN"]);
+        assert.equal(caseResult.stopEvents.length, 3);
+        assert.equal(caseResult.economicMetrics?.stopEvents, 3);
+        assert.equal(caseResult.economicMetrics?.duplicateStops, 0);
+    });
+});
+
+test("cooldown and released gross are reported from the reducer lifecycle", async () => {
+    await withOutput(async (outputDir) => {
+        const later = row("later-entry", { event_seq: 2, decision_ts_ms: START + 7_201_000, signal_ts_ms: START + 7_201_000, entry_valid_until_ms: START + 86_401_000, planned_exit: null });
+        const result = await runTask9Dynamic({ outputDir, sourceRecords: [source([row("first", { event_seq: 1 }), later])], cases: ["A"], costs: [10] });
+        const item = result.cases[0]!;
+        assert.equal(item.lifecycleAudit.cooldownExclusions, 1);
+        assert.equal(item.lifecycleAudit.grossReadmissions, 0);
+        assert.equal(item.lifecycleAudit.dynamicLotObservations >= 1, true);
+    });
+});
+
+test("OOS and Holdout metrics are independent and do not feed candidate selection state across splits", async () => {
+    await withOutput(async (outputDir) => {
+        const result = await runTask9Dynamic({ outputDir, sourceRecords: [source([
+            row("is-candidate", { event_seq: 1, data_split: "IS" }),
+            row("oos-candidate", { event_seq: 2, data_split: "OOS", decision_ts_ms: OOS_START, signal_ts_ms: OOS_START, entry_valid_until_ms: OOS_START + 86_400_000, planned_exit: null }),
+            row("holdout-candidate", { event_seq: 3, data_split: "HOLDOUT", decision_ts_ms: HOLDOUT_START, signal_ts_ms: HOLDOUT_START, entry_valid_until_ms: HOLDOUT_START + 86_400_000, planned_exit: null }),
+        ])], cases: ["BASELINE"], costs: [10] });
+        const caseResult = result.cases[0]!;
+        assert.equal(caseResult.splits.OOS.selectionStateLeaked, false);
+        assert.equal(caseResult.splits.HOLDOUT.selectionStateLeaked, false);
+        assert.equal(caseResult.splits.OOS.eventCount > 0, true);
+        assert.equal(caseResult.splits.HOLDOUT.eventCount > 0, true);
+    });
+});
+
+test("zero replayable rows fail closed for every case and never become economic BT metrics", async () => {
+    await withOutput(async (outputDir) => {
+        const incomplete = source([{ candidate_id: "missing-canonical-fields", strategy_id: "V12", symbol: "BTCUSDT", decision_ts_ms: START, candidate_status: "ACCEPTED" }]);
+        const result = await runTask9Dynamic({ outputDir, sourceRecords: [incomplete], costs: [10, 30] });
+        assert.equal(result.cases.length, 16);
+        for (const item of result.cases) {
+            assert.equal(item.classification, "BLOCKED_INCOMPLETE_SOURCE_COVERAGE");
+            assert.equal(item.economicAcceptanceEligible, false);
+            assert.equal(item.economicMetrics, null);
+            assert.equal(item.diagnosticMetrics.finalEquityJpy, 10_000);
+            assert.equal(item.diagnosticMetrics.tradeCount, 0);
+        }
+    });
+});
+
+test("repeated dynamic case runs are deterministic and carry the no-production marker", async () => {
+    await withOutput(async (firstOutput) => {
+        const first = await runTask9Dynamic({ outputDir: firstOutput, sourceRecords: [completeFixture()], verifyDeterminism: true });
+        await withOutput(async (secondOutput) => {
+            const second = await runTask9Dynamic({ outputDir: secondOutput, sourceRecords: [completeFixture()] });
+            assert.deepEqual(first.hashes, second.hashes);
+            assert.equal(first.productionChanges, 0);
+            assert.equal(first.liveClaim, false);
+        });
+    });
+});
+
+test("reporter preserves blocked classifications and cumulative gate in compact output", async () => {
+    await withOutput(async (outputDir) => {
+        const run = await runTask9Dynamic({ outputDir, sourceRecords: [source([{ candidate_id: "missing", strategy_id: "V12", symbol: "BTCUSDT", decision_ts_ms: START }])] });
+        const report = buildTask9DynamicReport(run);
+        assert.equal(report.classification, "BLOCKED_INCOMPLETE_SOURCE_COVERAGE");
+        assert.equal(report.economicAcceptanceEligible, false);
+        assert.equal(report.cumulativeGate.status, "BLOCKED_INCOMPLETE_SOURCE_COVERAGE");
+        assert.equal(report.cases.every((item) => item.classification === "BLOCKED_INCOMPLETE_SOURCE_COVERAGE"), true);
+    });
+});
