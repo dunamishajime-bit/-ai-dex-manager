@@ -127,5 +127,17 @@ class DependencyLivenessHealthTest(unittest.TestCase):
             wiring.index("ensure_trading_unit_running"),
         )
 
+    def test_v4_telemetry_cutover_does_not_require_flat_state_when_lineage_is_current(self):
+        wiring = WIRING.read_text(encoding="utf-8")
+        start = wiring.index("migrate_v4_telemetry_lineage() {")
+        end = wiring.index("\nrecover_hype_benign_state() {", start)
+        function = wiring[start:end]
+        self.assertIn('[[ "$from_sha" == "$V4_PRIMARY_SHA" ]] && continue', function)
+        self.assertIn("V4_TELEMETRY_LINEAGE_MIGRATION_NOT_FLAT", function)
+        self.assertLess(
+            function.index('[[ "$from_sha" == "$V4_PRIMARY_SHA" ]] && continue'),
+            function.index("V4_TELEMETRY_LINEAGE_MIGRATION_NOT_FLAT"),
+        )
+
 if __name__ == "__main__":
     unittest.main()
