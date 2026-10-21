@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "classification": "REBUILT_BASELINE_NONCANONICAL",
+  "formalParity": false,
+  "economicBacktest": false,
+  "observedRows": {
+    "10bps": 3185,
+    "30bps": 3185
+  },
+  "replayReadyRows": {
+    "10bps": 0,
+    "30bps": 0
+  },
+  "failClosedRows": {
+    "10bps": 3185,
+    "30bps": 3185
+  },
+  "inputSha256": {
+    "10bps": "eac68287e6f4e644c588b8689ce1dc67226abccea21bea09e29c0aeda0c1a3e2",
+    "30bps": "77087b72c7e9279d001b58e351d7e932a9b3dabcb58d9ccbf7f1a0fd28a7c5d1"
+  },
+  "adapterManifestSha256": {
+    "10bps": "1c3fc802cf2f2a8bc4f7b620a0bf229b4d0b22fa3633584278bde11e5569261b",
+    "30bps": "3abe3e54cd180b4ead336c203569f4d4526b9837155e57809136735a05a73462"
+  },
+  "blockers": [
+    "ALLOCATOR_ENTRY_VALIDITY_MISSING",
+    "ALLOCATOR_PRIORITY_TIE_BREAK_MISSING",
+    "ALLOCATOR_ASSET_CLASS_MISSING",
+    "REJECTED_DYNAMIC_QUANTITY_MISSING",
+    "REJECTED_ENTRY_EQUITY_MISSING",
+    "V52_PREALLOCATION_ENTRY_FIELDS_MISSING"
+  ]
+}
