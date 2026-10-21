@@ -163,7 +163,8 @@
     "verification": {
       "dd_reduction_suite": "18/18 files pass, 0 failed, 0 skipped, 0 todo",
       "typescript": "exit 0",
-      "python_discovery": "24/24 pass",
+      "python_discovery_local": "28/28 pass with local legacy dependencies present",
+      "python_ci_discovery": "4/4 self-contained pass; 3 legacy tests UNAVAILABLE_LEGACY_DEPENDENCY and not counted as pass/skip",
       "targeted_lint": "exit 0",
       "git_diff_check": "exit 0",
       "artifact_verifier": "PASS; external Task 6 ledgers and source references checked",

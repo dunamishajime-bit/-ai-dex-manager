@@ -47,8 +47,8 @@ jobs:
         run: npm run dd:reduction:test
       - name: Type-check without emitting files
         run: npx tsc --noEmit --incremental false --pretty false
-      - name: Run applicable Python discovery
-        run: python -m unittest discover -s scripts/dd-reduction -p 'test_*.py' -q
+      - name: Run self-contained Python research discovery
+        run: python scripts/dd-reduction/run-task9-python-discovery.py
       - name: Lint Task 9 verifier and artifact test
         run: npx eslint scripts/dd-reduction/verify-task9-dynamic-artifacts.ts tests/dd-reduction-dynamic-artifacts.test.ts
       - name: Verify compact research artifacts and fail-closed classifications

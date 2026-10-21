@@ -53,6 +53,13 @@
     "live_claim": false
   },
   "verification_scope": {
+    "python_ci": {
+      "self_contained_tests": 4,
+      "self_contained_failures": 0,
+      "legacy_unavailable_tests": 3,
+      "legacy_classification": "UNAVAILABLE_LEGACY_DEPENDENCY",
+      "excluded_are_not_counted_as_pass_or_skip": true
+    },
     "raw_ledgers": "C:\\Users\\dis\\Desktop\\DisDex_AI_Files\\01_BT_Research\\ referenced only; not copied into Git",
     "formal_parity_claim": false,
     "economic_acceptance_claim": false

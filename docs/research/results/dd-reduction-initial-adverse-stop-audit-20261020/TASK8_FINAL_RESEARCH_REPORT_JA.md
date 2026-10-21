@@ -43,7 +43,7 @@ Task 8 の成果物検証、CI 接続、研究専用変更監査を追加した�
 - CI: `.github/workflows/task9-dynamic-integrated-bt.yml`
 - raw ledger: `C:\Users\dis\Desktop\DisDex_AI_Files\01_BT_Research\` 配下を参照し、Git へコピーしていない。
 
-最終検証結果は、DD reduction suite 18/18 files pass（failed/skipped/todo は各 0）、TypeScript exit 0、Python discovery 24/24 pass、targeted ESLint exit 0、`git diff --check` exit 0、外部 Task 6 ledger/source SHA verifier PASS である。CI workflow には skip/no-jobs ではない実 job を定義した。
+最終ローカル検証は、DD reduction suite 18/18 files pass（failed/skipped/todo は各 0）、TypeScript exit 0、既存 Python discovery 28/28 pass、targeted ESLint exit 0、`git diff --check` exit 0、外部 Task 6 ledger/source SHA verifier PASS である。CI では self-contained Python artifact-contract test 4/4 を実行する。既存 legacy Python test 3件は untracked legacy dependency tree を必要とするため `UNAVAILABLE_LEGACY_DEPENDENCY` として明示除外し、pass/skip に数えていない。CI workflow には skip/no-jobs ではない実 job を定義した。
 
 Task 6/7 の source SHA、result hash、ledger hash、classification は既存 manifest/status の値を正本として扱う。結果を通すために raw ledger、fixed replay、dynamic report を改変していない。
 
