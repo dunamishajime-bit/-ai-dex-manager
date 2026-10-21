@@ -1,0 +1,1136 @@
+{
+  "metadata": {
+    "status": "HYPE_5_CASE_FULL8_8LOGIC_PROFIT_LOSS_ECONOMIC_BT_VERIFIED_NOT_LIVE",
+    "period": "2025-08-10 to 2026-08-10",
+    "initialJpy": 10000,
+    "depositsJpy": 0,
+    "costsBps": [
+      10,
+      30
+    ],
+    "V4FourAndQ102ThreeAdoptedPoliciesFixed": true,
+    "HYPE75EntryUnmodified": true,
+    "sourceArchiveSha256": "10cdc48705a6f9e310cd0aecc95ce781af24325b1a99c2eb9aaefe3bd2953934",
+    "pricePathHYPETradeCount10bps": 40,
+    "pricePathHYPETradeCount30bps": 38,
+    "studyCodeSha256": "aeb76f4c52952966b345bd41c06cc446614507ea633e387a38297239d19c955b",
+    "priceScanSha256": "ded812beb801c4dc34a118f53cde6790fd6d4ee32e648166f34ac18a0708330d",
+    "conservativeProfitModelSha256": "1ea4ce4a6587810d96cc4c9bb1bc3711c38a83bc7946dabc276ce794446d5bff",
+    "researchModelOnly": true,
+    "liveVenueAndCurrentTask9SourceParityNotCertified": true,
+    "productionOrdersChanged": false,
+    "HYPENewRulesAdopted": false
+  },
+  "acceptedBenchmark": {
+    "10": {
+      "finalEquityJpy": 198324735.05909136,
+      "maxMtmDdPct": -14.603309760733396,
+      "profitFactor": 3.164798912181309,
+      "closedTrades": 1326
+    },
+    "30": {
+      "finalEquityJpy": 88431930.94000964,
+      "maxMtmDdPct": -15.75383475906923,
+      "profitFactor": 2.7301229466853947,
+      "closedTrades": 1323
+    }
+  },
+  "HYPEPricePaths": {
+    "10": {
+      "count": 40,
+      "summary": {
+        "all": {
+          "trades": 40,
+          "wins": 12,
+          "medianMFE": 1.027078904080836,
+          "medianMAE": 1.4774241341735272,
+          "medianHrs": 3.625,
+          "totalRealizedPnlJpy": 9453396.257188842
+        },
+        "winners": {
+          "trades": 12,
+          "wins": 12,
+          "medianMFE": 5.552140112107795,
+          "medianMAE": 0.613336769136108,
+          "medianHrs": 6.5,
+          "totalRealizedPnlJpy": 31196303.945957884
+        },
+        "losers": {
+          "trades": 28,
+          "wins": 0,
+          "medianMFE": 0.7283489974139745,
+          "medianMAE": 1.7402173834456691,
+          "medianHrs": 1.5416666666666665,
+          "totalRealizedPnlJpy": -21742907.688769042
+        }
+      },
+      "exitReasons": {
+        "5M_PROTECTIVE_STOP": 28,
+        "TAKE_PROFIT": 12
+      },
+      "initialRisk": {
+        "0h_stop1_priorMfeLT0.3": {
+          "trades": 12,
+          "oldLosers": 10,
+          "oldWinners": 2,
+          "oldWinnersPnlAtRisk": 917808.3170290544,
+          "oldLoserPnL": -6948148.115486689
+        },
+        "0h_stop1.5_priorMfeLT0.3": {
+          "trades": 6,
+          "oldLosers": 5,
+          "oldWinners": 1,
+          "oldWinnersPnlAtRisk": 140674.32350184317,
+          "oldLoserPnL": -4573968.334442927
+        },
+        "0h_stop2_priorMfeLT0.5": {
+          "trades": 4,
+          "oldLosers": 3,
+          "oldWinners": 1,
+          "oldWinnersPnlAtRisk": 140674.32350184317,
+          "oldLoserPnL": -1436934.5297781052
+        },
+        "1h_stop1_priorMfeLT0.3": {
+          "trades": 5,
+          "oldLosers": 4,
+          "oldWinners": 1,
+          "oldWinnersPnlAtRisk": 140674.32350184317,
+          "oldLoserPnL": -3293739.020036343
+        },
+        "1h_stop1.5_priorMfeLT0.5": {
+          "trades": 4,
+          "oldLosers": 3,
+          "oldWinners": 1,
+          "oldWinnersPnlAtRisk": 140674.32350184317,
+          "oldLoserPnL": -2329614.5535251694
+        },
+        "2h_stop1.5_priorMfeLT0.5": {
+          "trades": 0,
+          "oldLosers": 0,
+          "oldWinners": 0,
+          "oldWinnersPnlAtRisk": 0,
+          "oldLoserPnL": 0
+        },
+        "3h_stop2_priorMfeLT0.5": {
+          "trades": 0,
+          "oldLosers": 0,
+          "oldWinners": 0,
+          "oldWinnersPnlAtRisk": 0,
+          "oldLoserPnL": 0
+        }
+      },
+      "profitProtection": {
+        "arm0.3_floor-0.25": {
+          "trades": 21,
+          "oldLosers": 16,
+          "oldWinners": 5
+        },
+        "arm0.3_floor0": {
+          "trades": 23,
+          "oldLosers": 16,
+          "oldWinners": 7
+        },
+        "arm0.3_floor0.2": {
+          "trades": 25,
+          "oldLosers": 16,
+          "oldWinners": 9
+        },
+        "arm0.5_floor-0.25": {
+          "trades": 15,
+          "oldLosers": 11,
+          "oldWinners": 4
+        },
+        "arm0.5_floor0": {
+          "trades": 17,
+          "oldLosers": 11,
+          "oldWinners": 6
+        },
+        "arm0.5_floor0.2": {
+          "trades": 20,
+          "oldLosers": 11,
+          "oldWinners": 9
+        },
+        "arm0.5_floor0.3": {
+          "trades": 21,
+          "oldLosers": 11,
+          "oldWinners": 10
+        },
+        "arm0.8_floor-0.25": {
+          "trades": 6,
+          "oldLosers": 5,
+          "oldWinners": 1
+        },
+        "arm0.8_floor0": {
+          "trades": 9,
+          "oldLosers": 5,
+          "oldWinners": 4
+        },
+        "arm0.8_floor0.2": {
+          "trades": 13,
+          "oldLosers": 5,
+          "oldWinners": 8
+        },
+        "arm0.8_floor0.3": {
+          "trades": 14,
+          "oldLosers": 5,
+          "oldWinners": 9
+        },
+        "arm0.8_floor0.5": {
+          "trades": 14,
+          "oldLosers": 5,
+          "oldWinners": 9
+        },
+        "arm1_floor-0.25": {
+          "trades": 5,
+          "oldLosers": 4,
+          "oldWinners": 1
+        },
+        "arm1_floor0": {
+          "trades": 8,
+          "oldLosers": 4,
+          "oldWinners": 4
+        },
+        "arm1_floor0.2": {
+          "trades": 12,
+          "oldLosers": 4,
+          "oldWinners": 8
+        },
+        "arm1_floor0.3": {
+          "trades": 13,
+          "oldLosers": 4,
+          "oldWinners": 9
+        },
+        "arm1_floor0.5": {
+          "trades": 13,
+          "oldLosers": 4,
+          "oldWinners": 9
+        },
+        "arm1_floor0.8": {
+          "trades": 15,
+          "oldLosers": 4,
+          "oldWinners": 11
+        },
+        "arm1.2_floor-0.25": {
+          "trades": 5,
+          "oldLosers": 4,
+          "oldWinners": 1
+        },
+        "arm1.2_floor0": {
+          "trades": 7,
+          "oldLosers": 4,
+          "oldWinners": 3
+        },
+        "arm1.2_floor0.2": {
+          "trades": 10,
+          "oldLosers": 4,
+          "oldWinners": 6
+        },
+        "arm1.2_floor0.3": {
+          "trades": 12,
+          "oldLosers": 4,
+          "oldWinners": 8
+        },
+        "arm1.2_floor0.5": {
+          "trades": 12,
+          "oldLosers": 4,
+          "oldWinners": 8
+        },
+        "arm1.2_floor0.8": {
+          "trades": 12,
+          "oldLosers": 4,
+          "oldWinners": 8
+        },
+        "arm1.2_floor1": {
+          "trades": 12,
+          "oldLosers": 4,
+          "oldWinners": 8
+        },
+        "arm1.5_floor-0.25": {
+          "trades": 5,
+          "oldLosers": 4,
+          "oldWinners": 1
+        },
+        "arm1.5_floor0": {
+          "trades": 7,
+          "oldLosers": 4,
+          "oldWinners": 3
+        },
+        "arm1.5_floor0.2": {
+          "trades": 9,
+          "oldLosers": 4,
+          "oldWinners": 5
+        },
+        "arm1.5_floor0.3": {
+          "trades": 11,
+          "oldLosers": 4,
+          "oldWinners": 7
+        },
+        "arm1.5_floor0.5": {
+          "trades": 11,
+          "oldLosers": 4,
+          "oldWinners": 7
+        },
+        "arm1.5_floor0.8": {
+          "trades": 11,
+          "oldLosers": 4,
+          "oldWinners": 7
+        },
+        "arm1.5_floor1": {
+          "trades": 11,
+          "oldLosers": 4,
+          "oldWinners": 7
+        },
+        "arm2_floor-0.25": {
+          "trades": 5,
+          "oldLosers": 4,
+          "oldWinners": 1
+        },
+        "arm2_floor0": {
+          "trades": 5,
+          "oldLosers": 4,
+          "oldWinners": 1
+        },
+        "arm2_floor0.2": {
+          "trades": 7,
+          "oldLosers": 4,
+          "oldWinners": 3
+        },
+        "arm2_floor0.3": {
+          "trades": 8,
+          "oldLosers": 4,
+          "oldWinners": 4
+        },
+        "arm2_floor0.5": {
+          "trades": 8,
+          "oldLosers": 4,
+          "oldWinners": 4
+        },
+        "arm2_floor0.8": {
+          "trades": 9,
+          "oldLosers": 4,
+          "oldWinners": 5
+        },
+        "arm2_floor1": {
+          "trades": 9,
+          "oldLosers": 4,
+          "oldWinners": 5
+        },
+        "arm2_floor1.5": {
+          "trades": 12,
+          "oldLosers": 4,
+          "oldWinners": 8
+        },
+        "arm3_floor-0.25": {
+          "trades": 1,
+          "oldLosers": 1,
+          "oldWinners": 0
+        },
+        "arm3_floor0": {
+          "trades": 1,
+          "oldLosers": 1,
+          "oldWinners": 0
+        },
+        "arm3_floor0.2": {
+          "trades": 3,
+          "oldLosers": 1,
+          "oldWinners": 2
+        },
+        "arm3_floor0.3": {
+          "trades": 3,
+          "oldLosers": 1,
+          "oldWinners": 2
+        },
+        "arm3_floor0.5": {
+          "trades": 3,
+          "oldLosers": 1,
+          "oldWinners": 2
+        },
+        "arm3_floor0.8": {
+          "trades": 4,
+          "oldLosers": 1,
+          "oldWinners": 3
+        },
+        "arm3_floor1": {
+          "trades": 4,
+          "oldLosers": 1,
+          "oldWinners": 3
+        },
+        "arm3_floor1.5": {
+          "trades": 4,
+          "oldLosers": 1,
+          "oldWinners": 3
+        },
+        "arm3_floor2": {
+          "trades": 5,
+          "oldLosers": 1,
+          "oldWinners": 4
+        },
+        "arm4_floor-0.25": {
+          "trades": 0,
+          "oldLosers": 0,
+          "oldWinners": 0
+        },
+        "arm4_floor0": {
+          "trades": 0,
+          "oldLosers": 0,
+          "oldWinners": 0
+        },
+        "arm4_floor0.2": {
+          "trades": 0,
+          "oldLosers": 0,
+          "oldWinners": 0
+        },
+        "arm4_floor0.3": {
+          "trades": 0,
+          "oldLosers": 0,
+          "oldWinners": 0
+        },
+        "arm4_floor0.5": {
+          "trades": 0,
+          "oldLosers": 0,
+          "oldWinners": 0
+        },
+        "arm4_floor0.8": {
+          "trades": 0,
+          "oldLosers": 0,
+          "oldWinners": 0
+        },
+        "arm4_floor1": {
+          "trades": 0,
+          "oldLosers": 0,
+          "oldWinners": 0
+        },
+        "arm4_floor1.5": {
+          "trades": 0,
+          "oldLosers": 0,
+          "oldWinners": 0
+        },
+        "arm4_floor2": {
+          "trades": 0,
+          "oldLosers": 0,
+          "oldWinners": 0
+        },
+        "arm5_floor-0.25": {
+          "trades": 0,
+          "oldLosers": 0,
+          "oldWinners": 0
+        },
+        "arm5_floor0": {
+          "trades": 0,
+          "oldLosers": 0,
+          "oldWinners": 0
+        },
+        "arm5_floor0.2": {
+          "trades": 0,
+          "oldLosers": 0,
+          "oldWinners": 0
+        },
+        "arm5_floor0.3": {
+          "trades": 0,
+          "oldLosers": 0,
+          "oldWinners": 0
+        },
+        "arm5_floor0.5": {
+          "trades": 0,
+          "oldLosers": 0,
+          "oldWinners": 0
+        },
+        "arm5_floor0.8": {
+          "trades": 0,
+          "oldLosers": 0,
+          "oldWinners": 0
+        },
+        "arm5_floor1": {
+          "trades": 0,
+          "oldLosers": 0,
+          "oldWinners": 0
+        },
+        "arm5_floor1.5": {
+          "trades": 0,
+          "oldLosers": 0,
+          "oldWinners": 0
+        },
+        "arm5_floor2": {
+          "trades": 0,
+          "oldLosers": 0,
+          "oldWinners": 0
+        }
+      }
+    },
+    "30": {
+      "count": 38,
+      "summary": {
+        "all": {
+          "trades": 38,
+          "wins": 13,
+          "medianMFE": 1.2052687931387585,
+          "medianMAE": 1.450229555764354,
+          "medianHrs": 3.958333333333333,
+          "totalRealizedPnlJpy": 3550521.35808494
+        },
+        "winners": {
+          "trades": 13,
+          "wins": 13,
+          "medianMFE": 5.256727190066224,
+          "medianMAE": 0.6331345093559926,
+          "medianHrs": 5.0,
+          "totalRealizedPnlJpy": 12431446.01932623
+        },
+        "losers": {
+          "trades": 25,
+          "wins": 0,
+          "medianMFE": 0.6852343059239541,
+          "medianMAE": 1.704143300484584,
+          "medianHrs": 1.5833333333333333,
+          "totalRealizedPnlJpy": -8880924.661241291
+        }
+      },
+      "exitReasons": {
+        "5M_PROTECTIVE_STOP": 25,
+        "TAKE_PROFIT": 13
+      },
+      "initialRisk": {
+        "0h_stop1_priorMfeLT0.3": {
+          "trades": 10,
+          "oldLosers": 8,
+          "oldWinners": 2,
+          "oldWinnersPnlAtRisk": 357525.3273642618,
+          "oldLoserPnL": -2013279.3899947174
+        },
+        "0h_stop1.5_priorMfeLT0.3": {
+          "trades": 5,
+          "oldLosers": 4,
+          "oldWinners": 1,
+          "oldWinnersPnlAtRisk": 65744.55015813494,
+          "oldLoserPnL": -1307959.5318201152
+        },
+        "0h_stop2_priorMfeLT0.5": {
+          "trades": 4,
+          "oldLosers": 3,
+          "oldWinners": 1,
+          "oldWinnersPnlAtRisk": 65744.55015813494,
+          "oldLoserPnL": -573898.855076752
+        },
+        "1h_stop1_priorMfeLT0.3": {
+          "trades": 5,
+          "oldLosers": 4,
+          "oldWinners": 1,
+          "oldWinnersPnlAtRisk": 65744.55015813494,
+          "oldLoserPnL": -1351585.9064673285
+        },
+        "1h_stop1.5_priorMfeLT0.5": {
+          "trades": 4,
+          "oldLosers": 3,
+          "oldWinners": 1,
+          "oldWinnersPnlAtRisk": 65744.55015813494,
+          "oldLoserPnL": -961636.7755590251
+        },
+        "2h_stop1.5_priorMfeLT0.5": {
+          "trades": 0,
+          "oldLosers": 0,
+          "oldWinners": 0,
+          "oldWinnersPnlAtRisk": 0,
+          "oldLoserPnL": 0
+        },
+        "3h_stop2_priorMfeLT0.5": {
+          "trades": 0,
+          "oldLosers": 0,
+          "oldWinners": 0,
+          "oldWinnersPnlAtRisk": 0,
+          "oldLoserPnL": 0
+        }
+      },
+      "profitProtection": {
+        "arm0.3_floor-0.25": {
+          "trades": 19,
+          "oldLosers": 14,
+          "oldWinners": 5
+        },
+        "arm0.3_floor0": {
+          "trades": 22,
+          "oldLosers": 14,
+          "oldWinners": 8
+        },
+        "arm0.3_floor0.2": {
+          "trades": 24,
+          "oldLosers": 14,
+          "oldWinners": 10
+        },
+        "arm0.5_floor-0.25": {
+          "trades": 14,
+          "oldLosers": 10,
+          "oldWinners": 4
+        },
+        "arm0.5_floor0": {
+          "trades": 16,
+          "oldLosers": 10,
+          "oldWinners": 6
+        },
+        "arm0.5_floor0.2": {
+          "trades": 20,
+          "oldLosers": 10,
+          "oldWinners": 10
+        },
+        "arm0.5_floor0.3": {
+          "trades": 21,
+          "oldLosers": 10,
+          "oldWinners": 11
+        },
+        "arm0.8_floor-0.25": {
+          "trades": 6,
+          "oldLosers": 5,
+          "oldWinners": 1
+        },
+        "arm0.8_floor0": {
+          "trades": 9,
+          "oldLosers": 5,
+          "oldWinners": 4
+        },
+        "arm0.8_floor0.2": {
+          "trades": 14,
+          "oldLosers": 5,
+          "oldWinners": 9
+        },
+        "arm0.8_floor0.3": {
+          "trades": 15,
+          "oldLosers": 5,
+          "oldWinners": 10
+        },
+        "arm0.8_floor0.5": {
+          "trades": 15,
+          "oldLosers": 5,
+          "oldWinners": 10
+        },
+        "arm1_floor-0.25": {
+          "trades": 5,
+          "oldLosers": 4,
+          "oldWinners": 1
+        },
+        "arm1_floor0": {
+          "trades": 8,
+          "oldLosers": 4,
+          "oldWinners": 4
+        },
+        "arm1_floor0.2": {
+          "trades": 13,
+          "oldLosers": 4,
+          "oldWinners": 9
+        },
+        "arm1_floor0.3": {
+          "trades": 14,
+          "oldLosers": 4,
+          "oldWinners": 10
+        },
+        "arm1_floor0.5": {
+          "trades": 14,
+          "oldLosers": 4,
+          "oldWinners": 10
+        },
+        "arm1_floor0.8": {
+          "trades": 16,
+          "oldLosers": 4,
+          "oldWinners": 12
+        },
+        "arm1.2_floor-0.25": {
+          "trades": 5,
+          "oldLosers": 4,
+          "oldWinners": 1
+        },
+        "arm1.2_floor0": {
+          "trades": 7,
+          "oldLosers": 4,
+          "oldWinners": 3
+        },
+        "arm1.2_floor0.2": {
+          "trades": 10,
+          "oldLosers": 4,
+          "oldWinners": 6
+        },
+        "arm1.2_floor0.3": {
+          "trades": 12,
+          "oldLosers": 4,
+          "oldWinners": 8
+        },
+        "arm1.2_floor0.5": {
+          "trades": 12,
+          "oldLosers": 4,
+          "oldWinners": 8
+        },
+        "arm1.2_floor0.8": {
+          "trades": 13,
+          "oldLosers": 4,
+          "oldWinners": 9
+        },
+        "arm1.2_floor1": {
+          "trades": 13,
+          "oldLosers": 4,
+          "oldWinners": 9
+        },
+        "arm1.5_floor-0.25": {
+          "trades": 5,
+          "oldLosers": 4,
+          "oldWinners": 1
+        },
+        "arm1.5_floor0": {
+          "trades": 7,
+          "oldLosers": 4,
+          "oldWinners": 3
+        },
+        "arm1.5_floor0.2": {
+          "trades": 9,
+          "oldLosers": 4,
+          "oldWinners": 5
+        },
+        "arm1.5_floor0.3": {
+          "trades": 11,
+          "oldLosers": 4,
+          "oldWinners": 7
+        },
+        "arm1.5_floor0.5": {
+          "trades": 11,
+          "oldLosers": 4,
+          "oldWinners": 7
+        },
+        "arm1.5_floor0.8": {
+          "trades": 11,
+          "oldLosers": 4,
+          "oldWinners": 7
+        },
+        "arm1.5_floor1": {
+          "trades": 11,
+          "oldLosers": 4,
+          "oldWinners": 7
+        },
+        "arm2_floor-0.25": {
+          "trades": 5,
+          "oldLosers": 4,
+          "oldWinners": 1
+        },
+        "arm2_floor0": {
+          "trades": 5,
+          "oldLosers": 4,
+          "oldWinners": 1
+        },
+        "arm2_floor0.2": {
+          "trades": 7,
+          "oldLosers": 4,
+          "oldWinners": 3
+        },
+        "arm2_floor0.3": {
+          "trades": 8,
+          "oldLosers": 4,
+          "oldWinners": 4
+        },
+        "arm2_floor0.5": {
+          "trades": 8,
+          "oldLosers": 4,
+          "oldWinners": 4
+        },
+        "arm2_floor0.8": {
+          "trades": 9,
+          "oldLosers": 4,
+          "oldWinners": 5
+        },
+        "arm2_floor1": {
+          "trades": 9,
+          "oldLosers": 4,
+          "oldWinners": 5
+        },
+        "arm2_floor1.5": {
+          "trades": 13,
+          "oldLosers": 4,
+          "oldWinners": 9
+        },
+        "arm3_floor-0.25": {
+          "trades": 1,
+          "oldLosers": 1,
+          "oldWinners": 0
+        },
+        "arm3_floor0": {
+          "trades": 1,
+          "oldLosers": 1,
+          "oldWinners": 0
+        },
+        "arm3_floor0.2": {
+          "trades": 3,
+          "oldLosers": 1,
+          "oldWinners": 2
+        },
+        "arm3_floor0.3": {
+          "trades": 3,
+          "oldLosers": 1,
+          "oldWinners": 2
+        },
+        "arm3_floor0.5": {
+          "trades": 3,
+          "oldLosers": 1,
+          "oldWinners": 2
+        },
+        "arm3_floor0.8": {
+          "trades": 4,
+          "oldLosers": 1,
+          "oldWinners": 3
+        },
+        "arm3_floor1": {
+          "trades": 4,
+          "oldLosers": 1,
+          "oldWinners": 3
+        },
+        "arm3_floor1.5": {
+          "trades": 4,
+          "oldLosers": 1,
+          "oldWinners": 3
+        },
+        "arm3_floor2": {
+          "trades": 5,
+          "oldLosers": 1,
+          "oldWinners": 4
+        },
+        "arm4_floor-0.25": {
+          "trades": 0,
+          "oldLosers": 0,
+          "oldWinners": 0
+        },
+        "arm4_floor0": {
+          "trades": 0,
+          "oldLosers": 0,
+          "oldWinners": 0
+        },
+        "arm4_floor0.2": {
+          "trades": 0,
+          "oldLosers": 0,
+          "oldWinners": 0
+        },
+        "arm4_floor0.3": {
+          "trades": 0,
+          "oldLosers": 0,
+          "oldWinners": 0
+        },
+        "arm4_floor0.5": {
+          "trades": 0,
+          "oldLosers": 0,
+          "oldWinners": 0
+        },
+        "arm4_floor0.8": {
+          "trades": 0,
+          "oldLosers": 0,
+          "oldWinners": 0
+        },
+        "arm4_floor1": {
+          "trades": 0,
+          "oldLosers": 0,
+          "oldWinners": 0
+        },
+        "arm4_floor1.5": {
+          "trades": 0,
+          "oldLosers": 0,
+          "oldWinners": 0
+        },
+        "arm4_floor2": {
+          "trades": 0,
+          "oldLosers": 0,
+          "oldWinners": 0
+        },
+        "arm5_floor-0.25": {
+          "trades": 0,
+          "oldLosers": 0,
+          "oldWinners": 0
+        },
+        "arm5_floor0": {
+          "trades": 0,
+          "oldLosers": 0,
+          "oldWinners": 0
+        },
+        "arm5_floor0.2": {
+          "trades": 0,
+          "oldLosers": 0,
+          "oldWinners": 0
+        },
+        "arm5_floor0.3": {
+          "trades": 0,
+          "oldLosers": 0,
+          "oldWinners": 0
+        },
+        "arm5_floor0.5": {
+          "trades": 0,
+          "oldLosers": 0,
+          "oldWinners": 0
+        },
+        "arm5_floor0.8": {
+          "trades": 0,
+          "oldLosers": 0,
+          "oldWinners": 0
+        },
+        "arm5_floor1": {
+          "trades": 0,
+          "oldLosers": 0,
+          "oldWinners": 0
+        },
+        "arm5_floor1.5": {
+          "trades": 0,
+          "oldLosers": 0,
+          "oldWinners": 0
+        },
+        "arm5_floor2": {
+          "trades": 0,
+          "oldLosers": 0,
+          "oldWinners": 0
+        }
+      }
+    }
+  },
+  "cases": {
+    "HYPE_BASELINE_3ACCEPTED": {
+      "candidate": null,
+      "costs": {
+        "10": {
+          "finalEquityJpy": 198324735.05909136,
+          "maxMtmDdPct": -14.603309760733396,
+          "profitFactor": 3.164798912181309,
+          "closedTrades": 1326,
+          "hypeAcceptedTrades": 40,
+          "hypeExitReasons": {
+            "5M_PROTECTIVE_STOP": 28,
+            "TAKE_PROFIT": 12
+          },
+          "newHypeExitCount": 0,
+          "deltaEquityJpy": 0.0,
+          "ddImprovementPp": 0.0,
+          "acceptedV4ShortStopCooldownCount": 52,
+          "accounting": "PASS"
+        },
+        "30": {
+          "finalEquityJpy": 88431930.94000964,
+          "maxMtmDdPct": -15.75383475906923,
+          "profitFactor": 2.7301229466853947,
+          "closedTrades": 1323,
+          "hypeAcceptedTrades": 38,
+          "hypeExitReasons": {
+            "5M_PROTECTIVE_STOP": 25,
+            "TAKE_PROFIT": 13
+          },
+          "newHypeExitCount": 0,
+          "deltaEquityJpy": 0.0,
+          "ddImprovementPp": 0.0,
+          "acceptedV4ShortStopCooldownCount": 51,
+          "accounting": "PASS"
+        }
+      },
+      "v4AndQ102Fixed": true,
+      "bothCostsImproveDdBy0p1Pp": false,
+      "bothCostsNoDdWorsening": true
+    },
+    "HYPE_EARLY_0H_MINUS1P5_MFE0P3": {
+      "candidate": {
+        "id": "HYPE_EARLY_0H_MINUS1P5_MFE0P3",
+        "strategy": "HYPE_LONG",
+        "sides": [
+          "LONG"
+        ],
+        "kind": "initial",
+        "arm_hours": 0,
+        "stop_pct": 0.015,
+        "mfe_gate_pct": 0.003,
+        "reentry_hours": 0
+      },
+      "costs": {
+        "10": {
+          "finalEquityJpy": 194099317.18922427,
+          "maxMtmDdPct": -14.603309760733396,
+          "profitFactor": 3.1832576717243684,
+          "closedTrades": 1325,
+          "hypeAcceptedTrades": 40,
+          "hypeExitReasons": {
+            "5M_PROTECTIVE_STOP": 27,
+            "TAKE_PROFIT": 11,
+            "RESEARCH_INITIAL_ADVERSE_STOP_HYPE_EARLY_0H_MINUS1P5_MFE0P3": 2
+          },
+          "newHypeExitCount": 2,
+          "deltaEquityJpy": -4225417.869867086,
+          "ddImprovementPp": 0.0,
+          "acceptedV4ShortStopCooldownCount": 52,
+          "accounting": "PASS"
+        },
+        "30": {
+          "finalEquityJpy": 81793767.69462779,
+          "maxMtmDdPct": -15.75383475906923,
+          "profitFactor": 2.6507426304305675,
+          "closedTrades": 1323,
+          "hypeAcceptedTrades": 38,
+          "hypeExitReasons": {
+            "5M_PROTECTIVE_STOP": 24,
+            "TAKE_PROFIT": 12,
+            "RESEARCH_INITIAL_ADVERSE_STOP_HYPE_EARLY_0H_MINUS1P5_MFE0P3": 2
+          },
+          "newHypeExitCount": 2,
+          "deltaEquityJpy": -6638163.245381847,
+          "ddImprovementPp": 0.0,
+          "acceptedV4ShortStopCooldownCount": 51,
+          "accounting": "PASS"
+        }
+      },
+      "v4AndQ102Fixed": true,
+      "bothCostsImproveDdBy0p1Pp": false,
+      "bothCostsNoDdWorsening": true
+    },
+    "HYPE_PROFIT_ARM0P8_FLOOR0P3": {
+      "candidate": {
+        "id": "HYPE_PROFIT_ARM0P8_FLOOR0P3",
+        "strategy": "HYPE_LONG",
+        "sides": [
+          "LONG"
+        ],
+        "kind": "profit",
+        "arm": 0.008,
+        "floor": 0.003
+      },
+      "costs": {
+        "10": {
+          "finalEquityJpy": 164263052.38278487,
+          "maxMtmDdPct": -14.603309760733396,
+          "profitFactor": 3.0873031223829743,
+          "closedTrades": 1330,
+          "hypeAcceptedTrades": 45,
+          "hypeExitReasons": {
+            "5M_PROTECTIVE_STOP": 24,
+            "RESEARCH_HYPE_PROFIT_ARM0P8_FLOOR0P3": 18,
+            "TAKE_PROFIT": 3
+          },
+          "newHypeExitCount": 18,
+          "deltaEquityJpy": -34061682.676306486,
+          "ddImprovementPp": 0.0,
+          "acceptedV4ShortStopCooldownCount": 52,
+          "accounting": "PASS"
+        },
+        "30": {
+          "finalEquityJpy": 55626272.45519287,
+          "maxMtmDdPct": -16.91736390724413,
+          "profitFactor": 2.2601390566596677,
+          "closedTrades": 1331,
+          "hypeAcceptedTrades": 42,
+          "hypeExitReasons": {
+            "5M_PROTECTIVE_STOP": 22,
+            "RESEARCH_HYPE_PROFIT_ARM0P8_FLOOR0P3": 17,
+            "TAKE_PROFIT": 3
+          },
+          "newHypeExitCount": 17,
+          "deltaEquityJpy": -32805658.484816767,
+          "ddImprovementPp": -1.1635291481749004,
+          "acceptedV4ShortStopCooldownCount": 51,
+          "accounting": "PASS"
+        }
+      },
+      "v4AndQ102Fixed": true,
+      "bothCostsImproveDdBy0p1Pp": false,
+      "bothCostsNoDdWorsening": false
+    },
+    "HYPE_BOTH_EARLY1H_PROFIT1P5": {
+      "candidate": {
+        "id": "HYPE_BOTH_EARLY1H_PROFIT1P5",
+        "strategy": "HYPE_LONG",
+        "sides": [
+          "LONG"
+        ],
+        "kind": "combined",
+        "arm_hours": 1,
+        "stop_pct": 0.01,
+        "mfe_gate_pct": 0.003,
+        "reentry_hours": 0,
+        "arm": 0.015,
+        "floor": 0.005
+      },
+      "costs": {
+        "10": {
+          "finalEquityJpy": 169054888.43690577,
+          "maxMtmDdPct": -14.603309760733396,
+          "profitFactor": 3.1086289421118694,
+          "closedTrades": 1328,
+          "hypeAcceptedTrades": 43,
+          "hypeExitReasons": {
+            "5M_PROTECTIVE_STOP": 22,
+            "TAKE_PROFIT": 4,
+            "RESEARCH_INITIAL_ADVERSE_STOP_HYPE_BOTH_EARLY1H_PROFIT1P5": 4,
+            "RESEARCH_HYPE_BOTH_EARLY1H_PROFIT1P5": 13
+          },
+          "newHypeExitCount": 17,
+          "deltaEquityJpy": -29269846.622185588,
+          "ddImprovementPp": 0.0,
+          "acceptedV4ShortStopCooldownCount": 52,
+          "accounting": "PASS"
+        },
+        "30": {
+          "finalEquityJpy": 63523545.060163826,
+          "maxMtmDdPct": -17.55497457761297,
+          "profitFactor": 2.4350954453954863,
+          "closedTrades": 1330,
+          "hypeAcceptedTrades": 42,
+          "hypeExitReasons": {
+            "5M_PROTECTIVE_STOP": 20,
+            "TAKE_PROFIT": 5,
+            "RESEARCH_INITIAL_ADVERSE_STOP_HYPE_BOTH_EARLY1H_PROFIT1P5": 4,
+            "RESEARCH_HYPE_BOTH_EARLY1H_PROFIT1P5": 13
+          },
+          "newHypeExitCount": 17,
+          "deltaEquityJpy": -24908385.879845813,
+          "ddImprovementPp": -1.8011398185437404,
+          "acceptedV4ShortStopCooldownCount": 51,
+          "accounting": "PASS"
+        }
+      },
+      "v4AndQ102Fixed": true,
+      "bothCostsImproveDdBy0p1Pp": false,
+      "bothCostsNoDdWorsening": false
+    },
+    "HYPE_PROFIT_ARM3_FLOOR1": {
+      "candidate": {
+        "id": "HYPE_PROFIT_ARM3_FLOOR1",
+        "strategy": "HYPE_LONG",
+        "sides": [
+          "LONG"
+        ],
+        "kind": "profit",
+        "arm": 0.03,
+        "floor": 0.01
+      },
+      "costs": {
+        "10": {
+          "finalEquityJpy": 187113866.86743447,
+          "maxMtmDdPct": -14.603309760733396,
+          "profitFactor": 3.120580163769695,
+          "closedTrades": 1326,
+          "hypeAcceptedTrades": 40,
+          "hypeExitReasons": {
+            "5M_PROTECTIVE_STOP": 27,
+            "TAKE_PROFIT": 9,
+            "RESEARCH_HYPE_PROFIT_ARM3_FLOOR1": 4
+          },
+          "newHypeExitCount": 4,
+          "deltaEquityJpy": -11210868.191656888,
+          "ddImprovementPp": 0.0,
+          "acceptedV4ShortStopCooldownCount": 52,
+          "accounting": "PASS"
+        },
+        "30": {
+          "finalEquityJpy": 78678609.46984331,
+          "maxMtmDdPct": -16.963342375795097,
+          "profitFactor": 2.5931151458153847,
+          "closedTrades": 1323,
+          "hypeAcceptedTrades": 38,
+          "hypeExitReasons": {
+            "5M_PROTECTIVE_STOP": 24,
+            "TAKE_PROFIT": 10,
+            "RESEARCH_HYPE_PROFIT_ARM3_FLOOR1": 4
+          },
+          "newHypeExitCount": 4,
+          "deltaEquityJpy": -9753321.470166326,
+          "ddImprovementPp": -1.2095076167258672,
+          "acceptedV4ShortStopCooldownCount": 51,
+          "accounting": "PASS"
+        }
+      },
+      "v4AndQ102Fixed": true,
+      "bothCostsImproveDdBy0p1Pp": false,
+      "bothCostsNoDdWorsening": false
+    }
+  }
+}

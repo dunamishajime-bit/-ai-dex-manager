@@ -1,0 +1,356 @@
+{
+  "sourceSha256": "aeb76f4c52952966b345bd41c06cc446614507ea633e387a38297239d19c955b",
+  "files": [
+    {
+      "candidate": "HYPE_BASELINE_3ACCEPTED",
+      "costBps": 10,
+      "file": "candidate-decisions.jsonl",
+      "sha256LastPass": "5d7194f1fe7125e3fb893e5dd748708e8cae31017cc60e21d0342f85beed855c",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_BASELINE_3ACCEPTED",
+      "costBps": 10,
+      "file": "portfolio-trades.jsonl",
+      "sha256LastPass": "1c7ac5c26dc78dec63b30d321c67a06d8d4dec14988a855f1f570dfc61868b99",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_BASELINE_3ACCEPTED",
+      "costBps": 10,
+      "file": "portfolio-events.jsonl",
+      "sha256LastPass": "686b2be153a5d861c0a8113161e53a9d31a2b86e9d95fa631f70fabdb9af4f33",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_BASELINE_3ACCEPTED",
+      "costBps": 10,
+      "file": "task9-mtm.jsonl",
+      "sha256LastPass": "dc35d4e2f76e6668e0778c5ece6b83e5c9ac4c8ff994f9629ed5b023108d86a6",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_BASELINE_3ACCEPTED",
+      "costBps": 10,
+      "file": "metrics.json",
+      "sha256LastPass": "96707850a3788856278ef1ed4e428e18865dc80d12ab09e735583e0ae494e7b4",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_BASELINE_3ACCEPTED",
+      "costBps": 30,
+      "file": "candidate-decisions.jsonl",
+      "sha256LastPass": "d017f8c817c23c58e3862a85cfc99ca5510f7755a3e1b258da1c559bfc3d3d2a",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_BASELINE_3ACCEPTED",
+      "costBps": 30,
+      "file": "portfolio-trades.jsonl",
+      "sha256LastPass": "cdfff52558fc819b0be06a316357e285c10ae950a7e1c6262c38e586a1cde9f1",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_BASELINE_3ACCEPTED",
+      "costBps": 30,
+      "file": "portfolio-events.jsonl",
+      "sha256LastPass": "6c123cfd95d5a6f418bb660690f261f1e0610583e0c3ef213cc99e435a41c57c",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_BASELINE_3ACCEPTED",
+      "costBps": 30,
+      "file": "task9-mtm.jsonl",
+      "sha256LastPass": "35dcd54206bc379011de74043b67d7d969f46217bb42e6bd98dd46534e53ac32",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_BASELINE_3ACCEPTED",
+      "costBps": 30,
+      "file": "metrics.json",
+      "sha256LastPass": "5c9151cfb65648ac83acf5b24172c599743e81cf781e659425f48d588b3f481e",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_EARLY_0H_MINUS1P5_MFE0P3",
+      "costBps": 10,
+      "file": "candidate-decisions.jsonl",
+      "sha256LastPass": "1358eeae52167d339602d072248c7254a0443c99af763203d5cd641fd2a1817c",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_EARLY_0H_MINUS1P5_MFE0P3",
+      "costBps": 10,
+      "file": "portfolio-trades.jsonl",
+      "sha256LastPass": "581bb8989343c55a08cdfa3ed8945ea0ad55e5dbf5c5f1659c782d6941ebf789",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_EARLY_0H_MINUS1P5_MFE0P3",
+      "costBps": 10,
+      "file": "portfolio-events.jsonl",
+      "sha256LastPass": "000eea7264a7a8414ab797bd748142d18f239db78210a308c98af1e8544989ee",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_EARLY_0H_MINUS1P5_MFE0P3",
+      "costBps": 10,
+      "file": "task9-mtm.jsonl",
+      "sha256LastPass": "79b5170475c15c1da2c868278c020a77685c2042bf6680dd1bc424eab4e11e16",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_EARLY_0H_MINUS1P5_MFE0P3",
+      "costBps": 10,
+      "file": "metrics.json",
+      "sha256LastPass": "7dbb78272d9d4088d22fffb2de8fd1e325ce529e420e62c1b5b91c6f0dcd563a",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_EARLY_0H_MINUS1P5_MFE0P3",
+      "costBps": 30,
+      "file": "candidate-decisions.jsonl",
+      "sha256LastPass": "f7256d9cdff4a4c5c8b564cd17b8625013be16bea6123bce741a1ef372a25ee5",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_EARLY_0H_MINUS1P5_MFE0P3",
+      "costBps": 30,
+      "file": "portfolio-trades.jsonl",
+      "sha256LastPass": "1157652a2b5cd70d049ea80a16b8f2f41c54a5238deaedefdacb2cf6831886d9",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_EARLY_0H_MINUS1P5_MFE0P3",
+      "costBps": 30,
+      "file": "portfolio-events.jsonl",
+      "sha256LastPass": "2be86e55100f25392933ddfa0bbd3bb0e2b0e817b9c605de5626e240f7af6837",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_EARLY_0H_MINUS1P5_MFE0P3",
+      "costBps": 30,
+      "file": "task9-mtm.jsonl",
+      "sha256LastPass": "14c338f6911313c3b4747b5037a97967fb59b9b87fe20e4847d908d01fe68f6c",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_EARLY_0H_MINUS1P5_MFE0P3",
+      "costBps": 30,
+      "file": "metrics.json",
+      "sha256LastPass": "d309f0633cece2f36f78f29bb3961ae845b35ddae06e1710c4ae50d5c91651bc",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_PROFIT_ARM0P8_FLOOR0P3",
+      "costBps": 10,
+      "file": "candidate-decisions.jsonl",
+      "sha256LastPass": "eedcf93b206ea0bdc2b8bbbe59db8502e62775967d3c0e72e944fabf46a8e5e3",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_PROFIT_ARM0P8_FLOOR0P3",
+      "costBps": 10,
+      "file": "portfolio-trades.jsonl",
+      "sha256LastPass": "412e5c1ed597b8a021f0d51bbd3b312226605a3fde644894d042f961d63c4d78",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_PROFIT_ARM0P8_FLOOR0P3",
+      "costBps": 10,
+      "file": "portfolio-events.jsonl",
+      "sha256LastPass": "456d3a848ba2fad1f0fc2bfd87f093c51add90ef42977ac324ed043646985fd0",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_PROFIT_ARM0P8_FLOOR0P3",
+      "costBps": 10,
+      "file": "task9-mtm.jsonl",
+      "sha256LastPass": "a06e49adb59f20bc484178882050f389228ffb6555953b0f39cf67b0ab170944",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_PROFIT_ARM0P8_FLOOR0P3",
+      "costBps": 10,
+      "file": "metrics.json",
+      "sha256LastPass": "c0882cb2e559ad873f5ef0202f5755d3f609f39321262fd6bdfff7fcfed9b9d3",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_PROFIT_ARM0P8_FLOOR0P3",
+      "costBps": 30,
+      "file": "candidate-decisions.jsonl",
+      "sha256LastPass": "e9efc584ef46884f37f1ae7cf9f44035b37f2197af0445c1e31436b92ad33788",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_PROFIT_ARM0P8_FLOOR0P3",
+      "costBps": 30,
+      "file": "portfolio-trades.jsonl",
+      "sha256LastPass": "c368efcb1a106f412ee536a03f01ef0e2bd5bf21c2c67fd930602223832a28d6",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_PROFIT_ARM0P8_FLOOR0P3",
+      "costBps": 30,
+      "file": "portfolio-events.jsonl",
+      "sha256LastPass": "c8243ffa4931259423bf35087a0fb41006837417d1f6e0ec921e0f892d184130",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_PROFIT_ARM0P8_FLOOR0P3",
+      "costBps": 30,
+      "file": "task9-mtm.jsonl",
+      "sha256LastPass": "c048904e31d63378d6aba447339c0a5aa5760b5dafe0b678405c0a09ec568119",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_PROFIT_ARM0P8_FLOOR0P3",
+      "costBps": 30,
+      "file": "metrics.json",
+      "sha256LastPass": "84cdae7042e90faebbc2a33526a38be4cfdff90164acefe90fa16a25208f899c",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_BOTH_EARLY1H_PROFIT1P5",
+      "costBps": 10,
+      "file": "candidate-decisions.jsonl",
+      "sha256LastPass": "0c36a5a40d70c7b857159e971b08c61d76e0a576a3878faff696b048dbbc6c4e",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_BOTH_EARLY1H_PROFIT1P5",
+      "costBps": 10,
+      "file": "portfolio-trades.jsonl",
+      "sha256LastPass": "5b8c0f36609e17ec10025d213d95bcbbcbe2ea23e54c42122e7e77f14cb17f0f",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_BOTH_EARLY1H_PROFIT1P5",
+      "costBps": 10,
+      "file": "portfolio-events.jsonl",
+      "sha256LastPass": "a94f5aa091425e2e3e4469beafaa795e3be98a5084729a82e9f3e6fd89718a49",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_BOTH_EARLY1H_PROFIT1P5",
+      "costBps": 10,
+      "file": "task9-mtm.jsonl",
+      "sha256LastPass": "74d87beabc4d37eb8ad46979b20b9b275c9f947c5548da4a22368504130182ed",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_BOTH_EARLY1H_PROFIT1P5",
+      "costBps": 10,
+      "file": "metrics.json",
+      "sha256LastPass": "bc70c860f72d911d427f5795fddc16f27c889bfef7e1064ab1f9dafe00f377b0",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_BOTH_EARLY1H_PROFIT1P5",
+      "costBps": 30,
+      "file": "candidate-decisions.jsonl",
+      "sha256LastPass": "2c2e97b89f51c4eb3e9fb9e14d5181d468e3e35e0c4db2d6c3a6760f457d79f1",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_BOTH_EARLY1H_PROFIT1P5",
+      "costBps": 30,
+      "file": "portfolio-trades.jsonl",
+      "sha256LastPass": "dec20fbf7329ceaa4d8c1b58de2c6a6d5135b7ac8825ebdbee5332ded7850d5c",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_BOTH_EARLY1H_PROFIT1P5",
+      "costBps": 30,
+      "file": "portfolio-events.jsonl",
+      "sha256LastPass": "966852a44538b88c44b30b86c3e9157abd5b0c86328df72f2660e0d10fb9b322",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_BOTH_EARLY1H_PROFIT1P5",
+      "costBps": 30,
+      "file": "task9-mtm.jsonl",
+      "sha256LastPass": "9ca513d32f6a8c737caf410002ea1b40c7d422cfd9cc1c2b7164b7f6df160bd9",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_BOTH_EARLY1H_PROFIT1P5",
+      "costBps": 30,
+      "file": "metrics.json",
+      "sha256LastPass": "44a2e54250b8b768a40a0d30a347db331004246819c65db41186d9141b472075",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_PROFIT_ARM3_FLOOR1",
+      "costBps": 10,
+      "file": "candidate-decisions.jsonl",
+      "sha256LastPass": "438bcfbbc4d6f1e52f902ecb139c99abd9fc2579440079ffebc8eca0bea49010",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_PROFIT_ARM3_FLOOR1",
+      "costBps": 10,
+      "file": "portfolio-trades.jsonl",
+      "sha256LastPass": "b01de787f5f783520ec2fb9f952acaaf4b9a808afa268026bbe031830f2bde59",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_PROFIT_ARM3_FLOOR1",
+      "costBps": 10,
+      "file": "portfolio-events.jsonl",
+      "sha256LastPass": "302b7b41b6ce01f28852e0ff881efe1e7bbe5b3bb0aeb704f8380bad077c1b47",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_PROFIT_ARM3_FLOOR1",
+      "costBps": 10,
+      "file": "task9-mtm.jsonl",
+      "sha256LastPass": "ab5c79ee92c4fbba7b0d121131cb4d67e9289bd676fb265c5697949dd96223aa",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_PROFIT_ARM3_FLOOR1",
+      "costBps": 10,
+      "file": "metrics.json",
+      "sha256LastPass": "7cafe11ca93f016261501f4465443c91eccb6d98b4e9d70460158365f1aca83c",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_PROFIT_ARM3_FLOOR1",
+      "costBps": 30,
+      "file": "candidate-decisions.jsonl",
+      "sha256LastPass": "fd7012973a696d4a0e67ac55438f0b4f89d8a15142082549abc1a46f16a9e966",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_PROFIT_ARM3_FLOOR1",
+      "costBps": 30,
+      "file": "portfolio-trades.jsonl",
+      "sha256LastPass": "894e97764ab037e8550d45aa3ca6763cdbfbbc9d1aee13cba16a542bd29031c3",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_PROFIT_ARM3_FLOOR1",
+      "costBps": 30,
+      "file": "portfolio-events.jsonl",
+      "sha256LastPass": "a9add2029ad9e10bc856fc306b1c8ca76768bc198543747fd553527d488987cb",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_PROFIT_ARM3_FLOOR1",
+      "costBps": 30,
+      "file": "task9-mtm.jsonl",
+      "sha256LastPass": "ac2407954f907b42ced4a36d3db5ce9708365f9b4da45809bdf85f73e9c82dc0",
+      "identicalFinalTwoPasses": true
+    },
+    {
+      "candidate": "HYPE_PROFIT_ARM3_FLOOR1",
+      "costBps": 30,
+      "file": "metrics.json",
+      "sha256LastPass": "79f9516b01ae11ea02703a87bf3469b0a504f18d179c9d88ebb52b2b3ac7f088",
+      "identicalFinalTwoPasses": true
+    }
+  ],
+  "identicalCount": 50
+}
