@@ -59,5 +59,7 @@ jobs:
         run: npm run dd:reduction:artifacts
       - name: Verify independent 35-symbol modeled BT report metadata
         run: python scripts/dd-reduction/verify-task9-sourcebacked-5m-artifacts.py
+      - name: Verify unified frozen-source and Task 9 policy bridge
+        run: python scripts/dd-reduction/verify-task9-unified-bridge.py
       - name: Check patch whitespace
         run: git diff --check

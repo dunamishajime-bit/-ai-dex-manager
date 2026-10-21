@@ -19,8 +19,9 @@ import { DYNAMIC_STRATEGY_IDS, type CandidateSourceKind,
     EvidenceLevel,
 } from "../../lib/backtest/dd-reduction/dynamic-types";
 import { DEFAULT_BASELINE_ANCHORS } from "./compare-dynamic-baseline";
+import sharedTask9Policy from "../../config/research/task9-unified-v12-short-20261021.json";
 
-export type Task9CaseName = "BASELINE" | "A" | "B" | "C" | "A_PLUS_C" | "B_PLUS_C" | "A_PLUS_B" | "BEST_QUALIFIED";
+export type Task9CaseName = "BASELINE" | "A" | "B" | "C" | "A_PLUS_C" | "B_PLUS_C" | "A_PLUS_B" | "BEST_QUALIFIED" | "SOURCE_BACKED_V12_SHORT_2P5";
 export type Task9CostBps = 10 | 30;
 export type Task9Classification = "ACCEPTED" | "DD_IMPROVED_RESEARCH_ONLY" | "REJECTED" | "BLOCKED_INCOMPLETE_SOURCE_COVERAGE" | "BLOCKED_REPLAY";
 
@@ -50,6 +51,24 @@ export const TASK9_DYNAMIC_CASES: readonly Task9CasePolicy[] = [
     { name: "A_PLUS_B", candidateId: null, candidateIds: ["V12_SHORT_PCT2P0_12H_MFE1P0_R12", "V12_SHORT_PCT2P0_6H_MFE0P5_R6"], overlayRules: [] },
     { name: "BEST_QUALIFIED", candidateId: null, candidateIds: [], overlayRules: [] },
 ];
+
+/**
+ * Shared opt-in policy for the frozen 5m source engine and Task 9 replay.
+ * The eight historical default cases remain unchanged.
+ * Integration of this contract does not certify accounting or STOP lifecycle parity.
+ */
+export const TASK9_SOURCE_BACKED_CASE: Task9CasePolicy = {
+    name: "SOURCE_BACKED_V12_SHORT_2P5",
+    candidateId: sharedTask9Policy.policyId,
+    candidateIds: [sharedTask9Policy.policyId],
+    overlayRules: [{
+        candidateId: sharedTask9Policy.policyId,
+        stopPct: sharedTask9Policy.stopPct,
+        armHours: sharedTask9Policy.armHours,
+        mfeGatePct: sharedTask9Policy.mfeGatePct,
+        reentryHours: sharedTask9Policy.reentryHours,
+    }],
+};
 
 export interface Task9SourceSpec { readonly path: string; readonly kind: CandidateSourceKind; readonly evidence?: EvidenceLevel; }
 export interface Task9DynamicOptions {
@@ -175,7 +194,9 @@ function number(value: unknown): number | null { return typeof value === "number
 function reservationId(event: DynamicCandidateEvent): string { return `reservation:${event.candidate_id}:${event.decision_ts_ms}`; }
 
 function policyFor(name: Task9CaseName): Task9CasePolicy {
-    const policy = TASK9_DYNAMIC_CASES.find((item) => item.name === name);
+    const policy = name === TASK9_SOURCE_BACKED_CASE.name
+        ? TASK9_SOURCE_BACKED_CASE
+        : TASK9_DYNAMIC_CASES.find((item) => item.name === name);
     if (policy === undefined) fail("CASE_UNKNOWN", name);
     return policy;
 }
@@ -445,7 +466,7 @@ export async function runTask9Dynamic(options: Task9DynamicOptions): Promise<Tas
 
 function valueFlag(args: readonly string[], name: string): string | undefined { const index = args.indexOf(name); const value = index >= 0 ? args[index + 1] : undefined; if (index >= 0 && (value === undefined || value.startsWith("--"))) fail("CLI_ARGUMENT", `${name} requires a value`); return value; }
 function repeated(args: readonly string[], name: string): string[] { const values: string[] = []; for (let i = 0; i < args.length; i += 1) if (args[i] === name) { const value = args[i + 1]; if (value === undefined || value.startsWith("--")) fail("CLI_ARGUMENT", `${name} requires a value`); values.push(value); i += 1; } return values; }
-function parseCase(value: string): Task9CaseName { if (TASK9_DYNAMIC_CASES.some((item) => item.name === value)) return value as Task9CaseName; fail("CASE_UNKNOWN", value); }
+function parseCase(value: string): Task9CaseName { if (value === TASK9_SOURCE_BACKED_CASE.name || TASK9_DYNAMIC_CASES.some((item) => item.name === value)) return value as Task9CaseName; fail("CASE_UNKNOWN", value); }
 function parseKind(value: string): CandidateSourceKind { if (value === "RAW_CANDIDATE_DECISIONS" || value === "SAVED_MARKET_DATA" || value === "STRATEGY_ADAPTER") return value; fail("AMBIGUOUS_SOURCE_CLASSIFICATION", value); }
 export function parseTask9DynamicArgs(args: readonly string[]): Task9DynamicArgs {
     const paths = repeated(args, "--source"); const kinds = repeated(args, "--source-kind"); if (paths.length === 0) fail("SOURCE_MISSING", "at least one --source is required"); if (paths.length !== kinds.length) fail("AMBIGUOUS_SOURCE_CLASSIFICATION", "each source needs one source-kind");

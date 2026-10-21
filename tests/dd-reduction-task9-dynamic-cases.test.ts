@@ -6,6 +6,8 @@ import assert from "node:assert/strict";
 
 import {
     TASK9_DYNAMIC_CASES,
+    TASK9_SOURCE_BACKED_CASE,
+    parseTask9DynamicArgs,
     buildCaseReplayEvents,
     runTask9Dynamic,
 } from "../scripts/dd-reduction/run-task9-dynamic";
@@ -89,6 +91,25 @@ test("Task 9 V12 SHORT policies are unique and preserve the named candidates", (
     assert.equal(TASK9_DYNAMIC_CASES.find((item) => item.name === "A")?.candidateId, "V12_SHORT_PCT2P0_12H_MFE1P0_R12");
     assert.equal(TASK9_DYNAMIC_CASES.find((item) => item.name === "B")?.candidateId, "V12_SHORT_PCT2P0_6H_MFE0P5_R6");
     assert.equal(TASK9_DYNAMIC_CASES.find((item) => item.name === "C")?.candidateId, "V12_SHORT_COMPOSITE_ATR1P5_6H_MFE0P5_STRUCTURE3_R12");
+});
+
+test("shared V12 SHORT 2.5% rule is opt-in and uses the same canonical policy as the source-backed 5m engine", () => {
+    assert.equal(TASK9_SOURCE_BACKED_CASE.name, "SOURCE_BACKED_V12_SHORT_2P5");
+    assert.equal(TASK9_SOURCE_BACKED_CASE.candidateId, "V12_SHORT_PCT2P5_12H_MFE1P0_R12");
+    assert.deepEqual(TASK9_SOURCE_BACKED_CASE.overlayRules, [{
+        candidateId: "V12_SHORT_PCT2P5_12H_MFE1P0_R12",
+        stopPct: 0.025,
+        armHours: 12,
+        mfeGatePct: 0.01,
+        reentryHours: 12,
+    }]);
+    const args = parseTask9DynamicArgs([
+        "--source", "some-source.jsonl", "--source-kind", "RAW_CANDIDATE_DECISIONS",
+        "--case", "SOURCE_BACKED_V12_SHORT_2P5", "--cost-bps", "10",
+    ]);
+    assert.deepEqual(args.cases, ["SOURCE_BACKED_V12_SHORT_2P5"]);
+    assert.deepEqual(args.costs, [10]);
+    assert.equal(TASK9_DYNAMIC_CASES.some((item) => item.name === TASK9_SOURCE_BACKED_CASE.name), false);
 });
 
 test("overlay event construction is causal and cannot target rejected or unfilled candidates", () => {

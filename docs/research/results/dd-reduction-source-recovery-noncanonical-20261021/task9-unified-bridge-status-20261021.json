@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "status": "UNIFIED_RESEARCH_BRIDGE_COMPLETE_DYNAMIC_PARITY_BLOCKED",
+  "sharedPolicyId": "V12_SHORT_PCT2P5_12H_MFE1P0_R12",
+  "sharedPolicySha256": "3f982baf2daaf074d39d892d4c7184175f6a9fa3d6141dff77d399650cd24010",
+  "oldEconomicEngine": "FROZEN_SOURCE_BACKED_FULL8_UNTIL_PARITY",
+  "newReplayEngine": "TASK9_CAUSAL_REPLAY",
+  "marketSourceSha256": "10cdc48705a6f9e310cd0aecc95ce781af24325b1a99c2eb9aaefe3bd2953934",
+  "modelBaselineExact": true,
+  "costScenarios": {
+    "10": {
+      "sourceCandidateSha256": "eac68287e6f4e644c588b8689ce1dc67226abccea21bea09e29c0aeda0c1a3e2",
+      "modelFinalEquityJpy": 206915420.7361137,
+      "modelMaxDdPct": -14.79603474654827,
+      "modelPf": 3.213431227600294,
+      "newTask9Status": "BLOCKED_INCOMPLETE_SOURCE_COVERAGE",
+      "observedRows": 3185,
+      "failClosedRows": 3185,
+      "replayableRows": 0,
+      "verifiedPreallocationExcludedRows": 16,
+      "newTask9SourceHash": "eac68287e6f4e644c588b8689ce1dc67226abccea21bea09e29c0aeda0c1a3e2",
+      "sourceGaps": [
+        "3169 actionable rows are fail-closed because canonical candidate fields are incomplete",
+        "partial actionable replay coverage: 0/3169 rows; partial subsets must not produce economic BT metrics",
+        "zero replayable rows; economic BT metrics are unavailable"
+      ],
+      "newEngineEconomicEligible": false
+    },
+    "30": {
+      "sourceCandidateSha256": "77087b72c7e9279d001b58e351d7e932a9b3dabcb58d9ccbf7f1a0fd28a7c5d1",
+      "modelFinalEquityJpy": 93869564.17641039,
+      "modelMaxDdPct": -15.854245259214217,
+      "modelPf": 2.7569004294487134,
+      "newTask9Status": "BLOCKED_INCOMPLETE_SOURCE_COVERAGE",
+      "observedRows": 3185,
+      "failClosedRows": 3185,
+      "replayableRows": 0,
+      "verifiedPreallocationExcludedRows": 16,
+      "newTask9SourceHash": "77087b72c7e9279d001b58e351d7e932a9b3dabcb58d9ccbf7f1a0fd28a7c5d1",
+      "sourceGaps": [
+        "3169 actionable rows are fail-closed because canonical candidate fields are incomplete",
+        "partial actionable replay coverage: 0/3169 rows; partial subsets must not produce economic BT metrics",
+        "zero replayable rows; economic BT metrics are unavailable"
+      ],
+      "newEngineEconomicEligible": false
+    }
+  },
+  "fullLifecycleStopParityProven": false,
+  "cooldownParityProven": false,
+  "economicParityProven": false,
+  "productionChanges": 0,
+  "liveChanges": 0,
+  "nextUnresolved": [
+    "actual rejected-candidate quantity/equity/priority/expiry in Task9",
+    "original-model PnL/funding/margin/protective-fill source bridge",
+    "time-sequential STOP-confirmed cooldown and gross re-admission",
+    "source-backed mark-to-market marks and same chronological wallet",
+    "formal transaction-level plus IS/OOS/Holdout economic parity"
+  ]
+}

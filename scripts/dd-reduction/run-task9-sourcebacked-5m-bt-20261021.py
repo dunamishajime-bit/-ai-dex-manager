@@ -39,13 +39,27 @@ CANDIDATES = (
     ("V12_SHORT", "V12_SHORT_PCT2P5_12H_MFE1P0_R12"),
 )
 
+# Both engines use a single policy source. Historical exploratory tests remain separate.
+SHARED_POLICY_PATH = HERE.parents[1] / "config/research/task9-unified-v12-short-20261021.json"
+SHARED_POLICY = json.loads(SHARED_POLICY_PATH.read_text(encoding="utf8"))
+assert SHARED_POLICY["schemaVersion"] == 1
+assert SHARED_POLICY["policyId"] == "V12_SHORT_PCT2P5_12H_MFE1P0_R12"
+assert SHARED_POLICY["strategy"] == "V12" and SHARED_POLICY["side"] == "SHORT"
+assert SHARED_POLICY["selectionMode"] == "POST_HOC_EXPLORATORY"
 EXPLORATORY_RULES = {
-    f"V12_SHORT_PCT{key}_12H_MFE1P0_R12": {
-        "id": f"V12_SHORT_PCT{key}_12H_MFE1P0_R12",
-        "strategy": "V12", "sides": ["SHORT"], "stop_pct": pct,
+    "V12_SHORT_PCT2P25_12H_MFE1P0_R12": {
+        "id": "V12_SHORT_PCT2P25_12H_MFE1P0_R12",
+        "strategy": "V12", "sides": ["SHORT"], "stop_pct": 0.0225,
         "arm_hours": 12, "mfe_gate_pct": 0.01, "reentry_hours": 12,
-    }
-    for key, pct in (("2P25", 0.0225), ("2P5", 0.025))
+    },
+    SHARED_POLICY["policyId"]: {
+        "id": SHARED_POLICY["policyId"],
+        "strategy": SHARED_POLICY["strategy"], "sides": [SHARED_POLICY["side"]],
+        "stop_pct": SHARED_POLICY["stopPct"],
+        "arm_hours": SHARED_POLICY["armHours"],
+        "mfe_gate_pct": SHARED_POLICY["mfeGatePct"],
+        "reentry_hours": SHARED_POLICY["reentryHours"],
+    },
 }
 
 
