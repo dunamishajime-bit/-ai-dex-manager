@@ -8,7 +8,7 @@ test('HYPE75 uses current H1 decision and live heartbeat, preserving resolved hi
  await put('hype-zec-long/runner.json',{runtimeCommitSha:sha,mode:'LIVE',updatedAt:now-600000,lastDecisionTs:now-600000,lastDecision:{strategy:'HYPE_LONG',reason:'REGIME_SLOPE_NOT_MET',accepted:false,signalTs:now-3600000},failures:[{occurredAt:now-86400000,message:'old resolved'}]});
  await put('runner-health/heartbeats/hype-trend-long.json',{runtimeSha:sha,expectedSha:sha,heartbeatAt:now,mainPid:42,mode:'LIVE',liveEnabled:true,safetyState:'HEALTHY'});await put('shared/kill-switch.json',{active:false});
  const d=await loadHypeRuntimeObservability(now,{releaseRoot:root,stateRoot:root});const h=d.sleeves.HYPE_LONG;
- assert.equal(h.status,'LIVE');assert.equal(h.maxGross,1.5);assert.equal(h.lastDecision?.reason,'REGIME_SLOPE_NOT_MET');assert.equal(h.publicSignalEligible,false);assert(h.gates.some(g=>g.key==='REGIME_SLOPE_NOT_MET'&&g.status==='BLOCKED'));assert(!h.gates.some(g=>g.key==='BTC_15M_MOVE'||g.key==='BREAKOUT_1M'));
- const stale=await loadHypeRuntimeObservability(now+120001,{releaseRoot:root,stateRoot:root});assert.equal(stale.sleeves.HYPE_LONG.status,'STALE');
+ assert.equal(h.status,'LIVE');assert.equal(h.maxGross,1.5);assert.equal(h.lastDecision?.reason,'REGIME_SLOPE_NOT_MET');assert.equal(h.publicSignalEligible,false);assert.equal(h.stateFresh,true);assert.equal(h.orderPermission.allowed,true);assert.equal(h.protection.status,'NONE');assert(h.gates.some(g=>g.key==='REGIME_SLOPE_NOT_MET'&&g.status==='BLOCKED'));assert(!h.gates.some(g=>g.key==='BTC_15M_MOVE'||g.key==='BREAKOUT_1M'));
+ const stale=await loadHypeRuntimeObservability(now+120001,{releaseRoot:root,stateRoot:root});assert.equal(stale.sleeves.HYPE_LONG.status,'STALE');assert.equal(stale.sleeves.HYPE_LONG.orderPermission.allowed,false);
  }finally{await rm(root,{recursive:true,force:true});}
 });

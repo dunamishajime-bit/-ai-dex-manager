@@ -53,8 +53,11 @@ export function HypeDecisionPanel({strategy}:{strategy:Strategy}){
           ["実設定Gross上限",row?.maxGross===undefined?"未取得":row.maxGross+"x"],
           ["実設定risk budget",row?.riskPct===undefined?"未取得":row.riskPct+"%"],
           ["state更新",dt(row?.stateUpdatedAt)],
+          ["heartbeat",dt(row?.heartbeatAt)],
           ["本番サービス",row?.serviceActive?"active":"未確認"],
           ["Shared Kill Switch",data?.sharedKillActive==null?"未取得":data?.sharedKillActive?"ON":"OFF"],
+          ["発注Permission",row?.orderPermission?.allowed?"許可条件内":row?.orderPermission?.reason||"未確認"],
+          ["保護注文",row?.protection?.status||"未確認"],
           ["実Runner確定H1判定",row?.publicSignalEligible===null?"未取得":row?.publicSignalEligible?"成立（発注とは別）":"未成立"],
           ["実Runner最終判定",row?.lastDecision?.reason||"対象通貨の最新記録なし"],
         ].map(([label,value])=><div key={label} className="min-w-0 rounded-xl border border-white/10 bg-black/20 px-3 py-3">
@@ -62,6 +65,7 @@ export function HypeDecisionPanel({strategy}:{strategy:Strategy}){
         </div>)}
       </div>
       {row?.manualReview?<p className="mt-3 rounded-xl border border-amber-400/30 p-3 text-xs text-amber-200">manualReview: {row.manualReview}</p>:null}
+      {row?.deferralReason?<p className="mt-3 rounded-xl border border-sky-400/30 p-3 text-xs text-sky-200">rate-budget deferral: {row.deferralReason}</p>:null}
       {row?.position?<p className="mt-3 text-sm text-white/85">建玉 {row.position.quantity} / Entry {row.position.entryPrice} / STOP {row.position.stopPrice} / TP {row.position.takeProfitPrice}</p>:
         <p className="mt-3 text-xs text-white/60">このRunnerの対象建玉stateなし。Asterの実口座照合とは別です。</p>}
     </section>

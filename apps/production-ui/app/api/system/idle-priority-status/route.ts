@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { NextRequest, NextResponse } from "next/server";
+import { evaluateIdleRuntimeHealth } from "@/lib/server/idle-runtime-observability";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -35,14 +36,30 @@ export async function GET(req: NextRequest) {
     jsonFile(heartbeatPath),
   ]);
 
+  const expectedSha = releaseSha.trim().toLowerCase();
+  const health = evaluateIdleRuntimeHealth({
+    now: Date.now(),
+    expectedSha,
+    heartbeat,
+    coreState: state,
+    residualState,
+  });
+
   return NextResponse.json({
     ok: true,
-    status: heartbeat?.status || heartbeat?.safetyState || (heartbeat ? "LIVE" : "UNKNOWN"),
+    status: health.status,
     releaseSha,
+    health,
+    orderPermission: {
+      core: health.core.orderPermission,
+      residual: health.residual.orderPermission,
+    },
     heartbeat,
     baseline,
     state,
     residualState,
+    // Core and residual are evaluated independently. A stale residual state
+    // must not make the core Idle runner (or HYPE) appear stopped.
     details,
     visibleSidecars: ["HYPE"],
     updatedAt: Date.now(),

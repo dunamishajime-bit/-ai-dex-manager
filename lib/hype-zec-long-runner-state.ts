@@ -2,6 +2,9 @@ import { chmod, lstat, mkdir, readFile, rename, unlink, writeFile } from "node:f
 import { dirname, resolve } from "node:path";
 
 export const HYPE_ZEC_LONG_STATE_SCHEMA = "disdex-hype-zec-long/v1" as const;
+/** HYPE/ZEC state heartbeat freshness contract used by runtime health. */
+export const HYPE_ZEC_LONG_STATE_MAX_AGE_MS = 3 * 60 * 60_000;
+export const HYPE_ZEC_LONG_STATE_CLOCK_SKEW_MS = 60_000;
 export type HypeZecLongStateMode = "LIVE" | "SHADOW" | "PAPER";
 export type HypeZecLongPendingPhase = "planned" | "submitted" | "manual_review";
 
@@ -62,17 +65,52 @@ function normalizedState(value: unknown, expectedRuntimeSha?: string, expectedMo
   if (raw.schema !== HYPE_ZEC_LONG_STATE_SCHEMA || typeof raw.runtimeCommitSha !== "string" || !raw.runtimeCommitSha.trim()) throw new Error("HYPE_ZEC_LONG_STATE_MALFORMED");
   if (expectedRuntimeSha && raw.runtimeCommitSha.toLowerCase() !== expectedRuntimeSha.toLowerCase()) throw new Error(`HYPE_ZEC_LONG_STATE_RUNTIME_SHA_MISMATCH:${raw.runtimeCommitSha}:${expectedRuntimeSha}`);
   if (expectedMode && raw.mode !== expectedMode) throw new Error(`HYPE_ZEC_LONG_STATE_MODE_MISMATCH:${raw.mode}:${expectedMode}`);
+  const updatedAt = Number(raw.updatedAt);
+  if (!Number.isFinite(updatedAt) || updatedAt <= 0) throw new Error("HYPE_ZEC_LONG_STATE_TIMESTAMP_INVALID");
+  if (updatedAt > Date.now() + HYPE_ZEC_LONG_STATE_CLOCK_SKEW_MS) throw new Error("HYPE_ZEC_LONG_STATE_TIMESTAMP_FUTURE");
+  if (raw.lastDecisionTs !== undefined && (!Number.isFinite(Number(raw.lastDecisionTs)) || Number(raw.lastDecisionTs) <= 0 || Number(raw.lastDecisionTs) > Date.now() + HYPE_ZEC_LONG_STATE_CLOCK_SKEW_MS)) {
+    throw new Error("HYPE_ZEC_LONG_STATE_DECISION_TIMESTAMP_INVALID");
+  }
   return {
     schema: HYPE_ZEC_LONG_STATE_SCHEMA,
     runtimeCommitSha: raw.runtimeCommitSha,
     mode: raw.mode === "LIVE" || raw.mode === "PAPER" ? raw.mode : "SHADOW",
-    updatedAt: Number(raw.updatedAt),
+    updatedAt,
     lastDecisionTs: raw.lastDecisionTs,
     lastDecision: raw.lastDecision,
     positions: Array.isArray(raw.positions) ? raw.positions.map((position) => ({ ...position })) : undefined,
     pending: raw.pending,
     manualReview: raw.manualReview,
     failures: Array.isArray(raw.failures) ? raw.failures.slice(-100) : [],
+  };
+}
+
+export function assertHypeZecLongRunnerStateFresh(state: HypeZecLongRunnerState, now = Date.now()): HypeZecLongRunnerState {
+  if (!Number.isFinite(state.updatedAt) || state.updatedAt <= 0) throw new Error("HYPE_ZEC_LONG_STATE_TIMESTAMP_INVALID");
+  if (state.updatedAt > now + HYPE_ZEC_LONG_STATE_CLOCK_SKEW_MS) throw new Error("HYPE_ZEC_LONG_STATE_TIMESTAMP_FUTURE");
+  if (now - state.updatedAt > HYPE_ZEC_LONG_STATE_MAX_AGE_MS) throw new Error("HYPE_ZEC_LONG_STATE_STALE");
+  return state;
+}
+
+export function heartbeatHypeZecRateBudgetDeferral(state: HypeZecLongRunnerState, reason: string, now = Date.now()): HypeZecLongRunnerState {
+  if (state.pending || state.manualReview) return state;
+  const owned = state.positions || [];
+  const protectedState = owned.length > 0 && owned.every((position) => (
+    typeof position.stopClientOrderId === "string" && position.stopClientOrderId.length > 0
+    && typeof position.takeProfitClientOrderId === "string" && position.takeProfitClientOrderId.length > 0
+    && Number.isFinite(position.stopReadBackAt) && Number(position.stopReadBackAt) > 0
+  ));
+  if (owned.length > 0 && !protectedState) return state;
+  return {
+    ...state,
+    updatedAt: now,
+    lastDecisionTs: now,
+    lastDecision: {
+      strategy: owned[0]?.strategy || "HYPE_LONG",
+      signalTs: owned[0]?.signalTs ?? null,
+      accepted: false,
+      reason: `HYPE_ZEC_${owned.length > 0 ? "PROTECTED_" : ""}RATE_BUDGET_DEFERRED:${reason}`,
+    },
   };
 }
 
@@ -84,7 +122,7 @@ export class FileHypeZecLongRunnerStateStore {
 
   async load(): Promise<HypeZecLongRunnerState> {
     try {
-      return normalizedState(JSON.parse(await readFile(this.path, "utf8")), this.runtimeCommitSha || undefined, this.mode);
+      return assertHypeZecLongRunnerStateFresh(normalizedState(JSON.parse(await readFile(this.path, "utf8")), this.runtimeCommitSha || undefined, this.mode));
     } catch (error) {
       const code = error && typeof error === "object" && "code" in error ? String((error as { code?: unknown }).code) : "";
       if (code !== "ENOENT") throw error;

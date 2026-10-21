@@ -17,7 +17,7 @@ import { buildHypeZecProtection, calculateHypeZecQuantity, evaluateHypeLongSigna
 import { buildHypeTrendSignal, type HypeTrendCandle } from "./hype-trend-long-signal";
 import { evaluateHypeTrendEntryGate } from "./hype-trend-long-runner";
 import type { HypeZecLongMarketData } from "./hype-zec-long-market-data";
-import { FileHypeZecLongRunnerStateStore, type HypeZecLongPositionState, type HypeZecLongRunnerState } from "./hype-zec-long-runner-state";
+import { FileHypeZecLongRunnerStateStore, heartbeatHypeZecRateBudgetDeferral, type HypeZecLongPositionState, type HypeZecLongRunnerState } from "./hype-zec-long-runner-state";
 import { BENIGN_HYPE_ZEC_MARKET_DATA_REVIEW } from "./hype-zec-long-recovery-contract";
 import { classifyAsterRateBudgetFailure } from "./disdex-aster-rate-budget-policy";
 
@@ -449,9 +449,19 @@ export class HypeZecLongRunner {
           && Math.abs(position.quantity) > EPSILON
         ));
         // All account/ownership reads completed and no order path has started.
-        // A known local pre-request budget denial can hold this flat tick, but
-        // must never clear an old review or recover pending/owned exposure.
+        // A known local pre-request budget denial can hold this tick. A
+        // protected owned position keeps its state heartbeat and protections;
+        // an unprotected or unresolved state remains fail-closed below.
         const budget = classifyAsterRateBudgetFailure(error);
+        if (budget && !state.manualReview && !state.pending && (!hasSidecarPosition || (state.positions || []).length > 0)) {
+          const next = heartbeatHypeZecRateBudgetDeferral(state, budget.reason, this.now());
+          if (next !== state) {
+            const reason = next.lastDecision?.reason || `HYPE_ZEC_RATE_BUDGET_DEFERRED:${budget.reason}`;
+            await this.dependencies.stateStore.save(next);
+            this.log.warn("hype-zec-rate-budget-deferred", { reason, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 });
+            return { status: "held", message: reason };
+          }
+        }
         if (budget && !state.manualReview && !hasSidecarPosition && !(state.positions || []).length && !state.pending) {
           const reason = `HYPE_ZEC_RATE_BUDGET_DEFERRED:${budget.reason}`;
           state.lastDecision = { strategy: "HYPE_LONG", signalTs: null, accepted: false, reason };
@@ -513,6 +523,15 @@ export class HypeZecLongRunner {
       const message = error instanceof Error ? error.message : String(error);
       const state = await this.dependencies.stateStore.load();
       const budget = classifyAsterRateBudgetFailure(error);
+      if (readOnlyBudgetPhase && budget && !state.manualReview && !state.pending && (state.positions || []).length > 0) {
+        const next = heartbeatHypeZecRateBudgetDeferral(state, budget.reason, this.now());
+        if (next !== state) {
+          const reason = next.lastDecision?.reason || `HYPE_ZEC_PROTECTED_RATE_BUDGET_DEFERRED:${budget.reason}`;
+          await this.dependencies.stateStore.save(next);
+          this.log.warn("hype-zec-rate-budget-deferred", { reason, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 });
+          return { status: "held", message: reason };
+        }
+      }
       if (readOnlyBudgetPhase && budget && !state.manualReview && !(state.positions || []).length && !state.pending) {
         // Reconciliation is deferred, not declared successful: no signal or
         // order may execute until a subsequent tick completes fresh reads.

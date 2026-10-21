@@ -3,7 +3,11 @@ import {join} from 'node:path';
 import {extractObjectNumber, loadCurrentProductionRuntime} from './current-production-runtime';
 import type {HypeZecGate,HypeZecSleeve} from './hype-zec-runtime-observability';
 export type HypeGate=HypeZecGate;
-export type HypeSleeve=HypeZecSleeve & {strategy:'HYPE_LONG';symbol:'HYPEUSDT'};
+export type HypeSleeve=HypeZecSleeve & {
+ strategy:'HYPE_LONG';symbol:'HYPEUSDT';heartbeatAt?:number;stateFresh?:boolean;
+ deferralReason?:string;protection:{status:'VERIFIED'|'NONE'|'UNVERIFIED';stopClientOrderId?:string;takeProfitClientOrderId?:string};
+ orderPermission:{allowed:boolean;reason:string};
+};
 export type HypeOverview={ok:true;readOnly:true;tradingMutation:0;capturedAt:string;releaseSha:string;sourceDeployed:boolean;stateAvailable:boolean;serviceActive:boolean;sharedKillActive:boolean|null;sleeves:{HYPE_LONG:HypeSleeve}};
 async function json(path:string){try{return JSON.parse(await readFile(path,'utf8'));}catch{return null;}}
 /** HYPE75 H1 runner is authoritative; legacy 15m sidecar gates are not its Entry logic. */
@@ -16,6 +20,8 @@ export async function loadHypeRuntimeObservability(now=Date.now(),options:{relea
  const n=(key:string)=>extractObjectNumber(source,key);
  const shaOk=state?.runtimeCommitSha===sha&&hb?.runtimeSha===sha&&hb?.expectedSha===sha;
  const fresh=Number.isFinite(hb?.heartbeatAt)&&hb.heartbeatAt<=now+5000&&now-hb.heartbeatAt<=120000;
+ const stateUpdatedAt=Number(state?.updatedAt);
+ const stateFresh=Number.isFinite(stateUpdatedAt)&&stateUpdatedAt>0&&stateUpdatedAt<=now+60000&&now-stateUpdatedAt<=3*3600000;
  const active=shaOk&&fresh&&Number(hb?.mainPid)>0&&hb?.liveEnabled===true;
  const pending=Boolean(state?.pending),manual=typeof state?.manualReview==='string'?state.manualReview:undefined;
  const last=state?.lastDecision?.strategy==='HYPE_LONG'?state.lastDecision:null;
@@ -23,7 +29,7 @@ export async function loadHypeRuntimeObservability(now=Date.now(),options:{relea
  const currentFailure=Array.isArray(state?.failures)&&state.failures.some((f:any)=>Number(f.occurredAt)>Number(state.lastDecisionTs??0));
  const blocked=pending||!!manual||currentFailure||hb?.safetyState!=='HEALTHY';
  const killActive=typeof kill?.active==='boolean'?kill.active:null;
- const status:HypeSleeve['status']=!state||!hb?'NOT_DEPLOYED':!shaOk?'BLOCKED':!fresh?'STALE':state.mode!=='LIVE'?'SHADOW':!active||blocked||killActive!==false?'UNCONFIRMED':'LIVE';
+ const status:HypeSleeve['status']=!state||!hb?'NOT_DEPLOYED':!shaOk?'BLOCKED':!fresh||!stateFresh?'STALE':state.mode!=='LIVE'?'SHADOW':!active||blocked||killActive!==false?'UNCONFIRMED':'LIVE';
  const gate=(key:string,label:string,pass:boolean|null,actual:unknown,threshold:unknown,reason:string):HypeGate=>({key,label,status:pass===null?'UNKNOWN':pass?'PASS':'BLOCKED',actual:actual===undefined?undefined:String(actual),threshold:threshold===undefined?undefined:String(threshold),reason,source:'RUNNER_STATE'});
  const gates:HypeGate[]=[gate('RUNTIME_H1','HYPE75 実Runner / 確定H1',status==='LIVE',status,'current SHA・heartbeat・LIVE・保護state正常','過去の解消済みエラーは監査履歴として保持'),gate('SHARED_KILL','Kill Switch',killActive===null?null:!killActive,killActive,'false','未知なら注文可能とは扱わない')];
  for(const [reason,label,threshold] of [
@@ -35,6 +41,11 @@ export async function loadHypeRuntimeObservability(now=Date.now(),options:{relea
  gates.push(gate('ACTUAL_ENTRY','最新の実Runner Entry判定',decisionFresh&&last?last.accepted===true:null,last?.reason,'HYPE_TREND_LONG_SIGNAL_ACCEPTED','最新判定がリスク・容量で拒否される場合も含む'));
  gates.push({...gate('VENUE_AND_PORTFOLIO','5x Cross・容量・保護注文',null,undefined,'注文直前 read-back','Entry成立・実約定・STOP保護は別の確認'),source:'EXECUTION'});
  const pos=Array.isArray(state?.positions)?state.positions.find((p:any)=>p.strategy==='HYPE_LONG'&&p.symbol==='HYPEUSDT'):null;
- const sleeve:HypeSleeve={strategy:'HYPE_LONG',symbol:'HYPEUSDT',status,runtimeSha:sha,stateSha:state?.runtimeCommitSha,stateMode:state?.mode,serviceActive:active,stateUpdatedAt:state?.updatedAt,lastDecision:last?{accepted:last.accepted===true,reason:last.reason,at:state.lastDecisionTs}:undefined,position:pos?{quantity:pos.quantity,entryPrice:pos.entryPrice,stopPrice:pos.stopPrice,takeProfitPrice:pos.takeProfitPrice}:undefined,pending,manualReview:manual,maxGross:n('maximumGross'),riskPct:n('riskPct'),publicSignalEligible:decisionFresh&&last?last.accepted===true:null,publicReferenceTs:last?.signalTs,gates,note:`HYPE75 / 確定H1 / Gross ${n('maximumGross')}x / STOP ATR×${n('stopAtrMultiple')} / trail ATR×${n('trailingAtrMultiple')} / hold≤${n('maximumHoldHours')}h。過去エラー履歴${state?.failures?.length??0}件は保持。現在の判定: ${last?.reason??'未取得'}。`};
+ const stopClientOrderId=typeof pos?.stopClientOrderId==='string'&&pos.stopClientOrderId?pos.stopClientOrderId:undefined;
+ const takeProfitClientOrderId=typeof pos?.takeProfitClientOrderId==='string'&&pos.takeProfitClientOrderId?pos.takeProfitClientOrderId:undefined;
+ const protection=pos?stopClientOrderId&&takeProfitClientOrderId&&Number.isFinite(Number(pos.stopReadBackAt))&&Number(pos.stopReadBackAt)>0?{status:'VERIFIED' as const,stopClientOrderId,takeProfitClientOrderId}:{status:'UNVERIFIED' as const}:{status:'NONE' as const};
+ const deferralReason=typeof last?.reason==='string'&&last.reason.includes('RATE_BUDGET')?last.reason:undefined;
+ const orderPermission={allowed:status==='LIVE'&&!pending&&!manual&&killActive===false&&stateFresh,reason:status!=='LIVE'?`HYPE_ORDER_PERMISSION_BLOCKED:${status}`:pending?'HYPE_ORDER_PERMISSION_BLOCKED:PENDING':manual?`HYPE_ORDER_PERMISSION_BLOCKED:MANUAL_REVIEW`:killActive!==false?'HYPE_ORDER_PERMISSION_BLOCKED:KILL_SWITCH_UNCONFIRMED':!stateFresh?'HYPE_ORDER_PERMISSION_BLOCKED:STATE_STALE':'HYPE_ORDER_PERMISSION_AVAILABLE'};
+ const sleeve:HypeSleeve={strategy:'HYPE_LONG',symbol:'HYPEUSDT',status,runtimeSha:sha,stateSha:state?.runtimeCommitSha,stateMode:state?.mode,serviceActive:active,stateUpdatedAt:state?.updatedAt,heartbeatAt:hb?.heartbeatAt,stateFresh,lastDecision:last?{accepted:last.accepted===true,reason:last.reason,at:state.lastDecisionTs}:undefined,position:pos?{quantity:pos.quantity,entryPrice:pos.entryPrice,stopPrice:pos.stopPrice,takeProfitPrice:pos.takeProfitPrice}:undefined,pending,manualReview:manual,deferralReason,protection,orderPermission,maxGross:n('maximumGross'),riskPct:n('riskPct'),publicSignalEligible:decisionFresh&&last?last.accepted===true:null,publicReferenceTs:last?.signalTs,gates,note:`HYPE75 / 確定H1 / Gross ${n('maximumGross')}x / STOP ATR×${n('stopAtrMultiple')} / trail ATR×${n('trailingAtrMultiple')} / hold≤${n('maximumHoldHours')}h。過去エラー履歴${state?.failures?.length??0}件は保持。現在の判定: ${last?.reason??'未取得'}。`};
  return{ok:true,readOnly:true,tradingMutation:0,capturedAt:new Date(now).toISOString(),releaseSha:sha,sourceDeployed:true,stateAvailable:!!state,serviceActive:active,sharedKillActive:killActive,sleeves:{HYPE_LONG:sleeve}};
 }

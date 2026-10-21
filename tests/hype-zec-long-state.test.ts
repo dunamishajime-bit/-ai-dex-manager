@@ -4,7 +4,7 @@ import { mkdtemp, readFile, stat } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
-import { FileHypeZecLongRunnerStateStore } from "../lib/hype-zec-long-runner-state";
+import { FileHypeZecLongRunnerStateStore, heartbeatHypeZecRateBudgetDeferral } from "../lib/hype-zec-long-runner-state";
 
 test("HYPE/ZEC state store writes an exact SHA-owned 0600 regular file", async () => {
   const root = await mkdtemp(join(tmpdir(), "hype-zec-state-"));
@@ -34,4 +34,39 @@ test("HYPE/ZEC state store rejects a stale runtime SHA", async () => {
     }),
     /RUNTIME_SHA_MISMATCH/,
   );
+});
+
+test("HYPE protected rate-budget deferral refreshes heartbeat without clearing protection", () => {
+  const now = Date.now();
+  const state = {
+    schema: "disdex-hype-zec-long/v1" as const,
+    runtimeCommitSha: "a".repeat(40),
+    mode: "LIVE" as const,
+    updatedAt: now - 1_000,
+    positions: [{
+      strategy: "HYPE_LONG" as const,
+      symbol: "HYPEUSDT" as const,
+      side: "LONG" as const,
+      positionId: "hype-position",
+      quantity: 1,
+      entryPrice: 10,
+      entryTs: now - 10_000,
+      signalTs: now - 11_000,
+      stopPrice: 9,
+      takeProfitPrice: 12,
+      stopClientOrderId: "hype-stop",
+      takeProfitClientOrderId: "hype-tp",
+      stopReadBackAt: now - 1_000,
+      peakPrice: 10,
+      updatedAt: now - 1_000,
+    }],
+    failures: [],
+  };
+  const next = heartbeatHypeZecRateBudgetDeferral(state, "ASTER_GLOBAL_RATE_BUDGET_SATURATED:5007", now);
+  assert.equal(next.updatedAt, now);
+  assert.deepEqual(next.positions, state.positions);
+  assert.equal(next.pending, undefined);
+  assert.equal(next.manualReview, undefined);
+  assert.equal(next.lastDecisionTs, now);
+  assert.equal(next.lastDecision?.reason, "HYPE_ZEC_PROTECTED_RATE_BUDGET_DEFERRED:ASTER_GLOBAL_RATE_BUDGET_SATURATED:5007");
 });

@@ -11,7 +11,7 @@ import type { V12AsterLiveAdapter } from "../lib/v12-aster-live-adapter";
 
 const SHA="a".repeat(40);
 
-function pos(): DirectPosition {
+function pos(now = Date.now()): DirectPosition {
   return {
     symbol:"DOGEUSDT",
     positionSide:"BOTH",
@@ -22,28 +22,29 @@ function pos(): DirectPosition {
     unrealizedPnl:10,
     leverage:5,
     pnlPct:0,
-    updatedAt:1_800_000_000_000,
+    updatedAt:now,
   } as DirectPosition;
 }
 
 test("formal preemption closes residual LONG reduce-only before clearing durable state", async()=>{
   const root=await mkdtemp(join(tmpdir(),"idle-res-preempt-"));
   try{
+    const now=Date.now();
     const statePath=join(root,"state.json");
     const store=new FileIdleResidualLongStateStore(statePath,SHA);
-    const state=emptyIdleResidualLongState(SHA,1_800_000_000_000);
+    const state=emptyIdleResidualLongState(SHA,now);
     state.position={
       symbol:"DOGEUSDT",route:"DOGE_REL_VOL",side:"LONG",
-      signalTs:1_799_996_400_000,entryTs:1_800_000_000_000,exitTs:1_800_043_200_000,
+      signalTs:now-3_600_000,entryTs:now,exitTs:now+43_200_000,
       entryPrice:100,quantity:10,gross:1,stopPrice:90,takeProfitPrice:125,
       stopClientOrderId:"res-stop-doge",takeProfitClientOrderId:"res-tp-doge",protectionVerified:true,
     };
     await store.save(state);
 
-    let positions:DirectPosition[]=[pos()];
+    let positions:DirectPosition[]=[pos(now)];
     let marketCalls=0;
     const executor={
-      getMarketQuote: async()=>({symbol:"DOGEUSDT",bidPrice:100,askPrice:100.1,bidQuantity:100,askQuantity:100,midPrice:100.05,spreadBps:10,updatedAt:1_800_000_000_000}),
+      getMarketQuote: async()=>({symbol:"DOGEUSDT",bidPrice:100,askPrice:100.1,bidQuantity:100,askQuantity:100,midPrice:100.05,spreadBps:10,updatedAt:now}),
       executeMarket: async(input:any)=>{
         marketCalls+=1;
         assert.equal(input.reduceOnly,true);
@@ -60,8 +61,8 @@ test("formal preemption closes residual LONG reduce-only before clearing durable
 
     const result=await releaseIdleResidualLongForFormalEntry({
       executor,adapter,lock:{document:async()=>{documented+=1;return {} as any;}},
-      positions:[pos()],causeIdempotencyKey:"V12|ENTRY",expectedRuntimeSha:SHA,
-      statePath,enabled:true,maxSlippageBps:20,now:()=>1_800_003_600_000,
+      positions:[pos(now)],causeIdempotencyKey:"V12|ENTRY",expectedRuntimeSha:SHA,
+      statePath,enabled:true,maxSlippageBps:20,now:()=>now,
     });
     assert.equal(result.status,"reduced");
     assert.equal(marketCalls,1);

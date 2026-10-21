@@ -19,7 +19,7 @@ import { evaluateIdleGenericCandidate, evaluateIdlePriorityShort, computeIdlePri
 import { readIdleState } from "./idle-priority-short-state";
 import type { IdlePriorityMarketSnapshot } from "./idle-priority-short-market-data";
 import { chooseIdleResidualLong, evaluateIdleResidualLong, type IdleResidualLongSignal } from "./idle-residual-long-signal";
-import { FileIdleResidualLongStateStore, type IdleResidualLongPending, type IdleResidualLongPosition, type IdleResidualLongState } from "./idle-residual-long-state";
+import { FileIdleResidualLongStateStore, heartbeatIdleResidualRateBudgetDeferral, type IdleResidualLongPending, type IdleResidualLongPosition, type IdleResidualLongState } from "./idle-residual-long-state";
 import { readAndAssertIdleResidualLongParityCert } from "./idle-residual-long-parity-cert";
 
 const EPS=1e-9;
@@ -31,6 +31,12 @@ export function classifyIdleResidualFlatRateBudgetDeferral(state:IdleResidualLon
   const deferred=classifyAsterRateBudgetFailure(error);
   if(!deferred||state.manualReview||state.pending||state.position)return undefined;
   return `IDLE_RESIDUAL_RATE_BUDGET_DEFERRED:${deferred.reason}`;
+}
+
+export function classifyIdleResidualRateBudgetDeferral(state:IdleResidualLongState,error:unknown){
+  const deferred=classifyAsterRateBudgetFailure(error);
+  if(!deferred||state.manualReview||state.pending)return undefined;
+  return `IDLE_RESIDUAL_${state.position?"PROTECTED_":""}RATE_BUDGET_DEFERRED:${deferred.reason}`;
 }
 
 export type IdleResidualLongTickResult={
@@ -349,8 +355,11 @@ export class IdleResidualLongRunner{
     }catch(error){
       const state=await this.d.stateStore.load().catch(()=>undefined);
       if(state){
-        const deferred=classifyIdleResidualFlatRateBudgetDeferral(state,error);
-        if(deferred)return {status:"held",message:deferred,ordersSent:0,cancelsSent:0,positionChangesSent:0};
+        const deferred=classifyIdleResidualRateBudgetDeferral(state,error);
+        if(deferred){
+          await this.d.stateStore.save(heartbeatIdleResidualRateBudgetDeferral(state,deferred.replace(/^IDLE_RESIDUAL_(?:PROTECTED_)?RATE_BUDGET_DEFERRED:/,""),this.now()));
+          return {status:"held",message:deferred,ordersSent:0,cancelsSent:0,positionChangesSent:0};
+        }
         return await this.manual(state,`IDLE_RESIDUAL_RUNNER_FAIL_CLOSED:${error instanceof Error?error.message:String(error)}`);
       }
       throw error;

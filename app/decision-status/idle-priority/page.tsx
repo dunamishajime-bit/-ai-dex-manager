@@ -21,6 +21,7 @@ type ResidualRow = {
 };
 type Payload = {
   ok: boolean; status?: string; releaseSha?: string; heartbeat?: any; baseline?: any; state?: any; residualState?: any;
+  health?: { core?: { status?: string; orderPermission?: { allowed?: boolean; reason?: string } }; residual?: { status?: string; orderPermission?: { allowed?: boolean; reason?: string } } };
   details?: { decisionTs: number; updatedAt: number; symbols: Row[]; residual: ResidualRow[]; finalReason?: string };
 };
 
@@ -61,6 +62,8 @@ export default function IdlePriorityDecisionPage(){
       <div className="mt-3 grid gap-2 text-xs md:grid-cols-4">
         <Gate label="Runtime" value={data?.status||"LOADING"} />
         <Gate label="Release SHA" value={data?.releaseSha?.slice(0,12)||"—"} />
+        <Gate label="Idle SHORT Permission" ok={data?.health?.core?.orderPermission?.allowed} value={data?.health?.core?.orderPermission?.allowed?"AVAILABLE":data?.health?.core?.orderPermission?.reason||"—"} />
+        <Gate label="Residual LONG" ok={data?.health?.residual?.status==="LIVE"} value={data?.health?.residual?.status||"—"} />
         <Gate label="Decision JST" value={ts(details?.decisionTs)} />
         <Gate label="Snapshot JST" value={ts(details?.updatedAt)} />
       </div>

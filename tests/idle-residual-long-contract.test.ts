@@ -6,7 +6,13 @@ import { V12_X1_ALL } from "../config/v12X1AllRuntime";
 import { IDLE_RESIDUAL_LONG_POLICY } from "../config/idleResidualLongPolicy";
 import { chooseIdleResidualLong, evaluateIdleResidualLongFeatures } from "../lib/idle-residual-long-signal";
 import { classifyIdleResidualFlatRateBudgetDeferral } from "../lib/idle-residual-long-runner";
-import { emptyIdleResidualLongState } from "../lib/idle-residual-long-state";
+import {
+  assertIdleResidualLongStateFresh,
+  emptyIdleResidualLongState,
+  heartbeatIdleResidualRateBudgetDeferral,
+  normalizeIdleResidualLongState,
+  IDLE_RESIDUAL_LONG_STATE_MAX_AGE_MS,
+} from "../lib/idle-residual-long-state";
 import { assertIdleResidualLongParityCert, IDLE_RESIDUAL_LONG_CERT_SCHEMA } from "../lib/idle-residual-long-parity-cert";
 import type { IdleFeatures } from "../lib/idle-priority-short-signal";
 
@@ -110,4 +116,58 @@ test("flat residual LONG defers only Aster rate-budget saturation", () => {
   assert.equal(classifyIdleResidualFlatRateBudgetDeferral({ ...state, pending: {} as any }, error), undefined);
   assert.equal(classifyIdleResidualFlatRateBudgetDeferral({ ...state, manualReview: "review" }, error), undefined);
   assert.equal(classifyIdleResidualFlatRateBudgetDeferral(state, new Error("OTHER")), undefined);
+});
+
+test("residual state freshness rejects stale and future heartbeats while accepting a fresh matching state", () => {
+  const now = 1_800_000_000_000;
+  const fresh = emptyIdleResidualLongState("a".repeat(40), now - 1_000);
+  assert.equal(assertIdleResidualLongStateFresh(fresh, now).updatedAt, fresh.updatedAt);
+  assert.throws(
+    () => assertIdleResidualLongStateFresh({ ...fresh, updatedAt: now - IDLE_RESIDUAL_LONG_STATE_MAX_AGE_MS - 1 }, now),
+    /IDLE_RESIDUAL_STATE_STALE/,
+  );
+  assert.throws(
+    () => assertIdleResidualLongStateFresh({ ...fresh, updatedAt: now + 60_001 }, now),
+    /IDLE_RESIDUAL_STATE_TIMESTAMP_FUTURE/,
+  );
+});
+
+test("residual state SHA mismatch fails closed with a precise reason", () => {
+  assert.throws(
+    () => normalizeIdleResidualLongState(emptyIdleResidualLongState("b".repeat(40)), "a".repeat(40)),
+    /IDLE_RESIDUAL_STATE_RUNTIME_OR_SCHEMA_MISMATCH/,
+  );
+});
+
+test("protected and flat rate-budget deferrals refresh heartbeat without clearing protection or creating review", () => {
+  const now = 1_800_000_000_000;
+  const reason = "ASTER_GLOBAL_RATE_BUDGET_SATURATED:5007";
+  const position = {
+    symbol: "DOGEUSDT" as const,
+    route: "DOGE_REL_VOL",
+    side: "LONG" as const,
+    signalTs: now - 10_000,
+    entryTs: now - 9_000,
+    exitTs: now + 12 * 3_600_000,
+    entryPrice: 100,
+    quantity: 1,
+    gross: 1 as const,
+    stopPrice: 90,
+    takeProfitPrice: 125,
+    stopClientOrderId: "res-stop",
+    takeProfitClientOrderId: "res-tp",
+    protectionVerified: true as const,
+  };
+  const protectedState = { ...emptyIdleResidualLongState("a".repeat(40), now - 1_000), position };
+  const nextProtected = heartbeatIdleResidualRateBudgetDeferral(protectedState, reason, now);
+  assert.equal(nextProtected.updatedAt, now);
+  assert.deepEqual(nextProtected.position, position);
+  assert.equal(nextProtected.pending, null);
+  assert.equal(nextProtected.manualReview, null);
+  assert.equal(nextProtected.lastDecision?.reason, `IDLE_RESIDUAL_PROTECTED_RATE_BUDGET_DEFERRED:${reason}`);
+
+  const nextFlat = heartbeatIdleResidualRateBudgetDeferral(emptyIdleResidualLongState("a".repeat(40), now - 1_000), reason, now);
+  assert.equal(nextFlat.updatedAt, now);
+  assert.equal(nextFlat.position, null);
+  assert.equal(nextFlat.lastDecision?.reason, `IDLE_RESIDUAL_RATE_BUDGET_DEFERRED:${reason}`);
 });

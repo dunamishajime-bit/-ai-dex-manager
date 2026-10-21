@@ -24,6 +24,9 @@ export type HypeZecSleeve = { strategy: Key; symbol: "HYPEUSDT" | "ZECUSDT";
   stateUpdatedAt?: number; lastDecision?: { accepted: boolean; reason: string; at?: number };
   position?: { quantity: number; entryPrice: number; stopPrice: number; takeProfitPrice: number };
   pending?: boolean; manualReview?: string; maxGross?: number; riskPct?: number;
+  stateFresh?: boolean; deferralReason?: string;
+  protection?: { status: "VERIFIED" | "NONE" | "UNVERIFIED"; stopClientOrderId?: string; takeProfitClientOrderId?: string };
+  orderPermission?: { allowed: boolean; reason: string };
   publicSignalEligible: boolean | null; publicReferenceTs?: number; publicError?: string;
   gates: HypeZecGate[]; note: string };
 export type HypeZecOverview = { ok: true; readOnly: true; tradingMutation: 0; capturedAt: string;
@@ -171,12 +174,15 @@ export async function loadHypeZecRuntimeObservability(now=Date.now()):Promise<Hy
       gates.push(go(g,label,null,undefined,undefined,!p?"Productionの実設定待ち":marketError||"公開15分足待機"));
     gates.push(go("VENUE_AND_PORTFOLIO","5x Cross・容量・保護注文",
       null,undefined,"注文直前の実Runner read-back","この欄は市場条件が成立しても、実Runnerの注文直前照合を証明しません","EXECUTION"));
+    const protection=pos?str(pos.stopClientOrderId)&&str(pos.takeProfitClientOrderId)?{status:"VERIFIED" as const,stopClientOrderId:str(pos.stopClientOrderId),takeProfitClientOrderId:str(pos.takeProfitClientOrderId)}:{status:"UNVERIFIED" as const}:{status:"NONE" as const};
+    const deferralReason=str(specific?.reason)?.includes("RATE_BUDGET")?str(specific?.reason):undefined;
+    const orderPermission={allowed:status==="LIVE"&&!state?.pending&&!str(state?.manualReview),reason:status!=="LIVE"?`HYPE_ZEC_ORDER_PERMISSION_BLOCKED:${status}`:state?.pending?"HYPE_ZEC_ORDER_PERMISSION_BLOCKED:PENDING":str(state?.manualReview)?"HYPE_ZEC_ORDER_PERMISSION_BLOCKED:MANUAL_REVIEW":"HYPE_ZEC_ORDER_PERMISSION_AVAILABLE"};
     results[key]={strategy:key,symbol,status,runtimeSha:releaseSha,stateSha,stateMode:mode,serviceActive:active,
       stateUpdatedAt:updatedAt,lastDecision:specific?{
         accepted:specific.accepted===true,reason:str(specific.reason)||"未取得",at:num(state?.lastDecisionTs)}:undefined,
       position:pos?{quantity:num(pos.quantity)||0,entryPrice:num(pos.entryPrice)||0,
         stopPrice:num(pos.stopPrice)||0,takeProfitPrice:num(pos.takeProfitPrice)||0}:undefined,
-      pending:!!state?.pending,manualReview:str(state?.manualReview),
+      pending:!!state?.pending,manualReview:str(state?.manualReview),stateFresh:fresh,deferralReason,protection,orderPermission,
       maxGross:riskValue("hypeZecMaximumGross"),
       riskPct:riskValue(key==="HYPE_LONG"?"hypeLongRiskPct":"zecLongRiskPct"),
       publicSignalEligible,publicReferenceTs,publicError:marketError,
