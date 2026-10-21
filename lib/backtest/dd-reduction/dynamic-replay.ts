@@ -13,6 +13,7 @@ import {
     type DynamicAllocatorCandidate,
     type DynamicAllocatorPolicy,
     type DynamicAllocatorState,
+    cooldownKey,
 } from "./dynamic-allocator";
 import { classifyOrderingEvidence, orderDynamicEvents, type DynamicOrderingInput } from "./dynamic-ordering";
 import { hashAllocatorState } from "./dynamic-state";
@@ -177,6 +178,7 @@ export interface ReplayLedgerEntry {
     readonly realized_pnl_jpy: number;
     readonly fee_jpy: number;
     readonly funding_jpy: number;
+    readonly lifecycle: "OWNERSHIP_CARRIED" | "COOLDOWN_CARRIED" | "VICTIM_RELEASED_INCOMING_REJECTED" | null;
 }
 
 export interface DynamicReplayResult {
@@ -259,6 +261,12 @@ function executionEvidence(event: ReplayEvent, timestamp: number): boolean {
     return evidence !== null && typeof evidence === "object" && typeof evidence.source === "string" && evidence.source.trim().length > 0 && typeof evidence.evidence_id === "string" && evidence.evidence_id.trim().length > 0 && finite(evidence.observed_ts_ms) && evidence.observed_ts_ms === timestamp;
 }
 
+function executionEvidenceKey(event: ReplayEvent): string | null {
+    const evidence = event.execution_evidence;
+    if (evidence === null || typeof evidence !== "object" || typeof evidence.source !== "string" || typeof evidence.evidence_id !== "string") return null;
+    return `${evidence.source.trim()}\u0000${evidence.evidence_id.trim()}`;
+}
+
 function isStop(kind: ReplayEventKind): boolean {
     return kind === "PROTECTION_STOP" || kind === "STOP";
 }
@@ -325,13 +333,25 @@ function windows(points: readonly ReplayMtmPoint[]): ReplayDdWindow[] {
 }
 
 function boundaryFor(policy: DynamicReplayPolicy): DynamicReplayResult["oos_boundary"] {
-    const start = policy.oos_start_ts_ms ?? null;
-    return { is_end_ts_ms: start === null ? null : start - 1, oos_start_ts_ms: start, oos_end_ts_ms: policy.oos_end_ts_ms ?? null, classification: start === null ? "UNSPECIFIED" : "EXPLICIT" };
+    const start = finite(policy.oos_start_ts_ms) ? policy.oos_start_ts_ms : null;
+    const end = finite(policy.oos_end_ts_ms) ? policy.oos_end_ts_ms : null;
+    const explicit = policy.oos_start_ts_ms !== undefined && policy.oos_start_ts_ms !== null || policy.oos_end_ts_ms !== undefined && policy.oos_end_ts_ms !== null;
+    return { is_end_ts_ms: start === null ? null : start - 1, oos_start_ts_ms: start, oos_end_ts_ms: end, classification: explicit ? "EXPLICIT" : "UNSPECIFIED" };
+}
+
+function boundaryReason(policy: DynamicReplayPolicy): ReplayRejection | null {
+    const hasStart = policy.oos_start_ts_ms !== undefined && policy.oos_start_ts_ms !== null;
+    const hasEnd = policy.oos_end_ts_ms !== undefined && policy.oos_end_ts_ms !== null;
+    if (!hasStart && !hasEnd) return null;
+    if (!hasStart || !hasEnd || !finite(policy.oos_start_ts_ms) || !finite(policy.oos_end_ts_ms) || policy.oos_start_ts_ms < 0 || policy.oos_end_ts_ms < 0 || policy.oos_start_ts_ms > policy.oos_end_ts_ms) return "DATA_MISSING";
+    return null;
 }
 
 function splitFor(event: ReplayEvent, boundary: DynamicReplayResult["oos_boundary"]): "IS" | "OOS" | null {
-    if (boundary.oos_start_ts_ms === null) return event.data_split ?? "IS";
-    const inferred = event.timestamp_ms >= boundary.oos_start_ts_ms ? "OOS" : "IS";
+    if (boundary.classification === "UNSPECIFIED") return event.data_split === "OOS" ? null : "IS";
+    if (boundary.oos_start_ts_ms === null || boundary.oos_end_ts_ms === null) return null;
+    const inferred = event.timestamp_ms < boundary.oos_start_ts_ms ? "IS" : event.timestamp_ms <= boundary.oos_end_ts_ms ? "OOS" : null;
+    if (inferred === null) return null;
     return event.data_split === undefined ? inferred : event.data_split === inferred ? event.data_split : null;
 }
 
@@ -357,6 +377,8 @@ function marketDataReason(marketData: readonly ReplayMarketMark[], policy: Dynam
 
 function prevalidate(events: readonly ReplayEvent[], policy: DynamicReplayPolicy, marketData: readonly ReplayMarketMark[]): ReplayRejection | null {
     if (!finite(policy.initial_wallet_jpy) || policy.initial_wallet_jpy < 0 || typeof policy.settlement_currency !== "string" || policy.settlement_currency.trim().length === 0 || !finite(policy.h1_interval_ms) || policy.h1_interval_ms <= 0) return "DATA_MISSING";
+    const boundaryValidation = boundaryReason(policy);
+    if (boundaryValidation !== null) return boundaryValidation;
     const marketReason = marketDataReason(marketData, policy);
     if (marketReason !== null) return marketReason;
     const entryTimestamps = new Map<string, number>();
@@ -397,13 +419,15 @@ function candidateCausality(event: ReplayEvent, candidate: DynamicAllocatorCandi
     const decisionTs = candidateTimestamp(candidate);
     const expiryTs = candidateExpiry(candidate);
     if (decisionTs === null || expiryTs === null || event.timestamp_ms < decisionTs) return "FUTURE_EVENT_REFERENCE";
+    if (decisionTs > expiryTs) return "ALLOCATOR_REJECTED";
     if (event.kind === "ENTRY" && event.timestamp_ms > expiryTs) return "ALLOCATOR_REJECTED";
     if (event.kind === "ENTRY_FILL" && event.timestamp_ms > expiryTs) return "DATA_MISSING";
+    if (event.kind === "PREEMPTION_EXIT" && event.timestamp_ms > expiryTs) return "ALLOCATOR_REJECTED";
     return null;
 }
 
 function isUnsupportedPhase(kind: ReplayEventKind): boolean {
-    return kind === "SIZING" || kind === "PREEMPTION_ELIGIBILITY" || kind === "COOLDOWN_UPDATE" || kind === "OWNERSHIP_UPDATE";
+    return kind === "SIZING" || kind === "PREEMPTION_ELIGIBILITY";
 }
 
 function isOosCandidateSelection(kind: ReplayEventKind): boolean {
@@ -414,7 +438,7 @@ function rejectedResult(policy: DynamicReplayPolicy, events: readonly ReplayEven
     const initial = finite(policy.initial_wallet_jpy) && policy.initial_wallet_jpy >= 0 ? policy.initial_wallet_jpy : 0;
     const state = createInitialAllocatorState({ wallet_jpy: initial, equity_jpy: initial, available_margin: initial });
     const accounting: ReplayAccounting = { initial_wallet_jpy: initial, wallet_jpy: initial, realized_pnl_settlement: 0, realized_pnl_jpy: 0, fees_settlement: 0, fees_jpy: 0, funding_settlement: 0, funding_jpy: 0, settlement_currency: null, deposits_jpy: 0, expected_wallet_jpy: initial, reconciliation_delta_jpy: 0, accounting_reconciliation: "PASS", charge_ledger: [], charge_reconciliation: "PASS" };
-    return { status: "FAIL", rejection: reason, allocator_state: state, execution_ledger: [], reservation_ledger: [], preemption_ledger: [], allocator_state_snapshots: [], charge_ledger: [], mtm_timeline: [], accounting, maximum_mtm_dd: null, top5_dd_windows: [], ordering_evidence: orderingEvidence, oos_boundary: boundaryFor(policy), processed_event_ids: events.map((event) => event.event_id) };
+    return { status: "FAIL", rejection: reason, allocator_state: state, execution_ledger: [], reservation_ledger: [], preemption_ledger: [], allocator_state_snapshots: [], charge_ledger: [], mtm_timeline: [], accounting, maximum_mtm_dd: null, top5_dd_windows: [], ordering_evidence: orderingEvidence, oos_boundary: boundaryFor(policy), processed_event_ids: [] };
 }
 
 /** Deterministic, research-only lifecycle reducer. */
@@ -443,6 +467,7 @@ export function replayDynamicPortfolio(
     const charges: ReplayChargeEntry[] = [];
     const depositsLedger: Array<{ readonly event_id: string; readonly amount_jpy: number }> = [];
     const reservationExpiry = new Map<string, number>();
+    const executionEvidenceKeys = new Set<string>();
     const mtm: ReplayMtmPoint[] = [{
         timestamp_ms: 0,
         wallet_jpy: policy.initial_wallet_jpy,
@@ -472,6 +497,7 @@ export function replayDynamicPortfolio(
         let eventFee = 0;
         let eventFunding = 0;
         let charge: ReplayChargeEntry | null = null;
+        let lifecycle: ReplayLedgerEntry["lifecycle"] = null;
         const split = splitFor(event, boundary);
         if (split === null) { failure = "DATA_MISSING"; break; }
         if (split === "OOS" && isOosCandidateSelection(event.kind)) { failure = "DATA_MISSING"; break; }
@@ -488,6 +514,19 @@ export function replayDynamicPortfolio(
             charged.add(event.charge_id);
             cash.wallet += settlement.fundingJpy; cash.funding += settlement.fundingJpy; cash.fundingSettlement += funding; eventFunding = settlement.fundingJpy;
             charge = { event_id: event.event_id, kind: event.kind, settlement_currency: settlement.currency, settlement_pnl: 0, pnl_jpy: 0, fee_settlement: 0, fee_jpy: 0, funding_settlement: funding, funding_jpy: settlement.fundingJpy, slippage_settlement: 0, gap_settlement: 0, wallet_delta_jpy: settlement.fundingJpy };
+        } else if (event.kind === "OWNERSHIP_UPDATE" || event.kind === "COOLDOWN_UPDATE") {
+            if (split !== "OOS" || event.reservation_id === undefined) { failure = "UNSUPPORTED_PHASE"; break; }
+            const reservation = allocator.reservations.find((item) => item.reservation_id === event.reservation_id);
+            if (reservation === undefined) { failure = "DATA_MISSING"; break; }
+            if (event.kind === "OWNERSHIP_UPDATE") {
+                const ownership = allocator.ownership.find((item) => item.reservation_id === event.reservation_id);
+                if (ownership === undefined || (ownership.status !== "OPEN" && ownership.status !== "RELEASED")) { failure = "DATA_MISSING"; break; }
+                lifecycle = "OWNERSHIP_CARRIED";
+            } else {
+                const cooldown = allocator.cooldown_by_symbol_side_strategy[cooldownKey(reservation.symbol, reservation.side, reservation.strategy_id)];
+                if ((reservation.status !== "RELEASED" && reservation.status !== "EXPIRED") || cooldown === undefined || cooldown.until_ts_ms !== event.cooldown_until_ts_ms || cooldown.source_event_ts_ms !== event.cooldown_source_event_ts_ms) { failure = "DATA_MISSING"; break; }
+                lifecycle = "COOLDOWN_CARRIED";
+            }
         } else if (event.kind === "CANDIDATE_VALIDATION" || event.kind === "CANDIDATE_PRIORITY") {
             if (!event.candidate) { failure = "DATA_MISSING"; break; }
             const causality = candidateCausality(event, event.candidate);
@@ -511,9 +550,11 @@ export function replayDynamicPortfolio(
             if (event.kind === "PARTIAL_FILL") { failure = "PARTIAL_EXECUTION_UNSUPPORTED"; break; }
             if (event.kind === "EXECUTION_RECONCILIATION") { failure = "UNKNOWN_EXECUTION"; break; }
             const expiryTs = event.reservation_id === undefined ? undefined : reservationExpiry.get(event.reservation_id);
-            if (!event.reservation_id || !finite(event.filled_gross) || !validPrice(event.fill_price) || (expiryTs !== undefined && event.timestamp_ms > expiryTs) || !executionFieldsPresent(event) || !executionEvidence(event, event.timestamp_ms)) { failure = "DATA_MISSING"; break; }
+            const evidenceKey = executionEvidenceKey(event);
+            if (!event.reservation_id || !finite(event.filled_gross) || !validPrice(event.fill_price) || (expiryTs !== undefined && event.timestamp_ms > expiryTs) || !executionFieldsPresent(event) || !executionEvidence(event, event.timestamp_ms) || evidenceKey === null || executionEvidenceKeys.has(evidenceKey)) { failure = "DATA_MISSING"; break; }
             const transition = confirmFill(allocator, event.reservation_id, { fill_ts_ms: event.timestamp_ms, filled_gross: event.filled_gross });
             if (!transition.applied) { accepted = false; reason = transition.reason; failure = "DATA_MISSING"; break; } else allocator = transition.state_after;
+            executionEvidenceKeys.add(evidenceKey);
         } else if (event.kind === "PROTECTION_REGISTRATION") {
             if (!event.reservation_id || !event.protection_id) { failure = "DATA_MISSING"; break; }
             const transition = registerProtection(allocator, event.reservation_id, { protection_id: event.protection_id, registered_ts_ms: event.timestamp_ms });
@@ -530,13 +571,18 @@ export function replayDynamicPortfolio(
             allocator = transition.state_after;
         } else if (event.kind === "PREEMPTION_EXIT") {
             const settlement = settlementValues(event, policy);
-            if (settlement === null || !validPrice(event.exit_price) || !executionFieldsPresent(event) || !event.victim_position || !(event.incoming_candidate ?? event.candidate) || !event.reservation_id || !finite(event.filled_gross) || event.exit_status === undefined || !executionEvidence(event, event.timestamp_ms)) { failure = "DATA_MISSING"; break; }
+            const incomingCandidate = event.incoming_candidate ?? event.candidate;
+            const incomingCausality = incomingCandidate === undefined ? "DATA_MISSING" : candidateCausality(event, incomingCandidate);
+            const evidenceKey = executionEvidenceKey(event);
+            if (incomingCausality !== null || settlement === null || !validPrice(event.exit_price) || !executionFieldsPresent(event) || !event.victim_position || incomingCandidate === undefined || !event.reservation_id || !finite(event.filled_gross) || event.exit_status === undefined || !executionEvidence(event, event.timestamp_ms) || evidenceKey === null || executionEvidenceKeys.has(evidenceKey)) { failure = incomingCausality ?? "DATA_MISSING"; break; }
             if (event.exit_status === "PARTIAL") { failure = "PARTIAL_EXECUTION_UNSUPPORTED"; break; }
             if (event.exit_status === "UNKNOWN") { failure = "UNKNOWN_EXECUTION"; break; }
             const sameTimestamp = ordered.filter((item) => item.timestamp_ms === event.timestamp_ms).map((item) => ({ ...item, candidate_id: item.victim_position?.candidate_id ?? item.candidate?.candidate_id ?? item.incoming_candidate?.candidate_id }));
-            const transition = applyPreemption({ state: allocator, incoming_candidate: event.incoming_candidate ?? event.candidate!, victim_position: event.victim_position, mode: event.mode ?? "WHOLE", requested_gross: event.filled_gross, exit: { status: event.exit_status, confirmed: event.confirmed === true && executionEvidence(event, event.timestamp_ms), filled_gross: event.filled_gross, exit_ts_ms: event.timestamp_ms, exit_price: event.exit_price }, cooldown: { until_ts_ms: event.cooldown_until_ts_ms, source_event_ts_ms: event.cooldown_source_event_ts_ms }, policy: policy.allocator, ordering_events: event.ordering_events ?? sameTimestamp });
+            const transition = applyPreemption({ state: allocator, incoming_candidate: incomingCandidate, victim_position: event.victim_position, mode: event.mode ?? "WHOLE", requested_gross: event.filled_gross, exit: { status: event.exit_status, confirmed: event.confirmed === true && executionEvidence(event, event.timestamp_ms), filled_gross: event.filled_gross, exit_ts_ms: event.timestamp_ms, exit_price: event.exit_price }, cooldown: { until_ts_ms: event.cooldown_until_ts_ms, source_event_ts_ms: event.cooldown_source_event_ts_ms }, policy: policy.allocator, ordering_events: event.ordering_events ?? sameTimestamp });
             if (!transition.victim_release_applied) { accepted = false; reason = transition.reason; failure = transition.reason === "PARTIAL_EXECUTION_UNSUPPORTED" ? "PARTIAL_EXECUTION_UNSUPPORTED" : transition.reason === "UNKNOWN_EXECUTION" ? "UNKNOWN_EXECUTION" : "DATA_MISSING"; break; }
-            allocator = transition.state_after; accepted = transition.applied; reason = transition.reason;
+            allocator = transition.state_after; lifecycle = transition.lifecycle === "VICTIM_RELEASED_INCOMING_REJECTED" ? "VICTIM_RELEASED_INCOMING_REJECTED" : null; accepted = transition.applied || lifecycle === "VICTIM_RELEASED_INCOMING_REJECTED"; reason = transition.reason;
+            if (!accepted) { failure = "DATA_MISSING"; break; }
+            executionEvidenceKeys.add(evidenceKey);
             const key = `reservation:${event.reservation_id}`;
             if (charged.has(key)) { failure = "DUPLICATE_CHARGE"; break; }
             charged.add(key); eventRealized = settlement.pnlJpy; eventFee = settlement.feeJpy; eventFunding = settlement.fundingJpy;
@@ -545,13 +591,14 @@ export function replayDynamicPortfolio(
         } else if (isExit(event.kind)) {
             const settlement = settlementValues(event, policy);
             const reservation = event.reservation_id === undefined ? undefined : allocator.reservations.find((item) => item.reservation_id === event.reservation_id);
-            if (settlement === null || !validPrice(event.exit_price) || !executionFieldsPresent(event) || !executionEvidence(event, event.timestamp_ms) || reservation === undefined || reservation.status === "PENDING" || reservation.status === "PARTIALLY_FILLED" || reservation.status === "RELEASED" || reservation.status === "EXPIRED" || reservation.fill_ts_ms === null || event.timestamp_ms < reservation.fill_ts_ms) { failure = reservation?.status === "RELEASED" || reservation?.status === "EXPIRED" ? "DUPLICATE_CHARGE" : "DATA_MISSING"; break; }
+            const evidenceKey = executionEvidenceKey(event);
+            if (settlement === null || !validPrice(event.exit_price) || !executionFieldsPresent(event) || !executionEvidence(event, event.timestamp_ms) || evidenceKey === null || executionEvidenceKeys.has(evidenceKey) || reservation === undefined || reservation.status === "PENDING" || reservation.status === "PARTIALLY_FILLED" || reservation.status === "RELEASED" || reservation.status === "EXPIRED" || reservation.fill_ts_ms === null || event.timestamp_ms < reservation.fill_ts_ms) { failure = reservation?.status === "RELEASED" || reservation?.status === "EXPIRED" ? "DUPLICATE_CHARGE" : "DATA_MISSING"; break; }
             if (isStop(event.kind) && (reservation.status !== "PROTECTED" || reservation.protection_id === null || event.protection_id !== reservation.protection_id)) { failure = "DATA_MISSING"; break; }
             const key = `reservation:${event.reservation_id}`;
             if (charged.has(key)) { failure = "DUPLICATE_CHARGE"; break; }
             const transition = releaseReservation(allocator, event.reservation_id!, { at_ts_ms: event.timestamp_ms, reason: event.exit_reason ?? event.kind, cooldown_until_ts_ms: event.cooldown_until_ts_ms, cooldown_source_event_ts_ms: event.cooldown_source_event_ts_ms });
             if (!transition.applied) { accepted = false; reason = transition.reason; failure = "DATA_MISSING"; break; }
-            allocator = transition.state_after; charged.add(key); eventRealized = settlement.pnlJpy; eventFee = settlement.feeJpy; eventFunding = settlement.fundingJpy;
+            allocator = transition.state_after; executionEvidenceKeys.add(evidenceKey); charged.add(key); eventRealized = settlement.pnlJpy; eventFee = settlement.feeJpy; eventFunding = settlement.fundingJpy;
             cash.wallet += eventRealized - eventFee + eventFunding; cash.realized += eventRealized; cash.realizedSettlement += settlement.pnl; cash.fees += eventFee; cash.feesSettlement += settlement.fee; cash.funding += eventFunding; cash.fundingSettlement += settlement.funding;
             charge = { event_id: event.event_id, kind: event.kind, settlement_currency: settlement.currency, settlement_pnl: settlement.pnl, pnl_jpy: settlement.pnlJpy, fee_settlement: settlement.fee, fee_jpy: settlement.feeJpy, funding_settlement: settlement.funding, funding_jpy: settlement.fundingJpy, slippage_settlement: 0, gap_settlement: 0, wallet_delta_jpy: eventRealized - eventFee + eventFunding };
         }
@@ -566,7 +613,7 @@ export function replayDynamicPortfolio(
         if (charge !== null) charges.push(charge);
         if (!mtmRefreshed && (event.kind === "DEPOSIT" || event.kind === "FUNDING" || charge !== null)) equity = cash.wallet;
         allocator = syncAllocatorCash(allocator, cash.wallet, equity, walletBefore);
-        const ledger: ReplayLedgerEntry = { event_id: event.event_id, timestamp_ms: event.timestamp_ms, kind: event.kind, accepted, reason, data_split: split, state_hash_before: hashAllocatorState(before), state_hash_after: hashAllocatorState(allocator), allocator_before: before, allocator_after: allocator, wallet_before_jpy: walletBefore, wallet_after_jpy: cash.wallet, realized_pnl_jpy: eventRealized, fee_jpy: eventFee, funding_jpy: eventFunding };
+        const ledger: ReplayLedgerEntry = { event_id: event.event_id, timestamp_ms: event.timestamp_ms, kind: event.kind, accepted, reason, data_split: split, state_hash_before: hashAllocatorState(before), state_hash_after: hashAllocatorState(allocator), allocator_before: before, allocator_after: allocator, wallet_before_jpy: walletBefore, wallet_after_jpy: cash.wallet, realized_pnl_jpy: eventRealized, fee_jpy: eventFee, funding_jpy: eventFunding, lifecycle };
         snapshots.push(ledger);
         execution.push(ledger);
         if (event.kind === "PREEMPTION_EXIT") preemptions.push(ledger);
