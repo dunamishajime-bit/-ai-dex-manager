@@ -18,13 +18,17 @@ class CompletedH1SnapshotCache {
     const key = `${symbol}|1h|${limit}`;
     const cached = this.entries.get(key);
     if (cached?.boundary === boundary) return cached.rows;
-    const pending = this.inFlight.get(key);
+    const requestKey = `${key}|${boundary}`;
+    const pending = this.inFlight.get(requestKey);
     if (pending) return pending;
     const request = loader().then((rows) => {
-      this.entries.set(key, { boundary, rows });
+      const current = this.entries.get(key);
+      // A slower request from an older candle must never replace a newer
+      // completed snapshot after a rollover.
+      if (!current || boundary >= current.boundary) this.entries.set(key, { boundary, rows });
       return rows;
-    }).finally(() => this.inFlight.delete(key));
-    this.inFlight.set(key, request);
+    }).finally(() => this.inFlight.delete(requestKey));
+    this.inFlight.set(requestKey, request);
     return request;
   }
 

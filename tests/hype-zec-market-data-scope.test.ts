@@ -52,3 +52,34 @@ test("HYPE-only TREND market data never depends on ZEC or legacy timeframes", as
   assert.equal(data.zec15m.length, 0);
   assert.equal(data.zec1m.length, 0);
 });
+
+test("HYPE TREND coalesces overlapping same-candle loads and refreshes after rollover", async () => {
+  let now = Date.UTC(2026, 9, 1, 3, 30, 0);
+  const calls: Array<[string, string, number]> = [];
+  const client = {
+    getKlines: async (symbol: string, interval: string, limit: number) => {
+      calls.push([symbol, interval, limit]);
+      return rows(now, 60 * 60_000);
+    },
+  };
+  const provider = new HypeZecAsterMarketDataProvider(client as never, {
+    now: () => now,
+    signalMode: "TREND",
+    symbols: ["HYPEUSDT"],
+    oneHourLimit: 360,
+  });
+
+  await Promise.all([provider.load(), provider.load()]);
+  assert.deepEqual(calls.map(([symbol, interval]) => [symbol, interval]), [
+    ["BTCUSDT", "1h"],
+    ["HYPEUSDT", "1h"],
+  ]);
+
+  now += 15 * 60_000;
+  await provider.load();
+  assert.equal(calls.length, 2, "unchanged completed candle must remain cached");
+
+  now += 45 * 60_000;
+  await provider.load();
+  assert.equal(calls.length, 4, "a new completed-candle boundary must fetch fresh data");
+});

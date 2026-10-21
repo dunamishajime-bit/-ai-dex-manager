@@ -54,6 +54,34 @@ test("reuses completed H1 snapshots inside one boundary and refreshes only at th
   await provider.load();
   assert.equal(calls,expected*2);
 });
+test("does not reuse an in-flight H1 request across a completed-candle rollover", async () => {
+  let now = 200 * H + 30_000;
+  let calls = 0;
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => { release = resolve; });
+  const client = {
+    getKlines: async (symbol: string) => {
+      calls += 1;
+      const requestedNow = now;
+      await gate;
+      const decisionTs = Math.floor(requestedNow / H) * H;
+      return Array.from({ length: 100 }, (_, i) => k((decisionTs - H) - ((99 - i) * H)));
+    },
+  };
+  const provider = new IdlePriorityAsterMarketDataProvider(client as any, { now: () => now, requestSpacingMs: 0 });
+  const expected = 1 + Object.keys(IDLE_PRIORITY_SHORT_POLICY.routes).length + Object.keys(IDLE_RESIDUAL_LONG_POLICY.routes).length;
+  const first = provider.load();
+  await Promise.resolve();
+  now = 201 * H + 30_000;
+  const second = provider.load();
+  await Promise.resolve();
+  assert.equal(calls, 2, "the new boundary must not await the old boundary's in-flight request");
+  release();
+  const [oldSnapshot, newSnapshot] = await Promise.all([first, second]);
+  assert.equal(oldSnapshot.decisionTs, 200 * H);
+  assert.equal(newSnapshot.decisionTs, 201 * H);
+  assert.equal(calls, expected * 2);
+});
 test("invalid H1 snapshots are evicted so a later read can recover",async()=>{
   const now=200*H+30_000;
   let invalid=true;

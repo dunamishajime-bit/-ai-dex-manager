@@ -1,6 +1,9 @@
 import { AsterV3Client, type AsterKline } from "./aster-v3-client";
 import type { HypeZecCandle } from "./hype-zec-long-sleeves";
 
+const MINUTE = 60_000;
+const HOUR = 60 * MINUTE;
+
 export interface HypeZecLongMarketData {
   btc15m: HypeZecCandle[];
   btc1h: HypeZecCandle[];
@@ -33,10 +36,17 @@ function normalize(rows: AsterKline[], symbol: string, intervalMs: number, now: 
 }
 
 export class HypeZecAsterMarketDataProvider {
+  private completedSnapshot?: { boundary: number; value: HypeZecLongMarketData };
+  private readonly inFlight = new Map<number, Promise<HypeZecLongMarketData>>();
+
   constructor(private readonly client: AsterV3Client, private readonly options: { fifteenMinuteLimit?: number; oneHourLimit?: number; oneMinuteLimit?: number; now?: () => number; signalMode?: "LEGACY" | "TREND"; symbols?: ReadonlyArray<"HYPEUSDT" | "ZECUSDT"> } = {}) {}
 
-  async load(): Promise<HypeZecLongMarketData> {
-    const now = (this.options.now || Date.now)();
+  private completedCandleBoundary(now: number) {
+    const intervalMs = this.options.signalMode === "TREND" ? HOUR : MINUTE;
+    return Math.floor(now / intervalMs) * intervalMs;
+  }
+
+  private async loadUncached(now: number): Promise<HypeZecLongMarketData> {
     const fifteenLimit = Math.max(80, Math.min(1500, this.options.fifteenMinuteLimit ?? 240));
     const oneHourLimit = Math.max(300, Math.min(1500, this.options.oneHourLimit ?? 360));
     const oneLimit = Math.max(30, Math.min(1500, this.options.oneMinuteLimit ?? 240));
@@ -65,5 +75,26 @@ export class HypeZecAsterMarketDataProvider {
       zec15m: optional(zec15, "ZECUSDT:15m", 15 * 60_000),
       zec1m: optional(zec1, "ZECUSDT:1m", 60_000),
     };
+  }
+
+  async load(): Promise<HypeZecLongMarketData> {
+    const now = (this.options.now || Date.now)();
+    const boundary = this.completedCandleBoundary(now);
+    if (this.completedSnapshot?.boundary === boundary) return this.completedSnapshot.value;
+
+    const pending = this.inFlight.get(boundary);
+    if (pending) return pending;
+
+    const request = this.loadUncached(now).then((value) => {
+      const current = this.completedSnapshot;
+      // A slower request from an older candle must never replace a newer
+      // completed snapshot after a rollover.
+      if (!current || boundary >= current.boundary) this.completedSnapshot = { boundary, value };
+      return value;
+    }).finally(() => {
+      this.inFlight.delete(boundary);
+    });
+    this.inFlight.set(boundary, request);
+    return request;
   }
 }
