@@ -1,6 +1,6 @@
 export type Gate = { key:string; label:string; state:'OK'|'NO'|'UNKNOWN'; actual?:number|string; required?:number|string; detail:string; kind?:'signal'|'execution'|'reference'|'shadow'; progress?:number };
 import type { RankingPricePreview } from './realtime-ranking-preview';
-export type RankRow = { id:string; symbol:string; logic:string; logicName?:string; side:string; score:number|null; gates:Gate[]; reason:string; fresh:boolean; checkedAt:number; rank?:number; previewRank?:number; preview?:RankingPricePreview; href?:string };
+export type RankRow = { id:string; symbol:string; logic:string; logicName?:string; side:string; score:number|null; scoreSource?:'gate'|'v4-native-display'; gates:Gate[]; reason:string; fresh:boolean; checkedAt:number; rank?:number; previewRank?:number; preview?:RankingPricePreview; href?:string };
 export function logicNameForRuntimeLogic(logic:string){
  switch(logic){
   case 'V12': return 'V12 V4';
@@ -41,7 +41,7 @@ export function updateFetClock(gates:Gate[],now:number){const entry=now-now%3600
 export function fetObservationExpiry(at:number,ttl:number){const hour=Math.floor(at/3600000)*3600000,cutoff=hour+FET_POLICY.liveEntryWindowMs+1;return Math.min(at+ttl,hour+3600000,at<cutoff?cutoff:Infinity);}
 export function currentFetGates(gates:Gate[],checkedAt:number,now:number){return updateFetClock(gates,now).map(g=>Math.floor(checkedAt/3600000)!==Math.floor(now/3600000)&&(g.kind!=='execution'||g.key==='data')?{...g,state:'UNKNOWN' as const,detail:'新しい確定足の観測更新待ち（前回値）'}:g);}
 export function currentRankRow(row:RankRow,now:number):RankRow{
- if(row.logic!=='FET')return row.gates.length?{...row,score:gateScore(row.gates,row.fresh)}:row;
+ if(row.logic!=='FET')return row.scoreSource==='v4-native-display'||!row.gates.length?row:{...row,score:gateScore(row.gates,row.fresh),scoreSource:'gate'};
  const fresh=row.fresh&&Math.floor(row.checkedAt/3600000)===Math.floor(now/3600000),gates=currentFetGates(row.gates,row.checkedAt,now);
  return {...row,fresh,gates,score:gateScore(gates,fresh),rank:fresh?row.rank:undefined,reason:fresh?row.reason:'新しい確定足の観測更新待ち'};
 }
