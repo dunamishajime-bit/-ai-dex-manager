@@ -480,12 +480,45 @@ async function systemctl(args, tolerateInactive = false) {
     }
 }
 
+function parseSystemdProperties(output) {
+    const properties = {};
+    for (const line of String(output || "").split(/\r?\n/)) {
+        const separator = line.indexOf("=");
+        if (separator <= 0) continue;
+        properties[line.slice(0, separator)] = line.slice(separator + 1);
+    }
+    return properties;
+}
+
 async function inspectService(unit) {
-    const activeState = await systemctl(["show", unit, "--property=ActiveState", "--value", "--no-pager"]);
-    const mainPidText = await systemctl(["show", unit, "--property=MainPID", "--value", "--no-pager"]);
-    const mainPid = Number(mainPidText);
+    const raw = await systemctl([
+        "show",
+        unit,
+        "--property=ActiveState",
+        "--property=MainPID",
+        "--property=Result",
+        "--property=ExecMainCode",
+        "--property=ExecMainStatus",
+        "--no-pager",
+    ]);
+    const properties = parseSystemdProperties(raw);
+    const mainPid = Number(properties.MainPID);
     if (!Number.isInteger(mainPid) || mainPid < 0) throw new Error("systemd MainPID is invalid");
-    return { active: activeState === "active", mainPid };
+    return {
+        active: properties.ActiveState === "active",
+        mainPid,
+        result: String(properties.Result || ""),
+        execMainCode: String(properties.ExecMainCode || ""),
+        execMainStatus: Number(properties.ExecMainStatus),
+    };
+}
+
+function isFatalFailClosedService(service) {
+    return service?.active === false
+        && service?.mainPid === 0
+        && service?.result === "exit-code"
+        && service?.execMainCode === "exited"
+        && service?.execMainStatus === 2;
 }
 
 async function processInfo(pid) {
@@ -573,9 +606,22 @@ async function evaluateRunner(config, runner, state, now) {
     if (runner.key === "V52" && await markerExists(paths.stopMarker)) {
         return { result: decision("NOOP", "V52 intentional stop marker is present", runner), attempts, clearAttempts: true };
     }
+    const service = await inspectService(runner.unit);
+    if (isFatalFailClosedService(service)) {
+        const reason = runner.key === "V12_V4" ? "V4_FATAL_FAIL_CLOSED" : "RUNNER_FATAL_FAIL_CLOSED";
+        return {
+            result: decision("HOLD_FAIL_CLOSED", reason, runner, {
+                fatalFailClosed: true,
+                serviceResult: service.result,
+                execMainCode: service.execMainCode,
+                execMainStatus: service.execMainStatus,
+            }),
+            attempts,
+            clearAttempts: false,
+        };
+    }
     const heartbeat = await readHeartbeat(config, runner, now);
     if (!heartbeat.present) return { result: decision("RESTART", "heartbeat is missing", runner), attempts };
-    const service = await inspectService(runner.unit);
     const process = await processInfo(service.mainPid);
     const identityHealthy = service.active && service.mainPid > 0 && process.cwd === runner.expectedCwd && commandMatches(config, runner, process.command);
     if (!identityHealthy) {
@@ -983,6 +1029,17 @@ function selfTest() {
     if (!heartbeatModeAllowed({ mode: "CANARY", liveEnabled: true, limitedLive: true, safetyState: "HEALTHY" }, "V12_V4")) throw new Error("limited V4 canary heartbeat self-test failed");
     if (heartbeatModeAllowed({ mode: "CANARY", liveEnabled: true, limitedLive: true, safetyState: "HEALTHY" }, "PENGU_V8")) throw new Error("limited V4 canary scope self-test failed");
     if (heartbeatModeAllowed({ mode: "CANARY", liveEnabled: true, limitedLive: false, safetyState: "HEALTHY" }, "V12_V4")) throw new Error("unattested canary heartbeat self-test failed");
+    const fatalService = {
+        active: false,
+        mainPid: 0,
+        result: "exit-code",
+        execMainCode: "exited",
+        execMainStatus: 2,
+    };
+    if (!isFatalFailClosedService(fatalService) || isFatalFailClosedService({ ...fatalService, execMainStatus: 1 })) {
+        throw new Error("fatal fail-closed service self-test failed");
+    }
+    console.log("DISDEX_CURRENT_WATCHDOG_FATAL_FAIL_CLOSED_SELFTEST_PASS");
     console.log("DISDEX_CURRENT_WATCHDOG_LIMITED_V4_CANARY_SELFTEST_PASS");
     console.log("DISDEX_CURRENT_WATCHDOG_OPERATOR_ACTIVATION_GATE_SELFTEST_PASS");
     const source = readFileSync(new URL(import.meta.url), "utf8");
