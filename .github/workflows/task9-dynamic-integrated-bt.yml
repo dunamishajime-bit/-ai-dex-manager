@@ -57,5 +57,7 @@ jobs:
         run: npx eslint scripts/dd-reduction/run-task9-dynamic.ts tests/dd-reduction-task9-dynamic-cases.test.ts scripts/dd-reduction/verify-task9-dynamic-artifacts.ts tests/dd-reduction-dynamic-artifacts.test.ts
       - name: Verify compact research artifacts and fail-closed classifications
         run: npm run dd:reduction:artifacts
+      - name: Verify independent 35-symbol modeled BT report metadata
+        run: python scripts/dd-reduction/verify-task9-sourcebacked-5m-artifacts.py
       - name: Check patch whitespace
         run: git diff --check

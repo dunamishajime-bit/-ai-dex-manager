@@ -1,0 +1,1073 @@
+{
+  "status": "COMPLETE_REPRODUCIBLE_RESEARCH_ONLY_NONCANONICAL",
+  "productionChanges": 0,
+  "liveChanges": 0,
+  "sourceArchive": {
+    "symbolCount": 35,
+    "zipCount": 422,
+    "archiveSha256": "10cdc48705a6f9e310cd0aecc95ce781af24325b1a99c2eb9aaefe3bd2953934",
+    "zipIntegrity": "ALL_ZIP_SHA_AND_CRC_PASS"
+  },
+  "baseline": {
+    "10": {
+      "finalEquityJpy": 222818966.87803495,
+      "profitFactor": 3.4587962777009813,
+      "maximumMtmDdPct": -15.62063681288941,
+      "winRate": 0.7236641221374046,
+      "closedTrades": 1310,
+      "accounting": "PASS",
+      "strategyTrades": {
+        "FET": 8,
+        "HYPE_LONG": 34,
+        "IDLE": 71,
+        "PENGU": 67,
+        "Q102": 182,
+        "RESIDUAL": 29,
+        "V12": 832,
+        "V52": 87
+      },
+      "strategyPnlJpy": {
+        "FET": 4637397.251266362,
+        "HYPE_LONG": 15044557.211347325,
+        "IDLE": 13290647.811908718,
+        "PENGU": 20447554.007752895,
+        "Q102": 7549341.297125514,
+        "RESIDUAL": -5556009.716164105,
+        "V12": 133047574.20283018,
+        "V52": 36793385.88811815
+      },
+      "originalWinnerStopped": 0,
+      "originalLoserStopped": 0,
+      "stopProposalsBeforeAdmission": 0,
+      "cooldownMode": "NOT_EVALUATED_PREALLOCATION_ONLY",
+      "cooldownRejected": null,
+      "eligible": 0,
+      "priceDataGaps": 0,
+      "internalDataGaps": 0,
+      "oos": {
+        "boundary_utc": "2026-04-22T12:00:00+00:00",
+        "trades": 329,
+        "known_pnl_trades": 329,
+        "unsettled_trades": 0,
+        "crossing_trades": 2,
+        "net_pnl_jpy": 180147461.35642645,
+        "profit_factor": 3.593058261272435,
+        "win_rate": 0.7386018237082067,
+        "max_cumulative_pnl_drawdown_jpy": -15738674.030424178,
+        "cost_bps": 10
+      },
+      "ledgerPath": "C:\\Users\\dis\\Desktop\\DisDex_AI_Files\\01_BT_Research\\2026-10-21_task9_full8_5m_replay_fixed\\engine\\BASELINE\\BASELINE\\10bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_10BPS\\portfolio-trades.jsonl"
+    },
+    "30": {
+      "finalEquityJpy": 124289206.81827945,
+      "profitFactor": 3.0785603081685435,
+      "maximumMtmDdPct": -16.78776877493442,
+      "winRate": 0.6954858454475898,
+      "closedTrades": 1307,
+      "accounting": "PASS",
+      "strategyTrades": {
+        "FET": 8,
+        "HYPE_LONG": 34,
+        "IDLE": 74,
+        "PENGU": 67,
+        "Q102": 181,
+        "RESIDUAL": 28,
+        "V12": 828,
+        "V52": 87
+      },
+      "strategyPnlJpy": {
+        "FET": 3627863.560846476,
+        "HYPE_LONG": 3100088.3145856024,
+        "IDLE": 8690427.25714448,
+        "PENGU": 13500724.707001911,
+        "Q102": 1351073.7006106582,
+        "RESIDUAL": -3333600.181771089,
+        "V12": 76938689.01056731,
+        "V52": 21980455.437175814
+      },
+      "originalWinnerStopped": 0,
+      "originalLoserStopped": 0,
+      "stopProposalsBeforeAdmission": 0,
+      "cooldownMode": "NOT_EVALUATED_PREALLOCATION_ONLY",
+      "cooldownRejected": null,
+      "eligible": 0,
+      "priceDataGaps": 0,
+      "internalDataGaps": 0,
+      "oos": {
+        "boundary_utc": "2026-04-22T12:00:00+00:00",
+        "trades": 330,
+        "known_pnl_trades": 330,
+        "unsettled_trades": 0,
+        "crossing_trades": 2,
+        "net_pnl_jpy": 106310615.72936173,
+        "profit_factor": 3.214635302313329,
+        "win_rate": 0.696969696969697,
+        "max_cumulative_pnl_drawdown_jpy": -8833168.122000292,
+        "cost_bps": 30
+      },
+      "ledgerPath": "C:\\Users\\dis\\Desktop\\DisDex_AI_Files\\01_BT_Research\\2026-10-21_task9_full8_5m_replay_fixed\\engine\\BASELINE\\BASELINE\\30bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_30BPS\\portfolio-trades.jsonl"
+    }
+  },
+  "candidateResults": {
+    "V12_SHORT_PCT2P0_12H_MFE1P0_R12": {
+      "rule": {
+        "id": "V12_SHORT_PCT2P0_12H_MFE1P0_R12",
+        "strategy": "V12",
+        "sides": [
+          "SHORT"
+        ],
+        "stop_pct": 0.02,
+        "arm_hours": 12,
+        "mfe_gate_pct": 0.01,
+        "reentry_hours": 12
+      },
+      "results": {
+        "10": {
+          "finalEquityJpy": 207397021.98841032,
+          "profitFactor": 3.2452566730725083,
+          "maximumMtmDdPct": -14.8413276097769,
+          "winRate": 0.7033383915022762,
+          "closedTrades": 1318,
+          "accounting": "PASS",
+          "strategyTrades": {
+            "FET": 8,
+            "HYPE_LONG": 38,
+            "IDLE": 71,
+            "PENGU": 67,
+            "Q102": 182,
+            "RESIDUAL": 29,
+            "V12": 836,
+            "V52": 87
+          },
+          "strategyPnlJpy": {
+            "FET": 4637397.251266362,
+            "HYPE_LONG": 10041165.160593577,
+            "IDLE": 12627406.581561515,
+            "PENGU": 20047466.43225571,
+            "Q102": 7271804.2384853875,
+            "RESIDUAL": -5058008.618661417,
+            "V12": 124168623.4074986,
+            "V52": 35995228.318580635
+          },
+          "originalWinnerStopped": 0,
+          "originalLoserStopped": 0,
+          "stopProposalsBeforeAdmission": 80,
+          "cooldownMode": "NOT_EVALUATED_PREALLOCATION_ONLY",
+          "cooldownRejected": null,
+          "eligible": 785,
+          "priceDataGaps": 0,
+          "internalDataGaps": 0,
+          "oos": {
+            "boundary_utc": "2026-04-22T12:00:00+00:00",
+            "trades": 333,
+            "known_pnl_trades": 333,
+            "unsettled_trades": 0,
+            "crossing_trades": 2,
+            "net_pnl_jpy": 169591782.39064938,
+            "profit_factor": 3.3826015456019354,
+            "win_rate": 0.7327327327327328,
+            "max_cumulative_pnl_drawdown_jpy": -18022904.80388458,
+            "cost_bps": 10
+          },
+          "ledgerPath": "C:\\Users\\dis\\Desktop\\DisDex_AI_Files\\01_BT_Research\\2026-10-21_task9_full8_5m_replay_fixed\\engine\\V12_SHORT\\RERUN_V12_SHORT_PCT2P0_12H_MFE1P0_R12_10\\10bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_10BPS\\portfolio-trades.jsonl",
+          "admittedStopTradeCount": 61,
+          "newlyAdmittedCandidateCount": 21,
+          "noLongerAdmittedCandidateCount": 13,
+          "baselineComparison": {
+            "ddImprovementPercentagePoints": 0.7793092,
+            "finalEquityRetention": 0.9307871088996379,
+            "profitFactorRetention": 0.9382618727777716,
+            "tradeDelta": 8,
+            "accountingPass": true
+          }
+        },
+        "30": {
+          "finalEquityJpy": 92139869.86822365,
+          "profitFactor": 2.7669221226659957,
+          "maximumMtmDdPct": -15.572718162888243,
+          "winRate": 0.6760456273764258,
+          "closedTrades": 1315,
+          "accounting": "PASS",
+          "strategyTrades": {
+            "FET": 8,
+            "HYPE_LONG": 37,
+            "IDLE": 75,
+            "PENGU": 67,
+            "Q102": 181,
+            "RESIDUAL": 28,
+            "V12": 832,
+            "V52": 87
+          },
+          "strategyPnlJpy": {
+            "FET": 3482181.244762008,
+            "HYPE_LONG": 3444171.5676077874,
+            "IDLE": 2240730.5591663998,
+            "PENGU": 10368419.070714142,
+            "Q102": 1175347.0414957004,
+            "RESIDUAL": -2361950.4218928576,
+            "V12": 56336805.2333658,
+            "V52": 18624828.417368717
+          },
+          "originalWinnerStopped": 0,
+          "originalLoserStopped": 0,
+          "stopProposalsBeforeAdmission": 80,
+          "cooldownMode": "NOT_EVALUATED_PREALLOCATION_ONLY",
+          "cooldownRejected": null,
+          "eligible": 785,
+          "priceDataGaps": 0,
+          "internalDataGaps": 0,
+          "oos": {
+            "boundary_utc": "2026-04-22T12:00:00+00:00",
+            "trades": 334,
+            "known_pnl_trades": 334,
+            "unsettled_trades": 0,
+            "crossing_trades": 2,
+            "net_pnl_jpy": 79723760.44535668,
+            "profit_factor": 2.907225850097488,
+            "win_rate": 0.6916167664670658,
+            "max_cumulative_pnl_drawdown_jpy": -7438879.955291003,
+            "cost_bps": 30
+          },
+          "ledgerPath": "C:\\Users\\dis\\Desktop\\DisDex_AI_Files\\01_BT_Research\\2026-10-21_task9_full8_5m_replay_fixed\\engine\\V12_SHORT\\RERUN_V12_SHORT_PCT2P0_12H_MFE1P0_R12_30\\30bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_30BPS\\portfolio-trades.jsonl",
+          "admittedStopTradeCount": 60,
+          "newlyAdmittedCandidateCount": 23,
+          "noLongerAdmittedCandidateCount": 15,
+          "baselineComparison": {
+            "ddImprovementPercentagePoints": 1.21505061,
+            "finalEquityRetention": 0.7413344426836624,
+            "profitFactorRetention": 0.898771453436966,
+            "tradeDelta": 8,
+            "accountingPass": true
+          }
+        }
+      }
+    },
+    "V12_SHORT_PCT1P5_6H_MFE0P5_R12": {
+      "rule": {
+        "id": "V12_SHORT_PCT1P5_6H_MFE0P5_R12",
+        "strategy": "V12",
+        "sides": [
+          "SHORT"
+        ],
+        "stop_pct": 0.015,
+        "arm_hours": 6,
+        "mfe_gate_pct": 0.005,
+        "reentry_hours": 12
+      },
+      "results": {
+        "10": {
+          "finalEquityJpy": 198385700.56507924,
+          "profitFactor": 3.092240160115196,
+          "maximumMtmDdPct": -15.493990702417793,
+          "winRate": 0.7028051554207733,
+          "closedTrades": 1319,
+          "accounting": "PASS",
+          "strategyTrades": {
+            "FET": 8,
+            "HYPE_LONG": 35,
+            "IDLE": 71,
+            "PENGU": 67,
+            "Q102": 182,
+            "RESIDUAL": 29,
+            "V12": 840,
+            "V52": 87
+          },
+          "strategyPnlJpy": {
+            "FET": 4637397.251266362,
+            "HYPE_LONG": 10509821.195168208,
+            "IDLE": 12849239.021417396,
+            "PENGU": 20187503.808889292,
+            "Q102": 7360091.827967676,
+            "RESIDUAL": -5072007.917814708,
+            "V12": 113804376.69030502,
+            "V52": 36169774.175067864
+          },
+          "originalWinnerStopped": 0,
+          "originalLoserStopped": 0,
+          "stopProposalsBeforeAdmission": 67,
+          "cooldownMode": "NOT_EVALUATED_PREALLOCATION_ONLY",
+          "cooldownRejected": null,
+          "eligible": 785,
+          "priceDataGaps": 0,
+          "internalDataGaps": 0,
+          "oos": {
+            "boundary_utc": "2026-04-22T12:00:00+00:00",
+            "trades": 330,
+            "known_pnl_trades": 330,
+            "unsettled_trades": 0,
+            "crossing_trades": 2,
+            "net_pnl_jpy": 159330205.51338038,
+            "profit_factor": 3.1740761181042285,
+            "win_rate": 0.7181818181818181,
+            "max_cumulative_pnl_drawdown_jpy": -17409851.73402019,
+            "cost_bps": 10
+          },
+          "ledgerPath": "C:\\Users\\dis\\Desktop\\DisDex_AI_Files\\01_BT_Research\\2026-10-21_task9_full8_5m_replay_fixed\\engine\\V12_SHORT\\RERUN_V12_SHORT_PCT1P5_6H_MFE0P5_R12_10\\10bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_10BPS\\portfolio-trades.jsonl",
+          "admittedStopTradeCount": 57,
+          "newlyAdmittedCandidateCount": 19,
+          "noLongerAdmittedCandidateCount": 10,
+          "baselineComparison": {
+            "ddImprovementPercentagePoints": 0.12664611,
+            "finalEquityRetention": 0.890344764382963,
+            "profitFactorRetention": 0.8940220561849828,
+            "tradeDelta": 9,
+            "accountingPass": true
+          }
+        },
+        "30": {
+          "finalEquityJpy": 85484302.75836179,
+          "profitFactor": 2.568548141202453,
+          "maximumMtmDdPct": -16.71337301828778,
+          "winRate": 0.6744890234670704,
+          "closedTrades": 1321,
+          "accounting": "PASS",
+          "strategyTrades": {
+            "FET": 8,
+            "HYPE_LONG": 36,
+            "IDLE": 75,
+            "PENGU": 67,
+            "Q102": 181,
+            "RESIDUAL": 28,
+            "V12": 839,
+            "V52": 87
+          },
+          "strategyPnlJpy": {
+            "FET": 3516745.1825749995,
+            "HYPE_LONG": 2825379.1974945744,
+            "IDLE": 2242064.403196734,
+            "PENGU": 10619543.525560994,
+            "Q102": 1290639.2354074428,
+            "RESIDUAL": -2386647.201473783,
+            "V12": 49606993.1295123,
+            "V52": 18769603.299693838
+          },
+          "originalWinnerStopped": 0,
+          "originalLoserStopped": 0,
+          "stopProposalsBeforeAdmission": 67,
+          "cooldownMode": "NOT_EVALUATED_PREALLOCATION_ONLY",
+          "cooldownRejected": null,
+          "eligible": 785,
+          "priceDataGaps": 0,
+          "internalDataGaps": 0,
+          "oos": {
+            "boundary_utc": "2026-04-22T12:00:00+00:00",
+            "trades": 332,
+            "known_pnl_trades": 332,
+            "unsettled_trades": 0,
+            "crossing_trades": 2,
+            "net_pnl_jpy": 72575880.51215617,
+            "profit_factor": 2.658980076598617,
+            "win_rate": 0.677710843373494,
+            "max_cumulative_pnl_drawdown_jpy": -6498387.299050376,
+            "cost_bps": 30
+          },
+          "ledgerPath": "C:\\Users\\dis\\Desktop\\DisDex_AI_Files\\01_BT_Research\\2026-10-21_task9_full8_5m_replay_fixed\\engine\\V12_SHORT\\RERUN_V12_SHORT_PCT1P5_6H_MFE0P5_R12_30\\30bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_30BPS\\portfolio-trades.jsonl",
+          "admittedStopTradeCount": 57,
+          "newlyAdmittedCandidateCount": 25,
+          "noLongerAdmittedCandidateCount": 11,
+          "baselineComparison": {
+            "ddImprovementPercentagePoints": 0.07439576,
+            "finalEquityRetention": 0.6877854074919517,
+            "profitFactorRetention": 0.8343341965356852,
+            "tradeDelta": 14,
+            "accountingPass": true
+          }
+        }
+      }
+    },
+    "V12_LONG_PCT2P0_12H_MFE1P0_R12": {
+      "rule": {
+        "id": "V12_LONG_PCT2P0_12H_MFE1P0_R12",
+        "strategy": "V12",
+        "sides": [
+          "LONG"
+        ],
+        "stop_pct": 0.02,
+        "arm_hours": 12,
+        "mfe_gate_pct": 0.01,
+        "reentry_hours": 12
+      },
+      "results": {
+        "10": {
+          "finalEquityJpy": 216573603.74219185,
+          "profitFactor": 3.4569928317749166,
+          "maximumMtmDdPct": -15.616362981841592,
+          "winRate": 0.7186311787072244,
+          "closedTrades": 1315,
+          "accounting": "PASS",
+          "strategyTrades": {
+            "FET": 8,
+            "HYPE_LONG": 34,
+            "IDLE": 74,
+            "PENGU": 67,
+            "Q102": 182,
+            "RESIDUAL": 29,
+            "V12": 834,
+            "V52": 87
+          },
+          "strategyPnlJpy": {
+            "FET": 4637397.251266362,
+            "HYPE_LONG": 14556644.34260921,
+            "IDLE": 12976198.35587213,
+            "PENGU": 20172316.54050774,
+            "Q102": 7375876.051862528,
+            "RESIDUAL": -5295296.822684615,
+            "V12": 128335546.01185654,
+            "V52": 36220292.79701972
+          },
+          "originalWinnerStopped": 0,
+          "originalLoserStopped": 0,
+          "stopProposalsBeforeAdmission": 19,
+          "cooldownMode": "NOT_EVALUATED_PREALLOCATION_ONLY",
+          "cooldownRejected": null,
+          "eligible": 173,
+          "priceDataGaps": 0,
+          "internalDataGaps": 0,
+          "oos": {
+            "boundary_utc": "2026-04-22T12:00:00+00:00",
+            "trades": 329,
+            "known_pnl_trades": 329,
+            "unsettled_trades": 0,
+            "crossing_trades": 2,
+            "net_pnl_jpy": 176496313.45251596,
+            "profit_factor": 3.6052314968699783,
+            "win_rate": 0.7386018237082067,
+            "max_cumulative_pnl_drawdown_jpy": -15404827.192258,
+            "cost_bps": 10
+          },
+          "ledgerPath": "C:\\Users\\dis\\Desktop\\DisDex_AI_Files\\01_BT_Research\\2026-10-21_task9_full8_5m_replay_fixed\\engine\\V12_LONG\\RERUN_V12_LONG_PCT2P0_12H_MFE1P0_R12_10\\10bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_10BPS\\portfolio-trades.jsonl",
+          "admittedStopTradeCount": 12,
+          "newlyAdmittedCandidateCount": 6,
+          "noLongerAdmittedCandidateCount": 1,
+          "baselineComparison": {
+            "ddImprovementPercentagePoints": 0.00427383,
+            "finalEquityRetention": 0.9719711332327394,
+            "profitFactorRetention": 0.9994785914574699,
+            "tradeDelta": 5,
+            "accountingPass": true
+          }
+        },
+        "30": {
+          "finalEquityJpy": 92906606.36310963,
+          "profitFactor": 2.790768154393036,
+          "maximumMtmDdPct": -16.804603146297215,
+          "winRate": 0.6877380045696877,
+          "closedTrades": 1313,
+          "accounting": "PASS",
+          "strategyTrades": {
+            "FET": 8,
+            "HYPE_LONG": 35,
+            "IDLE": 78,
+            "PENGU": 67,
+            "Q102": 181,
+            "RESIDUAL": 28,
+            "V12": 829,
+            "V52": 87
+          },
+          "strategyPnlJpy": {
+            "FET": 3520934.430823164,
+            "HYPE_LONG": 1593031.2332544655,
+            "IDLE": 2308163.9856221904,
+            "PENGU": 10738061.642839544,
+            "Q102": 1248616.1608664878,
+            "RESIDUAL": -2464943.321638758,
+            "V12": 58172611.955753505,
+            "V52": 18954254.690932747
+          },
+          "originalWinnerStopped": 0,
+          "originalLoserStopped": 0,
+          "stopProposalsBeforeAdmission": 19,
+          "cooldownMode": "NOT_EVALUATED_PREALLOCATION_ONLY",
+          "cooldownRejected": null,
+          "eligible": 173,
+          "priceDataGaps": 0,
+          "internalDataGaps": 0,
+          "oos": {
+            "boundary_utc": "2026-04-22T12:00:00+00:00",
+            "trades": 331,
+            "known_pnl_trades": 331,
+            "unsettled_trades": 0,
+            "crossing_trades": 2,
+            "net_pnl_jpy": 80073642.80196175,
+            "profit_factor": 2.961278739162251,
+            "win_rate": 0.6948640483383686,
+            "max_cumulative_pnl_drawdown_jpy": -6703366.7174269855,
+            "cost_bps": 30
+          },
+          "ledgerPath": "C:\\Users\\dis\\Desktop\\DisDex_AI_Files\\01_BT_Research\\2026-10-21_task9_full8_5m_replay_fixed\\engine\\V12_LONG\\RERUN_V12_LONG_PCT2P0_12H_MFE1P0_R12_30\\30bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_30BPS\\portfolio-trades.jsonl",
+          "admittedStopTradeCount": 11,
+          "newlyAdmittedCandidateCount": 10,
+          "noLongerAdmittedCandidateCount": 4,
+          "baselineComparison": {
+            "ddImprovementPercentagePoints": -0.01683437,
+            "finalEquityRetention": 0.7475034135421459,
+            "profitFactorRetention": 0.9065172921862567,
+            "tradeDelta": 6,
+            "accountingPass": true
+          }
+        }
+      }
+    },
+    "IDLE_ATR2P0_6H_MFE1P0_R12": {
+      "rule": {
+        "id": "IDLE_ATR2P0_6H_MFE1P0_R12",
+        "strategy": "IDLE",
+        "sides": [
+          "LONG",
+          "SHORT"
+        ],
+        "atr_mult": 2.0,
+        "atr_floor_pct": 0.01,
+        "atr_cap_pct": 0.05,
+        "arm_hours": 6,
+        "mfe_gate_pct": 0.01,
+        "reentry_hours": 12
+      },
+      "results": {
+        "10": {
+          "finalEquityJpy": 217759560.57008526,
+          "profitFactor": 3.614751227699105,
+          "maximumMtmDdPct": -15.610914015969268,
+          "winRate": 0.714828897338403,
+          "closedTrades": 1315,
+          "accounting": "PASS",
+          "strategyTrades": {
+            "FET": 8,
+            "HYPE_LONG": 34,
+            "IDLE": 74,
+            "PENGU": 67,
+            "Q102": 182,
+            "RESIDUAL": 30,
+            "V12": 832,
+            "V52": 88
+          },
+          "strategyPnlJpy": {
+            "FET": 4612199.784908347,
+            "HYPE_LONG": 14687318.83786305,
+            "IDLE": 9644505.525628185,
+            "PENGU": 19953554.7424377,
+            "Q102": 7300953.02204561,
+            "RESIDUAL": -403897.07204724464,
+            "V12": 128586675.58043309,
+            "V52": 35831958.930986024
+          },
+          "originalWinnerStopped": 0,
+          "originalLoserStopped": 0,
+          "stopProposalsBeforeAdmission": 190,
+          "cooldownMode": "NOT_EVALUATED_PREALLOCATION_ONLY",
+          "cooldownRejected": null,
+          "eligible": 694,
+          "priceDataGaps": 0,
+          "internalDataGaps": 0,
+          "oos": {
+            "boundary_utc": "2026-04-22T12:00:00+00:00",
+            "trades": 328,
+            "known_pnl_trades": 328,
+            "unsettled_trades": 0,
+            "crossing_trades": 2,
+            "net_pnl_jpy": 179602065.0062862,
+            "profit_factor": 3.8401346816742454,
+            "win_rate": 0.7378048780487805,
+            "max_cumulative_pnl_drawdown_jpy": -15468689.45167157,
+            "cost_bps": 10
+          },
+          "ledgerPath": "C:\\Users\\dis\\Desktop\\DisDex_AI_Files\\01_BT_Research\\2026-10-21_task9_full8_5m_replay_fixed\\engine\\IDLE\\RERUN_IDLE_ATR2P0_6H_MFE1P0_R12_10\\10bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_10BPS\\portfolio-trades.jsonl",
+          "admittedStopTradeCount": 23,
+          "newlyAdmittedCandidateCount": 10,
+          "noLongerAdmittedCandidateCount": 5,
+          "baselineComparison": {
+            "ddImprovementPercentagePoints": 0.0097228,
+            "finalEquityRetention": 0.9772936461431532,
+            "profitFactorRetention": 1.045089371410387,
+            "tradeDelta": 5,
+            "accountingPass": true
+          }
+        },
+        "30": {
+          "finalEquityJpy": 100497990.09052944,
+          "profitFactor": 2.938106116608687,
+          "maximumMtmDdPct": -16.801094107946966,
+          "winRate": 0.6846915460776847,
+          "closedTrades": 1313,
+          "accounting": "PASS",
+          "strategyTrades": {
+            "FET": 8,
+            "HYPE_LONG": 34,
+            "IDLE": 79,
+            "PENGU": 67,
+            "Q102": 181,
+            "RESIDUAL": 29,
+            "V12": 828,
+            "V52": 87
+          },
+          "strategyPnlJpy": {
+            "FET": 3409987.2174376566,
+            "HYPE_LONG": 2107915.0039687525,
+            "IDLE": 3097643.3601054107,
+            "PENGU": 10837118.509440647,
+            "Q102": 1238689.504156489,
+            "RESIDUAL": -607609.1931700781,
+            "V12": 62277313.05044295,
+            "V52": 19419502.721639387
+          },
+          "originalWinnerStopped": 0,
+          "originalLoserStopped": 0,
+          "stopProposalsBeforeAdmission": 190,
+          "cooldownMode": "NOT_EVALUATED_PREALLOCATION_ONLY",
+          "cooldownRejected": null,
+          "eligible": 694,
+          "priceDataGaps": 0,
+          "internalDataGaps": 0,
+          "oos": {
+            "boundary_utc": "2026-04-22T12:00:00+00:00",
+            "trades": 331,
+            "known_pnl_trades": 331,
+            "unsettled_trades": 0,
+            "crossing_trades": 2,
+            "net_pnl_jpy": 86799901.13197348,
+            "profit_factor": 3.096256516011624,
+            "win_rate": 0.6918429003021148,
+            "max_cumulative_pnl_drawdown_jpy": -7218660.2589491755,
+            "cost_bps": 30
+          },
+          "ledgerPath": "C:\\Users\\dis\\Desktop\\DisDex_AI_Files\\01_BT_Research\\2026-10-21_task9_full8_5m_replay_fixed\\engine\\IDLE\\RERUN_IDLE_ATR2P0_6H_MFE1P0_R12_30\\30bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_30BPS\\portfolio-trades.jsonl",
+          "admittedStopTradeCount": 26,
+          "newlyAdmittedCandidateCount": 10,
+          "noLongerAdmittedCandidateCount": 4,
+          "baselineComparison": {
+            "ddImprovementPercentagePoints": -0.01332533,
+            "finalEquityRetention": 0.8085817961447399,
+            "profitFactorRetention": 0.9543766639272324,
+            "tradeDelta": 6,
+            "accountingPass": true
+          }
+        }
+      }
+    },
+    "V12_SHORT_PCT2P25_12H_MFE1P0_R12": {
+      "rule": {
+        "id": "V12_SHORT_PCT2P25_12H_MFE1P0_R12",
+        "strategy": "V12",
+        "sides": [
+          "SHORT"
+        ],
+        "stop_pct": 0.0225,
+        "arm_hours": 12,
+        "mfe_gate_pct": 0.01,
+        "reentry_hours": 12
+      },
+      "results": {
+        "10": {
+          "finalEquityJpy": 207397494.74971855,
+          "profitFactor": 3.2020497275808433,
+          "maximumMtmDdPct": -14.79603474654827,
+          "winRate": 0.7068181818181818,
+          "closedTrades": 1320,
+          "accounting": "PASS",
+          "strategyTrades": {
+            "FET": 8,
+            "HYPE_LONG": 38,
+            "IDLE": 71,
+            "PENGU": 67,
+            "Q102": 182,
+            "RESIDUAL": 29,
+            "V12": 838,
+            "V52": 87
+          },
+          "strategyPnlJpy": {
+            "FET": 4637397.251266362,
+            "HYPE_LONG": 10086312.804670554,
+            "IDLE": 12765898.547525305,
+            "PENGU": 20130226.54373274,
+            "Q102": 7322053.549576218,
+            "RESIDUAL": -5112464.343923053,
+            "V12": 123756817.9922711,
+            "V52": 36124997.91168551
+          },
+          "originalWinnerStopped": 0,
+          "originalLoserStopped": 0,
+          "stopProposalsBeforeAdmission": 73,
+          "cooldownMode": "NOT_EVALUATED_PREALLOCATION_ONLY",
+          "cooldownRejected": null,
+          "eligible": 785,
+          "priceDataGaps": 0,
+          "internalDataGaps": 0,
+          "oos": {
+            "boundary_utc": "2026-04-22T12:00:00+00:00",
+            "trades": 333,
+            "known_pnl_trades": 333,
+            "unsettled_trades": 0,
+            "crossing_trades": 2,
+            "net_pnl_jpy": 169065025.60222015,
+            "profit_factor": 3.3292865481879237,
+            "win_rate": 0.7327327327327328,
+            "max_cumulative_pnl_drawdown_jpy": -18333686.826000586,
+            "cost_bps": 10
+          },
+          "ledgerPath": "C:\\Users\\dis\\Desktop\\DisDex_AI_Files\\01_BT_Research\\2026-10-21_task9_full8_5m_replay_fixed\\engine\\V12_SHORT\\RERUN_V12_SHORT_PCT2P25_12H_MFE1P0_R12_10\\10bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_10BPS\\portfolio-trades.jsonl",
+          "admittedStopTradeCount": 56,
+          "newlyAdmittedCandidateCount": 22,
+          "noLongerAdmittedCandidateCount": 12,
+          "baselineComparison": {
+            "ddImprovementPercentagePoints": 0.82460207,
+            "finalEquityRetention": 0.9307892306279397,
+            "profitFactorRetention": 0.9257699703866935,
+            "tradeDelta": 10,
+            "accountingPass": true
+          }
+        },
+        "30": {
+          "finalEquityJpy": 93335213.67258102,
+          "profitFactor": 2.743416866250476,
+          "maximumMtmDdPct": -15.729106196315158,
+          "winRate": 0.6790874524714829,
+          "closedTrades": 1315,
+          "accounting": "PASS",
+          "strategyTrades": {
+            "FET": 8,
+            "HYPE_LONG": 37,
+            "IDLE": 75,
+            "PENGU": 67,
+            "Q102": 181,
+            "RESIDUAL": 28,
+            "V12": 832,
+            "V52": 87
+          },
+          "strategyPnlJpy": {
+            "FET": 3501588.761964199,
+            "HYPE_LONG": 3517229.5843295557,
+            "IDLE": 2287801.988424924,
+            "PENGU": 10645823.2064566,
+            "Q102": 1226085.7935536504,
+            "RESIDUAL": -2420978.6331138457,
+            "V12": 56871093.35783771,
+            "V52": 18884748.36517976
+          },
+          "originalWinnerStopped": 0,
+          "originalLoserStopped": 0,
+          "stopProposalsBeforeAdmission": 73,
+          "cooldownMode": "NOT_EVALUATED_PREALLOCATION_ONLY",
+          "cooldownRejected": null,
+          "eligible": 785,
+          "priceDataGaps": 0,
+          "internalDataGaps": 0,
+          "oos": {
+            "boundary_utc": "2026-04-22T12:00:00+00:00",
+            "trades": 334,
+            "known_pnl_trades": 334,
+            "unsettled_trades": 0,
+            "crossing_trades": 2,
+            "net_pnl_jpy": 80543626.83664925,
+            "profit_factor": 2.8777545553760806,
+            "win_rate": 0.6916167664670658,
+            "max_cumulative_pnl_drawdown_jpy": -7698703.62528415,
+            "cost_bps": 30
+          },
+          "ledgerPath": "C:\\Users\\dis\\Desktop\\DisDex_AI_Files\\01_BT_Research\\2026-10-21_task9_full8_5m_replay_fixed\\engine\\V12_SHORT\\RERUN_V12_SHORT_PCT2P25_12H_MFE1P0_R12_30\\30bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_30BPS\\portfolio-trades.jsonl",
+          "admittedStopTradeCount": 55,
+          "newlyAdmittedCandidateCount": 23,
+          "noLongerAdmittedCandidateCount": 15,
+          "baselineComparison": {
+            "ddImprovementPercentagePoints": 1.05866258,
+            "finalEquityRetention": 0.7509518811962845,
+            "profitFactorRetention": 0.8911363077641163,
+            "tradeDelta": 8,
+            "accountingPass": true
+          }
+        }
+      },
+      "postHocExploratorySensitivity": true
+    },
+    "V12_SHORT_PCT2P5_12H_MFE1P0_R12": {
+      "rule": {
+        "id": "V12_SHORT_PCT2P5_12H_MFE1P0_R12",
+        "strategy": "V12",
+        "sides": [
+          "SHORT"
+        ],
+        "stop_pct": 0.025,
+        "arm_hours": 12,
+        "mfe_gate_pct": 0.01,
+        "reentry_hours": 12
+      },
+      "results": {
+        "10": {
+          "finalEquityJpy": 206915420.7361137,
+          "profitFactor": 3.213431227600294,
+          "maximumMtmDdPct": -14.79603474654827,
+          "winRate": 0.7063732928679818,
+          "closedTrades": 1318,
+          "accounting": "PASS",
+          "strategyTrades": {
+            "FET": 8,
+            "HYPE_LONG": 38,
+            "IDLE": 71,
+            "PENGU": 67,
+            "Q102": 182,
+            "RESIDUAL": 29,
+            "V12": 836,
+            "V52": 87
+          },
+          "strategyPnlJpy": {
+            "FET": 4637397.251266362,
+            "HYPE_LONG": 9998079.998285074,
+            "IDLE": 12675857.218033556,
+            "PENGU": 20097562.408193514,
+            "Q102": 7300597.124158348,
+            "RESIDUAL": -5081548.460235632,
+            "V12": 123554500.87162691,
+            "V52": 36059945.052810855
+          },
+          "originalWinnerStopped": 0,
+          "originalLoserStopped": 0,
+          "stopProposalsBeforeAdmission": 69,
+          "cooldownMode": "NOT_EVALUATED_PREALLOCATION_ONLY",
+          "cooldownRejected": null,
+          "eligible": 785,
+          "priceDataGaps": 0,
+          "internalDataGaps": 0,
+          "oos": {
+            "boundary_utc": "2026-04-22T12:00:00+00:00",
+            "trades": 333,
+            "known_pnl_trades": 333,
+            "unsettled_trades": 0,
+            "crossing_trades": 2,
+            "net_pnl_jpy": 168897419.3648199,
+            "profit_factor": 3.346992989556815,
+            "win_rate": 0.7327327327327328,
+            "max_cumulative_pnl_drawdown_jpy": -18537954.513018057,
+            "cost_bps": 10
+          },
+          "ledgerPath": "C:\\Users\\dis\\Desktop\\DisDex_AI_Files\\01_BT_Research\\2026-10-21_task9_full8_5m_replay_fixed\\engine\\V12_SHORT\\RERUN_V12_SHORT_PCT2P5_12H_MFE1P0_R12_10\\10bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_10BPS\\portfolio-trades.jsonl",
+          "admittedStopTradeCount": 53,
+          "newlyAdmittedCandidateCount": 20,
+          "noLongerAdmittedCandidateCount": 12,
+          "baselineComparison": {
+            "ddImprovementPercentagePoints": 0.82460207,
+            "finalEquityRetention": 0.9286257073859138,
+            "profitFactorRetention": 0.9290605660464691,
+            "tradeDelta": 8,
+            "accountingPass": true
+          }
+        },
+        "30": {
+          "finalEquityJpy": 93869564.17641039,
+          "profitFactor": 2.7569004294487134,
+          "maximumMtmDdPct": -15.854245259214217,
+          "winRate": 0.6785714285714286,
+          "closedTrades": 1316,
+          "accounting": "PASS",
+          "strategyTrades": {
+            "FET": 8,
+            "HYPE_LONG": 37,
+            "IDLE": 75,
+            "PENGU": 67,
+            "Q102": 181,
+            "RESIDUAL": 28,
+            "V12": 833,
+            "V52": 87
+          },
+          "strategyPnlJpy": {
+            "FET": 3506569.9611596633,
+            "HYPE_LONG": 3515329.770248049,
+            "IDLE": 2295181.657945293,
+            "PENGU": 10703289.138138266,
+            "Q102": 1240157.8884394988,
+            "RESIDUAL": -2432242.7057488468,
+            "V12": 57310415.73803241,
+            "V52": 18922348.37035572
+          },
+          "originalWinnerStopped": 0,
+          "originalLoserStopped": 0,
+          "stopProposalsBeforeAdmission": 69,
+          "cooldownMode": "NOT_EVALUATED_PREALLOCATION_ONLY",
+          "cooldownRejected": null,
+          "eligible": 785,
+          "priceDataGaps": 0,
+          "internalDataGaps": 0,
+          "oos": {
+            "boundary_utc": "2026-04-22T12:00:00+00:00",
+            "trades": 334,
+            "known_pnl_trades": 334,
+            "unsettled_trades": 0,
+            "crossing_trades": 2,
+            "net_pnl_jpy": 81018044.31348634,
+            "profit_factor": 2.897824522562839,
+            "win_rate": 0.6916167664670658,
+            "max_cumulative_pnl_drawdown_jpy": -7819812.05572214,
+            "cost_bps": 30
+          },
+          "ledgerPath": "C:\\Users\\dis\\Desktop\\DisDex_AI_Files\\01_BT_Research\\2026-10-21_task9_full8_5m_replay_fixed\\engine\\V12_SHORT\\RERUN_V12_SHORT_PCT2P5_12H_MFE1P0_R12_30\\30bps\\cases\\V2_M150_D05_CORE_NATIVE\\runs\\PRICE_MODEL_30BPS\\portfolio-trades.jsonl",
+          "admittedStopTradeCount": 53,
+          "newlyAdmittedCandidateCount": 25,
+          "noLongerAdmittedCandidateCount": 16,
+          "baselineComparison": {
+            "ddImprovementPercentagePoints": 0.93352352,
+            "finalEquityRetention": 0.755251132253624,
+            "profitFactorRetention": 0.8955161352966355,
+            "tradeDelta": 9,
+            "accountingPass": true
+          }
+        }
+      },
+      "postHocExploratorySensitivity": true
+    }
+  },
+  "researchCostGates": {
+    "V12_SHORT_PCT2P0_12H_MFE1P0_R12": {
+      "oosPfRetentionByCost": {
+        "10": 0.9414268569093647,
+        "30": 0.9043719043355799
+      },
+      "oosNetPnlPositiveByCost": {
+        "10": true,
+        "30": true
+      },
+      "bothOosPfRetentionAtLeast90pct": true,
+      "bothOosNetPnlPositive": true,
+      "bothDdImprovedAtLeast0p1pp": true,
+      "bothFinalEquityRetentionAtLeast75pct": false,
+      "bothAccountingPass": true,
+      "worstCostDdImprovementPp": 0.7793092,
+      "lowestEquityRetention": 0.7413344426836624,
+      "researchGatePass": false
+    },
+    "V12_SHORT_PCT1P5_6H_MFE0P5_R12": {
+      "oosPfRetentionByCost": {
+        "10": 0.8833912192061619,
+        "30": 0.8271482848101466
+      },
+      "oosNetPnlPositiveByCost": {
+        "10": true,
+        "30": true
+      },
+      "bothOosPfRetentionAtLeast90pct": false,
+      "bothOosNetPnlPositive": true,
+      "bothDdImprovedAtLeast0p1pp": false,
+      "bothFinalEquityRetentionAtLeast75pct": false,
+      "bothAccountingPass": true,
+      "worstCostDdImprovementPp": 0.07439576,
+      "lowestEquityRetention": 0.6877854074919517,
+      "researchGatePass": false
+    },
+    "V12_LONG_PCT2P0_12H_MFE1P0_R12": {
+      "oosPfRetentionByCost": {
+        "10": 1.0033879872555231,
+        "30": 0.9211865299405017
+      },
+      "oosNetPnlPositiveByCost": {
+        "10": true,
+        "30": true
+      },
+      "bothOosPfRetentionAtLeast90pct": true,
+      "bothOosNetPnlPositive": true,
+      "bothDdImprovedAtLeast0p1pp": false,
+      "bothFinalEquityRetentionAtLeast75pct": false,
+      "bothAccountingPass": true,
+      "worstCostDdImprovementPp": -0.01683437,
+      "lowestEquityRetention": 0.7475034135421459,
+      "researchGatePass": false
+    },
+    "IDLE_ATR2P0_6H_MFE1P0_R12": {
+      "oosPfRetentionByCost": {
+        "10": 1.0687649357275693,
+        "30": 0.9631750493698253
+      },
+      "oosNetPnlPositiveByCost": {
+        "10": true,
+        "30": true
+      },
+      "bothOosPfRetentionAtLeast90pct": true,
+      "bothOosNetPnlPositive": true,
+      "bothDdImprovedAtLeast0p1pp": false,
+      "bothFinalEquityRetentionAtLeast75pct": true,
+      "bothAccountingPass": true,
+      "worstCostDdImprovementPp": -0.01332533,
+      "lowestEquityRetention": 0.8085817961447399,
+      "researchGatePass": false
+    },
+    "V12_SHORT_PCT2P25_12H_MFE1P0_R12": {
+      "oosPfRetentionByCost": {
+        "10": 0.9265885232289276,
+        "30": 0.8952040541908997
+      },
+      "oosNetPnlPositiveByCost": {
+        "10": true,
+        "30": true
+      },
+      "bothOosPfRetentionAtLeast90pct": false,
+      "bothOosNetPnlPositive": true,
+      "bothDdImprovedAtLeast0p1pp": true,
+      "bothFinalEquityRetentionAtLeast75pct": true,
+      "bothAccountingPass": true,
+      "worstCostDdImprovementPp": 0.82460207,
+      "lowestEquityRetention": 0.7509518811962845,
+      "researchGatePass": false
+    },
+    "V12_SHORT_PCT2P5_12H_MFE1P0_R12": {
+      "oosPfRetentionByCost": {
+        "10": 0.9315164815533831,
+        "30": 0.9014473649553636
+      },
+      "oosNetPnlPositiveByCost": {
+        "10": true,
+        "30": true
+      },
+      "bothOosPfRetentionAtLeast90pct": true,
+      "bothOosNetPnlPositive": true,
+      "bothDdImprovedAtLeast0p1pp": true,
+      "bothFinalEquityRetentionAtLeast75pct": true,
+      "bothAccountingPass": true,
+      "worstCostDdImprovementPp": 0.82460207,
+      "lowestEquityRetention": 0.755251132253624,
+      "researchGatePass": true
+    }
+  },
+  "independentRepeat": {
+    "status": "PASS",
+    "costScenarios": [
+      10,
+      30
+    ],
+    "candidate": "V12_SHORT_PCT2P5_12H_MFE1P0_R12",
+    "model": "research_h1_price_model_5m_exit_overlay",
+    "archiveSha256": "10cdc48705a6f9e310cd0aecc95ce781af24325b1a99c2eb9aaefe3bd2953934",
+    "checks": {
+      "archiveHashMatches": true,
+      "sourceHashIndexMatches": true,
+      "baseline_10_metricsMatch": true,
+      "baseline_10_portfolio-trades.jsonl_shaEqual": true,
+      "baseline_10_portfolio-events.jsonl_shaEqual": true,
+      "baseline_10_candidate-decisions.jsonl_shaEqual": true,
+      "candidate_10_metricsMatch": true,
+      "candidate_10_portfolio-trades.jsonl_shaEqual": true,
+      "candidate_10_portfolio-events.jsonl_shaEqual": true,
+      "candidate_10_candidate-decisions.jsonl_shaEqual": true,
+      "baseline_30_metricsMatch": true,
+      "baseline_30_portfolio-trades.jsonl_shaEqual": true,
+      "baseline_30_portfolio-events.jsonl_shaEqual": true,
+      "baseline_30_candidate-decisions.jsonl_shaEqual": true,
+      "candidate_30_metricsMatch": true,
+      "candidate_30_portfolio-trades.jsonl_shaEqual": true,
+      "candidate_30_portfolio-events.jsonl_shaEqual": true,
+      "candidate_30_candidate-decisions.jsonl_shaEqual": true
+    },
+    "productionChanges": 0,
+    "liveChanges": 0
+  },
+  "limitations": [
+    "Not signed venue execution and not exact parity with the new Task 9 reducer.",
+    "Candidate alternatives use historical 5m models with price/fee/funding approximations.",
+    "Stops are modeled on candidate exits before portfolio admission. The full8 allocator then reruns; post-admission stop events are counted only from accepted trades.",
+    "Cooldown from a proposed stop is NOT applied because preallocation cannot prove a real STOP fill; do not interpret these scenarios as the original cooldown-equipped candidate.",
+    "Data-source stock proxy month gaps and intrabar ambiguity remain.",
+    "IS/OOS split inside a previously researched window is not untouched blind forward validation."
+  ],
+  "originalSourceSha256": {
+    "idle_profit_trailing_full8_20261016.py": "393c63bca56e6597d05302e7e20cb0b719bebf00917e54982f91af1068a69f6c",
+    "bt120_integrated_5minute_full8_20261017.py": "6fd448cc4dae0feb336c349ca1debdc7d74e22499650bdc65739cbf6ab12ca53",
+    "bt120_combined_and_slippage_stress_20261017.py": "ee67b9325d0a7c058a350c25f98517579d77baf4dde226ce4ae6e2db3d37c5b1",
+    "bt120_idle_gross_q102hype_20261017.py": "61b2f1e7167231e68ba9cb764cb2695511cfc246d0c99c9a9c86aa514839501d",
+    "idle_gross_fractional_isolated_full8_20261016.py": "9f2d713bc7d0efed73923e3839e43c39fcdc318baec9c58f9c3244e42c53ab8c"
+  }
+}

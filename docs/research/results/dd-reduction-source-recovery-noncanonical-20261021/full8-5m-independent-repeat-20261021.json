@@ -1,0 +1,32 @@
+{
+  "status": "PASS",
+  "costScenarios": [
+    10,
+    30
+  ],
+  "candidate": "V12_SHORT_PCT2P5_12H_MFE1P0_R12",
+  "model": "research_h1_price_model_5m_exit_overlay",
+  "archiveSha256": "10cdc48705a6f9e310cd0aecc95ce781af24325b1a99c2eb9aaefe3bd2953934",
+  "checks": {
+    "archiveHashMatches": true,
+    "sourceHashIndexMatches": true,
+    "baseline_10_metricsMatch": true,
+    "baseline_10_portfolio-trades.jsonl_shaEqual": true,
+    "baseline_10_portfolio-events.jsonl_shaEqual": true,
+    "baseline_10_candidate-decisions.jsonl_shaEqual": true,
+    "candidate_10_metricsMatch": true,
+    "candidate_10_portfolio-trades.jsonl_shaEqual": true,
+    "candidate_10_portfolio-events.jsonl_shaEqual": true,
+    "candidate_10_candidate-decisions.jsonl_shaEqual": true,
+    "baseline_30_metricsMatch": true,
+    "baseline_30_portfolio-trades.jsonl_shaEqual": true,
+    "baseline_30_portfolio-events.jsonl_shaEqual": true,
+    "baseline_30_candidate-decisions.jsonl_shaEqual": true,
+    "candidate_30_metricsMatch": true,
+    "candidate_30_portfolio-trades.jsonl_shaEqual": true,
+    "candidate_30_portfolio-events.jsonl_shaEqual": true,
+    "candidate_30_candidate-decisions.jsonl_shaEqual": true
+  },
+  "productionChanges": 0,
+  "liveChanges": 0
+}
