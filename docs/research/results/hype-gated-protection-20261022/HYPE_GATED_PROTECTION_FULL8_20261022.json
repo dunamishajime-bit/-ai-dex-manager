@@ -1,0 +1,795 @@
+{
+  "status": "RESEARCH_ONLY_GATE_USER_ADOPTED_NO_LIVE_CHANGE",
+  "period": "2025-08-10..2026-08-10",
+  "startingJPY": 10000,
+  "sourceCommit": "a40b72af98ce7e923beb3c4f7474c3fb42d4d7c3",
+  "sourceArchiveSha256": "10cdc48705a6f9e310cd0aecc95ce781af24325b1a99c2eb9aaefe3bd2953934",
+  "userAdoptedHypeEntryPolicy": {
+    "id": "HYPE_BTC3H_LE0P6_REL3H_GE2P0",
+    "btc3hMaxPct": 0.6,
+    "hypeMinusBtc3hMinPct": 2.0
+  },
+  "preservedV12V4FourExits": true,
+  "preservedQ102ThreeExits": true,
+  "preservedHype75Exit": true,
+  "dynamicEightLogicReallocation": true,
+  "baselineReproducedExactly": true,
+  "allModeledAcceptedHypeEntriesPassGate": true,
+  "independentTask9TSEconomicParityCertified": false,
+  "venueCertified": false,
+  "ordersOrProductionChanged": false,
+  "addedExitsMeetingBothCostEquityAndDDImprovement": [],
+  "newExitCases": {
+    "GATED_BASELINE": {
+      "rule": null,
+      "costs": {
+        "10": {
+          "finalEquityJpy": 244636192.77287373,
+          "equityDeltaFromGatedBaselineJpy": 0.0,
+          "maxMtmDdPct": -14.603309760733396,
+          "ddDeltaFromGatedBaselinePp": 0.0,
+          "profitFactor": 3.9455834161040158,
+          "closedTrades": 1304,
+          "hypeTrades": 18,
+          "hypeWins": 12,
+          "hypeLosses": 6,
+          "hypeWinRatePct": 66.66666666666667,
+          "hypePnlJpy": 36469795.50904447,
+          "hypeExitReasons": {
+            "TAKE_PROFIT": 12,
+            "5M_PROTECTIVE_STOP": 6
+          },
+          "replayPasses": [
+            {
+              "iteration": 0,
+              "v4AdmittedShortStopCount": 52,
+              "appliedPreviousCooldowns": 0,
+              "gateSourceMissing": 0
+            },
+            {
+              "iteration": 1,
+              "v4AdmittedShortStopCount": 52,
+              "appliedPreviousCooldowns": 52,
+              "gateSourceMissing": 0
+            },
+            {
+              "iteration": 2,
+              "v4AdmittedShortStopCount": 52,
+              "appliedPreviousCooldowns": 52,
+              "gateSourceMissing": 0
+            }
+          ],
+          "ledgersSha256": {
+            "candidate-decisions.jsonl": "0d0d5999a0a0b778ed50f85765c26f7ed798ef1c05ba5bec4870ed74e4078d19",
+            "portfolio-events.jsonl": "202f2623288dcd597bb6608a0d60b8f352ef7412b9fdb542b92e87ff146ae2cd",
+            "portfolio-trades.jsonl": "d16ca661dbe84b30a8c25ac8a6f66399806447cc70b30507ce04b32c67427878",
+            "task9-mtm.jsonl": "2b5bb3a0ef9cccb8a39807678fcf32ed58bb2977d7ad480fe0cf6b27500ecd90",
+            "metrics.json": "55affabcfcc10f71eaef3ac5083a07f86b9e4257504e7db76561970d9ad7fc5c"
+          },
+          "accounting": "PASS"
+        },
+        "30": {
+          "finalEquityJpy": 140458101.84898156,
+          "equityDeltaFromGatedBaselineJpy": 0.0,
+          "maxMtmDdPct": -15.80770763869479,
+          "ddDeltaFromGatedBaselinePp": 0.0,
+          "profitFactor": 3.3989430170488366,
+          "closedTrades": 1300,
+          "hypeTrades": 17,
+          "hypeWins": 12,
+          "hypeLosses": 5,
+          "hypeWinRatePct": 70.58823529411765,
+          "hypePnlJpy": 17780809.869600438,
+          "hypeExitReasons": {
+            "TAKE_PROFIT": 12,
+            "5M_PROTECTIVE_STOP": 5
+          },
+          "replayPasses": [
+            {
+              "iteration": 0,
+              "v4AdmittedShortStopCount": 51,
+              "appliedPreviousCooldowns": 0,
+              "gateSourceMissing": 0
+            },
+            {
+              "iteration": 1,
+              "v4AdmittedShortStopCount": 51,
+              "appliedPreviousCooldowns": 51,
+              "gateSourceMissing": 0
+            },
+            {
+              "iteration": 2,
+              "v4AdmittedShortStopCount": 51,
+              "appliedPreviousCooldowns": 51,
+              "gateSourceMissing": 0
+            }
+          ],
+          "ledgersSha256": {
+            "candidate-decisions.jsonl": "86779d235b7edfe575053d63d304ec0ea084cad33f2e706f978eec07cd24a0ad",
+            "portfolio-events.jsonl": "7aa8242b6d61c6941cc8c93fa5664d06e1a7c406dea3cdd7af6985f05f6bf127",
+            "portfolio-trades.jsonl": "3662c9e9d98583ee9d322aa15c4fef53c834bd3c2ff2a2d252cf85d07dde790d",
+            "task9-mtm.jsonl": "08ad0ddd3d11df625be730bc33d851a0b651618578a9cd2ee70f78bccfb155ca",
+            "metrics.json": "c79b6ca3c045dfe0b5a5b839a7edd2aafc4f9d616756d16fa3ae85950f57fb9f"
+          },
+          "accounting": "PASS"
+        }
+      }
+    },
+    "INITIAL_1H_1P0_MFE0P3": {
+      "rule": {
+        "id": "HYPE_GATED_INITIAL_1H_1P0_MFE0P3",
+        "strategy": "HYPE_LONG",
+        "sides": [
+          "LONG"
+        ],
+        "kind": "initial",
+        "arm_hours": 1,
+        "stop_pct": 0.01,
+        "mfe_gate_pct": 0.003,
+        "reentry_hours": 0
+      },
+      "costs": {
+        "10": {
+          "finalEquityJpy": 240126627.5997531,
+          "equityDeltaFromGatedBaselineJpy": -4509565.173120618,
+          "maxMtmDdPct": -14.603309760733396,
+          "ddDeltaFromGatedBaselinePp": 0.0,
+          "profitFactor": 3.9712531980772754,
+          "closedTrades": 1303,
+          "hypeTrades": 18,
+          "hypeWins": 11,
+          "hypeLosses": 7,
+          "hypeWinRatePct": 61.111111111111114,
+          "hypePnlJpy": 35958977.03940727,
+          "hypeExitReasons": {
+            "TAKE_PROFIT": 11,
+            "RESEARCH_INITIAL_ADVERSE_STOP_HYPE_GATED_INITIAL_1H_1P0_MFE0P3": 3,
+            "5M_PROTECTIVE_STOP": 4
+          },
+          "replayPasses": [
+            {
+              "iteration": 0,
+              "v4AdmittedShortStopCount": 52,
+              "appliedPreviousCooldowns": 0,
+              "gateSourceMissing": 0
+            },
+            {
+              "iteration": 1,
+              "v4AdmittedShortStopCount": 52,
+              "appliedPreviousCooldowns": 52,
+              "gateSourceMissing": 0
+            },
+            {
+              "iteration": 2,
+              "v4AdmittedShortStopCount": 52,
+              "appliedPreviousCooldowns": 52,
+              "gateSourceMissing": 0
+            }
+          ],
+          "ledgersSha256": {
+            "candidate-decisions.jsonl": "466fef86d7af3156e611acb4f8e9ef75798415a6c1dbd1d1eca609b0b22c2ae9",
+            "portfolio-events.jsonl": "2beac90ba0bd8fbcf33af5b0acc9489fe269aea1eda980a8547b19db5e3f748c",
+            "portfolio-trades.jsonl": "3b60533ee4fcf2b44b52977e1fe05794e9e744812ea71aeda88738a9e6b6f2ef",
+            "task9-mtm.jsonl": "5e7dc6fc928fa0d7a53f4bb54addc5a09aeb7f96b04dd99bfb7b0ebcac41a00d",
+            "metrics.json": "554428fb1c424886fd02ec5ae4714f830a90c48cbfe4eb55d05812333dc534c9"
+          },
+          "accounting": "PASS"
+        },
+        "30": {
+          "finalEquityJpy": 134931153.6046611,
+          "equityDeltaFromGatedBaselineJpy": -5526948.244320452,
+          "maxMtmDdPct": -15.80770763869479,
+          "ddDeltaFromGatedBaselinePp": 0.0,
+          "profitFactor": 3.403686225069615,
+          "closedTrades": 1300,
+          "hypeTrades": 17,
+          "hypeWins": 11,
+          "hypeLosses": 6,
+          "hypeWinRatePct": 64.70588235294117,
+          "hypePnlJpy": 16886165.660375465,
+          "hypeExitReasons": {
+            "TAKE_PROFIT": 11,
+            "RESEARCH_INITIAL_ADVERSE_STOP_HYPE_GATED_INITIAL_1H_1P0_MFE0P3": 3,
+            "5M_PROTECTIVE_STOP": 3
+          },
+          "replayPasses": [
+            {
+              "iteration": 0,
+              "v4AdmittedShortStopCount": 51,
+              "appliedPreviousCooldowns": 0,
+              "gateSourceMissing": 0
+            },
+            {
+              "iteration": 1,
+              "v4AdmittedShortStopCount": 51,
+              "appliedPreviousCooldowns": 51,
+              "gateSourceMissing": 0
+            },
+            {
+              "iteration": 2,
+              "v4AdmittedShortStopCount": 51,
+              "appliedPreviousCooldowns": 51,
+              "gateSourceMissing": 0
+            }
+          ],
+          "ledgersSha256": {
+            "candidate-decisions.jsonl": "5549caada39bbfa3102667535a262efbd0c32feaf200f13ba3f5956fdaaf353e",
+            "portfolio-events.jsonl": "71295cb4d3eaef3b088dda8cf9ebacf9aa6804e704fad3789a0f0b8c0010ea01",
+            "portfolio-trades.jsonl": "fa31bb232500724d2934d0ed2c11bfeefe589c960b37c41f4d8d9dd05ebf2bc1",
+            "task9-mtm.jsonl": "b4a100f1a435c9159cf0fbe4e262c2a0f421788cba1da6e306300db41ba7ad93",
+            "metrics.json": "65b05a0924e8d0701cf6bb4b5a7476600b15e7627ed59b6de420876e661d2d1a"
+          },
+          "accounting": "PASS"
+        }
+      }
+    },
+    "PROFIT_3P0_FLOOR1P0": {
+      "rule": {
+        "id": "HYPE_GATED_PROFIT_3P0_FLOOR1P0",
+        "strategy": "HYPE_LONG",
+        "sides": [
+          "LONG"
+        ],
+        "kind": "profit",
+        "arm": 0.03,
+        "floor": 0.01
+      },
+      "costs": {
+        "10": {
+          "finalEquityJpy": 233592374.2931933,
+          "equityDeltaFromGatedBaselineJpy": -11043818.479680419,
+          "maxMtmDdPct": -14.603309760733396,
+          "ddDeltaFromGatedBaselinePp": 0.0,
+          "profitFactor": 3.871012177795089,
+          "closedTrades": 1304,
+          "hypeTrades": 18,
+          "hypeWins": 13,
+          "hypeLosses": 5,
+          "hypeWinRatePct": 72.22222222222223,
+          "hypePnlJpy": 28174943.37109221,
+          "hypeExitReasons": {
+            "TAKE_PROFIT": 10,
+            "5M_PROTECTIVE_STOP": 5,
+            "RESEARCH_HYPE_GATED_PROFIT_3P0_FLOOR1P0": 3
+          },
+          "replayPasses": [
+            {
+              "iteration": 0,
+              "v4AdmittedShortStopCount": 52,
+              "appliedPreviousCooldowns": 0,
+              "gateSourceMissing": 0
+            },
+            {
+              "iteration": 1,
+              "v4AdmittedShortStopCount": 52,
+              "appliedPreviousCooldowns": 52,
+              "gateSourceMissing": 0
+            },
+            {
+              "iteration": 2,
+              "v4AdmittedShortStopCount": 52,
+              "appliedPreviousCooldowns": 52,
+              "gateSourceMissing": 0
+            }
+          ],
+          "ledgersSha256": {
+            "candidate-decisions.jsonl": "10e2df7cfbbb0ff4c697a43e629948d39a370f9e4609afa2123ba1078fcb9c6f",
+            "portfolio-events.jsonl": "374d4b3c636dc4767a0c916b151933dde7b4cc5d899a166e140e0a4ec548a81d",
+            "portfolio-trades.jsonl": "9dd9ff1b905719534733b5c0c8982c0c2935456b59aa53435a844f3e010351fa",
+            "task9-mtm.jsonl": "42ebecdb9301b6baa159029fc4ad49cf2ad43e820ed4618c6b72e35b5df6947e",
+            "metrics.json": "4f498f549bbc225f419e526349667255bf18808da7ea80fea3652c552eb6833c"
+          },
+          "accounting": "PASS"
+        },
+        "30": {
+          "finalEquityJpy": 133788362.46843164,
+          "equityDeltaFromGatedBaselineJpy": -6669739.380549923,
+          "maxMtmDdPct": -15.80770763869479,
+          "ddDeltaFromGatedBaselinePp": 0.0,
+          "profitFactor": 3.3390791528492025,
+          "closedTrades": 1300,
+          "hypeTrades": 17,
+          "hypeWins": 13,
+          "hypeLosses": 4,
+          "hypeWinRatePct": 76.47058823529412,
+          "hypePnlJpy": 13326888.993016519,
+          "hypeExitReasons": {
+            "TAKE_PROFIT": 10,
+            "5M_PROTECTIVE_STOP": 4,
+            "RESEARCH_HYPE_GATED_PROFIT_3P0_FLOOR1P0": 3
+          },
+          "replayPasses": [
+            {
+              "iteration": 0,
+              "v4AdmittedShortStopCount": 51,
+              "appliedPreviousCooldowns": 0,
+              "gateSourceMissing": 0
+            },
+            {
+              "iteration": 1,
+              "v4AdmittedShortStopCount": 51,
+              "appliedPreviousCooldowns": 51,
+              "gateSourceMissing": 0
+            },
+            {
+              "iteration": 2,
+              "v4AdmittedShortStopCount": 51,
+              "appliedPreviousCooldowns": 51,
+              "gateSourceMissing": 0
+            }
+          ],
+          "ledgersSha256": {
+            "candidate-decisions.jsonl": "c5267a36aa388e2e8cfd805f1ea5c9a07335ff219361f851e198e770f93633f6",
+            "portfolio-events.jsonl": "91fed84f8bba4bf4a14f44842b82ca9c57eb1696f819d70a184b260c88f55478",
+            "portfolio-trades.jsonl": "d056d52ff4b2a4fe35bb76ba5f65de18994e87fb8db5f24745c62bd27ffd8ef9",
+            "task9-mtm.jsonl": "a45e10c71be3bb439ebc2c12f5e341e7045251e97c33754c6a9bb695b92381bb",
+            "metrics.json": "a377985309e756c516a249bbe4dea97a748c6d114de02398dfa1b88acc27ce4d"
+          },
+          "accounting": "PASS"
+        }
+      }
+    },
+    "COMBO_I1H1_P3F1": {
+      "rule": {
+        "id": "HYPE_GATED_COMBO_I1H1_P3F1",
+        "strategy": "HYPE_LONG",
+        "sides": [
+          "LONG"
+        ],
+        "kind": "combined",
+        "arm_hours": 1,
+        "stop_pct": 0.01,
+        "mfe_gate_pct": 0.003,
+        "reentry_hours": 0,
+        "arm": 0.03,
+        "floor": 0.01
+      },
+      "costs": {
+        "10": {
+          "finalEquityJpy": 229515599.95100835,
+          "equityDeltaFromGatedBaselineJpy": -15120592.82186538,
+          "maxMtmDdPct": -14.603309760733396,
+          "ddDeltaFromGatedBaselinePp": 0.0,
+          "profitFactor": 3.900953750303556,
+          "closedTrades": 1303,
+          "hypeTrades": 18,
+          "hypeWins": 12,
+          "hypeLosses": 6,
+          "hypeWinRatePct": 66.66666666666667,
+          "hypePnlJpy": 27905150.61559234,
+          "hypeExitReasons": {
+            "TAKE_PROFIT": 9,
+            "RESEARCH_INITIAL_ADVERSE_STOP_HYPE_GATED_COMBO_I1H1_P3F1": 3,
+            "RESEARCH_HYPE_GATED_COMBO_I1H1_P3F1": 3,
+            "5M_PROTECTIVE_STOP": 3
+          },
+          "replayPasses": [
+            {
+              "iteration": 0,
+              "v4AdmittedShortStopCount": 52,
+              "appliedPreviousCooldowns": 0,
+              "gateSourceMissing": 0
+            },
+            {
+              "iteration": 1,
+              "v4AdmittedShortStopCount": 52,
+              "appliedPreviousCooldowns": 52,
+              "gateSourceMissing": 0
+            },
+            {
+              "iteration": 2,
+              "v4AdmittedShortStopCount": 52,
+              "appliedPreviousCooldowns": 52,
+              "gateSourceMissing": 0
+            }
+          ],
+          "ledgersSha256": {
+            "candidate-decisions.jsonl": "13fea0bb3da3f70a4ebf2d5ecb87ef06b9a49911728367c9fd5a6d0319babdff",
+            "portfolio-events.jsonl": "82f59f44dc548166749dec548f7ee68ae47fb0224b9b8c82e9588fcb1a1e3714",
+            "portfolio-trades.jsonl": "a61575f9a9bcf77f3f7d96e563bc7a448a70beb2a3ef8fbe893d9d6c6e459b68",
+            "task9-mtm.jsonl": "446d9a80fd8a89295d22ec26cbb8ad250716eb929f8b154c2d2d48805a91c11c",
+            "metrics.json": "78aad8877b9f335f7388939288e2f80251431620345f8db32f0f91393994666d"
+          },
+          "accounting": "PASS"
+        },
+        "30": {
+          "finalEquityJpy": 128120750.8345226,
+          "equityDeltaFromGatedBaselineJpy": -12337351.014458954,
+          "maxMtmDdPct": -15.80770763869479,
+          "ddDeltaFromGatedBaselinePp": 0.0,
+          "profitFactor": 3.3389867316050803,
+          "closedTrades": 1300,
+          "hypeTrades": 17,
+          "hypeWins": 12,
+          "hypeLosses": 5,
+          "hypeWinRatePct": 70.58823529411765,
+          "hypePnlJpy": 12674791.68713223,
+          "hypeExitReasons": {
+            "TAKE_PROFIT": 9,
+            "RESEARCH_INITIAL_ADVERSE_STOP_HYPE_GATED_COMBO_I1H1_P3F1": 3,
+            "RESEARCH_HYPE_GATED_COMBO_I1H1_P3F1": 3,
+            "5M_PROTECTIVE_STOP": 2
+          },
+          "replayPasses": [
+            {
+              "iteration": 0,
+              "v4AdmittedShortStopCount": 51,
+              "appliedPreviousCooldowns": 0,
+              "gateSourceMissing": 0
+            },
+            {
+              "iteration": 1,
+              "v4AdmittedShortStopCount": 51,
+              "appliedPreviousCooldowns": 51,
+              "gateSourceMissing": 0
+            },
+            {
+              "iteration": 2,
+              "v4AdmittedShortStopCount": 51,
+              "appliedPreviousCooldowns": 51,
+              "gateSourceMissing": 0
+            }
+          ],
+          "ledgersSha256": {
+            "candidate-decisions.jsonl": "653b0a15fe2c29e3c19ecd380efcf78202b348644285569276784e3ca174265d",
+            "portfolio-events.jsonl": "72d407ed8c0fb72fa6d6c43f7a90556d6b181353c3d7ff1d42da91b427f4770c",
+            "portfolio-trades.jsonl": "9e2efed8d003f440c0c00c30ca9ec975afb4426b2943793a7a8b2526a0edd45d",
+            "task9-mtm.jsonl": "954ae7b6231e406ef5ff0b490af43da78aa433747b0116d8c1c84203d8e31d9f",
+            "metrics.json": "e67508bf56fd46f4b029effbeeec19facbb7e5b4c5740fd7cc749effb9dbad34"
+          },
+          "accounting": "PASS"
+        }
+      }
+    },
+    "PROFIT_2P0_FLOOR0P5": {
+      "rule": {
+        "id": "HYPE_GATED_PROFIT_2P0_FLOOR0P5",
+        "strategy": "HYPE_LONG",
+        "sides": [
+          "LONG"
+        ],
+        "kind": "profit",
+        "arm": 0.02,
+        "floor": 0.005
+      },
+      "costs": {
+        "10": {
+          "finalEquityJpy": 221443177.2668918,
+          "equityDeltaFromGatedBaselineJpy": -23193015.505981922,
+          "maxMtmDdPct": -14.603309760733396,
+          "ddDeltaFromGatedBaselinePp": 0.0,
+          "profitFactor": 3.7377169404839203,
+          "closedTrades": 1305,
+          "hypeTrades": 19,
+          "hypeWins": 14,
+          "hypeLosses": 5,
+          "hypeWinRatePct": 73.6842105263158,
+          "hypePnlJpy": 19673384.92115637,
+          "hypeExitReasons": {
+            "TAKE_PROFIT": 8,
+            "RESEARCH_HYPE_GATED_PROFIT_2P0_FLOOR0P5": 6,
+            "5M_PROTECTIVE_STOP": 5
+          },
+          "replayPasses": [
+            {
+              "iteration": 0,
+              "v4AdmittedShortStopCount": 52,
+              "appliedPreviousCooldowns": 0,
+              "gateSourceMissing": 0
+            },
+            {
+              "iteration": 1,
+              "v4AdmittedShortStopCount": 52,
+              "appliedPreviousCooldowns": 52,
+              "gateSourceMissing": 0
+            },
+            {
+              "iteration": 2,
+              "v4AdmittedShortStopCount": 52,
+              "appliedPreviousCooldowns": 52,
+              "gateSourceMissing": 0
+            }
+          ],
+          "ledgersSha256": {
+            "candidate-decisions.jsonl": "23b61d3b3944974dc763c342e2daf17ae0a0ca04fb599ccf14b105eff6014158",
+            "portfolio-events.jsonl": "609015ef39e76ed5e4831a16f70c23a176f416fac668acb2a478529ff0164244",
+            "portfolio-trades.jsonl": "73f65af9dcdb243749218593137005d3f223e9a2b3bf583ecc54a72e9d0ee792",
+            "task9-mtm.jsonl": "8acfeb2ef5855b5209f66e37cccf7d7d80a3fb9f248dfad2f8a6fb5b724e7dfd",
+            "metrics.json": "7bc4c8f3ad82aa09d60f9b76ace6e2f2260bf3817abbc57e91e23e6c387ce835"
+          },
+          "accounting": "PASS"
+        },
+        "30": {
+          "finalEquityJpy": 122675381.21739471,
+          "equityDeltaFromGatedBaselineJpy": -17782720.63158685,
+          "maxMtmDdPct": -15.80770763869479,
+          "ddDeltaFromGatedBaselinePp": 0.0,
+          "profitFactor": 3.218068012408714,
+          "closedTrades": 1301,
+          "hypeTrades": 18,
+          "hypeWins": 8,
+          "hypeLosses": 10,
+          "hypeWinRatePct": 44.44444444444444,
+          "hypePnlJpy": 8266571.371861952,
+          "hypeExitReasons": {
+            "TAKE_PROFIT": 8,
+            "RESEARCH_HYPE_GATED_PROFIT_2P0_FLOOR0P5": 6,
+            "5M_PROTECTIVE_STOP": 4
+          },
+          "replayPasses": [
+            {
+              "iteration": 0,
+              "v4AdmittedShortStopCount": 51,
+              "appliedPreviousCooldowns": 0,
+              "gateSourceMissing": 0
+            },
+            {
+              "iteration": 1,
+              "v4AdmittedShortStopCount": 51,
+              "appliedPreviousCooldowns": 51,
+              "gateSourceMissing": 0
+            },
+            {
+              "iteration": 2,
+              "v4AdmittedShortStopCount": 51,
+              "appliedPreviousCooldowns": 51,
+              "gateSourceMissing": 0
+            }
+          ],
+          "ledgersSha256": {
+            "candidate-decisions.jsonl": "d21ab88da758de0c864588c16b1b204a4fdbe33a4a74406285ad93dec1c83365",
+            "portfolio-events.jsonl": "913b7b0cd5d70f10069b2b2525b14c54a0ac9cffd5052596eae26eaf62973569",
+            "portfolio-trades.jsonl": "4cf7bcf2d7460096f6b33fe8b6444f9e4b98211180b58227f4a8f9cf7b5f5167",
+            "task9-mtm.jsonl": "781c0501055769d569083eeb005dc300f9ae7e222312cfff3dedfff9d335f2c0",
+            "metrics.json": "3bb3944f964ba9c8b89670e2e7c1a56c158c6ed41254ad6dc54ae78400f7b073"
+          },
+          "accounting": "PASS"
+        }
+      }
+    },
+    "PROFIT_3P0_FLOOR1P5": {
+      "rule": {
+        "id": "HYPE_GATED_PROFIT_3P0_FLOOR1P5",
+        "strategy": "HYPE_LONG",
+        "sides": [
+          "LONG"
+        ],
+        "kind": "profit",
+        "arm": 0.03,
+        "floor": 0.015
+      },
+      "costs": {
+        "10": {
+          "finalEquityJpy": 234756539.24560505,
+          "equityDeltaFromGatedBaselineJpy": -9879653.527268678,
+          "maxMtmDdPct": -14.603309760733396,
+          "ddDeltaFromGatedBaselinePp": 0.0,
+          "profitFactor": 3.882129710994586,
+          "closedTrades": 1303,
+          "hypeTrades": 18,
+          "hypeWins": 13,
+          "hypeLosses": 5,
+          "hypeWinRatePct": 72.22222222222223,
+          "hypePnlJpy": 29513718.423952118,
+          "hypeExitReasons": {
+            "TAKE_PROFIT": 10,
+            "5M_PROTECTIVE_STOP": 5,
+            "RESEARCH_HYPE_GATED_PROFIT_3P0_FLOOR1P5": 3
+          },
+          "replayPasses": [
+            {
+              "iteration": 0,
+              "v4AdmittedShortStopCount": 52,
+              "appliedPreviousCooldowns": 0,
+              "gateSourceMissing": 0
+            },
+            {
+              "iteration": 1,
+              "v4AdmittedShortStopCount": 52,
+              "appliedPreviousCooldowns": 52,
+              "gateSourceMissing": 0
+            },
+            {
+              "iteration": 2,
+              "v4AdmittedShortStopCount": 52,
+              "appliedPreviousCooldowns": 52,
+              "gateSourceMissing": 0
+            }
+          ],
+          "ledgersSha256": {
+            "candidate-decisions.jsonl": "dc6cc286c2fb3c785fb12e1f80cc4d0ef1f6efafb362677df772dc6710dabe8e",
+            "portfolio-events.jsonl": "a66f1dc8243e4eab5fc39f23313c10d92edb65462b3f675cfd242cfda36111d1",
+            "portfolio-trades.jsonl": "ff85421added6172ace737b6ca80061325e35a2c427662e74cdb8af734ea38e4",
+            "task9-mtm.jsonl": "6a2e5e6b461b364e2542140e911063969053cdfaa1312acdb74ef4d9f43768ae",
+            "metrics.json": "12dd53bad96bb8d5904c4cd2d4c67fc8fb67861b51af9ccc12a921c129468e5d"
+          },
+          "accounting": "PASS"
+        },
+        "30": {
+          "finalEquityJpy": 135509380.302361,
+          "equityDeltaFromGatedBaselineJpy": -4948721.546620548,
+          "maxMtmDdPct": -15.80770763869479,
+          "ddDeltaFromGatedBaselinePp": 0.0,
+          "profitFactor": 3.351287822945291,
+          "closedTrades": 1300,
+          "hypeTrades": 17,
+          "hypeWins": 13,
+          "hypeLosses": 4,
+          "hypeWinRatePct": 76.47058823529412,
+          "hypePnlJpy": 14114083.10143479,
+          "hypeExitReasons": {
+            "TAKE_PROFIT": 10,
+            "5M_PROTECTIVE_STOP": 4,
+            "RESEARCH_HYPE_GATED_PROFIT_3P0_FLOOR1P5": 3
+          },
+          "replayPasses": [
+            {
+              "iteration": 0,
+              "v4AdmittedShortStopCount": 51,
+              "appliedPreviousCooldowns": 0,
+              "gateSourceMissing": 0
+            },
+            {
+              "iteration": 1,
+              "v4AdmittedShortStopCount": 51,
+              "appliedPreviousCooldowns": 51,
+              "gateSourceMissing": 0
+            },
+            {
+              "iteration": 2,
+              "v4AdmittedShortStopCount": 51,
+              "appliedPreviousCooldowns": 51,
+              "gateSourceMissing": 0
+            }
+          ],
+          "ledgersSha256": {
+            "candidate-decisions.jsonl": "e2d5651236b6b662644af82b6091aed1a8f19750e0818dcf6916ef57bc9d0da9",
+            "portfolio-events.jsonl": "768e975930f6d9c34fd91b9402bcca6b4f575fc44a435b7ff1e2cf31f9762b0f",
+            "portfolio-trades.jsonl": "a9a7545fcefc9da54e66dde5b61d28540a72e33f74d4a72df8511f3e606b408e",
+            "task9-mtm.jsonl": "00f3bad5f899a2a0578f8c324ed34ebcada72be1fc310c3dee1e1239b73ab6db",
+            "metrics.json": "2caf3c2bc9ddc4024cf0a73960a9294026926e4cc0096d63667008b01acfea38"
+          },
+          "accounting": "PASS"
+        }
+      }
+    }
+  },
+  "pathScreen": {
+    "10": {
+      "baselineHypeCount": 18,
+      "checks": {
+        "INITIAL_0H_1P5_MFE0P3": {
+          "triggered": 1,
+          "oldLosers": 0,
+          "oldWinners": 1,
+          "priceAlignmentOrGapWarnings": 0
+        },
+        "INITIAL_1H_1P0_MFE0P3": {
+          "triggered": 3,
+          "oldLosers": 2,
+          "oldWinners": 1,
+          "priceAlignmentOrGapWarnings": 0
+        },
+        "INITIAL_1H_1P5_MFE0P5": {
+          "triggered": 1,
+          "oldLosers": 0,
+          "oldWinners": 1,
+          "priceAlignmentOrGapWarnings": 0
+        },
+        "INITIAL_2H_2P0_MFE0P5": {
+          "triggered": 0,
+          "oldLosers": 0,
+          "oldWinners": 0,
+          "priceAlignmentOrGapWarnings": 0
+        },
+        "PROFIT_2P0_FLOOR0P5": {
+          "triggered": 6,
+          "oldLosers": 2,
+          "oldWinners": 4,
+          "priceAlignmentOrGapWarnings": 0
+        },
+        "PROFIT_3P0_FLOOR1P0": {
+          "triggered": 3,
+          "oldLosers": 1,
+          "oldWinners": 2,
+          "priceAlignmentOrGapWarnings": 0
+        },
+        "PROFIT_3P0_FLOOR1P5": {
+          "triggered": 3,
+          "oldLosers": 1,
+          "oldWinners": 2,
+          "priceAlignmentOrGapWarnings": 0
+        },
+        "PROFIT_4P0_FLOOR2P0": {
+          "triggered": 0,
+          "oldLosers": 0,
+          "oldWinners": 0,
+          "priceAlignmentOrGapWarnings": 0
+        },
+        "COMBO_I0H1P5_P3F1": {
+          "triggered": 4,
+          "oldLosers": 1,
+          "oldWinners": 3,
+          "priceAlignmentOrGapWarnings": 0
+        },
+        "COMBO_I1H1_P3F1": {
+          "triggered": 6,
+          "oldLosers": 3,
+          "oldWinners": 3,
+          "priceAlignmentOrGapWarnings": 0
+        }
+      }
+    },
+    "30": {
+      "baselineHypeCount": 17,
+      "checks": {
+        "INITIAL_0H_1P5_MFE0P3": {
+          "triggered": 1,
+          "oldLosers": 0,
+          "oldWinners": 1,
+          "priceAlignmentOrGapWarnings": 0
+        },
+        "INITIAL_1H_1P0_MFE0P3": {
+          "triggered": 3,
+          "oldLosers": 2,
+          "oldWinners": 1,
+          "priceAlignmentOrGapWarnings": 0
+        },
+        "INITIAL_1H_1P5_MFE0P5": {
+          "triggered": 1,
+          "oldLosers": 0,
+          "oldWinners": 1,
+          "priceAlignmentOrGapWarnings": 0
+        },
+        "INITIAL_2H_2P0_MFE0P5": {
+          "triggered": 0,
+          "oldLosers": 0,
+          "oldWinners": 0,
+          "priceAlignmentOrGapWarnings": 0
+        },
+        "PROFIT_2P0_FLOOR0P5": {
+          "triggered": 6,
+          "oldLosers": 2,
+          "oldWinners": 4,
+          "priceAlignmentOrGapWarnings": 0
+        },
+        "PROFIT_3P0_FLOOR1P0": {
+          "triggered": 3,
+          "oldLosers": 1,
+          "oldWinners": 2,
+          "priceAlignmentOrGapWarnings": 0
+        },
+        "PROFIT_3P0_FLOOR1P5": {
+          "triggered": 3,
+          "oldLosers": 1,
+          "oldWinners": 2,
+          "priceAlignmentOrGapWarnings": 0
+        },
+        "PROFIT_4P0_FLOOR2P0": {
+          "triggered": 0,
+          "oldLosers": 0,
+          "oldWinners": 0,
+          "priceAlignmentOrGapWarnings": 0
+        },
+        "COMBO_I0H1P5_P3F1": {
+          "triggered": 4,
+          "oldLosers": 1,
+          "oldWinners": 3,
+          "priceAlignmentOrGapWarnings": 0
+        },
+        "COMBO_I1H1_P3F1": {
+          "triggered": 6,
+          "oldLosers": 3,
+          "oldWinners": 3,
+          "priceAlignmentOrGapWarnings": 0
+        }
+      }
+    }
+  },
+  "limitations": [
+    "In sample winner selection; HYPE N=18 or N=17",
+    "Model-based M5 and H1 prices, not real venue execution evidence",
+    "Independent Task9 TypeScript production economic parity not certified",
+    "Forward shadow on unseen prices required before LIVE cutover"
+  ]
+}
