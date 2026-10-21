@@ -1,0 +1,496 @@
+{
+  "meta": {
+    "status": "FIVE_FRESH_Q102_TIMEEXIT_AND_COMPOSITE_FULL8_RESEARCH_VERIFIED_NOT_LIVE",
+    "V4AdoptedFourFixed": true,
+    "lockedV4HandoffSha": "4081eb37fe23f884a4d1fa93e2b608e388bf7071",
+    "priorQ102DeepResearchSha": "b9ee034d7d085647f146689475920223c53fb2f1",
+    "priorBaselineLatestQ102Research": "2026-10-22_q102_entry_path_decomposition",
+    "dateRange": "2025-08-10..2026-08-10",
+    "initialJpy": 10000,
+    "compounding": true,
+    "noDeposits": true,
+    "costsBps": [
+      10,
+      30
+    ],
+    "sourceArchiveSha256": "10cdc48705a6f9e310cd0aecc95ce781af24325b1a99c2eb9aaefe3bd2953934",
+    "sourceSha256": {
+      "run-q102-timeexit-continued-after-v4-20261022.py": "52a011b00e2aa8537bf4ca267528cdca3c6194a9fa6b7105008b318101dfebe7",
+      "run-q102-timeexit-two-confirmed-h1-after-v4-20261022.py": "87487abdfde79e282fc15594ecafa5ccbcd64ee57a97687973f8a5e8eb2bbed5",
+      "analyze-q102-timeexit-h1-2close-research-20261022.py": "dd5607172f1c8d36afc7531f6195c6212dfb97834ae647f8fe15b118f4df8efc",
+      "test-q102-h1-timeexit-after-v4-20261022.py": "c5fc386cfda01855392cb2f5db837d992feef654bcd88d1f10db2f70704dd410",
+      "build-q102-timeexit-continuation-report-20261022.py": "1d5dab9f868e281b77028ac3c1ec368c3387b0a7ecb56a92b0e4bdd14701e38e"
+    },
+    "modelOnly": true,
+    "noProductionChanges": true,
+    "signedVenueCertified": false,
+    "independentLatestTask9TSEconomicParity": false,
+    "noNewQ102RulesAdopted": true
+  },
+  "baseline": {
+    "10": {
+      "finalEquityJpy": 191750055.32685158,
+      "maxMtmDdPct": -14.603309760733396,
+      "profitFactor": 3.175048774826471,
+      "closedTrades": 1319,
+      "accounting": "PASS"
+    },
+    "30": {
+      "finalEquityJpy": 74740267.7840667,
+      "maxMtmDdPct": -15.778153069011314,
+      "profitFactor": 2.5810666001785227,
+      "closedTrades": 1316,
+      "accounting": "PASS"
+    }
+  },
+  "H1CausalScreenByFamily": {
+    "MR/SHORT@12h_2.0%": {
+      "10": {
+        "family": "MR",
+        "side": "SHORT",
+        "ageHours": 12,
+        "negativeClosedH1ThresholdPct": 2.0,
+        "oldWinners": 0,
+        "oldLosers": 8,
+        "originalWinnerPnlJpy": 0.0,
+        "originalLoserPnlJpy": -1140550.2871575863,
+        "oldTimeExitLosers": 8,
+        "hits": [
+          {
+            "symbol": "UNIUSDT",
+            "candidate": "C000030",
+            "oldWin": false,
+            "oldExitReason": "Q102_TIME_EXIT",
+            "atReturnPct": -4.362880886426601
+          },
+          {
+            "symbol": "AVAXUSDT",
+            "candidate": "C000070",
+            "oldWin": false,
+            "oldExitReason": "Q102_TIME_EXIT",
+            "atReturnPct": -3.043008967120575
+          },
+          {
+            "symbol": "AVAXUSDT",
+            "candidate": "C000173",
+            "oldWin": false,
+            "oldExitReason": "Q102_TIME_EXIT",
+            "atReturnPct": -3.350704340037458
+          },
+          {
+            "symbol": "AVAXUSDT",
+            "candidate": "C000219",
+            "oldWin": false,
+            "oldExitReason": "Q102_TIME_EXIT",
+            "atReturnPct": -3.7413786460139598
+          },
+          {
+            "symbol": "UNIUSDT",
+            "candidate": "C001165",
+            "oldWin": false,
+            "oldExitReason": "Q102_TIME_EXIT",
+            "atReturnPct": -5.933478188199892
+          },
+          {
+            "symbol": "UNIUSDT",
+            "candidate": "C001935",
+            "oldWin": false,
+            "oldExitReason": "Q102_TIME_EXIT",
+            "atReturnPct": -2.1365294424179115
+          },
+          {
+            "symbol": "UNIUSDT",
+            "candidate": "C001986",
+            "oldWin": false,
+            "oldExitReason": "Q102_TIME_EXIT",
+            "atReturnPct": -2.540473225404738
+          },
+          {
+            "symbol": "UNIUSDT",
+            "candidate": "C002968",
+            "oldWin": false,
+            "oldExitReason": "Q102_TIME_EXIT",
+            "atReturnPct": -3.5573122529644285
+          }
+        ]
+      },
+      "30": {
+        "family": "MR",
+        "side": "SHORT",
+        "ageHours": 12,
+        "negativeClosedH1ThresholdPct": 2.0,
+        "oldWinners": 0,
+        "oldLosers": 8,
+        "originalWinnerPnlJpy": 0.0,
+        "originalLoserPnlJpy": -868239.976108397,
+        "oldTimeExitLosers": 8,
+        "hits": [
+          {
+            "symbol": "UNIUSDT",
+            "candidate": "C000030",
+            "oldWin": false,
+            "oldExitReason": "Q102_TIME_EXIT",
+            "atReturnPct": -4.362880886426601
+          },
+          {
+            "symbol": "AVAXUSDT",
+            "candidate": "C000070",
+            "oldWin": false,
+            "oldExitReason": "Q102_TIME_EXIT",
+            "atReturnPct": -3.043008967120575
+          },
+          {
+            "symbol": "AVAXUSDT",
+            "candidate": "C000173",
+            "oldWin": false,
+            "oldExitReason": "Q102_TIME_EXIT",
+            "atReturnPct": -3.350704340037458
+          },
+          {
+            "symbol": "AVAXUSDT",
+            "candidate": "C000219",
+            "oldWin": false,
+            "oldExitReason": "Q102_TIME_EXIT",
+            "atReturnPct": -3.7413786460139598
+          },
+          {
+            "symbol": "UNIUSDT",
+            "candidate": "C001165",
+            "oldWin": false,
+            "oldExitReason": "Q102_TIME_EXIT",
+            "atReturnPct": -5.933478188199892
+          },
+          {
+            "symbol": "UNIUSDT",
+            "candidate": "C001935",
+            "oldWin": false,
+            "oldExitReason": "Q102_TIME_EXIT",
+            "atReturnPct": -2.1365294424179115
+          },
+          {
+            "symbol": "UNIUSDT",
+            "candidate": "C001986",
+            "oldWin": false,
+            "oldExitReason": "Q102_TIME_EXIT",
+            "atReturnPct": -2.540473225404738
+          },
+          {
+            "symbol": "UNIUSDT",
+            "candidate": "C002968",
+            "oldWin": false,
+            "oldExitReason": "Q102_TIME_EXIT",
+            "atReturnPct": -3.5573122529644285
+          }
+        ]
+      }
+    },
+    "HIGH_VOL/LONG@12h_3.0%": {
+      "10": {
+        "family": "HIGH_VOL",
+        "side": "LONG",
+        "ageHours": 12,
+        "negativeClosedH1ThresholdPct": 3.0,
+        "oldWinners": 0,
+        "oldLosers": 1,
+        "originalWinnerPnlJpy": 0.0,
+        "originalLoserPnlJpy": -2322300.2211902305,
+        "oldTimeExitLosers": 1,
+        "hits": [
+          {
+            "symbol": "ENAUSDT",
+            "candidate": "C002386",
+            "oldWin": false,
+            "oldExitReason": "Q102_TIME_EXIT",
+            "atReturnPct": -3.308162531463499
+          }
+        ]
+      },
+      "30": {
+        "family": "HIGH_VOL",
+        "side": "LONG",
+        "ageHours": 12,
+        "negativeClosedH1ThresholdPct": 3.0,
+        "oldWinners": 0,
+        "oldLosers": 1,
+        "originalWinnerPnlJpy": 0.0,
+        "originalLoserPnlJpy": -1036591.7331390035,
+        "oldTimeExitLosers": 1,
+        "hits": [
+          {
+            "symbol": "ENAUSDT",
+            "candidate": "C002386",
+            "oldWin": false,
+            "oldExitReason": "Q102_TIME_EXIT",
+            "atReturnPct": -3.308162531463499
+          }
+        ]
+      }
+    }
+  },
+  "cases": {
+    "Q102_PB3H_LOSS_PLUS_HV_SHORT_PROFIT3_TO1": {
+      "sourceFolder": "2026-10-22_q102_timeexit_risk_continued_after_v4",
+      "rule": {
+        "id": "Q102_PB3H_LOSS_PLUS_HV_SHORT_PROFIT3_TO1",
+        "strategy": "Q102",
+        "sides": [
+          "LONG",
+          "SHORT"
+        ],
+        "kind": "pb_early_plus_hv_short_profit",
+        "arm": 0.03,
+        "floor": 0.01
+      },
+      "costs": {
+        "10": {
+          "equityJpy": 195452680.3474182,
+          "mtmMaxDdPct": -14.603309760733396,
+          "profitFactor": 3.155691489962669,
+          "trades": 1323,
+          "extraQ102ExitLabels": {
+            "RESEARCH_Q102_PROFIT_ARM2_FLOOR0P5": 7,
+            "RESEARCH_INITIAL_ADVERSE_STOP_Q102_PB_LONG_1P5_3H": 2
+          },
+          "extraQ102ExitCount": 9,
+          "deltaEquityJpy": 3702625.0205666125,
+          "ddImprovementPp": 0.0,
+          "q102Trades": 183,
+          "acceptedV4ShortCooldowns": 52,
+          "replayConverged": true,
+          "accounting": "PASS"
+        },
+        "30": {
+          "equityJpy": 82997204.05155437,
+          "mtmMaxDdPct": -15.75383475906923,
+          "profitFactor": 2.6237616684773792,
+          "trades": 1320,
+          "extraQ102ExitLabels": {
+            "RESEARCH_Q102_PROFIT_ARM2_FLOOR0P5": 7,
+            "RESEARCH_INITIAL_ADVERSE_STOP_Q102_PB_LONG_1P5_3H": 2
+          },
+          "extraQ102ExitCount": 9,
+          "deltaEquityJpy": 8256936.26748766,
+          "ddImprovementPp": 0.024318309942083616,
+          "q102Trades": 182,
+          "acceptedV4ShortCooldowns": 51,
+          "replayConverged": true,
+          "accounting": "PASS"
+        }
+      },
+      "v4FourRuleLocked": true,
+      "noDdWorseningBothCosts": true,
+      "strict0p1PpDdImprovementBothCosts": false
+    },
+    "Q102_HV_72H_EARLY_TIME_RESCUE_24H": {
+      "sourceFolder": "2026-10-22_q102_timeexit_risk_continued_after_v4",
+      "rule": {
+        "id": "Q102_HV_72H_EARLY_TIME_RESCUE_24H",
+        "strategy": "Q102",
+        "sides": [
+          "LONG",
+          "SHORT"
+        ],
+        "family": "HIGH_VOL",
+        "kind": "time_loss_cut",
+        "arm_hours": 24,
+        "stop_pct": 0.02,
+        "mfe_gate_pct": 0.02,
+        "reentry_hours": 0
+      },
+      "costs": {
+        "10": {
+          "equityJpy": 199152715.24403128,
+          "mtmMaxDdPct": -14.603309760733396,
+          "profitFactor": 3.2890559210641004,
+          "trades": 1328,
+          "extraQ102ExitLabels": {
+            "RESEARCH_INITIAL_ADVERSE_STOP_Q102_HV_72H_EARLY_TIME_RESCUE_24H": 5
+          },
+          "extraQ102ExitCount": 5,
+          "deltaEquityJpy": 7402659.917179704,
+          "ddImprovementPp": 0.0,
+          "q102Trades": 183,
+          "acceptedV4ShortCooldowns": 52,
+          "replayConverged": true,
+          "accounting": "PASS"
+        },
+        "30": {
+          "equityJpy": 65954943.65262258,
+          "mtmMaxDdPct": -15.943885832001426,
+          "profitFactor": 2.4397581640206196,
+          "trades": 1323,
+          "extraQ102ExitLabels": {
+            "RESEARCH_INITIAL_ADVERSE_STOP_Q102_HV_72H_EARLY_TIME_RESCUE_24H": 5
+          },
+          "extraQ102ExitCount": 5,
+          "deltaEquityJpy": -8785324.131444126,
+          "ddImprovementPp": -0.1657327629901122,
+          "q102Trades": 182,
+          "acceptedV4ShortCooldowns": 51,
+          "replayConverged": true,
+          "accounting": "PASS"
+        }
+      },
+      "v4FourRuleLocked": true,
+      "noDdWorseningBothCosts": false,
+      "strict0p1PpDdImprovementBothCosts": false
+    },
+    "Q102_MR_SHORT_TIME_RESCUE_12H": {
+      "sourceFolder": "2026-10-22_q102_timeexit_risk_continued_after_v4",
+      "rule": {
+        "id": "Q102_MR_SHORT_TIME_RESCUE_12H",
+        "strategy": "Q102",
+        "sides": [
+          "SHORT"
+        ],
+        "family": "MR",
+        "kind": "time_loss_cut",
+        "arm_hours": 12,
+        "stop_pct": 0.03,
+        "mfe_gate_pct": 0.02,
+        "reentry_hours": 0
+      },
+      "costs": {
+        "10": {
+          "equityJpy": 189283074.16171122,
+          "mtmMaxDdPct": -16.514270280821954,
+          "profitFactor": 3.0943616532987277,
+          "trades": 1322,
+          "extraQ102ExitLabels": {
+            "RESEARCH_INITIAL_ADVERSE_STOP_Q102_MR_SHORT_TIME_RESCUE_12H": 9
+          },
+          "extraQ102ExitCount": 9,
+          "deltaEquityJpy": -2466981.1651403606,
+          "ddImprovementPp": -1.9109605200885582,
+          "q102Trades": 183,
+          "acceptedV4ShortCooldowns": 52,
+          "replayConverged": true,
+          "accounting": "PASS"
+        },
+        "30": {
+          "equityJpy": 67750234.25004694,
+          "mtmMaxDdPct": -17.50488305676455,
+          "profitFactor": 2.339555022053953,
+          "trades": 1317,
+          "extraQ102ExitLabels": {
+            "RESEARCH_INITIAL_ADVERSE_STOP_Q102_MR_SHORT_TIME_RESCUE_12H": 9
+          },
+          "extraQ102ExitCount": 9,
+          "deltaEquityJpy": -6990033.534019768,
+          "ddImprovementPp": -1.726729987753238,
+          "q102Trades": 181,
+          "acceptedV4ShortCooldowns": 51,
+          "replayConverged": true,
+          "accounting": "PASS"
+        }
+      },
+      "v4FourRuleLocked": true,
+      "noDdWorseningBothCosts": false,
+      "strict0p1PpDdImprovementBothCosts": false
+    },
+    "Q102_MR_SHORT_H1_2CLOSE_BELOW2_AFTER12H": {
+      "sourceFolder": "2026-10-22_q102_timeexit_h1_confirmed_after_v4",
+      "rule": {
+        "id": "Q102_MR_SHORT_H1_2CLOSE_BELOW2_AFTER12H",
+        "strategy": "Q102",
+        "sides": [
+          "SHORT"
+        ],
+        "family": "MR",
+        "kind": "h1_two_loss_closes",
+        "arm_hours": 12,
+        "loss_pct": 0.02,
+        "preprofit_close_arm": 0.02
+      },
+      "costs": {
+        "10": {
+          "equityJpy": 185706701.51272395,
+          "mtmMaxDdPct": -16.514270280821954,
+          "profitFactor": 3.1083566478215356,
+          "trades": 1319,
+          "extraQ102ExitLabels": {
+            "RESEARCH_Q102_H1_2CLOSE_LOSS_Q102_MR_SHORT_H1_2CLOSE_BELOW2_AFTER12H": 9
+          },
+          "extraQ102ExitCount": 9,
+          "deltaEquityJpy": -6043353.814127624,
+          "ddImprovementPp": -1.9109605200885582,
+          "q102Trades": 182,
+          "acceptedV4ShortCooldowns": 52,
+          "replayConverged": true,
+          "accounting": "PASS"
+        },
+        "30": {
+          "equityJpy": 65677448.168025725,
+          "mtmMaxDdPct": -17.50488305676455,
+          "profitFactor": 2.3428829369165682,
+          "trades": 1317,
+          "extraQ102ExitLabels": {
+            "RESEARCH_Q102_H1_2CLOSE_LOSS_Q102_MR_SHORT_H1_2CLOSE_BELOW2_AFTER12H": 9
+          },
+          "extraQ102ExitCount": 9,
+          "deltaEquityJpy": -9062819.616040982,
+          "ddImprovementPp": -1.726729987753238,
+          "q102Trades": 180,
+          "acceptedV4ShortCooldowns": 51,
+          "replayConverged": true,
+          "accounting": "PASS"
+        }
+      },
+      "v4FourRuleLocked": true,
+      "noDdWorseningBothCosts": false,
+      "strict0p1PpDdImprovementBothCosts": false
+    },
+    "Q102_HV_LONG_H1_2CLOSE_BELOW3_AFTER12H": {
+      "sourceFolder": "2026-10-22_q102_timeexit_h1_confirmed_after_v4",
+      "rule": {
+        "id": "Q102_HV_LONG_H1_2CLOSE_BELOW3_AFTER12H",
+        "strategy": "Q102",
+        "sides": [
+          "LONG"
+        ],
+        "family": "HIGH_VOL",
+        "kind": "h1_two_loss_closes",
+        "arm_hours": 12,
+        "loss_pct": 0.03,
+        "preprofit_close_arm": 0.02
+      },
+      "costs": {
+        "10": {
+          "equityJpy": 194578559.93762574,
+          "mtmMaxDdPct": -14.603309760733396,
+          "profitFactor": 3.183592629727858,
+          "trades": 1322,
+          "extraQ102ExitLabels": {
+            "RESEARCH_Q102_H1_2CLOSE_LOSS_Q102_HV_LONG_H1_2CLOSE_BELOW3_AFTER12H": 1
+          },
+          "extraQ102ExitCount": 1,
+          "deltaEquityJpy": 2828504.6107741594,
+          "ddImprovementPp": 0.0,
+          "q102Trades": 182,
+          "acceptedV4ShortCooldowns": 52,
+          "replayConverged": true,
+          "accounting": "PASS"
+        },
+        "30": {
+          "equityJpy": 77296638.73115937,
+          "mtmMaxDdPct": -15.778153069011314,
+          "profitFactor": 2.614905259316175,
+          "trades": 1319,
+          "extraQ102ExitLabels": {
+            "RESEARCH_Q102_H1_2CLOSE_LOSS_Q102_HV_LONG_H1_2CLOSE_BELOW3_AFTER12H": 1
+          },
+          "extraQ102ExitCount": 1,
+          "deltaEquityJpy": 2556370.947092667,
+          "ddImprovementPp": 0.0,
+          "q102Trades": 181,
+          "acceptedV4ShortCooldowns": 51,
+          "replayConverged": true,
+          "accounting": "PASS"
+        }
+      },
+      "v4FourRuleLocked": true,
+      "noDdWorseningBothCosts": true,
+      "strict0p1PpDdImprovementBothCosts": false
+    }
+  }
+}

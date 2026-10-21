@@ -1,0 +1,357 @@
+{
+  "sourceV4FourFixed": true,
+  "historyOnly": true,
+  "files": [
+    {
+      "name": "Q102_PB3H_LOSS_PLUS_HV_SHORT_PROFIT3_TO1",
+      "costBps": 10,
+      "file": "candidate-decisions.jsonl",
+      "sha256Final": "adc540b2fdcba4eeba3dab76073a7898d30074eccaa23b1f36c06491af115081",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_PB3H_LOSS_PLUS_HV_SHORT_PROFIT3_TO1",
+      "costBps": 10,
+      "file": "portfolio-trades.jsonl",
+      "sha256Final": "fd5a52827f65ae4dd44488444a5fd556b4e3adb14ff87579f5758ecda2841280",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_PB3H_LOSS_PLUS_HV_SHORT_PROFIT3_TO1",
+      "costBps": 10,
+      "file": "portfolio-events.jsonl",
+      "sha256Final": "1299d83a97cd570f2faa209e771bd7a06c7f762926f1878097bc5f2477694a70",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_PB3H_LOSS_PLUS_HV_SHORT_PROFIT3_TO1",
+      "costBps": 10,
+      "file": "task9-mtm.jsonl",
+      "sha256Final": "0ced97188112e9ad75f855fe29dcd6a00055e0100aeba10d214e93616c080509",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_PB3H_LOSS_PLUS_HV_SHORT_PROFIT3_TO1",
+      "costBps": 10,
+      "file": "metrics.json",
+      "sha256Final": "e0537e2adec074ee26de2a4cdd2d7d3b4255a030a5ee90e12b5c2fcd9acc8f81",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_PB3H_LOSS_PLUS_HV_SHORT_PROFIT3_TO1",
+      "costBps": 30,
+      "file": "candidate-decisions.jsonl",
+      "sha256Final": "fbc0e779571f7fed2cc6315fdcfa820fe48c4635c8f1026dedd96c8ec65f0e3d",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_PB3H_LOSS_PLUS_HV_SHORT_PROFIT3_TO1",
+      "costBps": 30,
+      "file": "portfolio-trades.jsonl",
+      "sha256Final": "ae65a21ded2de6795101620e72e4612175dd9e345c3f72173c4121670071fe22",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_PB3H_LOSS_PLUS_HV_SHORT_PROFIT3_TO1",
+      "costBps": 30,
+      "file": "portfolio-events.jsonl",
+      "sha256Final": "bc243a8f424b24faa85f3985941eae7c1f990b23ac9efd7cf8bee11069eca5f7",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_PB3H_LOSS_PLUS_HV_SHORT_PROFIT3_TO1",
+      "costBps": 30,
+      "file": "task9-mtm.jsonl",
+      "sha256Final": "da51c365e7958ae872b8f5db1e3749777eadfa209a664f7e175e8ca3a8fd3f33",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_PB3H_LOSS_PLUS_HV_SHORT_PROFIT3_TO1",
+      "costBps": 30,
+      "file": "metrics.json",
+      "sha256Final": "e013a13997faa85411c0cfec145b8e53846822444ed834ec54cba36542765f01",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_HV_72H_EARLY_TIME_RESCUE_24H",
+      "costBps": 10,
+      "file": "candidate-decisions.jsonl",
+      "sha256Final": "b6fad4451210eebf3610e89b3efec901f5b286d887ffa0011642f1fd3cb7124f",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_HV_72H_EARLY_TIME_RESCUE_24H",
+      "costBps": 10,
+      "file": "portfolio-trades.jsonl",
+      "sha256Final": "067f4f4a5a920bc0e1db7282096590f5b4c42bf4269543650c3670ab823bd099",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_HV_72H_EARLY_TIME_RESCUE_24H",
+      "costBps": 10,
+      "file": "portfolio-events.jsonl",
+      "sha256Final": "2534f9e80212b2272c086f3d7f2fbb8c89cdc7e80e2e8fee2fbbaa32bac9cead",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_HV_72H_EARLY_TIME_RESCUE_24H",
+      "costBps": 10,
+      "file": "task9-mtm.jsonl",
+      "sha256Final": "958d9ecec24222e540c735b619103c4a05aa70b5a934fb6b856b0dc3602a12db",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_HV_72H_EARLY_TIME_RESCUE_24H",
+      "costBps": 10,
+      "file": "metrics.json",
+      "sha256Final": "65f2fdb7d8553002acdaeb073722b506864d968322ba7b1cfe81496e7ce4c4f1",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_HV_72H_EARLY_TIME_RESCUE_24H",
+      "costBps": 30,
+      "file": "candidate-decisions.jsonl",
+      "sha256Final": "9e564932e512dd0812025b55ff2825feacb785db91b5683cc4bf5bb3fe621c71",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_HV_72H_EARLY_TIME_RESCUE_24H",
+      "costBps": 30,
+      "file": "portfolio-trades.jsonl",
+      "sha256Final": "a2a9f42d6796b0f0fe99b9df6b10fbc207ac96874b1e686e2cebecb817c655d6",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_HV_72H_EARLY_TIME_RESCUE_24H",
+      "costBps": 30,
+      "file": "portfolio-events.jsonl",
+      "sha256Final": "48c99169ec54dd4156d3687884f2987a534884bea144369402ce8fd9fa4b7b77",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_HV_72H_EARLY_TIME_RESCUE_24H",
+      "costBps": 30,
+      "file": "task9-mtm.jsonl",
+      "sha256Final": "02f6bbcd81228861ba75fe258758325e07d7a4ad2112965100aeefe504d0cc00",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_HV_72H_EARLY_TIME_RESCUE_24H",
+      "costBps": 30,
+      "file": "metrics.json",
+      "sha256Final": "70a16f54c3c1db04fed0d306b9d5912465ec1f9684d1111a6b0c39ae8bc90084",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_MR_SHORT_TIME_RESCUE_12H",
+      "costBps": 10,
+      "file": "candidate-decisions.jsonl",
+      "sha256Final": "4235f2f90e1375fe0557ef6d2ee7114a22cf17974341a04465c54f321e0ee182",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_MR_SHORT_TIME_RESCUE_12H",
+      "costBps": 10,
+      "file": "portfolio-trades.jsonl",
+      "sha256Final": "d0cf7aaf716e215eb854475146036dcaaec4446c0492f6df74633d10c4c5dc46",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_MR_SHORT_TIME_RESCUE_12H",
+      "costBps": 10,
+      "file": "portfolio-events.jsonl",
+      "sha256Final": "2aa7623f428d4ccee9c78884892114ec04a5926208a0eb1fc7b87423db589d2e",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_MR_SHORT_TIME_RESCUE_12H",
+      "costBps": 10,
+      "file": "task9-mtm.jsonl",
+      "sha256Final": "8b5fa85c2c8809242473e527d3f435015e5797149901c762cf42881e83f68ea6",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_MR_SHORT_TIME_RESCUE_12H",
+      "costBps": 10,
+      "file": "metrics.json",
+      "sha256Final": "72a91b3898870f37baed9a5eb141c84e0bd5e151b850487fddc29ae8740db150",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_MR_SHORT_TIME_RESCUE_12H",
+      "costBps": 30,
+      "file": "candidate-decisions.jsonl",
+      "sha256Final": "6fdd4b66f3f056b153aac10f230a1ae2ecde7ea28eefbf68e5495bb245e4288b",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_MR_SHORT_TIME_RESCUE_12H",
+      "costBps": 30,
+      "file": "portfolio-trades.jsonl",
+      "sha256Final": "46adf62fc9d7eca773769b146b3dda8b5850e1d82e5e700096ef43de7f850d5b",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_MR_SHORT_TIME_RESCUE_12H",
+      "costBps": 30,
+      "file": "portfolio-events.jsonl",
+      "sha256Final": "07ea36c814099226cbde3f38c7bfca95980e0d6e6c07b2c13fb4e57a56d5ca52",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_MR_SHORT_TIME_RESCUE_12H",
+      "costBps": 30,
+      "file": "task9-mtm.jsonl",
+      "sha256Final": "5acf8b094f8217e2197e0a0e207ba82de6531a1a0f87897d95e5997416bcaabb",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_MR_SHORT_TIME_RESCUE_12H",
+      "costBps": 30,
+      "file": "metrics.json",
+      "sha256Final": "40047553fce0553d9c3e30735107af722d7b2492f4e13464f9afdc68108a4ab1",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_MR_SHORT_H1_2CLOSE_BELOW2_AFTER12H",
+      "costBps": 10,
+      "file": "candidate-decisions.jsonl",
+      "sha256Final": "3bb8d75984afe4ac61613c5021aa823bdf47f3021bfd7fb776a4efe24bffc44e",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_MR_SHORT_H1_2CLOSE_BELOW2_AFTER12H",
+      "costBps": 10,
+      "file": "portfolio-trades.jsonl",
+      "sha256Final": "7089b37c654f2b756016bd7100923321279e91796e2942aa19d039fa8880b0e8",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_MR_SHORT_H1_2CLOSE_BELOW2_AFTER12H",
+      "costBps": 10,
+      "file": "portfolio-events.jsonl",
+      "sha256Final": "2cd154cb59f10f2a0dd2aa96d2939e99c0c8e6db519b38ab24d3b1e2e99bed8d",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_MR_SHORT_H1_2CLOSE_BELOW2_AFTER12H",
+      "costBps": 10,
+      "file": "task9-mtm.jsonl",
+      "sha256Final": "ea6c7a41afee5aaba66d9f199b4cf70475973c33f12d9cbc6b1b96df40f697da",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_MR_SHORT_H1_2CLOSE_BELOW2_AFTER12H",
+      "costBps": 10,
+      "file": "metrics.json",
+      "sha256Final": "8b238496593c4e77d6351b2ced1e0a83f4629b4a5ee95b95601752cfe80112df",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_MR_SHORT_H1_2CLOSE_BELOW2_AFTER12H",
+      "costBps": 30,
+      "file": "candidate-decisions.jsonl",
+      "sha256Final": "8309e08d6100d5333741521cff3e7c49b611282fd4e53478e8a05fbc9834f6dc",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_MR_SHORT_H1_2CLOSE_BELOW2_AFTER12H",
+      "costBps": 30,
+      "file": "portfolio-trades.jsonl",
+      "sha256Final": "ef507a1e1a3c97ee98d3fe680b3cd456bc27609cb05423509f137d46d120986a",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_MR_SHORT_H1_2CLOSE_BELOW2_AFTER12H",
+      "costBps": 30,
+      "file": "portfolio-events.jsonl",
+      "sha256Final": "0464b52931662c4fce0e6df59ce4aa589d63c8c62d28a1f4c4b33d59a38e7454",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_MR_SHORT_H1_2CLOSE_BELOW2_AFTER12H",
+      "costBps": 30,
+      "file": "task9-mtm.jsonl",
+      "sha256Final": "fe78feb331a0c431029725ecaa804c0eae26d27e6d4c106fb0921727ca12eeb9",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_MR_SHORT_H1_2CLOSE_BELOW2_AFTER12H",
+      "costBps": 30,
+      "file": "metrics.json",
+      "sha256Final": "b8686d95faa3f2f41ea48d6b49bfe53a023073ea73c771d5ef14654cf6098d76",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_HV_LONG_H1_2CLOSE_BELOW3_AFTER12H",
+      "costBps": 10,
+      "file": "candidate-decisions.jsonl",
+      "sha256Final": "6c5e24d3f993c08017de5fe67e7989ca1e786cd700c6412d3e4096c96083b8d6",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_HV_LONG_H1_2CLOSE_BELOW3_AFTER12H",
+      "costBps": 10,
+      "file": "portfolio-trades.jsonl",
+      "sha256Final": "29bde116862229691509b111965f4c9b6955b92dd8a433c0ae57f0a07d0d8451",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_HV_LONG_H1_2CLOSE_BELOW3_AFTER12H",
+      "costBps": 10,
+      "file": "portfolio-events.jsonl",
+      "sha256Final": "c41bbb7c3f95ad88e8dd50f493689e1bd5ffcbb510844387bbc04e3fb25d9937",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_HV_LONG_H1_2CLOSE_BELOW3_AFTER12H",
+      "costBps": 10,
+      "file": "task9-mtm.jsonl",
+      "sha256Final": "56c473ceabcb6c9ff4b3c9f5dc87bacfd84622370a2238884d81d3a1cd1a0254",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_HV_LONG_H1_2CLOSE_BELOW3_AFTER12H",
+      "costBps": 10,
+      "file": "metrics.json",
+      "sha256Final": "0e013500079e031f575ffbfdd6db02b482338b7bbfeb3a59084db41f45342b86",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_HV_LONG_H1_2CLOSE_BELOW3_AFTER12H",
+      "costBps": 30,
+      "file": "candidate-decisions.jsonl",
+      "sha256Final": "d5b0c08133d2a985e8f2442004cb5b2ff8d69479cffe30f8ef4a6c4589a3f8fc",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_HV_LONG_H1_2CLOSE_BELOW3_AFTER12H",
+      "costBps": 30,
+      "file": "portfolio-trades.jsonl",
+      "sha256Final": "f92b55d0ef693b63b197334ba0f2e79597db4ba635d1daaab565cba40d1dbec2",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_HV_LONG_H1_2CLOSE_BELOW3_AFTER12H",
+      "costBps": 30,
+      "file": "portfolio-events.jsonl",
+      "sha256Final": "c5b20b8e3475efe620e45e02fd2c0ff2cd8caa92ab2ad86cee7dbf859fbb4dc4",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_HV_LONG_H1_2CLOSE_BELOW3_AFTER12H",
+      "costBps": 30,
+      "file": "task9-mtm.jsonl",
+      "sha256Final": "3c81393bcb10e18c6063c6d8a3f94067360b95dc8f5b524b1279b932bf765057",
+      "exactLastTwoCooldownIterations": true
+    },
+    {
+      "name": "Q102_HV_LONG_H1_2CLOSE_BELOW3_AFTER12H",
+      "costBps": 30,
+      "file": "metrics.json",
+      "sha256Final": "dd5d4f02df44b79f9e540b8a7127c5ebcc98896da149f7e9f5ee30a463222295",
+      "exactLastTwoCooldownIterations": true
+    }
+  ],
+  "exactProofPassCount": 50
+}
