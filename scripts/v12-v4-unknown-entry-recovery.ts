@@ -36,7 +36,7 @@ async function main(){
    client.getUserTrades(leg.candidate.symbol,{startTime:windowStart,endTime:observedAt,limit:1000}),
    client.getIncomeHistory({symbol:leg.candidate.symbol,startTime:windowStart,endTime:observedAt,limit:1000}),
   ]);
-  const evidence={observedAt,order,positions:positions.map(row=>({symbol:String(row.symbol),positionAmt:String(row.positionAmt)})),openOrders,userTrades,income};
+  const evidence={observedAt,order,positions:positions.map(row=>({symbol:String(row.symbol),positionAmt:String(row.positionAmt),positionSide:String(row.positionSide||"BOTH")})),openOrders,userTrades,income};
   const auditPath="/var/lib/disdex/v12-v4/unknown-entry-recovery.jsonl";
   await mkdir("/var/lib/disdex/v12-v4",{recursive:true,mode:0o700});
   try{await regular(auditPath);}catch(error:any){if(error?.code!=="ENOENT")throw error;await writeFile(auditPath,"",{encoding:"utf8",mode:0o600});}
