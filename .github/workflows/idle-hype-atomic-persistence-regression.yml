@@ -4,9 +4,11 @@ on:
     paths:
       - 'lib/disdex-aster-global-rate-budget.ts'
       - 'lib/idle-priority-short-state.ts'
+      - 'lib/idle-residual-long-state.ts'
       - 'lib/hype-zec-long-runner-state.ts'
       - 'tests/aster-global-rate-budget.test.ts'
       - 'tests/idle-priority-short-state.test.ts'
+      - 'tests/idle-residual-long-state-migrate.test.ts'
       - 'tests/hype-zec-long-state.test.ts'
       - '.github/workflows/idle-hype-atomic-persistence-regression.yml'
   workflow_dispatch:
@@ -32,3 +34,5 @@ jobs:
         run: ./node_modules/.bin/tsx --test tests/hype-zec-long-state.test.ts
       - name: Idle persisted state tests
         run: ./node_modules/.bin/tsx --test tests/idle-priority-short-state.test.ts
+      - name: Idle residual persisted state and migration tests
+        run: ./node_modules/.bin/tsx --test tests/idle-residual-long-state-migrate.test.ts
