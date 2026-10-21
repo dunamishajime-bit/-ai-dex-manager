@@ -86,6 +86,25 @@ export interface DisDexV96KillSwitchAudit {
     observedAt: number;
 }
 
+export interface DisDexV96ReconciledPositionSnapshot {
+    symbol: string;
+    positionAmt: string;
+    positionSide: string;
+}
+
+export interface DisDexV96PositionReconciliationAudit {
+    reconciliationId: string;
+    migrationId: string;
+    status: "MATCHED" | "RESOLVED_FLAT";
+    reconciledAt: string;
+    legacyRecordedPositions: DisDexV96ReconciledPositionSnapshot[];
+    actualPositions: DisDexV96ReconciledPositionSnapshot[];
+    openOrderCount: number;
+    grossBefore: number;
+    grossAfter: number;
+    ordersSent: false;
+}
+
 export interface DisDexV96RunnerState {
     version: 2;
     strategyId: typeof DISDEX_V96_STRATEGY_ID;
@@ -95,6 +114,7 @@ export interface DisDexV96RunnerState {
     createdAt: number;
     lastRunAt?: number;
     lastSignalReferenceTs?: number;
+    skippedSignalReferenceTs?: number;
     lastCompletedIdempotencyKey?: string;
     pending?: DisDexV96PendingOrder;
     completedExecutions: DisDexV96CompletedExecution[];
@@ -103,6 +123,7 @@ export interface DisDexV96RunnerState {
     operatorOverride?: DisDexV96OperatorOverrideAudit;
     dailyRisk?: DisDexV96DailyRiskState;
     killSwitch?: DisDexV96KillSwitchAudit;
+    positionReconciliation?: DisDexV96PositionReconciliationAudit;
     bootstrapRequired: boolean;
     manualReviewReason?: string;
 }
@@ -165,6 +186,7 @@ function normalize(value: unknown, mode: DisDexV96RunnerMode): DisDexV96RunnerSt
         createdAt: Number.isFinite(Number(raw.createdAt)) ? Number(raw.createdAt) : now,
         lastRunAt: Number.isFinite(Number(raw.lastRunAt)) ? Number(raw.lastRunAt) : undefined,
         lastSignalReferenceTs: Number.isFinite(Number(raw.lastSignalReferenceTs)) ? Number(raw.lastSignalReferenceTs) : undefined,
+        skippedSignalReferenceTs: Number.isFinite(Number(raw.skippedSignalReferenceTs)) ? Number(raw.skippedSignalReferenceTs) : undefined,
         lastCompletedIdempotencyKey: typeof raw.lastCompletedIdempotencyKey === "string" ? raw.lastCompletedIdempotencyKey : undefined,
         pending: raw.pending && typeof raw.pending === "object" ? raw.pending as DisDexV96PendingOrder : undefined,
         completedExecutions: Array.isArray(raw.completedExecutions)
@@ -192,6 +214,9 @@ function normalize(value: unknown, mode: DisDexV96RunnerMode): DisDexV96RunnerSt
             : undefined,
         killSwitch: raw.killSwitch && typeof raw.killSwitch === "object"
             ? raw.killSwitch as DisDexV96KillSwitchAudit
+            : undefined,
+        positionReconciliation: raw.positionReconciliation && typeof raw.positionReconciliation === "object"
+            ? raw.positionReconciliation as DisDexV96PositionReconciliationAudit
             : undefined,
         bootstrapRequired: typeof raw.bootstrapRequired === "boolean" ? raw.bootstrapRequired : true,
         manualReviewReason: typeof raw.manualReviewReason === "string" ? raw.manualReviewReason : undefined,

@@ -144,6 +144,9 @@ async function main() {
         maxTransactionRetries: numberEnv("DISDEX_V96_MAX_TRANSACTION_RETRIES", 3),
         closeUnmanagedPositions: boolEnv("DISDEX_V96_CLOSE_UNMANAGED_POSITIONS", DISDEX_V96_RUNTIME.closeUnmanagedPositions),
         penguTargetGrossCap: approvedOverride?.initialPenguGrossCap,
+        oneTimeSkippedSignalReferenceTs: numberEnv("DISDEX_V96_ONE_TIME_SKIP_REFERENCE_TS", 1785024000000),
+        roundTripFeeBps: numberEnv("DISDEX_V96_ROUND_TRIP_FEE_BPS", 8),
+        minimumExecutionHeadroomUsd: numberEnv("DISDEX_V96_MIN_EXECUTION_HEADROOM_USD", 4),
         maximumDailyLossPct: approvedOverride?.maximumDailyLossPct
             ?? numberEnv("DISDEX_V96_MAX_DAILY_LOSS_PCT", DISDEX_V96_LIVE_PROMOTION.maximumDailyLossPct),
         maximumDailyLossUsd: approvedOverride?.maximumDailyLossUsd
@@ -168,6 +171,10 @@ async function main() {
         runnerMode,
         executor: executor.constructor.name,
         maximumGross: config.maxGross,
+        cashReservePct: config.cashReservePct,
+        roundTripFeeBps: config.roundTripFeeBps,
+        minimumExecutionHeadroomUsd: config.minimumExecutionHeadroomUsd,
+        oneTimeSkippedSignalReferenceTs: config.oneTimeSkippedSignalReferenceTs,
         penguTargetGross: 1.15,
         activePenguGrossCap: config.penguTargetGrossCap || 1.15,
         minimumPenguClip: 0.50,
