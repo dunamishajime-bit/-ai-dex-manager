@@ -1,0 +1,851 @@
+{
+  "status": "RESEARCH_ONLY_NOT_LIVE",
+  "period": "2025-08-10..2026-08-10",
+  "initialCapitalJpy": 10000,
+  "contributionsJpy": 0,
+  "costsBps": [
+    10,
+    30
+  ],
+  "fullyDynamicEightLogicReselection": true,
+  "HypeAlreadyUserAdoptedAndFixed": true,
+  "previousV12V4FourQ102ThreeAndPENGUUnchanged": true,
+  "dotExistingProductionSource": "lib/disdex-exit-overlay-contract.ts",
+  "dotExistingTrailingProfit": "confirmed_M5_close_3pct_arm_then_highest_confirmed_gain_minus_1p5_percentage_point_retrace",
+  "productionCodeConfiguredStopPct": 10,
+  "productionCodeConfiguredTakeProfitPct": 25,
+  "productionCodeDotHoldHours": 24,
+  "productionVpsHpOrdersChanged": false,
+  "venueFillAndTask9TypeScriptEconomicParityCertified": false,
+  "m5FixedFillScreen": {
+    "status": "ACCEPTED_FIXED_TRADES_M5_SCREEN_NO_DYNAMIC_RESELECTION",
+    "costs": {
+      "10": {
+        "baselineWins": 20,
+        "baselineLosses": 12,
+        "cases": {
+          "DOT_PROFIT_1P5_FLOOR0P25": {
+            "triggerN": 11,
+            "oldWinners": 7,
+            "oldLosers": 4,
+            "oldWinnersPnlJpy": 770114,
+            "oldLosersPnlJpy": -72408,
+            "triggerCandidateIds": [
+              "C000073",
+              "C000162",
+              "C000412",
+              "C000610",
+              "C001362",
+              "C001491",
+              "C001517",
+              "C001879",
+              "C002170",
+              "C002522",
+              "C003093"
+            ]
+          },
+          "DOT_PROFIT_2P0_FLOOR0P5": {
+            "triggerN": 10,
+            "oldWinners": 7,
+            "oldLosers": 3,
+            "oldWinnersPnlJpy": 772620,
+            "oldLosersPnlJpy": -71790,
+            "triggerCandidateIds": [
+              "C000162",
+              "C000412",
+              "C000916",
+              "C001362",
+              "C001491",
+              "C001517",
+              "C001879",
+              "C002170",
+              "C002522",
+              "C003093"
+            ]
+          },
+          "DOT_PROFIT_3P0_FLOOR1P0": {
+            "triggerN": 0,
+            "oldWinners": 0,
+            "oldLosers": 0,
+            "oldWinnersPnlJpy": 0,
+            "oldLosersPnlJpy": 0,
+            "triggerCandidateIds": []
+          }
+        }
+      },
+      "30": {
+        "baselineWins": 20,
+        "baselineLosses": 11,
+        "cases": {
+          "DOT_PROFIT_1P5_FLOOR0P25": {
+            "triggerN": 10,
+            "oldWinners": 7,
+            "oldLosers": 3,
+            "oldWinnersPnlJpy": 461572,
+            "oldLosersPnlJpy": -40216,
+            "triggerCandidateIds": [
+              "C000073",
+              "C000162",
+              "C000412",
+              "C000610",
+              "C001491",
+              "C001517",
+              "C001879",
+              "C002170",
+              "C002522",
+              "C003093"
+            ]
+          },
+          "DOT_PROFIT_2P0_FLOOR0P5": {
+            "triggerN": 9,
+            "oldWinners": 7,
+            "oldLosers": 2,
+            "oldWinnersPnlJpy": 463134,
+            "oldLosersPnlJpy": -39722,
+            "triggerCandidateIds": [
+              "C000162",
+              "C000412",
+              "C000916",
+              "C001491",
+              "C001517",
+              "C001879",
+              "C002170",
+              "C002522",
+              "C003093"
+            ]
+          },
+          "DOT_PROFIT_3P0_FLOOR1P0": {
+            "triggerN": 0,
+            "oldWinners": 0,
+            "oldLosers": 0,
+            "oldWinnersPnlJpy": 0,
+            "oldLosersPnlJpy": 0,
+            "triggerCandidateIds": []
+          }
+        }
+      }
+    }
+  },
+  "cases": {
+    "HYPE_ADOPTED_BASELINE": {
+      "10": {
+        "finalEquityJpy": 231889902.2769463,
+        "equityDeltaVsAdoptedJpy": 0.0,
+        "maxMtmDdPct": -14.603309760733396,
+        "maxMtmDdDeltaPp": 0.0,
+        "profitFactor": 3.914947744244699,
+        "trades": 1303,
+        "portfolioWinRatePct": 71.8342287029931,
+        "hypeTrades": 18,
+        "byIdleShortSymbol": {
+          "RENDERUSDT": {
+            "trades": 26,
+            "wins": 11,
+            "losses": 15,
+            "winRatePct": 42.30769230769231,
+            "modeledPnlJpy": 2191495.6379224514,
+            "loserPnlJpy": -2677193.2626111754
+          },
+          "TAOUSDT": {
+            "trades": 8,
+            "wins": 5,
+            "losses": 3,
+            "winRatePct": 62.5,
+            "modeledPnlJpy": 4367133.561072389,
+            "loserPnlJpy": -2233853.842943398
+          },
+          "DOTUSDT": {
+            "trades": 32,
+            "wins": 20,
+            "losses": 12,
+            "winRatePct": 62.5,
+            "modeledPnlJpy": 3289397.88517098,
+            "loserPnlJpy": -130599.44654908513
+          },
+          "JUPUSDT": {
+            "trades": 4,
+            "wins": 3,
+            "losses": 1,
+            "winRatePct": 75.0,
+            "modeledPnlJpy": 521273.0130165859,
+            "loserPnlJpy": -11185.549758518766
+          },
+          "TIAUSDT": {
+            "trades": 5,
+            "wins": 5,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "modeledPnlJpy": 654742.9899248002,
+            "loserPnlJpy": 0
+          }
+        },
+        "replay": [
+          {
+            "i": 0,
+            "stops": 52,
+            "entryCandidatesChecked": 0,
+            "idlesAllowed": 0,
+            "idlesRejected": 0,
+            "hypePassed": 1,
+            "hypeRejected": 1
+          },
+          {
+            "i": 1,
+            "stops": 52,
+            "entryCandidatesChecked": 0,
+            "idlesAllowed": 0,
+            "idlesRejected": 0,
+            "hypePassed": 1,
+            "hypeRejected": 1
+          },
+          {
+            "i": 2,
+            "stops": 52,
+            "entryCandidatesChecked": 0,
+            "idlesAllowed": 0,
+            "idlesRejected": 0,
+            "hypePassed": 1,
+            "hypeRejected": 1
+          }
+        ],
+        "sha256Ledgers": {
+          "portfolio-trades.jsonl": "f56f7c6fd2038b5e7b298d837b315fb9599ccb2ad19598289085a0f28d26bf11",
+          "candidate-decisions.jsonl": "7eb5f163eb626c493536adc4fdff319c7bec43ec873eca1ee416537a8986adf6",
+          "portfolio-events.jsonl": "7ac4736744038db856637ed8b798b06fc44108df81254c0776ae7d1f1832646c",
+          "task9-mtm.jsonl": "6dcea66f0638b38323f8c27331cf55b5a3632f258fa27b0bebd9e310a3ebe446",
+          "metrics.json": "8bb93b8dba9de9f0d16e77b4bc20258d31c1da576e29195dbd3492121793f0ac"
+        },
+        "accounting": "PASS"
+      },
+      "30": {
+        "finalEquityJpy": 129855821.95566286,
+        "equityDeltaVsAdoptedJpy": 0.0,
+        "maxMtmDdPct": -15.80770763869479,
+        "maxMtmDdDeltaPp": 0.0,
+        "profitFactor": 3.35179459175414,
+        "trades": 1300,
+        "portfolioWinRatePct": 69.38461538461539,
+        "hypeTrades": 17,
+        "byIdleShortSymbol": {
+          "RENDERUSDT": {
+            "trades": 24,
+            "wins": 10,
+            "losses": 14,
+            "winRatePct": 41.666666666666664,
+            "modeledPnlJpy": 744218.3064546698,
+            "loserPnlJpy": -1299355.3075383736
+          },
+          "TAOUSDT": {
+            "trades": 9,
+            "wins": 6,
+            "losses": 3,
+            "winRatePct": 66.66666666666667,
+            "modeledPnlJpy": 5203235.015418828,
+            "loserPnlJpy": -636368.594035139
+          },
+          "DOTUSDT": {
+            "trades": 31,
+            "wins": 20,
+            "losses": 11,
+            "winRatePct": 64.51612903225806,
+            "modeledPnlJpy": 1625628.9915814348,
+            "loserPnlJpy": -69840.21685008054
+          },
+          "JUPUSDT": {
+            "trades": 7,
+            "wins": 5,
+            "losses": 2,
+            "winRatePct": 71.42857142857143,
+            "modeledPnlJpy": 486652.86525425204,
+            "loserPnlJpy": -45069.11042453417
+          },
+          "TIAUSDT": {
+            "trades": 6,
+            "wins": 6,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "modeledPnlJpy": 484166.3671572728,
+            "loserPnlJpy": 0
+          }
+        },
+        "replay": [
+          {
+            "i": 0,
+            "stops": 51,
+            "entryCandidatesChecked": 0,
+            "idlesAllowed": 0,
+            "idlesRejected": 0,
+            "hypePassed": 1,
+            "hypeRejected": 1
+          },
+          {
+            "i": 1,
+            "stops": 51,
+            "entryCandidatesChecked": 0,
+            "idlesAllowed": 0,
+            "idlesRejected": 0,
+            "hypePassed": 1,
+            "hypeRejected": 1
+          },
+          {
+            "i": 2,
+            "stops": 51,
+            "entryCandidatesChecked": 0,
+            "idlesAllowed": 0,
+            "idlesRejected": 0,
+            "hypePassed": 1,
+            "hypeRejected": 1
+          }
+        ],
+        "sha256Ledgers": {
+          "portfolio-trades.jsonl": "43518d68f8fb6d3875c6feb77f34c71ec721847ddddf922ae667445fb7c82705",
+          "candidate-decisions.jsonl": "0e24da3b54af080b1d8f3a5466b96581f0025d9f75a002778acf4892f6490e44",
+          "portfolio-events.jsonl": "0ba4f61ef36c5729195aa85d330eaf0b255f74b0c948d32eaf8abf65322ceab2",
+          "task9-mtm.jsonl": "4eb5b3fa1292e617d871b90e6c4c6035a8a7bb89556c0082a3973cd41083c18f",
+          "metrics.json": "a6a2216a1ef14d676c0ec5e33f0203149ae0c81eb63bb1a0a34fab165f5e4cde"
+        },
+        "accounting": "PASS"
+      }
+    },
+    "DOT_PROFIT_1P5_FLOOR0P25": {
+      "10": {
+        "finalEquityJpy": 230103478.98116416,
+        "equityDeltaVsAdoptedJpy": -1786423.2957821488,
+        "maxMtmDdPct": -14.603309760733396,
+        "maxMtmDdDeltaPp": 0.0,
+        "profitFactor": 3.911186544697533,
+        "trades": 1300,
+        "portfolioWinRatePct": 71.92307692307692,
+        "hypeTrades": 17,
+        "byIdleShortSymbol": {
+          "RENDERUSDT": {
+            "trades": 26,
+            "wins": 11,
+            "losses": 15,
+            "winRatePct": 42.30769230769231,
+            "modeledPnlJpy": 2175661.750936256,
+            "loserPnlJpy": -2652765.9244848425
+          },
+          "TAOUSDT": {
+            "trades": 8,
+            "wins": 5,
+            "losses": 3,
+            "winRatePct": 62.5,
+            "modeledPnlJpy": 4313164.460223179,
+            "loserPnlJpy": -2213380.5126180267
+          },
+          "DOTUSDT": {
+            "trades": 32,
+            "wins": 23,
+            "losses": 9,
+            "winRatePct": 71.875,
+            "modeledPnlJpy": 2611874.941147599,
+            "loserPnlJpy": -61983.78706441816
+          },
+          "JUPUSDT": {
+            "trades": 4,
+            "wins": 3,
+            "losses": 1,
+            "winRatePct": 75.0,
+            "modeledPnlJpy": 513628.64899779327,
+            "loserPnlJpy": -11030.488135126381
+          },
+          "TIAUSDT": {
+            "trades": 5,
+            "wins": 5,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "modeledPnlJpy": 645916.0285875123,
+            "loserPnlJpy": 0
+          }
+        },
+        "replay": [
+          {
+            "i": 0,
+            "stops": 52,
+            "entryCandidatesChecked": 0,
+            "idlesAllowed": 0,
+            "idlesRejected": 0,
+            "hypePassed": 1,
+            "hypeRejected": 1
+          },
+          {
+            "i": 1,
+            "stops": 52,
+            "entryCandidatesChecked": 0,
+            "idlesAllowed": 0,
+            "idlesRejected": 0,
+            "hypePassed": 1,
+            "hypeRejected": 1
+          },
+          {
+            "i": 2,
+            "stops": 52,
+            "entryCandidatesChecked": 0,
+            "idlesAllowed": 0,
+            "idlesRejected": 0,
+            "hypePassed": 1,
+            "hypeRejected": 1
+          }
+        ],
+        "sha256Ledgers": {
+          "portfolio-trades.jsonl": "0c979c5c3b91d52a99f1818d8a847a9015c7abed50b51126c17d14eee7250de5",
+          "candidate-decisions.jsonl": "7bad65b9cc377425280d4597c25e31d6b41220fd0ebabfa210a8654cedba6766",
+          "portfolio-events.jsonl": "69a35f3a64fe3467a0689378d4c12683ee9c3a910ee714b6fe62d8edfe0b7de7",
+          "task9-mtm.jsonl": "f9ff6691f75d8005da3ba8dac2393be5a79bbee80a861e445746eaf9b4aa740d",
+          "metrics.json": "322787534ad60cf5571537c1d46dc4da529bf23f9464e79c638d6097835c221e"
+        },
+        "accounting": "PASS"
+      },
+      "30": {
+        "finalEquityJpy": 129052934.98356694,
+        "equityDeltaVsAdoptedJpy": -802886.9720959216,
+        "maxMtmDdPct": -15.82934613062129,
+        "maxMtmDdDeltaPp": -0.02163849192650069,
+        "profitFactor": 3.336323414309357,
+        "trades": 1298,
+        "portfolioWinRatePct": 68.79815100154083,
+        "hypeTrades": 16,
+        "byIdleShortSymbol": {
+          "RENDERUSDT": {
+            "trades": 24,
+            "wins": 10,
+            "losses": 14,
+            "winRatePct": 41.666666666666664,
+            "modeledPnlJpy": 741605.473301955,
+            "loserPnlJpy": -1296090.449917584
+          },
+          "TAOUSDT": {
+            "trades": 9,
+            "wins": 6,
+            "losses": 3,
+            "winRatePct": 66.66666666666667,
+            "modeledPnlJpy": 5188245.155680782,
+            "loserPnlJpy": -635070.780860991
+          },
+          "DOTUSDT": {
+            "trades": 31,
+            "wins": 13,
+            "losses": 18,
+            "winRatePct": 41.935483870967744,
+            "modeledPnlJpy": 1029953.5286850232,
+            "loserPnlJpy": -200428.55061072245
+          },
+          "JUPUSDT": {
+            "trades": 7,
+            "wins": 5,
+            "losses": 2,
+            "winRatePct": 71.42857142857143,
+            "modeledPnlJpy": 485718.1442881682,
+            "loserPnlJpy": -45000.490472161175
+          },
+          "TIAUSDT": {
+            "trades": 6,
+            "wins": 6,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "modeledPnlJpy": 483738.10539823934,
+            "loserPnlJpy": 0
+          }
+        },
+        "replay": [
+          {
+            "i": 0,
+            "stops": 51,
+            "entryCandidatesChecked": 0,
+            "idlesAllowed": 0,
+            "idlesRejected": 0,
+            "hypePassed": 1,
+            "hypeRejected": 1
+          },
+          {
+            "i": 1,
+            "stops": 51,
+            "entryCandidatesChecked": 0,
+            "idlesAllowed": 0,
+            "idlesRejected": 0,
+            "hypePassed": 1,
+            "hypeRejected": 1
+          },
+          {
+            "i": 2,
+            "stops": 51,
+            "entryCandidatesChecked": 0,
+            "idlesAllowed": 0,
+            "idlesRejected": 0,
+            "hypePassed": 1,
+            "hypeRejected": 1
+          }
+        ],
+        "sha256Ledgers": {
+          "portfolio-trades.jsonl": "a75223f05755fbfe2e0dc32ecd71f1f084d9d87398a220657ae76bad96cbbfd5",
+          "candidate-decisions.jsonl": "be6e0b12b4d88f797e301177e5d99e76d908720df0917f6b8b989d1a41db0438",
+          "portfolio-events.jsonl": "37f709db171528c214aa349c90a03951780eb752dfbcaea093494191a023c8fd",
+          "task9-mtm.jsonl": "4d87935e2c7dc27e8cbb25051adf9750257959e4bad707312be713717d783c1c",
+          "metrics.json": "eabf8bd5b677040a3fec6818eae691441e4eb0af92cb5d2b2adb449118a8c6e5"
+        },
+        "accounting": "PASS"
+      }
+    },
+    "DOT_PROFIT_2P0_FLOOR0P5": {
+      "10": {
+        "finalEquityJpy": 229193656.5958187,
+        "equityDeltaVsAdoptedJpy": -2696245.681127608,
+        "maxMtmDdPct": -14.603309760733396,
+        "maxMtmDdDeltaPp": 0.0,
+        "profitFactor": 3.9146760675502303,
+        "trades": 1299,
+        "portfolioWinRatePct": 71.90146266358738,
+        "hypeTrades": 17,
+        "byIdleShortSymbol": {
+          "RENDERUSDT": {
+            "trades": 26,
+            "wins": 11,
+            "losses": 15,
+            "winRatePct": 42.30769230769231,
+            "modeledPnlJpy": 2163951.0021016644,
+            "loserPnlJpy": -2629847.2683669636
+          },
+          "TAOUSDT": {
+            "trades": 8,
+            "wins": 5,
+            "losses": 3,
+            "winRatePct": 62.5,
+            "modeledPnlJpy": 4260630.068115123,
+            "loserPnlJpy": -2193013.599319872
+          },
+          "DOTUSDT": {
+            "trades": 32,
+            "wins": 23,
+            "losses": 9,
+            "winRatePct": 71.875,
+            "modeledPnlJpy": 2780240.9486357034,
+            "loserPnlJpy": -56941.0854579581
+          },
+          "JUPUSDT": {
+            "trades": 4,
+            "wins": 3,
+            "losses": 1,
+            "winRatePct": 75.0,
+            "modeledPnlJpy": 505697.0526966687,
+            "loserPnlJpy": -10843.151241706617
+          },
+          "TIAUSDT": {
+            "trades": 5,
+            "wins": 5,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "modeledPnlJpy": 634724.5399089806,
+            "loserPnlJpy": 0
+          }
+        },
+        "replay": [
+          {
+            "i": 0,
+            "stops": 52,
+            "entryCandidatesChecked": 0,
+            "idlesAllowed": 0,
+            "idlesRejected": 0,
+            "hypePassed": 1,
+            "hypeRejected": 1
+          },
+          {
+            "i": 1,
+            "stops": 52,
+            "entryCandidatesChecked": 0,
+            "idlesAllowed": 0,
+            "idlesRejected": 0,
+            "hypePassed": 1,
+            "hypeRejected": 1
+          },
+          {
+            "i": 2,
+            "stops": 52,
+            "entryCandidatesChecked": 0,
+            "idlesAllowed": 0,
+            "idlesRejected": 0,
+            "hypePassed": 1,
+            "hypeRejected": 1
+          }
+        ],
+        "sha256Ledgers": {
+          "portfolio-trades.jsonl": "a7fa67ff0305859b0d193e7fccdf66e000d6b424ccdbf827d37686253155753e",
+          "candidate-decisions.jsonl": "fec84e0e3534a61b300e84707b1d799d0b4769c84fa2df47c4549a61b6e4eddb",
+          "portfolio-events.jsonl": "72d3fbeb1de164082ea68a630fcaf4cd2c9bf2efda1618102cd4b4197bdc8ab8",
+          "task9-mtm.jsonl": "a60bf4346b437ea7f43a21a341eb709d9bbebf496fa70ad47f8c0f807fef11e8",
+          "metrics.json": "43e1fe3d1ee7cb8de755b418050fa9fbbf375f07e8e44818a89b0fa4690517d3"
+        },
+        "accounting": "PASS"
+      },
+      "30": {
+        "finalEquityJpy": 127856854.59431946,
+        "equityDeltaVsAdoptedJpy": -1998967.3613433987,
+        "maxMtmDdPct": -15.805240991203117,
+        "maxMtmDdDeltaPp": 0.002466647491672802,
+        "profitFactor": 3.3416554755236256,
+        "trades": 1297,
+        "portfolioWinRatePct": 68.77409406322282,
+        "hypeTrades": 16,
+        "byIdleShortSymbol": {
+          "RENDERUSDT": {
+            "trades": 24,
+            "wins": 10,
+            "losses": 14,
+            "winRatePct": 41.666666666666664,
+            "modeledPnlJpy": 733368.3316159642,
+            "loserPnlJpy": -1277858.7770268433
+          },
+          "TAOUSDT": {
+            "trades": 9,
+            "wins": 6,
+            "losses": 3,
+            "winRatePct": 66.66666666666667,
+            "modeledPnlJpy": 5112419.684462986,
+            "loserPnlJpy": -624380.8094228391
+          },
+          "DOTUSDT": {
+            "trades": 31,
+            "wins": 13,
+            "losses": 18,
+            "winRatePct": 41.935483870967744,
+            "modeledPnlJpy": 1137705.2839077138,
+            "loserPnlJpy": -75664.4486502295
+          },
+          "JUPUSDT": {
+            "trades": 7,
+            "wins": 5,
+            "losses": 2,
+            "winRatePct": 71.42857142857143,
+            "modeledPnlJpy": 477274.568461847,
+            "loserPnlJpy": -44227.30505225979
+          },
+          "TIAUSDT": {
+            "trades": 6,
+            "wins": 6,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "modeledPnlJpy": 474779.4999089625,
+            "loserPnlJpy": 0
+          }
+        },
+        "replay": [
+          {
+            "i": 0,
+            "stops": 51,
+            "entryCandidatesChecked": 0,
+            "idlesAllowed": 0,
+            "idlesRejected": 0,
+            "hypePassed": 1,
+            "hypeRejected": 1
+          },
+          {
+            "i": 1,
+            "stops": 51,
+            "entryCandidatesChecked": 0,
+            "idlesAllowed": 0,
+            "idlesRejected": 0,
+            "hypePassed": 1,
+            "hypeRejected": 1
+          },
+          {
+            "i": 2,
+            "stops": 51,
+            "entryCandidatesChecked": 0,
+            "idlesAllowed": 0,
+            "idlesRejected": 0,
+            "hypePassed": 1,
+            "hypeRejected": 1
+          }
+        ],
+        "sha256Ledgers": {
+          "portfolio-trades.jsonl": "1a74460a7b026b868863a752a95b6549c474e9f7bb214726790e34fa9dc9ace6",
+          "candidate-decisions.jsonl": "c3cefc8dd90f7d67c98d5b9c72cca5c78465f3fd8a0017f15997a418ad54c357",
+          "portfolio-events.jsonl": "9ac8870757b20ea4d621256125ec2b79d39a1cd06b6185304007bbba14d1ebca",
+          "task9-mtm.jsonl": "cd8ad1df892c92d3f18e9843e0008c92911efb8414cb83d27540c3b6c5e55c82",
+          "metrics.json": "b76a4a4f9b9042c4ee242761a81ed893ec49d5cf338ae1ff9d9070710173d3b2"
+        },
+        "accounting": "PASS"
+      }
+    },
+    "DOT_PROFIT_3P0_FLOOR1P0": {
+      "10": {
+        "finalEquityJpy": 231889902.2769463,
+        "equityDeltaVsAdoptedJpy": 0.0,
+        "maxMtmDdPct": -14.603309760733396,
+        "maxMtmDdDeltaPp": 0.0,
+        "profitFactor": 3.914947744244699,
+        "trades": 1303,
+        "portfolioWinRatePct": 71.8342287029931,
+        "hypeTrades": 18,
+        "byIdleShortSymbol": {
+          "RENDERUSDT": {
+            "trades": 26,
+            "wins": 11,
+            "losses": 15,
+            "winRatePct": 42.30769230769231,
+            "modeledPnlJpy": 2191495.6379224514,
+            "loserPnlJpy": -2677193.2626111754
+          },
+          "TAOUSDT": {
+            "trades": 8,
+            "wins": 5,
+            "losses": 3,
+            "winRatePct": 62.5,
+            "modeledPnlJpy": 4367133.561072389,
+            "loserPnlJpy": -2233853.842943398
+          },
+          "DOTUSDT": {
+            "trades": 32,
+            "wins": 20,
+            "losses": 12,
+            "winRatePct": 62.5,
+            "modeledPnlJpy": 3289397.88517098,
+            "loserPnlJpy": -130599.44654908513
+          },
+          "JUPUSDT": {
+            "trades": 4,
+            "wins": 3,
+            "losses": 1,
+            "winRatePct": 75.0,
+            "modeledPnlJpy": 521273.0130165859,
+            "loserPnlJpy": -11185.549758518766
+          },
+          "TIAUSDT": {
+            "trades": 5,
+            "wins": 5,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "modeledPnlJpy": 654742.9899248002,
+            "loserPnlJpy": 0
+          }
+        },
+        "replay": [
+          {
+            "i": 0,
+            "stops": 52,
+            "entryCandidatesChecked": 0,
+            "idlesAllowed": 0,
+            "idlesRejected": 0,
+            "hypePassed": 1,
+            "hypeRejected": 1
+          },
+          {
+            "i": 1,
+            "stops": 52,
+            "entryCandidatesChecked": 0,
+            "idlesAllowed": 0,
+            "idlesRejected": 0,
+            "hypePassed": 1,
+            "hypeRejected": 1
+          },
+          {
+            "i": 2,
+            "stops": 52,
+            "entryCandidatesChecked": 0,
+            "idlesAllowed": 0,
+            "idlesRejected": 0,
+            "hypePassed": 1,
+            "hypeRejected": 1
+          }
+        ],
+        "sha256Ledgers": {
+          "portfolio-trades.jsonl": "f56f7c6fd2038b5e7b298d837b315fb9599ccb2ad19598289085a0f28d26bf11",
+          "candidate-decisions.jsonl": "7eb5f163eb626c493536adc4fdff319c7bec43ec873eca1ee416537a8986adf6",
+          "portfolio-events.jsonl": "7ac4736744038db856637ed8b798b06fc44108df81254c0776ae7d1f1832646c",
+          "task9-mtm.jsonl": "6dcea66f0638b38323f8c27331cf55b5a3632f258fa27b0bebd9e310a3ebe446",
+          "metrics.json": "8bb93b8dba9de9f0d16e77b4bc20258d31c1da576e29195dbd3492121793f0ac"
+        },
+        "accounting": "PASS"
+      },
+      "30": {
+        "finalEquityJpy": 129855821.95566286,
+        "equityDeltaVsAdoptedJpy": 0.0,
+        "maxMtmDdPct": -15.80770763869479,
+        "maxMtmDdDeltaPp": 0.0,
+        "profitFactor": 3.35179459175414,
+        "trades": 1300,
+        "portfolioWinRatePct": 69.38461538461539,
+        "hypeTrades": 17,
+        "byIdleShortSymbol": {
+          "RENDERUSDT": {
+            "trades": 24,
+            "wins": 10,
+            "losses": 14,
+            "winRatePct": 41.666666666666664,
+            "modeledPnlJpy": 744218.3064546698,
+            "loserPnlJpy": -1299355.3075383736
+          },
+          "TAOUSDT": {
+            "trades": 9,
+            "wins": 6,
+            "losses": 3,
+            "winRatePct": 66.66666666666667,
+            "modeledPnlJpy": 5203235.015418828,
+            "loserPnlJpy": -636368.594035139
+          },
+          "DOTUSDT": {
+            "trades": 31,
+            "wins": 20,
+            "losses": 11,
+            "winRatePct": 64.51612903225806,
+            "modeledPnlJpy": 1625628.9915814348,
+            "loserPnlJpy": -69840.21685008054
+          },
+          "JUPUSDT": {
+            "trades": 7,
+            "wins": 5,
+            "losses": 2,
+            "winRatePct": 71.42857142857143,
+            "modeledPnlJpy": 486652.86525425204,
+            "loserPnlJpy": -45069.11042453417
+          },
+          "TIAUSDT": {
+            "trades": 6,
+            "wins": 6,
+            "losses": 0,
+            "winRatePct": 100.0,
+            "modeledPnlJpy": 484166.3671572728,
+            "loserPnlJpy": 0
+          }
+        },
+        "replay": [
+          {
+            "i": 0,
+            "stops": 51,
+            "entryCandidatesChecked": 0,
+            "idlesAllowed": 0,
+            "idlesRejected": 0,
+            "hypePassed": 1,
+            "hypeRejected": 1
+          },
+          {
+            "i": 1,
+            "stops": 51,
+            "entryCandidatesChecked": 0,
+            "idlesAllowed": 0,
+            "idlesRejected": 0,
+            "hypePassed": 1,
+            "hypeRejected": 1
+          },
+          {
+            "i": 2,
+            "stops": 51,
+            "entryCandidatesChecked": 0,
+            "idlesAllowed": 0,
+            "idlesRejected": 0,
+            "hypePassed": 1,
+            "hypeRejected": 1
+          }
+        ],
+        "sha256Ledgers": {
+          "portfolio-trades.jsonl": "43518d68f8fb6d3875c6feb77f34c71ec721847ddddf922ae667445fb7c82705",
+          "candidate-decisions.jsonl": "0e24da3b54af080b1d8f3a5466b96581f0025d9f75a002778acf4892f6490e44",
+          "portfolio-events.jsonl": "0ba4f61ef36c5729195aa85d330eaf0b255f74b0c948d32eaf8abf65322ceab2",
+          "task9-mtm.jsonl": "4eb5b3fa1292e617d871b90e6c4c6035a8a7bb89556c0082a3973cd41083c18f",
+          "metrics.json": "a6a2216a1ef14d676c0ec5e33f0203149ae0c81eb63bb1a0a34fab165f5e4cde"
+        },
+        "accounting": "PASS"
+      }
+    }
+  }
+}
