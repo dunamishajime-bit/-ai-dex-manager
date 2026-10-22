@@ -1,9 +1,9 @@
 {
-  "schema": "hype-entry-research-adoption-v1",
-  "status": "USER_ADOPTED_FOR_ALL_FUTURE_RESEARCH_BT_NOT_LIVE",
+  "schema": "hype-entry-and-dual-exit-research-adoption-v2",
+  "status": "USER_ADOPTED_FOR_NEXT_CUMULATIVE_FULL8_BT_NOT_YET_LIVE",
   "adoptedAt": "2026-10-22",
   "strategyId": "HYPE_LONG",
-  "policyId": "HYPE_BTC3H_LE0P6_REL3H_GE2P0",
+  "policyId": "HYPE_BTC3H_LE0P6_REL3H_GE2P0_AND_COMBO_I1H1_P3F1P5",
   "preEntry": {
     "btc3hMaxPct": 0.6,
     "hypeMinusBtc3hMinPercentagePoints": 2,
@@ -12,7 +12,7 @@
     "onlyFullyCompletedBars": true,
     "failClosedOnMissingHistory": true
   },
-  "existingHype75Exit": "UNCHANGED_PENDING_NEW_EXIT_ECONOMIC_VALIDATION",
+  "existingHype75Exit": "RETAIN_OTHER_EXISTING_HYPE75_TAKE_PROFIT_AND_PROTECTIVE_STOP",
   "otherLockedOverlays": [
     "V12 V4 user-adopted 4 exits",
     "Q102 user-adopted 3 exits"
@@ -40,5 +40,26 @@
     "Small HYPE subset (18 trades at 10bps, 17 at 30bps), optimized in-sample",
     "Independent unified Task9 TypeScript economic parity not yet certified",
     "Operator approval, venue execution and LIVE change are separate"
-  ]
+  ],
+  "adoptedInitialAdverseExit": {
+    "activationAfterEntryHours": 1,
+    "priorMaximumFavorableExcursionLessThanPct": 0.3,
+    "adverseMoveFromEntryPct": -1.0,
+    "side": "LONG",
+    "onTrigger": "close_position",
+    "entryPriceReference": "fill_entry_price",
+    "mfeReference": "since_entry",
+    "onM5Completed": "enforce_causal_no_same_bar_future_use"
+  },
+  "adoptedProfitProtectionExit": {
+    "armedAfterMaximumFavorableExcursionPct": 3.0,
+    "protectedGainFromEntryPct": 1.5,
+    "side": "LONG",
+    "onTrigger": "close_position",
+    "armOnConfirmedM5Close": true,
+    "protectiveLevel": "entryPrice * 1.015"
+  },
+  "adoptedCombinedCaseId": "COMBO_I1H1_P3F1P5",
+  "selectionRationale": "Explicit user adoption prioritizing per-strategy risk controls even if final compounded return falls.",
+  "historicalAnchorIsPreDualExit": true
 }

@@ -36,6 +36,7 @@ RULES={
  "PROFIT_4P0_FLOOR2P0":{"id":"HYPE_GATED_PROFIT_4P0_FLOOR2P0","strategy":"HYPE_LONG","sides":["LONG"],"kind":"profit","arm":.04,"floor":.02},
  "COMBO_I0H1P5_P3F1":{"id":"HYPE_GATED_COMBO_I0H1P5_P3F1","strategy":"HYPE_LONG","sides":["LONG"],"kind":"combined","arm_hours":0,"stop_pct":.015,"mfe_gate_pct":.003,"reentry_hours":0,"arm":.03,"floor":.01},
  "COMBO_I1H1_P3F1":{"id":"HYPE_GATED_COMBO_I1H1_P3F1","strategy":"HYPE_LONG","sides":["LONG"],"kind":"combined","arm_hours":1,"stop_pct":.01,"mfe_gate_pct":.003,"reentry_hours":0,"arm":.03,"floor":.01},
+ "COMBO_I1H1_P3F1P5":{"id":"HYPE_GATED_COMBO_I1H1_P3F1P5","strategy":"HYPE_LONG","sides":["LONG"],"kind":"combined","arm_hours":1,"stop_pct":.01,"mfe_gate_pct":.003,"reentry_hours":0,"arm":.03,"floor":.015},
 }
 
 def apply(row,rule,source,cost_bps,obs,original_row=None):

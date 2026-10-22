@@ -76,4 +76,28 @@ class HypeGateAndExitTests(unittest.TestCase):
                         Stub({"HYPEUSDT":series}),10,obs(),original_row=row)
         self.assertEqual(initial["exit_ts_ms"],row["exit_ts_ms"])
 
+
+    def test_user_adopted_combo_initial_exit(self):
+        series=[bar(i,100,100.1,98.8 if i==12 else 99.3,99.5) for i in range(20)]
+        row={"strategy_id":"HYPE_LONG","side":"LONG","symbol":"HYPEUSDT",
+             "entry_price":100.,"entry_ts_ms":0,"exit_ts_ms":20*M5}
+        out=m.apply(row,m.RULES["COMBO_I1H1_P3F1P5"],
+                    Stub({"HYPEUSDT":series}),10,obs(),original_row=row)
+        self.assertLess(out["exit_ts_ms"],row["exit_ts_ms"])
+        self.assertIn("INITIAL_ADVERSE_STOP",out["exit_reason"])
+        self.assertAlmostEqual(m.RULES["COMBO_I1H1_P3F1P5"]["stop_pct"],.01)
+
+    def test_user_adopted_combo_profit_floor(self):
+        series=[bar(i,100,100.1,99.7,100) for i in range(20)]
+        series[13]=bar(13,100,103.5,100,103.2)
+        series[14]=bar(14,103,103.2,101.2,101.4)
+        row={"strategy_id":"HYPE_LONG","side":"LONG","symbol":"HYPEUSDT",
+             "entry_price":100.,"entry_ts_ms":0,"exit_ts_ms":20*M5}
+        out=m.apply(row,m.RULES["COMBO_I1H1_P3F1P5"],
+                    Stub({"HYPEUSDT":series}),10,obs(),original_row=row)
+        self.assertLess(out["exit_ts_ms"],row["exit_ts_ms"])
+        self.assertEqual(out["exit_reason"],"RESEARCH_HYPE_GATED_COMBO_I1H1_P3F1P5")
+        self.assertGreater(out["exit_price"],101.3)
+        self.assertLess(out["exit_price"],102)
+
 if __name__=="__main__":unittest.main()
