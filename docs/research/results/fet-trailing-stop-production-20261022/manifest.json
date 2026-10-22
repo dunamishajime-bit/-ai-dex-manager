@@ -1,0 +1,51 @@
+{
+  "status": "RESEARCH_PROVENANCE_ONLY_LIVE_VENUE_UNOBSERVED",
+  "implementationPolicy": "FET_TRAIL_8P_GIVEBACK_4P",
+  "researchSource": {
+    "branch": "research/fet-after-hype-render-tao-exit-20261022",
+    "sha": "e0f39b9bf642f7cbffe0371b4c656ab64a4b91cb",
+    "report": "docs/research/results/fet-after-hype-render-tao-20261022/FET_EXIT_FULL8_REPORT_20261022.md",
+    "results": "docs/research/results/fet-after-hype-render-tao-20261022/FET_EXIT_FULL8_RESULTS_20261022.json",
+    "selectedCase": "FET_TRAIL_8P_GIVEBACK_4P",
+    "selectedLedgerSha256": {
+      "10bps": "efb1603a83397da174423855f4143ea5bcb139c680b1d8aa01aba7d6c77502e1",
+      "30bps": "25d07849173423eae6beee104e988e388cf3725787d7842ab005ec7f05972885"
+    }
+  },
+  "period": {
+    "start": "2025-08-10",
+    "end": "2026-08-10",
+    "initialCapitalJpy": 10000,
+    "deposits": 0,
+    "compounding": true,
+    "costsBps": [10, 30]
+  },
+  "researchMetrics": {
+    "10bps": {
+      "baselineFinalEquityJpy": 239985734.6618664,
+      "selectedFinalEquityJpy": 247247316.48637345,
+      "selectedMaxMtmDdPct": -14.603309760733396,
+      "selectedProfitFactor": 4.120700112246955,
+      "fetTrades": 8,
+      "fetTrailExits": 3
+    },
+    "30bps": {
+      "baselineFinalEquityJpy": 135946895.1553796,
+      "selectedFinalEquityJpy": 143906605.34174916,
+      "selectedMaxMtmDdPct": -15.80770763869479,
+      "selectedProfitFactor": 3.456156361142333,
+      "fetTrades": 8,
+      "fetTrailExits": 3
+    }
+  },
+  "researchReplayAttempt": {
+    "status": "BLOCKED_EXTERNAL_LEGACY_BOOTSTRAP_WRITE_PERMISSION",
+    "error": "PermissionError: [Errno 13] Permission denied while legacy bootstrap wrote state-pool.jsonl outside the pinned worktree",
+    "newResearchNumbersGenerated": false
+  },
+  "venueEvidence": {
+    "signedFetTrailingStopFill": "UNOBSERVED",
+    "testOrders": 0,
+    "manualPositionChanges": 0
+  }
+}

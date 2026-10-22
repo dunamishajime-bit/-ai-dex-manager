@@ -1,5 +1,6 @@
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
+import type { FetBrk48TrailingStopState } from "./fet-brk48-trailing-stop";
 
 export const FET_BRK48_STATE_SCHEMA = "fet-brk48-residual-state/v1" as const;
 export type FetPendingAction = "ENTRY" | "EXIT" | "PREEMPT";
@@ -14,9 +15,10 @@ export interface FetBrk48PositionState {
   gross: number;
   hardStop: number;
   stopClientOrderId: string;
-  protectionMode?: "INITIAL_HARD_STOP" | "PROFIT_FLOOR_3P0";
+  protectionMode?: "INITIAL_HARD_STOP" | "PROFIT_FLOOR_3P0" | "TRAIL_8P_GIVEBACK_4P";
   profitFloorArmedAt?: number;
   profitFloorTriggerPrice?: number;
+  trailingStop?: FetBrk48TrailingStopState;
 }
 
 export interface FetBrk48PendingState {
@@ -63,6 +65,17 @@ function finitePositive(value: unknown) {
   return Number.isFinite(n) && n > 0;
 }
 
+function validTrailingStop(value: unknown): value is FetBrk48TrailingStopState {
+  const state = value as any;
+  return Boolean(state)
+    && typeof state.armed === "boolean"
+    && Number.isFinite(state.bestGainPct)
+    && state.bestGainPct >= 0
+    && (state.stopPrice === undefined || finitePositive(state.stopPrice))
+    && (state.lastConfirmedBarTs === undefined || finitePositive(state.lastConfirmedBarTs))
+    && (state.armedAt === undefined || finitePositive(state.armedAt));
+}
+
 function validPosition(p: any): p is FetBrk48PositionState {
   return p
     && p.symbol === "FETUSDT"
@@ -75,9 +88,10 @@ function validPosition(p: any): p is FetBrk48PositionState {
     && finitePositive(p.hardStop)
     && typeof p.stopClientOrderId === "string"
     && p.stopClientOrderId.length > 0
-    && (p.protectionMode === undefined || ["INITIAL_HARD_STOP", "PROFIT_FLOOR_3P0"].includes(p.protectionMode))
+    && (p.protectionMode === undefined || ["INITIAL_HARD_STOP", "PROFIT_FLOOR_3P0", "TRAIL_8P_GIVEBACK_4P"].includes(p.protectionMode))
     && (p.profitFloorArmedAt === undefined || finitePositive(p.profitFloorArmedAt))
-    && (p.profitFloorTriggerPrice === undefined || finitePositive(p.profitFloorTriggerPrice));
+    && (p.profitFloorTriggerPrice === undefined || finitePositive(p.profitFloorTriggerPrice))
+    && (p.trailingStop === undefined || validTrailingStop(p.trailingStop));
 }
 
 function validPending(p: any): p is FetBrk48PendingState {

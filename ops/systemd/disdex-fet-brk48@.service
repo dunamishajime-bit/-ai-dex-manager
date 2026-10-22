@@ -15,6 +15,8 @@ Environment=NODE_ENV=production
 Environment=DISDEX_RUNTIME_COMMIT_SHA=%i
 Environment=DISDEX_RELEASE_SHA=%i
 Environment=FET_BRK48_LIVE_ENABLED=true
+Environment=FET_BRK48_TRAILING_STOP_ENABLED=true
+Environment=FET_BRK48_TRAILING_STOP_POLICY=FET_TRAIL_8P_GIVEBACK_4P
 Environment=FET_BRK48_STATE_PATH=/var/lib/disdex/fet-brk48-residual/state.json
 Environment=DISDEX_SHARED_CRYPTO_DAILY_RISK_FILE=/var/lib/disdex/shared/crypto-daily-risk.json
 Environment=DISDEX_ACCOUNT_LOCK_PATH=/var/lib/disdex/shared/account-order.lock

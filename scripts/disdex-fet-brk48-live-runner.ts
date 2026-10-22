@@ -6,6 +6,7 @@ import { FetBrk48LiveRunner } from "../lib/fet-brk48-live-runner";
 import { createInterruptibleDelay } from "../lib/interruptible-delay";
 import { classifyAsterRateBudgetFailure, nextAsterRateBudgetRetryMs } from "../lib/disdex-aster-rate-budget-policy";
 import { nextAccountLockAwareWaitMs } from "../lib/disdex-account-lock-retry-scheduling";
+import { FET_BRK48_TRAILING_STOP_POLICY } from "../lib/fet-brk48-trailing-stop";
 
 function numberEnv(name: string, fallback: number) {
   const n = Number(process.env[name]);
@@ -17,6 +18,10 @@ async function main() {
   if (!/^[0-9a-f]{40}$/i.test(runtimeSha)) throw new Error("FET_RUNTIME_SHA_REQUIRED");
   if (!/^(1|true|yes|on)$/i.test(String(process.env.FET_BRK48_LIVE_ENABLED || ""))) {
     throw new Error("FET_BRK48_LIVE_NOT_ENABLED");
+  }
+  if (/^(1|true|yes|on)$/i.test(String(process.env.FET_BRK48_TRAILING_STOP_ENABLED || ""))
+      && String(process.env.FET_BRK48_TRAILING_STOP_POLICY || "") !== FET_BRK48_TRAILING_STOP_POLICY.id) {
+    throw new Error(`FET_TRAILING_STOP_POLICY_MISMATCH:${process.env.FET_BRK48_TRAILING_STOP_POLICY || "MISSING"}`);
   }
 
   const client = new AsterV3Client({
@@ -53,6 +58,9 @@ async function main() {
       marginType,
       openOrders: openOrders.length,
       klines: klines.length,
+       trailingStopPolicy: /^(1|true|yes|on)$/i.test(String(process.env.FET_BRK48_TRAILING_STOP_ENABLED || ""))
+         ? FET_BRK48_TRAILING_STOP_POLICY.id
+         : "DISABLED",
       ordersSent: 0,
       cancelSent: 0,
       positionChangesSent: 0,

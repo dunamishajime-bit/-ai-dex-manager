@@ -23,6 +23,8 @@ class RuntimeWiringScriptTest(unittest.TestCase):
         self.assertIn("Environment=QUALITY102_CAUSAL_V1_MAX_GROSS=3.0", source)
         self.assertIn("Environment=QUALITY102_CAUSAL_V1_SELECTOR_MODE=CAUSAL_V4", source)
         self.assertIn("Environment=FET_BRK48_LIVE_ENABLED=true", source)
+        self.assertIn("FET_BRK48_TRAILING_STOP_ENABLED=true", source)
+        self.assertIn("FET_BRK48_TRAILING_STOP_POLICY=FET_TRAIL_8P_GIVEBACK_4P", source)
         self.assertIn("Environment=FET_BRK48_STATE_PATH=/var/lib/disdex/fet-brk48-residual/state.json", source)
         self.assertNotIn("Environment=FET_BRK48_MAX_GROSS=", source)
         self.assertIn('RUNTIME_CONTRACT_ENV_DIR="/etc/disdex/current-runtime"', source)
