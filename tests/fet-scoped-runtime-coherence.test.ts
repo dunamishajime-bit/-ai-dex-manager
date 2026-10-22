@@ -13,6 +13,9 @@ test("FET mixed-SHA scope is explicit and keeps the common current release uncha
   assert.match(coherence, /FET_SCOPE_ENV_FILE/);
   assert.match(coherence, /DISDEX_FET_SCOPED_SHA/);
   assert.match(coherence, /DISDEX_FET_SCOPED_RELEASE_ROOT/);
+  assert.match(coherence, /MONITOR_RUNTIME_SHA="\$FET_SCOPED_SHA"/);
+  assert.match(coherence, /MONITOR_RUNTIME_ROOT="\$FET_SCOPED_RELEASE_ROOT"/);
+  assert.match(coherence, /WorkingDirectory=\$MONITOR_RUNTIME_ROOT/);
   assert.match(coherence, /DISDEX_FET_OPERATOR_ACTIVATION_PATH/);
   assert.match(coherence, /--self-test-fet-mixed-sha/);
   assert.match(coherence, /disdex-fet-scoped-runtime-wiring/);

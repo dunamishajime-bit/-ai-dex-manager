@@ -131,6 +131,14 @@ resolve_current() {
     V12_EXPECTED_UNIT="disdex-v12-x1-all@$DEPLOYED_SHA.service"
     V12_OPERATOR_RUNNER="V12_X1_ALL"
   fi
+  # A scoped FET runtime carries the monitor implementation that understands
+  # per-sleeve SHA pins.  Keep the V4 runner itself as the primary V12 unit,
+  # but run the shared health/watchdog/alert monitors from the scoped release
+  # so a mixed V4+FET deployment has one internally consistent monitor pin.
+  if [[ -n "$FET_SCOPE_ENV_FILE" && -f "$FET_SCOPE_ENV_FILE" ]]; then
+    MONITOR_RUNTIME_SHA="$FET_SCOPED_SHA"
+    MONITOR_RUNTIME_ROOT="$FET_SCOPED_RELEASE_ROOT"
+  fi
   build_current_units
 }
 
@@ -276,10 +284,10 @@ monitor_pins_current() {
     grep -Fxq "DISDEX_WATCHDOG_V12_OPERATOR_ACTIVATION_PATH=$V4_OPERATOR_ACTIVATION_PATH" "$WATCHDOG_ENV" || return 1
     grep -Fxq "Environment=DISDEX_ALERT_V12_EXPECTED_SHA=$V4_PRIMARY_SHA" "$ALERT_DROPIN" || return 1
     grep -Fxq "Environment=DISDEX_ALERT_V12_SERVICE_UNIT=$V12_EXPECTED_UNIT" "$ALERT_DROPIN" || return 1
-    grep -Fq "WorkingDirectory=$V4_PRIMARY_RELEASE" "$ALERT_DROPIN" || return 1
-    grep -Fq "ExecStart=$V4_PRIMARY_RELEASE/node_modules/.bin/tsx $V4_PRIMARY_RELEASE/scripts/ops/root/disdex-runner-health-alert.ts" "$ALERT_DROPIN" || return 1
-    grep -Fxq "ExecStartPre=/usr/bin/test -f $V4_PRIMARY_RELEASE/.disdex-release-sha" "$ALERT_DROPIN" || return 1
-    grep -Fxq "ExecStartPre=/usr/bin/grep -Fxq $V4_PRIMARY_SHA $V4_PRIMARY_RELEASE/.disdex-release-sha" "$ALERT_DROPIN" || return 1
+    grep -Fq "WorkingDirectory=$MONITOR_RUNTIME_ROOT" "$ALERT_DROPIN" || return 1
+    grep -Fq "ExecStart=$MONITOR_RUNTIME_ROOT/node_modules/.bin/tsx $MONITOR_RUNTIME_ROOT/scripts/ops/root/disdex-runner-health-alert.ts" "$ALERT_DROPIN" || return 1
+    grep -Fxq "ExecStartPre=/usr/bin/test -f $MONITOR_RUNTIME_ROOT/.disdex-release-sha" "$ALERT_DROPIN" || return 1
+    grep -Fxq "ExecStartPre=/usr/bin/grep -Fxq $MONITOR_RUNTIME_SHA $MONITOR_RUNTIME_ROOT/.disdex-release-sha" "$ALERT_DROPIN" || return 1
     grep -Fxq "DISDEX_HEALTH_SNAPSHOT_V12_STATE_PATH=/var/lib/disdex/v12-v4/heartbeat.json" "$HEALTH_ENV" || return 1
   elif [[ "$PRIMARY_V12_MODE" == "DISABLED" ]]; then
     grep -Fxq "DISDEX_HEALTH_SNAPSHOT_V12_RELEASE_ROOT=$CURRENT_RELEASE" "$HEALTH_ENV" || return 1
