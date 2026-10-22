@@ -38,10 +38,11 @@ artifactは既存の`disdex-live-operator-activation/v1`契約に従い、少な
 - `ordersEnabled: true`
 - `approvedSha`はFETのimmutable release SHAと完全一致
 - `approvedRunners`は`["FET_BRK48_RESIDUAL"]`のみ
-- `target`はFET BRK48 Residualの本番対象と一致
+- `target`は対象releaseの`docs/production/current-implementation-readiness.json`のtargetと一致
 - operator acknowledgementが存在
 
-共通artifact（`current.json`）のSHAや承認Runner一覧へ、FET切替のための追記は行いません。
+現在の対象releaseでのtargetは`DD1296_FINAL_ALLIN_10BPS`です。共通artifact（`current.json`）の
+SHAや承認Runner一覧へ、FET切替のための追記は行いません。
 FET artifactを別Runnerのunitへ渡しても、runner-scoped gateが拒否することをテストで固定します。
 
 ## shared safety paths
