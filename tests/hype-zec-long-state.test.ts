@@ -84,3 +84,49 @@ test("HYPE/ZEC state store rejects an invalid mode instead of coercing it to SHA
   }), { mode: 0o600 });
   await assert.rejects(() => new FileHypeZecLongRunnerStateStore(path, sha, "SHADOW").load(), /MODE_INVALID/);
 });
+
+test("HYPE/ZEC state store rejects malformed adopted M5 restart fields", async () => {
+  const root = await mkdtemp(join(tmpdir(), "hype-zec-state-"));
+  const sha = "a".repeat(40);
+  const base = {
+    schema: "disdex-hype-zec-long/v1",
+    runtimeCommitSha: sha,
+    mode: "LIVE",
+    updatedAt: Date.now(),
+    failures: [],
+    positions: [{
+      strategy: "HYPE_LONG",
+      symbol: "HYPEUSDT",
+      side: "LONG",
+      positionId: "hype-position",
+      quantity: 1,
+      entryPrice: 10,
+      entryTs: Date.now() - 10_000,
+      signalTs: Date.now() - 11_000,
+      stopPrice: 9,
+      takeProfitPrice: 12,
+      peakPrice: 10,
+      updatedAt: Date.now(),
+    }],
+  };
+
+  const invalidArmedPath = join(root, "invalid-armed.json");
+  await writeFile(invalidArmedPath, JSON.stringify({
+    ...base,
+    positions: [{ ...base.positions[0], adoptedProfitStopArmed: "yes" }],
+  }), { mode: 0o600 });
+  await assert.rejects(
+    () => new FileHypeZecLongRunnerStateStore(invalidArmedPath, sha, "LIVE").load(),
+    /POSITION_INVALID/,
+  );
+
+  const invalidTimestampPath = join(root, "invalid-timestamp.json");
+  await writeFile(invalidTimestampPath, JSON.stringify({
+    ...base,
+    positions: [{ ...base.positions[0], lastConfirmed5mTs: "not-a-timestamp" }],
+  }), { mode: 0o600 });
+  await assert.rejects(
+    () => new FileHypeZecLongRunnerStateStore(invalidTimestampPath, sha, "LIVE").load(),
+    /POSITION_INVALID/,
+  );
+});

@@ -35,6 +35,7 @@ export function resolveIdlePriorityShortRuntime(){
   marginMaxAgeMs:Number(process.env.DISDEX_IDLE_PRIORITY_MARGIN_MAX_AGE_MS||90_000),
   maximumSlippageBps:Number(process.env.DISDEX_IDLE_PRIORITY_MAX_SLIPPAGE_BPS||20),
   pollMs:Number(process.env.DISDEX_IDLE_PRIORITY_POLL_MS||300_000),
+  adoptedHypeRenderTaoEnabled:bool(process.env.DISDEX_HYPE_RENDER_TAO_ADOPTED_ENABLED,false),
   policy:IDLE_PRIORITY_SHORT_POLICY
  };
 }

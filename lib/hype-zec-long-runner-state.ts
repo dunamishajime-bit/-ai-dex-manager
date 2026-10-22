@@ -28,6 +28,9 @@ export interface HypeZecLongPositionState {
   acceptedEntryGross?: number;
   /** Persist the contract used for restart/reconciliation audit. */
   walletStopRiskPct?: number;
+  /** Persist adopted M5 protection across restart/reconcile. */
+  adoptedProfitStopArmed?: boolean;
+  lastConfirmed5mTs?: number;
   updatedAt: number;
 }
 
@@ -72,6 +75,21 @@ function normalizedState(value: unknown, expectedRuntimeSha?: string, expectedMo
   if (raw.lastDecisionTs !== undefined && (!Number.isFinite(Number(raw.lastDecisionTs)) || Number(raw.lastDecisionTs) <= 0 || Number(raw.lastDecisionTs) > Date.now() + HYPE_ZEC_LONG_STATE_CLOCK_SKEW_MS)) {
     throw new Error("HYPE_ZEC_LONG_STATE_DECISION_TIMESTAMP_INVALID");
   }
+  const positions = Array.isArray(raw.positions) ? raw.positions.map((position) => {
+    if (!position || typeof position !== "object") throw new Error("HYPE_ZEC_LONG_POSITION_INVALID");
+    const candidate = position as HypeZecLongPositionState;
+    if (candidate.adoptedProfitStopArmed !== undefined && typeof candidate.adoptedProfitStopArmed !== "boolean") {
+      throw new Error("HYPE_ZEC_LONG_POSITION_INVALID");
+    }
+    if (candidate.lastConfirmed5mTs !== undefined && (
+      !Number.isFinite(Number(candidate.lastConfirmed5mTs))
+      || Number(candidate.lastConfirmed5mTs) <= 0
+      || Number(candidate.lastConfirmed5mTs) > Date.now() + HYPE_ZEC_LONG_STATE_CLOCK_SKEW_MS
+    )) {
+      throw new Error("HYPE_ZEC_LONG_POSITION_INVALID");
+    }
+    return { ...candidate };
+  }) : undefined;
   return {
     schema: HYPE_ZEC_LONG_STATE_SCHEMA,
     runtimeCommitSha: raw.runtimeCommitSha,
@@ -79,7 +97,7 @@ function normalizedState(value: unknown, expectedRuntimeSha?: string, expectedMo
     updatedAt,
     lastDecisionTs: raw.lastDecisionTs,
     lastDecision: raw.lastDecision,
-    positions: Array.isArray(raw.positions) ? raw.positions.map((position) => ({ ...position })) : undefined,
+    positions,
     pending: raw.pending,
     manualReview: raw.manualReview,
     failures: Array.isArray(raw.failures) ? raw.failures.slice(-100) : [],

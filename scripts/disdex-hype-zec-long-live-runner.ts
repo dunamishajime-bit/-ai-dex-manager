@@ -62,14 +62,18 @@ async function main() {
   });
   const lock = new FileAccountOrderLock(process.env.DISDEX_ACCOUNT_LOCK_PATH || "/var/lib/disdex/shared/account-order.lock", numberEnv("DISDEX_ACCOUNT_LOCK_LEASE_MS", 120_000));
   const stateStore = new FileHypeZecLongRunnerStateStore(resolve(runtime.statePath), runtimeSha(runtime.runtimeSha), runtime.mode);
-  const runner = new HypeZecLongRunner({
-    marketData: new HypeZecAsterMarketDataProvider(client, {
+  const provider = new HypeZecAsterMarketDataProvider(client, {
       fifteenMinuteLimit: numberEnv("DISDEX_HYPE_ZEC_15M_LIMIT", 240),
       oneMinuteLimit: numberEnv("DISDEX_HYPE_ZEC_1M_LIMIT", 240),
       oneHourLimit: numberEnv("DISDEX_HYPE_ZEC_1H_LIMIT", 360),
       signalMode: runtime.signalMode,
       symbols: runtime.symbols,
-    }),
+    });
+  const runner = new HypeZecLongRunner({
+    marketData: {
+      load: () => provider.load(),
+      loadAdoptedHypeFiveMinuteHistory: () => provider.loadAdoptedHypeFiveMinuteHistory(),
+    },
     executor,
     adapter,
     stateStore,

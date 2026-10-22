@@ -81,6 +81,7 @@ test("V4 primary contract preserves peer safety overrides after V4 env generatio
   assert.match(wiring, /DISDEX_V52_V50_GROSS_CAP=2\.0/);
   assert.match(wiring, /DISDEX_V52_PORTFOLIO_GROSS_CAP=4\.25/);
   assert.match(wiring, /DISDEX_HYPE_ZEC_MAX_GROSS=1\.5/);
+  assert.match(wiring, /DISDEX_HYPE_RENDER_TAO_ADOPTED_ENABLED=true/);
   assert.match(wiring, /DISDEX_IDLE_PRIORITY_RUNTIME_SHA=\$\{DEPLOYED_SHA\}/);
   assert.match(wiring, /DISDEX_SHARED_CRYPTO_MAX_DAILY_LOSS_PCT=7\.5/);
   assert.match(wiring, /PENGU_DUAL_LS_V2_MAX_DAILY_LOSS_PCT=7\.5/);

@@ -1,0 +1,131 @@
+{
+  "schema": "hype-render-tao-cumulative-user-adoption-v1",
+  "status": "USER_FORMALLY_ADOPTED_RESEARCH_CONTRACT_PENDING_PRODUCTION_INTEGRATION",
+  "adoptedDateJST": "2026-10-22",
+  "authoritativeFutureResearchBaseline": "HYPE_USER_ADOPTED_PLUS_TAO_RENDER_THREE_RULES",
+  "sourceResearch": {
+    "hypePolicy": "config/research/hype-entry-adopted-20261022.json",
+    "idleFull8Research": "docs/research/results/idle-five-short-winrate-20261022/IDLE_FIVE_SHORT_CAUSAL_FULL8_20261022.json",
+    "idleResearchCommit": "407c679515ff4c8951dd2aecdfcd8ddd47fa5786",
+    "dotUnchangedValidationCommit": "3ecde8d470788c1e5e6b2ebc257ef83168132b82",
+    "selectedIntegratedCaseId": "TAO_RET1H_PLUS_RENDER_SKIP_AND_PROFIT"
+  },
+  "hypeLong": {
+    "strategyId": "HYPE_LONG",
+    "symbol": "HYPEUSDT",
+    "side": "LONG",
+    "preEntry": {
+      "btcLastCompletedM5Return3hPctAtMost": 0.6,
+      "hypeMinusBtcLastCompletedM5Return3hPpAtLeast": 2.0,
+      "historyBarsLookback": 36,
+      "requireExactContiguousCompletedM5History": true,
+      "missingOrInvalidHistory": "BLOCK_NEW_ENTRY"
+    },
+    "earlyAdverseExit": {
+      "minimumElapsedTimeAfterFillMinutes": 60,
+      "maximumFavorableExcursionPctStrictlyBelow": 0.3,
+      "priceReturnFromActualEntryPctAtMost": -1.0,
+      "action": "CLOSE_LONG",
+      "entryReference": "ACTUAL_FILL_AVERAGE_PRICE",
+      "statePersistenceRequired": true
+    },
+    "profitProtection": {
+      "armWhenConfirmedM5CloseProfitFromEntryPctAtLeast": 3.0,
+      "protectGainFromEntryPct": 1.5,
+      "protectPrice": "actualFillAvgPrice*1.015",
+      "earlierApplicableExistingExitTakesPrecedence": true,
+      "armStatePersistenceRequired": true,
+      "liveStopLifecycleRequiresVenueCertification": true
+    },
+    "noHypeShortCreated": true
+  },
+  "idlePriorityShort": {
+    "scopeOnlyStrategyId": "IDLE_PRIORITY_SHORT",
+    "side": "SHORT",
+    "tao": {
+      "symbol": "TAOUSDT",
+      "requireLastCompletedM5Return1hPctAtMost": -1.0,
+      "historyBarsLookback": 12,
+      "missingOrInvalidHistory": "BLOCK_NEW_ENTRY",
+      "otherRouteRulesUnchanged": true
+    },
+    "render": {
+      "symbol": "RENDERUSDT",
+      "entryVetoOnlyWhenBothTrue": {
+        "btcLastCompletedM5Return6hPctStrictlyAbove": 0.0,
+        "renderMinusBtcLastCompletedM5Return6hPpStrictlyAbove": 0.0
+      },
+      "historyBarsLookback": 72,
+      "missingOrInvalidHistory": "BLOCK_NEW_ENTRY",
+      "profitProtection": {
+        "armWhenConfirmedM5CloseProfitFromEntryPctAtLeast": 1.5,
+        "protectGainFromEntryPct": 0.25,
+        "shortBuyStopPrice": "actualFillAvgPrice*0.9975",
+        "triggerOnlyOnSubsequentBarAfterArm": true,
+        "gapAwareNotGuaranteedProfit": true,
+        "existingStopTimeAndProfitExitsHigherPriority": true,
+        "stopReplacementRequiresVenueReadback": true,
+        "restartAndPartialFillQuantityReconciliationRequired": true
+      }
+    },
+    "doNotModifySymbols": [
+      "DOTUSDT",
+      "TIAUSDT",
+      "JUPUSDT"
+    ],
+    "doNotCreateIdleLongSignals": true
+  },
+  "unmodified": [
+    "V12 V4 accepted four exit changes",
+    "Q102 accepted three exit changes",
+    "PENGU",
+    "FET",
+    "V52",
+    "DOT SHORT existing confirmed 5m +3pct arm / 1.5 percentage-point trailing",
+    "All existing symbol ownership, gross caps, shared risk and margin locks"
+  ],
+  "modeledEightStrategyIntegratedBaseline": {
+    "periodStartInclusive": "2025-08-10",
+    "periodEnd": "2026-08-10",
+    "initialJPY": 10000,
+    "additionalDepositsJPY": 0,
+    "compounded": true,
+    "cost10bps": {
+      "finalEquityJPY": 239985734.6618664,
+      "deltaFromHypeOnlyJPY": 8095832.38492009,
+      "maxMtmDrawdownPct": -14.603309760733396,
+      "profitFactor": 4.099058603638445,
+      "renderShortWins": 15,
+      "renderShortLosses": 9,
+      "taoShortWins": 5,
+      "taoShortLosses": 0
+    },
+    "cost30bps": {
+      "finalEquityJPY": 135946895.1553796,
+      "deltaFromHypeOnlyJPY": 6091073.199716732,
+      "maxMtmDrawdownPct": -15.80770763869479,
+      "profitFactor": 3.443661412489594,
+      "renderShortWins": 10,
+      "renderShortLosses": 12,
+      "taoShortWins": 6,
+      "taoShortLosses": 0
+    },
+    "stressCostTradeoff": "At 30bps the 2-rule TAO+RENDER-entry alternative earned JPY 136216672.7081666; user chooses 3-rule combined as formal 10bps-priority baseline."
+  },
+  "implementationState": {
+    "adoptionAndGitPushApprovedByUser": true,
+    "economicBacktestEvidenceVerified": true,
+    "policyModuleImplementedAndUnitTested": true,
+    "wiredIntoLiveRunner": false,
+    "currentVpsReleaseChanged": false,
+    "exchangeCertifiedProtectiveOrderLifecycle": false,
+    "independentUnifiedTask9TypeScriptEconomicParityCertified": false,
+    "notAnAuthorizationToBypassSafetyGates": true
+  },
+  "limitations": [
+    "Optimized using the same historical 12 months; independent untouched out-of-sample has not yet been certified.",
+    "Small accepted TAO subset (5 at 10bps, 6 at 30bps); 100 percent past win rate is not a forward guarantee.",
+    "0.25 percent RENDER price-floor is smaller than the 30bps round-trip price cost, hence net profit cannot be assumed.",
+    "Signed exchange execution, limit/slippage, partial fills, restart and resident-stop certification must precede production switch."
+  ]
+}

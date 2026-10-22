@@ -3,6 +3,8 @@ import { IDLE_PRIORITY_SHORT_POLICY, type IdlePrioritySymbol } from "../config/i
 import { IDLE_RESIDUAL_LONG_POLICY, type IdleResidualLongSymbol } from "../config/idleResidualLongPolicy";
 import type { IdleH1Candle } from "./idle-priority-short-signal";
 import type { ConfirmedFiveMinuteBar } from "./disdex-exit-overlay-contract";
+import { ADOPTED_FIVE_MINUTE_MS, type ClosedFiveMinuteClose } from "./hype-render-tao-adopted-policy";
+import { normalizeAdoptedFiveMinuteCloses } from "./hype-render-tao-adopted-market-data";
 
 const HOUR = 3_600_000;
 const FIVE_MINUTE = 5 * 60_000;
@@ -90,8 +92,14 @@ export type IdlePriorityMarketSnapshot = {
   residualSymbols: Record<IdleResidualLongSymbol, IdleH1Candle[]>;
 };
 
+export type AdoptedIdleFiveMinuteHistory =
+  | { decisionTs: number; tao: ClosedFiveMinuteClose[] }
+  | { decisionTs: number; btc: ClosedFiveMinuteClose[]; render: ClosedFiveMinuteClose[] };
+
 export class IdlePriorityAsterMarketDataProvider {
   private readonly cache = new CompletedH1SnapshotCache();
+  private readonly adoptedM5Cache = new Map<string, { boundary: number; value: AdoptedIdleFiveMinuteHistory }>();
+  private readonly adoptedM5InFlight = new Map<string, Promise<AdoptedIdleFiveMinuteHistory>>();
   private readonly requestSpacingMs: number;
   constructor(
     private readonly client: AsterV3Client,
@@ -172,5 +180,38 @@ export class IdlePriorityAsterMarketDataProvider {
       throw new Error(`IDLE_5M_CANDLE_INVALID:${symbol}:${latestClosedOpen}`);
     }
     return result;
+  }
+
+  async loadAdoptedFiveMinuteHistory(symbol: "TAOUSDT" | "RENDERUSDT"): Promise<AdoptedIdleFiveMinuteHistory> {
+    const now = (this.options.now || Date.now)();
+    const decisionTs = Math.floor(now / ADOPTED_FIVE_MINUTE_MS) * ADOPTED_FIVE_MINUTE_MS;
+    const cached = this.adoptedM5Cache.get(symbol);
+    if (cached?.boundary === decisionTs) return cached.value;
+    const requestKey = `${symbol}|${decisionTs}`;
+    const pending = this.adoptedM5InFlight.get(requestKey);
+    if (pending) return pending;
+    const request = (async () => {
+      if (symbol === "TAOUSDT") {
+        const rows = await this.client.getKlines(symbol, "5m", 32);
+        const value: AdoptedIdleFiveMinuteHistory = {
+          decisionTs,
+          tao: normalizeAdoptedFiveMinuteCloses(rows, "TAO", decisionTs, 12),
+        };
+        this.adoptedM5Cache.set(symbol, { boundary: decisionTs, value });
+        return value;
+      }
+      const btcRows = await this.client.getKlines("BTCUSDT", "5m", 100);
+      await sleep(this.requestSpacingMs);
+      const renderRows = await this.client.getKlines(symbol, "5m", 100);
+      const value: AdoptedIdleFiveMinuteHistory = {
+        decisionTs,
+        btc: normalizeAdoptedFiveMinuteCloses(btcRows, "RENDER_BTC", decisionTs, 72),
+        render: normalizeAdoptedFiveMinuteCloses(renderRows, "RENDER", decisionTs, 72),
+      };
+      this.adoptedM5Cache.set(symbol, { boundary: decisionTs, value });
+      return value;
+    })().finally(() => this.adoptedM5InFlight.delete(requestKey));
+    this.adoptedM5InFlight.set(requestKey, request);
+    return request;
   }
 }

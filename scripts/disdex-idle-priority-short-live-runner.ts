@@ -73,6 +73,7 @@ async function main() {
             return value;
         },
         loadFiveMinute: (symbol: Parameters<typeof provider.loadFiveMinute>[0]) => provider.loadFiveMinute(symbol),
+        loadAdoptedFiveMinuteHistory: (symbol: "TAOUSDT" | "RENDERUSDT") => provider.loadAdoptedFiveMinuteHistory(symbol),
     };
     const coreStateStore = new FileIdlePriorityShortStateStore(runtime.statePath, runtime.runtimeSha);
     const residualStateStore = new FileIdleResidualLongStateStore(residualRuntime.statePath, residualRuntime.runtimeSha);

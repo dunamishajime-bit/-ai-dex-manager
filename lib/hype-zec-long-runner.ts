@@ -20,6 +20,11 @@ import type { HypeZecLongMarketData } from "./hype-zec-long-market-data";
 import { FileHypeZecLongRunnerStateStore, heartbeatHypeZecRateBudgetDeferral, type HypeZecLongPositionState, type HypeZecLongRunnerState } from "./hype-zec-long-runner-state";
 import { BENIGN_HYPE_ZEC_MARKET_DATA_REVIEW } from "./hype-zec-long-recovery-contract";
 import { classifyAsterRateBudgetFailure } from "./disdex-aster-rate-budget-policy";
+import {
+  evaluateAdoptedHypeLongExit,
+  gateAdoptedHypeLongEntry,
+} from "./hype-render-tao-live-adapter";
+import type { ClosedFiveMinuteClose } from "./hype-render-tao-adopted-policy";
 
 const EPSILON = 1e-9;
 
@@ -41,7 +46,10 @@ export function refreshHypeZecNoEntryDecision(
 }
 
 export interface HypeZecLongRunnerDependencies {
-  marketData: { load(): Promise<HypeZecLongMarketData> };
+  marketData: {
+    load(): Promise<HypeZecLongMarketData>;
+    loadAdoptedHypeFiveMinuteHistory?: () => Promise<{ decisionTs: number; btc: ClosedFiveMinuteClose[]; hype: ClosedFiveMinuteClose[] }>;
+  };
   executor: DirectTradeExecutor;
   adapter: V12AsterLiveAdapter;
   stateStore: FileHypeZecLongRunnerStateStore;
@@ -86,6 +94,7 @@ function gross(position: DirectPosition, equity: number) { return equity > 0 ? M
 function hashId(parts: readonly unknown[], prefix: string) { return `${prefix}-${createHash("sha256").update(parts.join("|")).digest("hex").slice(0, 27)}`.slice(0, 36); }
 function active(order: DirectOpenOrder) { return ["NEW", "PARTIALLY_FILLED", "PENDING_NEW"].includes(String(order.status || "").toUpperCase()); }
 function hasExposure(result: DirectTradeResult) { return ["FILLED", "PARTIALLY_FILLED"].includes(result.status) && result.executedQuantity > EPSILON; }
+function sameQuantity(actual: number, expected: number) { return Math.abs(actual - expected) <= Math.max(1e-8, Math.abs(expected) * 0.01); }
 
 export function unmanagedHypeZecOrders(openOrders: DirectOpenOrder[], positions: DirectPosition[]) {
   const managed = new Set<DirectOpenOrder>([
@@ -274,8 +283,78 @@ export class HypeZecLongRunner {
     return { status: "completed", message: `HYPE_ZEC_EXIT_COMPLETED:${owned.symbol}`, strategy: owned.strategy };
   }
 
+  private async replaceAdoptedHypeStop(owned: HypeZecLongPositionState, actual: DirectPosition, requestedStopPrice: number, barTs: number) {
+    const normalized = await this.dependencies.adapter.normalizeStopPrice(owned.symbol, requestedStopPrice);
+    if (normalized.price <= owned.stopPrice + Math.max(1e-12, Math.abs(owned.stopPrice) * 1e-9)) {
+      return { clientOrderId: owned.stopClientOrderId, stopPrice: owned.stopPrice };
+    }
+    const clientOrderId = hashId([owned.positionId, "ADOPTED_PROFIT_STOP", barTs], "hz-stop");
+    let open = await this.dependencies.executor.getOpenOrders();
+    let replacement = open.find((order) => order.clientOrderId === clientOrderId);
+    if (!replacement) {
+      await this.dependencies.adapter.placeStopMarket({
+        symbol: owned.symbol,
+        side: "SELL",
+        quantity: actualQuantity(actual),
+        stopPrice: normalized.price,
+        clientOrderId,
+        reduceOnly: true,
+      });
+      open = await this.dependencies.executor.getOpenOrders();
+      replacement = open.find((order) => order.clientOrderId === clientOrderId);
+    }
+    const tp = open.find((order) => order.clientOrderId === owned.takeProfitClientOrderId);
+    const validReplacement = replacement
+      && active(replacement)
+      && replacement.reduceOnly === true
+      && String(replacement.type).toUpperCase() === "STOP_MARKET"
+      && String(replacement.side).toUpperCase() === "SELL"
+      && sameQuantity(replacement.quantity, actualQuantity(actual))
+      && Number.isFinite(replacement.stopPrice)
+      && Math.abs(Number(replacement.stopPrice) - normalized.price) <= Math.max(1e-12, Math.abs(normalized.price) * 1e-6);
+    const validTp = tp
+      && active(tp)
+      && tp.reduceOnly === true
+      && String(tp.type).toUpperCase() === "TAKE_PROFIT_MARKET"
+      && String(tp.side).toUpperCase() === "SELL"
+      && sameQuantity(tp.quantity, actualQuantity(actual));
+    if (!validReplacement || !validTp) throw new Error("HYPE_ADOPTED_STOP_READBACK_FAILED");
+    if (owned.stopClientOrderId && owned.stopClientOrderId !== clientOrderId) {
+      await this.dependencies.adapter.cancel(owned.stopClientOrderId);
+      const after = await this.dependencies.executor.getOpenOrders();
+      const activeReplacement = after.find((order) => order.clientOrderId === clientOrderId && active(order));
+      const staleOld = after.find((order) => order.clientOrderId === owned.stopClientOrderId && active(order));
+      if (!activeReplacement || staleOld) throw new Error("HYPE_ADOPTED_STOP_SWAP_NOT_CONFIRMED");
+    }
+    return { clientOrderId, stopPrice: normalized.price };
+  }
+
   private async enter(state: HypeZecLongRunnerState, signal: HypeZecSignalResult, account: DirectAccountSnapshot, positions: DirectPosition[], lock: AccountLockHandle): Promise<HypeZecLongTickResult> {
     if (!signal.accepted || !signal.entryPrice || !signal.stopPrice || !signal.signalTs) return { status: "no-change", message: signal.reason, strategy: signal.strategy };
+    if (this.dependencies.runtime.adoptedHypeRenderTaoEnabled === true && signal.strategy === "HYPE_LONG") {
+      const loader = this.dependencies.marketData.loadAdoptedHypeFiveMinuteHistory;
+      if (!loader) {
+        state.lastDecision = { strategy: signal.strategy, signalTs: signal.signalTs, accepted: false, reason: "HYPE_ADOPTED_M5_HISTORY_UNAVAILABLE" };
+        state.lastDecisionTs = this.now();
+        await this.dependencies.stateStore.save(state);
+        return { status: "held", message: "HYPE_ADOPTED_M5_HISTORY_UNAVAILABLE", strategy: signal.strategy };
+      }
+      try {
+        const history = await loader();
+        const gate = gateAdoptedHypeLongEntry({ nativeAccepted: true, decisionTs: history.decisionTs, btc: history.btc, hype: history.hype });
+        if (!gate.accepted) {
+          state.lastDecision = { strategy: signal.strategy, signalTs: signal.signalTs, accepted: false, reason: gate.reason };
+          state.lastDecisionTs = this.now();
+          await this.dependencies.stateStore.save(state);
+          return { status: "held", message: `HYPE_ADOPTED_ENTRY_BLOCKED:${gate.reason}`, strategy: signal.strategy };
+        }
+      } catch (error) {
+        state.lastDecision = { strategy: signal.strategy, signalTs: signal.signalTs, accepted: false, reason: `HYPE_ADOPTED_M5_HISTORY_UNAVAILABLE:${error instanceof Error ? error.message : String(error)}` };
+        state.lastDecisionTs = this.now();
+        await this.dependencies.stateStore.save(state);
+        return { status: "held", message: "HYPE_ADOPTED_M5_HISTORY_UNAVAILABLE", strategy: signal.strategy };
+      }
+    }
     const sharedRisk = await readSharedCryptoDailyRisk(this.dependencies.runtime.sharedRiskPath, this.now());
     if (!sharedRisk.ok) {
       state.lastDecision = { strategy: signal.strategy, signalTs: signal.signalTs, accepted: false, reason: `SHARED_CRYPTO_RISK:${sharedRisk.reason || "INVALID"}` };
@@ -394,7 +473,7 @@ export class HypeZecLongRunner {
     } catch (error) {
       return this.manualReview(state, `HYPE_ZEC_PROTECTION_INSTALL_FAILED:${error instanceof Error ? error.message : String(error)}`);
     }
-    const position: HypeZecLongPositionState = { strategy: signal.strategy, symbol, side: "LONG", positionId: idempotencyKey, quantity: actualQty, entryPrice: actual.entryPrice || signal.entryPrice, entryTs: this.now(), signalTs: signal.signalTs, stopPrice: levels.stopPrice, takeProfitPrice: levels.takeProfitPrice, stopClientOrderId: stopId, takeProfitClientOrderId: tpId, stopReadBackAt: this.now(), peakPrice: actual.markPrice || signal.entryPrice, acceptedEntryGross, walletStopRiskPct: signal.strategy === "HYPE_LONG" ? HYPE_ZEC_LONG_POLICY.HYPE_LONG.walletStopRiskPct : undefined, updatedAt: this.now() };
+    const position: HypeZecLongPositionState = { strategy: signal.strategy, symbol, side: "LONG", positionId: idempotencyKey, quantity: actualQty, entryPrice: actual.entryPrice || signal.entryPrice, entryTs: this.now(), signalTs: signal.signalTs, stopPrice: levels.stopPrice, takeProfitPrice: levels.takeProfitPrice, stopClientOrderId: stopId, takeProfitClientOrderId: tpId, stopReadBackAt: this.now(), peakPrice: actual.markPrice || signal.entryPrice, adoptedProfitStopArmed: false, acceptedEntryGross, walletStopRiskPct: signal.strategy === "HYPE_LONG" ? HYPE_ZEC_LONG_POLICY.HYPE_LONG.walletStopRiskPct : undefined, updatedAt: this.now() };
     state.positions = [...(state.positions || []).filter((row) => row.strategy !== signal.strategy), position];
     state.pending = undefined;
     await stateStoreSave(this.dependencies.stateStore, state);
@@ -495,6 +574,39 @@ export class HypeZecLongRunner {
         const age = this.now() - quote.updatedAt;
         if (age < 0 || age > 5 * 60_000) return { status: "held", message: `HYPE_ZEC_EXIT_QUOTE_STALE:${owned.symbol}`, strategy: owned.strategy };
         const heldMinutes = (this.now() - owned.entryTs) / 60_000;
+        owned.peakPrice = Math.max(owned.peakPrice || owned.entryPrice, quote.bidPrice, actual.markPrice || 0);
+        let adoptedExit: ReturnType<typeof evaluateAdoptedHypeLongExit> | undefined;
+        if (this.dependencies.runtime.adoptedHypeRenderTaoEnabled === true && owned.strategy === "HYPE_LONG" && owned.symbol === "HYPEUSDT") {
+          const loader = this.dependencies.marketData.loadAdoptedHypeFiveMinuteHistory;
+          if (loader) {
+            try {
+              const history = await loader();
+              const latest = history.hype.at(-1);
+              const freshBar = latest && (owned.lastConfirmed5mTs === undefined || latest.openTs > owned.lastConfirmed5mTs);
+              adoptedExit = evaluateAdoptedHypeLongExit({
+                entryPrice: owned.entryPrice,
+                elapsedMinutes: heldMinutes,
+                maxFavorableExcursionPct: 100 * (owned.peakPrice / owned.entryPrice - 1),
+                currentReturnFromEntryPct: 100 * (quote.bidPrice / owned.entryPrice - 1),
+                confirmedCloseReturnPct: freshBar ? 100 * (latest!.close / owned.entryPrice - 1) : Number.NEGATIVE_INFINITY,
+                stopAlreadyArmed: owned.adoptedProfitStopArmed === true || owned.stopPrice >= owned.entryPrice * 1.015,
+              });
+              if (latest && freshBar) owned.lastConfirmed5mTs = latest.openTs;
+              if (adoptedExit.kind === "ARM_PROTECTIVE_STOP") {
+                const replacement = await this.replaceAdoptedHypeStop(owned, actual, Math.max(owned.stopPrice, adoptedExit.stopPrice), latest?.openTs || this.now());
+                owned.stopClientOrderId = replacement.clientOrderId;
+                owned.stopPrice = replacement.stopPrice;
+                owned.adoptedProfitStopArmed = true;
+              }
+            } catch (error) {
+              this.log.warn("hype-adopted-m5-exit-deferred", { reason: error instanceof Error ? error.message : String(error), symbol: owned.symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 });
+            }
+          } else {
+            this.log.warn("hype-adopted-m5-exit-source-unavailable", { symbol: owned.symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 });
+          }
+        }
+        await this.dependencies.stateStore.save(state);
+        if (adoptedExit?.kind === "CLOSE_LONG") return this.exitPosition(state, owned, actual, quote, adoptedExit.reason, lock);
         const maxHoldMinutes = this.dependencies.runtime.signalMode === "TREND" && owned.strategy === "HYPE_LONG"
           ? HYPE_TREND_LONG_POLICY.maximumHoldHours * 60
           : HYPE_ZEC_LONG_POLICY[owned.strategy].signal.holdMinutes;

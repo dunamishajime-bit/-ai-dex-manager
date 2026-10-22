@@ -1,5 +1,7 @@
 import { AsterV3Client, type AsterKline } from "./aster-v3-client";
 import type { HypeZecCandle } from "./hype-zec-long-sleeves";
+import { ADOPTED_FIVE_MINUTE_MS, type ClosedFiveMinuteClose } from "./hype-render-tao-adopted-policy";
+import { normalizeAdoptedFiveMinuteCloses } from "./hype-render-tao-adopted-market-data";
 
 const MINUTE = 60_000;
 const HOUR = 60 * MINUTE;
@@ -38,6 +40,8 @@ function normalize(rows: AsterKline[], symbol: string, intervalMs: number, now: 
 export class HypeZecAsterMarketDataProvider {
   private completedSnapshot?: { boundary: number; value: HypeZecLongMarketData };
   private readonly inFlight = new Map<number, Promise<HypeZecLongMarketData>>();
+  private adoptedM5Snapshot?: { boundary: number; value: { decisionTs: number; btc: ClosedFiveMinuteClose[]; hype: ClosedFiveMinuteClose[] } };
+  private adoptedM5InFlight = new Map<number, Promise<{ decisionTs: number; btc: ClosedFiveMinuteClose[]; hype: ClosedFiveMinuteClose[] }>>();
 
   constructor(private readonly client: AsterV3Client, private readonly options: { fifteenMinuteLimit?: number; oneHourLimit?: number; oneMinuteLimit?: number; now?: () => number; signalMode?: "LEGACY" | "TREND"; symbols?: ReadonlyArray<"HYPEUSDT" | "ZECUSDT"> } = {}) {}
 
@@ -95,6 +99,29 @@ export class HypeZecAsterMarketDataProvider {
       this.inFlight.delete(boundary);
     });
     this.inFlight.set(boundary, request);
+    return request;
+  }
+
+  async loadAdoptedHypeFiveMinuteHistory(): Promise<{ decisionTs: number; btc: ClosedFiveMinuteClose[]; hype: ClosedFiveMinuteClose[] }> {
+    const now = (this.options.now || Date.now)();
+    const decisionTs = Math.floor(now / ADOPTED_FIVE_MINUTE_MS) * ADOPTED_FIVE_MINUTE_MS;
+    if (this.adoptedM5Snapshot?.boundary === decisionTs) return this.adoptedM5Snapshot.value;
+    const pending = this.adoptedM5InFlight.get(decisionTs);
+    if (pending) return pending;
+    const request = Promise.all([
+      this.client.getKlines("BTCUSDT", "5m", 80),
+      this.client.getKlines("HYPEUSDT", "5m", 80),
+    ]).then(([btcRows, hypeRows]) => {
+      const value = {
+        decisionTs,
+        btc: normalizeAdoptedFiveMinuteCloses(btcRows, "HYPE_BTC", decisionTs, 36),
+        hype: normalizeAdoptedFiveMinuteCloses(hypeRows, "HYPE", decisionTs, 36),
+      };
+      const current = this.adoptedM5Snapshot;
+      if (!current || decisionTs >= current.boundary) this.adoptedM5Snapshot = { boundary: decisionTs, value };
+      return value;
+    }).finally(() => this.adoptedM5InFlight.delete(decisionTs));
+    this.adoptedM5InFlight.set(decisionTs, request);
     return request;
   }
 }

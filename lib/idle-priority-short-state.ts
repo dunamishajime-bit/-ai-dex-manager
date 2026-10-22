@@ -26,6 +26,7 @@ export type IdleOwnedPosition={
   bestConfirmed5mGainPct?: number;
   trailingStopPrice?: number;
   lastConfirmed5mTs?: number;
+  renderProfitFloorArmed?: boolean;
 };
 
 export type IdlePending={
@@ -90,6 +91,7 @@ function validatePosition(p:IdleOwnedPosition){
  if(!finitePositive(p.stopPrice)||!finitePositive(p.takeProfitPrice)||(!trailingStop && p.stopPrice<=p.entryPrice)||(trailingStop && p.stopPrice>p.entryPrice)||p.takeProfitPrice>=p.entryPrice)throw new Error("IDLE_STATE_POSITION_INVALID");
  if(!p.stopClientOrderId||!p.takeProfitClientOrderId||p.protectionVerified!==true)throw new Error("IDLE_STATE_POSITION_INVALID");
  if(p.trailArmed!==undefined&&typeof p.trailArmed!=="boolean")throw new Error("IDLE_STATE_POSITION_INVALID");
+ if(p.renderProfitFloorArmed!==undefined&&typeof p.renderProfitFloorArmed!=="boolean")throw new Error("IDLE_STATE_POSITION_INVALID");
  for(const value of [p.bestConfirmed5mGainPct,p.trailingStopPrice,p.lastConfirmed5mTs])if(value!==undefined&&!Number.isFinite(value))throw new Error("IDLE_STATE_POSITION_INVALID");
  if(p.trailingStopPrice!==undefined&&!trailingStop)throw new Error("IDLE_STATE_POSITION_INVALID");
  if(trailingStop && Math.abs(p.stopPrice-p.trailingStopPrice!)>Math.max(1e-10,Math.abs(p.stopPrice)*1e-9))throw new Error("IDLE_STATE_POSITION_INVALID");

@@ -26,6 +26,8 @@ export interface HypeZecLongRuntime {
   totalGrossCap: number;
   signalMode: "LEGACY" | "TREND";
   symbols: ReadonlyArray<"HYPEUSDT" | "ZECUSDT">;
+  /** User-adopted M5 HYPE gate/exit is independently opt-in. */
+  adoptedHypeRenderTaoEnabled?: boolean;
 }
 
 function bool(value: unknown, fallback = false) {
@@ -79,6 +81,7 @@ export function resolveHypeZecLongRuntime(env: NodeJS.ProcessEnv = process.env):
     totalGrossCap: INTEGRATED_PRODUCTION_RISK_POLICY.totalGrossCap,
     signalMode: resolvedSignalMode,
     symbols: symbols(env.DISDEX_HYPE_ZEC_SYMBOLS),
+    adoptedHypeRenderTaoEnabled: bool(env.DISDEX_HYPE_RENDER_TAO_ADOPTED_ENABLED, false),
   };
 }
 

@@ -24,6 +24,8 @@ import type { IdlePriorityMarketSnapshot } from "./idle-priority-short-market-da
 import { writeIdleDecisionDetails, IDLE_DECISION_DETAILS_SCHEMA } from "./idle-priority-decision-diagnostics";
 import { evaluateIdleResidualLong } from "./idle-residual-long-signal";
 import { applyIdleProfitTrailBar, type ConfirmedFiveMinuteBar } from "./disdex-exit-overlay-contract";
+import { chooseMoreProtectiveRenderShortStop, evaluateAdoptedRenderShortProfitArm, gateAdoptedIdleShortEntry } from "./hype-render-tao-live-adapter";
+import type { AdoptedIdleFiveMinuteHistory } from "./idle-priority-short-market-data";
 
 const EPSILON = 1e-9;
 const MAX_QUOTE_AGE_MS = 5 * 60_000;
@@ -77,7 +79,11 @@ export type IdlePriorityShortTickResult = {
 };
 
 export type IdlePriorityShortRunnerDependencies = {
-    marketData: { load(): Promise<IdlePriorityMarketSnapshot>; loadFiveMinute?(symbol: IdlePrioritySymbol): Promise<ConfirmedFiveMinuteBar> };
+    marketData: {
+        load(): Promise<IdlePriorityMarketSnapshot>;
+        loadFiveMinute?(symbol: IdlePrioritySymbol): Promise<ConfirmedFiveMinuteBar>;
+        loadAdoptedFiveMinuteHistory?(symbol: "TAOUSDT" | "RENDERUSDT"): Promise<AdoptedIdleFiveMinuteHistory>;
+    };
     executor: AsterDirectTradeExecutor;
     adapter: V12AsterLiveAdapter;
     client: AsterV3Client;
@@ -347,6 +353,7 @@ export class IdlePriorityShortRunner {
             protectionVerified: true,
             trailArmed: false,
             bestConfirmed5mGainPct: 0,
+            renderProfitFloorArmed: false,
         };
     }
 
@@ -484,6 +491,44 @@ export class IdlePriorityShortRunner {
 
     private async enter(state: IdleState, signal: IdleSignal, account: DirectAccountSnapshot, positions: DirectPosition[], lock: AccountLockHandle, pendingAggregate: ReturnType<typeof aggregatePendingExposure>): Promise<IdlePriorityShortTickResult> {
         const symbol = signal.symbol;
+        if (this.dependencies.runtime.adoptedHypeRenderTaoEnabled === true && (symbol === "TAOUSDT" || symbol === "RENDERUSDT")) {
+            const loader = this.dependencies.marketData.loadAdoptedFiveMinuteHistory;
+            if (!loader) {
+                const reason = `${symbol === "TAOUSDT" ? "TAO" : "RENDER"}_ADOPTED_M5_HISTORY_UNAVAILABLE`;
+                state.lastDecision = { decisionTs: signal.features.decisionTs, symbol, route: signal.route, accepted: false, reason };
+                await this.dependencies.stateStore.save(state);
+                return { status: "held", message: reason, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+            }
+            try {
+                const history = await loader(symbol);
+                const gate = symbol === "TAOUSDT"
+                    ? gateAdoptedIdleShortEntry({
+                        symbol,
+                        nativeAccepted: signal.accepted,
+                        nativeSide: signal.side,
+                        decisionTs: history.decisionTs,
+                        tao: (history as Extract<AdoptedIdleFiveMinuteHistory, { tao: unknown }>).tao,
+                    })
+                    : gateAdoptedIdleShortEntry({
+                        symbol,
+                        nativeAccepted: signal.accepted,
+                        nativeSide: signal.side,
+                        decisionTs: history.decisionTs,
+                        btc: (history as Extract<AdoptedIdleFiveMinuteHistory, { btc: unknown }>).btc,
+                        render: (history as Extract<AdoptedIdleFiveMinuteHistory, { render: unknown }>).render,
+                    });
+                if (!gate.accepted) {
+                    state.lastDecision = { decisionTs: signal.features.decisionTs, symbol, route: signal.route, accepted: false, reason: gate.reason };
+                    await this.dependencies.stateStore.save(state);
+                    return { status: "held", message: `IDLE_ADOPTED_ENTRY_BLOCKED:${gate.reason}`, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+                }
+            } catch (error) {
+                const reason = `${symbol === "TAOUSDT" ? "TAO" : "RENDER"}_ADOPTED_M5_HISTORY_UNAVAILABLE:${error instanceof Error ? error.message : String(error)}`;
+                state.lastDecision = { decisionTs: signal.features.decisionTs, symbol, route: signal.route, accepted: false, reason };
+                await this.dependencies.stateStore.save(state);
+                return { status: "held", message: `${symbol}_ADOPTED_M5_HISTORY_UNAVAILABLE`, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
+            }
+        }
         const quote = await this.dependencies.executor.getMarketQuote(symbol);
         if (!quoteFresh(quote, this.now())) return { status: "held", message: `IDLE_ENTRY_QUOTE_STALE:${symbol}`, symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
         const equity = account.walletBalance + positions.reduce((sum, position) => sum + Number(position.unrealizedPnl || 0), 0);
@@ -699,10 +744,40 @@ export class IdlePriorityShortRunner {
                 const quote = await this.dependencies.executor.getMarketQuote(owned.symbol);
                 if (!quoteFresh(quote, this.now())) return { status: "held", message: `IDLE_HELD_QUOTE_STALE:${owned.symbol}`, symbol: owned.symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
                 let trailExit = false;
+                let trailExitReason = "PROFIT_TRAIL_3_GIVEBACK_1P5";
                 if (owned.symbol === "DOTUSDT" || owned.symbol === "RENDERUSDT") {
                     const loadFiveMinute = this.dependencies.marketData.loadFiveMinute;
                     if (!loadFiveMinute) return this.manualReview(state, `IDLE_TRAIL_5M_SOURCE_UNAVAILABLE:${owned.symbol}`);
                     const bar = await loadFiveMinute(owned.symbol);
+                    if (owned.symbol === "RENDERUSDT" && this.dependencies.runtime.adoptedHypeRenderTaoEnabled === true) {
+                        const floor = evaluateAdoptedRenderShortProfitArm({
+                            entryPrice: owned.entryPrice,
+                            confirmedClose: bar.close,
+                            existingProtectiveStopPrice: owned.stopPrice,
+                        });
+                        if (floor.kind === "ARM_PROTECTIVE_STOP") {
+                            const effectiveFloor = chooseMoreProtectiveRenderShortStop(owned.stopPrice, floor.stopPrice);
+                            let installedFloor = owned.stopPrice;
+                            if (effectiveFloor < owned.stopPrice - Math.max(1e-12, Math.abs(owned.stopPrice) * 1e-9)) {
+                                try {
+                                    const replacement = await this.replaceTrailingStop(owned, effectiveFloor, bar.timestampMs);
+                                    owned.stopClientOrderId = replacement.clientOrderId;
+                                    owned.stopPrice = replacement.stopPrice;
+                                    owned.trailingStopPrice = replacement.stopPrice;
+                                    installedFloor = replacement.stopPrice;
+                                } catch (error) {
+                                    return this.manualReview(state, `IDLE_RENDER_FLOOR_STOP_REPLACEMENT_UNVERIFIED:${error instanceof Error ? error.message : String(error)}`);
+                                }
+                            }
+                            owned.renderProfitFloorArmed = true;
+                            owned.trailArmed = true;
+                            owned.trailingStopPrice = installedFloor;
+                            owned.stopPrice = installedFloor;
+                            owned.lastConfirmed5mTs = bar.timestampMs;
+                        } else if (owned.stopPrice <= owned.entryPrice * 0.9975) {
+                            owned.renderProfitFloorArmed = true;
+                        }
+                    }
                     const trail = applyIdleProfitTrailBar({
                         side: "SHORT",
                         entryPrice: owned.entryPrice,
@@ -715,9 +790,13 @@ export class IdlePriorityShortRunner {
                         bar,
                     });
                     trailExit = trail.stopHit;
-                    if (!trail.stopHit && trail.state.stopPrice !== owned.trailingStopPrice) {
+                    if (trail.stopHit && owned.renderProfitFloorArmed) trailExitReason = "RENDER_PROFIT_FLOOR_STOP_HIT";
+                    const trailCandidate = trail.state.stopPrice === undefined
+                        ? owned.trailingStopPrice
+                        : chooseMoreProtectiveRenderShortStop(owned.stopPrice, trail.state.stopPrice);
+                    if (!trail.stopHit && trailCandidate !== undefined && trailCandidate < owned.stopPrice - Math.max(1e-12, Math.abs(owned.stopPrice) * 1e-9)) {
                         try {
-                            const replacement = await this.replaceTrailingStop(owned, trail.state.stopPrice!, bar.timestampMs);
+                            const replacement = await this.replaceTrailingStop(owned, trailCandidate, bar.timestampMs);
                             owned.stopClientOrderId = replacement.clientOrderId;
                             owned.stopPrice = replacement.stopPrice;
                             owned.trailingStopPrice = replacement.stopPrice;
@@ -725,12 +804,13 @@ export class IdlePriorityShortRunner {
                             return this.manualReview(state, `IDLE_TRAIL_STOP_REPLACEMENT_UNVERIFIED:${owned.symbol}:${error instanceof Error ? error.message : String(error)}`);
                         }
                     }
-                    owned.trailArmed = trail.state.armed;
+                    owned.trailArmed = owned.trailArmed === true || trail.state.armed;
                     owned.bestConfirmed5mGainPct = trail.state.bestGainPct;
-                    owned.lastConfirmed5mTs = trail.state.lastConfirmedBarTs;
+                    owned.trailingStopPrice = owned.trailingStopPrice ?? trailCandidate;
+                    owned.lastConfirmed5mTs = Math.max(owned.lastConfirmed5mTs || 0, trail.state.lastConfirmedBarTs || 0) || undefined;
                     await this.dependencies.stateStore.save(state);
                 }
-                const exitReason = trailExit ? "PROFIT_TRAIL_3_GIVEBACK_1P5" : quote.askPrice >= owned.stopPrice ? "HARD_STOP" : quote.bidPrice <= owned.takeProfitPrice ? "TAKE_PROFIT" : this.now() >= owned.exitTs ? "FIXED_HOLD_EXIT" : undefined;
+                const exitReason = trailExit ? trailExitReason : quote.askPrice >= owned.stopPrice ? "HARD_STOP" : quote.bidPrice <= owned.takeProfitPrice ? "TAKE_PROFIT" : this.now() >= owned.exitTs ? "FIXED_HOLD_EXIT" : undefined;
                 if (exitReason && this.dependencies.runtime.mode === "LIVE") return await this.exitPosition(state, owned, actual, lock, exitReason);
                 if (exitReason) return { status: "shadow", message: `IDLE_SHADOW_EXIT:${owned.symbol}:${exitReason}`, symbol: owned.symbol, ordersSent: 0, cancelsSent: 0, positionChangesSent: 0 };
             }
